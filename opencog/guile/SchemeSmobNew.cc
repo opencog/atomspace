@@ -6,8 +6,6 @@
  * Copyright (c) 2008 Linas Vepstas <linas@linas.org>
  */
 
-#ifdef HAVE_GUILE
-
 #include <vector>
 
 #include <cstddef>
@@ -191,12 +189,19 @@ Handle SchemeSmob::scm_to_handle (SCM sh)
  */
 SCM SchemeSmob::ss_atom (SCM suuid)
 {
+	scm_misc_error("cog-atom", "Obsolete! Do not use!", suuid);
+	return SCM_EOL;
+#ifdef OLD_DEAD_CODE
 	if (scm_is_false(scm_integer_p(suuid)))
 		scm_wrong_type_arg_msg("cog-atom", 1, suuid, "integer opencog uuid");
 
 	// SCM_RETURN_NEWSMOB (cog_uuid_tag, suuid);
 	UUID uuid = scm_to_ulong(suuid);
+	if (INVALID_UUID == uuid)
+		scm_wrong_type_arg_msg("cog-atom", 1, suuid, "valid opencog uuid");
+
 	return handle_to_scm(Handle(uuid));
+#endif
 }
 
 /* ============================================================== */
@@ -214,11 +219,11 @@ SCM SchemeSmob::ss_handle (SCM satom)
 
 /* ============================================================== */
 /**
- * Return Handle::UNDEFINED
+ * Return 0 -- WTF what for?? who uses this?
  */
 SCM SchemeSmob::ss_undefined_handle (void)
 {
-	return scm_from_ulong(Handle::INVALID_UUID);
+	return scm_from_ulong(0);
 }
 
 /* ============================================================== */
@@ -386,7 +391,7 @@ SCM SchemeSmob::ss_new_node (SCM stype, SCM sname, SCM kv_pairs)
 	}
 	catch (const std::exception& ex)
 	{
-		throw_exception(ex, "cog-new-node");
+		throw_exception(ex, "cog-new-node", scm_cons(sname, kv_pairs));
 	}
 
 	scm_remember_upto_here_1(kv_pairs);
@@ -517,7 +522,7 @@ SCM SchemeSmob::ss_new_link (SCM stype, SCM satom_list)
 	}
 	catch (const std::exception& ex)
 	{
-		throw_exception(ex, "cog-new-link");
+		throw_exception(ex, "cog-new-link", satom_list);
 	}
 	scm_remember_upto_here_1(satom_list);
 	return handle_to_scm (h);
@@ -666,5 +671,4 @@ SCM SchemeSmob::ss_extract_recursive (SCM satom, SCM kv_pairs)
 	return SCM_BOOL_F;
 }
 
-#endif
 /* ===================== END OF FILE ============================ */

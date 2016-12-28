@@ -23,7 +23,6 @@
 
 (use-modules (opencog))
 (use-modules (opencog query))
-(load-from-path "utilities.scm")
 
 ; Create a "semantic triple" by combining a verb, an object and a
 ; preposition. This searches the atomsace for a verb-object pair,

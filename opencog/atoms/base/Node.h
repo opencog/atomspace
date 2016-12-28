@@ -49,6 +49,8 @@ protected:
     Node(const Node &l) : Atom(0)
     { OC_ASSERT(false, "Node: bad use of copy ctor"); }
 
+    virtual ContentHash compute_hash() const;
+
 public:
     /**
      * Constructor for this class.
@@ -87,13 +89,15 @@ public:
      */
     virtual const std::string& getName() const { return _name; }
 
+    virtual size_t size() const { return 1; }
+
     /**
      * Returns a string representation of the node.
      *
      * @return A string representation of the node.
      */
-    std::string toString(const std::string& indent);
-    std::string toShortString(const std::string& indent);
+    std::string toString(const std::string& indent) const;
+    std::string toShortString(const std::string& indent) const;
 
 	// Work around gdb's incapability to build a string on the fly,
 	// see http://stackoverflow.com/questions/16734783 and
@@ -103,16 +107,18 @@ public:
 	using Atom::toShortString;
 
     /**
-     * Returns whether a given atom is equal to the current node.
+     * Perform a content-based compare of another atom to this one.
+     * Return true if the content is the same for both atoms.
      * @param Atom to be tested.
-     * @return true if they are equal, false otherwise.
+     * @return true if content is equal, false otherwise.
      */
     virtual bool operator==(const Atom&) const;
 
-    /** Returns whether this atom is less than the given atom.
-     *
-     * WARNING: the comparison is based on content, and therefore
-     * potentially expensive.
+    /**
+     * Provides an ordering operator, based on the atom hash.
+     * Performs a simple numeric comparison on the hashes of
+     * this and the other atom. If the hashes are equal, then
+     * it performs a content-based compare.
      *
      * @return true if this atom is less than the given one, false otherwise.
      */

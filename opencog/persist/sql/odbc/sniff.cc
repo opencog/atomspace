@@ -13,7 +13,7 @@
 #include <opencog/atoms/base/Node.h>
 #include <opencog/truthvalue/SimpleTruthValue.h>
 
-#include <opencog/atomspace/TLB.h>
+#include <opencog/atomspaceutils/TLB.h>
 #include <opencog/persist/sql/odbc/ODBCAtomStorage.h>
 
 using namespace opencog;

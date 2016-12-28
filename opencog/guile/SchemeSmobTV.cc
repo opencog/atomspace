@@ -21,8 +21,6 @@
  * 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
  */
 
-#ifdef HAVE_GUILE
-
 #include <cstddef>
 #include <libguile.h>
 
@@ -31,6 +29,7 @@
 #include <opencog/truthvalue/CountTruthValue.h>
 #include <opencog/truthvalue/IndefiniteTruthValue.h>
 #include <opencog/truthvalue/SimpleTruthValue.h>
+#include <opencog/truthvalue/EvidenceCountTruthValue.h>
 #include <opencog/guile/SchemeSmob.h>
 
 using namespace opencog;
@@ -186,6 +185,15 @@ std::string SchemeSmob::tv_to_string(const TruthValue *tv)
 			ret += buff;
 			return ret;
 		}
+		case EVIDENCE_COUNT_TRUTH_VALUE:
+		{
+			const EvidenceCountTruthValue *etv = static_cast<const EvidenceCountTruthValue *>(tv);
+			snprintf(buff, BUFLEN, "(etv %.8g ", etv->getPositiveCount());
+			ret += buff;
+			snprintf(buff, BUFLEN, "%.8g)", etv->getCount());
+			ret += buff;
+			return ret;
+		}
 		default:
 			return ret;
 	}
@@ -282,6 +290,15 @@ SCM SchemeSmob::ss_new_ftv (SCM smean, SCM sconfidence)
 	return take_tv(tv);
 }
 
+SCM SchemeSmob::ss_new_etv (SCM sposcount, SCM stotalcount)
+{
+	double pos_count = scm_to_double(sposcount);
+	double total_count = scm_to_double(stotalcount);
+
+	TruthValue *tv = new EvidenceCountTruthValue(pos_count, total_count);
+	return take_tv(tv);
+}
+
 /* ============================================================== */
 /**
  * Return true if the scm is a truth value
@@ -294,8 +311,17 @@ SCM SchemeSmob::ss_tv_p (SCM s)
 		switch (misctype)
 		{
 			case COG_TV:
+			{
+				// It si very highly unlikely that we will ever get a
+				// NullTruthValue, here -- it really should never happen.
+				// But we are going to check anyway, as otherwise... bad
+				// things have happened before.
+				TruthValue *tv = (TruthValue *) SCM_SMOB_DATA(s);
+				TruthValueType tvt = tv->getType();
+				scm_remember_upto_here_1(s);
+				if (NULL_TRUTH_VALUE == tvt) return SCM_BOOL_F;
 				return SCM_BOOL_T;
-
+			}
 			default:
 				return SCM_BOOL_F;
 		}
@@ -308,7 +334,11 @@ SCM SchemeSmob::ss_tv_p (SCM s)
  */
 inline SCM SchemeSmob::tv_p (SCM s, TruthValueType wanted)
 {
-	if (SCM_BOOL_F == ss_tv_p(s)) return SCM_BOOL_F;
+	if (not SCM_SMOB_PREDICATE(SchemeSmob::cog_misc_tag, s))
+		return SCM_BOOL_F;
+
+	if (COG_TV != SCM_SMOB_FLAGS(s))
+		return SCM_BOOL_F;
 
 	TruthValue *tv = (TruthValue *) SCM_SMOB_DATA(s);
 	TruthValueType tvt = tv->getType();
@@ -342,6 +372,11 @@ SCM SchemeSmob::ss_ftv_p (SCM s)
 	return tv_p(s, FUZZY_TRUTH_VALUE);
 }
 
+SCM SchemeSmob::ss_etv_p (SCM s)
+{
+	return tv_p(s, EVIDENCE_COUNT_TRUTH_VALUE);
+}
+
 /* ============================================================== */
 
 TruthValue * SchemeSmob::verify_tv(SCM stv, const char *subrname, int pos)
@@ -354,6 +389,11 @@ TruthValue * SchemeSmob::verify_tv(SCM stv, const char *subrname, int pos)
 		scm_wrong_type_arg_msg(subrname, pos, stv, "opencog truth value");
 
 	TruthValue *tv = (TruthValue *) SCM_SMOB_DATA(stv);
+
+	// The NullTruthValue is an error condition.
+	if (NULL_TRUTH_VALUE == tv->getType())
+		scm_wrong_type_arg_msg(subrname, pos, stv, "opencog truth value");
+
 	return tv;
 }
 
@@ -451,6 +491,26 @@ SCM SchemeSmob::ss_tv_get_value (SCM s)
 			scm_remember_upto_here_1(s);
 			return rc;
 		}
+		case EVIDENCE_COUNT_TRUTH_VALUE:
+		{
+			EvidenceCountTruthValue *etv = static_cast<EvidenceCountTruthValue *>(tv);
+			SCM poscount = scm_from_double(etv->getPositiveCount());
+			SCM mean = scm_from_double(etv->getMean());
+			SCM conf = scm_from_double(etv->getConfidence());
+			SCM count = scm_from_double(etv->getCount());
+			SCM sposcount = scm_from_utf8_symbol("positive-count");
+			SCM smean = scm_from_utf8_symbol("mean");
+			SCM sconf = scm_from_utf8_symbol("confidence");
+			SCM scount = scm_from_utf8_symbol("count");
+
+			SCM rc = SCM_EOL;
+			rc = scm_acons(sposcount, poscount, rc);
+			rc = scm_acons(smean, mean, rc);
+			rc = scm_acons(sconf, conf, rc);
+			rc = scm_acons(scount, count, rc);
+			scm_remember_upto_here_1(s);
+			return rc;
+		}
 		default:
 			scm_remember_upto_here_1(s);
 			return SCM_EOL;
@@ -486,5 +546,4 @@ SCM SchemeSmob::ss_tv_get_count(SCM s)
 	return scm_from_double(tv->getCount());
 }
 
-#endif /* HAVE_GUILE */
 /* ===================== END OF FILE ============================ */

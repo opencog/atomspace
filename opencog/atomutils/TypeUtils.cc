@@ -26,17 +26,19 @@
 
 #include <opencog/atoms/TypeNode.h>
 #include <opencog/atoms/core/DefineLink.h>
+#include <opencog/atoms/core/VariableList.h>
+
+#include "FindUtils.h"
 
 #include "TypeUtils.h"
 
-using namespace opencog;
-
+namespace opencog {
 
 /* ================================================================= */
 /**
  * Type checker.  Returns true if `val` is of type `deep`.
  */
-bool opencog::value_is_type(const Handle& spec, const Handle& val)
+bool value_is_type(const Handle& spec, const Handle& val)
 {
 	Handle deep(spec);
 
@@ -238,16 +240,108 @@ static bool type_match_rec(const Handle& left_, const Handle& right_, bool tople
 	return true;
 }
 
-bool opencog::type_match(const Handle& left_, const Handle& right_)
+bool type_match(const Handle& left_, const Handle& right_)
 {
 	return type_match_rec(left_, right_, true);
 }
 
-Handle opencog::type_compose(const Handle& left, const Handle& right)
+Handle type_compose(const Handle& left, const Handle& right)
 {
 	return Handle::UNDEFINED;
 }
 
+Handle filter_vardecl(const Handle& vardecl, const Handle& body)
+{
+	return filter_vardecl(vardecl, HandleSeq{body});
+}
 
+Handle filter_vardecl(const Handle& vardecl, const HandleSeq& hs)
+{
+	// Base cases
+
+	if (vardecl.is_undefined())
+		// Return Handle::UNDEFINED to indicate that this variable
+		// declaration is useless.
+		return Handle::UNDEFINED;
+
+	Type t = vardecl->getType();
+	if (VARIABLE_NODE == t)
+	{
+		if (is_free_in_any_tree(hs, vardecl))
+			return vardecl;
+	}
+
+	// Recursive cases
+
+	else if (TYPED_VARIABLE_LINK == t)
+	{
+		Handle var = vardecl->getOutgoingAtom(0);
+		Type t = var->getType();
+		if (t == VARIABLE_NODE and filter_vardecl(var, hs).is_defined())
+			return vardecl;
+	}
+
+	else if (VARIABLE_LIST == t)
+	{
+		HandleSeq subvardecls;
+		for (const Handle& v : vardecl->getOutgoingSet())
+		{
+			if (filter_vardecl(v, hs).is_defined())
+				subvardecls.push_back(v);
+		}
+		if (subvardecls.empty())
+			return Handle::UNDEFINED;
+		if (subvardecls.size() == 1)
+			return subvardecls[0];
+		return Handle(createVariableList(subvardecls));
+	}
+
+	// If we're here we have failed to recognize vardecl as a useful
+	// and well formed variable declaration, so Handle::UNDEFINED is
+	// returned.
+	return Handle::UNDEFINED;
+}
+
+Type type_intersection(Type lhs, Type rhs)
+{
+	ClassServer& cs = classserver();
+	if (cs.isA(lhs, rhs))
+		return lhs;
+	if (cs.isA(rhs, lhs))
+		return rhs;
+	return NOTYPE;              // represent the bottom type
+}
+
+std::set<Type> type_intersection(Type lhs, const std::set<Type>& rhs)
+{
+	std::set<Type> res;
+	// Distribute the intersection over the union type rhs
+	for (Type rhst : rhs) {
+		Type ty = type_intersection(lhs, rhst);
+		if (ty != NOTYPE)
+			res.insert(ty);
+	}
+	return res;
+}
+
+std::set<Type> type_intersection(const std::set<Type>& lhs,
+                                 const std::set<Type>& rhs)
+{
+	// Base cases
+	if (lhs.empty())
+		return rhs;
+	if (rhs.empty())
+		return lhs;
+
+	// Recursive cases
+	std::set<Type> res;
+	for (Type ty : lhs) {
+		std::set<Type> itr = type_intersection(ty, rhs);
+		res.insert(itr.begin(), itr.end());
+	}
+	return res;
+}
+
+} // ~namespace opencog
 
 /* ===================== END OF FILE ===================== */

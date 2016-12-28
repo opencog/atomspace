@@ -39,27 +39,22 @@ void SQLBackingStore::set_store(AtomStorage *as)
 	_store = as;
 }
 
-NodePtr SQLBackingStore::getNode(Type t, const char *name) const
+Handle SQLBackingStore::getNode(Type t, const char *name) const
 {
 	return _store->getNode(t, name);
 }
 
-LinkPtr SQLBackingStore::getLink(Type t, const HandleSeq& oset) const
+Handle SQLBackingStore::getLink(Handle& h) const
 {
-	return _store->getLink(t, oset);
+	return _store->getLink(h);
 }
 
-AtomPtr SQLBackingStore::getAtom(UUID uuid) const
-{
-	return _store->getAtom(uuid);
-}
-
-HandleSeq SQLBackingStore::getIncomingSet(Handle h) const
+HandleSeq SQLBackingStore::getIncomingSet(const Handle& h) const
 {
 	return _store->getIncomingSet(h);
 }
 
-void SQLBackingStore::storeAtom(Handle h)
+void SQLBackingStore::storeAtom(const Handle& h)
 {
 	_store->storeAtom(h);
 }
@@ -74,3 +69,14 @@ void SQLBackingStore::barrier()
 	_store->flushStoreQueue();
 }
 
+void SQLBackingStore::registerWith(AtomSpace* as)
+{
+	_store->registerWith(as);
+	BackingStore::registerWith(as);
+}
+
+void SQLBackingStore::unregisterWith(AtomSpace* as)
+{
+	BackingStore::unregisterWith(as);
+	_store->unregisterWith(as);
+}

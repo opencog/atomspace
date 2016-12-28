@@ -36,7 +36,6 @@
 #include <vector>
 
 #include <zmq.hpp>
-#include <opencog/util/async_method_caller.h>
 #include <opencog/atoms/base/Atom.h>
 #include <opencog/atomspace/AtomTable.h>
 #include <opencog/atoms/base/Link.h>
@@ -81,17 +80,9 @@ class ZMQClient
 		// Fetch atoms from DB
 //		bool atomExists(Handle);
 		AtomPtr getAtom(UUID);
-		HandleSeq getIncomingSet(Handle);
-		NodePtr getNode(Type, const char *);
-		NodePtr getNode(const Node &n)
-		{
-			return getNode(n.getType(), n.getName().c_str());
-		}
-		LinkPtr getLink(Type, const HandleSeq&);
-		LinkPtr getLink(const Link &l)
-		{
-			return getLink(l.getType(), l.getOutgoingSet());
-		}
+		HandleSeq getIncomingSet(const Handle& );
+		Handle getNode(Type, const char *);
+		Handle getLink(Handle&);
 
 		// Large-scale loads and saves
 		void loadType(AtomTable &, Type); // Load *all* atoms of type

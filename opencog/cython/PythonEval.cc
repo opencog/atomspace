@@ -34,6 +34,7 @@
 
 #include <opencog/atoms/base/Atom.h>
 #include <opencog/atoms/base/Link.h>
+#include <opencog/atomspace/AtomSpace.h>
 
 #include "PythonEval.h"
 
@@ -56,18 +57,19 @@ const int SIMPLE_STRING_FAILURE = -1;
 const int MISSING_FUNC_CODE = -1;
 
 // The Python functions can't take const flags.
-#define NO_COMPILER_FLAGS NULL
-
 static bool already_initialized = false;
 static bool initialized_outside_opencog = false;
 std::recursive_mutex PythonEval::_mtx;
 
 /*
- * @todo When can we remove the singleton instance? Answer: never,
- * as long as python is single-threaded. Currently, python fakes
+ * @todo When can we remove the singleton instance? Answer: not sure.
+ * Python itself is single-threaded. That is, currently, python fakes
  * multi-thread support by grabbing a lock and only allowing just
  * one thread to run at a time.  Our singleton instance mirrors this
- * python limitation.
+ * python limitation.  However, if we could set a per-thread atomspace,
+ * then we could maybe still have python be callable in mutiple threads,
+ * with different atomspaces. Clearly python would become a major
+ * bottleneck, but this is why we strongly discourage using python.
  *
  * NOTE: The Python C API reference counting is very tricky and the
  * API inconsistently handles PyObject* object ownership.
@@ -217,9 +219,10 @@ static bool try_to_load_modules(const char ** config_paths)
         }
     }
 
-    // NOTE: Can't use get_path_as_string() yet because it is defined in a
-    // Cython api which we can't import unless the sys.path is correct. So
-    // we'll write it out before the imports below to aid in debugging.
+    // NOTE: Can't use get_path_as_string() yet, because it is defined
+    // in a Cython api which we can't import, unless the sys.path is
+    // correct. So we'll write it out before the imports below to aid
+    // in debugging.
     if (logger().is_debug_enabled())
     {
         logger().debug("Python 'sys.path' is:");
@@ -249,15 +252,6 @@ static bool try_to_load_modules(const char ** config_paths)
         logger().warn("PythonEval::%s Failed to load the "
                        "opencog.atomspace module", __FUNCTION__);
     }
-
-    // Now we can use get_path_as_string() to get 'sys.path',
-    // but only if import_opencog__atomspace() suceeded without error.
-    // When it fails, it fails silently, leaving get_path_as_string
-    // with a NULL PLT/GOT entry (i.e. calling the subroutine is a
-    // null-pointer deref).
-    if (nullptr != get_path_as_string)
-        logger().info("Python 'sys.path' after OpenCog config adds is: " +
-               get_path_as_string());
 
     // NOTE: PySys_GetObject returns a borrowed reference so don't do this:
     // Py_DECREF(pySysPath);
@@ -443,13 +437,25 @@ PythonEval& PythonEval::instance(AtomSpace* atomspace)
 #define CHECK_SINGLETON
 #ifdef CHECK_SINGLETON
         if (nullptr != singletonInstance->_atomspace)
+        {
             // Someone is trying to initialize the Python interpreter on a
             // different AtomSpace.  Because of the singleton design of the
             // the CosgServer+AtomSpace, there is no easy way to support this...
+            // logger().error() will print a stack tace to tell use who
+            // is doing this.
+            logger().error("PythonEval: ",
+                "Trying to re-initialize python interpreter with different\n"
+                "AtomSpace ptr! Current ptr=%p uuid=%d "
+                "New ptr=%p uuid=%d\n",
+                singletonInstance->_atomspace,
+                singletonInstance->_atomspace->get_uuid(),
+                atomspace, atomspace?atomspace->get_uuid():0);
+
             throw RuntimeException(TRACE_INFO,
                 "Trying to re-initialize python interpreter with different\n"
                 "AtomSpace ptr! Current ptr=%p New ptr=%p\n",
                 singletonInstance->_atomspace, atomspace);
+        }
 #else
         // We need to be able to call the python interpreter with
         // different atomspaces; for example, we need to use temporary
@@ -491,6 +497,8 @@ void PythonEval::initialize_python_objects_and_imports(void)
     PyObject* pyAtomSpaceObject = this->atomspace_py_object(_atomspace);
     PyDict_SetItemString(pyRootDictionary, "ATOMSPACE", pyAtomSpaceObject);
     Py_DECREF(pyAtomSpaceObject);
+    if (nullptr == _atomspace)
+        logger().warn("Python evaluator initialized with null atomspace!");
 
     // PyModule_GetDict returns a borrowed reference, so don't do this:
     // Py_DECREF(pyRootDictionary);
@@ -514,16 +522,16 @@ PyObject* PythonEval::atomspace_py_object(AtomSpace* atomspace)
     // a hard-to-debug crash on null-pointer-deref, and replace
     // it by a slightly less hard-to-debug error message.
     if (NULL == py_atomspace) {
-        logger().error("PythonEval::%s Failed to load the"
-                       "opencog.atomspace module", __FUNCTION__);
+        logger().warn("PythonEval::%s Failed to load the"
+                      "opencog.atomspace module", __FUNCTION__);
         return NULL;
     }
 
 /***********
     Weird ... I guess NULL atomspaces are OK!?
     if (NULL == atomspace) {
-        logger().error("PythonEval::%s No atomspace specified!",
-                        __FUNCTION__);
+        logger().warn("PythonEval::%s No atomspace specified!",
+                       __FUNCTION__);
         return NULL;
     }
 ************/
@@ -534,8 +542,8 @@ PyObject* PythonEval::atomspace_py_object(AtomSpace* atomspace)
         if (PyErr_Occurred())
             PyErr_Print();
 
-        logger().error("PythonEval::%s Failed to get atomspace "
-                       "wrapped with python object", __FUNCTION__);
+        logger().warn("PythonEval::%s Failed to get atomspace "
+                      "wrapped with python object", __FUNCTION__);
     }
 
     return pyAtomSpace;
@@ -616,10 +624,22 @@ void PythonEval::build_python_error_message(const char* function_name,
  */
 void PythonEval::execute_string(const char* command)
 {
-    PyObject *pyRootDictionary, *pyResult;
-    pyRootDictionary = PyModule_GetDict(_pyRootModule);
-    pyResult = PyRun_StringFlags(command, Py_file_input, pyRootDictionary,
-            pyRootDictionary, NO_COMPILER_FLAGS);
+    // We use Py_file_input here, instead of Py_single_input, because
+    // Py_single_input spews errors on blank lines.  However, the
+    // flip-side is that simple expressions, such as 2+2, generate no
+    // output at all when Py_file_input is used; they do generate output
+    // when Py_single_input is used.
+    //
+    // In either case, the pyResult does not have any string
+    // repesentation; using PyObject_Str(pyResult) and then
+    // PyString_AsString to print it gives "None" in all situations.
+    // Because of this, I don't know how to write a valid command
+    // interpreter for the python shell ...
+    PyObject* pyRootDictionary = PyModule_GetDict(_pyRootModule);
+    PyObject* pyResult = PyRun_StringFlags(command,
+            Py_file_input, pyRootDictionary, pyRootDictionary,
+            nullptr);
+
     if (pyResult)
         Py_DECREF(pyResult);
     Py_FlushLine();
@@ -705,7 +725,7 @@ PyObject* PythonEval::call_user_function(const std::string& moduleFunction,
     // If we can't find that module then throw an exception.
     if (!pyModule) {
         PyGILState_Release(gstate);
-        logger().error("Python module for '%s' not found!", moduleFunction.c_str());
+        logger().warn("Python module for '%s' not found!", moduleFunction.c_str());
         throw RuntimeException(TRACE_INFO,
             "Python module for '%s' not found!",
             moduleFunction.c_str());
@@ -773,7 +793,9 @@ PyObject* PythonEval::call_user_function(const std::string& moduleFunction,
     for (const Handle& h: argumentHandles)
     {
         // Place a Python atom object for this handle into the tuple.
-        PyObject* pyAtom = py_atom(h.value(), pyAtomSpace);
+
+        long int patom = (long int) &h;
+        PyObject* pyAtom = py_atom(patom, pyAtomSpace);
         PyTuple_SetItem(pyArguments, tupleItem, pyAtom);
 
         // PyTuple_SetItem steals it's item so don't do this:
@@ -816,8 +838,6 @@ Handle PythonEval::apply(AtomSpace* as, const std::string& func, Handle varargs)
     std::lock_guard<std::recursive_mutex> lck(_mtx);
     RAII raii(this, as);
 
-    UUID uuid = 0;
-
     // Get the atom object returned by this user function.
     PyObject* pyReturnAtom = this->call_user_function(func, varargs);
 
@@ -828,35 +848,37 @@ Handle PythonEval::apply(AtomSpace* as, const std::string& func, Handle varargs)
         PyGILState_STATE gstate;
         gstate = PyGILState_Ensure();
 
-        // Get the handle UUID from the atom.
-        PyObject* pyAtomUUID = PyObject_CallMethod(pyReturnAtom, (char*) "handle_uuid",
+        // Get the handle from the atom.
+        PyObject* pyAtomPATOM = PyObject_CallMethod(pyReturnAtom, (char*) "handle_ptr",
                 NULL);
 
-        // Make sure we got an atom UUID.
+        // Make sure we got an atom pointer.
         PyObject* pyError = PyErr_Occurred();
-        if (pyError or nullptr == pyAtomUUID) {
+        if (pyError or nullptr == pyAtomPATOM) {
             PyGILState_Release(gstate);
             throw RuntimeException(TRACE_INFO,
                 "Python function '%s' did not return Atom!", func.c_str());
         }
 
-        // Get the UUID from the python UUID.
-        uuid = static_cast<unsigned long>(PyLong_AsLong(pyAtomUUID));
+        // Get the atom pointer from the python atom pointer.
+        // Save it, because the DECREF will blow it away.
+        Handle hresult = *((Handle*)(PyLong_AsLong(pyAtomPATOM)));
 
         // Cleanup the reference counts.
         Py_DECREF(pyReturnAtom);
-        Py_DECREF(pyAtomUUID);
+        Py_DECREF(pyAtomPATOM);
 
         // Release the GIL. No Python API allowed beyond this point.
         PyGILState_Release(gstate);
 
+        return hresult;
     } else {
 
         throw RuntimeException(TRACE_INFO,
             "Python function '%s' did not return Atom!", func.c_str());
     }
 
-    return Handle(uuid);
+    return Handle::UNDEFINED;
 }
 
 /**
@@ -940,7 +962,7 @@ void PythonEval::apply_as(const std::string& moduleFunction,
     // If we can't find that module then throw an exception.
     if (!pyModule) {
         PyGILState_Release(gstate);
-        logger().error("Python module for '%s' not found!", moduleFunction.c_str());
+        logger().warn("Python module for '%s' not found!", moduleFunction.c_str());
         throw RuntimeException(TRACE_INFO,
             "Python module for '%s' not found!",
             moduleFunction.c_str());
@@ -1030,21 +1052,8 @@ std::string PythonEval::apply_script(const std::string& script)
 {
     std::lock_guard<std::recursive_mutex> lck(_mtx);
 
-    PyObject* pyError = NULL;
-    PyObject *pyCatcher = NULL;
-    PyObject *pyOutput = NULL;
-    std::string result;
-    bool errorRunningScript;
-    std::string errorString;
-
     // Grab the GIL
-    PyGILState_STATE gstate;
-    gstate = PyGILState_Ensure();
-
-    PyRun_SimpleString("_opencog_output_stream = StringIO.StringIO()\n"
-                       "_python_output_stream = sys.stdout\n"
-                       "sys.stdout = _opencog_output_stream\n"
-                       "sys.stderr = _opencog_output_stream\n");
+    PyGILState_STATE gstate = PyGILState_Ensure();
 
     // Execute the script. NOTE: This call replaces PyRun_SimpleString
     // which was masking errors because it calls PyErr_Clear() so the
@@ -1052,35 +1061,15 @@ std::string PythonEval::apply_script(const std::string& script)
     // was an error.
     this->execute_string(script.c_str());
 
+    bool errorRunningScript = false;
+    std::string errorString;
+
     // Check for errors in the script.
-    pyError = PyErr_Occurred();
-
-    // If the script executed without error...
-    if (!pyError) {
-        // Get the output stream as a string so we can return it.
-        errorRunningScript = false;
-        pyCatcher = PyObject_GetAttrString(_pyRootModule,
-                "_opencog_output_stream");
-        pyOutput = PyObject_CallMethod(pyCatcher, (char*)"getvalue", NULL);
-        result = PyBytes_AsString(pyOutput);
-
-        // Cleanup reference counts for Python objects we no longer reference.
-        Py_DECREF(pyCatcher);
-        Py_DECREF(pyOutput);
-
-    } else {
+    if (PyErr_Occurred()) {
         // Remember the error and get the error string for the throw below.
         errorRunningScript = true;
         this->build_python_error_message(NO_FUNCTION_NAME, errorString);
-
-        // PyErr_Occurred returns a borrowed reference, so don't do this:
-        // Py_DECREF(pyError);
     }
-
-    // Close the output stream.
-    PyRun_SimpleString("sys.stdout = _python_output_stream\n"
-                       "sys.stderr = _python_output_stream\n"
-                       "_opencog_output_stream.close()\n");
 
     // Release the GIL. No Python API allowed beyond this point.
     PyGILState_Release(gstate);
@@ -1090,8 +1079,7 @@ std::string PythonEval::apply_script(const std::string& script)
     if (errorRunningScript)
         throw RuntimeException(TRACE_INFO, "%s", errorString.c_str());
 
-    // printf("Python says that: %s\n", result.c_str());
-    return result;
+    return "";
 }
 
 void PythonEval::add_to_sys_path(std::string path)
@@ -1109,7 +1097,6 @@ void PythonEval::add_to_sys_path(std::string path)
     //
     Py_DECREF(pyPathString);
 }
-
 
 const int ABSOLUTE_IMPORTS_ONLY = 0;
 
@@ -1151,6 +1138,9 @@ void PythonEval::import_module(const boost::filesystem::path &file,
         // This decrement is needed because PyDict_SetItemString does
         // not "steal" the reference, unlike PyList_SetItem.
         Py_DECREF(pyAtomSpaceObject);
+        if (nullptr == _atomspace)
+            logger().warn("Python module initialized with null atomspace!");
+
 
         // We need to increment the pyModule reference because
         // PyModule_AddObject "steals" it and we're keeping a copy
@@ -1268,10 +1258,10 @@ void PythonEval::add_modules_from_path(std::string pathString)
         else {
             Logger::Level btl = logger().get_backtrace_level();
             logger().set_backtrace_level(Logger::Level::NONE);
-            logger().error() << "Failed to load python module \'"
+            logger().warn() << "Failed to load python module \'"
                 << abspath << "\', searched directories:";
             for (int i = 0; config_paths[i] != NULL; ++i) {
-                logger().error() << "Directory: " << config_paths[i];
+                logger().warn() << "Directory: " << config_paths[i];
             }
             logger().set_backtrace_level(btl);
        }
@@ -1303,8 +1293,8 @@ void PythonEval::add_modules_from_path(std::string pathString)
         }
     }
 
-    // Load First directories and then files to properly handle
-    // import dependencies.
+    // First, load directories, and then load files, to properly
+    // handle import dependencies.
     dirs.insert(dirs.end(), files.begin(), files.end());
     for (const auto& abspath : dirs)
         add_modules_from_abspath(abspath);
@@ -1326,11 +1316,17 @@ void PythonEval::add_modules_from_abspath(std::string pathString)
     else if (S_ISREG(finfo.st_mode))
         add_module_file(pathString);
     else
-        logger().error() << "Python module path \'" << pathString
-                         << "\' can't be found";
+        logger().warn() << "Python module path \'" << pathString
+                        << "\' can't be found";
 
     // Release the GIL. No Python API allowed beyond this point.
     PyGILState_Release(gstate);
+}
+
+void PythonEval::begin_eval()
+{
+    _eval_done = false;
+    _result = "";
 }
 
 void PythonEval::eval_expr(const std::string& partial_expr)
@@ -1403,39 +1399,71 @@ void PythonEval::eval_expr_line(const std::string& partial_expr)
 
     _input_line += part;
     _input_line += '\n';  // we stripped this off, above
-    logger().info("[PythonEval] eval_expr:\n%s", _input_line.c_str());
+    logger().debug("[PythonEval] eval_expr length=%zu:\n%s",
+                  _input_line.length(), _input_line.c_str());
 
     // This is the cogserver shell-freindly evaluator. We must
     // stop all exceptions thrown in other layers, or else we
     // will crash the cogserver. Pass the exception message to
     // the user, who can read and contemplate it: it is almost
     // surely a syntax error in the python code.
-    _result = "";
     try
     {
-        _result = this->apply_script(_input_line);
+        this->apply_script(_input_line);
     }
     catch (const RuntimeException &e)
     {
-        _result = e.get_message();
+        _result += e.get_message();
         _result += "\n";
     }
     _input_line = "";
     _paren_count = 0;
     _pending_input = false;
+    logger().debug("[PythonEval] eval_expr result length=%zu:\n%s",
+                  _result.length(), _result.c_str());
+
+    _eval_done = true;
+    _wait_done.notify_all();
     return;
 
 wait_for_more:
-    _result = "";
     _pending_input = true;
     // Add this expression to our evaluation buffer.
     _input_line += part;
     _input_line += '\n';  // we stripped this off, above
+
+    _result = "";
+    _eval_done = true;
+    _wait_done.notify_all();
 }
 
 std::string PythonEval::poll_result()
 {
+    if (not _eval_done)
+    {
+        // We don't have a real need to lock anything here; we're just
+        // using this as a hack, so that the condition variable will
+        // wake us up. The goal here is to block when there's no output
+        // to be reported.
+        auto evdone = [&](void) { return _eval_done; };
+        std::unique_lock<std::mutex> lck(_poll_mtx);
+        _wait_done.wait(lck, evdone);
+    }
+
     std::string r = _result;
     _result.clear();
     return r;
+}
+
+void PythonEval::interrupt(void)
+{
+    // What we want to do here is to somehow interrupt or throw an
+    // exception to the code that is running in the PyRun(), up above,
+    // in the execute_string() method. That is, we want to make it
+    // stop whatever infinite loop the user told it to run, and just
+    // return to the C code (possibly spewing exceptions, etc.)
+    // However, I cannot figure out how to implement this ...
+    _result += "PythonEval: interrupt not implemented!\n";
+
+    logger().warn("[PythonEval] interrupt not implemented!\n");
 }

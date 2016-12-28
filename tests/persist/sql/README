@@ -51,7 +51,7 @@ To run this test, perform the following steps:
 
 2g) Initialize the test database by creating tables. Do this with:
 
-    $ cat opencog/persist/sql/atom.sql | psql opencog_test -U opencog_tester -W -h localhost
+    $ cat opencog/persist/sql/odbc/atom.sql | psql opencog_test -U opencog_tester -W -h localhost
 
 2h) Verify that the tables were created. Login as before, then enter \d
     at the postgres prompt.  You should see this:

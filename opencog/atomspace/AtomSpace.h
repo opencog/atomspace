@@ -31,7 +31,6 @@
 #include <vector>
 
 #include <opencog/util/exceptions.h>
-#include <opencog/truthvalue/AttentionValue.h>
 #include <opencog/truthvalue/TruthValue.h>
 
 #include <opencog/atoms/base/ClassServer.h>
@@ -63,8 +62,10 @@ class AtomSpace
     friend class Atom;               // Needs to call get_atomtable()
     friend class AtomStorage;
     friend class BackingStore;
+    friend class ODBCAtomStorage;   // Needs to call get_atomtable()
     friend class ZMQPersistSCM;
     friend class ::AtomTableUTest;
+    friend class ecan::StochasticDiffusionAmountCalculator; // needs to access _bank
 
     /**
      * Override and declare copy constructor and equals operator, to
@@ -134,7 +135,7 @@ public:
      * then new truth value is ignored, and the existing atom is
      * returned.
      */
-    Handle add_atom(AtomPtr atom, bool async=false);
+    Handle add_atom(AtomPtr a, bool async=false);
 
     /**
      * Add a node to the Atom Table.  If the atom already exists
@@ -237,14 +238,12 @@ public:
      * get_atom() method instead.
      */
     Handle fetch_atom(Handle);
-    Handle fetch_atom(UUID);
 
     /**
      * Get an atom from the AtomTable. If the atom is not there, then
      * return Handle::UNDEFINED.
      */
     Handle get_atom(const Handle& h) const { return _atom_table.getHandle(h); }
-    Handle get_atom(UUID uuid) const { return _atom_table.getHandle(uuid); }
 
     /**
      * Load *all* atoms of the given type, but only if they are not
@@ -350,16 +349,16 @@ public:
     */
     Handle get_link(Type t, const HandleSeq& outgoing);
     inline Handle get_link(Type t, const Handle& ha) {
-	return get_link(t, HandleSeq({ha}));
+        return get_link(t, HandleSeq({ha}));
     }
     Handle get_link(Type t, const Handle& ha, const Handle& hb) {
-	return get_link(t, {ha, hb});
+        return get_link(t, {ha, hb});
     }
     Handle get_link(Type t, const Handle& ha, const Handle& hb, const Handle& hc) {
-	return get_link(t, {ha, hb, hc});
+        return get_link(t, {ha, hb, hc});
     }
     Handle get_link(Type t, const Handle& ha, const Handle& hb, const Handle& hc, const Handle& hd) {
-	return get_link(t, {ha, hb, hc, hd});
+        return get_link(t, {ha, hb, hc, hd});
     }
     Handle get_handle(Type t, const HandleSeq& outgoing) {
         return get_link(t, outgoing);
@@ -576,7 +575,7 @@ public:
                       AttentionValue::sti_t lowerBound,
                       AttentionValue::sti_t upperBound = AttentionValue::MAXSTI) const
     {
-        UnorderedHandleSet hs = _atom_table.getHandlesByAV(lowerBound, upperBound);
+        UnorderedHandleSet hs = _bank.getHandlesByAV(lowerBound, upperBound);
         return std::copy(hs.begin(), hs.end(), result);
     }
 
@@ -654,6 +653,26 @@ public:
     long get_STI_funds() const { return _bank.getSTIFunds(); }
     long get_LTI_funds() const { return _bank.getLTIFunds(); }
 
+    /** See the AttentionBank for documentation */
+    void stimulate(Handle& h, double stimulus) { _bank.stimulate(h, stimulus); }
+    void updateImportanceIndex(AtomPtr a, int bin) {
+        _bank.updateImportanceIndex(a, bin); }
+
+    // ---- AttentionBank Signals
+    boost::signals2::connection AddAFSignal(const AFCHSigl::slot_type& function)
+    {
+        return _bank.AddAFSignal().connect(function);
+    }
+    boost::signals2::connection RemoveAFSignal(const AFCHSigl::slot_type& function)
+    {
+        return _bank.RemoveAFSignal().connect(function);
+    }
+    boost::signals2::connection AVChangedSignal(const AVCHSigl::slot_type& function)
+    {
+        return _bank.getAVChangedSignal().connect(function);
+    }
+    AVCHSigl& getAVChangedSignal() { return _bank.getAVChangedSignal(); }
+
     /* ----------------------------------------------------------- */
     // ---- Signals
 
@@ -665,21 +684,9 @@ public:
     {
         return _atom_table.removeAtomSignal().connect(function);
     }
-    boost::signals2::connection AVChangedSignal(const AVCHSigl::slot_type& function)
-    {
-        return _atom_table.AVChangedSignal().connect(function);
-    }
     boost::signals2::connection TVChangedSignal(const TVCHSigl::slot_type& function)
     {
         return _atom_table.TVChangedSignal().connect(function);
-    }
-    boost::signals2::connection AddAFSignal(const AVCHSigl::slot_type& function)
-    {
-        return _bank.AddAFSignal().connect(function);
-    }
-    boost::signals2::connection RemoveAFSignal(const AVCHSigl::slot_type& function)
-    {
-        return _bank.RemoveAFSignal().connect(function);
     }
 
     /* ----------------------------------------------------------- */

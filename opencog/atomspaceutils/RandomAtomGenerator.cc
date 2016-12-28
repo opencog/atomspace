@@ -5,7 +5,6 @@
 
 #include <opencog/atoms/base/types.h>
 #include <opencog/truthvalue/SimpleTruthValue.h>
-#include <opencog/atomspace/TLB.h>
 #include <opencog/truthvalue/TruthValue.h>
 
 #include "RandomAtomGenerator.h"
@@ -44,10 +43,6 @@ RandomAtomGenerator::RandomAtomGenerator(AtomSpace* atomspace,
 
     // Create the poisson distribution around the link mean.
     _poisson_distribution = new std::poisson_distribution<unsigned>(_link_size_mean);
-
-    // Set the UUID for the first node.
-    _first_out_UUID = TLB::getMaxUUID();
-    _last_out_UUID = TLB::getMaxUUID();
 }
 
 RandomAtomGenerator::~RandomAtomGenerator()
@@ -128,9 +123,8 @@ Type RandomAtomGenerator::get_link_type()
 
 Handle RandomAtomGenerator::get_random_handle()
 {
-    int range = _last_out_UUID - _first_out_UUID - 1;
-    UUID random_UUID = _first_out_UUID + _random_generator->randint(range);
-    return Handle(random_UUID);
+    // _random_generator->randint(range);
+    return Handle::UNDEFINED;
 }
 
 bool RandomAtomGenerator::sequence_contains(HandleSeq& sequence, Handle& target)
@@ -194,17 +188,10 @@ void RandomAtomGenerator::make_random_atoms(long total_atoms,
     for (int node_count = 0; node_count < total_nodes; node_count++)
         make_random_node();
 
-    // Remember the last UUID which is used to generate the outgoing set
-    // in the links.
-    _last_out_UUID = TLB::getMaxUUID();
-
     // Add the links until we get to to our total.
     int total_links = total_atoms - total_nodes;
     for (int link_count = 0; link_count < total_links; link_count++)
         make_random_link();
-
-    // Remember the new last outgoing UUID.
-    _last_out_UUID = TLB::getMaxUUID();
 }
 
 } // namespace opencog

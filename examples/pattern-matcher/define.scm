@@ -3,10 +3,7 @@
 ;
 ; Demonstrate the use of DefineLink to give names to things.
 ;
-(use-modules (opencog))
-(use-modules (opencog query))
-
-(load-from-path "utilities.scm")
+(use-modules (opencog) (opencog query) (opencog exec))
 
 ;; Some data to populate the atomspace.
 (InheritanceLink

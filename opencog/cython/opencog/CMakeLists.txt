@@ -70,6 +70,7 @@ list(APPEND ADDITIONAL_MAKE_CLEAN_FILES "atomspace_api.h")
 
 # opencog.atomspace Python bindings
 ADD_LIBRARY(atomspace_cython
+	Cast.cc
 	atomspace.cpp
 )
 
@@ -94,10 +95,11 @@ SET_TARGET_PROPERTIES(atomspace_cython PROPERTIES
 	OUTPUT_NAME atomspace)
 
 # The cogserver needs the atomspace pxd file to get the Handle, Atom and
-# AtomSpace defintions.
+# AtomSpace defintions during compilation. So this must be installed.
 INSTALL (FILES
 	__init__.py
 	atomspace.pxd
+	Cast.h
 	DESTINATION "include/opencog/cython/opencog"
 )
 
@@ -160,6 +162,7 @@ ADD_LIBRARY(bindlink_cython
 )
 
 TARGET_LINK_LIBRARIES(bindlink_cython
+	atomspace_cython
 	query
 	execution
 	${PYTHON_LIBRARIES}
@@ -171,29 +174,21 @@ SET_TARGET_PROPERTIES(bindlink_cython PROPERTIES
 	PREFIX ""
 	OUTPUT_NAME bindlink)
 
-IF (WIN32)
-	INSTALL (TARGETS
-		atomspace_cython
-		bindlink_cython
-		logger_cython
-		type_constructors
-		utilities_cython
-		DESTINATION "${DATADIR}/python/opencog")
-ELSE (WIN32)
-	INSTALL (TARGETS
-		atomspace_cython
-		bindlink_cython
-		logger_cython
-		type_constructors
-		utilities_cython
-		DESTINATION "${DATADIR}/python/opencog")
-ENDIF (WIN32)
+# XXX FIXME -- there must surely be a more elegant way
+# of specifying the correct python install path ...
+INSTALL (TARGETS
+	atomspace_cython
+	bindlink_cython
+	logger_cython
+	type_constructors
+	utilities_cython
+	DESTINATION "lib${LIB_DIR_SUFFIX}/python2.7/dist-packages/opencog")
 
 IF (HAVE_GUILE)
 	############################## scheme wrapper #####################
 	CYTHON_ADD_MODULE_PYX(scheme_wrapper
 		"PyScheme.h" "atomspace.pxd" opencog_atom_types
-		"../../guile/load-file.h" "../../query/PatternSCM.h")
+		"../load-file.h")
 
 	list(APPEND ADDITIONAL_MAKE_CLEAN_FILES "scheme_wrapper.cpp")
 
@@ -203,6 +198,7 @@ IF (HAVE_GUILE)
 	)
 
 	TARGET_LINK_LIBRARIES(scheme_wrapper
+		atomspace_cython
 		query
 		execution
 		smob
@@ -213,19 +209,12 @@ IF (HAVE_GUILE)
 		PREFIX ""
 		OUTPUT_NAME scheme_wrapper)
 
-	IF (WIN32)
-		INSTALL (TARGETS
-			scheme_wrapper
-			DESTINATION "${DATADIR}/python/opencog")
-	ELSE (WIN32)
-		INSTALL (TARGETS
-			scheme_wrapper
-			DESTINATION "${DATADIR}/python/opencog")
-	ENDIF (WIN32)
-
+	INSTALL (TARGETS
+		scheme_wrapper
+		DESTINATION "lib${LIB_DIR_SUFFIX}/python2.7/dist-packages/opencog")
 ENDIF (HAVE_GUILE)
 
 
 INSTALL (FILES
 	__init__.py
-	DESTINATION "${DATADIR}/python/opencog")
+	DESTINATION "lib${LIB_DIR_SUFFIX}/python2.7/dist-packages/opencog")

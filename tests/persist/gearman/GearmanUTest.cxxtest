@@ -28,77 +28,84 @@
 #include <opencog/atoms/base/Handle.h>
 #include <opencog/guile/SchemeEval.h>
 
-#include <opencog/persist/gearman/DistSCM.h>
-
 using namespace opencog;
 // assuming cxxtest times the tests with some time out and fails test
 // on timeout - say if gearman breaks and test blocks forever
 // always use cerr or logger to debug instead of cout
 
-class DistScmUTest :  public CxxTest::TestSuite
+class GearmanUTest :  public CxxTest::TestSuite
 {
 	private:
 		AtomSpace *as;
 		SchemeEval *evl,*evl2;
 	public:
-		DistScmUTest(void)
+		GearmanUTest(void)
 		{
 			as = new AtomSpace();
-			evl = new SchemeEval(as);
-			evl2 = new SchemeEval(as);
 		}
 
-		~DistScmUTest()
+		~GearmanUTest()
 		{
-			delete evl;
-			delete evl2;
 			delete as;
 		}
 		void setUp(void);
-		static void create_slave_thread(DistScmUTest* dt);
+		static void worker_thread(GearmanUTest* dt);
 
-		// Thread join, after calling set master mode.
 		void tearDown(void){}
 
-		// Call master and get return.
+		// Send work to worker, wait for result.
 		void test_dist();
 };
 
-void DistScmUTest::setUp(void)
+void GearmanUTest::setUp(void)
 {
 	as->clear();
+	SchemeEval* evl = SchemeEval::get_evaluator(as);
 	evl->eval("(setenv \"LTDL_LIBRARY_PATH\" \"" PROJECT_BINARY_DIR
 	         "/opencog/persist/gearman:/usr/local/lib/opencog\")");
 	evl->eval("(add-to-load-path \"" PROJECT_SOURCE_DIR "/opencog/scm\")");
 	evl->eval("(add-to-load-path \"/usr/local/share/opencog/scm\")");
 	evl->eval("(use-modules (opencog))");
 	evl->eval("(use-modules (opencog dist-gearman))");
+
+	std::cout << "Finish GearmanUTest setup\n";
 }
 
-void DistScmUTest::create_slave_thread(DistScmUTest* dt)
+// Thread that will handle work requests.
+void GearmanUTest::worker_thread(GearmanUTest* dt)
 {
-	std::string slv = dt->evl->eval(
-		"(set-slave-mode \"localhost\" \"worker1\")");
+	std::cout << "Start GearmanUTest worker thread\n";
+	SchemeEval* evl = SchemeEval::get_evaluator(dt->as);
+	std::string slv = evl->eval(
+		"(start-work-handler \"localhost\" \"GearmanUTest-worker1\")");
 
-	std::cout << "Slave mode message:\n" << slv << std::endl;
+	std::cout << "GearmanUTest worker exiting, received message: "
+	          << slv << std::endl;
 	TS_ASSERT_EQUALS(slv, "localhost\n");
 }
 
-void DistScmUTest::test_dist()
+void GearmanUTest::test_dist()
 {
-	std::thread slaveThread(create_slave_thread, this);
+	// Start the worker thread.
+	std::thread workThread(worker_thread, this);
 
-	// Call master
-	std::string mast =
-		"(dist-run-scm \"(ConceptNode \\\"Hello\\\")\" \"client1\" #t)";
+	// Wait for the worker to get started.
+	sleep(1);
 
-	std::string result = evl2->eval(mast);
-	std::cout << "Master result message:\n" << result << std::endl;
-	std::cout << "Master got: " <<
-		evl2->eval("(cog-atom " + result + ")");
+	std::cout << "GearmanUTest client thread going to issue work\n";
 
-	evl2->eval("(set-master-mode)");
-	slaveThread.join();
+	// Send work to worker, and wait for result.
+	const char * work =
+		"(dist-eval \"(ConceptNode \\\"Hello\\\")\" \"client1\")";
 
-	TS_ASSERT_DIFFERS(atoll(result.c_str()), Handle::INVALID_UUID);
+	SchemeEval* evl = SchemeEval::get_evaluator(as);
+	std::string result = evl->eval(work);
+	std::cout << "GearmanUTest client got result:" << result;
+
+	evl->eval("(exit-all-workers)");
+	workThread.join();
+
+	Handle got = evl->eval_h(result.c_str());
+	Handle expected = evl->eval_h("(ConceptNode \"Hello\")");
+	TS_ASSERT_EQUALS(got, expected);
 }

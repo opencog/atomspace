@@ -35,10 +35,10 @@ After the opencog module is loaded, you can create atoms "as usual" e.g.
 (ConceptNode "asdf")
 ```
 
-You can load other scm files (for example, "utilities.scm") by saying:
+You can load other scm files (for example, "foobar.scm") by saying:
 
 ```
-(load-from-path "utilities.scm")
+(load-from-path "foobar.scm")
 ```
 
 Some, but not all functions have documentation, which can be viewed by

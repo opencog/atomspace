@@ -10,23 +10,31 @@ ADD_LIBRARY (atomspace
 	AttentionBank.cc
 	BackingStore.cc
 	FixedIntegerIndex.cc
-	HandleSeqIndex.cc
-	# HandleSetIndex.cc
+	ThreadSafeFixedIntegerIndex.cc
 	ImportanceIndex.cc
-	# IncomingIndex.cc
-	LinkIndex.cc
-	NodeIndex.cc
-	TLB.cc
+	StochasticImportanceDiffusion.cc
 	TypeIndex.cc
+
+	# The below are no longer used, but we will
+	# keep them around for a little while longer... just in case!?
+	# HandleSeqIndex.cc
+	# HandleSetIndex.cc
+	# IncomingIndex.cc
+	# LinkIndex.cc
+	# NodeIndex.cc
 )
 
 # Without this, parallel make will race and crap up the generated files.
 ADD_DEPENDENCIES(atomspace opencog_atom_types)
 
 TARGET_LINK_LIBRARIES(atomspace
-	atombase
-	truthvalue  
+	-Wl,--no-as-needed
+	atomcore
 	lambda
+	clearbox
+	atomutils
+	atombase
+	truthvalue
 	${COGUTIL_LIBRARY}
 	${Boost_THREAD_LIBRARY}
 )
@@ -41,14 +49,10 @@ INSTALL (FILES
 	AttentionBank.h
 	BackingStore.h
 	FixedIntegerIndex.h
-	HandleSeqIndex.h
+	ThreadSafeFixedIntegerIndex.h
 	ImportanceIndex.h
-	LinkIndex.h
-	NameIndex.h
-	NodeIndex.h
-	StringIndex.h
+	StochasticImportanceDiffusion.h
 	TypeIndex.h
-	TLB.h
 	version.h
 	DESTINATION "include/opencog/atomspace"
 )

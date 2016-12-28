@@ -23,6 +23,7 @@
 
 #include <math.h>
 
+#include <opencog/atomspace/AtomSpace.h>
 #include <opencog/atoms/base/Atom.h>
 #include <opencog/atoms/base/ClassServer.h>
 #include <opencog/atoms/base/Link.h>
@@ -32,12 +33,10 @@
 #include <opencog/truthvalue/IndefiniteTruthValue.h>
 
 #include <opencog/guile/SchemeEval.h>
-#include <opencog/guile/load-file.h>
 
 #include "../query/test-types.h"
 
 #include <opencog/util/Logger.h>
-#include <opencog/util/Config.h>
 
 using namespace opencog;
 using namespace std;
@@ -176,6 +175,7 @@ void BasicSCMUTest::check_node(const char * tipo, const char * nodename, float t
 		TS_ASSERT_LESS_THAN_EQUALS(fabs(c-conf), 1.0e-6);
 	}
 
+#if OBSOLETE_API
 	// Test the eval_h function also -- it returns a handle.
 	snprintf(buff, 500, "(cog-atom %lu)", h.value());
 	Handle h2 = eval->eval_h(buff);
@@ -184,6 +184,7 @@ void BasicSCMUTest::check_node(const char * tipo, const char * nodename, float t
 	eval->clear_pending();
 	TSM_ASSERT("Failed to eval_h", !eval_err);
 	TSM_ASSERT("Failed to get the correct handle", h == h2);
+#endif
 }
 
 void BasicSCMUTest::test_single_atom(void)
@@ -201,8 +202,15 @@ void BasicSCMUTest::test_single_atom(void)
 	TSM_ASSERT("Failed to find handle for first atom", h != NULL);
 
 	// Load the utility definitions
-	int rc = load_scm_file(*as,PROJECT_SOURCE_DIR"/tests/scm/typedefs.scm");
-	TSM_ASSERT_EQUALS("Failed to load type definitions", 0, rc);
+	eval->eval("(add-to-load-path \"..\")");
+	eval->eval("(add-to-load-path \"../..\")");
+	eval->eval("(add-to-load-path \"../../..\")");
+	std::string rs = eval->eval("(load-from-path \"tests/scm/typedefs.scm\")");
+	eval_err = eval->eval_error();
+	if (eval_err)
+		printf("Ohh noooo! %s\n", rs.c_str());
+	eval->clear_pending();
+	TSM_ASSERT_EQUALS("Failed to load type definitions", false, eval_err);
 	printf("typedefs now loaded!\n");
 
 	// We should add many more nodes, but I'm feeling lazy ...

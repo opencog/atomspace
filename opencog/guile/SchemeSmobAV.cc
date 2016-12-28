@@ -6,8 +6,6 @@
  * Copyright (c) 2008,2009 Linas Vepstas <linas@linas.org>
  */
 
-#ifdef HAVE_GUILE
-
 #include <cstddef>
 #include <libguile.h>
 
@@ -95,6 +93,18 @@ SCM SchemeSmob::ss_new_av (SCM ssti, SCM slti, SCM svlti)
 	return take_av(av);
 }
 
+/**
+ *  Stimulate an atom with given stimulus amount.
+ */
+SCM SchemeSmob::ss_stimulate (SCM satom, SCM sstimulus)
+{
+	Handle h(scm_to_handle(satom));
+	double stimulus = scm_to_double(sstimulus);
+	AtomSpace* atomspace = ss_get_env_as("cog-stimulate");
+	atomspace->stimulate(h,stimulus);
+	return satom;
+}
+
 /* ============================================================== */
 /**
  * Return true if the scm is an attention value
@@ -154,5 +164,4 @@ SCM SchemeSmob::ss_av_get_value (SCM s)
 	return rc;
 }
 
-#endif /* HAVE_GUILE */
 /* ===================== END OF FILE ============================ */

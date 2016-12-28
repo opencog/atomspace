@@ -5,6 +5,8 @@
 ; quoted variable.
 ;
 
+(use-modules (opencog) (opencog query))
+
 (EvaluationLink
 	(PredicateNode "similar")
 	(ListLink

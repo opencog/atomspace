@@ -25,7 +25,8 @@
 
 #include <unordered_map>
 
-#include <opencog/query/Pattern.h>
+#include <opencog/atoms/base/Quotation.h>
+#include <opencog/atoms/pattern/Pattern.h>
 #include <opencog/atoms/core/ScopeLink.h>
 #include <opencog/atoms/core/VariableList.h>
 #include <opencog/query/PatternMatchCallback.h>
@@ -73,6 +74,8 @@ namespace opencog
 ///
 /// The (cog-satisfy) and (cog-execute!) scheme calls can ground this
 /// link, and return a truth value.
+class PatternLink;
+typedef std::shared_ptr<PatternLink> PatternLinkPtr;
 class PatternLink : public ScopeLink
 {
 protected:
@@ -116,7 +119,7 @@ protected:
 
 	void trace_connectives(const std::set<Type>&,
 	                       const HandleSeq& clauses,
-	                       int quotation_level = 0);
+	                       Quotation quotation=Quotation());
 
 	void make_connectivity_map(const HandleSeq&);
 	void make_map_recursive(const Handle&, const Handle&);
@@ -132,11 +135,14 @@ protected:
 	void common_init(void);
 	void setup_components(void);
 
+public:
 	// Only derived classes can call this
+	// XXX Need to make this public, so that the factory can call it!
 	PatternLink(Type, const HandleSeq&,
 	            TruthValuePtr tv = TruthValue::DEFAULT_TV(),
 	            AttentionValuePtr av = AttentionValue::DEFAULT_AV());
 
+protected:
 	// utility debug print
 	static void prt(const Handle& h)
 	{
@@ -182,9 +188,11 @@ public:
 	bool satisfy(PatternMatchCallback&) const;
 
 	void debug_log(void) const;
+
+	static PatternLinkPtr factory(const Handle&);
+	static PatternLinkPtr factory(Type, const HandleSeq&);
 };
 
-typedef std::shared_ptr<PatternLink> PatternLinkPtr;
 static inline PatternLinkPtr PatternLinkCast(const Handle& h)
 	{ AtomPtr a(h); return std::dynamic_pointer_cast<PatternLink>(a); }
 static inline PatternLinkPtr PatternLinkCast(AtomPtr a)

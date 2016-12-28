@@ -48,6 +48,7 @@ namespace opencog
  *  @{
  */
 
+class AtomTable;
 class AtomSpace;
 
 //! arity of Links, represented as short integer (16 bits)
@@ -75,12 +76,10 @@ typedef boost::signals2::signal<void (AtomPtr, LinkPtr)> AtomPairSignal;
 class Atom
     : public ProtoAtom
 {
-    friend class AtomStorage;     // Needs to set _uuid
+    friend class AtomStorage;     // Needs to set atomtable
     friend class AtomTable;       // Needs to call MarkedForRemoval()
     friend class AtomSpace;       // Needs to call getAtomTable()
     friend class DeleteLink;      // Needs to call getAtomTable()
-    friend class Handle;          // Needs to view _uuid
-    friend class TLB;             // Needs to view _uuid
     friend class ProtocolBufferSerializer; // Needs to de/ser-ialize an Atom
 
 private:
@@ -95,19 +94,22 @@ protected:
     // Place this first, so that is shares a word with Type.
     char _flags;
 
-    UUID _uuid;
+    /// Merkle-tree hash of the atom contents. Generically useful
+    /// for indexing and comparison operations.
+    mutable ContentHash _content_hash;
+
     AtomTable *_atomTable;
 
     TruthValuePtr _truthValue;
     AttentionValuePtr _attentionValue;
-    ProtoAtomPtr _value;
+    ProtoAtomPtr _value; // XXX this iw wrong!!! Must remove this!!
 
     // Lock, used to serialize changes.
     // This costs 40 bytes per atom.  Tried using a single, global lock,
     // but there seemed to be too much contention for it, so instead,
     // we are using a lock-per-atom, even though this makes the atom
     // kind-of fat.
-    std::mutex _mtx;
+    mutable std::mutex _mtx;
 
     /**
      * Constructor for this class. Protected; no user should call this
@@ -123,7 +125,7 @@ protected:
          ProtoAtomPtr pv = NULL)
       : ProtoAtom(t),
         _flags(0),
-        _uuid(Handle::INVALID_UUID),
+        _content_hash(Handle::INVALID_HASH),
         _atomTable(NULL),
         _truthValue(tv),
         _attentionValue(av),
@@ -157,6 +159,8 @@ protected:
     void insert_atom(LinkPtr);
     void remove_atom(LinkPtr);
 
+    virtual ContentHash compute_hash() const = 0;
+
 private:
     /** Returns whether this atom is marked for removal.
      *
@@ -170,20 +174,13 @@ private:
     //! Unsets removal flag.
     void unsetRemovalFlag();
 
-    /** Returns whether this atom is marked checked.
-     *
-     * @return is atom checked.
-     */
+    /** Returns whether this atom is marked checked. */
     bool isChecked() const;
     void setChecked();
     void setUnchecked();
 
-    /** Change the Very-Long-Term Importance */
+    /** Change the Very-Long-Term Importance. */
     void chgVLTI(int unit);
-
-    // Set the UUID
-    void setUUID(UUID new_UUID)
-        { _uuid = new_UUID; }
 
 public:
 
@@ -192,7 +189,13 @@ public:
     //! Returns the AtomTable in which this Atom is inserted.
     AtomSpace* getAtomSpace() const;
 
-    inline UUID getUUID() const { return _uuid; }
+    /// Merkle-tree hash of the atom contents. Generically useful
+    /// for indexing and comparison operations.
+    inline ContentHash get_hash() const {
+        if (Handle::INVALID_HASH != _content_hash)
+            return _content_hash;
+        return compute_hash();
+    }
 
     virtual const std::string& getName() const {
         throw RuntimeException(TRACE_INFO, "Not a node!");
@@ -202,6 +205,10 @@ public:
         throw RuntimeException(TRACE_INFO, "Not a link!");
     }
 
+    // Return the size of an atom. 1 if a node, 1 + sizes of its
+    // outgoings if a link.
+    virtual size_t size() const = 0;
+
     virtual const HandleSeq& getOutgoingSet() const {
         throw RuntimeException(TRACE_INFO, "Not a link!");
     }
@@ -210,36 +217,29 @@ public:
         throw RuntimeException(TRACE_INFO, "Not a link!");
     }
 
-    /** Returns the handle of the atom.
-     *
-     * @return The handle of the atom.
-     */
+    /** Returns the handle of the atom. */
     inline Handle getHandle() {
         return Handle(std::dynamic_pointer_cast<Atom>(shared_from_this()));
     }
 
-    /** Returns the AttentionValue object of the atom.
-     *
-     * @return The pointer to the AttentionValue object
-     * of the atom.
-     */
-    AttentionValuePtr getAttentionValue();
+    /** Returns the AttentionValue object of the atom.  */
+    AttentionValuePtr getAttentionValue() const;
 
     //! Sets the AttentionValue object of the atom.
     void setAttentionValue(AttentionValuePtr);
 
     /// Handy-dandy convenience getters for attention values.
-    AttentionValue::sti_t getSTI()
+    AttentionValue::sti_t getSTI() const
     {
         return getAttentionValue()->getSTI();
     }
 
-    AttentionValue::lti_t getLTI()
+    AttentionValue::lti_t getLTI() const
     {
         return getAttentionValue()->getLTI();
     }
 
-    AttentionValue::vlti_t getVLTI()
+    AttentionValue::vlti_t getVLTI() const
     {
         return getAttentionValue()->getVLTI();
     }
@@ -256,7 +256,7 @@ public:
         setAttentionValue(new_av);
     }
 
-    /** Change the Long-Term Importance */
+    /** Change the Long-Term Importance. */
     void setLTI(AttentionValue::lti_t ltiValue)
     {
         AttentionValuePtr old_av = getAttentionValue();
@@ -267,7 +267,7 @@ public:
         setAttentionValue(new_av);
     }
 
-    /** Change the Very-Long-Term Importance */
+    /** Change the Very-Long-Term Importance. */
     void setVLTI(AttentionValue::vlti_t vltiValue)
     {
         AttentionValuePtr old_av = getAttentionValue();
@@ -278,17 +278,14 @@ public:
         setAttentionValue(new_av);
     }
 
-    /** Increase the Very-Long-Term Importance by 1 */
+    /** Increase the Very-Long-Term Importance by 1. */
     void incVLTI() { chgVLTI(+1); }
 
-    /** Decrease the Very-Long-Term Importance by 1 */
+    /** Decrease the Very-Long-Term Importance by 1. */
     void decVLTI() { chgVLTI(-1); }
 
-    /** Returns the TruthValue object of the atom.
-     *
-     * @return The const referent to the TruthValue object of the atom.
-     */
-    TruthValuePtr getTruthValue();
+    /** Returns the TruthValue object of the atom. */
+    TruthValuePtr getTruthValue() const;
 
     //! Sets the TruthValue object of the atom.
     void setTruthValue(TruthValuePtr);
@@ -307,7 +304,7 @@ public:
     }
 
     //! Get the size of the incoming set.
-    size_t getIncomingSetSize();
+    size_t getIncomingSetSize() const;
 
     //! Return the incoming set of this atom.
     //! If the AtomSpace pointer is non-null, then only those atoms
@@ -360,16 +357,13 @@ public:
     }
 
     /**
-     * Returns the set of atoms with a given target handle in their
-     * outgoing set (atom type and its subclasses optionally).
-     * That is, returns the incoming set of Handle h, with some optional
-     * filtering.
+     * Return all atoms of type `type` that contain this atom.
+     * That is, return all atoms that contain this atom, and are
+     * also of the given type. Optionally subclass the type.
      *
-     * @param The handle that must be in the outgoing set of the atom.
-     * @param The optional type of the atom.
+     * @param The iternator where the set of atoms will be returned.
+     * @param The type of the parent atom.
      * @param Whether atom type subclasses should be considered.
-     * @return The set of atoms of the given type with the given handle
-     *         in their outgoing set.
      */
     template <typename OutputIterator> OutputIterator
     getIncomingSetByType(OutputIterator result,
@@ -394,35 +388,34 @@ public:
         return result;
     }
 
-    /**
-     * Functional version of getIncomingSetByType
-     */
+    /** Functional version of getIncomingSetByType.  */
     IncomingSet getIncomingSetByType(Type type, bool subclass = false);
 
-    /** Returns a string representation of the node.
-     *
-     * @return A string representation of the node.
-     * cannot be const, because observing the TV and AV requires a lock.
-     */
-    virtual std::string toString(const std::string& indent) = 0;
-    virtual std::string toShortString(const std::string& indent) = 0;
+    /** Returns a string representation of the node. */
+    virtual std::string toString(const std::string& indent) const = 0;
+    virtual std::string toShortString(const std::string& indent) const = 0;
 
-    // Work around gdb's incapability to build a string on the fly,
+    // Work around gdb's inability to build a string on the fly,
     // see http://stackoverflow.com/questions/16734783 for more
     // explanation.
-    std::string toString() { return toString(""); }
-    std::string toShortString() { return toShortString(""); }
+    std::string toString() const { return toString(""); }
+    std::string toShortString() const { return toShortString(""); }
 
-    /** Returns whether two atoms are equal.
+    /**
+     * Perform a content-based comparison of two atoms.
+     * Returns true if the other atom is "semantically" equivalent
+     * to this one. Two atoms are semantically equivalent if they
+     * accomplish the same thing; even if they differ in details.
+     * For example, two ScopeLinks can be semantically equivalent,
+     * even though they use different variable names. As long as
+     * the different names can be alpha-converted, two different
+     * declarations are "the same", and count as the same atom.
      *
-     * @return true if the atoms are equal, false otherwise.
+     * @return true if the atoms are semantically equal, else false.
      */
     virtual bool operator==(const Atom&) const = 0;
 
-    /** Returns whether two atoms are different.
-     *
-     * @return true if the atoms are different, false otherwise.
-     */
+    /** Negation of operator==(). */
     bool operator!=(const Atom& other) const
     { return not operator==(other); }
 
@@ -432,10 +425,7 @@ public:
         return operator==(dynamic_cast<const Atom&>(other));
     }
 
-    /** Returns whether this atom is less than the given atom.
-     *
-     * @return true if this atom is less than the given one, false otherwise.
-     */
+    /** Ordering operator for Atoms. */
     virtual bool operator<(const Atom&) const = 0;
 };
 
@@ -448,7 +438,8 @@ static inline AtomPtr AtomCast(const Handle& h)
 static inline Handle HandleCast(const ProtoAtomPtr& pa)
     { return Handle(AtomCast(pa)); }
 
-// gdb helper
+// gdb helper, see
+// http://wiki.opencog.org/w/Development_standards#Print_OpenCog_Objects
 std::string oc_to_string(const IncomingSet& iset);
 
 /** @}*/

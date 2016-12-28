@@ -39,7 +39,11 @@ typedef std::unordered_set<Atom*> UnorderedAtomSet;
 // behavior
 typedef std::set<Atom*, content_based_atom_ptr_less> ContentBasedOrderedAtomSet;
 
+#ifdef REPRODUCIBLE_ATOMSPACE
+typedef ContentBasedOrderedAtomSet AtomSet;
+#else
 typedef UnorderedAtomSet AtomSet;
+#endif
 
 /**
  * Implements a vector of atom sets; each set can be found via an

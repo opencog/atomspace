@@ -23,6 +23,7 @@
 #ifndef _OPENCOG_EXECUTION_OUTPUT_LINK_H
 #define _OPENCOG_EXECUTION_OUTPUT_LINK_H
 
+#include <stdlib.h>
 #include <opencog/atomspace/AtomSpace.h>
 #include <opencog/atoms/core/FunctionLink.h>
 

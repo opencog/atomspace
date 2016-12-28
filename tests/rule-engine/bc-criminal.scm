@@ -6,7 +6,17 @@
 
 ; "... it is a crime for an American to sell weapons to hostile nations":
 ; American(x) ∧ Weapon(y) ∧ Sells(x, y, z) ∧ Hostile(z) ⇒ Criminal (x).
-(ImplicationLink (stv .99 .99)
+(ImplicationScopeLink (stv .99 .99)
+    (VariableList
+        (TypedVariable
+            (Variable "$x")
+            (Type "ConceptNode"))
+        (TypedVariable
+            (Variable "$y")
+            (Type "ConceptNode"))
+        (TypedVariable
+            (Variable "$z")
+            (Type "ConceptNode")))
     (AndLink
         (InheritanceLink
             (VariableNode "$x")
@@ -42,7 +52,10 @@
 
 ; "All of its missiles were sold to it by Colonel West":
 ; Missile(x) ∧ Owns(Nono, x) ⇒ Sells(West, x, Nono) .
-(ImplicationLink (stv .99 .99)
+(ImplicationScopeLink (stv .99 .99)
+    (TypedVariable
+        (Variable "$a")
+        (Type "ConceptNode"))
     (AndLink
         (InheritanceLink
             (VariableNode "$a")
@@ -65,7 +78,10 @@
     (ConceptNode "weapon"))
 
 ; An enemy of America is "hostile": Enemy(x,America) ⇒ Hostile(x) .
-(ImplicationLink (stv .99 .99)
+(ImplicationScopeLink (stv .99 .99)
+    (TypedVariable
+        (Variable "$b")
+        (Type "ConceptNode"))
     (EvaluationLink
         (PredicateNode "enemy_of")
         (ListLink
@@ -92,3 +108,20 @@
 ;    (InheritanceLink
 ;        (VariableNode "$isCriminal")
 ;        (ConceptNode "criminal")))
+
+;; Cheaping KB, used for debugging
+;;
+;; (Inheritance (stv .99 .99)
+;;   (ConceptNode "missile@123")
+;;   (ConceptNode "weapon"))
+
+;; (Evaluation (stv .99 .99)
+;;   (Predicate "sell")
+;;   (List
+;;     (Concept "West")
+;;     (Concept "missile@123")
+;;     (Concept "Nono")))
+
+;; (Inheritance (stv .99 .99)
+;;   (Concept "Nono")
+;;   (Concept "hostile"))

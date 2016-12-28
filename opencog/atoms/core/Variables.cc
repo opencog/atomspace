@@ -24,6 +24,7 @@
 #include <opencog/atoms/base/Atom.h>
 #include <opencog/atoms/base/Link.h>
 #include <opencog/atoms/base/ClassServer.h>
+#include <opencog/atoms/base/Quotation.h>
 #include <opencog/atomutils/TypeUtils.h>
 #include <opencog/atoms/TypeNode.h>
 
@@ -35,7 +36,7 @@ namespace opencog {
 
 struct VarScraper
 {
-	bool _in_quote;
+	Quotation _quotation;
 	OrderedHandleSet _bound_vars;
 	void find_vars(HandleSeq&, OrderedHandleSet&, const HandleSeq&);
 };
@@ -45,6 +46,10 @@ struct VarScraper
 // The work-horse that does the actual heavy-lifting.
 // See the find_variables() method for the description of what
 // this does, and why.
+//
+// Note: the algo used here is nearly identical to that in
+// ScopeLink::term_hash() -- if you modify this, then modify that
+// one too.
 void VarScraper::find_vars(HandleSeq& varseq, OrderedHandleSet& varset,
                            const HandleSeq& oset)
 {
@@ -53,7 +58,7 @@ void VarScraper::find_vars(HandleSeq& varseq, OrderedHandleSet& varset,
 		Type t = h->getType();
 
 		if ((VARIABLE_NODE == t or GLOB_NODE == t) and
-		    not _in_quote and
+		    _quotation.is_unquoted() and
 		    0 == varset.count(h) and
 		    0 == _bound_vars.count(h))
 		{
@@ -63,16 +68,9 @@ void VarScraper::find_vars(HandleSeq& varseq, OrderedHandleSet& varset,
 
 		if (not h->isLink()) continue;
 
-		// Save the recursive state on stack.
-		bool save_quote = _in_quote;
-		if (QUOTE_LINK == t)
-			_in_quote = true;
-		else
-		if (UNQUOTE_LINK == t)
-			_in_quote = false;
-
-		bool issco = classserver().isA(t, SCOPE_LINK);
-		OrderedHandleSet bsave = _bound_vars;
+		bool issco = _quotation.is_unquoted()
+			and classserver().isA(t, SCOPE_LINK);
+		OrderedHandleSet bsave;
 		if (issco)
 		{
 			// Save the current set of bound variables...
@@ -83,26 +81,29 @@ void VarScraper::find_vars(HandleSeq& varseq, OrderedHandleSet& varset,
 			// do the bound-variable extraction.
 			ScopeLinkPtr sco(ScopeLinkCast(h));
 			if (nullptr == sco)
-				sco = createScopeLink(h->getOutgoingSet());
+				sco = ScopeLink::factory(t, h->getOutgoingSet());
 			const Variables& vees = sco->get_variables();
 			for (const Handle& v : vees.varseq) _bound_vars.insert(v);
 		}
+
+		// Save quotation on the stack before updating it for the
+		// recursive call
+		Quotation save_quotation(_quotation);
+		_quotation.update(t);
 
 		find_vars(varseq, varset, h->getOutgoingSet());
 
 		if (issco)
 			_bound_vars = bsave;
 
-		// Restore current state from the stack.
-		if (QUOTE_LINK == t or UNQUOTE_LINK == t)
-			_in_quote = save_quote;
+		// Restore current state from the stack
+		_quotation = save_quotation;
 	}
 }
 
 void FreeVariables::find_variables(const HandleSeq& oset)
 {
 	VarScraper vsc;
-	vsc._in_quote = false;
 	vsc.find_vars(varseq, varset, oset);
 
 	// Build the index from variable name, to its ordinal number.
@@ -113,24 +114,26 @@ void FreeVariables::find_variables(const HandleSeq& oset)
 
 void FreeVariables::find_variables(const Handle& h)
 {
-	if (h->isLink())
-	{
-		find_variables(h->getOutgoingSet());
+	find_variables(HandleSeq{h});
+}
+
+HandleSeq FreeVariables::make_values(const HandleMap& varmap) const
+{
+	HandleSeq values;
+	for (const Handle& var : varseq) {
+		HandleMap::const_iterator it = varmap.find(var);
+		values.push_back(it == varmap.end() ? var : it->second);
 	}
-	else
-	{
-		HandleSeq bogus;
-		bogus.push_back(h);
-		find_variables(bogus);
-	}
+	return values;
 }
 
 /* ================================================================= */
 
 Handle FreeVariables::substitute_nocheck(const Handle& term,
-                                         const HandleSeq& args) const
+                                         const HandleSeq& args,
+                                         bool silent) const
 {
-	return substitute_scoped(term, args, index, 0);
+	return substitute_scoped(term, args, silent, index, 0);
 }
 
 /// Perform beta-reduction on the term.  This is more-or-less a purely
@@ -142,12 +145,15 @@ Handle FreeVariables::substitute_nocheck(const Handle& term,
 /// the bound variable has scope.
 Handle FreeVariables::substitute_scoped(const Handle& term,
                                         const HandleSeq& args,
+                                        bool silent,
                                         const IndexMap& index_map,
-                                        int quotation_level) const
+                                        Quotation quotation) const
 {
+	bool unquoted = quotation.is_unquoted();
+
 	// If we are not in a quote context, and `term` is a variable,
 	// then just return the corresponding value.
-	if (0 == quotation_level)
+	if (unquoted)
 	{
 		IndexMap::const_iterator idx = index_map.find(term);
 		if (idx != index_map.end())
@@ -158,21 +164,12 @@ Handle FreeVariables::substitute_scoped(const Handle& term,
 	// and just return that.
 	if (not term->isLink()) return term;
 
-	// QuoteLinks halt the reduction
 	Type ty = term->getType();
-	if (QUOTE_LINK == ty)
-	{
-		quotation_level++;
-	}
-	else
-	if (UNQUOTE_LINK == ty)
-	{
-		quotation_level--;
-		if (quotation_level < 0)
-			throw SyntaxException(TRACE_INFO, "Unbalanced quotes!");
-	}
-	else
-	if (0 == quotation_level and classserver().isA(ty, SCOPE_LINK))
+
+	// Update for subsequent recursive calls of substitute_scoped
+	quotation.update(ty);
+
+	if (unquoted and classserver().isA(ty, SCOPE_LINK))
 	{
 		// Perform alpha-conversion duck-n-cover.  We don't actually need
 		// to alpha-convert anything, if we happen to encounter a bound
@@ -198,7 +195,7 @@ Handle FreeVariables::substitute_scoped(const Handle& term,
 		// Hiding is expensive, so perform it only if we really have to.
 		if (alpha_hide)
 		{
-			// Make a copy... this is what's computatinoally expensive.
+			// Make a copy... this is what's computationally expensive.
 			IndexMap hidden_map = index_map;
 			// Remove the alpha-hidden variables.
 			for (const Handle& v : vees.varseq)
@@ -220,9 +217,10 @@ Handle FreeVariables::substitute_scoped(const Handle& term,
 			HandleSeq oset;
 			for (const Handle& h : term->getOutgoingSet())
 			{
-				oset.emplace_back(substitute_scoped(h, args, hidden_map, quotation_level));
+				oset.emplace_back(substitute_scoped(h, args, silent,
+				                                    hidden_map, quotation));
 			}
-			return Handle(createLink(term->getType(), oset));
+			return Handle(ScopeLink::factory(term->getType(), oset));
 		}
 	}
 
@@ -235,22 +233,46 @@ Handle FreeVariables::substitute_scoped(const Handle& term,
 		// that wraps them up.  See MapLinkUTest for examples.
 		if (GLOB_NODE == h->getType())
 		{
-			Handle glst(substitute_scoped(h, args, index_map, quotation_level));
+			Handle glst(substitute_scoped(h, args, silent, index_map, quotation));
+			if (glst->isNode())
+				return glst;
 			for (const Handle& gl : glst->getOutgoingSet())
 				oset.emplace_back(gl);
 		}
 		else
 			oset.emplace_back(
-				substitute_scoped(h, args, index_map, quotation_level));
+				substitute_scoped(h, args, silent, index_map, quotation));
 	}
+
+	if (classserver().isA(ty, SCOPE_LINK))
+		return Handle(ScopeLink::factory(term->getType(), oset));
+
 	return Handle(createLink(term->getType(), oset));
+}
+
+/* ================================================================= */
+
+bool FreeVariables::is_identical(const FreeVariables& other) const
+{
+	Arity ary = varseq.size();
+	if (ary != other.varseq.size()) return false;
+	for (Arity i=0; i< ary; i++)
+	{
+		if (*((AtomPtr) varseq[i]) != *((AtomPtr) other.varseq[i])) return false;
+	}
+	return true;
 }
 
 /* ================================================================= */
 
 /// Return true if the other Variables struct is equal to this one,
 /// up to alpha-conversion. That is, same number of variables, same
-/// type restrictions, but different actual variable names.
+/// type restrictions, but possibly different variable names.
+///
+/// This should give exactly the same answer as performing the tests
+///    this->is_type(other->varseq) and other->is_type(this->varseq)
+/// That is, the variables in this instance should have the same type
+/// restrictions as the variables in the other class.
 bool Variables::is_equal(const Variables& other) const
 {
 	size_t sz = varseq.size();
@@ -261,6 +283,10 @@ bool Variables::is_equal(const Variables& other) const
 	{
 		const Handle& vme(varseq[i]);
 		const Handle& voth(other.varseq[i]);
+
+		// If one is a GlobNode, and the other a VariableNode,
+		// then its a mismatch.
+		if (vme->getType() != voth->getType()) return false;
 
 		// If typed, types must match.
 		auto sime = _simple_typemap.find(vme);
@@ -289,8 +315,25 @@ bool Variables::is_equal(const Variables& other) const
 		// XXX TODO fuzzy?
 	}
 
-	// If we got toe here, everything must be OK.
+	// If we got to here, everything must be OK.
 	return true;
+}
+
+/* ================================================================= */
+
+/// Return true if the variable `othervar` in `other` is
+/// alpha-convertible to the variable `var` in this. That is,
+/// return true if they are the same variable, differing only
+/// in name.
+
+bool Variables::is_alpha_convertible(const Handle& var,
+                                     const Handle& othervar,
+                                     const Variables& other) const
+{
+	IndexMap::const_iterator idx = other.index.find(othervar);
+	if (other.index.end() == idx) return false;
+	if (varseq.at(idx->second) == var) return true;
+	return false;
 }
 
 /* ================================================================= */
@@ -403,8 +446,8 @@ bool Variables::is_type(const HandleSeq& hseq) const
  *
  * The resulting tree is NOT placed into any atomspace. If you want
  * that, you must do it yourself.  If you want evaluation or execution
- * to happen during sustitution, use either the EvaluationLink, the
- * ExecutionOutputLink, or the Instantiator.
+ * to happen during sustitution, then use either the EvaluationLink,
+ * the ExecutionOutputLink, or the Instantiator.
  *
  * So, for example, if this VariableList contains:
  *
@@ -440,7 +483,10 @@ bool Variables::is_type(const HandleSeq& hseq) const
  * `func` was simply `$b`, then `2.0` would be returned.
  *
  * Type checking is performed before substitution; if the args fail to
- * satisfy the type constraints, an exception is thrown.
+ * satisfy the type constraints, an exception is thrown. If `silent`
+ * is true, then the exception is non-printing, and so this method can
+ * be used for "filtering", i.e. for automatically rejecting arguments
+ * that fail the type check.
  *
  * The substitution is almost purely syntactic... with one exception:
  * the semantics of QuoteLink and UnquoteLink are honoured.  That is,
@@ -452,7 +498,8 @@ bool Variables::is_type(const HandleSeq& hseq) const
  * Note also that the resulting tree is NOT placed into any atomspace!
  */
 Handle Variables::substitute(const Handle& func,
-                             const HandleSeq& args) const
+                             const HandleSeq& args,
+                             bool silent) const
 {
 	if (args.size() != varseq.size())
 		throw SyntaxException(TRACE_INFO,
@@ -466,8 +513,11 @@ Handle Variables::substitute(const Handle& func,
 	// of the substitute_nocheck code. I'm too lazy to do this ... no one
 	// wants this whizzy-ness just right yet.
 	if (not is_type(args))
+	{
+		if (silent) throw TypeCheckException();
 		throw SyntaxException(TRACE_INFO,
 			"Arguments fail to match variable declarations");
+	}
 
 	return substitute_nocheck(func, args);
 }
@@ -477,6 +527,9 @@ Handle Variables::substitute(const Handle& func,
  * Extend a set of variables.
  *
  * That is, merge the given variables into this set.
+ *
+ * If a variable is both in *this and vset then its type intersection
+ * is assigned to it.
  */
 void Variables::extend(const Variables& vset)
 {
@@ -490,11 +543,11 @@ void Variables::extend(const Variables& vset)
 			try
 			{
 				const std::set<Type>& tms = vset._simple_typemap.at(h);
-				std::set<Type> mytypes = _simple_typemap[h];
-				for (Type t : tms)
-					mytypes.insert(t);
-				_simple_typemap.erase(h);	 // is it safe to erase if h not in already?
-				_simple_typemap.insert({h,mytypes});
+				std::set<Type> mytypes =
+					type_intersection(_simple_typemap[h], tms);
+				_simple_typemap.erase(h);	 // is it safe to erase if
+                                             // h not in already?
+				_simple_typemap.insert({h, mytypes});
 			}
 			catch(const std::out_of_range&) {}
 		}
@@ -516,9 +569,58 @@ void Variables::extend(const Variables& vset)
 	}
 }
 
+Handle Variables::get_vardecl() const
+{
+	HandleSeq vars;
+	for (const Handle& var : varseq) {
+
+		// Simple type info
+		auto sit = _simple_typemap.find(var);
+		if (sit != _simple_typemap.end()) {
+			HandleSeq types;
+			for (Type t : sit->second)
+				types.push_back(Handle(createTypeNode(t)));
+			Handle types_h = types.size() == 1 ? types[0]
+				: Handle(createLink(TYPE_CHOICE, types));
+			vars.push_back(Handle(createLink(TYPED_VARIABLE_LINK,
+			                                 var, types_h)));
+			continue;
+		}
+
+		auto dit = _deep_typemap.find(var);
+		if (dit != _deep_typemap.end()) {
+			OC_ASSERT(false, "TODO: support deep type info");
+			continue;
+		}
+
+		auto fit = _fuzzy_typemap.find(var);
+		if (fit != _fuzzy_typemap.end()) {
+			OC_ASSERT(false, "TODO: support fuzzy type info");
+			continue;
+		}
+
+		// No type info
+		vars.push_back(var);
+	}
+
+	if (vars.empty())
+		return Handle::UNDEFINED; // or throw an exception???
+
+	if (vars.size() == 1)
+		return vars[0];
+
+	return Handle(createVariableList(vars));
+}
+
 std::string Variables::to_string() const
 {
 	std::stringstream ss;
+
+	// Varseq
+	ss << "varseq:" << std::endl << oc_to_string(varseq);
+
+	// Simple typemap
+	ss << "_simple_typemap:" << std::endl;
 	ss << "size = " << _simple_typemap.size() << std::endl;
 	unsigned i = 0;
 	for (const auto& v : _simple_typemap)
@@ -537,6 +639,18 @@ std::string Variables::to_string() const
 std::string oc_to_string(const Variables& var)
 {
 	return var.to_string();
+}
+
+std::string oc_to_string(const FreeVariables::IndexMap& imap)
+{
+	std::stringstream ss;
+	ss << "size = " << imap.size() << std::endl;
+	for (const auto& vi : imap)
+	{
+		ss << "at[" << vi.second << "]:" << std::endl
+		   << h_to_string(vi.first);
+	}
+	return ss.str();
 }
 
 } // ~namespace opencog

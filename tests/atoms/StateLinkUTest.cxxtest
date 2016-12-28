@@ -47,6 +47,7 @@ public:
 	void test_setting();
 	void test_getting();
 	void test_putting();
+	void test_list();
 };
 
 #define N _as.add_node
@@ -239,6 +240,135 @@ void StateLinkUTest::test_putting()
 
 	// The incoming set should be simple.
 	TS_ASSERT_EQUALS(state, strawberry);
+
+	logger().info("END TEST: %s", __FUNCTION__);
+}
+
+// Test to make sure a ListLink can be used as the key.
+// Cut-n-paste of the test_setting() test, except that the
+// anchor will be a list.
+#define NA(T,S) Handle(createNode(T,S))
+#define LA(T,A1,A2) Handle(createLink(T,A1,A2))
+void StateLinkUTest::test_list()
+{
+	logger().info("BEGIN TEST: %s", __FUNCTION__);
+
+	Handle fruit =
+		L(LIST_LINK, N(ANCHOR_NODE, "fruit"), N(CONCEPT_NODE, "fresh"));
+
+	// Set the state to apple.
+	Handle apple, bananna;
+	LinkPtr link = LinkCast(
+		L(STATE_LINK,
+			LA(LIST_LINK, NA(ANCHOR_NODE, "fruit"), NA(CONCEPT_NODE, "fresh")),
+			apple = N(CONCEPT_NODE, "apple")));
+
+	bananna = N(CONCEPT_NODE, "bananna");
+
+	// The incoming set should be simple.
+	TS_ASSERT_EQUALS(1, fruit->getIncomingSetSize());
+	TS_ASSERT_EQUALS(1, apple->getIncomingSetSize());
+	TS_ASSERT_EQUALS(0, bananna->getIncomingSetSize());
+	TS_ASSERT_EQUALS(fruit, link->getOutgoingAtom(0));
+	TS_ASSERT_EQUALS(apple, link->getOutgoingAtom(1));
+
+	// Change the state to bananna
+	link = LinkCast(
+		L(STATE_LINK,
+			LA(LIST_LINK, NA(ANCHOR_NODE, "fruit"), NA(CONCEPT_NODE, "fresh")),
+			N(CONCEPT_NODE, "bananna")));
+
+	// The incoming set should be simple.
+	TS_ASSERT_EQUALS(1, fruit->getIncomingSetSize());
+	TS_ASSERT_EQUALS(0, apple->getIncomingSetSize());
+	TS_ASSERT_EQUALS(1, bananna->getIncomingSetSize());
+	TS_ASSERT_EQUALS(fruit, link->getOutgoingAtom(0));
+	TS_ASSERT_EQUALS(bananna, link->getOutgoingAtom(1));
+
+
+	// Change the state back to apple.
+	link = LinkCast(
+		L(STATE_LINK,
+			LA(LIST_LINK, NA(ANCHOR_NODE, "fruit"), NA(CONCEPT_NODE, "fresh")),
+			N(CONCEPT_NODE, "apple")));
+
+	// The incoming set should be simple.
+	TS_ASSERT_EQUALS(1, fruit->getIncomingSetSize());
+	TS_ASSERT_EQUALS(1, apple->getIncomingSetSize());
+	TS_ASSERT_EQUALS(0, bananna->getIncomingSetSize());
+	TS_ASSERT_EQUALS(fruit, link->getOutgoingAtom(0));
+	TS_ASSERT_EQUALS(apple, link->getOutgoingAtom(1));
+
+	// Change the state back to bananna, again
+	link = LinkCast(
+		L(STATE_LINK,
+			LA(LIST_LINK, NA(ANCHOR_NODE, "fruit"), NA(CONCEPT_NODE, "fresh")),
+			N(CONCEPT_NODE, "bananna")));
+
+	// The incoming set should be simple.
+	TS_ASSERT_EQUALS(1, fruit->getIncomingSetSize());
+	TS_ASSERT_EQUALS(0, apple->getIncomingSetSize());
+	TS_ASSERT_EQUALS(1, bananna->getIncomingSetSize());
+	TS_ASSERT_EQUALS(fruit, link->getOutgoingAtom(0));
+	TS_ASSERT_EQUALS(bananna, link->getOutgoingAtom(1));
+
+
+	// Change the state back to apple, again
+	link = LinkCast(
+		L(STATE_LINK,
+			LA(LIST_LINK, NA(ANCHOR_NODE, "fruit"), NA(CONCEPT_NODE, "fresh")),
+			N(CONCEPT_NODE, "apple")));
+
+	// The incoming set should be simple.
+	TS_ASSERT_EQUALS(1, fruit->getIncomingSetSize());
+	TS_ASSERT_EQUALS(1, apple->getIncomingSetSize());
+	TS_ASSERT_EQUALS(0, bananna->getIncomingSetSize());
+	TS_ASSERT_EQUALS(fruit, link->getOutgoingAtom(0));
+	TS_ASSERT_EQUALS(apple, link->getOutgoingAtom(1));
+
+	// --------------------------------------
+	// ... But variable nodes are OK...
+	Handle vara = N(VARIABLE_NODE, "$vara");
+	Handle varb = N(VARIABLE_NODE, "$varb");
+	L(STATE_LINK,
+		LA(LIST_LINK, NA(ANCHOR_NODE, "fruit"), NA(CONCEPT_NODE, "fresh")),
+		vara);
+	L(STATE_LINK,
+		LA(LIST_LINK, NA(ANCHOR_NODE, "fruit"), NA(CONCEPT_NODE, "fresh")),
+		varb);
+
+	// The incoming set should have 2 vars and one apple.
+	TS_ASSERT_EQUALS(3, fruit->getIncomingSetSize());
+	TS_ASSERT_EQUALS(1, apple->getIncomingSetSize());
+	TS_ASSERT_EQUALS(0, bananna->getIncomingSetSize());
+	TS_ASSERT_EQUALS(fruit, link->getOutgoingAtom(0));
+	TS_ASSERT_EQUALS(apple, link->getOutgoingAtom(1));
+
+	// Change the state to bananna, again
+	link = LinkCast(
+		L(STATE_LINK,
+			LA(LIST_LINK, NA(ANCHOR_NODE, "fruit"), NA(CONCEPT_NODE, "fresh")),
+			N(CONCEPT_NODE, "bananna")));
+
+	// The incoming set should have vars and bananna.
+	TS_ASSERT_EQUALS(3, fruit->getIncomingSetSize());
+	TS_ASSERT_EQUALS(0, apple->getIncomingSetSize());
+	TS_ASSERT_EQUALS(1, bananna->getIncomingSetSize());
+	TS_ASSERT_EQUALS(fruit, link->getOutgoingAtom(0));
+	TS_ASSERT_EQUALS(bananna, link->getOutgoingAtom(1));
+
+	// Change the state back to apple, again
+	link = LinkCast(
+		L(STATE_LINK,
+			LA(LIST_LINK, NA(ANCHOR_NODE, "fruit"), NA(CONCEPT_NODE, "fresh")),
+			N(CONCEPT_NODE, "apple")));
+
+	// The incoming set should two vars, one apple.
+	TS_ASSERT_EQUALS(3, fruit->getIncomingSetSize());
+	TS_ASSERT_EQUALS(1, apple->getIncomingSetSize());
+	TS_ASSERT_EQUALS(0, bananna->getIncomingSetSize());
+	TS_ASSERT_EQUALS(fruit, link->getOutgoingAtom(0));
+	TS_ASSERT_EQUALS(apple, link->getOutgoingAtom(1));
 
 	logger().info("END TEST: %s", __FUNCTION__);
 }

@@ -149,6 +149,11 @@ QUOTE_LINK <- ORDERED_LINK
 // quoting.  Defined to work just like in lisp/scheme.
 UNQUOTE_LINK <- ORDERED_LINK
 
+// Like QuoteLink but only affects the direct child, not its
+// descendants. It has the same effect as wrapping the child with a
+// QuoteLink and each atom of the its outgoing set with an UnquoteLink.
+LOCAL_QUOTE_LINK <- ORDERED_LINK
+
 // Everything under a DontExecLink is not executed. This is typically
 // used during pattern matching, to halt infinite recursion, when the
 // matched pattern is itself executable. Vaguely like QuoteLink, but
@@ -330,15 +335,23 @@ SATISFYING_SET_LINK <- SCOPE_LINK
 
 // Basic first-order logic operations
 
-// Due to ImplicationLink having a sugar syntax form, an
-// ImplicationLink *may* inherit from a ScopeLink. See
-// http://wiki.opencog.org/wikihome/index.php/ImplicationLink for more
-// explanation.
-IMPLICATION_LINK <- SCOPE_LINK
+// Sugar forms of implication and equivalence links. See
+// http://wiki.opencog.org/wikihome/index.php/ImplicationLink
+// for more information
+IMPLICATION_SCOPE_LINK <- SCOPE_LINK
+INTENSIONAL_IMPLICATION_SCOPE_LINK <- IMPLICATION_SCOPE_LINK
+EXTENSIONAL_IMPLICATION_SCOPE_LINK <- IMPLICATION_SCOPE_LINK
+
+EQUIVALENCE_SCOPE_LINK <- SCOPE_LINK
+INTENSIONAL_EQUIVALENCE_SCOPE_LINK <- EQUIVALENCE_SCOPE_LINK
+EXTENSIONAL_EQUIVALENCE_SCOPE_LINK <- EQUIVALENCE_SCOPE_LINK
+
+// Standard, non sugar form of implication and equivalence links.
+IMPLICATION_LINK <- ORDERED_LINK
 INTENSIONAL_IMPLICATION_LINK <- IMPLICATION_LINK
 EXTENSIONAL_IMPLICATION_LINK <- IMPLICATION_LINK
 
-EQUIVALENCE_LINK <- SCOPE_LINK
+EQUIVALENCE_LINK <- UNORDERED_LINK
 INTENSIONAL_EQUIVALENCE_LINK <- EQUIVALENCE_LINK
 EXTENSIONAL_EQUIVALENCE_LINK <- EQUIVALENCE_LINK
 
@@ -367,7 +380,8 @@ GROUNDED_SCHEMA_NODE <- SCHEMA_NODE,GROUNDED_PROCEDURE_NODE
 
 // PredicateNodes are TV-valued.
 PREDICATE_NODE <- PROCEDURE_NODE
-DEFINED_PREDICATE_NODE <- PREDICATE_NODE,EVALUATABLE_LINK
+// Cannot be both a node and a link! Have to be one or the other!
+DEFINED_PREDICATE_NODE <- PREDICATE_NODE// ,EVALUATABLE_LINK
 GROUNDED_PREDICATE_NODE <- PREDICATE_NODE,GROUNDED_PROCEDURE_NODE
 
 // Huh?? XXX What are these? I don't understand them Do we use them
@@ -411,8 +425,8 @@ GREATER_THAN_LINK <- VIRTUAL_LINK
 // arguments; it true only if both sides are the same atom.
 // EqualLink tests for semantic equality: the two sides are equal, if,
 // after execution, they evaluate to the same atom.
-IDENTICAL_LINK <- VIRTUAL_LINK
-EQUAL_LINK <- VIRTUAL_LINK
+IDENTICAL_LINK <- UNORDERED_LINK,VIRTUAL_LINK
+EQUAL_LINK <- UNORDERED_LINK,VIRTUAL_LINK
 
 // --------------------------------------------------------------
 // Functions that do NOT bind variables.

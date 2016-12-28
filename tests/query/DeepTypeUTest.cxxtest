@@ -53,6 +53,8 @@ public:
 		// Erase the log file if no assertions failed.
 		if (!CxxTest::TestTracker::tracker().suiteFailed())
 				std::remove(logger().get_filename().c_str());
+int rc = CxxTest::TestTracker::tracker().suiteFailed();
+_exit(rc); // XXX hack to avoid double-free in __run_exit_handlers
 	}
 
 	void setUp(void);

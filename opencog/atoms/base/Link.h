@@ -61,6 +61,7 @@ protected:
     //! Should not change during atom lifespan.
     HandleSeq _outgoing;
 
+    virtual ContentHash compute_hash() const;
 public:
     /**
      * Constructor for this class.
@@ -150,6 +151,13 @@ public:
         return _outgoing.size();
     }
 
+    virtual size_t size() const {
+        size_t size = 1;
+        for (const Handle&h : _outgoing)
+            size += h->size();
+        return size;
+    }
+
     /**
      * Returns a const reference to the array containing this
      * atom's outgoing set.
@@ -195,7 +203,7 @@ public:
      *
      * @return A string representation of the link.
      */
-    std::string toString(const std::string& indent);
+    std::string toString(const std::string& indent) const;
 
     /**
      * Returns a short string representation of the link.
@@ -205,7 +213,7 @@ public:
      *
      * @return A short string representation of the link.
      */
-    std::string toShortString(const std::string& indent);
+    std::string toShortString(const std::string& indent) const;
 
 	// Work around gdb's incapability to build a string on the fly,
 	// see http://stackoverflow.com/questions/16734783 and
@@ -215,17 +223,18 @@ public:
 	using Atom::toShortString;
 	
     /**
-     * Returns whether a given atom is equal to the current link.
+     * Perform a content-based compare of another atom to this one.
+     * Return true if the content is the same for both atoms.
      * @param Atom to be tested.
-     * @return true if they are equal, false otherwise.
+     * @return true if content is equal, false otherwise.
      */
     virtual bool operator==(const Atom&) const;
 
     /**
-     * Returns whether this atom is less than the given atom.
-     *
-     * WARNING: the comparison is based on content, and therefore
-     * potentially expensive.
+     * Provides an ordering operator, based on the atom hash.
+     * performs a simple numeric comparison on the hashes of
+     * this and the other atom. If the hashes are equal, then
+     * it performs a content-based compare.
      *
      * @return true if this atom is less than the given one, false otherwise.
      */

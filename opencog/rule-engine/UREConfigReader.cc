@@ -27,6 +27,7 @@
 #include <opencog/query/BindLinkAPI.h>
 #include <opencog/atomspaceutils/AtomSpaceUtils.h>
 
+using namespace std;
 using namespace opencog;
 
 const std::string UREConfigReader::top_rbs_name = "URE";
@@ -41,7 +42,7 @@ UREConfigReader::UREConfigReader(AtomSpace& as, const Handle& rbs) : _as(as)
 
 	// Retrieve the rules (MemberLinks) and instantiate them
 	for (const Handle& rule_name : fetch_rule_names(rbs))
-		_rbparams.rules.emplace_back(rule_name, rbs);
+		_rbparams.rules.emplace(rule_name, rbs);
 
 	// Fetch maximum number of iterations
 	_rbparams.max_iter = fetch_num_param(max_iter_name, rbs);
@@ -50,24 +51,14 @@ UREConfigReader::UREConfigReader(AtomSpace& as, const Handle& rbs) : _as(as)
 	_rbparams.attention_alloc = fetch_bool_param(attention_alloc_name, rbs);
 }
 
-const std::vector<Rule>& UREConfigReader::get_rules() const
+const RuleSet& UREConfigReader::get_rules() const
 {
 	return _rbparams.rules;
 }
 
-std::vector<Rule>& UREConfigReader::get_rules()
+RuleSet& UREConfigReader::get_rules()
 {
 	return _rbparams.rules;
-}
-
-const Rule& UREConfigReader::get_rule(const Handle& hblink)
-{
-    if (hblink->getType() != BIND_LINK) {
-        throw InvalidParamException(TRACE_INFO,
-                                    "UREConfigReader - Expected a BindLink.");
-    }
-
-    return _rbparams.get_rule(hblink);
 }
 
 bool UREConfigReader::get_attention_allocation() const

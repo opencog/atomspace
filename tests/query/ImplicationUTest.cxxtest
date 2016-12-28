@@ -22,9 +22,7 @@
 
 #include <opencog/guile/SchemeEval.h>
 #include <opencog/guile/SchemeSmob.h>
-#include <opencog/guile/load-file.h>
 #include <opencog/query/BindLinkAPI.h>
-#include <opencog/util/Config.h>
 #include <opencog/util/Logger.h>
 
 #include "imply.h"
@@ -90,8 +88,6 @@ void ImplicationUTest::setUp(void)
 {
 	as = new AtomSpace();
 	eval = new SchemeEval(as);
-
-	load_scm_files_from_config(*as);
 
 	// Create initialzation
 	const char * setup = 

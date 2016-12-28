@@ -70,7 +70,7 @@ class Recognizer :
 			DefaultPatternMatchCB(as) {}
 
 		virtual void set_pattern(const Variables& vars,
-										 const Pattern& pat)
+		                         const Pattern& pat)
 		{
 			_pattern = &pat;
 			DefaultPatternMatchCB::set_pattern(vars, pat);
@@ -78,7 +78,7 @@ class Recognizer :
 
 		virtual bool initiate_search(PatternMatchEngine*);
 		virtual bool node_match(const Handle&, const Handle&);
-		virtual bool link_match(const LinkPtr&, const LinkPtr&);
+		virtual bool link_match(const PatternTermPtr&, const Handle&);
 		virtual bool fuzzy_match(const Handle&, const Handle&);
 		virtual bool grounding(const HandleMap &var_soln,
 		                       const HandleMap &term_soln);
@@ -91,7 +91,7 @@ class Recognizer :
 using namespace opencog;
 
 // Uncomment below to enable debug print
-#define DEBUG
+#define DEBUG 1
 #ifdef DEBUG
 #define dbgprt(f, varargs...) logger().fine(f, ##varargs)
 #else
@@ -156,8 +156,10 @@ bool Recognizer::node_match(const Handle& npat_h, const Handle& nsoln_h)
 	return false;
 }
 
-bool Recognizer::link_match(const LinkPtr& lpat, const LinkPtr& lsoln)
+bool Recognizer::link_match(const PatternTermPtr& ptm, const Handle& lsoln)
 {
+	const Handle& lpat = ptm->getHandle();
+
 	// Self-compares always proceed.
 	if (lpat == lsoln) return true;
 

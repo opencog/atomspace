@@ -21,11 +21,9 @@
  */
 
 #include <iostream>
-#include <opencog/guile/load-file.h>
 #include <opencog/guile/SchemeEval.h>
 #include <opencog/atomspace/AtomSpace.h>
 #include <opencog/query/BindLinkAPI.h>
-#include <opencog/util/Config.h>
 #include <opencog/util/Logger.h>
 
 using namespace opencog;
@@ -36,11 +34,10 @@ SchemeEval* scheme;
 void load_scheme()
 {
     // Load some scheme for the setup
-    config().set("SCM_PRELOAD",
-        "opencog/atoms/base/core_types.scm, "
-        "opencog/scm/utilities.scm");
-    load_scm_files_from_config(*atomspace);
     scheme->eval("(use-modules (opencog))");
+    scheme->eval("(add-to-load-path \"../..\")");
+    scheme->eval("(load-from-path \"opencog/atoms/base/core_types.scm\")");
+    scheme->eval("(load-from-path \"opencog/scm/utilities.scm\")");
 
     // Define several animals and something of a different type as well
     std::string scheme_animals = 
@@ -77,7 +74,6 @@ Handle get_animals(Handle& animals_query)
 
 int main(void)
 {
-
     // Create the atomspace and scheme evaluator.
     atomspace = new AtomSpace();
     scheme = new SchemeEval(atomspace);

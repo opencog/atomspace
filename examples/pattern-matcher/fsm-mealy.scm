@@ -13,8 +13,6 @@
 (use-modules (opencog))
 (use-modules (opencog query))
 
-(load-from-path "utilities.scm")
-
 (define my-trans (ConceptNode "My FSM's Transition Rule"))
 (define my-state (AnchorNode "My FSM's Current State"))
 

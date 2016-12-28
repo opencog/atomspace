@@ -30,9 +30,18 @@
 #include <opencog/guile/SchemeEval.h>
 
 #include "ExecutionOutputLink.h"
-#include "Eager.h"
+#include "Force.h"
 
 using namespace opencog;
+
+class LibraryManager
+{
+private:
+    static std::unordered_map<std::string, void*> _librarys;
+    static std::unordered_map<std::string, void*> _functions;
+public:
+    static void* getFunc(std::string libName,std::string funcName);
+};
 
 ExecutionOutputLink::ExecutionOutputLink(const HandleSeq& oset,
                                          TruthValuePtr tv,
@@ -52,11 +61,6 @@ ExecutionOutputLink::ExecutionOutputLink(const HandleSeq& oset,
 			"ExecutionOutputLink must have schema! Got %s",
 			oset[0]->toString().c_str());
 	}
-
-	if (LIST_LINK != oset[1]->getType())
-		throw SyntaxException(TRACE_INFO,
-			"ExecutionOutputLink must have args! Got %s",
-			oset[1]->toString().c_str());
 }
 
 ExecutionOutputLink::ExecutionOutputLink(const Handle& schema,
@@ -74,11 +78,6 @@ ExecutionOutputLink::ExecutionOutputLink(const Handle& schema,
 			"ExecutionOutputLink expecting schema, got %s",
 			schema->toString().c_str());
 	}
-
-	if (LIST_LINK != args->getType())
-		throw SyntaxException(TRACE_INFO,
-			"ExecutionOutputLink expecting args, got %s",
-			args->toString().c_str());
 }
 
 ExecutionOutputLink::ExecutionOutputLink(Link& l)
@@ -121,12 +120,12 @@ Handle ExecutionOutputLink::do_execute(AtomSpace* as,
 	LAZY_LOG_FINE << "Execute gsn: " << gsn->toShortString()
 	              << "with arguments: " << cargs->toShortString();
 
-	// Perform eager execution of the arguments. We have to do this,
-	// because the user-defined functions are black-boxes, and cannot
-	// be trusted to do lazy execution correctly. Right now, this is
-	// the policy. I guess we could add "scm-lazy:" and "py-lazy:" URI's
-	// for user-defined functions smart enough to do lazy evaluation.
-	Handle args = eager_execute(as, cargs);
+	// Force execution of the arguments. We have to do this, because
+	// the user-defined functions are black-boxes, and cannot be trusted
+	// to do lazy execution correctly. Right now, forcing is the policy.
+	// We could add "scm-lazy:" and "py-lazy:" URI's for user-defined
+	// functions smart enough to do lazy evaluation.
+	Handle args = force_execute(as, cargs);
 
 	// Get the schema name.
 	const std::string& schema = gsn->getName();
@@ -177,8 +176,7 @@ Handle ExecutionOutputLink::do_execute(AtomSpace* as,
 #endif /* HAVE_CYTHON */
 	}
 
-	// This is used by the Haskel bindings.  XXX -- it uses a broken
-	// API, namely the UUID's, and should be fixed....
+	// This is used by the Haskel bindings.
 	if (0 == schema.compare(0, 4, "lib:", 4))
 	{
 		// Be friendly, and strip leading white-space, if any.
@@ -196,36 +194,61 @@ Handle ExecutionOutputLink::do_execute(AtomSpace* as,
 		std::string libName  = schema.substr(pos, dotpos - pos);
 		std::string funcName = schema.substr(dotpos + 1);
 
-		// Try and load the library and function.
-		void* libHandle = dlopen(libName.c_str(), RTLD_LAZY);
-		if (nullptr == libHandle)
-			throw RuntimeException(TRACE_INFO,
-				"Cannot open library: %s - %s", libName.c_str(), dlerror());
-
-		void* sym = dlsym(libHandle, funcName.c_str());
-		if (nullptr == sym)
-			throw RuntimeException(TRACE_INFO,
-				"Cannot find symbol %s in library: %s - %s",
-				funcName.c_str(), libName.c_str(), dlerror());
+#define BROKEN_CODE 1
+#ifdef BROKEN_CODE
+		void* sym = LibraryManager::getFunc(libName,funcName);
 
 		// Convert the void* pointer to the correct function type.
-		// XXX FIXME -- it is incorrect to use UUID's for this purpose!
-		// UUID's are meant for storage, not for the library API.
-		// (The UUID lookup on the receiving side is going to be slow).
-		UUID (*func)(AtomSpace*, UUID);
-		func = reinterpret_cast<UUID (*)(AtomSpace *, UUID)>(sym);
+		Handle* (*func)(AtomSpace*, Handle*);
+		func = reinterpret_cast<Handle* (*)(AtomSpace *, Handle*)>(sym);
 
 		// Execute the function.
-		Handle h(func(as, args.value()));
-
-		// Close library after use.
-		dlclose(libHandle);
+		Handle h = *func(as, &args);
 
 		// Return the handle.
 		return h;
+#else
+		return Handle();
+#endif
 	}
 
 	// Unkown proceedure type.
 	throw RuntimeException(TRACE_INFO,
 		"Cannot evaluate unknown Schema %s", gsn->toString().c_str());
+}
+
+std::unordered_map<std::string, void*> LibraryManager::_librarys;
+std::unordered_map<std::string, void*> LibraryManager::_functions;
+
+void* LibraryManager::getFunc(std::string libName,std::string funcName)
+{
+    void* libHandle;
+    if (_librarys.count(libName) == 0) {
+        // Try and load the library and function.
+        libHandle = dlopen(libName.c_str(), RTLD_LAZY);
+        if (nullptr == libHandle)
+            throw RuntimeException(TRACE_INFO,
+                "Cannot open library: %s - %s", libName.c_str(), dlerror());
+        _librarys[libName] = libHandle;
+    }
+    else {
+        libHandle = _librarys[libName];
+    }
+
+    std::string funcID = libName + "\\" + funcName;
+
+    void* sym;
+    if (_functions.count(funcID) == 0){
+        sym = dlsym(libHandle, funcName.c_str());
+        if (nullptr == sym)
+            throw RuntimeException(TRACE_INFO,
+                "Cannot find symbol %s in library: %s - %s",
+                funcName.c_str(), libName.c_str(), dlerror());
+        _functions[funcID] = sym;
+    }
+    else {
+        sym = _functions[funcID];
+    }
+
+    return sym;
 }

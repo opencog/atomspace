@@ -44,7 +44,7 @@ extern "C"
     int AtomSpace_addNode( AtomSpace* this_ptr
                          , const char* type
                          , const char* name
-                         , UUID* uuid_out );
+                         , Handle* uuid_out );
 
     /**
      * AtomSpace_addLink Inserts a new link to the atomspace, or
@@ -52,7 +52,7 @@ extern "C"
      *
      * @param      this_ptr  Pointer to AtomSpace instance.
      * @param      type      String representation of a link type.
-     * @param      outgoing  List of UUID of the outgoing set.
+     * @param      outgoing  List of Handle of the outgoing set.
      * @param      size      Size of the outgoing list.
      * @param[out] uuid_out  Uuid of the link inserted.
      *
@@ -60,9 +60,9 @@ extern "C"
      */
     int AtomSpace_addLink( AtomSpace* this_ptr
                          , const char* type
-                         , const UUID* outgoing
+                         , const Handle** outgoing
                          , int size
-                         , UUID* uuid_out );
+                         , Handle* uuid_out );
 
     /**
      * AtomSpace_getNode Gets a node back from the atomspace.
@@ -77,14 +77,14 @@ extern "C"
     int AtomSpace_getNode( AtomSpace* this_ptr
                          , const char* type
                          , const char* name
-                         , UUID* uuid_out );
+                         , Handle* uuid_out );
 
     /**
      * AtomSpace_getLink     Gets a link back from the atomspace.
      *
      * @param      this_ptr  Pointer to AtomSpace instance.
      * @param      type      String representation of a link type.
-     * @param      outgoing  List of UUID of the outgoing set.
+     * @param      outgoing  List of Handle of the outgoing set.
      * @param      size      Size of the outgoing list.
      * @param[out] uuid_out  Uuid of the link (when found).
      *
@@ -92,9 +92,9 @@ extern "C"
      */
     int AtomSpace_getLink( AtomSpace* this_ptr
                          , const char* type
-                         , const UUID* outgoing
+                         , const Handle** outgoing
                          , int size
-                         , UUID* uuid_out );
+                         , Handle* uuid_out );
 
     /**
      * AtomSpace_removeAtom  Removes an atom from the atomspace.
@@ -105,21 +105,21 @@ extern "C"
      * @return  0 (success) if the link was removed.
      */
     int AtomSpace_removeAtom( AtomSpace* this_ptr
-                            , UUID uuid );
+                            , Handle* uuid );
 
     /**
-     * AtomSpace_getAtomByUUID Gets an atom back from the atomspace.
-     * XXX FIXME no one should be using UUID's to work with atoms,
+     * AtomSpace_getAtomByHandle Gets an atom back from the atomspace.
+     * XXX FIXME no one should be using Handle's to work with atoms,
      * except for the database and communications back-ends.  The
-     * UUID's were never intended as a user interface to atoms, and,
+     * Handle's were never intended as a user interface to atoms, and,
      * in particular, language bindings should not be using them.
      *
      * @param      this_ptr      Pointer to AtomSpace instance.
-     * @param      uuid          UUID of the atom.
-     * @param      node_or_link  =1 if node, =0 if link.     
+     * @param      uuid          Handle of the atom.
+     * @param      node_or_link  =1 if node, =0 if link.
      * @param[out] type          String representation of atom type.
      * @param[out] name          String representation of atom name (if node).
-     * @param[out] out           List of UUID of the outgoing set (if link).
+     * @param[out] out           List of Handle of the outgoing set (if link).
      * @param[out] out_len       Size of the outgoing list (if link).
      *
      * @return  0 if success.
@@ -130,19 +130,20 @@ extern "C"
      *   If node -> free type and name fields.
      *   If link -> free type and out field.
      */
-    int AtomSpace_getAtomByUUID( AtomSpace* this_ptr
-                               , UUID handle
-                               , int* node_or_link
-                               , char** type
-                               , char** name
-                               , UUID** out
-                               , int* out_len);
+    int AtomSpace_getAtomByHandle( AtomSpace* this_ptr
+                                 , Handle* handle
+                                 , int* node_or_link
+                                 , char** type
+                                 , char** name
+                                 , Handle** out
+                                 , int* out_len);
+
     int AtomSpace_getAtom( AtomSpace * this_ptr
-                         , UUID id
+                         , Handle* id
                          , const char * name
                          , const char * type
                          , size_t * size
-                         , UUID* outsetp);
+                         , Handle* outsetp);
 
     /**
      * AtomSpace_debug  Debug function to print the state
@@ -167,9 +168,9 @@ extern "C"
      * @return  0 if success.
      */
     int AtomSpace_getTruthValue( AtomSpace* this_ptr
-                                          , UUID handle
-                                          , TruthValueType* tv_type
-                                          , double* parameters );
+                               , Handle* handle
+                               , TruthValueType* tv_type
+                               , double* parameters );
 
     /**
      * AtomSpace_setTruthValue  Sets the truthvalue of
@@ -186,7 +187,7 @@ extern "C"
      * @return  0 if success.
      */
     int AtomSpace_setTruthValue( AtomSpace* this_ptr
-                               , UUID handle
+                               , Handle* handle
                                , TruthValueType type
                                , double* parameters );
 }

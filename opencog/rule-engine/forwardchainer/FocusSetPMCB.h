@@ -58,7 +58,8 @@ public:
     {
         Handle h = _inst->instantiate(implicand, var_soln);
 
-        _result_list.push_back(h);
+        if (h != Handle::UNDEFINED)
+            _result_list.push_back(h);
 
         return false;
     }

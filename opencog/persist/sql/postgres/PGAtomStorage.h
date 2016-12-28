@@ -113,7 +113,7 @@ class PGAtomStorage : public AtomStorage
 
         // The actual storing calls.
         int do_store_atom_recursive(Database&, AtomPtr);
-        void vdo_store_atom(AtomPtr&);
+        void vdo_store_atom(const AtomPtr&);
         void do_store_atom_single(Database&, AtomPtr, int);
 
         std::string outgoing_set_to_string(const HandleSeq&);
@@ -242,32 +242,15 @@ class PGAtomStorage : public AtomStorage
         void disable_testing_mode();
 
         // AtomStorage interface
-        NodePtr getNode(Type, const char *);
-        LinkPtr getLink(Type, const HandleSeq&);
-        AtomPtr getAtom(UUID);
-        HandleSeq getIncomingSet(Handle);
-        void storeAtom(AtomPtr atomPtr, bool synchronous = false);
+        Handle getNode(Type, const char *);
+        Handle getLink(Handle&);
+        HandleSeq getIncomingSet(const Handle&);
+        void storeAtom(const AtomPtr&, bool synchronous = false);
         void loadType(AtomTable &, Type);
         void flushStoreQueue();
 
         // Fetch atoms from DB
         bool atomExists(Handle);
-        AtomPtr getAtom(const Handle& h)
-        {
-            NodePtr n(NodeCast(h));
-            if (n) return getNode(*n);
-            LinkPtr l(LinkCast(h));
-            if (l) return getLink(*l);
-            return NULL;
-        }
-        NodePtr getNode(const Node &n)
-        {
-            return getNode(n.getType(), n.getName().c_str());
-        }
-        LinkPtr getLink(const Link &l)
-        {
-            return getLink(l.getType(), l.getOutgoingSet());
-        }
 
         // Large-scale loads and saves
         void load(AtomTable &); // Load entire contents of DB

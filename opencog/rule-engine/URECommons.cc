@@ -109,7 +109,7 @@ bool URECommons::exists_in(const Handle& hlink, const Handle& h) const
 }
 
 Handle URECommons::change_node_types(const Handle& h,
-		HandleMap& replacement_map)
+                                     HandleMap& replacement_map)
 {
 	Handle hcpy;
 

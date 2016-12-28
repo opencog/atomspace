@@ -113,7 +113,9 @@ private:
 	static SCM ss_av(SCM);
 	static SCM ss_tv(SCM);
 	static SCM ss_incoming_set(SCM);
+	static SCM ss_incoming_by_type(SCM, SCM);
 	static SCM ss_outgoing_set(SCM);
+	static SCM ss_outgoing_atom(SCM, SCM);
 
 	// Type query functions
 	static SCM ss_map_type(SCM, SCM);
@@ -132,6 +134,7 @@ private:
 	static SCM ss_new_itv(SCM, SCM, SCM);
 	static SCM ss_new_ptv(SCM, SCM, SCM);
 	static SCM ss_new_ftv(SCM, SCM);
+	static SCM ss_new_etv(SCM, SCM);
 	static SCM ss_tv_p(SCM);
 	static SCM tv_p(SCM, TruthValueType);
 	static SCM ss_stv_p(SCM);
@@ -139,6 +142,7 @@ private:
 	static SCM ss_itv_p(SCM);
 	static SCM ss_ptv_p(SCM);
 	static SCM ss_ftv_p(SCM);
+	static SCM ss_etv_p(SCM);
 	static SCM take_tv(TruthValue *);
 	static SCM tv_to_scm(TruthValuePtr);
 	static SCM ss_tv_get_value(SCM);
@@ -163,6 +167,7 @@ private:
 
 	// Attention values
 	static SCM ss_new_av(SCM, SCM, SCM);
+	static SCM ss_stimulate(SCM, SCM);
 	static SCM ss_av_p(SCM);
 	static SCM take_av(AttentionValue *);
 	static SCM ss_av_get_value(SCM);
@@ -190,7 +195,7 @@ private:
 	static AtomSpace *get_as_from_list(SCM);
 
 	// validate arguments coming from scheme passing into C++
-	static void throw_exception(const std::exception&, const char *);
+	static void throw_exception(const std::exception&, const char *, SCM);
 	static AtomSpace* verify_atomspace(SCM, const char *, int pos = 1);
 	static Type verify_atom_type(SCM, const char *, int pos = 1);
 	static Handle verify_handle(SCM, const char *, int pos = 1);

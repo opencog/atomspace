@@ -39,6 +39,7 @@
 #include <opencog/atoms/base/types.h>
 
 #include <opencog/atomspace/AtomTable.h>
+#include <opencog/atomspaceutils/TLB.h>
 #include <opencog/persist/sql/AtomStorage.h>
 
 #include "odbcxx.h"
@@ -93,7 +94,7 @@ class ODBCAtomStorage : public AtomStorage
         int getMaxHeight(void);
 
         int do_store_atom(AtomPtr);
-        void vdo_store_atom(AtomPtr&);
+        void vdo_store_atom(const AtomPtr&);
         void do_store_single_atom(AtomPtr, int);
 
         std::string oset_to_string(const HandleSeq&, int);
@@ -107,6 +108,7 @@ class ODBCAtomStorage : public AtomStorage
         void create_tables(void);
 
         // Track UUID's that are in use.
+        // XXX FIXME -- get rid of this -- the TLB now plays this role.
         std::mutex id_cache_mutex;
         bool local_id_cache_is_inited;
         std::set<UUID> local_id_cache;
@@ -116,6 +118,8 @@ class ODBCAtomStorage : public AtomStorage
         std::mutex id_create_mutex;
         std::set<UUID> id_create_cache;
         std::unique_lock<std::mutex> maybe_create_id(UUID);
+
+        TLB _tlbuf;
 
         UUID getMaxObservedUUID(void);
         int getMaxObservedHeight(void);
@@ -163,36 +167,22 @@ class ODBCAtomStorage : public AtomStorage
 
         void kill_data(void); // destroy DB contents
 
+        void registerWith(AtomSpace*);
+        void unregisterWith(AtomSpace*);
+
         // AtomStorage interface
-        NodePtr getNode(Type, const char *);
-        LinkPtr getLink(Type, const HandleSeq&);
-        AtomPtr getAtom(UUID);
-        HandleSeq getIncomingSet(Handle);
-        void storeAtom(AtomPtr atomPtr, bool synchronous = false);
-        void loadType(AtomTable &, Type);
+        Handle getNode(Type, const char *);
+        Handle getLink(Handle& h);
+        HandleSeq getIncomingSet(const Handle&);
+        void storeAtom(const AtomPtr& atomPtr, bool synchronous = false);
+        void loadType(AtomTable&, Type);
         void flushStoreQueue();
 
         // Store atoms to DB
         void storeSingleAtom(AtomPtr);
 
         // Fetch atoms from DB
-        bool atomExists(Handle);
-        AtomPtr getAtom(const Handle& h)
-        {
-            NodePtr n(NodeCast(h));
-            if (n) return getNode(*n);
-            LinkPtr l(LinkCast(h));
-            if (l) return getLink(*l);
-            return NULL;
-        }
-        NodePtr getNode(const Node &n)
-        {
-            return getNode(n.getType(), n.getName().c_str());
-        }
-        LinkPtr getLink(const Link &l)
-        {
-            return getLink(l.getType(), l.getOutgoingSet());
-        }
+        bool atomExists(const Handle&);
 
         // Large-scale loads and saves
         void load(AtomTable &); // Load entire contents of DB

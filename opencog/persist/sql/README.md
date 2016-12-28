@@ -28,9 +28,10 @@ Features
 Missing features/ToDo items
 ---------------------------
  * Add support for multiple atom spaces.
- * Add full support for attention values. (??)
  * Provide optimized table layout for EvaluationLinks.
  * Add support for Space/TimeServer data.
+ * Implement ProtoAtom storage.
+ * See also TODO list at very bottom.
 
 Performance status
 ------------------
@@ -248,10 +249,10 @@ sudo gedit /etc/odbcinst.ini &
     CommLog     = 0
 ```
 
-The above stanza associates the name `PostgreSQL Unicode` with a particular 
-driver. This name is needed for later steps.  Notice that this is a quite 
-long name, with spaces!  You can change the name, (e.g. to shorten it) if 
-you wish, however, it **MUST** be consistent with the name given in the 
+The above stanza associates the name `PostgreSQL Unicode` with a particular
+driver. This name is needed for later steps.  Notice that this is a quite
+long name, with spaces!  You can change the name, (e.g. to shorten it) if
+you wish, however, it **MUST** be consistent with the name given in the
 `.odbc.ini` file (explained below in 'ODBC Setup, Part the Second').
 
 MySQL users need the stanza below; the `/etc/odbcinst.ini` file can
@@ -343,7 +344,7 @@ try doing this, replacing 'alex' with your username.
 Verify that worked out by typing \dg to see:
 
                              List of roles
- Role name |                   Attributes                   | Member of 
+ Role name |                   Attributes                   | Member of
 -----------+------------------------------------------------+-----------
  alex      | Superuser                                      | {}
  postgres  | Superuser, Create role, Create DB, Replication | {}
@@ -388,7 +389,7 @@ Navigate to the atomspace folder you cloned from GitHub:
 So we can create the database tables:
 
 ```
-   $ cat opencog/persist/sql/atom.sql | psql mycogdata -U opencog_user -W -h localhost
+   $ cat opencog/persist/sql/postgres/pg_atom.sql | psql mycogdata -U opencog_user -W -h localhost
 ```
 
 Verify that the tables were created. Login as before:
@@ -434,8 +435,8 @@ ODBC Setup, Part the Second
 Edit `~/.odbc.ini` in your home directory to add a stanza of the form
 below. You MUST create one of these for EACH repository you plan to
 use! The name of the stanza, and of the database, can be whatever you
-wish. The name given for `Driver`, here `PostgreSQL Unicode`, **must** 
-match a stanza name in `/etc/odbcinst.ini`.  Failure to have it match 
+wish. The name given for `Driver`, here `PostgreSQL Unicode`, **must**
+match a stanza name in `/etc/odbcinst.ini`.  Failure to have it match
 will cause an error message:
 
 ```
@@ -477,9 +478,9 @@ IMPORTANT: MAKE SURE THERE ARE NO SPACES AT THE START OF EVERY LINE!
 
 Opencog Setup
 -------------
-Edit `~/opencog/build/lib/opencog.conf` and set the `STORAGE`, 
-`STORAGE_USERNAME` and `STORAGE_PASSWD` there to the same values as 
-in `~/.odbc.ini`. 
+Edit `~/opencog/build/lib/opencog.conf` and set the `STORAGE`,
+`STORAGE_USERNAME` and `STORAGE_PASSWD` there to the same values as
+in `~/.odbc.ini`.
 
 ```
 STORAGE               = "mycogdata"
@@ -494,7 +495,7 @@ start the opencog server from your build folder as:
    $ ./opencog/server/cogserver -c my.conf
 ```
 
-Verify that everything works. Start the cogserver, and bulk-save. 
+Verify that everything works. Start the cogserver, and bulk-save.
 (Actually this didn't work for me, I had to do sql-open before sql-store
 worked, as shown below, even though my opencog.conf was correct and when
 using a custom my.conf file.)
@@ -915,11 +916,88 @@ Much much better!
 ```
 
 
+ProtoAtoms
+==========
+ProtoAtoms were invented to solve the representational issues associated
+with TV's. Narrowly, there is a need to store TV's of different kinds,
+including TV's with counts, relative entropies, value ranges, etc.
+Broadly, there is a need to store generic entity-attribute-value
+information with each atom (where the atom is the entity).  ProtoAtoms
+are the intended EAV solution for the atomspace.
+
+The ProtoAtom implementation, in the main atomspace, is incomplete.
+Much of the work has been done, but open design issues remain.
+
+
+JSONB
+=====
+The storage problem for the atomspace is essentially the problem of
+storing a graph, for which the EAV (Entity-Attribute-Value) pattern
+seems to be the best fit.  See
+https://en.wikipedia.org/wiki/Entity%E2%80%93attribute%E2%80%93value_model
+
+A workable design point, using postgres 9.4 or newer, is JSONB. See
+http://coussej.github.io/2016/01/14/Replacing-EAV-with-JSONB-in-PostgreSQL/
+
+The goal here is to deal with protoatom storage (i.e. as a replacement
+for the current TV representation problem.)
+
+The representation of the atomspace would then look vaguely like this
+(this is a rought sketch):
+
+CREATE TABLE atomspace (
+    uuid  SERIAL PRIMARY KEY,
+    type  INT,    ;; the atom type.
+    atom  JSONB
+);
+
+A node would be:
+{
+   id:   42
+   type:  3   ; a ConceptNode
+   atom: {
+       name:    "this is a node name"
+   }
+}
+
+A link would be:
+{
+   id:   43
+   type: 4     ; an OrderedLink
+   atom: {
+       outgoing:  [1,2,3]
+   }
+}
+
+ProtoAtom updates would look like this (e.g. for stv==SimpleTruthValue)
+
+UPDATE atomspace
+SET atom = jsonb_set(properties, '{"stv"}', '[0.2, 0.54]')
+WHERE id = 42;
+
+Critically important observations:
+----------------------------------
+Performance depends crucially on the use of the containment (@>)
+operator in the WHERE clause. This causes the GIN index to be used,
+and thus can run thousands (!) of times faster than an ordinary
+EAV table structure.
+
+
+
 TODO
 ====
  * See also to-do list way up top.
 
- * Store attention values. (??) maybe ??
+ * Finish and document the non-ODBC PGSQL interfaces. Explain why this
+   is better.
+
+ * Store ProtoAtoms
+
+ * Consider an alternate implementation, using JSONB to do an EAV-like
+   storage: For details, see
+   http://coussej.github.io/2016/01/14/Replacing-EAV-with-JSONB-in-PostgreSQL/
+
+ * Add support for multiple atomspaces.
 
  * Create custom table, tailored for EvaluationLink triples.
    Since majority of nodes/links in the DB will be in the form of
@@ -928,5 +1006,3 @@ TODO
    decrease the SQL table sizes significantly, and decrease server I/O
    by factors of 2x-3x.  Another table, designed just for simple pairs,
    might help a lot, too.
-
- * Add support for multiple atomspaces.

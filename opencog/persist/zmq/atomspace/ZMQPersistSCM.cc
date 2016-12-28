@@ -20,6 +20,7 @@
  * Free Software Foundation, Inc.,
  * 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
  */
+#ifdef HAVE_GUILE
 
 #include <opencog/atomspace/AtomSpace.h>
 #include <opencog/atomspace/BackingStore.h>
@@ -44,11 +45,11 @@ class ZMQBackingStore : public BackingStore
 		ZMQBackingStore();
 		void set_store(ZMQClient *);
 
-		virtual NodePtr getNode(Type, const char *) const;
-		virtual LinkPtr getLink(Type, const HandleSeq&) const;
+		virtual Handle getNode(Type, const char *) const;
+		virtual Handle getLink(Handle&) const;
 		virtual AtomPtr getAtom(UUID) const;
-		virtual HandleSeq getIncomingSet(Handle) const;
-		virtual void storeAtom(Handle);
+		virtual HandleSeq getIncomingSet(const Handle&) const;
+		virtual void storeAtom(const Handle&);
 		virtual void loadType(AtomTable&, Type);
 		virtual void barrier();
 };
@@ -66,14 +67,14 @@ void ZMQBackingStore::set_store(ZMQClient *as)
 	_store = as;
 }
 
-NodePtr ZMQBackingStore::getNode(Type t, const char *name) const
+Handle ZMQBackingStore::getNode(Type t, const char *name) const
 {
 	return _store->getNode(t, name);
 }
 
-LinkPtr ZMQBackingStore::getLink(Type t, const HandleSeq& oset) const
+Handle ZMQBackingStore::getLink(Handle& h) const
 {
-	return _store->getLink(t, oset);
+	return _store->getLink(h);
 }
 
 AtomPtr ZMQBackingStore::getAtom(UUID uuid) const
@@ -81,12 +82,12 @@ AtomPtr ZMQBackingStore::getAtom(UUID uuid) const
 	return _store->getAtom(uuid);
 }
 
-HandleSeq ZMQBackingStore::getIncomingSet(Handle h) const
+HandleSeq ZMQBackingStore::getIncomingSet(const Handle& h) const
 {
 	return _store->getIncomingSet(h);
 }
 
-void ZMQBackingStore::storeAtom(Handle h)
+void ZMQBackingStore::storeAtom(const Handle& h)
 {
 	_store->storeAtom(h);
 }
@@ -109,20 +110,16 @@ ZMQPersistSCM::ZMQPersistSCM(AtomSpace *as)
 	_store = NULL;
 	_backing = new ZMQBackingStore();
 
-#ifdef HAVE_GUILE
 	static bool is_init = false;
 	if (is_init) return;
 	is_init = true;
 	scm_with_guile(init_in_guile, this);
-#endif
 }
 
 void* ZMQPersistSCM::init_in_guile(void* self)
 {
-#ifdef HAVE_GUILE
 	scm_c_define_module("opencog persist-zmq", init_in_module, self);
 	scm_c_use_module("opencog persist-zmq");
-#endif
 	return NULL;
 }
 
@@ -134,12 +131,10 @@ void ZMQPersistSCM::init_in_module(void* data)
 
 void ZMQPersistSCM::init(void)
 {
-#ifdef HAVE_GUILE
 	define_scheme_primitive("zmq-open", &ZMQPersistSCM::do_open, this, "persist-zmq");
 	define_scheme_primitive("zmq-close", &ZMQPersistSCM::do_close, this, "persist-zmq");
 	define_scheme_primitive("zmq-load", &ZMQPersistSCM::do_load, this, "persist-zmq");
 	define_scheme_primitive("zmq-store", &ZMQPersistSCM::do_store, this, "persist-zmq");
-#endif
 }
 
 ZMQPersistSCM::~ZMQPersistSCM()
@@ -166,10 +161,8 @@ void ZMQPersistSCM::do_open(const std::string& networkAddress)
 	_store->reserve();
 	_backing->set_store(_store);
 	AtomSpace *as = _as;
-#ifdef HAVE_GUILE
 	if (NULL == as)
 		as = SchemeSmob::ss_get_env_as("zmq-open");
-#endif
 	// as->registerBackingStore(_backing); // TODO: register
 }
 
@@ -180,10 +173,8 @@ void ZMQPersistSCM::do_close(void)
 			 "zmq-close: Error: Database not open");
 
 	AtomSpace *as = _as;
-#ifdef HAVE_GUILE
 	if (NULL == as)
 		as = SchemeSmob::ss_get_env_as("zmq-close");
-#endif
 	// as->unregisterBackingStore(_backing); // TODO: unregister
 
 	_backing->set_store(NULL);
@@ -198,10 +189,8 @@ void ZMQPersistSCM::do_load(void)
 			"zmq-load: Error: Database not open");
 
 	AtomSpace *as = _as;
-#ifdef HAVE_GUILE
 	if (NULL == as)
 		as = SchemeSmob::ss_get_env_as("zmq-load");
-#endif
 	// XXX TODO: this should probably be done in a separate thread.
 	 _store->load(const_cast<AtomTable&>(as->get_atomtable()));
 }
@@ -213,10 +202,8 @@ void ZMQPersistSCM::do_store(void)
 			"zmq-store: Error: Database not open");
 
 	AtomSpace *as = _as;
-#ifdef HAVE_GUILE
 	if (NULL == as)
 		as = SchemeSmob::ss_get_env_as("zmq-store");
-#endif
 	// XXX TODO This should really be started in a new thread ...
 	_store->store(const_cast<AtomTable&>(as->get_atomtable()));
 }
@@ -225,3 +212,5 @@ void opencog_persist_zmq_init(void)
 {
    static ZMQPersistSCM patty(NULL);
 }
+
+#endif // HAVE_GUILE

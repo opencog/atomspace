@@ -45,6 +45,18 @@ BindLink::BindLink(const HandleSeq& hseq,
 	init();
 }
 
+BindLink::BindLink(const Handle& vardecl,
+                   const Handle& body,
+                   const Handle& rewrite,
+                   TruthValuePtr tv, AttentionValuePtr av)
+	: BindLink(HandleSeq{vardecl, body, rewrite}, tv, av)
+{}
+
+BindLink::BindLink(const Handle& body, const Handle& rewrite,
+                   TruthValuePtr tv, AttentionValuePtr av)
+	: BindLink(HandleSeq{body, rewrite}, tv, av)
+{}
+
 BindLink::BindLink(Type t, const HandleSeq& hseq,
                    TruthValuePtr tv, AttentionValuePtr av)
 	: PatternLink(t, hseq, tv, av)

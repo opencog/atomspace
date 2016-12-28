@@ -34,9 +34,6 @@ class RandomAtomGenerator
     MT19937RandGen* _random_generator;
     std::poisson_distribution<unsigned>* _poisson_distribution;
 
-    UUID _first_out_UUID;
-    UUID _last_out_UUID;
-
     // Generate a random type that is a subclass of the supplied parent type.
     Type random_type(Type parent_type);
 
@@ -64,7 +61,7 @@ class RandomAtomGenerator
     // Get a link type using chance defaults and threshold.
     Type get_link_type();
 
-    // Get a random handle between first_out_UUID and last_out_UUID.
+    // Get a random handle
     Handle get_random_handle();
 
 public:

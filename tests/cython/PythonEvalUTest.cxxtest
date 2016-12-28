@@ -5,6 +5,8 @@
 #include <opencog/cython/PythonEval.h>
 #include <opencog/guile/SchemeEval.h>
 
+#include <cxxtest/TestSuite.h>
+
 using std::string;
 
 using namespace opencog;
@@ -254,7 +256,7 @@ public:
 
             "def return_truth(atom1, atom2):\n"
             "    print 'return_truth TruthValue(0.75, 100.0)'\n"
-            "    return TruthValue(0.75, 100.0)\n"
+            "    return TruthValue(0.75, 100.0)\n\n"
             );
 
         // Create a scheme evaluator to trigger cog-evaluate and cog-execute.
@@ -293,6 +295,35 @@ public:
         error = scheme->eval_error();
         scheme->clear_pending();
         TSM_ASSERT("Failed cog-evaluate!", !error);
+
+        // Cleanup Python.
+        global_python_finalize();
+    }
+
+    void testCodeBlockWithNewline()
+    {
+        // Initialize Python.
+        global_python_initialize();
+
+        AtomSpace *as = new AtomSpace();
+        PythonEval::create_singleton_instance(as);
+        PythonEval* python = &PythonEval::instance();
+
+        // Define python functions with newline within the code block
+        string result = python->eval(
+            "def fun(x):\n"
+            "    y = x + 1\n"
+            "\n"
+            "    return y\n"
+            "\n"
+            "fun(1)\n\n"
+            );
+
+        std::cout << "result = " << result << std::endl;
+
+        // Because results are ignored this cannot be tested as of now
+        // TS_ASSERT_EQUALS(result, "3");
+        TS_ASSERT(true);
 
         // Cleanup Python.
         global_python_finalize();

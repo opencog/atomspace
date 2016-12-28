@@ -35,17 +35,12 @@
 #include <opencog/util/RandGen.h>
 
 #include <opencog/truthvalue/TruthValue.h>
-#include <opencog/truthvalue/AttentionValue.h>
 
-#include <opencog/atoms/base/atom_types.h>
+#include <opencog/atoms/base/Quotation.h>
 #include <opencog/atoms/base/ClassServer.h>
 #include <opencog/atoms/base/Link.h>
 #include <opencog/atoms/base/Node.h>
 
-#include <opencog/atomspace/FixedIntegerIndex.h>
-#include <opencog/atomspace/ImportanceIndex.h>
-#include <opencog/atomspace/LinkIndex.h>
-#include <opencog/atomspace/NodeIndex.h>
 #include <opencog/atomspace/TypeIndex.h>
 
 class AtomTableUTest;
@@ -60,9 +55,6 @@ typedef std::set<AtomPtr> AtomPtrSet;
 
 typedef boost::signals2::signal<void (const Handle&)> AtomSignal;
 typedef boost::signals2::signal<void (const AtomPtr&)> AtomPtrSignal;
-typedef boost::signals2::signal<void (const Handle&,
-                                      const AttentionValuePtr&,
-                                      const AttentionValuePtr&)> AVCHSigl;
 typedef boost::signals2::signal<void (const Handle&,
                                       const TruthValuePtr&,
                                       const TruthValuePtr&)> TVCHSigl;
@@ -89,31 +81,21 @@ private:
 
     // Cached count of the number of atoms in the table.
     size_t _size;
+    size_t _num_nodes;
+    size_t _num_links;
 
     // Cached count of the number of atoms of each type.
     std::vector<size_t> _size_by_type;
 
-    // Holds all atoms in the table.  Provides lookup between numeric
-    // handle uuid and the actual atom pointer. To some degree, this info
-    // is duplicated in the Node and LinkIndex below; we have this here
-    // for convenience.
-    //
-    // This also plays a critical role for memory management: this is
-    // the only index that actually holds the atom shared_ptr, and thus
-    // increments the atom use count in a guaranteed fashion.  This is
-    // the one true guaranteee that the atom will not be deleted while
-    // it is in the atom table.
-    std::unordered_map<UUID, Handle> _atom_set;
+    // Eventual replacement for _atom_set above.
+    std::unordered_multimap<ContentHash, Handle> _atom_store;
 
     //!@{
     //! Index for quick retrieval of certain kinds of atoms.
     TypeIndex typeIndex;
-    NodeIndex nodeIndex;
-    LinkIndex linkIndex;
-    ImportanceIndex importanceIndex;
 
     async_caller<AtomTable, AtomPtr> _index_queue;
-    void put_atom_into_index(AtomPtr&);
+    void put_atom_into_index(const AtomPtr&);
     //!@}
 
     /**
@@ -131,9 +113,6 @@ private:
 
     /** Signal emitted when the TV changes. */
     TVCHSigl _TVChangedSignal;
-
-    /** Signal emitted when the AV changes. */
-    AVCHSigl _AVChangedSignal;
 
     /// Parent environment for this table.  Null if top-level.
     /// This allows atomspaces to be nested; atoms in this atomspace
@@ -154,6 +133,10 @@ private:
      */
     AtomTable& operator=(const AtomTable&);
     AtomTable(const AtomTable&);
+
+    AtomPtr do_factory(Type atom_type, AtomPtr atom);
+    AtomPtr factory(Type atom_type, AtomPtr atom);
+    AtomPtr clone_factory(Type atom_type, AtomPtr atom);
 
 public:
 
@@ -203,14 +186,14 @@ public:
      * @param The type of the desired atom.
      * @return The handle of the desired atom if found.
      */
-    Handle getHandle(Type, std::string) const;
+    Handle getHandle(Type, const std::string&) const;
+    Handle getNodeHandle(AtomPtr&) const;
     Handle getHandle(Type, const HandleSeq&) const;
-    Handle getHandle(const AtomPtr&) const;
-    Handle getHandle(UUID) const;
-
-    AtomPtr do_factory(Type atom_type, AtomPtr atom);
-    AtomPtr factory(Type atom_type, AtomPtr atom);
-    AtomPtr clone_factory(Type, AtomPtr);
+    Handle getLinkHandle(AtomPtr&, Quotation quotation = Quotation()) const;
+    Handle getHandle(AtomPtr&, Quotation quotation = Quotation()) const;
+    Handle getHandle(const Handle& h) const {
+        AtomPtr a(h); return getHandle(a);
+    }
 
     /**
      * Returns the set of atoms of a given type (subclasses optionally).
@@ -263,34 +246,6 @@ public:
         { return typeIndex.end(); }
 
     /**
-     * Returns the set of atoms within the given importance range.
-     *
-     * @param Importance range lower bound (inclusive).
-     * @param Importance range upper bound (inclusive).
-     * @return The set of atoms within the given importance range.
-     */
-    UnorderedHandleSet getHandlesByAV(AttentionValue::sti_t lowerBound,
-                              AttentionValue::sti_t upperBound = AttentionValue::MAXSTI) const
-    {
-        std::lock_guard<std::recursive_mutex> lck(_mtx);
-        return importanceIndex.getHandleSet(this, lowerBound, upperBound);
-    }
-
-    /**
-     * Updates the importance index for the given atom. According to the
-     * new importance of the atom, it may change importance bins.
-     *
-     * @param The atom whose importance index will be updated.
-     * @param The old importance bin where the atom originally was.
-     */
-    void updateImportanceIndex(AtomPtr a, int bin)
-    {
-        if (a->_atomTable != this) return;
-        std::lock_guard<std::recursive_mutex> lck(_mtx);
-        importanceIndex.updateImportance(a.operator->(), bin);
-    }
-
-    /**
      * Adds an atom to the table. If the atom already is in the
      * atomtable, then the truth values and attention values of the
      * two are merged (how, exactly? Is this done corrrectly!?)
@@ -327,28 +282,6 @@ public:
         return (NULL != h) and h->getAtomTable() == this;
     }
 
-    /** Get Node object already in the AtomTable.
-     *
-     * @param h Handle of the node to retrieve.
-     * @return pointer to Node object, NULL if no atom within this AtomTable is
-     * associated with handle or if the atom is a link.
-     */
-    inline NodePtr getNode(Handle& h) const {
-        h = getHandle(h); // force resolution of uuid into atom pointer.
-        return NodeCast(h);
-    }
-
-    /** Get Link object already in the AtomTable.
-     *
-     * @param h Handle of the link to retrieve.
-     * @return pointer to Link object, NULL if no atom within this AtomTable is
-     * associated with handle or if the atom is a node.
-     */
-    inline LinkPtr getLink(Handle& h) const {
-        h = getHandle(h); // force resolution of uuid into atom pointer.
-        return LinkCast(h);
-    }
-
     /**
      * Extracts atoms from the table. Table will not contain the
      * extracted atoms anymore.
@@ -373,9 +306,6 @@ public:
 
     AtomSignal& addAtomSignal() { return _addAtomSignal; }
     AtomPtrSignal& removeAtomSignal() { return _removeAtomSignal; }
-
-    /** Provide ability for others to find out about AV changes */
-    AVCHSigl& AVChangedSignal() { return _AVChangedSignal; }
 
     /** Provide ability for others to find out about TV changes */
     TVCHSigl& TVChangedSignal() { return _TVChangedSignal; }

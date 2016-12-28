@@ -40,6 +40,7 @@
 
 #include "PyIncludeWrapper.h"
 
+#include <condition_variable>
 #include <map>
 #include <mutex>
 #include <string>
@@ -55,24 +56,6 @@
 namespace opencog {
 
 class AtomSpace;
-class CogServer;
-
-/**
- * Each call of the embedded python code could be easily locked by object of this class
- */
-class PythonThreadLocker
-{
-    private:
-        PyGILState_STATE state;
-
-    public:
-        PythonThreadLocker() : state(PyGILState_Ensure())
-        {}
-
-        ~PythonThreadLocker() {
-            PyGILState_Release(state);
-        }
-};
 
 /**
  * Singleton class used to initialize python interpreter in the main thread.
@@ -129,8 +112,14 @@ class PythonEval : public GenericEval
         // The lock is recursive, because we may need to use multiple
         // different atomspaces with the evaluator, in some nested
         // fashion. So this lock prevents other threads from using the
-        // wrong atomspace in some other thread.  Unfort
+        // wrong atomspace in some other thread.  Quite unfortunate.
         static std::recursive_mutex _mtx;
+
+        // Computed results are typically polled in a distinct thread.
+        bool _eval_done;
+        std::mutex _poll_mtx;
+        std::mutex _eval_mutex;
+        std::condition_variable _wait_done;
 
         PyObject* _pyGlobal;
         PyObject* _pyLocal;
@@ -164,13 +153,17 @@ class PythonEval : public GenericEval
         static PythonEval & instance(AtomSpace* atomspace = NULL);
 
         // The async-output interface.
-        virtual void begin_eval() {}
+        virtual void begin_eval(void);
         virtual void eval_expr(const std::string&);
-        virtual std::string poll_result();
+        virtual std::string poll_result(void);
+        virtual void interrupt(void);
 
         // The synchronous-output interface.
         std::string eval(const std::string& expr)
-            { begin_eval(); eval_expr(expr); return poll_result(); }
+        {
+            std::lock_guard<std::mutex> lock(_eval_mutex);
+            begin_eval(); eval_expr(expr); return poll_result();
+        }
 
         /**
          * Runs the Python code contained in 'script'.

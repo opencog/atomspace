@@ -30,8 +30,6 @@
 (use-modules (opencog))
 (use-modules (opencog query))
 
-(load-from-path "utilities.scm")
-
 ;; Some arbitrary function, taking one atom as an argument.
 ;; This function could take zero, two or more arguments; however,
 ;; in general, it should always return an atom.  It doesn't have to;
@@ -109,4 +107,4 @@
 ;; The below should cause two hello messages to be printed, when
 ;; it is run.
 ;;
-; (cog-bind find-humans)
+(cog-bind find-humans)

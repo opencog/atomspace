@@ -24,6 +24,7 @@
 #define _OPENCOG_SCOPE_LINK_H
 
 #include <opencog/atoms/core/VariableList.h>
+#include <opencog/atoms/base/Quotation.h>
 
 namespace opencog
 {
@@ -45,6 +46,8 @@ namespace opencog
 /// the point of unpacked variables is to act as a memo or cache,
 /// speeding up later calculations.
 ///
+class ScopeLink;
+typedef std::shared_ptr<ScopeLink> ScopeLinkPtr;
 class ScopeLink : public Link
 {
 protected:
@@ -53,7 +56,6 @@ protected:
 	/// Handle of the body of the expression.
 	Handle _body;
 
-
 	/// Variables bound in the body.
 	Variables _varlist;
 
@@ -61,19 +63,21 @@ protected:
 	          TruthValuePtr tv = TruthValue::DEFAULT_TV(),
 	          AttentionValuePtr av = AttentionValue::DEFAULT_AV());
 
+public:
+	// XXX Need to make this public, so that the factory can call it!
 	ScopeLink(Type, const HandleSeq&,
 	          TruthValuePtr tv = TruthValue::DEFAULT_TV(),
 	          AttentionValuePtr av = AttentionValue::DEFAULT_AV());
-
+protected:
 	void init(void);
 	void extract_variables(const HandleSeq& oset);
 	void init_scoped_variables(const Handle& hvar);
 
-	// utility debug print
-	static void prt(const Handle& h)
-	{
-		printf("%s\n", h->toShortString().c_str());
-	}
+	bool skip_init(Type);
+	ContentHash term_hash(const Handle&, UnorderedHandleSet&,
+	                      Quotation quotation = Quotation()) const;
+	virtual ContentHash compute_hash() const;
+
 public:
 	ScopeLink(const HandleSeq&,
 	          TruthValuePtr tv = TruthValue::DEFAULT_TV(),
@@ -93,14 +97,68 @@ public:
 	// Return true if the other Handle is equal to this one,
 	// i.e. is the same, up to alpha conversion. i.e. is the same,
 	// up to a renaming of the bound variables.
-	bool is_equal(const Handle&) const;
+	bool is_equal(const Handle&, bool silent=false) const;
+
+	/**
+	 * Return an alpha converted copy of itself. One can provide in
+	 * argument a list of new variable names, possibly with a new
+	 * variable declaration. If not the variable names are randomly
+	 * generated (a random string is appended to the old variable
+	 * names). One may choose as well to have the variables replaced
+	 * by non variable atoms, in such cases the missing variables are
+	 * filtered out.
+	 *
+	 * Examples:
+	 *
+	 * Assume the instance is:
+	 *
+	 * (ScopeLink
+	 *    (VariableList (Variable "$X") (Variable "$Y"))
+	 *    (Inheritance (Variable "$X") (Variable "$Y")))
+	 *
+	 * 1. alpha_conversion() (i.e. called with no argument) returns:
+	 *
+	 * (ScopeLink
+	 *    (VariableList (Variable "$X-af45") (Variable "$Y-2b5a"))
+	 *    (Inheritance (Variable "$X-af45") (Variable "$Y-2b5a")))
+	 *
+	 * 2. alpha_conversion([(Variable "$W"), (Variable "$Z")]) returns:
+	 *
+	 * (ScopeLink
+	 *    (VariableList (Variable "$W") (Variable "$Z"))
+	 *    (Inheritance (Variable "$W") (Variable "$Z")))
+	 *
+	 * 3. alpha_conversion([(Variable "$W"), (Variable "$Z")], variables)
+	 *    such that variables associates a ConceptNode type to $W and $Z
+	 *    returns:
+	 *
+	 * (ScopeLink
+	 *    (VariableList
+	 *       (TypedVariable (Variable "$W") (Type "ConceptNode"))
+	 *       (TypedVariable (Variable "$Z") (Type "ConceptNode")))
+	 *    (Inheritance (Variable "$W") (Variable "$Z")))
+	 *
+	 * 4. alpha_conversion([(Variable "$W"), (Concept "B")]) returns:
+	 *
+	 * (ScopeLink
+	 *    (Variable "$W")
+	 *    (Inheritance (Variable "$W") (Concept "B")))
+	 *
+	 * Note: the arguments are passed by copy because their copy might
+	 * be modified in case they are empty or undefined, see
+	 * alpha_conversion implementation.
+	 */
+	Handle alpha_conversion(HandleSeq vars = HandleSeq(),
+	                        Handle vardecl = Handle::UNDEFINED) const;
 
 	// Overload equality check!
 	virtual bool operator==(const Atom&) const;
 	virtual bool operator!=(const Atom&) const;
+
+	static ScopeLinkPtr factory(const Handle&);
+	static ScopeLinkPtr factory(Type, const HandleSeq&);
 };
 
-typedef std::shared_ptr<ScopeLink> ScopeLinkPtr;
 static inline ScopeLinkPtr ScopeLinkCast(const Handle& h)
 	{ return std::dynamic_pointer_cast<ScopeLink>(AtomCast(h)); }
 static inline ScopeLinkPtr ScopeLinkCast(const AtomPtr& a)

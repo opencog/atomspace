@@ -33,10 +33,11 @@
 #include "opencog/truthvalue/NullTruthValue.h"
 #include "opencog/truthvalue/IndefiniteTruthValue.h"
 #include "opencog/truthvalue/SimpleTruthValue.h"
+#include "opencog/atomspaceutils/TLB.h"
 
 using namespace opencog;
 
-//TODO move this file to the persist directory
+TLB tlbuf;
 
 ProtocolBufferSerializer::ProtocolBufferSerializer()
 {
@@ -232,7 +233,7 @@ NodePtr ProtocolBufferSerializer::deserializeNode(
     	tv = TruthValue::DEFAULT_TV();
     }
 	NodePtr nodePtr(new Node(atomMessage.type(), atomMessage.name(), tv));
-	nodePtr->_uuid = atomMessage.handle();
+	tlbuf.addAtom(nodePtr, atomMessage.handle());
     deserializeAtom(atomMessage, *nodePtr);
 
     return nodePtr;
@@ -245,7 +246,7 @@ LinkPtr ProtocolBufferSerializer::deserializeLink(
 	HandleSeq oset(atomMessage.outgoing_size());
     for(int i = 0; i < atomMessage.outgoing_size(); i++)
     {
-    	oset[i] = Handle(atomMessage.outgoing(i));
+		// oset[i] = Handle(atomMessage.outgoing(i));
     }
 
     TruthValuePtr tv;
@@ -255,7 +256,7 @@ LinkPtr ProtocolBufferSerializer::deserializeLink(
     	tv = TruthValue::DEFAULT_TV();
     }
 	LinkPtr linkPtr(new Link(atomMessage.type(), oset, tv));
-	linkPtr->_uuid = atomMessage.handle();
+	tlbuf.addAtom(linkPtr, atomMessage.handle());
     deserializeAtom(atomMessage, *linkPtr);
 
     return linkPtr;

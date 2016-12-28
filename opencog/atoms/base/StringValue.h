@@ -57,8 +57,8 @@ public:
 
 
 	/** Returns a string representation of the value.  */
-	virtual std::string toString(const std::string& indent);
-	virtual std::string toShortString(const std::string& indent)
+	virtual std::string toString(const std::string& indent) const;
+	virtual std::string toShortString(const std::string& indent) const
 	{ return toString(indent); }
 
 	/** Returns true if the two atoms are equal.  */

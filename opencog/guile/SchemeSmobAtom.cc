@@ -6,8 +6,6 @@
  * Copyright (c) 2008,2009 Linas Vepstas <linas@linas.org>
  */
 
-#ifdef HAVE_GUILE
-
 #include <vector>
 
 #include <cstddef>
@@ -201,6 +199,23 @@ SCM SchemeSmob::ss_outgoing_set (SCM satom)
 
 /* ============================================================== */
 /**
+ * Return the n'th atom of the outgoing set..
+ */
+SCM SchemeSmob::ss_outgoing_atom (SCM satom, SCM spos)
+{
+	Handle h = verify_handle(satom, "cog-outgoing-atom");
+	size_t pos = verify_size(spos, "cog-outgoing-atom");
+
+	if (not h->isLink()) return SCM_EOL;
+
+	const HandleSeq& oset = h->getOutgoingSet();
+	if (oset.size() <= pos) return SCM_EOL;
+
+	return handle_to_scm(oset[pos]);
+}
+
+/* ============================================================== */
+/**
  * Convert the incoming set of an atom into a list; return the list.
  */
 SCM SchemeSmob::ss_incoming_set (SCM satom)
@@ -213,6 +228,27 @@ SCM SchemeSmob::ss_incoming_set (SCM satom)
 	for (const LinkPtr& l : iset)
 	{
 		SCM smob = handle_to_scm(l->getHandle());
+		head = scm_cons(smob, head);
+	}
+
+	return head;
+}
+
+/* ============================================================== */
+/**
+ * Convert the incoming set of an atom into a list; return the list.
+ */
+SCM SchemeSmob::ss_incoming_by_type (SCM satom, SCM stype)
+{
+	Handle h = verify_handle(satom, "cog-incoming-by-type");
+	Type t = verify_atom_type (stype, "cog-incoming-by-type");
+
+	HandleSeq iset;
+	h->getIncomingSetByType(std::back_inserter(iset), t, false);
+	SCM head = SCM_EOL;
+	for (const Handle& ih : iset)
+	{
+		SCM smob = handle_to_scm(ih);
 		head = scm_cons(smob, head);
 	}
 
@@ -475,7 +511,5 @@ SCM SchemeSmob::ss_is_closed(SCM satom)
 	Handle h = verify_handle(satom, "cog-closed?");
 	return is_closed(h) ? SCM_BOOL_T : SCM_BOOL_F;
 }
-
-#endif
 
 /* ===================== END OF FILE ============================ */

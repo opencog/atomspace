@@ -29,6 +29,8 @@
 #include <opencog/atoms/core/FreeLink.h>
 #include <opencog/atomutils/FindUtils.h>
 
+#include "BindLink.h"
+#include "DualLink.h"
 #include "PatternLink.h"
 #include "PatternUtils.h"
 
@@ -119,7 +121,7 @@ void PatternLink::setup_components(void)
 void PatternLink::init(void)
 {
 	_pat.redex_name = "anonymous PatternLink";
-	extract_variables(_outgoing);
+	ScopeLink::extract_variables(_outgoing);
 
 	if (2 < _outgoing.size() or
 	   (2 == _outgoing.size() and _outgoing[1] != _body))
@@ -754,25 +756,20 @@ bool PatternLink::add_dummies()
 /// evaluatable.
 void PatternLink::trace_connectives(const std::set<Type>& connectives,
                                     const HandleSeq& oset,
-                                    int quotation_level)
+                                    Quotation quotation)
 {
 	for (const Handle& term: oset)
 	{
 		Type t = term->getType();
 
-		// Deal with quote
-		if (t == QUOTE_LINK)
-			quotation_level++;
-		else if (t == UNQUOTE_LINK)
-			quotation_level--;
+		quotation.update(t);
 
-		if (quotation_level > 0
-		    or connectives.find(t) == connectives.end()) continue;
+		if (quotation.is_quoted() or connectives.find(t) == connectives.end())
+			continue;
 		_pat.evaluatable_holders.insert(term);
 		add_to_map(_pat.in_evaluatable, term, term);
 		if (term->isLink())
-			trace_connectives(connectives, term->getOutgoingSet(),
-			                  quotation_level);
+			trace_connectives(connectives, term->getOutgoingSet(), quotation);
 	}
 }
 
@@ -784,7 +781,7 @@ void PatternLink::trace_connectives(const std::set<Type>& connectives,
  * how the trees are connected.
  *
  * This is used for only one purpose: to find the next unsolved
- * clause. Perhaps this could be simplied somehow ...
+ * clause. Perhaps this could be simplified somehow ...
  */
 void PatternLink::make_connectivity_map(const HandleSeq& component)
 {
@@ -800,7 +797,7 @@ void PatternLink::make_connectivity_map(const HandleSeq& component)
 	auto end = _pat.connectivity_map.end();
 	while (it != end)
 	{
-		if (it->second.size() == 1)
+		if (1 == _pat.connectivity_map.count(it->first))
 			it = _pat.connectivity_map.erase(it);
 		else
 			it++;
@@ -809,7 +806,7 @@ void PatternLink::make_connectivity_map(const HandleSeq& component)
 
 void PatternLink::make_map_recursive(const Handle& root, const Handle& h)
 {
-	_pat.connectivity_map[h].emplace_back(root);
+	_pat.connectivity_map.emplace(h, root);
 
 	if (h->isLink())
 	{
@@ -830,10 +827,7 @@ void PatternLink::check_satisfiability(const OrderedHandleSet& vars,
 	// Compute the set-union of all component vars.
 	OrderedHandleSet vunion;
 	for (const OrderedHandleSet& vset : compvars)
-	{
-		for (const Handle& v : vset)
-			vunion.insert(v);
-	}
+		vunion.insert(vset.begin(), vset.end());
 
 	// Is every variable in some component? If not, then throw.
 	for (const Handle& v : vars)
@@ -847,9 +841,9 @@ void PatternLink::check_satisfiability(const OrderedHandleSet& vars,
 	}
 }
 
-// Hack alert: Definitely it should not be here. Though some refactoring
+// Hack alert: The line below should not be here. Though some refactoring
 // regarding shared libraries circular dependencies (liblambda and libquery)
-// need to be done before fixing...
+// needs to be done before this becomes fixable...
 const PatternTermPtr PatternTerm::UNDEFINED(std::make_shared<PatternTerm>());
 
 void PatternLink::make_term_trees()
@@ -865,35 +859,18 @@ void PatternLink::make_term_tree_recursive(const Handle& root,
                                            Handle h,
                                            PatternTermPtr& parent)
 {
-	Type t = h->getType();
-
-	// Ignore quoting and unquoting nodes in the PatternTerm
-	if ((not parent->isQuoted() and QUOTE_LINK == t)
-	    or (parent->getQuotationLevel() == 1 and UNQUOTE_LINK == t)) {
-		if (1 != h->getArity())
-			throw InvalidParamException(TRACE_INFO,
-			                            "QuoteLink/UnquoteLink has "
-			                            "unexpected arity!");
-		h = h->getOutgoingAtom(0);
-	}
-
 	PatternTermPtr ptm(std::make_shared<PatternTerm>(parent, h));
+	h = ptm->getHandle();
 	parent->addOutgoingTerm(ptm);
 	_pat.connected_terms_map[{h, root}].emplace_back(ptm);
-
-	// Update the PatternTerm quotation level
-	if (QUOTE_LINK == t)
-		ptm->addQuote();
-	else if (UNQUOTE_LINK == t)
-		ptm->remQuote();
 
 	// If the current node is a bound variable store this information for
 	// later checks. The flag telling whether the term subtree contains
 	// any bound variable is set by addBoundVariable() method for all terms
 	// on the path up to the root (unless it has been set already).
-	t = h->getType();
+	Type t = h->getType();
 	if ((VARIABLE_NODE == t or GLOB_NODE == t)
-	    and not ptm->isQuoted()
+	    and not ptm->getQuotation().is_quoted()
 	    and _varlist.varset.end() != _varlist.varset.find(h))
 	{
 		ptm->addBoundVariable();
@@ -987,6 +964,38 @@ void PatternLink::debug_log(void) const
 
 	if (_varlist.varset.empty())
 		logger().fine("There are no bound vars in this pattern");
+}
+
+/* ================================================================= */
+
+PatternLinkPtr PatternLink::factory(const Handle& h)
+{
+	// If h is of the right form already, its just a matter of calling
+	// it.  Otherwise, we have to create
+	PatternLinkPtr plp(PatternLinkCast(h));
+	if (plp) return plp;
+
+	if (nullptr == h)
+		throw RuntimeException(TRACE_INFO, "Null pointer exception!");
+
+	return factory(h->getType(), h->getOutgoingSet());
+}
+
+// Basic type factory.
+PatternLinkPtr PatternLink::factory(Type t, const HandleSeq& seq)
+{
+	if (BIND_LINK == t)
+		return createBindLink(seq);
+	if (DUAL_LINK == t)
+		return createDualLink(seq);
+
+	// Handle all of the others
+	if (classserver().isA(t, PATTERN_LINK))
+		return createPatternLink(t, seq);
+
+	throw SyntaxException(TRACE_INFO,
+		"PatternLink is not a factory for %s",
+		classserver().getTypeName(t).c_str());
 }
 
 /* ===================== END OF FILE ===================== */

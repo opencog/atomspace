@@ -1,5 +1,5 @@
 name:                opencog-atomspace
-version:             0.1.0.3
+version:             0.1.0.7
 synopsis:            Haskell Bindings for the AtomSpace.
 description:         This library defines Haskell Bindings for the AtomSpace.
                      .
@@ -32,4 +32,3 @@ library
                    , transformers     >=0.3
 
   extra-libraries:   atomspace-cwrapper
-  ghc-options:       -fcontext-stack=500

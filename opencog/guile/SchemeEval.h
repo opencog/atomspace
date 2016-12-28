@@ -67,8 +67,6 @@ class SchemeEval : public GenericEval
 		void init(void);
 		static void * c_wrap_init(void *);
 		void per_thread_init(void);
-		void thread_lock(void);
-		void thread_unlock(void);
 
 		// Destructor stuff
 		void finish(void);
@@ -89,6 +87,10 @@ class SchemeEval : public GenericEval
 		std::string poll_port();
 		static void * c_wrap_eval(void *);
 		static void * c_wrap_poll(void *);
+
+		// Support for interruption from a shell.
+		SCM _eval_thread;
+		static void * c_wrap_interrupt(void *);
 		
 		// Output port, for any printing done by scheme code.
 		SCM _outport;
@@ -149,9 +151,10 @@ class SchemeEval : public GenericEval
 		static SchemeEval* get_evaluator(AtomSpace* = NULL);
 
 		// The async-output interface.
-		void begin_eval();
+		void begin_eval(void);
 		void eval_expr(const std::string&);
-		std::string poll_result();
+		std::string poll_result(void);
+		void interrupt(void);
 
 		// The synchronous-output interfaces.
 		std::string eval(const std::string& expr)

@@ -24,7 +24,8 @@
 #ifndef _OPENCOG_SQL_PERSIST_SCM_H
 #define _OPENCOG_SQL_PERSIST_SCM_H
 
-#include <vector>
+#ifdef HAVE_GUILE
+
 #include <string>
 
 #include <opencog/atomspace/AtomSpace.h>
@@ -67,5 +68,6 @@ public:
 extern "C" {
 void opencog_persist_sql_init(void);
 };
+#endif // HAVE_GUILE
 
 #endif // _OPENCOG_SQL_PERSIST_SCM_H

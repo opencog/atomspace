@@ -53,13 +53,15 @@ class SQLBackingStore : public BackingStore
         SQLBackingStore();
         void set_store(AtomStorage *);
 
-        virtual NodePtr getNode(Type, const char *) const;
-        virtual LinkPtr getLink(Type, const HandleSeq&) const;
-        virtual AtomPtr getAtom(UUID) const;
-        virtual HandleSeq getIncomingSet(Handle) const;
-        virtual void storeAtom(Handle);
+        virtual Handle getNode(Type, const char *) const;
+        virtual Handle getLink(Handle&) const;
+        virtual HandleSeq getIncomingSet(const Handle&) const;
+        virtual void storeAtom(const Handle&);
         virtual void loadType(AtomTable&, Type);
         virtual void barrier();
+
+        void registerWith(AtomSpace*);
+        void unregisterWith(AtomSpace*);
 };
 
 

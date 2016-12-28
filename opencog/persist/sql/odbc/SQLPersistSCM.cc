@@ -21,6 +21,8 @@
  * 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
  */
 
+#ifdef HAVE_GUILE
+
 #include <opencog/atomspace/AtomSpace.h>
 #include <opencog/atomspace/BackingStore.h>
 #include <opencog/guile/SchemePrimitive.h>
@@ -66,20 +68,16 @@ SQLPersistSCM::SQLPersistSCM(AtomSpace *as)
     _backing->_ignored_types.insert(WORD_INSTANCE_LINK);
 #endif // NLP_HACK
 
-#ifdef HAVE_GUILE
     static bool is_init = false;
     if (is_init) return;
     is_init = true;
     scm_with_guile(init_in_guile, this);
-#endif
 }
 
 void* SQLPersistSCM::init_in_guile(void* self)
 {
-#ifdef HAVE_GUILE
     scm_c_define_module("opencog persist-sql", init_in_module, self);
     scm_c_use_module("opencog persist-sql");
-#endif
     return NULL;
 }
 
@@ -91,12 +89,10 @@ void SQLPersistSCM::init_in_module(void* data)
 
 void SQLPersistSCM::init(void)
 {
-#ifdef HAVE_GUILE
     define_scheme_primitive("sql-open", &SQLPersistSCM::do_open, this, "persist-sql");
     define_scheme_primitive("sql-close", &SQLPersistSCM::do_close, this, "persist-sql");
     define_scheme_primitive("sql-load", &SQLPersistSCM::do_load, this, "persist-sql");
     define_scheme_primitive("sql-store", &SQLPersistSCM::do_store, this, "persist-sql");
-#endif
 }
 
 SQLPersistSCM::~SQLPersistSCM()
@@ -123,10 +119,8 @@ void SQLPersistSCM::do_open(const std::string& dbname,
 
     _backing->set_store(_store);
     AtomSpace *as = _as;
-#ifdef HAVE_GUILE
     if (NULL == as)
         as = SchemeSmob::ss_get_env_as("sql-open");
-#endif
     _backing->registerWith(as);
 }
 
@@ -137,10 +131,8 @@ void SQLPersistSCM::do_close(void)
              "sql-close: Error: Database not open");
 
     AtomSpace *as = _as;
-#ifdef HAVE_GUILE
     if (NULL == as)
         as = SchemeSmob::ss_get_env_as("sql-close");
-#endif
     _backing->unregisterWith(as);
     _backing->set_store(NULL);
     delete _store;
@@ -154,10 +146,8 @@ void SQLPersistSCM::do_load(void)
             "sql-load: Error: Database not open");
 
     AtomSpace *as = _as;
-#ifdef HAVE_GUILE
     if (NULL == as)
         as = SchemeSmob::ss_get_env_as("sql-load");
-#endif
     // XXX TODO: this should probably be done in a separate thread.
     _store->loadAtomSpace(as);
 }
@@ -170,10 +160,8 @@ void SQLPersistSCM::do_store(void)
             "sql-store: Error: Database not open");
 
     AtomSpace *as = _as;
-#ifdef HAVE_GUILE
     if (NULL == as)
         as = SchemeSmob::ss_get_env_as("sql-store");
-#endif
     // XXX TODO This should really be started in a new thread ...
     _store->storeAtomSpace(as);
 }
@@ -182,3 +170,4 @@ void opencog_persist_sql_init(void)
 {
    static SQLPersistSCM patty(NULL);
 }
+#endif // HAVE_GUILE

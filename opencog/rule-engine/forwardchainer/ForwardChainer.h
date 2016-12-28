@@ -34,19 +34,25 @@ class ForwardChainerUTest;
 namespace opencog
 {
 
-enum class source_selection_mode {
-	TV_FITNESS, STI, UNIFORM
+enum class source_selection_mode
+{
+    TV_FITNESS, STI, UNIFORM
 };
 
-class FCMemory;
 class Rule;
 
-class ForwardChainer {
+class ForwardChainer
+{
 private:
     friend class ::ForwardChainerUTest;
 
     AtomSpace& _as;
-    //This restricts PM to look only in the focus set
+
+    // The focus set is copied into this atomspace; during chaining,
+    // the pattern matcher is applied only to this atomspace.  This
+    // is the primary mechanism by which chaining is restricted to
+    // the focus set.  This is effective, but not very efficient;
+    // perhaps there is some better mechanism?
     AtomSpace _focus_set_as;
 
     URECommons _rec;            // utility class
@@ -60,8 +66,8 @@ private:
     bool _search_focus_set;
     Handle _cur_source;
 
-	// We maintain both a selected and unselected sources to speed up
-	// choose_source
+    // We maintain both selected and unselected sources, to speed up
+    // choose_source()
     UnorderedHandleSet _selected_sources;
     UnorderedHandleSet _unselected_sources;
 
@@ -79,17 +85,19 @@ private:
                                    const OrderedHandleSet& vars,
                                    const HandleMapSeq&
                                    var_groundings);
-    bool unify(const Handle& source, const Handle& pattern, const Rule* rule);
+    bool unify(const Handle& source, const Handle& pattern, const Rule& rule);
     UnorderedHandleSet derive_rules(const Handle& source, const Handle& pattern,
-                                    const Rule* rule);
-	template<typename HandleContainer>
-    void update_potential_sources(const HandleContainer& input) {
-		UnorderedHandleSet input_minus_selected;
-		for (const Handle& h : input)
-			if (_selected_sources.find(h) == _selected_sources.end())
-				input_minus_selected.insert(h);
-		_potential_sources.insert(input_minus_selected.begin(),
-		                          input_minus_selected.end());
+                                    const Rule& rule);
+
+    template<typename HandleContainer>
+    void update_potential_sources(const HandleContainer& input)
+    {
+        UnorderedHandleSet input_minus_selected;
+        for (const Handle& h : input)
+            if (_selected_sources.find(h) == _selected_sources.end())
+                input_minus_selected.insert(h);
+        _potential_sources.insert(input_minus_selected.begin(),
+                                  input_minus_selected.end());
         _unselected_sources.insert(input_minus_selected.begin(),
                                    input_minus_selected.end());
     }
@@ -97,7 +105,7 @@ private:
     void validate(const Handle& hsource, const HandleSeq& hfocus_set);
 
 protected:
-    vector<Rule*> _rules; /*<loaded rules*/
+    RuleSet _rules; /* loaded rules */
     UnorderedHandleSet _potential_sources;
     HandleSeq _focus_set;
 
@@ -106,9 +114,9 @@ protected:
      *
      * @return  A handle to the chosen source from source list
      */
-    virtual Handle choose_source();
+    virtual Handle select_source();
 
-	/**
+    /**
      * Choose an applicable rules from the rule base by selecting
      * rules whose premise structurally matches with the source.
      *
@@ -116,15 +124,15 @@ protected:
      *
      * @return  A rule that in which @param source could ground.
      */
-    virtual Rule* choose_rule(const Handle& hsource);
+    virtual const Rule* select_rule(const Handle& hsource);
 
-	/**
-	 * Apply rule on the current source. Creating derived rules if
-	 * necessary.
-	 */
-    virtual UnorderedHandleSet apply_rule(const Rule* rule);
+    /**
+     * Apply rule on the current source. Create derived rules,
+     * if necessary.
+     */
+    virtual UnorderedHandleSet apply_rule(const Rule& rule);
 
-	/**
+    /**
      * Apply rule handle (BindLink).
      *
      * @return  A set of handles created as a result of applying current
@@ -132,7 +140,7 @@ protected:
      */
     virtual HandleSeq apply_rule(const Handle& rhandle);
 
-    UnorderedHandleSet derive_rules(const Handle& source, const Rule* rule);
+    UnorderedHandleSet derive_rules(const Handle& source, const Rule& rule);
 
 public:
     /**

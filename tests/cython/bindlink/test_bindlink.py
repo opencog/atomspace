@@ -8,8 +8,8 @@ from opencog.bindlink import stub_bindlink, bindlink, single_bindlink,\
                              satisfying_element, first_n_satisfying_set, \
                              execute_atom, evaluate_atom
 
-from opencog.utilities import initialize_opencog, finalize_opencog
 from opencog.type_constructors import *
+from opencog.utilities import initialize_opencog, finalize_opencog
 
 from test_functions import green_count, red_count
 

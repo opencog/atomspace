@@ -31,12 +31,6 @@ AtomSpace is a wrapper around the AtomTable, it can go off to other
 machines to fetch (and store) atoms if they are not in the local
 AtomTable.
 
-The distributed AtomSpace uses UUID's (universally unique identifiers)
-to uniquely identify an atom. Due to a historical accident, the UUID's
-are stored both in a Handle and in the Atom it refers to. The seems to
-be a design error: Handles should not store UUID's; Handles should be
-be just a synonym for AtomPtr.  Fixing this will take a lot of work.
-
 Multiple AtomSpaces can be used simultaneously, and AtomSpaces can be
 created in a hierarchical fashion.  Thus, the AtomSpace can be thought
 of as an "environment" (kind-of like the environment in bash, but

@@ -28,12 +28,12 @@
  * 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
  */
 
+#include <opencog/atoms/base/atom_types.h>
 #include <opencog/atoms/base/Atom.h>
 #include <opencog/atoms/base/Link.h>
 #include <opencog/atoms/base/Node.h>
 #include <opencog/truthvalue/SimpleTruthValue.h>
-#include <opencog/atomspace/TLB.h>
-#include <opencog/atoms/base/atom_types.h>
+#include <opencog/atomspaceutils/TLB.h>
 #include <opencog/persist/sql/odbc/ODBCAtomStorage.h>
 #include <opencog/persist/sql/odbc/SQLPersistSCM.h>
 
@@ -98,8 +98,9 @@ class PersistUTest :  public CxxTest::TestSuite
         }
 
         void add_to_space(int, AtomSpace *, std::string id);
-        void check_space(int, AtomSpace *);
+        void check_space(int, AtomSpace *, std::string dbgmsg);
         void check_empty(int, AtomSpace *);
+        void atomCompare(AtomPtr, AtomPtr, std::string);
 
         void test_atomspace(void);
 };
@@ -183,10 +184,12 @@ void PersistUTest::kill_data(void)
 
 // ============================================================
 
-static void atomCompare(AtomPtr a, AtomPtr b)
+void PersistUTest::atomCompare(AtomPtr a, AtomPtr b, std::string where)
 {
-    TSM_ASSERT("No atom found", b != NULL);
-    if (NULL == b) return;
+    printf("Check %s expect %s\n", where.c_str(), a->toString().c_str());
+    TSM_ASSERT("No atom found", b != nullptr);
+
+    if (nullptr == b) return;
 
     TSM_ASSERT_EQUALS("Type mismatch", a->getType(), b->getType());
 
@@ -264,6 +267,7 @@ void PersistUTest::add_to_space(int idx, AtomSpace *as, std::string id)
     hvec.push_back(h3[idx]);
     hvec.push_back(h4[idx]);
 
+    // Note that SetLink is an unordered link.
     hl[idx] = as->add_link(SET_LINK, hvec);
     l[idx] = LinkCast(hl[idx]);
 
@@ -274,19 +278,19 @@ void PersistUTest::add_to_space(int idx, AtomSpace *as, std::string id)
     l3[idx] = LinkCast(hl3[idx]);
 }
 
-void PersistUTest::check_space(int idx, AtomSpace *space)
+void PersistUTest::check_space(int idx, AtomSpace *space, std::string dbgmsg)
 {
     Handle hb1 = space->get_handle(n1[idx]->getType(), n1[idx]->getName());
-    atomCompare(h1[idx], hb1);
+    atomCompare(h1[idx], hb1, dbgmsg + "-hb1");
 
     Handle hb2 = space->get_handle(n2[idx]->getType(), n2[idx]->getName());
-    atomCompare(h2[idx], hb2);
+    atomCompare(h2[idx], hb2, dbgmsg + "-hb2");
 
     Handle hb3 = space->get_handle(n3[idx]->getType(), n3[idx]->getName());
-    atomCompare(h3[idx], hb3);
+    atomCompare(h3[idx], hb3, dbgmsg + "-hb3");
 
     Handle hb4 = space->get_handle(n4[idx]->getType(), n4[idx]->getName());
-    atomCompare(h4[idx], hb4);
+    atomCompare(h4[idx], hb4, dbgmsg + "-hb4");
 
     HandleSeq hvec;
     hvec.push_back(hb1);
@@ -295,15 +299,15 @@ void PersistUTest::check_space(int idx, AtomSpace *space)
     hvec.push_back(hb4);
 
     Handle hlb = space->get_handle(hl[idx]->getType(), hvec);
-    atomCompare(hl[idx], hlb);
+    atomCompare(hl[idx], hlb, dbgmsg + "-hlinkb");
 
     HandleSeq hv2({hlb, hb2});
     Handle hlb2 = space->get_handle(hl2[idx]->getType(), hv2);
-    atomCompare(hl2[idx], hlb2);
+    atomCompare(hl2[idx], hlb2, dbgmsg + "-hlinkb2");
 
     HandleSeq hv3({hb1, hlb2, hb3});
     Handle hlb3 = space->get_handle(hl3[idx]->getType(), hv3);
-    atomCompare(hl3[idx], hlb3);
+    atomCompare(hl3[idx], hlb3, dbgmsg + "-hlinkb3");
 }
 
 void PersistUTest::check_empty(int idx, AtomSpace *space)
@@ -351,18 +355,18 @@ void PersistUTest::test_atomspace(void)
 
     /* Verify that the atoms were added */
     idx = 0;
-    check_space(idx++, _as);
-    check_space(idx++, _as);
-    check_space(idx++, _as);
-    check_space(idx++, _as);
-    check_space(idx++, _as);
+    check_space(idx++, _as, "verify-add");
+    check_space(idx++, _as, "verify-add");
+    check_space(idx++, _as, "verify-add");
+    check_space(idx++, _as, "verify-add");
+    check_space(idx++, _as, "verify-add");
 
     /* Push all atoms out to the SQL DB */
     _pm->do_store();
 
     /* Extract atoms from the AtomSpace. This does not delete them from
      * the SQL storage, though; to do that, they must be deleted, not
-     * extractd.
+     * extracted.
      */
     _as->barrier();
     _as->clear();
@@ -370,11 +374,11 @@ void PersistUTest::test_atomspace(void)
 
     /* Verify that the atoms can still be fetched from storage. */
     idx = 0;
-    check_space(idx++, _as);
-    check_space(idx++, _as);
-    check_space(idx++, _as);
-    check_space(idx++, _as);
-    check_space(idx++, _as);
+    check_space(idx++, _as, "verify-fetch");
+    check_space(idx++, _as, "verify-fetch");
+    check_space(idx++, _as, "verify-fetch");
+    check_space(idx++, _as, "verify-fetch");
+    check_space(idx++, _as, "verify-fetch");
 
     /* Do it again, for good luck.  */
     _as->clear();
@@ -382,11 +386,11 @@ void PersistUTest::test_atomspace(void)
 
     /* Verify that the atoms can still be fetched from storage. */
     idx = 0;
-    check_space(idx++, _as);
-    check_space(idx++, _as);
-    check_space(idx++, _as);
-    check_space(idx++, _as);
-    check_space(idx++, _as);
+    check_space(idx++, _as, "ver-again");
+    check_space(idx++, _as, "ver-again");
+    check_space(idx++, _as, "ver-again");
+    check_space(idx++, _as, "ver-again");
+    check_space(idx++, _as, "ver-again");
 
     /* Kill data for good */
     _as->clear();

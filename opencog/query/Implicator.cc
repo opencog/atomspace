@@ -49,8 +49,16 @@ bool Implicator::grounding(const HandleMap &var_soln,
 	if (_result_set.size() >= max_results)
 		return true;
 
-	Handle h = inst.instantiate(implicand, var_soln);
-	insert_result(h);
+	// Ignore the case where PLN is wants to create badly-formed
+	// ImplicationLinks on purpose. This is actually a PLN bug,
+	// See issue #950 and pull req #962.  That is, we should NOT
+	// use a try-catch here to mask out user-errors -- user errors
+	// really should be reported to the user. But for now, this is
+	// needed. XXX FIXME later.
+	try {
+		Handle h = inst.instantiate(implicand, var_soln);
+		insert_result(h);
+	} catch(...) {}
 
 	// If we found as many as we want, then stop looking for more.
 	return (_result_set.size() >= max_results);

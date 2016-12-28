@@ -24,7 +24,7 @@
 #define _OPENCOG_IMPORTANCEINDEX_H
 
 #include <opencog/truthvalue/AttentionValue.h>
-#include <opencog/atomspace/FixedIntegerIndex.h>
+#include <opencog/atomspace/ThreadSafeFixedIntegerIndex.h>
 
 namespace opencog
 {
@@ -32,15 +32,16 @@ namespace opencog
  *  @{
  */
 
-class AtomTable;
-
 /**
- * Implements an index with additional routines needed for managing 
+ * Implements an index with additional routines needed for managing
  * short-term importance.  This index is not thread-safe, by itself.
  * Users of this class must gauarantee single-threaded access!
  */
-class ImportanceIndex: public FixedIntegerIndex
+class ImportanceIndex
 {
+private:
+    ThreadSafeFixedIntegerIndex _index;
+
 public:
     ImportanceIndex(void);
     void insertAtom(Atom*);
@@ -54,10 +55,9 @@ public:
      * @param The old importance bin where the atom originally was.
      */
     void updateImportance(Atom*, int);
-    
-    UnorderedHandleSet getHandleSet(const AtomTable*,
-                              AttentionValue::sti_t,
-                              AttentionValue::sti_t) const;
+
+    UnorderedHandleSet getHandleSet(AttentionValue::sti_t,
+                                    AttentionValue::sti_t) const;
 
     /**
      * This method returns which importance bin an atom with the given
@@ -68,6 +68,21 @@ public:
      * should be placed.
      */
     static unsigned int importanceBin(short);
+
+    /**
+     * Get the highest bin which containsAtoms
+     */
+    UnorderedHandleSet getMaxBinContents();
+
+    /**
+     * Get the lowest bin which containsAtoms
+     */
+    UnorderedHandleSet getMinBinContents();
+ 
+    /**
+     * Get the size of the bin at the given index.
+     */
+    size_t size(int) const;
 };
 
 /** @}*/

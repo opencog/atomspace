@@ -21,6 +21,31 @@
  * 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
  */
 
+#include <opencog/guile/SchemeModule.h>
+
+namespace opencog {
+
+class InferenceSCM : public ModuleWrap
+{
+protected:
+	virtual void init();
+
+	Handle do_forward_chaining(Handle h,
+	                           Handle rbs,
+	                           Handle hfocus_set);
+
+	Handle do_backward_chaining(Handle h,
+	                            Handle rbs,
+	                            Handle hfocus_set);
+
+	Handle get_rulebase_rules(Handle rbs);
+
+public:
+	InferenceSCM();
+};
+
+} /*end of namespace opencog*/
+
 #include <opencog/atomspace/AtomSpace.h>
 #include <opencog/guile/SchemePrimitive.h>
 
@@ -28,7 +53,6 @@
 #include <opencog/rule-engine/backwardchainer/BackwardChainer.h>
 
 #include "UREConfigReader.h"
-#include "InferenceSCM.h"
 using namespace opencog;
 
 InferenceSCM::InferenceSCM() : ModuleWrap("opencog rule-engine") {}
@@ -47,19 +71,17 @@ void InferenceSCM::init(void)
 		&InferenceSCM::get_rulebase_rules, this, "rule-engine");
 }
 
-namespace opencog {
-
 /**
- * A scheme cog-fc call back handler method which invokes the forward
- * chainer with the arguments passed to cog-fc.
+ * The scheme (cog-fc) function calls this, to perform forward-chaining.
  *
- * @param hsource      The source atom to start the forward chaining with.
- * @param rbs          A handle to the rule base ConceptNode.
- * @param hfoucs_set   A handle to a set link containing the set of focus sets.
- *                     if the set link is empty, FC will be invoked on the entire
+ * @param hsource      The source atom with which to start the chaining.
+ * @param rbs          A node, holding the name of the rulebase.
+ * @param hfoucs_set   A SetLink containing the atoms to which forward
+ *                     chaining will be applied.  If the set link is
+ *                     empty, chaining will be invoked on the entire
  *                     atomspace.
  *
- * @return             A ListLink containing the result of FC inference.
+ * @return             A SetLink containing the results of FC inference.
  */
 Handle InferenceSCM::do_forward_chaining(Handle hsource,
                                          Handle rbs,
@@ -91,29 +113,18 @@ Handle InferenceSCM::do_backward_chaining(Handle h,
             "InferenceSCM::do_backward_chaining - invalid rulebase!");
 
     AtomSpace *as = SchemeSmob::ss_get_env_as("cog-bc");
-    BackwardChainer bc(*as, rbs);
-    bc.set_target(h, focus_link);
-
-    logger().debug("[BackwardChainer] Before do_chain");
+    BackwardChainer bc(*as, rbs, h,
+                       Handle::UNDEFINED /*TODO support vardecl*/,
+                       focus_link);
 
     bc.do_chain();
 
-    logger().debug("[BackwardChainer] After do_chain");
-    HandleMultimap soln = bc.get_chaining_result();
-
-    HandleSeq soln_list_link;
-    for (auto it = soln.begin(); it != soln.end(); ++it) {
-        HandleSeq hs;
-        hs.push_back(it->first);
-        hs.insert(hs.end(), it->second.begin(), it->second.end());
-
-        soln_list_link.push_back(as->add_link(LIST_LINK, hs));
-    }
-
-    return as->add_link(LIST_LINK, soln_list_link);
+    return bc.get_results();
 }
 
-HandleSeq InferenceSCM::get_rulebase_rules(Handle rbs)
+// XXX FIXME -- this appears to be dead code, that no one uses.
+// Can this be removed?
+Handle InferenceSCM::get_rulebase_rules(Handle rbs)
 {
     if (Handle::UNDEFINED == rbs)
         throw RuntimeException(TRACE_INFO,
@@ -124,18 +135,18 @@ HandleSeq InferenceSCM::get_rulebase_rules(Handle rbs)
     auto rules = ure_config.get_rules();
     HandleSeq hs;
 
-    // Copy handles from a rule vector to a handle vector as there are no
-    // scheme-primitive signature for rule vector.
-    // TODO: create a rule-vector scheme-primitive signature, if Rule.h isn't
-    // converted to a sub-class of PatternLink.
+    // Copy handles from a rule vector to a handle vector
     for (auto i = rules.begin(); i != rules.end(); i++){
         hs.push_back((*i).get_alias());
     }
 
-    return hs;
+    return Handle(createLink(SET_LINK, hs));
 }
 
-}
+
+extern "C" {
+void opencog_ruleengine_init(void);
+};
 
 void opencog_ruleengine_init(void)
 {

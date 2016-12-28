@@ -379,6 +379,23 @@
         guile> (cog-new-stv 0.7 0.9)
 ")
 
+(set-procedure-property! cog-new-etv 'documentation
+"
+ cog-new-etv POSITIVE-COUNT TOTAL-COUNT
+    Create an EvidenceCountTruthValue with the given POSITIVE-COUNT
+    and TOTAL-COUNT. Unlike atoms, truth values are ephemeral: they are
+    automatically garbage-collected when no longer needed.
+
+    The total count is optional in the sense that any value below the
+    positive count will be considered undefined.
+
+    Throws errors if positive-count and total-count are not
+    floating-point values.
+    Example:
+        ; Create a new simple truth value:
+        guile> (cog-new-etv 100 150)
+")
+
 (set-procedure-property! cog-new-ctv 'documentation
 "
  cog-new-ctv MEAN CONFIDENCE COUNT

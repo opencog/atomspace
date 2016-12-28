@@ -41,49 +41,6 @@ BackwardChainerPMCB::~BackwardChainerPMCB()
 {
 }
 
-bool BackwardChainerPMCB::node_match(const Handle& npat_h, const Handle& nsoln_h)
-{
-	if (npat_h == nsoln_h)
-		return true;
-
-	// The name of the non-variable VariableNode does not matter.
-	// This allows treating
-	//
-	//   SatisfyingSetLink
-	//      VariableNode $X
-	//      EvaluationLink
-	//         eat
-	//         ListLink
-	//            $X
-	//            birds
-	//
-	// to be the same as
-	//
-	//   SatisfyingSetLink
-	//      VariableNode $Y
-	//      EvaluationLink
-	//         eat
-	//         ListLink
-	//            $Y
-	//            birds
-	//
-	// although PM will still returns more than one solution.
-	//
-	// This is for PLN's member-to-evaluation-rule, which contains a
-	// non-variable VariableNode that should be matched to all other
-	// VariableNode no matter the name.
-	//
-	// XXX this is not needed when VariableNode is correctly implemented to be
-	//     unique
-	// XXX TODO this is making VariableNode self-grounding awkward to implement
-	if (not _enable_var_name_check
-	        && npat_h->getType() == VARIABLE_NODE
-	        && nsoln_h->getType() == VARIABLE_NODE)
-		return true;
-
-	return false;
-}
-
 bool BackwardChainerPMCB::grounding(const HandleMap &var_soln,
                                     const HandleMap &pred_soln)
 {

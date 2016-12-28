@@ -44,6 +44,8 @@
 ; -- cartesian-prod -- create Cartesian product from tuple of sets.
 ; -- cartesian-prod-list-only -- Alternative version of cartesian-prod.
 ; -- approx-eq? -- Test equality of 2 floats up to an epsilon
+; -- bool->tv -- Convert #t to TRUE_TV and #f to FALSE_TV
+; -- tv->bool -- Convert TRUE_TV to #t, anything else to #f
 ; -- cog-equal? -- Test equality of 2 atoms and returns TRUE_TV/FALSE_TV
 ; -- max-element-by-key -- Get maximum element in a list
 ; -- min-element-by-key -- Get maximum element in a list
@@ -72,6 +74,7 @@
 (define-public (ctv mean conf count) (cog-new-ctv mean conf count))
 (define-public (ptv mean conf count) (cog-new-ptv mean conf count))
 (define-public (ftv mean conf) (cog-new-ftv mean conf))
+(define-public (etv pos-count total-count) (cog-new-etv pos-count total-count))
 
 ; Fetch the mean, confidence and count of a TV.
 (define-public (tv-mean tv)
@@ -85,6 +88,13 @@
   Return the floating-point confidence of a TruthValue.
 "
 	(assoc-ref (cog-tv->alist tv) 'confidence))
+
+(define-public (tv-positive-conf? tv)
+"
+  Return #t if the confidence of tv is non null positive, #f otherwise.
+"
+	(< (tv-conf tv) 0))
+
 ;
 ; Simple truth values won't have a count. Its faster to just check
 ; for #f than to call (cog-ctv? tv)
@@ -96,6 +106,44 @@
 	(if (eq? cnt #f) 0 cnt)
 )
 
+(define-public (tv-positive-count tv)
+"
+  Return the floating-point positive count of a EvidenceCountTruthValue.
+"
+	(define pos-cnt (assoc-ref (cog-tv->alist tv) 'positive-count))
+	(if (eq? pos-cnt #f) 0 pos-cnt)
+)
+
+; -----------------------------------------------------------------------
+(define-public (cog-set-sti! atom sti)
+"
+  Returns the atom after setting its sti to the given value.
+"
+    (let ((av-alist (cog-av->alist (cog-av atom))))
+        (cog-set-av! atom
+            (av sti (assoc-ref av-alist 'lti) (assoc-ref av-alist 'vlti)))
+    )
+)
+
+(define-public (cog-set-lti! atom lti)
+"
+  Returns the atom after setting its lti to the given value.
+"
+    (let ((av-alist (cog-av->alist (cog-av atom))))
+        (cog-set-av! atom
+            (av (assoc-ref av-alist 'sti) lti (assoc-ref av-alist 'vlti)))
+    )
+)
+
+(define-public (cog-set-vlti! atom vlti)
+"
+  Returns the atom after setting its vlti to the given value.
+"
+    (let ((av-alist (cog-av->alist (cog-av atom))))
+        (cog-set-av! atom
+            (av (assoc-ref av-alist 'sti) (assoc-ref av-alist 'lti) vlti))
+    )
+)
 ; -----------------------------------------------------------------------
 ; Analogs of car, cdr, etc. but for atoms.
 ; (define (gar x) (if (cog-atom? x) (car (cog-outgoing-set x)) (car x)))
@@ -104,7 +152,7 @@
 (define-public (gar LINK)
 "
   gar LINK - return first element of a Link atom.
-  Return null if teh LINK is empty.
+  Return null if the LINK is empty.
 "
 	(define oset (cog-outgoing-set LINK))
 	(if (null? oset) '() (car oset)) )
@@ -112,7 +160,7 @@
 (define-public (gdr LINK)
 "
   gdr LINK - return second element of a Link atom.
-  Return null if teh LINK is empty or has only one element.
+  Return null if the LINK is empty or has only one element.
 "
 	(define oset (cog-outgoing-set LINK))
 	(if (null? oset) '()
@@ -284,26 +332,18 @@
 "
   cog-prt-atomspace -- Prints all atoms in the atomspace
 
-  This will print all of the atoms in the atomspace: specifically, only those
-  atoms that have no incoming set, and thus are at the top of a hierarchy.
-  All other atoms (those which do have an incoming set) then appear somewhere
-  underneath these top-most atoms.
-
-  Example usage:
-  (display (cog-get-atoms 'ConceptNode))
-  will return and display all atoms of type 'ConceptNode
+  This will print all of the atoms in the atomspace: specifically, only
+  those atoms that have no incoming set, and thus are at the top of a
+  tree.  All other atoms (those which do have an incoming set) will
+  appear somewhere underneath these top-most atoms.
 "
 	(define (prt-atom h)
-		; print only the top-level atoms.
+		; Print only the top-level atoms.
 		(if (null? (cog-incoming-set h))
 			(display h))
-	#f)
-	(define (prt-type type)
-		(cog-map-type prt-atom type)
-		; We have to recurse over sub-types
-		(for-each prt-type (cog-get-subtypes type))
-	)
-	(prt-type 'Atom)
+		#f)
+
+	(for-each (lambda (ty) (cog-map-type prt-atom ty)) (cog-get-types))
 )
 
 ; -----------------------------------------------------------------------
@@ -996,16 +1036,31 @@
 	)
 )
 
+(define-public (bool->tv b)
+"
+  Convert #t to TRUE_TV and #f to FALSE_TV
+"
+    (if b
+        (stv 1 1)
+        (stv 0 1)
+    )
+)
+
+(define-public (tv->bool tv)
+"
+  Convert TRUE_TV to #t, anything else to #f
+"
+    (if (equal? (stv 1 1) tv)
+        #t
+        #f))
+
 ; ---------------------------------------------------------------------
 (define-public (cog-equal? atom-1 atom-2)
 "
   Checks whether two nodes are equal. If they are equal then it will return
   TRUE_TV else it returns FALSE_TV.
 "
-    (if (equal? atom-1 atom-2)
-        (stv 1 1)
-        (stv 0 1)
-    )
+    (bool->tv (equal? atom-1 atom-2))
 )
 
 ; ---------------------------------------------------------------------
@@ -1181,9 +1236,14 @@
 'stv
 'itv
 'ctv
+'etv
 'tv-mean
 'tv-conf
+'tv-positive-conf?
 'tv-count
+'cog-set-sti!
+'cog-set-lti!
+'cog-set-vlti!
 'gar
 'gdr
 'gadr
@@ -1218,10 +1278,13 @@
 'cog-get-link
 'cog-get-pred
 'cog-get-reference
+'cog-get-trunk
 'filter-hypergraph
 'cartesian-prod
 'cartesian-prod-list-only
 'approx-eq?
+'bool->tv
+'tv->bool
 'cog-equal?
 'min-element-by-key
 'max-element-by-key

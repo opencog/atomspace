@@ -30,7 +30,6 @@
 (use-modules (opencog))
 (use-modules (opencog persist))
 (use-modules (opencog persist-sql))
-(load-from-path "utilities.scm")
 
 ; The below should throw an exception, since the database is not yet
 ; open.

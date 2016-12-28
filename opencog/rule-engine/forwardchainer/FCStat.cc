@@ -27,15 +27,15 @@
 using namespace opencog;
 
 void FCStat::add_inference_record(unsigned iteration, Handle source,
-                                  const Rule* rule,
+                                  const Rule& rule,
                                   const UnorderedHandleSet& product)
 {
 	_inf_rec.emplace_back(source, rule, product);
 
 	for (const Handle& p : product)
 		_as.add_link(EXECUTION_LINK,
-		             rule->get_alias(),
-		             _as.add_node(NUMBER_NODE, to_string(iteration)),
+		             rule.get_alias(),
+		             _as.add_node(NUMBER_NODE, std::to_string(iteration)),
 		             source, p);
 }
 

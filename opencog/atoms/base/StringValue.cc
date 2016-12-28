@@ -32,7 +32,7 @@ bool StringValue::operator==(const ProtoAtom& other) const
 
 // ==============================================================
 
-std::string StringValue::toString(const std::string& indent)
+std::string StringValue::toString(const std::string& indent) const
 {
 	std::string rv = indent + "(StringValue";
 	for (std::string v :_value)

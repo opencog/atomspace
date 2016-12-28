@@ -37,7 +37,7 @@
 #include <opencog/guile/SchemeEval.h>
 #include <opencog/query/BindLinkAPI.h>
 
-#include "Eager.h"
+#include "Force.h"
 #include "EvaluationLink.h"
 
 using namespace opencog;
@@ -510,28 +510,32 @@ TruthValuePtr EvaluationLink::do_evaluate(AtomSpace* as, const HandleSeq& sna)
 TruthValuePtr EvaluationLink::do_evaluate(AtomSpace* as,
                                     const Handle& pn, const Handle& cargs)
 {
-	if (LIST_LINK != cargs->getType())
-	{
-		throw RuntimeException(TRACE_INFO,
-			"Expecting arguments to EvaluationLink!");
-	}
-
 	Type pntype = pn->getType();
 	if (DEFINED_PREDICATE_NODE == pntype)
 	{
 		Handle defn = DefineLink::get_definition(pn);
+		Type dtype = defn->getType();
+
+		// Allow recursive definitions. This can be handy.
+		while (DEFINED_PREDICATE_NODE == dtype)
+		{
+			defn = DefineLink::get_definition(defn);
+			dtype = defn->getType();
+		}
 
 		// If its not a LambdaLink, then I don't know what to do...
-		Type dtype = defn->getType();
 		if (LAMBDA_LINK != dtype)
 			throw RuntimeException(TRACE_INFO,
-				"Expecting defintion to be a LambdaLink, got %s",
+				"Expecting definition to be a LambdaLink, got %s",
 				defn->toString().c_str());
 
 		// Treat it as if it were a PutLink -- perform the
 		// beta-reduction, and evaluate the result.
 		LambdaLinkPtr lam(LambdaLinkCast(defn));
-		Handle reduct = lam->substitute(cargs->getOutgoingSet());
+		Type atype = cargs->getType();
+		Handle reduct = lam->substitute(atype == LIST_LINK ?
+		                                cargs->getOutgoingSet()
+		                                : HandleSeq(1, cargs));
 		return do_evaluate(as, reduct);
 	}
 
@@ -541,12 +545,12 @@ TruthValuePtr EvaluationLink::do_evaluate(AtomSpace* as,
 		throw NotEvaluatableException();
 	}
 
-	// Perform eager execution of the arguments. We have to do this,
-	// because the user-defined functions are black-boxes, and cannot
-	// be trusted to do lazy execution correctly. Right now, this is
-	// the policy. I guess we could add "scm-lazy:" and "py-lazy:" URI's
-	// for user-defined functions smart enough to do lazy evaluation.
-	Handle args = eager_execute(as, cargs);
+	// Force execution of the arguments. We have to do this, because
+	// the user-defined functions are black-boxes, and cannot be trusted
+	// to do lazy execution correctly. Right now, forcing is the policy.
+	// We could add "scm-lazy:" and "py-lazy:" URI's for user-defined
+	// functions smart enough to do lazy evaluation.
+	Handle args = force_execute(as, cargs);
 
 	// Get the schema name.
 	const std::string& schema = pn->getName();

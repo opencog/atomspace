@@ -59,7 +59,7 @@ bool Satisfier::search_finished(bool done)
 	// If there were no variables to be grounded, we have nothing to do.
 	if (not _have_variables) return done;
 
-	// If there was a grounding, then don't don't re-run; we're here
+	// If there was a grounding, then don't re-run; we're here
 	// only to handle the no-groundings case.
 	if (TruthValue::TRUE_TV() == _result) return done;
 
@@ -67,8 +67,13 @@ bool Satisfier::search_finished(bool done)
 	// was grounded. Ergo, its not the no-grounding case.
 	if (_optionals_present) return done;
 
-	// Evaluating the pattern bod only makes sense if it is sequential
-	// (ordered) -- if the body is an unordered AdLik, or if its a
+	// Multi-component patterns will not have distinct bodies.
+	// A failure to match one of the components is benign, and is
+	// treated appropriately upstream. Just return.
+	if (nullptr == _pattern_body) return done;
+
+	// Evaluating the pattern body only makes sense if it is sequential
+	// (ordered) -- if the body is an unordered AndLink, or if its a
 	// ChoiceLink, etc, this makes no sense.
 	Type btype = _pattern_body->getType();
 	if (SEQUENTIAL_AND_LINK != btype and SEQUENTIAL_OR_LINK != btype)
@@ -87,7 +92,7 @@ bool Satisfier::search_finished(bool done)
 bool SatisfyingSet::grounding(const HandleMap &var_soln,
                               const HandleMap &term_soln)
 {
-	// PatternMatchEngine::print_solution(var_soln, term_soln);
+	// PatternMatchEngine::log_solution(var_soln, term_soln);
 
 	// Do not accept new solution if maximum number has been already reached
 	if (_satisfying_set.size() >= max_results)

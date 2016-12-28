@@ -37,9 +37,6 @@ INSTALL (FILES
 	DefaultPatternMatchCB.h
 	Implicator.h
 	InitiateSearchCB.h
-	Pattern.h
-	PatternTerm.h
-	PatternSCM.h
 	PatternMatchCallback.h
 	PatternMatchEngine.h
 	Satisfier.h

@@ -6,8 +6,6 @@
  * Copyright (c) 2008, 2013, 2014, 2015 Linas Vepstas <linas@linas.org>
  */
 
-#ifdef HAVE_GUILE
-
 #include <cstddef>
 #include <libguile.h>
 
@@ -42,7 +40,17 @@ SCM SchemeSmob::_radix_ten;
 
 void SchemeSmob::init()
 {
-	if (is_inited.test_and_set()) return;
+	static volatile bool done_with_init = false;
+	if (done_with_init) return;
+
+	// Allow only one thread, ever to initialize. Hold off all other
+	// threads until initialization is complete.  This could be done
+	// with mutexes, but atomic test-n-set is easier and faster.
+	if (is_inited.test_and_set())
+	{
+		while (not done_with_init) { usleep(1000); }
+		return;
+	}
 
 	init_smob_type();
 	scm_c_define_module("opencog", module_init, NULL);
@@ -51,6 +59,10 @@ void SchemeSmob::init()
 	atomspace_fluid = scm_make_fluid();
 	atomspace_fluid = scm_permanent_object(atomspace_fluid);
 	_radix_ten = scm_from_int8(10);
+
+	// Tell compiler to set flag dead-last, after above has executed.
+	asm volatile("": : :"memory");
+	done_with_init = true;
 }
 
 SchemeSmob::SchemeSmob()
@@ -148,7 +160,8 @@ SCM SchemeSmob::equalp_misc(SCM a, SCM b)
 /* ============================================================== */
 
 [[ noreturn ]] void SchemeSmob::throw_exception(const std::exception& ex,
-                                                const char *func)
+                                                const char *func,
+                                                SCM args)
 {
 	const char * msg = ex.what();
 	if (msg and msg[0] != 0)
@@ -161,14 +174,28 @@ SCM SchemeSmob::equalp_misc(SCM a, SCM b)
 			logger().error("Guile caught C++ exception: %s", msg);
 		}
 
+		// Hmmm. scm_throw() is supposed to be able to take a list;
+		// however, it gets an "Error while printing exception" if
+		// we do actually pass a list. So hack all messages into a
+		// string.
+		SCM sargs = scm_open_output_string();
+		scm_display(args, sargs);
+		SCM sout = scm_get_output_string(sargs);
+		char * v = scm_to_utf8_string(sout);
+
+		std::string ma = msg;
+		ma += "\nFunction args:\n";
+		ma += v;
+		free(v);
+
 		// scm_misc_error(fe->get_name(), msg, SCM_EOL);
 		scm_throw(
 			scm_from_utf8_symbol("C++-EXCEPTION"),
 			scm_cons(
 				scm_from_utf8_string(func),
 				scm_cons(
-					scm_from_utf8_string(msg),
-					SCM_EOL)));
+					scm_from_utf8_string(ma.c_str()), SCM_EOL)));
+
 		// Hmm. scm_throw never returns.
 	}
 	else
@@ -179,7 +206,7 @@ SCM SchemeSmob::equalp_misc(SCM a, SCM b)
 			scm_from_utf8_symbol("C++ exception"),
 			scm_from_utf8_string(func),
 			scm_from_utf8_string("unknown C++ exception"),
-			SCM_EOL,
+			args,
 			SCM_EOL);
 		// Hmm. scm_error never returns.
 	}
@@ -274,7 +301,9 @@ void SchemeSmob::register_procs()
 	register_proc("cog-type",              1, 0, 0, C(ss_type));
 	register_proc("cog-arity",             1, 0, 0, C(ss_arity));
 	register_proc("cog-incoming-set",      1, 0, 0, C(ss_incoming_set));
+	register_proc("cog-incoming-by-type",  2, 0, 0, C(ss_incoming_by_type));
 	register_proc("cog-outgoing-set",      1, 0, 0, C(ss_outgoing_set));
+	register_proc("cog-outgoing-atom",     2, 0, 0, C(ss_outgoing_atom));
 	register_proc("cog-tv",                1, 0, 0, C(ss_tv));
 	register_proc("cog-av",                1, 0, 0, C(ss_av));
 	register_proc("cog-as",                1, 0, 0, C(ss_as));
@@ -285,12 +314,14 @@ void SchemeSmob::register_procs()
 	register_proc("cog-new-itv",           3, 0, 0, C(ss_new_itv));
 	register_proc("cog-new-ptv",           3, 0, 0, C(ss_new_ptv));
 	register_proc("cog-new-ftv",           2, 0, 0, C(ss_new_ftv));
+	register_proc("cog-new-etv",           2, 0, 0, C(ss_new_etv));
 	register_proc("cog-tv?",               1, 0, 0, C(ss_tv_p));
 	register_proc("cog-stv?",              1, 0, 0, C(ss_stv_p));
 	register_proc("cog-ctv?",              1, 0, 0, C(ss_ctv_p));
 	register_proc("cog-itv?",              1, 0, 0, C(ss_itv_p));
 	register_proc("cog-ptv?",              1, 0, 0, C(ss_ptv_p));
 	register_proc("cog-ftv?",              1, 0, 0, C(ss_ftv_p));
+	register_proc("cog-etv?",              1, 0, 0, C(ss_etv_p));
 	register_proc("cog-tv->alist",         1, 0, 0, C(ss_tv_get_value));
 	register_proc("cog-tv-mean",           1, 0, 0, C(ss_tv_get_mean));
 	register_proc("cog-tv-confidence",     1, 0, 0, C(ss_tv_get_confidence));
@@ -307,6 +338,7 @@ void SchemeSmob::register_procs()
 
 	// Attention values
 	register_proc("cog-new-av",            3, 0, 0, C(ss_new_av));
+	register_proc("cog-stimulate",         2, 0, 0, C(ss_stimulate));
 	register_proc("cog-av?",               1, 0, 0, C(ss_av_p));
 	register_proc("cog-av->alist",         1, 0, 0, C(ss_av_get_value));
 
@@ -339,5 +371,4 @@ void SchemeSmob::register_proc(const char* name, int req, int opt, int rst, scm_
 	scm_c_export(name, NULL);
 }
 
-#endif
 /* ===================== END OF FILE ============================ */

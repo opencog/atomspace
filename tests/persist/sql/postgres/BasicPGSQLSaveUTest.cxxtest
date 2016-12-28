@@ -33,7 +33,7 @@
 #include <opencog/atoms/base/Link.h>
 #include <opencog/atoms/base/Node.h>
 #include <opencog/truthvalue/SimpleTruthValue.h>
-#include <opencog/atomspace/TLB.h>
+#include <opencog/atomspaceutils/TLB.h>
 #include <opencog/atoms/base/atom_types.h>
 #include <opencog/persist/sql/postgres/PGAtomStorage.h>
 
@@ -230,8 +230,7 @@ void BasicSaveUTest::single_atom_save_restore(std::string id)
     AtomPtr a(createNode(SCHEMA_NODE, id + "someNode"));
     TruthValuePtr stv(SimpleTruthValue::createTV(0.55, 0.6));
     a->setTruthValue(stv);
-    TLB::addAtom(a);
-    UUID uuid = a->getUUID();
+    TLB::addAtom(a, TLB::INVALID_UUID);
 
     Handle h = a->getHandle();
 
@@ -241,7 +240,8 @@ void BasicSaveUTest::single_atom_save_restore(std::string id)
     store->storeAtom(a, true);
 
     // Fetch it back ...
-    AtomPtr b = store->getAtom(uuid);
+    std::string nam = id + "someNode";
+    AtomPtr b = store->getNode(SCHEMA_NODE, nam.c_str());
 
     // Are they equal ??
     atomCompare(a, b, "Single node save-restore");
@@ -249,7 +249,7 @@ void BasicSaveUTest::single_atom_save_restore(std::string id)
     // Create a second atom, connect it to the first
     // with a link. Save it, fetch it ... are they equal?
     AtomPtr a2(createNode(SCHEMA_NODE, id + "otherNode"));
-    TLB::addAtom(a2);
+    TLB::addAtom(a2, TLB::INVALID_UUID);
     store->storeAtom(a2, true);
 
     HandleSeq hvec;
@@ -257,11 +257,12 @@ void BasicSaveUTest::single_atom_save_restore(std::string id)
     hvec.push_back(a2->getHandle());
 
     LinkPtr l(createLink(SET_LINK, hvec));
-    TLB::addAtom(l);
+    TLB::addAtom(l, TLB::INVALID_UUID);
     store->storeAtom(l, true);
 
-    UUID ul = l->getUUID();
-    AtomPtr lb = store->getAtom(ul);
+    LinkPtr ll(createLink(SET_LINK, hvec));
+    Handle hl(ll->getHandle());
+    AtomPtr lb = store->getLink(hl);
     atomCompare(l, lb, "Single link save-restore");
 
     store->kill_data();
@@ -313,16 +314,16 @@ void BasicSaveUTest::add_to_table(int idx, AtomTable *table, std::string id)
 
 void BasicSaveUTest::check_table(int idx, AtomTable *table, std::string id)
 {
-    Handle hb1 = table->getHandle(n1[idx]);
+    Handle hb1 = table->getHandle((Handle) n1[idx]);
     atomCompare(a1[idx], hb1, "check_table hb1");
 
-    Handle hb2 = table->getHandle(n2[idx]);
+    Handle hb2 = table->getHandle((Handle) n2[idx]);
     atomCompare(a2[idx], hb2, "check_table hb2");
 
-    Handle hb3 = table->getHandle(n3[idx]);
+    Handle hb3 = table->getHandle((Handle) n3[idx]);
     atomCompare(a3[idx], hb3, "check_table hb3");
 
-    Handle hb4 = table->getHandle(n4[idx]);
+    Handle hb4 = table->getHandle((Handle) n4[idx]);
     atomCompare(a4[idx], hb4, "check_table hb4");
 
     HandleSeq hvec;
@@ -332,7 +333,7 @@ void BasicSaveUTest::check_table(int idx, AtomTable *table, std::string id)
     hvec.push_back(hb4);
 
     LinkPtr lb(createLink(SET_LINK, hvec));
-    Handle hlb = table->getHandle(lb);
+    Handle hlb = table->getHandle((Handle) lb);
     atomCompare(al[idx], hlb, "check_table hlb");
 }
 

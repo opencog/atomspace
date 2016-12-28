@@ -29,7 +29,7 @@
 
 using namespace opencog;
 
-class Disconnected :  public CxxTest::TestSuite
+class DisconnectedUTest :  public CxxTest::TestSuite
 {
 	private:
 		AtomSpace *as;
@@ -37,13 +37,13 @@ class Disconnected :  public CxxTest::TestSuite
 
 	public:
 
-		Disconnected(void)
+		DisconnectedUTest(void)
 		{
 			logger().set_level(Logger::DEBUG);
 			logger().set_print_to_stdout_flag(true);
 		}
 
-		~Disconnected()
+		~DisconnectedUTest()
 		{
 			// Erase the log file if no assertions failed.
 			if (!CxxTest::TestTracker::tracker().suiteFailed())
@@ -63,7 +63,7 @@ class Disconnected :  public CxxTest::TestSuite
  */
 #define an as->add_node
 #define al as->add_link
-void Disconnected::setUp(void)
+void DisconnectedUTest::setUp(void)
 {
 	as = new AtomSpace();
 	eval = new SchemeEval(as);
@@ -73,7 +73,7 @@ void Disconnected::setUp(void)
 	eval->eval("(load-from-path \"tests/query/test_types.scm\")");
 }
 
-void Disconnected::tearDown(void)
+void DisconnectedUTest::tearDown(void)
 {
 	delete as;
 }
@@ -84,7 +84,7 @@ void Disconnected::tearDown(void)
 #define getlink(hand,pos) as->getOutgoing(hand,pos)
 #define getarity(hand) as->getArity(hand)
 
-void Disconnected::test_components(void)
+void DisconnectedUTest::test_components(void)
 {
 	logger().debug("BEGIN TEST: %s", __FUNCTION__);
 
@@ -118,7 +118,7 @@ void Disconnected::test_components(void)
 /*
  * Test several patterns carrying ill-formed variable declarations
  */
-void Disconnected::test_variables(void)
+void DisconnectedUTest::test_variables(void)
 {
 	logger().debug("BEGIN TEST: %s", __FUNCTION__);
 
@@ -173,7 +173,7 @@ void Disconnected::test_variables(void)
 
 // Similar to above, except that the stuff is build up in C++ not in
 // scheme.  See bug #172.
-void Disconnected::test_cvariables(void)
+void DisconnectedUTest::test_cvariables(void)
 {
 	logger().debug("BEGIN TEST: %s", __FUNCTION__);
 

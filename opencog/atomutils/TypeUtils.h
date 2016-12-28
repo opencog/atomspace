@@ -108,6 +108,62 @@ bool type_match(const Handle&, const Handle&);
  */
 Handle type_compose(const Handle&, const Handle&);
 
+/**
+ * Given a variable declaration (VariableList) and a pattern body,
+ * filter out all variables in the declaration that are not present in
+ * the pattern body.
+ *
+ * For instance filter_vardecl applied to
+ *
+ * var_decl
+ * =
+ * (VariableList
+ *    (TypedVariableLink
+ *       (VariableNode "$X")
+ *       (TypeNode "ConceptNode"))
+ *    (TypedVariableLink
+ *       (VariableNode "$Y")
+ *       (TypeNode "ConceptNode")))
+ *
+ * body
+ * =
+ * (InheritanceLink
+ *    (ConceptNode "human")
+ *    (VariableNode "$Y"))
+ *
+ * will return
+ *
+ * (TypedVariableLink
+ *    (VariableNode "$Y")
+ *    (TypeNode "ConceptNode"))
+ *
+ * Special cases:
+ *
+ * 1. The VariableListLink is discarded if the resulting variable
+ *    declaration contains only one variable.
+ *
+ * 2. If nothing is left after filtering it returns Handle::UNDEFINED
+ *
+ * Also, the resulting variable declaration will not be added to any
+ * AtomSpace, it's up to the user to possibly do it.
+ */
+Handle filter_vardecl(const Handle& vardecl, const Handle& body);
+
+/**
+ * Like filter_vardecl(const Handle& vardecl, const Handle& body)
+ * except that the variable needs to be in at least one body of hs.
+ */
+Handle filter_vardecl(const Handle& vardecl, const HandleSeq& hs);
+
+/**
+ * Return shallow type intersection between lhs and rhs. Take into
+ * account type inheritance as well.
+ */
+Type type_intersection(Type lhs, Type rhs);
+std::set<Type> type_intersection(Type lhs, const std::set<Type>& rhs);
+std::set<Type> type_intersection(const std::set<Type>& lhs,
+                                 const std::set<Type>& rhs);
+
 /** @}*/
 }
 

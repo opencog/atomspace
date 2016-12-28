@@ -68,8 +68,8 @@ Atom::~Atom()
         // shared pointers are doing. (Or someone explcitly called the
         // destructor! Which they shouldn't do.)
         OC_ASSERT(0 == getIncomingSet().size(),
-             "Atom deletion failure; incoming set not empty for %s h=%d",
-             classserver().getTypeName(_type).c_str(), _uuid);
+             "Atom deletion failure; incoming set not empty for %s h=%x",
+             classserver().getTypeName(_type).c_str(), get_hash());
     }
     drop_incoming_set();
 }
@@ -110,7 +110,7 @@ void Atom::setTruthValue(TruthValuePtr newTV)
     }
 }
 
-TruthValuePtr Atom::getTruthValue()
+TruthValuePtr Atom::getTruthValue() const
 {
     // OK. The atomic thread-safety of shared-pointers is subtle. See
     // http://www.boost.org/doc/libs/1_53_0/libs/smart_ptr/shared_ptr.htm#ThreadSafety
@@ -152,7 +152,7 @@ void Atom::merge(TruthValuePtr tvn, const MergeCtrl& mc)
 
 // ==============================================================
 
-AttentionValuePtr Atom::getAttentionValue()
+AttentionValuePtr Atom::getAttentionValue() const
 {
     // OK. The atomic thread-safety of shared-pointers is subtle. See
     // http://www.boost.org/doc/libs/1_53_0/libs/smart_ptr/shared_ptr.htm#ThreadSafety
@@ -169,6 +169,7 @@ AttentionValuePtr Atom::getAttentionValue()
     return local;
 }
 
+// XXX TODO This is insane. All this needs to be moved to the attention bank.
 void Atom::setAttentionValue(AttentionValuePtr av)
 {
     // Must obtain a local copy of the AV, since there may be
@@ -193,11 +194,11 @@ void Atom::setAttentionValue(AttentionValuePtr av)
     // If the atom importance has changed its bin,
     // update the importance index.
     if (oldBin != newBin) {
-        _atomTable->updateImportanceIndex(getHandle(), oldBin);
+        _atomTable->getAtomSpace()->updateImportanceIndex(getHandle(), oldBin);
     }
 
     // Notify any interested parties that the AV changed.
-    AVCHSigl& avch = _atomTable->AVChangedSignal();
+    AVCHSigl& avch = _atomTable->getAtomSpace()->getAVChangedSignal();
     avch(getHandle(), local, av);
 }
 
@@ -255,11 +256,6 @@ void Atom::setAtomTable(AtomTable *tb)
     // illegal to just switch membership: one or the other of these two
     // pointers must be null.
     OC_ASSERT (NULL == _atomTable or tb == NULL, "Atom table is not null!");
-    if (NULL != _atomTable) {
-        // Atom is being removed from the atom table.
-        // UUID's belong to the atom table, not the atom. Reclaim it.
-        _uuid = Handle::INVALID_UUID;
-    }
     _atomTable = tb;
 }
 
@@ -316,7 +312,7 @@ void Atom::remove_atom(LinkPtr a)
     _incoming_set->_iset.erase(a);
 }
 
-size_t Atom::getIncomingSetSize()
+size_t Atom::getIncomingSetSize() const
 {
     if (NULL == _incoming_set) return 0;
     std::lock_guard<std::mutex> lck (_mtx);

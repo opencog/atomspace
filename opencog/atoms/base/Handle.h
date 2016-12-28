@@ -27,16 +27,23 @@
 
 #include <iostream>
 #include <climits>
+#include <cstdint>
 #include <functional>
+#include <limits>
+#include <map>
 #include <memory>
 #include <string>
 #include <sstream>
 #include <set>
 #include <unordered_set>
 #include <vector>
-#include <map>
 
 #include <opencog/atoms/base/types.h>
+
+// Comment this out if you want to enforce more determinism in the
+// AtomSpace. For instance atoms are indexed according to content
+// rather address, etc.
+// #define REPRODUCIBLE_ATOMSPACE
 
 /** \addtogroup grp_atomspace
  *  @{
@@ -46,47 +53,37 @@ namespace opencog
 
 //! UUID == Universally Unique Identifier
 typedef unsigned long UUID;
+typedef size_t ContentHash;
 
 class Atom;
-class Handle;
 typedef std::shared_ptr<Atom> AtomPtr;
-class AtomTable;
-class Link;
-typedef std::shared_ptr<Link> LinkPtr;
 
 //! contains an unique identificator
 class Handle
 {
 
 friend class Atom;
-friend class AtomTable;
-friend class AtomStorage;         // persistance
 friend class content_based_atom_ptr_less;
+friend class content_based_handle_less;
 
 private:
     AtomPtr _ptr;
 
     static bool atoms_less(const Atom*, const Atom*);
     static bool content_based_atoms_less(const Atom*, const Atom*);
-    static Handle do_res(UUID);
-    static std::vector<const AtomTable*> _resolver;
-
-    static void set_resolver(const AtomTable*);
-    static void clear_resolver(const AtomTable*);
 
     static const AtomPtr NULL_POINTER;
-public:
 
-    static const UUID INVALID_UUID = ULONG_MAX;
+public:
+    static const ContentHash INVALID_HASH = std::numeric_limits<size_t>::max();
     static const Handle UNDEFINED;
 
     explicit Handle(const AtomPtr& atom) : _ptr(atom) {}
-    explicit Handle(const UUID);
     explicit Handle() {}
     Handle(const Handle& h) : _ptr(h._ptr) {}
     ~Handle() {}
 
-    UUID value(void) const;
+    ContentHash value(void) const;
 
     inline Handle& operator=(const Handle& h) {
         this->_ptr = h._ptr;
@@ -125,11 +122,15 @@ public:
         return _ptr.get();
     }
 
-    inline bool is_defined() {
+    inline const Atom* const_atom_ptr() const {
+        return _ptr.get();
+    }
+
+    inline bool is_defined() const {
         return *this != Handle::UNDEFINED;
     }
 
-    inline bool is_undefined() {
+    inline bool is_undefined() const {
         return *this == Handle::UNDEFINED;
     }
 
@@ -152,25 +153,17 @@ public:
     inline bool operator!=(const Handle& h) const noexcept {
         return _ptr.get() != h._ptr.get();
     }
-#define DEFAULT_ATOMS_LESS atoms_less
-    inline bool operator< (const Handle& h) const noexcept {
-       return DEFAULT_ATOMS_LESS(_ptr.get(), h._ptr.get());
-    }
-    inline bool operator> (const Handle& h) const noexcept {
-       return DEFAULT_ATOMS_LESS(h._ptr.get(), _ptr.get());
-    }
-    inline bool operator<=(const Handle& h) const noexcept {
-       return not DEFAULT_ATOMS_LESS(h._ptr.get(), _ptr.get());
-    }
-    inline bool operator>=(const Handle& h) const noexcept {
-       return not DEFAULT_ATOMS_LESS(_ptr.get(), h._ptr.get());
-    }
-#undef DEFAULT_ATOMS_LESS
+    bool operator< (const Handle& h) const noexcept;
+    bool operator> (const Handle& h) const noexcept;
+    bool operator<=(const Handle& h) const noexcept;
+    bool operator>=(const Handle& h) const noexcept;
 
     /**
      * Returns a negative value, zero or a positive value if the first
      * argument is respectively smaller than, equal to, or larger than
-     * the second argument.
+     * the second argument. The atom hashes are compared, so the
+     * comparison is content-based, and is stable, independent of the
+     * the address space layout.
      *
      * @param The first handle element.
      * @param The second handle element.
@@ -178,12 +171,7 @@ public:
      * argument is respectively smaller than, equal to, or larger then the
      * second argument.
      */
-    static int compare(const Handle& h1, const Handle& h2)
-    {
-        if (h1 < h2) return -1;
-        if (h1 > h2) return 1;
-        return 0;
-    }
+    static int compare(const Handle&, const Handle&);
 };
 
 static inline bool operator== (std::nullptr_t, const Handle& rhs) noexcept
@@ -192,29 +180,32 @@ static inline bool operator== (std::nullptr_t, const Handle& rhs) noexcept
 static inline bool operator!= (std::nullptr_t, const Handle& rhs) noexcept
     { return rhs != nullptr; }
 
+bool content_eq(const opencog::Handle& lh,
+                const opencog::Handle& rh) noexcept;
+
+//! Boost needs this function to be called by exactly this name.
+std::size_t hash_value(Handle const&);
+
 //! gcc-4.7.2 needs this, because std::hash<opencog::Handle> no longer works.
 //! (See very bottom of this file).
 struct handle_hash : public std::unary_function<Handle, size_t>
 {
    size_t operator()(const Handle& h) const
    {
-       return static_cast<std::size_t>(h.value());
+       return hash_value(h);
    }
 };
-
-//! Boost needs this function to be called by exactly this name.
-inline std::size_t hash_value(Handle const& h)
-{
-    return static_cast<std::size_t>(h.value());
-}
 
 struct handle_less
 {
    bool operator()(const Handle& hl, const Handle& hr) const
    {
-       return hl < hr;
+       return hash_value(hl) < hash_value(hr);
    }
 };
+
+//! a pair of Handles
+typedef std::pair<Handle, Handle> HandlePair;
 
 //! a list of handles
 typedef std::vector<Handle> HandleSeq;
@@ -225,6 +216,9 @@ typedef std::vector<HandleSeq> HandleSeqSeq;
 //! a set of handles
 typedef std::set<Handle> OrderedHandleSet;
 
+//! a pair of handles
+typedef std::pair<Handle, Handle> HandlePair;
+
 //! a hash that associates the handle to its unique identificator
 typedef std::unordered_set<Handle, handle_hash> UnorderedHandleSet;
 
@@ -234,8 +228,17 @@ typedef std::map<Handle, UnorderedHandleSet> HandleMultimap;
 //! an ordered map from Handle to Handle
 typedef std::map<Handle, Handle> HandleMap;
 
-//! a sequence of ordered handle map
+//! a sequence of ordered handle maps
 typedef std::vector<HandleMap> HandleMapSeq;
+
+//! a set of ordered handle maps
+typedef std::set<HandleMap> HandleMapSet;
+
+//! a pair of handles
+typedef std::pair<Handle, Handle> HandlePair;
+
+//! a sequence of handle pairs
+typedef std::vector<HandlePair> HandlePairSeq;
 
 //! a handle iterator
 typedef std::iterator<std::forward_iterator_tag, Handle> HandleIterator;
@@ -248,6 +251,15 @@ struct content_based_atom_ptr_less
     }
 };
 
+struct content_based_handle_less
+{
+    bool operator()(const Handle& hl, const Handle& hr) const
+    {
+        return Handle::content_based_atoms_less(hl.const_atom_ptr(),
+                                                hr.const_atom_ptr());
+    }
+};
+
 struct handle_seq_less
 {
     bool operator()(const HandleSeq& hsl, const HandleSeq& hsr) const
@@ -255,8 +267,11 @@ struct handle_seq_less
         size_t sl = hsl.size();
         size_t sr = hsr.size();
         if (sl != sr) return sl < sr;
-        for (size_t i=0; i<sl; i++) {
-            if (hsl[i] != hsr[i]) return hsl[i] < hsr[i];
+        for (size_t i=0; i<sl; i++)
+        {
+            ContentHash chsl = hash_value(hsl[i]);
+            ContentHash chsr = hash_value(hsr[i]);
+            if (chsl != chsr) return chsl < chsr;
         }
         return false;
     }
@@ -264,17 +279,19 @@ struct handle_seq_less
 
 struct handle_seq_ptr_less
 {
-   bool operator()(const HandleSeq* hsl, const HandleSeq* hsr) const
-   {
-       size_t sl = hsl->size();
-       size_t sr = hsr->size();
-       if (sl != sr) return sl < sr;
-       for (size_t i=0; i<sl; i++) {
-           if (hsl->operator[](i) != hsr->operator[](i))
-               return hsl->operator[](i) < hsr->operator[](i);
-       }
-       return false;
-   }
+    bool operator()(const HandleSeq* hsl, const HandleSeq* hsr) const
+    {
+        size_t sl = hsl->size();
+        size_t sr = hsr->size();
+        if (sl != sr) return sl < sr;
+        for (size_t i=0; i<sl; i++)
+        {
+            ContentHash chsl = hash_value(hsl->operator[](i));
+            ContentHash chsr = hash_value(hsr->operator[](i));
+            if (chsl != chsr) return chsl < chsr;
+        }
+        return false;
+    }
 };
 
 //! append string representation of the Hash to the string
@@ -296,38 +313,43 @@ static inline std::string operator+ (const std::string &lhs, Handle h)
 
 // Debugging helpers, very convenient to print Handle sets in gdb
 std::string h_to_string(const Handle& h);
+std::string hp_to_string(const HandlePair& hp);
 std::string hs_to_string(const HandleSeq& hs);
 std::string ohs_to_string(const OrderedHandleSet& ohs);
 std::string uhs_to_string(const UnorderedHandleSet& uhs);
 std::string hmap_to_string(const HandleMap& hm);
 std::string hmultimap_to_string(const HandleMultimap& hmm);
 std::string hmaps_to_string(const HandleMapSeq& hms);
+std::string hmapset_to_string(const HandleMapSet& hms);
+std::string hps_to_string(const HandlePairSeq& hps);
 std::string atomtype_to_string(Type type);
-std::string lptr_to_string(const LinkPtr& gl);
+std::string aptr_to_string(const AtomPtr& aptr);
+class Link;
+typedef std::shared_ptr<Link> LinkPtr;
+std::string lptr_to_string(const LinkPtr& lptr);
 
-// In case your gdb supports overloading
+// In case your gdb supports overloading, see
+// http://wiki.opencog.org/w/Development_standards#Print_OpenCog_Objects
 std::string oc_to_string(const Handle& h);
+std::string oc_to_string(const HandlePair& hp);
 std::string oc_to_string(const HandleSeq& hs);
-std::string oc_to_string(const OrderedHandleSet& hs);
+std::string oc_to_string(const OrderedHandleSet& ohs);
 std::string oc_to_string(const UnorderedHandleSet& uhs);
 std::string oc_to_string(const HandleMap& hm);
 std::string oc_to_string(const HandleMultimap& hmm);
 std::string oc_to_string(const HandleMapSeq& hms);
+std::string oc_to_string(const HandleMapSet& hms);
+std::string oc_to_string(const HandlePairSeq& hps);
 std::string oc_to_string(Type type);
-std::string oc_to_string(const LinkPtr& gl);
+std::string oc_to_string(const AtomPtr& aptr);
 
 } // namespace opencog
 
 namespace std {
-inline ostream& operator<<(ostream& out, const opencog::Handle& h)
-{
-    out << h.value();
-    return out;
-}
-
-ostream& operator<<(ostream& out, const opencog::HandleSeq& hs);
-ostream& operator<<(ostream& out, const opencog::OrderedHandleSet& hs);
-ostream& operator<<(ostream& out, const opencog::UnorderedHandleSet& hs);
+ostream& operator<<(ostream&, const opencog::Handle&);
+ostream& operator<<(ostream&, const opencog::HandleSeq&);
+ostream& operator<<(ostream&, const opencog::OrderedHandleSet&);
+ostream& operator<<(ostream&, const opencog::UnorderedHandleSet&);
 
 #ifdef THIS_USED_TO_WORK_GREAT_BUT_IS_BROKEN_IN_GCC472
 // The below used to work, but broke in gcc-4.7.2. The reason it
@@ -340,9 +362,9 @@ ostream& operator<<(ostream& out, const opencog::UnorderedHandleSet& hs);
 
 template<>
 inline std::size_t
-std::hash<opencog::Handle>::operator()(opencog::Handle h) const
+std::hash<opencog::Handle>::operator()(const opencog::Handle& h) const
 {
-    return static_cast<std::size_t>(h.value());
+    return hash_value(h);
 }
 
 #else
@@ -354,8 +376,25 @@ struct hash<opencog::Handle>
     typedef std::size_t result_type;
     typedef opencog::Handle argument_type;
     std::size_t
-    operator()(opencog::Handle h) const noexcept
-    { return static_cast<std::size_t>(h.value()); }
+    operator()(const opencog::Handle& h) const noexcept
+    { return hash_value(h); }
+};
+
+// content-based equality
+template<>
+struct equal_to<opencog::Handle>
+{
+    typedef bool result_type;
+    typedef opencog::Handle first_argument;
+    typedef opencog::Handle second_argument;
+    bool
+    operator()(const opencog::Handle& lh,
+               const opencog::Handle& rh) const noexcept
+    {
+        if (lh == rh) return true;
+        if (nullptr == lh or nullptr == rh) return false;
+        return opencog::content_eq(lh, rh);
+    }
 };
 
 #endif // THIS_USED_TO_WORK_GREAT_BUT_IS_BROKEN_IN_GCC472
