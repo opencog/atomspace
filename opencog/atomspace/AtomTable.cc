@@ -359,7 +359,7 @@ bool AtomTable::in_environ(const AtomPtr& atom) const
 }
 
 // C++ atom types support.  Try to cast, if possible.
-AtomPtr AtomTable::do_factory(Type atom_type, AtomPtr atom)
+AtomPtr AtomTable::cast_factory(Type atom_type, AtomPtr atom)
 {
     // Nodes of various kinds -----------
     if (NUMBER_NODE == atom_type) {
@@ -503,12 +503,6 @@ AtomPtr AtomTable::clone_factory(Type atom_type, AtomPtr atom)
           "AtomTable - failed factory call!");
 }
 
-AtomPtr AtomTable::factory(Type atom_type, AtomPtr atom)
-{
-	return do_factory(atom_type, atom);
-}
-
-
 #if 0
 static void prt_diag(AtomPtr atom, size_t i, size_t arity, const HandleSeq& ogs)
 {
@@ -554,7 +548,7 @@ Handle AtomTable::add(AtomPtr atom, bool async)
     // Factory implements C++ atom types.
     AtomPtr orig(atom);
     Type atom_type = atom->getType();
-    atom = factory(atom_type, atom);
+    atom = cast_factory(atom_type, atom);
 
     // Certain DeleteLinks can never be added!
     if (nullptr == atom) return Handle();

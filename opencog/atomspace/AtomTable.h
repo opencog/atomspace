@@ -134,8 +134,7 @@ private:
     AtomTable& operator=(const AtomTable&);
     AtomTable(const AtomTable&);
 
-    AtomPtr do_factory(Type atom_type, AtomPtr atom);
-    AtomPtr factory(Type atom_type, AtomPtr atom);
+    AtomPtr cast_factory(Type atom_type, AtomPtr atom);
     AtomPtr clone_factory(Type atom_type, AtomPtr atom);
 
 public:
