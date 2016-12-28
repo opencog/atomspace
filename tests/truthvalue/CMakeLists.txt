@@ -1,8 +1,9 @@
 
 LINK_LIBRARIES(
+	attentionbank
+	atomspace
 	atombase
 	atomutils
-	atomspace
 )
 
 ADD_CXXTEST(SimpleTruthValueUTest)

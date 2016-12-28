@@ -32,6 +32,7 @@
 #include <boost/bind.hpp>
 
 #include <opencog/atomspace/AtomSpace.h>
+#include <opencog/attentionbank/AttentionBank.h>
 #include <opencog/atoms/base/Node.h>
 #include <opencog/truthvalue/SimpleTruthValue.h>
 #include <opencog/util/Logger.h>
@@ -495,16 +496,16 @@ public:
     void testAFSignals()
     {
         boost::signals2::connection addAFConnection =
-            atomSpace->AddAFSignal(
+            attentionbank(atomSpace).AddAFSignal().connect(
                     boost::bind(&AtomSpaceAsyncUTest::addAFSignal,
                                 this, _1, _2, _3));
         boost::signals2::connection removeAFConnection =
-            atomSpace->RemoveAFSignal(
+            attentionbank(atomSpace).RemoveAFSignal().connect(
                     boost::bind(&AtomSpaceAsyncUTest::removeAFSignal,
                                 this, _1, _2, _3));
 
         __testAFSignalsCounter = 0;
-        atomSpace->set_attentional_focus_boundary(100);
+        attentionbank(atomSpace).setAttentionalFocusBoundary(100);
 
         // Add a node to the AttentionalFocus
         Handle h = atomSpace->add_node(CONCEPT_NODE,
