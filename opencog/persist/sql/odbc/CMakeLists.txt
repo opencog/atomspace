@@ -35,11 +35,13 @@ TARGET_LINK_LIBRARIES(sniff
     atomspace
     execution
     clearbox
-    smob
     atomcore
     atomutils
     ${ODBC_LIBRARIES}
 )
+IF (HAVE_GUILE)
+	TARGET_LINK_LIBRARIES(sniff smob)
+ENDIF (HAVE_GUILE)
 
 INSTALL (TARGETS persist-sql
     DESTINATION "lib${LIB_DIR_SUFFIX}/opencog"
