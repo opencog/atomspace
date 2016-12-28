@@ -5,6 +5,7 @@
  * Copyright (c) 2008, 2014, 2015 Linas Vepstas <linas@linas.org>
  */
 
+#ifdef HAVE_GUILE
 
 #include <cstddef>
 #include <opencog/atoms/base/Link.h>
@@ -15,7 +16,6 @@
 #include <opencog/guile/SchemeModule.h>
 
 #include "ExecSCM.h"
-
 
 // ========================================================
 
@@ -113,3 +113,4 @@ void opencog_exec_init(void)
 	static ExecSCM exy;
 	exy.module_init();
 }
+#endif // HAVE_GUILE

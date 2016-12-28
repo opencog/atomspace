@@ -24,10 +24,13 @@ TARGET_LINK_LIBRARIES(zmqatoms
 	zmq
 	atombase
 	truthvalue
-	smob
 	${COGUTIL_LIBRARY}
 	${PROTOBUF_LIBRARY}
 )
+
+IF(HAVE_GUILE)
+	TARGET_LINK_LIBRARIES(zmqatoms smob)
+ENDIF(HAVE_GUILE)
 
 INSTALL (TARGETS zmqatoms
 	DESTINATION "lib${LIB_DIR_SUFFIX}/opencog"

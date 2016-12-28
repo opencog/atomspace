@@ -21,11 +21,10 @@
  * Free Software Foundation, Inc.,
  * 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
  */
+#ifdef HAVE_GUILE
 
 #ifndef _OPENCOG_PYTHON_SCM_H
 #define _OPENCOG_PYTHON_SCM_H
-
-#ifdef HAVE_GUILE
 
 #include <string>
 #include <opencog/atomspace/AtomSpace.h>

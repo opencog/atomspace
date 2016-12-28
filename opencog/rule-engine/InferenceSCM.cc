@@ -21,6 +21,8 @@
  * 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
  */
 
+#ifdef HAVE_GUILE
+
 #include <opencog/guile/SchemeModule.h>
 
 namespace opencog {
@@ -153,3 +155,5 @@ void opencog_ruleengine_init(void)
     static InferenceSCM inference;
     inference.module_init();
 }
+
+#endif // HAVE_GUILE

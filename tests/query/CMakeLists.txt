@@ -22,7 +22,6 @@ LINK_LIBRARIES (
 # features that the later tests depend on.
 
 ADD_CXXTEST(PatternUTest)
-ADD_CXXTEST(PatternCrashUTest)
 ADD_CXXTEST(StackUTest)
 ADD_CXXTEST(BigPatternUTest)
 ADD_CXXTEST(BiggerPatternUTest)
@@ -36,6 +35,7 @@ ADD_CXXTEST(Boolean2NotUTest)
 # that are tested in earlier test cases.  DO NOT reorder this
 # list unless you are sure of what you are doing.
 IF (HAVE_GUILE)
+	ADD_CXXTEST(PatternCrashUTest)
 	ADD_CXXTEST(DisconnectedUTest)
 	ADD_CXXTEST(ImplicationUTest)
 	ADD_CXXTEST(ExecutionOutputUTest)

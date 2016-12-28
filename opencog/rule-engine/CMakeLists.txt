@@ -26,12 +26,14 @@ ADD_DEPENDENCIES(ruleengine
 TARGET_LINK_LIBRARIES(ruleengine
 	lambda
 	query
-	smob
 	execution
 	atomutils
 	atomspace
 	atomspaceutils
 )
+IF (HAVE_GUILE)
+	TARGET_LINK_LIBRARIES(ruleengine smob)
+ENDIF (HAVE_GUILE)
 
 INSTALL (TARGETS ruleengine DESTINATION "lib${LIB_DIR_SUFFIX}/opencog")
 
