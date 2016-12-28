@@ -26,17 +26,16 @@
 #include <libguile.h>
 
 #include <opencog/guile/SchemeSmob.h>
+#include <opencog/attentionbank/AttentionBank.h>
 
 using namespace opencog;
 
 /**
  * Return AttentionalFocus Boundary
  */
-
 SCM SchemeSmob::ss_af_boundary (void)
 {
-	AtomSpace* atomspace = ss_get_env_as("cog-af-boundary");
-	return scm_from_short(atomspace->get_attentional_focus_boundary());
+	return scm_from_short(attentionbank().getAttentionalFocusBoundary());
 }
 
 /**
@@ -44,13 +43,12 @@ SCM SchemeSmob::ss_af_boundary (void)
  */
 SCM SchemeSmob::ss_set_af_boundary (SCM sboundary)
 {
-	AtomSpace* atomspace = ss_get_env_as("cog-set-af-boundary!");
 	if (scm_is_false(scm_integer_p(sboundary)))
 		scm_wrong_type_arg_msg("cog-set-af-boundary", 1, sboundary,
 			"integer opencog AttentionalFocus Boundary");
 
 	short bdy = scm_to_short(sboundary);
-	return scm_from_short(atomspace->set_attentional_focus_boundary(bdy));
+	return scm_from_short(attentionbank().setAttentionalFocusBoundary(bdy));
 }
 
 /**
@@ -58,10 +56,8 @@ SCM SchemeSmob::ss_set_af_boundary (SCM sboundary)
  */
 SCM SchemeSmob::ss_af (void)
 {
-    AtomSpace* atomspace = ss_get_env_as("cog-af");
-
     HandleSeq attentionalFocus;
-    atomspace->get_handle_set_in_attentional_focus(back_inserter(attentionalFocus));
+    attentionbank().get_handle_set_in_attentional_focus(back_inserter(attentionalFocus));
     size_t isz = attentionalFocus.size();
 	if (0 == isz) return SCM_EOL;
 

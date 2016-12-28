@@ -9,6 +9,7 @@
 #include <cstddef>
 #include <libguile.h>
 
+#include <opencog/attentionbank/AttentionBank.h>
 #include <opencog/truthvalue/AttentionValue.h>
 #include <opencog/guile/SchemeSmob.h>
 
@@ -100,8 +101,7 @@ SCM SchemeSmob::ss_stimulate (SCM satom, SCM sstimulus)
 {
 	Handle h(scm_to_handle(satom));
 	double stimulus = scm_to_double(sstimulus);
-	AtomSpace* atomspace = ss_get_env_as("cog-stimulate");
-	atomspace->stimulate(h,stimulus);
+	attentionbank().stimulate(h, stimulus);
 	return satom;
 }
 

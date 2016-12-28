@@ -192,13 +192,6 @@ cdef extern from "opencog/atomspace/AtomSpace.h" namespace "opencog":
         # get by type
         output_iterator get_handles_by_type(output_iterator, Type t, bint subclass)
 
-        # get by STI range
-        output_iterator get_handles_by_AV(output_iterator, short lowerBound, short upperBound)
-        output_iterator get_handles_by_AV(output_iterator, short lowerBound)
-
-        # get from AttentionalFocus
-        output_iterator get_handle_set_in_attentional_focus(output_iterator)
-
         void clear()
         bint remove_atom(cHandle h, bint recursive)
 
@@ -207,6 +200,18 @@ cdef AtomSpace_factory(cAtomSpace *to_wrap)
 cdef class AtomSpace:
     cdef cAtomSpace *atomspace
     cdef bint owns_atomspace
+
+cdef extern from "opencog/attentionbank/AttentionBank.h" namespace "opencog":
+    cdef cppclass cAttentionBank "opencog::AttentionBank":
+
+        # get by STI range
+        output_iterator get_handles_by_AV(output_iterator, short lowerBound, short upperBound)
+        output_iterator get_handles_by_AV(output_iterator, short lowerBound)
+
+        # get from AttentionalFocus
+        output_iterator get_handle_set_in_attentional_focus(output_iterator)
+
+    cdef cAttentionBank attentionbank()
 
 
 cdef extern from "opencog/atomutils/AtomUtils.h" namespace "opencog":
