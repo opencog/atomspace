@@ -23,6 +23,7 @@
  */
 
 #include <opencog/atomspace/AtomSpace.h>
+#include <opencog/attentionbank/AttentionBank.h>
 #include <opencog/truthvalue/AttentionValue.h>
 #include <opencog/atoms/base/Node.h>
 #include <opencog/truthvalue/SimpleTruthValue.h>
@@ -184,8 +185,9 @@ public:
 
     void testVLTI() {
         AtomSpace* atomSpace = new AtomSpace();
+        attentionbank(atomSpace);
         HandleSeq atoms = createSimpleGraph(atomSpace, "vlti");
-        
+
         TS_ASSERT(getVLTI(atoms[0])==AttentionValue::DISPOSABLE);
         incVLTI(atoms[0]);//VLTI=1
         TS_ASSERT(getVLTI(atoms[0])!=AttentionValue::DISPOSABLE);
@@ -207,14 +209,16 @@ public:
 
     void testComparisons() {
         logger().debug("BEGIN TEST:");
-        
+
         AtomSpace* atomSpace = new AtomSpace();
+        attentionbank(atomSpace);
+
         HandleSeq atoms = createSimpleGraph(atomSpace, "comparisons");
-        
+
         logger().debug("STISort");
 
         STISort sSort;
-        
+
         // an atom which has higher sti is strictly before one with lower sti
         TS_ASSERT_EQUALS(sSort(atoms[1], atoms[0]), true);
         // an atom which has lower sti is not strictly before one with higher sti
@@ -222,11 +226,11 @@ public:
         // two atoms with the same sti are not strictly before each other
         TS_ASSERT_EQUALS(sSort(atoms[2], atoms[1]), false);
         TS_ASSERT_EQUALS(sSort(atoms[1], atoms[2]), false);
-        
+
         logger().debug("LTIAndTVAscendingSort");
 
         LTIAndTVAscendingSort latvSort;
-        
+
         // an atom which has higher LTI*TV is not strictly before one with lower LTI*TV
         TS_ASSERT_EQUALS(latvSort(atoms[1], atoms[0]), false);
         // an atom which has lower LTI*TV is strictly before one with higher LTI*TV
@@ -236,26 +240,32 @@ public:
         TS_ASSERT_EQUALS(latvSort(atoms[1], atoms[2]), false);
 
         logger().debug("LTIThenTVAscendingSort");
-        
+
         LTIThenTVAscendingSort lttvSort;
 
-        // an atom which has higher LTI is not strictly before one with lower LTI
+        // An atom which has higher LTI is not strictly before one
+        // with lower LTI.
         TS_ASSERT_EQUALS(lttvSort(atoms[1], atoms[0]), false);
         // an atom which has lower LTI is strictly before one with higher LTI
         TS_ASSERT_EQUALS(lttvSort(atoms[0], atoms[1]), true);
-        // two atoms with the same LTI and the same TV are not strictly before each other
+        // Two atoms with the same LTI and the same TV are not
+        // strictly before each other.
         TS_ASSERT_EQUALS(lttvSort(atoms[2], atoms[1]), false);
         TS_ASSERT_EQUALS(lttvSort(atoms[1], atoms[2]), false);
-        // two atoms with the same LTI: the one with lower TV is strictly before the one with higher TV
+        // Two atoms with the same LTI: the one with lower TV is
+        // strictly before the one with higher TV.
         TS_ASSERT_EQUALS(lttvSort(atoms[2], atoms[3]), true);
-        // two atoms with the same LTI: the one with higher TV is not strictly before the one with lower TV
+        // Two atoms with the same LTI: the one with higher TV is not
+        // strictly before the one with lower TV.
         TS_ASSERT_EQUALS(lttvSort(atoms[3], atoms[2]), false);
-        
+
         logger().debug("END TEST:");
     }
 
-    // copied from AtomSpaceUTest.cxxtest, but modified for the test testComparisons 
-    HandleSeq createSimpleGraph(AtomSpace* atomSpace, const char* baseName) {
+    // Copied from AtomSpaceUTest.cxxtest, but modified for the test
+    // testComparisons
+    HandleSeq createSimpleGraph(AtomSpace* atomSpace, const char* baseName)
+    {
         char buf[256];
         HandleSeq testAtoms;
         int baseNameLength;
@@ -331,7 +341,8 @@ public:
     }
 
     //static std::string toStr();
-    void testtoString() {
+    void testtoString()
+    {
         char buffer[100];
         //logger().debug("AttentionValue::testtoString()");
         for (int i = 0; i < NUM_AVS; i++) {
