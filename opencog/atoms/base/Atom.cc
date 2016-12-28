@@ -40,6 +40,8 @@
 
 #include <opencog/atomspace/AtomSpace.h>
 #include <opencog/atomspace/AtomTable.h>
+#include <opencog/attentionbank/AttentionBank.h>
+#include <opencog/attentionbank/ImportanceIndex.h>
 
 //! Atom flag
 // #define WRITE_MUTEX             1  //BIT0
@@ -194,11 +196,11 @@ void Atom::setAttentionValue(AttentionValuePtr av)
     // If the atom importance has changed its bin,
     // update the importance index.
     if (oldBin != newBin) {
-        _atomTable->getAtomSpace()->updateImportanceIndex(getHandle(), oldBin);
+        attentionbank().updateImportanceIndex(getHandle(), oldBin);
     }
 
     // Notify any interested parties that the AV changed.
-    AVCHSigl& avch = _atomTable->getAtomSpace()->getAVChangedSignal();
+    AVCHSigl& avch = attentionbank().getAVChangedSignal();
     avch(getHandle(), local, av);
 }
 
