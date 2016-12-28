@@ -259,6 +259,7 @@ public:
             "    return TruthValue(0.75, 100.0)\n\n"
             );
 
+#ifdef HAVE_GUILE
         // Create a scheme evaluator to trigger cog-evaluate and cog-execute.
         SchemeEval* scheme = new SchemeEval(as);
 
@@ -295,6 +296,7 @@ public:
         error = scheme->eval_error();
         scheme->clear_pending();
         TSM_ASSERT("Failed cog-evaluate!", !error);
+#endif // HAVE_GUILE
 
         // Cleanup Python.
         global_python_finalize();
