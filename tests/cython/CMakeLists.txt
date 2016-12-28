@@ -11,9 +11,12 @@ LINK_DIRECTORIES(
 	${PROJECT_BINARY_DIR}/opencog/util
 )
 
+IF (HAVE_GUILE)
+	LINK_LIBRARIES(smob)
+ENDIF (HAVE_GUILE)
+
 LINK_LIBRARIES(
 	atomspace
-	smob
 	clearbox
 	execution
 	${GUILE_LIBRARIES}
@@ -28,11 +31,11 @@ ADD_CXXTEST(PythonEvalUTest)
 TARGET_LINK_LIBRARIES(PythonEvalUTest
 	atomspace
 	clearbox
-	smob
 	PythonEval
 	atomspace_cython
 	${COGUTIL_LIBRARY}
 )
+
 SET_TESTS_PROPERTIES(PythonEvalUTest
 	PROPERTIES
 	ENVIRONMENT "PYTHONDONTWRITEBYTECODE=1"
@@ -45,7 +48,6 @@ SET_TESTS_PROPERTIES(PythonEvalUTest
 ADD_CXXTEST(PythonUtilitiesUTest)
 
 TARGET_LINK_LIBRARIES(PythonUtilitiesUTest
-	smob
 	PythonEval
 	utilities_cython
 	atomspace_cython
