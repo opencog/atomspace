@@ -20,6 +20,8 @@
  * Free Software Foundation, Inc.,
  * 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
  */
+
+#include <opencog/attentionbank/AttentionBank.h>
 #include "AttentionalFocusCB.h"
 
 using namespace opencog;
@@ -34,13 +36,13 @@ AttentionalFocusCB::AttentionalFocusCB(AtomSpace* as) :
 bool AttentionalFocusCB::node_match(const Handle& node1, const Handle& node2)
 {
 	return node1 == node2 and
-		node2->getSTI() > _as->get_attentional_focus_boundary();
+		node2->getSTI() > attentionbank(_as).getAttentionalFocusBoundary();
 }
 
 bool AttentionalFocusCB::link_match(const PatternTermPtr& ptm, const Handle& lsoln)
 {
 	return DefaultPatternMatchCB::link_match(ptm, lsoln)
-		and lsoln->getSTI() > _as->get_attentional_focus_boundary();
+		and lsoln->getSTI() > attentionbank(_as).getAttentionalFocusBoundary();
 }
 
 static bool compare_sti(const LinkPtr& lptr1, const LinkPtr& lptr2)
@@ -58,7 +60,7 @@ IncomingSet AttentionalFocusCB::get_incoming_set(const Handle& h)
 	// parts of the hypergraph.
 	IncomingSet filtered_set;
 	for (const auto& l : incoming_set)
-		if (l->getSTI() > _as->get_attentional_focus_boundary())
+		if (l->getSTI() > attentionbank(_as).getAttentionalFocusBoundary())
 			filtered_set.push_back(l);
 
 	// If nothing is in AF
