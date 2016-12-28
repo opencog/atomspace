@@ -47,11 +47,6 @@ ClassServer::ClassServer(void)
     nTypes = 0;
 }
 
-ClassServer* ClassServer::createInstance(void)
-{
-    return new ClassServer();
-}
-
 Type ClassServer::addType(const Type parent, const std::string& name)
 {
     // Check if a type with this name already exists. If it does, then
@@ -151,9 +146,9 @@ const std::string& ClassServer::getTypeName(Type type)
     return nullString;
 }
 
-ClassServer& opencog::classserver(ClassServerFactory* factory)
+ClassServer& opencog::classserver()
 {
-    static std::unique_ptr<ClassServer> instance((*factory)());
+    static std::unique_ptr<ClassServer> instance(new ClassServer());
     return *instance;
 }
 

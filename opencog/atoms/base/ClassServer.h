@@ -38,16 +38,13 @@ namespace opencog
  *  @{
  */
 
-class ClassServer;
-
-typedef ClassServer* ClassServerFactory(void);
+typedef boost::signals2::signal<void (Type)> TypeSignal;
 
 /**
  * This class keeps track of the complete atom class hierarchy.
  * The current implementation is hardwired. Future versions may include
  * different structures based on run-time type identification.
  */
-typedef boost::signals2::signal<void (Type)> TypeSignal;
 class ClassServer
 {
 private:
@@ -76,8 +73,8 @@ private:
     void setParentRecursively(Type parent, Type type);
 
 public:
-    /** Returns a new ClassServer instance */
-    static ClassServer* createInstance(void);
+    /** Gets the singleton instance (following meyer's design pattern) */
+    friend ClassServer& classserver();
 
     /** Adds a new atom type with the given name and parent type */
     Type addType(const Type parent, const std::string& name);
@@ -211,8 +208,7 @@ public:
     const std::string& getTypeName(Type type);
 };
 
-/** Gets the singleton instance (following meyer's design pattern) */
-ClassServer& classserver(ClassServerFactory* = ClassServer::createInstance);
+ClassServer& classserver();
 
 /** @}*/
 } // namespace opencog
