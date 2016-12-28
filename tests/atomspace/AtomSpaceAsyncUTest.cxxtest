@@ -87,11 +87,13 @@ public:
     void setUp()
     {
         atomSpace = new AtomSpace();
+        attentionbank(atomSpace);
         rng = new opencog::MT19937RandGen((unsigned long) time(NULL));
     }
 
     void tearDown()
     {
+        attentionbank(nullptr);
         delete atomSpace;
         delete rng;
     }
