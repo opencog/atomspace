@@ -35,8 +35,8 @@
 
 #include <opencog/atoms/base/ClassServer.h>
 
+#include <opencog/attentionbank/AttentionBank.h>
 #include <opencog/atomspace/AtomTable.h>
-#include <opencog/atomspace/AttentionBank.h>
 #include <opencog/atomspace/BackingStore.h>
 
 namespace opencog
