@@ -780,7 +780,7 @@ SCM SchemeEval::do_scm_eval(SCM sexpr, SCM (*evo)(void *))
 		}
 	}
 
-	// If we are in the cogservdr, but are anot in a shell context,
+	// If we are in the cogserver, but are not in a shell context,
 	// then truncate the output, because it will never ever be displayed.
 	// (i.e. don't overflow the output buffers.) If we are in_shell,
 	// then we are here probably because user typed something that
