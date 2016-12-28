@@ -333,12 +333,14 @@ void AtomSpaceBenchmark::doBenchmark(const std::string& methodName,
     Nclock = baseNclock;
     Nloops = baseNloops;
     Nreps = baseNreps / Nclock;
+#ifdef HAVE_GUILE
     if (BENCH_SCM == testKind /* or BENCH_PYTHON == testKind */)
     {
         // Try to avoid excessive compilation times.
         Nclock /= 100;
         Nreps *= 100;
     }
+#endif // HAVE_GUILE
 
     // Must not remove more atoms than there are
     if (methodToCall == &AtomSpaceBenchmark::bm_rmAtom)
