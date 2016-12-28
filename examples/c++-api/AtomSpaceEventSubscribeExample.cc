@@ -3,6 +3,7 @@
 #include <boost/signals2.hpp>
 
 #include <opencog/atomspace/AtomSpace.h>
+#include <opencog/attentionbank/AttentionBank.h>
 #include <opencog/truthvalue/AttentionValue.h>
 #include <opencog/truthvalue/SimpleTruthValue.h>
 #include <opencog/truthvalue/TruthValue.h>
@@ -40,15 +41,17 @@ int main(int argc, char ** args)
     //Register Atomspace Event call back handlers.
     AtomAddedSignalConn = as.addAtomSignal(
             boost::bind(&AtomAddedCBHandler, _1));
-    AVChangedSignalConn = as.AVChangedSignal(
+    AVChangedSignalConn = attentionbank(&as).getAVChangedSignal().connect(
             boost::bind(&AVChangedCBHandler, _1, _2, _3));
     TVChangedSignalConn = as.TVChangedSignal(
             boost::bind(&TVChangedCBHandler, _1, _2, _3));
     AtomsRemovedSignalConn = as.removeAtomSignal(
             boost::bind(&AtomRemovedCBHandler, _1));
-    AtomAddedToAttentionalFocusSignalConn = as.AddAFSignal(
+    AtomAddedToAttentionalFocusSignalConn =
+        attentionbank(&as).AddAFSignal().connect(
             boost::bind(&AtomAddedToAFCBHandler, _1, _2, _3));
-    AtomRemovedFromAttentionalFocusSignalConn = as.RemoveAFSignal(
+    AtomRemovedFromAttentionalFocusSignalConn =
+        attentionbank(&as).RemoveAFSignal().connect(
             boost::bind(&AtomRemovedFromAFCBHandler, _1, _2, _3));
 
     // create atoms
