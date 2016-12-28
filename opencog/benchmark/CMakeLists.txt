@@ -24,6 +24,7 @@ ENDIF(HAVE_CYTHON)
 
 TARGET_LINK_LIBRARIES (atomspace_bm m
 	atomutils
+	attentionbank
 	atomspace
 	execution
 	clearbox
@@ -39,6 +40,7 @@ IF (HAVE_GUILE)
 
 	TARGET_LINK_LIBRARIES (profile_bindlink m
 		atomutils
+		attentionbank
 		atomspace
 		execution
 		query

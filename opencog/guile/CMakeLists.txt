@@ -22,6 +22,7 @@ ADD_LIBRARY (logger
 )
 
 TARGET_LINK_LIBRARIES(smob
+	attentionbank
 	atomspace
 	${GUILE_LIBRARIES}
 	${COGUTIL_LIBRARY}
