@@ -356,9 +356,11 @@ public:
 
     void setUp() {
         atomSpace = new AtomSpace();
+        attentionbank(atomSpace);
     }
 
     void tearDown() {
+        attentionbank(nullptr);
         delete atomSpace;
     }
 
