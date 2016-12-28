@@ -5,6 +5,7 @@
  * Copyright (c) 2008, 2014, 2015 Linas Vepstas <linas@linas.org>
  */
 
+#ifdef HAVE_GUILE
 
 #include <cstddef>
 #include <opencog/atoms/base/Link.h>
@@ -14,8 +15,30 @@
 #include <opencog/atoms/reduct/FoldLink.h>
 #include <opencog/guile/SchemeModule.h>
 
-#include "ExecSCM.h"
+#ifndef _OPENCOG_EXEC_SCM_H
+#define _OPENCOG_EXEC_SCM_H
 
+#include <opencog/guile/SchemeModule.h>
+
+namespace opencog {
+
+class ExecSCM : public ModuleWrap
+{
+	protected:
+		virtual void init(void);
+		static std::vector<FunctionWrap*> _binders;
+	public:
+		ExecSCM(void);
+		~ExecSCM();
+};
+
+}
+
+extern "C" {
+void opencog_exec_init(void);
+};
+
+#endif // _OPENCOG_EXEC_SCM_H
 
 // ========================================================
 
@@ -113,3 +136,4 @@ void opencog_exec_init(void)
 	static ExecSCM exy;
 	exy.module_init();
 }
+#endif // HAVE_GUILE
