@@ -45,14 +45,17 @@ cdef class AtomSpace:
         if (addr == 0) :
             self.atomspace = new cAtomSpace()
             self.owns_atomspace = True
+            attentionbank(self.atomspace)
         else :
             self.atomspace = <cAtomSpace*> PyLong_AsVoidPtr(addr)
             self.owns_atomspace = False
+            attentionbank(self.atomspace)
 
     def __dealloc__(self):
         if self.owns_atomspace:
             if self.atomspace:
                 del self.atomspace
+                attentionbank(<cAtomSpace*> PyLong_AsVoidPtr(0))
 
     def __richcmp__(as_1, as_2, int op):
         if not isinstance(as_1, AtomSpace) or not isinstance(as_2, AtomSpace):
