@@ -22,9 +22,12 @@ TARGET_LINK_LIBRARIES(execution
 	atombase
 	query
 	clearbox
-	smob
 	${Boost_SYSTEM_LIBRARY}
 )
+
+IF (HAVE_GUILE)
+	TARGET_LINK_LIBRARIES(execution smob)
+ENDIF (HAVE_GUILE)
 
 IF (HAVE_CYTHON)
 	TARGET_LINK_LIBRARIES(execution PythonEval)
