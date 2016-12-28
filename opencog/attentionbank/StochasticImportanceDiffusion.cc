@@ -24,8 +24,9 @@
  */
 
 #include <algorithm>
+#include <math.h>
 
-#include <opencog/atomspace/AtomSpace.h>
+#include <opencog/attentionbank/AttentionBank.h>
 #include "StochasticImportanceDiffusion.h"
 
 using namespace opencog;
@@ -33,13 +34,13 @@ using namespace opencog::ecan;
 
 unsigned int StochasticDiffusionAmountCalculator::bin_index(const Handle& h)
 {
-    return _as->_bank._importanceIndex.
+    return attentionbank(_as)._importanceIndex.
                      importanceBin(h->getAttentionValue()->getSTI());
 }
 
 size_t StochasticDiffusionAmountCalculator::bin_size(unsigned int index)
 {
-   return _as->_bank._importanceIndex.size(index);
+   return attentionbank(_as)._importanceIndex.size(index);
 }
 
 void StochasticDiffusionAmountCalculator::update_bin(const Handle& h)
@@ -65,7 +66,7 @@ void StochasticDiffusionAmountCalculator::update_bin(const Handle& h)
 }
 
 StochasticDiffusionAmountCalculator::StochasticDiffusionAmountCalculator
-                                     (const AtomSpace * as) : _as(as)
+                                     (AtomSpace * as) : _as(as)
 {
 }
 

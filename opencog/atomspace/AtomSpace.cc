@@ -61,7 +61,6 @@ using namespace opencog;
  */
 AtomSpace::AtomSpace(AtomSpace* parent, bool transient) :
     _atom_table(parent? &parent->_atom_table : NULL, this, transient),
-    _bank(this, transient),
     _backing_store(NULL),
     _transient(transient)
 {
@@ -69,14 +68,10 @@ AtomSpace::AtomSpace(AtomSpace* parent, bool transient) :
 
 AtomSpace::~AtomSpace()
 {
-    // Be sure to disconnect the attention bank signals before the
-    // atom table destructor runs. XXX FIXME yes this is an ugly hack.
-    _bank.shutdown();
 }
 
 AtomSpace::AtomSpace(const AtomSpace&) :
     _atom_table(NULL),
-    _bank(this, true),
     _backing_store(NULL)
 {
      throw opencog::RuntimeException(TRACE_INFO,

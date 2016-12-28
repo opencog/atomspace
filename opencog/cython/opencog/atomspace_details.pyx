@@ -45,14 +45,17 @@ cdef class AtomSpace:
         if (addr == 0) :
             self.atomspace = new cAtomSpace()
             self.owns_atomspace = True
+            attentionbank(self.atomspace)
         else :
             self.atomspace = <cAtomSpace*> PyLong_AsVoidPtr(addr)
             self.owns_atomspace = False
+            attentionbank(self.atomspace)
 
     def __dealloc__(self):
         if self.owns_atomspace:
             if self.atomspace:
                 del self.atomspace
+                attentionbank(<cAtomSpace*> PyLong_AsVoidPtr(0))
 
     def __richcmp__(as_1, as_2, int op):
         if not isinstance(as_1, AtomSpace) or not isinstance(as_2, AtomSpace):
@@ -218,10 +221,10 @@ cdef class AtomSpace:
             return None
         cdef vector[cHandle] handle_vector
         if upper_bound is not None:
-            self.atomspace.get_handles_by_AV(back_inserter(handle_vector),
+            attentionbank(self.atomspace).get_handles_by_AV(back_inserter(handle_vector),
                     lower_bound, upper_bound)
         else:
-            self.atomspace.get_handles_by_AV(back_inserter(handle_vector),
+            attentionbank(self.atomspace).get_handles_by_AV(back_inserter(handle_vector),
                     lower_bound)
         return convert_handle_seq_to_python_list(handle_vector, self)
 
@@ -230,10 +233,10 @@ cdef class AtomSpace:
             return None
         cdef vector[cHandle] handle_vector
         if upper_bound is not None:
-            self.atomspace.get_handles_by_AV(back_inserter(handle_vector),
+            attentionbank(self.atomspace).get_handles_by_AV(back_inserter(handle_vector),
                     lower_bound, upper_bound)
         else:
-            self.atomspace.get_handles_by_AV(back_inserter(handle_vector),
+            attentionbank(self.atomspace).get_handles_by_AV(back_inserter(handle_vector),
                     lower_bound)
 
         # This code is the same for all the x iterators but there is no
@@ -251,16 +254,14 @@ cdef class AtomSpace:
         if self.atomspace == NULL:
             return None
         cdef vector[cHandle] handle_vector
-        self.atomspace.get_handle_set_in_attentional_focus(
-                back_inserter(handle_vector))
+        attentionbank(self.atomspace).get_handle_set_in_attentional_focus(back_inserter(handle_vector))
         return convert_handle_seq_to_python_list(handle_vector, self)
 
     def xget_atoms_in_attentional_focus(self):
         if self.atomspace == NULL:
             return None
         cdef vector[cHandle] handle_vector
-        self.atomspace.get_handle_set_in_attentional_focus(
-                back_inserter(handle_vector))
+        attentionbank(self.atomspace).get_handle_set_in_attentional_focus(back_inserter(handle_vector))
 
         # This code is the same for all the x iterators but there is no
         # way in Cython to yield out of a cdef function and no way to pass a

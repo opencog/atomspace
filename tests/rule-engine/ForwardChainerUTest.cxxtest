@@ -7,6 +7,7 @@
 #include <boost/range/algorithm/find.hpp>
 
 #include <opencog/atomspace/AtomSpace.h>
+#include <opencog/attentionbank/AttentionBank.h>
 #include <opencog/guile/SchemeEval.h>
 
 #include <opencog/rule-engine/forwardchainer/ForwardChainer.h>
@@ -37,7 +38,7 @@ public:
 		logger().set_print_to_stdout_flag(true);
 
 		// Disable the AF mechanism during testing!
-		_as.set_attentional_focus_boundary(AttentionValue::MINSTI);
+		attentionbank(&_as).setAttentionalFocusBoundary(AttentionValue::MINSTI);
 
 		string source_dir = string(PROJECT_SOURCE_DIR),
 			test_dir = source_dir + "/tests",

@@ -31,15 +31,10 @@
 
 using namespace opencog;
 
-AttentionBank::AttentionBank(AtomSpace *asp, bool transient)
-    : _as(asp)
-    , _index_insert_queue(this, &AttentionBank::put_atom_into_index, transient?0:4)
-    , _index_remove_queue(this, &AttentionBank::remove_atom_from_index, transient?0:4)
+AttentionBank::AttentionBank(AtomSpace* asp) :
+    _index_insert_queue(this, &AttentionBank::put_atom_into_index, 4),
+    _index_remove_queue(this, &AttentionBank::remove_atom_from_index, 4)
 {
-    /* Do not boether with initialization, if this is transient */
-    if (transient) { _zombie = true; return; }
-    _zombie = false;
-
     startingFundsSTI = fundsSTI = config().get_int("STARTING_STI_FUNDS", 100000);
     startingFundsLTI = fundsLTI = config().get_int("STARTING_LTI_FUNDS", 100000);
     stiFundsBuffer = config().get_int("STI_FUNDS_BUFFER", 10000);
@@ -49,8 +44,6 @@ AttentionBank::AttentionBank(AtomSpace *asp, bool transient)
     STIAtomWage = config().get_int("ECAN_STARTING_ATOM_STI_WAGE", 10);
     LTIAtomWage = config().get_int("ECAN_STARTING_ATOM_LTI_WAGE", 10);
 
-    bool async = config().get_bool("ATTENTION_BANK_ASYNC",false);
-
     _attentionalFocusBoundary = 1;
 
     // Subscribe to my own changes. This is insane and hacky; must move
@@ -59,6 +52,7 @@ AttentionBank::AttentionBank(AtomSpace *asp, bool transient)
         _AVChangedSignal.connect(
             boost::bind(&AttentionBank::AVChanged, this, _1, _2, _3));
 
+    bool async = config().get_bool("ATTENTION_BANK_ASYNC", false);
     if (async) {
      _addAtomConnection =
         asp->addAtomSignal(
@@ -84,7 +78,6 @@ AttentionBank::AttentionBank(AtomSpace *asp, bool transient)
 /// tacky hack to fix a design bug.
 void AttentionBank::shutdown(void)
 {
-    if (_zombie) return;  /* no-op, if a zombie */
     _AVChangedConnection.disconnect();
     _addAtomConnection.disconnect();
     _removeAtomConnection.disconnect();
@@ -99,8 +92,8 @@ void AttentionBank::AVChanged(const Handle& h,
 {
     AttentionValue::sti_t newSti = new_av->getSTI();
     
-    // Add the old attention values to the AtomSpace funds and
-    // subtract the new attention values from the AtomSpace funds
+    // Add the old attention values to the AttentionBank funds and
+    // subtract the new attention values from the AttentionBank funds
     updateSTIFunds(old_av->getSTI() - newSti);
     updateLTIFunds(old_av->getLTI() - new_av->getLTI());
 
@@ -121,8 +114,8 @@ void AttentionBank::AVChanged(const Handle& h,
         minSTISeen = maxSTISeen;
     }
 
-    _as->update_max_STI(maxSTISeen);
-    _as->update_min_STI(minSTISeen);
+    updateMaxSTI(maxSTISeen);
+    updateMinSTI(minSTISeen);
 
     logger().fine("AVChanged: fundsSTI = %d, old_av: %d, new_av: %d",
                    fundsSTI.load(), old_av->getSTI(), new_av->getSTI());
@@ -252,4 +245,31 @@ double AttentionBank::getNormalisedZeroToOneSTI(AttentionValuePtr av,
     double val = (s - getMinSTI(average)) / (double) normaliser;
     if (clip) return std::max(0.0, std::min(val, 1.0));
     return val;
+}
+
+/** Unique singleton instance (for now) */
+// This implementation is pretty hokey, and is a stop-gap until some
+// sort of moreelegant way of managing the attentionbank is found.
+// One of the issues is that access via this function can be CPU-wasteful.
+AttentionBank& opencog::attentionbank(AtomSpace* asp)
+{
+    static AttentionBank* _instance = nullptr;
+    static AtomSpace* _as = nullptr;
+
+    // Protect setting and getting against thread races.
+    // This is probably not needed.
+    static std::map<AtomSpace*, AttentionBank*> banksy;
+    static std::mutex art;
+    std::unique_lock<std::mutex> graffiti(art);
+
+    if (_as != asp and _instance) {
+        delete _instance;
+        _instance = nullptr;
+        _as = nullptr;
+    }
+    if (asp and nullptr == _instance) {
+        _instance = new AttentionBank(asp);
+        _as = asp;
+    }
+    return *_instance;
 }

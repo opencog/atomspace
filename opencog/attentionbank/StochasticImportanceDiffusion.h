@@ -61,7 +61,7 @@ namespace opencog
          */
         class StochasticDiffusionAmountCalculator
         {
-            const AtomSpace * _as;
+            AtomSpace * _as;
             std::vector<DiffusionRecordBin> _bins; 
 
             unsigned int bin_index(const Handle& h);
@@ -69,7 +69,7 @@ namespace opencog
             void update_bin(const Handle& h);
 
             public:
-            StochasticDiffusionAmountCalculator(const AtomSpace * as);
+            StochasticDiffusionAmountCalculator(AtomSpace * as);
             ~StochasticDiffusionAmountCalculator();
 
             std::vector<DiffusionRecordBin> merge_bins(const std::vector<DiffusionRecordBin>& past,

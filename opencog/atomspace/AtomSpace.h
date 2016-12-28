@@ -35,7 +35,6 @@
 
 #include <opencog/atoms/base/ClassServer.h>
 
-#include <opencog/attentionbank/AttentionBank.h>
 #include <opencog/atomspace/AtomTable.h>
 #include <opencog/atomspace/BackingStore.h>
 
@@ -65,7 +64,6 @@ class AtomSpace
     friend class ODBCAtomStorage;   // Needs to call get_atomtable()
     friend class ZMQPersistSCM;
     friend class ::AtomTableUTest;
-    friend class ecan::StochasticDiffusionAmountCalculator; // needs to access _bank
 
     /**
      * Override and declare copy constructor and equals operator, to
@@ -75,7 +73,6 @@ class AtomSpace
     AtomSpace(const AtomSpace&);
 
     AtomTable _atom_table;
-    AttentionBank _bank;
     /**
      * Used to fetch atoms from disk.
      */
@@ -530,150 +527,6 @@ public:
     std::string to_string();
 
     /* ----------------------------------------------------------- */
-    /* Attentional Focus stuff */
-
-    /** Retrieve the doubly normalised Short-Term Importance between -1..1
-     * for a given Handle. STI above and below threshold normalised separately
-     * and linearly.
-     *
-     * @param h The atom handle to get STI for
-     * @param average Should the recent average max/min STI be used, or the
-     * exact min/max?
-     * @param clip Should the returned value be clipped to -1..1? Outside this
-     * range can be returned if average=true
-     * @return normalised STI between -1..1
-     */
-    float get_normalised_STI(Handle h, bool average=true, bool clip=false) const {
-        return _bank.getNormalisedSTI(h->getAttentionValue(), average, clip);
-    }
-
-    /** Retrieve the linearly normalised Short-Term Importance between 0..1
-     * for a given Handle.
-     *
-     * @param h The atom handle to get STI for
-     * @param average Should the recent average max/min STI be used, or the
-     * exact min/max?
-     * @param clip Should the returned value be clipped to 0..1? Outside this
-     * range can be returned if average=true
-     * @return normalised STI between 0..1
-     */
-    float get_normalised_zero_to_one_STI(Handle h, bool average=true, bool clip=false) const {
-        return _bank.getNormalisedZeroToOneSTI(h->getAttentionValue(), average, clip);
-    }
-
-    /**
-     * Returns the set of atoms within the given importance range.
-     *
-     * @param Importance range lower bound (inclusive).
-     * @param Importance range upper bound (inclusive).
-     * @return The set of atoms within the given importance range.
-     *
-     * @note: This method utilizes the ImportanceIndex
-     */
-    template <typename OutputIterator> OutputIterator
-    get_handles_by_AV(OutputIterator result,
-                      AttentionValue::sti_t lowerBound,
-                      AttentionValue::sti_t upperBound = AttentionValue::MAXSTI) const
-    {
-        UnorderedHandleSet hs = _bank.getHandlesByAV(lowerBound, upperBound);
-        return std::copy(hs.begin(), hs.end(), result);
-    }
-
-    /**
-     * Gets the set of all handles in the Attentional Focus
-     *
-     * @return The set of all atoms in the Attentional Focus
-     * @note: This method utilizes the ImportanceIndex
-     */
-    template <typename OutputIterator> OutputIterator
-    get_handle_set_in_attentional_focus(OutputIterator result) const
-    {
-        return get_handles_by_AV(result, get_attentional_focus_boundary(),
-                                 AttentionValue::AttentionValue::MAXSTI);
-    }
-
-    /** Get attentional focus boundary
-     * Generally atoms below this threshold shouldn't be accessed unless search
-     * methods are unsuccessful on those that are above this value.
-     *
-     * @return Short Term Importance threshold value
-     */
-    AttentionValue::sti_t get_attentional_focus_boundary() const {
-        return _bank.getAttentionalFocusBoundary();
-    }
-
-    /** Change the attentional focus boundary.
-     * Some situations may benefit from less focussed searches.
-     *
-     * @param s New threshold
-     * @return Short Term Importance threshold value
-     */
-    AttentionValue::sti_t set_attentional_focus_boundary(
-        AttentionValue::sti_t s) {
-        return _bank.setAttentionalFocusBoundary(s);
-    }
-
-    /** Get the maximum STI observed in the AtomSpace.
-     * @param average If true, return an exponentially decaying average of
-     * maximum STI, otherwise return the actual maximum.
-     * @return Maximum STI
-     */
-    AttentionValue::sti_t get_max_STI(bool average=true) const
-    { return _bank.getMaxSTI(average); }
-
-    /** Get the minimum STI observed in the AtomSpace.
-     *
-     * @param average If true, return an exponentially decaying average of
-     * minimum STI, otherwise return the actual maximum.
-     * @return Minimum STI
-     */
-    AttentionValue::sti_t get_min_STI(bool average=true) const
-    { return _bank.getMinSTI(average); }
-
-    /** Update the minimum STI observed in the AtomSpace.
-     * Min/max are not updated on setSTI because average is calculate by lobe
-     * cycle, although this could potentially also be handled by the cogServer.
-     *
-     * @warning Should only be used by attention allocation system.
-     * @param m New minimum STI
-     */
-    void update_min_STI(AttentionValue::sti_t m) { _bank.updateMinSTI(m); }
-
-    /**
-     * Update the maximum STI observed in the AtomSpace. Min/max are not updated
-     * on setSTI because average is calculate by lobe cycle, although this could
-     * potentially also be handled by the cogServer.
-     *
-     * @warning Should only be used by attention allocation system.
-     * @param m New maximum STI
-     */
-    void update_max_STI(AttentionValue::sti_t m) { _bank.updateMaxSTI(m); }
-    void update_STI_funds(AttentionValue::sti_t m) { _bank.updateSTIFunds(m); }
-    void update_LTI_funds(AttentionValue::lti_t m) { _bank.updateLTIFunds(m); }
-    long get_STI_funds() const { return _bank.getSTIFunds(); }
-    long get_LTI_funds() const { return _bank.getLTIFunds(); }
-
-    /** See the AttentionBank for documentation */
-    void stimulate(Handle& h, double stimulus) { _bank.stimulate(h, stimulus); }
-    void updateImportanceIndex(AtomPtr a, int bin) {
-        _bank.updateImportanceIndex(a, bin); }
-
-    // ---- AttentionBank Signals
-    boost::signals2::connection AddAFSignal(const AFCHSigl::slot_type& function)
-    {
-        return _bank.AddAFSignal().connect(function);
-    }
-    boost::signals2::connection RemoveAFSignal(const AFCHSigl::slot_type& function)
-    {
-        return _bank.RemoveAFSignal().connect(function);
-    }
-    boost::signals2::connection AVChangedSignal(const AVCHSigl::slot_type& function)
-    {
-        return _bank.getAVChangedSignal().connect(function);
-    }
-    AVCHSigl& getAVChangedSignal() { return _bank.getAVChangedSignal(); }
-
-    /* ----------------------------------------------------------- */
     // ---- Signals
 
     boost::signals2::connection addAtomSignal(const AtomSignal::slot_type& function)
@@ -698,33 +551,8 @@ public:
      * If you need this function, just cut and paste the code below into
      * whatever you are doing!
      */
-    template <typename OutputIterator> OutputIterator
-    get_handles_by_name(OutputIterator result,
-                        const std::string& name,
-                        Type type = NODE,
-                        bool subclass = true)
-    {
-        if (name.c_str()[0] == 0)
-            return get_handles_by_type(result, type, subclass);
-
-        if (false == subclass) {
-            Handle h(get_handle(type, name));
-            if (h) *(result++) = h;
-            return result;
-        }
-
-        classserver().foreachRecursive(
-            [&](Type t)->void {
-                Handle h(get_handle(t, name));
-                if (h) *(result++) = h; }, type);
-
-        return result;
-    }
-
-    /** DEPRECATED! Do NOT USE IN NEW CODE!
-     * If you need this, just copy the code below into your app! */
-    bool is_node(Handle h) const { return NodeCast(h) != NULL; }
-    bool is_link(Handle h) const { return LinkCast(h) != NULL; }
+    bool is_node(Handle h) const { return h != nullptr and h->isNode(); }
+    bool is_link(Handle h) const { return h != nullptr and h->isLink(); }
 
     /** DEPRECATED! Do NOT USE IN NEW CODE!
      * If you need this, just copy the code below into your app! */
@@ -733,7 +561,7 @@ public:
         return h->toString();
     }
 
-    /** DEPRECATED! Do NOT USE IN NEW CODE!
+    /** DEPRECATED! Do NOT USE IN NEW CODE! (in use by pattern miner)
      * If you need this, just copy the code below into your app! */
     const std::string& get_name(Handle h) const {
         static std::string noname;
@@ -742,25 +570,13 @@ public:
         return noname;
     }
 
-    /** DEPRECATED! Do NOT USE IN NEW CODE!
-     * If you need this, just copy the code below into your app! */
-    void set_STI(Handle h, AttentionValue::sti_t stiValue) const {
-        h->setSTI(stiValue);
-    }
-
-    /** DEPRECATED! Do NOT USE IN NEW CODE!
-     * If you need this, just copy the code below into your app! */
-    AttentionValue::sti_t get_STI(Handle h) const {
-        return h->getAttentionValue()->getSTI();
-    }
-
-    /** DEPRECATED! Do NOT USE IN NEW CODE!
+    /** DEPRECATED! Do NOT USE IN NEW CODE! (in use by pattern miner)
      * If you need this, just copy the code below into your app! */
     Type get_type(Handle h) const {
         return h->getType();
     }
 
-    /** DEPRECATED! Do NOT USE IN NEW CODE!
+    /** DEPRECATED! Do NOT USE IN NEW CODE! (in use by pattern miner)
      * If you need this, just copy the code below into your app! */
     TruthValuePtr get_TV(Handle h) const
     {

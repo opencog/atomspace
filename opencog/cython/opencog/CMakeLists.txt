@@ -79,6 +79,7 @@ ADD_LIBRARY(atomspace_cython
 ADD_DEPENDENCIES(atomspace_cython opencog_atom_types)
 
 TARGET_LINK_LIBRARIES(atomspace_cython
+	attentionbank
 	atomspace
 	atomutils
 	clearbox

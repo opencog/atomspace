@@ -4,6 +4,7 @@ LINK_LIBRARIES(
 	atomutils
 	atomspaceutils
 	atomspace
+	attentionbank
 	clearbox
 )
 

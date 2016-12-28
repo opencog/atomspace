@@ -29,6 +29,7 @@
 
 #include <opencog/atomspace/AtomSpace.h>
 #include <opencog/atoms/base/Node.h>
+#include <opencog/attentionbank/AttentionBank.h>
 #include <opencog/truthvalue/SimpleTruthValue.h>
 #include <opencog/util/misc.h>
 #include <opencog/util/oc_assert.h>
@@ -737,13 +738,13 @@ public:
     void testGetNormalisedSTI() {
         Handle h = atomSpace->add_node(CONCEPT_NODE,"blah");
         bool clip = false, average = false;
-        TS_ASSERT_EQUALS(atomSpace->get_normalised_zero_to_one_STI(h, average, clip), 0.0f);
+        TS_ASSERT_EQUALS(attentionbank(atomSpace).getNormalisedZeroToOneSTI(h->getAttentionValue(), average, clip), 0.0f);
         average = true;
         setSTI(h,10);
-        atomSpace->update_max_STI(10);
-        TS_ASSERT(atomSpace->get_normalised_zero_to_one_STI(h, average, clip) > 1.0f);
+        attentionbank(atomSpace).updateMaxSTI(10);
+        TS_ASSERT(attentionbank(atomSpace).getNormalisedZeroToOneSTI(h->getAttentionValue(), average, clip) > 1.0f);
         clip = true;
-        TS_ASSERT_DELTA(atomSpace->get_normalised_zero_to_one_STI(h, average, clip), 1.0f, 0.001f);
+        TS_ASSERT_DELTA(attentionbank(atomSpace).getNormalisedZeroToOneSTI(h->getAttentionValue(), average, clip), 1.0f, 0.001f);
     }
 
 };
