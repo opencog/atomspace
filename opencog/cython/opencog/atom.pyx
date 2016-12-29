@@ -74,9 +74,9 @@ cdef class Atom(object):
             cdef cAtom* atom_ptr = self.handle.atom_ptr()
             if atom_ptr == NULL:   # avoid null-pointer deref
                 return None
-            sti = atom_ptr.getSTI()
-            lti = atom_ptr.getLTI()
-            vlti = atom_ptr.getVLTI()
+            sti = attentionbank(self.atomspace.atomspace).get_sti(self.handle[0])
+            lti = attentionbank(self.atomspace.atomspace).get_lti(self.handle[0])
+            vlti = attentionbank(self.atomspace.atomspace).get_vlti(self.handle[0])
             return { "sti": sti, "lti": lti, "vlti": vlti }
         def __set__(self, av_dict):
             try:
@@ -90,57 +90,60 @@ cdef class Atom(object):
                 if "sti" in av_dict: sti = av_dict["sti"]
                 if "lti" in av_dict: lti = av_dict["lti"]
                 if "vlti" in av_dict: vlti = av_dict["vlti"]
-            if sti: atom_ptr.setSTI(sti)
-            if lti: atom_ptr.setLTI(lti)
-            if vlti: atom_ptr.setVLTI(vlti)
+            if sti:
+                attentionbank(self.atomspace.atomspace).set_sti(self.handle[0], sti)
+            if lti:
+                attentionbank(self.atomspace.atomspace).set_lti(self.handle[0], lti)
+            if vlti:
+                attentionbank(self.atomspace.atomspace).inc_vlti(self.handle[0])
 
     property sti:
         def __get__(self):
             cdef cAtom* atom_ptr = self.handle.atom_ptr()
             if atom_ptr == NULL:   # avoid null-pointer deref
                 return None
-            return atom_ptr.getSTI()
+            return attentionbank(self.atomspace.atomspace).get_sti(self.handle[0])
         def __set__(self,val):
             cdef cAtom* atom_ptr = self.handle.atom_ptr()
             if atom_ptr == NULL:   # avoid null-pointer deref
                 return
-            atom_ptr.setSTI(val)
+            attentionbank(self.atomspace.atomspace).set_sti(self.handle[0], val)
 
     property lti:
         def __get__(self):
             cdef cAtom* atom_ptr = self.handle.atom_ptr()
             if atom_ptr == NULL:   # avoid null-pointer deref
                 return None
-            return atom_ptr.getLTI()
+            return attentionbank(self.atomspace.atomspace).get_lti(self.handle[0])
         def __set__(self,val):
             cdef cAtom* atom_ptr = self.handle.atom_ptr()
             if atom_ptr == NULL:   # avoid null-pointer deref
                 return
-            atom_ptr.setLTI(val)
+            attentionbank(self.atomspace.atomspace).set_lti(self.handle[0], val)
 
     property vlti:
         def __get__(self):
             cdef cAtom* atom_ptr = self.handle.atom_ptr()
             if atom_ptr == NULL:   # avoid null-pointer deref
                 return None
-            return atom_ptr.getVLTI()
+            return attentionbank(self.atomspace.atomspace).get_vlti(self.handle[0])
         def __set__(self,val):
             cdef cAtom* atom_ptr = self.handle.atom_ptr()
             if atom_ptr == NULL:   # avoid null-pointer deref
                 return
-            atom_ptr.setVLTI(val)
+            attentionbank(self.atomspace.atomspace).inc_vlti(self.handle[0])
 
     def increment_vlti(self):
         cdef cAtom* atom_ptr = self.handle.atom_ptr()
         if atom_ptr == NULL:   # avoid null-pointer deref
             return
-        atom_ptr.incVLTI()
+        attentionbank(self.atomspace.atomspace).inc_vlti(self.handle[0])
 
     def decrement_vlti(self):
         cdef cAtom* atom_ptr = self.handle.atom_ptr()
         if atom_ptr == NULL:   # avoid null-pointer deref
             return
-        atom_ptr.decVLTI()
+        attentionbank(self.atomspace.atomspace).dec_vlti(self.handle[0])
 
     def get_out(self):
         cdef cAtom* atom_ptr = self.handle.atom_ptr()

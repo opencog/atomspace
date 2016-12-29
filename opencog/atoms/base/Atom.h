@@ -219,67 +219,15 @@ public:
         return Handle(std::dynamic_pointer_cast<Atom>(shared_from_this()));
     }
 
-    /** Returns the AttentionValue object of the atom.  */
+    /**
+     * Returns the AttentionValue object of the atom.
+     * XXX Deprecated; use the AttentionBank, instead.
+     */
     AttentionValuePtr getAttentionValue() const;
 
     //! Sets the AttentionValue object of the atom.
+    //! XXX Deprecated; use the AttentionBank, instead.
     void setAttentionValue(AttentionValuePtr);
-
-    /// Handy-dandy convenience getters for attention values.
-    AttentionValue::sti_t getSTI() const
-    {
-        return getAttentionValue()->getSTI();
-    }
-
-    AttentionValue::lti_t getLTI() const
-    {
-        return getAttentionValue()->getLTI();
-    }
-
-    AttentionValue::vlti_t getVLTI() const
-    {
-        return getAttentionValue()->getVLTI();
-    }
-
-    /** Change the Short-Term Importance */
-    void setSTI(AttentionValue::sti_t stiValue)
-    {
-        /* Make a copy */
-        AttentionValuePtr old_av = getAttentionValue();
-        AttentionValuePtr new_av = createAV(
-            stiValue,
-            old_av->getLTI(),
-            old_av->getVLTI());
-        setAttentionValue(new_av);
-    }
-
-    /** Change the Long-Term Importance. */
-    void setLTI(AttentionValue::lti_t ltiValue)
-    {
-        AttentionValuePtr old_av = getAttentionValue();
-        AttentionValuePtr new_av = createAV(
-            old_av->getSTI(),
-            ltiValue,
-            old_av->getVLTI());
-        setAttentionValue(new_av);
-    }
-
-    /** Change the Very-Long-Term Importance. */
-    void setVLTI(AttentionValue::vlti_t vltiValue)
-    {
-        AttentionValuePtr old_av = getAttentionValue();
-        AttentionValuePtr new_av = createAV(
-            old_av->getSTI(),
-            old_av->getLTI(),
-            vltiValue);
-        setAttentionValue(new_av);
-    }
-
-    /** Increase the Very-Long-Term Importance by 1. */
-    void incVLTI() { chgVLTI(+1); }
-
-    /** Decrease the Very-Long-Term Importance by 1. */
-    void decVLTI() { chgVLTI(-1); }
 
     /** Returns the TruthValue object of the atom. */
     TruthValuePtr getTruthValue() const;
