@@ -12,6 +12,7 @@
 #include <libguile.h>
 
 #include <opencog/atomspace/AtomSpace.h>
+#include <opencog/attentionbank/AttentionBank.h>
 #include <opencog/atoms/base/ClassServer.h>
 #include <opencog/guile/SchemeSmob.h>
 
@@ -59,7 +60,8 @@ std::string SchemeSmob::handle_to_string(Handle h, int indent)
 	// to file, and then restored, as needed.
 	std::string ret = "";
 	for (int i=0; i< indent; i++) ret += "   ";
-	if (h->isNode()) {
+	if (h->isNode())
+	{
 		ret += "(";
 		ret += classserver().getTypeName(h->getType());
 		ret += " \"";
@@ -74,7 +76,8 @@ std::string SchemeSmob::handle_to_string(Handle h, int indent)
 		}
 
 		// Print the attention value after the truth value
-		AttentionValuePtr av(h->getAttentionValue());
+		AtomSpace* as = ss_get_env_as("cog-node-to-string");
+		AttentionValuePtr av(attentionbank(as).get_av(h));
 		if (not av->isDefaultAV()) {
 			ret += " ";
 			ret += av_to_string (av.get());
@@ -83,7 +86,8 @@ std::string SchemeSmob::handle_to_string(Handle h, int indent)
 		return ret;
 	}
 
-	if (h->isLink()) {
+	if (h->isLink())
+	{
 		ret += "(";
 		ret += classserver().getTypeName(h->getType());
 
@@ -95,7 +99,8 @@ std::string SchemeSmob::handle_to_string(Handle h, int indent)
 		}
 
 		// Print the attention value after the truth value
-		AttentionValuePtr av(h->getAttentionValue());
+		AtomSpace* as = ss_get_env_as("cog-link-to-string");
+		AttentionValuePtr av(attentionbank(as).get_av(h));
 		if (not av->isDefaultAV()) {
 			ret += " ";
 			ret += av_to_string (av.get());
@@ -379,15 +384,12 @@ SCM SchemeSmob::ss_new_node (SCM stype, SCM sname, SCM kv_pairs)
 		// using a garbage-collected raw pointer.  So clone makes up the
 		// difference.
 		const TruthValue *tv = get_tv_from_list(kv_pairs);
-		if (tv)
-			h->setTruthValue(tv->clone());
+		if (tv) h->setTruthValue(tv->clone());
 
 		// Was an attention value explicitly specified?
 		// If so, then we've got to set it.
 		AttentionValue *av = get_av_from_list(kv_pairs);
-		if (av) {
-			h->setAttentionValue(av->clone());
-		}
+		if (av) attentionbank(atomspace).change_av(h, av->clone());
 	}
 	catch (const std::exception& ex)
 	{
@@ -419,15 +421,12 @@ SCM SchemeSmob::ss_node (SCM stype, SCM sname, SCM kv_pairs)
 
 	// If there was a truth value, change it.
 	const TruthValue *tv = get_tv_from_list(kv_pairs);
-	if (tv) {
-		h->setTruthValue(tv->clone());
-	}
+	if (tv) h->setTruthValue(tv->clone());
 
 	// If there was an attention value, change it.
 	const AttentionValue *av = get_av_from_list(kv_pairs);
-	if (av) {
-		h->setAttentionValue(av->clone());
-	}
+	if (av) attentionbank(atomspace).change_av(h, av->clone());
+
 	scm_remember_upto_here_1(kv_pairs);
 	return handle_to_scm (h);
 }
@@ -516,9 +515,7 @@ SCM SchemeSmob::ss_new_link (SCM stype, SCM satom_list)
 		// Was an attention value explicitly specified?
 		// If so, then we've got to set it.
 		const AttentionValue *av = get_av_from_list(satom_list);
-		if (av) {
-			h->setAttentionValue(av->clone());
-		}
+		if (av) attentionbank(atomspace).change_av(h, av->clone());
 	}
 	catch (const std::exception& ex)
 	{
@@ -553,7 +550,7 @@ SCM SchemeSmob::ss_link (SCM stype, SCM satom_list)
 
 	// If there was an attention value, change it.
 	const AttentionValue *av = get_av_from_list(satom_list);
-	if (av) h->setAttentionValue(av->clone());
+	if (av) attentionbank(atomspace).change_av(h, av->clone());
 
 	scm_remember_upto_here_1(satom_list);
 	return handle_to_scm (h);
