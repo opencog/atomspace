@@ -12,7 +12,7 @@ using namespace opencog;
 
 /**
  * Sample code that shows how to listen for AtomSpace related events.
- * The followings are all the events/signals supported by the AtomSpace.
+ * The following are all of the events/signals emitted by the AtomSpace.
  */
 
 void AtomAddedCBHandler(const Handle& h);
@@ -30,6 +30,7 @@ void AtomRemovedFromAFCBHandler(const Handle& h,
 int main(int argc, char ** args)
 {
     AtomSpace as;
+    AttentionBank& bank(attentionbank(&as));
 
     boost::signals2::connection AtomAddedSignalConn,
                                 AVChangedSignalConn,
@@ -38,20 +39,20 @@ int main(int argc, char ** args)
                                 AtomAddedToAttentionalFocusSignalConn,
                                 AtomRemovedFromAttentionalFocusSignalConn;
 
-    //Register Atomspace Event call back handlers.
+    // Register Atomspace and AttentionBank event callback handlers.
     AtomAddedSignalConn = as.addAtomSignal(
             boost::bind(&AtomAddedCBHandler, _1));
-    AVChangedSignalConn = attentionbank(&as).getAVChangedSignal().connect(
+    AVChangedSignalConn = bank.getAVChangedSignal().connect(
             boost::bind(&AVChangedCBHandler, _1, _2, _3));
     TVChangedSignalConn = as.TVChangedSignal(
             boost::bind(&TVChangedCBHandler, _1, _2, _3));
     AtomsRemovedSignalConn = as.removeAtomSignal(
             boost::bind(&AtomRemovedCBHandler, _1));
     AtomAddedToAttentionalFocusSignalConn =
-        attentionbank(&as).AddAFSignal().connect(
+        bank.AddAFSignal().connect(
             boost::bind(&AtomAddedToAFCBHandler, _1, _2, _3));
     AtomRemovedFromAttentionalFocusSignalConn =
-        attentionbank(&as).RemoveAFSignal().connect(
+        bank.RemoveAFSignal().connect(
             boost::bind(&AtomRemovedFromAFCBHandler, _1, _2, _3));
 
     // create atoms
@@ -64,22 +65,22 @@ int main(int argc, char ** args)
     HandleSeq hseq = { h1, h2 };
     Handle hinheritance = as.add_link(INHERITANCE_LINK, hseq);
 
-    // Update atom's truth value
+    // Update the atom's truth value.
     SimpleTruthValuePtr tvinheritance = std::make_shared<SimpleTruthValue>(0.5, 100);
     hinheritance->setTruthValue(tvinheritance);
 
-    // Update atom's Attention value. Attention values are managed by the
-    // ECAN(http://wiki.opencog.org/wikihome/index.php/Attention_Allocation)
-    //mind agents.Not meant to be used by other modules.
-    hinheritance->setAttentionValue(
-            AttentionValuePtr(new AttentionValue(15, 30, 45)));
+    // Update the atom's Attention value. Attention values are managed
+    // by ECAN agents. See
+    // http://wiki.opencog.org/w/Attention_Allocation
+    bank.change_av(hinheritance, createAV(15, 30, 45));
 
     // ListLink is an example of unordered type of Link.
     // Thus order is not guaranteed in this case.
     hseq = {h, h2};
     Handle hllink = as.add_link(LIST_LINK, hseq);
 
-    // Set the recursive delete flag to delete h including everything pointing to it.
+    // Set the recursive delete flag to delete h including
+    // everything pointing to it.
     assert(as.remove_atom(h, true));
 
     return 0;
@@ -88,14 +89,12 @@ int main(int argc, char ** args)
 
 void AtomAddedCBHandler(const Handle& h)
 {
-
     std::cout << "An atom added.\n" << h->toShortString() << std::endl;
 }
 
 void AVChangedCBHandler(const Handle& h, const AttentionValuePtr& av_old,
                         const AttentionValuePtr& av_new)
 {
-
     std::cout << "An atom's attention value changed.\n" << h->toShortString()
               << std::endl;
 }
