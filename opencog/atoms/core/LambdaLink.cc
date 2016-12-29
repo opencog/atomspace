@@ -28,26 +28,26 @@
 using namespace opencog;
 
 LambdaLink::LambdaLink(const HandleSeq& oset,
-                       TruthValuePtr tv, AttentionValuePtr av)
-	: ScopeLink(LAMBDA_LINK, oset, tv, av)
+                       TruthValuePtr tv)
+	: ScopeLink(LAMBDA_LINK, oset, tv)
 {
 }
 
 LambdaLink::LambdaLink(const Handle& vars, const Handle& body,
-                       TruthValuePtr tv, AttentionValuePtr av)
-	: ScopeLink(LAMBDA_LINK, HandleSeq({vars, body}), tv, av)
+                       TruthValuePtr tv)
+	: ScopeLink(LAMBDA_LINK, HandleSeq({vars, body}), tv)
 {
 }
 
 LambdaLink::LambdaLink(Type t, const Handle& body,
-                       TruthValuePtr tv, AttentionValuePtr av)
-	: ScopeLink(t, HandleSeq({body}), tv, av)
+                       TruthValuePtr tv)
+	: ScopeLink(t, HandleSeq({body}), tv)
 {
 }
 
 LambdaLink::LambdaLink(Type t, const HandleSeq& oset,
-                       TruthValuePtr tv, AttentionValuePtr av)
-	: ScopeLink(t, oset, tv, av)
+                       TruthValuePtr tv)
+	: ScopeLink(t, oset, tv)
 {
 }
 

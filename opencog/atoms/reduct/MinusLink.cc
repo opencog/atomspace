@@ -28,18 +28,14 @@
 
 using namespace opencog;
 
-MinusLink::MinusLink(const HandleSeq& oset,
-                   TruthValuePtr tv,
-                   AttentionValuePtr av)
-    : PlusLink(MINUS_LINK, oset, tv, av)
+MinusLink::MinusLink(const HandleSeq& oset, TruthValuePtr tv)
+    : PlusLink(MINUS_LINK, oset, tv)
 {
 	init();
 }
 
-MinusLink::MinusLink(Type t, const HandleSeq& oset,
-                   TruthValuePtr tv,
-                   AttentionValuePtr av)
-    : PlusLink(t, oset, tv, av)
+MinusLink::MinusLink(Type t, const HandleSeq& oset, TruthValuePtr tv)
+    : PlusLink(t, oset, tv)
 {
 	if (not classserver().isA(t, MINUS_LINK))
 		throw InvalidParamException(TRACE_INFO, "Expecting a MinusLink");
@@ -47,17 +43,15 @@ MinusLink::MinusLink(Type t, const HandleSeq& oset,
 }
 
 MinusLink::MinusLink(const Handle& a, const Handle& b,
-                   TruthValuePtr tv,
-                   AttentionValuePtr av)
-    : PlusLink(MINUS_LINK, a, b, tv, av)
+                   TruthValuePtr tv)
+    : PlusLink(MINUS_LINK, a, b, tv)
 {
 	init();
 }
 
 MinusLink::MinusLink(Type t, const Handle& a, const Handle& b,
-                   TruthValuePtr tv,
-                   AttentionValuePtr av)
-    : PlusLink(t, a, b, tv, av)
+                   TruthValuePtr tv)
+    : PlusLink(t, a, b, tv)
 {
 	if (not classserver().isA(t, MINUS_LINK))
 		throw InvalidParamException(TRACE_INFO, "Expecting a MinusLink");

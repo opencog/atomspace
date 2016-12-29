@@ -54,6 +54,8 @@ using namespace std;
 class AttentionValueUTest :  public CxxTest::TestSuite
 {
 private:
+    AtomSpace* atomSpace;
+    AttentionBank* bank;
 
     AttentionValue::sti_t sti[NUM_AVS];
     AttentionValue::lti_t lti[NUM_AVS];
@@ -61,41 +63,40 @@ private:
 
     AttentionValuePtr avs[NUM_AVS];
 
-    AttentionValue::vlti_t getVLTI(Handle h) const {
-        return h->getAttentionValue()->getVLTI();
+    AttentionValue::vlti_t getVLTI(Handle h) {
+        return bank->get_vlti(h);
     }
 
-    void chgVLTI(Handle h, int unit) const {
-        AttentionValuePtr old_av = h->getAttentionValue();
+    void chgVLTI(Handle h, int unit) {
+        AttentionValuePtr old_av = bank->get_av(h);
         AttentionValuePtr new_av = createAV(
             old_av->getSTI(),
             old_av->getLTI(),
             old_av->getVLTI() + unit);
-        h->setAttentionValue(new_av);
+        bank->change_av(h, new_av);
     }
 
     void incVLTI(Handle h) { chgVLTI(h, +1); }
     void decVLTI(Handle h) { chgVLTI(h, -1); }
 
-    void setSTI(Handle h, AttentionValue::sti_t stiValue) const {
+    void setSTI(Handle h, AttentionValue::sti_t stiValue) {
         /* Make a copy */
-        AttentionValuePtr old_av = h->getAttentionValue();
+        AttentionValuePtr old_av = bank->get_av(h);
         AttentionValuePtr new_av = createAV(
             stiValue,
             old_av->getLTI(),
             old_av->getVLTI());
-        h->setAttentionValue(new_av);
+        bank->change_av(h, new_av);
     }
 
-    void setLTI(Handle h, AttentionValue::lti_t ltiValue) const {
-        AttentionValuePtr old_av = h->getAttentionValue();
+    void setLTI(Handle h, AttentionValue::lti_t ltiValue) {
+        AttentionValuePtr old_av = bank->get_av(h);
         AttentionValuePtr new_av = createAV(
             old_av->getSTI(),
             ltiValue,
             old_av->getVLTI());
-        h->setAttentionValue(new_av);
+        bank->change_av(h, new_av);
     }
-
 
 public:
     AttentionValueUTest() {
@@ -121,13 +122,19 @@ public:
     }
 
     void setUp() {
+        atomSpace = new AtomSpace();
+        bank = &attentionbank(atomSpace);
+
         avs[0] = createAV();
         avs[1] = createAV(sti[1]);
         avs[2] = createAV(sti[2], lti[2]);
         avs[3] = createAV(sti[3], lti[3], vlti[3]);
     }
 
-    void tearDown() {}
+    void tearDown() {
+        attentionbank(nullptr);
+        delete atomSpace;
+    }
 
     void testConstructors() {
 
@@ -184,8 +191,6 @@ public:
     }
 
     void testVLTI() {
-        AtomSpace* atomSpace = new AtomSpace();
-        attentionbank(atomSpace);
         HandleSeq atoms = createSimpleGraph(atomSpace, "vlti");
 
         TS_ASSERT(getVLTI(atoms[0])==AttentionValue::DISPOSABLE);
@@ -210,14 +215,12 @@ public:
     void testComparisons() {
         logger().debug("BEGIN TEST:");
 
-        AtomSpace* atomSpace = new AtomSpace();
-        attentionbank(atomSpace);
-
         HandleSeq atoms = createSimpleGraph(atomSpace, "comparisons");
 
         logger().debug("STISort");
 
         STISort sSort;
+        sSort._ab = bank;
 
         // an atom which has higher sti is strictly before one with lower sti
         TS_ASSERT_EQUALS(sSort(atoms[1], atoms[0]), true);
@@ -230,6 +233,7 @@ public:
         logger().debug("LTIAndTVAscendingSort");
 
         LTIAndTVAscendingSort latvSort;
+        latvSort._ab = bank;
 
         // an atom which has higher LTI*TV is not strictly before one with lower LTI*TV
         TS_ASSERT_EQUALS(latvSort(atoms[1], atoms[0]), false);
@@ -242,6 +246,7 @@ public:
         logger().debug("LTIThenTVAscendingSort");
 
         LTIThenTVAscendingSort lttvSort;
+        lttvSort._ab = bank;
 
         // An atom which has higher LTI is not strictly before one
         // with lower LTI.

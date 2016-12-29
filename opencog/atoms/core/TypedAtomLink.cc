@@ -58,15 +58,15 @@ void TypedAtomLink::init()
 }
 
 TypedAtomLink::TypedAtomLink(const HandleSeq& oset,
-                             TruthValuePtr tv, AttentionValuePtr av)
-	: UniqueLink(TYPED_ATOM_LINK, oset, tv, av)
+                             TruthValuePtr tv)
+	: UniqueLink(TYPED_ATOM_LINK, oset, tv)
 {
 	init();
 }
 
 TypedAtomLink::TypedAtomLink(const Handle& name, const Handle& defn,
-                             TruthValuePtr tv, AttentionValuePtr av)
-	: UniqueLink(TYPED_ATOM_LINK, HandleSeq({name, defn}), tv, av)
+                             TruthValuePtr tv)
+	: UniqueLink(TYPED_ATOM_LINK, HandleSeq({name, defn}), tv)
 {
 	init();
 }

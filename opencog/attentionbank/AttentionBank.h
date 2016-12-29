@@ -28,6 +28,7 @@
 
 #include <atomic>
 #include <mutex>
+#include <unordered_map>
 
 #include <boost/signals2.hpp>
 
@@ -59,11 +60,13 @@ class AttentionBank
 {
     friend class ecan::StochasticDiffusionAmountCalculator; //need to access _importanceIndex
 
-    /** The connection by which we are notified of AV changes */
-    boost::signals2::connection _AVChangedConnection;
+    /** The attention values of all the atoms in the attention bank */
+    std::mutex _idx_mtx;
+    std::unordered_map<Handle, AttentionValuePtr> _atom_index;
+
+    /** AV changes */
     void AVChanged(const Handle&, const AttentionValuePtr&, const AttentionValuePtr&);
 
-    boost::signals2::connection _addAtomConnection;
     boost::signals2::connection _removeAtomConnection;
 
     /**
@@ -81,7 +84,8 @@ class AttentionBank
     AFCHSigl _RemoveAFSignal;
 
     /**
-     * Running average min and max STI, together with locks to pretect updates.
+     * Running average min and max STI, together with locks to
+     * protect updates.
      */
     opencog::recent_val<AttentionValue::sti_t> _maxSTI;
     opencog::recent_val<AttentionValue::sti_t> _minSTI;
@@ -111,13 +115,10 @@ class AttentionBank
     /** The importance index */
     ImportanceIndex _importanceIndex;
 
-    async_caller<AttentionBank,Handle> _index_insert_queue;
-    async_caller<AttentionBank,AtomPtr> _index_remove_queue;
-
     /** Signal emitted when the AV changes. */
     AVCHSigl _AVChangedSignal;
 
-    void shutdown(void);
+    void change_vlti(const Handle&, int);
 public:
     AttentionBank(AtomSpace*);
     ~AttentionBank();
@@ -133,13 +134,36 @@ public:
     AVCHSigl& getAVChangedSignal() { return _AVChangedSignal; }
 
     /**
+     * Get the attention value of an atom.
+     */
+    AttentionValuePtr get_av(const Handle&);
+    AttentionValue::sti_t get_sti(const Handle& h) {
+        return get_av(h)->getSTI();
+    }
+    AttentionValue::lti_t get_lti(const Handle& h) {
+        return get_av(h)->getLTI();
+    }
+    AttentionValue::vlti_t get_vlti(const Handle& h) {
+        return get_av(h)->getVLTI();
+    }
+
+    /**
+     * Change the attention value of an atom.
+     */
+    void change_av(const Handle&, AttentionValuePtr);
+    void set_sti(const Handle&, AttentionValue::sti_t);
+    void set_lti(const Handle&, AttentionValue::lti_t);
+    void inc_vlti(const Handle& h) { change_vlti(h, +1); }
+    void dec_vlti(const Handle& h) { change_vlti(h, -1); }
+
+    /**
      * Stimulate an atom.
      *
      * @warning Should only be used by attention allocation system.
      * @param  h Handle to be stimulated
      * @param stimulus stimulus amount
      */
-    void stimulate(Handle&, double stimulus);
+    void stimulate(const Handle&, double stimulus);
 
     /**
      * Get the total amount of STI in the AttentionBank, sum of
@@ -332,31 +356,12 @@ public:
      * @param The atom whose importance index will be updated.
      * @param The old importance bin where the atom originally was.
      */
-    void updateImportanceIndex(AtomPtr a, int bin)
+    void updateImportanceIndex(const Handle& h, int oldbin, int newbin)
     {
-        _importanceIndex.updateImportance(a.operator->(), bin);
+        _importanceIndex.updateImportance(h.operator->(), oldbin, newbin);
     }
 
-    void add_atom_to_indexInsertQueue(const Handle& h)
-    {
-        _index_insert_queue.enqueue(h);
-    }
-
-    void add_atom_to_indexRemoveQueue(const AtomPtr& atom)
-    {
-        _index_remove_queue.enqueue(atom);
-    }
-
-    void put_atom_into_index(const Handle& h)
-    {
-        _importanceIndex.insertAtom(h.operator->());
-    }
-
-    void remove_atom_from_index(const AtomPtr& atom)
-    {
-        _importanceIndex.removeAtom(atom.operator->());
-    }
-
+    void remove_atom_from_index(const AtomPtr& atom);
 };
 
 /* Singleton instance (for now) */

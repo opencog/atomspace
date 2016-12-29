@@ -49,16 +49,13 @@ protected:
 
 	void init(void);
 	FoldLink(Type, const HandleSeq& oset,
-	         TruthValuePtr tv = TruthValue::DEFAULT_TV(),
-	         AttentionValuePtr av = AttentionValue::DEFAULT_AV());
+	         TruthValuePtr tv = TruthValue::DEFAULT_TV());
 
 	FoldLink(Type, const Handle& a, const Handle& b,
-	         TruthValuePtr tv = TruthValue::DEFAULT_TV(),
-	         AttentionValuePtr av = AttentionValue::DEFAULT_AV());
+	         TruthValuePtr tv = TruthValue::DEFAULT_TV());
 public:
 	FoldLink(const HandleSeq& oset,
-	         TruthValuePtr tv = TruthValue::DEFAULT_TV(),
-	         AttentionValuePtr av = AttentionValue::DEFAULT_AV());
+	         TruthValuePtr tv = TruthValue::DEFAULT_TV());
 	FoldLink(Link& l);
 
    virtual Handle reduce(void);

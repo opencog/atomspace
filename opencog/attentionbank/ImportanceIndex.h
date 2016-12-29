@@ -24,7 +24,7 @@
 #define _OPENCOG_IMPORTANCEINDEX_H
 
 #include <opencog/truthvalue/AttentionValue.h>
-#include <opencog/atomspace/ThreadSafeFixedIntegerIndex.h>
+#include <opencog/attentionbank/ThreadSafeFixedIntegerIndex.h>
 
 namespace opencog
 {
@@ -32,29 +32,30 @@ namespace opencog
  *  @{
  */
 
+class AttentionBank;
 /**
  * Implements an index with additional routines needed for managing
- * short-term importance.  This index is not thread-safe, by itself.
- * Users of this class must gauarantee single-threaded access!
+ * short-term importance.  This index is thread-safe.
  */
 class ImportanceIndex
 {
 private:
+    AttentionBank& _bank;
     ThreadSafeFixedIntegerIndex _index;
 
 public:
-    ImportanceIndex(void);
-    void insertAtom(Atom*);
-    void removeAtom(Atom*);
+    ImportanceIndex(AttentionBank&);
+    void removeAtom(Atom*, int);
 
-    /** Updates the importance index for the given atom.
+    /**
+     * Updates the importance index for the given atom.
      * According to the new importance of the atom, it may change importance
      * bins.
      *
      * @param The atom whose importance index will be updated.
      * @param The old importance bin where the atom originally was.
      */
-    void updateImportance(Atom*, int);
+    void updateImportance(Atom*, int, int);
 
     UnorderedHandleSet getHandleSet(AttentionValue::sti_t,
                                     AttentionValue::sti_t) const;
@@ -70,12 +71,12 @@ public:
     static unsigned int importanceBin(short);
 
     /**
-     * Get the highest bin which containsAtoms
+     * Get the highest bin which contains Atoms
      */
     UnorderedHandleSet getMaxBinContents();
 
     /**
-     * Get the lowest bin which containsAtoms
+     * Get the lowest bin which contains Atoms
      */
     UnorderedHandleSet getMinBinContents();
  

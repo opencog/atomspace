@@ -49,17 +49,14 @@ protected:
 	void init(bool);
 	static Handle get_unique(const Handle&, Type, bool);
 	UniqueLink(Type, const HandleSeq&,
-	           TruthValuePtr tv = TruthValue::DEFAULT_TV(),
-	           AttentionValuePtr av = AttentionValue::DEFAULT_AV());
+	           TruthValuePtr tv = TruthValue::DEFAULT_TV());
 
 public:
 	UniqueLink(const HandleSeq&,
-	           TruthValuePtr tv = TruthValue::DEFAULT_TV(),
-	           AttentionValuePtr av = AttentionValue::DEFAULT_AV());
+	           TruthValuePtr tv = TruthValue::DEFAULT_TV());
 
 	UniqueLink(const Handle& alias, const Handle& body,
-	           TruthValuePtr tv = TruthValue::DEFAULT_TV(),
-	           AttentionValuePtr av = AttentionValue::DEFAULT_AV());
+	           TruthValuePtr tv = TruthValue::DEFAULT_TV());
 
 	UniqueLink(Link &l);
 

@@ -32,8 +32,7 @@
 using namespace opencog;
 
 AttentionBank::AttentionBank(AtomSpace* asp) :
-    _index_insert_queue(this, &AttentionBank::put_atom_into_index, 4),
-    _index_remove_queue(this, &AttentionBank::remove_atom_from_index, 4)
+    _importanceIndex(*this)
 {
     startingFundsSTI = fundsSTI = config().get_int("STARTING_STI_FUNDS", 100000);
     startingFundsLTI = fundsLTI = config().get_int("STARTING_LTI_FUNDS", 100000);
@@ -46,110 +45,197 @@ AttentionBank::AttentionBank(AtomSpace* asp) :
 
     _attentionalFocusBoundary = 1;
 
-    // Subscribe to my own changes. This is insane and hacky; must move
-    // the AV stuf out of the Atom itself.  XXX FIXME.
-    _AVChangedConnection =
-        _AVChangedSignal.connect(
-            boost::bind(&AttentionBank::AVChanged, this, _1, _2, _3));
-
-    bool async = config().get_bool("ATTENTION_BANK_ASYNC", false);
-    if (async) {
-     _addAtomConnection =
-        asp->addAtomSignal(
-            boost::bind(&AttentionBank::add_atom_to_indexInsertQueue, this, _1));
-    _removeAtomConnection =
-        asp->removeAtomSignal(
-            boost::bind(&AttentionBank::add_atom_to_indexRemoveQueue, this, _1));
-    }
-    else {
-     _addAtomConnection =
-        asp->addAtomSignal(
-            boost::bind(&AttentionBank::put_atom_into_index, this, _1));
     _removeAtomConnection =
         asp->removeAtomSignal(
             boost::bind(&AttentionBank::remove_atom_from_index, this, _1));
-
-    }
 }
 
-/// This must be called before the AtomTable is destroyed. Which
-/// means that it cannot be in the destructor (since the AtomTable
-/// is gone by then, leading to a crash.  XXX FIXME yes this is a
-/// tacky hack to fix a design bug.
-void AttentionBank::shutdown(void)
+AttentionBank::~AttentionBank()
 {
-    _AVChangedConnection.disconnect();
-    _addAtomConnection.disconnect();
     _removeAtomConnection.disconnect();
 }
 
-AttentionBank::~AttentionBank() {}
+void AttentionBank::remove_atom_from_index(const AtomPtr& atom)
+{
+    std::unique_lock<std::mutex> lck(_idx_mtx);
 
+    auto pr = _atom_index.find(Handle(atom));
+    if (pr == _atom_index.end()) return;
+    AttentionValuePtr av = pr->second;
+    _atom_index.erase(pr->first);
+    lck.unlock();
+
+    int bin = ImportanceIndex::importanceBin(av->getSTI());
+
+    _importanceIndex.removeAtom(atom.operator->(), bin);
+}
+
+void AttentionBank::change_av(const Handle& h, AttentionValuePtr newav)
+{
+    std::unique_lock<std::mutex> lck(_idx_mtx);
+
+    AttentionValuePtr oldav = AttentionValue::DEFAULT_AV();
+    auto pr = _atom_index.find(h);
+    if (pr != _atom_index.end()) oldav = pr->second;
+
+    _atom_index[h] = newav;
+    lck.unlock();
+
+    // XXX FIXME the code below could be made more efficient,
+    // by avoiding the calls to atom->getAttentionValue() in
+    // the ImportanceIndex code.
+
+    // Get old and new bins.
+    int oldBin = ImportanceIndex::importanceBin(oldav->getSTI());
+    int newBin = ImportanceIndex::importanceBin(newav->getSTI());
+
+    // If the atom importance has changed its bin,
+    // update the importance index.
+    if (oldBin != newBin) updateImportanceIndex(h, oldBin, newBin);
+
+    AVChanged(h, oldav, newav);
+}
+
+void AttentionBank::set_sti(const Handle& h, AttentionValue::sti_t stiValue)
+{
+    std::unique_lock<std::mutex> lck(_idx_mtx);
+
+    AttentionValuePtr old_av = AttentionValue::DEFAULT_AV();
+    auto pr = _atom_index.find(h);
+    if (pr != _atom_index.end()) old_av = pr->second;
+
+    AttentionValuePtr new_av = createAV(
+        stiValue, old_av->getLTI(), old_av->getVLTI());
+    _atom_index[h] = new_av;
+    lck.unlock();
+
+    // Get old and new bins.
+    int oldBin = ImportanceIndex::importanceBin(old_av->getSTI());
+    int newBin = ImportanceIndex::importanceBin(new_av->getSTI());
+
+    // If the atom importance has changed its bin,
+    // update the importance index.
+    if (oldBin != newBin) updateImportanceIndex(h, oldBin, newBin);
+
+    AVChanged(h, old_av, new_av);
+}
+
+void AttentionBank::set_lti(const Handle& h, AttentionValue::lti_t ltiValue)
+{
+    std::unique_lock<std::mutex> lck(_idx_mtx);
+
+    AttentionValuePtr old_av = AttentionValue::DEFAULT_AV();
+    auto pr = _atom_index.find(h);
+    if (pr != _atom_index.end()) old_av = pr->second;
+
+    AttentionValuePtr new_av = createAV(
+        old_av->getSTI(), ltiValue, old_av->getVLTI());
+    _atom_index[h] = new_av;
+    lck.unlock();
+
+    AVChanged(h, old_av, new_av);
+}
+
+void AttentionBank::change_vlti(const Handle& h, int unit)
+{
+    std::unique_lock<std::mutex> lck(_idx_mtx);
+
+    AttentionValuePtr old_av = AttentionValue::DEFAULT_AV();
+    auto pr = _atom_index.find(h);
+    if (pr != _atom_index.end()) old_av = pr->second;
+
+    AttentionValuePtr new_av = createAV(
+        old_av->getSTI(),
+        old_av->getLTI(),
+        old_av->getVLTI() + unit);
+
+    _atom_index[h] = new_av;
+    lck.unlock();
+
+    AVChanged(h, old_av, new_av);
+}
+
+AttentionValuePtr AttentionBank::get_av(const Handle& h)
+{
+    std::lock_guard<std::mutex> lck(_idx_mtx);
+    auto pr = _atom_index.find(h);
+    if (pr == _atom_index.end()) return AttentionValue::DEFAULT_AV();
+
+    return pr->second;
+}
 
 void AttentionBank::AVChanged(const Handle& h,
                               const AttentionValuePtr& old_av,
                               const AttentionValuePtr& new_av)
 {
+    AttentionValue::sti_t oldSti = old_av->getSTI();
     AttentionValue::sti_t newSti = new_av->getSTI();
     
     // Add the old attention values to the AttentionBank funds and
     // subtract the new attention values from the AttentionBank funds
-    updateSTIFunds(old_av->getSTI() - newSti);
+    updateSTIFunds(oldSti - newSti);
     updateLTIFunds(old_av->getLTI() - new_av->getLTI());
 
     // Update MinMax STI values
-   UnorderedHandleSet minbin = _importanceIndex.getMinBinContents();
-    AttentionValue::sti_t minSTISeen = (*std::min_element(minbin.begin(),minbin.end(),
-            [](const Handle& h1, const Handle& h2) {
-            return h1->getAttentionValue()->getSTI() < h2->getAttentionValue()->getSTI();
-            }))->getAttentionValue()->getSTI();
+    AttentionValue::sti_t minSTISeen = 0;
+    UnorderedHandleSet minbin = _importanceIndex.getMinBinContents();
+    auto minit = std::min_element(minbin.begin(), minbin.end(),
+            [&](const Handle& h1, const Handle& h2) {
+                return get_sti(h1) < get_sti(h2);
+            });
+    if (minit != minbin.end()) minSTISeen = get_sti(*minit);
 
-    UnorderedHandleSet maxbin = _importanceIndex.getMaxBinContents();
-    AttentionValue::sti_t maxSTISeen = (*std::max_element(maxbin.begin(),maxbin.end(),
-            [](const Handle& h1, const Handle& h2) {
-            return h1->getAttentionValue()->getSTI() > h2->getAttentionValue()->getSTI();
-            }))->getAttentionValue()->getSTI();
+    AttentionValue::sti_t maxSTISeen = 0;
+    UnorderedHandleSet maxbin = _importanceIndex.getMinBinContents();
+    auto maxit = std::max_element(maxbin.begin(), maxbin.end(),
+            [&](const Handle& h1, const Handle& h2) {
+                return get_sti(h1) < get_sti(h2);
+            });
+    if (maxit != maxbin.end()) maxSTISeen = get_sti(*maxit);
 
     if (minSTISeen > maxSTISeen) {
         minSTISeen = maxSTISeen;
     }
 
-    updateMaxSTI(maxSTISeen);
     updateMinSTI(minSTISeen);
+    updateMaxSTI(maxSTISeen);
 
     logger().fine("AVChanged: fundsSTI = %d, old_av: %d, new_av: %d",
-                   fundsSTI.load(), old_av->getSTI(), new_av->getSTI());
+                   fundsSTI.load(), oldSti, newSti);
+
+    // Notify any interested parties that the AV changed.
+    _AVChangedSignal(h, old_av, new_av);
 
     // Check if the atom crossed into or out of the AttentionalFocus
     // and notify any interested parties
-    if (old_av->getSTI() < getAttentionalFocusBoundary() and
-        new_av->getSTI() >= getAttentionalFocusBoundary())
+    if (oldSti < getAttentionalFocusBoundary() and
+        newSti >= getAttentionalFocusBoundary())
     {
         AFCHSigl& afch = AddAFSignal();
         afch(h, old_av, new_av);
     }
-    else if (new_av->getSTI() < getAttentionalFocusBoundary() and
-             old_av->getSTI() >= getAttentionalFocusBoundary())
+    else if (newSti < getAttentionalFocusBoundary() and
+             oldSti >= getAttentionalFocusBoundary())
     {
         AFCHSigl& afch = RemoveAFSignal();
         afch(h, old_av, new_av);
     }
 }
 
-void AttentionBank::stimulate(Handle& h, double stimulus)
+void AttentionBank::stimulate(const Handle& h, double stimulus)
 {
-    // XXX This is not protected and made atomic in any way ...
-    // If two different threads stiumlate the same atom at the same
-    // time, then the calculations could get wonky. Does it matter?
-    AttentionValue::sti_t sti   = h->getAttentionValue()->getSTI();
-    AttentionValue::lti_t lti   = h->getAttentionValue()->getLTI();
-    AttentionValue::vlti_t vlti = h->getAttentionValue()->getVLTI();
+    // XXX This is not protected or made atomic in any way ...
+    // If two different threads stimulate the same atom at the same
+    // time, then the calculations will be bad. Does it matter?
+    AttentionValue::sti_t sti   = get_sti(h);
+    AttentionValue::lti_t lti   = get_lti(h);
+    AttentionValue::vlti_t vlti = get_vlti(h);
 
     int stiWage = calculateSTIWage() * stimulus;
     int ltiWage = calculateLTIWage() * stimulus;
 
     AttentionValuePtr new_av = createAV(sti + stiWage, lti + ltiWage, vlti);
-    h->setAttentionValue(new_av);
+    change_av(h, new_av);
 }
 
 void AttentionBank::updateMaxSTI(AttentionValue::sti_t m)

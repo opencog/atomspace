@@ -39,8 +39,7 @@ class SleepLink : public FunctionLink
 {
 public:
 	SleepLink(const HandleSeq&,
-	           TruthValuePtr tv = TruthValue::DEFAULT_TV(),
-	           AttentionValuePtr av = AttentionValue::DEFAULT_AV());
+	           TruthValuePtr tv = TruthValue::DEFAULT_TV());
 
 	SleepLink(Link &l);
 

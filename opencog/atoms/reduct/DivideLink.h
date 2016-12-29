@@ -41,22 +41,18 @@ class DivideLink : public TimesLink
 protected:
 	void init(void);
 	DivideLink(Type, const HandleSeq& oset,
-	         TruthValuePtr tv = TruthValue::DEFAULT_TV(),
-	         AttentionValuePtr av = AttentionValue::DEFAULT_AV());
+	         TruthValuePtr tv = TruthValue::DEFAULT_TV());
 
 	DivideLink(Type, const Handle& a, const Handle& b,
-	         TruthValuePtr tv = TruthValue::DEFAULT_TV(),
-	         AttentionValuePtr av = AttentionValue::DEFAULT_AV());
+	         TruthValuePtr tv = TruthValue::DEFAULT_TV());
 
 	virtual Handle do_execute(AtomSpace*, const HandleSeq&) const;
 public:
 	DivideLink(const Handle& a, const Handle& b,
-	         TruthValuePtr tv = TruthValue::DEFAULT_TV(),
-	         AttentionValuePtr av = AttentionValue::DEFAULT_AV());
+	         TruthValuePtr tv = TruthValue::DEFAULT_TV());
 
 	DivideLink(const HandleSeq& oset,
-	         TruthValuePtr tv = TruthValue::DEFAULT_TV(),
-	         AttentionValuePtr av = AttentionValue::DEFAULT_AV());
+	         TruthValuePtr tv = TruthValue::DEFAULT_TV());
 	DivideLink(Link& l);
 };
 

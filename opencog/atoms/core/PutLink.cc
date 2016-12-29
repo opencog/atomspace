@@ -29,18 +29,14 @@
 
 using namespace opencog;
 
-PutLink::PutLink(const HandleSeq& oset,
-                 TruthValuePtr tv,
-                 AttentionValuePtr av)
-    : ScopeLink(PUT_LINK, oset, tv, av)
+PutLink::PutLink(const HandleSeq& oset, TruthValuePtr tv)
+    : ScopeLink(PUT_LINK, oset, tv)
 {
 	init();
 }
 
-PutLink::PutLink(const Handle& a,
-                 TruthValuePtr tv,
-                 AttentionValuePtr av)
-    : ScopeLink(PUT_LINK, a, tv, av)
+PutLink::PutLink(const Handle& a, TruthValuePtr tv)
+    : ScopeLink(PUT_LINK, a, tv)
 {
 	init();
 }

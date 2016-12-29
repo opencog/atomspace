@@ -32,25 +32,22 @@
 using namespace opencog;
 
 FreeLink::FreeLink(const HandleSeq& oset,
-                   TruthValuePtr tv,
-                   AttentionValuePtr av)
-    : Link(FREE_LINK, oset, tv, av)
+                   TruthValuePtr tv)
+    : Link(FREE_LINK, oset, tv)
 {
 	init();
 }
 
 FreeLink::FreeLink(const Handle& a,
-                   TruthValuePtr tv,
-                   AttentionValuePtr av)
-    : Link(FREE_LINK, a, tv, av)
+                   TruthValuePtr tv)
+    : Link(FREE_LINK, a, tv)
 {
 	init();
 }
 
 FreeLink::FreeLink(Type t, const HandleSeq& oset,
-                   TruthValuePtr tv,
-                   AttentionValuePtr av)
-    : Link(t, oset, tv, av)
+                   TruthValuePtr tv)
+    : Link(t, oset, tv)
 {
 	if (not classserver().isA(t, FREE_LINK))
 		throw InvalidParamException(TRACE_INFO, "Expecting a FreeLink");
@@ -61,9 +58,8 @@ FreeLink::FreeLink(Type t, const HandleSeq& oset,
 }
 
 FreeLink::FreeLink(Type t, const Handle& a,
-                   TruthValuePtr tv,
-                   AttentionValuePtr av)
-    : Link(t, a, tv, av)
+                   TruthValuePtr tv)
+    : Link(t, a, tv)
 {
 	if (not classserver().isA(t, FREE_LINK))
 		throw InvalidParamException(TRACE_INFO, "Expecting a FreeLink");
@@ -74,9 +70,8 @@ FreeLink::FreeLink(Type t, const Handle& a,
 }
 
 FreeLink::FreeLink(Type t, const Handle& a, const Handle& b,
-                   TruthValuePtr tv,
-                   AttentionValuePtr av)
-    : Link(t, a, b, tv, av)
+                   TruthValuePtr tv)
+    : Link(t, a, b, tv)
 {
 	if (not classserver().isA(t, FREE_LINK))
 		throw InvalidParamException(TRACE_INFO, "Expecting a FreeLink");

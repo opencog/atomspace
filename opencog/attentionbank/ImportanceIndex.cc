@@ -25,8 +25,8 @@
 
 #include <opencog/util/functional.h>
 
-#include <opencog/atoms/base/Atom.h>
 #include <opencog/attentionbank/ImportanceIndex.h>
+#include <opencog/attentionbank/AttentionBank.h>
 
 using namespace opencog;
 
@@ -44,8 +44,10 @@ using namespace opencog;
 #define GROUP_NUM 12
 #define IMPORTANCE_INDEX_SIZE (GROUP_NUM*GROUP_SIZE)+GROUP_NUM //104
 
-ImportanceIndex::ImportanceIndex()
-    : _index(IMPORTANCE_INDEX_SIZE+1)
+// ==============================================================
+
+ImportanceIndex::ImportanceIndex(AttentionBank& bank)
+    : _bank(bank), _index(IMPORTANCE_INDEX_SIZE+1)
 {
 }
 
@@ -76,26 +78,16 @@ unsigned int ImportanceIndex::importanceBin(short importance)
     return bin;
 }
 
-void ImportanceIndex::updateImportance(Atom* atom, int bin)
+void ImportanceIndex::updateImportance(Atom* atom, int oldbin, int newbin)
 {
-    int newbin = importanceBin(atom->getAttentionValue()->getSTI());
-    if (bin == newbin) return;
+    if (oldbin == newbin) return;
 
-    _index.remove(bin, atom);
+    _index.remove(oldbin, atom);
     _index.insert(newbin, atom);
 }
 
-void ImportanceIndex::insertAtom(Atom* atom)
+void ImportanceIndex::removeAtom(Atom* atom, int bin)
 {
-    int sti = atom->getAttentionValue()->getSTI();
-    int bin = importanceBin(sti);
-    _index.insert(bin, atom);
-}
-
-void ImportanceIndex::removeAtom(Atom* atom)
-{
-    int sti = atom->getAttentionValue()->getSTI();
-    int bin = importanceBin(sti);
     _index.remove(bin, atom);
 }
 
@@ -103,7 +95,6 @@ UnorderedHandleSet ImportanceIndex::getHandleSet(
         AttentionValue::sti_t lowerBound,
         AttentionValue::sti_t upperBound) const
 {
-    AtomSet set;
     UnorderedHandleSet ret;
 
     if (lowerBound < 0 || upperBound < 0)
@@ -120,12 +111,12 @@ UnorderedHandleSet ImportanceIndex::getHandleSet(
     // upperBound.
     std::function<bool(Atom *)> pred =
         [&](Atom* atom)->bool {
-            AttentionValue::sti_t sti =
-                atom->getAttentionValue()->getSTI();
+            AttentionValue::sti_t sti = _bank.get_sti(atom->getHandle());
             return (lowerBound <= sti and sti <= upperBound);
         };
 
-    _index.getContentIf(lowerBin,inserter(set),pred);
+    AtomSet set;
+    _index.getContentIf(lowerBin, inserter(set), pred);
 
     // If both lower and upper bounds are in the same bin,
     // Then we are done.
@@ -137,12 +128,11 @@ UnorderedHandleSet ImportanceIndex::getHandleSet(
 
     // For every index within lowerBound and upperBound,
     // add to the list.
-    while (++lowerBin < upperBin) {
-        _index.getContent(lowerBin,inserter(set));
-    }
+    while (++lowerBin < upperBin)
+        _index.getContent(lowerBin, inserter(set));
 
     // The two lists are concatenated.
-    _index.getContentIf(upperBin,inserter(set),pred);
+    _index.getContentIf(upperBin, inserter(set), pred);
 
     std::transform(set.begin(), set.end(), inserter(ret),
                    [](Atom* atom)->Handle { return atom->getHandle(); });
@@ -157,7 +147,7 @@ UnorderedHandleSet ImportanceIndex::getMaxBinContents()
     {
         if (_index.size(i) > 0)
         {
-            _index.getContent(i,inserter(set));
+            _index.getContent(i, inserter(set));
             std::transform(set.begin(), set.end(), inserter(ret),
                    [](Atom* atom)->Handle { return atom->getHandle(); });
             return ret;
@@ -174,7 +164,7 @@ UnorderedHandleSet ImportanceIndex::getMinBinContents()
     {
         if (_index.size(i) > 0)
         {
-            _index.getContent(i,inserter(set));
+            _index.getContent(i, inserter(set));
             std::transform(set.begin(), set.end(), inserter(ret),
                    [](Atom* atom)->Handle { return atom->getHandle(); });
             return ret;
@@ -185,5 +175,5 @@ UnorderedHandleSet ImportanceIndex::getMinBinContents()
 
 size_t ImportanceIndex::size(int i) const
 {
-      return _index.size(i);
+    return _index.size(i);
 }

@@ -63,8 +63,7 @@ class RandomChoiceLink : public FunctionLink
 {
 public:
 	RandomChoiceLink(const HandleSeq&,
-	           TruthValuePtr tv = TruthValue::DEFAULT_TV(),
-	           AttentionValuePtr av = AttentionValue::DEFAULT_AV());
+	           TruthValuePtr tv = TruthValue::DEFAULT_TV());
 
 	RandomChoiceLink(Link &l);
 

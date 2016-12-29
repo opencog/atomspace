@@ -94,32 +94,29 @@ void MapLink::init(void)
 	// FunctionLink::init();
 }
 
-MapLink::MapLink(const HandleSeq& oset,
-                       TruthValuePtr tv, AttentionValuePtr av)
-	: FunctionLink(MAP_LINK, oset, tv, av)
+MapLink::MapLink(const HandleSeq& oset, TruthValuePtr tv)
+	: FunctionLink(MAP_LINK, oset, tv)
 {
 	init();
 }
 
 MapLink::MapLink(const Handle& vars, const Handle& body,
-                       TruthValuePtr tv, AttentionValuePtr av)
-	: FunctionLink(MAP_LINK, HandleSeq({vars, body}), tv, av)
+                       TruthValuePtr tv)
+	: FunctionLink(MAP_LINK, HandleSeq({vars, body}), tv)
 {
 	init();
 }
 
-MapLink::MapLink(Type t, const Handle& body,
-                       TruthValuePtr tv, AttentionValuePtr av)
-	: FunctionLink(t, HandleSeq({body}), tv, av)
+MapLink::MapLink(Type t, const Handle& body, TruthValuePtr tv)
+	: FunctionLink(t, HandleSeq({body}), tv)
 {
 	// Derived types have a different initialization sequence.
 	if (MAP_LINK != t) return;
 	init();
 }
 
-MapLink::MapLink(Type t, const HandleSeq& oset,
-                       TruthValuePtr tv, AttentionValuePtr av)
-	: FunctionLink(t, oset, tv, av)
+MapLink::MapLink(Type t, const HandleSeq& oset, TruthValuePtr tv)
+	: FunctionLink(t, oset, tv)
 {
 	// Derived types have a different initialization sequence.
 	if (MAP_LINK != t) return;

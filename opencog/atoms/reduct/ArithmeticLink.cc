@@ -29,18 +29,15 @@
 
 using namespace opencog;
 
-ArithmeticLink::ArithmeticLink(const HandleSeq& oset,
-                   TruthValuePtr tv,
-                   AttentionValuePtr av)
-    : FoldLink(ARITHMETIC_LINK, oset, tv, av)
+ArithmeticLink::ArithmeticLink(const HandleSeq& oset, TruthValuePtr tv)
+    : FoldLink(ARITHMETIC_LINK, oset, tv)
 {
 	init();
 }
 
 ArithmeticLink::ArithmeticLink(Type t, const HandleSeq& oset,
-                   TruthValuePtr tv,
-                   AttentionValuePtr av)
-    : FoldLink(t, oset, tv, av)
+                   TruthValuePtr tv)
+    : FoldLink(t, oset, tv)
 {
 	if (not classserver().isA(t, ARITHMETIC_LINK))
 		throw InvalidParamException(TRACE_INFO, "Expecting a ArithmeticLink");
@@ -48,9 +45,8 @@ ArithmeticLink::ArithmeticLink(Type t, const HandleSeq& oset,
 }
 
 ArithmeticLink::ArithmeticLink(Type t, const Handle& a, const Handle& b,
-                   TruthValuePtr tv,
-                   AttentionValuePtr av)
-    : FoldLink(t, a, b, tv, av)
+                   TruthValuePtr tv)
+    : FoldLink(t, a, b, tv)
 {
 	if (not classserver().isA(t, ARITHMETIC_LINK))
 		throw InvalidParamException(TRACE_INFO, "Expecting a ArithmeticLink");

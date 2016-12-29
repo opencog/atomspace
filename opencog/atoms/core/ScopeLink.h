@@ -60,14 +60,12 @@ protected:
 	Variables _varlist;
 
 	ScopeLink(Type, const Handle&,
-	          TruthValuePtr tv = TruthValue::DEFAULT_TV(),
-	          AttentionValuePtr av = AttentionValue::DEFAULT_AV());
+	          TruthValuePtr tv = TruthValue::DEFAULT_TV());
 
 public:
 	// XXX Need to make this public, so that the factory can call it!
 	ScopeLink(Type, const HandleSeq&,
-	          TruthValuePtr tv = TruthValue::DEFAULT_TV(),
-	          AttentionValuePtr av = AttentionValue::DEFAULT_AV());
+	          TruthValuePtr tv = TruthValue::DEFAULT_TV());
 protected:
 	void init(void);
 	void extract_variables(const HandleSeq& oset);
@@ -80,12 +78,10 @@ protected:
 
 public:
 	ScopeLink(const HandleSeq&,
-	          TruthValuePtr tv = TruthValue::DEFAULT_TV(),
-	          AttentionValuePtr av = AttentionValue::DEFAULT_AV());
+	          TruthValuePtr tv = TruthValue::DEFAULT_TV());
 
 	ScopeLink(const Handle& varcdecls, const Handle& body,
-	          TruthValuePtr tv = TruthValue::DEFAULT_TV(),
-	          AttentionValuePtr av = AttentionValue::DEFAULT_AV());
+	          TruthValuePtr tv = TruthValue::DEFAULT_TV());
 
 	ScopeLink(Link &l);
 

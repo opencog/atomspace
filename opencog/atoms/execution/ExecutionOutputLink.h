@@ -40,12 +40,10 @@ private:
 	                                     const Handle& args);
 public:
 	ExecutionOutputLink(const HandleSeq& oset,
-	     TruthValuePtr tv = TruthValue::DEFAULT_TV(),
-	     AttentionValuePtr av = AttentionValue::DEFAULT_AV());
+	     TruthValuePtr tv = TruthValue::DEFAULT_TV());
 
 	ExecutionOutputLink(const Handle& schema, const Handle& args,
-	     TruthValuePtr tv = TruthValue::DEFAULT_TV(),
-	     AttentionValuePtr av = AttentionValue::DEFAULT_AV());
+	     TruthValuePtr tv = TruthValue::DEFAULT_TV());
 
 	ExecutionOutputLink(Link& l);
 

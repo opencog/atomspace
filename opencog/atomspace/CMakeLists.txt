@@ -8,7 +8,6 @@ ADD_LIBRARY (atomspace
 	AtomTable.cc
 	BackingStore.cc
 	FixedIntegerIndex.cc
-	ThreadSafeFixedIntegerIndex.cc
 	TypeIndex.cc
 
 	# The below are no longer used, but we will
@@ -45,7 +44,6 @@ INSTALL (FILES
 	AtomTable.h
 	BackingStore.h
 	FixedIntegerIndex.h
-	ThreadSafeFixedIntegerIndex.h
 	TypeIndex.h
 	version.h
 	DESTINATION "include/opencog/atomspace"

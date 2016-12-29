@@ -56,42 +56,38 @@ using namespace std;
 #define AV2_LTI 30000
 #define AV3_LTI 700
 
-void setSTI(Handle h, AttentionValue::sti_t stiValue)
+void setSTI(AttentionBank* ab, Handle h, AttentionValue::sti_t stiValue)
 {
     /* Make a copy */
-    AttentionValuePtr old_av = h->getAttentionValue();
+    AttentionValuePtr old_av = ab->get_av(h);
     AttentionValuePtr new_av = createAV(
         stiValue,
         old_av->getLTI(),
         old_av->getVLTI());
-    h->setAttentionValue(new_av);
+    ab->change_av(h, new_av);
 }
 
 
-void setLTI(Handle h, AttentionValue::lti_t ltiValue)
+void setLTI(AttentionBank* ab, Handle h, AttentionValue::lti_t ltiValue)
 {
-    AttentionValuePtr old_av = h->getAttentionValue();
+    AttentionValuePtr old_av = ab->get_av(h);
     AttentionValuePtr new_av = createAV(
         old_av->getSTI(),
         ltiValue,
         old_av->getVLTI());
-    h->setAttentionValue(new_av);
+    ab->change_av(h, new_av);
 }
 
-bool isLink(Handle h) 
-{ return classserver().isA(h->getType(), LINK); }
+bool isLink(Handle h) { return h->isLink(); }
 
-bool isNode(Handle h) 
-{ return classserver().isA(h->getType(), NODE); }
+bool isNode(Handle h) { return h->isNode(); }
 
 HandleSeq createSimpleGraph(AtomSpace* atomSpace, const char* baseName)
 {
+    AttentionBank* bank = &attentionbank(atomSpace);
     char buf[256];
-    HandleSeq testAtoms;
-    int baseNameLength;
-
     memset(buf, 0, 256);
-    baseNameLength = strlen(baseName);
+    int baseNameLength = strlen(baseName);
     strcpy(buf, baseName);
 
     TruthValuePtr tv1 = SimpleTruthValue::createTV(0.001f, 0.00001f);
@@ -100,18 +96,18 @@ HandleSeq createSimpleGraph(AtomSpace* atomSpace, const char* baseName)
     buf[baseNameLength] = '1';
     Handle h1 = atomSpace->add_node(CONCEPT_NODE, buf);
     h1->setTruthValue(tv1);
-    setSTI(h1, AV1_STI);
-    setLTI(h1, AV1_LTI);
+    setSTI(bank, h1, AV1_STI);
+    setLTI(bank, h1, AV1_LTI);
     buf[baseNameLength] = '2';
     Handle h2 = atomSpace->add_node(CONCEPT_NODE, buf);
     h2->setTruthValue(tv2);
-    setSTI(h2, AV2_STI);
-    setLTI(h2, AV2_LTI);
+    setSTI(bank, h2, AV2_STI);
+    setLTI(bank, h2, AV2_LTI);
     buf[baseNameLength] = '3';
     Handle h3 = atomSpace->add_node(CONCEPT_NODE, buf);
     h3->setTruthValue(tv3);
-    setSTI(h3, AV3_STI);
-    setLTI(h3, AV3_LTI);
+    setSTI(bank, h3, AV3_STI);
+    setLTI(bank, h3, AV3_LTI);
 
     HandleSeq outgoing1;
     outgoing1.push_back(h2);
@@ -124,6 +120,7 @@ HandleSeq createSimpleGraph(AtomSpace* atomSpace, const char* baseName)
     Handle l2 = atomSpace->add_link(EVALUATION_LINK, outgoing2);
     l2->setTruthValue(tv2);
 
+    HandleSeq testAtoms;
     testAtoms.push_back(h1);
     testAtoms.push_back(h2);
     testAtoms.push_back(h3);
@@ -204,7 +201,7 @@ struct compareAtom
  * @endcode
  */
 template <typename OutputIterator, typename Compare> OutputIterator
-getSortedHandleSet(AtomSpace*as, 
+getSortedHandleSet(AtomSpace* as,
              OutputIterator result,
              Type type,
              bool subclass,
@@ -214,36 +211,17 @@ getSortedHandleSet(AtomSpace*as,
     HandleSeq hs;
 
     as->get_handles_by_type(back_inserter(hs), type, subclass);
+    compare->_ab = &attentionbank(as);
     std::sort(hs.begin(), hs.end(), compareAtom<AtomComparator>(compare));
     return std::copy(hs.begin(), hs.end(), result);
 }
-
-struct STIAboveThreshold : public HandlePredicate
-{
-    STIAboveThreshold(const AttentionValue::sti_t t) : threshold (t) {}
-
-    virtual bool test(const Handle& atom) const {
-        return atom->getAttentionValue()->getSTI() > threshold;
-    }
-    AttentionValue::sti_t threshold;
-};
-
-struct LTIAboveThreshold : public HandlePredicate
-{
-    LTIAboveThreshold(const AttentionValue::lti_t t) : threshold (t) {}
-
-    virtual bool test(const Handle& atom) const {
-        return atom->getAttentionValue()->getLTI() > threshold;
-    }
-    AttentionValue::lti_t threshold;
-};
-
 
 class AtomSpaceImplUTest :  public CxxTest::TestSuite
 {
 private:
 
-    static AtomSpace *atomSpace;
+    AtomSpace* atomSpace;
+    AttentionBank* bank;
 
 public:
     AtomSpaceImplUTest() {
@@ -253,9 +231,11 @@ public:
 
     void setUp() {
         atomSpace = new AtomSpace();
+        bank = &attentionbank(atomSpace);
     }
 
     void tearDown() {
+        attentionbank(nullptr);
         delete atomSpace;
     }
 
@@ -549,11 +529,11 @@ public:
         TS_ASSERT(isNode(h4));
         // Check that isLink returns false
         TS_ASSERT(!isLink(h4));
-    
+
 #if 0
 // The current design to support this leaks memory. So I plugged the
 // memory leak. But that means that this test fails.  So I am disabling
-// this test for now ... If someone wants to implement this correctly 
+// this test for now ... If someone wants to implement this correctly
 // someday (so that id doesn't leak memory) then, whatever, go ahead.
 // (I still think its a bad idea, for all sorts of reasons)
 
@@ -693,7 +673,7 @@ public:
         HandleSeq atoms;
         logger().debug("BEGIN TEST: getSortedHandleSet");
         atoms = createSimpleGraph(as, "stim_sortedHandleSet\0");
-        
+
         logger().debug("STISort");
 
         STISort sSort;
@@ -702,18 +682,18 @@ public:
         for (unsigned int i = 0; i < sAtoms.size() - 1; i++) {
             TS_ASSERT(sSort(sAtoms[i + 1], sAtoms[i]) == false);
         }
-        
+
         logger().debug("LTIAndTVAscendingSort");
-        
+
         LTIAndTVAscendingSort latvSort;
         HandleSeq latvAtoms;
         getSortedHandleSet(as, back_inserter(latvAtoms), ATOM, true, &latvSort);
         for (unsigned int i = 0; i < latvAtoms.size() - 1; i++) {
             TS_ASSERT(latvSort(latvAtoms[i + 1], latvAtoms[i]) == false);
         }
-        
+
         logger().debug("LTIThenTVAscendingSort");
-        
+
         LTIThenTVAscendingSort lttvSort;
         HandleSeq lttvAtoms;
         getSortedHandleSet(as, back_inserter(lttvAtoms), ATOM, true, &lttvSort);
@@ -738,15 +718,13 @@ public:
     void testGetNormalisedSTI() {
         Handle h = atomSpace->add_node(CONCEPT_NODE,"blah");
         bool clip = false, average = false;
-        TS_ASSERT_EQUALS(attentionbank(atomSpace).getNormalisedZeroToOneSTI(h->getAttentionValue(), average, clip), 0.0f);
+        TS_ASSERT_EQUALS(bank->getNormalisedZeroToOneSTI(bank->get_av(h), average, clip), 0.0f);
         average = true;
-        setSTI(h,10);
-        attentionbank(atomSpace).updateMaxSTI(10);
-        TS_ASSERT(attentionbank(atomSpace).getNormalisedZeroToOneSTI(h->getAttentionValue(), average, clip) > 1.0f);
+        setSTI(bank, h,10);
+        bank->updateMaxSTI(10);
+        TS_ASSERT(bank->getNormalisedZeroToOneSTI(bank->get_av(h), average, clip) > 1.0f);
         clip = true;
-        TS_ASSERT_DELTA(attentionbank(atomSpace).getNormalisedZeroToOneSTI(h->getAttentionValue(), average, clip), 1.0f, 0.001f);
+        TS_ASSERT_DELTA(bank->getNormalisedZeroToOneSTI(bank->get_av(h), average, clip), 1.0f, 0.001f);
     }
 
 };
-
-AtomSpace *AtomSpaceImplUTest::atomSpace = NULL;

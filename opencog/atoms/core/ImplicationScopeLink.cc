@@ -31,17 +31,15 @@ void ImplicationScopeLink::init(void)
 }
 
 ImplicationScopeLink::ImplicationScopeLink(const HandleSeq& hseq,
-                                           TruthValuePtr tv,
-                                           AttentionValuePtr av)
-	: ScopeLink(IMPLICATION_SCOPE_LINK, hseq, tv, av)
+                                           TruthValuePtr tv)
+	: ScopeLink(IMPLICATION_SCOPE_LINK, hseq, tv)
 {
 	init();
 }
 
 ImplicationScopeLink::ImplicationScopeLink(Type t, const HandleSeq& hseq,
-                                           TruthValuePtr tv,
-                                           AttentionValuePtr av)
-	: ScopeLink(t, hseq, tv, av)
+                                           TruthValuePtr tv)
+	: ScopeLink(t, hseq, tv)
 {
 	init();
 }

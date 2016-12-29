@@ -111,17 +111,6 @@ cdef extern from "opencog/atoms/base/Atom.h" namespace "opencog":
         tv_ptr getTruthValue()
         void setTruthValue(tv_ptr tvp)
 
-        av_type getSTI()
-        av_type getLTI()
-        av_type getVLTI()
-
-        void setSTI(av_type stiValue)
-        void setLTI(av_type ltiValue)
-        void setVLTI(av_type vltiValue)
-
-        void incVLTI()
-        void decVLTI()
-
         output_iterator getIncomingSetByType(output_iterator, Type type, bint subclass)
 
         # Conditionally-valid methods. Not defined for all atoms.
@@ -203,6 +192,14 @@ cdef class AtomSpace:
 
 cdef extern from "opencog/attentionbank/AttentionBank.h" namespace "opencog":
     cdef cppclass cAttentionBank "opencog::AttentionBank":
+        av_type get_sti(const cHandle&)
+        av_type get_lti(const cHandle&)
+        av_type get_vlti(const cHandle&)
+
+        void set_sti(const cHandle&, av_type stiValue)
+        void set_lti(const cHandle&, av_type ltiValue)
+        void inc_vlti(const cHandle&)
+        void dec_vlti(const cHandle&)
 
         # get by STI range
         output_iterator get_handles_by_AV(output_iterator, short lowerBound, short upperBound)

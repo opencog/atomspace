@@ -224,11 +224,14 @@ Handle ForwardChainer::select_source()
 	    hchosen = urec.tournament_select(tournament_elem);
 	    break;
 
+/*
+An attentionbank is needed in order to get the STI...
 	case source_selection_mode::STI:
 	    for (const Handle& s : to_select_sources)
 		    tournament_elem[s] = s->getSTI();
 	    hchosen = urec.tournament_select(tournament_elem);
 	    break;
+*/
 
 	case source_selection_mode::UNIFORM:
 		hchosen = rand_element(to_select_sources);

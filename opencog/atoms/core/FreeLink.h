@@ -49,25 +49,20 @@ protected:
 
 public:
 	FreeLink(Type, const HandleSeq& oset,
-	         TruthValuePtr tv = TruthValue::DEFAULT_TV(),
-	         AttentionValuePtr av = AttentionValue::DEFAULT_AV());
+	         TruthValuePtr tv = TruthValue::DEFAULT_TV());
 
 protected:
 	// XXX Need to make this public, so that the factory can call it!
 	FreeLink(Type, const Handle& a,
-	         TruthValuePtr tv = TruthValue::DEFAULT_TV(),
-	         AttentionValuePtr av = AttentionValue::DEFAULT_AV());
+	         TruthValuePtr tv = TruthValue::DEFAULT_TV());
 
 	FreeLink(Type, const Handle& a, const Handle& b,
-	         TruthValuePtr tv = TruthValue::DEFAULT_TV(),
-	         AttentionValuePtr av = AttentionValue::DEFAULT_AV());
+	         TruthValuePtr tv = TruthValue::DEFAULT_TV());
 public:
 	FreeLink(const HandleSeq& oset,
-	         TruthValuePtr tv = TruthValue::DEFAULT_TV(),
-	         AttentionValuePtr av = AttentionValue::DEFAULT_AV());
+	         TruthValuePtr tv = TruthValue::DEFAULT_TV());
 	FreeLink(const Handle& a,
-	         TruthValuePtr tv = TruthValue::DEFAULT_TV(),
-	         AttentionValuePtr av = AttentionValue::DEFAULT_AV());
+	         TruthValuePtr tv = TruthValue::DEFAULT_TV());
 
 	FreeLink(Link& l);
 	virtual ~FreeLink() {}

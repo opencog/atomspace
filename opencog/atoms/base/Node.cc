@@ -74,13 +74,7 @@ std::string Node::toString(const std::string& indent) const
 
     answer += " \"" + tmpname + "\"";
 
-    // Print the TV and AV only if its not the default.
-    if (not getAttentionValue()->isDefaultAV())
-        answer += " (av " +
-             std::to_string(getAttentionValue()->getSTI()) + " " +
-             std::to_string(getAttentionValue()->getLTI()) + " " +
-             std::to_string(getAttentionValue()->getVLTI()) + ")";
-
+    // Print the TV only if its not the default.
     if (not getTruthValue()->isDefaultTV())
         answer += " " + getTruthValue()->toString();
 

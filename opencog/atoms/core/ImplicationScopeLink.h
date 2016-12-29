@@ -51,8 +51,7 @@ class ImplicationScopeLink : public ScopeLink
 public:
 	// XXX Need to make this public, so that the factory can call it!
 	ImplicationScopeLink(Type, const HandleSeq&,
-	                     TruthValuePtr tv = TruthValue::DEFAULT_TV(),
-	                     AttentionValuePtr av = AttentionValue::DEFAULT_AV());
+	                     TruthValuePtr tv = TruthValue::DEFAULT_TV());
 
 protected:
 	void init(void);
@@ -61,8 +60,7 @@ protected:
 	Handle _implicand;
 public:
 	ImplicationScopeLink(const HandleSeq&,
-	                     TruthValuePtr tv = TruthValue::DEFAULT_TV(),
-	                     AttentionValuePtr av = AttentionValue::DEFAULT_AV());
+	                     TruthValuePtr tv = TruthValue::DEFAULT_TV());
 
 	ImplicationScopeLink(Link &l);
 };

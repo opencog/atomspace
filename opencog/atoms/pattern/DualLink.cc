@@ -55,16 +55,15 @@ void DualLink::init(void)
 	make_term_trees();
 }
 
-DualLink::DualLink(const HandleSeq& hseq,
-                   TruthValuePtr tv, AttentionValuePtr av)
-	: PatternLink(DUAL_LINK, hseq, tv, av)
+DualLink::DualLink(const HandleSeq& hseq, TruthValuePtr tv)
+	: PatternLink(DUAL_LINK, hseq, tv)
 {
 	init();
 }
 
 DualLink::DualLink(Type t, const HandleSeq& hseq,
-                   TruthValuePtr tv, AttentionValuePtr av)
-	: PatternLink(t, hseq, tv, av)
+                   TruthValuePtr tv)
+	: PatternLink(t, hseq, tv)
 {
 	init();
 }

@@ -22,6 +22,7 @@
 
 #include <opencog/util/Logger.h>
 #include <opencog/atomspace/AtomSpace.h>
+#include <opencog/attentionbank/AttentionBank.h>
 #include <opencog/atoms/pattern/PatternLink.h>
 #include <opencog/atomutils/FindUtils.h>
 #include <opencog/guile/SchemeEval.h>
@@ -45,6 +46,7 @@ class PatternCrashUTest: public CxxTest::TestSuite
 			logger().set_level(Logger::DEBUG);
 			logger().set_print_to_stdout_flag(true);
 			_as = new AtomSpace();
+			attentionbank(_as);
 			_eval = new SchemeEval(_as);
 		}
 

@@ -55,12 +55,10 @@ protected:
 	void init(void);
 
 	MapLink(Type, const Handle&,
-	           TruthValuePtr tv = TruthValue::DEFAULT_TV(),
-	           AttentionValuePtr av = AttentionValue::DEFAULT_AV());
+	           TruthValuePtr tv = TruthValue::DEFAULT_TV());
 
 	MapLink(Type, const HandleSeq&,
-	           TruthValuePtr tv = TruthValue::DEFAULT_TV(),
-	           AttentionValuePtr av = AttentionValue::DEFAULT_AV());
+	           TruthValuePtr tv = TruthValue::DEFAULT_TV());
 
 	bool extract(const Handle&, const Handle&,
 	             HandleMap&,
@@ -70,12 +68,10 @@ protected:
 
 public:
 	MapLink(const HandleSeq&,
-	        TruthValuePtr tv = TruthValue::DEFAULT_TV(),
-	        AttentionValuePtr av = AttentionValue::DEFAULT_AV());
+	        TruthValuePtr tv = TruthValue::DEFAULT_TV());
 
 	MapLink(const Handle& pattern, const Handle& term,
-	        TruthValuePtr tv = TruthValue::DEFAULT_TV(),
-	        AttentionValuePtr av = AttentionValue::DEFAULT_AV());
+	        TruthValuePtr tv = TruthValue::DEFAULT_TV());
 
 	MapLink(Link &l);
 

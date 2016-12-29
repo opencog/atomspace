@@ -61,9 +61,8 @@ public:
      * @param Node truthvalue A reference to a TruthValue object.
      */
     Node(Type t, const std::string& s,
-         TruthValuePtr tv = TruthValue::DEFAULT_TV(),
-         AttentionValuePtr av = AttentionValue::DEFAULT_AV())
-        : Atom(t,tv,av)
+         TruthValuePtr tv = TruthValue::DEFAULT_TV())
+        : Atom(t,tv)
     {
         init(s);
     }
@@ -74,7 +73,7 @@ public:
      * because thread-safe locking required in the gets.
      */
     Node(Node &n)
-        : Atom(n.getType(), n.getTruthValue(), n.getAttentionValue())
+        : Atom(n.getType(), n.getTruthValue())
     {
         init(n._name);
     }
