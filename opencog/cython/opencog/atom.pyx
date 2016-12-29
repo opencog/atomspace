@@ -95,7 +95,15 @@ cdef class Atom(object):
             if lti:
                 attentionbank(self.atomspace.atomspace).set_lti(self.handle[0], lti)
             if vlti:
-                attentionbank(self.atomspace.atomspace).inc_vlti(self.handle[0])
+                vlti = vlti - attentionbank(self.atomspace.atomspace).get_vlti(self.handle[0])
+                if vlti > 0:
+                    while vlti > 0:
+                        self.increment_vlti()
+                        vlti = vlti - 1
+                if vlti < 0:
+                    while vlti < 0:
+                        self.decrement_vlti()
+                        vlti = vlti + 1
 
     property sti:
         def __get__(self):
@@ -127,11 +135,19 @@ cdef class Atom(object):
             if atom_ptr == NULL:   # avoid null-pointer deref
                 return None
             return attentionbank(self.atomspace.atomspace).get_vlti(self.handle[0])
-        def __set__(self,val):
+        def __set__(self, val):
             cdef cAtom* atom_ptr = self.handle.atom_ptr()
             if atom_ptr == NULL:   # avoid null-pointer deref
                 return
-            attentionbank(self.atomspace.atomspace).inc_vlti(self.handle[0])
+            vlti = val - attentionbank(self.atomspace.atomspace).get_vlti(self.handle[0])
+            if vlti > 0:
+                while vlti > 0:
+                    self.increment_vlti()
+                    vlti = vlti - 1
+            if vlti < 0:
+                while vlti < 0:
+                    self.decrement_vlti()
+                    vlti = vlti + 1
 
     def increment_vlti(self):
         cdef cAtom* atom_ptr = self.handle.atom_ptr()
