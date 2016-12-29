@@ -47,7 +47,8 @@ class AtomSpaceAsyncUTest :  public CxxTest::TestSuite
 {
 private:
 
-    AtomSpace *atomSpace;
+    AtomSpace* atomSpace;
+    AttentionBank* ab;
 
     // Counters must be atomic; we are incrementing them inside threads
     std::atomic_size_t __testSignalsCounter;
@@ -65,12 +66,12 @@ private:
     void setSTI(Handle h, AttentionValue::sti_t stiValue) const
     {
         /* Make a copy */
-        AttentionValuePtr old_av = h->getAttentionValue();
+        AttentionValuePtr old_av = ab->get_av(h);
         AttentionValuePtr new_av = createAV(
             stiValue,
             old_av->getLTI(),
             old_av->getVLTI());
-        h->setAttentionValue(new_av);
+        ab->change_av(h, new_av);
     }
 
 public:
@@ -87,7 +88,7 @@ public:
     void setUp()
     {
         atomSpace = new AtomSpace();
-        attentionbank(atomSpace);
+        ab = &attentionbank(atomSpace);
         rng = new opencog::MT19937RandGen((unsigned long) time(NULL));
     }
 
@@ -498,26 +499,26 @@ public:
     void testAFSignals()
     {
         boost::signals2::connection addAFConnection =
-            attentionbank(atomSpace).AddAFSignal().connect(
+            ab->AddAFSignal().connect(
                     boost::bind(&AtomSpaceAsyncUTest::addAFSignal,
                                 this, _1, _2, _3));
         boost::signals2::connection removeAFConnection =
-            attentionbank(atomSpace).RemoveAFSignal().connect(
+            ab->RemoveAFSignal().connect(
                     boost::bind(&AtomSpaceAsyncUTest::removeAFSignal,
                                 this, _1, _2, _3));
 
         __testAFSignalsCounter = 0;
-        attentionbank(atomSpace).setAttentionalFocusBoundary(100);
+        ab->setAttentionalFocusBoundary(100);
 
         // Add a node to the AttentionalFocus
         Handle h = atomSpace->add_node(CONCEPT_NODE,
                                        "test");
         h->setTruthValue(SimpleTruthValue::createTV(0.01, 1));
-        h->setSTI(200);
+        ab->set_sti(h, 200);
         TS_ASSERT(__testAFSignalsCounter == 1);
 
         // Remove the node from the AttentionalFocus
-        h->setSTI(90);
+        ab->set_sti(h, 90);
         TS_ASSERT(__testAFSignalsCounter == 2);
 
         addAFConnection.disconnect();
