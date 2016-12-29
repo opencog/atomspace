@@ -86,8 +86,9 @@ AtomSpaceBenchmark::~AtomSpaceBenchmark()
     delete randomGenerator;
 }
 
-// This is wrong, because it fails to also count the amount of RAM
-// used by the AtomTable to store indexes.
+// This is wrong, because it fails to count also the amount of RAM
+// used by the AtomTable to store indexes, as well as the AttentionBank
+// to store the AttentionValues.
 size_t AtomSpaceBenchmark::estimateOfAtomSize(Handle h)
 {
     size_t total = 0;
@@ -106,11 +107,6 @@ size_t AtomSpaceBenchmark::estimateOfAtomSize(Handle h)
         default:
             break;
         }
-    }
-
-    if (h->getAttentionValue() != AttentionValue::DEFAULT_AV())
-    {
-        total += sizeof(AttentionValue);
     }
 
     NodePtr n(NodeCast(h));
