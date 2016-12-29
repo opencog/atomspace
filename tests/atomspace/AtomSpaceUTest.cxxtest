@@ -319,6 +319,7 @@ getSortedHandleSet(AtomSpace* as,
     HandleSeq hs;
 
     as->get_handles_by_type(back_inserter(hs), type, subclass);
+    compare->_ab = &attentionbank(as);
     std::sort(hs.begin(), hs.end(), compareAtom<AtomComparator>(compare));
     return std::copy(hs.begin(), hs.end(), result);
 }
