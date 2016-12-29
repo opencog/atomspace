@@ -1,5 +1,5 @@
 /*
- * opencog/atomspace/ThreadSafeFixedIntegerIndex.cc
+ * opencog/attentionbank/ThreadSafeFixedIntegerIndex.cc
  *
  * Copyright (C) 2016 Roman Treutlein <roman.treutlein@gmail.com>
  *
@@ -19,7 +19,7 @@
  * 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
  */
 
-#include <opencog/atomspace/ThreadSafeFixedIntegerIndex.h>
+#include <opencog/attentionbank/ThreadSafeFixedIntegerIndex.h>
 
 using namespace opencog;
 

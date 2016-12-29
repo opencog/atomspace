@@ -1,5 +1,5 @@
 /*
- * opencog/atomspace/ThreadSafeFixedIntegerIndex.h
+ * opencog/attentinbank/ThreadSafeFixedIntegerIndex.h
  *
  * Copyright (C) 2016 Roman Treutlein <roman.treutlein@gmail.com>
  *
@@ -27,9 +27,6 @@
 #include <atomic>
 #include <memory>
 
-#include <opencog/atoms/base/Atom.h>
-#include <opencog/atoms/base/Handle.h>
-
 #include <opencog/atomspace/FixedIntegerIndex.h>
 
 namespace opencog
@@ -38,6 +35,7 @@ namespace opencog
  *  @{
  */
 
+class Atom;
 typedef std::unordered_set<Atom*> UnorderedAtomSet;
 
 // This is possibly very costly and only used to get deterministic
