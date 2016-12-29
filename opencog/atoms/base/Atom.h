@@ -184,10 +184,6 @@ protected:
      */
     AttentionValuePtr getAttentionValue() const;
 
-    //! Sets the AttentionValue object of the atom.
-    //! XXX Deprecated; use the AttentionBank, instead.
-    void setAttentionValue(AttentionValuePtr);
-
 public:
 
     virtual ~Atom();
