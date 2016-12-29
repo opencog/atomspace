@@ -101,7 +101,6 @@ protected:
     AtomTable *_atomTable;
 
     TruthValuePtr _truthValue;
-    AttentionValuePtr _attentionValue;
     ProtoAtomPtr _value; // XXX this iw wrong!!! Must remove this!!
 
     // Lock, used to serialize changes.
@@ -128,7 +127,6 @@ protected:
         _content_hash(Handle::INVALID_HASH),
         _atomTable(NULL),
         _truthValue(tv),
-        _attentionValue(av),
         _value(pv)
     {}
 
