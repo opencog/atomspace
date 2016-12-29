@@ -76,7 +76,6 @@ typedef boost::signals2::signal<void (AtomPtr, LinkPtr)> AtomPairSignal;
 class Atom
     : public ProtoAtom
 {
-    friend class ImportanceIndex; // Needs to call getAttentionValue
     friend class AtomStorage;     // Needs to set atomtable
     friend class AtomTable;       // Needs to call MarkedForRemoval()
     friend class AtomSpace;       // Needs to call getAtomTable()
@@ -176,13 +175,6 @@ private:
     bool isChecked() const;
     void setChecked();
     void setUnchecked();
-
-protected:
-    /**
-     * Returns the AttentionValue object of the atom.
-     * XXX Deprecated; use the AttentionBank, instead.
-     */
-    AttentionValuePtr getAttentionValue() const;
 
 public:
 
