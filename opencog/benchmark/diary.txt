@@ -1397,6 +1397,40 @@ Remarks:
   depending on the atom.  So cache line alignments will be different.
 * Variation of getType performance indicatie of the caching effect.
 * Variation of getOutgoingSet unexpected: caching effect?
+  Maybe something to do with cache alignment of Handles and atoms?
 * Improvement of addNode, addLink and removeAtom probably explainable
   by the removal of the atom-UUID index.
 * addLink is still slow, due to all the stupid cloning & etc.
+
+======================================================================
+
+29 Dec 2016
+-----------
+New core baseline. Fanny.  This baseline measures perf after removing
+AttentionValue's from the atoms (and thus, removing signal overuse in
+the AttentionBank.) This should make atom insertion and deletion faster.
+
+compiler: gcc version 6.2.1
+
+                     -A          -A           -A
+   test            11 Nov       today         Feb
+   name            K-ops/sec   K-ops/sec      2016         Comments
+   ----            ---------   ---------      ----      -----------------
+  noop              1.76e6      2.20e6       1.5e6      cache effects
+  getType          79.1K       82.3K        78.0K       ??
+  getTV             4099        4109         4261
+  setTV             1217        1243         1129
+  pointerCast       7561        8236                    ??
+  getIncomingSet    2272        2270         2250
+  getOutgoingSet   43.6K       47.2K        38.6K       ??
+  addNode            231         305          145       32% faster
+  addLink             88.3       103         67.5       17% faster
+  removeAtom         431         559          186       30% faster !!
+
+Remarks:
+* Variation of getOutgoingSet unexpected: it improves on the previous
+  unexpected improvement... can this be because the Atom got smaller
+  again?
+* Improvement in getType and pointerCast also unexpected.
+* Improvement in addNode addLink removeAtom expected, because of
+  refactoring of very inefficient AttentionBank.
