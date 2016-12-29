@@ -41,8 +41,8 @@ void RandomNumberLink::init()
 }
 
 RandomNumberLink::RandomNumberLink(const HandleSeq& oset,
-                       TruthValuePtr tv, AttentionValuePtr av)
-	: FunctionLink(RANDOM_NUMBER_LINK, oset, tv, av)
+                       TruthValuePtr tv)
+	: FunctionLink(RANDOM_NUMBER_LINK, oset, tv)
 {
 	init();
 }

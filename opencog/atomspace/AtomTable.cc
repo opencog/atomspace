@@ -576,9 +576,7 @@ Handle AtomTable::add(AtomPtr atom, bool async)
             if (nullptr == h.operator->()) return Handle::UNDEFINED;
             closet.emplace_back(add(h, async));
         }
-        atom = createLink(atom_type, closet,
-                          atom->getTruthValue(),
-                          atom->getAttentionValue());
+        atom = createLink(atom_type, closet, atom->getTruthValue());
         atom = clone_factory(atom_type, atom);
     }
 

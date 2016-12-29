@@ -36,15 +36,15 @@ void StateLink::init()
 }
 
 StateLink::StateLink(const HandleSeq& oset,
-                     TruthValuePtr tv, AttentionValuePtr av)
-	: UniqueLink(STATE_LINK, oset, tv, av)
+                     TruthValuePtr tv)
+	: UniqueLink(STATE_LINK, oset, tv)
 {
 	init();
 }
 
 StateLink::StateLink(const Handle& name, const Handle& defn,
-                     TruthValuePtr tv, AttentionValuePtr av)
-	: UniqueLink(STATE_LINK, HandleSeq({name, defn}), tv, av)
+                     TruthValuePtr tv)
+	: UniqueLink(STATE_LINK, HandleSeq({name, defn}), tv)
 {
 	init();
 }

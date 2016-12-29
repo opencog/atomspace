@@ -63,12 +63,10 @@ protected:
 	void init();
 public:
 	DefineLink(const HandleSeq&,
-	           TruthValuePtr tv = TruthValue::DEFAULT_TV(),
-	           AttentionValuePtr av = AttentionValue::DEFAULT_AV());
+	           TruthValuePtr tv = TruthValue::DEFAULT_TV());
 
 	DefineLink(const Handle& alias, const Handle& body,
-	           TruthValuePtr tv = TruthValue::DEFAULT_TV(),
-	           AttentionValuePtr av = AttentionValue::DEFAULT_AV());
+	           TruthValuePtr tv = TruthValue::DEFAULT_TV());
 
 	DefineLink(Link &l);
 	Handle get_alias(void) const { return _outgoing[0]; }

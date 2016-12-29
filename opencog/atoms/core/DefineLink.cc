@@ -49,16 +49,15 @@ void DefineLink::init()
 				classserver().getTypeName(dtype).c_str());
 }
 
-DefineLink::DefineLink(const HandleSeq& oset,
-                       TruthValuePtr tv, AttentionValuePtr av)
-	: UniqueLink(DEFINE_LINK, oset, tv, av)
+DefineLink::DefineLink(const HandleSeq& oset, TruthValuePtr tv)
+	: UniqueLink(DEFINE_LINK, oset, tv)
 {
 	init();
 }
 
 DefineLink::DefineLink(const Handle& name, const Handle& defn,
-                       TruthValuePtr tv, AttentionValuePtr av)
-	: UniqueLink(DEFINE_LINK, HandleSeq({name, defn}), tv, av)
+                       TruthValuePtr tv)
+	: UniqueLink(DEFINE_LINK, HandleSeq({name, defn}), tv)
 {
 	init();
 }

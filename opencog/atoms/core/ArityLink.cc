@@ -28,9 +28,8 @@
 
 using namespace opencog;
 
-ArityLink::ArityLink(const HandleSeq& oset,
-                       TruthValuePtr tv, AttentionValuePtr av)
-	: FunctionLink(ARITY_LINK, oset, tv, av)
+ArityLink::ArityLink(const HandleSeq& oset, TruthValuePtr tv)
+	: FunctionLink(ARITY_LINK, oset, tv)
 {
 }
 

@@ -72,17 +72,15 @@ public:
      * @param Link truthvalue.
      */
     Link(Type t, const HandleSeq& oset,
-         TruthValuePtr tv = TruthValue::DEFAULT_TV(),
-         AttentionValuePtr av = AttentionValue::DEFAULT_AV())
-        : Atom(t, tv, av)
+         TruthValuePtr tv = TruthValue::DEFAULT_TV())
+        : Atom(t, tv)
     {
         init(oset);
     }
 
     Link(Type t, const Handle& h,
-         TruthValuePtr tv = TruthValue::DEFAULT_TV(),
-         AttentionValuePtr av = AttentionValue::DEFAULT_AV())
-        : Atom(t, tv, av)
+         TruthValuePtr tv = TruthValue::DEFAULT_TV())
+        : Atom(t, tv)
     {
         // reserve+assign is 2x faster than push_back()/emplace_back()
         HandleSeq oset(1);
@@ -91,9 +89,8 @@ public:
     }
 
     Link(Type t, const Handle& ha, const Handle &hb,
-         TruthValuePtr tv = TruthValue::DEFAULT_TV(),
-         AttentionValuePtr av = AttentionValue::DEFAULT_AV())
-        : Atom(t, tv, av)
+         TruthValuePtr tv = TruthValue::DEFAULT_TV())
+        : Atom(t, tv)
     {
         // reserve+assign is 2x faster than push_back()/emplace_back()
         HandleSeq oset(2);
@@ -103,9 +100,8 @@ public:
     }
 
     Link(Type t, const Handle& ha, const Handle &hb, const Handle &hc,
-         TruthValuePtr tv = TruthValue::DEFAULT_TV(),
-         AttentionValuePtr av = AttentionValue::DEFAULT_AV())
-        : Atom(t, tv, av)
+         TruthValuePtr tv = TruthValue::DEFAULT_TV())
+        : Atom(t, tv)
     {
         // reserve+assign is 2x faster than push_back()/emplace_back()
         HandleSeq oset(3);
@@ -116,9 +112,8 @@ public:
     }
     Link(Type t, const Handle& ha, const Handle &hb,
 	      const Handle &hc, const Handle &hd,
-         TruthValuePtr tv = TruthValue::DEFAULT_TV(),
-         AttentionValuePtr av = AttentionValue::DEFAULT_AV())
-        : Atom(t, tv, av)
+         TruthValuePtr tv = TruthValue::DEFAULT_TV())
+        : Atom(t, tv)
     {
         // reserve+assign is 2x faster than push_back()/emplace_back()
         HandleSeq oset(4);
@@ -134,7 +129,7 @@ public:
      * Cannot be const, because the get() functions can't be,
      * because thread-safe locking required in the gets. */
     Link(Link &l)
-        : Atom(l.getType(), l.getTruthValue(), l.getAttentionValue())
+        : Atom(l.getType(), l.getTruthValue())
     {
         init(l.getOutgoingSet());
     }

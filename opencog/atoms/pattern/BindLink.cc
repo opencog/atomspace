@@ -38,9 +38,8 @@ void BindLink::init(void)
 	_pat.redex_name = "anonymous BindLink";
 }
 
-BindLink::BindLink(const HandleSeq& hseq,
-                   TruthValuePtr tv, AttentionValuePtr av)
-	: PatternLink(BIND_LINK, hseq, tv, av)
+BindLink::BindLink(const HandleSeq& hseq, TruthValuePtr tv)
+	: PatternLink(BIND_LINK, hseq, tv)
 {
 	init();
 }
@@ -48,18 +47,17 @@ BindLink::BindLink(const HandleSeq& hseq,
 BindLink::BindLink(const Handle& vardecl,
                    const Handle& body,
                    const Handle& rewrite,
-                   TruthValuePtr tv, AttentionValuePtr av)
-	: BindLink(HandleSeq{vardecl, body, rewrite}, tv, av)
+                   TruthValuePtr tv)
+	: BindLink(HandleSeq{vardecl, body, rewrite}, tv)
 {}
 
 BindLink::BindLink(const Handle& body, const Handle& rewrite,
-                   TruthValuePtr tv, AttentionValuePtr av)
-	: BindLink(HandleSeq{body, rewrite}, tv, av)
+                   TruthValuePtr tv)
+	: BindLink(HandleSeq{body, rewrite}, tv)
 {}
 
-BindLink::BindLink(Type t, const HandleSeq& hseq,
-                   TruthValuePtr tv, AttentionValuePtr av)
-	: PatternLink(t, hseq, tv, av)
+BindLink::BindLink(Type t, const HandleSeq& hseq, TruthValuePtr tv)
+	: PatternLink(t, hseq, tv)
 {
 	init();
 }

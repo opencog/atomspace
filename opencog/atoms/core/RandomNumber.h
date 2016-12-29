@@ -49,8 +49,7 @@ protected:
 
 public:
 	RandomNumberLink(const HandleSeq&,
-	           TruthValuePtr tv = TruthValue::DEFAULT_TV(),
-	           AttentionValuePtr av = AttentionValue::DEFAULT_AV());
+	           TruthValuePtr tv = TruthValue::DEFAULT_TV());
 
 	RandomNumberLink(Link &l);
 

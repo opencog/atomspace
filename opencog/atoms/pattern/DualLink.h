@@ -35,13 +35,11 @@ protected:
 	void init(void);
 
 	DualLink(Type, const HandleSeq&,
-	         TruthValuePtr tv = TruthValue::DEFAULT_TV(),
-	         AttentionValuePtr av = AttentionValue::DEFAULT_AV());
+	         TruthValuePtr tv = TruthValue::DEFAULT_TV());
 
 public:
 	DualLink(const HandleSeq&,
-	         TruthValuePtr tv = TruthValue::DEFAULT_TV(),
-	         AttentionValuePtr av = AttentionValue::DEFAULT_AV());
+	         TruthValuePtr tv = TruthValue::DEFAULT_TV());
 
 	DualLink(Link &l);
 };

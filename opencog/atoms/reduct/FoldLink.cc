@@ -33,18 +33,14 @@
 
 using namespace opencog;
 
-FoldLink::FoldLink(const HandleSeq& oset,
-                   TruthValuePtr tv,
-                   AttentionValuePtr av)
-    : FunctionLink(FOLD_LINK, oset, tv, av)
+FoldLink::FoldLink(const HandleSeq& oset, TruthValuePtr tv)
+    : FunctionLink(FOLD_LINK, oset, tv)
 {
 	init();
 }
 
-FoldLink::FoldLink(Type t, const HandleSeq& oset,
-                   TruthValuePtr tv,
-                   AttentionValuePtr av)
-    : FunctionLink(t, oset, tv, av)
+FoldLink::FoldLink(Type t, const HandleSeq& oset, TruthValuePtr tv)
+    : FunctionLink(t, oset, tv)
 {
 	if (not classserver().isA(t, FOLD_LINK))
 		throw InvalidParamException(TRACE_INFO, "Expecting a FoldLink");
@@ -52,9 +48,8 @@ FoldLink::FoldLink(Type t, const HandleSeq& oset,
 }
 
 FoldLink::FoldLink(Type t, const Handle& a, const Handle& b,
-                   TruthValuePtr tv,
-                   AttentionValuePtr av)
-    : FunctionLink(t, a, b, tv, av)
+                   TruthValuePtr tv)
+    : FunctionLink(t, a, b, tv)
 {
 	if (not classserver().isA(t, FOLD_LINK))
 		throw InvalidParamException(TRACE_INFO, "Expecting a FoldLink");

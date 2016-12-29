@@ -139,8 +139,7 @@ public:
 	// Only derived classes can call this
 	// XXX Need to make this public, so that the factory can call it!
 	PatternLink(Type, const HandleSeq&,
-	            TruthValuePtr tv = TruthValue::DEFAULT_TV(),
-	            AttentionValuePtr av = AttentionValue::DEFAULT_AV());
+	            TruthValuePtr tv = TruthValue::DEFAULT_TV());
 
 protected:
 	// utility debug print
@@ -151,16 +150,13 @@ protected:
 
 public:
 	PatternLink(const HandleSeq&,
-	            TruthValuePtr tv = TruthValue::DEFAULT_TV(),
-	            AttentionValuePtr av = AttentionValue::DEFAULT_AV());
+	            TruthValuePtr tv = TruthValue::DEFAULT_TV());
 
 	PatternLink(const Handle& body,
-	            TruthValuePtr tv = TruthValue::DEFAULT_TV(),
-	            AttentionValuePtr av = AttentionValue::DEFAULT_AV());
+	            TruthValuePtr tv = TruthValue::DEFAULT_TV());
 
 	PatternLink(const Handle& varcdecls, const Handle& body,
-	            TruthValuePtr tv = TruthValue::DEFAULT_TV(),
-	            AttentionValuePtr av = AttentionValue::DEFAULT_AV());
+	            TruthValuePtr tv = TruthValue::DEFAULT_TV());
 
 	PatternLink(const Variables&, const Handle&);
 

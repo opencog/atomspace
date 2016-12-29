@@ -43,9 +43,8 @@
 using namespace opencog;
 
 EvaluationLink::EvaluationLink(const HandleSeq& oset,
-                               TruthValuePtr tv,
-                               AttentionValuePtr av)
-    : FreeLink(EVALUATION_LINK, oset, tv, av)
+                               TruthValuePtr tv)
+    : FreeLink(EVALUATION_LINK, oset, tv)
 {
 	if ((2 != oset.size()) or
 	   (LIST_LINK != oset[1]->getType()))
@@ -56,9 +55,8 @@ EvaluationLink::EvaluationLink(const HandleSeq& oset,
 }
 
 EvaluationLink::EvaluationLink(const Handle& schema, const Handle& args,
-                               TruthValuePtr tv,
-                               AttentionValuePtr av)
-    : FreeLink(EVALUATION_LINK, schema, args, tv, av)
+                               TruthValuePtr tv)
+    : FreeLink(EVALUATION_LINK, schema, args, tv)
 {
 	if (LIST_LINK != args->getType()) {
 		throw RuntimeException(TRACE_INFO,

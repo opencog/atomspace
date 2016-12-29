@@ -241,30 +241,28 @@ PatternLink::PatternLink(const OrderedHandleSet& vars,
 
 /* ================================================================= */
 
-PatternLink::PatternLink(const HandleSeq& hseq,
-                         TruthValuePtr tv, AttentionValuePtr av)
-	: ScopeLink(PATTERN_LINK, hseq, tv, av)
+PatternLink::PatternLink(const HandleSeq& hseq, TruthValuePtr tv)
+	: ScopeLink(PATTERN_LINK, hseq, tv)
 {
 	init();
 }
 
-PatternLink::PatternLink(const Handle& body,
-                         TruthValuePtr tv, AttentionValuePtr av)
-	: ScopeLink(PATTERN_LINK, HandleSeq({body}), tv, av)
+PatternLink::PatternLink(const Handle& body, TruthValuePtr tv)
+	: ScopeLink(PATTERN_LINK, HandleSeq({body}), tv)
 {
 	init();
 }
 
 PatternLink::PatternLink(const Handle& vars, const Handle& body,
-                         TruthValuePtr tv, AttentionValuePtr av)
-	: ScopeLink(PATTERN_LINK, HandleSeq({vars, body}), tv, av)
+                         TruthValuePtr tv)
+	: ScopeLink(PATTERN_LINK, HandleSeq({vars, body}), tv)
 {
 	init();
 }
 
 PatternLink::PatternLink(Type t, const HandleSeq& hseq,
-                         TruthValuePtr tv, AttentionValuePtr av)
-	: ScopeLink(t, hseq, tv, av)
+                         TruthValuePtr tv)
+	: ScopeLink(t, hseq, tv)
 {
 	// BindLink uses a different initialization sequence.
 	if (BIND_LINK == t) return;

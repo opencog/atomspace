@@ -57,18 +57,15 @@ protected:
 	void validate_vardecl(const HandleSeq&);
 
 	VariableList(Type, const HandleSeq&,
-	             TruthValuePtr tv = TruthValue::DEFAULT_TV(),
-	             AttentionValuePtr av = AttentionValue::DEFAULT_AV());
+	             TruthValuePtr tv = TruthValue::DEFAULT_TV());
 
 	void build_index(void);
 public:
 	VariableList(const Handle& hvardecls,
-	             TruthValuePtr tv = TruthValue::DEFAULT_TV(),
-	             AttentionValuePtr av = AttentionValue::DEFAULT_AV());
+	             TruthValuePtr tv = TruthValue::DEFAULT_TV());
 
 	VariableList(const HandleSeq& vardecls,
-	             TruthValuePtr tv = TruthValue::DEFAULT_TV(),
-	             AttentionValuePtr av = AttentionValue::DEFAULT_AV());
+	             TruthValuePtr tv = TruthValue::DEFAULT_TV());
 
 	VariableList(Link&);
 

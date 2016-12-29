@@ -51,12 +51,10 @@ protected:
 	void init();
 public:
 	TypedAtomLink(const HandleSeq&,
-	           TruthValuePtr tv = TruthValue::DEFAULT_TV(),
-	           AttentionValuePtr av = AttentionValue::DEFAULT_AV());
+	           TruthValuePtr tv = TruthValue::DEFAULT_TV());
 
 	TypedAtomLink(const Handle& alias, const Handle& body,
-	           TruthValuePtr tv = TruthValue::DEFAULT_TV(),
-	           AttentionValuePtr av = AttentionValue::DEFAULT_AV());
+	           TruthValuePtr tv = TruthValue::DEFAULT_TV());
 
 	TypedAtomLink(Link &l);
 	Handle get_atom(void) const { return _outgoing[0]; }

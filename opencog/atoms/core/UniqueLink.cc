@@ -60,8 +60,8 @@ void UniqueLink::init(bool allow_open)
 }
 
 UniqueLink::UniqueLink(Type type, const HandleSeq& oset,
-                       TruthValuePtr tv, AttentionValuePtr av)
-	: FreeLink(type, oset, tv, av)
+                       TruthValuePtr tv)
+	: FreeLink(type, oset, tv)
 {
 	if (not classserver().isA(type, UNIQUE_LINK))
 	{
@@ -76,15 +76,15 @@ UniqueLink::UniqueLink(Type type, const HandleSeq& oset,
 }
 
 UniqueLink::UniqueLink(const HandleSeq& oset,
-                       TruthValuePtr tv, AttentionValuePtr av)
-	: FreeLink(UNIQUE_LINK, oset, tv, av)
+                       TruthValuePtr tv)
+	: FreeLink(UNIQUE_LINK, oset, tv)
 {
 	init(true);
 }
 
 UniqueLink::UniqueLink(const Handle& name, const Handle& defn,
-                       TruthValuePtr tv, AttentionValuePtr av)
-	: FreeLink(UNIQUE_LINK, HandleSeq({name, defn}), tv, av)
+                       TruthValuePtr tv)
+	: FreeLink(UNIQUE_LINK, HandleSeq({name, defn}), tv)
 {
 	init(true);
 }

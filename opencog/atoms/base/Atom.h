@@ -120,7 +120,6 @@ protected:
      * @param The truthValue of the atom.
      */
     Atom(Type t, TruthValuePtr tv = TruthValue::DEFAULT_TV(),
-         AttentionValuePtr av = AttentionValue::DEFAULT_AV(),
          ProtoAtomPtr pv = NULL)
       : ProtoAtom(t),
         _flags(0),

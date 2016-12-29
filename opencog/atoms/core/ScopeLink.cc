@@ -44,15 +44,15 @@ void ScopeLink::init(void)
 }
 
 ScopeLink::ScopeLink(const HandleSeq& oset,
-                     TruthValuePtr tv, AttentionValuePtr av)
-	: Link(SCOPE_LINK, oset, tv, av)
+                     TruthValuePtr tv)
+	: Link(SCOPE_LINK, oset, tv)
 {
 	init();
 }
 
 ScopeLink::ScopeLink(const Handle& vars, const Handle& body,
-                     TruthValuePtr tv, AttentionValuePtr av)
-	: Link(SCOPE_LINK, HandleSeq({vars, body}), tv, av)
+                     TruthValuePtr tv)
+	: Link(SCOPE_LINK, HandleSeq({vars, body}), tv)
 {
 	init();
 }
@@ -77,16 +77,16 @@ bool ScopeLink::skip_init(Type t)
 }
 
 ScopeLink::ScopeLink(Type t, const Handle& body,
-                     TruthValuePtr tv, AttentionValuePtr av)
-	: Link(t, HandleSeq({body}), tv, av)
+                     TruthValuePtr tv)
+	: Link(t, HandleSeq({body}), tv)
 {
 	if (skip_init(t)) return;
 	init();
 }
 
 ScopeLink::ScopeLink(Type t, const HandleSeq& oset,
-                     TruthValuePtr tv, AttentionValuePtr av)
-	: Link(t, oset, tv, av)
+                     TruthValuePtr tv)
+	: Link(t, oset, tv)
 {
 	if (skip_init(t)) return;
 	init();

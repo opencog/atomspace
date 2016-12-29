@@ -46,8 +46,7 @@ protected:
 	void init(void);
 public:
 	DeleteLink(const HandleSeq&,
-	           TruthValuePtr tv = TruthValue::DEFAULT_TV(),
-	           AttentionValuePtr av = AttentionValue::DEFAULT_AV());
+	           TruthValuePtr tv = TruthValue::DEFAULT_TV());
 
 	DeleteLink(Link &l);
 };

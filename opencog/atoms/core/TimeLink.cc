@@ -30,8 +30,8 @@
 using namespace opencog;
 
 TimeLink::TimeLink(const HandleSeq& oset,
-                       TruthValuePtr tv, AttentionValuePtr av)
-	: FunctionLink(TIME_LINK, oset, tv, av)
+                       TruthValuePtr tv)
+	: FunctionLink(TIME_LINK, oset, tv)
 {
 	if (0 < oset.size())
 		throw SyntaxException(TRACE_INFO,

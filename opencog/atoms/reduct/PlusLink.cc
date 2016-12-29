@@ -28,18 +28,14 @@
 
 using namespace opencog;
 
-PlusLink::PlusLink(const HandleSeq& oset,
-                   TruthValuePtr tv,
-                   AttentionValuePtr av)
-    : ArithmeticLink(PLUS_LINK, oset, tv, av)
+PlusLink::PlusLink(const HandleSeq& oset, TruthValuePtr tv)
+    : ArithmeticLink(PLUS_LINK, oset, tv)
 {
 	init();
 }
 
-PlusLink::PlusLink(Type t, const HandleSeq& oset,
-                   TruthValuePtr tv,
-                   AttentionValuePtr av)
-    : ArithmeticLink(t, oset, tv, av)
+PlusLink::PlusLink(Type t, const HandleSeq& oset, TruthValuePtr tv)
+    : ArithmeticLink(t, oset, tv)
 {
 	if (not classserver().isA(t, PLUS_LINK))
 		throw InvalidParamException(TRACE_INFO, "Expecting a PlusLink");
@@ -47,17 +43,15 @@ PlusLink::PlusLink(Type t, const HandleSeq& oset,
 }
 
 PlusLink::PlusLink(const Handle& a, const Handle& b,
-                   TruthValuePtr tv,
-                   AttentionValuePtr av)
-    : ArithmeticLink(PLUS_LINK, a, b, tv, av)
+                   TruthValuePtr tv)
+    : ArithmeticLink(PLUS_LINK, a, b, tv)
 {
 	init();
 }
 
 PlusLink::PlusLink(Type t, const Handle& a, const Handle& b,
-                   TruthValuePtr tv,
-                   AttentionValuePtr av)
-    : ArithmeticLink(t, a, b, tv, av)
+                   TruthValuePtr tv)
+    : ArithmeticLink(t, a, b, tv)
 {
 	if (not classserver().isA(t, PLUS_LINK))
 		throw InvalidParamException(TRACE_INFO, "Expecting a PlusLink");

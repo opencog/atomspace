@@ -48,8 +48,7 @@ class ArityLink : public FunctionLink
 {
 public:
 	ArityLink(const HandleSeq&,
-	           TruthValuePtr tv = TruthValue::DEFAULT_TV(),
-	           AttentionValuePtr av = AttentionValue::DEFAULT_AV());
+	           TruthValuePtr tv = TruthValue::DEFAULT_TV());
 
 	ArityLink(Link &l);
 

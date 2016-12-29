@@ -38,8 +38,7 @@ class TimeLink : public FunctionLink
 {
 public:
 	TimeLink(const HandleSeq&,
-	           TruthValuePtr tv = TruthValue::DEFAULT_TV(),
-	           AttentionValuePtr av = AttentionValue::DEFAULT_AV());
+	           TruthValuePtr tv = TruthValue::DEFAULT_TV());
 
 	TimeLink(Link &l);
 

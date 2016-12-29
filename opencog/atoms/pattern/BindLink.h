@@ -43,19 +43,15 @@ protected:
 	void extract_variables(const HandleSeq& oset);
 
 	BindLink(Type, const HandleSeq&,
-	         TruthValuePtr tv=TruthValue::DEFAULT_TV(),
-	         AttentionValuePtr av=AttentionValue::DEFAULT_AV());
+	         TruthValuePtr tv=TruthValue::DEFAULT_TV());
 
 public:
 	BindLink(const HandleSeq&,
-	         TruthValuePtr tv=TruthValue::DEFAULT_TV(),
-	         AttentionValuePtr av=AttentionValue::DEFAULT_AV());
+	         TruthValuePtr tv=TruthValue::DEFAULT_TV());
 	BindLink(const Handle& vardecl, const Handle& body, const Handle& rewrite,
-	         TruthValuePtr tv=TruthValue::DEFAULT_TV(),
-	         AttentionValuePtr av=AttentionValue::DEFAULT_AV());
+	         TruthValuePtr tv=TruthValue::DEFAULT_TV());
 	BindLink(const Handle& body, const Handle& rewrite,
-	         TruthValuePtr tv=TruthValue::DEFAULT_TV(),
-	         AttentionValuePtr av=AttentionValue::DEFAULT_AV());
+	         TruthValuePtr tv=TruthValue::DEFAULT_TV());
 
 	explicit BindLink(Link &l);
 

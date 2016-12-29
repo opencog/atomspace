@@ -44,9 +44,8 @@ public:
 };
 
 ExecutionOutputLink::ExecutionOutputLink(const HandleSeq& oset,
-                                         TruthValuePtr tv,
-                                         AttentionValuePtr av)
-	: FunctionLink(EXECUTION_OUTPUT_LINK, oset, tv, av)
+                                         TruthValuePtr tv)
+	: FunctionLink(EXECUTION_OUTPUT_LINK, oset, tv)
 {
 	if (2 != oset.size())
 		throw SyntaxException(TRACE_INFO,
@@ -65,9 +64,8 @@ ExecutionOutputLink::ExecutionOutputLink(const HandleSeq& oset,
 
 ExecutionOutputLink::ExecutionOutputLink(const Handle& schema,
                                          const Handle& args,
-                                         TruthValuePtr tv,
-                                         AttentionValuePtr av)
-	: FunctionLink(EXECUTION_OUTPUT_LINK, schema, args, tv, av)
+                                         TruthValuePtr tv)
+	: FunctionLink(EXECUTION_OUTPUT_LINK, schema, args, tv)
 {
 	Type stype = schema->getType();
 	if (GROUNDED_SCHEMA_NODE != stype and
