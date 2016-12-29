@@ -74,14 +74,6 @@ std::string SchemeSmob::handle_to_string(Handle h, int indent)
 			ret += " ";
 			ret += tv_to_string (tv.get());
 		}
-
-		// Print the attention value after the truth value
-		AtomSpace* as = ss_get_env_as("cog-node-to-string");
-		AttentionValuePtr av(attentionbank(as).get_av(h));
-		if (not av->isDefaultAV()) {
-			ret += " ";
-			ret += av_to_string (av.get());
-		}
 		ret += ")";
 		return ret;
 	}
@@ -96,14 +88,6 @@ std::string SchemeSmob::handle_to_string(Handle h, int indent)
 		if (not tv->isDefaultTV()) {
 			ret += " ";
 			ret += tv_to_string (tv.get());
-		}
-
-		// Print the attention value after the truth value
-		AtomSpace* as = ss_get_env_as("cog-link-to-string");
-		AttentionValuePtr av(attentionbank(as).get_av(h));
-		if (not av->isDefaultAV()) {
-			ret += " ";
-			ret += av_to_string (av.get());
 		}
 
 		// print the outgoing link set.
