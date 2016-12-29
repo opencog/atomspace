@@ -76,6 +76,7 @@ typedef boost::signals2::signal<void (AtomPtr, LinkPtr)> AtomPairSignal;
 class Atom
     : public ProtoAtom
 {
+    friend class ImportanceIndex; // Needs to call getAttentionValue
     friend class AtomStorage;     // Needs to set atomtable
     friend class AtomTable;       // Needs to call MarkedForRemoval()
     friend class AtomSpace;       // Needs to call getAtomTable()
@@ -176,8 +177,16 @@ private:
     void setChecked();
     void setUnchecked();
 
-    /** Change the Very-Long-Term Importance. */
-    void chgVLTI(int unit);
+protected:
+    /**
+     * Returns the AttentionValue object of the atom.
+     * XXX Deprecated; use the AttentionBank, instead.
+     */
+    AttentionValuePtr getAttentionValue() const;
+
+    //! Sets the AttentionValue object of the atom.
+    //! XXX Deprecated; use the AttentionBank, instead.
+    void setAttentionValue(AttentionValuePtr);
 
 public:
 
@@ -218,16 +227,6 @@ public:
     inline Handle getHandle() {
         return Handle(std::dynamic_pointer_cast<Atom>(shared_from_this()));
     }
-
-    /**
-     * Returns the AttentionValue object of the atom.
-     * XXX Deprecated; use the AttentionBank, instead.
-     */
-    AttentionValuePtr getAttentionValue() const;
-
-    //! Sets the AttentionValue object of the atom.
-    //! XXX Deprecated; use the AttentionBank, instead.
-    void setAttentionValue(AttentionValuePtr);
 
     /** Returns the TruthValue object of the atom. */
     TruthValuePtr getTruthValue() const;
