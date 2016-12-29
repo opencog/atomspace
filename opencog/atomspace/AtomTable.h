@@ -87,7 +87,7 @@ private:
     // Cached count of the number of atoms of each type.
     std::vector<size_t> _size_by_type;
 
-    // Eventual replacement for _atom_set above.
+    // Index of all the atoms in the table, addressible by thier hash.
     std::unordered_multimap<ContentHash, Handle> _atom_store;
 
     //!@{
