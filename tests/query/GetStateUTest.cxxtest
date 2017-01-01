@@ -20,6 +20,8 @@
  * 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
  */
 
+#include <thread>
+
 #include <opencog/guile/SchemeEval.h>
 #include <opencog/truthvalue/SimpleTruthValue.h>
 #include <opencog/atomspace/AtomSpace.h>
@@ -37,6 +39,9 @@ class GetStateUTest: public CxxTest::TestSuite
 private:
 	AtomSpace* as;
 	SchemeEval* eval;
+
+	std::thread*  setthr;
+	std::thread*  getthr;
 
 public:
 	GetStateUTest(void)
@@ -65,6 +70,9 @@ _exit(rc); // XXX hack to avoid double-free in __run_exit_handlers
 	void setUp(void);
 	void tearDown(void);
 
+	void Setter(void);
+	void Getter(void);
+
 	void test_race(void);
 };
 
@@ -76,6 +84,20 @@ void GetStateUTest::setUp(void)
 {
 }
 
+void GetStateUTest::Setter(void)
+{
+#define LOOP_CNT 1000
+	for (int lc=0; lc<LOOP_CNT; lc++)
+	{
+		eval->eval_h(
+			"(State anch (Concept \"whiz-" + std::to_string(lc) + "\"))");
+	}
+}
+
+void GetStateUTest::Getter(void)
+{
+}
+
 /*
  * Two-variable GetLink unit test.
  */
@@ -83,20 +105,27 @@ void GetStateUTest::test_race(void)
 {
 	logger().debug("BEGIN TEST: %s", __FUNCTION__);
 
-	as->clear();
-	eval->eval("(load-from-path \"tests/query/get-link.scm\")");
+	eval->eval("(define anch (Anchor \"foo-anchor\"))");
 
-	Handle hgnd = eval->eval_h("(cog-satisfying-set is-something)");
-	Handle hans = eval->eval_h(
-		"(SetLink "
-		"(ListLink (ConceptNode \"Ben\") (ConceptNode \"human\"))"
-		"(ListLink (ConceptNode \"Linas\") (ConceptNode \"human\"))"
-		"(ListLink (ConceptNode \"Sparky\") (ConceptNode \"dog\")))");
+	// Create setter and getter threads.
+	auto set_wrap = [&](void) { Setter(); };
+	auto get_wrap = [&](void) { Getter(); };
 
-	printf("Expected this: %s\n", hans->toString().c_str());
-	printf("Found this answer: %s\n", hgnd->toString().c_str());
+	setthr = new std::thread(set_wrap);
+	getthr = new std::thread(get_wrap);
 
-	TSM_ASSERT("Didn't get the expected grounding", hans == hgnd);
+	setthr->join();
+
+//	Handle hans = eval->eval_h(
+//		"(SetLink "
+//		"(ListLink (ConceptNode \"Ben\") (ConceptNode \"human\"))"
+//		"(ListLink (ConceptNode \"Linas\") (ConceptNode \"human\"))"
+//		"(ListLink (ConceptNode \"Sparky\") (ConceptNode \"dog\")))");
+//
+//	printf("Expected this: %s\n", hans->toString().c_str());
+//	printf("Found this answer: %s\n", hgnd->toString().c_str());
+
+//	TSM_ASSERT("Didn't get the expected grounding", hans == hgnd);
 
 	logger().debug("END TEST: %s", __FUNCTION__);
 }
