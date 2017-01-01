@@ -1,0 +1,106 @@
+/*
+ * tests/query/GetStateUTest.cxxtest
+ *
+ * Copyright (C) 2017 Linas Vepstas
+ * All Rights Reserved
+ *
+ * This program is free software; you can redistribute it and/or modify
+ * it under the terms of the GNU Affero General Public License v3 as
+ * published by the Free Software Foundation and including the exceptions
+ * at http://opencog.org/wiki/Licenses
+ *
+ * This program is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ * GNU General Public License for more details.
+ *
+ * You should have received a copy of the GNU Affero General Public License
+ * along with this program; if not, write to:
+ * Free Software Foundation, Inc.,
+ * 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
+ */
+
+#include <opencog/guile/SchemeEval.h>
+#include <opencog/truthvalue/SimpleTruthValue.h>
+#include <opencog/atomspace/AtomSpace.h>
+#include <opencog/query/BindLinkAPI.h>
+#include <opencog/util/Logger.h>
+#include <cxxtest/TestSuite.h>
+
+using namespace opencog;
+
+#define al as->add_link
+#define an as->add_node
+
+class GetStateUTest: public CxxTest::TestSuite
+{
+private:
+	AtomSpace* as;
+	SchemeEval* eval;
+
+public:
+	GetStateUTest(void)
+	{
+		// logger().set_level(Logger::FINE);
+		logger().set_print_to_stdout_flag(true);
+		logger().set_timestamp_flag(false);
+
+		as = new AtomSpace();
+		eval = new SchemeEval(as);
+		eval->eval("(use-modules (opencog exec) (opencog query))");
+		eval->eval("(add-to-load-path \"..\")");
+		eval->eval("(add-to-load-path \"../../..\")");
+	}
+
+	~GetStateUTest()
+	{
+		delete as;
+		// Erase the log file if no assertions failed.
+		if (!CxxTest::TestTracker::tracker().suiteFailed())
+				std::remove(logger().get_filename().c_str());
+int rc = CxxTest::TestTracker::tracker().suiteFailed();
+_exit(rc); // XXX hack to avoid double-free in __run_exit_handlers
+	}
+
+	void setUp(void);
+	void tearDown(void);
+
+	void test_race(void);
+};
+
+void GetStateUTest::tearDown(void)
+{
+}
+
+void GetStateUTest::setUp(void)
+{
+}
+
+/*
+ * Two-variable GetLink unit test.
+ */
+void GetStateUTest::test_race(void)
+{
+	logger().debug("BEGIN TEST: %s", __FUNCTION__);
+
+	as->clear();
+	eval->eval("(load-from-path \"tests/query/get-link.scm\")");
+
+	Handle hgnd = eval->eval_h("(cog-satisfying-set is-something)");
+	Handle hans = eval->eval_h(
+		"(SetLink "
+		"(ListLink (ConceptNode \"Ben\") (ConceptNode \"human\"))"
+		"(ListLink (ConceptNode \"Linas\") (ConceptNode \"human\"))"
+		"(ListLink (ConceptNode \"Sparky\") (ConceptNode \"dog\")))");
+
+	printf("Expected this: %s\n", hans->toString().c_str());
+	printf("Found this answer: %s\n", hgnd->toString().c_str());
+
+	TSM_ASSERT("Didn't get the expected grounding", hans == hgnd);
+
+	logger().debug("END TEST: %s", __FUNCTION__);
+}
+
+
+#undef al
+#undef an

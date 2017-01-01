@@ -50,6 +50,7 @@ IF (HAVE_GUILE)
 	ADD_CXXTEST(ArcanaUTest)
 	ADD_CXXTEST(SubstitutionUTest)
 	ADD_CXXTEST(GetLinkUTest)
+	ADD_CXXTEST(GetStateUTest)
 	ADD_CXXTEST(DeepTypeUTest)
 
 	ADD_CXXTEST(GreaterThanUTest)
