@@ -38,7 +38,6 @@ class GetStateUTest: public CxxTest::TestSuite
 {
 private:
 	AtomSpace* as;
-	SchemeEval* eval;
 
 	std::thread*  setthr;
 	std::thread*  getthr;
@@ -51,7 +50,7 @@ public:
 		logger().set_timestamp_flag(false);
 
 		as = new AtomSpace();
-		eval = new SchemeEval(as);
+		SchemeEval* eval = SchemeEval::get_evaluator(as);
 		eval->eval("(use-modules (opencog exec) (opencog query))");
 		eval->eval("(add-to-load-path \"..\")");
 		eval->eval("(add-to-load-path \"../../..\")");
@@ -86,16 +85,41 @@ void GetStateUTest::setUp(void)
 
 void GetStateUTest::Setter(void)
 {
+	SchemeEval* eval = SchemeEval::get_evaluator(as);
 #define LOOP_CNT 1000
 	for (int lc=0; lc<LOOP_CNT; lc++)
 	{
 		eval->eval_h(
 			"(State anch (Concept \"whiz-" + std::to_string(lc) + "\"))");
+		sched_yield();
 	}
 }
 
 void GetStateUTest::Getter(void)
 {
+	SchemeEval* eval = SchemeEval::get_evaluator(as);
+	eval->eval(
+			"(define getter (Get (State anch (Variable \"foovar\"))))");
+
+	int fail_count = 0;
+	for (int lc=0; lc<LOOP_CNT; lc++)
+	{
+		Handle got = eval->eval_h("(cog-execute! getter)");
+
+		TSM_ASSERT("Expected a valid handle", got != nullptr);
+		TSM_ASSERT("Expected a StateLink", got->getType() == SET_LINK);
+		if (1 != got->getArity())
+		{
+			fail_count++;
+			printf("Ohh nooo: failure %d got %s\n", fail_count,
+				got->toString().c_str());
+		}
+		TSM_ASSERT("Expected arity of one", got->getArity() == 1);
+		sched_yield();
+	}
+
+	double ratio = 100.0 * fail_count / ((double) LOOP_CNT);
+	printf("failure rate=%g percent\n", ratio);
 }
 
 /*
@@ -105,6 +129,7 @@ void GetStateUTest::test_race(void)
 {
 	logger().debug("BEGIN TEST: %s", __FUNCTION__);
 
+	SchemeEval* eval = SchemeEval::get_evaluator(as);
 	eval->eval("(define anch (Anchor \"foo-anchor\"))");
 
 	// Create setter and getter threads.
@@ -115,17 +140,7 @@ void GetStateUTest::test_race(void)
 	getthr = new std::thread(get_wrap);
 
 	setthr->join();
-
-//	Handle hans = eval->eval_h(
-//		"(SetLink "
-//		"(ListLink (ConceptNode \"Ben\") (ConceptNode \"human\"))"
-//		"(ListLink (ConceptNode \"Linas\") (ConceptNode \"human\"))"
-//		"(ListLink (ConceptNode \"Sparky\") (ConceptNode \"dog\")))");
-//
-//	printf("Expected this: %s\n", hans->toString().c_str());
-//	printf("Found this answer: %s\n", hgnd->toString().c_str());
-
-//	TSM_ASSERT("Didn't get the expected grounding", hans == hgnd);
+	getthr->join();
 
 	logger().debug("END TEST: %s", __FUNCTION__);
 }
