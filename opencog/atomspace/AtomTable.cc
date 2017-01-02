@@ -540,11 +540,6 @@ Handle AtomTable::add(AtomPtr atom, bool async)
     if (in_environ(atom))
         return atom->getHandle();
 
-    // We expect to be given a valid atom...
-    if (nullptr == atom)
-        throw RuntimeException(TRACE_INFO,
-            "AtomTable - Cannot insert null atom! ");
-
     // Factory implements C++ atom types.
     AtomPtr orig(atom);
     Type atom_type = atom->getType();
