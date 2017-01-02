@@ -1169,8 +1169,8 @@ SchemeEval* SchemeEval::get_evaluator(AtomSpace* as)
 
 				// It would have been easier to just call delete evaluator
 				// instead of return_to_pool.  Unfortunately, the delete
-				// won't work, because the STL destructor has already run
-				// the guile GC at this point, for this thread, and so
+				// won't work, because the TLS thread destructor has already
+				// run the guile GC at this point, for this thread, and so
 				// calling delete will lead to a crash in c_wrap_finish().
 				// It would be nice if we got called before guile did, but
 				// there is no way in TLS to control execution order...
