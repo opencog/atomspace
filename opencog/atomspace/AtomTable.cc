@@ -548,10 +548,9 @@ Handle AtomTable::add(AtomPtr atom, bool async)
     // Certain DeleteLinks can never be added!
     if (nullptr == atom) return Handle();
 
-    // Is the equivalent of this atom already in the table?
-    // If so, then return the existing atom.  (Note that this 'existing'
-    // atom might be in another atomspace, or might not be in any
-    // atomspace yet.)
+    // Is the equivalent of this atom already in the table?  If so,
+    // then return the existing atom.  Note that this 'existing'
+    // atom might be in a parent atomspace.
     Handle hexist(getHandle(atom));
     if (hexist) return hexist;
 
