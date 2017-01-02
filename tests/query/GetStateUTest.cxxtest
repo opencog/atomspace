@@ -131,6 +131,7 @@ void GetStateUTest::test_race(void)
 
 	SchemeEval* eval = SchemeEval::get_evaluator(as);
 	eval->eval("(define anch (Anchor \"foo-anchor\"))");
+	eval->eval_h("(State anch (Concept \"initial value\"))");
 
 	// Create setter and getter threads.
 	auto set_wrap = [&](void) { Setter(); };
