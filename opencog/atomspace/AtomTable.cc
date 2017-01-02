@@ -560,6 +560,10 @@ Handle AtomTable::add(AtomPtr atom, bool async)
     Handle hexist(getHandle(atom));
     if (hexist) return hexist;
 
+    // Sometimes one inserts an atom that was previously deleted.
+    // In this case, the removal flag might still be set. Clear it.
+    atom->unsetRemovalFlag();
+
     // If this atom is in some other atomspace or not in any atomspace,
     // then we need to clone it. We cannot insert it into this atomtable
     // as-is.  (We already know that its not in this atomspace, or its
@@ -578,26 +582,19 @@ Handle AtomTable::add(AtomPtr atom, bool async)
         }
         atom = createLink(atom_type, closet, atom->getTruthValue());
         atom = clone_factory(atom_type, atom);
-    }
 
-    // Clone, if we haven't done so already. We MUST maintain our own
-    // private copy of the atom, else crazy things go wrong.
-    if (atom == orig)
-        atom = clone_factory(atom_type, atom);
-
-    // Sometimes one inserts an atom that was previously deleted.
-    // In this case, the removal flag might still be set. Clear it.
-    atom->unsetRemovalFlag();
-
-    // Build the incoming set of outgoing atom h.
-    if (atom->isLink())
-    {
+        // Build the incoming set of outgoing atom h.
         size_t arity = atom->getArity();
         LinkPtr llc(LinkCast(atom));
         for (size_t i = 0; i < arity; i++) {
             llc->_outgoing[i]->insert_atom(llc);
         }
     }
+
+    // Clone, if we haven't done so already. We MUST maintain our own
+    // private copy of the atom, else crazy things go wrong.
+    else if (atom == orig)
+        atom = clone_factory(atom_type, atom);
 
     _size++;
     if (atom->isNode()) _num_nodes++;
