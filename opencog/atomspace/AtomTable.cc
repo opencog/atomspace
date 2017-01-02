@@ -413,34 +413,8 @@ AtomPtr AtomTable::cast_factory(Type atom_type, AtomPtr atom)
         return delp;
     }
 
-    // Very special handling for StateLink's
-    else if (STATE_LINK == atom_type) {
-        StateLinkPtr slp(StateLinkCast(atom));
-        if (NULL == slp)
-            slp = createStateLink(*LinkCast(atom));
-
-        // Removing the old state simply won't work, if the key is
-        // not in the atom table. So make sure the key is present.
-        Handle alias = slp->get_alias();
-        Handle tails = add(alias, false);
-        if (tails != alias)
-            slp = createStateLink(tails, slp->get_state());
-
-        // If this is a closed StateLink, (i.e. has no variables)
-        // then get and extract the old state. Otherwise, its not
-        // really "state", because we allow multiple StateLinks with
-        // variables in them.
-        if (slp->is_closed()) {
-            try {
-                Handle old_state = StateLink::get_link(tails);
-                if (old_state) this->extract(old_state, true);
-            } catch (const InvalidParamException& ex) {}
-        }
-
-        return slp;
-
     // Handle MapLinks before FreeLink
-    } else if (EXECUTION_OUTPUT_LINK == atom_type) {
+    else if (EXECUTION_OUTPUT_LINK == atom_type) {
     } else if (MAP_LINK == atom_type) {
         // if (nullptr == TypedAtomLinkCast(atom))
             // return createMapLink(*LinkCast(atom));
@@ -577,6 +551,28 @@ Handle AtomTable::add(AtomPtr atom, bool async)
         atom = createLink(atom_type, closet, atom->getTruthValue());
         atom = clone_factory(atom_type, atom);
 
+        if (STATE_LINK == atom_type) {
+            // If this is a closed StateLink, (i.e. has no variables)
+            // then make sure that the old state gets removed from the
+            // atomtable. The atomtable must contain no more than one
+            // closed state at a time.  Also: we must be careful to
+            // update the incoming set in an atomic fashion, so that
+            // the pattern matcher never finds two closed StateLinks
+            // for any one given alias.  Any number of non-closed
+            // StateLinks are allowed.
+
+            StateLinkPtr slp(StateLinkCast(atom));
+            if (slp->is_closed()) {
+                try {
+                    Handle alias = slp->get_alias();
+                    Handle old_state = StateLink::get_link(alias);
+                    atom->setAtomTable(this);
+                    alias->swap_atom(LinkCast(old_state), slp);
+                    extract(old_state, true);
+                } catch (const InvalidParamException& ex) {}
+            }
+        }
+
         // Build the incoming set of outgoing atom h.
         size_t arity = atom->getArity();
         LinkPtr llc(LinkCast(atom));
@@ -590,6 +586,9 @@ Handle AtomTable::add(AtomPtr atom, bool async)
     else if (atom == orig)
         atom = clone_factory(atom_type, atom);
 
+    atom->keep_incoming_set();
+    atom->setAtomTable(this);
+
     _size++;
     if (atom->isNode()) _num_nodes++;
     if (atom->isLink()) _num_links++;
@@ -597,9 +596,6 @@ Handle AtomTable::add(AtomPtr atom, bool async)
 
     Handle h(atom->getHandle());
     _atom_store.insert({atom->get_hash(), h});
-
-    atom->keep_incoming_set();
-    atom->setAtomTable(this);
 
     if (not _transient and not async)
         put_atom_into_index(atom);
