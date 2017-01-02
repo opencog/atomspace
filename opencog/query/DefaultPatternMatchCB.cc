@@ -329,28 +329,20 @@ bool DefaultPatternMatchCB::post_link_match(const Handle& lpat,
 		_gnd_bound_vars = nullptr;
 	}
 
-	// The if (STATE_LINK) thing is a temp hack until we get a nicer
+	// The if (STATE_LINK) below is a temp hack until we get a nicer
 	// solution, viz, get around to implementing executable terms in
 	// the search pattern. So: an executable term is anything that
 	// should be executed before the match is made... in this case,
 	// the StateLink has a single, unique closed-term value (or possibly
 	// no value at all), and the check below discards all matches that
 	// aren't closed form, i.e. all StateLinks with a variable as state.
+	//
+	// Note, BTW, that the value of the StateLink may have changed
+	// between the time that the search was started, and the time that
+	// we arrive here...
 	if (STATE_LINK == pattype)
 	{
-		try
-		{
-			// This throws an exception if there is no state.
-			// Obviousy, that's a mismatch.
-			if (StateLink::get_state(lgnd->getOutgoingAtom(0)) !=
-			    lgnd->getOutgoingAtom(1))
-				return false;
-		}
-		catch (const InvalidParamException& ex)
-		{
-			return false;
-		}
-		return true;
+		return StateLinkCast(lgnd)->is_closed();
 	}
 
 	if (not _have_evaluatables) return true;

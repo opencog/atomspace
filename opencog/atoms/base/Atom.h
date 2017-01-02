@@ -153,8 +153,9 @@ protected:
     void drop_incoming_set();
 
     // Insert and remove links from the incoming set.
-    void insert_atom(LinkPtr);
-    void remove_atom(LinkPtr);
+    void insert_atom(const LinkPtr&);
+    void remove_atom(const LinkPtr&);
+    void swap_atom(const LinkPtr&, const LinkPtr&);
 
     virtual ContentHash compute_hash() const = 0;
 

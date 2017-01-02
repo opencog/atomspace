@@ -413,34 +413,8 @@ AtomPtr AtomTable::cast_factory(Type atom_type, AtomPtr atom)
         return delp;
     }
 
-    // Very special handling for StateLink's
-    else if (STATE_LINK == atom_type) {
-        StateLinkPtr slp(StateLinkCast(atom));
-        if (NULL == slp)
-            slp = createStateLink(*LinkCast(atom));
-
-        // Removing the old state simply won't work, if the key is
-        // not in the atom table. So make sure the key is present.
-        Handle alias = slp->get_alias();
-        Handle tails = add(alias, false);
-        if (tails != alias)
-            slp = createStateLink(tails, slp->get_state());
-
-        // If this is a closed StateLink, (i.e. has no variables)
-        // then get and extract the old state. Otherwise, its not
-        // really "state", because we allow multiple StateLinks with
-        // variables in them.
-        if (slp->is_closed()) {
-            try {
-                Handle old_state = StateLink::get_link(tails);
-                if (old_state) this->extract(old_state, true);
-            } catch(const InvalidParamException& ex) {}
-        }
-
-        return slp;
-
     // Handle MapLinks before FreeLink
-    } else if (EXECUTION_OUTPUT_LINK == atom_type) {
+    else if (EXECUTION_OUTPUT_LINK == atom_type) {
     } else if (MAP_LINK == atom_type) {
         // if (nullptr == TypedAtomLinkCast(atom))
             // return createMapLink(*LinkCast(atom));
@@ -540,11 +514,6 @@ Handle AtomTable::add(AtomPtr atom, bool async)
     if (in_environ(atom))
         return atom->getHandle();
 
-    // We expect to be given a valid atom...
-    if (nullptr == atom)
-        throw RuntimeException(TRACE_INFO,
-            "AtomTable - Cannot insert null atom! ");
-
     // Factory implements C++ atom types.
     AtomPtr orig(atom);
     Type atom_type = atom->getType();
@@ -553,12 +522,15 @@ Handle AtomTable::add(AtomPtr atom, bool async)
     // Certain DeleteLinks can never be added!
     if (nullptr == atom) return Handle();
 
-    // Is the equivalent of this atom already in the table?
-    // If so, then return the existing atom.  (Note that this 'existing'
-    // atom might be in another atomspace, or might not be in any
-    // atomspace yet.)
+    // Is the equivalent of this atom already in the table?  If so,
+    // then return the existing atom.  Note that this 'existing'
+    // atom might be in a parent atomspace.
     Handle hexist(getHandle(atom));
     if (hexist) return hexist;
+
+    // Sometimes one inserts an atom that was previously deleted.
+    // In this case, the removal flag might still be set. Clear it.
+    atom->unsetRemovalFlag();
 
     // If this atom is in some other atomspace or not in any atomspace,
     // then we need to clone it. We cannot insert it into this atomtable
@@ -578,48 +550,44 @@ Handle AtomTable::add(AtomPtr atom, bool async)
         }
         atom = createLink(atom_type, closet, atom->getTruthValue());
         atom = clone_factory(atom_type, atom);
+
+        if (STATE_LINK == atom_type) {
+            // If this is a closed StateLink, (i.e. has no variables)
+            // then make sure that the old state gets removed from the
+            // atomtable. The atomtable must contain no more than one
+            // closed state at a time.  Also: we must be careful to
+            // update the incoming set in an atomic fashion, so that
+            // the pattern matcher never finds two closed StateLinks
+            // for any one given alias.  Any number of non-closed
+            // StateLinks are allowed.
+
+            StateLinkPtr slp(StateLinkCast(atom));
+            if (slp->is_closed()) {
+                try {
+                    Handle alias = slp->get_alias();
+                    Handle old_state = StateLink::get_link(alias);
+                    atom->setAtomTable(this);
+                    alias->swap_atom(LinkCast(old_state), slp);
+                    extract(old_state, true);
+                } catch (const InvalidParamException& ex) {}
+            }
+        }
+
+        // Build the incoming set of outgoing atom h.
+        size_t arity = atom->getArity();
+        LinkPtr llc(LinkCast(atom));
+        for (size_t i = 0; i < arity; i++) {
+            llc->_outgoing[i]->insert_atom(llc);
+        }
     }
 
     // Clone, if we haven't done so already. We MUST maintain our own
     // private copy of the atom, else crazy things go wrong.
-    if (atom == orig)
+    else if (atom == orig)
         atom = clone_factory(atom_type, atom);
 
-    // Sometimes one inserts an atom that was previously deleted.
-    // In this case, the removal flag might still be set. Clear it.
-    atom->unsetRemovalFlag();
-
-    // Check for bad outgoing set members; fix them up if needed.
-    if (atom->isLink())
-    {
-        const HandleSeq& ogs(atom->getOutgoingSet());
-        size_t arity = ogs.size();
-
-        // The outgoing set must consist entirely of atoms that
-        // are either in this atomtable, or its environment.
-        bool need_copy = false;
-        for (size_t i = 0; i < arity; i++) {
-            if (not in_environ(ogs[i])) need_copy = true;
-        }
-
-        if (need_copy) {
-            atom = clone_factory(atom_type, atom);
-        }
-
-        // llc not lll, in case a copy was made.
-        LinkPtr llc(LinkCast(atom));
-        for (size_t i = 0; i < arity; i++) {
-
-            // Make sure all children have correct incoming sets
-            Handle ho(llc->_outgoing[i]);
-            if (not in_environ(ho)) {
-                ho->remove_atom(llc);
-                llc->_outgoing[i] = add(ho, async);
-            }
-            // Build the incoming set of outgoing atom h.
-            llc->_outgoing[i]->insert_atom(llc);
-        }
-    }
+    atom->keep_incoming_set();
+    atom->setAtomTable(this);
 
     _size++;
     if (atom->isNode()) _num_nodes++;
@@ -628,9 +596,6 @@ Handle AtomTable::add(AtomPtr atom, bool async)
 
     Handle h(atom->getHandle());
     _atom_store.insert({atom->get_hash(), h});
-
-    atom->keep_incoming_set();
-    atom->setAtomTable(this);
 
     if (not _transient and not async)
         put_atom_into_index(atom);

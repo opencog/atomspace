@@ -1,0 +1,151 @@
+/*
+ * tests/query/GetStateUTest.cxxtest
+ *
+ * Copyright (C) 2017 Linas Vepstas
+ * All Rights Reserved
+ *
+ * This program is free software; you can redistribute it and/or modify
+ * it under the terms of the GNU Affero General Public License v3 as
+ * published by the Free Software Foundation and including the exceptions
+ * at http://opencog.org/wiki/Licenses
+ *
+ * This program is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ * GNU General Public License for more details.
+ *
+ * You should have received a copy of the GNU Affero General Public License
+ * along with this program; if not, write to:
+ * Free Software Foundation, Inc.,
+ * 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
+ */
+
+#include <thread>
+
+#include <opencog/guile/SchemeEval.h>
+#include <opencog/truthvalue/SimpleTruthValue.h>
+#include <opencog/atomspace/AtomSpace.h>
+#include <opencog/query/BindLinkAPI.h>
+#include <opencog/util/Logger.h>
+#include <cxxtest/TestSuite.h>
+
+using namespace opencog;
+
+#define al as->add_link
+#define an as->add_node
+
+class GetStateUTest: public CxxTest::TestSuite
+{
+private:
+	AtomSpace* as;
+
+	std::thread*  setthr;
+	std::thread*  getthr;
+
+public:
+	GetStateUTest(void)
+	{
+		// logger().set_level(Logger::FINE);
+		logger().set_print_to_stdout_flag(true);
+		logger().set_timestamp_flag(false);
+
+		as = new AtomSpace();
+		SchemeEval* eval = SchemeEval::get_evaluator(as);
+		eval->eval("(use-modules (opencog exec) (opencog query))");
+		eval->eval("(add-to-load-path \"..\")");
+		eval->eval("(add-to-load-path \"../../..\")");
+	}
+
+	~GetStateUTest()
+	{
+		delete as;
+		// Erase the log file if no assertions failed.
+		if (!CxxTest::TestTracker::tracker().suiteFailed())
+				std::remove(logger().get_filename().c_str());
+int rc = CxxTest::TestTracker::tracker().suiteFailed();
+_exit(rc); // XXX hack to avoid double-free in __run_exit_handlers
+	}
+
+	void setUp(void);
+	void tearDown(void);
+
+	void Setter(void);
+	void Getter(void);
+
+	void test_race(void);
+};
+
+void GetStateUTest::tearDown(void)
+{
+}
+
+void GetStateUTest::setUp(void)
+{
+}
+
+void GetStateUTest::Setter(void)
+{
+	SchemeEval* eval = SchemeEval::get_evaluator(as);
+#define LOOP_CNT 20000
+	for (int lc=0; lc<LOOP_CNT; lc++)
+	{
+		eval->eval_h(
+			"(State anch (Concept \"whiz-" + std::to_string(lc) + "\"))");
+		// sched_yield();
+	}
+}
+
+void GetStateUTest::Getter(void)
+{
+	SchemeEval* eval = SchemeEval::get_evaluator(as);
+	eval->eval(
+			"(define getter (Get (State anch (Variable \"foovar\"))))");
+
+	int fail_count = 0;
+	for (int lc=0; lc<LOOP_CNT; lc++)
+	{
+		Handle got = eval->eval_h("(cog-execute! getter)");
+
+		TSM_ASSERT("Expected a valid handle", got != nullptr);
+		TSM_ASSERT("Expected a StateLink", got->getType() == SET_LINK);
+		if (1 != got->getArity())
+		{
+			fail_count++;
+			printf("Ohh nooo: failure %d got %s\n", fail_count,
+				got->toString().c_str());
+		}
+		TSM_ASSERT("Expected arity of one", got->getArity() == 1);
+		// sched_yield();
+	}
+
+	double ratio = 100.0 * fail_count / ((double) LOOP_CNT);
+	printf("failure rate=%g percent\n", ratio);
+}
+
+/*
+ * Two-variable GetLink unit test.
+ */
+void GetStateUTest::test_race(void)
+{
+	logger().debug("BEGIN TEST: %s", __FUNCTION__);
+
+	SchemeEval* eval = SchemeEval::get_evaluator(as);
+	eval->eval("(define anch (Anchor \"foo-anchor\"))");
+	eval->eval_h("(State anch (Concept \"initial value\"))");
+
+	// Create setter and getter threads.
+	auto set_wrap = [&](void) { Setter(); };
+	auto get_wrap = [&](void) { Getter(); };
+
+	setthr = new std::thread(set_wrap);
+	getthr = new std::thread(get_wrap);
+
+	setthr->join();
+	getthr->join();
+
+	logger().debug("END TEST: %s", __FUNCTION__);
+}
+
+
+#undef al
+#undef an

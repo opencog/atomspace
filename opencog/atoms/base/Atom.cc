@@ -227,7 +227,7 @@ void Atom::drop_incoming_set()
 }
 
 /// Add an atom to the incoming set.
-void Atom::insert_atom(LinkPtr a)
+void Atom::insert_atom(const LinkPtr& a)
 {
     if (NULL == _incoming_set) return;
     std::lock_guard<std::mutex> lck (_mtx);
@@ -238,7 +238,7 @@ void Atom::insert_atom(LinkPtr a)
 }
 
 /// Remove an atom from the incoming set.
-void Atom::remove_atom(LinkPtr a)
+void Atom::remove_atom(const LinkPtr& a)
 {
     if (NULL == _incoming_set) return;
     std::lock_guard<std::mutex> lck (_mtx);
@@ -246,6 +246,23 @@ void Atom::remove_atom(LinkPtr a)
     _incoming_set->_removeAtomSignal(shared_from_this(), a);
 #endif /* INCOMING_SET_SIGNALS */
     _incoming_set->_iset.erase(a);
+}
+
+/// Remove old, and add new, atomically, so that every user
+/// will see either one or the other, but not both/neither in
+/// the incoming set. This is used to manage the StateLink.
+void Atom::swap_atom(const LinkPtr& old, const LinkPtr& neu)
+{
+    if (NULL == _incoming_set) return;
+    std::lock_guard<std::mutex> lck (_mtx);
+#ifdef INCOMING_SET_SIGNALS
+    _incoming_set->_removeAtomSignal(shared_from_this(), old);
+#endif /* INCOMING_SET_SIGNALS */
+    _incoming_set->_iset.erase(old);
+    _incoming_set->_iset.insert(neu);
+#ifdef INCOMING_SET_SIGNALS
+    _incoming_set->_addAtomSignal(shared_from_this(), neu);
+#endif /* INCOMING_SET_SIGNALS */
 }
 
 size_t Atom::getIncomingSetSize() const
