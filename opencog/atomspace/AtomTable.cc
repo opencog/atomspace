@@ -434,7 +434,7 @@ AtomPtr AtomTable::cast_factory(Type atom_type, AtomPtr atom)
             try {
                 Handle old_state = StateLink::get_link(tails);
                 if (old_state) this->extract(old_state, true);
-            } catch(const InvalidParamException& ex) {}
+            } catch (const InvalidParamException& ex) {}
         }
 
         return slp;
@@ -592,21 +592,7 @@ Handle AtomTable::add(AtomPtr atom, bool async)
     // Check for bad outgoing set members; fix them up if needed.
     if (atom->isLink())
     {
-        const HandleSeq& ogs(atom->getOutgoingSet());
-        size_t arity = ogs.size();
-
-        // The outgoing set must consist entirely of atoms that
-        // are either in this atomtable, or its environment.
-        bool need_copy = false;
-        for (size_t i = 0; i < arity; i++) {
-            if (not in_environ(ogs[i])) need_copy = true;
-        }
-
-        if (need_copy) {
-            atom = clone_factory(atom_type, atom);
-        }
-
-        // llc not lll, in case a copy was made.
+        size_t arity = atom->getArity();
         LinkPtr llc(LinkCast(atom));
         for (size_t i = 0; i < arity; i++) {
 
