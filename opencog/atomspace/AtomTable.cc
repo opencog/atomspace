@@ -589,20 +589,12 @@ Handle AtomTable::add(AtomPtr atom, bool async)
     // In this case, the removal flag might still be set. Clear it.
     atom->unsetRemovalFlag();
 
-    // Check for bad outgoing set members; fix them up if needed.
+    // Build the incoming set of outgoing atom h.
     if (atom->isLink())
     {
         size_t arity = atom->getArity();
         LinkPtr llc(LinkCast(atom));
         for (size_t i = 0; i < arity; i++) {
-
-            // Make sure all children have correct incoming sets
-            Handle ho(llc->_outgoing[i]);
-            if (not in_environ(ho)) {
-                ho->remove_atom(llc);
-                llc->_outgoing[i] = add(ho, async);
-            }
-            // Build the incoming set of outgoing atom h.
             llc->_outgoing[i]->insert_atom(llc);
         }
     }
