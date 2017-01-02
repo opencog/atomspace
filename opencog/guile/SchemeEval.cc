@@ -1138,6 +1138,7 @@ static SchemeEval* get_from_pool(void)
 
 static void return_to_pool(SchemeEval* ev)
 {
+	ev->clear_pending();
 	std::lock_guard<std::mutex> lock(pool_mtx);
 	pool.push(ev);
 }
