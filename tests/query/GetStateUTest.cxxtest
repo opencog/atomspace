@@ -86,12 +86,12 @@ void GetStateUTest::setUp(void)
 void GetStateUTest::Setter(void)
 {
 	SchemeEval* eval = SchemeEval::get_evaluator(as);
-#define LOOP_CNT 1000
+#define LOOP_CNT 20000
 	for (int lc=0; lc<LOOP_CNT; lc++)
 	{
 		eval->eval_h(
 			"(State anch (Concept \"whiz-" + std::to_string(lc) + "\"))");
-		sched_yield();
+		// sched_yield();
 	}
 }
 
@@ -115,7 +115,7 @@ void GetStateUTest::Getter(void)
 				got->toString().c_str());
 		}
 		TSM_ASSERT("Expected arity of one", got->getArity() == 1);
-		sched_yield();
+		// sched_yield();
 	}
 
 	double ratio = 100.0 * fail_count / ((double) LOOP_CNT);
