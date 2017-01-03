@@ -5,8 +5,7 @@
 # See, for example,
 # https://groups.google.com/forum/#!topic/cython-users/JV1-KvIUeIg
 #
-# -DDEPRECATED_CYTHON_CALLS: cython uses the oboslete atomspace API.
-SET(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -fno-strict-aliasing -DDEPRECATED_ATOMSPACE_CALLS -DDEPRECATED_CYTHON_CALLS")
+SET(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -fno-strict-aliasing")
 
 INCLUDE_DIRECTORIES(
 	${PYTHON_INCLUDE_DIRS}
