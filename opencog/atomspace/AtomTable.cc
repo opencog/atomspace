@@ -62,7 +62,13 @@ std::recursive_mutex AtomTable::_mtx;
 static std::atomic<UUID> _id_pool(0);
 
 AtomTable::AtomTable(AtomTable* parent, AtomSpace* holder, bool transient)
-    : _index_queue(this, &AtomTable::put_atom_into_index, transient?0:4)
+    // Hmm. Right now async doesn't work anyway, so lets not create
+    // threads for it. It just makes using gdb that much harder.
+    // FIXME later. Actually, the async idea is not going to work as
+    // originally envisioned, anyway.  What we really need are
+    // consistent views of the atomtable.
+    // : _index_queue(this, &AtomTable::put_atom_into_index, transient?0:4)
+    : _index_queue(this, &AtomTable::put_atom_into_index, 0)
 {
     _as = holder;
     _environ = parent;
