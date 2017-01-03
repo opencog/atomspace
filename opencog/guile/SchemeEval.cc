@@ -547,15 +547,13 @@ void SchemeEval::do_eval(const std::string &expr)
 	_pending_input = false;
 	_error_msg.clear();
 	set_captured_stack(SCM_BOOL_F);
-	scm_gc_unprotect_object(_rc);
 	SCM eval_str = scm_from_utf8_string(_input_line.c_str());
-	_rc = scm_c_catch (SCM_BOOL_T,
+	SCM rc = scm_c_catch (SCM_BOOL_T,
 	                      (scm_t_catch_body) scm_eval_string,
 	                      (void *) eval_str,
 	                      SchemeEval::catch_handler_wrapper, this,
 	                      SchemeEval::preunwind_handler_wrapper, this);
-	_rc = scm_gc_protect_object(_rc);
-
+	save_rc(rc);
 	restore_output();
 
 	if (saved_as)
@@ -603,6 +601,19 @@ std::string SchemeEval::poll_port()
 	return rv;
 }
 
+/// Set the _rc member in an pseudo-atomic fashion.
+///
+/// This should never-ever need to actually be done atomically, so if
+/// you witness a crash in this code, then there is a bug in the code
+/// that is using this instance!  There have been bugs in the past, in
+/// the cogserver SchemeShell.
+void SchemeEval::save_rc(SCM rc)
+{
+	scm_gc_unprotect_object(_rc);
+	_rc = rc;
+	_rc = scm_gc_protect_object(_rc);
+}
+
 /// Get output from evaluator, if any; block otherwise.
 ///
 /// This method is meant to be called from a different thread than
@@ -646,17 +657,20 @@ std::string SchemeEval::do_poll_result()
 			if (0 < rv.size()) return rv;
 		}
 	}
-	// If we are here, then evaluation is done. Check the various
-	// evalution result flags, etc.
-	_poll_done = true;
+
+	// Bugs in the scheme shell can trigger this assert!
+	// This can happen if the evaluator is mis-used.
+	OC_ASSERT(_poll_done == false);
 
 	// Save the result of evaluation, and clear it. Recall that _rc is
 	// typically set in a different thread.  We want it cleared before
 	// we ever get here again, on later evals.
 	SCM tmp_rc = _rc;
-	scm_gc_unprotect_object(_rc);
-	_rc = SCM_EOL;
-	_rc = scm_gc_protect_object(_rc);
+	save_rc(SCM_EOL);
+
+	// If we are here, then evaluation is done. Check the various
+	// evalution result flags, etc.
+	_poll_done = true;
 
 	/* An error is thrown if the input expression is incomplete,
 	 * in which case the error handler sets the _pending_input flag

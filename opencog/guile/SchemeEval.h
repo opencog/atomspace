@@ -75,7 +75,10 @@ class SchemeEval : public GenericEval
 		// Things related to (async) cogserver shell-evaluation
 		const std::string *_pexpr;
 		std::string _answer;
+
+		void save_rc(SCM);
 		SCM _rc;
+
 		bool _eval_done;
 		bool _poll_done;
 		std::mutex _poll_mtx;
