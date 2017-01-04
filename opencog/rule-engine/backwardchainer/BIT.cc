@@ -87,6 +87,16 @@ Handle BIT::expand(const Handle& fcs, BITNode& bitleaf, const Rule& rule)
 	return new_fcs;
 }
 
+OrderedHandleSet& BIT::get_fcss()
+{
+	return _fcss;
+}
+
+const OrderedHandleSet& BIT::get_fcss() const
+{
+	return _fcss;
+}
+
 Handle BIT::select_fcs() const
 {
 	return rand_element(_fcss);
@@ -98,7 +108,7 @@ BITNode& BIT::select_bitleaf(const Handle& fcs)
 	return _handle2bitnode[rand_element(get_leaves(fcs))];
 }
 
-void BIT::insert_bitnode(Handle body, Handle vardecl, const BITFitness& fitness)
+void BIT::insert_bitnode(Handle body, const BITFitness& fitness)
 {
 	if (body.is_undefined())
 		return;
@@ -142,7 +152,7 @@ void BIT::insert_fcs(const Handle& fcs)
 		Handle fcs_vardecl = BindLinkCast(fcs)->get_vardecl();
 		for (const Handle& leaf : get_leaves(fcs)) {
 			Handle leaf_vardecl = filter_vardecl(fcs_vardecl, leaf);
-			insert_bitnode(leaf, leaf_vardecl, BITFitness());
+			insert_bitnode(leaf, BITFitness());
 		}
 	}
 	else {
@@ -242,16 +252,8 @@ Handle BIT::substitute_unified_variables(const Handle& fcs,
 	BindLinkPtr fcs_bl(BindLinkCast(fcs));
 	Handle leaf_vardecl = filter_vardecl(fcs_bl->get_vardecl(), leaf),
 		conclusion_vardecl = rule.get_forward_vardecl();
-	bc_logger().debug() << "BIT::substitute_unified_variables "
-	                    << "leaf = " << oc_to_string(leaf)
-	                    << "conclusion = " << oc_to_string(conclusion)
-	                    << "leaf_vardecl = " << oc_to_string(leaf_vardecl)
-	                    << "conclusion_vardecl = " << oc_to_string(conclusion_vardecl);
 	UnificationSolutionSet sol =
 		unify(leaf, conclusion, leaf_vardecl, conclusion_vardecl);
-
-	bc_logger().debug() << "BIT::substitute_unified_variables sol: "
-	                    << oc_to_string(sol);
 
 	OC_ASSERT(sol.satisfiable); // If the rule has been selected it
                                 // has to be satisfiable

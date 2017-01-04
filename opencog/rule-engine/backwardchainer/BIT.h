@@ -113,6 +113,12 @@ public:
 	// Access
 
 	/**
+	 * Get the set of all FCSs (or and-BITs).
+	 */
+	OrderedHandleSet& get_fcss();
+	const OrderedHandleSet& get_fcss() const;
+
+	/**
 	 * Select uniformly randomly a FCS amonst the FCS collection
 	 */
 	Handle select_fcs() const;
@@ -131,7 +137,7 @@ private:
 	 * Build the bitnode associated to body and insert it in
 	 * _handle2bitnode.
 	 */
-	void insert_bitnode(Handle body, Handle vardecl, const BITFitness& fitness);
+	void insert_bitnode(Handle body, const BITFitness& fitness);
 
 	/**
 	 * Initialize the FCS collection with
