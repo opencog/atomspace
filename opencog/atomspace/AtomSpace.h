@@ -527,7 +527,7 @@ public:
     std::string to_string();
 
     /* ----------------------------------------------------------- */
-   // ---- Signals
+    // ---- Signals
 
     boost::signals2::connection addAtomSignal(const AtomSignal::slot_type& function)
     {
