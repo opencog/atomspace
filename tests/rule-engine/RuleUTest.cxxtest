@@ -126,7 +126,7 @@ void RuleUTest::test_unify_target_deduction_1()
 
 	TS_ASSERT_EQUALS(rules.size(), 1);
 
-	Handle forward_rule = rules.begin()->get_forward_rule(),
+	Handle rule = rules.begin()->get_rule(),
 		// Expected up to an alpha conversion
 		vardecl = al(VARIABLE_LIST,
 		             // TODO: unify needs to be upgraded so it can
@@ -146,15 +146,15 @@ void RuleUTest::test_unify_target_deduction_1()
 		schema = an(GROUNDED_SCHEMA_NODE, "scm: bc-deduction-formula"),
 		rewrite = al(EXECUTION_OUTPUT_LINK,
 		             schema,
-		             al(LIST_LINK, XV, VA, XA)),
+		             al(LIST_LINK, XA, XV, VA)),
 		expected = al(BIND_LINK, vardecl, body, rewrite);
 
-	std::cout << "forward_rule = " << oc_to_string(forward_rule);
+	std::cout << "rule = " << oc_to_string(rule);
 	std::cout << "expected = " << oc_to_string(expected);
 
 	ScopeLinkPtr expected_sc = ScopeLinkCast(expected);
 
-	TS_ASSERT(expected_sc->is_equal(forward_rule));
+	TS_ASSERT(expected_sc->is_equal(rule));
 }
 
 // Like test_unify_target_deduction_1 but with a variable declaration
@@ -167,7 +167,7 @@ void RuleUTest::test_unify_target_deduction_2()
 
 	TS_ASSERT_EQUALS(rules.size(), 1);
 
-	Handle forward_rule = rules.begin()->get_forward_rule(),
+	Handle rule = rules.begin()->get_rule(),
 		// Expected up to an alpha conversion
 		vardecl = al(VARIABLE_LIST,
 		             al(TYPED_VARIABLE_LINK, X, CT),
@@ -183,15 +183,15 @@ void RuleUTest::test_unify_target_deduction_2()
 		schema = an(GROUNDED_SCHEMA_NODE, "scm: bc-deduction-formula"),
 		rewrite = al(EXECUTION_OUTPUT_LINK,
 		             schema,
-		             al(LIST_LINK, XV, VA, XA)),
+		             al(LIST_LINK, XA, XV, VA)),
 		expected = al(BIND_LINK, vardecl, body, rewrite);
 
-	std::cout << "forward_rule = " << oc_to_string(forward_rule);
+	std::cout << "rule = " << oc_to_string(rule);
 	std::cout << "expected = " << oc_to_string(expected);
 
 	ScopeLinkPtr expected_sc = ScopeLinkCast(expected);
 
-	TS_ASSERT(expected_sc->is_equal(forward_rule));
+	TS_ASSERT(expected_sc->is_equal(rule));
 }
 
 void RuleUTest::test_unify_target_deduction_3()
@@ -227,7 +227,7 @@ void RuleUTest::test_unify_target_deduction_3()
 
 	TS_ASSERT_EQUALS(rules.size(), 1);
 
-	Handle forward_rule = rules.begin()->get_forward_rule();
+	Handle rule = rules.begin()->get_rule();
 	// Expected up to an alpha conversion
 	// TODO
 	Handle expected =
@@ -313,9 +313,6 @@ void RuleUTest::test_unify_target_deduction_3()
 		             "            (ListLink"
 		             "              (VariableNode \"$X\")"
 		             "              (ConceptNode \"treatment-1\"))))"
-		             "        (VariableNode \"$B-6c74a409\"))"
-		             "      (ImplicationLink"
-		             "        (VariableNode \"$B-6c74a409\")"
 		             "        (QuoteLink"
 		             "          (LambdaLink"
 		             "            (UnquoteLink"
@@ -332,6 +329,9 @@ void RuleUTest::test_unify_target_deduction_3()
 		             "            (ListLink"
 		             "              (VariableNode \"$X\")"
 		             "              (ConceptNode \"treatment-1\"))))"
+		             "        (VariableNode \"$B-6c74a409\"))"
+		             "      (ImplicationLink"
+		             "        (VariableNode \"$B-6c74a409\")"
 		             "        (QuoteLink"
 		             "          (LambdaLink"
 		             "            (UnquoteLink"
@@ -339,12 +339,12 @@ void RuleUTest::test_unify_target_deduction_3()
 		             "            (UnquoteLink"
 		             "              (VariableNode \"$P-25868310\"))))))))");
 
-	std::cout << "forward_rule = " << oc_to_string(forward_rule);
+	std::cout << "rule = " << oc_to_string(rule);
 	std::cout << "expected = " << oc_to_string(expected);
 
 	ScopeLinkPtr expected_sc = ScopeLinkCast(expected);
 
-	TS_ASSERT(expected_sc->is_equal(forward_rule));
+	TS_ASSERT(expected_sc->is_equal(rule));
 }
 
 // Test how useless quotation gets eliminated during
@@ -359,22 +359,22 @@ void RuleUTest::test_unify_target_implication_scope_to_implication_1()
 
 	TS_ASSERT_EQUALS(rules.size(), 1);
 
-	Handle forward_rule = rules.begin()->get_forward_rule(),
+	Handle rule = rules.begin()->get_rule(),
 		// Expected up to an alpha conversion
 		body = al(IMPLICATION_SCOPE_LINK, Typed_X, Eval_P, Eval_Q),
 		schema = an(GROUNDED_SCHEMA_NODE,
 		            "scm: implication-scope-to-implication-formula"),
 		rewrite = al(EXECUTION_OUTPUT_LINK,
 		             schema,
-		             al(LIST_LINK, body, target)),
+		             al(LIST_LINK, target, body)),
 		expected = al(BIND_LINK, body, rewrite);
 
-	std::cout << "forward_rule = " << oc_to_string(forward_rule);
+	std::cout << "rule = " << oc_to_string(rule);
 	std::cout << "expected = " << oc_to_string(expected);
 
 	ScopeLinkPtr expected_sc = ScopeLinkCast(expected);
 
-	TS_ASSERT(expected_sc->is_equal(forward_rule));
+	TS_ASSERT(expected_sc->is_equal(rule));
 }
 
 // Like test_unify_target_implication_scope_to_implication_1 but
@@ -389,24 +389,24 @@ void RuleUTest::test_unify_target_implication_scope_to_implication_2()
 
 	TS_ASSERT_EQUALS(rules.size(), 1);
 
-	Handle forward_rule = rules.begin()->get_forward_rule(),
+	Handle rule = rules.begin()->get_rule(),
 		// Expected up to an alpha conversion
 		body = al(IMPLICATION_SCOPE_LINK, Typed_X, P_body_var, Eval_Q),
 		schema = an(GROUNDED_SCHEMA_NODE,
 		            "scm: implication-scope-to-implication-formula"),
 		rewrite = al(EXECUTION_OUTPUT_LINK,
 		             schema,
-		             al(LIST_LINK, body, target)),
+		             al(LIST_LINK, target, body)),
 		expected = al(BIND_LINK, P_body_var, body, rewrite);
 
 	std::cout << "implication_scope_to_implication_rule = " << oc_to_string(implication_scope_to_implication_rule);
 	std::cout << "target = " << oc_to_string(target);
-	std::cout << "forward_rule = " << oc_to_string(forward_rule);
+	std::cout << "rule = " << oc_to_string(rule);
 	std::cout << "expected = " << oc_to_string(expected);
 
 	ScopeLinkPtr expected_sc = ScopeLinkCast(expected);
 
-	TS_ASSERT(expected_sc->is_equal(forward_rule));
+	TS_ASSERT(expected_sc->is_equal(rule));
 }
 
 // This time the unification should fail. Indeed
@@ -472,7 +472,7 @@ void RuleUTest::test_unify_target_implication_scope_to_implication_4()
 
 	TS_ASSERT_EQUALS(rules.size(), 1);
 
-	Handle forward_rule = rules.begin()->get_forward_rule();
+	Handle rule = rules.begin()->get_rule();
 	// Expected up to an alpha conversion
 	Handle expected =
 		_eval.eval_h("(BindLink"
@@ -491,26 +491,26 @@ void RuleUTest::test_unify_target_implication_scope_to_implication_4()
 		             "  (ExecutionOutputLink"
 		             "    (GroundedSchemaNode \"scm: implication-scope-to-implication-formula\")"
 		             "    (ListLink"
-		             "       (Quote (ImplicationScopeLink"
-		             "         (Unquote (VariableNode \"$TyVs-6c74a409\"))"
-		             "         (Unquote (VariableNode \"$P-6266d6f2\"))"
-		             "         (Unquote (VariableNode \"$Q-7005b724\"))))"
 		             "      (ImplicationLink"
 		             "        (Quote (LambdaLink"
 		             "          (Unquote (VariableNode \"$TyVs-6c74a409\"))"
 		             "          (Unquote (VariableNode \"$P-6266d6f2\"))))"
 		             "        (Quote (LambdaLink"
 		             "          (Unquote (VariableNode \"$TyVs-6c74a409\"))"
-		             "          (Unquote (VariableNode \"$Q-7005b724\"))))))))");
+		             "          (Unquote (VariableNode \"$Q-7005b724\")))))"
+		             "      (Quote (ImplicationScopeLink"
+		             "        (Unquote (VariableNode \"$TyVs-6c74a409\"))"
+		             "        (Unquote (VariableNode \"$P-6266d6f2\"))"
+		             "        (Unquote (VariableNode \"$Q-7005b724\")))))))");
 
 	std::cout << "implication_scope_to_implication_rule = " << oc_to_string(implication_scope_to_implication_rule);
 	std::cout << "target = " << oc_to_string(target);
-	std::cout << "forward_rule = " << oc_to_string(forward_rule);
+	std::cout << "rule = " << oc_to_string(rule);
 	std::cout << "expected = " << oc_to_string(expected);
 
 	ScopeLinkPtr expected_sc = ScopeLinkCast(expected);
 
-	TS_ASSERT(expected_sc->is_equal(forward_rule));
+	TS_ASSERT(expected_sc->is_equal(rule));
 }
 
 void RuleUTest::test_unify_target_implication_and_lambda_factorization()
@@ -570,7 +570,7 @@ void RuleUTest::test_unify_target_implication_and_lambda_factorization()
 
 	TS_ASSERT_EQUALS(rules.size(), 1);
 
-	Handle forward_rule = rules.begin()->get_forward_rule();
+	Handle rule = rules.begin()->get_rule();
 	Handle expected =
 		_eval.eval_h("(BindLink"
 		             "  (LocalQuoteLink"
@@ -660,10 +660,10 @@ void RuleUTest::test_unify_target_implication_and_lambda_factorization()
 		             "  )"
 		             ")");
 
-	std::cout << "forward_rule = " << oc_to_string(forward_rule);
+	std::cout << "rule = " << oc_to_string(rule);
 	std::cout << "expected = " << oc_to_string(expected);
 
 	ScopeLinkPtr expected_sc = ScopeLinkCast(expected);
 
-	TS_ASSERT(expected_sc->is_equal(forward_rule));
+	TS_ASSERT(expected_sc->is_equal(rule));
 }

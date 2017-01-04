@@ -93,22 +93,8 @@ void Rule::init(const Handle& rule_alias, const Handle& rbs)
 
 void Rule::init(const Handle& rule_alias, const Handle& rule, const Handle& rbs)
 {
-	if (rule->getType() == LIST_LINK)
-	{
-		OC_ASSERT(rule->getArity() > 0);
-		// Split the rule into a forward and backward parts
-		_forward_rule = BindLinkCast(rule->getOutgoingAtom(0));
-		for (unsigned i = 1; i < rule->getArity(); i++) {
-			Handle bch = rule->getOutgoingAtom(i);
-			_backward_rule_handles.push_back(bch);
-			_backward_rule_scope_links.push_back(ScopeLinkCast(bch));
-		}
-	}
-	else
-	{
-		OC_ASSERT(rule->getType() == BIND_LINK);
-		_forward_rule = BindLinkCast(rule);
-	}
+	OC_ASSERT(rule->getType() == BIND_LINK);
+	_rule = BindLinkCast(rule);
 
 	_rule_alias = rule_alias;
 	_name = _rule_alias->getName();
@@ -118,31 +104,19 @@ void Rule::init(const Handle& rule_alias, const Handle& rule, const Handle& rbs)
 
 bool Rule::operator==(const Rule& r) const
 {
-	return r._forward_rule == _forward_rule
-		and r._backward_rule_handles == _backward_rule_handles;
+	return r._rule == _rule;
 }
 
 bool Rule::operator<(const Rule& r) const
 {
 	return _weight == r._weight ?
-		Handle(_forward_rule).value() < Handle(r._forward_rule).value()
+		Handle(_rule).value() < Handle(r._rule).value()
 		: _weight < r._weight;
 }
 
 bool Rule::is_alpha_equivalent(const Rule& r) const
 {
-	if (not _forward_rule->is_equal(Handle(r._forward_rule)))
-		return false;
-
-	size_t n_backrules = r._backward_rule_scope_links.size();
-	if (n_backrules != _backward_rule_scope_links.size())
-		return false;
-
-	for (size_t i = 0; i < n_backrules; i++) {
-		if (not _backward_rule_scope_links[i]->is_equal(r._backward_rule_handles[i]))
-			return false;
-	}
-	return true;
+	return _rule->is_equal(Handle(r._rule));
 }
 
 double Rule::get_weight() const
@@ -165,22 +139,14 @@ const std::string& Rule::get_name() const
 	return _name;
 }
 
-void Rule::set_forward_handle(const Handle& h)
+void Rule::set_rule(const Handle& h)
 {
-	_forward_rule = BindLinkCast(h);
+	_rule = BindLinkCast(h);
 }
 
-void Rule::set_backward_handles(const HandleSeq& hs)
+Handle Rule::get_rule() const
 {
-	_backward_rule_handles = hs;
-	_backward_rule_scope_links.clear();
-	for (const Handle& h : hs)
-		_backward_rule_scope_links.push_back(ScopeLinkCast(h));
-}
-
-Handle Rule::get_forward_rule() const
-{
-	return Handle(_forward_rule);
+	return Handle(_rule);
 }
 
 Handle Rule::get_alias() const
@@ -195,35 +161,20 @@ Handle Rule::get_rbs() const
 
 void Rule::add(AtomSpace& as)
 {
-	if (!_forward_rule)
+	if (!_rule)
 		return;
 
 	HandleSeq outgoings;
-	for (const Handle& h : _forward_rule->getOutgoingSet())
+	for (const Handle& h : _rule->getOutgoingSet())
 		outgoings.push_back(as.add_atom(h));
-	_forward_rule = createBindLink(outgoings);
-
-	// TODO: support backward rule
+	_rule = createBindLink(outgoings);
 }
 
-Handle Rule::get_forward_vardecl() const
+Handle Rule::get_vardecl() const
 {
-	if (_forward_rule)
-		return _forward_rule->get_vardecl();
+	if (_rule)
+		return _rule->get_vardecl();
 	return Handle::UNDEFINED;
-}
-
-/**
- * Get the typed variable list of the Rule.
- *
- * @return the VariableList or the lone VariableNode
- */
-HandleSeq Rule::get_backward_vardecls() const
-{
-	HandleSeq results;
-	for (const Handle& h : _backward_rule_handles)
-		results.push_back(h->getOutgoingAtom(0));
-	return results;
 }
 
 /**
@@ -231,28 +182,28 @@ HandleSeq Rule::get_backward_vardecls() const
  *
  * @return the Handle of the implicant
  */
-Handle Rule::get_forward_implicant() const
+Handle Rule::get_implicant() const
 {
-	if (_forward_rule)
-		return _forward_rule->get_body();
+	if (_rule)
+		return _rule->get_body();
 	return Handle::UNDEFINED;
 }
 
-Handle Rule::get_forward_implicand() const
+Handle Rule::get_implicand() const
 {
-	if (_forward_rule)
-		return _forward_rule->get_implicand();
+	if (_rule)
+		return _rule->get_implicand();
 	return Handle::UNDEFINED;
 }
 
 bool Rule::is_valid() const
 {
-	return (bool)_forward_rule;
+	return (bool)_rule;
 }
 
 bool Rule::is_meta() const
 {
-	Handle implicand = get_forward_implicand();
+	Handle implicand = get_implicand();
 
 	if (implicand.is_undefined())
 		return false;
@@ -268,13 +219,13 @@ bool Rule::is_meta() const
  *
  * @return HandleSeq of members of the implicant
  */
-HandleSeq Rule::get_premises(const Handle& conclusion) const
+HandleSeq Rule::get_clauses() const
 {
 	// if the rule's handle has not been set yet
-	if (!_forward_rule)
+	if (!_rule)
 		return HandleSeq();
 
-    Handle implicant = get_forward_implicant();
+    Handle implicant = get_implicant();
     Type t = implicant->getType();
     HandleSeq hs;
 
@@ -291,12 +242,12 @@ HandleSeq Rule::get_premises(const Handle& conclusion) const
  *
  * @return the Handle of the implicand
  *
- * TODO: indentical to get_forward_implicand()
+ * TODO: indentical to get_implicand()
  */
-Handle Rule::get_forward_conclusion() const
+Handle Rule::get_conclusion() const
 {
-	if (_forward_rule)
-		return _forward_rule->get_implicand();
+	if (_rule)
+		return _rule->get_implicand();
 	return Handle::UNDEFINED;
 }
 
@@ -305,27 +256,12 @@ HandlePairSeq Rule::get_conclusions() const
 	HandlePairSeq results;
 
 	// If the rule's handle has not been set yet
-	if (!_forward_rule)
+	if (!_rule)
 		return HandlePairSeq();
 
-	// If no backward rule then extract the conclusions from the
-	// forward rule
-	if (_backward_rule_handles.empty())
-	{
-		Handle vardecl = get_forward_vardecl();
-		for (const Handle& c : get_forward_conclusion_patterns())
-			results.push_back({filter_vardecl(vardecl, c), c});
-	}
-	// There are backward rules so return directly their patterns
-	else
-	{
-		for (const Handle& h : _backward_rule_handles)
-		{
-			Type t = h->getType();
-			OC_ASSERT(t == BIND_LINK or t == GET_LINK);
-			results.push_back({h->getOutgoingAtom(0), h->getOutgoingAtom(1)});
-		}
-	}
+	Handle vardecl = get_vardecl();
+	for (const Handle& c : get_conclusion_patterns())
+		results.push_back({filter_vardecl(vardecl, c), c});
 
 	return results;
 }
@@ -337,7 +273,7 @@ void Rule::set_weight(double p)
 
 Rule Rule::gen_standardize_apart(AtomSpace* as)
 {
-	if (!_forward_rule)
+	if (!_rule)
 		throw InvalidParamException(TRACE_INFO,
 		                            "Attempted standardized-apart on "
 		                            "invalid Rule");
@@ -346,7 +282,7 @@ Rule Rule::gen_standardize_apart(AtomSpace* as)
 	Rule st_ver = *this;
 	HandleMap dict;
 
-	Handle vdecl = get_forward_vardecl();
+	Handle vdecl = get_vardecl();
 	OrderedHandleSet varset;
 
 	if (VariableListCast(vdecl))
@@ -357,8 +293,8 @@ Rule Rule::gen_standardize_apart(AtomSpace* as)
 	for (auto& h : varset)
 		dict[h] = Handle::UNDEFINED;
 
-	Handle st_bindlink = standardize_helper(as, Handle(_forward_rule), dict);
-	st_ver.set_forward_handle(st_bindlink);
+	Handle st_bindlink = standardize_helper(as, Handle(_rule), dict);
+	st_ver.set_rule(st_bindlink);
 
 	return st_ver;
 }
@@ -374,40 +310,28 @@ RuleSet Rule::unify_target(const Handle& target,
                            const Handle& vardecl) const
 {
 	// If the rule's handle has not been set yet
-	if (!_forward_rule)
+	if (!_rule)
 		return {};
 
 	Rule alpha_rule = rand_alpha_converted();
 
 	RuleSet unified_rules;
 
-	// If no backward rule then only consider the conclusions from the
-	// forward rule
-	if (_backward_rule_handles.empty())
+	Handle alpha_vardecl = alpha_rule.get_vardecl();
+	for (const Handle& alpha_pat : alpha_rule.get_conclusion_patterns())
 	{
-		Handle alpha_vardecl = alpha_rule.get_forward_vardecl();
-		for (const Handle& alpha_pat : alpha_rule.get_forward_conclusion_patterns())
-		{
-			UnificationSolutionSet sol =
-				unify(target, alpha_pat, vardecl, alpha_vardecl);
-			if (sol.satisfiable) {
-				TypedSubstitutions tss =
-					typed_substitutions(sol, target, target, alpha_pat,
-					                    vardecl, alpha_vardecl);
-				// For each typed substitution produce a new rule by
-				// substituting all variables by their associated
-				// values.
-				for (const auto& ts : tss)
-					unified_rules.insert(alpha_rule.substituted(ts));
-			}
+		UnificationSolutionSet sol =
+			unify(target, alpha_pat, vardecl, alpha_vardecl);
+		if (sol.satisfiable) {
+			TypedSubstitutions tss =
+				typed_substitutions(sol, target, target, alpha_pat,
+				                    vardecl, alpha_vardecl);
+			// For each typed substitution produce a new rule by
+			// substituting all variables by their associated
+			// values.
+			for (const auto& ts : tss)
+				unified_rules.insert(alpha_rule.substituted(ts));
 		}
-	}
-	// There are backward rules so return directly their patterns
-	else {
-		std::stringstream ss;
-		ss << "TODO: support backward rules (offending rule is `"
-		   << get_name() << "')";
-		OC_ASSERT(false, ss.str());
 	}
 
 	return unified_rules;
@@ -415,17 +339,14 @@ RuleSet Rule::unify_target(const Handle& target,
 
 Handle Rule::apply(AtomSpace& as) const
 {
-	return bindlink(&as, Handle(_forward_rule));
+	return bindlink(&as, Handle(_rule));
 }
 
 std::string Rule::to_string() const
 {
 	std::stringstream ss;
 	ss << "name: " << _name << std::endl
-	   << "forward rule:" << std::endl
-	   << _forward_rule->toString()
-	   << "backward rules:" << std::endl
-	   << oc_to_string(_backward_rule_handles);
+	   << "rule:" << std::endl << _rule->toString();
 	return ss.str();
 }
 
@@ -434,14 +355,8 @@ Rule Rule::rand_alpha_converted() const
 	// Clone the rule
 	Rule result = *this;
 
-	// Alpha convert the forward rule
-	result.set_forward_handle(_forward_rule->alpha_conversion());
-
-	// Alpha convert the backward rules
-	HandleSeq bhs;
-	for (ScopeLinkPtr sc : _backward_rule_scope_links)
-		bhs.push_back(Handle(sc->alpha_conversion()));
-	result.set_backward_handles(bhs);
+	// Alpha convert the rule
+	result.set_rule(_rule->alpha_conversion());
 
 	return result;
 }
@@ -502,36 +417,36 @@ Handle Rule::standardize_helper(AtomSpace* as, const Handle& h,
 	return hcpy;
 }
 
-HandleSeq Rule::get_forward_conclusion_patterns() const
+HandleSeq Rule::get_conclusion_patterns() const
 {
 	HandleSeq results;
-	Handle implicand = get_forward_implicand();
+	Handle implicand = get_implicand();
 	Type t = implicand->getType();
 	if (LIST_LINK == t)
 		for (const Handle& h : implicand->getOutgoingSet())
-			results.push_back(get_forward_conclusion_pattern(h));
+			results.push_back(get_conclusion_pattern(h));
 	else
-		results.push_back(get_forward_conclusion_pattern(implicand));
+		results.push_back(get_conclusion_pattern(implicand));
 
 	return results;
 }
 
-Handle Rule::get_forward_conclusion_pattern(const Handle& h) const
+Handle Rule::get_conclusion_pattern(const Handle& h) const
 {
 	Type t = h->getType();
 	if (EXECUTION_OUTPUT_LINK == t)
-		return get_execution_output_last_argument(h);
+		return get_execution_output_first_argument(h);
 	else
 		return h;
 }
 
-Handle Rule::get_execution_output_last_argument(const Handle& h) const
+Handle Rule::get_execution_output_first_argument(const Handle& h) const
 {
 	OC_ASSERT(h->getType() == EXECUTION_OUTPUT_LINK);
 	Handle args = h->getOutgoingAtom(1);
 	if (args->getType() == LIST_LINK) {
 		OC_ASSERT(args->getArity() > 0);
-		return args->getOutgoingAtom(args->getArity()-1);
+		return args->getOutgoingAtom(0);
 	} else
 		return args;
 }
@@ -539,7 +454,7 @@ Handle Rule::get_execution_output_last_argument(const Handle& h) const
 Rule Rule::substituted(const TypedSubstitutions::value_type& ts) const
 {
 	Rule new_rule(*this);
-	new_rule.set_forward_handle(substitute(_forward_rule, ts));
+	new_rule.set_rule(substitute(_rule, ts));
 	return new_rule;
 }
 

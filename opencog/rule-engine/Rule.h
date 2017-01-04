@@ -45,9 +45,7 @@ public:
 /**
  * Class for managing rules in the URE.
  *
- * A URE rule may have one of the following formats.
- *
- * 1. A single, forward-only premises-to-conclusion rule, of the style
+ * A URE rule have one of the following format
  *
  *     <premise-1>
  *     ...
@@ -55,7 +53,7 @@ public:
  *     |-
  *     <conclusion>
  *
- * is represented as
+ * represented as
  *
  *     BindLink
  *        <variables>
@@ -65,50 +63,11 @@ public:
  *           <premise-n>
  *        <conclusion>
  *
- * Here, `<conclusion>` may represent the conclusion pattern explicitly,
- * or, in most cases, it may be obfuscated in a grounded schema node.
- * In such a case, the following format may be used. Note that if the
- * rule uses a `GroundedSchema` and no backward form is used, as
- * described below, then the last argument of the `GroundedSchema`
- * will represent the rule's conclusion pattern.
- *
- * 2. A list starting with a forward-format and, optionally, one or
- * more backward-forms. The backward forms allow the conclusion
- * patterns to be easily obtained, as well as a means to reconstruct
- * the premises, given a conclusion. In this case, a rule is
- * represented as follows:
- *
- *     ListLink
- *        <forward>
- *        <backward-1>
- *        ...
- *        <backward-n>
- *
- * where `<forward>` is the structure described in part 1, above. The
- * `<backward-k>` terms are either
- *
- *      BindLink
- *         <variables>
- *         <conclusion>
- *         AndLink
- *            <premise-1>
- *            ...
- *            <premise-n>
- *
- * or, if we don't need to translate a certain conclusion into premises,
- * such terms take the form
- *
- *      GetLink
- *         <variables>
- *         <conclusion>
- *
- * This second notation (forward and backward forms) is necessary when
- * the forward rule output(s) is obfuscated by a grounded schema(ta).
- * It can also be useful when the transformations going from conclusion
- * to premises are non-trivial. The reason there are several backward
- * forms is because a forward rule may output several conclusions.
- * Take, for instance, the PLN equivalence-to-double-implication rule,
- * that given A<->B, outputs A->B and B->A.
+ * Here, `<conclusion>` may represent the conclusion pattern
+ * explicitly, or, in most cases, is a call to a grounded schema node
+ * to calculate the conclusion given the premises. In such a case, the
+ * conclusion is a first argument of the call, followed by the
+ * premises.
  *
  */
 class Rule : public boost::less_than_comparable<Rule>,
@@ -143,8 +102,7 @@ public:
 	bool is_alpha_equivalent(const Rule&) const;
 
 	// Modifiers
-	void set_forward_handle(const Handle&);
-	void set_backward_handles(const HandleSeq&);
+	void set_rule(const Handle&);
 	void set_name(const std::string&);
 	void set_category(const std::string&);
 	void set_weight(double);
@@ -152,7 +110,7 @@ public:
 	// Access
 	std::string& get_name();
 	const std::string& get_name() const;
-	Handle get_forward_rule() const;
+	Handle get_rule() const;
 	Handle get_alias() const;
 	Handle get_rbs() const;
 
@@ -179,29 +137,29 @@ public:
 	void add(AtomSpace&);
 
 	/**
-	 * Return the variable declaration of the forward rule form.
+	 * Return the variable declaration of the rule.
 	 */
-	Handle get_forward_vardecl() const;
-	HandleSeq get_backward_vardecls() const;
-	Handle get_forward_implicant() const;
-	Handle get_forward_implicand() const;
+	Handle get_vardecl() const;
+	Handle get_implicant() const;
+	Handle get_implicand() const;
 
 	// Properties
 	bool is_valid() const;
 	bool is_meta() const;       // does that rule produces a rule
 
 	/**
-	 * Return the premises of the rule. Optionally, a conclusion can
-	 * be provided as the argument. In such a case, the premises will
-	 * be computed, based on the backward rule.
+	 * Return the pattern matcher clauses of the rule. This may not
+	 * necessarily represent the premises of the rule which may be the
+	 * last arguments of the rewrite term, but rather the pattern
+	 * matcher clauses required to trigger that rule.
 	 */
-	HandleSeq get_premises(const Handle& = Handle::UNDEFINED) const;
+	HandleSeq get_clauses() const;
 
 	/**
-	 * Return the conclusion on the forward rule. Used for applying a
-	 * forward step.
+	 * Return the conclusion of the rule. Used for applying a forward
+	 * step.
 	 */
-	Handle get_forward_conclusion() const;
+	Handle get_conclusion() const;
 
 	/**
 	 * Return the list of conclusion patterns. Each pattern is a pair
@@ -216,8 +174,6 @@ public:
 	 *
 	 * @param as  pointer to the atomspace where the new BindLink will be added
 	 * @return    a new Rule object with its own new BindLink
-	 *
-	 * TODO: support backward rule handles.
 	 */
 	Rule gen_standardize_apart(AtomSpace*);
 
@@ -249,14 +205,8 @@ public:
 	std::string to_string() const;
 
 private:
-	// Forward rule
-	BindLinkPtr _forward_rule;
-
-	// Backward rule handles, BindLinks or a GetLinks
-	//
-	// TODO: Maybe replace that by vector<ScopeLinkPtr>
-	HandleSeq _backward_rule_handles;
-	std::vector<ScopeLinkPtr> _backward_rule_scope_links;
+	// Rule
+	BindLinkPtr _rule;
 
 	// Rule alias: (DefineLink _rule_alias _rule_handle)
 	Handle _rule_alias;
@@ -277,16 +227,15 @@ private:
 
 	Handle standardize_helper(AtomSpace*, const Handle&, HandleMap&);
 
-	// Return the conclusion patterns of the forward
-	// conclusions. There are several of them because the conclusions
-	// can be wrapped in the ListLink. In case each conclusion is an
-	// ExecutionOutputLink then return the last argument of that
-	// ExecutionOutputLink.
-	HandleSeq get_forward_conclusion_patterns() const;
-	Handle get_forward_conclusion_pattern(const Handle& h) const;
+	// Return the conclusion patterns of the rule. There are several
+	// of them because the conclusions can be wrapped in the
+	// ListLink. In case each conclusion is an ExecutionOutputLink
+	// then return the first argument of that ExecutionOutputLink.
+	HandleSeq get_conclusion_patterns() const;
+	Handle get_conclusion_pattern(const Handle& h) const;
 
-	// Given an ExecutionOutputLink return its last argument
-	Handle get_execution_output_last_argument(const Handle& h) const;
+	// Given an ExecutionOutputLink return its first argument
+	Handle get_execution_output_first_argument(const Handle& h) const;
 
 	// Given a typed substitution obtained from typed_substitutions
 	// unify function, generate a new partially substituted rule.

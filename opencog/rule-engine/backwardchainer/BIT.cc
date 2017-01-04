@@ -177,12 +177,12 @@ OrderedHandleSet BIT::get_leaves(const Handle& h) const
 		Handle rewrite = hsc->get_implicand();
 		return get_leaves(rewrite);
 	} else if (t == EXECUTION_OUTPUT_LINK) {
-		// All arguments except the last one are potential target leaves
+		// All arguments except the first one are potential target leaves
 		Handle args = h->getOutgoingAtom(1);
 		OrderedHandleSet leaves;
 		if (args->getType() == LIST_LINK) {
 			OC_ASSERT(args->getArity() > 0);
-			for (Arity i = 0; i+1 < args->getArity(); i++) {
+			for (Arity i = 1; i < args->getArity(); i++) {
 				OrderedHandleSet aleaves = get_leaves(args->getOutgoingAtom(i));
 				leaves.insert(aleaves.begin(), aleaves.end());
 			}
@@ -212,7 +212,7 @@ Handle BIT::expand_fcs(const Handle& fcs, const Handle& leaf, const Rule& rule)
 	Handle nfcs_vardecl = nfcs_bl->get_vardecl();
 	Handle nfcs_pattern = nfcs_bl->get_body();
 	Handle nfcs_rewrite = nfcs_bl->get_implicand();
-	Handle rule_vardecl = rule.get_forward_vardecl();
+	Handle rule_vardecl = rule.get_vardecl();
 
 	// Generate new pattern term
 	Handle npattern = expand_fcs_pattern(nfcs_pattern, rule);
@@ -251,7 +251,7 @@ Handle BIT::substitute_unified_variables(const Handle& fcs,
 
 	BindLinkPtr fcs_bl(BindLinkCast(fcs));
 	Handle leaf_vardecl = filter_vardecl(fcs_bl->get_vardecl(), leaf),
-		conclusion_vardecl = rule.get_forward_vardecl();
+		conclusion_vardecl = rule.get_vardecl();
 	UnificationSolutionSet sol =
 		unify(leaf, conclusion, leaf_vardecl, conclusion_vardecl);
 
@@ -267,7 +267,7 @@ Handle BIT::substitute_unified_variables(const Handle& fcs,
 
 Handle BIT::expand_fcs_pattern(const Handle& fcs_pattern, const Rule& rule)
 {
-	HandleSeq clauses = rule.get_premises();
+	HandleSeq clauses = rule.get_clauses();
 	HandlePairSeq conclusions = rule.get_conclusions();
 	OC_ASSERT(conclusions.size() == 1);
 	Handle conclusion = conclusions[0].second;
@@ -306,7 +306,7 @@ Handle BIT::expand_fcs_rewrite(const Handle& fcs_rewrite, const Rule& rule)
 	// Replace the fcs rewrite atoms by the rule rewrite if equal to
 	// the rule conclusion
 	if (content_eq(fcs_rewrite, conclusion))
-		return rule.get_forward_implicand();
+		return rule.get_implicand();
 	// If node and isn't equal to conclusion leave alone
 	if (fcs_rewrite->isNode())
 		return fcs_rewrite;
