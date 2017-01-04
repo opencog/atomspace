@@ -23,6 +23,7 @@
 
 #include <opencog/atomutils/Unify.h>
 #include <opencog/atomspace/AtomSpace.h>
+#include <opencog/guile/SchemeEval.h>
 
 #include <cxxtest/TestSuite.h>
 
@@ -32,6 +33,7 @@ class UnifyUTest :  public CxxTest::TestSuite
 {
 private:
 	AtomSpace _as;
+	SchemeEval _eval;
 	Handle X, Y, Z, W, V, A, B, AB, XB, AY, XY, AZ, AW, AV,
 		AndAA, AndAB, AndAY, AndXB, AndXY,
 		AndAABB, AndXYAB, AndAAABBB, AndXXYYAB, AndAAAABBBB, AndXXXYYYAB,
@@ -41,7 +43,7 @@ private:
 		XY_vardecl;
 	
 public:
-	UnifyUTest() {}
+	UnifyUTest() : _eval(&_as) {}
 
 	void setUp();
 
@@ -67,6 +69,7 @@ public:
 	void test_unify_vardecl_5();
 
 	// // Cyclic dependence
+	// TODO: is it really needed?
 	// void test_unify_cyclic_dependence_1();
 
 	// // Type union
@@ -84,6 +87,9 @@ public:
 	void test_unify_unordered_8();
 
 	// TODO: add test about same variable X in different scopes
+
+	// // Various complex unify queries
+	// void test_unify_complex_1();
 };
 
 void UnifyUTest::setUp(void)
@@ -425,3 +431,140 @@ void UnifyUTest::test_unify_unordered_8()
 
 	TS_ASSERT_EQUALS(result, expected);
 }
+
+// // TODO: what is the purpose of this test given that it have variables
+// // in common from lhs and rhs
+// void UnifyUTest::test_unify_complex_1()
+// {
+// 	Handle lhs =
+// 		_eval.eval_h("(ImplicationLink"
+// 		             "  (AndLink"
+// 		             "    (QuoteLink"
+// 		             "      (LambdaLink"
+// 		             "        (UnquoteLink"
+// 		             "          (VariableNode \"$TyVs-1e715739\")"
+// 		             "        )"
+// 		             "        (UnquoteLink"
+// 		             "          (VariableNode \"$A1-6ae3d959\")"
+// 		             "        )"
+// 		             "      )"
+// 		             "    )"
+// 		             "    (QuoteLink"
+// 		             "      (LambdaLink"
+// 		             "        (UnquoteLink"
+// 		             "          (VariableNode \"$TyVs-1e715739\")"
+// 		             "        )"
+// 		             "        (UnquoteLink"
+// 		             "          (VariableNode \"$A2-4414053b\")"
+// 		             "        )"
+// 		             "      )"
+// 		             "    )"
+// 		             "  )"
+// 		             "  (QuoteLink"
+// 		             "    (LambdaLink"
+// 		             "      (UnquoteLink"
+// 		             "        (VariableNode \"$TyVs-1e715739\")"
+// 		             "      )"
+// 		             "      (UnquoteLink"
+// 		             "        (AndLink"
+// 		             "          (VariableNode \"$A1-6ae3d959\")"
+// 		             "          (VariableNode \"$A2-4414053b\")"
+// 		             "        )"
+// 		             "      )"
+// 		             "    )"
+// 		             "  )"
+// 		             ")");
+// 	Handle rhs =
+// 		_eval.eval_h("(ImplicationLink"
+// 		             "  (AndLink"
+// 		             "    (QuoteLink"
+// 		             "      (LambdaLink"
+// 		             "        (UnquoteLink"
+// 		             "          (VariableNode \"$TyVs-74d4bf25\")"
+// 		             "        )"
+// 		             "        (UnquoteLink"
+// 		             "          (VariableNode \"$A1-6ae3d959\")"
+// 		             "        )"
+// 		             "      )"
+// 		             "    )"
+// 		             "    (QuoteLink"
+// 		             "      (LambdaLink"
+// 		             "        (UnquoteLink"
+// 		             "          (VariableNode \"$TyVs-74d4bf25\")"
+// 		             "        )"
+// 		             "        (UnquoteLink"
+// 		             "          (VariableNode \"$A2-4414053b\")"
+// 		             "        )"
+// 		             "      )"
+// 		             "    )"
+// 		             "  )"
+// 		             "  (QuoteLink"
+// 		             "    (LambdaLink"
+// 		             "      (UnquoteLink"
+// 		             "        (VariableNode \"$TyVs-74d4bf25\")"
+// 		             "      )"
+// 		             "      (UnquoteLink"
+// 		             "        (AndLink"
+// 		             "          (VariableNode \"$A1-6ae3d959\")"
+// 		             "          (VariableNode \"$A2-4414053b\")"
+// 		             "        )"
+// 		             "      )"
+// 		             "    )"
+// 		             "  )"
+// 		             ")");
+// 	Handle lhs_vardecl =
+// 		_eval.eval_h("(VariableList"
+// 		             "  (TypedVariableLink"
+// 		             "    (VariableNode \"$TyVs-1e715739\")"
+// 		             "    (TypeChoice"
+// 		             "      (TypeNode \"TypedVariableLink\")"
+// 		             "      (TypeNode \"VariableNode\")"
+// 		             "      (TypeNode \"VariableList\")"
+// 		             "    )"
+// 		             "  )"
+// 		             "  (TypedVariableLink"
+// 		             "    (VariableNode \"$A1-6ae3d959\")"
+// 		             "    (TypeNode \"EvaluationLink\")"
+// 		             "  )"
+// 		             "  (TypedVariableLink"
+// 		             "    (VariableNode \"$A2-4414053b\")"
+// 		             "    (TypeNode \"EvaluationLink\")"
+// 		             "  )"
+// 		             ")");
+// 	Handle rhs_vardecl =
+// 		_eval.eval_h("(VariableList"
+// 		             "  (TypedVariableLink"
+// 		             "    (VariableNode \"$TyVs-74d4bf25\")"
+// 		             "    (TypeChoice"
+// 		             "      (TypeNode \"TypedVariableLink\")"
+// 		             "      (TypeNode \"VariableNode\")"
+// 		             "      (TypeNode \"VariableList\")"
+// 		             "    )"
+// 		             "  )"
+// 		             "  (TypedVariableLink"
+// 		             "    (VariableNode \"$A1-6ae3d959\")"
+// 		             "    (TypeNode \"EvaluationLink\")"
+// 		             "  )"
+// 		             "  (TypedVariableLink"
+// 		             "    (VariableNode \"$A2-4414053b\")"
+// 		             "    (TypeNode \"EvaluationLink\")"
+// 		             "  )"
+// 		             ")");
+
+// 	Handle
+// 		TyVs1 = _eval.eval_h("(VariableNode \"$TyVs-1e715739\")"),
+// 		TyVs2 = _eval.eval_h("(VariableNode \"$TyVs-74d4bf25\")"),
+// 		A1 = _eval.eval_h("(VariableNode \"$A1-6ae3d959\")"),
+// 		A2 = _eval.eval_h("(VariableNode \"$A2-4414053b\")");
+
+// 	UnificationSolutionSet result = unify(lhs, rhs, lhs_vardecl, rhs_vardecl),
+// 		expected = UnificationSolutionSet(true,
+// 		                                  {{{{TyVs1, TyVs2}, TyVs2},
+// 				                             {{A1, A1}, A1},
+// 				                             {{A2, A2}, A2}}});
+
+// 	std::cout << "result = " << oc_to_string(result) << std::endl;
+// 	std::cout << "expected = " << oc_to_string(expected) << std::endl;
+
+// 	TS_ASSERT_EQUALS(result, expected);
+// }

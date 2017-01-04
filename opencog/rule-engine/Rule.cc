@@ -391,7 +391,9 @@ RuleSet Rule::unify_target(const Handle& target,
 			UnificationSolutionSet sol =
 				unify(target, alpha_pat, vardecl, alpha_vardecl);
 			if (sol.satisfiable) {
-				TypedSubstitutions tss = typed_substitutions(sol, target);
+				TypedSubstitutions tss =
+					typed_substitutions(sol, target, target, alpha_pat,
+					                    vardecl, alpha_vardecl);
 				// For each typed substitution produce a new rule by
 				// substituting all variables by their associated
 				// values.
@@ -536,98 +538,9 @@ Handle Rule::get_execution_output_last_argument(const Handle& h) const
 
 Rule Rule::substituted(const TypedSubstitutions::value_type& ts) const
 {
-	// Get the list of values to substitute from ts
-	HandleSeq values = _forward_rule->get_variables().make_values(ts.first);
-	// Perform alpha-conversion, this will work over valiues that are
-	// non variables as well
-	Handle h = _forward_rule->alpha_conversion(values, ts.second);
-
 	Rule new_rule(*this);
-	new_rule.set_forward_handle(h);
-	new_rule.consume_bad_quotations();
-
+	new_rule.set_forward_handle(substitute(_forward_rule, ts));
 	return new_rule;
-}
-
-bool Rule::is_bad_quotation(BindLinkPtr bl) const
-{
-	return bl->get_vardecl().is_undefined();
-}
-
-bool Rule::is_pm_connector(const Handle& h) const
-{
-	return is_pm_connector(h->getType());
-}
-
-bool Rule::is_pm_connector(Type t) const
-{
-	return t == AND_LINK or t == OR_LINK or t == NOT_LINK;
-}
-
-bool Rule::has_bl_variable_in_local_scope(const Handle& scope) const
-{
-	Handle var = scope->getOutgoingAtom(0)->getOutgoingAtom(0);
-	return _forward_rule->get_variables().is_in_varset(var);
-}
-
-void Rule::consume_bad_quotations()
-{
-	Handle vardecl = _forward_rule->get_vardecl(),
-		pattern = _forward_rule->get_body(),
-		rewrite = _forward_rule->get_implicand();
-
-	// Consume the pattern's quotations
-	pattern = consume_bad_quotations(pattern);
-
-	// Consume the rewrite's quotations
-	rewrite = consume_bad_quotations(rewrite);
-
-	// Recreate the BindLink
-	_forward_rule = vardecl.is_defined() ?
-		createBindLink(vardecl, pattern, rewrite)
-		: createBindLink(pattern, rewrite);
-}
-
-Handle Rule::consume_bad_quotations(Handle h, Quotation quotation, bool escape)
-{
-	// Base case
-	if (h->isNode())
-		return h;
-
-	// Recursive cases
-	Type t = h->getType();
-	if (quotation.consumable(t)) {
-		if (t == QUOTE_LINK) {
-			Handle scope = h->getOutgoingAtom(0);
-			OC_ASSERT(classserver().isA(scope->getType(), SCOPE_LINK),
-			          "This defaults the assumption, see this function comment");
-			// Check whether a variable of the BindLink is present in
-			// the local scope vardecl, if so escape the consumption.
-			if (not has_bl_variable_in_local_scope(scope)) {
-				quotation.update(t);
-				return consume_bad_quotations(scope, quotation);
-			} else {
-				escape = true;
-			}
-		} else if (t == UNQUOTE_LINK) {
-			if (not escape) {
-				quotation.update(t);
-				return consume_bad_quotations(h->getOutgoingAtom(0), quotation);
-			}
-		}
-		// Ignore LocalQuotes as they supposedly used only to quote
-		// pattern matcher connectors.
-	}
-
-	quotation.update(t);
-	HandleSeq consumed;
-	for (const Handle outh : h->getOutgoingSet())
-		consumed.push_back(consume_bad_quotations(outh, quotation, escape));
-
-	// TODO: call all factories
-	bool is_scope = classserver().isA(t, SCOPE_LINK);
-	return is_scope ? Handle(ScopeLink::factory(t, consumed))
-		: Handle(createLink(t, consumed));
 }
 
 std::string oc_to_string(const Rule& rule)

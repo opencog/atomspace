@@ -41,7 +41,9 @@ UnificationSolutionSet::UnificationSolutionSet(bool s,
 }
 
 TypedSubstitutions typed_substitutions(const UnificationSolutionSet& sol,
-                                       const Handle& pre)
+                                       const Handle& pre,
+                                       const Handle& lhs, const Handle& rhs,
+                                       Handle lhs_vardecl, Handle rhs_vardecl)
 {
 	OC_ASSERT(sol.satisfiable);
 
@@ -59,8 +61,6 @@ TypedSubstitutions typed_substitutions(const UnificationSolutionSet& sol,
 				    (h->getType() != VARIABLE_NODE
 				     or is_unquoted_unscoped_in_tree(pre, h)))
 					least_abstract = h;
-
-				// TODO: take care of ts type
 			}
 			// Build variable mapping
 			for (const Handle& var : typed_block.first) {
@@ -68,9 +68,122 @@ TypedSubstitutions typed_substitutions(const UnificationSolutionSet& sol,
 					ts.first.insert({var, least_abstract});
 			}
 		}
+		// Build the type for this variable. For now, the type is
+		// merely lhs_vardecl and rhs_vardecl merged together. To do
+		// well it should be taking into account the possibly more
+		// restrictive types found during unification (i.e. the block
+		// types).
+		//
+		// TODO: variables without declaration (i.e. rhs_vardecl or
+		// lhs_vardecl are undefined) should be added here, borrowing
+		// the variable declarations of equivalent variables if any.
+		if (lhs.is_defined() and lhs_vardecl.is_undefined())
+			lhs_vardecl = gen_vardecl(lhs);
+		if (rhs.is_defined() and rhs_vardecl.is_undefined())
+			rhs_vardecl = gen_vardecl(rhs);
+		ts.second = merge_vardecl(rhs_vardecl, lhs_vardecl);
+
 		result.insert(ts);
 	}
 	return result;
+}
+
+bool is_ill_quotation(BindLinkPtr bl)
+{
+	return bl->get_vardecl().is_undefined();
+}
+
+bool is_pm_connector(const Handle& h)
+{
+	return is_pm_connector(h->getType());
+}
+
+bool is_pm_connector(Type t)
+{
+	return t == AND_LINK or t == OR_LINK or t == NOT_LINK;
+}
+
+bool has_bl_variable_in_local_scope(BindLinkPtr bl, const Handle& scope)
+{
+	Handle var = scope->getOutgoingAtom(0)->getOutgoingAtom(0);
+	return bl->get_variables().is_in_varset(var);
+}
+
+BindLinkPtr consume_ill_quotations(BindLinkPtr bl)
+{
+	Handle vardecl = bl->get_vardecl(),
+		pattern = bl->get_body(),
+		rewrite = bl->get_implicand();
+
+	// Consume the pattern's quotations
+	pattern = consume_ill_quotations(bl, pattern);
+
+	// Consume the rewrite's quotations
+	rewrite = consume_ill_quotations(bl, rewrite);
+
+	// Recreate the BindLink
+	return vardecl.is_defined() ?
+		createBindLink(vardecl, pattern, rewrite)
+		: createBindLink(pattern, rewrite);
+}
+
+Handle consume_ill_quotations(BindLinkPtr bl, Handle h,
+                              Quotation quotation, bool escape)
+{
+	// Base case
+	if (h->isNode())
+		return h;
+
+	// Recursive cases
+	Type t = h->getType();
+	if (quotation.consumable(t)) {
+		if (t == QUOTE_LINK) {
+			Handle scope = h->getOutgoingAtom(0);
+			OC_ASSERT(classserver().isA(scope->getType(), SCOPE_LINK),
+			          "This defaults the assumption, see this function comment");
+			// Check whether a variable of the BindLink is present in
+			// the local scope vardecl, if so escape the consumption.
+			if (not has_bl_variable_in_local_scope(bl, scope)) {
+				quotation.update(t);
+				return consume_ill_quotations(bl, scope, quotation);
+			} else {
+				escape = true;
+			}
+		} else if (t == UNQUOTE_LINK) {
+			if (not escape) {
+				quotation.update(t);
+				return consume_ill_quotations(bl, h->getOutgoingAtom(0),
+				                              quotation);
+			}
+		}
+		// Ignore LocalQuotes as they supposedly used only to quote
+		// pattern matcher connectors.
+	}
+
+	quotation.update(t);
+	HandleSeq consumed;
+	for (const Handle outh : h->getOutgoingSet())
+		consumed.push_back(consume_ill_quotations(bl, outh, quotation, escape));
+
+	// TODO: call all factories
+	bool is_scope = classserver().isA(t, SCOPE_LINK);
+	return is_scope ? Handle(ScopeLink::factory(t, consumed))
+		: Handle(createLink(t, consumed));
+}
+
+Handle substitute(BindLinkPtr bl, const TypedSubstitutions::value_type& ts)
+{
+	// Get the list of values to substitute from ts
+	HandleSeq values = bl->get_variables().make_values(ts.first);
+
+	// Perform alpha-conversion, this will work over valiues that are
+	// non variables as well
+	//
+	// TODO: make sure that ts.second contains the declaration of all
+	// variables
+	Handle h = bl->alpha_conversion(values, ts.second);
+
+	return Handle(consume_ill_quotations(BindLinkCast(h)));
 }
 
 UnificationSolutionSet unify(const Handle& lhs, const Handle& rhs,
@@ -107,6 +220,14 @@ UnificationSolutionSet unify(const Handle& lhs, const Handle& rhs,
 	////////////////////////
 
 	// Consume quotations
+	if (lhs_quotation.consumable(lhs_type)
+	    and rhs_quotation.consumable(rhs_type)) {
+		lhs_quotation.update(lhs_type);
+		rhs_quotation.update(rhs_type);
+		return unify(lhs->getOutgoingAtom(0), rhs->getOutgoingAtom(0),
+		             lhs_vardecl, rhs_vardecl,
+		             lhs_quotation, rhs_quotation);
+	}
 	if (lhs_quotation.consumable(lhs_type)) {
 		lhs_quotation.update(lhs_type);
 		return unify(lhs->getOutgoingAtom(0), rhs, lhs_vardecl, rhs_vardecl,
@@ -429,6 +550,11 @@ VariableListPtr gen_varlist(const Handle& h)
 {
 	OrderedHandleSet vars = get_free_variables(h);
 	return createVariableList(HandleSeq(vars.begin(), vars.end()));
+}
+
+Handle gen_vardecl(const Handle& h)
+{
+	return Handle(gen_varlist(h));
 }
 
 /**

@@ -31,14 +31,13 @@
 
 namespace opencog {
 
-BITNode::BITNode(const Handle& bd, const Handle& vd, const BITFitness& fit)
-	: body(bd), vardecl(vd), fitness(fit) {}
+BITNode::BITNode(const Handle& bd, const BITFitness& fit)
+	: body(bd), fitness(fit) {}
 
 std::string	BITNode::to_string() const
 {
 	std::stringstream ss;
 	ss << "body:" << std::endl << oc_to_string(body)
-	   << "vardecl:" << std::endl << oc_to_string(vardecl)
 	   << "rules:" << std::endl << oc_to_string(rules);
 	return ss.str();
 }
@@ -105,7 +104,7 @@ void BIT::insert_bitnode(Handle body, Handle vardecl, const BITFitness& fitness)
 		return;
 
 	if (_handle2bitnode.find(body) == _handle2bitnode.end())
-		_handle2bitnode[body] = BITNode(body, vardecl, fitness);
+		_handle2bitnode[body] = BITNode(body, fitness);
 }
 
 void BIT::init_fcss()
@@ -241,17 +240,27 @@ Handle BIT::substitute_unified_variables(const Handle& fcs,
 		return fcs;
 
 	BindLinkPtr fcs_bl(BindLinkCast(fcs));
+	Handle leaf_vardecl = filter_vardecl(fcs_bl->get_vardecl(), leaf),
+		conclusion_vardecl = rule.get_forward_vardecl();
+	bc_logger().debug() << "BIT::substitute_unified_variables "
+	                    << "leaf = " << oc_to_string(leaf)
+	                    << "conclusion = " << oc_to_string(conclusion)
+	                    << "leaf_vardecl = " << oc_to_string(leaf_vardecl)
+	                    << "conclusion_vardecl = " << oc_to_string(conclusion_vardecl);
 	UnificationSolutionSet sol =
-		unify(leaf, conclusion,
-		      fcs_bl->get_vardecl(), rule.get_forward_vardecl());
+		unify(leaf, conclusion, leaf_vardecl, conclusion_vardecl);
+
+	bc_logger().debug() << "BIT::substitute_unified_variables sol: "
+	                    << oc_to_string(sol);
 
 	OC_ASSERT(sol.satisfiable); // If the rule has been selected it
                                 // has to be satisfiable
-	TypedSubstitutions tss = typed_substitutions(sol, leaf);
+	TypedSubstitutions tss =
+		typed_substitutions(sol, leaf, leaf, conclusion,
+		                    fcs_bl->get_vardecl(), conclusion_vardecl);
 	OC_ASSERT(not tss.empty());
 	auto ts = *tss.begin();
-	HandleSeq values = fcs_bl->get_variables().make_values(ts.first);
-	return fcs_bl->alpha_conversion(values, ts.second);
+	return Handle(substitute(fcs_bl, ts));
 }
 
 Handle BIT::expand_fcs_pattern(const Handle& fcs_pattern, const Rule& rule)
