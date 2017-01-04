@@ -160,6 +160,9 @@ private:
 	// possibly be used to infer the target.
 	RuleSet get_valid_rules(const BITNode& target, const Handle& vardecl);
 
+	// Hack alert!!! FCS above this size are considered too big
+	const size_t _max_fcs_size = 1200;
+
 	AtomSpace& _as;
 	UREConfigReader _configReader;
 

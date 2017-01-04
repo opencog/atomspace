@@ -72,7 +72,7 @@ void BackwardChainer::do_chain()
 
 void BackwardChainer::do_step()
 {
-	bc_logger().info("Iteration %d", _iteration);
+	bc_logger().debug("Iteration %d", _iteration);
 	_iteration++;
 
 	expand_bit();
@@ -107,13 +107,6 @@ void BackwardChainer::expand_bit()
 		Handle fcs = select_expansion_fcs();
 		LAZY_BC_LOG_DEBUG << "Selected FCS for expansion:" << std::endl
 		                  << fcs;
-
-		// Hack before we code a proper complexity penalty to avoid
-		// exploring overly complex and-BITs.
-		if (fcs->size() > 1000) {
-			bc_logger().debug() << "The selected FCS size it too big, abort expansion";
-			return;
-		}
 		expand_bit(fcs);
 	}
 }
@@ -189,7 +182,23 @@ Handle BackwardChainer::select_fulfillment_fcs() const
 
 void BackwardChainer::reduce_bit()
 {
-	// TODO: avoid having the BIT grow arbitrarily large
+	OrderedHandleSet& fcss = _bit.get_fcss();
+	size_t fcss_size = fcss.size();
+
+	// Remove and-BITs above a certain size. Hack before we code a
+	// proper complexity penalty to avoid exploring overly complex
+	// and-BITs.
+	for (auto it = fcss.begin(); it != fcss.end();) {
+		if ((*it)->size() > _max_fcs_size)
+			it = fcss.erase(it);
+		else
+			++it;
+	}
+
+	if (size_t removed_andbits = fcss_size - fcss.size()) {
+		LAZY_BC_LOG_DEBUG << "Removed " << removed_andbits
+		                  << " overly complex and-BITs from the BIT";
+	}
 }
 
 Rule BackwardChainer::select_rule(const BITNode& target, const Handle& vardecl)
