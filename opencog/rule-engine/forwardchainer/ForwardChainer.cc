@@ -155,7 +155,7 @@ void ForwardChainer::apply_all_rules()
 {
     for (const Rule& rule : _rules) {
         fc_logger().debug("Apply rule %s", rule.get_name().c_str());
-        HandleSeq hs = apply_rule(rule.get_forward_rule());
+        HandleSeq hs = apply_rule(rule.get_rule());
 
         // Update
         _fcstat.add_inference_record(_iteration,
@@ -439,7 +439,7 @@ UnorderedHandleSet ForwardChainer::derive_rules(const Handle& source,
     AtomSpace temp_pm_as;
     Handle hcpy = temp_pm_as.add_atom(pattern);
     Handle implicant_vardecl = temp_pm_as.add_atom(
-        gen_sub_varlist(pattern, rule.get_forward_vardecl()));
+        gen_sub_varlist(pattern, rule.get_vardecl()));
     Handle sourcecpy = temp_pm_as.add_atom(source);
 
     Handle h = temp_pm_as.add_link(BIND_LINK, implicant_vardecl, hcpy, hcpy);
@@ -481,7 +481,7 @@ UnorderedHandleSet ForwardChainer::derive_rules(const Handle& source,
 
             fv.search_set(it.first);
 
-            Handle rhandle = rule.get_forward_rule();
+            Handle rhandle = rule.get_rule();
             HandleSeq new_candidate_rules = substitute_rule_part(
                 temp_pm_as, temp_pm_as.add_atom(rhandle), fv.varset,
                 gcb.var_groundings);
@@ -674,7 +674,7 @@ bool ForwardChainer::unify(const Handle& source, const Handle& pattern,
     AtomSpace tmp_as;
     Handle pattern_cpy = tmp_as.add_atom(pattern);
     Handle pattern_vardecl =
-	    tmp_as.add_atom(gen_sub_varlist(pattern, rule.get_forward_vardecl()));
+	    tmp_as.add_atom(gen_sub_varlist(pattern, rule.get_vardecl()));
     Handle source_cpy = tmp_as.add_atom(source);
 
     Handle bl =
