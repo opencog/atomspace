@@ -201,14 +201,16 @@ Install, Setup and Usage HOWTO
 There are many steps needed to install and use this. Sorry!
 
 07-05-2015: Updated instructions below to be slightly more instructive
-	    and up to date for PostgreSQL 9.3 and Ubuntu 14.04.
+	    and up-to-date for PostgreSQL 9.3 and Ubuntu 14.04.
 
 Compiling
 ---------
 Download and install UnixODBC devel packages. Run cmake; make.
 Do NOT use IODBC, it fails to support UTF-8.
 
-sudo apt-get install unixodbc-dev
+```
+  sudo apt-get install unixodbc-dev
+```
 
 Database Setup
 --------------
@@ -228,17 +230,21 @@ the missing features are kind-of complicated, and likely to be slow.
 Be sure to install the postgres server, the postgres client, and the
 odbc-postgresql device driver.
 
-sudo apt-get install postgresql-9.3
+```
+    sudo apt-get install postgresql-9.3
+```
 
 Device Driver Setup
 -------------------
-Configure the ODBC driver. After install, verify that /etc/odbcinst.ini
+Configure the ODBC driver. After install, verify that `/etc/odbcinst.ini`
 contains the stanza below (or something similar).  If it is missing,
 then edit this file (as root) and add the stanza.  Notice that it uses
 the Unicode drivers, and NOT the ANSI (ASCII) drivers.  Opencog uses
 unicode!
 
-sudo gedit /etc/odbcinst.ini &
+```
+    sudo vi /etc/odbcinst.ini &
+```
 
 ```
     [PostgreSQL Unicode]
@@ -272,8 +278,9 @@ mess with it, then add the below:
 Performance tweaks
 ------------------
 The Postgres default configuration can be/should be tweaked for
-performance.  Newer version of Postgress seem to be OK (??) but in
-some cases, performance will be a disaster if the database is not tuned.
+performance.  Newer version of Postgres seem to be OK (??) but in
+some cases, performance will be a disaster if the database is not
+tuned.
 
 Edit `postgresql.conf` (a typical location is
 `/etc/postgresql/9.3/main/postgresql.conf`) and make the changes below.
@@ -336,7 +343,7 @@ try doing this, replacing 'alex' with your username.
 ```
    $ sudo su - postgres
    $ psql template1
-   template1=# CREATE ROLE alex superuser;
+   template1=# CREATE ROLE alex WITH SUPERUSER;
    template1=# ALTER ROLE alex WITH LOGIN;
 
 ```
@@ -550,7 +557,7 @@ So here's a super-short recap:
  * Create a new database: e.g.  `$ createdb opencog_test`
  * Create the tables: `$ cat atom.sql | psql `
  * Create an entry in `~/.odbc.ini`, as explained above.  The entry
-   should be called `opencot_test`, and use `opencog_tester` as the user.
+   should be called `opencog_test`, and use `opencog_tester` as the user.
  * The file `lib/opencog-test.conf` already has the above as the default
    username and database names.  Stick to these.
 
@@ -573,7 +580,7 @@ Some example walkthroughs of some typical usage scenarios.
 
 Bulk Save and Restore
 ---------------------
-At last! bulk save of atoms that were previous created is done by
+At last! Bulk save of atoms that were previously created is done by
 getting to the opencog prompt (`telnet localhost 17001`) and issuing the
 commands:
 ```
