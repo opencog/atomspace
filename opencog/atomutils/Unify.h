@@ -34,6 +34,7 @@
 #include <opencog/atoms/base/atom_types.h>
 #include <opencog/atoms/base/Quotation.h>
 #include <opencog/atoms/core/VariableList.h>
+#include <opencog/atoms/pattern/BindLink.h>
 #include <opencog/atomutils/TypeUtils.h>
 
 // TODO: turn this into a class because there are way too many
@@ -80,10 +81,50 @@ typedef TypedSubstitutions::value_type TypedSubstitution;
  * and the term from which to select the variables as values in case
  * multiple choices are possible.
  *
- * TODO: support generating the associated type declartion.
+ * Remarks: lhs_vardecl and rhs_vardecl are passed by copy because
+ * they will be filled with free variables in case they are empty.
  */
 TypedSubstitutions typed_substitutions(const UnificationSolutionSet& sol,
-                                       const Handle& pre);
+                                       const Handle& pre,
+                                       const Handle& lhs=Handle::UNDEFINED,
+                                       const Handle& rhs=Handle::UNDEFINED,
+                                       Handle lhs_vardecl=Handle::UNDEFINED,
+                                       Handle rhs_vardecl=Handle::UNDEFINED);
+
+/**
+ * If the quotations are useless or harmful, which might be the
+ * case if they deprive a ScopeLink from hiding supposedly hidden
+ * variables, consume them.
+ *
+ * Specifically this code makes 2 assumptions
+ *
+ * 1. LocalQuotes in front root level And, Or or Not links on the
+ *    pattern body are not consumed because they are supposedly
+ *    used to avoid interpreting them as pattern matcher
+ *    connectors.
+ *
+ * 2. Quote/Unquote are used to wrap scope links so that their
+ *    variable declaration can pattern match grounded or partially
+ *    grounded scope links.
+ *
+ * No other use of quotation is assumed besides the 2 above.
+ */
+bool is_ill_quotation(BindLinkPtr bl);
+bool is_pm_connector(const Handle& h);
+bool is_pm_connector(Type t);
+bool has_bl_variable_in_local_scope(BindLinkPtr bl, const Handle& h);
+BindLinkPtr consume_ill_quotations(BindLinkPtr bl);
+Handle consume_ill_quotations(BindLinkPtr bl, Handle h,
+                              Quotation quotation=Quotation(),
+                              bool escape=false /* ignore the next
+                                                 * quotation
+                                                 * consumption */);
+
+/**
+ * Given a typed substitution, perform the substitution over a scope
+ * link (for now only BindLinks are supported).
+ */
+Handle substitute(BindLinkPtr bl, const TypedSubstitutions::value_type& ts);
 
 /**
  * This algorithm perform unification by recursively
@@ -327,6 +368,7 @@ bool inherit(const std::set<Type>& lhs, const std::set<Type>& rhs);
  * Generate a VariableList of the free variables of a given atom h.
  */
 VariableListPtr gen_varlist(const Handle& h);
+Handle gen_vardecl(const Handle& h);
 
 /**
  * Given an atom h and its variable declaration vardecl, turn the

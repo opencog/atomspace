@@ -242,16 +242,25 @@ Handle BIT::substitute_unified_variables(const Handle& fcs,
 	BindLinkPtr fcs_bl(BindLinkCast(fcs));
 	Handle leaf_vardecl = filter_vardecl(fcs_bl->get_vardecl(), leaf),
 		conclusion_vardecl = rule.get_forward_vardecl();
+	bc_logger().debug() << "BIT::substitute_unified_variables "
+	                    << "leaf = " << oc_to_string(leaf)
+	                    << "conclusion = " << oc_to_string(conclusion)
+	                    << "leaf_vardecl = " << oc_to_string(leaf_vardecl)
+	                    << "conclusion_vardecl = " << oc_to_string(conclusion_vardecl);
 	UnificationSolutionSet sol =
 		unify(leaf, conclusion, leaf_vardecl, conclusion_vardecl);
 
+	bc_logger().debug() << "BIT::substitute_unified_variables sol: "
+	                    << oc_to_string(sol);
+
 	OC_ASSERT(sol.satisfiable); // If the rule has been selected it
                                 // has to be satisfiable
-	TypedSubstitutions tss = typed_substitutions(sol, leaf);
+	TypedSubstitutions tss =
+		typed_substitutions(sol, leaf, leaf, conclusion,
+		                    fcs_bl->get_vardecl(), conclusion_vardecl);
 	OC_ASSERT(not tss.empty());
 	auto ts = *tss.begin();
-	HandleSeq values = fcs_bl->get_variables().make_values(ts.first);
-	return fcs_bl->alpha_conversion(values, ts.second);
+	return Handle(substitute(fcs_bl, ts));
 }
 
 Handle BIT::expand_fcs_pattern(const Handle& fcs_pattern, const Rule& rule)

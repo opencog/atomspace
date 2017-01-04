@@ -291,32 +291,6 @@ private:
 	// Given a typed substitution obtained from typed_substitutions
 	// unify function, generate a new partially substituted rule.
 	Rule substituted(const TypedSubstitutions::value_type& ts) const;
-
-	// If the quotations are useless or harmful, which might be the
-	// case if they deprive a ScopeLink from hiding supposedly hidden
-	// variables, then consume them.
-	//
-	// Specifically this code makes 2 assumptions
-	//
-	// 1. LocalQuotes in front root level And, Or or Not links on the
-	//    pattern body are not consumed because they are supposedly
-	//    used to avoid interpreting them as pattern matcher
-	//    connectors.
-	//
-	// 2. Quote/Unquote are used to wrap scope links so that their
-	//    variable declaration can pattern match grounded or partially
-	//    grounded scope links.
-	//
-	// No other of quotation is assumed besides the 2 above.
-	bool is_bad_quotation(BindLinkPtr bl) const;
-	bool is_pm_connector(const Handle& h) const;
-	bool is_pm_connector(Type t) const;
-	bool has_bl_variable_in_local_scope(const Handle& h) const;
-	void consume_bad_quotations();
-	Handle consume_bad_quotations(Handle h, Quotation quotation=Quotation(),
-	                              bool escape=false /* ignore the next
-	                                                 * quotation
-	                                                 * consumption */);
 };
 
 // For Gdb debugging, see

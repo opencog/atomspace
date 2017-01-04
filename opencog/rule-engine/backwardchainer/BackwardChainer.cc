@@ -72,7 +72,7 @@ void BackwardChainer::do_chain()
 
 void BackwardChainer::do_step()
 {
-	bc_logger().debug("Iteration %d", _iteration);
+	bc_logger().info("Iteration %d", _iteration);
 	_iteration++;
 
 	expand_bit();
