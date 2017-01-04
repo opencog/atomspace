@@ -262,8 +262,7 @@ ENDIF (HYPERTABLE_FOUND)
 # FIND_PACKAGE(LibMemCached)
 
 # Google Protobuf library
-# The protocol buffer compiler is a separately installable package, and
-# it is also needed for building embodiment PAI. So check for that, too.
+# The protocol buffer compiler is needed for ZMQ-based persistence.
 FIND_PACKAGE(Protobuf)
 IF (PROTOBUF_FOUND
 		AND PROTOBUF_LIBRARY
@@ -282,9 +281,9 @@ ELSE (PROTOBUF_FOUND
 	# If we are here, then we are missing either the libraries, or the
 	# compiler. React appropriately.
 	IF (PROTOBUF_PROTOC_EXECUTABLE)
-		SET(PROTOBUF_DIR_MESSAGE "Protobuf was not found; the new message decoding functions would not work.\n	To over-ride, make sure PROTOBUF_LIBRARIES and PROTOBUF_INCLUDE_DIRS are set.")
+		SET(PROTOBUF_DIR_MESSAGE "Protobuf libraries were not found; these are needed to link the ZMQ-based persistence backend.\n	To over-ride, make sure PROTOBUF_LIBRARIES and PROTOBUF_INCLUDE_DIRS are set.")
 	ELSE (PROTOBUF_PROTOC_EXECUTABLE)
-		SET(PROTOBUF_DIR_MESSAGE "Protobuf compiler was not found; embodiment PAI can't be built without it.\n	To over-ride, make sure PROTOBUF_PROTOC_EXECUTABLE is set.")
+		SET(PROTOBUF_DIR_MESSAGE "Protobuf compiler was not found; the ZMQ-based persistence backend can't be built without it.\n	To over-ride, make sure PROTOBUF_PROTOC_EXECUTABLE is set.")
 	ENDIF (PROTOBUF_PROTOC_EXECUTABLE)
 
 ENDIF (PROTOBUF_FOUND
@@ -294,7 +293,7 @@ ENDIF (PROTOBUF_FOUND
 
 MESSAGE(STATUS "${PROTOBUF_DIR_MESSAGE}")
 
-# Python needed for PLN !???
+# Python needed for ... I'm not sure what. Something.
 FIND_PACKAGE(PythonInterp)
 FIND_PACKAGE(PythonLibs 2.7)
 IF(PYTHONLIBS_FOUND)
