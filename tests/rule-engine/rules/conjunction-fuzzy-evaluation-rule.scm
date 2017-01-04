@@ -43,13 +43,13 @@
                     ;; We wrap the variables in Set because the order
                     ;; doesn't matter and that way alpha-conversion
                     ;; works better.
-                    (List (Set variables) (And variables)))))
+                    (List (And variables) (Set variables)))))
     (Bind
       vardecl
       pattern
       rewrite)))
 
-(define (conjunction-fuzzy-evaluation-formula S A)
+(define (conjunction-fuzzy-evaluation-formula A S)
   (let* ((andees (cog-outgoing-set S))
          (min-s-atom (min-element-by-key andees cog-stv-strength))
          (min-c-atom (min-element-by-key andees cog-stv-confidence))

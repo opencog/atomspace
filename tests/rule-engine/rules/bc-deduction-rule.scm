@@ -25,7 +25,7 @@
          (pattern (And AB BC precon1 precon2 precon3))
          (rewrite (ExecutionOutput
                      (GroundedSchema "scm: bc-deduction-formula")
-                     (List AB BC AC))))
+                     (List AC AB BC))))
     (Bind
        vardecl
        pattern
@@ -42,7 +42,7 @@
 (define (true-enough a)
   (bool->tv (true-enough-bool a)))
 
-(define (bc-deduction-formula AB BC AC)
+(define (bc-deduction-formula AC AB BC)
   ;; We keep this precondition here again just in case
   (if (and (true-enough-bool AB) (true-enough-bool BC))
       (cog-set-tv! AC (stv 1 1))))

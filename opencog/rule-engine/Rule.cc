@@ -219,7 +219,7 @@ bool Rule::is_meta() const
  *
  * @return HandleSeq of members of the implicant
  */
-HandleSeq Rule::get_premises() const
+HandleSeq Rule::get_clauses() const
 {
 	// if the rule's handle has not been set yet
 	if (!_rule)
@@ -435,18 +435,18 @@ Handle Rule::get_conclusion_pattern(const Handle& h) const
 {
 	Type t = h->getType();
 	if (EXECUTION_OUTPUT_LINK == t)
-		return get_execution_output_last_argument(h);
+		return get_execution_output_first_argument(h);
 	else
 		return h;
 }
 
-Handle Rule::get_execution_output_last_argument(const Handle& h) const
+Handle Rule::get_execution_output_first_argument(const Handle& h) const
 {
 	OC_ASSERT(h->getType() == EXECUTION_OUTPUT_LINK);
 	Handle args = h->getOutgoingAtom(1);
 	if (args->getType() == LIST_LINK) {
 		OC_ASSERT(args->getArity() > 0);
-		return args->getOutgoingAtom(args->getArity()-1);
+		return args->getOutgoingAtom(0);
 	} else
 		return args;
 }

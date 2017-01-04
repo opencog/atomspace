@@ -70,9 +70,9 @@
         (GroundedSchema "scm: conditional-full-instantiation-formula")
         (Unquote
           (ListLink
+            Q
             implication
-            P
-            Q)))))))
+            P)))))))
 
 (define conditional-full-instantiation-meta-rule
   (BindLink
@@ -102,7 +102,7 @@
 
 ;; Set (stv 1 1) on Q is Impl and P strength are both above 0.5 and
 ;; their confidence is non null.
-(define (conditional-full-instantiation-formula Impl P Q)
+(define (conditional-full-instantiation-formula Q Impl P)
   ;; Evaluate Q
   (if (and (true-enough-bool Impl) (true-enough-bool P))
       (cog-set-tv! Q (stv 1 1))))

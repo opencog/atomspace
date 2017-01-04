@@ -146,7 +146,7 @@ void RuleUTest::test_unify_target_deduction_1()
 		schema = an(GROUNDED_SCHEMA_NODE, "scm: bc-deduction-formula"),
 		rewrite = al(EXECUTION_OUTPUT_LINK,
 		             schema,
-		             al(LIST_LINK, XV, VA, XA)),
+		             al(LIST_LINK, XA, XV, VA)),
 		expected = al(BIND_LINK, vardecl, body, rewrite);
 
 	std::cout << "rule = " << oc_to_string(rule);
@@ -183,7 +183,7 @@ void RuleUTest::test_unify_target_deduction_2()
 		schema = an(GROUNDED_SCHEMA_NODE, "scm: bc-deduction-formula"),
 		rewrite = al(EXECUTION_OUTPUT_LINK,
 		             schema,
-		             al(LIST_LINK, XV, VA, XA)),
+		             al(LIST_LINK, XA, XV, VA)),
 		expected = al(BIND_LINK, vardecl, body, rewrite);
 
 	std::cout << "rule = " << oc_to_string(rule);
@@ -313,9 +313,6 @@ void RuleUTest::test_unify_target_deduction_3()
 		             "            (ListLink"
 		             "              (VariableNode \"$X\")"
 		             "              (ConceptNode \"treatment-1\"))))"
-		             "        (VariableNode \"$B-6c74a409\"))"
-		             "      (ImplicationLink"
-		             "        (VariableNode \"$B-6c74a409\")"
 		             "        (QuoteLink"
 		             "          (LambdaLink"
 		             "            (UnquoteLink"
@@ -332,6 +329,9 @@ void RuleUTest::test_unify_target_deduction_3()
 		             "            (ListLink"
 		             "              (VariableNode \"$X\")"
 		             "              (ConceptNode \"treatment-1\"))))"
+		             "        (VariableNode \"$B-6c74a409\"))"
+		             "      (ImplicationLink"
+		             "        (VariableNode \"$B-6c74a409\")"
 		             "        (QuoteLink"
 		             "          (LambdaLink"
 		             "            (UnquoteLink"
@@ -366,7 +366,7 @@ void RuleUTest::test_unify_target_implication_scope_to_implication_1()
 		            "scm: implication-scope-to-implication-formula"),
 		rewrite = al(EXECUTION_OUTPUT_LINK,
 		             schema,
-		             al(LIST_LINK, body, target)),
+		             al(LIST_LINK, target, body)),
 		expected = al(BIND_LINK, body, rewrite);
 
 	std::cout << "rule = " << oc_to_string(rule);
@@ -396,7 +396,7 @@ void RuleUTest::test_unify_target_implication_scope_to_implication_2()
 		            "scm: implication-scope-to-implication-formula"),
 		rewrite = al(EXECUTION_OUTPUT_LINK,
 		             schema,
-		             al(LIST_LINK, body, target)),
+		             al(LIST_LINK, target, body)),
 		expected = al(BIND_LINK, P_body_var, body, rewrite);
 
 	std::cout << "implication_scope_to_implication_rule = " << oc_to_string(implication_scope_to_implication_rule);
@@ -491,17 +491,17 @@ void RuleUTest::test_unify_target_implication_scope_to_implication_4()
 		             "  (ExecutionOutputLink"
 		             "    (GroundedSchemaNode \"scm: implication-scope-to-implication-formula\")"
 		             "    (ListLink"
-		             "       (Quote (ImplicationScopeLink"
-		             "         (Unquote (VariableNode \"$TyVs-6c74a409\"))"
-		             "         (Unquote (VariableNode \"$P-6266d6f2\"))"
-		             "         (Unquote (VariableNode \"$Q-7005b724\"))))"
 		             "      (ImplicationLink"
 		             "        (Quote (LambdaLink"
 		             "          (Unquote (VariableNode \"$TyVs-6c74a409\"))"
 		             "          (Unquote (VariableNode \"$P-6266d6f2\"))))"
 		             "        (Quote (LambdaLink"
 		             "          (Unquote (VariableNode \"$TyVs-6c74a409\"))"
-		             "          (Unquote (VariableNode \"$Q-7005b724\"))))))))");
+		             "          (Unquote (VariableNode \"$Q-7005b724\")))))"
+		             "      (Quote (ImplicationScopeLink"
+		             "        (Unquote (VariableNode \"$TyVs-6c74a409\"))"
+		             "        (Unquote (VariableNode \"$P-6266d6f2\"))"
+		             "        (Unquote (VariableNode \"$Q-7005b724\")))))))");
 
 	std::cout << "implication_scope_to_implication_rule = " << oc_to_string(implication_scope_to_implication_rule);
 	std::cout << "target = " << oc_to_string(target);

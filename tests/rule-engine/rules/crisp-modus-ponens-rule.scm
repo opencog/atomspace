@@ -23,7 +23,7 @@
          (pattern (And AB precon1 precon2))
          (rewrite (ExecutionOutput
                      (GroundedSchema "scm: crisp-modus-ponens-formula")
-                     (List A AB B))))
+                     (List B A AB))))
     (BindLink
         vardecl
         pattern
@@ -43,7 +43,7 @@
 (define (true-enough a)
   (bool->tv (true-enough-bool a)))
 
-(define (crisp-modus-ponens-formula A AB B)
+(define (crisp-modus-ponens-formula B A AB)
   (if (and (true-enough-bool A) (true-enough-bool AB))
       (cog-set-tv! B (stv 1 1))))
 

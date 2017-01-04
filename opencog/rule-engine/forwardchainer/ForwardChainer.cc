@@ -269,7 +269,7 @@ const Rule* ForwardChainer::select_rule(const Handle& hsource)
                          temp->get_name().c_str());
 
         bool unified = false;
-        for (Handle premise_pat : temp->get_premises()) {
+        for (Handle premise_pat : temp->get_clauses()) {
             if (unify(hsource, premise_pat, *temp)) {
                 rule = temp;
                 unified = true;
@@ -515,7 +515,7 @@ UnorderedHandleSet ForwardChainer::derive_rules(const Handle& source,
         derived_rules.insert(result.begin(), result.end());
     };
 
-    for (const Handle& premise_pat : rule.get_premises())
+    for (const Handle& premise_pat : rule.get_clauses())
         add_result(derive_rules(source, premise_pat, rule));
 
     return derived_rules;

@@ -177,12 +177,12 @@ OrderedHandleSet BIT::get_leaves(const Handle& h) const
 		Handle rewrite = hsc->get_implicand();
 		return get_leaves(rewrite);
 	} else if (t == EXECUTION_OUTPUT_LINK) {
-		// All arguments except the last one are potential target leaves
+		// All arguments except the first one are potential target leaves
 		Handle args = h->getOutgoingAtom(1);
 		OrderedHandleSet leaves;
 		if (args->getType() == LIST_LINK) {
 			OC_ASSERT(args->getArity() > 0);
-			for (Arity i = 0; i+1 < args->getArity(); i++) {
+			for (Arity i = 1; i < args->getArity(); i++) {
 				OrderedHandleSet aleaves = get_leaves(args->getOutgoingAtom(i));
 				leaves.insert(aleaves.begin(), aleaves.end());
 			}
@@ -267,7 +267,7 @@ Handle BIT::substitute_unified_variables(const Handle& fcs,
 
 Handle BIT::expand_fcs_pattern(const Handle& fcs_pattern, const Rule& rule)
 {
-	HandleSeq clauses = rule.get_premises();
+	HandleSeq clauses = rule.get_clauses();
 	HandlePairSeq conclusions = rule.get_conclusions();
 	OC_ASSERT(conclusions.size() == 1);
 	Handle conclusion = conclusions[0].second;

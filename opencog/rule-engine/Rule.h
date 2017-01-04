@@ -148,9 +148,12 @@ public:
 	bool is_meta() const;       // does that rule produces a rule
 
 	/**
-	 * Return the premises of the rule.
+	 * Return the pattern matcher clauses of the rule. This may not
+	 * necessarily represent the premises of the rule which may be the
+	 * last arguments of the rewrite term, but rather the pattern
+	 * matcher clauses required to trigger that rule.
 	 */
-	HandleSeq get_premises() const;
+	HandleSeq get_clauses() const;
 
 	/**
 	 * Return the conclusion of the rule. Used for applying a forward
@@ -227,12 +230,12 @@ private:
 	// Return the conclusion patterns of the rule. There are several
 	// of them because the conclusions can be wrapped in the
 	// ListLink. In case each conclusion is an ExecutionOutputLink
-	// then return the last argument of that ExecutionOutputLink.
+	// then return the first argument of that ExecutionOutputLink.
 	HandleSeq get_conclusion_patterns() const;
 	Handle get_conclusion_pattern(const Handle& h) const;
 
-	// Given an ExecutionOutputLink return its last argument
-	Handle get_execution_output_last_argument(const Handle& h) const;
+	// Given an ExecutionOutputLink return its first argument
+	Handle get_execution_output_first_argument(const Handle& h) const;
 
 	// Given a typed substitution obtained from typed_substitutions
 	// unify function, generate a new partially substituted rule.
