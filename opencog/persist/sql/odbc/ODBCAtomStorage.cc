@@ -596,10 +596,7 @@ int ODBCAtomStorage::storeTruthValue(AtomPtr atom, Handle h)
 
     const SimpleTruthValue *stv = dynamic_cast<const SimpleTruthValue *>(&tv);
     if (NULL == stv)
-    {
-        fprintf(stderr, "Error: non-simple truth values are not handled\n");
-        return 0;
-    }
+        throw IOException(TRACE_INFO, "Non-simple truth values are not handled\n");
 
     int tvid = TVID(tv);
 
@@ -882,7 +879,7 @@ void ODBCAtomStorage::do_store_single_atom(AtomPtr atom, int aheight)
             // and make sure that is unique.
             if (2700 < qname.size())
             {
-                throw RuntimeException(TRACE_INFO,
+                throw IOException(TRACE_INFO,
                     "Error: do_store_single_atom: Maxiumum Node name size is 2700.\n");
             }
             STMT("name", qname);
@@ -912,7 +909,7 @@ void ODBCAtomStorage::do_store_single_atom(AtomPtr atom, int aheight)
                 // the hash.
                 if (330 < arity)
                 {
-                    throw RuntimeException(TRACE_INFO,
+                    throw IOException(TRACE_INFO,
                         "Error: do_store_single_atom: Maxiumum Link size is 330.\n");
                 }
 
@@ -953,7 +950,7 @@ void ODBCAtomStorage::do_store_single_atom(AtomPtr atom, int aheight)
             break;
         }
         default:
-            throw RuntimeException(TRACE_INFO,
+            throw IOException(TRACE_INFO,
                 "Error: store_single: Unknown truth value type\n");
     }
 
@@ -1073,8 +1070,7 @@ void ODBCAtomStorage::setup_typemap(void)
                 if (TYPEMAP_SZ <= sqid)
                 {
                     put_conn(db_conn);
-                    fprintf(stderr, "Fatal Error: type table overflow!\n");
-                    abort();
+                    OC_ASSERT("Fatal Error: type table overflow!\n");
                 }
             }
 
@@ -1322,17 +1318,18 @@ HandleSeq ODBCAtomStorage::getIncomingSet(const Handle& h)
 Handle ODBCAtomStorage::getNode(Type t, const char * str)
 {
     setup_typemap();
-    char buff[40*BUFSZ];
+    char buff[4*BUFSZ];
 
     // Use postgres $-quoting to make unicode strings easier to deal with.
     int nc = snprintf(buff, 4*BUFSZ, "SELECT * FROM Atoms WHERE "
         "type = %hu AND name = $ocp$%s$ocp$ ;", storing_typemap[t], str);
 
-    if (40*BUFSZ-1 <= nc)
+    if (4*BUFSZ-1 <= nc)
     {
-        fprintf(stderr, "Error: ODBCAtomStorage::getNode: buffer overflow!\n");
-        buff[40*BUFSZ-1] = 0x0;
-        fprintf(stderr, "\tnc=%d buffer=>>%s<<\n", nc, buff);
+        buff[4*BUFSZ-1] = 0x0;
+        throw IOException(TRACE_INFO,
+            "ODBCAtomStorage::getNode: buffer overflow!\n"
+            "\tnc=%d buffer=>>%s<<\n", nc, buff);
         return Handle();
     }
 
@@ -1385,7 +1382,7 @@ ODBCAtomStorage::PseudoPtr ODBCAtomStorage::makeAtom(Response &rp, UUID uuid)
 
     if (NOTYPE == realtype)
     {
-        throw RuntimeException(TRACE_INFO,
+        throw IOException(TRACE_INFO,
             "Fatal Error: OpenCog does not have a type called %s\n",
             db_typename[rp.itype]);
         return NULL;
@@ -1449,14 +1446,14 @@ ODBCAtomStorage::PseudoPtr ODBCAtomStorage::makeAtom(Response &rp, UUID uuid)
             break;
         }
         default:
-            throw RuntimeException(TRACE_INFO,
-                "Error: makeAtom: Unknown truth value type\n");
+            throw IOException(TRACE_INFO,
+                "makeAtom: Unknown truth value type\n");
     }
 
     load_count ++;
     if (load_count%10000 == 0)
     {
-        fprintf(stderr, "\tLoaded %lu atoms.\n", (unsigned long) load_count);
+        printf("\tLoaded %lu atoms.\n", (unsigned long) load_count);
     }
 
     add_id_to_cache(uuid);
@@ -1469,10 +1466,10 @@ void ODBCAtomStorage::load(AtomTable &table)
 {
     unsigned long max_nrec = getMaxObservedUUID();
     _tlbuf.reserve_upto(max_nrec);
-    fprintf(stderr, "Max observed UUID is %lu\n", max_nrec);
+    printf("Max observed UUID is %lu\n", max_nrec);
     load_count = 0;
     max_height = getMaxObservedHeight();
-    fprintf(stderr, "Max Height is %d\n", max_height);
+    printf("Max Height is %d\n", max_height);
 
     setup_typemap();
 
@@ -1515,10 +1512,10 @@ void ODBCAtomStorage::load(AtomTable &table)
             rp.release();
         }
 #endif
-        fprintf(stderr, "Loaded %lu atoms at height %d\n", load_count - cur, hei);
+        printf("Loaded %lu atoms at height %d\n", load_count - cur, hei);
     }
     put_conn(db_conn);
-    fprintf(stderr, "Finished loading %lu atoms in total\n",
+    printf("Finished loading %lu atoms in total\n",
         (unsigned long) load_count);
 
     // synchrnonize!
@@ -1600,7 +1597,7 @@ bool ODBCAtomStorage::store_cb(AtomPtr atom)
     store_count ++;
     if (store_count%1000 == 0)
     {
-        fprintf(stderr, "\tStored %lu atoms.\n", (unsigned long) store_count);
+        printf("\tStored %lu atoms.\n", (unsigned long) store_count);
     }
     return false;
 }
@@ -1617,7 +1614,7 @@ void ODBCAtomStorage::store(const AtomTable &table)
 
     get_ids();
     UUID max_uuid = _tlbuf.getMaxUUID();
-    fprintf(stderr, "Max UUID is %lu\n", max_uuid);
+    printf("Max UUID is %lu\n", max_uuid);
 
     setup_typemap();
 
@@ -1645,7 +1642,7 @@ void ODBCAtomStorage::store(const AtomTable &table)
     put_conn(db_conn);
 
     setMaxHeight(getMaxObservedHeight());
-    fprintf(stderr, "\tFinished storing %lu atoms total.\n",
+    printf("\tFinished storing %lu atoms total.\n",
         (unsigned long) store_count);
 }
 
@@ -1808,7 +1805,7 @@ int ODBCAtomStorage::getMaxObservedHeight(void)
 void ODBCAtomStorage::reserve(void)
 {
     UUID max_observed_id = getMaxObservedUUID();
-    fprintf(stderr, "Reserving UUID up to %lu\n", max_observed_id);
+    printf("Reserving UUID up to %lu\n", max_observed_id);
     _tlbuf.reserve_upto(max_observed_id);
 }
 
