@@ -468,8 +468,7 @@ IMPORTANT: MAKE SURE THERE ARE NO SPACES AT THE START OF EVERY LINE!
    [mycogdata]
    Description       = My Favorite Database
    Driver            = PostgreSQL Unicode
-   Trace             = No
-   TraceFile         =
+   CommLog           = No
    Database          = mycogdata
    Servername        = localhost
    Port              = 5432
