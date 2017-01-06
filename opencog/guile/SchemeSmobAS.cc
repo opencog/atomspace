@@ -72,8 +72,6 @@ void SchemeSmob::release_as (AtomSpace *as)
 		AtomSpace* env = as->get_environ();
 		deleteable_as.erase(has);
 		lck.unlock();
-		scm_gc_unregister_collectable_memory (as,
-	                  sizeof(*as), "opencog atomspace");
 		delete as;
 
 		// (Recursively) decrement the use count on the parent.
@@ -93,8 +91,7 @@ SCM SchemeSmob::ss_new_as (SCM s)
 
 	AtomSpace *as = new AtomSpace(parent);
 
-	scm_gc_register_collectable_memory (as,
-	                 sizeof(*as), "opencog atomspace");
+	scm_gc_register_allocation(sizeof(*as));
 
 	// Only the internally-created atomspaces are trackable.
 	std::lock_guard<std::mutex> lck(as_mtx);

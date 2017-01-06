@@ -63,8 +63,7 @@ std::string SchemeSmob::av_to_string(const AttentionValue *av)
  */
 SCM SchemeSmob::take_av (AttentionValue *av)
 {
-	scm_gc_register_collectable_memory (av,
-	                 sizeof(*av), "opencog av");
+	scm_gc_register_allocation(sizeof(*av));
 
 	SCM smob;
 	SCM_NEWSMOB (smob, cog_misc_tag, av);

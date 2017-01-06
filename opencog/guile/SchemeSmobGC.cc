@@ -68,8 +68,6 @@ size_t SchemeSmob::free_misc(SCM node)
 		case COG_AV:
 			AttentionValue *av;
 			av = (AttentionValue *) SCM_SMOB_DATA(node);
-			scm_gc_unregister_collectable_memory (av,
-			                  sizeof(*av), "opencog av");
 			delete av;
 			scm_remember_upto_here_1(node);
 			return 0;
@@ -77,8 +75,6 @@ size_t SchemeSmob::free_misc(SCM node)
 		case COG_HANDLE:
 			Handle* hp;
 			hp = (Handle*) SCM_SMOB_DATA(node);
-			scm_gc_unregister_collectable_memory (hp,
-			                  sizeof(*hp), "opencog handle");
 			delete hp;
 			scm_remember_upto_here_1(node);
 			return 0;
@@ -86,8 +82,6 @@ size_t SchemeSmob::free_misc(SCM node)
 		case COG_TV:
 			TruthValue *tv;
 			tv = (TruthValue *) SCM_SMOB_DATA(node);
-			scm_gc_unregister_collectable_memory (tv,
-			                  sizeof(*tv), "opencog tv");
 			delete tv;
 			scm_remember_upto_here_1(node);
 			return 0;
@@ -95,8 +89,6 @@ size_t SchemeSmob::free_misc(SCM node)
 		case COG_EXTEND:
 			PrimitiveEnviron *pe;
 			pe = (PrimitiveEnviron *) SCM_SMOB_DATA(node);
-			scm_gc_unregister_collectable_memory (pe,
-			                  pe->get_size(), "opencog primitive environ");
 			delete pe;
 			scm_remember_upto_here_1(node);
 			return 0;

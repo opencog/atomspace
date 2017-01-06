@@ -228,9 +228,7 @@ SCM SchemeSmob::tv_to_scm (TruthValuePtr tvp)
  */
 SCM SchemeSmob::take_tv (TruthValue *tv)
 {
-	scm_gc_register_collectable_memory (tv,
-	                 sizeof(*tv), "opencog tv");
-
+	scm_gc_register_allocation (sizeof(*tv));
 	SCM smob;
 	SCM_NEWSMOB (smob, cog_misc_tag, tv);
 	SCM_SET_SMOB_FLAGS(smob, COG_TV);
@@ -312,7 +310,7 @@ SCM SchemeSmob::ss_tv_p (SCM s)
 		{
 			case COG_TV:
 			{
-				// It si very highly unlikely that we will ever get a
+				// It is very highly unlikely that we will ever get a
 				// NullTruthValue, here -- it really should never happen.
 				// But we are going to check anyway, as otherwise... bad
 				// things have happened before.

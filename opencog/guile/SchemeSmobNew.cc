@@ -135,8 +135,7 @@ SCM SchemeSmob::protom_to_scm (const ProtoAtomPtr& pa)
 {
 	// Use new so that the smart pointer increments!
 	ProtoAtomPtr* pap = new ProtoAtomPtr(pa);
-	scm_gc_register_collectable_memory (pap,
-					sizeof(pa), "opencog protoatom");
+	scm_gc_register_allocation(sizeof(pa));
 
 	SCM smob;
 	SCM_NEWSMOB (smob, cog_misc_tag, pap);
