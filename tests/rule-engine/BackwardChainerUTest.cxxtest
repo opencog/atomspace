@@ -34,7 +34,7 @@ private:
 public:
 	BackwardChainerUTest() : _eval(&_as)
 	{
-		logger().set_level(Logger::DEBUG);
+		logger().set_level(Logger::INFO);
 		logger().set_timestamp_flag(false);
 		// logger().set_sync_flag(true);
 		// logger().set_print_to_stdout_flag(true);
@@ -342,7 +342,7 @@ void BackwardChainerUTest::test_conditional_instantiation_2()
 		vardecl = al(TYPED_VARIABLE_LINK, what, concept);
 
 	BackwardChainer bc(_as, top_rbs, target, vardecl);
-	bc.get_config().set_maximum_iterations(20);
+	bc.get_config().set_maximum_iterations(40);
 	bc.do_chain();
 
 	Handle results = bc.get_results(),
@@ -375,7 +375,7 @@ void BackwardChainerUTest::test_conditional_instantiation_tv_query()
 	                 "   (ConceptNode \"green\"))");
 
 	BackwardChainer bc(_as, top_rbs, target);
-	bc.get_config().set_maximum_iterations(20);
+	bc.get_config().set_maximum_iterations(40);
 	bc.do_chain();
 
 	TS_ASSERT_DELTA(target->getTruthValue()->getMean(), 1, .1);
@@ -449,7 +449,7 @@ void BackwardChainerUTest::test_criminal()
 	Handle soln = _eval.eval_h("(ConceptNode \"West\")");
 
 	BackwardChainer bc(_as, top_rbs, target, vardecl);
-	bc.get_config().set_maximum_iterations(1000);
+	bc.get_config().set_maximum_iterations(5000);
 	bc.do_chain();
 
 	Handle results = bc.get_results(),
@@ -462,10 +462,10 @@ void BackwardChainerUTest::test_criminal()
 	logger().debug() << "expected = " << oc_to_string(expected);
 
 	// Disable that till fixed
-	// TS_ASSERT_EQUALS(results, expected);
-	// TS_ASSERT_LESS_THAN(0.9, expected_target->getTruthValue()->getMean());
-	// TS_ASSERT_LESS_THAN(0.9, expected_target->getTruthValue()->getConfidence());
-	TS_ASSERT(true);
+	TS_ASSERT_EQUALS(results, expected);
+	TS_ASSERT_LESS_THAN(0.9, expected_target->getTruthValue()->getMean());
+	TS_ASSERT_LESS_THAN(0.9, expected_target->getTruthValue()->getConfidence());
+	// TS_ASSERT(true);
 
 	logger().debug("END TEST: %s", __FUNCTION__);
 }
