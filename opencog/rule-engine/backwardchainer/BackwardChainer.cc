@@ -23,6 +23,8 @@
  * 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
  */
 
+#include <boost/range/algorithm/lower_bound.hpp>
+
 #include <opencog/util/random.h>
 
 #include <opencog/atomutils/FindUtils.h>
@@ -48,8 +50,9 @@ BackwardChainer::BackwardChainer(AtomSpace& as, const Handle& rbs,
                                                           // support
                                                           // focus_set
                                  const BITFitness& fitness)
-	: _as(as), _configReader(as, rbs), _bit(as, target, vardecl, fitness),
-	  _iteration(0), _last_expansion_fcs(Handle::UNDEFINED),
+	: _max_fcs_size(950), _as(as), _configReader(as, rbs),
+	  _bit(as, target, vardecl, fitness),
+	  _iteration(0), _last_expansion_andbit(nullptr),
 	  _rules(_configReader.get_rules()) {}
 
 UREConfigReader& BackwardChainer::get_config()
@@ -98,34 +101,35 @@ void BackwardChainer::expand_bit()
 	_rules.expand_meta_rules(_as);
 
 	// Reset _last_expansion_fcs
-	_last_expansion_fcs = Handle::UNDEFINED;
+	_last_expansion_andbit = nullptr;
 
 	if (_bit.empty()) {
-		_last_expansion_fcs = _bit.init();
+		_last_expansion_andbit = _bit.init();
 	} else {
 		// Select an FCS (i.e. and-BIT) and expand it
-		Handle fcs = select_expansion_fcs();
-		LAZY_BC_LOG_DEBUG << "Selected FCS for expansion:" << std::endl
-		                  << fcs;
-		expand_bit(fcs);
+		AndBIT* andbit = select_expansion_andbit();
+		LAZY_BC_LOG_DEBUG << "Selected and-BIT for expansion:" << std::endl
+		                  << andbit->to_string();
+		expand_bit(*andbit);
 	}
 }
 
-void BackwardChainer::expand_bit(const Handle& fcs)
+void BackwardChainer::expand_bit(AndBIT& andbit)
 {
 	// Select leaf
-	BITNode& bitleaf = _bit.select_bitleaf(fcs);
+	BITNode& bitleaf = andbit.select_leaf();
 	LAZY_BC_LOG_DEBUG << "Selected BIT-node for expansion:" << std::endl
 	                  << bitleaf.to_string();
 
 	// Build the leaf vardecl from fcs
-	Handle vardecl = fcs.is_defined() ?
-		filter_vardecl(BindLinkCast(fcs)->get_vardecl(), bitleaf.body)
+	Handle vardecl = andbit.fcs.is_defined() ?
+		filter_vardecl(BindLinkCast(andbit.fcs)->get_vardecl(), bitleaf.body)
 		: Handle::UNDEFINED;
 
 	// Select a valid rule
 	Rule rule = select_rule(bitleaf, vardecl);
 	// Add the rule in the _bit.bit_as to make comparing atoms easier
+	// as well as logging more consistent.
 	rule.add(_bit.bit_as);
 	if (not rule.is_valid()) {
 		bc_logger().debug("No valid rule for the selected BIT-node, abort expansion");
@@ -134,8 +138,7 @@ void BackwardChainer::expand_bit(const Handle& fcs)
 	LAZY_BC_LOG_DEBUG << "Selected rule for BIT expansion:" << std::endl
 	                  << rule.to_string();
 
-	// Expand the back-inference tree from this target
-	_last_expansion_fcs = _bit.expand(fcs, bitleaf, rule);
+	_last_expansion_andbit = _bit.expand(andbit, bitleaf, rule);
 }
 
 void BackwardChainer::fulfill_bit()
@@ -146,14 +149,15 @@ void BackwardChainer::fulfill_bit()
 	}
 
 	// Select an and-BIT for fulfillment
-	Handle fcs = select_fulfillment_fcs();
-	if (fcs == Handle::UNDEFINED) {
-		bc_logger().debug() << "Cannot fulfill an empty FCS. Abort BIT fulfillment";
+	const AndBIT* andbit = select_fulfillment_andbit();
+	if (andbit == nullptr) {
+		bc_logger().debug() << "Cannot fulfill an empty and-BIT. "
+		                    << "Abort BIT fulfillment";
 		return;
 	}
-	LAZY_BC_LOG_DEBUG << "Selected FCS for fulfillment:" << std::endl
-	                  << fcs;
-	fulfill_fcs(fcs);
+	LAZY_BC_LOG_DEBUG << "Selected and-BIT for fulfillment:" << std::endl
+	                  << oc_to_string(andbit->fcs);
+	fulfill_fcs(andbit->fcs);
 }
 
 void BackwardChainer::fulfill_fcs(const Handle& fcs)
@@ -164,38 +168,25 @@ void BackwardChainer::fulfill_fcs(const Handle& fcs)
 	_results.insert(results.begin(), results.end());
 }
 
-Handle BackwardChainer::select_expansion_fcs() const
+AndBIT* BackwardChainer::select_expansion_andbit()
 {
-	return _bit.select_fcs();
+	return &rand_element(_bit.andbits);
 }
 
-Handle BackwardChainer::select_fulfillment_fcs() const
+const AndBIT* BackwardChainer::select_fulfillment_andbit() const
 {
-	// Select the lastly expanded and-BIT
-	if (_last_expansion_fcs.is_defined())
-		return _last_expansion_fcs;
-
-	// If the last expansion has failed then don't waste time retry to
-	// fulfill an old and-BIT
-	return Handle::UNDEFINED;
+	return _last_expansion_andbit;
 }
 
 void BackwardChainer::reduce_bit()
 {
-	OrderedHandleSet& fcss = _bit.get_fcss();
-	size_t fcss_size = fcss.size();
-
-	// Remove and-BITs above a certain size. Hack before we code a
-	// proper complexity penalty to avoid exploring overly complex
-	// and-BITs.
-	for (auto it = fcss.begin(); it != fcss.end();) {
-		if ((*it)->size() > _max_fcs_size)
-			it = fcss.erase(it);
-		else
-			++it;
-	}
-
-	if (size_t removed_andbits = fcss_size - fcss.size()) {
+	// Remove and-BITs above a certain size.
+	auto less_complex_than = [&](const AndBIT& andbit, size_t max_size) {
+		return andbit.fcs->size() < max_size; };
+	auto it = boost::lower_bound(_bit.andbits, _max_fcs_size, less_complex_than);
+	size_t previous_size = _bit.andbits.size();
+	_bit.andbits.erase(it, _bit.andbits.end());
+	if (size_t removed_andbits = previous_size - _bit.andbits.size()) {
 		LAZY_BC_LOG_DEBUG << "Removed " << removed_andbits
 		                  << " overly complex and-BITs from the BIT";
 	}

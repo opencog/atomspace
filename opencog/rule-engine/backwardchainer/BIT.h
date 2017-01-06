@@ -1,10 +1,8 @@
 /*
  * BIT.h
  *
- * Authors: William Ma <https://github.com/williampma>
- *          Nil Geisweiller
- *
- * Copyright (C) 2015 OpenCog Foundation
+ * Copyright (C) 2016-2017 OpenCog Foundation
+ * Author: Nil Geisweiller
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU Affero General Public License v3 as
@@ -25,6 +23,7 @@
 #ifndef _OPENCOG_BIT_H
 #define _OPENCOG_BIT_H
 
+#include <boost/operators.hpp>
 #include <opencog/rule-engine/Rule.h>
 #include <opencog/atoms/base/Handle.h>
 
@@ -44,7 +43,7 @@ class BITFitness
  * A BIT (Back Inference Tree) node, and how it relates to its
  * children. A back-inference tree is an and-or-tree, where there are
  * 2 types of children, or-children and and-children. The or-children
- * are represented by Target::rules, because multiple rules or rule
+ * are represented by BITNode::rules, because multiple rules or rule
  * variations can infer the same target. Then within each rule or rule
  * variation, the rule premises are and-children because in order to
  * apply a certain rule all premises must be fulfilled.
@@ -55,7 +54,7 @@ public:
 	BITNode(const Handle& body=Handle::UNDEFINED,
 	        const BITFitness& fitness=BITFitness());
 
-	// BITNode handle
+	// BITNode handle (TODO: maybe this is not necessary)
 	Handle body;
 
 	// BITNode fitness
@@ -69,104 +68,56 @@ public:
 };
 
 /**
- * Mapping from Handle to BITNodePtr in order to quickly access the
- * BITNode of a certain body. This is useful because the premises of a
- * rule are returned in terms of Handle, not BITNode.
+ * And-BIT
  */
-typedef std::unordered_map<Handle, BITNode> HandleBITNodeMap;
-
-/**
- * Back Inference Tree. A graph of BIT-Nodes and a collection of
- * and-BITs (as Forward Chaining Strategies, FCS for short), with
- * methods to build and use it.
- */
-class BIT
+class AndBIT : public boost::less_than_comparable<AndBIT>,
+               public boost::equality_comparable<AndBIT>
 {
 public:
+	// FCS associated to the and-BIT
+	Handle fcs;
 
-	// Constructors
-
-	BIT(AtomSpace& as, const Handle& target, const Handle& vardecl,
-	    const BITFitness& fitness=BITFitness());
-
-
-	// Properties
-
-	bool empty() const;
-
-	// Modifiers
-
-	// Initialize the BIT and return the initial FCS
-	Handle init();
+	// Mapping from the FCS leaves to BITNodes
+	typedef std::unordered_map<Handle, BITNode> HandleBITNodeMap;
+	HandleBITNodeMap leaf2bitnode;
 
 	/**
-	 * Expand the BIT given a FCS (i.e. and-BIT) as parent, a BITNode
-	 * as leaf of that and-BIT and an inference rule.
+	 * @brief Initialize an and-BIT with a certain target, vardecl and
+	 * fitness and add it in as.
+	 */
+	AndBIT();
+	AndBIT(AtomSpace& as, const Handle& target, const Handle& vardecl,
+	       const BITFitness& fitness=BITFitness());
+
+	/**
+	 * @brief Expand the and-BIT given a target leaf and rule.
 	 *
-	 * Return the FCS created from that expansion, or
-	 * Handle::UNDEFINED if the expansion has failed.
+	 * @param leaf from which to expand the and-BIT.
+	 * @param rule with which to expand the and-BIT.
 	 *
-	 * TODO: support fitness function.
+	 * @return A new and-BIT resulting from the expansion.
+	 *
+	 * @todo support fitness function.
 	 */
-	Handle expand(const Handle& fcs, BITNode& leaf, const Rule& rule);
-
-	// Access
+	AndBIT expand(const Handle& leaf, const Rule& rule) const;
 
 	/**
-	 * Get the set of all FCSs (or and-BITs).
+	 * @brief Randomly uniformly select a leaf of the FCS.
+	 *
+	 * @return The selected leaf.
 	 */
-	OrderedHandleSet& get_fcss();
-	const OrderedHandleSet& get_fcss() const;
+	BITNode& select_leaf();
 
 	/**
-	 * Select uniformly randomly a FCS amonst the FCS collection
+	 * Comparison operators. For operator< compare fcs by size, or by
+	 * handle value if they are of the same size.
 	 */
-	Handle select_fcs() const;
+	bool operator==(const AndBIT& andbit) const;
+	bool operator<(const AndBIT& andbit) const;
 
-	/**
-	 * Given a FCS (i.e. and and-BIT) uniformly randomly select a
-	 * leave of it as potential target for expansion.
-	 */
-	BITNode& select_bitleaf(const Handle& fcs);
-
-	// Temporary atomspace for storing the BIT
-	AtomSpace bit_as;
+	std::string to_string() const;
 
 private:
-	/**
-	 * Build the bitnode associated to body and insert it in
-	 * _handle2bitnode.
-	 */
-	void insert_bitnode(Handle body, const BITFitness& fitness);
-
-	/**
-	 * Initialize the FCS collection with
-	 *
-	 * BindLink
-	 *   _init_vardecl
-	 *   _init_target
-	 *   _init_target
-	 */
-	void init_fcss();
-
-	/**
-	 * Insert a new FCS in the BIT
-	 */
-	void insert_fcs(const Handle& fcs);
-
-	/**
-	 * Return all the leaves of an FCS (i.e. and-BIT). Another way is
-	 * to call it a blanket, because these new target leaves cover the
-	 * previous intermediary targets.
-	 */
-	OrderedHandleSet get_leaves(const Handle& fcs) const;
-
-	/**
-	 * Return true if the rule is already an or-children of bitnode up
-	 * to an alpha conversion.
-	 */
-	bool is_in(const Rule& rule, const BITNode& bitnode);
-
 	/**
 	 * Given an FCS, a leaf of it to expand, and a rule, return a new
 	 * FCS where the leaf has been substituted by the rule premises
@@ -178,15 +129,35 @@ private:
 	 *
 	 * TODO: give examples.
 	 */
-	Handle expand_fcs(const Handle& fcs, const Handle& leaf, const Rule& rule);
+	Handle expand_fcs(const Handle& leaf, const Rule& rule) const;
+
+	/**
+	 * @brief Given that FCS is defined generate the mapping from FCS
+	 * leaves to bitnotes.
+	 */
+	void set_leaf2bitnode();
+
+	/**
+	 * @brief Build the bitnode associated to leaf and insert it in
+	 * leaf2bitnode.
+	 */
+	void insert_bitnode(Handle leaf, const BITFitness& fitness);
+
+	/**
+	 * Return all the leaves (or blanket because these new target
+	 * leaves cover the previous intermediary targets), of an
+	 * FCS.
+	 */
+	OrderedHandleSet get_leaves() const;
+	OrderedHandleSet get_leaves(const Handle& h) const;
 
 	/**
 	 * Given a FCS, a leaf of it and a rule. Unify the rule conclusion
 	 * with the leaf and replace any variables in the FCS by its
 	 * corresponding term in the rule.
 	 */
-	Handle substitute_unified_variables(const Handle& fcs, const Handle& leaf,
-	                                    const Rule& rule);
+	Handle substitute_unified_variables(const Handle& leaf,
+	                                    const Rule& rule) const;
 
 	/**
 	 * Given the pattern term of an FCS where all variables have been
@@ -195,7 +166,8 @@ private:
 	 *
 	 * TODO: give examples.
 	 */
-	Handle expand_fcs_pattern(const Handle& fcs_pattern, const Rule& rule);
+	Handle expand_fcs_pattern(const Handle& fcs_pattern,
+	                          const Rule& rule) const;
 
 	/**
 	 * Given the rewrite term of an FCS where all variables have been
@@ -204,35 +176,100 @@ private:
 	 *
 	 * TODO: give examples.
 	 */
-	Handle expand_fcs_rewrite(const Handle& fcs_rewrite, const Rule& rule);
+	Handle expand_fcs_rewrite(const Handle& fcs_rewrite,
+	                          const Rule& rule) const;
 
 	/**
 	 * Return true if atom is an argument of an evaluation
 	 */
-	bool is_argument_of(const Handle& eval, const Handle& atom);
+	bool is_argument_of(const Handle& eval, const Handle& atom) const;
 
 	/**
 	 * Equal even if one of them is locally quoted
 	 */
-	bool is_locally_quoted_eq(const Handle& lhs, const Handle& rhs);
+	bool is_locally_quoted_eq(const Handle& lhs, const Handle& rhs) const;
+};
+
+/**
+ * Back Inference Tree. A graph of BIT-Nodes and a collection of
+ * and-BITs (as Forward Chaining Strategies, FCS for short), with
+ * methods to build and use it.
+ */
+class BIT
+{
+public:
+	// Atomspace for storing the BIT
+	AtomSpace bit_as;
+
+	// Collection of and-BITs. We use a sorted vector instead of a set
+	// because the andbit being expanded is modified (its expanded
+	// bit-Node keeps track of the expansion). Alternatively we could
+	// use a set and define AndBIT::leaf2bitnode as mutable.
+	std::vector<AndBIT> andbits;
+
+	/**
+	 * Ctor
+	 */
+	BIT(AtomSpace& as, const Handle& target, const Handle& vardecl,
+	    const BITFitness& fitness=BITFitness());
+
+	/**
+	 * @brief return true iff the BIT is empty (i.e. has no and-BITs).
+	 */
+	bool empty() const;
+
+	/**
+	 * @brief Initialize the BIT and return the initial and-BIT.
+	 */
+	AndBIT* init();
+
+	/**
+	 * Expand the andbit, add it to the BIT and return its pointer. If
+	 * the expansion has failed return nullptr.
+	 *
+	 * andbit and bitleaf are not passed by const because bitleaf
+	 * keeps a record of that expansion and is this modified during
+	 * that step.
+	 */
+	AndBIT* expand(AndBIT& andbit, BITNode& bitleaf, const Rule& rule);
+
+	/**
+	 * Select uniformly randomly an and-BIT amonst the and-BITs.
+	 */
+	Handle select_andbit() const;
+
+private:
+	/**
+	 * Insert a new andbit in the BIT and return its pointer, nullptr
+	 * if not inserted (which may happen if an equivalent one is
+	 * already in it).
+	 */
+	AndBIT* insert_andbit(const AndBIT& andbit);
+
+	/**
+	 * Return true if the rule is already an or-children of bitnode up
+	 * to an alpha conversion.
+	 */
+	bool is_in(const Rule& rule, const BITNode& bitnode);
 
 	Handle _init_target;
 	Handle _init_vardecl;
 	BITFitness _init_fitness;
 
-	// Mapping from handles to their corresponding BITNode
-	// bodies. Also where the BITNode are actually instantiated.
-	HandleBITNodeMap _handle2bitnode;
+	// // Mapping from handles to their corresponding BITNode
+	// // bodies. Also where the BITNode are actually instantiated.
+	// HandleBITNodeMap _handle2bitnode;
 
-	// Set of forward chaining strategies, each one corresponding to
-	// an and-BIT.
-	OrderedHandleSet _fcss;
+	// // Set of forward chaining strategies, each one corresponding to
+	// // an and-BIT.
+	// OrderedHandleSet _fcss;
 };
 	
 // Gdb debugging, see
 // http://wiki.opencog.org/w/Development_standards#Print_OpenCog_Objects
 std::string oc_to_string(const BITNode& bitnode);
-std::string oc_to_string(const HandleBITNodeMap& hbn);
+std::string oc_to_string(const AndBIT& andbit);
+// std::string oc_to_string(const BIT& bit);
 
 } // ~namespace opencog
 

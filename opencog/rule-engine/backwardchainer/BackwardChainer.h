@@ -130,8 +130,9 @@ private:
 	// Expand the BIT
 	void expand_bit();
 
-	// Expand a selected FCS (i.e. and-BIT)
-	void expand_bit(const Handle& fcs);
+	// Expand a selected and-BIT. It is not passed by const because it
+	// will keep a record of the expansion if successful.
+	void expand_bit(AndBIT& andbit);
 
 	// Fulfill the BIT. That is run some or all its and-BITs
 	void fulfill_bit();
@@ -143,11 +144,12 @@ private:
 	// Reduce the BIT. Remove some and-BITs.
 	void reduce_bit();
 
-	// Select an FCS (i.e. and-BIT) for expansion
-	Handle select_expansion_fcs() const;
+	// Select an and-BIT for expansion
+	AndBIT* select_expansion_andbit();
 
-	// Select an FCS (i.e. and-BIT) for fulfilment
-	Handle select_fulfillment_fcs() const;
+	// Select an and-BIT for fulfilment. Return nullptr if none have
+	// been selected.
+	const AndBIT* select_fulfillment_andbit() const;
 
 	// Select a valid rule given a target. The selected is a new
 	// object because a new rule is created, its variables are
@@ -161,7 +163,7 @@ private:
 	RuleSet get_valid_rules(const BITNode& target, const Handle& vardecl);
 
 	// Hack alert!!! FCS above this size are considered too big
-	const size_t _max_fcs_size = 1200;
+	const size_t _max_fcs_size;
 
 	AtomSpace& _as;
 	UREConfigReader _configReader;
@@ -171,9 +173,9 @@ private:
 
 	int _iteration;
 
-	// Keep track of the and-BIT (FCS) of the last
-	// expansion. UNDEFINED if the last expansion has failed.
-	Handle _last_expansion_fcs;
+	// Keep track of the and-BIT of the last expansion. Null if the
+	// last expansion has failed.
+	const AndBIT* _last_expansion_andbit;
 
 	RuleSet _rules;
 
