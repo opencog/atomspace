@@ -82,7 +82,7 @@ public:
 
     /**
      * Adds a new atom to the TLB.
-     * If the atom has already be added then an exception is thrown.
+     * If the atom has already been added, then an exception is thrown.
      *
      * @param Atom to be added.
      * @return UUID of the newly added atom.
@@ -96,8 +96,8 @@ public:
 
     UUID getMaxUUID(void) { return _brk_uuid; }
 
-    /// Reserve a range of UUID's.  The range is inclusive; both lo and
-    /// hi are reserved.  The range must NOT intersect with the
+    /// Reserve a range of UUID's.  The range is inclusive; both `lo`
+    /// and `hi` are reserved.  The range must NOT intersect with the
     /// currently issued UUID's.
     inline void reserve_range(UUID lo, UUID hi)
     {
