@@ -52,11 +52,12 @@ BackwardChainer::BackwardChainer(AtomSpace& as, const Handle& rbs,
                                                           // support
                                                           // focus_set
                                  const BITNodeFitness& fitness)
-	: _fcs_maximum_size(2000), _fcs_complexity_penalty(0.001),
+	: _fcs_maximum_size(2000),
 	  _as(as), _configReader(as, rbs),
 	  _bit(as, target, vardecl, fitness),
 	  _iteration(0), _last_expansion_andbit(nullptr),
-	  _rules(_configReader.get_rules()) {}
+	  _rules(_configReader.get_rules()) {
+}
 
 UREConfigReader& BackwardChainer::get_config()
 {
@@ -254,5 +255,5 @@ RuleSet BackwardChainer::get_valid_rules(const BITNode& target,
 
 double BackwardChainer::complexity_factor(const AndBIT& andbit) const
 {
-	return exp(- _fcs_complexity_penalty * andbit.fcs->size());
+	return exp(- _configReader.get_complexity_penalty() * andbit.fcs->size());
 }
