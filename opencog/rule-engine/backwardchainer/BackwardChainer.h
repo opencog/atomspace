@@ -166,8 +166,19 @@ private:
 	// possibly be used to infer the target.
 	RuleSet get_valid_rules(const BITNode& target, const Handle& vardecl);
 
-	// Hack alert!!! FCS above this size are considered too big
-	const size_t _max_fcs_size;
+	// Return the complexity factor of an andbit. The formula is
+	//
+	// exp(-_fcs_complexity_penalty * andbit.fcs->size())
+	double complexity_factor(const AndBIT& andbit) const;
+
+	// FCS above this size are considered too big and automatically
+	// removed.
+	const size_t _fcs_maximum_size;
+
+	// This parameter biases select_expansion_andbit towards simpler
+	// FCS. Range from 0 to +inf. 0 means there is no complexity
+	// penalty, the greater value the greater the complexity penalty.
+	double _fcs_complexity_penalty;
 
 	AtomSpace& _as;
 	UREConfigReader _configReader;

@@ -1,11 +1,11 @@
 /*
  * BackwardChainer.cc
  *
- * Copyright (C) 2014-2016 OpenCog Foundation
+ * Copyright (C) 2014-2017 OpenCog Foundation
  *
  * Authors: Misgana Bayetta <misgana.bayetta@gmail.com>  October 2014
  *          William Ma <https://github.com/williampma>
- *          Nil Geisweiller 2016
+ *          Nil Geisweiller 2016-2017
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU Affero General Public License v3 as
@@ -52,7 +52,8 @@ BackwardChainer::BackwardChainer(AtomSpace& as, const Handle& rbs,
                                                           // support
                                                           // focus_set
                                  const BITNodeFitness& fitness)
-	: _max_fcs_size(950), _as(as), _configReader(as, rbs),
+	: _fcs_maximum_size(2000), _fcs_complexity_penalty(0.001),
+	  _as(as), _configReader(as, rbs),
 	  _bit(as, target, vardecl, fitness),
 	  _iteration(0), _last_expansion_andbit(nullptr),
 	  _rules(_configReader.get_rules()) {}
@@ -172,7 +173,17 @@ void BackwardChainer::fulfill_fcs(const Handle& fcs)
 
 AndBIT* BackwardChainer::select_expansion_andbit()
 {
-	return &rand_element(_bit.andbits);
+	// Calculate distribution. For now it only uses the complexity
+	// factor. Ultimately it should estimate the probability that
+	// selecting an andbit for expansion is gonna contribute to the
+	// inference.
+	std::vector<double> weights;
+	for (const AndBIT& andbit : _bit.andbits)
+		weights.push_back(complexity_factor(andbit));
+
+	std::discrete_distribution<size_t> dist(weights.begin(), weights.end());
+
+	return &rand_element(_bit.andbits, dist);
 }
 
 const AndBIT* BackwardChainer::select_fulfillment_andbit() const
@@ -183,9 +194,9 @@ const AndBIT* BackwardChainer::select_fulfillment_andbit() const
 void BackwardChainer::reduce_bit()
 {
 	// Remove and-BITs above a certain size.
-	auto less_complex_than = [&](const AndBIT& andbit, size_t max_size) {
+	auto complex_lt = [&](const AndBIT& andbit, size_t max_size) {
 		return andbit.fcs->size() < max_size; };
-	auto it = boost::lower_bound(_bit.andbits, _max_fcs_size, less_complex_than);
+	auto it = boost::lower_bound(_bit.andbits, _fcs_maximum_size, complex_lt);
 	size_t previous_size = _bit.andbits.size();
 	_bit.erase(it, _bit.andbits.end());
 	if (size_t removed_andbits = previous_size - _bit.andbits.size()) {
@@ -239,4 +250,9 @@ RuleSet BackwardChainer::get_valid_rules(const BITNode& target,
 		valid_rules.insert(unified_rules.begin(), unified_rules.end());
 	}
 	return valid_rules;
+}
+
+double BackwardChainer::complexity_factor(const AndBIT& andbit) const
+{
+	return exp(- _fcs_complexity_penalty * andbit.fcs->size());
 }
