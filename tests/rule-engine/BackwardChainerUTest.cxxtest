@@ -410,7 +410,7 @@ void BackwardChainerUTest::test_impossible_criminal()
 	// Should NOT be possible to find the solution without deduction
 	// rule, as it won't be able to tell that missile@123 is a weapon.
 	BackwardChainer bc(_as, top_rbs, target, vardecl);
-	bc.get_config().set_maximum_iterations(100);
+	bc.get_config().set_maximum_iterations(400);
 	bc.do_chain();
 
 	Handle results = bc.get_results(),
@@ -449,7 +449,7 @@ void BackwardChainerUTest::test_criminal()
 	Handle soln = _eval.eval_h("(ConceptNode \"West\")");
 
 	BackwardChainer bc(_as, top_rbs, target, vardecl);
-	bc.get_config().set_maximum_iterations(5000);
+	bc.get_config().set_maximum_iterations(400);
 	bc.do_chain();
 
 	Handle results = bc.get_results(),
