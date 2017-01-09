@@ -87,8 +87,7 @@ BITNode& AndBIT::select_leaf()
 {
 	// TODO: optimize, do not remake the distribution each time
 	LeafDistribution dist = get_distribution();
-	size_t index = dist(randGen());
-	return std::next(leaf2bitnode.begin(), index)->second;
+	return rand_element(leaf2bitnode, dist).second;
 }
 
 bool AndBIT::operator==(const AndBIT& andbit) const
