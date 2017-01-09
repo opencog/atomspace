@@ -155,8 +155,12 @@ private:
 	// object because a new rule is created, its variables are
 	// uniquely renamed, possibly some partial substitutions are
 	// applied.
+	//
+	// The Selection is random amongst the valid rules and weighted
+	// according to their weights.
 	Rule select_rule(const BITNode& target,
 	                 const Handle& vardecl=Handle::UNDEFINED);
+	Rule select_rule(const RuleSet& rules);
 
 	// Return all valid rules, in the sense that these rules may
 	// possibly be used to infer the target.

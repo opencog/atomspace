@@ -23,6 +23,8 @@
  * 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
  */
 
+#include <random>
+
 #include <boost/range/algorithm/lower_bound.hpp>
 
 #include <opencog/util/random.h>
@@ -200,16 +202,26 @@ Rule BackwardChainer::select_rule(const BITNode& target, const Handle& vardecl)
 	if (valid_rules.empty())
 		return Rule();
 
-	// Log all valid rules
+	// Log all valid rules and their weights
 	if (bc_logger().is_debug_enabled()) {
 		std::stringstream ss;
-		ss << "The following rules are valid:";
+		ss << "The following (weighted) rules are valid:";
 		for (const Rule& r : valid_rules)
-			ss << std::endl << r.get_name();
+			ss << std::endl << "(" << r.get_weight() << ") " << r.get_name();
 		LAZY_BC_LOG_DEBUG << ss.str();
 	}
 
-	return rand_element(valid_rules);
+	return select_rule(valid_rules);
+}
+
+Rule BackwardChainer::select_rule(const RuleSet& rules)
+{
+	// Build weight vector to do a weighted random selection
+	std::vector<double> weights;
+	for (const Rule& rule : rules)
+		weights.push_back(rule.get_weight());
+	std::discrete_distribution<size_t> dist(weights.begin(), weights.end());
+	return rand_element(rules, dist);
 }
 
 RuleSet BackwardChainer::get_valid_rules(const BITNode& target,
