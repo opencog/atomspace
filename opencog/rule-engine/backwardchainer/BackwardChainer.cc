@@ -185,7 +185,7 @@ void BackwardChainer::reduce_bit()
 		return andbit.fcs->size() < max_size; };
 	auto it = boost::lower_bound(_bit.andbits, _max_fcs_size, less_complex_than);
 	size_t previous_size = _bit.andbits.size();
-	_bit.andbits.erase(it, _bit.andbits.end());
+	_bit.erase(it, _bit.andbits.end());
 	if (size_t removed_andbits = previous_size - _bit.andbits.size()) {
 		LAZY_BC_LOG_DEBUG << "Removed " << removed_andbits
 		                  << " overly complex and-BITs from the BIT";

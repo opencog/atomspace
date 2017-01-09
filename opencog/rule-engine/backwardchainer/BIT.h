@@ -23,6 +23,7 @@
 #ifndef _OPENCOG_BIT_H
 #define _OPENCOG_BIT_H
 
+#include <random>
 #include <boost/operators.hpp>
 #include <opencog/rule-engine/Rule.h>
 #include <opencog/atoms/base/Handle.h>
@@ -56,6 +57,10 @@ public:
 	// variations (partially unified, etc) can yield the same target.
 	RuleSet rules;
 
+	// Estimate the probability of usefulness of expanding this
+	// BIT-Node.
+	double operator()() const;
+
 	std::string to_string() const;
 };
 
@@ -80,6 +85,7 @@ public:
 	AndBIT();
 	AndBIT(AtomSpace& as, const Handle& target, const Handle& vardecl,
 	       const BITNodeFitness& fitness=BITNodeFitness());
+	~AndBIT();
 
 	/**
 	 * @brief Expand the and-BIT given a target leaf and rule.
@@ -94,7 +100,9 @@ public:
 	AndBIT expand(const Handle& leaf, const Rule& rule) const;
 
 	/**
-	 * @brief Randomly uniformly select a leaf of the FCS.
+	 * @brief Randomly select a leaf of the FCS. Leaves with lower
+	 * BIT-node fitness have more chance of being selected (cause they
+	 * need to get fitter).
 	 *
 	 * @return The selected leaf.
 	 */
@@ -110,6 +118,11 @@ public:
 	std::string to_string() const;
 
 private:
+	// Weighted distribution over the targets leaves, defined
+	// according to their BIT-node fitnesses. The higher the fitness
+	// the lower the chance of being selected as it is already fit.
+	typedef std::discrete_distribution<size_t> LeafDistribution;
+
 	/**
 	 * Given an FCS, a leaf of it to expand, and a rule, return a new
 	 * FCS where the leaf has been substituted by the rule premises
@@ -180,6 +193,14 @@ private:
 	 * Equal even if one of them is locally quoted
 	 */
 	bool is_locally_quoted_eq(const Handle& lhs, const Handle& rhs) const;
+
+
+	/**
+	 * Generate the distribution over target leaves according to the
+	 * BIT-node fitnesses. The higher the fitness the lower the chance
+	 * of being selected as it is already fit.
+	 */
+	LeafDistribution get_distribution();
 };
 
 /**
@@ -197,13 +218,15 @@ public:
 	// because the andbit being expanded is modified (its expanded
 	// bit-Node keeps track of the expansion). Alternatively we could
 	// use a set and define AndBIT::leaf2bitnode as mutable.
-	std::vector<AndBIT> andbits;
+	typedef std::vector<AndBIT> AndBITs;
+	AndBITs andbits;
 
 	/**
-	 * Ctor
+	 * Ctor/Dtor
 	 */
 	BIT(AtomSpace& as, const Handle& target, const Handle& vardecl,
 	    const BITNodeFitness& fitness=BITNodeFitness());
+	~BIT();
 
 	/**
 	 * @brief return true iff the BIT is empty (i.e. has no and-BITs).
@@ -230,14 +253,20 @@ public:
 	 */
 	Handle select_andbit() const;
 
-private:
 	/**
 	 * Insert a new andbit in the BIT and return its pointer, nullptr
 	 * if not inserted (which may happen if an equivalent one is
 	 * already in it).
 	 */
-	AndBIT* insert_andbit(const AndBIT& andbit);
+	AndBIT* insert(const AndBIT& andbit);
 
+	/**
+	 * Erase one more andbits. Return iterator after the erasing has
+	 * occured.
+	 */
+	AndBITs::iterator erase(AndBITs::iterator from, AndBITs::iterator to);
+
+private:
 	/**
 	 * Return true if the rule is already an or-children of bitnode up
 	 * to an alpha conversion.

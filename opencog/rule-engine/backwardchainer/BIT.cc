@@ -39,6 +39,14 @@ namespace opencog {
 BITNode::BITNode(const Handle& bd, const BITNodeFitness& fi)
 	: body(bd), fitness(fi) {}
 
+double BITNode::operator()() const
+{
+	// The probably is anti-proportional to the fitness. Indeed if the
+	// fitness already is high, expanding the BIT-Node won't likely
+	// add anything to the success of the inference.
+	return (fitness.upper - fitness(*this)) / (fitness.upper - fitness.lower);
+}
+
 std::string	BITNode::to_string() const
 {
 	std::stringstream ss;
@@ -65,17 +73,22 @@ AndBIT::AndBIT(AtomSpace& as, const Handle& target, const Handle& vardecl,
 	insert_bitnode(target, fitness);
 }
 
+AndBIT::~AndBIT() {}
+
 AndBIT AndBIT::expand(const Handle& leaf, const Rule& rule) const
 {
 	AndBIT andbit;
 	andbit.fcs = expand_fcs(leaf, rule);
-	andbit.set_leaf2bitnode();
+	andbit.set_leaf2bitnode();  // TODO: might differ till needed
 	return andbit;
 }
 
 BITNode& AndBIT::select_leaf()
 {
-	return rand_element(leaf2bitnode).second;
+	// TODO: optimize, do not remake the distribution each time
+	LeafDistribution dist = get_distribution();
+	size_t index = dist(randGen());
+	return std::next(leaf2bitnode.begin(), index)->second;
 }
 
 bool AndBIT::operator==(const AndBIT& andbit) const
@@ -297,6 +310,14 @@ bool AndBIT::is_locally_quoted_eq(const Handle& lhs, const Handle& rhs) const
 	return false;
 }
 
+AndBIT::LeafDistribution AndBIT::get_distribution()
+{
+	std::vector<double> weights;
+	for (const auto& lb : leaf2bitnode)
+		weights.push_back(lb.second());
+	return LeafDistribution(weights.begin(), weights.end());
+}
+
 /////////
 // BIT //
 /////////
@@ -308,6 +329,8 @@ BIT::BIT(AtomSpace& as,
 	: bit_as(&as),
 	  _init_target(target), _init_vardecl(vardecl), _init_fitness(fitness)
 {}
+
+BIT::~BIT() {}
 
 bool BIT::empty() const
 {
@@ -337,10 +360,10 @@ AndBIT* BIT::expand(AndBIT& andbit, BITNode& bitleaf, const Rule& rule)
 	bitleaf.rules.insert(rule);
 
 	// Expand the and-BIT and insert it in the BIT
-	return insert_andbit(andbit.expand(bitleaf.body, rule));
+	return insert(andbit.expand(bitleaf.body, rule));
 }
 
-AndBIT* BIT::insert_andbit(const AndBIT& andbit)
+AndBIT* BIT::insert(const AndBIT& andbit)
 {
 	// Check that it isn't already in the BIT
 	if (boost::binary_search(andbits, andbit)) {
@@ -364,6 +387,12 @@ AndBIT* BIT::insert_andbit(const AndBIT& andbit)
 
 	// Return andbit pointer
 	return &*it;
+}
+
+BIT::AndBITs::iterator BIT::erase(BIT::AndBITs::iterator from,
+                                  BIT::AndBITs::iterator to)
+{
+	return andbits.erase(from, to);
 }
 
 bool BIT::is_in(const Rule& rule, const BITNode& bitnode)
