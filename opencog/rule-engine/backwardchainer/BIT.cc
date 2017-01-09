@@ -1,9 +1,8 @@
 /*
  * BIT.cc
  *
- * Author: William Ma <https://github.com/williampma>
- *
- * Copyright (C) 2015 OpenCog Foundation
+ * Copyright (C) 2016-2017 OpenCog Foundation
+ * Author: Nil Geisweiller
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU Affero General Public License v3 as
@@ -37,7 +36,7 @@ namespace opencog {
 // BITNode //
 /////////////
 
-BITNode::BITNode(const Handle& bd, const BITFitness& fi)
+BITNode::BITNode(const Handle& bd, const BITNodeFitness& fi)
 	: body(bd), fitness(fi) {}
 
 std::string	BITNode::to_string() const
@@ -55,7 +54,7 @@ std::string	BITNode::to_string() const
 AndBIT::AndBIT() {}
 
 AndBIT::AndBIT(AtomSpace& as, const Handle& target, const Handle& vardecl,
-               const BITFitness& fitness)
+               const BITNodeFitness& fitness)
 {
 	// Create initial FCS
 	HandleSeq bl{target, target};
@@ -136,16 +135,16 @@ void AndBIT::set_leaf2bitnode()
 {
 	// For each leaf of fcs, associate a corresponding BITNode
 	for (const Handle& leaf : get_leaves())
-		insert_bitnode(leaf, BITFitness());
+		insert_bitnode(leaf, BITNodeFitness());
 }
 
-void AndBIT::insert_bitnode(Handle leaf, const BITFitness& fitness)
+void AndBIT::insert_bitnode(Handle leaf, const BITNodeFitness& fitness)
 {
 	if (leaf.is_undefined())
 		return;
 
 	if (leaf2bitnode.find(leaf) == leaf2bitnode.end())
-		leaf2bitnode[leaf] = BITNode(leaf, fitness);
+		leaf2bitnode.emplace(leaf, BITNode(leaf, fitness));
 }
 
 OrderedHandleSet AndBIT::get_leaves() const
@@ -305,7 +304,7 @@ bool AndBIT::is_locally_quoted_eq(const Handle& lhs, const Handle& rhs) const
 BIT::BIT(AtomSpace& as,
          const Handle& target,
          const Handle& vardecl,
-         const BITFitness& fitness)
+         const BITNodeFitness& fitness)
 	: bit_as(&as),
 	  _init_target(target), _init_vardecl(vardecl), _init_fitness(fitness)
 {}

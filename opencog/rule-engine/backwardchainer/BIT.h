@@ -26,18 +26,10 @@
 #include <boost/operators.hpp>
 #include <opencog/rule-engine/Rule.h>
 #include <opencog/atoms/base/Handle.h>
+#include "Fitness.h"
 
 namespace opencog
 {
-
-/**
- * Contains the fitness type of a certain BIT node. For instance
- * whether the target is a variable query such that the variables
- * maximize the target TV in a certain way, etc.
- */
-class BITFitness
-{
-};
 
 /**
  * A BIT (Back Inference Tree) node, and how it relates to its
@@ -52,13 +44,13 @@ class BITNode
 {
 public:
 	BITNode(const Handle& body=Handle::UNDEFINED,
-	        const BITFitness& fitness=BITFitness());
+	        const BITNodeFitness& fitness=BITNodeFitness());
 
 	// BITNode handle (TODO: maybe this is not necessary)
 	Handle body;
 
 	// BITNode fitness
-	BITFitness fitness;
+	BITNodeFitness fitness;
 
 	// Or-children at the rule level, as multiple rules, or rule
 	// variations (partially unified, etc) can yield the same target.
@@ -87,7 +79,7 @@ public:
 	 */
 	AndBIT();
 	AndBIT(AtomSpace& as, const Handle& target, const Handle& vardecl,
-	       const BITFitness& fitness=BITFitness());
+	       const BITNodeFitness& fitness=BITNodeFitness());
 
 	/**
 	 * @brief Expand the and-BIT given a target leaf and rule.
@@ -141,7 +133,7 @@ private:
 	 * @brief Build the bitnode associated to leaf and insert it in
 	 * leaf2bitnode.
 	 */
-	void insert_bitnode(Handle leaf, const BITFitness& fitness);
+	void insert_bitnode(Handle leaf, const BITNodeFitness& fitness);
 
 	/**
 	 * Return all the leaves (or blanket because these new target
@@ -211,7 +203,7 @@ public:
 	 * Ctor
 	 */
 	BIT(AtomSpace& as, const Handle& target, const Handle& vardecl,
-	    const BITFitness& fitness=BITFitness());
+	    const BITNodeFitness& fitness=BITNodeFitness());
 
 	/**
 	 * @brief return true iff the BIT is empty (i.e. has no and-BITs).
@@ -254,7 +246,7 @@ private:
 
 	Handle _init_target;
 	Handle _init_vardecl;
-	BITFitness _init_fitness;
+	BITNodeFitness _init_fitness;
 
 	// // Mapping from handles to their corresponding BITNode
 	// // bodies. Also where the BITNode are actually instantiated.

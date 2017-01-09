@@ -49,7 +49,7 @@ BackwardChainer::BackwardChainer(AtomSpace& as, const Handle& rbs,
                                  const Handle& focus_set, // TODO:
                                                           // support
                                                           // focus_set
-                                 const BITFitness& fitness)
+                                 const BITNodeFitness& fitness)
 	: _max_fcs_size(950), _as(as), _configReader(as, rbs),
 	  _bit(as, target, vardecl, fitness),
 	  _iteration(0), _last_expansion_andbit(nullptr),

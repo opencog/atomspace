@@ -96,7 +96,7 @@ public:
 	                const Handle& target,
 	                const Handle& vardecl=Handle::UNDEFINED,
 	                const Handle& focus_set=Handle::UNDEFINED,
-	                const BITFitness& fitness=BITFitness());
+	                const BITNodeFitness& fitness=BITNodeFitness());
 
 	/**
 	 * URE configuration accessors
