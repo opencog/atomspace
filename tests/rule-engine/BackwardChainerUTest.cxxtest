@@ -167,7 +167,7 @@ void BackwardChainerUTest::test_deduction()
 	Handle X = an(VARIABLE_NODE, "$X"),
 		D = an(CONCEPT_NODE, "D"),
 		target = al(INHERITANCE_LINK, X, D);
-		
+
 	BackwardChainer bc(_as, top_rbs, target);
 	bc.get_config().set_maximum_iterations(10);
 	bc.do_chain();
@@ -180,7 +180,7 @@ void BackwardChainerUTest::test_deduction()
 		BD = al(INHERITANCE_LINK, B, D),
 		AD = al(INHERITANCE_LINK, A, D),
 		expected = al(SET_LINK, CD, BD, AD);
-		
+
 	logger().debug() << "results = " << results;
 	logger().debug() << "expected = " << expected;
 
@@ -206,7 +206,7 @@ void BackwardChainerUTest::test_deduction_tv_query()
 	                             "   (Concept \"D\"))");
 
 	BackwardChainer bc(_as, top_rbs, target);
-	bc.get_config().set_maximum_iterations(20);
+	bc.get_config().set_maximum_iterations(10);
 	bc.do_chain();
 
 	TS_ASSERT_DELTA(target->getTruthValue()->getMean(), 1, 1e-10);
@@ -230,7 +230,7 @@ void BackwardChainerUTest::test_modus_ponens_tv_query()
 	Handle target = an(PREDICATE_NODE, "T");
 
 	BackwardChainer bc(_as, top_rbs, target);
-	bc.get_config().set_maximum_iterations(100);
+	bc.get_config().set_maximum_iterations(40);
 	bc.do_chain();
 
 	TS_ASSERT_DELTA(target->getTruthValue()->getMean(), 1, 1e-10);
@@ -302,7 +302,7 @@ void BackwardChainerUTest::test_conditional_instantiation_1()
 		                target_var, an(TYPE_NODE, "ConceptNode")));
 
 	BackwardChainer bc(_as, top_rbs, target, vardecl);
-	bc.get_config().set_maximum_iterations(50);
+	bc.get_config().set_maximum_iterations(20);
 	bc.do_chain();
 
 	Handle results = bc.get_results(),
@@ -342,7 +342,7 @@ void BackwardChainerUTest::test_conditional_instantiation_2()
 		vardecl = al(TYPED_VARIABLE_LINK, what, concept);
 
 	BackwardChainer bc(_as, top_rbs, target, vardecl);
-	bc.get_config().set_maximum_iterations(40);
+	bc.get_config().set_maximum_iterations(20);
 	bc.do_chain();
 
 	Handle results = bc.get_results(),
@@ -375,7 +375,7 @@ void BackwardChainerUTest::test_conditional_instantiation_tv_query()
 	                 "   (ConceptNode \"green\"))");
 
 	BackwardChainer bc(_as, top_rbs, target);
-	bc.get_config().set_maximum_iterations(40);
+	bc.get_config().set_maximum_iterations(20);
 	bc.do_chain();
 
 	TS_ASSERT_DELTA(target->getTruthValue()->getMean(), 1, .1);
