@@ -33,52 +33,78 @@ using namespace opencog;
 const std::string UREConfigReader::top_rbs_name = "URE";
 const std::string UREConfigReader::attention_alloc_name = "URE:attention-allocation";
 const std::string UREConfigReader::max_iter_name = "URE:maximum-iterations";
+const std::string UREConfigReader::bc_complexity_penalty_name = "URE:BC:complexity-penalty";
 
 UREConfigReader::UREConfigReader(AtomSpace& as, const Handle& rbs) : _as(as)
 {
+	//////////////////////////
+	// Common parameters    //
+	//////////////////////////
+
 	if (Handle::UNDEFINED == rbs)
 		throw RuntimeException(TRACE_INFO,
 			"UREConfigReader - invalid rulebase specified!");
 
 	// Retrieve the rules (MemberLinks) and instantiate them
 	for (const Handle& rule_name : fetch_rule_names(rbs))
-		_rbparams.rules.emplace(rule_name, rbs);
+		_common_params.rules.emplace(rule_name, rbs);
 
 	// Fetch maximum number of iterations
-	_rbparams.max_iter = fetch_num_param(max_iter_name, rbs);
+	_common_params.max_iter = fetch_num_param(max_iter_name, rbs);
 
 	// Fetch attention allocation parameter
-	_rbparams.attention_alloc = fetch_bool_param(attention_alloc_name, rbs);
+	_common_params.attention_alloc = fetch_bool_param(attention_alloc_name, rbs);
+
+	//////////////////////
+	// FC parameters    //
+	//////////////////////
+
+	//////////////////////
+	// BC parameters    //
+	//////////////////////
+
+	// Fetch BC complexity penalty parameter
+	_bc_params.complexity_penalty = fetch_num_param(bc_complexity_penalty_name, rbs);
 }
 
 const RuleSet& UREConfigReader::get_rules() const
 {
-	return _rbparams.rules;
+	return _common_params.rules;
 }
 
 RuleSet& UREConfigReader::get_rules()
 {
-	return _rbparams.rules;
+	return _common_params.rules;
 }
 
 bool UREConfigReader::get_attention_allocation() const
 {
-	return _rbparams.attention_alloc;
+	return _common_params.attention_alloc;
 }
 
 int UREConfigReader::get_maximum_iterations() const
 {
-	return _rbparams.max_iter;
+	return _common_params.max_iter;
+}
+
+double UREConfigReader::get_complexity_penalty() const
+{
+	return _bc_params.complexity_penalty;
 }
 
 void UREConfigReader::set_attention_allocation(bool aa)
 {
-	_rbparams.attention_alloc = aa;
+	_common_params.attention_alloc = aa;
 }
 
 void UREConfigReader::set_maximum_iterations(int mi)
 {
-	_rbparams.max_iter = mi;
+	_common_params.max_iter = mi;
+}
+
+void UREConfigReader::set_complexity_penalty(double cp)
+{
+	_bc_params.complexity_penalty = cp;
 }
 
 HandleSeq UREConfigReader::fetch_rule_names(const Handle& rbs)

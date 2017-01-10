@@ -44,21 +44,39 @@ namespace opencog {
 class UREConfigReader
 {
 public:
-	// Ctor
+	/////////////
+	// Ctor    //
+	/////////////
 
 	// rbs is a Handle pointing to a rule-based system is as
 	UREConfigReader(AtomSpace& as, const Handle& rbs);
 
-	// Access methods, return parameters given a rule-based system
+	///////////////
+	// Accessors //
+	///////////////
+
+	// Common
 	const RuleSet& get_rules() const;
 	RuleSet& get_rules();
 	bool get_attention_allocation() const;
 	int get_maximum_iterations() const;
+	// BC
+	double get_complexity_penalty() const;
 
-	// Modifiers. WARNING: Those changes are not reflected in the
-	// AtomSpace, only in the UREConfigReader object.
+	///////////////////////////////////////////////////////////////////
+	// Modifiers. WARNING: Those changes are not reflected in the    //
+	// AtomSpace, only in the UREConfigReader object.                //
+	///////////////////////////////////////////////////////////////////
+
+	// Common
 	void set_attention_allocation(bool);
 	void set_maximum_iterations(int);
+	// BC
+	void set_complexity_penalty(double);
+
+	//////////////////
+	// Constants    //
+	//////////////////
 
 	// Name of the top rule base from which all rule-based systems
 	// inherit. It should corresponds to a ConceptNode in the
@@ -72,6 +90,10 @@ public:
 	// Name of the SchemaNode outputing the maximum iterations
 	// parameter
 	static const std::string max_iter_name;
+
+	// Name of the complexity penalty parameter for the Backward
+	// Chainer
+	static const std::string bc_complexity_penalty_name;
 private:
 
 	// Fetch from the AtomSpace all rules of a given rube-based
@@ -84,12 +106,27 @@ private:
 
 	AtomSpace& _as;
 
-	struct RuleBaseParameters {
+	// Parameter common to the forward and backward chainer.
+	struct CommonParameters {
 		RuleSet rules;
 		bool attention_alloc;
 		int max_iter;
 	};
-	RuleBaseParameters _rbparams;
+	CommonParameters _common_params;
+
+	// Parameter specific to the forward chainer.
+	struct FCParameters {};
+	FCParameters _fc_params;
+
+	// Parameter specific to the backward chainer.
+	struct BCParameters {
+		// This parameter biases select_expansion_andbit towards
+		// simpler FCS. Range from 0 to +inf. 0 means there is no
+		// complexity penalty, the greater value the greater the
+		// complexity penalty.
+		double complexity_penalty;
+	};
+	BCParameters _bc_params;
 
 	// Given <schema>, an <input> and optionally an output <type> (or
 	// subtype), return the <output>s in

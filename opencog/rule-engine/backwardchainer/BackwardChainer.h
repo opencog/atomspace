@@ -96,7 +96,7 @@ public:
 	                const Handle& target,
 	                const Handle& vardecl=Handle::UNDEFINED,
 	                const Handle& focus_set=Handle::UNDEFINED,
-	                const BITFitness& fitness=BITFitness());
+	                const BITNodeFitness& fitness=BITNodeFitness());
 
 	/**
 	 * URE configuration accessors
@@ -155,15 +155,31 @@ private:
 	// object because a new rule is created, its variables are
 	// uniquely renamed, possibly some partial substitutions are
 	// applied.
-	Rule select_rule(const BITNode& target,
-	                 const Handle& vardecl=Handle::UNDEFINED);
+	//
+	// The Selection is random amongst the valid rules and weighted
+	// according to their weights.
+	//
+	// The target is not const because if the rules are exhausted it
+	// will set its exhausted flag to false.
+	Rule select_rule(BITNode& target, const Handle& vardecl=Handle::UNDEFINED);
+	Rule select_rule(const RuleSet& rules);
 
-	// Return all valid rules, in the sense that these rules may
-	// possibly be used to infer the target.
+	// Return all valid rules, in the sense that they may possibly be
+	// used to infer the target.
 	RuleSet get_valid_rules(const BITNode& target, const Handle& vardecl);
 
-	// Hack alert!!! FCS above this size are considered too big
-	const size_t _max_fcs_size;
+	// Return the complexity factor of an andbit. The formula is
+	//
+	// exp(-complexity_penalty * andbit.fcs->size())
+	double complexity_factor(const AndBIT& andbit) const;
+
+	// Return an very crude estimate of the probability that expanding
+	// this and-BIT may lead to a successful inference.
+	double operator()(const AndBIT& andbit) const;
+
+	// FCS above this size are considered too big and automatically
+	// removed.
+	const size_t _fcs_maximum_size;
 
 	AtomSpace& _as;
 	UREConfigReader _configReader;
