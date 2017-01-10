@@ -57,8 +57,13 @@ public:
 	// variations (partially unified, etc) can yield the same target.
 	RuleSet rules;
 
+	// True iff all valid rules have already expanded this BIT-node.
+	// TODO (don't forget to reset if the rule set changes)
+	bool exhausted;
+
 	// Estimate the probability of usefulness of expanding this
 	// BIT-Node.
+	// TODO: Maybe this should be moved to BackwardChainer
 	double operator()() const;
 
 	std::string to_string() const;
@@ -77,6 +82,10 @@ public:
 	// Mapping from the FCS leaves to BITNodes
 	typedef std::unordered_map<Handle, BITNode> HandleBITNodeMap;
 	HandleBITNodeMap leaf2bitnode;
+
+	// True iff all leaves are exhausted (see BITNode::exhausted)
+	// TODO (don't forget to reset if the rule set changes)
+	bool exhausted;
 
 	/**
 	 * @brief Initialize an and-BIT with a certain target, vardecl and
@@ -106,7 +115,13 @@ public:
 	 *
 	 * @return The selected leaf.
 	 */
-	BITNode& select_leaf();
+	BITNode* select_leaf();
+
+	/**
+	 * Set the and-BIT exhausted flags to false. Take care of the
+	 * BIT-nodes exhausted flags as well.
+	 */
+	void reset_exhausted();
 
 	/**
 	 * Comparison operators. For operator< compare fcs by size, or by
@@ -193,14 +208,6 @@ private:
 	 * Equal even if one of them is locally quoted
 	 */
 	bool is_locally_quoted_eq(const Handle& lhs, const Handle& rhs) const;
-
-
-	/**
-	 * Generate the distribution over target leaves according to the
-	 * BIT-node fitnesses. The higher the fitness the lower the chance
-	 * of being selected as it is already fit.
-	 */
-	LeafDistribution get_distribution();
 };
 
 /**
@@ -249,11 +256,6 @@ public:
 	AndBIT* expand(AndBIT& andbit, BITNode& bitleaf, const Rule& rule);
 
 	/**
-	 * Select uniformly randomly an and-BIT amonst the and-BITs.
-	 */
-	Handle select_andbit() const;
-
-	/**
 	 * Insert a new andbit in the BIT and return its pointer, nullptr
 	 * if not inserted (which may happen if an equivalent one is
 	 * already in it).
@@ -266,26 +268,23 @@ public:
 	 */
 	AndBITs::iterator erase(AndBITs::iterator from, AndBITs::iterator to);
 
-private:
+	/**
+	 * Reset to false all and-BITs exhausted flags.
+	 */
+	void reset_exhausted_flags();
+
 	/**
 	 * Return true if the rule is already an or-children of bitnode up
 	 * to an alpha conversion.
 	 */
-	bool is_in(const Rule& rule, const BITNode& bitnode);
+	bool is_in(const Rule& rule, const BITNode& bitnode) const;
 
+private:
 	Handle _init_target;
 	Handle _init_vardecl;
 	BITNodeFitness _init_fitness;
-
-	// // Mapping from handles to their corresponding BITNode
-	// // bodies. Also where the BITNode are actually instantiated.
-	// HandleBITNodeMap _handle2bitnode;
-
-	// // Set of forward chaining strategies, each one corresponding to
-	// // an and-BIT.
-	// OrderedHandleSet _fcss;
 };
-	
+
 // Gdb debugging, see
 // http://wiki.opencog.org/w/Development_standards#Print_OpenCog_Objects
 std::string oc_to_string(const BITNode& bitnode);

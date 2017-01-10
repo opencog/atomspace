@@ -102,7 +102,17 @@ void BackwardChainer::expand_bit()
 {
 	// This is kinda of hack before meta rules are fully supported by
 	// the Rule class.
+	size_t rules_size = _rules.size();
 	_rules.expand_meta_rules(_as);
+
+	// If the rule set has changed we need to reset the exhausted
+	// flags.
+	if (rules_size != _rules.size()) {
+		_bit.reset_exhausted_flags();
+		bc_logger().debug() << "The rule set has gone from "
+		                    << rules_size << " rules to " << _rules.size()
+		                    << ". All exhausted flags have been reset.";
+	}
 
 	// Reset _last_expansion_fcs
 	_last_expansion_andbit = nullptr;
@@ -121,17 +131,24 @@ void BackwardChainer::expand_bit()
 void BackwardChainer::expand_bit(AndBIT& andbit)
 {
 	// Select leaf
-	BITNode& bitleaf = andbit.select_leaf();
-	LAZY_BC_LOG_DEBUG << "Selected BIT-node for expansion:" << std::endl
-	                  << bitleaf.to_string();
+	BITNode* bitleaf = andbit.select_leaf();
+	if (bitleaf) {
+		LAZY_BC_LOG_DEBUG << "Selected BIT-node for expansion:" << std::endl
+		                  << bitleaf->to_string();
+	} else {
+		bc_logger().debug() << "All BIT-nodes of this and-BIT are exhausted "
+		                    << "(or possibly fulfilled). Abort expansion.";
+		andbit.exhausted = true;
+		return;
+	}
 
 	// Build the leaf vardecl from fcs
 	Handle vardecl = andbit.fcs.is_defined() ?
-		filter_vardecl(BindLinkCast(andbit.fcs)->get_vardecl(), bitleaf.body)
+		filter_vardecl(BindLinkCast(andbit.fcs)->get_vardecl(), bitleaf->body)
 		: Handle::UNDEFINED;
 
 	// Select a valid rule
-	Rule rule = select_rule(bitleaf, vardecl);
+	Rule rule = select_rule(*bitleaf, vardecl);
 	// Add the rule in the _bit.bit_as to make comparing atoms easier
 	// as well as logging more consistent.
 	rule.add(_bit.bit_as);
@@ -142,7 +159,7 @@ void BackwardChainer::expand_bit(AndBIT& andbit)
 	LAZY_BC_LOG_DEBUG << "Selected rule for BIT expansion:" << std::endl
 	                  << rule.to_string();
 
-	_last_expansion_andbit = _bit.expand(andbit, bitleaf, rule);
+	_last_expansion_andbit = _bit.expand(andbit, *bitleaf, rule);
 }
 
 void BackwardChainer::fulfill_bit()
@@ -180,7 +197,7 @@ AndBIT* BackwardChainer::select_expansion_andbit()
 	// inference.
 	std::vector<double> weights;
 	for (const AndBIT& andbit : _bit.andbits)
-		weights.push_back(complexity_factor(andbit));
+		weights.push_back(operator()(andbit));
 
 	std::discrete_distribution<size_t> dist(weights.begin(), weights.end());
 
@@ -194,6 +211,8 @@ const AndBIT* BackwardChainer::select_fulfillment_andbit() const
 
 void BackwardChainer::reduce_bit()
 {
+	// TODO: reset exhausted flags related to the removed and-BITs.
+
 	// Remove and-BITs above a certain size.
 	auto complex_lt = [&](const AndBIT& andbit, size_t max_size) {
 		return andbit.fcs->size() < max_size; };
@@ -206,20 +225,22 @@ void BackwardChainer::reduce_bit()
 	}
 }
 
-Rule BackwardChainer::select_rule(const BITNode& target, const Handle& vardecl)
+Rule BackwardChainer::select_rule(BITNode& target, const Handle& vardecl)
 {
-	// For now the rule is uniformly randomly selected amongst the
-	// valid ones
+	// The rule is randomly selected amongst the valid ones, with
+	// probability of selection being proportional to its weight.
 	const RuleSet valid_rules = get_valid_rules(target, vardecl);
-	if (valid_rules.empty())
+	if (valid_rules.empty()) {
+		target.exhausted = true;
 		return Rule();
+	}
 
 	// Log all valid rules and their weights
 	if (bc_logger().is_debug_enabled()) {
 		std::stringstream ss;
-		ss << "The following (weighted) rules are valid:";
+		ss << "The following rules are valid:";
 		for (const Rule& r : valid_rules)
-			ss << std::endl << "(" << r.get_weight() << ") " << r.get_name();
+			ss << std::endl << r.get_name();
 		LAZY_BC_LOG_DEBUG << ss.str();
 	}
 
@@ -228,10 +249,12 @@ Rule BackwardChainer::select_rule(const BITNode& target, const Handle& vardecl)
 
 Rule BackwardChainer::select_rule(const RuleSet& rules)
 {
-	// Build weight vector to do a weighted random selection
+	// Build weight vector to do weighted random selection
 	std::vector<double> weights;
 	for (const Rule& rule : rules)
 		weights.push_back(rule.get_weight());
+
+	// No rule exhaustion, sample one according to the distribution
 	std::discrete_distribution<size_t> dist(weights.begin(), weights.end());
 	return rand_element(rules, dist);
 }
@@ -248,12 +271,25 @@ RuleSet BackwardChainer::get_valid_rules(const BITNode& target,
 			continue;
 
 		RuleSet unified_rules = rule.unify_target(target.body, vardecl);
-		valid_rules.insert(unified_rules.begin(), unified_rules.end());
+
+		// Insert only rules with positive probability of success
+		RuleSet pos_rules;
+		for (const Rule& rule : unified_rules) {
+			double p = (_bit.is_in(rule, target) ? 0.0 : 1.0) * rule.get_weight();
+			if (p > 0) pos_rules.insert(rule);
+		}
+
+		valid_rules.insert(pos_rules.begin(), pos_rules.end());
 	}
 	return valid_rules;
 }
 
 double BackwardChainer::complexity_factor(const AndBIT& andbit) const
 {
-	return exp(- _configReader.get_complexity_penalty() * andbit.fcs->size());
+	return exp(-_configReader.get_complexity_penalty() * andbit.fcs->size());
+}
+
+double BackwardChainer::operator()(const AndBIT& andbit) const
+{
+	return (andbit.exhausted ? 0.0 : 1.0) * complexity_factor(andbit);
 }

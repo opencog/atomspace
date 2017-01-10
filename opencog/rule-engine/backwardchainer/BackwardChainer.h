@@ -158,18 +158,24 @@ private:
 	//
 	// The Selection is random amongst the valid rules and weighted
 	// according to their weights.
-	Rule select_rule(const BITNode& target,
-	                 const Handle& vardecl=Handle::UNDEFINED);
+	//
+	// The target is not const because if the rules are exhausted it
+	// will set its exhausted flag to false.
+	Rule select_rule(BITNode& target, const Handle& vardecl=Handle::UNDEFINED);
 	Rule select_rule(const RuleSet& rules);
 
-	// Return all valid rules, in the sense that these rules may
-	// possibly be used to infer the target.
+	// Return all valid rules, in the sense that they may possibly be
+	// used to infer the target.
 	RuleSet get_valid_rules(const BITNode& target, const Handle& vardecl);
 
 	// Return the complexity factor of an andbit. The formula is
 	//
 	// exp(-complexity_penalty * andbit.fcs->size())
 	double complexity_factor(const AndBIT& andbit) const;
+
+	// Return an very crude estimate of the probability that expanding
+	// this and-BIT may lead to a successful inference.
+	double operator()(const AndBIT& andbit) const;
 
 	// FCS above this size are considered too big and automatically
 	// removed.

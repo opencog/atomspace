@@ -37,21 +37,23 @@ namespace opencog {
 /////////////
 
 BITNode::BITNode(const Handle& bd, const BITNodeFitness& fi)
-	: body(bd), fitness(fi) {}
+	: body(bd), fitness(fi), exhausted(false) {}
 
 double BITNode::operator()() const
 {
 	// The probably is anti-proportional to the fitness. Indeed if the
 	// fitness already is high, expanding the BIT-Node won't likely
 	// add anything to the success of the inference.
-	return (fitness.upper - fitness(*this)) / (fitness.upper - fitness.lower);
+	return (exhausted ? 0.0 : 1.0) *
+		(fitness.upper - fitness(*this)) / (fitness.upper - fitness.lower);
 }
 
 std::string	BITNode::to_string() const
 {
 	std::stringstream ss;
 	ss << "body:" << std::endl << oc_to_string(body)
-	   << "rules:" << std::endl << oc_to_string(rules);
+	   << "rules:" << std::endl << oc_to_string(rules)
+	   << "exhausted: " << exhausted;
 	return ss.str();
 }
 
@@ -59,10 +61,10 @@ std::string	BITNode::to_string() const
 // AndBIT //
 ////////////
 
-AndBIT::AndBIT() {}
+AndBIT::AndBIT() : exhausted(false) {}
 
 AndBIT::AndBIT(AtomSpace& as, const Handle& target, const Handle& vardecl,
-               const BITNodeFitness& fitness)
+               const BITNodeFitness& fitness) : exhausted(false)
 {
 	// Create initial FCS
 	HandleSeq bl{target, target};
@@ -83,11 +85,33 @@ AndBIT AndBIT::expand(const Handle& leaf, const Rule& rule) const
 	return andbit;
 }
 
-BITNode& AndBIT::select_leaf()
+BITNode* AndBIT::select_leaf()
 {
-	// TODO: optimize, do not remake the distribution each time
-	LeafDistribution dist = get_distribution();
-	return rand_element(leaf2bitnode, dist).second;
+	// Generate the distribution over target leaves according to the
+	// BIT-node fitnesses. The higher the fitness the lower the chance
+	// of being selected as it is already fit.
+	std::vector<double> weights;
+	bool all_weights_null = true;
+	for (const auto& lb : leaf2bitnode) {
+		double p = lb.second();
+		weights.push_back(p);
+		if (p > 0) all_weights_null = false;
+	}
+
+	// Check that the distribution is well defined
+	if (all_weights_null)
+		return nullptr;
+
+	// If well defined then sample according to it
+	LeafDistribution dist(weights.begin(), weights.end());
+	return &rand_element(leaf2bitnode, dist).second;
+}
+
+void AndBIT::reset_exhausted()
+{
+	for (auto& el : leaf2bitnode)
+		el.second.exhausted = false;
+	exhausted = false;
 }
 
 bool AndBIT::operator==(const AndBIT& andbit) const
@@ -309,14 +333,6 @@ bool AndBIT::is_locally_quoted_eq(const Handle& lhs, const Handle& rhs) const
 	return false;
 }
 
-AndBIT::LeafDistribution AndBIT::get_distribution()
-{
-	std::vector<double> weights;
-	for (const auto& lb : leaf2bitnode)
-		weights.push_back(lb.second());
-	return LeafDistribution(weights.begin(), weights.end());
-}
-
 /////////
 // BIT //
 /////////
@@ -394,7 +410,13 @@ BIT::AndBITs::iterator BIT::erase(BIT::AndBITs::iterator from,
 	return andbits.erase(from, to);
 }
 
-bool BIT::is_in(const Rule& rule, const BITNode& bitnode)
+void BIT::reset_exhausted_flags()
+{
+	for (AndBIT& andbit : andbits)
+		andbit.reset_exhausted();
+}
+
+bool BIT::is_in(const Rule& rule, const BITNode& bitnode) const
 {
 	for (const Rule& bnr : bitnode.rules)
 		if (rule.is_alpha_equivalent(bnr))
