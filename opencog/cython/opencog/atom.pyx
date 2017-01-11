@@ -9,9 +9,6 @@ cdef class Atom(object):
     def __dealloc__(self):
         del self.handle
 
-    def value(self):
-        return avoid_from_cptr(self.handle)
-
     def __init__(self, PANDLE lptr, AtomSpace a):
         # self.handle = h is set in __cinit__ above
 

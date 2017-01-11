@@ -87,7 +87,7 @@ class BindlinkTest(TestCase):
 
         # Run bindlink.
         atom = stub_bindlink(self.atomspace, self.bindlink_atom)
-        self.assertTrue(atom is not None and atom.value() > 0)
+        self.assertTrue(atom is not None)
 
         # Check the ending atomspace size, it should be the same.
         ending_size = self.atomspace.size()
@@ -96,7 +96,7 @@ class BindlinkTest(TestCase):
     def _check_result_setlink(self, atom, expected_arity):
 
         # Check if the atom is a SetLink
-        self.assertTrue(atom is not None and atom.value() > 0)
+        self.assertTrue(atom is not None)
         self.assertEquals(atom.type, types.SetLink)
 
         # Check the ending atomspace size, it should have added one SetLink.

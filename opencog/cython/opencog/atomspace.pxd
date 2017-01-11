@@ -9,7 +9,6 @@ cdef extern from "Python.h":
     # Needed to return truth value pointers to C++ callers.
     cdef object PyLong_FromVoidPtr(void *p)
 
-ctypedef public long PATOM
 ctypedef public long PANDLE
 
 cdef extern from "opencog/cython/opencog/Cast.h":
@@ -19,7 +18,6 @@ cdef extern from "opencog/cython/opencog/Cast.h":
     # Tacky hack to convert C objects into Python objects.
     cdef PANDLE   void_from_candle(const cHandle& h)
     cdef PANDLE   void_from_cptr(cHandle* hp)
-    cdef PATOM   avoid_from_cptr(cHandle* hp)
 
 
 # Basic wrapping for std::string conversion.
