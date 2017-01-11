@@ -169,7 +169,7 @@ cdef class Atom(object):
         return convert_handle_seq_to_python_list(handle_vector, self.atomspace)
 
     property out:
-        def __get__(self):            
+        def __get__(self):
             if self._outgoing is None:
                 atom_ptr = self.handle.atom_ptr()
                 if atom_ptr == NULL:   # avoid null-pointer deref
@@ -202,7 +202,7 @@ cdef class Atom(object):
             atom_ptr.getIncomingSet(back_inserter(handle_vector))
 
             # This code is the same for all the x iterators but there is no
-            # way in Cython to yield out of a cdef function and no way to pass a 
+            # way in Cython to yield out of a cdef function and no way to pass a
             # vector into a Python def function, so we have to repeat code. ARGGG!
             cdef vector[cHandle].iterator c_handle_iter
             cdef cHandle current_c_handle
@@ -230,7 +230,7 @@ cdef class Atom(object):
         atom_ptr.getIncomingSetByType(back_inserter(handle_vector), type, subt)
 
         # This code is the same for all the x iterators but there is no
-        # way in Cython to yield out of a cdef function and no way to pass a 
+        # way in Cython to yield out of a cdef function and no way to pass a
         # vector into a Python def function, so we have to repeat code. ARGGG!
         cdef vector[cHandle].iterator c_handle_iter
         cdef cHandle current_c_handle
@@ -261,7 +261,7 @@ cdef class Atom(object):
     def truth_value(self, mean, count):
         self.tv = TruthValue(mean, count)
         return self
-    
+
     def handle_ptr(self):
         return PyLong_FromVoidPtr(self.handle)
 
@@ -294,7 +294,7 @@ cdef class Atom(object):
             return NotImplemented
         cdef Atom a1 = a1_
         cdef Atom a2 = a2_
-        
+
         is_equal = (a1.atomspace == a2.atomspace and
                      deref(a1.handle) == deref(a2.handle))
         if op == 2: # ==
