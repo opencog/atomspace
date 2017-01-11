@@ -56,7 +56,7 @@ starting_size = atomspace.size()
 
 # Run bindlink.
 result = stub_bindlink(atomspace, bindlink_atom)
-assert_true(result is not None and result.value() > 0)
+assert_true(result is not None)
 
 # Check the ending atomspace size, it should be the same.
 ending_size = atomspace.size()
@@ -67,7 +67,7 @@ starting_size = atomspace.size()
 
 # Run bindlink.
 result = bindlink(atomspace, bindlink_atom)
-assert_true(result is not None and result.value() > 0)
+assert_true(result is not None)
 
 # Check the ending atomspace size, it should have added one SetLink.
 ending_size = atomspace.size()
