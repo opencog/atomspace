@@ -45,25 +45,22 @@ void Node::init(const std::string& cname)
 
 std::string Node::toShortString(const std::string& indent) const
 {
-    std::string atname;
-    if (_atomTable)
-        atname = std::to_string(_atomTable->get_uuid());
-    else
-        atname = "NULL";
+    std::string answer = indent;
+    answer += "(" + classserver().getTypeName(_type);
+    answer += " \"" + _name + "\"";
 
-    std::string nam = indent +
-        "(" + classserver().getTypeName(_type) +
-        " \"" + _name + "\") ; [" +
-        std::to_string(get_hash()) + "][" + atname +"]\n";
-    return nam;
+    answer += ") ; [" +
+            std::to_string(get_hash()) + "][" +
+            std::to_string(_atomTable? _atomTable->get_uuid() : -1) +
+            "]\n";
+
+    return answer;
 }
 
 std::string Node::toString(const std::string& indent) const
 {
     std::string answer = indent;
-
     answer += "(" + classserver().getTypeName(_type);
-
     answer += " \"" + _name + "\"";
 
     // Print the TV only if its not the default.
