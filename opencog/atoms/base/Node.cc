@@ -45,10 +45,6 @@ void Node::init(const std::string& cname)
 
 std::string Node::toShortString(const std::string& indent) const
 {
-    std::string tmpname = _name;
-    if (_name == "")
-        tmpname = "#" + std::to_string(get_hash());
-
     std::string atname;
     if (_atomTable)
         atname = std::to_string(_atomTable->get_uuid());
@@ -57,22 +53,18 @@ std::string Node::toShortString(const std::string& indent) const
 
     std::string nam = indent +
         "(" + classserver().getTypeName(_type) +
-        " \"" + tmpname + "\") ; [" +
+        " \"" + _name + "\") ; [" +
         std::to_string(get_hash()) + "][" + atname +"]\n";
     return nam;
 }
 
 std::string Node::toString(const std::string& indent) const
 {
-    std::string tmpname = _name;
-    if (_name == "")
-        tmpname = "#" + std::to_string(get_hash());
-
     std::string answer = indent;
 
     answer += "(" + classserver().getTypeName(_type);
 
-    answer += " \"" + tmpname + "\"";
+    answer += " \"" + _name + "\"";
 
     // Print the TV only if its not the default.
     if (not getTruthValue()->isDefaultTV())
