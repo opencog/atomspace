@@ -52,8 +52,8 @@ std::string	BITNode::to_string() const
 {
 	std::stringstream ss;
 	ss << "body:" << std::endl << oc_to_string(body)
-	   << "rules:" << std::endl << oc_to_string(rules)
-	   << "exhausted: " << exhausted;
+	   << "exhausted: " << exhausted << std::endl
+	   << "rules: " << oc_to_string(rules);
 	return ss.str();
 }
 
