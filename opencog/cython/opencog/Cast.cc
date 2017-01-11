@@ -5,6 +5,6 @@
 
 using namespace opencog;
 
-Handle atom_from_the_void(long p) { return *((Handle*) p); }
-long void_from_candle(const Handle& hp) { return (long) (&hp); }
-long void_from_cptr(Handle* hp) { return (long) (hp); }
+Handle atom_from_the_void(long p) { return ((Atom*) p)->getHandle(); }
+long void_from_candle(const Handle& hp) { return (long) (hp.operator->()); }
+long void_from_cptr(Handle* hp) { return (long) (hp->operator->()); }
