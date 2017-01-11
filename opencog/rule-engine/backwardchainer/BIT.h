@@ -23,21 +23,14 @@
 #ifndef _OPENCOG_BIT_H
 #define _OPENCOG_BIT_H
 
+#include <random>
 #include <boost/operators.hpp>
 #include <opencog/rule-engine/Rule.h>
 #include <opencog/atoms/base/Handle.h>
+#include "Fitness.h"
 
 namespace opencog
 {
-
-/**
- * Contains the fitness type of a certain BIT node. For instance
- * whether the target is a variable query such that the variables
- * maximize the target TV in a certain way, etc.
- */
-class BITFitness
-{
-};
 
 /**
  * A BIT (Back Inference Tree) node, and how it relates to its
@@ -52,17 +45,26 @@ class BITNode
 {
 public:
 	BITNode(const Handle& body=Handle::UNDEFINED,
-	        const BITFitness& fitness=BITFitness());
+	        const BITNodeFitness& fitness=BITNodeFitness());
 
 	// BITNode handle (TODO: maybe this is not necessary)
 	Handle body;
 
 	// BITNode fitness
-	BITFitness fitness;
+	BITNodeFitness fitness;
 
 	// Or-children at the rule level, as multiple rules, or rule
 	// variations (partially unified, etc) can yield the same target.
 	RuleSet rules;
+
+	// True iff all valid rules have already expanded this BIT-node.
+	// TODO (don't forget to reset if the rule set changes)
+	bool exhausted;
+
+	// Estimate the probability of usefulness of expanding this
+	// BIT-Node.
+	// TODO: Maybe this should be moved to BackwardChainer
+	double operator()() const;
 
 	std::string to_string() const;
 };
@@ -81,13 +83,18 @@ public:
 	typedef std::unordered_map<Handle, BITNode> HandleBITNodeMap;
 	HandleBITNodeMap leaf2bitnode;
 
+	// True iff all leaves are exhausted (see BITNode::exhausted)
+	// TODO (don't forget to reset if the rule set changes)
+	bool exhausted;
+
 	/**
 	 * @brief Initialize an and-BIT with a certain target, vardecl and
 	 * fitness and add it in as.
 	 */
 	AndBIT();
 	AndBIT(AtomSpace& as, const Handle& target, const Handle& vardecl,
-	       const BITFitness& fitness=BITFitness());
+	       const BITNodeFitness& fitness=BITNodeFitness());
+	~AndBIT();
 
 	/**
 	 * @brief Expand the and-BIT given a target leaf and rule.
@@ -102,11 +109,19 @@ public:
 	AndBIT expand(const Handle& leaf, const Rule& rule) const;
 
 	/**
-	 * @brief Randomly uniformly select a leaf of the FCS.
+	 * @brief Randomly select a leaf of the FCS. Leaves with lower
+	 * BIT-node fitness have more chance of being selected (cause they
+	 * need to get fitter).
 	 *
 	 * @return The selected leaf.
 	 */
-	BITNode& select_leaf();
+	BITNode* select_leaf();
+
+	/**
+	 * Set the and-BIT exhausted flags to false. Take care of the
+	 * BIT-nodes exhausted flags as well.
+	 */
+	void reset_exhausted();
 
 	/**
 	 * Comparison operators. For operator< compare fcs by size, or by
@@ -118,6 +133,11 @@ public:
 	std::string to_string() const;
 
 private:
+	// Weighted distribution over the targets leaves, defined
+	// according to their BIT-node fitnesses. The higher the fitness
+	// the lower the chance of being selected as it is already fit.
+	typedef std::discrete_distribution<size_t> LeafDistribution;
+
 	/**
 	 * Given an FCS, a leaf of it to expand, and a rule, return a new
 	 * FCS where the leaf has been substituted by the rule premises
@@ -141,7 +161,7 @@ private:
 	 * @brief Build the bitnode associated to leaf and insert it in
 	 * leaf2bitnode.
 	 */
-	void insert_bitnode(Handle leaf, const BITFitness& fitness);
+	void insert_bitnode(Handle leaf, const BITNodeFitness& fitness);
 
 	/**
 	 * Return all the leaves (or blanket because these new target
@@ -205,13 +225,15 @@ public:
 	// because the andbit being expanded is modified (its expanded
 	// bit-Node keeps track of the expansion). Alternatively we could
 	// use a set and define AndBIT::leaf2bitnode as mutable.
-	std::vector<AndBIT> andbits;
+	typedef std::vector<AndBIT> AndBITs;
+	AndBITs andbits;
 
 	/**
-	 * Ctor
+	 * Ctor/Dtor
 	 */
 	BIT(AtomSpace& as, const Handle& target, const Handle& vardecl,
-	    const BITFitness& fitness=BITFitness());
+	    const BITNodeFitness& fitness=BITNodeFitness());
+	~BIT();
 
 	/**
 	 * @brief return true iff the BIT is empty (i.e. has no and-BITs).
@@ -234,37 +256,35 @@ public:
 	AndBIT* expand(AndBIT& andbit, BITNode& bitleaf, const Rule& rule);
 
 	/**
-	 * Select uniformly randomly an and-BIT amonst the and-BITs.
-	 */
-	Handle select_andbit() const;
-
-private:
-	/**
 	 * Insert a new andbit in the BIT and return its pointer, nullptr
 	 * if not inserted (which may happen if an equivalent one is
 	 * already in it).
 	 */
-	AndBIT* insert_andbit(const AndBIT& andbit);
+	AndBIT* insert(const AndBIT& andbit);
+
+	/**
+	 * Erase one more andbits. Return iterator after the erasing has
+	 * occured.
+	 */
+	AndBITs::iterator erase(AndBITs::iterator from, AndBITs::iterator to);
+
+	/**
+	 * Reset to false all and-BITs exhausted flags.
+	 */
+	void reset_exhausted_flags();
 
 	/**
 	 * Return true if the rule is already an or-children of bitnode up
 	 * to an alpha conversion.
 	 */
-	bool is_in(const Rule& rule, const BITNode& bitnode);
+	bool is_in(const Rule& rule, const BITNode& bitnode) const;
 
+private:
 	Handle _init_target;
 	Handle _init_vardecl;
-	BITFitness _init_fitness;
-
-	// // Mapping from handles to their corresponding BITNode
-	// // bodies. Also where the BITNode are actually instantiated.
-	// HandleBITNodeMap _handle2bitnode;
-
-	// // Set of forward chaining strategies, each one corresponding to
-	// // an and-BIT.
-	// OrderedHandleSet _fcss;
+	BITNodeFitness _init_fitness;
 };
-	
+
 // Gdb debugging, see
 // http://wiki.opencog.org/w/Development_standards#Print_OpenCog_Objects
 std::string oc_to_string(const BITNode& bitnode);

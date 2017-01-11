@@ -1,9 +1,8 @@
 /*
  * BIT.cc
  *
- * Author: William Ma <https://github.com/williampma>
- *
- * Copyright (C) 2015 OpenCog Foundation
+ * Copyright (C) 2016-2017 OpenCog Foundation
+ * Author: Nil Geisweiller
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU Affero General Public License v3 as
@@ -37,14 +36,24 @@ namespace opencog {
 // BITNode //
 /////////////
 
-BITNode::BITNode(const Handle& bd, const BITFitness& fi)
-	: body(bd), fitness(fi) {}
+BITNode::BITNode(const Handle& bd, const BITNodeFitness& fi)
+	: body(bd), fitness(fi), exhausted(false) {}
+
+double BITNode::operator()() const
+{
+	// The probably is anti-proportional to the fitness. Indeed if the
+	// fitness already is high, expanding the BIT-Node won't likely
+	// add anything to the success of the inference.
+	return (exhausted ? 0.0 : 1.0) *
+		(fitness.upper - fitness(*this)) / (fitness.upper - fitness.lower);
+}
 
 std::string	BITNode::to_string() const
 {
 	std::stringstream ss;
 	ss << "body:" << std::endl << oc_to_string(body)
-	   << "rules:" << std::endl << oc_to_string(rules);
+	   << "rules:" << std::endl << oc_to_string(rules)
+	   << "exhausted: " << exhausted;
 	return ss.str();
 }
 
@@ -52,10 +61,10 @@ std::string	BITNode::to_string() const
 // AndBIT //
 ////////////
 
-AndBIT::AndBIT() {}
+AndBIT::AndBIT() : exhausted(false) {}
 
 AndBIT::AndBIT(AtomSpace& as, const Handle& target, const Handle& vardecl,
-               const BITFitness& fitness)
+               const BITNodeFitness& fitness) : exhausted(false)
 {
 	// Create initial FCS
 	HandleSeq bl{target, target};
@@ -66,17 +75,43 @@ AndBIT::AndBIT(AtomSpace& as, const Handle& target, const Handle& vardecl,
 	insert_bitnode(target, fitness);
 }
 
+AndBIT::~AndBIT() {}
+
 AndBIT AndBIT::expand(const Handle& leaf, const Rule& rule) const
 {
 	AndBIT andbit;
 	andbit.fcs = expand_fcs(leaf, rule);
-	andbit.set_leaf2bitnode();
+	andbit.set_leaf2bitnode();  // TODO: might differ till needed
 	return andbit;
 }
 
-BITNode& AndBIT::select_leaf()
+BITNode* AndBIT::select_leaf()
 {
-	return rand_element(leaf2bitnode).second;
+	// Generate the distribution over target leaves according to the
+	// BIT-node fitnesses. The higher the fitness the lower the chance
+	// of being selected as it is already fit.
+	std::vector<double> weights;
+	bool all_weights_null = true;
+	for (const auto& lb : leaf2bitnode) {
+		double p = lb.second();
+		weights.push_back(p);
+		if (p > 0) all_weights_null = false;
+	}
+
+	// Check that the distribution is well defined
+	if (all_weights_null)
+		return nullptr;
+
+	// If well defined then sample according to it
+	LeafDistribution dist(weights.begin(), weights.end());
+	return &rand_element(leaf2bitnode, dist).second;
+}
+
+void AndBIT::reset_exhausted()
+{
+	for (auto& el : leaf2bitnode)
+		el.second.exhausted = false;
+	exhausted = false;
 }
 
 bool AndBIT::operator==(const AndBIT& andbit) const
@@ -136,16 +171,16 @@ void AndBIT::set_leaf2bitnode()
 {
 	// For each leaf of fcs, associate a corresponding BITNode
 	for (const Handle& leaf : get_leaves())
-		insert_bitnode(leaf, BITFitness());
+		insert_bitnode(leaf, BITNodeFitness());
 }
 
-void AndBIT::insert_bitnode(Handle leaf, const BITFitness& fitness)
+void AndBIT::insert_bitnode(Handle leaf, const BITNodeFitness& fitness)
 {
 	if (leaf.is_undefined())
 		return;
 
 	if (leaf2bitnode.find(leaf) == leaf2bitnode.end())
-		leaf2bitnode[leaf] = BITNode(leaf, fitness);
+		leaf2bitnode.emplace(leaf, BITNode(leaf, fitness));
 }
 
 OrderedHandleSet AndBIT::get_leaves() const
@@ -305,10 +340,12 @@ bool AndBIT::is_locally_quoted_eq(const Handle& lhs, const Handle& rhs) const
 BIT::BIT(AtomSpace& as,
          const Handle& target,
          const Handle& vardecl,
-         const BITFitness& fitness)
+         const BITNodeFitness& fitness)
 	: bit_as(&as),
 	  _init_target(target), _init_vardecl(vardecl), _init_fitness(fitness)
 {}
+
+BIT::~BIT() {}
 
 bool BIT::empty() const
 {
@@ -338,10 +375,10 @@ AndBIT* BIT::expand(AndBIT& andbit, BITNode& bitleaf, const Rule& rule)
 	bitleaf.rules.insert(rule);
 
 	// Expand the and-BIT and insert it in the BIT
-	return insert_andbit(andbit.expand(bitleaf.body, rule));
+	return insert(andbit.expand(bitleaf.body, rule));
 }
 
-AndBIT* BIT::insert_andbit(const AndBIT& andbit)
+AndBIT* BIT::insert(const AndBIT& andbit)
 {
 	// Check that it isn't already in the BIT
 	if (boost::binary_search(andbits, andbit)) {
@@ -367,7 +404,19 @@ AndBIT* BIT::insert_andbit(const AndBIT& andbit)
 	return &*it;
 }
 
-bool BIT::is_in(const Rule& rule, const BITNode& bitnode)
+BIT::AndBITs::iterator BIT::erase(BIT::AndBITs::iterator from,
+                                  BIT::AndBITs::iterator to)
+{
+	return andbits.erase(from, to);
+}
+
+void BIT::reset_exhausted_flags()
+{
+	for (AndBIT& andbit : andbits)
+		andbit.reset_exhausted();
+}
+
+bool BIT::is_in(const Rule& rule, const BITNode& bitnode) const
 {
 	for (const Rule& bnr : bitnode.rules)
 		if (rule.is_alpha_equivalent(bnr))
