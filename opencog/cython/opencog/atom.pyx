@@ -2,7 +2,7 @@
 # Atom wrapper object
 cdef class Atom(object):
 
-    def __cinit__(self, PATOM lptr, AtomSpace a):
+    def __cinit__(self, PANDLE lptr, AtomSpace a):
         atomo = atom_from_the_void(lptr)
         self.handle = new cHandle(atomo)
 
@@ -10,9 +10,9 @@ cdef class Atom(object):
         del self.handle
 
     def value(self):
-        return void_from_cptr(self.handle)
+        return avoid_from_cptr(self.handle)
 
-    def __init__(self, PATOM lptr, AtomSpace a):
+    def __init__(self, PANDLE lptr, AtomSpace a):
         # self.handle = h is set in __cinit__ above
 
         # cache the results after first retrieval of

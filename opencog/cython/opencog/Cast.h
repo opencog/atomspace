@@ -6,3 +6,4 @@ using namespace opencog;
 Handle atom_from_the_void(long p);
 long   void_from_candle(const Handle& hp);
 long   void_from_cptr(Handle* hp);
+long   avoid_from_cptr(Handle* hp);

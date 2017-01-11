@@ -10,14 +10,16 @@ cdef extern from "Python.h":
     cdef object PyLong_FromVoidPtr(void *p)
 
 ctypedef public long PATOM
+ctypedef public long PANDLE
 
 cdef extern from "opencog/cython/opencog/Cast.h":
     # Tacky hack to pass atom pointer to Atom ctor.
     cdef cHandle atom_from_the_void(long p)
 
     # Tacky hack to convert C objects into Python objects.
-    cdef PATOM   void_from_candle(const cHandle& h)
-    cdef PATOM   void_from_cptr(cHandle* hp)
+    cdef PANDLE   void_from_candle(const cHandle& h)
+    cdef PANDLE   void_from_cptr(cHandle* hp)
+    cdef PATOM   avoid_from_cptr(cHandle* hp)
 
 
 # Basic wrapping for std::string conversion.
