@@ -286,15 +286,6 @@ bool contains_atomtype(const Handle& clause, Type atom_type, Quotation quotation
 	return false;
 }
 
-bool contains_atomtype(const HandleSeq& clauses, Type atom_type)
-{
-	for (const Handle& clause: clauses)
-	{
-		if (contains_atomtype(clause, atom_type)) return true;
-	}
-	return false;
-}
-
 OrderedHandleSet get_free_variables(const Handle& h, Quotation quotation)
 {
 	Type t = h->getType();

@@ -27,6 +27,8 @@
 #include <opencog/util/random.h>
 
 #include <opencog/atomutils/Neighbors.h>
+#include <opencog/atomutils/FindUtils.h>
+
 #include "BIT.h"
 #include "BCLogger.h"
 
@@ -52,8 +54,8 @@ std::string	BITNode::to_string() const
 {
 	std::stringstream ss;
 	ss << "body:" << std::endl << oc_to_string(body)
-	   << "rules:" << std::endl << oc_to_string(rules)
-	   << "exhausted: " << exhausted;
+	   << "exhausted: " << exhausted << std::endl
+	   << "rules: " << oc_to_string(rules);
 	return ss.str();
 }
 
@@ -216,9 +218,16 @@ OrderedHandleSet AndBIT::get_leaves(const Handle& h) const
 			leaves.insert(el_leaves.begin(), el_leaves.end());
 		}
 		return leaves;
-	} else
-		// It is probably a leaf so return it
-		return OrderedHandleSet{h};
+	} else if (contains_atomtype(h, EXECUTION_OUTPUT_LINK)) {
+		// If it contains an unquoted ExecutionOutputLink then it is
+		// not a leaf (maybe it could but it would over complicate the
+		// rest and bring no benefit since we can always expand a
+		// parent and-BIT that has no such ExecutionOutputLink).
+		return OrderedHandleSet{};
+	}
+
+	// Here it must be a leaf so return it
+	return OrderedHandleSet{h};
 }
 
 Handle AndBIT::substitute_unified_variables(const Handle& leaf,
