@@ -282,12 +282,6 @@ bool contains_atomtype(const Handle& clause, Type atom_type,
                        Quotation quotation=Quotation());
 
 /**
- * Returns true if any of the clauses contain an atom of type atom_type.
- * ... but only if it is not quoted.  Quoted terms are constants (literals).
- */
-bool contains_atomtype(const HandleSeq& clauses, Type atom_type);
-
-/**
  * Search for free (unscoped and unquoted) VariableNode in a tree.
  *
  * For example: applying this function over
