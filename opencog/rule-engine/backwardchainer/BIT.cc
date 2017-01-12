@@ -23,6 +23,7 @@
 #include <boost/range/algorithm/lower_bound.hpp>
 #include <boost/range/algorithm/remove_if.hpp>
 #include <boost/range/algorithm/binary_search.hpp>
+#include <boost/range/algorithm/find.hpp>
 
 #include <opencog/util/random.h>
 
@@ -271,14 +272,22 @@ Handle AndBIT::expand_fcs_pattern(const Handle& fcs_pattern,
 		                                     HandleSeq(clauses.begin(),
 		                                               clauses.end()));
 
-	// The fcs contains a conjunction of clauses. Remove any clause
-	// that is equal to the rule conclusion, or precondition that uses
-	// that conclusion as argument.
+	// The fcs contains a conjunction of clauses
 	OC_ASSERT(fcs_pattern->getType() == AND_LINK);
+
+	// Remove any fcs clause that:
+	//
+	// 1. is equal to the rule conclusion.
+	//
+	// 2. is a precondition that uses that conclusion as argument.
+	//
+	// 3. is equal to any rule clause about to get added (to avoid
+	// redundant clauses).
 	HandleSeq fcs_clauses = fcs_pattern->getOutgoingSet();
 	auto to_remove = [&](const Handle& h) {
 		return (is_locally_quoted_eq(h, conclusion)
-		        or is_argument_of(h, conclusion));
+		        or is_argument_of(h, conclusion)
+		        or (boost::find(clauses, h) != clauses.end()));
 	};
 	fcs_clauses.erase(boost::remove_if(fcs_clauses, to_remove),
 	                  fcs_clauses.end());
