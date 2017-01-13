@@ -268,7 +268,7 @@ public:
      * I.e. if the atom is a link, then store all of the atoms
      * in its outgoing set as well, recursively.
      */
-    void store_atom(Handle h);
+    void store_atom(const Handle& h);
 
     /**
      * Extract an atom from the atomspace.  This only removes the atom
