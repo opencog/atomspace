@@ -355,12 +355,9 @@ void PersistUTest::test_atomspace(void)
     add_to_space(idx++, _as, "係拉丁字母");
 
     /* Verify that the atoms were added */
-    idx = 0;
-    check_space(idx++, _as, "verify-add");
-    check_space(idx++, _as, "verify-add");
-    check_space(idx++, _as, "verify-add");
-    check_space(idx++, _as, "verify-add");
-    check_space(idx++, _as, "verify-add");
+    int i;
+    for (i=0; i<idx; i++)
+        check_space(i, _as, "verify-add");
 
     /* Push all atoms out to the SQL DB */
     _pm->do_store();
@@ -374,24 +371,16 @@ void PersistUTest::test_atomspace(void)
     TSM_ASSERT("Non-empty atomspace", 0 == _as->get_size());
 
     /* Verify that the atoms can still be fetched from storage. */
-    idx = 0;
-    check_space(idx++, _as, "verify-fetch");
-    check_space(idx++, _as, "verify-fetch");
-    check_space(idx++, _as, "verify-fetch");
-    check_space(idx++, _as, "verify-fetch");
-    check_space(idx++, _as, "verify-fetch");
+    for (i=0; i<idx; i++)
+        check_space(i, _as, "verify-fetch");
 
     /* Do it again, for good luck.  */
     _as->clear();
     TSM_ASSERT("Non-empty atomspace", 0 == _as->get_size());
 
     /* Verify that the atoms can still be fetched from storage. */
-    idx = 0;
-    check_space(idx++, _as, "ver-again");
-    check_space(idx++, _as, "ver-again");
-    check_space(idx++, _as, "ver-again");
-    check_space(idx++, _as, "ver-again");
-    check_space(idx++, _as, "ver-again");
+    for (i=0; i<idx; i++)
+        check_space(i, _as, "ver-again");
 
     /* Kill data for good */
     _as->clear();
