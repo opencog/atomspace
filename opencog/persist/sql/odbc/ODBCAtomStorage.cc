@@ -1610,6 +1610,7 @@ void ODBCAtomStorage::store(const AtomTable &table)
     printf("Max UUID is %lu\n", max_uuid);
 
     setup_typemap();
+    store_atomtable_id(table);
 
     ODBCConnection* db_conn = get_conn();
     Response rp;
