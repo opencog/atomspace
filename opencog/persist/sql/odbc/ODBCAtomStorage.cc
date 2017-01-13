@@ -445,7 +445,6 @@ void ODBCAtomStorage::init(const char * dbname,
     }
 
     local_id_cache_is_inited = false;
-    table_cache_is_inited = false;
     if (!connected()) return;
 
     reserve();

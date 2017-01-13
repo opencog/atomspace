@@ -68,7 +68,6 @@ class ODBCAtomStorage : public AtomStorage
         // Handle multiple atomspaces like typecodes: we have to
         // convert from sql UUID to the atual UUID.
         std::mutex table_cache_mutex;
-        bool table_cache_is_inited;
         std::set<UUID> table_id_cache;
         void store_atomtable_id(const AtomTable&);
 
