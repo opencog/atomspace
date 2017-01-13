@@ -513,7 +513,7 @@ bool AtomSpace::remove_atom(Handle h, bool recursive)
     return 0 < _atom_table.extract(h, recursive).size();
 }
 
-std::string AtomSpace::to_string()
+std::string AtomSpace::to_string() const
 {
 	std::stringstream ss;
 	ss << *this;
