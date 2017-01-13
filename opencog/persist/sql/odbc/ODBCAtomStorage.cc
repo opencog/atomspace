@@ -424,6 +424,7 @@ void ODBCAtomStorage::unregisterWith(AtomSpace* as)
 
 /* ================================================================== */
 /* AtomTable UUID stuff */
+#define BUFSZ 250
 
 void ODBCAtomStorage::store_atomtable_id(const AtomTable& at)
 {
