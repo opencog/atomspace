@@ -460,12 +460,12 @@ void ODBCAtomStorage::store_atomtable_id(const AtomTable& at)
 
 #define STMT(colname,val) { \
     if (update) { \
-        if (notfirst) { cols += ", "; } else notfirst = 1; \
+        if (notfirst) { cols += ", "; } else notfirst = true; \
         cols += colname; \
         cols += " = "; \
         cols += val; \
     } else { \
-        if (notfirst) { cols += ", "; vals += ", "; } else notfirst = 1; \
+        if (notfirst) { cols += ", "; vals += ", "; } else notfirst = true; \
         cols += colname; \
         vals += val; \
     } \
@@ -503,7 +503,7 @@ bool ODBCAtomStorage::tvExists(int tvid)
  */
 int ODBCAtomStorage::storeTruthValue(AtomPtr atom, Handle h)
 {
-    int notfirst = 0;
+    bool notfirst = false;
     std::string cols;
     std::string vals;
     std::string coda;
@@ -725,7 +725,7 @@ void ODBCAtomStorage::do_store_single_atom(AtomPtr atom, int aheight)
 {
     setup_typemap();
 
-    int notfirst = 0;
+    bool notfirst = false;
     std::string cols;
     std::string vals;
     std::string coda;
