@@ -46,18 +46,19 @@
 #include <sqlext.h>
 #include <stdio.h>
 
+#include <opencog/util/exceptions.h>
+#include <opencog/util/Logger.h>
 #include <opencog/util/platform.h>
 
 #include "odbcxx.h"
 
-
-// cheesy hack for missing PERR
-#define PERR printf
+#define PERR(...) \
+    throw opencog::RuntimeException(TRACE_INFO, __VA_ARGS__);
 
 /* =========================================================== */
 
-#define PRINT_SQLERR(HTYPE,HAN)                                \
-{                                                              \
+#define PRINT_SQLERR(HTYPE,HAN)                                 \
+{                                                               \
     char sql_stat[10];                                          \
     SQLSMALLINT msglen;                                         \
     SQLINTEGER err;                                             \
@@ -65,7 +66,7 @@
                                                                 \
     SQLGetDiagRec(HTYPE, HAN, 1, (SQLCHAR *) sql_stat,          \
                   &err, (SQLCHAR*) msg, sizeof(msg), &msglen);  \
-    PERR("(%ld) %s\n", (long int) err, msg);                    \
+    opencog::logger().warn("(%ld) %s\n", (long int) err, msg);  \
 }
 
 /* =========================================================== */
@@ -100,10 +101,10 @@ ODBCConnection::ODBCConnection(const char * _dbname,
                        (void*)SQL_OV_ODBC3, 0);
     if ((SQL_SUCCESS != rc) and (SQL_SUCCESS_WITH_INFO != rc))
     {
-        PERR("Can't SQLSetEnv, rc=%d", rc);
         PRINT_SQLERR (SQL_HANDLE_ENV, sql_henv);
         SQLFreeHandle(SQL_HANDLE_ENV, sql_henv);
         sql_henv = NULL;
+        PERR("Can't SQLSetEnv, rc=%d", rc);
         return;
     }
 
@@ -111,10 +112,10 @@ ODBCConnection::ODBCConnection(const char * _dbname,
     rc = SQLAllocConnect(sql_henv, &sql_hdbc);
     if ((SQL_SUCCESS != rc) and (SQL_SUCCESS_WITH_INFO != rc))
     {
-        PERR ("Can't SQLAllocConnect handle rc=%d", rc);
         PRINT_SQLERR (SQL_HANDLE_ENV, sql_henv);
         SQLFreeHandle(SQL_HANDLE_ENV, sql_henv);
         sql_henv = NULL;
+        PERR ("Can't SQLAllocConnect handle rc=%d", rc);
         return;
     }
 
@@ -129,12 +130,12 @@ ODBCConnection::ODBCConnection(const char * _dbname,
 
     if ((SQL_SUCCESS != rc) and (SQL_SUCCESS_WITH_INFO != rc))
     {
-        PERR ("Can't perform SQLConnect rc=%d", rc);
         PRINT_SQLERR (SQL_HANDLE_DBC, sql_hdbc);
         SQLFreeHandle(SQL_HANDLE_DBC, sql_hdbc);
         SQLFreeHandle(SQL_HANDLE_ENV, sql_henv);
         sql_henv = NULL;
         sql_hdbc = NULL;
+        PERR ("Can't perform SQLConnect rc=%d", rc);
         return;
     }
 
@@ -207,10 +208,11 @@ void ODBCConnection::extract_error(const char *msg)
     SQLSMALLINT len;
     do
     {
-        ret = SQLGetDiagRec(SQL_HANDLE_ENV, sql_henv, ++i, state, &native, text,
-               sizeof(text), &len);
+        ret = SQLGetDiagRec(SQL_HANDLE_ENV, sql_henv, ++i,
+               state, &native, text, sizeof(text), &len);
         if (SQL_SUCCEEDED(ret))
-            PERR("\t%s : %d : %d : %s\n", state, i, native, text);
+            opencog::logger().warn("\t%s : %d : %d : %s\n",
+                                    state, i, native, text);
     } while (ret == SQL_SUCCESS);
 }
 
@@ -240,11 +242,11 @@ ODBCConnection::exec(const char * buff)
 
     if ((SQL_SUCCESS != rc) and (SQL_SUCCESS_WITH_INFO != rc))
     {
-        PERR ("Can't perform query rc=%d ", rc);
         PRINT_SQLERR (SQL_HANDLE_STMT, rs->sql_hstmt);
         rs->release();
-        PERR ("\tQuery was: %s\n", buff);
+        opencog::logger().warn("\tQuery was: %s\n", buff);
         extract_error("exec");
+        PERR ("Can't perform query rc=%d ", rc);
         return NULL;
     }
 
@@ -317,8 +319,8 @@ ODBCRecordSet::alloc_and_bind_cols(int new_ncols)
     rc = SQLAllocStmt (conn->sql_hdbc, &sql_hstmt);
     if ((SQL_SUCCESS != rc) and (SQL_SUCCESS_WITH_INFO != rc))
     {
-        PERR("Can't allocate statement handle, rc=%d", rc);
         PRINT_SQLERR (SQL_HANDLE_STMT, sql_hstmt);
+        PERR("Can't allocate statement handle, rc=%d", rc);
         /* oops memory leak */
         return;
     }
@@ -343,8 +345,8 @@ ODBCRecordSet::alloc_and_bind_cols(int new_ncols)
             values[i], vsizes[i], &bogus);
         if ((SQL_SUCCESS != rc) and (SQL_SUCCESS_WITH_INFO != rc))
         {
-            PERR ("Can't bind col=%d rc=%d", i, rc);
             PRINT_SQLERR (SQL_HANDLE_STMT, sql_hstmt);
+            PERR ("Can't bind col=%d rc=%d", i, rc);
             return;
         }
     }
@@ -374,11 +376,6 @@ ODBCRecordSet::ODBCRecordSet(ODBCConnection *_conn)
 void
 ODBCRecordSet::release(void)
 {
-    // 'this' is typically null when an error occurred, or if no data
-    // was returned. We don't want a call to 'release()' to crash for
-    // these cases ... we want to just keep going like normal.
-    if (!this) return;
-
     // Avoid accidental double-release
     if (NULL == sql_hstmt) return;
 
@@ -435,15 +432,15 @@ ODBCRecordSet::get_column_labels(void)
     rc = SQLNumResultCols(sql_hstmt, &_ncols);
     if ((SQL_SUCCESS != rc) and (SQL_SUCCESS_WITH_INFO != rc))
     {
-        PERR ("Can't get num columns rc=%d", rc);
         PRINT_SQLERR (SQL_HANDLE_STMT, sql_hstmt);
+        PERR ("Can't get num columns rc=%d", rc);
         return;
     }
 
     if (_ncols > arrsize)
     {
-        PERR( "screwed not enough columns !! ");
         _ncols = arrsize;
+        PERR( "screwed not enough columns !! ");
     }
 
     for (i=0; i<_ncols; i++)
@@ -460,8 +457,8 @@ ODBCRecordSet::get_column_labels(void)
                   &datatype, &column_size, &decimal_digits, &nullable);
         if ((SQL_SUCCESS != rc) and (SQL_SUCCESS_WITH_INFO != rc))
         {
-            PERR ("Can't describe col rc=%d", rc);
             PRINT_SQLERR (SQL_HANDLE_STMT, sql_hstmt);
+            PERR ("Can't describe col rc=%d", rc);
             return;
         }
 
@@ -481,7 +478,6 @@ ODBCRecordSet::get_column_labels(void)
 void
 ODBCRecordSet::rewind(void)
 {
-    if (!this) return;
     SQL_POSITION_TO(sql_hstmt, 0);
 }
 
@@ -489,8 +485,6 @@ ODBCRecordSet::rewind(void)
 int
 ODBCRecordSet::fetch_row(void)
 {
-    if (!this) return 0;
-
     // Columns can have null values.  In this case, the ODBC shims
     // will neither set nor clear the value-strings. As a result,
     // some random value from a previous query will still be sitting
@@ -505,8 +499,8 @@ ODBCRecordSet::fetch_row(void)
 
     if ((SQL_SUCCESS != rc) and (SQL_SUCCESS_WITH_INFO != rc))
     {
-        PERR ("Can't fetch row rc=%d", rc);
         PRINT_SQLERR (SQL_HANDLE_STMT, sql_hstmt);
+        PERR ("Can't fetch row rc=%d", rc);
         return 0;
     }
 
@@ -543,7 +537,6 @@ ODBCRecordSet::get_col_by_name (const char * fieldname)
 const char *
 ODBCRecordSet::get_value(const char * fieldname)
 {
-    if (!this) return NULL;
     int column;
 
     /* If number of columns is negative, then we haven't
@@ -565,8 +558,6 @@ ODBCRecordSet::get_value(const char * fieldname)
 int 
 ODBCRecordSet::get_column_count()
 { 
-    if (!this) return -1;
-
     /* If number of columns is negative, then we haven't
      * gotten any results back yet.  Start by getting the
      * column labels which will set the column count.
@@ -580,8 +571,6 @@ ODBCRecordSet::get_column_count()
 const char * 
 ODBCRecordSet::get_column_value(int column)
 {
-    if (!this) return NULL;
-
     /* Make sure we have columns and this column is in range. */
     if (column >= get_column_count()) return NULL;
 
@@ -677,9 +666,9 @@ dui_odbc_connection_tables (DuiDBConnection *dbc)
 
     if ((SQL_SUCCESS != rc) and (SQL_SUCCESS_WITH_INFO != rc))
     {
-        PERR ("Can't perform query rc=%d", rc);
         PRINT_SQLERR (SQL_HANDLE_STMT, rs->sql_hstmt);
         dui_odbc_recordset_release (&rs->recset);
+        PERR ("Can't perform query rc=%d", rc);
         return NULL;
     }
 
@@ -711,9 +700,9 @@ dui_odbc_connection_table_columns (DuiDBConnection *dbc,
 
     if ((SQL_SUCCESS != rc) and (SQL_SUCCESS_WITH_INFO != rc))
     {
-        PERR ("Can't perform query rc=%d", rc);
         PRINT_SQLERR (SQL_HANDLE_STMT, rs->sql_hstmt);
         dui_odbc_recordset_release (&rs->recset);
+        PERR ("Can't perform query rc=%d", rc);
         return NULL;
     }
 

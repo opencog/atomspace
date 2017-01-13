@@ -2101,6 +2101,8 @@ void PGAtomStorage::store(const AtomTable &table)
     create_tables();
 #endif
 
+    store_atomtable_id(table);
+
     // Get the local cache of stored atoms.
     get_ids();
 
