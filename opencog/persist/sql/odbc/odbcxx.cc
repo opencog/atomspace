@@ -46,13 +46,13 @@
 #include <sqlext.h>
 #include <stdio.h>
 
+#include <opencog/util/exceptions.h>
 #include <opencog/util/platform.h>
 
 #include "odbcxx.h"
 
-
-// cheesy hack for missing PERR
-#define PERR printf
+#define PERR(...) \
+    throw opencog::RuntimeException(TRACE_INFO, __VA_ARGS__);
 
 /* =========================================================== */
 
