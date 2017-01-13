@@ -53,20 +53,21 @@ class MultiPersistUTest :  public CxxTest::TestSuite
         const char * username;
         const char * passwd;
 
-        NodePtr n1[10];
-        NodePtr n2[10];
-        NodePtr n3[10];
-        NodePtr n4[10];
-        LinkPtr l[10];
-        LinkPtr l2[10];
-        LinkPtr l3[10];
-        Handle h1[10];
-        Handle h2[10];
-        Handle h3[10];
-        Handle h4[10];
-        Handle hl[10];
-        Handle hl2[10];
-        Handle hl3[10];
+#define NATOMS 1000
+        NodePtr *n1;
+        NodePtr *n2;
+        NodePtr *n3;
+        NodePtr *n4;
+        LinkPtr *l;
+        LinkPtr *l2;
+        LinkPtr *l3;
+        Handle *h1;
+        Handle *h2;
+        Handle *h3;
+        Handle *h4;
+        Handle *hl;
+        Handle *hl2;
+        Handle *hl3;
 
     public:
 
@@ -117,6 +118,21 @@ MultiPersistUTest:: MultiPersistUTest(void)
     }
     logger().set_level(Logger::DEBUG);
     logger().set_print_to_stdout_flag(true);
+
+    n1 = new NodePtr[NATOMS];
+    n2 = new NodePtr[NATOMS];
+    n3 = new NodePtr[NATOMS];
+    n4 = new NodePtr[NATOMS];
+    l = new LinkPtr[NATOMS];
+    l2 = new LinkPtr[NATOMS];
+    l3 = new LinkPtr[NATOMS];
+    h1 = new Handle[NATOMS];
+    h2 = new Handle[NATOMS];
+    h3 = new Handle[NATOMS];
+    h4 = new Handle[NATOMS];
+    hl = new Handle[NATOMS];
+    hl2 = new Handle[NATOMS];
+    hl3 = new Handle[NATOMS];
 
     try {
         // Get the database logins & etc from the config file.
@@ -269,13 +285,21 @@ void MultiPersistUTest::add_to_space(int idx, AtomSpace *as, std::string id)
 
     // Note that SetLink is an unordered link.
     hl[idx] = as->add_link(SET_LINK, hvec);
+    as->store_atom(hl[idx]);
     l[idx] = LinkCast(hl[idx]);
 
     hl2[idx] = as->add_link(LIST_LINK, hl[idx], h2[idx]);
+    as->store_atom(hl2[idx]);
     l2[idx] = LinkCast(hl2[idx]);
 
     hl3[idx] = as->add_link(EVALUATION_LINK, h1[idx], hl2[idx], h3[idx]);
+    as->store_atom(hl3[idx]);
     l3[idx] = LinkCast(hl3[idx]);
+
+    // Do it again, just for good measure.
+    as->store_atom(hl[idx]);
+    as->store_atom(hl2[idx]);
+    as->store_atom(hl3[idx]);
 }
 
 void MultiPersistUTest::check_space(int idx, AtomSpace *space, std::string dbgmsg)
@@ -361,9 +385,6 @@ void MultiPersistUTest::test_atomspace(void)
     check_space(idx++, _as, "verify-add");
     check_space(idx++, _as, "verify-add");
     check_space(idx++, _as, "verify-add");
-
-    /* Push all atoms out to the SQL DB */
-    _pm->do_store();
 
     /* Extract atoms from the AtomSpace. This does not delete them from
      * the SQL storage, though; to do that, they must be deleted, not
