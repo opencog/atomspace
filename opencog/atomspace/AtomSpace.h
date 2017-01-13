@@ -524,7 +524,7 @@ public:
     /**
      * Convert the atomspace into a string
      */
-    std::string to_string();
+    std::string to_string() const;
 
     /* ----------------------------------------------------------- */
     // ---- Signals
