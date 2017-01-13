@@ -106,8 +106,8 @@ class ODBCAtomStorage : public AtomStorage
         void rename_tables(void);
         void create_tables(void);
 
-        // Track UUID's that are in use.
-        // XXX FIXME -- get rid of this -- the TLB now plays this role.
+        // Track UUID's that are in use. Needed to determine
+        // whether to UPDATE or INSERT.
         std::mutex id_cache_mutex;
         bool local_id_cache_is_inited;
         std::set<UUID> local_id_cache;

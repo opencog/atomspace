@@ -709,9 +709,10 @@ void ODBCAtomStorage::vdo_store_atom(const AtomPtr& atom)
 
 /* ================================================================ */
 /**
- * Store the single, indicated atom.
- * Store its truth values too.
- * The store is performed synchnously (in the calling thread).
+ * Store the just this one single atom.
+ * Store its truth value too.
+ * Atoms in the outgoing set are NOT stored!
+ * The store is performed synchronously (in the calling thread).
  */
 void ODBCAtomStorage::storeSingleAtom(AtomPtr atom)
 {
