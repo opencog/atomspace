@@ -491,6 +491,8 @@ ODBCRecordSet::fetch_row(void)
 {
     if (!this) return 0;
 
+    for (int i=0; i<ncols; i++) values[i][0] = 0;
+
     SQLRETURN rc = SQLFetch(sql_hstmt);
 
     /* no more data */
