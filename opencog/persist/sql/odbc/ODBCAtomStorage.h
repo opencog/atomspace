@@ -1,6 +1,6 @@
 /*
  * FUNCTION:
- * Base class for SQL-backed persistent storage.
+ * ODBC style SQL-backed persistent storage.
  *
  * HISTORY:
  * Copyright (c) 2008,2009 Linas Vepstas <linasvepstas@gmail.com>
