@@ -687,13 +687,12 @@ TruthValue* ODBCAtomStorage::getTV(int tvid)
  */
 int ODBCAtomStorage::get_height(AtomPtr atom)
 {
-    LinkPtr l(LinkCast(atom));
-    if (NULL == l) return 0;
+    if (not atom->isLink()) return 0;
 
     int maxd = 0;
-    int arity = l->getArity();
+    int arity = atom->getArity();
 
-    const HandleSeq& out = l->getOutgoingSet();
+    const HandleSeq& out = atom->getOutgoingSet();
     for (int i=0; i<arity; i++)
     {
         Handle h = out[i];
@@ -764,16 +763,15 @@ void ODBCAtomStorage::storeAtom(const AtomPtr& atom, bool synchronous)
  */
 int ODBCAtomStorage::do_store_atom(AtomPtr atom)
 {
-    LinkPtr l(LinkCast(atom));
-    if (NULL == l)
+    if (atom->isNode())
     {
         do_store_single_atom(atom, 0);
         return 0;
     }
 
     int lheight = 0;
-    int arity = l->getArity();
-    const HandleSeq& out = l->getOutgoingSet();
+    int arity = atom->getArity();
+    const HandleSeq& out = atom->getOutgoingSet();
     for (int i=0; i<arity; i++)
     {
         // Recurse.
@@ -859,13 +857,12 @@ void ODBCAtomStorage::do_store_single_atom(AtomPtr atom, int aheight)
         STMTI("type", dbtype);
 
         // Store the node name, if its a node
-        NodePtr n(NodeCast(atom));
-        if (n)
+        if (atom->isNode())
         {
             // Use postgres $-quoting to make unicode strings
             // easier to deal with.
             std::string qname = " $ocp$";
-            qname += n->getName();
+            qname += atom->getName();
             qname += "$ocp$ ";
 
             // The Atoms table has a UNIQUE constraint on the
@@ -893,10 +890,9 @@ void ODBCAtomStorage::do_store_single_atom(AtomPtr atom, int aheight)
             STMTI("height", aheight);
 
 #ifdef USE_INLINE_EDGES
-            LinkPtr l(LinkCast(atom));
-            if (l)
+            if (atom->isLink())
             {
-                int arity = l->getArity();
+                int arity = atom->getArity();
 
                 // The Atoms table has a UNIQUE constraint on the
                 // outgoing set.  If a link is too large, a postgres
@@ -917,7 +913,7 @@ void ODBCAtomStorage::do_store_single_atom(AtomPtr atom, int aheight)
                 {
                     cols += ", outgoing";
                     vals += ", ";
-                    vals += oset_to_string(l->getOutgoingSet(), arity);
+                    vals += oset_to_string(atom->getOutgoingSet(), arity);
                 }
             }
 #endif /* USE_INLINE_EDGES */
