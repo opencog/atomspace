@@ -249,9 +249,6 @@ class PGAtomStorage : public AtomStorage
         void loadType(AtomTable &, Type);
         void flushStoreQueue();
 
-        // Fetch atoms from DB
-        bool atomExists(Handle);
-
         // Large-scale loads and saves
         void load(AtomTable &); // Load entire contents of DB
         void store(const AtomTable &); // Store entire contents of AtomTable

@@ -1090,23 +1090,6 @@ void ODBCAtomStorage::set_typemap(int dbval, const char * tname)
 }
 
 /* ================================================================ */
-/**
- * Return true if the indicated handle exists in the storage.
- * Thread-safe.
- */
-bool ODBCAtomStorage::atomExists(const Handle& h)
-{
-    UUID uuid = _tlbuf.addAtom(h, TLB::INVALID_UUID);
-#ifdef ASK_SQL_SERVER
-    char buff[BUFSZ];
-    snprintf(buff, BUFSZ, "SELECT uuid FROM Atoms WHERE uuid = %lu;", uuid);
-    return idExists(buff);
-#else
-    std::unique_lock<std::mutex> lock(id_cache_mutex);
-    // look at the local cache of id's to see if the atom is in storage or not.
-    return local_id_cache.count(uuid);
-#endif
-}
 
 /**
  * Add a single UUID to the ID cache. Thread-safe.

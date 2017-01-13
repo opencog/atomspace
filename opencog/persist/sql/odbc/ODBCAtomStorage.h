@@ -181,9 +181,6 @@ class ODBCAtomStorage : public AtomStorage
         // Store atoms to DB
         void storeSingleAtom(AtomPtr);
 
-        // Fetch atoms from DB
-        bool atomExists(const Handle&);
-
         // Large-scale loads and saves
         void load(AtomTable &); // Load entire contents of DB
         void store(const AtomTable &); // Store entire contents of AtomTable

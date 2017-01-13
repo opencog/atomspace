@@ -1332,22 +1332,6 @@ void PGAtomStorage::map_database_type(int dbval, const char * type_name)
 
 /* ================================================================ */
 /**
- * Return true if the indicated handle exists in the storage.
- * Thread-safe.
- */
-bool PGAtomStorage::atomExists(Handle h)
-{
-    UUID uuid = TLB::addAtom(h, TLB::INVALID_UUID);
-#ifdef ASK_SQL_SERVER
-    return query_uuid_exists(uuid);
-#else
-    // Look at the local cache of id's to see if the atom is in storage or not.
-    std::unique_lock<std::mutex> lock(id_cache_mutex);
-    return local_id_cache.count(uuid);
-#endif
-}
-
-/**
  * Add a single UUID to the ID cache. Thread-safe.
  * This also unlocks the id-creation lock, if it was being held.
  */
