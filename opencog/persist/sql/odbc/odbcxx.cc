@@ -374,11 +374,6 @@ ODBCRecordSet::ODBCRecordSet(ODBCConnection *_conn)
 void
 ODBCRecordSet::release(void)
 {
-    // 'this' is typically null when an error occurred, or if no data
-    // was returned. We don't want a call to 'release()' to crash for
-    // these cases ... we want to just keep going like normal.
-    if (!this) return;
-
     // Avoid accidental double-release
     if (NULL == sql_hstmt) return;
 
@@ -481,7 +476,6 @@ ODBCRecordSet::get_column_labels(void)
 void
 ODBCRecordSet::rewind(void)
 {
-    if (!this) return;
     SQL_POSITION_TO(sql_hstmt, 0);
 }
 
@@ -489,8 +483,6 @@ ODBCRecordSet::rewind(void)
 int
 ODBCRecordSet::fetch_row(void)
 {
-    if (!this) return 0;
-
     // Columns can have null values.  In this case, the ODBC shims
     // will neither set nor clear the value-strings. As a result,
     // some random value from a previous query will still be sitting
@@ -543,7 +535,6 @@ ODBCRecordSet::get_col_by_name (const char * fieldname)
 const char *
 ODBCRecordSet::get_value(const char * fieldname)
 {
-    if (!this) return NULL;
     int column;
 
     /* If number of columns is negative, then we haven't
@@ -565,8 +556,6 @@ ODBCRecordSet::get_value(const char * fieldname)
 int 
 ODBCRecordSet::get_column_count()
 { 
-    if (!this) return -1;
-
     /* If number of columns is negative, then we haven't
      * gotten any results back yet.  Start by getting the
      * column labels which will set the column count.
@@ -580,8 +569,6 @@ ODBCRecordSet::get_column_count()
 const char * 
 ODBCRecordSet::get_column_value(int column)
 {
-    if (!this) return NULL;
-
     /* Make sure we have columns and this column is in range. */
     if (column >= get_column_count()) return NULL;
 
