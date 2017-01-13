@@ -1207,6 +1207,16 @@ void ODBCAtomStorage::get_ids(void)
         rp.rs->foreach_row(&Response::note_id_cb, &rp);
         rp.release();
     }
+
+    // Also get the ID's of the spaces that are in use.
+    table_id_cache.clear();
+
+    Response rp;
+    rp.id_set = &table_id_cache;
+    rp.rs = db_conn->exec("SELECT space FROM Spaces;");
+    rp.rs->foreach_row(&Response::note_id_cb, &rp);
+    rp.release();
+
     put_conn(db_conn);
 }
 
