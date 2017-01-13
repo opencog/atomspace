@@ -53,8 +53,6 @@
 
 using namespace opencog;
 
-#define USE_INLINE_EDGES
-
 /* ================================================================ */
 
 /**
@@ -228,36 +226,6 @@ class ODBCAtomStorage::Response
             return false;
         }
 
-#ifndef USE_INLINE_EDGES
-        // Temporary cache of info about the outgoing set.
-        HandleSeq *outvec;
-        Handle dst;
-        int pos;
-
-        bool create_edge_cb(void)
-        {
-            // printf ("---- New edge found ----\n");
-            rs->foreach_column(&Response::create_edge_column_cb, this);
-            int sz = outvec->size();
-            if (sz <= pos) outvec->resize(pos+1);
-            outvec->at(pos) = dst;
-            return false;
-        }
-        bool create_edge_column_cb(const char *colname, const char * colvalue)
-        {
-            // printf ("%s = %s\n", colname, colvalue);
-            if (!strcmp(colname, "dst_uuid"))
-            {
-                dst = Handle(strtoul(colvalue, (char **) NULL, 10));
-            }
-            else if (!strcmp(colname, "pos"))
-            {
-                pos = atoi(colvalue);
-            }
-            return false;
-        }
-#endif /* USE_INLINE_EDGES */
-
         // deal twith the type-to-id map
         bool type_cb(void)
         {
@@ -367,58 +335,6 @@ bool ODBCAtomStorage::idExists(const char * buff)
     put_conn(db_conn);
     return rp.row_exists;
 }
-
-/* ================================================================ */
-#define BUFSZ 250
-
-#ifndef USE_INLINE_EDGES
-/**
- * Callback class, whose method is invoked on each outgoing edge.
- * The callback constructs an SQL query to store the edge.
- */
-class ODBCAtomStorage::Outgoing
-{
-    private:
-        ODBCConnection *db_conn;
-        unsigned int pos;
-        Handle src_handle;
-    public:
-        Outgoing (ODBCConnection *c, Handle h)
-        {
-            db_conn = c;
-            src_handle = h;
-            pos = 0;
-        }
-        bool each_handle (Handle h)
-        {
-            char buff[BUFSZ];
-            UUID src_uuid = _tlbuf.addAtom(src_handle, TLB::INVALID_UUID);
-            UUID dst_uuid = _tlbuf.addAtom(h, TLB::INVALID_UUID);
-            snprintf(buff, BUFSZ, "INSERT  INTO Edges "
-                    "(src_uuid, dst_uuid, pos) VALUES (%lu, %lu, %u);",
-                    src_uuid, dst_uuid, pos);
-
-            Response rp;
-            rp.rs = db_conn->exec(buff);
-            rp.release();
-            pos ++;
-            return false;
-        }
-};
-
-/**
- * Store the outgoing set of the atom.
- * Handle h must be the handle for the atom; its passed as an arg to
- * avoid having to look it up.
- */
-void ODBCAtomStorage::storeOutgoing(AtomPtr atom, Handle h)
-{
-    Outgoing out(db_conn, h);
-
-    foreach_outgoing_handle(h, &Outgoing::each_handle, &out);
-}
-
-#endif /* USE_INLINE_EDGES */
 
 /* ================================================================ */
 // Constructors
@@ -888,7 +804,6 @@ void ODBCAtomStorage::do_store_single_atom(AtomPtr atom, int aheight)
             if (max_height < aheight) max_height = aheight;
             STMTI("height", aheight);
 
-#ifdef USE_INLINE_EDGES
             if (atom->isLink())
             {
                 int arity = atom->getArity();
@@ -912,7 +827,6 @@ void ODBCAtomStorage::do_store_single_atom(AtomPtr atom, int aheight)
                 vals += ", ";
                 vals += oset_to_string(atom->getOutgoingSet(), arity);
             }
-#endif /* USE_INLINE_EDGES */
         }
     }
 
@@ -964,16 +878,6 @@ void ODBCAtomStorage::do_store_single_atom(AtomPtr atom, int aheight)
         rp.release();
     }
     put_conn(db_conn);
-
-#ifndef USE_INLINE_EDGES
-    // Store the outgoing handles only if we are storing for the first
-    // time, otherwise do nothing. The semantics is that, once the
-    // outgoing set has been determined, it cannot be changed.
-    if (false == update)
-    {
-        storeOutgoing(atom);
-    }
-#endif /* USE_INLINE_EDGES */
 
     // Make note of the fact that this atom has been stored.
     add_id_to_cache(uuid);
@@ -1201,25 +1105,6 @@ void ODBCAtomStorage::get_ids(void)
 
     put_conn(db_conn);
 }
-
-/* ================================================================ */
-
-#ifndef USE_INLINE_EDGES
-void ODBCAtomStorage::getOutgoing(HandleSeq &outv, Handle h)
-{
-    char buff[BUFSZ];
-    UUID uuid = _tlbuf.addAtom(h, TLB::INVALID_UUID);
-    snprintf(buff, BUFSZ, "SELECT * FROM Edges WHERE src_uuid = %lu;", uuid);
-
-    ODBCConnection* db_conn = get_conn();
-    Response rp;
-    rp.rs = db_conn->exec(buff);
-    rp.outvec = &outv;
-    rp.rs->foreach_row(&Response::create_edge_cb, &rp);
-    rp.release();
-    put_conn(db_conn);
-}
-#endif /* USE_INLINE_EDGES */
 
 /* ================================================================ */
 
@@ -1607,21 +1492,8 @@ void ODBCAtomStorage::store(const AtomTable &table)
     ODBCConnection* db_conn = get_conn();
     Response rp;
 
-#ifndef USE_INLINE_EDGES
-    // Drop indexes, for faster loading.
-    // But this only matters for the non-inline eges...
-    rp.rs = db_conn->exec("DROP INDEX src_idx;");
-    rp.release();
-#endif
-
     table.foreachHandleByType(
         [&](Handle h)->void { store_cb(h); }, ATOM, true);
-
-#ifndef USE_INLINE_EDGES
-    // Create indexes
-    rp.rs = db_conn->exec("CREATE INDEX src_idx ON Edges (src_uuid);");
-    rp.release();
-#endif /* USE_INLINE_EDGES */
 
     rp.rs = db_conn->exec("VACUUM ANALYZE;");
     rp.release();
@@ -1641,10 +1513,6 @@ void ODBCAtomStorage::rename_tables(void)
 
     rp.rs = db_conn->exec("ALTER TABLE Atoms RENAME TO Atoms_Backup;");
     rp.release();
-#ifndef USE_INLINE_EDGES
-    rp.rs = db_conn->exec("ALTER TABLE Edges RENAME TO Edges_Backup;");
-    rp.release();
-#endif /* USE_INLINE_EDGES */
     rp.rs = db_conn->exec("ALTER TABLE Global RENAME TO Global_Backup;");
     rp.release();
     rp.rs = db_conn->exec("ALTER TABLE TypeCodes RENAME TO TypeCodes_Backup;");
@@ -1683,14 +1551,6 @@ void ODBCAtomStorage::create_tables(void)
                           "UNIQUE (type, name),"
                           "UNIQUE (type, outgoing));");
     rp.release();
-
-#ifndef USE_INLINE_EDGES
-    rp.rs = db_conn->exec("CREATE TABLE Edges ("
-                          "src_uuid  INT,"
-                          "dst_uuid  INT,"
-                          "pos INT);");
-    rp.release();
-#endif /* USE_INLINE_EDGES */
 
     rp.rs = db_conn->exec("CREATE TABLE TypeCodes ("
                           "type SMALLINT UNIQUE,"
