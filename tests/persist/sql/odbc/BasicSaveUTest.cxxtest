@@ -126,6 +126,7 @@ class BasicSaveUTest :  public CxxTest::TestSuite
         void check_table(int, AtomTable *, std::string id);
 
         void test_single_atom(void);
+        void test_fresh_atom(void);
         void test_table(void);
 };
 
@@ -340,6 +341,48 @@ void BasicSaveUTest::test_single_atom(void)
     single_atom_save_restore("ddd ");
     single_atom_save_restore("eee ");
     single_atom_save_restore("$$$ ");
+
+    logger().debug("END TEST: %s", __FUNCTION__);
+}
+
+void BasicSaveUTest::test_fresh_atom(void)
+{
+    logger().debug("BEGIN TEST: %s", __FUNCTION__);
+
+    ODBCAtomStorage *store = new ODBCAtomStorage(dbname, username, passwd);
+    if (!store->connected())
+    {
+        logger().debug("single_atom_save_restore: cannot connect to db");
+        return;
+    }
+
+    Handle ha(createNode(CONCEPT_NODE, "electrical"));
+    Handle hb(createNode(CONCEPT_NODE, "energy"));
+
+    // Store a ListLink with stuff in it.
+    LinkPtr lf(createLink(LIST_LINK, ha, hb));
+    store->storeAtom(lf, true);
+
+    // Store an empty ListLink.
+    LinkPtr le(createLink(LIST_LINK, HandleSeq()));
+    store->storeAtom(le, true);
+
+    // Now get them back.  Get empty after full.
+    Handle hf(lf->getHandle());
+    AtomPtr lfu = store->getLink(hf);
+    atomCompare(lf, lfu, "Fully Fresh");
+
+    Handle he(le->getHandle());
+    AtomPtr lem = store->getLink(he);
+
+    printf("Expecting %s\n", le->toString().c_str());
+    printf("Got pointer: %p\n", lem.operator->());
+    if (lem) printf("Got %s\n", lem->toString().c_str());
+
+    atomCompare(le, lem, "Empty Fresh");
+
+    store->kill_data();
+    delete store;
 
     logger().debug("END TEST: %s", __FUNCTION__);
 }
