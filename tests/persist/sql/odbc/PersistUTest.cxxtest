@@ -153,7 +153,7 @@ void PersistUTest::setUp(void)
 
 void PersistUTest::tearDown(void)
 {
-    /* Orderly shutdown avoids warning in Potgres log file */
+    /* Orderly shutdown avoids warning in Postgres log file. */
     _pm->do_close();
 
     delete _pm;
@@ -349,9 +349,10 @@ void PersistUTest::test_atomspace(void)
     add_to_space(idx++, _as, "DD-dd-wow ");
     add_to_space(idx++, _as, "EE-ee-wow ");
 
-    /* Make sure UTF-8 works fine */
+    /* Make sure UTF-8 works fine. */
     add_to_space(idx++, _as, "Попытка выбраться вызвала слабый стон ");
     add_to_space(idx++, _as, "はにがうりだそうであってるのかはち ");
+    add_to_space(idx++, _as, "係拉丁字母");
 
     /* Verify that the atoms were added */
     idx = 0;
