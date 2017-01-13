@@ -491,6 +491,10 @@ ODBCRecordSet::fetch_row(void)
 {
     if (!this) return 0;
 
+    // Columns can have null values.  In this case, the ODBC shims
+    // will neither set nor clear the value-strings. As a result,
+    // some random value from a previous query will still be sitting
+    // there, in the values, and get reported to the unlucky user.
     for (int i=0; i<ncols; i++) values[i][0] = 0;
 
     SQLRETURN rc = SQLFetch(sql_hstmt);
