@@ -374,6 +374,11 @@ void BasicSaveUTest::test_fresh_atom(void)
 
     Handle he(le->getHandle());
     AtomPtr lem = store->getLink(he);
+
+    printf("Expecting %s\n", le->toString().c_str());
+    printf("Got pointer: %p\n", lem.operator->());
+    if (lem) printf("Got %s\n", lem->toString().c_str());
+
     atomCompare(le, lem, "Empty Fresh");
 
     store->kill_data();

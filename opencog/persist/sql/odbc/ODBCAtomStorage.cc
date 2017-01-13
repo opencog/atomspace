@@ -909,12 +909,9 @@ void ODBCAtomStorage::do_store_single_atom(AtomPtr atom, int aheight)
                         "Error: do_store_single_atom: Maxiumum Link size is 330.\n");
                 }
 
-                if (arity)
-                {
-                    cols += ", outgoing";
-                    vals += ", ";
-                    vals += oset_to_string(atom->getOutgoingSet(), arity);
-                }
+                cols += ", outgoing";
+                vals += ", ";
+                vals += oset_to_string(atom->getOutgoingSet(), arity);
             }
 #endif /* USE_INLINE_EDGES */
         }
