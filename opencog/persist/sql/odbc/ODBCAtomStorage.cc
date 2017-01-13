@@ -1022,6 +1022,14 @@ void ODBCAtomStorage::add_id_to_cache(UUID uuid)
  * to avoid the case of two threads, each trying to perform an INSERT
  * in the same ID. We do this by taking the id_create_mutex, so that
  * only one writer ever gets told that its a new ID.
+ *
+ * This cannot be replaced by the new Postgres UPSERT command (well,
+ * actually the INSERT ... ON CONFLICT UPDATE command) because we still
+ * have to make sure that an atom is uniquely associated with a given
+ * UUID, even if two different threads race, trying to store the same
+ * atom. Otherwise, we risk inserting the same atom twice, with two
+ * different UUID's. Whatever. The point is that the issuance of UUID's
+ * is subtle, and can be bungled, if you're not careful.
  */
 std::unique_lock<std::mutex> ODBCAtomStorage::maybe_create_id(UUID uuid)
 {
