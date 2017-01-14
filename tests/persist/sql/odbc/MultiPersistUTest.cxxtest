@@ -56,10 +56,9 @@ class MultiPersistUTest :  public CxxTest::TestSuite
         const char * username;
         const char * passwd;
 
-#define NTHREADS 20
-#define NREPS 50
+#define NTHREADS 16
 #define NHACK 10
-#define NATOMS (NTHREADS * NREPS * NHACK)
+#define NATOMS (NTHREADS * NHACK)
         NodePtr *n1;
         NodePtr *n2;
         NodePtr *n3;
@@ -113,6 +112,7 @@ class MultiPersistUTest :  public CxxTest::TestSuite
         void atomCompare(AtomPtr, AtomPtr, std::string);
 
         void threaded_add(int);
+        void one_rep(void);
 
         void test_atomspace(void);
 };
@@ -215,10 +215,14 @@ void MultiPersistUTest::kill_data(void)
 
 void MultiPersistUTest::atomCompare(AtomPtr a, AtomPtr b, std::string where)
 {
-    printf("Check %s expect %s\n", where.c_str(), a->toString().c_str());
+    // printf("Check %s expect %s\n", where.c_str(), a->toString().c_str());
     TSM_ASSERT("No atom found", b != nullptr);
 
-    if (nullptr == b) return;
+    if (nullptr == b)
+    {
+        printf("Check %s expect %s\n", where.c_str(), a->toString().c_str());
+        return;
+    }
 
     TSM_ASSERT_EQUALS("Type mismatch", a->getType(), b->getType());
 
@@ -313,10 +317,16 @@ void MultiPersistUTest::add_to_space(int idx, AtomSpace *as, std::string id)
     as->store_atom(hl[idx]);
     as->store_atom(hl2[idx]);
     as->store_atom(hl3[idx]);
+
+    // printf("Added for idx=%d\n", idx);
+    fflush(stdout);
 }
 
 void MultiPersistUTest::check_space(int idx, AtomSpace *space, std::string dbgmsg)
 {
+    // printf("Checking %d\n", idx);
+    fflush(stdout);
+
     Handle hb1 = space->get_handle(n1[idx]->getType(), n1[idx]->getName());
     atomCompare(h1[idx], hb1, dbgmsg + "-hb1");
 
@@ -395,13 +405,11 @@ void MultiPersistUTest::threaded_add(int thread_id)
 }
 
 // ============================================================
+// Perform one repetition of the unit test.
 
-void MultiPersistUTest::test_atomspace(void)
+void MultiPersistUTest::one_rep(void)
 {
-    logger().debug("BEGIN TEST: %s", __FUNCTION__);
-
-    TSM_ASSERT("Persist Module not loaded", _pm);
-
+    printf("Start one repetition\n");
     std::vector<std::thread> thread_pool;
     for (int i=0; i < n_threads; i++) {
         thread_pool.push_back(
@@ -409,6 +417,7 @@ void MultiPersistUTest::test_atomspace(void)
     }
 
     for (std::thread& t : thread_pool) t.join();
+    printf("Done joining threads\n");
 
     /* Extract atoms from the AtomSpace. This does not delete them from
      * the SQL storage, though; to do that, they must be deleted, not
@@ -419,20 +428,20 @@ void MultiPersistUTest::test_atomspace(void)
     TSM_ASSERT("Non-empty atomspace", 0 == _as->get_size());
 
     int i, off;
-#define NATS 9
+#define NATS 8
     /* Verify that the atoms can still be fetched from storage. */
-    for (i=0; i<NATS; i++)
-        for (off=0; off<n_threads; off++)
-            check_space(off+i, _as, "verify-fetch");
+   for (off=0; off<n_threads; off++)
+        for (i=0; i<NATS; i++)
+            check_space(NHACK*off+i, _as, "verify-fetch");
 
     /* Do it again, for good luck.  */
     _as->clear();
     TSM_ASSERT("Non-empty atomspace", 0 == _as->get_size());
 
     /* Verify that the atoms can still be fetched from storage. */
-    for (i=0; i<NATS; i++)
-        for (off=0; off<n_threads; off++)
-            check_space(off+i, _as, "verify-again");
+    for (off=0; off<n_threads; off++)
+        for (i=0; i<NATS; i++)
+            check_space(NHACK*off+i, _as, "verify-again");
 
     /* Kill data for good */
     _as->clear();
@@ -440,9 +449,21 @@ void MultiPersistUTest::test_atomspace(void)
     kill_data();
 
     /* Verify that the atoms no longer being found. */
-    for (i=0; i<NATS; i++)
-        for (off=0; off<n_threads; off++)
-            check_empty(off+i, _as);
+    for (off=0; off<n_threads; off++)
+        for (i=0; i<NATS; i++)
+            check_empty(NHACK*off+i, _as);
+}
+
+// ============================================================
+
+void MultiPersistUTest::test_atomspace(void)
+{
+    logger().debug("BEGIN TEST: %s", __FUNCTION__);
+
+    TSM_ASSERT("Persist Module not loaded", _pm);
+
+#define NREPS 3
+    for (int i=0; i<NREPS; i++) one_rep();
 
     logger().debug("END TEST: %s", __FUNCTION__);
 }
