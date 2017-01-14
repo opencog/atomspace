@@ -55,62 +55,47 @@ Handle TLB::do_res(const Handle& h)
 
 UUID TLB::addAtom(const Handle& h, UUID uuid)
 {
-    if (uuid == INVALID_UUID)
+    Handle hr = do_res(h);
+
+    // We need to always use the atomspace version of this handle
+    if (nullptr == hr) hr = h;
+
+    std::lock_guard<std::mutex> lck(_mtx);
+
+    // If we hold something that isn't the atomspace's version,
+    // then remove it. Only theatomspace's version has the
+    // correct TV on it.
+    if (hr != h)
     {
-        std::lock_guard<std::mutex> lck(_mtx);
         auto pr = _handle_map.find(h);
         if (_handle_map.end() != pr)
         {
             uuid = pr->second;
-            Handle hr = do_res(pr->first);
-            if (nullptr == hr) return uuid;
-            if (hr == pr->first) return uuid;
-
-            // Make sure that we always store the atomspaces
-            // version (as its the one with the right TV on it).
             _handle_map.erase(pr);
             _uuid_map.erase(uuid);
-
-            _handle_map.emplace(std::make_pair(hr, uuid));
-            _uuid_map.emplace(std::make_pair(uuid, hr));
-            return uuid;
         }
+    }
 
+    auto pr = _handle_map.find(hr);
+    if (uuid == INVALID_UUID)
+    {
+        if (_handle_map.end() != pr) return pr->second;
+
+        // Not found; we need a new uuid.
         uuid = _brk_uuid.fetch_add(1, std::memory_order_relaxed);
     }
     else
     {
-        std::lock_guard<std::mutex> lck(_mtx);
-        auto pr = _handle_map.find(h);
         if (_handle_map.end() != pr)
         {
             if (uuid != pr->second)
                 throw InvalidParamException(TRACE_INFO,
                      "Atom is already in the TLB, and UUID's don't match!");
-
-            Handle hr = do_res(pr->first);
-            if (nullptr == hr) return uuid;
-            if (hr == pr->first) return uuid;
-
-            // Make sure that we always store the atomspaces
-            // version (as its the one with the right TV on it).
-            _handle_map.erase(pr);
-            _uuid_map.erase(uuid);
-
-            _handle_map.emplace(std::make_pair(hr, uuid));
-            _uuid_map.emplace(std::make_pair(uuid, hr));
-
             return uuid;
         }
-
         reserve_upto(uuid);
     }
 
-    // We need to always use the atomspace version of this handle
-    Handle hr = do_res(h);
-    if (nullptr == hr) hr = h;
-
-    std::lock_guard<std::mutex> lck(_mtx);
     _uuid_map.emplace(std::make_pair(uuid, hr));
     _handle_map.emplace(std::make_pair(hr, uuid));
 
