@@ -389,7 +389,7 @@ void PersistUTest::test_atomspace(void)
 
     /* Verify that the atoms are no longer being found. */
     for (i=0; i<idx; i++)
-        check_space(i, _as, "ver-again");
+        check_empty(i, _as);
 
     logger().debug("END TEST: %s", __FUNCTION__);
 }
