@@ -93,6 +93,9 @@ void SQLPersistSCM::init(void)
     define_scheme_primitive("sql-close", &SQLPersistSCM::do_close, this, "persist-sql");
     define_scheme_primitive("sql-load", &SQLPersistSCM::do_load, this, "persist-sql");
     define_scheme_primitive("sql-store", &SQLPersistSCM::do_store, this, "persist-sql");
+#ifdef STORAGE_DEBUG
+    define_scheme_primitive("sql-stats", &SQLPersistSCM::do_stats, this, "persist-sql");
+#endif
 }
 
 SQLPersistSCM::~SQLPersistSCM()
@@ -166,8 +169,21 @@ void SQLPersistSCM::do_store(void)
     _store->storeAtomSpace(as);
 }
 
+#ifdef STORAGE_DEBUG
+void SQLPersistSCM::do_stats(void)
+{
+    if (_store == NULL)
+        printf("sql-stats: Database not open\n");
+
+    if (NULL == _as)
+        printf("sql-stats: AtomSpace not set\n");
+
+    printf("sql-stats: tlbuf size=%lu\n", _store->tlb_size());
+}
+#endif
+
 void opencog_persist_sql_init(void)
 {
-   static SQLPersistSCM patty(NULL);
+    static SQLPersistSCM patty(NULL);
 }
 #endif // HAVE_GUILE

@@ -170,6 +170,7 @@ class ODBCAtomStorage : public AtomStorage
         void unregisterWith(AtomSpace*);
         void extract_callback(const AtomPtr&);
         boost::signals2::connection _extract_sig;
+        size_t tlb_size(void) { return _tlbuf.size(); }
 
         // AtomStorage interface
         Handle getNode(Type, const char *);

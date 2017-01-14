@@ -60,6 +60,11 @@ public:
     void do_load(void);
     void do_store(void);
 
+// #define STORAGE_DEBUG 1
+#ifdef STORAGE_DEBUG
+    void do_stats(void);
+#endif
+
 }; // class
 
 /** @}*/
