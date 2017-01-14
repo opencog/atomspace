@@ -834,9 +834,12 @@ AtomPtrSet AtomTable::extract(Handle& handle, bool recursive)
     // removed.  This is needed so that certain subsystems, e.g. the
     // Agent system activity table, can correctly manage the atom;
     // it needs info that gets blanked out during removal.
-    lck.unlock();
+    // Pfft. Give up the pretension. This is a recursive lock;
+    // unlocking it once is not enough, because it can still be
+    // recurisvely locked.
+    // lck.unlock();
     _removeAtomSignal(atom);
-    lck.lock();
+    // lck.lock();
 
     // Decrements the size of the table
     _size--;
