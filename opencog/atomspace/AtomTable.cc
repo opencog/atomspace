@@ -52,12 +52,11 @@
 #include <opencog/util/Logger.h>
 
 //#define DPRINTF printf
-//#define tableId (0) // Hack around some DPRINTF statements that want an old tableID member variable
 #define DPRINTF(...)
 
 using namespace opencog;
 
-// Nothig should ever get the uuid of zero. Zero is reserved for
+// Nothing should ever get the uuid of zero. Zero is reserved for
 // "no atomtable" (in the persist code).
 static std::atomic<UUID> _id_pool(1);
 
