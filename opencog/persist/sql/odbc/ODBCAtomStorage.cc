@@ -940,7 +940,10 @@ void ODBCAtomStorage::setup_typemap(void)
 {
     /* Only need to set up the typemap once. */
     if (type_map_was_loaded) return;
-    type_map_was_loaded = true;
+
+    /* Again, under the lock, so we don't race against ourselves. */
+    std::lock_guard<std::mutex> lck(_typemap_mutex);
+    if (type_map_was_loaded) return;
 
     // If we are here, we need to reconcile the types currently in
     // use, with a possibly pre-existing typemap. New types must be
@@ -1006,6 +1009,9 @@ void ODBCAtomStorage::setup_typemap(void)
         }
     }
     put_conn(db_conn);
+
+    // Set this last!
+    type_map_was_loaded = true;
 }
 
 void ODBCAtomStorage::set_typemap(int dbval, const char * tname)

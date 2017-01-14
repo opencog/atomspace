@@ -148,6 +148,7 @@ class ODBCAtomStorage : public AtomStorage
         void load_typemap(void);
         void setup_typemap(void);
         void set_typemap(int, const char *);
+        std::mutex _typemap_mutex;
 
 #ifdef OUT_OF_LINE_TVS
         bool tvExists(int);
