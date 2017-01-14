@@ -1,6 +1,6 @@
 /*
  * FUNCTION:
- * Base class for SQL-backed persistent storage.
+ * ODBC style SQL-backed persistent storage.
  *
  * HISTORY:
  * Copyright (c) 2008,2009 Linas Vepstas <linasvepstas@gmail.com>
@@ -68,7 +68,6 @@ class ODBCAtomStorage : public AtomStorage
         // Handle multiple atomspaces like typecodes: we have to
         // convert from sql UUID to the atual UUID.
         std::mutex table_cache_mutex;
-        bool table_cache_is_inited;
         std::set<UUID> table_id_cache;
         void store_atomtable_id(const AtomTable&);
 
@@ -107,8 +106,8 @@ class ODBCAtomStorage : public AtomStorage
         void rename_tables(void);
         void create_tables(void);
 
-        // Track UUID's that are in use.
-        // XXX FIXME -- get rid of this -- the TLB now plays this role.
+        // Track UUID's that are in use. Needed to determine
+        // whether to UPDATE or INSERT.
         std::mutex id_cache_mutex;
         bool local_id_cache_is_inited;
         std::set<UUID> local_id_cache;
@@ -180,9 +179,6 @@ class ODBCAtomStorage : public AtomStorage
 
         // Store atoms to DB
         void storeSingleAtom(AtomPtr);
-
-        // Fetch atoms from DB
-        bool atomExists(const Handle&);
 
         // Large-scale loads and saves
         void load(AtomTable &); // Load entire contents of DB

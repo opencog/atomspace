@@ -53,8 +53,6 @@
 
 using namespace opencog;
 
-#define USE_INLINE_EDGES
-
 /* ================================================================ */
 
 /**
@@ -228,36 +226,6 @@ class ODBCAtomStorage::Response
             return false;
         }
 
-#ifndef USE_INLINE_EDGES
-        // Temporary cache of info about the outgoing set.
-        HandleSeq *outvec;
-        Handle dst;
-        int pos;
-
-        bool create_edge_cb(void)
-        {
-            // printf ("---- New edge found ----\n");
-            rs->foreach_column(&Response::create_edge_column_cb, this);
-            int sz = outvec->size();
-            if (sz <= pos) outvec->resize(pos+1);
-            outvec->at(pos) = dst;
-            return false;
-        }
-        bool create_edge_column_cb(const char *colname, const char * colvalue)
-        {
-            // printf ("%s = %s\n", colname, colvalue);
-            if (!strcmp(colname, "dst_uuid"))
-            {
-                dst = Handle(strtoul(colvalue, (char **) NULL, 10));
-            }
-            else if (!strcmp(colname, "pos"))
-            {
-                pos = atoi(colvalue);
-            }
-            return false;
-        }
-#endif /* USE_INLINE_EDGES */
-
         // deal twith the type-to-id map
         bool type_cb(void)
         {
@@ -369,58 +337,6 @@ bool ODBCAtomStorage::idExists(const char * buff)
 }
 
 /* ================================================================ */
-#define BUFSZ 250
-
-#ifndef USE_INLINE_EDGES
-/**
- * Callback class, whose method is invoked on each outgoing edge.
- * The callback constructs an SQL query to store the edge.
- */
-class ODBCAtomStorage::Outgoing
-{
-    private:
-        ODBCConnection *db_conn;
-        unsigned int pos;
-        Handle src_handle;
-    public:
-        Outgoing (ODBCConnection *c, Handle h)
-        {
-            db_conn = c;
-            src_handle = h;
-            pos = 0;
-        }
-        bool each_handle (Handle h)
-        {
-            char buff[BUFSZ];
-            UUID src_uuid = _tlbuf.addAtom(src_handle, TLB::INVALID_UUID);
-            UUID dst_uuid = _tlbuf.addAtom(h, TLB::INVALID_UUID);
-            snprintf(buff, BUFSZ, "INSERT  INTO Edges "
-                    "(src_uuid, dst_uuid, pos) VALUES (%lu, %lu, %u);",
-                    src_uuid, dst_uuid, pos);
-
-            Response rp;
-            rp.rs = db_conn->exec(buff);
-            rp.release();
-            pos ++;
-            return false;
-        }
-};
-
-/**
- * Store the outgoing set of the atom.
- * Handle h must be the handle for the atom; its passed as an arg to
- * avoid having to look it up.
- */
-void ODBCAtomStorage::storeOutgoing(AtomPtr atom, Handle h)
-{
-    Outgoing out(db_conn, h);
-
-    foreach_outgoing_handle(h, &Outgoing::each_handle, &out);
-}
-
-#endif /* USE_INLINE_EDGES */
-
-/* ================================================================ */
 // Constructors
 
 void ODBCAtomStorage::init(const char * dbname,
@@ -445,7 +361,6 @@ void ODBCAtomStorage::init(const char * dbname,
     }
 
     local_id_cache_is_inited = false;
-    table_cache_is_inited = false;
     if (!connected()) return;
 
     reserve();
@@ -509,6 +424,7 @@ void ODBCAtomStorage::unregisterWith(AtomSpace* as)
 
 /* ================================================================== */
 /* AtomTable UUID stuff */
+#define BUFSZ 250
 
 void ODBCAtomStorage::store_atomtable_id(const AtomTable& at)
 {
@@ -544,12 +460,12 @@ void ODBCAtomStorage::store_atomtable_id(const AtomTable& at)
 
 #define STMT(colname,val) { \
     if (update) { \
-        if (notfirst) { cols += ", "; } else notfirst = 1; \
+        if (notfirst) { cols += ", "; } else notfirst = true; \
         cols += colname; \
         cols += " = "; \
         cols += val; \
     } else { \
-        if (notfirst) { cols += ", "; vals += ", "; } else notfirst = 1; \
+        if (notfirst) { cols += ", "; vals += ", "; } else notfirst = true; \
         cols += colname; \
         vals += val; \
     } \
@@ -587,7 +503,7 @@ bool ODBCAtomStorage::tvExists(int tvid)
  */
 int ODBCAtomStorage::storeTruthValue(AtomPtr atom, Handle h)
 {
-    int notfirst = 0;
+    bool notfirst = false;
     std::string cols;
     std::string vals;
     std::string coda;
@@ -793,9 +709,10 @@ void ODBCAtomStorage::vdo_store_atom(const AtomPtr& atom)
 
 /* ================================================================ */
 /**
- * Store the single, indicated atom.
- * Store its truth values too.
- * The store is performed synchnously (in the calling thread).
+ * Store the just this one single atom.
+ * Store its truth value too.
+ * Atoms in the outgoing set are NOT stored!
+ * The store is performed synchronously (in the calling thread).
  */
 void ODBCAtomStorage::storeSingleAtom(AtomPtr atom)
 {
@@ -808,7 +725,7 @@ void ODBCAtomStorage::do_store_single_atom(AtomPtr atom, int aheight)
 {
     setup_typemap();
 
-    int notfirst = 0;
+    bool notfirst = false;
     std::string cols;
     std::string vals;
     std::string coda;
@@ -889,7 +806,6 @@ void ODBCAtomStorage::do_store_single_atom(AtomPtr atom, int aheight)
             if (max_height < aheight) max_height = aheight;
             STMTI("height", aheight);
 
-#ifdef USE_INLINE_EDGES
             if (atom->isLink())
             {
                 int arity = atom->getArity();
@@ -913,7 +829,6 @@ void ODBCAtomStorage::do_store_single_atom(AtomPtr atom, int aheight)
                 vals += ", ";
                 vals += oset_to_string(atom->getOutgoingSet(), arity);
             }
-#endif /* USE_INLINE_EDGES */
         }
     }
 
@@ -965,16 +880,6 @@ void ODBCAtomStorage::do_store_single_atom(AtomPtr atom, int aheight)
         rp.release();
     }
     put_conn(db_conn);
-
-#ifndef USE_INLINE_EDGES
-    // Store the outgoing handles only if we are storing for the first
-    // time, otherwise do nothing. The semantics is that, once the
-    // outgoing set has been determined, it cannot be changed.
-    if (false == update)
-    {
-        storeOutgoing(atom);
-    }
-#endif /* USE_INLINE_EDGES */
 
     // Make note of the fact that this atom has been stored.
     add_id_to_cache(uuid);
@@ -1090,23 +995,6 @@ void ODBCAtomStorage::set_typemap(int dbval, const char * tname)
 }
 
 /* ================================================================ */
-/**
- * Return true if the indicated handle exists in the storage.
- * Thread-safe.
- */
-bool ODBCAtomStorage::atomExists(const Handle& h)
-{
-    UUID uuid = _tlbuf.addAtom(h, TLB::INVALID_UUID);
-#ifdef ASK_SQL_SERVER
-    char buff[BUFSZ];
-    snprintf(buff, BUFSZ, "SELECT uuid FROM Atoms WHERE uuid = %lu;", uuid);
-    return idExists(buff);
-#else
-    std::unique_lock<std::mutex> lock(id_cache_mutex);
-    // look at the local cache of id's to see if the atom is in storage or not.
-    return local_id_cache.count(uuid);
-#endif
-}
 
 /**
  * Add a single UUID to the ID cache. Thread-safe.
@@ -1134,6 +1022,14 @@ void ODBCAtomStorage::add_id_to_cache(UUID uuid)
  * to avoid the case of two threads, each trying to perform an INSERT
  * in the same ID. We do this by taking the id_create_mutex, so that
  * only one writer ever gets told that its a new ID.
+ *
+ * This cannot be replaced by the new Postgres UPSERT command (well,
+ * actually the INSERT ... ON CONFLICT UPDATE command) because we still
+ * have to make sure that an atom is uniquely associated with a given
+ * UUID, even if two different threads race, trying to store the same
+ * atom. Otherwise, we risk inserting the same atom twice, with two
+ * different UUID's. Whatever. The point is that the issuance of UUID's
+ * is subtle, and can be bungled, if you're not careful.
  */
 std::unique_lock<std::mutex> ODBCAtomStorage::maybe_create_id(UUID uuid)
 {
@@ -1219,25 +1115,6 @@ void ODBCAtomStorage::get_ids(void)
 
     put_conn(db_conn);
 }
-
-/* ================================================================ */
-
-#ifndef USE_INLINE_EDGES
-void ODBCAtomStorage::getOutgoing(HandleSeq &outv, Handle h)
-{
-    char buff[BUFSZ];
-    UUID uuid = _tlbuf.addAtom(h, TLB::INVALID_UUID);
-    snprintf(buff, BUFSZ, "SELECT * FROM Edges WHERE src_uuid = %lu;", uuid);
-
-    ODBCConnection* db_conn = get_conn();
-    Response rp;
-    rp.rs = db_conn->exec(buff);
-    rp.outvec = &outv;
-    rp.rs->foreach_row(&Response::create_edge_cb, &rp);
-    rp.release();
-    put_conn(db_conn);
-}
-#endif /* USE_INLINE_EDGES */
 
 /* ================================================================ */
 
@@ -1625,21 +1502,8 @@ void ODBCAtomStorage::store(const AtomTable &table)
     ODBCConnection* db_conn = get_conn();
     Response rp;
 
-#ifndef USE_INLINE_EDGES
-    // Drop indexes, for faster loading.
-    // But this only matters for the non-inline eges...
-    rp.rs = db_conn->exec("DROP INDEX src_idx;");
-    rp.release();
-#endif
-
     table.foreachHandleByType(
         [&](Handle h)->void { store_cb(h); }, ATOM, true);
-
-#ifndef USE_INLINE_EDGES
-    // Create indexes
-    rp.rs = db_conn->exec("CREATE INDEX src_idx ON Edges (src_uuid);");
-    rp.release();
-#endif /* USE_INLINE_EDGES */
 
     rp.rs = db_conn->exec("VACUUM ANALYZE;");
     rp.release();
@@ -1659,10 +1523,6 @@ void ODBCAtomStorage::rename_tables(void)
 
     rp.rs = db_conn->exec("ALTER TABLE Atoms RENAME TO Atoms_Backup;");
     rp.release();
-#ifndef USE_INLINE_EDGES
-    rp.rs = db_conn->exec("ALTER TABLE Edges RENAME TO Edges_Backup;");
-    rp.release();
-#endif /* USE_INLINE_EDGES */
     rp.rs = db_conn->exec("ALTER TABLE Global RENAME TO Global_Backup;");
     rp.release();
     rp.rs = db_conn->exec("ALTER TABLE TypeCodes RENAME TO TypeCodes_Backup;");
@@ -1701,14 +1561,6 @@ void ODBCAtomStorage::create_tables(void)
                           "UNIQUE (type, name),"
                           "UNIQUE (type, outgoing));");
     rp.release();
-
-#ifndef USE_INLINE_EDGES
-    rp.rs = db_conn->exec("CREATE TABLE Edges ("
-                          "src_uuid  INT,"
-                          "dst_uuid  INT,"
-                          "pos INT);");
-    rp.release();
-#endif /* USE_INLINE_EDGES */
 
     rp.rs = db_conn->exec("CREATE TABLE TypeCodes ("
                           "type SMALLINT UNIQUE,"

@@ -78,7 +78,6 @@ class ZMQClient
 		void flushStoreQueue();
 
 		// Fetch atoms from DB
-//		bool atomExists(Handle);
 		AtomPtr getAtom(UUID);
 		HandleSeq getIncomingSet(const Handle& );
 		Handle getNode(Type, const char *);

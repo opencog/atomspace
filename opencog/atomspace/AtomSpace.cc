@@ -419,7 +419,7 @@ Handle AtomSpace::get_link(Type t, const HandleSeq& outgoing)
     return Handle::UNDEFINED;
 }
 
-void AtomSpace::store_atom(Handle h)
+void AtomSpace::store_atom(const Handle& h)
 {
     if (NULL == _backing_store)
         throw RuntimeException(TRACE_INFO, "No backing store");
