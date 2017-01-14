@@ -415,11 +415,34 @@ bool ODBCAtomStorage::connected(void)
 void ODBCAtomStorage::registerWith(AtomSpace* as)
 {
 	_tlbuf.set_resolver(&as->get_atomtable());
+
+	// The goal here is to avoid cluttering the TLB with lots of
+	// extra junk that has been removed from the atomspace. This
+	// can happen if/when transient atoms are added to the atomspace
+	// while the sql backend is attached. The backend apparatus will
+	// query the back-end, not knowng that these atoms are transient,
+	// and they'll end up here, in the TLB, chewing up space. So just
+	// delete them, as chances are, they'll never be used again.
+#ifdef LATER
+
+arh. this is deadlocking somwhere...
+	_extract_sig = as->removeAtomSignal(
+		boost::bind(&ODBCAtomStorage::extract_callback, this, _1));
+#endif
 }
 
 void ODBCAtomStorage::unregisterWith(AtomSpace* as)
 {
 	_tlbuf.clear_resolver(&as->get_atomtable());
+
+#ifdef LATER
+	_extract_sig.disconnect();
+#endif
+}
+
+void ODBCAtomStorage::extract_callback(const AtomPtr& atom)
+{
+	_tlbuf.removeAtom(atom);
 }
 
 /* ================================================================== */

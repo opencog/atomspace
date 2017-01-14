@@ -118,7 +118,14 @@ class ODBCAtomStorage : public AtomStorage
         std::set<UUID> id_create_cache;
         std::unique_lock<std::mutex> maybe_create_id(UUID);
 
+// #define STORAGE_DEBUG 1
+#ifdef STORAGE_DEBUG
+    public:
+#endif
         TLB _tlbuf;
+#ifdef STORAGE_DEBUG
+    private:
+#endif
 
         UUID getMaxObservedUUID(void);
         int getMaxObservedHeight(void);
@@ -168,6 +175,8 @@ class ODBCAtomStorage : public AtomStorage
 
         void registerWith(AtomSpace*);
         void unregisterWith(AtomSpace*);
+        void extract_callback(const AtomPtr&);
+        boost::signals2::connection _extract_sig;
 
         // AtomStorage interface
         Handle getNode(Type, const char *);

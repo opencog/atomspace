@@ -80,6 +80,8 @@ public:
     void set_resolver(const AtomTable*);
     void clear_resolver(const AtomTable*);
 
+    size_t size() { return _uuid_map.size(); }
+
     /**
      * Adds a new atom to the TLB.
      * If the atom has already been added, then an exception is thrown.
@@ -92,7 +94,17 @@ public:
     }
     UUID addAtom(const Handle&, UUID);
 
+    /** Look up atom corresponding to the UUID. */
     Handle getAtom(UUID);
+
+    /** Look up UUID corresponding to the atom. */
+    UUID getUUID(const Handle&);
+
+    /** Remove the atom. */
+    void removeAtom(const AtomPtr& a) {
+        return removeAtom(a->getHandle());
+    }
+    void removeAtom(const Handle&);
 
     UUID getMaxUUID(void) { return _brk_uuid; }
 

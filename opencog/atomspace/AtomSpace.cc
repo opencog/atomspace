@@ -264,7 +264,7 @@ Handle AtomSpace::add_atom(AtomPtr a, bool async)
     if (nullptr == a) return Handle();
 
     // XXX FIXME -- this API is foobar'ed. Just use handles,
-    // everywhere, consistently. All this casting too and fro
+    // everywhere, consistently. All this casting to and fro
     // just eats CPU cycles.
     Handle h(a->getHandle());
 
@@ -274,6 +274,11 @@ Handle AtomSpace::add_atom(AtomPtr a, bool async)
 
     // If we are here, the AtomTable does not yet know about this atom.
     // Maybe the backing store knows about this atom.
+    //
+    // XXX FIXME it does not make sense to unconditionally fetch the
+    // atom from the backing store, here.  This ony needs to be done
+    // if the user is querying the TV: only then do we need to get the
+    // TV from the atomspace. Otherwise, blow it off See issue #1077
     Type t = h->getType();
     if (_backing_store and not _backing_store->ignoreType(t))
     {
