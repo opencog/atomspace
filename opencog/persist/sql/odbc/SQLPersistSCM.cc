@@ -178,8 +178,6 @@ void SQLPersistSCM::do_stats(void)
     if (NULL == _as)
         printf("sql-stats: AtomSpace not set\n");
 
-    printf("sql-stats: tlbuf size=%lu\n", _store->_tlbuf.size());
-
     size_t extra = 0;
     HandleSeq all;
     AtomSpace* as = SchemeSmob::ss_get_env_as("sql-stats");
@@ -196,6 +194,7 @@ void SQLPersistSCM::do_stats(void)
     }
 
     printf("sql-stats: Examined %lu atoms in atomspace\n", all.size());
+    printf("sql-stats: tlbuf size=%lu\n", _store->_tlbuf.size());
 }
 #endif
 
