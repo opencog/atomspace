@@ -77,7 +77,7 @@ private:
     // Its recursive because we need to lock twice during atom insertion
     // and removal: we need to keep the indexes stable while we search
     // them during add/remove.
-    static std::recursive_mutex _mtx;
+    mutable std::recursive_mutex _mtx;
 
     // Cached count of the number of atoms in the table.
     size_t _size;

@@ -57,8 +57,6 @@
 
 using namespace opencog;
 
-std::recursive_mutex AtomTable::_mtx;
-
 // Nothig should ever get the uuid of zero. Zero is reserved for
 // "no atomtable" (in the persist code).
 static std::atomic<UUID> _id_pool(1);
