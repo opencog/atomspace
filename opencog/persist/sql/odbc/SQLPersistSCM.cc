@@ -182,7 +182,8 @@ void SQLPersistSCM::do_stats(void)
 
     size_t extra = 0;
     HandleSeq all;
-    _as->get_all_atoms(all);
+    AtomSpace* as = SchemeSmob::ss_get_env_as("sql-stats");
+    as->get_all_atoms(all);
     for (const Handle& h: all)
     {
         UUID uuid = _store->_tlbuf.getUUID(h);
