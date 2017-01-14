@@ -168,6 +168,8 @@ class ODBCAtomStorage : public AtomStorage
 
         void registerWith(AtomSpace*);
         void unregisterWith(AtomSpace*);
+        void extract_callback(const AtomPtr&);
+        boost::signals2::connection _extract_sig;
 
         // AtomStorage interface
         Handle getNode(Type, const char *);

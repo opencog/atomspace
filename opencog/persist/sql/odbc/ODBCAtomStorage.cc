@@ -415,11 +415,21 @@ bool ODBCAtomStorage::connected(void)
 void ODBCAtomStorage::registerWith(AtomSpace* as)
 {
 	_tlbuf.set_resolver(&as->get_atomtable());
+
+	_extract_sig = as->removeAtomSignal(
+		boost::bind(&ODBCAtomStorage::extract_callback, this, _1));
 }
 
 void ODBCAtomStorage::unregisterWith(AtomSpace* as)
 {
 	_tlbuf.clear_resolver(&as->get_atomtable());
+
+	_extract_sig.disconnect();
+}
+
+void ODBCAtomStorage::extract_callback(const AtomPtr& atom)
+{
+	_tlbuf.removeAtom(atom);
 }
 
 /* ================================================================== */
