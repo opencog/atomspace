@@ -56,7 +56,7 @@ class MultiPersistUTest :  public CxxTest::TestSuite
         const char * username;
         const char * passwd;
 
-#define NTHREADS 16
+#define NTHREADS 6
 #define NHACK 10
 #define NATOMS (NTHREADS * NHACK)
         NodePtr *n1;
