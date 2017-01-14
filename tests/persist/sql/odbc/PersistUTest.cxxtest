@@ -387,13 +387,9 @@ void PersistUTest::test_atomspace(void)
     TSM_ASSERT("Non-empty atomspace", 0 == _as->get_size());
     kill_data();
 
-    /* Verify that the atoms no longer being found. */
-    idx = 0;
-    check_empty(idx++, _as);
-    check_empty(idx++, _as);
-    check_empty(idx++, _as);
-    check_empty(idx++, _as);
-    check_empty(idx++, _as);
+    /* Verify that the atoms are no longer being found. */
+    for (i=0; i<idx; i++)
+        check_space(i, _as, "ver-again");
 
     logger().debug("END TEST: %s", __FUNCTION__);
 }

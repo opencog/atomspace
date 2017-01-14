@@ -112,7 +112,6 @@ class MultiPersistUTest :  public CxxTest::TestSuite
         void atomCompare(AtomPtr, AtomPtr, std::string);
 
         void threaded_add(int);
-        void one_rep(void);
 
         void test_atomspace(void);
 };
@@ -407,9 +406,14 @@ void MultiPersistUTest::threaded_add(int thread_id)
 // ============================================================
 // Perform one repetition of the unit test.
 
-void MultiPersistUTest::one_rep(void)
+void MultiPersistUTest::test_atomspace(void)
 {
-    printf("Start one repetition\n");
+    logger().debug("BEGIN TEST: %s", __FUNCTION__);
+
+    TSM_ASSERT("Persist Module not loaded", _pm);
+
+    printf("Start creating %d theads\n", n_threads);
+
     std::vector<std::thread> thread_pool;
     for (int i=0; i < n_threads; i++) {
         thread_pool.push_back(
@@ -448,22 +452,10 @@ void MultiPersistUTest::one_rep(void)
     TSM_ASSERT("Non-empty atomspace", 0 == _as->get_size());
     kill_data();
 
-    /* Verify that the atoms no longer being found. */
+    /* Verify that the atoms are no longer being found. */
     for (off=0; off<n_threads; off++)
         for (i=0; i<NATS; i++)
             check_empty(NHACK*off+i, _as);
-}
-
-// ============================================================
-
-void MultiPersistUTest::test_atomspace(void)
-{
-    logger().debug("BEGIN TEST: %s", __FUNCTION__);
-
-    TSM_ASSERT("Persist Module not loaded", _pm);
-
-#define NREPS 3
-    for (int i=0; i<NREPS; i++) one_rep();
 
     logger().debug("END TEST: %s", __FUNCTION__);
 }
