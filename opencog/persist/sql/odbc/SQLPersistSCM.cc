@@ -178,7 +178,23 @@ void SQLPersistSCM::do_stats(void)
     if (NULL == _as)
         printf("sql-stats: AtomSpace not set\n");
 
-    printf("sql-stats: tlbuf size=%lu\n", _store->tlb_size());
+    printf("sql-stats: tlbuf size=%lu\n", _store->_tlbuf.size());
+
+    size_t extra = 0;
+    HandleSeq all;
+    _as->get_all_atoms(all);
+    for (const Handle& h: all)
+    {
+        UUID uuid = _store->_tlbuf.getUUID(h);
+        if (TLB::INVALID_UUID != uuid)
+        {
+            extra++;
+            printf("TLB holds extra atoms %lu UUID=%lu %s\n",
+                    extra, uuid, h->toString().c_str());
+        }
+    }
+
+    printf("sql-stats: Examined %lu atoms in atomspace\n", all.size());
 }
 #endif
 
