@@ -121,7 +121,9 @@ class ODBCAtomStorage : public AtomStorage
 // #define STORAGE_DEBUG 1
 #ifdef STORAGE_DEBUG
     public:
+#endif
         TLB _tlbuf;
+#ifdef STORAGE_DEBUG
     private:
 #endif
 
