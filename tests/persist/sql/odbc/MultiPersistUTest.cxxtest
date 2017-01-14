@@ -28,19 +28,22 @@
  * 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
  */
 
+#include <atomic>
+#include <cstdio>
+#include <thread>
+
 #include <opencog/atoms/base/atom_types.h>
 #include <opencog/atoms/base/Atom.h>
 #include <opencog/atoms/base/Link.h>
 #include <opencog/atoms/base/Node.h>
-#include <opencog/truthvalue/SimpleTruthValue.h>
 #include <opencog/atomspaceutils/TLB.h>
 #include <opencog/persist/sql/odbc/ODBCAtomStorage.h>
 #include <opencog/persist/sql/odbc/SQLPersistSCM.h>
+#include <opencog/truthvalue/SimpleTruthValue.h>
 
 #include <opencog/util/Logger.h>
 #include <opencog/util/Config.h>
 
-#include <cstdio>
 
 using namespace opencog;
 
@@ -53,7 +56,10 @@ class MultiPersistUTest :  public CxxTest::TestSuite
         const char * username;
         const char * passwd;
 
-#define NATOMS 1000
+#define NTHREADS 20
+#define NREPS 50
+#define NHACK 10
+#define NATOMS (NTHREADS * NREPS * NHACK)
         NodePtr *n1;
         NodePtr *n2;
         NodePtr *n3;
@@ -68,6 +74,9 @@ class MultiPersistUTest :  public CxxTest::TestSuite
         Handle *hl;
         Handle *hl2;
         Handle *hl3;
+
+        int n_threads;
+        bool spinwait;
 
     public:
 
@@ -103,6 +112,8 @@ class MultiPersistUTest :  public CxxTest::TestSuite
         void check_empty(int, AtomSpace *);
         void atomCompare(AtomPtr, AtomPtr, std::string);
 
+        void threaded_add(int);
+
         void test_atomspace(void);
 };
 
@@ -118,6 +129,8 @@ MultiPersistUTest:: MultiPersistUTest(void)
     }
     logger().set_level(Logger::DEBUG);
     logger().set_print_to_stdout_flag(true);
+
+    n_threads = NTHREADS;
 
     n1 = new NodePtr[NATOMS];
     n2 = new NodePtr[NATOMS];
@@ -360,31 +373,42 @@ void MultiPersistUTest::check_empty(int idx, AtomSpace *space)
 
 // ============================================================
 
+void MultiPersistUTest::threaded_add(int thread_id)
+{
+    int idx = 0;
+    int off = NHACK*thread_id;
+
+    add_to_space(off + idx++, _as, "AA-aa-wow ");
+    add_to_space(off + idx++, _as, "BB-bb-wow ");
+    add_to_space(off + idx++, _as, "CC-cc-wow ");
+    add_to_space(off + idx++, _as, "DD-dd-wow ");
+    add_to_space(off + idx++, _as, "EE-ee-wow ");
+
+    /* Make sure UTF-8 works fine. */
+    add_to_space(off + idx++, _as, "Попытка выбраться вызвала слабый стон ");
+    add_to_space(off + idx++, _as, "はにがうりだそうであってるのかはち ");
+    add_to_space(off + idx++, _as, "係拉丁字母");
+
+    /* Verify that the atoms were added */
+    for (int i=0; i<idx; i++)
+        check_space(off+i, _as, "verify-add");
+}
+
+// ============================================================
+
 void MultiPersistUTest::test_atomspace(void)
 {
     logger().debug("BEGIN TEST: %s", __FUNCTION__);
 
     TSM_ASSERT("Persist Module not loaded", _pm);
 
-    int idx = 0;
-    add_to_space(idx++, _as, "AA-aa-wow ");
-    add_to_space(idx++, _as, "BB-bb-wow ");
-    add_to_space(idx++, _as, "CC-cc-wow ");
-    add_to_space(idx++, _as, "DD-dd-wow ");
-    add_to_space(idx++, _as, "EE-ee-wow ");
+    std::vector<std::thread> thread_pool;
+    for (int i=0; i < n_threads; i++) {
+        thread_pool.push_back(
+            std::thread(&MultiPersistUTest::threaded_add, this, i));
+    }
 
-    /* Make sure UTF-8 works fine. */
-    add_to_space(idx++, _as, "Попытка выбраться вызвала слабый стон ");
-    add_to_space(idx++, _as, "はにがうりだそうであってるのかはち ");
-    add_to_space(idx++, _as, "係拉丁字母");
-
-    /* Verify that the atoms were added */
-    idx = 0;
-    check_space(idx++, _as, "verify-add");
-    check_space(idx++, _as, "verify-add");
-    check_space(idx++, _as, "verify-add");
-    check_space(idx++, _as, "verify-add");
-    check_space(idx++, _as, "verify-add");
+    for (std::thread& t : thread_pool) t.join();
 
     /* Extract atoms from the AtomSpace. This does not delete them from
      * the SQL storage, though; to do that, they must be deleted, not
@@ -394,25 +418,21 @@ void MultiPersistUTest::test_atomspace(void)
     _as->clear();
     TSM_ASSERT("Non-empty atomspace", 0 == _as->get_size());
 
+    int i, off;
+#define NATS 9
     /* Verify that the atoms can still be fetched from storage. */
-    idx = 0;
-    check_space(idx++, _as, "verify-fetch");
-    check_space(idx++, _as, "verify-fetch");
-    check_space(idx++, _as, "verify-fetch");
-    check_space(idx++, _as, "verify-fetch");
-    check_space(idx++, _as, "verify-fetch");
+    for (i=0; i<NATS; i++)
+        for (off=0; off<n_threads; off++)
+            check_space(off+i, _as, "verify-fetch");
 
     /* Do it again, for good luck.  */
     _as->clear();
     TSM_ASSERT("Non-empty atomspace", 0 == _as->get_size());
 
     /* Verify that the atoms can still be fetched from storage. */
-    idx = 0;
-    check_space(idx++, _as, "ver-again");
-    check_space(idx++, _as, "ver-again");
-    check_space(idx++, _as, "ver-again");
-    check_space(idx++, _as, "ver-again");
-    check_space(idx++, _as, "ver-again");
+    for (i=0; i<NATS; i++)
+        for (off=0; off<n_threads; off++)
+            check_space(off+i, _as, "verify-again");
 
     /* Kill data for good */
     _as->clear();
@@ -420,12 +440,9 @@ void MultiPersistUTest::test_atomspace(void)
     kill_data();
 
     /* Verify that the atoms no longer being found. */
-    idx = 0;
-    check_empty(idx++, _as);
-    check_empty(idx++, _as);
-    check_empty(idx++, _as);
-    check_empty(idx++, _as);
-    check_empty(idx++, _as);
+    for (i=0; i<NATS; i++)
+        for (off=0; off<n_threads; off++)
+            check_empty(off+i, _as);
 
     logger().debug("END TEST: %s", __FUNCTION__);
 }
