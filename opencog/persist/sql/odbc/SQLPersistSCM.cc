@@ -179,31 +179,36 @@ void SQLPersistSCM::do_stats(void)
         printf("sql-stats: AtomSpace not set\n");
 
     size_t extra = 0;
-    HandleSeq all;
+    size_t noh = 0;
+    size_t remap = 0;
     AtomSpace* as = SchemeSmob::ss_get_env_as("sql-stats");
-    as->get_all_atoms(all);
-    for (const Handle& h: all)
+
+    printf("sql-stats: Atomspace holds %lu atoms\n", as->size());
+    printf("sql-stats: tlbuf holds %lu atoms\n", _store->_tlbuf.size());
+
+    UUID mad = _store->_tlbuf.getMaxUUID();
+    for (UUID uuid = 1; uuid < mad; uuid++)
     {
-        UUID uuid = _store->_tlbuf.getUUID(h);
-        if (TLB::INVALID_UUID != uuid)
-        {
-            extra++;
-#if 0
-            // Too much to print.
-            printf("TLB holds extra atoms %lu UUID=%lu %s\n",
-                    extra, uuid, h->toString().c_str());
-#endif
-        }
+        Handle h = _store->_tlbuf.getAtom(uuid);
+        if (nullptr == h) { noh++; continue; }
+
+        Handle hr = as->get_atom(h);
+        if (nullptr == hr) { extra++; continue; }
+
+        if (hr != h) { remap++; }
     }
 
-    printf("sql-stats: Atomspace holds %lu atoms\n", all.size());
-    printf("sql-stats: tlbuf holds %lu atoms\n", _store->_tlbuf.size());
-    printf("sql-stats: tlbuf holds %lu atoms not in atomspace\n", extra);
+    double frac = 100.0 * extra / ((double) _store->_tlbuf.size());
+    printf("sql-stats: tlbuf holds %lu atoms not in atomspace (%f pct)\n",
+           extra, frac);
 
-    double asfrac = 100.0 * extra / ((double) all.size());
-    double tlfrac = 100.0 * extra / ((double) _store->_tlbuf.size());
-    printf("Extra is %f percent of atomsapce and %f of tlb \n",
-        asfrac, tlfrac);
+    frac = 100.0 * remap / ((double) _store->_tlbuf.size());
+    printf("sql-stats: tlbuf holds %lu unremapped atoms (%f pct)\n",
+           remap, frac);
+
+    frac = 100.0 * noh / ((double) mad);
+    printf("sql-stats: %lu of %lu uuids unused (%f pct)\n",
+           noh, mad, frac);
 }
 #endif
 
