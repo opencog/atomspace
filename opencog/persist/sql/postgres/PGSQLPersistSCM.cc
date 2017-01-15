@@ -42,32 +42,6 @@ PGSQLPersistSCM::PGSQLPersistSCM(AtomSpace *as)
     _store = NULL;
     _backing = new SQLBackingStore();
 
-    // XXX FIXME Huge hack alert.
-    // As of 2013, no one uses this thing, except for NLP processing.
-    // Since I'm too lazy to find an elegant solution right now, I'm
-    // just going to hack this in.  Fix this someday.
-    //
-    // Anyway, what the below does is to ignore these certain types,
-    // when they are to be fetched from the backing store.  This can
-    // speed up document processing, since we know that word instances
-    // and documents and sentences will not be stored in the database.
-    // Thus, we don't even try to fetch these.
-
-#define NLP_HACK 0
-#if NLP_HACK
-    _backing->_ignored_types.insert(VARIABLE_NODE);
-    _backing->_ignored_types.insert(TYPE_NODE);
-    _backing->_ignored_types.insert(TYPED_VARIABLE_LINK);
-    _backing->_ignored_types.insert(BIND_LINK);
-
-    _backing->_ignored_types.insert(DOCUMENT_NODE);
-    _backing->_ignored_types.insert(SENTENCE_NODE);
-    _backing->_ignored_types.insert(PARSE_NODE);
-    _backing->_ignored_types.insert(PARSE_LINK);
-    _backing->_ignored_types.insert(WORD_INSTANCE_NODE);
-    _backing->_ignored_types.insert(WORD_INSTANCE_LINK);
-#endif // NLP_HACK
-
     static bool is_init = false;
     if (is_init) return;
     is_init = true;
