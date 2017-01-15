@@ -205,8 +205,6 @@ void SQLPersistSCM::do_stats(void)
     printf("Extra is %f percent of atomsapce and %f of tlb \n",
         asfrac, tlfrac);
 }
-
-}
 #endif
 
 void opencog_persist_sql_init(void)
