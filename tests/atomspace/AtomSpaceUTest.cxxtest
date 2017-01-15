@@ -64,9 +64,9 @@ using namespace std;
 
 
 Handle addRealAtom(AtomSpace& as, AtomPtr atom,
-                   TruthValuePtr tvn = TruthValue::NULL_TV())
+                   TruthValuePtr tvn = TruthValuePtr())
 {
-    TruthValuePtr newTV = (tvn->isNullTv()) ? atom->getTruthValue() : tvn;
+    TruthValuePtr newTV = tvn ? atom->getTruthValue() : tvn;
     // Check if the given Atom reference is of an atom
     // that was not inserted yet.  If so, adds the atom. Otherwise, just sets
     // result to the correct/valid handle.
@@ -90,12 +90,8 @@ Handle addRealAtom(AtomSpace& as, AtomPtr atom,
         }
     }
     const TruthValuePtr currentTV = result->getTruthValue();
-    if (currentTV->isNullTv()) {
-        result->setTruthValue(newTV);
-    } else {
-        TruthValuePtr mergedTV = currentTV->merge(newTV);
-        result->setTruthValue(mergedTV);
-    }
+    TruthValuePtr mergedTV = currentTV->merge(newTV);
+    result->setTruthValue(mergedTV);
     return result;
 }
 
@@ -111,12 +107,8 @@ static inline Handle addAtomIter(AtomSpace& as, tree<Vertex>& a, tree<Vertex>::i
     if (head_handle_ptr != NULL) {
         OC_ASSERT(as.is_valid_handle(*head_handle_ptr), "head_handle_ptr is not valid");
         TruthValuePtr currentTV((*head_handle_ptr)->getTruthValue());
-        if (currentTV->isNullTv()) {
-            (*head_handle_ptr)->setTruthValue(tvn);
-        } else {
-            TruthValuePtr mergedTV(currentTV->merge(tvn));
-            (*head_handle_ptr)->setTruthValue(mergedTV);
-        }
+        TruthValuePtr mergedTV(currentTV->merge(tvn));
+        (*head_handle_ptr)->setTruthValue(mergedTV);
 
         return *head_handle_ptr;
     }
@@ -125,7 +117,7 @@ static inline Handle addAtomIter(AtomSpace& as, tree<Vertex>& a, tree<Vertex>::i
         Handle *h_ptr = boost::get<Handle>(&*i);
 
         if (h_ptr) {
-            handles.push_back(addRealAtom(as, *h_ptr, TruthValue::NULL_TV()));
+            handles.push_back(addRealAtom(as, *h_ptr));
         } else {
             handles.push_back(addAtomIter(as, a, i, TruthValue::TRIVIAL_TV()));
         }
@@ -424,7 +416,6 @@ public:
         // Check TVS
         for (int i = 0; i < NUM_NODES; i++) {
             TruthValuePtr tv = h[i]->getTruthValue();
-            TS_ASSERT(!tv->isNullTv());
             logger().debug("h: tv mean = %f, atomSpace->getMean(h[i]) = %f\n",
                  tv->getMean(), h[i]->getTruthValue()->getMean());
             TS_ASSERT(fabs(tv->getMean() - 0.001) < FLOAT_ACCEPTABLE_ERROR);
@@ -432,7 +423,6 @@ public:
             TS_ASSERT(fabs(tv->getConfidence() - 0.99) < FLOAT_ACCEPTABLE_ERROR);
             if (i < NUM_FORCEUSER_LINKS) {
                 TruthValuePtr tv = FU[i]->getTruthValue();
-                TS_ASSERT(!tv->isNullTv());
                 logger().debug("h: tv mean = %f, atomSpace->getMean(h[i]) = %f\n",
                   tv->getMean(), h[i]->getTruthValue()->getMean());
                 logger().debug("FU: tv mean = %f, atomSpace->getMean(FU[i]) = %f\n",
@@ -443,7 +433,6 @@ public:
             }
             if (i < NUM_HUMAN_LINKS) {
                 TruthValuePtr tv = H[i]->getTruthValue();
-                TS_ASSERT(!tv->isNullTv());
                 logger().debug("h: tv mean = %f, atomSpace->getMean(h[i]) = %f\n",
                      tv->getMean(), h[i]->getTruthValue()->getMean());
                 TS_ASSERT(fabs(tv->getMean() - Human[i]) < FLOAT_ACCEPTABLE_ERROR);

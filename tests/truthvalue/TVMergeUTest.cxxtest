@@ -211,16 +211,4 @@ public:
             }
         }
     }
-
-    void testIsNullTv()
-    {
-        for (int i = 0; i < NUM_TVS; i++) {
-            TS_ASSERT(!(tvs[i]->isNullTv()));
-        }
-        TS_ASSERT(TruthValue::NULL_TV()->isNullTv());
-        TS_ASSERT(not TruthValue::DEFAULT_TV()->isNullTv());
-        TS_ASSERT(not TruthValue::TRUE_TV()->isNullTv());
-        TS_ASSERT(not TruthValue::FALSE_TV()->isNullTv());
-        TS_ASSERT(not TruthValue::TRIVIAL_TV()->isNullTv());
-    }
 };

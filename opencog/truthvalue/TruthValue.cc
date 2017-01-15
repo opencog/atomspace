@@ -25,7 +25,6 @@
 
 #include <stdio.h>
 
-#include <opencog/truthvalue/NullTruthValue.h>
 #include <opencog/truthvalue/SimpleTruthValue.h>
 #include <opencog/truthvalue/TruthValue.h>
 
@@ -33,12 +32,6 @@ using namespace opencog;
 
 const strength_t MAX_TRUTH  = 1.0f;
 count_t TruthValue::DEFAULT_K = 800.0;
-
-TruthValuePtr TruthValue::NULL_TV()
-{
-    static TruthValuePtr instance(std::make_shared<NullTruthValue>());
-    return instance;
-}
 
 TruthValuePtr TruthValue::DEFAULT_TV()
 {
@@ -66,11 +59,6 @@ TruthValuePtr TruthValue::TRIVIAL_TV()
     // False, with no confidence.
     static TruthValuePtr instance(std::make_shared<SimpleTruthValue>(0.0, 0.0));
     return instance;
-}
-
-bool TruthValue::isNullTv() const
-{
-    return false;
 }
 
 bool TruthValue::isDefaultTV() const

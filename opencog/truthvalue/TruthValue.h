@@ -134,13 +134,6 @@ public:
     // Special TVs
 
     /**
-     * The shared reference to a special NullTruthValue object.
-     * This is supposed to be used only for book-keeping, and it must
-     * not be used as a normal TV object. Calling methods on it will
-     * throw exceptions.
-     */
-    static TruthValuePtr NULL_TV();
-    /**
      * The shared reference to a special TRUE (Simple) TruthValue
      * object with MAX_TRUTH mean and MAX_TV_CONFIDENCE count. That is,
      * its true with absolute confidence.
@@ -192,11 +185,6 @@ public:
      */
     virtual TruthValuePtr merge(TruthValuePtr,
                                 const MergeCtrl& = MergeCtrl()) const = 0;
-
-    /**
-     * Check if this TV is a null TV.
-     */
-    virtual bool isNullTv() const;
 
     /**
      * Check if this TV is equal to the default TV.

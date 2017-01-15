@@ -87,7 +87,7 @@ AtomSpace* Atom::getAtomSpace() const
 
 void Atom::setTruthValue(TruthValuePtr newTV)
 {
-    if (newTV->isNullTv()) return;
+    if (nullptr == newTV) return;
 
     // We need to guarantee that the signal goes out with the
     // correct truth value.  That is, another setter could be changing
@@ -128,7 +128,7 @@ TruthValuePtr Atom::getTruthValue() const
 
 void Atom::merge(TruthValuePtr tvn, const MergeCtrl& mc)
 {
-    if (NULL == tvn or tvn->isDefaultTV() or tvn->isNullTv()) return;
+    if (nullptr == tvn or tvn->isDefaultTV()) return;
 
     // No locking to be done here. It is possible that between the time
     // that we read the TV here (i.e. set currentTV) and the time that
@@ -139,7 +139,7 @@ void Atom::merge(TruthValuePtr tvn, const MergeCtrl& mc)
     // they deserve -- a race. (We still use getTruthValue() to avoid a
     // read-write race on the shared_pointer itself!)
     TruthValuePtr currentTV(getTruthValue());
-    if (currentTV->isDefaultTV() or currentTV->isNullTv()) {
+    if (currentTV->isDefaultTV()) {
         setTruthValue(tvn);
         return;
     }

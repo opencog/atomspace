@@ -50,7 +50,7 @@ cdef class Atom(object):
             if atom_ptr == NULL:   # avoid null-pointer deref
                 return None
             tvp = atom_ptr.getTruthValue()
-            if (not tvp.get() or tvp.get().isNullTv()):
+            if (not tvp.get()):
                 pytv = TruthValue()
                 pytv.cobj = new tv_ptr(tvp) # make copy of smart pointer
                 return pytv
