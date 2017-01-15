@@ -178,7 +178,7 @@ HandleSeq ZMQClient::getIncomingSet(const Handle& h)
  * However, it does register with the TLB, as the SQL uuids and the
  * TLB Handles must be kept in sync, or all hell breaks loose.
  */
-Handle ZMQClient::getNode(Type t, const char * str)
+TruthValuePtr ZMQClient::getNode(Type t, const char * str)
 {
     ZMQRequestMessage req;
     ZMQReplyMessage rep;
@@ -193,9 +193,9 @@ Handle ZMQClient::getNode(Type t, const char * str)
     ZMQAtomMessage atomMsg = rep.atom(0);
     if (atomMsg.atomtype() == ZMQAtomTypeNode) {
         NodePtr nodePtr = dynamic_pointer_cast<Node>(ProtocolBufferSerializer::deserialize(atomMsg));
-        return nodePtr->getHandle();
+        return nodePtr->getTruthValue();
     } else {
-        return Handle();
+        return TruthValuePtr();
     }
 }
 
@@ -209,7 +209,7 @@ Handle ZMQClient::getNode(Type t, const char * str)
  * However, it does register with the TLB, as the SQL uuids and the
  * TLB Handles must be kept in sync, or all hell breaks loose.
  */
-Handle ZMQClient::getLink(Handle& h)
+TruthValuePtr ZMQClient::getLink(const Handle& h)
 {
     Type t = h->getType();
     const HandleSeq& oset = h->getOutgoingSet();
@@ -229,9 +229,9 @@ Handle ZMQClient::getLink(Handle& h)
     ZMQAtomMessage atomMsg = rep.atom(0);
     if (atomMsg.atomtype() == ZMQAtomTypeLink) {
         LinkPtr linkPtr = dynamic_pointer_cast<Link>(ProtocolBufferSerializer::deserialize(atomMsg));
-        return linkPtr->getHandle();
+        return linkPtr->getTruthValue();
     } else {
-        return Handle();
+        return TruthValuePtr();
     }
 }
 
