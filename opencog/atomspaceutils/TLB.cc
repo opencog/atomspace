@@ -63,16 +63,20 @@ UUID TLB::addAtom(const Handle& h, UUID uuid)
     std::lock_guard<std::mutex> lck(_mtx);
 
     // If we hold something that isn't the atomspace's version,
-    // then remove it. Only theatomspace's version has the
+    // then remove it. Only the atomspace's version has the
     // correct TV on it.
     if (hr != h)
     {
         auto pr = _handle_map.find(h);
         if (_handle_map.end() != pr)
         {
-            uuid = pr->second;
+            UUID oid = pr->second;
             _handle_map.erase(pr);
-            _uuid_map.erase(uuid);
+            _uuid_map.erase(oid);
+
+            if (uuid != INVALID_UUID and oid != uuid)
+                throw InvalidParamException(TRACE_INFO,
+                     "Earlier version of atom has mis-matched UUID!");
         }
     }
 
