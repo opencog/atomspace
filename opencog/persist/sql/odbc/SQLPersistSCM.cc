@@ -186,6 +186,34 @@ void SQLPersistSCM::do_stats(void)
     printf("sql-stats: Atomspace holds %lu atoms\n", as->get_size());
     printf("sql-stats: tlbuf holds %lu atoms\n", _store->_tlbuf.size());
 
+    size_t num_get_nodes = _store->num_get_nodes;
+    size_t num_got_nodes = _store->num_got_nodes;
+    size_t num_get_links = _store->num_get_links;
+    size_t num_got_links = _store->num_got_links;
+    size_t num_get_insets = _store->num_get_insets;
+    size_t num_get_inatoms = _store->num_get_inatoms;
+    size_t num_node_inserts = _store->num_node_inserts;
+    size_t num_node_updates = _store->num_node_updates;
+    size_t num_link_inserts = _store->num_link_inserts;
+    size_t num_link_updates = _store->num_link_updates;
+
+    double frac = 100.0 * num_got_nodes / ((double) num_get_nodes);
+    printf("num_get_nodes=%lu num_got_nodes=%lu (%f pct)\n",
+        num_get_nodes, num_got_nodes, frac);
+
+    frac = 100.0 * num_got_links / ((double) num_get_links);
+    printf("num_get_links=%lu num_got_links=%lu (%f pct)\n",
+        num_get_links, num_got_links, frac);
+
+    printf("num_get_insets=%lu num_get_inatoms=%lu\n",
+         num_get_insets, num_get_inatoms);
+
+    printf("num_node_inserts=%lu num_node_updates=%lu\n",
+         num_node_inserts, num_node_updates);
+
+    printf("num_link_inserts=%lu num_link_updates=%lu\n",
+         num_link_inserts, num_link_updates);
+
     UUID mad = _store->_tlbuf.getMaxUUID();
     for (UUID uuid = 1; uuid < mad; uuid++)
     {
@@ -198,7 +226,7 @@ void SQLPersistSCM::do_stats(void)
         if (hr != h) { remap++; }
     }
 
-    double frac = 100.0 * extra / ((double) _store->_tlbuf.size());
+    frac = 100.0 * extra / ((double) _store->_tlbuf.size());
     printf("sql-stats: tlbuf holds %lu atoms not in atomspace (%f pct)\n",
            extra, frac);
 

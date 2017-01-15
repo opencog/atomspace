@@ -367,6 +367,19 @@ void ODBCAtomStorage::init(const char * dbname,
     if (!connected()) return;
 
     reserve();
+
+#ifdef STORAGE_DEBUG
+    num_get_nodes = 0;
+    num_got_nodes = 0;
+    num_get_links = 0;
+    num_got_links = 0;
+    num_get_insets = 0;
+    num_get_inatoms = 0;
+    num_node_updates = 0;
+    num_node_inserts = 0;
+    num_link_updates = 0;
+    num_link_inserts = 0;
+#endif // STORAGE_DEBUG
 }
 
 ODBCAtomStorage::ODBCAtomStorage(const char * dbname,
@@ -775,6 +788,14 @@ void ODBCAtomStorage::do_store_single_atom(AtomPtr atom, int aheight)
 
         STMT("uuid", uuidbuff);
     }
+
+#ifdef STORAGE_DEBUG
+    if (0 == aheight) {
+        if (update) num_node_updates++; else num_node_inserts++;
+    } else {
+        if (update) num_link_updates++; else num_link_inserts++;
+    }
+#endif // STORAGE_DEBUG
 
     // Store the atom type and node name only if storing for the
     // first time ever. Once an atom is in an atom table, it's
@@ -1211,8 +1232,10 @@ HandleSeq ODBCAtomStorage::getIncomingSet(const Handle& h)
     rp.release();
     put_conn(db_conn);
 
-    // XXX Odd ... these are never inserted into an atomspace!??
-    // FIXME ???
+#ifdef STORAGE_DEBUG
+    num_get_insets++;
+    num_get_inatoms += iset.size();
+#endif // STORAGE_DEBUG
 
     return iset;
 }
@@ -1242,10 +1265,16 @@ Handle ODBCAtomStorage::getNode(Type t, const char * str)
             "\tnc=%d buffer=>>%s<<\n", nc, buff);
         return Handle();
     }
+#ifdef STORAGE_DEBUG
+    num_get_nodes++;
+#endif // STORAGE_DEBUG
 
     PseudoPtr p(getAtom(buff, 0));
     if (NULL == p) return Handle();
 
+#ifdef STORAGE_DEBUG
+    num_got_nodes++;
+#endif // STORAGE_DEBUG
     NodePtr node = createNode(t, str, p->tv);
     _tlbuf.addAtom(node, p->uuid);
     return node->getHandle();
@@ -1274,9 +1303,15 @@ Handle ODBCAtomStorage::getLink(Handle& h)
     ostr += oset_to_string(oset, oset.size());
     ostr += ";";
 
+#ifdef STORAGE_DEBUG
+    num_get_links++;
+#endif // STORAGE_DEBUG
     PseudoPtr p = getAtom(ostr.c_str(), 1);
     if (NULL == p) return Handle();
 
+#ifdef STORAGE_DEBUG
+    num_got_links++;
+#endif // STORAGE_DEBUG
     h->setTruthValue(p->tv);
     _tlbuf.addAtom(h, p->uuid);
     return h;
