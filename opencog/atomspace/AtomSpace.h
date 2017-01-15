@@ -236,7 +236,7 @@ public:
      * To avoid a fetch if the atom already is in the atomtable, use the
      * get_atom() method instead.
      */
-    Handle fetch_atom(Handle&);
+    Handle fetch_atom(const Handle&);
 
     /**
      * Get an atom from the AtomTable. If the atom is not there, then

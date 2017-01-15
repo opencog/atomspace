@@ -317,7 +317,7 @@ void AtomSpace::store_atom(const Handle& h)
     _backing_store->storeAtom(h);
 }
 
-Handle AtomSpace::fetch_atom(Handle& h)
+Handle AtomSpace::fetch_atom(const Handle& h)
 {
     if (nullptr == _backing_store)
         throw RuntimeException(TRACE_INFO, "No backing store");
@@ -344,29 +344,32 @@ Handle AtomSpace::fetch_atom(Handle& h)
     if (_atom_table.holds(hb))
         return hb;
 
-    // Case 2:
-    // This atom is not yet in any (this??) atomspace; go get it.
-    if (NULL == h->getAtomTable()) {
-        TruthValuePtr tv;
-        if (h->isNode()) {
-            tv = _backing_store->getNode(h->getType(),
-                                         h->getName().c_str());
-        }
-        else if (h->isLink()) {
-            tv = _backing_store->getLink(h);
-        }
+    // Case 2: Atom is in some other atom table. Just copy it to here.
+    if (h->getAtomTable())
+        return _atom_table.add(h, false);
 
-        // If we still don't have an atom, then the requested atom
-        // was "insane", that is, unknown by either the atom table
-        // (case 1) or the backend.
-        if (nullptr == tv)
-            throw RuntimeException(TRACE_INFO,
-                "Asked backend for an atom %s\n",
-                h->toString().c_str());
-        h->setTruthValue(tv);
+    // Case 3:
+    // This atom is not yet in any (this??) atomspace; go get it.
+    TruthValuePtr tv;
+    if (h->isNode()) {
+        tv = _backing_store->getNode(h->getType(),
+                                     h->getName().c_str());
+    }
+    else if (h->isLink()) {
+        tv = _backing_store->getLink(h);
     }
 
-    return _atom_table.add(h, false);
+    // If we still don't have an atom, then the requested atom
+    // was "insane", that is, unknown by either the atom table
+    // (case 1) or the backend.
+    if (nullptr == tv)
+        throw RuntimeException(TRACE_INFO,
+            "Asked backend for an atom %s\n",
+            h->toString().c_str());
+
+    Handle hc(h);
+    hc->setTruthValue(tv);
+    return _atom_table.add(hc, false);
 }
 
 Handle AtomSpace::fetch_incoming_set(Handle h, bool recursive)
