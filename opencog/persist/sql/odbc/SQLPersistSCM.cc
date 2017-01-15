@@ -183,7 +183,7 @@ void SQLPersistSCM::do_stats(void)
     size_t remap = 0;
     AtomSpace* as = SchemeSmob::ss_get_env_as("sql-stats");
 
-    printf("sql-stats: Atomspace holds %lu atoms\n", as->size());
+    printf("sql-stats: Atomspace holds %lu atoms\n", as->get_size());
     printf("sql-stats: tlbuf holds %lu atoms\n", _store->_tlbuf.size());
 
     UUID mad = _store->_tlbuf.getMaxUUID();
