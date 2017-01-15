@@ -141,7 +141,7 @@ void RandomAtomGenerator::make_random_link()
 
     // Loop until we add a link in case we randomly create a duplicate which
     // will not create a new link and throw off our counts.
-    int initial_atom_count = _atomspace->get_size();
+    size_t initial_atom_count = _atomspace->get_size();
     do {
         // Get the link type (non-default based on random chance and threshold).
         Type link_type = get_link_type();
