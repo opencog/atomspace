@@ -146,7 +146,10 @@ class ODBCAtomStorage::Response
 
             PseudoPtr p(store->makeAtom(*this, uuid));
             AtomPtr atom(get_recursive_if_not_exists(p));
-            table->add(atom, true);
+            Handle h = table->add(atom, false);
+
+            // Force resolution in TLB, so that later removes work.
+            store->_tlbuf.addAtom(h, TLB::INVALID_UUID);
             return false;
         }
 
@@ -167,8 +170,8 @@ class ODBCAtomStorage::Response
                 Handle h = table->getHandle(atom);
                 if (nullptr == h)
                 {
-                    store->_tlbuf.addAtom(atom, uuid);
-                    table->add(atom, true);
+                    h = table->add(atom, false);
+                    store->_tlbuf.addAtom(h, uuid);
                 }
             }
             return false;
@@ -364,6 +367,19 @@ void ODBCAtomStorage::init(const char * dbname,
     if (!connected()) return;
 
     reserve();
+
+#ifdef STORAGE_DEBUG
+    num_get_nodes = 0;
+    num_got_nodes = 0;
+    num_get_links = 0;
+    num_got_links = 0;
+    num_get_insets = 0;
+    num_get_inatoms = 0;
+    num_node_updates = 0;
+    num_node_inserts = 0;
+    num_link_updates = 0;
+    num_link_inserts = 0;
+#endif // STORAGE_DEBUG
 }
 
 ODBCAtomStorage::ODBCAtomStorage(const char * dbname,
@@ -423,21 +439,16 @@ void ODBCAtomStorage::registerWith(AtomSpace* as)
 	// query the back-end, not knowng that these atoms are transient,
 	// and they'll end up here, in the TLB, chewing up space. So just
 	// delete them, as chances are, they'll never be used again.
-#ifdef LATER
-
-arh. this is deadlocking somwhere...
+	//
 	_extract_sig = as->removeAtomSignal(
 		boost::bind(&ODBCAtomStorage::extract_callback, this, _1));
-#endif
 }
 
 void ODBCAtomStorage::unregisterWith(AtomSpace* as)
 {
 	_tlbuf.clear_resolver(&as->get_atomtable());
 
-#ifdef LATER
 	_extract_sig.disconnect();
-#endif
 }
 
 void ODBCAtomStorage::extract_callback(const AtomPtr& atom)
@@ -778,6 +789,14 @@ void ODBCAtomStorage::do_store_single_atom(AtomPtr atom, int aheight)
         STMT("uuid", uuidbuff);
     }
 
+#ifdef STORAGE_DEBUG
+    if (0 == aheight) {
+        if (update) num_node_updates++; else num_node_inserts++;
+    } else {
+        if (update) num_link_updates++; else num_link_inserts++;
+    }
+#endif // STORAGE_DEBUG
+
     // Store the atom type and node name only if storing for the
     // first time ever. Once an atom is in an atom table, it's
     // name can type cannot be changed. Only its truth value can
@@ -940,7 +959,10 @@ void ODBCAtomStorage::setup_typemap(void)
 {
     /* Only need to set up the typemap once. */
     if (type_map_was_loaded) return;
-    type_map_was_loaded = true;
+
+    /* Again, under the lock, so we don't race against ourselves. */
+    std::lock_guard<std::mutex> lck(_typemap_mutex);
+    if (type_map_was_loaded) return;
 
     // If we are here, we need to reconcile the types currently in
     // use, with a possibly pre-existing typemap. New types must be
@@ -1006,6 +1028,9 @@ void ODBCAtomStorage::setup_typemap(void)
         }
     }
     put_conn(db_conn);
+
+    // Set this last!
+    type_map_was_loaded = true;
 }
 
 void ODBCAtomStorage::set_typemap(int dbval, const char * tname)
@@ -1146,13 +1171,13 @@ ODBCAtomStorage::PseudoPtr ODBCAtomStorage::getAtom(const char * query, int heig
 {
     ODBCConnection* db_conn = get_conn();
     Response rp;
-    rp.uuid = _tlbuf.INVALID_UUID;
+    rp.uuid = TLB::INVALID_UUID;
     rp.rs = db_conn->exec(query);
     rp.rs->foreach_row(&Response::create_atom_cb, &rp);
 
     // Did we actually find anything?
     // DO NOT USE IsInvalidHandle() HERE! It won't work, duhh!
-    if (rp.uuid == _tlbuf.INVALID_UUID)
+    if (rp.uuid == TLB::INVALID_UUID)
     {
         rp.release();
         put_conn(db_conn);
@@ -1207,6 +1232,11 @@ HandleSeq ODBCAtomStorage::getIncomingSet(const Handle& h)
     rp.release();
     put_conn(db_conn);
 
+#ifdef STORAGE_DEBUG
+    num_get_insets++;
+    num_get_inatoms += iset.size();
+#endif // STORAGE_DEBUG
+
     return iset;
 }
 
@@ -1235,10 +1265,16 @@ Handle ODBCAtomStorage::getNode(Type t, const char * str)
             "\tnc=%d buffer=>>%s<<\n", nc, buff);
         return Handle();
     }
+#ifdef STORAGE_DEBUG
+    num_get_nodes++;
+#endif // STORAGE_DEBUG
 
     PseudoPtr p(getAtom(buff, 0));
     if (NULL == p) return Handle();
 
+#ifdef STORAGE_DEBUG
+    num_got_nodes++;
+#endif // STORAGE_DEBUG
     NodePtr node = createNode(t, str, p->tv);
     _tlbuf.addAtom(node, p->uuid);
     return node->getHandle();
@@ -1267,9 +1303,15 @@ Handle ODBCAtomStorage::getLink(Handle& h)
     ostr += oset_to_string(oset, oset.size());
     ostr += ";";
 
+#ifdef STORAGE_DEBUG
+    num_get_links++;
+#endif // STORAGE_DEBUG
     PseudoPtr p = getAtom(ostr.c_str(), 1);
     if (NULL == p) return Handle();
 
+#ifdef STORAGE_DEBUG
+    num_got_links++;
+#endif // STORAGE_DEBUG
     h->setTruthValue(p->tv);
     _tlbuf.addAtom(h, p->uuid);
     return h;

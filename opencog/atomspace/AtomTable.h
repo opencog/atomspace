@@ -53,6 +53,13 @@ namespace opencog
 
 typedef std::set<AtomPtr> AtomPtrSet;
 
+// XXX FIXME boost::signals2 is painfully bloated and slow. It accounts
+// for 5% or 10% of the total performance of the atomspace (try it -
+// comment out the emit-signal functions below, and measure.
+// Alternately, launch gdb, get into the signal, and look at the stack.
+// boost::signals2 uses eleven stack frames to do its thing. Eleven!
+// Really!) Should be enough to use SigSlot in cogutils.  Need to just
+// finish this work.
 typedef boost::signals2::signal<void (const Handle&)> AtomSignal;
 typedef boost::signals2::signal<void (const AtomPtr&)> AtomPtrSignal;
 typedef boost::signals2::signal<void (const Handle&,
@@ -77,7 +84,7 @@ private:
     // Its recursive because we need to lock twice during atom insertion
     // and removal: we need to keep the indexes stable while we search
     // them during add/remove.
-    static std::recursive_mutex _mtx;
+    mutable std::recursive_mutex _mtx;
 
     // Cached count of the number of atoms in the table.
     size_t _size;

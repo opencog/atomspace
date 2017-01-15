@@ -121,6 +121,16 @@ class ODBCAtomStorage : public AtomStorage
 // #define STORAGE_DEBUG 1
 #ifdef STORAGE_DEBUG
     public:
+        size_t num_get_nodes;
+        size_t num_got_nodes;
+        size_t num_get_links;
+        size_t num_got_links;
+        size_t num_get_insets;
+        size_t num_get_inatoms;
+        size_t num_node_inserts;
+        size_t num_node_updates;
+        size_t num_link_inserts;
+        size_t num_link_updates;
 #endif
         TLB _tlbuf;
 #ifdef STORAGE_DEBUG
@@ -148,6 +158,7 @@ class ODBCAtomStorage : public AtomStorage
         void load_typemap(void);
         void setup_typemap(void);
         void set_typemap(int, const char *);
+        std::mutex _typemap_mutex;
 
 #ifdef OUT_OF_LINE_TVS
         bool tvExists(int);
