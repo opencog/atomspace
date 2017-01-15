@@ -167,8 +167,8 @@ class ODBCAtomStorage::Response
                 Handle h = table->getHandle(atom);
                 if (nullptr == h)
                 {
-                    store->_tlbuf.addAtom(atom, uuid);
                     table->add(atom, true);
+                    store->_tlbuf.addAtom(atom, uuid);
                 }
             }
             return false;
@@ -1147,13 +1147,13 @@ ODBCAtomStorage::PseudoPtr ODBCAtomStorage::getAtom(const char * query, int heig
 {
     ODBCConnection* db_conn = get_conn();
     Response rp;
-    rp.uuid = _tlbuf.INVALID_UUID;
+    rp.uuid = TLB::INVALID_UUID;
     rp.rs = db_conn->exec(query);
     rp.rs->foreach_row(&Response::create_atom_cb, &rp);
 
     // Did we actually find anything?
     // DO NOT USE IsInvalidHandle() HERE! It won't work, duhh!
-    if (rp.uuid == _tlbuf.INVALID_UUID)
+    if (rp.uuid == TLB::INVALID_UUID)
     {
         rp.release();
         put_conn(db_conn);
