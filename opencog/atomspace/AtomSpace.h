@@ -116,10 +116,10 @@ public:
     /**
      * Return the number of atoms contained in the space.
      */
-    inline int get_size() const { return _atom_table.getSize(); }
-    inline int get_num_nodes() const { return _atom_table.getNumNodes(); }
-    inline int get_num_links() const { return _atom_table.getNumLinks(); }
-    inline int get_num_atoms_of_type(Type type, bool subclass = false) const
+    inline size_t get_size() const { return _atom_table.getSize(); }
+    inline size_t get_num_nodes() const { return _atom_table.getNumNodes(); }
+    inline size_t get_num_links() const { return _atom_table.getNumLinks(); }
+    inline size_t get_num_atoms_of_type(Type type, bool subclass = false) const
         { return _atom_table.getNumAtomsOfType(type, subclass); }
     inline UUID get_uuid(void) const { return _atom_table.get_uuid(); }
 
