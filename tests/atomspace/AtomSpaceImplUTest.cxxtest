@@ -133,7 +133,7 @@ HandleSeq createSimpleGraph(AtomSpace* atomSpace, const char* baseName)
 Handle addRealAtom(AtomSpace& as, AtomPtr atom,
                    TruthValuePtr tvn = TruthValuePtr())
 {
-    TruthValuePtr newTV = tvn ? atom->getTruthValue() : tvn;
+    TruthValuePtr newTV = tvn ? tvn: atom->getTruthValue();
     // Check if the given Atom reference is of an atom
     // that was not inserted yet.  If so, adds the atom. Otherwise, just sets
     // result to the correct/valid handle.
