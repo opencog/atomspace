@@ -60,6 +60,13 @@ UUID TLB::addAtom(const Handle& h, UUID uuid)
     // We need to always use the atomspace version of this handle
     if (nullptr == hr) hr = h;
 
+    // Force a resolution of the outgoing set!
+    if (hr != h and h->isLink())
+    {
+        for (const Handle& ho: h->getOutgoingSet())
+            addAtom(ho, TLB::INVALID_UUID);
+    }
+
     std::lock_guard<std::mutex> lck(_mtx);
 
     // If we hold something that isn't the atomspace's version,
