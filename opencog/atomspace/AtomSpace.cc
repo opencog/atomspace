@@ -311,7 +311,7 @@ Handle AtomSpace::get_link(Type t, const HandleSeq& outgoing)
 
 void AtomSpace::store_atom(const Handle& h)
 {
-    if (NULL == _backing_store)
+    if (nullptr == _backing_store)
         throw RuntimeException(TRACE_INFO, "No backing store");
 
     _backing_store->storeAtom(h);
@@ -359,7 +359,7 @@ Handle AtomSpace::fetch_atom(Handle& h)
         // If we still don't have an atom, then the requested atom
         // was "insane", that is, unknown by either the atom table
         // (case 1) or the backend.
-        if (NULL == tv)
+        if (nullptr == tv)
             throw RuntimeException(TRACE_INFO,
                 "Asked backend for an atom %s\n",
                 h->toString().c_str());

@@ -42,7 +42,7 @@
 #include <opencog/atomspace/AtomTable.h>
 
 //! Atom flag
-// #define WRITE_MUTEX             1  //BIT0
+#define FETCHED_RECENTLY        1  //BIT0
 #define MARKED_FOR_REMOVAL      2  //BIT1
 // #define MULTIPLE_TRUTH_VALUES   4  //BIT2
 // #define FIRED_ACTIVATION        8  //BIT3
@@ -123,6 +123,29 @@ TruthValuePtr Atom::getTruthValue() const
 
     std::lock_guard<std::mutex> lck(_mtx);
     TruthValuePtr local(_truthValue);
+    if (_flags & FETCHED_RECENTLY)
+        return local;
+
+    if (nullptr == _atomTable)
+        return local;
+
+    BackingStore* bs = _atomTable->getAtomSpace()->_backing_store;
+    if (nullptr == bs)
+        return local;
+
+    TruthValuePtr tv;
+    if (isNode()) {
+        tv = bs->getNode(getType(), getName().c_str());
+    } else {
+        Atom* that = (Atom*) this; // cast away constness
+        tv = bs->getLink(that->getHandle());
+    }
+    if (tv) {
+        _flags = _flags | FETCHED_RECENTLY;
+        _truthValue = tv;
+        return tv;
+    }
+
     return local;
 }
 
