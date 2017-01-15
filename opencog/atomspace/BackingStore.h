@@ -41,35 +41,35 @@ namespace opencog
  * storing/retreiving atoms from disk or other remote location or
  * process. This class focuses on "on-demand" atom retreival,
  * rather than on bulk-save/restore (although perhaps that should
- * be provided as well.)  
+ * be provided as well.)
  */
 class BackingStore
 {
 	public:
 		virtual ~BackingStore() {}
 
-		/** 
-		 * Return a pointer to a link of the indicated type and outset,
-		 * if it exists; else return NULL.
+		/**
+		 * Return a pointer to the TruthValue of the link with the
+		 * indicated type and outset, if it exists; else return NULL.
 		 */
-		virtual Handle getLink(Handle&) const = 0;
+		virtual TruthValuePtr getLink(Handle&) const = 0;
 
-		/** 
-		 * Return a pointer to a node of the indicated type and name,
-		 * if it exists; else return NULL.
+		/**
+		 * Return a pointer to the TruthValue of the node with the
+		 * indicated type and name, if it exists; else return NULL.
 		 */
-		virtual Handle getNode(Type, const char *) const = 0;
+		virtual TruthValuePtr getNode(Type, const char *) const = 0;
 
 		/**
 		 * Return a vector containing the handles of the entire incoming
-		 * set of the indicated handle. 
+		 * set of the indicated handle.
 		 */
 		virtual HandleSeq getIncomingSet(const Handle&) const = 0;
 
 		/**
 		 * Recursively store the atom and anything in it's outgoing set.
-		 * If the atom is already in storage, this will update it's 
-		 * truth value, etc. 
+		 * If the atom is already in storage, this will update it's
+		 * truth value, etc.
 		 */
 		virtual void storeAtom(const Handle&) = 0;
 
