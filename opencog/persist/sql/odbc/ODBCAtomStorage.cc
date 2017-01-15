@@ -148,8 +148,8 @@ class ODBCAtomStorage::Response
             AtomPtr atom(get_recursive_if_not_exists(p));
             Handle h = table->add(atom, false);
 
-            // Force resolutioniin TLB, so that later removes work.
-            _tlbuf.addAtom(h, TLB::INVALID_UUID);
+            // Force resolution in TLB, so that later removes work.
+            store->_tlbuf.addAtom(h, TLB::INVALID_UUID);
             return false;
         }
 
