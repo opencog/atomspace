@@ -172,8 +172,10 @@ void SQLPersistSCM::do_store(void)
 #ifdef STORAGE_DEBUG
 void SQLPersistSCM::do_stats(void)
 {
-    if (_store == NULL)
+    if (_store == NULL) {
         printf("sql-stats: Database not open\n");
+        return;
+    }
 
     if (NULL == _as)
         printf("sql-stats: AtomSpace not set\n");
