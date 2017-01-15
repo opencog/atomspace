@@ -188,13 +188,24 @@ void SQLPersistSCM::do_stats(void)
         if (TLB::INVALID_UUID != uuid)
         {
             extra++;
+#if 0
+            // Too much to print.
             printf("TLB holds extra atoms %lu UUID=%lu %s\n",
                     extra, uuid, h->toString().c_str());
+#endif
         }
     }
 
-    printf("sql-stats: Examined %lu atoms in atomspace\n", all.size());
-    printf("sql-stats: tlbuf size=%lu\n", _store->_tlbuf.size());
+    printf("sql-stats: Atomspace holds %lu atoms\n", all.size());
+    printf("sql-stats: tlbuf holds %lu atoms\n", _store->_tlbuf.size());
+    printf("sql-stats: tlbuf holds %lu atoms not in atomspace\n", extra);
+
+    double asfrac = 100.0 * extra / ((double) all.size());
+    double tlfrac = 100.0 * extra / ((double) _store->_tlbuf.size());
+    printf("Extra is %f percent of atomsapce and %f of tlb \n",
+        asfrac, tlfrac);
+}
+
 }
 #endif
 
