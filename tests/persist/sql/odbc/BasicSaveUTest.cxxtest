@@ -235,7 +235,9 @@ void BasicSaveUTest::single_atom_save_restore(std::string id)
 
     // Fetch it back ...
     std::string nam = id + "someNode";
-    AtomPtr b = store->getNode(SCHEMA_NODE, nam.c_str());
+    AtomPtr b(createNode(SCHEMA_NODE, nam));
+    TruthValuePtr btv = store->getNode(SCHEMA_NODE, nam.c_str());
+    b->setTruthValue(btv);
 
     // Are they equal ??
     atomCompare(a, b, "Single node save-restore");
@@ -254,8 +256,9 @@ void BasicSaveUTest::single_atom_save_restore(std::string id)
 
     LinkPtr ll(createLink(SET_LINK, hvec));
     Handle hl(ll->getHandle());
-    AtomPtr lb = store->getLink(hl);
-    atomCompare(l, lb, "Single link save-restore");
+    TruthValuePtr lbtv = store->getLink(hl);
+    hl->setTruthValue(lbtv);
+    atomCompare(l, hl, "Single link save-restore");
 
     store->kill_data();
     delete store;
@@ -361,25 +364,29 @@ void BasicSaveUTest::test_fresh_atom(void)
 
     // Store a ListLink with stuff in it.
     LinkPtr lf(createLink(LIST_LINK, ha, hb));
+    lf->setTruthValue(SimpleTruthValue::createTV(0.55, 0.6));
     store->storeAtom(lf, true);
 
     // Store an empty ListLink.
     LinkPtr le(createLink(LIST_LINK, HandleSeq()));
+    le->setTruthValue(SimpleTruthValue::createTV(0.1, 0.9));
     store->storeAtom(le, true);
 
     // Now get them back.  Get empty after full.
-    Handle hf(lf->getHandle());
-    AtomPtr lfu = store->getLink(hf);
-    atomCompare(lf, lfu, "Fully Fresh");
+    Handle hf(createLink(LIST_LINK, ha, hb)->getHandle());
+    TruthValuePtr ftv = store->getLink(hf);
+    hf->setTruthValue(ftv);
+    atomCompare(lf, hf, "Fully Fresh");
 
-    Handle he(le->getHandle());
-    AtomPtr lem = store->getLink(he);
+    Handle he(createLink(LIST_LINK, HandleSeq())->getHandle());
+    TruthValuePtr etv = store->getLink(he);
 
     printf("Expecting %s\n", le->toString().c_str());
-    printf("Got pointer: %p\n", lem.operator->());
-    if (lem) printf("Got %s\n", lem->toString().c_str());
+    printf("Got pointer: %p\n", etv.operator->());
 
-    atomCompare(le, lem, "Empty Fresh");
+    he->setTruthValue(etv);
+    if (etv) printf("Got %s\n", he->toString().c_str());
+    atomCompare(le, he, "Empty Fresh");
 
     store->kill_data();
     delete store;
