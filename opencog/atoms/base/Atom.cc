@@ -129,7 +129,13 @@ TruthValuePtr Atom::getTruthValue() const
     if (nullptr == _atomTable)
         return local;
 
-    BackingStore* bs = _atomTable->getAtomSpace()->_backing_store;
+    // XXX The only time that as is null is in BasicSaveUTest
+    // In all other cases, it will never be null.
+    AtomSpace* as = _atomTable->getAtomSpace();
+    if (nullptr == as)
+        return local;
+
+    BackingStore* bs = as->_backing_store;
     if (nullptr == bs)
         return local;
 
