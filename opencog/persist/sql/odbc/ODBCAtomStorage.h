@@ -190,8 +190,8 @@ class ODBCAtomStorage : public AtomStorage
         boost::signals2::connection _extract_sig;
 
         // AtomStorage interface
-        Handle getNode(Type, const char *);
-        Handle getLink(Handle& h);
+        TruthValuePtr getNode(Type, const char *);
+        TruthValuePtr getLink(const Handle& h);
         HandleSeq getIncomingSet(const Handle&);
         void storeAtom(const AtomPtr& atomPtr, bool synchronous = false);
         void loadType(AtomTable&, Type);
