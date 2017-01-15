@@ -27,8 +27,6 @@
 #include <set>
 
 #include <opencog/atoms/base/Atom.h>
-#include <opencog/atoms/base/Link.h>
-#include <opencog/atoms/base/Node.h>
 
 namespace opencog
 {
@@ -52,7 +50,7 @@ class BackingStore
 		 * Return a pointer to the TruthValue of the link with the
 		 * indicated type and outset, if it exists; else return NULL.
 		 */
-		virtual TruthValuePtr getLink(Handle&) const = 0;
+		virtual TruthValuePtr getLink(const Handle&) const = 0;
 
 		/**
 		 * Return a pointer to the TruthValue of the node with the

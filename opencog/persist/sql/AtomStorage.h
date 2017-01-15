@@ -45,8 +45,8 @@ class AtomStorage
         virtual ~AtomStorage();
 
         // AtomStorage interface
-        virtual Handle getNode(Type, const char *) = 0;
-        virtual Handle getLink(Handle&) = 0;
+        virtual TruthValuePtr getNode(Type, const char *) = 0;
+        virtual TruthValuePtr getLink(const Handle&) = 0;
         virtual HandleSeq getIncomingSet(const Handle&) = 0;
         virtual void storeAtom(const AtomPtr&, bool synchronous = false) = 0;
         virtual void loadType(AtomTable&, Type) = 0;

@@ -39,12 +39,12 @@ void SQLBackingStore::set_store(AtomStorage *as)
 	_store = as;
 }
 
-Handle SQLBackingStore::getNode(Type t, const char *name) const
+TruthValuePtr SQLBackingStore::getNode(Type t, const char *name) const
 {
 	return _store->getNode(t, name);
 }
 
-Handle SQLBackingStore::getLink(Handle& h) const
+TruthValuePtr SQLBackingStore::getLink(const Handle& h) const
 {
 	return _store->getLink(h);
 }
