@@ -146,7 +146,10 @@ class ODBCAtomStorage::Response
 
             PseudoPtr p(store->makeAtom(*this, uuid));
             AtomPtr atom(get_recursive_if_not_exists(p));
-            table->add(atom, true);
+            Handle h = table->add(atom, false);
+
+            // Force resolutioniin TLB, so that later removes work.
+            _tlbuf.addAtom(h, TLB::INVALID_UUID);
             return false;
         }
 
@@ -167,8 +170,8 @@ class ODBCAtomStorage::Response
                 Handle h = table->getHandle(atom);
                 if (nullptr == h)
                 {
-                    table->add(atom, true);
-                    store->_tlbuf.addAtom(atom, uuid);
+                    h = table->add(atom, false);
+                    store->_tlbuf.addAtom(h, uuid);
                 }
             }
             return false;
@@ -1207,6 +1210,9 @@ HandleSeq ODBCAtomStorage::getIncomingSet(const Handle& h)
     rp.rs->foreach_row(&Response::fetch_incoming_set_cb, &rp);
     rp.release();
     put_conn(db_conn);
+
+    // XXX Odd ... these are never inserted into an atomspace!??
+    // FIXME ???
 
     return iset;
 }
