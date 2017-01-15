@@ -4,7 +4,6 @@ ADD_LIBRARY (truthvalue
 	FuzzyTruthValue.cc
 	GenericTruthValue.cc
 	IndefiniteTruthValue.cc
-	NullTruthValue.cc
 	ProbabilisticTruthValue.cc
 	SimpleTruthValue.cc
 	EvidenceCountTruthValue.cc
@@ -25,7 +24,6 @@ INSTALL (FILES
 	FuzzyTruthValue.h
 	GenericTruthValue.h
 	IndefiniteTruthValue.h
-	NullTruthValue.h
 	ProbabilisticTruthValue.h
 	SimpleTruthValue.h
 	EvidenceCountTruthValue.h
