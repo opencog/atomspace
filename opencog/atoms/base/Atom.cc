@@ -127,16 +127,19 @@ TruthValuePtr Atom::getTruthValue() const
 
 #if THIS_WONT_WORK_AS_NICELY_AS_YOU_MIGHT_GUESS
 
-    // This automatic fetching of TV's from the database gets really
-    // nasty, really quick.  One problem is that getTV is used
-    // everywhere -- printing atoms, you name it, and so gets hit a
-    // lot. Another, more subtle, problem is that the Atom ctors cause
-    // the TV to be fetched, and for UnorderredLinks, this is a
-    // disaster: Links get entered into the TLB with the wrong
-    // outgoing-set order, where they live on like zombies, causing
-    // damage.  These are both difficult technical problems to solve,
-    // so the code below, although it seems nice, doesn't really do
-    // the right thing.
+    // This automatic fetching of TV's from the database seems OK, but
+    // gets really nasty, really quick.  One problem is that getTV is
+    // used everywhere -- printing atoms, you name it, and so gets hit
+    // a lot. Another, more subtle, problem is that the current Atom
+    // ctors accept a TV argument, and so cause the TV to be fetched
+    // during the ctor. This has multiple undeseriable side-effects:
+    // one is that for UnorderredLinks, a badly-ordered version of the
+    // link is inserted into the TLB, before the ctor has finished
+    // sorting the outgoing set! A third issue is that the backend
+    // itself calls this method, when saving the TV! So that's just
+    // kind-of crazy. These are all difficult technical problems to
+    // solve, so the code below, although initially appealing, doesn't
+    // really do the right thing.
     if (_flags & FETCHED_RECENTLY)
         return local;
 
@@ -165,6 +168,7 @@ TruthValuePtr Atom::getTruthValue() const
         _truthValue = tv;
         return tv;
     }
+    return local;
 #endif
 }
 
