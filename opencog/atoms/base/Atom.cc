@@ -42,7 +42,7 @@
 #include <opencog/atomspace/AtomTable.h>
 
 //! Atom flag
-// #define WRITE_MUTEX             1  //BIT0
+#define FETCHED_RECENTLY        1  //BIT0
 #define MARKED_FOR_REMOVAL      2  //BIT1
 // #define MULTIPLE_TRUTH_VALUES   4  //BIT2
 // #define FIRED_ACTIVATION        8  //BIT3
@@ -124,6 +124,52 @@ TruthValuePtr Atom::getTruthValue() const
     std::lock_guard<std::mutex> lck(_mtx);
     TruthValuePtr local(_truthValue);
     return local;
+
+#if THIS_WONT_WORK_AS_NICELY_AS_YOU_MIGHT_GUESS
+
+    // This automatic fetching of TV's from the database seems OK, but
+    // gets really nasty, really quick.  One problem is that getTV is
+    // used everywhere -- printing atoms, you name it, and so gets hit
+    // a lot. Another, more subtle, problem is that the current Atom
+    // ctors accept a TV argument, and so cause the TV to be fetched
+    // during the ctor. This has multiple undeseriable side-effects:
+    // one is that for UnorderredLinks, a badly-ordered version of the
+    // link is inserted into the TLB, before the ctor has finished
+    // sorting the outgoing set! A third issue is that the backend
+    // itself calls this method, when saving the TV! So that's just
+    // kind-of crazy. These are all difficult technical problems to
+    // solve, so the code below, although initially appealing, doesn't
+    // really do the right thing.
+    if (_flags & FETCHED_RECENTLY)
+        return local;
+
+    if (nullptr == _atomTable)
+        return local;
+
+    // XXX The only time that as is null is in BasicSaveUTest
+    // In all other cases, it will never be null.
+    AtomSpace* as = _atomTable->getAtomSpace();
+    if (nullptr == as)
+        return local;
+
+    BackingStore* bs = as->_backing_store;
+    if (nullptr == bs)
+        return local;
+
+    TruthValuePtr tv;
+    if (isNode()) {
+        tv = bs->getNode(getType(), getName().c_str());
+    } else {
+        Atom* that = (Atom*) this; // cast away constness
+        tv = bs->getLink(that->getHandle());
+    }
+    if (tv) {
+        _flags = _flags | FETCHED_RECENTLY;
+        _truthValue = tv;
+        return tv;
+    }
+    return local;
+#endif
 }
 
 void Atom::merge(TruthValuePtr tvn, const MergeCtrl& mc)

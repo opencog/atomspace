@@ -242,8 +242,8 @@ class PGAtomStorage : public AtomStorage
         void disable_testing_mode();
 
         // AtomStorage interface
-        Handle getNode(Type, const char *);
-        Handle getLink(Handle&);
+        TruthValuePtr getNode(Type, const char *);
+        TruthValuePtr getLink(const Handle&);
         HandleSeq getIncomingSet(const Handle&);
         void storeAtom(const AtomPtr&, bool synchronous = false);
         void loadType(AtomTable &, Type);

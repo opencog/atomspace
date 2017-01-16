@@ -90,9 +90,9 @@ private:
     AtomTable *getAtomTable() const { return _atomTable; }
 
 protected:
-    // Byte of bitflags (each bit is a flag, see AtomSpaceDefinites.h)
+    // Byte of bitflags (each bit is a flag).
     // Place this first, so that is shares a word with Type.
-    char _flags;
+    mutable char _flags;
 
     /// Merkle-tree hash of the atom contents. Generically useful
     /// for indexing and comparison operations.
@@ -100,7 +100,7 @@ protected:
 
     AtomTable *_atomTable;
 
-    TruthValuePtr _truthValue;
+    mutable TruthValuePtr _truthValue;
     ProtoAtomPtr _value; // XXX this iw wrong!!! Must remove this!!
 
     // Lock, used to serialize changes.

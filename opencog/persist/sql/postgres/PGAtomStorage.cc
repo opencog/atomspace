@@ -1607,7 +1607,7 @@ HandleSeq PGAtomStorage::getIncomingSet(const Handle& h)
  *
  * This method does *not* register the atom with any atomtable/atomspace
  */
-Handle PGAtomStorage::getNode(Type t, const char * str)
+TruthValuePtr PGAtomStorage::getNode(Type t, const char * str)
 {
     char statement[40*BUFFER_SIZE];
 
@@ -1624,11 +1624,11 @@ Handle PGAtomStorage::getNode(Type t, const char * str)
     }
 
     PseudoPtr p = load_pseudo_atom(statement, 0);
-    if (nullptr == p) return Handle();
+    if (nullptr == p) return TruthValuePtr();
 
     NodePtr node = createNode(t, str, p->tv);
     TLB::addAtom(node, p->uuid);
-    return Handle(node);
+    return p->tv;
 }
 
 bool PGAtomStorage::outgoing_matches_uuids(const HandleSeq& outgoing,
@@ -1666,7 +1666,7 @@ bool PGAtomStorage::outgoing_matches_uuids(const HandleSeq& outgoing,
  *
  * This method does *not* register the atom with any atomtable / atomspace
  */
-Handle PGAtomStorage::getLink(Handle& h)
+TruthValuePtr PGAtomStorage::getLink(const Handle& h)
 {
     Type type = h->getType();
     const HandleSeq& outgoing = h->getOutgoingSet();
@@ -1726,7 +1726,7 @@ Handle PGAtomStorage::getLink(Handle& h)
     // Did we actually find anything? DO NOT USE IsInvalidHandle() HERE! 
     // It won't work, duhh!
     if (database.uuid == TLB::INVALID_UUID)
-        return Handle();
+        return TruthValuePtr();
 
     // If we get here, we have the real Atoms column data loaded and the
     // collisions have been handled so the outgoing set matches the
@@ -1737,7 +1737,7 @@ Handle PGAtomStorage::getLink(Handle& h)
     // Create the actual link.
     LinkPtr link = createLink(type, outgoing, pseudo_atom->tv);
     TLB::addAtom(link, pseudo_atom->uuid);
-    return Handle(link);
+    return pseudo_atom->tv;
 }
 
 /**

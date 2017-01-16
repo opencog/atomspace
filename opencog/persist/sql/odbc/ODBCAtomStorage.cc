@@ -798,8 +798,8 @@ void ODBCAtomStorage::do_store_single_atom(AtomPtr atom, int aheight)
 #endif // STORAGE_DEBUG
 
     // Store the atom type and node name only if storing for the
-    // first time ever. Once an atom is in an atom table, it's
-    // name can type cannot be changed. Only its truth value can
+    // first time ever. Once an atom is in an atom table, it's type,
+    // name or outset cannot be changed. Only its truth value can
     // change.
     if (false == update)
     {
@@ -1241,14 +1241,10 @@ HandleSeq ODBCAtomStorage::getIncomingSet(const Handle& h)
 }
 
 /**
- * Fetch Node from database, with the indicated type and name.
+ * Fetch the TV, for the Node with the indicated type and name.
  * If there is no such node, NULL is returned.
- * More properly speaking, the point of this routine is really
- * to fetch the associated TruthValue for this node.
- *
- * This method does *not* register the atom with any atomtable/atomspace
  */
-Handle ODBCAtomStorage::getNode(Type t, const char * str)
+TruthValuePtr ODBCAtomStorage::getNode(Type t, const char * str)
 {
     setup_typemap();
     char buff[4*BUFSZ];
@@ -1263,32 +1259,28 @@ Handle ODBCAtomStorage::getNode(Type t, const char * str)
         throw IOException(TRACE_INFO,
             "ODBCAtomStorage::getNode: buffer overflow!\n"
             "\tnc=%d buffer=>>%s<<\n", nc, buff);
-        return Handle();
+        return TruthValuePtr();
     }
 #ifdef STORAGE_DEBUG
     num_get_nodes++;
 #endif // STORAGE_DEBUG
 
     PseudoPtr p(getAtom(buff, 0));
-    if (NULL == p) return Handle();
+    if (NULL == p) return TruthValuePtr();
 
 #ifdef STORAGE_DEBUG
     num_got_nodes++;
 #endif // STORAGE_DEBUG
     NodePtr node = createNode(t, str, p->tv);
     _tlbuf.addAtom(node, p->uuid);
-    return node->getHandle();
+    return p->tv;
 }
 
 /**
- * Fetch Link from database, with the indicated type and outgoing set.
+ * Fetch TruthValue for the Link with given type and outgoing set.
  * If there is no such link, NULL is returned.
- * More properly speaking, the point of this routine is really
- * to fetch the associated TruthValue for this link.
- *
- * This method does *not* register the atom with any atomtable/atomspace
  */
-Handle ODBCAtomStorage::getLink(Handle& h)
+TruthValuePtr ODBCAtomStorage::getLink(const Handle& h)
 {
     Type t = h->getType();
     const HandleSeq& oset = h->getOutgoingSet();
@@ -1307,14 +1299,14 @@ Handle ODBCAtomStorage::getLink(Handle& h)
     num_get_links++;
 #endif // STORAGE_DEBUG
     PseudoPtr p = getAtom(ostr.c_str(), 1);
-    if (NULL == p) return Handle();
+    if (NULL == p) return TruthValuePtr();
 
 #ifdef STORAGE_DEBUG
     num_got_links++;
 #endif // STORAGE_DEBUG
     h->setTruthValue(p->tv);
     _tlbuf.addAtom(h, p->uuid);
-    return h;
+    return p->tv;
 }
 
 /**
