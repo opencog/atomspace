@@ -37,7 +37,6 @@
 #include <opencog/truthvalue/IndefiniteTruthValue.h>
 #include <opencog/atoms/base/Link.h>
 #include <opencog/atoms/base/Node.h>
-#include <opencog/truthvalue/NullTruthValue.h>
 #include <opencog/truthvalue/SimpleTruthValue.h>
 #include <opencog/truthvalue/TruthValue.h>
 #include <opencog/atoms/base/types.h>
@@ -80,8 +79,6 @@ class ProtocolBufferSerializer {
             const ZMQSingleTruthValueMessage& singleTruthValue);
     static void serializeIndefiniteTruthValue(
             IndefiniteTruthValue& tv, ZMQTruthValueMessage* truthValueMessage);
-    static void serializeNullTruthValue(
-            NullTruthValue& tv, ZMQTruthValueMessage* truthValueMessage);
     static SimpleTruthValuePtr deserializeSimpleTruthValue(
             const ZMQSingleTruthValueMessage& singleTruthValue);
     static void serializeSimpleTruthValue(

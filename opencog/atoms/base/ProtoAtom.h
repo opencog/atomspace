@@ -66,7 +66,8 @@ public:
 	virtual bool isNode() const { return false; }
 	virtual bool isLink() const { return false; }
 
-	/** Returns a string representation of the node.
+	/**
+	 * Returns a string representation of the node.
 	 *
 	 * @return A string representation of the node.
 	 * cannot be const, because observing the TV and AV requires a lock.
@@ -80,13 +81,15 @@ public:
 	std::string toString() const { return toString(""); }
 	std::string toShortString() const { return toShortString(""); }
 
-	/** Returns whether two atoms are equal.
+	/**
+	 * Returns whether two atoms are equal.
 	 *
 	 * @return true if the atoms are equal, false otherwise.
 	 */
 	virtual bool operator==(const ProtoAtom&) const = 0;
 
-	/** Returns whether two atoms are different.
+	/**
+	 * Returns whether two atoms are different.
 	 *
 	 * @return true if the atoms are different, false otherwise.
 	 */
@@ -95,7 +98,7 @@ public:
 };
 
 typedef std::shared_ptr<ProtoAtom> ProtoAtomPtr;
-/*
+#if NOT_RIGHT_NOW
 struct ProtoAtomPtr : public std::shared_ptr<ProtoAtom>
 {
 	ProtoAtomPtr(std::shared_ptr<ProtoAtom> pa) :
@@ -111,7 +114,7 @@ struct ProtoAtomPtr : public std::shared_ptr<ProtoAtom>
 	operator Handle() const
 		{ return Handle(AtomPtr(*this)); }
 };
-*/
+#endif
 
 typedef std::vector<ProtoAtomPtr> ProtomSeq;
 

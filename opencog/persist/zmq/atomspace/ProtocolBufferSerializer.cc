@@ -30,7 +30,6 @@
 #include "opencog/truthvalue/AttentionValue.h"
 #include "opencog/truthvalue/TruthValue.h"
 #include "opencog/truthvalue/CountTruthValue.h"
-#include "opencog/truthvalue/NullTruthValue.h"
 #include "opencog/truthvalue/IndefiniteTruthValue.h"
 #include "opencog/truthvalue/SimpleTruthValue.h"
 #include "opencog/atomspaceutils/TLB.h"
@@ -286,13 +285,6 @@ LinkPtr ProtocolBufferSerializer::deserializeLink(
 //    atomMessage->set_name(node.name);
 //}
 
-void ProtocolBufferSerializer::serializeNullTruthValue(
-        NullTruthValue& tv, ZMQTruthValueMessage* truthValueMessage)
-{
-    ZMQSingleTruthValueMessage *singleTruthValue = truthValueMessage->add_singletruthvalue();
-    singleTruthValue->set_truthvaluetype(ZMQTruthValueTypeNull);
-}
-
 SimpleTruthValuePtr ProtocolBufferSerializer::deserializeSimpleTruthValue(
         const ZMQSingleTruthValueMessage& singleTruthValue)
 {
@@ -327,13 +319,6 @@ void ProtocolBufferSerializer::serialize(TruthValue &tv, ZMQTruthValueMessage* t
         return;
     }
 
-    NullTruthValue* nulltv = dynamic_cast<NullTruthValue*>(&tv);
-    if(nulltv)
-    {
-        serializeNullTruthValue(*nulltv, truthValueMessage);
-        return;
-    }
-
     SimpleTruthValue* simple = dynamic_cast<SimpleTruthValue*>(&tv);
     if(simple)
     {
@@ -364,11 +349,6 @@ TruthValuePtr ProtocolBufferSerializer::deserialize(
         return deserializeSimpleTruthValue(singleTruthValueMessage);
     case ZMQTruthValueTypeCount:
         return deserializeCountTruthValue(singleTruthValueMessage);
-    case ZMQTruthValueTypeNull:
-    {
-        shared_ptr<NullTruthValue> tv(new NullTruthValue());
-        return tv;
-    }
     case ZMQTruthValueTypeIndefinite:
         return deserializeIndefiniteTruthValue(singleTruthValueMessage);
     default:

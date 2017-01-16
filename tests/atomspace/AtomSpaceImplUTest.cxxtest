@@ -131,9 +131,9 @@ HandleSeq createSimpleGraph(AtomSpace* atomSpace, const char* baseName)
 }
 
 Handle addRealAtom(AtomSpace& as, AtomPtr atom,
-                   TruthValuePtr tvn = TruthValue::NULL_TV())
+                   TruthValuePtr tvn = TruthValuePtr())
 {
-    TruthValuePtr newTV = (tvn->isNullTv()) ? atom->getTruthValue() : tvn;
+    TruthValuePtr newTV = tvn ? tvn: atom->getTruthValue();
     // Check if the given Atom reference is of an atom
     // that was not inserted yet.  If so, adds the atom. Otherwise, just sets
     // result to the correct/valid handle.
@@ -157,12 +157,8 @@ Handle addRealAtom(AtomSpace& as, AtomPtr atom,
         }
     }
     TruthValuePtr currentTV = result->getTruthValue();
-    if (currentTV->isNullTv()) {
-        result->setTruthValue(newTV);
-    } else {
-        TruthValuePtr mergedTV = currentTV->merge(newTV);
-        result->setTruthValue(mergedTV);
-    }
+    TruthValuePtr mergedTV = currentTV->merge(newTV);
+    result->setTruthValue(mergedTV);
     return result;
 }
 
@@ -296,7 +292,6 @@ public:
         for (int i = 0; i < NUM_NODES; i++) {
             TruthValuePtr tv = h[i]->getTruthValue();
             logger().debug("tv initialized to TV object with pointer %p => &(getTV(h[i])) = %p\n", tv.get(), h[i]->getTruthValue().get());
-            TS_ASSERT(not tv->isNullTv());
             logger().debug("h: tv mean = %f, getTV(h[i]) = %f\n", tv->getMean(), h[i]->getTruthValue()->getMean());
             TS_ASSERT(fabs(tv->getMean() - 0.001) < FLOAT_ACCEPTABLE_ERROR);
             logger().debug("h: confidence = %f, diff = %f, error = %f\n", tv->getConfidence(), fabs(tv->getConfidence() - 0.99), FLOAT_ACCEPTABLE_ERROR);
@@ -304,7 +299,6 @@ public:
             if (i < NUM_FORCEUSER_LINKS) {
                 TruthValuePtr tv = FU[i]->getTruthValue();
                 //logger().debug("AFTER ASSIGN THE reference tv to another TV: &tv = %p, getTV(h[i] = %p getTV(FU[i]) = %p\n", tv.get(), atomSpace->getTV(h[i].get()), atomSpace->getTV(FU[i]).get());
-                TS_ASSERT(not tv->isNullTv());
                 // logger().debug("h: tv mean = %f, atomSpace->getTV(h[i]) = %f\n", tv->getMean(), atomSpace->getTV(h[i])->getMean());
                 // logger().debug("FU: tv mean = %f, atomSpace->getTV(FU[i]) = %f\n", tv->getMean(), atomSpace->getTV(FU[i])->getMean());
                 TS_ASSERT(fabs(tv->getMean() - ForceUser[i]) < FLOAT_ACCEPTABLE_ERROR);
@@ -313,7 +307,6 @@ public:
             }
             if (i < NUM_HUMAN_LINKS) {
                 TruthValuePtr tv = H[i]->getTruthValue();
-                TS_ASSERT(not tv->isNullTv());
                 // logger().debug("h: tv mean = %f, atomSpace->getTV(h[i]) = %f\n", tv->getMean(), atomSpace->getTV(h[i])->getMean());
                 // logger().debug("FU: tv mean = %f, atomSpace->getTV(FU[i]) = %f\n", tv->getMean(), atomSpace->getTV(FU[i])->getMean());
                 // logger().debug("H: tv mean = %f,atomSpace->getTV(H[i]) = %f\n", tv->getMean(), atomSpace->getTV(H[i])->getMean());
@@ -390,7 +383,7 @@ public:
             Handle *h_ptr = boost::get<Handle>(&*i);
 
             if (h_ptr) {
-                handles.push_back(addRealAtom(as, *h_ptr, TruthValue::NULL_TV()));
+                handles.push_back(addRealAtom(as, *h_ptr));
             } else {
                 handles.push_back(addAtomIter(as, a, i, TruthValue::TRIVIAL_TV()));
             }

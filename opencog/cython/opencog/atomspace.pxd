@@ -53,7 +53,6 @@ cdef extern from "opencog/truthvalue/TruthValue.h" namespace "opencog":
         confidence_t getConfidence()
         count_t getCount()
         tv_ptr DEFAULT_TV()
-        bint isNullTv()
         string toString()
         bint operator==(cTruthValue h)
         bint operator!=(cTruthValue h)
