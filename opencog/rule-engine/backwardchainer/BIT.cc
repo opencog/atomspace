@@ -20,10 +20,12 @@
  * 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
  */
 
+#include <boost/range/algorithm/binary_search.hpp>
 #include <boost/range/algorithm/lower_bound.hpp>
 #include <boost/range/algorithm/remove_if.hpp>
-#include <boost/range/algorithm/binary_search.hpp>
+#include <boost/range/algorithm/unique.hpp>
 #include <boost/range/algorithm/find.hpp>
+#include <boost/range/algorithm/sort.hpp>
 
 #include <opencog/util/random.h>
 
@@ -280,9 +282,6 @@ Handle AndBIT::expand_fcs_pattern(const Handle& fcs_pattern,
 	// 1. is equal to the rule conclusion.
 	//
 	// 2. is a precondition that uses that conclusion as argument.
-	//
-	// 3. is equal to any rule clause about to get added (to avoid
-	// redundant clauses).
 	HandleSeq fcs_clauses = fcs_pattern->getOutgoingSet();
 	auto to_remove = [&](const Handle& h) {
 		return (is_locally_quoted_eq(h, conclusion)
@@ -294,6 +293,9 @@ Handle AndBIT::expand_fcs_pattern(const Handle& fcs_pattern,
 
 	// Add the patterns and preconditions associated to the rule
 	fcs_clauses.insert(fcs_clauses.end(), clauses.begin(), clauses.end());
+
+	// Remove redundant clauses
+	boost::unique(boost::sort(fcs_clauses));
 
 	return fcs->getAtomSpace()->add_link(AND_LINK, fcs_clauses);
 }
