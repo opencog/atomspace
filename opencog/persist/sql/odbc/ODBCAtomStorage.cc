@@ -763,7 +763,6 @@ void ODBCAtomStorage::storeSingleAtom(AtomPtr atom)
     get_ids();
     int height = get_height(atom);
     do_store_single_atom(atom, height);
-    store_count ++;
 }
 
 void ODBCAtomStorage::do_store_single_atom(AtomPtr atom, int aheight)
@@ -936,6 +935,7 @@ void ODBCAtomStorage::do_store_single_atom(AtomPtr atom, int aheight)
 
     // Make note of the fact that this atom has been stored.
     add_id_to_cache(uuid);
+    store_count ++;
 }
 
 /* ================================================================ */
