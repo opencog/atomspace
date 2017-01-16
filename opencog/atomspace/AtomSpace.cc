@@ -323,8 +323,13 @@ Handle AtomSpace::fetch_atom(const Handle& h)
         throw RuntimeException(TRACE_INFO, "No backing store");
     if (nullptr == h) return Handle::UNDEFINED;
 
-    // Case 1:
-    // Try to get the atom from the backing store.
+    // First, make sure the atom is actually in the atomspace.
+    Handle hc(_atom_table.add(h, false));
+
+    // Now, get teh latest TV from the backing store.
+    // The operation here is to CLOBBER the tv, NOT to merge it!
+    // The goal of an explicit fetch is to explicitly fetch the TV,
+    // and not to play monkey-shines with it.
     TruthValuePtr tv;
     if (h->isNode()) {
         tv = _backing_store->getNode(h->getType(),
@@ -334,15 +339,9 @@ Handle AtomSpace::fetch_atom(const Handle& h)
         tv = _backing_store->getLink(h);
     }
 
-    if (tv) {
-        Handle hc(h);
-        hc->setTruthValue(tv);
-        return _atom_table.add(hc, false);
-    }
+    if (tv) hc->setTruthValue(tv);
 
-    // Case 2: Its not in the backing store. Whatever. Make sure that
-    // it really is in the atomspace, and return to user.
-    return _atom_table.add(h, false);
+    return hc;
 }
 
 Handle AtomSpace::fetch_incoming_set(Handle h, bool recursive)
