@@ -84,6 +84,8 @@ UUID TLB::addAtom(const Handle& h, UUID uuid)
             if (uuid != INVALID_UUID and oid != uuid)
                 throw InvalidParamException(TRACE_INFO,
                      "Earlier version of atom has mis-matched UUID!");
+
+            // If not given a uuid, now we know what it is.
             uuid = oid;
         }
     }
