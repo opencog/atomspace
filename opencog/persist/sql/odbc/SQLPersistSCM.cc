@@ -173,14 +173,17 @@ void SQLPersistSCM::do_stats(void)
     printf("num_get_links=%lu num_got_links=%lu (%f pct)\n",
         num_get_links, num_got_links, frac);
 
-    printf("num_get_insets=%lu num_get_inatoms=%lu\n",
-         num_get_insets, num_get_inatoms);
+    frac = num_get_inatoms / ((double) num_get_insets);
+    printf("num_get_insets=%lu num_get_inatoms=%lu ratio=%f\n",
+         num_get_insets, num_get_inatoms, frac);
 
-    printf("num_node_inserts=%lu num_node_updates=%lu\n",
-         num_node_inserts, num_node_updates);
+    frac = num_node_updates / ((double) num_node_inserts);
+    printf("num_node_inserts=%lu num_node_updates=%lu ratio=%f\n",
+         num_node_inserts, num_node_updates, frac);
 
-    printf("num_link_inserts=%lu num_link_updates=%lu\n",
-         num_link_inserts, num_link_updates);
+    frac = num_link_updates / ((double) num_link_inserts);
+    printf("num_link_inserts=%lu num_link_updates=%lu ratio=%f\n",
+         num_link_inserts, num_link_updates, frac);
 
     UUID mad = _store->_tlbuf.getMaxUUID();
     for (UUID uuid = 1; uuid < mad; uuid++)

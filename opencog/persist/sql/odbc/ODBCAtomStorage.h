@@ -118,19 +118,19 @@ class ODBCAtomStorage : public AtomStorage
         std::set<UUID> id_create_cache;
         std::unique_lock<std::mutex> maybe_create_id(UUID);
 
-// #define STORAGE_DEBUG 1
+#define STORAGE_DEBUG 1
 #ifdef STORAGE_DEBUG
     public:
-        size_t num_get_nodes;
-        size_t num_got_nodes;
-        size_t num_get_links;
-        size_t num_got_links;
-        size_t num_get_insets;
-        size_t num_get_inatoms;
-        size_t num_node_inserts;
-        size_t num_node_updates;
-        size_t num_link_inserts;
-        size_t num_link_updates;
+        std::atomic<size_t> num_get_nodes;
+        std::atomic<size_t> num_got_nodes;
+        std::atomic<size_t> num_get_links;
+        std::atomic<size_t> num_got_links;
+        std::atomic<size_t> num_get_insets;
+        std::atomic<size_t> num_get_inatoms;
+        std::atomic<size_t> num_node_inserts;
+        std::atomic<size_t> num_node_updates;
+        std::atomic<size_t> num_link_inserts;
+        std::atomic<size_t> num_link_updates;
 #endif
         TLB _tlbuf;
 #ifdef STORAGE_DEBUG
