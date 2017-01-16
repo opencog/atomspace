@@ -123,6 +123,20 @@ TruthValuePtr Atom::getTruthValue() const
 
     std::lock_guard<std::mutex> lck(_mtx);
     TruthValuePtr local(_truthValue);
+    return local;
+
+#if THIS_WONT_WORK_AS_NICELY_AS_YOU_MIGHT_GUESS
+
+    // This automatic fetching of TV's from the database gets really
+    // nasty, really quick.  One problem is that getTV is used
+    // everywhere -- printing atoms, you name it, and so gets hit a
+    // lot. Another, more subtle, problem is that the Atom ctors cause
+    // the TV to be fetched, and for UnorderredLinks, this is a
+    // disaster: Links get entered into the TLB with the wrong
+    // outgoing-set order, where they live on like zombies, causing
+    // damage.  These are both difficult technical problems to solve,
+    // so the code below, although it seems nice, doesn't really do
+    // the right thing.
     if (_flags & FETCHED_RECENTLY)
         return local;
 
@@ -151,8 +165,7 @@ TruthValuePtr Atom::getTruthValue() const
         _truthValue = tv;
         return tv;
     }
-
-    return local;
+#endif
 }
 
 void Atom::merge(TruthValuePtr tvn, const MergeCtrl& mc)
