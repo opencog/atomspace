@@ -18,7 +18,7 @@ timestamp_re = r'\[\d{4}-\d{2}-\d{2} \d{2}:\d{2}:\d{2}:\d{3}\]'
 debug_re = r'\[DEBUG\]'
 bc_re = r'\[BackwardChainer\]'
 iter_re = r'Iteration (\d+)'
-iteration_re = r'{} {} {} {}'.format(timestamp_re, debug_re, bc_re, iter_re)
+iteration_re = r'({} )?{} {} {}'.format(timestamp_re, debug_re, bc_re, iter_re)
 iteration_cre = re.compile(iteration_re)
 from_re = r'from:'
 from_cre = re.compile(from_re)
@@ -43,13 +43,13 @@ i2ft = dict()
 src = ''
 for l in open(logfile):
     ls = l.rstrip()
-    
+
     # Extract iteration
     m = iteration_cre.match(ls)
     if m:
-        iteration = int(m.group(1))
+        iteration = int(m.group(2))
         continue
-    
+
     # Extract from/to fcs handle
     m = from_cre.match(ls)
     if m:
@@ -94,7 +94,7 @@ for l in open(logfile):
     # Extract iteration
     m = iteration_cre.match(ls)
     if m:
-        iteration = int(m.group(1))
-    
+        iteration = int(m.group(2))
+
     if iteration == 0 or iteration in i2ft_trace:
         print ls
