@@ -81,6 +81,14 @@ void SQLPersistSCM::do_open(const std::string& dbname,
                          const std::string& username,
                          const std::string& auth)
 {
+    // Unconditionally use the current atomspace, until the next close.
+    AtomSpace *as = SchemeSmob::ss_get_env_as("sql-open");
+    if (nullptr != as) _as = as;
+
+    if (nullptr == _as)
+        throw RuntimeException(TRACE_INFO,
+             "sql-open: Error: No atomspace specified!");
+
     _store = new ODBCAtomStorage(dbname, username, auth);
     if (!_store)
         throw RuntimeException(TRACE_INFO,
@@ -95,9 +103,6 @@ void SQLPersistSCM::do_open(const std::string& dbname,
     }
 
     _backing->set_store(_store);
-
-    // Unconditionally use the current atomspace, until the next close.
-    _as = SchemeSmob::ss_get_env_as("sql-open");
     _backing->registerWith(_as);
 }
 
@@ -107,10 +112,7 @@ void SQLPersistSCM::do_close(void)
         throw RuntimeException(TRACE_INFO,
              "sql-close: Error: Database not open");
 
-    AtomSpace *as = _as;
-    if (NULL == as)
-        as = SchemeSmob::ss_get_env_as("sql-close");
-    _backing->unregisterWith(as);
+    _backing->unregisterWith(_as);
     _backing->set_store(NULL);
     delete _store;
     _store = NULL;
