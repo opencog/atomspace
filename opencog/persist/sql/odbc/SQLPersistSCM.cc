@@ -95,8 +95,9 @@ void SQLPersistSCM::do_open(const std::string& dbname,
     }
 
     _backing->set_store(_store);
-    if (NULL == _as)
-        _as = SchemeSmob::ss_get_env_as("sql-open");
+
+    // Unconditionally use the current atomspace, until the next close.
+    _as = SchemeSmob::ss_get_env_as("sql-open");
     _backing->registerWith(_as);
 }
 
