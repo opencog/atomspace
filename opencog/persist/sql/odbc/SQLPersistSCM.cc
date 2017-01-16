@@ -154,6 +154,11 @@ void SQLPersistSCM::do_stats(void)
     printf("sql-stats: Atomspace holds %lu atoms\n", as->get_size());
     printf("sql-stats: tlbuf holds %lu atoms\n", _store->_tlbuf.size());
 
+    size_t load_count = _store->load_count;
+    size_t store_count = _store->store_count;
+    printf("sql-stats: total loads = %lu total stores = %lu\n",
+         load_count, store_count);
+
     size_t num_get_nodes = _store->num_get_nodes;
     size_t num_got_nodes = _store->num_got_nodes;
     size_t num_get_links = _store->num_get_links;

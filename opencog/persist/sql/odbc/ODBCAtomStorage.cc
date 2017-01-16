@@ -357,6 +357,7 @@ void ODBCAtomStorage::init(const char * dbname,
     }
     type_map_was_loaded = false;
     max_height = 0;
+    bulk_load = false;
 
     for (int i=0; i< TYPEMAP_SZ; i++)
     {
@@ -762,6 +763,7 @@ void ODBCAtomStorage::storeSingleAtom(AtomPtr atom)
     get_ids();
     int height = get_height(atom);
     do_store_single_atom(atom, height);
+    store_count ++;
 }
 
 void ODBCAtomStorage::do_store_single_atom(AtomPtr atom, int aheight)
@@ -1397,7 +1399,7 @@ ODBCAtomStorage::PseudoPtr ODBCAtomStorage::makeAtom(Response &rp, UUID uuid)
     }
 
     load_count ++;
-    if (load_count%10000 == 0)
+    if (bulk_load and load_count%10000 == 0)
     {
         printf("\tLoaded %lu atoms.\n", (unsigned long) load_count);
     }
@@ -1416,6 +1418,7 @@ void ODBCAtomStorage::load(AtomTable &table)
     load_count = 0;
     max_height = getMaxObservedHeight();
     printf("Max Height is %d\n", max_height);
+    bulk_load = true;
 
     setup_typemap();
 
@@ -1463,6 +1466,7 @@ void ODBCAtomStorage::load(AtomTable &table)
     put_conn(db_conn);
     printf("Finished loading %lu atoms in total\n",
         (unsigned long) load_count);
+    bulk_load = false;
 
     // synchrnonize!
     table.barrier();
@@ -1540,7 +1544,6 @@ void ODBCAtomStorage::loadType(AtomTable &table, Type atom_type)
 bool ODBCAtomStorage::store_cb(AtomPtr atom)
 {
     storeSingleAtom(atom);
-    store_count ++;
     if (store_count%1000 == 0)
     {
         printf("\tStored %lu atoms.\n", (unsigned long) store_count);

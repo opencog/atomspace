@@ -100,8 +100,7 @@ class ODBCAtomStorage : public AtomStorage
         void storeOutgoing(AtomPtr, Handle);
         void getOutgoing(HandleSeq&, Handle);
         bool store_cb(AtomPtr);
-        std::atomic<unsigned long> load_count;
-        std::atomic<unsigned long> store_count;
+        bool bulk_load;
 
         void rename_tables(void);
         void create_tables(void);
@@ -132,6 +131,8 @@ class ODBCAtomStorage : public AtomStorage
         std::atomic<size_t> num_link_inserts;
         std::atomic<size_t> num_link_updates;
 #endif
+        std::atomic<size_t> load_count;
+        std::atomic<size_t> store_count;
         TLB _tlbuf;
 #ifdef STORAGE_DEBUG
     private:
