@@ -364,7 +364,7 @@ Handle AtomSpace::fetch_atom(const Handle& h)
     // (case 1) or the backend.
     if (nullptr == tv)
         throw RuntimeException(TRACE_INFO,
-            "Asked backend for an atom %s\n",
+            "Asked backend for non-existant atom %s\n",
             h->toString().c_str());
 
     Handle hc(h);

@@ -798,8 +798,8 @@ void ODBCAtomStorage::do_store_single_atom(AtomPtr atom, int aheight)
 #endif // STORAGE_DEBUG
 
     // Store the atom type and node name only if storing for the
-    // first time ever. Once an atom is in an atom table, it's
-    // name can type cannot be changed. Only its truth value can
+    // first time ever. Once an atom is in an atom table, it's type,
+    // name or outset cannot be changed. Only its truth value can
     // change.
     if (false == update)
     {
@@ -1277,12 +1277,8 @@ TruthValuePtr ODBCAtomStorage::getNode(Type t, const char * str)
 }
 
 /**
- * Fetch Link from database, with the indicated type and outgoing set.
+ * Fetch TruthValue for the Link with given type and outgoing set.
  * If there is no such link, NULL is returned.
- * More properly speaking, the point of this routine is really
- * to fetch the associated TruthValue for this link.
- *
- * This method does *not* register the atom with any atomtable/atomspace
  */
 TruthValuePtr ODBCAtomStorage::getLink(const Handle& h)
 {
