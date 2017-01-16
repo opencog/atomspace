@@ -95,10 +95,9 @@ void SQLPersistSCM::do_open(const std::string& dbname,
     }
 
     _backing->set_store(_store);
-    AtomSpace *as = _as;
-    if (NULL == as)
-        as = SchemeSmob::ss_get_env_as("sql-open");
-    _backing->registerWith(as);
+    if (NULL == _as)
+        _as = SchemeSmob::ss_get_env_as("sql-open");
+    _backing->registerWith(_as);
 }
 
 void SQLPersistSCM::do_close(void)
@@ -122,11 +121,7 @@ void SQLPersistSCM::do_load(void)
         throw RuntimeException(TRACE_INFO,
             "sql-load: Error: Database not open");
 
-    AtomSpace *as = _as;
-    if (NULL == as)
-        as = SchemeSmob::ss_get_env_as("sql-load");
-    // XXX TODO: this should probably be done in a separate thread.
-    _store->loadAtomSpace(as);
+    _store->loadAtomSpace(_as);
 }
 
 
@@ -136,11 +131,7 @@ void SQLPersistSCM::do_store(void)
         throw RuntimeException(TRACE_INFO,
             "sql-store: Error: Database not open");
 
-    AtomSpace *as = _as;
-    if (NULL == as)
-        as = SchemeSmob::ss_get_env_as("sql-store");
-    // XXX TODO This should really be started in a new thread ...
-    _store->storeAtomSpace(as);
+    _store->storeAtomSpace(_as);
 }
 
 #ifdef STORAGE_DEBUG
