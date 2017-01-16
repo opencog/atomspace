@@ -340,6 +340,10 @@ void SchemeSmob::ss_set_env_as(AtomSpace *nas)
 
 AtomSpace* SchemeSmob::ss_get_env_as(const char* subr)
 {
+   // There are weird test-case scenarios where the fluid is not
+   // initalized. Those will crash-n-burn without this test.
+	if (0x0 == atomspace_fluid) return nullptr;
+
 	SCM ref = scm_fluid_ref(atomspace_fluid);
 	AtomSpace* as = ss_to_atomspace(ref);
 	// if (NULL == as)
