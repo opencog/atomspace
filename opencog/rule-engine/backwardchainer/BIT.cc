@@ -80,14 +80,16 @@ AndBIT::AndBIT(AtomSpace& as, const Handle& target, const Handle& vardecl,
 	insert_bitnode(target, fitness);
 }
 
+AndBIT::AndBIT(const Handle& f) : fcs(f), exhausted(false)
+{
+	set_leaf2bitnode();         // TODO: might differ till needed
+}
+
 AndBIT::~AndBIT() {}
 
 AndBIT AndBIT::expand(const Handle& leaf, const Rule& rule) const
 {
-	AndBIT andbit;
-	andbit.fcs = expand_fcs(leaf, rule);
-	andbit.set_leaf2bitnode();  // TODO: might differ till needed
-	return andbit;
+	return AndBIT(expand_fcs(leaf, rule));
 }
 
 BITNode* AndBIT::select_leaf()
@@ -210,8 +212,7 @@ OrderedHandleSet AndBIT::get_leaves(const Handle& h) const
 				OrderedHandleSet aleaves = get_leaves(args->getOutgoingAtom(i));
 				leaves.insert(aleaves.begin(), aleaves.end());
 			}
-		} else
-			leaves.insert(args);
+		}
 		return leaves;
 	} else if (t == SET_LINK) {
 		// All atoms wrapped in a SetLink are potential target leaves

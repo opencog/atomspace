@@ -94,6 +94,7 @@ public:
 	AndBIT();
 	AndBIT(AtomSpace& as, const Handle& target, const Handle& vardecl,
 	       const BITNodeFitness& fitness=BITNodeFitness());
+	AndBIT(const Handle& fcs);
 	~AndBIT();
 
 	/**
