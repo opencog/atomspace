@@ -66,7 +66,7 @@ void SchemeEval::init(void)
 	_captured_stack = scm_gc_protect_object(_captured_stack);
 
 	_pexpr = NULL;
-	_eval_done = false;
+	_eval_done = true;
 	_poll_done = false;
 
 	_rc = SCM_EOL;
