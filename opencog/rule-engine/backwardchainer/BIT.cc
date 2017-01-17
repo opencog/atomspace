@@ -212,8 +212,7 @@ OrderedHandleSet AndBIT::get_leaves(const Handle& h) const
 				OrderedHandleSet aleaves = get_leaves(args->getOutgoingAtom(i));
 				leaves.insert(aleaves.begin(), aleaves.end());
 			}
-		} else
-			leaves.insert(args);
+		}
 		return leaves;
 	} else if (t == SET_LINK) {
 		// All atoms wrapped in a SetLink are potential target leaves
