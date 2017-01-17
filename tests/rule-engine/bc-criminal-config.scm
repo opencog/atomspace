@@ -45,7 +45,7 @@
 (ExecutionLink
    (SchemaNode "URE:maximum-iterations")
    (ConceptNode "URE")
-   (NumberNode "200")
+   (NumberNode "400")
 )
 
 ;; Attention allocation (set the TV strength to 0 to disable it, 1 to
