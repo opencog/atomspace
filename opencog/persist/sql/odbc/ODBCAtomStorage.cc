@@ -1632,12 +1632,6 @@ void ODBCAtomStorage::create_tables(void)
     rp.release();
     type_map_was_loaded = false;
 
-    rp.rs = db_conn->exec("CREATE TABLE Global ("
-                          "max_height INT);");
-    rp.release();
-    rp.rs = db_conn->exec("INSERT INTO Global (max_height) VALUES (0);");
-    rp.release();
-
     put_conn(db_conn);
 }
 
@@ -1665,8 +1659,6 @@ void ODBCAtomStorage::kill_data(void)
     rp.rs = db_conn->exec("INSERT INTO Spaces VALUES (1,1);");
     rp.release();
 
-    rp.rs = db_conn->exec("UPDATE Global SET max_height = 0;");
-    rp.release();
     put_conn(db_conn);
 }
 
