@@ -299,6 +299,8 @@ bool contains_atomtype(const Handle& clause, Type atom_type,
  */
 OrderedHandleSet get_free_variables(const Handle& h,
                                     Quotation quotation=Quotation());
+OrderedHandleSet get_free_variables(const HandleSeq& hs,
+                                    Quotation quotation=Quotation());
 
 /**
  * Return true if h has no free variable (unscoped or unquoted) in it,

@@ -297,13 +297,9 @@ OrderedHandleSet get_free_variables(const Handle& h, Quotation quotation)
 		return {};
 
 	// Recursive cases
-	OrderedHandleSet results;
 	OC_ASSERT(h->isLink());
 	quotation.update(t);
-	for (const Handle& ch : h->getOutgoingSet()) {
-		OrderedHandleSet ch_free_var = get_free_variables(ch, quotation);
-		results.insert(ch_free_var.begin(), ch_free_var.end());
-	}
+	OrderedHandleSet results = get_free_variables(h->getOutgoingSet(), quotation);
 	// If the link was a scope link then remove the scoped
 	// variables from the free variables found.
 	ScopeLinkPtr sh(ScopeLinkCast(h));
@@ -311,6 +307,16 @@ OrderedHandleSet get_free_variables(const Handle& h, Quotation quotation)
 		const OrderedHandleSet& varset = sh->get_variables().varset;
 		for (auto& v : varset)
 			results.erase(v);
+	}
+	return results;
+}
+
+OrderedHandleSet get_free_variables(const HandleSeq& hs, Quotation quotation)
+{
+	OrderedHandleSet results;
+	for (const Handle& h : hs) {
+		OrderedHandleSet free_var = get_free_variables(h, quotation);
+		results.insert(free_var.begin(), free_var.end());
 	}
 	return results;
 }
