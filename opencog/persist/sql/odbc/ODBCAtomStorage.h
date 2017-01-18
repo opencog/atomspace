@@ -72,6 +72,7 @@ class ODBCAtomStorage : public AtomStorage
         void store_atomtable_id(const AtomTable&);
 
         // ---------------------------------------------
+        // Fetching of atoms.
         struct PseudoAtom
             : public std::enable_shared_from_this<PseudoAtom>
         {
@@ -92,18 +93,25 @@ class ODBCAtomStorage : public AtomStorage
         void setMaxHeight(int);
         int getMaxHeight(void);
 
+        // --------------------------
+        // Storing of atoms
         int do_store_atom(AtomPtr);
         void vdo_store_atom(const AtomPtr&);
         void do_store_single_atom(AtomPtr, int);
 
+        UUID get_uuid(const Handle&);
         std::string oset_to_string(const HandleSeq&, int);
-        void storeOutgoing(AtomPtr, Handle);
+
         bool store_cb(AtomPtr);
         bool bulk_load;
 
+        // --------------------------
+        // Table management
         void rename_tables(void);
         void create_tables(void);
 
+        // --------------------------
+        // UUID management
         // Track UUID's that are in use. Needed to determine
         // whether to UPDATE or INSERT.
         std::mutex id_cache_mutex;
@@ -115,6 +123,10 @@ class ODBCAtomStorage : public AtomStorage
         std::mutex id_create_mutex;
         std::set<UUID> id_create_cache;
         std::unique_lock<std::mutex> maybe_create_id(UUID);
+
+        UUID getMaxObservedUUID(void);
+        int getMaxObservedHeight(void);
+        bool idExists(const char *);
 
 #define STORAGE_DEBUG 1
 #ifdef STORAGE_DEBUG
@@ -137,10 +149,8 @@ class ODBCAtomStorage : public AtomStorage
     private:
 #endif
 
-        UUID getMaxObservedUUID(void);
-        int getMaxObservedHeight(void);
-        bool idExists(const char *);
-
+        // -------------------------------
+        // Type management
         // The typemap translates between opencog type numbers and
         // the database type numbers.  Initially, they match up, but
         // might get askew if new types are added or deleted.
