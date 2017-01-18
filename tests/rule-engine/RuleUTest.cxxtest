@@ -42,6 +42,7 @@ private:
 		deduction_implication_rule_h, deduction_inheritance_rule_h,
 		implication_scope_to_implication_rule_h,
 		implication_and_lambda_factorization_rule_h,
+		lambda_closed_construction_rule_h,
 		X, A, V, CT, Typed_X, P_body_var, P, Q, Eval_P, Eval_Q;
 
 public:
@@ -61,6 +62,7 @@ public:
 	void test_unify_target_implication_scope_to_implication_4();
 	// TODO provide a unit tests when some quotation should be not consumed
 	void test_unify_target_implication_and_lambda_factorization();
+	void test_unify_target_lambda_closed_construction();
 };
 
 void RuleUTest::setUp()
@@ -83,6 +85,7 @@ void RuleUTest::setUp()
 	eval_result = _eval.eval("(load-from-path \"crisp-deduction-rule.scm\")");
 	eval_result = _eval.eval("(load-from-path \"implication-scope-to-implication-rule.scm\")");
 	eval_result = _eval.eval("(load-from-path \"implication-and-lambda-factorization-rule.scm\")");
+	eval_result = _eval.eval("(load-from-path \"lambda-closed-construction-rule.scm\")");
 
 	deduction_rule_h =
 		_eval.eval_h("(MemberLink (stv 1 1)"
@@ -99,6 +102,10 @@ void RuleUTest::setUp()
 	implication_and_lambda_factorization_rule_h =
 		_eval.eval_h("(MemberLink (stv 1 1)"
 		             "   implication-and-lambda-factorization-rule-name"
+		             "   (ConceptNode \"URE\"))");
+	lambda_closed_construction_rule_h =
+		_eval.eval_h("(MemberLink (stv 1 1)"
+		             "   lambda-closed-construction-rule-name"
 		             "   (ConceptNode \"URE\"))");
 
 	X = an(VARIABLE_NODE, "$X");
@@ -654,6 +661,86 @@ void RuleUTest::test_unify_target_implication_and_lambda_factorization()
 		             "              (ConceptNode \"treatment-1\")"
 		             "            )"
 		             "          )"
+		             "        )"
+		             "      )"
+		             "    )"
+		             "  )"
+		             ")");
+
+	std::cout << "rule = " << oc_to_string(rule);
+	std::cout << "expected = " << oc_to_string(expected);
+
+	ScopeLinkPtr expected_sc = ScopeLinkCast(expected);
+
+	TS_ASSERT(expected_sc->is_equal(rule));
+}
+
+void RuleUTest::test_unify_target_lambda_closed_construction()
+{
+	Rule lambda_closed_construction_rule(lambda_closed_construction_rule_h);
+	Handle target =
+		_eval.eval_h("(LambdaLink"
+		             "  (TypedVariableLink"
+		             "    (VariableNode \"$X\")"
+		             "    (TypeNode \"ConceptNode\"))"
+		             "  (EvaluationLink (stv 1.000000 1.000000)"
+		             "    (PredicateNode \"contain\")"
+		             "    (ListLink"
+		             "      (ConceptNode \"treatment-1\")"
+		             "      (ConceptNode \"compound-A\"))))");
+	RuleSet rules =
+		lambda_closed_construction_rule.unify_target(target);
+
+	TS_ASSERT_EQUALS(rules.size(), 1);
+
+	Handle rule = rules.begin()->get_rule();
+	Handle expected =
+		_eval.eval_h("(BindLink"
+		             "  (VariableList)"
+		             "  (AndLink"
+		             "    (EvaluationLink"
+		             "      (GroundedPredicateNode \"scm: lambda-closed-construction-precondition\")"
+		             "      (EvaluationLink (stv 1.000000 1.000000)"
+		             "        (PredicateNode \"contain\")"
+		             "        (ListLink"
+		             "          (ConceptNode \"treatment-1\")"
+		             "          (ConceptNode \"compound-A\")"
+		             "        )"
+		             "      )"
+		             "    )"
+		             "    (EvaluationLink (stv 1.000000 1.000000)"
+		             "      (PredicateNode \"contain\")"
+		             "      (ListLink"
+		             "        (ConceptNode \"treatment-1\")"
+		             "        (ConceptNode \"compound-A\")"
+		             "      )"
+		             "    )"
+		             "    (TypedVariableLink"
+		             "      (VariableNode \"$X\")"
+		             "      (TypeNode \"ConceptNode\")"
+		             "    )"
+		             "  )"
+		             "  (ExecutionOutputLink"
+		             "    (GroundedSchemaNode \"scm: lambda-closed-construction-formula\")"
+		             "    (ListLink"
+		             "      (LambdaLink"
+		             "        (TypedVariableLink"
+		             "          (VariableNode \"$X\")"
+		             "          (TypeNode \"ConceptNode\")"
+		             "        )"
+		             "        (EvaluationLink (stv 1.000000 1.000000)"
+		             "          (PredicateNode \"contain\")"
+		             "          (ListLink"
+		             "            (ConceptNode \"treatment-1\")"
+		             "            (ConceptNode \"compound-A\")"
+		             "          )"
+		             "        )"
+		             "      )"
+		             "      (EvaluationLink (stv 1.000000 1.000000)"
+		             "        (PredicateNode \"contain\")"
+		             "        (ListLink"
+		             "          (ConceptNode \"treatment-1\")"
+		             "          (ConceptNode \"compound-A\")"
 		             "        )"
 		             "      )"
 		             "    )"

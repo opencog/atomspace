@@ -121,6 +121,12 @@ BindLinkPtr consume_ill_quotations(BindLinkPtr bl)
 	// Consume the rewrite's quotations
 	rewrite = consume_ill_quotations(bl, rewrite);
 
+	// If the pattern has clauses with free variables but no vardecl
+	// it means that some quotations are missing. Rather than adding
+	// them we merely set vardecl to an empty VariableList.
+	if (vardecl.is_undefined() and not get_free_variables(pattern).empty())
+		vardecl = Handle(createVariableList(HandleSeq{}));
+
 	// Recreate the BindLink
 	return vardecl.is_defined() ?
 		createBindLink(vardecl, pattern, rewrite)
@@ -176,7 +182,7 @@ Handle substitute(BindLinkPtr bl, const TypedSubstitutions::value_type& ts)
 	// Get the list of values to substitute from ts
 	HandleSeq values = bl->get_variables().make_values(ts.first);
 
-	// Perform alpha-conversion, this will work over valiues that are
+	// Perform alpha-conversion, this will work over values that are
 	// non variables as well
 	//
 	// TODO: make sure that ts.second contains the declaration of all
