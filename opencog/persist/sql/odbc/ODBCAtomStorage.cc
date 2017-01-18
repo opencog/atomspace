@@ -1282,7 +1282,7 @@ TruthValuePtr ODBCAtomStorage::getNode(Type t, const char * str)
 #ifdef STORAGE_DEBUG
     num_got_nodes++;
 #endif // STORAGE_DEBUG
-    NodePtr node = createNode(t, str, p->tv);
+    NodePtr node = createNode(t, str);
     _tlbuf.addAtom(node, p->uuid);
     return p->tv;
 }
@@ -1315,7 +1315,6 @@ TruthValuePtr ODBCAtomStorage::getLink(const Handle& h)
 #ifdef STORAGE_DEBUG
     num_got_links++;
 #endif // STORAGE_DEBUG
-    h->setTruthValue(p->tv);
     _tlbuf.addAtom(h, p->uuid);
     return p->tv;
 }

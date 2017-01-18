@@ -326,7 +326,7 @@ Handle AtomSpace::fetch_atom(const Handle& h)
     // First, make sure the atom is actually in the atomspace.
     Handle hc(_atom_table.add(h, false));
 
-    // Now, get teh latest TV from the backing store.
+    // Now, get the latest TV from the backing store.
     // The operation here is to CLOBBER the tv, NOT to merge it!
     // The goal of an explicit fetch is to explicitly fetch the TV,
     // and not to play monkey-shines with it.
