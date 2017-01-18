@@ -1691,17 +1691,6 @@ void ODBCAtomStorage::setMaxHeight(int sqmax)
     put_conn(db_conn);
 }
 
-int ODBCAtomStorage::getMaxHeight(void)
-{
-    ODBCConnection* db_conn = get_conn();
-    Response rp;
-    rp.rs = db_conn->exec("SELECT max_height FROM Global;");
-    rp.rs->foreach_row(&Response::intval_cb, &rp);
-    rp.release();
-    put_conn(db_conn);
-    return rp.intval;
-}
-
 UUID ODBCAtomStorage::getMaxObservedUUID(void)
 {
     ODBCConnection* db_conn = get_conn();
