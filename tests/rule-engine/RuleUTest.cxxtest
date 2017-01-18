@@ -696,6 +696,7 @@ void RuleUTest::test_unify_target_lambda_closed_construction()
 	Handle rule = rules.begin()->get_rule();
 	Handle expected =
 		_eval.eval_h("(BindLink"
+		             "  (VariableList)"
 		             "  (AndLink"
 		             "    (EvaluationLink"
 		             "      (GroundedPredicateNode \"scm: lambda-closed-construction-precondition\")"
@@ -714,11 +715,9 @@ void RuleUTest::test_unify_target_lambda_closed_construction()
 		             "        (ConceptNode \"compound-A\")"
 		             "      )"
 		             "    )"
-		             "    (QuoteLink"
-		             "      (TypedVariableLink"
-		             "        (VariableNode \"$X\")"
-		             "        (TypeNode \"ConceptNode\")"
-		             "      )"
+		             "    (TypedVariableLink"
+		             "      (VariableNode \"$X\")"
+		             "      (TypeNode \"ConceptNode\")"
 		             "    )"
 		             "  )"
 		             "  (ExecutionOutputLink"
