@@ -1,0 +1,136 @@
+/*
+ * tests/query/ConstantClausesUTest.cxxtest
+ *
+ * Copyright (C) 2017 OpenCog Foundation
+ * All Rights Reserved
+ * Author: Nil Geisweiller
+ *
+ * This program is free software; you can redistribute it and/or modify
+ * it under the terms of the GNU Affero General Public License v3 as
+ * published by the Free Software Foundation and including the exceptions
+ * at http://opencog.org/wiki/Licenses
+ *
+ * This program is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ * GNU General Public License for more details.
+ *
+ * You should have received a copy of the GNU Affero General Public License
+ * along with this program; if not, write to:
+ * Free Software Foundation, Inc.,
+ * 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
+ */
+
+#include <opencog/atomspace/AtomSpace.h>
+#include <opencog/query/BindLinkAPI.h>
+#include <opencog/util/Logger.h>
+
+using namespace opencog;
+
+#define al as.add_link
+#define an as.add_node
+
+class ConstantClausesUTest: public CxxTest::TestSuite
+{
+private:
+	AtomSpace as;
+	Handle A, B, C, AB, IdAA;
+
+public:
+	ConstantClausesUTest(void)
+	{
+		logger().set_level(Logger::DEBUG);
+		logger().set_print_to_stdout_flag(true);
+	}
+
+	~ConstantClausesUTest()
+	{
+		// Erase the log file if no assertions failed.
+		if (!CxxTest::TestTracker::tracker().suiteFailed())
+				std::remove(logger().get_filename().c_str());
+		int rc = CxxTest::TestTracker::tracker().suiteFailed();
+		_exit(rc); // XXX hack to avoid double-free in __run_exit_handlers
+	}
+
+	void setUp(void);
+	void tearDown(void);
+
+	void test_constant_1(void);
+	void test_constant_2(void);
+	void test_constant_3(void);
+	void test_constant_virtual_1(void);
+	void test_constant_virtual_2(void);
+};
+
+void ConstantClausesUTest::tearDown(void)
+{
+}
+
+void ConstantClausesUTest::setUp(void)
+{
+	A = an(CONCEPT_NODE, "A");
+	B = an(CONCEPT_NODE, "B");
+	C = an(CONCEPT_NODE, "C");
+	AB = al(INHERITANCE_LINK, A, B);
+	IdAA = al(IDENTICAL_LINK, A, A);
+}
+
+/*
+ * Simple Concept as constant clause.
+ */
+void ConstantClausesUTest::test_constant_1(void)
+{
+	Handle bl = al(BIND_LINK, A, B),
+		result = bindlink(&as, bl),
+		expected = al(SET_LINK, B);
+	TS_ASSERT_EQUALS(result, expected);
+}
+
+/*
+ * Simple Inheritance link as constant clause.
+ */
+void ConstantClausesUTest::test_constant_2(void)
+{
+	Handle bl = al(BIND_LINK, AB, C),
+		result = bindlink(&as, bl),
+		expected = al(SET_LINK, C);
+	TS_ASSERT_EQUALS(result, expected);
+}
+
+/*
+ * Conjunction of Concept and Inheritance as constant clauses.
+ */
+void ConstantClausesUTest::test_constant_3(void)
+{
+	Handle bl = al(BIND_LINK, al(AND_LINK, AB, A), C),
+		result = bindlink(&as, bl),
+		expected = al(SET_LINK, C);
+	TS_ASSERT_EQUALS(result, expected);
+}
+
+/*
+ * Simple Concept as constant clause with a virtual constant clause
+ * that is true (so the rewrite term should be triggered).
+ */
+void ConstantClausesUTest::test_constant_virtual_1(void)
+{
+	Handle bl = al(BIND_LINK, al(AND_LINK, A, IdAA), B),
+		result = bindlink(&as, bl),
+		expected = al(SET_LINK, B);
+	TS_ASSERT_EQUALS(result, expected);
+}
+
+/*
+ * Simple Concept as constant clause with a virtual constant clause
+ * that is false (so the rewrite term should not be triggered).
+ */
+void ConstantClausesUTest::test_constant_virtual_2(void)
+{
+	Handle bl = al(BIND_LINK, al(AND_LINK, A, al(NOT_LINK, IdAA)), B),
+		result = bindlink(&as, bl),
+		expected = al(SET_LINK);
+	TS_ASSERT_EQUALS(result, expected);
+}
+
+#undef al
+#undef an
