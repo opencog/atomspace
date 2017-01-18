@@ -98,7 +98,6 @@ class ODBCAtomStorage : public AtomStorage
 
         std::string oset_to_string(const HandleSeq&, int);
         void storeOutgoing(AtomPtr, Handle);
-        void getOutgoing(HandleSeq&, Handle);
         bool store_cb(AtomPtr);
         bool bulk_load;
 
