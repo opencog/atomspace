@@ -156,6 +156,11 @@ public:
      */
     Handle add_link(Type t, const HandleSeq& outgoing, bool async = false);
 
+    inline Handle add_link(Type t)
+    {
+        return add_link(t, HandleSeq{});
+    }
+
     inline Handle add_link(Type t, Handle h)
     {
 	    return add_link(t, HandleSeq({h}));
