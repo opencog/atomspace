@@ -127,92 +127,97 @@ Handle ExecutionOutputLink::do_execute(AtomSpace* as,
 
 	// Get the schema name.
 	const std::string& schema = gsn->getName();
-	// printf ("Grounded schema name: %s\n", schema.c_str());
+
+	// Extract the language, library and function
+	std::string lang, lib, fun;
+	lang_lib_fun(schema, lang, lib, fun);
+
+	Handle result;
 
 	// At this point, we only run scheme, python schemas and functions from
 	// libraries loaded at runtime.
-	if (0 == schema.compare(0, 4, "scm:", 4))
+	if (lang == "scm")
 	{
 #ifdef HAVE_GUILE
-		// Be friendly, and strip leading white-space, if any.
-		size_t pos = 4;
-		while (' ' == schema[pos]) pos++;
-
 		SchemeEval* applier = SchemeEval::get_evaluator(as);
-		Handle h(applier->apply(schema.substr(pos), args));
+		result = applier->apply(fun, args);
 
 		// Exceptions were already caught, before leaving guile mode,
 		// so we can't rethrow.  Just throw a new exception.
 		if (applier->eval_error())
 			throw RuntimeException(TRACE_INFO,
 			    "Failed evaluation; see logfile for stack trace.");
-		return h;
 #else
 		throw RuntimeException(TRACE_INFO,
 		    "Cannot evaluate scheme GroundedSchemaNode!");
 #endif /* HAVE_GUILE */
 	}
-
-	if (0 == schema.compare(0, 3, "py:", 3))
+	else if (lang == "py")
 	{
 #ifdef HAVE_CYTHON
-		// Be friendly, and strip leading white-space, if any.
-		size_t pos = 3;
-		while (' ' == schema[pos]) pos++;
-
 		// Get a reference to the python evaluator. 
 		// Be sure to specify the atomspace in which the
 		// evaluation is to be performed.
 		PythonEval &applier = PythonEval::instance();
-		Handle h = applier.apply(as, schema.substr(pos), args);
-
-		// Return the handle
-		return h;
+		result = applier.apply(as, fun, args);
 #else
 		throw RuntimeException(TRACE_INFO,
 		    "Cannot evaluate python GroundedSchemaNode!");
 #endif /* HAVE_CYTHON */
 	}
-
-	// This is used by the Haskel bindings.
-	if (0 == schema.compare(0, 4, "lib:", 4))
+	// Used by the Haskel bindings
+	else if (lang == "lib")
 	{
-		// Be friendly, and strip leading white-space, if any.
-		size_t pos = 4;
-		while (' ' == schema[pos]) pos++;
-
-		//Get the name of the Library and Function
-		//They should be sperated by a .
-		std::size_t dotpos = schema.find("\\");
-		if (std::string::npos == dotpos)
-		{
-			throw RuntimeException(TRACE_INFO,
-				"Library name and function name must be separated by a '\\'");
-		}
-		std::string libName  = schema.substr(pos, dotpos - pos);
-		std::string funcName = schema.substr(dotpos + 1);
-
-#define BROKEN_CODE 1
+#define BROKEN_CODE
 #ifdef BROKEN_CODE
-		void* sym = LibraryManager::getFunc(libName,funcName);
+		void* sym = LibraryManager::getFunc(lib,fun);
 
 		// Convert the void* pointer to the correct function type.
 		Handle* (*func)(AtomSpace*, Handle*);
 		func = reinterpret_cast<Handle* (*)(AtomSpace *, Handle*)>(sym);
 
-		// Execute the function.
-		Handle h = *func(as, &args);
-
-		// Return the handle.
-		return h;
-#else
-		return Handle();
+		// Execute the function
+		result = *func(as, &args);
 #endif
 	}
+	else {
+		// Unkown proceedure type
+		throw RuntimeException(TRACE_INFO,
+		                       "Cannot evaluate unknown Schema %s",
+		                       gsn->toString().c_str());
+	}
 
-	// Unkown proceedure type.
-	throw RuntimeException(TRACE_INFO,
-		"Cannot evaluate unknown Schema %s", gsn->toString().c_str());
+	LAZY_LOG_FINE << "Result: " << oc_to_string(result);
+	return result;
+}
+
+void ExecutionOutputLink::lang_lib_fun(const std::string& schema,
+                                       std::string& lang,
+                                       std::string& lib,
+                                       std::string& fun)
+{
+	std::string::size_type pos = schema.find(":");
+	if (pos == std::string::npos)
+		return;
+
+	lang = schema.substr(0, pos);
+
+	// Move past the colon and strip leading white-space
+	do { pos++; } while (' ' == schema[pos]);
+
+	if (lang == "lib") {
+		// Get the name of the Library and Function. They should be
+		// sperated by "\\".
+		std::size_t seppos = schema.find("\\");
+		if (seppos == std::string::npos)
+		{
+			throw RuntimeException(TRACE_INFO,
+				"Library name and function name must be separated by '\\'");
+		}
+		lib = schema.substr(pos, seppos - pos);
+		fun = schema.substr(seppos + 1);
+	} else
+		fun = schema.substr(pos);
 }
 
 std::unordered_map<std::string, void*> LibraryManager::_librarys;
