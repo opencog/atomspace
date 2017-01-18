@@ -289,7 +289,7 @@ Handle filter_vardecl(const Handle& vardecl, const HandleSeq& hs)
 			if (filter_vardecl(v, hs).is_defined())
 				subvardecls.push_back(v);
 		}
-		if (subvardecls.empty())
+		if (subvardecls.empty() and get_free_variables(hs).empty())
 			return Handle::UNDEFINED;
 		if (subvardecls.size() == 1)
 			return subvardecls[0];
