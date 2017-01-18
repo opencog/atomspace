@@ -88,7 +88,7 @@ class ODBCAtomStorage : public AtomStorage
         PseudoPtr getAtom(const char *, int);
         PseudoPtr petAtom(UUID);
 
-        int get_height(AtomPtr);
+        int get_height(const Handle&);
         int max_height;
 
         // --------------------------

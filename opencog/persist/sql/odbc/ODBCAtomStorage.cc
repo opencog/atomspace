@@ -642,21 +642,17 @@ TruthValue* ODBCAtomStorage::getTV(int tvid)
  * of the tallest atom in its outgoing set.
  * @note This can conversely be viewed as the depth of a tree.
  */
-int ODBCAtomStorage::get_height(AtomPtr atom)
+int ODBCAtomStorage::get_height(const Handle& atom)
 {
     if (not atom->isLink()) return 0;
 
     int maxd = 0;
-    int arity = atom->getArity();
-
-    const HandleSeq& out = atom->getOutgoingSet();
-    for (int i=0; i<arity; i++)
+    for (const Handle& h : atom->getOutgoingSet())
     {
-        Handle h = out[i];
         int d = get_height(h);
         if (maxd < d) maxd = d;
     }
-    return maxd +1;
+    return maxd + 1;
 }
 
 /* ================================================================ */
@@ -758,7 +754,7 @@ void ODBCAtomStorage::vdo_store_atom(const AtomPtr& atom)
 void ODBCAtomStorage::storeSingleAtom(AtomPtr atom)
 {
     get_ids();
-    int height = get_height(atom);
+    int height = get_height(atom->getHandle());
     do_store_single_atom(atom, height);
 }
 
