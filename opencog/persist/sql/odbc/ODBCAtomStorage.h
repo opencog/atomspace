@@ -90,7 +90,6 @@ class ODBCAtomStorage : public AtomStorage
 
         int get_height(AtomPtr);
         int max_height;
-        void setMaxHeight(int);
 
         // --------------------------
         // Storing of atoms

@@ -401,9 +401,6 @@ ODBCAtomStorage::ODBCAtomStorage(const std::string& dbname,
 
 ODBCAtomStorage::~ODBCAtomStorage()
 {
-    if (connected())
-        setMaxHeight(getMaxObservedHeight());
-
     while (not conn_pool.is_empty())
     {
         ODBCConnection* db_conn = conn_pool.pop();
@@ -1577,7 +1574,6 @@ void ODBCAtomStorage::store(const AtomTable &table)
     rp.release();
     put_conn(db_conn);
 
-    setMaxHeight(getMaxObservedHeight());
     printf("\tFinished storing %lu atoms total.\n",
         (unsigned long) store_count);
 }
@@ -1675,21 +1671,6 @@ void ODBCAtomStorage::kill_data(void)
 }
 
 /* ================================================================ */
-
-void ODBCAtomStorage::setMaxHeight(int sqmax)
-{
-    // Max height of db contents can only get larger!
-    if (max_height < sqmax) max_height = sqmax;
-
-    char buff[BUFSZ];
-    snprintf(buff, BUFSZ, "UPDATE Global SET max_height = %d;", max_height);
-
-    ODBCConnection* db_conn = get_conn();
-    Response rp;
-    rp.rs = db_conn->exec(buff);
-    rp.release();
-    put_conn(db_conn);
-}
 
 UUID ODBCAtomStorage::getMaxObservedUUID(void)
 {
