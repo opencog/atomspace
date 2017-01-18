@@ -48,7 +48,7 @@
   (cog-set-tv! lamb (cog-tv body)))
 
 (define (lambda-closed-construction-precondition atom)
-  (bool->tv (and (cog-closed? atom) (tv-positive-conf? (cog-tv atom)))))
+  (bool->tv (and (cog-closed? atom) (tv-non-null-conf? (cog-tv atom)))))
 
 ;; Name the rule
 (define lambda-closed-construction-rule-name

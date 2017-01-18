@@ -89,11 +89,11 @@
 "
 	(assoc-ref (cog-tv->alist tv) 'confidence))
 
-(define-public (tv-positive-conf? tv)
+(define-public (tv-non-null-conf? tv)
 "
   Return #t if the confidence of tv is non null positive, #f otherwise.
 "
-	(< (tv-conf tv) 0))
+	(< 0 (tv-conf tv)))
 
 ;
 ; Simple truth values won't have a count. Its faster to just check
@@ -1239,7 +1239,7 @@
 'etv
 'tv-mean
 'tv-conf
-'tv-positive-conf?
+'tv-non-null-conf?
 'tv-count
 'cog-set-sti!
 'cog-set-lti!
