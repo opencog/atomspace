@@ -657,15 +657,26 @@ int ODBCAtomStorage::get_height(const Handle& atom)
 
 /* ================================================================ */
 
-UUID get_uuid(const Handle& h)
+UUID ODBCAtomStorage::get_uuid(const Handle& h)
 {
     UUID uuid = _tlbuf.getUUID(h);
     if (TLB::INVALID_UUID != uuid) return uuid;
 
     // Ooops. We need to find out what this is.
+    TruthValuePtr tv;
+    if (h->isNode())
+    {
+        tv = getNode(h->getType(), h->getName().c_str());
+    }
+    else
+    {
+        tv = getLink(h);
+    }
+    // If it was found, then the TLB got updated.
+    if (tv) return _tlbuf.getUUID(h);
 
-    UUID uuid = _tlbuf.addAtom(h, TLB::INVALID_UUID);
-    return uuid;
+    // If it was not found, then issue a brand-spankin new UUID.
+    return _tlbuf.addAtom(h, TLB::INVALID_UUID);
 }
 
 std::string ODBCAtomStorage::oset_to_string(const HandleSeq& out)
