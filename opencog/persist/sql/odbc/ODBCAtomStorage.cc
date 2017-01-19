@@ -401,9 +401,6 @@ ODBCAtomStorage::ODBCAtomStorage(const std::string& dbname,
 
 ODBCAtomStorage::~ODBCAtomStorage()
 {
-    if (connected())
-        setMaxHeight(getMaxObservedHeight());
-
     while (not conn_pool.is_empty())
     {
         ODBCConnection* db_conn = conn_pool.pop();
@@ -645,36 +642,52 @@ TruthValue* ODBCAtomStorage::getTV(int tvid)
  * of the tallest atom in its outgoing set.
  * @note This can conversely be viewed as the depth of a tree.
  */
-int ODBCAtomStorage::get_height(AtomPtr atom)
+int ODBCAtomStorage::get_height(const Handle& atom)
 {
     if (not atom->isLink()) return 0;
 
     int maxd = 0;
-    int arity = atom->getArity();
-
-    const HandleSeq& out = atom->getOutgoingSet();
-    for (int i=0; i<arity; i++)
+    for (const Handle& h : atom->getOutgoingSet())
     {
-        Handle h = out[i];
         int d = get_height(h);
         if (maxd < d) maxd = d;
     }
-    return maxd +1;
+    return maxd + 1;
 }
 
 /* ================================================================ */
 
-std::string ODBCAtomStorage::oset_to_string(const HandleSeq& out,
-                                        int arity)
+UUID ODBCAtomStorage::get_uuid(const Handle& h)
 {
-    std::string str;
-    str += "\'{";
-    for (int i=0; i<arity; i++)
+    UUID uuid = _tlbuf.getUUID(h);
+    if (TLB::INVALID_UUID != uuid) return uuid;
+
+    // Ooops. We need to find out what this is.
+    TruthValuePtr tv;
+    if (h->isNode())
     {
-        const Handle& h = out[i];
-        UUID uuid = _tlbuf.addAtom(h, TLB::INVALID_UUID);
-        if (i != 0) str += ", ";
-        str += std::to_string(uuid);
+        tv = getNode(h->getType(), h->getName().c_str());
+    }
+    else
+    {
+        tv = getLink(h);
+    }
+    // If it was found, then the TLB got updated.
+    if (tv) return _tlbuf.getUUID(h);
+
+    // If it was not found, then issue a brand-spankin new UUID.
+    return _tlbuf.addAtom(h, TLB::INVALID_UUID);
+}
+
+std::string ODBCAtomStorage::oset_to_string(const HandleSeq& out)
+{
+    bool not_first = false;
+    std::string str = "\'{";
+    for (const Handle& h : out)
+    {
+        if (not_first) str += ", ";
+        not_first = true;
+        str += std::to_string(get_uuid(h));
     }
     str += "}\'";
     return str;
@@ -761,7 +774,7 @@ void ODBCAtomStorage::vdo_store_atom(const AtomPtr& atom)
 void ODBCAtomStorage::storeSingleAtom(AtomPtr atom)
 {
     get_ids();
-    int height = get_height(atom);
+    int height = get_height(atom->getHandle());
     do_store_single_atom(atom, height);
 }
 
@@ -860,8 +873,6 @@ void ODBCAtomStorage::do_store_single_atom(AtomPtr atom, int aheight)
 
             if (atom->isLink())
             {
-                int arity = atom->getArity();
-
                 // The Atoms table has a UNIQUE constraint on the
                 // outgoing set.  If a link is too large, a postgres
                 // error is generated:
@@ -871,7 +882,7 @@ void ODBCAtomStorage::do_store_single_atom(AtomPtr atom, int aheight)
                 // redesign.  One could hash together the UUID's in the
                 // outgoing set, and then force a unique constraint on
                 // the hash.
-                if (330 < arity)
+                if (330 < atom->getArity())
                 {
                     throw IOException(TRACE_INFO,
                         "Error: do_store_single_atom: Maxiumum Link size is 330.\n");
@@ -879,7 +890,7 @@ void ODBCAtomStorage::do_store_single_atom(AtomPtr atom, int aheight)
 
                 cols += ", outgoing";
                 vals += ", ";
-                vals += oset_to_string(atom->getOutgoingSet(), arity);
+                vals += oset_to_string(atom->getOutgoingSet());
             }
         }
     }
@@ -1282,7 +1293,7 @@ TruthValuePtr ODBCAtomStorage::getNode(Type t, const char * str)
 #ifdef STORAGE_DEBUG
     num_got_nodes++;
 #endif // STORAGE_DEBUG
-    NodePtr node = createNode(t, str, p->tv);
+    NodePtr node = createNode(t, str);
     _tlbuf.addAtom(node, p->uuid);
     return p->tv;
 }
@@ -1303,7 +1314,7 @@ TruthValuePtr ODBCAtomStorage::getLink(const Handle& h)
         storing_typemap[t]);
 
     std::string ostr = buff;
-    ostr += oset_to_string(oset, oset.size());
+    ostr += oset_to_string(oset);
     ostr += ";";
 
 #ifdef STORAGE_DEBUG
@@ -1315,7 +1326,6 @@ TruthValuePtr ODBCAtomStorage::getLink(const Handle& h)
 #ifdef STORAGE_DEBUG
     num_got_links++;
 #endif // STORAGE_DEBUG
-    h->setTruthValue(p->tv);
     _tlbuf.addAtom(h, p->uuid);
     return p->tv;
 }
@@ -1578,7 +1588,6 @@ void ODBCAtomStorage::store(const AtomTable &table)
     rp.release();
     put_conn(db_conn);
 
-    setMaxHeight(getMaxObservedHeight());
     printf("\tFinished storing %lu atoms total.\n",
         (unsigned long) store_count);
 }
@@ -1637,12 +1646,6 @@ void ODBCAtomStorage::create_tables(void)
     rp.release();
     type_map_was_loaded = false;
 
-    rp.rs = db_conn->exec("CREATE TABLE Global ("
-                          "max_height INT);");
-    rp.release();
-    rp.rs = db_conn->exec("INSERT INTO Global (max_height) VALUES (0);");
-    rp.release();
-
     put_conn(db_conn);
 }
 
@@ -1670,38 +1673,10 @@ void ODBCAtomStorage::kill_data(void)
     rp.rs = db_conn->exec("INSERT INTO Spaces VALUES (1,1);");
     rp.release();
 
-    rp.rs = db_conn->exec("UPDATE Global SET max_height = 0;");
-    rp.release();
     put_conn(db_conn);
 }
 
 /* ================================================================ */
-
-void ODBCAtomStorage::setMaxHeight(int sqmax)
-{
-    // Max height of db contents can only get larger!
-    if (max_height < sqmax) max_height = sqmax;
-
-    char buff[BUFSZ];
-    snprintf(buff, BUFSZ, "UPDATE Global SET max_height = %d;", max_height);
-
-    ODBCConnection* db_conn = get_conn();
-    Response rp;
-    rp.rs = db_conn->exec(buff);
-    rp.release();
-    put_conn(db_conn);
-}
-
-int ODBCAtomStorage::getMaxHeight(void)
-{
-    ODBCConnection* db_conn = get_conn();
-    Response rp;
-    rp.rs = db_conn->exec("SELECT max_height FROM Global;");
-    rp.rs->foreach_row(&Response::intval_cb, &rp);
-    rp.release();
-    put_conn(db_conn);
-    return rp.intval;
-}
 
 UUID ODBCAtomStorage::getMaxObservedUUID(void)
 {

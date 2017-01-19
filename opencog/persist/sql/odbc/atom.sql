@@ -39,7 +39,7 @@ CREATE TABLE Atoms (
     stv_count DOUBLE PRECISION,
 
     -- distance from this link to farthest Node in the outgoing
-    -- set of this atom. 
+    -- set of this atom.
     -- height of Nodes is by definition zero.
     -- height of Links containing only nodes is one, etc.
     height SMALLINT,
@@ -69,7 +69,7 @@ CREATE TABLE Atoms (
 -- However, neither MySQL nor SQLite3 support arrays, and so maybe
 -- this could be useful for a port to those DB's.
 --
--- Table of the edges of the Levi craph corresponding 
+-- Table of the edges of the Levi craph corresponding
 -- to the hypergraph. An edge is a (src,dst) pair. The
 -- pair, understood as going src->dst, for a fixed src,
 -- is the set of outgoing edges of the atom. Understood
@@ -98,19 +98,10 @@ CREATE TABLE TypeCodes (
 );
 
 -- -----------------------------------------------------------
--- Global state
-
-CREATE TABLE Global (
-    max_height INT          -- max height of all links.
-);
-
-INSERT INTO Global (max_height) VALUES (0); -- largest height observed.
-
--- -----------------------------------------------------------
 -- Simple truth values
 -- This would store truth values out-of-line with the atom,
--- but this seems very ineffcient, as it wastes index space, 
--- requires extra queries, and so on. 
+-- but this seems very ineffcient, as it wastes index space,
+-- requires extra queries, and so on.
 -- So its commented out below, and left behind as FYI.
 --
 -- CREATE TABLE SimpleTVs (
@@ -118,14 +109,13 @@ INSERT INTO Global (max_height) VALUES (0); -- largest height observed.
 --  mean FLOAT,
 --  count FLOAT
 -- );
--- 
--- 
+--
+--
 -- INSERT INTO SimpleTVs VALUES (0, 0.0, 0.0);     -- NULL_TV
 -- INSERT INTO SimpleTVs VALUES (1, 0.0, 0.0);     -- TRIVIAL_TV
 -- INSERT INTO SimpleTVs VALUES (2, 0.0, 10000.0); -- FALSE_TV
 -- INSERT INTO SimpleTVs VALUES (3, 1.0, 10000.0); -- TRUE_TV
 -- INSERT INTO SimpleTVs VALUES (4, 1.0, 0.0);     -- DEFAULT_TV
--- 
+--
 -- CREATE SEQUENCE tvid_seq START WITH 5;
--- 
-
+--
