@@ -32,6 +32,7 @@
 #include <opencog/atoms/base/Atom.h>
 #include <opencog/guile/SchemeEval.h>
 #include <opencog/persist/sql/odbc/ODBCAtomStorage.h>
+#include <opencog/truthvalue/SimpleTruthValue.h>
 
 #include <opencog/util/Logger.h>
 #include <opencog/util/Config.h>
@@ -126,8 +127,11 @@ void FetchUTest::setUp(void)
 	eval = SchemeEval::get_evaluator(_as);
 	kill_data();
 
-	eval->eval(R"((add-to-load-path "/usr/local/share/opencog/scm"))");
-	eval->eval("(use-modules (opencog))");
+	// eval->eval(R"((add-to-load-path "/usr/local/share/opencog/scm"))");
+	// eval->eval("(use-modules (opencog))");
+
+	// WTF ... Module loading fails without this; but why is this
+	// even needed ???
    eval->eval(R"((setenv "LTDL_LIBRARY_PATH" (if (getenv "LTDL_LIBRARY_PATH") (string-append (getenv "LTDL_LIBRARY_PATH") ":/usr/local/lib/opencog") "/usr/local/lib/opencog")))");
 
 }
@@ -215,15 +219,56 @@ void FetchUTest::test_stuff(void)
 {
 	logger().debug("BEGIN TEST: %s", __FUNCTION__);
 
+	// First, initialize the database
 	eval->eval("(use-modules (opencog persist) (opencog persist-sql))");
 	eval->eval(sql_open);
-	eval->eval(R"((cog-set-tv! (ConceptNode "AAA") (stv 0.1 0.11)))");
+	eval->eval(R"((cog-set-tv! (Concept "AAA") (stv 0.1 0.11)))");
+	eval->eval(R"((cog-set-tv! (Concept "BBB") (stv 0.2 0.22)))");
 	eval->eval("(sql-store)");
 	eval->eval("(sql-close)");
 
 	delete _as;
 	_as = new AtomSpace();
 	eval = SchemeEval::get_evaluator(_as);
+	eval->eval(sql_open);
+	eval->eval(R"((fetch-atom (List (Concept "AAA") (Concept "BBB"))))");
+
+	// The above should NOT update the TV of (Concept "AAA")
+	TruthValuePtr tv = eval->eval_tv(R"((cog-tv (Concept "AAA")))");
+	printf("Expecting default, got %s\n", tv->toString().c_str());
+	TruthValuePtr dtv = TruthValue::DEFAULT_TV();
+	TS_ASSERT((*tv) == (*dtv));
+
+	// If we fetch the TV explicitly, then we should get the
+	// value from the database.
+	eval->eval(R"((fetch-atom (Concept "AAA")))");
+	tv = eval->eval_tv(R"((cog-tv (Concept "AAA")))");
+	TruthValuePtr etv = SimpleTruthValue::createTV(0.1, 0.11);
+	TS_ASSERT((*tv) == (*etv));
+
+	// Update A.
+	eval->eval(R"((cog-set-tv! (Concept "AAA") (stv 0.3 0.33)))");
+
+	// Saving everything should not crash.  It should, however,
+	// clober the TV on (Concept "BBB")
+	eval->eval("(sql-store)");
+	eval->eval("(sql-close)");
+
+	delete _as;
+	_as = new AtomSpace();
+	eval = SchemeEval::get_evaluator(_as);
+	eval->eval(sql_open);
+
+	// AAA should have been update, as above.
+	eval->eval(R"((fetch-atom (Concept "AAA")))");
+	tv = eval->eval_tv(R"((cog-tv (Concept "AAA")))");
+	etv = SimpleTruthValue::createTV(0.3, 0.33);
+	TS_ASSERT((*tv) == (*etv));
+
+	// BBB should have been clobbered.
+	eval->eval(R"((fetch-atom (Concept "BBB")))");
+	tv = eval->eval_tv(R"((cog-tv (Concept "BBB")))");
+	TS_ASSERT((*tv) == (*dtv));
 
 	logger().debug("END TEST: %s", __FUNCTION__);
 }

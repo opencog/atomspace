@@ -60,13 +60,19 @@ LINK_LIBRARIES(
 )
 
 IF (DB_IS_CONFIGURED)
+    MESSAGE(STATUS "Postgres database is configured for ODBC unit tests." )
+
     ADD_CXXTEST(BasicSaveUTest)
     IF (HAVE_GUILE)
         ADD_CXXTEST(PersistUTest)
         ADD_CXXTEST(MultiPersistUTest)
         ADD_CXXTEST(FetchUTest)
+
+        # This seems not to work ... why?
+        SET_TESTS_PROPERTIES(FetchUTest PROPERTIES
+            ENVIRONMENT "LTDL_LIBRARY_PATH=${PROJECT_BINARY_DIR}/opencog/persist/guile:${PROJECT_BINARY_DIR}/opencog/persist/sql/odbc")
     ENDIF (HAVE_GUILE)
-    MESSAGE(STATUS "Postgres database is configured for ODBC unit tests." )
+
 ELSE (DB_IS_CONFIGURED)
     MESSAGE(WARNING "Postgres database not configured for unit tests! See the README!")
 ENDIF (DB_IS_CONFIGURED)
