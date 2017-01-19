@@ -188,18 +188,14 @@ PatternLink::PatternLink(const OrderedHandleSet& vars,
 	_pat.cnf_clauses = compo;
 	for (const Handle& h : compo)
 	{
-		bool h_is_opt = false;
-		for (const Handle& opt : opts)
+		auto h_is_in = [&](const Handle& opt) { return is_atom_in_tree(opt, h); };
+		auto it = boost::find_if(opts, h_is_in);
+		if (it != opts.end())
 		{
-			if (is_atom_in_tree(opt, h))
-			{
-				_pat.optionals.insert(opt);
-				_pat.clauses.emplace_back(opt);
-				h_is_opt = true;
-				break;
-			}
+			_pat.optionals.insert(*it);
+			_pat.clauses.emplace_back(*it);
 		}
-		if (not h_is_opt)
+		else
 		{
 			_pat.clauses.emplace_back(h);
 			_pat.mandatory.emplace_back(h);
