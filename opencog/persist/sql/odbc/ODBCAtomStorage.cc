@@ -657,16 +657,26 @@ int ODBCAtomStorage::get_height(const Handle& atom)
 
 /* ================================================================ */
 
+UUID get_uuid(const Handle& h)
+{
+    UUID uuid = _tlbuf.getUUID(h);
+    if (TLB::INVALID_UUID != uuid) return uuid;
+
+    // Ooops. We need to find out what this is.
+
+    UUID uuid = _tlbuf.addAtom(h, TLB::INVALID_UUID);
+    return uuid;
+}
+
 std::string ODBCAtomStorage::oset_to_string(const HandleSeq& out)
 {
     bool not_first = false;
     std::string str = "\'{";
     for (const Handle& h : out)
     {
-        UUID uuid = _tlbuf.addAtom(h, TLB::INVALID_UUID);
         if (not_first) str += ", ";
         not_first = true;
-        str += std::to_string(uuid);
+        str += std::to_string(get_uuid(h));
     }
     str += "}\'";
     return str;
