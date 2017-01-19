@@ -67,7 +67,7 @@ void SchemeEval::init(void)
 
 	_pexpr = NULL;
 	_eval_done = true;
-	_poll_done = false;
+	_poll_done = true;
 
 	_rc = SCM_EOL;
 	_rc = scm_gc_protect_object(_rc);
