@@ -98,7 +98,7 @@ class ODBCAtomStorage : public AtomStorage
         void do_store_single_atom(AtomPtr, int);
 
         UUID get_uuid(const Handle&);
-        std::string oset_to_string(const HandleSeq&, int);
+        std::string oset_to_string(const HandleSeq&);
 
         bool store_cb(AtomPtr);
         bool bulk_load;

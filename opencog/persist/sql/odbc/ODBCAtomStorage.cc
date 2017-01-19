@@ -657,16 +657,15 @@ int ODBCAtomStorage::get_height(const Handle& atom)
 
 /* ================================================================ */
 
-std::string ODBCAtomStorage::oset_to_string(const HandleSeq& out,
-                                        int arity)
+std::string ODBCAtomStorage::oset_to_string(const HandleSeq& out)
 {
-    std::string str;
-    str += "\'{";
-    for (int i=0; i<arity; i++)
+    bool not_first = false;
+    std::string str = "\'{";
+    for (const Handle& h : out)
     {
-        const Handle& h = out[i];
         UUID uuid = _tlbuf.addAtom(h, TLB::INVALID_UUID);
-        if (i != 0) str += ", ";
+        if (not_first) str += ", ";
+        not_first = true;
         str += std::to_string(uuid);
     }
     str += "}\'";
@@ -853,8 +852,6 @@ void ODBCAtomStorage::do_store_single_atom(AtomPtr atom, int aheight)
 
             if (atom->isLink())
             {
-                int arity = atom->getArity();
-
                 // The Atoms table has a UNIQUE constraint on the
                 // outgoing set.  If a link is too large, a postgres
                 // error is generated:
@@ -864,7 +861,7 @@ void ODBCAtomStorage::do_store_single_atom(AtomPtr atom, int aheight)
                 // redesign.  One could hash together the UUID's in the
                 // outgoing set, and then force a unique constraint on
                 // the hash.
-                if (330 < arity)
+                if (330 < atom->getArity())
                 {
                     throw IOException(TRACE_INFO,
                         "Error: do_store_single_atom: Maxiumum Link size is 330.\n");
@@ -872,7 +869,7 @@ void ODBCAtomStorage::do_store_single_atom(AtomPtr atom, int aheight)
 
                 cols += ", outgoing";
                 vals += ", ";
-                vals += oset_to_string(atom->getOutgoingSet(), arity);
+                vals += oset_to_string(atom->getOutgoingSet());
             }
         }
     }
@@ -1296,7 +1293,7 @@ TruthValuePtr ODBCAtomStorage::getLink(const Handle& h)
         storing_typemap[t]);
 
     std::string ostr = buff;
-    ostr += oset_to_string(oset, oset.size());
+    ostr += oset_to_string(oset);
     ostr += ";";
 
 #ifdef STORAGE_DEBUG
