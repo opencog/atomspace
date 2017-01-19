@@ -396,7 +396,7 @@ bool PatternLink::satisfy(PatternMatchCallback& pmcb) const
 	std::vector<HandleMapSeq> comp_term_gnds;
 	std::vector<HandleMapSeq> comp_var_gnds;
 
-	for (size_t i=0; i<_num_comps; i++)
+	for (size_t i = 0; i < _num_comps; i++)
 	{
 #ifdef DEBUG
 		LAZY_LOG_FINE << "BEGIN COMPONENT GROUNDING " << i+1

@@ -580,7 +580,6 @@ bool InitiateSearchCB::link_type_search(PatternMatchEngine *pme)
 {
 	const HandleSeq& clauses = _pattern->mandatory;
 
-	_search_fail = false;
 	_root = Handle::UNDEFINED;
 	_starter_term = Handle::UNDEFINED;
 	size_t count = SIZE_MAX;

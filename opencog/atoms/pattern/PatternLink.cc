@@ -23,6 +23,8 @@
  * 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
  */
 
+#include <boost/range/algorithm/find_if.hpp>
+
 #include <opencog/util/Logger.h>
 #include <opencog/atoms/base/ClassServer.h>
 #include <opencog/atoms/base/Node.h>
@@ -110,7 +112,7 @@ void PatternLink::setup_components(void)
 	// explore that combinatoric explosion, on purpose. So we have to
 	// allow the multiple disconnected components for that case.
 	_component_patterns.reserve(_num_comps);
-	for (size_t i=0; i<_num_comps; i++)
+	for (size_t i = 0; i < _num_comps; i++)
 	{
 		Handle h(createPatternLink(_component_vars[i], _varlist._simple_typemap,
 		                           _components[i], _pat.optionals));
