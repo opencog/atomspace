@@ -33,7 +33,6 @@
 #include <opencog/atoms/base/Link.h>
 #include <opencog/atoms/base/Node.h>
 #include <opencog/truthvalue/SimpleTruthValue.h>
-#include <opencog/atomspaceutils/TLB.h>
 #include <opencog/persist/sql/odbc/ODBCAtomStorage.h>
 #include <opencog/persist/sql/odbc/SQLPersistSCM.h>
 
@@ -174,7 +173,7 @@ void PersistUTest::kill_data(void)
         friendlyFailMessage();
         exit(1);
     }
-    logger().info("Connect to \"%s\" as \"%s\" passwd \"%s\"", dbname, username, passwd);
+    logger().info("Delete data in \"%s\" as \"%s\" passwd \"%s\"", dbname, username, passwd);
 
     // Trash the contents of the database.
     astore->kill_data();

@@ -30,12 +30,8 @@
 
 #include <opencog/atoms/base/atom_types.h>
 #include <opencog/atoms/base/Atom.h>
-#include <opencog/atoms/base/Link.h>
-#include <opencog/atoms/base/Node.h>
-#include <opencog/truthvalue/SimpleTruthValue.h>
-#include <opencog/atomspaceutils/TLB.h>
+#include <opencog/guile/SchemeEval.h>
 #include <opencog/persist/sql/odbc/ODBCAtomStorage.h>
-#include <opencog/persist/sql/odbc/SQLPersistSCM.h>
 
 #include <opencog/util/Logger.h>
 #include <opencog/util/Config.h>
@@ -47,11 +43,13 @@ using namespace opencog;
 class FetchUTest :  public CxxTest::TestSuite
 {
 	private:
-		AtomSpace *_as;
-		SQLPersistSCM *_pm;
 		const char * dbname;
 		const char * username;
 		const char * passwd;
+		std::string sql_open;
+
+		AtomSpace *_as;
+		SchemeEval *eval;
 
 	public:
 
@@ -104,6 +102,14 @@ FetchUTest:: FetchUTest(void)
 		dbname = config()["TEST_DB_NAME"].c_str();
 		username = config()["TEST_DB_USERNAME"].c_str();
 		passwd = config()["TEST_DB_PASSWD"].c_str();
+
+		sql_open = "(sql-open \"";
+		sql_open += dbname;
+		sql_open += "\" \"";
+		sql_open += username;
+		sql_open += "\" \"";
+		sql_open += passwd;
+		sql_open += "\")\n";
 	}
 	catch (InvalidParamException &e)
 	{
@@ -117,30 +123,19 @@ FetchUTest:: FetchUTest(void)
 void FetchUTest::setUp(void)
 {
 	_as = new AtomSpace();
-	_pm = new SQLPersistSCM(_as);
-
-	try {
-		_pm->do_open(dbname, username, passwd);
-	}
-	catch (RuntimeException &e)
-	{
-		logger().info("setUp: SQLPersistSCM cannot connect to database");
-		friendlyFailMessage();
-		exit(1);
-	};
-
+	eval = SchemeEval::get_evaluator(_as);
 	kill_data();
+
+	eval->eval(R"((add-to-load-path "/usr/local/share/opencog/scm"))");
+	eval->eval("(use-modules (opencog))");
+   eval->eval(R"((setenv "LTDL_LIBRARY_PATH" (if (getenv "LTDL_LIBRARY_PATH") (string-append (getenv "LTDL_LIBRARY_PATH") ":/usr/local/lib/opencog") "/usr/local/lib/opencog")))");
+
 }
 
 void FetchUTest::tearDown(void)
 {
-	/* Orderly shutdown avoids warning in Postgres log file. */
-	_pm->do_close();
-
-	delete _pm;
 	delete _as;
-
-	kill_data();
+	// kill_data();
 }
 
 // ============================================================
@@ -154,7 +149,7 @@ void FetchUTest::kill_data(void)
 		friendlyFailMessage();
 		exit(1);
 	}
-	logger().info("Connect to \"%s\" as \"%s\" passwd \"%s\"", dbname, username, passwd);
+	logger().info("Delete data in \"%s\" as \"%s\" passwd \"%s\"", dbname, username, passwd);
 
 	// Trash the contents of the database.
 	astore->kill_data();
@@ -220,7 +215,15 @@ void FetchUTest::test_stuff(void)
 {
 	logger().debug("BEGIN TEST: %s", __FUNCTION__);
 
-	TSM_ASSERT("Fetch Module not loaded", _pm);
+	eval->eval("(use-modules (opencog persist) (opencog persist-sql))");
+	eval->eval(sql_open);
+	eval->eval(R"((cog-set-tv! (ConceptNode "AAA") (stv 0.1 0.11)))");
+	eval->eval("(sql-store)");
+	eval->eval("(sql-close)");
+
+	delete _as;
+	_as = new AtomSpace();
+	eval = SchemeEval::get_evaluator(_as);
 
 	logger().debug("END TEST: %s", __FUNCTION__);
 }
