@@ -158,8 +158,9 @@ void SQLPersistSCM::do_stats(void)
 
     size_t load_count = _store->load_count;
     size_t store_count = _store->store_count;
-    printf("sql-stats: total loads = %lu total stores = %lu\n",
-         load_count, store_count);
+    double frac = store_count / ((double) load_count);
+    printf("sql-stats: total loads = %lu total stores = %lu ratio=%f\n",
+         load_count, store_count, frac);
 
     size_t num_get_nodes = _store->num_get_nodes;
     size_t num_got_nodes = _store->num_got_nodes;
@@ -172,7 +173,7 @@ void SQLPersistSCM::do_stats(void)
     size_t num_link_inserts = _store->num_link_inserts;
     size_t num_link_updates = _store->num_link_updates;
 
-    double frac = 100.0 * num_got_nodes / ((double) num_get_nodes);
+    frac = 100.0 * num_got_nodes / ((double) num_get_nodes);
     printf("num_get_nodes=%lu num_got_nodes=%lu (%f pct)\n",
         num_get_nodes, num_got_nodes, frac);
 

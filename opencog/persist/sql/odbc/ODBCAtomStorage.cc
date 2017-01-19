@@ -356,8 +356,11 @@ void ODBCAtomStorage::init(const char * dbname,
         conn_pool.push(db_conn);
     }
     type_map_was_loaded = false;
+
     max_height = 0;
     bulk_load = false;
+    load_count = 0;
+    store_count = 0;
 
     for (int i=0; i< TYPEMAP_SZ; i++)
     {
