@@ -92,7 +92,7 @@ protected:
 	HandleSeq _virtual;
 
 	size_t _num_comps;
-	std::vector<HandleSeq> _components;
+	HandleSeqSeq _components;
 	std::vector<OrderedHandleSet> _component_vars;
 	HandleSeq _component_patterns;
 
@@ -123,7 +123,7 @@ protected:
 
 	void make_connectivity_map(const HandleSeq&);
 	void make_map_recursive(const Handle&, const Handle&);
-	void check_connectivity(const std::vector<HandleSeq>&);
+	void check_connectivity(const HandleSeqSeq&);
 	void check_satisfiability(const OrderedHandleSet&,
 	                          const std::vector<OrderedHandleSet>&);
 

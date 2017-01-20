@@ -113,12 +113,12 @@ bool remove_constants(const OrderedHandleSet &vars,
  * course, users will typically never specify clauses in such order.
  *
  * XXX FIXME: It can happen that some clauses have no variables at all
- * in them.  These end up in thier own component, which can be extremely
- * confusing.
+ * in them.  These end up in their own component, which can be
+ * extremely confusing.
  */
 void get_connected_components(const OrderedHandleSet& vars,
                               const HandleSeq& clauses,
-                              std::vector<HandleSeq>& components,
+                              HandleSeqSeq& components,
                               std::vector<OrderedHandleSet>& component_vars)
 {
 	HandleSeq todo(clauses);

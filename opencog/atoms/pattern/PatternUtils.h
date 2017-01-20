@@ -46,7 +46,7 @@ bool remove_constants(const OrderedHandleSet &vars,
 // See C file for description
 void get_connected_components(const OrderedHandleSet& vars,
                               const HandleSeq& clauses,
-                              std::vector<HandleSeq>& compset,
+                              HandleSeqSeq& compset,
                               std::vector<OrderedHandleSet>& compvars);
 
 } // namespace opencog

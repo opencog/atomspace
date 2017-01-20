@@ -884,7 +884,7 @@ void PatternLink::make_term_tree_recursive(const Handle& root,
 /**
  * Check that all clauses are connected
  */
-void PatternLink::check_connectivity(const std::vector<HandleSeq>& components)
+void PatternLink::check_connectivity(const HandleSeqSeq& components)
 {
 	if (1 == components.size()) return;
 
