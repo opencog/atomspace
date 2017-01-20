@@ -34,7 +34,7 @@ class ConstantClausesUTest: public CxxTest::TestSuite
 {
 private:
 	AtomSpace as;
-	Handle A, B, C, AB, IdAA;
+	Handle A, B, C, AB, IdAA, P, Q, X, LP, LQ;
 
 public:
 	ConstantClausesUTest(void)
@@ -58,8 +58,11 @@ public:
 	void test_constant_1(void);
 	void test_constant_2(void);
 	void test_constant_3(void);
-	void test_constant_virtual_1(void);
-	void test_constant_virtual_2(void);
+	void test_evaluatable_1(void);
+	void test_evaluatable_2(void);
+	void test_constant_evaluatable_1(void);
+	void test_constant_evaluatable_2(void);
+	void test_constant_evaluatable_3(void);
 };
 
 void ConstantClausesUTest::tearDown(void)
@@ -73,6 +76,11 @@ void ConstantClausesUTest::setUp(void)
 	C = an(CONCEPT_NODE, "C");
 	AB = al(INHERITANCE_LINK, A, B);
 	IdAA = al(IDENTICAL_LINK, A, A);
+	P = an(PREDICATE_NODE, "P");
+	Q = an(PREDICATE_NODE, "Q");
+	X = an(VARIABLE_NODE, "$X");
+	LP = al(LAMBDA_LINK, X, al(EVALUATION_LINK, P));
+	LQ = al(LAMBDA_LINK, X, al(EVALUATION_LINK, Q));
 }
 
 /*
@@ -109,10 +117,34 @@ void ConstantClausesUTest::test_constant_3(void)
 }
 
 /*
- * Simple Concept as constant clause with a virtual constant clause
- * that is true (so the rewrite term should be triggered).
+ * Simple clause with an evaluatable constant clause that is true (so
+ * the rewrite term should be triggered).
  */
-void ConstantClausesUTest::test_constant_virtual_1(void)
+void ConstantClausesUTest::test_evaluatable_1(void)
+{
+	Handle bl = al(BIND_LINK, IdAA, B),
+		result = bindlink(&as, bl),
+		expected = al(SET_LINK, B);
+	TS_ASSERT_EQUALS(result, expected);
+}
+
+/*
+ * Simple clause with an evaluatable constant clause that is false (so
+ * the rewrite term should not be triggered).
+ */
+void ConstantClausesUTest::test_evaluatable_2(void)
+{
+	Handle bl = al(BIND_LINK, al(NOT_LINK, IdAA), B),
+		result = bindlink(&as, bl),
+		expected = al(SET_LINK);
+	TS_ASSERT_EQUALS(result, expected);
+}
+
+/*
+ * Simple Concept as constant clause with an evaluatable constant
+ * clause that is true (so the rewrite term should be triggered).
+ */
+void ConstantClausesUTest::test_constant_evaluatable_1(void)
 {
 	Handle bl = al(BIND_LINK, al(AND_LINK, A, IdAA), B),
 		result = bindlink(&as, bl),
@@ -121,12 +153,25 @@ void ConstantClausesUTest::test_constant_virtual_1(void)
 }
 
 /*
- * Simple Concept as constant clause with a virtual constant clause
- * that is false (so the rewrite term should not be triggered).
+ * Simple Concept as constant clause with a evaluatable constant
+ * clause that is false (so the rewrite term should not be triggered).
  */
-void ConstantClausesUTest::test_constant_virtual_2(void)
+void ConstantClausesUTest::test_constant_evaluatable_2(void)
 {
 	Handle bl = al(BIND_LINK, al(AND_LINK, A, al(NOT_LINK, IdAA)), B),
+		result = bindlink(&as, bl),
+		expected = al(SET_LINK);
+	TS_ASSERT_EQUALS(result, expected);
+}
+
+/*
+ * Simple Concept as constant clause with a complex evaluatable
+ * constant clause that not is true (so the rewrite term should not be
+ * triggered).
+ */
+void ConstantClausesUTest::test_constant_evaluatable_3(void)
+{
+	Handle bl = al(BIND_LINK, al(AND_LINK, A, al(IDENTICAL_LINK, LP, LQ)), B),
 		result = bindlink(&as, bl),
 		expected = al(SET_LINK);
 	TS_ASSERT_EQUALS(result, expected);
