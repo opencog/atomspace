@@ -137,6 +137,17 @@ std::string hs_to_string(const HandleSeq& hs)
 {
 	std::stringstream ss; std::operator<<(ss, hs); return ss.str();
 }
+std::string hss_to_string(const HandleSeqSeq& hss)
+{
+	std::stringstream ss;
+	ss << "size = " << hss.size() << std::endl;
+	size_t i = 0;
+	for (const HandleSeq& hs : hss) {
+		ss << "atoms[" << i << "]:" << std::endl << hs_to_string(hs);
+		i++;
+	}
+	return ss.str();
+}
 std::string ohs_to_string(const OrderedHandleSet& ohs)
 {
 	std::stringstream ss; std::operator<<(ss, ohs); return ss.str();
@@ -230,6 +241,10 @@ std::string oc_to_string(const HandlePair& hp)
 std::string oc_to_string(const HandleSeq& hs)
 {
 	return hs_to_string(hs);
+}
+std::string oc_to_string(const HandleSeqSeq& hss)
+{
+	return hss_to_string(hss);
 }
 std::string oc_to_string(const OrderedHandleSet& ohs)
 {

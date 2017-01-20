@@ -315,6 +315,7 @@ static inline std::string operator+ (const std::string &lhs, Handle h)
 std::string h_to_string(const Handle& h);
 std::string hp_to_string(const HandlePair& hp);
 std::string hs_to_string(const HandleSeq& hs);
+std::string hss_to_string(const HandleSeqSeq& hss);
 std::string ohs_to_string(const OrderedHandleSet& ohs);
 std::string uhs_to_string(const UnorderedHandleSet& uhs);
 std::string hmap_to_string(const HandleMap& hm);
@@ -333,6 +334,7 @@ std::string lptr_to_string(const LinkPtr& lptr);
 std::string oc_to_string(const Handle& h);
 std::string oc_to_string(const HandlePair& hp);
 std::string oc_to_string(const HandleSeq& hs);
+std::string oc_to_string(const HandleSeqSeq& hss);
 std::string oc_to_string(const OrderedHandleSet& ohs);
 std::string oc_to_string(const UnorderedHandleSet& uhs);
 std::string oc_to_string(const HandleMap& hm);
