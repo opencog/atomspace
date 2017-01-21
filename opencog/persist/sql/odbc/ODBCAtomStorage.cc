@@ -8,7 +8,7 @@
  * system here depends on the handles in the TLB and in the SQL DB
  * to be consistent (i.e. kept in sync).
  *
- * Copyright (c) 2008,2009,2013 Linas Vepstas <linas@linas.org>
+ * Copyright (c) 2008,2009,2013,2017 Linas Vepstas <linas@linas.org>
  *
  * LICENSE:
  * This program is free software; you can redistribute it and/or modify
@@ -1768,14 +1768,17 @@ void ODBCAtomStorage::print_stats(void)
     unsigned long item_count = _write_queue._item_count;
     unsigned long drain_count = _write_queue._drain_count;
     unsigned long drain_msec = _write_queue._drain_msec;
+    unsigned long drain_slowest_msec = _write_queue._drain_slowest_msec;
 
     double fill_frac = item_count / ((double) drain_count);
     double drain_secs = 0.001 * drain_msec / ((double) drain_count);
+    double slowest = 0.001 * drain_slowest_msec;
 
     printf("\n");
     printf("write items=%lu drains=%lu fill_fraction=%f\n",
            item_count, drain_count, fill_frac);
-    printf("avg drain time=%f seconds\n", drain_secs);
+    printf("avg drain time=%f seconds; longest drain time=%f\n",
+           drain_secs, slowest);
 
     // Some basic TLB statistics; could be improved;
     // The TLB remapping theory needs some work...
