@@ -552,10 +552,35 @@ Using the System
 ================
 Some example walkthroughs of some typical usage scenarios.
 
+Access via guile
+----------------
+Start the guile shell, and load the needed modules:
+```
+$ guile
+scheme@(guile-user)> (use-modules (opencog))
+scheme@(guile-user)> (use-modules (opencog persist) (opencog persist-sql))
+```
+Open a database with `sql-open`:
+```
+scheme@(guile-user)> (sql-open "opencog_test" "opencog_tester" "cheese")
+Reserving UUID up to 3
+```
+Save an atom with `store-atom`:
+```
+scheme@(guile-user)> (define x (ConceptNode "asdfasdf" (stv 0.123 0.789)))
+scheme@(guile-user)> (store-atom x)
+```
+
+Other useful scheme functions: `fetch-atom` and `fetch-incoming-set`.
+A debugging print: `sql-stats`
+
+Bulk load and restore: `sql-load` `sql-store` `sql-close`
+
+
 Bulk Save and Restore
 ---------------------
-At last! Bulk save of atoms that were previously created is done by
-getting to the opencog prompt (`telnet localhost 17001`) and issuing the
+Bulk save and restore of atoms can also be done from the cogserver
+command line -- `rlwrap telnet -8 localhost 17001` and issuing the
 commands:
 ```
     opencog> ?
@@ -591,21 +616,11 @@ The completion message will be on the server output, for example:
 
 Individual-atom save and restore
 --------------------------------
-There is an interface to save and restore individual atoms. It may be
-used as follows:
+Individual atoms can be saved and fetched, using the guile interface.
+Either the guile shell, or the cogserver shell can be used.  If the
+guile shell is used, then you do NOT! need to start the cogserver!
 
-Start the server:
 ```
-    $ opencog/server/cogserver -c ../lib/opencog.conf
-```
-Open a shell:
-```
-    $ telnet localhost 17001
-    Trying 127.0.0.1...
-    opencog> sql-open mycogdata opencog_user cheese
-    Database opened
-    opencog> scm
-    Entering scheme shell; use ^D or a single . on a line by itself to exit.
     guile> (define x (ConceptNode "asdfasdf" (stv 0.123 0.789)))
     guile> (store-atom x)
     (ConceptNode "asdfasdf" (stv 0.123 0.78899997))
@@ -622,8 +637,7 @@ It's presence can be verified by examining the database directly:
     (1 row)
 ```
 The backing-store mechanism can now retrieve this atom at a later time.
-Thus, for example, shut down the server, restart it, re-open the database,
-and enter the scheme shell again. Then,
+Thus, for example, exit, restart, and re-open the database again. Then,
 ```
     guile> (ConceptNode "asdfasdf")
     (ConceptNode "asdfasdf")
