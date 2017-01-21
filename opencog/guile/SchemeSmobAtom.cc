@@ -14,6 +14,7 @@
 #include <opencog/atoms/base/ClassServer.h>
 #include <opencog/atoms/base/ProtoAtom.h>
 #include <opencog/truthvalue/AttentionValue.h>
+#include <opencog/truthvalue/CountTruthValue.h>
 #include <opencog/truthvalue/TruthValue.h>
 #include <opencog/atomutils/FindUtils.h>
 #include <opencog/guile/SchemeSmob.h>
@@ -137,6 +138,25 @@ SCM SchemeSmob::ss_merge_hi_conf_tv (SCM satom, SCM stv)
 
 	h->merge(tv->clone(), MergeCtrl(MergeCtrl::TVFormula::HIGHER_CONFIDENCE));
 	scm_remember_upto_here_1(stv);
+	return satom;
+}
+
+// Increment the count, keeping mean and confidence as-is.
+// Converts existing truth value to a CountTruthValue.
+SCM SchemeSmob::ss_inc_count (SCM satom, SCM scnt)
+{
+	Handle h = verify_handle(satom, "cog-inc-count!");
+	double cnt = verify_real(scnt, "cog-inc-count!", 2);
+
+	TruthValuePtr tv = h->getTruthValue();
+	if (COUNT_TRUTH_VALUE == tv->getType())
+	{
+		cnt += tv->getCount();
+	}
+	tv = CountTruthValue::createTV(
+		tv->getMean(), tv->getConfidence(), cnt);
+
+	h->setTruthValue(tv);
 	return satom;
 }
 

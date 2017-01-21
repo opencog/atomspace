@@ -102,6 +102,7 @@ private:
 	static SCM ss_set_tv(SCM, SCM);
 	static SCM ss_merge_tv(SCM, SCM);
 	static SCM ss_merge_hi_conf_tv(SCM, SCM);
+	static SCM ss_inc_count(SCM, SCM);
 	static SCM ss_inc_vlti(SCM);
 	static SCM ss_dec_vlti(SCM);
 
