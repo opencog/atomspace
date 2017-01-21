@@ -1766,11 +1766,13 @@ void ODBCAtomStorage::print_stats(void)
 
     // Store queue performance
     unsigned long item_count = _write_queue._item_count;
+    unsigned long flush_count = _write_queue._flush_count;
     unsigned long drain_count = _write_queue._drain_count;
     unsigned long drain_msec = _write_queue._drain_msec;
     unsigned long drain_slowest_msec = _write_queue._drain_slowest_msec;
     unsigned long drain_concurrent = _write_queue._drain_concurrent;
 
+    double flush_frac = item_count / ((double) flush_count);
     double fill_frac = item_count / ((double) drain_count);
 
     unsigned long dentries = drain_count + drain_concurrent;
@@ -1779,8 +1781,10 @@ void ODBCAtomStorage::print_stats(void)
     double slowest = 0.001 * drain_slowest_msec;
 
     printf("\n");
-    printf("write items=%lu drains=%lu fill_fraction=%f concurrency=%f\n",
-           item_count, drain_count, fill_frac, drain_ratio);
+    printf("write items=%lu flushes=%lu flush_ratio=%f\n",
+           item_count, flush_count, flush_frac);
+    printf("drains=%lu fill_fraction=%f concurrency=%f\n",
+            drain_count, fill_frac, drain_ratio);
     printf("avg drain time=%f seconds; longest drain time=%f\n",
            drain_secs, slowest);
 
