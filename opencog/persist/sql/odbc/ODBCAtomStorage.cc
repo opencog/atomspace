@@ -1772,8 +1772,10 @@ void ODBCAtomStorage::print_stats(void)
     unsigned long drain_concurrent = _write_queue._drain_concurrent;
 
     double fill_frac = item_count / ((double) drain_count);
-    double drain_ratio = (drain_count + drain_concurrent) / ((double) drain_count);
-    double drain_secs = 0.001 * drain_msec / ((double) drain_count);
+
+    unsigned long dentries = drain_count + drain_concurrent;
+    double drain_ratio = dentries / ((double) drain_count);
+    double drain_secs = 0.001 * drain_msec / ((double) dentries);
     double slowest = 0.001 * drain_slowest_msec;
 
     printf("\n");
