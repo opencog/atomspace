@@ -818,9 +818,9 @@ void ODBCAtomStorage::do_store_single_atom(AtomPtr atom, int aheight)
 
 #ifdef STORAGE_DEBUG
     if (0 == aheight) {
-        if (update) _num_node_updates++; else num_node_inserts++;
+        if (update) _num_node_updates++; else _num_node_inserts++;
     } else {
-        if (update) _num_link_updates++; else num_link_inserts++;
+        if (update) _num_link_updates++; else _num_link_inserts++;
     }
 #endif // STORAGE_DEBUG
 
