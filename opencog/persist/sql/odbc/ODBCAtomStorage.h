@@ -125,27 +125,21 @@ class ODBCAtomStorage : public AtomStorage
         UUID getMaxObservedUUID(void);
         int getMaxObservedHeight(void);
         bool idExists(const char *);
-
-#define STORAGE_DEBUG 1
-#ifdef STORAGE_DEBUG
-    public:
-        std::atomic<size_t> num_get_nodes;
-        std::atomic<size_t> num_got_nodes;
-        std::atomic<size_t> num_get_links;
-        std::atomic<size_t> num_got_links;
-        std::atomic<size_t> num_get_insets;
-        std::atomic<size_t> num_get_inatoms;
-        std::atomic<size_t> num_node_inserts;
-        std::atomic<size_t> num_node_updates;
-        std::atomic<size_t> num_link_inserts;
-        std::atomic<size_t> num_link_updates;
-#endif
-        std::atomic<size_t> load_count;
-        std::atomic<size_t> store_count;
         TLB _tlbuf;
-#ifdef STORAGE_DEBUG
-    private:
-#endif
+
+        // Performance statistics
+        std::atomic<size_t> _num_get_nodes;
+        std::atomic<size_t> _num_got_nodes;
+        std::atomic<size_t> _num_get_links;
+        std::atomic<size_t> _num_got_links;
+        std::atomic<size_t> _num_get_insets;
+        std::atomic<size_t> _num_get_inatoms;
+        std::atomic<size_t> _num_node_inserts;
+        std::atomic<size_t> _num_node_updates;
+        std::atomic<size_t> _num_link_inserts;
+        std::atomic<size_t> _num_link_updates;
+        std::atomic<size_t> _load_count;
+        std::atomic<size_t> _store_count;
 
         // -------------------------------
         // Type management
@@ -212,6 +206,9 @@ class ODBCAtomStorage : public AtomStorage
         void load(AtomTable &); // Load entire contents of DB
         void store(const AtomTable &); // Store entire contents of AtomTable
         void reserve(void);     // reserve range of UUID's
+
+        // Debugging and perforamnce monitoring
+        void print_stats(void);
 };
 
 

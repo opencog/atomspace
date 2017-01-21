@@ -60,9 +60,7 @@ public:
     void do_load(void);
     void do_store(void);
 
-#ifdef STORAGE_DEBUG
     void do_stats(void);
-#endif
 
 }; // class
 
