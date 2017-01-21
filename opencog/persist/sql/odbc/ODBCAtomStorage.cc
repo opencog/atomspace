@@ -1716,11 +1716,13 @@ void ODBCAtomStorage::reserve(void)
 
 void ODBCAtomStorage::print_stats(void)
 {
+    printf("\n");
     size_t load_count = _load_count;
     size_t store_count = _store_count;
     double frac = store_count / ((double) load_count);
     printf("sql-stats: total loads = %lu total stores = %lu ratio=%f\n",
          load_count, store_count, frac);
+    printf("\n");
 
     size_t num_get_nodes = _num_get_nodes;
     size_t num_got_nodes = _num_got_nodes;
@@ -1753,6 +1755,19 @@ void ODBCAtomStorage::print_stats(void)
     printf("num_link_inserts=%lu num_link_updates=%lu ratio=%f\n",
          num_link_inserts, num_link_updates, frac);
 
+    // Store queue performance
+    unsigned long item_count = _write_queue._item_count;
+    unsigned long drain_count = _write_queue._drain_count;
+    unsigned long drain_msec = _write_queue._drain_msec;
+
+    double fill_frac = item_count / ((double) drain_count);
+    double drain_secs = 0.001 * drain_msec / ((double) drain_count);
+
+    printf("\n");
+    printf("write items=%lu drains=%lu fill_fraction=%f\n",
+           item_count, drain_count, fill_frac);
+    printf("avg drain time=%f seconds\n", drain_secs);
+
     // Some basic TLB statistics; could be improved;
     // The TLB remapping theory needs some work...
     size_t noh = 0;
@@ -1771,6 +1786,7 @@ void ODBCAtomStorage::print_stats(void)
 #endif
     }
 
+    printf("\n");
     printf("sql-stats: tlbuf holds %lu atoms\n", _tlbuf.size());
 #if 0
     frac = 100.0 * extra / ((double) _tlbuf.size());
@@ -1785,6 +1801,7 @@ void ODBCAtomStorage::print_stats(void)
     frac = 100.0 * noh / ((double) mad);
     printf("sql-stats: %lu of %lu uuids unused (%f pct)\n",
            noh, mad, frac);
+
 }
 
 #endif /* HAVE_SQL_STORAGE */
