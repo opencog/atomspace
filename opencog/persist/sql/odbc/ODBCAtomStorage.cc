@@ -372,6 +372,7 @@ void ODBCAtomStorage::init(const char * dbname,
 
     reserve();
 
+#define STORAGE_DEBUG 1
 #ifdef STORAGE_DEBUG
     _num_get_nodes = 0;
     _num_got_nodes = 0;
@@ -1724,6 +1725,7 @@ void ODBCAtomStorage::print_stats(void)
          load_count, store_count, frac);
     printf("\n");
 
+#ifdef STORAGE_DEBUG
     size_t num_get_nodes = _num_get_nodes;
     size_t num_got_nodes = _num_got_nodes;
     size_t num_get_links = _num_get_links;
@@ -1760,6 +1762,7 @@ void ODBCAtomStorage::print_stats(void)
     frac = tot_node / ((double) tot_link);
     printf("total stores for node=%lu link=%lu ratio=%f\n",
            tot_node, tot_link, frac);
+#endif // STORAGE_DEBUG
 
     // Store queue performance
     unsigned long item_count = _write_queue._item_count;
