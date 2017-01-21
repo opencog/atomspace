@@ -1316,17 +1316,15 @@ TruthValuePtr ODBCAtomStorage::getNode(Type t, const char * str)
  */
 TruthValuePtr ODBCAtomStorage::getLink(const Handle& h)
 {
-    Type t = h->getType();
-    const HandleSeq& oset = h->getOutgoingSet();
     setup_typemap();
 
     char buff[BUFSZ];
     snprintf(buff, BUFSZ,
         "SELECT * FROM Atoms WHERE type = %hu AND outgoing = ",
-        storing_typemap[t]);
+        storing_typemap[h->getType()]);
 
     std::string ostr = buff;
-    ostr += oset_to_string(oset);
+    ostr += oset_to_string(h->getOutgoingSet());
     ostr += ";";
 
 #ifdef STORAGE_DEBUG
