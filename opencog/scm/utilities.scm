@@ -213,33 +213,9 @@
 "
   cog-atom-incr --  Increment count truth value on 'atom' by 'cnt'
 
-  If the current truth value on the atom is not a CountTruthValue,
-  then the truth value is replaced by a CountTruthValue, with the
-  count set to 'cnt'.  The mean and confidence values are left
-  untouched.
-
-  XXX this implementation is slow/wasteful, a native C++ would
-  be considerably faster.
-
-  Example usage:
-  (cog-atom-incr (ConceptNode 'Answer') 42)
+  DEPRECATED! Use cog-inc-count! instead!
 "
-	(let* (
-			(tv (cog-tv atom))
-			(atv (cog-tv->alist tv))
-			(mean (assoc-ref atv 'mean))
-			(conf (assoc-ref atv 'confidence))
-			(count (assoc-ref atv 'count))
-
-			; non-CountTV's will not have a 'count in the a-list
-			; so its enough to test for that.
-			(ntv (if count
-					(cog-new-ctv mean conf (+ count cnt))
-					(cog-new-ctv mean conf cnt))
-			)
-		)
-		(cog-set-tv! atom ntv)
-	)
+	(cog-inc-count! atom cnt)
 )
 
 ; --------------------------------------------------------------------
