@@ -1,10 +1,10 @@
 Persist
--------
--------
-Linas Vepstas <linasvepstas@gmail.com>
-Basic implementation Feb-June 2008
-Status update May 2009
-Status update Dec 2013
+=======
++ Linas Vepstas <linasvepstas@gmail.com>
++ Basic implementation Feb-June 2008
++ Status update May 2009
++ Status update Dec 2013
++ Status update Jan 2017
 
 A simple implementation of atom persistence in SQL.  This allows not
 only saving and restoring of the atomspace, but it also allows multiple
@@ -169,26 +169,6 @@ be changed by searching for `HIGH_WATER_MARK`, changing it and recompiling.
 not return to the user until the atom is available.  At this time,
 pre-fetch has not been implemented.  But that's because pre-fetch is
 easy: the user can do it in thier own thread :-)
-
-
-Issues
-------
- * The TV merge issue. Right now, the AtomSpace/AtomTable is designed to
-merge truth values between an atom that is added to the table, and any
-atom that is already present in the table.  This can lead to unexpected
-truth-value changes when atoms are being fetched from the backend.  The
-correct solution is probably to change the table to not auto-merge. This
-still leaves the question of what to do with the two TV's, since
-different users are likely to want different behaviors.
-
- * The AV issue.  Two issues, here.  First, if the AV changes to a non
-zero VLTI, the atom should be auto-saved to the backend.  This has not
-been implemented.  Second, if the VLTI is positive, and the TV changes,
-should this trigger an auto-save?  Conceptually, it probably should;
-practically, it may hurt performance. At any rate, this can be handled
-in a "policy" thread (a thread that implements some sort of policy) that
-is independent of the storage mechanism here.  Again: we implement
-mechanism, here, not policy.
 
 
 Install, Setup and Usage HOWTO
@@ -408,10 +388,9 @@ Then enter `\d` at the postgres prompt.  You should see this:
      Schema |   Name    | Type  |     Owner
     --------+-----------+-------+----------------
      public | atoms     | table | opencog_user
-     public | global    | table | opencog_user
      public | spaces    | table | opencog_user
      public | typecodes | table | opencog_user
-    (4 rows)
+    (3 rows)
 ```
 
 If the above doesn't work, go back, and try again.
@@ -456,7 +435,7 @@ correspond to a database created with postgres. In the examples above,
 it was `mycogdata`.
 
 IMPORTANT: MAKE SURE THERE ARE NO SPACES AT THE START OF EVERY LINE!
-           IF YOU COPY PASTE THE TEXT BELOW YOU WILL HAVE SPACES!
+           IF YOU COPY-PASTE THE TEXT BELOW YOU WILL HAVE SPACES!
            REMOVE THEM! OR YOU WILL ALSO GET THE ERROR ABOVE!
 
 ```
@@ -566,6 +545,7 @@ Unit Test Status
 * As of 2013-11-26 BasicSaveUTest works and passes, again.
 * As of 2014-06-19 both unit tests work and pass.
 * As of 2015-04-23 both unit tests work and pass.
+* As of 2017-01-20 all three unit tests work and pass.
 
 
 Using the System
@@ -641,24 +621,23 @@ It's presence can be verified by examining the database directly:
         2 |    3 |       1 |    0.123 |     0.78899997 | 2991.4688 |      0 | asdfasdf |
     (1 row)
 ```
-The backing-store mechanism can now automatically retrieve this atom at
-a later time.  Thus, for example, shut down the server, restart it,
-re-open the database, and enter the scheme shell again. Then,
+The backing-store mechanism can now retrieve this atom at a later time.
+Thus, for example, shut down the server, restart it, re-open the database,
+and enter the scheme shell again. Then,
 ```
-    guile> (define y (ConceptNode "asdfasdf"))
-    guile> y
+    guile> (ConceptNode "asdfasdf")
+    (ConceptNode "asdfasdf")
+
+    guile> (cog-fetch (ConceptNode "asdfasdf"))
     (ConceptNode "asdfasdf" (stv 0.123 0.78899997))
 ```
-Note that, this time, when the node was created, the database was
-searched for a ConceptNode with the same string name. If it was found
-in the database, then it is automatically loaded into the AtomSpace,
-with the appropriate truth value taken from the database.
+When the atom is first recreated, it just has the default TV on it. The
+TV is not updated until it is explicitly fetched. The existing TV on
+the atom is clobbered when it is fetched; no attempt is made to merge.
 
 If the truth value is modified, the atom is *not* automatically saved
 to the database.  The modified atom would need to be explicitly saved
-again. If you need this to happen, you probably should design a thread
-whose only job it is is to handle truth-value changes. Note: this could
-be slow.
+again.
 
 Once stored, the atom may be deleted from the AtomSpace; it will
 remain in storage, and can be recreated at will:
@@ -668,20 +647,13 @@ remain in storage, and can be recreated at will:
     guile> y
     #<Invalid handle>
     guile> (define y (ConceptNode "asdfasdf"))
-    guile> y
+    guile> (cog-fetch y)
     (ConceptNode "asdfasdf" (stv 0.123 0.78899997))
 ```
 Notice, in the above, that the truth value is the same as it was before.
 That is because the truth value was fetched from the database when the
 atom is recreated.
 
-The UUID associated with the atom will NOT change between extracts
-and server restarts. This can be verified with the cog-handle command,
-which returns the UUID:
-```
-    guile> (cog-handle y)
-    2
-```
 
 Extraction vs. Deletion
 -----------------------
@@ -711,16 +683,11 @@ SQL fetch from store is not automatic!  That is because this layer
 cannot guess the user's intentions. There is no way for this layer
 to guess which atoms might be deleted in a few milliseconds from now,
 or to guess which atoms need to loaded into RAM (do you really want ALL
-of them to be loaded ??)  Some higher level management and policy thread
-will need to make the fetch and store decisions. This layer only
-implements the raw capability: it does not implement the policy.
+of them to be loaded ??)  Some higher level management and policy will
+need to make the fetch and store decisions. This layer only implements
+the raw capability: it does not implement the policy.
 
-There is one thing that is automatic: when a new atom is added to the
-atomspace, then the database is automatically searched, to see if this
-atom already exists.  If it does, then its truth value is restored.
-However, **AND THIS IS IMPORTANT**, the incoming set of the atom is not
-automatically fecthed from storage.  This must be done manually, using
-either C++:
+Incoming sets of an atom can be fetched by using either C++:
 ```
    AtomSpace::fetchIncomingSet(h, true);
 ```
@@ -728,17 +695,6 @@ or the scheme call
 ```
   (fetch-incoming-set atom)
 ```
-
-Since UUID's are assigned uniquely, they can be used for out-of-band
-communication of atoms between cogservers.  Thus, if by some magic, the
-numeric uuid for an atom is known, but the atom itself is not, then the
-scheme call
-```
-   (fetch-atom (cog-atom uuid))
-```
-can be used to pull an atom into the AtomSpace from the database server.
-(You can also do this from C++, by creating a `Handle` with that UUID in
-it, and then forcing resolution of the handle).
 
 To force an atom to be saved, call:
 ```
