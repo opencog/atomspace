@@ -376,7 +376,7 @@
 
   Example usage:
      (cog-inc-count! (ConceptNode \"Answer\") 42.0)
-"
+")
 
 (set-procedure-property! cog-new-stv 'documentation
 "
