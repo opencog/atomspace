@@ -1755,6 +1755,12 @@ void ODBCAtomStorage::print_stats(void)
     printf("num_link_inserts=%lu num_link_updates=%lu ratio=%f\n",
          num_link_inserts, num_link_updates, frac);
 
+    unsigned long tot_node = num_node_inserts + num_node_updates;
+    unsigned long tot_link = num_link_inserts + num_link_updates;
+    frac = tot_node / ((double) tot_link);
+    printf("total stores for node=%lu link=%lu ratio=%f\n",
+           tot_node, tot_link, frac);
+
     // Store queue performance
     unsigned long item_count = _write_queue._item_count;
     unsigned long drain_count = _write_queue._drain_count;
