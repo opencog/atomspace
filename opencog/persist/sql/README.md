@@ -1,11 +1,12 @@
-                                Persist
-                                -------
-                   Linas Vepstas <linasvepstas@gmail.com>
-                    Basic implementation Feb-June 2008
-                         Status update May 2009
-                         Status update Dec 2013
+Persist
+-------
+-------
+Linas Vepstas <linasvepstas@gmail.com>
+Basic implementation Feb-June 2008
+Status update May 2009
+Status update Dec 2013
 
-A simple implementation of atom persistence into SQL.  This allows not
+A simple implementation of atom persistence in SQL.  This allows not
 only saving and restoring of the atomspace, but it also allows multiple
 cogservers to share a common set of data.  That is, it implements a
 basic form of a distributed atomspace.
@@ -14,14 +15,14 @@ Status
 ======
 It works and has been used with databases containing millions of atoms,
 accessed by cogservers that ran for months to perform computations. It
-has scaled trouble-free, without any slowdown, up to four cogserrvers.
+has scaled trouble-free, without any slowdown, up to four cogservers.
 No one has tried anything larger than that, yet.
 
 Features
 --------
- * Save and restore of atoms, and several kinds of truth values.
+ * Save and restore of individual atoms, and several kinds of truth values.
  * Bulk save-and-restore of entire AtomSpace contents.
- * Incremental save/restore (i.e. updates the SQL contents as AtomSpace
+ * Incremental save/restore (i.e. update the SQL contents as AtomSpace
    changes).
  * Generic API, useful for inter-server communications.
 
@@ -50,7 +51,7 @@ The loaded hypergraphs were all EvaluationLinks, viz:
 
 The above measurements were made on a busy server that was doing many
 other CPU & RAM intensive things; there was no performance tuning of
-the postgress server.  A section below explains how to performance tune
+the postgres server.  A section below explains how to performance tune
 the postgres server for better results.  The above was also done through
 the scheme interface; since then, garbage collection has been tuned a
 little bit, and so RAM usage should drop a bit.
@@ -107,8 +108,7 @@ The goal of this implementation is to:
 Current Design
 ==============
 The core design defines only a few very simple SQL tables, and some
-simple readers and writers to save and restore atoms from an SQL
-database.
+readers and writers to save and restore atoms from an SQL database.
 
 Note that the core design does *not* make use of object reflection,
 nor can it store arbitrary kinds of objects. It is very definitely
@@ -127,23 +127,18 @@ the current, minimalistic, low-function API for this.
 
 Features
 --------
- * The AtomStorage class should be completely thread-safe (I think ...
-only lightly tested).
+ * The AtomStorage class is thread-safe, according to the unit tests
+and limited personal experience.
 
- * This implementation avoids UUID collisions, and automatically thunks
-UUID's as needed if an accidental collision with the database occurs.
-In order to avoid excess thunking, it is strongly recommended that
-the SQL database should be opened immediately on cogserver start, before
-any atoms are created.  This will automatically reserve the range of
-UUID's that are stored in the DB, and thus avoid collisions as new atoms
-are created.
+ * Fully automated mapping of in-RAM atoms to in-storage universal
+unique identifiers (UUID's), using the TLB mechanism.
 
- * UUID's are reseved in blocks, or ranges. That is, UUID's are issued
-in blocks of a million each.  This way, multiple different cogservers
-can have some reasonable chance of using UUID's that do not collide with
-one-another.  That is, UUID's can be "malloced" in ranges.  XXX Caution:
-this mechanism may be broken or incomplete.  Ask Linas for the current
-status.
+ * Multi-user issuance and management of UUID's is un-tested and is
+probably broken at this time.  That is, if multiple cogservers connect
+to the atomspace at the same time, it probably won't work.  It used to
+work, but there have been some major changes that probably broke this.
+There is existing infrastructure that enables this, e.g. one can
+"malloc" ranges of UUID's.  The code has bit-rotted, for lack of use.
 
  * This implementation automatically handles clashing atom types.  That
 is, if the database is written with one set of atom types, and then the
