@@ -359,8 +359,8 @@ void ODBCAtomStorage::init(const char * dbname,
 
     max_height = 0;
     bulk_load = false;
-    load_count = 0;
-    store_count = 0;
+    _load_count = 0;
+    _store_count = 0;
 
     for (int i=0; i< TYPEMAP_SZ; i++)
     {
@@ -373,16 +373,16 @@ void ODBCAtomStorage::init(const char * dbname,
     reserve();
 
 #ifdef STORAGE_DEBUG
-    num_get_nodes = 0;
-    num_got_nodes = 0;
-    num_get_links = 0;
-    num_got_links = 0;
-    num_get_insets = 0;
-    num_get_inatoms = 0;
-    num_node_updates = 0;
-    num_node_inserts = 0;
-    num_link_updates = 0;
-    num_link_inserts = 0;
+    _num_get_nodes = 0;
+    _num_got_nodes = 0;
+    _num_get_links = 0;
+    _num_got_links = 0;
+    _num_get_insets = 0;
+    _num_get_inatoms = 0;
+    _num_node_updates = 0;
+    _num_node_inserts = 0;
+    _num_link_updates = 0;
+    _num_link_inserts = 0;
 #endif // STORAGE_DEBUG
 }
 
@@ -817,9 +817,9 @@ void ODBCAtomStorage::do_store_single_atom(AtomPtr atom, int aheight)
 
 #ifdef STORAGE_DEBUG
     if (0 == aheight) {
-        if (update) num_node_updates++; else num_node_inserts++;
+        if (update) _num_node_updates++; else num_node_inserts++;
     } else {
-        if (update) num_link_updates++; else num_link_inserts++;
+        if (update) _num_link_updates++; else num_link_inserts++;
     }
 #endif // STORAGE_DEBUG
 
@@ -949,7 +949,7 @@ void ODBCAtomStorage::do_store_single_atom(AtomPtr atom, int aheight)
 
     // Make note of the fact that this atom has been stored.
     add_id_to_cache(uuid);
-    store_count ++;
+    _store_count ++;
 }
 
 /* ================================================================ */
@@ -1258,8 +1258,8 @@ HandleSeq ODBCAtomStorage::getIncomingSet(const Handle& h)
     put_conn(db_conn);
 
 #ifdef STORAGE_DEBUG
-    num_get_insets++;
-    num_get_inatoms += iset.size();
+    _num_get_insets++;
+    _num_get_inatoms += iset.size();
 #endif // STORAGE_DEBUG
 
     return iset;
@@ -1287,14 +1287,14 @@ TruthValuePtr ODBCAtomStorage::getNode(Type t, const char * str)
         return TruthValuePtr();
     }
 #ifdef STORAGE_DEBUG
-    num_get_nodes++;
+    _num_get_nodes++;
 #endif // STORAGE_DEBUG
 
     PseudoPtr p(getAtom(buff, 0));
     if (NULL == p) return TruthValuePtr();
 
 #ifdef STORAGE_DEBUG
-    num_got_nodes++;
+    _num_got_nodes++;
 #endif // STORAGE_DEBUG
     NodePtr node = createNode(t, str);
     _tlbuf.addAtom(node, p->uuid);
@@ -1321,13 +1321,13 @@ TruthValuePtr ODBCAtomStorage::getLink(const Handle& h)
     ostr += ";";
 
 #ifdef STORAGE_DEBUG
-    num_get_links++;
+    _num_get_links++;
 #endif // STORAGE_DEBUG
     PseudoPtr p = getAtom(ostr.c_str(), 1);
     if (NULL == p) return TruthValuePtr();
 
 #ifdef STORAGE_DEBUG
-    num_got_links++;
+    _num_got_links++;
 #endif // STORAGE_DEBUG
     _tlbuf.addAtom(h, p->uuid);
     return p->tv;
@@ -1411,10 +1411,10 @@ ODBCAtomStorage::PseudoPtr ODBCAtomStorage::makeAtom(Response &rp, UUID uuid)
                 "makeAtom: Unknown truth value type\n");
     }
 
-    load_count ++;
-    if (bulk_load and load_count%10000 == 0)
+    _load_count ++;
+    if (bulk_load and _load_count%10000 == 0)
     {
-        printf("\tLoaded %lu atoms.\n", (unsigned long) load_count);
+        printf("\tLoaded %lu atoms.\n", (unsigned long) _load_count);
     }
 
     add_id_to_cache(uuid);
@@ -1428,7 +1428,7 @@ void ODBCAtomStorage::load(AtomTable &table)
     unsigned long max_nrec = getMaxObservedUUID();
     _tlbuf.reserve_upto(max_nrec);
     printf("Max observed UUID is %lu\n", max_nrec);
-    load_count = 0;
+    _load_count = 0;
     max_height = getMaxObservedHeight();
     printf("Max Height is %d\n", max_height);
     bulk_load = true;
@@ -1442,7 +1442,7 @@ void ODBCAtomStorage::load(AtomTable &table)
 
     for (int hei=0; hei<=max_height; hei++)
     {
-        unsigned long cur = load_count;
+        unsigned long cur = _load_count;
 
 #if GET_ONE_BIG_BLOB
         char buff[BUFSZ];
@@ -1474,11 +1474,11 @@ void ODBCAtomStorage::load(AtomTable &table)
             rp.release();
         }
 #endif
-        printf("Loaded %lu atoms at height %d\n", load_count - cur, hei);
+        printf("Loaded %lu atoms at height %d\n", _load_count - cur, hei);
     }
     put_conn(db_conn);
     printf("Finished loading %lu atoms in total\n",
-        (unsigned long) load_count);
+        (unsigned long) _load_count);
     bulk_load = false;
 
     // synchrnonize!
@@ -1490,7 +1490,7 @@ void ODBCAtomStorage::loadType(AtomTable &table, Type atom_type)
     unsigned long max_nrec = getMaxObservedUUID();
     _tlbuf.reserve_upto(max_nrec);
     logger().debug("ODBCAtomStorage::loadType: Max observed UUID is %lu\n", max_nrec);
-    load_count = 0;
+    _load_count = 0;
 
     // For links, assume a worst-case height.
     // For nodes, its easy ... max_height is zero.
@@ -1510,7 +1510,7 @@ void ODBCAtomStorage::loadType(AtomTable &table, Type atom_type)
 
     for (int hei=0; hei<=max_height; hei++)
     {
-        unsigned long cur = load_count;
+        unsigned long cur = _load_count;
 
 #if GET_ONE_BIG_BLOB
         char buff[BUFSZ];
@@ -1544,11 +1544,11 @@ void ODBCAtomStorage::loadType(AtomTable &table, Type atom_type)
         }
 #endif
         logger().debug("ODBCAtomStorage::loadType: Loaded %lu atoms of type %d at height %d\n",
-            load_count - cur, db_atom_type, hei);
+            _load_count - cur, db_atom_type, hei);
     }
     put_conn(db_conn);
     logger().debug("ODBCAtomStorage::loadType: Finished loading %lu atoms in total\n",
-        (unsigned long) load_count);
+        (unsigned long) _load_count);
 
     // Synchronize!
     table.barrier();
@@ -1557,9 +1557,9 @@ void ODBCAtomStorage::loadType(AtomTable &table, Type atom_type)
 bool ODBCAtomStorage::store_cb(AtomPtr atom)
 {
     storeSingleAtom(atom);
-    if (store_count%1000 == 0)
+    if (_store_count%1000 == 0)
     {
-        printf("\tStored %lu atoms.\n", (unsigned long) store_count);
+        printf("\tStored %lu atoms.\n", (unsigned long) _store_count);
     }
     return false;
 }
@@ -1567,7 +1567,7 @@ bool ODBCAtomStorage::store_cb(AtomPtr atom)
 void ODBCAtomStorage::store(const AtomTable &table)
 {
     max_height = 0;
-    store_count = 0;
+    _store_count = 0;
 
 #ifdef ALTER
     rename_tables();
@@ -1592,7 +1592,7 @@ void ODBCAtomStorage::store(const AtomTable &table)
     put_conn(db_conn);
 
     printf("\tFinished storing %lu atoms total.\n",
-        (unsigned long) store_count);
+        (unsigned long) _store_count);
 }
 
 /* ================================================================ */
@@ -1710,6 +1710,81 @@ void ODBCAtomStorage::reserve(void)
     UUID max_observed_id = getMaxObservedUUID();
     printf("Reserving UUID up to %lu\n", max_observed_id);
     _tlbuf.reserve_upto(max_observed_id);
+}
+
+/* ================================================================ */
+
+void ODBCAtomStorage::print_stats(void)
+{
+    size_t load_count = _load_count;
+    size_t store_count = _store_count;
+    double frac = store_count / ((double) load_count);
+    printf("sql-stats: total loads = %lu total stores = %lu ratio=%f\n",
+         load_count, store_count, frac);
+
+    size_t num_get_nodes = _num_get_nodes;
+    size_t num_got_nodes = _num_got_nodes;
+    size_t num_get_links = _num_get_links;
+    size_t num_got_links = _num_got_links;
+    size_t num_get_insets = _num_get_insets;
+    size_t num_get_inatoms = _num_get_inatoms;
+    size_t num_node_inserts = _num_node_inserts;
+    size_t num_node_updates = _num_node_updates;
+    size_t num_link_inserts = _num_link_inserts;
+    size_t num_link_updates = _num_link_updates;
+
+    frac = 100.0 * num_got_nodes / ((double) num_get_nodes);
+    printf("num_get_nodes=%lu num_got_nodes=%lu (%f pct)\n",
+        num_get_nodes, num_got_nodes, frac);
+
+    frac = 100.0 * num_got_links / ((double) num_get_links);
+    printf("num_get_links=%lu num_got_links=%lu (%f pct)\n",
+        num_get_links, num_got_links, frac);
+
+    frac = num_get_inatoms / ((double) num_get_insets);
+    printf("num_get_insets=%lu num_get_inatoms=%lu ratio=%f\n",
+         num_get_insets, num_get_inatoms, frac);
+
+    frac = num_node_updates / ((double) num_node_inserts);
+    printf("num_node_inserts=%lu num_node_updates=%lu ratio=%f\n",
+         num_node_inserts, num_node_updates, frac);
+
+    frac = num_link_updates / ((double) num_link_inserts);
+    printf("num_link_inserts=%lu num_link_updates=%lu ratio=%f\n",
+         num_link_inserts, num_link_updates, frac);
+
+    // Some basic TLB statistics; could be improved;
+    // The TLB remapping theory needs some work...
+    size_t noh = 0;
+    // size_t remap = 0;
+
+    UUID mad = _tlbuf.getMaxUUID();
+    for (UUID uuid = 1; uuid < mad; uuid++)
+    {
+        Handle h = _tlbuf.getAtom(uuid);
+        if (nullptr == h) { noh++; continue; }
+
+#if 0
+        Handle hr = as->get_atom(h);
+        if (nullptr == hr) { extra++; continue; }
+        if (hr != h) { remap++; }
+#endif
+    }
+
+    printf("sql-stats: tlbuf holds %lu atoms\n", _tlbuf.size());
+#if 0
+    frac = 100.0 * extra / ((double) _tlbuf.size());
+    printf("sql-stats: tlbuf holds %lu atoms not in atomspace (%f pct)\n",
+           extra, frac);
+
+    frac = 100.0 * remap / ((double) _tlbuf.size());
+    printf("sql-stats: tlbuf holds %lu unremapped atoms (%f pct)\n",
+           remap, frac);
+#endif
+
+    frac = 100.0 * noh / ((double) mad);
+    printf("sql-stats: %lu of %lu uuids unused (%f pct)\n",
+           noh, mad, frac);
 }
 
 #endif /* HAVE_SQL_STORAGE */
