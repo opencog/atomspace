@@ -700,13 +700,21 @@ std::string ODBCAtomStorage::oset_to_string(const HandleSeq& out)
 /* ================================================================ */
 
 /// Drain the pending store queue.
-/// Caution: this is slightly racy; a writer could still be busy
-/// even though this returns. (There's a window in writeLoop, between
-/// the dequeue, and the busy_writer increment. I guess we should fix
-/// this...
+///
+/// Caution: this is ptentially racey in two different ways.
+/// First, there is a small window in the async_caller implementation,
+/// where, if the timing is just so, the barrier might return before
+/// the last element is written.  Technically, that's a bug, but its
+/// "minor" so we don't fix it.
+///
+/// The second issue is much more serious: We are NOT using any of the
+/// transactional features in SQL, and so while we might have drained
+/// the write queues here, on the client side, the SQL server will not
+/// have actually commited the work by the time that this returns.
+///
 void ODBCAtomStorage::flushStoreQueue()
 {
-    _write_queue.flush_queue();
+    _write_queue.barrier();
 }
 
 /* ================================================================ */
