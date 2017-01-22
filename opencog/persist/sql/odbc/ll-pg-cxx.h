@@ -27,8 +27,7 @@
 
 #ifdef HAVE_PGSQL_STORAGE
 
-#include <stack>
-#include <string>
+#include <libpq-fe.h>
 
 #include "llapi.h"
 
@@ -40,35 +39,37 @@ class PGRecordSet;
 
 class PGConnection : public LLConnection
 {
-    friend class PGRecordSet;
-    private:
-        PGRecordSet *get_record_set(void);
+	friend class PGRecordSet;
+	private:
+		PGconn* pgconn;
+		PGRecordSet* get_record_set(void);
 
-    public:
-        PGConnection(const char * dbname,
-                       const char * username,
-                       const char * authentication);
-        ~PGConnection();
+	public:
+		PGConnection(const char * dbname,
+		             const char * username,
+		             const char * authentication);
+		~PGConnection();
 
-        LLRecordSet *exec(const char *);
+		LLRecordSet *exec(const char *);
 };
 
 class PGRecordSet : public LLRecordSet
 {
-    friend class PGConnection;
-    private:
-        void alloc_and_bind_cols(int ncols);
-        PGRecordSet(PGConnection *);
-        ~PGRecordSet();
+	friend class PGConnection;
+	private:
+		void alloc_and_bind_cols(int ncols);
+		PGRecordSet(PGConnection *);
+		~PGRecordSet();
 
-        void get_column_labels(void);
+		void get_column_labels(void);
 
-    public:
-        int fetch_row(void); // return non-zero value if there's another row.
+	public:
+		// return non-zero value if there's another row.
+		int fetch_row(void);
 
-        // call this, instead of the destructor,
-        // when done with this instance.
-        void release(void);
+		// call this, instead of the destructor,
+		// when done with this instance.
+		void release(void);
 };
 
 /** @}*/

@@ -30,9 +30,6 @@
 
 #ifdef HAVE_ODBC_STORAGE
 
-#include <stack>
-#include <string>
-
 #include <sql.h>
 #include <sqlext.h>
 
@@ -76,7 +73,8 @@ class ODBCRecordSet : public LLRecordSet
         void get_column_labels(void);
 
     public:
-        int fetch_row(void); // return non-zero value if there's another row.
+        // return non-zero value if there's another row.
+        int fetch_row(void);
 
         // call this, instead of the destructor,
         // when done with this instance.
