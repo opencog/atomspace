@@ -735,10 +735,10 @@ void ODBCAtomStorage::storeAtom(const AtomPtr& atom, bool synchronous)
     // If a synchronous store, avoid the queues entirely.
     if (synchronous)
     {
-        do_store_atom(atom);
+        do_store_atom(atom->getHandle());
         return;
     }
-    _write_queue.enqueue(atom);
+    _write_queue.enqueue(atom->getHandle());
 }
 
 /**
@@ -746,9 +746,8 @@ void ODBCAtomStorage::storeAtom(const AtomPtr& atom, bool synchronous)
  * in the calling thread.
  * Returns the height of the atom.
  */
-int ODBCAtomStorage::do_store_atom(AtomPtr atom)
+int ODBCAtomStorage::do_store_atom(const Handle& h)
 {
-    Handle h(atom->getHandle());
     if (h->isNode())
     {
         do_store_single_atom(h, 0);
@@ -770,9 +769,9 @@ int ODBCAtomStorage::do_store_atom(AtomPtr atom)
     return lheight;
 }
 
-void ODBCAtomStorage::vdo_store_atom(const AtomPtr& atom)
+void ODBCAtomStorage::vdo_store_atom(const Handle& h)
 {
-    do_store_atom(atom);
+    do_store_atom(h);
 }
 
 /* ================================================================ */

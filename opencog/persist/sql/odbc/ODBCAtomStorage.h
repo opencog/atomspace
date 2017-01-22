@@ -93,8 +93,8 @@ class ODBCAtomStorage : public AtomStorage
 
         // --------------------------
         // Storing of atoms
-        int do_store_atom(AtomPtr);
-        void vdo_store_atom(const AtomPtr&);
+        int do_store_atom(const Handle&);
+        void vdo_store_atom(const Handle&);
         void do_store_single_atom(const Handle&, int);
 
         UUID get_uuid(const Handle&);
@@ -170,7 +170,7 @@ class ODBCAtomStorage : public AtomStorage
 #endif /* OUT_OF_LINE_TVS */
 
         // Provider of asynchronous store of atoms.
-        async_caller<ODBCAtomStorage, AtomPtr> _write_queue;
+        async_caller<ODBCAtomStorage, Handle> _write_queue;
 
     public:
         ODBCAtomStorage(const std::string& dbname, 
