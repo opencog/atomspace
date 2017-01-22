@@ -34,7 +34,7 @@
 #include <opencog/atoms/base/atom_types.h>
 #include <opencog/truthvalue/SimpleTruthValue.h>
 #include <opencog/atomspace/AtomSpace.h>
-#include <opencog/persist/sql/odbc/ODBCAtomStorage.h>
+#include <opencog/persist/sql/odbc/SQLAtomStorage.h>
 
 #include <opencog/util/Logger.h>
 #include <opencog/util/Config.h>
@@ -120,7 +120,7 @@ class BasicSaveUTest :  public CxxTest::TestSuite
             exit(1);
         }
 
-        ODBCAtomStorage *astore;
+        SQLAtomStorage *astore;
         void single_atom_save_restore(std::string id);
         void add_to_table(int, AtomTable *, std::string id);
         void check_table(int, AtomTable *, std::string id);
@@ -137,7 +137,7 @@ void BasicSaveUTest::setUp(void)
 {
     as = new AtomSpace();
 
-    astore = new ODBCAtomStorage(dbname, username, passwd);
+    astore = new SQLAtomStorage(dbname, username, passwd);
     if (!astore->connected())
     {
         logger().info("setUp: cannot connect to database");
@@ -214,7 +214,7 @@ static void atomCompare(AtomPtr a, AtomPtr b, const char* where)
  */
 void BasicSaveUTest::single_atom_save_restore(std::string id)
 {
-    ODBCAtomStorage *store = new ODBCAtomStorage(dbname, username, passwd);
+    SQLAtomStorage *store = new SQLAtomStorage(dbname, username, passwd);
     if (!store->connected())
     {
         logger().debug("single_atom_save_restore: cannot connect to db");
@@ -352,7 +352,7 @@ void BasicSaveUTest::test_fresh_atom(void)
 {
     logger().debug("BEGIN TEST: %s", __FUNCTION__);
 
-    ODBCAtomStorage *store = new ODBCAtomStorage(dbname, username, passwd);
+    SQLAtomStorage *store = new SQLAtomStorage(dbname, username, passwd);
     if (!store->connected())
     {
         logger().debug("single_atom_save_restore: cannot connect to db");
@@ -398,7 +398,7 @@ void BasicSaveUTest::test_table(void)
 {
     logger().debug("BEGIN TEST: %s", __FUNCTION__);
 
-    ODBCAtomStorage *store = new ODBCAtomStorage(dbname, username, passwd);
+    SQLAtomStorage *store = new SQLAtomStorage(dbname, username, passwd);
     if (!store->connected())
     {
         logger().debug("test_table: cannot connect to db");
@@ -419,7 +419,7 @@ void BasicSaveUTest::test_table(void)
     delete table1;
 
     // Reopen connection, and load the atom table.
-    store = new ODBCAtomStorage(dbname, username, passwd);
+    store = new SQLAtomStorage(dbname, username, passwd);
     TSM_ASSERT("Not connected to database", store->connected());
 
     AtomTable *table2 = new AtomTable();

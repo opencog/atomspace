@@ -31,7 +31,7 @@
 #include <opencog/atoms/base/atom_types.h>
 #include <opencog/atoms/base/Atom.h>
 #include <opencog/guile/SchemeEval.h>
-#include <opencog/persist/sql/odbc/ODBCAtomStorage.h>
+#include <opencog/persist/sql/odbc/SQLAtomStorage.h>
 #include <opencog/truthvalue/SimpleTruthValue.h>
 
 #include <opencog/util/Logger.h>
@@ -146,10 +146,10 @@ void FetchUTest::tearDown(void)
 
 void FetchUTest::kill_data(void)
 {
-	ODBCAtomStorage* astore = new ODBCAtomStorage(dbname, username, passwd);
+	SQLAtomStorage* astore = new SQLAtomStorage(dbname, username, passwd);
 	if (!astore->connected())
 	{
-		logger().info("setUp: ODBCAtomStorage cannot connect to database");
+		logger().info("setUp: SQLAtomStorage cannot connect to database");
 		friendlyFailMessage();
 		exit(1);
 	}

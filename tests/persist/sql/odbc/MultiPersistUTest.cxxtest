@@ -36,7 +36,7 @@
 #include <opencog/atoms/base/Atom.h>
 #include <opencog/atoms/base/Link.h>
 #include <opencog/atoms/base/Node.h>
-#include <opencog/persist/sql/odbc/ODBCAtomStorage.h>
+#include <opencog/persist/sql/odbc/SQLAtomStorage.h>
 #include <opencog/persist/sql/odbc/SQLPersistSCM.h>
 #include <opencog/truthvalue/SimpleTruthValue.h>
 
@@ -194,10 +194,10 @@ void MultiPersistUTest::tearDown(void)
 
 void MultiPersistUTest::kill_data(void)
 {
-    ODBCAtomStorage* astore = new ODBCAtomStorage(dbname, username, passwd);
+    SQLAtomStorage* astore = new SQLAtomStorage(dbname, username, passwd);
     if (!astore->connected())
     {
-        logger().info("setUp: ODBCAtomStorage cannot connect to database");
+        logger().info("setUp: SQLAtomStorage cannot connect to database");
         friendlyFailMessage();
         exit(1);
     }
