@@ -234,7 +234,7 @@ public:
             _environ->foreachHandleByType(func, type, subclass);
         std::for_each(typeIndex.begin(type, subclass),
                       typeIndex.end(),
-             [&](Handle h)->void {
+             [&](const Handle& h)->void {
                   (func)(h);
              });
     }
