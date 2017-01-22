@@ -1,12 +1,9 @@
 /*
  * FUNCTION:
- * ODBC driver -- developed/tested with both iODBC http://www.iodbc.org
- * and with unixODBC
+ * Postgres driver -- low-level API for postgres
  *
  * HISTORY:
- * Copyright (c) 2002,2008 Linas Vepstas <linas@linas.org>
- * created by Linas Vepstas  March 2002
- * ported to C++ March 2008
+ * Copyright (c) 2017 Linas Vepstas
  *
  * LICENSE:
  * This program is free software; you can redistribute it and/or modify
@@ -25,16 +22,13 @@
  * 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
  */
 
-#ifndef _OPENCOG_PERSISTENT_ODBC_DRIVER_H
-#define _OPENCOG_PERSISTENT_ODBC_DRIVER_H
+#ifndef _OPENCOG_PERSISTENT_POSTGRES_DRIVER_H
+#define _OPENCOG_PERSISTENT_POSTGRES_DRIVER_H
 
-#ifdef HAVE_ODBC_STORAGE
+#ifdef HAVE_PGSQL_STORAGE
 
 #include <stack>
 #include <string>
-
-#include <sql.h>
-#include <sqlext.h>
 
 #include "llapi.h"
 
@@ -42,36 +36,31 @@
  *  @{
  */
 
-class ODBCRecordSet;
+class PGRecordSet;
 
-class ODBCConnection : public LLConnection
+class PGConnection : public LLConnection
 {
-    friend class ODBCRecordSet;
+    friend class PGRecordSet;
     private:
-        SQLHENV sql_henv;
-        SQLHDBC sql_hdbc;
-
-        ODBCRecordSet *get_record_set(void);
+        PGRecordSet *get_record_set(void);
 
     public:
-        ODBCConnection(const char * dbname,
+        PGConnection(const char * dbname,
                        const char * username,
                        const char * authentication);
-        ~ODBCConnection();
+        ~PGConnection();
 
         LLRecordSet *exec(const char *);
         void extract_error(const char *);
 };
 
-class ODBCRecordSet : public LLRecordSet
+class PGRecordSet : public LLRecordSet
 {
-    friend class ODBCConnection;
+    friend class PGConnection;
     private:
-        SQLHSTMT sql_hstmt;
-
         void alloc_and_bind_cols(int ncols);
-        ODBCRecordSet(ODBCConnection *);
-        ~ODBCRecordSet();
+        PGRecordSet(PGConnection *);
+        ~PGRecordSet();
 
         void get_column_labels(void);
 
@@ -88,5 +77,5 @@ class ODBCRecordSet : public LLRecordSet
 
 /** @}*/
 
-#endif /* HAVE_ODBC_STORAGE */
-#endif // _OPENCOG_PERSISTENT_ODBC_DRIVER_H
+#endif /* HAVE_PGSQL_STORAGE */
+#endif // _OPENCOG_PERSISTENT_POSTGRES_DRIVER_H

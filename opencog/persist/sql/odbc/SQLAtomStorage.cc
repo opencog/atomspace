@@ -49,6 +49,7 @@
 #include <opencog/atomspaceutils/TLB.h>
 
 #include "llapi.h"
+#include "ll-pg-cxx.h"
 #include "odbcxx.h"
 #include "SQLAtomStorage.h"
 
@@ -353,10 +354,14 @@ void SQLAtomStorage::init(const char * dbname,
 #define DEFAULT_NUM_CONNS 24
 	for (int i=0; i<DEFAULT_NUM_CONNS; i++)
 	{
-#ifdef HAVE_ODBC_STORAGE
+#ifdef XHAVE_ODBC_STORAGE
 		LLConnection* db_conn = new ODBCConnection(dbname, username, authentication);
 		conn_pool.push(db_conn);
 #endif /* HAVE_ODBC_STORAGE */
+#ifdef HAVE_PGSQL_STORAGE
+		LLConnection* db_conn = new PGConnection(dbname, username, authentication);
+		conn_pool.push(db_conn);
+#endif /* HAVE_PGSQL_STORAGE */
 	}
 	type_map_was_loaded = false;
 
