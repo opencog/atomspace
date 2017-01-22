@@ -308,24 +308,6 @@ ODBCRecordSet::release(void)
 
 ODBCRecordSet::~ODBCRecordSet()
 {
-    conn = NULL;
-
-    for (int i=0; i<arrsize; i++)
-    {
-        delete[] column_labels[i];
-        delete[] values[i];
-    }
-    delete[] column_labels;
-    column_labels = NULL;
-
-    delete[] column_datatype;
-    column_datatype = NULL;
-
-    delete[] values;
-    values = NULL;
-
-    delete[] vsizes;
-    vsizes = NULL;
 }
 
 /* =========================================================== */
