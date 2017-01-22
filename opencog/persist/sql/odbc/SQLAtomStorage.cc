@@ -359,7 +359,7 @@ void SQLAtomStorage::init(const char * dbname,
 		conn_pool.push(db_conn);
 #endif /* HAVE_ODBC_STORAGE */
 #ifdef HAVE_PGSQL_STORAGE
-		LLConnection* db_conn = new PGConnection(dbname, username, authentication);
+		LLConnection* db_conn = new LLPGConnection(dbname, username, authentication);
 		conn_pool.push(db_conn);
 #endif /* HAVE_PGSQL_STORAGE */
 	}

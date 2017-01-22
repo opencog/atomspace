@@ -44,7 +44,7 @@
 
 /* =========================================================== */
 
-PGConnection::PGConnection(const char * _dbname,
+LLPGConnection::LLPGConnection(const char * _dbname,
 							   const char * _username,
 							   const char * _authentication)
 	: LLConnection(_dbname, _username, _authentication)
@@ -69,7 +69,7 @@ PGConnection::PGConnection(const char * _dbname,
 
 /* =========================================================== */
 
-PGConnection::~PGConnection()
+LLPGConnection::~LLPGConnection()
 {
 	PQfinish(pgconn);
 }
@@ -77,19 +77,19 @@ PGConnection::~PGConnection()
 /* =========================================================== */
 #define DEFAULT_NUM_COLS 50
 
-PGRecordSet * PGConnection::get_record_set(void)
+LLPGRecordSet * LLPGConnection::get_record_set(void)
 {
-	PGRecordSet *rs;
+	LLPGRecordSet *rs;
 	if (!free_pool.empty())
 	{
 		LLRecordSet* llrs = free_pool.top();
-		rs = dynamic_cast<PGRecordSet*>(llrs);
+		rs = dynamic_cast<LLPGRecordSet*>(llrs);
 		free_pool.pop();
 		rs->ncols = -1;
 	}
 	else
 	{
-		rs = new PGRecordSet(this);
+		rs = new LLPGRecordSet(this);
 	}
 
 	rs->alloc_and_bind_cols(DEFAULT_NUM_COLS);
@@ -100,11 +100,19 @@ PGRecordSet * PGConnection::get_record_set(void)
 /* =========================================================== */
 
 LLRecordSet *
-PGConnection::exec(const char * buff)
+LLPGConnection::exec(const char * buff)
 {
 	if (!is_connected) return NULL;
 
-	PGRecordSet* rs = get_record_set();
+	LLPGRecordSet* rs = get_record_set();
+
+	rs->_result = PQexec(pgconn, buff);
+
+	if (PQresultStatus(rs->_result) != PGRES_COMMAND_OK)
+	{
+		rs->release();
+		PERR("Failed to execute!");
+	}
 
 	/* Use numbr of columns to indicate that the query hasn't
 	 * given results yet. */
@@ -115,7 +123,7 @@ PGConnection::exec(const char * buff)
 /* =========================================================== */
 
 void
-PGRecordSet::alloc_and_bind_cols(int new_ncols)
+LLPGRecordSet::alloc_and_bind_cols(int new_ncols)
 {
 	LLRecordSet::alloc_and_bind_cols(new_ncols);
 }
@@ -124,7 +132,7 @@ PGRecordSet::alloc_and_bind_cols(int new_ncols)
 /* pseudo-private routine */
 
 
-PGRecordSet::PGRecordSet(PGConnection* _conn)
+LLPGRecordSet::LLPGRecordSet(LLPGConnection* _conn)
 	: LLRecordSet(_conn)
 {
 }
@@ -132,21 +140,22 @@ PGRecordSet::PGRecordSet(PGConnection* _conn)
 /* =========================================================== */
 
 void
-PGRecordSet::release(void)
+LLPGRecordSet::release(void)
 {
+	PQclear(_result);
 	LLRecordSet::release();
 }
 
 /* =========================================================== */
 
-PGRecordSet::~PGRecordSet()
+LLPGRecordSet::~LLPGRecordSet()
 {
 }
 
 /* =========================================================== */
 
 void
-PGRecordSet::get_column_labels(void)
+LLPGRecordSet::get_column_labels(void)
 {
 	if (0 <= ncols) return;
 
@@ -160,7 +169,7 @@ PGRecordSet::get_column_labels(void)
 
 
 int
-PGRecordSet::fetch_row(void)
+LLPGRecordSet::fetch_row(void)
 {
 	// Columns can have null values.  In this case, the PG shims
 	// will neither set nor clear the value-strings. As a result,

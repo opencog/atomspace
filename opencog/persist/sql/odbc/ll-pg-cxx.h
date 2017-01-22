@@ -35,31 +35,33 @@
  *  @{
  */
 
-class PGRecordSet;
+class LLPGRecordSet;
 
-class PGConnection : public LLConnection
+class LLPGConnection : public LLConnection
 {
-	friend class PGRecordSet;
+	friend class LLPGRecordSet;
 	private:
 		PGconn* pgconn;
-		PGRecordSet* get_record_set(void);
+		LLPGRecordSet* get_record_set(void);
 
 	public:
-		PGConnection(const char * dbname,
+		LLPGConnection(const char * dbname,
 		             const char * username,
 		             const char * authentication);
-		~PGConnection();
+		~LLPGConnection();
 
 		LLRecordSet *exec(const char *);
 };
 
-class PGRecordSet : public LLRecordSet
+class LLPGRecordSet : public LLRecordSet
 {
-	friend class PGConnection;
+	friend class LLPGConnection;
 	private:
+		PGresult* _result;
+
 		void alloc_and_bind_cols(int ncols);
-		PGRecordSet(PGConnection *);
-		~PGRecordSet();
+		LLPGRecordSet(LLPGConnection *);
+		~LLPGRecordSet();
 
 		void get_column_labels(void);
 
