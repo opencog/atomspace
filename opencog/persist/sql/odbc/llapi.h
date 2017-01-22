@@ -1,12 +1,12 @@
 /*
  * FUNCTION:
- * ODBC driver -- developed/tested with both iODBC http://www.iodbc.org
- * and with unixODBC
+ * Low-Level SQL database API. Super-Simple.
  *
  * HISTORY:
  * Copyright (c) 2002,2008 Linas Vepstas <linas@linas.org>
  * created by Linas Vepstas  March 2002
  * ported to C++ March 2008
+ * Made generic, 2017
  *
  * LICENSE:
  * This program is free software; you can redistribute it and/or modify
@@ -25,60 +25,70 @@
  * 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
  */
 
-#ifndef _OPENCOG_PERSISTENT_ODBC_DRIVER_H
-#define _OPENCOG_PERSISTENT_ODBC_DRIVER_H
+#ifndef _OPENCOG_PERSISTENT_LL_DRIVER_H
+#define _OPENCOG_PERSISTENT_LL_DRIVER_H
 
 #include <stack>
 #include <string>
-
-#include <sql.h>
-#include <sqlext.h>
-
-#include "llapi.h"
 
 /** \addtogroup grp_persist
  *  @{
  */
 
-class ODBCRecordSet;
+class LLRecordSet;
 
-class ODBCConnection : public LLConnection
+class LLConnection
 {
-    friend class ODBCRecordSet;
-    private:
-        SQLHENV sql_henv;
-        SQLHDBC sql_hdbc;
+    friend class LLRecordSet;
+    protected:
+        std::string dbname;
+        std::string username;
+        bool is_connected;
+        std::stack<LLRecordSet *> free_pool;
 
-        ODBCRecordSet *get_record_set(void);
+        LLRecordSet *get_record_set(void);
 
     public:
-        ODBCConnection(const char * dbname,
-                       const char * username,
-                       const char * authentication);
-        ~ODBCConnection();
+        LLConnection(const char * dbname,
+                     const char * username,
+                     const char * authentication);
+        virtual ~LLConnection();
 
-        ODBCRecordSet *exec(const char *);
-        void extract_error(const char *);
+        bool connected(void) const;
+
+        virtual LLRecordSet *exec(const char *) = 0;
+        virtual void extract_error(const char *) = 0;
 };
 
-class ODBCRecordSet : public LLRecordSet
+class LLRecordSet
 {
-    friend class ODBCConnection;
-    private:
-        ODBCConnection *conn;
-        SQLHSTMT sql_hstmt;
+    friend class LLConnection;
+    protected:
+        LLConnection *conn;
+
+        int ncols;
+        int arrsize;
+        char **column_labels;
+        int  *column_datatype;
+        char **values;
+        int  *vsizes;
 
         void alloc_and_bind_cols(int ncols);
-        ODBCRecordSet(ODBCConnection *);
-        ~ODBCRecordSet();
+        LLRecordSet(LLConnection *);
+        virtual ~LLRecordSet();
 
-        void get_column_labels(void);
+        virtual void get_column_labels(void) = 0;
+        int get_col_by_name (const char *);
 
     public:
         // rewind the cursor to the start
-        void rewind(void);
+        virtual void rewind(void) = 0;
 
-        int fetch_row(void); // return non-zero value if there's another row.
+        // return non-zero value if there's another row.
+        virtual int fetch_row(void) = 0;
+        const char * get_value(const char * fieldname);
+        int get_column_count();
+        const char * get_column_value(int column);
 
         // call this, instead of the destructor,
         // when done with this instance.
@@ -115,6 +125,23 @@ class ODBCRecordSet : public LLRecordSet
         }
 };
 
+/**
+ * Handy-dandy utility function: since SQL uses single-quotes
+ * for delimiting strings, the strings themselves need to have
+ * any single-quotes escaped, to avoid bad syntax.
+ */
+inline void escape_single_quotes(std::string &str)
+{
+    std::string::size_type pos = 0;
+    pos = str.find ('\'', pos);
+    while (pos != std::string::npos)
+    {
+        str.insert(pos, 1, '\'');
+        pos += 2;
+        pos = str.find('\'', pos);
+    }
+}
+
 /** @}*/
 
-#endif // _OPENCOG_PERSISTENT_ODBC_DRIVER_H
+#endif // _OPENCOG_PERSISTENT_LL_DRIVER_H

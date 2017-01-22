@@ -48,7 +48,7 @@ INSTALL (TARGETS persist-sql
 )
 
 INSTALL (FILES
-    odbcxx.h
+    llapi.h
     SQLAtomStorage.h
     SQLPersistSCM.h
     DESTINATION "include/opencog/persist/sql/odbc"
