@@ -41,13 +41,13 @@ class LLPGConnection : public LLConnection
 {
 	friend class LLPGRecordSet;
 	private:
-		PGconn* pgconn;
+		PGconn* _pgconn;
 		LLPGRecordSet* get_record_set(void);
 
 	public:
 		LLPGConnection(const char * dbname,
-		             const char * username,
-		             const char * authentication);
+		               const char * username,
+		               const char * authentication);
 		~LLPGConnection();
 
 		LLRecordSet *exec(const char *);

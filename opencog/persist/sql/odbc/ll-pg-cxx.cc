@@ -56,22 +56,27 @@ LLPGConnection::LLPGConnection(const char * _dbname,
 		PERR("No DB specified");
 		return;
 	}
-	pgconn = PQconnectdb("dbname = postgres");
 
-	if (PQstatus(pgconn) != CONNECTION_OK)
+	std::string constr = "dbname = ";
+	constr += _dbname;
+	_pgconn = PQconnectdb(constr.c_str());
+
+	if (PQstatus(_pgconn) != CONNECTION_OK)
 	{
-		PQfinish(pgconn);
+printf("duuuude %s", PQerrorMessage(_pgconn));
+		opencog::logger().warn("%s", PQerrorMessage(_pgconn));
+		PQfinish(_pgconn);
 		PERR("Cannot conect to database");
 	}
-
-	// is_connected = true;
+ 
+	is_connected = true;
 }
 
 /* =========================================================== */
 
 LLPGConnection::~LLPGConnection()
 {
-	PQfinish(pgconn);
+	PQfinish(_pgconn);
 }
 
 /* =========================================================== */
@@ -106,14 +111,25 @@ LLPGConnection::exec(const char * buff)
 
 	LLPGRecordSet* rs = get_record_set();
 
-	rs->_result = PQexec(pgconn, buff);
+if (PQstatus(_pgconn) != CONNECTION_OK)
+{
+printf("duuuude wtf.....\n");
+}
+	rs->_result = PQexec(_pgconn, buff);
 
-	if (PQresultStatus(rs->_result) != PGRES_COMMAND_OK)
+	ExecStatusType rest = PQresultStatus(rs->_result);
+printf("duuude try exec %s\n", buff);
+	if (rest != PGRES_COMMAND_OK and
+	    rest != PGRES_EMPTY_QUERY and
+	    rest != PGRES_TUPLES_OK)
 	{
+		opencog::logger().warn("%s", PQresultErrorMessage(rs->_result));
+printf("duuude %s", PQresultErrorMessage(rs->_result));
 		rs->release();
 		PERR("Failed to execute!");
 	}
 
+printf("duuude done exec %s\n", buff);
 	/* Use numbr of columns to indicate that the query hasn't
 	 * given results yet. */
 	rs->ncols = -1;
@@ -163,6 +179,8 @@ LLPGRecordSet::get_column_labels(void)
 	 * gotten any results back yet.  Start by getting the
 	 * column labels.
 	 */
+
+printf("duuuuuuuuuuuuuuude get teh column labs!!!!\n");
 }
 
 /* =========================================================== */
@@ -177,6 +195,7 @@ LLPGRecordSet::fetch_row(void)
 	// there, in the values, and get reported to the unlucky user.
 	for (int i=0; i<ncols; i++) values[i][0] = 0;
 
+printf("duuuuuuuuuuuuuuude get fetch the rowss!!!!\n");
 	return 1;
 }
 
