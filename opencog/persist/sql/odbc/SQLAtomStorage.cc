@@ -315,13 +315,13 @@ class SQLAtomStorage::Response
 /// XXX Should do the same for Response rp.rs->release() to auto-release.
 
 /// Get an SQL connection
-ODBCConnection* SQLAtomStorage::get_conn()
+LLConnection* SQLAtomStorage::get_conn()
 {
 	return conn_pool.pop();
 }
 
 /// Put an SQL connection back into the pool.
-void SQLAtomStorage::put_conn(ODBCConnection* db_conn)
+void SQLAtomStorage::put_conn(LLConnection* db_conn)
 {
 	conn_pool.push(db_conn);
 }
@@ -330,7 +330,7 @@ void SQLAtomStorage::put_conn(ODBCConnection* db_conn)
 
 bool SQLAtomStorage::idExists(const char * buff)
 {
-	ODBCConnection* db_conn = get_conn();
+	LLConnection* db_conn = get_conn();
 	Response rp;
 	rp.row_exists = false;
 	rp.rs = db_conn->exec(buff);
@@ -353,7 +353,7 @@ void SQLAtomStorage::init(const char * dbname,
 #define DEFAULT_NUM_CONNS 6
 	for (int i=0; i<DEFAULT_NUM_CONNS; i++)
 	{
-		ODBCConnection* db_conn = new ODBCConnection(dbname, username, authentication);
+		LLConnection* db_conn = new ODBCConnection(dbname, username, authentication);
 		conn_pool.push(db_conn);
 	}
 	type_map_was_loaded = false;
@@ -408,7 +408,7 @@ SQLAtomStorage::~SQLAtomStorage()
 {
 	while (not conn_pool.is_empty())
 	{
-		ODBCConnection* db_conn = conn_pool.pop();
+		LLConnection* db_conn = conn_pool.pop();
 		delete db_conn;
 	}
 
@@ -425,7 +425,7 @@ SQLAtomStorage::~SQLAtomStorage()
  */
 bool SQLAtomStorage::connected(void)
 {
-	ODBCConnection* db_conn = get_conn();
+	LLConnection* db_conn = get_conn();
 	bool have_connection = db_conn->connected();
 	put_conn(db_conn);
 	return have_connection;
@@ -494,7 +494,7 @@ void SQLAtomStorage::store_atomtable_id(const AtomTable& at)
 		tab_id, parent_id);
 
 	std::unique_lock<std::mutex> lock(table_cache_mutex);
-	ODBCConnection* db_conn = get_conn();
+	LLConnection* db_conn = get_conn();
 	Response rp;
 	rp.rs = db_conn->exec(buff);
 	rp.release();
@@ -931,7 +931,7 @@ void SQLAtomStorage::do_store_single_atom(const Handle& h, int aheight)
 	// We waste CPU cycles to store the atomtable, only if it failed.
 	bool try_again = false;
 	std::string qry = cols + vals + coda;
-	ODBCConnection* db_conn = get_conn();
+	LLConnection* db_conn = get_conn();
 	Response rp;
 	rp.rs = db_conn->exec(qry.c_str());
 	if (NULL == rp.rs) try_again = true;
@@ -1001,7 +1001,7 @@ void SQLAtomStorage::setup_typemap(void)
 		db_typename[i] = NULL;
 	}
 
-	ODBCConnection* db_conn = get_conn();
+	LLConnection* db_conn = get_conn();
 	Response rp;
 	rp.rs = db_conn->exec("SELECT * FROM TypeCodes;");
 	rp.store = this;
@@ -1151,7 +1151,7 @@ void SQLAtomStorage::get_ids(void)
 	local_id_cache_is_inited = true;
 
 	local_id_cache.clear();
-	ODBCConnection* db_conn = get_conn();
+	LLConnection* db_conn = get_conn();
 
 	// It appears that, when the select statment returns more than
 	// about a 100K to a million atoms or so, some sort of heap
@@ -1193,7 +1193,7 @@ void SQLAtomStorage::get_ids(void)
 /* One-size-fits-all atom fetcher */
 SQLAtomStorage::PseudoPtr SQLAtomStorage::getAtom(const char * query, int height)
 {
-	ODBCConnection* db_conn = get_conn();
+	LLConnection* db_conn = get_conn();
 	Response rp;
 	rp.uuid = TLB::INVALID_UUID;
 	rp.rs = db_conn->exec(query);
@@ -1246,7 +1246,7 @@ HandleSeq SQLAtomStorage::getIncomingSet(const Handle& h)
 	// The cast to BIGINT is needed, as otherwise on gets
 	// ERROR:  operator does not exist: bigint[] @> integer[]
 
-	ODBCConnection* db_conn = get_conn();
+	LLConnection* db_conn = get_conn();
 	Response rp;
 	rp.store = this;
 	rp.height = -1;
@@ -1432,7 +1432,7 @@ void SQLAtomStorage::load(AtomTable &table)
 
 	setup_typemap();
 
-	ODBCConnection* db_conn = get_conn();
+	LLConnection* db_conn = get_conn();
 	Response rp;
 	rp.table = &table;
 	rp.store = this;
@@ -1500,7 +1500,7 @@ void SQLAtomStorage::loadType(AtomTable &table, Type atom_type)
 	setup_typemap();
 	int db_atom_type = storing_typemap[atom_type];
 
-	ODBCConnection* db_conn = get_conn();
+	LLConnection* db_conn = get_conn();
 	Response rp;
 	rp.table = &table;
 	rp.store = this;
@@ -1580,7 +1580,7 @@ void SQLAtomStorage::store(const AtomTable &table)
 	setup_typemap();
 	store_atomtable_id(table);
 
-	ODBCConnection* db_conn = get_conn();
+	LLConnection* db_conn = get_conn();
 	Response rp;
 
 	table.foreachHandleByType(
@@ -1598,7 +1598,7 @@ void SQLAtomStorage::store(const AtomTable &table)
 
 void SQLAtomStorage::rename_tables(void)
 {
-	ODBCConnection* db_conn = get_conn();
+	LLConnection* db_conn = get_conn();
 	Response rp;
 
 	rp.rs = db_conn->exec("ALTER TABLE Atoms RENAME TO Atoms_Backup;");
@@ -1612,7 +1612,7 @@ void SQLAtomStorage::rename_tables(void)
 
 void SQLAtomStorage::create_tables(void)
 {
-	ODBCConnection* db_conn = get_conn();
+	LLConnection* db_conn = get_conn();
 	Response rp;
 
 	// See the file "atom.sql" for detailed documentation as to the
@@ -1658,7 +1658,7 @@ void SQLAtomStorage::create_tables(void)
  */
 void SQLAtomStorage::kill_data(void)
 {
-	ODBCConnection* db_conn = get_conn();
+	LLConnection* db_conn = get_conn();
 	Response rp;
 
 	// See the file "atom.sql" for detailed documentation as to the
@@ -1682,7 +1682,7 @@ void SQLAtomStorage::kill_data(void)
 
 UUID SQLAtomStorage::getMaxObservedUUID(void)
 {
-	ODBCConnection* db_conn = get_conn();
+	LLConnection* db_conn = get_conn();
 	Response rp;
 	rp.intval = 0;
 	rp.rs = db_conn->exec("SELECT uuid FROM Atoms ORDER BY uuid DESC LIMIT 1;");
@@ -1694,7 +1694,7 @@ UUID SQLAtomStorage::getMaxObservedUUID(void)
 
 int SQLAtomStorage::getMaxObservedHeight(void)
 {
-	ODBCConnection* db_conn = get_conn();
+	LLConnection* db_conn = get_conn();
 	Response rp;
 	rp.intval = 0;
 	rp.rs = db_conn->exec("SELECT height FROM Atoms ORDER BY height DESC LIMIT 1;");

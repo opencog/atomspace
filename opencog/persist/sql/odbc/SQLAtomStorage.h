@@ -42,7 +42,7 @@
 #include <opencog/atomspaceutils/TLB.h>
 #include <opencog/persist/sql/AtomStorage.h>
 
-#include "odbcxx.h"
+#include "llapi.h"
 
 namespace opencog
 {
@@ -54,9 +54,9 @@ class SQLAtomStorage : public AtomStorage
 {
 	private:
 		// Pool of shared connections
-		ODBCConnection* get_conn();
-		void put_conn(ODBCConnection*);
-		concurrent_stack<ODBCConnection*> conn_pool;
+		LLConnection* get_conn();
+		void put_conn(LLConnection*);
+		concurrent_stack<LLConnection*> conn_pool;
 
 		// Utility for handling responses on stack.
 		class Response;
