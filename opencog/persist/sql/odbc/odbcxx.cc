@@ -250,10 +250,6 @@ ODBCRecordSet::alloc_and_bind_cols(int new_ncols)
 {
     LLRecordSet::alloc_and_bind_cols(new_ncols);
 
-    // IMPORTANT! MUST NOT BE ON STACK!! Else stack corruption will result.
-    // The ODBC driver really wants to write a return value here!
-    static SQLLEN bogus;
-
     SQLRETURN rc = SQLAllocStmt (conn->sql_hdbc, &sql_hstmt);
     if ((SQL_SUCCESS != rc) and (SQL_SUCCESS_WITH_INFO != rc))
     {
@@ -263,22 +259,13 @@ ODBCRecordSet::alloc_and_bind_cols(int new_ncols)
         return;
     }
 
+    // IMPORTANT! MUST NOT BE ON STACK!! Else stack corruption will result.
+    // The ODBC driver really wants to write a return value here!
+    static SQLLEN bogus;
+
     /* Initialize the newly realloc'ed entries */
     for (int i=0; i<new_ncols; i++)
     {
-        column_datatype[i] = 0;
-
-        if (NULL == column_labels[i])
-        {
-            column_labels[i] = new char[DEFAULT_COLUMN_NAME_SIZE];
-            column_labels[i][0] = 0;
-        }
-        if (NULL == values[i])
-        {
-            values[i] = new char[DEFAULT_VARCHAR_SIZE];
-            vsizes[i] = DEFAULT_VARCHAR_SIZE;
-            values[i][0] = 0;
-        }
         rc = SQLBindCol(sql_hstmt, i+1, SQL_C_CHAR,
             values[i], vsizes[i], &bogus);
         if ((SQL_SUCCESS != rc) and (SQL_SUCCESS_WITH_INFO != rc))

@@ -128,10 +128,12 @@ LLRecordSet::alloc_and_bind_cols(int new_ncols)
     /* intialize */
     for (i = 0; i<new_ncols; i++)
     {
-        column_labels[i] = NULL;
+        column_labels[i] = new char[DEFAULT_COLUMN_NAME_SIZE];
+        column_labels[i][0] = 0;
         column_datatype[i] = 0;
-        values[i] = NULL;
-        vsizes[i] = 0;
+        values[i] = new char[DEFAULT_VARCHAR_SIZE];
+        vsizes[i] = DEFAULT_VARCHAR_SIZE;
+        values[i][0] = 0;
     }
 
     arrsize = new_ncols;
