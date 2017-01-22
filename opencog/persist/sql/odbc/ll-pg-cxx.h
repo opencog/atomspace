@@ -51,7 +51,6 @@ class PGConnection : public LLConnection
         ~PGConnection();
 
         LLRecordSet *exec(const char *);
-        void extract_error(const char *);
 };
 
 class PGRecordSet : public LLRecordSet
@@ -65,9 +64,6 @@ class PGRecordSet : public LLRecordSet
         void get_column_labels(void);
 
     public:
-        // rewind the cursor to the start
-        void rewind(void);
-
         int fetch_row(void); // return non-zero value if there's another row.
 
         // call this, instead of the destructor,

@@ -55,7 +55,6 @@ class LLConnection
         bool connected(void) const;
 
         virtual LLRecordSet *exec(const char *) = 0;
-        virtual void extract_error(const char *) = 0;
 };
 
 class LLRecordSet
@@ -79,9 +78,6 @@ class LLRecordSet
         int get_col_by_name (const char *);
 
     public:
-        // rewind the cursor to the start
-        virtual void rewind(void) = 0;
-
         // return non-zero value if there's another row.
         virtual int fetch_row(void) = 0;
 

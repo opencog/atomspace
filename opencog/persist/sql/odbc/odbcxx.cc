@@ -243,7 +243,6 @@ ODBCConnection::exec(const char * buff)
 /* =========================================================== */
 
 #define DEFAULT_COLUMN_NAME_SIZE 121
-#define DEFAULT_VARCHAR_SIZE 4040
 
 void
 ODBCRecordSet::alloc_and_bind_cols(int new_ncols)
@@ -372,13 +371,6 @@ ODBCRecordSet::get_column_labels(void)
 
 /* =========================================================== */
 
-void
-ODBCRecordSet::rewind(void)
-{
-    SQL_POSITION_TO(sql_hstmt, 0);
-}
-
-
 int
 ODBCRecordSet::fetch_row(void)
 {
@@ -403,72 +395,6 @@ ODBCRecordSet::fetch_row(void)
 
     return 1;
 }
-
-/* =========================================================== */
-
-#ifdef UNIT_TEST_EXAMPLE
-
-class Ola
-{
-    public:
-        ODBCRecordSet *rs;
-        bool column_cb(const char *colname, const char * colvalue)
-        {
-            printf ("%s = %s\n", colname, colvalue);
-            return false;
-        }
-        bool row_cb(void)
-        {
-            printf ("---- New row found ----\n");
-            rs->foreach_column(&Ola::column_cb, this);
-            return false;
-        }
-};
-
-int main ()
-{
-    ODBCConnection *conn;
-    conn = new ODBCConnection("opencog", "linas", NULL);
-
-    ODBCRecordSet *rs;
-
-// #define MAKE_SOME_DATA
-#ifdef MAKE_SOME_DATA
-    rs = conn->exec(
-        "INSERT INTO Atoms VALUES (3,1,0.5, 0.5, 'umm');");
-#endif
-
-    // One way of doing things
-    rs = conn->exec("SELECT * FROM Atoms;");
-    while (rs->fetch_row())
-    {
-        const char * n = rs->get_value("name");
-        printf ("found column with value %s\n", n);
-    }
-    rs->release();
-
-    // Another way of doing things
-    Ola *ola = new Ola();
-    rs = conn->exec("SELECT * FROM Atoms;");
-    while (rs->fetch_row())
-    {
-        printf("--- method 2 has row:\n");
-        rs->foreach_column(&Ola::column_cb, ola);
-    }
-    rs->release();
-
-    // A third way of doing things
-    ola->rs = rs;
-    rs = conn->exec("SELECT * FROM Atoms;");
-    rs->foreach_row(&Ola::row_cb, ola);
-    rs->release();
-
-    delete conn;
-
-    return 0;
-}
-
-#endif /* UNIT_TEST_EXAMPLE */
 
 #endif /* HAVE_ODBC_STORAGE */
 /* ============================= END OF FILE ================= */
