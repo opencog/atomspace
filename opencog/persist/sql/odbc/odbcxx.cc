@@ -74,6 +74,7 @@
 ODBCConnection::ODBCConnection(const char * _dbname,
                                const char * _username,
                                const char * _authentication)
+    : LLConnection(_dbname, _username, _authentication)
 {
     SQLRETURN rc;
 
@@ -139,8 +140,6 @@ ODBCConnection::ODBCConnection(const char * _dbname,
         return;
     }
 
-    dbname = _dbname;
-    username = _username;
     is_connected = true;
 }
 
@@ -160,18 +159,6 @@ ODBCConnection::~ODBCConnection()
         SQLFreeHandle(SQL_HANDLE_ENV, sql_henv);
         sql_henv = NULL;
     }
-
-    while (!free_pool.empty())
-    {
-        ODBCRecordSet *rs = free_pool.top();
-        delete rs;
-        free_pool.pop();
-    }
-}
-
-bool ODBCConnection::connected (void) const
-{
-    return is_connected;
 }
 
 /* =========================================================== */
@@ -218,18 +205,18 @@ void ODBCConnection::extract_error(const char *msg)
 
 /* =========================================================== */
 
-ODBCRecordSet *
+LLRecordSet *
 ODBCConnection::exec(const char * buff)
 {
-    ODBCRecordSet *rs;
-    SQLRETURN rc;
-
     if (!is_connected) return NULL;
 
-    rs = get_record_set();
-    if (!rs) return NULL;
+    LLRecordSet* llrs;
+    llrs = get_record_set();
+    if (!llrs) return NULL;
 
-    rc = SQLExecDirect(rs->sql_hstmt, (SQLCHAR *)buff, SQL_NTS);
+    ODBCRecordSet* rs = std::dynamic_cast<ODBCRecordSet>(llrs);
+
+    SQLRETURN rc = SQLExecDirect(rs->sql_hstmt, (SQLCHAR *)buff, SQL_NTS);
 
     /* If query returned no data, its not necessarily an error:
      * its simply "no data", that's all.
@@ -384,7 +371,7 @@ ODBCRecordSet::release(void)
     SQLFreeHandle(SQL_HANDLE_STMT, sql_hstmt);
     sql_hstmt = NULL;
 
-    conn->free_pool.push(this);
+    LLRecordSet::release();
 }
 
 /* =========================================================== */

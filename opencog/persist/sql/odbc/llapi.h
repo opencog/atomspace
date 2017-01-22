@@ -86,6 +86,7 @@ class LLRecordSet
 
         // return non-zero value if there's another row.
         virtual int fetch_row(void) = 0;
+
         const char * get_value(const char * fieldname);
         int get_column_count();
         const char * get_column_value(int column);
