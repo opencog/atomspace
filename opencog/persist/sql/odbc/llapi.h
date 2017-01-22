@@ -46,8 +46,6 @@ class LLConnection
         bool is_connected;
         std::stack<LLRecordSet *> free_pool;
 
-        LLRecordSet *get_record_set(void);
-
     public:
         LLConnection(const char * dbname,
                      const char * username,

@@ -42,7 +42,7 @@
 
 class ODBCRecordSet;
 
-class ODBCConnection : public LLConnection<ODBCRecordSet>
+class ODBCConnection : public LLConnection
 {
     friend class ODBCRecordSet;
     private:

@@ -169,7 +169,8 @@ ODBCRecordSet * ODBCConnection::get_record_set(void)
     ODBCRecordSet *rs;
     if (!free_pool.empty())
     {
-        rs = free_pool.top();
+        LLRecordSet* llrs = free_pool.top();
+        rs = dynamic_cast<ODBCRecordSet*>(llrs);
         free_pool.pop();
         rs->ncols = -1;
     }
@@ -210,11 +211,7 @@ ODBCConnection::exec(const char * buff)
 {
     if (!is_connected) return NULL;
 
-    LLRecordSet* llrs;
-    llrs = get_record_set();
-    if (!llrs) return NULL;
-
-    ODBCRecordSet* rs = std::dynamic_cast<ODBCRecordSet>(llrs);
+    ODBCRecordSet* rs = get_record_set();
 
     SQLRETURN rc = SQLExecDirect(rs->sql_hstmt, (SQLCHAR *)buff, SQL_NTS);
 
@@ -251,59 +248,13 @@ ODBCConnection::exec(const char * buff)
 void
 ODBCRecordSet::alloc_and_bind_cols(int new_ncols)
 {
+    LLRecordSet::alloc_and_bind_cols(new_ncols);
+
     // IMPORTANT! MUST NOT BE ON STACK!! Else stack corruption will result.
     // The ODBC driver really wants to write a return value here!
     static SQLLEN bogus;
 
-    SQLRETURN rc;
-    int i;
-
-    if (new_ncols > arrsize)
-    {
-        if (column_labels)
-        {
-            for (i=0; i<arrsize; i++)
-            {
-                if (column_labels[i])
-                {
-                    delete[] column_labels[i];
-                }
-            }
-            delete[] column_labels;
-        }
-        if (column_datatype) delete[] column_datatype;
-
-        if (values)
-        {
-            for (i=0; i<arrsize; i++)
-            {
-                if (values[i])
-                {
-                    delete[] values[i];
-                }
-            }
-            delete[] values;
-        }
-        if (vsizes) delete[] vsizes;
-
-        column_labels = new char*[new_ncols];
-        column_datatype = new int[new_ncols];
-        values = new char*[new_ncols];
-        vsizes = new int[new_ncols];
-
-        /* intialize */
-        for (i = 0; i<new_ncols; i++)
-        {
-            column_labels[i] = NULL;
-            column_datatype[i] = 0;
-            values[i] = NULL;
-            vsizes[i] = 0;
-        }
-
-        arrsize = new_ncols;
-    }
-
-    rc = SQLAllocStmt (conn->sql_hdbc, &sql_hstmt);
+    SQLRETURN rc = SQLAllocStmt (conn->sql_hdbc, &sql_hstmt);
     if ((SQL_SUCCESS != rc) and (SQL_SUCCESS_WITH_INFO != rc))
     {
         PRINT_SQLERR (SQL_HANDLE_STMT, sql_hstmt);
@@ -313,7 +264,7 @@ ODBCRecordSet::alloc_and_bind_cols(int new_ncols)
     }
 
     /* Initialize the newly realloc'ed entries */
-    for (i=0; i<new_ncols; i++)
+    for (int i=0; i<new_ncols; i++)
     {
         column_datatype[i] = 0;
 
@@ -343,18 +294,9 @@ ODBCRecordSet::alloc_and_bind_cols(int new_ncols)
 /* pseudo-private routine */
 
 
-ODBCRecordSet::ODBCRecordSet(ODBCConnection *_conn)
+ODBCRecordSet::ODBCRecordSet(ODBCConnection* _conn)
+    : LLRecordSet(_conn)
 {
-    // If _conn is null, then this is null, too.
-    if (NULL == _conn) return;
-
-    conn = _conn;
-    ncols = -1;
-    arrsize = 0;
-    column_labels = NULL;
-    column_datatype = NULL;
-    values = NULL;
-    vsizes = NULL;
     sql_hstmt = NULL;
 }
 
@@ -378,8 +320,6 @@ ODBCRecordSet::release(void)
 
 ODBCRecordSet::~ODBCRecordSet()
 {
-    release();  // shouldn't be needed ... but just in case.
-
     conn = NULL;
 
     for (int i=0; i<arrsize; i++)

@@ -84,28 +84,6 @@ bool LLConnection::connected (void) const
 }
 
 /* =========================================================== */
-#define DEFAULT_NUM_COLS 50
-
-LLRecordSet * LLConnection::get_record_set(void)
-{
-    LLRecordSet *rs;
-    if (!free_pool.empty())
-    {
-        rs = free_pool.top();
-        free_pool.pop();
-        rs->ncols = -1;
-    }
-    else
-    {
-        rs = new LLRecordSet(this);
-    }
-
-    rs->alloc_and_bind_cols(DEFAULT_NUM_COLS);
-
-    return rs;
-}
-
-/* =========================================================== */
 
 #define DEFAULT_COLUMN_NAME_SIZE 121
 #define DEFAULT_VARCHAR_SIZE 4040
@@ -113,52 +91,50 @@ LLRecordSet * LLConnection::get_record_set(void)
 void
 LLRecordSet::alloc_and_bind_cols(int new_ncols)
 {
+    if (new_ncols <= arrsize) return;
+
     int i;
-
-    if (new_ncols > arrsize)
+    if (column_labels)
     {
-        if (column_labels)
+        for (i=0; i<arrsize; i++)
         {
-            for (i=0; i<arrsize; i++)
+            if (column_labels[i])
             {
-                if (column_labels[i])
-                {
-                    delete[] column_labels[i];
-                }
+                delete[] column_labels[i];
             }
-            delete[] column_labels;
         }
-        if (column_datatype) delete[] column_datatype;
-
-        if (values)
-        {
-            for (i=0; i<arrsize; i++)
-            {
-                if (values[i])
-                {
-                    delete[] values[i];
-                }
-            }
-            delete[] values;
-        }
-        if (vsizes) delete[] vsizes;
-
-        column_labels = new char*[new_ncols];
-        column_datatype = new int[new_ncols];
-        values = new char*[new_ncols];
-        vsizes = new int[new_ncols];
-
-        /* intialize */
-        for (i = 0; i<new_ncols; i++)
-        {
-            column_labels[i] = NULL;
-            column_datatype[i] = 0;
-            values[i] = NULL;
-            vsizes[i] = 0;
-        }
-
-        arrsize = new_ncols;
+        delete[] column_labels;
     }
+    if (column_datatype) delete[] column_datatype;
+
+    if (values)
+    {
+        for (i=0; i<arrsize; i++)
+        {
+            if (values[i])
+            {
+                delete[] values[i];
+            }
+        }
+        delete[] values;
+    }
+    if (vsizes) delete[] vsizes;
+
+    column_labels = new char*[new_ncols];
+    column_datatype = new int[new_ncols];
+    values = new char*[new_ncols];
+    vsizes = new int[new_ncols];
+
+    /* intialize */
+    for (i = 0; i<new_ncols; i++)
+    {
+        column_labels[i] = NULL;
+        column_datatype[i] = 0;
+        values[i] = NULL;
+        vsizes[i] = 0;
+    }
+
+    arrsize = new_ncols;
 }
 
 /* =========================================================== */
@@ -167,9 +143,6 @@ LLRecordSet::alloc_and_bind_cols(int new_ncols)
 
 LLRecordSet::LLRecordSet(LLConnection *_conn)
 {
-    // If _conn is null, then this is null, too.
-    if (NULL == _conn) return;
-
     conn = _conn;
     ncols = -1;
     arrsize = 0;
@@ -191,8 +164,6 @@ LLRecordSet::release(void)
 
 LLRecordSet::~LLRecordSet()
 {
-    release();  // shouldn't be needed ... but just in case.
-
     conn = NULL;
 
     for (int i=0; i<arrsize; i++)
