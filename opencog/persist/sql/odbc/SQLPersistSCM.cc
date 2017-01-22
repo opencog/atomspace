@@ -28,7 +28,7 @@
 #include <opencog/guile/SchemePrimitive.h>
 #include <opencog/persist/sql/SQLBackingStore.h>
 
-#include "ODBCAtomStorage.h"
+#include "SQLAtomStorage.h"
 #include "SQLPersistSCM.h"
 
 using namespace opencog;
@@ -87,7 +87,7 @@ void SQLPersistSCM::do_open(const std::string& dbname,
         throw RuntimeException(TRACE_INFO,
              "sql-open: Error: No atomspace specified!");
 
-    _store = new ODBCAtomStorage(dbname, username, auth);
+    _store = new SQLAtomStorage(dbname, username, auth);
     if (!_store)
         throw RuntimeException(TRACE_INFO,
             "sql-open: Error: Unable to open the database");

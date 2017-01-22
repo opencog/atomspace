@@ -7,7 +7,7 @@ INCLUDE_DIRECTORIES (
 
 ADD_LIBRARY (persist-sql
     odbcxx
-    ODBCAtomStorage
+    SQLAtomStorage
     SQLPersistSCM
 )
 
@@ -48,8 +48,8 @@ INSTALL (TARGETS persist-sql
 )
 
 INSTALL (FILES
-    ODBCAtomStorage.h
     odbcxx.h
+    SQLAtomStorage.h
     SQLPersistSCM.h
     DESTINATION "include/opencog/persist/sql/odbc"
 )

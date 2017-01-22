@@ -14,7 +14,7 @@
 #include <opencog/truthvalue/SimpleTruthValue.h>
 
 #include <opencog/atomspaceutils/TLB.h>
-#include <opencog/persist/sql/odbc/ODBCAtomStorage.h>
+#include <opencog/persist/sql/odbc/SQLAtomStorage.h>
 
 using namespace opencog;
 
@@ -73,7 +73,7 @@ int atomCompare(Atom *a, Atom *b)
 #if 0
 void single_atom_test(std::string id)
 {
-    ODBCAtomStorage *store = new ODBCAtomStorage("opencog", "linas", NULL);
+    SQLAtomStorage *store = new SQLAtomStorage("opencog", "linas", NULL);
 
     // Create an atom ... 
     Atom *a = new Node(SCHEMA_NODE, id + "someNode");
@@ -159,7 +159,7 @@ int main ()
 #endif
 
 #if 1
-    ODBCAtomStorage *store = new ODBCAtomStorage("opencog", "linas", NULL);
+    SQLAtomStorage *store = new SQLAtomStorage("opencog", "linas", NULL);
 
     AtomTable *table = new AtomTable();
     store->load(*table);
@@ -171,7 +171,7 @@ int main ()
 #endif
 
 #if 0
-    ODBCAtomStorage *store = new ODBCAtomStorage("opencog", "linas", NULL);
+    SQLAtomStorage *store = new SQLAtomStorage("opencog", "linas", NULL);
 
     AtomTable *table = new AtomTable();
     add_to_table(table, "aaa ");

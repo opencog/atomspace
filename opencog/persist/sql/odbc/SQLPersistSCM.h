@@ -48,7 +48,7 @@ private:
     void init(void);
 
     SQLBackingStore *_backing;
-    ODBCAtomStorage *_store;
+    SQLAtomStorage *_store;
     AtomSpace *_as;
 
 public:
