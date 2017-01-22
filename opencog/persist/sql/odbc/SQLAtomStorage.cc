@@ -48,6 +48,7 @@
 #include <opencog/atomspace/AtomSpace.h>
 #include <opencog/atomspaceutils/TLB.h>
 
+#include "llapi.h"
 #include "odbcxx.h"
 #include "SQLAtomStorage.h"
 
@@ -67,7 +68,7 @@ using namespace opencog;
 class SQLAtomStorage::Response
 {
 	public:
-		ODBCRecordSet *rs;
+		LLRecordSet *rs;
 
 		// Temporary cache of info about atom being assembled.
 		UUID uuid;
