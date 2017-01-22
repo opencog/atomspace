@@ -756,12 +756,10 @@ int ODBCAtomStorage::do_store_atom(AtomPtr atom)
     }
 
     int lheight = 0;
-    int arity = h->getArity();
-    const HandleSeq& out = h->getOutgoingSet();
-    for (int i=0; i<arity; i++)
+    for (const Handle& ho: h->getOutgoingSet())
     {
         // Recurse.
-        int heig = do_store_atom(out[i]);
+        int heig = do_store_atom(ho);
         if (lheight < heig) lheight = heig;
     }
 
