@@ -728,17 +728,17 @@ void ODBCAtomStorage::flushStoreQueue()
  * thread); this routine merely queues up the atom. If the synchronous
  * flag is set, then the store is done in this thread.
  */
-void ODBCAtomStorage::storeAtom(const AtomPtr& atom, bool synchronous)
+void ODBCAtomStorage::storeAtom(const Handle& h, bool synchronous)
 {
     get_ids();
 
     // If a synchronous store, avoid the queues entirely.
     if (synchronous)
     {
-        do_store_atom(atom->getHandle());
+        do_store_atom(h);
         return;
     }
-    _write_queue.enqueue(atom->getHandle());
+    _write_queue.enqueue(h);
 }
 
 /**

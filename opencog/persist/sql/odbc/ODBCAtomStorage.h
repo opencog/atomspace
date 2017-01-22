@@ -195,7 +195,7 @@ class ODBCAtomStorage : public AtomStorage
         TruthValuePtr getNode(Type, const char *);
         TruthValuePtr getLink(const Handle& h);
         HandleSeq getIncomingSet(const Handle&);
-        void storeAtom(const AtomPtr& atomPtr, bool synchronous = false);
+        void storeAtom(const Handle&, bool synchronous = false);
         void loadType(AtomTable&, Type);
         void flushStoreQueue();
 
