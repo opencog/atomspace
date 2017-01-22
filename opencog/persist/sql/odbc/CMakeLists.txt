@@ -1,13 +1,8 @@
 # Uncomment this if SQL is installed.
 # ADD_DEFINITIONS(-DHAVE_SQL_STORAGE)
 
-INCLUDE_DIRECTORIES (
-	${ODBC_INCLUDE_DIRS}
-)
-
 ADD_LIBRARY (persist-sql
 	llapi
-	odbcxx
 	SQLAtomStorage
 	SQLPersistSCM
 )
@@ -18,12 +13,20 @@ TARGET_LINK_LIBRARIES(persist-sql
 	sql-support
 	atomspaceutils
 	atomspace
-	${ODBC_LIBRARIES}
 )
 
 IF (HAVE_GUILE)
 	TARGET_LINK_LIBRARIES(persist-sql smob)
 ENDIF (HAVE_GUILE)
+
+IF (ODBC_FOUND)
+	INCLUDE_DIRECTORIES ( ${ODBC_INCLUDE_DIRS} )
+	ADD_LIBRARY (persist-odbc
+		odbcxx
+	)
+	TARGET_LINK_LIBRARIES(persist-odbc ${ODBC_LIBRARIES})
+	TARGET_LINK_LIBRARIES(persist-sql persist-odbc)
+ENDIF (ODBC_FOUND)
 
 
 ADD_EXECUTABLE(sniff
@@ -38,8 +41,10 @@ TARGET_LINK_LIBRARIES(sniff
 	clearbox
 	atomcore
 	atomutils
-	${ODBC_LIBRARIES}
 )
+IF (ODBC_FOUND)
+	TARGET_LINK_LIBRARIES(sniff ${ODBC_LIBRARIES})
+ENDIF (ODBC_FOUND)
 IF (HAVE_GUILE)
 	TARGET_LINK_LIBRARIES(sniff smob)
 ENDIF (HAVE_GUILE)

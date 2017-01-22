@@ -10,7 +10,6 @@ ADD_DEPENDENCIES(sql-support opencog_atom_types)
 
 TARGET_LINK_LIBRARIES(sql-support
 	atomspace
-	${ODBC_LIBRARIES}
 )
 
 INSTALL (FILES
@@ -23,9 +22,7 @@ INSTALL (TARGETS sql-support
     DESTINATION "lib${LIB_DIR_SUFFIX}/opencog"
 )
 
-IF (ODBC_FOUND)
-	ADD_SUBDIRECTORY(odbc)
-ENDIF (ODBC_FOUND)
+ADD_SUBDIRECTORY(odbc)
 
 #IF (PGSQL_FOUND)
 #	ADD_SUBDIRECTORY(postgres)

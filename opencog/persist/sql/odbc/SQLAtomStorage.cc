@@ -347,14 +347,16 @@ void SQLAtomStorage::init(const char * dbname,
                           const char * username,
                           const char * authentication)
 {
-	// Create six, by default ... maybe make more?
-	// There should probably be a few more here, than the number of
-	// startWriterThread() calls below.
-#define DEFAULT_NUM_CONNS 6
+	// Create 24, by default ... I'm guessing that a number similar to
+	// the number of cores on a modern CPU will be enough.  This limits
+	// the number of startWriterThread() calls below.
+#define DEFAULT_NUM_CONNS 24
 	for (int i=0; i<DEFAULT_NUM_CONNS; i++)
 	{
+#ifdef HAVE_ODBC_STORAGE
 		LLConnection* db_conn = new ODBCConnection(dbname, username, authentication);
 		conn_pool.push(db_conn);
+#endif /* HAVE_ODBC_STORAGE */
 	}
 	type_map_was_loaded = false;
 

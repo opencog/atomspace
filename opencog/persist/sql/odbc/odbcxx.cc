@@ -37,7 +37,7 @@
  * 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
  */
 
-#ifdef HAVE_SQL_STORAGE
+#ifdef HAVE_ODBC_STORAGE
 
 #include <stack>
 #include <string>
@@ -470,6 +470,5 @@ int main ()
 
 #endif /* UNIT_TEST_EXAMPLE */
 
-#endif /* HAVE_SQL_STORAGE */
+#endif /* HAVE_ODBC_STORAGE */
 /* ============================= END OF FILE ================= */
-
