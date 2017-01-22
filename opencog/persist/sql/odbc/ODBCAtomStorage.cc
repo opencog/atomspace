@@ -839,7 +839,7 @@ void ODBCAtomStorage::do_store_single_atom(AtomPtr atom, int aheight)
     if (false == update)
     {
         // Store the atomspace UUID
-        AtomTable * at = getAtomTable(atom);
+        AtomTable * at = getAtomTable(h);
         // We allow storage of atoms that don't belong to an atomspace.
         if (at) uuidbuff = std::to_string(at->get_uuid());
         else uuidbuff = "0";
@@ -949,7 +949,7 @@ void ODBCAtomStorage::do_store_single_atom(AtomPtr atom, int aheight)
 
     if (try_again)
     {
-        AtomTable *at = getAtomTable(atom);
+        AtomTable *at = getAtomTable(h);
         if (at) store_atomtable_id(*at);
         rp.rs = db_conn->exec(qry.c_str());
         rp.release();

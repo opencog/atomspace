@@ -70,8 +70,8 @@ class AtomStorage
 
     protected:
         // For accessing Atom through friend relationship in subclasses.
-        static AtomTable* getAtomTable(AtomPtr atom)
-            { return atom->getAtomTable(); }
+        static AtomTable* getAtomTable(const Handle& h)
+            { return h->getAtomTable(); }
 
 };
 
