@@ -65,7 +65,6 @@ class ODBCRecordSet : public LLRecordSet
 {
     friend class ODBCConnection;
     private:
-        ODBCConnection *conn;
         SQLHSTMT sql_hstmt;
 
         void alloc_and_bind_cols(int ncols);

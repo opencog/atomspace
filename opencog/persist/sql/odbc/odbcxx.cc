@@ -250,7 +250,8 @@ ODBCRecordSet::alloc_and_bind_cols(int new_ncols)
 {
     LLRecordSet::alloc_and_bind_cols(new_ncols);
 
-    SQLRETURN rc = SQLAllocStmt (conn->sql_hdbc, &sql_hstmt);
+    ODBCConnection* oconn = dynamic_cast<ODBCConnection*>(conn);
+    SQLRETURN rc = SQLAllocStmt (oconn->sql_hdbc, &sql_hstmt);
     if ((SQL_SUCCESS != rc) and (SQL_SUCCESS_WITH_INFO != rc))
     {
         PRINT_SQLERR (SQL_HANDLE_STMT, sql_hstmt);
