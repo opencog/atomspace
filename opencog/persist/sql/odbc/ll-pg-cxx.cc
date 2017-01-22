@@ -57,13 +57,19 @@ LLPGConnection::LLPGConnection(const char * _dbname,
 		return;
 	}
 
-	std::string constr = "dbname = ";
+	// XXX hack. We should probably use the postrges URI format, here.
+	// The URI format allows a remote host to be specified, and to toggle
+	// between unix-domain and tcp sockets, etc.
+	std::string constr = "dbname=";
 	constr += _dbname;
+	constr += " user=";
+	constr += _username;
+	constr += " password=";
+	constr += _authentication;
 	_pgconn = PQconnectdb(constr.c_str());
 
 	if (PQstatus(_pgconn) != CONNECTION_OK)
 	{
-printf("duuuude %s", PQerrorMessage(_pgconn));
 		opencog::logger().warn("%s", PQerrorMessage(_pgconn));
 		PQfinish(_pgconn);
 		PERR("Cannot conect to database");
@@ -111,14 +117,9 @@ LLPGConnection::exec(const char * buff)
 
 	LLPGRecordSet* rs = get_record_set();
 
-if (PQstatus(_pgconn) != CONNECTION_OK)
-{
-printf("duuuude wtf.....\n");
-}
 	rs->_result = PQexec(_pgconn, buff);
 
 	ExecStatusType rest = PQresultStatus(rs->_result);
-printf("duuude try exec %s\n", buff);
 	if (rest != PGRES_COMMAND_OK and
 	    rest != PGRES_EMPTY_QUERY and
 	    rest != PGRES_TUPLES_OK)
@@ -196,7 +197,7 @@ LLPGRecordSet::fetch_row(void)
 	for (int i=0; i<ncols; i++) values[i][0] = 0;
 
 printf("duuuuuuuuuuuuuuude get fetch the rowss!!!!\n");
-	return 1;
+	return 0;
 }
 
 #endif /* HAVE_PGSQL_STORAGE */
