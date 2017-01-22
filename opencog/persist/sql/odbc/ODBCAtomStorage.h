@@ -100,7 +100,7 @@ class ODBCAtomStorage : public AtomStorage
         UUID get_uuid(const Handle&);
         std::string oset_to_string(const HandleSeq&);
 
-        bool store_cb(AtomPtr);
+        void store_cb(const Handle&);
         bool bulk_load;
 
         // --------------------------
@@ -198,9 +198,6 @@ class ODBCAtomStorage : public AtomStorage
         void storeAtom(const AtomPtr& atomPtr, bool synchronous = false);
         void loadType(AtomTable&, Type);
         void flushStoreQueue();
-
-        // Store atoms to DB
-        void storeSingleAtom(AtomPtr);
 
         // Large-scale loads and saves
         void load(AtomTable &); // Load entire contents of DB

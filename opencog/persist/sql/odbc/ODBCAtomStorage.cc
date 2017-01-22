@@ -776,19 +776,10 @@ void ODBCAtomStorage::vdo_store_atom(const Handle& h)
 
 /* ================================================================ */
 /**
- * Store the just this one single atom.
- * Store its truth value too.
+ * Store just this one single atom (and its truth value).
  * Atoms in the outgoing set are NOT stored!
  * The store is performed synchronously (in the calling thread).
  */
-void ODBCAtomStorage::storeSingleAtom(AtomPtr atom)
-{
-    Handle h(atom->getHandle());
-    get_ids();
-    int height = get_height(h);
-    do_store_single_atom(h, height);
-}
-
 void ODBCAtomStorage::do_store_single_atom(const Handle& h, int aheight)
 {
     setup_typemap();
@@ -1559,14 +1550,16 @@ void ODBCAtomStorage::loadType(AtomTable &table, Type atom_type)
     table.barrier();
 }
 
-bool ODBCAtomStorage::store_cb(AtomPtr atom)
+void ODBCAtomStorage::store_cb(const Handle& h)
 {
-    storeSingleAtom(atom);
+    get_ids();
+    int height = get_height(h);
+    do_store_single_atom(h, height);
+
     if (_store_count%1000 == 0)
     {
         printf("\tStored %lu atoms.\n", (unsigned long) _store_count);
     }
-    return false;
 }
 
 void ODBCAtomStorage::store(const AtomTable &table)
@@ -1590,7 +1583,7 @@ void ODBCAtomStorage::store(const AtomTable &table)
     Response rp;
 
     table.foreachHandleByType(
-        [&](Handle h)->void { store_cb(h); }, ATOM, true);
+        [&](const Handle& h)->void { store_cb(h); }, ATOM, true);
 
     rp.rs = db_conn->exec("VACUUM ANALYZE;");
     rp.release();
