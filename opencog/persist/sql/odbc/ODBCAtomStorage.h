@@ -95,7 +95,7 @@ class ODBCAtomStorage : public AtomStorage
         // Storing of atoms
         int do_store_atom(AtomPtr);
         void vdo_store_atom(const AtomPtr&);
-        void do_store_single_atom(AtomPtr, int);
+        void do_store_single_atom(const Handle&, int);
 
         UUID get_uuid(const Handle&);
         std::string oset_to_string(const HandleSeq&);

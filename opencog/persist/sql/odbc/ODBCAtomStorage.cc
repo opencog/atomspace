@@ -748,15 +748,16 @@ void ODBCAtomStorage::storeAtom(const AtomPtr& atom, bool synchronous)
  */
 int ODBCAtomStorage::do_store_atom(AtomPtr atom)
 {
-    if (atom->isNode())
+    Handle h(atom->getHandle());
+    if (h->isNode())
     {
-        do_store_single_atom(atom, 0);
+        do_store_single_atom(h, 0);
         return 0;
     }
 
     int lheight = 0;
-    int arity = atom->getArity();
-    const HandleSeq& out = atom->getOutgoingSet();
+    int arity = h->getArity();
+    const HandleSeq& out = h->getOutgoingSet();
     for (int i=0; i<arity; i++)
     {
         // Recurse.
@@ -767,7 +768,7 @@ int ODBCAtomStorage::do_store_atom(AtomPtr atom)
     // Height of this link is, by definition, one more than tallest
     // atom in outgoing set.
     lheight ++;
-    do_store_single_atom(atom, lheight);
+    do_store_single_atom(h, lheight);
     return lheight;
 }
 
@@ -785,12 +786,13 @@ void ODBCAtomStorage::vdo_store_atom(const AtomPtr& atom)
  */
 void ODBCAtomStorage::storeSingleAtom(AtomPtr atom)
 {
+    Handle h(atom->getHandle());
     get_ids();
-    int height = get_height(atom->getHandle());
-    do_store_single_atom(atom, height);
+    int height = get_height(h);
+    do_store_single_atom(h, height);
 }
 
-void ODBCAtomStorage::do_store_single_atom(AtomPtr atom, int aheight)
+void ODBCAtomStorage::do_store_single_atom(const Handle& h, int aheight)
 {
     setup_typemap();
 
@@ -800,7 +802,6 @@ void ODBCAtomStorage::do_store_single_atom(AtomPtr atom, int aheight)
     std::string coda;
 
     // Use the TLB Handle as the UUID.
-    Handle h(atom->getHandle());
     UUID uuid = _tlbuf.addAtom(h, TLB::INVALID_UUID);
 
     std::string uuidbuff = std::to_string(uuid);
@@ -846,17 +847,17 @@ void ODBCAtomStorage::do_store_single_atom(AtomPtr atom, int aheight)
         STMT("space", uuidbuff);
 
         // Store the atom UUID
-        Type t = atom->getType();
+        Type t = h->getType();
         int dbtype = storing_typemap[t];
         STMTI("type", dbtype);
 
         // Store the node name, if its a node
-        if (atom->isNode())
+        if (h->isNode())
         {
             // Use postgres $-quoting to make unicode strings
             // easier to deal with.
             std::string qname = " $ocp$";
-            qname += atom->getName();
+            qname += h->getName();
             qname += "$ocp$ ";
 
             // The Atoms table has a UNIQUE constraint on the
@@ -883,7 +884,7 @@ void ODBCAtomStorage::do_store_single_atom(AtomPtr atom, int aheight)
             if (max_height < aheight) max_height = aheight;
             STMTI("height", aheight);
 
-            if (atom->isLink())
+            if (h->isLink())
             {
                 // The Atoms table has a UNIQUE constraint on the
                 // outgoing set.  If a link is too large, a postgres
@@ -894,7 +895,7 @@ void ODBCAtomStorage::do_store_single_atom(AtomPtr atom, int aheight)
                 // redesign.  One could hash together the UUID's in the
                 // outgoing set, and then force a unique constraint on
                 // the hash.
-                if (330 < atom->getArity())
+                if (330 < h->getArity())
                 {
                     throw IOException(TRACE_INFO,
                         "Error: do_store_single_atom: Maxiumum Link size is 330.\n");
@@ -902,13 +903,13 @@ void ODBCAtomStorage::do_store_single_atom(AtomPtr atom, int aheight)
 
                 cols += ", outgoing";
                 vals += ", ";
-                vals += oset_to_string(atom->getOutgoingSet());
+                vals += oset_to_string(h->getOutgoingSet());
             }
         }
     }
 
     // Store the truth value
-    TruthValuePtr tv(atom->getTruthValue());
+    TruthValuePtr tv(h->getTruthValue());
     TruthValueType tvt = NULL_TRUTH_VALUE;
     if (tv) tvt = tv->getType();
     STMTI("tv_type", tvt);
