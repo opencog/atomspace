@@ -93,14 +93,14 @@ class ODBCAtomStorage : public AtomStorage
 
         // --------------------------
         // Storing of atoms
-        int do_store_atom(AtomPtr);
-        void vdo_store_atom(const AtomPtr&);
-        void do_store_single_atom(AtomPtr, int);
+        int do_store_atom(const Handle&);
+        void vdo_store_atom(const Handle&);
+        void do_store_single_atom(const Handle&, int);
 
         UUID get_uuid(const Handle&);
         std::string oset_to_string(const HandleSeq&);
 
-        bool store_cb(AtomPtr);
+        void store_cb(const Handle&);
         bool bulk_load;
 
         // --------------------------
@@ -170,7 +170,7 @@ class ODBCAtomStorage : public AtomStorage
 #endif /* OUT_OF_LINE_TVS */
 
         // Provider of asynchronous store of atoms.
-        async_caller<ODBCAtomStorage, AtomPtr> _write_queue;
+        async_caller<ODBCAtomStorage, Handle> _write_queue;
 
     public:
         ODBCAtomStorage(const std::string& dbname, 
@@ -195,12 +195,9 @@ class ODBCAtomStorage : public AtomStorage
         TruthValuePtr getNode(Type, const char *);
         TruthValuePtr getLink(const Handle& h);
         HandleSeq getIncomingSet(const Handle&);
-        void storeAtom(const AtomPtr& atomPtr, bool synchronous = false);
+        void storeAtom(const Handle&, bool synchronous = false);
         void loadType(AtomTable&, Type);
         void flushStoreQueue();
-
-        // Store atoms to DB
-        void storeSingleAtom(AtomPtr);
 
         // Large-scale loads and saves
         void load(AtomTable &); // Load entire contents of DB

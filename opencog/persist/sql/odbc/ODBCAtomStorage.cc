@@ -728,17 +728,17 @@ void ODBCAtomStorage::flushStoreQueue()
  * thread); this routine merely queues up the atom. If the synchronous
  * flag is set, then the store is done in this thread.
  */
-void ODBCAtomStorage::storeAtom(const AtomPtr& atom, bool synchronous)
+void ODBCAtomStorage::storeAtom(const Handle& h, bool synchronous)
 {
     get_ids();
 
     // If a synchronous store, avoid the queues entirely.
     if (synchronous)
     {
-        do_store_atom(atom);
+        do_store_atom(h);
         return;
     }
-    _write_queue.enqueue(atom);
+    _write_queue.enqueue(h);
 }
 
 /**
@@ -746,51 +746,41 @@ void ODBCAtomStorage::storeAtom(const AtomPtr& atom, bool synchronous)
  * in the calling thread.
  * Returns the height of the atom.
  */
-int ODBCAtomStorage::do_store_atom(AtomPtr atom)
+int ODBCAtomStorage::do_store_atom(const Handle& h)
 {
-    if (atom->isNode())
+    if (h->isNode())
     {
-        do_store_single_atom(atom, 0);
+        do_store_single_atom(h, 0);
         return 0;
     }
 
     int lheight = 0;
-    int arity = atom->getArity();
-    const HandleSeq& out = atom->getOutgoingSet();
-    for (int i=0; i<arity; i++)
+    for (const Handle& ho: h->getOutgoingSet())
     {
         // Recurse.
-        int heig = do_store_atom(out[i]);
+        int heig = do_store_atom(ho);
         if (lheight < heig) lheight = heig;
     }
 
     // Height of this link is, by definition, one more than tallest
     // atom in outgoing set.
     lheight ++;
-    do_store_single_atom(atom, lheight);
+    do_store_single_atom(h, lheight);
     return lheight;
 }
 
-void ODBCAtomStorage::vdo_store_atom(const AtomPtr& atom)
+void ODBCAtomStorage::vdo_store_atom(const Handle& h)
 {
-    do_store_atom(atom);
+    do_store_atom(h);
 }
 
 /* ================================================================ */
 /**
- * Store the just this one single atom.
- * Store its truth value too.
+ * Store just this one single atom (and its truth value).
  * Atoms in the outgoing set are NOT stored!
  * The store is performed synchronously (in the calling thread).
  */
-void ODBCAtomStorage::storeSingleAtom(AtomPtr atom)
-{
-    get_ids();
-    int height = get_height(atom->getHandle());
-    do_store_single_atom(atom, height);
-}
-
-void ODBCAtomStorage::do_store_single_atom(AtomPtr atom, int aheight)
+void ODBCAtomStorage::do_store_single_atom(const Handle& h, int aheight)
 {
     setup_typemap();
 
@@ -800,7 +790,6 @@ void ODBCAtomStorage::do_store_single_atom(AtomPtr atom, int aheight)
     std::string coda;
 
     // Use the TLB Handle as the UUID.
-    Handle h(atom->getHandle());
     UUID uuid = _tlbuf.addAtom(h, TLB::INVALID_UUID);
 
     std::string uuidbuff = std::to_string(uuid);
@@ -839,24 +828,24 @@ void ODBCAtomStorage::do_store_single_atom(AtomPtr atom, int aheight)
     if (false == update)
     {
         // Store the atomspace UUID
-        AtomTable * at = getAtomTable(atom);
+        AtomTable * at = getAtomTable(h);
         // We allow storage of atoms that don't belong to an atomspace.
         if (at) uuidbuff = std::to_string(at->get_uuid());
         else uuidbuff = "0";
         STMT("space", uuidbuff);
 
         // Store the atom UUID
-        Type t = atom->getType();
+        Type t = h->getType();
         int dbtype = storing_typemap[t];
         STMTI("type", dbtype);
 
         // Store the node name, if its a node
-        if (atom->isNode())
+        if (h->isNode())
         {
             // Use postgres $-quoting to make unicode strings
             // easier to deal with.
             std::string qname = " $ocp$";
-            qname += atom->getName();
+            qname += h->getName();
             qname += "$ocp$ ";
 
             // The Atoms table has a UNIQUE constraint on the
@@ -883,7 +872,7 @@ void ODBCAtomStorage::do_store_single_atom(AtomPtr atom, int aheight)
             if (max_height < aheight) max_height = aheight;
             STMTI("height", aheight);
 
-            if (atom->isLink())
+            if (h->isLink())
             {
                 // The Atoms table has a UNIQUE constraint on the
                 // outgoing set.  If a link is too large, a postgres
@@ -894,7 +883,7 @@ void ODBCAtomStorage::do_store_single_atom(AtomPtr atom, int aheight)
                 // redesign.  One could hash together the UUID's in the
                 // outgoing set, and then force a unique constraint on
                 // the hash.
-                if (330 < atom->getArity())
+                if (330 < h->getArity())
                 {
                     throw IOException(TRACE_INFO,
                         "Error: do_store_single_atom: Maxiumum Link size is 330.\n");
@@ -902,13 +891,13 @@ void ODBCAtomStorage::do_store_single_atom(AtomPtr atom, int aheight)
 
                 cols += ", outgoing";
                 vals += ", ";
-                vals += oset_to_string(atom->getOutgoingSet());
+                vals += oset_to_string(h->getOutgoingSet());
             }
         }
     }
 
     // Store the truth value
-    TruthValuePtr tv(atom->getTruthValue());
+    TruthValuePtr tv(h->getTruthValue());
     TruthValueType tvt = NULL_TRUTH_VALUE;
     if (tv) tvt = tv->getType();
     STMTI("tv_type", tvt);
@@ -949,7 +938,7 @@ void ODBCAtomStorage::do_store_single_atom(AtomPtr atom, int aheight)
 
     if (try_again)
     {
-        AtomTable *at = getAtomTable(atom);
+        AtomTable *at = getAtomTable(h);
         if (at) store_atomtable_id(*at);
         rp.rs = db_conn->exec(qry.c_str());
         rp.release();
@@ -1561,14 +1550,16 @@ void ODBCAtomStorage::loadType(AtomTable &table, Type atom_type)
     table.barrier();
 }
 
-bool ODBCAtomStorage::store_cb(AtomPtr atom)
+void ODBCAtomStorage::store_cb(const Handle& h)
 {
-    storeSingleAtom(atom);
+    get_ids();
+    int height = get_height(h);
+    do_store_single_atom(h, height);
+
     if (_store_count%1000 == 0)
     {
         printf("\tStored %lu atoms.\n", (unsigned long) _store_count);
     }
-    return false;
 }
 
 void ODBCAtomStorage::store(const AtomTable &table)
@@ -1592,7 +1583,7 @@ void ODBCAtomStorage::store(const AtomTable &table)
     Response rp;
 
     table.foreachHandleByType(
-        [&](Handle h)->void { store_cb(h); }, ATOM, true);
+        [&](const Handle& h)->void { store_cb(h); }, ATOM, true);
 
     rp.rs = db_conn->exec("VACUUM ANALYZE;");
     rp.release();

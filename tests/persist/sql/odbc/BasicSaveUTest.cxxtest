@@ -228,10 +228,10 @@ void BasicSaveUTest::single_atom_save_restore(std::string id)
 
     Handle h = a->getHandle();
 
-    TSM_ASSERT("Bad Handle", h != Handle::UNDEFINED);
+    TSM_ASSERT("Bad Handle", h != nullptr);
 
     // Store the atom ...
-    store->storeAtom(a, true);
+    store->storeAtom(h, true);
 
     // Fetch it back ...
     std::string nam = id + "someNode";
@@ -245,14 +245,14 @@ void BasicSaveUTest::single_atom_save_restore(std::string id)
     // Create a second atom, connect it to the first
     // with a link. Save it, fetch it ... are they equal?
     AtomPtr a2(createNode(SCHEMA_NODE, id + "otherNode"));
-    store->storeAtom(a2, true);
+    store->storeAtom(a2->getHandle(), true);
 
     HandleSeq hvec;
     hvec.push_back(a->getHandle());
     hvec.push_back(a2->getHandle());
 
     LinkPtr l(createLink(SET_LINK, hvec));
-    store->storeAtom(l, true);
+    store->storeAtom(l->getHandle(), true);
 
     LinkPtr ll(createLink(SET_LINK, hvec));
     Handle hl(ll->getHandle());
@@ -365,12 +365,12 @@ void BasicSaveUTest::test_fresh_atom(void)
     // Store a ListLink with stuff in it.
     LinkPtr lf(createLink(LIST_LINK, ha, hb));
     lf->setTruthValue(SimpleTruthValue::createTV(0.55, 0.6));
-    store->storeAtom(lf, true);
+    store->storeAtom(lf->getHandle(), true);
 
     // Store an empty ListLink.
     LinkPtr le(createLink(LIST_LINK, HandleSeq()));
     le->setTruthValue(SimpleTruthValue::createTV(0.1, 0.9));
-    store->storeAtom(le, true);
+    store->storeAtom(le->getHandle(), true);
 
     // Now get them back.  Get empty after full.
     Handle hf(createLink(LIST_LINK, ha, hb)->getHandle());
