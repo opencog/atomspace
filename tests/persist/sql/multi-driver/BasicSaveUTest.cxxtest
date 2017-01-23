@@ -81,9 +81,9 @@ class BasicSaveUTest :  public CxxTest::TestSuite
 
             try {
                 // Get the database logins & etc from the config file.
-                dbname = config()["TEST_DB_NAME"].c_str();
-                username = config()["TEST_DB_USERNAME"].c_str();
-                passwd = config()["TEST_DB_PASSWD"].c_str();
+                dbname = config().get("TEST_DB_NAME", "opencog_test").c_str();
+                username = config().get("TEST_DB_USERNAME", "opencog_tester").c_str();
+                passwd = config().get("TEST_DB_PASSWD", "cheese").c_str();
             }
             catch (InvalidParamException &e)
             {
