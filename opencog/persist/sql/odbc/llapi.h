@@ -70,7 +70,6 @@ class LLRecordSet
         char **values;
         int  *vsizes;
 
-        void alloc_and_bind_cols(int ncols);
         LLRecordSet(LLConnection *);
         virtual ~LLRecordSet();
 

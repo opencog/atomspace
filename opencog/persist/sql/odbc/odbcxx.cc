@@ -243,11 +243,64 @@ ODBCConnection::exec(const char * buff)
 /* =========================================================== */
 
 #define DEFAULT_COLUMN_NAME_SIZE 121
+#define DEFAULT_VARCHAR_SIZE 4040
 
 void
 ODBCRecordSet::alloc_and_bind_cols(int new_ncols)
 {
-    LLRecordSet::alloc_and_bind_cols(new_ncols);
+
+    // This static alloc of column names and values is crazy and
+    // bizarre, but it is driven by the fact that ODBC must be given
+    // mem locations in which to scribble it's results. Which is
+    // a nutty design, given that we don't know sizes of the columns
+    // in advance. Only Microsoft could invent something this nasty.
+
+    if (new_ncols <= arrsize) return;
+
+    int i;
+    if (column_labels)
+    {
+        for (i=0; i<arrsize; i++)
+        {
+            if (column_labels[i])
+            {
+                delete[] column_labels[i];
+            }
+        }
+        delete[] column_labels;
+    }
+    if (column_datatype) delete[] column_datatype;
+
+    if (values)
+    {
+        for (i=0; i<arrsize; i++)
+        {
+            if (values[i])
+            {
+                delete[] values[i];
+            }
+        }
+        delete[] values;
+    }
+    if (vsizes) delete[] vsizes;
+
+    column_labels = new char*[new_ncols];
+    column_datatype = new int[new_ncols];
+    values = new char*[new_ncols];
+    vsizes = new int[new_ncols];
+
+    /* intialize */
+    for (i = 0; i<new_ncols; i++)
+    {
+        column_labels[i] = new char[DEFAULT_COLUMN_NAME_SIZE];
+        column_labels[i][0] = 0;
+        column_datatype[i] = 0;
+        values[i] = new char[DEFAULT_VARCHAR_SIZE];
+        vsizes[i] = DEFAULT_VARCHAR_SIZE;
+        values[i][0] = 0;
+    }
+
+    arrsize = new_ncols;
 
     ODBCConnection* oconn = dynamic_cast<ODBCConnection*>(conn);
     SQLRETURN rc = SQLAllocStmt (oconn->sql_hdbc, &sql_hstmt);
@@ -307,6 +360,11 @@ ODBCRecordSet::release(void)
 
 ODBCRecordSet::~ODBCRecordSet()
 {
+    for (int i=0; i<arrsize; i++)
+    {
+        delete[] column_labels[i];
+        delete[] values[i];
+    }
 }
 
 /* =========================================================== */

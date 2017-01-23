@@ -84,70 +84,6 @@ bool LLConnection::connected (void) const
 }
 
 /* =========================================================== */
-
-// This kind of static alloc is kind of crazy and bizarre, it was
-// driven by the need for odbc too be given mem locations in which
-// to scribble it's results. Ugly, but it works, with some kind of
-// reasonable efficiency, for now.
-//
-// XXX we could improve the postgres efficiency by just mallocing
-// these for odbc, and storing pointers for postgres. XXX TODO.
-
-#define DEFAULT_COLUMN_NAME_SIZE 121
-#define DEFAULT_VARCHAR_SIZE 4040
-
-void
-LLRecordSet::alloc_and_bind_cols(int new_ncols)
-{
-    if (new_ncols <= arrsize) return;
-
-    int i;
-    if (column_labels)
-    {
-        for (i=0; i<arrsize; i++)
-        {
-            if (column_labels[i])
-            {
-                delete[] column_labels[i];
-            }
-        }
-        delete[] column_labels;
-    }
-    if (column_datatype) delete[] column_datatype;
-
-    if (values)
-    {
-        for (i=0; i<arrsize; i++)
-        {
-            if (values[i])
-            {
-                delete[] values[i];
-            }
-        }
-        delete[] values;
-    }
-    if (vsizes) delete[] vsizes;
-
-    column_labels = new char*[new_ncols];
-    column_datatype = new int[new_ncols];
-    values = new char*[new_ncols];
-    vsizes = new int[new_ncols];
-
-    /* intialize */
-    for (i = 0; i<new_ncols; i++)
-    {
-        column_labels[i] = new char[DEFAULT_COLUMN_NAME_SIZE];
-        column_labels[i][0] = 0;
-        column_datatype[i] = 0;
-        values[i] = new char[DEFAULT_VARCHAR_SIZE];
-        vsizes[i] = DEFAULT_VARCHAR_SIZE;
-        values[i][0] = 0;
-    }
-
-    arrsize = new_ncols;
-}
-
-/* =========================================================== */
 /* pseudo-private routine */
 
 
@@ -156,10 +92,10 @@ LLRecordSet::LLRecordSet(LLConnection *_conn)
     conn = _conn;
     ncols = -1;
     arrsize = 0;
-    column_labels = NULL;
-    column_datatype = NULL;
-    values = NULL;
-    vsizes = NULL;
+    column_labels = nullptr;
+    column_datatype = nullptr;
+    values = nullptr;
+    vsizes = nullptr;
 }
 
 /* =========================================================== */
@@ -174,24 +110,19 @@ LLRecordSet::release(void)
 
 LLRecordSet::~LLRecordSet()
 {
-    conn = NULL;
+    conn = nullptr;
 
-    for (int i=0; i<arrsize; i++)
-    {
-        delete[] column_labels[i];
-        delete[] values[i];
-    }
-    delete[] column_labels;
-    column_labels = NULL;
+    if (column_labels) delete[] column_labels;
+    column_labels = nullptr;
 
-    delete[] column_datatype;
-    column_datatype = NULL;
+    if (column_datatype) delete[] column_datatype;
+    column_datatype = nullptr;
 
-    delete[] values;
-    values = NULL;
+    if (values) delete[] values;
+    values = nullptr;
 
-    delete[] vsizes;
-    vsizes = NULL;
+    if (vsizes) delete[] vsizes;
+    vsizes = nullptr;
 }
 
 /* =========================================================== */
@@ -232,7 +163,7 @@ LLRecordSet::get_value(const char * fieldname)
     }
 
     int column = get_col_by_name (fieldname);
-    if (0 > column) return NULL;
+    if (0 > column) return nullptr;
 
     // LEAVE ("(rs=%p, fieldname=%s) {val=\'%s\'}", rs, fieldname,  rs->values[column]);
     return values[column];
@@ -255,7 +186,7 @@ const char *
 LLRecordSet::get_column_value(int column)
 {
     /* Make sure we have columns and this column is in range. */
-    if (column >= get_column_count()) return NULL;
+    if (column >= get_column_count()) return nullptr;
 
     return values[column];
 }
@@ -328,4 +259,3 @@ int main ()
 
 #endif /* HAVE_SQL_STORAGE */
 /* ============================= END OF FILE ================= */
-

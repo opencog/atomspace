@@ -61,7 +61,7 @@ class LLPGRecordSet : public LLRecordSet
 		int _nrows;
 		int _curr_row;
 
-		void alloc_and_bind_cols(int ncols);
+		void setup_cols(int ncols);
 		LLPGRecordSet(LLPGConnection *);
 		~LLPGRecordSet();
 

@@ -86,7 +86,7 @@ LLPGConnection::~LLPGConnection()
 }
 
 /* =========================================================== */
-#define DEFAULT_NUM_COLS 50
+#define DEFAULT_NUM_COLS 20
 
 LLPGRecordSet * LLPGConnection::get_record_set(void)
 {
@@ -103,7 +103,7 @@ LLPGRecordSet * LLPGConnection::get_record_set(void)
 		rs = new LLPGRecordSet(this);
 	}
 
-	rs->alloc_and_bind_cols(DEFAULT_NUM_COLS);
+	rs->setup_cols(DEFAULT_NUM_COLS);
 
 	return rs;
 }
@@ -138,9 +138,19 @@ LLPGConnection::exec(const char * buff)
 /* =========================================================== */
 
 void
-LLPGRecordSet::alloc_and_bind_cols(int new_ncols)
+LLPGRecordSet::setup_cols(int new_ncols)
 {
-	LLRecordSet::alloc_and_bind_cols(new_ncols);
+	if (new_ncols <= arrsize) return;
+
+	if (column_labels) delete[] column_labels;
+	column_labels = new char*[new_ncols];
+	memset(column_labels, 0, new_ncols * sizeof(char*));
+
+	if (values) delete[] values;
+	values = new char*[new_ncols];
+	memset(values, 0, new_ncols * sizeof(char*));
+
+   arrsize = new_ncols;
 }
 
 /* =========================================================== */
@@ -165,6 +175,8 @@ LLPGRecordSet::release(void)
 	_nrows = -1;
 	_curr_row = -1;
 	ncols = -1;
+	memset(column_labels, 0, arrsize * sizeof(char*));
+	memset(values, 0, arrsize * sizeof(char*));
 	LLRecordSet::release();
 }
 
@@ -191,7 +203,7 @@ LLPGRecordSet::get_column_labels(void)
 	ncols = PQnfields(_result);
 	for (int i=0; i<ncols; i++)
 	{
-		strncpy(column_labels[i], PQfname(_result, i), DEFAULT_COLUMN_NAME_SIZE);
+		column_labels[i] = PQfname(_result, i);
 	}
 }
 
@@ -213,9 +225,7 @@ LLPGRecordSet::fetch_row(void)
 
 	for (int i=0; i< ncols; i++)
 	{
-// XXX TODO don't copy, just store pointers.
-		values[i][0] = 0;
-		strncpy(values[i], PQgetvalue(_result, _curr_row, i), DEFAULT_VARCHAR_SIZE);
+		values[i] = PQgetvalue(_result, _curr_row, i);
 	}
 	_curr_row++;
 	return true;
