@@ -68,11 +68,23 @@ LLPGConnection::LLPGConnection(const char * _dbname,
 	constr += _authentication;
 	_pgconn = PQconnectdb(constr.c_str());
 
+	// If the above did not work, try again with localhst-tcpip.
+	// This is because the default `pg_hba.conf` file does not
+	// enable password-authenticated `md5` logins over unix-domain
+	// sockets.  So be gentle with the naive user, and try again.
+	if (PQstatus(_pgconn) != CONNECTION_OK)
+	{
+		PQfinish(_pgconn);
+		constr += " host=localhost";
+		_pgconn = PQconnectdb(constr.c_str());
+	}
+
+	// Well, that's that. User screwed up.
 	if (PQstatus(_pgconn) != CONNECTION_OK)
 	{
 		std::string msg = PQerrorMessage(_pgconn);
 		PQfinish(_pgconn);
-		PERR("Cannot conect to database: %s", msg.c_str());
+		PERR("Cannot connect to database: %s", msg.c_str());
 	}
 
 	is_connected = true;
