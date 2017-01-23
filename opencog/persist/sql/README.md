@@ -378,14 +378,12 @@ that a distinct user be created, called `opencog_tester`, although you
 can bypass this, too, by altering the opencog test configuration file.
 
 The database user is NOT the same thing as a unix user: the login is for
-the database (only), not the OS.  The current authentication method that
-OpenCog uses is password-based, and the passwords must be supplied in
-clear-text; thus, you will want to pick a password that is DIFFERENT
-than your unix-password! This is because you will often be using the
-database password as clear-text, allowing almost anyone to see it.
-Experienced Postgres coder-admins are invited to set up more flexible,
-more sophisticated authentication schemes. Some tinkering with the
-OpenCog driver code will be required for this.
+the database (only), not the OS. In general, you will want to pick a
+password that is DIFFERENT than your unix-password. This is because some
+of the database login methods require a clear-text password to be
+supplied. The full set of postgres login styles are supported, as long
+as you use the postgres URI format.  The ODBC logins require cleartext
+passwords to be used.
 
 In the following, a database user named `opencog_user` is created, and
 given the password `cheese`.  You can pick a different username and
