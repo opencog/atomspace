@@ -171,9 +171,25 @@ public:
 
     /**
      * Return true if the atom is in this atomtable, or if it is
-     * in the environment of this atomspace.
+     * in the environment of this atomtable.
+     *
+     * This is provided in the header file, so that it gets inlined
+     * into Atom.cc, where the incoming link is fetched.  This helps
+     * avoid what would otherwise be a circular dependency between
+     * shared libraries. Yes, this is kind-of hacky, but its the
+     * simplest fix for just right now.
      */
-    bool in_environ(const AtomPtr&) const;
+    bool in_environ(const AtomPtr& atom) const
+    {
+        if (nullptr == atom) return false;
+        AtomTable* atab = atom->getAtomTable();
+        const AtomTable* env = this;
+        while (env) {
+            if (atab == env) return true;
+            env = env->_environ;
+        }
+        return false;
+    }
 
     /**
      * Return the number of atoms contained in a table.

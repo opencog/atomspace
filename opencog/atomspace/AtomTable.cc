@@ -349,20 +349,6 @@ Handle AtomTable::getHandle(AtomPtr& a, Quotation quotation) const
     return Handle::UNDEFINED;
 }
 
-/// Return true if the atom is in this atomtable, or in the
-/// environment for this atomtable.
-bool AtomTable::in_environ(const AtomPtr& atom) const
-{
-    if (nullptr == atom) return false;
-    AtomTable* atab = atom->getAtomTable();
-    const AtomTable* env = this;
-    while (env) {
-        if (atab == env) return true;
-        env = env->_environ;
-    }
-    return false;
-}
-
 // C++ atom types support.  Try to cast, if possible.
 AtomPtr AtomTable::cast_factory(Type atom_type, AtomPtr atom)
 {
