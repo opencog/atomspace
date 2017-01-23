@@ -1,6 +1,6 @@
 /*
  * FUNCTION:
- * Potgres driver -- 
+ * Potgres driver --
  *
  * Threading:
  * ----------
@@ -74,7 +74,7 @@ LLPGConnection::LLPGConnection(const char * _dbname,
 		PQfinish(_pgconn);
 		PERR("Cannot conect to database");
 	}
- 
+
 	is_connected = true;
 }
 

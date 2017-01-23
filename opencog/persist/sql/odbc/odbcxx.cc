@@ -248,6 +248,7 @@ ODBCConnection::exec(const char * buff)
 void
 ODBCRecordSet::alloc_and_bind_cols(int new_ncols)
 {
+    int i;
 
     // This static alloc of column names and values is crazy and
     // bizarre, but it is driven by the fact that ODBC must be given
@@ -255,52 +256,52 @@ ODBCRecordSet::alloc_and_bind_cols(int new_ncols)
     // a nutty design, given that we don't know sizes of the columns
     // in advance. Only Microsoft could invent something this nasty.
 
-    if (new_ncols <= arrsize) return;
-
-    int i;
-    if (column_labels)
+    if (new_ncols > arrsize)
     {
-        for (i=0; i<arrsize; i++)
+        if (column_labels)
         {
-            if (column_labels[i])
+            for (i=0; i<arrsize; i++)
             {
-                delete[] column_labels[i];
+                if (column_labels[i])
+                {
+                    delete[] column_labels[i];
+                }
             }
+            delete[] column_labels;
         }
-        delete[] column_labels;
-    }
-    if (column_datatype) delete[] column_datatype;
+        if (column_datatype) delete[] column_datatype;
 
-    if (values)
-    {
-        for (i=0; i<arrsize; i++)
+        if (values)
         {
-            if (values[i])
+            for (i=0; i<arrsize; i++)
             {
-                delete[] values[i];
+                if (values[i])
+                {
+                    delete[] values[i];
+                }
             }
+            delete[] values;
         }
-        delete[] values;
+        if (vsizes) delete[] vsizes;
+
+        column_labels = new char*[new_ncols];
+        column_datatype = new int[new_ncols];
+        values = new char*[new_ncols];
+        vsizes = new int[new_ncols];
+
+        /* intialize */
+        for (i = 0; i<new_ncols; i++)
+        {
+            column_labels[i] = new char[DEFAULT_COLUMN_NAME_SIZE];
+            column_labels[i][0] = 0;
+            column_datatype[i] = 0;
+            values[i] = new char[DEFAULT_VARCHAR_SIZE];
+            vsizes[i] = DEFAULT_VARCHAR_SIZE;
+            values[i][0] = 0;
+        }
+
+        arrsize = new_ncols;
     }
-    if (vsizes) delete[] vsizes;
-
-    column_labels = new char*[new_ncols];
-    column_datatype = new int[new_ncols];
-    values = new char*[new_ncols];
-    vsizes = new int[new_ncols];
-
-    /* intialize */
-    for (i = 0; i<new_ncols; i++)
-    {
-        column_labels[i] = new char[DEFAULT_COLUMN_NAME_SIZE];
-        column_labels[i][0] = 0;
-        column_datatype[i] = 0;
-        values[i] = new char[DEFAULT_VARCHAR_SIZE];
-        vsizes[i] = DEFAULT_VARCHAR_SIZE;
-        values[i][0] = 0;
-    }
-
-    arrsize = new_ncols;
 
     ODBCConnection* oconn = dynamic_cast<ODBCConnection*>(conn);
     SQLRETURN rc = SQLAllocStmt (oconn->sql_hdbc, &sql_hstmt);
@@ -317,7 +318,7 @@ ODBCRecordSet::alloc_and_bind_cols(int new_ncols)
     static SQLLEN bogus;
 
     /* Initialize the newly realloc'ed entries */
-    for (int i=0; i<new_ncols; i++)
+    for (i=0; i<new_ncols; i++)
     {
         rc = SQLBindCol(sql_hstmt, i+1, SQL_C_CHAR,
             values[i], vsizes[i], &bogus);
@@ -345,6 +346,8 @@ ODBCRecordSet::ODBCRecordSet(ODBCConnection* _conn)
 void
 ODBCRecordSet::release(void)
 {
+    ncols = -1;
+
     // Avoid accidental double-release
     if (NULL == sql_hstmt) return;
 
