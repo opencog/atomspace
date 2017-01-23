@@ -51,8 +51,8 @@ The loaded hypergraphs were all EvaluationLinks, viz:
 
 The above measurements were made on a busy server that was doing many
 other CPU & RAM intensive things; there was no performance tuning of
-the postgres server.  A section below explains how to performance tune
-the postgres server for better results.  The above was also done through
+the Postgres server.  A section below explains how to performance tune
+the Postgres server for better results.  The above was also done through
 the scheme interface; since then, garbage collection has been tuned a
 little bit, and so RAM usage should drop a bit.
 
@@ -72,11 +72,11 @@ The goal of this implementation is to:
 
 2) Provide an API for inter-server communications and atom exchange.
    Multiple cogservers can share data simply by sending atoms to,
-   and retreiving atoms from the database.  Although this may not be
+   and retrieving atoms from the database.  Although this may not be
    the fastest way to send just single atoms, most algorithms do not
    need to send just single atoms: they just need to share some atoms,
    but its not clear which ones need to be shared.  Since all atoms are
-   in the database, only the ones that are needed can be retreived.
+   in the database, only the ones that are needed can be retrieved.
 
 3) Provide a baseline/reference implementation by which other
    persistence designs can be measured. It is hoped that other systems
@@ -168,7 +168,7 @@ be changed by searching for `HIGH_WATER_MARK`, changing it and recompiling.
  * Reading always blocks: if the user asks for an atom, the call will
 not return to the user until the atom is available.  At this time,
 pre-fetch has not been implemented.  But that's because pre-fetch is
-easy: the user can do it in thier own thread :-)
+easy: the user can do it in their own thread :-)
 
 
 Install, Setup and Usage HOWTO
@@ -193,8 +193,8 @@ Optional ODBC drivers
 ---------------------
 Optionally, download and install UnixODBC devel packages.
 Do NOT use IODBC, it fails to support UTF-8.
-The postgres drivers seem to be considerably faster; the use of the
-ODBC driver is dicouraged, unlesss you really need it or really like it.
+The Postgres drivers seem to be considerably faster; the use of the
+ODBC driver is discouraged, unless you really need it or really like it.
 
 ```
   sudo apt-get install unixodbc-dev odbc-postgresql
@@ -217,7 +217,7 @@ Same holds true for SQLite.  Sorry. There is some work in the
 code-base to support these other databases, but the work-arounds for
 the missing features are kind-of complicated, and likely to be slow.
 
-Be sure to install the postgres server and the postgres client.
+Be sure to install the Postgres server and the Postgres client.
 
 ```
     sudo apt-get install postgresql-9.3
@@ -232,7 +232,7 @@ and more complex.
 After install, verify that `/etc/odbcinst.ini` contains the stanza
 below (or something similar).  If it is missing, then edit this file
 (as root) and add the stanza.  Notice that it uses the Unicode drivers,
-and NOT the ANSI (ASCII) drivers.  Opencog uses unicode!
+and NOT the ANSI (ASCII) drivers.  Opencog uses Unicode!
 
 ```
     sudo vi /etc/odbcinst.ini &
@@ -294,7 +294,7 @@ http://wiki.postgresql.org/wiki/Tuning_Your_PostgreSQL_Server
 A large value for `wal_buffers` is needed because much of the database
 traffic consists of updates.  Enabling vacuum is very important, for
 the same reason; performance degrades substantially (by factors of
-3x-10x) without regular vacuuming. (Newer versions of postrgres vacuum
+3x-10x) without regular vacuuming. (Newer versions of Postgres vacuum
 automatically. YMMV.)
 
 Restarting the server might lead to errors stating that max shared mem
@@ -353,7 +353,7 @@ return to your own account:
 ```
 
 If you ran into the error above you still need to create the database of
-course (no output if succesful):
+course (no output if successful):
 
 ```
    $ createdb mycogdata
@@ -381,7 +381,7 @@ The database user is NOT the same thing as a unix user: the login is for
 the database (only), not the OS.  The current authentication method that
 OpenCog uses is password-based, and the passwords must be supplied in
 clear-text; thus, you will want to pick a password that is DIFFERENT
-than your unix-pasword! This is because you will often be using the
+than your unix-password! This is because you will often be using the
 database password as clear-text, allowing almost anyone to see it.
 Experienced Postgres coder-admins are invited to set up more flexible,
 more sophisticated authentication schemes. Some tinkering with the
@@ -406,7 +406,7 @@ Check that the above worked, by manually logging in:
 If you can't login, something up above failed.
 
 Next, see if you can login using unix-domain sockets, instead of
-tcpip sockets to `localhost`:
+TCP-IP sockets to `localhost`:
 
 ```
    $  psql mycogdata -U opencog_user
@@ -471,7 +471,7 @@ entering the below.
     mycogdata=> INSERT INTO TypeCodes (type, typename) VALUES (97, 'SemanticRelationNode');
 ```
 
-You should see the appropriate respone:
+You should see the appropriate response:
 
 ```
     INSERT 0 1
@@ -562,7 +562,7 @@ Some output should be printed in the COGSERVER window:
    Finished storing 55 atoms total.
 ```
 
-The typical nuber of atoms stored will differ from this.
+The typical number of atoms stored will differ from this.
 
 You don't have to put the database credentials into the `opencog.conf`
 file.  In this case, the database would need to be opened manually,
@@ -580,7 +580,7 @@ username and password!
 
 How To Pass the Unit Tests
 ==========================
-There are four unit tests for this API, `BasicSaveUTest`, `PersisUTest`,
+There are four unit tests for this API, `BasicSaveUTest`, `PersistUTest`,
 `MultiPersistUTest` and `FetchUTest`.  The CMakefile will not compile or
 run these tests unless you have either:
 * created an `opencog_tester` user and an `opencog_test` database, or
@@ -671,7 +671,7 @@ commands:
     opencog> sql-store
     SQL data store thread started
 ```
-At this point, a progres indicator will be printed by the opencog
+At this point, a progress indicator will be printed by the opencog
 server, on the OpenCog server's stdout. It  will say something like:
 Stored 236000 atoms. When finished, its nice to say:
 ```
@@ -759,10 +759,10 @@ atom, it will be re-created in the database.  There is no way to
 broadcast a distributed system-wide delete message.  Such a message
 does not seem to be a good idea, anyway.)
 
-Atoms can also be extracted or deleted recusrively. Thus, normally, a
+Atoms can also be extracted or deleted recursively. Thus, normally, a
 extract/delete will succeed only if the atom has no incoming set.
 The recursive forms, `cog-extract-recursive` and `cog-delete-recursive`
-extract/delete the atom and avery link that contains that atom, and so
+extract/delete the atom and every link that contains that atom, and so
 on.
 
 
@@ -989,7 +989,7 @@ The goal here is to deal with protoatom storage (i.e. as a replacement
 for the current TV representation problem.)
 
 The representation of the atomspace would then look vaguely like this
-(this is a rought sketch):
+(this is a rough sketch):
 
 CREATE TABLE atomspace (
     uuid  SERIAL PRIMARY KEY,
