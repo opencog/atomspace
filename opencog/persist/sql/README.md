@@ -637,9 +637,21 @@ scheme@(guile-user)> (use-modules (opencog persist) (opencog persist-sql))
 ```
 Open a database with `sql-open`:
 ```
-scheme@(guile-user)> (sql-open "opencog_test" "opencog_tester" "cheese")
+scheme@(guile-user)> (sql-open "postgres:///opencog_test?user=opencog_tester")
 Reserving UUID up to 3
 ```
+There are other, alternate forms for the URI. See the [postgres
+documentation](https://www.postgresql.org/docs/9.6/static/libpq-connect.html)
+for details.
+```
+> (sql-open "odbc://opencog_tester:cheese/opencog_test")
+> (sql-open "postgres://opencog_tester@localhost/opencog_test")
+> (sql-open "postgres://opencog_tester:cheese@localhost/opencog_test")
+> (sql-open "postgres:///opencog_test?user=opencog_tester")
+> (sql-open "postgres:///opencog_test?user=opencog_tester&host=localhost")
+> (sql-open "postgres:///opencog_test?user=opencog_tester&password=cheese")
+```
+
 Save an atom with `store-atom`:
 ```
 scheme@(guile-user)> (define x (ConceptNode "asdfasdf" (stv 0.123 0.789)))
