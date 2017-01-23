@@ -385,6 +385,10 @@ supplied. The full set of postgres login styles are supported, as long
 as you use the postgres URI format.  The ODBC logins require cleartext
 passwords to be used.
 
+See the [postgres
+documentation]((https://www.postgresql.org/docs/9.6/static/libpq-connect.html)
+for details on the allowed URI format.
+
 In the following, a database user named `opencog_user` is created, and
 given the password `cheese`.  You can pick a different username and
 password.  If you are using ODBC (not recommended), then these two must
