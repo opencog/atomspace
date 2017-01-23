@@ -45,9 +45,7 @@ class LLPGConnection : public LLConnection
 		LLPGRecordSet* get_record_set(void);
 
 	public:
-		LLPGConnection(const char * dbname,
-		               const char * username,
-		               const char * authentication);
+		LLPGConnection(const char * uri);
 		~LLPGConnection();
 
 		LLRecordSet *exec(const char *);

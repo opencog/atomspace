@@ -51,9 +51,7 @@ class ODBCConnection : public LLConnection
         ODBCRecordSet *get_record_set(void);
 
     public:
-        ODBCConnection(const char * dbname,
-                       const char * username,
-                       const char * authentication);
+        ODBCConnection(const char * uri);
         ~ODBCConnection();
 
         LLRecordSet *exec(const char *);

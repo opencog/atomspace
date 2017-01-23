@@ -44,51 +44,18 @@
 
 /* =========================================================== */
 
-LLPGConnection::LLPGConnection(const char * _dbname,
-							   const char * _username,
-							   const char * _authentication)
-	: LLConnection(_dbname, _username, _authentication)
+LLPGConnection::LLPGConnection(const char * uri)
 {
 	is_connected = false;
 
-	if (NULL == _dbname)
-	{
-		PERR("No DB specified");
-		return;
-	}
+	_pgconn = PQconnectdb(uri);
 
-	// XXX hack. We should probably use the postrges URI format, here.
-	// The URI format allows a remote host to be specified, and to toggle
-	// between unix-domain and tcp sockets, etc.
-	std::string constr = "dbname=";
-	constr += _dbname;
-	constr += " user=";
-	constr += _username;
-	constr += " password=";
-	constr += _authentication;
-	_pgconn = PQconnectdb(constr.c_str());
-
-	// If the above did not work, try again with localhst-tcpip.
-	// This is because the default `pg_hba.conf` file does not
-	// enable password-authenticated `md5` logins over unix-domain
-	// sockets.  So be gentle with the naive user, and try again.
-	if (PQstatus(_pgconn) != CONNECTION_OK)
-	{
-		PQfinish(_pgconn);
-		constr += " host=localhost";
-		_pgconn = PQconnectdb(constr.c_str());
-	}
-
-	// Well, that's that. User screwed up.
 	if (PQstatus(_pgconn) != CONNECTION_OK)
 	{
 		std::string msg = PQerrorMessage(_pgconn);
 		PQfinish(_pgconn);
 		PERR("Cannot connect to database: %s", msg.c_str());
 	}
-
-	// Discard remaining error messages.
-	PQerrorMessage(_pgconn);
 
 	is_connected = true;
 }
