@@ -545,7 +545,7 @@ So here's a super-short recap:
 
  * Create a user 'opencog_tester' with password 'cheese'.
  * Create a new database: e.g.  `$ createdb opencog_test`
- * Create the tables: `$ cat atom.sql | psql `
+ * Create the tables: `$ cat opencog/persist/sql/multi-driver/atom.sql | psql opencog_test  -U opencog_tester -W -h localhost`
  * (Optional) Create an entry in `~/.odbc.ini`, as explained above.
    The entry should be called `opencog_test`, and use `opencog_tester`
    as the user. Password is `cheese`.
