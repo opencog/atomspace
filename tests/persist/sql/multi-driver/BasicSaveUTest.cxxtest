@@ -130,17 +130,13 @@ class BasicSaveUTest :  public CxxTest::TestSuite
         void do_test_fresh_atom(void);
         void do_test_table(void);
 
-#ifdef HAVE_PGSQL_STORAGE
         void test_pq_single_atom(void);
         void test_pq_fresh_atom(void);
         void test_pq_table(void);
-#endif
 
-#ifdef HAVE_ODBC_STORAGE
         void test_odbc_single_atom(void);
         void test_odbc_fresh_atom(void);
         void test_odbc_table(void);
-#endif
 };
 
 /*
@@ -156,41 +152,49 @@ void BasicSaveUTest::tearDown(void)
     delete as;
 }
 
-#ifdef HAVE_ODBC_STORAGE
 void BasicSaveUTest::test_odbc_single_atom(void)
 {
+#if HAVE_ODBC_STORAGE
 	driver = "odbc";   
 	do_test_single_atom();
+#endif
 }
 void BasicSaveUTest::test_odbc_fresh_atom(void)
 {
+#if HAVE_ODBC_STORAGE
 	driver = "odbc";   
 	do_test_fresh_atom();
+#endif
 }
 void BasicSaveUTest::test_odbc_table(void)
 {
+#if HAVE_ODBC_STORAGE
 	driver = "odbc";   
 	do_test_table();
+#endif
 }
-#endif // HAVE_ODBC_STORAGE
 
-#ifdef HAVE_PGSQL_STORAGE
 void BasicSaveUTest::test_pq_single_atom(void)
 {
+#if HAVE_PGSQL_STORAGE
 	driver = "postgres";
 	do_test_single_atom();
+#endif // HAVE_PGSQL_STORAGE
 }
 void BasicSaveUTest::test_pq_fresh_atom(void)
 {
+#if HAVE_PGSQL_STORAGE
 	driver = "postgres";
 	do_test_fresh_atom();
+#endif // HAVE_PGSQL_STORAGE
 }
 void BasicSaveUTest::test_pq_table(void)
 {
+#if HAVE_PGSQL_STORAGE
 	driver = "postgres";
 	do_test_table();
-}
 #endif // HAVE_PGSQL_STORAGE
+}
 
 // ============================================================
 
