@@ -2,11 +2,12 @@
  * FUNCTION:
  * Persistent Atom storage, SQL-backed.
  *
- * Atoms are saved to, and restored from, an SQL DB using the ODBC driver.
- * Atoms are identified by means of unique ID's, which are taken to
- * be the atom Handles, as maintained by the TLB. In particular, the
- * system here depends on the handles in the TLB and in the SQL DB
- * to be consistent (i.e. kept in sync).
+ * Atoms are saved to, and restored from, an SQL DB using one of the
+ * avaialble database drivers. Curently, postgres native libpq-dev and
+ * ODBC are supported.
+ *
+ * Atoms are identified by means of unique ID's (UUID's), which are
+ * correlated with specific in-RAM atoms via the TLB.
  *
  * Copyright (c) 2008,2009,2013,2017 Linas Vepstas <linas@linas.org>
  *
@@ -354,11 +355,11 @@ void SQLAtomStorage::init(const char * dbname,
 #define DEFAULT_NUM_CONNS 24
 	for (int i=0; i<DEFAULT_NUM_CONNS; i++)
 	{
-#ifdef XHAVE_ODBC_STORAGE
+#ifdef HAVE_ODBC_STORAGE
 		LLConnection* db_conn = new ODBCConnection(dbname, username, authentication);
 		conn_pool.push(db_conn);
 #endif /* HAVE_ODBC_STORAGE */
-#ifdef HAVE_PGSQL_STORAGE
+#ifdef XHAVE_PGSQL_STORAGE
 		LLConnection* db_conn = new LLPGConnection(dbname, username, authentication);
 		conn_pool.push(db_conn);
 #endif /* HAVE_PGSQL_STORAGE */
