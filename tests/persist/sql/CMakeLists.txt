@@ -1,10 +1,12 @@
 #
 # Don't built tests which don't have installed libraries...
 
-IF (ODBC_FOUND)
-	ADD_SUBDIRECTORY (odbc)
-ENDIF (ODBC_FOUND)
 
+IF(HAVE_SQL_STORAGE)
+	ADD_SUBDIRECTORY (multi-driver)
+ENDIF(HAVE_SQL_STORAGE)
+
+# This is just horridly borkn...
 #IF (PGSQL_FOUND)
 #	ADD_SUBDIRECTORY (postgres)
 #ENDIF (PGSQL_FOUND)

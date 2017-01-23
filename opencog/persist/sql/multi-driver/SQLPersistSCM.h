@@ -31,7 +31,7 @@
 #include <opencog/atomspace/AtomSpace.h>
 #include <opencog/atoms/base/Handle.h>
 #include <opencog/persist/sql/SQLBackingStore.h>
-#include <opencog/persist/sql/odbc/ODBCAtomStorage.h>
+#include <opencog/persist/sql/multi-driver/SQLAtomStorage.h>
 
 namespace opencog
 {
@@ -47,14 +47,16 @@ private:
     static void init_in_module(void*);
     void init(void);
 
+    std::string _driver;
     SQLBackingStore *_backing;
-    ODBCAtomStorage *_store;
+    SQLAtomStorage *_store;
     AtomSpace *_as;
 
 public:
     SQLPersistSCM(AtomSpace*);
     ~SQLPersistSCM();
 
+    void pick_driver(const std::string&);
     void do_open(const std::string&, const std::string&, const std::string&);
     void do_close(void);
     void do_load(void);

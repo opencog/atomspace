@@ -5,7 +5,7 @@ ADD_LIBRARY (atomspace-cwrapper
     Utils_CWrapper.cpp
 )
 
-ADD_DEPENDENCIES(atomspace-cwrapper atomspace query atoms)
+ADD_DEPENDENCIES(atomspace-cwrapper atomspace query)
 
 TARGET_LINK_LIBRARIES(atomspace-cwrapper
 	atomspace

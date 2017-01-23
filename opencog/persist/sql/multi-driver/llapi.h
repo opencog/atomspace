@@ -1,12 +1,12 @@
 /*
  * FUNCTION:
- * ODBC driver -- developed/tested with both iODBC http://www.iodbc.org
- * and with unixODBC
+ * Low-Level SQL database API. Super-Simple.
  *
  * HISTORY:
  * Copyright (c) 2002,2008 Linas Vepstas <linas@linas.org>
  * created by Linas Vepstas  March 2002
  * ported to C++ March 2008
+ * Made generic, 2017
  *
  * LICENSE:
  * This program is free software; you can redistribute it and/or modify
@@ -25,52 +25,43 @@
  * 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
  */
 
-#ifndef _OPENCOG_PERSISTENT_ODBC_DRIVER_H
-#define _OPENCOG_PERSISTENT_ODBC_DRIVER_H
+#ifndef _OPENCOG_PERSISTENT_LL_DRIVER_H
+#define _OPENCOG_PERSISTENT_LL_DRIVER_H
 
 #include <stack>
 #include <string>
-
-#include <sql.h>
-#include <sqlext.h>
 
 /** \addtogroup grp_persist
  *  @{
  */
 
-class ODBCRecordSet;
+class LLRecordSet;
 
-class ODBCConnection
+class LLConnection
 {
-    friend class ODBCRecordSet;
-    private:
+    friend class LLRecordSet;
+    protected:
         std::string dbname;
         std::string username;
         bool is_connected;
-        SQLHENV sql_henv;
-        SQLHDBC sql_hdbc;
-        std::stack<ODBCRecordSet *> free_pool;
-
-        ODBCRecordSet *get_record_set(void);
+        std::stack<LLRecordSet *> free_pool;
 
     public:
-        ODBCConnection(const char * dbname,
-                       const char * username,
-                       const char * authentication);
-        ~ODBCConnection();
+        LLConnection(const char * dbname,
+                     const char * username,
+                     const char * authentication);
+        virtual ~LLConnection();
 
         bool connected(void) const;
 
-        ODBCRecordSet *exec(const char *);
-        void extract_error(const char *);
+        virtual LLRecordSet *exec(const char *) = 0;
 };
 
-class ODBCRecordSet
+class LLRecordSet
 {
-    friend class ODBCConnection;
-    private:
-        ODBCConnection *conn;
-        SQLHSTMT sql_hstmt;
+    friend class LLConnection;
+    protected:
+        LLConnection *conn;
 
         int ncols;
         int arrsize;
@@ -79,25 +70,23 @@ class ODBCRecordSet
         char **values;
         int  *vsizes;
 
-        void alloc_and_bind_cols(int ncols);
-        ODBCRecordSet(ODBCConnection *);
-        ~ODBCRecordSet();
+        LLRecordSet(LLConnection *);
+        virtual ~LLRecordSet();
 
-        void get_column_labels(void);
+        virtual void get_column_labels(void) = 0;
         int get_col_by_name (const char *);
 
     public:
-        // rewind the cursor to the start
-        void rewind(void);
+        // return true if there's another row.
+        virtual bool fetch_row(void) = 0;
 
-        int fetch_row(void); // return non-zero value if there's another row.
         const char * get_value(const char * fieldname);
         int get_column_count();
         const char * get_column_value(int column);
 
         // call this, instead of the destructor,
         // when done with this instance.
-        void release(void);
+        virtual void release(void);
 
         // Calls the callback once for each row.
         template<class T> bool
@@ -149,4 +138,4 @@ inline void escape_single_quotes(std::string &str)
 
 /** @}*/
 
-#endif // _OPENCOG_PERSISTENT_ODBC_DRIVER_H
+#endif // _OPENCOG_PERSISTENT_LL_DRIVER_H

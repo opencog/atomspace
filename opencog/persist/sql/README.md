@@ -1,5 +1,5 @@
-Persist
-=======
+SQL Persist
+===========
 + Linas Vepstas <linasvepstas@gmail.com>
 + Basic implementation Feb-June 2008
 + Status update May 2009
@@ -180,11 +180,26 @@ There are many steps needed to install and use this. Sorry!
 
 Compiling
 ---------
-Download and install UnixODBC devel packages. Run cmake; make.
-Do NOT use IODBC, it fails to support UTF-8.
+Download and install the `libpq-dev` packages, which provide the
+C-language bindings to the Postgres client library.
 
 ```
-  sudo apt-get install unixodbc-dev
+  sudo apt-get install libpq-dev
+  cmake
+  make
+```
+
+Optional ODBC drivers
+---------------------
+Optionally, download and install UnixODBC devel packages.
+Do NOT use IODBC, it fails to support UTF-8.
+The postgres drivers seem to be considerably faster; the use of the
+ODBC driver is dicouraged, unlesss you really need it or really like it.
+
+```
+  sudo apt-get install unixodbc-dev odbc-postgresql
+  cmake
+  make
 ```
 
 Database Setup
@@ -202,20 +217,22 @@ Same holds true for SQLite.  Sorry. There is some work in the
 code-base to support these other databases, but the work-arounds for
 the missing features are kind-of complicated, and likely to be slow.
 
-Be sure to install the postgres server, the postgres client, and the
-odbc-postgresql device driver.
+Be sure to install the postgres server and the postgres client.
 
 ```
     sudo apt-get install postgresql-9.3
 ```
 
-Device Driver Setup
--------------------
-Configure the ODBC driver. After install, verify that `/etc/odbcinst.ini`
-contains the stanza below (or something similar).  If it is missing,
-then edit this file (as root) and add the stanza.  Notice that it uses
-the Unicode drivers, and NOT the ANSI (ASCII) drivers.  Opencog uses
-unicode!
+Optional: ODBC Device Driver Setup
+----------------------------------
+If you want to use ODBC, then you need to configure the ODBC driver.
+Again: the use of ODBC is optional and discouraged; its slower clunkier
+and more complex.
+
+After install, verify that `/etc/odbcinst.ini` contains the stanza
+below (or something similar).  If it is missing, then edit this file
+(as root) and add the stanza.  Notice that it uses the Unicode drivers,
+and NOT the ANSI (ASCII) drivers.  Opencog uses unicode!
 
 ```
     sudo vi /etc/odbcinst.ini &
@@ -529,14 +546,15 @@ So here's a super-short recap:
  * Create a user 'opencog_tester' with password 'cheese'.
  * Create a new database: e.g.  `$ createdb opencog_test`
  * Create the tables: `$ cat atom.sql | psql `
- * Create an entry in `~/.odbc.ini`, as explained above.  The entry
-   should be called `opencog_test`, and use `opencog_tester` as the user.
+ * (Optional) Create an entry in `~/.odbc.ini`, as explained above.
+   The entry should be called `opencog_test`, and use `opencog_tester`
+   as the user. Password is `cheese`.
  * The file `lib/opencog-test.conf` already has the above as the default
    username and database names.  Stick to these.
 
 
-After the above steps, `BasicSaveUTest` and `PersistUTest` should run
-and pass.
+After the above steps, `BasicSaveUTest`, `PersistUTest`,
+`MultiPersistUTest` and `FetchUTest` should run and pass.
 
 
 Unit Test Status

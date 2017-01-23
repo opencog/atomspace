@@ -1,6 +1,6 @@
 # The two tests below currrently work and pass, as of 10 December 2013.
 # There's this complicated cmake junk, because they will fail for
-# anyone who hasn't corrrectly configured their SQL setup.  To run
+# anyone who hasn't correctly configured their SQL setup.  To run
 # these tests, see the README file, and re-run cmake.
 
 FIND_PROGRAM(PSQL_EXECUTABLE psql)
@@ -60,7 +60,7 @@ LINK_LIBRARIES(
 )
 
 IF (DB_IS_CONFIGURED)
-    MESSAGE(STATUS "Postgres database is configured for ODBC unit tests." )
+    MESSAGE(STATUS "Postgres database is configured for unit tests." )
 
     ADD_CXXTEST(BasicSaveUTest)
     IF (HAVE_GUILE)
@@ -70,7 +70,7 @@ IF (DB_IS_CONFIGURED)
 
         # This seems not to work ... why?
         SET_TESTS_PROPERTIES(FetchUTest PROPERTIES
-            ENVIRONMENT "LTDL_LIBRARY_PATH=${PROJECT_BINARY_DIR}/opencog/persist/guile:${PROJECT_BINARY_DIR}/opencog/persist/sql/odbc")
+            ENVIRONMENT "LTDL_LIBRARY_PATH=${PROJECT_BINARY_DIR}/opencog/persist/guile:${PROJECT_BINARY_DIR}/opencog/persist/sql/multi-driver")
     ENDIF (HAVE_GUILE)
 
 ELSE (DB_IS_CONFIGURED)

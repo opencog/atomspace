@@ -37,7 +37,7 @@
  * 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
  */
 
-#ifdef HAVE_SQL_STORAGE
+#ifdef HAVE_ODBC_STORAGE
 
 #include <stack>
 #include <string>
@@ -74,6 +74,7 @@
 ODBCConnection::ODBCConnection(const char * _dbname,
                                const char * _username,
                                const char * _authentication)
+    : LLConnection(_dbname, _username, _authentication)
 {
     SQLRETURN rc;
 
@@ -139,8 +140,6 @@ ODBCConnection::ODBCConnection(const char * _dbname,
         return;
     }
 
-    dbname = _dbname;
-    username = _username;
     is_connected = true;
 }
 
@@ -160,18 +159,6 @@ ODBCConnection::~ODBCConnection()
         SQLFreeHandle(SQL_HANDLE_ENV, sql_henv);
         sql_henv = NULL;
     }
-
-    while (!free_pool.empty())
-    {
-        ODBCRecordSet *rs = free_pool.top();
-        delete rs;
-        free_pool.pop();
-    }
-}
-
-bool ODBCConnection::connected (void) const
-{
-    return is_connected;
 }
 
 /* =========================================================== */
@@ -182,7 +169,8 @@ ODBCRecordSet * ODBCConnection::get_record_set(void)
     ODBCRecordSet *rs;
     if (!free_pool.empty())
     {
-        rs = free_pool.top();
+        LLRecordSet* llrs = free_pool.top();
+        rs = dynamic_cast<ODBCRecordSet*>(llrs);
         free_pool.pop();
         rs->ncols = -1;
     }
@@ -218,18 +206,14 @@ void ODBCConnection::extract_error(const char *msg)
 
 /* =========================================================== */
 
-ODBCRecordSet *
+LLRecordSet *
 ODBCConnection::exec(const char * buff)
 {
-    ODBCRecordSet *rs;
-    SQLRETURN rc;
-
     if (!is_connected) return NULL;
 
-    rs = get_record_set();
-    if (!rs) return NULL;
+    ODBCRecordSet* rs = get_record_set();
 
-    rc = SQLExecDirect(rs->sql_hstmt, (SQLCHAR *)buff, SQL_NTS);
+    SQLRETURN rc = SQLExecDirect(rs->sql_hstmt, (SQLCHAR *)buff, SQL_NTS);
 
     /* If query returned no data, its not necessarily an error:
      * its simply "no data", that's all.
@@ -264,12 +248,13 @@ ODBCConnection::exec(const char * buff)
 void
 ODBCRecordSet::alloc_and_bind_cols(int new_ncols)
 {
-    // IMPORTANT! MUST NOT BE ON STACK!! Else stack corruption will result.
-    // The ODBC driver really wants to write a return value here!
-    static SQLLEN bogus;
-
-    SQLRETURN rc;
     int i;
+
+    // This static alloc of column names and values is crazy and
+    // bizarre, but it is driven by the fact that ODBC must be given
+    // mem locations in which to scribble it's results. Which is
+    // a nutty design, given that we don't know sizes of the columns
+    // in advance. Only Microsoft could invent something this nasty.
 
     if (new_ncols > arrsize)
     {
@@ -307,16 +292,19 @@ ODBCRecordSet::alloc_and_bind_cols(int new_ncols)
         /* intialize */
         for (i = 0; i<new_ncols; i++)
         {
-            column_labels[i] = NULL;
+            column_labels[i] = new char[DEFAULT_COLUMN_NAME_SIZE];
+            column_labels[i][0] = 0;
             column_datatype[i] = 0;
-            values[i] = NULL;
-            vsizes[i] = 0;
+            values[i] = new char[DEFAULT_VARCHAR_SIZE];
+            vsizes[i] = DEFAULT_VARCHAR_SIZE;
+            values[i][0] = 0;
         }
 
         arrsize = new_ncols;
     }
 
-    rc = SQLAllocStmt (conn->sql_hdbc, &sql_hstmt);
+    ODBCConnection* oconn = dynamic_cast<ODBCConnection*>(conn);
+    SQLRETURN rc = SQLAllocStmt (oconn->sql_hdbc, &sql_hstmt);
     if ((SQL_SUCCESS != rc) and (SQL_SUCCESS_WITH_INFO != rc))
     {
         PRINT_SQLERR (SQL_HANDLE_STMT, sql_hstmt);
@@ -325,22 +313,13 @@ ODBCRecordSet::alloc_and_bind_cols(int new_ncols)
         return;
     }
 
+    // IMPORTANT! MUST NOT BE ON STACK!! Else stack corruption will result.
+    // The ODBC driver really wants to write a return value here!
+    static SQLLEN bogus;
+
     /* Initialize the newly realloc'ed entries */
     for (i=0; i<new_ncols; i++)
     {
-        column_datatype[i] = 0;
-
-        if (NULL == column_labels[i])
-        {
-            column_labels[i] = new char[DEFAULT_COLUMN_NAME_SIZE];
-            column_labels[i][0] = 0;
-        }
-        if (NULL == values[i])
-        {
-            values[i] = new char[DEFAULT_VARCHAR_SIZE];
-            vsizes[i] = DEFAULT_VARCHAR_SIZE;
-            values[i][0] = 0;
-        }
         rc = SQLBindCol(sql_hstmt, i+1, SQL_C_CHAR,
             values[i], vsizes[i], &bogus);
         if ((SQL_SUCCESS != rc) and (SQL_SUCCESS_WITH_INFO != rc))
@@ -356,18 +335,9 @@ ODBCRecordSet::alloc_and_bind_cols(int new_ncols)
 /* pseudo-private routine */
 
 
-ODBCRecordSet::ODBCRecordSet(ODBCConnection *_conn)
+ODBCRecordSet::ODBCRecordSet(ODBCConnection* _conn)
+    : LLRecordSet(_conn)
 {
-    // If _conn is null, then this is null, too.
-    if (NULL == _conn) return;
-
-    conn = _conn;
-    ncols = -1;
-    arrsize = 0;
-    column_labels = NULL;
-    column_datatype = NULL;
-    values = NULL;
-    vsizes = NULL;
     sql_hstmt = NULL;
 }
 
@@ -376,6 +346,8 @@ ODBCRecordSet::ODBCRecordSet(ODBCConnection *_conn)
 void
 ODBCRecordSet::release(void)
 {
+    ncols = -1;
+
     // Avoid accidental double-release
     if (NULL == sql_hstmt) return;
 
@@ -384,33 +356,18 @@ ODBCRecordSet::release(void)
     SQLFreeHandle(SQL_HANDLE_STMT, sql_hstmt);
     sql_hstmt = NULL;
 
-    conn->free_pool.push(this);
+    LLRecordSet::release();
 }
 
 /* =========================================================== */
 
 ODBCRecordSet::~ODBCRecordSet()
 {
-    release();  // shouldn't be needed ... but just in case.
-
-    conn = NULL;
-
     for (int i=0; i<arrsize; i++)
     {
         delete[] column_labels[i];
         delete[] values[i];
     }
-    delete[] column_labels;
-    column_labels = NULL;
-
-    delete[] column_datatype;
-    column_datatype = NULL;
-
-    delete[] values;
-    values = NULL;
-
-    delete[] vsizes;
-    vsizes = NULL;
 }
 
 /* =========================================================== */
@@ -475,14 +432,7 @@ ODBCRecordSet::get_column_labels(void)
 
 /* =========================================================== */
 
-void
-ODBCRecordSet::rewind(void)
-{
-    SQL_POSITION_TO(sql_hstmt, 0);
-}
-
-
-int
+bool
 ODBCRecordSet::fetch_row(void)
 {
     // Columns can have null values.  In this case, the ODBC shims
@@ -494,227 +444,18 @@ ODBCRecordSet::fetch_row(void)
     SQLRETURN rc = SQLFetch(sql_hstmt);
 
     /* no more data */
-    if (SQL_NO_DATA == rc) return 0;
-    if (SQL_NULL_DATA == rc) return 0;
+    if (SQL_NO_DATA == rc) return false;
+    if (SQL_NULL_DATA == rc) return false;
 
     if ((SQL_SUCCESS != rc) and (SQL_SUCCESS_WITH_INFO != rc))
     {
         PRINT_SQLERR (SQL_HANDLE_STMT, sql_hstmt);
         PERR ("Can't fetch row rc=%d", rc);
-        return 0;
+        return false;
     }
 
-    return 1;
+    return true;
 }
 
-/* =========================================================== */
-
-int
-ODBCRecordSet::get_col_by_name (const char * fieldname)
-{
-    int i;
-    const char * fp;
-
-    /* lookup the column number based on the column name */
-    for (i=0; i<ncols; i++)
-    {
-        if (!strcasecmp (fieldname, column_labels[i])) return i;
-    }
-
-    /* oops. Try removing the table name if possible */
-    fp = strrchr (fieldname, '.');
-    if (!fp) return -1;
-    fp ++;
-
-    for (i=0; i<ncols; i++)
-    {
-        if (!strcasecmp (fp, column_labels[i])) return i;
-    }
-
-    return -1;
-}
-
-const char *
-ODBCRecordSet::get_value(const char * fieldname)
-{
-    int column;
-
-    /* If number of columns is negative, then we haven't
-     * gotten any results back yet.  Start by getting the
-     * column labels.
-     */
-    if (0 > ncols)
-    {
-        get_column_labels();
-    }
-
-    column = get_col_by_name (fieldname);
-    if (0 > column) return NULL;
-
-    // LEAVE ("(rs=%p, fieldname=%s) {val=\'%s\'}", rs, fieldname,  rs->values[column]);
-    return values[column];
-}
-
-int 
-ODBCRecordSet::get_column_count()
-{ 
-    /* If number of columns is negative, then we haven't
-     * gotten any results back yet.  Start by getting the
-     * column labels which will set the column count.
-     */
-    if (0 > ncols)
-        get_column_labels();
-
-    return ncols;
-}
-
-const char * 
-ODBCRecordSet::get_column_value(int column)
-{
-    /* Make sure we have columns and this column is in range. */
-    if (column >= get_column_count()) return NULL;
-
-    return values[column];
-}
-
-/* =========================================================== */
-
-#ifdef UNIT_TEST_EXAMPLE
-
-class Ola
-{
-    public:
-        ODBCRecordSet *rs;
-        bool column_cb(const char *colname, const char * colvalue)
-        {
-            printf ("%s = %s\n", colname, colvalue);
-            return false;
-        }
-        bool row_cb(void)
-        {
-            printf ("---- New row found ----\n");
-            rs->foreach_column(&Ola::column_cb, this);
-            return false;
-        }
-};
-
-int main ()
-{
-    ODBCConnection *conn;
-    conn = new ODBCConnection("opencog", "linas", NULL);
-
-    ODBCRecordSet *rs;
-
-// #define MAKE_SOME_DATA
-#ifdef MAKE_SOME_DATA
-    rs = conn->exec(
-        "INSERT INTO Atoms VALUES (3,1,0.5, 0.5, 'umm');");
-#endif
-
-    // One way of doing things
-    rs = conn->exec("SELECT * FROM Atoms;");
-    while (rs->fetch_row())
-    {
-        const char * n = rs->get_value("name");
-        printf ("found column with value %s\n", n);
-    }
-    rs->release();
-
-    // Another way of doing things
-    Ola *ola = new Ola();
-    rs = conn->exec("SELECT * FROM Atoms;");
-    while (rs->fetch_row())
-    {
-        printf("--- method 2 has row:\n");
-        rs->foreach_column(&Ola::column_cb, ola);
-    }
-    rs->release();
-
-    // A third way of doing things
-    ola->rs = rs;
-    rs = conn->exec("SELECT * FROM Atoms;");
-    rs->foreach_row(&Ola::row_cb, ola);
-    rs->release();
-
-    delete conn;
-
-    return 0;
-}
-
-#endif /* UNIT_TEST_EXAMPLE */
-
-/* =========================================================== */
-
-#if OLD_UNPORTED_C_CODE
-
-/* =========================================================== */
-
-DuiDBRecordSet *
-dui_odbc_connection_tables (DuiDBConnection *dbc)
-{
-    DuiODBCConnection *conn = (DuiODBCConnection *) dbc;
-    DuiODBCRecordSet *rs;
-    SQLRETURN rc;
-
-    ENTER ("(conn=%p)", conn);
-    if (!conn) return NULL;
-
-    rs = dui_odbc_recordset_new (conn);
-    if (!rs) return NULL;
-
-    rc = SQLTables (rs->sql_hstmt,NULL, 0, NULL, 0, NULL,0, NULL, 0);
-
-    if ((SQL_SUCCESS != rc) and (SQL_SUCCESS_WITH_INFO != rc))
-    {
-        PRINT_SQLERR (SQL_HANDLE_STMT, rs->sql_hstmt);
-        dui_odbc_recordset_release (&rs->recset);
-        PERR ("Can't perform query rc=%d", rc);
-        return NULL;
-    }
-
-    LEAVE ("(conn=%p)", conn);
-    /* Use numbr of columns to indicate that the query hasn't
-     * given results yet. */
-    rs->ncols = -1;
-    return &rs->recset;
-}
-
-/* =========================================================== */
-
-DuiDBRecordSet *
-dui_odbc_connection_table_columns (DuiDBConnection *dbc,
-                                   const char * tablename)
-{
-    DuiODBCConnection *conn = (DuiODBCConnection *) dbc;
-    DuiODBCRecordSet *rs;
-    SQLRETURN rc;
-
-    ENTER ("(conn=%p, table=%s)", conn, tablename);
-    if (!conn || !tablename) return NULL;
-
-    rs = dui_odbc_recordset_new (conn);
-    if (!rs) return NULL;
-
-    rc = SQLColumns (rs->sql_hstmt,NULL, 0, NULL, 0,
-                     (char *) tablename, SQL_NTS, NULL, 0);
-
-    if ((SQL_SUCCESS != rc) and (SQL_SUCCESS_WITH_INFO != rc))
-    {
-        PRINT_SQLERR (SQL_HANDLE_STMT, rs->sql_hstmt);
-        dui_odbc_recordset_release (&rs->recset);
-        PERR ("Can't perform query rc=%d", rc);
-        return NULL;
-    }
-
-    LEAVE ("(conn=%p, table=%s)", conn, tablename);
-    /* Use number of columns to indicate that the query hasn't
-     * given results yet. */
-    rs->ncols = -1;
-    return &rs->recset;
-}
-
-#endif /* OLD_UNPORTED_C_CODE */
-
-#endif /* HAVE_SQL_STORAGE */
+#endif /* HAVE_ODBC_STORAGE */
 /* ============================= END OF FILE ================= */
-
