@@ -156,14 +156,28 @@ void BasicSaveUTest::tearDown(void)
 
 void BasicSaveUTest::mkuri(std::string driver)
 {
-    uri = driver;
-    uri += "://";
-    uri += username;
-    uri += ":";
-    uri += passwd;
-    if (driver == "postgres") uri += "@localhost";
-    uri += "/";
-    uri += dbname;
+    // Sigh. The buildbot postgres config balks at the
+    // "localhost" URI scheme.
+    if (driver == "postgres")
+    {
+        uri = driver;
+        uri += ":///";
+        uri += dbname;
+        uri += "?user=";
+        uri += username;
+        uri += "&password=";
+        uri += passwd;
+    }
+    else
+    {
+        uri = driver;
+        uri += "://";
+        uri += username;
+        uri += ":";
+        uri += passwd;
+        uri += "/";
+        uri += dbname;
+    }
 }
 
 void BasicSaveUTest::test_odbc_single_atom(void)
