@@ -87,6 +87,9 @@ LLPGConnection::LLPGConnection(const char * _dbname,
 		PERR("Cannot connect to database: %s", msg.c_str());
 	}
 
+	// Discard remaining error messages.
+	PQerrorMessage(_pgconn);
+
 	is_connected = true;
 }
 
