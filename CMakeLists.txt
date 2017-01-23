@@ -82,8 +82,14 @@ IF (CMAKE_COMPILER_IS_GNUCXX)
 		SET(CMAKE_C_FLAGS_PROFILE "-O2 -g3 -fstack-protector -pg")
 		# -flto is good for performance, but wow is it slow to link...
 		# XXX disable for now ... its just to painful, in daily life.
-		SET(CMAKE_C_FLAGS_RELEASE "-O3 -g -fstack-protector")
-		# SET(CMAKE_C_FLAGS_RELEASE "-O3 -g -fstack-protector -flto")
+		# ... except that the buildbot needs this, to pass unit tests.
+		# Current failure is in libatomcore, which depends on atomspace.
+		# (ldd -r libatomcore shows unresolved symbols.)
+		# This will someday be fiaxable by moving the factories out
+		# of the atomtable, and into the class server. But for now,
+		# we use -flto as a work-around.
+		# SET(CMAKE_C_FLAGS_RELEASE "-O3 -g -fstack-protector")
+		SET(CMAKE_C_FLAGS_RELEASE "-O3 -g -fstack-protector -flto")
 		# SET(CMAKE_C_FLAGS_RELEASE "-O3 -g -fstack-protector -flto=8")
 		LINK_LIBRARIES(pthread)
 
