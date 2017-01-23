@@ -167,6 +167,7 @@ void MultiPersistUTest::setUp(void)
     _pm = new SQLPersistSCM(_as);
 
     try {
+        _pm->pick_driver("postgres");
         _pm->do_open(dbname, username, passwd);
     }
     catch (RuntimeException &e)
@@ -194,7 +195,7 @@ void MultiPersistUTest::tearDown(void)
 
 void MultiPersistUTest::kill_data(void)
 {
-    SQLAtomStorage* astore = new SQLAtomStorage(dbname, username, passwd);
+    SQLAtomStorage* astore = new SQLAtomStorage("postgres", dbname, username, passwd);
     if (!astore->connected())
     {
         logger().info("setUp: SQLAtomStorage cannot connect to database");

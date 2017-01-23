@@ -47,7 +47,7 @@ class PersistUTest :  public CxxTest::TestSuite
 {
     private:
         AtomSpace *_as;
-        SQLPersistSCM *_pm;
+        const char * driver;
         const char * dbname;
         const char * username;
         const char * passwd;
@@ -102,7 +102,9 @@ class PersistUTest :  public CxxTest::TestSuite
         void check_empty(int, AtomSpace *);
         void atomCompare(AtomPtr, AtomPtr, std::string);
 
-        void test_atomspace(void);
+        void do_test_atomspace(void);
+        void test_odbc_atomspace(void);
+        void test_pq_atomspace(void);
 };
 
 PersistUTest:: PersistUTest(void)
@@ -136,27 +138,10 @@ PersistUTest:: PersistUTest(void)
 void PersistUTest::setUp(void)
 {
     _as = new AtomSpace();
-    _pm = new SQLPersistSCM(_as);
-
-    try {
-        _pm->do_open(dbname, username, passwd);
-    }
-    catch (RuntimeException &e)
-    {
-        logger().info("setUp: SQLPersistSCM cannot connect to database");
-        friendlyFailMessage();
-        exit(1);
-    };
-
-    kill_data();
 }
 
 void PersistUTest::tearDown(void)
 {
-    /* Orderly shutdown avoids warning in Postgres log file. */
-    _pm->do_close();
-
-    delete _pm;
     delete _as;
 
     kill_data();
@@ -166,7 +151,7 @@ void PersistUTest::tearDown(void)
 
 void PersistUTest::kill_data(void)
 {
-    SQLAtomStorage* astore = new SQLAtomStorage(dbname, username, passwd);
+    SQLAtomStorage* astore = new SQLAtomStorage(driver, dbname, username, passwd);
     if (!astore->connected())
     {
         logger().info("setUp: SQLAtomStorage cannot connect to database");
@@ -375,11 +360,37 @@ void PersistUTest::check_empty(int idx, AtomSpace *space)
 
 // ============================================================
 
-void PersistUTest::test_atomspace(void)
+void PersistUTest::test_odbc_atomspace(void)
+{
+    driver = "odbc";
+    do_test_atomspace();
+}
+
+void PersistUTest::test_pq_atomspace(void)
+{
+    driver = "postgres";
+    do_test_atomspace();
+}
+
+void PersistUTest::do_test_atomspace(void)
 {
     logger().debug("BEGIN TEST: %s", __FUNCTION__);
 
+    SQLPersistSCM* _pm = new SQLPersistSCM(_as);
     TSM_ASSERT("Persist Module not loaded", _pm);
+
+    try {
+        _pm->pick_driver(driver);
+        _pm->do_open(dbname, username, passwd);
+    }
+    catch (RuntimeException &e)
+    {
+        logger().info("setUp: SQLPersistSCM cannot connect to database");
+        friendlyFailMessage();
+        exit(1);
+    };
+
+    kill_data();
 
     int idx = 0;
     add_to_space(idx++, _as, "AA-aa-wow ");
@@ -434,6 +445,10 @@ void PersistUTest::test_atomspace(void)
     for (i=0; i<idx; i++)
         check_empty(i, _as);
 
+    /* Orderly shutdown avoids warning in Postgres log file. */
+    _pm->do_close();
+
+    delete _pm;
     logger().debug("END TEST: %s", __FUNCTION__);
 }
 

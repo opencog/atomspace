@@ -146,7 +146,7 @@ void FetchUTest::tearDown(void)
 
 void FetchUTest::kill_data(void)
 {
-	SQLAtomStorage* astore = new SQLAtomStorage(dbname, username, passwd);
+	SQLAtomStorage* astore = new SQLAtomStorage("postgres", dbname, username, passwd);
 	if (!astore->connected())
 	{
 		logger().info("setUp: SQLAtomStorage cannot connect to database");
