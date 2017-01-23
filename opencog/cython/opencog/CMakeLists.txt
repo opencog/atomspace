@@ -78,12 +78,14 @@ ADD_LIBRARY(atomspace_cython
 ADD_DEPENDENCIES(atomspace_cython opencog_atom_types)
 
 TARGET_LINK_LIBRARIES(atomspace_cython
+	-Wl,--no-as-needed
 	attentionbank
 	atomspace
 	atomutils
 	clearbox
 	atomspaceutils
 	atomcore
+	atomspace
 	${COGUTIL_LIBRARY}
 	${PYTHON_LIBRARIES}
 	${Boost_THREAD_LIBRARY}
