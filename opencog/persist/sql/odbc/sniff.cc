@@ -160,7 +160,7 @@ int main ()
 
 #if 1
     // SQLAtomStorage *store = new SQLAtomStorage("opencog", "linas", NULL);
-    SQLAtomStorage *store = new SQLAtomStorage("opencog_test", "opencog_tester", "cheese");
+    SQLAtomStorage *store = new SQLAtomStorage("postgres", "opencog_test", "opencog_tester", "cheese");
 
     AtomTable *table = new AtomTable();
     store->load(*table);

@@ -41,6 +41,7 @@ SQLPersistSCM::SQLPersistSCM(AtomSpace *as)
     _as = as;
     _store = NULL;
     _backing = new SQLBackingStore();
+    _driver = "postgres";  // by default.
 
     static bool is_init = false;
     if (is_init) return;
@@ -63,6 +64,7 @@ void SQLPersistSCM::init_in_module(void* data)
 
 void SQLPersistSCM::init(void)
 {
+    define_scheme_primitive("sql-driver", &SQLPersistSCM::pick_driver, this, "persist-sql");
     define_scheme_primitive("sql-open", &SQLPersistSCM::do_open, this, "persist-sql");
     define_scheme_primitive("sql-close", &SQLPersistSCM::do_close, this, "persist-sql");
     define_scheme_primitive("sql-load", &SQLPersistSCM::do_load, this, "persist-sql");
@@ -73,6 +75,11 @@ void SQLPersistSCM::init(void)
 SQLPersistSCM::~SQLPersistSCM()
 {
     delete _backing;
+}
+
+void SQLPersistSCM::pick_driver(const std::string& driver)
+{
+    _driver = driver;
 }
 
 void SQLPersistSCM::do_open(const std::string& dbname,
@@ -87,7 +94,8 @@ void SQLPersistSCM::do_open(const std::string& dbname,
         throw RuntimeException(TRACE_INFO,
              "sql-open: Error: No atomspace specified!");
 
-    _store = new SQLAtomStorage(dbname, username, auth);
+    // Use the postgres driver.
+    _store = new SQLAtomStorage(_driver, dbname, username, auth);
     if (!_store)
         throw RuntimeException(TRACE_INFO,
             "sql-open: Error: Unable to open the database");

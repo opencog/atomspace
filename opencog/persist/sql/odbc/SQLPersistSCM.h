@@ -47,6 +47,7 @@ private:
     static void init_in_module(void*);
     void init(void);
 
+    std::string _driver;
     SQLBackingStore *_backing;
     SQLAtomStorage *_store;
     AtomSpace *_as;
@@ -55,6 +56,7 @@ public:
     SQLPersistSCM(AtomSpace*);
     ~SQLPersistSCM();
 
+    void pick_driver(const std::string&);
     void do_open(const std::string&, const std::string&, const std::string&);
     void do_close(void);
     void do_load(void);

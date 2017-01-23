@@ -62,7 +62,7 @@ class SQLAtomStorage : public AtomStorage
 		class Response;
 		class Outgoing;
 
-		void init(const char *, const char *, const char *);
+		void init(const char *, const char *, const char *, const char *);
 
 		// ---------------------------------------------
 		// Handle multiple atomspaces like typecodes: we have to
@@ -173,10 +173,12 @@ class SQLAtomStorage : public AtomStorage
 		async_caller<SQLAtomStorage, Handle> _write_queue;
 
 	public:
-		SQLAtomStorage(const std::string& dbname,
+		SQLAtomStorage(const std::string& driver,
+		               const std::string& dbname,
 		               const std::string& username,
 		               const std::string& authentication);
-		SQLAtomStorage(const char * dbname,
+		SQLAtomStorage(const char * driver,
+		               const char * dbname,
 		               const char * username,
 		               const char * authentication);
 		SQLAtomStorage(const SQLAtomStorage&) = delete; // disable copying

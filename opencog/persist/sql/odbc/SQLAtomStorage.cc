@@ -345,29 +345,35 @@ bool SQLAtomStorage::idExists(const char * buff)
 /* ================================================================ */
 // Constructors
 
-void SQLAtomStorage::init(const char * dbname,
+void SQLAtomStorage::init(const char * driver,
+                          const char * dbname,
                           const char * username,
                           const char * authentication)
 {
+	bool use_libpq = (0 == strcmp(driver, "postgres"));
+	bool use_odbc = (0 == strcmp(driver, "odbc"));
+
+	if (not use_libpq and not use_odbc)
+		throw IOException(TRACE_INFO, "Unknown driver '%s'\n", driver);
+
 	// Create 24, by default ... I'm guessing that a number similar to
 	// the number of cores on a modern CPU will be enough.  This limits
 	// the number of writeback threads that can be used.
 #define DEFAULT_NUM_CONNS 24
 	for (int i=0; i<DEFAULT_NUM_CONNS; i++)
 	{
-		// Preferentially use libpq, if we've got that.
-		// If we don't have that, fall back to ODBC.
+		LLConnection* db_conn = nullptr;
 #ifdef HAVE_PGSQL_STORAGE
-		LLConnection* db_conn = new LLPGConnection(dbname, username, authentication);
-		conn_pool.push(db_conn);
-#else /* HAVE_PGSQL_STORAGE */
-	#ifdef HAVE_ODBC_STORAGE
-		LLConnection* db_conn = new ODBCConnection(dbname, username, authentication);
-		conn_pool.push(db_conn);
-	#else
-	#error "Need to have either Postgres (libpq-dev) or ODBC (unixodbc-dev) installed"
-	#endif /* HAVE_ODBC_STORAGE */
+		if (use_libpq)
+			db_conn = new LLPGConnection(dbname, username, authentication);
 #endif /* HAVE_PGSQL_STORAGE */
+
+#ifdef HAVE_ODBC_STORAGE
+		if (use_odbc)
+			db_conn = new ODBCConnection(dbname, username, authentication);
+#endif /* HAVE_ODBC_STORAGE */
+
+		conn_pool.push(db_conn);
 	}
 	type_map_was_loaded = false;
 
@@ -401,20 +407,23 @@ void SQLAtomStorage::init(const char * dbname,
 #endif // STORAGE_DEBUG
 }
 
-SQLAtomStorage::SQLAtomStorage(const char * dbname,
+SQLAtomStorage::SQLAtomStorage(const char * driver,
+                               const char * dbname,
                                const char * username,
                                const char * authentication)
-	: _write_queue(this, &SQLAtomStorage::vdo_store_atom)
+	: _write_queue(this, &SQLAtomStorage::vdo_store_atom, 8)
 {
-	init(dbname, username, authentication);
+	init(driver, dbname, username, authentication);
 }
 
-SQLAtomStorage::SQLAtomStorage(const std::string& dbname,
+SQLAtomStorage::SQLAtomStorage(const std::string& driver,
+                               const std::string& dbname,
                                const std::string& username,
                                const std::string& authentication)
-	: _write_queue(this, &SQLAtomStorage::vdo_store_atom)
+	: _write_queue(this, &SQLAtomStorage::vdo_store_atom, 8)
 {
-	init(dbname.c_str(), username.c_str(), authentication.c_str());
+	init(driver.c_str(), dbname.c_str(), username.c_str(),
+	     authentication.c_str());
 }
 
 SQLAtomStorage::~SQLAtomStorage()
