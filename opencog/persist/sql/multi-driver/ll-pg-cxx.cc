@@ -70,9 +70,9 @@ LLPGConnection::LLPGConnection(const char * _dbname,
 
 	if (PQstatus(_pgconn) != CONNECTION_OK)
 	{
-		opencog::logger().warn("%s", PQerrorMessage(_pgconn));
+		std::string msg = PQerrorMessage(_pgconn);
 		PQfinish(_pgconn);
-		PERR("Cannot conect to database");
+		PERR("Cannot conect to database: %s", msg.c_str());
 	}
 
 	is_connected = true;
