@@ -122,9 +122,9 @@ PersistUTest:: PersistUTest(void)
 
     try {
         // Get the database logins & etc from the config file.
-        dbname = config()["TEST_DB_NAME"].c_str();
-        username = config()["TEST_DB_USERNAME"].c_str();
-        passwd = config()["TEST_DB_PASSWD"].c_str();
+        dbname = config().get("TEST_DB_NAME", "opencog_test").c_str();
+        username = config().get("TEST_DB_USERNAME", "opencog_tester").c_str();
+        passwd = config().get("TEST_DB_PASSWD", "cheese").c_str();
     }
     catch (InvalidParamException &e)
     {
@@ -151,6 +151,12 @@ void PersistUTest::tearDown(void)
 
 void PersistUTest::kill_data(void)
 {
+#if HAVE_ODBC_STORAGE
+    if (nullptr==driver) driver = "odbc";
+#endif
+#if HAVE_PGSQL_STORAGE
+    if (nullptr==driver) driver = "postgres";
+#endif
     SQLAtomStorage* astore = new SQLAtomStorage(driver, dbname, username, passwd);
     if (!astore->connected())
     {
