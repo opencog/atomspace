@@ -26,6 +26,10 @@ IF (ODBC_FOUND)
 	)
 	TARGET_LINK_LIBRARIES(persist-odbc ${ODBC_LIBRARIES})
 	TARGET_LINK_LIBRARIES(persist-sql persist-odbc)
+
+	INSTALL (TARGETS persist-odbc
+		DESTINATION "lib${LIB_DIR_SUFFIX}/opencog"
+	)
 ENDIF (ODBC_FOUND)
 
 IF (PGSQL_FOUND)
@@ -33,6 +37,10 @@ IF (PGSQL_FOUND)
 	ADD_LIBRARY (persist-pg ll-pg-cxx)
 	TARGET_LINK_LIBRARIES(persist-pg ${PGSQL_LIBRARIES})
 	TARGET_LINK_LIBRARIES(persist-sql persist-pg)
+
+	INSTALL (TARGETS persist-pg
+		DESTINATION "lib${LIB_DIR_SUFFIX}/opencog"
+	)
 ENDIF (PGSQL_FOUND)
 
 ADD_EXECUTABLE(sniff
