@@ -71,10 +71,7 @@
 
 /* =========================================================== */
 
-ODBCConnection::ODBCConnection(const char * _dbname,
-                               const char * _username,
-                               const char * _authentication)
-    : LLConnection(_dbname, _username, _authentication)
+ODBCConnection::ODBCConnection(const char * uri)
 {
     SQLRETURN rc;
 
@@ -83,16 +80,42 @@ ODBCConnection::ODBCConnection(const char * _dbname,
     sql_hdbc = NULL;
     sql_henv = NULL;
 
-    if (NULL == _dbname)
+    // We expect odbc://user:password/database
+    if (0 != strncmp("odbc://", uri, 7))
     {
-        PERR("No DB specified");
+        PERR("Invalid URI specified: %s", uri);
         return;
     }
+    uri += 7;   // skip past odbc://
+    char* curi = strdup(uri);
+    char* username = curi;
+    char* authentication;
+    char* p = strchr(curi, ':');
+    if (p)
+    {
+        *p = 0;
+        authentication = ++p;
+    }
+    else
+    {
+        // Point at the null byte at the end of the string.
+        authentication = curi+strlen(curi);
+        p = curi;
+    }
+    p = strchr(p, '/');
+    if (!p)
+    {
+        free(curi);
+        PERR("Invalid URI specified: %s", uri);
+    }
+    *p = 0;
+    char *dbname = ++p;
 
     /* Allocate environment handle */
     rc = SQLAllocEnv(&sql_henv);
     if ((SQL_SUCCESS != rc) and (SQL_SUCCESS_WITH_INFO != rc))
     {
+        free(curi);
         PERR("Can't SQLAllocEnv, rc=%d", rc);
         return;
     }
@@ -102,6 +125,7 @@ ODBCConnection::ODBCConnection(const char * _dbname,
                        (void*)SQL_OV_ODBC3, 0);
     if ((SQL_SUCCESS != rc) and (SQL_SUCCESS_WITH_INFO != rc))
     {
+        free(curi);
         PRINT_SQLERR (SQL_HANDLE_ENV, sql_henv);
         SQLFreeHandle(SQL_HANDLE_ENV, sql_henv);
         sql_henv = NULL;
@@ -113,6 +137,7 @@ ODBCConnection::ODBCConnection(const char * _dbname,
     rc = SQLAllocConnect(sql_henv, &sql_hdbc);
     if ((SQL_SUCCESS != rc) and (SQL_SUCCESS_WITH_INFO != rc))
     {
+        free(curi);
         PRINT_SQLERR (SQL_HANDLE_ENV, sql_henv);
         SQLFreeHandle(SQL_HANDLE_ENV, sql_henv);
         sql_henv = NULL;
@@ -123,14 +148,14 @@ ODBCConnection::ODBCConnection(const char * _dbname,
     /* set the timeout to 5 seconds ?? hack alert fixme */
     // SQLSetConnectAttr(sql_hdbc, SQL_LOGIN_TIMEOUT, (SQLPOINTER *)5, 0);
 
-    if (NULL == _authentication) _authentication = "";
     rc = SQLConnect(sql_hdbc,
-                    (SQLCHAR*) _dbname, SQL_NTS,
-                    (SQLCHAR*) _username, SQL_NTS,
-                    (SQLCHAR*) _authentication, SQL_NTS);
+                    (SQLCHAR*) dbname, SQL_NTS,
+                    (SQLCHAR*) username, SQL_NTS,
+                    (SQLCHAR*) authentication, SQL_NTS);
 
     if ((SQL_SUCCESS != rc) and (SQL_SUCCESS_WITH_INFO != rc))
     {
+        free(curi);
         PRINT_SQLERR (SQL_HANDLE_DBC, sql_hdbc);
         SQLFreeHandle(SQL_HANDLE_DBC, sql_hdbc);
         SQLFreeHandle(SQL_HANDLE_ENV, sql_henv);
@@ -141,6 +166,7 @@ ODBCConnection::ODBCConnection(const char * _dbname,
     }
 
     is_connected = true;
+    free(curi);
 }
 
 /* =========================================================== */

@@ -44,7 +44,7 @@ using namespace opencog;
 class FetchUTest :  public CxxTest::TestSuite
 {
 	private:
-		const char * driver;
+		std::string uri;
 		const char * dbname;
 		const char * username;
 		const char * passwd;
@@ -66,6 +66,7 @@ class FetchUTest :  public CxxTest::TestSuite
 		void setUp(void);
 		void tearDown(void);
 		void kill_data(void);
+		void mkuri(std::string);
 
 		void friendlyFailMessage()
 		{
@@ -86,7 +87,7 @@ class FetchUTest :  public CxxTest::TestSuite
 		void test_stuff(void);
 };
 
-FetchUTest:: FetchUTest(void)
+FetchUTest::FetchUTest(void)
 {
 	try
 	{
@@ -99,34 +100,38 @@ FetchUTest:: FetchUTest(void)
 	logger().set_level(Logger::DEBUG);
 	logger().set_print_to_stdout_flag(true);
 
-	// use postgres preferentially, unless its missing.
-#ifdef HAVE_ODBC_STORAGE
-	driver = "odbc";
-#endif
-#ifdef HAVE_PGSQL_STORAGE
-	driver = "postgres";
-#endif
-
 	try {
 		// Get the database logins & etc from the config file.
       dbname = config().get("TEST_DB_NAME", "opencog_test").c_str();
       username = config().get("TEST_DB_USERNAME", "opencog_tester").c_str();
       passwd = config().get("TEST_DB_PASSWD", "cheese").c_str();
 
-		sql_open = "(sql-driver \"";
-		sql_open += driver;
-		sql_open += "\")\n(sql-open \"";
-		sql_open += dbname;
-		sql_open += "\" \"";
-		sql_open += username;
-		sql_open += "\" \"";
-		sql_open += passwd;
-		sql_open += "\")\n";
+		// use postgres preferentially, unless its missing.
+#ifdef HAVE_ODBC_STORAGE
+		mkuri("odbc");
+#endif
+#ifdef HAVE_PGSQL_STORAGE
+		mkuri("postgres");
+#endif
+
+		sql_open = "(sql-open \"" + uri + "\")\n";
 	}
 	catch (InvalidParamException &e)
 	{
 		friendlyFailMessage();
 	}
+}
+
+void FetchUTest::mkuri(std::string driver)
+{
+	uri = driver;
+	uri += "://";
+	uri += username;
+	uri += ":";
+	uri += passwd;
+	if (driver == "postgres") uri += "@localhost";
+	uri += "/";
+	uri += dbname;
 }
 
 /*
@@ -157,7 +162,7 @@ void FetchUTest::tearDown(void)
 
 void FetchUTest::kill_data(void)
 {
-	SQLAtomStorage* astore = new SQLAtomStorage(driver, dbname, username, passwd);
+	SQLAtomStorage* astore = new SQLAtomStorage(uri);
 	if (!astore->connected())
 	{
 		logger().info("setUp: SQLAtomStorage cannot connect to database");

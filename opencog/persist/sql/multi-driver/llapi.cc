@@ -50,20 +50,9 @@
 
 /* =========================================================== */
 
-LLConnection::LLConnection(const char * _dbname,
-                           const char * _username,
-                           const char * _authentication)
+LLConnection::LLConnection(void)
 {
     is_connected = false;
-
-    if (NULL == _dbname)
-    {
-        PERR("No DB specified");
-        return;
-    }
-
-    dbname = _dbname;
-    username = _username;
 }
 
 /* =========================================================== */

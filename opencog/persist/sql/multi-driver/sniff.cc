@@ -159,8 +159,13 @@ int main ()
 #endif
 
 #if 1
-    // SQLAtomStorage *store = new SQLAtomStorage("opencog", "linas", NULL);
-    SQLAtomStorage *store = new SQLAtomStorage("postgres", "opencog_test", "opencog_tester", "cheese");
+    SQLAtomStorage *store = new SQLAtomStorage(
+             // "odbc://opencog_tester:cheese/opencog_test");
+             // "postgres://opencog_tester:cheese@localhost/opencog_test");
+             // "postgres://opencog_tester@localhost/opencog_test");
+             // "postgres:///opencog_test?user=opencog_tester");
+             // "postgres:///opencog_test?user=opencog_tester&host=localhost");
+             "postgres:///opencog_test?user=opencog_tester&password=cheese");
 
     AtomTable *table = new AtomTable();
     store->load(*table);

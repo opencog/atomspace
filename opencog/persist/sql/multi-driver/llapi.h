@@ -41,15 +41,11 @@ class LLConnection
 {
     friend class LLRecordSet;
     protected:
-        std::string dbname;
-        std::string username;
         bool is_connected;
         std::stack<LLRecordSet *> free_pool;
 
     public:
-        LLConnection(const char * dbname,
-                     const char * username,
-                     const char * authentication);
+        LLConnection(void);
         virtual ~LLConnection();
 
         bool connected(void) const;

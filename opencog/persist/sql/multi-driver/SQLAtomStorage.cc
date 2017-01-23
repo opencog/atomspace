@@ -348,32 +348,30 @@ bool SQLAtomStorage::idExists(const char * buff)
 /* ================================================================ */
 // Constructors
 
-void SQLAtomStorage::init(const char * driver,
-                          const char * dbname,
-                          const char * username,
-                          const char * authentication)
+void SQLAtomStorage::init(const char * uri)
 {
-	bool use_libpq = (0 == strcmp(driver, "postgres"));
-	bool use_odbc = (0 == strcmp(driver, "odbc"));
+	bool use_libpq = (0 == strncmp(uri, "postgres", 8));
+	bool use_odbc = (0 == strncmp(uri, "odbc", 4));
+
+	// default to postgres, if no driver given.
+	if (uri[0] == '/') use_libpq = true;
 
 	if (not use_libpq and not use_odbc)
-		throw IOException(TRACE_INFO, "Unknown driver '%s'\n", driver);
+		throw IOException(TRACE_INFO, "Unknown URI '%s'\n", uri);
 
-	// Create 24, by default ... I'm guessing that a number similar to
-	// the number of cores on a modern CPU will be enough.  This limits
-	// the number of writeback threads that can be used.
-#define DEFAULT_NUM_CONNS 24
-	for (int i=0; i<DEFAULT_NUM_CONNS; i++)
+	int ncores = std::thread::hardware_concurrency();
+	if (0 == ncores) ncores = 8;
+	for (int i=0; i<ncores; i++)
 	{
 		LLConnection* db_conn = nullptr;
 #ifdef HAVE_PGSQL_STORAGE
 		if (use_libpq)
-			db_conn = new LLPGConnection(dbname, username, authentication);
+			db_conn = new LLPGConnection(uri);
 #endif /* HAVE_PGSQL_STORAGE */
 
 #ifdef HAVE_ODBC_STORAGE
 		if (use_odbc)
-			db_conn = new ODBCConnection(dbname, username, authentication);
+			db_conn = new ODBCConnection(uri);
 #endif /* HAVE_ODBC_STORAGE */
 
 		conn_pool.push(db_conn);
@@ -410,23 +408,12 @@ void SQLAtomStorage::init(const char * driver,
 #endif // STORAGE_DEBUG
 }
 
-SQLAtomStorage::SQLAtomStorage(const char * driver,
-                               const char * dbname,
-                               const char * username,
-                               const char * authentication)
+// Initialize with 8 write-back queues, but maybe this should be...
+// I dunno -- std::thread::hardware_concurrency()  ???
+SQLAtomStorage::SQLAtomStorage(std::string uri)
 	: _write_queue(this, &SQLAtomStorage::vdo_store_atom, 8)
 {
-	init(driver, dbname, username, authentication);
-}
-
-SQLAtomStorage::SQLAtomStorage(const std::string& driver,
-                               const std::string& dbname,
-                               const std::string& username,
-                               const std::string& authentication)
-	: _write_queue(this, &SQLAtomStorage::vdo_store_atom, 8)
-{
-	init(driver.c_str(), dbname.c_str(), username.c_str(),
-	     authentication.c_str());
+	init(uri.c_str());
 }
 
 SQLAtomStorage::~SQLAtomStorage()

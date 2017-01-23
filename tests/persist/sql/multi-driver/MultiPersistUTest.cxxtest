@@ -51,7 +51,7 @@ class MultiPersistUTest :  public CxxTest::TestSuite
     private:
         AtomSpace *_as;
         SQLPersistSCM *_pm;
-        const char * driver;
+        std::string uri;
         const char * dbname;
         const char * username;
         const char * passwd;
@@ -90,6 +90,7 @@ class MultiPersistUTest :  public CxxTest::TestSuite
         void setUp(void);
         void tearDown(void);
         void kill_data(void);
+        void mkuri(std::string);
 
         void friendlyFailMessage()
         {
@@ -147,14 +148,6 @@ MultiPersistUTest:: MultiPersistUTest(void)
     hl2 = new Handle[NATOMS];
     hl3 = new Handle[NATOMS];
 
-    // use postgres preferentially, unless its missing.
-#ifdef HAVE_ODBC_STORAGE
-    driver = "odbc";
-#endif
-#ifdef HAVE_PGSQL_STORAGE
-    driver = "postgres";
-#endif
-
     try
     {
         // Get the database logins & etc from the config file.
@@ -166,6 +159,15 @@ MultiPersistUTest:: MultiPersistUTest(void)
     {
         friendlyFailMessage();
     }
+
+    // use postgres preferentially, unless its missing.
+#ifdef HAVE_ODBC_STORAGE
+    mkuri("odbc");
+#endif
+#ifdef HAVE_PGSQL_STORAGE
+    mkuri("postgres");
+#endif
+
 }
 
 /*
@@ -177,8 +179,7 @@ void MultiPersistUTest::setUp(void)
     _pm = new SQLPersistSCM(_as);
 
     try {
-        _pm->pick_driver(driver);
-        _pm->do_open(dbname, username, passwd);
+        _pm->do_open(uri);
     }
     catch (RuntimeException &e)
     {
@@ -201,11 +202,23 @@ void MultiPersistUTest::tearDown(void)
     kill_data();
 }
 
+void MultiPersistUTest::mkuri(std::string driver)
+{
+    uri = driver;
+    uri += "://";
+    uri += username;
+    uri += ":";
+    uri += passwd;
+    if (driver == "postgres") uri += "@localhost";
+    uri += "/";
+    uri += dbname;
+}
+
 // ============================================================
 
 void MultiPersistUTest::kill_data(void)
 {
-    SQLAtomStorage* astore = new SQLAtomStorage(driver, dbname, username, passwd);
+    SQLAtomStorage* astore = new SQLAtomStorage(uri);
     if (!astore->connected())
     {
         logger().info("setUp: SQLAtomStorage cannot connect to database");

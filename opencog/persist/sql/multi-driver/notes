@@ -499,3 +499,15 @@ Both:
         Start  41: FetchUTest
  41/109 Test  #41: FetchUTest .......................   Passed    1.58 sec
 
+Both, with the new URI scheme  (wtf is this different!??!!??)
+
+
+        Start  38: BasicSaveUTest
+ 38/109 Test  #38: BasicSaveUTest ...................   Passed    9.65 sec
+        Start  39: PersistUTest
+ 39/109 Test  #39: PersistUTest .....................   Passed    4.02 sec
+        Start  40: MultiPersistUTest
+ 40/109 Test  #40: MultiPersistUTest ................   Passed   11.37 sec
+        Start  41: FetchUTest
+ 41/109 Test  #41: FetchUTest .......................   Passed    2.08 sec
+
