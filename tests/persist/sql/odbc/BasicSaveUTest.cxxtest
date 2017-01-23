@@ -47,6 +47,7 @@ class BasicSaveUTest :  public CxxTest::TestSuite
 {
     private:
         AtomSpace *as;
+        const char * driver;
         const char * dbname;
         const char * username;
         const char * passwd;
@@ -125,9 +126,17 @@ class BasicSaveUTest :  public CxxTest::TestSuite
         void add_to_table(int, AtomTable *, std::string id);
         void check_table(int, AtomTable *, std::string id);
 
-        void test_single_atom(void);
-        void test_fresh_atom(void);
-        void test_table(void);
+        void do_test_single_atom(void);
+        void do_test_fresh_atom(void);
+        void do_test_table(void);
+
+        void test_pq_single_atom(void);
+        void test_pq_fresh_atom(void);
+        void test_pq_table(void);
+
+        void test_odbc_single_atom(void);
+        void test_odbc_fresh_atom(void);
+        void test_odbc_table(void);
 };
 
 /*
@@ -136,25 +145,43 @@ class BasicSaveUTest :  public CxxTest::TestSuite
 void BasicSaveUTest::setUp(void)
 {
     as = new AtomSpace();
-
-    astore = new SQLAtomStorage(dbname, username, passwd);
-    if (!astore->connected())
-    {
-        logger().info("setUp: cannot connect to database");
-        friendlyFailMessage(true);
-        exit(1);
-    }
-    logger().info("Connect to \"%s\" as \"%s\" passwd \"%s\"", dbname, username, passwd);
-
-    // Trash the contents of the database.
-    astore->kill_data();
 }
 
 void BasicSaveUTest::tearDown(void)
 {
-    astore->kill_data();
-    delete astore;
     delete as;
+}
+
+void BasicSaveUTest::test_odbc_single_atom(void)
+{
+	driver = "odbc";   
+	do_test_single_atom();
+}
+void BasicSaveUTest::test_odbc_fresh_atom(void)
+{
+	driver = "odbc";   
+	do_test_fresh_atom();
+}
+void BasicSaveUTest::test_odbc_table(void)
+{
+	driver = "odbc";   
+	do_test_table();
+}
+
+void BasicSaveUTest::test_pq_single_atom(void)
+{
+	driver = "postgres";
+	do_test_single_atom();
+}
+void BasicSaveUTest::test_pq_fresh_atom(void)
+{
+	driver = "postgres";
+	do_test_fresh_atom();
+}
+void BasicSaveUTest::test_pq_table(void)
+{
+	driver = "postgres";
+	do_test_table();
 }
 
 // ============================================================
@@ -214,7 +241,7 @@ static void atomCompare(AtomPtr a, AtomPtr b, const char* where)
  */
 void BasicSaveUTest::single_atom_save_restore(std::string id)
 {
-    SQLAtomStorage *store = new SQLAtomStorage(dbname, username, passwd);
+    SQLAtomStorage *store = new SQLAtomStorage(driver, dbname, username, passwd);
     if (!store->connected())
     {
         logger().debug("single_atom_save_restore: cannot connect to db");
@@ -334,10 +361,22 @@ void BasicSaveUTest::check_table(int idx, AtomTable *table, std::string id)
 
 // ============================================================
 
-void BasicSaveUTest::test_single_atom(void)
+void BasicSaveUTest::do_test_single_atom(void)
 {
     logger().debug("BEGIN TEST: %s", __FUNCTION__);
 
+    astore = new SQLAtomStorage(driver, dbname, username, passwd);
+    if (!astore->connected())
+    {
+        logger().info("setUp: cannot connect to database");
+        friendlyFailMessage(true);
+        exit(1);
+    }
+    logger().info("Using \"%s\", connect to \"%s\" as \"%s\" passwd \"%s\"", 
+        driver, dbname, username, passwd);
+
+    // Trash the contents of the database.
+    astore->kill_data();
     single_atom_save_restore("aaa ");
     single_atom_save_restore("bbb ");
     single_atom_save_restore("ccc ");
@@ -345,14 +384,17 @@ void BasicSaveUTest::test_single_atom(void)
     single_atom_save_restore("eee ");
     single_atom_save_restore("$$$ ");
 
+    astore->kill_data();
+    delete astore;
     logger().debug("END TEST: %s", __FUNCTION__);
 }
 
-void BasicSaveUTest::test_fresh_atom(void)
+void BasicSaveUTest::do_test_fresh_atom(void)
 {
     logger().debug("BEGIN TEST: %s", __FUNCTION__);
 
-    SQLAtomStorage *store = new SQLAtomStorage(dbname, username, passwd);
+    SQLAtomStorage *store = new SQLAtomStorage(driver,
+                                       dbname, username, passwd);
     if (!store->connected())
     {
         logger().debug("single_atom_save_restore: cannot connect to db");
@@ -394,11 +436,12 @@ void BasicSaveUTest::test_fresh_atom(void)
     logger().debug("END TEST: %s", __FUNCTION__);
 }
 
-void BasicSaveUTest::test_table(void)
+void BasicSaveUTest::do_test_table()
 {
     logger().debug("BEGIN TEST: %s", __FUNCTION__);
 
-    SQLAtomStorage *store = new SQLAtomStorage(dbname, username, passwd);
+    SQLAtomStorage *store = new SQLAtomStorage(driver,
+                                          dbname, username, passwd);
     if (!store->connected())
     {
         logger().debug("test_table: cannot connect to db");
@@ -419,7 +462,7 @@ void BasicSaveUTest::test_table(void)
     delete table1;
 
     // Reopen connection, and load the atom table.
-    store = new SQLAtomStorage(dbname, username, passwd);
+    store = new SQLAtomStorage(driver, dbname, username, passwd);
     TSM_ASSERT("Not connected to database", store->connected());
 
     AtomTable *table2 = new AtomTable();
