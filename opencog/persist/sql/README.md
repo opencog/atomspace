@@ -313,15 +313,12 @@ If you continue to get errors after that, read this for help fixing them:
    http://stackoverflow.com/questions/12616935/postgresql-shared-memory-settings
 
 
-User and Database Setup
------------------------
-A database user needs to be created; the database tables need to be
-created. The database user is NOT the same thing as a unix user:
-the user login is for the database, not the OS. Do NOT use the same
-login and password!
-
-Multiple databases can be created.  In this example, the database
-name will be "mycogdata".  Change this as desired.
+Database Setup
+--------------
+A database to hold the opencog data needs to be created.  Multiple
+databases can be created.  In this example, the database name will
+be "mycogdata".  Change this as desired.  The unit tests require a
+scratch database called "opencog_test".
 
 So, at the Unix command line:
 
@@ -348,8 +345,8 @@ Verify that worked out by typing \dg to see:
  alex      | Superuser                                      | {}
  postgres  | Superuser, Create role, Create DB, Replication | {}
 
-Then do Ctrl+D to exit, ignoring any message about psql_history, and return to
-your own account:
+Then do Ctrl+D to exit, ignoring any message about `psql_history`, and
+return to your own account:
 
 ```
    $ exit
@@ -361,11 +358,40 @@ course (no output if succesful):
 ```
    $ createdb mycogdata
 ```
+You should be able to access that database using the so-called `peer`
+authentication method. This command:
+```
+   $  psql mycogdata
+```
+should place you at the postgres-client prompt; you are now ready to
+create the opencog tables.  If the above didn't work, then you will
+have to create an explicit database user login, as explained below;
+otherwise, creating a user is optional.
 
-Next, create a database user named `opencog_user` with password `cheese`.
-You can pick a different username and password, but it must be consistent
-with the `~/.odbc.ini` file. Do NOT use your unix login password!  Pick
-something else! Create the user at the shell prompt:
+
+User setup
+----------
+(Optional)  You can continue without creating a database user, if you
+wish; postgres automatically provides password-less `peer`
+authentication to your unix username. However, the unit-tests do require
+that a distinct user be created, called `opencog_tester`, although you
+can bypass this, too, by altering the opencog test configuration file.
+
+The database user is NOT the same thing as a unix user: the login is for
+the database (only), not the OS.  The current authentication method that
+OpenCog uses is password-based, and the passwords must be supplied in
+clear-text; thus, you will want to pick a password that is DIFFERENT
+than your unix-pasword! This is because you will often be using the
+database password as clear-text, allowing almost anyone to see it.
+Experienced Postgres coder-admins are invited to set up more flexible,
+more sophisticated authentication schemes. Some tinkering with the
+OpenCog driver code will be required for this.
+
+In the following, a database user named `opencog_user` is created, and
+given the password `cheese`.  You can pick a different username and
+password.  If you are using ODBC (not recommended), then these two must
+be consistent with the `~/.odbc.ini` file. Do NOT use your unix password!
+Pick something else! Create the user at the shell prompt:
 
 ```
    $ psql -c "CREATE USER opencog_user WITH PASSWORD 'cheese'" -d mycogdata
@@ -379,22 +405,48 @@ Check that the above worked, by manually logging in:
 
 If you can't login, something up above failed.
 
+Next, see if you can login using unix-domain sockets, instead of
+tcpip sockets to `localhost`:
+
+```
+   $  psql mycogdata -U opencog_user
+```
+
+For most users, this will fail. To fix this, you need to edit the file
+```
+   /etc/postgresql/9.3/main/pg_hba.conf
+```
+as `root` or as user `postgres`, and add the following line. It will
+allow password logins to all local users:
+```
+   local   all      all           md5
+```
+
+Table initialization
+--------------------
+Next, you need to populate the database with OpenCog-specific tables.
 Navigate to the atomspace folder you cloned from GitHub:
 
 ```
    $  cd ~/atomspace
 ```
 
-So we can create the database tables:
+Create the database tables:
 
 ```
-   $ cat opencog/persist/sql/postgres/pg_atom.sql | psql mycogdata -U opencog_user -W -h localhost
+   $ cat opencog/persist/sql/postgres/pg_atom.sql | psql mycogdata
 ```
+
+If you are using a different user-id than your login, then you will
+have to add the `-U opencog_user` flag to the `psql` command.  If you
+created a distinct user, and did not set up the `hba.conf` file as
+above, then you also need a `-h localhost` flag, to access the database
+using TCP/IP sockets on the local network.
 
 Verify that the tables were created. Login as before:
 
 ```
-   $  psql mycogdata -U opencog_user -W -h localhost
+   $  psql mycogdata
 ```
 
 Then enter `\d` at the postgres prompt.  You should see this:
@@ -412,7 +464,7 @@ Then enter `\d` at the postgres prompt.  You should see this:
 
 If the above doesn't work, go back, and try again.
 
-Verify that `opencog_user` has write permissions to the tables. Do this
+Verify that you have write permissions to the tables. Do this by
 entering the below.
 
 ```
@@ -430,6 +482,7 @@ If the above doesn't work, go back, and try again. Exit with Ctrl+D.
 
 ODBC Setup, Part the Second
 ---------------------------
+(Optional, required only if you are using the deprecated ODBC bindings.)
 Edit `~/.odbc.ini` in your home directory to add a stanza of the form
 below. You MUST create one of these for EACH repository you plan to
 use! The name of the stanza, and of the database, can be whatever you
@@ -525,17 +578,21 @@ in the `~/.odbc.ini` file.  These are NOT (and should not be) your unix
 username and password!
 
 
-How To Pass the Unit Test
-=========================
-There are two unit tests for this API, called BasicSaveUTest and
-PersistUTest.  The CMakefile will not run compile or run these tests
-unless postgres is configured just-so.  To run and past these tests,
-you should:
+How To Pass the Unit Tests
+==========================
+There are four unit tests for this API, `BasicSaveUTest`, `PersisUTest`,
+`MultiPersistUTest` and `FetchUTest`.  The CMakefile will not compile or
+run these tests unless you have either:
+* created an `opencog_tester` user and an `opencog_test` database, or
+* altered the `lib/opencog-test.conf` file, and placed a different
+  user/database login combination in there.
+
+To run and past these tests, you should:
 
  * Read tests/persist/sql/README and follow the instructions there.
    They are almost identical to the instructions above, except that
-   they call for a test user to be set up. You can do that, or you
-   can use your current DB user.
+   they require a user called `opencog_tester` to be set up. You can
+   do that, or alter the config file to use your current DB user.
  * To compile and run:
 ```
     $ make test
