@@ -1,12 +1,25 @@
 
-                        HOWTO Run the SQL Tests
-                        -----------------------
+SQL Backend Tests
+-----------------
+There are two subdirectories, here:
 
-The test in this directory is disabled, because it requires some
-manual configuration in order to make it work. Most users don't
-bother with this configuration, so we disable it to avoid grief.
+* `multi-driver`
+* `postgres`
 
-To run this test, perform the following steps:
+Everything in the `postgres` directory is broken. Don't go there.
+
+The tests in `multi-driver` test both the `odbc` and the `postgres`
+driver backends.  The `postgres` driver seems to be faster.
+
+
+HOWTO Run the SQL Tests
+-----------------------
+
+The tests in this directory are disabled, because they require some
+manual configuration in order to make it work. Most users don't bother
+with this configuration, so we disable it to avoid grief.
+
+To run these tests, perform the following steps:
 
 1) If you choose to change the default database name and username, then
    edit tests/persist/sql/CMakeLists.txt and uncomment
