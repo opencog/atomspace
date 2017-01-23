@@ -85,6 +85,14 @@ bool LLConnection::connected (void) const
 
 /* =========================================================== */
 
+// This kind of static alloc is kind of crazy and bizarre, it was
+// driven by the need for odbc too be given mem locations in which
+// to scribble it's results. Ugly, but it works, with some kind of
+// reasonable efficiency, for now.
+//
+// XXX we could improve the postgres efficiency by just mallocing
+// these for odbc, and storing pointers for postgres. XXX TODO.
+
 #define DEFAULT_COLUMN_NAME_SIZE 121
 #define DEFAULT_VARCHAR_SIZE 4040
 
@@ -191,17 +199,15 @@ LLRecordSet::~LLRecordSet()
 int
 LLRecordSet::get_col_by_name (const char * fieldname)
 {
-    int i;
-    const char * fp;
-
     /* lookup the column number based on the column name */
+    int i;
     for (i=0; i<ncols; i++)
     {
         if (!strcasecmp (fieldname, column_labels[i])) return i;
     }
 
     /* oops. Try removing the table name if possible */
-    fp = strrchr (fieldname, '.');
+    const char * fp = strrchr (fieldname, '.');
     if (!fp) return -1;
     fp ++;
 
@@ -216,8 +222,6 @@ LLRecordSet::get_col_by_name (const char * fieldname)
 const char *
 LLRecordSet::get_value(const char * fieldname)
 {
-    int column;
-
     /* If number of columns is negative, then we haven't
      * gotten any results back yet.  Start by getting the
      * column labels.
@@ -227,16 +231,16 @@ LLRecordSet::get_value(const char * fieldname)
         get_column_labels();
     }
 
-    column = get_col_by_name (fieldname);
+    int column = get_col_by_name (fieldname);
     if (0 > column) return NULL;
 
     // LEAVE ("(rs=%p, fieldname=%s) {val=\'%s\'}", rs, fieldname,  rs->values[column]);
     return values[column];
 }
 
-int 
+int
 LLRecordSet::get_column_count()
-{ 
+{
     /* If number of columns is negative, then we haven't
      * gotten any results back yet.  Start by getting the
      * column labels which will set the column count.
@@ -247,7 +251,7 @@ LLRecordSet::get_column_count()
     return ncols;
 }
 
-const char * 
+const char *
 LLRecordSet::get_column_value(int column)
 {
     /* Make sure we have columns and this column is in range. */

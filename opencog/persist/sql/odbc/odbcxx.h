@@ -73,8 +73,8 @@ class ODBCRecordSet : public LLRecordSet
         void get_column_labels(void);
 
     public:
-        // return non-zero value if there's another row.
-        int fetch_row(void);
+        // return true if there's another row.
+        bool fetch_row(void);
 
         // call this, instead of the destructor,
         // when done with this instance.

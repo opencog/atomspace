@@ -371,7 +371,7 @@ ODBCRecordSet::get_column_labels(void)
 
 /* =========================================================== */
 
-int
+bool
 ODBCRecordSet::fetch_row(void)
 {
     // Columns can have null values.  In this case, the ODBC shims
@@ -383,17 +383,17 @@ ODBCRecordSet::fetch_row(void)
     SQLRETURN rc = SQLFetch(sql_hstmt);
 
     /* no more data */
-    if (SQL_NO_DATA == rc) return 0;
-    if (SQL_NULL_DATA == rc) return 0;
+    if (SQL_NO_DATA == rc) return false;
+    if (SQL_NULL_DATA == rc) return false;
 
     if ((SQL_SUCCESS != rc) and (SQL_SUCCESS_WITH_INFO != rc))
     {
         PRINT_SQLERR (SQL_HANDLE_STMT, sql_hstmt);
         PERR ("Can't fetch row rc=%d", rc);
-        return 0;
+        return false;
     }
 
-    return 1;
+    return true;
 }
 
 #endif /* HAVE_ODBC_STORAGE */

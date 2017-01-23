@@ -58,6 +58,8 @@ class LLPGRecordSet : public LLRecordSet
 	friend class LLPGConnection;
 	private:
 		PGresult* _result;
+		int _nrows;
+		int _curr_row;
 
 		void alloc_and_bind_cols(int ncols);
 		LLPGRecordSet(LLPGConnection *);
@@ -66,8 +68,8 @@ class LLPGRecordSet : public LLRecordSet
 		void get_column_labels(void);
 
 	public:
-		// return non-zero value if there's another row.
-		int fetch_row(void);
+		// return true if there's another row.
+		bool fetch_row(void);
 
 		// call this, instead of the destructor,
 		// when done with this instance.

@@ -78,8 +78,8 @@ class LLRecordSet
         int get_col_by_name (const char *);
 
     public:
-        // return non-zero value if there's another row.
-        virtual int fetch_row(void) = 0;
+        // return true if there's another row.
+        virtual bool fetch_row(void) = 0;
 
         const char * get_value(const char * fieldname);
         int get_column_count();
@@ -87,7 +87,7 @@ class LLRecordSet
 
         // call this, instead of the destructor,
         // when done with this instance.
-        void release(void);
+        virtual void release(void);
 
         // Calls the callback once for each row.
         template<class T> bool

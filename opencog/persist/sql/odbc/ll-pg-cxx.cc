@@ -125,12 +125,10 @@ LLPGConnection::exec(const char * buff)
 	    rest != PGRES_TUPLES_OK)
 	{
 		opencog::logger().warn("%s", PQresultErrorMessage(rs->_result));
-printf("duuude %s", PQresultErrorMessage(rs->_result));
 		rs->release();
 		PERR("Failed to execute!");
 	}
 
-printf("duuude done exec %s\n", buff);
 	/* Use numbr of columns to indicate that the query hasn't
 	 * given results yet. */
 	rs->ncols = -1;
@@ -152,6 +150,9 @@ LLPGRecordSet::alloc_and_bind_cols(int new_ncols)
 LLPGRecordSet::LLPGRecordSet(LLPGConnection* _conn)
 	: LLRecordSet(_conn)
 {
+	_result = nullptr;
+	_nrows = -1;
+	_curr_row = -1;
 }
 
 /* =========================================================== */
@@ -160,6 +161,10 @@ void
 LLPGRecordSet::release(void)
 {
 	PQclear(_result);
+	_result = nullptr;
+	_nrows = -1;
+	_curr_row = -1;
+	ncols = -1;
 	LLRecordSet::release();
 }
 
@@ -171,6 +176,8 @@ LLPGRecordSet::~LLPGRecordSet()
 
 /* =========================================================== */
 
+#define DEFAULT_COLUMN_NAME_SIZE 121
+
 void
 LLPGRecordSet::get_column_labels(void)
 {
@@ -181,23 +188,37 @@ LLPGRecordSet::get_column_labels(void)
 	 * column labels.
 	 */
 
-printf("duuuuuuuuuuuuuuude get teh column labs!!!!\n");
+	ncols = PQnfields(_result);
+	for (int i=0; i<ncols; i++)
+	{
+		strncpy(column_labels[i], PQfname(_result, i), DEFAULT_COLUMN_NAME_SIZE);
+	}
 }
 
 /* =========================================================== */
 
+#define DEFAULT_VARCHAR_SIZE 4040
 
-int
+bool
 LLPGRecordSet::fetch_row(void)
 {
-	// Columns can have null values.  In this case, the PG shims
-	// will neither set nor clear the value-strings. As a result,
-	// some random value from a previous query will still be sitting
-	// there, in the values, and get reported to the unlucky user.
-	for (int i=0; i<ncols; i++) values[i][0] = 0;
+	if (_nrows < 0)
+	{
+		_curr_row = 0;
+		_nrows = PQntuples(_result);
+	}
+	if (_nrows <= _curr_row or _curr_row < 0) return false;
 
-printf("duuuuuuuuuuuuuuude get fetch the rowss!!!!\n");
-	return 0;
+	if (ncols < 0) get_column_labels();
+
+	for (int i=0; i< ncols; i++)
+	{
+// XXX TODO don't copy, just store pointers.
+		values[i][0] = 0;
+		strncpy(values[i], PQgetvalue(_result, _curr_row, i), DEFAULT_VARCHAR_SIZE);
+	}
+	_curr_row++;
+	return true;
 }
 
 #endif /* HAVE_PGSQL_STORAGE */
