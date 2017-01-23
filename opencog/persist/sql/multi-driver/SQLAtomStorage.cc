@@ -316,7 +316,10 @@ class SQLAtomStorage::Response
 ///
 /// XXX Should do the same for Response rp.rs->release() to auto-release.
 
-/// Get an SQL connection
+/// Get an SQL connection.  If the pool is empty, this will block,
+/// waiting for a connection to be returned to the pool. Thus, the
+/// size of the pool regulates how many outstanding SQL requests can
+/// be pedning in parallel.
 LLConnection* SQLAtomStorage::get_conn()
 {
 	return conn_pool.pop();
