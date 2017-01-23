@@ -31,7 +31,7 @@
 #include <opencog/atoms/base/atom_types.h>
 #include <opencog/atoms/base/Atom.h>
 #include <opencog/guile/SchemeEval.h>
-#include <opencog/persist/sql/odbc/SQLAtomStorage.h>
+#include <opencog/persist/sql/multi-driver/SQLAtomStorage.h>
 #include <opencog/truthvalue/SimpleTruthValue.h>
 
 #include <opencog/util/Logger.h>

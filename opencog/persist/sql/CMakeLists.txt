@@ -22,7 +22,7 @@ INSTALL (TARGETS sql-support
     DESTINATION "lib${LIB_DIR_SUFFIX}/opencog"
 )
 
-ADD_SUBDIRECTORY(odbc)
+ADD_SUBDIRECTORY(multi-driver)
 
 #IF (PGSQL_FOUND)
 #	ADD_SUBDIRECTORY(postgres)

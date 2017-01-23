@@ -31,7 +31,7 @@
 #include <opencog/atomspace/AtomSpace.h>
 #include <opencog/atoms/base/Handle.h>
 #include <opencog/persist/sql/SQLBackingStore.h>
-#include <opencog/persist/sql/odbc/SQLAtomStorage.h>
+#include <opencog/persist/sql/multi-driver/SQLAtomStorage.h>
 
 namespace opencog
 {

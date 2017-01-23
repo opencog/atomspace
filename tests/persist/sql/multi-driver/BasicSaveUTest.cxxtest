@@ -34,7 +34,7 @@
 #include <opencog/atoms/base/atom_types.h>
 #include <opencog/truthvalue/SimpleTruthValue.h>
 #include <opencog/atomspace/AtomSpace.h>
-#include <opencog/persist/sql/odbc/SQLAtomStorage.h>
+#include <opencog/persist/sql/multi-driver/SQLAtomStorage.h>
 
 #include <opencog/util/Logger.h>
 #include <opencog/util/Config.h>
@@ -130,13 +130,17 @@ class BasicSaveUTest :  public CxxTest::TestSuite
         void do_test_fresh_atom(void);
         void do_test_table(void);
 
+#ifdef HAVE_PGSQL_STORAGE
         void test_pq_single_atom(void);
         void test_pq_fresh_atom(void);
         void test_pq_table(void);
+#endif
 
+#ifdef HAVE_ODBC_STORAGE
         void test_odbc_single_atom(void);
         void test_odbc_fresh_atom(void);
         void test_odbc_table(void);
+#endif
 };
 
 /*
@@ -152,6 +156,7 @@ void BasicSaveUTest::tearDown(void)
     delete as;
 }
 
+#ifdef HAVE_ODBC_STORAGE
 void BasicSaveUTest::test_odbc_single_atom(void)
 {
 	driver = "odbc";   
@@ -167,7 +172,9 @@ void BasicSaveUTest::test_odbc_table(void)
 	driver = "odbc";   
 	do_test_table();
 }
+#endif // HAVE_ODBC_STORAGE
 
+#ifdef HAVE_PGSQL_STORAGE
 void BasicSaveUTest::test_pq_single_atom(void)
 {
 	driver = "postgres";
@@ -183,6 +190,7 @@ void BasicSaveUTest::test_pq_table(void)
 	driver = "postgres";
 	do_test_table();
 }
+#endif // HAVE_PGSQL_STORAGE
 
 // ============================================================
 

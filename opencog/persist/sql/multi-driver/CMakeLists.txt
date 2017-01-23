@@ -65,6 +65,5 @@ INSTALL (TARGETS persist-sql
 INSTALL (FILES
 	llapi.h
 	SQLAtomStorage.h
-	SQLPersistSCM.h
-	DESTINATION "include/opencog/persist/sql/odbc"
+	DESTINATION "include/opencog/persist/sql/multi-driver"
 )

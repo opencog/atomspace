@@ -14,7 +14,7 @@
 #include <opencog/truthvalue/SimpleTruthValue.h>
 
 #include <opencog/atomspaceutils/TLB.h>
-#include <opencog/persist/sql/odbc/SQLAtomStorage.h>
+#include <opencog/persist/sql/multi-driver/SQLAtomStorage.h>
 
 using namespace opencog;
 
