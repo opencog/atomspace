@@ -27,6 +27,7 @@
  * Free Software Foundation, Inc.,
  * 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
  */
+#include <cstdio>
 
 #include <opencog/atoms/base/Atom.h>
 #include <opencog/atoms/base/Link.h>
@@ -39,7 +40,7 @@
 #include <opencog/util/Logger.h>
 #include <opencog/util/Config.h>
 
-#include <cstdio>
+#include "mkuri.h"
 
 using namespace opencog;
 
@@ -121,8 +122,6 @@ class BasicSaveUTest :  public CxxTest::TestSuite
             exit(1);
         }
 
-        void mkuri(std::string);
-
         SQLAtomStorage *astore;
         void single_atom_save_restore(std::string id);
         void add_to_table(int, AtomTable *, std::string id);
@@ -154,50 +153,24 @@ void BasicSaveUTest::tearDown(void)
     delete as;
 }
 
-void BasicSaveUTest::mkuri(std::string driver)
-{
-    // Sigh. The buildbot postgres config balks at the
-    // "localhost" URI scheme.
-    if (driver == "postgres")
-    {
-        uri = driver;
-        uri += ":///";
-        uri += dbname;
-        uri += "?user=";
-        uri += username;
-        uri += "&password=";
-        uri += passwd;
-    }
-    else
-    {
-        uri = driver;
-        uri += "://";
-        uri += username;
-        uri += ":";
-        uri += passwd;
-        uri += "/";
-        uri += dbname;
-    }
-}
-
 void BasicSaveUTest::test_odbc_single_atom(void)
 {
 #if HAVE_ODBC_STORAGE
-	mkuri("odbc");
+	uri = mkuri("odbc", dbname, username, passwd);
 	do_test_single_atom();
 #endif
 }
 void BasicSaveUTest::test_odbc_fresh_atom(void)
 {
 #if HAVE_ODBC_STORAGE
-	mkuri("odbc");
+	uri = mkuri("odbc", dbname, username, passwd);
 	do_test_fresh_atom();
 #endif
 }
 void BasicSaveUTest::test_odbc_table(void)
 {
 #if HAVE_ODBC_STORAGE
-	mkuri("odbc");
+	uri = mkuri("odbc", dbname, username, passwd);
 	do_test_table();
 #endif
 }
@@ -205,21 +178,21 @@ void BasicSaveUTest::test_odbc_table(void)
 void BasicSaveUTest::test_pq_single_atom(void)
 {
 #if HAVE_PGSQL_STORAGE
-	mkuri("postgres");
+	uri = mkuri("postgres", dbname, username, passwd);
 	do_test_single_atom();
 #endif // HAVE_PGSQL_STORAGE
 }
 void BasicSaveUTest::test_pq_fresh_atom(void)
 {
 #if HAVE_PGSQL_STORAGE
-	mkuri("postgres");
+	uri = mkuri("postgres", dbname, username, passwd);
 	do_test_fresh_atom();
 #endif // HAVE_PGSQL_STORAGE
 }
 void BasicSaveUTest::test_pq_table(void)
 {
 #if HAVE_PGSQL_STORAGE
-	mkuri("postgres");
+	uri = mkuri("postgres", dbname, username, passwd);
 	do_test_table();
 #endif // HAVE_PGSQL_STORAGE
 }

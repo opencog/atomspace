@@ -28,6 +28,8 @@
  * 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
  */
 
+#include <cstdio>
+
 #include <opencog/atoms/base/atom_types.h>
 #include <opencog/atoms/base/Atom.h>
 #include <opencog/atoms/base/Link.h>
@@ -39,7 +41,7 @@
 #include <opencog/util/Logger.h>
 #include <opencog/util/Config.h>
 
-#include <cstdio>
+#include "mkuri.h"
 
 using namespace opencog;
 
@@ -79,7 +81,6 @@ class PersistUTest :  public CxxTest::TestSuite
 
         void setUp(void);
         void tearDown(void);
-        void mkuri(std::string);
         void kill_data(void);
 
         void friendlyFailMessage()
@@ -148,27 +149,15 @@ void PersistUTest::tearDown(void)
     kill_data();
 }
 
-void PersistUTest::mkuri(std::string driver)
-{
-    uri = driver;
-    uri += "://";
-    uri += username;
-    uri += ":";
-    uri += passwd;
-    if (driver == "postgres") uri += "@localhost";
-    uri += "/";
-    uri += dbname;
-}
-
 // ============================================================
 
 void PersistUTest::kill_data(void)
 {
 #if HAVE_ODBC_STORAGE
-    if ("" == uri) mkuri("odbc");
+    if ("" == uri) uri = mkuri("odbc", dbname, username, passwd);
 #endif
 #if HAVE_PGSQL_STORAGE
-    if ("" == uri) mkuri("postgres");
+    if ("" == uri) uri = mkuri("postgres", dbname, username, passwd);
 #endif
     SQLAtomStorage* astore = new SQLAtomStorage(uri);
     if (!astore->connected())
@@ -382,7 +371,7 @@ void PersistUTest::check_empty(int idx, AtomSpace *space)
 void PersistUTest::test_odbc_atomspace(void)
 {
 #ifdef HAVE_ODBC_STORAGE
-    mkuri("odbc");
+    uri = mkuri("odbc", dbname, username, passwd);
     do_test_atomspace();
 #endif
 }
@@ -390,7 +379,7 @@ void PersistUTest::test_odbc_atomspace(void)
 void PersistUTest::test_pq_atomspace(void)
 {
 #ifdef HAVE_PGSQL_STORAGE
-    mkuri("postgres");
+    uri = mkuri("postgres", dbname, username, passwd);
     do_test_atomspace();
 #endif
 }

@@ -28,6 +28,8 @@
  * 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
  */
 
+#include <cstdio>
+
 #include <opencog/atoms/base/atom_types.h>
 #include <opencog/atoms/base/Atom.h>
 #include <opencog/guile/SchemeEval.h>
@@ -37,7 +39,7 @@
 #include <opencog/util/Logger.h>
 #include <opencog/util/Config.h>
 
-#include <cstdio>
+#include "mkuri.h"
 
 using namespace opencog;
 
@@ -66,7 +68,6 @@ class FetchUTest :  public CxxTest::TestSuite
 		void setUp(void);
 		void tearDown(void);
 		void kill_data(void);
-		void mkuri(std::string);
 
 		void friendlyFailMessage()
 		{
@@ -108,10 +109,10 @@ FetchUTest::FetchUTest(void)
 
 		// use postgres preferentially, unless its missing.
 #ifdef HAVE_ODBC_STORAGE
-		mkuri("odbc");
+		uri = mkuri("odbc", dbname, username, passwd);
 #endif
 #ifdef HAVE_PGSQL_STORAGE
-		mkuri("postgres");
+		uri = mkuri("postgres", dbname, username, passwd);
 #endif
 
 		sql_open = "(sql-open \"" + uri + "\")\n";
@@ -120,18 +121,6 @@ FetchUTest::FetchUTest(void)
 	{
 		friendlyFailMessage();
 	}
-}
-
-void FetchUTest::mkuri(std::string driver)
-{
-	uri = driver;
-	uri += "://";
-	uri += username;
-	uri += ":";
-	uri += passwd;
-	if (driver == "postgres") uri += "@localhost";
-	uri += "/";
-	uri += dbname;
 }
 
 /*
