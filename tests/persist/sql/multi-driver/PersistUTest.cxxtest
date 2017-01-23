@@ -47,7 +47,7 @@ class PersistUTest :  public CxxTest::TestSuite
 {
     private:
         AtomSpace *_as;
-        const char * driver;
+        std::string uri;
         const char * dbname;
         const char * username;
         const char * passwd;
@@ -79,6 +79,7 @@ class PersistUTest :  public CxxTest::TestSuite
 
         void setUp(void);
         void tearDown(void);
+        void mkuri(std::string);
         void kill_data(void);
 
         void friendlyFailMessage()
@@ -147,17 +148,29 @@ void PersistUTest::tearDown(void)
     kill_data();
 }
 
+void PersistUTest::mkuri(std::string driver)
+{
+    uri = driver;
+    uri += "://";
+    uri += username;
+    uri += ":";
+    uri += passwd;
+    if (driver == "postgres") uri += "@localhost";
+    uri += "/";
+    uri += dbname;
+}
+
 // ============================================================
 
 void PersistUTest::kill_data(void)
 {
 #if HAVE_ODBC_STORAGE
-    if (nullptr==driver) driver = "odbc";
+    if ("" == uri) mkuri("odbc");
 #endif
 #if HAVE_PGSQL_STORAGE
-    if (nullptr==driver) driver = "postgres";
+    if ("" == uri) mkuri("postgres");
 #endif
-    SQLAtomStorage* astore = new SQLAtomStorage(driver, dbname, username, passwd);
+    SQLAtomStorage* astore = new SQLAtomStorage(uri);
     if (!astore->connected())
     {
         logger().info("setUp: SQLAtomStorage cannot connect to database");
@@ -369,7 +382,7 @@ void PersistUTest::check_empty(int idx, AtomSpace *space)
 void PersistUTest::test_odbc_atomspace(void)
 {
 #ifdef HAVE_ODBC_STORAGE
-    driver = "odbc";
+    mkuri("odbc");
     do_test_atomspace();
 #endif
 }
@@ -377,7 +390,7 @@ void PersistUTest::test_odbc_atomspace(void)
 void PersistUTest::test_pq_atomspace(void)
 {
 #ifdef HAVE_PGSQL_STORAGE
-    driver = "postgres";
+    mkuri("postgres");
     do_test_atomspace();
 #endif
 }
@@ -390,8 +403,7 @@ void PersistUTest::do_test_atomspace(void)
     TSM_ASSERT("Persist Module not loaded", _pm);
 
     try {
-        _pm->pick_driver(driver);
-        _pm->do_open(dbname, username, passwd);
+        _pm->do_open(uri);
     }
     catch (RuntimeException &e)
     {
