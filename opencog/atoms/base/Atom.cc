@@ -332,7 +332,7 @@ IncomingSet Atom::getIncomingSet(AtomSpace* as)
         // Prevent update of set while a copy is being made.
         std::lock_guard<std::mutex> lck (_mtx);
         IncomingSet iset;
-        for (WinkPtr w : _incoming_set->_iset)
+        for (const WinkPtr& w : _incoming_set->_iset)
         {
             LinkPtr l(w.lock());
             if (l and atab->in_environ(l))
