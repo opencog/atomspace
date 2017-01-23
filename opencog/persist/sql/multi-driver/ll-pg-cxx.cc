@@ -46,7 +46,8 @@
 
 LLPGConnection::LLPGConnection(const char * _dbname,
 							   const char * _username,
-							   const char * _authentication)
+							   const char * _authentication,
+ 							   const char * _host)
 	: LLConnection(_dbname, _username, _authentication)
 {
 	is_connected = false;
@@ -66,6 +67,9 @@ LLPGConnection::LLPGConnection(const char * _dbname,
 	constr += _username;
 	constr += " password=";
 	constr += _authentication;
+	constr += " host=";
+	constr += _host;
+
 	_pgconn = PQconnectdb(constr.c_str());
 
 	// If the above did not work, try again with localhst-tcpip.
