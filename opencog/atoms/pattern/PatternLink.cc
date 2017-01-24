@@ -602,6 +602,7 @@ void PatternLink::unbundle_virtual(const OrderedHandleSet& vars,
 			// But they're virtual only if they have two or more
 			// unquoted, bound variables in them. Otherwise, they
 			// can be evaluated on the spot.
+			// TODO: shouldn't there be unscoped as well?
 			if (2 <= num_unquoted_in_tree(sh, vars))
 			{
 				is_virtual = true;

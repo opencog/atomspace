@@ -49,12 +49,12 @@ bool Implicator::grounding(const HandleMap &var_soln,
 	if (_result_set.size() >= max_results)
 		return true;
 
-	// Ignore the case where PLN is wants to create badly-formed
-	// ImplicationLinks on purpose. This is actually a PLN bug,
-	// See issue #950 and pull req #962.  That is, we should NOT
-	// use a try-catch here to mask out user-errors -- user errors
-	// really should be reported to the user. But for now, this is
-	// needed. XXX FIXME later.
+	// Ignore the case where the URE creates ill-formed links (due to
+	// rules producing nothing). Ideally this should be treated as a
+	// user error, that is the user should design rule pre-conditions
+	// to prevent them from producing nothing.  In practice it is
+	// difficult to insure so meanwhile this try-catch is used. See
+	// issue #950 and pull req #962. XXX FIXME later.
 	try {
 		Handle h = inst.instantiate(implicand, var_soln);
 		insert_result(h);
@@ -110,7 +110,7 @@ static Handle do_imply(AtomSpace* as,
 		return gl;
 	}
 
-	// If we are here, then there were zero mathces.
+	// If we are here, then there were zero matches.
 	//
 	// There are certain useful queries, where the goal of the query
 	// is to determine that some clause or set of clauses are absent

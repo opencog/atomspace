@@ -458,7 +458,7 @@ bool PatternLink::satisfy(PatternMatchCallback& pmcb) const
 // http://wiki.opencog.org/w/Development_standards#Print_OpenCog_Objects
 std::string oc_to_string(const Pattern& pattern)
 {
-   return pattern.to_string();
+	return pattern.to_string();
 }
 
 /* ===================== END OF FILE ===================== */
