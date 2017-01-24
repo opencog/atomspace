@@ -345,7 +345,7 @@ bool PatternLink::satisfy(PatternMatchCallback& pmcb) const
 	// If there is just one connected component, we don't have to
 	// do anything special to find a grounding for it.  Proceed
 	// in a direct fashion.
-	if (1 == _num_comps)
+	if (_num_comps <= 1)
 	{
 		PatternMatchEngine pme(pmcb);
 

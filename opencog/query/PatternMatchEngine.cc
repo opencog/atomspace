@@ -21,6 +21,7 @@
  * 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
  */
 
+#include <opencog/util/algorithm.h>
 #include <opencog/util/oc_assert.h>
 #include <opencog/util/Logger.h>
 #include <opencog/atomutils/FindUtils.h>
@@ -1819,6 +1820,22 @@ void PatternMatchEngine::clear_current_state(void)
 	_perm_state.clear();
 
 	issued.clear();
+}
+
+bool PatternMatchEngine::explore_constant_evaluatables(const HandleSeq& clauses)
+{
+	bool found = true;
+	for (const Handle& clause : clauses) {
+		if (is_in(clause, _pat->evaluatable_holders)) {
+			found = _pmc.evaluate_sentence(clause, HandleMap());
+			if (not found)
+				break;
+		}
+	}
+	if (found)
+		_pmc.grounding(HandleMap(), HandleMap());
+
+	return found;
 }
 
 PatternMatchEngine::PatternMatchEngine(PatternMatchCallback& pmcb)

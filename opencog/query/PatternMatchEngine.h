@@ -219,6 +219,11 @@ public:
 	// matches.
 	bool explore_neighborhood(const Handle&, const Handle&, const Handle&);
 
+	// Evaluate constant evaluatable and ground it via the
+	// PatternMatchCallback. It is assumed that all clauses are
+	// connected by an AndLink.
+	bool explore_constant_evaluatables(const HandleSeq& clauses);
+
 	// Handy-dandy utilities
 	static void log_solution(const HandleMap &vars,
 	                         const HandleMap &clauses);

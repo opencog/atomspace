@@ -56,9 +56,18 @@ void PatternLink::common_init(void)
 	validate_clauses(_varlist.varset, _pat.clauses, _pat.constants);
 	extract_optionals(_varlist.varset, _pat.clauses);
 
-	// Locate the black-box clauses.
+	// Locate as well as black-box and clear-box clauses.
 	unbundle_virtual(_varlist.varset, _pat.cnf_clauses,
 	                 _fixed, _virtual, _pat.black);
+
+	// Same as above but for constant clauses. The fixed clauses (non
+	// virtual because with less than 2 variables) are pushed into a
+	// dummy container, constant_fixed as they are not useful for
+	// subsequent component analysis.
+	HandleSeq constant_fixed;
+	unbundle_virtual(_varlist.varset, _pat.constants,
+	                 constant_fixed, _virtual, _pat.black);
+
 	_num_virts = _virtual.size();
 
 	add_dummies();
@@ -101,7 +110,7 @@ void PatternLink::common_init(void)
 /// The second half of the common initialization sequence
 void PatternLink::setup_components(void)
 {
-	if (1 == _num_comps) return;
+	if (_num_comps <= 1) return;
 
 	// If we are here, then set up a PatternLink for each connected
 	// component.
@@ -432,25 +441,16 @@ void PatternLink::validate_clauses(OrderedHandleSet& vars,
                                    HandleSeq& constants)
 
 {
-	// XXX FIXME The AIML ruleset includes BindLinks that have no
-	// variables in them, and the clauses are all constant.  This
-	// is kind of uncomfortably weird.  Does this really happen?
-	// There is a unit test for this - arcana-const.scm Should
-	// this unit test be disabled? XXX DualLink makes this obsolete.
-	// This if statement should be removed.
-	if (0 < vars.size())
+	// Make sure that the user did not pass in bogus clauses.
+	// Make sure that every clause contains at least one variable.
+	// The presence of constant clauses will mess up the current
+	// pattern matcher.  Constant clauses are "trivial" to match,
+	// and so its pointless to even send them through the system.
+	bool bogus = remove_constants(vars, clauses, constants);
+	if (bogus)
 	{
-		// Make sure that the user did not pass in bogus clauses.
-		// Make sure that every clause contains at least one variable.
-		// The presence of constant clauses will mess up the current
-		// pattern matcher.  Constant clauses are "trivial" to match,
-		// and so its pointless to even send them through the system.
-		bool bogus = remove_constants(vars, clauses, constants);
-		if (bogus)
-		{
-			logger().warn("%s: Constant clauses removed from pattern",
-			              __FUNCTION__);
-		}
+		logger().warn("%s: Constant clauses removed from pattern",
+		              __FUNCTION__);
 	}
 
 	// Make sure that each declared variable appears in some clause.
@@ -467,13 +467,6 @@ void PatternLink::validate_clauses(OrderedHandleSet& vars,
 			   v->toShortString().c_str());
 		}
 	}
-
-	// The above 1-2 combination of removing constant clauses, and
-	// removing variables, can result in an empty body. That surely
-	// warrants a throw, and BuggyQuoteUTest is expecting one.
-	if (0 == vars.size() and 0 == clauses.size())
-			throw InvalidParamException(TRACE_INFO,
-			   "No variable appears (unquoted) anywhere in any clause!");
 }
 
 /* ================================================================= */
