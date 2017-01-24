@@ -210,7 +210,7 @@ class PatternMatchCallback
 		 * grounding, and forces a backtrack.
 		 */
 		virtual bool evaluate_sentence(const Handle& eval,
-		                      const std::map<Handle,Handle>& gnds) = 0;
+		                               const HandleMap& gnds) = 0;
 
 		/**
 		 * Called when a top-level clause has been fully grounded.

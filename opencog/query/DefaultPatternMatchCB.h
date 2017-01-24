@@ -82,8 +82,7 @@ class DefaultPatternMatchCB : public virtual PatternMatchCallback
 		 * Called when a virtual link is encountered. Returns false
 		 * to reject the match.
 		 */
-		virtual bool evaluate_sentence(const Handle& pat,
-		                           const std::map<Handle,Handle>& gnds)
+		virtual bool evaluate_sentence(const Handle& pat, const HandleMap& gnds)
 		{ return eval_sentence(pat, gnds); }
 
 		virtual const std::set<Type>& get_connectives(void)
