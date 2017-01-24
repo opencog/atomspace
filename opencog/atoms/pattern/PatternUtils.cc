@@ -65,7 +65,9 @@ bool remove_constants(const OrderedHandleSet &vars,
 		    or contains_atomtype(clause, DEFINED_PREDICATE_NODE)
 		    or contains_atomtype(clause, DEFINED_SCHEMA_NODE)
 		    or contains_atomtype(clause, GROUNDED_PREDICATE_NODE)
-		    or contains_atomtype(clause, GROUNDED_SCHEMA_NODE))
+		    or contains_atomtype(clause, GROUNDED_SCHEMA_NODE)
+		    or contains_atomtype(clause, IDENTICAL_LINK)
+		    or contains_atomtype(clause, EQUAL_LINK))
 		{
 			++i;
 		}
