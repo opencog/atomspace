@@ -1927,9 +1927,8 @@ void PatternMatchEngine::log_solution(
 /**
  * For debug logging only
  */
-void PatternMatchEngine::log_term(
-                  const OrderedHandleSet &vars,
-                  const HandleSeq &clauses)
+void PatternMatchEngine::log_term(const OrderedHandleSet &vars,
+                                  const HandleSeq &clauses)
 {
 	logger().fine("Clauses:");
 	for (Handle h : clauses) log(h);
@@ -1939,13 +1938,11 @@ void PatternMatchEngine::log_term(
 }
 #else
 
-void PatternMatchEngine::log_solution(
-	const HandleMap &vars,
-	const HandleMap &clauses) {}
+void PatternMatchEngine::log_solution(const HandleMap &vars,
+                                      const HandleMap &clauses) {}
 
-void PatternMatchEngine::log_term(
-                  const OrderedHandleSet &vars,
-                  const HandleSeq &clauses) {}
+void PatternMatchEngine::log_term(const OrderedHandleSet &vars,
+                                  const HandleSeq &clauses) {}
 #endif
 
 /* ===================== END OF FILE ===================== */
