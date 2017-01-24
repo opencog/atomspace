@@ -59,9 +59,7 @@ public:
 	void test_criminal();
 	// TODO: re-enable the following tests
 	void test_induction();
-	// TODO: think about fixing or removing the follow tests
-	// void test_focus_set();
-	// void test_virtual_no_grnd();
+	void test_focus_set();
 };
 
 void BackwardChainerUTest::setUp()
@@ -503,141 +501,66 @@ void BackwardChainerUTest::test_induction()
 	logger().debug("END TEST: %s", __FUNCTION__);
 }
 
-// void BackwardChainerUTest::test_focus_set()
-// {
-// 	logger().debug("BEGIN TEST: %s", __FUNCTION__);
+void BackwardChainerUTest::test_focus_set()
+{
+	logger().debug("BEGIN TEST: %s", __FUNCTION__);
 
-// 	_as.clear();
+	_as.clear();
 
-// 	_eval.eval("(load-from-path \"tests/rule-engine/bc-modus-ponens-config.scm\")");
-// 	_eval.eval("(load-from-path \"tests/rule-engine/bc-animals.scm\")");
-// 	randGen().seed(0);
+	_eval.eval("(load-from-path \"tests/rule-engine/conditional-instantiation-config.scm\")");
+	_eval.eval("(load-from-path \"tests/rule-engine/bc-animals.scm\")");
+	randGen().seed(500);
 
-// 	// load 1 modus ponens rule
-// 	Handle top_rbs = _as.get_node(CONCEPT_NODE, UREConfigReader::top_rbs_name);
-// 	BackwardChainer bc(_as, top_rbs);
+	// load 1 modus ponens rule
+	Handle top_rbs = _as.get_node(CONCEPT_NODE, UREConfigReader::top_rbs_name);
 
-// 	Handle target_var = _eval.eval_h("(VariableNode \"$what\")");
-// 	Handle target =
-// 	        _eval.eval_h("(InheritanceLink"
-// 	                     "   (VariableNode \"$what\")"
-// 	                     "   (ConceptNode \"green\"))");
-// 	Handle focus_set =
-// 	        _eval.eval_h("(SetLink"
-// 	                     " (InheritanceLink"
-// 	                     "   (ConceptNode \"tree\")"
-// 	                     "   (ConceptNode \"plant\"))"
-// 	                     " (ImplicationLink (stv 1.0 1.0)"
-// 	                     "   (InheritanceLink"
-// 	                     "     (VariableNode \"$P\")"
-// 	                     "     (ConceptNode \"plant\")"
-// 	                     "   )"
-// 	                     "   (InheritanceLink"
-// 	                     "     (VariableNode \"$P\")"
-// 	                     "     (ConceptNode \"green\")"
-// 	                     "   )"
-// 	                     " )"
-// 	                     ")");
-// 	Handle soln1 = _eval.eval_h("(ConceptNode \"tree\")");
+	Handle green = an(CONCEPT_NODE, "green"),
+		Fritz = an(CONCEPT_NODE, "Fritz"),
+		what = an(VARIABLE_NODE, "$what"),
+		target = al(INHERITANCE_LINK, what, green),
+		concept = an(TYPE_NODE, "ConceptNode"),
+		vardecl = al(TYPED_VARIABLE_LINK, what, concept);
 
-// 	// should not be able to find this solution outside the focus set
-// 	Handle soln2 = _eval.eval_h("(ConceptNode \"Fritz\")");
+	Handle focus_set =
+		_eval.eval_h("(SetLink"
+		             " (InheritanceLink"
+		             "   (ConceptNode \"tree\")"
+		             "   (ConceptNode \"plant\"))"
+		             " (ImplicationLink (stv 1.0 1.0)"
+		             "   (InheritanceLink"
+		             "     (VariableNode \"$P\")"
+		             "     (ConceptNode \"plant\")"
+		             "   )"
+		             "   (InheritanceLink"
+		             "     (VariableNode \"$P\")"
+		             "     (ConceptNode \"green\")"
+		             "   )"
+		             " )"
+		             ")");
 
-// 	bc.set_target(target, focus_set);
-// 	bc.get_config().set_maximum_iterations(300);
-// 	bc.do_chain();
+	BackwardChainer bc(_as, top_rbs, target, vardecl, focus_set);
 
-// 	HandleMultimap results = bc.get_chaining_result();
+	Handle soln1 = _eval.eval_h("(InheritanceLink"
+	                            "  (ConceptNode \"tree\")"
+	                            "  (ConceptNode \"green\"))");
 
-// 	TS_ASSERT_EQUALS(results[target_var].size(), 2);
-// 	TS_ASSERT_EQUALS(results[target_var].count(soln1), 1);
-// 	TS_ASSERT_EQUALS(results[target_var].count(soln2), 0);
+	// should not be able to find this solution outside the focus set
+	Handle soln2 = _eval.eval_h("(InheritanceLink"
+	                            "  (ConceptNode \"Fritz\")"
+	                            "  (ConceptNode \"green\"))");
 
-// 	logger().debug("END TEST: %s", __FUNCTION__);
-// }
+	bc.get_config().set_maximum_iterations(300);
+	bc.do_chain();
 
-// /**
-//  * Test the following pattern using the BackwardChainerPMCB
-//  *
-//  * (AndLink
-//  *   (InheritanceLink
-//  *     (ConceptNode "A")
-//  *     (VariableNode "$X")
-//  *   )
-//  *   (InheritanceLink
-//  *     (VariableNode "$X")
-//  *     (VariableNode "$Y")
-//  *   )
-//  *   (NotLink
-//  *     (IdenticalLink
-//  *       (ConceptNode "A")
-//  *       (VariableNode "$Y")
-//  *     )
-//  *   )
-//  * )
-//  *
-//  * on the the following data:
-//  *
-//  * (InheritanceLink
-//  *  (ConceptNode "A")
-//  *   (ConceptNode "B")
-//  * )/
-// *
-//  * (InheritanceLink
-//  *   (ConceptNode "A")
-//  *   (VariableNode "$X")
-//  * )
-//  *
-//  * (InheritanceLink
-//  *   (ConceptNode "B")
-//  *   (ConceptNode "C")
-//  * )
-//  *
-//  */
-// void BackwardChainerUTest::test_virtual_no_grnd()
-// {
-// 	logger().debug("BEGIN TEST: %s", __FUNCTION__);
+	Handle results = bc.get_results(),
+		expected = al(SET_LINK, soln1);
 
-// 	_as.clear();
+	// Re-enable when focu set is supported
+	TS_ASSERT(true);
+	// TS_ASSERT_EQUALS(results, expected);
 
-// 	// Define the pattern to match against.
-// 	Handle
-// 		A = an(CONCEPT_NODE, "A"),
-// 		B = an(CONCEPT_NODE, "B"),
-// 		C = an(CONCEPT_NODE, "C"),
-// 		X = an(VARIABLE_NODE, "$X"),
-// 		Y = an(VARIABLE_NODE, "$Y"),
-// 		AX = al(INHERITANCE_LINK, A, X),
-// 		XY = al(INHERITANCE_LINK, X, Y),
-// 		NotIdAY = al(NOT_LINK, al(IDENTICAL_LINK, A, Y)),
-// 		AB = al(INHERITANCE_LINK, A, B),
-// 		BC = al(INHERITANCE_LINK, B, C),
-// 		Concept = an(TYPE_NODE, "ConceptNode"),
-// 		vardecl = al(VARIABLE_LIST,
-// 		             al(TYPED_VARIABLE_LINK, X, Concept),
-// 		             al(TYPED_VARIABLE_LINK, Y, Concept)),
-// 		body = al(AND_LINK, AX, XY, NotIdAY),
-// 		pattern = al(PATTERN_LINK, vardecl, body);
-
-// 	PatternLinkPtr sl(PatternLinkCast(pattern));
-// 	BackwardChainerPMCB pmcb(&_as, VariableListCast(vardecl), true);
-// 	sl->satisfy(pmcb);
-
-// 	const HandleMapSeq& var_solns = pmcb.get_var_list();
-// 	const HandleMapSeq& pred_solns = pmcb.get_pred_list();
-
-// 	TS_ASSERT_EQUALS(var_solns.size(), 1);
-// 	TS_ASSERT_EQUALS(var_solns.front().size(), 2);
-// 	TS_ASSERT_EQUALS(var_solns.front().at(X), B);
-// 	TS_ASSERT_EQUALS(var_solns.front().at(Y), C);
-
-// 	TS_ASSERT_EQUALS(pred_solns.size(), 1);
-// 	TS_ASSERT_EQUALS(pred_solns.front().size(), 2);
-// 	TS_ASSERT_EQUALS(pred_solns.front().at(AX), AB);
-// 	TS_ASSERT_EQUALS(pred_solns.front().at(XY), BC);
-
-// 	logger().debug("END TEST: %s", __FUNCTION__);
-// }
+	logger().debug("END TEST: %s", __FUNCTION__);
+}
 
 #undef al
 #undef an
