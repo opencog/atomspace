@@ -132,10 +132,8 @@ class DefaultPatternMatchCB : public virtual PatternMatchCallback
 #endif
 		// Crisp-logic evaluation of evaluatable terms
 		std::set<Type> _connectives;
-		bool eval_term(const Handle& pat,
-		             const std::map<Handle,Handle>& gnds);
-		bool eval_sentence(const Handle& pat,
-		             const std::map<Handle,Handle>& gnds);
+		bool eval_term(const Handle& pat, const HandleMap& gnds);
+		bool eval_sentence(const Handle& pat, const HandleMap& gnds);
 
 		bool _optionals_present = false;
 		AtomSpace* _as;
