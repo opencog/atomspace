@@ -306,6 +306,13 @@ Handle InitiateSearchCB::find_thinnest(const HandleSeq& clauses,
  */
 bool InitiateSearchCB::neighbor_search(PatternMatchEngine *pme)
 {
+	// If there are no non constant clauses, abort, will use
+	// no_search instead.
+	if (_pattern->clauses.empty()) {
+		_search_fail = true;
+		return false;
+	}
+
 	// Sometimes, the number of mandatory clauses can be zero...
 	// or they might all be evaluatable.  In this case, its OK to
 	// start searching with an optional clause. But if there ARE
@@ -580,7 +587,6 @@ bool InitiateSearchCB::link_type_search(PatternMatchEngine *pme)
 {
 	const HandleSeq& clauses = _pattern->mandatory;
 
-	_search_fail = false;
 	_root = Handle::UNDEFINED;
 	_starter_term = Handle::UNDEFINED;
 	size_t count = SIZE_MAX;
@@ -810,39 +816,26 @@ bool InitiateSearchCB::variable_search(PatternMatchEngine *pme)
 
 /* ======================================================== */
 /**
- * No search -- no variables, one evaluatable clause.
- * The stop-go sequence demo falls in this category: no actual
- * matching needs to be done; merely, the sequence needs to be
- * evaluated.  Arguably, it is a user error to use the pattern
- * matcher for this, as there is nothing that needs to be matched.
- * But, for just right now, we gloss over this, and allow it, because
- * it is "closely related" to sequences with variables. It is a
- * bit inefficient to use the pattern matcher for this, so if you
- * want it to run fast, re-work the below to not use the PME.
+ * No search -- no variables, only constant, possibly evaluatable
+ * clauses.  The stop-go sequence demo falls in this category: no
+ * actual matching needs to be done; merely, the sequence needs to be
+ * evaluated.  Arguably, it is a user error to use the pattern matcher
+ * for this, as there is nothing that needs to be matched.  But, for
+ * just right now, we gloss over this, and allow it, because it is
+ * "closely related" to sequences with variables. It is a bit
+ * inefficient to use the pattern matcher for this, so if you want it
+ * to run fast, re-work the below to not use the PME.
  */
 bool InitiateSearchCB::no_search(PatternMatchEngine *pme)
 {
-	if (0 < _variables->varset.size() or
-	    1 != _pattern->mandatory.size())
+	if (0 < _variables->varset.size())
 	{
 		_search_fail = true;
 		return false;
 	}
 
-	// The one-and-only clause must be evaluatable!
-	const HandleSeq& clauses = _pattern->mandatory;
-	const OrderedHandleSet& evl = _pattern->evaluatable_holders;
-	if (0 == evl.count(clauses[0]))
-	{
-		_search_fail = true;
-		return false;
-	}
-
-	DO_LOG({LAZY_LOG_FINE << "wwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwww\n"
-	              << "Non-search: no variables, no non-evaluatable clauses";})
-	_root = _starter_term = clauses[0];
-	bool found = pme->explore_neighborhood(_root, _starter_term, _root);
-	return found;
+	// Evaluate all evaluatable clauses
+	return pme->explore_constant_evaluatables(_pattern->mandatory);
 }
 
 /* ======================================================== */

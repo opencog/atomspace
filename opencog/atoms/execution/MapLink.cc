@@ -160,7 +160,7 @@ MapLink::MapLink(Link &l)
 ///
 bool MapLink::extract(const Handle& termpat,
                       const Handle& ground,
-                      std::map<Handle,Handle>& valmap,
+                      HandleMap& valmap,
                       AtomSpace* scratch) const
 {
 	if (termpat == ground) return true;
@@ -316,7 +316,7 @@ Handle MapLink::rewrite_one(const Handle& cterm, AtomSpace* scratch) const
 	Handle term(inst.execute(cterm));
 
 	// Extract values for variables.
-	std::map<Handle,Handle> valmap;
+	HandleMap valmap;
 	if (not extract(_pattern->get_body(), term, valmap, scratch))
 		return Handle::UNDEFINED;
 

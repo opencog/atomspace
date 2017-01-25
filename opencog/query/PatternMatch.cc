@@ -345,7 +345,7 @@ bool PatternLink::satisfy(PatternMatchCallback& pmcb) const
 	// If there is just one connected component, we don't have to
 	// do anything special to find a grounding for it.  Proceed
 	// in a direct fashion.
-	if (1 == _num_comps)
+	if (_num_comps <= 1)
 	{
 		PatternMatchEngine pme(pmcb);
 
@@ -396,7 +396,7 @@ bool PatternLink::satisfy(PatternMatchCallback& pmcb) const
 	std::vector<HandleMapSeq> comp_term_gnds;
 	std::vector<HandleMapSeq> comp_var_gnds;
 
-	for (size_t i=0; i<_num_comps; i++)
+	for (size_t i = 0; i < _num_comps; i++)
 	{
 #ifdef DEBUG
 		LAZY_LOG_FINE << "BEGIN COMPONENT GROUNDING " << i+1
@@ -458,7 +458,7 @@ bool PatternLink::satisfy(PatternMatchCallback& pmcb) const
 // http://wiki.opencog.org/w/Development_standards#Print_OpenCog_Objects
 std::string oc_to_string(const Pattern& pattern)
 {
-   return pattern.to_string();
+	return pattern.to_string();
 }
 
 /* ===================== END OF FILE ===================== */

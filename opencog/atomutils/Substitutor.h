@@ -54,7 +54,7 @@ private:
 	// frame. That is, expr changes each time, but vmap does not.
 	static Handle walk_tree(const HandleMap &vmap, const Handle& expr)
 	{
-		std::map<Handle,Handle>::const_iterator it = vmap.find(expr);
+		HandleMap::const_iterator it = vmap.find(expr);
 		if (vmap.end() != it )
 			return it->second;
 

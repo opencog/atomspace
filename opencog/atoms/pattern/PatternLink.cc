@@ -23,6 +23,8 @@
  * 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
  */
 
+#include <boost/range/algorithm/find_if.hpp>
+
 #include <opencog/util/Logger.h>
 #include <opencog/atoms/base/ClassServer.h>
 #include <opencog/atoms/base/Node.h>
@@ -54,9 +56,18 @@ void PatternLink::common_init(void)
 	validate_clauses(_varlist.varset, _pat.clauses, _pat.constants);
 	extract_optionals(_varlist.varset, _pat.clauses);
 
-	// Locate the black-box clauses.
+	// Locate as well as black-box and clear-box clauses.
 	unbundle_virtual(_varlist.varset, _pat.cnf_clauses,
 	                 _fixed, _virtual, _pat.black);
+
+	// Same as above but for constant clauses. The fixed clauses (non
+	// virtual because with less than 2 variables) are pushed into a
+	// dummy container, constant_fixed as they are not useful for
+	// subsequent component analysis.
+	HandleSeq constant_fixed;
+	unbundle_virtual(_varlist.varset, _pat.constants,
+	                 constant_fixed, _virtual, _pat.black);
+
 	_num_virts = _virtual.size();
 
 	add_dummies();
@@ -99,7 +110,7 @@ void PatternLink::common_init(void)
 /// The second half of the common initialization sequence
 void PatternLink::setup_components(void)
 {
-	if (1 == _num_comps) return;
+	if (_num_comps <= 1) return;
 
 	// If we are here, then set up a PatternLink for each connected
 	// component.
@@ -110,7 +121,7 @@ void PatternLink::setup_components(void)
 	// explore that combinatoric explosion, on purpose. So we have to
 	// allow the multiple disconnected components for that case.
 	_component_patterns.reserve(_num_comps);
-	for (size_t i=0; i<_num_comps; i++)
+	for (size_t i = 0; i < _num_comps; i++)
 	{
 		Handle h(createPatternLink(_component_vars[i], _varlist._simple_typemap,
 		                           _components[i], _pat.optionals));
@@ -188,18 +199,14 @@ PatternLink::PatternLink(const OrderedHandleSet& vars,
 	_pat.cnf_clauses = compo;
 	for (const Handle& h : compo)
 	{
-		bool h_is_opt = false;
-		for (const Handle& opt : opts)
+		auto h_is_in = [&](const Handle& opt) { return is_atom_in_tree(opt, h); };
+		auto it = boost::find_if(opts, h_is_in);
+		if (it != opts.end())
 		{
-			if (is_atom_in_tree(opt, h))
-			{
-				_pat.optionals.insert(opt);
-				_pat.clauses.emplace_back(opt);
-				h_is_opt = true;
-				break;
-			}
+			_pat.optionals.insert(*it);
+			_pat.clauses.emplace_back(*it);
 		}
-		if (not h_is_opt)
+		else
 		{
 			_pat.clauses.emplace_back(h);
 			_pat.mandatory.emplace_back(h);
@@ -434,25 +441,16 @@ void PatternLink::validate_clauses(OrderedHandleSet& vars,
                                    HandleSeq& constants)
 
 {
-	// XXX FIXME The AIML ruleset includes BindLinks that have no
-	// variables in them, and the clauses are all constant.  This
-	// is kind of uncomfortably weird.  Does this really happen?
-	// There is a unit test for this - arcana-const.scm Should
-	// this unit test be disabled? XXX DualLink makes this obsolete.
-	// This if statement should be removed.
-	if (0 < vars.size())
+	// Make sure that the user did not pass in bogus clauses.
+	// Make sure that every clause contains at least one variable.
+	// The presence of constant clauses will mess up the current
+	// pattern matcher.  Constant clauses are "trivial" to match,
+	// and so its pointless to even send them through the system.
+	bool bogus = remove_constants(vars, clauses, constants);
+	if (bogus)
 	{
-		// Make sure that the user did not pass in bogus clauses.
-		// Make sure that every clause contains at least one variable.
-		// The presence of constant clauses will mess up the current
-		// pattern matcher.  Constant clauses are "trivial" to match,
-		// and so its pointless to even send them through the system.
-		bool bogus = remove_constants(vars, clauses, constants);
-		if (bogus)
-		{
-			logger().warn("%s: Constant clauses removed from pattern",
-			              __FUNCTION__);
-		}
+		logger().warn("%s: Constant clauses removed from pattern",
+		              __FUNCTION__);
 	}
 
 	// Make sure that each declared variable appears in some clause.
@@ -469,13 +467,6 @@ void PatternLink::validate_clauses(OrderedHandleSet& vars,
 			   v->toShortString().c_str());
 		}
 	}
-
-	// The above 1-2 combination of removing constant clauses, and
-	// removing variables, can result in an empty body. That surely
-	// warrants a throw, and BuggyQuoteUTest is expecting one.
-	if (0 == vars.size() and 0 == clauses.size())
-			throw InvalidParamException(TRACE_INFO,
-			   "No variable appears (unquoted) anywhere in any clause!");
 }
 
 /* ================================================================= */
@@ -604,6 +595,7 @@ void PatternLink::unbundle_virtual(const OrderedHandleSet& vars,
 			// But they're virtual only if they have two or more
 			// unquoted, bound variables in them. Otherwise, they
 			// can be evaluated on the spot.
+			// TODO: shouldn't there be unscoped as well?
 			if (2 <= num_unquoted_in_tree(sh, vars))
 			{
 				is_virtual = true;
@@ -886,7 +878,7 @@ void PatternLink::make_term_tree_recursive(const Handle& root,
 /**
  * Check that all clauses are connected
  */
-void PatternLink::check_connectivity(const std::vector<HandleSeq>& components)
+void PatternLink::check_connectivity(const HandleSeqSeq& components)
 {
 	if (1 == components.size()) return;
 

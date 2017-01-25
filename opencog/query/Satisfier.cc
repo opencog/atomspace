@@ -79,7 +79,7 @@ bool Satisfier::search_finished(bool done)
 	if (SEQUENTIAL_AND_LINK != btype and SEQUENTIAL_OR_LINK != btype)
 		return done;
 
-	std::map<Handle,Handle> empty;
+	HandleMap empty;
 	bool rc = eval_sentence(_pattern_body, empty);
 	if (rc)
 		_result = TruthValue::TRUE_TV();

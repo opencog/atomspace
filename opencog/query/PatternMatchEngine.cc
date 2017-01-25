@@ -21,6 +21,7 @@
  * 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
  */
 
+#include <opencog/util/algorithm.h>
 #include <opencog/util/oc_assert.h>
 #include <opencog/util/Logger.h>
 #include <opencog/atomutils/FindUtils.h>
@@ -1821,6 +1822,22 @@ void PatternMatchEngine::clear_current_state(void)
 	issued.clear();
 }
 
+bool PatternMatchEngine::explore_constant_evaluatables(const HandleSeq& clauses)
+{
+	bool found = true;
+	for (const Handle& clause : clauses) {
+		if (is_in(clause, _pat->evaluatable_holders)) {
+			found = _pmc.evaluate_sentence(clause, HandleMap());
+			if (not found)
+				break;
+		}
+	}
+	if (found)
+		_pmc.grounding(HandleMap(), HandleMap());
+
+	return found;
+}
+
 PatternMatchEngine::PatternMatchEngine(PatternMatchCallback& pmcb)
 	: _pmc(pmcb),
 	_classserver(classserver()),
@@ -1910,9 +1927,8 @@ void PatternMatchEngine::log_solution(
 /**
  * For debug logging only
  */
-void PatternMatchEngine::log_term(
-                  const OrderedHandleSet &vars,
-                  const HandleSeq &clauses)
+void PatternMatchEngine::log_term(const OrderedHandleSet &vars,
+                                  const HandleSeq &clauses)
 {
 	logger().fine("Clauses:");
 	for (Handle h : clauses) log(h);
@@ -1922,13 +1938,11 @@ void PatternMatchEngine::log_term(
 }
 #else
 
-void PatternMatchEngine::log_solution(
-	const HandleMap &vars,
-	const HandleMap &clauses) {}
+void PatternMatchEngine::log_solution(const HandleMap &vars,
+                                      const HandleMap &clauses) {}
 
-void PatternMatchEngine::log_term(
-                  const OrderedHandleSet &vars,
-                  const HandleSeq &clauses) {}
+void PatternMatchEngine::log_term(const OrderedHandleSet &vars,
+                                  const HandleSeq &clauses) {}
 #endif
 
 /* ===================== END OF FILE ===================== */
