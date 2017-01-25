@@ -334,7 +334,7 @@ bool AndBIT::is_argument_of(const Handle& eval, const Handle& atom) const
 		if (content_eq(args, atom))
 			return true;
 		if (args->getType() == LIST_LINK)
-			for (Arity i = 0; i+1 < args->getArity(); i++)
+			for (Arity i = 0; i < args->getArity(); i++)
 				if (content_eq(args->getOutgoingAtom(i), atom))
 					return true;
 	}
