@@ -21,6 +21,7 @@
  * 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
  */
 
+#include <opencog/guile/SchemeEval.h>
 #include <opencog/atomspace/AtomSpace.h>
 #include <opencog/query/BindLinkAPI.h>
 #include <opencog/util/Logger.h>
@@ -34,10 +35,11 @@ class ConstantClausesUTest: public CxxTest::TestSuite
 {
 private:
 	AtomSpace as;
+	SchemeEval eval;
 	Handle A, B, C, AB, IdAA, P, Q, X, LP, LQ;
 
 public:
-	ConstantClausesUTest(void)
+	ConstantClausesUTest() : eval(&as)
 	{
 		logger().set_level(Logger::DEBUG);
 		logger().set_print_to_stdout_flag(true);
@@ -52,25 +54,26 @@ public:
 		_exit(rc); // XXX hack to avoid double-free in __run_exit_handlers
 	}
 
-	void setUp(void);
-	void tearDown(void);
+	void setUp();
+	void tearDown();
 
-	void test_constant_1(void);
-	void test_constant_2(void);
-	void test_constant_3(void);
-	void test_evaluatable_1(void);
-	void test_evaluatable_2(void);
-	void test_evaluatable_3(void);
-	void test_constant_evaluatable_1(void);
-	void test_constant_evaluatable_2(void);
-	void test_constant_evaluatable_3(void);
+	void test_constant_1();
+	void test_constant_2();
+	void test_constant_3();
+	void test_evaluatable_1();
+	void test_evaluatable_2();
+	void test_evaluatable_3();
+	void test_constant_evaluatable_1();
+	void test_constant_evaluatable_2();
+	void test_constant_evaluatable_3();
+	void test_complex();
 };
 
-void ConstantClausesUTest::tearDown(void)
+void ConstantClausesUTest::tearDown()
 {
 }
 
-void ConstantClausesUTest::setUp(void)
+void ConstantClausesUTest::setUp()
 {
 	A = an(CONCEPT_NODE, "A");
 	B = an(CONCEPT_NODE, "B");
@@ -87,7 +90,7 @@ void ConstantClausesUTest::setUp(void)
 /*
  * Simple Concept as constant clause.
  */
-void ConstantClausesUTest::test_constant_1(void)
+void ConstantClausesUTest::test_constant_1()
 {
 	Handle bl = al(BIND_LINK, A, B),
 		result = bindlink(&as, bl),
@@ -98,7 +101,7 @@ void ConstantClausesUTest::test_constant_1(void)
 /*
  * Simple Inheritance link as constant clause.
  */
-void ConstantClausesUTest::test_constant_2(void)
+void ConstantClausesUTest::test_constant_2()
 {
 	Handle bl = al(BIND_LINK, AB, C),
 		result = bindlink(&as, bl),
@@ -109,7 +112,7 @@ void ConstantClausesUTest::test_constant_2(void)
 /*
  * Conjunction of Concept and Inheritance as constant clauses.
  */
-void ConstantClausesUTest::test_constant_3(void)
+void ConstantClausesUTest::test_constant_3()
 {
 	Handle bl = al(BIND_LINK, al(AND_LINK, AB, A), C),
 		result = bindlink(&as, bl),
@@ -121,7 +124,7 @@ void ConstantClausesUTest::test_constant_3(void)
  * Simple clause with an evaluatable constant clause that is true (so
  * the rewrite term should be triggered).
  */
-void ConstantClausesUTest::test_evaluatable_1(void)
+void ConstantClausesUTest::test_evaluatable_1()
 {
 	Handle bl = al(BIND_LINK, IdAA, B),
 		result = bindlink(&as, bl),
@@ -133,7 +136,7 @@ void ConstantClausesUTest::test_evaluatable_1(void)
  * Simple clause with an evaluatable constant clause that is false (so
  * the rewrite term should not be triggered).
  */
-void ConstantClausesUTest::test_evaluatable_2(void)
+void ConstantClausesUTest::test_evaluatable_2()
 {
 	Handle bl = al(BIND_LINK, al(NOT_LINK, IdAA), B),
 		result = bindlink(&as, bl),
@@ -145,7 +148,7 @@ void ConstantClausesUTest::test_evaluatable_2(void)
  * Simple clause with an evaluatable constant clause that is false (so
  * the rewrite term should not be triggered).
  */
-void ConstantClausesUTest::test_evaluatable_3(void)
+void ConstantClausesUTest::test_evaluatable_3()
 {
 	Handle bl = al(BIND_LINK, al(AND_LINK, IdAA, al(NOT_LINK, IdAA)), B),
 		result = bindlink(&as, bl),
@@ -157,7 +160,7 @@ void ConstantClausesUTest::test_evaluatable_3(void)
  * Simple Concept as constant clause with an evaluatable constant
  * clause that is true (so the rewrite term should be triggered).
  */
-void ConstantClausesUTest::test_constant_evaluatable_1(void)
+void ConstantClausesUTest::test_constant_evaluatable_1()
 {
 	Handle bl = al(BIND_LINK, al(AND_LINK, A, IdAA), B),
 		result = bindlink(&as, bl),
@@ -169,7 +172,7 @@ void ConstantClausesUTest::test_constant_evaluatable_1(void)
  * Simple Concept as constant clause with a evaluatable constant
  * clause that is false (so the rewrite term should not be triggered).
  */
-void ConstantClausesUTest::test_constant_evaluatable_2(void)
+void ConstantClausesUTest::test_constant_evaluatable_2()
 {
 	Handle bl = al(BIND_LINK, al(AND_LINK, A, al(NOT_LINK, IdAA)), B),
 		result = bindlink(&as, bl),
@@ -182,11 +185,445 @@ void ConstantClausesUTest::test_constant_evaluatable_2(void)
  * constant clause that not is true (so the rewrite term should not be
  * triggered).
  */
-void ConstantClausesUTest::test_constant_evaluatable_3(void)
+void ConstantClausesUTest::test_constant_evaluatable_3()
 {
 	Handle bl = al(BIND_LINK, al(AND_LINK, A, al(IDENTICAL_LINK, LP, LQ)), B),
 		result = bindlink(&as, bl),
 		expected = al(SET_LINK);
+	TS_ASSERT_EQUALS(result, expected);
+}
+
+/**
+ * Complex bindlink with constant clauses
+ */
+void ConstantClausesUTest::test_complex()
+{
+	Handle bl = eval.eval_h(
+		"(BindLink"
+		"  (VariableList"
+		"  )"
+		"  (AndLink"
+		"    (LocalQuoteLink"
+		"      (AndLink"
+		"        (LambdaLink"
+		"          (TypedVariableLink"
+		"            (VariableNode \"$X\")"
+		"            (TypeNode \"ConceptNode\")"
+		"          )"
+		"          (EvaluationLink (stv 1.000000 1.000000)"
+		"            (PredicateNode \"contain\")"
+		"            (ListLink"
+		"              (ConceptNode \"treatment-1\")"
+		"              (ConceptNode \"compound-A\")"
+		"            )"
+		"          )"
+		"        )"
+		"        (LambdaLink"
+		"          (TypedVariableLink"
+		"            (VariableNode \"$X\")"
+		"            (TypeNode \"ConceptNode\")"
+		"          )"
+		"          (EvaluationLink"
+		"            (PredicateNode \"take\")"
+		"            (ListLink"
+		"              (VariableNode \"$X\")"
+		"              (ConceptNode \"treatment-1\")"
+		"            )"
+		"          )"
+		"        )"
+		"      )"
+		"    )"
+		"    (EvaluationLink"
+		"      (GroundedPredicateNode \"scm: lambda-closed-construction-precondition\")"
+		"      (EvaluationLink (stv 1.000000 1.000000)"
+		"        (PredicateNode \"contain\")"
+		"        (ListLink"
+		"          (ConceptNode \"treatment-1\")"
+		"          (ConceptNode \"compound-A\")"
+		"        )"
+		"      )"
+		"    )"
+		"    (NotLink"
+		"      (IdenticalLink"
+		"        (LambdaLink"
+		"          (TypedVariableLink"
+		"            (VariableNode \"$X\")"
+		"            (TypeNode \"ConceptNode\")"
+		"          )"
+		"          (EvaluationLink"
+		"            (PredicateNode \"take\")"
+		"            (ListLink"
+		"              (VariableNode \"$X\")"
+		"              (ConceptNode \"treatment-1\")"
+		"            )"
+		"          )"
+		"        )"
+		"        (LambdaLink"
+		"          (TypedVariableLink"
+		"            (VariableNode \"$X\")"
+		"            (TypeNode \"ConceptNode\")"
+		"          )"
+		"          (AndLink"
+		"            (EvaluationLink (stv 1.000000 1.000000)"
+		"              (PredicateNode \"contain\")"
+		"              (ListLink"
+		"                (ConceptNode \"treatment-1\")"
+		"                (ConceptNode \"compound-A\")"
+		"              )"
+		"            )"
+		"            (EvaluationLink"
+		"              (PredicateNode \"take\")"
+		"              (ListLink"
+		"                (VariableNode \"$X\")"
+		"                (ConceptNode \"treatment-1\")"
+		"              )"
+		"            )"
+		"          )"
+		"        )"
+		"      )"
+		"    )"
+		"    (NotLink"
+		"      (EqualLink"
+		"        (LambdaLink"
+		"          (TypedVariableLink"
+		"            (VariableNode \"$X\")"
+		"            (TypeNode \"ConceptNode\")"
+		"          )"
+		"          (EvaluationLink (stv 1.000000 1.000000)"
+		"            (PredicateNode \"contain\")"
+		"            (ListLink"
+		"              (ConceptNode \"treatment-1\")"
+		"              (ConceptNode \"compound-A\")"
+		"            )"
+		"          )"
+		"        )"
+		"        (LambdaLink"
+		"          (TypedVariableLink"
+		"            (VariableNode \"$X\")"
+		"            (TypeNode \"ConceptNode\")"
+		"          )"
+		"          (EvaluationLink"
+		"            (PredicateNode \"take\")"
+		"            (ListLink"
+		"              (VariableNode \"$X\")"
+		"              (ConceptNode \"treatment-1\")"
+		"            )"
+		"          )"
+		"        )"
+		"      )"
+		"    )"
+		"    (EvaluationLink"
+		"      (GroundedPredicateNode \"scm: implication-construction-precondition\")"
+		"      (ListLink"
+		"        (LambdaLink"
+		"          (TypedVariableLink"
+		"            (VariableNode \"$X\")"
+		"            (TypeNode \"ConceptNode\")"
+		"          )"
+		"          (EvaluationLink"
+		"            (PredicateNode \"take\")"
+		"            (ListLink"
+		"              (VariableNode \"$X\")"
+		"              (ConceptNode \"treatment-1\")"
+		"            )"
+		"          )"
+		"        )"
+		"        (LambdaLink"
+		"          (TypedVariableLink"
+		"            (VariableNode \"$X\")"
+		"            (TypeNode \"ConceptNode\")"
+		"          )"
+		"          (EvaluationLink (stv 1.000000 1.000000)"
+		"            (PredicateNode \"contain\")"
+		"            (ListLink"
+		"              (ConceptNode \"treatment-1\")"
+		"              (ConceptNode \"compound-A\")"
+		"            )"
+		"          )"
+		"        )"
+		"      )"
+		"    )"
+		"    (LambdaLink"
+		"      (TypedVariableLink"
+		"        (VariableNode \"$X\")"
+		"        (TypeNode \"ConceptNode\")"
+		"      )"
+		"      (EvaluationLink"
+		"        (PredicateNode \"take\")"
+		"        (ListLink"
+		"          (VariableNode \"$X\")"
+		"          (ConceptNode \"treatment-1\")"
+		"        )"
+		"      )"
+		"    )"
+		"    (EvaluationLink (stv 1.000000 1.000000)"
+		"      (PredicateNode \"contain\")"
+		"      (ListLink"
+		"        (ConceptNode \"treatment-1\")"
+		"        (ConceptNode \"compound-A\")"
+		"      )"
+		"    )"
+		"    (TypedVariableLink"
+		"      (VariableNode \"$X\")"
+		"      (TypeNode \"ConceptNode\")"
+		"    )"
+		"  )"
+		"  (ExecutionOutputLink"
+		"    (GroundedSchemaNode \"scm: deduction-formula\")"
+		"    (ListLink"
+		"      (ImplicationLink"
+		"        (LambdaLink"
+		"          (TypedVariableLink"
+		"            (VariableNode \"$X\")"
+		"            (TypeNode \"ConceptNode\")"
+		"          )"
+		"          (EvaluationLink"
+		"            (PredicateNode \"take\")"
+		"            (ListLink"
+		"              (VariableNode \"$X\")"
+		"              (ConceptNode \"treatment-1\")"
+		"            )"
+		"          )"
+		"        )"
+		"        (LambdaLink"
+		"          (TypedVariableLink"
+		"            (VariableNode \"$X\")"
+		"            (TypeNode \"ConceptNode\")"
+		"          )"
+		"          (AndLink"
+		"            (EvaluationLink (stv 1.000000 1.000000)"
+		"              (PredicateNode \"contain\")"
+		"              (ListLink"
+		"                (ConceptNode \"treatment-1\")"
+		"                (ConceptNode \"compound-A\")"
+		"              )"
+		"            )"
+		"            (EvaluationLink"
+		"              (PredicateNode \"take\")"
+		"              (ListLink"
+		"                (VariableNode \"$X\")"
+		"                (ConceptNode \"treatment-1\")"
+		"              )"
+		"            )"
+		"          )"
+		"        )"
+		"      )"
+		"      (ExecutionOutputLink"
+		"        (GroundedSchemaNode \"scm: implication-implicant-distribution-formula\")"
+		"        (ListLink"
+		"          (ImplicationLink"
+		"            (LambdaLink"
+		"              (TypedVariableLink"
+		"                (VariableNode \"$X\")"
+		"                (TypeNode \"ConceptNode\")"
+		"              )"
+		"              (EvaluationLink"
+		"                (PredicateNode \"take\")"
+		"                (ListLink"
+		"                  (VariableNode \"$X\")"
+		"                  (ConceptNode \"treatment-1\")"
+		"                )"
+		"              )"
+		"            )"
+		"            (AndLink"
+		"              (LambdaLink"
+		"                (TypedVariableLink"
+		"                  (VariableNode \"$X\")"
+		"                  (TypeNode \"ConceptNode\")"
+		"                )"
+		"                (EvaluationLink"
+		"                  (PredicateNode \"take\")"
+		"                  (ListLink"
+		"                    (VariableNode \"$X\")"
+		"                    (ConceptNode \"treatment-1\")"
+		"                  )"
+		"                )"
+		"              )"
+		"              (ExecutionOutputLink"
+		"                (GroundedSchemaNode \"scm: lambda-closed-construction-formula\")"
+		"                (ListLink"
+		"                  (LambdaLink"
+		"                    (TypedVariableLink"
+		"                      (VariableNode \"$X\")"
+		"                      (TypeNode \"ConceptNode\")"
+		"                    )"
+		"                    (EvaluationLink (stv 1.000000 1.000000)"
+		"                      (PredicateNode \"contain\")"
+		"                      (ListLink"
+		"                        (ConceptNode \"treatment-1\")"
+		"                        (ConceptNode \"compound-A\")"
+		"                      )"
+		"                    )"
+		"                  )"
+		"                  (EvaluationLink (stv 1.000000 1.000000)"
+		"                    (PredicateNode \"contain\")"
+		"                    (ListLink"
+		"                      (ConceptNode \"treatment-1\")"
+		"                      (ConceptNode \"compound-A\")"
+		"                    )"
+		"                  )"
+		"                )"
+		"              )"
+		"            )"
+		"          )"
+		"          (ExecutionOutputLink"
+		"            (GroundedSchemaNode \"scm: implication-construction-formula\")"
+		"            (ListLink"
+		"              (ImplicationLink"
+		"                (LambdaLink"
+		"                  (TypedVariableLink"
+		"                    (VariableNode \"$X\")"
+		"                    (TypeNode \"ConceptNode\")"
+		"                  )"
+		"                  (EvaluationLink"
+		"                    (PredicateNode \"take\")"
+		"                    (ListLink"
+		"                      (VariableNode \"$X\")"
+		"                      (ConceptNode \"treatment-1\")"
+		"                    )"
+		"                  )"
+		"                )"
+		"                (ExecutionOutputLink"
+		"                  (GroundedSchemaNode \"scm: lambda-closed-construction-formula\")"
+		"                  (ListLink"
+		"                    (LambdaLink"
+		"                      (TypedVariableLink"
+		"                        (VariableNode \"$X\")"
+		"                        (TypeNode \"ConceptNode\")"
+		"                      )"
+		"                      (EvaluationLink (stv 1.000000 1.000000)"
+		"                        (PredicateNode \"contain\")"
+		"                        (ListLink"
+		"                          (ConceptNode \"treatment-1\")"
+		"                          (ConceptNode \"compound-A\")"
+		"                        )"
+		"                      )"
+		"                    )"
+		"                    (EvaluationLink (stv 1.000000 1.000000)"
+		"                      (PredicateNode \"contain\")"
+		"                      (ListLink"
+		"                        (ConceptNode \"treatment-1\")"
+		"                        (ConceptNode \"compound-A\")"
+		"                      )"
+		"                    )"
+		"                  )"
+		"                )"
+		"              )"
+		"              (LambdaLink"
+		"                (TypedVariableLink"
+		"                  (VariableNode \"$X\")"
+		"                  (TypeNode \"ConceptNode\")"
+		"                )"
+		"                (EvaluationLink"
+		"                  (PredicateNode \"take\")"
+		"                  (ListLink"
+		"                    (VariableNode \"$X\")"
+		"                    (ConceptNode \"treatment-1\")"
+		"                  )"
+		"                )"
+		"              )"
+		"              (ExecutionOutputLink"
+		"                (GroundedSchemaNode \"scm: lambda-closed-construction-formula\")"
+		"                (ListLink"
+		"                  (LambdaLink"
+		"                    (TypedVariableLink"
+		"                      (VariableNode \"$X\")"
+		"                      (TypeNode \"ConceptNode\")"
+		"                    )"
+		"                    (EvaluationLink (stv 1.000000 1.000000)"
+		"                      (PredicateNode \"contain\")"
+		"                      (ListLink"
+		"                        (ConceptNode \"treatment-1\")"
+		"                        (ConceptNode \"compound-A\")"
+		"                      )"
+		"                    )"
+		"                  )"
+		"                  (EvaluationLink (stv 1.000000 1.000000)"
+		"                    (PredicateNode \"contain\")"
+		"                    (ListLink"
+		"                      (ConceptNode \"treatment-1\")"
+		"                      (ConceptNode \"compound-A\")"
+		"                    )"
+		"                  )"
+		"                )"
+		"              )"
+		"            )"
+		"          )"
+		"        )"
+		"      )"
+		"      (ExecutionOutputLink"
+		"        (GroundedSchemaNode \"scm: implication-and-lambda-factorization-formula\")"
+		"        (ImplicationLink"
+		"          (AndLink"
+		"            (LambdaLink"
+		"              (TypedVariableLink"
+		"                (VariableNode \"$X\")"
+		"                (TypeNode \"ConceptNode\")"
+		"              )"
+		"              (EvaluationLink"
+		"                (PredicateNode \"take\")"
+		"                (ListLink"
+		"                  (VariableNode \"$X\")"
+		"                  (ConceptNode \"treatment-1\")"
+		"                )"
+		"              )"
+		"            )"
+		"            (ExecutionOutputLink"
+		"              (GroundedSchemaNode \"scm: lambda-closed-construction-formula\")"
+		"              (ListLink"
+		"                (LambdaLink"
+		"                  (TypedVariableLink"
+		"                    (VariableNode \"$X\")"
+		"                    (TypeNode \"ConceptNode\")"
+		"                  )"
+		"                  (EvaluationLink (stv 1.000000 1.000000)"
+		"                    (PredicateNode \"contain\")"
+		"                    (ListLink"
+		"                      (ConceptNode \"treatment-1\")"
+		"                      (ConceptNode \"compound-A\")"
+		"                    )"
+		"                  )"
+		"                )"
+		"                (EvaluationLink (stv 1.000000 1.000000)"
+		"                  (PredicateNode \"contain\")"
+		"                  (ListLink"
+		"                    (ConceptNode \"treatment-1\")"
+		"                    (ConceptNode \"compound-A\")"
+		"                  )"
+		"                )"
+		"              )"
+		"            )"
+		"          )"
+		"          (LambdaLink"
+		"            (TypedVariableLink"
+		"              (VariableNode \"$X\")"
+		"              (TypeNode \"ConceptNode\")"
+		"            )"
+		"            (AndLink"
+		"              (EvaluationLink (stv 1.000000 1.000000)"
+		"                (PredicateNode \"contain\")"
+		"                (ListLink"
+		"                  (ConceptNode \"treatment-1\")"
+		"                  (ConceptNode \"compound-A\")"
+		"                )"
+		"              )"
+		"              (EvaluationLink"
+		"                (PredicateNode \"take\")"
+		"                (ListLink"
+		"                  (VariableNode \"$X\")"
+		"                  (ConceptNode \"treatment-1\")"
+		"                )"
+		"              )"
+		"            )"
+		"          )"
+		"        )"
+		"      )"
+		"    )"
+		"  )"
+		")");
+	Handle result = bindlink(&as, bl);
+	Handle expected = al(SET_LINK, B);
+
 	TS_ASSERT_EQUALS(result, expected);
 }
 
