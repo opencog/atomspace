@@ -34,8 +34,8 @@ CREATE TABLE Atoms (
 
     -- Inlined (simple) truth values
     tv_type  SMALLINT,
-    stv_mean FLOAT,
-    stv_confidence FLOAT,
+    stv_mean DOUBLE PRECISION,
+    stv_confidence DOUBLE PRECISION,
     stv_count DOUBLE PRECISION,
 
     -- distance from this link to farthest Node in the outgoing
@@ -106,8 +106,8 @@ CREATE TABLE TypeCodes (
 --
 -- CREATE TABLE SimpleTVs (
 --  tvid INT PRIMARY KEY,
---  mean FLOAT,
---  count FLOAT
+--  mean DOUBLE PRECISION,
+--  count DOUBLE PRECISION
 -- );
 --
 --
