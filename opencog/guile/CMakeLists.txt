@@ -34,6 +34,17 @@ TARGET_LINK_LIBRARIES(logger
 	${COGUTIL_LIBRARY}
 )
 
+# XXX FIXME: We should also be installing `ln -s` links into one of
+# these eight locations:
+#    /usr/lib/guile/2.0/extensions
+#    /usr/local/lib/guile/2.0/extensions
+#    /usr/lib64/guile/2.0/extensions
+#    /usr/local/lib64/guile/2.0/extensions
+#    /usr/lib/guile/2.2/extensions
+#    /usr/local/lib/guile/2.2/extensions
+#    /usr/lib64/guile/2.2/extensions
+#    /usr/local/lib64/guile/2.2/extensions
+# ... but which one?  what a pain.
 INSTALL (TARGETS smob DESTINATION "lib${LIB_DIR_SUFFIX}/opencog")
 INSTALL (TARGETS logger DESTINATION "lib${LIB_DIR_SUFFIX}/opencog")
 
