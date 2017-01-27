@@ -29,7 +29,6 @@
 
 #include <opencog/util/random.h>
 
-#include <opencog/atomutils/Neighbors.h>
 #include <opencog/atomutils/FindUtils.h>
 
 #include "BIT.h"
