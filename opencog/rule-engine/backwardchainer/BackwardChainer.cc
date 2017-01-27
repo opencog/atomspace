@@ -183,8 +183,15 @@ void BackwardChainer::fulfill_bit()
 
 void BackwardChainer::fulfill_fcs(const Handle& fcs)
 {
-	Handle hresult = bindlink(&_as, fcs);
-	const HandleSeq& results = hresult->getOutgoingSet();
+	// Temporary atomspace to not pollute _as with intermediary
+	// results
+	AtomSpace tmp_as(&_as);
+
+	// Run the FCS and add the results in _as
+	Handle hresult = bindlink(&tmp_as, fcs);
+	HandleSeq results;
+	for (const Handle& result : hresult->getOutgoingSet())
+		results.push_back(_as.add_atom(result));
 	LAZY_BC_LOG_DEBUG << "Results:" << std::endl << results;
 	_results.insert(results.begin(), results.end());
 }
