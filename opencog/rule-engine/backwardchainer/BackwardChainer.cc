@@ -206,8 +206,19 @@ AndBIT* BackwardChainer::select_expansion_andbit()
 	for (const AndBIT& andbit : _bit.andbits)
 		weights.push_back(operator()(andbit));
 
-	std::discrete_distribution<size_t> dist(weights.begin(), weights.end());
+	// Debug log
+	if (bc_logger().is_debug_enabled()) {
+		OC_ASSERT(weights.size() == _bit.andbits.size());
+		std::stringstream ss;
+		ss << "Weighted and-BITs:";
+		for (size_t i = 0; i < weights.size(); i++)
+			ss << std::endl << weights[i] << " "
+			   << _bit.andbits[i].fcs->idToString();
+		bc_logger().debug() << ss.str();
+	}
 
+	// Sample andbits according to this distribution
+	std::discrete_distribution<size_t> dist(weights.begin(), weights.end());
 	return &rand_element(_bit.andbits, dist);
 }
 
