@@ -29,7 +29,6 @@
 
 #include <opencog/util/random.h>
 
-#include <opencog/atomutils/Neighbors.h>
 #include <opencog/atomutils/FindUtils.h>
 
 #include "BIT.h"
@@ -128,10 +127,13 @@ bool AndBIT::operator==(const AndBIT& andbit) const
 
 bool AndBIT::operator<(const AndBIT& andbit) const
 {
+	// Sort by size first to so that shorter and-BITs come
+	// first. Makes it easier to prune by complexity. Then by content.
 	size_t fcs_size = fcs->size();
 	size_t other_size = andbit.fcs->size();
 	return (fcs_size < other_size)
-		or (fcs_size == other_size and fcs < andbit.fcs);
+		or (fcs_size == other_size
+		    and content_based_handle_less()(fcs, andbit.fcs));
 }
 
 std::string AndBIT::to_string() const
@@ -410,9 +412,11 @@ AndBIT* BIT::insert(const AndBIT& andbit)
 		// Check that it is not alpha-equivalent either
 		for (const AndBIT& ab : andbits) {
 			if (ScopeLinkCast(andbit.fcs)->is_equal(ab.fcs)) {
-				LAZY_BC_LOG_DEBUG << "The following and-BIT is alpha-equivalent "
-				                  << "to another one already in the BIT:"
-				                  << std::endl << andbit.to_string();
+				LAZY_BC_LOG_DEBUG << "The following and-BIT:"
+				                  << std::endl << andbit.to_string()
+				                  << "is alpha-equivalent to another one "
+				                  << "already in the BIT:"
+				                  << std::endl << ab.to_string();
 				return nullptr;
 			}
 		}
