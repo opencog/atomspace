@@ -139,7 +139,7 @@ bool EvidenceCountTruthValue::operator==(const TruthValue& rhs) const
 
 #define FLOAT_ACCEPTABLE_ERROR 0.000001
 	auto close_enough = [](count_t lhs, count_t rhs) {
-		return isWithin(lhs, rhs, FLOAT_ACCEPTABLE_ERROR);
+		return is_within(lhs, rhs, FLOAT_ACCEPTABLE_ERROR);
 	};
 #undef FLOAT_ACCEPTABLE_ERROR
 
