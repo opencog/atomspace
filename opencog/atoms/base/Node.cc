@@ -49,10 +49,7 @@ std::string Node::toShortString(const std::string& indent) const
     answer += "(" + classserver().getTypeName(_type);
     answer += " \"" + _name + "\"";
 
-    answer += ") ; [" +
-            std::to_string(get_hash()) + "][" +
-            std::to_string(_atomTable? _atomTable->get_uuid() : -1) +
-            "]\n";
+    answer += ") ; " + idToString() + "\n";
 
     return answer;
 }
@@ -67,10 +64,7 @@ std::string Node::toString(const std::string& indent) const
     if (not getTruthValue()->isDefaultTV())
         answer += " " + getTruthValue()->toString();
 
-    answer += ") ; [" +
-            std::to_string(get_hash()) + "][" +
-            std::to_string(_atomTable? _atomTable->get_uuid() : -1) +
-            "]\n";
+    answer += ") ; " + idToString() + "\n";
 
     return answer;
 }
