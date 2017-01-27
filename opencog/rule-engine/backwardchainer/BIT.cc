@@ -120,6 +120,13 @@ void AndBIT::reset_exhausted()
 	exhausted = false;
 }
 
+double AndBIT::complexity() const
+{
+	Handle rewrite = BindLinkCast(fcs)->get_implicand();
+	// TODO
+	return 0;
+}
+
 bool AndBIT::operator==(const AndBIT& andbit) const
 {
 	return fcs == andbit.fcs;

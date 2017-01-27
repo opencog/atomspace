@@ -125,6 +125,30 @@ public:
 	void reset_exhausted();
 
 	/**
+	 * The complexity of an and-BIT is the sum of the entropy of its
+	 * formula applications, where the entropy is calculated from the
+	 * formula's probability (gotten from its rule weight). For
+	 * instance if the rewrite term of the associated FCS is (in
+	 * pseudo language)
+	 *
+	 * f1(f1(X, Y), f2(Z))
+	 *
+	 * f1 is the formula of rule r1 with weight w1
+	 * f2 is the formula of rule r2 with weight w2
+	 *
+	 * and the following formula probabilities are calculated as
+	 * follows (assuming there are only 2 rules in the rule base)
+	 *
+	 * p1 = w1 / (w1 + w2)
+	 * p2 = w2 / (w1 + w2)
+	 *
+	 * then the complexity of this and-BIT is
+	 *
+	 * H(p1) + H(p1) + H(p2)
+	 */
+	double complexity() const;
+
+	/**
 	 * Comparison operators. For operator< compare fcs by size, or by
 	 * handle value if they are of the same size.
 	 */

@@ -198,11 +198,8 @@ void BackwardChainer::fulfill_fcs(const Handle& fcs)
 
 AndBIT* BackwardChainer::select_expansion_andbit()
 {
-	// Calculate distribution. For now it only uses the complexity
-	// factor. Ultimately it should estimate the probability that
-	// selecting an andbit for expansion is gonna contribute to the
-	// inference.
-	std::vector<double> weights;
+	// Calculate distribution based on a (poor) estimate of the
+	// probablity of a and-BIT within the path of the solution.
 	for (const AndBIT& andbit : _bit.andbits)
 		weights.push_back(operator()(andbit));
 
@@ -304,7 +301,7 @@ RuleSet BackwardChainer::get_valid_rules(const BITNode& target,
 
 double BackwardChainer::complexity_factor(const AndBIT& andbit) const
 {
-	return exp(-_configReader.get_complexity_penalty() * andbit.fcs->size());
+	return exp(-_configReader.get_complexity_penalty() * andbit.complexity());
 }
 
 double BackwardChainer::operator()(const AndBIT& andbit) const
