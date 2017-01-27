@@ -362,6 +362,12 @@ IncomingSet Atom::getIncomingSetByType(Type type, bool subclass)
     return inlinks;
 }
 
+std::string Atom::idToString() const
+{
+    return std::string("[") + std::to_string(get_hash()) + "][" +
+        std::to_string(_atomTable? _atomTable->get_uuid() : -1) + "]";
+}
+
 std::string oc_to_string(const IncomingSet& iset)
 {
 	std::stringstream ss;
