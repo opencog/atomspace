@@ -57,6 +57,9 @@ public:
 	// variations (partially unified, etc) can yield the same target.
 	RuleSet rules;
 
+	// The complexity of the BITNode. For now -log(probability).
+	double complexity;
+
 	// True iff all valid rules have already expanded this BIT-node.
 	// TODO (don't forget to reset if the rule set changes)
 	bool exhausted;
@@ -83,6 +86,12 @@ public:
 	typedef std::unordered_map<Handle, BITNode> HandleBITNodeMap;
 	HandleBITNodeMap leaf2bitnode;
 
+	// The complexity of an and-BIT is the sum of the complexities of
+	// the steps involved in producing it. More specifically the steps
+	// of choosing the BIT-leaf to expand from and the rule to expand
+	// with.
+	double complexity;
+
 	// True iff all leaves are exhausted (see BITNode::exhausted)
 	// TODO (don't forget to reset if the rule set changes)
 	bool exhausted;
@@ -94,7 +103,10 @@ public:
 	AndBIT();
 	AndBIT(AtomSpace& as, const Handle& target, const Handle& vardecl,
 	       const BITNodeFitness& fitness=BITNodeFitness());
-	AndBIT(const Handle& fcs);
+	/**
+	 * @brief construct a and-BIT given its FCS and complexity.
+	 */
+	AndBIT(const Handle& fcs, double complexity=0.0);
 	~AndBIT();
 
 	/**
@@ -123,30 +135,6 @@ public:
 	 * BIT-nodes exhausted flags as well.
 	 */
 	void reset_exhausted();
-
-	/**
-	 * The complexity of an and-BIT is the sum of the entropy of its
-	 * formula applications, where the entropy is calculated from the
-	 * formula's probability (gotten from its rule weight). For
-	 * instance if the rewrite term of the associated FCS is (in
-	 * pseudo language)
-	 *
-	 * f1(f1(X, Y), f2(Z))
-	 *
-	 * f1 is the formula of rule r1 with weight w1
-	 * f2 is the formula of rule r2 with weight w2
-	 *
-	 * and the following formula probabilities are calculated as
-	 * follows (assuming there are only 2 rules in the rule base)
-	 *
-	 * p1 = w1 / (w1 + w2)
-	 * p2 = w2 / (w1 + w2)
-	 *
-	 * then the complexity of this and-BIT is
-	 *
-	 * H(p1) + H(p1) + H(p2)
-	 */
-	double complexity() const;
 
 	/**
 	 * Comparison operators. For operator< compare fcs by size, or by

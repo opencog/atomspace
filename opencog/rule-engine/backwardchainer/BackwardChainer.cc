@@ -304,7 +304,7 @@ RuleSet BackwardChainer::get_valid_rules(const BITNode& target,
 
 double BackwardChainer::complexity_factor(const AndBIT& andbit) const
 {
-	return exp(-_configReader.get_complexity_penalty() * andbit.complexity());
+	return exp(-_configReader.get_complexity_penalty() * andbit.complexity);
 }
 
 double BackwardChainer::operator()(const AndBIT& andbit) const
