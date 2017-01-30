@@ -199,7 +199,8 @@ void BackwardChainer::fulfill_fcs(const Handle& fcs)
 AndBIT* BackwardChainer::select_expansion_andbit()
 {
 	// Calculate distribution based on a (poor) estimate of the
-	// probablity of a and-BIT within the path of the solution.
+	// probablity of a and-BIT being within the path of the solution.
+	std::vector<double> weights;
 	for (const AndBIT& andbit : _bit.andbits)
 		weights.push_back(operator()(andbit));
 
@@ -255,9 +256,9 @@ Rule BackwardChainer::select_rule(BITNode& target, const Handle& vardecl)
 	// Log all valid rules and their weights
 	if (bc_logger().is_debug_enabled()) {
 		std::stringstream ss;
-		ss << "The following rules are valid:";
+		ss << "The following weighted rules are valid:";
 		for (const Rule& r : valid_rules)
-			ss << std::endl << r.get_name();
+			ss << std::endl << r.get_weight() << " " << r.get_name();
 		LAZY_BC_LOG_DEBUG << ss.str();
 	}
 
