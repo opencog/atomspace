@@ -330,13 +330,30 @@ Handle AndBIT::expand_fcs_rewrite(const Handle& fcs_rewrite,
 	if (fcs_rewrite->isNode())
 		return fcs_rewrite;
 
-	// Recursive case
+	// Recursive cases
 
+	AtomSpace& as = *fcs->getAtomSpace();
 	Type t = fcs_rewrite->getType();
+
+	// If it is an ExecutionOutput then skip the first input argument
+	// as it is a conclusion already
+	if (t == EXECUTION_OUTPUT_LINK) {
+		Handle gsn = fcs_rewrite->getOutgoingAtom(0);
+		Handle arg = fcs_rewrite->getOutgoingAtom(1);
+		if (arg->getType() == LIST_LINK) {
+			HandleSeq args = arg->getOutgoingSet();
+			for (size_t i = 1; i < args.size(); i++)
+				args[i] = expand_fcs_rewrite(args[i], rule);
+			arg = as.add_link(LIST_LINK, args);
+		}
+		return as.add_link(EXECUTION_OUTPUT_LINK, {gsn, arg});
+	}
+
+	// Otherwise perform a mere recursion
 	HandleSeq outgoings;
 	for (const Handle& h : fcs_rewrite->getOutgoingSet())
 		outgoings.push_back(expand_fcs_rewrite(h, rule));
-	return fcs->getAtomSpace()->add_link(t, outgoings);
+	return as.add_link(t, outgoings);
 }
 
 bool AndBIT::is_argument_of(const Handle& eval, const Handle& atom) const
