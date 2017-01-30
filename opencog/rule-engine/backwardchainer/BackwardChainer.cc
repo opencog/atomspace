@@ -228,16 +228,18 @@ void BackwardChainer::reduce_bit()
 {
 	// TODO: reset exhausted flags related to the removed and-BITs.
 
-	// Remove and-BITs above a certain size.
-	auto complex_lt = [&](const AndBIT& andbit, size_t max_size) {
-		return andbit.fcs->size() < max_size; };
-	auto it = boost::lower_bound(_bit.andbits, _fcs_maximum_size, complex_lt);
-	size_t previous_size = _bit.andbits.size();
-	_bit.erase(it, _bit.andbits.end());
-	if (size_t removed_andbits = previous_size - _bit.andbits.size()) {
-		LAZY_BC_LOG_DEBUG << "Removed " << removed_andbits
-		                  << " overly complex and-BITs from the BIT";
-	}
+	// TODO: remove least likely and-BITs
+
+	// // Remove and-BITs above a certain size.
+	// auto complex_lt = [&](const AndBIT& andbit, size_t max_size) {
+	// 	return andbit.fcs->size() < max_size; };
+	// auto it = boost::lower_bound(_bit.andbits, _fcs_maximum_size, complex_lt);
+	// size_t previous_size = _bit.andbits.size();
+	// _bit.erase(it, _bit.andbits.end());
+	// if (size_t removed_andbits = previous_size - _bit.andbits.size()) {
+	// 	LAZY_BC_LOG_DEBUG << "Removed " << removed_andbits
+	// 	                  << " overly complex and-BITs from the BIT";
+	// }
 }
 
 Rule BackwardChainer::select_rule(BITNode& target, const Handle& vardecl)
