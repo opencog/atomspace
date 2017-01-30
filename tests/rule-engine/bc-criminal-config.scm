@@ -16,7 +16,7 @@
    conditional-full-instantiation-meta-rule-name
    (ConceptNode "URE")
 )
-(MemberLink (stv 1 1)
+(MemberLink (stv 0.6 1)
    bc-deduction-rule-name
    (ConceptNode "URE")
 )
@@ -45,7 +45,7 @@
 (ExecutionLink
    (SchemaNode "URE:maximum-iterations")
    (ConceptNode "URE")
-   (NumberNode "400")
+   (NumberNode "500")
 )
 
 ;; Attention allocation (set the TV strength to 0 to disable it, 1 to
@@ -59,5 +59,5 @@
 (ExecutionLink
    (SchemaNode "URE:BC:complexity-penalty")
    (ConceptNode "URE")
-   (NumberNode "0.001")
+   (NumberNode "0.1")
 )

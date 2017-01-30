@@ -170,7 +170,7 @@ private:
 
 	// Return the complexity factor of an andbit. The formula is
 	//
-	// exp(-complexity_penalty * andbit.fcs->size())
+	// exp(-complexity_penalty * andbit.complexity())
 	double complexity_factor(const AndBIT& andbit) const;
 
 	// Return an very crude estimate of the probability that expanding

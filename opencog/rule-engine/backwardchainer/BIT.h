@@ -57,6 +57,9 @@ public:
 	// variations (partially unified, etc) can yield the same target.
 	RuleSet rules;
 
+	// The complexity of the BITNode. For now -log(probability).
+	double complexity;
+
 	// True iff all valid rules have already expanded this BIT-node.
 	// TODO (don't forget to reset if the rule set changes)
 	bool exhausted;
@@ -83,6 +86,12 @@ public:
 	typedef std::unordered_map<Handle, BITNode> HandleBITNodeMap;
 	HandleBITNodeMap leaf2bitnode;
 
+	// The complexity of an and-BIT is the sum of the complexities of
+	// the steps involved in producing it. More specifically the steps
+	// of choosing the BIT-leaf to expand from and the rule to expand
+	// with.
+	double complexity;
+
 	// True iff all leaves are exhausted (see BITNode::exhausted)
 	// TODO (don't forget to reset if the rule set changes)
 	bool exhausted;
@@ -94,7 +103,10 @@ public:
 	AndBIT();
 	AndBIT(AtomSpace& as, const Handle& target, const Handle& vardecl,
 	       const BITNodeFitness& fitness=BITNodeFitness());
-	AndBIT(const Handle& fcs);
+	/**
+	 * @brief construct a and-BIT given its FCS and complexity.
+	 */
+	AndBIT(const Handle& fcs, double complexity=0.0);
 	~AndBIT();
 
 	/**
@@ -159,10 +171,12 @@ private:
 	void set_leaf2bitnode();
 
 	/**
-	 * @brief Build the bitnode associated to leaf and insert it in
-	 * leaf2bitnode.
+	 * @brief Build the BITNode associated to leaf, insert it in
+	 * leaf2bitnode and return its iterator. If already in then return
+	 * the iterator or the existing BITNode.
 	 */
-	void insert_bitnode(Handle leaf, const BITNodeFitness& fitness);
+	HandleBITNodeMap::iterator
+	insert_bitnode(Handle leaf, const BITNodeFitness& fitness);
 
 	/**
 	 * Return all the leaves (or blanket because these new target

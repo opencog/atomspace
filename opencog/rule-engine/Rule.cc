@@ -99,7 +99,9 @@ void Rule::init(const Handle& rule_alias, const Handle& rule, const Handle& rbs)
 	_rule_alias = rule_alias;
 	_name = _rule_alias->getName();
 	_rbs = rbs;
-	_weight = rule->getTruthValue()->getMean();
+	AtomSpace& as = *rule_alias->getAtomSpace();
+	Handle ml = as.get_link(MEMBER_LINK, rule_alias, rbs);
+	_weight = ml->getTruthValue()->getMean();
 }
 
 bool Rule::operator==(const Rule& r) const

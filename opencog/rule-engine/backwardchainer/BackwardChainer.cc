@@ -198,10 +198,8 @@ void BackwardChainer::fulfill_fcs(const Handle& fcs)
 
 AndBIT* BackwardChainer::select_expansion_andbit()
 {
-	// Calculate distribution. For now it only uses the complexity
-	// factor. Ultimately it should estimate the probability that
-	// selecting an andbit for expansion is gonna contribute to the
-	// inference.
+	// Calculate distribution based on a (poor) estimate of the
+	// probablity of a and-BIT being within the path of the solution.
 	std::vector<double> weights;
 	for (const AndBIT& andbit : _bit.andbits)
 		weights.push_back(operator()(andbit));
@@ -231,16 +229,18 @@ void BackwardChainer::reduce_bit()
 {
 	// TODO: reset exhausted flags related to the removed and-BITs.
 
-	// Remove and-BITs above a certain size.
-	auto complex_lt = [&](const AndBIT& andbit, size_t max_size) {
-		return andbit.fcs->size() < max_size; };
-	auto it = boost::lower_bound(_bit.andbits, _fcs_maximum_size, complex_lt);
-	size_t previous_size = _bit.andbits.size();
-	_bit.erase(it, _bit.andbits.end());
-	if (size_t removed_andbits = previous_size - _bit.andbits.size()) {
-		LAZY_BC_LOG_DEBUG << "Removed " << removed_andbits
-		                  << " overly complex and-BITs from the BIT";
-	}
+	// TODO: remove least likely and-BITs
+
+	// // Remove and-BITs above a certain size.
+	// auto complex_lt = [&](const AndBIT& andbit, size_t max_size) {
+	// 	return andbit.fcs->size() < max_size; };
+	// auto it = boost::lower_bound(_bit.andbits, _fcs_maximum_size, complex_lt);
+	// size_t previous_size = _bit.andbits.size();
+	// _bit.erase(it, _bit.andbits.end());
+	// if (size_t removed_andbits = previous_size - _bit.andbits.size()) {
+	// 	LAZY_BC_LOG_DEBUG << "Removed " << removed_andbits
+	// 	                  << " overly complex and-BITs from the BIT";
+	// }
 }
 
 Rule BackwardChainer::select_rule(BITNode& target, const Handle& vardecl)
@@ -256,9 +256,9 @@ Rule BackwardChainer::select_rule(BITNode& target, const Handle& vardecl)
 	// Log all valid rules and their weights
 	if (bc_logger().is_debug_enabled()) {
 		std::stringstream ss;
-		ss << "The following rules are valid:";
+		ss << "The following weighted rules are valid:";
 		for (const Rule& r : valid_rules)
-			ss << std::endl << r.get_name();
+			ss << std::endl << r.get_weight() << " " << r.get_name();
 		LAZY_BC_LOG_DEBUG << ss.str();
 	}
 
@@ -304,7 +304,7 @@ RuleSet BackwardChainer::get_valid_rules(const BITNode& target,
 
 double BackwardChainer::complexity_factor(const AndBIT& andbit) const
 {
-	return exp(-_configReader.get_complexity_penalty() * andbit.fcs->size());
+	return exp(-_configReader.get_complexity_penalty() * andbit.complexity);
 }
 
 double BackwardChainer::operator()(const AndBIT& andbit) const

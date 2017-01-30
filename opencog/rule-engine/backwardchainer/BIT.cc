@@ -41,13 +41,17 @@ namespace opencog {
 /////////////
 
 BITNode::BITNode(const Handle& bd, const BITNodeFitness& fi)
-	: body(bd), fitness(fi), exhausted(false) {}
+	: body(bd), fitness(fi), exhausted(false) {
+	complexity = -std::log(operator()());
+}
 
 double BITNode::operator()() const
 {
-	// The probably is anti-proportional to the fitness. Indeed if the
-	// fitness already is high, expanding the BIT-Node won't likely
-	// add anything to the success of the inference.
+	// The probably estimate is anti-proportional to the fitness. The
+	// assumption used here is that, if the fitness is already high,
+	// expanding the BIT-Node is less likely to increase it. This
+	// assumption is perfectly right when the fitness equals its upper
+	// bound, but isn't generally right otherwise.
 	return (exhausted ? 0.0 : 1.0) *
 		(fitness.upper - fitness(*this)) / (fitness.upper - fitness.lower);
 }
@@ -76,19 +80,29 @@ AndBIT::AndBIT(AtomSpace& as, const Handle& target, const Handle& vardecl,
 		bl.insert(bl.begin(), vardecl);
 	fcs = as.add_link(BIND_LINK, bl);
 
-	insert_bitnode(target, fitness);
+	// Insert the initial BITNode and initialize the AndBIT complexity
+	auto it = insert_bitnode(target, fitness);
+	complexity = it->second.complexity;
 }
 
-AndBIT::AndBIT(const Handle& f) : fcs(f), exhausted(false)
+AndBIT::AndBIT(const Handle& f, double cpx)	:
+	fcs(f), complexity(cpx), exhausted(false)
 {
-	set_leaf2bitnode();         // TODO: might differ till needed
+	set_leaf2bitnode();         // TODO: might differ till needed to optimize
 }
 
 AndBIT::~AndBIT() {}
 
 AndBIT AndBIT::expand(const Handle& leaf, const Rule& rule) const
 {
-	return AndBIT(expand_fcs(leaf, rule));
+	// Calculate the complexity of the expanded and-BIT. Sum up the
+	// complexity of the parent and-BIT with the complexity of the
+	// expanded BIT-node and the complexity of the rule (1 - log(rule-weight))
+	double new_cpx = complexity
+		+ leaf2bitnode.find(leaf)->second.complexity
+		+ 1 - log(rule.get_weight());
+
+	return AndBIT(expand_fcs(leaf, rule), new_cpx);
 }
 
 BITNode* AndBIT::select_leaf()
@@ -127,12 +141,10 @@ bool AndBIT::operator==(const AndBIT& andbit) const
 
 bool AndBIT::operator<(const AndBIT& andbit) const
 {
-	// Sort by size first to so that shorter and-BITs come
-	// first. Makes it easier to prune by complexity. Then by content.
-	size_t fcs_size = fcs->size();
-	size_t other_size = andbit.fcs->size();
-	return (fcs_size < other_size)
-		or (fcs_size == other_size
+	// Sort by complexity to so that simpler and-BITs come first. Then
+	// by content. Makes it easier to prune by complexity.
+	return (complexity < andbit.complexity)
+		or (complexity == andbit.complexity
 		    and content_based_handle_less()(fcs, andbit.fcs));
 }
 
@@ -183,13 +195,16 @@ void AndBIT::set_leaf2bitnode()
 		insert_bitnode(leaf, BITNodeFitness());
 }
 
-void AndBIT::insert_bitnode(Handle leaf, const BITNodeFitness& fitness)
+AndBIT::HandleBITNodeMap::iterator
+AndBIT::insert_bitnode(Handle leaf, const BITNodeFitness& fitness)
 {
 	if (leaf.is_undefined())
-		return;
+		return leaf2bitnode.end();
 
-	if (leaf2bitnode.find(leaf) == leaf2bitnode.end())
-		leaf2bitnode.emplace(leaf, BITNode(leaf, fitness));
+	HandleBITNodeMap::iterator it = leaf2bitnode.find(leaf);
+	if (it == leaf2bitnode.end())
+		return leaf2bitnode.emplace(leaf, BITNode(leaf, fitness)).first;
+	return it;
 }
 
 OrderedHandleSet AndBIT::get_leaves() const
@@ -320,13 +335,30 @@ Handle AndBIT::expand_fcs_rewrite(const Handle& fcs_rewrite,
 	if (fcs_rewrite->isNode())
 		return fcs_rewrite;
 
-	// Recursive case
+	// Recursive cases
 
+	AtomSpace& as = *fcs->getAtomSpace();
 	Type t = fcs_rewrite->getType();
+
+	// If it is an ExecutionOutput then skip the first input argument
+	// as it is a conclusion already
+	if (t == EXECUTION_OUTPUT_LINK) {
+		Handle gsn = fcs_rewrite->getOutgoingAtom(0);
+		Handle arg = fcs_rewrite->getOutgoingAtom(1);
+		if (arg->getType() == LIST_LINK) {
+			HandleSeq args = arg->getOutgoingSet();
+			for (size_t i = 1; i < args.size(); i++)
+				args[i] = expand_fcs_rewrite(args[i], rule);
+			arg = as.add_link(LIST_LINK, args);
+		}
+		return as.add_link(EXECUTION_OUTPUT_LINK, {gsn, arg});
+	}
+
+	// Otherwise perform a mere recursion
 	HandleSeq outgoings;
 	for (const Handle& h : fcs_rewrite->getOutgoingSet())
 		outgoings.push_back(expand_fcs_rewrite(h, rule));
-	return fcs->getAtomSpace()->add_link(t, outgoings);
+	return as.add_link(t, outgoings);
 }
 
 bool AndBIT::is_argument_of(const Handle& eval, const Handle& atom) const
