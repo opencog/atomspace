@@ -183,10 +183,12 @@ private:
 	void set_leaf2bitnode();
 
 	/**
-	 * @brief Build the bitnode associated to leaf and insert it in
-	 * leaf2bitnode.
+	 * @brief Build the BITNode associated to leaf, insert it in
+	 * leaf2bitnode and return its iterator. If already in then return
+	 * the iterator or the existing BITNode.
 	 */
-	void insert_bitnode(Handle leaf, const BITNodeFitness& fitness);
+	HandleBITNodeMap::iterator
+	insert_bitnode(Handle leaf, const BITNodeFitness& fitness);
 
 	/**
 	 * Return all the leaves (or blanket because these new target

@@ -190,13 +190,16 @@ void AndBIT::set_leaf2bitnode()
 		insert_bitnode(leaf, BITNodeFitness());
 }
 
-void AndBIT::insert_bitnode(Handle leaf, const BITNodeFitness& fitness)
+AndBIT::HandleBITNodeMap::iterator
+AndBIT::insert_bitnode(Handle leaf, const BITNodeFitness& fitness)
 {
 	if (leaf.is_undefined())
-		return;
+		return leaf2bitnode.end();
 
-	if (leaf2bitnode.find(leaf) == leaf2bitnode.end())
-		leaf2bitnode.emplace(leaf, BITNode(leaf, fitness));
+	HandleBITNodeMap::iterator it = leaf2bitnode.find(leaf);
+	if (it == leaf2bitnode.end())
+		return leaf2bitnode.emplace(leaf, BITNode(leaf, fitness)).first;
+	return it;
 }
 
 OrderedHandleSet AndBIT::get_leaves() const
