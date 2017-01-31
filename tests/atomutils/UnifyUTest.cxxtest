@@ -86,10 +86,9 @@ public:
 	void test_unify_unordered_7();
 	void test_unify_unordered_8();
 
-	// TODO: add test about same variable X in different scopes
-
-	// // Various complex unify queries
-	// void test_unify_complex_1();
+	// Various complex unify queries
+	void test_unify_complex_1();
+	// void test_unify_complex_2();
 };
 
 void UnifyUTest::setUp(void)
@@ -432,9 +431,130 @@ void UnifyUTest::test_unify_unordered_8()
 	TS_ASSERT_EQUALS(result, expected);
 }
 
+void UnifyUTest::test_unify_complex_1()
+{
+	Handle lhs =
+		_eval.eval_h("(ImplicationLink"
+		             "  (LambdaLink"
+		             "    (TypedVariableLink"
+		             "      (VariableNode \"$X\")"
+		             "      (TypeNode \"ConceptNode\"))"
+		             "    (EvaluationLink"
+		             "      (PredicateNode \"take\")"
+		             "      (ListLink"
+		             "        (VariableNode \"$X\")"
+		             "        (ConceptNode \"treatment-1\"))))"
+		             "  (AndLink"
+		             "    (QuoteLink"
+		             "      (LambdaLink"
+		             "        (UnquoteLink"
+		             "          (VariableNode \"$TyVs\"))"
+		             "        (UnquoteLink"
+		             "          (VariableNode \"$A1\"))))"
+		             "    (QuoteLink"
+		             "      (LambdaLink"
+		             "        (UnquoteLink"
+		             "          (VariableNode \"$TyVs\"))"
+		             "        (UnquoteLink"
+		             "          (VariableNode \"$A2\"))))))");
+	Handle rhs =
+		_eval.eval_h("(ImplicationLink"
+		             "   (VariableNode \"$P\")"
+		             "   (And"
+		             "      (VariableNode \"$P\")"
+		             "      (VariableNode \"$Q\")))");
+	Handle lhs_vardecl =
+		_eval.eval_h("(VariableList"
+		             "  (TypedVariableLink"
+		             "    (VariableNode \"$TyVs-5476a9b9\")"
+		             "    (TypeChoice"
+		             "      (TypeNode \"TypedVariableLink\")"
+		             "      (TypeNode \"VariableNode\")"
+		             "      (TypeNode \"VariableList\")))"
+		             "  (TypedVariableLink"
+		             "    (VariableNode \"$A1-7235efc6\")"
+		             "    (TypeNode \"EvaluationLink\"))"
+		             "  (TypedVariableLink"
+		             "    (VariableNode \"$A2-1ac8e4a2\")"
+		             "    (TypeNode \"EvaluationLink\")))");
+	Handle rhs_vardecl =
+		_eval.eval_h("(VariableList"
+		             "   (TypedVariableLink"
+		             "      (VariableNode \"$P\")"
+		             "      (TypeChoice"
+		             "         (TypeNode \"PredicateNode\")"
+		             "         (TypeNode \"LambdaLink\")))"
+		             "   (TypedVariableLink"
+		             "      (VariableNode \"$Q\")"
+		             "      (TypeChoice"
+		             "         (TypeNode \"PredicateNode\")"
+		             "         (TypeNode \"LambdaLink\")))))");
+
+	Handle P = _eval.eval_h("(VariableNode \"$P\")");
+	Handle Q = _eval.eval_h("(VariableNode \"$Q\")");
+	Handle TyVs = _eval.eval_h("(VariableNode \"$TyVs\")");
+	Handle A1 = _eval.eval_h("(VariableNode \"$A1\")");
+	Handle A2 = _eval.eval_h("(VariableNode \"$A2\")");
+
+	Handle implicant =
+		_eval.eval_h("(LambdaLink"
+		             "  (TypedVariableLink"
+		             "    (VariableNode \"$X\")"
+		             "    (TypeNode \"ConceptNode\"))"
+		             "  (EvaluationLink"
+		             "    (PredicateNode \"take\")"
+		             "    (ListLink"
+		             "      (VariableNode \"$X\")"
+		             "      (ConceptNode \"treatment-1\"))))");
+	Handle quoted_implicant =
+		_eval.eval_h("(QuoteLink"
+		             "  (LambdaLink"
+		             "    (UnquoteLink"
+		             "      (VariableNode \"$TyVs\"))"
+		             "    (UnquoteLink"
+		             "      (VariableNode \"$A1\"))))");
+
+	Handle quoted_implicand =
+		_eval.eval_h("(QuoteLink"
+		             "  (LambdaLink"
+		             "    (UnquoteLink"
+		             "      (VariableNode \"$TyVs\"))"
+		             "    (UnquoteLink"
+		             "      (VariableNode \"$A2\"))))");
+
+	Handle implicant_vardecl =
+		_eval.eval_h("(TypedVariableLink"
+		             "  (VariableNode \"$X\")"
+		             "  (TypeNode \"ConceptNode\"))");
+
+	Handle implicant_body =
+		_eval.eval_h("(EvaluationLink"
+		             "  (PredicateNode \"take\")"
+		             "  (ListLink"
+		             "    (VariableNode \"$X\")"
+		             "    (ConceptNode \"treatment-1\")))");
+
+	UnificationSolutionSet result = unify(lhs, rhs, lhs_vardecl, rhs_vardecl),
+		expected = UnificationSolutionSet(true,
+		                                  {{{{P, implicant, quoted_implicant},
+						                     implicant},
+				                            {{Q, quoted_implicand},
+						                     quoted_implicant},
+				                            {{TyVs, implicant_vardecl},
+						                     implicant_vardecl},
+				                            {{A1, implicant_body},
+						                     implicant_body},
+				                            {{A2}, A2}}});
+
+	std::cout << "result = " << oc_to_string(result) << std::endl;
+	std::cout << "expected = " << oc_to_string(expected) << std::endl;
+
+	TS_ASSERT_EQUALS(result, expected);
+}
+
 // // TODO: what is the purpose of this test given that it have variables
 // // in common from lhs and rhs
-// void UnifyUTest::test_unify_complex_1()
+// void UnifyUTest::test_unify_complex_2()
 // {
 // 	Handle lhs =
 // 		_eval.eval_h("(ImplicationLink"
@@ -560,8 +680,8 @@ void UnifyUTest::test_unify_unordered_8()
 // 	UnificationSolutionSet result = unify(lhs, rhs, lhs_vardecl, rhs_vardecl),
 // 		expected = UnificationSolutionSet(true,
 // 		                                  {{{{TyVs1, TyVs2}, TyVs2},
-// 				                             {{A1, A1}, A1},
-// 				                             {{A2, A2}, A2}}});
+// 				                            {{A1, A1}, A1},
+// 				                            {{A2, A2}, A2}}});
 
 // 	std::cout << "result = " << oc_to_string(result) << std::endl;
 // 	std::cout << "expected = " << oc_to_string(expected) << std::endl;
