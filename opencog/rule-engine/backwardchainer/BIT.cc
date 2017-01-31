@@ -61,7 +61,10 @@ std::string	BITNode::to_string() const
 	std::stringstream ss;
 	ss << "body:" << std::endl << oc_to_string(body)
 	   << "exhausted: " << exhausted << std::endl
-	   << "rules: " << oc_to_string(rules);
+	   << "rules: size = " << rules.size();
+	for (const Rule& rule : rules)
+		ss << std::endl << rule.get_name()
+		   << " " << rule.get_rule()->idToString();
 	return ss.str();
 }
 
