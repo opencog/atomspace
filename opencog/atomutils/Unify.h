@@ -206,22 +206,19 @@ public:
 	                       Quotation lhs_quotation=Quotation(),
 	                       Quotation rhs_quotation=Quotation());
 	SolutionSet unify(const Handle& lhs, const Handle& rhs,
-	                  const Handle& lhs_vardecl=Handle::UNDEFINED,
-	                  const Handle& rhs_vardecl=Handle::UNDEFINED,
 	                  Quotation lhs_quotation=Quotation(),
 	                  Quotation rhs_quotation=Quotation());
 
 private:
+	Handle _lhs_vardecl;
+	Handle _rhs_vardecl;
+
 	SolutionSet unordered_unify(const HandleSeq& lhs,
 	                            const HandleSeq& rhs,
-	                            const Handle& lhs_vardecl,
-	                            const Handle& rhs_vardecl,
 	                            Quotation lhs_quotation=Quotation(),
 	                            Quotation rhs_quotation=Quotation());
 	SolutionSet ordered_unify(const HandleSeq& lhs,
 	                          const HandleSeq& rhs,
-	                          const Handle& lhs_vardecl,
-	                          const Handle& rhs_vardecl,
 	                          Quotation lhs_quotation=Quotation(),
 	                          Quotation rhs_quotation=Quotation());
 
@@ -240,8 +237,6 @@ private:
 	 * one of them is a variable.
 	 */
 	SolutionSet mkvarsol(const Handle& lhs, const Handle& rhs,
-	                     const Handle& lhs_vardecl,
-	                     const Handle& rhs_vardecl,
 	                     Quotation lhs_quotation,
 	                     Quotation rhs_quotation);
 

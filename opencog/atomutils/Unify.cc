@@ -194,12 +194,12 @@ Unify::SolutionSet Unify::operator()(const Handle& lhs, const Handle& rhs,
                                      Quotation lhs_quotation,
                                      Quotation rhs_quotation)
 {
-	return unify(lhs, rhs, lhs_vardecl, rhs_vardecl, lhs_quotation, rhs_quotation);
+	_lhs_vardecl = lhs_vardecl;
+	_rhs_vardecl = rhs_vardecl;
+	return unify(lhs, rhs, lhs_quotation, rhs_quotation);
 }
 
 Unify::SolutionSet Unify::unify(const Handle& lhs, const Handle& rhs,
-                                const Handle& lhs_vardecl,
-                                const Handle& rhs_vardecl,
                                 Quotation lhs_quotation,
                                 Quotation rhs_quotation)
 {
@@ -220,8 +220,7 @@ Unify::SolutionSet Unify::unify(const Handle& lhs, const Handle& rhs,
 		// check their equality
 		if ((lhs_quotation.is_unquoted() and lhs_type == VARIABLE_NODE)
 		    or (rhs_quotation.is_unquoted() and rhs_type == VARIABLE_NODE)) {
-			return mkvarsol(lhs, rhs, lhs_vardecl, rhs_vardecl,
-			                lhs_quotation, rhs_quotation);
+			return mkvarsol(lhs, rhs, lhs_quotation, rhs_quotation);
 		} else
 			return SolutionSet(lhs == rhs);
 	}
@@ -236,18 +235,15 @@ Unify::SolutionSet Unify::unify(const Handle& lhs, const Handle& rhs,
 		lhs_quotation.update(lhs_type);
 		rhs_quotation.update(rhs_type);
 		return unify(lhs->getOutgoingAtom(0), rhs->getOutgoingAtom(0),
-		             lhs_vardecl, rhs_vardecl,
 		             lhs_quotation, rhs_quotation);
 	}
 	if (lhs_quotation.consumable(lhs_type)) {
 		lhs_quotation.update(lhs_type);
-		return unify(lhs->getOutgoingAtom(0), rhs, lhs_vardecl, rhs_vardecl,
-		             lhs_quotation, rhs_quotation);
+		return unify(lhs->getOutgoingAtom(0), rhs, lhs_quotation, rhs_quotation);
 	}
 	if (rhs_quotation.consumable(rhs_type)) {
 		rhs_quotation.update(rhs_type);
-		return unify(lhs, rhs->getOutgoingAtom(0), lhs_vardecl, rhs_vardecl,
-		             lhs_quotation, rhs_quotation);
+		return unify(lhs, rhs->getOutgoingAtom(0), lhs_quotation, rhs_quotation);
 	}
 
 	// Update quotations
@@ -268,18 +264,14 @@ Unify::SolutionSet Unify::unify(const Handle& lhs, const Handle& rhs,
 
 	if (is_unordered(rhs))
 		return unordered_unify(lhs->getOutgoingSet(), rhs->getOutgoingSet(),
-		                       lhs_vardecl, rhs_vardecl,
 		                       lhs_quotation, rhs_quotation);
 	else
 		return ordered_unify(lhs->getOutgoingSet(), rhs->getOutgoingSet(),
-		                     lhs_vardecl, rhs_vardecl,
 		                     lhs_quotation, rhs_quotation);
 }
 
 Unify::SolutionSet Unify::unordered_unify(const HandleSeq& lhs,
                                           const HandleSeq& rhs,
-                                          const Handle& lhs_vardecl,
-                                          const Handle& rhs_vardecl,
                                           Quotation lhs_quotation,
                                           Quotation rhs_quotation)
 {
@@ -294,13 +286,11 @@ Unify::SolutionSet Unify::unordered_unify(const HandleSeq& lhs,
 	// Recursive case
 	Unify::SolutionSet sol(false);
 	for (Arity i = 0; i < lhs_arity; ++i) {
-		auto head_sol = unify(lhs[i], rhs[0], lhs_vardecl, rhs_vardecl,
-		                      lhs_quotation, rhs_quotation);
+		auto head_sol = unify(lhs[i], rhs[0], lhs_quotation, rhs_quotation);
 		if (head_sol.satisfiable) {
 			HandleSeq lhs_tail(cp_erase(lhs, i));
 			HandleSeq rhs_tail(cp_erase(rhs, 0));
 			auto tail_sol = unordered_unify(lhs_tail, rhs_tail,
-			                                lhs_vardecl, rhs_vardecl,
 			                                lhs_quotation, rhs_quotation);
 			Unify::SolutionSet perm_sol = join(head_sol, tail_sol);
 			// Union merge satisfiable permutations
@@ -316,8 +306,6 @@ Unify::SolutionSet Unify::unordered_unify(const HandleSeq& lhs,
 
 Unify::SolutionSet Unify::ordered_unify(const HandleSeq& lhs,
                                         const HandleSeq& rhs,
-                                        const Handle& lhs_vardecl,
-                                        const Handle& rhs_vardecl,
                                         Quotation lhs_quotation,
                                         Quotation rhs_quotation)
 {
@@ -327,8 +315,7 @@ Unify::SolutionSet Unify::ordered_unify(const HandleSeq& lhs,
 
 	Unify::SolutionSet sol;
 	for (Arity i = 0; i < lhs_arity; ++i) {
-		auto rs = unify(lhs[i], rhs[i], lhs_vardecl, rhs_vardecl,
-		                lhs_quotation, rhs_quotation);
+		auto rs = unify(lhs[i], rhs[i], lhs_quotation, rhs_quotation);
 		sol = join(sol, rs);
 		if (not sol.satisfiable)     // Stop if unification has failed
 			break;
@@ -349,12 +336,10 @@ HandleSeq Unify::cp_erase(const HandleSeq& hs, Arity i)
 }
 
 Unify::SolutionSet Unify::mkvarsol(const Handle& lhs, const Handle& rhs,
-                                   const Handle& lhs_vardecl,
-                                   const Handle& rhs_vardecl,
                                    Quotation lhs_quotation,
                                    Quotation rhs_quotation)
 {
-	Handle inter = type_intersection(lhs, rhs, lhs_vardecl, rhs_vardecl,
+	Handle inter = type_intersection(lhs, rhs, _lhs_vardecl, _rhs_vardecl,
 	                                 lhs_quotation, rhs_quotation);
 	if (inter == Handle::UNDEFINED)
 		return SolutionSet(false);
