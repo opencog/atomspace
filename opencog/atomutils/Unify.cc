@@ -35,11 +35,12 @@ namespace opencog {
 Unify::SolutionSet::SolutionSet(bool s, const Unify::Partitions& p)
 	: satisfiable(s), partitions(p) {}
 
-Unify::TypedSubstitutions
-Unify::typed_substitutions(const Unify::SolutionSet& sol,
-                           const Handle& pre,
-                           const Handle& lhs, const Handle& rhs,
-                           Handle lhs_vardecl, Handle rhs_vardecl)
+Unify::TypedSubstitutions Unify::typed_substitutions(const SolutionSet& sol,
+                                                     const Handle& pre,
+                                                     const Handle& lhs,
+                                                     const Handle& rhs,
+                                                     Handle lhs_vardecl,
+                                                     Handle rhs_vardecl) const
 {
 	OC_ASSERT(sol.satisfiable);
 
@@ -84,28 +85,29 @@ Unify::typed_substitutions(const Unify::SolutionSet& sol,
 	return result;
 }
 
-bool Unify::is_ill_quotation(BindLinkPtr bl)
+bool Unify::is_ill_quotation(BindLinkPtr bl) const
 {
 	return bl->get_vardecl().is_undefined();
 }
 
-bool Unify::is_pm_connector(const Handle& h)
+bool Unify::is_pm_connector(const Handle& h) const
 {
 	return is_pm_connector(h->getType());
 }
 
-bool Unify::is_pm_connector(Type t)
+bool Unify::is_pm_connector(Type t) const
 {
 	return t == AND_LINK or t == OR_LINK or t == NOT_LINK;
 }
 
-bool Unify::has_bl_variable_in_local_scope(BindLinkPtr bl, const Handle& scope)
+bool Unify::has_bl_variable_in_local_scope(BindLinkPtr bl,
+                                           const Handle& scope) const
 {
 	Handle var = scope->getOutgoingAtom(0)->getOutgoingAtom(0);
 	return bl->get_variables().is_in_varset(var);
 }
 
-BindLinkPtr Unify::consume_ill_quotations(BindLinkPtr bl)
+BindLinkPtr Unify::consume_ill_quotations(BindLinkPtr bl) const
 {
 	Handle vardecl = bl->get_vardecl(),
 		pattern = bl->get_body(),
@@ -130,7 +132,7 @@ BindLinkPtr Unify::consume_ill_quotations(BindLinkPtr bl)
 }
 
 Handle Unify::consume_ill_quotations(BindLinkPtr bl, Handle h,
-                                     Quotation quotation, bool escape)
+                                     Quotation quotation, bool escape) const
 {
 	// Base case
 	if (h->isNode())
@@ -173,7 +175,7 @@ Handle Unify::consume_ill_quotations(BindLinkPtr bl, Handle h,
 		: Handle(createLink(t, consumed));
 }
 
-Handle Unify::substitute(BindLinkPtr bl, const Unify::TypedSubstitution& ts)
+Handle Unify::substitute(BindLinkPtr bl, const TypedSubstitution& ts) const
 {
 	// Get the list of values to substitute from ts
 	HandleSeq values = bl->get_variables().make_values(ts.first);
@@ -201,7 +203,7 @@ Unify::SolutionSet Unify::operator()(const Handle& lhs, const Handle& rhs,
 
 Unify::SolutionSet Unify::unify(const Handle& lhs, const Handle& rhs,
                                 Quotation lhs_quotation,
-                                Quotation rhs_quotation)
+                                Quotation rhs_quotation) const
 {
 	///////////////////
 	// Base cases    //
@@ -273,7 +275,7 @@ Unify::SolutionSet Unify::unify(const Handle& lhs, const Handle& rhs,
 Unify::SolutionSet Unify::unordered_unify(const HandleSeq& lhs,
                                           const HandleSeq& rhs,
                                           Quotation lhs_quotation,
-                                          Quotation rhs_quotation)
+                                          Quotation rhs_quotation) const
 {
 	Arity lhs_arity(lhs.size());
 	Arity rhs_arity(rhs.size());
@@ -284,7 +286,7 @@ Unify::SolutionSet Unify::unordered_unify(const HandleSeq& lhs,
 		return SolutionSet();
 
 	// Recursive case
-	Unify::SolutionSet sol(false);
+	SolutionSet sol(false);
 	for (Arity i = 0; i < lhs_arity; ++i) {
 		auto head_sol = unify(lhs[i], rhs[0], lhs_quotation, rhs_quotation);
 		if (head_sol.satisfiable) {
@@ -292,7 +294,7 @@ Unify::SolutionSet Unify::unordered_unify(const HandleSeq& lhs,
 			HandleSeq rhs_tail(cp_erase(rhs, 0));
 			auto tail_sol = unordered_unify(lhs_tail, rhs_tail,
 			                                lhs_quotation, rhs_quotation);
-			Unify::SolutionSet perm_sol = join(head_sol, tail_sol);
+			SolutionSet perm_sol = join(head_sol, tail_sol);
 			// Union merge satisfiable permutations
 			if (perm_sol.satisfiable) {
 				sol.satisfiable = true;
@@ -307,13 +309,13 @@ Unify::SolutionSet Unify::unordered_unify(const HandleSeq& lhs,
 Unify::SolutionSet Unify::ordered_unify(const HandleSeq& lhs,
                                         const HandleSeq& rhs,
                                         Quotation lhs_quotation,
-                                        Quotation rhs_quotation)
+                                        Quotation rhs_quotation) const
 {
 	Arity lhs_arity(lhs.size());
 	Arity rhs_arity(rhs.size());
 	OC_ASSERT(lhs_arity == rhs_arity);
 
-	Unify::SolutionSet sol;
+	SolutionSet sol;
 	for (Arity i = 0; i < lhs_arity; ++i) {
 		auto rs = unify(lhs[i], rhs[i], lhs_quotation, rhs_quotation);
 		sol = join(sol, rs);
@@ -323,12 +325,12 @@ Unify::SolutionSet Unify::ordered_unify(const HandleSeq& lhs,
 	return sol;
 }
 	
-bool Unify::is_unordered(const Handle& h)
+bool Unify::is_unordered(const Handle& h) const
 {
 	return classserver().isA(h->getType(), UNORDERED_LINK);
 }
 
-HandleSeq Unify::cp_erase(const HandleSeq& hs, Arity i)
+HandleSeq Unify::cp_erase(const HandleSeq& hs, Arity i) const
 {
 	HandleSeq hs_cp(hs);
 	hs_cp.erase(hs_cp.begin() + i);
@@ -337,7 +339,7 @@ HandleSeq Unify::cp_erase(const HandleSeq& hs, Arity i)
 
 Unify::SolutionSet Unify::mkvarsol(const Handle& lhs, const Handle& rhs,
                                    Quotation lhs_quotation,
-                                   Quotation rhs_quotation)
+                                   Quotation rhs_quotation) const
 {
 	Handle inter = type_intersection(lhs, rhs, _lhs_vardecl, _rhs_vardecl,
 	                                 lhs_quotation, rhs_quotation);
@@ -350,8 +352,8 @@ Unify::SolutionSet Unify::mkvarsol(const Handle& lhs, const Handle& rhs,
 	}
 }
 
-Unify::SolutionSet Unify::join(const Unify::SolutionSet& lhs,
-                               const Unify::SolutionSet& rhs)
+Unify::SolutionSet Unify::join(const SolutionSet& lhs,
+                               const SolutionSet& rhs) const
 {
 	// No need to join if one of them is non satisfiable
 	if (not lhs.satisfiable or not rhs.satisfiable)
@@ -377,8 +379,7 @@ Unify::SolutionSet Unify::join(const Unify::SolutionSet& lhs,
 	return result;
 }
 
-Unify::Partitions Unify::join(const Unify::Partitions& lhs,
-                              const Unify::Partition& rhs)
+Unify::Partitions Unify::join(const Partitions& lhs, const Partition& rhs) const
 {
 	// Base cases
 	if (rhs.empty())
@@ -387,58 +388,69 @@ Unify::Partitions Unify::join(const Unify::Partitions& lhs,
 		return {rhs};
 
 	// Recursive case (a loop actually)
-	Unify::Partitions result;
+	Partitions result;
 	for (const auto& par : lhs) {
-		Unify::Partition jo = join(par, rhs);
+		Partition jo = join(par, rhs);
 		if (not jo.empty())
 			result.insert(jo);
+		// result.insert(jo.begin(), jo.end());
 	}
 	return result;
 }
 
-Unify::Partition Unify::join(const Unify::Partition& lhs,
-                             const Unify::Partition& rhs)
+Unify::Partition Unify::join(const Partition& lhs, const Partition& rhs) const
 {
 	// Don't bother joining if one of them is empty
 	if (lhs.empty())
-		return rhs;
+		return {rhs};
 	if (rhs.empty())
-		return lhs;
+		return {lhs};
 
 	// Join
-	Unify::Partition result(lhs);
-	for (const auto& typed_block : rhs) {
-		for (auto it = lhs.begin(); it != lhs.end(); ++it) {
-			if (has_empty_intersection(typed_block.first, it->first)) {
-				// Merely insert this independent block
-				result.insert(typed_block);
+	Partition result(lhs);
+	for (const Block& rhs_block : rhs) {
+		// Find all lhs blocks that have elements in common with rhs_block
+		Partition common_blocks;
+		for (const Block& lhs_block : lhs)
+			if (not has_empty_intersection(rhs_block.first, lhs_block.first))
+				common_blocks.insert(lhs_block);
+
+		if (common_blocks.empty()) {
+			// If none then merely insert in independent block
+			result.insert(rhs_block);
+		} else {
+			// Otherwise join rhs_block with all common blocks and
+			// replace them by it (if satisfiable, otherwise abort)
+			Block j_block = join(rhs_block, common_blocks);
+			if (is_satisfiable(j_block)) {
+				for (const Block& rm : common_blocks)
+					result.erase(rm.first);
+				result.insert(j_block);
 			} else {
-				// Join the 2 equality related blocks
-				Unify::Block m_typed_block = join(typed_block, *it);
-				// If the resulting block is satisfiable then replace *it
-				if (is_satisfiable(m_typed_block)) {
-					result.erase(it->first);
-					result.insert(m_typed_block);
-				}
-				// If the resulting block is non satisfiable then the
-				// partition is non satisfiable as well, thus an empty
-				// partition is returned
-				else {
-					return Partition();
-				}
+				return Partition();
 			}
 		}
 	}
 	return result;
 }
 
-Unify::Block Unify::join(const Unify::Block& lhs, const Unify::Block& rhs)
+Unify::Block Unify::join(const Block& lhs, const Partition& rhs) const
+{
+	std::vector<Block> result{lhs}; // due to some weird shit I can't
+                                    // overwrite the previous block so
+                                    // I'm creating a vector of them
+	for (const auto& rhs_block : rhs)
+		result.push_back(join(result.back(), rhs_block));
+	return result.back();
+}
+
+Unify::Block Unify::join(const Block& lhs, const Block& rhs) const
 {
 	return {set_union(lhs.first, rhs.first),
 			type_intersection(lhs.second, rhs.second)};
 }
 
-bool Unify::is_satisfiable(const Unify::Block& block)
+bool Unify::is_satisfiable(const Block& block) const
 {
 	return block.second != Handle::UNDEFINED;
 }

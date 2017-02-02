@@ -86,7 +86,7 @@ public:
 	                                       const Handle& lhs=Handle::UNDEFINED,
 	                                       const Handle& rhs=Handle::UNDEFINED,
 	                                       Handle lhs_vardecl=Handle::UNDEFINED,
-	                                       Handle rhs_vardecl=Handle::UNDEFINED);
+	                                       Handle rhs_vardecl=Handle::UNDEFINED) const;
 
 	/**
 	 * If the quotations are useless or harmful, which might be the
@@ -106,22 +106,22 @@ public:
 	 *
 	 * No other use of quotation is assumed besides the 2 above.
 	 */
-	bool is_ill_quotation(BindLinkPtr bl);
-	bool is_pm_connector(const Handle& h);
-	bool is_pm_connector(Type t);
-	bool has_bl_variable_in_local_scope(BindLinkPtr bl, const Handle& h);
-	BindLinkPtr consume_ill_quotations(BindLinkPtr bl);
+	bool is_ill_quotation(BindLinkPtr bl) const;
+	bool is_pm_connector(const Handle& h) const;
+	bool is_pm_connector(Type t) const;
+	bool has_bl_variable_in_local_scope(BindLinkPtr bl, const Handle& h) const;
+	BindLinkPtr consume_ill_quotations(BindLinkPtr bl) const;
 	Handle consume_ill_quotations(BindLinkPtr bl, Handle h,
 	                              Quotation quotation=Quotation(),
 	                              bool escape=false /* ignore the next
 	                                                 * quotation
-	                                                 * consumption */);
+	                                                 * consumption */) const;
 
 	/**
 	 * Given a typed substitution, perform the substitution over a scope
 	 * link (for now only BindLinks are supported).
 	 */
-	Handle substitute(BindLinkPtr bl, const TypedSubstitution& ts);
+	Handle substitute(BindLinkPtr bl, const TypedSubstitution& ts) const;
 
 	/**
 	 * This algorithm perform unification by recursively
@@ -207,7 +207,7 @@ public:
 	                       Quotation rhs_quotation=Quotation());
 	SolutionSet unify(const Handle& lhs, const Handle& rhs,
 	                  Quotation lhs_quotation=Quotation(),
-	                  Quotation rhs_quotation=Quotation());
+	                  Quotation rhs_quotation=Quotation()) const;
 
 private:
 	Handle _lhs_vardecl;
@@ -216,21 +216,21 @@ private:
 	SolutionSet unordered_unify(const HandleSeq& lhs,
 	                            const HandleSeq& rhs,
 	                            Quotation lhs_quotation=Quotation(),
-	                            Quotation rhs_quotation=Quotation());
+	                            Quotation rhs_quotation=Quotation()) const;
 	SolutionSet ordered_unify(const HandleSeq& lhs,
 	                          const HandleSeq& rhs,
 	                          Quotation lhs_quotation=Quotation(),
-	                          Quotation rhs_quotation=Quotation());
+	                          Quotation rhs_quotation=Quotation()) const;
 
 	/**
 	 * Return if the atom is an unordered link.
 	 */
-	bool is_unordered(const Handle& h);
+	bool is_unordered(const Handle& h) const;
 
 	/**
 	 * Return a copy of a HandleSeq with the ith element removed.
 	 */
-	HandleSeq cp_erase(const HandleSeq& hs, Arity i);
+	HandleSeq cp_erase(const HandleSeq& hs, Arity i) const;
 
 	/**
 	 * Build elementary solution set between 2 atoms given that at least
@@ -238,30 +238,36 @@ private:
 	 */
 	SolutionSet mkvarsol(const Handle& lhs, const Handle& rhs,
 	                     Quotation lhs_quotation,
-	                     Quotation rhs_quotation);
+	                     Quotation rhs_quotation) const;
 
 public:                         // TODO: being friend with UnifyUTest
                                 // somehow doesn't work
-
 	friend class UnifyUTest;
-	
+
 	/**
 	 * Join 2 solution sets. Generate the product of all consistent
 	 * solutions (with partitions so that all blocks are typed with a
 	 * defined Handle).
 	 */
-	SolutionSet join(const SolutionSet& lhs, const SolutionSet& rhs);
+	SolutionSet join(const SolutionSet& lhs, const SolutionSet& rhs) const;
 
 private:
 	// TODO: add comment. Possibly return UnificationPartitions instead of
 	// UnificationSolutionSet.
-	Partitions join(const Partitions& lhs, const Partition& rhs);
+	Partitions join(const Partitions& lhs, const Partition& rhs) const;
 
 	/**
-	 * Join 2 partitions. If the resulting partition is satisfiable then
-	 * the empty partition is returned.
+	 * Join 2 partitions. The result can be set of partitions because
+	 * subsequent joins may generate new sub-unification problems (see
+	 * below).
 	 */
-	Partition join(const Partition& lhs, const Partition& rhs);
+	Partition join(const Partition& lhs, const Partition& rhs) const;
+
+	/**
+	 * Join a block to a partition to form a single block. It is
+	assumed that all blocks have some element in common
+	*/
+	Block join(const Block& lhs, const Partition& rhs) const;
 
 	/**
 	 * Join 2 blocks (supposedly satisfiable).
@@ -270,13 +276,13 @@ private:
 	 * the block as the union of the 2 blocks, typed with their type
 	 * intersection.
 	 */
-	Block join(const Block& lhs, const Block& rhs);
+	Block join(const Block& lhs, const Block& rhs) const;
 
 	/**
 	 * Return true if a unification block is satisfiable. A unification
 	 * block is non satisfiable if it's type is undefined (bottom).
 	 */
-	bool is_satisfiable(const Block& block);
+	bool is_satisfiable(const Block& block) const;
 };
 
 /**
