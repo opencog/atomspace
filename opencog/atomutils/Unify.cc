@@ -21,8 +21,6 @@
  * along with this program; if not, write to:
  * Free Software Foundation, Inc.,
  * 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
- *
- * Created by Linas Vepstas February 2008
  */
 
 #include "Unify.h"
@@ -507,6 +505,21 @@ bool inherit(const Handle& lhs, const Handle& rhs,
 		               lhs_quotation, rhs_quotation);
 	}
 
+	// If both are links then check that the outgoings of lhs inherit
+	// the outgoings of rhs.
+	if (lhs->isLink() and rhs->isLink() and (lhs_type == rhs_type)) {
+		if (lhs->getArity() == rhs->getArity()) {
+			for (size_t i = 0; i < lhs->getArity(); i++) {
+				if (not inherit(lhs->getOutgoingAtom(i),
+				                rhs->getOutgoingAtom(i),
+				                lhs_vardecl, rhs_vardecl,
+				                lhs_quotation, rhs_quotation))
+					return false;
+			}
+			return true;
+		} else return false;
+	}
+
 	// Base cases
 
 	if (lhs == rhs)
@@ -517,7 +530,7 @@ bool inherit(const Handle& lhs, const Handle& rhs,
 		return inherit(get_union_type(lhs, lhs_vardecl),
 		               get_union_type(rhs, rhs_vardecl));
 
-	if (rhs_quotation.is_unquoted())
+	if (rhs_quotation.is_unquoted() and VARIABLE_NODE == rhs_type)
 		return gen_varlist(rhs, rhs_vardecl)->is_type(rhs, lhs);
 
 	return false;
