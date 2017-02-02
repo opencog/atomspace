@@ -400,37 +400,45 @@ Unify::Partitions Unify::join(const Partitions& lhs, const Partition& rhs) const
 
 Unify::Partition Unify::join(const Partition& lhs, const Partition& rhs) const
 {
-	// Don't bother joining if one of them is empty
+	// Don't bother joining if lhs is empty (it saves a bit of computation)
 	if (lhs.empty())
-		return {rhs};
-	if (rhs.empty())
-		return {lhs};
+		return rhs;
 
 	// Join
 	Partition result(lhs);
-	for (const Block& rhs_block : rhs) {
-		// Find all lhs blocks that have elements in common with rhs_block
-		Partition common_blocks;
-		for (const Block& lhs_block : lhs)
-			if (not has_empty_intersection(rhs_block.first, lhs_block.first))
-				common_blocks.insert(lhs_block);
+	for (const Block& rhs_block : rhs)
+		result = join(result, rhs_block);
 
-		if (common_blocks.empty()) {
-			// If none then merely insert in independent block
-			result.insert(rhs_block);
+	return result;
+}
+
+Unify::Partition Unify::join(const Partition& partition, const Block& block) const
+{
+	Partition result(partition);
+
+	// Find all lhs blocks that have elements in common with rhs_block
+	Partition common_blocks;
+	for (const Block& p_block : partition)
+		if (not has_empty_intersection(block.first, p_block.first))
+			common_blocks.insert(p_block);
+
+	if (common_blocks.empty()) {
+		// If none then merely insert in independent block
+		result.insert(block);
+	} else {
+		// Otherwise join block with all common blocks and replace
+		// them by it (if satisfiable, otherwise return the empty
+		// partition)
+		Block j_block = join(block, common_blocks);
+		if (is_satisfiable(j_block)) {
+			for (const Block& rm : common_blocks)
+				result.erase(rm.first);
+			result.insert(j_block);
 		} else {
-			// Otherwise join rhs_block with all common blocks and
-			// replace them by it (if satisfiable, otherwise abort)
-			Block j_block = join(rhs_block, common_blocks);
-			if (is_satisfiable(j_block)) {
-				for (const Block& rm : common_blocks)
-					result.erase(rm.first);
-				result.insert(j_block);
-			} else {
-				return Partition();
-			}
+			return Partition();
 		}
 	}
+
 	return result;
 }
 

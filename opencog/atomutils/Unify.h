@@ -264,8 +264,15 @@ private:
 	Partition join(const Partition& lhs, const Partition& rhs) const;
 
 	/**
+	 * Join a partition and a block. If the block has no element in
+	 * common with any block of the partition, merely insert
+	 * it. Otherwise fuse the blocks with common elements into one.
+	*/
+	Partition join(const Partition& lhs, const Block &rhs) const;
+
+	/**
 	 * Join a block to a partition to form a single block. It is
-	assumed that all blocks have some element in common
+	 * assumed that all blocks have elements in common.
 	*/
 	Block join(const Block& lhs, const Partition& rhs) const;
 
