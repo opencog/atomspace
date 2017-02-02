@@ -322,12 +322,12 @@ RuleSet Rule::unify_target(const Handle& target,
 	Handle alpha_vardecl = alpha_rule.get_vardecl();
 	for (const Handle& alpha_pat : alpha_rule.get_conclusion_patterns())
 	{
-		UnificationSolutionSet sol =
-			unify(target, alpha_pat, vardecl, alpha_vardecl);
+		Unify::SolutionSet sol =
+			Unify()(target, alpha_pat, vardecl, alpha_vardecl);
 		if (sol.satisfiable) {
-			TypedSubstitutions tss =
-				typed_substitutions(sol, target, target, alpha_pat,
-				                    vardecl, alpha_vardecl);
+			Unify::TypedSubstitutions tss =
+				Unify().typed_substitutions(sol, target, target, alpha_pat,
+				                            vardecl, alpha_vardecl);
 			// For each typed substitution produce a new rule by
 			// substituting all variables by their associated
 			// values.
@@ -453,10 +453,10 @@ Handle Rule::get_execution_output_first_argument(const Handle& h) const
 		return args;
 }
 
-Rule Rule::substituted(const TypedSubstitutions::value_type& ts) const
+Rule Rule::substituted(const Unify::TypedSubstitution& ts) const
 {
 	Rule new_rule(*this);
-	new_rule.set_rule(substitute(_rule, ts));
+	new_rule.set_rule(Unify().substitute(_rule, ts));
 	return new_rule;
 }
 

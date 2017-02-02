@@ -35,244 +35,254 @@
 #include <opencog/atoms/pattern/BindLink.h>
 #include <opencog/atomutils/TypeUtils.h>
 
-// TODO: turn this into a class because there are way too many
-// auxiliary functions
-
 namespace opencog {
 
-// Mapping from partition blocks to type
-typedef std::map<OrderedHandleSet, Handle> UnificationPartition;
-typedef UnificationPartition::value_type UnificationBlock;
-typedef std::set<UnificationPartition> UnificationPartitions;
-
-// TODO: the type of a typed block is currently a handle of the
-// variable or ground it is exists, instead of an actual type.
-struct UnificationSolutionSet :
-		public boost::equality_comparable<UnificationSolutionSet>
+class Unify
 {
-	// Default ctor
-	UnificationSolutionSet(bool s=true,
-	                       const UnificationPartitions& p=UnificationPartitions());
+public:
+	// Mapping from partition blocks to type
+	typedef std::map<OrderedHandleSet, Handle> Partition;
+	typedef Partition::value_type Block;
+	typedef std::set<Partition> Partitions;
 
-	// Whether the unification satisfiable. Not that satisfiable is
-	// different than empty. An empty solution set may still be
-	// satisfiable, that would be the case of two candidates that
-	// match but have no variables.
-	bool satisfiable;
+	// TODO: the type of a typed block is currently a handle of the
+	// variable or ground it is exists, instead of an actual type.
+	struct SolutionSet :
+		public boost::equality_comparable<SolutionSet>
+	{
+		// Default ctor
+		SolutionSet(bool s=true, const Partitions& p=Partitions());
 
-	// Set of typed partitions
-	UnificationPartitions partitions;
+		// Whether the unification satisfiable. Not that satisfiable is
+		// different than empty. An empty solution set may still be
+		// satisfiable, that would be the case of two candidates that
+		// match but have no variables.
+		bool satisfiable;
 
-	bool operator==(const UnificationSolutionSet& other) const {
-		return satisfiable == other.satisfiable
-			and partitions == other.partitions;
-	}
+		// Set of typed partitions
+		Partitions partitions;
+
+		bool operator==(const SolutionSet& other) const {
+			return satisfiable == other.satisfiable
+				and partitions == other.partitions;
+		}
+	};
+
+	// Subtitution values and their corresponding variable declaration
+	// (cause some values will be variables).
+	typedef std::map<HandleMap, Handle> TypedSubstitutions;
+	typedef TypedSubstitutions::value_type TypedSubstitution;
+
+	/**
+	 * Generate typed substitution rules, given a UnificationSolutionSet
+	 * and the term from which to select the variables as values in case
+	 * multiple choices are possible.
+	 *
+	 * Remarks: lhs_vardecl and rhs_vardecl are passed by copy because
+	 * they will be filled with free variables in case they are empty.
+	 */
+	TypedSubstitutions typed_substitutions(const SolutionSet& sol,
+	                                       const Handle& pre,
+	                                       const Handle& lhs=Handle::UNDEFINED,
+	                                       const Handle& rhs=Handle::UNDEFINED,
+	                                       Handle lhs_vardecl=Handle::UNDEFINED,
+	                                       Handle rhs_vardecl=Handle::UNDEFINED);
+
+	/**
+	 * If the quotations are useless or harmful, which might be the
+	 * case if they deprive a ScopeLink from hiding supposedly hidden
+	 * variables, consume them.
+	 *
+	 * Specifically this code makes 2 assumptions
+	 *
+	 * 1. LocalQuotes in front root level And, Or or Not links on the
+	 *    pattern body are not consumed because they are supposedly
+	 *    used to avoid interpreting them as pattern matcher
+	 *    connectors.
+	 *
+	 * 2. Quote/Unquote are used to wrap scope links so that their
+	 *    variable declaration can pattern match grounded or partially
+	 *    grounded scope links.
+	 *
+	 * No other use of quotation is assumed besides the 2 above.
+	 */
+	bool is_ill_quotation(BindLinkPtr bl);
+	bool is_pm_connector(const Handle& h);
+	bool is_pm_connector(Type t);
+	bool has_bl_variable_in_local_scope(BindLinkPtr bl, const Handle& h);
+	BindLinkPtr consume_ill_quotations(BindLinkPtr bl);
+	Handle consume_ill_quotations(BindLinkPtr bl, Handle h,
+	                              Quotation quotation=Quotation(),
+	                              bool escape=false /* ignore the next
+	                                                 * quotation
+	                                                 * consumption */);
+
+	/**
+	 * Given a typed substitution, perform the substitution over a scope
+	 * link (for now only BindLinks are supported).
+	 */
+	Handle substitute(BindLinkPtr bl, const TypedSubstitution& ts);
+
+	/**
+	 * This algorithm perform unification by recursively
+	 *
+	 * 1. Generate all equality partitions
+	 *
+	 * 2. Decorate partition blocks with types
+	 *
+	 * 3. Check that each partition is satisfiable
+	 *
+	 * For now the types in 2. are represented by the substitutions, for
+	 * instance the typed block {{X, A}, A} means that X is A. Later one
+	 * we will replace that by deep types as to represents things like
+	 * {{X, Y}, ConceptNode} meaning that X and Y must be concept nodes is
+	 * order to be satisfiable, of course the deep will still need to
+	 * capture grounds such as {{X, A}, A}, it's not clear excatly how,
+	 * maybe Linas deep type implementation can already do that.
+	 *
+	 * To solve 3, for each partition block, it computes the type that
+	 * intersects all its elements and repeat till a fixed point is
+	 * reached. To do that efficiently we would need to build a dependency
+	 * DAG, but at first we can afford to compute type intersections is
+	 * random order.
+	 *
+	 * Also, permutations are supported though very slow.
+	 *
+	 * Examples:
+	 *
+	 * 1.
+	 *
+	 * unify((Variable "$X"), (Concept "A"))
+	 * ->
+	 * {{<{(Variable "$X"), (Concept "A")}, (Concept "A")>}}
+	 *
+	 * meaning that the partition block {(Variable "$X"), (Concept "A")}
+	 * has type (Concept "A"), and there is only one partition in the
+	 * solution set.
+	 *
+	 * 2.
+	 *
+	 * unify((Concept "A"), (Concept "$X"))
+	 * ->
+	 * {{<{(Variable "$X"), (Concept "A")}, (Concept "A")>}}
+	 *
+	 * 3.
+	 *
+	 * unify((Inheritance (Concept "A") (Concept "B")), (Variable "$X"))
+	 * ->
+	 * {{<{(Variable "$X"), (Inheritance (Concept "A") (Concept "B"))},
+	 *    (Inheritance (Concept "A") (Concept "B"))>}}
+	 *
+	 * 4.
+	 *
+	 * unify((Inheritance (Concept "A") (Variable "$Y")),
+	 *       (Inheritance (Variable "$X") (Concept "B"))
+	 * ->
+	 * {{<{(Variable "$X"), (Concept "A")}, (Concept "A")>,
+	 *   <{(Variable "$Y"), (Concept "B")}, (Concept "B")>}}
+	 *
+	 * 5.
+	 *
+	 * unify((And (Concept "A") (Concept "B")),
+	 *       (And (Variable "$X") (Variable "$Y"))
+	 * ->
+	 * {
+	 *  {<{(Variable "$X"), (Concept "A")}, (Concept "A")>,
+	 *   <{(Variable "$Y"), (Concept "B")}, (Concept "B")>},
+	 *
+	 *  {<{(Variable "$X"), (Concept "B")}, (Concept "B")>,
+	 *   <{(Variable "$Y"), (Concept "A")}, (Concept "A")>}
+	 * }
+	 *
+	 * mean that the solution set has 2 partitions, one where X unifies to
+	 * A and Y unifies to B, and another one where X unifies to B and Y
+	 * unifies to A.
+	 *
+	 * TODO: take care of Un/Quote and Scope links.
+	 */
+	SolutionSet operator()(const Handle& lhs, const Handle& rhs,
+	                       const Handle& lhs_vardecl=Handle::UNDEFINED,
+	                       const Handle& rhs_vardecl=Handle::UNDEFINED,
+	                       Quotation lhs_quotation=Quotation(),
+	                       Quotation rhs_quotation=Quotation());
+	SolutionSet unify(const Handle& lhs, const Handle& rhs,
+	                  const Handle& lhs_vardecl=Handle::UNDEFINED,
+	                  const Handle& rhs_vardecl=Handle::UNDEFINED,
+	                  Quotation lhs_quotation=Quotation(),
+	                  Quotation rhs_quotation=Quotation());
+
+private:
+	SolutionSet unordered_unify(const HandleSeq& lhs,
+	                            const HandleSeq& rhs,
+	                            const Handle& lhs_vardecl,
+	                            const Handle& rhs_vardecl,
+	                            Quotation lhs_quotation=Quotation(),
+	                            Quotation rhs_quotation=Quotation());
+	SolutionSet ordered_unify(const HandleSeq& lhs,
+	                          const HandleSeq& rhs,
+	                          const Handle& lhs_vardecl,
+	                          const Handle& rhs_vardecl,
+	                          Quotation lhs_quotation=Quotation(),
+	                          Quotation rhs_quotation=Quotation());
+
+	/**
+	 * Return if the atom is an unordered link.
+	 */
+	bool is_unordered(const Handle& h);
+
+	/**
+	 * Return a copy of a HandleSeq with the ith element removed.
+	 */
+	HandleSeq cp_erase(const HandleSeq& hs, Arity i);
+
+	/**
+	 * Build elementary solution set between 2 atoms given that at least
+	 * one of them is a variable.
+	 */
+	SolutionSet mkvarsol(const Handle& lhs, const Handle& rhs,
+	                     const Handle& lhs_vardecl,
+	                     const Handle& rhs_vardecl,
+	                     Quotation lhs_quotation,
+	                     Quotation rhs_quotation);
+
+public:                         // TODO: being friend with UnifyUTest
+                                // somehow doesn't work
+
+	friend class UnifyUTest;
+	
+	/**
+	 * Join 2 solution sets. Generate the product of all consistent
+	 * solutions (with partitions so that all blocks are typed with a
+	 * defined Handle).
+	 */
+	SolutionSet join(const SolutionSet& lhs, const SolutionSet& rhs);
+
+private:
+	// TODO: add comment. Possibly return UnificationPartitions instead of
+	// UnificationSolutionSet.
+	Partitions join(const Partitions& lhs, const Partition& rhs);
+
+	/**
+	 * Join 2 partitions. If the resulting partition is satisfiable then
+	 * the empty partition is returned.
+	 */
+	Partition join(const Partition& lhs, const Partition& rhs);
+
+	/**
+	 * Join 2 blocks (supposedly satisfiable).
+	 *
+	 * That is compute their type intersection and if defined, then build
+	 * the block as the union of the 2 blocks, typed with their type
+	 * intersection.
+	 */
+	Block join(const Block& lhs, const Block& rhs);
+
+	/**
+	 * Return true if a unification block is satisfiable. A unification
+	 * block is non satisfiable if it's type is undefined (bottom).
+	 */
+	bool is_satisfiable(const Block& block);
 };
-
-// Subtitution values and their corresponding variable declaration
-// (cause some values will be variables).
-typedef std::map<HandleMap, Handle> TypedSubstitutions;
-typedef TypedSubstitutions::value_type TypedSubstitution;
-
-/**
- * Generate typed substitution rules, given a UnificationSolutionSet
- * and the term from which to select the variables as values in case
- * multiple choices are possible.
- *
- * Remarks: lhs_vardecl and rhs_vardecl are passed by copy because
- * they will be filled with free variables in case they are empty.
- */
-TypedSubstitutions typed_substitutions(const UnificationSolutionSet& sol,
-                                       const Handle& pre,
-                                       const Handle& lhs=Handle::UNDEFINED,
-                                       const Handle& rhs=Handle::UNDEFINED,
-                                       Handle lhs_vardecl=Handle::UNDEFINED,
-                                       Handle rhs_vardecl=Handle::UNDEFINED);
-
-/**
- * If the quotations are useless or harmful, which might be the
- * case if they deprive a ScopeLink from hiding supposedly hidden
- * variables, consume them.
- *
- * Specifically this code makes 2 assumptions
- *
- * 1. LocalQuotes in front root level And, Or or Not links on the
- *    pattern body are not consumed because they are supposedly
- *    used to avoid interpreting them as pattern matcher
- *    connectors.
- *
- * 2. Quote/Unquote are used to wrap scope links so that their
- *    variable declaration can pattern match grounded or partially
- *    grounded scope links.
- *
- * No other use of quotation is assumed besides the 2 above.
- */
-bool is_ill_quotation(BindLinkPtr bl);
-bool is_pm_connector(const Handle& h);
-bool is_pm_connector(Type t);
-bool has_bl_variable_in_local_scope(BindLinkPtr bl, const Handle& h);
-BindLinkPtr consume_ill_quotations(BindLinkPtr bl);
-Handle consume_ill_quotations(BindLinkPtr bl, Handle h,
-                              Quotation quotation=Quotation(),
-                              bool escape=false /* ignore the next
-                                                 * quotation
-                                                 * consumption */);
-
-/**
- * Given a typed substitution, perform the substitution over a scope
- * link (for now only BindLinks are supported).
- */
-Handle substitute(BindLinkPtr bl, const TypedSubstitutions::value_type& ts);
-
-/**
- * This algorithm perform unification by recursively
- *
- * 1. Generate all equality partitions
- *
- * 2. Decorate partition blocks with types
- *
- * 3. Check that each partition is satisfiable
- *
- * For now the types in 2. are represented by the substitutions, for
- * instance the typed block {{X, A}, A} means that X is A. Later one
- * we will replace that by deep types as to represents things like
- * {{X, Y}, ConceptNode} meaning that X and Y must be concept nodes is
- * order to be satisfiable, of course the deep will still need to
- * capture grounds such as {{X, A}, A}, it's not clear excatly how,
- * maybe Linas deep type implementation can already do that.
- *
- * To solve 3, for each partition block, it computes the type that
- * intersects all its elements and repeat till a fixed point is
- * reached. To do that efficiently we would need to build a dependency
- * DAG, but at first we can afford to compute type intersections is
- * random order.
- *
- * Also, permutations are supported though very slow.
- *
- * Examples:
- *
- * 1.
- *
- * unify((Variable "$X"), (Concept "A"))
- * ->
- * {{<{(Variable "$X"), (Concept "A")}, (Concept "A")>}}
- *
- * meaning that the partition block {(Variable "$X"), (Concept "A")}
- * has type (Concept "A"), and there is only one partition in the
- * solution set.
- *
- * 2.
- *
- * unify((Concept "A"), (Concept "$X"))
- * ->
- * {{<{(Variable "$X"), (Concept "A")}, (Concept "A")>}}
- *
- * 3.
- *
- * unify((Inheritance (Concept "A") (Concept "B")), (Variable "$X"))
- * ->
- * {{<{(Variable "$X"), (Inheritance (Concept "A") (Concept "B"))},
- *    (Inheritance (Concept "A") (Concept "B"))>}}
- *
- * 4.
- *
- * unify((Inheritance (Concept "A") (Variable "$Y")),
- *       (Inheritance (Variable "$X") (Concept "B"))
- * ->
- * {{<{(Variable "$X"), (Concept "A")}, (Concept "A")>,
- *   <{(Variable "$Y"), (Concept "B")}, (Concept "B")>}}
- *
- * 5.
- *
- * unify((And (Concept "A") (Concept "B")),
- *       (And (Variable "$X") (Variable "$Y"))
- * ->
- * {
- *  {<{(Variable "$X"), (Concept "A")}, (Concept "A")>,
- *   <{(Variable "$Y"), (Concept "B")}, (Concept "B")>},
- *
- *  {<{(Variable "$X"), (Concept "B")}, (Concept "B")>,
- *   <{(Variable "$Y"), (Concept "A")}, (Concept "A")>}
- * }
- *
- * mean that the solution set has 2 partitions, one where X unifies to
- * A and Y unifies to B, and another one where X unifies to B and Y
- * unifies to A.
- *
- * TODO: take care of Un/Quote and Scope links.
- */
-UnificationSolutionSet unify(const Handle& lhs, const Handle& rhs,
-                             const Handle& lhs_vardecl=Handle::UNDEFINED,
-                             const Handle& rhs_vardecl=Handle::UNDEFINED,
-                             Quotation lhs_quotation=Quotation(),
-                             Quotation rhs_quotation=Quotation());
-UnificationSolutionSet unordered_unify(const HandleSeq& lhs,
-                                       const HandleSeq& rhs,
-                                       const Handle& lhs_vardecl,
-                                       const Handle& rhs_vardecl,
-                                       Quotation lhs_quotation=Quotation(),
-                                       Quotation rhs_quotation=Quotation());
-UnificationSolutionSet ordered_unify(const HandleSeq& lhs,
-                                     const HandleSeq& rhs,
-                                     const Handle& lhs_vardecl,
-                                     const Handle& rhs_vardecl,
-                                     Quotation lhs_quotation=Quotation(),
-                                     Quotation rhs_quotation=Quotation());
-
-/**
- * Return if the atom is an unordered link.
- */
-bool is_unordered(const Handle& h);
-
-/**
- * Return a copy of a HandleSeq with the ith element removed.
- */
-HandleSeq cp_erase(const HandleSeq& hs, Arity i);
-
-/**
- * Build elementary solution set between 2 atoms given that at least
- * one of them is a variable.
- */
-UnificationSolutionSet mkvarsol(const Handle& lhs, const Handle& rhs,
-                                const Handle& lhs_vardecl,
-                                const Handle& rhs_vardecl,
-                                Quotation lhs_quotation,
-                                Quotation rhs_quotation);
-
-/**
- * Join 2 solution sets. Generate the product of all consistent
- * solutions (with partitions so that all blocks are typed with a
- * defined Handle).
- */
-UnificationSolutionSet join(const UnificationSolutionSet& lhs,
-                             const UnificationSolutionSet& rhs);
-
-// TODO: add comment. Possibly return UnificationPartitions instead of
-// UnificationSolutionSet.
-UnificationPartitions join(const UnificationPartitions& lhs,
-                            const UnificationPartition& rhs);
-
-/**
- * Join 2 partitions. If the resulting partition is satisfiable then
- * the empty partition is returned.
- */
-UnificationPartition join(const UnificationPartition& lhs,
-                           const UnificationPartition& rhs);
-
-/**
- * Join 2 blocks (supposedly satisfiable).
- *
- * That is compute their type intersection and if defined, then build
- * the block as the union of the 2 blocks, typed with their type
- * intersection.
- */
-UnificationBlock join(const UnificationBlock& lhs, const UnificationBlock& rhs);
-
-/**
- * Return true if a unification block is satisfiable. A unification
- * block is non satisfiable if it's type is undefined (bottom).
- */
-bool is_satisfiable(const UnificationBlock& block);
 
 /**
  * Calculate type intersection. For example: say you have for a block
@@ -384,12 +394,12 @@ VariableListPtr gen_varlist(const Handle& h, const Handle& vardecl);
  */
 Handle merge_vardecl(const Handle& lhs_vardecl, const Handle& rhs_vardecl);
 
-std::string oc_to_string(const UnificationPartition& hshm);
-std::string oc_to_string(const UnificationBlock& ub);
-std::string oc_to_string(const UnificationPartitions& par);
-std::string oc_to_string(const UnificationSolutionSet& sol);
-std::string oc_to_string(const TypedSubstitutions& tss);
-std::string oc_to_string(const TypedSubstitution& ts);
+std::string oc_to_string(const Unify::Partition& hshm);
+std::string oc_to_string(const Unify::Block& ub);
+std::string oc_to_string(const Unify::Partitions& par);
+std::string oc_to_string(const Unify::SolutionSet& sol);
+std::string oc_to_string(const Unify::TypedSubstitutions& tss);
+std::string oc_to_string(const Unify::TypedSubstitution& ts);
 	
 } // namespace opencog
 

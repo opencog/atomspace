@@ -32,23 +32,21 @@
 
 namespace opencog {
 
-UnificationSolutionSet::UnificationSolutionSet(bool s,
-                                               const UnificationPartitions& p)
-	: satisfiable(s), partitions(p)
-{
-}
+Unify::SolutionSet::SolutionSet(bool s, const Unify::Partitions& p)
+	: satisfiable(s), partitions(p) {}
 
-TypedSubstitutions typed_substitutions(const UnificationSolutionSet& sol,
-                                       const Handle& pre,
-                                       const Handle& lhs, const Handle& rhs,
-                                       Handle lhs_vardecl, Handle rhs_vardecl)
+Unify::TypedSubstitutions
+Unify::typed_substitutions(const Unify::SolutionSet& sol,
+                           const Handle& pre,
+                           const Handle& lhs, const Handle& rhs,
+                           Handle lhs_vardecl, Handle rhs_vardecl)
 {
 	OC_ASSERT(sol.satisfiable);
 
 	TypedSubstitutions result;
-	for (const UnificationPartition& partition : sol.partitions) {
+	for (const Partition& partition : sol.partitions) {
 		std::pair<HandleMap, Handle> ts;
-		for (const UnificationPartition::value_type& typed_block : partition) {
+		for (const Partition::value_type& typed_block : partition) {
 			Handle least_abstract(Handle(createNode(VARIABLE_NODE,
 			                                        "__dummy_top__")));
 			for (const Handle& h : typed_block.first) {
@@ -86,28 +84,28 @@ TypedSubstitutions typed_substitutions(const UnificationSolutionSet& sol,
 	return result;
 }
 
-bool is_ill_quotation(BindLinkPtr bl)
+bool Unify::is_ill_quotation(BindLinkPtr bl)
 {
 	return bl->get_vardecl().is_undefined();
 }
 
-bool is_pm_connector(const Handle& h)
+bool Unify::is_pm_connector(const Handle& h)
 {
 	return is_pm_connector(h->getType());
 }
 
-bool is_pm_connector(Type t)
+bool Unify::is_pm_connector(Type t)
 {
 	return t == AND_LINK or t == OR_LINK or t == NOT_LINK;
 }
 
-bool has_bl_variable_in_local_scope(BindLinkPtr bl, const Handle& scope)
+bool Unify::has_bl_variable_in_local_scope(BindLinkPtr bl, const Handle& scope)
 {
 	Handle var = scope->getOutgoingAtom(0)->getOutgoingAtom(0);
 	return bl->get_variables().is_in_varset(var);
 }
 
-BindLinkPtr consume_ill_quotations(BindLinkPtr bl)
+BindLinkPtr Unify::consume_ill_quotations(BindLinkPtr bl)
 {
 	Handle vardecl = bl->get_vardecl(),
 		pattern = bl->get_body(),
@@ -131,8 +129,8 @@ BindLinkPtr consume_ill_quotations(BindLinkPtr bl)
 		: createBindLink(pattern, rewrite);
 }
 
-Handle consume_ill_quotations(BindLinkPtr bl, Handle h,
-                              Quotation quotation, bool escape)
+Handle Unify::consume_ill_quotations(BindLinkPtr bl, Handle h,
+                                     Quotation quotation, bool escape)
 {
 	// Base case
 	if (h->isNode())
@@ -175,7 +173,7 @@ Handle consume_ill_quotations(BindLinkPtr bl, Handle h,
 		: Handle(createLink(t, consumed));
 }
 
-Handle substitute(BindLinkPtr bl, const TypedSubstitutions::value_type& ts)
+Handle Unify::substitute(BindLinkPtr bl, const Unify::TypedSubstitution& ts)
 {
 	// Get the list of values to substitute from ts
 	HandleSeq values = bl->get_variables().make_values(ts.first);
@@ -190,11 +188,20 @@ Handle substitute(BindLinkPtr bl, const TypedSubstitutions::value_type& ts)
 	return Handle(consume_ill_quotations(BindLinkCast(h)));
 }
 
-UnificationSolutionSet unify(const Handle& lhs, const Handle& rhs,
-                             const Handle& lhs_vardecl,
-                             const Handle& rhs_vardecl,
-                             Quotation lhs_quotation,
-                             Quotation rhs_quotation)
+Unify::SolutionSet Unify::operator()(const Handle& lhs, const Handle& rhs,
+                                     const Handle& lhs_vardecl,
+                                     const Handle& rhs_vardecl,
+                                     Quotation lhs_quotation,
+                                     Quotation rhs_quotation)
+{
+	return unify(lhs, rhs, lhs_vardecl, rhs_vardecl, lhs_quotation, rhs_quotation);
+}
+
+Unify::SolutionSet Unify::unify(const Handle& lhs, const Handle& rhs,
+                                const Handle& lhs_vardecl,
+                                const Handle& rhs_vardecl,
+                                Quotation lhs_quotation,
+                                Quotation rhs_quotation)
 {
 	///////////////////
 	// Base cases    //
@@ -202,7 +209,7 @@ UnificationSolutionSet unify(const Handle& lhs, const Handle& rhs,
 
 	// Make sure both handles are defined
 	if (lhs == Handle::UNDEFINED or rhs == Handle::UNDEFINED)
-		return UnificationSolutionSet(false);
+		return SolutionSet(false);
 
 	Type lhs_type(lhs->getType());
 	Type rhs_type(rhs->getType());
@@ -216,7 +223,7 @@ UnificationSolutionSet unify(const Handle& lhs, const Handle& rhs,
 			return mkvarsol(lhs, rhs, lhs_vardecl, rhs_vardecl,
 			                lhs_quotation, rhs_quotation);
 		} else
-			return UnificationSolutionSet(lhs == rhs);
+			return SolutionSet(lhs == rhs);
 	}
 
 	////////////////////////
@@ -250,14 +257,14 @@ UnificationSolutionSet unify(const Handle& lhs, const Handle& rhs,
 	// At least one of them is a link, check if they have the same
 	// type (e.i. do they match so far)
 	if (lhs_type != rhs_type)
-		return UnificationSolutionSet(false);
+		return SolutionSet(false);
 
 	// At this point they are both links of the same type, check that
 	// they have the same arity
 	Arity lhs_arity(lhs->getArity());
 	Arity rhs_arity(rhs->getArity());
 	if (lhs_arity != rhs_arity)
-		return UnificationSolutionSet(false);
+		return SolutionSet(false);
 
 	if (is_unordered(rhs))
 		return unordered_unify(lhs->getOutgoingSet(), rhs->getOutgoingSet(),
@@ -269,12 +276,12 @@ UnificationSolutionSet unify(const Handle& lhs, const Handle& rhs,
 		                     lhs_quotation, rhs_quotation);
 }
 
-UnificationSolutionSet unordered_unify(const HandleSeq& lhs,
-                                       const HandleSeq& rhs,
-                                       const Handle& lhs_vardecl,
-                                       const Handle& rhs_vardecl,
-                                       Quotation lhs_quotation,
-                                       Quotation rhs_quotation)
+Unify::SolutionSet Unify::unordered_unify(const HandleSeq& lhs,
+                                          const HandleSeq& rhs,
+                                          const Handle& lhs_vardecl,
+                                          const Handle& rhs_vardecl,
+                                          Quotation lhs_quotation,
+                                          Quotation rhs_quotation)
 {
 	Arity lhs_arity(lhs.size());
 	Arity rhs_arity(rhs.size());
@@ -282,10 +289,10 @@ UnificationSolutionSet unordered_unify(const HandleSeq& lhs,
 
 	// Base case
 	if (lhs_arity == 0)
-		return UnificationSolutionSet();
+		return SolutionSet();
 
 	// Recursive case
-	UnificationSolutionSet sol(false);
+	Unify::SolutionSet sol(false);
 	for (Arity i = 0; i < lhs_arity; ++i) {
 		auto head_sol = unify(lhs[i], rhs[0], lhs_vardecl, rhs_vardecl,
 		                      lhs_quotation, rhs_quotation);
@@ -295,7 +302,7 @@ UnificationSolutionSet unordered_unify(const HandleSeq& lhs,
 			auto tail_sol = unordered_unify(lhs_tail, rhs_tail,
 			                                lhs_vardecl, rhs_vardecl,
 			                                lhs_quotation, rhs_quotation);
-			UnificationSolutionSet perm_sol = join(head_sol, tail_sol);
+			Unify::SolutionSet perm_sol = join(head_sol, tail_sol);
 			// Union merge satisfiable permutations
 			if (perm_sol.satisfiable) {
 				sol.satisfiable = true;
@@ -307,18 +314,18 @@ UnificationSolutionSet unordered_unify(const HandleSeq& lhs,
 	return sol;
 }
 
-UnificationSolutionSet ordered_unify(const HandleSeq& lhs,
-                                     const HandleSeq& rhs,
-                                     const Handle& lhs_vardecl,
-                                     const Handle& rhs_vardecl,
-                                     Quotation lhs_quotation,
-                                     Quotation rhs_quotation)
+Unify::SolutionSet Unify::ordered_unify(const HandleSeq& lhs,
+                                        const HandleSeq& rhs,
+                                        const Handle& lhs_vardecl,
+                                        const Handle& rhs_vardecl,
+                                        Quotation lhs_quotation,
+                                        Quotation rhs_quotation)
 {
 	Arity lhs_arity(lhs.size());
 	Arity rhs_arity(rhs.size());
 	OC_ASSERT(lhs_arity == rhs_arity);
 
-	UnificationSolutionSet sol;
+	Unify::SolutionSet sol;
 	for (Arity i = 0; i < lhs_arity; ++i) {
 		auto rs = unify(lhs[i], rhs[i], lhs_vardecl, rhs_vardecl,
 		                lhs_quotation, rhs_quotation);
@@ -329,41 +336,41 @@ UnificationSolutionSet ordered_unify(const HandleSeq& lhs,
 	return sol;
 }
 	
-bool is_unordered(const Handle& h)
+bool Unify::is_unordered(const Handle& h)
 {
 	return classserver().isA(h->getType(), UNORDERED_LINK);
 }
 
-HandleSeq cp_erase(const HandleSeq& hs, Arity i)
+HandleSeq Unify::cp_erase(const HandleSeq& hs, Arity i)
 {
 	HandleSeq hs_cp(hs);
 	hs_cp.erase(hs_cp.begin() + i);
 	return hs_cp;
 }
 
-UnificationSolutionSet mkvarsol(const Handle& lhs, const Handle& rhs,
-                                const Handle& lhs_vardecl,
-                                const Handle& rhs_vardecl,
-                                Quotation lhs_quotation,
-                                Quotation rhs_quotation)
+Unify::SolutionSet Unify::mkvarsol(const Handle& lhs, const Handle& rhs,
+                                   const Handle& lhs_vardecl,
+                                   const Handle& rhs_vardecl,
+                                   Quotation lhs_quotation,
+                                   Quotation rhs_quotation)
 {
 	Handle inter = type_intersection(lhs, rhs, lhs_vardecl, rhs_vardecl,
 	                                 lhs_quotation, rhs_quotation);
 	if (inter == Handle::UNDEFINED)
-		return UnificationSolutionSet(false);
+		return SolutionSet(false);
 	else {
 		OrderedHandleSet hset{lhs, rhs};
-		UnificationPartitions par{{{hset, inter}}};
-		return UnificationSolutionSet(true, par);
+		Partitions par{{{hset, inter}}};
+		return SolutionSet(true, par);
 	}
 }
 
-UnificationSolutionSet join(const UnificationSolutionSet& lhs,
-                            const UnificationSolutionSet& rhs)
+Unify::SolutionSet Unify::join(const Unify::SolutionSet& lhs,
+                               const Unify::SolutionSet& rhs)
 {
 	// No need to join if one of them is non satisfiable
 	if (not lhs.satisfiable or not rhs.satisfiable)
-		return UnificationSolutionSet(false);
+		return SolutionSet(false);
 
 	// No need to join if one of them is empty
 	if (rhs.partitions.empty())
@@ -372,9 +379,9 @@ UnificationSolutionSet join(const UnificationSolutionSet& lhs,
 		return rhs;
 
 	// By now both are satisfiable and non empty, join them
-	UnificationSolutionSet result;
-	for (const UnificationPartition& rp : rhs.partitions) {
-		UnificationPartitions sol(join(lhs.partitions, rp));
+	SolutionSet result;
+	for (const Partition& rp : rhs.partitions) {
+		Partitions sol(join(lhs.partitions, rp));
 		result.partitions.insert(sol.begin(), sol.end());
 	}
 
@@ -385,8 +392,8 @@ UnificationSolutionSet join(const UnificationSolutionSet& lhs,
 	return result;
 }
 
-UnificationPartitions join(const UnificationPartitions& lhs,
-                           const UnificationPartition& rhs)
+Unify::Partitions Unify::join(const Unify::Partitions& lhs,
+                              const Unify::Partition& rhs)
 {
 	// Base cases
 	if (rhs.empty())
@@ -395,17 +402,17 @@ UnificationPartitions join(const UnificationPartitions& lhs,
 		return {rhs};
 
 	// Recursive case (a loop actually)
-	UnificationPartitions result;
+	Unify::Partitions result;
 	for (const auto& par : lhs) {
-		UnificationPartition jo = join(par, rhs);
+		Unify::Partition jo = join(par, rhs);
 		if (not jo.empty())
 			result.insert(jo);
 	}
 	return result;
 }
 
-UnificationPartition join(const UnificationPartition& lhs,
-                          const UnificationPartition& rhs)
+Unify::Partition Unify::join(const Unify::Partition& lhs,
+                             const Unify::Partition& rhs)
 {
 	// Don't bother joining if one of them is empty
 	if (lhs.empty())
@@ -414,7 +421,7 @@ UnificationPartition join(const UnificationPartition& lhs,
 		return lhs;
 
 	// Join
-	UnificationPartition result(lhs);
+	Unify::Partition result(lhs);
 	for (const auto& typed_block : rhs) {
 		for (auto it = lhs.begin(); it != lhs.end(); ++it) {
 			if (has_empty_intersection(typed_block.first, it->first)) {
@@ -422,7 +429,7 @@ UnificationPartition join(const UnificationPartition& lhs,
 				result.insert(typed_block);
 			} else {
 				// Join the 2 equality related blocks
-				UnificationBlock m_typed_block = join(typed_block, *it);
+				Unify::Block m_typed_block = join(typed_block, *it);
 				// If the resulting block is satisfiable then replace *it
 				if (is_satisfiable(m_typed_block)) {
 					result.erase(it->first);
@@ -432,7 +439,7 @@ UnificationPartition join(const UnificationPartition& lhs,
 				// partition is non satisfiable as well, thus an empty
 				// partition is returned
 				else {
-					return UnificationPartition();
+					return Partition();
 				}
 			}
 		}
@@ -440,13 +447,13 @@ UnificationPartition join(const UnificationPartition& lhs,
 	return result;
 }
 
-UnificationBlock join(const UnificationBlock& lhs, const UnificationBlock& rhs)
+Unify::Block Unify::join(const Unify::Block& lhs, const Unify::Block& rhs)
 {
 	return {set_union(lhs.first, rhs.first),
 			type_intersection(lhs.second, rhs.second)};
 }
 
-bool is_satisfiable(const UnificationBlock& block)
+bool Unify::is_satisfiable(const Unify::Block& block)
 {
 	return block.second != Handle::UNDEFINED;
 }
@@ -616,7 +623,7 @@ Handle merge_vardecl(const Handle& lhs_vardecl, const Handle& rhs_vardecl)
 	return new_vars.get_vardecl();
 }
 
-std::string oc_to_string(const UnificationBlock& ub)
+std::string oc_to_string(const Unify::Block& ub)
 {
 	std::stringstream ss;
 	ss << "block:" << std::endl << oc_to_string(ub.first)
@@ -624,7 +631,7 @@ std::string oc_to_string(const UnificationBlock& ub)
 	return ss.str();
 }
 
-std::string oc_to_string(const UnificationPartition& up)
+std::string oc_to_string(const Unify::Partition& up)
 {
 	std::stringstream ss;
 	ss << "size = " << up.size() << std::endl;
@@ -637,7 +644,7 @@ std::string oc_to_string(const UnificationPartition& up)
 	return ss.str();
 }
 
-std::string oc_to_string(const UnificationPartitions& par)
+std::string oc_to_string(const Unify::Partitions& par)
 {
 	std::stringstream ss;
 	ss << "size = " << par.size() << std::endl;
@@ -649,7 +656,7 @@ std::string oc_to_string(const UnificationPartitions& par)
 	return ss.str();
 }
 
-std::string oc_to_string(const UnificationSolutionSet& sol)
+std::string oc_to_string(const Unify::SolutionSet& sol)
 {
 	std::stringstream ss;
 	ss << "satisfiable: " << sol.satisfiable << std::endl
@@ -657,7 +664,7 @@ std::string oc_to_string(const UnificationSolutionSet& sol)
 	return ss.str();
 }
 
-std::string oc_to_string(const TypedSubstitutions& tss)
+std::string oc_to_string(const Unify::TypedSubstitutions& tss)
 {
 	std::stringstream ss;
 	ss << "size = " << tss.size() << std::endl;
@@ -668,7 +675,7 @@ std::string oc_to_string(const TypedSubstitutions& tss)
 	return ss.str();
 }
 
-std::string oc_to_string(const TypedSubstitution& ts)
+std::string oc_to_string(const Unify::TypedSubstitution& ts)
 {
 	std::stringstream ss;
 	ss << "substitution:" << std::endl << oc_to_string(ts.first)
