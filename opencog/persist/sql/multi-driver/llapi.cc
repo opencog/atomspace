@@ -67,14 +67,8 @@ LLConnection::~LLConnection()
     }
 }
 
-bool LLConnection::connected (void) const
-{
-    return is_connected;
-}
-
 /* =========================================================== */
 /* pseudo-private routine */
-
 
 LLRecordSet::LLRecordSet(LLConnection *_conn)
 {

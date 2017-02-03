@@ -83,18 +83,42 @@ class SQLAtomStorage::Response
 		const char *outlist;
 		int height;
 
-		Response()
+	private:
+		concurrent_stack<LLConnection*>& _pool;
+		LLConnection* _conn;
+
+	public:
+		Response(concurrent_stack<LLConnection*>& pool) : _pool(pool)
 		{
 			tname = "";
 			itype = 0;
 			intval = 0;
+			_conn = nullptr;
+			rs = nullptr;
 		}
 
-		void release()
+		~Response()
 		{
 			if (rs) rs->release();
 			rs = nullptr;
+
+			// Put the SQL connection back into the pool.
+			if (_conn) _pool.push(_conn);
+			_conn = nullptr;
 		}
+
+		void exec(const char * buff)
+		{
+			if (rs) rs->release();
+
+			// Get an SQL connection.  If the pool is empty, this will
+			// block, waiting for a connection to be returned to the pool.
+			// Thus, the size of the pool regulates how many outstanding
+			// SQL requests can be pending in parallel.
+			if (nullptr == _conn) _conn = _pool.pop();
+			rs = _conn->exec(buff);
+		}
+
 		bool create_atom_column_cb(const char *colname, const char * colvalue)
 		{
 			// printf ("%s = %s\n", colname, colvalue);
@@ -308,40 +332,13 @@ class SQLAtomStorage::Response
 };
 
 /* ================================================================ */
-/// XXX TODO Make the connection pointer scoped.
-/// That is, we should define a ConnPtr class here, and it's destructor
-/// should do the conn_pool.push(). Doing this can help avoid mem leaks,
-/// e.g. failure to put because of a throw.  I'm just kind of lazy now,
-/// and the code below works ... so maybe it shouldn't be messed with.
-///
-/// XXX Should do the same for Response rp.rs->release() to auto-release.
-
-/// Get an SQL connection.  If the pool is empty, this will block,
-/// waiting for a connection to be returned to the pool. Thus, the
-/// size of the pool regulates how many outstanding SQL requests can
-/// be pending in parallel.
-LLConnection* SQLAtomStorage::get_conn()
-{
-	return conn_pool.pop();
-}
-
-/// Put an SQL connection back into the pool.
-void SQLAtomStorage::put_conn(LLConnection* db_conn)
-{
-	conn_pool.push(db_conn);
-}
-
-/* ================================================================ */
 
 bool SQLAtomStorage::idExists(const char * buff)
 {
-	LLConnection* db_conn = get_conn();
-	Response rp;
+	Response rp(conn_pool);
 	rp.row_exists = false;
-	rp.rs = db_conn->exec(buff);
+	rp.exec(buff);
 	rp.rs->foreach_row(&Response::row_exists_cb, &rp);
-	rp.release();
-	put_conn(db_conn);
 	return rp.row_exists;
 }
 
@@ -443,9 +440,10 @@ SQLAtomStorage::~SQLAtomStorage()
  */
 bool SQLAtomStorage::connected(void)
 {
-	LLConnection* db_conn = get_conn();
+	// This will leak a resource, if db_conn->connected() ever throws.
+	LLConnection* db_conn = conn_pool.pop();
 	bool have_connection = db_conn->connected();
-	put_conn(db_conn);
+	conn_pool.push(db_conn);
 	return have_connection;
 }
 
@@ -511,12 +509,8 @@ void SQLAtomStorage::store_atomtable_id(const AtomTable& at)
 		"INSERT INTO Spaces (space, parent) VALUES (%ld, %ld);",
 		tab_id, parent_id);
 
-	std::unique_lock<std::mutex> lock(table_cache_mutex);
-	LLConnection* db_conn = get_conn();
-	Response rp;
-	rp.rs = db_conn->exec(buff);
-	rp.release();
-	put_conn(db_conn);
+	Response rp(conn_pool);
+	rp.exec(buff);
 }
 
 
@@ -608,10 +602,8 @@ int SQLAtomStorage::storeTruthValue(AtomPtr atom, Handle h)
 	STMTF("count", tv.getCount());
 
 	std::string qry = cols + vals + coda;
-	Response rp;
-	rp.rs = db_conn->exec(qry.c_str());
-	rp.release();
-
+	Response rp(conn_pool);
+	rp.exec(qry.c_str());
 	return tvid;
 }
 
@@ -626,10 +618,9 @@ int SQLAtomStorage::TVID(const TruthValue &tv)
 	if (tv == TruthValue::TRUE_TV()) return 3;
 	if (tv == TruthValue::DEFAULT_TV()) return 4;
 
-	Response rp;
-	rp.rs = db_conn->exec("SELECT NEXTVAL('tvid_seq');");
+	Response rp(conn_pool);
+	rp.exec("SELECT NEXTVAL('tvid_seq');");
 	rp.rs->foreach_row(&Response::tvid_seq_cb, &rp);
-	rp.release();
 	return rp.tvid;
 }
 
@@ -644,10 +635,9 @@ TruthValue* SQLAtomStorage::getTV(int tvid)
 	char buff[BUFSZ];
 	snprintf(buff, BUFSZ, "SELECT * FROM SimpleTVs WHERE tvid = %u;", tvid);
 
-	Response rp;
-	rp.rs = db_conn->exec(buff);
+	Response rp(conn_pool);
+	rp.exec(buff);
 	rp.rs->foreach_row(&Response::create_tv_cb, &rp);
-	rp.release();
 
 	SimpleTruthValue *stv = new SimpleTruthValue(rp.mean, rp.confidence);
 	return stv;
@@ -949,20 +939,21 @@ void SQLAtomStorage::do_store_single_atom(const Handle& h, int aheight)
 	// We waste CPU cycles to store the atomtable, only if it failed.
 	bool try_again = false;
 	std::string qry = cols + vals + coda;
-	LLConnection* db_conn = get_conn();
-	Response rp;
-	rp.rs = db_conn->exec(qry.c_str());
-	if (NULL == rp.rs) try_again = true;
-	rp.release();
+
+	{
+		Response rp(conn_pool);
+		rp.exec(qry.c_str());
+		if (NULL == rp.rs) try_again = true;
+	}
 
 	if (try_again)
 	{
 		AtomTable *at = getAtomTable(h);
 		if (at) store_atomtable_id(*at);
-		rp.rs = db_conn->exec(qry.c_str());
-		rp.release();
+
+		Response rp(conn_pool);
+		rp.exec(qry.c_str());
 	}
-	put_conn(db_conn);
 
 	// Make note of the fact that this atom has been stored.
 	add_id_to_cache(uuid);
@@ -1019,12 +1010,12 @@ void SQLAtomStorage::setup_typemap(void)
 		db_typename[i] = NULL;
 	}
 
-	LLConnection* db_conn = get_conn();
-	Response rp;
-	rp.rs = db_conn->exec("SELECT * FROM TypeCodes;");
-	rp.store = this;
-	rp.rs->foreach_row(&Response::type_cb, &rp);
-	rp.release();
+	{
+		Response rp(conn_pool);
+		rp.exec("SELECT * FROM TypeCodes;");
+		rp.store = this;
+		rp.rs->foreach_row(&Response::type_cb, &rp);
+	}
 
 	unsigned int numberOfTypes = classserver().getNumberOfClasses();
 	for (Type t=0; t<numberOfTypes; t++)
@@ -1054,22 +1045,20 @@ void SQLAtomStorage::setup_typemap(void)
 
 				if (TYPEMAP_SZ <= sqid)
 				{
-					put_conn(db_conn);
 					OC_ASSERT("Fatal Error: type table overflow!\n");
 				}
 			}
+			set_typemap(sqid, tname);
 
 			char buff[BUFSZ];
 			snprintf(buff, BUFSZ,
 			         "INSERT INTO TypeCodes (type, typename) "
 			         "VALUES (%d, \'%s\');",
 			         sqid, tname);
-			rp.rs = db_conn->exec(buff);
-			rp.release();
-			set_typemap(sqid, tname);
+			Response rp(conn_pool);
+			rp.exec(buff);
 		}
 	}
-	put_conn(db_conn);
 
 	// Set this last!
 	type_map_was_loaded = true;
@@ -1169,7 +1158,7 @@ void SQLAtomStorage::get_ids(void)
 	local_id_cache_is_inited = true;
 
 	local_id_cache.clear();
-	LLConnection* db_conn = get_conn();
+	Response rp(conn_pool);
 
 	// It appears that, when the select statment returns more than
 	// about a 100K to a million atoms or so, some sort of heap
@@ -1187,23 +1176,17 @@ void SQLAtomStorage::get_ids(void)
 		         "uuid > %lu AND uuid <= %lu;",
 		         rec, rec+USTEP);
 
-		Response rp;
 		rp.id_set = &local_id_cache;
-		rp.rs = db_conn->exec(buff);
+		rp.exec(buff);
 		rp.rs->foreach_row(&Response::note_id_cb, &rp);
-		rp.release();
 	}
 
 	// Also get the ID's of the spaces that are in use.
 	table_id_cache.clear();
 
-	Response rp;
 	rp.id_set = &table_id_cache;
-	rp.rs = db_conn->exec("SELECT space FROM Spaces;");
+	rp.exec("SELECT space FROM Spaces;");
 	rp.rs->foreach_row(&Response::note_id_cb, &rp);
-	rp.release();
-
-	put_conn(db_conn);
 }
 
 /* ================================================================ */
@@ -1211,25 +1194,17 @@ void SQLAtomStorage::get_ids(void)
 /* One-size-fits-all atom fetcher */
 SQLAtomStorage::PseudoPtr SQLAtomStorage::getAtom(const char * query, int height)
 {
-	LLConnection* db_conn = get_conn();
-	Response rp;
+	Response rp(conn_pool);
 	rp.uuid = TLB::INVALID_UUID;
-	rp.rs = db_conn->exec(query);
+	rp.exec(query);
 	rp.rs->foreach_row(&Response::create_atom_cb, &rp);
 
 	// Did we actually find anything?
 	// DO NOT USE IsInvalidHandle() HERE! It won't work, duhh!
-	if (rp.uuid == TLB::INVALID_UUID)
-	{
-		rp.release();
-		put_conn(db_conn);
-		return NULL;
-	}
+	if (rp.uuid == TLB::INVALID_UUID) return nullptr;
 
 	rp.height = height;
 	PseudoPtr atom(makeAtom(rp, rp.uuid));
-	rp.release();
-	put_conn(db_conn);
 	return atom;
 }
 
@@ -1264,15 +1239,12 @@ HandleSeq SQLAtomStorage::getIncomingSet(const Handle& h)
 	// The cast to BIGINT is needed, as otherwise on gets
 	// ERROR:  operator does not exist: bigint[] @> integer[]
 
-	LLConnection* db_conn = get_conn();
-	Response rp;
+	Response rp(conn_pool);
 	rp.store = this;
 	rp.height = -1;
 	rp.hvec = &iset;
-	rp.rs = db_conn->exec(buff);
+	rp.exec(buff);
 	rp.rs->foreach_row(&Response::fetch_incoming_set_cb, &rp);
-	rp.release();
-	put_conn(db_conn);
 
 #ifdef STORAGE_DEBUG
 	_num_get_insets++;
@@ -1450,8 +1422,7 @@ void SQLAtomStorage::load(AtomTable &table)
 
 	setup_typemap();
 
-	LLConnection* db_conn = get_conn();
-	Response rp;
+	Response rp(conn_pool);
 	rp.table = &table;
 	rp.store = this;
 
@@ -1463,9 +1434,8 @@ void SQLAtomStorage::load(AtomTable &table)
 		char buff[BUFSZ];
 		snprintf(buff, BUFSZ, "SELECT * FROM Atoms WHERE height = %d;", hei);
 		rp.height = hei;
-		rp.rs = db_conn->exec(buff);
+		rp.exec(buff);
 		rp.rs->foreach_row(&Response::load_all_atoms_cb, &rp);
-		rp.release();
 #else
 		// It appears that, when the select statement returns more than
 		// about a 100K to a million atoms or so, some sort of heap
@@ -1484,14 +1454,12 @@ void SQLAtomStorage::load(AtomTable &table)
 			         "height = %d AND uuid > %lu AND uuid <= %lu;",
 			         hei, rec, rec+STEP);
 			rp.height = hei;
-			rp.rs = db_conn->exec(buff);
+			rp.exec(buff);
 			rp.rs->foreach_row(&Response::load_all_atoms_cb, &rp);
-			rp.release();
 		}
 #endif
 		printf("Loaded %lu atoms at height %d\n", _load_count - cur, hei);
 	}
-	put_conn(db_conn);
 	printf("Finished loading %lu atoms in total\n",
 		(unsigned long) _load_count);
 	bulk_load = false;
@@ -1518,8 +1486,7 @@ void SQLAtomStorage::loadType(AtomTable &table, Type atom_type)
 	setup_typemap();
 	int db_atom_type = storing_typemap[atom_type];
 
-	LLConnection* db_conn = get_conn();
-	Response rp;
+	Response rp(conn_pool);
 	rp.table = &table;
 	rp.store = this;
 
@@ -1533,9 +1500,8 @@ void SQLAtomStorage::loadType(AtomTable &table, Type atom_type)
 		         "SELECT * FROM Atoms WHERE height = %d AND type = %d;",
 		         hei, db_atom_type);
 		rp.height = hei;
-		rp.rs = db_conn->exec(buff);
+		rp.exec(buff);
 		rp.rs->foreach_row(&Response::load_if_not_exists_cb, &rp);
-		rp.release();
 #else
 		// It appears that, when the select statment returns more than
 		// about a 100K to a million atoms or so, some sort of heap
@@ -1553,15 +1519,13 @@ void SQLAtomStorage::loadType(AtomTable &table, Type atom_type)
 			         "AND height = %d AND uuid > %lu AND uuid <= %lu;",
 			         db_atom_type, hei, rec, rec+STEP);
 			rp.height = hei;
-			rp.rs = db_conn->exec(buff);
+			rp.exec(buff);
 			rp.rs->foreach_row(&Response::load_if_not_exists_cb, &rp);
-			rp.release();
 		}
 #endif
 		logger().debug("SQLAtomStorage::loadType: Loaded %lu atoms of type %d at height %d\n",
 			_load_count - cur, db_atom_type, hei);
 	}
-	put_conn(db_conn);
 	logger().debug("SQLAtomStorage::loadType: Finished loading %lu atoms in total\n",
 		(unsigned long) _load_count);
 
@@ -1598,15 +1562,11 @@ void SQLAtomStorage::store(const AtomTable &table)
 	setup_typemap();
 	store_atomtable_id(table);
 
-	LLConnection* db_conn = get_conn();
-	Response rp;
-
 	table.foreachHandleByType(
 		[&](const Handle& h)->void { store_cb(h); }, ATOM, true);
 
-	rp.rs = db_conn->exec("VACUUM ANALYZE;");
-	rp.release();
-	put_conn(db_conn);
+	Response rp(conn_pool);
+	rp.exec("VACUUM ANALYZE;");
 
 	printf("\tFinished storing %lu atoms total.\n",
 		(unsigned long) _store_count);
@@ -1616,57 +1576,45 @@ void SQLAtomStorage::store(const AtomTable &table)
 
 void SQLAtomStorage::rename_tables(void)
 {
-	LLConnection* db_conn = get_conn();
-	Response rp;
+	Response rp(conn_pool);
 
-	rp.rs = db_conn->exec("ALTER TABLE Atoms RENAME TO Atoms_Backup;");
-	rp.release();
-	rp.rs = db_conn->exec("ALTER TABLE Global RENAME TO Global_Backup;");
-	rp.release();
-	rp.rs = db_conn->exec("ALTER TABLE TypeCodes RENAME TO TypeCodes_Backup;");
-	rp.release();
-	put_conn(db_conn);
+	rp.exec("ALTER TABLE Atoms RENAME TO Atoms_Backup;");
+	rp.exec("ALTER TABLE Global RENAME TO Global_Backup;");
+	rp.exec("ALTER TABLE TypeCodes RENAME TO TypeCodes_Backup;");
 }
 
 void SQLAtomStorage::create_tables(void)
 {
-	LLConnection* db_conn = get_conn();
-	Response rp;
+	Response rp(conn_pool);
 
 	// See the file "atom.sql" for detailed documentation as to the
 	// structure of the SQL tables.
-	rp.rs = db_conn->exec("CREATE TABLE Spaces ("
-	                      "space     BIGINT PRIMARY KEY,"
-	                      "parent    BIGINT);");
-	rp.release();
+	rp.exec("CREATE TABLE Spaces ("
+	              "space     BIGINT PRIMARY KEY,"
+	              "parent    BIGINT);");
 
-	rp.rs = db_conn->exec("INSERT INTO Spaces VALUES (0,0);");
-	rp.release();
-	rp.rs = db_conn->exec("INSERT INTO Spaces VALUES (1,1);");
-	rp.release();
+	rp.exec("INSERT INTO Spaces VALUES (0,0);");
+	rp.exec("INSERT INTO Spaces VALUES (1,1);");
 
-	rp.rs = db_conn->exec("CREATE TABLE Atoms ("
-	                      "uuid     BIGINT PRIMARY KEY,"
-	                      "space    BIGINT REFERENCES spaces(space),"
-	                      "type     SMALLINT,"
-	                      "type_tv  SMALLINT,"
-	                      "stv_mean FLOAT,"
-	                      "stv_confidence FLOAT,"
-	                      "stv_count DOUBLE PRECISION,"
-	                      "height   SMALLINT,"
-	                      "name     TEXT,"
-	                      "outgoing BIGINT[],"
-	                      "UNIQUE (type, name),"
-	                      "UNIQUE (type, outgoing));");
-	rp.release();
+	rp.exec("CREATE TABLE Atoms ("
+	            "uuid     BIGINT PRIMARY KEY,"
+	            "space    BIGINT REFERENCES spaces(space),"
+	            "type     SMALLINT,"
+	            "type_tv  SMALLINT,"
+	            "stv_mean FLOAT,"
+	            "stv_confidence FLOAT,"
+	            "stv_count DOUBLE PRECISION,"
+	            "height   SMALLINT,"
+	            "name     TEXT,"
+	            "outgoing BIGINT[],"
+	            "UNIQUE (type, name),"
+	            "UNIQUE (type, outgoing));");
 
-	rp.rs = db_conn->exec("CREATE TABLE TypeCodes ("
-	                      "type SMALLINT UNIQUE,"
-	                      "typename TEXT UNIQUE);");
-	rp.release();
+	rp.exec("CREATE TABLE TypeCodes ("
+	            "type SMALLINT UNIQUE,"
+	            "typename TEXT UNIQUE);");
+
 	type_map_was_loaded = false;
-
-	put_conn(db_conn);
 }
 
 /**
@@ -1676,49 +1624,36 @@ void SQLAtomStorage::create_tables(void)
  */
 void SQLAtomStorage::kill_data(void)
 {
-	LLConnection* db_conn = get_conn();
-	Response rp;
+	Response rp(conn_pool);
 
 	// See the file "atom.sql" for detailed documentation as to the
 	// structure of the SQL tables.
-	rp.rs = db_conn->exec("DELETE from Atoms;");
-	rp.release();
+	rp.exec("DELETE from Atoms;");
 
 	// Delete the atomspaces as well!
-	rp.rs = db_conn->exec("DELETE from Spaces;");
-	rp.release();
+	rp.exec("DELETE from Spaces;");
 
-	rp.rs = db_conn->exec("INSERT INTO Spaces VALUES (0,0);");
-	rp.release();
-	rp.rs = db_conn->exec("INSERT INTO Spaces VALUES (1,1);");
-	rp.release();
-
-	put_conn(db_conn);
+	rp.exec("INSERT INTO Spaces VALUES (0,0);");
+	rp.exec("INSERT INTO Spaces VALUES (1,1);");
 }
 
 /* ================================================================ */
 
 UUID SQLAtomStorage::getMaxObservedUUID(void)
 {
-	LLConnection* db_conn = get_conn();
-	Response rp;
+	Response rp(conn_pool);
 	rp.intval = 0;
-	rp.rs = db_conn->exec("SELECT uuid FROM Atoms ORDER BY uuid DESC LIMIT 1;");
+	rp.exec("SELECT uuid FROM Atoms ORDER BY uuid DESC LIMIT 1;");
 	rp.rs->foreach_row(&Response::intval_cb, &rp);
-	rp.release();
-	put_conn(db_conn);
 	return rp.intval;
 }
 
 int SQLAtomStorage::getMaxObservedHeight(void)
 {
-	LLConnection* db_conn = get_conn();
-	Response rp;
+	Response rp(conn_pool);
 	rp.intval = 0;
-	rp.rs = db_conn->exec("SELECT height FROM Atoms ORDER BY height DESC LIMIT 1;");
+	rp.exec("SELECT height FROM Atoms ORDER BY height DESC LIMIT 1;");
 	rp.rs->foreach_row(&Response::intval_cb, &rp);
-	rp.release();
-	put_conn(db_conn);
 	return rp.intval;
 }
 
