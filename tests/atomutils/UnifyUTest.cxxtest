@@ -94,7 +94,9 @@ public:
 
 	// // Various complex unify queries
 	// void test_unify_complex_1();
-	// // void test_unify_complex_2();
+
+	// TODO: add substitution test as well, following up
+	// test_unify_complex_1()
 };
 
 void UnifyUTest::setUp(void)
@@ -693,143 +695,6 @@ void UnifyUTest::test_unify_unordered_8()
 // 				                            // {{A1, implicant_body},
 // 						                    //  implicant_body},
 // 				                            // {{A2}, A2}}});
-
-// 	std::cout << "result = " << oc_to_string(result) << std::endl;
-// 	std::cout << "expected = " << oc_to_string(expected) << std::endl;
-
-// 	TS_ASSERT_EQUALS(result, expected);
-// }
-
-// // TODO: what is the purpose of this test given that it have variables
-// // in common from lhs and rhs
-// void UnifyUTest::test_unify_complex_2()
-// {
-// 	Handle lhs =
-// 		_eval.eval_h("(ImplicationLink"
-// 		             "  (AndLink"
-// 		             "    (QuoteLink"
-// 		             "      (LambdaLink"
-// 		             "        (UnquoteLink"
-// 		             "          (VariableNode \"$TyVs-1e715739\")"
-// 		             "        )"
-// 		             "        (UnquoteLink"
-// 		             "          (VariableNode \"$A1-6ae3d959\")"
-// 		             "        )"
-// 		             "      )"
-// 		             "    )"
-// 		             "    (QuoteLink"
-// 		             "      (LambdaLink"
-// 		             "        (UnquoteLink"
-// 		             "          (VariableNode \"$TyVs-1e715739\")"
-// 		             "        )"
-// 		             "        (UnquoteLink"
-// 		             "          (VariableNode \"$A2-4414053b\")"
-// 		             "        )"
-// 		             "      )"
-// 		             "    )"
-// 		             "  )"
-// 		             "  (QuoteLink"
-// 		             "    (LambdaLink"
-// 		             "      (UnquoteLink"
-// 		             "        (VariableNode \"$TyVs-1e715739\")"
-// 		             "      )"
-// 		             "      (UnquoteLink"
-// 		             "        (AndLink"
-// 		             "          (VariableNode \"$A1-6ae3d959\")"
-// 		             "          (VariableNode \"$A2-4414053b\")"
-// 		             "        )"
-// 		             "      )"
-// 		             "    )"
-// 		             "  )"
-// 		             ")");
-// 	Handle rhs =
-// 		_eval.eval_h("(ImplicationLink"
-// 		             "  (AndLink"
-// 		             "    (QuoteLink"
-// 		             "      (LambdaLink"
-// 		             "        (UnquoteLink"
-// 		             "          (VariableNode \"$TyVs-74d4bf25\")"
-// 		             "        )"
-// 		             "        (UnquoteLink"
-// 		             "          (VariableNode \"$A1-6ae3d959\")"
-// 		             "        )"
-// 		             "      )"
-// 		             "    )"
-// 		             "    (QuoteLink"
-// 		             "      (LambdaLink"
-// 		             "        (UnquoteLink"
-// 		             "          (VariableNode \"$TyVs-74d4bf25\")"
-// 		             "        )"
-// 		             "        (UnquoteLink"
-// 		             "          (VariableNode \"$A2-4414053b\")"
-// 		             "        )"
-// 		             "      )"
-// 		             "    )"
-// 		             "  )"
-// 		             "  (QuoteLink"
-// 		             "    (LambdaLink"
-// 		             "      (UnquoteLink"
-// 		             "        (VariableNode \"$TyVs-74d4bf25\")"
-// 		             "      )"
-// 		             "      (UnquoteLink"
-// 		             "        (AndLink"
-// 		             "          (VariableNode \"$A1-6ae3d959\")"
-// 		             "          (VariableNode \"$A2-4414053b\")"
-// 		             "        )"
-// 		             "      )"
-// 		             "    )"
-// 		             "  )"
-// 		             ")");
-// 	Handle lhs_vardecl =
-// 		_eval.eval_h("(VariableList"
-// 		             "  (TypedVariableLink"
-// 		             "    (VariableNode \"$TyVs-1e715739\")"
-// 		             "    (TypeChoice"
-// 		             "      (TypeNode \"TypedVariableLink\")"
-// 		             "      (TypeNode \"VariableNode\")"
-// 		             "      (TypeNode \"VariableList\")"
-// 		             "    )"
-// 		             "  )"
-// 		             "  (TypedVariableLink"
-// 		             "    (VariableNode \"$A1-6ae3d959\")"
-// 		             "    (TypeNode \"EvaluationLink\")"
-// 		             "  )"
-// 		             "  (TypedVariableLink"
-// 		             "    (VariableNode \"$A2-4414053b\")"
-// 		             "    (TypeNode \"EvaluationLink\")"
-// 		             "  )"
-// 		             ")");
-// 	Handle rhs_vardecl =
-// 		_eval.eval_h("(VariableList"
-// 		             "  (TypedVariableLink"
-// 		             "    (VariableNode \"$TyVs-74d4bf25\")"
-// 		             "    (TypeChoice"
-// 		             "      (TypeNode \"TypedVariableLink\")"
-// 		             "      (TypeNode \"VariableNode\")"
-// 		             "      (TypeNode \"VariableList\")"
-// 		             "    )"
-// 		             "  )"
-// 		             "  (TypedVariableLink"
-// 		             "    (VariableNode \"$A1-6ae3d959\")"
-// 		             "    (TypeNode \"EvaluationLink\")"
-// 		             "  )"
-// 		             "  (TypedVariableLink"
-// 		             "    (VariableNode \"$A2-4414053b\")"
-// 		             "    (TypeNode \"EvaluationLink\")"
-// 		             "  )"
-// 		             ")");
-
-// 	Handle
-// 		TyVs1 = _eval.eval_h("(VariableNode \"$TyVs-1e715739\")"),
-// 		TyVs2 = _eval.eval_h("(VariableNode \"$TyVs-74d4bf25\")"),
-// 		A1 = _eval.eval_h("(VariableNode \"$A1-6ae3d959\")"),
-// 		A2 = _eval.eval_h("(VariableNode \"$A2-4414053b\")");
-
-// 	Unify::SolutionSet result = Unify()()(lhs, rhs, lhs_vardecl, rhs_vardecl),
-// 		expected = Unify::SolutionSet(true,
-// 		                              {{{{TyVs1, TyVs2}, TyVs2},
-// 				                        {{A1, A1}, A1},
-// 				                        {{A2, A2}, A2}}});
 
 // 	std::cout << "result = " << oc_to_string(result) << std::endl;
 // 	std::cout << "expected = " << oc_to_string(expected) << std::endl;
