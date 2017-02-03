@@ -384,30 +384,29 @@ Unify::Partitions Unify::join(const Partitions& lhs, const Partition& rhs) const
 	// Base cases
 	if (rhs.empty())
 		return lhs;
-	if (lhs.empty())
-		return {rhs};
 
 	// Recursive case (a loop actually)
 	Partitions result;
 	for (const auto& par : lhs) {
-		Partition jo = join(par, rhs);
-		if (not jo.empty())
-			result.insert(jo);
-		// result.insert(jo.begin(), jo.end());
+		Partitions jps = join(par, rhs);
+		result.insert(jps.begin(), jps.end());
 	}
 	return result;
 }
 
-Unify::Partition Unify::join(const Partition& lhs, const Partition& rhs) const
+// TODO: this one is probably temporary and will be merged in the
+// above method. Or replace that by a join(Partitions, Block) method.
+Unify::Partitions Unify::join(const Partition& lhs, const Partition& rhs) const
 {
 	// Don't bother joining if lhs is empty (it saves a bit of computation)
 	if (lhs.empty())
-		return rhs;
+		return {rhs};
 
 	// Join
-	Partition result(lhs);
+	Partitions result{lhs};
 	for (const Block& rhs_block : rhs) {
-		result = join(result, rhs_block);
+		// For now we assume result has only 0 or 1 partition
+		result = join(*result.begin(), rhs_block);
 		if (result.empty())
 			break;              // If empty, break cause not satisfiable
 	}
@@ -415,7 +414,8 @@ Unify::Partition Unify::join(const Partition& lhs, const Partition& rhs) const
 	return result;
 }
 
-Unify::Partition Unify::join(const Partition& partition, const Block& block) const
+Unify::Partitions Unify::join(const Partition& partition,
+                              const Block& block) const
 {
 	Partition result(partition);
 
@@ -438,11 +438,11 @@ Unify::Partition Unify::join(const Partition& partition, const Block& block) con
 				result.erase(rm.first);
 			result.insert(j_block);
 		} else {
-			return Partition();
+			return Partitions();
 		}
 	}
 
-	return result;
+	return {result};
 }
 
 Unify::Block Unify::join(const Block& lhs, const Partition& rhs) const

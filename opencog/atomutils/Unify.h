@@ -252,8 +252,10 @@ public:                         // TODO: being friend with UnifyUTest
 	SolutionSet join(const SolutionSet& lhs, const SolutionSet& rhs) const;
 
 private:
-	// TODO: add comment. Possibly return UnificationPartitions instead of
-	// UnificationSolutionSet.
+	/**
+	 * Join a non-empty satisfiable partition sets with a satisfiable
+	 * partition.
+	 */
 	Partitions join(const Partitions& lhs, const Partition& rhs) const;
 
 	/**
@@ -261,14 +263,17 @@ private:
 	 * subsequent joins may generate new sub-unification problems (see
 	 * below).
 	 */
-	Partition join(const Partition& lhs, const Partition& rhs) const;
+	Partitions join(const Partition& lhs, const Partition& rhs) const;
 
 	/**
 	 * Join a partition and a block. If the block has no element in
 	 * common with any block of the partition, merely insert
-	 * it. Otherwise fuse the blocks with common elements into one.
+	 * it. Otherwise fuse the blocks with common elements into
+	 * one. During this fusion new unification problems may arise
+	 * (TODO: detail why) thus possibly multiple partitions will be
+	 * returned.
 	*/
-	Partition join(const Partition& lhs, const Block &rhs) const;
+	Partitions join(const Partition& lhs, const Block &rhs) const;
 
 	/**
 	 * Join a block to a partition to form a single block. It is
