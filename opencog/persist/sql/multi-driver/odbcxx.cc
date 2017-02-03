@@ -17,6 +17,9 @@
  *    Wow! Aside from the bad English, this is a stunningly bad idea!
  * 4) It's slowww. Terrible performance. The native bindings are 3x
  *    faster!
+ * 5) It's verbose. Notice how the native postgres driver can
+ *    accomplish the same thing in less than half the number of lines
+ *    of code!
  *
  * Blame it on SQLBindCol(), which is a terrible idea.  @#$%^ Microsoft.
  *
