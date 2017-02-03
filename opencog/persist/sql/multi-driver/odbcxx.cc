@@ -280,9 +280,16 @@ ODBCConnection::exec(const char * buff)
     /* ODBC treats the appearence of the question-mark character ? as
      * something special -- for binding columns, even if you are NOT
      * actualy binding columns. If it shows up in the query, it will
-     * result in error message
+     * result in the error message
      * (34) The # of binded parameters < the # of parameter markers;
-     * Therefore we scan for and html-escape al question marks.
+     * Therefore we scan for and html-escape all question marks.
+     *
+     * XXX FIXME This changes the name of the atom in the database,
+     * itself.  This is fine, if we only ever store or update the
+     * truth value on the atom, but breaks it if we try to read the
+     * atom.  We could try to convert &#63; back into a question-mark,
+     * when we read the atom name, but then, in that case, how can we
+     * know that the atom name didn't originally have &#63; in it?
      */
     if (need_qmark_escape and strchr(buff, '?'))
     {
