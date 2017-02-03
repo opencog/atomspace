@@ -91,6 +91,7 @@ ODBCConnection::ODBCConnection(const char * uri)
     SQLRETURN rc;
 
     is_connected = false;
+    need_qmark_escape = false;
 
     sql_hdbc = NULL;
     sql_henv = NULL;
@@ -182,6 +183,21 @@ ODBCConnection::ODBCConnection(const char * uri)
 
     is_connected = true;
     free(curi);
+
+#define DRBUFSZ 120
+    char buf[DRBUFSZ];
+    rc = SQLGetInfo(sql_hdbc, SQL_DRIVER_ODBC_VER, buf, DRBUFSZ, NULL);
+    if ((SQL_SUCCESS == rc) or (SQL_SUCCESS_WITH_INFO == rc))
+    {
+        // I'm not sure when question-mark escaping got fixed,
+        // and I'm not sure if it got fixed in the postgres driver
+        // or in the UnixODBC shims.  I do know that it works for
+        // unixODBC version "03.51" and fails for "03.00". So make
+        // the worst-case assumption that it fails for any version
+        // except "03.51".
+        need_qmark_escape = true;
+        if (0 == strcmp(buf, "03.51")) need_qmark_escape = false;
+    }
 }
 
 /* =========================================================== */
@@ -261,7 +277,7 @@ ODBCConnection::exec(const char * buff)
      * (34) The # of binded parameters < the # of parameter markers;
      * Therefore we scan for and html-escape al question marks.
      */
-    if (strchr(buff, '?'))
+    if (need_qmark_escape and strchr(buff, '?'))
     {
         int cnt = 0;
         const char* p = buff;
