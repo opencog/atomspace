@@ -290,6 +290,11 @@ ODBCConnection::exec(const char * buff)
      * atom.  We could try to convert &#63; back into a question-mark,
      * when we read the atom name, but then, in that case, how can we
      * know that the atom name didn't originally have &#63; in it?
+     *
+     * Basically, its a really crappy situation, and the only real
+     * solution is to simply not use the old/broken drivers, or not
+     * use ODBC at all. Since this is not always possible, we have
+     * to, uhh, pretend we can make lemonade out of the lemons.
      */
     if (need_qmark_escape and strchr(buff, '?'))
     {
