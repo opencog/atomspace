@@ -81,7 +81,7 @@
                                                                 \
     SQLGetDiagRec(HTYPE, HAN, 1, (SQLCHAR *) sql_stat,          \
                   &err, (SQLCHAR*) msg, sizeof(msg), &msglen);  \
-    opencog::logger().warn("(%ld) %s\n", (long int) err, msg);  \
+    opencog::logger().warn("ODBC Driver: (%ld) %s\n", (long int) err, msg);  \
 }
 
 /* =========================================================== */
@@ -197,6 +197,13 @@ ODBCConnection::ODBCConnection(const char * uri)
         // except "03.51".
         need_qmark_escape = true;
         if (0 == strcmp(buf, "03.51")) need_qmark_escape = false;
+
+        if (need_qmark_escape)
+            opencog::logger().warn(
+               "ODBC Driver: Version %s needs question-mark escaping\n"
+               "\tThis WILL garble atom names with question-marks in them!\n"
+               "\tIt will replace question-marks by &#63;\n",
+               buf);
     }
 }
 
@@ -256,7 +263,7 @@ void ODBCConnection::extract_error(const char *msg)
         ret = SQLGetDiagRec(SQL_HANDLE_ENV, sql_henv, ++i,
                state, &native, text, sizeof(text), &len);
         if (SQL_SUCCEEDED(ret))
-            opencog::logger().warn("\t%s : %d : %d : %s\n",
+            opencog::logger().warn("ODBC Driver: %s : %d : %d : %s\n",
                                     state, i, native, text);
     } while (ret == SQL_SUCCESS);
 }
@@ -316,7 +323,7 @@ ODBCConnection::exec(const char * buff)
     {
         PRINT_SQLERR (SQL_HANDLE_STMT, rs->sql_hstmt);
         rs->release();
-        opencog::logger().warn("\tQuery was: %s\n", buff);
+        opencog::logger().warn("ODCB Driver: Query was: %s\n", buff);
         extract_error("exec");
         PERR ("Can't perform query rc=%d ", rc);
         return NULL;
