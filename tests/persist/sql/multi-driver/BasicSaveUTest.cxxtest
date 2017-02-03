@@ -321,7 +321,10 @@ void BasicSaveUTest::add_to_table(int idx, AtomTable *table, std::string id)
     n2[idx] = NodeCast(table->add(n2[idx], false));
     a2[idx] = n2[idx];
 
-    n3[idx] = createNode(SCHEMA_NODE, id + "third wheel");
+    // ODBC fails when there is a question mark in the text.
+    // Sad but painfully true.
+    std::string qmark = "? ";
+    n3[idx] = createNode(SCHEMA_NODE, qmark + id + "third ? wheel");
     TruthValuePtr stv3(SimpleTruthValue::createTV(0.33, 1.0/(300.0+idx)));
     n3[idx]->setTruthValue(stv3);
     n3[idx] = NodeCast(table->add(n3[idx], false));
