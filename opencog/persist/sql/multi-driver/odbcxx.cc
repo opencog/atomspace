@@ -91,7 +91,7 @@ ODBCConnection::ODBCConnection(const char * uri)
     SQLRETURN rc;
 
     is_connected = false;
-    need_qmark_escape = false;
+    need_qmark_escape = true; // worst-case assumption
 
     sql_hdbc = NULL;
     sql_henv = NULL;
