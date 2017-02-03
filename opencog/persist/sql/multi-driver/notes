@@ -511,3 +511,35 @@ Both, with the new URI scheme  (wtf is this different!??!!??)
         Start  41: FetchUTest
  41/109 Test  #41: FetchUTest .......................   Passed    2.08 sec
 
+_store->print_stats
+
+async_caller<SQLAtomStorage, Handle> _write_queue;
+
+_in_drain bool -- 
+_busy_writers
+_store_queue.size()
+      unsigned long get_busy_writers() const { return _busy_writers; }
+      unsigned long get_queue_size() const { return _store_queue.size(); }
+
+conn_pool.pop
+
+\conn_pool.size() -- default is 8 or hardware concurrency
+
+conn->exec() returns an rs... 
+
+
+ConsoleSocket.h:    GenericShell *_shell;
+ConsoleSocket.cc:    bool is_shell = request->isShell();
+
+built-in req
+ConsoleSocket* con = req->get_console();
+
+  // The total number of concurrently open sockets is managed by
+        // keeping a count in ConsoleSocket, and blocking when there are
+        // too many.
+
+
+console has a _use_count -- volative per-inst updated byg get put in the req
+_max_open_sockets -- static uint
+_num_open_sockets -- static  uint
+

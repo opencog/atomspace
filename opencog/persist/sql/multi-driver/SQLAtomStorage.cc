@@ -348,6 +348,10 @@ bool SQLAtomStorage::idExists(const char * buff)
 /* ================================================================ */
 // Constructors
 
+// Initialize with 8 write-back queues, but maybe this should be...
+// I dunno -- std::thread::hardware_concurrency()  ???
+#define NUM_WB_QUEUES 8
+
 void SQLAtomStorage::init(const char * uri)
 {
 	bool use_libpq = (0 == strncmp(uri, "postgres", 8));
@@ -359,8 +363,12 @@ void SQLAtomStorage::init(const char * uri)
 	if (not use_libpq and not use_odbc)
 		throw IOException(TRACE_INFO, "Unknown URI '%s'\n", uri);
 
+	// Allow for one connection ber database-reader, and one connection
+	// for each writer.  Make sure that there are more connections than
+	// there are writers, else both readers and writers starve.
 	_initial_conn_pool_size = std::thread::hardware_concurrency();
 	if (0 == _initial_conn_pool_size) _initial_conn_pool_size = 8;
+	_initial_conn_pool_size += NUM_WB_QUEUES;
 	for (int i=0; i<_initial_conn_pool_size; i++)
 	{
 		LLConnection* db_conn = nullptr;
@@ -408,10 +416,8 @@ void SQLAtomStorage::init(const char * uri)
 #endif // STORAGE_DEBUG
 }
 
-// Initialize with 8 write-back queues, but maybe this should be...
-// I dunno -- std::thread::hardware_concurrency()  ???
 SQLAtomStorage::SQLAtomStorage(std::string uri)
-	: _write_queue(this, &SQLAtomStorage::vdo_store_atom, 8)
+	: _write_queue(this, &SQLAtomStorage::vdo_store_atom, NUM_WB_QUEUES)
 {
 	init(uri.c_str());
 }
