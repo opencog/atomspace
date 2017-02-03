@@ -406,8 +406,11 @@ Unify::Partition Unify::join(const Partition& lhs, const Partition& rhs) const
 
 	// Join
 	Partition result(lhs);
-	for (const Block& rhs_block : rhs)
+	for (const Block& rhs_block : rhs) {
 		result = join(result, rhs_block);
+		if (result.empty())
+			break;              // If empty, break cause not satisfiable
+	}
 
 	return result;
 }
@@ -427,8 +430,8 @@ Unify::Partition Unify::join(const Partition& partition, const Block& block) con
 		result.insert(block);
 	} else {
 		// Otherwise join block with all common blocks and replace
-		// them by it (if satisfiable, otherwise return the empty
-		// partition)
+		// them by the result (if satisfiable, otherwise return the
+		// empty partition)
 		Block j_block = join(block, common_blocks);
 		if (is_satisfiable(j_block)) {
 			for (const Block& rm : common_blocks)
