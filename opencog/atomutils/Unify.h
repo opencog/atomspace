@@ -259,27 +259,32 @@ private:
 	Partitions join(const Partitions& lhs, const Partition& rhs) const;
 
 	/**
-	 * Join 2 partitions. The result can be set of partitions because
-	 * subsequent joins may generate new sub-unification problems (see
-	 * below).
+	 * Join 2 partitions. The result can be set of partitions (see
+	 * join(const Partition&, const Block&) for explanation).
 	 */
 	Partitions join(const Partition& lhs, const Partition& rhs) const;
+
+	/**
+	 * Join a block with a partition set. The partition set is assumed
+	 * non empty and satisfiable.
+	 */
+	Partitions join(const Partitions& partitions, const Block& block) const;
 
 	/**
 	 * Join a partition and a block. If the block has no element in
 	 * common with any block of the partition, merely insert
 	 * it. Otherwise fuse the blocks with common elements into
 	 * one. During this fusion new unification problems may arise
-	 * (TODO: detail why) thus possibly multiple partitions will be
+	 * (TODO: explain why) thus possibly multiple partitions will be
 	 * returned.
 	*/
-	Partitions join(const Partition& lhs, const Block &rhs) const;
+	Partitions join(const Partition& partition, const Block &block) const;
 
 	/**
 	 * Join a block to a partition to form a single block. It is
 	 * assumed that all blocks have elements in common.
 	*/
-	Block join(const Block& lhs, const Partition& rhs) const;
+	Block join(const Block& block, const Partition& common_blocks) const;
 
 	/**
 	 * Join 2 blocks (supposedly satisfiable).

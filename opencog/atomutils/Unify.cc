@@ -394,11 +394,9 @@ Unify::Partitions Unify::join(const Partitions& lhs, const Partition& rhs) const
 	return result;
 }
 
-// TODO: this one is probably temporary and will be merged in the
-// above method. Or replace that by a join(Partitions, Block) method.
 Unify::Partitions Unify::join(const Partition& lhs, const Partition& rhs) const
 {
-	// Don't bother joining if lhs is empty (it saves a bit of computation)
+	// Don't bother joining if lhs is empty (saves a bit of computation)
 	if (lhs.empty())
 		return {rhs};
 
@@ -406,11 +404,22 @@ Unify::Partitions Unify::join(const Partition& lhs, const Partition& rhs) const
 	Partitions result{lhs};
 	for (const Block& rhs_block : rhs) {
 		// For now we assume result has only 0 or 1 partition
-		result = join(*result.begin(), rhs_block);
+		result = join(result, rhs_block);
 		if (result.empty())
 			break;              // If empty, break cause not satisfiable
 	}
 
+	return result;
+}
+
+Unify::Partitions Unify::join(const Partitions& partitions,
+                              const Block& block) const
+{
+	Partitions result;
+	for (const Partition& partition : partitions) {
+		Partitions jps = join(partition, block);
+		result.insert(jps.begin(), jps.end());
+	}
 	return result;
 }
 
@@ -419,7 +428,7 @@ Unify::Partitions Unify::join(const Partition& partition,
 {
 	Partition result(partition);
 
-	// Find all lhs blocks that have elements in common with rhs_block
+	// Find all partition blocks that have elements in common with block
 	Partition common_blocks;
 	for (const Block& p_block : partition)
 		if (not has_empty_intersection(block.first, p_block.first))
@@ -445,13 +454,13 @@ Unify::Partitions Unify::join(const Partition& partition,
 	return {result};
 }
 
-Unify::Block Unify::join(const Block& lhs, const Partition& rhs) const
+Unify::Block Unify::join(const Block& block, const Partition& common_blocks) const
 {
-	std::vector<Block> result{lhs}; // due to some weird shit I can't
+	std::vector<Block> result{block}; // due to some weird shit I can't
                                     // overwrite the previous block so
                                     // I'm creating a vector of them
-	for (const auto& rhs_block : rhs)
-		result.push_back(join(result.back(), rhs_block));
+	for (const auto& c_block : common_blocks)
+		result.push_back(join(result.back(), c_block));
 	return result.back();
 }
 
