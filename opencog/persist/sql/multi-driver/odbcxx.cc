@@ -265,11 +265,11 @@ ODBCConnection::exec(const char * buff)
     {
         int cnt = 0;
         const char* p = buff;
-        while ((p = strchr(buff, '?'))) { ++p; cnt++; }
+        while ((p = strchr(p, '?'))) { ++p; cnt++; }
         char *escape = (char *) malloc(strlen(buff) + 4*cnt + 1);
         char *d = escape;
         const char *b = buff;
-        while ((p = strchr(buff, '?'))) {
+        while ((p = strchr(b, '?'))) {
             size_t len = p-b;
             memcpy(d, b, len);
             d += len;
