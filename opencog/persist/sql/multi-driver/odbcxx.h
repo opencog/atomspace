@@ -45,6 +45,7 @@ class ODBCConnection : public LLConnection
 {
     friend class ODBCRecordSet;
     private:
+        bool need_qmark_escape;
         SQLHENV sql_henv;
         SQLHDBC sql_hdbc;
 

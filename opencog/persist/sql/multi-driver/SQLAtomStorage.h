@@ -54,12 +54,10 @@ class SQLAtomStorage : public AtomStorage
 {
 	private:
 		// Pool of shared connections
-		LLConnection* get_conn();
-		void put_conn(LLConnection*);
 		concurrent_stack<LLConnection*> conn_pool;
 		int _initial_conn_pool_size;
 
-		// Utility for handling responses on stack.
+		// Utility for handling responses (on stack).
 		class Response;
 		class Outgoing;
 
@@ -68,7 +66,6 @@ class SQLAtomStorage : public AtomStorage
 		// ---------------------------------------------
 		// Handle multiple atomspaces like typecodes: we have to
 		// convert from sql UUID to the atual UUID.
-		std::mutex table_cache_mutex;
 		std::set<UUID> table_id_cache;
 		void store_atomtable_id(const AtomTable&);
 

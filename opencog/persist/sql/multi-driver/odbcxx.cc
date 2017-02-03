@@ -3,9 +3,24 @@
  * ODBC driver -- developed/tested with unixodbc http://www.unixodbc.org
  *
  * ODBC is basically brain-damaged, and so is this driver.
- * The problem is that ODBC forces you to guess how many columns there
- * are in your reply, and etc. which we don't know a-priori.  Also
- * makes VARCHAR difficult (impossible ??) to support correctly!
+ *
+ * Do not use this driver, unless you have some backwards-compat issues
+ * that you have to work around.
+ *
+ * ODBC has several problems:
+ * 1) It forces you to guess how many columns there are in your reply,
+ *    which we don't know a-priori.
+ * 2) VARCHAR is difficult (impossible ??) to support correctly!
+ * 3) The use of the question mark as a special character, even when
+ *    you have nothing bound, nothing at all, giving this message:
+ *    (34) The # of binded parameters < the # of parameter markers;
+ *    Wow! Aside from the bad English, this is a stunningly bad idea!
+ * 4) It's slowww. Terrible performance. The native bindings are 3x
+ *    faster!
+ * 5) It's verbose. Notice how the native postgres driver can
+ *    accomplish the same thing in less than half the number of lines
+ *    of code!
+ *
  * Blame it on SQLBindCol(), which is a terrible idea.  @#$%^ Microsoft.
  *
  * Threading:
@@ -66,7 +81,7 @@
                                                                 \
     SQLGetDiagRec(HTYPE, HAN, 1, (SQLCHAR *) sql_stat,          \
                   &err, (SQLCHAR*) msg, sizeof(msg), &msglen);  \
-    opencog::logger().warn("(%ld) %s\n", (long int) err, msg);  \
+    opencog::logger().warn("ODBC Driver: (%ld) %s\n", (long int) err, msg);  \
 }
 
 /* =========================================================== */
@@ -76,6 +91,7 @@ ODBCConnection::ODBCConnection(const char * uri)
     SQLRETURN rc;
 
     is_connected = false;
+    need_qmark_escape = true; // worst-case assumption
 
     sql_hdbc = NULL;
     sql_henv = NULL;
@@ -167,6 +183,28 @@ ODBCConnection::ODBCConnection(const char * uri)
 
     is_connected = true;
     free(curi);
+
+#define DRBUFSZ 120
+    char buf[DRBUFSZ];
+    rc = SQLGetInfo(sql_hdbc, SQL_DRIVER_ODBC_VER, buf, DRBUFSZ, NULL);
+    if ((SQL_SUCCESS == rc) or (SQL_SUCCESS_WITH_INFO == rc))
+    {
+        // I'm not sure when question-mark escaping got fixed,
+        // and I'm not sure if it got fixed in the postgres driver
+        // or in the UnixODBC shims.  I do know that it works for
+        // unixODBC version "03.51" and fails for "03.00". So make
+        // the worst-case assumption that it fails for any version
+        // except "03.51".
+        need_qmark_escape = true;
+        if (0 == strcmp(buf, "03.51")) need_qmark_escape = false;
+
+        if (need_qmark_escape)
+            opencog::logger().warn(
+               "ODBC Driver: Version %s needs question-mark escaping\n"
+               "\tThis WILL garble atom names with question-marks in them!\n"
+               "\tIt will replace question-marks by &#63;\n",
+               buf);
+    }
 }
 
 /* =========================================================== */
@@ -225,7 +263,7 @@ void ODBCConnection::extract_error(const char *msg)
         ret = SQLGetDiagRec(SQL_HANDLE_ENV, sql_henv, ++i,
                state, &native, text, sizeof(text), &len);
         if (SQL_SUCCEEDED(ret))
-            opencog::logger().warn("\t%s : %d : %d : %s\n",
+            opencog::logger().warn("ODBC Driver: %s : %d : %d : %s\n",
                                     state, i, native, text);
     } while (ret == SQL_SUCCESS);
 }
@@ -236,12 +274,55 @@ LLRecordSet *
 ODBCConnection::exec(const char * buff)
 {
     if (!is_connected) return NULL;
-
     ODBCRecordSet* rs = get_record_set();
+    SQLRETURN rc;
 
-    SQLRETURN rc = SQLExecDirect(rs->sql_hstmt, (SQLCHAR *)buff, SQL_NTS);
+    /* ODBC treats the appearence of the question-mark character ? as
+     * something special -- for binding columns, even if you are NOT
+     * actualy binding columns. If it shows up in the query, it will
+     * result in the error message
+     * (34) The # of binded parameters < the # of parameter markers;
+     * Therefore we scan for and html-escape all question marks.
+     *
+     * XXX FIXME This changes the name of the atom in the database,
+     * itself.  This is fine, if we only ever store or update the
+     * truth value on the atom, but breaks it if we try to read the
+     * atom.  We could try to convert &#63; back into a question-mark,
+     * when we read the atom name, but then, in that case, how can we
+     * know that the atom name didn't originally have &#63; in it?
+     *
+     * Basically, its a really crappy situation, and the only real
+     * solution is to simply not use the old/broken drivers, or not
+     * use ODBC at all. Since this is not always possible, we have
+     * to, uhh, pretend we can make lemonade out of the lemons.
+     */
+    if (need_qmark_escape and strchr(buff, '?'))
+    {
+        int cnt = 0;
+        const char* p = buff;
+        while ((p = strchr(p, '?'))) { ++p; cnt++; }
+        char *escape = (char *) malloc(strlen(buff) + 4*cnt + 1);
+        char *d = escape;
+        const char *b = buff;
+        while ((p = strchr(b, '?'))) {
+            size_t len = p-b;
+            memcpy(d, b, len);
+            d += len;
+            memcpy(d, "&#63;", 5);
+            d += 5;
+            ++p;
+            b = p;
+        }
+        strcpy(d, b);
+        rc = SQLExecDirect(rs->sql_hstmt, (SQLCHAR *)escape, SQL_NTS);
+        free(escape);
+    }
+    else
+    {
+        rc = SQLExecDirect(rs->sql_hstmt, (SQLCHAR *)buff, SQL_NTS);
+    }
 
-    /* If query returned no data, its not necessarily an error:
+    /* If query returned no data, its not an error:
      * its simply "no data", that's all.
      */
     if (SQL_NO_DATA == rc)
@@ -254,7 +335,7 @@ ODBCConnection::exec(const char * buff)
     {
         PRINT_SQLERR (SQL_HANDLE_STMT, rs->sql_hstmt);
         rs->release();
-        opencog::logger().warn("\tQuery was: %s\n", buff);
+        opencog::logger().warn("ODCB Driver: Query was: %s\n", buff);
         extract_error("exec");
         PERR ("Can't perform query rc=%d ", rc);
         return NULL;

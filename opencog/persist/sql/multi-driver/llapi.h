@@ -48,7 +48,8 @@ class LLConnection
         LLConnection(void);
         virtual ~LLConnection();
 
-        bool connected(void) const;
+        // No future version of this must ever throw!
+        bool connected(void) const { return is_connected; }
 
         virtual LLRecordSet *exec(const char *) = 0;
 };
