@@ -4,6 +4,9 @@
  *
  * ODBC is basically brain-damaged, and so is this driver.
  *
+ * Do not use this driver, unless you have some backwards-compat issues
+ * that you have to work around.
+ *
  * ODBC has several problems:
  * 1) It forces you to guess how many columns there are in your reply,
  *    which we don't know a-priori.
@@ -245,12 +248,43 @@ LLRecordSet *
 ODBCConnection::exec(const char * buff)
 {
     if (!is_connected) return NULL;
-
     ODBCRecordSet* rs = get_record_set();
+    SQLRETURN rc;
 
-    SQLRETURN rc = SQLExecDirect(rs->sql_hstmt, (SQLCHAR *)buff, SQL_NTS);
+    /* ODBC treats the appearence of the question-mark character ? as
+     * something special -- for binding columns, even if you are NOT
+     * actualy binding columns. If it shows up in the query, it will
+     * result in error message
+     * (34) The # of binded parameters < the # of parameter markers;
+     * Therefore we scan for and html-escape al question marks.
+     */
+    if (strchr(buff, '?'))
+    {
+        int cnt = 0;
+        const char* p = buff;
+        while ((p = strchr(buff, '?'))) { ++p; cnt++; }
+        char *escape = (char *) malloc(strlen(buff) + 4*cnt + 1);
+        char *d = escape;
+        const char *b = buff;
+        while ((p = strchr(buff, '?'))) {
+            size_t len = p-b;
+            memcpy(d, b, len);
+            d += len;
+            memcpy(d, "&#63;", 5);
+            d += 5;
+            ++p;
+            b = p;
+        }
+        strcpy(d, b);
+        rc = SQLExecDirect(rs->sql_hstmt, (SQLCHAR *)escape, SQL_NTS);
+        free(escape);
+    }
+    else
+    {
+        rc = SQLExecDirect(rs->sql_hstmt, (SQLCHAR *)buff, SQL_NTS);
+    }
 
-    /* If query returned no data, its not necessarily an error:
+    /* If query returned no data, its not an error:
      * its simply "no data", that's all.
      */
     if (SQL_NO_DATA == rc)
