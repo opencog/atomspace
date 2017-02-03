@@ -1798,6 +1798,10 @@ void SQLAtomStorage::print_stats(void)
 	printf("avg drain time=%f seconds; longest drain time=%f\n",
 	       drain_secs, slowest);
 
+	printf("currently in_drain=%d num_busy=%lu queue_size=%lu\n",
+	       _write_queue._in_drain, _write_queue.get_busy_writers(),
+	       _write_queue.get_queue_size());
+
 	// Some basic TLB statistics; could be improved;
 	// The TLB remapping theory needs some work...
 	size_t noh = 0;
