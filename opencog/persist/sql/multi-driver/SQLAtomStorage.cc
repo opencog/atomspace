@@ -319,7 +319,7 @@ class SQLAtomStorage::Response
 /// Get an SQL connection.  If the pool is empty, this will block,
 /// waiting for a connection to be returned to the pool. Thus, the
 /// size of the pool regulates how many outstanding SQL requests can
-/// be pedning in parallel.
+/// be pending in parallel.
 LLConnection* SQLAtomStorage::get_conn()
 {
 	return conn_pool.pop();
@@ -359,9 +359,9 @@ void SQLAtomStorage::init(const char * uri)
 	if (not use_libpq and not use_odbc)
 		throw IOException(TRACE_INFO, "Unknown URI '%s'\n", uri);
 
-	int ncores = std::thread::hardware_concurrency();
-	if (0 == ncores) ncores = 8;
-	for (int i=0; i<ncores; i++)
+	_initial_conn_pool_size = std::thread::hardware_concurrency();
+	if (0 == _initial_conn_pool_size) _initial_conn_pool_size = 8;
+	for (int i=0; i<_initial_conn_pool_size; i++)
 	{
 		LLConnection* db_conn = nullptr;
 #ifdef HAVE_PGSQL_STORAGE
@@ -1801,6 +1801,9 @@ void SQLAtomStorage::print_stats(void)
 	printf("currently in_drain=%d num_busy=%lu queue_size=%lu\n",
 	       _write_queue._in_drain, _write_queue.get_busy_writers(),
 	       _write_queue.get_queue_size());
+
+	printf("current conn_pool free=%u of %d\n", conn_pool.size(),
+	       _initial_conn_pool_size);
 
 	// Some basic TLB statistics; could be improved;
 	// The TLB remapping theory needs some work...

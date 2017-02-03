@@ -57,6 +57,7 @@ class SQLAtomStorage : public AtomStorage
 		LLConnection* get_conn();
 		void put_conn(LLConnection*);
 		concurrent_stack<LLConnection*> conn_pool;
+		int _initial_conn_pool_size;
 
 		// Utility for handling responses on stack.
 		class Response;
