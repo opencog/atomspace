@@ -3,9 +3,18 @@
  * ODBC driver -- developed/tested with unixodbc http://www.unixodbc.org
  *
  * ODBC is basically brain-damaged, and so is this driver.
- * The problem is that ODBC forces you to guess how many columns there
- * are in your reply, and etc. which we don't know a-priori.  Also
- * makes VARCHAR difficult (impossible ??) to support correctly!
+ *
+ * ODBC has several problems:
+ * 1) It forces you to guess how many columns there are in your reply,
+ *    which we don't know a-priori.
+ * 2) VARCHAR is difficult (impossible ??) to support correctly!
+ * 3) The use of the question mark as a special character, even when
+ *    you have nothing bound, nothing at all, giving this message:
+ *    (34) The # of binded parameters < the # of parameter markers;
+ *    Wow! Aside from the bad English, this is a stunningly bad idea!
+ * 4) It's slowww. Terrible performance. The native bindings are 3x
+ *    faster!
+ *
  * Blame it on SQLBindCol(), which is a terrible idea.  @#$%^ Microsoft.
  *
  * Threading:
