@@ -205,22 +205,43 @@ public:
 	                       const Handle& rhs_vardecl=Handle::UNDEFINED,
 	                       Quotation lhs_quotation=Quotation(),
 	                       Quotation rhs_quotation=Quotation());
-	SolutionSet unify(const Handle& lhs, const Handle& rhs,
-	                  Quotation lhs_quotation=Quotation(),
-	                  Quotation rhs_quotation=Quotation()) const;
 
 private:
 	Handle _lhs_vardecl;
 	Handle _rhs_vardecl;
 
-	SolutionSet unordered_unify(const HandleSeq& lhs,
-	                            const HandleSeq& rhs,
+	/**
+	 * Unify lhs and rhs. _lhs_vardecl and _rhs_vardecl should be set
+	 * prior to run this method.
+	 */
+	SolutionSet unify(const Handle& lhs, const Handle& rhs,
+	                  Quotation lhs_quotation=Quotation(),
+	                  Quotation rhs_quotation=Quotation()) const;
+
+	/**
+	 * Unify all elements of lhs with all elements of rhs, considering
+	 * all permutations.
+	 */
+	SolutionSet unordered_unify(const HandleSeq& lhs, const HandleSeq& rhs,
 	                            Quotation lhs_quotation=Quotation(),
 	                            Quotation rhs_quotation=Quotation()) const;
-	SolutionSet ordered_unify(const HandleSeq& lhs,
-	                          const HandleSeq& rhs,
+
+	/**
+	 * Unify all elements of lhs with all elements of rhs, in the
+	 * provided order.
+	 */
+	SolutionSet ordered_unify(const HandleSeq& lhs, const HandleSeq& rhs,
 	                          Quotation lhs_quotation=Quotation(),
 	                          Quotation rhs_quotation=Quotation()) const;
+
+	/**
+	 * Unify all elements of lhs with all elements of rhs, considering
+	 * all pairwise combinations.
+	 */
+	SolutionSet comb_unify(const OrderedHandleSet& lhs,
+	                       const OrderedHandleSet& rhs,
+	                       Quotation lhs_quotation=Quotation(),
+	                       Quotation rhs_quotation=Quotation()) const;
 
 	/**
 	 * Return if the atom is an unordered link.
@@ -253,8 +274,7 @@ public:                         // TODO: being friend with UnifyUTest
 
 private:
 	/**
-	 * Join a non-empty satisfiable partition sets with a satisfiable
-	 * partition.
+	 * Join a satisfiable partition sets with a satisfiable partition.
 	 */
 	Partitions join(const Partitions& lhs, const Partition& rhs) const;
 
@@ -284,7 +304,7 @@ private:
 	 * Join a block to a partition to form a single block. It is
 	 * assumed that all blocks have elements in common.
 	*/
-	Block join(const Block& block, const Partition& common_blocks) const;
+	Block join(const std::vector<Block>& common_blocks, const Block& block) const;
 
 	/**
 	 * Join 2 blocks (supposedly satisfiable).
@@ -294,6 +314,23 @@ private:
 	 * intersection.
 	 */
 	Block join(const Block& lhs, const Block& rhs) const;
+
+	/**
+	 * Unify all terms that are not in the intersection of block and
+	 * each block of common_blocks.
+	 *
+	 * TODO: should probably support quotation.
+	 */
+	SolutionSet subunify(const std::vector<Block>& common_blocks,
+	                     const Block& block) const;
+
+	/**
+	 * Unify all terms that are not in the intersection of blocks lhs
+	 * and rhs.
+	 *
+	 * TODO: should probably support quotation.
+	 */
+	SolutionSet subunify(const Block& lhs, const Block& rhs) const;
 
 	/**
 	 * Return true if a unification block is satisfiable. A unification

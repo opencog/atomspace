@@ -272,6 +272,14 @@ Unify::SolutionSet Unify::unify(const Handle& lhs, const Handle& rhs,
 		                     lhs_quotation, rhs_quotation);
 }
 
+std::string i2s(int indentation)
+{
+	std::stringstream ss;
+	while (0 < indentation--)
+		ss << " ";
+	return ss.str();
+}
+
 Unify::SolutionSet Unify::unordered_unify(const HandleSeq& lhs,
                                           const HandleSeq& rhs,
                                           Quotation lhs_quotation,
@@ -321,6 +329,23 @@ Unify::SolutionSet Unify::ordered_unify(const HandleSeq& lhs,
 		sol = join(sol, rs);
 		if (not sol.satisfiable)     // Stop if unification has failed
 			break;
+	}
+	return sol;
+}
+
+Unify::SolutionSet Unify::comb_unify(const OrderedHandleSet& lhs,
+                                     const OrderedHandleSet& rhs,
+                                     Quotation lhs_quotation,
+                                     Quotation rhs_quotation) const
+{
+	SolutionSet sol;
+	for (const Handle& lh : lhs) {
+		for (const Handle& rh : rhs) {
+			auto rs = unify(lh, rh, lhs_quotation, rhs_quotation);
+			sol = join(sol, rs);
+			if (not sol.satisfiable)     // Stop if unification has failed
+				return sol;
+		}
 	}
 	return sol;
 }
@@ -384,6 +409,8 @@ Unify::Partitions Unify::join(const Partitions& lhs, const Partition& rhs) const
 	// Base cases
 	if (rhs.empty())
 		return lhs;
+	if (lhs.empty())
+		return {rhs};
 
 	// Recursive case (a loop actually)
 	Partitions result;
@@ -426,39 +453,43 @@ Unify::Partitions Unify::join(const Partitions& partitions,
 Unify::Partitions Unify::join(const Partition& partition,
                               const Block& block) const
 {
-	Partition result(partition);
-
 	// Find all partition blocks that have elements in common with block
-	Partition common_blocks;
+	std::vector<Block> common_blocks;
 	for (const Block& p_block : partition)
 		if (not has_empty_intersection(block.first, p_block.first))
-			common_blocks.insert(p_block);
+			common_blocks.push_back(p_block);
 
+	Partition jp(partition);
 	if (common_blocks.empty()) {
-		// If none then merely insert in independent block
-		result.insert(block);
+		// If none then merely insert the independent block
+		jp.insert(block);
+		return {jp};
 	} else {
 		// Otherwise join block with all common blocks and replace
 		// them by the result (if satisfiable, otherwise return the
 		// empty partition)
-		Block j_block = join(block, common_blocks);
+		Block j_block = join(common_blocks, block);
 		if (is_satisfiable(j_block)) {
 			for (const Block& rm : common_blocks)
-				result.erase(rm.first);
-			result.insert(j_block);
-		} else {
-			return Partitions();
-		}
-	}
+				jp.erase(rm.first);
+			jp.insert(j_block);
 
-	return {result};
+			// Perform the sub-unification of all common blocks with
+			// block and join the solution set to jp
+			SolutionSet sol = subunify(common_blocks, block);
+			if (sol.satisfiable)
+				return join(sol.partitions, jp);
+		}
+		return Partitions();
+	}
 }
 
-Unify::Block Unify::join(const Block& block, const Partition& common_blocks) const
+Unify::Block Unify::join(const std::vector<Block>& common_blocks,
+                         const Block& block) const
 {
-	std::vector<Block> result{block}; // due to some weird shit I can't
-                                    // overwrite the previous block so
-                                    // I'm creating a vector of them
+	std::vector<Block> result{block}; // Due to some weird shit I can't
+	                                  // overwrite the previous block so
+	                                  // I'm creating a vector of them
 	for (const auto& c_block : common_blocks)
 		result.push_back(join(result.back(), c_block));
 	return result.back();
@@ -468,6 +499,25 @@ Unify::Block Unify::join(const Block& lhs, const Block& rhs) const
 {
 	return {set_union(lhs.first, rhs.first),
 			type_intersection(lhs.second, rhs.second)};
+}
+
+Unify::SolutionSet Unify::subunify(const std::vector<Block>& common_blocks,
+                                   const Block& block) const
+{
+	SolutionSet sol;
+	for (const Block& c_block : common_blocks) {
+		SolutionSet rs = subunify(c_block, block);
+		sol = join(sol, rs);
+		if (not sol.satisfiable)     // Stop if unification has failed
+			break;
+	}
+	return sol;
+}
+
+Unify::SolutionSet Unify::subunify(const Block& lhs, const Block& rhs) const
+{
+	return comb_unify(set_difference(lhs.first, rhs.first),
+	                  set_difference(rhs.first, lhs.first));
 }
 
 bool Unify::is_satisfiable(const Block& block) const

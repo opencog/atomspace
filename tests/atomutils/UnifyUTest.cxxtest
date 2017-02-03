@@ -244,7 +244,7 @@ void UnifyUTest::test_join_1()
 // 	TS_ASSERT_EQUALS(result, expected);
 // }
 
-// Same as test_join_2 but using A2 as well. See test_complex_1
+// // Same as test_join_2 but using A2 as well. See test_complex_1
 // void UnifyUTest::test_join_3()
 // {
 // 	Handle P = _eval.eval_h("(VariableNode \"$P\")");
