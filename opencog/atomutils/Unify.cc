@@ -122,11 +122,11 @@ BindLinkPtr Unify::consume_ill_quotations(BindLinkPtr bl) const
 	// If the pattern has clauses with free variables but no vardecl
 	// it means that some quotations are missing. Rather than adding
 	// them we merely set vardecl to an empty VariableList.
-	if (vardecl.is_undefined() and not get_free_variables(pattern).empty())
+	if (not vardecl and not get_free_variables(pattern).empty())
 		vardecl = Handle(createVariableList(HandleSeq{}));
 
 	// Recreate the BindLink
-	return vardecl.is_defined() ?
+	return vardecl ?
 		createBindLink(vardecl, pattern, rewrite)
 		: createBindLink(pattern, rewrite);
 }
@@ -210,7 +210,7 @@ Unify::SolutionSet Unify::unify(const Handle& lhs, const Handle& rhs,
 	///////////////////
 
 	// Make sure both handles are defined
-	if (lhs == Handle::UNDEFINED or rhs == Handle::UNDEFINED)
+	if (not lhs or not rhs)
 		return SolutionSet(false);
 
 	Type lhs_type(lhs->getType());
@@ -360,7 +360,7 @@ Unify::SolutionSet Unify::mkvarsol(const Handle& lhs, const Handle& rhs,
 {
 	Handle inter = type_intersection(lhs, rhs, _lhs_vardecl, _rhs_vardecl,
 	                                 lhs_quotation, rhs_quotation);
-	if (inter == Handle::UNDEFINED)
+	if (not inter)
 		return SolutionSet(false);
 	else {
 		OrderedHandleSet hset{lhs, rhs};
@@ -514,7 +514,7 @@ Unify::SolutionSet Unify::subunify(const Block& lhs, const Block& rhs) const
 
 bool Unify::is_satisfiable(const Block& block) const
 {
-	return block.second != Handle::UNDEFINED;
+	return (bool)block.second;
 }
 
 // TODO: very limited type intersection, should support structural
