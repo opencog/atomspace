@@ -272,14 +272,6 @@ Unify::SolutionSet Unify::unify(const Handle& lhs, const Handle& rhs,
 		                     lhs_quotation, rhs_quotation);
 }
 
-std::string i2s(int indentation)
-{
-	std::stringstream ss;
-	while (0 < indentation--)
-		ss << " ";
-	return ss.str();
-}
-
 Unify::SolutionSet Unify::unordered_unify(const HandleSeq& lhs,
                                           const HandleSeq& rhs,
                                           Quotation lhs_quotation,
