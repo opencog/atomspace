@@ -86,6 +86,32 @@ public:
 	                                       Handle rhs_vardecl=Handle::UNDEFINED) const;
 
 	/**
+	 * Like typed_substitutions but generate a single typed
+	 * substitution of a supposedly satisfiable partition.
+	 */
+	TypedSubstitution typed_substitution(const Partition& partition,
+	                                     const Handle& pre,
+	                                     const Handle& lhs_vardecl,
+	                                     const Handle& rhs_vardecl) const;
+
+	/**
+	 * Calculate the closure of a typed substitution. That is apply
+	 * self-substitution to each values till a fixed point is
+	 * reached. For instance given the variable to value mapping
+	 *
+	 * (Variable "$X") -> (Inheritance (Variable "$P") (Variable "$Q"))
+	 * (Variable "$P") -> (Concept "A")
+	 * (Variable "$Q") -> (Concept "B")
+	 *
+	 * produces
+	 *
+	 * (Variable "$X") -> (Inheritance (Concept "A") (Concept "B"))
+	 * (Variable "$P") -> (Concept "A")
+	 * (Variable "$Q") -> (Concept "B")
+	 */
+	HandleMap substitution_closure(const HandleMap& var2val) const;
+
+	/**
 	 * If the quotations are useless or harmful, which might be the
 	 * case if they deprive a ScopeLink from hiding supposedly hidden
 	 * variables, consume them.
@@ -347,6 +373,15 @@ private:
 };
 
 /**
+ * Till content equality between atoms become the default.
+ */
+bool hm_content_eq(const HandleMap& lhs, const HandleMap& rhs);
+bool ts_content_eq(const Unify::TypedSubstitution& lhs,
+                   const Unify::TypedSubstitution& rhs);
+bool tss_content_eq(const Unify::TypedSubstitutions& lhs,
+                    const Unify::TypedSubstitutions& rhs);
+
+/**
  * Calculate type intersection. For example: say you have for a block
  * with
  *
@@ -368,6 +403,9 @@ private:
  *
  * which is supposed to represent the set of all potential groundings
  * that may satisfy that block.
+ *
+ * TODO: For now though it's only a very limited type intersection,
+ *       should support structural types, etc.
  *
  * TODO: this can be probably by optimized by using VariableListPtr
  *       instead of Handle, so we don't rebuild it every time.

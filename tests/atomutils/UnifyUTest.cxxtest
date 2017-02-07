@@ -658,6 +658,9 @@ void UnifyUTest::test_unify_complex_1()
 	Handle TyVs = _eval.eval_h("(VariableNode \"$TyVs\")");
 	Handle A1 = _eval.eval_h("(VariableNode \"$A1\")");
 	Handle A2 = _eval.eval_h("(VariableNode \"$A2\")");
+	Handle vardecl = _eval.eval_h("  (TypedVariableLink"
+	                              "    (VariableNode \"$X\")"
+	                              "    (TypeNode \"ConceptNode\"))");
 
 	Handle implicant =
 		_eval.eval_h("(LambdaLink"
@@ -720,4 +723,54 @@ void UnifyUTest::test_unify_complex_1()
 	std::cout << "expected = " << oc_to_string(expected) << std::endl;
 
 	TS_ASSERT_EQUALS(result, expected);
+
+	Handle ts_vardecl = _eval.eval_h("(VariableList"
+	                                 "  (TypedVariableLink"
+	                                 "    (VariableNode \"$TyVs-5476a9b9\")"
+	                                 "    (TypeChoice"
+	                                 "      (TypeNode \"TypedVariableLink\")"
+	                                 "      (TypeNode \"VariableNode\")"
+	                                 "      (TypeNode \"VariableList\")))"
+	                                 "  (TypedVariableLink"
+	                                 "    (VariableNode \"$A1-7235efc6\")"
+	                                 "    (TypeNode \"EvaluationLink\"))"
+	                                 "  (TypedVariableLink"
+	                                 "    (VariableNode \"$A2-1ac8e4a2\")"
+	                                 "    (TypeNode \"EvaluationLink\"))"
+	                                 "  (VariableNode \"$P\")"
+	                                 "  (VariableNode \"$Q\"))");
+
+	Handle consumed_LA1 =
+		_eval.eval_h("(LambdaLink"
+		             "  (TypedVariableLink"
+		             "    (VariableNode \"$X\")"
+		             "    (TypeNode \"ConceptNode\"))"
+		             "  (VariableNode \"$A1\"))");
+
+	Handle consumed_LA2 =
+		_eval.eval_h("(LambdaLink"
+		             "  (TypedVariableLink"
+		             "    (VariableNode \"$X\")"
+		             "    (TypeNode \"ConceptNode\"))"
+		             "  (VariableNode \"$A2\"))");
+
+	Unify::TypedSubstitutions ts_result =
+		Unify().typed_substitutions(result, lhs, lhs, rhs,
+		                            lhs_vardecl, rhs_vardecl);
+	Unify::TypedSubstitutions ts_expected =
+		Unify::TypedSubstitutions{{{{P, implicant},
+		                            {TyVs, vardecl},
+		                            {A2, implicant_body},
+		                            {Q, consumed_LA1}},
+		                           ts_vardecl},
+		                          {{{P, implicant},
+		                            {TyVs, vardecl},
+		                            {A1, implicant_body},
+		                            {Q, consumed_LA2}},
+		                           ts_vardecl}};
+
+	std::cout << "ts_result = " << oc_to_string(ts_result) << std::endl;
+	std::cout << "ts_expected = " << oc_to_string(ts_expected) << std::endl;
+
+	TS_ASSERT(tss_content_eq(ts_result, ts_expected));
 }

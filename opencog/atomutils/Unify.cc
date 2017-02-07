@@ -50,50 +50,74 @@ Unify::TypedSubstitutions Unify::typed_substitutions(const SolutionSet& sol,
 {
 	OC_ASSERT(sol.satisfiable);
 
-	TypedSubstitutions result;
-	for (const Partition& partition : sol.partitions) {
-		std::pair<HandleMap, Handle> ts;
-		for (const Partition::value_type& typed_block : partition) {
-			Handle least_abstract(Handle(createNode(VARIABLE_NODE,
-			                                        "__dummy_top__")));
-			for (const Handle& h : typed_block.first) {
-				// Find the least abstract atom
-				if (inherit(h, least_abstract) and
-				    // If h is a variable, only consider it as value
-				    // if it is in pre (stands for precedence)
-				    (h->getType() != VARIABLE_NODE
-				     or is_unquoted_unscoped_in_tree(pre, h)))
-					least_abstract = h;
-			}
-			// Build variable mapping
-			for (const Handle& var : typed_block.first) {
-				if (var->getType() == VARIABLE_NODE)
-					ts.first.insert({var, least_abstract});
-			}
-		}
-		// Build the type for this variable. For now, the type is
-		// merely lhs_vardecl and rhs_vardecl merged together. To do
-		// well it should be taking into account the possibly more
-		// restrictive types found during unification (i.e. the block
-		// types).
-		//
-		// TODO: variables without declaration (i.e. rhs_vardecl or
-		// lhs_vardecl are undefined) should be added here, borrowing
-		// the variable declarations of equivalent variables if any.
-		if (lhs.is_defined() and lhs_vardecl.is_undefined())
-			lhs_vardecl = gen_vardecl(lhs);
-		if (rhs.is_defined() and rhs_vardecl.is_undefined())
-			rhs_vardecl = gen_vardecl(rhs);
-		ts.second = merge_vardecl(rhs_vardecl, lhs_vardecl);
+	if (lhs and not lhs_vardecl)
+		lhs_vardecl = gen_vardecl(lhs);
+	if (rhs and not rhs_vardecl)
+		rhs_vardecl = gen_vardecl(rhs);
 
-		result.insert(ts);
-	}
+	TypedSubstitutions result;
+	for (const Partition& partition : sol.partitions)
+		result.insert(typed_substitution(partition, pre,
+		                                 lhs_vardecl, rhs_vardecl));
 	return result;
 }
 
-bool Unify::is_ill_quotation(BindLinkPtr bl) const
+Unify::TypedSubstitution Unify::typed_substitution(const Partition& partition,
+                                                   const Handle& pre,
+                                                   const Handle& lhs_vardecl,
+                                                   const Handle& rhs_vardecl) const
 {
-	return bl->get_vardecl().is_undefined();
+	HandleMap var2val;
+	for (const Block& block : partition) {
+		Handle least_abstract(Handle(createNode(VARIABLE_NODE, "__dummy_top__")));
+		for (const Handle& h : block.first) {
+			// Find the least abstract atom
+			if (inherit(h, least_abstract) and
+			    // If h is a variable, only consider it as value
+			    // if it is in pre (stands for precedence)
+			    (h->getType() != VARIABLE_NODE
+			     or is_unquoted_unscoped_in_tree(pre, h)))
+				least_abstract = h;
+		}
+		// Build variable mapping
+		for (const Handle& var : block.first) {
+			if (var->getType() == VARIABLE_NODE)
+				var2val.insert({var, least_abstract});
+		}
+	}
+	// Build the type for this variable. For now, the type is
+	// merely lhs_vardecl and rhs_vardecl merged together. To do
+	// well it should be taking into account the possibly more
+	// restrictive types found during unification (i.e. the block
+	// types).
+	Handle vardecl = merge_vardecl(rhs_vardecl, lhs_vardecl);
+
+	// Calculate its closure
+	var2val = substitution_closure(var2val);
+
+	// Remove ill quotations
+	VariableListPtr vardecl_vl = createVariableList(vardecl);
+	for (auto& vv : var2val)
+		vv.second = consume_ill_quotations(vardecl_vl->get_variables(), vv.second);
+
+	// Return the typed substitution
+	return {var2val, vardecl};
+}
+
+HandleMap Unify::substitution_closure(const HandleMap& var2val) const
+{
+	HandleMap result(var2val);
+	for (auto& el : result) {
+		VariableListPtr varlist = gen_varlist(el.second);
+		const Variables& variables = varlist->get_variables();
+		HandleSeq values = variables.make_values(var2val);
+		el.second = variables.substitute_nocheck(el.second, values);
+	}
+
+	// If we have reached a fixed point then return substitution,
+	// otherwise re-iterate
+	return hm_content_eq(result, var2val) ?
+		result : substitution_closure(result);
 }
 
 bool Unify::is_pm_connector(const Handle& h) const
@@ -527,8 +551,46 @@ bool Unify::is_satisfiable(const Block& block) const
 	return (bool)block.second;
 }
 
-// TODO: very limited type intersection, should support structural
-// types, etc.
+bool hm_content_eq(const HandleMap& lhs, const HandleMap& rhs)
+{
+	if (lhs.size() != rhs.size())
+		return false;
+
+	auto lit = lhs.begin();
+	auto rit = rhs.begin();
+	while (lit != lhs.end()) {
+		if (not content_eq(lit->first, rit->first)
+		   or not content_eq(lit->second, rit->second))
+			return false;
+		++lit; ++rit;
+	}
+	return true;
+}
+
+bool ts_content_eq(const Unify::TypedSubstitution& lhs,
+                   const Unify::TypedSubstitution& rhs)
+{
+	return lhs.first.size() == rhs.first.size()
+		and hm_content_eq(lhs.first, rhs.first)
+		and content_eq(lhs.second, rhs.second);
+}
+
+bool tss_content_eq(const Unify::TypedSubstitutions& lhs,
+                    const Unify::TypedSubstitutions& rhs)
+{
+	if (lhs.size() != rhs.size())
+		return false;
+
+	auto lit = lhs.begin();
+	auto rit = rhs.begin();
+	while (lit != lhs.end()) {
+		if (not ts_content_eq(*lit, *rit))
+			return false;
+		++lit; ++rit;
+	}
+	return true;
+}
+
 Handle type_intersection(const Handle& lhs, const Handle& rhs,
                          const Handle& lhs_vardecl, const Handle& rhs_vardecl,
                          Quotation lhs_quotation, Quotation rhs_quotation)
