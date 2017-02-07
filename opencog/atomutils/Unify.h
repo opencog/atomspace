@@ -62,10 +62,7 @@ public:
 		// Set of typed partitions
 		Partitions partitions;
 
-		bool operator==(const SolutionSet& other) const {
-			return satisfiable == other.satisfiable
-				and partitions == other.partitions;
-		}
+		bool operator==(const SolutionSet& other) const;
 	};
 
 	// Subtitution values and their corresponding variable declaration

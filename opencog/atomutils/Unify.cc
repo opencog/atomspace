@@ -35,6 +35,12 @@ namespace opencog {
 Unify::SolutionSet::SolutionSet(bool s, const Unify::Partitions& p)
 	: satisfiable(s), partitions(p) {}
 
+bool Unify::SolutionSet::operator==(const SolutionSet& other) const
+{
+	return satisfiable == other.satisfiable
+		and partitions == other.partitions;
+}
+
 Unify::TypedSubstitutions Unify::typed_substitutions(const SolutionSet& sol,
                                                      const Handle& pre,
                                                      const Handle& lhs,
