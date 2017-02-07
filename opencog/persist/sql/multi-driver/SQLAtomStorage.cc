@@ -1566,7 +1566,7 @@ void SQLAtomStorage::store(const AtomTable &table)
 		[&](const Handle& h)->void { store_cb(h); }, ATOM, true);
 
 	Response rp(conn_pool);
-	rp.exec("VACUUM ANALYZE;");
+	rp.exec("VACUUM ANALYZE Atoms;");
 
 	printf("\tFinished storing %lu atoms total.\n",
 		(unsigned long) _store_count);
