@@ -491,12 +491,10 @@ Unify::Partitions Unify::join(const Partition& partition,
 Unify::Block Unify::join(const std::vector<Block>& common_blocks,
                          const Block& block) const
 {
-	std::vector<Block> result{block}; // Due to some weird shit I can't
-	                                  // overwrite the previous block so
-	                                  // I'm creating a vector of them
+	std::pair<OrderedHandleSet, Handle> result{block};
 	for (const auto& c_block : common_blocks)
-		result.push_back(join(result.back(), c_block));
-	return result.back();
+		result =  join(result, c_block);
+	return result;
 }
 
 Unify::Block Unify::join(const Block& lhs, const Block& rhs) const
@@ -661,7 +659,7 @@ Handle gen_vardecl(const Handle& h)
  */
 VariableListPtr gen_varlist(const Handle& h, const Handle& vardecl)
 {
-	if (vardecl == Handle::UNDEFINED)
+	if (not vardecl)
 		return gen_varlist(h);
 	else {
 		Type vardecl_t = vardecl->getType();
@@ -677,9 +675,9 @@ VariableListPtr gen_varlist(const Handle& h, const Handle& vardecl)
 
 Handle merge_vardecl(const Handle& lhs_vardecl, const Handle& rhs_vardecl)
 {
-	if (lhs_vardecl.is_undefined())
+	if (not lhs_vardecl)
 		return rhs_vardecl;
-	if (rhs_vardecl.is_undefined())
+	if (not rhs_vardecl)
 		return lhs_vardecl;
 
 	VariableList
@@ -740,9 +738,11 @@ std::string oc_to_string(const Unify::TypedSubstitutions& tss)
 	std::stringstream ss;
 	ss << "size = " << tss.size() << std::endl;
 	int i = 0;
-	for (const auto& ts : tss)
+	for (const auto& ts : tss) {
 		ss << "typed substitution[" << i << "]:" << std::endl
 		   << oc_to_string(ts);
+		i++;
+	}
 	return ss.str();
 }
 
@@ -750,7 +750,7 @@ std::string oc_to_string(const Unify::TypedSubstitution& ts)
 {
 	std::stringstream ss;
 	ss << "substitution:" << std::endl << oc_to_string(ts.first)
-	   << "type:" << std::endl << oc_to_string(ts.second);
+	   << "vardecl:" << std::endl << oc_to_string(ts.second);
 	return ss.str();
 }
 
