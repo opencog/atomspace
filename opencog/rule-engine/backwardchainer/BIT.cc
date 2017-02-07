@@ -61,7 +61,10 @@ std::string	BITNode::to_string() const
 	std::stringstream ss;
 	ss << "body:" << std::endl << oc_to_string(body)
 	   << "exhausted: " << exhausted << std::endl
-	   << "rules: " << oc_to_string(rules);
+	   << "rules: size = " << rules.size();
+	for (const Rule& rule : rules)
+		ss << std::endl << rule.get_name()
+		   << " " << rule.get_rule()->idToString();
 	return ss.str();
 }
 
@@ -265,17 +268,17 @@ Handle AndBIT::substitute_unified_variables(const Handle& leaf,
 	BindLinkPtr fcs_bl(BindLinkCast(fcs));
 	Handle leaf_vardecl = filter_vardecl(fcs_bl->get_vardecl(), leaf),
 		conclusion_vardecl = rule.get_vardecl();
-	UnificationSolutionSet sol =
-		unify(leaf, conclusion, leaf_vardecl, conclusion_vardecl);
+	Unify::SolutionSet sol =
+		Unify()(leaf, conclusion, leaf_vardecl, conclusion_vardecl);
 
 	OC_ASSERT(sol.satisfiable); // If the rule has been selected it
                                 // has to be satisfiable
-	TypedSubstitutions tss =
-		typed_substitutions(sol, leaf, leaf, conclusion,
-		                    fcs_bl->get_vardecl(), conclusion_vardecl);
+	Unify::TypedSubstitutions tss =
+		Unify().typed_substitutions(sol, leaf, leaf, conclusion,
+		                            fcs_bl->get_vardecl(), conclusion_vardecl);
 	OC_ASSERT(not tss.empty());
 	auto ts = *tss.begin();
-	return Handle(substitute(fcs_bl, ts));
+	return Handle(Unify().substitute(fcs_bl, ts));
 }
 
 Handle AndBIT::expand_fcs_pattern(const Handle& fcs_pattern,

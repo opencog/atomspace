@@ -575,6 +575,8 @@ void RuleUTest::test_unify_target_implication_and_lambda_factorization()
 	RuleSet rules =
 		implication_and_lambda_factorization_rule.unify_target(target, vardecl);
 
+	std::cout << "rules = " << oc_to_string(rules) << std::endl;
+
 	TS_ASSERT_EQUALS(rules.size(), 1);
 
 	Handle rule = rules.begin()->get_rule();

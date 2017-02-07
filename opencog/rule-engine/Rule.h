@@ -239,7 +239,7 @@ private:
 
 	// Given a typed substitution obtained from typed_substitutions
 	// unify function, generate a new partially substituted rule.
-	Rule substituted(const TypedSubstitutions::value_type& ts) const;
+	Rule substituted(const Unify::TypedSubstitution& ts) const;
 };
 
 // For Gdb debugging, see

@@ -306,7 +306,7 @@ OrderedHandleSet get_free_variables(const HandleSeq& hs,
  * Return true if h has no free variable (unscoped or unquoted) in it,
  * false otherwise.
  */
-bool is_closed(const Handle& h);
+bool is_closed(const Handle& h, Quotation quotation=Quotation());
 
 } // namespace opencog
 

@@ -320,9 +320,9 @@ OrderedHandleSet get_free_variables(const HandleSeq& hs, Quotation quotation)
 	return results;
 }
 
-bool is_closed(const Handle& h)
+bool is_closed(const Handle& h, Quotation quotation)
 {
-	return get_free_variables(h).empty();
+	return get_free_variables(h, quotation).empty();
 }
 
 } // namespace opencog

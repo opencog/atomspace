@@ -382,18 +382,18 @@ Handle ScopeLink::alpha_conversion(HandleSeq vars, Handle vardecl) const
 		hs.push_back(_varlist.substitute_nocheck(getOutgoingAtom(i), vars));
 
 	// Replace vardecl by the substituted version if any
-	if (vardecl.is_undefined() and _vardecl.is_defined())
+	if (!vardecl and _vardecl)
 		vardecl = hs[0];
 
 	// Remove the optional variable declaration from hs
-	if (_vardecl.is_defined())
+	if (_vardecl)
 		hs.erase(hs.begin());
 
 	// Filter vardecl
 	vardecl = filter_vardecl(vardecl, hs);
 
 	// Insert vardecl back in hs if defined
-	if (vardecl.is_defined())
+	if (vardecl)
 		hs.insert(hs.begin(), vardecl);
 
 	// Create the alpha converted scope link
