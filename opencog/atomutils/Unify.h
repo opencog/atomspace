@@ -103,16 +103,26 @@ public:
 	 *
 	 * No other use of quotation is assumed besides the 2 above.
 	 */
-	bool is_ill_quotation(BindLinkPtr bl) const;
-	bool is_pm_connector(const Handle& h) const;
-	bool is_pm_connector(Type t) const;
-	bool has_bl_variable_in_local_scope(BindLinkPtr bl, const Handle& h) const;
 	BindLinkPtr consume_ill_quotations(BindLinkPtr bl) const;
-	Handle consume_ill_quotations(BindLinkPtr bl, Handle h,
+	Handle consume_ill_quotations(const Variables& variables, Handle h,
 	                              Quotation quotation=Quotation(),
 	                              bool escape=false /* ignore the next
 	                                                 * quotation
 	                                                 * consumption */) const;
+
+	/**
+	 * Return true iff the variable declaration of local_scope is a
+	 * variable of variables wrapped in a UnquoteLink.
+	 */
+	bool is_bound_to_ancestor(const Variables& variables,
+	                          const Handle& local_scope) const;
+
+	/**
+	 * Return true iff the handle or type correspond to a pattern
+	 * matcher connector.
+	 */
+	bool is_pm_connector(const Handle& h) const;
+	bool is_pm_connector(Type t) const;
 
 	/**
 	 * Given a typed substitution, perform the substitution over a scope

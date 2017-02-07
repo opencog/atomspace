@@ -106,13 +106,6 @@ bool Unify::is_pm_connector(Type t) const
 	return t == AND_LINK or t == OR_LINK or t == NOT_LINK;
 }
 
-bool Unify::has_bl_variable_in_local_scope(BindLinkPtr bl,
-                                           const Handle& scope) const
-{
-	Handle var = scope->getOutgoingAtom(0)->getOutgoingAtom(0);
-	return bl->get_variables().is_in_varset(var);
-}
-
 BindLinkPtr Unify::consume_ill_quotations(BindLinkPtr bl) const
 {
 	Handle vardecl = bl->get_vardecl(),
@@ -120,10 +113,10 @@ BindLinkPtr Unify::consume_ill_quotations(BindLinkPtr bl) const
 		rewrite = bl->get_implicand();
 
 	// Consume the pattern's quotations
-	pattern = consume_ill_quotations(bl, pattern);
+	pattern = consume_ill_quotations(bl->get_variables(), pattern);
 
 	// Consume the rewrite's quotations
-	rewrite = consume_ill_quotations(bl, rewrite);
+	rewrite = consume_ill_quotations(bl->get_variables(), rewrite);
 
 	// If the pattern has clauses with free variables but no vardecl
 	// it means that some quotations are missing. Rather than adding
@@ -137,7 +130,7 @@ BindLinkPtr Unify::consume_ill_quotations(BindLinkPtr bl) const
 		: createBindLink(pattern, rewrite);
 }
 
-Handle Unify::consume_ill_quotations(BindLinkPtr bl, Handle h,
+Handle Unify::consume_ill_quotations(const Variables& variables, Handle h,
                                      Quotation quotation, bool escape) const
 {
 	// Base case
@@ -151,18 +144,19 @@ Handle Unify::consume_ill_quotations(BindLinkPtr bl, Handle h,
 			Handle scope = h->getOutgoingAtom(0);
 			OC_ASSERT(classserver().isA(scope->getType(), SCOPE_LINK),
 			          "This defaults the assumption, see this function comment");
-			// Check whether a variable of the BindLink is present in
-			// the local scope vardecl, if so escape the consumption.
-			if (not has_bl_variable_in_local_scope(bl, scope)) {
+			// Check whether the vardecl of scope is bound to the
+			// ancestor scope rather than itself, if so escape the
+			// consumption.
+			if (not is_bound_to_ancestor(variables, scope)) {
 				quotation.update(t);
-				return consume_ill_quotations(bl, scope, quotation);
+				return consume_ill_quotations(variables, scope, quotation);
 			} else {
 				escape = true;
 			}
 		} else if (t == UNQUOTE_LINK) {
 			if (not escape) {
 				quotation.update(t);
-				return consume_ill_quotations(bl, h->getOutgoingAtom(0),
+				return consume_ill_quotations(variables, h->getOutgoingAtom(0),
 				                              quotation);
 			}
 		}
@@ -173,12 +167,24 @@ Handle Unify::consume_ill_quotations(BindLinkPtr bl, Handle h,
 	quotation.update(t);
 	HandleSeq consumed;
 	for (const Handle outh : h->getOutgoingSet())
-		consumed.push_back(consume_ill_quotations(bl, outh, quotation, escape));
+		consumed.push_back(consume_ill_quotations(variables, outh, quotation,
+		                                          escape));
 
 	// TODO: call all factories
 	bool is_scope = classserver().isA(t, SCOPE_LINK);
 	return is_scope ? Handle(ScopeLink::factory(t, consumed))
 		: Handle(createLink(t, consumed));
+}
+
+bool Unify::is_bound_to_ancestor(const Variables& variables,
+                                 const Handle& local_scope) const
+{
+	Handle unquote = local_scope->getOutgoingAtom(0);
+	if (unquote->getType() == UNQUOTE_LINK) {
+		Handle var = unquote->getOutgoingAtom(0);
+		return variables.is_in_varset(var);
+	}
+	return false;
 }
 
 Handle Unify::substitute(BindLinkPtr bl, const TypedSubstitution& ts) const
