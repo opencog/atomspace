@@ -98,14 +98,7 @@ AndBIT::~AndBIT() {}
 
 AndBIT AndBIT::expand(const Handle& leaf, const Rule& rule) const
 {
-	// Calculate the complexity of the expanded and-BIT. Sum up the
-	// complexity of the parent and-BIT with the complexity of the
-	// expanded BIT-node and the complexity of the rule (1 - log(rule-weight))
-	double new_cpx = complexity
-		+ leaf2bitnode.find(leaf)->second.complexity
-		+ 1 - log(rule.get_weight());
-
-	return AndBIT(expand_fcs(leaf, rule), new_cpx);
+	return AndBIT(expand_fcs(leaf, rule), expand_complexity(leaf, rule));
 }
 
 BITNode* AndBIT::select_leaf()
@@ -154,6 +147,16 @@ bool AndBIT::operator<(const AndBIT& andbit) const
 std::string AndBIT::to_string() const
 {
 	return oc_to_string(fcs);
+}
+
+double AndBIT::expand_complexity(const Handle& leaf, const Rule& rule) const
+{
+	// Calculate the complexity of the expanded and-BIT. Sum up the
+	// complexity of the parent and-BIT with the complexity of the
+	// expanded BIT-node and the complexity of the rule (1 - log(rule-weight))
+	return complexity
+		+ leaf2bitnode.find(leaf)->second.complexity
+		+ 1 - log(rule.get_weight());
 }
 
 Handle AndBIT::expand_fcs(const Handle& leaf, const Rule& rule) const

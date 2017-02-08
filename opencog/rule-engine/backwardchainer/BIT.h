@@ -152,6 +152,12 @@ private:
 	typedef std::discrete_distribution<size_t> LeafDistribution;
 
 	/**
+	 * Calculate the complexity of the and-BIT resulting from
+	 * expanding this and-BIT from leaf with rule.
+	 */
+	double expand_complexity(const Handle& leaf, const Rule& rule) const;
+
+	/**
 	 * Given an FCS, a leaf of it to expand, and a rule, return a new
 	 * FCS where the leaf has been substituted by the rule premises
 	 * and rule application.
