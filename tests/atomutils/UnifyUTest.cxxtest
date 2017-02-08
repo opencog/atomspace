@@ -94,6 +94,7 @@ public:
 
 	// Various complex unify queries
 	void test_unify_complex_1();
+	void test_unify_complex_2();
 };
 
 void UnifyUTest::setUp(void)
@@ -768,6 +769,91 @@ void UnifyUTest::test_unify_complex_1()
 		                            {A1, implicant_body},
 		                            {Q, consumed_LA2}},
 		                           ts_vardecl}};
+
+	std::cout << "ts_result = " << oc_to_string(ts_result) << std::endl;
+	std::cout << "ts_expected = " << oc_to_string(ts_expected) << std::endl;
+
+	TS_ASSERT(tss_content_eq(ts_result, ts_expected));
+}
+
+void UnifyUTest::test_unify_complex_2()
+{
+	Handle lhs =
+		_eval.eval_h("(ImplicationScopeLink"
+		             "  (TypedVariableLink"
+		             "    (VariableNode \"$X\")"
+		             "    (TypeNode \"ConceptNode\"))"
+		             "  (VariableNode \"$P-55ebe96e\")"
+		             "  (EvaluationLink"
+		             "    (PredicateNode \"take\")"
+		             "    (ListLink"
+		             "      (VariableNode \"$X\")"
+		             "      (ConceptNode \"compound-A\"))))");
+
+	Handle rhs =
+		_eval.eval_h("(ImplicationScopeLink"
+		             "  (TypedVariableLink"
+		             "    (VariableNode \"$X\")"
+		             "    (TypeNode \"ConceptNode\"))"
+		             "  (AndLink"
+		             "    (EvaluationLink"
+		             "      (PredicateNode \"contain\")"
+		             "      (ListLink"
+		             "        (VariableNode \"$Y-6f50cc6a\")"
+		             "        (ConceptNode \"compound-A\")))"
+		             "    (EvaluationLink"
+		             "      (PredicateNode \"take\")"
+		             "      (ListLink"
+		             "        (VariableNode \"$X\")"
+		             "        (VariableNode \"$Y-6f50cc6a\"))))"
+		             "  (EvaluationLink"
+		             "    (PredicateNode \"take\")"
+		             "    (ListLink"
+		             "      (VariableNode \"$X\")"
+		             "      (ConceptNode \"compound-A\"))))");
+
+	Handle lhs_vardecl =
+		_eval.eval_h("(VariableNode \"$P-55ebe96e\")");
+
+	Handle rhs_vardecl =
+		_eval.eval_h("(TypedVariableLink"
+		             "  (VariableNode \"$Y-6f50cc6a\")"
+		             "  (TypeNode \"ConceptNode\"))");
+
+	Handle P = _eval.eval_h("(VariableNode \"$P-55ebe96e\")");
+
+	Handle conjunction =
+		_eval.eval_h("(AndLink"
+		             "  (EvaluationLink"
+		             "    (PredicateNode \"contain\")"
+		             "    (ListLink"
+		             "      (VariableNode \"$Y-6f50cc6a\")"
+		             "      (ConceptNode \"compound-A\")))"
+		             "  (EvaluationLink"
+		             "    (PredicateNode \"take\")"
+		             "    (ListLink"
+		             "      (VariableNode \"$X\")"
+		             "      (VariableNode \"$Y-6f50cc6a\"))))");
+
+	Unify::SolutionSet result = Unify()(lhs, rhs, lhs_vardecl, rhs_vardecl),
+		expected = Unify::SolutionSet(true, {{{{P, conjunction}, conjunction}}});
+
+	std::cout << "result = " << oc_to_string(result) << std::endl;
+	std::cout << "expected = " << oc_to_string(expected) << std::endl;
+
+	TS_ASSERT_EQUALS(result, expected);
+
+	Handle ts_vardecl = _eval.eval_h("(VariableList"
+	                                 "  (VariableNode \"$P-55ebe96e\")"
+	                                 "  (TypedVariableLink"
+	                                 "    (VariableNode \"$Y-6f50cc6a\")"
+	                                 "    (TypeNode \"ConceptNode\")))");
+
+	Unify::TypedSubstitutions ts_result =
+		Unify().typed_substitutions(result, lhs, lhs, rhs,
+		                            lhs_vardecl, rhs_vardecl);
+	Unify::TypedSubstitutions ts_expected =
+		Unify::TypedSubstitutions{{{{P, conjunction}}, ts_vardecl}};
 
 	std::cout << "ts_result = " << oc_to_string(ts_result) << std::endl;
 	std::cout << "ts_expected = " << oc_to_string(ts_expected) << std::endl;

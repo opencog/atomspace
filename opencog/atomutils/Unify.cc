@@ -69,9 +69,11 @@ Unify::TypedSubstitution Unify::typed_substitution(const Partition& partition,
 {
 	HandleMap var2val;
 	for (const Block& block : partition) {
-		Handle least_abstract(Handle(createNode(VARIABLE_NODE, "__dummy_top__")));
+		Handle most_abstract(Handle(createNode(VARIABLE_NODE, "__dummy_top__")));
+
+		// Find the least abstract atom amonst the block.
+		Handle least_abstract(most_abstract);
 		for (const Handle& h : block.first) {
-			// Find the least abstract atom
 			if (inherit(h, least_abstract) and
 			    // If h is a variable, only consider it as value
 			    // if it is in pre (stands for precedence)
@@ -79,6 +81,11 @@ Unify::TypedSubstitution Unify::typed_substitution(const Partition& partition,
 			     or is_unquoted_unscoped_in_tree(pre, h)))
 				least_abstract = h;
 		}
+
+		OC_ASSERT(least_abstract != most_abstract,
+		          "Finding the least abstract atom in the block has failed. "
+		          "It is probably a bug.");
+
 		// Build variable mapping
 		for (const Handle& var : block.first) {
 			if (var->getType() == VARIABLE_NODE)
