@@ -78,6 +78,11 @@ class FixedIntegerIndex
 			return s.size();
 		}
 
+		size_t bin_size(void) const
+		{
+			return idx.size();
+		}
+
 		size_t size(void) const;
 };
 
