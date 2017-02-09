@@ -75,8 +75,7 @@ public:
 /**
  * And-BIT
  */
-class AndBIT : public boost::less_than_comparable<AndBIT>,
-               public boost::equality_comparable<AndBIT>
+class AndBIT : public boost::totally_ordered<AndBIT>
 {
 public:
 	// FCS associated to the and-BIT

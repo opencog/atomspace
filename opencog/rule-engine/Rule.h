@@ -70,8 +70,7 @@ public:
  * premises.
  *
  */
-class Rule : public boost::less_than_comparable<Rule>,
-             public boost::equality_comparable<Rule>
+class Rule : public boost::totally_ordered<Rule>
 {
 public:
 	/**
