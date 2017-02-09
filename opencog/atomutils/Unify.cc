@@ -331,7 +331,7 @@ Unify::SolutionSet Unify::operator()(const Handle& lhs, const Handle& rhs,
 
 Unify::SolutionSet Unify::unify(const CHandle& lhs, const CHandle& rhs) const
 {
-	return unify(lhs.handle, rhs.handle, lhs.context, lhs.context);
+	return unify(lhs.handle, rhs.handle, lhs.context, rhs.context);
 }
 
 Unify::SolutionSet Unify::unify(const Handle& lh, const Handle& rh,
