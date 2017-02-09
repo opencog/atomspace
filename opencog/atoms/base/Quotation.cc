@@ -76,11 +76,23 @@ void Quotation::update(Type t)
     }
 }
 
+bool Quotation::operator<(const Quotation& quotation) const
+{
+	return (_quotation_level < quotation._quotation_level)
+		or ((_quotation_level == quotation._quotation_level)
+		    and (_local_quote < quotation._local_quote));
+}
+
+bool Quotation::operator==(const Quotation& quotation) const
+{
+	return (_quotation_level == quotation._quotation_level)
+		and (_local_quote == quotation._local_quote);
+}
+
 std::string Quotation::to_string() const
 {
 	std::stringstream ss;
-	ss << "quotation level = " << _quotation_level << std::endl
-	   << "local quote = " << _local_quote << std::endl;
+	ss << "{level = " << _quotation_level << ", local = " << _local_quote << "}";
 	return ss.str();
 }
 
