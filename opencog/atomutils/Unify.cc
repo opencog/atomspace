@@ -568,7 +568,7 @@ Unify::Partitions Unify::join(const Partition& partition,
                               const TypedBlock& block) const
 {
 	// Find all partition blocks that have elements in common with block
-	std::vector<TypedBlock> common_blocks;
+	TypedBlockSeq common_blocks;
 	for (const TypedBlock& p_block : partition)
 		if (not has_empty_intersection(block.first, p_block.first))
 			common_blocks.push_back(p_block);
@@ -598,7 +598,7 @@ Unify::Partitions Unify::join(const Partition& partition,
 	}
 }
 
-Unify::TypedBlock Unify::join(const std::vector<TypedBlock>& common_blocks,
+Unify::TypedBlock Unify::join(const TypedBlockSeq& common_blocks,
                          const TypedBlock& block) const
 {
 	std::pair<Block, Handle> result{block};
@@ -613,7 +613,7 @@ Unify::TypedBlock Unify::join(const TypedBlock& lhs, const TypedBlock& rhs) cons
 			type_intersection(lhs.second, rhs.second)};
 }
 
-Unify::SolutionSet Unify::subunify(const std::vector<TypedBlock>& common_blocks,
+Unify::SolutionSet Unify::subunify(const TypedBlockSeq& common_blocks,
                                    const TypedBlock& block) const
 {
 	SolutionSet sol;

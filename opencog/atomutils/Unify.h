@@ -130,6 +130,9 @@ public:
 	// being so frequently used.
 	typedef Partition::value_type TypedBlock;
 
+	// Useful for representing common block before sub-unification.
+	typedef std::vector<TypedBlock> TypedBlockSeq;
+
 	// Set of partitions, that is a solution set, typically assumed
 	// satisfiable when used in standalone.
 	typedef std::set<Partition> Partitions;
@@ -431,7 +434,7 @@ private:
 	 * Join a block to a partition to form a single block. It is
 	 * assumed that all blocks have elements in common.
 	*/
-	TypedBlock join(const std::vector<TypedBlock>& common_blocks,
+	TypedBlock join(const TypedBlockSeq& common_blocks,
 	                const TypedBlock& block) const;
 
 	/**
@@ -449,7 +452,7 @@ private:
 	 *
 	 * TODO: should probably support quotation.
 	 */
-	SolutionSet subunify(const std::vector<TypedBlock>& common_blocks,
+	SolutionSet subunify(const TypedBlockSeq& common_blocks,
 	                     const TypedBlock& block) const;
 
 	/**
