@@ -40,15 +40,103 @@ namespace opencog {
 class Unify
 {
 public:
+	// A context holds the quotation state and the current shadowing
+	// variables of a atom (typically coming from ancestor scopes).
+	//
+	// The context is important to have for both unification, in
+	// particular sub-unification, see Unify::subunify, and closure,
+	// see Unify::substitution_closure, because quoted or shadowed
+	// variables should not be substituted.
+	//
+	// This notion of context is distinct and unrelated to
+	// ContextLink.
+	struct Context : public boost::totally_ordered<Context>
+	{
+		// Default ctor
+		Context(const Quotation& quotation=Quotation(),
+		        const OrderedHandleSet& shadow=OrderedHandleSet());
+
+		// Quotation state
+		Quotation quotation;
+
+		// Set of shadowing variables
+		OrderedHandleSet shadow;
+
+		/**
+		 * Update the context over an atom. That is if the atom is a
+		 * consumable quotation then update the context quotation. If
+		 * the atom is a scope link then update the context shadow.
+		 */
+		void update(const Handle& h);
+
+		/**
+		 * Return true iff the given atom in that context is a free
+		 * variable, that is unquoted and unshadowed.
+		 */
+		bool is_free_variable(const Handle& h) const;
+
+		/**
+		 * Comparison.
+		 */
+		bool operator==(const Context& context) const;
+		bool operator<(const Context& context) const;
+	};
+
+	// Contextual Handle
+	//
+	// TODO: the notion of equality between 2 CHandles might one where
+	// the Context isn't necessarily equal but where the 2 handles
+	// (besides being equal) have the same quotation and same
+	// (free inter shadow) variables.
+	struct CHandle : public boost::totally_ordered<CHandle>
+	{
+		CHandle(const Handle& handle, const Context& context=Context());
+
+		Handle handle;
+		Context context;
+
+		/**
+		 * Return true iff the atom in that context is a free
+		 * variable, that is unquoted and unshadowed.
+		 */
+		bool is_free_variable() const;
+
+		/**
+		 * Return the set of free visible variables from that context.
+		 */
+		OrderedHandleSet get_free_variables() const;
+
+		/**
+		 * Return true if 2 contextual handles are satisfiable in some
+		 * restricted sense, it only covers the cases where atoms are
+		 * equal and have the same free variables.
+		 */
+		bool satisfiable(const CHandle& ch) const;
+
+		/**
+		 * Comparison.
+		 */
+		bool operator==(const CHandle& ch) const;
+		bool operator<(const CHandle& ch) const;
+	};
+
+	// Partition block
+	typedef std::set<CHandle> Block;
+
 	// Mapping from partition blocks to type
-	typedef std::map<OrderedHandleSet, Handle> Partition;
-	typedef Partition::value_type Block;
+	typedef std::map<Block, Handle> Partition;
+
+	// This is in fact a typed block but is merely named Block due to
+	// being so frequently used.
+	typedef Partition::value_type TypedBlock;
+
+	// Set of partitions, that is a solution set, typically assumed
+	// satisfiable when used in standalone.
 	typedef std::set<Partition> Partitions;
 
 	// TODO: the type of a typed block is currently a handle of the
 	// variable or ground it is exists, instead of an actual type.
-	struct SolutionSet :
-		public boost::equality_comparable<SolutionSet>
+	struct SolutionSet : public boost::equality_comparable<SolutionSet>
 	{
 		// Default ctor
 		SolutionSet(bool s=true, const Partitions& p=Partitions());
@@ -65,9 +153,12 @@ public:
 		bool operator==(const SolutionSet& other) const;
 	};
 
+	// Mapping from Handle (typically a variable) to a contextual handle
+	typedef std::map<Handle, CHandle> HandleCHandleMap;
+
 	// Subtitution values and their corresponding variable declaration
 	// (cause some values will be variables).
-	typedef std::map<HandleMap, Handle> TypedSubstitutions;
+	typedef std::map<HandleCHandleMap, Handle> TypedSubstitutions;
 	typedef TypedSubstitutions::value_type TypedSubstitution;
 
 	/**
@@ -109,7 +200,7 @@ public:
 	 * (Variable "$P") -> (Concept "A")
 	 * (Variable "$Q") -> (Concept "B")
 	 */
-	HandleMap substitution_closure(const HandleMap& var2val) const;
+	HandleCHandleMap substitution_closure(const HandleCHandleMap& var2val) const;
 
 	/**
 	 * If the quotations are useless or harmful, which might be the
@@ -230,51 +321,54 @@ public:
 	 * mean that the solution set has 2 partitions, one where X unifies to
 	 * A and Y unifies to B, and another one where X unifies to B and Y
 	 * unifies to A.
-	 *
-	 * TODO: take care of Un/Quote and Scope links.
 	 */
 	SolutionSet operator()(const Handle& lhs, const Handle& rhs,
 	                       const Handle& lhs_vardecl=Handle::UNDEFINED,
-	                       const Handle& rhs_vardecl=Handle::UNDEFINED,
-	                       Quotation lhs_quotation=Quotation(),
-	                       Quotation rhs_quotation=Quotation());
+	                       const Handle& rhs_vardecl=Handle::UNDEFINED);
 
 private:
 	Handle _lhs_vardecl;
 	Handle _rhs_vardecl;
 
 	/**
+	 * Find the least abstract atom in the given block.
+	 */
+	CHandle find_least_abstract(const TypedBlock& block, const Handle& pre) const;
+
+	/**
 	 * Unify lhs and rhs. _lhs_vardecl and _rhs_vardecl should be set
 	 * prior to run this method.
 	 */
+	// TODO: replace quotation by context
+	SolutionSet unify(const CHandle& lhs, const CHandle& rhs) const;
 	SolutionSet unify(const Handle& lhs, const Handle& rhs,
-	                  Quotation lhs_quotation=Quotation(),
-	                  Quotation rhs_quotation=Quotation()) const;
+	                  Context lhs_context=Context(),
+	                  Context rhs_context=Context()) const;
 
 	/**
 	 * Unify all elements of lhs with all elements of rhs, considering
 	 * all permutations.
 	 */
+	// TODO: replace quotation by context
 	SolutionSet unordered_unify(const HandleSeq& lhs, const HandleSeq& rhs,
-	                            Quotation lhs_quotation=Quotation(),
-	                            Quotation rhs_quotation=Quotation()) const;
+	                            Context lhs_context=Context(),
+	                            Context rhs_context=Context()) const;
 
 	/**
 	 * Unify all elements of lhs with all elements of rhs, in the
 	 * provided order.
 	 */
+	// TODO: replace quotation by context
 	SolutionSet ordered_unify(const HandleSeq& lhs, const HandleSeq& rhs,
-	                          Quotation lhs_quotation=Quotation(),
-	                          Quotation rhs_quotation=Quotation()) const;
+	                          Context lhs_context=Context(),
+	                          Context rhs_context=Context()) const;
 
 	/**
 	 * Unify all elements of lhs with all elements of rhs, considering
 	 * all pairwise combinations.
 	 */
-	SolutionSet comb_unify(const OrderedHandleSet& lhs,
-	                       const OrderedHandleSet& rhs,
-	                       Quotation lhs_quotation=Quotation(),
-	                       Quotation rhs_quotation=Quotation()) const;
+	SolutionSet comb_unify(const std::set<CHandle>& lhs,
+	                       const std::set<CHandle>& rhs) const;
 
 	/**
 	 * Return if the atom is an unordered link.
@@ -290,9 +384,9 @@ private:
 	 * Build elementary solution set between 2 atoms given that at least
 	 * one of them is a variable.
 	 */
+	SolutionSet mkvarsol(const CHandle& lhs, const CHandle& rhs) const;
 	SolutionSet mkvarsol(const Handle& lhs, const Handle& rhs,
-	                     Quotation lhs_quotation,
-	                     Quotation rhs_quotation) const;
+	                     Context lhs_context, Context rhs_context) const;
 
 public:                         // TODO: being friend with UnifyUTest
                                 // somehow doesn't work
@@ -313,7 +407,7 @@ private:
 
 	/**
 	 * Join 2 partitions. The result can be set of partitions (see
-	 * join(const Partition&, const Block&) for explanation).
+	 * join(const Partition&, const TypedBlock&) for explanation).
 	 */
 	Partitions join(const Partition& lhs, const Partition& rhs) const;
 
@@ -321,7 +415,7 @@ private:
 	 * Join a block with a partition set. The partition set is assumed
 	 * non empty and satisfiable.
 	 */
-	Partitions join(const Partitions& partitions, const Block& block) const;
+	Partitions join(const Partitions& partitions, const TypedBlock& block) const;
 
 	/**
 	 * Join a partition and a block. If the block has no element in
@@ -331,13 +425,14 @@ private:
 	 * (TODO: explain why) thus possibly multiple partitions will be
 	 * returned.
 	*/
-	Partitions join(const Partition& partition, const Block &block) const;
+	Partitions join(const Partition& partition, const TypedBlock &block) const;
 
 	/**
 	 * Join a block to a partition to form a single block. It is
 	 * assumed that all blocks have elements in common.
 	*/
-	Block join(const std::vector<Block>& common_blocks, const Block& block) const;
+	TypedBlock join(const std::vector<TypedBlock>& common_blocks,
+	                const TypedBlock& block) const;
 
 	/**
 	 * Join 2 blocks (supposedly satisfiable).
@@ -346,7 +441,7 @@ private:
 	 * the block as the union of the 2 blocks, typed with their type
 	 * intersection.
 	 */
-	Block join(const Block& lhs, const Block& rhs) const;
+	TypedBlock join(const TypedBlock& lhs, const TypedBlock& rhs) const;
 
 	/**
 	 * Unify all terms that are not in the intersection of block and
@@ -354,8 +449,8 @@ private:
 	 *
 	 * TODO: should probably support quotation.
 	 */
-	SolutionSet subunify(const std::vector<Block>& common_blocks,
-	                     const Block& block) const;
+	SolutionSet subunify(const std::vector<TypedBlock>& common_blocks,
+	                     const TypedBlock& block) const;
 
 	/**
 	 * Unify all terms that are not in the intersection of blocks lhs
@@ -363,23 +458,32 @@ private:
 	 *
 	 * TODO: should probably support quotation.
 	 */
-	SolutionSet subunify(const Block& lhs, const Block& rhs) const;
+	SolutionSet subunify(const TypedBlock& lhs, const TypedBlock& rhs) const;
 
 	/**
 	 * Return true if a unification block is satisfiable. A unification
 	 * block is non satisfiable if it's type is undefined (bottom).
 	 */
-	bool is_satisfiable(const Block& block) const;
+	bool is_satisfiable(const TypedBlock& block) const;
 };
 
 /**
  * Till content equality between atoms become the default.
  */
+bool ch_content_eq(const Unify::CHandle& lhs, const Unify::CHandle& rhs);
+bool ohs_content_eq(const OrderedHandleSet& lhs, const OrderedHandleSet& rhs);
 bool hm_content_eq(const HandleMap& lhs, const HandleMap& rhs);
+bool hchm_content_eq(const Unify::HandleCHandleMap& lhs,
+                     const Unify::HandleCHandleMap& rhs);
 bool ts_content_eq(const Unify::TypedSubstitution& lhs,
                    const Unify::TypedSubstitution& rhs);
 bool tss_content_eq(const Unify::TypedSubstitutions& lhs,
                     const Unify::TypedSubstitutions& rhs);
+
+/**
+ * Strip the context from hchm.
+ */
+HandleMap strip_context(const Unify::HandleCHandleMap& hchm);
 
 /**
  * Calculate type intersection. For example: say you have for a block
@@ -407,9 +511,11 @@ bool tss_content_eq(const Unify::TypedSubstitutions& lhs,
  * TODO: For now though it's only a very limited type intersection,
  *       should support structural types, etc.
  *
- * TODO: this can be probably by optimized by using VariableListPtr
+ * TODO: This can be probably by optimized by using VariableListPtr
  *       instead of Handle, so we don't rebuild it every time.
  */
+Handle type_intersection(const Unify::CHandle& lch, const Unify::CHandle& rch,
+                         const Handle& lhs_vardecl, const Handle& rhs_vardecl);
 Handle type_intersection(const Handle& lhs, const Handle& rhs,
                          const Handle& lhs_vardecl=Handle::UNDEFINED,
                          const Handle& rhs_vardecl=Handle::UNDEFINED,
@@ -479,6 +585,12 @@ VariableListPtr gen_varlist(const Handle& h);
 Handle gen_vardecl(const Handle& h);
 
 /**
+ * Generate a VariableList of the free variables of a given contextual
+ * atom ch.
+ */
+VariableListPtr gen_varlist(const Unify::CHandle& ch);
+
+/**
  * Given an atom h and its variable declaration vardecl, turn the
  * vardecl into a VariableList if not already, and if undefined,
  * generate a VariableList of the free variables of h.
@@ -494,12 +606,16 @@ VariableListPtr gen_varlist(const Handle& h, const Handle& vardecl);
  */
 Handle merge_vardecl(const Handle& lhs_vardecl, const Handle& rhs_vardecl);
 
+std::string oc_to_string(const Unify::Context& c);
+std::string oc_to_string(const Unify::CHandle& ch);
+std::string oc_to_string(const Unify::Block& pb);
 std::string oc_to_string(const Unify::Partition& hshm);
-std::string oc_to_string(const Unify::Block& ub);
+std::string oc_to_string(const Unify::TypedBlock& ub);
 std::string oc_to_string(const Unify::Partitions& par);
 std::string oc_to_string(const Unify::SolutionSet& sol);
-std::string oc_to_string(const Unify::TypedSubstitutions& tss);
+std::string oc_to_string(const Unify::HandleCHandleMap& hchm);
 std::string oc_to_string(const Unify::TypedSubstitution& ts);
+std::string oc_to_string(const Unify::TypedSubstitutions& tss);
 	
 } // namespace opencog
 

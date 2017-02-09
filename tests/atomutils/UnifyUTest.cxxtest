@@ -175,8 +175,10 @@ void UnifyUTest::test_type_intersection()
 
 void UnifyUTest::test_join_1()
 {
-	Unify::SolutionSet s1 = Unify::SolutionSet(true, {{{{X, A}, A}}}),
-		s2 = Unify::SolutionSet(true, {{{{X, B}, B}}}),
+	Unify::Block pb1{X, A};
+	Unify::SolutionSet s1 = Unify::SolutionSet(true, {{{pb1, A}}});
+	Unify::Block pb2{X, B};
+	Unify::SolutionSet s2 = Unify::SolutionSet(true, {{{pb2, B}}}),
 		result = Unify().join(s1, s2),
 		expected = Unify::SolutionSet(false);
 
@@ -223,16 +225,22 @@ void UnifyUTest::test_join_2()
 		             "    (VariableNode \"$X\")"
 		             "    (ConceptNode \"treatment-1\")))");
 
-	Unify::SolutionSet
-		s1 = Unify::SolutionSet(true, {{{{P, implicant}, implicant}}}),
-		s2 = Unify::SolutionSet(true, {{{{P, quoted_implicant}, quoted_implicant}}}),
-		result = Unify().join(s1, s2),
-		expected = Unify::SolutionSet(true, {{{{P, implicant, quoted_implicant},
-						 	                   implicant},
-						                      {{TyVs, implicant_vardecl},
-						 	                   implicant_vardecl},
-						                      {{A1, implicant_body},
-						 	                   implicant_body}}});
+	Unify::Context C(Quotation(), {X});
+	Unify::CHandle Cimplicant_vardecl(implicant_vardecl, C),
+		Cimplicant_body(implicant_body, C);
+
+	Unify::Block pb1{P, implicant};
+	Unify::SolutionSet s1 = Unify::SolutionSet(true, {{{pb1, implicant}}});
+	Unify::Block pb2{P, quoted_implicant};
+	Unify::SolutionSet s2 = Unify::SolutionSet(true, {{{pb2, quoted_implicant}}});
+	Unify::SolutionSet result = Unify().join(s1, s2);
+	Unify::Block pb1_expected{P, implicant, quoted_implicant};
+	Unify::Block pb2_expected{TyVs, Cimplicant_vardecl};
+	Unify::Block pb3_expected{A1, Cimplicant_body};
+	Unify::SolutionSet expected =
+		Unify::SolutionSet(true, {{{pb1_expected, implicant},
+					               {pb2_expected, implicant_vardecl},
+						           {pb3_expected, implicant_body}}});
 
 	std::cout << "result = " << oc_to_string(result) << std::endl;
 	std::cout << "expected = " << oc_to_string(expected) << std::endl;
@@ -288,6 +296,10 @@ void UnifyUTest::test_join_3()
 		             "    (VariableNode \"$X\")"
 		             "    (ConceptNode \"treatment-1\")))");
 
+	Unify::Context C(Quotation(), {X});
+	Unify::CHandle Cimplicant_vardecl(implicant_vardecl, C),
+		Cimplicant_body(implicant_body, C);
+
 	Unify::SolutionSet
 		s1 = Unify::SolutionSet(true, {{{{P, implicant}, implicant}}}),
 		s2 = Unify::SolutionSet(true,
@@ -298,17 +310,17 @@ void UnifyUTest::test_join_3()
 		result = Unify().join(s1, s2),
 		expected = Unify::SolutionSet(true, {{{{P, implicant, quoted_LA2},
 						 	                   implicant},
-						                      {{TyVs, implicant_vardecl},
+						                      {{TyVs, Cimplicant_vardecl},
 						 	                   implicant_vardecl},
-						                      {{A2, implicant_body},
+						                      {{A2, Cimplicant_body},
 								               implicant_body},
 						                      {{Q, quoted_LA1},
 								               quoted_LA1}},
 				                             {{{P, implicant, quoted_LA1},
 						 	                   implicant},
-						                      {{TyVs, implicant_vardecl},
+						                      {{TyVs, Cimplicant_vardecl},
 						 	                   implicant_vardecl},
-						                      {{A1, implicant_body},
+						                      {{A1, Cimplicant_body},
 								               implicant_body},
 						                      {{Q, quoted_LA2},
 								               quoted_LA2}}});
@@ -659,9 +671,6 @@ void UnifyUTest::test_unify_complex_1()
 	Handle TyVs = _eval.eval_h("(VariableNode \"$TyVs\")");
 	Handle A1 = _eval.eval_h("(VariableNode \"$A1\")");
 	Handle A2 = _eval.eval_h("(VariableNode \"$A2\")");
-	Handle vardecl = _eval.eval_h("  (TypedVariableLink"
-	                              "    (VariableNode \"$X\")"
-	                              "    (TypeNode \"ConceptNode\"))");
 
 	Handle implicant =
 		_eval.eval_h("(LambdaLink"
@@ -702,20 +711,24 @@ void UnifyUTest::test_unify_complex_1()
 		             "    (VariableNode \"$X\")"
 		             "    (ConceptNode \"treatment-1\")))");
 
+	Unify::Context C(Quotation(), {X});
+	Unify::CHandle Cimplicant_vardecl(implicant_vardecl, C),
+		Cimplicant_body(implicant_body, C);
+
 	Unify::SolutionSet result = Unify()(lhs, rhs, lhs_vardecl, rhs_vardecl),
 		expected = Unify::SolutionSet(true, {{{{P, implicant, quoted_LA2},
 						 	                   implicant},
-						                      {{TyVs, implicant_vardecl},
+						                      {{TyVs, Cimplicant_vardecl},
 						 	                   implicant_vardecl},
-						                      {{A2, implicant_body},
+						                      {{A2, Cimplicant_body},
 								               implicant_body},
 						                      {{Q, quoted_LA1},
 								               quoted_LA1}},
 				                             {{{P, implicant, quoted_LA1},
 						 	                   implicant},
-						                      {{TyVs, implicant_vardecl},
+						                      {{TyVs, Cimplicant_vardecl},
 						 	                   implicant_vardecl},
-						                      {{A1, implicant_body},
+						                      {{A1, Cimplicant_body},
 								               implicant_body},
 						                      {{Q, quoted_LA2},
 								               quoted_LA2}}});
@@ -760,13 +773,13 @@ void UnifyUTest::test_unify_complex_1()
 		                            lhs_vardecl, rhs_vardecl);
 	Unify::TypedSubstitutions ts_expected =
 		Unify::TypedSubstitutions{{{{P, implicant},
-		                            {TyVs, vardecl},
-		                            {A2, implicant_body},
+		                            {TyVs, Cimplicant_vardecl},
+		                            {A2, Cimplicant_body},
 		                            {Q, consumed_LA1}},
 		                           ts_vardecl},
 		                          {{{P, implicant},
-		                            {TyVs, vardecl},
-		                            {A1, implicant_body},
+		                            {TyVs, Cimplicant_vardecl},
+		                            {A1, Cimplicant_body},
 		                            {Q, consumed_LA2}},
 		                           ts_vardecl}};
 
@@ -834,9 +847,14 @@ void UnifyUTest::test_unify_complex_2()
 		             "    (ListLink"
 		             "      (VariableNode \"$X\")"
 		             "      (VariableNode \"$Y-6f50cc6a\"))))");
+	Unify::Context C(Quotation(), {X});
+	Unify::CHandle CP(P, C);
+	Unify::CHandle Cconjunction(conjunction, C);
 
-	Unify::SolutionSet result = Unify()(lhs, rhs, lhs_vardecl, rhs_vardecl),
-		expected = Unify::SolutionSet(true, {{{{P, conjunction}, conjunction}}});
+	Unify::SolutionSet result = Unify()(lhs, rhs, lhs_vardecl, rhs_vardecl);
+	Unify::Block pb_expected{CP, Cconjunction};
+	Unify::Partition partition_expected{{pb_expected, conjunction}};
+	Unify::SolutionSet expected = Unify::SolutionSet(true, {partition_expected});
 
 	std::cout << "result = " << oc_to_string(result) << std::endl;
 	std::cout << "expected = " << oc_to_string(expected) << std::endl;
@@ -849,14 +867,18 @@ void UnifyUTest::test_unify_complex_2()
 	                                 "    (VariableNode \"$Y-6f50cc6a\")"
 	                                 "    (TypeNode \"ConceptNode\")))");
 
-	Unify::TypedSubstitutions ts_result =
+	Unify::TypedSubstitutions tss_result =
 		Unify().typed_substitutions(result, lhs, lhs, rhs,
 		                            lhs_vardecl, rhs_vardecl);
-	Unify::TypedSubstitutions ts_expected =
-		Unify::TypedSubstitutions{{{{P, conjunction}}, ts_vardecl}};
+	Unify::HandleCHandleMap hchm_expected =
+		Unify::HandleCHandleMap{{P, Cconjunction}};
+	Unify::TypedSubstitution ts_expected =
+		Unify::TypedSubstitution{hchm_expected, ts_vardecl};
+	Unify::TypedSubstitutions tss_expected =
+		Unify::TypedSubstitutions{ts_expected};
 
-	std::cout << "ts_result = " << oc_to_string(ts_result) << std::endl;
-	std::cout << "ts_expected = " << oc_to_string(ts_expected) << std::endl;
+	std::cout << "tss_result = " << oc_to_string(tss_result) << std::endl;
+	std::cout << "tss_expected = " << oc_to_string(tss_expected) << std::endl;
 
-	TS_ASSERT(tss_content_eq(ts_result, ts_expected));
+	TS_ASSERT(tss_content_eq(tss_result, tss_expected));
 }
