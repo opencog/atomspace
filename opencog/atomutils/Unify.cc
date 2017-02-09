@@ -331,7 +331,7 @@ Unify::SolutionSet Unify::operator()(const Handle& lhs, const Handle& rhs,
 
 Unify::SolutionSet Unify::unify(const CHandle& lhs, const CHandle& rhs) const
 {
-	return unify(lhs.handle, rhs.handle, lhs.context, lhs.context);
+	return unify(lhs.handle, rhs.handle, lhs.context, rhs.context);
 }
 
 Unify::SolutionSet Unify::unify(const Handle& lh, const Handle& rh,
@@ -568,7 +568,7 @@ Unify::Partitions Unify::join(const Partition& partition,
                               const TypedBlock& block) const
 {
 	// Find all partition blocks that have elements in common with block
-	std::vector<TypedBlock> common_blocks;
+	TypedBlockSeq common_blocks;
 	for (const TypedBlock& p_block : partition)
 		if (not has_empty_intersection(block.first, p_block.first))
 			common_blocks.push_back(p_block);
@@ -598,7 +598,7 @@ Unify::Partitions Unify::join(const Partition& partition,
 	}
 }
 
-Unify::TypedBlock Unify::join(const std::vector<TypedBlock>& common_blocks,
+Unify::TypedBlock Unify::join(const TypedBlockSeq& common_blocks,
                          const TypedBlock& block) const
 {
 	std::pair<Block, Handle> result{block};
@@ -613,7 +613,7 @@ Unify::TypedBlock Unify::join(const TypedBlock& lhs, const TypedBlock& rhs) cons
 			type_intersection(lhs.second, rhs.second)};
 }
 
-Unify::SolutionSet Unify::subunify(const std::vector<TypedBlock>& common_blocks,
+Unify::SolutionSet Unify::subunify(const TypedBlockSeq& common_blocks,
                                    const TypedBlock& block) const
 {
 	SolutionSet sol;
@@ -905,8 +905,11 @@ Handle merge_vardecl(const Handle& lhs_vardecl, const Handle& rhs_vardecl)
 std::string oc_to_string(const Unify::Context& c)
 {
 	std::stringstream ss;
-	ss << "quotation: " << oc_to_string(c.quotation) << std::endl
-	   << "shadow:" << std::endl << oc_to_string(c.shadow);
+	if (c == Unify::Context())
+		ss << "none" << std::endl;
+	else
+		ss << "quotation: " << oc_to_string(c.quotation) << std::endl
+		   << "shadow:" << std::endl << oc_to_string(c.shadow);
 	return ss.str();
 }
 
@@ -927,11 +930,21 @@ std::string oc_to_string(const Unify::Block& pb)
 	return ss.str();
 }
 
-std::string oc_to_string(const Unify::TypedBlock& ub)
+std::string oc_to_string(const Unify::TypedBlock& tb)
 {
 	std::stringstream ss;
-	ss << "block:" << std::endl << oc_to_string(ub.first)
-	   << "type:" << std::endl << oc_to_string(ub.second);
+	ss << "block:" << std::endl << oc_to_string(tb.first)
+	   << "type:" << std::endl << oc_to_string(tb.second);
+	return ss.str();
+}
+
+std::string oc_to_string(const Unify::TypedBlockSeq& tbs)
+{
+	std::stringstream ss;
+	ss << "size = " << tbs.size() << std::endl;
+	for (size_t i = 0; i < tbs.size(); i++)
+		ss << "typed block[" << i << "]:" << std::endl
+		   << oc_to_string(tbs[i]);
 	return ss.str();
 }
 
