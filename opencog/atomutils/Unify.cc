@@ -905,8 +905,11 @@ Handle merge_vardecl(const Handle& lhs_vardecl, const Handle& rhs_vardecl)
 std::string oc_to_string(const Unify::Context& c)
 {
 	std::stringstream ss;
-	ss << "quotation: " << oc_to_string(c.quotation) << std::endl
-	   << "shadow:" << std::endl << oc_to_string(c.shadow);
+	if (c == Unify::Context())
+		ss << "none" << std::endl;
+	else
+		ss << "quotation: " << oc_to_string(c.quotation) << std::endl
+		   << "shadow:" << std::endl << oc_to_string(c.shadow);
 	return ss.str();
 }
 
@@ -927,11 +930,21 @@ std::string oc_to_string(const Unify::Block& pb)
 	return ss.str();
 }
 
-std::string oc_to_string(const Unify::TypedBlock& ub)
+std::string oc_to_string(const Unify::TypedBlock& tb)
 {
 	std::stringstream ss;
-	ss << "block:" << std::endl << oc_to_string(ub.first)
-	   << "type:" << std::endl << oc_to_string(ub.second);
+	ss << "block:" << std::endl << oc_to_string(tb.first)
+	   << "type:" << std::endl << oc_to_string(tb.second);
+	return ss.str();
+}
+
+std::string oc_to_string(const Unify::TypedBlockSeq& tbs)
+{
+	std::stringstream ss;
+	ss << "size = " << tbs.size() << std::endl;
+	for (size_t i = 0; i < tbs.size(); i++)
+		ss << "typed block[" << i << "]:" << std::endl
+		   << oc_to_string(tbs[i]);
 	return ss.str();
 }
 
