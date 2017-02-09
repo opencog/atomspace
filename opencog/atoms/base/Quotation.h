@@ -25,6 +25,8 @@
 #ifndef _OPENCOG_QUOTATION_H
 #define _OPENCOG_QUOTATION_H
 
+#include <boost/operators.hpp>
+
 #include <opencog/atoms/base/atom_types.h>
 #include <string>
 
@@ -38,7 +40,7 @@ namespace opencog
 /**
  * Quotation data and methods. See http://wiki.opencog.org/w/QuoteLink.
  */
-class Quotation
+class Quotation : public boost::totally_ordered<Quotation>
 {
 	int _quotation_level;
 	bool _local_quote;
@@ -80,6 +82,12 @@ public:
 	 * the current atom before handing the quotation to the outgoing.
 	 */
 	void update(Type t);
+
+	/**
+	 * Comparison
+	 */
+	bool operator<(const Quotation& quotation) const;
+	bool operator==(const Quotation& quotation) const;
 
 	std::string to_string() const;
 };

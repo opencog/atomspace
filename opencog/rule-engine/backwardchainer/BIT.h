@@ -75,8 +75,7 @@ public:
 /**
  * And-BIT
  */
-class AndBIT : public boost::less_than_comparable<AndBIT>,
-               public boost::equality_comparable<AndBIT>
+class AndBIT : public boost::totally_ordered<AndBIT>
 {
 public:
 	// FCS associated to the and-BIT
@@ -150,6 +149,12 @@ private:
 	// according to their BIT-node fitnesses. The higher the fitness
 	// the lower the chance of being selected as it is already fit.
 	typedef std::discrete_distribution<size_t> LeafDistribution;
+
+	/**
+	 * Calculate the complexity of the and-BIT resulting from
+	 * expanding this and-BIT from leaf with rule.
+	 */
+	double expand_complexity(const Handle& leaf, const Rule& rule) const;
 
 	/**
 	 * Given an FCS, a leaf of it to expand, and a rule, return a new
