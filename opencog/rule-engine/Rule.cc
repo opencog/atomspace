@@ -317,13 +317,23 @@ RuleSet Rule::unify_target(const Handle& target,
 
 	Rule alpha_rule = rand_alpha_converted();
 
+	logger().debug() << "Rule::unify_target" << std::endl
+	                 << "alpha_rule:" << std::endl << oc_to_string(alpha_rule);
+
 	RuleSet unified_rules;
 
 	Handle alpha_vardecl = alpha_rule.get_vardecl();
 	for (const Handle& alpha_pat : alpha_rule.get_conclusion_patterns())
 	{
+		logger().debug() << "Rule::unify_target" << std::endl
+		                 << "target:" << std::endl << target
+		                 << "alpha_pat:" << std::endl << alpha_pat
+		                 << "vardecl:" << std::endl << vardecl
+		                 << "alpha_vardecl:" << std::endl << alpha_vardecl;
 		Unify::SolutionSet sol =
 			Unify()(target, alpha_pat, vardecl, alpha_vardecl);
+		logger().debug() << "Rule::unify_target" << std::endl
+		                 << "sol:" << std::endl << oc_to_string(sol);
 		if (sol.satisfiable) {
 			Unify::TypedSubstitutions tss =
 				Unify().typed_substitutions(sol, target, target, alpha_pat,

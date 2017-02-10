@@ -101,7 +101,10 @@ bool Unify::CHandle::operator<(const CHandle& ch) const
 }
 
 Unify::SolutionSet::SolutionSet(bool s, const Unify::Partitions& p)
-	: satisfiable(s), partitions(p) {}
+	: satisfiable(s), partitions(p) {
+	logger().debug() << "SolutionSet::SolutionSet()"
+	                 << std::endl << oc_to_string(*this);
+}
 
 bool Unify::SolutionSet::operator==(const SolutionSet& other) const
 {
@@ -337,6 +340,12 @@ Unify::SolutionSet Unify::unify(const CHandle& lhs, const CHandle& rhs) const
 Unify::SolutionSet Unify::unify(const Handle& lh, const Handle& rh,
                                 Context lc, Context rc) const
 {
+	logger().debug() << "Unify::unify" << std::endl
+	                 << "lh:" << std::endl << lh
+	                 << "rh:" << std::endl << rh
+	                 << "lc:" << std::endl << oc_to_string(lc)
+	                 << "rc:" << std::endl << oc_to_string(rc);
+
 	///////////////////
 	// Base cases    //
 	///////////////////
