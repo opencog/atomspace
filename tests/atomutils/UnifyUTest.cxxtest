@@ -21,6 +21,8 @@
  * 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
  */
 
+#include <opencog/util/Logger.h>
+
 #include <opencog/atomutils/Unify.h>
 #include <opencog/atomspace/AtomSpace.h>
 #include <opencog/guile/SchemeEval.h>
@@ -43,7 +45,12 @@ private:
 		XY_vardecl;
 	
 public:
-	UnifyUTest() : _eval(&_as) {}
+	UnifyUTest() : _eval(&_as)
+	{
+		logger().set_level(Logger::INFO);
+		logger().set_print_to_stdout_flag(true);
+		logger().set_timestamp_flag(false);
+	}
 
 	void setUp();
 
@@ -643,16 +650,16 @@ void UnifyUTest::test_unify_complex_1()
 	Handle lhs_vardecl =
 		_eval.eval_h("(VariableList"
 		             "  (TypedVariableLink"
-		             "    (VariableNode \"$TyVs-5476a9b9\")"
+		             "    (VariableNode \"$TyVs\")"
 		             "    (TypeChoice"
 		             "      (TypeNode \"TypedVariableLink\")"
 		             "      (TypeNode \"VariableNode\")"
 		             "      (TypeNode \"VariableList\")))"
 		             "  (TypedVariableLink"
-		             "    (VariableNode \"$A1-7235efc6\")"
+		             "    (VariableNode \"$A1\")"
 		             "    (TypeNode \"EvaluationLink\"))"
 		             "  (TypedVariableLink"
-		             "    (VariableNode \"$A2-1ac8e4a2\")"
+		             "    (VariableNode \"$A2\")"
 		             "    (TypeNode \"EvaluationLink\")))");
 	Handle rhs_vardecl =
 		_eval.eval_h("(VariableList"
@@ -741,16 +748,16 @@ void UnifyUTest::test_unify_complex_1()
 
 	Handle ts_vardecl = _eval.eval_h("(VariableList"
 	                                 "  (TypedVariableLink"
-	                                 "    (VariableNode \"$TyVs-5476a9b9\")"
+	                                 "    (VariableNode \"$TyVs\")"
 	                                 "    (TypeChoice"
 	                                 "      (TypeNode \"TypedVariableLink\")"
 	                                 "      (TypeNode \"VariableNode\")"
 	                                 "      (TypeNode \"VariableList\")))"
 	                                 "  (TypedVariableLink"
-	                                 "    (VariableNode \"$A1-7235efc6\")"
+	                                 "    (VariableNode \"$A1\")"
 	                                 "    (TypeNode \"EvaluationLink\"))"
 	                                 "  (TypedVariableLink"
-	                                 "    (VariableNode \"$A2-1ac8e4a2\")"
+	                                 "    (VariableNode \"$A2\")"
 	                                 "    (TypeNode \"EvaluationLink\"))"
 	                                 "  (VariableNode \"$P\")"
 	                                 "  (VariableNode \"$Q\"))");
