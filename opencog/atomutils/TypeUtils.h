@@ -156,6 +156,21 @@ Handle filter_vardecl(const Handle& vardecl, const Handle& body);
 Handle filter_vardecl(const Handle& vardecl, const HandleSeq& hs);
 
 /**
+ * Return true if t is different than NOTYPE
+ */
+bool is_well_typed(Type t);
+
+/**
+ * Return true if all type in ts are well typed.
+ *
+ * This might too strict. One might argue that NOTYPE is akin to the
+ * empty set, thus the union of a valid type and NOTYPE should merely
+ * amount to the valid type. We may want to relax that definition in
+ * the future.
+ */
+bool is_well_typed(const std::set<Type>& ts);
+
+/**
  * Return shallow type intersection between lhs and rhs. Take into
  * account type inheritance as well.
  */

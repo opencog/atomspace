@@ -302,6 +302,19 @@ Handle filter_vardecl(const Handle& vardecl, const HandleSeq& hs)
 	return Handle::UNDEFINED;
 }
 
+bool is_well_typed(Type t)
+{
+	return t != NOTYPE;
+}
+
+bool is_well_typed(const std::set<Type>& ts)
+{
+	for (Type t : ts)
+		if (not is_well_typed(t))
+			return false;
+	return true;
+}
+
 Type type_intersection(Type lhs, Type rhs)
 {
 	ClassServer& cs = classserver();
