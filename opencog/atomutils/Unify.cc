@@ -650,11 +650,10 @@ Unify::SolutionSet Unify::subunify(const TypedBlockSeq& common_blocks,
 	return sol;
 }
 
-Unify::SolutionSet Unify::subunify(const TypedBlock& lhs, const TypedBlock& rhs) const
+Unify::SolutionSet Unify::subunify(const TypedBlock& lhs,
+                                   const TypedBlock& rhs) const
 {
-	return comb_unify(set_difference(lhs.first, rhs.first),
-	                  set_difference(rhs.first, lhs.first));
-	// return comb_unify(set_symmetric_difference(lhs.first, rhs.first));
+	return comb_unify(set_symmetric_difference(lhs.first, rhs.first));
 }
 
 bool Unify::is_satisfiable(const TypedBlock& block) const
