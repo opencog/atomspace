@@ -265,6 +265,16 @@ bool FreeVariables::is_identical(const FreeVariables& other) const
 
 /* ================================================================= */
 
+bool Variables::is_well_typed() const
+{
+	for (const auto& vt : _simple_typemap)
+		if (not opencog::is_well_typed(vt.second))
+			return false;
+	return true;
+}
+
+/* ================================================================= */
+
 /// Return true if the other Variables struct is equal to this one,
 /// up to alpha-conversion. That is, same number of variables, same
 /// type restrictions, but possibly different variable names.

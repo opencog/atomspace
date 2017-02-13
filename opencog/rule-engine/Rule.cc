@@ -317,17 +317,26 @@ RuleSet Rule::unify_target(const Handle& target,
 
 	Rule alpha_rule = rand_alpha_converted();
 
+	logger().debug() << "Rule::unify_target" << std::endl
+	                 << "alpha_rule:" << std::endl << oc_to_string(alpha_rule);
+
 	RuleSet unified_rules;
 
 	Handle alpha_vardecl = alpha_rule.get_vardecl();
 	for (const Handle& alpha_pat : alpha_rule.get_conclusion_patterns())
 	{
-		Unify::SolutionSet sol =
-			Unify()(target, alpha_pat, vardecl, alpha_vardecl);
+		logger().debug() << "Rule::unify_target" << std::endl
+		                 << "target:" << std::endl << target
+		                 << "alpha_pat:" << std::endl << alpha_pat
+		                 << "vardecl:" << std::endl << vardecl
+		                 << "alpha_vardecl:" << std::endl << alpha_vardecl;
+		Unify unify(target, alpha_pat, vardecl, alpha_vardecl);
+		Unify::SolutionSet sol = unify();
+		logger().debug() << "Rule::unify_target" << std::endl
+		                 << "sol:" << std::endl << oc_to_string(sol);
 		if (sol.satisfiable) {
 			Unify::TypedSubstitutions tss =
-				Unify().typed_substitutions(sol, target, target, alpha_pat,
-				                            vardecl, alpha_vardecl);
+				unify.typed_substitutions(sol, target);
 			// For each typed substitution produce a new rule by
 			// substituting all variables by their associated
 			// values.
@@ -456,7 +465,7 @@ Handle Rule::get_execution_output_first_argument(const Handle& h) const
 Rule Rule::substituted(const Unify::TypedSubstitution& ts) const
 {
 	Rule new_rule(*this);
-	new_rule.set_rule(Unify().substitute(_rule, ts));
+	new_rule.set_rule(Unify::substitute(_rule, ts));
 	return new_rule;
 }
 

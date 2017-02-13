@@ -84,7 +84,7 @@ OrderedHandleSet Unify::CHandle::get_free_variables() const
 	return set_difference(free_vars, context.shadow);
 }
 
-bool Unify::CHandle::satisfiable(const CHandle& ch) const
+bool Unify::CHandle::is_satisfiable(const CHandle& ch) const
 {
 	return content_eq(handle, ch.handle)
 		and (get_free_variables() == ch.get_free_variables());
@@ -109,31 +109,30 @@ bool Unify::SolutionSet::operator==(const SolutionSet& other) const
 		and partitions == other.partitions;
 }
 
+Unify::Unify(const Handle& lhs, const Handle& rhs,
+             const Handle& lhs_vardecl, const Handle& rhs_vardecl)
+{
+	// Set terms to unify
+	_lhs = lhs;
+	_rhs = rhs;
+
+	// Set _variables
+	set_variables(lhs, rhs, lhs_vardecl, rhs_vardecl);
+}
+
 Unify::TypedSubstitutions Unify::typed_substitutions(const SolutionSet& sol,
-                                                     const Handle& pre,
-                                                     const Handle& lhs,
-                                                     const Handle& rhs,
-                                                     Handle lhs_vardecl,
-                                                     Handle rhs_vardecl) const
+                                                     const Handle& pre) const
 {
 	OC_ASSERT(sol.satisfiable);
 
-	if (lhs and not lhs_vardecl)
-		lhs_vardecl = gen_vardecl(lhs);
-	if (rhs and not rhs_vardecl)
-		rhs_vardecl = gen_vardecl(rhs);
-
 	TypedSubstitutions result;
 	for (const Partition& partition : sol.partitions)
-		result.insert(typed_substitution(partition, pre,
-		                                 lhs_vardecl, rhs_vardecl));
+		result.insert(typed_substitution(partition, pre));
 	return result;
 }
 
 Unify::TypedSubstitution Unify::typed_substitution(const Partition& partition,
-                                                   const Handle& pre,
-                                                   const Handle& lhs_vardecl,
-                                                   const Handle& rhs_vardecl) const
+                                                   const Handle& pre) const
 {
 	// Associate the least abstract element to each variable of each
 	// block.
@@ -146,27 +145,35 @@ Unify::TypedSubstitution Unify::typed_substitution(const Partition& partition,
 			if (ch.is_free_variable())
 				var2cval.insert({ch.handle, least_abstract});
 	}
-	// Build the type for this variable. For now, the type is
-	// merely lhs_vardecl and rhs_vardecl merged together. To do
-	// well it should be taking into account the possibly more
-	// restrictive types found during unification (i.e. the block
-	// types).
-	Handle vardecl = merge_vardecl(rhs_vardecl, lhs_vardecl);
 
 	// Calculate its closure
 	var2cval = substitution_closure(var2cval);
 
 	// Remove ill quotations
-	VariableListPtr vardecl_vl = createVariableList(vardecl);
 	for (auto& vcv : var2cval) {
-		Handle consumed = consume_ill_quotations(vardecl_vl->get_variables(),
-		                                         vcv.second.handle,
+		Handle consumed = consume_ill_quotations(_variables, vcv.second.handle,
 		                                         vcv.second.context.quotation);
 		vcv.second = CHandle(consumed, vcv.second.context);
 	}
 
+	// Build the type declaration for this substitution. For now, the
+	// type is merely lhs_vardecl and rhs_vardecl merged together. To
+	// do well it should be taking into account the possibly more
+	// restrictive types found during unification (i.e. the block
+	// types).
+	Handle vardecl = _variables.get_vardecl();
+
 	// Return the typed substitution
 	return {var2cval, vardecl};
+}
+
+void Unify::set_variables(const Handle& lhs, const Handle& rhs,
+                          const Handle& lhs_vardecl, const Handle& rhs_vardecl)
+{
+	// Merge the 2 type declarations
+	Variables lv = gen_varlist(lhs, lhs_vardecl)->get_variables();
+	Variables rv = gen_varlist(rhs, rhs_vardecl)->get_variables();
+	_variables = merge_variables(lv, rv);
 }
 
 Unify::CHandle Unify::find_least_abstract(const TypedBlock& block,
@@ -175,7 +182,7 @@ Unify::CHandle Unify::find_least_abstract(const TypedBlock& block,
 	static Handle top(Handle(createNode(VARIABLE_NODE, "__dummy_top__")));
 	CHandle least_abstract(top);
 	for (const CHandle& ch : block.first) {
-		if (inherit(ch.handle, least_abstract.handle) and
+		if (inherit(ch, least_abstract) and
 		    // If h is a variable, only consider it as value
 		    // if it is in pre (stands for precedence)
 		    (ch.handle->getType() != VARIABLE_NODE
@@ -212,17 +219,17 @@ Unify::HandleCHandleMap Unify::substitution_closure(const HandleCHandleMap& var2
 		result : substitution_closure(result);
 }
 
-bool Unify::is_pm_connector(const Handle& h) const
+bool Unify::is_pm_connector(const Handle& h)
 {
 	return is_pm_connector(h->getType());
 }
 
-bool Unify::is_pm_connector(Type t) const
+bool Unify::is_pm_connector(Type t)
 {
 	return t == AND_LINK or t == OR_LINK or t == NOT_LINK;
 }
 
-BindLinkPtr Unify::consume_ill_quotations(BindLinkPtr bl) const
+BindLinkPtr Unify::consume_ill_quotations(BindLinkPtr bl)
 {
 	Handle vardecl = bl->get_vardecl(),
 		pattern = bl->get_body(),
@@ -247,7 +254,7 @@ BindLinkPtr Unify::consume_ill_quotations(BindLinkPtr bl) const
 }
 
 Handle Unify::consume_ill_quotations(const Variables& variables, Handle h,
-                                     Quotation quotation, bool escape) const
+                                     Quotation quotation, bool escape)
 {
 	// Base case
 	if (h->isNode())
@@ -293,7 +300,7 @@ Handle Unify::consume_ill_quotations(const Variables& variables, Handle h,
 }
 
 bool Unify::is_bound_to_ancestor(const Variables& variables,
-                                 const Handle& local_scope) const
+                                 const Handle& local_scope)
 {
 	Handle unquote = local_scope->getOutgoingAtom(0);
 	if (unquote->getType() == UNQUOTE_LINK) {
@@ -303,7 +310,7 @@ bool Unify::is_bound_to_ancestor(const Variables& variables,
 	return false;
 }
 
-Handle Unify::substitute(BindLinkPtr bl, const TypedSubstitution& ts) const
+Handle Unify::substitute(BindLinkPtr bl, const TypedSubstitution& ts)
 {
 	HandleMap var2val = strip_context(ts.first);
 
@@ -320,13 +327,14 @@ Handle Unify::substitute(BindLinkPtr bl, const TypedSubstitution& ts) const
 	return Handle(consume_ill_quotations(BindLinkCast(h)));
 }
 
-Unify::SolutionSet Unify::operator()(const Handle& lhs, const Handle& rhs,
-                                     const Handle& lhs_vardecl,
-                                     const Handle& rhs_vardecl)
+Unify::SolutionSet Unify::operator()()
 {
-	_lhs_vardecl = lhs_vardecl;
-	_rhs_vardecl = rhs_vardecl;
-	return unify(lhs, rhs);
+	// If the declaration is ill typed, there is no solution
+	if (not _variables.is_well_typed())
+		return SolutionSet(false);
+
+	// It is well typed, perform the unification
+	return unify(_lhs, _rhs);
 }
 
 Unify::SolutionSet Unify::unify(const CHandle& lhs, const CHandle& rhs) const
@@ -355,10 +363,12 @@ Unify::SolutionSet Unify::unify(const Handle& lh, const Handle& rh,
 	if (lh->isNode() or rh->isNode()) {
 		// If one is an unquoted variable, then unifies, otherwise
 		// check their equality
-		if (lch.is_free_variable() or rch.is_free_variable()) {
+		if ((lch.is_free_variable() or rch.is_free_variable())
+			// Add this to ignore solutions like {X}->X
+			and lch != rch) {
 			return mkvarsol(lch, rch);
 		} else
-			return SolutionSet(lch.satisfiable(rch));
+			return SolutionSet(lch.is_satisfiable(rch));
 	}
 
 	////////////////////////
@@ -466,6 +476,20 @@ Unify::SolutionSet Unify::comb_unify(const std::set<CHandle>& lhs,
 	}
 	return sol;
 }
+
+Unify::SolutionSet Unify::comb_unify(const std::set<CHandle>& chs) const
+{
+	SolutionSet sol;
+	for (auto lit = chs.begin(); lit != chs.end(); ++lit) {
+		for (auto rit = std::next(lit); rit != chs.end(); ++rit) {
+			auto rs = unify(*lit, *rit);
+			sol = join(sol, rs);
+			if (not sol.satisfiable)     // Stop if unification has failed
+				return sol;
+		}
+	}
+	return sol;
+}
 	
 bool Unify::is_unordered(const Handle& h) const
 {
@@ -481,7 +505,7 @@ HandleSeq Unify::cp_erase(const HandleSeq& hs, Arity i) const
 
 Unify::SolutionSet Unify::mkvarsol(const CHandle& lch, const CHandle& rch) const
 {
-	Handle inter = type_intersection(lch, rch, _lhs_vardecl, _rhs_vardecl);
+	Handle inter = type_intersection(lch, rch);
 	if (not inter)
 		return SolutionSet(false);
 	else {
@@ -626,10 +650,10 @@ Unify::SolutionSet Unify::subunify(const TypedBlockSeq& common_blocks,
 	return sol;
 }
 
-Unify::SolutionSet Unify::subunify(const TypedBlock& lhs, const TypedBlock& rhs) const
+Unify::SolutionSet Unify::subunify(const TypedBlock& lhs,
+                                   const TypedBlock& rhs) const
 {
-	return comb_unify(set_difference(lhs.first, rhs.first),
-	                  set_difference(rhs.first, lhs.first));
+	return comb_unify(set_symmetric_difference(lhs.first, rhs.first));
 }
 
 bool Unify::is_satisfiable(const TypedBlock& block) const
@@ -722,37 +746,29 @@ HandleMap strip_context(const Unify::HandleCHandleMap& hchm)
 	return result;
 }
 
-Handle type_intersection(const Unify::CHandle& lch, const Unify::CHandle& rch,
-                         const Handle& lhs_vardecl, const Handle& rhs_vardecl)
+Handle Unify::type_intersection(const CHandle& lch, const CHandle& rch) const
 {
-	return type_intersection(lch.handle, rch.handle, lhs_vardecl, rhs_vardecl,
-	                         // TODO: do we need to use context?
-	                         lch.context.quotation, rch.context.quotation);
+	return type_intersection(lch.handle, rch.handle, lch.context, rch.context);
 }
 
-Handle type_intersection(const Handle& lhs, const Handle& rhs,
-                         const Handle& lhs_vardecl, const Handle& rhs_vardecl,
-                         Quotation lhs_quotation, Quotation rhs_quotation)
+Handle Unify::type_intersection(const Handle& lh, const Handle& rh,
+                                Context lc, Context rc) const
 {
-	if (inherit(lhs, rhs, lhs_vardecl, rhs_vardecl,
-	            lhs_quotation, rhs_quotation))
-		return lhs;
-	if (inherit(rhs, lhs, rhs_vardecl, lhs_vardecl,
-	            rhs_quotation, lhs_quotation))
-		return rhs;
+	if (inherit(lh, rh, lc, rc))
+		return lh;
+	if (inherit(rh, lh, rc, lc))
+		return rh;
 	return Handle::UNDEFINED;
 }
 
-std::set<Type> simplify_type_union(std::set<Type>& type)
+std::set<Type> Unify::simplify_type_union(std::set<Type>& type) const
 {
 	return {}; // TODO: do we really need that?
 }
 
-std::set<Type> get_union_type(const Handle& h, const Handle& vardecl)
+std::set<Type> Unify::get_union_type(const Handle& h) const
 {
-	VariableListPtr vardecl_vlp(gen_varlist(h, vardecl));
-	const Variables& variables(vardecl_vlp->get_variables());
-	const VariableTypeMap& vtm = variables._simple_typemap;
+	const VariableTypeMap& vtm = _variables._simple_typemap;
 	auto it = vtm.find(h);
 	if (it == vtm.end() or it->second.empty())
 		return {ATOM};
@@ -761,36 +777,37 @@ std::set<Type> get_union_type(const Handle& h, const Handle& vardecl)
 	}
 }
 
-bool inherit(const Handle& lhs, const Handle& rhs,
-             const Handle& lhs_vardecl, const Handle& rhs_vardecl,
-             Quotation lhs_quotation, Quotation rhs_quotation)
+bool Unify::inherit(const CHandle& lch, const CHandle& rch) const
 {
-	Type lhs_type = lhs->getType();
-	Type rhs_type = rhs->getType();
+	return inherit(lch.handle, rch.handle, lch.context, rch.context);
+}
+
+bool Unify::inherit(const Handle& lh, const Handle& rh,
+                    Context lc, Context rc) const
+{
+	Type lt = lh->getType();
+	Type rt = rh->getType();
 
 	// Recursive cases
 
 	// Consume quotations
-	if (lhs_quotation.consumable(lhs_type)) {
-		lhs_quotation.update(lhs_type);
-		return inherit(lhs->getOutgoingAtom(0), rhs, lhs_vardecl, rhs_vardecl,
-		               lhs_quotation, rhs_quotation);
+	if (lc.quotation.consumable(lt)) {
+		lc.quotation.update(lt);
+		return inherit(lh->getOutgoingAtom(0), rh, lc, rc);
 	}
-	if (rhs_quotation.consumable(rhs_type)) {
-		rhs_quotation.update(rhs_type);
-		return inherit(lhs, rhs->getOutgoingAtom(0), lhs_vardecl, rhs_vardecl,
-		               lhs_quotation, rhs_quotation);
+	if (rc.quotation.consumable(rt)) {
+		rc.quotation.update(rt);
+		return inherit(lh, rh->getOutgoingAtom(0), lc, rc);
 	}
 
 	// If both are links then check that the outgoings of lhs inherit
 	// the outgoings of rhs.
-	if (lhs->isLink() and rhs->isLink() and (lhs_type == rhs_type)) {
-		if (lhs->getArity() == rhs->getArity()) {
-			for (size_t i = 0; i < lhs->getArity(); i++) {
-				if (not inherit(lhs->getOutgoingAtom(i),
-				                rhs->getOutgoingAtom(i),
-				                lhs_vardecl, rhs_vardecl,
-				                lhs_quotation, rhs_quotation))
+	if (lh->isLink() and rh->isLink() and (lt == rt)) {
+		if (lh->getArity() == rh->getArity()) {
+			for (size_t i = 0; i < lh->getArity(); i++) {
+				if (not inherit(lh->getOutgoingAtom(i),
+				                rh->getOutgoingAtom(i),
+				                lc, rc))
 					return false;
 			}
 			return true;
@@ -799,31 +816,32 @@ bool inherit(const Handle& lhs, const Handle& rhs,
 
 	// Base cases
 
-	if (lhs == rhs)
+	// If they are equal then lh trivial inherits from rh
+	if (lh == rh)
 		return true;
 
-	if (lhs_quotation.is_unquoted() and VARIABLE_NODE == lhs_type
-	    and rhs_quotation.is_unquoted() and VARIABLE_NODE == rhs_type)
-		return inherit(get_union_type(lhs, lhs_vardecl),
-		               get_union_type(rhs, rhs_vardecl));
+	// If both are unquoted variables then look at then types (only
+	// simple types are considered for now).
+	if (lc.quotation.is_unquoted() and VARIABLE_NODE == lt
+	    and rc.quotation.is_unquoted() and VARIABLE_NODE == rt)
+		return inherit(get_union_type(lh), get_union_type(rh));
 
-	if (rhs_quotation.is_unquoted() and VARIABLE_NODE == rhs_type)
-		return gen_varlist(rhs, rhs_vardecl)->is_type(rhs, lhs);
+	// If only rh is a variable, if its in _variable then check
+	// whether lh type inherits from it (using Variables::is_type),
+	// otherwise assume rh is the top type and thus anything inherits
+	// from it.
+	if (rc.quotation.is_unquoted() and VARIABLE_NODE == rt)
+        return not _variables.is_in_varset(rh) or _variables.is_type(rh, lh);
 
 	return false;
 }
 
-bool inherit(const Handle& lhs, const Handle& rhs)
-{
-	return VARIABLE_NODE == rhs->getType() or lhs == rhs;
-}
-
-bool inherit(Type lhs, Type rhs)
+bool Unify::inherit(Type lhs, Type rhs) const
 {
 	return classserver().isA(lhs, rhs);
 }
 
-bool inherit(Type lhs, const std::set<Type>& rhs)
+bool Unify::inherit(Type lhs, const std::set<Type>& rhs) const
 {
 	for (Type ty : rhs)
 		if (inherit(lhs, ty))
@@ -831,7 +849,7 @@ bool inherit(Type lhs, const std::set<Type>& rhs)
 	return false;
 }
 
-bool inherit(const std::set<Type>& lhs, const std::set<Type>& rhs)
+bool Unify::inherit(const std::set<Type>& lhs, const std::set<Type>& rhs) const
 {
 	for (Type ty : lhs)
 		if (not inherit(ty, rhs))
@@ -883,6 +901,13 @@ VariableListPtr gen_varlist(const Handle& h, const Handle& vardecl)
 	}
 }
 
+Variables merge_variables(const Variables& lhs, const Variables& rhs)
+{
+	Variables new_vars(lhs);
+	new_vars.extend(rhs);
+	return new_vars;
+}
+
 Handle merge_vardecl(const Handle& lhs_vardecl, const Handle& rhs_vardecl)
 {
 	if (not lhs_vardecl)
@@ -894,11 +919,8 @@ Handle merge_vardecl(const Handle& lhs_vardecl, const Handle& rhs_vardecl)
 		lhs_vl(lhs_vardecl),
 		rhs_vl(rhs_vardecl);
 
-	const Variables& lhs_vars = lhs_vl.get_variables();
-	Variables new_vars = rhs_vl.get_variables();
-
-	new_vars.extend(lhs_vars);
-
+	Variables new_vars =
+		merge_variables(lhs_vl.get_variables(), rhs_vl.get_variables());
 	return new_vars.get_vardecl();
 }
 
