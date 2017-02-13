@@ -31,6 +31,7 @@
 #include <opencog/atoms/base/Handle.h>
 #include <opencog/atoms/base/atom_types.h>
 #include <opencog/atoms/base/Quotation.h>
+#include <opencog/atoms/core/Variables.h>
 #include <opencog/atoms/core/VariableList.h>
 #include <opencog/atoms/pattern/BindLink.h>
 #include <opencog/atomutils/TypeUtils.h>
@@ -39,6 +40,8 @@ namespace opencog {
 
 class Unify
 {
+	friend class UnifyUTest;
+
 public:
 	// A context holds the quotation state and the current shadowing
 	// variables of a atom (typically coming from ancestor scopes).
@@ -111,7 +114,7 @@ public:
 		 * restricted sense, it only covers the cases where atoms are
 		 * equal and have the same free variables.
 		 */
-		bool satisfiable(const CHandle& ch) const;
+		bool is_satisfiable(const CHandle& ch) const;
 
 		/**
 		 * Comparison.
@@ -165,6 +168,14 @@ public:
 	typedef TypedSubstitutions::value_type TypedSubstitution;
 
 	/**
+	 * Ctor. Initialize for the unification of lhs and rhs, with
+	 * respective variable declarations lhs_vardecl and rhs_vardecl.
+	 */
+	Unify(const Handle& lhs, const Handle& rhs,
+	      const Handle& lhs_vardecl=Handle::UNDEFINED,
+	      const Handle& rhs_vardecl=Handle::UNDEFINED);
+
+	/**
 	 * Generate typed substitution rules, given a satisfiable
 	 * SolutionSet and the term from which to select the variables as
 	 * values in case multiple choices are possible.
@@ -173,20 +184,14 @@ public:
 	 * they will be filled with free variables in case they are empty.
 	 */
 	TypedSubstitutions typed_substitutions(const SolutionSet& sol,
-	                                       const Handle& pre,
-	                                       const Handle& lhs=Handle::UNDEFINED,
-	                                       const Handle& rhs=Handle::UNDEFINED,
-	                                       Handle lhs_vardecl=Handle::UNDEFINED,
-	                                       Handle rhs_vardecl=Handle::UNDEFINED) const;
+	                                       const Handle& pre) const;
 
 	/**
 	 * Like typed_substitutions but generate a single typed
 	 * substitution of a supposedly satisfiable partition.
 	 */
 	TypedSubstitution typed_substitution(const Partition& partition,
-	                                     const Handle& pre,
-	                                     const Handle& lhs_vardecl,
-	                                     const Handle& rhs_vardecl) const;
+	                                     const Handle& pre) const;
 
 	/**
 	 * Calculate the closure of a typed substitution. That is apply
@@ -223,35 +228,35 @@ public:
 	 *
 	 * No other use of quotation is assumed besides the 2 above.
 	 */
-	BindLinkPtr consume_ill_quotations(BindLinkPtr bl) const;
-	Handle consume_ill_quotations(const Variables& variables, Handle h,
-	                              Quotation quotation=Quotation(),
-	                              bool escape=false /* ignore the next
-	                                                 * quotation
-	                                                 * consumption */) const;
+	static BindLinkPtr consume_ill_quotations(BindLinkPtr bl);
+	static Handle consume_ill_quotations(const Variables& variables, Handle h,
+	                                     Quotation quotation=Quotation(),
+	                                     bool escape=false /* ignore the next
+	                                                        * quotation
+	                                                        * consumption */);
 
 	/**
 	 * Return true iff the variable declaration of local_scope is a
 	 * variable of variables wrapped in a UnquoteLink.
 	 */
-	bool is_bound_to_ancestor(const Variables& variables,
-	                          const Handle& local_scope) const;
+	static bool is_bound_to_ancestor(const Variables& variables,
+	                                 const Handle& local_scope);
 
 	/**
 	 * Return true iff the handle or type correspond to a pattern
 	 * matcher connector.
 	 */
-	bool is_pm_connector(const Handle& h) const;
-	bool is_pm_connector(Type t) const;
+	static bool is_pm_connector(const Handle& h);
+	static bool is_pm_connector(Type t);
 
 	/**
 	 * Given a typed substitution, perform the substitution over a scope
 	 * link (for now only BindLinks are supported).
 	 */
-	Handle substitute(BindLinkPtr bl, const TypedSubstitution& ts) const;
+	static Handle substitute(BindLinkPtr bl, const TypedSubstitution& ts);
 
 	/**
-	 * This algorithm perform unification by recursively
+	 * Perform unification by recursively
 	 *
 	 * 1. Generate all equality partitions
 	 *
@@ -325,14 +330,26 @@ public:
 	 * A and Y unifies to B, and another one where X unifies to B and Y
 	 * unifies to A.
 	 */
-	SolutionSet operator()(const Handle& lhs, const Handle& rhs,
-	                       const Handle& lhs_vardecl=Handle::UNDEFINED,
-	                       const Handle& rhs_vardecl=Handle::UNDEFINED);
+	SolutionSet operator()();
 
 private:
-	Handle _lhs_vardecl;
-	Handle _rhs_vardecl;
+	// Terms to unify
+	Handle _lhs;
+	Handle _rhs;
 
+	// Common variable declaration of the two terms to unify.
+	Variables _variables;
+
+public:                         // ???? It's a friend yet
+	/**
+	 * Set Unify::_variables given the variable declarations of the
+	 * two terms to unify.
+	 */
+	void set_variables(const Handle& lhs, const Handle& rhs,
+	                   const Handle& lhs_vardecl=Handle::UNDEFINED,
+	                   const Handle& rhs_vardecl=Handle::UNDEFINED);
+
+private:
 	/**
 	 * Find the least abstract atom in the given block.
 	 */
@@ -341,8 +358,10 @@ private:
 	/**
 	 * Unify lhs and rhs. _lhs_vardecl and _rhs_vardecl should be set
 	 * prior to run this method.
+	 *
+	 * Could probably optimize by memoizing unify, due to subunify
+	 * being called redundantly.
 	 */
-	// TODO: replace quotation by context
 	SolutionSet unify(const CHandle& lhs, const CHandle& rhs) const;
 	SolutionSet unify(const Handle& lhs, const Handle& rhs,
 	                  Context lhs_context=Context(),
@@ -352,7 +371,6 @@ private:
 	 * Unify all elements of lhs with all elements of rhs, considering
 	 * all permutations.
 	 */
-	// TODO: replace quotation by context
 	SolutionSet unordered_unify(const HandleSeq& lhs, const HandleSeq& rhs,
 	                            Context lhs_context=Context(),
 	                            Context rhs_context=Context()) const;
@@ -361,7 +379,6 @@ private:
 	 * Unify all elements of lhs with all elements of rhs, in the
 	 * provided order.
 	 */
-	// TODO: replace quotation by context
 	SolutionSet ordered_unify(const HandleSeq& lhs, const HandleSeq& rhs,
 	                          Context lhs_context=Context(),
 	                          Context rhs_context=Context()) const;
@@ -372,6 +389,11 @@ private:
 	 */
 	SolutionSet comb_unify(const std::set<CHandle>& lhs,
 	                       const std::set<CHandle>& rhs) const;
+
+	/**
+	 * Unify all pairs of elements in chs.
+	 */
+	SolutionSet comb_unify(const std::set<CHandle>& chs) const;
 
 	/**
 	 * Return if the atom is an unordered link.
@@ -393,8 +415,6 @@ private:
 
 public:                         // TODO: being friend with UnifyUTest
                                 // somehow doesn't work
-	friend class UnifyUTest;
-
 	/**
 	 * Join 2 solution sets. Generate the product of all consistent
 	 * solutions (with partitions so that all blocks are typed with a
@@ -449,8 +469,6 @@ private:
 	/**
 	 * Unify all terms that are not in the intersection of block and
 	 * each block of common_blocks.
-	 *
-	 * TODO: should probably support quotation.
 	 */
 	SolutionSet subunify(const TypedBlockSeq& common_blocks,
 	                     const TypedBlock& block) const;
@@ -458,8 +476,6 @@ private:
 	/**
 	 * Unify all terms that are not in the intersection of blocks lhs
 	 * and rhs.
-	 *
-	 * TODO: should probably support quotation.
 	 */
 	SolutionSet subunify(const TypedBlock& lhs, const TypedBlock& rhs) const;
 
@@ -468,6 +484,89 @@ private:
 	 * block is non satisfiable if it's type is undefined (bottom).
 	 */
 	bool is_satisfiable(const TypedBlock& block) const;
+
+	/**
+	 * Calculate type intersection. For example: say you have for a block
+	 * with
+	 *
+	 * X
+	 * ListLink(Y)
+	 * ListLink(Z)
+	 *
+	 * meaning that X is equal to ListLink Y which is equal to ListLink Z,
+	 * each having the following types at that point (i.e. not having
+	 * reached the fixed point yet)
+	 *
+	 * X:Atom
+	 * ListLink(Y):ListLink(Atom)
+	 * ListLink(Z):ListLink(Atom)
+	 *
+	 * then their type intersection will be
+	 *
+	 * ListLink(Atom)
+	 *
+	 * which is supposed to represent the set of all potential groundings
+	 * that may satisfy that block.
+	 *
+	 * TODO: For now though it's only a very limited type intersection,
+	 *       should support structural types, etc.
+	 *
+	 * TODO: This can be probably by optimized by using VariableListPtr
+	 *       instead of Handle, so we don't rebuild it every time.
+	 */
+	Handle type_intersection(const CHandle& lch, const CHandle& rch) const;
+public:
+	Handle type_intersection(const Handle& lh, const Handle& rh,
+	                         Context lc=Context(), Context rc=Context()) const;
+private:
+
+	/**
+	 * Return a simplification of a type union, by eliminating all types
+	 * that are redundant. For instance
+	 *
+	 * {Node, ConceptNode, ListLink}
+	 *
+	 * would return
+	 *
+	 * {Node, ListLink}
+	 *
+	 * As ConceptNode inherits Node.
+	 */
+	std::set<Type> simplify_type_union(std::set<Type>& type) const;
+
+	/**
+	 * Return the union type of a variable. If the variable
+	 * declaration is empty (Handle::UNDEFINED) then the union type is
+	 * not empty, instead it contains the singleton {ATOM}. An empty
+	 * union type would instead mean the bottom type (that nothing can
+	 * inherit).
+	 */
+	std::set<Type> get_union_type(const Handle& h) const;
+
+	/**
+	 * Return true if lhs inherit rhs. If lhs is not a variable then it
+	 * relays that to VariableList::is_type, otherwise their type
+	 * declarations are compared.
+	 */
+	bool inherit(const CHandle& lhs, const CHandle& rhs) const;
+	bool inherit(const Handle& lhs, const Handle& rhs,
+	             Context lc=Context(), Context rc=Context()) const;
+
+	/**
+	 * Return true if lhs inherits rhs.
+	 */
+	bool inherit(Type lhs, Type rhs) const;
+
+	/**
+	 * Return true if a type inherits a type union.
+	 */
+	bool inherit(Type lhs, const std::set<Type>& rhs) const;
+
+	/**
+	 * Return true if lhs inherits rhs. That is if all elements of lhs
+	 * inherits rhs.
+	 */
+	bool inherit(const std::set<Type>& lhs, const std::set<Type>& rhs) const;
 };
 
 /**
@@ -487,99 +586,6 @@ bool tss_content_eq(const Unify::TypedSubstitutions& lhs,
  * Strip the context from hchm.
  */
 HandleMap strip_context(const Unify::HandleCHandleMap& hchm);
-
-/**
- * Calculate type intersection. For example: say you have for a block
- * with
- *
- * X
- * ListLink(Y)
- * ListLink(Z)
- *
- * meaning that X is equal to ListLink Y which is equal to ListLink Z,
- * each having the following types at that point (i.e. not having
- * reached the fixed point yet)
- *
- * X:Atom
- * ListLink(Y):ListLink(Atom)
- * ListLink(Z):ListLink(Atom)
- *
- * then their type intersection will be
- *
- * ListLink(Atom)
- *
- * which is supposed to represent the set of all potential groundings
- * that may satisfy that block.
- *
- * TODO: For now though it's only a very limited type intersection,
- *       should support structural types, etc.
- *
- * TODO: This can be probably by optimized by using VariableListPtr
- *       instead of Handle, so we don't rebuild it every time.
- */
-Handle type_intersection(const Unify::CHandle& lch, const Unify::CHandle& rch,
-                         const Handle& lhs_vardecl, const Handle& rhs_vardecl);
-Handle type_intersection(const Handle& lhs, const Handle& rhs,
-                         const Handle& lhs_vardecl=Handle::UNDEFINED,
-                         const Handle& rhs_vardecl=Handle::UNDEFINED,
-                         Quotation lhs_quotation=Quotation(),
-                         Quotation rhs_quotation=Quotation());
-
-/**
- * Return a simplification of a type union, by eliminating all types
- * that are redundant. For instance
- *
- * {Node, ConceptNode, ListLink}
- *
- * would return
- *
- * {Node, ListLink}
- *
- * As ConceptNode inherits Node.
- */
-std::set<Type> simplify_type_union(std::set<Type>& type);
-
-/**
- * Return the union type of a variable given its variable declaration.
- * If the variable declaration is empty (Handle::UNDEFINED) then the
- * union type is not empty, instead it contains the singleton
- * {ATOM}. An empty union type would instead mean the bottom type
- * (that nothing can inherit).
- */
-std::set<Type> get_union_type(const Handle& h, const Handle& vardecl);
-
-/**
- * Return true if lhs inherit rhs. If lhs is not a variable then it
- * relays that to VariableList::is_type, otherwise their type
- * declarations are compared.
- */
-bool inherit(const Handle& lhs, const Handle& rhs,
-             const Handle& lhs_vardecl, const Handle& rhs_vardecl,
-             Quotation lhs_quotation=Quotation(),
-             Quotation rhs_quotation=Quotation());
-
-/**
- * Extreme crude version of the above when we have no variable
- * declarations. Basically 2 variables inherits each other and a non
- * variable inherits a variable. Everything else return false.
- */
-bool inherit(const Handle& lhs, const Handle& rhs);
-
-/**
- * Return true if lhs inherits rhs.
- */
-bool inherit(Type lhs, Type rhs);
-
-/**
- * Return true if a type inherits a type union.
- */
-bool inherit(Type lhs, const std::set<Type>& rhs);
-
-/**
- * Return true if lhs inherits rhs. That is if all elements of lhs
- * inherits rhs.
- */
-bool inherit(const std::set<Type>& lhs, const std::set<Type>& rhs);
 
 /**
  * Generate a VariableList of the free variables of a given atom h.
@@ -607,7 +613,8 @@ VariableListPtr gen_varlist(const Handle& h, const Handle& vardecl);
  *
  * TODO: give example.
  */
-Handle merge_vardecl(const Handle& lhs_vardecl, const Handle& rhs_vardecl);
+Variables merge_variables(const Variables& lv, const Variables& rv);
+Handle merge_vardecl(const Handle& l_vardecl, const Handle& r_vardecl);
 
 std::string oc_to_string(const Unify::Context& c);
 std::string oc_to_string(const Unify::CHandle& ch);
