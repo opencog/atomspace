@@ -308,8 +308,7 @@ RuleSet Rule::unify_source(const Handle& source,
 	return {};
 }
 
-RuleSet Rule::unify_target(const Handle& target,
-                           const Handle& vardecl) const
+RuleSet Rule::unify_target(const Handle& target, const Handle& vardecl) const
 {
 	// If the rule's handle has not been set yet
 	if (!_rule)
