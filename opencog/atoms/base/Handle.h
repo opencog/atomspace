@@ -126,10 +126,14 @@ public:
         return _ptr.get();
     }
 
+	//! To be deprecated. You may use implicit bool conversion
+	//! instead. See bool() below.
     inline bool is_defined() const {
         return *this != Handle::UNDEFINED;
     }
 
+	//! To be deprecated. You may use implicit bool conversion
+	//! instead. See bool() below.
     inline bool is_undefined() const {
         return *this == Handle::UNDEFINED;
     }
