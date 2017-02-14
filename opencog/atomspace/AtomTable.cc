@@ -496,15 +496,6 @@ Handle AtomTable::add(AtomPtr atom, bool async)
     if (in_environ(atom))
         return atom->getHandle();
 
-    // Lock before checking to see if this kind of atom can already
-    // be found in the atomspace.  We need to lock here, to avoid two
-    // different threads from trying to add exactly the same atom.
-    std::unique_lock<std::recursive_mutex> lck(_mtx);
-
-    // Check again, under the lock this time.
-    if (in_environ(atom))
-        return atom->getHandle();
-
     // Factory implements C++ atom types.
     AtomPtr orig(atom);
     Type atom_type = atom->getType();
@@ -512,16 +503,6 @@ Handle AtomTable::add(AtomPtr atom, bool async)
 
     // Certain DeleteLinks can never be added!
     if (nullptr == atom) return Handle();
-
-    // Is the equivalent of this atom already in the table?  If so,
-    // then return the existing atom.  Note that this 'existing'
-    // atom might be in a parent atomspace.
-    Handle hexist(getHandle(atom));
-    if (hexist) return hexist;
-
-    // Sometimes one inserts an atom that was previously deleted.
-    // In this case, the removal flag might still be set. Clear it.
-    atom->unsetRemovalFlag();
 
     // If this atom is in some other atomspace or not in any atomspace,
     // then we need to clone it. We cannot insert it into this atomtable
@@ -541,7 +522,21 @@ Handle AtomTable::add(AtomPtr atom, bool async)
         }
         atom = createLink(atom_type, closet, atom->getTruthValue());
         atom = clone_factory(atom_type, atom);
+    }
 
+    // Clone, if we haven't done so already. We MUST maintain our own
+    // private copy of the atom, else crazy things go wrong.
+    else if (atom == orig)
+        atom = clone_factory(atom_type, atom);
+
+    // Lock before checking to see if this kind of atom is already in
+    // the atomspace.  Lock, to prevent two different threads from
+    // trying to add exactly the same atom.
+    std::unique_lock<std::recursive_mutex> lck(_mtx);
+    Handle hcheck(getHandle(orig));
+    if (hcheck) return hcheck;
+
+    if (atom->isLink()) {
         if (STATE_LINK == atom_type) {
             // If this is a closed StateLink, (i.e. has no variables)
             // then make sure that the old state gets removed from the
@@ -571,11 +566,6 @@ Handle AtomTable::add(AtomPtr atom, bool async)
             llc->_outgoing[i]->insert_atom(llc);
         }
     }
-
-    // Clone, if we haven't done so already. We MUST maintain our own
-    // private copy of the atom, else crazy things go wrong.
-    else if (atom == orig)
-        atom = clone_factory(atom_type, atom);
 
     atom->keep_incoming_set();
     atom->setAtomTable(this);
