@@ -187,10 +187,6 @@ Handle AndBIT::expand_fcs(const Handle& leaf, const Rule& rule) const
 		noutgoings.insert(noutgoings.begin(), nvardecl);
 	nfcs = fcs->getAtomSpace()->add_link(BIND_LINK, noutgoings);
 
-	LAZY_BC_LOG_DEBUG << "Expanded forward chainer strategy:" << std::endl
-	                  << "from:" << std::endl << fcs
-	                  << "to:" << std::endl << nfcs;
-
 	return nfcs;
 }
 
