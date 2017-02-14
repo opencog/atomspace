@@ -259,9 +259,9 @@ Handle filter_vardecl(const Handle& vardecl, const HandleSeq& hs)
 {
 	// Base cases
 
-	if (vardecl.is_undefined())
+	if (not vardecl)
 		// Return Handle::UNDEFINED to indicate that this variable
-		// declaration is useless.
+		// declaration is nonexistent.
 		return Handle::UNDEFINED;
 
 	Type t = vardecl->getType();
@@ -277,7 +277,7 @@ Handle filter_vardecl(const Handle& vardecl, const HandleSeq& hs)
 	{
 		Handle var = vardecl->getOutgoingAtom(0);
 		Type t = var->getType();
-		if (t == VARIABLE_NODE and filter_vardecl(var, hs).is_defined())
+		if (t == VARIABLE_NODE and filter_vardecl(var, hs))
 			return vardecl;
 	}
 
@@ -286,7 +286,7 @@ Handle filter_vardecl(const Handle& vardecl, const HandleSeq& hs)
 		HandleSeq subvardecls;
 		for (const Handle& v : vardecl->getOutgoingSet())
 		{
-			if (filter_vardecl(v, hs).is_defined())
+			if (filter_vardecl(v, hs))
 				subvardecls.push_back(v);
 		}
 		if (subvardecls.empty() and get_free_variables(hs).empty())
