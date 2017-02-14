@@ -496,6 +496,13 @@ Handle AtomTable::add(AtomPtr atom, bool async)
     if (in_environ(atom))
         return atom->getHandle();
 
+    // Is the equivalent of this atom already in the table?  If so,
+    // then return the existing atom.  Note that this 'existing'
+    // atom might be in a parent atomspace. We will double-check
+    // later, while holding a lock.
+    Handle hexist(getHandle(atom));
+    if (hexist) return hexist;
+
     // Factory implements C++ atom types.
     AtomPtr orig(atom);
     Type atom_type = atom->getType();
@@ -529,16 +536,12 @@ Handle AtomTable::add(AtomPtr atom, bool async)
     else if (atom == orig)
         atom = clone_factory(atom_type, atom);
 
-    // Lock before checking to see if this kind of atom can already
-    // be found in the atomspace.  We need to lock here, to avoid two
-    // different threads from trying to add exactly the same atom.
+    // Lock before re-checking to see if this kind of atom is already
+    // in the atomspace.  Lock, to prevent two different threads from
+    // trying to add exactly the same atom.
     std::unique_lock<std::recursive_mutex> lck(_mtx);
-
-    // Is the equivalent of this atom already in the table?  If so,
-    // then return the existing atom.  Note that this 'existing'
-    // atom might be in a parent atomspace.
-    Handle hexist(getHandle(orig));
-    if (hexist) return hexist;
+    Handle hcheck(getHandle(orig));
+    if (hcheck) return hcheck;
 
     if (atom->isLink()) {
         if (STATE_LINK == atom_type) {
