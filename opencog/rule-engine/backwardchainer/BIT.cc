@@ -178,8 +178,9 @@ Handle AndBIT::expand_fcs(const Handle& leaf, const Rule& rule) const
 	Handle nrewrite = expand_fcs_rewrite(nfcs_rewrite, rule);
 
 	// Generate new vardecl
-	Handle nvardecl = filter_vardecl(merge_vardecl(nfcs_vardecl, rule_vardecl),
-	                                 {npattern, nrewrite});
+    // TODO: is this merging necessary?
+	Handle merged_vardecl = merge_vardecl(nfcs_vardecl, rule_vardecl);
+	Handle nvardecl = filter_vardecl(merged_vardecl, {npattern, nrewrite});
 
 	// Generate new atomese forward chaining strategy
 	HandleSeq noutgoings({npattern, nrewrite});
@@ -265,15 +266,17 @@ Handle AndBIT::substitute_unified_variables(const Handle& leaf,
 		return fcs;
 
 	BindLinkPtr fcs_bl(BindLinkCast(fcs));
-	Handle leaf_vardecl = filter_vardecl(fcs_bl->get_vardecl(), leaf),
+	// We don't want to filter leaf_vardecl because the resulting
+	// merged variable declaration may then miss variables that are
+	// not in the leaf yet present in the fcs.
+	Handle leaf_vardecl = fcs_bl->get_vardecl(),
 		conclusion_vardecl = rule.get_vardecl();
 	Unify unify(leaf, conclusion, leaf_vardecl, conclusion_vardecl);
 	Unify::SolutionSet sol = unify();
 
 	OC_ASSERT(sol.satisfiable); // If the rule has been selected it
                                 // has to be satisfiable
-	Unify::TypedSubstitutions tss =
-		unify.typed_substitutions(sol, leaf);
+	Unify::TypedSubstitutions tss = unify.typed_substitutions(sol, leaf);
 	OC_ASSERT(not tss.empty());
 	auto ts = *tss.begin();
 	return Handle(Unify::substitute(fcs_bl, ts));
