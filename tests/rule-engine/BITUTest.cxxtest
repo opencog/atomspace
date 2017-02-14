@@ -995,8 +995,8 @@ void BITUTest::test_expand_1()
 
 void BITUTest::test_expand_2()
 {
-	AndBIT andbit(
-		_eval.eval_h("(BindLink"
+    Handle fcs =
+ 		_eval.eval_h("(BindLink"
 		             "  (VariableList"
 		             "    (TypedVariableLink"
 		             "      (VariableNode \"$B-732fec2a\")"
@@ -1252,21 +1252,68 @@ void BITUTest::test_expand_2()
 		             "      )"
 		             "    )"
 		             "  )"
-		             ")"));
+		             ")");
+
+	AndBIT andbit(fcs);
 
 	Handle leaf = _eval.eval_h("(ImplicationLink"
 	                           "  (VariableNode \"$B-531e6c5d\")"
 	                           "  (VariableNode \"$B-edaffcb\")"
 	                           ")");
 
-	Rule implication_and_lambda_factorization_rule(lambda_closed_construction_rule_h);
-	RuleSet rules = implication_and_lambda_factorization_rule.unify_target(leaf);
+    Handle vardecl =
+        _eval.eval_h("(VariableList"
+		             "  (TypedVariableLink"
+		             "    (VariableNode \"$B-732fec2a\")"
+		             "    (TypeChoice"
+		             "      (TypeNode \"OrLink\")"
+		             "      (TypeNode \"AndLink\")"
+		             "      (TypeNode \"LambdaLink\")"
+		             "      (TypeNode \"NotLink\")"
+		             "      (TypeNode \"PredicateNode\")"
+		             "    )"
+		             "  )"
+		             "  (TypedVariableLink"
+		             "    (VariableNode \"$B-edaffcb\")"
+		             "    (TypeChoice"
+		             "      (TypeNode \"OrLink\")"
+		             "      (TypeNode \"AndLink\")"
+		             "      (TypeNode \"LambdaLink\")"
+		             "      (TypeNode \"NotLink\")"
+		             "      (TypeNode \"PredicateNode\")"
+		             "    )"
+		             "  )"
+		             "  (TypedVariableLink"
+		             "    (VariableNode \"$B-531e6c5d\")"
+		             "    (TypeChoice"
+		             "      (TypeNode \"OrLink\")"
+		             "      (TypeNode \"AndLink\")"
+		             "      (TypeNode \"LambdaLink\")"
+		             "      (TypeNode \"NotLink\")"
+		             "      (TypeNode \"PredicateNode\")"
+		             "    )"
+		             "  )"
+		             ")");
+
+	Rule implication_and_lambda_factorization_rule(implication_and_lambda_factorization_rule_h);
+	RuleSet rules =
+        implication_and_lambda_factorization_rule.unify_target(leaf, vardecl);
 	Rule rule = *rules.begin();
 
 	AndBIT result = andbit.expand(leaf, rule);
 	AndBIT expected(
 		_eval.eval_h("(BindLink"
 		             "  (VariableList"
+		             "    (TypedVariableLink"
+		             "      (VariableNode \"$B-732fec2a\")"
+		             "      (TypeChoice"
+		             "        (TypeNode \"OrLink\")"
+		             "        (TypeNode \"AndLink\")"
+		             "        (TypeNode \"LambdaLink\")"
+		             "        (TypeNode \"NotLink\")"
+		             "        (TypeNode \"PredicateNode\")"
+		             "      )"
+		             "    )"
 		             "    (TypedVariableLink"
 		             "      (VariableNode \"$TyVs-5c1f7467\")"
 		             "      (TypeChoice"
