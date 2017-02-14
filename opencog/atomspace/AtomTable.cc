@@ -515,10 +515,6 @@ Handle AtomTable::add(AtomPtr atom, bool async)
     Handle hexist(getHandle(atom));
     if (hexist) return hexist;
 
-    // Sometimes one inserts an atom that was previously deleted.
-    // In this case, the removal flag might still be set. Clear it.
-    atom->unsetRemovalFlag();
-
     // If this atom is in some other atomspace or not in any atomspace,
     // then we need to clone it. We cannot insert it into this atomtable
     // as-is.  (We already know that its not in this atomspace, or its
