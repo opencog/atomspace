@@ -133,7 +133,7 @@ int min_quotation_level(const Handle& tree,
                         Quotation quotation)
 {
 	// Base case
-	if (tree == atom) return quotation.level();
+	if (content_eq(tree, atom)) return quotation.level();
 	if (not tree->isLink()) return std::numeric_limits<int>::max();
 
 	// Recursive case
@@ -163,7 +163,7 @@ int max_quotation_level(const Handle& tree,
 bool is_unscoped_in_tree(const Handle& tree, const Handle& atom)
 {
 	// Base cases
-	if (tree == atom) return true;
+	if (content_eq(tree, atom)) return true;
 	if (not tree->isLink()) return false;
 	ScopeLinkPtr stree(ScopeLinkCast(tree));
 	if (nullptr != stree) {
