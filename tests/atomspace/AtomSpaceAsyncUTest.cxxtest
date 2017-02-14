@@ -707,9 +707,8 @@ public:
         __totalPurged = 0;
         __altTotalPurged = 0;
 
-        boost::signals2::connection del =
-            atomSpace->removeAtomSignal(boost::bind(&AtomSpaceAsyncUTest::countAtomPurged, this, _1));
-            atomSpace->removeAtomSignal(boost::bind(&AtomSpaceAsyncUTest::simpleCountPurged, this, _1));
+        atomSpace->removeAtomSignal(boost::bind(&AtomSpaceAsyncUTest::countAtomPurged, this, _1));
+        atomSpace->removeAtomSignal(boost::bind(&AtomSpaceAsyncUTest::simpleCountPurged, this, _1));
 
         spinwait = true;
         std::vector<std::thread> thread_pool;

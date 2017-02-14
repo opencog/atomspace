@@ -496,15 +496,6 @@ Handle AtomTable::add(AtomPtr atom, bool async)
     if (in_environ(atom))
         return atom->getHandle();
 
-    // Lock before checking to see if this kind of atom can already
-    // be found in the atomspace.  We need to lock here, to avoid two
-    // different threads from trying to add exactly the same atom.
-    std::unique_lock<std::recursive_mutex> lck(_mtx);
-
-    // Check again, under the lock this time.
-    if (in_environ(atom))
-        return atom->getHandle();
-
     // Factory implements C++ atom types.
     AtomPtr orig(atom);
     Type atom_type = atom->getType();
@@ -512,6 +503,11 @@ Handle AtomTable::add(AtomPtr atom, bool async)
 
     // Certain DeleteLinks can never be added!
     if (nullptr == atom) return Handle();
+
+    // Lock before checking to see if this kind of atom can already
+    // be found in the atomspace.  We need to lock here, to avoid two
+    // different threads from trying to add exactly the same atom.
+    std::unique_lock<std::recursive_mutex> lck(_mtx);
 
     // Is the equivalent of this atom already in the table?  If so,
     // then return the existing atom.  Note that this 'existing'
