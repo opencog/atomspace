@@ -626,13 +626,18 @@ Unify::TypedBlock Unify::join(const TypedBlockSeq& common_blocks,
                          const TypedBlock& block) const
 {
 	std::pair<Block, Handle> result{block};
-	for (const auto& c_block : common_blocks)
+	for (const auto& c_block : common_blocks) {
 		result =  join(result, c_block);
+        // Abort if unsatisfiable
+        if (not is_satisfiable(result))
+            return result;
+    }
 	return result;
 }
 
 Unify::TypedBlock Unify::join(const TypedBlock& lhs, const TypedBlock& rhs) const
 {
+    OC_ASSERT(lhs.second and rhs.second, "Can only join 2 satisfiable blocks");
 	return {set_union(lhs.first, rhs.first),
 			type_intersection(lhs.second, rhs.second)};
 }
