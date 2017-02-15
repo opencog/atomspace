@@ -481,12 +481,17 @@ private:
 
 	/**
 	 * Return true if a unification block is satisfiable. A unification
-	 * block is non satisfiable if it's type is undefined (bottom).
+	 * block is not satisfiable if it's type is undefined (bottom).
 	 */
 	bool is_satisfiable(const TypedBlock& block) const;
 
 	/**
-	 * Calculate type intersection. For example: say you have for a block
+	 * Calculate type intersection.
+     *
+     * What we would like:
+     * ==================
+     *
+     * For example: say you have for a block
 	 * with
 	 *
 	 * X
@@ -508,11 +513,25 @@ private:
 	 * which is supposed to represent the set of all potential groundings
 	 * that may satisfy that block.
 	 *
-	 * TODO: For now though it's only a very limited type intersection,
-	 *       should support structural types, etc.
-	 *
-	 * TODO: This can be probably by optimized by using VariableListPtr
-	 *       instead of Handle, so we don't rebuild it every time.
+     * What we have:
+     * ============
+     *
+     * The type is represented by the term itself. For instance, to
+	 * take the example above, the terms and their types are
+     *
+	 * X:X
+	 * ListLink(Y):ListLink(Y)
+	 * ListLink(Z):ListLink(Z)
+     *
+     * and their intersection is the most restricted one, for that one
+     * looks at the type declarations of X, Y and Z. So assuming that
+     * Y has type Node and Z has type ConceptNode, then Z is most
+     * resticted, so the result of their intersection will be
+     *
+     * ListLink(Z)
+     *
+     * In case the intersection is empty, then Handle::UNDEFINED is
+     * returned.
 	 */
 	Handle type_intersection(const CHandle& lch, const CHandle& rch) const;
 public:
