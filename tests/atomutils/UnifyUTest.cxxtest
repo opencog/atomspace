@@ -107,6 +107,8 @@ public:
 	void test_unify_complex_2();
 	void test_unify_complex_3();
 	void test_unify_complex_4();
+	void test_unify_complex_5();
+	void test_unify_complex_6();
 };
 
 void UnifyUTest::setUp(void)
@@ -1161,6 +1163,232 @@ void UnifyUTest::test_unify_complex_4()
 								               implicant_body},
 						                      {{Q, quoted_LA2},
 								               quoted_LA2}}});
+
+	std::cout << "result = " << oc_to_string(result) << std::endl;
+	std::cout << "expected = " << oc_to_string(expected) << std::endl;
+
+	TS_ASSERT_EQUALS(result, expected);
+}
+
+void UnifyUTest::test_unify_complex_5()
+{
+	Handle target =
+        _eval.eval_h("(LambdaLink"
+                     "  (TypedVariableLink"
+                     "    (VariableNode \"$X\")"
+                     "    (TypeNode \"ConceptNode\")"
+                     "  )"
+                     "  (VariableNode \"$Q-496643b4\")"
+                     ")");
+
+	Handle alpha_pat =
+        _eval.eval_h("(QuoteLink"
+                     "  (LambdaLink"
+                     "    (UnquoteLink"
+                     "      (VariableNode \"$TyVs-3e93b595\")"
+                     "    )"
+                     "    (UnquoteLink"
+                     "      (VariableNode \"$A2-76df4103\")"
+                     "    )"
+                     "  )"
+                     ")");
+
+	Handle vardecl =
+        _eval.eval_h("(VariableNode \"$Q-496643b4\")");
+
+	Handle alpha_vardecl =
+        _eval.eval_h("(VariableList"
+                     "  (TypedVariableLink"
+                     "    (VariableNode \"$TyVs-3e93b595\")"
+                     "    (TypeChoice"
+                     "      (TypeNode \"TypedVariableLink\")"
+                     "      (TypeNode \"VariableNode\")"
+                     "      (TypeNode \"VariableList\")"
+                     "    )"
+                     "  )"
+                     "  (TypedVariableLink"
+                     "    (VariableNode \"$A2-76df4103\")"
+                     "    (TypeNode \"EvaluationLink\")"
+                     "  )"
+                     ")");
+
+	Handle Q = _eval.eval_h("(VariableNode \"$Q-496643b4\")");
+	Handle TyVs = _eval.eval_h("(VariableNode \"$TyVs-3e93b595\")");
+	Handle A2 = _eval.eval_h("(VariableNode \"$A2-76df4103\")");
+
+	Handle lambda_vardecl =
+		_eval.eval_h("(TypedVariableLink"
+		             "  (VariableNode \"$X\")"
+		             "  (TypeNode \"ConceptNode\"))");
+
+	Handle take_treatment_1 =
+		_eval.eval_h("(EvaluationLink"
+		             "  (PredicateNode \"take\")"
+		             "  (ListLink"
+		             "    (VariableNode \"$X\")"
+		             "    (ConceptNode \"treatment-1\")))");
+
+	Unify::Context C(Quotation(), {X});
+	Unify::CHandle CQ(Q, C),
+        Clambda_vardecl(lambda_vardecl, C),
+		Ctake_treatment_1(take_treatment_1, C);
+
+	Unify unify(target, alpha_pat, vardecl, alpha_vardecl);
+	Unify::SolutionSet result = unify(),
+		expected = Unify::SolutionSet(true, {{{{CQ, A2}, A2},
+						                      {{TyVs, Clambda_vardecl},
+                                               lambda_vardecl}}});
+
+	std::cout << "result = " << oc_to_string(result) << std::endl;
+	std::cout << "expected = " << oc_to_string(expected) << std::endl;
+
+	TS_ASSERT_EQUALS(result, expected);
+}
+
+void UnifyUTest::test_unify_complex_6()
+{
+	Handle target =
+        _eval.eval_h("(ImplicationLink"
+                     "  (AndLink"
+                     "    (LambdaLink"
+                     "      (TypedVariableLink"
+                     "        (VariableNode \"$X\")"
+                     "        (TypeNode \"ConceptNode\")"
+                     "      )"
+                     "      (EvaluationLink"
+                     "        (PredicateNode \"take\")"
+                     "        (ListLink"
+                     "          (VariableNode \"$X\")"
+                     "          (ConceptNode \"treatment-1\")"
+                     "        )"
+                     "      )"
+                     "    )"
+                     "    (LambdaLink"
+                     "      (TypedVariableLink"
+                     "        (VariableNode \"$X\")"
+                     "        (TypeNode \"ConceptNode\")"
+                     "      )"
+                     "      (VariableNode \"$Q-496643b4\")"
+                     "    )"
+                     "  )"
+                     "  (LambdaLink"
+                     "    (TypedVariableLink"
+                     "      (VariableNode \"$X\")"
+                     "      (TypeNode \"ConceptNode\")"
+                     "    )"
+                     "    (AndLink"
+                     "      (VariableNode \"$Q-496643b4\")"
+                     "      (EvaluationLink"
+                     "        (PredicateNode \"take\")"
+                     "        (ListLink"
+                     "          (VariableNode \"$X\")"
+                     "          (ConceptNode \"treatment-1\")"
+                     "        )"
+                     "      )"
+                     "    )"
+                     "  )"
+                     ")");
+
+	Handle alpha_pat =
+        _eval.eval_h("(ImplicationLink"
+                     "  (AndLink"
+                     "    (QuoteLink"
+                     "      (LambdaLink"
+                     "        (UnquoteLink"
+                     "          (VariableNode \"$TyVs-3e93b595\")"
+                     "        )"
+                     "        (UnquoteLink"
+                     "          (VariableNode \"$A1-4fd556f2\")"
+                     "        )"
+                     "      )"
+                     "    )"
+                     "    (QuoteLink"
+                     "      (LambdaLink"
+                     "        (UnquoteLink"
+                     "          (VariableNode \"$TyVs-3e93b595\")"
+                     "        )"
+                     "        (UnquoteLink"
+                     "          (VariableNode \"$A2-76df4103\")"
+                     "        )"
+                     "      )"
+                     "    )"
+                     "  )"
+                     "  (QuoteLink"
+                     "    (LambdaLink"
+                     "      (UnquoteLink"
+                     "        (VariableNode \"$TyVs-3e93b595\")"
+                     "      )"
+                     "      (UnquoteLink"
+                     "        (AndLink"
+                     "          (VariableNode \"$A1-4fd556f2\")"
+                     "          (VariableNode \"$A2-76df4103\")"
+                     "        )"
+                     "      )"
+                     "    )"
+                     "  )"
+                     ")");
+
+	Handle vardecl =
+        _eval.eval_h("(VariableNode \"$Q-496643b4\")");
+
+	Handle alpha_vardecl =
+        _eval.eval_h("(VariableList"
+                     "  (TypedVariableLink"
+                     "    (VariableNode \"$TyVs-3e93b595\")"
+                     "    (TypeChoice"
+                     "      (TypeNode \"TypedVariableLink\")"
+                     "      (TypeNode \"VariableNode\")"
+                     "      (TypeNode \"VariableList\")"
+                     "    )"
+                     "  )"
+                     "  (TypedVariableLink"
+                     "    (VariableNode \"$A1-4fd556f2\")"
+                     "    (TypeNode \"EvaluationLink\")"
+                     "  )"
+                     "  (TypedVariableLink"
+                     "    (VariableNode \"$A2-76df4103\")"
+                     "    (TypeNode \"EvaluationLink\")"
+                     "  )"
+                     ")");
+
+	Handle Q = _eval.eval_h("(VariableNode \"$Q-496643b4\")");
+	Handle TyVs = _eval.eval_h("(VariableNode \"$TyVs-3e93b595\")");
+	Handle A1 = _eval.eval_h("(VariableNode \"$A1-4fd556f2\")");
+	Handle A2 = _eval.eval_h("(VariableNode \"$A2-76df4103\")");
+
+	Handle lambda_vardecl =
+		_eval.eval_h("(TypedVariableLink"
+		             "  (VariableNode \"$X\")"
+		             "  (TypeNode \"ConceptNode\"))");
+
+	Handle take_treatment_1 =
+		_eval.eval_h("(EvaluationLink"
+		             "  (PredicateNode \"take\")"
+		             "  (ListLink"
+		             "    (VariableNode \"$X\")"
+		             "    (ConceptNode \"treatment-1\")))");
+
+	Unify::Context C(Quotation(), {X});
+	Unify::CHandle CQ(Q, C),
+        Clambda_vardecl(lambda_vardecl, C),
+		Ctake_treatment_1(take_treatment_1, C);
+
+	Unify unify(target, alpha_pat, vardecl, alpha_vardecl);
+	Unify::SolutionSet result = unify(),
+		expected = Unify::SolutionSet(true, {{{{CQ, A1}, A1},
+						                      {{TyVs, Clambda_vardecl},
+						 	                   lambda_vardecl},
+						                      {{A2, Ctake_treatment_1},
+                                               take_treatment_1}},
+				                             {{{CQ, A1, A2, Ctake_treatment_1},
+							                   take_treatment_1},
+						                      {{TyVs, Clambda_vardecl},
+								               lambda_vardecl}},
+                                             {{{CQ, A2}, A2},
+						                      {{TyVs, Clambda_vardecl},
+						 	                   lambda_vardecl},
+						                      {{A1, Ctake_treatment_1},
+                                               take_treatment_1}}});
 
 	std::cout << "result = " << oc_to_string(result) << std::endl;
 	std::cout << "expected = " << oc_to_string(expected) << std::endl;

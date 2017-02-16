@@ -84,6 +84,29 @@ OrderedHandleSet Unify::CHandle::get_free_variables() const
 	return set_difference(free_vars, context.shadow);
 }
 
+bool Unify::CHandle::is_consumable() const
+{
+	return context.quotation.consumable(handle->getType());
+}
+
+bool Unify::CHandle::is_quoted() const
+{
+	return context.quotation.is_quoted();
+}
+
+bool Unify::CHandle::is_unquoted() const
+{
+	return context.quotation.is_unquoted();
+}
+
+void Unify::CHandle::update()
+{
+	bool isc = is_consumable();
+	context.update(handle);
+	if (isc)
+		handle = handle->getOutgoingAtom(0);
+}
+
 bool Unify::CHandle::is_satisfiable(const CHandle& ch) const
 {
 	return content_eq(handle, ch.handle)
@@ -345,6 +368,9 @@ Unify::SolutionSet Unify::unify(const CHandle& lhs, const CHandle& rhs) const
 Unify::SolutionSet Unify::unify(const Handle& lh, const Handle& rh,
                                 Context lc, Context rc) const
 {
+	Type lt(lh->getType());
+	Type rt(rh->getType());
+
 	///////////////////
 	// Base cases    //
 	///////////////////
@@ -353,19 +379,16 @@ Unify::SolutionSet Unify::unify(const Handle& lh, const Handle& rh,
 	if (not lh or not rh)
 		return SolutionSet(false);
 
-	Type lt(lh->getType());
-	Type rt(rh->getType());
-
 	CHandle lch(lh, lc);
 	CHandle rch(rh, rc);
 
 	// If one is a node
 	if (lh->isNode() or rh->isNode()) {
-		// If one is an unquoted variable, then unifies, otherwise
-		// check their equality
+		// If one is a free variable and they are different, then
+		// unifies.
 		if ((lch.is_free_variable() or rch.is_free_variable())
-			// Add this to ignore solutions like {X}->X
-			and lch != rch) {
+            // Ignore solutions like {X}->X
+            and lch != rch) {
 			return mkvarsol(lch, rch);
 		} else
 			return SolutionSet(lch.is_satisfiable(rch));
@@ -375,17 +398,19 @@ Unify::SolutionSet Unify::unify(const Handle& lh, const Handle& rh,
 	// Recursive cases    //
 	////////////////////////
 
-	// Consume quotations
-	if (lc.quotation.consumable(lt) and rc.quotation.consumable(rt)) {
+    // Consume quotations
+	bool lq = lc.quotation.consumable(lt);
+	bool rq = rc.quotation.consumable(rt);
+	if (lq and rq) {
 		lc.quotation.update(lt);
 		rc.quotation.update(rt);
 		return unify(lh->getOutgoingAtom(0), rh->getOutgoingAtom(0), lc, rc);
 	}
-	if (lc.quotation.consumable(lt)) {
+	if (lq) {
 		lc.quotation.update(lt);
 		return unify(lh->getOutgoingAtom(0), rh, lc, rc);
 	}
-	if (rc.quotation.consumable(rt)) {
+	if (rq) {
 		rc.quotation.update(rt);
 		return unify(lh, rh->getOutgoingAtom(0), lc, rc);
 	}
@@ -462,6 +487,18 @@ Unify::SolutionSet Unify::ordered_unify(const HandleSeq& lhs,
 	return sol;
 }
 
+Unify::SolutionSet Unify::pairwise_unify(const std::set<CHandlePair>& pchs) const
+{
+	SolutionSet sol;
+	for (const CHandlePair& pch : pchs) {
+		auto rs = unify(pch.first, pch.second);
+		sol = join(sol, rs);
+		if (not sol.satisfiable)     // Stop if unification has failed
+			return sol;
+	}
+	return sol;
+}
+
 Unify::SolutionSet Unify::comb_unify(const std::set<CHandle>& lhs,
                                      const std::set<CHandle>& rhs) const
 {
@@ -503,8 +540,15 @@ HandleSeq Unify::cp_erase(const HandleSeq& hs, Arity i) const
 	return hs_cp;
 }
 
-Unify::SolutionSet Unify::mkvarsol(const CHandle& lch, const CHandle& rch) const
+Unify::SolutionSet Unify::mkvarsol(CHandle lch, CHandle rch) const
 {
+	// Attempt to consume quotation to avoid putting quoted elements
+	// in the block.
+	if (lch.is_free_variable() and rch.is_consumable() and rch.is_quoted())
+		rch.update();
+	if (rch.is_free_variable() and lch.is_consumable() and lch.is_quoted())
+		lch.update();
+
 	Handle inter = type_intersection(lch, rch);
 	if (not inter)
 		return SolutionSet(false);
@@ -626,13 +670,18 @@ Unify::TypedBlock Unify::join(const TypedBlockSeq& common_blocks,
                          const TypedBlock& block) const
 {
 	std::pair<Block, Handle> result{block};
-	for (const auto& c_block : common_blocks)
+	for (const auto& c_block : common_blocks) {
 		result =  join(result, c_block);
+        // Abort if unsatisfiable
+        if (not is_satisfiable(result))
+            return result;
+    }
 	return result;
 }
 
 Unify::TypedBlock Unify::join(const TypedBlock& lhs, const TypedBlock& rhs) const
 {
+    OC_ASSERT(lhs.second and rhs.second, "Can only join 2 satisfiable blocks");
 	return {set_union(lhs.first, rhs.first),
 			type_intersection(lhs.second, rhs.second)};
 }
@@ -640,14 +689,40 @@ Unify::TypedBlock Unify::join(const TypedBlock& lhs, const TypedBlock& rhs) cons
 Unify::SolutionSet Unify::subunify(const TypedBlockSeq& common_blocks,
                                    const TypedBlock& block) const
 {
-	SolutionSet sol;
-	for (const TypedBlock& c_block : common_blocks) {
-		SolutionSet rs = subunify(c_block, block);
-		sol = join(sol, rs);
-		if (not sol.satisfiable)     // Stop if unification has failed
-			break;
+	// Form a set with all terms
+	std::set<CHandle> all_chs(block.first);
+	for (const TypedBlock& cb : common_blocks)
+		all_chs.insert(cb.first.begin(), cb.first.end());
+
+	// Build a set of all pairs of terms that may have not been
+	// unified so far.
+	std::set<CHandlePair> not_unified;
+	// This function returns true iff both terms are in the given
+	// block. If so it means they have already been unified.
+	auto both_in_block = [](const CHandle& lch, const CHandle& rch,
+	                        const TypedBlock& block) {
+		return is_in(lch, block.first) and is_in(rch, block.first);
+	};
+	for (auto lit = all_chs.begin(); lit != all_chs.end(); ++lit) {
+		for (auto rit = std::next(lit); rit != all_chs.end(); ++rit) {
+			// Check if they are in block
+			bool already_unified = both_in_block(*lit, *rit, block);
+			// If not, then check if they are in one of the common
+			// blocks
+			if (not already_unified) {
+				for (const TypedBlock& cb : common_blocks) {
+					already_unified = both_in_block(*lit, *rit, cb);
+					if (already_unified)
+						break;
+				}
+			}
+			if (not already_unified)
+				not_unified.insert({*lit, *rit});
+		}
 	}
-	return sol;
+
+	// Unify all not unified yet terms
+	return pairwise_unify(not_unified);
 }
 
 Unify::SolutionSet Unify::subunify(const TypedBlock& lhs,
@@ -659,11 +734,6 @@ Unify::SolutionSet Unify::subunify(const TypedBlock& lhs,
 bool Unify::is_satisfiable(const TypedBlock& block) const
 {
 	return (bool)block.second;
-}
-
-bool ch_content_eq(const Unify::CHandle& lhs, const Unify::CHandle& rhs)
-{
-	return (lhs.context == rhs.context) and content_eq(lhs.handle, rhs.handle);
 }
 
 bool ohs_content_eq(const OrderedHandleSet& lhs, const OrderedHandleSet& rhs)
@@ -707,7 +777,7 @@ bool hchm_content_eq(const Unify::HandleCHandleMap& lhs,
 	auto rit = rhs.begin();
 	while (lit != lhs.end()) {
 		if (not content_eq(lit->first, rit->first)
-		   or not ch_content_eq(lit->second, rit->second))
+		    or lit->second != rit->second)
 			return false;
 		++lit; ++rit;
 	}
