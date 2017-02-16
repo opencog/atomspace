@@ -110,6 +110,27 @@ public:
 		OrderedHandleSet get_free_variables() const;
 
 		/**
+		 * Return true iff has a consumable quotation
+		 */
+		bool is_consumable() const;
+
+		/**
+		 * Return true iff it is quoted.
+		 */
+		bool is_quoted() const;
+
+		/**
+		 * Return true iff it is unquoted.
+		 */
+		bool is_unquoted() const;
+
+		/**
+		 * Update its context, and if consumable update the Handle as
+		 * well, that is replace itself by its child.
+		 */
+		void update();
+
+		/**
 		 * Return true if 2 contextual handles are satisfiable in some
 		 * restricted sense, it only covers the cases where atoms are
 		 * equal and have the same free variables.
@@ -122,6 +143,9 @@ public:
 		bool operator==(const CHandle& ch) const;
 		bool operator<(const CHandle& ch) const;
 	};
+
+	// Pair of CHandles
+	typedef std::pair<CHandle, CHandle> CHandlePair;
 
 	// Partition block
 	typedef std::set<CHandle> Block;
@@ -384,6 +408,11 @@ private:
 	                          Context rhs_context=Context()) const;
 
 	/**
+	 * Unify all pairs of CHandles.
+	 */
+	SolutionSet pairwise_unify(const std::set<CHandlePair>& pchs) const;
+
+	/**
 	 * Unify all elements of lhs with all elements of rhs, considering
 	 * all pairwise combinations.
 	 */
@@ -406,12 +435,12 @@ private:
 	HandleSeq cp_erase(const HandleSeq& hs, Arity i) const;
 
 	/**
-	 * Build elementary solution set between 2 atoms given that at least
-	 * one of them is a variable.
+	 * Build elementary solution set between 2 atoms given that at
+	 * least one of them is a variable.
+	 *
+	 * Passed by copy because this method may use and modify the copy.
 	 */
-	SolutionSet mkvarsol(const CHandle& lhs, const CHandle& rhs) const;
-	SolutionSet mkvarsol(const Handle& lhs, const Handle& rhs,
-	                     Context lhs_context, Context rhs_context) const;
+	SolutionSet mkvarsol(CHandle lhs, CHandle rhs) const;
 
 public:                         // TODO: being friend with UnifyUTest
                                 // somehow doesn't work
@@ -591,7 +620,6 @@ private:
 /**
  * Till content equality between atoms become the default.
  */
-bool ch_content_eq(const Unify::CHandle& lhs, const Unify::CHandle& rhs);
 bool ohs_content_eq(const OrderedHandleSet& lhs, const OrderedHandleSet& rhs);
 bool hm_content_eq(const HandleMap& lhs, const HandleMap& rhs);
 bool hchm_content_eq(const Unify::HandleCHandleMap& lhs,
