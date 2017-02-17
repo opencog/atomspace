@@ -55,7 +55,7 @@ public:
 
 	// Or-children at the rule level, as multiple rules, or rule
 	// variations (partially unified, etc) can yield the same target.
-	RuleSet rules;
+	RuleTypedSubstitutionMap rules;
 
 	// The complexity of the BITNode. For now -log(probability).
 	double complexity;
@@ -118,7 +118,7 @@ public:
 	 *
 	 * @todo support fitness function.
 	 */
-	AndBIT expand(const Handle& leaf, const Rule& rule) const;
+	AndBIT expand(const Handle& leaf, const RuleTypedSubstitutionPair& rule) const;
 
 	/**
 	 * @brief Randomly select a leaf of the FCS. Leaves with lower
@@ -167,7 +167,8 @@ private:
 	 *
 	 * TODO: give examples.
 	 */
-	Handle expand_fcs(const Handle& leaf, const Rule& rule) const;
+	Handle expand_fcs(const Handle& leaf,
+	                  const RuleTypedSubstitutionPair& rule) const;
 
 	/**
 	 * @brief Given that FCS is defined generate the mapping from FCS
@@ -192,12 +193,12 @@ private:
 	OrderedHandleSet get_leaves(const Handle& h) const;
 
 	/**
-	 * Given a FCS, a leaf of it and a rule. Unify the rule conclusion
-	 * with the leaf and replace any variables in the FCS by its
-	 * corresponding term in the rule.
+	 * Given a FCS, a leaf of it and a rule and its associated typed
+	 * substitution. Substitution the FCS according to the typed
+	 * substitution.
 	 */
 	Handle substitute_unified_variables(const Handle& leaf,
-	                                    const Rule& rule) const;
+	                                    const Unify::TypedSubstitution& ts) const;
 
 	/**
 	 * Given the pattern term of an FCS where all variables have been
@@ -206,8 +207,7 @@ private:
 	 *
 	 * TODO: give examples.
 	 */
-	Handle expand_fcs_pattern(const Handle& fcs_pattern,
-	                          const Rule& rule) const;
+	Handle expand_fcs_pattern(const Handle& fcs_pattern, const Rule& rule) const;
 
 	/**
 	 * Given the rewrite term of an FCS where all variables have been
@@ -273,7 +273,8 @@ public:
 	 * keeps a record of that expansion and is this modified during
 	 * that step.
 	 */
-	AndBIT* expand(AndBIT& andbit, BITNode& bitleaf, const Rule& rule);
+	AndBIT* expand(AndBIT& andbit, BITNode& bitleaf,
+	               const RuleTypedSubstitutionPair& rule);
 
 	/**
 	 * Insert a new andbit in the BIT and return its pointer, nullptr
@@ -297,7 +298,8 @@ public:
 	 * Return true if the rule is already an or-children of bitnode up
 	 * to an alpha conversion.
 	 */
-	bool is_in(const Rule& rule, const BITNode& bitnode) const;
+	bool is_in(const RuleTypedSubstitutionPair& rule,
+	           const BITNode& bitnode) const;
 
 private:
 	Handle _init_target;

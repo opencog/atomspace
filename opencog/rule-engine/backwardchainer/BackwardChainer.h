@@ -161,12 +161,14 @@ private:
 	//
 	// The target is not const because if the rules are exhausted it
 	// will set its exhausted flag to false.
-	Rule select_rule(BITNode& target, const Handle& vardecl=Handle::UNDEFINED);
-	Rule select_rule(const RuleSet& rules);
+	RuleTypedSubstitutionPair select_rule(BITNode& target,
+	                                      const Handle& vardecl=Handle::UNDEFINED);
+	RuleTypedSubstitutionPair select_rule(const RuleTypedSubstitutionMap& rules);
 
 	// Return all valid rules, in the sense that they may possibly be
 	// used to infer the target.
-	RuleSet get_valid_rules(const BITNode& target, const Handle& vardecl);
+	RuleTypedSubstitutionMap get_valid_rules(const BITNode& target,
+	                                         const Handle& vardecl);
 
 	// Return the complexity factor of an andbit. The formula is
 	//

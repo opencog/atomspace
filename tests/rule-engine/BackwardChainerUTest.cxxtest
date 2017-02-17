@@ -109,9 +109,9 @@ void BackwardChainerUTest::test_select_rule_1()
 	                               "   (Concept \"B\"))");
 	BITNode target(target_h);
 
-	Rule selected_rule = _bc->select_rule(target);
+	RuleTypedSubstitutionPair selected_rule = _bc->select_rule(target);
 
-	TS_ASSERT_EQUALS(selected_rule.get_name(), "bc-deduction-rule");
+	TS_ASSERT_EQUALS(selected_rule.first.get_name(), "bc-deduction-rule");
 }
 
 // Test select rule with a target with variables
@@ -126,9 +126,9 @@ void BackwardChainerUTest::test_select_rule_2()
 	                               "   (Variable \"$X\"))");
 	BITNode target(target_h);
 
-	Rule selected_rule = _bc->select_rule(target);
+	RuleTypedSubstitutionPair selected_rule = _bc->select_rule(target);
 
-	TS_ASSERT_EQUALS(selected_rule.get_name(), "bc-deduction-rule");
+	TS_ASSERT_EQUALS(selected_rule.first.get_name(), "bc-deduction-rule");
 }
 
 // Test select rule with a target with variables with the same name as
@@ -145,9 +145,9 @@ void BackwardChainerUTest::test_select_rule_3()
 		                         "   (Type \"InheritanceLink\"))");
 	BITNode target(target_h);
 
-	Rule selected_rule = _bc->select_rule(target, vardecl_h);
+	RuleTypedSubstitutionPair selected_rule = _bc->select_rule(target, vardecl_h);
 
-	TS_ASSERT_EQUALS(selected_rule.get_name(), "bc-deduction-rule");
+	TS_ASSERT_EQUALS(selected_rule.first.get_name(), "bc-deduction-rule");
 }
 
 void BackwardChainerUTest::test_deduction()

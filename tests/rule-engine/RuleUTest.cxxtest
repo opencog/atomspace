@@ -129,11 +129,11 @@ void RuleUTest::test_unify_target_deduction_1()
 {
 	Rule deduction_rule(deduction_rule_h);
 	Handle target = al(INHERITANCE_LINK, X, A);
-	RuleSet rules = deduction_rule.unify_target(target);
+	RuleTypedSubstitutionMap rules = deduction_rule.unify_target(target);
 
 	TS_ASSERT_EQUALS(rules.size(), 1);
 
-	Handle rule = rules.begin()->get_rule(),
+	Handle rule = rules.begin()->first.get_rule(),
 		// Expected up to an alpha conversion
 		vardecl = al(VARIABLE_LIST,
 		             // TODO: unify needs to be upgraded so it can
@@ -170,11 +170,12 @@ void RuleUTest::test_unify_target_deduction_2()
 	Rule deduction_rule(deduction_rule_h);
 	Handle target = al(INHERITANCE_LINK, X, A),
 		target_vardecl = al(TYPED_VARIABLE_LINK, X, CT);
-	RuleSet rules = deduction_rule.unify_target(target, target_vardecl);
+	RuleTypedSubstitutionMap rules =
+		deduction_rule.unify_target(target, target_vardecl);
 
 	TS_ASSERT_EQUALS(rules.size(), 1);
 
-	Handle rule = rules.begin()->get_rule(),
+	Handle rule = rules.begin()->first.get_rule(),
 		// Expected up to an alpha conversion
 		vardecl = al(VARIABLE_LIST,
 		             al(TYPED_VARIABLE_LINK, X, CT),
@@ -230,11 +231,12 @@ void RuleUTest::test_unify_target_deduction_3()
 		             "      (TypeNode \"VariableList\")))"
 		             "  (VariableNode \"$P-25868310\"))");
 
-	RuleSet rules = deduction_implication_rule.unify_target(target, vardecl);
+	RuleTypedSubstitutionMap rules =
+		deduction_implication_rule.unify_target(target, vardecl);
 
 	TS_ASSERT_EQUALS(rules.size(), 1);
 
-	Handle rule = rules.begin()->get_rule();
+	Handle rule = rules.begin()->first.get_rule();
 	// Expected up to an alpha conversion
 	// TODO
 	Handle expected =
@@ -362,11 +364,12 @@ void RuleUTest::test_unify_target_implication_scope_to_implication_1()
 	Handle target = al(IMPLICATION_LINK,
 	                   al(LAMBDA_LINK, Typed_X, Eval_P),
 	                   al(LAMBDA_LINK, Typed_X, Eval_Q));
-	RuleSet rules = implication_scope_to_implication_rule.unify_target(target);
+	RuleTypedSubstitutionMap rules =
+		implication_scope_to_implication_rule.unify_target(target);
 
 	TS_ASSERT_EQUALS(rules.size(), 1);
 
-	Handle rule = rules.begin()->get_rule(),
+	Handle rule = rules.begin()->first.get_rule(),
 		// Expected up to an alpha conversion
 		body = al(IMPLICATION_SCOPE_LINK, Typed_X, Eval_P, Eval_Q),
 		schema = an(GROUNDED_SCHEMA_NODE,
@@ -392,11 +395,12 @@ void RuleUTest::test_unify_target_implication_scope_to_implication_2()
 	Handle target = al(IMPLICATION_LINK,
 	                   al(LAMBDA_LINK, Typed_X, P_body_var),
 	                   al(LAMBDA_LINK, Typed_X, Eval_Q));
-	RuleSet rules = implication_scope_to_implication_rule.unify_target(target);
+	RuleTypedSubstitutionMap rules =
+		implication_scope_to_implication_rule.unify_target(target);
 
 	TS_ASSERT_EQUALS(rules.size(), 1);
 
-	Handle rule = rules.begin()->get_rule(),
+	Handle rule = rules.begin()->first.get_rule(),
 		// Expected up to an alpha conversion
 		body = al(IMPLICATION_SCOPE_LINK, Typed_X, P_body_var, Eval_Q),
 		schema = an(GROUNDED_SCHEMA_NODE,
@@ -443,7 +447,7 @@ void RuleUTest::test_unify_target_implication_scope_to_implication_3()
 		             ")");
 	Handle vardecl =
 		_eval.eval_h("(VariableNode \"$P-1dd6c910\")");
-	RuleSet rules =
+	RuleTypedSubstitutionMap rules =
 		implication_scope_to_implication_rule.unify_target(target, vardecl);
 
 	// It should fail
@@ -474,12 +478,12 @@ void RuleUTest::test_unify_target_implication_scope_to_implication_4()
 		             "  )"
 		             ")");
 
-	RuleSet rules =
+	RuleTypedSubstitutionMap rules =
 		implication_scope_to_implication_rule.unify_target(target, vardecl);
 
 	TS_ASSERT_EQUALS(rules.size(), 1);
 
-	Handle rule = rules.begin()->get_rule();
+	Handle rule = rules.begin()->first.get_rule();
 	// Expected up to an alpha conversion
 	Handle expected =
 		_eval.eval_h("(BindLink"
@@ -510,7 +514,8 @@ void RuleUTest::test_unify_target_implication_scope_to_implication_4()
 		             "        (Unquote (VariableNode \"$P-6266d6f2\"))"
 		             "        (Unquote (VariableNode \"$Q-7005b724\")))))))");
 
-	std::cout << "implication_scope_to_implication_rule = " << oc_to_string(implication_scope_to_implication_rule);
+	std::cout << "implication_scope_to_implication_rule = "
+	          << oc_to_string(implication_scope_to_implication_rule);
 	std::cout << "target = " << oc_to_string(target);
 	std::cout << "rule = " << oc_to_string(rule);
 	std::cout << "expected = " << oc_to_string(expected);
@@ -572,14 +577,14 @@ void RuleUTest::test_unify_target_implication_and_lambda_factorization()
 		             "    (TypeNode \"PredicateNode\")"
 		             "  )"
 		             ")");
-	RuleSet rules =
+	RuleTypedSubstitutionMap rules =
 		implication_and_lambda_factorization_rule.unify_target(target, vardecl);
 
 	std::cout << "rules = " << oc_to_string(rules) << std::endl;
 
 	TS_ASSERT_EQUALS(rules.size(), 1);
 
-	Handle rule = rules.begin()->get_rule();
+	Handle rule = rules.begin()->first.get_rule();
 	Handle expected =
 		_eval.eval_h("(BindLink"
 		             "  (LocalQuoteLink"
@@ -690,12 +695,12 @@ void RuleUTest::test_unify_target_lambda_closed_construction()
 		             "    (ListLink"
 		             "      (ConceptNode \"treatment-1\")"
 		             "      (ConceptNode \"compound-A\"))))");
-	RuleSet rules =
+	RuleTypedSubstitutionMap rules =
 		lambda_closed_construction_rule.unify_target(target);
 
 	TS_ASSERT_EQUALS(rules.size(), 1);
 
-	Handle rule = rules.begin()->get_rule();
+	Handle rule = rules.begin()->first.get_rule();
 	Handle expected =
 		_eval.eval_h("(BindLink"
 		             "  (VariableList)"

@@ -743,8 +743,9 @@ void BITUTest::test_expand_1()
 	                           "      (ConceptNode \"compound-A\"))))");
 
 	Rule lambda_closed_construction_rule(lambda_closed_construction_rule_h);
-	RuleSet rules = lambda_closed_construction_rule.unify_target(leaf);
-	Rule rule = *rules.begin();
+	RuleTypedSubstitutionMap rules =
+		lambda_closed_construction_rule.unify_target(leaf);
+	RuleTypedSubstitutionPair rule = *rules.begin();
 
 	AndBIT result = andbit.expand(leaf, rule);
 	AndBIT expected(
@@ -1296,9 +1297,9 @@ void BITUTest::test_expand_2()
 		             ")");
 
 	Rule implication_and_lambda_factorization_rule(implication_and_lambda_factorization_rule_h);
-	RuleSet rules =
+	RuleTypedSubstitutionMap rules =
         implication_and_lambda_factorization_rule.unify_target(leaf, vardecl);
-	Rule rule = *rules.begin();
+	RuleTypedSubstitutionPair rule = *rules.begin();
 
 	AndBIT result = andbit.expand(leaf, rule);
 	AndBIT expected(

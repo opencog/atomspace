@@ -62,9 +62,9 @@ std::string	BITNode::to_string() const
 	ss << "body:" << std::endl << oc_to_string(body)
 	   << "exhausted: " << exhausted << std::endl
 	   << "rules: size = " << rules.size();
-	for (const Rule& rule : rules)
-		ss << std::endl << rule.get_name()
-		   << " " << rule.get_rule()->idToString();
+	for (const auto& rule : rules)
+		ss << std::endl << rule.first.get_name()
+		   << " " << rule.first.get_rule()->idToString();
 	return ss.str();
 }
 
@@ -96,9 +96,11 @@ AndBIT::AndBIT(const Handle& f, double cpx)	:
 
 AndBIT::~AndBIT() {}
 
-AndBIT AndBIT::expand(const Handle& leaf, const Rule& rule) const
+AndBIT AndBIT::expand(const Handle& leaf,
+                      const RuleTypedSubstitutionPair& rule) const
 {
-	return AndBIT(expand_fcs(leaf, rule), expand_complexity(leaf, rule));
+	return AndBIT(expand_fcs(leaf, rule),
+	              expand_complexity(leaf, rule.first));
 }
 
 BITNode* AndBIT::select_leaf()
@@ -159,30 +161,31 @@ double AndBIT::expand_complexity(const Handle& leaf, const Rule& rule) const
 		+ 1 - log(rule.get_weight());
 }
 
-Handle AndBIT::expand_fcs(const Handle& leaf, const Rule& rule) const
+Handle AndBIT::expand_fcs(const Handle& leaf,
+                          const RuleTypedSubstitutionPair& rule) const
 {
 	// Unify the rule conclusion with the leaf, and substitute any
 	// variables in it by the associated term.
-	Handle nfcs = substitute_unified_variables(leaf, rule);
+	Handle nfcs = substitute_unified_variables(leaf, rule.second);
 
 	BindLinkPtr nfcs_bl(BindLinkCast(nfcs));
 	Handle nfcs_vardecl = nfcs_bl->get_vardecl();
 	Handle nfcs_pattern = nfcs_bl->get_body();
 	Handle nfcs_rewrite = nfcs_bl->get_implicand();
-	Handle rule_vardecl = rule.get_vardecl();
+	Handle rule_vardecl = rule.first.get_vardecl();
 
 	// Generate new pattern term
-	Handle npattern = expand_fcs_pattern(nfcs_pattern, rule);
+	Handle npattern = expand_fcs_pattern(nfcs_pattern, rule.first);
 
 	// Generate new rewrite term
-	Handle nrewrite = expand_fcs_rewrite(nfcs_rewrite, rule);
+	Handle nrewrite = expand_fcs_rewrite(nfcs_rewrite, rule.first);
 
 	// Generate new vardecl
     // TODO: is this merging necessary?
 	Handle merged_vardecl = merge_vardecl(nfcs_vardecl, rule_vardecl);
 	Handle nvardecl = filter_vardecl(merged_vardecl, {npattern, nrewrite});
 
-	// Generate new atomese forward chaining strategy
+	// Generate new atomese forward chaining s trategy
 	HandleSeq noutgoings({npattern, nrewrite});
 	if (nvardecl.is_defined())
 		noutgoings.insert(noutgoings.begin(), nvardecl);
@@ -260,30 +263,9 @@ OrderedHandleSet AndBIT::get_leaves(const Handle& h) const
 }
 
 Handle AndBIT::substitute_unified_variables(const Handle& leaf,
-                                            const Rule& rule) const
+                                            const Unify::TypedSubstitution& ts) const
 {
-	HandlePairSeq conclusions = rule.get_conclusions();
-	OC_ASSERT(conclusions.size() == 1);
-	Handle conclusion = conclusions[0].second;
-
-	// If the conclusion is already equal to leaf no need to unify
-	if (content_eq(conclusion, leaf))
-		return fcs;
-
 	BindLinkPtr fcs_bl(BindLinkCast(fcs));
-	// We don't want to filter leaf_vardecl because the resulting
-	// merged variable declaration may then miss variables that are
-	// not in the leaf yet present in the fcs.
-	Handle leaf_vardecl = fcs_bl->get_vardecl(),
-		conclusion_vardecl = rule.get_vardecl();
-	Unify unify(leaf, conclusion, leaf_vardecl, conclusion_vardecl);
-	Unify::SolutionSet sol = unify();
-
-	OC_ASSERT(sol.satisfiable); // If the rule has been selected it
-                                // has to be satisfiable
-	Unify::TypedSubstitutions tss = unify.typed_substitutions(sol, leaf);
-	OC_ASSERT(not tss.empty());
-	auto ts = *tss.begin();
 	return Handle(Unify::substitute(fcs_bl, ts));
 }
 
@@ -426,7 +408,8 @@ AndBIT* BIT::init()
 	return &*andbits.begin();
 }
 
-AndBIT* BIT::expand(AndBIT& andbit, BITNode& bitleaf, const Rule& rule)
+AndBIT* BIT::expand(AndBIT& andbit, BITNode& bitleaf,
+                    const RuleTypedSubstitutionPair& rule)
 {
 	// Make sure that the rule is not already an or-child of bitleaf.
 	if (is_in(rule, bitleaf)) {
@@ -482,10 +465,11 @@ void BIT::reset_exhausted_flags()
 		andbit.reset_exhausted();
 }
 
-bool BIT::is_in(const Rule& rule, const BITNode& bitnode) const
+bool BIT::is_in(const RuleTypedSubstitutionPair& rule,
+                const BITNode& bitnode) const
 {
-	for (const Rule& bnr : bitnode.rules)
-		if (rule.is_alpha_equivalent(bnr))
+	for (const auto& bnr : bitnode.rules)
+		if (rule.first.is_alpha_equivalent(bnr.first))
 			return true;
 	return false;
 }
