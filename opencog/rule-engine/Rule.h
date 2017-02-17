@@ -42,6 +42,9 @@ public:
 	void expand_meta_rules(AtomSpace& as);
 };
 
+typedef std::map<Rule, Unify::TypedSubstitution> RuleTypedSubstitutionMap;
+typedef RuleTypedSubstitutionMap::value_type RuleTypedSubstitutionPair;
+
 /**
  * Class for managing rules in the URE.
  *
@@ -184,17 +187,34 @@ public:
 	 *
 	 * TODO: we probably want to support a vector of sources for rules
 	 * with multiple premises.
+	 *
+	 * TODO: we probably want to return only typed substitutions.
+	 * However due to the unifier not supporting well same variables
+	 * one different sides, we need to perform alpha conversion to
+	 * avoid troubles, thus having to return the rules along side the
+	 * typed substitutions.
 	 */
-	RuleSet unify_source(const Handle& source,
-	                     const Handle& vardecl=Handle::UNDEFINED) const;
+	RuleTypedSubstitutionMap unify_source(const Handle& source,
+	                                      const Handle& vardecl=Handle::UNDEFINED) const;
 
 	/**
 	 * Used by the backward chainer. Given a target, generate all rule
 	 * variations that may infer this target. The variables in the
 	 * rules are renamed to almost certainly avoid name collision.
+	 *
+	 * TODO: we probably want to return only typed substitutions.
+	 * However due to the unifier not supporting well same variables
+	 * one different sides, we need to perform alpha conversion to
+	 * avoid troubles, thus having to return the rules along side the
+	 * typed substitutions.
 	 */
-	RuleSet unify_target(const Handle& target,
-	                     const Handle& vardecl=Handle::UNDEFINED) const;
+	 RuleTypedSubstitutionMap unify_target(const Handle& target,
+	                                       const Handle& vardecl=Handle::UNDEFINED) const;
+
+	/**
+	 * Remove the typed substitutions from the rule typed substitution map.
+	 */
+	static RuleSet strip_typed_substitution(const RuleTypedSubstitutionMap& rules);
 
 	/**
 	 * Apply rule (in a forward way) over atomspace as.
@@ -245,6 +265,8 @@ private:
 // http://wiki.opencog.org/w/Development_standards#Print_OpenCog_Objects
 std::string oc_to_string(const Rule& rule);
 std::string oc_to_string(const RuleSet& rules);
+std::string oc_to_string(const RuleTypedSubstitutionPair& rule_ts_pair);
+std::string oc_to_string(const RuleTypedSubstitutionMap& rule_ts_map);
 
 } // ~namespace opencog
 

@@ -142,13 +142,16 @@ void BackwardChainer::expand_bit(AndBIT& andbit)
 		return;
 	}
 
-	// Build the leaf vardecl from fcs
-	Handle vardecl = andbit.fcs.is_defined() ?
-		filter_vardecl(BindLinkCast(andbit.fcs)->get_vardecl(), bitleaf->body)
-		: Handle::UNDEFINED;
+	// Get the leaf vardecl from fcs. We don't want to filter it
+	// because otherwise the typed substitution obtained may miss some
+	// variables in the FCS declaration that needs to be substituted
+	// during expension.
+	Handle vardecl = BindLinkCast(andbit.fcs)->get_vardecl();
 
 	// Select a valid rule
-	Rule rule = select_rule(*bitleaf, vardecl);
+	RuleTypedSubstitutionPair rule_ts = select_rule(*bitleaf, vardecl);
+	Rule rule(rule_ts.first);
+	Unify::TypedSubstitution ts(rule_ts.second);
 	// Add the rule in the _bit.bit_as to make comparing atoms easier
 	// as well as logging more consistent.
 	rule.add(_bit.bit_as);
@@ -159,7 +162,7 @@ void BackwardChainer::expand_bit(AndBIT& andbit)
 	LAZY_BC_LOG_DEBUG << "Selected rule for BIT expansion:" << std::endl
 	                  << rule.to_string();
 
-	_last_expansion_andbit = _bit.expand(andbit, *bitleaf, rule);
+	_last_expansion_andbit = _bit.expand(andbit, *bitleaf, {rule, ts});
 }
 
 void BackwardChainer::fulfill_bit()
@@ -243,57 +246,60 @@ void BackwardChainer::reduce_bit()
 	// }
 }
 
-Rule BackwardChainer::select_rule(BITNode& target, const Handle& vardecl)
+RuleTypedSubstitutionPair BackwardChainer::select_rule(BITNode& target,
+                                                       const Handle& vardecl)
 {
 	// The rule is randomly selected amongst the valid ones, with
 	// probability of selection being proportional to its weight.
-	const RuleSet valid_rules = get_valid_rules(target, vardecl);
+	const RuleTypedSubstitutionMap valid_rules = get_valid_rules(target, vardecl);
 	if (valid_rules.empty()) {
 		target.exhausted = true;
-		return Rule();
+		return {Rule(), Unify::TypedSubstitution()};;
 	}
 
 	// Log all valid rules and their weights
 	if (bc_logger().is_debug_enabled()) {
 		std::stringstream ss;
 		ss << "The following weighted rules are valid:";
-		for (const Rule& r : valid_rules)
-			ss << std::endl << r.get_weight() << " " << r.get_name();
+		for (const auto& r : valid_rules)
+			ss << std::endl << r.first.get_weight() << " " << r.first.get_name();
 		LAZY_BC_LOG_DEBUG << ss.str();
 	}
 
 	return select_rule(valid_rules);
 }
 
-Rule BackwardChainer::select_rule(const RuleSet& rules)
+RuleTypedSubstitutionPair BackwardChainer::select_rule(const RuleTypedSubstitutionMap& rules)
 {
 	// Build weight vector to do weighted random selection
 	std::vector<double> weights;
-	for (const Rule& rule : rules)
-		weights.push_back(rule.get_weight());
+	for (const auto& rule : rules)
+		weights.push_back(rule.first.get_weight());
 
 	// No rule exhaustion, sample one according to the distribution
 	std::discrete_distribution<size_t> dist(weights.begin(), weights.end());
 	return rand_element(rules, dist);
 }
 
-RuleSet BackwardChainer::get_valid_rules(const BITNode& target,
-                                         const Handle& vardecl)
+RuleTypedSubstitutionMap BackwardChainer::get_valid_rules(const BITNode& target,
+                                                          const Handle& vardecl)
 {
 	// Generate all valid rules
-	RuleSet valid_rules;
+	RuleTypedSubstitutionMap valid_rules;
 	for (const Rule& rule : _rules) {
 		// For now ignore meta rules as they are forwardly applied in
 		// expand_bit()
 		if (rule.is_meta())
 			continue;
 
-		RuleSet unified_rules = rule.unify_target(target.body, vardecl);
+		RuleTypedSubstitutionMap unified_rules
+			= rule.unify_target(target.body, vardecl);
 
 		// Insert only rules with positive probability of success
-		RuleSet pos_rules;
-		for (const Rule& rule : unified_rules) {
-			double p = (_bit.is_in(rule, target) ? 0.0 : 1.0) * rule.get_weight();
+		RuleTypedSubstitutionMap pos_rules;
+		for (const auto& rule : unified_rules) {
+			double p = (_bit.is_in(rule, target) ? 0.0 : 1.0)
+				* rule.first.get_weight();
 			if (p > 0) pos_rules.insert(rule);
 		}
 

@@ -301,23 +301,25 @@ Rule Rule::gen_standardize_apart(AtomSpace* as)
 	return st_ver;
 }
 
-RuleSet Rule::unify_source(const Handle& source,
-                           const Handle& vardecl) const
+RuleTypedSubstitutionMap Rule::unify_source(const Handle& source,
+                                            const Handle& vardecl) const
 {
 	// TODO
 	return {};
 }
 
-RuleSet Rule::unify_target(const Handle& target, const Handle& vardecl) const
+RuleTypedSubstitutionMap Rule::unify_target(const Handle& target,
+                                            const Handle& vardecl) const
 {
 	// If the rule's handle has not been set yet
 	if (!_rule)
 		return {};
 
+	// To guaranty that the rule variable does not share any variable
+	// of the target.
 	Rule alpha_rule = rand_alpha_converted();
 
-	RuleSet unified_rules;
-
+	RuleTypedSubstitutionMap unified_rules;
 	Handle alpha_vardecl = alpha_rule.get_vardecl();
 	for (const Handle& alpha_pat : alpha_rule.get_conclusion_patterns())
 	{
@@ -330,7 +332,7 @@ RuleSet Rule::unify_target(const Handle& target, const Handle& vardecl) const
 			// substituting all variables by their associated
 			// values.
 			for (const auto& ts : tss)
-				unified_rules.insert(alpha_rule.substituted(ts));
+				unified_rules.insert({alpha_rule.substituted(ts), ts});
 		}
 	}
 
@@ -469,6 +471,26 @@ std::string oc_to_string(const RuleSet& rules)
 	ss << "size = " << rules.size() << std::endl;
 	size_t i = 0;
 	for (const Rule& rule : rules)
+		ss << "rule[" << i++ << "]:" << std::endl
+		   << oc_to_string(rule) << std::endl;
+	return ss.str();
+}
+
+std::string oc_to_string(const RuleTypedSubstitutionPair& rule_ts)
+{
+	std::stringstream ss;
+	ss << "rule:" << std::endl << oc_to_string(rule_ts.first) << std::endl;
+	ss << "typed substitutions:" << std::endl
+	   << oc_to_string(rule_ts.second) << std::endl;
+	return ss.str();
+}
+
+std::string oc_to_string(const RuleTypedSubstitutionMap& rules)
+{
+	std::stringstream ss;
+	ss << "size = " << rules.size() << std::endl;
+	size_t i = 0;
+	for (const RuleTypedSubstitutionPair& rule : rules)
 		ss << "rule[" << i++ << "]:" << std::endl
 		   << oc_to_string(rule) << std::endl;
 	return ss.str();
