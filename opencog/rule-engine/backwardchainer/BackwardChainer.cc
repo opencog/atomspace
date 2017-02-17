@@ -142,10 +142,11 @@ void BackwardChainer::expand_bit(AndBIT& andbit)
 		return;
 	}
 
-	// Build the leaf vardecl from fcs
-	Handle vardecl = andbit.fcs.is_defined() ?
-		filter_vardecl(BindLinkCast(andbit.fcs)->get_vardecl(), bitleaf->body)
-		: Handle::UNDEFINED;
+	// Get the leaf vardecl from fcs. We don't want to filter it
+	// because otherwise the typed substitution obtained may miss some
+	// variables in the FCS declaration that needs to be substituted
+	// during expension.
+	Handle vardecl = BindLinkCast(andbit.fcs)->get_vardecl();
 
 	// Select a valid rule
 	RuleTypedSubstitutionPair rule_ts = select_rule(*bitleaf, vardecl);
