@@ -907,33 +907,29 @@ void SQLAtomStorage::do_store_single_atom(const Handle& h, int aheight)
 
 	// Store the truth value
 	TruthValuePtr tv(h->getTruthValue());
-	TruthValueType tvt = NULL_TRUTH_VALUE;
+	Type tvt = 0;
 	if (tv) tvt = tv->getType();
 	STMTI("tv_type", tvt);
 
-	switch (tvt)
+	if (SIMPLE_TRUTH_VALUE == tvt ||
+	    COUNT_TRUTH_VALUE == tvt ||
+	    PROBABILISTIC_TRUTH_VALUE == tvt)
 	{
-		case NULL_TRUTH_VALUE:
-			break;
-		case SIMPLE_TRUTH_VALUE:
-		case COUNT_TRUTH_VALUE:
-		case PROBABILISTIC_TRUTH_VALUE:
-			STMTF("stv_mean", tv->getMean());
-			STMTF("stv_confidence", tv->getConfidence());
-			STMTF("stv_count", tv->getCount());
-			break;
-		case INDEFINITE_TRUTH_VALUE:
-		{
-			IndefiniteTruthValuePtr itv = std::static_pointer_cast<const IndefiniteTruthValue>(tv);
-			STMTF("stv_mean", itv->getL());
-			STMTF("stv_count", itv->getU());
-			STMTF("stv_confidence", itv->getConfidenceLevel());
-			break;
-		}
-		default:
-			throw IOException(TRACE_INFO,
-				"Error: store_single: Unknown truth value type\n");
+		STMTF("stv_mean", tv->getMean());
+		STMTF("stv_confidence", tv->getConfidence());
+		STMTF("stv_count", tv->getCount());
 	}
+	else
+	if (INDEFINITE_TRUTH_VALUE == tvt)
+	{
+		IndefiniteTruthValuePtr itv = std::dynamic_pointer_cast<const IndefiniteTruthValue>(tv);
+		STMTF("stv_mean", itv->getL());
+		STMTF("stv_count", itv->getU());
+		STMTF("stv_confidence", itv->getConfidenceLevel());
+	}
+	else
+		throw IOException(TRACE_INFO,
+			"Error: store_single: Unknown truth value type\n");
 
 	// We may have to store the atom table UUID and try again...
 	// We waste CPU cycles to store the atomtable, only if it failed.
