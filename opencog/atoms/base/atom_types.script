@@ -19,6 +19,17 @@ FLOAT_VALUE <- VALUE    // vector of floats, actually.
 STRING_VALUE <- VALUE
 LINK_VALUE <- VALUE     // vector of values ("link" holding values)
 
+// All the falvors of truth values
+TRUTH_VALUE <- VALUE
+SIMPLE_TRUTH_VALUE <- TRUTH_VALUE
+COUNT_TRUTH_VALUE <- TRUTH_VALUE
+INDEFINITE_TRUTH_VALUE <- TRUTH_VALUE
+FUZZY_TRUTH_VALUE <- TRUTH_VALUE
+PROBABILISTIC_TRUTH_VALUE <- TRUTH_VALUE
+GENERIC_TRUTH_VALUE <- TRUTH_VALUE
+EVIDENCE_COUNT_TRUTH_VALUE <- TRUTH_VALUE
+
+
 // Base of hierarchy - NOTE: ATOM will not have a corresponding Python
 // construction function to avoid identifier conflict with the Atom object.
 ATOM <- VALUE
