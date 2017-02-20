@@ -1360,39 +1360,32 @@ SQLAtomStorage::PseudoPtr SQLAtomStorage::makeAtom(Response &rp, UUID uuid)
 	atom->uuid = uuid;
 
 	// Now get the truth value
-	switch (rp.tv_type)
+	if (rp.tv_type == SIMPLE_TRUTH_VALUE)
 	{
-		case NULL_TRUTH_VALUE:
-			break;
-
-		case SIMPLE_TRUTH_VALUE:
-		{
-			TruthValuePtr stv(SimpleTruthValue::createTV(rp.mean, rp.confidence));
-			atom->tv = stv;
-			break;
-		}
-		case COUNT_TRUTH_VALUE:
-		{
-			TruthValuePtr ctv(CountTruthValue::createTV(rp.mean, rp.confidence, rp.count));
-			atom->tv = ctv;
-			break;
-		}
-		case INDEFINITE_TRUTH_VALUE:
-		{
-			TruthValuePtr itv(IndefiniteTruthValue::createTV(rp.mean, rp.count, rp.confidence));
-			atom->tv = itv;
-			break;
-		}
-		case PROBABILISTIC_TRUTH_VALUE:
-		{
-			TruthValuePtr ptv(ProbabilisticTruthValue::createTV(rp.mean, rp.confidence, rp.count));
-			atom->tv = ptv;
-			break;
-		}
-		default:
-			throw IOException(TRACE_INFO,
-				"makeAtom: Unknown truth value type\n");
+		TruthValuePtr stv(SimpleTruthValue::createTV(rp.mean, rp.confidence));
+		atom->tv = stv;
 	}
+	else
+	if (rp.tv_type == COUNT_TRUTH_VALUE)
+	{
+		TruthValuePtr ctv(CountTruthValue::createTV(rp.mean, rp.confidence, rp.count));
+		atom->tv = ctv;
+	}
+	else
+	if (rp.tv_type == INDEFINITE_TRUTH_VALUE)
+	{
+		TruthValuePtr itv(IndefiniteTruthValue::createTV(rp.mean, rp.count, rp.confidence));
+		atom->tv = itv;
+	}
+	else
+	if (rp.tv_type == PROBABILISTIC_TRUTH_VALUE)
+	{
+		TruthValuePtr ptv(ProbabilisticTruthValue::createTV(rp.mean, rp.confidence, rp.count));
+		atom->tv = ptv;
+	}
+	else
+		throw IOException(TRACE_INFO,
+			"makeAtom: Unknown truth value type\n");
 
 	_load_count ++;
 	if (bulk_load and _load_count%10000 == 0)
