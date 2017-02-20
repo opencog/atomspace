@@ -62,7 +62,7 @@ public:
     confidence_t getConfidence() const;
 
     virtual TruthValuePtr merge(TruthValuePtr,
-                                const MergeCtrl& mc=MergeCtrl());
+                                const MergeCtrl& mc=MergeCtrl()) const;
 
     static TruthValuePtr createTV(strength_t s, confidence_t f, count_t c)
     {

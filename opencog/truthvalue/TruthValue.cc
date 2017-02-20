@@ -128,10 +128,10 @@ bool TruthValue::isDefinedTV() const
     return false;
 }
 
-TruthValuePtr TruthValue::higher_confidence_merge(TruthValuePtr other)
+TruthValuePtr TruthValue::higher_confidence_merge(TruthValuePtr other) const
 {
     if (other->getConfidence() > getConfidence()) {
         return other;
     }
-    return std::dynamic_pointer_cast<TruthValue>(shared_from_this());
+    return std::dynamic_pointer_cast<const TruthValue>(shared_from_this());
 }

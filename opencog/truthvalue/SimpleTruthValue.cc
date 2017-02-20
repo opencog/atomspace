@@ -77,7 +77,7 @@ confidence_t SimpleTruthValue::getConfidence() const
 
 // This is the merge formula appropriate for PLN.
 TruthValuePtr SimpleTruthValue::merge(TruthValuePtr other,
-                                      const MergeCtrl& mc)
+                                      const MergeCtrl& mc) const
 {
     switch(mc.tv_formula)
     {

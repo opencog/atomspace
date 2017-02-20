@@ -156,7 +156,7 @@ public:
      *        https://github.com/opencog/opencog/issues/1295
      */
     virtual TruthValuePtr merge(TruthValuePtr,
-                                const MergeCtrl& = MergeCtrl()) = 0;
+                                const MergeCtrl& = MergeCtrl()) const = 0;
 
     /**
      * Check if this TV is equal to the default TV.
@@ -167,7 +167,7 @@ public:
 
 protected:
     // Helper merging methods
-    TruthValuePtr higher_confidence_merge(TruthValuePtr);
+    TruthValuePtr higher_confidence_merge(TruthValuePtr) const;
 };
 
 } // namespace opencog

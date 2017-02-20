@@ -74,7 +74,7 @@ class GenericTruthValue : public TruthValue
 
         entropy_t getEntropy() const;
 
-        TruthValuePtr merge(TruthValuePtr, const MergeCtrl& = MergeCtrl());
+        TruthValuePtr merge(TruthValuePtr, const MergeCtrl& = MergeCtrl()) const;
 
         TruthValuePtr clone() const
         {

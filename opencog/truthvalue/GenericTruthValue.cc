@@ -118,7 +118,7 @@ entropy_t GenericTruthValue::getEntropy() const
     return entropy;
 }
 
-TruthValuePtr GenericTruthValue::merge(TruthValuePtr tv, const MergeCtrl& mc) 
+TruthValuePtr GenericTruthValue::merge(TruthValuePtr tv, const MergeCtrl& mc) const
 {
     GenericTruthValuePtr gtv = std::dynamic_pointer_cast<const GenericTruthValue>(tv);
     if (NULL == gtv) return tv;

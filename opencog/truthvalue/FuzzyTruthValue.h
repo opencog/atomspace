@@ -85,7 +85,7 @@ public:
      * with the highest confidence.
      */
     TruthValuePtr merge(TruthValuePtr,
-                        const MergeCtrl& mc=MergeCtrl());
+                        const MergeCtrl& mc=MergeCtrl()) const;
 
     static FuzzyTruthValuePtr createSTV(strength_t mean, count_t count)
     {

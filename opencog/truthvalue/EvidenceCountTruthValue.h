@@ -76,7 +76,7 @@ public:
 	 * with the highest confidence.
 	 */
 	TruthValuePtr merge(TruthValuePtr,
-	                    const MergeCtrl& mc=MergeCtrl());
+	                    const MergeCtrl& mc=MergeCtrl()) const;
 
 	static EvidenceCountTruthValuePtr createECTV(count_t pos_count,
 	                                             count_t total_count = -1.0)
