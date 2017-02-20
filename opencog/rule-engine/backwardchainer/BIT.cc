@@ -566,6 +566,11 @@ bool BIT::empty() const
 	return andbits.empty();
 }
 
+size_t BIT::size() const
+{
+	return andbits.size();
+}
+
 AndBIT* BIT::init()
 {
 	andbits.emplace_back(bit_as, _init_target, _init_vardecl, _init_fitness);

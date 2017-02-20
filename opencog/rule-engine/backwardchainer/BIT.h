@@ -371,6 +371,11 @@ public:
 	bool empty() const;
 
 	/**
+	 * @brief return the number of and-BITs in the BIT.
+	 */
+	size_t size() const;
+
+	/**
 	 * @brief Initialize the BIT and return the initial and-BIT.
 	 */
 	AndBIT* init();
