@@ -57,7 +57,7 @@ public:
     FuzzyTruthValue(const TruthValue&);
     FuzzyTruthValue(FuzzyTruthValue const&);
 
-    virtual bool operator==(const TruthValue& rhs) const;
+    virtual bool operator==(const ProtoAtom&) const;
 
     /// Heuristic to compute the count given the confidence (according
     /// to the PLN book)
@@ -71,8 +71,7 @@ public:
     /// where k is the look-ahead
     static confidence_t countToConfidence(count_t);
 
-    std::string toString() const;
-    TruthValueType getType() const;
+    std::string toString(const std::string&) const;
 
     strength_t getMean() const;
     count_t getCount() const;
@@ -86,7 +85,7 @@ public:
      * with the highest confidence.
      */
     TruthValuePtr merge(TruthValuePtr,
-                        const MergeCtrl& mc=MergeCtrl()) const;
+                        const MergeCtrl& mc=MergeCtrl());
 
     static FuzzyTruthValuePtr createSTV(strength_t mean, count_t count)
     {

@@ -33,6 +33,11 @@ using namespace opencog;
 const strength_t MAX_TRUTH  = 1.0f;
 count_t TruthValue::DEFAULT_K = 800.0;
 
+std::string toShortString(const std::string& indent) const
+{
+    toString(indent);
+}
+
 TruthValuePtr TruthValue::DEFAULT_TV()
 {
     // True, but no confidence.

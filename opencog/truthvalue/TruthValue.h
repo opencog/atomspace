@@ -112,6 +112,8 @@ public:
     TruthValue(Type t) : ProtoAtom(t) {}
     virtual ~TruthValue() {}
 
+    std::string toShortString(const std::string&) const;
+
     // Special TVs
 
     /**

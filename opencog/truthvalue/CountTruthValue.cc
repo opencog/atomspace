@@ -84,11 +84,6 @@ std::string CountTruthValue::toString(const std::string& indent) const
     return buf;
 }
 
-std::string CountTruthValue::toShortString(const std::string& indent) const
-{
-	return toString(indent);
-}
-
 bool CountTruthValue::operator==(const ProtoAtom& rhs) const
 {
     const CountTruthValue *ctv = dynamic_cast<const CountTruthValue *>(&rhs);
