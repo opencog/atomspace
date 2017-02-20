@@ -167,7 +167,7 @@ public:
 
 protected:
     // Helper merging methods
-    TruthValuePtr higher_confidence_merge(TruthValuePtr) const;
+    TruthValuePtr higher_confidence_merge(TruthValuePtr);
 };
 
 } // namespace opencog

@@ -53,10 +53,9 @@ public:
 	EvidenceCountTruthValue(const TruthValue&);
 	EvidenceCountTruthValue(EvidenceCountTruthValue const&);
 
-	virtual bool operator==(const TruthValue& rhs) const;
+	virtual bool operator==(const ProtoAtom&) const;
 
-	std::string toString() const;
-	TruthValueType getType() const;
+	std::string toString(const std::string&) const;
 
 	strength_t getMean() const;
 	count_t getCount() const;
@@ -77,7 +76,7 @@ public:
 	 * with the highest confidence.
 	 */
 	TruthValuePtr merge(TruthValuePtr,
-	                    const MergeCtrl& mc=MergeCtrl()) const;
+	                    const MergeCtrl& mc=MergeCtrl());
 
 	static EvidenceCountTruthValuePtr createECTV(count_t pos_count,
 	                                             count_t total_count = -1.0)

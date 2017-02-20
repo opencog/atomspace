@@ -1,12 +1,12 @@
 ADD_LIBRARY (truthvalue
 	AttentionValue.cc
 	CountTruthValue.cc
+	EvidenceCountTruthValue.cc
 	FuzzyTruthValue.cc
 	GenericTruthValue.cc
 	IndefiniteTruthValue.cc
 	ProbabilisticTruthValue.cc
 	SimpleTruthValue.cc
-	EvidenceCountTruthValue.cc
 	TruthValue.cc
 )
 

@@ -38,17 +38,21 @@
 using namespace opencog;
 
 SimpleTruthValue::SimpleTruthValue(strength_t m, confidence_t c)
+	: TruthValue(SIMPLE_TRUTH_VALUE)
 {
     _mean = m;
     _confidence = c;
 }
 
 SimpleTruthValue::SimpleTruthValue(const TruthValue& source)
+	: TruthValue(SIMPLE_TRUTH_VALUE)
 {
     _mean = source.getMean();
     _confidence = source.getConfidence();
 }
+
 SimpleTruthValue::SimpleTruthValue(SimpleTruthValue const& source)
+	: TruthValue(SIMPLE_TRUTH_VALUE)
 {
     _mean = source._mean;
     _confidence = source._confidence;
@@ -73,7 +77,7 @@ confidence_t SimpleTruthValue::getConfidence() const
 
 // This is the merge formula appropriate for PLN.
 TruthValuePtr SimpleTruthValue::merge(TruthValuePtr other,
-                                      const MergeCtrl& mc) const
+                                      const MergeCtrl& mc)
 {
     switch(mc.tv_formula)
     {
@@ -107,7 +111,7 @@ TruthValuePtr SimpleTruthValue::merge(TruthValuePtr other,
        }
 }
 
-std::string SimpleTruthValue::toString() const
+std::string SimpleTruthValue::toString(const std::string& indent) const
 {
     char buf[1024];
     sprintf(buf, "(stv %f %f)",
@@ -116,7 +120,7 @@ std::string SimpleTruthValue::toString() const
     return buf;
 }
 
-bool SimpleTruthValue::operator==(const TruthValue& rhs) const
+bool SimpleTruthValue::operator==(const ProtoAtom& rhs) const
 {
     const SimpleTruthValue *stv = dynamic_cast<const SimpleTruthValue *>(&rhs);
     if (NULL == stv) return false;
@@ -126,9 +130,4 @@ bool SimpleTruthValue::operator==(const TruthValue& rhs) const
 
     if (FLOAT_ACCEPTABLE_ERROR < fabs(_confidence - stv->_confidence)) return false;
     return true;
-}
-
-TruthValueType SimpleTruthValue::getType() const
-{
-    return SIMPLE_TRUTH_VALUE;
 }

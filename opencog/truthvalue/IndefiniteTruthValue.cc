@@ -117,22 +117,25 @@ void IndefiniteTruthValue::copy(const IndefiniteTruthValue& source)
 }
 
 IndefiniteTruthValue::IndefiniteTruthValue()
+	: TruthValue(INDEFINITE_TRUTH_VALUE)
 {
     init();
 }
 
 IndefiniteTruthValue::IndefiniteTruthValue(strength_t l, strength_t u,
                                            confidence_t c)
+	: TruthValue(INDEFINITE_TRUTH_VALUE)
 {
     init(l, u, c);
 }
 
 IndefiniteTruthValue::IndefiniteTruthValue(IndefiniteTruthValue const& source)
+	: TruthValue(INDEFINITE_TRUTH_VALUE)
 {
     copy(source);
 }
 
-bool IndefiniteTruthValue::operator==(const TruthValue& rhs) const
+bool IndefiniteTruthValue::operator==(const ProtoAtom& rhs) const
 {
     const IndefiniteTruthValue* itv = dynamic_cast<const IndefiniteTruthValue*>(&rhs);
     if (NULL == itv) {
@@ -184,19 +187,14 @@ const std::vector<strength_t*>& IndefiniteTruthValue::getFirstOrderDistribution(
     return firstOrderDistribution;
 }
 
-TruthValueType IndefiniteTruthValue::getType() const
-{
-    return INDEFINITE_TRUTH_VALUE;
-}
-
 // Merge formula, as specified by PLN.
 TruthValuePtr IndefiniteTruthValue::merge(TruthValuePtr other,
-                                          const MergeCtrl& mc) const
+                                          const MergeCtrl& mc)
 {
     return higher_confidence_merge(other);
 }
 
-std::string IndefiniteTruthValue::toString() const
+std::string IndefiniteTruthValue::toString(const std::string& indent) const
 {
     char buf[1024];
     sprintf(buf, "[%f,%f,%f,%f,%f,%d]",

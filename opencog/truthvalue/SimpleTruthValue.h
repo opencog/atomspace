@@ -54,10 +54,9 @@ public:
     SimpleTruthValue(const TruthValue&);
     SimpleTruthValue(SimpleTruthValue const&);
 
-    virtual bool operator==(const TruthValue& rhs) const;
+    virtual bool operator==(const ProtoAtom& rhs) const;
 
-    std::string toString() const;
-    TruthValueType getType() const;
+    std::string toString(const std::string&) const;
 
     strength_t getMean() const;
     count_t getCount() const;
@@ -71,7 +70,7 @@ public:
      * with the highest confidence.
      */
     TruthValuePtr merge(TruthValuePtr,
-                        const MergeCtrl& mc=MergeCtrl()) const;
+                        const MergeCtrl& mc=MergeCtrl());
 
     static SimpleTruthValuePtr createSTV(strength_t mean, confidence_t conf)
     {
