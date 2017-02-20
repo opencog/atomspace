@@ -137,7 +137,7 @@ private:
 	static SCM ss_new_ftv(SCM, SCM);
 	static SCM ss_new_etv(SCM, SCM);
 	static SCM ss_tv_p(SCM);
-	static SCM tv_p(SCM, TruthValueType);
+	static SCM tv_p(SCM, Type);
 	static SCM ss_stv_p(SCM);
 	static SCM ss_ctv_p(SCM);
 	static SCM ss_itv_p(SCM);
