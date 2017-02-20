@@ -169,7 +169,7 @@ extern "C"
      */
     int AtomSpace_getTruthValue( AtomSpace* this_ptr
                                , Handle* handle
-                               , TruthValueType* tv_type
+                               , Type* tv_type
                                , double* parameters );
 
     /**
@@ -188,7 +188,7 @@ extern "C"
      */
     int AtomSpace_setTruthValue( AtomSpace* this_ptr
                                , Handle* handle
-                               , TruthValueType type
+                               , Type type
                                , double* parameters );
 }
 

@@ -12,7 +12,7 @@ Handle* PatternMatcher_BindLink(AtomSpace* this_ptr, Handle* handle)
 
 int PatternMatcher_SatisfactionLink(AtomSpace* this_ptr
                             , Handle* handle
-                            , TruthValueType* tv_type
+                            , Type* tv_type
                             , double* parameters)
 {
     TruthValuePtr tv = satisfaction_link(this_ptr, *handle);

@@ -19,7 +19,7 @@ extern "C"
     using namespace opencog;
 
     int Utils_toRawType(TruthValuePtr tv
-                        , TruthValueType* tv_type
+                        , Type* tv_type
                         , double* parameters);
 }
 

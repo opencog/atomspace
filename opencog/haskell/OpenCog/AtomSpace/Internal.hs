@@ -29,7 +29,7 @@ type HandleSeq = Ptr Handle
 tvMAX_PARAMS :: Int
 tvMAX_PARAMS = 5
 
--- TV enum type to work with TruthValueTypes from
+-- TV enum type to work with Types from
 -- <opencog/truthvalue/TruthValue.h> definition.
 -- Note: this data type must be always similar to the definition on ../TruthValue.h.
 -- The order of enum types MUST be exactly the same on both sites.
