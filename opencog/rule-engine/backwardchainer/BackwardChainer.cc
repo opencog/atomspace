@@ -52,8 +52,7 @@ BackwardChainer::BackwardChainer(AtomSpace& as, const Handle& rbs,
                                                           // support
                                                           // focus_set
                                  const BITNodeFitness& fitness)
-	: _fcs_maximum_size(2000),
-	  _as(as), _configReader(as, rbs),
+	: _as(as), _configReader(as, rbs),
 	  _bit(as, target, vardecl, fitness),
 	  _iteration(0), _last_expansion_andbit(nullptr),
 	  _rules(_configReader.get_rules()) {
@@ -199,13 +198,17 @@ void BackwardChainer::fulfill_fcs(const Handle& fcs)
 	_results.insert(results.begin(), results.end());
 }
 
-AndBIT* BackwardChainer::select_expansion_andbit()
+std::vector<double> BackwardChainer::expansion_anbit_weights()
 {
-	// Calculate distribution based on a (poor) estimate of the
-	// probablity of a and-BIT being within the path of the solution.
 	std::vector<double> weights;
 	for (const AndBIT& andbit : _bit.andbits)
 		weights.push_back(operator()(andbit));
+	return weights;
+}
+
+AndBIT* BackwardChainer::select_expansion_andbit()
+{
+	std::vector<double> weights = expansion_anbit_weights();
 
 	// Debug log
 	if (bc_logger().is_debug_enabled()) {
@@ -230,20 +233,37 @@ const AndBIT* BackwardChainer::select_fulfillment_andbit() const
 
 void BackwardChainer::reduce_bit()
 {
-	// TODO: reset exhausted flags related to the removed and-BITs.
+	size_t previous_size = _bit.size();
 
-	// TODO: remove least likely and-BITs
+	if (0 < _configReader.get_max_bit_size()) {
+		// If the BIT size has reached its maximum, randomly remove
+		// and-BITs so that the BIT size gets back below or equal to
+		// its maximum. The and-BITs to remove are selected so that
+		// the least likely and-BITs to be selected for expansion are
+		// removed first.
+		while (_configReader.get_max_bit_size() < _bit.size()) {
+			// Calculate negated distribution of selecting an and-BIT
+			// for expansion
+			std::vector<double> weights = expansion_anbit_weights();
+			std::discrete_distribution<size_t> dist(weights.begin(),
+			                                        weights.end());
+			std::vector<double> neg_p;
+			for (double p : dist.probabilities())
+				neg_p.push_back(1 - p);
+			std::discrete_distribution<size_t> neg_dist(neg_p.begin(),
+			                                            neg_p.end());
 
-	// // Remove and-BITs above a certain size.
-	// auto complex_lt = [&](const AndBIT& andbit, size_t max_size) {
-	// 	return andbit.fcs->size() < max_size; };
-	// auto it = boost::lower_bound(_bit.andbits, _fcs_maximum_size, complex_lt);
-	// size_t previous_size = _bit.andbits.size();
-	// _bit.erase(it, _bit.andbits.end());
-	// if (size_t removed_andbits = previous_size - _bit.andbits.size()) {
-	// 	LAZY_BC_LOG_DEBUG << "Removed " << removed_andbits
-	// 	                  << " overly complex and-BITs from the BIT";
-	// }
+			// Pick the and-BIT and remove it from the BIT
+			auto it = std::next(_bit.andbits.begin(),
+			                    randGen().randint(_bit.size()));
+			_bit.andbits.erase(it);
+		}
+
+		if (size_t removed_andbits = previous_size - _bit.size()) {
+			LAZY_BC_LOG_DEBUG << "Removed " << removed_andbits
+			                  << " and-BITs from the BIT";
+		}
+	}
 }
 
 RuleTypedSubstitutionPair BackwardChainer::select_rule(BITNode& target,
