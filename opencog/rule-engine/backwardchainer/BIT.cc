@@ -151,6 +151,57 @@ std::string AndBIT::to_string() const
 	return oc_to_string(fcs);
 }
 
+std::string AndBIT::inference_tree_to_string() const
+{
+	return inference_tree_to_string(BindLinkCast(fcs)->get_implicand());
+}
+
+std::string AndBIT::inference_tree_to_string(const Handle& h) const
+{
+	if (h->getType() == EXECUTION_OUTPUT_LINK) {
+		Handle arg = h->getOutgoingAtom(0);
+		if (arg->getType() == LIST_LINK) {
+			// Render the conclusion
+			Handle conclusion = arg->getOutgoingAtom(0);
+			std::string conclusion_str = inference_tree_to_string(arg);
+
+			// Render the premises
+			Arity arity = arg->getArity();
+			if (1 < arity) {
+				std::vector<std::string> premises_strs;
+				bool unordered_premises =
+					arg->getOutgoingAtom(1)->getType() == SET_LINK;
+				if (unordered_premises) {
+					OC_ASSERT(arity == 2,
+					          "Mixture of ordered and unordered"
+					          " premises not implemented!");
+					arg = arg->getOutgoingAtom(1);
+					for (const Handle& ph : arg->getOutgoingSet())
+						premises_strs.push_back(inference_tree_to_string(ph));
+				} else {
+					for (Arity i = 1; i < arity; ++i) {
+						Handle ph = arg->getOutgoingAtom(i);
+						premises_strs.push_back(inference_tree_to_string(ph));
+					}
+				}
+				// Put a line over the head of the conclusion, with
+				// the premises over that line.
+				// TODO
+			} else {
+				// No premises, just put a line over the head of the
+				// conclusion
+				std::string line_str('-', conclusion_str.size());
+				return line_str + "\n" + conclusion_str + "\n";
+			}
+		} else {
+			// No premise, put a line over the head of the conclusion
+			std::string conclusion_str = inference_tree_to_string(arg);
+			std::string line_str('-', conclusion_str.size());
+			return line_str + "\n" + conclusion_str + "\n";
+		}
+	} else return h->idToString();
+}
+
 double AndBIT::expand_complexity(const Handle& leaf, const Rule& rule) const
 {
 	// Calculate the complexity of the expanded and-BIT. Sum up the

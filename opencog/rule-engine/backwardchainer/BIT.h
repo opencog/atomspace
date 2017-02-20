@@ -144,6 +144,80 @@ public:
 
 	std::string to_string() const;
 
+	/**
+	 * Print the inference tree of the FCS associated to the and-BIT
+	 * in a graphical form.
+	 *
+	 * Basically it ignores the pattern part of the FCS and only
+	 * consider how the premises relate to the conclusions in the
+	 * rewrite term.
+	 *
+	 * For instance, if the following FCS has the rewrite term
+	 *
+	 * ExecutionOutputLink
+	 *   <rule-1>
+	 *   ListLink
+	 *     <conclusion-1>
+	 *     <premise-1->
+	 *     <premise-2->
+	 *     ExecutionOutputLink
+	 *       <rule-2>
+	 *       ListLink
+	 *         <conclusion-2>
+	 *         <premise-3>
+	 *         ExecutionOutputLink
+	 *           <rule-3>
+	 *           <conclusion-3>
+	 *
+	 * Then this function is gonna produce
+	 *
+	 *                                    --------------<rule-3>
+	 *                       <premise-3>  <conclusion-3>
+	 *                       ---------------------------<rule-2>
+	 *   <premise-1>  <premise-2>  <conclusion-2>
+	 *   ----------------------------------------<rule-1>
+	 *                <conclusion-1>
+	 *
+	 * Where <conclusion-1>, <premises-1>, etc, are replaced by Handle
+	 * values. Also, note that <conclusion-2> for instance is a
+	 * conclusion from <rule-2> viewpoint, but a premise from <rule-1>
+	 * viewpoint.
+	 *
+	 * When the rule takes unordered premises, using a SetLink, then
+	 * the straight line is replaced by a doubled line. For instance,
+	 * to take a similar example, where <rule-2> happens have
+	 * unordered premises, the following FCS rewrite term
+	 *
+	 * ExecutionOutputLink
+	 *   <rule-1>
+	 *   ListLink
+	 *     <conclusion-1>
+	 *     <premise-1->
+	 *     <premise-2->
+	 *     ExecutionOutputLink
+	 *       <rule-2>
+	 *       ListLink
+	 *         <conclusion-2>
+	 *         SetLink
+	 *           <premise-3>
+	 *           ExecutionOutputLink
+	 *             <rule-3>
+	 *             <conclusion-3>
+	 *
+	 * Will be displayed as followed
+	 *
+	 *                                    --------------<rule-3>
+	 *                       <premise-3>  <conclusion-3>
+	 *                       ===========================<rule-2>
+	 *   <premise-1>  <premise-2>  <conclusion-2>
+	 *   ----------------------------------------<rule-1>
+	 *                <conclusion-1>
+	 *
+	 * TODO: display the rules
+	 */
+	std::string inference_tree_to_string() const;
+	std::string inference_tree_to_string(const Handle& h) const;
+
 private:
 	// Weighted distribution over the targets leaves, defined
 	// according to their BIT-node fitnesses. The higher the fitness
