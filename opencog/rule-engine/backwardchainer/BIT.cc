@@ -244,8 +244,8 @@ Handle AndBIT::expand_fcs(const Handle& leaf,
 
 	// Log expansion
 	LAZY_BC_LOG_DEBUG << "Expanded forward chainer strategy:" << std::endl
-	                  << "from:" << std::endl << fcs
-	                  << "to:" << std::endl << nfcs;
+	                  << nfcs << "with inference tree:"
+	                  << inference_tree_to_string(nfcs);
 
 	return nfcs;
 }

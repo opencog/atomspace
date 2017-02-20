@@ -179,8 +179,8 @@ void BackwardChainer::fulfill_bit()
 		                    << "Abort BIT fulfillment";
 		return;
 	}
-	LAZY_BC_LOG_DEBUG << "Selected and-BIT for fulfillment:" << std::endl
-	                  << oc_to_string(andbit->fcs);
+	LAZY_BC_LOG_DEBUG << "Selected and-BIT for fulfillment:"
+	                  << andbit->fcs->idToString();
 	fulfill_fcs(andbit->fcs);
 }
 
