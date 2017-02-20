@@ -53,17 +53,17 @@ public:
     CountTruthValue(const TruthValue&);
     CountTruthValue(CountTruthValue const&);
 
-    virtual bool operator==(const TruthValue& rhs) const;
+    virtual bool operator==(const ProtoAtom& rhs) const;
 
-    std::string toString() const;
-    TruthValueType getType() const;
+    std::string toString(const std::string&) const;
+    std::string toShortString(const std::string&) const;
 
     strength_t getMean() const;
     count_t getCount() const;
     confidence_t getConfidence() const;
 
     virtual TruthValuePtr merge(TruthValuePtr,
-                                const MergeCtrl& mc=MergeCtrl()) const;
+                                const MergeCtrl& mc=MergeCtrl());
 
     static TruthValuePtr createTV(strength_t s, confidence_t f, count_t c)
     {

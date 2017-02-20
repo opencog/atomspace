@@ -10,6 +10,9 @@ ADD_LIBRARY (truthvalue
 	TruthValue.cc
 )
 
+# Without this, parallel make will race and crap up the generated files.
+ADD_DEPENDENCIES(truthvalue opencog_atom_types)
+
 TARGET_LINK_LIBRARIES(truthvalue
 	${COGUTIL_LIBRARY}
 )
