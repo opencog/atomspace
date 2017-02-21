@@ -173,8 +173,9 @@ FOREACH (LINE ${TYPE_SCRIPT_CONTENTS})
         # identifier as the Python Atom object.
         IF (NOT TYPE_NAME STREQUAL "Atom")
             IF (ISVALUE STREQUAL "VALUE")
-                FILE(APPEND "${PYTHON_FILE}" "def ${TYPE_NAME}(node_name, tv=None):\n")
-                FILE(APPEND "${PYTHON_FILE}" "    return atomspace.add_node(types.${TYPE_NAME}, node_name, tv)\n")
+                # XXX FIXME -- invent something for python
+                # FILE(APPEND "${PYTHON_FILE}" "def ${TYPE_NAME}(node_name, tv=None):\n")
+                # FILE(APPEND "${PYTHON_FILE}" "    return atomspace.add_node(types.${TYPE_NAME}, node_name, tv)\n")
             ENDIF (ISVALUE STREQUAL "VALUE")
             IF (ISNODE STREQUAL "NODE")
                 FILE(APPEND "${PYTHON_FILE}" "def ${TYPE_NAME}(node_name, tv=None):\n")
