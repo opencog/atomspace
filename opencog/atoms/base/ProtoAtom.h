@@ -71,7 +71,8 @@ public:
 	 * Returns a string representation of the proto-atom.
 	 */
 	virtual std::string toString(const std::string& indent) const = 0;
-	virtual std::string toShortString(const std::string& indent) const = 0;
+	virtual std::string toShortString(const std::string& indent) const
+		{ return toString(indent); }
 
 	// Work around gdb's inability to build a string on the fly,
 	// see http://stackoverflow.com/questions/16734783 for more

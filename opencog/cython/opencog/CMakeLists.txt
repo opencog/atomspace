@@ -84,6 +84,7 @@ TARGET_LINK_LIBRARIES(atomspace_cython
 	atomutils
 	clearbox
 	atomspaceutils
+	truthvalue
 	atomcore
 	atomspace
 	${COGUTIL_LIBRARY}
