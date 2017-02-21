@@ -53,10 +53,9 @@ public:
     ProbabilisticTruthValue(const TruthValue&);
     ProbabilisticTruthValue(ProbabilisticTruthValue const&);
 
-    virtual bool operator==(const TruthValue& rhs) const;
+    virtual bool operator==(const ProtoAtom&) const;
 
-    std::string toString() const;
-    TruthValueType getType() const;
+    std::string toString(const std::string&) const;
 
     strength_t getMean() const;
     count_t getCount() const;

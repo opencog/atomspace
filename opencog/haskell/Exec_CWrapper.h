@@ -9,6 +9,6 @@ extern "C"
 
     int Exec_evaluate(AtomSpace* atomspace
                      , Handle* handle
-                     , TruthValueType* tv_type
+                     , Type* tv_type
                      , double* parameters);
 }

@@ -91,7 +91,7 @@ public:
     IndefiniteTruthValue(IndefiniteTruthValue const&);
 
     //! it is a strict equality comparison, without error interval tolerance
-    virtual bool operator==(const TruthValue& rhs) const;
+    virtual bool operator==(const ProtoAtom&) const;
 
     strength_t getMean() const { return mean; }
     strength_t getU() const { return U; }
@@ -109,8 +109,7 @@ public:
     TruthValuePtr merge(TruthValuePtr,
                         const MergeCtrl& mc=MergeCtrl()) const;
 
-    std::string toString() const;
-    TruthValueType getType() const;
+    std::string toString(const std::string&) const;
 
     // clone method
     static IndefiniteTruthValuePtr createITV(TruthValuePtr tv)

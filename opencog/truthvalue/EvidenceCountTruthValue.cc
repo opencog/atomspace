@@ -39,17 +39,21 @@ using namespace opencog;
 
 EvidenceCountTruthValue::EvidenceCountTruthValue(count_t pos_count,
                                                  count_t total_count)
+	: TruthValue(EVIDENCE_COUNT_TRUTH_VALUE)
 {
 	_pos_count = pos_count;
 	_total_count = total_count;
 }
 
 EvidenceCountTruthValue::EvidenceCountTruthValue(const TruthValue& source)
+	: TruthValue(EVIDENCE_COUNT_TRUTH_VALUE)
 {
 	_pos_count = source.getMean() * source.getCount();
 	_total_count = source.getCount();
 }
+
 EvidenceCountTruthValue::EvidenceCountTruthValue(EvidenceCountTruthValue const& source)
+	: TruthValue(EVIDENCE_COUNT_TRUTH_VALUE)
 {
 	_pos_count = source._pos_count;
 	_total_count = source._total_count;
@@ -122,7 +126,7 @@ TruthValuePtr EvidenceCountTruthValue::merge(TruthValuePtr other,
 	}
 }
 
-std::string EvidenceCountTruthValue::toString() const
+std::string EvidenceCountTruthValue::toString(const std::string& indent) const
 {
 	char buf[1024];
 	sprintf(buf, "(ectv %f %f)",
@@ -131,7 +135,7 @@ std::string EvidenceCountTruthValue::toString() const
 	return buf;
 }
 
-bool EvidenceCountTruthValue::operator==(const TruthValue& rhs) const
+bool EvidenceCountTruthValue::operator==(const ProtoAtom& rhs) const
 {
 	const EvidenceCountTruthValue *ectv
 		= dynamic_cast<const EvidenceCountTruthValue *>(&rhs);
@@ -147,9 +151,4 @@ bool EvidenceCountTruthValue::operator==(const TruthValue& rhs) const
 		and is_count_valid() == ectv->is_count_valid()
 		and (!is_count_valid() or
 		     close_enough(_total_count, ectv->_total_count));
-}
-
-TruthValueType EvidenceCountTruthValue::getType() const
-{
-	return EVIDENCE_COUNT_TRUTH_VALUE;
 }

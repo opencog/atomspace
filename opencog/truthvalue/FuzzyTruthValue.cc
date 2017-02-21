@@ -38,17 +38,20 @@
 using namespace opencog;
 
 FuzzyTruthValue::FuzzyTruthValue(strength_t m, count_t c)
+	: TruthValue(FUZZY_TRUTH_VALUE)
 {
     mean = m;
     count = c;
 }
 
 FuzzyTruthValue::FuzzyTruthValue(const TruthValue& source)
+	: TruthValue(FUZZY_TRUTH_VALUE)
 {
     mean = source.getMean();
     count = source.getCount();
 }
 FuzzyTruthValue::FuzzyTruthValue(FuzzyTruthValue const& source)
+	: TruthValue(FUZZY_TRUTH_VALUE)
 {
     mean = source.mean;
     count = source.count;
@@ -82,10 +85,10 @@ TruthValuePtr FuzzyTruthValue::merge(TruthValuePtr other,
     if (other->getConfidence() > getConfidence()) {
         return other;
     }
-    return shared_from_this();
+    return std::dynamic_pointer_cast<const TruthValue>(shared_from_this());
 }
 
-std::string FuzzyTruthValue::toString() const
+std::string FuzzyTruthValue::toString(const std::string& indent) const
 {
     char buf[1024];
     sprintf(buf, "(stv %f %f)",
@@ -94,7 +97,7 @@ std::string FuzzyTruthValue::toString() const
     return buf;
 }
 
-bool FuzzyTruthValue::operator==(const TruthValue& rhs) const
+bool FuzzyTruthValue::operator==(const ProtoAtom& rhs) const
 {
     const FuzzyTruthValue *stv = dynamic_cast<const FuzzyTruthValue *>(&rhs);
     if (NULL == stv) return false;
@@ -111,11 +114,6 @@ bool FuzzyTruthValue::operator==(const TruthValue& rhs) const
 
     if (FLOAT_ACCEPTABLE_COUNT_ERROR < fabs(1.0 - (stv->count/count))) return false;
     return true;
-}
-
-TruthValueType FuzzyTruthValue::getType() const
-{
-    return FUZZY_TRUTH_VALUE;
 }
 
 count_t FuzzyTruthValue::confidenceToCount(confidence_t cf)

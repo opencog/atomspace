@@ -31,6 +31,7 @@
 #include <vector>
 
 #include <opencog/util/exceptions.h>
+#include <opencog/atoms/base/ProtoAtom.h>
 
 /** \addtogroup grp_atomspace
  *  @{
@@ -51,27 +52,6 @@ namespace opencog
 typedef float strength_t;
 typedef float confidence_t;
 typedef double count_t;
-
-//! TruthValue types
-//! XXX TODO This should probably be removed.
-//! The truth-value types are currently used in only two places;
-//! The guile interpreter, and the SQL peristance layer.  Both of
-//! these layers should almost surely use their own private system
-//! for serializing/deserializing truth value types, instead of
-//! using this.  This is unstable, and should be removed ...
-// NUMBER_OF_TRUTH_VALUE_TYPES must be the last one in this enum.
-enum TruthValueType
-{
-    NULL_TRUTH_VALUE = 0,
-    SIMPLE_TRUTH_VALUE = 1,
-    COUNT_TRUTH_VALUE,
-    INDEFINITE_TRUTH_VALUE,
-    FUZZY_TRUTH_VALUE,
-    PROBABILISTIC_TRUTH_VALUE,
-    GENERIC_TRUTH_VALUE,
-    EVIDENCE_COUNT_TRUTH_VALUE,
-    NUMBER_OF_TRUTH_VALUE_TYPES
-};
 
 /// Class to control the TV merging strategy
 struct MergeCtrl
@@ -110,7 +90,7 @@ class TruthValue;
 typedef std::shared_ptr<const TruthValue> TruthValuePtr;
 
 class TruthValue
-    : public std::enable_shared_from_this<TruthValue>
+    : public ProtoAtom
 {
     friend class Atom;
 
@@ -129,7 +109,10 @@ public:
         DEFAULT_K = k;
     }
 
-	virtual ~TruthValue() {}
+    TruthValue(Type t) : ProtoAtom(t) {}
+    virtual ~TruthValue() {}
+
+    std::string toShortString(const std::string&) const;
 
     // Special TVs
 
@@ -162,19 +145,8 @@ public:
     virtual confidence_t getConfidence()  const = 0;
     virtual count_t getCount()  const = 0;
 
-    virtual std::string toString() const  = 0;
-    virtual TruthValueType getType() const  = 0;
     virtual TruthValuePtr clone() const  = 0;
     virtual TruthValue* rawclone() const  = 0;
-
-    /**
-     * Equality. Used to determine if two truth values are the
-     * same, or not. Primarily useful see if a TV is equal to
-     * NULL_TV, TRUE_TV, FALSE_TV, etc.
-     */
-    virtual bool operator==(const TruthValue& rhs) const = 0;
-    inline bool operator!=(const TruthValue& rhs) const
-         { return !(*this == rhs); }
 
     /**
      * Merge this TV object with the given TV object argument.
@@ -199,18 +171,6 @@ protected:
 };
 
 } // namespace opencog
-
-// overload of operator<< to print TruthValue
-namespace std
-{
-    template<typename Out>
-    Out& operator<<(Out& out, const opencog::TruthValue& tv)
-    {
-        out << tv.toString();
-        return out;
-    }
-} // ~namespace std
-
 
 /** @}*/
 #endif // _OPENCOG_TRUTH_VALUE_H

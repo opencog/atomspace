@@ -32,6 +32,7 @@ using namespace opencog;
 GenericTruthValue::GenericTruthValue(count_t pe, count_t te,
                                      strength_t f, strength_t fs,
                                      confidence_t c, entropy_t e)
+	: TruthValue(GENERIC_TRUTH_VALUE)
 {
     positiveEvidence = pe;
     totalEvidence = te;
@@ -42,6 +43,7 @@ GenericTruthValue::GenericTruthValue(count_t pe, count_t te,
 }
 
 GenericTruthValue::GenericTruthValue(GenericTruthValue const& gtv)
+	: TruthValue(GENERIC_TRUTH_VALUE)
 {
     positiveEvidence = gtv.positiveEvidence;
     totalEvidence = gtv.totalEvidence;
@@ -49,11 +51,6 @@ GenericTruthValue::GenericTruthValue(GenericTruthValue const& gtv)
     fuzzyStrength = gtv.fuzzyStrength;
     confidence = gtv.confidence;
     entropy = gtv.entropy;
-}
-
-TruthValueType GenericTruthValue::getType() const
-{
-    return GENERIC_TRUTH_VALUE;
 }
 
 count_t GenericTruthValue::getCount() const
@@ -142,7 +139,7 @@ TruthValuePtr GenericTruthValue::merge(TruthValuePtr tv, const MergeCtrl& mc) co
 }
 
 
-bool GenericTruthValue::operator==(const TruthValue& rhs) const
+bool GenericTruthValue::operator==(const ProtoAtom& rhs) const
 {
     const GenericTruthValue *gtv = dynamic_cast<const GenericTruthValue *>(&rhs);
     if (NULL == gtv) return false;
@@ -166,7 +163,7 @@ bool GenericTruthValue::operator==(const TruthValue& rhs) const
     return true;
 }
 
-std::string GenericTruthValue::toString() const
+std::string GenericTruthValue::toString(const std::string& indent) const
 {
     char buf[1024];
     sprintf(buf, "(gtv %f %f %f %f %f %f)",

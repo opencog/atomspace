@@ -35,6 +35,7 @@
 using namespace opencog;
 
 ProbabilisticTruthValue::ProbabilisticTruthValue(strength_t m, confidence_t n, count_t c)
+	: TruthValue(PROBABILISTIC_TRUTH_VALUE)
 {
     mean = m;
     confidence = n;
@@ -42,12 +43,15 @@ ProbabilisticTruthValue::ProbabilisticTruthValue(strength_t m, confidence_t n, c
 }
 
 ProbabilisticTruthValue::ProbabilisticTruthValue(const TruthValue& source)
+	: TruthValue(PROBABILISTIC_TRUTH_VALUE)
 {
     mean = source.getMean();
     confidence = source.getConfidence();
     count = source.getCount();
 }
+
 ProbabilisticTruthValue::ProbabilisticTruthValue(ProbabilisticTruthValue const& source)
+	: TruthValue(PROBABILISTIC_TRUTH_VALUE)
 {
     mean = source.mean;
     confidence = source.confidence;
@@ -69,7 +73,7 @@ confidence_t ProbabilisticTruthValue::getConfidence() const
     return confidence;
 }
 
-std::string ProbabilisticTruthValue::toString() const
+std::string ProbabilisticTruthValue::toString(const std::string& indent) const
 {
     char buf[1024];
     sprintf(buf, "(ctv %f %f %f)",
@@ -79,7 +83,7 @@ std::string ProbabilisticTruthValue::toString() const
     return buf;
 }
 
-bool ProbabilisticTruthValue::operator==(const TruthValue& rhs) const
+bool ProbabilisticTruthValue::operator==(const ProtoAtom& rhs) const
 {
     const ProbabilisticTruthValue *ctv = dynamic_cast<const ProbabilisticTruthValue *>(&rhs);
     if (NULL == ctv) return false;
@@ -91,11 +95,6 @@ bool ProbabilisticTruthValue::operator==(const TruthValue& rhs) const
     if (DOUBLE_ACCEPTABLE_ERROR < fabs(1.0 - (ctv->count/count))) return false;
 
     return true;
-}
-
-TruthValueType ProbabilisticTruthValue::getType() const
-{
-    return PROBABILISTIC_TRUTH_VALUE;
 }
 
 // Note: this is NOT the merge formula used by PLN.  This is
@@ -112,7 +111,8 @@ TruthValuePtr ProbabilisticTruthValue::merge(TruthValuePtr other,
     // value with a count of 1?  In which case, we should add a merge
     // routine to SimpleTruthValue to do likewise... Anyway, for now,
     // just ignore this possible complication to the semantics.
-    if (NULL == oc) return shared_from_this();
+    if (NULL == oc)
+         return std::dynamic_pointer_cast<const TruthValue>(shared_from_this());
     
     // If both this and other are counts, then accumulate to get the
     // total count, and average together the strengths, using the 
@@ -132,4 +132,3 @@ TruthValuePtr ProbabilisticTruthValue::merge(TruthValuePtr other,
     
     return createTV(meeny, this->confidence, cnt);
 }
-

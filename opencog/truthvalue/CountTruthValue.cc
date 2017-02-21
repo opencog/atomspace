@@ -32,9 +32,12 @@
 #include <opencog/util/platform.h>
 #include <opencog/util/exceptions.h>
 
+#include <opencog/atoms/base/atom_types.h>
+
 using namespace opencog;
 
 CountTruthValue::CountTruthValue(strength_t m, confidence_t n, count_t c)
+	: TruthValue(COUNT_TRUTH_VALUE)
 {
     mean = m;
     confidence = n;
@@ -42,12 +45,14 @@ CountTruthValue::CountTruthValue(strength_t m, confidence_t n, count_t c)
 }
 
 CountTruthValue::CountTruthValue(const TruthValue& source)
+	: TruthValue(COUNT_TRUTH_VALUE)
 {
     mean = source.getMean();
     confidence = source.getConfidence();
     count = source.getCount();
 }
 CountTruthValue::CountTruthValue(CountTruthValue const& source)
+	: TruthValue(COUNT_TRUTH_VALUE)
 {
     mean = source.mean;
     confidence = source.confidence;
@@ -69,7 +74,7 @@ confidence_t CountTruthValue::getConfidence() const
     return confidence;
 }
 
-std::string CountTruthValue::toString() const
+std::string CountTruthValue::toString(const std::string& indent) const
 {
     char buf[1024];
     sprintf(buf, "(ctv %f %f %f)",
@@ -79,7 +84,7 @@ std::string CountTruthValue::toString() const
     return buf;
 }
 
-bool CountTruthValue::operator==(const TruthValue& rhs) const
+bool CountTruthValue::operator==(const ProtoAtom& rhs) const
 {
     const CountTruthValue *ctv = dynamic_cast<const CountTruthValue *>(&rhs);
     if (NULL == ctv) return false;
@@ -91,11 +96,6 @@ bool CountTruthValue::operator==(const TruthValue& rhs) const
     if (DOUBLE_ACCEPTABLE_ERROR < fabs(1.0 - (ctv->count/count))) return false;
 
     return true;
-}
-
-TruthValueType CountTruthValue::getType() const
-{
-    return COUNT_TRUTH_VALUE;
 }
 
 // Note: this is NOT the merge formula used by PLN.  This is
@@ -112,7 +112,8 @@ TruthValuePtr CountTruthValue::merge(TruthValuePtr other,
     // value with a count of 1?  In which case, we should add a merge
     // routine to SimpleTruthValue to do likewise... Anyway, for now,
     // just ignore this possible complication to the semantics.
-    if (NULL == oc) return shared_from_this();
+    if (NULL == oc) return
+        std::dynamic_pointer_cast<const TruthValue>(shared_from_this());
     
     // If both this and other are counts, then accumulate to get the
     // total count, and average together the strengths, using the 

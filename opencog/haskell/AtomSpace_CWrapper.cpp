@@ -149,7 +149,7 @@ void AtomSpace_debug( AtomSpace* this_ptr )
 
 int AtomSpace_getTruthValue( AtomSpace* this_ptr
                            , Handle* atom
-                           , TruthValueType* tv_type
+                           , Type* tv_type
                            , double* parameters )
 {
     Handle h = *atom;
@@ -162,44 +162,45 @@ int AtomSpace_getTruthValue( AtomSpace* this_ptr
 
 int AtomSpace_setTruthValue( AtomSpace* this_ptr
                            , Handle* atom
-                           , TruthValueType type
+                           , Type type
                            , double* parameters )
 {
     Handle h = *atom;
-    if(!h) // Invalid UUID parameter.
+    if (!h) // Invalid UUID parameter.
         return -1;
-    switch(type)
-    {
-        case SIMPLE_TRUTH_VALUE: {
-            h->setTruthValue(SimpleTruthValue::createTV(parameters[0],parameters[1]));
-            break; }
-        case COUNT_TRUTH_VALUE: {
-            h->setTruthValue(CountTruthValue::createTV(parameters[0]
-                                                      ,parameters[2]
-                                                      ,parameters[1]));
-            break; }
-        case INDEFINITE_TRUTH_VALUE: {
-            IndefiniteTruthValuePtr iptr =
-                IndefiniteTruthValue::createITV(parameters[1]
-                                               ,parameters[2]
-                                               ,parameters[3]);
-            // iptr->setMean(parameters[0]);
-            // iptr->setDiff(parameters[4]);
-            h->setTruthValue(std::static_pointer_cast<const TruthValue>(iptr));
-            break; }
-        case FUZZY_TRUTH_VALUE: {
-            double count = FuzzyTruthValue::confidenceToCount(parameters[1]);
-            h->setTruthValue(FuzzyTruthValue::createTV(parameters[0],count));
-            break; }
-        case PROBABILISTIC_TRUTH_VALUE: {
-            h->setTruthValue(ProbabilisticTruthValue::createTV(parameters[0]
-                                                              ,parameters[2]
-                                                              ,parameters[1]));
-            break; }
-        default:
-            throw InvalidParamException(TRACE_INFO,
-                "Invalid TruthValue Type parameter.");
-            break;
+
+    if (type == SIMPLE_TRUTH_VALUE) {
+        h->setTruthValue(SimpleTruthValue::createTV(parameters[0],parameters[1]));
     }
+    else
+    if (type == COUNT_TRUTH_VALUE) {
+        h->setTruthValue(CountTruthValue::createTV(parameters[0]
+                                                  ,parameters[2]
+                                                  ,parameters[1]));
+    }
+    else
+    if (type == INDEFINITE_TRUTH_VALUE) {
+        IndefiniteTruthValuePtr iptr =
+            IndefiniteTruthValue::createITV(parameters[1]
+                                           ,parameters[2]
+                                           ,parameters[3]);
+        // iptr->setMean(parameters[0]);
+        // iptr->setDiff(parameters[4]);
+        h->setTruthValue(std::static_pointer_cast<const TruthValue>(iptr));
+    }
+    else
+    if (type == FUZZY_TRUTH_VALUE) {
+        double count = FuzzyTruthValue::confidenceToCount(parameters[1]);
+        h->setTruthValue(FuzzyTruthValue::createTV(parameters[0],count));
+    }
+    else
+    if (type == PROBABILISTIC_TRUTH_VALUE) {
+        h->setTruthValue(ProbabilisticTruthValue::createTV(parameters[0]
+                                                          ,parameters[2]
+                                                          ,parameters[1]));
+    }
+    else
+        throw InvalidParamException(TRACE_INFO,
+            "Invalid TruthValue Type parameter.");
     return 0;
 }

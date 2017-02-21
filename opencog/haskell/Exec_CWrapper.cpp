@@ -26,7 +26,7 @@ int Exec_execute(AtomSpace* atomspace, Handle* handle,Handle* out)
  */
 int Exec_evaluate(AtomSpace* atomspace
                  , Handle* handle
-                 , TruthValueType* tv_type
+                 , Type* tv_type
                  , double* parameters)
 {
     Handle h = *handle;

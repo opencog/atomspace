@@ -33,6 +33,11 @@ using namespace opencog;
 const strength_t MAX_TRUTH  = 1.0f;
 count_t TruthValue::DEFAULT_K = 800.0;
 
+std::string TruthValue::toShortString(const std::string& indent) const
+{
+    return toString(indent);
+}
+
 TruthValuePtr TruthValue::DEFAULT_TV()
 {
     // True, but no confidence.
@@ -128,5 +133,5 @@ TruthValuePtr TruthValue::higher_confidence_merge(TruthValuePtr other) const
     if (other->getConfidence() > getConfidence()) {
         return other;
     }
-    return shared_from_this();
+    return std::dynamic_pointer_cast<const TruthValue>(shared_from_this());
 }

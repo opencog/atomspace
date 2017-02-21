@@ -94,19 +94,15 @@ size_t AtomSpaceBenchmark::estimateOfAtomSize(Handle h)
     size_t total = 0;
     if (h->getTruthValue() != TruthValue::DEFAULT_TV())
     {
-        switch (h->getTruthValue()->getType()) {
-        case SIMPLE_TRUTH_VALUE:
+        Type tvt = h->getTruthValue()->getType();
+        if (tvt == SIMPLE_TRUTH_VALUE)
             total += sizeof(SimpleTruthValue);
-            break;
-        case COUNT_TRUTH_VALUE:
+        else
+        if (tvt == COUNT_TRUTH_VALUE)
             total += sizeof(CountTruthValue);
-            break;
-        case INDEFINITE_TRUTH_VALUE:
+        else
+        if (tvt == INDEFINITE_TRUTH_VALUE)
             total += sizeof(IndefiniteTruthValue);
-            break;
-        default:
-            break;
-        }
     }
 
     NodePtr n(NodeCast(h));

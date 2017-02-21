@@ -1,14 +1,17 @@
 ADD_LIBRARY (truthvalue
 	AttentionValue.cc
 	CountTruthValue.cc
+	EvidenceCountTruthValue.cc
 	FuzzyTruthValue.cc
 	GenericTruthValue.cc
 	IndefiniteTruthValue.cc
 	ProbabilisticTruthValue.cc
 	SimpleTruthValue.cc
-	EvidenceCountTruthValue.cc
 	TruthValue.cc
 )
+
+# Without this, parallel make will race and crap up the generated files.
+ADD_DEPENDENCIES(truthvalue opencog_atom_types)
 
 TARGET_LINK_LIBRARIES(truthvalue
 	${COGUTIL_LIBRARY}

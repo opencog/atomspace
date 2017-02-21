@@ -54,7 +54,6 @@ class GenericTruthValue : public TruthValue
                           confidence_t, entropy_t);
         GenericTruthValue(GenericTruthValue const&);
 
-        TruthValueType getType() const;
         strength_t getMean() const;
         count_t getCount() const;
         confidence_t getConfidence() const;
@@ -87,8 +86,8 @@ class GenericTruthValue : public TruthValue
             return new GenericTruthValue(*this);
         }
 
-        bool operator==(const TruthValue&) const;
-        std::string toString() const;
+        bool operator==(const ProtoAtom&) const;
+        std::string toString(const std::string&) const;
 
     protected:
         count_t positiveEvidence;

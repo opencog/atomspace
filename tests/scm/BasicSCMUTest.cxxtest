@@ -84,7 +84,7 @@ class BasicSCMUTest :  public CxxTest::TestSuite
 	//void test_evaluation_link(void);
 
 	// TVs
-	void check_truth_value(const TruthValue& tv);
+	void check_truth_value(const TruthValuePtr& tv);
 	void test_truth_value(void);
 
 	// Relex links
@@ -226,7 +226,7 @@ void BasicSCMUTest::test_single_atom(void)
 
 // ============================================================
 
-void BasicSCMUTest::check_truth_value(const TruthValue& tv)
+void BasicSCMUTest::check_truth_value(const TruthValuePtr& tv)
 {
 	logger().debug() << "check_node_truth_value(" << tv << ")";
 
@@ -242,22 +242,19 @@ void BasicSCMUTest::check_truth_value(const TruthValue& tv)
 	// set its truth value
 	stringstream ss;
 	ss << "(cog-set-tv! " << add_node_str << "(";
-	switch(TruthValueType tvt = tv.getType()) {
-	case SIMPLE_TRUTH_VALUE:
-		ss << "cog-new-stv " << tv.getMean() << " " << tv.getConfidence();
-		break;
-	case COUNT_TRUTH_VALUE:
-		ss << "cog-new-stv " << tv.getMean() << " " << tv.getConfidence()
-		   << " " << tv.getCount();
-		break;
-	case INDEFINITE_TRUTH_VALUE: {
-		const IndefiniteTruthValue& itv =
-			static_cast<const IndefiniteTruthValue&>(tv);
-		ss << "cog-new-itv " << itv.getL() << " " << itv.getU()
-		   << " " << itv.getConfidence();
-		break;
+	Type tvt = tv->getType();
+	if (tvt == SIMPLE_TRUTH_VALUE)
+		ss << "cog-new-stv " << tv->getMean() << " " << tv->getConfidence();
+	else if (tvt == COUNT_TRUTH_VALUE)
+		ss << "cog-new-stv " << tv->getMean() << " " << tv->getConfidence()
+		   << " " << tv->getCount();
+	else if (tvt == INDEFINITE_TRUTH_VALUE) {
+		const IndefiniteTruthValuePtr& itv =
+			dynamic_pointer_cast<const IndefiniteTruthValue>(tv);
+		ss << "cog-new-itv " << itv->getL() << " " << itv->getU()
+		   << " " << itv->getConfidence();
 	}
-	default:
+	else {
 		ss << "Wrong Truth Value Type (" << tvt << ")";
 		TSM_ASSERT(ss.str().c_str(), false);
 	}
@@ -273,7 +270,7 @@ void BasicSCMUTest::check_truth_value(const TruthValue& tv)
 	Handle h = as->get_handle(NODE, node_str);
 	TSM_ASSERT("Failed to get the handle", h != Handle::UNDEFINED);
 	// hack to avoid floating error
-	bool tv_eq = tv.toString() == h->getTruthValue()->toString();
+	bool tv_eq = tv->toString() == h->getTruthValue()->toString();
 	TSM_ASSERT("TVs are different", tv_eq);
 
 	// remove Node so we can redo the test
@@ -283,8 +280,8 @@ void BasicSCMUTest::check_truth_value(const TruthValue& tv)
 void BasicSCMUTest::test_truth_value(void)
 {
 	logger().debug("BEGIN TEST: %s", __FUNCTION__);
-	check_truth_value(SimpleTruthValue(0.5, 0.5));
-	check_truth_value(SimpleTruthValue(0.2, 0.7));
+	check_truth_value(SimpleTruthValue::createTV(0.5, 0.5));
+	check_truth_value(SimpleTruthValue::createTV(0.2, 0.7));
 	// @todo : add more
 }
 
