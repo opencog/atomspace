@@ -94,6 +94,9 @@ cdef extern from "opencog/atoms/base/atom_types.h" namespace "opencog":
 # Atom
 ctypedef public short av_type
 
+cdef extern from "opencog/atoms/base/Link.h" namespace "opencog":
+    pass
+
 cdef extern from "opencog/atoms/base/Atom.h" namespace "opencog":
     cdef cppclass cAtom "opencog::Atom":
         cAtom()

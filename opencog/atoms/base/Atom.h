@@ -36,7 +36,6 @@
 
 #include <opencog/atoms/base/Handle.h>
 #include <opencog/atoms/base/ProtoAtom.h>
-#include <opencog/truthvalue/AttentionValue.h>
 #include <opencog/truthvalue/TruthValue.h>
 
 class AtomUTest;
