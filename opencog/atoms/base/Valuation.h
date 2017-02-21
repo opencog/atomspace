@@ -23,7 +23,7 @@
 #ifndef _OPENCOG_VALUATION_H
 #define _OPENCOG_VALUATION_H
 
-#include <vector>
+#include <opencog/atoms/base/Handle.h>
 #include <opencog/atoms/base/ProtoAtom.h>
 #include <opencog/atoms/base/atom_types.h>
 
