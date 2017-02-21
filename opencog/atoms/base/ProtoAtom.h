@@ -125,9 +125,9 @@ typedef std::vector<ProtoAtomPtr> ProtomSeq;
 namespace std
 {
     template<typename Out>
-    Out& operator<<(Out& out, const opencog::ProtoAtom& pa)
+    Out& operator<<(Out& out, const opencog::ProtoAtomPtr& pa)
     {
-        out << pa.toString("");
+        out << pa->toString("");
         return out;
     }
 } // ~namespace std
