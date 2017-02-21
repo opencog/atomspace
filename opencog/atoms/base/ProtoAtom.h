@@ -121,4 +121,15 @@ typedef std::vector<ProtoAtomPtr> ProtomSeq;
 /** @}*/
 } // namespace opencog
 
+// overload of operator<< to print ProtoAtoms
+namespace std
+{
+    template<typename Out>
+    Out& operator<<(Out& out, const opencog::ProtoAtom& pa)
+    {
+        out << pa.toString("");
+        return out;
+    }
+} // ~namespace std
+
 #endif // _OPENCOG_PROTO_ATOM_H
