@@ -63,14 +63,12 @@ public:
 		return classserver().isA(at, t);
 	}
 
+	virtual bool isAtom() const { return false; }
 	virtual bool isNode() const { return false; }
 	virtual bool isLink() const { return false; }
 
 	/**
-	 * Returns a string representation of the node.
-	 *
-	 * @return A string representation of the node.
-	 * cannot be const, because observing the TV and AV requires a lock.
+	 * Returns a string representation of the proto-atom.
 	 */
 	virtual std::string toString(const std::string& indent) const = 0;
 	virtual std::string toShortString(const std::string& indent) const = 0;
@@ -82,16 +80,16 @@ public:
 	std::string toShortString() const { return toShortString(""); }
 
 	/**
-	 * Returns whether two atoms are equal.
+	 * Returns whether two proto-atoms are equal.
 	 *
-	 * @return true if the atoms are equal, false otherwise.
+	 * @return true if the proto-atoms are equal, false otherwise.
 	 */
 	virtual bool operator==(const ProtoAtom&) const = 0;
 
 	/**
-	 * Returns whether two atoms are different.
+	 * Returns whether two proto-atoms are different.
 	 *
-	 * @return true if the atoms are different, false otherwise.
+	 * @return true if the proto-atoms are different, false otherwise.
 	 */
 	bool operator!=(const ProtoAtom& other) const
 	{ return not operator==(other); }

@@ -101,7 +101,6 @@ protected:
     AtomTable *_atomTable;
 
     mutable TruthValuePtr _truthValue;
-    ProtoAtomPtr _value; // XXX this iw wrong!!! Must remove this!!
 
     // Lock, used to serialize changes.
     // This costs 40 bytes per atom.  Tried using a single, global lock,
@@ -119,14 +118,12 @@ protected:
      * atom references. It must be an empty vector if the atom is a node.
      * @param The truthValue of the atom.
      */
-    Atom(Type t, TruthValuePtr tv = TruthValue::DEFAULT_TV(),
-         ProtoAtomPtr pv = NULL)
+    Atom(Type t, TruthValuePtr tv = TruthValue::DEFAULT_TV())
       : ProtoAtom(t),
         _flags(0),
         _content_hash(Handle::INVALID_HASH),
         _atomTable(NULL),
-        _truthValue(tv),
-        _value(pv)
+        _truthValue(tv)
     {}
 
     struct InSet
@@ -180,6 +177,7 @@ private:
 public:
 
     virtual ~Atom();
+    virtual bool isAtom() const { return true; }
 
     //! Returns the AtomTable in which this Atom is inserted.
     AtomSpace* getAtomSpace() const;
