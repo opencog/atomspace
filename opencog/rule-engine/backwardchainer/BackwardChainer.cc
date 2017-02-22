@@ -233,8 +233,6 @@ const AndBIT* BackwardChainer::select_fulfillment_andbit() const
 
 void BackwardChainer::reduce_bit()
 {
-	size_t previous_size = _bit.size();
-
 	if (0 < _configReader.get_max_bit_size()) {
 		// If the BIT size has reached its maximum, randomly remove
 		// and-BITs so that the BIT size gets back below or equal to
@@ -256,12 +254,9 @@ void BackwardChainer::reduce_bit()
 			// Pick the and-BIT and remove it from the BIT
 			auto it = std::next(_bit.andbits.begin(),
 			                    randGen().randint(_bit.size()));
+			LAZY_BC_LOG_DEBUG << "Remove " << it->fcs->idToString()
+			                  << " from the BIT";
 			_bit.andbits.erase(it);
-		}
-
-		if (size_t removed_andbits = previous_size - _bit.size()) {
-			LAZY_BC_LOG_DEBUG << "Removed " << removed_andbits
-			                  << " and-BITs from the BIT";
 		}
 	}
 }
