@@ -251,12 +251,13 @@ void BackwardChainer::reduce_bit()
 			std::discrete_distribution<size_t> neg_dist(neg_p.begin(),
 			                                            neg_p.end());
 
-			// Pick the and-BIT and remove it from the BIT
+			// Pick the and-BIT, remove it from the BIT and remove its
+			// FCS from the bit atomspace.
 			auto it = std::next(_bit.andbits.begin(),
 			                    randGen().randint(_bit.size()));
+			_bit.erase(it);
 			LAZY_BC_LOG_DEBUG << "Remove " << it->fcs->idToString()
 			                  << " from the BIT";
-			_bit.andbits.erase(it);
 		}
 	}
 }
