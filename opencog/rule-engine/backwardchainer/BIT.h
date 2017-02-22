@@ -145,8 +145,7 @@ public:
 	std::string to_string() const;
 
 	/**
-	 * Print the inference tree of the FCS associated to the and-BIT
-	 * in a graphical form.
+	 * Print the inference tree of a given FCS in ascii art.
 	 *
 	 * Basically it ignores the pattern part of the FCS and only
 	 * consider how the premises relate to the conclusions in the
@@ -215,8 +214,8 @@ public:
 	 *
 	 * TODO: display the rules
 	 */
-	std::string inference_tree_to_string() const;
-	std::string inference_tree_to_string(const Handle& h) const;
+	std::string fcs_to_ascii_art(const Handle& fcs) const;
+	std::string fcs_rewrite_to_ascii_art(const Handle& h) const;
 
 private:
 	// Weighted distribution over the targets leaves, defined
@@ -302,6 +301,43 @@ private:
 	 * Equal even if one of them is locally quoted
 	 */
 	bool is_locally_quoted_eq(const Handle& lhs, const Handle& rhs) const;
+
+	/**
+	 * Merge horizontally 2 ascii art strings, avoiding collision. The
+	 * collision distance is specified in dst, in number of horizontal
+	 * characters.
+	 */
+	static std::vector<std::string>
+	ascii_art_hmerge(const std::vector<std::string>& laa /* botton to top */,
+	                 const std::vector<std::string>& raa /* botton to top */,
+	                 unsigned dst);
+	static std::string ascii_art_hmerge(const std::vector<std::string>& aas,
+	                                    unsigned dst=1);
+	static std::string ascii_art_hmerge(const std::string& laa,
+	                                    const std::string& raa,
+	                                    unsigned dst);
+
+	/**
+	 * Turn a multiline string into a list of string where the last
+	 * line is the first of the line, and the first line is the last
+	 */
+	static std::vector<std::string> reverse_split(const std::string& aa);
+
+	/**
+	 * Return the bottom line of an ascii art string.
+	 */
+	static std::string bottom_line(const std::string& aa);
+
+	/**
+	 * Return the number of leading spaces.
+	 */
+	static unsigned leading_spaces(const std::string& line);
+
+	/**
+	 * Given an ascii art, produce a string that underlines the bottom
+	 * line with the provided character.
+	 */
+	static std::string underline(const std::string& aa, char c='-');
 };
 
 /**
