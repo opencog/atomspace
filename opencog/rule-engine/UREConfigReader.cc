@@ -31,9 +31,12 @@ using namespace std;
 using namespace opencog;
 
 const std::string UREConfigReader::top_rbs_name = "URE";
+
+// Parameters
 const std::string UREConfigReader::attention_alloc_name = "URE:attention-allocation";
 const std::string UREConfigReader::max_iter_name = "URE:maximum-iterations";
 const std::string UREConfigReader::bc_complexity_penalty_name = "URE:BC:complexity-penalty";
+const std::string UREConfigReader::bc_max_bit_size_name = "URE:BC:max-bit-size";
 
 UREConfigReader::UREConfigReader(AtomSpace& as, const Handle& rbs) : _as(as)
 {
@@ -65,6 +68,9 @@ UREConfigReader::UREConfigReader(AtomSpace& as, const Handle& rbs) : _as(as)
 
 	// Fetch BC complexity penalty parameter
 	_bc_params.complexity_penalty = fetch_num_param(bc_complexity_penalty_name, rbs);
+
+	// Fetch BC BIT maximum size parameter
+	_bc_params.max_bit_size = fetch_num_param(bc_max_bit_size_name, rbs, -1);
 }
 
 const RuleSet& UREConfigReader::get_rules() const
@@ -90,6 +96,11 @@ int UREConfigReader::get_maximum_iterations() const
 double UREConfigReader::get_complexity_penalty() const
 {
 	return _bc_params.complexity_penalty;
+}
+
+double UREConfigReader::get_max_bit_size() const
+{
+	return _bc_params.max_bit_size;
 }
 
 void UREConfigReader::set_attention_allocation(bool aa)

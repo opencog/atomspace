@@ -144,6 +144,10 @@ private:
 	// Reduce the BIT. Remove some and-BITs.
 	void reduce_bit();
 
+	// Calculate distribution based on a (poor) estimate of the
+	// probablity of a and-BIT being within the path of the solution.
+	std::vector<double> expansion_anbit_weights();
+
 	// Select an and-BIT for expansion
 	AndBIT* select_expansion_andbit();
 
@@ -178,10 +182,6 @@ private:
 	// Return an very crude estimate of the probability that expanding
 	// this and-BIT may lead to a successful inference.
 	double operator()(const AndBIT& andbit) const;
-
-	// FCS above this size are considered too big and automatically
-	// removed.
-	const size_t _fcs_maximum_size;
 
 	AtomSpace& _as;
 	UREConfigReader _configReader;

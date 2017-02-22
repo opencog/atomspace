@@ -62,6 +62,7 @@ public:
 	int get_maximum_iterations() const;
 	// BC
 	double get_complexity_penalty() const;
+	double get_max_bit_size() const;
 
 	///////////////////////////////////////////////////////////////////
 	// Modifiers. WARNING: Those changes are not reflected in the    //
@@ -94,6 +95,9 @@ public:
 	// Name of the complexity penalty parameter for the Backward
 	// Chainer
 	static const std::string bc_complexity_penalty_name;
+
+	// Name of the maximum number of and-BITs in the BIT parameter
+	static const std::string bc_max_bit_size_name;
 private:
 
 	// Fetch from the AtomSpace all rules of a given rube-based
@@ -125,6 +129,10 @@ private:
 		// complexity penalty, the greater value the greater the
 		// complexity penalty.
 		double complexity_penalty;
+
+		// This put an upper boundary on the maximum number of
+		// and-BITs the BIT can hold. Negative means unlimited.
+		int max_bit_size;
 	};
 	BCParameters _bc_params;
 
