@@ -255,9 +255,9 @@ void BackwardChainer::reduce_bit()
 			// FCS from the bit atomspace.
 			auto it = std::next(_bit.andbits.begin(),
 			                    randGen().randint(_bit.size()));
-			_bit.erase(it);
 			LAZY_BC_LOG_DEBUG << "Remove " << it->fcs->idToString()
 			                  << " from the BIT";
+			_bit.erase(it);
 		}
 	}
 }
