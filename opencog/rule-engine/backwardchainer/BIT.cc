@@ -207,13 +207,13 @@ std::string AndBIT::fcs_rewrite_to_ascii_art(const Handle& h) const
 				// No premises, just put a line over the head of the
 				// conclusion
 				std::string line_str(conclusion_aa.size(), '-');
-				return line_str + "\n" + conclusion_aa + "\n";
+				return line_str + "\n" + conclusion_aa;
 			}
 		} else {
 			// No premise, put a line over the head of the conclusion
-			std::string conclusion_str = fcs_rewrite_to_ascii_art(arg);
-			std::string line_str(conclusion_str.size(), '-');
-			return line_str + "\n" + conclusion_str + "\n";
+			std::string conclusion_aa = fcs_rewrite_to_ascii_art(arg);
+			std::string line_str(conclusion_aa.size(), '-');
+			return line_str + "\n" + conclusion_aa;
 		}
 	} else return h->idToString();
 }
