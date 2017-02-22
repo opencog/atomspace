@@ -23,9 +23,15 @@
 #include <boost/range/algorithm/binary_search.hpp>
 #include <boost/range/algorithm/lower_bound.hpp>
 #include <boost/range/algorithm/remove_if.hpp>
+#include <boost/range/algorithm/reverse.hpp>
 #include <boost/range/algorithm/unique.hpp>
 #include <boost/range/algorithm/find.hpp>
 #include <boost/range/algorithm/sort.hpp>
+
+#include <boost/algorithm/string/classification.hpp>
+#include <boost/algorithm/string/split.hpp>
+#include <boost/algorithm/string/trim.hpp>
+#include <boost/algorithm/string/join.hpp>
 
 #include <opencog/util/random.h>
 
@@ -151,6 +157,67 @@ std::string AndBIT::to_string() const
 	return oc_to_string(fcs);
 }
 
+std::string AndBIT::fcs_to_ascii_art(const Handle& nfcs) const
+{
+	return fcs_rewrite_to_ascii_art(BindLinkCast(nfcs)->get_implicand());
+}
+
+std::string AndBIT::fcs_rewrite_to_ascii_art(const Handle& h) const
+{
+	if (h->getType() == EXECUTION_OUTPUT_LINK) {
+		Handle arg = h->getOutgoingAtom(1);
+		if (arg->getType() == LIST_LINK) {
+			// Render the conclusion
+			Handle conclusion = arg->getOutgoingAtom(0);
+			std::string conclusion_aa = fcs_rewrite_to_ascii_art(conclusion);
+
+			// Render the premises
+			Arity arity = arg->getArity();
+			if (1 < arity) {
+				std::vector<std::string> premises_aas;
+				bool unordered_premises =
+					arg->getOutgoingAtom(1)->getType() == SET_LINK;
+				if (unordered_premises) {
+					OC_ASSERT(arity == 2,
+					          "Mixture of ordered and unordered"
+					          " premises not implemented!");
+					arg = arg->getOutgoingAtom(1);
+					for (const Handle& ph : arg->getOutgoingSet())
+						premises_aas.push_back(fcs_rewrite_to_ascii_art(ph));
+				} else {
+					for (Arity i = 1; i < arity; ++i) {
+						Handle ph = arg->getOutgoingAtom(i);
+						premises_aas.push_back(fcs_rewrite_to_ascii_art(ph));
+					}
+				}
+				// Merge horizontally the ascii arts of all premises
+				std::string premises_merged_aa = ascii_art_hmerge(premises_aas);
+
+				// Put a line over the head of the conclusion, with
+				// the premises over that line.
+				std::string ul(underline(premises_merged_aa,
+				                         unordered_premises ? '=' : '-'));
+				unsigned ulls = leading_spaces(ul);
+				unsigned conclusion_offset =
+					(ul.size() + ulls - conclusion_aa.size()) / 2;
+				std::string conclusion_indent(conclusion_offset, ' ');
+				return premises_merged_aa + "\n" + ul + "\n"
+					+ conclusion_indent + conclusion_aa;
+			} else {
+				// No premises, just put a line over the head of the
+				// conclusion
+				std::string line_str(conclusion_aa.size(), '-');
+				return line_str + "\n" + conclusion_aa + "\n";
+			}
+		} else {
+			// No premise, put a line over the head of the conclusion
+			std::string conclusion_str = fcs_rewrite_to_ascii_art(arg);
+			std::string line_str(conclusion_str.size(), '-');
+			return line_str + "\n" + conclusion_str + "\n";
+		}
+	} else return h->idToString();
+}
+
 double AndBIT::expand_complexity(const Handle& leaf, const Rule& rule) const
 {
 	// Calculate the complexity of the expanded and-BIT. Sum up the
@@ -193,8 +260,9 @@ Handle AndBIT::expand_fcs(const Handle& leaf,
 
 	// Log expansion
 	LAZY_BC_LOG_DEBUG << "Expanded forward chainer strategy:" << std::endl
-	                  << "from:" << std::endl << fcs
-	                  << "to:" << std::endl << nfcs;
+	                  << nfcs;
+	LAZY_BC_LOG_DEBUG << "With inference tree:" << std::endl << std::endl
+	                  << fcs_to_ascii_art(nfcs) << std::endl;
 
 	return nfcs;
 }
@@ -377,6 +445,106 @@ bool AndBIT::is_locally_quoted_eq(const Handle& lhs, const Handle& rhs) const
 	if (lhs_t != LOCAL_QUOTE_LINK and rhs_t == LOCAL_QUOTE_LINK)
 		return content_eq(lhs, rhs->getOutgoingAtom(0));
 	return false;
+}
+
+std::vector<std::string>
+AndBIT::ascii_art_hmerge(const std::vector<std::string>& laa,
+                         const std::vector<std::string>& raa,
+                         unsigned dst)
+{
+	if (laa.empty())
+		return raa;
+	if (raa.empty())
+		return laa;
+
+	// Max line size of laa (in common with raa)
+	int left_max = 0;
+
+	// Min leading spaces of raa (in common with laa)
+	int right_min = std::numeric_limits<int>::max();
+
+	// Calculate the merging offset of origin of the right image
+	// relative to the origin of the left one.
+	size_t ls = laa.size();
+	size_t rs = raa.size();
+	for (size_t i = 0; i < std::min(ls, rs); ++i) {
+		left_max = std::max(left_max, (int)laa[i].size());
+		right_min = std::min(right_min, (int)leading_spaces(raa[i]));
+	}
+
+	// Only add dst if there is an actual border to not collide with.
+	if (left_max) left_max += dst;
+
+	// Where to paste the raa
+	size_t offset = std::max(0, left_max - right_min);
+
+	// Perform merging
+	std::vector<std::string> result;
+	for (size_t i = 0; i < std::max(ls, rs); ++i) {
+		std::string line;
+		if (i < ls)
+			line = laa[i];
+		if (i < rs) {
+			// Fill with spaces
+			while (line.size() < offset)
+				line += " ";
+			// Remove unused leading spaces
+			line += i < ls ? raa[i].substr(line.size() - offset) : raa[i];
+		}
+		result.push_back(line);
+	}
+	return result;
+}
+
+std::string AndBIT::ascii_art_hmerge(const std::string& laa,
+                                     const std::string& raa, unsigned dst)
+{
+	// Split laa into lines, from bottom to top
+	std::vector<std::string> laa_lines = reverse_split(laa);
+	// Split raa into lines, from bottom to top
+	std::vector<std::string> raa_lines = reverse_split(raa);
+	// Produce the merge and join it back into a string
+	std::vector<std::string> res_lines =
+		ascii_art_hmerge(laa_lines, raa_lines, dst);
+	boost::reverse(res_lines);
+	return boost::join(res_lines, "\n");
+}
+
+std::string AndBIT::ascii_art_hmerge(const std::vector<std::string>& aas,
+                                     unsigned dst)
+{
+	std::string result;
+	for (const std::string& aa : aas)
+		result = ascii_art_hmerge(result, aa, dst);
+	return result;
+}
+
+std::vector<std::string> AndBIT::reverse_split(const std::string& aa)
+{
+	std::vector<std::string> result;
+	boost::split(result, aa, boost::is_any_of("\n"));
+	boost::reverse(result);
+	return result;
+}
+
+std::string AndBIT::bottom_line(const std::string& aa)
+{
+	std::vector<std::string> aa_lines = reverse_split(aa);
+	return aa_lines.front();
+}
+
+unsigned AndBIT::leading_spaces(const std::string& line)
+{
+	std::string left_trimmed_line = boost::trim_left_copy(line);
+	return line.size() - left_trimmed_line.size();
+}
+
+std::string AndBIT::underline(const std::string& aa, char c)
+{
+	std::string bl = bottom_line(aa);
+	size_t bls = bl.size();
+	size_t ls = leading_spaces(bl);
+	return std::string(ls, ' ') + std::string(bls - ls, c);
 }
 
 /////////
