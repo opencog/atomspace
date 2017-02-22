@@ -390,18 +390,15 @@ Handle AndBIT::expand_fcs_rewrite(const Handle& fcs_rewrite,
 	// the rule conclusion
 	if (content_eq(fcs_rewrite, conclusion))
 		return rule.get_implicand();
-	// If node and isn't equal to conclusion leave alone
-	if (fcs_rewrite->isNode())
-		return fcs_rewrite;
 
 	// Recursive cases
 
 	AtomSpace& as = *fcs->getAtomSpace();
 	Type t = fcs_rewrite->getType();
 
-	// If it is an ExecutionOutput then skip the first input argument
-	// as it is a conclusion already
 	if (t == EXECUTION_OUTPUT_LINK) {
+		// If it is an ExecutionOutput then skip the first input
+		// argument as it is a conclusion already.
 		Handle gsn = fcs_rewrite->getOutgoingAtom(0);
 		Handle arg = fcs_rewrite->getOutgoingAtom(1);
 		if (arg->getType() == LIST_LINK) {
@@ -411,13 +408,21 @@ Handle AndBIT::expand_fcs_rewrite(const Handle& fcs_rewrite,
 			arg = as.add_link(LIST_LINK, args);
 		}
 		return as.add_link(EXECUTION_OUTPUT_LINK, {gsn, arg});
-	}
-
-	// Otherwise perform a mere recursion
-	HandleSeq outgoings;
-	for (const Handle& h : fcs_rewrite->getOutgoingSet())
-		outgoings.push_back(expand_fcs_rewrite(h, rule));
-	return as.add_link(t, outgoings);
+	} else if (t == SET_LINK) {
+		// If a SetLink then treat its arguments as (unordered)
+		// premises.
+		HandleSeq args = fcs_rewrite->getOutgoingSet();
+		for (size_t i = 0; i < args.size(); i++)
+			args[i] = expand_fcs_rewrite(args[i], rule);
+		return as.add_link(SET_LINK, args);
+	} else
+		// If none of the conditions apply just leave alone. Indeed,
+		// assuming that the pattern matcher is executing the rewrite
+		// term eagerly then it is garantied that all premises TVs
+		// will be updated before running a rule, so we don't need to
+		// substitute parts of a term containing the conclusion by the
+		// application rule(premises).
+		return fcs_rewrite;
 }
 
 bool AndBIT::is_argument_of(const Handle& eval, const Handle& atom) const
