@@ -36,7 +36,7 @@ const std::string UREConfigReader::top_rbs_name = "URE";
 const std::string UREConfigReader::attention_alloc_name = "URE:attention-allocation";
 const std::string UREConfigReader::max_iter_name = "URE:maximum-iterations";
 const std::string UREConfigReader::bc_complexity_penalty_name = "URE:BC:complexity-penalty";
-const std::string UREConfigReader::bc_max_bit_size_name = "URE:BC:max-bit-size";
+const std::string UREConfigReader::bc_max_bit_size_name = "URE:BC:maximum-bit-size";
 
 UREConfigReader::UREConfigReader(AtomSpace& as, const Handle& rbs) : _as(as)
 {
