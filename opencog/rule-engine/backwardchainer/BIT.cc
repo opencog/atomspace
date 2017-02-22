@@ -198,8 +198,9 @@ std::string AndBIT::fcs_rewrite_to_ascii_art(const Handle& h) const
 				std::string ul(underline(premises_merged_aa,
 				                         unordered_premises ? '=' : '-'));
 				unsigned ulls = leading_spaces(ul);
-				unsigned conclusion_offset =
-					(ul.size() + ulls - conclusion_aa.size()) / 2;
+				unsigned ullls = ul.size() + ulls;
+				unsigned conclusion_offset = ullls < conclusion_aa.size() ? 0 :
+					(ullls - conclusion_aa.size()) / 2;
 				std::string conclusion_indent(conclusion_offset, ' ');
 				return premises_merged_aa + "\n" + ul + "\n"
 					+ conclusion_indent + conclusion_aa;
