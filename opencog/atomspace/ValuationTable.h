@@ -23,6 +23,8 @@
 #ifndef _OPENCOG_VALUTATION_TABLE_H
 #define _OPENCOG_VALUTATION_TABLE_H
 
+#include <map>
+
 #include <opencog/atoms/base/Handle.h>
 #include <opencog/atoms/base/Valuation.h>
 
@@ -41,6 +43,8 @@ private:
 
 	// Single, global mutex for locking the indexes.
 	mutable std::mutex _mtx;
+
+	std::map<std::pair<Handle, Handle>, ValuationPtr> _vindex;
 
 	/**
 	 * Override and declare copy constructor and equals operator as

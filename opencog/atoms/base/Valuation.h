@@ -53,7 +53,9 @@ public:
 
 	virtual ~Valuation() {}
 
-	const ProtoAtomPtr& value() { return _value; }
+	const Handle& key() { return _key; }
+	const Handle& atom() { return _atom; }
+	ProtoAtomPtr& value() { return _value; }
 
 	void setValue(const ProtoAtomPtr&);
 

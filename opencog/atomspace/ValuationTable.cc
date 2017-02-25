@@ -20,6 +20,8 @@
  * 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
  */
 
+#include <opencog/util/exceptions.h>
+
 #include "ValuationTable.h"
 
 using namespace opencog;
@@ -34,6 +36,8 @@ ValuationTable::~ValuationTable()
 
 void ValuationTable::addValuation(ValuationPtr& vp)
 {
+	_vindex.insert(std::make_pair(
+		std::make_pair(vp->key(), vp->atom()), vp));
 }
 
 void ValuationTable::addValuation(const Handle& key,
@@ -46,10 +50,13 @@ void ValuationTable::addValuation(const Handle& key,
 
 ValuationPtr ValuationTable::getValuation(const Handle& key, const Handle& atom)
 {
-	return nullptr;
+	auto vpiter = _vindex.find(std::make_pair(key, atom));
+	if (vpiter == _vindex.end())
+		throw RuntimeException(TRACE_INFO, "there is now value for this key");
+	return vpiter->second;
 }
 
 ProtoAtomPtr ValuationTable::getValue(const Handle& key, const Handle& atom)
 {
-	return nullptr;
+	return getValuation(key, atom)->value();
 }
