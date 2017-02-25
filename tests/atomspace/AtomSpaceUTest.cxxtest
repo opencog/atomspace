@@ -34,6 +34,7 @@
 #include <opencog/attentionbank/AttentionBank.h>
 #include <opencog/atoms/base/Handle.h>
 #include <opencog/atoms/base/Node.h>
+#include <opencog/atoms/base/Link.h>
 #include <opencog/truthvalue/SimpleTruthValue.h>
 #include <opencog/util/Logger.h>
 #include <opencog/util/platform.h>

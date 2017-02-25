@@ -22,6 +22,7 @@
 
 #include <cxxtest/TestSuite.h>
 
+#include <opencog/atoms/base/Node.h>
 #include <opencog/atomspace/AtomSpace.h>
 #include <opencog/query/DefaultPatternMatchCB.h>
 #include <opencog/query/InitiateSearchCB.h>
@@ -146,7 +147,7 @@ bool PMCB::grounding(const HandleMap &var_soln,
 	return false;
 }
 
-#define getlink(hand,pos) LinkCast(hand)->getOutgoingAtom(pos)
+#define getlink(hand,pos) hand->getOutgoingAtom(pos)
 
 /*
  * This function sets up the following structures:

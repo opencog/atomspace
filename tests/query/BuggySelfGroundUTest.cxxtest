@@ -72,7 +72,7 @@ void BuggySelfGroundUTest::setUp(void)
     as->clear();
 }
 
-#define getarity(hand) LinkCast(hand)->getArity()
+#define getarity(hand) hand->getArity()
 
 void BuggySelfGroundUTest::test_crash(void)
 {

@@ -71,7 +71,7 @@ void SingleUTest::setUp(void)
 {
 }
 
-#define getarity(hand) LinkCast(hand)->getArity()
+#define getarity(hand) hand->getArity()
 
 /*
  * Basic SingleLink unit test. Defines 3 inheritance relationships,

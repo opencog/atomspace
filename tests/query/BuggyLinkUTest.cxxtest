@@ -20,8 +20,8 @@
  * 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
  */
 
-#include <opencog/guile/SchemeEval.h>
 #include <opencog/atomspace/AtomSpace.h>
+#include <opencog/guile/SchemeEval.h>
 #include <opencog/query/BindLinkAPI.h>
 #include <opencog/util/Logger.h>
 
@@ -69,7 +69,7 @@ void BuggyLinkUTest::setUp(void)
     as->clear();
 }
 
-#define getarity(hand) LinkCast(hand)->getArity()
+#define getarity(hand) hand->getArity()
 
 /*
  * BuggyLink unit test.  Test binding to unquoted links.
