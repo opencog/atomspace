@@ -23,13 +23,12 @@
 #include <iostream>
 #include <fstream>
 
+#include <opencog/atomspace/AtomSpace.h>
 #include <opencog/atomspace/ValuationTable.h>
 #include <opencog/atoms/base/FloatValue.h>
 #include <opencog/atoms/base/Link.h>
 #include <opencog/atoms/base/Node.h>
 #include <opencog/util/Logger.h>
-#include <opencog/util/platform.h>
-#include <opencog/util/mt19937ar.h>
 
 using namespace opencog;
 using namespace std;
@@ -63,8 +62,8 @@ public:
 
 	void testSimple()
 	{
-		Handle key = space->add(CONCEPT_NODE, "The F Key");
-		Handle blah = space->add(CONCEPT_NODE, "28675194");
+		Handle key = space->add_node(CONCEPT_NODE, "The F Key");
+		Handle blah = space->add_node(CONCEPT_NODE, "28675194");
 
 		ProtoAtomPtr fvalue(createFloatValue(2.222));
 
@@ -72,6 +71,6 @@ public:
 
 		ProtoAtomPtr fetch = vtable->getValue(key, blah);
 
-		TS_EQUALS(fvalue, fetch);
+		TS_ASSERT_EQUALS(fvalue, fetch);
 	}
 };
