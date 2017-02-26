@@ -1,8 +1,8 @@
 
-                   AtomSpace README
-                   ----------------
+AtomSpace README
+----------------
 
-The README contains miscellaneous notes about the atomspace. But first:
+This README contains miscellaneous notes about the atomspace. But first:
 
 What is an Atom?
 ================
@@ -36,32 +36,56 @@ constraint is used to avoid race conditions, to prevent different
 processes or users from accidentally seeing different versions of the
 "same" thing.
 
+One way to understand typed hypergraphs is to realize that they are
+"term graphs".  A formal definition of a "term graph" can be found on
+page 66 of the book Franz Baader, Tobias Nipkow, "Term Rewriting and
+All That", Cambridge University Press, 1998.  That book also provides
+a general sketch of why, and how, term graphs can be used to represent
+knowledge of any sort. Another way of looking at atoms is as the basic
+building blocks of Model Theory: atoms are used to construct models.
+See, for example, the book "A Shorter Model Theory", by Wilfred Hodges.
+
+One way in which the concept of Atoms and AtomSpaces differ from
+"standard" Model Theory or from "plain" term graphs is that the re-write
+rules for term graphs can themselves be expressed in terms of atoms. So,
+for example, the (typed) lambda calculus can be represented with atoms,
+and beta-reduction is represented in terms of Atoms, as well. The
+default defintions include several variants of beta reduction, including
+the PutLink and the MapLink (which see, on the wiki).
+
 What is the AtomSpace?
 ======================
-The AtomSpace is a database that holds "term graphs".  The formal
-definition of a "term graph" can be found on page 66 of the book
-Franz Baader, Tobias Nipkow, "Term Rewriting and All That", Cambridge
-University Press, 1998.  What this means in practice is that every atom
-in the atomspace is unique: you cannot have two of the "same" atom in
-the atomspace.  So, for example, you can create two "identical" atoms
-simply by using the C++ new operator, you cannot place both in the
-atomspace: putting the second one in returns a copy of the first one.
+The AtomSpace is a database that holds Atoms. In the default mode, the
+AtomSpace is purely an in-RAM database, although the "backend API"
+allows portions (or all) of an AtomSpace to be persisted to disk.
 
-This implies that the AtomTable::addAtom() method is fairly complicated:
-it must be able to detect is that atom being added already exists in the
-atomspace.  The addAtom() method implements the "merge proceedure", page
-68 of Baader&Nipkow; the soundness of the proceedure is given in theorem
-4.4.3.  A lot of the complexity of atoms and te atomspace centers around
-trying to make that merge algo efficient.  It is the primary bottleneck
-of the system.
+For some types of algorithms, it is convenient to have multiple
+AtomSpaces; the implementation here supports this, although in a
+relatively naive and unsophisticated way. The atomspaces can be nested;
+one way to think of them is that they resemble the concept of an
+"environment" in the scheme programming language (or the "environment"
+in the bash shell).  Thus, the AtomSpace can be thought of as a space
+holding "S-expressions"; indeed, every Link-Node tree (DAG) can be
+thought of as an S-expression.
+
+AtomSpace Implementation Notes
+==============================
+The uniqueness constraint on Atoms implies that the AtomTable::addAtom()
+method is fairly complicated: it must be able to detect if an atom
+being added already exists in the atomspace.  The addAtom() method
+implements the "merge procedure", page 68 of Baader&Nipkow; the
+soundness of the proceedure is given in theorem 4.4.3.  A lot of the
+complexity of atoms and the atomspace centers around trying to make
+the merge algorithm efficient.  It is the primary bottleneck of the
+current implementation.
 
 The AtomSpace is crudely "distributed", i.e. parts of it can reside on
 a networked collection of computers.  It is "crude" because the current
-architecture works, but is not somehow magically, blazingly fast.  The
-AtomTable holds the local, in-RAM cache of atoms on this computer; the
-AtomSpace is a wrapper around the AtomTable, it can go off to other
-machines to fetch (and store) atoms if they are not in the local
-AtomTable.
+architecture works, but is not very fast or efficient.  The AtomTable
+holds the local, in-RAM cache of atoms on this computer. The AtomSpace
+is a wrapper around the AtomTable, and provides a backing store
+(persistance) for the atomtable.  Depending on which backend is used,
+atomtables on different machines can share a common database.
 
 Multiple AtomSpaces can be used simultaneously, and AtomSpaces can be
 created in a hierarchical fashion.  Thus, the AtomSpace can be thought
