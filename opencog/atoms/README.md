@@ -10,6 +10,9 @@ the performance of the system.  Almost all of these atom types
 during run-time to speed performance, and avoid repeated, redundant
 computations.
 
+See the [AtomSpace REAMDE](../atomspace/README) for a quick definition
+of what an Atom is.
+
 Subdirectories
 --------------
  * base -- The basic atoms: ProtoAtom, Atom, Node, Link, Value.

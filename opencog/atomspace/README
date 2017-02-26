@@ -1,35 +1,139 @@
 
-                   AtomSpace README
-                   ----------------
+AtomSpace README
+----------------
 
-The README contains miscellaneous notes about the atomspace. But first:
+This README contains miscellaneous notes about the atomspace. But first:
 
-What is the Atomspace?
+What is an Atom?
+================
+An Atom is an immutable data structure that can be used to represent
+knowledge. Atoms are designed to be so general that any kind of domain
+knowledge can be represented with them, including classical predicate
+logic, natural language, Bayesian probability networks, neural networks,
+and so on. The basic representation is that of "typed hypergraphs". Each
+atom has a "type" (in the sense of "type theory") -- there are currently
+over one hundred pre-defined types, such as "and", "or", "not", but also
+"word", "sentence", as well as "implication" and "inheritance".  A
+hypergraph is a certain generalization of a graph that makes it simpler
+to represent knowledge.  Note that hypergraphs can be represented with
+ordinary graphs, and a specific representation, that of DAGs (directed
+acyclic graphs) is used throughout the code.
+
+Atoms come in two basic types: Nodes and Links.  Nodes correspond to the
+leafs of a tree, while Links correspond to vertexes internal to the
+tree (non-leaf vertexes).  Nodes can be given a name, Links cannot.
+Nodes and Links have a type, but no further properties, except for
+values (valuations); these are described in a later section.
+
+Nodes and Links can be shared between different trees.  Nodes and Links
+are, by definition, immutable: once created, they cannot be changed;
+they can only be deleted.  Nodes and Links are, by definition, globally,
+universally unique: there can only ever be one Node of a given type and
+name. Likewise, there can only be one Link of a given type, holding the
+Atoms that it does.  The uniqueness constraint is used to avoid
+ambiguity and duplication in knowledge representation. The immutability
+constraint is used to avoid race conditions, to prevent different
+processes or users from accidentally seeing different versions of the
+"same" thing.
+
+By definition, Links contain (ordered) sets of Atoms: this is refered to
+as the "outgoing set" of the Link. Conversely, an Atom might be
+contained in one or more Links; these links form the "incoming set" of
+the atom.
+
+One way to understand typed hypergraphs is to realize that they are
+"term graphs".  A formal definition of a "term graph" can be found on
+page 66 of the book Franz Baader, Tobias Nipkow, "Term Rewriting and
+All That", Cambridge University Press, 1998.  That book also provides
+a general sketch of why, and how, term graphs can be used to represent
+knowledge of any sort. Another way of looking at atoms is as the basic
+building blocks of Model Theory: atoms are used to construct models.
+See, for example, the book "A Shorter Model Theory", by Wilfred Hodges.
+
+One way in which the concept of Atoms and AtomSpaces differ from
+"standard" Model Theory or from "plain" term graphs is that the re-write
+rules for term graphs can themselves be expressed in terms of atoms. So,
+for example, the (typed) lambda calculus can be represented with atoms,
+and beta-reduction is represented in terms of Atoms, as well. The
+default defintions include several variants of beta reduction, including
+the PutLink and the MapLink (which see, on the wiki).
+
+What is the AtomSpace?
 ======================
-The AtomSpace is a database that holds "term graphs".  The formal
-definition of a "term graph" can be found on page 66 of the book
-Franz Baader, Tobias Nipkow, "Term Rewriting and All That", Cambridge
-University Press, 1998.  What this means is practice is that every atom
-in the atomspace is unique: you cannot have two of the "same" atom in
-the atomspace.  So, for example, you can create two "identical" atoms
-simply by using the C++ new operator, you cannot place both in the
-atomspace: putting the second one in returns a copy of the first one.
+The AtomSpace is a database that holds Atoms. In the default mode, the
+AtomSpace is purely an in-RAM database, although the "backend API"
+allows portions (or all) of an AtomSpace to be persisted to disk.
 
-This implies that the AtomTable::addAtom() method is fairly complicated:
-it must be able to detect is that atom being added already exists in the
-atomspace.  The addAtom() method implements the "merge proceedure", page
-68 of Baader&Nipkow; the soundness of the proceedure is given in theorem
-4.4.3.  A lot of the complexity of atoms and te atomspace centers around
-trying to make that merge algo efficient.  It is the primary bottleneck
-of the system.
+For some types of algorithms, it is convenient to have multiple
+AtomSpaces; the implementation here supports this, although in a
+relatively naive and unsophisticated way. The atomspaces can be nested;
+one way to think of them is that they resemble the concept of an
+"environment" in the scheme programming language (or the "environment"
+in the bash shell).  Thus, the AtomSpace can be thought of as a space
+holding "S-expressions"; indeed, every Link-Node tree (DAG) can be
+thought of as an S-expression.
+
+What is a Valuation?
+====================
+Although a typed hypergraph of Atoms can, in principle, represent any
+kind of data, it is inefficient for many practical uses: the demand for
+immutability and uniqueness implies a significant overhead for indexing
+Atoms, and for thread-safety of the index.  Thus, for rapidly-changing
+data, a different mechanism is provided: this associates one or more
+"values" to an atom; the values are indexed by a "key" (which is an
+Atom).  The values can be a vector of floats, a vector of strings, or a
+vector of values; yet more kinds of values can be defined, if desired.
+
+Values differ from Atoms in that they can change at any time; they are
+mutable. Two different threads can observe two different values "at the
+same time". The value of an atom can be obtained by specifying a key;
+however, the values have no "incoming set": given a value, there is no
+way of finding out what atoms might be associated with it.
+
+The Valuation type is a C++ class that associates the (key,atom) pair
+with a value; thus a Valuation is the triple (key, atom, value). Thus,
+the Valuation loosely resembles the EvaluationLink, with the key playing
+the role of a PredicateNode, and the value playing the role of the
+ListLink.
+
+The name "valuation" was chosen to explicitly call to mind the notion of
+a "valuation" in model theory: so, for example, atoms are used to
+represent sentences and theories, while valuations are used to assign
+truth values to each atom. Indeed, the TruthValue is a special case of a
+valuation. For historical reasons, the TruthValue is treated in a
+special way in the implementation.
+
+The ValuationSpace vaguely resembles the AtomSpace, and is used to solve
+the technical issues that arise in managing valuations.
+
+
+Atom Implementation Notes
+=========================
+The Link class explicitly contains the outgoing set of the Link.  The
+Atom class explicitly contains the incoming set of the Atom. Smart
+pointers (the C++ std::shared_ptr class) are used for holding Atoms.
+The Handle class is a wrapper around std::shared_ptr.  The Link contains
+an std::vector of Handles.  Thus, to avoid memory management issues, the
+Atom uses weak pointers for the incoming set.
+
+AtomSpace Implementation Notes
+==============================
+The uniqueness constraint on Atoms implies that the AtomTable::addAtom()
+method is fairly complicated: it must be able to detect if an atom
+being added already exists in the atomspace.  The addAtom() method
+implements the "merge procedure", page 68 of Baader&Nipkow; the
+soundness of the proceedure is given in theorem 4.4.3.  A lot of the
+complexity of atoms and the atomspace centers around trying to make
+the merge algorithm efficient.  It is the primary bottleneck of the
+current implementation.
 
 The AtomSpace is crudely "distributed", i.e. parts of it can reside on
 a networked collection of computers.  It is "crude" because the current
-architecture works, but is not somehow magically, blazingly fast.  The
-AtomTable holds the local, in-RAM cache of atoms on this computer; the
-AtomSpace is a wrapper around the AtomTable, it can go off to other
-machines to fetch (and store) atoms if they are not in the local
-AtomTable.
+architecture works, but is not very fast or efficient.  The AtomTable
+holds the local, in-RAM cache of atoms on this computer. The AtomSpace
+is a wrapper around the AtomTable, and provides a backing store
+(persistance) for the atomtable.  Depending on which backend is used,
+atomtables on different machines can share a common database.
 
 Multiple AtomSpaces can be used simultaneously, and AtomSpaces can be
 created in a hierarchical fashion.  Thus, the AtomSpace can be thought
