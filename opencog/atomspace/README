@@ -4,12 +4,44 @@
 
 The README contains miscellaneous notes about the atomspace. But first:
 
-What is the Atomspace?
+What is an Atom?
+================
+An Atom is an immutable data structure that can be used to represent
+knowledge. Atoms are designed to be so general that any kind of domain
+knowledge can be represented with them, including classical predicate
+logic, natural language, Bayesian probability networks, neural networks,
+and so on. The basic representation is that of "typed hypergraphs". Each
+atom has a "type" (in the sense of "type theory") -- there are currently
+over one hundred pre-defined types, such as "and", "or", "not", but also
+"word", "sentence", as well as "implication" and "inheritance".  A
+hypergraph is a certain generalization of a graph that makes it simpler
+to represent knowledge.  Note that hypergraphs can be represented with
+ordinary graphs, and a specific representation, that of DAGs (directed
+acyclic graphs) is used throughout the code.
+
+Atoms come in two basic types: Nodes and Links.  Nodes correspond to the
+leafs of a tree, while Links correspond to vertexes internal to the
+tree (non-leaf vertexes).  Nodes can be given a name, Links cannot.
+Nodes and Links have a type, but no further properties, except for
+values (valuations); these are described in a later section.
+
+Nodes and Links can be shared between different trees.  Nodes and Links
+are, by definition, immutable: once created, they cannot be changed;
+they can only be deleted.  Nodes and Links are, by definition, globally,
+universally unique: there can only ever be one Node of a given type and
+name. Likewise, there can only be one Link of a given type, holding the
+Atoms that it does.  The uniqueness constraint is used to avoid
+ambiguity and duplication in knowledge representation. The immutability
+constraint is used to avoid race conditions, to prevent different
+processes or users from accidentally seeing different versions of the
+"same" thing.
+
+What is the AtomSpace?
 ======================
 The AtomSpace is a database that holds "term graphs".  The formal
 definition of a "term graph" can be found on page 66 of the book
 Franz Baader, Tobias Nipkow, "Term Rewriting and All That", Cambridge
-University Press, 1998.  What this means is practice is that every atom
+University Press, 1998.  What this means in practice is that every atom
 in the atomspace is unique: you cannot have two of the "same" atom in
 the atomspace.  So, for example, you can create two "identical" atoms
 simply by using the C++ new operator, you cannot place both in the
