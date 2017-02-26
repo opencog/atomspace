@@ -19,8 +19,9 @@ ADD_LIBRARY (atombase
 	Link.cc
 	LinkValue.cc
 	Node.cc
-	StringValue.cc
 	Quotation.cc
+	StringValue.cc
+	Valuation.cc
 )
 
 # Without this, parallel make will race and crap up the generated files.
@@ -46,9 +47,10 @@ INSTALL (FILES
 	LinkValue.h
 	Node.h
 	ProtoAtom.h
+	Quotation.h
 	StringValue.h
 	types.h
-	Quotation.h
+	Valuation.h
 	DESTINATION "include/opencog/atoms/base"
 )
 

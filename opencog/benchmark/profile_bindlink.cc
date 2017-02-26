@@ -22,6 +22,7 @@
 
 #include <iostream>
 #include <opencog/guile/SchemeEval.h>
+#include <opencog/atoms/base/Link.h>
 #include <opencog/atomspace/AtomSpace.h>
 #include <opencog/query/BindLinkAPI.h>
 #include <opencog/util/Logger.h>
@@ -86,10 +87,9 @@ int main(void)
 
     // Do the queries.
     Handle animals = get_animals(animals_query);
-    LinkPtr link(LinkCast(animals));
-    if (link)
+    if (animals->isLink())
     {
-        size_t total_animals = link->getOutgoingSet().size();
+        size_t total_animals = animals->getOutgoingSet().size();
         std::cout << "total animals = " << total_animals << std::endl;
     }
 

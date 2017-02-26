@@ -145,6 +145,10 @@ FOREACH (LINE ${TYPE_SCRIPT_CONTENTS})
             SET(ISLINK "LINK")
         ENDIF (NOT ISNODE STREQUAL "NODE" AND NOT ISVALUE STREQUAL "VALUE")
 
+        IF (${TYPE} STREQUAL "VALUATION")
+            SET(ISLINK "")
+        ENDIF (${TYPE} STREQUAL "VALUATION")
+
         # Print out the scheme definitions
         FILE(APPEND "${SCM_FILE}" "(define-public ${TYPE_NAME}Type (cog-type->int '${TYPE_NAME}))\n")
         IF (ISVALUE STREQUAL "VALUE")

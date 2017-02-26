@@ -97,7 +97,7 @@ bool PMCB::grounding(const HandleMap &var_soln,
 	return true;
 }
 
-#define getlink(hand,pos) LinkCast(hand)->getOutgoingAtom(pos)
+#define getlink(hand,pos) hand->getOutgoingAtom(pos)
 
 void PatternCrashUTest::tearDown(void)
 {

@@ -23,6 +23,7 @@
 
 #include <opencog/util/macros.h>
 #include <opencog/guile/SchemeSmob.h>
+#include <opencog/atoms/base/Link.h>
 
 #include "URECommons.h"
 #include "ChainerUtils.h"

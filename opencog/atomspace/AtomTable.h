@@ -38,8 +38,6 @@
 
 #include <opencog/atoms/base/Quotation.h>
 #include <opencog/atoms/base/ClassServer.h>
-#include <opencog/atoms/base/Link.h>
-#include <opencog/atoms/base/Node.h>
 
 #include <opencog/atomspace/TypeIndex.h>
 

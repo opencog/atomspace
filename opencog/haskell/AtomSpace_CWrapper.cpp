@@ -2,6 +2,8 @@
 #include "AtomSpace_CWrapper.h"
 #include "Utils_CWrapper.h"
 #include <opencog/atoms/base/ClassServer.h>
+#include <opencog/atoms/base/Link.h>
+#include <opencog/atoms/base/Node.h>
 #include <opencog/truthvalue/TruthValue.h>
 #include <opencog/truthvalue/SimpleTruthValue.h>
 #include <opencog/truthvalue/CountTruthValue.h>

@@ -1,7 +1,7 @@
 /*
- * opencog/atoms/base/FloatValue.h
+ * opencog/atoms/base/Valuation.h
  *
- * Copyright (C) 2015 Linas Vepstas
+ * Copyright (C) 2015,2017 Linas Vepstas
  * All Rights Reserved
  *
  * This program is free software; you can redistribute it and/or modify
@@ -20,10 +20,10 @@
  * 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
  */
 
-#ifndef _OPENCOG_FLOAT_VALUE_H
-#define _OPENCOG_FLOAT_VALUE_H
+#ifndef _OPENCOG_VALUATION_H
+#define _OPENCOG_VALUATION_H
 
-#include <vector>
+#include <opencog/atoms/base/Handle.h>
 #include <opencog/atoms/base/ProtoAtom.h>
 #include <opencog/atoms/base/atom_types.h>
 
@@ -35,40 +35,46 @@ namespace opencog
  */
 
 /**
- * FloatValues hold an ordered vector of doubles.
+ * A Valuation resembles an EvaluationLink, except that its a bit
+ * more strictly defined, and is intended to be used for associating
+ * Values with Atoms.
  */
-class FloatValue
+class Valuation
 	: public ProtoAtom
 {
 protected:
-	std::vector<double> _value;
+	Handle _key;
+	Handle _atom;
+	ProtoAtomPtr _value;  // XXX TODO should this be  vector?
 
 public:
-	FloatValue(double v) : ProtoAtom(FLOAT_VALUE) { _value.push_back(v); }
-	FloatValue(std::vector<double> v) : ProtoAtom(FLOAT_VALUE), _value(v) {}
+	Valuation(const Handle& k, const Handle& a, const ProtoAtomPtr& v)
+		: ProtoAtom(VALUATION), _key(k), _atom(a), _value(v) {}
 
-	virtual ~FloatValue() {}
+	virtual ~Valuation() {}
 
-	std::vector<double>& value() { return _value; }
-	void setValue(const std::vector<double>& v) { _value = v; }
-	void setValue(double v) { _value = std::vector<double>({v}); }
+	const Handle& key() { return _key; }
+	const Handle& atom() { return _atom; }
+	ProtoAtomPtr& value() { return _value; }
+
+	void setValue(const ProtoAtomPtr&);
 
 	/** Returns a string representation of the value.  */
 	virtual std::string toString(const std::string& indent) const;
 
-	/** Returns true if two atoms are equal.  */
+	/** Returns true if the two atoms are equal, else false.  */
 	virtual bool operator==(const ProtoAtom&) const;
 };
 
-typedef std::shared_ptr<FloatValue> FloatValuePtr;
-static inline FloatValuePtr FloatValueCast(const ProtoAtomPtr& a)
-	{ return std::dynamic_pointer_cast<FloatValue>(a); }
+typedef std::shared_ptr<Valuation> ValuationPtr;
+static inline ValuationPtr ValuationCast(const ProtoAtomPtr& a)
+	{ return std::dynamic_pointer_cast<Valuation>(a); }
 
 // XXX temporary hack ...
-#define createFloatValue std::make_shared<FloatValue>
+#define createValuation std::make_shared<Valuation>
 
 
 /** @}*/
 } // namespace opencog
 
-#endif // _OPENCOG_FLOAT_VALUE_H
+#endif // _OPENCOG_VALUATION_H

@@ -65,7 +65,7 @@ void AttentionalFocusCBUTest::setUp(void)
 {
 }
 
-#define getarity(hand) LinkCast(hand)->getArity()
+#define getarity(hand) hand->getArity()
 
 void AttentionalFocusCBUTest::test_af_bindlink(void)
 {

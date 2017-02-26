@@ -28,6 +28,8 @@
 #include <boost/uuid/uuid_generators.hpp>
 
 #include <opencog/atomspace/AtomSpace.h>
+#include <opencog/atoms/base/Node.h>
+#include <opencog/atoms/base/Link.h>
 #include <opencog/atoms/base/Quotation.h>
 #include <opencog/atoms/core/DefineLink.h>
 #include <opencog/atoms/pattern/BindLink.h>

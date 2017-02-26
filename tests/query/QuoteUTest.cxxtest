@@ -20,6 +20,8 @@
  * 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
  */
 
+#include <opencog/atoms/base/Link.h>
+#include <opencog/atoms/base/Node.h>
 #include <opencog/atomspace/AtomSpace.h>
 #include <opencog/guile/SchemeEval.h>
 #include <opencog/query/BindLinkAPI.h>
@@ -79,9 +81,9 @@ void QuoteUTest::setUp(void)
     as->clear();
 }
 
-#define getarity(hand) LinkCast(hand)->getArity()
-#define getlink(hand,pos) LinkCast(hand)->getOutgoingAtom(pos)
-#define getname(hand) NodeCast(hand)->getName()
+#define getarity(hand) hand->getArity()
+#define getlink(hand,pos) hand->getOutgoingAtom(pos)
+#define getname(hand) hand->getName()
 
 /*
  * QuoteLink unit test.  Test quoted variables.

@@ -13,6 +13,8 @@
 #include <opencog/util/random.h>
 
 #include <opencog/atoms/base/types.h>
+#include <opencog/atoms/base/Node.h>
+#include <opencog/atoms/base/Link.h>
 #include <opencog/truthvalue/AttentionValue.h>
 #include <opencog/truthvalue/CountTruthValue.h>
 #include <opencog/truthvalue/IndefiniteTruthValue.h>

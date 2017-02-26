@@ -1,0 +1,76 @@
+/*
+ * tests/atomspace/ValuationTableUTest.cxtest
+ *
+ * Copyright (C) 2017 Linas Vepstas
+ * All Rights Reserved
+ *
+ * This program is free software; you can redistribute it and/or modify
+ * it under the terms of the GNU Affero General Public License v3 as
+ * published by the Free Software Foundation and including the exceptions
+ * at http://opencog.org/wiki/Licenses
+ *
+ * This program is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ * GNU General Public License for more details.
+ *
+ * You should have received a copy of the GNU Affero General Public License
+ * along with this program; if not, write to:
+ * Free Software Foundation, Inc.,
+ * 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
+ */
+
+#include <iostream>
+#include <fstream>
+
+#include <opencog/atomspace/AtomSpace.h>
+#include <opencog/atomspace/ValuationTable.h>
+#include <opencog/atoms/base/FloatValue.h>
+#include <opencog/atoms/base/Link.h>
+#include <opencog/atoms/base/Node.h>
+#include <opencog/util/Logger.h>
+
+using namespace opencog;
+using namespace std;
+
+class ValuationTableUTest : public CxxTest::TestSuite
+{
+private:
+
+	AtomSpace* space;
+	ValuationTable* vtable;
+
+public:
+
+	ValuationTableUTest() {
+		// Uncomment to enable logging
+		//logger().setLevel(Logger::DEBUG);
+		//logger().setPrintToStdoutFlag(true);
+
+		space = new AtomSpace();
+		// vtable = (ValuationTable*) & (atomSpace->get_atomvtable());
+		vtable = new ValuationTable();
+	}
+	~ValuationTableUTest() {
+		delete space;
+		delete vtable;
+	}
+
+	void setUp() {}
+
+	void tearDown() {}
+
+	void testSimple()
+	{
+		Handle key = space->add_node(CONCEPT_NODE, "The F Key");
+		Handle blah = space->add_node(CONCEPT_NODE, "28675194");
+
+		ProtoAtomPtr fvalue(createFloatValue(2.222));
+
+		vtable->addValuation(key, blah, fvalue);
+
+		ProtoAtomPtr fetch = vtable->getValue(key, blah);
+
+		TS_ASSERT_EQUALS(fvalue, fetch);
+	}
+};

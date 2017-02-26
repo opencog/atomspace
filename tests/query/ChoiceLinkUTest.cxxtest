@@ -80,7 +80,7 @@ void ChoiceLinkUTest::setUp(void)
 	eval->eval("(use-modules (opencog query))");
 }
 
-#define getarity(hand) LinkCast(hand)->getArity()
+#define getarity(hand) hand->getArity()
 
 /*
  * ChoiceLink most basic unit test.
