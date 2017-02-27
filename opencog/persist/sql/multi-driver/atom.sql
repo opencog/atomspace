@@ -13,9 +13,14 @@ CREATE TABLE Spaces (
 INSERT INTO Spaces VALUES (0,0); -- no space defined; raw atoms.
 INSERT INTO Spaces VALUES (1,1); -- default root
 
+
+-- -----------------------------------------------------------
+-- An SQL table representation for opencog Atoms
 --
--- Create a table representation for an opencog Atom
---
+-- This contains both the Node and Link types; having a single table
+-- to contain both seemed easier than having two tables, one for Nodes
+-- and once for Links.  In particular, forcing the UUID to be unique is
+-- much easier when there is only one table.
 
 CREATE TABLE Atoms (
     -- The uuid maps to the atom handle.
@@ -51,16 +56,11 @@ CREATE TABLE Atoms (
     outgoing BIGINT[],
 
     -- Force the uniqueness of atoms!!
+    -- This has the side-effect of creating indexes for fast lookup by
+    -- name or by outgoing set.
     UNIQUE (type, name),
     UNIQUE (type, outgoing)
 );
-
--- Indexes, needed for fast node and link lookup.
--- Make them unique, to catch any errors early.
--- Actually, this is not needed; the unique constraints on the table
--- defacto create indexes; creating them again just doubles the index.
--- CREATE UNIQUE INDEX nodeidx ON Atoms(type, name);
--- CREATE UNIQUE INDEX linkidx ON Atoms(type, outgoing);
 
 
 -- -----------------------------------------------------------
@@ -87,6 +87,30 @@ CREATE TABLE Atoms (
 -- CREATE INDEX outidx ON Edges(dst_uuid);
 
 -- -----------------------------------------------------------
+-- An SQL table representation for opencog Values
+--
+CREATE TABLE Valuations (
+    -- The key for this value
+    key BIGINT REFERENCES Atoms(uuid),
+    -- The Atom to which this value applies
+    atom BIGINT REFERENCES Atoms(uuid),
+
+    -- Value type, e.g. FloatValue, StringValue, etc.
+    type  SMALLINT,
+
+    -- An array of values associated with the (key,atom) pair
+    -- Only float, or string or link should be non-empty, the other
+    -- two should be empty. We could have three different tables,
+    -- one each for each of these, but then the UNIQUE constraint is
+    -- harder to force.
+    floatvalue DOUBLE PRECISION[],
+    stringvalue TEXT[],
+    linkvalue BIGINT[],
+
+    UNIQUE (key, atom)
+);
+
+-- -----------------------------------------------------------
 -- Table associating type names to stored integer values. The list of
 -- type names and numbers may differ from one version of the opencog
 -- server to another; thus, we need to convert from type names, to
@@ -98,24 +122,3 @@ CREATE TABLE TypeCodes (
 );
 
 -- -----------------------------------------------------------
--- Simple truth values
--- This would store truth values out-of-line with the atom,
--- but this seems very ineffcient, as it wastes index space,
--- requires extra queries, and so on.
--- So its commented out below, and left behind as FYI.
---
--- CREATE TABLE SimpleTVs (
---  tvid INT PRIMARY KEY,
---  mean DOUBLE PRECISION,
---  count DOUBLE PRECISION
--- );
---
---
--- INSERT INTO SimpleTVs VALUES (0, 0.0, 0.0);     -- NULL_TV
--- INSERT INTO SimpleTVs VALUES (1, 0.0, 0.0);     -- TRIVIAL_TV
--- INSERT INTO SimpleTVs VALUES (2, 0.0, 10000.0); -- FALSE_TV
--- INSERT INTO SimpleTVs VALUES (3, 1.0, 10000.0); -- TRUE_TV
--- INSERT INTO SimpleTVs VALUES (4, 1.0, 0.0);     -- DEFAULT_TV
---
--- CREATE SEQUENCE tvid_seq START WITH 5;
---

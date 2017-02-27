@@ -334,7 +334,6 @@ try doing this, replacing 'alex' with your username.
    $ psql template1
    template1=# CREATE ROLE alex WITH SUPERUSER;
    template1=# ALTER ROLE alex WITH LOGIN;
-
 ```
 
 Verify that worked out by typing \dg to see:
