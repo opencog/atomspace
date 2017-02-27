@@ -59,7 +59,7 @@ namespace opencog {
 
 Atom::~Atom()
 {
-    _atomTable = NULL;
+    _atom_space = NULL;
     if (0 < getIncomingSetSize()) {
         // This can't ever possibly happen. If it does, then there is
         // some very sick bug with the reference counting that the
@@ -70,15 +70,6 @@ Atom::~Atom()
              classserver().getTypeName(_type).c_str(), get_hash());
     }
     drop_incoming_set();
-}
-
-// ==============================================================
-
-// Return the atomspace in which this atom is inserted.
-AtomSpace* Atom::getAtomSpace() const
-{
-    if (_atomTable) return _atomTable->getAtomSpace();
-    return nullptr;
 }
 
 // ==============================================================
@@ -102,8 +93,8 @@ void Atom::setTruthValue(TruthValuePtr newTV)
     _truthValue = newTV;
     lck.unlock();
 
-    if (_atomTable != NULL) {
-        TVCHSigl& tvch = _atomTable->TVChangedSignal();
+    if (_atom_space != nullptr) {
+        TVCHSigl& tvch = _atom_space->_atom_table.TVChangedSignal();
         tvch(getHandle(), oldTV, newTV);
     }
 }
@@ -143,16 +134,10 @@ TruthValuePtr Atom::getTruthValue() const
     if (_flags & FETCHED_RECENTLY)
         return local;
 
-    if (nullptr == _atomTable)
+    if (nullptr == _atom_space)
         return local;
 
-    // XXX The only time that as is null is in BasicSaveUTest
-    // In all other cases, it will never be null.
-    AtomSpace* as = _atomTable->getAtomSpace();
-    if (nullptr == as)
-        return local;
-
-    BackingStore* bs = as->_backing_store;
+    BackingStore* bs = _atom_space->_backing_store;
     if (nullptr == bs)
         return local;
 
@@ -239,17 +224,23 @@ void Atom::setUnchecked(void)
 
 // ==============================================================
 
-void Atom::setAtomTable(AtomTable *tb)
+void Atom::setAtomSpace(AtomSpace *tb)
 {
-    if (tb == _atomTable) return;
+    if (tb == _atom_space) return;
 
-    // Either the existing _atomTable is null, and tb is not, i.e. this
-    // atom is being inserted into tb, or _atomTable is not null, while
-    // tb is null, i.e. atom is being removed from _atomTable.  It is
+    // Either the existing _atomSpace is null, and tb is not, i.e. this
+    // atom is being inserted into tb, or _atomSpace is not null, while
+    // tb is null, i.e. atom is being removed from _atomSpace.  It is
     // illegal to just switch membership: one or the other of these two
     // pointers must be null.
-    OC_ASSERT (NULL == _atomTable or tb == NULL, "Atom table is not null!");
-    _atomTable = tb;
+    OC_ASSERT (nullptr == _atom_space or tb == nullptr,
+               "Atom table is not null!");
+    _atom_space = tb;
+}
+
+AtomTable* Atom::getAtomTable() const
+{
+    return &(_atom_space->_atom_table);
 }
 
 // ==============================================================
@@ -376,7 +367,7 @@ IncomingSet Atom::getIncomingSetByType(Type type, bool subclass)
 std::string Atom::idToString() const
 {
     return std::string("[") + std::to_string(get_hash()) + "][" +
-        std::to_string(_atomTable? _atomTable->get_uuid() : -1) + "]";
+        std::to_string(_atom_space? _atom_space->_atom_table.get_uuid() : -1) + "]";
 }
 
 std::string oc_to_string(const IncomingSet& iset)
