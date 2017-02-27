@@ -638,16 +638,6 @@ BIT::AndBITs::iterator BIT::erase(AndBITs::const_iterator pos)
 	return andbits.erase(pos);
 }
 
-BIT::AndBITs::iterator BIT::erase(AndBITs::const_iterator from,
-                                  AndBITs::const_iterator to)
-{
-	while (from != to) {
-		bit_as.remove_atom(from->fcs);
-		++from;
-	}
-	return andbits.erase(from, to);
-}
-
 void BIT::reset_exhausted_flags()
 {
 	for (AndBIT& andbit : andbits)
