@@ -95,7 +95,7 @@ AtomTable::~AtomTable()
     // find a reference to this atomtable.
     for (auto& pr : _atom_store) {
         Handle& atom_to_delete = pr.second;
-        atom_to_delete->_atomTable = NULL;
+        atom_to_delete->_atom_space = nullptr;
 
         // Aiee ... We added this link to every incoming set;
         // thus, it is our responsibility to remove it as well.
@@ -159,7 +159,7 @@ void AtomTable::clear_all_atoms()
     // Clear the atoms in the set.
     for (auto& pr : _atom_store) {
         Handle& atom_to_clear = pr.second;
-        atom_to_clear->_atomTable = NULL;
+        atom_to_clear->_atom_space = nullptr;
 
         // If this is a link we need to remove this atom from the incoming
         // sets for any atoms in this atom's outgoing set. See note in
@@ -552,7 +552,7 @@ Handle AtomTable::add(AtomPtr atom, bool async)
                 try {
                     Handle alias = slp->get_alias();
                     Handle old_state = StateLink::get_link(alias);
-                    atom->setAtomTable(this);
+                    atom->setAtomSpace(_as);
                     alias->swap_atom(LinkCast(old_state), slp);
                     extract(old_state, true);
                 } catch (const InvalidParamException& ex) {}
@@ -568,7 +568,7 @@ Handle AtomTable::add(AtomPtr atom, bool async)
     }
 
     atom->keep_incoming_set();
-    atom->setAtomTable(this);
+    atom->setAtomSpace(_as);
 
     _size++;
     if (atom->isNode()) _num_nodes++;
@@ -847,7 +847,7 @@ AtomPtrSet AtomTable::extract(Handle& handle, bool recursive)
     // We should really do this unlocked, but I'm too lazy to fix, and
     // am hoping no one will notice. This will probably need to be fixed
     // someday.
-    atom->setAtomTable(NULL);
+    atom->setAtomSpace(nullptr);
 
     result.insert(atom);
     return result;
