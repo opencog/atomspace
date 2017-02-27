@@ -399,12 +399,10 @@ public:
 	AndBIT* insert(const AndBIT& andbit);
 
 	/**
-	 * Erase the given and-BIT(s) from the BIT and remove its (their)
-	 * FCS from bit_as.
+	 * Erase the given and-BIT from the BIT and remove its FCS from
+	 * bit_as.
 	 */
 	AndBITs::iterator erase(AndBITs::const_iterator pos);
-	AndBITs::iterator erase(AndBITs::const_iterator from,
-	                        AndBITs::const_iterator to);
 
 	/**
 	 * Reset to false all and-BITs exhausted flags.
