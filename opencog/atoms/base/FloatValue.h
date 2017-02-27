@@ -43,6 +43,8 @@ class FloatValue
 protected:
 	std::vector<double> _value;
 
+	FloatValue(Type t) : ProtoAtom(t) {}
+
 public:
 	FloatValue(double v) : ProtoAtom(FLOAT_VALUE) { _value.push_back(v); }
 	FloatValue(std::vector<double> v) : ProtoAtom(FLOAT_VALUE), _value(v) {}
