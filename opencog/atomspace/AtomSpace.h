@@ -25,18 +25,14 @@
 #ifndef _OPENCOG_ATOMSPACE_H
 #define _OPENCOG_ATOMSPACE_H
 
-#include <algorithm>
 #include <list>
-#include <set>
-#include <vector>
 
 #include <opencog/util/exceptions.h>
 #include <opencog/truthvalue/TruthValue.h>
 
-#include <opencog/atoms/base/ClassServer.h>
-
 #include <opencog/atomspace/AtomTable.h>
 #include <opencog/atomspace/BackingStore.h>
+#include <opencog/atomspace/ValuationTable.h>
 
 namespace opencog
 {
@@ -73,6 +69,7 @@ class AtomSpace
     AtomSpace(const AtomSpace&);
 
     AtomTable _atom_table;
+    ValuationTable _value_table;
     /**
      * Used to fetch atoms from disk.
      */

@@ -127,9 +127,9 @@ Handle ArithmeticLink::reorder(void)
 	for (const Handle& h : numbers) result.push_back(h);
 
 	Handle h(FoldLink::factory(getType(), result));
-	if (NULL == _atomTable) return h;
+	if (NULL == _atom_space) return h;
 
-	return _atomTable->getAtomSpace()->add_atom(h);
+	return _atom_space->add_atom(h);
 }
 
 // ===========================================================

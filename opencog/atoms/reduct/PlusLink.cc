@@ -150,8 +150,8 @@ Handle PlusLink::kons(const Handle& fi, const Handle& fj)
 			// We need to insert into the atomspace, else reduce() horks
 			// up the knil compares during reduction.
 			Handle foo(createLink(PLUS_LINK, rest));
-			if (_atomTable)
-				foo = _atomTable->getAtomSpace()->add_atom(foo);
+			if (_atom_space)
+				foo = _atom_space->add_atom(foo);
 
 			PlusLinkPtr ap = PlusLinkCast(foo);
 			Handle a_plus(ap->reduce());

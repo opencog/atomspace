@@ -74,9 +74,8 @@ void FoldLink::init(void) {}
 // the atomspace with intermediate results. This needs to
 // be fixed somehow. Right now, I don't know how.
 #define DO_RETURN(result) { \
-	if (not _atomTable) return (result); \
-	AtomSpace* as = _atomTable->getAtomSpace(); \
-	return as->add_atom(result); \
+	if (not _atom_space) return (result); \
+	return _atom_space->add_atom(result); \
 }
 
 /// reduce() -- reduce the expression by summing constants, etc.
@@ -125,8 +124,8 @@ Handle FoldLink::reduce(void)
 {
 	// The atom table is typically not set when the ctor runs.
 	// So fix it up now.
-	if (_atomTable)
-		knil = _atomTable->getAtomSpace()->add_atom(knil);
+	if (_atom_space)
+		knil = _atom_space->add_atom(knil);
 
 	HandleSeq reduct;
 	bool did_reduce = false;
@@ -214,8 +213,8 @@ Handle FoldLink::reduce(void)
 			// when reduce is called; else the knil
 			// compares up above fail.
 			Handle foo(createLink(getType(), rere));
-			if (_atomTable)
-				foo = _atomTable->getAtomSpace()->add_atom(foo);
+			if (_atom_space)
+				foo = _atom_space->add_atom(foo);
 
 			FoldLinkPtr flp = factory(foo);
 			DO_RETURN(Handle(flp->reduce()));

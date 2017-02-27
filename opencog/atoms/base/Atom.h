@@ -47,8 +47,8 @@ namespace opencog
  *  @{
  */
 
-class AtomTable;
 class AtomSpace;
+class AtomTable;
 
 //! arity of Links, represented as short integer (16 bits)
 typedef unsigned short Arity;
@@ -82,11 +82,11 @@ class Atom
     friend class ProtocolBufferSerializer; // Needs to de/ser-ialize an Atom
 
 private:
-    //! Sets the AtomTable in which this Atom is inserted.
-    void setAtomTable(AtomTable *);
+    //! Sets the AtomSpace in which this Atom is inserted.
+    void setAtomSpace(AtomSpace *);
 
     //! Returns the AtomTable in which this Atom is inserted.
-    AtomTable *getAtomTable() const { return _atomTable; }
+    AtomTable *getAtomTable() const;
 
 protected:
     // Byte of bitflags (each bit is a flag).
@@ -97,7 +97,7 @@ protected:
     /// for indexing and comparison operations.
     mutable ContentHash _content_hash;
 
-    AtomTable *_atomTable;
+    AtomSpace *_atom_space;
 
     mutable TruthValuePtr _truthValue;
 
@@ -121,7 +121,7 @@ protected:
       : ProtoAtom(t),
         _flags(0),
         _content_hash(Handle::INVALID_HASH),
-        _atomTable(NULL),
+        _atom_space(nullptr),
         _truthValue(tv)
     {}
 
@@ -178,8 +178,8 @@ public:
     virtual ~Atom();
     virtual bool isAtom() const { return true; }
 
-    //! Returns the AtomTable in which this Atom is inserted.
-    AtomSpace* getAtomSpace() const;
+    //! Returns the AtomSpace in which this Atom is inserted.
+    AtomSpace* getAtomSpace() const { return _atom_space; }
 
     /// Merkle-tree hash of the atom contents. Generically useful
     /// for indexing and comparison operations.
@@ -232,6 +232,13 @@ public:
         merge(tv);
         return getHandle();
     }
+
+    /**
+     * Set and gets values for this atom.
+     */
+    void setValue(const Handle& key, ProtoAtomPtr& value);
+    ProtoAtomPtr getValue(const Handle& key);
+
 
     //! Get the size of the incoming set.
     size_t getIncomingSetSize() const;
