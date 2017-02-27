@@ -233,6 +233,13 @@ public:
         return getHandle();
     }
 
+    /**
+     * Set and gets values for this atom.
+     */
+    void setValue(const Handle& key, ProtoAtomPtr& value);
+    ProtoAtomPtr getValue(const Handle& key);
+
+
     //! Get the size of the incoming set.
     size_t getIncomingSetSize() const;
 

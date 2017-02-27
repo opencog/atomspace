@@ -195,6 +195,17 @@ void Atom::merge(TruthValuePtr tvn, const MergeCtrl& mc)
 }
 
 // ==============================================================
+// Setting values associated with this atom.
+void Atom::setValue(const Handle& key, ProtoAtomPtr& value)
+{
+}
+
+ProtoAtomPtr Atom::getValue(const Handle& key)
+{
+    return nullptr;
+}
+
+// ==============================================================
 // Flag stuff
 bool Atom::isMarkedForRemoval() const
 {
