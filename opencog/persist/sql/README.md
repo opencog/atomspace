@@ -413,14 +413,24 @@ TCP-IP sockets to `localhost`:
    $  psql mycogdata -U opencog_user
 ```
 
-For most users, this will fail. To fix this, you need to edit the file
+For most users, this will fail with the message
+```
+psql: FATAL:  Peer authentication failed for user "opencog_user"
+```
+To fix this, you need to edit the file
 ```
    /etc/postgresql/9.3/main/pg_hba.conf
 ```
-as `root` or as user `postgres`, and add the following line. It will
-allow password logins to all local users:
+as unix user `postgres`, and add the following line. It will allow
+password logins for all local users. (A local user is a user on the
+same machine, connecting to the database by means of unix-domain
+sockets, instead of tcp/ip sockets.)
 ```
    local   all      all           md5
+```
+Be sure to reload or restart the postgres server after the above change:
+```
+   service postgresql reload
 ```
 
 Table initialization
