@@ -632,12 +632,6 @@ AndBIT* BIT::insert(const AndBIT& andbit)
 	return &*it;
 }
 
-BIT::AndBITs::iterator BIT::erase(AndBITs::const_iterator pos)
-{
-	bit_as.remove_atom(pos->fcs);
-	return andbits.erase(pos);
-}
-
 void BIT::reset_exhausted_flags()
 {
 	for (AndBIT& andbit : andbits)
