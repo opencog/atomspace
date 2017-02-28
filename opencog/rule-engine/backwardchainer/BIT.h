@@ -402,7 +402,7 @@ public:
 	 * Erase the given and-BIT from the BIT and remove its FCS from
 	 * bit_as.
 	 */
-	AndBITs::iterator erase(AndBITs::const_iterator pos);
+	template<typename It> AndBITs::iterator erase(It pos);
 
 	/**
 	 * Reset to false all and-BITs exhausted flags.
@@ -421,6 +421,13 @@ private:
 	Handle _init_vardecl;
 	BITNodeFitness _init_fitness;
 };
+
+template<typename It>
+BIT::AndBITs::iterator BIT::erase(It pos)
+{
+	bit_as.remove_atom(pos->fcs);
+	return andbits.erase(pos);
+}
 
 // Gdb debugging, see
 // http://wiki.opencog.org/w/Development_standards#Print_OpenCog_Objects
