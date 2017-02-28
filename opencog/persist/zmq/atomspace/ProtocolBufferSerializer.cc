@@ -52,7 +52,10 @@ void ProtocolBufferSerializer::deserializeAtom(
 {
     //deserializeAttentionValueHolder(atomMessage.attentionvalueholder(), atom);
 
-    atom._atomTable = NULL;
+    // XXX FIXME This is truly a bad and illegal design -- screwing
+    // around with the Atom internals is just plain the wrong thing to
+    // do.  Please use the Atom ctors correctly!
+    atom._atom_space = NULL;
     if (atomMessage.incoming_size() == 0)
     {
         atom._incoming_set = NULL;
