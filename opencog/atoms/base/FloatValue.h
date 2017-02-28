@@ -56,7 +56,7 @@ public:
 	void setValue(double v) { _value = std::vector<double>({v}); }
 
 	/** Returns a string representation of the value.  */
-	virtual std::string toString(const std::string& indent) const;
+	virtual std::string toString(const std::string& indent = "") const;
 
 	/** Returns true if two atoms are equal.  */
 	virtual bool operator==(const ProtoAtom&) const;
