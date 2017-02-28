@@ -56,6 +56,7 @@ SimpleTruthValue::SimpleTruthValue(const TruthValue& source)
 SimpleTruthValue::SimpleTruthValue(SimpleTruthValue const& source)
 	: TruthValue(SIMPLE_TRUTH_VALUE)
 {
+    _value.resize(2);
     _value[MEAN] = source._value[MEAN];
     _value[CONFIDENCE] = source._value[CONFIDENCE];
 }

@@ -112,7 +112,7 @@ public:
     TruthValue(Type t) : FloatValue(t) {}
     virtual ~TruthValue() {}
 
-    virtual std::string toShortString(const std::string& = "") const;
+    virtual std::string toShortString(const std::string&) const;
 
     // Special TVs
 
