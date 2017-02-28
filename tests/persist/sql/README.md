@@ -72,12 +72,12 @@ To run these tests, perform the following steps:
 ```
     opencog_test=> \d
                   List of relations
-     Schema |   Name    | Type  |     Owner
-    --------+-----------+-------+----------------
-     public | atoms     | table | opencog_tester
-     public | edges     | table | opencog_tester
-     public | global    | table | opencog_tester
-     public | typecodes | table | opencog_tester
+     Schema |    Name    | Type  |     Owner
+    --------+------------+-------+----------------
+     public | atoms      | table | opencog_tester
+     public | spaces     | table | opencog_tester
+     public | typecodes  | table | opencog_tester
+     public | valuations | table | opencog_tester
     (4 rows)
 ```
     If the above doesn't work, go back, and try again.
@@ -132,17 +132,35 @@ To run these tests, perform the following steps:
 3) Run the four test cases:
 
 ```
-   $ ./tests/persist/sql/BasicSaveUTest
-   $ ./tests/persist/sql/PersistUTest
-   $ ./tests/persist/sql/MultiPersistUTest
-   $ ./tests/persist/sql/FetchUTest
+   $ ./tests/persist/sql/multi-driver/BasicSaveUTest
+   $ ./tests/persist/sql/multi-driver/PersistUTest
+   $ ./tests/persist/sql/multi-driver/MultiPersistUTest
+   $ ./tests/persist/sql/multi-driver/FetchUTest
 ```
-   It should print OK! at the end, if all tests passed.
+   It should print `OK!` at the end, if all tests passed.
 
-3a) If the above doesn't work, note that the `lib/atomspace-test.conf`
+3a) If the above gives the message
+```
+    Error: Test failed: Cannot connect to database: FATAL:  Peer authentication failed for user "opencog_tester"
+```
+    then edit
+```
+    /etc/postgresql/9.3/main/pg_hba.conf
+```
+    and add the line
+```
+    local   all      all           md5
+```
+    Be sure to reload or restart the postgres server after the above change:
+```
+   service postgresql reload
+```
+
+
+3b) If the above doesn't work, note that the `lib/atomspace-test.conf`
     being used is the one in the BUILD directory not the SOURCE directory!
 
-3b) If the above still doesn't work, make sure that postgres is actually
+3c) If the above still doesn't work, make sure that postgres is actually
     listening on port 5432, and not some other port.  If it is using a
     different port, and testing ODBC, then change `~/.odbc.ini` to that.
     The postgres config can be found in

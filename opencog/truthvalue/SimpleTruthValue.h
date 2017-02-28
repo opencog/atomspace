@@ -42,12 +42,10 @@ typedef std::shared_ptr<SimpleTruthValue> SimpleTruthValuePtr;
 class SimpleTruthValue : public TruthValue
 {
 protected:
-
-    /// Mean of the strength of the TV over all observations.
-    strength_t _mean;
-
-    /// Estimate of confidence of the observation.
-    confidence_t _confidence;
+    enum {
+        MEAN, /// Mean of the strength of the TV over all observations.
+        CONFIDENCE /// Estimate of confidence of the observation.
+    };
 
 public:
     SimpleTruthValue(strength_t, confidence_t);

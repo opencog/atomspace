@@ -31,7 +31,7 @@
 #include <vector>
 
 #include <opencog/util/exceptions.h>
-#include <opencog/atoms/base/ProtoAtom.h>
+#include <opencog/atoms/base/FloatValue.h>
 
 /** \addtogroup grp_atomspace
  *  @{
@@ -90,7 +90,7 @@ class TruthValue;
 typedef std::shared_ptr<const TruthValue> TruthValuePtr;
 
 class TruthValue
-    : public ProtoAtom
+    : public FloatValue
 {
     friend class Atom;
 
@@ -109,10 +109,10 @@ public:
         DEFAULT_K = k;
     }
 
-    TruthValue(Type t) : ProtoAtom(t) {}
+    TruthValue(Type t) : FloatValue(t) {}
     virtual ~TruthValue() {}
 
-    std::string toShortString(const std::string&) const;
+    virtual std::string toShortString(const std::string&) const;
 
     // Special TVs
 

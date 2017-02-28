@@ -21,7 +21,7 @@ LINK_VALUE <- VALUE     // vector of values ("link" holding values)
 VALUATION <- VALUE
 
 // All of the different flavors of truth values
-TRUTH_VALUE <- VALUE
+TRUTH_VALUE <- FLOAT_VALUE
 SIMPLE_TRUTH_VALUE <- TRUTH_VALUE
 COUNT_TRUTH_VALUE <- TRUTH_VALUE
 INDEFINITE_TRUTH_VALUE <- TRUTH_VALUE

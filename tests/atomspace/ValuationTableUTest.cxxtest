@@ -67,10 +67,32 @@ public:
 
 		ProtoAtomPtr fvalue(createFloatValue(2.222));
 
+		// Place a valuation in the table.
 		vtable->addValuation(key, blah, fvalue);
 
+		// Get it back, and make sure that its equal to what we put in.
 		ProtoAtomPtr fetch = vtable->getValue(key, blah);
 
 		TS_ASSERT_EQUALS(fvalue, fetch);
+	}
+
+	void testKeyset()
+	{
+		Handle ka = space->add_node(CONCEPT_NODE, "The F Key");
+		Handle kb = space->add_node(CONCEPT_NODE, "The G Key");
+		Handle kc = space->add_node(CONCEPT_NODE, "The H Key");
+		Handle blah = space->add_node(CONCEPT_NODE, "Hi Mom!");
+
+		ProtoAtomPtr fvalue(createFloatValue(2.222));
+		vtable->addValuation(ka, blah, fvalue);
+		vtable->addValuation(kb, blah, fvalue);
+		vtable->addValuation(kc, blah, fvalue);
+
+		std::set<Handle> keys = vtable->getKeys(blah);
+
+		TS_ASSERT_EQUALS(3, keys.size());
+		TS_ASSERT(keys.end() != keys.find(ka));
+		TS_ASSERT(keys.end() != keys.find(kb));
+		TS_ASSERT(keys.end() != keys.find(kc));
 	}
 };

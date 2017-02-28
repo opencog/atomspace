@@ -42,10 +42,11 @@ typedef std::shared_ptr<const CountTruthValue> CountTruthValuePtr;
 class CountTruthValue : public TruthValue
 {
 protected:
-
-    strength_t mean;
-    confidence_t confidence;
-    count_t count;
+    enum {
+        MEAN, /// Mean of the strength of the TV over all observations.
+        CONFIDENCE, /// Estimate of confidence of the observation.
+        COUNT /// Raw count
+    };
 
 public:
 
@@ -55,7 +56,7 @@ public:
 
     virtual bool operator==(const ProtoAtom& rhs) const;
 
-    std::string toString(const std::string&) const;
+    virtual std::string toString(const std::string& = "") const;
 
     strength_t getMean() const;
     count_t getCount() const;

@@ -1,5 +1,5 @@
 /*
- * opencog/atomspace/CountTruthValue.cc
+ * opencog/truthvalue/CountTruthValue.cc
  *
  * Copyright (C) 2002-2007 Novamente LLC
  * All Rights Reserved
@@ -22,10 +22,7 @@
  * along with this program; if not, write to:
  * Free Software Foundation, Inc.,
  * 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
- *
  */
-
-#include "CountTruthValue.h"
 
 #include <math.h>
 
@@ -33,45 +30,49 @@
 #include <opencog/util/exceptions.h>
 
 #include <opencog/atoms/base/atom_types.h>
+#include "CountTruthValue.h"
 
 using namespace opencog;
 
 CountTruthValue::CountTruthValue(strength_t m, confidence_t n, count_t c)
 	: TruthValue(COUNT_TRUTH_VALUE)
 {
-    mean = m;
-    confidence = n;
-    count = c;
+    _value.resize(3);
+    _value[MEAN] = m;
+    _value[CONFIDENCE] = n;
+    _value[COUNT] = c;
 }
 
 CountTruthValue::CountTruthValue(const TruthValue& source)
 	: TruthValue(COUNT_TRUTH_VALUE)
 {
-    mean = source.getMean();
-    confidence = source.getConfidence();
-    count = source.getCount();
+    _value.resize(3);
+    _value[MEAN] = source.getMean();
+    _value[CONFIDENCE] = source.getConfidence();
+    _value[COUNT] = source.getCount();
 }
 CountTruthValue::CountTruthValue(CountTruthValue const& source)
 	: TruthValue(COUNT_TRUTH_VALUE)
 {
-    mean = source.mean;
-    confidence = source.confidence;
-    count = source.count;
+    _value.resize(3);
+    _value[MEAN] = source.getMean();
+    _value[CONFIDENCE] = source.getConfidence();
+    _value[COUNT] = source.getCount();
 }
 
 strength_t CountTruthValue::getMean() const
 {
-    return mean;
+    return _value[MEAN];
 }
 
 count_t CountTruthValue::getCount() const
 {
-    return count;
+    return  _value[COUNT];
 }
 
 confidence_t CountTruthValue::getConfidence() const
 {
-    return confidence;
+    return _value[CONFIDENCE];
 }
 
 std::string CountTruthValue::toString(const std::string& indent) const
@@ -90,10 +91,10 @@ bool CountTruthValue::operator==(const ProtoAtom& rhs) const
     if (NULL == ctv) return false;
 
 #define FLOAT_ACCEPTABLE_ERROR 0.000001
-    if (FLOAT_ACCEPTABLE_ERROR < fabs(mean - ctv->mean)) return false;
-    if (FLOAT_ACCEPTABLE_ERROR < fabs(confidence - ctv->confidence)) return false;
+    if (FLOAT_ACCEPTABLE_ERROR < fabs(getMean() - ctv->getMean())) return false;
+    if (FLOAT_ACCEPTABLE_ERROR < fabs(getConfidence() - ctv->getConfidence())) return false;
 #define DOUBLE_ACCEPTABLE_ERROR 1.0e-14
-    if (DOUBLE_ACCEPTABLE_ERROR < fabs(1.0 - (ctv->count/count))) return false;
+    if (DOUBLE_ACCEPTABLE_ERROR < fabs(1.0 - (ctv->getCount()/getCount()))) return false;
 
     return true;
 }
@@ -114,23 +115,22 @@ TruthValuePtr CountTruthValue::merge(TruthValuePtr other,
     // just ignore this possible complication to the semantics.
     if (NULL == oc) return
         std::dynamic_pointer_cast<const TruthValue>(shared_from_this());
-    
-    // If both this and other are counts, then accumulate to get the
-    // total count, and average together the strengths, using the 
-    // count as the relative weight.
-    count_t cnt = count + oc->count;
-    strength_t meeny = (this->mean * this->count +
-                   oc->mean * oc->count) / cnt;
 
-    // XXX This is not the correct way to handle confidence ... 
+    // If both this and other are counts, then accumulate to get the
+    // total count, and average together the strengths, using the
+    // count as the relative weight.
+    count_t cnt =  getCount() + oc->getCount();
+    strength_t meeny = (getMean() * getCount() +
+                   oc->getMean() * oc->getCount()) / cnt;
+
+    // XXX This is not the correct way to handle confidence ...
     // The confidence will typically hold the log probability,
     // where the probability is the normalized count.  Thus
     // the right thing to do is probably to add the probabilities!?
     // However, this is not correct when the confidence is actually
-    // holding the mutual information ... which is additive ... 
+    // holding the mutual information ... which is additive ...
     // Argh .. what to do?
     //    confidence = oc->confidence;
-    
-    return createTV(meeny, this->confidence, cnt);
-}
 
+    return createTV(meeny, getConfidence(), cnt);
+}

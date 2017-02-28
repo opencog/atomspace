@@ -42,10 +42,11 @@ typedef std::shared_ptr<const ProbabilisticTruthValue> ProbabilisticTruthValuePt
 class ProbabilisticTruthValue : public TruthValue
 {
 protected:
-
-    strength_t mean;
-    confidence_t confidence;
-    count_t count;
+    enum {
+        MEAN, /// Mean of the strength of the TV over all observations.
+        CONFIDENCE, /// Estimate of confidence of the observation.
+        COUNT /// Raw count
+    };
 
 public:
 

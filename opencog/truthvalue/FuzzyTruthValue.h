@@ -38,16 +38,15 @@ namespace opencog
 class FuzzyTruthValue;
 typedef std::shared_ptr<FuzzyTruthValue> FuzzyTruthValuePtr;
 
-//! a TruthValue that stores a mean and the number of observations (strength and confidence)
+//! A TruthValue that stores a mean and the number of observations
+//! (strength and confidence)
 class FuzzyTruthValue : public TruthValue
 {
 protected:
-
-    /// Mean of the strength of the TV over all observations
-    strength_t mean;
-
-    /// Total number of observations used to estimate the mean 
-    count_t count;
+    enum {
+        MEAN, /// Mean of the strength of the TV over all observations
+        COUNT /// Total number of observations used to estimate the mean
+    };
 
     void init(strength_t mean, count_t count);
 
