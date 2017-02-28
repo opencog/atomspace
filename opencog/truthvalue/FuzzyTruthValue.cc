@@ -1,5 +1,5 @@
 /*
- * opencog/atomspace/FuzzyTruthValue.cc
+ * opencog/truthvalue/FuzzyTruthValue.cc
  *
  * Copyright (C) 2002-2007 Novamente LLC
  * All Rights Reserved
@@ -32,44 +32,44 @@
 
 #include "FuzzyTruthValue.h"
 
-//#define DPRINTF printf
-#define DPRINTF(...)
-
 using namespace opencog;
 
 FuzzyTruthValue::FuzzyTruthValue(strength_t m, count_t c)
 	: TruthValue(FUZZY_TRUTH_VALUE)
 {
-    mean = m;
-    count = c;
+    _value.resize(2);
+    _value[MEAN] = m;
+    _value[COUNT] = c;
 }
 
 FuzzyTruthValue::FuzzyTruthValue(const TruthValue& source)
 	: TruthValue(FUZZY_TRUTH_VALUE)
 {
-    mean = source.getMean();
-    count = source.getCount();
+    _value.resize(2);
+    _value[MEAN] = source.getMean();
+    _value[COUNT] = source.getCount();
 }
 FuzzyTruthValue::FuzzyTruthValue(FuzzyTruthValue const& source)
 	: TruthValue(FUZZY_TRUTH_VALUE)
 {
-    mean = source.mean;
-    count = source.count;
+    _value.resize(2);
+    _value[MEAN] = source.getMean();
+    _value[COUNT] = source.getCount();
 }
 
 strength_t FuzzyTruthValue::getMean() const
 {
-    return mean;
+    return _value[MEAN];
 }
 
 count_t FuzzyTruthValue::getCount() const
 {
-    return count;
+    return _value[COUNT];
 }
 
 confidence_t FuzzyTruthValue::getConfidence() const
 {
-    return countToConfidence(count);
+    return countToConfidence(getCount());
 }
 
 // This is the merge formula appropriate for PLN.
@@ -103,7 +103,7 @@ bool FuzzyTruthValue::operator==(const ProtoAtom& rhs) const
     if (NULL == stv) return false;
 
 #define FLOAT_ACCEPTABLE_MEAN_ERROR 0.000001
-    if (FLOAT_ACCEPTABLE_MEAN_ERROR < fabs(mean - stv->mean)) return false;
+    if (FLOAT_ACCEPTABLE_MEAN_ERROR < fabs(getMean() - stv->getMean())) return false;
 
 // Converting from confidence to count and back again using single-precision
 // float is a real accuracy killer.  In particular, 2/802 = 0.002494 but
@@ -112,7 +112,7 @@ bool FuzzyTruthValue::operator==(const ProtoAtom& rhs) const
 // thereabouts.
 #define FLOAT_ACCEPTABLE_COUNT_ERROR 0.0002
 
-    if (FLOAT_ACCEPTABLE_COUNT_ERROR < fabs(1.0 - (stv->count/count))) return false;
+    if (FLOAT_ACCEPTABLE_COUNT_ERROR < fabs(1.0 - (stv->getCount()/getCount()))) return false;
     return true;
 }
 
