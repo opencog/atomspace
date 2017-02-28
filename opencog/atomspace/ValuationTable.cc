@@ -34,12 +34,32 @@ ValuationTable::~ValuationTable()
 {
 }
 
+/// Associate a value with a particular (key,atom) pair
+/// The atom, key and value are wrapped up in a single valuation.
 void ValuationTable::addValuation(ValuationPtr& vp)
 {
+	const Handle& key = vp->key();
+	const Handle& atom = vp->atom();
+
+	// Make a record of all the keys being used for this atom.
+	auto ikeys = _keyset.find(atom);
+	if (ikeys == _keyset.end())
+	{
+		std::set<Handle> keys;
+		keys.insert(key);
+		_keyset.insert(make_pair(atom, keys));
+	}
+	else
+	{
+		ikeys->second.insert(key);
+	}
+
+	// Record the actual valuation
 	_vindex.insert(std::make_pair(
-		std::make_pair(vp->key(), vp->atom()), vp));
+		std::make_pair(key, atom), vp));
 }
 
+/// Associate a value with a particular (key,atom) pair
 void ValuationTable::addValuation(const Handle& key,
                                   const Handle& atom,
                                   ProtoAtomPtr& val)
@@ -59,4 +79,13 @@ ValuationPtr ValuationTable::getValuation(const Handle& key, const Handle& atom)
 ProtoAtomPtr ValuationTable::getValue(const Handle& key, const Handle& atom)
 {
 	return getValuation(key, atom)->value();
+}
+
+std::set<Handle> ValuationTable::getKeys(const Handle& atom)
+{
+	auto ikeys = _keyset.find(atom);
+	if (ikeys == _keyset.end())
+		return std::set<Handle>();
+
+	return ikeys->second;
 }

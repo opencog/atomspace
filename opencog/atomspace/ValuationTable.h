@@ -24,6 +24,7 @@
 #define _OPENCOG_VALUTATION_TABLE_H
 
 #include <map>
+#include <set>
 
 #include <opencog/atoms/base/Handle.h>
 #include <opencog/atoms/base/Valuation.h>
@@ -45,6 +46,7 @@ private:
 	mutable std::mutex _mtx;
 
 	std::map<std::pair<Handle, Handle>, ValuationPtr> _vindex;
+	std::map<Handle, std::set<Handle>> _keyset;
 
 	/**
 	 * Override and declare copy constructor and equals operator as
@@ -62,6 +64,8 @@ public:
    void addValuation(const Handle&, const Handle&, ProtoAtomPtr&);
 	ValuationPtr getValuation(const Handle&, const Handle&);
 	ProtoAtomPtr getValue(const Handle&, const Handle&);
+
+	std::set<Handle> getKeys(const Handle&);
 };
 
 /** @}*/
