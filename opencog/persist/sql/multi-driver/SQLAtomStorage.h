@@ -37,6 +37,7 @@
 #include <opencog/atoms/base/Link.h>
 #include <opencog/atoms/base/Node.h>
 #include <opencog/atoms/base/types.h>
+#include <opencog/atoms/base/Valuation.h>
 
 #include <opencog/atomspace/AtomTable.h>
 #include <opencog/atomspaceutils/TLB.h>
@@ -124,6 +125,9 @@ class SQLAtomStorage : public AtomStorage
 		int getMaxObservedHeight(void);
 		bool idExists(const char *);
 		TLB _tlbuf;
+
+		// Values
+		Type valueExists(const ValuationPtr&);
 
 		// Performance statistics
 		std::atomic<size_t> _num_get_nodes;

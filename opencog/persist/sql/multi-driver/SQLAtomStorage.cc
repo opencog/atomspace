@@ -2,9 +2,10 @@
  * FUNCTION:
  * Persistent Atom storage, SQL-backed.
  *
- * Atoms are saved to, and restored from, an SQL DB using one of the
- * avaialble database drivers. Curently, postgres native libpq-dev and
- * ODBC are supported.
+ * Atoms and Values are saved to, and restored from, an SQL DB using
+ * one of the available database drivers. Currently, the postgres
+ * native libpq-dev API and the ODBC API are supported. Note that
+ * libpq-dev is about three times faster than ODBC.
  *
  * Atoms are identified by means of unique ID's (UUID's), which are
  * correlated with specific in-RAM atoms via the TLB.
@@ -75,14 +76,21 @@ class SQLAtomStorage::Response
 
 		// Temporary cache of info about atom being assembled.
 		UUID uuid;
-		int itype;
+		Type itype;
 		const char * name;
+		const char *outlist;
+		int height;
+
+		// TV's
 		int tv_type;
 		double mean;
 		double confidence;
 		double count;
-		const char *outlist;
-		int height;
+
+		// Values
+		double *floatval;
+		const char *stringval;
+		UUID *linkval;
 
 	private:
 		concurrent_stack<LLConnection*>& _pool;
@@ -157,6 +165,7 @@ class SQLAtomStorage::Response
 			}
 			return false;
 		}
+
 		bool create_atom_cb(void)
 		{
 			// printf ("---- New atom found ----\n");
@@ -264,6 +273,7 @@ class SQLAtomStorage::Response
 			store->set_typemap(itype, tname);
 			return false;
 		}
+
 		const char * tname;
 		bool type_column_cb(const char *colname, const char * colvalue)
 		{
@@ -275,6 +285,20 @@ class SQLAtomStorage::Response
 			{
 				tname = colvalue;
 			}
+			return false;
+		}
+
+		// Values ---------------------------------------------------
+		// If a value exists, then return its type.
+		Type vtype;
+		bool valtype_cb(const char *colname, const char * colvalue)
+		{
+			// printf ("%s = %s\n", colname, colvalue);
+			if (strcmp(colname, "type"))
+			{
+				throw IOException(TRACE_INFO, "Unexpected column '%s'\n", colname);
+			}
+			vtype = atoi(colvalue);
 			return false;
 		}
 #ifdef OUT_OF_LINE_TVS
@@ -309,6 +333,7 @@ class SQLAtomStorage::Response
 			rs->foreach_column(&Response::intval_column_cb, this);
 			return false;
 		}
+
 		bool intval_column_cb(const char *colname, const char * colvalue)
 		{
 			// we're not going to bother to check the column name ...
@@ -317,7 +342,7 @@ class SQLAtomStorage::Response
 		}
 
 		// Get all handles in the database.
-		std::set<UUID> *id_set;
+		std::set<UUID>* id_set;
 		bool note_id_cb(void)
 		{
 			rs->foreach_column(&Response::note_id_column_cb, this);
@@ -544,17 +569,22 @@ void SQLAtomStorage::store_atomtable_id(const AtomTable& at)
 
 /* ================================================================ */
 
-#ifdef 0
-Type valueExists(const ValuationPtr& valn)
+Type SQLAtomStorage::valueExists(const ValuationPtr& valn)
 {
 	char buff[BUFSZ];
 	snprintf(buff, BUFSZ,
-		"SELECT type FROM Valuations WHERE key = %u AND atom = %u;",
-		valn->key(), valn->atom());
-	return
-xxxxxxxxxxxx
+		"SELECT type FROM Valuations WHERE key = %lu AND atom = %lu;",
+		_tlbuf.getUUID(valn->key()),
+		_tlbuf.getUUID(valn->atom()));
+
+	Response rp(conn_pool);
+	rp.vtype = 0;
+	rp.exec(buff);
+	rp.rs->foreach_row(&Response::valtype_cb, &rp);
+xxxxxxx
+
+	return rp.vtype;
 }
-#endif
 
 #ifdef OUT_OF_LINE_TVS
 /**
