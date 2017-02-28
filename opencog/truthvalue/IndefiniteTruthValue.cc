@@ -75,6 +75,7 @@ static strength_t DensityIntegral(strength_t lower, strength_t upper,
 
 void IndefiniteTruthValue::init(strength_t l, strength_t u, confidence_t c)
 {
+    _value.resize(4);
     _value[L] = l;
     _value[U] = u;
     _value[CONFIDENCE_LEVEL] = c;

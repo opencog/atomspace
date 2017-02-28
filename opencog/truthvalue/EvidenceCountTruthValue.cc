@@ -41,6 +41,7 @@ EvidenceCountTruthValue::EvidenceCountTruthValue(count_t pos_count,
                                                  count_t total_count)
 	: TruthValue(EVIDENCE_COUNT_TRUTH_VALUE)
 {
+	_value.resize(2);
 	_value[POS_COUNT] = pos_count;
 	_value[TOTAL_COUNT] = total_count;
 }
@@ -48,6 +49,7 @@ EvidenceCountTruthValue::EvidenceCountTruthValue(count_t pos_count,
 EvidenceCountTruthValue::EvidenceCountTruthValue(const TruthValue& source)
 	: TruthValue(EVIDENCE_COUNT_TRUTH_VALUE)
 {
+	_value.resize(2);
 	_value[POS_COUNT] = source.getMean() * source.getCount();
 	_value[TOTAL_COUNT] = source.getCount();
 }
@@ -55,6 +57,7 @@ EvidenceCountTruthValue::EvidenceCountTruthValue(const TruthValue& source)
 EvidenceCountTruthValue::EvidenceCountTruthValue(EvidenceCountTruthValue const& source)
 	: TruthValue(EVIDENCE_COUNT_TRUTH_VALUE)
 {
+	_value.resize(2);
 	_value[POS_COUNT] = source.getPositiveCount();
 	_value[TOTAL_COUNT] = source.getCount();
 }
