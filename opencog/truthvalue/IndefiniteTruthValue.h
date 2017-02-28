@@ -26,7 +26,6 @@
 #ifndef _OPENCOG_INDEFINITE_TRUTH_VALUE_H
 #define _OPENCOG_INDEFINITE_TRUTH_VALUE_H
 
-#include <memory>
 #include <vector>
 
 #include <opencog/truthvalue/TruthValue.h>

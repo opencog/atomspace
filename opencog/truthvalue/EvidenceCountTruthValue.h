@@ -40,13 +40,12 @@ typedef std::shared_ptr<EvidenceCountTruthValue> EvidenceCountTruthValuePtr;
 class EvidenceCountTruthValue : public TruthValue
 {
 protected:
+   enum {
+		POS_COUNT, /// Positive evidence count, i.e. number of
+		           /// observations corroborating with the atom's truth.
 
-	/// Positive evidence count, i.e. number of observations
-	/// corroborating with the atom's truth.
-	count_t _pos_count;
-
-	/// Total number of observations.
-	count_t _total_count;
+		TOTAL_COUNT /// Total number of observations.
+   };
 
 public:
 	EvidenceCountTruthValue(count_t pos_count, count_t total_count = -1);

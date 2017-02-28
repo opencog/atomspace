@@ -1,5 +1,5 @@
 /*
- * opencog/atomspace/EvidenceCountTruthValue.cc
+ * opencog/truthvalue/EvidenceCountTruthValue.cc
  *
  * Copyright (C) 2016 OpenCog Foundation
  * All Rights Reserved
@@ -41,51 +41,51 @@ EvidenceCountTruthValue::EvidenceCountTruthValue(count_t pos_count,
                                                  count_t total_count)
 	: TruthValue(EVIDENCE_COUNT_TRUTH_VALUE)
 {
-	_pos_count = pos_count;
-	_total_count = total_count;
+	_value[POS_COUNT] = pos_count;
+	_value[TOTAL_COUNT] = total_count;
 }
 
 EvidenceCountTruthValue::EvidenceCountTruthValue(const TruthValue& source)
 	: TruthValue(EVIDENCE_COUNT_TRUTH_VALUE)
 {
-	_pos_count = source.getMean() * source.getCount();
-	_total_count = source.getCount();
+	_value[POS_COUNT] = source.getMean() * source.getCount();
+	_value[TOTAL_COUNT] = source.getCount();
 }
 
 EvidenceCountTruthValue::EvidenceCountTruthValue(EvidenceCountTruthValue const& source)
 	: TruthValue(EVIDENCE_COUNT_TRUTH_VALUE)
 {
-	_pos_count = source._pos_count;
-	_total_count = source._total_count;
+	_value[POS_COUNT] = source.getPositiveCount();
+	_value[TOTAL_COUNT] = source.getCount();
 }
 
 strength_t EvidenceCountTruthValue::getMean() const
 {
 	if (is_count_valid())
-		return _pos_count / _total_count;
+		return getPositiveCount() / getCount();
 	return NAN;
 }
 
 count_t EvidenceCountTruthValue::getPositiveCount() const
 {
-	return _pos_count;
+	return _value[POS_COUNT];
 }
 
 count_t EvidenceCountTruthValue::getCount() const
 {
-	return _total_count;
+	return _value[TOTAL_COUNT];
 }
 
 confidence_t EvidenceCountTruthValue::getConfidence() const
 {
 	if (is_count_valid())
-		return _total_count / (DEFAULT_K + _total_count);
+		return _value[TOTAL_COUNT] / (DEFAULT_K + _value[TOTAL_COUNT]);
 	return NAN;
 }
 
 bool EvidenceCountTruthValue::is_count_valid() const
 {
-	return _pos_count <= _total_count;
+	return _value[POS_COUNT] <= _value[TOTAL_COUNT];
 }
 
 // This is the merge formula appropriate for PLN.
@@ -130,8 +130,8 @@ std::string EvidenceCountTruthValue::toString(const std::string& indent) const
 {
 	char buf[1024];
 	sprintf(buf, "(ectv %f %f)",
-	        static_cast<float>(_pos_count),
-	        static_cast<float>(_total_count));
+	        static_cast<float>(_value[POS_COUNT]),
+	        static_cast<float>(_value[TOTAL_COUNT]));
 	return buf;
 }
 
@@ -147,8 +147,8 @@ bool EvidenceCountTruthValue::operator==(const ProtoAtom& rhs) const
 	};
 #undef FLOAT_ACCEPTABLE_ERROR
 
-	return close_enough(_pos_count, ectv->_pos_count)
+	return close_enough(getPositiveCount(), ectv->getPositiveCount())
 		and is_count_valid() == ectv->is_count_valid()
 		and (!is_count_valid() or
-		     close_enough(_total_count, ectv->_total_count));
+		     close_enough(getCount(), ectv->getCount()));
 }
