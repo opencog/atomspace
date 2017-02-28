@@ -81,6 +81,14 @@ ProtoAtomPtr ValuationTable::getValue(const Handle& key, const Handle& atom)
 	return getValuation(key, atom)->value();
 }
 
+/// Obtain all of the keys in use for a given atom.
+//
+// XXX FIXME this implementation is ... poor. Its probably just enough
+// to store all keys in use, instead of all keys for a given atom.
+// i.e. this uses too much RAM, and we could get away wtih just
+// searching the _vindex, instead, which would be slower but more memory
+// efficient.  The point is that the only user of this function is going
+// to be the peristence framework, and so we should optimize for that.
 std::set<Handle> ValuationTable::getKeys(const Handle& atom)
 {
 	auto ikeys = _keyset.find(atom);
