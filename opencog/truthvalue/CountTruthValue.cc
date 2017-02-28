@@ -22,10 +22,7 @@
  * along with this program; if not, write to:
  * Free Software Foundation, Inc.,
  * 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
- *
  */
-
-#include "CountTruthValue.h"
 
 #include <math.h>
 
@@ -33,6 +30,7 @@
 #include <opencog/util/exceptions.h>
 
 #include <opencog/atoms/base/atom_types.h>
+#include "CountTruthValue.h"
 
 using namespace opencog;
 
@@ -102,8 +100,8 @@ bool CountTruthValue::operator==(const ProtoAtom& rhs) const
 }
 
 // Note: this is NOT the merge formula used by PLN.  This is
-// because the CountTruthValue usally stores an integer  _value[COUNT],
-// and a log-probability or entropy, instead of a _value[CONFIDENCE].
+// because the CountTruthValue usally stores an integer count,
+// and a log-probability or entropy, instead of a confidence.
 TruthValuePtr CountTruthValue::merge(TruthValuePtr other,
                                      const MergeCtrl& mc) const
 {
