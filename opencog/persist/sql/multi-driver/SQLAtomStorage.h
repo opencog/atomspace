@@ -160,13 +160,6 @@ class SQLAtomStorage : public AtomStorage
 		void set_typemap(int, const char *);
 		std::mutex _typemap_mutex;
 
-#ifdef OUT_OF_LINE_TVS
-		bool tvExists(int);
-		int storeTruthValue(AtomPtr, Handle);
-		int  TVID(const TruthValue &);
-		TruthValue * getTV(int);
-#endif /* OUT_OF_LINE_TVS */
-
 		// Provider of asynchronous store of atoms.
 		async_caller<SQLAtomStorage, Handle> _write_queue;
 

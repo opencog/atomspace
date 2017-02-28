@@ -41,6 +41,7 @@
 #include <opencog/atoms/base/ClassServer.h>
 #include <opencog/atoms/base/Link.h>
 #include <opencog/atoms/base/Node.h>
+#include <opencog/atoms/base/Valuation.h>
 #include <opencog/truthvalue/CountTruthValue.h>
 #include <opencog/truthvalue/IndefiniteTruthValue.h>
 #include <opencog/truthvalue/ProbabilisticTruthValue.h>
@@ -543,39 +544,28 @@ void SQLAtomStorage::store_atomtable_id(const AtomTable& at)
 
 /* ================================================================ */
 
-#ifdef OUT_OF_LINE_TVS
-/**
- * Return true if the indicated handle exists in the storage.
- */
-bool SQLAtomStorage::tvExists(int tvid)
+#ifdef 0
+Type valueExists(const ValuationPtr& valn)
 {
 	char buff[BUFSZ];
-	snprintf(buff, BUFSZ, "SELECT tvid FROM SimpleTVs WHERE tvid = %u;", tvid);
-	return idExists(buff);
+	snprintf(buff, BUFSZ,
+		"SELECT type FROM Valuations WHERE key = %u AND atom = %u;",
+		valn->key(), valn->atom());
+	return
+xxxxxxxxxxxx
 }
+#endif
 
+#ifdef OUT_OF_LINE_TVS
 /**
- * Store the truthvalue of the atom.
- * Handle h must be the handle for the atom; its passed as an arg to
- * avoid having to look it up.
+ * Store a valuation
  */
-int SQLAtomStorage::storeTruthValue(AtomPtr atom, Handle h)
+void SQLAtomStorage::storeValuation(const ValuationPtr& valn)
 {
 	bool notfirst = false;
 	std::string cols;
 	std::string vals;
 	std::string coda;
-
-	const TruthValue &tv = atom->getTruthValue();
-
-	const SimpleTruthValue *stv = dynamic_cast<const SimpleTruthValue *>(&tv);
-	if (NULL == stv)
-		throw IOException(TRACE_INFO, "Non-simple truth values are not handled\n");
-
-	int tvid = TVID(tv);
-
-	// If its a stock truth value, there is nothing to do.
-	if (tvid <= 4) return tvid;
 
 	// Use the TLB Handle as the UUID.
 	char tvidbuff[BUFSZ];
@@ -607,31 +597,8 @@ int SQLAtomStorage::storeTruthValue(AtomPtr atom, Handle h)
 	return tvid;
 }
 
-/**
- * Return a new, unique ID for every truth value
- */
-int SQLAtomStorage::TVID(const TruthValue &tv)
-{
-	if (tv == TruthValue::NULL_TV()) return 0;
-	if (tv == TruthValue::TRIVIAL_TV()) return 1;
-	if (tv == TruthValue::FALSE_TV()) return 2;
-	if (tv == TruthValue::TRUE_TV()) return 3;
-	if (tv == TruthValue::DEFAULT_TV()) return 4;
-
-	Response rp(conn_pool);
-	rp.exec("SELECT NEXTVAL('tvid_seq');");
-	rp.rs->foreach_row(&Response::tvid_seq_cb, &rp);
-	return rp.tvid;
-}
-
 TruthValue* SQLAtomStorage::getTV(int tvid)
 {
-	if (0 == tvid) return (TruthValue *) & TruthValue::NULL_TV();
-	if (1 == tvid) return (TruthValue *) & TruthValue::DEFAULT_TV();
-	if (2 == tvid) return (TruthValue *) & TruthValue::FALSE_TV();
-	if (3 == tvid) return (TruthValue *) & TruthValue::TRUE_TV();
-	if (4 == tvid) return (TruthValue *) & TruthValue::TRIVIAL_TV();
-
 	char buff[BUFSZ];
 	snprintf(buff, BUFSZ, "SELECT * FROM SimpleTVs WHERE tvid = %u;", tvid);
 
