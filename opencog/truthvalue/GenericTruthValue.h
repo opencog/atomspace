@@ -25,7 +25,6 @@
 #define _OPENCOG_GENERIC_TRUTH_VALUE_H
 
 #include <string>
-#include <memory>
 
 #include <opencog/util/exceptions.h>
 #include <opencog/truthvalue/TruthValue.h>
@@ -90,21 +89,14 @@ class GenericTruthValue : public TruthValue
         std::string toString(const std::string&) const;
 
     protected:
-        count_t positiveEvidence;
-
-        // PLN count
-        count_t totalEvidence;
-
-        // Probabilistic strength
-        strength_t frequency;
-
-        // Fuzzy set membership strength
-        strength_t fuzzyStrength;
-
-        confidence_t confidence;
-
-        entropy_t entropy;
-
+        enum {
+            POSITIVE_EVIDENCE,
+            TOTAL_EVIDENCE, // PLN count
+            FREQUENCY, // Probabilistic strength
+            FUZZY_STRENGTH, // Fuzzy set membership strength
+            CONFIDENCE,
+            ENTROPY
+        };
 };
 } // namespace opencog
 
