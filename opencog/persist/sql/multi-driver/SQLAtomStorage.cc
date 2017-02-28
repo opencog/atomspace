@@ -1599,6 +1599,15 @@ void SQLAtomStorage::create_tables(void)
 	            "UNIQUE (type, name),"
 	            "UNIQUE (type, outgoing));");
 
+	rp.exec("CREATE TABLE Valuations ("
+	            "key BIGINT REFERENCES Atoms(uuid),"
+	            "atom BIGINT REFERENCES Atoms(uuid),"
+	            "type  SMALLINT,"
+	            "floatvalue DOUBLE PRECISION[],"
+	            "stringvalue TEXT[],"
+	            "linkvalue BIGINT[],"
+	            "UNIQUE (key, atom));");
+
 	rp.exec("CREATE TABLE TypeCodes ("
 	            "type SMALLINT UNIQUE,"
 	            "typename TEXT UNIQUE);");
@@ -1617,6 +1626,7 @@ void SQLAtomStorage::kill_data(void)
 
 	// See the file "atom.sql" for detailed documentation as to the
 	// structure of the SQL tables.
+	rp.exec("DELETE from Valuations;");
 	rp.exec("DELETE from Atoms;");
 
 	// Delete the atomspaces as well!
