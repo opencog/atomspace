@@ -40,46 +40,48 @@ using namespace opencog;
 SimpleTruthValue::SimpleTruthValue(strength_t m, confidence_t c)
 	: TruthValue(SIMPLE_TRUTH_VALUE)
 {
-    _mean = m;
-    _confidence = c;
+    _value.resize(2);
+    _value[MEAN] = m;
+    _value[CONFIDENCE] = c;
 }
 
 SimpleTruthValue::SimpleTruthValue(const TruthValue& source)
 	: TruthValue(SIMPLE_TRUTH_VALUE)
 {
-    _mean = source.getMean();
-    _confidence = source.getConfidence();
+    _value.resize(2);
+    _value[MEAN] = source.getMean();
+    _value[CONFIDENCE] = source.getConfidence();
 }
 
 SimpleTruthValue::SimpleTruthValue(SimpleTruthValue const& source)
 	: TruthValue(SIMPLE_TRUTH_VALUE)
 {
-    _mean = source._mean;
-    _confidence = source._confidence;
+    _value[MEAN] = source._value[MEAN];
+    _value[CONFIDENCE] = source._value[CONFIDENCE];
 }
 
 strength_t SimpleTruthValue::getMean() const
 {
-    return _mean;
+    return _value[MEAN];
 }
 
 count_t SimpleTruthValue::getCount() const
 {
     // Formula from PLN book.
-    confidence_t cf = std::min(_confidence, 0.9999998f);
+    confidence_t cf = std::min(_value[CONFIDENCE], 0.9999998);
     return static_cast<count_t>(DEFAULT_K * cf / (1.0f - cf));
 }
 
 confidence_t SimpleTruthValue::getConfidence() const
 {
-    return _confidence;
+    return _value[CONFIDENCE];
 }
 
 // This is the merge formula appropriate for PLN.
 TruthValuePtr SimpleTruthValue::merge(TruthValuePtr other,
                                       const MergeCtrl& mc) const
 {
-    switch(mc.tv_formula)
+    switch (mc.tv_formula)
     {
         case MergeCtrl::TVFormula::HIGHER_CONFIDENCE:
             return higher_confidence_merge(other);
@@ -126,8 +128,8 @@ bool SimpleTruthValue::operator==(const ProtoAtom& rhs) const
     if (NULL == stv) return false;
 
 #define FLOAT_ACCEPTABLE_ERROR 0.000001
-    if (FLOAT_ACCEPTABLE_ERROR < fabs(_mean - stv->_mean)) return false;
+    if (FLOAT_ACCEPTABLE_ERROR < fabs(_value[MEAN] - stv->_value[MEAN])) return false;
 
-    if (FLOAT_ACCEPTABLE_ERROR < fabs(_confidence - stv->_confidence)) return false;
+    if (FLOAT_ACCEPTABLE_ERROR < fabs(_value[CONFIDENCE] - stv->_value[CONFIDENCE])) return false;
     return true;
 }
