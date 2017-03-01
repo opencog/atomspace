@@ -266,7 +266,7 @@ class SQLAtomStorage::Response
 			return false;
 		}
 
-		// deal twith the type-to-id map
+		// deal with the type-to-id map
 		bool type_cb(void)
 		{
 			rs->foreach_column(&Response::type_column_cb, this);
@@ -291,7 +291,7 @@ class SQLAtomStorage::Response
 		// Values ---------------------------------------------------
 		// If a value exists, then return its type.
 		Type vtype;
-		bool valtype_cb(const char *colname, const char * colvalue)
+		bool valtype_column_cb(const char *colname, const char * colvalue)
 		{
 			// printf ("%s = %s\n", colname, colvalue);
 			if (strcmp(colname, "type"))
@@ -301,6 +301,13 @@ class SQLAtomStorage::Response
 			vtype = atoi(colvalue);
 			return false;
 		}
+
+		bool valtype_cb(void)
+		{
+			rs->foreach_column(&Response::valtype_column_cb, this);
+			return false;
+		}
+
 #ifdef OUT_OF_LINE_TVS
 		// Callbacks for SimpleTruthValues
 		int tvid;
@@ -581,7 +588,6 @@ Type SQLAtomStorage::valueExists(const ValuationPtr& valn)
 	rp.vtype = 0;
 	rp.exec(buff);
 	rp.rs->foreach_row(&Response::valtype_cb, &rp);
-xxxxxxx
 
 	return rp.vtype;
 }

@@ -547,3 +547,5 @@ console has a _use_count -- volative per-inst updated byg get put in the req
 _max_open_sockets -- static uint
 _num_open_sockets -- static  uint
 
+
+store->_tlbuf..getUUID(h)
