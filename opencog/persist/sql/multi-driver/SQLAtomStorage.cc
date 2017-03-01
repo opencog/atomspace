@@ -433,6 +433,7 @@ void SQLAtomStorage::init(const char * uri)
 	if (!connected()) return;
 
 	reserve();
+	_next_valid = 1;
 
 #define STORAGE_DEBUG 1
 #ifdef STORAGE_DEBUG
@@ -596,9 +597,9 @@ Type SQLAtomStorage::valueExists(const ValuationPtr& valn)
 }
 
 /**
- * Store a valuation
+ * Store a valuation. Return an integer ID for that valuation.
  */
-void SQLAtomStorage::storeValuation(const ValuationPtr& valn)
+VUID SQLAtomStorage::storeValuation(const ValuationPtr& valn)
 {
 	bool notfirst = false;
 	std::string cols;
@@ -750,6 +751,20 @@ std::string SQLAtomStorage::string_to_string(const StringValuePtr& svle)
 	bool not_first = false;
 	std::string str = "\'{";
 	for (const std::string& v : svle->value())
+	{
+		if (not_first) str += ", ";
+		not_first = true;
+		str += v;
+	}
+	str += "}\'";
+	return str;
+}
+
+std::string SQLAtomStorage::link_to_string(const LinkValuePtr& lvle)
+{
+	bool not_first = false;
+	std::string str = "\'{";
+	for (const ProtoAtomPtr& v : lvle->value())
 	{
 		if (not_first) str += ", ";
 		not_first = true;
@@ -1630,7 +1645,8 @@ void SQLAtomStorage::create_tables(void)
 	Response rp(conn_pool);
 
 	// See the file "atom.sql" for detailed documentation as to the
-	// structure of the SQL tables.
+	// structure of the SQL tables. The code below is kept in sync,
+	// manually, with the contents of atom.sql.
 	rp.exec("CREATE TABLE Spaces ("
 	              "space     BIGINT PRIMARY KEY,"
 	              "parent    BIGINT);");
@@ -1660,6 +1676,13 @@ void SQLAtomStorage::create_tables(void)
 	            "stringvalue TEXT[],"
 	            "linkvalue BIGINT[],"
 	            "UNIQUE (key, atom));");
+
+	rp.exec("CREATE TABLE Values ("
+	            "vuid BIGINT PRIMARY KEY,"
+	            "type  SMALLINT,"
+	            "floatvalue DOUBLE PRECISION[],"
+	            "stringvalue TEXT[],"
+	            "linkvalue BIGINT[]);");
 
 	rp.exec("CREATE TABLE TypeCodes ("
 	            "type SMALLINT UNIQUE,"
