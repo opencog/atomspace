@@ -134,12 +134,15 @@ class SQLAtomStorage : public AtomStorage
 		typedef unsigned long VUID;
 
 		Type valueExists(const ValuationPtr&);
+public:
 		void storeValuation(const ValuationPtr&);
+private:
 		VUID storeValue(const ProtoAtomPtr&);
 		std::string float_to_string(const FloatValuePtr&);
 		std::string string_to_string(const StringValuePtr&);
 		std::string link_to_string(const LinkValuePtr&);
 
+		VUID getMaxObservedVUID(void);
 		VUID _next_valid;
 
 		// --------------------------

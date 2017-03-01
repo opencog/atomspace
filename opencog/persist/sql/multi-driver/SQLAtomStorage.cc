@@ -433,7 +433,7 @@ void SQLAtomStorage::init(const char * uri)
 	if (!connected()) return;
 
 	reserve();
-	_next_valid = 1;
+	_next_valid = getMaxObservedVUID() + 1;
 
 #define STORAGE_DEBUG 1
 #ifdef STORAGE_DEBUG
@@ -1782,6 +1782,15 @@ UUID SQLAtomStorage::getMaxObservedUUID(void)
 	Response rp(conn_pool);
 	rp.intval = 0;
 	rp.exec("SELECT uuid FROM Atoms ORDER BY uuid DESC LIMIT 1;");
+	rp.rs->foreach_row(&Response::intval_cb, &rp);
+	return rp.intval;
+}
+
+SQLAtomStorage::VUID SQLAtomStorage::getMaxObservedVUID(void)
+{
+	Response rp(conn_pool);
+	rp.intval = 0;
+	rp.exec("SELECT vuid FROM Values ORDER BY vuid DESC LIMIT 1;");
 	rp.rs->foreach_row(&Response::intval_cb, &rp);
 	return rp.intval;
 }

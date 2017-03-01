@@ -1057,10 +1057,15 @@ TODO
 ====
  * See also to-do list way up top.
 
- * Finish and document the non-ODBC PGSQL interfaces. Explain why this
-   is better.
+ * Implement the large-outgoing-set extension. A version of this can be
+   found in the `postgres-dead` directory, but the code there is badly
+   broken. Its probably simplest to just ignore the code in
+   `postgres-dead`, and design something from scratch.
 
- * Store ProtoAtoms
+ * Store ProtoAtoms. Work is underway, see issue #513 for progress.
+
+ * Current implementation leaks in the Values table, when the values
+   are changed. This is a bug, needs fixing.
 
  * Consider an alternate implementation, using JSONB to do an EAV-like
    storage: For details, see
