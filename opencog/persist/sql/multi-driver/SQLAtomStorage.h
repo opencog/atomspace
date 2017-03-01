@@ -128,6 +128,7 @@ class SQLAtomStorage : public AtomStorage
 
 		// Values
 		Type valueExists(const ValuationPtr&);
+		void storeValuation(const ValuationPtr&);
 
 		// Performance statistics
 		std::atomic<size_t> _num_get_nodes;

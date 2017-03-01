@@ -592,7 +592,6 @@ Type SQLAtomStorage::valueExists(const ValuationPtr& valn)
 	return rp.vtype;
 }
 
-#ifdef OUT_OF_LINE_TVS
 /**
  * Store a valuation
  */
@@ -603,36 +602,41 @@ void SQLAtomStorage::storeValuation(const ValuationPtr& valn)
 	std::string vals;
 	std::string coda;
 
-	// Use the TLB Handle as the UUID.
-	char tvidbuff[BUFSZ];
-	snprintf(tvidbuff, BUFSZ, "%u", tvid);
+	// Get UUID from the TLB.
+	char kidbuff[BUFSZ];
+	snprintf(kidbuff, BUFSZ, "%lu", _tlbuf.getUUID(valn->key()));
 
-	bool update = tvExists(tvid);
+	char aidbuff[BUFSZ];
+	snprintf(aidbuff, BUFSZ, "%lu", _tlbuf.getUUID(valn->atom()));
+
+	bool update = valueExists(valn);
 	if (update)
 	{
-		cols = "UPDATE SimpleTVs SET ";
+		cols = "UPDATE Valuations SET ";
 		vals = "";
-		coda = " WHERE tvid = ";
-		coda += tvidbuff;
+		coda = " WHERE key = ";
+		coda += kidbuff;
+		coda = " AND atom = ";
+		coda += aidbuff;
 		coda += ";";
 	}
 	else
 	{
-		cols = "INSERT INTO SimpleTVs (";
+		cols = "INSERT INTO Valuations (";
 		vals = ") VALUES (";
 		coda = ");";
-		STMT("tvid", tvidbuff);
+		STMT("key", kidbuff);
+		STMT("atom", aidbuff);
 	}
 
-	STMTF("mean", tv.getMean());
-	STMTF("count", tv.getCount());
+	STMTI("type", valn->getType());
 
 	std::string qry = cols + vals + coda;
 	Response rp(conn_pool);
 	rp.exec(qry.c_str());
-	return tvid;
 }
 
+#ifdef OUT_OF_LINE_TVS
 TruthValue* SQLAtomStorage::getTV(int tvid)
 {
 	char buff[BUFSZ];
