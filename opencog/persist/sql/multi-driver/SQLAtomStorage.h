@@ -138,10 +138,10 @@ class SQLAtomStorage : public AtomStorage
 		Type valuationExists(const ValuationPtr&);
 public:
 		void storeValuation(const ValuationPtr&);
-private:
 		VUID storeValue(const ProtoAtomPtr&);
 		ProtoAtomPtr getValue(VUID);
 
+private:
 		std::string float_to_string(const FloatValuePtr&);
 		std::string string_to_string(const StringValuePtr&);
 		std::string link_to_string(const LinkValuePtr&);

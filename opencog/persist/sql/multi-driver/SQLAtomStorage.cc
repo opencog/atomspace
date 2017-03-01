@@ -311,32 +311,32 @@ class SQLAtomStorage::Response
 			return false;
 		}
 
-#ifdef OUT_OF_LINE_TVS
-		// Callbacks for SimpleTruthValues
-		int tvid;
-		bool create_tv_cb(void)
+		// Callbacks for Values
+		VUID vuid;
+		bool create_value_cb(void)
 		{
-			// printf ("---- New SimpleTV found ----\n");
-			rs->foreach_column(&Response::create_tv_column_cb, this);
+			rs->foreach_column(&Response::create_value_column_cb, this);
 			return false;
 		}
-		bool create_tv_column_cb(const char *colname, const char * colvalue)
+		bool create_value_column_cb(const char *colname, const char * colvalue)
 		{
 			printf ("%s = %s\n", colname, colvalue);
-			if (!strcmp(colname, "mean"))
+			if (!strcmp(colname, "floatvalue"))
 			{
-				mean = atof(colvalue);
+				// mean = atof(colvalue);
 			}
-			else if (!strcmp(colname, "count"))
+			else if (!strcmp(colname, "stringvalue"))
 			{
-				count = atof(colvalue);
+				// count = atof(colvalue);
+			}
+			else if (!strcmp(colname, "linkvalue"))
+			{
+				// count = atof(colvalue);
 			}
 			return false;
 		}
 
-#endif /* OUT_OF_LINE_TVS */
-
-		// get generic positive integer values
+		// Get generic positive integer values
 		unsigned long intval;
 		bool intval_cb(void)
 		{
@@ -722,23 +722,22 @@ SQLAtomStorage::VUID SQLAtomStorage::storeValue(const ProtoAtomPtr& pap)
 
 ProtoAtomPtr SQLAtomStorage::getValue(VUID vuid)
 {
+	char buff[BUFSZ];
+	snprintf(buff, BUFSZ, "SELECT * FROM Values WHERE vuid = %lu;", vuid);
+
+	Response rp(conn_pool);
+	rp.exec(buff);
+	rp.rs->foreach_row(&Response::create_value_cb, &rp);
+
 	return nullptr;
 }
 
 #ifdef OUT_OF_LINE_TVS
 TruthValue* SQLAtomStorage::getTV(int tvid)
 {
-	char buff[BUFSZ];
-	snprintf(buff, BUFSZ, "SELECT * FROM SimpleTVs WHERE tvid = %u;", tvid);
-
-	Response rp(conn_pool);
-	rp.exec(buff);
-	rp.rs->foreach_row(&Response::create_tv_cb, &rp);
-
 	SimpleTruthValue *stv = new SimpleTruthValue(rp.mean, rp.confidence);
 	return stv;
 }
-
 #endif /* OUT_OF_LINE_TVS */
 
 /* ================================================================== */
