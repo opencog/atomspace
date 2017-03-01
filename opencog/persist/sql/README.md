@@ -1063,6 +1063,7 @@ TODO
    `postgres-dead`, and design something from scratch.
 
  * Store ProtoAtoms. Work is underway, see issue #513 for progress.
+   Right now, its not thread-safe.... vuid issuance is not thread-safe.
 
  * Current implementation leaks in the Values table, when the values
    are changed. This is a bug, needs fixing.

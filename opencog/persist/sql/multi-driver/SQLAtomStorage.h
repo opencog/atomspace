@@ -69,7 +69,7 @@ class SQLAtomStorage : public AtomStorage
 
 		// ---------------------------------------------
 		// Handle multiple atomspaces like typecodes: we have to
-		// convert from sql UUID to the atual UUID.
+		// convert from sql UUID to the actual UUID.
 		std::set<UUID> table_id_cache;
 		void store_atomtable_id(const AtomTable&);
 
@@ -143,7 +143,7 @@ private:
 		std::string link_to_string(const LinkValuePtr&);
 
 		VUID getMaxObservedVUID(void);
-		VUID _next_valid;
+		std::atomic<VUID> _next_valid;
 
 		// --------------------------
 		// Performance statistics
