@@ -599,7 +599,7 @@ Type SQLAtomStorage::valueExists(const ValuationPtr& valn)
 /**
  * Store a valuation. Return an integer ID for that valuation.
  */
-VUID SQLAtomStorage::storeValuation(const ValuationPtr& valn)
+void SQLAtomStorage::storeValuation(const ValuationPtr& valn)
 {
 	bool notfirst = false;
 	std::string cols;
@@ -633,7 +633,7 @@ VUID SQLAtomStorage::storeValuation(const ValuationPtr& valn)
 		STMT("atom", aidbuff);
 	}
 
-	Type vtype = valn->getType();
+	Type vtype = valn->value()->getType();
 	STMTI("type", vtype);
 
 	if (classserver().isA(vtype, FLOAT_VALUE))
@@ -649,10 +649,64 @@ VUID SQLAtomStorage::storeValuation(const ValuationPtr& valn)
 		std::string sstr = string_to_string(fvp);
 		STMT("stringvalue", sstr);
 	}
+	else
+	if (classserver().isA(vtype, LINK_VALUE))
+	{
+		LinkValuePtr fvp = LinkValueCast(valn->value());
+		std::string lstr = link_to_string(fvp);
+		STMT("linkvalue", lstr);
+	}
 
 	std::string qry = cols + vals + coda;
 	Response rp(conn_pool);
 	rp.exec(qry.c_str());
+}
+
+// Almost a cut-n-passte of the above, but different.
+SQLAtomStorage::VUID SQLAtomStorage::storeValue(const ProtoAtomPtr& pap)
+{
+	VUID vuid = _next_valid++;
+
+	bool update = false;
+	bool notfirst = false;
+	std::string cols;
+	std::string vals;
+	std::string coda;
+
+	cols = "INSERT INTO Valuations (";
+	vals = ") VALUES (";
+	coda = ");";
+	STMT("vuid", std::to_string(vuid));
+
+	Type vtype = pap->getType();
+	STMTI("type", vtype);
+
+	if (classserver().isA(vtype, FLOAT_VALUE))
+	{
+		FloatValuePtr fvp = FloatValueCast(pap);
+		std::string fstr = float_to_string(fvp);
+		STMT("floatvalue", fstr);
+	}
+	else
+	if (classserver().isA(vtype, STRING_VALUE))
+	{
+		StringValuePtr fvp = StringValueCast(pap);
+		std::string sstr = string_to_string(fvp);
+		STMT("stringvalue", sstr);
+	}
+	else
+	if (classserver().isA(vtype, LINK_VALUE))
+	{
+		LinkValuePtr fvp = LinkValueCast(pap);
+		std::string lstr = link_to_string(fvp);
+		STMT("linkvalue", lstr);
+	}
+
+	std::string qry = cols + vals + coda;
+	Response rp(conn_pool);
+	rp.exec(qry.c_str());
+
+	return vuid;
 }
 
 #ifdef OUT_OF_LINE_TVS
@@ -764,11 +818,12 @@ std::string SQLAtomStorage::link_to_string(const LinkValuePtr& lvle)
 {
 	bool not_first = false;
 	std::string str = "\'{";
-	for (const ProtoAtomPtr& v : lvle->value())
+	for (const ProtoAtomPtr& pap : lvle->value())
 	{
 		if (not_first) str += ", ";
 		not_first = true;
-		str += v;
+		VUID vuid = storeValue(pap);
+		str += std::to_string(vuid);
 	}
 	str += "}\'";
 	return str;
@@ -1703,6 +1758,7 @@ void SQLAtomStorage::kill_data(void)
 	// See the file "atom.sql" for detailed documentation as to the
 	// structure of the SQL tables.
 	rp.exec("DELETE from Valuations;");
+	rp.exec("DELETE from Values;");
 	rp.exec("DELETE from Atoms;");
 
 	// Delete the atomspaces as well!
