@@ -641,6 +641,8 @@ void SQLAtomStorage::storeValuation(const ValuationPtr& valn)
 		FloatValuePtr fvp = FloatValueCast(valn->value());
 		std::string fstr = float_to_string(fvp);
 		STMT("floatvalue", fstr);
+		STMT("stringvalue", "'{}'");
+		STMT("linkvalue", "'{}'");
 	}
 	else
 	if (classserver().isA(vtype, STRING_VALUE))
@@ -648,6 +650,8 @@ void SQLAtomStorage::storeValuation(const ValuationPtr& valn)
 		StringValuePtr fvp = StringValueCast(valn->value());
 		std::string sstr = string_to_string(fvp);
 		STMT("stringvalue", sstr);
+		STMT("floatvalue", "'{}'");
+		STMT("linkvalue", "'{}'");
 	}
 	else
 	if (classserver().isA(vtype, LINK_VALUE))
@@ -655,6 +659,8 @@ void SQLAtomStorage::storeValuation(const ValuationPtr& valn)
 		LinkValuePtr fvp = LinkValueCast(valn->value());
 		std::string lstr = link_to_string(fvp);
 		STMT("linkvalue", lstr);
+		STMT("floatvalue", "'{}'");
+		STMT("stringvalue", "'{}'");
 	}
 
 	std::string qry = cols + vals + coda;
@@ -673,7 +679,7 @@ SQLAtomStorage::VUID SQLAtomStorage::storeValue(const ProtoAtomPtr& pap)
 	std::string vals;
 	std::string coda;
 
-	cols = "INSERT INTO Valuations (";
+	cols = "INSERT INTO Values (";
 	vals = ") VALUES (";
 	coda = ");";
 	STMT("vuid", std::to_string(vuid));

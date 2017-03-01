@@ -551,3 +551,11 @@ _num_open_sockets -- static  uint
 store->_tlbuf..getUUID(h)
 
 oset_to_string
+
+maybe_create_id
+
+do_store_single_atom wtf uuid not checked!
+
+maybe_create_id but assumes the UUID is already correct!
+
+getNode
