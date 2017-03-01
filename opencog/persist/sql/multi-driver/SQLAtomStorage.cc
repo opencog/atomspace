@@ -42,6 +42,9 @@
 #include <opencog/atoms/base/ClassServer.h>
 #include <opencog/atoms/base/Link.h>
 #include <opencog/atoms/base/Node.h>
+#include <opencog/atoms/base/FloatValue.h>
+#include <opencog/atoms/base/LinkValue.h>
+#include <opencog/atoms/base/StringValue.h>
 #include <opencog/atoms/base/Valuation.h>
 #include <opencog/truthvalue/CountTruthValue.h>
 #include <opencog/truthvalue/IndefiniteTruthValue.h>
@@ -638,6 +641,13 @@ void SQLAtomStorage::storeValuation(const ValuationPtr& valn)
 		std::string fstr = float_to_string(fvp);
 		STMT("floatvalue", fstr);
 	}
+	else
+	if (classserver().isA(vtype, STRING_VALUE))
+	{
+		StringValuePtr fvp = StringValueCast(valn->value());
+		std::string sstr = string_to_string(fvp);
+		STMT("stringvalue", sstr);
+	}
 
 	std::string qry = cols + vals + coda;
 	Response rp(conn_pool);
@@ -730,6 +740,20 @@ std::string SQLAtomStorage::float_to_string(const FloatValuePtr& fvle)
 		if (not_first) str += ", ";
 		not_first = true;
 		str += std::to_string(v);
+	}
+	str += "}\'";
+	return str;
+}
+
+std::string SQLAtomStorage::string_to_string(const StringValuePtr& svle)
+{
+	bool not_first = false;
+	std::string str = "\'{";
+	for (const std::string& v : svle->value())
+	{
+		if (not_first) str += ", ";
+		not_first = true;
+		str += v;
 	}
 	str += "}\'";
 	return str;

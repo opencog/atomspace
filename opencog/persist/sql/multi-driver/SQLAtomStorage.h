@@ -37,7 +37,11 @@
 #include <opencog/atoms/base/Link.h>
 #include <opencog/atoms/base/Node.h>
 #include <opencog/atoms/base/types.h>
+#include <opencog/atoms/base/FloatValue.h>
+#include <opencog/atoms/base/LinkValue.h>
+#include <opencog/atoms/base/StringValue.h>
 #include <opencog/atoms/base/Valuation.h>
+
 
 #include <opencog/atomspace/AtomTable.h>
 #include <opencog/atomspaceutils/TLB.h>
@@ -131,6 +135,7 @@ class SQLAtomStorage : public AtomStorage
 		Type valueExists(const ValuationPtr&);
 		void storeValuation(const ValuationPtr&);
 		std::string float_to_string(const FloatValuePtr&);
+		std::string string_to_string(const StringValuePtr&);
 
 		// --------------------------
 		// Performance statistics
