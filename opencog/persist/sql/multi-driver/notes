@@ -549,3 +549,5 @@ _num_open_sockets -- static  uint
 
 
 store->_tlbuf..getUUID(h)
+
+oset_to_string

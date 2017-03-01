@@ -629,7 +629,15 @@ void SQLAtomStorage::storeValuation(const ValuationPtr& valn)
 		STMT("atom", aidbuff);
 	}
 
-	STMTI("type", valn->getType());
+	Type vtype = valn->getType();
+	STMTI("type", vtype);
+
+	if (classserver().isA(vtype, FLOAT_VALUE))
+	{
+		FloatValuePtr fvp = FloatValueCast(valn->value());
+		std::string fstr = float_to_string(fvp);
+		STMT("floatvalue", fstr);
+	}
 
 	std::string qry = cols + vals + coda;
 	Response rp(conn_pool);
@@ -708,6 +716,20 @@ std::string SQLAtomStorage::oset_to_string(const HandleSeq& out)
 		if (not_first) str += ", ";
 		not_first = true;
 		str += std::to_string(get_uuid(h));
+	}
+	str += "}\'";
+	return str;
+}
+
+std::string SQLAtomStorage::float_to_string(const FloatValuePtr& fvle)
+{
+	bool not_first = false;
+	std::string str = "\'{";
+	for (double v : fvle->value())
+	{
+		if (not_first) str += ", ";
+		not_first = true;
+		str += std::to_string(v);
 	}
 	str += "}\'";
 	return str;

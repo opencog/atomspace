@@ -126,10 +126,13 @@ class SQLAtomStorage : public AtomStorage
 		bool idExists(const char *);
 		TLB _tlbuf;
 
+		// --------------------------
 		// Values
 		Type valueExists(const ValuationPtr&);
 		void storeValuation(const ValuationPtr&);
+		std::string float_to_string(const FloatValuePtr&);
 
+		// --------------------------
 		// Performance statistics
 		std::atomic<size_t> _num_get_nodes;
 		std::atomic<size_t> _num_got_nodes;
