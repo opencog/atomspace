@@ -185,14 +185,21 @@ int main ()
     SQLAtomStorage *store = new SQLAtomStorage(
              "postgres:///opencog_test?user=opencog_tester&password=cheese");
 
+    store->getNode(CONCEPT_NODE, "keynode");
+    store->getNode(CONCEPT_NODE, "atom");
+
     Handle key(createNode(CONCEPT_NODE, "keynode"));
     Handle atom(createNode(CONCEPT_NODE, "atom"));
-    store->storeAtom(key);
-    store->storeAtom(atom);
+    store->storeAtom(key, true);
+    store->storeAtom(atom, true);
 
-    ProtoAtomPtr pv = createFloatValue(std::vector<double>({1.0, 2.0, 3.0}));
-    ValuationPtr valn = createValuation(key, atom, pv);
-    store->storeValuation(valn);
+    ProtoAtomPtr pvf = createFloatValue(std::vector<double>({1.1, 2.2, 3.3}));
+    ValuationPtr valf = createValuation(key, atom, pvf);
+    store->storeValuation(valf);
+
+    ProtoAtomPtr pvs = createStringValue(std::vector<std::string>({"a", "b", "c"}));
+    ValuationPtr vals = createValuation(key, atom, pvs);
+    store->storeValuation(vals);
     delete store;
 #endif
 

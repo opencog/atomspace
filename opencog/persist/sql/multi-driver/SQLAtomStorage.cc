@@ -620,7 +620,7 @@ void SQLAtomStorage::storeValuation(const ValuationPtr& valn)
 		vals = "";
 		coda = " WHERE key = ";
 		coda += kidbuff;
-		coda = " AND atom = ";
+		coda += " AND atom = ";
 		coda += aidbuff;
 		coda += ";";
 	}
@@ -858,7 +858,8 @@ void SQLAtomStorage::flushStoreQueue()
  *
  * By default, the actual store is done asynchronously (in a different
  * thread); this routine merely queues up the atom. If the synchronous
- * flag is set, then the store is done in this thread.
+ * flag is set, then the store is performed in this thread, and it is
+ * completed (sent to the Postgres server) before this method returns.
  */
 void SQLAtomStorage::storeAtom(const Handle& h, bool synchronous)
 {
