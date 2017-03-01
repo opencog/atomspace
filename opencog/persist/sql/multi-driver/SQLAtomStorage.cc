@@ -580,7 +580,12 @@ void SQLAtomStorage::store_atomtable_id(const AtomTable& at)
 
 /* ================================================================ */
 
-Type SQLAtomStorage::valueExists(const ValuationPtr& valn)
+/// Return the type of the valuation, if it exists in the
+/// Valuation table; else return zero.  This is used only
+/// for determining whether to perform an insert or an update.
+/// XXX FIXME: in order to be thread-safe, this should grab
+/// and return a lock, the same way that maybe_create_id does it.
+Type SQLAtomStorage::valuationExists(const ValuationPtr& valn)
 {
 	char buff[BUFSZ];
 	snprintf(buff, BUFSZ,
@@ -613,7 +618,7 @@ void SQLAtomStorage::storeValuation(const ValuationPtr& valn)
 	char aidbuff[BUFSZ];
 	snprintf(aidbuff, BUFSZ, "%lu", _tlbuf.getUUID(valn->atom()));
 
-	bool update = valueExists(valn);
+	bool update = valuationExists(valn);
 	if (update)
 	{
 		cols = "UPDATE Valuations SET ";
@@ -713,6 +718,11 @@ SQLAtomStorage::VUID SQLAtomStorage::storeValue(const ProtoAtomPtr& pap)
 	rp.exec(qry.c_str());
 
 	return vuid;
+}
+
+ProtoAtomPtr SQLAtomStorage::getValue(VUID vuid)
+{
+	return nullptr;
 }
 
 #ifdef OUT_OF_LINE_TVS

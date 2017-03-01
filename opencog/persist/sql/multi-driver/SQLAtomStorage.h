@@ -54,6 +54,8 @@ namespace opencog
  *  @{
  */
 
+/// This class can only be used safely as a singleton; however, this
+/// singleton can be used by multiple threads.
 class SQLAtomStorage : public AtomStorage
 {
 	private:
@@ -133,17 +135,20 @@ class SQLAtomStorage : public AtomStorage
 		// Values
 		typedef unsigned long VUID;
 
-		Type valueExists(const ValuationPtr&);
+		Type valuationExists(const ValuationPtr&);
 public:
 		void storeValuation(const ValuationPtr&);
 private:
 		VUID storeValue(const ProtoAtomPtr&);
+		ProtoAtomPtr getValue(VUID);
+
 		std::string float_to_string(const FloatValuePtr&);
 		std::string string_to_string(const StringValuePtr&);
 		std::string link_to_string(const LinkValuePtr&);
 
 		VUID getMaxObservedVUID(void);
 		std::atomic<VUID> _next_valid;
+
 
 		// --------------------------
 		// Performance statistics
