@@ -1,6 +1,6 @@
 /*
  * FUNCTION:
- * Sniff test. Low-brow test, to see if basic atom storage is working.
+ * Scratch and Sniff test. A test & debug scaffold.
  *
  * HISTORY:
  * Copyright (c) 2008 Linas Vepstas <linas@linas.org>
@@ -12,6 +12,11 @@
 #include <opencog/atoms/base/Link.h>
 #include <opencog/atoms/base/Node.h>
 #include <opencog/truthvalue/SimpleTruthValue.h>
+
+#include <opencog/atoms/base/FloatValue.h>
+#include <opencog/atoms/base/LinkValue.h>
+#include <opencog/atoms/base/StringValue.h>
+#include <opencog/atoms/base/Valuation.h>
 
 #include <opencog/atomspaceutils/TLB.h>
 #include <opencog/persist/sql/multi-driver/SQLAtomStorage.h>
@@ -158,7 +163,7 @@ int main ()
     single_atom_test("eee ");
 #endif
 
-#if 1
+#if 0
     SQLAtomStorage *store = new SQLAtomStorage(
              // "odbc://opencog_tester:cheese/opencog_test");
              // "postgres://opencog_tester:cheese@localhost/opencog_test");
@@ -173,6 +178,21 @@ int main ()
     printf("Printing table:\n");
     // table->print();
 
+    delete store;
+#endif
+
+#if 1
+    SQLAtomStorage *store = new SQLAtomStorage(
+             "postgres:///opencog_test?user=opencog_tester&password=cheese");
+
+    Handle key(createNode(CONCEPT_NODE, "keynode"));
+    Handle atom(createNode(CONCEPT_NODE, "atom"));
+    store->storeAtom(key);
+    store->storeAtom(atom);
+
+    ProtoAtomPtr pv = createFloatValue(std::vector<double>({1.0, 2.0, 3.0}));
+    ValuationPtr valn = createValuation(key, atom, pv);
+    store->storeValuation(valn);
     delete store;
 #endif
 
