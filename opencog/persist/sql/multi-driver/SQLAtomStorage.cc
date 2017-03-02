@@ -323,7 +323,7 @@ class SQLAtomStorage::Response
 		}
 		bool create_value_column_cb(const char *colname, const char * colvalue)
 		{
-			printf ("value -- %s = %s\n", colname, colvalue);
+			// printf ("value -- %s = %s\n", colname, colvalue);
 			if (!strcmp(colname, "floatvalue"))
 			{
 				fltval = colvalue;
@@ -724,8 +724,6 @@ SQLAtomStorage::VUID SQLAtomStorage::storeValue(const ProtoAtomPtr& pap)
 	Response rp(conn_pool);
 	rp.exec(qry.c_str());
 
-ProtoAtomPtr foo = getValue(vuid);
-if (foo) std::cout << foo << std::endl;
 	return vuid;
 }
 
@@ -737,8 +735,6 @@ ProtoAtomPtr SQLAtomStorage::getValue(VUID vuid)
 	char buff[BUFSZ];
 	snprintf(buff, BUFSZ, "SELECT * FROM Values WHERE vuid = %lu;", vuid);
 
-printf("duuude enter getval\n");
-fflush(stdout);
 	Response rp(conn_pool);
 	rp.exec(buff);
 	rp.rs->foreach_row(&Response::create_value_cb, &rp);
@@ -797,16 +793,14 @@ fflush(stdout);
 		std::vector<ProtoAtomPtr> lnkarr;
 		const char *p = rp.lnkval;
 		if (p and *p == '{') p++;
-printf("duuude start a linkval\n");
 		while (p)
 		{
 			if (*p == '}' or *p == '\0') break;
 			VUID vu = atoi(p);
-printf("duuude reusrse to vuid %lu\n", vu);
 			ProtoAtomPtr pap = getValue(vu);
 			lnkarr.emplace_back(pap);
 			p = strchr(p, ',');
-			p++;
+			if (p) p++;
 		}
 		return createLinkValue(lnkarr);
 	}
