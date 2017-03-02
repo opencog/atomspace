@@ -731,7 +731,29 @@ ProtoAtomPtr SQLAtomStorage::getValue(VUID vuid)
 {
 	char buff[BUFSZ];
 	snprintf(buff, BUFSZ, "SELECT * FROM Values WHERE vuid = %lu;", vuid);
+	return doGetValue(buff);
+}
 
+/// Return a value, given by the key-atom pair.
+/// If the value type is a link, then the full recursive
+/// fetch is performed.
+ProtoAtomPtr SQLAtomStorage::getValuation(const Handle& key,
+                                          const Handle& atom)
+{
+	char buff[BUFSZ];
+	snprintf(buff, BUFSZ,
+		"SELECT * FROM Valuations WHERE key = %lu AND atom = %lu;",
+		_tlbuf.getUUID(key),
+		_tlbuf.getUUID(atom));
+
+	return doGetValue(buff);
+}
+
+/// Return a value, given by indicated query buffer.
+/// If the value type is a link, then the full recursive
+/// fetch is performed.
+ProtoAtomPtr SQLAtomStorage::doGetValue(const char * buff)
+{
 	Response rp(conn_pool);
 	rp.exec(buff);
 	rp.rs->foreach_row(&Response::get_value_cb, &rp);
