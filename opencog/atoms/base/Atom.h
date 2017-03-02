@@ -239,6 +239,8 @@ public:
     void setValue(const Handle& key, ProtoAtomPtr& value);
     ProtoAtomPtr getValue(const Handle& key);
 
+    /// Get the set of all keys in use for this Atom.
+    std::set<Handle> getKeys();
 
     //! Get the size of the incoming set.
     size_t getIncomingSetSize() const;

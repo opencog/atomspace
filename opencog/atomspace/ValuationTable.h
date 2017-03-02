@@ -37,6 +37,11 @@ namespace opencog
 
 /**
  * This class provides a mechanism to store valuations for atoms.
+ * XXX FIXME:  An alternative sould be to store values directly
+ * with each atom. That would make access to values faster, but
+ * some number of bytes in each atom, to hold the needed map.
+ * Not clear which is preferale, at this point.  RAM is cheap,
+ * CPU cycles are harder to get. Hmmmm.
  */
 class ValuationTable
 {

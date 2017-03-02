@@ -559,3 +559,11 @@ do_store_single_atom wtf uuid not checked!
 maybe_create_id but assumes the UUID is already correct!
 
 getNode
+
+Atom::getValue(key)
+
+ValuationTable::
+std::set<Handle> getKeys(const Handle&);
+    ValuationTable _value_table;
+
+

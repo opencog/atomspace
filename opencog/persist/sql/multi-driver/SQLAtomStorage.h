@@ -133,19 +133,22 @@ class SQLAtomStorage : public AtomStorage
 
 		// --------------------------
 		// Values
+
+		void store_atom_values(const Handle &);
+
 		typedef unsigned long VUID;
 
 		ProtoAtomPtr doGetValue(const char *);
-public:
+
 		void storeValuation(const ValuationPtr&);
+		void storeValuation(const Handle&, const Handle&, const ProtoAtomPtr&);
 		ProtoAtomPtr getValuation(const Handle&, const Handle&);
-		void deleteValuation(const ValuationPtr&);
+		void deleteValuation(const Handle&, const Handle&);
 
 		VUID storeValue(const ProtoAtomPtr&);
 		ProtoAtomPtr getValue(VUID);
 		void deleteValue(VUID);
 
-private:
 		std::string float_to_string(const FloatValuePtr&);
 		std::string string_to_string(const StringValuePtr&);
 		std::string link_to_string(const LinkValuePtr&);

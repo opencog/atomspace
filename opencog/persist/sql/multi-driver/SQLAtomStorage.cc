@@ -574,13 +574,12 @@ void SQLAtomStorage::store_atomtable_id(const AtomTable& at)
 /// Delete the valuation, if it exists. This is required, in order
 /// to prevent garbage from accumulating in theValues table.
 /// It also simplifies, ever-so-slightly, the update of valuations.
-void SQLAtomStorage::deleteValuation(const ValuationPtr& valn)
+void SQLAtomStorage::deleteValuation(const Handle& key, const Handle& atom)
 {
 	char buff[BUFSZ];
 	snprintf(buff, BUFSZ,
 		"SELECT * FROM Valuations WHERE key = %lu AND atom = %lu;",
-		_tlbuf.getUUID(valn->key()),
-		_tlbuf.getUUID(valn->atom()));
+		_tlbuf.getUUID(key), _tlbuf.getUUID(atom));
 
 	Response rp(conn_pool);
 	rp.vtype = 0;
@@ -605,8 +604,7 @@ void SQLAtomStorage::deleteValuation(const ValuationPtr& valn)
 	{
 		snprintf(buff, BUFSZ,
 			"DELETE FROM Valuations WHERE key = %lu AND atom = %lu;",
-			_tlbuf.getUUID(valn->key()),
-			_tlbuf.getUUID(valn->atom()));
+			_tlbuf.getUUID(key), _tlbuf.getUUID(atom));
 
 		rp.exec(buff);
 	}
@@ -618,6 +616,13 @@ void SQLAtomStorage::deleteValuation(const ValuationPtr& valn)
  */
 void SQLAtomStorage::storeValuation(const ValuationPtr& valn)
 {
+	storeValuation(valn->key(), valn->atom(), valn->value());
+}
+
+void SQLAtomStorage::storeValuation(const Handle& key,
+                                    const Handle& atom,
+                                    const ProtoAtomPtr& pap)
+{
 	bool notfirst = false;
 	bool update = false;
 	std::string cols;
@@ -626,10 +631,10 @@ void SQLAtomStorage::storeValuation(const ValuationPtr& valn)
 
 	// Get UUID from the TLB.
 	char kidbuff[BUFSZ];
-	snprintf(kidbuff, BUFSZ, "%lu", _tlbuf.getUUID(valn->key()));
+	snprintf(kidbuff, BUFSZ, "%lu", _tlbuf.getUUID(key));
 
 	char aidbuff[BUFSZ];
-	snprintf(aidbuff, BUFSZ, "%lu", _tlbuf.getUUID(valn->atom()));
+	snprintf(aidbuff, BUFSZ, "%lu", _tlbuf.getUUID(atom));
 
 	// Use a transaction, so that other threads/users see the
 	// valuation update atomically. That is, two sets of
@@ -640,7 +645,7 @@ void SQLAtomStorage::storeValuation(const ValuationPtr& valn)
 	rp.exec("BEGIN");
 
 	// If there's an existing valuation, delete it.
-	deleteValuation(valn);
+	deleteValuation(key, atom);
 
 	// Above delete should have done the trick; we can do a
 	// pure insert here.
@@ -650,26 +655,26 @@ void SQLAtomStorage::storeValuation(const ValuationPtr& valn)
 	STMT("key", kidbuff);
 	STMT("atom", aidbuff);
 
-	Type vtype = valn->value()->getType();
+	Type vtype = pap->getType();
 	STMTI("type", vtype);
 
 	if (classserver().isA(vtype, FLOAT_VALUE))
 	{
-		FloatValuePtr fvp = FloatValueCast(valn->value());
+		FloatValuePtr fvp = FloatValueCast(pap);
 		std::string fstr = float_to_string(fvp);
 		STMT("floatvalue", fstr);
 	}
 	else
 	if (classserver().isA(vtype, STRING_VALUE))
 	{
-		StringValuePtr fvp = StringValueCast(valn->value());
+		StringValuePtr fvp = StringValueCast(pap);
 		std::string sstr = string_to_string(fvp);
 		STMT("stringvalue", sstr);
 	}
 	else
 	if (classserver().isA(vtype, LINK_VALUE))
 	{
-		LinkValuePtr fvp = LinkValueCast(valn->value());
+		LinkValuePtr fvp = LinkValueCast(pap);
 		std::string lstr = link_to_string(fvp);
 		STMT("linkvalue", lstr);
 	}
@@ -860,6 +865,17 @@ void SQLAtomStorage::deleteValue(VUID vuid)
 	rp.exec(buff);
 }
 
+/// Store ALL of the values associated with the atom.
+void SQLAtomStorage::store_atom_values(const Handle& atom)
+{
+	std::set<Handle> keys = atom->getKeys();
+	for (const Handle& key: keys)
+	{
+		ProtoAtomPtr pap = atom->getValue(key);
+		storeValuation(key, atom, pap);
+	}
+}
+
 /* ================================================================== */
 
 /**
@@ -1011,7 +1027,9 @@ void SQLAtomStorage::storeAtom(const Handle& h, bool synchronous)
 
 /**
  * Synchronously store a single atom. That is, the actual store is done
- * in the calling thread.
+ * in the calling thread.  All values attached to the atom are also
+ * stored.
+ *
  * Returns the height of the atom.
  */
 int SQLAtomStorage::do_store_atom(const Handle& h)
@@ -1019,6 +1037,7 @@ int SQLAtomStorage::do_store_atom(const Handle& h)
 	if (h->isNode())
 	{
 		do_store_single_atom(h, 0);
+		store_atom_values(h);
 		return 0;
 	}
 
@@ -1034,6 +1053,7 @@ int SQLAtomStorage::do_store_atom(const Handle& h)
 	// atom in outgoing set.
 	lheight ++;
 	do_store_single_atom(h, lheight);
+	store_atom_values(h);
 	return lheight;
 }
 
@@ -1786,6 +1806,7 @@ void SQLAtomStorage::store_cb(const Handle& h)
 	get_ids();
 	int height = get_height(h);
 	do_store_single_atom(h, height);
+	store_atom_values(h);
 
 	if (_store_count%1000 == 0)
 	{

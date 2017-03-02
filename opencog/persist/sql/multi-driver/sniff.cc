@@ -181,7 +181,7 @@ int main ()
     delete store;
 #endif
 
-#if 1
+#if 0
     SQLAtomStorage *store = new SQLAtomStorage(
              "postgres:///opencog_test?user=opencog_tester&password=cheese");
 

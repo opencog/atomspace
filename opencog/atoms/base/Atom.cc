@@ -193,6 +193,12 @@ ProtoAtomPtr Atom::getValue(const Handle& key)
     return _atom_space->_value_table.getValue(key, getHandle());
 }
 
+std::set<Handle> Atom::getKeys()
+{
+    if (nullptr == _atom_space) return std::set<Handle>();
+    return _atom_space->_value_table.getKeys(getHandle());
+}
+
 // ==============================================================
 // Flag stuff
 bool Atom::isMarkedForRemoval() const
