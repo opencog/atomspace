@@ -614,7 +614,7 @@ void SQLAtomStorage::deleteValuation(const ValuationPtr& valn)
 
 /**
  * Store a valuation. Return an integer ID for that valuation.
-XXX TODO: add a lock to make this thread safe.
+ * Thread-safe.
  */
 void SQLAtomStorage::storeValuation(const ValuationPtr& valn)
 {
@@ -630,6 +630,14 @@ void SQLAtomStorage::storeValuation(const ValuationPtr& valn)
 
 	char aidbuff[BUFSZ];
 	snprintf(aidbuff, BUFSZ, "%lu", _tlbuf.getUUID(valn->atom()));
+
+	// Use a transaction, so that other threads/users see the
+	// valuation update atomically. That is, two sets of
+	// users/threads can safely set the same valuation at the same
+	// time. A third thread will always see an appropriate valuation,
+	// either the earlier one, or the newer one.
+	Response rp(conn_pool);
+	rp.exec("BEGIN");
 
 	// If there's an existing valuation, delete it.
 	deleteValuation(valn);
@@ -650,8 +658,6 @@ void SQLAtomStorage::storeValuation(const ValuationPtr& valn)
 		FloatValuePtr fvp = FloatValueCast(valn->value());
 		std::string fstr = float_to_string(fvp);
 		STMT("floatvalue", fstr);
-		STMT("stringvalue", "'{}'");
-		STMT("linkvalue", "'{}'");
 	}
 	else
 	if (classserver().isA(vtype, STRING_VALUE))
@@ -659,8 +665,6 @@ void SQLAtomStorage::storeValuation(const ValuationPtr& valn)
 		StringValuePtr fvp = StringValueCast(valn->value());
 		std::string sstr = string_to_string(fvp);
 		STMT("stringvalue", sstr);
-		STMT("floatvalue", "'{}'");
-		STMT("linkvalue", "'{}'");
 	}
 	else
 	if (classserver().isA(vtype, LINK_VALUE))
@@ -668,13 +672,11 @@ void SQLAtomStorage::storeValuation(const ValuationPtr& valn)
 		LinkValuePtr fvp = LinkValueCast(valn->value());
 		std::string lstr = link_to_string(fvp);
 		STMT("linkvalue", lstr);
-		STMT("floatvalue", "'{}'");
-		STMT("stringvalue", "'{}'");
 	}
 
 	std::string qry = cols + vals + coda;
-	Response rp(conn_pool);
 	rp.exec(qry.c_str());
+	rp.exec("COMMIT");
 }
 
 // Almost a cut-n-passte of the above, but different.

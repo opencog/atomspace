@@ -153,7 +153,6 @@ private:
 		VUID getMaxObservedVUID(void);
 		std::atomic<VUID> _next_valid;
 
-
 		// --------------------------
 		// Performance statistics
 		std::atomic<size_t> _num_get_nodes;
