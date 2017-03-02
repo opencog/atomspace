@@ -724,23 +724,28 @@ SQLAtomStorage::VUID SQLAtomStorage::storeValue(const ProtoAtomPtr& pap)
 	Response rp(conn_pool);
 	rp.exec(qry.c_str());
 
-std::cout << "duuuuuude gonna get \n";
 ProtoAtomPtr foo = getValue(vuid);
-std::cout << "duuuuuude got \n";
-if (foo) std::cout << foo;
-std::cout << "duuuuuude don prt \n";
+if (foo) std::cout << foo << std::endl;
 	return vuid;
 }
 
+/// Return a value, given by the VUID identifier, taken from the
+/// Values table. If the value type is a link, then the full recursive
+/// fetch is performed.
 ProtoAtomPtr SQLAtomStorage::getValue(VUID vuid)
 {
 	char buff[BUFSZ];
 	snprintf(buff, BUFSZ, "SELECT * FROM Values WHERE vuid = %lu;", vuid);
 
+printf("duuude enter getval\n");
+fflush(stdout);
 	Response rp(conn_pool);
 	rp.exec(buff);
 	rp.rs->foreach_row(&Response::create_value_cb, &rp);
 
+	// We expect rp.strval to be of the form
+	// {aaa,"bb bb bb","ccc ccc ccc"}
+	// Split it along the commas.
 	if (rp.vtype == STRING_VALUE)
 	{
 		std::vector<std::string> strarr;
@@ -762,11 +767,14 @@ ProtoAtomPtr SQLAtomStorage::getValue(VUID vuid)
 
 			strarr.emplace_back(p);
 			p = c;
+			p++;
 		}
 		free(s);
 		return createStringValue(strarr);
 	}
 
+	// We expect rp.fltval to be of the form
+	// {1.1,2.2,3.3}
 	if (rp.vtype == FLOAT_VALUE)
 	{
 		std::vector<double> fltarr;
@@ -777,21 +785,28 @@ ProtoAtomPtr SQLAtomStorage::getValue(VUID vuid)
 			if (*p == '}' or *p == '\0') break;
 			double flt = strtod(p, &p);
 			fltarr.emplace_back(flt);
+			p++; // skip over  comma
 		}
 		return createFloatValue(fltarr);
 	}
 
+	// We expect rp.lnkval to be a comma-separated list of
+	// vuid's, which we then fetch recursively.
 	if (rp.vtype == LINK_VALUE)
 	{
 		std::vector<ProtoAtomPtr> lnkarr;
 		const char *p = rp.lnkval;
 		if (p and *p == '{') p++;
+printf("duuude start a linkval\n");
 		while (p)
 		{
 			if (*p == '}' or *p == '\0') break;
 			VUID vu = atoi(p);
+printf("duuude reusrse to vuid %lu\n", vu);
 			ProtoAtomPtr pap = getValue(vu);
 			lnkarr.emplace_back(pap);
+			p = strchr(p, ',');
+			p++;
 		}
 		return createLinkValue(lnkarr);
 	}
@@ -799,14 +814,6 @@ ProtoAtomPtr SQLAtomStorage::getValue(VUID vuid)
 	throw IOException(TRACE_INFO, "Unexpected value type!");
 	return nullptr;
 }
-
-#ifdef OUT_OF_LINE_TVS
-TruthValue* SQLAtomStorage::getTV(int tvid)
-{
-	SimpleTruthValue *stv = new SimpleTruthValue(rp.mean, rp.confidence);
-	return stv;
-}
-#endif /* OUT_OF_LINE_TVS */
 
 /* ================================================================== */
 
