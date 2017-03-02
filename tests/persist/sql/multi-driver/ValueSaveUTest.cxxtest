@@ -171,6 +171,9 @@ void ValueSaveUTest::single_atom_save_restore(std::string id)
 		return;
 	}
 
+	// Clear out left-over junk, just in case.
+	store->kill_data();
+
 	SQLBackingStore* backing = new SQLBackingStore();
 	backing->set_store(store);
 	backing->registerWith(as);
@@ -219,7 +222,7 @@ void ValueSaveUTest::single_atom_save_restore(std::string id)
 
 	// --------------------
 	delete backing;
-	// store->kill_data();
+	store->kill_data();
 	delete store;
 }
 
