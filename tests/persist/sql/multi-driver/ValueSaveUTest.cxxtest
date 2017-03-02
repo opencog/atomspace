@@ -1,0 +1,222 @@
+/*
+ * tests/persist/sql/multi-driver/ValueSaveUTest.cxxtest
+ *
+ * Basic test of generic value save and restore.
+ *
+ * If this test is failing for you, then be sure to read the README in
+ * this directory, and also ../../opencong/persist/README, and then
+ * create and configure the SQL database as described there. Next,
+ * edit ../../lib/test-opencog.conf to add the database credentials
+ * (the username and passwd).
+ *
+ * Copyright (C) 2008, 2009, 2017 Linas Vepstas <linasvepstas@gmail.com>
+ * All Rights Reserved
+ *
+ * This program is free software; you can redistribute it and/or modify
+ * it under the terms of the GNU Affero General Public License v3 as
+ * published by the Free Software Foundation and including the exceptions
+ * at http://opencog.org/wiki/Licenses
+ *
+ * This program is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ * GNU General Public License for more details.
+ *
+ * You should have received a copy of the GNU Affero General Public License
+ * along with this program; if not, write to:
+ * Free Software Foundation, Inc.,
+ * 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
+ */
+#include <cstdio>
+
+#include <opencog/atoms/base/Atom.h>
+#include <opencog/atoms/base/Link.h>
+#include <opencog/atoms/base/Node.h>
+#include <opencog/atoms/base/atom_types.h>
+#include <opencog/atomspace/AtomSpace.h>
+
+#include <opencog/atoms/base/FloatValue.h>
+#include <opencog/atoms/base/LinkValue.h>
+#include <opencog/atoms/base/StringValue.h>
+#include <opencog/atoms/base/Valuation.h>
+
+#include <opencog/persist/sql/multi-driver/SQLAtomStorage.h>
+
+#include <opencog/util/Logger.h>
+#include <opencog/util/Config.h>
+
+#include "mkuri.h"
+
+using namespace opencog;
+
+class ValueSaveUTest :  public CxxTest::TestSuite
+{
+    private:
+        AtomSpace *as;
+        std::string uri;
+        const char * dbname;
+        const char * username;
+        const char * passwd;
+
+    public:
+
+        ValueSaveUTest(void)
+        {
+            try
+            {
+                config().load("atomspace-test.conf");
+            }
+            catch (RuntimeException &e)
+            {
+                std::cerr << e.get_message() << std::endl;
+            }
+
+            logger().set_level(Logger::DEBUG);
+            logger().set_print_to_stdout_flag(true);
+
+            try {
+                // Get the database logins & etc from the config file.
+                dbname = config().get("TEST_DB_NAME", "opencog_test").c_str();
+                username = config().get("TEST_DB_USERNAME", "opencog_tester").c_str();
+                passwd = config().get("TEST_DB_PASSWD", "cheese").c_str();
+            }
+            catch (InvalidParamException &e)
+            {
+                friendlyFailMessage(false);
+            }
+        }
+
+        ~ValueSaveUTest()
+        {
+            // erase the log file if no assertions failed
+            if (!CxxTest::TestTracker::tracker().suiteFailed())
+                std::remove(logger().get_filename().c_str());
+        }
+
+        void setUp(void);
+        void tearDown(void);
+
+        void friendlyFailMessage(bool ts)
+        {
+            const char * fail = "The ValueSaveUTest failed.\n"
+                "This is probably because you do not have SQL installed\n"
+                "or configured the way that OpenCog expects.\n\n"
+                "SQL persistance is optional for OpenCog, so if you don't\n"
+                "want it or need it, just ignore this test failure.\n"
+                "Otherwise, please be sure to read opencong/persist/sql/README,\n"
+                "and create/configure the SQL database as described there.\n"
+                "Next, edit lib/atomspace-test.conf appropriately, so as\n"
+                "to indicate the location of your database. If this is\n"
+                "done correctly, then this test will pass.\n";
+
+            if (ts)
+                TS_FAIL(fail);
+            else
+                fprintf(stderr, "%s", fail);
+            exit(1);
+        }
+
+        SQLAtomStorage *astore;
+
+        void do_test_single_atom();
+        void single_atom_save_restore(std::string);
+
+        void test_odbc_single_atom();
+        void test_pq_single_atom();
+};
+
+/*
+ * This is called once before each test, for each test (!!)
+ */
+void ValueSaveUTest::setUp(void)
+{
+    as = new AtomSpace();
+}
+
+void ValueSaveUTest::tearDown(void)
+{
+    delete as;
+}
+
+void ValueSaveUTest::test_odbc_single_atom(void)
+{
+	logger().debug("BEGIN TEST: %s", __FUNCTION__);
+#if HAVE_ODBC_STORAGE
+	uri = mkuri("odbc", dbname, username, passwd);
+	do_test_single_atom();
+#endif
+	logger().debug("END TEST: %s", __FUNCTION__);
+}
+
+void ValueSaveUTest::test_pq_single_atom(void)
+{
+	logger().debug("BEGIN TEST: %s", __FUNCTION__);
+#if HAVE_PGSQL_STORAGE
+	uri = mkuri("postgres", dbname, username, passwd);
+	do_test_single_atom();
+#endif // HAVE_PGSQL_STORAGE
+	logger().debug("END TEST: %s", __FUNCTION__);
+}
+
+// ============================================================
+/**
+ * A simple test case that tests the save and restore of
+ * a couple of nodes and a link. Does not test atomtable/atomspace at all.
+ */
+void ValueSaveUTest::single_atom_save_restore(std::string id)
+{
+	SQLAtomStorage *store = new SQLAtomStorage(uri);
+	if (!store->connected())
+	{
+		logger().debug("single_atom_save_restore: cannot connect to db");
+		return;
+	}
+
+	Handle key(createNode(CONCEPT_NODE, id + " some keynode"));
+	Handle atom(createNode(CONCEPT_NODE, id + " some node"));
+
+	// Store the key and the atom, so as to avoid any UUID
+	// confusions.
+	store->storeAtom(key, true);
+	store->storeAtom(atom, true);
+
+	// --------------------
+	// Now set some values
+	ProtoAtomPtr pvf = createFloatValue(
+		std::vector<double>({1.14, 2.24, 3.34}));
+
+	atom->setValue(key, pvf);
+	store->storeAtom(atom, true);
+
+	// --------------------
+	ProtoAtomPtr pvs = createStringValue(
+		std::vector<std::string>({"aaa", "bb bb bb", "ccc ccc ccc"}));
+
+	atom->setValue(key, pvs);
+	store->storeAtom(atom, true);
+
+	// --------------------
+	ProtoAtomPtr pvl = createLinkValue(
+		std::vector<ProtoAtomPtr>({pvf, pvs}));
+
+	atom->setValue(key, pvl);
+	store->storeAtom(atom, true);
+
+	// --------------------
+	ProtoAtomPtr pvl2 = createLinkValue(
+		std::vector<ProtoAtomPtr>({pvl, pvl, pvf, pvs}));
+
+	atom->setValue(key, pvl2);
+	store->storeAtom(atom, true);
+
+	// --------------------
+	// store->kill_data();
+	delete store;
+}
+
+void ValueSaveUTest::do_test_single_atom()
+{
+	single_atom_save_restore("aaa");
+}
+
+/* ============================= END OF FILE ================= */
