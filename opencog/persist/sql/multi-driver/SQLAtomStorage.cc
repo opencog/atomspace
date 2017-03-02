@@ -313,6 +313,9 @@ class SQLAtomStorage::Response
 
 		// Callbacks for Values
 		VUID vuid;
+		const char * fltval;
+		const char * strval;
+		const char * lnkval;
 		bool create_value_cb(void)
 		{
 			rs->foreach_column(&Response::create_value_column_cb, this);
@@ -320,18 +323,22 @@ class SQLAtomStorage::Response
 		}
 		bool create_value_column_cb(const char *colname, const char * colvalue)
 		{
-			printf ("%s = %s\n", colname, colvalue);
+			printf ("value -- %s = %s\n", colname, colvalue);
 			if (!strcmp(colname, "floatvalue"))
 			{
-				// mean = atof(colvalue);
+				fltval = colvalue;
 			}
 			else if (!strcmp(colname, "stringvalue"))
 			{
-				// count = atof(colvalue);
+				strval = colvalue;
 			}
 			else if (!strcmp(colname, "linkvalue"))
 			{
-				// count = atof(colvalue);
+				lnkval = colvalue;
+			}
+			else if (!strcmp(colname, "type"))
+			{
+				vtype = atoi(colvalue);
 			}
 			return false;
 		}
@@ -717,6 +724,11 @@ SQLAtomStorage::VUID SQLAtomStorage::storeValue(const ProtoAtomPtr& pap)
 	Response rp(conn_pool);
 	rp.exec(qry.c_str());
 
+std::cout << "duuuuuude gonna get \n";
+ProtoAtomPtr foo = getValue(vuid);
+std::cout << "duuuuuude got \n";
+if (foo) std::cout << foo;
+std::cout << "duuuuuude don prt \n";
 	return vuid;
 }
 
@@ -729,6 +741,62 @@ ProtoAtomPtr SQLAtomStorage::getValue(VUID vuid)
 	rp.exec(buff);
 	rp.rs->foreach_row(&Response::create_value_cb, &rp);
 
+	if (rp.vtype == STRING_VALUE)
+	{
+		std::vector<std::string> strarr;
+		char *s = strdup(rp.strval);
+		char *p = s;
+		if (p and *p == '{') p++;
+		while (p)
+		{
+			if (*p == '}' or *p == '\0') break;
+			// String terminates at comma or close-brace.
+			char * c = strchr(p, ',');
+			if (c) *c = 0;
+			else c = strchr(p, '}');
+			if (c) *c = 0;
+
+			// Wipe out quote marks
+			if (*p == '"') p++;
+			if (c and *(c-1) == '"') *(c-1) = 0;
+
+			strarr.emplace_back(p);
+			p = c;
+		}
+		free(s);
+		return createStringValue(strarr);
+	}
+
+	if (rp.vtype == FLOAT_VALUE)
+	{
+		std::vector<double> fltarr;
+		char *p = (char *) rp.fltval;
+		if (p and *p == '{') p++;
+		while (p)
+		{
+			if (*p == '}' or *p == '\0') break;
+			double flt = strtod(p, &p);
+			fltarr.emplace_back(flt);
+		}
+		return createFloatValue(fltarr);
+	}
+
+	if (rp.vtype == LINK_VALUE)
+	{
+		std::vector<ProtoAtomPtr> lnkarr;
+		const char *p = rp.lnkval;
+		if (p and *p == '{') p++;
+		while (p)
+		{
+			if (*p == '}' or *p == '\0') break;
+			VUID vu = atoi(p);
+			ProtoAtomPtr pap = getValue(vu);
+			lnkarr.emplace_back(pap);
+		}
+		return createLinkValue(lnkarr);
+	}
+
+	throw IOException(TRACE_INFO, "Unexpected value type!");
 	return nullptr;
 }
 

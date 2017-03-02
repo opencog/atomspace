@@ -197,7 +197,7 @@ int main ()
     ValuationPtr valf = createValuation(key, atom, pvf);
     store->storeValuation(valf);
 
-    ProtoAtomPtr pvs = createStringValue(std::vector<std::string>({"a", "b", "c"}));
+    ProtoAtomPtr pvs = createStringValue(std::vector<std::string>({"aaa", "bb bb bb", "ccc ccc ccc"}));
     ValuationPtr vals = createValuation(key, atom, pvs);
     store->storeValuation(vals);
 
