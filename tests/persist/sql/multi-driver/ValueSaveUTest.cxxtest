@@ -191,6 +191,7 @@ void ValueSaveUTest::single_atom_save_restore(std::string id)
 
 	atom->setValue(key, pvf);
 	as->store_atom(atom);
+	as->barrier();
 
 	// --------------------
 	ProtoAtomPtr pvs = createStringValue(
@@ -198,6 +199,7 @@ void ValueSaveUTest::single_atom_save_restore(std::string id)
 
 	atom->setValue(key, pvs);
 	as->store_atom(atom);
+	as->barrier();
 
 	// --------------------
 	ProtoAtomPtr pvl = createLinkValue(
@@ -205,6 +207,7 @@ void ValueSaveUTest::single_atom_save_restore(std::string id)
 
 	atom->setValue(key, pvl);
 	as->store_atom(atom);
+	as->barrier();
 
 	// --------------------
 	ProtoAtomPtr pvl2 = createLinkValue(
@@ -212,6 +215,7 @@ void ValueSaveUTest::single_atom_save_restore(std::string id)
 
 	atom->setValue(key, pvl2);
 	as->store_atom(atom);
+	as->barrier();
 
 	// --------------------
 	delete backing;
