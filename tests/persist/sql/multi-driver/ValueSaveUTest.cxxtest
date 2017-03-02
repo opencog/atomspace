@@ -40,6 +40,7 @@
 #include <opencog/atoms/base/StringValue.h>
 #include <opencog/atoms/base/Valuation.h>
 
+#include <opencog/persist/sql/SQLBackingStore.h>
 #include <opencog/persist/sql/multi-driver/SQLAtomStorage.h>
 
 #include <opencog/util/Logger.h>
@@ -116,12 +117,10 @@ class ValueSaveUTest :  public CxxTest::TestSuite
             exit(1);
         }
 
-        SQLAtomStorage *astore;
-
         void do_test_single_atom();
         void single_atom_save_restore(std::string);
 
-        void test_odbc_single_atom();
+        void xtest_odbc_single_atom();
         void test_pq_single_atom();
 };
 
@@ -138,7 +137,7 @@ void ValueSaveUTest::tearDown(void)
     delete as;
 }
 
-void ValueSaveUTest::test_odbc_single_atom(void)
+void ValueSaveUTest::xtest_odbc_single_atom(void)
 {
 	logger().debug("BEGIN TEST: %s", __FUNCTION__);
 #if HAVE_ODBC_STORAGE
@@ -172,13 +171,18 @@ void ValueSaveUTest::single_atom_save_restore(std::string id)
 		return;
 	}
 
-	Handle key(createNode(CONCEPT_NODE, id + " some keynode"));
-	Handle atom(createNode(CONCEPT_NODE, id + " some node"));
+	SQLBackingStore* backing = new SQLBackingStore();
+	backing->set_store(store);
+	backing->registerWith(as);
+
+	Handle key = as->add_node(CONCEPT_NODE, id + " some keynode");
+	Handle atom = as->add_node(CONCEPT_NODE, id + " some node");
 
 	// Store the key and the atom, so as to avoid any UUID
 	// confusions.
-	store->storeAtom(key, true);
-	store->storeAtom(atom, true);
+	as->store_atom(key);
+	as->store_atom(atom);
+	as->barrier();
 
 	// --------------------
 	// Now set some values
@@ -186,30 +190,31 @@ void ValueSaveUTest::single_atom_save_restore(std::string id)
 		std::vector<double>({1.14, 2.24, 3.34}));
 
 	atom->setValue(key, pvf);
-	store->storeAtom(atom, true);
+	as->store_atom(atom);
 
 	// --------------------
 	ProtoAtomPtr pvs = createStringValue(
 		std::vector<std::string>({"aaa", "bb bb bb", "ccc ccc ccc"}));
 
 	atom->setValue(key, pvs);
-	store->storeAtom(atom, true);
+	as->store_atom(atom);
 
 	// --------------------
 	ProtoAtomPtr pvl = createLinkValue(
 		std::vector<ProtoAtomPtr>({pvf, pvs}));
 
 	atom->setValue(key, pvl);
-	store->storeAtom(atom, true);
+	as->store_atom(atom);
 
 	// --------------------
 	ProtoAtomPtr pvl2 = createLinkValue(
 		std::vector<ProtoAtomPtr>({pvl, pvl, pvf, pvs}));
 
 	atom->setValue(key, pvl2);
-	store->storeAtom(atom, true);
+	as->store_atom(atom);
 
 	// --------------------
+	delete backing;
 	// store->kill_data();
 	delete store;
 }

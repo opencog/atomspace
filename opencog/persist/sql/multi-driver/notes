@@ -566,4 +566,9 @@ ValuationTable::
 std::set<Handle> getKeys(const Handle&);
     ValuationTable _value_table;
 
+    _backing = new SQLBackingStore();
+
+_backing->set_store(_store);
+    _backing->registerWith(_as);
+
 
