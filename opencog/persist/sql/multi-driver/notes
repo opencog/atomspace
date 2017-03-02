@@ -572,3 +572,4 @@ _backing->set_store(_store);
     _backing->registerWith(_as);
 
 
+getNode

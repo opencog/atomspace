@@ -876,6 +876,11 @@ void SQLAtomStorage::store_atom_values(const Handle& atom)
 	}
 }
 
+/// Get ALL of the values associated with an atom.
+void SQLAtomStorage::get_atom_values(const Handle& atom)
+{
+}
+
 /* ================================================================== */
 
 /**
@@ -1533,7 +1538,7 @@ HandleSeq SQLAtomStorage::getIncomingSet(const Handle& h)
  * Fetch the TV, for the Node with the indicated type and name.
  * If there is no such node, NULL is returned.
  */
-TruthValuePtr SQLAtomStorage::getNode(Type t, const char * str)
+SQLAtomStorage::PseudoPtr SQLAtomStorage::doGetNode(Type t, const char * str)
 {
 	setup_typemap();
 	char buff[4*BUFSZ];
@@ -1548,20 +1553,28 @@ TruthValuePtr SQLAtomStorage::getNode(Type t, const char * str)
 		throw IOException(TRACE_INFO,
 			"SQLAtomStorage::getNode: buffer overflow!\n"
 			"\tnc=%d buffer=>>%s<<\n", nc, buff);
-		return TruthValuePtr();
+		return PseudoPtr();
 	}
 #ifdef STORAGE_DEBUG
 	_num_get_nodes++;
 #endif // STORAGE_DEBUG
 
 	PseudoPtr p(getAtom(buff, 0));
-	if (NULL == p) return TruthValuePtr();
+	if (NULL == p) return PseudoPtr();
 
 #ifdef STORAGE_DEBUG
 	_num_got_nodes++;
 #endif // STORAGE_DEBUG
 	NodePtr node = createNode(t, str);
 	_tlbuf.addAtom(node, p->uuid);
+	return p;
+}
+
+TruthValuePtr SQLAtomStorage::getNode(Type t, const char * str)
+{
+	PseudoPtr p = doGetNode(t, str);
+	Handle h = _tlbuf.getAtom(p->uuid);
+	get_atom_values(h);
 	return p->tv;
 }
 
@@ -1569,7 +1582,7 @@ TruthValuePtr SQLAtomStorage::getNode(Type t, const char * str)
  * Fetch TruthValue for the Link with given type and outgoing set.
  * If there is no such link, NULL is returned.
  */
-TruthValuePtr SQLAtomStorage::getLink(const Handle& h)
+TruthValuePtr SQLAtomStorage::doGetLink(const Handle& h)
 {
 	setup_typemap();
 
@@ -1593,6 +1606,13 @@ TruthValuePtr SQLAtomStorage::getLink(const Handle& h)
 #endif // STORAGE_DEBUG
 	_tlbuf.addAtom(h, p->uuid);
 	return p->tv;
+}
+
+TruthValuePtr SQLAtomStorage::getLink(const Handle& h)
+{
+	TruthValuePtr tv = doGetLink(h);
+	get_atom_values(h);
+	return tv;
 }
 
 /**
@@ -1888,6 +1908,8 @@ void SQLAtomStorage::create_tables(void)
 	            "stringvalue TEXT[],"
 	            "linkvalue BIGINT[],"
 	            "UNIQUE (key, atom));");
+
+	rp.exec("CREATE INDEX ON Valuations (atom);");
 
 	rp.exec("CREATE TABLE Values ("
 	            "vuid BIGINT PRIMARY KEY,"

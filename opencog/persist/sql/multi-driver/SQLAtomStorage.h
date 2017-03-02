@@ -92,6 +92,9 @@ class SQLAtomStorage : public AtomStorage
 		PseudoPtr getAtom(const char *, int);
 		PseudoPtr petAtom(UUID);
 
+		PseudoPtr doGetNode(Type, const char *);
+		TruthValuePtr doGetLink(const Handle&);
+
 		int get_height(const Handle&);
 		int max_height;
 
@@ -135,6 +138,7 @@ class SQLAtomStorage : public AtomStorage
 		// Values
 
 		void store_atom_values(const Handle &);
+		void get_atom_values(const Handle &);
 
 		typedef unsigned long VUID;
 
