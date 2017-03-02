@@ -1063,10 +1063,7 @@ TODO
    `postgres-dead`, and design something from scratch.
 
  * Store ProtoAtoms. Work is underway, see issue #513 for progress.
-   Right now, its not thread-safe.... see FIXME in valuationExists
-
- * Current implementation leaks in the Values table, when the values
-   are changed. This is a bug, needs fixing.
+   Right now, its not thread-safe....
 
  * Consider an alternate implementation, using JSONB to do an EAV-like
    storage: For details, see

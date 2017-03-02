@@ -292,36 +292,20 @@ class SQLAtomStorage::Response
 		}
 
 		// Values ---------------------------------------------------
-		// If a value exists, then return its type.
-		Type vtype;
-		bool valtype_column_cb(const char *colname, const char * colvalue)
-		{
-			// printf ("%s = %s\n", colname, colvalue);
-			if (strcmp(colname, "type"))
-			{
-				throw IOException(TRACE_INFO, "Unexpected column '%s'\n", colname);
-			}
-			vtype = atoi(colvalue);
-			return false;
-		}
-
-		bool valtype_cb(void)
-		{
-			rs->foreach_column(&Response::valtype_column_cb, this);
-			return false;
-		}
-
-		// Callbacks for Values
+		// Callbacks for Values and Valuations.
+		// The table layout for values and valuations are almost
+		// identical, so we use common code for both.
 		VUID vuid;
+		Type vtype;
 		const char * fltval;
 		const char * strval;
 		const char * lnkval;
-		bool create_value_cb(void)
+		bool get_value_cb(void)
 		{
-			rs->foreach_column(&Response::create_value_column_cb, this);
+			rs->foreach_column(&Response::get_value_column_cb, this);
 			return false;
 		}
-		bool create_value_column_cb(const char *colname, const char * colvalue)
+		bool get_value_column_cb(const char *colname, const char * colvalue)
 		{
 			// printf ("value -- %s = %s\n", colname, colvalue);
 			if (!strcmp(colname, "floatvalue"))
@@ -587,33 +571,55 @@ void SQLAtomStorage::store_atomtable_id(const AtomTable& at)
 
 /* ================================================================ */
 
-/// Return the type of the valuation, if it exists in the
-/// Valuation table; else return zero.  This is used only
-/// for determining whether to perform an insert or an update.
-/// XXX FIXME: in order to be thread-safe, this should grab
-/// and return a lock, the same way that maybe_create_id does it.
-Type SQLAtomStorage::valuationExists(const ValuationPtr& valn)
+/// Delete the valuation, if it exists. This is required, in order
+/// to prevent garbage from accumulating in theValues table.
+/// It also simplifies, ever-so-slightly, the update of valuations.
+void SQLAtomStorage::deleteValuation(const ValuationPtr& valn)
 {
 	char buff[BUFSZ];
 	snprintf(buff, BUFSZ,
-		"SELECT type FROM Valuations WHERE key = %lu AND atom = %lu;",
+		"SELECT * FROM Valuations WHERE key = %lu AND atom = %lu;",
 		_tlbuf.getUUID(valn->key()),
 		_tlbuf.getUUID(valn->atom()));
 
 	Response rp(conn_pool);
 	rp.vtype = 0;
 	rp.exec(buff);
-	rp.rs->foreach_row(&Response::valtype_cb, &rp);
+	rp.rs->foreach_row(&Response::get_value_cb, &rp);
 
-	return rp.vtype;
+	if (LINK_VALUE == rp.vtype)
+	{
+		const char *p = rp.lnkval;
+		if (p and *p == '{') p++;
+		while (p)
+		{
+			if (*p == '}' or *p == '\0') break;
+			VUID vu = atoi(p);
+			deleteValue(vu);
+			p = strchr(p, ',');
+			if (p) p++;
+		}
+	}
+
+	if (0 != rp.vtype)
+	{
+		snprintf(buff, BUFSZ,
+			"DELETE FROM Valuations WHERE key = %lu AND atom = %lu;",
+			_tlbuf.getUUID(valn->key()),
+			_tlbuf.getUUID(valn->atom()));
+
+		rp.exec(buff);
+	}
 }
 
 /**
  * Store a valuation. Return an integer ID for that valuation.
+XXX TODO: add a lock to make this thread safe.
  */
 void SQLAtomStorage::storeValuation(const ValuationPtr& valn)
 {
 	bool notfirst = false;
+	bool update = false;
 	std::string cols;
 	std::string vals;
 	std::string coda;
@@ -625,25 +631,16 @@ void SQLAtomStorage::storeValuation(const ValuationPtr& valn)
 	char aidbuff[BUFSZ];
 	snprintf(aidbuff, BUFSZ, "%lu", _tlbuf.getUUID(valn->atom()));
 
-	bool update = valuationExists(valn);
-	if (update)
-	{
-		cols = "UPDATE Valuations SET ";
-		vals = "";
-		coda = " WHERE key = ";
-		coda += kidbuff;
-		coda += " AND atom = ";
-		coda += aidbuff;
-		coda += ";";
-	}
-	else
-	{
-		cols = "INSERT INTO Valuations (";
-		vals = ") VALUES (";
-		coda = ");";
-		STMT("key", kidbuff);
-		STMT("atom", aidbuff);
-	}
+	// If there's an existing valuation, delete it.
+	deleteValuation(valn);
+
+	// Above delete should have done the trick; we can do a
+	// pure insert here.
+	cols = "INSERT INTO Valuations (";
+	vals = ") VALUES (";
+	coda = ");";
+	STMT("key", kidbuff);
+	STMT("atom", aidbuff);
 
 	Type vtype = valn->value()->getType();
 	STMTI("type", vtype);
@@ -737,7 +734,7 @@ ProtoAtomPtr SQLAtomStorage::getValue(VUID vuid)
 
 	Response rp(conn_pool);
 	rp.exec(buff);
-	rp.rs->foreach_row(&Response::create_value_cb, &rp);
+	rp.rs->foreach_row(&Response::get_value_cb, &rp);
 
 	// We expect rp.strval to be of the form
 	// {aaa,"bb bb bb","ccc ccc ccc"}
@@ -816,7 +813,7 @@ void SQLAtomStorage::deleteValue(VUID vuid)
 
 	Response rp(conn_pool);
 	rp.exec(buff);
-	rp.rs->foreach_row(&Response::create_value_cb, &rp);
+	rp.rs->foreach_row(&Response::get_value_cb, &rp);
 
 	// Perform a recursive delete, if necessary.
 	// We expect rp.strval to be of the form

@@ -135,7 +135,7 @@ class SQLAtomStorage : public AtomStorage
 		// Values
 		typedef unsigned long VUID;
 
-		Type valuationExists(const ValuationPtr&);
+		void deleteValuation(const ValuationPtr&);
 public:
 		void storeValuation(const ValuationPtr&);
 		VUID storeValue(const ProtoAtomPtr&);
