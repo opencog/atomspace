@@ -140,6 +140,7 @@ public:
 		void storeValuation(const ValuationPtr&);
 		VUID storeValue(const ProtoAtomPtr&);
 		ProtoAtomPtr getValue(VUID);
+		void deleteValue(VUID);
 
 private:
 		std::string float_to_string(const FloatValuePtr&);

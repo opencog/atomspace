@@ -809,6 +809,36 @@ ProtoAtomPtr SQLAtomStorage::getValue(VUID vuid)
 	return nullptr;
 }
 
+void SQLAtomStorage::deleteValue(VUID vuid)
+{
+	char buff[BUFSZ];
+	snprintf(buff, BUFSZ, "SELECT * FROM Values WHERE vuid = %lu;", vuid);
+
+	Response rp(conn_pool);
+	rp.exec(buff);
+	rp.rs->foreach_row(&Response::create_value_cb, &rp);
+
+	// Perform a recursive delete, if necessary.
+	// We expect rp.strval to be of the form
+	// {81,82,83} -- Split it along the commas.
+	if (rp.vtype == LINK_VALUE)
+	{
+		const char *p = rp.lnkval;
+		if (p and *p == '{') p++;
+		while (p)
+		{
+			if (*p == '}' or *p == '\0') break;
+			VUID vu = atoi(p);
+			deleteValue(vu);
+			p = strchr(p, ',');
+			if (p) p++;
+		}
+	}
+
+	snprintf(buff, BUFSZ, "DELETE FROM Values WHERE vuid = %lu;", vuid);
+	rp.exec(buff);
+}
+
 /* ================================================================== */
 
 /**
