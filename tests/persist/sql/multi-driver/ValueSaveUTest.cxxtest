@@ -53,7 +53,6 @@ using namespace opencog;
 class ValueSaveUTest :  public CxxTest::TestSuite
 {
     private:
-        AtomSpace *as;
         std::string uri;
         const char * dbname;
         const char * username;
@@ -117,42 +116,35 @@ class ValueSaveUTest :  public CxxTest::TestSuite
             exit(1);
         }
 
-        void do_test_single_atom();
-        void single_atom_save_restore(std::string);
+        void do_test_single_atom_save();
 
-        void xtest_odbc_single_atom();
-        void test_pq_single_atom();
+        void test_odbc_single_atom_save();
+        void test_pq_single_atom_save();
 };
 
 /*
  * This is called once before each test, for each test (!!)
  */
-void ValueSaveUTest::setUp(void)
-{
-    as = new AtomSpace();
-}
+void ValueSaveUTest::setUp(void) {}
 
-void ValueSaveUTest::tearDown(void)
-{
-    delete as;
-}
+void ValueSaveUTest::tearDown(void) {}
 
-void ValueSaveUTest::xtest_odbc_single_atom(void)
+void ValueSaveUTest::test_odbc_single_atom_save(void)
 {
 	logger().debug("BEGIN TEST: %s", __FUNCTION__);
 #if HAVE_ODBC_STORAGE
 	uri = mkuri("odbc", dbname, username, passwd);
-	do_test_single_atom();
+	do_test_single_atom_save();
 #endif
 	logger().debug("END TEST: %s", __FUNCTION__);
 }
 
-void ValueSaveUTest::test_pq_single_atom(void)
+void ValueSaveUTest::test_pq_single_atom_save(void)
 {
 	logger().debug("BEGIN TEST: %s", __FUNCTION__);
 #if HAVE_PGSQL_STORAGE
 	uri = mkuri("postgres", dbname, username, passwd);
-	do_test_single_atom();
+	do_test_single_atom_save();
 #endif // HAVE_PGSQL_STORAGE
 	logger().debug("END TEST: %s", __FUNCTION__);
 }
@@ -162,7 +154,7 @@ void ValueSaveUTest::test_pq_single_atom(void)
  * A simple test case that tests the save and restore of
  * a couple of nodes and a link. Does not test atomtable/atomspace at all.
  */
-void ValueSaveUTest::single_atom_save_restore(std::string id)
+void ValueSaveUTest::do_test_single_atom_save()
 {
 	SQLAtomStorage *store = new SQLAtomStorage(uri);
 	if (!store->connected())
@@ -174,12 +166,13 @@ void ValueSaveUTest::single_atom_save_restore(std::string id)
 	// Clear out left-over junk, just in case.
 	store->kill_data();
 
+	AtomSpace* as = new AtomSpace();
 	SQLBackingStore* backing = new SQLBackingStore();
 	backing->set_store(store);
 	backing->registerWith(as);
 
-	Handle key = as->add_node(CONCEPT_NODE, id + " some keynode");
-	Handle atom = as->add_node(CONCEPT_NODE, id + " some node");
+	Handle key = as->add_node(CONCEPT_NODE, "some keynode");
+	Handle atom = as->add_node(CONCEPT_NODE, "some node");
 
 	// Store the key and the atom, so as to avoid any UUID
 	// confusions.
@@ -221,14 +214,10 @@ void ValueSaveUTest::single_atom_save_restore(std::string id)
 	as->barrier();
 
 	// --------------------
+	delete as;
 	delete backing;
 	store->kill_data();
 	delete store;
-}
-
-void ValueSaveUTest::do_test_single_atom()
-{
-	single_atom_save_restore("aaa");
 }
 
 /* ============================= END OF FILE ================= */

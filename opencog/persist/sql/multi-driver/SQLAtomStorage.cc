@@ -1125,6 +1125,10 @@ void SQLAtomStorage::do_store_single_atom(const Handle& h, int aheight)
 		// We allow storage of atoms that don't belong to an atomspace.
 		if (at) uuidbuff = std::to_string(at->get_uuid());
 		else uuidbuff = "0";
+
+		// XXX FIXME -- right now, multiple space support is incomplete,
+		// the below hacks around some testing issues.
+		if (at) uuidbuff = "1";
 		STMT("space", uuidbuff);
 
 		// Store the atom UUID
