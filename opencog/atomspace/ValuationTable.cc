@@ -71,7 +71,7 @@ ValuationPtr ValuationTable::getValuation(const Handle& key, const Handle& atom)
 {
 	auto vpiter = _vindex.find(std::make_pair(key, atom));
 	if (vpiter == _vindex.end())
-		throw RuntimeException(TRACE_INFO, "there is now value for this key");
+		throw RuntimeException(TRACE_INFO, "there is no value for this key");
 	return vpiter->second;
 }
 

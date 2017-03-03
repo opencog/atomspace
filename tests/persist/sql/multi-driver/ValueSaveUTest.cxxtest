@@ -247,6 +247,11 @@ void ValueSaveUTest::do_test_single_atom_save()
  */
 void ValueSaveUTest::check_one(ProtoAtomPtr pap)
 {
+	Handle bkey(createNode(CONCEPT_NODE, "some keynode"));
+	Handle batom(createNode(CONCEPT_NODE, "some node"));
+
+	// ------
+	// First, save the value
 	SQLAtomStorage *store = new SQLAtomStorage(uri);
 	TS_ASSERT(store->connected())
 
@@ -255,13 +260,34 @@ void ValueSaveUTest::check_one(ProtoAtomPtr pap)
 	backing->set_store(store);
 	backing->registerWith(as);
 
-	Handle key(createNode(CONCEPT_NODE, "some keynode"));
-	key = as->fetch_atom(key);
-	Handle atom(createNode(CONCEPT_NODE, "some node"));
-	atom = as->fetch_atom(atom);
+	Handle key = as->fetch_atom(bkey);
+	Handle atom = as->fetch_atom(batom);
 
 	atom->setValue(key, pap);
 	as->store_atom(atom);
+	as->barrier();
+
+	delete as;
+	delete backing;
+	delete store;
+
+	// ---------------------------------
+	// Now, fetch the value and compare.
+	store = new SQLAtomStorage(uri);
+	TS_ASSERT(store->connected())
+
+	as = new AtomSpace();
+	backing = new SQLBackingStore();
+	backing->set_store(store);
+	backing->registerWith(as);
+
+	key = as->fetch_atom(bkey);
+	atom = as->fetch_atom(batom);
+
+	printf("Got atom %s\n", atom->toString().c_str());
+	ProtoAtomPtr fap = atom->getValue(key);
+
+	TS_ASSERT(pap == fap);
 
 	delete as;
 	delete backing;

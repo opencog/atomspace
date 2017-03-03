@@ -225,18 +225,16 @@ public:
 
     /**
      * Unconditionally fetch an atom from the backingstore.
+     *
      * If there is no backingstore, then Handle::UNDEINFED is returned.
      * If the atom is found in the backingstore, then it is placed in
      * the atomtable before returning.  If the atom is already in the
-     * atomtable, and is also found in the backingstore, then the TV's
-     * are merged.
+     * atomtable, and is also found in the backingstore, then all of
+     * the values on the atom are updated from the database. (Values
+     * not in the database are not touched).
      *
-     * The fetch is 'unconditional', in that it is fetched, even if it
-     * already is in the atomspace.  Also, the ignored-types of the
-     * backing store are not used.
-     *
-     * To avoid a fetch if the atom already is in the atomtable, use the
-     * get_atom() method instead.
+     * To avoid a fetch if the atom already is in the atomtable, use
+     * the get_atom() method instead.
      */
     Handle fetch_atom(const Handle&);
 
