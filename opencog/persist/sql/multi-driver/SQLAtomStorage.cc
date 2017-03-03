@@ -1573,6 +1573,7 @@ SQLAtomStorage::PseudoPtr SQLAtomStorage::doGetNode(Type t, const char * str)
 TruthValuePtr SQLAtomStorage::getNode(Type t, const char * str)
 {
 	PseudoPtr p = doGetNode(t, str);
+	if (!p) return nullptr;
 	Handle h = _tlbuf.getAtom(p->uuid);
 	get_atom_values(h);
 	return p->tv;
