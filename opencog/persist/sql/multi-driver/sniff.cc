@@ -1,6 +1,6 @@
 /*
  * FUNCTION:
- * Sniff test. Low-brow test, to see if basic atom storage is working.
+ * Scratch and Sniff test. A test & debug scaffold.
  *
  * HISTORY:
  * Copyright (c) 2008 Linas Vepstas <linas@linas.org>
@@ -12,6 +12,11 @@
 #include <opencog/atoms/base/Link.h>
 #include <opencog/atoms/base/Node.h>
 #include <opencog/truthvalue/SimpleTruthValue.h>
+
+#include <opencog/atoms/base/FloatValue.h>
+#include <opencog/atoms/base/LinkValue.h>
+#include <opencog/atoms/base/StringValue.h>
+#include <opencog/atoms/base/Valuation.h>
 
 #include <opencog/atomspaceutils/TLB.h>
 #include <opencog/persist/sql/multi-driver/SQLAtomStorage.h>
@@ -158,7 +163,7 @@ int main ()
     single_atom_test("eee ");
 #endif
 
-#if 1
+#if 0
     SQLAtomStorage *store = new SQLAtomStorage(
              // "odbc://opencog_tester:cheese/opencog_test");
              // "postgres://opencog_tester:cheese@localhost/opencog_test");
@@ -172,6 +177,37 @@ int main ()
 
     printf("Printing table:\n");
     // table->print();
+
+    delete store;
+#endif
+
+#if 0
+    SQLAtomStorage *store = new SQLAtomStorage(
+             "postgres:///opencog_test?user=opencog_tester&password=cheese");
+
+    store->getNode(CONCEPT_NODE, "keynode");
+    store->getNode(CONCEPT_NODE, "atom");
+
+    Handle key(createNode(CONCEPT_NODE, "keynode"));
+    Handle atom(createNode(CONCEPT_NODE, "atom"));
+    store->storeAtom(key, true);
+    store->storeAtom(atom, true);
+
+    ProtoAtomPtr pvf = createFloatValue(std::vector<double>({1.14, 2.24, 3.34}));
+    ValuationPtr valf = createValuation(key, atom, pvf);
+    store->storeValuation(valf);
+
+    ProtoAtomPtr pvs = createStringValue(std::vector<std::string>({"aaa", "bb bb bb", "ccc ccc ccc"}));
+    ValuationPtr vals = createValuation(key, atom, pvs);
+    store->storeValuation(vals);
+
+    ProtoAtomPtr pvl = createLinkValue(std::vector<ProtoAtomPtr>({pvf, pvs}));
+    ValuationPtr vall = createValuation(key, atom, pvl);
+    store->storeValuation(vall);
+
+    ProtoAtomPtr pvl2 = createLinkValue(std::vector<ProtoAtomPtr>({pvl, pvl, pvl, pvf, pvs}));
+    ValuationPtr vall2 = createValuation(key, atom, pvl2);
+    store->storeValuation(vall2);
 
     delete store;
 #endif

@@ -106,7 +106,9 @@ LLPGConnection::exec(const char * buff)
 	    rest != PGRES_EMPTY_QUERY and
 	    rest != PGRES_TUPLES_OK)
 	{
-		opencog::logger().warn("%s", PQresultErrorMessage(rs->_result));
+		opencog::logger().warn("PQresult message: %s",
+		               PQresultErrorMessage(rs->_result));
+		opencog::logger().warn("PQ query was: %s", buff);
 		rs->release();
 		PERR("Failed to execute!");
 	}

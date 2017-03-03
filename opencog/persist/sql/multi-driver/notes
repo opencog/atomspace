@@ -547,3 +547,29 @@ console has a _use_count -- volative per-inst updated byg get put in the req
 _max_open_sockets -- static uint
 _num_open_sockets -- static  uint
 
+
+store->_tlbuf..getUUID(h)
+
+oset_to_string
+
+maybe_create_id
+
+do_store_single_atom wtf uuid not checked!
+
+maybe_create_id but assumes the UUID is already correct!
+
+getNode
+
+Atom::getValue(key)
+
+ValuationTable::
+std::set<Handle> getKeys(const Handle&);
+    ValuationTable _value_table;
+
+    _backing = new SQLBackingStore();
+
+_backing->set_store(_store);
+    _backing->registerWith(_as);
+
+
+getNode

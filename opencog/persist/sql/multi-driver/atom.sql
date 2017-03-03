@@ -87,7 +87,7 @@ CREATE TABLE Atoms (
 -- CREATE INDEX outidx ON Edges(dst_uuid);
 
 -- -----------------------------------------------------------
--- An SQL table representation for opencog Values
+-- An SQL table representation for opencog Valuations
 --
 CREATE TABLE Valuations (
     -- The key for this value
@@ -99,15 +99,41 @@ CREATE TABLE Valuations (
     type  SMALLINT,
 
     -- An array of values associated with the (key,atom) pair
-    -- Only float, or string or link should be non-empty, the other
-    -- two should be empty. We could have three different tables,
-    -- one each for each of these, but then the UNIQUE constraint is
-    -- harder to force.
+    -- Only one of the three of float, or string or link should be
+    -- non-empty; the other two should be empty. We could have three
+    -- different tables, one each for each of these, but then the
+    -- UNIQUE constraint is harder to force.
+    -- The linkevalue should be an array of vuid's from the Values
+    -- table. The "ELEMENT REFERENCES" would do the trick, but it's
+    -- not yet implemented in postgres.
     floatvalue DOUBLE PRECISION[],
     stringvalue TEXT[],
-    linkvalue BIGINT[],
+    linkvalue BIGINT[], -- ELEMENT REFERENCES Values(vuid),
 
     UNIQUE (key, atom)
+);
+
+-- Index for the fast lookup of all valuations for a given atom.
+CREATE INDEX ON Valuations (atom);
+
+-- A recursive overflow table, if recursive values did not directly
+-- fit into the Valuation table.
+CREATE TABLE Values (
+    -- The unique ID for this value
+    vuid BIGINT PRIMARY KEY,
+
+    -- Value type, e.g. FloatValue, StringValue, etc.
+    type  SMALLINT,
+
+    -- An array of values associated with the vuid.
+    -- Only one of the three of float, or string or link should be
+    -- non-empty; the other two should be empty.
+    -- The linkevalue should be an array of vuid's for other rows
+    -- in this table. The "ELEMENT REFERENCES" would do the trick,
+    -- but it's not yet implemented in postgres.
+    floatvalue DOUBLE PRECISION[],
+    stringvalue TEXT[],
+    linkvalue BIGINT[] -- ELEMENT REFERENCES Values(vuid)
 );
 
 -- -----------------------------------------------------------

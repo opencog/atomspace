@@ -1,5 +1,5 @@
 /*
- * tests/persist/sql/odbc/MultiPersistUTest.cxxtest
+ * tests/persist/sql/multi-driver/MultiPersistUTest.cxxtest
  *
  * Test multi-threaded persistance.  Assumes PersistUTest is passing.
  *

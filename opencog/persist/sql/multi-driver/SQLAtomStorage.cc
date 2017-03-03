@@ -2,9 +2,10 @@
  * FUNCTION:
  * Persistent Atom storage, SQL-backed.
  *
- * Atoms are saved to, and restored from, an SQL DB using one of the
- * avaialble database drivers. Curently, postgres native libpq-dev and
- * ODBC are supported.
+ * Atoms and Values are saved to, and restored from, an SQL DB using
+ * one of the available database drivers. Currently, the postgres
+ * native libpq-dev API and the ODBC API are supported. Note that
+ * libpq-dev is about three times faster than ODBC.
  *
  * Atoms are identified by means of unique ID's (UUID's), which are
  * correlated with specific in-RAM atoms via the TLB.
@@ -41,6 +42,10 @@
 #include <opencog/atoms/base/ClassServer.h>
 #include <opencog/atoms/base/Link.h>
 #include <opencog/atoms/base/Node.h>
+#include <opencog/atoms/base/FloatValue.h>
+#include <opencog/atoms/base/LinkValue.h>
+#include <opencog/atoms/base/StringValue.h>
+#include <opencog/atoms/base/Valuation.h>
 #include <opencog/truthvalue/CountTruthValue.h>
 #include <opencog/truthvalue/IndefiniteTruthValue.h>
 #include <opencog/truthvalue/ProbabilisticTruthValue.h>
@@ -74,14 +79,21 @@ class SQLAtomStorage::Response
 
 		// Temporary cache of info about atom being assembled.
 		UUID uuid;
-		int itype;
+		Type itype;
 		const char * name;
+		const char *outlist;
+		int height;
+
+		// TV's
 		int tv_type;
 		double mean;
 		double confidence;
 		double count;
-		const char *outlist;
-		int height;
+
+		// Values
+		double *floatval;
+		const char *stringval;
+		UUID *linkval;
 
 	private:
 		concurrent_stack<LLConnection*>& _pool;
@@ -156,6 +168,7 @@ class SQLAtomStorage::Response
 			}
 			return false;
 		}
+
 		bool create_atom_cb(void)
 		{
 			// printf ("---- New atom found ----\n");
@@ -256,13 +269,14 @@ class SQLAtomStorage::Response
 			return false;
 		}
 
-		// deal twith the type-to-id map
+		// deal with the type-to-id map
 		bool type_cb(void)
 		{
 			rs->foreach_column(&Response::type_column_cb, this);
 			store->set_typemap(itype, tname);
 			return false;
 		}
+
 		const char * tname;
 		bool type_column_cb(const char *colname, const char * colvalue)
 		{
@@ -276,38 +290,51 @@ class SQLAtomStorage::Response
 			}
 			return false;
 		}
-#ifdef OUT_OF_LINE_TVS
-		// Callbacks for SimpleTruthValues
-		int tvid;
-		bool create_tv_cb(void)
+
+		// Values ---------------------------------------------------
+		// Callbacks for Values and Valuations.
+		// The table layout for values and valuations are almost
+		// identical, so we use common code for both.
+		VUID vuid;
+		Type vtype;
+		const char * fltval;
+		const char * strval;
+		const char * lnkval;
+		bool get_value_cb(void)
 		{
-			// printf ("---- New SimpleTV found ----\n");
-			rs->foreach_column(&Response::create_tv_column_cb, this);
+			rs->foreach_column(&Response::get_value_column_cb, this);
 			return false;
 		}
-		bool create_tv_column_cb(const char *colname, const char * colvalue)
+		bool get_value_column_cb(const char *colname, const char * colvalue)
 		{
-			printf ("%s = %s\n", colname, colvalue);
-			if (!strcmp(colname, "mean"))
+			// printf ("value -- %s = %s\n", colname, colvalue);
+			if (!strcmp(colname, "floatvalue"))
 			{
-				mean = atof(colvalue);
+				fltval = colvalue;
 			}
-			else if (!strcmp(colname, "count"))
+			else if (!strcmp(colname, "stringvalue"))
 			{
-				count = atof(colvalue);
+				strval = colvalue;
+			}
+			else if (!strcmp(colname, "linkvalue"))
+			{
+				lnkval = colvalue;
+			}
+			else if (!strcmp(colname, "type"))
+			{
+				vtype = atoi(colvalue);
 			}
 			return false;
 		}
 
-#endif /* OUT_OF_LINE_TVS */
-
-		// get generic positive integer values
+		// Get generic positive integer values
 		unsigned long intval;
 		bool intval_cb(void)
 		{
 			rs->foreach_column(&Response::intval_column_cb, this);
 			return false;
 		}
+
 		bool intval_column_cb(const char *colname, const char * colvalue)
 		{
 			// we're not going to bother to check the column name ...
@@ -316,7 +343,7 @@ class SQLAtomStorage::Response
 		}
 
 		// Get all handles in the database.
-		std::set<UUID> *id_set;
+		std::set<UUID>* id_set;
 		bool note_id_cb(void)
 		{
 			rs->foreach_column(&Response::note_id_column_cb, this);
@@ -397,6 +424,7 @@ void SQLAtomStorage::init(const char * uri)
 	if (!connected()) return;
 
 	reserve();
+	_next_valid = getMaxObservedVUID() + 1;
 
 #define STORAGE_DEBUG 1
 #ifdef STORAGE_DEBUG
@@ -543,107 +571,315 @@ void SQLAtomStorage::store_atomtable_id(const AtomTable& at)
 
 /* ================================================================ */
 
-#ifdef OUT_OF_LINE_TVS
-/**
- * Return true if the indicated handle exists in the storage.
- */
-bool SQLAtomStorage::tvExists(int tvid)
+/// Delete the valuation, if it exists. This is required, in order
+/// to prevent garbage from accumulating in theValues table.
+/// It also simplifies, ever-so-slightly, the update of valuations.
+void SQLAtomStorage::deleteValuation(const Handle& key, const Handle& atom)
 {
 	char buff[BUFSZ];
-	snprintf(buff, BUFSZ, "SELECT tvid FROM SimpleTVs WHERE tvid = %u;", tvid);
-	return idExists(buff);
+	snprintf(buff, BUFSZ,
+		"SELECT * FROM Valuations WHERE key = %lu AND atom = %lu;",
+		_tlbuf.getUUID(key), _tlbuf.getUUID(atom));
+
+	Response rp(conn_pool);
+	rp.vtype = 0;
+	rp.exec(buff);
+	rp.rs->foreach_row(&Response::get_value_cb, &rp);
+
+	if (LINK_VALUE == rp.vtype)
+	{
+		const char *p = rp.lnkval;
+		if (p and *p == '{') p++;
+		while (p)
+		{
+			if (*p == '}' or *p == '\0') break;
+			VUID vu = atoi(p);
+			deleteValue(vu);
+			p = strchr(p, ',');
+			if (p) p++;
+		}
+	}
+
+	if (0 != rp.vtype)
+	{
+		snprintf(buff, BUFSZ,
+			"DELETE FROM Valuations WHERE key = %lu AND atom = %lu;",
+			_tlbuf.getUUID(key), _tlbuf.getUUID(atom));
+
+		rp.exec(buff);
+	}
 }
 
 /**
- * Store the truthvalue of the atom.
- * Handle h must be the handle for the atom; its passed as an arg to
- * avoid having to look it up.
+ * Store a valuation. Return an integer ID for that valuation.
+ * Thread-safe.
  */
-int SQLAtomStorage::storeTruthValue(AtomPtr atom, Handle h)
+void SQLAtomStorage::storeValuation(const ValuationPtr& valn)
 {
+	storeValuation(valn->key(), valn->atom(), valn->value());
+}
+
+void SQLAtomStorage::storeValuation(const Handle& key,
+                                    const Handle& atom,
+                                    const ProtoAtomPtr& pap)
+{
+	bool notfirst = false;
+	bool update = false;
+	std::string cols;
+	std::string vals;
+	std::string coda;
+
+	// Get UUID from the TLB.
+	char kidbuff[BUFSZ];
+	snprintf(kidbuff, BUFSZ, "%lu", _tlbuf.getUUID(key));
+
+	char aidbuff[BUFSZ];
+	snprintf(aidbuff, BUFSZ, "%lu", _tlbuf.getUUID(atom));
+
+	// Use a transaction, so that other threads/users see the
+	// valuation update atomically. That is, two sets of
+	// users/threads can safely set the same valuation at the same
+	// time. A third thread will always see an appropriate valuation,
+	// either the earlier one, or the newer one.
+	Response rp(conn_pool);
+	rp.exec("BEGIN");
+
+	// If there's an existing valuation, delete it.
+	deleteValuation(key, atom);
+
+	// Above delete should have done the trick; we can do a
+	// pure insert here.
+	cols = "INSERT INTO Valuations (";
+	vals = ") VALUES (";
+	coda = ");";
+	STMT("key", kidbuff);
+	STMT("atom", aidbuff);
+
+	Type vtype = pap->getType();
+	STMTI("type", vtype);
+
+	if (classserver().isA(vtype, FLOAT_VALUE))
+	{
+		FloatValuePtr fvp = FloatValueCast(pap);
+		std::string fstr = float_to_string(fvp);
+		STMT("floatvalue", fstr);
+	}
+	else
+	if (classserver().isA(vtype, STRING_VALUE))
+	{
+		StringValuePtr fvp = StringValueCast(pap);
+		std::string sstr = string_to_string(fvp);
+		STMT("stringvalue", sstr);
+	}
+	else
+	if (classserver().isA(vtype, LINK_VALUE))
+	{
+		LinkValuePtr fvp = LinkValueCast(pap);
+		std::string lstr = link_to_string(fvp);
+		STMT("linkvalue", lstr);
+	}
+
+	std::string qry = cols + vals + coda;
+	rp.exec(qry.c_str());
+	rp.exec("COMMIT");
+}
+
+// Almost a cut-n-passte of the above, but different.
+SQLAtomStorage::VUID SQLAtomStorage::storeValue(const ProtoAtomPtr& pap)
+{
+	VUID vuid = _next_valid++;
+
+	bool update = false;
 	bool notfirst = false;
 	std::string cols;
 	std::string vals;
 	std::string coda;
 
-	const TruthValue &tv = atom->getTruthValue();
+	cols = "INSERT INTO Values (";
+	vals = ") VALUES (";
+	coda = ");";
+	STMT("vuid", std::to_string(vuid));
 
-	const SimpleTruthValue *stv = dynamic_cast<const SimpleTruthValue *>(&tv);
-	if (NULL == stv)
-		throw IOException(TRACE_INFO, "Non-simple truth values are not handled\n");
+	Type vtype = pap->getType();
+	STMTI("type", vtype);
 
-	int tvid = TVID(tv);
-
-	// If its a stock truth value, there is nothing to do.
-	if (tvid <= 4) return tvid;
-
-	// Use the TLB Handle as the UUID.
-	char tvidbuff[BUFSZ];
-	snprintf(tvidbuff, BUFSZ, "%u", tvid);
-
-	bool update = tvExists(tvid);
-	if (update)
+	if (classserver().isA(vtype, FLOAT_VALUE))
 	{
-		cols = "UPDATE SimpleTVs SET ";
-		vals = "";
-		coda = " WHERE tvid = ";
-		coda += tvidbuff;
-		coda += ";";
+		FloatValuePtr fvp = FloatValueCast(pap);
+		std::string fstr = float_to_string(fvp);
+		STMT("floatvalue", fstr);
 	}
 	else
+	if (classserver().isA(vtype, STRING_VALUE))
 	{
-		cols = "INSERT INTO SimpleTVs (";
-		vals = ") VALUES (";
-		coda = ");";
-		STMT("tvid", tvidbuff);
+		StringValuePtr fvp = StringValueCast(pap);
+		std::string sstr = string_to_string(fvp);
+		STMT("stringvalue", sstr);
 	}
-
-	STMTF("mean", tv.getMean());
-	STMTF("count", tv.getCount());
+	else
+	if (classserver().isA(vtype, LINK_VALUE))
+	{
+		LinkValuePtr fvp = LinkValueCast(pap);
+		std::string lstr = link_to_string(fvp);
+		STMT("linkvalue", lstr);
+	}
 
 	std::string qry = cols + vals + coda;
 	Response rp(conn_pool);
 	rp.exec(qry.c_str());
-	return tvid;
+
+	return vuid;
 }
 
-/**
- * Return a new, unique ID for every truth value
- */
-int SQLAtomStorage::TVID(const TruthValue &tv)
+/// Return a value, given by the VUID identifier, taken from the
+/// Values table. If the value type is a link, then the full recursive
+/// fetch is performed.
+ProtoAtomPtr SQLAtomStorage::getValue(VUID vuid)
 {
-	if (tv == TruthValue::NULL_TV()) return 0;
-	if (tv == TruthValue::TRIVIAL_TV()) return 1;
-	if (tv == TruthValue::FALSE_TV()) return 2;
-	if (tv == TruthValue::TRUE_TV()) return 3;
-	if (tv == TruthValue::DEFAULT_TV()) return 4;
-
-	Response rp(conn_pool);
-	rp.exec("SELECT NEXTVAL('tvid_seq');");
-	rp.rs->foreach_row(&Response::tvid_seq_cb, &rp);
-	return rp.tvid;
-}
-
-TruthValue* SQLAtomStorage::getTV(int tvid)
-{
-	if (0 == tvid) return (TruthValue *) & TruthValue::NULL_TV();
-	if (1 == tvid) return (TruthValue *) & TruthValue::DEFAULT_TV();
-	if (2 == tvid) return (TruthValue *) & TruthValue::FALSE_TV();
-	if (3 == tvid) return (TruthValue *) & TruthValue::TRUE_TV();
-	if (4 == tvid) return (TruthValue *) & TruthValue::TRIVIAL_TV();
-
 	char buff[BUFSZ];
-	snprintf(buff, BUFSZ, "SELECT * FROM SimpleTVs WHERE tvid = %u;", tvid);
+	snprintf(buff, BUFSZ, "SELECT * FROM Values WHERE vuid = %lu;", vuid);
+	return doGetValue(buff);
+}
+
+/// Return a value, given by the key-atom pair.
+/// If the value type is a link, then the full recursive
+/// fetch is performed.
+ProtoAtomPtr SQLAtomStorage::getValuation(const Handle& key,
+                                          const Handle& atom)
+{
+	char buff[BUFSZ];
+	snprintf(buff, BUFSZ,
+		"SELECT * FROM Valuations WHERE key = %lu AND atom = %lu;",
+		_tlbuf.getUUID(key),
+		_tlbuf.getUUID(atom));
+
+	return doGetValue(buff);
+}
+
+/// Return a value, given by indicated query buffer.
+/// If the value type is a link, then the full recursive
+/// fetch is performed.
+ProtoAtomPtr SQLAtomStorage::doGetValue(const char * buff)
+{
+	Response rp(conn_pool);
+	rp.exec(buff);
+	rp.rs->foreach_row(&Response::get_value_cb, &rp);
+
+	// We expect rp.strval to be of the form
+	// {aaa,"bb bb bb","ccc ccc ccc"}
+	// Split it along the commas.
+	if (rp.vtype == STRING_VALUE)
+	{
+		std::vector<std::string> strarr;
+		char *s = strdup(rp.strval);
+		char *p = s;
+		if (p and *p == '{') p++;
+		while (p)
+		{
+			if (*p == '}' or *p == '\0') break;
+			// String terminates at comma or close-brace.
+			char * c = strchr(p, ',');
+			if (c) *c = 0;
+			else c = strchr(p, '}');
+			if (c) *c = 0;
+
+			// Wipe out quote marks
+			if (*p == '"') p++;
+			if (c and *(c-1) == '"') *(c-1) = 0;
+
+			strarr.emplace_back(p);
+			p = c;
+			p++;
+		}
+		free(s);
+		return createStringValue(strarr);
+	}
+
+	// We expect rp.fltval to be of the form
+	// {1.1,2.2,3.3}
+	if (rp.vtype == FLOAT_VALUE)
+	{
+		std::vector<double> fltarr;
+		char *p = (char *) rp.fltval;
+		if (p and *p == '{') p++;
+		while (p)
+		{
+			if (*p == '}' or *p == '\0') break;
+			double flt = strtod(p, &p);
+			fltarr.emplace_back(flt);
+			p++; // skip over  comma
+		}
+		return createFloatValue(fltarr);
+	}
+
+	// We expect rp.lnkval to be a comma-separated list of
+	// vuid's, which we then fetch recursively.
+	if (rp.vtype == LINK_VALUE)
+	{
+		std::vector<ProtoAtomPtr> lnkarr;
+		const char *p = rp.lnkval;
+		if (p and *p == '{') p++;
+		while (p)
+		{
+			if (*p == '}' or *p == '\0') break;
+			VUID vu = atoi(p);
+			ProtoAtomPtr pap = getValue(vu);
+			lnkarr.emplace_back(pap);
+			p = strchr(p, ',');
+			if (p) p++;
+		}
+		return createLinkValue(lnkarr);
+	}
+
+	throw IOException(TRACE_INFO, "Unexpected value type!");
+	return nullptr;
+}
+
+void SQLAtomStorage::deleteValue(VUID vuid)
+{
+	char buff[BUFSZ];
+	snprintf(buff, BUFSZ, "SELECT * FROM Values WHERE vuid = %lu;", vuid);
 
 	Response rp(conn_pool);
 	rp.exec(buff);
-	rp.rs->foreach_row(&Response::create_tv_cb, &rp);
+	rp.rs->foreach_row(&Response::get_value_cb, &rp);
 
-	SimpleTruthValue *stv = new SimpleTruthValue(rp.mean, rp.confidence);
-	return stv;
+	// Perform a recursive delete, if necessary.
+	// We expect rp.strval to be of the form
+	// {81,82,83} -- Split it along the commas.
+	if (rp.vtype == LINK_VALUE)
+	{
+		const char *p = rp.lnkval;
+		if (p and *p == '{') p++;
+		while (p)
+		{
+			if (*p == '}' or *p == '\0') break;
+			VUID vu = atoi(p);
+			deleteValue(vu);
+			p = strchr(p, ',');
+			if (p) p++;
+		}
+	}
+
+	snprintf(buff, BUFSZ, "DELETE FROM Values WHERE vuid = %lu;", vuid);
+	rp.exec(buff);
 }
 
-#endif /* OUT_OF_LINE_TVS */
+/// Store ALL of the values associated with the atom.
+void SQLAtomStorage::store_atom_values(const Handle& atom)
+{
+	std::set<Handle> keys = atom->getKeys();
+	for (const Handle& key: keys)
+	{
+		ProtoAtomPtr pap = atom->getValue(key);
+		storeValuation(key, atom, pap);
+	}
+}
+
+/// Get ALL of the values associated with an atom.
+void SQLAtomStorage::get_atom_values(const Handle& atom)
+{
+}
 
 /* ================================================================== */
 
@@ -706,6 +942,49 @@ std::string SQLAtomStorage::oset_to_string(const HandleSeq& out)
 	return str;
 }
 
+std::string SQLAtomStorage::float_to_string(const FloatValuePtr& fvle)
+{
+	bool not_first = false;
+	std::string str = "\'{";
+	for (double v : fvle->value())
+	{
+		if (not_first) str += ", ";
+		not_first = true;
+		str += std::to_string(v);
+	}
+	str += "}\'";
+	return str;
+}
+
+std::string SQLAtomStorage::string_to_string(const StringValuePtr& svle)
+{
+	bool not_first = false;
+	std::string str = "\'{";
+	for (const std::string& v : svle->value())
+	{
+		if (not_first) str += ", ";
+		not_first = true;
+		str += v;
+	}
+	str += "}\'";
+	return str;
+}
+
+std::string SQLAtomStorage::link_to_string(const LinkValuePtr& lvle)
+{
+	bool not_first = false;
+	std::string str = "\'{";
+	for (const ProtoAtomPtr& pap : lvle->value())
+	{
+		if (not_first) str += ", ";
+		not_first = true;
+		VUID vuid = storeValue(pap);
+		str += std::to_string(vuid);
+	}
+	str += "}\'";
+	return str;
+}
+
 /* ================================================================ */
 
 /// Drain the pending store queue.
@@ -735,7 +1014,8 @@ void SQLAtomStorage::flushStoreQueue()
  *
  * By default, the actual store is done asynchronously (in a different
  * thread); this routine merely queues up the atom. If the synchronous
- * flag is set, then the store is done in this thread.
+ * flag is set, then the store is performed in this thread, and it is
+ * completed (sent to the Postgres server) before this method returns.
  */
 void SQLAtomStorage::storeAtom(const Handle& h, bool synchronous)
 {
@@ -752,7 +1032,9 @@ void SQLAtomStorage::storeAtom(const Handle& h, bool synchronous)
 
 /**
  * Synchronously store a single atom. That is, the actual store is done
- * in the calling thread.
+ * in the calling thread.  All values attached to the atom are also
+ * stored.
+ *
  * Returns the height of the atom.
  */
 int SQLAtomStorage::do_store_atom(const Handle& h)
@@ -760,6 +1042,7 @@ int SQLAtomStorage::do_store_atom(const Handle& h)
 	if (h->isNode())
 	{
 		do_store_single_atom(h, 0);
+		store_atom_values(h);
 		return 0;
 	}
 
@@ -775,6 +1058,7 @@ int SQLAtomStorage::do_store_atom(const Handle& h)
 	// atom in outgoing set.
 	lheight ++;
 	do_store_single_atom(h, lheight);
+	store_atom_values(h);
 	return lheight;
 }
 
@@ -1254,7 +1538,7 @@ HandleSeq SQLAtomStorage::getIncomingSet(const Handle& h)
  * Fetch the TV, for the Node with the indicated type and name.
  * If there is no such node, NULL is returned.
  */
-TruthValuePtr SQLAtomStorage::getNode(Type t, const char * str)
+SQLAtomStorage::PseudoPtr SQLAtomStorage::doGetNode(Type t, const char * str)
 {
 	setup_typemap();
 	char buff[4*BUFSZ];
@@ -1269,20 +1553,29 @@ TruthValuePtr SQLAtomStorage::getNode(Type t, const char * str)
 		throw IOException(TRACE_INFO,
 			"SQLAtomStorage::getNode: buffer overflow!\n"
 			"\tnc=%d buffer=>>%s<<\n", nc, buff);
-		return TruthValuePtr();
+		return PseudoPtr();
 	}
 #ifdef STORAGE_DEBUG
 	_num_get_nodes++;
 #endif // STORAGE_DEBUG
 
 	PseudoPtr p(getAtom(buff, 0));
-	if (NULL == p) return TruthValuePtr();
+	if (NULL == p) return PseudoPtr();
 
 #ifdef STORAGE_DEBUG
 	_num_got_nodes++;
 #endif // STORAGE_DEBUG
 	NodePtr node = createNode(t, str);
 	_tlbuf.addAtom(node, p->uuid);
+	return p;
+}
+
+TruthValuePtr SQLAtomStorage::getNode(Type t, const char * str)
+{
+	PseudoPtr p = doGetNode(t, str);
+	if (!p) return nullptr;
+	Handle h = _tlbuf.getAtom(p->uuid);
+	get_atom_values(h);
 	return p->tv;
 }
 
@@ -1290,7 +1583,7 @@ TruthValuePtr SQLAtomStorage::getNode(Type t, const char * str)
  * Fetch TruthValue for the Link with given type and outgoing set.
  * If there is no such link, NULL is returned.
  */
-TruthValuePtr SQLAtomStorage::getLink(const Handle& h)
+TruthValuePtr SQLAtomStorage::doGetLink(const Handle& h)
 {
 	setup_typemap();
 
@@ -1314,6 +1607,13 @@ TruthValuePtr SQLAtomStorage::getLink(const Handle& h)
 #endif // STORAGE_DEBUG
 	_tlbuf.addAtom(h, p->uuid);
 	return p->tv;
+}
+
+TruthValuePtr SQLAtomStorage::getLink(const Handle& h)
+{
+	TruthValuePtr tv = doGetLink(h);
+	get_atom_values(h);
+	return tv;
 }
 
 /**
@@ -1527,6 +1827,7 @@ void SQLAtomStorage::store_cb(const Handle& h)
 	get_ids();
 	int height = get_height(h);
 	do_store_single_atom(h, height);
+	store_atom_values(h);
 
 	if (_store_count%1000 == 0)
 	{
@@ -1577,7 +1878,8 @@ void SQLAtomStorage::create_tables(void)
 	Response rp(conn_pool);
 
 	// See the file "atom.sql" for detailed documentation as to the
-	// structure of the SQL tables.
+	// structure of the SQL tables. The code below is kept in sync,
+	// manually, with the contents of atom.sql.
 	rp.exec("CREATE TABLE Spaces ("
 	              "space     BIGINT PRIMARY KEY,"
 	              "parent    BIGINT);");
@@ -1599,6 +1901,24 @@ void SQLAtomStorage::create_tables(void)
 	            "UNIQUE (type, name),"
 	            "UNIQUE (type, outgoing));");
 
+	rp.exec("CREATE TABLE Valuations ("
+	            "key BIGINT REFERENCES Atoms(uuid),"
+	            "atom BIGINT REFERENCES Atoms(uuid),"
+	            "type  SMALLINT,"
+	            "floatvalue DOUBLE PRECISION[],"
+	            "stringvalue TEXT[],"
+	            "linkvalue BIGINT[],"
+	            "UNIQUE (key, atom));");
+
+	rp.exec("CREATE INDEX ON Valuations (atom);");
+
+	rp.exec("CREATE TABLE Values ("
+	            "vuid BIGINT PRIMARY KEY,"
+	            "type  SMALLINT,"
+	            "floatvalue DOUBLE PRECISION[],"
+	            "stringvalue TEXT[],"
+	            "linkvalue BIGINT[]);");
+
 	rp.exec("CREATE TABLE TypeCodes ("
 	            "type SMALLINT UNIQUE,"
 	            "typename TEXT UNIQUE);");
@@ -1617,6 +1937,8 @@ void SQLAtomStorage::kill_data(void)
 
 	// See the file "atom.sql" for detailed documentation as to the
 	// structure of the SQL tables.
+	rp.exec("DELETE from Valuations;");
+	rp.exec("DELETE from Values;");
 	rp.exec("DELETE from Atoms;");
 
 	// Delete the atomspaces as well!
@@ -1633,6 +1955,15 @@ UUID SQLAtomStorage::getMaxObservedUUID(void)
 	Response rp(conn_pool);
 	rp.intval = 0;
 	rp.exec("SELECT uuid FROM Atoms ORDER BY uuid DESC LIMIT 1;");
+	rp.rs->foreach_row(&Response::intval_cb, &rp);
+	return rp.intval;
+}
+
+SQLAtomStorage::VUID SQLAtomStorage::getMaxObservedVUID(void)
+{
+	Response rp(conn_pool);
+	rp.intval = 0;
+	rp.exec("SELECT vuid FROM Values ORDER BY vuid DESC LIMIT 1;");
 	rp.rs->foreach_row(&Response::intval_cb, &rp);
 	return rp.intval;
 }

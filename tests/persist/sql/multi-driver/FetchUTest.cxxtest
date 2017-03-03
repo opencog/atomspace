@@ -1,5 +1,5 @@
 /*
- * tests/persist/sql/odbc/FetchUTest.cxxtest
+ * tests/persist/sql/multi-driver/FetchUTest.cxxtest
  *
  * Test atom fetch semantics.  Assumes PersistUTest is passing.
  *

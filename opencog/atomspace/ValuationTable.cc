@@ -55,8 +55,7 @@ void ValuationTable::addValuation(ValuationPtr& vp)
 	}
 
 	// Record the actual valuation
-	_vindex.insert(std::make_pair(
-		std::make_pair(key, atom), vp));
+	_vindex[std::make_pair(key, atom)] = vp;
 }
 
 /// Associate a value with a particular (key,atom) pair

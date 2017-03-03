@@ -63,6 +63,7 @@ IF (DB_IS_CONFIGURED)
     MESSAGE(STATUS "Postgres database is configured for unit tests." )
 
     ADD_CXXTEST(BasicSaveUTest)
+    ADD_CXXTEST(ValueSaveUTest)
     IF (HAVE_GUILE)
         ADD_CXXTEST(PersistUTest)
         ADD_CXXTEST(MultiPersistUTest)

@@ -37,6 +37,10 @@
 #include <opencog/atoms/base/Link.h>
 #include <opencog/atoms/base/Node.h>
 #include <opencog/atoms/base/types.h>
+#include <opencog/atoms/base/FloatValue.h>
+#include <opencog/atoms/base/LinkValue.h>
+#include <opencog/atoms/base/StringValue.h>
+#include <opencog/atoms/base/Valuation.h>
 
 #include <opencog/atomspace/AtomTable.h>
 #include <opencog/atomspaceutils/TLB.h>
@@ -50,6 +54,8 @@ namespace opencog
  *  @{
  */
 
+/// This class can only be used safely as a singleton; however, this
+/// singleton can be used by multiple threads.
 class SQLAtomStorage : public AtomStorage
 {
 	private:
@@ -65,7 +71,7 @@ class SQLAtomStorage : public AtomStorage
 
 		// ---------------------------------------------
 		// Handle multiple atomspaces like typecodes: we have to
-		// convert from sql UUID to the atual UUID.
+		// convert from sql UUID to the actual UUID.
 		std::set<UUID> table_id_cache;
 		void store_atomtable_id(const AtomTable&);
 
@@ -85,6 +91,9 @@ class SQLAtomStorage : public AtomStorage
 		PseudoPtr makeAtom(Response &, UUID);
 		PseudoPtr getAtom(const char *, int);
 		PseudoPtr petAtom(UUID);
+
+		PseudoPtr doGetNode(Type, const char *);
+		TruthValuePtr doGetLink(const Handle&);
 
 		int get_height(const Handle&);
 		int max_height;
@@ -125,6 +134,33 @@ class SQLAtomStorage : public AtomStorage
 		bool idExists(const char *);
 		TLB _tlbuf;
 
+		// --------------------------
+		// Values
+
+		void store_atom_values(const Handle &);
+		void get_atom_values(const Handle &);
+
+		typedef unsigned long VUID;
+
+		ProtoAtomPtr doGetValue(const char *);
+
+		void storeValuation(const ValuationPtr&);
+		void storeValuation(const Handle&, const Handle&, const ProtoAtomPtr&);
+		ProtoAtomPtr getValuation(const Handle&, const Handle&);
+		void deleteValuation(const Handle&, const Handle&);
+
+		VUID storeValue(const ProtoAtomPtr&);
+		ProtoAtomPtr getValue(VUID);
+		void deleteValue(VUID);
+
+		std::string float_to_string(const FloatValuePtr&);
+		std::string string_to_string(const StringValuePtr&);
+		std::string link_to_string(const LinkValuePtr&);
+
+		VUID getMaxObservedVUID(void);
+		std::atomic<VUID> _next_valid;
+
+		// --------------------------
 		// Performance statistics
 		std::atomic<size_t> _num_get_nodes;
 		std::atomic<size_t> _num_got_nodes;
@@ -159,13 +195,6 @@ class SQLAtomStorage : public AtomStorage
 		void setup_typemap(void);
 		void set_typemap(int, const char *);
 		std::mutex _typemap_mutex;
-
-#ifdef OUT_OF_LINE_TVS
-		bool tvExists(int);
-		int storeTruthValue(AtomPtr, Handle);
-		int  TVID(const TruthValue &);
-		TruthValue * getTV(int);
-#endif /* OUT_OF_LINE_TVS */
 
 		// Provider of asynchronous store of atoms.
 		async_caller<SQLAtomStorage, Handle> _write_queue;
