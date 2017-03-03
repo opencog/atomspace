@@ -117,9 +117,14 @@ class ValueSaveUTest :  public CxxTest::TestSuite
         }
 
         void do_test_single_atom_save();
+        void do_test_save_restore();
+        void check_one(ProtoAtomPtr);
 
         void test_odbc_single_atom_save();
         void test_pq_single_atom_save();
+
+        void test_odbc_save_restore();
+        void test_pq_save_restore();
 };
 
 /*
@@ -149,19 +154,34 @@ void ValueSaveUTest::test_pq_single_atom_save(void)
 	logger().debug("END TEST: %s", __FUNCTION__);
 }
 
+void ValueSaveUTest::test_odbc_save_restore(void)
+{
+	logger().debug("BEGIN TEST: %s", __FUNCTION__);
+#if HAVE_ODBC_STORAGE
+	uri = mkuri("odbc", dbname, username, passwd);
+	do_test_save_restore();
+#endif
+	logger().debug("END TEST: %s", __FUNCTION__);
+}
+
+void ValueSaveUTest::test_pq_save_restore(void)
+{
+	logger().debug("BEGIN TEST: %s", __FUNCTION__);
+#if HAVE_PGSQL_STORAGE
+	uri = mkuri("postgres", dbname, username, passwd);
+	do_test_save_restore();
+#endif // HAVE_PGSQL_STORAGE
+	logger().debug("END TEST: %s", __FUNCTION__);
+}
+
 // ============================================================
 /**
- * A simple test case that tests the save and restore of
- * a couple of nodes and a link. Does not test atomtable/atomspace at all.
+ * A simple test case that tests the saving of various values.
  */
 void ValueSaveUTest::do_test_single_atom_save()
 {
 	SQLAtomStorage *store = new SQLAtomStorage(uri);
-	if (!store->connected())
-	{
-		logger().debug("single_atom_save_restore: cannot connect to db");
-		return;
-	}
+	TS_ASSERT(store->connected())
 
 	// Clear out left-over junk, just in case.
 	store->kill_data();
@@ -212,6 +232,88 @@ void ValueSaveUTest::do_test_single_atom_save()
 	atom->setValue(key, pvl2);
 	as->store_atom(atom);
 	as->barrier();
+
+	// --------------------
+	delete as;
+	delete backing;
+	store->kill_data();
+	delete store;
+}
+
+// ============================================================
+/**
+ * Similar to above, but attempts to verify that the saved
+ * values are correct.
+ */
+void ValueSaveUTest::check_one(ProtoAtomPtr pap)
+{
+	SQLAtomStorage *store = new SQLAtomStorage(uri);
+	TS_ASSERT(store->connected())
+
+	AtomSpace* as = new AtomSpace();
+	SQLBackingStore* backing = new SQLBackingStore();
+	backing->set_store(store);
+	backing->registerWith(as);
+
+	Handle key(createNode(CONCEPT_NODE, "some keynode"));
+	key = as->fetch_atom(key);
+	Handle atom(createNode(CONCEPT_NODE, "some node"));
+	atom = as->fetch_atom(atom);
+
+	atom->setValue(key, pap);
+	as->store_atom(atom);
+
+	delete as;
+	delete backing;
+	delete store;
+}
+
+void ValueSaveUTest::do_test_save_restore()
+{
+	SQLAtomStorage *store = new SQLAtomStorage(uri);
+	TS_ASSERT(store->connected())
+
+	// Clear out left-over junk, just in case.
+	store->kill_data();
+
+	AtomSpace* as = new AtomSpace();
+	SQLBackingStore* backing = new SQLBackingStore();
+	backing->set_store(store);
+	backing->registerWith(as);
+
+	Handle key = as->add_node(CONCEPT_NODE, "some keynode");
+	Handle atom = as->add_node(CONCEPT_NODE, "some node");
+
+	// Store the key and the atom, so as to avoid any UUID
+	// confusions.
+	as->store_atom(key);
+	as->store_atom(atom);
+	as->barrier();
+
+	// --------------------
+	// Now set some values
+	ProtoAtomPtr pvf = createFloatValue(
+		std::vector<double>({1.14, 2.24, 3.34}));
+
+	check_one(pvf);
+
+	// --------------------
+	ProtoAtomPtr pvs = createStringValue(
+		std::vector<std::string>({"aaa", "bb bb bb", "ccc ccc ccc"}));
+
+	check_one(pvs);
+
+	// --------------------
+	ProtoAtomPtr pvl = createLinkValue(
+		std::vector<ProtoAtomPtr>({pvf, pvs}));
+
+	check_one(pvl);
+
+	// --------------------
+	ProtoAtomPtr pvl2 = createLinkValue(
+		std::vector<ProtoAtomPtr>({pvl, pvl, pvf, pvs}));
+
+	check_one(pvl2);
 
 	// --------------------
 	delete as;
