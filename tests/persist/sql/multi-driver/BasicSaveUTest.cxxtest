@@ -289,10 +289,10 @@ void BasicSaveUTest::single_atom_save_restore(std::string id)
     hvec.push_back(a->getHandle());
     hvec.push_back(a2->getHandle());
 
-    LinkPtr l(createLink(SET_LINK, hvec));
+    LinkPtr l(createLink(LIST_LINK, hvec));
     store->storeAtom(l->getHandle(), true);
 
-    Handle hl = store->getLink(SET_LINK, hvec);
+    Handle hl = store->getLink(LIST_LINK, hvec);
     atomCompare(l, hl, "Single link save-restore");
 
     store->kill_data();
