@@ -343,6 +343,8 @@ Handle AtomSpace::fetch_atom(const Handle& h)
     if (hv)
     {
         hc->copyValues(hv);
+        TruthValuePtr tv = hv->getTruthValue();
+        hc->setTruthValue(tv);
     }
 
     return hc;
