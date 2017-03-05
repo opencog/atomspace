@@ -262,6 +262,7 @@ void ValueSaveUTest::check_one(ProtoAtomPtr pap)
 
 	Handle key = as->fetch_atom(bkey);
 	Handle atom = as->fetch_atom(batom);
+	printf ("Setup atom %s\n", atom->toString().c_str());
 
 	atom->setValue(key, pap);
 	as->store_atom(atom);
@@ -270,6 +271,8 @@ void ValueSaveUTest::check_one(ProtoAtomPtr pap)
 	delete as;
 	delete backing;
 	delete store;
+
+	printf ("Stored atom %s\n", atom->toString().c_str());
 
 	// ---------------------------------
 	// Now, fetch the value and compare.
