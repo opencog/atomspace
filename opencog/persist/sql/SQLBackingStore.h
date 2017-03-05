@@ -53,8 +53,8 @@ class SQLBackingStore : public BackingStore
         SQLBackingStore();
         void set_store(AtomStorage *);
 
-        virtual TruthValuePtr getNode(Type, const char *) const;
-        virtual TruthValuePtr getLink(const Handle&) const;
+        virtual Handle getNode(Type, const char *) const;
+        virtual Handle getLink(Type, const HandleSeq&) const;
         virtual HandleSeq getIncomingSet(const Handle&) const;
         virtual void storeAtom(const Handle&);
         virtual void loadType(AtomTable&, Type);

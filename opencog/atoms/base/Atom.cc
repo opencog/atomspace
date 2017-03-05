@@ -199,6 +199,16 @@ std::set<Handle> Atom::getKeys()
     return _atom_space->_value_table.getKeys(getHandle());
 }
 
+void Atom::copyValues(const Handle& other)
+{
+    std::set<Handle> okeys(other->getKeys());
+    for (const Handle& k: okeys)
+    {
+        ProtoAtomPtr p = other->getValue(k);
+        setValue(k, p);
+    }
+}
+
 // ==============================================================
 // Flag stuff
 bool Atom::isMarkedForRemoval() const

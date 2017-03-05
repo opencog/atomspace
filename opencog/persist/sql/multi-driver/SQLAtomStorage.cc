@@ -879,6 +879,7 @@ void SQLAtomStorage::store_atom_values(const Handle& atom)
 /// Get ALL of the values associated with an atom.
 void SQLAtomStorage::get_atom_values(const Handle& atom)
 {
+	if (nullptr == atom) return;
 }
 
 /* ================================================================== */
@@ -912,17 +913,17 @@ UUID SQLAtomStorage::get_uuid(const Handle& h)
 	if (TLB::INVALID_UUID != uuid) return uuid;
 
 	// Ooops. We need to find out what this is.
-	TruthValuePtr tv;
+	Handle dbh;
 	if (h->isNode())
 	{
-		tv = getNode(h->getType(), h->getName().c_str());
+		dbh = doGetNode(h->getType(), h->getName().c_str());
 	}
 	else
 	{
-		tv = getLink(h);
+		dbh = doGetLink(h->getType(), h->getOutgoingSet());
 	}
 	// If it was found, then the TLB got updated.
-	if (tv) return _tlbuf.getUUID(h);
+	if (dbh) return _tlbuf.getUUID(h);
 
 	// If it was not found, then issue a brand-spankin new UUID.
 	return _tlbuf.addAtom(h, TLB::INVALID_UUID);
@@ -1542,7 +1543,7 @@ HandleSeq SQLAtomStorage::getIncomingSet(const Handle& h)
  * Fetch the TV, for the Node with the indicated type and name.
  * If there is no such node, NULL is returned.
  */
-SQLAtomStorage::PseudoPtr SQLAtomStorage::doGetNode(Type t, const char * str)
+Handle SQLAtomStorage::doGetNode(Type t, const char * str)
 {
 	setup_typemap();
 	char buff[4*BUFSZ];
@@ -1557,67 +1558,66 @@ SQLAtomStorage::PseudoPtr SQLAtomStorage::doGetNode(Type t, const char * str)
 		throw IOException(TRACE_INFO,
 			"SQLAtomStorage::getNode: buffer overflow!\n"
 			"\tnc=%d buffer=>>%s<<\n", nc, buff);
-		return PseudoPtr();
+		return Handle();
 	}
 #ifdef STORAGE_DEBUG
 	_num_get_nodes++;
 #endif // STORAGE_DEBUG
 
 	PseudoPtr p(getAtom(buff, 0));
-	if (NULL == p) return PseudoPtr();
+	if (NULL == p) return Handle();
 
 #ifdef STORAGE_DEBUG
 	_num_got_nodes++;
 #endif // STORAGE_DEBUG
-	NodePtr node = createNode(t, str);
+	Handle node(createNode(t, str));
 	_tlbuf.addAtom(node, p->uuid);
-	return p;
+	return node;
 }
 
-TruthValuePtr SQLAtomStorage::getNode(Type t, const char * str)
+Handle SQLAtomStorage::getNode(Type t, const char * str)
 {
-	PseudoPtr p = doGetNode(t, str);
-	if (!p) return nullptr;
-	Handle h = _tlbuf.getAtom(p->uuid);
-	get_atom_values(h);
-	return p->tv;
+	Handle h(doGetNode(t, str));
+	if (h) get_atom_values(h);
+	return h;
 }
 
 /**
  * Fetch TruthValue for the Link with given type and outgoing set.
  * If there is no such link, NULL is returned.
  */
-TruthValuePtr SQLAtomStorage::doGetLink(const Handle& h)
+Handle SQLAtomStorage::doGetLink(Type t, const HandleSeq& hseq)
 {
 	setup_typemap();
 
 	char buff[BUFSZ];
 	snprintf(buff, BUFSZ,
 		"SELECT * FROM Atoms WHERE type = %hu AND outgoing = ",
-		storing_typemap[h->getType()]);
+		storing_typemap[t]);
 
 	std::string ostr = buff;
-	ostr += oset_to_string(h->getOutgoingSet());
+	ostr += oset_to_string(hseq);
 	ostr += ";";
 
 #ifdef STORAGE_DEBUG
 	_num_get_links++;
 #endif // STORAGE_DEBUG
 	PseudoPtr p = getAtom(ostr.c_str(), 1);
-	if (NULL == p) return TruthValuePtr();
+	if (nullptr == p) return Handle();
 
 #ifdef STORAGE_DEBUG
 	_num_got_links++;
 #endif // STORAGE_DEBUG
-	_tlbuf.addAtom(h, p->uuid);
-	return p->tv;
+	Handle link(createLink(t, hseq));
+	_tlbuf.addAtom(link, p->uuid);
+	return link;
 }
 
-TruthValuePtr SQLAtomStorage::getLink(const Handle& h)
+Handle SQLAtomStorage::getLink(Type t, const HandleSeq& hs)
 {
-	TruthValuePtr tv = doGetLink(h);
-	get_atom_values(h);
-	return tv;
+	Handle hg(doGetLink(t, hs));
+	if (hg) get_atom_values(hg);
+	return hg;
 }
 
 /**

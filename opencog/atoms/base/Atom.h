@@ -242,6 +242,9 @@ public:
     /// Get the set of all keys in use for this Atom.
     std::set<Handle> getKeys();
 
+    /// Copy all the values from the other atom to this one
+    void copyValues(const Handle&);
+
     //! Get the size of the incoming set.
     size_t getIncomingSetSize() const;
 

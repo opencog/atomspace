@@ -47,16 +47,20 @@ class BackingStore
 		virtual ~BackingStore() {}
 
 		/**
-		 * Return a pointer to the TruthValue of the link with the
-		 * indicated type and outset, if it exists; else return NULL.
+		 * Return a Link with the indicated type and outset,
+		 * if it exists; else return nullptr. The returned atom
+		 * will have all values attached to it, that the backing
+		 * store knows about.
 		 */
-		virtual TruthValuePtr getLink(const Handle&) const = 0;
+		virtual Handle getLink(Type, const HandleSeq&) const = 0;
 
 		/**
-		 * Return a pointer to the TruthValue of the node with the
-		 * indicated type and name, if it exists; else return NULL.
+		 * Return a Node with the indicated type and name, if it
+		 * exists; else return nullptr. The returned atom will have
+		 * all values attached to it, that the backing store knows
+		 * about.
 		 */
-		virtual TruthValuePtr getNode(Type, const char *) const = 0;
+		virtual Handle getNode(Type, const char *) const = 0;
 
 		/**
 		 * Return a vector containing the handles of the entire incoming

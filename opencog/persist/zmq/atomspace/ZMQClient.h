@@ -80,8 +80,8 @@ class ZMQClient
 		// Fetch atoms from DB
 		AtomPtr getAtom(UUID);
 		HandleSeq getIncomingSet(const Handle& );
-		TruthValuePtr getNode(Type, const char *);
-		TruthValuePtr getLink(const Handle&);
+		Handle getNode(Type, const char *);
+		Handle getLink(Type, const HandleSeq&);
 
 		// Large-scale loads and saves
 		void loadType(AtomTable &, Type); // Load *all* atoms of type

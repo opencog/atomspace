@@ -275,9 +275,7 @@ void BasicSaveUTest::single_atom_save_restore(std::string id)
 
     // Fetch it back ...
     std::string nam = id + "someNode";
-    AtomPtr b(createNode(SCHEMA_NODE, nam));
-    TruthValuePtr btv = store->getNode(SCHEMA_NODE, nam.c_str());
-    b->setTruthValue(btv);
+    Handle b = store->getNode(SCHEMA_NODE, nam.c_str());
 
     // Are they equal ??
     atomCompare(a, b, "Single node save-restore");
@@ -294,10 +292,7 @@ void BasicSaveUTest::single_atom_save_restore(std::string id)
     LinkPtr l(createLink(SET_LINK, hvec));
     store->storeAtom(l->getHandle(), true);
 
-    LinkPtr ll(createLink(SET_LINK, hvec));
-    Handle hl(ll->getHandle());
-    TruthValuePtr lbtv = store->getLink(hl);
-    hl->setTruthValue(lbtv);
+    Handle hl = store->getLink(SET_LINK, hvec);
     atomCompare(l, hl, "Single link save-restore");
 
     store->kill_data();
@@ -429,19 +424,14 @@ void BasicSaveUTest::do_test_fresh_atom(void)
     store->storeAtom(le->getHandle(), true);
 
     // Now get them back.  Get empty after full.
-    Handle hf(createLink(LIST_LINK, ha, hb)->getHandle());
-    TruthValuePtr ftv = store->getLink(hf);
-    hf->setTruthValue(ftv);
+    Handle hf(store->getLink(LIST_LINK, {ha, hb}));
     atomCompare(lf, hf, "Fully Fresh");
 
-    Handle he(createLink(LIST_LINK, HandleSeq())->getHandle());
-    TruthValuePtr etv = store->getLink(he);
+    Handle he(store->getLink(LIST_LINK, HandleSeq()));
 
     printf("Expecting %s\n", le->toString().c_str());
-    printf("Got pointer: %p\n", etv.operator->());
 
-    he->setTruthValue(etv);
-    if (etv) printf("Got %s\n", he->toString().c_str());
+    if (he) printf("Got %s\n", he->toString().c_str());
     atomCompare(le, he, "Empty Fresh");
 
     store->kill_data();
