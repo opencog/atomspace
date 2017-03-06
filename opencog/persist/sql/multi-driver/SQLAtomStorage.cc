@@ -877,15 +877,12 @@ void SQLAtomStorage::store_atom_values(const Handle& atom)
 			_tlbuf.addAtom(tvpred, TLB::INVALID_UUID);
 		else
 			tvpred = _tlbuf.getAtom(utv);
+		do_store_single_atom(tvpred, 0);
 	}
 	TruthValuePtr tv(atom->getTruthValue());
 	if (tv->isDefaultTV()) return;
 
-	// XXX FIXME get rid of this cast by defining TruthValuePtr to be
-	// the same as ProtoAtomPtr ...
-	ProtoAtomPtr ptv(std::dynamic_pointer_cast<ProtoAtom>(tv));
-
-	storeValuation(tvpred, atom, ptv);
+	storeValuation(tvpred, atom, tv);
 }
 
 /// Get ALL of the values associated with an atom.
