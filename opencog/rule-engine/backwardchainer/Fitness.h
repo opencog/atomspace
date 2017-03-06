@@ -24,14 +24,16 @@
 #define _OPENCOG_URE_FITNESS_H
 
 #include <functional>
+#include <opencog/atoms/base/Handle.h>
 
 namespace opencog
 {
 
 class BITNode;
+class AndBIT;
 
 /**
- * Contains the BIT-node fitness type.
+ * BIT-node fitness type.
  */
 class BITNodeFitness
 {
@@ -47,11 +49,48 @@ public:
 
 	// Fitness attributes
 	std::function<double(const BITNode&)> function;
-	double upper;       // Co-domain upper bound
 	double lower;       // Co-domain lower bound
+	double upper;       // Co-domain upper bound
 
 	// Evaluate the fitness of a given BIT-node.
 	double operator()(const BITNode& bitnode) const;
+};
+
+/**
+ * And-BIT fitness base class.
+ */
+class AndBITFitness
+{
+public:
+	enum FitnessType {
+		// Return 1.0 no matter what
+		Uniform,
+
+		// Given a trace, return 1.0 if the AndBIT FCS is in the
+		// trace, 0.0 otherwise. This is handy for running inferences
+		// without the computational cost of searching the trace.
+		Trace
+	};
+
+	// TODO: we may want to move the arguments in its own class if it
+	// groses bigger.
+	AndBITFitness(FitnessType ft=Uniform,
+	              const std::set<ContentHash>& tr=std::set<ContentHash>());
+
+	// Fitness type
+	const FitnessType type;
+
+	// Fitness attributes
+	std::function<double(const AndBIT&)> function;
+	double lower;       // Co-domain lower bound
+	double upper;       // Co-domain upper bound
+
+	// Fitness evaluation function
+	double operator()(const AndBIT& andbit) const;
+
+private:
+	// TODO: replace by class dedicated to hold the parameters
+	std::set<ContentHash> _trace;
 };
 
 } // ~namespace opencog

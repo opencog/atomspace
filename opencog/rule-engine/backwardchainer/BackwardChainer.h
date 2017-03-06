@@ -96,7 +96,9 @@ public:
 	                const Handle& target,
 	                const Handle& vardecl=Handle::UNDEFINED,
 	                const Handle& focus_set=Handle::UNDEFINED,
-	                const BITNodeFitness& fitness=BITNodeFitness());
+	                // TODO: maybe wrap all fitnesses in a Fitness class
+	                const BITNodeFitness& bitnode_fitness=BITNodeFitness(),
+	                const AndBITFitness& andbit_fitness=AndBITFitness());
 
 	/**
 	 * URE configuration accessors
@@ -188,6 +190,9 @@ private:
 
 	// Structure holding the Back Inference Tree
 	BIT _bit;
+
+	// TODO: perhaps move that under BIT
+	AndBITFitness _andbit_fitness;
 
 	int _iteration;
 
