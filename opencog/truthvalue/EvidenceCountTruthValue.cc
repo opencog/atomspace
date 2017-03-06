@@ -64,6 +64,19 @@ EvidenceCountTruthValue::EvidenceCountTruthValue(EvidenceCountTruthValue const& 
 	_value[TOTAL_COUNT] = source.getCount();
 }
 
+EvidenceCountTruthValue::EvidenceCountTruthValue(const ProtoAtomPtr& source)
+       : TruthValue(EVIDENCE_COUNT_TRUTH_VALUE)
+{
+    if (source->getType() != EVIDENCE_COUNT_TRUTH_VALUE)
+        throw RuntimeException(TRACE_INFO,
+            "Source must be a EvidenceCountTruthValue");
+
+    FloatValuePtr fp(FloatValueCast(source));
+    _value.resize(2);
+    _value[POS_COUNT] = fp->value()[POS_COUNT];
+    _value[TOTAL_COUNT] = fp->value()[TOTAL_COUNT];
+}
+
 strength_t EvidenceCountTruthValue::getMean() const
 {
 	if (is_count_valid())

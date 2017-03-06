@@ -51,6 +51,7 @@ ProbabilisticTruthValue::ProbabilisticTruthValue(const TruthValue& source)
     _value[CONFIDENCE] = source.getConfidence();
     _value[COUNT] = source.getCount();
 }
+
 ProbabilisticTruthValue::ProbabilisticTruthValue(ProbabilisticTruthValue const& source)
 	: TruthValue(PROBABILISTIC_TRUTH_VALUE)
 {
@@ -58,6 +59,20 @@ ProbabilisticTruthValue::ProbabilisticTruthValue(ProbabilisticTruthValue const& 
     _value[MEAN] = source.getMean();
     _value[CONFIDENCE] = source.getConfidence();
     _value[COUNT] = source.getCount();
+}
+
+ProbabilisticTruthValue::ProbabilisticTruthValue(const ProtoAtomPtr& source)
+       : TruthValue(PROBABILISTIC_TRUTH_VALUE)
+{
+    if (source->getType() != PROBABILISTIC_TRUTH_VALUE)
+        throw RuntimeException(TRACE_INFO,
+            "Source must be a ProbabilisticTruthValue");
+
+    FloatValuePtr fp(FloatValueCast(source));
+    _value.resize(2);
+    _value[MEAN] = fp->value()[MEAN];
+    _value[CONFIDENCE] = fp->value()[CONFIDENCE];
+    _value[COUNT] = fp->value()[COUNT];
 }
 
 strength_t ProbabilisticTruthValue::getMean() const

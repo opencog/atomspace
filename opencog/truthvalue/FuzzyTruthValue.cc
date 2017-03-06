@@ -51,12 +51,26 @@ FuzzyTruthValue::FuzzyTruthValue(const TruthValue& source)
     _value[MEAN] = source.getMean();
     _value[COUNT] = source.getCount();
 }
+
 FuzzyTruthValue::FuzzyTruthValue(FuzzyTruthValue const& source)
 	: TruthValue(FUZZY_TRUTH_VALUE)
 {
     _value.resize(2);
     _value[MEAN] = source.getMean();
     _value[COUNT] = source.getCount();
+}
+
+FuzzyTruthValue::FuzzyTruthValue(const ProtoAtomPtr& source)
+    : TruthValue(FUZZY_TRUTH_VALUE)
+{
+    if (source->getType() != FUZZY_TRUTH_VALUE)
+        throw RuntimeException(TRACE_INFO,
+            "Source must be a FuzzyTruthValue");
+
+    FloatValuePtr fp(FloatValueCast(source));
+    _value.resize(2);
+    _value[MEAN] = fp->value()[MEAN];
+    _value[COUNT] = fp->value()[COUNT];
 }
 
 strength_t FuzzyTruthValue::getMean() const

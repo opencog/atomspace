@@ -51,6 +51,7 @@ CountTruthValue::CountTruthValue(const TruthValue& source)
     _value[CONFIDENCE] = source.getConfidence();
     _value[COUNT] = source.getCount();
 }
+
 CountTruthValue::CountTruthValue(CountTruthValue const& source)
 	: TruthValue(COUNT_TRUTH_VALUE)
 {
@@ -58,6 +59,20 @@ CountTruthValue::CountTruthValue(CountTruthValue const& source)
     _value[MEAN] = source.getMean();
     _value[CONFIDENCE] = source.getConfidence();
     _value[COUNT] = source.getCount();
+}
+
+CountTruthValue::CountTruthValue(const ProtoAtomPtr& source)
+       : TruthValue(COUNT_TRUTH_VALUE)
+{
+    if (source->getType() != COUNT_TRUTH_VALUE)
+        throw RuntimeException(TRACE_INFO,
+            "Source must be a CountTruthValue");
+
+    FloatValuePtr fp(FloatValueCast(source));
+    _value.resize(2);
+    _value[MEAN] = fp->value()[MEAN];
+    _value[CONFIDENCE] = fp->value()[CONFIDENCE];
+    _value[COUNT] = fp->value()[COUNT];
 }
 
 strength_t CountTruthValue::getMean() const

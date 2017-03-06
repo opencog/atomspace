@@ -137,6 +137,21 @@ IndefiniteTruthValue::IndefiniteTruthValue(IndefiniteTruthValue const& source)
     copy(source);
 }
 
+IndefiniteTruthValue::IndefiniteTruthValue(const ProtoAtomPtr& source)
+       : TruthValue(INDEFINITE_TRUTH_VALUE)
+{
+    if (source->getType() != INDEFINITE_TRUTH_VALUE)
+        throw RuntimeException(TRACE_INFO,
+            "Source must be a IndefiniteTruthValue");
+
+    FloatValuePtr fp(FloatValueCast(source));
+    _value.resize(4);
+    _value[L] = fp->value()[L];
+    _value[U] = fp->value()[U];
+    _value[MEAN] = fp->value()[MEAN];
+    _value[CONFIDENCE_LEVEL] = fp->value()[CONFIDENCE_LEVEL];
+}
+
 bool IndefiniteTruthValue::operator==(const ProtoAtom& rhs) const
 {
     const IndefiniteTruthValue* itv = dynamic_cast<const IndefiniteTruthValue*>(&rhs);

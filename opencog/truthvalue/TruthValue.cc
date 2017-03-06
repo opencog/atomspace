@@ -25,6 +25,11 @@
 
 #include <stdio.h>
 
+#include <opencog/truthvalue/CountTruthValue.h>
+#include <opencog/truthvalue/FuzzyTruthValue.h>
+#include <opencog/truthvalue/GenericTruthValue.h>
+#include <opencog/truthvalue/IndefiniteTruthValue.h>
+#include <opencog/truthvalue/ProbabilisticTruthValue.h>
 #include <opencog/truthvalue/SimpleTruthValue.h>
 #include <opencog/truthvalue/TruthValue.h>
 
@@ -139,9 +144,17 @@ TruthValuePtr TruthValue::factory(const ProtoAtomPtr& pap)
 {
 	Type t = pap->getType();
 	if (SIMPLE_TRUTH_VALUE == t)
-	{
 		return SimpleTruthValue::createTV(pap);
-	}
+	if (COUNT_TRUTH_VALUE == t)
+		return CountTruthValue::createTV(pap);
+	if (FUZZY_TRUTH_VALUE == t)
+		return FuzzyTruthValue::createTV(pap);
+	if (GENERIC_TRUTH_VALUE == t)
+		return GenericTruthValue::createTV(pap);
+	if (INDEFINITE_TRUTH_VALUE == t)
+		return IndefiniteTruthValue::createTV(pap);
+	if (PROBABILISTIC_TRUTH_VALUE == t)
+		return ProbabilisticTruthValue::createTV(pap);
 
 	throw RuntimeException(TRACE_INFO,
 		"Unknown TrtuhValue type");

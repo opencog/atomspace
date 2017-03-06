@@ -53,6 +53,7 @@ public:
     ProbabilisticTruthValue(strength_t, confidence_t, count_t);
     ProbabilisticTruthValue(const TruthValue&);
     ProbabilisticTruthValue(ProbabilisticTruthValue const&);
+    ProbabilisticTruthValue(const ProtoAtomPtr&);
 
     virtual bool operator==(const ProtoAtom&) const;
 
@@ -69,6 +70,11 @@ public:
     {
         return std::static_pointer_cast<TruthValue>(
             std::make_shared<ProbabilisticTruthValue>(s, f, c));
+    }
+    static TruthValuePtr createTV(const ProtoAtomPtr& pap)
+    {
+        return std::static_pointer_cast<TruthValue>(
+            std::make_shared<ProbabilisticTruthValue>(pap));
     }
 
     TruthValuePtr clone() const

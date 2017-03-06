@@ -52,6 +52,7 @@ class GenericTruthValue : public TruthValue
                           strength_t, strength_t,
                           confidence_t, entropy_t);
         GenericTruthValue(GenericTruthValue const&);
+        GenericTruthValue(const ProtoAtomPtr&);
 
         strength_t getMean() const;
         count_t getCount() const;
@@ -74,6 +75,12 @@ class GenericTruthValue : public TruthValue
         entropy_t getEntropy() const;
 
         TruthValuePtr merge(TruthValuePtr, const MergeCtrl& = MergeCtrl());
+
+        static TruthValuePtr createTV(const ProtoAtomPtr& pap)
+        {
+            return std::static_pointer_cast<TruthValue>(
+                std::make_shared<GenericTruthValue>(pap));
+        }
 
         TruthValuePtr clone() const
         {

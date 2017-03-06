@@ -70,10 +70,10 @@ SimpleTruthValue::SimpleTruthValue(const ProtoAtomPtr& source)
 		throw RuntimeException(TRACE_INFO,
 			"Source must be a SimpleTruthValue");
 
-    FloatValuePtr fp(FloatValueCast(source));
-    _value.resize(2);
-    _value[MEAN] = fp->value()[MEAN];
-    _value[CONFIDENCE] = fp->value()[CONFIDENCE];
+	FloatValuePtr fp(FloatValueCast(source));
+	_value.resize(2);
+	_value[MEAN] = fp->value()[MEAN];
+	_value[CONFIDENCE] = fp->value()[CONFIDENCE];
 }
 
 strength_t SimpleTruthValue::getMean() const
