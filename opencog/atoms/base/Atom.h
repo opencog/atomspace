@@ -233,17 +233,19 @@ public:
         return getHandle();
     }
 
-    /**
-     * Set and gets values for this atom.
-     */
+    /// Associate `value` to `key` for this atom.
     void setValue(const Handle& key, ProtoAtomPtr& value);
+    /// Get value at `key` for this atom.
     ProtoAtomPtr getValue(const Handle& key);
 
     /// Get the set of all keys in use for this Atom.
     std::set<Handle> getKeys();
 
-    /// Copy all the values from the other atom to this one
+    /// Copy all the values from the other atom to this one.
     void copyValues(const Handle&);
+
+    /// Print all of the key-value pairs.
+    virtual std::string valuesToString();
 
     //! Get the size of the incoming set.
     size_t getIncomingSetSize() const;
