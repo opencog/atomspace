@@ -21,6 +21,7 @@
  */
 
 #include <opencog/util/exceptions.h>
+#include <opencog/atoms/base/Atom.h>
 
 #include "ValuationTable.h"
 
@@ -71,7 +72,9 @@ ValuationPtr ValuationTable::getValuation(const Handle& key, const Handle& atom)
 {
 	auto vpiter = _vindex.find(std::make_pair(key, atom));
 	if (vpiter == _vindex.end())
-		throw RuntimeException(TRACE_INFO, "there is now value for this key");
+		throw RuntimeException(TRACE_INFO,
+			"There is no value for key %s on atom %s",
+			key->toString().c_str(), atom->toString().c_str());
 	return vpiter->second;
 }
 

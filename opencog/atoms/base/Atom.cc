@@ -199,6 +199,30 @@ std::set<Handle> Atom::getKeys()
     return _atom_space->_value_table.getKeys(getHandle());
 }
 
+void Atom::copyValues(const Handle& other)
+{
+    std::set<Handle> okeys(other->getKeys());
+    for (const Handle& k: okeys)
+    {
+        ProtoAtomPtr p = other->getValue(k);
+        setValue(k, p);
+    }
+}
+
+std::string Atom::valuesToString()
+{
+    std::string rv;
+
+    std::set<Handle> keys(getKeys());
+    for (const Handle& k: keys)
+    {
+        ProtoAtomPtr p = getValue(k);
+        rv += "; key = " + k->toString();
+        rv += "; val = " + p->toString() + "\n";
+    }
+    return rv;
+}
+
 // ==============================================================
 // Flag stuff
 bool Atom::isMarkedForRemoval() const
@@ -375,8 +399,9 @@ IncomingSet Atom::getIncomingSetByType(Type type, bool subclass)
 
 std::string Atom::idToString() const
 {
-    return std::string("[") + std::to_string(get_hash()) + "][" +
-        std::to_string(_atom_space? _atom_space->_atom_table.get_uuid() : -1) + "]";
+    return
+        // std::string("[") + std::to_string(get_hash()) + "]" +
+        std::string("[") + std::to_string(_atom_space? _atom_space->_atom_table.get_uuid() : -1) + "]";
 }
 
 std::string oc_to_string(const IncomingSet& iset)

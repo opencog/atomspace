@@ -92,8 +92,8 @@ class SQLAtomStorage : public AtomStorage
 		PseudoPtr getAtom(const char *, int);
 		PseudoPtr petAtom(UUID);
 
-		PseudoPtr doGetNode(Type, const char *);
-		TruthValuePtr doGetLink(const Handle&);
+		Handle doGetNode(Type, const char *);
+		Handle doGetLink(Type, const HandleSeq&);
 
 		int get_height(const Handle&);
 		int max_height;
@@ -138,10 +138,11 @@ class SQLAtomStorage : public AtomStorage
 		// Values
 
 		void store_atom_values(const Handle &);
-		void get_atom_values(const Handle &);
+		void get_atom_values(Handle &);
 
 		typedef unsigned long VUID;
 
+		ProtoAtomPtr doUnpackValue(Response&);
 		ProtoAtomPtr doGetValue(const char *);
 
 		void storeValuation(const ValuationPtr&);
@@ -214,8 +215,8 @@ class SQLAtomStorage : public AtomStorage
 		boost::signals2::connection _extract_sig;
 
 		// AtomStorage interface
-		TruthValuePtr getNode(Type, const char *);
-		TruthValuePtr getLink(const Handle& h);
+		Handle getNode(Type, const char *);
+		Handle getLink(Type, const HandleSeq&);
 		HandleSeq getIncomingSet(const Handle&);
 		void storeAtom(const Handle&, bool synchronous = false);
 		void loadType(AtomTable&, Type);
