@@ -193,7 +193,7 @@ Handle ZMQClient::getNode(Type t, const char * str)
     ZMQAtomMessage atomMsg = rep.atom(0);
     if (atomMsg.atomtype() == ZMQAtomTypeNode) {
         NodePtr nodePtr = dynamic_pointer_cast<Node>(ProtocolBufferSerializer::deserialize(atomMsg));
-        return nodePtr;
+        return Handle(nodePtr);
     } else {
         return Handle();
     }
@@ -226,7 +226,7 @@ Handle ZMQClient::getLink(Type t, const HandleSeq& oset)
     ZMQAtomMessage atomMsg = rep.atom(0);
     if (atomMsg.atomtype() == ZMQAtomTypeLink) {
         LinkPtr linkPtr = dynamic_pointer_cast<Link>(ProtocolBufferSerializer::deserialize(atomMsg));
-        return linkPtr;
+        return Handle(linkPtr);
     } else {
         return Handle();
     }
