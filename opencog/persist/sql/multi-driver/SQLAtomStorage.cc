@@ -1531,11 +1531,18 @@ HandleSeq SQLAtomStorage::getIncomingSet(const Handle& h)
 }
 
 /**
- * Fetch the TV, for the Node with the indicated type and name.
+ * Fetch the Node with the indicated type and name.
  * If there is no such node, NULL is returned.
  */
 Handle SQLAtomStorage::doGetNode(Type t, const char * str)
 {
+	// First, check to see if we already know this Node.
+	Handle node(createNode(t, str));
+	UUID uuid = _tlbuf.getUUID(node);
+	if (TLB::INVALID_UUID != uuid)
+		return _tlbuf.getAtom(uuid);
+
+	// If we don't know it, then go get it's UUID.
 	setup_typemap();
 	char buff[4*BUFSZ];
 
@@ -1561,10 +1568,8 @@ Handle SQLAtomStorage::doGetNode(Type t, const char * str)
 #ifdef STORAGE_DEBUG
 	_num_got_nodes++;
 #endif // STORAGE_DEBUG
-	Handle node(createNode(t, str));
 	_tlbuf.addAtom(node, p->uuid);
-	node = _tlbuf.getAtom(p->uuid);
-	return node;
+	return _tlbuf.getAtom(p->uuid);
 }
 
 Handle SQLAtomStorage::getNode(Type t, const char * str)
@@ -1580,6 +1585,13 @@ Handle SQLAtomStorage::getNode(Type t, const char * str)
  */
 Handle SQLAtomStorage::doGetLink(Type t, const HandleSeq& hseq)
 {
+	// First, check to see if we already know this Link.
+	Handle link(createLink(t, hseq));
+	UUID uuid = _tlbuf.getUUID(link);
+	if (TLB::INVALID_UUID != uuid)
+		return _tlbuf.getAtom(uuid);
+
+	// If we don't know it, then go get it's UUID.
 	setup_typemap();
 
 	char buff[BUFSZ];
@@ -1600,10 +1612,8 @@ Handle SQLAtomStorage::doGetLink(Type t, const HandleSeq& hseq)
 #ifdef STORAGE_DEBUG
 	_num_got_links++;
 #endif // STORAGE_DEBUG
-	Handle link(createLink(t, hseq));
 	_tlbuf.addAtom(link, p->uuid);
-	link = _tlbuf.getAtom(p->uuid);
-	return link;
+	return _tlbuf.getAtom(p->uuid);
 }
 
 Handle SQLAtomStorage::getLink(Type t, const HandleSeq& hs)
