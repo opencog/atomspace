@@ -445,7 +445,7 @@ Navigate to the atomspace folder you cloned from GitHub:
 Create the database tables:
 
 ```
-   $ cat opencog/persist/sql/postgres/pg_atom.sql | psql mycogdata
+   $ cat opencog/persist/sql/multi-driver/atom.sql | psql mycogdata
 ```
 
 If you are using a different user-id than your login, then you will
