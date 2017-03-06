@@ -300,6 +300,7 @@ class SQLAtomStorage::Response
 		const char * fltval;
 		const char * strval;
 		const char * lnkval;
+		UUID key;
 		bool get_value_cb(void)
 		{
 			rs->foreach_column(&Response::get_value_column_cb, this);
@@ -324,6 +325,26 @@ class SQLAtomStorage::Response
 			{
 				vtype = atoi(colvalue);
 			}
+			else if (!strcmp(colname, "key"))
+			{
+				key = atoi(colvalue);
+			}
+			return false;
+		}
+		Handle atom;
+		bool get_all_values_cb(void)
+		{
+			rs->foreach_column(&Response::get_value_column_cb, this);
+
+			Handle hkey = store->_tlbuf.getAtom(key);
+			if (nullptr == hkey)
+			{
+throw IOException(TRACE_INFO,
+		"Oh no mr billll.\n");
+// xxxxxxxx
+			}
+			ProtoAtomPtr pap = store->doUnpackValue(*this);
+			atom->setValue(hkey, pap);
 			return false;
 		}
 
@@ -764,7 +785,14 @@ ProtoAtomPtr SQLAtomStorage::doGetValue(const char * buff)
 	Response rp(conn_pool);
 	rp.exec(buff);
 	rp.rs->foreach_row(&Response::get_value_cb, &rp);
+   return doUnpackValue(rp);
+}
 
+/// Return a value, given by indicated query buffer.
+/// If the value type is a link, then the full recursive
+/// fetch is performed.
+ProtoAtomPtr SQLAtomStorage::doUnpackValue(Response& rp)
+{
 	// We expect rp.strval to be of the form
 	// {aaa,"bb bb bb","ccc ccc ccc"}
 	// Split it along the commas.
@@ -877,9 +905,22 @@ void SQLAtomStorage::store_atom_values(const Handle& atom)
 }
 
 /// Get ALL of the values associated with an atom.
-void SQLAtomStorage::get_atom_values(const Handle& atom)
+void SQLAtomStorage::get_atom_values(Handle& atom)
 {
 	if (nullptr == atom) return;
+
+	char buff[BUFSZ];
+	snprintf(buff, BUFSZ,
+		"SELECT * FROM Valuations WHERE atom = %lu;",
+		_tlbuf.getUUID(atom));
+
+	Response rp(conn_pool);
+	rp.exec(buff);
+
+	rp.store = this;
+	rp.atom = atom;
+	rp.rs->foreach_row(&Response::get_all_values_cb, &rp);
+	rp.atom = nullptr;
 }
 
 /* ================================================================== */

@@ -138,10 +138,11 @@ class SQLAtomStorage : public AtomStorage
 		// Values
 
 		void store_atom_values(const Handle &);
-		void get_atom_values(const Handle &);
+		void get_atom_values(Handle &);
 
 		typedef unsigned long VUID;
 
+		ProtoAtomPtr doUnpackValue(Response&);
 		ProtoAtomPtr doGetValue(const char *);
 
 		void storeValuation(const ValuationPtr&);
