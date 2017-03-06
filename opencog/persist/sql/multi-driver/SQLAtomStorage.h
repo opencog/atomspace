@@ -84,7 +84,6 @@ class SQLAtomStorage : public AtomStorage
 		    UUID uuid;
 		    std::string name;
 		    std::vector<UUID> oset;
-		    TruthValuePtr tv;
 		};
 		typedef std::shared_ptr<PseudoAtom> PseudoPtr;
 		#define createPseudo std::make_shared<PseudoAtom>

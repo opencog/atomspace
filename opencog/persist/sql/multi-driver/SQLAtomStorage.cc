@@ -46,10 +46,6 @@
 #include <opencog/atoms/base/LinkValue.h>
 #include <opencog/atoms/base/StringValue.h>
 #include <opencog/atoms/base/Valuation.h>
-#include <opencog/truthvalue/CountTruthValue.h>
-#include <opencog/truthvalue/IndefiniteTruthValue.h>
-#include <opencog/truthvalue/ProbabilisticTruthValue.h>
-#include <opencog/truthvalue/SimpleTruthValue.h>
 #include <opencog/truthvalue/TruthValue.h>
 #include <opencog/atomspace/AtomSpace.h>
 #include <opencog/atomspaceutils/TLB.h>
@@ -218,7 +214,7 @@ class SQLAtomStorage::Response
 		{
 			if (classserver().isA(p->type, NODE))
 			{
-				NodePtr node(createNode(p->type, p->name, p->tv));
+				NodePtr node(createNode(p->type, p->name));
 				store->_tlbuf.addAtom(node, p->uuid);
 				return node;
 			}
@@ -235,7 +231,7 @@ class SQLAtomStorage::Response
 				AtomPtr ra = get_recursive_if_not_exists(po);
 				resolved_oset.emplace_back(ra->getHandle());
 			}
-			LinkPtr link(createLink(p->type, resolved_oset, p->tv));
+			LinkPtr link(createLink(p->type, resolved_oset));
 			store->_tlbuf.addAtom(link, p->uuid);
 			return link;
 		}
@@ -1568,7 +1564,6 @@ Handle SQLAtomStorage::doGetNode(Type t, const char * str)
 	Handle node(createNode(t, str));
 	_tlbuf.addAtom(node, p->uuid);
 	node = _tlbuf.getAtom(p->uuid);
-	node->setTruthValue(p->tv);
 	return node;
 }
 
@@ -1580,7 +1575,7 @@ Handle SQLAtomStorage::getNode(Type t, const char * str)
 }
 
 /**
- * Fetch TruthValue for the Link with given type and outgoing set.
+ * Fetch the Link with given type and outgoing set.
  * If there is no such link, NULL is returned.
  */
 Handle SQLAtomStorage::doGetLink(Type t, const HandleSeq& hseq)
@@ -1608,7 +1603,6 @@ Handle SQLAtomStorage::doGetLink(Type t, const HandleSeq& hseq)
 	Handle link(createLink(t, hseq));
 	_tlbuf.addAtom(link, p->uuid);
 	link = _tlbuf.getAtom(p->uuid);
-	link->setTruthValue(p->tv);
 	return link;
 }
 
