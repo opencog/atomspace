@@ -867,6 +867,25 @@ void SQLAtomStorage::store_atom_values(const Handle& atom)
 		ProtoAtomPtr pap = atom->getValue(key);
 		storeValuation(key, atom, pap);
 	}
+
+	// Special-case for TruthValues.
+	if (nullptr == tvpred)
+	{
+		tvpred = createNode(PREDICATE_NODE, "*-TruthValueKey-*");
+		UUID utv = _tlbuf.getUUID(tvpred);
+		if (TLB::INVALID_UUID == utv)
+			_tlbuf.addAtom(tvpred, TLB::INVALID_UUID);
+		else
+			tvpred = _tlbuf.getAtom(utv);
+	}
+	TruthValuePtr tv(atom->getTruthValue());
+	if (tv->isDefaultTV()) return;
+
+	// XXX FIXME get rid of this cast by defining TruthValuePtr to be
+	// the same as ProtoAtomPtr ...
+	ProtoAtomPtr ptv(std::dynamic_pointer_cast<ProtoAtom>(tv));
+
+	storeValuation(tvpred, atom, ptv);
 }
 
 /// Get ALL of the values associated with an atom.
