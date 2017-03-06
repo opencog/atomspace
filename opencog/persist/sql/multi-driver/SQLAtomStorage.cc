@@ -540,16 +540,9 @@ void SQLAtomStorage::store_atomtable_id(const AtomTable& at)
 /* ================================================================ */
 
 #define STMT(colname,val) { \
-	if (update) { \
-		if (notfirst) { cols += ", "; } else notfirst = true; \
-		cols += colname; \
-		cols += " = "; \
-		cols += val; \
-	} else { \
-		if (notfirst) { cols += ", "; vals += ", "; } else notfirst = true; \
-		cols += colname; \
-		vals += val; \
-	} \
+	if (notfirst) { cols += ", "; vals += ", "; } else notfirst = true; \
+	cols += colname; \
+	vals += val; \
 }
 
 #define STMTI(colname,ival) { \
@@ -619,7 +612,6 @@ void SQLAtomStorage::storeValuation(const Handle& key,
                                     const ProtoAtomPtr& pap)
 {
 	bool notfirst = false;
-	bool update = false;
 	std::string cols;
 	std::string vals;
 	std::string coda;
@@ -684,7 +676,6 @@ SQLAtomStorage::VUID SQLAtomStorage::storeValue(const ProtoAtomPtr& pap)
 {
 	VUID vuid = _next_valid++;
 
-	bool update = false;
 	bool notfirst = false;
 	std::string cols;
 	std::string vals;
@@ -1104,108 +1095,91 @@ void SQLAtomStorage::do_store_single_atom(const Handle& h, int aheight)
 	std::string uuidbuff = std::to_string(uuid);
 
 	std::unique_lock<std::mutex> lck = maybe_create_id(uuid);
-	bool update = not lck.owns_lock();
-	if (update)
-	{
-		cols = "UPDATE Atoms SET ";
-		vals = "";
-		coda = " WHERE uuid = ";
-		coda += uuidbuff;
-		coda += ";";
-	}
-	else
-	{
-		cols = "INSERT INTO Atoms (";
-		vals = ") VALUES (";
-		coda = ");";
+	if (not lck.owns_lock()) return;
 
-		STMT("uuid", uuidbuff);
-	}
+	cols = "INSERT INTO Atoms (";
+	vals = ") VALUES (";
+	coda = ");";
+
+	STMT("uuid", uuidbuff);
 
 #ifdef STORAGE_DEBUG
 	if (0 == aheight) {
-		if (update) _num_node_updates++; else _num_node_inserts++;
+		_num_node_inserts++;
 	} else {
-		if (update) _num_link_updates++; else _num_link_inserts++;
+		_num_link_inserts++;
 	}
 #endif // STORAGE_DEBUG
 
-	// Store the atom type and node name only if storing for the
-	// first time ever. Once an atom is in an atom table, it's type,
-	// name or outset cannot be changed. Only its truth value can
-	// change.
-	if (false == update)
+	// Store the atomspace UUID
+	AtomTable * at = getAtomTable(h);
+	// We allow storage of atoms that don't belong to an atomspace.
+	if (at) uuidbuff = std::to_string(at->get_uuid());
+	else uuidbuff = "0";
+
+	// XXX FIXME -- right now, multiple space support is incomplete,
+	// the below hacks around some testing issues.
+	if (at) uuidbuff = "1";
+	STMT("space", uuidbuff);
+
+	// Store the atom UUID
+	Type t = h->getType();
+	int dbtype = storing_typemap[t];
+	STMTI("type", dbtype);
+
+	// Store the node name, if its a node
+	if (h->isNode())
 	{
-		// Store the atomspace UUID
-		AtomTable * at = getAtomTable(h);
-		// We allow storage of atoms that don't belong to an atomspace.
-		if (at) uuidbuff = std::to_string(at->get_uuid());
-		else uuidbuff = "0";
+		// Use postgres $-quoting to make unicode strings
+		// easier to deal with.
+		std::string qname = " $ocp$";
+		qname += h->getName();
+		qname += "$ocp$ ";
 
-		// XXX FIXME -- right now, multiple space support is incomplete,
-		// the below hacks around some testing issues.
-		if (at) uuidbuff = "1";
-		STMT("space", uuidbuff);
-
-		// Store the atom UUID
-		Type t = h->getType();
-		int dbtype = storing_typemap[t];
-		STMTI("type", dbtype);
-
-		// Store the node name, if its a node
-		if (h->isNode())
+		// The Atoms table has a UNIQUE constraint on the
+		// node name.  If a node name is too long, a postgres
+		// error is generated:
+		// ERROR: index row size 4440 exceeds maximum 2712
+		// for index "atoms_type_name_key"
+		// There's not much that can be done about this, without
+		// a redesign of the table format, in some way. Maybe
+		// we could hash the long node names, store the hash,
+		// and make sure that is unique.
+		if (2700 < qname.size())
 		{
-			// Use postgres $-quoting to make unicode strings
-			// easier to deal with.
-			std::string qname = " $ocp$";
-			qname += h->getName();
-			qname += "$ocp$ ";
+			throw IOException(TRACE_INFO,
+				"Error: do_store_single_atom: Maxiumum Node name size is 2700.\n");
+		}
+		STMT("name", qname);
 
+		// Nodes have a height of zero by definition.
+		STMTI("height", 0);
+	}
+	else
+	{
+		if (max_height < aheight) max_height = aheight;
+		STMTI("height", aheight);
+
+		if (h->isLink())
+		{
 			// The Atoms table has a UNIQUE constraint on the
-			// node name.  If a node name is too long, a postgres
+			// outgoing set.  If a link is too large, a postgres
 			// error is generated:
 			// ERROR: index row size 4440 exceeds maximum 2712
-			// for index "atoms_type_name_key"
-			// There's not much that can be done about this, without
-			// a redesign of the table format, in some way. Maybe
-			// we could hash the long node names, store the hash,
-			// and make sure that is unique.
-			if (2700 < qname.size())
+			// for index "atoms_type_outgoing_key"
+			// The simplest solution that I see requires a database
+			// redesign.  One could hash together the UUID's in the
+			// outgoing set, and then force a unique constraint on
+			// the hash.
+			if (330 < h->getArity())
 			{
 				throw IOException(TRACE_INFO,
-					"Error: do_store_single_atom: Maxiumum Node name size is 2700.\n");
+					"Error: do_store_single_atom: Maxiumum Link size is 330.\n");
 			}
-			STMT("name", qname);
 
-			// Nodes have a height of zero by definition.
-			STMTI("height", 0);
-		}
-		else
-		{
-			if (max_height < aheight) max_height = aheight;
-			STMTI("height", aheight);
-
-			if (h->isLink())
-			{
-				// The Atoms table has a UNIQUE constraint on the
-				// outgoing set.  If a link is too large, a postgres
-				// error is generated:
-				// ERROR: index row size 4440 exceeds maximum 2712
-				// for index "atoms_type_outgoing_key"
-				// The simplest solution that I see requires a database
-				// redesign.  One could hash together the UUID's in the
-				// outgoing set, and then force a unique constraint on
-				// the hash.
-				if (330 < h->getArity())
-				{
-					throw IOException(TRACE_INFO,
-						"Error: do_store_single_atom: Maxiumum Link size is 330.\n");
-				}
-
-				cols += ", outgoing";
-				vals += ", ";
-				vals += oset_to_string(h->getOutgoingSet());
-			}
+			cols += ", outgoing";
+			vals += ", ";
+			vals += oset_to_string(h->getOutgoingSet());
 		}
 	}
 
@@ -1368,20 +1342,11 @@ void SQLAtomStorage::add_id_to_cache(UUID uuid)
 /**
  * This returns a lock that is either locked, or not, depending on
  * whether we think that the database already knows about this UUID,
- * or not.  We do this because we need to use an SQL INSERT instead
- * of an SQL UPDATE when putting a given atom in the database the first
- * time ever.  Since SQL INSERT can be used once and only once, we have
- * to avoid the case of two threads, each trying to perform an INSERT
- * in the same ID. We do this by taking the id_create_mutex, so that
- * only one writer ever gets told that its a new ID.
- *
- * This cannot be replaced by the new Postgres UPSERT command (well,
- * actually the INSERT ... ON CONFLICT UPDATE command) because we still
- * have to make sure that an atom is uniquely associated with a given
- * UUID, even if two different threads race, trying to store the same
- * atom. Otherwise, we risk inserting the same atom twice, with two
- * different UUID's. Whatever. The point is that the issuance of UUID's
- * is subtle, and can be bungled, if you're not careful.
+ * or not.  We do this because we can use an SQL INSERT only once,
+ * and we have to avoid the case of two threads, each trying to
+ * perform an INSERT in the same ID.  We do this by taking the
+ * id_create_mutex, so that only one writer ever gets told that
+ * its a new ID.
  */
 std::unique_lock<std::mutex> SQLAtomStorage::maybe_create_id(UUID uuid)
 {
