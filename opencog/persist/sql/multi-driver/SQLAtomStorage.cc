@@ -336,13 +336,13 @@ class SQLAtomStorage::Response
 		{
 			rs->foreach_column(&Response::get_value_column_cb, this);
 
-			Handle hkey = store->_tlbuf.getAtom(key);
+			Handle hkey(store->_tlbuf.getAtom(key));
 			if (nullptr == hkey)
 			{
-throw IOException(TRACE_INFO,
-		"Oh no mr billll.\n");
-// xxxxxxxx
+				PseudoPtr pu(store->petAtom(key));
+				hkey = get_recursive_if_not_exists(pu);
 			}
+
 			ProtoAtomPtr pap = store->doUnpackValue(*this);
 			atom->setValue(hkey, pap);
 			return false;
@@ -1517,7 +1517,11 @@ void SQLAtomStorage::get_ids(void)
 
 /* ================================================================ */
 
-/* One-size-fits-all atom fetcher */
+/**
+ * One-size-fits-all atom fetcher.
+ * Given an SQL query string, this will return a single atom.
+ * It does NOT fetch values.
+ */
 SQLAtomStorage::PseudoPtr SQLAtomStorage::getAtom(const char * query, int height)
 {
 	Response rp(conn_pool);
@@ -1542,7 +1546,6 @@ SQLAtomStorage::PseudoPtr SQLAtomStorage::petAtom(UUID uuid)
 
 	return getAtom(buff, -1);
 }
-
 
 /**
  * Retreive the entire incoming set of the indicated atom.
