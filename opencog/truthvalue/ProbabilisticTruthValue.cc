@@ -103,18 +103,18 @@ bool ProbabilisticTruthValue::operator==(const ProtoAtom& rhs) const
 // because the ProbabilisticTruthValue usally stores an integer count,
 // and a log-probability or entropy, instead of a confidence.
 TruthValuePtr ProbabilisticTruthValue::merge(TruthValuePtr other,
-                                     const MergeCtrl& mc) const
+                                     const MergeCtrl& mc)
 {
     ProbabilisticTruthValuePtr oc =
-        std::dynamic_pointer_cast<const ProbabilisticTruthValue>(other);
+        std::dynamic_pointer_cast<ProbabilisticTruthValue>(other);
 
     // If other is a simple truth value, *and* its not the default TV,
     // then perhaps we should merge it in, as if it were a count truth
     // value with a count of 1?  In which case, we should add a merge
     // routine to SimpleTruthValue to do likewise... Anyway, for now,
     // just ignore this possible complication to the semantics.
-    if (NULL == oc) return
-        std::dynamic_pointer_cast<const TruthValue>(shared_from_this());
+    if (nullptr == oc) return
+        std::dynamic_pointer_cast<TruthValue>(shared_from_this());
 
     // If both this and other are counts, then accumulate to get the
     // total count, and average together the strengths, using the

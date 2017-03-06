@@ -87,7 +87,7 @@ struct MergeCtrl
 };
 
 class TruthValue;
-typedef std::shared_ptr<const TruthValue> TruthValuePtr;
+typedef std::shared_ptr<TruthValue> TruthValuePtr;
 
 class TruthValue
     : public FloatValue
@@ -156,7 +156,7 @@ public:
      *        https://github.com/opencog/opencog/issues/1295
      */
     virtual TruthValuePtr merge(TruthValuePtr,
-                                const MergeCtrl& = MergeCtrl()) const = 0;
+                                const MergeCtrl& = MergeCtrl()) = 0;
 
     /**
      * Check if this TV is equal to the default TV.
@@ -167,7 +167,7 @@ public:
 
 protected:
     // Helper merging methods
-    TruthValuePtr higher_confidence_merge(TruthValuePtr) const;
+    TruthValuePtr higher_confidence_merge(TruthValuePtr);
 };
 
 } // namespace opencog
