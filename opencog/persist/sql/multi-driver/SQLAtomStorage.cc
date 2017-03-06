@@ -84,12 +84,6 @@ class SQLAtomStorage::Response
 		const char *outlist;
 		int height;
 
-		// TV's
-		int tv_type;
-		double mean;
-		double confidence;
-		double count;
-
 		// Values
 		double *floatval;
 		const char *stringval;
@@ -145,22 +139,6 @@ class SQLAtomStorage::Response
 			else if (!strcmp(colname, "outgoing"))
 			{
 				outlist = colvalue;
-			}
-			if (!strcmp(colname, "tv_type"))
-			{
-				tv_type = atoi(colvalue);
-			}
-			else if (!strcmp(colname, "stv_mean"))
-			{
-				mean = atof(colvalue);
-			}
-			else if (!strcmp(colname, "stv_confidence"))
-			{
-				confidence = atof(colvalue);
-			}
-			else if (!strcmp(colname, "stv_count"))
-			{
-				count = atof(colvalue);
 			}
 			else if (!strcmp(colname, "uuid"))
 			{
@@ -1235,37 +1213,10 @@ void SQLAtomStorage::do_store_single_atom(const Handle& h, int aheight)
 		}
 	}
 
-	// Store the truth value
-	TruthValuePtr tv(h->getTruthValue());
-	Type tvt = 0;
-	if (tv) tvt = tv->getType();
-	STMTI("tv_type", tvt);
-
-	if (SIMPLE_TRUTH_VALUE == tvt ||
-	    COUNT_TRUTH_VALUE == tvt ||
-	    PROBABILISTIC_TRUTH_VALUE == tvt)
-	{
-		STMTF("stv_mean", tv->getMean());
-		STMTF("stv_confidence", tv->getConfidence());
-		STMTF("stv_count", tv->getCount());
-	}
-	else
-	if (INDEFINITE_TRUTH_VALUE == tvt)
-	{
-		IndefiniteTruthValuePtr itv = std::dynamic_pointer_cast<const IndefiniteTruthValue>(tv);
-		STMTF("stv_mean", itv->getL());
-		STMTF("stv_count", itv->getU());
-		STMTF("stv_confidence", itv->getConfidenceLevel());
-	}
-	else
-		throw IOException(TRACE_INFO,
-			"Error: store_single: Unknown truth value type\n");
-
 	// We may have to store the atom table UUID and try again...
 	// We waste CPU cycles to store the atomtable, only if it failed.
 	bool try_again = false;
 	std::string qry = cols + vals + coda;
-
 	{
 		Response rp(conn_pool);
 		rp.exec(qry.c_str());
@@ -1710,34 +1661,6 @@ SQLAtomStorage::PseudoPtr SQLAtomStorage::makeAtom(Response &rp, UUID uuid)
 	// Give the atom the correct UUID. The AtomTable will need this.
 	atom->type = realtype;
 	atom->uuid = uuid;
-
-	// Now get the truth value
-	if (rp.tv_type == SIMPLE_TRUTH_VALUE)
-	{
-		TruthValuePtr stv(SimpleTruthValue::createTV(rp.mean, rp.confidence));
-		atom->tv = stv;
-	}
-	else
-	if (rp.tv_type == COUNT_TRUTH_VALUE)
-	{
-		TruthValuePtr ctv(CountTruthValue::createTV(rp.mean, rp.confidence, rp.count));
-		atom->tv = ctv;
-	}
-	else
-	if (rp.tv_type == INDEFINITE_TRUTH_VALUE)
-	{
-		TruthValuePtr itv(IndefiniteTruthValue::createTV(rp.mean, rp.count, rp.confidence));
-		atom->tv = itv;
-	}
-	else
-	if (rp.tv_type == PROBABILISTIC_TRUTH_VALUE)
-	{
-		TruthValuePtr ptv(ProbabilisticTruthValue::createTV(rp.mean, rp.confidence, rp.count));
-		atom->tv = ptv;
-	}
-	else
-		throw IOException(TRACE_INFO,
-			"makeAtom: Unknown truth value type\n");
 
 	_load_count ++;
 	if (bulk_load and _load_count%10000 == 0)
