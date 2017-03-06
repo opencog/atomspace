@@ -15,11 +15,11 @@ INSERT INTO Spaces VALUES (1,1); -- default root
 
 
 -- -----------------------------------------------------------
--- An SQL table representation for opencog Atoms
+-- An SQL table representation for OpensCog Atoms
 --
 -- This contains both the Node and Link types; having a single table
 -- to contain both seemed easier than having two tables, one for Nodes
--- and once for Links.  In particular, forcing the UUID to be unique is
+-- and one for Links.  In particular, forcing the UUID to be unique is
 -- much easier when there is only one table.
 
 CREATE TABLE Atoms (
@@ -33,15 +33,6 @@ CREATE TABLE Atoms (
 
     -- Atom type, e.g. Link, Node, etc.
     type  SMALLINT,
-
-    -- maps to TruthValue ID
-    -- tvid INT, -- not used, just inline the truth value
-
-    -- Inlined (simple) truth values
-    tv_type  SMALLINT,
-    stv_mean DOUBLE PRECISION,
-    stv_confidence DOUBLE PRECISION,
-    stv_count DOUBLE PRECISION,
 
     -- distance from this link to farthest Node in the outgoing
     -- set of this atom.
