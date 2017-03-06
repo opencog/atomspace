@@ -20,10 +20,15 @@ bc_re = r'\[BackwardChainer\]'
 iter_re = r'Iteration (\d+)'
 iteration_re = r'({} )?{} {} {}'.format(timestamp_re, debug_re, bc_re, iter_re)
 iteration_cre = re.compile(iteration_re)
-from_re = r'from:'
+select_andbit_re = r'Selected and-BIT for expansion:'
+from_re = r'({} )?{} {} {}'.format(timestamp_re, debug_re, bc_re, select_andbit_re)
 from_cre = re.compile(from_re)
-to_re = r'to:'
+expand_andbit_re = r'Expanded forward chainer strategy:'
+to_re = r'({} )?{} {} {}'.format(timestamp_re, debug_re, bc_re, expand_andbit_re)
 to_cre = re.compile(to_re)
+select_bn_re = r'Selected BIT-node for expansion:'
+inter_re = r'({} )?{} {} {}'.format(timestamp_re, debug_re, bc_re, select_bn_re)
+inter_cre = re.compile(inter_re)
 handle_re = r'\) ; (\[\d+\]\[\d+\])'
 handle_cre = re.compile(handle_re)
 
@@ -58,6 +63,10 @@ for l in open(logfile):
     m = to_cre.match(ls)
     if m:
         src = 'to'
+        continue
+    m = inter_cre.match(ls)
+    if m:
+        src = ''
         continue
     m = handle_cre.match(ls)
     if m:
