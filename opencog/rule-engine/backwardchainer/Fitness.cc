@@ -24,6 +24,8 @@
 #include "BIT.h"
 #include "BCLogger.h"
 
+#include <opencog/util/algorithm.h>
+
 using namespace opencog;
 
 BITNodeFitness::BITNodeFitness(FitnessType ft) : type(ft)
@@ -33,8 +35,8 @@ BITNodeFitness::BITNodeFitness(FitnessType ft) : type(ft)
 		function = [](const BITNode& bitnode) {
 			return bitnode.body->getTruthValue()->getConfidence();
 		};
-		upper = 1;
 		lower = 0;
+		upper = 1;
 		break;
 	default:
 		bc_logger().error() << "Not implemented";
@@ -44,4 +46,29 @@ BITNodeFitness::BITNodeFitness(FitnessType ft) : type(ft)
 double BITNodeFitness::operator()(const BITNode& bitnode) const
 {
 	return function(bitnode);
-};
+}
+
+AndBITFitness::AndBITFitness(FitnessType ft, const std::set<ContentHash>& tr)
+	: type(ft), _trace(tr)
+{
+	switch(type) {
+	case (Uniform):
+		function = [](const AndBIT&) { return 1.0; };
+		lower = 1.0;
+		upper = 1.0;
+		break;
+	case (Trace):
+		function = [&](const AndBIT& andbit) {
+			return is_in(andbit.fcs.value(), _trace) ? 1.0 : 0.0; };
+		lower = 0.0;
+		upper = 1.0;
+		break;
+	default:
+		bc_logger().error() << "Not implemented";
+	}
+}
+
+double AndBITFitness::operator()(const AndBIT& andbit) const
+{
+	return function(andbit);
+}

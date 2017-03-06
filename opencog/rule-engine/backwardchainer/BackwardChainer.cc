@@ -51,9 +51,11 @@ BackwardChainer::BackwardChainer(AtomSpace& as, const Handle& rbs,
                                  const Handle& focus_set, // TODO:
                                                           // support
                                                           // focus_set
-                                 const BITNodeFitness& fitness)
+                                 const BITNodeFitness& bitnode_fitness,
+                                 const AndBITFitness& andbit_fitness)
 	: _as(as), _configReader(as, rbs),
-	  _bit(as, target, vardecl, fitness),
+	  _bit(as, target, vardecl, bitnode_fitness),
+	  _andbit_fitness(andbit_fitness),
 	  _iteration(0), _last_expansion_andbit(nullptr),
 	  _rules(_configReader.get_rules()) {
 }
@@ -331,5 +333,7 @@ double BackwardChainer::complexity_factor(const AndBIT& andbit) const
 
 double BackwardChainer::operator()(const AndBIT& andbit) const
 {
-	return (andbit.exhausted ? 0.0 : 1.0) * complexity_factor(andbit);
+	return (andbit.exhausted ? 0.0 : 1.0)
+		* _andbit_fitness(andbit)
+		* complexity_factor(andbit);
 }
