@@ -117,8 +117,8 @@ class ValueSaveUTest :  public CxxTest::TestSuite
         }
 
         void do_test_single_atom_save();
-        void do_test_save_restore();
-        void check_one(ProtoAtomPtr);
+        void do_test_save_restore(bool);
+        void check_one(ProtoAtomPtr, bool);
 
         void test_odbc_single_atom_save();
         void test_pq_single_atom_save();
@@ -159,7 +159,8 @@ void ValueSaveUTest::test_odbc_save_restore(void)
 	logger().debug("BEGIN TEST: %s", __FUNCTION__);
 #if HAVE_ODBC_STORAGE
 	uri = mkuri("odbc", dbname, username, passwd);
-	do_test_save_restore();
+	do_test_save_restore(true);
+	do_test_save_restore(false);
 #endif
 	logger().debug("END TEST: %s", __FUNCTION__);
 }
@@ -169,7 +170,8 @@ void ValueSaveUTest::test_pq_save_restore(void)
 	logger().debug("BEGIN TEST: %s", __FUNCTION__);
 #if HAVE_PGSQL_STORAGE
 	uri = mkuri("postgres", dbname, username, passwd);
-	do_test_save_restore();
+	do_test_save_restore(true);
+	do_test_save_restore(false);
 #endif // HAVE_PGSQL_STORAGE
 	logger().debug("END TEST: %s", __FUNCTION__);
 }
@@ -245,7 +247,7 @@ void ValueSaveUTest::do_test_single_atom_save()
  * Similar to above, but attempts to verify that the saved
  * values are correct.
  */
-void ValueSaveUTest::check_one(ProtoAtomPtr pap)
+void ValueSaveUTest::check_one(ProtoAtomPtr pap, bool fetchkey)
 {
 	Handle bkey(createNode(CONCEPT_NODE, "some keynode"));
 	Handle batom(createNode(CONCEPT_NODE, "some node"));
@@ -286,7 +288,9 @@ void ValueSaveUTest::check_one(ProtoAtomPtr pap)
 	backing->set_store(store);
 	backing->registerWith(as);
 
-	key = as->fetch_atom(bkey);
+	// Storage uses a different code path if the key is not
+	// yet known when the values are fethed.  Test this code path.
+	if (fetchkey) key = as->fetch_atom(bkey);
 	atom = as->fetch_atom(batom);
 
 	printf("Got atom %s\n", atom->toString().c_str());
@@ -300,7 +304,7 @@ void ValueSaveUTest::check_one(ProtoAtomPtr pap)
 	delete store;
 }
 
-void ValueSaveUTest::do_test_save_restore()
+void ValueSaveUTest::do_test_save_restore(bool fkey)
 {
 	SQLAtomStorage *store = new SQLAtomStorage(uri);
 	TS_ASSERT(store->connected())
@@ -327,25 +331,25 @@ void ValueSaveUTest::do_test_save_restore()
 	ProtoAtomPtr pvf = createFloatValue(
 		std::vector<double>({1.14, 2.24, 3.34}));
 
-	check_one(pvf);
+	check_one(pvf, fkey);
 
 	// --------------------
 	ProtoAtomPtr pvs = createStringValue(
 		std::vector<std::string>({"aaa", "bb bb bb", "ccc ccc ccc"}));
 
-	check_one(pvs);
+	check_one(pvs, fkey);
 
 	// --------------------
 	ProtoAtomPtr pvl = createLinkValue(
 		std::vector<ProtoAtomPtr>({pvf, pvs}));
 
-	check_one(pvl);
+	check_one(pvl, fkey);
 
 	// --------------------
 	ProtoAtomPtr pvl2 = createLinkValue(
 		std::vector<ProtoAtomPtr>({pvl, pvl, pvf, pvs}));
 
-	check_one(pvl2);
+	check_one(pvl2, fkey);
 
 	// --------------------
 	delete as;
