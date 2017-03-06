@@ -1613,6 +1613,7 @@ Handle SQLAtomStorage::doGetNode(Type t, const char * str)
 #endif // STORAGE_DEBUG
 	Handle node(createNode(t, str));
 	_tlbuf.addAtom(node, p->uuid);
+	node = _tlbuf.getAtom(p->uuid);
 	node->setTruthValue(p->tv);
 	return node;
 }
@@ -1652,6 +1653,7 @@ Handle SQLAtomStorage::doGetLink(Type t, const HandleSeq& hseq)
 #endif // STORAGE_DEBUG
 	Handle link(createLink(t, hseq));
 	_tlbuf.addAtom(link, p->uuid);
+	link = _tlbuf.getAtom(p->uuid);
 	link->setTruthValue(p->tv);
 	return link;
 }

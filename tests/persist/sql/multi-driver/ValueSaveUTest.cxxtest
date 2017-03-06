@@ -293,7 +293,7 @@ void ValueSaveUTest::check_one(ProtoAtomPtr pap)
 	printf("Got vals %s\n", atom->valuesToString().c_str());
 	ProtoAtomPtr fap = atom->getValue(key);
 
-	TS_ASSERT(pap == fap);
+	TS_ASSERT(*pap == *fap);
 
 	delete as;
 	delete backing;

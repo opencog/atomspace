@@ -329,7 +329,7 @@ Handle AtomSpace::fetch_atom(const Handle& h)
     // Now, get the latest values from the backing store.
     // The operation here is to CLOBBER the values, NOT to merge them!
     // The goal of an explicit fetch is to explicitly fetch the values,
-    // and not to play monkey-shines with tehm.
+    // and not to play monkey-shines with them.
     Handle hv;
     if (h->isNode()) {
         hv = _backing_store->getNode(h->getType(),
