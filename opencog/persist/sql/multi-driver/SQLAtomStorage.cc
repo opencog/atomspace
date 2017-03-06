@@ -790,7 +790,8 @@ ProtoAtomPtr SQLAtomStorage::doUnpackValue(Response& rp)
 
 	// We expect rp.fltval to be of the form
 	// {1.1,2.2,3.3}
-	if (rp.vtype == FLOAT_VALUE)
+	if ((rp.vtype == FLOAT_VALUE)
+	    or classserver().isA(rp.vtype, TRUTH_VALUE))
 	{
 		std::vector<double> fltarr;
 		char *p = (char *) rp.fltval;
@@ -802,7 +803,10 @@ ProtoAtomPtr SQLAtomStorage::doUnpackValue(Response& rp)
 			fltarr.emplace_back(flt);
 			p++; // skip over  comma
 		}
-		return createFloatValue(fltarr);
+		if (rp.vtype == FLOAT_VALUE)
+			return createFloatValue(fltarr);
+		else
+			return TruthValue::factory(createFloatValue(fltarr));
 	}
 
 	// We expect rp.lnkval to be a comma-separated list of

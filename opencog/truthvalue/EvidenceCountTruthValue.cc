@@ -37,6 +37,8 @@
 
 using namespace opencog;
 
+count_t EvidenceCountTruthValue::DEFAULT_K = 800.0;
+
 EvidenceCountTruthValue::EvidenceCountTruthValue(count_t pos_count,
                                                  count_t total_count)
 	: TruthValue(EVIDENCE_COUNT_TRUTH_VALUE)

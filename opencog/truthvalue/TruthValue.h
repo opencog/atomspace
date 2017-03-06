@@ -102,15 +102,17 @@ class TruthValue
     TruthValue& operator=(const TruthValue& rhs) {
         throw RuntimeException(TRACE_INFO, "Cannot modify truth values!");
     }
-public:
-    // default lookahead
-    static count_t DEFAULT_K;
-    static void setDefaultK(count_t k) {
-        DEFAULT_K = k;
-    }
 
+protected:
     TruthValue(Type t) : FloatValue(t) {}
+
+    // Merge helper method
+    TruthValuePtr higher_confidence_merge(TruthValuePtr);
+
+public:
     virtual ~TruthValue() {}
+
+    static TruthValuePtr factory(const ProtoAtomPtr&);
 
     virtual std::string toShortString(const std::string&) const;
 
@@ -164,10 +166,6 @@ public:
      */
     virtual bool isDefaultTV() const;
     virtual bool isDefinedTV() const;
-
-protected:
-    // Helper merging methods
-    TruthValuePtr higher_confidence_merge(TruthValuePtr);
 };
 
 } // namespace opencog

@@ -47,6 +47,8 @@ protected:
 		TOTAL_COUNT /// Total number of observations.
    };
 
+	static count_t DEFAULT_K;
+
 public:
 	EvidenceCountTruthValue(count_t pos_count, count_t total_count = -1);
 	EvidenceCountTruthValue(const TruthValue&);

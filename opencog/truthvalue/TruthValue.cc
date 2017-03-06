@@ -30,8 +30,7 @@
 
 using namespace opencog;
 
-const strength_t MAX_TRUTH  = 1.0f;
-count_t TruthValue::DEFAULT_K = 800.0;
+const strength_t MAX_TRUTH  = 1.0;
 
 std::string TruthValue::toShortString(const std::string& indent) const
 {
@@ -134,4 +133,17 @@ TruthValuePtr TruthValue::higher_confidence_merge(TruthValuePtr other)
         return other;
     }
     return std::dynamic_pointer_cast<TruthValue>(shared_from_this());
+}
+
+TruthValuePtr TruthValue::factory(const ProtoAtomPtr& pap)
+{
+	Type t = pap->getType();
+	if (SIMPLE_TRUTH_VALUE == t)
+	{
+		return SimpleTruthValue::createTV(pap);
+	}
+
+	throw RuntimeException(TRACE_INFO,
+		"Unknown TrtuhValue type");
+	return nullptr;
 }

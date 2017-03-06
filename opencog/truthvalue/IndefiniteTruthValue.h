@@ -85,6 +85,11 @@ private:
     strength_t findDiff(strength_t idiff) const;
 
 public:
+    static count_t DEFAULT_K;
+    static void setDefaultK(count_t k) {
+        DEFAULT_K = k;
+    }
+
     IndefiniteTruthValue();
     IndefiniteTruthValue(strength_t l, strength_t u,
                          confidence_t c = DEFAULT_CONFIDENCE_LEVEL);

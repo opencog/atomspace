@@ -37,6 +37,7 @@ confidence_t IndefiniteTruthValue::DEFAULT_CONFIDENCE_LEVEL = 0.9;
 strength_t IndefiniteTruthValue::diffError = 0.001;
 strength_t IndefiniteTruthValue::s = 0.5;
 
+count_t IndefiniteTruthValue::DEFAULT_K = 800.0;
 
 // Formula defined in the integral of one step (x-L1)^ks * (U1-x)^k(1-s)
 static double integralFormula (double x, void * params)

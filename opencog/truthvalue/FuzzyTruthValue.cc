@@ -34,6 +34,8 @@
 
 using namespace opencog;
 
+count_t FuzzyTruthValue::DEFAULT_K = 800.0;
+
 FuzzyTruthValue::FuzzyTruthValue(strength_t m, count_t c)
 	: TruthValue(FUZZY_TRUTH_VALUE)
 {

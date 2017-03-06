@@ -50,6 +50,7 @@ protected:
 
     void init(strength_t mean, count_t count);
 
+    static count_t DEFAULT_K;
 public:
 
     FuzzyTruthValue(strength_t mean, count_t count);
