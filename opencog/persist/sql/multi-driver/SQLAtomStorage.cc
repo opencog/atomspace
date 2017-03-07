@@ -429,6 +429,14 @@ void SQLAtomStorage::init(const char * uri)
 	reserve();
 	_next_valid = getMaxObservedVUID() + 1;
 
+	// Special-case for TruthValues
+	tvpred = doGetNode(PREDICATE_NODE, "*-TruthValueKey-*");
+	if (nullptr == tvpred)
+	{
+		tvpred = createNode(PREDICATE_NODE, "*-TruthValueKey-*");
+		do_store_single_atom(tvpred, 0);
+	}
+
 #define STORAGE_DEBUG 1
 #ifdef STORAGE_DEBUG
 	_num_get_nodes = 0;
@@ -886,15 +894,6 @@ void SQLAtomStorage::store_atom_values(const Handle& atom)
 	}
 
 	// Special-case for TruthValues.
-	if (nullptr == tvpred)
-	{
-		tvpred = doGetNode(PREDICATE_NODE, "*-TruthValueKey-*");
-		if (nullptr == tvpred)
-		{
-			tvpred = createNode(PREDICATE_NODE, "*-TruthValueKey-*");
-			do_store_single_atom(tvpred, 0);
-		}
-	}
 	TruthValuePtr tv(atom->getTruthValue());
 
 	// XXX This is wasteful of performance; do we really
