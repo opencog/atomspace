@@ -891,7 +891,14 @@ void SQLAtomStorage::store_atom_values(const Handle& atom)
 		}
 	}
 	TruthValuePtr tv(atom->getTruthValue());
-	if (tv->isDefaultTV()) return;
+
+	// XXX This is wasteful of performance; do we really
+	// need to do this?
+	if (tv->isDefaultTV())
+	{
+		deleteValuation(tvpred, atom);
+		return;
+	}
 
 	storeValuation(tvpred, atom, tv);
 }
