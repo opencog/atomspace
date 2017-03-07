@@ -9,7 +9,8 @@
 -- Use at your own risk. Backup your data. You may need to fiddle
 -- with the UUID for the *-TruthValueKey-*
 
-COPY AtABLE Atoms
+ALTER TABLE Atoms RENAME TO Atoms_Backup;
+CREATE TABLE Atoms AS SELECT * FROM Atoms_Backup;
 
 CREATE TABLE Valuations (
     key BIGINT REFERENCES Atoms(uuid),
@@ -30,3 +31,5 @@ CREATE TABLE Values (
     stringvalue TEXT[],
     linkvalue BIGINT[] -- ELEMENT REFERENCES Values(vuid)
 );
+
+
