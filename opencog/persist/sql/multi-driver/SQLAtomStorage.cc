@@ -875,13 +875,12 @@ void SQLAtomStorage::store_atom_values(const Handle& atom)
 	// Special-case for TruthValues.
 	if (nullptr == tvpred)
 	{
-		tvpred = createNode(PREDICATE_NODE, "*-TruthValueKey-*");
-		UUID utv = _tlbuf.getUUID(tvpred);
-		if (TLB::INVALID_UUID == utv)
-			_tlbuf.addAtom(tvpred, TLB::INVALID_UUID);
-		else
-			tvpred = _tlbuf.getAtom(utv);
-		do_store_single_atom(tvpred, 0);
+		tvpred = doGetNode(PREDICATE_NODE, "*-TruthValueKey-*");
+		if (nullptr == tvpred)
+		{
+			tvpred = createNode(PREDICATE_NODE, "*-TruthValueKey-*");
+			do_store_single_atom(tvpred, 0);
+		}
 	}
 	TruthValuePtr tv(atom->getTruthValue());
 	if (tv->isDefaultTV()) return;
