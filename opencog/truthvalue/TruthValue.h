@@ -112,6 +112,7 @@ protected:
 public:
     virtual ~TruthValue() {}
 
+    static TruthValuePtr factory(Type, std::vector<double>);
     static TruthValuePtr factory(const ProtoAtomPtr&);
 
     virtual std::string toShortString(const std::string&) const;

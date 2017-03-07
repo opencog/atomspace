@@ -806,7 +806,7 @@ ProtoAtomPtr SQLAtomStorage::doUnpackValue(Response& rp)
 		if (rp.vtype == FLOAT_VALUE)
 			return createFloatValue(fltarr);
 		else
-			return TruthValue::factory(createFloatValue(fltarr));
+			return TruthValue::factory(rp.vtype, fltarr);
 	}
 
 	// We expect rp.lnkval to be a comma-separated list of

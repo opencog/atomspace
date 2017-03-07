@@ -140,6 +140,12 @@ TruthValuePtr TruthValue::higher_confidence_merge(TruthValuePtr other)
     return std::dynamic_pointer_cast<TruthValue>(shared_from_this());
 }
 
+TruthValuePtr TruthValue::factory(Type t, std::vector<double> v)
+{
+	ProtoAtomPtr pap = createFloatValue(t,v);
+	return factory(pap);
+}
+
 TruthValuePtr TruthValue::factory(const ProtoAtomPtr& pap)
 {
 	Type t = pap->getType();
@@ -157,6 +163,6 @@ TruthValuePtr TruthValue::factory(const ProtoAtomPtr& pap)
 		return ProbabilisticTruthValue::createTV(pap);
 
 	throw RuntimeException(TRACE_INFO,
-		"Unknown TrtuhValue type");
+		"Unknown TruthValue type %d", t);
 	return nullptr;
 }
