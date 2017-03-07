@@ -38,26 +38,36 @@ CREATE TABLE Values (
 
 -- Change uuid to some, any unused uuid
 INSERT INTO Atoms (uuid, space, type, height, name) VALUES
-	(1, 1, 
-	SELECT type FROM TypeCodes WHERE typename = "PREDICATE_NODE",
-	0, "*-TruthValueKey-*");
+	(1, 1,
+	(SELECT type FROM TypeCodes WHERE typename = 'PredicateNode'),
+	0, '*-TruthValueKey-*');
 
 -- 'key' must be exactly the same as uuid above.
 -- tv_type == 1 is SimpleTV
 -- tv_type == 2 is CountTV
--- no other tv types were ever used/supported.
+-- No other tv types were ever used/supported.
+--
 -- The new types are:
 -- type == 6 == SimpleTruthValue
 -- type == 7 == CountTruthValue
+--
+-- The above should be correct for the current versions;
+-- however, YMMV, so check to make sure. The below copies
+-- these two types.
 
-INSERT INTO Valuations 
-	(SELECT 1 AS key,
+INSERT INTO Valuations
+	(SELECT 1 AS key,  -- 1 here is the predicate node
 		uuid AS atom,
 		6 as type,
-		{stv_mean, stv_confidence} as floatvalue
-		FROM FAtoms WHERE tv_type = 1);
+		ARRAY[stv_mean, stv_confidence] as floatvalue
+		FROM Atoms WHERE tv_type = 1);
 
-
+INSERT INTO Valuations
+	(SELECT 1 AS key, -- 1 here is the redicate node
+		uuid AS atom,
+		7 as type,
+		ARRAY[stv_mean, stv_confidence, stv_count] as floatvalue
+		FROM Atoms WHERE tv_type = 2);
 
 -- Drop the columns we no longer use.
 ALTER TABLE Atoms DROP COLUMN tv_type;
