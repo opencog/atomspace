@@ -13,9 +13,11 @@
 -- You may need to fiddle with the UUID for the *-TruthValueKey-*
 --
 
+-- Backup the affectede table
 ALTER TABLE Atoms RENAME TO Atoms_Backup;
 CREATE TABLE Atoms AS SELECT * FROM Atoms_Backup;
 
+-- Create the new, needed tables
 CREATE TABLE Valuations (
     key BIGINT REFERENCES Atoms(uuid),
     atom BIGINT REFERENCES Atoms(uuid),
@@ -36,16 +38,20 @@ CREATE TABLE Values (
     linkvalue BIGINT[] -- ELEMENT REFERENCES Values(vuid)
 );
 
--- Change uuid to some, any unused uuid
+-- Create the TruthValueKey.
+-- You may need to change the uuid value to some (any) unused uuid
+-- Whatever you pick here, must also be used as the  key, below.
 INSERT INTO Atoms (uuid, space, type, height, name) VALUES
 	(1, 1,
 	(SELECT type FROM TypeCodes WHERE typename = 'PredicateNode'),
 	0, '*-TruthValueKey-*');
 
 -- 'key' must be exactly the same as uuid above.
+--
+-- In the old (version 2.0) tables:
 -- tv_type == 1 is SimpleTV
 -- tv_type == 2 is CountTV
--- No other tv types were ever used/supported.
+-- No other TV types were ever used/supported.
 --
 -- The new types are:
 -- type == 6 == SimpleTruthValue
@@ -63,7 +69,7 @@ INSERT INTO Valuations
 		FROM Atoms WHERE tv_type = 1);
 
 INSERT INTO Valuations
-	(SELECT 1 AS key, -- 1 here is the redicate node
+	(SELECT 1 AS key, -- 1 here is the predicate node
 		uuid AS atom,
 		7 as type,
 		ARRAY[stv_mean, stv_confidence, stv_count] as floatvalue
@@ -74,3 +80,6 @@ ALTER TABLE Atoms DROP COLUMN tv_type;
 ALTER TABLE Atoms DROP COLUMN stv_mean;
 ALTER TABLE Atoms DROP COLUMN stv_confidence;
 ALTER TABLE Atoms DROP COLUMN stv_count;
+
+-- That's all, folks!  The result should now work with the version 3.0
+-- postgres drivers.
