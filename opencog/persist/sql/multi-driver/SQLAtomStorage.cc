@@ -319,6 +319,13 @@ class SQLAtomStorage::Response
 
 			ProtoAtomPtr pap = store->doUnpackValue(*this);
 			atom->setValue(hkey, pap);
+
+			// Special case for truth values
+			if (classserver().isA(pap->getType(), TRUTH_VALUE))
+			{
+				TruthValuePtr tv(std::dynamic_pointer_cast<TruthValue>(pap));
+				atom->setTruthValue(tv);
+			}
 			return false;
 		}
 
