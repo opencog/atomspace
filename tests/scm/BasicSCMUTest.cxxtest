@@ -228,7 +228,7 @@ void BasicSCMUTest::test_single_atom(void)
 
 void BasicSCMUTest::check_truth_value(const TruthValuePtr& tv)
 {
-	logger().debug() << "check_node_truth_value(" << tv << ")";
+	// logger().debug() << "check_node_truth_value(" << tv << ")";
 
 	// added check_truth_value_node in the atomspace
 	string node_str = "check_truth_value_node";
@@ -250,7 +250,7 @@ void BasicSCMUTest::check_truth_value(const TruthValuePtr& tv)
 		   << " " << tv->getCount();
 	else if (tvt == INDEFINITE_TRUTH_VALUE) {
 		const IndefiniteTruthValuePtr& itv =
-			dynamic_pointer_cast<const IndefiniteTruthValue>(tv);
+			dynamic_pointer_cast<IndefiniteTruthValue>(tv);
 		ss << "cog-new-itv " << itv->getL() << " " << itv->getU()
 		   << " " << itv->getConfidence();
 	}
