@@ -1,3 +1,14 @@
+--
+-- atom.sql
+-- Version 3.0 of the Postgres database schema for the AtomSpace.
+--
+-- Changes since version 2.0:
+--   * Added support for generic values.
+--   * TruthValues now treated as generic Values.
+--
+-- Changes since version 1.0:
+--   * Added support for multiple atomspaces.
+--
 -- -----------------------------------------------------------
 -- Table showing inheritance relationship between atomspaces.
 -- Atomspaces have UUID's identifying them. Top-level atomspaces have
