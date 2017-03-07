@@ -43,12 +43,21 @@ INSERT INTO Atoms (uuid, space, type, height, name) VALUES
 	0, "*-TruthValueKey-*");
 
 -- 'key' must be exactly the same as uuid above.
-INSERT INtO Valuations (key, atom, type, floatvalue) VALUES
-	(1, 
-	SELECT uuid FROM Atoms,
-	16,
-	{0,0,0}
-	); 
+-- tv_type == 1 is SimpleTV
+-- tv_type == 2 is CountTV
+-- no other tv types were ever used/supported.
+-- The new types are:
+-- type == 6 == SimpleTruthValue
+-- type == 7 == CountTruthValue
+
+INSERT INTO Valuations 
+	(SELECT 1 AS key,
+		uuid AS atom,
+		6 as type,
+		{stv_mean, stv_confidence} as floatvalue
+		FROM FAtoms WHERE tv_type = 1);
+
+
 
 -- Drop the columns we no longer use.
 ALTER TABLE Atoms DROP COLUMN tv_type;
