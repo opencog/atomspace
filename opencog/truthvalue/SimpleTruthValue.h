@@ -47,8 +47,9 @@ protected:
         CONFIDENCE /// Estimate of confidence of the observation.
     };
 
-    static count_t DEFAULT_K;
 public:
+    static count_t DEFAULT_K;
+
     SimpleTruthValue(strength_t, confidence_t);
     SimpleTruthValue(const TruthValue&);
     SimpleTruthValue(const SimpleTruthValue&);

@@ -289,7 +289,7 @@ SimpleTruthValuePtr ProtocolBufferSerializer::deserializeSimpleTruthValue(
         const ZMQSingleTruthValueMessage& singleTruthValue)
 {
 	count_t cn = singleTruthValue.count();
-	confidence_t cf = cn / (cn + TruthValue::DEFAULT_K);
+	confidence_t cf = cn / (cn + SimpleTruthValue::DEFAULT_K);
 	SimpleTruthValuePtr tv(new SimpleTruthValue(singleTruthValue.mean(), cf));
 	return tv;
 }
@@ -343,7 +343,7 @@ TruthValuePtr ProtocolBufferSerializer::deserialize(
 TruthValuePtr ProtocolBufferSerializer::deserialize(
         const ZMQSingleTruthValueMessage& singleTruthValueMessage)
 {
-    switch(singleTruthValueMessage.truthvaluetype())
+    switch (singleTruthValueMessage.truthvaluetype())
     {
     case ZMQTruthValueTypeSimple:
         return deserializeSimpleTruthValue(singleTruthValueMessage);
