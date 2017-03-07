@@ -1924,6 +1924,11 @@ void SQLAtomStorage::kill_data(void)
 
 	rp.exec("INSERT INTO Spaces VALUES (0,0);");
 	rp.exec("INSERT INTO Spaces VALUES (1,1);");
+	id_create_cache.clear();
+	local_id_cache.clear();
+
+	// Special case for TruthValues - must always have this atom.
+	do_store_single_atom(tvpred, 0);
 }
 
 /* ================================================================ */
