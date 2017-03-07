@@ -629,21 +629,11 @@ void SQLAtomStorage::storeValuation(const Handle& key,
 	snprintf(kidbuff, BUFSZ, "%lu", _tlbuf.getUUID(key));
 
 	char aidbuff[BUFSZ];
-	snprintf(aidbuff, BUFSZ, "%lu", _tlbuf.getUUID(atom));
+	UUID auid = _tlbuf.getUUID(atom);
+	snprintf(aidbuff, BUFSZ, "%lu", auid);
 
-	// Use a transaction, so that other threads/users see the
-	// valuation update atomically. That is, two sets of
-	// users/threads can safely set the same valuation at the same
-	// time. A third thread will always see an appropriate valuation,
-	// either the earlier one, or the newer one.
-	Response rp(conn_pool);
-	rp.exec("BEGIN");
-
-	// If there's an existing valuation, delete it.
-	deleteValuation(key, atom);
-
-	// Above delete should have done the trick; we can do a
-	// pure insert here.
+	// The prior valuation, if any, will be deleted firest,
+	// and so an INSERT is sufficient to cover everything.
 	cols = "INSERT INTO Valuations (";
 	vals = ") VALUES (";
 	coda = ");";
@@ -674,8 +664,23 @@ void SQLAtomStorage::storeValuation(const Handle& key,
 		STMT("linkvalue", lstr);
 	}
 
-	std::string qry = cols + vals + coda;
-	rp.exec(qry.c_str());
+	std::string insert = cols + vals + coda;
+
+	std::lock_guard<std::mutex> lck(_value_mutex[auid%NUMVMUT]);
+	// Use a transaction, so that other threads/users see the
+	// valuation update atomically. That is, two sets of
+	// users/threads can safely set the same valuation at the same
+	// time. A third thread will always see an appropriate valuation,
+	// either the earlier one, or the newer one.
+	// XXX At least, that was the hope. In practice, this is not working
+	// as designed. fixme later.
+	Response rp(conn_pool);
+	rp.exec("BEGIN");
+
+	// If there's an existing valuation, delete it.
+	deleteValuation(key, atom);
+
+	rp.exec(insert.c_str());
 	rp.exec("COMMIT");
 }
 

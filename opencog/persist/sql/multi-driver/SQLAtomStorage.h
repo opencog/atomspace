@@ -136,6 +136,8 @@ class SQLAtomStorage : public AtomStorage
 		// --------------------------
 		// Values
 
+#define NUMVMUT 16
+		std::mutex _value_mutex[NUMVMUT];
 		void store_atom_values(const Handle &);
 		void get_atom_values(Handle &);
 
