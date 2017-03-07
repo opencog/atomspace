@@ -121,7 +121,7 @@ TruthValuePtr CountTruthValue::merge(TruthValuePtr other,
                                      const MergeCtrl& mc)
 {
     CountTruthValuePtr oc =
-        std::dynamic_pointer_cast<const CountTruthValue>(other);
+        std::dynamic_pointer_cast<CountTruthValue>(other);
 
     // If other is a simple truth value, *and* its not the default TV,
     // then perhaps we should merge it in, as if it were a count truth
