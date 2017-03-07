@@ -48,9 +48,12 @@ protected:
     };
 
 public:
+    static count_t DEFAULT_K;
+
     SimpleTruthValue(strength_t, confidence_t);
     SimpleTruthValue(const TruthValue&);
-    SimpleTruthValue(SimpleTruthValue const&);
+    SimpleTruthValue(const SimpleTruthValue&);
+    SimpleTruthValue(const ProtoAtomPtr&);
 
     virtual bool operator==(const ProtoAtom& rhs) const;
 
@@ -68,7 +71,7 @@ public:
      * with the highest confidence.
      */
     TruthValuePtr merge(TruthValuePtr,
-                        const MergeCtrl& mc=MergeCtrl()) const;
+                        const MergeCtrl& mc=MergeCtrl());
 
     static SimpleTruthValuePtr createSTV(strength_t mean, confidence_t conf)
     {
@@ -77,6 +80,11 @@ public:
     static TruthValuePtr createTV(strength_t mean, confidence_t conf)
     {
         return std::static_pointer_cast<TruthValue>(createSTV(mean, conf));
+    }
+    static TruthValuePtr createTV(const ProtoAtomPtr& pap)
+    {
+        return std::static_pointer_cast<TruthValue>(
+            std::make_shared<SimpleTruthValue>(pap));
     }
 
     TruthValuePtr clone() const

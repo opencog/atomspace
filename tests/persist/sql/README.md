@@ -129,10 +129,11 @@ To run these tests, perform the following steps:
 2k) Edit `lib/atomspace-test.conf` and verify that the username and password
     are set as above.
 
-3) Run the four test cases:
+3) Run the five test cases:
 
 ```
    $ ./tests/persist/sql/multi-driver/BasicSaveUTest
+   $ ./tests/persist/sql/multi-driver/ValueUTest
    $ ./tests/persist/sql/multi-driver/PersistUTest
    $ ./tests/persist/sql/multi-driver/MultiPersistUTest
    $ ./tests/persist/sql/multi-driver/FetchUTest

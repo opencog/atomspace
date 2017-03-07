@@ -50,11 +50,13 @@ protected:
 
     void init(strength_t mean, count_t count);
 
+    static count_t DEFAULT_K;
 public:
 
     FuzzyTruthValue(strength_t mean, count_t count);
     FuzzyTruthValue(const TruthValue&);
     FuzzyTruthValue(FuzzyTruthValue const&);
+    FuzzyTruthValue(const ProtoAtomPtr&);
 
     virtual bool operator==(const ProtoAtom&) const;
 
@@ -84,7 +86,7 @@ public:
      * with the highest confidence.
      */
     TruthValuePtr merge(TruthValuePtr,
-                        const MergeCtrl& mc=MergeCtrl()) const;
+                        const MergeCtrl& mc=MergeCtrl());
 
     static FuzzyTruthValuePtr createSTV(strength_t mean, count_t count)
     {
@@ -93,6 +95,11 @@ public:
     static TruthValuePtr createTV(strength_t mean, count_t count)
     {
         return std::static_pointer_cast<TruthValue>(createSTV(mean, count));
+    }
+    static TruthValuePtr createTV(const ProtoAtomPtr& pap)
+    {
+        return std::static_pointer_cast<TruthValue>(
+            std::make_shared<FuzzyTruthValue>(pap));
     }
 
     TruthValuePtr clone() const

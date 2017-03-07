@@ -46,10 +46,6 @@
 #include <opencog/atoms/base/LinkValue.h>
 #include <opencog/atoms/base/StringValue.h>
 #include <opencog/atoms/base/Valuation.h>
-#include <opencog/truthvalue/CountTruthValue.h>
-#include <opencog/truthvalue/IndefiniteTruthValue.h>
-#include <opencog/truthvalue/ProbabilisticTruthValue.h>
-#include <opencog/truthvalue/SimpleTruthValue.h>
 #include <opencog/truthvalue/TruthValue.h>
 #include <opencog/atomspace/AtomSpace.h>
 #include <opencog/atomspaceutils/TLB.h>
@@ -83,12 +79,6 @@ class SQLAtomStorage::Response
 		const char * name;
 		const char *outlist;
 		int height;
-
-		// TV's
-		int tv_type;
-		double mean;
-		double confidence;
-		double count;
 
 		// Values
 		double *floatval;
@@ -146,22 +136,6 @@ class SQLAtomStorage::Response
 			{
 				outlist = colvalue;
 			}
-			if (!strcmp(colname, "tv_type"))
-			{
-				tv_type = atoi(colvalue);
-			}
-			else if (!strcmp(colname, "stv_mean"))
-			{
-				mean = atof(colvalue);
-			}
-			else if (!strcmp(colname, "stv_confidence"))
-			{
-				confidence = atof(colvalue);
-			}
-			else if (!strcmp(colname, "stv_count"))
-			{
-				count = atof(colvalue);
-			}
 			else if (!strcmp(colname, "uuid"))
 			{
 				uuid = strtoul(colvalue, NULL, 10);
@@ -186,10 +160,11 @@ class SQLAtomStorage::Response
 
 			PseudoPtr p(store->makeAtom(*this, uuid));
 			AtomPtr atom(get_recursive_if_not_exists(p));
-			Handle h = table->add(atom, false);
+			Handle h(table->add(atom, false));
+			store->get_atom_values(h);
 
 			// Force resolution in TLB, so that later removes work.
-			store->_tlbuf.addAtom(h, TLB::INVALID_UUID);
+			store->_tlbuf.addAtom(h, uuid);
 			return false;
 		}
 
@@ -240,7 +215,7 @@ class SQLAtomStorage::Response
 		{
 			if (classserver().isA(p->type, NODE))
 			{
-				NodePtr node(createNode(p->type, p->name, p->tv));
+				NodePtr node(createNode(p->type, p->name));
 				store->_tlbuf.addAtom(node, p->uuid);
 				return node;
 			}
@@ -257,7 +232,7 @@ class SQLAtomStorage::Response
 				AtomPtr ra = get_recursive_if_not_exists(po);
 				resolved_oset.emplace_back(ra->getHandle());
 			}
-			LinkPtr link(createLink(p->type, resolved_oset, p->tv));
+			LinkPtr link(createLink(p->type, resolved_oset));
 			store->_tlbuf.addAtom(link, p->uuid);
 			return link;
 		}
@@ -345,6 +320,13 @@ class SQLAtomStorage::Response
 
 			ProtoAtomPtr pap = store->doUnpackValue(*this);
 			atom->setValue(hkey, pap);
+
+			// Special case for truth values
+			if (classserver().isA(pap->getType(), TRUTH_VALUE))
+			{
+				TruthValuePtr tv(std::dynamic_pointer_cast<TruthValue>(pap));
+				atom->setTruthValue(tv);
+			}
 			return false;
 		}
 
@@ -446,6 +428,14 @@ void SQLAtomStorage::init(const char * uri)
 
 	reserve();
 	_next_valid = getMaxObservedVUID() + 1;
+
+	// Special-case for TruthValues
+	tvpred = doGetNode(PREDICATE_NODE, "*-TruthValueKey-*");
+	if (nullptr == tvpred)
+	{
+		tvpred = createNode(PREDICATE_NODE, "*-TruthValueKey-*");
+		do_store_single_atom(tvpred, 0);
+	}
 
 #define STORAGE_DEBUG 1
 #ifdef STORAGE_DEBUG
@@ -566,16 +556,9 @@ void SQLAtomStorage::store_atomtable_id(const AtomTable& at)
 /* ================================================================ */
 
 #define STMT(colname,val) { \
-	if (update) { \
-		if (notfirst) { cols += ", "; } else notfirst = true; \
-		cols += colname; \
-		cols += " = "; \
-		cols += val; \
-	} else { \
-		if (notfirst) { cols += ", "; vals += ", "; } else notfirst = true; \
-		cols += colname; \
-		vals += val; \
-	} \
+	if (notfirst) { cols += ", "; vals += ", "; } else notfirst = true; \
+	cols += colname; \
+	vals += val; \
 }
 
 #define STMTI(colname,ival) { \
@@ -645,7 +628,6 @@ void SQLAtomStorage::storeValuation(const Handle& key,
                                     const ProtoAtomPtr& pap)
 {
 	bool notfirst = false;
-	bool update = false;
 	std::string cols;
 	std::string vals;
 	std::string coda;
@@ -655,21 +637,11 @@ void SQLAtomStorage::storeValuation(const Handle& key,
 	snprintf(kidbuff, BUFSZ, "%lu", _tlbuf.getUUID(key));
 
 	char aidbuff[BUFSZ];
-	snprintf(aidbuff, BUFSZ, "%lu", _tlbuf.getUUID(atom));
+	UUID auid = _tlbuf.getUUID(atom);
+	snprintf(aidbuff, BUFSZ, "%lu", auid);
 
-	// Use a transaction, so that other threads/users see the
-	// valuation update atomically. That is, two sets of
-	// users/threads can safely set the same valuation at the same
-	// time. A third thread will always see an appropriate valuation,
-	// either the earlier one, or the newer one.
-	Response rp(conn_pool);
-	rp.exec("BEGIN");
-
-	// If there's an existing valuation, delete it.
-	deleteValuation(key, atom);
-
-	// Above delete should have done the trick; we can do a
-	// pure insert here.
+	// The prior valuation, if any, will be deleted firest,
+	// and so an INSERT is sufficient to cover everything.
 	cols = "INSERT INTO Valuations (";
 	vals = ") VALUES (";
 	coda = ");";
@@ -700,8 +672,23 @@ void SQLAtomStorage::storeValuation(const Handle& key,
 		STMT("linkvalue", lstr);
 	}
 
-	std::string qry = cols + vals + coda;
-	rp.exec(qry.c_str());
+	std::string insert = cols + vals + coda;
+
+	std::lock_guard<std::mutex> lck(_value_mutex[auid%NUMVMUT]);
+	// Use a transaction, so that other threads/users see the
+	// valuation update atomically. That is, two sets of
+	// users/threads can safely set the same valuation at the same
+	// time. A third thread will always see an appropriate valuation,
+	// either the earlier one, or the newer one.
+	// XXX At least, that was the hope. In practice, this is not working
+	// as designed. fixme later.
+	Response rp(conn_pool);
+	rp.exec("BEGIN");
+
+	// If there's an existing valuation, delete it.
+	deleteValuation(key, atom);
+
+	rp.exec(insert.c_str());
 	rp.exec("COMMIT");
 }
 
@@ -710,7 +697,6 @@ SQLAtomStorage::VUID SQLAtomStorage::storeValue(const ProtoAtomPtr& pap)
 {
 	VUID vuid = _next_valid++;
 
-	bool update = false;
 	bool notfirst = false;
 	std::string cols;
 	std::string vals;
@@ -825,7 +811,8 @@ ProtoAtomPtr SQLAtomStorage::doUnpackValue(Response& rp)
 
 	// We expect rp.fltval to be of the form
 	// {1.1,2.2,3.3}
-	if (rp.vtype == FLOAT_VALUE)
+	if ((rp.vtype == FLOAT_VALUE)
+	    or classserver().isA(rp.vtype, TRUTH_VALUE))
 	{
 		std::vector<double> fltarr;
 		char *p = (char *) rp.fltval;
@@ -837,7 +824,10 @@ ProtoAtomPtr SQLAtomStorage::doUnpackValue(Response& rp)
 			fltarr.emplace_back(flt);
 			p++; // skip over  comma
 		}
-		return createFloatValue(fltarr);
+		if (rp.vtype == FLOAT_VALUE)
+			return createFloatValue(fltarr);
+		else
+			return TruthValue::factory(rp.vtype, fltarr);
 	}
 
 	// We expect rp.lnkval to be a comma-separated list of
@@ -902,6 +892,19 @@ void SQLAtomStorage::store_atom_values(const Handle& atom)
 		ProtoAtomPtr pap = atom->getValue(key);
 		storeValuation(key, atom, pap);
 	}
+
+	// Special-case for TruthValues.
+	TruthValuePtr tv(atom->getTruthValue());
+
+	// XXX This is wasteful of performance; do we really
+	// need to do this?
+	if (tv->isDefaultTV())
+	{
+		deleteValuation(tvpred, atom);
+		return;
+	}
+
+	storeValuation(tvpred, atom, tv);
 }
 
 /// Get ALL of the values associated with an atom.
@@ -1130,142 +1133,98 @@ void SQLAtomStorage::do_store_single_atom(const Handle& h, int aheight)
 	std::string uuidbuff = std::to_string(uuid);
 
 	std::unique_lock<std::mutex> lck = maybe_create_id(uuid);
-	bool update = not lck.owns_lock();
-	if (update)
-	{
-		cols = "UPDATE Atoms SET ";
-		vals = "";
-		coda = " WHERE uuid = ";
-		coda += uuidbuff;
-		coda += ";";
-	}
-	else
-	{
-		cols = "INSERT INTO Atoms (";
-		vals = ") VALUES (";
-		coda = ");";
+	if (not lck.owns_lock()) return;
 
-		STMT("uuid", uuidbuff);
-	}
+	cols = "INSERT INTO Atoms (";
+	vals = ") VALUES (";
+	coda = ");";
+
+	STMT("uuid", uuidbuff);
 
 #ifdef STORAGE_DEBUG
 	if (0 == aheight) {
-		if (update) _num_node_updates++; else _num_node_inserts++;
+		_num_node_inserts++;
 	} else {
-		if (update) _num_link_updates++; else _num_link_inserts++;
+		_num_link_inserts++;
 	}
 #endif // STORAGE_DEBUG
 
-	// Store the atom type and node name only if storing for the
-	// first time ever. Once an atom is in an atom table, it's type,
-	// name or outset cannot be changed. Only its truth value can
-	// change.
-	if (false == update)
+	// Store the atomspace UUID
+	AtomTable * at = getAtomTable(h);
+	// We allow storage of atoms that don't belong to an atomspace.
+	if (at) uuidbuff = std::to_string(at->get_uuid());
+	else uuidbuff = "0";
+
+	// XXX FIXME -- right now, multiple space support is incomplete,
+	// the below hacks around some testing issues.
+	if (at) uuidbuff = "1";
+	STMT("space", uuidbuff);
+
+	// Store the atom UUID
+	Type t = h->getType();
+	int dbtype = storing_typemap[t];
+	STMTI("type", dbtype);
+
+	// Store the node name, if its a node
+	if (h->isNode())
 	{
-		// Store the atomspace UUID
-		AtomTable * at = getAtomTable(h);
-		// We allow storage of atoms that don't belong to an atomspace.
-		if (at) uuidbuff = std::to_string(at->get_uuid());
-		else uuidbuff = "0";
+		// Use postgres $-quoting to make unicode strings
+		// easier to deal with.
+		std::string qname = " $ocp$";
+		qname += h->getName();
+		qname += "$ocp$ ";
 
-		// XXX FIXME -- right now, multiple space support is incomplete,
-		// the below hacks around some testing issues.
-		if (at) uuidbuff = "1";
-		STMT("space", uuidbuff);
-
-		// Store the atom UUID
-		Type t = h->getType();
-		int dbtype = storing_typemap[t];
-		STMTI("type", dbtype);
-
-		// Store the node name, if its a node
-		if (h->isNode())
+		// The Atoms table has a UNIQUE constraint on the
+		// node name.  If a node name is too long, a postgres
+		// error is generated:
+		// ERROR: index row size 4440 exceeds maximum 2712
+		// for index "atoms_type_name_key"
+		// There's not much that can be done about this, without
+		// a redesign of the table format, in some way. Maybe
+		// we could hash the long node names, store the hash,
+		// and make sure that is unique.
+		if (2700 < qname.size())
 		{
-			// Use postgres $-quoting to make unicode strings
-			// easier to deal with.
-			std::string qname = " $ocp$";
-			qname += h->getName();
-			qname += "$ocp$ ";
+			throw IOException(TRACE_INFO,
+				"Error: do_store_single_atom: Maxiumum Node name size is 2700.\n");
+		}
+		STMT("name", qname);
 
+		// Nodes have a height of zero by definition.
+		STMTI("height", 0);
+	}
+	else
+	{
+		if (max_height < aheight) max_height = aheight;
+		STMTI("height", aheight);
+
+		if (h->isLink())
+		{
 			// The Atoms table has a UNIQUE constraint on the
-			// node name.  If a node name is too long, a postgres
+			// outgoing set.  If a link is too large, a postgres
 			// error is generated:
 			// ERROR: index row size 4440 exceeds maximum 2712
-			// for index "atoms_type_name_key"
-			// There's not much that can be done about this, without
-			// a redesign of the table format, in some way. Maybe
-			// we could hash the long node names, store the hash,
-			// and make sure that is unique.
-			if (2700 < qname.size())
+			// for index "atoms_type_outgoing_key"
+			// The simplest solution that I see requires a database
+			// redesign.  One could hash together the UUID's in the
+			// outgoing set, and then force a unique constraint on
+			// the hash.
+			if (330 < h->getArity())
 			{
 				throw IOException(TRACE_INFO,
-					"Error: do_store_single_atom: Maxiumum Node name size is 2700.\n");
+					"Error: do_store_single_atom: Maxiumum Link size is 330.\n");
 			}
-			STMT("name", qname);
 
-			// Nodes have a height of zero by definition.
-			STMTI("height", 0);
-		}
-		else
-		{
-			if (max_height < aheight) max_height = aheight;
-			STMTI("height", aheight);
-
-			if (h->isLink())
-			{
-				// The Atoms table has a UNIQUE constraint on the
-				// outgoing set.  If a link is too large, a postgres
-				// error is generated:
-				// ERROR: index row size 4440 exceeds maximum 2712
-				// for index "atoms_type_outgoing_key"
-				// The simplest solution that I see requires a database
-				// redesign.  One could hash together the UUID's in the
-				// outgoing set, and then force a unique constraint on
-				// the hash.
-				if (330 < h->getArity())
-				{
-					throw IOException(TRACE_INFO,
-						"Error: do_store_single_atom: Maxiumum Link size is 330.\n");
-				}
-
-				cols += ", outgoing";
-				vals += ", ";
-				vals += oset_to_string(h->getOutgoingSet());
-			}
+			cols += ", outgoing";
+			vals += ", ";
+			vals += oset_to_string(h->getOutgoingSet());
 		}
 	}
-
-	// Store the truth value
-	TruthValuePtr tv(h->getTruthValue());
-	Type tvt = 0;
-	if (tv) tvt = tv->getType();
-	STMTI("tv_type", tvt);
-
-	if (SIMPLE_TRUTH_VALUE == tvt ||
-	    COUNT_TRUTH_VALUE == tvt ||
-	    PROBABILISTIC_TRUTH_VALUE == tvt)
-	{
-		STMTF("stv_mean", tv->getMean());
-		STMTF("stv_confidence", tv->getConfidence());
-		STMTF("stv_count", tv->getCount());
-	}
-	else
-	if (INDEFINITE_TRUTH_VALUE == tvt)
-	{
-		IndefiniteTruthValuePtr itv = std::dynamic_pointer_cast<const IndefiniteTruthValue>(tv);
-		STMTF("stv_mean", itv->getL());
-		STMTF("stv_count", itv->getU());
-		STMTF("stv_confidence", itv->getConfidenceLevel());
-	}
-	else
-		throw IOException(TRACE_INFO,
-			"Error: store_single: Unknown truth value type\n");
 
 	// We may have to store the atom table UUID and try again...
 	// We waste CPU cycles to store the atomtable, only if it failed.
 	bool try_again = false;
 	std::string qry = cols + vals + coda;
-
 	{
 		Response rp(conn_pool);
 		rp.exec(qry.c_str());
@@ -1421,20 +1380,11 @@ void SQLAtomStorage::add_id_to_cache(UUID uuid)
 /**
  * This returns a lock that is either locked, or not, depending on
  * whether we think that the database already knows about this UUID,
- * or not.  We do this because we need to use an SQL INSERT instead
- * of an SQL UPDATE when putting a given atom in the database the first
- * time ever.  Since SQL INSERT can be used once and only once, we have
- * to avoid the case of two threads, each trying to perform an INSERT
- * in the same ID. We do this by taking the id_create_mutex, so that
- * only one writer ever gets told that its a new ID.
- *
- * This cannot be replaced by the new Postgres UPSERT command (well,
- * actually the INSERT ... ON CONFLICT UPDATE command) because we still
- * have to make sure that an atom is uniquely associated with a given
- * UUID, even if two different threads race, trying to store the same
- * atom. Otherwise, we risk inserting the same atom twice, with two
- * different UUID's. Whatever. The point is that the issuance of UUID's
- * is subtle, and can be bungled, if you're not careful.
+ * or not.  We do this because we can use an SQL INSERT only once,
+ * and we have to avoid the case of two threads, each trying to
+ * perform an INSERT in the same ID.  We do this by taking the
+ * id_create_mutex, so that only one writer ever gets told that
+ * its a new ID.
  */
 std::unique_lock<std::mutex> SQLAtomStorage::maybe_create_id(UUID uuid)
 {
@@ -1584,11 +1534,18 @@ HandleSeq SQLAtomStorage::getIncomingSet(const Handle& h)
 }
 
 /**
- * Fetch the TV, for the Node with the indicated type and name.
+ * Fetch the Node with the indicated type and name.
  * If there is no such node, NULL is returned.
  */
 Handle SQLAtomStorage::doGetNode(Type t, const char * str)
 {
+	// First, check to see if we already know this Node.
+	Handle node(createNode(t, str));
+	UUID uuid = _tlbuf.getUUID(node);
+	if (TLB::INVALID_UUID != uuid)
+		return _tlbuf.getAtom(uuid);
+
+	// If we don't know it, then go get it's UUID.
 	setup_typemap();
 	char buff[4*BUFSZ];
 
@@ -1614,11 +1571,8 @@ Handle SQLAtomStorage::doGetNode(Type t, const char * str)
 #ifdef STORAGE_DEBUG
 	_num_got_nodes++;
 #endif // STORAGE_DEBUG
-	Handle node(createNode(t, str));
 	_tlbuf.addAtom(node, p->uuid);
-	node = _tlbuf.getAtom(p->uuid);
-	node->setTruthValue(p->tv);
-	return node;
+	return _tlbuf.getAtom(p->uuid);
 }
 
 Handle SQLAtomStorage::getNode(Type t, const char * str)
@@ -1629,11 +1583,18 @@ Handle SQLAtomStorage::getNode(Type t, const char * str)
 }
 
 /**
- * Fetch TruthValue for the Link with given type and outgoing set.
+ * Fetch the Link with given type and outgoing set.
  * If there is no such link, NULL is returned.
  */
 Handle SQLAtomStorage::doGetLink(Type t, const HandleSeq& hseq)
 {
+	// First, check to see if we already know this Link.
+	Handle link(createLink(t, hseq));
+	UUID uuid = _tlbuf.getUUID(link);
+	if (TLB::INVALID_UUID != uuid)
+		return _tlbuf.getAtom(uuid);
+
+	// If we don't know it, then go get it's UUID.
 	setup_typemap();
 
 	char buff[BUFSZ];
@@ -1654,11 +1615,8 @@ Handle SQLAtomStorage::doGetLink(Type t, const HandleSeq& hseq)
 #ifdef STORAGE_DEBUG
 	_num_got_links++;
 #endif // STORAGE_DEBUG
-	Handle link(createLink(t, hseq));
 	_tlbuf.addAtom(link, p->uuid);
-	link = _tlbuf.getAtom(p->uuid);
-	link->setTruthValue(p->tv);
-	return link;
+	return _tlbuf.getAtom(p->uuid);
 }
 
 Handle SQLAtomStorage::getLink(Type t, const HandleSeq& hs)
@@ -1710,34 +1668,6 @@ SQLAtomStorage::PseudoPtr SQLAtomStorage::makeAtom(Response &rp, UUID uuid)
 	// Give the atom the correct UUID. The AtomTable will need this.
 	atom->type = realtype;
 	atom->uuid = uuid;
-
-	// Now get the truth value
-	if (rp.tv_type == SIMPLE_TRUTH_VALUE)
-	{
-		TruthValuePtr stv(SimpleTruthValue::createTV(rp.mean, rp.confidence));
-		atom->tv = stv;
-	}
-	else
-	if (rp.tv_type == COUNT_TRUTH_VALUE)
-	{
-		TruthValuePtr ctv(CountTruthValue::createTV(rp.mean, rp.confidence, rp.count));
-		atom->tv = ctv;
-	}
-	else
-	if (rp.tv_type == INDEFINITE_TRUTH_VALUE)
-	{
-		TruthValuePtr itv(IndefiniteTruthValue::createTV(rp.mean, rp.count, rp.confidence));
-		atom->tv = itv;
-	}
-	else
-	if (rp.tv_type == PROBABILISTIC_TRUTH_VALUE)
-	{
-		TruthValuePtr ptv(ProbabilisticTruthValue::createTV(rp.mean, rp.confidence, rp.count));
-		atom->tv = ptv;
-	}
-	else
-		throw IOException(TRACE_INFO,
-			"makeAtom: Unknown truth value type\n");
 
 	_load_count ++;
 	if (bulk_load and _load_count%10000 == 0)
@@ -1943,10 +1873,6 @@ void SQLAtomStorage::create_tables(void)
 	            "uuid     BIGINT PRIMARY KEY,"
 	            "space    BIGINT REFERENCES spaces(space),"
 	            "type     SMALLINT,"
-	            "type_tv  SMALLINT,"
-	            "stv_mean FLOAT,"
-	            "stv_confidence FLOAT,"
-	            "stv_count DOUBLE PRECISION,"
 	            "height   SMALLINT,"
 	            "name     TEXT,"
 	            "outgoing BIGINT[],"
@@ -1998,6 +1924,11 @@ void SQLAtomStorage::kill_data(void)
 
 	rp.exec("INSERT INTO Spaces VALUES (0,0);");
 	rp.exec("INSERT INTO Spaces VALUES (1,1);");
+	id_create_cache.clear();
+	local_id_cache.clear();
+
+	// Special case for TruthValues - must always have this atom.
+	do_store_single_atom(tvpred, 0);
 }
 
 /* ================================================================ */

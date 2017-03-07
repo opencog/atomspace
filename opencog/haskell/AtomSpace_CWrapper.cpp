@@ -188,7 +188,7 @@ int AtomSpace_setTruthValue( AtomSpace* this_ptr
                                            ,parameters[3]);
         // iptr->setMean(parameters[0]);
         // iptr->setDiff(parameters[4]);
-        h->setTruthValue(std::static_pointer_cast<const TruthValue>(iptr));
+        h->setTruthValue(std::static_pointer_cast<TruthValue>(iptr));
     }
     else
     if (type == FUZZY_TRUTH_VALUE) {

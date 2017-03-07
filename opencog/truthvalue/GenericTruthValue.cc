@@ -55,6 +55,23 @@ GenericTruthValue::GenericTruthValue(GenericTruthValue const& gtv)
     _value[ENTROPY] = gtv.getEntropy();
 }
 
+GenericTruthValue::GenericTruthValue(const ProtoAtomPtr& source)
+       : TruthValue(GENERIC_TRUTH_VALUE)
+{
+    if (source->getType() != GENERIC_TRUTH_VALUE)
+        throw RuntimeException(TRACE_INFO,
+            "Source must be a GenericTruthValue");
+
+    FloatValuePtr fp(FloatValueCast(source));
+    _value.resize(2);
+    _value[POSITIVE_EVIDENCE] = fp->value()[POSITIVE_EVIDENCE];
+    _value[TOTAL_EVIDENCE] = fp->value()[TOTAL_EVIDENCE];
+    _value[FREQUENCY] = fp->value()[FREQUENCY];
+    _value[FUZZY_STRENGTH] = fp->value()[FUZZY_STRENGTH];
+    _value[CONFIDENCE] = fp->value()[CONFIDENCE];
+    _value[ENTROPY] = fp->value()[ENTROPY];
+}
+
 count_t GenericTruthValue::getCount() const
 {
     return _value[FREQUENCY];
@@ -120,7 +137,7 @@ entropy_t GenericTruthValue::getEntropy() const
     return _value[ENTROPY];
 }
 
-TruthValuePtr GenericTruthValue::merge(TruthValuePtr tv, const MergeCtrl& mc) const
+TruthValuePtr GenericTruthValue::merge(TruthValuePtr tv, const MergeCtrl& mc)
 {
     GenericTruthValuePtr gtv = std::dynamic_pointer_cast<const GenericTruthValue>(tv);
     if (NULL == gtv) return tv;

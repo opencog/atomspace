@@ -34,6 +34,8 @@
 
 using namespace opencog;
 
+count_t FuzzyTruthValue::DEFAULT_K = 800.0;
+
 FuzzyTruthValue::FuzzyTruthValue(strength_t m, count_t c)
 	: TruthValue(FUZZY_TRUTH_VALUE)
 {
@@ -49,12 +51,26 @@ FuzzyTruthValue::FuzzyTruthValue(const TruthValue& source)
     _value[MEAN] = source.getMean();
     _value[COUNT] = source.getCount();
 }
+
 FuzzyTruthValue::FuzzyTruthValue(FuzzyTruthValue const& source)
 	: TruthValue(FUZZY_TRUTH_VALUE)
 {
     _value.resize(2);
     _value[MEAN] = source.getMean();
     _value[COUNT] = source.getCount();
+}
+
+FuzzyTruthValue::FuzzyTruthValue(const ProtoAtomPtr& source)
+    : TruthValue(FUZZY_TRUTH_VALUE)
+{
+    if (source->getType() != FUZZY_TRUTH_VALUE)
+        throw RuntimeException(TRACE_INFO,
+            "Source must be a FuzzyTruthValue");
+
+    FloatValuePtr fp(FloatValueCast(source));
+    _value.resize(2);
+    _value[MEAN] = fp->value()[MEAN];
+    _value[COUNT] = fp->value()[COUNT];
 }
 
 strength_t FuzzyTruthValue::getMean() const
@@ -74,7 +90,7 @@ confidence_t FuzzyTruthValue::getConfidence() const
 
 // This is the merge formula appropriate for PLN.
 TruthValuePtr FuzzyTruthValue::merge(TruthValuePtr other,
-                                     const MergeCtrl& mc) const
+                                     const MergeCtrl& mc)
 {
     if (other->getType() != SIMPLE_TRUTH_VALUE) {
         throw RuntimeException(TRACE_INFO,
@@ -82,10 +98,10 @@ TruthValuePtr FuzzyTruthValue::merge(TruthValuePtr other,
            typeid(*other).name());
     }
 
-    if (other->getConfidence() > getConfidence()) {
+    if (other->getConfidence() > getConfidence())
         return other;
-    }
-    return std::dynamic_pointer_cast<const TruthValue>(shared_from_this());
+
+    return std::dynamic_pointer_cast<TruthValue>(shared_from_this());
 }
 
 std::string FuzzyTruthValue::toString(const std::string& indent) const

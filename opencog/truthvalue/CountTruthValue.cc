@@ -51,6 +51,7 @@ CountTruthValue::CountTruthValue(const TruthValue& source)
     _value[CONFIDENCE] = source.getConfidence();
     _value[COUNT] = source.getCount();
 }
+
 CountTruthValue::CountTruthValue(CountTruthValue const& source)
 	: TruthValue(COUNT_TRUTH_VALUE)
 {
@@ -58,6 +59,20 @@ CountTruthValue::CountTruthValue(CountTruthValue const& source)
     _value[MEAN] = source.getMean();
     _value[CONFIDENCE] = source.getConfidence();
     _value[COUNT] = source.getCount();
+}
+
+CountTruthValue::CountTruthValue(const ProtoAtomPtr& source)
+       : TruthValue(COUNT_TRUTH_VALUE)
+{
+    if (source->getType() != COUNT_TRUTH_VALUE)
+        throw RuntimeException(TRACE_INFO,
+            "Source must be a CountTruthValue");
+
+    FloatValuePtr fp(FloatValueCast(source));
+    _value.resize(2);
+    _value[MEAN] = fp->value()[MEAN];
+    _value[CONFIDENCE] = fp->value()[CONFIDENCE];
+    _value[COUNT] = fp->value()[COUNT];
 }
 
 strength_t CountTruthValue::getMean() const
@@ -103,10 +118,10 @@ bool CountTruthValue::operator==(const ProtoAtom& rhs) const
 // because the CountTruthValue usally stores an integer count,
 // and a log-probability or entropy, instead of a confidence.
 TruthValuePtr CountTruthValue::merge(TruthValuePtr other,
-                                     const MergeCtrl& mc) const
+                                     const MergeCtrl& mc)
 {
     CountTruthValuePtr oc =
-        std::dynamic_pointer_cast<const CountTruthValue>(other);
+        std::dynamic_pointer_cast<CountTruthValue>(other);
 
     // If other is a simple truth value, *and* its not the default TV,
     // then perhaps we should merge it in, as if it were a count truth
@@ -114,7 +129,7 @@ TruthValuePtr CountTruthValue::merge(TruthValuePtr other,
     // routine to SimpleTruthValue to do likewise... Anyway, for now,
     // just ignore this possible complication to the semantics.
     if (NULL == oc) return
-        std::dynamic_pointer_cast<const TruthValue>(shared_from_this());
+        std::dynamic_pointer_cast<TruthValue>(shared_from_this());
 
     // If both this and other are counts, then accumulate to get the
     // total count, and average together the strengths, using the

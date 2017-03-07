@@ -37,6 +37,8 @@
 
 using namespace opencog;
 
+count_t SimpleTruthValue::DEFAULT_K = 800.0;
+
 SimpleTruthValue::SimpleTruthValue(strength_t m, confidence_t c)
 	: TruthValue(SIMPLE_TRUTH_VALUE)
 {
@@ -53,12 +55,25 @@ SimpleTruthValue::SimpleTruthValue(const TruthValue& source)
     _value[CONFIDENCE] = source.getConfidence();
 }
 
-SimpleTruthValue::SimpleTruthValue(SimpleTruthValue const& source)
+SimpleTruthValue::SimpleTruthValue(const SimpleTruthValue& source)
 	: TruthValue(SIMPLE_TRUTH_VALUE)
 {
     _value.resize(2);
     _value[MEAN] = source._value[MEAN];
     _value[CONFIDENCE] = source._value[CONFIDENCE];
+}
+
+SimpleTruthValue::SimpleTruthValue(const ProtoAtomPtr& source)
+	: TruthValue(SIMPLE_TRUTH_VALUE)
+{
+	if (source->getType() != SIMPLE_TRUTH_VALUE)
+		throw RuntimeException(TRACE_INFO,
+			"Source must be a SimpleTruthValue");
+
+	FloatValuePtr fp(FloatValueCast(source));
+	_value.resize(2);
+	_value[MEAN] = fp->value()[MEAN];
+	_value[CONFIDENCE] = fp->value()[CONFIDENCE];
 }
 
 strength_t SimpleTruthValue::getMean() const
@@ -80,7 +95,7 @@ confidence_t SimpleTruthValue::getConfidence() const
 
 // This is the merge formula appropriate for PLN.
 TruthValuePtr SimpleTruthValue::merge(TruthValuePtr other,
-                                      const MergeCtrl& mc) const
+                                      const MergeCtrl& mc)
 {
     switch (mc.tv_formula)
     {

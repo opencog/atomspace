@@ -255,7 +255,7 @@ void FetchUTest::test_stuff(void)
 	eval->eval(R"((cog-set-tv! (Concept "AAA") (stv 0.3 0.33)))");
 
 	// Saving everything should not crash.  It should, however,
-	// clober the TV on (Concept "BBB")
+	// change the TV on (Concept "BBB") back to DEFAULT_TV.
 	eval->eval("(sql-store)");
 	eval->eval("(sql-close)");
 
@@ -274,6 +274,8 @@ void FetchUTest::test_stuff(void)
 	eval->eval(R"((fetch-atom (Concept "BBB")))");
 	tv = eval->eval_tv(R"((cog-tv (Concept "BBB")))");
 	TS_ASSERT((*tv) == (*dtv));
+	printf("Expecting %s\n", dtv->toString().c_str());
+	printf("Got %s\n", tv->toString().c_str());
 
 	logger().debug("END TEST: %s", __FUNCTION__);
 }

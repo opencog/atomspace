@@ -44,6 +44,8 @@ protected:
 	std::vector<double> _value;
 
 	FloatValue(Type t) : ProtoAtom(t) {}
+public: // XXX should be protected...
+	FloatValue(Type t, std::vector<double> v) : ProtoAtom(t), _value(v) {}
 
 public:
 	FloatValue(double v) : ProtoAtom(FLOAT_VALUE) { _value.push_back(v); }

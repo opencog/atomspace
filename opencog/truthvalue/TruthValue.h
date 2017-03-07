@@ -87,7 +87,7 @@ struct MergeCtrl
 };
 
 class TruthValue;
-typedef std::shared_ptr<const TruthValue> TruthValuePtr;
+typedef std::shared_ptr<TruthValue> TruthValuePtr;
 
 class TruthValue
     : public FloatValue
@@ -102,15 +102,18 @@ class TruthValue
     TruthValue& operator=(const TruthValue& rhs) {
         throw RuntimeException(TRACE_INFO, "Cannot modify truth values!");
     }
-public:
-    // default lookahead
-    static count_t DEFAULT_K;
-    static void setDefaultK(count_t k) {
-        DEFAULT_K = k;
-    }
 
+protected:
     TruthValue(Type t) : FloatValue(t) {}
+
+    // Merge helper method
+    TruthValuePtr higher_confidence_merge(TruthValuePtr);
+
+public:
     virtual ~TruthValue() {}
+
+    static TruthValuePtr factory(Type, std::vector<double>);
+    static TruthValuePtr factory(const ProtoAtomPtr&);
 
     virtual std::string toShortString(const std::string&) const;
 
@@ -156,7 +159,7 @@ public:
      *        https://github.com/opencog/opencog/issues/1295
      */
     virtual TruthValuePtr merge(TruthValuePtr,
-                                const MergeCtrl& = MergeCtrl()) const = 0;
+                                const MergeCtrl& = MergeCtrl()) = 0;
 
     /**
      * Check if this TV is equal to the default TV.
@@ -164,10 +167,6 @@ public:
      */
     virtual bool isDefaultTV() const;
     virtual bool isDefinedTV() const;
-
-protected:
-    // Helper merging methods
-    TruthValuePtr higher_confidence_merge(TruthValuePtr) const;
 };
 
 } // namespace opencog

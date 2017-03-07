@@ -193,7 +193,7 @@ void ValueSaveUTest::do_test_single_atom_save()
 	backing->set_store(store);
 	backing->registerWith(as);
 
-	Handle key = as->add_node(CONCEPT_NODE, "some keynode");
+	Handle key = as->add_node(PREDICATE_NODE, "some pred key");
 	Handle atom = as->add_node(CONCEPT_NODE, "some node");
 
 	// Store the key and the atom, so as to avoid any UUID
@@ -236,9 +236,10 @@ void ValueSaveUTest::do_test_single_atom_save()
 	as->barrier();
 
 	// --------------------
+	store->kill_data();
+
 	delete as;
 	delete backing;
-	store->kill_data();
 	delete store;
 }
 
@@ -249,7 +250,7 @@ void ValueSaveUTest::do_test_single_atom_save()
  */
 void ValueSaveUTest::check_one(ProtoAtomPtr pap, bool fetchkey)
 {
-	Handle bkey(createNode(CONCEPT_NODE, "some keynode"));
+	Handle bkey(createNode(PREDICATE_NODE, "some pred key"));
 	Handle batom(createNode(CONCEPT_NODE, "some node"));
 
 	// ------
@@ -317,7 +318,7 @@ void ValueSaveUTest::do_test_save_restore(bool fkey)
 	backing->set_store(store);
 	backing->registerWith(as);
 
-	Handle key = as->add_node(CONCEPT_NODE, "some keynode");
+	Handle key = as->add_node(PREDICATE_NODE, "some pred key");
 	Handle atom = as->add_node(CONCEPT_NODE, "some node");
 
 	// Store the key and the atom, so as to avoid any UUID
@@ -352,9 +353,9 @@ void ValueSaveUTest::do_test_save_restore(bool fkey)
 	check_one(pvl2, fkey);
 
 	// --------------------
+	store->kill_data();
 	delete as;
 	delete backing;
-	store->kill_data();
 	delete store;
 }
 

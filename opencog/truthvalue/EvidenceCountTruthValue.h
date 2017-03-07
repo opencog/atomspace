@@ -47,10 +47,13 @@ protected:
 		TOTAL_COUNT /// Total number of observations.
    };
 
+	static count_t DEFAULT_K;
+
 public:
 	EvidenceCountTruthValue(count_t pos_count, count_t total_count = -1);
 	EvidenceCountTruthValue(const TruthValue&);
 	EvidenceCountTruthValue(EvidenceCountTruthValue const&);
+	EvidenceCountTruthValue(const ProtoAtomPtr&);
 
 	virtual bool operator==(const ProtoAtom&) const;
 
@@ -75,7 +78,7 @@ public:
 	 * with the highest confidence.
 	 */
 	TruthValuePtr merge(TruthValuePtr,
-	                    const MergeCtrl& mc=MergeCtrl()) const;
+	                    const MergeCtrl& mc=MergeCtrl());
 
 	static EvidenceCountTruthValuePtr createECTV(count_t pos_count,
 	                                             count_t total_count = -1.0)
@@ -86,6 +89,11 @@ public:
 	{
 		return std::static_pointer_cast<TruthValue>(createECTV(pos_count,
 		                                                       total_count));
+	}
+	static TruthValuePtr createTV(const ProtoAtomPtr& pap)
+	{
+		return std::static_pointer_cast<TruthValue>(
+			std::make_shared<EvidenceCountTruthValue>(pap));
 	}
 
 	TruthValuePtr clone() const

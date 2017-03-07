@@ -84,7 +84,6 @@ class SQLAtomStorage : public AtomStorage
 		    UUID uuid;
 		    std::string name;
 		    std::vector<UUID> oset;
-		    TruthValuePtr tv;
 		};
 		typedef std::shared_ptr<PseudoAtom> PseudoPtr;
 		#define createPseudo std::make_shared<PseudoAtom>
@@ -137,6 +136,8 @@ class SQLAtomStorage : public AtomStorage
 		// --------------------------
 		// Values
 
+#define NUMVMUT 16
+		std::mutex _value_mutex[NUMVMUT];
 		void store_atom_values(const Handle &);
 		void get_atom_values(Handle &);
 
@@ -161,6 +162,7 @@ class SQLAtomStorage : public AtomStorage
 		VUID getMaxObservedVUID(void);
 		std::atomic<VUID> _next_valid;
 
+		Handle tvpred;
 		// --------------------------
 		// Performance statistics
 		std::atomic<size_t> _num_get_nodes;

@@ -37,10 +37,10 @@ namespace opencog
  */
 
 class IndefiniteTruthValue;
-typedef std::shared_ptr<const IndefiniteTruthValue> IndefiniteTruthValuePtr;
+typedef std::shared_ptr<IndefiniteTruthValue> IndefiniteTruthValuePtr;
 
 static inline IndefiniteTruthValuePtr IndefiniteTVCast(TruthValuePtr tv)
-    { return std::dynamic_pointer_cast<const IndefiniteTruthValue>(tv); }
+    { return std::dynamic_pointer_cast<IndefiniteTruthValue>(tv); }
 
 /**
  * Indefinite probabilities are in the form ([L,U],b,N). In practical work,
@@ -85,10 +85,16 @@ private:
     strength_t findDiff(strength_t idiff) const;
 
 public:
+    static count_t DEFAULT_K;
+    static void setDefaultK(count_t k) {
+        DEFAULT_K = k;
+    }
+
     IndefiniteTruthValue();
     IndefiniteTruthValue(strength_t l, strength_t u,
                          confidence_t c = DEFAULT_CONFIDENCE_LEVEL);
     IndefiniteTruthValue(IndefiniteTruthValue const&);
+    IndefiniteTruthValue(const ProtoAtomPtr&);
 
     //! it is a strict equality comparison, without error interval tolerance
     virtual bool operator==(const ProtoAtom&) const;
@@ -107,7 +113,7 @@ public:
     bool isSymmetric() const { return symmetric; }
 
     TruthValuePtr merge(TruthValuePtr,
-                        const MergeCtrl& mc=MergeCtrl()) const;
+                        const MergeCtrl& mc=MergeCtrl());
 
     std::string toString(const std::string&) const;
 
@@ -122,7 +128,7 @@ public:
 
     static TruthValuePtr createTV(TruthValuePtr tv)
     {
-        return std::static_pointer_cast<const TruthValue>(createITV(tv));
+        return std::static_pointer_cast<TruthValue>(createITV(tv));
     }
 
     static IndefiniteTruthValuePtr createITV(strength_t l, strength_t u,
@@ -134,7 +140,12 @@ public:
     static TruthValuePtr createTV(strength_t l, strength_t u,
                          confidence_t c = DEFAULT_CONFIDENCE_LEVEL)
     {
-        return std::static_pointer_cast<const TruthValue>(createITV(l, u, c));
+        return std::static_pointer_cast<TruthValue>(createITV(l, u, c));
+    }
+    static TruthValuePtr createTV(const ProtoAtomPtr& pap)
+    {
+        return std::static_pointer_cast<TruthValue>(
+            std::make_shared<IndefiniteTruthValue>(pap));
     }
 
     TruthValuePtr clone() const

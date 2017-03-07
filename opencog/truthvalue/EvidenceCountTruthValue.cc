@@ -37,6 +37,8 @@
 
 using namespace opencog;
 
+count_t EvidenceCountTruthValue::DEFAULT_K = 800.0;
+
 EvidenceCountTruthValue::EvidenceCountTruthValue(count_t pos_count,
                                                  count_t total_count)
 	: TruthValue(EVIDENCE_COUNT_TRUTH_VALUE)
@@ -60,6 +62,19 @@ EvidenceCountTruthValue::EvidenceCountTruthValue(EvidenceCountTruthValue const& 
 	_value.resize(2);
 	_value[POS_COUNT] = source.getPositiveCount();
 	_value[TOTAL_COUNT] = source.getCount();
+}
+
+EvidenceCountTruthValue::EvidenceCountTruthValue(const ProtoAtomPtr& source)
+       : TruthValue(EVIDENCE_COUNT_TRUTH_VALUE)
+{
+    if (source->getType() != EVIDENCE_COUNT_TRUTH_VALUE)
+        throw RuntimeException(TRACE_INFO,
+            "Source must be a EvidenceCountTruthValue");
+
+    FloatValuePtr fp(FloatValueCast(source));
+    _value.resize(2);
+    _value[POS_COUNT] = fp->value()[POS_COUNT];
+    _value[TOTAL_COUNT] = fp->value()[TOTAL_COUNT];
 }
 
 strength_t EvidenceCountTruthValue::getMean() const
@@ -93,10 +108,10 @@ bool EvidenceCountTruthValue::is_count_valid() const
 
 // This is the merge formula appropriate for PLN.
 TruthValuePtr EvidenceCountTruthValue::merge(TruthValuePtr other,
-                                             const MergeCtrl& mc) const
+                                             const MergeCtrl& mc)
 {
 	// TODO
-	switch(mc.tv_formula)
+	switch (mc.tv_formula)
 	{
 	case MergeCtrl::TVFormula::HIGHER_CONFIDENCE:
 		return higher_confidence_merge(other);
