@@ -236,9 +236,10 @@ void ValueSaveUTest::do_test_single_atom_save()
 	as->barrier();
 
 	// --------------------
+	store->kill_data();
+
 	delete as;
 	delete backing;
-	store->kill_data();
 	delete store;
 }
 
@@ -352,9 +353,9 @@ void ValueSaveUTest::do_test_save_restore(bool fkey)
 	check_one(pvl2, fkey);
 
 	// --------------------
+	store->kill_data();
 	delete as;
 	delete backing;
-	store->kill_data();
 	delete store;
 }
 
