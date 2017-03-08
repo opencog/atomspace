@@ -112,8 +112,8 @@ TruthValuePtr SimpleTruthValue::merge(TruthValuePtr other,
                                    "SimpleTruthValue using the default style",
                                    typeid(*other).name());
 
-            confidence_t cf = std::min(getConfidence(), 0.9999998f);
-            auto count = static_cast<count_t>(DEFAULT_K * cf / (1.0f - cf));
+            confidence_t cf = std::min(getConfidence(), 0.9999998);
+            auto count = static_cast<count_t>(DEFAULT_K * cf / (1.0 - cf));
             auto count2 = other->getCount();
 #define CVAL  0.2f
             auto count_new = count + count2 - std::min(count, count2) * CVAL;

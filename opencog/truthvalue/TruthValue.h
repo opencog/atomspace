@@ -43,14 +43,8 @@ namespace opencog
 {
 
 // Truth-value components
-// For essentially all truth-value calculations, float is enough, so
-// we save space here, and use float. For counting, a float is not
-// enough -- it gets up to 16 million (24 bits) and then clamps. So
-// we use a double for counting, which should provide 48 bits. Since
-// SimpleTruthValue does not store count anyway, there is no storage
-// penalty associated with this.
-typedef float strength_t;
-typedef float confidence_t;
+typedef double strength_t;
+typedef double confidence_t;
 typedef double count_t;
 
 /// Class to control the TV merging strategy
@@ -168,6 +162,9 @@ public:
     virtual bool isDefaultTV() const;
     virtual bool isDefinedTV() const;
 };
+
+static inline TruthValuePtr TruthValueCast(const ProtoAtomPtr& pa)
+    { return std::dynamic_pointer_cast<TruthValue>(pa); }
 
 } // namespace opencog
 

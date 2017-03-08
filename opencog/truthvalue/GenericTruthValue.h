@@ -32,9 +32,6 @@
 namespace opencog
 {
 
-typedef float strength_t;
-typedef float confidence_t;
-typedef double count_t;
 typedef double entropy_t;
 
 class GenericTruthValue;
