@@ -22,6 +22,7 @@
  */
 
 #include <cstddef>
+#include <memory>
 #include <libguile.h>
 
 #include <opencog/truthvalue/FuzzyTruthValue.h>
@@ -109,9 +110,10 @@ TruthValuePtr SchemeSmob::get_tv_from_list(SCM slist)
 			scm_t_bits misctype = SCM_SMOB_FLAGS(sval);
 			switch (misctype)
 			{
-				case COG_PROTOM:
+				case COG_PROTOM: {
 					ProtoAtomPtr pa(scm_to_protom(sval));
 					return TruthValueCast(pa);
+				}
 				default:
 					break;
 			}
@@ -155,7 +157,7 @@ std::string SchemeSmob::tv_to_string(const TruthValuePtr& tv)
 
 	if (INDEFINITE_TRUTH_VALUE == tvt)
 	{
-		const IndefiniteTruthValuePtr itv = static_cast<IndefiniteTruthValuePtr>(tv);
+		const IndefiniteTruthValuePtr itv = IndefiniteTVCast(tv);
 		snprintf(buff, BUFLEN, "(itv %.8g ", itv->getL());
 		ret += buff;
 		snprintf(buff, BUFLEN, "%.8g ", itv->getU());
@@ -187,7 +189,7 @@ std::string SchemeSmob::tv_to_string(const TruthValuePtr& tv)
 
 	if (EVIDENCE_COUNT_TRUTH_VALUE == tvt)
 	{
-		const EvidenceCountTruthValuePtr etv = static_cast<EvidenceCountTruthValuePtr>(tv);
+		const EvidenceCountTruthValuePtr etv = std::dynamic_pointer_cast<EvidenceCountTruthValue>(tv);
 		snprintf(buff, BUFLEN, "(etv %.8g ", etv->getPositiveCount());
 		ret += buff;
 		snprintf(buff, BUFLEN, "%.8g)", etv->getCount());
@@ -206,7 +208,7 @@ SCM SchemeSmob::ss_new_stv (SCM smean, SCM sconfidence)
 	double mean = scm_to_double(smean);
 	double confidence = scm_to_double(sconfidence);
 
-	ProtoAtomPtr tv = new SimpleTruthValue(mean, confidence);
+	ProtoAtomPtr tv = SimpleTruthValue::createTV(mean, confidence);
 	return protom_to_scm(tv);
 }
 
@@ -216,7 +218,7 @@ SCM SchemeSmob::ss_new_ctv (SCM smean, SCM sconfidence, SCM scount)
 	double confidence = scm_to_double(sconfidence);
 	double count = scm_to_double(scount);
 
-	ProtoAtomPtr tv = new CountTruthValue(mean, confidence, count);
+	ProtoAtomPtr tv = CountTruthValue::createTV(mean, confidence, count);
 	return protom_to_scm(tv);
 }
 
@@ -226,7 +228,7 @@ SCM SchemeSmob::ss_new_itv (SCM slower, SCM supper, SCM sconfidence)
 	double upper = scm_to_double(supper);
 	double confidence = scm_to_double(sconfidence);
 
-	ProtoAtomPtr tv = new IndefiniteTruthValue(lower, upper, confidence);
+	ProtoAtomPtr tv = IndefiniteTruthValue::createTV(lower, upper, confidence);
 	return protom_to_scm(tv);
 }
 
@@ -236,7 +238,7 @@ SCM SchemeSmob::ss_new_ptv (SCM smean, SCM sconfidence, SCM scount)
 	double confidence = scm_to_double(sconfidence);
 	double count = scm_to_double(scount);
 
-	ProtoAtomPtr tv = new ProbabilisticTruthValue(mean, confidence, count);
+	ProtoAtomPtr tv = ProbabilisticTruthValue::createTV(mean, confidence, count);
 	return protom_to_scm(tv);
 }
 
@@ -246,7 +248,7 @@ SCM SchemeSmob::ss_new_ftv (SCM smean, SCM sconfidence)
 	double confidence = scm_to_double(sconfidence);
 
 	float cnt = FuzzyTruthValue::confidenceToCount(confidence);
-	ProtoAtomPtr tv = new FuzzyTruthValue(mean, cnt);
+	ProtoAtomPtr tv = FuzzyTruthValue::createTV(mean, cnt);
 	return protom_to_scm(tv);
 }
 
@@ -255,7 +257,7 @@ SCM SchemeSmob::ss_new_etv (SCM sposcount, SCM stotalcount)
 	double pos_count = scm_to_double(sposcount);
 	double total_count = scm_to_double(stotalcount);
 
-	ProtoAtomPtr tv = new EvidenceCountTruthValue(pos_count, total_count);
+	ProtoAtomPtr tv = EvidenceCountTruthValue::createTV(pos_count, total_count);
 	return protom_to_scm(tv);
 }
 
@@ -383,7 +385,7 @@ SCM SchemeSmob::ss_tv_get_value (SCM s)
 
 	if (INDEFINITE_TRUTH_VALUE == tvt)
 	{
-		IndefiniteTruthValuePtr itv = static_cast<IndefiniteTruthValuePtr>(tv);
+		IndefiniteTruthValuePtr itv = IndefiniteTVCast(tv);
 		SCM lower = scm_from_double(itv->getL());
 		SCM upper = scm_from_double(itv->getU());
 		SCM conf_level = scm_from_double(itv->getConfidenceLevel());
@@ -435,7 +437,7 @@ SCM SchemeSmob::ss_tv_get_value (SCM s)
 
 	if	(EVIDENCE_COUNT_TRUTH_VALUE == tvt)
 	{
-		EvidenceCountTruthValuePtr etv = static_cast<EvidenceCountTruthValuePtr>(tv);
+		EvidenceCountTruthValuePtr etv = std::dynamic_pointer_cast<EvidenceCountTruthValue>(tv);
 		SCM poscount = scm_from_double(etv->getPositiveCount());
 		SCM mean = scm_from_double(etv->getMean());
 		SCM conf = scm_from_double(etv->getConfidence());

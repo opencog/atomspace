@@ -72,7 +72,7 @@ std::string SchemeSmob::handle_to_string(const Handle& h, int indent)
 		TruthValuePtr tv(h->getTruthValue());
 		if (not tv->isDefaultTV()) {
 			ret += " ";
-			ret += tv_to_string (tv.get());
+			ret += tv_to_string (tv);
 		}
 		ret += ")";
 		return ret;
@@ -87,14 +87,15 @@ std::string SchemeSmob::handle_to_string(const Handle& h, int indent)
 		TruthValuePtr tv(h->getTruthValue());
 		if (not tv->isDefaultTV()) {
 			ret += " ";
-			ret += tv_to_string (tv.get());
+			ret += tv_to_string(tv);
 		}
 
-		// print the outgoing link set.
+		// Print the outgoing link set.
 		ret += "\n";
 		const HandleSeq& oset = h->getOutgoingSet();
 		unsigned int arity = oset.size();
-		for (unsigned int i=0; i<arity; i++) {
+		for (unsigned int i=0; i<arity; i++)
+		{
 			//ret += " ";
 			ret += handle_to_string(oset[i], /*(0==i)?0:*/indent+1);
 			ret += "\n";
@@ -359,13 +360,8 @@ SCM SchemeSmob::ss_new_node (SCM stype, SCM sname, SCM kv_pairs)
 		// Now, create the actual node... in the actual atom space.
 		h = atomspace->add_node(t, name);
 
-		// tv->clone is called here, because, for the atomspace, we want
-		// to use a use-counted std:shared_ptr, whereas in guile, we are
-		// using a garbage-collected raw pointer.  So clone makes up the
-		// difference.
-		const TruthValue *tv = get_tv_from_list(kv_pairs);
-		if (tv) h->setTruthValue(tv->clone());
-xxxxxxxx
+		const TruthValuePtr tv = get_tv_from_list(kv_pairs);
+		if (tv) h->setTruthValue(tv);
 
 		// Was an attention value explicitly specified?
 		// If so, then we've got to set it.
@@ -401,8 +397,8 @@ SCM SchemeSmob::ss_node (SCM stype, SCM sname, SCM kv_pairs)
 	if (NULL == h) return SCM_EOL;
 
 	// If there was a truth value, change it.
-	const TruthValue *tv = get_tv_from_list(kv_pairs);
-	if (tv) h->setTruthValue(tv->clone());
+	const TruthValuePtr tv = get_tv_from_list(kv_pairs);
+	if (tv) h->setTruthValue(tv);
 
 	// If there was an attention value, change it.
 	const AttentionValue *av = get_av_from_list(kv_pairs);
@@ -488,10 +484,8 @@ SCM SchemeSmob::ss_new_link (SCM stype, SCM satom_list)
 		h = atomspace->add_link(t, outgoing_set);
 
 		// Fish out a truth value, if its there.
-		const TruthValue *tv = get_tv_from_list(satom_list);
-		if (tv) {
-			h->setTruthValue(tv->clone());
-		}
+		const TruthValuePtr tv = get_tv_from_list(satom_list);
+		if (tv) h->setTruthValue(tv);
 
 		// Was an attention value explicitly specified?
 		// If so, then we've got to set it.
@@ -526,8 +520,8 @@ SCM SchemeSmob::ss_link (SCM stype, SCM satom_list)
 	if (nullptr == h) return SCM_EOL;
 
 	// If there was a truth value, change it.
-	const TruthValue *tv = get_tv_from_list(satom_list);
-	if (tv) h->setTruthValue(tv->clone());
+	const TruthValuePtr tv = get_tv_from_list(satom_list);
+	if (tv) h->setTruthValue(tv);
 
 	// If there was an attention value, change it.
 	const AttentionValue *av = get_av_from_list(satom_list);
