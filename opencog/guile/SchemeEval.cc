@@ -907,7 +907,7 @@ TruthValuePtr SchemeEval::eval_tv(const std::string &expr)
 		SCM rc = do_scm_eval(expr_str, recast_scm_eval_string);
 		if (eval_error())
 			throw RuntimeException(TRACE_INFO, "%s", _error_msg.c_str());
-		return SchemeSmob::to_tv(rc);
+		return SchemeSmob::scm_to_tv(rc);
 	}
 
 	_pexpr = &expr;
@@ -932,7 +932,7 @@ void * SchemeEval::c_wrap_eval_tv(void * p)
 	// Pass evaluation errors out of the wrapper.
 	if (self->eval_error()) return self;
 
-	self->_tvp = SchemeSmob::to_tv(rc);
+	self->_tvp = SchemeSmob::scm_to_tv(rc);
 	return self;
 }
 
@@ -1103,7 +1103,7 @@ TruthValuePtr SchemeEval::apply_tv(const std::string &func, Handle varargs)
 			// At any rate, we must not return a TV of any sort, here.
 			throw RuntimeException(TRACE_INFO, "%s", _error_msg.c_str());
 		}
-		return SchemeSmob::to_tv(tv_smob);
+		return SchemeSmob::scm_to_tv(tv_smob);
 	}
 
 	_pexpr = &func;
@@ -1127,7 +1127,7 @@ void * SchemeEval::c_wrap_apply_tv(void * p)
 	SchemeEval *self = (SchemeEval *) p;
 	SCM tv_smob = self->do_apply_scm(*self->_pexpr, self->_hargs);
 	if (self->eval_error()) return self;
-	self->_tvp = SchemeSmob::to_tv(tv_smob);
+	self->_tvp = SchemeSmob::scm_to_tv(tv_smob);
 	return self;
 }
 

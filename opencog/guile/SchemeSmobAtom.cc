@@ -104,17 +104,15 @@ SCM SchemeSmob::ss_arity (SCM satom)
 SCM SchemeSmob::ss_tv (SCM satom)
 {
 	Handle h = verify_handle(satom, "cog-tv");
-	TruthValuePtr tv(h->getTruthValue());
-	TruthValue *stv = tv->rawclone();
-	return take_tv(stv);
+	return protom_to_scm(h->getTruthValue());
 }
 
 SCM SchemeSmob::ss_set_tv (SCM satom, SCM stv)
 {
 	Handle h = verify_handle(satom, "cog-set-tv!");
-	TruthValue *tv = verify_tv(stv, "cog-set-tv!", 2);
+	TruthValuePtr tv = verify_tv(stv, "cog-set-tv!", 2);
 
-	h->setTruthValue(tv->clone());
+	h->setTruthValue(tv);
 	scm_remember_upto_here_1(stv);
 	return satom;
 }
@@ -122,9 +120,9 @@ SCM SchemeSmob::ss_set_tv (SCM satom, SCM stv)
 SCM SchemeSmob::ss_merge_tv (SCM satom, SCM stv)
 {
 	Handle h = verify_handle(satom, "cog-merge-tv!");
-	TruthValue *tv = verify_tv(stv, "cog-merge-tv!", 2);
+	TruthValuePtr tv = verify_tv(stv, "cog-merge-tv!", 2);
 
-	h->merge(tv->clone());
+	h->merge(tv);
 	scm_remember_upto_here_1(stv);
 	return satom;
 }
@@ -134,9 +132,9 @@ SCM SchemeSmob::ss_merge_tv (SCM satom, SCM stv)
 SCM SchemeSmob::ss_merge_hi_conf_tv (SCM satom, SCM stv)
 {
 	Handle h = verify_handle(satom, "cog-merge-hi-conf-tv!");
-	TruthValue *tv = verify_tv(stv, "cog-merge-hi-conf-tv!", 2);
+	TruthValuePtr tv = verify_tv(stv, "cog-merge-hi-conf-tv!", 2);
 
-	h->merge(tv->clone(), MergeCtrl(MergeCtrl::TVFormula::HIGHER_CONFIDENCE));
+	h->merge(tv, MergeCtrl(MergeCtrl::TVFormula::HIGHER_CONFIDENCE));
 	scm_remember_upto_here_1(stv);
 	return satom;
 }

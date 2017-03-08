@@ -320,9 +320,16 @@ SCM SchemeSmob::ss_etv_p (SCM s)
 
 /* ============================================================== */
 
+TruthValuePtr SchemeSmob::scm_to_tv(SCM stv)
+{
+	ProtoAtomPtr pa(scm_to_protom(stv));
+	TruthValuePtr tv(TruthValueCast(pa));
+
+	return tv;
+}
+
 TruthValuePtr SchemeSmob::verify_tv(SCM stv, const char *subrname, int pos)
 {
-
 	ProtoAtomPtr pa(scm_to_protom(stv));
 	TruthValuePtr tv(TruthValueCast(pa));
 

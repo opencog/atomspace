@@ -72,6 +72,7 @@ private:
 	static SCM protom_to_scm(const ProtoAtomPtr&);
 	static Handle scm_to_handle(SCM);
 	static ProtoAtomPtr scm_to_protom(SCM);
+	static TruthValuePtr scm_to_tv(SCM);
 
 	// Atom creation and deletion functions
 	static SCM ss_new_value(SCM, SCM);
