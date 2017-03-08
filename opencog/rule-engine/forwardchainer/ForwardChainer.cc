@@ -35,8 +35,6 @@
 #include <opencog/rule-engine/Rule.h>
 
 #include "ForwardChainer.h"
-#include "FocusSetPMCB.h"
-#include "VarGroundingPMCB.h"
 #include "FCLogger.h"
 
 using namespace opencog;

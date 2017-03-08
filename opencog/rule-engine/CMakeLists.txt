@@ -9,9 +9,7 @@ ADD_LIBRARY(ruleengine
 	backwardchainer/UnifyPMCB
 	backwardchainer/BCLogger
 	forwardchainer/FCStat
-	forwardchainer/FocusSetPMCB
 	forwardchainer/ForwardChainer
-	forwardchainer/VarGroundingPMCB
 	forwardchainer/FCLogger
 	ChainerUtils.cc
 	InferenceSCM.cc
