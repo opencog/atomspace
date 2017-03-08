@@ -400,7 +400,7 @@ IncomingSet Atom::getIncomingSetByType(Type type, bool subclass)
 std::string Atom::idToString() const
 {
     return
-        // std::string("[") + std::to_string(get_hash()) + "]" +
+        std::string("[") + std::to_string(get_hash()) + "]" +
         std::string("[") + std::to_string(_atom_space? _atom_space->_atom_table.get_uuid() : -1) + "]";
 }
 
