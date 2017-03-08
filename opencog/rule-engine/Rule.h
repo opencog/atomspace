@@ -158,6 +158,14 @@ public:
 	HandleSeq get_clauses() const;
 
 	/**
+	 * Return the rule premises, that is the last arguments of the
+	 * rewrite term's ExecutionOutputLink. If the last arguments are
+	 * SetLinks, then return their outgoings as well. That is because
+	 * SetLink is used to represent unordered arguments.
+	 */
+	HandleSeq get_premises() const;
+
+	/**
 	 * Return the conclusion of the rule. Used for applying a forward
 	 * step.
 	 */
@@ -193,6 +201,10 @@ public:
 	 * one different sides, we need to perform alpha conversion to
 	 * avoid troubles, thus having to return the rules along side the
 	 * typed substitutions.
+	 *
+	 * TODO: it's not clear the forward chainer needs the
+	 * TypedSubtitution at all. Maybe only the rules are enough. For
+	 * now we return both.
 	 */
 	RuleTypedSubstitutionMap unify_source(const Handle& source,
 	                                      const Handle& vardecl=Handle::UNDEFINED) const;
