@@ -344,8 +344,6 @@ SCM SchemeSmob::ss_new_node (SCM stype, SCM sname, SCM kv_pairs)
 	// Special case handling for NumberNode (and TimeNode, etc.)
 	if (classserver().isA(t, NUMBER_NODE) and scm_is_number(sname)) {
 		sname = scm_number_to_string(sname, _radix_ten);
-		// TODO: if we're given a string, I guess maybe we should check
-		// that the string is convertible to a number ??
 	}
 	std::string name(verify_string (sname, "cog-new-node", 2,
 		"string name for the node"));
@@ -353,20 +351,19 @@ SCM SchemeSmob::ss_new_node (SCM stype, SCM sname, SCM kv_pairs)
 	AtomSpace* atomspace = get_as_from_list(kv_pairs);
 	if (NULL == atomspace) atomspace = ss_get_env_as("cog-new-node");
 
-	Handle h;
-
 	try
 	{
 		// Now, create the actual node... in the actual atom space.
-		h = atomspace->add_node(t, name);
+		Handle h(atomspace->add_node(t, name));
 
-		const TruthValuePtr tv = get_tv_from_list(kv_pairs);
+		const TruthValuePtr tv(get_tv_from_list(kv_pairs));
 		if (tv) h->setTruthValue(tv);
 
 		// Was an attention value explicitly specified?
 		// If so, then we've got to set it.
 		AttentionValue *av = get_av_from_list(kv_pairs);
 		if (av) attentionbank(atomspace).change_av(h, av->clone());
+		return handle_to_scm(h);
 	}
 	catch (const std::exception& ex)
 	{
@@ -374,7 +371,7 @@ SCM SchemeSmob::ss_new_node (SCM stype, SCM sname, SCM kv_pairs)
 	}
 
 	scm_remember_upto_here_1(kv_pairs);
-	return handle_to_scm(h);
+	return SCM_EOL;
 }
 
 /**
@@ -397,7 +394,7 @@ SCM SchemeSmob::ss_node (SCM stype, SCM sname, SCM kv_pairs)
 	if (NULL == h) return SCM_EOL;
 
 	// If there was a truth value, change it.
-	const TruthValuePtr tv = get_tv_from_list(kv_pairs);
+	const TruthValuePtr tv(get_tv_from_list(kv_pairs));
 	if (tv) h->setTruthValue(tv);
 
 	// If there was an attention value, change it.
@@ -469,7 +466,6 @@ SchemeSmob::verify_handle_list (SCM satom_list, const char * subrname, int pos)
  */
 SCM SchemeSmob::ss_new_link (SCM stype, SCM satom_list)
 {
-	Handle h;
 	Type t = verify_atom_type(stype, "cog-new-link", 1);
 
 	HandleSeq outgoing_set;
@@ -481,23 +477,24 @@ SCM SchemeSmob::ss_new_link (SCM stype, SCM satom_list)
 	try
 	{
 		// Now, create the actual link... in the actual atom space.
-		h = atomspace->add_link(t, outgoing_set);
+		Handle h(atomspace->add_link(t, outgoing_set));
 
 		// Fish out a truth value, if its there.
-		const TruthValuePtr tv = get_tv_from_list(satom_list);
+		const TruthValuePtr tv(get_tv_from_list(satom_list));
 		if (tv) h->setTruthValue(tv);
 
 		// Was an attention value explicitly specified?
 		// If so, then we've got to set it.
 		const AttentionValue *av = get_av_from_list(satom_list);
 		if (av) attentionbank(atomspace).change_av(h, av->clone());
+		return handle_to_scm (h);
 	}
 	catch (const std::exception& ex)
 	{
 		throw_exception(ex, "cog-new-link", satom_list);
 	}
 	scm_remember_upto_here_1(satom_list);
-	return handle_to_scm (h);
+	return SCM_EOL;
 }
 
 /**
@@ -520,7 +517,7 @@ SCM SchemeSmob::ss_link (SCM stype, SCM satom_list)
 	if (nullptr == h) return SCM_EOL;
 
 	// If there was a truth value, change it.
-	const TruthValuePtr tv = get_tv_from_list(satom_list);
+	const TruthValuePtr tv(get_tv_from_list(satom_list));
 	if (tv) h->setTruthValue(tv);
 
 	// If there was an attention value, change it.

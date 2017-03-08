@@ -41,17 +41,17 @@ using namespace opencog;
 /**
  * Search for a truth value (demarked by #:tv) in a list of key-value
  * pairs.  Return the truth value if found, else return null.
- * Throw errors if the list is not stictly just key-value pairs
+ * Throw errors if the list is not strictly just key-value pairs
  *
  * XXX This code is not currently used, since it seems pointless
  * to have key-value pairs for this function. After all, an atom
  * can only have one truth value ever -- if we find a truth value, we
  * use it. We don't really need a key to tell us that its a truth value.
  * So punt, and get truth values implicitly. Meanwhile, this code is
- * stubbed out, for a rainy tay, in case we need to resurrect key-value
+ * stubbed out, for a rainy day, in case we need to resurrect key-value
  * pairs in the future.
  */
-static TruthValue *get_tv_from_kvp(SCM kvp, const char * subrname, int pos)
+static TruthValuePtr get_tv_from_kvp(SCM kvp, const char * subrname, int pos)
 {
 	if (!scm_is_pair(kvp)) return NULL;
 
@@ -80,9 +80,7 @@ static TruthValue *get_tv_from_kvp(SCM kvp, const char * subrname, int pos)
 			scm_t_bits misctype = SCM_SMOB_FLAGS(sval);
 			if (misctype != COG_SIMPLE_TV)
 				scm_wrong_type_arg_msg(subrname, pos, sval, "opencog truth value");
-			TruthValue *tv;
-			tv = (TruthValue *) SCM_SMOB_DATA(sval);
-			return tv;
+			return scm_to_tv(sval);
 		}
 		free(key);
 
