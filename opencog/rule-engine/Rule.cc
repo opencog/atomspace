@@ -225,8 +225,8 @@ bool Rule::is_meta() const
  */
 HandleSeq Rule::get_clauses() const
 {
-	// if the rule's handle has not been set yet
-	if (!_rule)
+	// If the rule's handle has not been set yet
+	if (not is_valid())
 		return HandleSeq();
 
     Handle implicant = get_implicant();
@@ -239,6 +239,38 @@ HandleSeq Rule::get_clauses() const
         hs.push_back(implicant);
 
     return hs;
+}
+
+HandleSeq Rule::get_premises() const
+{
+	HandleSeq premises;
+
+	// If the rule's handle has not been set yet
+	if (not is_valid())
+		return HandleSeq();
+
+	// Search the premises in the rewrite term's ExecutionOutputLink
+	Handle rewrite = _rule->get_implicand();
+	if (rewrite->getType() == EXECUTION_OUTPUT_LINK) {
+		Handle args = rewrite->getOutgoingAtom(1);
+		if (args->getType() == LIST_LINK) {
+			OC_ASSERT(args->getArity() > 0);
+			for (Arity i = 1; i < args->getArity(); i++) {
+				Handle argi = args->getOutgoingAtom(i);
+				// Return unordered premises
+				if (argi->getType() == SET_LINK) {
+					for (Arity i = 1; i < argi->getArity(); i++)
+						premises.push_back(args->getOutgoingAtom(i));
+				}
+				// Return ordered premise
+				else {
+					premises.push_back(argi);
+				}
+			}
+		}
+	}
+
+	return premises;
 }
 
 /**
@@ -260,7 +292,7 @@ HandlePairSeq Rule::get_conclusions() const
 	HandlePairSeq results;
 
 	// If the rule's handle has not been set yet
-	if (!_rule)
+	if (not is_valid())
 		return HandlePairSeq();
 
 	Handle vardecl = get_vardecl();
@@ -306,15 +338,39 @@ Rule Rule::gen_standardize_apart(AtomSpace* as)
 RuleTypedSubstitutionMap Rule::unify_source(const Handle& source,
                                             const Handle& vardecl) const
 {
-	// TODO
-	return {};
+	// If the rule's handle has not been set yet
+	if (not is_valid())
+		return {};
+
+	// To guaranty that the rule variable does not share any variable
+	// with the source.
+	Rule alpha_rule = rand_alpha_converted();
+
+	RuleTypedSubstitutionMap unified_rules;
+	Handle rule_vardecl = alpha_rule.get_vardecl();
+	for (const Handle& premise : alpha_rule.get_premises())
+	{
+		Unify unify(source, premise, vardecl, rule_vardecl);
+		Unify::SolutionSet sol = unify();
+		if (sol.satisfiable) {
+			Unify::TypedSubstitutions tss =
+				unify.typed_substitutions(sol, source);
+			// For each typed substitution produce a new rule by
+			// substituting all variables by their associated
+			// values.
+			for (const auto& ts : tss)
+				unified_rules.insert({alpha_rule.substituted(ts), ts});
+		}
+	}
+
+	return unified_rules;
 }
 
 RuleTypedSubstitutionMap Rule::unify_target(const Handle& target,
                                             const Handle& vardecl) const
 {
 	// If the rule's handle has not been set yet
-	if (!_rule)
+	if (not is_valid())
 		return {};
 
 	// To guaranty that the rule variable does not share any variable
@@ -339,6 +395,15 @@ RuleTypedSubstitutionMap Rule::unify_target(const Handle& target,
 	}
 
 	return unified_rules;
+}
+
+RuleSet Rule::strip_typed_substitution(const RuleTypedSubstitutionMap& rules)
+{
+	RuleSet rs;
+	for (const auto& r : rules)
+		rs.insert(r.first);
+
+	return rs;
 }
 
 Handle Rule::apply(AtomSpace& as) const

@@ -77,18 +77,6 @@ private:
 
     void apply_all_rules();
 
-    Handle gen_sub_varlist(const Handle& parent, const Handle& parent_varlist);
-    bool is_constant_clause(const Handle& hvarlist, const Handle& hclause) const;
-    Handle remove_constant_clauses(const Handle& hvarlist,
-                                   const Handle& himplicand);
-    HandleSeq substitute_rule_part(AtomSpace& as, const Handle& hrule,
-                                   const OrderedHandleSet& vars,
-                                   const HandleMapSeq&
-                                   var_groundings);
-    bool unify(const Handle& source, const Handle& pattern, const Rule& rule);
-    UnorderedHandleSet derive_rules(const Handle& source, const Handle& pattern,
-                                    const Rule& rule);
-
     template<typename HandleContainer>
     void update_potential_sources(const HandleContainer& input)
     {
@@ -101,7 +89,6 @@ private:
         _unselected_sources.insert(input_minus_selected.begin(),
                                    input_minus_selected.end());
     }
-    bool is_valid_implicant(const Handle& h);
     void validate(const Handle& hsource, const HandleSeq& hfocus_set);
 
 protected:
@@ -114,7 +101,7 @@ protected:
      *
      * @return  A handle to the chosen source from source list
      */
-    virtual Handle select_source();
+    Handle select_source();
 
     /**
      * Choose an applicable rules from the rule base by selecting
@@ -124,23 +111,12 @@ protected:
      *
      * @return  A rule that in which @param source could ground.
      */
-    virtual const Rule* select_rule(const Handle& hsource);
+    Rule select_rule(const Handle& hsource);
 
     /**
-     * Apply rule on the current source. Create derived rules,
-     * if necessary.
+     * Apply rule.
      */
-    virtual UnorderedHandleSet apply_rule(const Rule& rule);
-
-    /**
-     * Apply rule handle (BindLink).
-     *
-     * @return  A set of handles created as a result of applying current
-     *          choosen rule.
-     */
-    virtual HandleSeq apply_rule(const Handle& rhandle);
-
-    UnorderedHandleSet derive_rules(const Handle& source, const Rule& rule);
+    UnorderedHandleSet apply_rule(const Rule& rule);
 
 public:
     /**
@@ -149,18 +125,18 @@ public:
     ForwardChainer(AtomSpace& as, const Handle& rbs, const Handle& hsource,
                    const HandleSeq& focus_set = HandleSeq(),
                    source_selection_mode sm = source_selection_mode::UNIFORM);
-    virtual ~ForwardChainer();
-
-    /**
-     * Perform a single forward chaining inference step.
-     */
-    void do_step();
+    ~ForwardChainer();
 
     /**
      * Perform forward chaining inference till the termination
      * criteria have been met.
      */
     void do_chain();
+
+	/**
+     * Perform a single forward chaining inference step.
+     */
+    void do_step();
 
     /**
      * @return true if the termination criteria have been met.

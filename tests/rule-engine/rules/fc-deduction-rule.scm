@@ -1,7 +1,10 @@
 ;; =============================================================================
 ;; Crisp logic entailment (Deduction) Rule.
 ;;
-;;   A->B and B->C  |-  A->C
+;;   A->B
+;;   B->C
+;;   |-
+;;   A->C
 ;;
 ;; See examples/rule-engine/README.md for more details.
 ;; -----------------------------------------------------------------------------
@@ -40,12 +43,12 @@
             (ListLink
                 (InheritanceLink
                     (VariableNode "$A")
-                    (VariableNode "$B"))
-                (InheritanceLink
-                    (VariableNode "$B")
                     (VariableNode "$C"))
                 (InheritanceLink
                     (VariableNode "$A")
+                    (VariableNode "$B"))
+                (InheritanceLink
+                    (VariableNode "$B")
                     (VariableNode "$C"))
             )
         )
@@ -60,7 +63,7 @@
 ;; set the TV of A->C to (stv 1 1)
 ;; -----------------------------------------------------------------------------
 
-(define (fc-deduction-formula AB BC AC)
+(define (fc-deduction-formula AC AB BC)
     (let (  (sAB (cog-stv-strength AB))
             (cAB (cog-stv-confidence AB))
             (sBC (cog-stv-strength BC))
