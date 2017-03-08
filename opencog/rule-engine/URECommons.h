@@ -48,6 +48,9 @@ public:
 	 * Randomly pick about half of the elements, and amongst those
 	 * return the fittest (higher is better). If tfitness_map is
 	 * empty, then return the default value (build with Type()).
+	 *
+	 * TODO: generalize and move this method to
+	 * opencog/util/selection.h
 	 */
 	template<class Type>
 	Type tournament_select(const map<Type, float>& tfitnes_map) {
@@ -77,7 +80,7 @@ public:
 	 *
 	 * F = s^x * c^(2-x)
 	 *
-	 * where s is strength,c is confidence and x is some fixed value
+	 * where s is strength, c is confidence and x is some fixed value
 	 *
 	 * @param h - a handle
 	 * @return a fitness value
