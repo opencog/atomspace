@@ -100,6 +100,7 @@ private:
 	// Set properties of atoms
 	static SCM ss_set_av(SCM, SCM);
 	static SCM ss_set_tv(SCM, SCM);
+	static SCM ss_set_value(SCM, SCM, SCM);
 	static SCM ss_merge_tv(SCM, SCM);
 	static SCM ss_merge_hi_conf_tv(SCM, SCM);
 	static SCM ss_inc_count(SCM, SCM);
@@ -113,6 +114,7 @@ private:
 	static SCM ss_as(SCM);
 	static SCM ss_av(SCM);
 	static SCM ss_tv(SCM);
+	static SCM ss_value(SCM, SCM);
 	static SCM ss_incoming_set(SCM);
 	static SCM ss_incoming_by_type(SCM, SCM);
 	static SCM ss_outgoing_set(SCM);
