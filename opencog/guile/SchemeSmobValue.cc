@@ -26,7 +26,7 @@ SCM SchemeSmob::ss_value_p (SCM s)
 		return SCM_BOOL_F;
 
 	scm_t_bits misctype = SCM_SMOB_FLAGS(s);
-	if (COG_HANDLE == misctype)
+	if (COG_PROTOM == misctype)
 		return SCM_BOOL_T;
 
 	return SCM_BOOL_F;

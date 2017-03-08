@@ -137,21 +137,15 @@ SCM SchemeSmob::equalp_misc(SCM a, SCM b)
 			if (av == bv) return SCM_BOOL_T;
 			return SCM_BOOL_F;
 		}
-		case COG_HANDLE:
+		case COG_PROTOM:
 		{
-			Handle ha(scm_to_handle(a));
-			Handle hb(scm_to_handle(b));
-			if (ha == hb) return SCM_BOOL_T;
-			return SCM_BOOL_F;
-		}
-		case COG_TV:
-		{
-			TruthValue* av = (TruthValue *) SCM_SMOB_DATA(a);
-			TruthValue* bv = (TruthValue *) SCM_SMOB_DATA(b);
+			ProtoAtomPtr* av = (ProtoAtomPtr *) SCM_SMOB_DATA(a);
+			ProtoAtomPtr* bv = (ProtoAtomPtr *) SCM_SMOB_DATA(b);
 			scm_remember_upto_here_1(a);
 			scm_remember_upto_here_1(b);
 			if (av == bv) return SCM_BOOL_T;
 			if (*av == *bv) return SCM_BOOL_T;
+			if (**av == **bv) return SCM_BOOL_T;
 			return SCM_BOOL_F;
 		}
 	}

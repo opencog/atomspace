@@ -47,12 +47,12 @@ std::string SchemeSmob::to_string(SCM node)
  * This does NOT use the Atom::toString() methods, because those
  * methods are not guaranteed to generate valid scheme.
  */
-std::string SchemeSmob::to_string(Handle h)
+std::string SchemeSmob::to_string(const Handle& h)
 {
 	return handle_to_string(h, 0);
 }
 
-std::string SchemeSmob::handle_to_string(Handle h, int indent)
+std::string SchemeSmob::handle_to_string(const Handle& h, int indent)
 {
 	if (nullptr == h) return "#<Invalid handle>";
 
@@ -105,18 +105,16 @@ std::string SchemeSmob::handle_to_string(Handle h, int indent)
 		return ret;
 	}
 
-	ProtoAtomPtr vvv(AtomCast(h));
-	if (vvv) {
-		ret += vvv->toString();
-		return ret;
-	}
 	return ret;
 }
 
-std::string SchemeSmob::handle_to_string(SCM node)
+std::string SchemeSmob::protom_to_string(SCM node)
 {
-	Handle h(scm_to_handle(node));
-	return handle_to_string(h, 0) + "\n";
+	ProtoAtomPtr pa(scm_to_protom(node));
+	if (not pa->isAtom())
+		return pa->toString();  // XXX FIXME this is temporary hack
+
+	return handle_to_string(HandleCast(pa), 0) + "\n";
 }
 
 /* ============================================================== */
@@ -139,7 +137,7 @@ SCM SchemeSmob::protom_to_scm (const ProtoAtomPtr& pa)
 
 	SCM smob;
 	SCM_NEWSMOB (smob, cog_misc_tag, pap);
-	SCM_SET_SMOB_FLAGS(smob, COG_HANDLE);
+	SCM_SET_SMOB_FLAGS(smob, COG_PROTOM);
 	return smob;
 }
 
@@ -149,7 +147,7 @@ ProtoAtomPtr SchemeSmob::scm_to_protom (SCM sh)
 		return nullptr;
 
 	scm_t_bits misctype = SCM_SMOB_FLAGS(sh);
-	if (COG_HANDLE != misctype)
+	if (COG_PROTOM != misctype)
 		return nullptr;
 
 	ProtoAtomPtr pv(*((ProtoAtomPtr *) SCM_SMOB_DATA(sh)));
@@ -159,16 +157,15 @@ ProtoAtomPtr SchemeSmob::scm_to_protom (SCM sh)
 
 Handle SchemeSmob::scm_to_handle (SCM sh)
 {
-	if (not SCM_SMOB_PREDICATE(SchemeSmob::cog_misc_tag, sh))
+	ProtoAtomPtr pa(scm_to_protom(sh));
+	if (nullptr == pa)
 		return Handle::UNDEFINED;
 
-	scm_t_bits misctype = SCM_SMOB_FLAGS(sh);
-	if (COG_HANDLE != misctype)
+	if (not pa->isAtom())
 		return Handle::UNDEFINED;
 
-	Handle h(*((Handle *) SCM_SMOB_DATA(sh)));
 	scm_remember_upto_here_1(sh);
-	return h;
+	return HandleCast(pa);
 }
 
 /* ============================================================== */
@@ -368,6 +365,7 @@ SCM SchemeSmob::ss_new_node (SCM stype, SCM sname, SCM kv_pairs)
 		// difference.
 		const TruthValue *tv = get_tv_from_list(kv_pairs);
 		if (tv) h->setTruthValue(tv->clone());
+xxxxxxxx
 
 		// Was an attention value explicitly specified?
 		// If so, then we've got to set it.
