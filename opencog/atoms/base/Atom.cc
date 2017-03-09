@@ -157,7 +157,7 @@ TruthValuePtr Atom::getTruthValue() const
 #endif
 }
 
-void Atom::merge(TruthValuePtr tvn, const MergeCtrl& mc)
+void Atom::merge(const TruthValuePtr& tvn, const MergeCtrl& mc)
 {
     if (nullptr == tvn or tvn->isDefaultTV()) return;
 

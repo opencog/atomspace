@@ -71,7 +71,7 @@ public:
      * with the highest confidence.
      */
     TruthValuePtr merge(const TruthValuePtr&,
-                        const MergeCtrl& mc=MergeCtrl());
+                        const MergeCtrl& mc=MergeCtrl()) const;
 
     static SimpleTruthValuePtr createSTV(strength_t mean, confidence_t conf)
     {

@@ -205,7 +205,7 @@ const std::vector<strength_t*>& IndefiniteTruthValue::getFirstOrderDistribution(
 
 // Merge formula, as specified by PLN.
 TruthValuePtr IndefiniteTruthValue::merge(const TruthValuePtr& other,
-                                          const MergeCtrl& mc)
+                                          const MergeCtrl& mc) const
 {
     return higher_confidence_merge(other);
 }

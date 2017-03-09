@@ -71,7 +71,8 @@ class GenericTruthValue : public TruthValue
 
         entropy_t getEntropy() const;
 
-        TruthValuePtr merge(const TruthValuePtr&, const MergeCtrl& = MergeCtrl());
+        TruthValuePtr merge(const TruthValuePtr&,
+                            const MergeCtrl& = MergeCtrl()) const;
 
         static TruthValuePtr createTV(const ProtoAtomPtr& pap)
         {

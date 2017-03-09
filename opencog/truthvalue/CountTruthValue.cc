@@ -118,7 +118,7 @@ bool CountTruthValue::operator==(const ProtoAtom& rhs) const
 // because the CountTruthValue usally stores an integer count,
 // and a log-probability or entropy, instead of a confidence.
 TruthValuePtr CountTruthValue::merge(const TruthValuePtr& other,
-                                     const MergeCtrl& mc)
+                                     const MergeCtrl& mc) const
 {
     CountTruthValuePtr oc(CountTruthValueCast(other));
 
@@ -128,7 +128,7 @@ TruthValuePtr CountTruthValue::merge(const TruthValuePtr& other,
     // routine to SimpleTruthValue to do likewise... Anyway, for now,
     // just ignore this possible complication to the semantics.
     if (NULL == oc)
-        return TruthValueCast(shared_from_this());
+        return std::dynamic_pointer_cast<const TruthValue>(shared_from_this());
 
     // If both this and other are counts, then accumulate to get the
     // total count, and average together the strengths, using the

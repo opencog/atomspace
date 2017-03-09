@@ -222,14 +222,14 @@ public:
     void setTruthValue(TruthValuePtr);
 
     /** merge truth value into this */
-    void merge(TruthValuePtr, const MergeCtrl& mc=MergeCtrl());
+    void merge(const TruthValuePtr&, const MergeCtrl& mc=MergeCtrl());
 
     /**
      * Merge truth value, return Handle for this.
      * This allows oneliners such as:
      *   Handle h = atomSpace->addNode(FOO_NODE, "foo")->tvmerge(tv);
      */
-    inline Handle tvmerge(TruthValuePtr tv) {
+    inline Handle tvmerge(const TruthValuePtr& tv) {
         merge(tv);
         return getHandle();
     }

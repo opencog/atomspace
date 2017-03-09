@@ -113,7 +113,7 @@ public:
     bool isSymmetric() const { return symmetric; }
 
     TruthValuePtr merge(const TruthValuePtr&,
-                        const MergeCtrl& mc=MergeCtrl());
+                        const MergeCtrl& mc=MergeCtrl()) const;
 
     std::string toString(const std::string&) const;
 

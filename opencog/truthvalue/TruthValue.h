@@ -101,7 +101,7 @@ protected:
     TruthValue(Type t) : FloatValue(t) {}
 
     // Merge helper method
-    TruthValuePtr higher_confidence_merge(const TruthValuePtr&);
+    TruthValuePtr higher_confidence_merge(const TruthValuePtr&) const;
 
 public:
     virtual ~TruthValue() {}
@@ -153,7 +153,7 @@ public:
      *        https://github.com/opencog/opencog/issues/1295
      */
     virtual TruthValuePtr merge(const TruthValuePtr&,
-                                const MergeCtrl& = MergeCtrl()) = 0;
+                                const MergeCtrl& = MergeCtrl()) const = 0;
 
     /**
      * Check if this TV is equal to the default TV.
