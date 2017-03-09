@@ -70,6 +70,7 @@ private:
 
 	static SCM handle_to_scm(const Handle&);
 	static SCM protom_to_scm(const ProtoAtomPtr&);
+	static SCM tv_to_scm(const TruthValuePtr&);
 	static Handle scm_to_handle(SCM);
 	static ProtoAtomPtr scm_to_protom(SCM);
 	static TruthValuePtr scm_to_tv(SCM);
