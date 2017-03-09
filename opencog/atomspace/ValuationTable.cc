@@ -37,7 +37,7 @@ ValuationTable::~ValuationTable()
 
 /// Associate a value with a particular (key,atom) pair
 /// The atom, key and value are wrapped up in a single valuation.
-void ValuationTable::addValuation(ValuationPtr& vp)
+void ValuationTable::addValuation(const ValuationPtr& vp)
 {
 	const Handle& key = vp->key();
 	const Handle& atom = vp->atom();
@@ -62,7 +62,7 @@ void ValuationTable::addValuation(ValuationPtr& vp)
 /// Associate a value with a particular (key,atom) pair
 void ValuationTable::addValuation(const Handle& key,
                                   const Handle& atom,
-                                  ProtoAtomPtr& val)
+                                  const ProtoAtomPtr& val)
 {
 	ValuationPtr vp(createValuation(key, atom, val));
 	addValuation(vp);

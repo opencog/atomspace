@@ -181,7 +181,7 @@ void Atom::merge(const TruthValuePtr& tvn, const MergeCtrl& mc)
 
 // ==============================================================
 // Setting values associated with this atom.
-void Atom::setValue(const Handle& key, ProtoAtomPtr& value)
+void Atom::setValue(const Handle& key, const ProtoAtomPtr& value)
 {
     if (nullptr == _atom_space) return;
     _atom_space->_value_table.addValuation(key, getHandle(), value);

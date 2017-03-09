@@ -235,7 +235,7 @@ public:
     }
 
     /// Associate `value` to `key` for this atom.
-    void setValue(const Handle& key, ProtoAtomPtr& value);
+    void setValue(const Handle& key, const ProtoAtomPtr& value);
     /// Get value at `key` for this atom.
     ProtoAtomPtr getValue(const Handle& key) const;
 
