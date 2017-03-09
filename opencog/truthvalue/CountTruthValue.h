@@ -36,7 +36,7 @@ namespace opencog
  */
 
 class CountTruthValue;
-typedef std::shared_ptr<CountTruthValue> CountTruthValuePtr;
+typedef std::shared_ptr<const CountTruthValue> CountTruthValuePtr;
 
 //! a TruthValue that stores a mean, a confidence and the number of observations
 class CountTruthValue : public TruthValue
@@ -63,18 +63,18 @@ public:
     count_t getCount() const;
     confidence_t getConfidence() const;
 
-    virtual TruthValuePtr merge(TruthValuePtr,
+    virtual TruthValuePtr merge(const TruthValuePtr&,
                                 const MergeCtrl& mc=MergeCtrl());
 
     static TruthValuePtr createTV(strength_t s, confidence_t f, count_t c)
     {
-        return std::static_pointer_cast<TruthValue>(
-            std::make_shared<CountTruthValue>(s, f, c));
+        return std::static_pointer_cast<const TruthValue>(
+            std::make_shared<const CountTruthValue>(s, f, c));
     }
     static TruthValuePtr createTV(const ProtoAtomPtr& pap)
     {
-        return std::static_pointer_cast<TruthValue>(
-            std::make_shared<CountTruthValue>(pap));
+        return std::static_pointer_cast<const TruthValue>(
+            std::make_shared<const CountTruthValue>(pap));
     }
 
     TruthValuePtr clone() const
@@ -86,6 +86,10 @@ public:
         return new CountTruthValue(*this);
     }
 };
+
+static inline CountTruthValuePtr CountTruthValueCast(const TruthValuePtr& tv)
+    { return std::dynamic_pointer_cast<const CountTruthValue>(tv); }
+
 
 /** @}*/
 } // namespace opencog

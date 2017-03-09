@@ -36,7 +36,7 @@ namespace opencog
  */
 
 class SimpleTruthValue;
-typedef std::shared_ptr<SimpleTruthValue> SimpleTruthValuePtr;
+typedef std::shared_ptr<const SimpleTruthValue> SimpleTruthValuePtr;
 
 //! a TruthValue that stores a strength and confidence.
 class SimpleTruthValue : public TruthValue
@@ -70,26 +70,26 @@ public:
      * the resulting TV is either tv1 or tv2, the result being the one
      * with the highest confidence.
      */
-    TruthValuePtr merge(TruthValuePtr,
+    TruthValuePtr merge(const TruthValuePtr&,
                         const MergeCtrl& mc=MergeCtrl());
 
     static SimpleTruthValuePtr createSTV(strength_t mean, confidence_t conf)
     {
-        return std::make_shared<SimpleTruthValue>(mean, conf);
+        return std::make_shared<const SimpleTruthValue>(mean, conf);
     }
     static TruthValuePtr createTV(strength_t mean, confidence_t conf)
     {
-        return std::static_pointer_cast<TruthValue>(createSTV(mean, conf));
+        return std::static_pointer_cast<const TruthValue>(createSTV(mean, conf));
     }
     static TruthValuePtr createTV(const ProtoAtomPtr& pap)
     {
-        return std::static_pointer_cast<TruthValue>(
-            std::make_shared<SimpleTruthValue>(pap));
+        return std::static_pointer_cast<const TruthValue>(
+            std::make_shared<const SimpleTruthValue>(pap));
     }
 
     TruthValuePtr clone() const
     {
-        return std::make_shared<SimpleTruthValue>(*this);
+        return std::make_shared<const SimpleTruthValue>(*this);
     }
     TruthValue* rawclone() const
     {

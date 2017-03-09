@@ -34,7 +34,7 @@ namespace opencog
  */
 
 class EvidenceCountTruthValue;
-typedef std::shared_ptr<EvidenceCountTruthValue> EvidenceCountTruthValuePtr;
+typedef std::shared_ptr<const EvidenceCountTruthValue> EvidenceCountTruthValuePtr;
 
 //! a TruthValue that stores a strength and confidence.
 class EvidenceCountTruthValue : public TruthValue
@@ -77,23 +77,23 @@ public:
 	 * the resulting TV is either tv1 or tv2, the result being the one
 	 * with the highest confidence.
 	 */
-	TruthValuePtr merge(TruthValuePtr,
+	TruthValuePtr merge(const TruthValuePtr&,
 	                    const MergeCtrl& mc=MergeCtrl());
 
 	static EvidenceCountTruthValuePtr createECTV(count_t pos_count,
 	                                             count_t total_count = -1.0)
 	{
-		return std::make_shared<EvidenceCountTruthValue>(pos_count, total_count);
+		return std::make_shared<const EvidenceCountTruthValue>(pos_count, total_count);
 	}
 	static TruthValuePtr createTV(count_t pos_count, count_t total_count = -1.0)
 	{
-		return std::static_pointer_cast<TruthValue>(createECTV(pos_count,
+		return std::static_pointer_cast<const TruthValue>(createECTV(pos_count,
 		                                                       total_count));
 	}
 	static TruthValuePtr createTV(const ProtoAtomPtr& pap)
 	{
-		return std::static_pointer_cast<TruthValue>(
-			std::make_shared<EvidenceCountTruthValue>(pap));
+		return std::static_pointer_cast<const TruthValue>(
+			std::make_shared<const EvidenceCountTruthValue>(pap));
 	}
 
 	TruthValuePtr clone() const

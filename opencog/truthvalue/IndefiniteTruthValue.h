@@ -37,10 +37,10 @@ namespace opencog
  */
 
 class IndefiniteTruthValue;
-typedef std::shared_ptr<IndefiniteTruthValue> IndefiniteTruthValuePtr;
+typedef std::shared_ptr<const IndefiniteTruthValue> IndefiniteTruthValuePtr;
 
 static inline IndefiniteTruthValuePtr IndefiniteTVCast(TruthValuePtr tv)
-    { return std::dynamic_pointer_cast<IndefiniteTruthValue>(tv); }
+    { return std::dynamic_pointer_cast<const IndefiniteTruthValue>(tv); }
 
 /**
  * Indefinite probabilities are in the form ([L,U],b,N). In practical work,
@@ -112,7 +112,7 @@ public:
     strength_t getL_() const { return _value[L] - diff; }
     bool isSymmetric() const { return symmetric; }
 
-    TruthValuePtr merge(TruthValuePtr,
+    TruthValuePtr merge(const TruthValuePtr&,
                         const MergeCtrl& mc=MergeCtrl());
 
     std::string toString(const std::string&) const;
@@ -128,24 +128,24 @@ public:
 
     static TruthValuePtr createTV(TruthValuePtr tv)
     {
-        return std::static_pointer_cast<TruthValue>(createITV(tv));
+        return std::static_pointer_cast<const TruthValue>(createITV(tv));
     }
 
     static IndefiniteTruthValuePtr createITV(strength_t l, strength_t u,
                          confidence_t c = DEFAULT_CONFIDENCE_LEVEL)
     {
-        return std::make_shared<IndefiniteTruthValue>(l, u, c);
+        return std::make_shared<const IndefiniteTruthValue>(l, u, c);
     }
 
     static TruthValuePtr createTV(strength_t l, strength_t u,
                          confidence_t c = DEFAULT_CONFIDENCE_LEVEL)
     {
-        return std::static_pointer_cast<TruthValue>(createITV(l, u, c));
+        return std::static_pointer_cast<const TruthValue>(createITV(l, u, c));
     }
     static TruthValuePtr createTV(const ProtoAtomPtr& pap)
     {
-        return std::static_pointer_cast<TruthValue>(
-            std::make_shared<IndefiniteTruthValue>(pap));
+        return std::static_pointer_cast<const TruthValue>(
+            std::make_shared<const IndefiniteTruthValue>(pap));
     }
 
     TruthValuePtr clone() const

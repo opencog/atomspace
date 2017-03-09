@@ -107,7 +107,7 @@ bool EvidenceCountTruthValue::is_count_valid() const
 }
 
 // This is the merge formula appropriate for PLN.
-TruthValuePtr EvidenceCountTruthValue::merge(TruthValuePtr other,
+TruthValuePtr EvidenceCountTruthValue::merge(const TruthValuePtr& other,
                                              const MergeCtrl& mc)
 {
 	// TODO

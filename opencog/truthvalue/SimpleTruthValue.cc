@@ -94,7 +94,7 @@ confidence_t SimpleTruthValue::getConfidence() const
 }
 
 // This is the merge formula appropriate for PLN.
-TruthValuePtr SimpleTruthValue::merge(TruthValuePtr other,
+TruthValuePtr SimpleTruthValue::merge(const TruthValuePtr& other,
                                       const MergeCtrl& mc)
 {
     switch (mc.tv_formula)
@@ -120,7 +120,7 @@ TruthValuePtr SimpleTruthValue::merge(TruthValuePtr other,
             auto mean_new = (getMean() * count + other->getMean() * count2)
                 / (count + count2);
             confidence_t confidence_new = static_cast<confidence_t>(count_new / (count_new + DEFAULT_K));
-            return std::make_shared<SimpleTruthValue>(mean_new, confidence_new);
+            return createTV(mean_new, confidence_new);
         }
         default:
             throw RuntimeException(TRACE_INFO,
