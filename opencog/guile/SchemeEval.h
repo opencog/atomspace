@@ -15,10 +15,10 @@
 #include <sstream>
 #include <cstddef>
 #include <libguile.h>
+#include <opencog/atoms/base/Atom.h>
 #include <opencog/atoms/base/Handle.h>
 #include <opencog/eval/GenericEval.h>
 #include <opencog/truthvalue/TruthValue.h>
-#include <opencog/util/exceptions.h>
 
 namespace opencog {
 /** \addtogroup grp_smob
@@ -108,13 +108,13 @@ class SchemeEval : public GenericEval
 
 		// Straight-up evaluation
 		SCM do_scm_eval(SCM, SCM (*)(void *));
-		static void * c_wrap_eval_h(void *);
-		static void * c_wrap_eval_tv(void *);
+		static void * c_wrap_eval_v(void *);
 		static void * c_wrap_eval_as(void *);
 
 		// Apply function to arguments, returning Handle or TV
 		Handle _hargs;
-		TruthValuePtr _tvp;
+		ProtoAtomPtr _retval;
+TruthValuePtr _tvp;
 		AtomSpace* _retas;
 		Handle do_apply(const std::string& func, const Handle& varargs);
 		SCM do_apply_scm(const std::string& func, const Handle& varargs);
@@ -165,12 +165,16 @@ class SchemeEval : public GenericEval
 		std::string eval(const std::stringstream& ss)
 			{ return eval(ss.str()); }
 
+		// Evaluate expression, returning value.
+		ProtoAtomPtr eval_v(const std::string&);
+		ProtoAtomPtr eval_v(const std::stringstream& ss) { return eval_v(ss.str()); }
+
 		// Evaluate expression, returning handle.
-		Handle eval_h(const std::string&);
+		Handle eval_h(const std::string& str) { return HandleCast(eval_v(str)); }
 		Handle eval_h(const std::stringstream& ss) { return eval_h(ss.str()); }
 
 		// Evaluate expression, returning TV.
-		TruthValuePtr eval_tv(const std::string&);
+		TruthValuePtr eval_tv(const std::string& str) { return TruthValueCast(eval_v(str)); }
 		TruthValuePtr eval_tv(const std::stringstream& ss) { return eval_tv(ss.str()); }
 
 		// Evaluate expression, returning AtomSpace.

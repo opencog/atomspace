@@ -438,7 +438,7 @@ SCM SchemeEval::catch_handler (SCM tag, SCM throw_args)
  *    string.
  *
  * An "unforgiving" evaluator, with none of these amenities, can be
- * found in eval_h(), below.
+ * found in eval_v(), below.
  */
 void SchemeEval::eval_expr(const std::string &expr)
 {
@@ -841,51 +841,28 @@ SCM recast_scm_eval_string(void * expr)
 	return scm_eval_string((SCM)expr);
 }
 
-/**
- * Evaluate a string containing a scheme expression, returning a Handle.
- * If an evaluation error occurs, an exception is thrown, and the stack
- * trace is logged to the log file.
- */
-Handle SchemeEval::eval_h(const std::string &expr)
-{
-	// If we are recursing, then we already are in the guile
-	// environment, and don't need to do any additional setup.
-	// Just go.
-	if (_in_eval) {
-		// scm_from_utf8_string is lots faster than scm_from_locale_string
-		SCM expr_str = scm_from_utf8_string(expr.c_str());
-		SCM rc = do_scm_eval(expr_str, recast_scm_eval_string);
-		return SchemeSmob::scm_to_handle(rc);
-	}
-
-	_pexpr = &expr;
-	_in_eval = true;
-	scm_with_guile(c_wrap_eval_h, this);
-	_in_eval = false;
-
-	// Convert evaluation errors into C++ exceptions.
-	if (eval_error())
-		throw RuntimeException(TRACE_INFO, "%s", _error_msg.c_str());
-
-	return _hargs;
-}
-
-void * SchemeEval::c_wrap_eval_h(void * p)
+void * SchemeEval::c_wrap_eval_v(void * p)
 {
 	SchemeEval *self = (SchemeEval *) p;
 	// scm_from_utf8_string is lots faster than scm_from_locale_string
 	SCM expr_str = scm_from_utf8_string(self->_pexpr->c_str());
 	SCM rc = self->do_scm_eval(expr_str, recast_scm_eval_string);
-	self->_hargs = SchemeSmob::scm_to_handle(rc);
+
+	// Pass evaluation errors out of the wrapper.
+	if (self->eval_error()) return self;
+
+	self->_retval = SchemeSmob::scm_to_protom(rc);
 	return self;
 }
 
+
 /**
- * Evaluate a string containing a scheme expression, returning a TV.
- * If an evaluation error occurs, an exception is thrown, and the stack
- * trace is logged to the log file.
+ * Evaluate a string containing a scheme expression, returning a
+ * ProtoAtom (Handle, TruthValue or Value).  If an evaluation error
+ * occurs, an exception is thrown, and the stack trace is logged to
+ * the log file.
  */
-TruthValuePtr SchemeEval::eval_tv(const std::string &expr)
+ProtoAtomPtr SchemeEval::eval_v(const std::string &expr)
 {
 	// If we are recursing, then we already are in the guile
 	// environment, and don't need to do any additional setup.
@@ -907,33 +884,23 @@ TruthValuePtr SchemeEval::eval_tv(const std::string &expr)
 		SCM rc = do_scm_eval(expr_str, recast_scm_eval_string);
 		if (eval_error())
 			throw RuntimeException(TRACE_INFO, "%s", _error_msg.c_str());
-		return SchemeSmob::scm_to_tv(rc);
+		return SchemeSmob::scm_to_protom(rc);
 	}
 
 	_pexpr = &expr;
 	_in_eval = true;
-	scm_with_guile(c_wrap_eval_tv, this);
+	scm_with_guile(c_wrap_eval_v, this);
 	_in_eval = false;
 
 	// Convert evaluation errors into C++ exceptions.
 	if (eval_error())
 		throw RuntimeException(TRACE_INFO, "%s", _error_msg.c_str());
 
-	return _tvp;
-}
-
-void * SchemeEval::c_wrap_eval_tv(void * p)
-{
-	SchemeEval *self = (SchemeEval *) p;
-	// scm_from_utf8_string is lots faster than scm_from_locale_string
-	SCM expr_str = scm_from_utf8_string(self->_pexpr->c_str());
-	SCM rc = self->do_scm_eval(expr_str, recast_scm_eval_string);
-
-	// Pass evaluation errors out of the wrapper.
-	if (self->eval_error()) return self;
-
-	self->_tvp = SchemeSmob::scm_to_tv(rc);
-	return self;
+	// We do not want this->_retval to point at anything after we return.
+	// This is so that we do not hold a long-term reference to the TV.
+	ProtoAtomPtr rv;
+	swap(rv, _retval);
+	return rv;
 }
 
 /**
