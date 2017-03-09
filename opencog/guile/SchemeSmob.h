@@ -74,6 +74,10 @@ private:
 	static ProtoAtomPtr scm_to_protom(SCM);
 	static TruthValuePtr scm_to_tv(SCM);
 
+	static std::vector<double> scm_to_float_list (SCM);
+	static std::vector<ProtoAtomPtr> scm_to_protom_list (SCM);
+	static std::vector<std::string> scm_to_string_list (SCM);
+
 	// Atom creation and deletion functions
 	static SCM ss_new_value(SCM, SCM);
 	static SCM ss_new_node(SCM, SCM, SCM);

@@ -44,10 +44,14 @@ SchemeSmob::verify_float_list (SCM svalue_list, const char * subrname, int pos)
 	// as this can be convenient for writing scheme code.
 	if (!scm_is_pair(svalue_list) and !scm_is_null(svalue_list))
 		scm_wrong_type_arg_msg(subrname, pos, svalue_list, "a list of float-pt values");
+	return scm_to_float_list(svalue_list);
+}
 
+std::vector<double>
+SchemeSmob::scm_to_float_list (SCM svalue_list)
+{
 	std::vector<double> valist;
 	SCM sl = svalue_list;
-	pos = 2;
 	while (scm_is_pair(sl)) {
 		SCM svalue = SCM_CAR(sl);
 
@@ -56,9 +60,7 @@ SchemeSmob::verify_float_list (SCM svalue_list, const char * subrname, int pos)
 			valist.emplace_back(v);
 		}
 		sl = SCM_CDR(sl);
-		pos++;
 	}
-
 	return valist;
 }
 
@@ -73,10 +75,14 @@ SchemeSmob::verify_protom_list (SCM svalue_list, const char * subrname, int pos)
 	// as this can be convenient for writing scheme code.
 	if (!scm_is_pair(svalue_list) and !scm_is_null(svalue_list))
 		scm_wrong_type_arg_msg(subrname, pos, svalue_list, "a list of protoatom values");
+	return scm_to_protom_list(svalue_list);
+}
 
+std::vector<ProtoAtomPtr>
+SchemeSmob::scm_to_protom_list (SCM svalue_list)
+{
 	std::vector<ProtoAtomPtr> valist;
 	SCM sl = svalue_list;
-	pos = 2;
 	while (scm_is_pair(sl)) {
 		SCM svalue = SCM_CAR(sl);
 
@@ -85,9 +91,7 @@ SchemeSmob::verify_protom_list (SCM svalue_list, const char * subrname, int pos)
 			valist.emplace_back(pa);
 		}
 		sl = SCM_CDR(sl);
-		pos++;
 	}
-
 	return valist;
 }
 
@@ -103,9 +107,14 @@ SchemeSmob::verify_string_list (SCM svalue_list, const char * subrname, int pos)
 	if (!scm_is_pair(svalue_list) and !scm_is_null(svalue_list))
 		scm_wrong_type_arg_msg(subrname, pos, svalue_list, "a list of string values");
 
+	return scm_to_string_list(svalue_list);
+}
+
+std::vector<std::string>
+SchemeSmob::scm_to_string_list (SCM svalue_list)
+{
 	std::vector<std::string> valist;
 	SCM sl = svalue_list;
-	pos = 2;
 	while (scm_is_pair(sl)) {
 		SCM svalue = SCM_CAR(sl);
 
@@ -114,9 +123,7 @@ SchemeSmob::verify_string_list (SCM svalue_list, const char * subrname, int pos)
 			valist.emplace_back(v);
 		}
 		sl = SCM_CDR(sl);
-		pos++;
 	}
-
 	return valist;
 }
 
