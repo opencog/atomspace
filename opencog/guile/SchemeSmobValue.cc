@@ -167,6 +167,36 @@ SCM SchemeSmob::ss_set_value (SCM satom, SCM skey, SCM svalue)
 {
 	Handle atom(verify_handle(satom, "cog-set-value!", 1));
 	Handle key(verify_handle(skey, "cog-set-value!", 2));
+
+	// If svalue is actually a value, just use it.
+	// If it is a list, assume its a list of values.
+	ProtoAtomPtr pa;
+	if (scm_is_pair(svalue)) {
+		SCM sitem = SCM_CAR(svalue);
+
+		if (scm_is_number(sitem))
+		{
+			std::vector<double> fl = scm_to_float_list(svalue);
+			pa = createFloatValue(fl);
+		}
+		else if (scm_is_string(sitem))
+		{
+			std::vector<std::string> fl = scm_to_string_list(svalue);
+			pa = createStringValue(fl);
+		}
+		else
+		{
+			verify_protom(sitem, "cog-set-value!", 3);
+			std::vector<ProtoAtomPtr> fl = scm_to_protom_list(svalue);
+			pa = createLinkValue(fl);
+		}
+	}
+	else
+	{
+		pa = verify_protom(svalue, "cog-set-value!", 3);
+	}
+
+	atom->setValue(key, pa);
 	return satom;
 }
 
