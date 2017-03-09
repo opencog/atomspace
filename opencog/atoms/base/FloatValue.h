@@ -45,17 +45,16 @@ protected:
 
 	FloatValue(Type t) : ProtoAtom(t) {}
 public: // XXX should be protected...
-	FloatValue(Type t, std::vector<double> v) : ProtoAtom(t), _value(v) {}
+	FloatValue(Type t, const std::vector<double>& v) : ProtoAtom(t), _value(v) {}
 
 public:
 	FloatValue(double v) : ProtoAtom(FLOAT_VALUE) { _value.push_back(v); }
-	FloatValue(std::vector<double> v) : ProtoAtom(FLOAT_VALUE), _value(v) {}
+	FloatValue(const std::vector<double>& v)
+		: ProtoAtom(FLOAT_VALUE), _value(v) {}
 
 	virtual ~FloatValue() {}
 
-	std::vector<double>& value() { return _value; }
-	void setValue(const std::vector<double>& v) { _value = v; }
-	void setValue(double v) { _value = std::vector<double>({v}); }
+	const std::vector<double>& value() const { return _value; }
 
 	/** Returns a string representation of the value.  */
 	virtual std::string toString(const std::string& indent = "") const;
@@ -64,9 +63,9 @@ public:
 	virtual bool operator==(const ProtoAtom&) const;
 };
 
-typedef std::shared_ptr<FloatValue> FloatValuePtr;
+typedef std::shared_ptr<const FloatValue> FloatValuePtr;
 static inline FloatValuePtr FloatValueCast(const ProtoAtomPtr& a)
-	{ return std::dynamic_pointer_cast<FloatValue>(a); }
+	{ return std::dynamic_pointer_cast<const FloatValue>(a); }
 
 // XXX temporary hack ...
 #define createFloatValue std::make_shared<FloatValue>
