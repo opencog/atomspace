@@ -210,8 +210,9 @@ public:
     }
 
     /** Returns the handle of the atom. */
-    inline Handle getHandle() {
-        return Handle(std::dynamic_pointer_cast<Atom>(shared_from_this()));
+    inline Handle getHandle() const {
+        return Handle(std::dynamic_pointer_cast<Atom>(
+             const_cast<Atom*>(this)->shared_from_this()));
     }
 
     /** Returns the TruthValue object of the atom. */
