@@ -26,8 +26,8 @@
 
 using namespace opencog;
 
-#define KKK 800.0f
-#define CVAL  0.2f
+#define KKK 800.0
+#define CVAL  0.2
 
 GenericTruthValue::GenericTruthValue(count_t pe, count_t te,
                                      strength_t f, strength_t fs,

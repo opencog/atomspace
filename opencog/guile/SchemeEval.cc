@@ -438,7 +438,7 @@ SCM SchemeEval::catch_handler (SCM tag, SCM throw_args)
  *    string.
  *
  * An "unforgiving" evaluator, with none of these amenities, can be
- * found in eval_h(), below.
+ * found in eval_v(), below.
  */
 void SchemeEval::eval_expr(const std::string &expr)
 {
@@ -841,51 +841,28 @@ SCM recast_scm_eval_string(void * expr)
 	return scm_eval_string((SCM)expr);
 }
 
-/**
- * Evaluate a string containing a scheme expression, returning a Handle.
- * If an evaluation error occurs, an exception is thrown, and the stack
- * trace is logged to the log file.
- */
-Handle SchemeEval::eval_h(const std::string &expr)
-{
-	// If we are recursing, then we already are in the guile
-	// environment, and don't need to do any additional setup.
-	// Just go.
-	if (_in_eval) {
-		// scm_from_utf8_string is lots faster than scm_from_locale_string
-		SCM expr_str = scm_from_utf8_string(expr.c_str());
-		SCM rc = do_scm_eval(expr_str, recast_scm_eval_string);
-		return SchemeSmob::scm_to_handle(rc);
-	}
-
-	_pexpr = &expr;
-	_in_eval = true;
-	scm_with_guile(c_wrap_eval_h, this);
-	_in_eval = false;
-
-	// Convert evaluation errors into C++ exceptions.
-	if (eval_error())
-		throw RuntimeException(TRACE_INFO, "%s", _error_msg.c_str());
-
-	return _hargs;
-}
-
-void * SchemeEval::c_wrap_eval_h(void * p)
+void * SchemeEval::c_wrap_eval_v(void * p)
 {
 	SchemeEval *self = (SchemeEval *) p;
 	// scm_from_utf8_string is lots faster than scm_from_locale_string
 	SCM expr_str = scm_from_utf8_string(self->_pexpr->c_str());
 	SCM rc = self->do_scm_eval(expr_str, recast_scm_eval_string);
-	self->_hargs = SchemeSmob::scm_to_handle(rc);
+
+	// Pass evaluation errors out of the wrapper.
+	if (self->eval_error()) return self;
+
+	self->_retval = SchemeSmob::scm_to_protom(rc);
 	return self;
 }
 
+
 /**
- * Evaluate a string containing a scheme expression, returning a TV.
- * If an evaluation error occurs, an exception is thrown, and the stack
- * trace is logged to the log file.
+ * Evaluate a string containing a scheme expression, returning a
+ * ProtoAtom (Handle, TruthValue or Value).  If an evaluation error
+ * occurs, an exception is thrown, and the stack trace is logged to
+ * the log file.
  */
-TruthValuePtr SchemeEval::eval_tv(const std::string &expr)
+ProtoAtomPtr SchemeEval::eval_v(const std::string &expr)
 {
 	// If we are recursing, then we already are in the guile
 	// environment, and don't need to do any additional setup.
@@ -907,33 +884,23 @@ TruthValuePtr SchemeEval::eval_tv(const std::string &expr)
 		SCM rc = do_scm_eval(expr_str, recast_scm_eval_string);
 		if (eval_error())
 			throw RuntimeException(TRACE_INFO, "%s", _error_msg.c_str());
-		return SchemeSmob::to_tv(rc);
+		return SchemeSmob::scm_to_protom(rc);
 	}
 
 	_pexpr = &expr;
 	_in_eval = true;
-	scm_with_guile(c_wrap_eval_tv, this);
+	scm_with_guile(c_wrap_eval_v, this);
 	_in_eval = false;
 
 	// Convert evaluation errors into C++ exceptions.
 	if (eval_error())
 		throw RuntimeException(TRACE_INFO, "%s", _error_msg.c_str());
 
-	return _tvp;
-}
-
-void * SchemeEval::c_wrap_eval_tv(void * p)
-{
-	SchemeEval *self = (SchemeEval *) p;
-	// scm_from_utf8_string is lots faster than scm_from_locale_string
-	SCM expr_str = scm_from_utf8_string(self->_pexpr->c_str());
-	SCM rc = self->do_scm_eval(expr_str, recast_scm_eval_string);
-
-	// Pass evaluation errors out of the wrapper.
-	if (self->eval_error()) return self;
-
-	self->_tvp = SchemeSmob::to_tv(rc);
-	return self;
+	// We do not want this->_retval to point at anything after we return.
+	// This is so that we do not hold a long-term reference to the TV.
+	ProtoAtomPtr rv;
+	swap(rv, _retval);
+	return rv;
 }
 
 /**
@@ -985,57 +952,6 @@ void * SchemeEval::c_wrap_eval_as(void * p)
 
 /* ============================================================== */
 /* ============================================================== */
-/**
- * apply -- apply named function func to arguments in ListLink
- * It is assumed that varargs is a ListLink, containing a list of
- * atom handles. This list is unpacked, and then the function func
- * is applied to them. If the function returns an atom handle, then
- * this is returned. If the function does not return a handle, or if
- * an error ocurred during evaluation, then a C++ exception is thrown.
- */
-Handle SchemeEval::apply(const std::string &func, Handle varargs)
-{
-	// If we are recursing, then we already are in the guile
-	// environment, and don't need to do any additional setup.
-	// Just go.
-	if (_in_eval) {
-		return do_apply(func, varargs);
-	}
-
-	_pexpr = &func;
-	_hargs = varargs;
-	_in_eval = true;
-	scm_with_guile(c_wrap_apply, this);
-	_in_eval = false;
-
-	if (eval_error())
-		throw RuntimeException(TRACE_INFO, "%s", _error_msg.c_str());
-
-	return _hargs;
-}
-
-void * SchemeEval::c_wrap_apply(void * p)
-{
-	SchemeEval *self = (SchemeEval *) p;
-	self->_hargs = self->do_apply(*self->_pexpr, self->_hargs);
-	return self;
-}
-
-/**
- * do_apply -- apply named function func to arguments in ListLink
- * It is assumed that varargs is a ListLink, containing a list of
- * atom handles. This list is unpacked, and then the fuction func
- * is applied to them. If the function returns an atom handle, then
- * this is returned.
- */
-Handle SchemeEval::do_apply(const std::string &func, const Handle& varargs)
-{
-	// Apply the function to the args
-	SCM sresult = do_apply_scm (func, varargs);
-
-	// If the result is a handle, return the handle.
-	return SchemeSmob::scm_to_handle(sresult);
-}
 
 static SCM thunk_scm_eval(void * expr)
 {
@@ -1081,20 +997,22 @@ SCM SchemeEval::do_apply_scm(const std::string& func, const Handle& varargs )
 
 /* ============================================================== */
 /**
- * apply_tv -- apply named function func to arguments in ListLink.
- * Return an OpenCog TruthValuePtr.
+ * apply_v -- apply named function func to arguments in ListLink.
+ * Return an OpenCog ProtoAtomPtr (Handle, TruthValue or Value).
  * It is assumed that varargs is a ListLink, containing a list of
  * atom handles. This list is unpacked, and then the fuction func
  * is applied to them. The function is presumed to return pointer
- * to a TruthValue object.
+ * to a ProtoAtom object. If the function does not return a ProtoAtom,
+ * or if n error ocurred during evaluation, then a C++ exception is
+ * thrown.
  */
-TruthValuePtr SchemeEval::apply_tv(const std::string &func, Handle varargs)
+ProtoAtomPtr SchemeEval::apply_v(const std::string &func, Handle varargs)
 {
 	// If we are recursing, then we already are in the guile
 	// environment, and don't need to do any additional setup.
 	// Just go.
 	if (_in_eval) {
-		SCM tv_smob = do_apply_scm(func, varargs);
+		SCM smob = do_apply_scm(func, varargs);
 		if (eval_error())
 		{
 			// Rethrow.  It would be better to just allow exceptions
@@ -1103,31 +1021,32 @@ TruthValuePtr SchemeEval::apply_tv(const std::string &func, Handle varargs)
 			// At any rate, we must not return a TV of any sort, here.
 			throw RuntimeException(TRACE_INFO, "%s", _error_msg.c_str());
 		}
-		return SchemeSmob::to_tv(tv_smob);
+		return SchemeSmob::scm_to_protom(smob);
 	}
 
 	_pexpr = &func;
 	_hargs = varargs;
 	_in_eval = true;
-	scm_with_guile(c_wrap_apply_tv, this);
+	scm_with_guile(c_wrap_apply_v, this);
 	_in_eval = false;
+	_hargs = nullptr;
 
 	if (eval_error())
 		throw RuntimeException(TRACE_INFO, "%s", _error_msg.c_str());
 
-	// We do not want this->_tvp to point at anything after we return.
+	// We do not want this->_retval to point at anything after we return.
 	// This is so that we do not hold a long-term reference to the TV.
-	TruthValuePtr rtv;
-	swap(rtv, _tvp);
-	return rtv;
+	ProtoAtomPtr rv;
+	swap(rv, _retval);
+	return rv;
 }
 
-void * SchemeEval::c_wrap_apply_tv(void * p)
+void * SchemeEval::c_wrap_apply_v(void * p)
 {
 	SchemeEval *self = (SchemeEval *) p;
-	SCM tv_smob = self->do_apply_scm(*self->_pexpr, self->_hargs);
+	SCM smob = self->do_apply_scm(*self->_pexpr, self->_hargs);
 	if (self->eval_error()) return self;
-	self->_tvp = SchemeSmob::to_tv(tv_smob);
+	self->_retval = SchemeSmob::scm_to_protom(smob);
 	return self;
 }
 

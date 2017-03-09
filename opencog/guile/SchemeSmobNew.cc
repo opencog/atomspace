@@ -47,12 +47,12 @@ std::string SchemeSmob::to_string(SCM node)
  * This does NOT use the Atom::toString() methods, because those
  * methods are not guaranteed to generate valid scheme.
  */
-std::string SchemeSmob::to_string(Handle h)
+std::string SchemeSmob::to_string(const Handle& h)
 {
 	return handle_to_string(h, 0);
 }
 
-std::string SchemeSmob::handle_to_string(Handle h, int indent)
+std::string SchemeSmob::handle_to_string(const Handle& h, int indent)
 {
 	if (nullptr == h) return "#<Invalid handle>";
 
@@ -72,7 +72,7 @@ std::string SchemeSmob::handle_to_string(Handle h, int indent)
 		TruthValuePtr tv(h->getTruthValue());
 		if (not tv->isDefaultTV()) {
 			ret += " ";
-			ret += tv_to_string (tv.get());
+			ret += tv_to_string (tv);
 		}
 		ret += ")";
 		return ret;
@@ -87,14 +87,15 @@ std::string SchemeSmob::handle_to_string(Handle h, int indent)
 		TruthValuePtr tv(h->getTruthValue());
 		if (not tv->isDefaultTV()) {
 			ret += " ";
-			ret += tv_to_string (tv.get());
+			ret += tv_to_string(tv);
 		}
 
-		// print the outgoing link set.
+		// Print the outgoing link set.
 		ret += "\n";
 		const HandleSeq& oset = h->getOutgoingSet();
 		unsigned int arity = oset.size();
-		for (unsigned int i=0; i<arity; i++) {
+		for (unsigned int i=0; i<arity; i++)
+		{
 			//ret += " ";
 			ret += handle_to_string(oset[i], /*(0==i)?0:*/indent+1);
 			ret += "\n";
@@ -105,18 +106,16 @@ std::string SchemeSmob::handle_to_string(Handle h, int indent)
 		return ret;
 	}
 
-	ProtoAtomPtr vvv(AtomCast(h));
-	if (vvv) {
-		ret += vvv->toString();
-		return ret;
-	}
 	return ret;
 }
 
-std::string SchemeSmob::handle_to_string(SCM node)
+std::string SchemeSmob::protom_to_string(SCM node)
 {
-	Handle h(scm_to_handle(node));
-	return handle_to_string(h, 0) + "\n";
+	ProtoAtomPtr pa(scm_to_protom(node));
+	if (not pa->isAtom())
+		return pa->toString();  // XXX FIXME this is temporary hack
+
+	return handle_to_string(HandleCast(pa), 0) + "\n";
 }
 
 /* ============================================================== */
@@ -139,7 +138,7 @@ SCM SchemeSmob::protom_to_scm (const ProtoAtomPtr& pa)
 
 	SCM smob;
 	SCM_NEWSMOB (smob, cog_misc_tag, pap);
-	SCM_SET_SMOB_FLAGS(smob, COG_HANDLE);
+	SCM_SET_SMOB_FLAGS(smob, COG_PROTOM);
 	return smob;
 }
 
@@ -149,7 +148,7 @@ ProtoAtomPtr SchemeSmob::scm_to_protom (SCM sh)
 		return nullptr;
 
 	scm_t_bits misctype = SCM_SMOB_FLAGS(sh);
-	if (COG_HANDLE != misctype)
+	if (COG_PROTOM != misctype)
 		return nullptr;
 
 	ProtoAtomPtr pv(*((ProtoAtomPtr *) SCM_SMOB_DATA(sh)));
@@ -159,16 +158,15 @@ ProtoAtomPtr SchemeSmob::scm_to_protom (SCM sh)
 
 Handle SchemeSmob::scm_to_handle (SCM sh)
 {
-	if (not SCM_SMOB_PREDICATE(SchemeSmob::cog_misc_tag, sh))
+	ProtoAtomPtr pa(scm_to_protom(sh));
+	if (nullptr == pa)
 		return Handle::UNDEFINED;
 
-	scm_t_bits misctype = SCM_SMOB_FLAGS(sh);
-	if (COG_HANDLE != misctype)
+	if (not pa->isAtom())
 		return Handle::UNDEFINED;
 
-	Handle h(*((Handle *) SCM_SMOB_DATA(sh)));
 	scm_remember_upto_here_1(sh);
-	return h;
+	return HandleCast(pa);
 }
 
 /* ============================================================== */
@@ -346,8 +344,6 @@ SCM SchemeSmob::ss_new_node (SCM stype, SCM sname, SCM kv_pairs)
 	// Special case handling for NumberNode (and TimeNode, etc.)
 	if (classserver().isA(t, NUMBER_NODE) and scm_is_number(sname)) {
 		sname = scm_number_to_string(sname, _radix_ten);
-		// TODO: if we're given a string, I guess maybe we should check
-		// that the string is convertible to a number ??
 	}
 	std::string name(verify_string (sname, "cog-new-node", 2,
 		"string name for the node"));
@@ -355,24 +351,19 @@ SCM SchemeSmob::ss_new_node (SCM stype, SCM sname, SCM kv_pairs)
 	AtomSpace* atomspace = get_as_from_list(kv_pairs);
 	if (NULL == atomspace) atomspace = ss_get_env_as("cog-new-node");
 
-	Handle h;
-
 	try
 	{
 		// Now, create the actual node... in the actual atom space.
-		h = atomspace->add_node(t, name);
+		Handle h(atomspace->add_node(t, name));
 
-		// tv->clone is called here, because, for the atomspace, we want
-		// to use a use-counted std:shared_ptr, whereas in guile, we are
-		// using a garbage-collected raw pointer.  So clone makes up the
-		// difference.
-		const TruthValue *tv = get_tv_from_list(kv_pairs);
-		if (tv) h->setTruthValue(tv->clone());
+		const TruthValuePtr tv(get_tv_from_list(kv_pairs));
+		if (tv) h->setTruthValue(tv);
 
 		// Was an attention value explicitly specified?
 		// If so, then we've got to set it.
 		AttentionValue *av = get_av_from_list(kv_pairs);
 		if (av) attentionbank(atomspace).change_av(h, av->clone());
+		return handle_to_scm(h);
 	}
 	catch (const std::exception& ex)
 	{
@@ -380,7 +371,7 @@ SCM SchemeSmob::ss_new_node (SCM stype, SCM sname, SCM kv_pairs)
 	}
 
 	scm_remember_upto_here_1(kv_pairs);
-	return handle_to_scm(h);
+	return SCM_EOL;
 }
 
 /**
@@ -403,8 +394,8 @@ SCM SchemeSmob::ss_node (SCM stype, SCM sname, SCM kv_pairs)
 	if (NULL == h) return SCM_EOL;
 
 	// If there was a truth value, change it.
-	const TruthValue *tv = get_tv_from_list(kv_pairs);
-	if (tv) h->setTruthValue(tv->clone());
+	const TruthValuePtr tv(get_tv_from_list(kv_pairs));
+	if (tv) h->setTruthValue(tv);
 
 	// If there was an attention value, change it.
 	const AttentionValue *av = get_av_from_list(kv_pairs);
@@ -475,7 +466,6 @@ SchemeSmob::verify_handle_list (SCM satom_list, const char * subrname, int pos)
  */
 SCM SchemeSmob::ss_new_link (SCM stype, SCM satom_list)
 {
-	Handle h;
 	Type t = verify_atom_type(stype, "cog-new-link", 1);
 
 	HandleSeq outgoing_set;
@@ -487,25 +477,24 @@ SCM SchemeSmob::ss_new_link (SCM stype, SCM satom_list)
 	try
 	{
 		// Now, create the actual link... in the actual atom space.
-		h = atomspace->add_link(t, outgoing_set);
+		Handle h(atomspace->add_link(t, outgoing_set));
 
 		// Fish out a truth value, if its there.
-		const TruthValue *tv = get_tv_from_list(satom_list);
-		if (tv) {
-			h->setTruthValue(tv->clone());
-		}
+		const TruthValuePtr tv(get_tv_from_list(satom_list));
+		if (tv) h->setTruthValue(tv);
 
 		// Was an attention value explicitly specified?
 		// If so, then we've got to set it.
 		const AttentionValue *av = get_av_from_list(satom_list);
 		if (av) attentionbank(atomspace).change_av(h, av->clone());
+		return handle_to_scm (h);
 	}
 	catch (const std::exception& ex)
 	{
 		throw_exception(ex, "cog-new-link", satom_list);
 	}
 	scm_remember_upto_here_1(satom_list);
-	return handle_to_scm (h);
+	return SCM_EOL;
 }
 
 /**
@@ -528,8 +517,8 @@ SCM SchemeSmob::ss_link (SCM stype, SCM satom_list)
 	if (nullptr == h) return SCM_EOL;
 
 	// If there was a truth value, change it.
-	const TruthValue *tv = get_tv_from_list(satom_list);
-	if (tv) h->setTruthValue(tv->clone());
+	const TruthValuePtr tv(get_tv_from_list(satom_list));
+	if (tv) h->setTruthValue(tv);
 
 	// If there was an attention value, change it.
 	const AttentionValue *av = get_av_from_list(satom_list);

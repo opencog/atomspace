@@ -539,7 +539,7 @@ class SchemePrimitive : public PrimitiveEnviron
 				{
 					Handle h = SchemeSmob::verify_handle(scm_car(args), scheme_name);
 					TruthValuePtr tv((that->*method.p_h)(h));
-					rc = SchemeSmob::tv_to_scm(tv);
+					rc = SchemeSmob::protom_to_scm(tv);
 					break;
 				}
 				case S_AS:

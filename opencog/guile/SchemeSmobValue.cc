@@ -26,7 +26,7 @@ SCM SchemeSmob::ss_value_p (SCM s)
 		return SCM_BOOL_F;
 
 	scm_t_bits misctype = SCM_SMOB_FLAGS(s);
-	if (COG_HANDLE == misctype)
+	if (COG_PROTOM == misctype)
 		return SCM_BOOL_T;
 
 	return SCM_BOOL_F;
@@ -43,11 +43,15 @@ SchemeSmob::verify_float_list (SCM svalue_list, const char * subrname, int pos)
 	// (which is rather unusual, but legit.  Allow embedded nulls
 	// as this can be convenient for writing scheme code.
 	if (!scm_is_pair(svalue_list) and !scm_is_null(svalue_list))
-		scm_wrong_type_arg_msg(subrname, pos, svalue_list, "a list of (float-pt) values");
+		scm_wrong_type_arg_msg(subrname, pos, svalue_list, "a list of float-pt values");
+	return scm_to_float_list(svalue_list);
+}
 
+std::vector<double>
+SchemeSmob::scm_to_float_list (SCM svalue_list)
+{
 	std::vector<double> valist;
 	SCM sl = svalue_list;
-	pos = 2;
 	while (scm_is_pair(sl)) {
 		SCM svalue = SCM_CAR(sl);
 
@@ -56,9 +60,7 @@ SchemeSmob::verify_float_list (SCM svalue_list, const char * subrname, int pos)
 			valist.emplace_back(v);
 		}
 		sl = SCM_CDR(sl);
-		pos++;
 	}
-
 	return valist;
 }
 
@@ -72,11 +74,15 @@ SchemeSmob::verify_protom_list (SCM svalue_list, const char * subrname, int pos)
 	// (which is rather unusual, but legit.  Allow embedded nulls
 	// as this can be convenient for writing scheme code.
 	if (!scm_is_pair(svalue_list) and !scm_is_null(svalue_list))
-		scm_wrong_type_arg_msg(subrname, pos, svalue_list, "a list of (protoato) values");
+		scm_wrong_type_arg_msg(subrname, pos, svalue_list, "a list of protoatom values");
+	return scm_to_protom_list(svalue_list);
+}
 
+std::vector<ProtoAtomPtr>
+SchemeSmob::scm_to_protom_list (SCM svalue_list)
+{
 	std::vector<ProtoAtomPtr> valist;
 	SCM sl = svalue_list;
-	pos = 2;
 	while (scm_is_pair(sl)) {
 		SCM svalue = SCM_CAR(sl);
 
@@ -85,9 +91,7 @@ SchemeSmob::verify_protom_list (SCM svalue_list, const char * subrname, int pos)
 			valist.emplace_back(pa);
 		}
 		sl = SCM_CDR(sl);
-		pos++;
 	}
-
 	return valist;
 }
 
@@ -98,14 +102,19 @@ std::vector<std::string>
 SchemeSmob::verify_string_list (SCM svalue_list, const char * subrname, int pos)
 {
 	// Verify that second arg is an actual list. Allow null list
-	// (which is rather unusual, but legit.  Allow embedded nulls
+	// (which is rather unusual, but legit).  Allow embedded nulls,
 	// as this can be convenient for writing scheme code.
 	if (!scm_is_pair(svalue_list) and !scm_is_null(svalue_list))
-		scm_wrong_type_arg_msg(subrname, pos, svalue_list, "a list of (string) values");
+		scm_wrong_type_arg_msg(subrname, pos, svalue_list, "a list of string values");
 
+	return scm_to_string_list(svalue_list);
+}
+
+std::vector<std::string>
+SchemeSmob::scm_to_string_list (SCM svalue_list)
+{
 	std::vector<std::string> valist;
 	SCM sl = svalue_list;
-	pos = 2;
 	while (scm_is_pair(sl)) {
 		SCM svalue = SCM_CAR(sl);
 
@@ -114,9 +123,7 @@ SchemeSmob::verify_string_list (SCM svalue_list, const char * subrname, int pos)
 			valist.emplace_back(v);
 		}
 		sl = SCM_CDR(sl);
-		pos++;
 	}
-
 	return valist;
 }
 
@@ -152,6 +159,61 @@ SCM SchemeSmob::ss_new_value (SCM stype, SCM svalue_list)
 
 	scm_remember_upto_here_1(svalue_list);
 	return protom_to_scm(pa);
+}
+
+/* ============================================================== */
+
+SCM SchemeSmob::ss_set_value (SCM satom, SCM skey, SCM svalue)
+{
+	Handle atom(verify_handle(satom, "cog-set-value!", 1));
+	Handle key(verify_handle(skey, "cog-set-value!", 2));
+
+	// If svalue is actually a value, just use it.
+	// If it is a list, assume its a list of values.
+	ProtoAtomPtr pa;
+	if (scm_is_pair(svalue)) {
+		SCM sitem = SCM_CAR(svalue);
+
+		if (scm_is_number(sitem))
+		{
+			std::vector<double> fl = scm_to_float_list(svalue);
+			pa = createFloatValue(fl);
+		}
+		else if (scm_is_string(sitem))
+		{
+			std::vector<std::string> fl = scm_to_string_list(svalue);
+			pa = createStringValue(fl);
+		}
+		else
+		{
+			verify_protom(sitem, "cog-set-value!", 3);
+			std::vector<ProtoAtomPtr> fl = scm_to_protom_list(svalue);
+			pa = createLinkValue(fl);
+		}
+	}
+	else
+	{
+		pa = verify_protom(svalue, "cog-set-value!", 3);
+	}
+
+	atom->setValue(key, pa);
+	return satom;
+}
+
+SCM SchemeSmob::ss_value (SCM satom, SCM skey)
+{
+	Handle atom(verify_handle(satom, "cog-value", 1));
+	Handle key(verify_handle(skey, "cog-value", 2));
+
+	try
+	{
+		return protom_to_scm(atom->getValue(key));
+	}
+	catch (const std::exception& ex)
+	{
+		throw_exception(ex, "cog-value", scm_cons(satom, skey));
+	}
+	return SCM_EOL;
 }
 
 /* ===================== END OF FILE ============================ */

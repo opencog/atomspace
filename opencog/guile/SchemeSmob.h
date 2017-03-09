@@ -45,8 +45,7 @@ private:
 
 	enum {
 		COG_UUID = 1, // unsigned long int
-		COG_HANDLE,   // smart pointer
-		COG_TV,       // truth values
+		COG_PROTOM,   // values or atoms - smart pointer
 		COG_AV,       // attention values
 		COG_AS,       // atom spaces
 		COG_EXTEND    // callbacks into C++ code.
@@ -73,6 +72,11 @@ private:
 	static SCM protom_to_scm(const ProtoAtomPtr&);
 	static Handle scm_to_handle(SCM);
 	static ProtoAtomPtr scm_to_protom(SCM);
+	static TruthValuePtr scm_to_tv(SCM);
+
+	static std::vector<double> scm_to_float_list (SCM);
+	static std::vector<ProtoAtomPtr> scm_to_protom_list (SCM);
+	static std::vector<std::string> scm_to_string_list (SCM);
 
 	// Atom creation and deletion functions
 	static SCM ss_new_value(SCM, SCM);
@@ -100,6 +104,7 @@ private:
 	// Set properties of atoms
 	static SCM ss_set_av(SCM, SCM);
 	static SCM ss_set_tv(SCM, SCM);
+	static SCM ss_set_value(SCM, SCM, SCM);
 	static SCM ss_merge_tv(SCM, SCM);
 	static SCM ss_merge_hi_conf_tv(SCM, SCM);
 	static SCM ss_inc_count(SCM, SCM);
@@ -113,6 +118,7 @@ private:
 	static SCM ss_as(SCM);
 	static SCM ss_av(SCM);
 	static SCM ss_tv(SCM);
+	static SCM ss_value(SCM, SCM);
 	static SCM ss_incoming_set(SCM);
 	static SCM ss_incoming_by_type(SCM, SCM);
 	static SCM ss_outgoing_set(SCM);
@@ -144,8 +150,6 @@ private:
 	static SCM ss_ptv_p(SCM);
 	static SCM ss_ftv_p(SCM);
 	static SCM ss_etv_p(SCM);
-	static SCM take_tv(TruthValue *);
-	static SCM tv_to_scm(TruthValuePtr);
 	static SCM ss_tv_get_value(SCM);
 	static SCM ss_tv_get_mean(SCM);
 	static SCM ss_tv_get_confidence(SCM);
@@ -187,11 +191,10 @@ private:
 
 	// Misc utilities
 	static std::string to_string(SCM);
-	static TruthValuePtr to_tv(SCM);
-	static std::string handle_to_string(SCM);
-	static std::string handle_to_string(Handle, int);
+	static std::string protom_to_string(SCM);
+	static std::string handle_to_string(const Handle&, int);
 	static std::string misc_to_string(SCM);
-	static TruthValue *get_tv_from_list(SCM);
+	static TruthValuePtr get_tv_from_list(SCM);
 	static AttentionValue *get_av_from_list(SCM);
 	static AtomSpace *get_as_from_list(SCM);
 
@@ -201,7 +204,7 @@ private:
 	static Type verify_atom_type(SCM, const char *, int pos = 1);
 	static Handle verify_handle(SCM, const char *, int pos = 1);
 	static ProtoAtomPtr verify_protom(SCM, const char *, int pos = 1);
-	static TruthValue* verify_tv(SCM, const char *, int pos = 1);
+	static TruthValuePtr verify_tv(SCM, const char *, int pos = 1);
 	static AttentionValue* verify_av(SCM, const char *, int pos = 1);
 	static HandleSeq verify_handle_list (SCM, const char *,
 	                                               int pos = 1);
@@ -233,10 +236,10 @@ public:
 public:
 
 	// Utility printing functions
-	static std::string to_string(Handle);
+	static std::string to_string(const Handle&);
 	static std::string as_to_string(const AtomSpace *);
 	static std::string av_to_string(const AttentionValue *);
-	static std::string tv_to_string(const TruthValue *);
+	static std::string tv_to_string(const TruthValuePtr&);
 };
 
 /** @}*/

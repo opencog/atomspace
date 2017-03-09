@@ -136,8 +136,8 @@ count_t FuzzyTruthValue::confidenceToCount(confidence_t cf)
 {
     // There are not quite 16 digits in double precision
     // not quite 7 in single-precision float
-    cf = std::min(cf, 0.9999998f);
-    return static_cast<count_t>(DEFAULT_K * cf / (1.0f - cf));
+    cf = std::min(cf, 0.9999998);
+    return static_cast<count_t>(DEFAULT_K * cf / (1.0 - cf));
 }
 
 confidence_t FuzzyTruthValue::countToConfidence(count_t cn)
