@@ -205,7 +205,15 @@ SCM SchemeSmob::ss_value (SCM satom, SCM skey)
 	Handle atom(verify_handle(satom, "cog-value", 1));
 	Handle key(verify_handle(skey, "cog-value", 2));
 
-	return protom_to_scm(atom->getValue(key));
+	try
+	{
+		return protom_to_scm(atom->getValue(key));
+	}
+	catch (const std::exception& ex)
+	{
+		throw_exception(ex, "cog-value", scm_cons(satom, skey));
+	}
+	return SCM_EOL;
 }
 
 /* ===================== END OF FILE ============================ */
