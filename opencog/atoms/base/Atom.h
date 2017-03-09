@@ -237,16 +237,16 @@ public:
     /// Associate `value` to `key` for this atom.
     void setValue(const Handle& key, ProtoAtomPtr& value);
     /// Get value at `key` for this atom.
-    ProtoAtomPtr getValue(const Handle& key);
+    ProtoAtomPtr getValue(const Handle& key) const;
 
     /// Get the set of all keys in use for this Atom.
-    std::set<Handle> getKeys();
+    std::set<Handle> getKeys() const;
 
     /// Copy all the values from the other atom to this one.
     void copyValues(const Handle&);
 
     /// Print all of the key-value pairs.
-    virtual std::string valuesToString();
+    virtual std::string valuesToString() const;
 
     //! Get the size of the incoming set.
     size_t getIncomingSetSize() const;
@@ -260,7 +260,7 @@ public:
     //! That is, this call returns the incoming set as it was att the
     //! time of the call; any deletions that occur afterwards (possibly
     //! in other threads) will not be reflected in the returned set.
-    IncomingSet getIncomingSet(AtomSpace* = NULL);
+    IncomingSet getIncomingSet(AtomSpace* = NULL) const;
 
     //! Place incoming set into STL container of Handles.
     //! Example usage:
@@ -270,7 +270,7 @@ public:
     //! that were actually part of the incoming set at the time of
     //! the call to this function.
     template <typename OutputIterator> OutputIterator
-    getIncomingSet(OutputIterator result)
+    getIncomingSet(OutputIterator result) const
     {
         if (NULL == _incoming_set) return result;
         std::lock_guard<std::mutex> lck(_mtx);
@@ -312,7 +312,7 @@ public:
      */
     template <typename OutputIterator> OutputIterator
     getIncomingSetByType(OutputIterator result,
-                         Type type, bool subclass = false)
+                         Type type, bool subclass = false) const
     {
         if (NULL == _incoming_set) return result;
         std::lock_guard<std::mutex> lck(_mtx);
@@ -334,7 +334,7 @@ public:
     }
 
     /** Functional version of getIncomingSetByType.  */
-    IncomingSet getIncomingSetByType(Type type, bool subclass = false);
+    IncomingSet getIncomingSetByType(Type type, bool subclass = false) const;
 
     /** Returns a string representation of the node. */
     virtual std::string toString(const std::string& indent) const = 0;

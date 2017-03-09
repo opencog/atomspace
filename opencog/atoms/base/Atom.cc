@@ -187,13 +187,13 @@ void Atom::setValue(const Handle& key, ProtoAtomPtr& value)
     _atom_space->_value_table.addValuation(key, getHandle(), value);
 }
 
-ProtoAtomPtr Atom::getValue(const Handle& key)
+ProtoAtomPtr Atom::getValue(const Handle& key) const
 {
     if (nullptr == _atom_space) return nullptr;
     return _atom_space->_value_table.getValue(key, getHandle());
 }
 
-std::set<Handle> Atom::getKeys()
+std::set<Handle> Atom::getKeys() const
 {
     if (nullptr == _atom_space) return std::set<Handle>();
     return _atom_space->_value_table.getKeys(getHandle());
@@ -209,7 +209,7 @@ void Atom::copyValues(const Handle& other)
     }
 }
 
-std::string Atom::valuesToString()
+std::string Atom::valuesToString() const
 {
     std::string rv;
 
@@ -357,7 +357,7 @@ size_t Atom::getIncomingSetSize() const
 // is not thread-safe during reading while simultaneous insertion and
 // deletion.  Besides, the incoming set is weak; we have to make it
 // strong in order to hand it out.
-IncomingSet Atom::getIncomingSet(AtomSpace* as)
+IncomingSet Atom::getIncomingSet(AtomSpace* as) const
 {
     static IncomingSet empty_set;
     if (NULL == _incoming_set) return empty_set;
@@ -387,7 +387,7 @@ IncomingSet Atom::getIncomingSet(AtomSpace* as)
     return iset;
 }
 
-IncomingSet Atom::getIncomingSetByType(Type type, bool subclass)
+IncomingSet Atom::getIncomingSetByType(Type type, bool subclass) const
 {
     HandleSeq inhs;
     getIncomingSetByType(std::back_inserter(inhs), type, subclass);
