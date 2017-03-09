@@ -166,6 +166,18 @@ public:
 static inline TruthValuePtr TruthValueCast(const ProtoAtomPtr& pa)
     { return std::dynamic_pointer_cast<const TruthValue>(pa); }
 
+static inline ProtoAtomPtr ProtoAtomCast(const TruthValuePtr& tv)
+{
+    // This should have worked!?
+    // return std::const_pointer_cast<ProtoAtom>(tv);
+
+    // This, too, should have worked!?
+    // return std::shared_ptr<ProtoAtom>(tv, const_cast<ProtoAtom*>(tv.get()));
+
+    // This works...
+    return std::shared_ptr<ProtoAtom>(tv, (ProtoAtom*) tv.get());
+}
+
 } // namespace opencog
 
 /** @}*/

@@ -201,18 +201,7 @@ std::string SchemeSmob::tv_to_string(const TruthValuePtr& tv)
 
 SCM SchemeSmob::tv_to_scm (const TruthValuePtr& tv)
 {
-	// This should have worked!?
-	// ProtoAtomPtr pa(std::const_pointer_cast<ProtoAtom>(tv));
-
-	// This, too, should have worked!?
-	// ProtoAtomPtr pa(std::shared_ptr<ProtoAtom>(tv,
-	//	const_cast<ProtoAtom*>(tv.get())));
-
-	// This works...
-	ProtoAtomPtr pa(std::shared_ptr<ProtoAtom>(tv,
-		(ProtoAtom*) tv.get()));
-
-	return protom_to_scm(pa);
+	return protom_to_scm(ProtoAtomCast(tv));
 }
 
 /**
