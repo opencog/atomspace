@@ -219,7 +219,7 @@ void ProtocolBufferSerializer::serializeIndefiniteTruthValue(
     singleTruthValue->set_mean(tv.getMean());
     singleTruthValue->set_count(tv.getCount());
     singleTruthValue->set_confidence(tv.getConfidence());
-    for (double *f const: tv.getFirstOrderDistribution())
+    for (const double *f: tv.getFirstOrderDistribution())
     {
         singleTruthValue->add_firstorderdistribution(*f);
     }
