@@ -82,13 +82,20 @@ Atoms, and for thread-safety of the index.  Thus, for rapidly-changing
 data, a different mechanism is provided: this associates one or more
 "values" to an atom; the values are indexed by a "key" (which is an
 Atom).  The values can be a vector of floats, a vector of strings, or a
-vector of values; yet more kinds of values can be defined, if desired.
+vector of values; yet more kinds of values could be defined, if desired.
 
-Values differ from Atoms in that they can change at any time; they are
-mutable. Two different threads can observe two different values "at the
-same time". The value of an atom can be obtained by specifying a key;
-however, the values have no "incoming set": given a value, there is no
-way of finding out what atoms might be associated with it.
+Values differ from Atoms in that they are not indexed in the AtomSpace,
+which means that they cannot be searched-for by content. Unlike Atoms,
+Values are also not globally unique: there may be two distinct Values
+holding exactly the same data.  Values have no "incoming set": given
+a Value, there is no way of finding out what Atoms might be using it.
+
+Values, and in particular TruthValues, are immutable: once created,
+they cannot be changed. What can be changed is the association of
+Values to Atoms. Immutabilty seems to be a simpler, faster solution
+than using mutex locks to guarantee consistent data. Immutability does
+incurr some performance costs (for managing/swapping the smart
+pointers, as well as forcing a malloc to change a value.).
 
 The Valuation type is a C++ class that associates the (key,atom) pair
 with a value; thus a Valuation is the triple (key, atom, value). Thus,
@@ -163,6 +170,18 @@ larger than what bdgc can easily detect. In essence, std::set does not
 play nice with bdgc. Bummer. So reference counting is done instead, and
 in order to break the circular loops, the incoming set consists of weak
 pointers. More about garbage collection below.
+
+Valuation Implementation Nodes
+==============================
+Valuations are currently stored in a ValuationSpace, but it might be
+better to store them directly, in each atom.
+
+TruthValues are stored directly with each Atom; this could be changed
+to use the generic Valuation mechanism, but this would incurr
+significant(?) performance penalty.
+
+Valuations are currently immutable, this too has performance and access
+penalties that perhaps should be re-thought?
 
 
 ======================================================================
