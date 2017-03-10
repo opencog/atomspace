@@ -84,6 +84,10 @@ void ForwardChainer::init(const Handle& hsource, const HandleSeq& focus_set)
 
     // Set rules.
     _rules = _configReader.get_rules();
+    // TODO: For now the FC follows the old standard. We may move to
+    // the new standard when all rules have been ported to the new one.
+    for (const Rule& rule : _rules)
+        rule.premises_as_clauses = true; // can be modify as mutable
 
     // Reset the iteration count and max count
     _iteration = 0;
