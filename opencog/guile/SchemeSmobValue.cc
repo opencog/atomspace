@@ -184,11 +184,38 @@ SCM SchemeSmob::ss_set_value (SCM satom, SCM skey, SCM svalue)
 			std::vector<std::string> fl = scm_to_string_list(svalue);
 			pa = createStringValue(fl);
 		}
-		else
+		else if (scm_is_symbol(sitem))
+		{
+			// The code below allows the following to be evaluated:
+			// (define x 0.44) (define y 0.55)
+			// (cog-set-value! (Concept "foo") (Predicate "bar") '(x y))
+			// Here, x and y are symbols, the symbol lookup gives
+			// variables, and the variable deref gives 0.44, 0.55.
+			SCM sl = svalue;
+			SCM newl = SCM_EOL;
+			while (scm_is_pair(sl)) {
+				SCM sym = SCM_CAR(sl);
+				if (scm_is_symbol(sym))
+					newl = scm_cons(scm_variable_ref(scm_lookup(sym)), newl);
+				else if (scm_is_true(scm_variable_p(sym)))
+					newl = scm_cons(scm_variable_ref(sym), newl);
+				else
+					newl = scm_cons(sym, newl);
+				sl = SCM_CDR(sl);
+			}
+			newl = scm_reverse(newl);
+			return ss_set_value(satom, skey, newl);
+		}
+		else if (scm_is_true(scm_list_p(svalue)))
 		{
 			verify_protom(sitem, "cog-set-value!", 3);
 			std::vector<ProtoAtomPtr> fl = scm_to_protom_list(svalue);
 			pa = createLinkValue(fl);
+		}
+		else
+		{
+			scm_wrong_type_arg_msg("cog-set-value!", 3, svalue,
+				"a list of protoatom values");
 		}
 	}
 	else
