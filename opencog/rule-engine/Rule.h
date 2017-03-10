@@ -56,7 +56,7 @@ typedef RuleTypedSubstitutionMap::value_type RuleTypedSubstitutionPair;
  *     |-
  *     <conclusion>
  *
- * represented as
+ * represented either as
  *
  *     BindLink
  *        <variables>
@@ -66,12 +66,24 @@ typedef RuleTypedSubstitutionMap::value_type RuleTypedSubstitutionPair;
  *           <premise-n>
  *        <conclusion>
  *
- * Here, `<conclusion>` may represent the conclusion pattern
- * explicitly, or, in most cases, is a call to a grounded schema node
- * to calculate the conclusion given the premises. In such a case, the
- * conclusion is a first argument of the call, followed by the
- * premises.
+ * if there is ExecutionOutputLink in the BindLink rewrite term. Or
+ * 
+ *     BindLink
+ *        <variables>
+ *        AndLink
+ *           <clauses-1>
+ *           ...
+ *           <clauses-n>
+ *        ExecutionOutputLink
+ *           <formula>
+ *           ListLink
+ *              <conclusion>
+ *              <premises-1>
+ *              ...
+ *              <premises-m>
  *
+ * Also, unordered premises can be wrapped in SetLink as this may
+ * speed up a bit the Backward Chainer.
  */
 class Rule : public boost::totally_ordered<Rule>
 {
@@ -234,6 +246,11 @@ public:
 	Handle apply(AtomSpace& as) const;
 
 	std::string to_string() const;
+
+	// This flag allows to only sonsider the Rule clauses as
+	// premises. This is for backward compatibility with some rule
+	// base like R2L.
+	mutable bool premises_as_clauses;
 
 private:
 	// Rule

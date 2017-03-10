@@ -57,7 +57,7 @@ void RuleSet::expand_meta_rules(AtomSpace& as)
 }
 
 Rule::Rule()
-	: _rule_alias(Handle::UNDEFINED) {}
+	: premises_as_clauses(false), _rule_alias(Handle::UNDEFINED) {}
 
 Rule::Rule(const Handle& rule_member)
 {
@@ -243,15 +243,20 @@ HandleSeq Rule::get_clauses() const
 
 HandleSeq Rule::get_premises() const
 {
-	HandleSeq premises;
-
 	// If the rule's handle has not been set yet
 	if (not is_valid())
 		return HandleSeq();
 
-	// Search the premises in the rewrite term's ExecutionOutputLink
 	Handle rewrite = _rule->get_implicand();
-	if (rewrite->getType() == EXECUTION_OUTPUT_LINK) {
+	Type rewrite_type = rewrite->getType();
+
+	// Return the clauses
+	if (premises_as_clauses or rewrite_type != EXECUTION_OUTPUT_LINK)
+		return get_clauses();
+
+	// Search the premises in the rewrite term's ExecutionOutputLink
+	HandleSeq premises;
+	if (rewrite_type == EXECUTION_OUTPUT_LINK) {
 		Handle args = rewrite->getOutgoingAtom(1);
 		if (args->getType() == LIST_LINK) {
 			OC_ASSERT(args->getArity() > 0);
@@ -269,7 +274,6 @@ HandleSeq Rule::get_premises() const
 			}
 		}
 	}
-
 	return premises;
 }
 
