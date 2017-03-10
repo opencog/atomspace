@@ -36,7 +36,7 @@ namespace opencog
  */
 
 class ProbabilisticTruthValue;
-typedef std::shared_ptr<ProbabilisticTruthValue> ProbabilisticTruthValuePtr;
+typedef std::shared_ptr<const ProbabilisticTruthValue> ProbabilisticTruthValuePtr;
 
 //! a TruthValue that stores a mean, a confidence and the number of observations
 class ProbabilisticTruthValue : public TruthValue
@@ -63,23 +63,23 @@ public:
     count_t getCount() const;
     confidence_t getConfidence() const;
 
-    virtual TruthValuePtr merge(TruthValuePtr,
-                                const MergeCtrl& mc=MergeCtrl());
+    virtual TruthValuePtr merge(const TruthValuePtr&,
+                                const MergeCtrl& mc=MergeCtrl()) const;
 
     static TruthValuePtr createTV(strength_t s, confidence_t f, count_t c)
     {
-        return std::static_pointer_cast<TruthValue>(
-            std::make_shared<ProbabilisticTruthValue>(s, f, c));
+        return std::static_pointer_cast<const TruthValue>(
+            std::make_shared<const ProbabilisticTruthValue>(s, f, c));
     }
     static TruthValuePtr createTV(const ProtoAtomPtr& pap)
     {
-        return std::static_pointer_cast<TruthValue>(
-            std::make_shared<ProbabilisticTruthValue>(pap));
+        return std::static_pointer_cast<const TruthValue>(
+            std::make_shared<const ProbabilisticTruthValue>(pap));
     }
 
     TruthValuePtr clone() const
     {
-        return std::make_shared<ProbabilisticTruthValue>(*this);
+        return std::make_shared<const ProbabilisticTruthValue>(*this);
     }
     TruthValue* rawclone() const
     {

@@ -45,12 +45,12 @@ protected:
 	std::vector<ProtoAtomPtr> _value;
 
 public:
-	LinkValue(std::vector<ProtoAtomPtr> v) : ProtoAtom(LINK_VALUE), _value(v) {}
+	LinkValue(const std::vector<ProtoAtomPtr>& v)
+		: ProtoAtom(LINK_VALUE), _value(v) {}
 
 	virtual ~LinkValue() {}
 
-	std::vector<ProtoAtomPtr>& value() { return _value; }
-	void setValue(const std::vector<ProtoAtomPtr>& v) { _value = v; }
+	const std::vector<ProtoAtomPtr>& value() const { return _value; }
 
 	/** Returns a string representation of the value.  */
 	virtual std::string toString(const std::string& indent) const;

@@ -827,7 +827,7 @@ ProtoAtomPtr SQLAtomStorage::doUnpackValue(Response& rp)
 		if (rp.vtype == FLOAT_VALUE)
 			return createFloatValue(fltarr);
 		else
-			return TruthValue::factory(rp.vtype, fltarr);
+			return ProtoAtomCast(TruthValue::factory(rp.vtype, fltarr));
 	}
 
 	// We expect rp.lnkval to be a comma-separated list of
@@ -893,7 +893,7 @@ void SQLAtomStorage::store_atom_values(const Handle& atom)
 		storeValuation(key, atom, pap);
 	}
 
-	// Special-case for TruthValues.
+	// Special-case for TruthValues. Can we get rid of this someday?
 	TruthValuePtr tv(atom->getTruthValue());
 
 	// XXX This is wasteful of performance; do we really
@@ -904,7 +904,7 @@ void SQLAtomStorage::store_atom_values(const Handle& atom)
 		return;
 	}
 
-	storeValuation(tvpred, atom, tv);
+	storeValuation(tvpred, atom, ProtoAtomCast(tv));
 }
 
 /// Get ALL of the values associated with an atom.

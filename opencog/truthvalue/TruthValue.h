@@ -81,7 +81,7 @@ struct MergeCtrl
 };
 
 class TruthValue;
-typedef std::shared_ptr<TruthValue> TruthValuePtr;
+typedef std::shared_ptr<const TruthValue> TruthValuePtr;
 
 class TruthValue
     : public FloatValue
@@ -101,12 +101,12 @@ protected:
     TruthValue(Type t) : FloatValue(t) {}
 
     // Merge helper method
-    TruthValuePtr higher_confidence_merge(TruthValuePtr);
+    TruthValuePtr higher_confidence_merge(const TruthValuePtr&) const;
 
 public:
     virtual ~TruthValue() {}
 
-    static TruthValuePtr factory(Type, std::vector<double>);
+    static TruthValuePtr factory(Type, const std::vector<double>&);
     static TruthValuePtr factory(const ProtoAtomPtr&);
 
     virtual std::string toShortString(const std::string&) const;
@@ -152,8 +152,8 @@ public:
      * @param ms the merge style as described in
      *        https://github.com/opencog/opencog/issues/1295
      */
-    virtual TruthValuePtr merge(TruthValuePtr,
-                                const MergeCtrl& = MergeCtrl()) = 0;
+    virtual TruthValuePtr merge(const TruthValuePtr&,
+                                const MergeCtrl& = MergeCtrl()) const = 0;
 
     /**
      * Check if this TV is equal to the default TV.
@@ -164,7 +164,19 @@ public:
 };
 
 static inline TruthValuePtr TruthValueCast(const ProtoAtomPtr& pa)
-    { return std::dynamic_pointer_cast<TruthValue>(pa); }
+    { return std::dynamic_pointer_cast<const TruthValue>(pa); }
+
+static inline ProtoAtomPtr ProtoAtomCast(const TruthValuePtr& tv)
+{
+    // This should have worked!?
+    // return std::const_pointer_cast<ProtoAtom>(tv);
+
+    // This, too, should have worked!?
+    // return std::shared_ptr<ProtoAtom>(tv, const_cast<ProtoAtom*>(tv.get()));
+
+    // This works...
+    return std::shared_ptr<ProtoAtom>(tv, (ProtoAtom*) tv.get());
+}
 
 } // namespace opencog
 

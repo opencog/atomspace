@@ -253,7 +253,7 @@ void BasicSCMUTest::check_truth_value(const TruthValuePtr& tv)
 		   << " " << tv->getCount();
 	else if (tvt == INDEFINITE_TRUTH_VALUE) {
 		const IndefiniteTruthValuePtr& itv =
-			dynamic_pointer_cast<IndefiniteTruthValue>(tv);
+			dynamic_pointer_cast<const IndefiniteTruthValue>(tv);
 		ss << "cog-new-itv " << itv->getL() << " " << itv->getU()
 		   << " " << itv->getConfidence();
 	}
@@ -325,7 +325,7 @@ void BasicSCMUTest::test_values(void)
 	TSM_ASSERT("Failed to set float", not eval->eval_error());
 
 	ProtoAtomPtr fv = h->getValue(k);
-	std::vector<double>& vv(FloatValueCast(fv)->value());
+	const std::vector<double>& vv(FloatValueCast(fv)->value());
 
 	TS_ASSERT_LESS_THAN_EQUALS(fabs(vv[0] - 0.1), 1.0e-6);
 	TS_ASSERT_LESS_THAN_EQUALS(fabs(vv[1] - 0.2), 1.0e-6);

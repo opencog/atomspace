@@ -71,17 +71,18 @@ class GenericTruthValue : public TruthValue
 
         entropy_t getEntropy() const;
 
-        TruthValuePtr merge(TruthValuePtr, const MergeCtrl& = MergeCtrl());
+        TruthValuePtr merge(const TruthValuePtr&,
+                            const MergeCtrl& = MergeCtrl()) const;
 
         static TruthValuePtr createTV(const ProtoAtomPtr& pap)
         {
-            return std::static_pointer_cast<TruthValue>(
-                std::make_shared<GenericTruthValue>(pap));
+            return std::static_pointer_cast<const TruthValue>(
+                std::make_shared<const GenericTruthValue>(pap));
         }
 
         TruthValuePtr clone() const
         {
-            return std::make_shared<GenericTruthValue>(*this);
+            return std::make_shared<const GenericTruthValue>(*this);
         }
 
         TruthValue* rawclone() const

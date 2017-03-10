@@ -36,7 +36,7 @@ namespace opencog
  */
 
 class FuzzyTruthValue;
-typedef std::shared_ptr<FuzzyTruthValue> FuzzyTruthValuePtr;
+typedef std::shared_ptr<const FuzzyTruthValue> FuzzyTruthValuePtr;
 
 //! A TruthValue that stores a mean and the number of observations
 //! (strength and confidence)
@@ -85,8 +85,8 @@ public:
      * the resulting TV is either tv1 or tv2, the result being the one
      * with the highest confidence.
      */
-    TruthValuePtr merge(TruthValuePtr,
-                        const MergeCtrl& mc=MergeCtrl());
+    TruthValuePtr merge(const TruthValuePtr&,
+                        const MergeCtrl& mc=MergeCtrl()) const;
 
     static FuzzyTruthValuePtr createSTV(strength_t mean, count_t count)
     {
@@ -94,12 +94,12 @@ public:
     }
     static TruthValuePtr createTV(strength_t mean, count_t count)
     {
-        return std::static_pointer_cast<TruthValue>(createSTV(mean, count));
+        return std::static_pointer_cast<const TruthValue>(createSTV(mean, count));
     }
     static TruthValuePtr createTV(const ProtoAtomPtr& pap)
     {
-        return std::static_pointer_cast<TruthValue>(
-            std::make_shared<FuzzyTruthValue>(pap));
+        return std::static_pointer_cast<const TruthValue>(
+            std::make_shared<const FuzzyTruthValue>(pap));
     }
 
     TruthValuePtr clone() const

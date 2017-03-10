@@ -89,8 +89,8 @@ confidence_t FuzzyTruthValue::getConfidence() const
 }
 
 // This is the merge formula appropriate for PLN.
-TruthValuePtr FuzzyTruthValue::merge(TruthValuePtr other,
-                                     const MergeCtrl& mc)
+TruthValuePtr FuzzyTruthValue::merge(const TruthValuePtr& other,
+                                     const MergeCtrl& mc) const
 {
     if (other->getType() != SIMPLE_TRUTH_VALUE) {
         throw RuntimeException(TRACE_INFO,
@@ -101,7 +101,7 @@ TruthValuePtr FuzzyTruthValue::merge(TruthValuePtr other,
     if (other->getConfidence() > getConfidence())
         return other;
 
-    return std::dynamic_pointer_cast<TruthValue>(shared_from_this());
+    return std::static_pointer_cast<const TruthValue>(shared_from_this());
 }
 
 std::string FuzzyTruthValue::toString(const std::string& indent) const

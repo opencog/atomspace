@@ -45,16 +45,14 @@ protected:
 	std::vector<std::string> _value;
 
 public:
-	StringValue(std::string v) : ProtoAtom(STRING_VALUE) { _value.push_back(v); }
-	StringValue(std::vector<std::string> v) : ProtoAtom(STRING_VALUE), _value(v) {}
+	StringValue(const std::string& v)
+		: ProtoAtom(STRING_VALUE) { _value.push_back(v); }
+	StringValue(const std::vector<std::string>& v)
+		: ProtoAtom(STRING_VALUE), _value(v) {}
 
 	virtual ~StringValue() {}
 
-	std::vector<std::string>& value() { return _value; }
-	void setValue(const std::vector<std::string>& v) { _value = v; }
-	void setValue(const std::string& v) {
-		_value = std::vector<std::string>({v}); }
-
+	const std::vector<std::string>& value() const { return _value; }
 
 	/** Returns a string representation of the value.  */
 	virtual std::string toString(const std::string& indent) const;
@@ -63,9 +61,9 @@ public:
 	virtual bool operator==(const ProtoAtom&) const;
 };
 
-typedef std::shared_ptr<StringValue> StringValuePtr;
+typedef std::shared_ptr<const StringValue> StringValuePtr;
 static inline StringValuePtr StringValueCast(const ProtoAtomPtr& a)
-	{ return std::dynamic_pointer_cast<StringValue>(a); }
+	{ return std::dynamic_pointer_cast<const StringValue>(a); }
 
 // XXX temporary hack ...
 #define createStringValue std::make_shared<StringValue>
