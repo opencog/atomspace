@@ -42,7 +42,7 @@ void ValuationTable::addValuation(const ValuationPtr& vp)
 	const Handle& key = vp->key();
 	const Handle& atom = vp->atom();
 
-	std::lock_guard<std::recursive_mutex> lck(_mtx);
+	std::lock_guard<std::mutex> lck(_mtx);
 
 	// Make a record of all the keys being used for this atom.
 	auto ikeys = _keyset.find(atom);
@@ -72,7 +72,7 @@ void ValuationTable::addValuation(const Handle& key,
 
 ValuationPtr ValuationTable::getValuation(const Handle& key, const Handle& atom)
 {
-	std::lock_guard<std::recursive_mutex> lck(_mtx);
+	std::lock_guard<std::mutex> lck(_mtx);
 
 	auto vpiter = _vindex.find(std::make_pair(key, atom));
 	if (vpiter == _vindex.end())
@@ -97,7 +97,7 @@ ProtoAtomPtr ValuationTable::getValue(const Handle& key, const Handle& atom)
 // to be the peristence framework, and so we should optimize for that.
 std::set<Handle> ValuationTable::getKeys(const Handle& atom)
 {
-	std::lock_guard<std::recursive_mutex> lck(_mtx);
+	std::lock_guard<std::mutex> lck(_mtx);
 
 	auto ikeys = _keyset.find(atom);
 	if (ikeys == _keyset.end())
