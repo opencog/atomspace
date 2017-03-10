@@ -35,6 +35,7 @@
 #include <opencog/rule-engine/Rule.h>
 
 #include "ForwardChainer.h"
+#include "FocusSetPMCB.h"
 #include "FCLogger.h"
 
 using namespace opencog;
@@ -240,7 +241,7 @@ An attentionbank is needed in order to get the STI...
 	}
 
 	OC_ASSERT(hchosen != Handle::UNDEFINED);
-	
+
 	_selected_sources.insert(hchosen);
 	_unselected_sources.erase(hchosen);
 
@@ -289,14 +290,61 @@ Rule ForwardChainer::select_rule(const Handle& hsource)
 
 UnorderedHandleSet ForwardChainer::apply_rule(const Rule& rule)
 {
-	Handle result = rule.apply(_search_focus_set ? _focus_set_as : _as);
+    HandleSeq results;
 
-	LAZY_FC_LOG_DEBUG << "Results:" << std::endl
-                      << result->toShortString();
+    if (_search_focus_set) {
+	    // rule.get_rule() may introduce a new atom that satisfies
+	    // condition for the output. In order to prevent this
+	    // undesirable effect, lets store rule.get_rule() in a child
+	    // atomspace of parent focus_set_as so that PM will never be
+	    // able to find this new undesired atom created from partial
+	    // grounding.
+	    AtomSpace derived_rule_as(&_focus_set_as);
+	    Handle rhcpy = derived_rule_as.add_atom(rule.get_rule());
+	    BindLinkPtr bl = BindLinkCast(rhcpy);
+	    FocusSetPMCB fs_pmcb(&derived_rule_as, &_as);
+	    fs_pmcb.implicand = bl->get_implicand();
+	    bl->imply(fs_pmcb, false);
+	    results = fs_pmcb.get_result_list();
+    }
+    // Search the whole atomspace.
+    else {
+	    AtomSpace derived_rule_as(&_as);
+	    Handle rhcpy = derived_rule_as.add_atom(rule.get_rule());
+	    Handle h = bindlink(&derived_rule_as, rhcpy);
+	    results = h->getOutgoingSet();
+    }
 
-	return UnorderedHandleSet(result->getOutgoingSet().begin(),
-	                          result->getOutgoingSet().end());
+    // Take the results from applying the rule and add them in the
+    // given AtomSpace
+    auto add_results = [&](AtomSpace& as) {
+	    for (Handle& h : results)
+	    {
+		    Type t = h->getType();
+		    // If it's a List then add all the results. That kinda
+		    // means you can't infer List itself, maybe something to
+		    // look after.
+		    if (t == LIST_LINK)
+			    for (const Handle& hc : h->getOutgoingSet())
+				    as.add_atom(hc);
+		    else
+			    h = as.add_atom(h);
+	    }
+    };
+
+    // Add result back to atomspace.
+    if (_search_focus_set) {
+	    add_results(_focus_set_as);
+    } else {
+	    add_results(_as);
+    }
+
+    LAZY_FC_LOG_DEBUG << "Result is:" << std::endl
+                      << _as.add_link(SET_LINK, results)->toShortString();
+
+    return UnorderedHandleSet(results.begin(), results.end());
 }
+
 
 void ForwardChainer::validate(const Handle& hsource, const HandleSeq& hfocus_set)
 {
