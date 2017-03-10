@@ -24,6 +24,7 @@
 #define _OPENCOG_VALUTATION_TABLE_H
 
 #include <map>
+#include <mutex>
 #include <set>
 
 #include <opencog/atoms/base/Handle.h>
