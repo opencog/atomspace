@@ -31,6 +31,7 @@
 
 #include <opencog/atoms/base/types.h>
 #include <opencog/atoms/base/atom_types.h>
+#include <opencog/atoms/base/Handle.h>
 
 namespace opencog
 {
@@ -40,13 +41,20 @@ namespace opencog
 
 typedef boost::signals2::signal<void (Type)> TypeSignal;
 
+class ProtoAtom;
+typedef std::shared_ptr<ProtoAtom> ProtoAtomPtr;
+
 /**
- * This class keeps track of the complete atom class hierarchy.
- * The current implementation is hardwired. Future versions may include
- * different structures based on run-time type identification.
+ * This class keeps track of the complete protoatom (value and atom)
+ * class hierarchy. It also provides factories for those atom types
+ * that have non-trivial C++ objects behind them.
  */
 class ClassServer
 {
+public:
+    // Currently, we provide factories only for atoms, not for
+    // values.
+    typedef Handle (AtomFactory)(const ProtoAtomPtr&);
 private:
 
     /** Private default constructor for this class to make it a singleton. */
@@ -68,6 +76,7 @@ private:
     std::vector< std::vector<bool> > recursiveMap;
     std::unordered_map<std::string, Type> name2CodeMap;
     std::unordered_map<Type, const std::string*> code2NameMap;
+    std::unordered_map<Type, AtomFactory*> _atomFactory;
     TypeSignal _addTypeSignal;
 
     void setParentRecursively(Type parent, Type type);
@@ -76,8 +85,22 @@ public:
     /** Gets the singleton instance (following meyer's design pattern) */
     friend ClassServer& classserver();
 
-    /** Adds a new atom type with the given name and parent type */
+    /**
+     * Adds a new atom type with the given name and parent type.
+     * Return a numeric value that is assigned to the new type.
+     */
     Type addType(const Type parent, const std::string& name);
+
+    /**
+     * Declare a factory for an atom type.
+     */
+    void addFactory(Type, AtomFactory*);
+
+    /**
+     * Convert the indicated ProtoAtom into a C++ instance of the
+     * same type.
+     */
+    Handle factory(const ProtoAtomPtr&);
 
     /** Provides ability to get type-added signals.
      * @warning methods connected to this signal must not call ClassServer::addType or
