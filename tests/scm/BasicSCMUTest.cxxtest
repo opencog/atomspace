@@ -328,7 +328,7 @@ void BasicSCMUTest::test_values(void)
 	TSM_ASSERT("Failed to set float", not eval->eval_error());
 
 	ProtoAtomPtr fv = h->getValue(k);
-	TSM_ASSERT("Failed to get correct value", f == fv);
+	TSM_ASSERT("Failed to get correct value", *f == *fv);
 
 	const std::vector<double>& vv(FloatValueCast(fv)->value());
 	TS_ASSERT_LESS_THAN_EQUALS(fabs(vv[0] - 0.1), 1.0e-6);
@@ -337,7 +337,7 @@ void BasicSCMUTest::test_values(void)
 
 	ProtoAtomPtr fv2 = eval->eval_v("(cog-value h k)");
 	TSM_ASSERT("Failed to get value", not eval->eval_error());
-	TSM_ASSERT("Failed to get correct value", f == fv2);
+	TSM_ASSERT("Failed to get correct value", *f == *fv2);
 
 	// -------
 	eval->eval("(cog-set-value! h k (list f h s k t))");
@@ -353,7 +353,7 @@ void BasicSCMUTest::test_values(void)
 
 	ProtoAtomPtr sv = eval->eval_v("(cog-value h k)");
 	TSM_ASSERT("Failed to get value", not eval->eval_error());
-	TSM_ASSERT("Failed to get correct value", s == sv);
+	TSM_ASSERT("Failed to get correct value", *s == *sv);
 
 	// -------
 	// This is a kind-of funky, not entirely Kosher syntax,
@@ -363,7 +363,7 @@ void BasicSCMUTest::test_values(void)
 
 	ProtoAtomPtr lv3 = eval->eval_v("(cog-value h k)");
 	TSM_ASSERT("Failed to get value", not eval->eval_error());
-	TSM_ASSERT("Failed to get correct value", l == lv3);
+	TSM_ASSERT("Failed to get correct value", *l == *lv3);
 }
 
 // ============================================================
