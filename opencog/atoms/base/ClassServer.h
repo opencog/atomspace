@@ -80,6 +80,8 @@ private:
 
     void setParentRecursively(Type parent, Type type);
 
+    AtomFactory* searchToDepth(Type, int);
+
 public:
     /** Gets the singleton instance (following meyer's design pattern) */
     friend ClassServer& classserver();
@@ -94,7 +96,7 @@ public:
      * Declare a factory for an atom type.
      */
     void addFactory(Type, AtomFactory*);
-    AtomFactory* getFactory(Type, int = 0);
+    AtomFactory* getFactory(Type);
 
     /**
      * Convert the indicated Atom into a C++ instance of the

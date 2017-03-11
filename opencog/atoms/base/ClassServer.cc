@@ -115,7 +115,31 @@ void ClassServer::addFactory(Type t, AtomFactory* fact)
     _atomFactory[t] = fact;
 }
 
-ClassServer::AtomFactory* ClassServer::getFactory(Type t, int depth)
+// Perform a depth-first recursive search for a factory,
+// up to a maximum depth.
+ClassServer::AtomFactory* ClassServer::searchToDepth(Type t, int depth)
+{
+	// If there is a factory, then return it.
+	auto fpr = _atomFactory.find(t);
+	if (_atomFactory.end() != fpr)
+		return fpr->second;
+
+	// Perhaps one of the parent types has a factory.
+	// Perform a depth-first recursion.
+	depth--;
+	if (depth < 0) return nullptr;
+
+	std::vector<Type> parents;
+	getParents(t, parents.begin());
+	for (auto p: parents)
+	{
+		AtomFactory* fact = searchToDepth(p, depth);
+		if (fact) return fact;
+	}
+
+	return nullptr;
+}
+ClassServer::AtomFactory* ClassServer::getFactory(Type t)
 {
 	// If there is a factory, then return it.
 	auto fpr = _atomFactory.find(t);
@@ -127,23 +151,13 @@ ClassServer::AtomFactory* ClassServer::getFactory(Type t, int depth)
 	// We want to use a breadth-first recursion, and not
 	// the simpler-to-code depth-first recursion.  That is,
 	// we do NOT want some deep parent factory, when there
-	// is some factory at a shallower level. Breadth-first
-	// recursive algos are icky, but that's what we need.
+	// is some factory at a shallower level.
 	//
-	depth ++;
-
 #define MAX_DEPTH 100
 	for (int search_depth = 1; search_depth < MAX_DEPTH; search_depth++)
 	{
-		if (depth > search_depth) return nullptr;
-
-		std::vector<Type> parents;
-		getParents(t, parents.begin());
-		for (auto p: parents)
-		{
-			AtomFactory* fact = getFactory(p, depth);
-			if (fact) return fact;
-		}
+		AtomFactory* fact = searchToDepth(t, search_depth);
+		if (fact) return fact;
 	}
 
 	return nullptr;
