@@ -115,14 +115,14 @@ void ClassServer::addFactory(Type t, AtomFactory* fact)
     _atomFactory[t] = fact;
 }
 
-Handle ClassServer::factory(const ProtoAtomPtr& pap)
+Handle ClassServer::factory(const Handle& h)
 {
-	auto fpr = _atomFactory.find(pap->getType());
+	auto fpr = _atomFactory.find(h->getType());
 	if (_atomFactory.end() == fpr)
-		return HandleCast(pap);
+		return Handle(h);
 
 	AtomFactory* fact = fpr->second;
-	return (*fact)(pap);
+	return (*fact)(h);
 }
 
 Type ClassServer::getNumberOfClasses()

@@ -42,9 +42,6 @@ namespace opencog
 
 typedef boost::signals2::signal<void (Type)> TypeSignal;
 
-class ProtoAtom;
-typedef std::shared_ptr<ProtoAtom> ProtoAtomPtr;
-
 /**
  * This class keeps track of the complete protoatom (value and atom)
  * class hierarchy. It also provides factories for those atom types
@@ -54,8 +51,9 @@ class ClassServer
 {
 public:
     // Currently, we provide factories only for atoms, not for
-    // values.
-    typedef Handle (AtomFactory)(const ProtoAtomPtr&);
+    // values. TruthValues could use a factory, but, for now,
+    // we don't have a pressing reason to add that.
+    typedef Handle (AtomFactory)(const Handle&);
 private:
 
     /** Private default constructor for this class to make it a singleton. */
@@ -98,10 +96,10 @@ public:
     void addFactory(Type, AtomFactory*);
 
     /**
-     * Convert the indicated ProtoAtom into a C++ instance of the
+     * Convert the indicated Atom into a C++ instance of the
      * same type.
      */
-    Handle factory(const ProtoAtomPtr&);
+    Handle factory(const Handle&);
 
     /** Provides ability to get type-added signals.
      * @warning methods connected to this signal must not call ClassServer::addType or
