@@ -413,8 +413,12 @@ AtomPtr AtomTable::cast_factory(Type atom_type, AtomPtr atom)
     // Handle FreeLinks only after special treatment for State,
     // Delete, above.
     } else if (classserver().isA(atom_type, FREE_LINK)) {
-        if (nullptr == FreeLinkCast(atom))
+        if (nullptr == FreeLinkCast(atom)) {
+            auto fact = classserver().getFactory(atom_type);
+            if (fact) return (*fact) (Handle(atom));
+
             return FreeLink::factory(Handle(atom));
+        }
     }
     return atom;
 }
