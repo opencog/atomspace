@@ -30,7 +30,6 @@
 #include "ClassServer.h"
 
 #include <exception>
-#include <boost/bind.hpp>
 
 #include <opencog/atoms/base/types.h>
 #include <opencog/atoms/base/atom_types.h>
@@ -72,11 +71,8 @@ Type ClassServer::addType(const Type parent, const std::string& name)
     inheritanceMap.resize(nTypes);
     recursiveMap.resize(nTypes);
 
-    std::for_each(inheritanceMap.begin(), inheritanceMap.end(),
-          boost::bind(&std::vector<bool>::resize, _1, nTypes, false));
-
-    std::for_each(recursiveMap.begin(), recursiveMap.end(),
-          boost::bind(&std::vector<bool>::resize, _1, nTypes, false));
+    for (auto& bv: inheritanceMap) bv.resize(nTypes, false);
+    for (auto& bv: recursiveMap) bv.resize(nTypes, false);
 
     inheritanceMap[type][type]   = true;
     inheritanceMap[parent][type] = true;
