@@ -309,6 +309,8 @@ void BasicSCMUTest::test_values(void)
 
 	Handle h = eval->eval_h("h");
 	Handle k = eval->eval_h("k");
+	ProtoAtomPtr f = eval->eval_v("f");
+	ProtoAtomPtr s = eval->eval_v("s");
 	ProtoAtomPtr l = eval->eval_v("l");
 
 	eval->eval("(cog-set-value! h k l)");
@@ -321,15 +323,47 @@ void BasicSCMUTest::test_values(void)
 	ProtoAtomPtr alv = h->getValue(k);
 	TSM_ASSERT("Failed to get correct value", l == alv);
 
+	// -------
 	eval->eval("(cog-set-value! h k '(0.1 0.2 0.3))");
 	TSM_ASSERT("Failed to set float", not eval->eval_error());
 
 	ProtoAtomPtr fv = h->getValue(k);
-	const std::vector<double>& vv(FloatValueCast(fv)->value());
+	TSM_ASSERT("Failed to get correct value", f == fv);
 
+	const std::vector<double>& vv(FloatValueCast(fv)->value());
 	TS_ASSERT_LESS_THAN_EQUALS(fabs(vv[0] - 0.1), 1.0e-6);
 	TS_ASSERT_LESS_THAN_EQUALS(fabs(vv[1] - 0.2), 1.0e-6);
 	TS_ASSERT_LESS_THAN_EQUALS(fabs(vv[2] - 0.3), 1.0e-6);
+
+	ProtoAtomPtr fv2 = eval->eval_v("(cog-value h k)");
+	TSM_ASSERT("Failed to get value", not eval->eval_error());
+	TSM_ASSERT("Failed to get correct value", f == fv2);
+
+	// -------
+	eval->eval("(cog-set-value! h k (list f h s k t))");
+	TSM_ASSERT("Failed to set value", not eval->eval_error());
+
+	ProtoAtomPtr lv2 = eval->eval_v("(cog-value h k)");
+	TSM_ASSERT("Failed to get value", not eval->eval_error());
+	TSM_ASSERT("Failed to get correct value", l == lv2);
+
+	// -------
+	eval->eval("(cog-set-value! h k '(\"a\" \"bb\" \"ccc\"))");
+	TSM_ASSERT("Failed to set value", not eval->eval_error());
+
+	ProtoAtomPtr sv = eval->eval_v("(cog-value h k)");
+	TSM_ASSERT("Failed to get value", not eval->eval_error());
+	TSM_ASSERT("Failed to get correct value", s == sv);
+
+	// -------
+	// This is a kind-of funky, not entirely Kosher syntax,
+	// but we support it anyway... 
+	eval->eval("(cog-set-value! h k '(f h s k t))");
+	TSM_ASSERT("Failed to set value", not eval->eval_error());
+
+	ProtoAtomPtr lv3 = eval->eval_v("(cog-value h k)");
+	TSM_ASSERT("Failed to get value", not eval->eval_error());
+	TSM_ASSERT("Failed to get correct value", l == lv3);
 }
 
 // ============================================================
