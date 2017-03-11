@@ -29,23 +29,22 @@
 
 using namespace opencog;
 
-FoldLink::FoldLink(const HandleSeq& oset, TruthValuePtr tv)
-    : FunctionLink(FOLD_LINK, oset, tv)
+FoldLink::FoldLink(const HandleSeq& oset)
+    : FunctionLink(FOLD_LINK, oset)
 {
 	init();
 }
 
-FoldLink::FoldLink(Type t, const HandleSeq& oset, TruthValuePtr tv)
-    : FunctionLink(t, oset, tv)
+FoldLink::FoldLink(Type t, const HandleSeq& oset)
+    : FunctionLink(t, oset)
 {
 	if (not classserver().isA(t, FOLD_LINK))
 		throw InvalidParamException(TRACE_INFO, "Expecting a FoldLink");
 	init();
 }
 
-FoldLink::FoldLink(Type t, const Handle& a, const Handle& b,
-                   TruthValuePtr tv)
-    : FunctionLink(t, a, b, tv)
+FoldLink::FoldLink(Type t, const Handle& a, const Handle& b)
+    : FunctionLink(t, a, b)
 {
 	if (not classserver().isA(t, FOLD_LINK))
 		throw InvalidParamException(TRACE_INFO, "Expecting a FoldLink");
@@ -135,7 +134,8 @@ Handle FoldLink::reduce(void)
 
 		if (classserver().isA(t, FOLD_LINK))
 		{
-			FoldLinkPtr fff(factory(h));
+			auto fact = classserver().getFactory(t);
+			FoldLinkPtr fff(FoldLinkCast((*fact)(h)));
 			Handle redh = fff->reduce();
 			if (h != redh)
 			{
@@ -211,8 +211,13 @@ Handle FoldLink::reduce(void)
 			Handle foo(createLink(getType(), rere));
 			if (_atom_space)
 				foo = _atom_space->add_atom(foo);
+			else
+			{
+				auto fact = classserver().getFactory(getType());
+				foo = (*fact)(foo);
+			}
+			FoldLinkPtr flp(FoldLinkCast(foo));
 
-			FoldLinkPtr flp = factory(foo);
 			DO_RETURN(Handle(flp->reduce()));
 		}
 	}

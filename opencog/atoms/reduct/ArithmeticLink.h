@@ -43,17 +43,13 @@ protected:
 	virtual double konsd(double, double) const = 0;
 
 	void init(void);
-	ArithmeticLink(Type, const HandleSeq& oset,
-	         TruthValuePtr tv = TruthValue::DEFAULT_TV());
-
-	ArithmeticLink(Type, const Handle& a, const Handle& b,
-	         TruthValuePtr tv = TruthValue::DEFAULT_TV());
+	ArithmeticLink(Type, const HandleSeq& oset);
+	ArithmeticLink(Type, const Handle& a, const Handle& b);
 
 	NumberNodePtr unwrap_set(Handle) const;
 	virtual Handle do_execute(AtomSpace*, const HandleSeq&) const;
 public:
-	ArithmeticLink(const HandleSeq& oset,
-	         TruthValuePtr tv = TruthValue::DEFAULT_TV());
+	ArithmeticLink(const HandleSeq& oset);
 	ArithmeticLink(Link& l);
 
 	virtual Handle reorder(void);

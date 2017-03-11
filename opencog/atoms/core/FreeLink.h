@@ -48,21 +48,16 @@ protected:
 	void init(void);
 
 public:
-	FreeLink(Type, const HandleSeq& oset,
-	         TruthValuePtr tv = TruthValue::DEFAULT_TV());
+	// XXX Need to make this public, so that the factory can call it!
+	FreeLink(Type, const HandleSeq& oset);
 
 protected:
-	// XXX Need to make this public, so that the factory can call it!
-	FreeLink(Type, const Handle& a,
-	         TruthValuePtr tv = TruthValue::DEFAULT_TV());
+	FreeLink(Type, const Handle& a);
+	FreeLink(Type, const Handle& a, const Handle& b);
 
-	FreeLink(Type, const Handle& a, const Handle& b,
-	         TruthValuePtr tv = TruthValue::DEFAULT_TV());
 public:
-	FreeLink(const HandleSeq& oset,
-	         TruthValuePtr tv = TruthValue::DEFAULT_TV());
-	FreeLink(const Handle& a,
-	         TruthValuePtr tv = TruthValue::DEFAULT_TV());
+	FreeLink(const HandleSeq& oset);
+	FreeLink(const Handle& a);
 
 	FreeLink(Link& l);
 	virtual ~FreeLink() {}
@@ -70,8 +65,7 @@ public:
 	const FreeVariables& get_vars() const
 	{ return  _vars; }
 
-	static FreeLinkPtr factory(const Handle&);
-	static FreeLinkPtr factory(Type, const HandleSeq&);
+	static Handle factory(const Handle&);
 };
 
 static inline FreeLinkPtr FreeLinkCast(const Handle& h)

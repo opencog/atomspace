@@ -48,19 +48,17 @@ class UniqueLink : public FreeLink
 protected:
 	void init(bool);
 	static Handle get_unique(const Handle&, Type, bool);
-	UniqueLink(Type, const HandleSeq&,
-	           TruthValuePtr tv = TruthValue::DEFAULT_TV());
+	UniqueLink(Type, const HandleSeq&);
 
 public:
-	UniqueLink(const HandleSeq&,
-	           TruthValuePtr tv = TruthValue::DEFAULT_TV());
-
-	UniqueLink(const Handle& alias, const Handle& body,
-	           TruthValuePtr tv = TruthValue::DEFAULT_TV());
+	UniqueLink(const HandleSeq&);
+	UniqueLink(const Handle& alias, const Handle& body);
 
 	UniqueLink(Link &l);
 
 	Handle get_alias(void) const { return _outgoing[0]; }
+
+	static Handle factory(const Handle&);
 };
 
 typedef std::shared_ptr<UniqueLink> UniqueLinkPtr;

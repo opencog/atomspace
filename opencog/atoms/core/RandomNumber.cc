@@ -40,9 +40,8 @@ void RandomNumberLink::init()
 			toString().c_str());
 }
 
-RandomNumberLink::RandomNumberLink(const HandleSeq& oset,
-                       TruthValuePtr tv)
-	: FunctionLink(RANDOM_NUMBER_LINK, oset, tv)
+RandomNumberLink::RandomNumberLink(const HandleSeq& oset)
+	: FunctionLink(RANDOM_NUMBER_LINK, oset)
 {
 	init();
 }
@@ -108,6 +107,6 @@ Handle RandomNumberLink::execute(AtomSpace * as) const
 	return as->add_atom(createNumberNode(ary));
 }
 
-DEFINE_LINK_FACTORY(RandomeNumberLink, RANDOM_NUMBER_LINK);
+DEFINE_LINK_FACTORY(RandomNumberLink, RANDOM_NUMBER_LINK);
 
 /* ===================== END OF FILE ===================== */

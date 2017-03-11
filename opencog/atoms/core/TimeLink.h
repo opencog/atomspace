@@ -37,9 +37,7 @@ namespace opencog
 class TimeLink : public FunctionLink
 {
 public:
-	TimeLink(const HandleSeq&,
-	           TruthValuePtr tv = TruthValue::DEFAULT_TV());
-
+	TimeLink(const HandleSeq&);
 	TimeLink(Link &l);
 
 	// Return a pointer to the atom being specified.

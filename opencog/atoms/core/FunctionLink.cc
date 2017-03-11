@@ -31,27 +31,24 @@ void FunctionLink::init(void)
 	FreeLink::init();
 }
 
-FunctionLink::FunctionLink(Type t, const HandleSeq& oset,
-                   TruthValuePtr tv)
-    : FreeLink(t, oset, tv)
+FunctionLink::FunctionLink(Type t, const HandleSeq& oset)
+    : FreeLink(t, oset)
 {
 	if (not classserver().isA(t, FUNCTION_LINK))
 		throw InvalidParamException(TRACE_INFO, "Expecting a FunctionLink");
 	init();
 }
 
-FunctionLink::FunctionLink(Type t, const Handle& a,
-                   TruthValuePtr tv)
-    : FreeLink(t, a, tv)
+FunctionLink::FunctionLink(Type t, const Handle& a)
+    : FreeLink(t, a)
 {
 	if (not classserver().isA(t, FUNCTION_LINK))
 		throw InvalidParamException(TRACE_INFO, "Expecting a FunctionLink");
 	init();
 }
 
-FunctionLink::FunctionLink(Type t, const Handle& a, const Handle& b,
-                   TruthValuePtr tv)
-    : FreeLink(t, {a, b}, tv)
+FunctionLink::FunctionLink(Type t, const Handle& a, const Handle& b)
+    : FreeLink(t, {a, b})
 {
 	if (not classserver().isA(t, FUNCTION_LINK))
 		throw InvalidParamException(TRACE_INFO, "Expecting a FunctionLink");

@@ -29,24 +29,22 @@
 
 using namespace opencog;
 
-ArithmeticLink::ArithmeticLink(const HandleSeq& oset, TruthValuePtr tv)
-    : FoldLink(ARITHMETIC_LINK, oset, tv)
+ArithmeticLink::ArithmeticLink(const HandleSeq& oset)
+    : FoldLink(ARITHMETIC_LINK, oset)
 {
 	init();
 }
 
-ArithmeticLink::ArithmeticLink(Type t, const HandleSeq& oset,
-                   TruthValuePtr tv)
-    : FoldLink(t, oset, tv)
+ArithmeticLink::ArithmeticLink(Type t, const HandleSeq& oset)
+    : FoldLink(t, oset)
 {
 	if (not classserver().isA(t, ARITHMETIC_LINK))
 		throw InvalidParamException(TRACE_INFO, "Expecting a ArithmeticLink");
 	init();
 }
 
-ArithmeticLink::ArithmeticLink(Type t, const Handle& a, const Handle& b,
-                   TruthValuePtr tv)
-    : FoldLink(t, a, b, tv)
+ArithmeticLink::ArithmeticLink(Type t, const Handle& a, const Handle& b)
+    : FoldLink(t, a, b)
 {
 	if (not classserver().isA(t, ARITHMETIC_LINK))
 		throw InvalidParamException(TRACE_INFO, "Expecting a ArithmeticLink");
@@ -126,7 +124,8 @@ Handle ArithmeticLink::reorder(void)
 	for (const Handle& h : exprs) result.push_back(h);
 	for (const Handle& h : numbers) result.push_back(h);
 
-	Handle h(FoldLink::factory(getType(), result));
+	auto fact = classserver().getFactory(_type);
+	Handle h((*fact)(Handle(createLink(_type, result))));
 	if (NULL == _atom_space) return h;
 
 	return _atom_space->add_atom(h);

@@ -59,9 +59,8 @@ void UniqueLink::init(bool allow_open)
 	}
 }
 
-UniqueLink::UniqueLink(Type type, const HandleSeq& oset,
-                       TruthValuePtr tv)
-	: FreeLink(type, oset, tv)
+UniqueLink::UniqueLink(Type type, const HandleSeq& oset)
+	: FreeLink(type, oset)
 {
 	if (not classserver().isA(type, UNIQUE_LINK))
 	{
@@ -75,16 +74,14 @@ UniqueLink::UniqueLink(Type type, const HandleSeq& oset,
 	init(true);
 }
 
-UniqueLink::UniqueLink(const HandleSeq& oset,
-                       TruthValuePtr tv)
-	: FreeLink(UNIQUE_LINK, oset, tv)
+UniqueLink::UniqueLink(const HandleSeq& oset)
+	: FreeLink(UNIQUE_LINK, oset)
 {
 	init(true);
 }
 
-UniqueLink::UniqueLink(const Handle& name, const Handle& defn,
-                       TruthValuePtr tv)
-	: FreeLink(UNIQUE_LINK, HandleSeq({name, defn}), tv)
+UniqueLink::UniqueLink(const Handle& name, const Handle& defn)
+	: FreeLink(UNIQUE_LINK, HandleSeq({name, defn}))
 {
 	init(true);
 }
@@ -135,5 +132,7 @@ Handle UniqueLink::get_unique(const Handle& alias, Type type,
 	                            "Cannot find defined hypergraph for atom %s",
 	                            alias->toString().c_str());
 }
+
+DEFINE_LINK_FACTORY(UniqueLink, UNIQUE_LINK)
 
 /* ===================== END OF FILE ===================== */

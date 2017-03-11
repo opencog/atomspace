@@ -50,11 +50,8 @@ class TypedAtomLink : public UniqueLink
 protected:
 	void init();
 public:
-	TypedAtomLink(const HandleSeq&,
-	           TruthValuePtr tv = TruthValue::DEFAULT_TV());
-
-	TypedAtomLink(const Handle& alias, const Handle& body,
-	           TruthValuePtr tv = TruthValue::DEFAULT_TV());
+	TypedAtomLink(const HandleSeq&);
+	TypedAtomLink(const Handle& alias, const Handle& body);
 
 	TypedAtomLink(Link &l);
 	Handle get_atom(void) const { return _outgoing[0]; }
@@ -70,6 +67,8 @@ public:
 	 * return <type-specification>
 	 */
 	static Handle get_type(const Handle& atom);
+
+	static Handle factory(const Handle&);
 };
 
 typedef std::shared_ptr<TypedAtomLink> TypedAtomLinkPtr;

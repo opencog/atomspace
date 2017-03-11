@@ -48,9 +48,7 @@ protected:
 	void init();
 
 public:
-	RandomNumberLink(const HandleSeq&,
-	           TruthValuePtr tv = TruthValue::DEFAULT_TV());
-
+	RandomNumberLink(const HandleSeq&);
 	RandomNumberLink(Link &l);
 
 	// Return a pointer to the atom being specified.

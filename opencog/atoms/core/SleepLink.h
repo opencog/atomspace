@@ -38,9 +38,7 @@ namespace opencog
 class SleepLink : public FunctionLink
 {
 public:
-	SleepLink(const HandleSeq&,
-	           TruthValuePtr tv = TruthValue::DEFAULT_TV());
-
+	SleepLink(const HandleSeq&);
 	SleepLink(Link &l);
 
 	// Return a pointer to the atom being specified.

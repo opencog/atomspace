@@ -28,30 +28,28 @@
 
 using namespace opencog;
 
-DivideLink::DivideLink(const HandleSeq& oset, TruthValuePtr tv)
-    : TimesLink(DIVIDE_LINK, oset, tv)
+DivideLink::DivideLink(const HandleSeq& oset)
+    : TimesLink(DIVIDE_LINK, oset)
 {
 	init();
 }
 
-DivideLink::DivideLink(Type t, const HandleSeq& oset, TruthValuePtr tv)
-    : TimesLink(t, oset, tv)
+DivideLink::DivideLink(Type t, const HandleSeq& oset)
+    : TimesLink(t, oset)
 {
 	if (not classserver().isA(t, DIVIDE_LINK))
 		throw InvalidParamException(TRACE_INFO, "Expecting a DivideLink");
 	init();
 }
 
-DivideLink::DivideLink(const Handle& a, const Handle& b,
-                   TruthValuePtr tv)
-    : TimesLink(DIVIDE_LINK, a, b, tv)
+DivideLink::DivideLink(const Handle& a, const Handle& b)
+    : TimesLink(DIVIDE_LINK, a, b)
 {
 	init();
 }
 
-DivideLink::DivideLink(Type t, const Handle& a, const Handle& b,
-                   TruthValuePtr tv)
-    : TimesLink(t, a, b, tv)
+DivideLink::DivideLink(Type t, const Handle& a, const Handle& b)
+    : TimesLink(t, a, b)
 {
 	if (not classserver().isA(t, DIVIDE_LINK))
 		throw InvalidParamException(TRACE_INFO, "Expecting a DivideLink");
@@ -89,4 +87,5 @@ Handle DivideLink::do_execute(AtomSpace* as, const HandleSeq& oset) const
 }
 
 DEFINE_LINK_FACTORY(DivideLink, DIVIDE_LINK)
+
 // ============================================================

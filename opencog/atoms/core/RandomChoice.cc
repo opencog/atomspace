@@ -32,9 +32,8 @@ using namespace opencog;
 
 static MT19937RandGen randy(43);
 
-RandomChoiceLink::RandomChoiceLink(const HandleSeq& oset,
-                       TruthValuePtr tv)
-	: FunctionLink(RANDOM_CHOICE_LINK, oset, tv)
+RandomChoiceLink::RandomChoiceLink(const HandleSeq& oset)
+	: FunctionLink(RANDOM_CHOICE_LINK, oset)
 {
 }
 

@@ -62,9 +62,7 @@ namespace opencog
 class RandomChoiceLink : public FunctionLink
 {
 public:
-	RandomChoiceLink(const HandleSeq&,
-	           TruthValuePtr tv = TruthValue::DEFAULT_TV());
-
+	RandomChoiceLink(const HandleSeq&);
 	RandomChoiceLink(Link &l);
 
 	// Return a pointer to the atom being specified.

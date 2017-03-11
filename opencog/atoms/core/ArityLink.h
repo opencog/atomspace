@@ -47,9 +47,7 @@ namespace opencog
 class ArityLink : public FunctionLink
 {
 public:
-	ArityLink(const HandleSeq&,
-	           TruthValuePtr tv = TruthValue::DEFAULT_TV());
-
+	ArityLink(const HandleSeq&);
 	ArityLink(Link &l);
 
 	// Return a pointer to the atom being specified.

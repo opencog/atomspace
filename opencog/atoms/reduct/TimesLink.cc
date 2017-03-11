@@ -27,32 +27,30 @@
 
 using namespace opencog;
 
-TimesLink::TimesLink(const HandleSeq& oset, TruthValuePtr tv)
-    : ArithmeticLink(TIMES_LINK, oset, tv)
+TimesLink::TimesLink(const HandleSeq& oset)
+    : ArithmeticLink(TIMES_LINK, oset)
 {
 	init();
 }
 
-TimesLink::TimesLink(Type t, const HandleSeq& oset, TruthValuePtr tv)
-    : ArithmeticLink(t, oset, tv)
-{
-	if (not classserver().isA(t, TIMES_LINK))
-		throw InvalidParamException(TRACE_INFO, "Expecting a TimesLink");
-	init();
-}
-
-TimesLink::TimesLink(Type t, const Handle& a, const Handle& b,
-                   TruthValuePtr tv)
-    : ArithmeticLink(t, a, b, tv)
+TimesLink::TimesLink(Type t, const HandleSeq& oset)
+    : ArithmeticLink(t, oset)
 {
 	if (not classserver().isA(t, TIMES_LINK))
 		throw InvalidParamException(TRACE_INFO, "Expecting a TimesLink");
 	init();
 }
 
-TimesLink::TimesLink(const Handle& a, const Handle& b,
-                   TruthValuePtr tv)
-    : ArithmeticLink(TIMES_LINK, a, b, tv)
+TimesLink::TimesLink(Type t, const Handle& a, const Handle& b)
+    : ArithmeticLink(t, a, b)
+{
+	if (not classserver().isA(t, TIMES_LINK))
+		throw InvalidParamException(TRACE_INFO, "Expecting a TimesLink");
+	init();
+}
+
+TimesLink::TimesLink(const Handle& a, const Handle& b)
+    : ArithmeticLink(TIMES_LINK, a, b)
 {
 	init();
 }

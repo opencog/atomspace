@@ -253,7 +253,7 @@ public:
 
 ClassServer& classserver();
 
-#define DECLARE_LINK_FACTORY(CNAME,CTYPE)                         \
+#define DEFINE_LINK_FACTORY(CNAME,CTYPE)                          \
                                                                   \
 Handle CNAME::factory(const Handle& base)                         \
 {                                                                 \
@@ -266,8 +266,6 @@ static __attribute__ ((constructor)) void init(void)              \
 {                                                                 \
    classserver().addFactory(CTYPE, &CNAME::factory);              \
 }
-
-/* ===================== END OF FILE ===================== */
 
 /** @}*/
 } // namespace opencog
