@@ -3,7 +3,7 @@
  *
  * Copyright (C) 2002-2007 Novamente LLC
  * Copyright (C) 2008 by OpenCog Foundation
- * Copyright (C) 2009 Linas Vepstas <linasvepstas@gmail.com>
+ * Copyright (C) 2009,2017 Linas Vepstas <linasvepstas@gmail.com>
  * All Rights Reserved
  *
  * Written by Thiago Maia <thiago@vettatech.com>
@@ -32,9 +32,11 @@
 #include <exception>
 #include <boost/bind.hpp>
 
+#include <opencog/atoms/base/types.h>
 #include <opencog/atoms/base/atom_types.h>
+#include <opencog/atoms/base/Atom.h>
+#include <opencog/atoms/base/ProtoAtom.h>
 
-#include "types.h"
 #include "opencog/atoms/base/atom_types.definitions"
 
 //#define DPRINTF printf
@@ -105,6 +107,22 @@ void ClassServer::setParentRecursively(Type parent, Type type)
 boost::signals2::signal<void (Type)>& ClassServer::addTypeSignal()
 {
     return _addTypeSignal;
+}
+
+void ClassServer::addFactory(Type t, AtomFactory* fact)
+{
+    std::unique_lock<std::mutex> l(type_mutex);
+    _atomFactory[t] = fact;
+}
+
+Handle ClassServer::factory(const ProtoAtomPtr& pap)
+{
+	auto fpr = _atomFactory.find(pap->getType());
+	if (_atomFactory.end() == fpr)
+		return HandleCast(pap);
+
+	AtomFactory* fact = fpr->second;
+	return (*fact)(pap);
 }
 
 Type ClassServer::getNumberOfClasses()

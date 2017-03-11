@@ -2,6 +2,7 @@
  * opencog/atoms/base/ClassServer.h
  *
  * Copyright (C) 2011 by The OpenCog Foundation
+ * Copyright (C) 2017 by Linas Vepstas
  * All Rights Reserved
  *
  * This program is free software; you can redistribute it and/or modify
