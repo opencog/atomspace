@@ -94,6 +94,7 @@ public:
      * Declare a factory for an atom type.
      */
     void addFactory(Type, AtomFactory*);
+    AtomFactory* getFactory(Type, int = 0);
 
     /**
      * Convert the indicated Atom into a C++ instance of the
@@ -108,15 +109,15 @@ public:
     TypeSignal& addTypeSignal();
 
     /**
-     * Stores the children types on the OutputIterator 'result'. Returns the
-     * number of children types.
+     * Stores the children types on the OutputIterator 'result'.
+     * Returns the number of children types.
      */
     template<typename OutputIterator>
     unsigned long getChildren(Type type, OutputIterator result)
     {
         unsigned long n_children = 0;
         for (Type i = 0; i < nTypes; ++i) {
-            if (inheritanceMap[type][i] && (type != i)) {
+            if (inheritanceMap[type][i] and (type != i)) {
                 *(result++) = i;
                 n_children++;
             }
@@ -124,12 +125,29 @@ public:
         return n_children;
     }
 
+    /**
+     * Stores the parent types on the OutputIterator 'result'.
+     * Returns the number of parent types.
+     */
+    template<typename OutputIterator>
+    unsigned long getParents(Type type, OutputIterator result)
+    {
+        unsigned long n_parents = 0;
+        for (Type i = 0; i < nTypes; ++i) {
+            if (inheritanceMap[i][type] and (type != i)) {
+                *(result++) = i;
+                n_parents++;
+            }
+        }
+        return n_parents;
+    }
+
     template <typename OutputIterator>
     unsigned long getChildrenRecursive(Type type, OutputIterator result)
     {
         unsigned long n_children = 0;
         for (Type i = 0; i < nTypes; ++i) {
-            if (recursiveMap[type][i] && (type != i)) {
+            if (recursiveMap[type][i] and (type != i)) {
                 *(result++) = i;
                 n_children++;
             }

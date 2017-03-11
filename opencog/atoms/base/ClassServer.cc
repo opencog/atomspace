@@ -115,14 +115,48 @@ void ClassServer::addFactory(Type t, AtomFactory* fact)
     _atomFactory[t] = fact;
 }
 
+ClassServer::AtomFactory* ClassServer::getFactory(Type t, int depth)
+{
+	// If there is a factory, then return it.
+	auto fpr = _atomFactory.find(t);
+	if (_atomFactory.end() != fpr)
+		return fpr->second;
+
+	// Perhaps one of the parent types has a factory.
+	//
+	// We want to use a breadth-first recursion, and not
+	// the simpler-to-code depth-first recursion.  That is,
+	// we do NOT want some deep parent factory, when there
+	// is some factory at a shallower level. Breadth-first
+	// recursive algos are icky, but that's what we need.
+	//
+	depth ++;
+
+#define MAX_DEPTH 100
+	for (int search_depth = 1; search_depth < MAX_DEPTH; search_depth++)
+	{
+		if (depth > search_depth) return nullptr;
+
+		std::vector<Type> parents;
+		getParents(t, parents.begin());
+		for (auto p: parents)
+		{
+			AtomFactory* fact = getFactory(p, depth);
+			if (fact) return fact;
+		}
+	}
+
+	return nullptr;
+}
+
 Handle ClassServer::factory(const Handle& h)
 {
-	auto fpr = _atomFactory.find(h->getType());
-	if (_atomFactory.end() == fpr)
-		return Handle(h);
+	// If there is a factory, then use it.
+	AtomFactory* fact = getFactory(h->getType());
+	if (fact)
+		return (*fact)(h);
 
-	AtomFactory* fact = fpr->second;
-	return (*fact)(h);
+	return Handle(h);
 }
 
 Type ClassServer::getNumberOfClasses()
