@@ -41,7 +41,6 @@
 #include <opencog/atoms/NumberNode.h>
 #include <opencog/atoms/TypeNode.h>
 #include <opencog/atoms/core/DeleteLink.h>
-#include <opencog/atoms/core/FreeLink.h>
 #include <opencog/atoms/core/StateLink.h>
 #include <opencog/atoms/core/VariableList.h>
 #include <opencog/atoms/execution/EvaluationLink.h>
@@ -404,22 +403,11 @@ AtomPtr AtomTable::cast_factory(Type atom_type, AtomPtr atom)
         return delp;
     }
 
-    // Handle MapLinks before FreeLink
-    else if (EXECUTION_OUTPUT_LINK == atom_type) {
-    } else if (MAP_LINK == atom_type) {
-        // if (nullptr == TypedAtomLinkCast(atom))
-            // return createMapLink(*LinkCast(atom));
-
-    // Handle FreeLinks only after special treatment for State,
+    // Handle other link types only after special treatment for State,
     // Delete, above.
-    } else if (classserver().isA(atom_type, FREE_LINK)) {
-        if (nullptr == FreeLinkCast(atom)) {
-            auto fact = classserver().getFactory(atom_type);
-            if (fact) return (*fact) (Handle(atom));
+    auto fact = classserver().getFactory(atom_type);
+    if (fact) return (*fact) (Handle(atom));
 
-            return FreeLink::factory(Handle(atom));
-        }
-    }
     return atom;
 }
 
