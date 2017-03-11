@@ -348,7 +348,7 @@ void BasicSCMUTest::test_values(void)
 
 	ProtoAtomPtr lv2 = eval->eval_v("(cog-value h k)");
 	TSM_ASSERT("Failed to get value", not eval->eval_error());
-	TSM_ASSERT("Failed to get correct value", l == lv2);
+	TSM_ASSERT("Failed to get correct value", *l == *lv2);
 
 	// -------
 	eval->eval("(cog-set-value! h k '(\"a\" \"bb\" \"ccc\"))");
