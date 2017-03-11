@@ -28,8 +28,7 @@ bool StringValue::operator==(const ProtoAtom& other) const
 {
 	if (STRING_VALUE != other.getType()) return false;
 
-	ProtoAtomPtr pov(const_cast<ProtoAtom*>(&other));
-	const StringValuePtr sov(StringValueCast(pov));
+	const StringValue* sov = (const StringValue*) &other;
 
 	if (_value.size() != sov->_value.size()) return false;
 	size_t len = _value.size();

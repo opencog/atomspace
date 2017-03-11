@@ -27,6 +27,19 @@ using namespace opencog;
 bool FloatValue::operator==(const ProtoAtom& other) const
 {
 	if (FLOAT_VALUE != other.getType()) return false;
+
+   const FloatValue* fov = (const FloatValue*) &other;
+
+	if (_value.size() != fov->_value.size()) return false;
+	size_t len = _value.size();
+	for (size_t i=0; i<len; i++)
+		// Compare floats with ULPS, because they are lexicographically
+		// ordered. For technical explanation, see
+		// http://www.cygnus-software.com/papers/comparingfloats/Comparing%20floating%20point%20numbers.htm
+		// if (1.0e-15 < fabs(1.0 - fov->_value[i]/_value[i])) return false;
+#define MAX_ULPS 1
+		if (MAX_ULPS < abs(*(int64_t*) &(_value[i]) - *(int64_t*)&(fov->_value[i])))
+			return false;
 	return true;
 }
 
