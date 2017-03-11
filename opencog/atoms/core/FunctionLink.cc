@@ -24,9 +24,6 @@
 #include <opencog/atoms/base/ClassServer.h>
 #include "FunctionLink.h"
 
-#include "../reduct/FoldLink.h"
-// #include "MapLink.h"   goddamned python bindings
-
 using namespace opencog;
 
 void FunctionLink::init(void)
@@ -93,48 +90,21 @@ FunctionLinkPtr FunctionLink::castfactory(const Handle& h)
 		throw RuntimeException(TRACE_INFO, "Not executable!");
 
 	auto fact = classserver().getFactory(h->getType());
-	if (fact) return FunctionLinkCast((*fact)(h));
-
-	// XXX eventually above is enough, so remove below...
-	return factory(h->getType(), h->getOutgoingSet());
+	return FunctionLinkCast((*fact)(h));
 }
 
 Handle FunctionLink::factory(const Handle& h)
 {
-	// If h is of the right form already, its just a matter of calling
-	// it.  Otherwise, we have to create
-	FunctionLinkPtr flp(FunctionLinkCast(h));
-	if (flp) return h;
+	if (FunctionLinkCast(h)) return h;
 
-	if (nullptr == h)
-		throw RuntimeException(TRACE_INFO, "Not executable!");
-
-	return HandleCast(factory(h->getType(), h->getOutgoingSet()));
+	return HandleCast(createFunctionLink(h->getType(), h->getOutgoingSet()));
 }
 
-// Basic type factory.
-FunctionLinkPtr FunctionLink::factory(Type t, const HandleSeq& seq)
+// This runs when the shared lib is loaded.  The factory
+// must get registered early, b efore anyone can do anything else.
+static __attribute__ ((constructor)) void init(void)
 {
-	if (classserver().isA(t, FOLD_LINK))
-		return FoldLink::factory(t, seq);
-
-	// XXX FIXME In principle, we should manufacture the
-	// ExecutionOutputLink as well. In practice, we can't, due to a
-	// circular shared library dependency between python and itself.
-	// (Python depends on ExecutionOutputLink and ExecutionOutputLink
-	// depends on python. Whoops!)
-	if (EXECUTION_OUTPUT_LINK == t)
-		// return Handle(createExecutionOutputLink(seq));
-		throw SyntaxException(TRACE_INFO, "Can't be a factory for this!");
-
-	if (MAP_LINK == t)
-		// return createMapLink(seq);
-		throw SyntaxException(TRACE_INFO, "Can't be a factory for MapLink!");
-
-	if (classserver().isA(t, FUNCTION_LINK))
-		return createFunctionLink(t, seq);
-
-	throw SyntaxException(TRACE_INFO,
-		"FunctionLink is not a factory for %s",
-		classserver().getTypeName(t).c_str());
+   classserver().addFactory(FUNCTION_LINK, &FunctionLink::factory);
 }
+
+/* ===================== END OF FILE ===================== */

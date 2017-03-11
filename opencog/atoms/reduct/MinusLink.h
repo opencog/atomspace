@@ -54,6 +54,8 @@ public:
 	MinusLink(const HandleSeq& oset,
 	         TruthValuePtr tv = TruthValue::DEFAULT_TV());
 	MinusLink(Link& l);
+
+	static Handle factory(const Handle&);
 };
 
 typedef std::shared_ptr<MinusLink> MinusLinkPtr;

@@ -88,4 +88,6 @@ Handle MinusLink::do_execute(AtomSpace* as, const HandleSeq& oset) const
 	return createNumberNode(na->get_value() - nb->get_value())->getHandle();
 }
 
+DEFINE_LINK_FACTORY(MinusLink, MINUS_LINK)
+
 // ============================================================

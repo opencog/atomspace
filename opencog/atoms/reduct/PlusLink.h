@@ -55,6 +55,8 @@ public:
 	PlusLink(const HandleSeq& oset,
 	         TruthValuePtr tv = TruthValue::DEFAULT_TV());
 	PlusLink(Link& l);
+
+	static Handle factory(const Handle&);
 };
 
 typedef std::shared_ptr<PlusLink> PlusLinkPtr;

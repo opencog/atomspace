@@ -108,17 +108,6 @@ Handle RandomNumberLink::execute(AtomSpace * as) const
 	return as->add_atom(createNumberNode(ary));
 }
 
-Handle RandomNumberLink::factory(const Handle& base)
-{
-	if (RandomNumberLinkCast(base)) return base;
-	return Handle(createRandomNumberLink(base->getOutgoingSet()));
-}
-
-// This runs when the shared lib is loaded.  The factory
-// must get registered early, b efore anyone can do anything else.
-static __attribute__ ((constructor)) void init(void)
-{
-   classserver().addFactory(RANDOM_NUMBER_LINK, &RandomNumberLink::factory);
-}
+DEFINE_LINK_FACTORY(RandomeNumberLink, RANDOM_NUMBER_LINK);
 
 /* ===================== END OF FILE ===================== */

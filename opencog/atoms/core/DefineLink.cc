@@ -78,17 +78,6 @@ Handle DefineLink::get_definition(const Handle& alias)
 	return uniq->getOutgoingAtom(1);
 }
 
-Handle DefineLink::factory(const Handle& base)
-{
-	if (DefineLinkCast(base)) return base;
-	return Handle(createDefineLink(base->getOutgoingSet()));
-}
-
-// This runs when the shared lib is loaded.  The factory
-// must get registered early, b efore anyone can do anything else.
-static __attribute__ ((constructor)) void init(void)
-{
-   classserver().addFactory(DEFINE_LINK, &DefineLink::factory);
-}
+DEFINE_LINK_FACTORY(DefineLink, DEFINE_LINK)
 
 /* ===================== END OF FILE ===================== */

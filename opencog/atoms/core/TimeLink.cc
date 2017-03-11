@@ -69,17 +69,6 @@ Handle TimeLink::execute(AtomSpace * as) const
 	return as->add_atom(createNumberNode(now));
 }
 
-Handle TimeLink::factory(const Handle& base)
-{
-	if (TimeLinkCast(base)) return base;
-	return Handle(createTimeLink(base->getOutgoingSet()));
-}
-
-// This runs when the shared lib is loaded.  The factory
-// must get registered early, b efore anyone can do anything else.
-static __attribute__ ((constructor)) void init(void)
-{
-   classserver().addFactory(TIME_LINK, &TimeLink::factory);
-}
+DEFINE_LINK_FACTORY(TimeLink, TIME_LINK)
 
 /* ===================== END OF FILE ===================== */

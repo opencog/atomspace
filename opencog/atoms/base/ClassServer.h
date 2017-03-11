@@ -253,6 +253,22 @@ public:
 
 ClassServer& classserver();
 
+#define DECLARE_LINK_FACTORY(CNAME,CTYPE)                         \
+                                                                  \
+Handle CNAME::factory(const Handle& base)                         \
+{                                                                 \
+   if (CNAME##Cast(base)) return base;                            \
+   return Handle(create##CNAME(base->getOutgoingSet()));          \
+}                                                                 \
+                                                                  \
+/* This runs when the shared lib is loaded. */                    \
+static __attribute__ ((constructor)) void init(void)              \
+{                                                                 \
+   classserver().addFactory(CTYPE, &CNAME::factory);              \
+}
+
+/* ===================== END OF FILE ===================== */
+
 /** @}*/
 } // namespace opencog
 

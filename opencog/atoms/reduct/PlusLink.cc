@@ -166,4 +166,5 @@ Handle PlusLink::kons(const Handle& fi, const Handle& fj)
 	return Handle(createPlusLink(fi, fj)->reorder());
 }
 
+DEFINE_LINK_FACTORY(PlusLink, PLUS_LINK);
 // ============================================================

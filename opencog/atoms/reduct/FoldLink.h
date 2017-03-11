@@ -59,9 +59,6 @@ public:
 	FoldLink(Link& l);
 
    virtual Handle reduce(void);
-
-	static FoldLinkPtr factory(const Handle&);
-	static FoldLinkPtr factory(Type, const HandleSeq&);
 };
 
 static inline FoldLinkPtr FoldLinkCast(const Handle& h)

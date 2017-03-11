@@ -23,7 +23,6 @@
 #include <opencog/atoms/base/atom_types.h>
 #include <opencog/atoms/base/ClassServer.h>
 #include "FreeLink.h"
-#include "FunctionLink.h"
 #include "StateLink.h"
 #include "TypedAtomLink.h"
 #include "UniqueLink.h"
@@ -117,9 +116,6 @@ FreeLinkPtr FreeLink::factory(const Handle& h)
 // Basic type factory.
 FreeLinkPtr FreeLink::factory(Type t, const HandleSeq& seq)
 {
-	if (classserver().isA(t, FUNCTION_LINK))
-		return FunctionLink::factory(t, seq);
-
 	if (STATE_LINK == t)
 		return createStateLink(seq);
 

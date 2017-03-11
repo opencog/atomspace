@@ -55,6 +55,8 @@ public:
 	         TruthValuePtr tv = TruthValue::DEFAULT_TV());
 
 	TimesLink(Link& l);
+
+	static Handle factory(const Handle&);
 };
 
 typedef std::shared_ptr<TimesLink> TimesLinkPtr;

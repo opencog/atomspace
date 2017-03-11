@@ -76,7 +76,6 @@ public:
 
 	static Handle factory(const Handle&);
 	static FunctionLinkPtr castfactory(const Handle&);
-	static FunctionLinkPtr factory(Type, const HandleSeq&);
 };
 
 static inline FunctionLinkPtr FunctionLinkCast(const Handle& h)

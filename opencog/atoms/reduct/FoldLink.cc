@@ -25,11 +25,7 @@
 #include <opencog/atoms/base/atom_types.h>
 #include <opencog/atoms/base/ClassServer.h>
 #include <opencog/atoms/NumberNode.h>
-#include "DivideLink.h"
 #include "FoldLink.h"
-#include "MinusLink.h"
-#include "PlusLink.h"
-#include "TimesLink.h"
 
 using namespace opencog;
 
@@ -229,31 +225,3 @@ Handle FoldLink::reduce(void)
 }
 
 // ===========================================================
-
-FoldLinkPtr FoldLink::factory(const Handle& h)
-{
-	// If h is of the right form already, its just a matter of calling
-	// it.  Otherwise, we have to create
-	FoldLinkPtr flp(FoldLinkCast(h));
-	if (flp) return flp;
-
-	if (nullptr == h)
-		throw RuntimeException(TRACE_INFO, "Null FoldLink handle!");
-
-	return FoldLink::factory(h->getType(), h->getOutgoingSet());
-}
-
-// Basic type factory.
-FoldLinkPtr FoldLink::factory(Type t, const HandleSeq& seq)
-{
-	if (DIVIDE_LINK == t)
-		return createDivideLink(seq);
-	if (MINUS_LINK == t)
-		return createMinusLink(seq);
-	if (PLUS_LINK == t)
-		return createPlusLink(seq);
-	if (TIMES_LINK == t)
-		return createTimesLink(seq);
-
-	throw RuntimeException(TRACE_INFO, "Not a FoldLink!");
-}

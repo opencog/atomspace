@@ -92,17 +92,6 @@ Handle SleepLink::execute(AtomSpace * as) const
 	return as->add_atom(createNumberNode(secs));
 }
 
-Handle SleepLink::factory(const Handle& base)
-{
-	if (SleepLinkCast(base)) return base;
-	return Handle(createSleepLink(base->getOutgoingSet()));
-}
-
-// This runs when the shared lib is loaded.  The factory
-// must get registered early, b efore anyone can do anything else.
-static __attribute__ ((constructor)) void init(void)
-{
-   classserver().addFactory(SLEEP_LINK, &SleepLink::factory);
-}
+DEFINE_LINK_FACTORY(SleepLink, SLEEP_LINK)
 
 /* ===================== END OF FILE ===================== */

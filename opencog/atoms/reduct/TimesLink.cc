@@ -103,4 +103,6 @@ Handle TimesLink::kons(const Handle& fi, const Handle& fj)
 	return Handle(createTimesLink(fi, fj)->reorder());
 }
 
+DEFINE_LINK_FACTORY(TimesLink, TIMES_LINK)
+
 // ============================================================

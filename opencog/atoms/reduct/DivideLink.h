@@ -54,6 +54,8 @@ public:
 	DivideLink(const HandleSeq& oset,
 	         TruthValuePtr tv = TruthValue::DEFAULT_TV());
 	DivideLink(Link& l);
+
+	static Handle factory(const Handle&);
 };
 
 typedef std::shared_ptr<DivideLink> DivideLinkPtr;
