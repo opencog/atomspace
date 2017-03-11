@@ -206,4 +206,17 @@ uniform:
 	return _outgoing.at(randy.randint(ary));
 }
 
+Handle RandomChoiceLink::factory(const Handle& base)
+{
+	if (RandomChoiceLinkCast(base)) return base;
+	return Handle(createRandomChoiceLink(base->getOutgoingSet()));
+}
+
+// This runs when the shared lib is loaded.  The factory
+// must get registered early, b efore anyone can do anything else.
+static __attribute__ ((constructor)) void init(void)
+{
+   classserver().addFactory(RANDOM_CHOICE_LINK, &RandomChoiceLink::factory);
+}
+
 /* ===================== END OF FILE ===================== */

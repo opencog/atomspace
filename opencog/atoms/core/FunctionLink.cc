@@ -24,14 +24,8 @@
 #include <opencog/atoms/base/ClassServer.h>
 #include "FunctionLink.h"
 
-#include "ArityLink.h"
-#include "DeleteLink.h"
 #include "../reduct/FoldLink.h"
 // #include "MapLink.h"   goddamned python bindings
-#include "SleepLink.h"
-#include "TimeLink.h"
-#include "RandomChoice.h"
-#include "RandomNumber.h"
 
 using namespace opencog;
 
@@ -84,11 +78,11 @@ Handle FunctionLink::execute(AtomSpace* as) const
 
 Handle FunctionLink::do_execute(AtomSpace* as, const Handle& h)
 {
-	FunctionLinkPtr flp(factory(h));
+	FunctionLinkPtr flp(castfactory(h));
 	return flp->execute(as);
 }
 
-FunctionLinkPtr FunctionLink::factory(const Handle& h)
+FunctionLinkPtr FunctionLink::castfactory(const Handle& h)
 {
 	// If h is of the right form already, its just a matter of calling
 	// it.  Otherwise, we have to create
@@ -98,27 +92,29 @@ FunctionLinkPtr FunctionLink::factory(const Handle& h)
 	if (nullptr == h)
 		throw RuntimeException(TRACE_INFO, "Not executable!");
 
+	auto fact = classserver().getFactory(h->getType());
+	if (fact) return FunctionLinkCast((*fact)(h));
+
+	// XXX eventually above is enough, so remove below...
 	return factory(h->getType(), h->getOutgoingSet());
+}
+
+Handle FunctionLink::factory(const Handle& h)
+{
+	// If h is of the right form already, its just a matter of calling
+	// it.  Otherwise, we have to create
+	FunctionLinkPtr flp(FunctionLinkCast(h));
+	if (flp) return h;
+
+	if (nullptr == h)
+		throw RuntimeException(TRACE_INFO, "Not executable!");
+
+	return HandleCast(factory(h->getType(), h->getOutgoingSet()));
 }
 
 // Basic type factory.
 FunctionLinkPtr FunctionLink::factory(Type t, const HandleSeq& seq)
 {
-	if (ARITY_LINK == t)
-		return createArityLink(seq);
-
-	if (RANDOM_CHOICE_LINK == t)
-		return createRandomChoiceLink(seq);
-
-	if (RANDOM_NUMBER_LINK == t)
-		return createRandomNumberLink(seq);
-
-	if (SLEEP_LINK == t)
-		return createSleepLink(seq);
-
-	if (TIME_LINK == t)
-		return createTimeLink(seq);
-
 	if (classserver().isA(t, FOLD_LINK))
 		return FoldLink::factory(t, seq);
 

@@ -70,4 +70,17 @@ Handle ArityLink::execute(AtomSpace * as) const
 	return as->add_atom(createNumberNode(ary));
 }
 
+Handle ArityLink::factory(const Handle& base)
+{
+	if (ArityLinkCast(base)) return base;
+	return Handle(createArityLink(base->getOutgoingSet()));
+}
+
+// This runs when the shared lib is loaded.  The factory
+// must get registered early, b efore anyone can do anything else.
+static __attribute__ ((constructor)) void init(void)
+{
+   classserver().addFactory(ARITY_LINK, &ArityLink::factory);
+}
+
 /* ===================== END OF FILE ===================== */

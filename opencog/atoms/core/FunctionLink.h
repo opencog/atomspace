@@ -74,7 +74,8 @@ public:
 	virtual Handle execute(AtomSpace* = NULL) const;
 	static Handle do_execute(AtomSpace*, const Handle&);
 
-	static FunctionLinkPtr factory(const Handle&);
+	static Handle factory(const Handle&);
+	static FunctionLinkPtr castfactory(const Handle&);
 	static FunctionLinkPtr factory(Type, const HandleSeq&);
 };
 

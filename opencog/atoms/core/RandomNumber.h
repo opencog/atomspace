@@ -55,6 +55,8 @@ public:
 
 	// Return a pointer to the atom being specified.
 	virtual Handle execute(AtomSpace* = NULL) const;
+
+	static Handle factory(const Handle&);
 };
 
 typedef std::shared_ptr<RandomNumberLink> RandomNumberLinkPtr;

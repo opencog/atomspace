@@ -393,7 +393,7 @@ Handle Instantiator::walk_tree(const Handle& expr)
 			// Also, the number of arguments is not fixed, its always variadic.
 			// Perform substitution on all arguments before applying the
 			// function itself.
-			FunctionLinkPtr flp(FunctionLink::factory(expr));
+			FunctionLinkPtr flp(FunctionLink::castfactory(expr));
 			return flp->execute(_as);
 		}
 	}
