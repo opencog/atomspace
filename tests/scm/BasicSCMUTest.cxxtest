@@ -302,6 +302,8 @@ void BasicSCMUTest::test_values(void)
 	TSM_ASSERT("Failed to create float", not eval->eval_error());
 	eval->eval("(define s (StringValue \"a\" \"bb\" \"ccc\"))");
 	TSM_ASSERT("Failed to create string", not eval->eval_error());
+	eval->eval("(define ss (StringValue \"ddd\" \"eee\" \"fff\"))");
+	TSM_ASSERT("Failed to create string", not eval->eval_error());
 	eval->eval("(define t (stv 0.5 0.8))");
 	TSM_ASSERT("Failed to create TV", not eval->eval_error());
 	eval->eval("(define l (LinkValue f h s k t))");
@@ -311,6 +313,7 @@ void BasicSCMUTest::test_values(void)
 	Handle k = eval->eval_h("k");
 	ProtoAtomPtr f = eval->eval_v("f");
 	ProtoAtomPtr s = eval->eval_v("s");
+	ProtoAtomPtr ss = eval->eval_v("ss");
 	ProtoAtomPtr l = eval->eval_v("l");
 
 	eval->eval("(cog-set-value! h k l)");
@@ -354,6 +357,7 @@ void BasicSCMUTest::test_values(void)
 	ProtoAtomPtr sv = eval->eval_v("(cog-value h k)");
 	TSM_ASSERT("Failed to get value", not eval->eval_error());
 	TSM_ASSERT("Failed to get correct value", *s == *sv);
+	TSM_ASSERT("Failed to test inequality", *ss != *sv);
 
 	// -------
 	// This is a kind-of funky, not entirely Kosher syntax,

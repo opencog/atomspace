@@ -27,6 +27,14 @@ using namespace opencog;
 bool StringValue::operator==(const ProtoAtom& other) const
 {
 	if (STRING_VALUE != other.getType()) return false;
+
+	ProtoAtomPtr pov(const_cast<ProtoAtom*>(&other));
+	const StringValuePtr sov(StringValueCast(pov));
+
+	if (_value.size() != sov->_value.size()) return false;
+	size_t len = _value.size();
+	for (size_t i=0; i<len; i++)
+		if (_value[i] != sov->_value[i]) return false;
 	return true;
 }
 
