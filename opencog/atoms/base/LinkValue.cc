@@ -27,6 +27,13 @@ using namespace opencog;
 bool LinkValue::operator==(const ProtoAtom& other) const
 {
 	if (LINK_VALUE != other.getType()) return false;
+
+	const LinkValue* lov = (const LinkValue*) &other;
+
+	if (_value.size() != lov->_value.size()) return false;
+	size_t len = _value.size();
+	for (size_t i=0; i<len; i++)
+		if (_value[i] != lov->_value[i]) return false;
 	return true;
 }
 
