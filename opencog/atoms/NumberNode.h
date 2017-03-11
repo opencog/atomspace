@@ -66,22 +66,19 @@ protected:
 	double value;
 
 public:
-	NumberNode(const std::string& s,
-	           TruthValuePtr tv = TruthValue::DEFAULT_TV())
+	NumberNode(const std::string& s)
 		// Convert to number and back to string to avoid miscompares.
-		: Node(NUMBER_NODE, double_to_string(std::stod(s)), tv),
+		: Node(NUMBER_NODE, double_to_string(std::stod(s))),
 		  value(std::stod(s))
 	{}
 
-	NumberNode(double vvv,
-	           TruthValuePtr tv = TruthValue::DEFAULT_TV())
-		: Node(NUMBER_NODE, double_to_string(vvv), tv),
+	NumberNode(double vvv)
+		: Node(NUMBER_NODE, double_to_string(vvv)),
 		  value(vvv)
 	{}
 
 	NumberNode(Node &n)
-		: Node(n.getType(), double_to_string(std::stod(n.getName())),
-		       n.getTruthValue()),
+		: Node(n.getType(), double_to_string(std::stod(n.getName()))),
 		  value(std::stod(n.getName()))
 	{
 		OC_ASSERT(classserver().isA(_type, NUMBER_NODE),

@@ -54,12 +54,11 @@ static Handle ss_reduce(AtomSpace* atomspace, const Handle& h)
 	if (NUMBER_NODE == t) return Handle(h);
 
 	if (not classserver().isA(t, FOLD_LINK))
-	{
 		throw InvalidParamException(TRACE_INFO,
 			"Expecting a FoldLink (PlusLink, TimesLink, etc");
-	}
 
-	FoldLinkPtr fff(FoldLink::factory(h));
+	auto fact = classserver().getFactory(t);
+	FoldLinkPtr fff(FoldLinkCast((*fact)(h)));
 	Handle hr(fff->reduce());
 
 	if (DELETE_LINK == hr->getType())

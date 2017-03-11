@@ -43,9 +43,8 @@ public:
     static void* getFunc(std::string libName,std::string funcName);
 };
 
-ExecutionOutputLink::ExecutionOutputLink(const HandleSeq& oset,
-                                         TruthValuePtr tv)
-	: FunctionLink(EXECUTION_OUTPUT_LINK, oset, tv)
+ExecutionOutputLink::ExecutionOutputLink(const HandleSeq& oset)
+	: FunctionLink(EXECUTION_OUTPUT_LINK, oset)
 {
 	if (2 != oset.size())
 		throw SyntaxException(TRACE_INFO,
@@ -63,9 +62,8 @@ ExecutionOutputLink::ExecutionOutputLink(const HandleSeq& oset,
 }
 
 ExecutionOutputLink::ExecutionOutputLink(const Handle& schema,
-                                         const Handle& args,
-                                         TruthValuePtr tv)
-	: FunctionLink(EXECUTION_OUTPUT_LINK, schema, args, tv)
+                                         const Handle& args)
+	: FunctionLink(EXECUTION_OUTPUT_LINK, schema, args)
 {
 	Type stype = schema->getType();
 	if (GROUNDED_SCHEMA_NODE != stype and
@@ -219,6 +217,8 @@ void ExecutionOutputLink::lang_lib_fun(const std::string& schema,
 	} else
 		fun = schema.substr(pos);
 }
+
+DEFINE_LINK_FACTORY(ExecutionOutputLink, EXECUTION_OUTPUT_LINK)
 
 std::unordered_map<std::string, void*> LibraryManager::_librarys;
 std::unordered_map<std::string, void*> LibraryManager::_functions;

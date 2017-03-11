@@ -42,9 +42,8 @@
 
 using namespace opencog;
 
-EvaluationLink::EvaluationLink(const HandleSeq& oset,
-                               TruthValuePtr tv)
-    : FreeLink(EVALUATION_LINK, oset, tv)
+EvaluationLink::EvaluationLink(const HandleSeq& oset)
+    : FreeLink(EVALUATION_LINK, oset)
 {
 	if ((2 != oset.size()) or
 	   (LIST_LINK != oset[1]->getType()))
@@ -54,9 +53,8 @@ EvaluationLink::EvaluationLink(const HandleSeq& oset,
 	}
 }
 
-EvaluationLink::EvaluationLink(const Handle& schema, const Handle& args,
-                               TruthValuePtr tv)
-    : FreeLink(EVALUATION_LINK, schema, args, tv)
+EvaluationLink::EvaluationLink(const Handle& schema, const Handle& args)
+    : FreeLink(EVALUATION_LINK, schema, args)
 {
 	if (LIST_LINK != args->getType()) {
 		throw RuntimeException(TRACE_INFO,
@@ -615,3 +613,5 @@ TruthValuePtr EvaluationLink::do_evaluate(AtomSpace* as,
 	     "Cannot evaluate unknown GroundedPredicateNode: %s",
 	      schema.c_str());
 }
+
+DEFINE_LINK_FACTORY(EvaluationLink, EVALUATION_LINK)

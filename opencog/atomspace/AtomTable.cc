@@ -41,11 +41,9 @@
 #include <opencog/atoms/NumberNode.h>
 #include <opencog/atoms/TypeNode.h>
 #include <opencog/atoms/core/DeleteLink.h>
+#include <opencog/atoms/core/ScopeLink.h>
 #include <opencog/atoms/core/StateLink.h>
 #include <opencog/atoms/core/VariableList.h>
-#include <opencog/atoms/execution/EvaluationLink.h>
-#include <opencog/atoms/execution/ExecutionOutputLink.h>
-#include <opencog/atoms/execution/MapLink.h>
 #include <opencog/util/exceptions.h>
 #include <opencog/util/functional.h>
 #include <opencog/util/Logger.h>
@@ -360,18 +358,6 @@ AtomPtr AtomTable::cast_factory(Type atom_type, AtomPtr atom)
             return createTypeNode(*NodeCast(atom));
 
     // Links of various kinds -----------
-/*
-    XXX FIXME: cannot do this, due to a circular shared library
-    dependency between python and itself: python depends on
-    ExecutionOutputLink, and ExecutionOutputLink depends on python.
-    Boo.  I tried fixing this, but it is hard, somehow.
-
-*/
-    } else if (EVALUATION_LINK == atom_type) {
-/*
-        if (nullptr == EvaluationLinkCast(atom))
-            return createEvaluationLink(*LinkCast(atom));
-*/
     } else if (VARIABLE_LIST == atom_type) {
         if (nullptr == VariableListCast(atom))
             return createVariableList(*LinkCast(atom));
@@ -427,27 +413,13 @@ AtomPtr AtomTable::clone_factory(Type atom_type, AtomPtr atom)
         return createNode(*NodeCast(atom));
 
     // Links of various kinds -----------
-/*
-    XXX FIXME: cannot do this, due to a circular shared library
-    dependency between python and itself: python depends on
-    ExecutionOutputLink, and ExecutionOutputLink depends on python.
-    Boo.  I tried fixing this, but it is hard, somehow.
-*/
-    if (EVALUATION_LINK == atom_type)
-        // return createEvaluationLink(*LinkCast(atom));
-        return createLink(*LinkCast(atom));
     if (VARIABLE_LIST == atom_type)
         return createVariableList(*LinkCast(atom));
 
-    // Handle MapLink *before* FunctionLink.
-    if (EXECUTION_OUTPUT_LINK == atom_type)
-        // return createExecutionOutputLink(*LinkCast(atom));
-        return createLink(*LinkCast(atom));
-    if (MAP_LINK == atom_type)
-        // return createMapLink(*LinkCast(atom));
-        return createLink(*LinkCast(atom));
-    if (classserver().isA(atom_type, FREE_LINK))
-        return FreeLink::factory(Handle(atom));
+    // The createLink *forces* cloning to occur, even if the factory
+    // decided only to cast.
+    auto fact = classserver().getFactory(atom_type);
+    if (fact) return (*fact)(Handle(createLink(*LinkCast(atom))));
 
     // isA because we want to force alpha-conversion.
     if (classserver().isA(atom_type, SCOPE_LINK))

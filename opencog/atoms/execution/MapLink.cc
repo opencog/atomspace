@@ -94,29 +94,28 @@ void MapLink::init(void)
 	// FunctionLink::init();
 }
 
-MapLink::MapLink(const HandleSeq& oset, TruthValuePtr tv)
-	: FunctionLink(MAP_LINK, oset, tv)
+MapLink::MapLink(const HandleSeq& oset)
+	: FunctionLink(MAP_LINK, oset)
 {
 	init();
 }
 
-MapLink::MapLink(const Handle& vars, const Handle& body,
-                       TruthValuePtr tv)
-	: FunctionLink(MAP_LINK, HandleSeq({vars, body}), tv)
+MapLink::MapLink(const Handle& vars, const Handle& body)
+	: FunctionLink(MAP_LINK, HandleSeq({vars, body}))
 {
 	init();
 }
 
-MapLink::MapLink(Type t, const Handle& body, TruthValuePtr tv)
-	: FunctionLink(t, HandleSeq({body}), tv)
+MapLink::MapLink(Type t, const Handle& body)
+	: FunctionLink(t, HandleSeq({body}))
 {
 	// Derived types have a different initialization sequence.
 	if (MAP_LINK != t) return;
 	init();
 }
 
-MapLink::MapLink(Type t, const HandleSeq& oset, TruthValuePtr tv)
-	: FunctionLink(t, oset, tv)
+MapLink::MapLink(Type t, const HandleSeq& oset)
+	: FunctionLink(t, oset)
 {
 	// Derived types have a different initialization sequence.
 	if (MAP_LINK != t) return;
@@ -384,5 +383,7 @@ Handle MapLink::execute(AtomSpace* scratch) const
 	// Its a singleton. Just remap that.
 	return rewrite_one(valh, scratch);
 }
+
+DEFINE_LINK_FACTORY(MapLink, MAP_LINK)
 
 /* ===================== END OF FILE ===================== */
