@@ -38,7 +38,7 @@ void DefineLink::init()
 	UniqueLink::init(false);
 
 	// Type-check. The execution and FunctionLink's only expand
-	// definitions anchored with these type; other definitions won't
+	// definitions anchored with these types; other definitions won't
 	// work during execution.
 	Type dtype = _outgoing[0]->getType();
 	if (DEFINED_SCHEMA_NODE != dtype and
@@ -49,15 +49,14 @@ void DefineLink::init()
 				classserver().getTypeName(dtype).c_str());
 }
 
-DefineLink::DefineLink(const HandleSeq& oset, TruthValuePtr tv)
-	: UniqueLink(DEFINE_LINK, oset, tv)
+DefineLink::DefineLink(const HandleSeq& oset)
+	: UniqueLink(DEFINE_LINK, oset)
 {
 	init();
 }
 
-DefineLink::DefineLink(const Handle& name, const Handle& defn,
-                       TruthValuePtr tv)
-	: UniqueLink(DEFINE_LINK, HandleSeq({name, defn}), tv)
+DefineLink::DefineLink(const Handle& name, const Handle& defn)
+	: UniqueLink(DEFINE_LINK, HandleSeq({name, defn}))
 {
 	init();
 }
@@ -77,6 +76,19 @@ Handle DefineLink::get_definition(const Handle& alias)
 {
 	Handle uniq(get_unique(alias, DEFINE_LINK, false));
 	return uniq->getOutgoingAtom(1);
+}
+
+Handle DefineLink::factory(const Handle& base)
+{
+	if (DefineLinkCast(base)) return base;
+	return Handle(createDefineLink(base->getOutgoingSet()));
+}
+
+// This runs when the shared lib is loaded.  The factory
+// must get registered early, b efore anyone can do anything else.
+static __attribute__ ((constructor)) void init(void)
+{
+   classserver().addFactory(DEFINE_LINK, &DefineLink::factory);
 }
 
 /* ===================== END OF FILE ===================== */
