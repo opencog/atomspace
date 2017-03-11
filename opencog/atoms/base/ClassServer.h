@@ -70,6 +70,7 @@ private:
     mutable std::mutex type_mutex;
 
     Type nTypes;
+    Type _maxDepth;
 
     std::vector< std::vector<bool> > inheritanceMap;
     std::vector< std::vector<bool> > recursiveMap;
@@ -78,7 +79,7 @@ private:
     std::unordered_map<Type, AtomFactory*> _atomFactory;
     TypeSignal _addTypeSignal;
 
-    void setParentRecursively(Type parent, Type type);
+    void setParentRecursively(Type parent, Type type, Type& maxd);
 
     AtomFactory* searchToDepth(Type, int);
 

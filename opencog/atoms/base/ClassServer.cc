@@ -46,6 +46,7 @@ using namespace opencog;
 ClassServer::ClassServer(void)
 {
     nTypes = 0;
+    _maxDepth = 0;
 }
 
 Type ClassServer::addType(const Type parent, const std::string& name)
@@ -59,7 +60,10 @@ Type ClassServer::addType(const Type parent, const std::string& name)
         std::lock_guard<std::mutex> l(type_mutex);
         DPRINTF("Type \"%s\" has already been added (%d)\n", name.c_str(), type);
         inheritanceMap[parent][type] = true;
-        setParentRecursively(parent, type);
+
+        Type maxd = 1;
+        setParentRecursively(parent, type, maxd);
+        if (_maxDepth < maxd) _maxDepth = maxd;
         return type;
     }
 
@@ -77,9 +81,12 @@ Type ClassServer::addType(const Type parent, const std::string& name)
     inheritanceMap[type][type]   = true;
     inheritanceMap[parent][type] = true;
     recursiveMap[type][type]     = true;
-    setParentRecursively(parent, type);
     name2CodeMap[name]           = type;
     code2NameMap[type]           = &(name2CodeMap.find(name)->first);
+
+    Type maxd = 1;
+    setParentRecursively(parent, type, maxd);
+    if (_maxDepth < maxd) _maxDepth = maxd;
 
     // unlock mutex before sending signal which could call
     l.unlock();
@@ -90,14 +97,17 @@ Type ClassServer::addType(const Type parent, const std::string& name)
     return type;
 }
 
-void ClassServer::setParentRecursively(Type parent, Type type)
+void ClassServer::setParentRecursively(Type parent, Type type, Type& maxd)
 {
+    bool incr = false;
     recursiveMap[parent][type] = true;
     for (Type i = 0; i < nTypes; ++i) {
-        if ((recursiveMap[i][parent]) && (i != parent)) {
-            setParentRecursively(i, type);
+        if ((recursiveMap[i][parent]) and (i != parent)) {
+            incr = true;
+            setParentRecursively(i, type, maxd);
         }
     }
+    if (incr) maxd++;
 }
 
 boost::signals2::signal<void (Type)>& ClassServer::addTypeSignal()
@@ -149,8 +159,7 @@ ClassServer::AtomFactory* ClassServer::getFactory(Type t)
 	// we do NOT want some deep parent factory, when there
 	// is some factory at a shallower level.
 	//
-#define MAX_DEPTH 100
-	for (int search_depth = 1; search_depth < MAX_DEPTH; search_depth++)
+	for (int search_depth = 1; search_depth <= _maxDepth; search_depth++)
 	{
 		AtomFactory* fact = searchToDepth(t, search_depth);
 		if (fact) return fact;
