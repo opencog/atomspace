@@ -53,12 +53,25 @@ EvaluationLink::EvaluationLink(const HandleSeq& oset)
 	//
 	// However, patterns can have variables for either the
 	// ListLink, or the PredicateNode, or both.
+	//
+	// ... except reality is worse: many examples include
+	// badly-formed EvaluationLinks, on-purpose.  So, before
+	// we can do any sort of strict checking here, we would
+	// need fix all those wiki pages, examples, etc.
+	// As of this writing (March 2017), there are seven unit
+	// tests that create EvaluationLinks whose size() is not 2:
+	//    PutLinkUTest GetLinkUTest BuggySelfGroundUTest
+	//    StackMoreUTest ConstantClausesUTest PersistUTest
+	//    MultiPersistUTest
+	//
+/********
 	if (2 != oset.size())
 	   // or (LIST_LINK != oset[1]->getType()))
 	{
 		throw RuntimeException(TRACE_INFO,
 		    "EvaluationLink must have predicate and args!");
 	}
+*********/
 }
 
 EvaluationLink::EvaluationLink(const Handle& schema, const Handle& args)
