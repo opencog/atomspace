@@ -635,4 +635,8 @@ TruthValuePtr EvaluationLink::do_evaluate(AtomSpace* as,
 	      schema.c_str());
 }
 
-DEFINE_LINK_FACTORY(EvaluationLink, EVALUATION_LINK)
+// The EvaluationLink factory, if allowed to run, just screws up
+// all sorts of unit test cases, and causes a large variety of
+// faults.  I suppose that perhaps this needs to be fixed, but its
+// daunting at this time.
+// DEFINE_LINK_FACTORY(EvaluationLink, EVALUATION_LINK)
