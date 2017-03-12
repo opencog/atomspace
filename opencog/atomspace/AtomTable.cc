@@ -235,8 +235,9 @@ Handle AtomTable::getHandle(Type t, const std::string& n) const
     return getNodeHandle(a);
 }
 
-Handle AtomTable::getNodeHandle(AtomPtr& a) const
+Handle AtomTable::getNodeHandle(AtomPtr& orig) const
 {
+    AtomPtr a(orig);
     // The hash function will fail to find NumberNodes unless
     // they are in the proper format.
     if (NUMBER_NODE == a->getType()) {
@@ -267,8 +268,9 @@ Handle AtomTable::getHandle(Type t, const HandleSeq& seq) const
     return getLinkHandle(a);
 }
 
-Handle AtomTable::getLinkHandle(AtomPtr& a, Quotation quotation) const
+Handle AtomTable::getLinkHandle(AtomPtr& orig, Quotation quotation) const
 {
+    AtomPtr a(orig);
     Type t = a->getType();
     const HandleSeq &seq = a->getOutgoingSet();
     bool unquoted = not quotation.is_quoted();
@@ -434,6 +436,10 @@ Handle AtomTable::add(AtomPtr atom, bool async)
     // Factory implements C++ atom types.
     AtomPtr orig(atom);
     Type atom_type = atom->getType();
+
+// XXX FIXME ... this cast is not needed, its superceeded by
+// the clones below; its used only to hadle the deleteLink.
+// so just handle teh DeleteLink, and forget about the rest of the cast.
     atom = cast_factory(atom_type, atom);
 
     // Certain DeleteLinks can never be added!
@@ -455,7 +461,7 @@ Handle AtomTable::add(AtomPtr atom, bool async)
             if (nullptr == h.operator->()) return Handle::UNDEFINED;
             closet.emplace_back(add(h, async));
         }
-        atom = createLink(atom_type, closet, atom->getTruthValue());
+        atom = createLink(atom_type, closet);
         atom = clone_factory(atom_type, atom);
     }
 
@@ -470,6 +476,8 @@ Handle AtomTable::add(AtomPtr atom, bool async)
     std::unique_lock<std::recursive_mutex> lck(_mtx);
     Handle hcheck(getHandle(orig));
     if (hcheck) return hcheck;
+
+    atom->copyValues(Handle(orig));
 
     if (atom->isLink()) {
         if (STATE_LINK == atom_type) {

@@ -178,7 +178,7 @@ Handle ClassServer::factory(const Handle& h)
 	if (fact)
 		return (*fact)(h);
 
-	return Handle(h);
+	return h;
 }
 
 Type ClassServer::getNumberOfClasses()
