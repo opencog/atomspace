@@ -964,4 +964,11 @@ Handle PatternLink::factory(const Handle& h)
 	return Handle(createPatternLink(h->getType(), h->getOutgoingSet()));
 }
 
+// This runs when the shared lib is loaded.  The factory
+// must get registered early, b efore anyone can do anything else.
+static __attribute__ ((constructor)) void init(void)
+{
+   classserver().addFactory(PATTERN_LINK, &PatternLink::factory);
+}
+
 /* ===================== END OF FILE ===================== */
