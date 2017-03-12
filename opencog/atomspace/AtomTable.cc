@@ -381,17 +381,7 @@ AtomPtr AtomTable::cast_factory(Type atom_type, AtomPtr atom)
 
     // Handle other link types only after special treatment for State,
     // Delete, above.
-    auto fact = classserver().getFactory(atom_type);
-    if (fact) return (*fact) (Handle(atom));
-
-    // XXX FIXME get rid of this when ready
-    if (classserver().isA(atom_type, SCOPE_LINK)) {
-        // isA because we want to force alpha-conversion.
-        if (nullptr == ScopeLinkCast(atom))
-            return ScopeLink::factory(Handle(atom));
-    }
-
-    return atom;
+    return classserver().factory(Handle(atom));
 }
 
 /// The purpose of the clone factory is to create a private, unique
@@ -409,21 +399,8 @@ AtomPtr AtomTable::clone_factory(Type atom_type, AtomPtr atom)
     if (classserver().isA(atom_type, NODE))
         return createNode(*NodeCast(atom));
 
-    // The createLink *forces* cloning to occur, even if the factory
-    // decided only to cast.
-    auto fact = classserver().getFactory(atom_type);
-    if (fact) return (*fact)(Handle(createLink(*LinkCast(atom))));
-
-    // isA because we want to force alpha-conversion.
-// XXX FIXME get rid of this wehn ready
-    if (classserver().isA(atom_type, SCOPE_LINK))
-        return ScopeLink::factory(Handle(atom));
-
-    if (classserver().isA(atom_type, LINK))
-        return createLink(*LinkCast(atom));
-
-    throw RuntimeException(TRACE_INFO,
-          "AtomTable - failed factory call!");
+    // The createLink *forces* a copy of the link to be made.
+    return classserver().factory(Handle(createLink(*LinkCast(atom))));
 }
 
 #if 0
