@@ -301,8 +301,8 @@ ENDIF (PROTOBUF_FOUND
 MESSAGE(STATUS "${PROTOBUF_DIR_MESSAGE}")
 
 # Python needed for ... I'm not sure what. Something.
-FIND_PACKAGE(PythonInterp)
-FIND_PACKAGE(PythonLibs 2.7)
+FIND_PACKAGE(PythonInterp 2.7 EXACT)
+FIND_PACKAGE(PythonLibs 2.7 EXACT)
 IF(PYTHONLIBS_FOUND)
 	MESSAGE(STATUS "Python libs found.")
 ELSE(PYTHONLIBS_FOUND)
