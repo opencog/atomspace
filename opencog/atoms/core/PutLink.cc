@@ -29,14 +29,14 @@
 
 using namespace opencog;
 
-PutLink::PutLink(const HandleSeq& oset, TruthValuePtr tv)
-    : ScopeLink(PUT_LINK, oset, tv)
+PutLink::PutLink(const HandleSeq& oset)
+    : ScopeLink(PUT_LINK, oset)
 {
 	init();
 }
 
-PutLink::PutLink(const Handle& a, TruthValuePtr tv)
-    : ScopeLink(PUT_LINK, a, tv)
+PutLink::PutLink(const Handle& a)
+    : ScopeLink(PUT_LINK, a)
 {
 	init();
 }
@@ -333,5 +333,7 @@ Handle PutLink::reduce(void)
 {
 	return do_reduce();
 }
+
+DEFINE_LINK_FACTORY(PutLink, PUT_LINK)
 
 /* ===================== END OF FILE ===================== */

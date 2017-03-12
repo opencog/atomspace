@@ -27,27 +27,23 @@
 
 using namespace opencog;
 
-LambdaLink::LambdaLink(const HandleSeq& oset,
-                       TruthValuePtr tv)
-	: ScopeLink(LAMBDA_LINK, oset, tv)
+LambdaLink::LambdaLink(const HandleSeq& oset)
+	: ScopeLink(LAMBDA_LINK, oset)
 {
 }
 
-LambdaLink::LambdaLink(const Handle& vars, const Handle& body,
-                       TruthValuePtr tv)
-	: ScopeLink(LAMBDA_LINK, HandleSeq({vars, body}), tv)
+LambdaLink::LambdaLink(const Handle& vars, const Handle& body)
+	: ScopeLink(LAMBDA_LINK, HandleSeq({vars, body}))
 {
 }
 
-LambdaLink::LambdaLink(Type t, const Handle& body,
-                       TruthValuePtr tv)
-	: ScopeLink(t, HandleSeq({body}), tv)
+LambdaLink::LambdaLink(Type t, const Handle& body)
+	: ScopeLink(t, HandleSeq({body}))
 {
 }
 
-LambdaLink::LambdaLink(Type t, const HandleSeq& oset,
-                       TruthValuePtr tv)
-	: ScopeLink(t, oset, tv)
+LambdaLink::LambdaLink(Type t, const HandleSeq& oset)
+	: ScopeLink(t, oset)
 {
 }
 
@@ -63,5 +59,7 @@ LambdaLink::LambdaLink(Link &l)
 			"Expecting a LambdaLink, got %s", tname.c_str());
 	}
 }
+
+DEFINE_LINK_FACTORY(LambdaLink, LAMBDA_LINK)
 
 /* ===================== END OF FILE ===================== */

@@ -28,8 +28,6 @@
 #include <opencog/atoms/TypeNode.h>
 #include <opencog/atoms/core/FreeLink.h>
 #include <opencog/atoms/core/LambdaLink.h>
-#include <opencog/atoms/core/PutLink.h>
-#include <opencog/atoms/core/ImplicationScopeLink.h>
 #include <opencog/atoms/pattern/PatternLink.h>
 #include <opencog/atomutils/TypeUtils.h>
 
@@ -43,16 +41,14 @@ void ScopeLink::init(void)
 	extract_variables(_outgoing);
 }
 
-ScopeLink::ScopeLink(const HandleSeq& oset,
-                     TruthValuePtr tv)
-	: Link(SCOPE_LINK, oset, tv)
+ScopeLink::ScopeLink(const HandleSeq& oset)
+	: Link(SCOPE_LINK, oset)
 {
 	init();
 }
 
-ScopeLink::ScopeLink(const Handle& vars, const Handle& body,
-                     TruthValuePtr tv)
-	: Link(SCOPE_LINK, HandleSeq({vars, body}), tv)
+ScopeLink::ScopeLink(const Handle& vars, const Handle& body)
+	: Link(SCOPE_LINK, HandleSeq({vars, body}))
 {
 	init();
 }
@@ -76,17 +72,15 @@ bool ScopeLink::skip_init(Type t)
 	return false;
 }
 
-ScopeLink::ScopeLink(Type t, const Handle& body,
-                     TruthValuePtr tv)
-	: Link(t, HandleSeq({body}), tv)
+ScopeLink::ScopeLink(Type t, const Handle& body)
+	: Link(t, HandleSeq({body}))
 {
 	if (skip_init(t)) return;
 	init();
 }
 
-ScopeLink::ScopeLink(Type t, const HandleSeq& oset,
-                     TruthValuePtr tv)
-	: Link(t, oset, tv)
+ScopeLink::ScopeLink(Type t, const HandleSeq& oset)
+	: Link(t, oset)
 {
 	if (skip_init(t)) return;
 	init();
@@ -425,15 +419,6 @@ ScopeLinkPtr ScopeLink::factory(const Handle& h)
 
 ScopeLinkPtr ScopeLink::factory(Type t, const HandleSeq& seq)
 {
-	if (PUT_LINK == t)
-		return createPutLink(seq);
-
-	if (LAMBDA_LINK == t)
-		return createLambdaLink(seq);
-
-	if (classserver().isA(t, IMPLICATION_SCOPE_LINK))
-		return createImplicationScopeLink(t, seq);
-
 	if (classserver().isA(t, PATTERN_LINK))
 		return PatternLink::factory(t, seq);
 

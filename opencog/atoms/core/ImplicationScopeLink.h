@@ -48,20 +48,15 @@ namespace opencog
 ///       <Q-body>
 class ImplicationScopeLink : public ScopeLink
 {
-public:
-	// XXX Need to make this public, so that the factory can call it!
-	ImplicationScopeLink(Type, const HandleSeq&,
-	                     TruthValuePtr tv = TruthValue::DEFAULT_TV());
-
 protected:
+	ImplicationScopeLink(Type, const HandleSeq&);
+
 	void init(void);
 	void extract_variables(const HandleSeq& oset);
 	// Useless for now, but...
 	Handle _implicand;
 public:
-	ImplicationScopeLink(const HandleSeq&,
-	                     TruthValuePtr tv = TruthValue::DEFAULT_TV());
-
+	ImplicationScopeLink(const HandleSeq&);
 	ImplicationScopeLink(Link &l);
 };
 

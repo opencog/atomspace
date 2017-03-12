@@ -38,20 +38,12 @@ namespace opencog
 class LambdaLink : public ScopeLink
 {
 protected:
-
-	LambdaLink(Type, const Handle&,
-	           TruthValuePtr tv = TruthValue::DEFAULT_TV());
-
-	LambdaLink(Type, const HandleSeq&,
-	           TruthValuePtr tv = TruthValue::DEFAULT_TV());
+	LambdaLink(Type, const Handle&);
+	LambdaLink(Type, const HandleSeq&);
 
 public:
-	LambdaLink(const HandleSeq&,
-	           TruthValuePtr tv = TruthValue::DEFAULT_TV());
-
-	LambdaLink(const Handle& varcdecls, const Handle& body,
-	           TruthValuePtr tv = TruthValue::DEFAULT_TV());
-
+	LambdaLink(const HandleSeq&);
+	LambdaLink(const Handle& varcdecls, const Handle& body);
 	LambdaLink(Link &l);
 
 	// Take the list of values `vals`, and substitute them in for the
@@ -61,6 +53,8 @@ public:
 	{
 		return get_variables().substitute(_body, vals);
 	}
+
+	static Handle factory(const Handle&);
 };
 
 typedef std::shared_ptr<LambdaLink> LambdaLinkPtr;

@@ -304,7 +304,12 @@ Handle AtomTable::getLinkHandle(AtomPtr& a, Quotation quotation) const
     if (unquoted and classserver().isA(t, SCOPE_LINK)) {
         ScopeLinkPtr wanted = ScopeLinkCast(a);
         if (nullptr == wanted) {
-            wanted = ScopeLink::factory(Handle(a));
+            auto fact = classserver().getFactory(t);
+            if (fact)
+                wanted = (*fact)(Handle(a));
+            else
+                wanted = ScopeLink::factory(Handle(a));
+                // XXX FIXME get rid of above line of code.
         }
         ch = wanted->get_hash();
         a = wanted;
@@ -361,10 +366,6 @@ AtomPtr AtomTable::cast_factory(Type atom_type, AtomPtr atom)
     } else if (VARIABLE_LIST == atom_type) {
         if (nullptr == VariableListCast(atom))
             return createVariableList(*LinkCast(atom));
-    } else if (classserver().isA(atom_type, SCOPE_LINK)) {
-        // isA because we want to force alpha-conversion.
-        if (nullptr == ScopeLinkCast(atom))
-            return ScopeLink::factory(Handle(atom));
     }
 
     // Very special handling for DeleteLink's
@@ -394,6 +395,13 @@ AtomPtr AtomTable::cast_factory(Type atom_type, AtomPtr atom)
     auto fact = classserver().getFactory(atom_type);
     if (fact) return (*fact) (Handle(atom));
 
+    // XXX FIXME get rid of this when ready
+    if (classserver().isA(atom_type, SCOPE_LINK)) {
+        // isA because we want to force alpha-conversion.
+        if (nullptr == ScopeLinkCast(atom))
+            return ScopeLink::factory(Handle(atom));
+    }
+
     return atom;
 }
 
@@ -422,6 +430,7 @@ AtomPtr AtomTable::clone_factory(Type atom_type, AtomPtr atom)
     if (fact) return (*fact)(Handle(createLink(*LinkCast(atom))));
 
     // isA because we want to force alpha-conversion.
+// XXX FIXME get rid of this wehn ready
     if (classserver().isA(atom_type, SCOPE_LINK))
         return ScopeLink::factory(Handle(atom));
 

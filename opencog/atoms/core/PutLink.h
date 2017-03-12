@@ -59,17 +59,16 @@ protected:
 	Handle do_reduce(void) const;
 
 public:
-	PutLink(const HandleSeq& oset,
-	         TruthValuePtr tv = TruthValue::DEFAULT_TV());
-	PutLink(const Handle& a,
-	         TruthValuePtr tv = TruthValue::DEFAULT_TV());
-
+	PutLink(const HandleSeq& oset);
+	PutLink(const Handle& a);
 	PutLink(Link& l);
 	virtual ~PutLink() {}
 
 	// PutLink values may be e second or the third outset elt.
 	Handle get_values() { return _values; }
 	virtual Handle reduce(void);
+
+	static Handle factory(const Handle&);
 };
 
 typedef std::shared_ptr<PutLink> PutLinkPtr;

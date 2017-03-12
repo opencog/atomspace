@@ -80,6 +80,9 @@ void Atom::setTruthValue(TruthValuePtr newTV)
 {
     if (nullptr == newTV) return;
 
+    // If both old and new are e.g. DEFAULT_TV, then do nothing.
+    if (_truthValue.get() == newTV.get()) return;
+
     // We need to guarantee that the signal goes out with the
     // correct truth value.  That is, another setter could be changing
     // this, even as we are.  So make a copy, first.
