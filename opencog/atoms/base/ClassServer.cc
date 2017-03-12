@@ -99,6 +99,8 @@ Type ClassServer::addType(const Type parent, const std::string& name)
 
 void ClassServer::setParentRecursively(Type parent, Type type, Type& maxd)
 {
+    if (recursiveMap[parent][type]) return;
+
     bool incr = false;
     recursiveMap[parent][type] = true;
     for (Type i = 0; i < nTypes; ++i) {
