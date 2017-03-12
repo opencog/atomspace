@@ -145,8 +145,7 @@ public:
 	virtual bool operator==(const Atom&) const;
 	virtual bool operator!=(const Atom&) const;
 
-	static ScopeLinkPtr factory(const Handle&);
-	static ScopeLinkPtr factory(Type, const HandleSeq&);
+	static Handle factory(const Handle&);
 };
 
 static inline ScopeLinkPtr ScopeLinkCast(const Handle& h)

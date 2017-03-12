@@ -56,17 +56,12 @@ protected:
 	void validate_vardecl(const Handle&);
 	void validate_vardecl(const HandleSeq&);
 
-	VariableList(Type, const HandleSeq&,
-	             TruthValuePtr tv = TruthValue::DEFAULT_TV());
+	VariableList(Type, const HandleSeq&);
 
 	void build_index(void);
 public:
-	VariableList(const Handle& hvardecls,
-	             TruthValuePtr tv = TruthValue::DEFAULT_TV());
-
-	VariableList(const HandleSeq& vardecls,
-	             TruthValuePtr tv = TruthValue::DEFAULT_TV());
-
+	VariableList(const Handle& hvardecls);
+	VariableList(const HandleSeq& vardecls);
 	VariableList(Link&);
 
 	// Return the list of variables we are holding.
@@ -93,6 +88,8 @@ public:
 	// exception is thrown.
 	Handle substitute(const Handle& tree, const HandleSeq& vals) const
 		{ return _varlist.substitute(tree, vals); }
+
+	static Handle factory(const Handle&);
 };
 
 typedef std::shared_ptr<VariableList> VariableListPtr;

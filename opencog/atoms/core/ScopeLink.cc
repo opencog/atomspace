@@ -26,9 +26,7 @@
 #include <opencog/util/mt19937ar.h>
 #include <opencog/atoms/base/ClassServer.h>
 #include <opencog/atoms/TypeNode.h>
-#include <opencog/atoms/core/FreeLink.h>
 #include <opencog/atoms/core/LambdaLink.h>
-#include <opencog/atoms/pattern/PatternLink.h>
 #include <opencog/atomutils/TypeUtils.h>
 
 
@@ -318,7 +316,7 @@ ContentHash ScopeLink::term_hash(const Handle& h,
 		// Add the Scope links vars to the hidden set.
 		ScopeLinkPtr sco(ScopeLinkCast(h));
 		if (nullptr == sco)
-			sco = ScopeLink::factory(t, h->getOutgoingSet());
+			sco = ScopeLinkCast(classserver().factory(h));
 		const Variables& vees = sco->get_variables();
 		for (const Handle& v : vees.varseq) bound_vars.insert(v);
 	}
@@ -391,7 +389,7 @@ Handle ScopeLink::alpha_conversion(HandleSeq vars, Handle vardecl) const
 		hs.insert(hs.begin(), vardecl);
 
 	// Create the alpha converted scope link
-	return Handle(factory(getType(), hs));
+	return classserver().factory(Handle(createLink(getType(), hs)));
 }
 
 /* ================================================================= */
@@ -412,22 +410,17 @@ bool ScopeLink::operator!=(const Atom& a) const
 
 /* ================================================================= */
 
-ScopeLinkPtr ScopeLink::factory(const Handle& h)
+Handle ScopeLink::factory(const Handle& h)
 {
-	return factory(h->getType(), h->getOutgoingSet());
+	if (ScopeLinkCast(h)) return h;
+	return Handle(createScopeLink(h->getType(), h->getOutgoingSet()));
 }
 
-ScopeLinkPtr ScopeLink::factory(Type t, const HandleSeq& seq)
+// This runs when the shared lib is loaded.  The factory
+// must get registered early, b efore anyone can do anything else.
+static __attribute__ ((constructor)) void init(void)
 {
-	if (classserver().isA(t, PATTERN_LINK))
-		return PatternLink::factory(t, seq);
-
-	if (classserver().isA(t, SCOPE_LINK))
-		return createScopeLink(t, seq);
-
-	throw SyntaxException(TRACE_INFO,
-		"ScopeLink is not a factory for %s",
-		classserver().getTypeName(t).c_str());
+   classserver().addFactory(SCOPE_LINK, &ScopeLink::factory);
 }
 
 /* ===================== END OF FILE ===================== */

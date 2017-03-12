@@ -38,26 +38,24 @@ void BindLink::init(void)
 	_pat.redex_name = "anonymous BindLink";
 }
 
-BindLink::BindLink(const HandleSeq& hseq, TruthValuePtr tv)
-	: PatternLink(BIND_LINK, hseq, tv)
+BindLink::BindLink(const HandleSeq& hseq)
+	: PatternLink(BIND_LINK, hseq)
 {
 	init();
 }
 
 BindLink::BindLink(const Handle& vardecl,
                    const Handle& body,
-                   const Handle& rewrite,
-                   TruthValuePtr tv)
-	: BindLink(HandleSeq{vardecl, body, rewrite}, tv)
+                   const Handle& rewrite)
+	: BindLink(HandleSeq{vardecl, body, rewrite})
 {}
 
-BindLink::BindLink(const Handle& body, const Handle& rewrite,
-                   TruthValuePtr tv)
-	: BindLink(HandleSeq{body, rewrite}, tv)
+BindLink::BindLink(const Handle& body, const Handle& rewrite)
+	: BindLink(HandleSeq{body, rewrite})
 {}
 
-BindLink::BindLink(Type t, const HandleSeq& hseq, TruthValuePtr tv)
-	: PatternLink(t, hseq, tv)
+BindLink::BindLink(Type t, const HandleSeq& hseq)
+	: PatternLink(t, hseq)
 {
 	init();
 }
@@ -110,5 +108,9 @@ void BindLink::extract_variables(const HandleSeq& oset)
 	// Initialize _varlist with the scoped variables
 	init_scoped_variables(oset[0]);
 }
+
+/* ================================================================= */
+
+DEFINE_LINK_FACTORY(BindLink, BIND_LINK)
 
 /* ===================== END OF FILE ===================== */

@@ -248,28 +248,26 @@ PatternLink::PatternLink(const OrderedHandleSet& vars,
 
 /* ================================================================= */
 
-PatternLink::PatternLink(const HandleSeq& hseq, TruthValuePtr tv)
-	: ScopeLink(PATTERN_LINK, hseq, tv)
+PatternLink::PatternLink(const HandleSeq& hseq)
+	: ScopeLink(PATTERN_LINK, hseq)
 {
 	init();
 }
 
-PatternLink::PatternLink(const Handle& body, TruthValuePtr tv)
-	: ScopeLink(PATTERN_LINK, HandleSeq({body}), tv)
+PatternLink::PatternLink(const Handle& body)
+	: ScopeLink(PATTERN_LINK, HandleSeq({body}))
 {
 	init();
 }
 
-PatternLink::PatternLink(const Handle& vars, const Handle& body,
-                         TruthValuePtr tv)
-	: ScopeLink(PATTERN_LINK, HandleSeq({vars, body}), tv)
+PatternLink::PatternLink(const Handle& vars, const Handle& body)
+	: ScopeLink(PATTERN_LINK, HandleSeq({vars, body}))
 {
 	init();
 }
 
-PatternLink::PatternLink(Type t, const HandleSeq& hseq,
-                         TruthValuePtr tv)
-	: ScopeLink(t, hseq, tv)
+PatternLink::PatternLink(Type t, const HandleSeq& hseq)
+	: ScopeLink(t, hseq)
 {
 	// BindLink uses a different initialization sequence.
 	if (BIND_LINK == t) return;
@@ -958,34 +956,12 @@ void PatternLink::debug_log(void) const
 
 /* ================================================================= */
 
-PatternLinkPtr PatternLink::factory(const Handle& h)
+Handle PatternLink::factory(const Handle& h)
 {
-	// If h is of the right form already, its just a matter of calling
-	// it.  Otherwise, we have to create
-	PatternLinkPtr plp(PatternLinkCast(h));
-	if (plp) return plp;
+	// Just cast, if possible.
+	if (PatternLinkCast(h)) return h;
 
-	if (nullptr == h)
-		throw RuntimeException(TRACE_INFO, "Null pointer exception!");
-
-	return factory(h->getType(), h->getOutgoingSet());
-}
-
-// Basic type factory.
-PatternLinkPtr PatternLink::factory(Type t, const HandleSeq& seq)
-{
-	if (BIND_LINK == t)
-		return createBindLink(seq);
-	if (DUAL_LINK == t)
-		return createDualLink(seq);
-
-	// Handle all of the others
-	if (classserver().isA(t, PATTERN_LINK))
-		return createPatternLink(t, seq);
-
-	throw SyntaxException(TRACE_INFO,
-		"PatternLink is not a factory for %s",
-		classserver().getTypeName(t).c_str());
+	return createPatternLink(h->getType(), h->getOutgoingSet());
 }
 
 /* ===================== END OF FILE ===================== */

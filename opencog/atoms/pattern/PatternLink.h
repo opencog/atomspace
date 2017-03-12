@@ -135,11 +135,8 @@ protected:
 	void common_init(void);
 	void setup_components(void);
 
-public:
 	// Only derived classes can call this
-	// XXX Need to make this public, so that the factory can call it!
-	PatternLink(Type, const HandleSeq&,
-	            TruthValuePtr tv = TruthValue::DEFAULT_TV());
+	PatternLink(Type, const HandleSeq&);
 
 protected:
 	// utility debug print
@@ -149,15 +146,9 @@ protected:
 	}
 
 public:
-	PatternLink(const HandleSeq&,
-	            TruthValuePtr tv = TruthValue::DEFAULT_TV());
-
-	PatternLink(const Handle& body,
-	            TruthValuePtr tv = TruthValue::DEFAULT_TV());
-
-	PatternLink(const Handle& varcdecls, const Handle& body,
-	            TruthValuePtr tv = TruthValue::DEFAULT_TV());
-
+	PatternLink(const HandleSeq&);
+	PatternLink(const Handle& body);
+	PatternLink(const Handle& varcdecls, const Handle& body);
 	PatternLink(const Variables&, const Handle&);
 
 	PatternLink(Link &l);
@@ -185,8 +176,7 @@ public:
 
 	void debug_log(void) const;
 
-	static PatternLinkPtr factory(const Handle&);
-	static PatternLinkPtr factory(Type, const HandleSeq&);
+	static Handle factory(const Handle&);
 };
 
 static inline PatternLinkPtr PatternLinkCast(const Handle& h)

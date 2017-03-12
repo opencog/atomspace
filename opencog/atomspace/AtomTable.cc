@@ -43,7 +43,6 @@
 #include <opencog/atoms/core/DeleteLink.h>
 #include <opencog/atoms/core/ScopeLink.h>
 #include <opencog/atoms/core/StateLink.h>
-#include <opencog/atoms/core/VariableList.h>
 #include <opencog/util/exceptions.h>
 #include <opencog/util/functional.h>
 #include <opencog/util/Logger.h>
@@ -304,12 +303,7 @@ Handle AtomTable::getLinkHandle(AtomPtr& a, Quotation quotation) const
     if (unquoted and classserver().isA(t, SCOPE_LINK)) {
         ScopeLinkPtr wanted = ScopeLinkCast(a);
         if (nullptr == wanted) {
-            auto fact = classserver().getFactory(t);
-            if (fact)
-                wanted = (*fact)(Handle(a));
-            else
-                wanted = ScopeLink::factory(Handle(a));
-                // XXX FIXME get rid of above line of code.
+            wanted = ScopeLinkCast(classserver().factory(Handle(a)));
         }
         ch = wanted->get_hash();
         a = wanted;
@@ -361,11 +355,6 @@ AtomPtr AtomTable::cast_factory(Type atom_type, AtomPtr atom)
     } else if (TYPE_NODE == atom_type) {
         if (nullptr == TypeNodeCast(atom))
             return createTypeNode(*NodeCast(atom));
-
-    // Links of various kinds -----------
-    } else if (VARIABLE_LIST == atom_type) {
-        if (nullptr == VariableListCast(atom))
-            return createVariableList(*LinkCast(atom));
     }
 
     // Very special handling for DeleteLink's
@@ -419,10 +408,6 @@ AtomPtr AtomTable::clone_factory(Type atom_type, AtomPtr atom)
         return createTypeNode(*NodeCast(atom));
     if (classserver().isA(atom_type, NODE))
         return createNode(*NodeCast(atom));
-
-    // Links of various kinds -----------
-    if (VARIABLE_LIST == atom_type)
-        return createVariableList(*LinkCast(atom));
 
     // The createLink *forces* cloning to occur, even if the factory
     // decided only to cast.

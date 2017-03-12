@@ -65,28 +65,24 @@ void VariableList::validate_vardecl(const HandleSeq& oset)
 	build_index();
 }
 
-VariableList::VariableList(const Handle& hvardecls,
-                           TruthValuePtr tv)
+VariableList::VariableList(const Handle& hvardecls)
 	: Link(VARIABLE_LIST,
 	    // Either it is a VariableList, or its a naked variable, or
 	    // its a typed variable.
 	    hvardecls->getType() == VARIABLE_LIST ?
-	          hvardecls->getOutgoingSet() : HandleSeq({hvardecls}),
-	    tv)
+	          hvardecls->getOutgoingSet() : HandleSeq({hvardecls}))
 {
 	validate_vardecl(getOutgoingSet());
 }
 
-VariableList::VariableList(const HandleSeq& oset,
-                           TruthValuePtr tv)
-	: Link(VARIABLE_LIST, oset, tv)
+VariableList::VariableList(const HandleSeq& oset)
+	: Link(VARIABLE_LIST, oset)
 {
 	validate_vardecl(oset);
 }
 
-VariableList::VariableList(Type t, const HandleSeq& oset,
-                           TruthValuePtr tv)
-	: Link(t, oset, tv)
+VariableList::VariableList(Type t, const HandleSeq& oset)
+	: Link(t, oset)
 {
 	// derived classes have a different initialization order
 	if (VARIABLE_LIST != t) return;
@@ -344,5 +340,7 @@ std::string opencog::oc_to_string(const VariableListPtr& vlp)
 	else
 		return oc_to_string(vlp->getHandle());
 }
+
+DEFINE_LINK_FACTORY(VariableList, VARIABLE_LIST)
 
 /* ===================== END OF FILE ===================== */
