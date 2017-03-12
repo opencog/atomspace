@@ -46,7 +46,7 @@ protected:
 
 public:
 	BindLink(const HandleSeq&);
-	BindLink(const Handle& vardecl, const Handle& body, const Handle& rewrite)
+	BindLink(const Handle& vardecl, const Handle& body, const Handle& rewrite);
 	BindLink(const Handle& body, const Handle& rewrite);
 	explicit BindLink(Link &l);
 

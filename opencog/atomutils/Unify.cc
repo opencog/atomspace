@@ -28,6 +28,7 @@
 #include <opencog/util/algorithm.h>
 #include <opencog/atoms/base/Atom.h>
 #include <opencog/atoms/base/Node.h>
+#include <opencog/atoms/core/ScopeLink.h>
 #include <opencog/atomutils/FindUtils.h>
 
 namespace opencog {
@@ -316,10 +317,7 @@ Handle Unify::consume_ill_quotations(const Variables& variables, Handle h,
 		consumed.push_back(consume_ill_quotations(variables, outh, quotation,
 		                                          escape));
 
-	// TODO: call all factories
-	bool is_scope = classserver().isA(t, SCOPE_LINK);
-	return is_scope ? Handle(ScopeLink::factory(t, consumed))
-		: Handle(createLink(t, consumed));
+	return classserver().factory(Handle(createLink(t, consumed)));
 }
 
 bool Unify::is_bound_to_ancestor(const Variables& variables,

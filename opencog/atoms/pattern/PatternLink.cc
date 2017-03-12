@@ -961,7 +961,7 @@ Handle PatternLink::factory(const Handle& h)
 	// Just cast, if possible.
 	if (PatternLinkCast(h)) return h;
 
-	return createPatternLink(h->getType(), h->getOutgoingSet());
+	return Handle(createPatternLink(h->getType(), h->getOutgoingSet()));
 }
 
 /* ===================== END OF FILE ===================== */

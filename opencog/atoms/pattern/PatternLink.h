@@ -135,6 +135,8 @@ protected:
 	void common_init(void);
 	void setup_components(void);
 
+public:
+	// XXX the factory needs to call thus, and thus needs to be public!
 	// Only derived classes can call this
 	PatternLink(Type, const HandleSeq&);
 
