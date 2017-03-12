@@ -45,8 +45,16 @@ using namespace opencog;
 EvaluationLink::EvaluationLink(const HandleSeq& oset)
     : FreeLink(EVALUATION_LINK, oset)
 {
-	if ((2 != oset.size()) or
-	   (LIST_LINK != oset[1]->getType()))
+	// The "canonical" EvaluationLink structure is:
+	//    EvaluationLink
+	//        PredicateNode "foo"
+	//        ListLink
+	//           ...
+	//
+	// However, patterns can have variables for either the
+	// ListLink, or the PredicateNode, or both.
+	if (2 != oset.size())
+	   // or (LIST_LINK != oset[1]->getType()))
 	{
 		throw RuntimeException(TRACE_INFO,
 		    "EvaluationLink must have predicate and args!");
