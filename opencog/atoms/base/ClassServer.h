@@ -258,7 +258,9 @@ ClassServer& classserver();
 Handle CNAME::factory(const Handle& base)                         \
 {                                                                 \
    if (CNAME##Cast(base)) return base;                            \
-   return Handle(create##CNAME(base->getOutgoingSet()));          \
+   Handle h(create##CNAME(base->getOutgoingSet()));               \
+   h->copyValues(base);                                           \
+   return h;                                                      \
 }                                                                 \
                                                                   \
 /* This runs when the shared lib is loaded. */                    \

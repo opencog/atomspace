@@ -207,6 +207,9 @@ void Atom::copyValues(const Handle& other)
         ProtoAtomPtr p = other->getValue(k);
         setValue(k, p);
     }
+
+    // Special case for truth values
+    setTruthValue(other->getTruthValue());
 }
 
 std::string Atom::valuesToString() const
