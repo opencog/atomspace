@@ -136,7 +136,7 @@ ClassServer::AtomFactory* ClassServer::searchToDepth(Type t, int depth)
 	if (depth < 0) return nullptr;
 
 	std::vector<Type> parents;
-	getParents(t, parents.begin());
+	getParents(t, back_inserter(parents));
 	for (auto p: parents)
 	{
 		AtomFactory* fact = searchToDepth(p, depth);
@@ -145,6 +145,7 @@ ClassServer::AtomFactory* ClassServer::searchToDepth(Type t, int depth)
 
 	return nullptr;
 }
+
 ClassServer::AtomFactory* ClassServer::getFactory(Type t)
 {
 	// If there is a factory, then return it.
