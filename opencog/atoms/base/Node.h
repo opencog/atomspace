@@ -46,9 +46,6 @@ protected:
     std::string _name;
     void init(const std::string&);
 
-    Node(const Node &l) : Atom(0)
-    { OC_ASSERT(false, "Node: bad use of copy ctor"); }
-
     virtual ContentHash compute_hash() const;
 
 public:
@@ -69,7 +66,7 @@ public:
      * Copy constructor, does not copy atomspace membership,
      * or any of the values/truthvalues.
      */
-    Node(Node &n)
+    Node(const Node &n)
         : Atom(n.getType())
     {
         init(n._name);

@@ -52,16 +52,13 @@ private:
     void init(const HandleSeq&);
     void resort(void);
 
-    Link(const Link &l) : Atom(0)
-    { OC_ASSERT(false, "Link: bad use of copy ctor"); }
-
 protected:
-
     //! Array holding actual outgoing set of the link.
     //! Should not change during atom lifespan.
     HandleSeq _outgoing;
 
     virtual ContentHash compute_hash() const;
+
 public:
     /**
      * Constructor for this class.
@@ -123,7 +120,7 @@ public:
      * Copy constructor, does NOT copy atomspace membership,
      * or any of the values or truth values.
      */
-    Link(Link &l)
+    Link(const Link &l)
         : Atom(l.getType())
     {
         init(l.getOutgoingSet());
