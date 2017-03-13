@@ -160,7 +160,7 @@ struct less<PatternTermPtr>
 		const Handle& rHandle = rhs->getHandle();
 		if (lHandle == rHandle)
 		{
-			if (lHandle == nullptr) return false;
+			if (not lHandle) return false;
 			return lhs->getParent() < rhs->getParent();
 		}
 		return lHandle < rHandle;

@@ -36,7 +36,7 @@ const AtomPtr Handle::NULL_POINTER;
 
 ContentHash Handle::value(void) const
 {
-    if (_ptr) return _ptr->get_hash();
+    if (get()) return get()->get_hash();
     return INVALID_HASH;
 }
 
@@ -121,7 +121,7 @@ bool Handle::operator>= (const Handle& h) const noexcept
 // http://wiki.opencog.org/w/Development_standards#Print_OpenCog_Objects
 std::string h_to_string(const Handle& h)
 {
-	if (h == nullptr)
+	if (h == (Atom*) nullptr)
 		return "nullatom\n";
 	else
 		return h->toString();

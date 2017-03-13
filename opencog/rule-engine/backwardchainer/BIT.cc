@@ -85,7 +85,7 @@ AndBIT::AndBIT(AtomSpace& as, const Handle& target, const Handle& vardecl,
 {
 	// Create initial FCS
 	HandleSeq bl{target, target};
-	if (vardecl.is_defined())
+	if (vardecl)
 		bl.insert(bl.begin(), vardecl);
 	fcs = as.add_link(BIND_LINK, bl);
 
@@ -255,7 +255,7 @@ Handle AndBIT::expand_fcs(const Handle& leaf,
 
 	// Generate new atomese forward chaining s trategy
 	HandleSeq noutgoings({npattern, nrewrite});
-	if (nvardecl.is_defined())
+	if (nvardecl)
 		noutgoings.insert(noutgoings.begin(), nvardecl);
 	nfcs = fcs->getAtomSpace()->add_link(BIND_LINK, noutgoings);
 
@@ -278,7 +278,7 @@ void AndBIT::set_leaf2bitnode()
 AndBIT::HandleBITNodeMap::iterator
 AndBIT::insert_bitnode(Handle leaf, const BITNodeFitness& fitness)
 {
-	if (leaf.is_undefined())
+	if (leaf)
 		return leaf2bitnode.end();
 
 	HandleBITNodeMap::iterator it = leaf2bitnode.find(leaf);

@@ -51,7 +51,7 @@ static TruthValuePtr ss_evaluate(AtomSpace* atomspace, const Handle& h)
 static Handle ss_reduce(AtomSpace* atomspace, const Handle& h)
 {
 	Type t = h->getType();
-	if (NUMBER_NODE == t) return Handle(h);
+	if (NUMBER_NODE == t) return h;
 
 	if (not classserver().isA(t, FOLD_LINK))
 		throw InvalidParamException(TRACE_INFO,

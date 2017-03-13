@@ -268,7 +268,7 @@ void BasicSaveUTest::single_atom_save_restore(std::string id)
 
     Handle h = a->getHandle();
 
-    TSM_ASSERT("Bad Handle", h != nullptr);
+    TSM_ASSERT("Bad Handle", nullptr != h);
 
     // Store the atom ...
     store->storeAtom(h, true);
