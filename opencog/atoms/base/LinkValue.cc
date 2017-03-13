@@ -31,9 +31,11 @@ bool LinkValue::operator==(const ProtoAtom& other) const
 	const LinkValue* lov = (const LinkValue*) &other;
 
 	if (_value.size() != lov->_value.size()) return false;
+
+	// Content-compare, NOT pointer-compare!
 	size_t len = _value.size();
 	for (size_t i=0; i<len; i++)
-		if (_value[i] != lov->_value[i]) return false;
+		if (*(_value[i]) != *(lov->_value[i])) return false;
 	return true;
 }
 
