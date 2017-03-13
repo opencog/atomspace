@@ -39,14 +39,8 @@ void ScopeLink::init(void)
 	extract_variables(_outgoing);
 }
 
-ScopeLink::ScopeLink(const HandleSeq& oset)
-	: Link(SCOPE_LINK, oset)
-{
-	init();
-}
-
 ScopeLink::ScopeLink(const Handle& vars, const Handle& body)
-	: Link(SCOPE_LINK, HandleSeq({vars, body}))
+	: Link(HandleSeq({vars, body}), SCOPE_LINK)
 {
 	init();
 }
@@ -71,20 +65,20 @@ bool ScopeLink::skip_init(Type t)
 }
 
 ScopeLink::ScopeLink(Type t, const Handle& body)
-	: Link(t, HandleSeq({body}))
+	: Link(HandleSeq({body}), t)
 {
 	if (skip_init(t)) return;
 	init();
 }
 
-ScopeLink::ScopeLink(Type t, const HandleSeq& oset)
-	: Link(t, oset)
+ScopeLink::ScopeLink(const HandleSeq& oset, Type t)
+	: Link(oset, t)
 {
 	if (skip_init(t)) return;
 	init();
 }
 
-ScopeLink::ScopeLink(Link &l)
+ScopeLink::ScopeLink(const Link &l)
 	: Link(l)
 {
 	if (skip_init(l.getType())) return;
@@ -389,7 +383,7 @@ Handle ScopeLink::alpha_conversion(HandleSeq vars, Handle vardecl) const
 		hs.insert(hs.begin(), vardecl);
 
 	// Create the alpha converted scope link
-	return classserver().factory(Handle(createLink(getType(), hs)));
+	return classserver().factory(Handle(createLink(hs, getType())));
 }
 
 /* ================================================================= */
@@ -408,19 +402,6 @@ bool ScopeLink::operator!=(const Atom& a) const
 	return not operator==(a);
 }
 
-/* ================================================================= */
-
-Handle ScopeLink::factory(const Handle& h)
-{
-	if (ScopeLinkCast(h)) return h;
-	return Handle(createScopeLink(h->getType(), h->getOutgoingSet()));
-}
-
-// This runs when the shared lib is loaded.  The factory
-// must get registered early, b efore anyone can do anything else.
-static __attribute__ ((constructor)) void init(void)
-{
-   classserver().addFactory(SCOPE_LINK, &ScopeLink::factory);
-}
+DEFINE_LINK_FACTORY(ScopeLink, SCOPE_LINK);
 
 /* ===================== END OF FILE ===================== */

@@ -39,12 +39,11 @@ class LambdaLink : public ScopeLink
 {
 protected:
 	LambdaLink(Type, const Handle&);
-	LambdaLink(Type, const HandleSeq&);
 
 public:
-	LambdaLink(const HandleSeq&);
+	LambdaLink(const HandleSeq&, Type=LAMBDA_LINK);
 	LambdaLink(const Handle& varcdecls, const Handle& body);
-	LambdaLink(Link &l);
+	LambdaLink(const Link &l);
 
 	// Take the list of values `vals`, and substitute them in for the
 	// variables in the body of this lambda. The values must satisfy all

@@ -49,15 +49,13 @@ namespace opencog
 class ImplicationScopeLink : public ScopeLink
 {
 protected:
-	ImplicationScopeLink(Type, const HandleSeq&);
-
 	void init(void);
 	void extract_variables(const HandleSeq& oset);
 	// Useless for now, but...
 	Handle _implicand;
 public:
 	ImplicationScopeLink(const HandleSeq&);
-	ImplicationScopeLink(Link &l);
+	ImplicationScopeLink(const Link &l);
 };
 
 typedef std::shared_ptr<ImplicationScopeLink> ImplicationScopeLinkPtr;

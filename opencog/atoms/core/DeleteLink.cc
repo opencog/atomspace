@@ -63,12 +63,12 @@ Handle DeleteLink::execute(AtomSpace * as) const
 #endif
 
 DeleteLink::DeleteLink(const HandleSeq& oset)
-	: FreeLink(DELETE_LINK, oset)
+	: FreeLink(oset, DELETE_LINK)
 {
 	init();
 }
 
-DeleteLink::DeleteLink(Link &l)
+DeleteLink::DeleteLink(const Link &l)
 	: FreeLink(l)
 {
 	// Type must be as expected

@@ -62,9 +62,9 @@ protected:
 
 public:
 	// XXX Need to make this public, so that the factory can call it!
-	FunctionLink(Type, const HandleSeq& oset);
+	FunctionLink(const HandleSeq& oset, Type = FUNCTION_LINK);
 
-	FunctionLink(Link& l);
+	FunctionLink(const Link& l);
 	virtual ~FunctionLink() {}
 
 	virtual Handle execute(AtomSpace* = NULL) const;

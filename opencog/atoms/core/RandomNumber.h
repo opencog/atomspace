@@ -48,8 +48,8 @@ protected:
 	void init();
 
 public:
-	RandomNumberLink(const HandleSeq&);
-	RandomNumberLink(Link &l);
+	RandomNumberLink(const HandleSeq&, Type=RANDOM_NUMBER_LINK);
+	RandomNumberLink(const Link &l);
 
 	// Return a pointer to the atom being specified.
 	virtual Handle execute(AtomSpace* = NULL) const;

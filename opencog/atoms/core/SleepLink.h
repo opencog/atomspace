@@ -38,8 +38,8 @@ namespace opencog
 class SleepLink : public FunctionLink
 {
 public:
-	SleepLink(const HandleSeq&);
-	SleepLink(Link &l);
+	SleepLink(const HandleSeq&, Type=SLEEP_LINK);
+	SleepLink(const Link &l);
 
 	// Return a pointer to the atom being specified.
 	virtual Handle execute(AtomSpace* = NULL) const;

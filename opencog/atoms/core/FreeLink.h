@@ -47,19 +47,14 @@ protected:
 
 	void init(void);
 
-public:
-	// XXX Need to make this public, so that the factory can call it!
-	FreeLink(Type, const HandleSeq& oset);
-
 protected:
 	FreeLink(Type, const Handle& a);
 	FreeLink(Type, const Handle& a, const Handle& b);
 
 public:
-	FreeLink(const HandleSeq& oset);
+	FreeLink(const HandleSeq& oset, Type=FREE_LINK);
 	FreeLink(const Handle& a);
-
-	FreeLink(Link& l);
+	FreeLink(const Link& l);
 	virtual ~FreeLink() {}
 
 	const FreeVariables& get_vars() const

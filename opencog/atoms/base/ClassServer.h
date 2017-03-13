@@ -258,7 +258,7 @@ ClassServer& classserver();
 Handle CNAME::factory(const Handle& base)                         \
 {                                                                 \
    if (CNAME##Cast(base)) return base;                            \
-   Handle h(create##CNAME(base->getOutgoingSet()));               \
+   Handle h(create##CNAME(base->getOutgoingSet(), base->getType())); \
    return h;                                                      \
 }                                                                 \
                                                                   \

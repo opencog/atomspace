@@ -60,9 +60,9 @@ protected:
 
 	void build_index(void);
 public:
+	VariableList(const HandleSeq& vardecls, Type=VARIABLE_LIST);
 	VariableList(const Handle& hvardecls);
-	VariableList(const HandleSeq& vardecls);
-	VariableList(Link&);
+	VariableList(const Link&);
 
 	// Return the list of variables we are holding.
 	const Variables& get_variables(void) const { return _varlist; }

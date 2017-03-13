@@ -29,6 +29,11 @@ using namespace opencog;
 
 void DefineLink::init()
 {
+	if (not classserver().isA(getType(), DEFINE_LINK))
+		throw SyntaxException(TRACE_INFO,
+			"Expecting a DefineLink, got %s",
+				classserver().getTypeName(getType()).c_str());
+
 	// Must have name and body
 	if (2 != _outgoing.size())
 		throw SyntaxException(TRACE_INFO,
@@ -49,19 +54,19 @@ void DefineLink::init()
 				classserver().getTypeName(dtype).c_str());
 }
 
-DefineLink::DefineLink(const HandleSeq& oset)
-	: UniqueLink(DEFINE_LINK, oset)
+DefineLink::DefineLink(const HandleSeq& oset, Type t)
+	: UniqueLink(oset, t)
 {
 	init();
 }
 
 DefineLink::DefineLink(const Handle& name, const Handle& defn)
-	: UniqueLink(DEFINE_LINK, HandleSeq({name, defn}))
+	: UniqueLink(HandleSeq({name, defn}), DEFINE_LINK)
 {
 	init();
 }
 
-DefineLink::DefineLink(Link &l)
+DefineLink::DefineLink(const Link &l)
 	: UniqueLink(l)
 {
 	init();

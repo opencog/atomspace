@@ -35,19 +35,19 @@ void StateLink::init()
 	FreeLink::init();
 }
 
-StateLink::StateLink(const HandleSeq& oset)
-	: UniqueLink(STATE_LINK, oset)
+StateLink::StateLink(const HandleSeq& oset, Type t)
+	: UniqueLink(oset, t)
 {
 	init();
 }
 
 StateLink::StateLink(const Handle& name, const Handle& defn)
-	: UniqueLink(STATE_LINK, HandleSeq({name, defn}))
+	: UniqueLink(HandleSeq({name, defn}), STATE_LINK)
 {
 	init();
 }
 
-StateLink::StateLink(Link &l)
+StateLink::StateLink(const Link &l)
 	: UniqueLink(l)
 {
 	init();

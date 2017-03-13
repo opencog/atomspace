@@ -47,7 +47,7 @@ protected:
 public:
 	DeleteLink(const HandleSeq&);
 
-	DeleteLink(Link &l);
+	DeleteLink(const Link&);
 };
 
 typedef std::shared_ptr<DeleteLink> DeleteLinkPtr;

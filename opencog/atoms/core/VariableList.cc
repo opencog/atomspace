@@ -70,30 +70,31 @@ void VariableList::validate_vardecl(const HandleSeq& oset)
 }
 
 VariableList::VariableList(const Handle& hvardecls)
-	: Link(VARIABLE_LIST,
+	: Link(
 	    // Either it is a VariableList, or its a naked variable, or
 	    // its a typed variable.
 	    hvardecls->getType() == VARIABLE_LIST ?
-	          hvardecls->getOutgoingSet() : HandleSeq({hvardecls}))
+	          hvardecls->getOutgoingSet() : HandleSeq({hvardecls}),
+	    VARIABLE_LIST)
 {
 	validate_vardecl(getOutgoingSet());
 }
 
-VariableList::VariableList(const HandleSeq& oset)
-	: Link(VARIABLE_LIST, oset)
+VariableList::VariableList(const HandleSeq& oset, Type t)
+	: Link(oset, t)
 {
-	validate_vardecl(oset);
-}
-
-VariableList::VariableList(Type t, const HandleSeq& oset)
-	: Link(t, oset)
-{
+	if (not classserver().isA(t, VARIABLE_LIST))
+	{
+		const std::string& tname = classserver().getTypeName(t);
+		throw InvalidParamException(TRACE_INFO,
+			"Expecting a VariableList, got %s", tname.c_str());
+	}
 	// derived classes have a different initialization order
 	if (VARIABLE_LIST != t) return;
 	validate_vardecl(oset);
 }
 
-VariableList::VariableList(Link &l)
+VariableList::VariableList(const Link &l)
 	: Link(l)
 {
 	// Type must be as expected

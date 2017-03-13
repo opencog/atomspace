@@ -29,8 +29,8 @@
 
 using namespace opencog;
 
-PutLink::PutLink(const HandleSeq& oset)
-    : ScopeLink(PUT_LINK, oset)
+PutLink::PutLink(const HandleSeq& oset, Type t)
+    : ScopeLink(oset, t)
 {
 	init();
 }
@@ -41,12 +41,9 @@ PutLink::PutLink(const Handle& a)
 	init();
 }
 
-PutLink::PutLink(Link& l)
+PutLink::PutLink(const Link& l)
     : ScopeLink(l)
 {
-	Type tscope = l.getType();
-	if (not classserver().isA(tscope, PUT_LINK))
-		throw InvalidParamException(TRACE_INFO, "Expecting a PutLink");
 	init();
 }
 
@@ -87,6 +84,9 @@ PutLink::PutLink(Link& l)
 ///
 void PutLink::init(void)
 {
+	if (not classserver().isA(getType(), PUT_LINK))
+		throw InvalidParamException(TRACE_INFO, "Expecting a PutLink");
+
 	size_t sz = _outgoing.size();
 	if (2 != sz and 3 != sz)
 		throw InvalidParamException(TRACE_INFO,
@@ -298,7 +298,7 @@ Handle PutLink::do_reduce(void) const
 			}
 			catch (const TypeCheckException& ex) {}
 		}
-		return Handle(createLink(SET_LINK, bset));
+		return Handle(createLink(bset, SET_LINK));
 	}
 	if (LIST_LINK == vtype)
 	{
@@ -326,7 +326,7 @@ Handle PutLink::do_reduce(void) const
 		}
 		catch (const TypeCheckException& ex) {}
 	}
-	return Handle(createLink(SET_LINK, bset));
+	return Handle(createLink(bset, SET_LINK));
 }
 
 Handle PutLink::reduce(void)

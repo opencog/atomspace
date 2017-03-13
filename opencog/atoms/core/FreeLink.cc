@@ -26,20 +26,14 @@
 
 using namespace opencog;
 
-FreeLink::FreeLink(const HandleSeq& oset)
-    : Link(FREE_LINK, oset)
-{
-	init();
-}
-
 FreeLink::FreeLink(const Handle& a)
     : Link(FREE_LINK, a)
 {
 	init();
 }
 
-FreeLink::FreeLink(Type t, const HandleSeq& oset)
-    : Link(t, oset)
+FreeLink::FreeLink(const HandleSeq& oset, Type t)
+    : Link(oset, t)
 {
 	if (not classserver().isA(t, FREE_LINK))
 		throw InvalidParamException(TRACE_INFO, "Expecting a FreeLink");
@@ -71,7 +65,7 @@ FreeLink::FreeLink(Type t, const Handle& a, const Handle& b)
 	init();
 }
 
-FreeLink::FreeLink(Link& l)
+FreeLink::FreeLink(const Link& l)
     : Link(l)
 {
 	Type tscope = l.getType();
@@ -90,20 +84,6 @@ void FreeLink::init(void)
 	_vars.find_variables(_outgoing);
 }
 
-/* ================================================================= */
-
-Handle FreeLink::factory(const Handle& h)
-{
-	if (FreeLinkCast(h)) return h;
-
-	return HandleCast(createFreeLink(h->getType(), h->getOutgoingSet()));
-}
-
-// This runs when the shared lib is loaded.  The factory
-// must get registered early, b efore anyone can do anything else.
-static __attribute__ ((constructor)) void init(void)
-{
-   classserver().addFactory(FREE_LINK, &FreeLink::factory);
-}
+DEFINE_LINK_FACTORY(FreeLink, FREE_LINK);
 
 /* ===================== END OF FILE ===================== */

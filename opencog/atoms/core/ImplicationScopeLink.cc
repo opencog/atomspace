@@ -31,18 +31,12 @@ void ImplicationScopeLink::init(void)
 }
 
 ImplicationScopeLink::ImplicationScopeLink(const HandleSeq& hseq)
-	: ScopeLink(IMPLICATION_SCOPE_LINK, hseq)
+	: ScopeLink(hseq, IMPLICATION_SCOPE_LINK)
 {
 	init();
 }
 
-ImplicationScopeLink::ImplicationScopeLink(Type t, const HandleSeq& hseq)
-	: ScopeLink(t, hseq)
-{
-	init();
-}
-
-ImplicationScopeLink::ImplicationScopeLink(Link &l)
+ImplicationScopeLink::ImplicationScopeLink(const Link &l)
 	: ScopeLink(l)
 {
 	Type t = l.getType();

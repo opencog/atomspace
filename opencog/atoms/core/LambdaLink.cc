@@ -27,27 +27,28 @@
 
 using namespace opencog;
 
-LambdaLink::LambdaLink(const HandleSeq& oset)
-	: ScopeLink(LAMBDA_LINK, oset)
-{
-}
-
 LambdaLink::LambdaLink(const Handle& vars, const Handle& body)
-	: ScopeLink(LAMBDA_LINK, HandleSeq({vars, body}))
+	: ScopeLink(HandleSeq({vars, body}), LAMBDA_LINK)
 {
 }
 
 LambdaLink::LambdaLink(Type t, const Handle& body)
-	: ScopeLink(t, HandleSeq({body}))
+	: ScopeLink(HandleSeq({body}), t)
 {
 }
 
-LambdaLink::LambdaLink(Type t, const HandleSeq& oset)
-	: ScopeLink(t, oset)
+LambdaLink::LambdaLink(const HandleSeq& oset, Type t)
+	: ScopeLink(oset, t)
 {
+	if (not classserver().isA(t, LAMBDA_LINK))
+	{
+		const std::string& tname = classserver().getTypeName(t);
+		throw SyntaxException(TRACE_INFO,
+			"Expecting a LambdaLink, got %s", tname.c_str());
+	}
 }
 
-LambdaLink::LambdaLink(Link &l)
+LambdaLink::LambdaLink(const Link &l)
 	: ScopeLink(l)
 {
 	// Type must be as expected

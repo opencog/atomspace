@@ -68,7 +68,7 @@ public:
      *        referenced by this link.
      * @param Link truthvalue.
      */
-    Link(Type t, const HandleSeq& oset)
+    Link(const HandleSeq& oset, Type t=LINK)
         : Atom(t)
     {
         init(oset);

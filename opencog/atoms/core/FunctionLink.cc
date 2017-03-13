@@ -31,8 +31,8 @@ void FunctionLink::init(void)
 	FreeLink::init();
 }
 
-FunctionLink::FunctionLink(Type t, const HandleSeq& oset)
-    : FreeLink(t, oset)
+FunctionLink::FunctionLink(const HandleSeq& oset, Type t)
+    : FreeLink(oset, t)
 {
 	if (not classserver().isA(t, FUNCTION_LINK))
 		throw InvalidParamException(TRACE_INFO, "Expecting a FunctionLink");
@@ -48,14 +48,14 @@ FunctionLink::FunctionLink(Type t, const Handle& a)
 }
 
 FunctionLink::FunctionLink(Type t, const Handle& a, const Handle& b)
-    : FreeLink(t, {a, b})
+    : FreeLink({a, b}, t)
 {
 	if (not classserver().isA(t, FUNCTION_LINK))
 		throw InvalidParamException(TRACE_INFO, "Expecting a FunctionLink");
 	init();
 }
 
-FunctionLink::FunctionLink(Link& l)
+FunctionLink::FunctionLink(const Link& l)
     : FreeLink(l)
 {
 	Type tscope = l.getType();
@@ -90,18 +90,6 @@ FunctionLinkPtr FunctionLink::castfactory(const Handle& h)
 	return FunctionLinkCast((*fact)(h));
 }
 
-Handle FunctionLink::factory(const Handle& h)
-{
-	if (FunctionLinkCast(h)) return h;
-
-	return HandleCast(createFunctionLink(h->getType(), h->getOutgoingSet()));
-}
-
-// This runs when the shared lib is loaded.  The factory
-// must get registered early, b efore anyone can do anything else.
-static __attribute__ ((constructor)) void init(void)
-{
-   classserver().addFactory(FUNCTION_LINK, &FunctionLink::factory);
-}
+DEFINE_LINK_FACTORY(FunctionLink, FUNCTION_LINK);
 
 /* ===================== END OF FILE ===================== */

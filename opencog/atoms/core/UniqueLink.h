@@ -48,13 +48,12 @@ class UniqueLink : public FreeLink
 protected:
 	void init(bool);
 	static Handle get_unique(const Handle&, Type, bool);
-	UniqueLink(Type, const HandleSeq&);
 
 public:
-	UniqueLink(const HandleSeq&);
+	UniqueLink(const HandleSeq&, Type=UNIQUE_LINK);
 	UniqueLink(const Handle& alias, const Handle& body);
 
-	UniqueLink(Link &l);
+	UniqueLink(const Link &l);
 
 	Handle get_alias(void) const { return _outgoing[0]; }
 

@@ -47,8 +47,8 @@ namespace opencog
 class ArityLink : public FunctionLink
 {
 public:
-	ArityLink(const HandleSeq&);
-	ArityLink(Link &l);
+	ArityLink(const HandleSeq&, Type = ARITY_LINK);
+	ArityLink(const Link &l);
 
 	// Return a pointer to the atom being specified.
 	virtual Handle execute(AtomSpace* = NULL) const;

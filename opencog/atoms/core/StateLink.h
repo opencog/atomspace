@@ -47,10 +47,10 @@ class StateLink : public UniqueLink
 protected:
 	void init();
 public:
-	StateLink(const HandleSeq&);
+	StateLink(const HandleSeq&, Type=STATE_LINK);
 	StateLink(const Handle& alias, const Handle& body);
 
-	StateLink(Link &l);
+	StateLink(const Link&);
 	Handle get_alias(void) const { return _outgoing[0]; }
 	Handle get_state(void) const { return _outgoing[1]; }
 

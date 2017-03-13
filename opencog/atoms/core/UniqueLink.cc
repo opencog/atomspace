@@ -59,8 +59,8 @@ void UniqueLink::init(bool allow_open)
 	}
 }
 
-UniqueLink::UniqueLink(Type type, const HandleSeq& oset)
-	: FreeLink(type, oset)
+UniqueLink::UniqueLink(const HandleSeq& oset, Type type)
+	: FreeLink(oset, type)
 {
 	if (not classserver().isA(type, UNIQUE_LINK))
 	{
@@ -74,19 +74,13 @@ UniqueLink::UniqueLink(Type type, const HandleSeq& oset)
 	init(true);
 }
 
-UniqueLink::UniqueLink(const HandleSeq& oset)
-	: FreeLink(UNIQUE_LINK, oset)
-{
-	init(true);
-}
-
 UniqueLink::UniqueLink(const Handle& name, const Handle& defn)
-	: FreeLink(UNIQUE_LINK, HandleSeq({name, defn}))
+	: FreeLink(HandleSeq({name, defn}), UNIQUE_LINK)
 {
 	init(true);
 }
 
-UniqueLink::UniqueLink(Link &l)
+UniqueLink::UniqueLink(const Link &l)
 	: FreeLink(l)
 {
 	// Type must be as expected

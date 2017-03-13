@@ -61,9 +61,6 @@ protected:
 
 	ScopeLink(Type, const Handle&);
 
-public:
-	// XXX Need to make this public, so that the factory can call it!
-	ScopeLink(Type, const HandleSeq&);
 protected:
 	void init(void);
 	void extract_variables(const HandleSeq& oset);
@@ -75,9 +72,9 @@ protected:
 	virtual ContentHash compute_hash() const;
 
 public:
-	ScopeLink(const HandleSeq&);
+	ScopeLink(const HandleSeq&, Type=SCOPE_LINK);
 	ScopeLink(const Handle& varcdecls, const Handle& body);
-	ScopeLink(Link &l);
+	ScopeLink(const Link &l);
 
 	// Return the list of variables we are holding.
 	const Variables& get_variables(void) const { return _varlist; }

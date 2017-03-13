@@ -37,8 +37,8 @@ namespace opencog
 class TimeLink : public FunctionLink
 {
 public:
-	TimeLink(const HandleSeq&);
-	TimeLink(Link &l);
+	TimeLink(const HandleSeq&, Type=TIME_LINK);
+	TimeLink(const Link&);
 
 	// Return a pointer to the atom being specified.
 	virtual Handle execute(AtomSpace* = NULL) const;

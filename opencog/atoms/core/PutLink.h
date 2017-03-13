@@ -59,9 +59,9 @@ protected:
 	Handle do_reduce(void) const;
 
 public:
-	PutLink(const HandleSeq& oset);
+	PutLink(const HandleSeq& oset, Type=PUT_LINK);
 	PutLink(const Handle& a);
-	PutLink(Link& l);
+	PutLink(const Link& l);
 	virtual ~PutLink() {}
 
 	// PutLink values may be e second or the third outset elt.
