@@ -83,41 +83,10 @@ public:
 
     ContentHash value(void) const;
 
-#if 0
-    inline Handle& operator=(const Handle& h) {
-        this->_ptr = h._ptr;
-        return *this;
-    }
-#endif
-
     inline Handle& operator=(const AtomPtr& a) {
         this->AtomPtr::operator=(a);
         return *this;
     }
-
-#if 0
-    inline Atom* operator->() {
-        return _ptr.get();
-    }
-
-    inline Atom* operator->() const {
-        return _ptr.get();
-    }
-
-#ifdef INLINE_POINTER_CHASING
-    Handle& operator=(const AtomPtr& a) {
-        this->_ptr = std::dynamic_pointer_cast<Atom>(a);
-        return *this;
-    }
-#endif
-
-    operator AtomPtr() const {
-        return _ptr;
-    }
-    operator AtomPtr() {
-        return _ptr;
-    }
-#endif
 
     // Cython can't access operator->() so we'll duplicate here.
     inline Atom* atom_ptr() {
@@ -126,18 +95,6 @@ public:
 
     inline const Atom* const_atom_ptr() const {
         return get();
-    }
-
-	//! To be deprecated. You may use implicit bool conversion
-	//! instead. See bool() below.
-    inline bool is_defined() const {
-        return *this != Handle::UNDEFINED;
-    }
-
-	//! To be deprecated. You may use implicit bool conversion
-	//! instead. See bool() below.
-    inline bool is_undefined() const {
-        return *this == Handle::UNDEFINED;
     }
 
     // Allows expressions like "if(h)..." to work when h has a non-null pointer.

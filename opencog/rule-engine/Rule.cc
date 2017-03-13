@@ -209,7 +209,7 @@ bool Rule::is_meta() const
 {
 	Handle implicand = get_implicand();
 
-	if (implicand.is_undefined())
+	if (implicand)
 		return false;
 
 	Type itype = implicand->getType();
