@@ -55,7 +55,6 @@ protected:
 	void init(void);
 
 	MapLink(Type, const Handle&);
-	MapLink(Type, const HandleSeq&);
 
 	bool extract(const Handle&, const Handle&,
 	             HandleMap&,
@@ -64,9 +63,9 @@ protected:
 	Handle rewrite_one(const Handle&, AtomSpace*) const;
 
 public:
-	MapLink(const HandleSeq&);
+	MapLink(const HandleSeq&, Type=MAP_LINK);
 	MapLink(const Handle& pattern, const Handle& term);
-	MapLink(Link &l);
+	MapLink(const Link &l);
 
 	// Align the pattern and the term side-by-side, and extract the
 	// values that match up with the variables.  If the term is not of

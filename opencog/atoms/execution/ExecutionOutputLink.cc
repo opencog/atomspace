@@ -43,9 +43,13 @@ public:
     static void* getFunc(std::string libName,std::string funcName);
 };
 
-ExecutionOutputLink::ExecutionOutputLink(const HandleSeq& oset)
-	: FunctionLink(EXECUTION_OUTPUT_LINK, oset)
+ExecutionOutputLink::ExecutionOutputLink(const HandleSeq& oset, Type t)
+	: FunctionLink(oset, t)
 {
+	if (EXECUTION_OUTPUT_LINK != t)
+		throw SyntaxException(TRACE_INFO,
+			"Expection an ExecutionOutputLink!");
+
 	if (2 != oset.size())
 		throw SyntaxException(TRACE_INFO,
 			"ExecutionOutputLink must have schema and args! Got arity=%d",
@@ -76,7 +80,7 @@ ExecutionOutputLink::ExecutionOutputLink(const Handle& schema,
 	}
 }
 
-ExecutionOutputLink::ExecutionOutputLink(Link& l)
+ExecutionOutputLink::ExecutionOutputLink(const Link& l)
 	: FunctionLink(l)
 {
 	Type tscope = l.getType();

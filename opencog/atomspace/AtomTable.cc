@@ -264,7 +264,7 @@ Handle AtomTable::getNodeHandle(const AtomPtr& orig) const
 
 Handle AtomTable::getHandle(Type t, const HandleSeq& seq) const
 {
-    AtomPtr a(createLink(t, seq));
+    AtomPtr a(createLink(seq, t));
     return getLinkHandle(a);
 }
 
@@ -290,7 +290,7 @@ Handle AtomTable::getLinkHandle(const AtomPtr& orig, Quotation quotation) const
         resolved_seq.emplace_back(rh);
     }
 
-    a = createLink(t, resolved_seq);
+    a = createLink(resolved_seq, t);
 
     // Start searching to see if we have this atom.
     ContentHash ch = a->get_hash();
@@ -444,7 +444,7 @@ Handle AtomTable::add(AtomPtr atom, bool async)
             if (nullptr == h.operator->()) return Handle::UNDEFINED;
             closet.emplace_back(add(h, async));
         }
-        atom = createLink(atom_type, closet);
+        atom = createLink(closet, atom_type);
         atom = clone_factory(atom_type, atom);
     }
 

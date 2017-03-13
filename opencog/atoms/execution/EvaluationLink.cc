@@ -42,9 +42,13 @@
 
 using namespace opencog;
 
-EvaluationLink::EvaluationLink(const HandleSeq& oset)
-    : FreeLink(EVALUATION_LINK, oset)
+EvaluationLink::EvaluationLink(const HandleSeq& oset, Type t)
+    : FreeLink(oset, t)
 {
+	if (EVALUATION_LINK != t)
+		throw RuntimeException(TRACE_INFO,
+		    "Expecting an EvaluationLink");
+
 	// The "canonical" EvaluationLink structure is:
 	//    EvaluationLink
 	//        PredicateNode "foo"
@@ -83,14 +87,13 @@ EvaluationLink::EvaluationLink(const Handle& schema, const Handle& args)
 	}
 }
 
-EvaluationLink::EvaluationLink(Link& l)
+EvaluationLink::EvaluationLink(const Link& l)
     : FreeLink(l)
 {
 	Type tscope = l.getType();
-	if (EVALUATION_LINK != tscope) {
+	if (EVALUATION_LINK != tscope)
 		throw RuntimeException(TRACE_INFO,
 		    "Expecting an EvaluationLink");
-	}
 }
 
 // Pattern matching hack. The pattern matcher returns sets of atoms;

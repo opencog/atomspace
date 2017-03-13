@@ -283,7 +283,7 @@ bool PatternMatchEngine::ordered_compare(const PatternTermPtr& ptm,
 				}
 
 				// If we are here, we've got a match; record the glob.
-				LinkPtr glp(createLink(LIST_LINK, glob_seq));
+				LinkPtr glp(createLink(glob_seq, LIST_LINK));
 				var_grounding[glob->getHandle()] = glp->getHandle();
 			}
 			else

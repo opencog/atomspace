@@ -292,7 +292,7 @@ Handle AtomSpace::add_link(Type t, const HandleSeq& outgoing, bool async)
     // If it is a DeleteLink, then the addition will fail. Deal with it.
     Handle rh;
     try {
-        rh = _atom_table.add(createLink(t, outgoing), async);
+        rh = _atom_table.add(createLink(outgoing, t), async);
     }
     catch (const DeleteException& ex) {
         // Atom deletion has not been implemented in the backing store

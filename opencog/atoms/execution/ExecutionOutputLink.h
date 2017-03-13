@@ -50,9 +50,9 @@ private:
 	                         std::string& lib,
 	                         std::string& fun);;
 public:
-	ExecutionOutputLink(const HandleSeq& oset);
+	ExecutionOutputLink(const HandleSeq&, Type=EXECUTION_OUTPUT_LINK);
 	ExecutionOutputLink(const Handle& schema, const Handle& args);
-	ExecutionOutputLink(Link& l);
+	ExecutionOutputLink(const Link& l);
 
 	virtual Handle execute(AtomSpace* = NULL) const;
 

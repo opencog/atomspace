@@ -36,9 +36,9 @@ class AtomSpace;
 class EvaluationLink : public FreeLink
 {
 public:
-	EvaluationLink(const HandleSeq& oset);
+	EvaluationLink(const HandleSeq&, Type=EVALUATION_LINK);
 	EvaluationLink(const Handle& schema, const Handle& args);
-	EvaluationLink(Link& l);
+	EvaluationLink(const Link& l);
 
 	TruthValuePtr evaluate(AtomSpace* as) {
 	    return do_evaluate(as, getHandle());
