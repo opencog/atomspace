@@ -36,7 +36,7 @@ class ConcreteAtom : public Link
 {
 
 public:
-    ConcreteAtom(Type t, const HandleSeq& o) : Link(t, o) {}
+    ConcreteAtom(Type t, const HandleSeq& o) : Link(o, t) {}
 };
 
 class AtomUTest :  public CxxTest::TestSuite

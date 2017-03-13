@@ -189,7 +189,7 @@ void DisconnectedUTest::test_cvariables(void)
 		Handle blb(createLink(AND_LINK, va));
 		Handle blt(createLink(LIST_LINK, va));
 		HandleSeq bll = {blv, blb, blt};
-		Handle bl_final(createLink(BIND_LINK, bll));
+		Handle bl_final(createLink(bll, BIND_LINK));
 		as->add_atom(bl_final);
 	}
 	catch (const InvalidParamException& ex)
