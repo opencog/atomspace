@@ -135,11 +135,6 @@ protected:
 	void common_init(void);
 	void setup_components(void);
 
-public:
-	// XXX the factory needs to call thus, and thus needs to be public!
-	// Only derived classes can call this
-	PatternLink(Type, const HandleSeq&);
-
 protected:
 	// utility debug print
 	static void prt(const Handle& h)
@@ -148,12 +143,11 @@ protected:
 	}
 
 public:
-	PatternLink(const HandleSeq&);
+	PatternLink(const HandleSeq&, Type=PATTERN_LINK);
 	PatternLink(const Handle& body);
 	PatternLink(const Handle& varcdecls, const Handle& body);
 	PatternLink(const Variables&, const Handle&);
-
-	PatternLink(Link &l);
+	PatternLink(const Link &l);
 
 	// Used only to set up multi-component links.
 	// DO NOT call this! (unless you are the component handler).

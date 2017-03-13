@@ -33,11 +33,9 @@ class DualLink : public PatternLink
 {
 protected:
 	void init(void);
-	DualLink(Type, const HandleSeq&);
-
 public:
-	DualLink(const HandleSeq&);
-	DualLink(Link &l);
+	DualLink(const HandleSeq&, Type=DUAL_LINK);
+	DualLink(const Link &l);
 
 	static Handle factory(const Handle&);
 };

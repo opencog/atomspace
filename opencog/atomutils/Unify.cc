@@ -317,7 +317,7 @@ Handle Unify::consume_ill_quotations(const Variables& variables, Handle h,
 		consumed.push_back(consume_ill_quotations(variables, outh, quotation,
 		                                          escape));
 
-	return classserver().factory(Handle(createLink(t, consumed)));
+	return classserver().factory(Handle(createLink(consumed, t)));
 }
 
 bool Unify::is_bound_to_ancestor(const Variables& variables,

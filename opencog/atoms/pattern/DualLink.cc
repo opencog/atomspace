@@ -30,6 +30,14 @@ using namespace opencog;
 
 void DualLink::init(void)
 {
+	Type t = getType();
+	if (not classserver().isA(t, DUAL_LINK))
+	{
+		const std::string& tname = classserver().getTypeName(t);
+		throw InvalidParamException(TRACE_INFO,
+			"Expecting a DualLink, got %s", tname.c_str());
+	}
+
 	_pat.redex_name = "anonymous DualLink";
 
 	_num_virts = 1;
@@ -55,29 +63,15 @@ void DualLink::init(void)
 	make_term_trees();
 }
 
-DualLink::DualLink(const HandleSeq& hseq)
-	: PatternLink(DUAL_LINK, hseq)
+DualLink::DualLink(const HandleSeq& hseq, Type t)
+	: PatternLink(hseq, t)
 {
 	init();
 }
 
-DualLink::DualLink(Type t, const HandleSeq& hseq)
-	: PatternLink(t, hseq)
-{
-	init();
-}
-
-DualLink::DualLink(Link &l)
+DualLink::DualLink(const Link &l)
 	: PatternLink(l)
 {
-	Type t = l.getType();
-	if (not classserver().isA(t, DUAL_LINK))
-	{
-		const std::string& tname = classserver().getTypeName(t);
-		throw InvalidParamException(TRACE_INFO,
-			"Expecting a DualLink, got %s", tname.c_str());
-	}
-
 	init();
 }
 

@@ -42,13 +42,11 @@ protected:
 	// will initialize the rewrite term _implicand.
 	void extract_variables(const HandleSeq& oset);
 
-	BindLink(Type, const HandleSeq&);
-
 public:
-	BindLink(const HandleSeq&);
+	BindLink(const HandleSeq&, Type=BIND_LINK);
 	BindLink(const Handle& vardecl, const Handle& body, const Handle& rewrite);
 	BindLink(const Handle& body, const Handle& rewrite);
-	explicit BindLink(Link &l);
+	explicit BindLink(const Link &l);
 
 	bool imply(PatternMatchCallback&, bool check_connectivity=true);
 	const Handle& get_implicand(void) { return _implicand; }

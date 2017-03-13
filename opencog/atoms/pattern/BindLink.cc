@@ -31,17 +31,19 @@ using namespace opencog;
 
 void BindLink::init(void)
 {
+	Type t = getType();
+	if (not classserver().isA(t, BIND_LINK))
+	{
+		const std::string& tname = classserver().getTypeName(t);
+		throw InvalidParamException(TRACE_INFO,
+			"Expecting a BindLink, got %s", tname.c_str());
+	}
+
 	extract_variables(_outgoing);
 	unbundle_clauses(_body);
 	common_init();
 	setup_components();
 	_pat.redex_name = "anonymous BindLink";
-}
-
-BindLink::BindLink(const HandleSeq& hseq)
-	: PatternLink(BIND_LINK, hseq)
-{
-	init();
 }
 
 BindLink::BindLink(const Handle& vardecl,
@@ -54,23 +56,15 @@ BindLink::BindLink(const Handle& body, const Handle& rewrite)
 	: BindLink(HandleSeq{body, rewrite})
 {}
 
-BindLink::BindLink(Type t, const HandleSeq& hseq)
-	: PatternLink(t, hseq)
+BindLink::BindLink(const HandleSeq& hseq, Type t)
+	: PatternLink(hseq, t)
 {
 	init();
 }
 
-BindLink::BindLink(Link &l)
+BindLink::BindLink(const Link &l)
 	: PatternLink(l)
 {
-	Type t = l.getType();
-	if (not classserver().isA(t, BIND_LINK))
-	{
-		const std::string& tname = classserver().getTypeName(t);
-		throw InvalidParamException(TRACE_INFO,
-			"Expecting a BindLink, got %s", tname.c_str());
-	}
-
 	init();
 }
 
