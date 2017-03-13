@@ -1345,8 +1345,7 @@ bool PatternMatchEngine::do_next_clause(void)
 
 		clause_accepted = false;
 		Handle hgnd = var_grounding[joiner];
-		OC_ASSERT(hgnd != (Atom*) nullptr,
-			"Error: joining handle has not been grounded yet!");
+		OC_ASSERT(hgnd, "Error: joining handle has not been grounded yet!");
 		found = explore_clause(joiner, hgnd, curr_root);
 
 		// If we are here, and found is false, then we've exhausted all
@@ -1748,8 +1747,7 @@ bool PatternMatchEngine::explore_redex(const Handle& term,
                                        const Handle& grnd,
                                        const Handle& first_clause)
 {
-	if (term == (Atom*) nullptr)
-		return false;
+	if (not term) return false;
 
 	// Cleanup
 	clear_current_state();
@@ -1895,7 +1893,7 @@ void PatternMatchEngine::log_solution(
 		Type vtype = var->getType();
 		if (VARIABLE_NODE != vtype and GLOB_NODE != vtype) continue;
 
-		if (soln == (Atom*) nullptr)
+		if (not soln)
 		{
 			logger().fine("ERROR: ungrounded variable %s\n",
 			              var->toShortString().c_str());
@@ -1913,7 +1911,7 @@ void PatternMatchEngine::log_solution(
 	int i = 0;
 	for (m = clauses.begin(); m != clauses.end(); ++m, ++i)
 	{
-		if (m->second == (Atom*) nullptr)
+		if (not m->second)
 		{
 			Handle mf(m->first);
 			logmsg("ERROR: ungrounded clause", mf);

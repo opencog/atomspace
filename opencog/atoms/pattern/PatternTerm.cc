@@ -134,7 +134,7 @@ std::string PatternTerm::toString() const { return toString(":"); }
 
 std::string PatternTerm::toString(std::string indent) const
 {
-	if (_handle == (Atom*) nullptr) return "-";
+	if (not _handle) return "-";
 	std::string str = _parent->toString();
 	str += indent + std::to_string(_handle.value());
 	return str;

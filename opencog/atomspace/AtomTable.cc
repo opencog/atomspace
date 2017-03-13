@@ -286,7 +286,7 @@ Handle AtomTable::getLinkHandle(const AtomPtr& orig, Quotation quotation) const
     for (const Handle& ho : seq) {
         AtomPtr ao(ho);
         Handle rh(getHandle(ao, quotation));
-        if (rh == (Atom*) nullptr) return Handle::UNDEFINED;
+        if (not rh) return Handle::UNDEFINED;
         resolved_seq.emplace_back(rh);
     }
 

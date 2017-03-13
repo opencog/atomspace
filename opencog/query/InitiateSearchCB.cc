@@ -269,7 +269,7 @@ Handle InitiateSearchCB::find_thinnest(const HandleSeq& clauses,
 		size_t width = SIZE_MAX;
 		Handle term(Handle::UNDEFINED);
 		Handle start(find_starter(h, depth, term, width));
-		if (start != (Atom*) nullptr
+		if (start
 		    and (width < thinnest
 		         or (width == thinnest and depth > deepest)))
 		{
