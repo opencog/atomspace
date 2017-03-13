@@ -232,7 +232,7 @@ class SQLAtomStorage::Response
 				AtomPtr ra = get_recursive_if_not_exists(po);
 				resolved_oset.emplace_back(ra->getHandle());
 			}
-			LinkPtr link(createLink(p->type, resolved_oset));
+			LinkPtr link(createLink(resolved_oset, p->type));
 			store->_tlbuf.addAtom(link, p->uuid);
 			return link;
 		}
@@ -1589,7 +1589,7 @@ Handle SQLAtomStorage::getNode(Type t, const char * str)
 Handle SQLAtomStorage::doGetLink(Type t, const HandleSeq& hseq)
 {
 	// First, check to see if we already know this Link.
-	Handle link(createLink(t, hseq));
+	Handle link(createLink(hseq, t));
 	UUID uuid = _tlbuf.getUUID(link);
 	if (TLB::INVALID_UUID != uuid)
 		return _tlbuf.getAtom(uuid);

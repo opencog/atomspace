@@ -170,7 +170,7 @@ void AtomSpaceBenchmark::printTypeSizes()
          << estimateOfAtomSize(h) << endl;
 
     HandleSeq empty;
-    h = Handle(createLink(LIST_LINK, empty));
+    h = Handle(createLink(empty, LIST_LINK));
     cout << "Empty ListLink = " << estimateOfAtomSize(h) << endl;
 
     Handle na = ND(CONCEPT_NODE, "first atom");
@@ -791,7 +791,7 @@ clock_t AtomSpaceBenchmark::makeRandomLinks()
     case BENCH_TABLE: {
         clock_t tAddLinkStart = clock();
         for (unsigned int i=0; i<Nclock; i++)
-            atab->add(createLink(ta[i], og[i]), false);
+            atab->add(createLink(og[i], ta[i]), false);
         return clock() - tAddLinkStart;
     }
     case BENCH_AS: {

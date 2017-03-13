@@ -453,7 +453,7 @@ Handle Rule::standardize_helper(AtomSpace* as, const Handle& h,
 		for (auto ho : old_outgoing)
 			new_outgoing.push_back(standardize_helper(as, ho, dict));
 
-		Handle hcpy(as->add_atom(createLink(h->getType(), new_outgoing)));
+		Handle hcpy(as->add_atom(createLink(new_outgoing, h->getType())));
 		hcpy->copyValues(h);
 		return hcpy;
 	}
