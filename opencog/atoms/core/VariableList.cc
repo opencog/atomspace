@@ -58,9 +58,13 @@ void VariableList::validate_vardecl(const HandleSeq& oset)
 			return;
 		}
 		else
+		{
 			throw InvalidParamException(TRACE_INFO,
-				"Expected a VariableNode or a TypedVariableLink, got: %s",
-					classserver().getTypeName(t).c_str());
+				"Expected a VariableNode or a TypedVariableLink, got: %s"
+				"\nVariableList is %s",
+					classserver().getTypeName(t).c_str(),
+					toString().c_str());
+		}
 	}
 	build_index();
 }

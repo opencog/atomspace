@@ -341,8 +341,7 @@ Handle Instantiator::walk_tree(const Handle& expr)
 			// function itself.
 			HandleSeq oset_results;
 			walk_sequence(oset_results, expr->getOutgoingSet());
-			auto fact = classserver().getFactory(t);
-			Handle fh((*fact)(Handle(createLink(t, oset_results))));
+			Handle fh(classserver().factory(Handle(createLink(t, oset_results))));
 			FoldLinkPtr flp(FoldLinkCast(fh));
 			return flp->execute(_as);
 		}
@@ -372,9 +371,8 @@ Handle Instantiator::walk_tree(const Handle& expr)
 			HandleSeq oset_results;
 			walk_sequence(oset_results, expr->getOutgoingSet());
 
-			auto fact = classserver().getFactory(t);
 			FunctionLinkPtr flp(FunctionLinkCast(
-				(*fact)(Handle(createLink(t, oset_results)))));
+				classserver().factory(Handle(createLink(t, oset_results)))));
 			return flp->execute(_as);
 		}
 		else
@@ -428,7 +426,8 @@ mere_recursive_call:
 	bool changed = walk_sequence(oset_results, expr->getOutgoingSet());
 	if (changed)
 	{
-		LinkPtr subl = createLink(t, oset_results, expr->getTruthValue());
+		LinkPtr subl = createLink(t, oset_results);
+		subl->copyValues(expr);
 		return Handle(_as->add_atom(subl));
 	}
 	return expr;
