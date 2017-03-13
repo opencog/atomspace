@@ -259,7 +259,6 @@ Handle CNAME::factory(const Handle& base)                         \
 {                                                                 \
    if (CNAME##Cast(base)) return base;                            \
    Handle h(create##CNAME(base->getOutgoingSet()));               \
-   h->copyValues(base);                                           \
    return h;                                                      \
 }                                                                 \
                                                                   \

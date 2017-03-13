@@ -71,16 +71,14 @@ public:
      *        referenced by this link.
      * @param Link truthvalue.
      */
-    Link(Type t, const HandleSeq& oset,
-         TruthValuePtr tv = TruthValue::DEFAULT_TV())
-        : Atom(t, tv)
+    Link(Type t, const HandleSeq& oset)
+        : Atom(t)
     {
         init(oset);
     }
 
-    Link(Type t, const Handle& h,
-         TruthValuePtr tv = TruthValue::DEFAULT_TV())
-        : Atom(t, tv)
+    Link(Type t, const Handle& h)
+        : Atom(t)
     {
         // reserve+assign is 2x faster than push_back()/emplace_back()
         HandleSeq oset(1);
@@ -88,9 +86,8 @@ public:
         init(oset);
     }
 
-    Link(Type t, const Handle& ha, const Handle &hb,
-         TruthValuePtr tv = TruthValue::DEFAULT_TV())
-        : Atom(t, tv)
+    Link(Type t, const Handle& ha, const Handle &hb)
+        : Atom(t)
     {
         // reserve+assign is 2x faster than push_back()/emplace_back()
         HandleSeq oset(2);
@@ -99,9 +96,8 @@ public:
         init(oset);
     }
 
-    Link(Type t, const Handle& ha, const Handle &hb, const Handle &hc,
-         TruthValuePtr tv = TruthValue::DEFAULT_TV())
-        : Atom(t, tv)
+    Link(Type t, const Handle& ha, const Handle &hb, const Handle &hc)
+        : Atom(t)
     {
         // reserve+assign is 2x faster than push_back()/emplace_back()
         HandleSeq oset(3);
@@ -111,9 +107,8 @@ public:
         init(oset);
     }
     Link(Type t, const Handle& ha, const Handle &hb,
-	      const Handle &hc, const Handle &hd,
-         TruthValuePtr tv = TruthValue::DEFAULT_TV())
-        : Atom(t, tv)
+	      const Handle &hc, const Handle &hd)
+        : Atom(t)
     {
         // reserve+assign is 2x faster than push_back()/emplace_back()
         HandleSeq oset(4);
@@ -125,11 +120,11 @@ public:
     }
 
     /**
-     * Copy constructor, does NOT copy atom table membership!
-     * Cannot be const, because the get() functions can't be,
-     * because thread-safe locking required in the gets. */
+     * Copy constructor, does NOT copy atomspace membership,
+     * or any of the values or truth values.
+     */
     Link(Link &l)
-        : Atom(l.getType(), l.getTruthValue())
+        : Atom(l.getType())
     {
         init(l.getOutgoingSet());
     }
