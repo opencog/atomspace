@@ -1344,8 +1344,8 @@ bool PatternMatchEngine::do_next_clause(void)
 		// else the join is a 'real' atom.
 
 		clause_accepted = false;
-		Handle hgnd = var_grounding[joiner];
-		OC_ASSERT(hgnd, "Error: joining handle has not been grounded yet!");
+		Handle hgnd(var_grounding[joiner]);
+		OC_ASSERT(nullptr != hgnd, "Error: joining handle has not been grounded yet!");
 		found = explore_clause(joiner, hgnd, curr_root);
 
 		// If we are here, and found is false, then we've exhausted all

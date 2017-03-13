@@ -428,7 +428,7 @@ mere_recursive_call:
 	{
 		LinkPtr subl = createLink(oset_results, t);
 		subl->copyValues(expr);
-		return Handle(_as->add_atom(subl));
+		return _as->add_atom(subl);
 	}
 	return expr;
 }

@@ -284,8 +284,7 @@ Handle AtomTable::getLinkHandle(const AtomPtr& orig, Quotation quotation) const
     // The other troublemaker is any ScopeLink.
     HandleSeq resolved_seq;
     for (const Handle& ho : seq) {
-        AtomPtr ao(ho);
-        Handle rh(getHandle(ao, quotation));
+        Handle rh(getHandle(ho, quotation));
         if (not rh) return Handle::UNDEFINED;
         resolved_seq.emplace_back(rh);
     }

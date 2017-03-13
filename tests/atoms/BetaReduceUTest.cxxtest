@@ -80,7 +80,7 @@ void BetaReduceUTest::test_unquote()
 	// Perform beta reduction
 	const Variables& vars = scox->get_variables();
 	Handle redox = vars.substitute(body, vals);
-	TS_ASSERT(redox != nullptr);
+	TS_ASSERT(nullptr != redox);
 
 	redox = _as.add_atom(redox);
 	printf("reduced set=%s\n", redox->toString().c_str());
@@ -152,7 +152,7 @@ void BetaReduceUTest::test_alpha_hiding()
 	const Variables& vars = scoxy->get_variables();
 	Handle redox = vars.substitute(xybody, vals);
 	redox = _as.add_atom(redox);
-	TS_ASSERT(redox != nullptr);
+	TS_ASSERT(nullptr != redox);
 
 	printf("reduced set=%s\n", redox->toString().c_str());
 

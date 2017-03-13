@@ -78,7 +78,6 @@ public:
 
     explicit Handle(const AtomPtr& atom) : AtomPtr(atom) {}
     explicit Handle() {}
-    // Handle(const Handle& h) : _ptr(h._ptr) {}
     ~Handle() {}
 
     ContentHash value(void) const;
