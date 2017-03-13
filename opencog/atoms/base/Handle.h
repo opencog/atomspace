@@ -59,7 +59,7 @@ class Atom;
 typedef std::shared_ptr<Atom> AtomPtr;
 
 //! contains an unique identificator
-class Handle
+class Handle : public AtomPtr
 {
 
 friend class Atom;
@@ -67,8 +67,6 @@ friend class content_based_atom_ptr_less;
 friend class content_based_handle_less;
 
 private:
-    AtomPtr _ptr;
-
     static bool atoms_less(const Atom*, const Atom*);
     static bool content_based_atoms_less(const Atom*, const Atom*);
 
@@ -78,23 +76,26 @@ public:
     static const ContentHash INVALID_HASH = std::numeric_limits<size_t>::max();
     static const Handle UNDEFINED;
 
-    explicit Handle(const AtomPtr& atom) : _ptr(atom) {}
+    explicit Handle(const AtomPtr& atom) : AtomPtr(atom) {}
     explicit Handle() {}
-    Handle(const Handle& h) : _ptr(h._ptr) {}
+    // Handle(const Handle& h) : _ptr(h._ptr) {}
     ~Handle() {}
 
     ContentHash value(void) const;
 
+#if 0
     inline Handle& operator=(const Handle& h) {
         this->_ptr = h._ptr;
         return *this;
     }
+#endif
 
     inline Handle& operator=(const AtomPtr& a) {
-        this->_ptr = a;
+        this->AtomPtr::operator=(a);
         return *this;
     }
 
+#if 0
     inline Atom* operator->() {
         return _ptr.get();
     }
@@ -116,14 +117,15 @@ public:
     operator AtomPtr() {
         return _ptr;
     }
+#endif
 
     // Cython can't access operator->() so we'll duplicate here.
     inline Atom* atom_ptr() {
-        return _ptr.get();
+        return get();
     }
 
     inline const Atom* const_atom_ptr() const {
-        return _ptr.get();
+        return get();
     }
 
 	//! To be deprecated. You may use implicit bool conversion
@@ -140,22 +142,22 @@ public:
 
     // Allows expressions like "if(h)..." to work when h has a non-null pointer.
     explicit inline operator bool() const noexcept {
-        if (_ptr.get()) return true;
+        if (get()) return true;
         return false;
     }
 
     inline bool operator==(const Atom* ap) const noexcept {
-        return _ptr.get() == ap;
+        return get() == ap;
     }
     inline bool operator!=(const Atom* ap) const noexcept {
-        return _ptr.get() != ap;
+        return get() != ap;
     }
 
     inline bool operator==(const Handle& h) const noexcept {
-        return _ptr.get() == h._ptr.get();
+        return get() == h.get();
     }
     inline bool operator!=(const Handle& h) const noexcept {
-        return _ptr.get() != h._ptr.get();
+        return get() != h.get();
     }
     bool operator< (const Handle& h) const noexcept;
     bool operator> (const Handle& h) const noexcept;
@@ -179,10 +181,10 @@ public:
 };
 
 static inline bool operator== (std::nullptr_t, const Handle& rhs) noexcept
-    { return rhs == nullptr; }
+    { return rhs == (Atom*) nullptr; }
 
 static inline bool operator!= (std::nullptr_t, const Handle& rhs) noexcept
-    { return rhs != nullptr; }
+    { return rhs != (Atom*) nullptr; }
 
 bool content_eq(const opencog::Handle& lh,
                 const opencog::Handle& rh) noexcept;

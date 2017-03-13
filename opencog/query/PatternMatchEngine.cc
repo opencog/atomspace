@@ -67,7 +67,7 @@ static inline void log(const Handle& h)
 static inline void logmsg(const char * msg, const Handle& h)
 {
 	LAZY_LOG_FINE << msg << std::endl
-	              << (h == nullptr ?
+	              << (h == (Atom*) nullptr ?
 	                  std::string("(invalid handle)") :
 	                  h->toShortString());
 }
@@ -1345,7 +1345,7 @@ bool PatternMatchEngine::do_next_clause(void)
 
 		clause_accepted = false;
 		Handle hgnd = var_grounding[joiner];
-		OC_ASSERT(hgnd != nullptr,
+		OC_ASSERT(hgnd != (Atom*) nullptr,
 			"Error: joining handle has not been grounded yet!");
 		found = explore_clause(joiner, hgnd, curr_root);
 
@@ -1748,7 +1748,7 @@ bool PatternMatchEngine::explore_redex(const Handle& term,
                                        const Handle& grnd,
                                        const Handle& first_clause)
 {
-	if (term == nullptr)
+	if (term == (Atom*) nullptr)
 		return false;
 
 	// Cleanup
@@ -1895,7 +1895,7 @@ void PatternMatchEngine::log_solution(
 		Type vtype = var->getType();
 		if (VARIABLE_NODE != vtype and GLOB_NODE != vtype) continue;
 
-		if (soln == nullptr)
+		if (soln == (Atom*) nullptr)
 		{
 			logger().fine("ERROR: ungrounded variable %s\n",
 			              var->toShortString().c_str());
@@ -1913,7 +1913,7 @@ void PatternMatchEngine::log_solution(
 	int i = 0;
 	for (m = clauses.begin(); m != clauses.end(); ++m, ++i)
 	{
-		if (m->second == nullptr)
+		if (m->second == (Atom*) nullptr)
 		{
 			Handle mf(m->first);
 			logmsg("ERROR: ungrounded clause", mf);
