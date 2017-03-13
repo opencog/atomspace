@@ -453,8 +453,9 @@ Handle Rule::standardize_helper(AtomSpace* as, const Handle& h,
 		for (auto ho : old_outgoing)
 			new_outgoing.push_back(standardize_helper(as, ho, dict));
 
-		return as->add_atom(createLink(h->getType(), new_outgoing,
-		                               h->getTruthValue()));
+		Handle hcpy(as->add_atom(createLink(h->getType(), new_outgoing)));
+		hcpy->copyValues(h);
+		return hcpy;
 	}
 
 	// normal node does not need to be changed
@@ -469,11 +470,11 @@ Handle Rule::standardize_helper(AtomSpace* as, const Handle& h,
 		// TODO: use opencog's random generator
 		std::string new_name = h->getName() + "-"
 			+ boost::uuids::to_string(boost::uuids::random_generator()());
-		Handle hcpy = as->add_atom(createNode(h->getType(), new_name,
-		                                      h->getTruthValue()));
+
+		Handle hcpy(as->add_atom(createNode(h->getType(), new_name)));
+		hcpy->copyValues(h);
 
 		dict[h] = hcpy;
-
 		return hcpy;
 	}
 
@@ -482,11 +483,10 @@ Handle Rule::standardize_helper(AtomSpace* as, const Handle& h,
 		return dict[h];
 
 	std::string new_name = h->getName() + "-" + _name;
-	Handle hcpy = as->add_atom(createNode(h->getType(), new_name,
-	                                      h->getTruthValue()));
+	Handle hcpy(as->add_atom(createNode(h->getType(), new_name)));
+	hcpy->copyValues(h);
 
 	dict[h] = hcpy;
-
 	return hcpy;
 }
 
