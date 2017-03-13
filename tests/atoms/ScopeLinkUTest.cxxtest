@@ -1,0 +1,92 @@
+/*
+ * tests/atoms/ScopeLinkUTest.cxxtest
+ *
+ * Copyright (C) 2017 OpenCog Foundation
+ * All Rights Reserved
+ *
+ * This program is free software; you can redistribute it and/or modify
+ * it under the terms of the GNU Affero General Public License v3 as
+ * published by the Free Software Foundation and including the exceptions
+ * at http://opencog.org/wiki/Licenses
+ *
+ * This program is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ * GNU General Public License for more details.
+ *
+ * You should have received a copy of the GNU Affero General Public License
+ * along with this program; if not, write to:
+ * Free Software Foundation, Inc.,
+ * 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
+ */
+
+#include <opencog/guile/SchemeEval.h>
+#include <opencog/atoms/base/Atom.h>
+#include <opencog/atomspace/AtomSpace.h>
+#include <opencog/atoms/core/ScopeLink.h>
+
+#include <cxxtest/TestSuite.h>
+
+using namespace opencog;
+
+#define al _as.add_link
+#define an _as.add_node
+
+// Test ScopeLink.
+//
+class ScopeLinkUTest :  public CxxTest::TestSuite
+{
+private:
+	AtomSpace _as;
+	SchemeEval _eval;
+	Handle X, Y, P, Q, CT;
+
+public:
+	ScopeLinkUTest() : _eval(&_as)
+	{
+		logger().set_print_to_stdout_flag(true);
+
+		X = an(VARIABLE_NODE, "$X");
+		Y = an(VARIABLE_NODE, "$Y");
+		P = an(PREDICATE_NODE, "P");
+		Q = an(PREDICATE_NODE, "Q");
+		CT = an(TYPE_NODE, "ConceptNode");
+	}
+
+	void setUp() {}
+
+	void tearDown() {}
+
+	void test_get_variables_1();
+	void test_get_variables_2();
+};
+
+void ScopeLinkUTest::test_get_variables_1()
+{
+	Handle sch = al(SCOPE_LINK,
+	                X,
+	                al(AND_LINK,
+	                   al(EVALUATION_LINK, P, X),
+	                   al(EVALUATION_LINK, Q, Y)));
+
+	ScopeLinkPtr sc = ScopeLinkCast(sch);
+
+	TS_ASSERT_EQUALS(sc->get_variables().varset, OrderedHandleSet{X});
+}
+
+void ScopeLinkUTest::test_get_variables_2()
+{
+	Handle sch = al(IMPLICATION_SCOPE_LINK,
+	                al(TYPED_VARIABLE_LINK, X, CT),
+	                an(VARIABLE_NODE, "$P-55ebe96e"),
+	                al(EVALUATION_LINK,
+	                   an(PREDICATE_NODE, "take"),
+	                   an(CONCEPT_NODE, "compound-A")));
+
+	ScopeLinkPtr sc = ScopeLinkCast(sch);
+
+	TS_ASSERT_EQUALS(sc->get_variables().varset, OrderedHandleSet{X});
+}
+
+#undef al
+#undef an
