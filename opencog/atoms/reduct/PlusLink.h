@@ -42,19 +42,14 @@ protected:
 	virtual Handle kons(const Handle&, const Handle&);
 
 	void init(void);
-	PlusLink(Type, const HandleSeq& oset,
-	         TruthValuePtr tv = TruthValue::DEFAULT_TV());
-
-	PlusLink(Type, const Handle& a, const Handle& b,
-	         TruthValuePtr tv = TruthValue::DEFAULT_TV());
+	PlusLink(Type, const Handle& a, const Handle& b);
 
 public:
-	PlusLink(const Handle& a, const Handle& b,
-	         TruthValuePtr tv = TruthValue::DEFAULT_TV());
+	PlusLink(const Handle& a, const Handle& b);
+	PlusLink(const HandleSeq&, Type=PLUS_LINK);
+	PlusLink(const Link&);
 
-	PlusLink(const HandleSeq& oset,
-	         TruthValuePtr tv = TruthValue::DEFAULT_TV());
-	PlusLink(Link& l);
+	static Handle factory(const Handle&);
 };
 
 typedef std::shared_ptr<PlusLink> PlusLinkPtr;

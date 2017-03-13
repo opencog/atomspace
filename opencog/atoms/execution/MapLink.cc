@@ -94,36 +94,36 @@ void MapLink::init(void)
 	// FunctionLink::init();
 }
 
-MapLink::MapLink(const HandleSeq& oset, TruthValuePtr tv)
-	: FunctionLink(MAP_LINK, oset, tv)
+MapLink::MapLink(const Handle& vars, const Handle& body)
+	: FunctionLink(HandleSeq({vars, body}), MAP_LINK)
 {
 	init();
 }
 
-MapLink::MapLink(const Handle& vars, const Handle& body,
-                       TruthValuePtr tv)
-	: FunctionLink(MAP_LINK, HandleSeq({vars, body}), tv)
-{
-	init();
-}
-
-MapLink::MapLink(Type t, const Handle& body, TruthValuePtr tv)
-	: FunctionLink(t, HandleSeq({body}), tv)
+MapLink::MapLink(Type t, const Handle& body)
+	: FunctionLink(HandleSeq({body}), t)
 {
 	// Derived types have a different initialization sequence.
 	if (MAP_LINK != t) return;
 	init();
 }
 
-MapLink::MapLink(Type t, const HandleSeq& oset, TruthValuePtr tv)
-	: FunctionLink(t, oset, tv)
+MapLink::MapLink(const HandleSeq& oset, Type t)
+	: FunctionLink(oset, t)
 {
+	if (not classserver().isA(t, MAP_LINK))
+	{
+		const std::string& tname = classserver().getTypeName(t);
+		throw SyntaxException(TRACE_INFO,
+			"Expecting a MapLink, got %s", tname.c_str());
+	}
+
 	// Derived types have a different initialization sequence.
 	if (MAP_LINK != t) return;
 	init();
 }
 
-MapLink::MapLink(Link &l)
+MapLink::MapLink(const Link &l)
 	: FunctionLink(l)
 {
 	// Type must be as expected
@@ -297,7 +297,7 @@ bool MapLink::extract(const Handle& termpat,
 			}
 
 			// If we are here, we've got a match. Record it.
-			LinkPtr glp(createLink(LIST_LINK, glob_seq));
+			LinkPtr glp(createLink(glob_seq, LIST_LINK));
 			valmap.emplace(std::make_pair(glob, glp->getHandle()));
 		}
 		else
@@ -355,7 +355,7 @@ Handle MapLink::rewrite_one(const Handle& cterm, AtomSpace* scratch) const
 	// variable.
 	size_t nv = valseq.size();
 	if (1 < nv)
-		return Handle(createLink(LIST_LINK, valseq));
+		return Handle(createLink(valseq, LIST_LINK));
 	else if (1 == nv)
 		return valseq[0];
 	return Handle::UNDEFINED;
@@ -378,11 +378,13 @@ Handle MapLink::execute(AtomSpace* scratch) const
 			Handle mone = rewrite_one(h, scratch);
 			if (nullptr != mone) remap.emplace_back(mone);
 		}
-		return Handle(createLink(argtype, remap));
+		return Handle(createLink(remap, argtype));
 	}
 
 	// Its a singleton. Just remap that.
 	return rewrite_one(valh, scratch);
 }
+
+DEFINE_LINK_FACTORY(MapLink, MAP_LINK)
 
 /* ===================== END OF FILE ===================== */

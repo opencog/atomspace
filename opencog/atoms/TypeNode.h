@@ -42,10 +42,9 @@ protected:
 	Type value;
 
 public:
-	TypeNode(const std::string& s,
-	           TruthValuePtr tv = TruthValue::DEFAULT_TV())
+	TypeNode(const std::string& s)
 		// Convert to number and back to string to avoid miscompares.
-		: Node(TYPE_NODE, s, tv),
+		: Node(TYPE_NODE, s),
 		  value(classserver().getType(s))
 	{
 		if (NOTYPE == value)
@@ -53,8 +52,8 @@ public:
 				"Not a valid typename: '%s'", s.c_str());
 	}
 
-	TypeNode(Type t, TruthValuePtr tv = TruthValue::DEFAULT_TV())
-		: Node(TYPE_NODE, classserver().getTypeName(t), tv),
+	TypeNode(Type t)
+		: Node(TYPE_NODE, classserver().getTypeName(t)),
 		  value(t)
 	{}
 

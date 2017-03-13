@@ -59,13 +59,8 @@ protected:
 	/// Variables bound in the body.
 	Variables _varlist;
 
-	ScopeLink(Type, const Handle&,
-	          TruthValuePtr tv = TruthValue::DEFAULT_TV());
+	ScopeLink(Type, const Handle&);
 
-public:
-	// XXX Need to make this public, so that the factory can call it!
-	ScopeLink(Type, const HandleSeq&,
-	          TruthValuePtr tv = TruthValue::DEFAULT_TV());
 protected:
 	void init(void);
 	void extract_variables(const HandleSeq& oset);
@@ -77,13 +72,9 @@ protected:
 	virtual ContentHash compute_hash() const;
 
 public:
-	ScopeLink(const HandleSeq&,
-	          TruthValuePtr tv = TruthValue::DEFAULT_TV());
-
-	ScopeLink(const Handle& varcdecls, const Handle& body,
-	          TruthValuePtr tv = TruthValue::DEFAULT_TV());
-
-	ScopeLink(Link &l);
+	ScopeLink(const HandleSeq&, Type=SCOPE_LINK);
+	ScopeLink(const Handle& varcdecls, const Handle& body);
+	ScopeLink(const Link &l);
 
 	// Return the list of variables we are holding.
 	const Variables& get_variables(void) const { return _varlist; }
@@ -151,8 +142,7 @@ public:
 	virtual bool operator==(const Atom&) const;
 	virtual bool operator!=(const Atom&) const;
 
-	static ScopeLinkPtr factory(const Handle&);
-	static ScopeLinkPtr factory(Type, const HandleSeq&);
+	static Handle factory(const Handle&);
 };
 
 static inline ScopeLinkPtr ScopeLinkCast(const Handle& h)

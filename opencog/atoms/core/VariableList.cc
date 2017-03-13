@@ -58,42 +58,43 @@ void VariableList::validate_vardecl(const HandleSeq& oset)
 			return;
 		}
 		else
+		{
 			throw InvalidParamException(TRACE_INFO,
-				"Expected a VariableNode or a TypedVariableLink, got: %s",
-					classserver().getTypeName(t).c_str());
+				"Expected a VariableNode or a TypedVariableLink, got: %s"
+				"\nVariableList is %s",
+					classserver().getTypeName(t).c_str(),
+					toString().c_str());
+		}
 	}
 	build_index();
 }
 
-VariableList::VariableList(const Handle& hvardecls,
-                           TruthValuePtr tv)
-	: Link(VARIABLE_LIST,
+VariableList::VariableList(const Handle& hvardecls)
+	: Link(
 	    // Either it is a VariableList, or its a naked variable, or
 	    // its a typed variable.
 	    hvardecls->getType() == VARIABLE_LIST ?
 	          hvardecls->getOutgoingSet() : HandleSeq({hvardecls}),
-	    tv)
+	    VARIABLE_LIST)
 {
 	validate_vardecl(getOutgoingSet());
 }
 
-VariableList::VariableList(const HandleSeq& oset,
-                           TruthValuePtr tv)
-	: Link(VARIABLE_LIST, oset, tv)
+VariableList::VariableList(const HandleSeq& oset, Type t)
+	: Link(oset, t)
 {
-	validate_vardecl(oset);
-}
-
-VariableList::VariableList(Type t, const HandleSeq& oset,
-                           TruthValuePtr tv)
-	: Link(t, oset, tv)
-{
+	if (not classserver().isA(t, VARIABLE_LIST))
+	{
+		const std::string& tname = classserver().getTypeName(t);
+		throw InvalidParamException(TRACE_INFO,
+			"Expecting a VariableList, got %s", tname.c_str());
+	}
 	// derived classes have a different initialization order
 	if (VARIABLE_LIST != t) return;
 	validate_vardecl(oset);
 }
 
-VariableList::VariableList(Link &l)
+VariableList::VariableList(const Link &l)
 	: Link(l)
 {
 	// Type must be as expected
@@ -344,5 +345,7 @@ std::string opencog::oc_to_string(const VariableListPtr& vlp)
 	else
 		return oc_to_string(vlp->getHandle());
 }
+
+DEFINE_LINK_FACTORY(VariableList, VARIABLE_LIST)
 
 /* ===================== END OF FILE ===================== */

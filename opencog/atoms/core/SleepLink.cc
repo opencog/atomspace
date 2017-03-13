@@ -32,21 +32,28 @@
 
 using namespace opencog;
 
-SleepLink::SleepLink(const HandleSeq& oset,
-                       TruthValuePtr tv)
-	: FunctionLink(SLEEP_LINK, oset, tv)
+SleepLink::SleepLink(const HandleSeq& oset, Type t)
+	: FunctionLink(oset, t)
 {
+	// Type must be as expected
+	if (not classserver().isA(t, SLEEP_LINK))
+	{
+		const std::string& tname = classserver().getTypeName(t);
+		throw InvalidParamException(TRACE_INFO,
+			"Expecting an SleepLink, got %s", tname.c_str());
+	}
+
 	if (1 != oset.size())
 		throw SyntaxException(TRACE_INFO,
 			"SleepLink expects only one argument");
 
-	Type t = oset[0]->getType();
-	if (NUMBER_NODE != t and classserver().isA(t, FUNCTION_LINK))
+	Type tf = oset[0]->getType();
+	if (NUMBER_NODE != tf and classserver().isA(tf, FUNCTION_LINK))
 		throw SyntaxException(TRACE_INFO,
 			"Expecting a NumberNode or something that returns a NumberNode");
 }
 
-SleepLink::SleepLink(Link &l)
+SleepLink::SleepLink(const Link &l)
 	: FunctionLink(l)
 {
 	// Type must be as expected
@@ -91,5 +98,7 @@ Handle SleepLink::execute(AtomSpace * as) const
 
 	return as->add_atom(createNumberNode(secs));
 }
+
+DEFINE_LINK_FACTORY(SleepLink, SLEEP_LINK)
 
 /* ===================== END OF FILE ===================== */

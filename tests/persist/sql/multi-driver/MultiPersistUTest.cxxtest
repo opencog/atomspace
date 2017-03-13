@@ -356,17 +356,17 @@ void MultiPersistUTest::fetch_space(int idx, AtomSpace *space)
     hvec.push_back(hb3);
     hvec.push_back(hb4);
 
-    AtomPtr alb = createLink(hl[idx]->getType(), hvec);
+    AtomPtr alb = createLink(hvec, hl[idx]->getType());
     Handle hlb(alb->getHandle());
     space->fetch_atom(hlb);
 
     HandleSeq hv2({hlb, hb2});
-    AtomPtr alb2 = createLink(hl2[idx]->getType(), hv2);
+    AtomPtr alb2 = createLink(hv2, hl2[idx]->getType());
     Handle hlb2(alb2->getHandle());
     space->fetch_atom(hlb2);
 
     HandleSeq hv3({hb1, hlb2, hb3});
-    AtomPtr alb3 = createLink(hl3[idx]->getType(), hv3);
+    AtomPtr alb3 = createLink(hv3, hl3[idx]->getType());
     Handle hlb3(alb3->getHandle());
     space->fetch_atom(hlb3);
 }

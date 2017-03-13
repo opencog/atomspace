@@ -50,18 +50,16 @@ private:
 	                         std::string& lib,
 	                         std::string& fun);;
 public:
-	ExecutionOutputLink(const HandleSeq& oset,
-	     TruthValuePtr tv = TruthValue::DEFAULT_TV());
-
-	ExecutionOutputLink(const Handle& schema, const Handle& args,
-	     TruthValuePtr tv = TruthValue::DEFAULT_TV());
-
-	ExecutionOutputLink(Link& l);
+	ExecutionOutputLink(const HandleSeq&, Type=EXECUTION_OUTPUT_LINK);
+	ExecutionOutputLink(const Handle& schema, const Handle& args);
+	ExecutionOutputLink(const Link& l);
 
 	virtual Handle execute(AtomSpace* = NULL) const;
 
 	Handle get_schema(void) const { return getOutgoingAtom(0); }
 	Handle get_args(void) const { return getOutgoingAtom(1); }
+
+	static Handle factory(const Handle&);
 };
 
 typedef std::shared_ptr<ExecutionOutputLink> ExecutionOutputLinkPtr;

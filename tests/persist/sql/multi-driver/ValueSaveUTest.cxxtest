@@ -298,6 +298,7 @@ void ValueSaveUTest::check_one(ProtoAtomPtr pap, bool fetchkey)
 	printf("Got vals %s\n", atom->valuesToString().c_str());
 	ProtoAtomPtr fap = atom->getValue(key);
 
+	printf("Expecting %s\n", pap->toString().c_str());
 	TS_ASSERT(*pap == *fap);
 
 	delete as;

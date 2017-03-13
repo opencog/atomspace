@@ -29,16 +29,23 @@
 
 using namespace opencog;
 
-TimeLink::TimeLink(const HandleSeq& oset,
-                       TruthValuePtr tv)
-	: FunctionLink(TIME_LINK, oset, tv)
+TimeLink::TimeLink(const HandleSeq& oset, Type t)
+	: FunctionLink(oset, t)
 {
+	// Type must be as expected
+	if (not classserver().isA(t, TIME_LINK))
+	{
+		const std::string& tname = classserver().getTypeName(t);
+		throw InvalidParamException(TRACE_INFO,
+			"Expecting an TimeLink, got %s", tname.c_str());
+	}
+
 	if (0 < oset.size())
 		throw SyntaxException(TRACE_INFO,
 			"TimeLink does not expect any arguments");
 }
 
-TimeLink::TimeLink(Link &l)
+TimeLink::TimeLink(const Link &l)
 	: FunctionLink(l)
 {
 	// Type must be as expected
@@ -68,5 +75,7 @@ Handle TimeLink::execute(AtomSpace * as) const
 
 	return as->add_atom(createNumberNode(now));
 }
+
+DEFINE_LINK_FACTORY(TimeLink, TIME_LINK)
 
 /* ===================== END OF FILE ===================== */

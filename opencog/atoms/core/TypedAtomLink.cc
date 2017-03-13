@@ -57,21 +57,19 @@ void TypedAtomLink::init()
 
 }
 
-TypedAtomLink::TypedAtomLink(const HandleSeq& oset,
-                             TruthValuePtr tv)
-	: UniqueLink(TYPED_ATOM_LINK, oset, tv)
+TypedAtomLink::TypedAtomLink(const HandleSeq& oset, Type t)
+	: UniqueLink(oset, t)
 {
 	init();
 }
 
-TypedAtomLink::TypedAtomLink(const Handle& name, const Handle& defn,
-                             TruthValuePtr tv)
-	: UniqueLink(TYPED_ATOM_LINK, HandleSeq({name, defn}), tv)
+TypedAtomLink::TypedAtomLink(const Handle& name, const Handle& defn)
+	: UniqueLink(HandleSeq({name, defn}), TYPED_ATOM_LINK)
 {
 	init();
 }
 
-TypedAtomLink::TypedAtomLink(Link &l)
+TypedAtomLink::TypedAtomLink(const Link &l)
 	: UniqueLink(l)
 {
 	init();
@@ -87,5 +85,7 @@ Handle TypedAtomLink::get_type(const Handle& atom)
 	Handle uniq(get_unique(atom, TYPED_ATOM_LINK, false));
 	return uniq->getOutgoingAtom(1);
 }
+
+DEFINE_LINK_FACTORY(TypedAtomLink, TYPED_ATOM_LINK);
 
 /* ===================== END OF FILE ===================== */

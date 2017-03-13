@@ -33,15 +33,11 @@ class DualLink : public PatternLink
 {
 protected:
 	void init(void);
-
-	DualLink(Type, const HandleSeq&,
-	         TruthValuePtr tv = TruthValue::DEFAULT_TV());
-
 public:
-	DualLink(const HandleSeq&,
-	         TruthValuePtr tv = TruthValue::DEFAULT_TV());
+	DualLink(const HandleSeq&, Type=DUAL_LINK);
+	DualLink(const Link &l);
 
-	DualLink(Link &l);
+	static Handle factory(const Handle&);
 };
 
 typedef std::shared_ptr<DualLink> DualLinkPtr;

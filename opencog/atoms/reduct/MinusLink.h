@@ -40,20 +40,15 @@ class MinusLink : public PlusLink
 {
 protected:
 	void init(void);
-	MinusLink(Type, const HandleSeq& oset,
-	         TruthValuePtr tv = TruthValue::DEFAULT_TV());
-
-	MinusLink(Type, const Handle& a, const Handle& b,
-	         TruthValuePtr tv = TruthValue::DEFAULT_TV());
+	MinusLink(Type, const Handle& a, const Handle& b);
 
 	virtual Handle do_execute(AtomSpace*, const HandleSeq&) const;
 public:
-	MinusLink(const Handle& a, const Handle& b,
-	         TruthValuePtr tv = TruthValue::DEFAULT_TV());
+	MinusLink(const Handle& a, const Handle& b);
+	MinusLink(const HandleSeq&, Type=MINUS_LINK);
+	MinusLink(const Link&);
 
-	MinusLink(const HandleSeq& oset,
-	         TruthValuePtr tv = TruthValue::DEFAULT_TV());
-	MinusLink(Link& l);
+	static Handle factory(const Handle&);
 };
 
 typedef std::shared_ptr<MinusLink> MinusLinkPtr;

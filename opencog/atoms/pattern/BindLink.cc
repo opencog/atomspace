@@ -31,41 +31,7 @@ using namespace opencog;
 
 void BindLink::init(void)
 {
-	extract_variables(_outgoing);
-	unbundle_clauses(_body);
-	common_init();
-	setup_components();
-	_pat.redex_name = "anonymous BindLink";
-}
-
-BindLink::BindLink(const HandleSeq& hseq, TruthValuePtr tv)
-	: PatternLink(BIND_LINK, hseq, tv)
-{
-	init();
-}
-
-BindLink::BindLink(const Handle& vardecl,
-                   const Handle& body,
-                   const Handle& rewrite,
-                   TruthValuePtr tv)
-	: BindLink(HandleSeq{vardecl, body, rewrite}, tv)
-{}
-
-BindLink::BindLink(const Handle& body, const Handle& rewrite,
-                   TruthValuePtr tv)
-	: BindLink(HandleSeq{body, rewrite}, tv)
-{}
-
-BindLink::BindLink(Type t, const HandleSeq& hseq, TruthValuePtr tv)
-	: PatternLink(t, hseq, tv)
-{
-	init();
-}
-
-BindLink::BindLink(Link &l)
-	: PatternLink(l)
-{
-	Type t = l.getType();
+	Type t = getType();
 	if (not classserver().isA(t, BIND_LINK))
 	{
 		const std::string& tname = classserver().getTypeName(t);
@@ -73,6 +39,32 @@ BindLink::BindLink(Link &l)
 			"Expecting a BindLink, got %s", tname.c_str());
 	}
 
+	extract_variables(_outgoing);
+	unbundle_clauses(_body);
+	common_init();
+	setup_components();
+	_pat.redex_name = "anonymous BindLink";
+}
+
+BindLink::BindLink(const Handle& vardecl,
+                   const Handle& body,
+                   const Handle& rewrite)
+	: BindLink(HandleSeq{vardecl, body, rewrite})
+{}
+
+BindLink::BindLink(const Handle& body, const Handle& rewrite)
+	: BindLink(HandleSeq{body, rewrite})
+{}
+
+BindLink::BindLink(const HandleSeq& hseq, Type t)
+	: PatternLink(hseq, t)
+{
+	init();
+}
+
+BindLink::BindLink(const Link &l)
+	: PatternLink(l)
+{
 	init();
 }
 
@@ -110,5 +102,9 @@ void BindLink::extract_variables(const HandleSeq& oset)
 	// Initialize _varlist with the scoped variables
 	init_scoped_variables(oset[0]);
 }
+
+/* ================================================================= */
+
+DEFINE_LINK_FACTORY(BindLink, BIND_LINK)
 
 /* ===================== END OF FILE ===================== */

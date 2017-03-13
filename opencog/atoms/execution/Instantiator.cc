@@ -23,8 +23,6 @@
 
 #include <opencog/atoms/core/DefineLink.h>
 #include <opencog/atoms/core/LambdaLink.h>
-// #include <opencog/atoms/core/MapLink.h>
-#include "MapLink.h"  // fucking python
 #include <opencog/atoms/core/PutLink.h>
 #include <opencog/atoms/execution/ExecutionOutputLink.h>
 #include <opencog/atoms/execution/EvaluationLink.h>
@@ -343,13 +341,15 @@ Handle Instantiator::walk_tree(const Handle& expr)
 			// function itself.
 			HandleSeq oset_results;
 			walk_sequence(oset_results, expr->getOutgoingSet());
-			FoldLinkPtr flp(FoldLink::factory(t, oset_results));
+			Handle fh(classserver().factory(Handle(createLink(oset_results, t))));
+			FoldLinkPtr flp(FoldLinkCast(fh));
 			return flp->execute(_as);
 		}
 		else
 		{
 			Handle hexpr(beta_reduce(expr, *_vmap));
-			FoldLinkPtr flp(FoldLink::factory(hexpr));
+			hexpr = classserver().factory(hexpr);
+			FoldLinkPtr flp(FoldLinkCast(hexpr));
 			return flp->execute(_as);
 		}
 	}
@@ -357,18 +357,6 @@ Handle Instantiator::walk_tree(const Handle& expr)
 	// Fire any other function links, not handled above.
 	if (classserver().isA(t, FUNCTION_LINK))
 	{
-		// MapLink is a FunctionLink, but circular shared-library
-		// dependencies prevent the factory from handling it.
-		// Anyway, we avoid doing eager evaluation on the MapLink,
-		// It can do that, itself. If we did do eager evaluation of the
-		// MapLink, we'd need to get eager only on its argument list,
-		// and not on its body.
-		if (classserver().isA(t, MAP_LINK))
-		{
-			FunctionLinkPtr flp(createMapLink(expr->getOutgoingSet()));
-			return flp->execute(_as);
-		}
-
 		if (_eager)
 		{
 			// Perform substitution on all arguments before applying the
@@ -383,7 +371,8 @@ Handle Instantiator::walk_tree(const Handle& expr)
 			HandleSeq oset_results;
 			walk_sequence(oset_results, expr->getOutgoingSet());
 
-			FunctionLinkPtr flp(FunctionLink::factory(t, oset_results));
+			FunctionLinkPtr flp(FunctionLinkCast(
+				classserver().factory(Handle(createLink(oset_results, t)))));
 			return flp->execute(_as);
 		}
 		else
@@ -393,7 +382,8 @@ Handle Instantiator::walk_tree(const Handle& expr)
 			// Also, the number of arguments is not fixed, its always variadic.
 			// Perform substitution on all arguments before applying the
 			// function itself.
-			FunctionLinkPtr flp(FunctionLink::factory(expr));
+			FunctionLinkPtr flp(FunctionLinkCast(
+				classserver().factory(expr)));
 			return flp->execute(_as);
 		}
 	}
@@ -436,7 +426,8 @@ mere_recursive_call:
 	bool changed = walk_sequence(oset_results, expr->getOutgoingSet());
 	if (changed)
 	{
-		LinkPtr subl = createLink(t, oset_results, expr->getTruthValue());
+		LinkPtr subl = createLink(oset_results, t);
+		subl->copyValues(expr);
 		return Handle(_as->add_atom(subl));
 	}
 	return expr;

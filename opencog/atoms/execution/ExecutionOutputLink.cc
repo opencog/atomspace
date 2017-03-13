@@ -43,10 +43,13 @@ public:
     static void* getFunc(std::string libName,std::string funcName);
 };
 
-ExecutionOutputLink::ExecutionOutputLink(const HandleSeq& oset,
-                                         TruthValuePtr tv)
-	: FunctionLink(EXECUTION_OUTPUT_LINK, oset, tv)
+ExecutionOutputLink::ExecutionOutputLink(const HandleSeq& oset, Type t)
+	: FunctionLink(oset, t)
 {
+	if (EXECUTION_OUTPUT_LINK != t)
+		throw SyntaxException(TRACE_INFO,
+			"Expection an ExecutionOutputLink!");
+
 	if (2 != oset.size())
 		throw SyntaxException(TRACE_INFO,
 			"ExecutionOutputLink must have schema and args! Got arity=%d",
@@ -63,9 +66,8 @@ ExecutionOutputLink::ExecutionOutputLink(const HandleSeq& oset,
 }
 
 ExecutionOutputLink::ExecutionOutputLink(const Handle& schema,
-                                         const Handle& args,
-                                         TruthValuePtr tv)
-	: FunctionLink(EXECUTION_OUTPUT_LINK, schema, args, tv)
+                                         const Handle& args)
+	: FunctionLink(EXECUTION_OUTPUT_LINK, schema, args)
 {
 	Type stype = schema->getType();
 	if (GROUNDED_SCHEMA_NODE != stype and
@@ -78,7 +80,7 @@ ExecutionOutputLink::ExecutionOutputLink(const Handle& schema,
 	}
 }
 
-ExecutionOutputLink::ExecutionOutputLink(Link& l)
+ExecutionOutputLink::ExecutionOutputLink(const Link& l)
 	: FunctionLink(l)
 {
 	Type tscope = l.getType();
@@ -219,6 +221,8 @@ void ExecutionOutputLink::lang_lib_fun(const std::string& schema,
 	} else
 		fun = schema.substr(pos);
 }
+
+DEFINE_LINK_FACTORY(ExecutionOutputLink, EXECUTION_OUTPUT_LINK)
 
 std::unordered_map<std::string, void*> LibraryManager::_librarys;
 std::unordered_map<std::string, void*> LibraryManager::_functions;

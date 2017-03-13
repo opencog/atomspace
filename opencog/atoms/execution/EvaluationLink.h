@@ -36,13 +36,9 @@ class AtomSpace;
 class EvaluationLink : public FreeLink
 {
 public:
-	EvaluationLink(const HandleSeq& oset,
-	     TruthValuePtr tv = TruthValue::DEFAULT_TV());
-
-	EvaluationLink(const Handle& schema, const Handle& args,
-	     TruthValuePtr tv = TruthValue::DEFAULT_TV());
-
-	EvaluationLink(Link& l);
+	EvaluationLink(const HandleSeq&, Type=EVALUATION_LINK);
+	EvaluationLink(const Handle& schema, const Handle& args);
+	EvaluationLink(const Link& l);
 
 	TruthValuePtr evaluate(AtomSpace* as) {
 	    return do_evaluate(as, getHandle());
@@ -58,6 +54,8 @@ public:
 	                                 const HandleSeq& schema_and_args);
 	static TruthValuePtr do_evaluate(AtomSpace*,
 	                                const Handle& schema, const Handle& args);
+
+	static Handle factory(const Handle&);
 };
 
 typedef std::shared_ptr<EvaluationLink> EvaluationLinkPtr;

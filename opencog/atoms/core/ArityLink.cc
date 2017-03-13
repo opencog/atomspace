@@ -28,12 +28,18 @@
 
 using namespace opencog;
 
-ArityLink::ArityLink(const HandleSeq& oset, TruthValuePtr tv)
-	: FunctionLink(ARITY_LINK, oset, tv)
+ArityLink::ArityLink(const HandleSeq& oset, Type t)
+	: FunctionLink(oset, t)
 {
+	if (not classserver().isA(t, ARITY_LINK))
+	{
+		const std::string& tname = classserver().getTypeName(t);
+		throw InvalidParamException(TRACE_INFO,
+			"Expecting an ArityLink, got %s", tname.c_str());
+	}
 }
 
-ArityLink::ArityLink(Link &l)
+ArityLink::ArityLink(const Link &l)
 	: FunctionLink(l)
 {
 	// Type must be as expected
@@ -69,5 +75,7 @@ Handle ArityLink::execute(AtomSpace * as) const
 
 	return as->add_atom(createNumberNode(ary));
 }
+
+DEFINE_LINK_FACTORY(ArityLink, ARITY_LINK)
 
 /* ===================== END OF FILE ===================== */

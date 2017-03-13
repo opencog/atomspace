@@ -48,20 +48,13 @@ protected:
 	Type distributive_type = NOTYPE;
 
 	void init(void);
-	FoldLink(Type, const HandleSeq& oset,
-	         TruthValuePtr tv = TruthValue::DEFAULT_TV());
+	FoldLink(Type, const Handle& a, const Handle& b);
 
-	FoldLink(Type, const Handle& a, const Handle& b,
-	         TruthValuePtr tv = TruthValue::DEFAULT_TV());
 public:
-	FoldLink(const HandleSeq& oset,
-	         TruthValuePtr tv = TruthValue::DEFAULT_TV());
-	FoldLink(Link& l);
+	FoldLink(const HandleSeq&, Type=FOLD_LINK);
+	FoldLink(const Link& l);
 
    virtual Handle reduce(void);
-
-	static FoldLinkPtr factory(const Handle&);
-	static FoldLinkPtr factory(Type, const HandleSeq&);
 };
 
 static inline FoldLinkPtr FoldLinkCast(const Handle& h)

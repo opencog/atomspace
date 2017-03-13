@@ -27,47 +27,36 @@
 
 using namespace opencog;
 
-TimesLink::TimesLink(const HandleSeq& oset, TruthValuePtr tv)
-    : ArithmeticLink(TIMES_LINK, oset, tv)
+TimesLink::TimesLink(const HandleSeq& oset, Type t)
+    : ArithmeticLink(oset, t)
 {
 	init();
 }
 
-TimesLink::TimesLink(Type t, const HandleSeq& oset, TruthValuePtr tv)
-    : ArithmeticLink(t, oset, tv)
-{
-	if (not classserver().isA(t, TIMES_LINK))
-		throw InvalidParamException(TRACE_INFO, "Expecting a TimesLink");
-	init();
-}
-
-TimesLink::TimesLink(Type t, const Handle& a, const Handle& b,
-                   TruthValuePtr tv)
-    : ArithmeticLink(t, a, b, tv)
-{
-	if (not classserver().isA(t, TIMES_LINK))
-		throw InvalidParamException(TRACE_INFO, "Expecting a TimesLink");
-	init();
-}
-
-TimesLink::TimesLink(const Handle& a, const Handle& b,
-                   TruthValuePtr tv)
-    : ArithmeticLink(TIMES_LINK, a, b, tv)
+TimesLink::TimesLink(Type t, const Handle& a, const Handle& b)
+    : ArithmeticLink(t, a, b)
 {
 	init();
 }
 
-TimesLink::TimesLink(Link& l)
+TimesLink::TimesLink(const Handle& a, const Handle& b)
+    : ArithmeticLink(TIMES_LINK, a, b)
+{
+	init();
+}
+
+TimesLink::TimesLink(const Link& l)
     : ArithmeticLink(l)
 {
-	Type tscope = l.getType();
-	if (not classserver().isA(tscope, TIMES_LINK))
-		throw InvalidParamException(TRACE_INFO, "Expecting a TimesLink");
 	init();
 }
 
 void TimesLink::init(void)
 {
+	Type tscope = getType();
+	if (not classserver().isA(tscope, TIMES_LINK))
+		throw InvalidParamException(TRACE_INFO, "Expecting a TimesLink");
+
 	knild = 1.0;
 	knil = Handle(createNumberNode("1"));
 }
@@ -102,5 +91,7 @@ Handle TimesLink::kons(const Handle& fi, const Handle& fj)
 	// same type, but they are not of a type that we know how to multiply.
 	return Handle(createTimesLink(fi, fj)->reorder());
 }
+
+DEFINE_LINK_FACTORY(TimesLink, TIMES_LINK)
 
 // ============================================================

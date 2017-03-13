@@ -34,30 +34,30 @@ static MT19937RandGen randy(616432);
 
 void RandomNumberLink::init()
 {
-	if (_outgoing.size() != 2)
-		throw SyntaxException(TRACE_INFO,
-			"Expecting a numerical min and max; got %s",
-			toString().c_str());
-}
-
-RandomNumberLink::RandomNumberLink(const HandleSeq& oset,
-                       TruthValuePtr tv)
-	: FunctionLink(RANDOM_NUMBER_LINK, oset, tv)
-{
-	init();
-}
-
-RandomNumberLink::RandomNumberLink(Link &l)
-	: FunctionLink(l)
-{
 	// Type must be as expected
-	Type tscope = l.getType();
+	Type tscope = getType();
 	if (not classserver().isA(tscope, RANDOM_NUMBER_LINK))
 	{
 		const std::string& tname = classserver().getTypeName(tscope);
 		throw InvalidParamException(TRACE_INFO,
 			"Expecting an RandomNumberLink, got %s", tname.c_str());
 	}
+
+	if (_outgoing.size() != 2)
+		throw SyntaxException(TRACE_INFO,
+			"Expecting a numerical min and max; got %s",
+			toString().c_str());
+}
+
+RandomNumberLink::RandomNumberLink(const HandleSeq& oset, Type t)
+	: FunctionLink(oset, t)
+{
+	init();
+}
+
+RandomNumberLink::RandomNumberLink(const Link &l)
+	: FunctionLink(l)
+{
 	init();
 }
 
@@ -107,5 +107,7 @@ Handle RandomNumberLink::execute(AtomSpace * as) const
 
 	return as->add_atom(createNumberNode(ary));
 }
+
+DEFINE_LINK_FACTORY(RandomNumberLink, RANDOM_NUMBER_LINK);
 
 /* ===================== END OF FILE ===================== */

@@ -28,47 +28,36 @@
 
 using namespace opencog;
 
-DivideLink::DivideLink(const HandleSeq& oset, TruthValuePtr tv)
-    : TimesLink(DIVIDE_LINK, oset, tv)
+DivideLink::DivideLink(const HandleSeq& oset, Type t)
+    : TimesLink(oset, t)
 {
 	init();
 }
 
-DivideLink::DivideLink(Type t, const HandleSeq& oset, TruthValuePtr tv)
-    : TimesLink(t, oset, tv)
-{
-	if (not classserver().isA(t, DIVIDE_LINK))
-		throw InvalidParamException(TRACE_INFO, "Expecting a DivideLink");
-	init();
-}
-
-DivideLink::DivideLink(const Handle& a, const Handle& b,
-                   TruthValuePtr tv)
-    : TimesLink(DIVIDE_LINK, a, b, tv)
+DivideLink::DivideLink(const Handle& a, const Handle& b)
+    : TimesLink(DIVIDE_LINK, a, b)
 {
 	init();
 }
 
-DivideLink::DivideLink(Type t, const Handle& a, const Handle& b,
-                   TruthValuePtr tv)
-    : TimesLink(t, a, b, tv)
+DivideLink::DivideLink(Type t, const Handle& a, const Handle& b)
+    : TimesLink(t, a, b)
 {
-	if (not classserver().isA(t, DIVIDE_LINK))
-		throw InvalidParamException(TRACE_INFO, "Expecting a DivideLink");
 	init();
 }
 
-DivideLink::DivideLink(Link& l)
+DivideLink::DivideLink(const Link& l)
     : TimesLink(l)
 {
-	Type tscope = l.getType();
-	if (not classserver().isA(tscope, DIVIDE_LINK))
-		throw InvalidParamException(TRACE_INFO, "Expecting a DivideLink");
 	init();
 }
 
 void DivideLink::init(void)
 {
+	Type tscope = getType();
+	if (not classserver().isA(tscope, DIVIDE_LINK))
+		throw InvalidParamException(TRACE_INFO, "Expecting a DivideLink");
+
 	size_t sz = _outgoing.size();
 	if (2 < sz or 0 == sz)
 		throw InvalidParamException(TRACE_INFO,
@@ -87,5 +76,7 @@ Handle DivideLink::do_execute(AtomSpace* as, const HandleSeq& oset) const
 	NumberNodePtr nb(unwrap_set(oset[1]));
 	return createNumberNode(na->get_value() / nb->get_value())->getHandle();
 }
+
+DEFINE_LINK_FACTORY(DivideLink, DIVIDE_LINK)
 
 // ============================================================

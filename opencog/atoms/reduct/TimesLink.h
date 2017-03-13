@@ -42,19 +42,14 @@ protected:
 	Handle kons(const Handle&, const Handle&);
 
 	void init(void);
-	TimesLink(Type, const HandleSeq& oset,
-	         TruthValuePtr tv = TruthValue::DEFAULT_TV());
+	TimesLink(Type, const Handle& a, const Handle& b);
 
-	TimesLink(Type, const Handle& a, const Handle& b,
-	         TruthValuePtr tv = TruthValue::DEFAULT_TV());
 public:
-	TimesLink(const HandleSeq& oset,
-	         TruthValuePtr tv = TruthValue::DEFAULT_TV());
+	TimesLink(const HandleSeq&, Type=TIMES_LINK);
+	TimesLink(const Handle& a, const Handle& b);
+	TimesLink(const Link&);
 
-	TimesLink(const Handle& a, const Handle& b,
-	         TruthValuePtr tv = TruthValue::DEFAULT_TV());
-
-	TimesLink(Link& l);
+	static Handle factory(const Handle&);
 };
 
 typedef std::shared_ptr<TimesLink> TimesLinkPtr;

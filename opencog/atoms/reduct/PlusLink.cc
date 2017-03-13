@@ -28,47 +28,36 @@
 
 using namespace opencog;
 
-PlusLink::PlusLink(const HandleSeq& oset, TruthValuePtr tv)
-    : ArithmeticLink(PLUS_LINK, oset, tv)
+PlusLink::PlusLink(const HandleSeq& oset, Type t)
+    : ArithmeticLink(oset, t)
 {
 	init();
 }
 
-PlusLink::PlusLink(Type t, const HandleSeq& oset, TruthValuePtr tv)
-    : ArithmeticLink(t, oset, tv)
-{
-	if (not classserver().isA(t, PLUS_LINK))
-		throw InvalidParamException(TRACE_INFO, "Expecting a PlusLink");
-	init();
-}
-
-PlusLink::PlusLink(const Handle& a, const Handle& b,
-                   TruthValuePtr tv)
-    : ArithmeticLink(PLUS_LINK, a, b, tv)
+PlusLink::PlusLink(const Handle& a, const Handle& b)
+    : ArithmeticLink(PLUS_LINK, a, b)
 {
 	init();
 }
 
-PlusLink::PlusLink(Type t, const Handle& a, const Handle& b,
-                   TruthValuePtr tv)
-    : ArithmeticLink(t, a, b, tv)
+PlusLink::PlusLink(Type t, const Handle& a, const Handle& b)
+    : ArithmeticLink(t, a, b)
 {
-	if (not classserver().isA(t, PLUS_LINK))
-		throw InvalidParamException(TRACE_INFO, "Expecting a PlusLink");
 	init();
 }
 
-PlusLink::PlusLink(Link& l)
+PlusLink::PlusLink(const Link& l)
     : ArithmeticLink(l)
 {
-	Type tscope = l.getType();
-	if (not classserver().isA(tscope, PLUS_LINK))
-		throw InvalidParamException(TRACE_INFO, "Expecting a PlusLink");
 	init();
 }
 
 void PlusLink::init(void)
 {
+	Type tscope = getType();
+	if (not classserver().isA(tscope, PLUS_LINK))
+		throw InvalidParamException(TRACE_INFO, "Expecting a PlusLink");
+
 	knild = 0.0;
 	knil = Handle(createNumberNode("0"));
 
@@ -149,14 +138,14 @@ Handle PlusLink::kons(const Handle& fi, const Handle& fj)
 			// a_plus is now (a+1) or (a+b) as described above.
 			// We need to insert into the atomspace, else reduce() horks
 			// up the knil compares during reduction.
-			Handle foo(createLink(PLUS_LINK, rest));
+			Handle foo(createLink(rest, PLUS_LINK));
 			if (_atom_space)
 				foo = _atom_space->add_atom(foo);
 
 			PlusLinkPtr ap = PlusLinkCast(foo);
 			Handle a_plus(ap->reduce());
 
-			return Handle(createTimesLink(exx, a_plus));
+			return Handle(createTimesLink(a_plus, exx));
 		}
 	}
 
@@ -166,4 +155,5 @@ Handle PlusLink::kons(const Handle& fi, const Handle& fj)
 	return Handle(createPlusLink(fi, fj)->reorder());
 }
 
+DEFINE_LINK_FACTORY(PlusLink, PLUS_LINK);
 // ============================================================

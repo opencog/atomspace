@@ -73,8 +73,9 @@ private:
 		if (not changed) return expr;
 
 		// Create a duplicate link with the substitution.
-		return Handle(createLink(expr->getType(), oset_results,
-		                         expr->getTruthValue()));
+		Handle hret(createLink(oset_results, expr->getType()));
+		hret->copyValues(expr);
+		return hret;
 	}
 
 public:

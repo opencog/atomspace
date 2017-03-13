@@ -117,12 +117,12 @@ protected:
      * atom references. It must be an empty vector if the atom is a node.
      * @param The truthValue of the atom.
      */
-    Atom(Type t, TruthValuePtr tv = TruthValue::DEFAULT_TV())
+    Atom(Type t)
       : ProtoAtom(t),
         _flags(0),
         _content_hash(Handle::INVALID_HASH),
         _atom_space(nullptr),
-        _truthValue(tv)
+        _truthValue(TruthValue::DEFAULT_TV())
     {}
 
     struct InSet

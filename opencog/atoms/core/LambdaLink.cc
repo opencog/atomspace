@@ -27,31 +27,28 @@
 
 using namespace opencog;
 
-LambdaLink::LambdaLink(const HandleSeq& oset,
-                       TruthValuePtr tv)
-	: ScopeLink(LAMBDA_LINK, oset, tv)
+LambdaLink::LambdaLink(const Handle& vars, const Handle& body)
+	: ScopeLink(HandleSeq({vars, body}), LAMBDA_LINK)
 {
 }
 
-LambdaLink::LambdaLink(const Handle& vars, const Handle& body,
-                       TruthValuePtr tv)
-	: ScopeLink(LAMBDA_LINK, HandleSeq({vars, body}), tv)
+LambdaLink::LambdaLink(Type t, const Handle& body)
+	: ScopeLink(HandleSeq({body}), t)
 {
 }
 
-LambdaLink::LambdaLink(Type t, const Handle& body,
-                       TruthValuePtr tv)
-	: ScopeLink(t, HandleSeq({body}), tv)
+LambdaLink::LambdaLink(const HandleSeq& oset, Type t)
+	: ScopeLink(oset, t)
 {
+	if (not classserver().isA(t, LAMBDA_LINK))
+	{
+		const std::string& tname = classserver().getTypeName(t);
+		throw SyntaxException(TRACE_INFO,
+			"Expecting a LambdaLink, got %s", tname.c_str());
+	}
 }
 
-LambdaLink::LambdaLink(Type t, const HandleSeq& oset,
-                       TruthValuePtr tv)
-	: ScopeLink(t, oset, tv)
-{
-}
-
-LambdaLink::LambdaLink(Link &l)
+LambdaLink::LambdaLink(const Link &l)
 	: ScopeLink(l)
 {
 	// Type must be as expected
@@ -63,5 +60,7 @@ LambdaLink::LambdaLink(Link &l)
 			"Expecting a LambdaLink, got %s", tname.c_str());
 	}
 }
+
+DEFINE_LINK_FACTORY(LambdaLink, LAMBDA_LINK)
 
 /* ===================== END OF FILE ===================== */

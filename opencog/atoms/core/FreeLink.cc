@@ -23,31 +23,17 @@
 #include <opencog/atoms/base/atom_types.h>
 #include <opencog/atoms/base/ClassServer.h>
 #include "FreeLink.h"
-#include "DefineLink.h"
-#include "FunctionLink.h"
-#include "StateLink.h"
-#include "TypedAtomLink.h"
-#include "UniqueLink.h"
 
 using namespace opencog;
 
-FreeLink::FreeLink(const HandleSeq& oset,
-                   TruthValuePtr tv)
-    : Link(FREE_LINK, oset, tv)
+FreeLink::FreeLink(const Handle& a)
+    : Link(FREE_LINK, a)
 {
 	init();
 }
 
-FreeLink::FreeLink(const Handle& a,
-                   TruthValuePtr tv)
-    : Link(FREE_LINK, a, tv)
-{
-	init();
-}
-
-FreeLink::FreeLink(Type t, const HandleSeq& oset,
-                   TruthValuePtr tv)
-    : Link(t, oset, tv)
+FreeLink::FreeLink(const HandleSeq& oset, Type t)
+    : Link(oset, t)
 {
 	if (not classserver().isA(t, FREE_LINK))
 		throw InvalidParamException(TRACE_INFO, "Expecting a FreeLink");
@@ -57,9 +43,8 @@ FreeLink::FreeLink(Type t, const HandleSeq& oset,
 	init();
 }
 
-FreeLink::FreeLink(Type t, const Handle& a,
-                   TruthValuePtr tv)
-    : Link(t, a, tv)
+FreeLink::FreeLink(Type t, const Handle& a)
+    : Link(t, a)
 {
 	if (not classserver().isA(t, FREE_LINK))
 		throw InvalidParamException(TRACE_INFO, "Expecting a FreeLink");
@@ -69,9 +54,8 @@ FreeLink::FreeLink(Type t, const Handle& a,
 	init();
 }
 
-FreeLink::FreeLink(Type t, const Handle& a, const Handle& b,
-                   TruthValuePtr tv)
-    : Link(t, a, b, tv)
+FreeLink::FreeLink(Type t, const Handle& a, const Handle& b)
+    : Link(t, a, b)
 {
 	if (not classserver().isA(t, FREE_LINK))
 		throw InvalidParamException(TRACE_INFO, "Expecting a FreeLink");
@@ -81,7 +65,7 @@ FreeLink::FreeLink(Type t, const Handle& a, const Handle& b,
 	init();
 }
 
-FreeLink::FreeLink(Link& l)
+FreeLink::FreeLink(const Link& l)
     : Link(l)
 {
 	Type tscope = l.getType();
@@ -100,43 +84,6 @@ void FreeLink::init(void)
 	_vars.find_variables(_outgoing);
 }
 
-/* ================================================================= */
+DEFINE_LINK_FACTORY(FreeLink, FREE_LINK);
 
-FreeLinkPtr FreeLink::factory(const Handle& h)
-{
-	// If h is of the right form already, its just a matter of calling
-	// it.  Otherwise, we have to create
-	FreeLinkPtr flp(FreeLinkCast(h));
-	if (flp) return flp;
-
-	if (nullptr == h)
-		throw RuntimeException(TRACE_INFO, "Not executable!");
-
-	return factory(h->getType(), h->getOutgoingSet());
-}
-
-// Basic type factory.
-FreeLinkPtr FreeLink::factory(Type t, const HandleSeq& seq)
-{
-	if (DEFINE_LINK == t)
-		return createDefineLink(seq);
-
-	if (classserver().isA(t, FUNCTION_LINK))
-		return FunctionLink::factory(t, seq);
-
-	if (STATE_LINK == t)
-		return createStateLink(seq);
-
-	if (TYPED_ATOM_LINK == t)
-		return createTypedAtomLink(seq);
-
-	if (UNIQUE_LINK == t)
-		return createUniqueLink(seq);
-
-	if (classserver().isA(t, FREE_LINK))
-		return createFreeLink(t, seq);
-
-	throw SyntaxException(TRACE_INFO,
-		"FreeLink is not a factory for %s",
-		classserver().getTypeName(t).c_str());
-}
+/* ===================== END OF FILE ===================== */

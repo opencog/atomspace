@@ -47,13 +47,10 @@ class StateLink : public UniqueLink
 protected:
 	void init();
 public:
-	StateLink(const HandleSeq&,
-	           TruthValuePtr tv = TruthValue::DEFAULT_TV());
+	StateLink(const HandleSeq&, Type=STATE_LINK);
+	StateLink(const Handle& alias, const Handle& body);
 
-	StateLink(const Handle& alias, const Handle& body,
-	           TruthValuePtr tv = TruthValue::DEFAULT_TV());
-
-	StateLink(Link &l);
+	StateLink(const Link&);
 	Handle get_alias(void) const { return _outgoing[0]; }
 	Handle get_state(void) const { return _outgoing[1]; }
 
@@ -75,6 +72,8 @@ public:
 	 */
 	static Handle get_link(const Handle& alias);
 	static Handle get_state(const Handle& alias);
+
+	static Handle factory(const Handle&);
 };
 
 typedef std::shared_ptr<StateLink> StateLinkPtr;

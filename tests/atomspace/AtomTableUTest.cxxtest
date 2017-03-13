@@ -97,7 +97,7 @@ public:
         os.push_back(time);
         os.push_back(word);
         os.push_back(sense);
-        table->add(createLink(INHERITANCE_LINK, os), true);
+        table->add(createLink(os, INHERITANCE_LINK), true);
         table->barrier();
     }
 
@@ -221,7 +221,7 @@ public:
 
         HandleSeq os;
         os.push_back(hn1); os.push_back(hn1); os.push_back(hn2);
-        LinkPtr l1(createLink(LIST_LINK, os));
+        LinkPtr l1(createLink(os, LIST_LINK));
         Handle hl1 = table->add(l1, false);
 
         // Now, remove hn1 from the table ...
@@ -234,7 +234,7 @@ public:
         os.push_back(h3);
         os.push_back(h3);
 
-        Handle l33 = table->add(createLink(LIST_LINK, os), false);
+        Handle l33 = table->add(createLink(os, LIST_LINK), false);
         LinkPtr lptr33(LinkCast(l33));
         HandleSeq hs = lptr33->getOutgoingSet();
         printf("hs1 & hs2 ptr's: %p %p\n", hs[0].operator->(), hs[1].operator->());
@@ -254,7 +254,7 @@ public:
         HandleSeq os;
         os.push_back(word);
         os.push_back(sense);
-        LinkPtr lp = createLink(MY_INHERITANCE_LINK, os);
+        LinkPtr lp = createLink(os, MY_INHERITANCE_LINK);
         Handle lh = table->add(lp, false);
 
 #define getHandlex(N,T) getHandle(T,N)

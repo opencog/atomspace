@@ -46,9 +46,6 @@ protected:
     std::string _name;
     void init(const std::string&);
 
-    Node(const Node &l) : Atom(0)
-    { OC_ASSERT(false, "Node: bad use of copy ctor"); }
-
     virtual ContentHash compute_hash() const;
 
 public:
@@ -58,22 +55,19 @@ public:
      * @param Node type
      * @param Node name A reference to a std::string with the name of
      *                  the node.  Use empty string for unamed node.
-     * @param Node truthvalue A reference to a TruthValue object.
      */
-    Node(Type t, const std::string& s,
-         TruthValuePtr tv = TruthValue::DEFAULT_TV())
-        : Atom(t,tv)
+    Node(Type t, const std::string& s)
+        : Atom(t)
     {
         init(s);
     }
 
     /**
-     * Copy constructor, does not copy atom table membership!
-     * Cannot be const, because the get() functions can't be,
-     * because thread-safe locking required in the gets.
+     * Copy constructor, does not copy atomspace membership,
+     * or any of the values/truthvalues.
      */
-    Node(Node &n)
-        : Atom(n.getType(), n.getTruthValue())
+    Node(const Node &n)
+        : Atom(n.getType())
     {
         init(n._name);
     }

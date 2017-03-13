@@ -113,7 +113,7 @@ bool SatisfyingSet::grounding(const HandleMap &var_soln,
 	{
 		vargnds.push_back(var_soln.at(hv));
 	}
-	_satisfying_set.emplace(Handle(createLink(LIST_LINK, vargnds)));
+	_satisfying_set.emplace(Handle(createLink(vargnds, LIST_LINK)));
 
 	// If we found as many as we want, then stop looking for more.
 	return (_satisfying_set.size() >= max_results);

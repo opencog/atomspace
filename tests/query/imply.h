@@ -20,7 +20,7 @@ static inline Handle imply(AtomSpace* as, Handle hclauses, Handle himplicand)
 	HandleSeq vars(fv.varset.begin(), fv.varset.end());
 
 	// Stuff the variables into a proper variable list.
-	Handle hvars(createLink(VARIABLE_LIST, vars));
+	Handle hvars(createLink(vars, VARIABLE_LIST));
 
 	HandleSeq oset = {hvars, hclauses, himplicand};
 

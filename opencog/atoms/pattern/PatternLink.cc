@@ -154,7 +154,7 @@ void PatternLink::init(void)
 /// It assumes that the variables have already been correctly extracted
 /// from the body, as appropriate.
 PatternLink::PatternLink(const Variables& vars, const Handle& body)
-	: ScopeLink(PATTERN_LINK, HandleSeq())
+	: ScopeLink(HandleSeq(), PATTERN_LINK)
 {
 	_pat.redex_name = "jit PatternLink";
 
@@ -174,7 +174,7 @@ PatternLink::PatternLink(const OrderedHandleSet& vars,
                          const VariableTypeMap& typemap,
                          const HandleSeq& compo,
                          const OrderedHandleSet& opts)
-	: ScopeLink(PATTERN_LINK, HandleSeq())
+	: ScopeLink(HandleSeq(), PATTERN_LINK)
 {
 	// First, lets deal with the vars. We have discarded the original
 	// order of the variables, and I think that's OK, because we will
@@ -238,7 +238,7 @@ PatternLink::PatternLink(const OrderedHandleSet& vars,
 /// either.  This is used only for backwards-compatibility API's.
 PatternLink::PatternLink(const OrderedHandleSet& vars,
                          const HandleSeq& clauses)
-	: ScopeLink(PATTERN_LINK, HandleSeq())
+	: ScopeLink(HandleSeq(), PATTERN_LINK)
 {
 	_varlist.varset = vars;
 	_pat.clauses = clauses;
@@ -248,36 +248,36 @@ PatternLink::PatternLink(const OrderedHandleSet& vars,
 
 /* ================================================================= */
 
-PatternLink::PatternLink(const HandleSeq& hseq, TruthValuePtr tv)
-	: ScopeLink(PATTERN_LINK, hseq, tv)
+PatternLink::PatternLink(const Handle& body)
+	: ScopeLink(HandleSeq({body}), PATTERN_LINK)
 {
 	init();
 }
 
-PatternLink::PatternLink(const Handle& body, TruthValuePtr tv)
-	: ScopeLink(PATTERN_LINK, HandleSeq({body}), tv)
+PatternLink::PatternLink(const Handle& vars, const Handle& body)
+	: ScopeLink(HandleSeq({vars, body}), PATTERN_LINK)
 {
 	init();
 }
 
-PatternLink::PatternLink(const Handle& vars, const Handle& body,
-                         TruthValuePtr tv)
-	: ScopeLink(PATTERN_LINK, HandleSeq({vars, body}), tv)
+PatternLink::PatternLink(const HandleSeq& hseq, Type t)
+	: ScopeLink(hseq, t)
 {
-	init();
-}
+	// Type must be as expected
+	if (not classserver().isA(t, PATTERN_LINK))
+	{
+		const std::string& tname = classserver().getTypeName(t);
+		throw InvalidParamException(TRACE_INFO,
+			"Expecting a PatternLink, got %s", tname.c_str());
+	}
 
-PatternLink::PatternLink(Type t, const HandleSeq& hseq,
-                         TruthValuePtr tv)
-	: ScopeLink(t, hseq, tv)
-{
 	// BindLink uses a different initialization sequence.
 	if (BIND_LINK == t) return;
 	if (DUAL_LINK == t) return;
 	init();
 }
 
-PatternLink::PatternLink(Link &l)
+PatternLink::PatternLink(const Link &l)
 	: ScopeLink(l)
 {
 	// Type must be as expected
@@ -956,36 +956,6 @@ void PatternLink::debug_log(void) const
 		logger().fine("There are no bound vars in this pattern");
 }
 
-/* ================================================================= */
-
-PatternLinkPtr PatternLink::factory(const Handle& h)
-{
-	// If h is of the right form already, its just a matter of calling
-	// it.  Otherwise, we have to create
-	PatternLinkPtr plp(PatternLinkCast(h));
-	if (plp) return plp;
-
-	if (nullptr == h)
-		throw RuntimeException(TRACE_INFO, "Null pointer exception!");
-
-	return factory(h->getType(), h->getOutgoingSet());
-}
-
-// Basic type factory.
-PatternLinkPtr PatternLink::factory(Type t, const HandleSeq& seq)
-{
-	if (BIND_LINK == t)
-		return createBindLink(seq);
-	if (DUAL_LINK == t)
-		return createDualLink(seq);
-
-	// Handle all of the others
-	if (classserver().isA(t, PATTERN_LINK))
-		return createPatternLink(t, seq);
-
-	throw SyntaxException(TRACE_INFO,
-		"PatternLink is not a factory for %s",
-		classserver().getTypeName(t).c_str());
-}
+DEFINE_LINK_FACTORY(PatternLink, PATTERN_LINK)
 
 /* ===================== END OF FILE ===================== */

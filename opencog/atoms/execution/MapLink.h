@@ -54,11 +54,7 @@ protected:
 
 	void init(void);
 
-	MapLink(Type, const Handle&,
-	           TruthValuePtr tv = TruthValue::DEFAULT_TV());
-
-	MapLink(Type, const HandleSeq&,
-	           TruthValuePtr tv = TruthValue::DEFAULT_TV());
+	MapLink(Type, const Handle&);
 
 	bool extract(const Handle&, const Handle&,
 	             HandleMap&,
@@ -67,18 +63,16 @@ protected:
 	Handle rewrite_one(const Handle&, AtomSpace*) const;
 
 public:
-	MapLink(const HandleSeq&,
-	        TruthValuePtr tv = TruthValue::DEFAULT_TV());
-
-	MapLink(const Handle& pattern, const Handle& term,
-	        TruthValuePtr tv = TruthValue::DEFAULT_TV());
-
-	MapLink(Link &l);
+	MapLink(const HandleSeq&, Type=MAP_LINK);
+	MapLink(const Handle& pattern, const Handle& term);
+	MapLink(const Link &l);
 
 	// Align the pattern and the term side-by-side, and extract the
 	// values that match up with the variables.  If the term is not of
 	// the same type as the pattern, return the undefined handle.
 	virtual Handle execute(AtomSpace* = NULL) const;
+
+	static Handle factory(const Handle&);
 };
 
 typedef std::shared_ptr<MapLink> MapLinkPtr;

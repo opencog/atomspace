@@ -41,12 +41,8 @@
 #include <opencog/atoms/NumberNode.h>
 #include <opencog/atoms/TypeNode.h>
 #include <opencog/atoms/core/DeleteLink.h>
-#include <opencog/atoms/core/FreeLink.h>
+#include <opencog/atoms/core/ScopeLink.h>
 #include <opencog/atoms/core/StateLink.h>
-#include <opencog/atoms/core/VariableList.h>
-#include <opencog/atoms/execution/EvaluationLink.h>
-#include <opencog/atoms/execution/ExecutionOutputLink.h>
-#include <opencog/atoms/execution/MapLink.h>
 #include <opencog/util/exceptions.h>
 #include <opencog/util/functional.h>
 #include <opencog/util/Logger.h>
@@ -239,8 +235,9 @@ Handle AtomTable::getHandle(Type t, const std::string& n) const
     return getNodeHandle(a);
 }
 
-Handle AtomTable::getNodeHandle(AtomPtr& a) const
+Handle AtomTable::getNodeHandle(const AtomPtr& orig) const
 {
+    AtomPtr a(orig);
     // The hash function will fail to find NumberNodes unless
     // they are in the proper format.
     if (NUMBER_NODE == a->getType()) {
@@ -267,12 +264,13 @@ Handle AtomTable::getNodeHandle(AtomPtr& a) const
 
 Handle AtomTable::getHandle(Type t, const HandleSeq& seq) const
 {
-    AtomPtr a(createLink(t, seq));
+    AtomPtr a(createLink(seq, t));
     return getLinkHandle(a);
 }
 
-Handle AtomTable::getLinkHandle(AtomPtr& a, Quotation quotation) const
+Handle AtomTable::getLinkHandle(const AtomPtr& orig, Quotation quotation) const
 {
+    AtomPtr a(orig);
     Type t = a->getType();
     const HandleSeq &seq = a->getOutgoingSet();
     bool unquoted = not quotation.is_quoted();
@@ -292,7 +290,7 @@ Handle AtomTable::getLinkHandle(AtomPtr& a, Quotation quotation) const
         resolved_seq.emplace_back(rh);
     }
 
-    a = createLink(t, resolved_seq);
+    a = createLink(resolved_seq, t);
 
     // Start searching to see if we have this atom.
     ContentHash ch = a->get_hash();
@@ -307,7 +305,7 @@ Handle AtomTable::getLinkHandle(AtomPtr& a, Quotation quotation) const
     if (unquoted and classserver().isA(t, SCOPE_LINK)) {
         ScopeLinkPtr wanted = ScopeLinkCast(a);
         if (nullptr == wanted) {
-            wanted = ScopeLink::factory(Handle(a));
+            wanted = ScopeLinkCast(classserver().factory(Handle(a)));
         }
         ch = wanted->get_hash();
         a = wanted;
@@ -334,7 +332,7 @@ Handle AtomTable::getLinkHandle(AtomPtr& a, Quotation quotation) const
 /// Find an equivalent atom that is exactly the same as the arg. If
 /// such an atom is in the table, it is returned, else the return
 /// is the bad handle.
-Handle AtomTable::getHandle(AtomPtr& a, Quotation quotation) const
+Handle AtomTable::getHandle(const AtomPtr& a, Quotation quotation) const
 {
     if (nullptr == a) return Handle::UNDEFINED;
 
@@ -349,41 +347,11 @@ Handle AtomTable::getHandle(AtomPtr& a, Quotation quotation) const
     return Handle::UNDEFINED;
 }
 
-// C++ atom types support.  Try to cast, if possible.
+// Special atom types support.
 AtomPtr AtomTable::cast_factory(Type atom_type, AtomPtr atom)
 {
-    // Nodes of various kinds -----------
-    if (NUMBER_NODE == atom_type) {
-        if (nullptr == NumberNodeCast(atom))
-            return createNumberNode(*NodeCast(atom));
-    } else if (TYPE_NODE == atom_type) {
-        if (nullptr == TypeNodeCast(atom))
-            return createTypeNode(*NodeCast(atom));
-
-    // Links of various kinds -----------
-/*
-    XXX FIXME: cannot do this, due to a circular shared library
-    dependency between python and itself: python depends on
-    ExecutionOutputLink, and ExecutionOutputLink depends on python.
-    Boo.  I tried fixing this, but it is hard, somehow.
-
-*/
-    } else if (EVALUATION_LINK == atom_type) {
-/*
-        if (nullptr == EvaluationLinkCast(atom))
-            return createEvaluationLink(*LinkCast(atom));
-*/
-    } else if (VARIABLE_LIST == atom_type) {
-        if (nullptr == VariableListCast(atom))
-            return createVariableList(*LinkCast(atom));
-    } else if (classserver().isA(atom_type, SCOPE_LINK)) {
-        // isA because we want to force alpha-conversion.
-        if (nullptr == ScopeLinkCast(atom))
-            return ScopeLink::factory(Handle(atom));
-    }
-
     // Very special handling for DeleteLink's
-    else if (DELETE_LINK == atom_type) {
+    if (DELETE_LINK == atom_type) {
         DeleteLinkPtr delp(DeleteLinkCast(atom));
         // If it can be cast, then its not an open term.
         if (nullptr != delp)
@@ -403,19 +371,6 @@ AtomPtr AtomTable::cast_factory(Type atom_type, AtomPtr atom)
         }
         return delp;
     }
-
-    // Handle MapLinks before FreeLink
-    else if (EXECUTION_OUTPUT_LINK == atom_type) {
-    } else if (MAP_LINK == atom_type) {
-        // if (nullptr == TypedAtomLinkCast(atom))
-            // return createMapLink(*LinkCast(atom));
-
-    // Handle FreeLinks only after special treatment for State,
-    // Delete, above.
-    } else if (classserver().isA(atom_type, FREE_LINK)) {
-        if (nullptr == FreeLinkCast(atom))
-            return FreeLink::factory(Handle(atom));
-    }
     return atom;
 }
 
@@ -434,38 +389,8 @@ AtomPtr AtomTable::clone_factory(Type atom_type, AtomPtr atom)
     if (classserver().isA(atom_type, NODE))
         return createNode(*NodeCast(atom));
 
-    // Links of various kinds -----------
-/*
-    XXX FIXME: cannot do this, due to a circular shared library
-    dependency between python and itself: python depends on
-    ExecutionOutputLink, and ExecutionOutputLink depends on python.
-    Boo.  I tried fixing this, but it is hard, somehow.
-*/
-    if (EVALUATION_LINK == atom_type)
-        // return createEvaluationLink(*LinkCast(atom));
-        return createLink(*LinkCast(atom));
-    if (VARIABLE_LIST == atom_type)
-        return createVariableList(*LinkCast(atom));
-
-    // Handle MapLink *before* FunctionLink.
-    if (EXECUTION_OUTPUT_LINK == atom_type)
-        // return createExecutionOutputLink(*LinkCast(atom));
-        return createLink(*LinkCast(atom));
-    if (MAP_LINK == atom_type)
-        // return createMapLink(*LinkCast(atom));
-        return createLink(*LinkCast(atom));
-    if (classserver().isA(atom_type, FREE_LINK))
-        return FreeLink::factory(Handle(atom));
-
-    // isA because we want to force alpha-conversion.
-    if (classserver().isA(atom_type, SCOPE_LINK))
-        return ScopeLink::factory(Handle(atom));
-
-    if (classserver().isA(atom_type, LINK))
-        return createLink(*LinkCast(atom));
-
-    throw RuntimeException(TRACE_INFO,
-          "AtomTable - failed factory call!");
+    // The createLink *forces* a copy of the link to be made.
+    return classserver().factory(Handle(createLink(*LinkCast(atom))));
 }
 
 #if 0
@@ -496,12 +421,11 @@ Handle AtomTable::add(AtomPtr atom, bool async)
     if (in_environ(atom))
         return atom->getHandle();
 
-    // Factory implements C++ atom types.
     AtomPtr orig(atom);
     Type atom_type = atom->getType();
-    atom = cast_factory(atom_type, atom);
 
     // Certain DeleteLinks can never be added!
+    atom = cast_factory(atom_type, atom);
     if (nullptr == atom) return Handle();
 
     // If this atom is in some other atomspace or not in any atomspace,
@@ -520,7 +444,7 @@ Handle AtomTable::add(AtomPtr atom, bool async)
             if (nullptr == h.operator->()) return Handle::UNDEFINED;
             closet.emplace_back(add(h, async));
         }
-        atom = createLink(atom_type, closet, atom->getTruthValue());
+        atom = createLink(closet, atom_type);
         atom = clone_factory(atom_type, atom);
     }
 
@@ -535,6 +459,8 @@ Handle AtomTable::add(AtomPtr atom, bool async)
     std::unique_lock<std::recursive_mutex> lck(_mtx);
     Handle hcheck(getHandle(orig));
     if (hcheck) return hcheck;
+
+    atom->copyValues(Handle(orig));
 
     if (atom->isLink()) {
         if (STATE_LINK == atom_type) {

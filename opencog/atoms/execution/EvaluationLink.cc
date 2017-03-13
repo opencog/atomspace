@@ -42,21 +42,44 @@
 
 using namespace opencog;
 
-EvaluationLink::EvaluationLink(const HandleSeq& oset,
-                               TruthValuePtr tv)
-    : FreeLink(EVALUATION_LINK, oset, tv)
+EvaluationLink::EvaluationLink(const HandleSeq& oset, Type t)
+    : FreeLink(oset, t)
 {
-	if ((2 != oset.size()) or
-	   (LIST_LINK != oset[1]->getType()))
+	if (EVALUATION_LINK != t)
+		throw RuntimeException(TRACE_INFO,
+		    "Expecting an EvaluationLink");
+
+	// The "canonical" EvaluationLink structure is:
+	//    EvaluationLink
+	//        PredicateNode "foo"
+	//        ListLink
+	//           ...
+	//
+	// However, patterns can have variables for either the
+	// ListLink, or the PredicateNode, or both.
+	//
+	// ... except reality is worse: many examples include
+	// badly-formed EvaluationLinks, on-purpose.  So, before
+	// we can do any sort of strict checking here, we would
+	// need fix all those wiki pages, examples, etc.
+	// As of this writing (March 2017), there are seven unit
+	// tests that create EvaluationLinks whose size() is not 2:
+	//    PutLinkUTest GetLinkUTest BuggySelfGroundUTest
+	//    StackMoreUTest ConstantClausesUTest PersistUTest
+	//    MultiPersistUTest
+	//
+/********
+	if (2 != oset.size())
+	   // or (LIST_LINK != oset[1]->getType()))
 	{
 		throw RuntimeException(TRACE_INFO,
 		    "EvaluationLink must have predicate and args!");
 	}
+*********/
 }
 
-EvaluationLink::EvaluationLink(const Handle& schema, const Handle& args,
-                               TruthValuePtr tv)
-    : FreeLink(EVALUATION_LINK, schema, args, tv)
+EvaluationLink::EvaluationLink(const Handle& schema, const Handle& args)
+    : FreeLink(EVALUATION_LINK, schema, args)
 {
 	if (LIST_LINK != args->getType()) {
 		throw RuntimeException(TRACE_INFO,
@@ -64,14 +87,13 @@ EvaluationLink::EvaluationLink(const Handle& schema, const Handle& args,
 	}
 }
 
-EvaluationLink::EvaluationLink(Link& l)
+EvaluationLink::EvaluationLink(const Link& l)
     : FreeLink(l)
 {
 	Type tscope = l.getType();
-	if (EVALUATION_LINK != tscope) {
+	if (EVALUATION_LINK != tscope)
 		throw RuntimeException(TRACE_INFO,
 		    "Expecting an EvaluationLink");
-	}
 }
 
 // Pattern matching hack. The pattern matcher returns sets of atoms;
@@ -615,3 +637,9 @@ TruthValuePtr EvaluationLink::do_evaluate(AtomSpace* as,
 	     "Cannot evaluate unknown GroundedPredicateNode: %s",
 	      schema.c_str());
 }
+
+// The EvaluationLink factory, if allowed to run, just screws up
+// all sorts of unit test cases, and causes a large variety of
+// faults.  I suppose that perhaps this needs to be fixed, but its
+// daunting at this time.
+// DEFINE_LINK_FACTORY(EvaluationLink, EVALUATION_LINK)

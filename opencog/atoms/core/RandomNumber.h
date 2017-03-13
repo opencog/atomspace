@@ -48,13 +48,13 @@ protected:
 	void init();
 
 public:
-	RandomNumberLink(const HandleSeq&,
-	           TruthValuePtr tv = TruthValue::DEFAULT_TV());
-
-	RandomNumberLink(Link &l);
+	RandomNumberLink(const HandleSeq&, Type=RANDOM_NUMBER_LINK);
+	RandomNumberLink(const Link &l);
 
 	// Return a pointer to the atom being specified.
 	virtual Handle execute(AtomSpace* = NULL) const;
+
+	static Handle factory(const Handle&);
 };
 
 typedef std::shared_ptr<RandomNumberLink> RandomNumberLinkPtr;

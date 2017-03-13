@@ -35,21 +35,19 @@ void StateLink::init()
 	FreeLink::init();
 }
 
-StateLink::StateLink(const HandleSeq& oset,
-                     TruthValuePtr tv)
-	: UniqueLink(STATE_LINK, oset, tv)
+StateLink::StateLink(const HandleSeq& oset, Type t)
+	: UniqueLink(oset, t)
 {
 	init();
 }
 
-StateLink::StateLink(const Handle& name, const Handle& defn,
-                     TruthValuePtr tv)
-	: UniqueLink(STATE_LINK, HandleSeq({name, defn}), tv)
+StateLink::StateLink(const Handle& name, const Handle& defn)
+	: UniqueLink(HandleSeq({name, defn}), STATE_LINK)
 {
 	init();
 }
 
-StateLink::StateLink(Link &l)
+StateLink::StateLink(const Link &l)
 	: UniqueLink(l)
 {
 	init();
@@ -74,5 +72,7 @@ Handle StateLink::get_link(const Handle& alias)
 {
 	return get_unique(alias, STATE_LINK, true);
 }
+
+DEFINE_LINK_FACTORY(StateLink, STATE_LINK);
 
 /* ===================== END OF FILE ===================== */

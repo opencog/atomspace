@@ -81,7 +81,7 @@ void VarScraper::find_vars(HandleSeq& varseq, OrderedHandleSet& varset,
 			// do the bound-variable extraction.
 			ScopeLinkPtr sco(ScopeLinkCast(h));
 			if (nullptr == sco)
-				sco = ScopeLink::factory(t, h->getOutgoingSet());
+				sco = ScopeLinkCast(classserver().factory(h));
 			const Variables& vees = sco->get_variables();
 			for (const Handle& v : vees.varseq) _bound_vars.insert(v);
 		}
@@ -220,7 +220,7 @@ Handle FreeVariables::substitute_scoped(const Handle& term,
 				oset.emplace_back(substitute_scoped(h, args, silent,
 				                                    hidden_map, quotation));
 			}
-			return Handle(ScopeLink::factory(term->getType(), oset));
+			return classserver().factory(Handle(createLink(oset, term->getType())));
 		}
 	}
 
@@ -244,10 +244,7 @@ Handle FreeVariables::substitute_scoped(const Handle& term,
 				substitute_scoped(h, args, silent, index_map, quotation));
 	}
 
-	if (classserver().isA(ty, SCOPE_LINK))
-		return Handle(ScopeLink::factory(term->getType(), oset));
-
-	return Handle(createLink(term->getType(), oset));
+	return classserver().factory(Handle(createLink(oset, term->getType())));
 }
 
 /* ================================================================= */
@@ -591,7 +588,7 @@ Handle Variables::get_vardecl() const
 			for (Type t : sit->second)
 				types.push_back(Handle(createTypeNode(t)));
 			Handle types_h = types.size() == 1 ? types[0]
-				: Handle(createLink(TYPE_CHOICE, types));
+				: Handle(createLink(types, TYPE_CHOICE));
 			vars.push_back(Handle(createLink(TYPED_VARIABLE_LINK,
 			                                 var, types_h)));
 			continue;

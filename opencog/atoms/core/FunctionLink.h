@@ -57,25 +57,21 @@ class FunctionLink : public FreeLink
 {
 protected:
 	void init(void);
-	FunctionLink(Type, const Handle& a,
-	             TruthValuePtr tv = TruthValue::DEFAULT_TV());
-
-	FunctionLink(Type, const Handle& a, const Handle& b,
-	             TruthValuePtr tv = TruthValue::DEFAULT_TV());
+	FunctionLink(Type, const Handle& a);
+	FunctionLink(Type, const Handle& a, const Handle& b);
 
 public:
 	// XXX Need to make this public, so that the factory can call it!
-	FunctionLink(Type, const HandleSeq& oset,
-	             TruthValuePtr tv = TruthValue::DEFAULT_TV());
+	FunctionLink(const HandleSeq& oset, Type = FUNCTION_LINK);
 
-	FunctionLink(Link& l);
+	FunctionLink(const Link& l);
 	virtual ~FunctionLink() {}
 
 	virtual Handle execute(AtomSpace* = NULL) const;
 	static Handle do_execute(AtomSpace*, const Handle&);
 
-	static FunctionLinkPtr factory(const Handle&);
-	static FunctionLinkPtr factory(Type, const HandleSeq&);
+	static Handle factory(const Handle&);
+	static FunctionLinkPtr castfactory(const Handle&);
 };
 
 static inline FunctionLinkPtr FunctionLinkCast(const Handle& h)
