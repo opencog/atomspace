@@ -235,7 +235,7 @@ Handle AtomTable::getHandle(Type t, const std::string& n) const
     return getNodeHandle(a);
 }
 
-Handle AtomTable::getNodeHandle(AtomPtr& orig) const
+Handle AtomTable::getNodeHandle(const AtomPtr& orig) const
 {
     AtomPtr a(orig);
     // The hash function will fail to find NumberNodes unless
@@ -268,7 +268,7 @@ Handle AtomTable::getHandle(Type t, const HandleSeq& seq) const
     return getLinkHandle(a);
 }
 
-Handle AtomTable::getLinkHandle(AtomPtr& orig, Quotation quotation) const
+Handle AtomTable::getLinkHandle(const AtomPtr& orig, Quotation quotation) const
 {
     AtomPtr a(orig);
     Type t = a->getType();
@@ -332,7 +332,7 @@ Handle AtomTable::getLinkHandle(AtomPtr& orig, Quotation quotation) const
 /// Find an equivalent atom that is exactly the same as the arg. If
 /// such an atom is in the table, it is returned, else the return
 /// is the bad handle.
-Handle AtomTable::getHandle(AtomPtr& a, Quotation quotation) const
+Handle AtomTable::getHandle(const AtomPtr& a, Quotation quotation) const
 {
     if (nullptr == a) return Handle::UNDEFINED;
 
@@ -347,20 +347,11 @@ Handle AtomTable::getHandle(AtomPtr& a, Quotation quotation) const
     return Handle::UNDEFINED;
 }
 
-// C++ atom types support.  Try to cast, if possible.
+// Special atom types support.
 AtomPtr AtomTable::cast_factory(Type atom_type, AtomPtr atom)
 {
-    // Nodes of various kinds -----------
-    if (NUMBER_NODE == atom_type) {
-        if (nullptr == NumberNodeCast(atom))
-            return createNumberNode(*NodeCast(atom));
-    } else if (TYPE_NODE == atom_type) {
-        if (nullptr == TypeNodeCast(atom))
-            return createTypeNode(*NodeCast(atom));
-    }
-
     // Very special handling for DeleteLink's
-    else if (DELETE_LINK == atom_type) {
+    if (DELETE_LINK == atom_type) {
         DeleteLinkPtr delp(DeleteLinkCast(atom));
         // If it can be cast, then its not an open term.
         if (nullptr != delp)
@@ -380,10 +371,7 @@ AtomPtr AtomTable::cast_factory(Type atom_type, AtomPtr atom)
         }
         return delp;
     }
-
-    // Handle other link types only after special treatment for State,
-    // Delete, above.
-    return classserver().factory(Handle(atom));
+    return atom;
 }
 
 /// The purpose of the clone factory is to create a private, unique
@@ -433,16 +421,11 @@ Handle AtomTable::add(AtomPtr atom, bool async)
     if (in_environ(atom))
         return atom->getHandle();
 
-    // Factory implements C++ atom types.
     AtomPtr orig(atom);
     Type atom_type = atom->getType();
 
-// XXX FIXME ... this cast is not needed, its superceeded by
-// the clones below; its used only to hadle the deleteLink.
-// so just handle teh DeleteLink, and forget about the rest of the cast.
-    atom = cast_factory(atom_type, atom);
-
     // Certain DeleteLinks can never be added!
+    atom = cast_factory(atom_type, atom);
     if (nullptr == atom) return Handle();
 
     // If this atom is in some other atomspace or not in any atomspace,
