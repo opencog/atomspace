@@ -42,13 +42,12 @@ protected:
 	Handle kons(const Handle&, const Handle&);
 
 	void init(void);
-	TimesLink(Type, const HandleSeq& oset);
 	TimesLink(Type, const Handle& a, const Handle& b);
 
 public:
-	TimesLink(const HandleSeq& oset);
+	TimesLink(const HandleSeq&, Type=TIMES_LINK);
 	TimesLink(const Handle& a, const Handle& b);
-	TimesLink(Link& l);
+	TimesLink(const Link&);
 
 	static Handle factory(const Handle&);
 };

@@ -40,14 +40,13 @@ class DivideLink : public TimesLink
 {
 protected:
 	void init(void);
-	DivideLink(Type, const HandleSeq& oset);
 	DivideLink(Type, const Handle& a, const Handle& b);
 
 	virtual Handle do_execute(AtomSpace*, const HandleSeq&) const;
 public:
 	DivideLink(const Handle& a, const Handle& b);
-	DivideLink(const HandleSeq& oset);
-	DivideLink(Link& l);
+	DivideLink(const HandleSeq& oset, Type=DIVIDE_LINK);
+	DivideLink(const Link& l);
 
 	static Handle factory(const Handle&);
 };

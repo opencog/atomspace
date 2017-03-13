@@ -42,13 +42,12 @@ protected:
 	virtual Handle kons(const Handle&, const Handle&);
 
 	void init(void);
-	PlusLink(Type, const HandleSeq& oset);
 	PlusLink(Type, const Handle& a, const Handle& b);
 
 public:
 	PlusLink(const Handle& a, const Handle& b);
-	PlusLink(const HandleSeq& oset);
-	PlusLink(Link& l);
+	PlusLink(const HandleSeq&, Type=PLUS_LINK);
+	PlusLink(const Link&);
 
 	static Handle factory(const Handle&);
 };

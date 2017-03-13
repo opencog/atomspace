@@ -48,12 +48,11 @@ protected:
 	Type distributive_type = NOTYPE;
 
 	void init(void);
-	FoldLink(Type, const HandleSeq& oset);
 	FoldLink(Type, const Handle& a, const Handle& b);
 
 public:
-	FoldLink(const HandleSeq& oset);
-	FoldLink(Link& l);
+	FoldLink(const HandleSeq&, Type=FOLD_LINK);
+	FoldLink(const Link& l);
 
    virtual Handle reduce(void);
 };
