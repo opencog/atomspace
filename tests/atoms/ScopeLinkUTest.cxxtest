@@ -59,10 +59,13 @@ public:
 
 	void test_get_variables_1();
 	void test_get_variables_2();
+	void test_get_variables_3();
 };
 
 void ScopeLinkUTest::test_get_variables_1()
 {
+	logger().info("BEGIN TEST: %s", __FUNCTION__);
+
 	Handle sch = al(SCOPE_LINK,
 	                X,
 	                al(AND_LINK,
@@ -78,10 +81,38 @@ void ScopeLinkUTest::test_get_variables_1()
 	printf("Excepted %s\n", ohs_to_string(exp).c_str());
 
 	TS_ASSERT_EQUALS(got, exp);
+
+	logger().info("END TEST: %s", __FUNCTION__);
 }
 
 void ScopeLinkUTest::test_get_variables_2()
 {
+	logger().info("BEGIN TEST: %s", __FUNCTION__);
+
+	Handle sch = al(SCOPE_LINK,
+	                al(TYPED_VARIABLE_LINK, X, CT),
+	                an(VARIABLE_NODE, "$P-55ebe96e"),
+	                al(EVALUATION_LINK,
+	                   an(PREDICATE_NODE, "take"),
+	                   an(CONCEPT_NODE, "compound-A")));
+
+	ScopeLinkPtr sc = ScopeLinkCast(sch);
+
+	auto got = sc->get_variables().varset;
+	auto exp = OrderedHandleSet{X};
+
+	printf("Got %s\n", ohs_to_string(got).c_str());
+	printf("Excepted %s\n", ohs_to_string(exp).c_str());
+
+	TS_ASSERT_EQUALS(got, exp);
+
+	logger().info("END TEST: %s", __FUNCTION__);
+}
+
+void ScopeLinkUTest::test_get_variables_3()
+{
+	logger().info("BEGIN TEST: %s", __FUNCTION__);
+
 	Handle sch = al(IMPLICATION_SCOPE_LINK,
 	                al(TYPED_VARIABLE_LINK, X, CT),
 	                an(VARIABLE_NODE, "$P-55ebe96e"),
@@ -98,6 +129,8 @@ void ScopeLinkUTest::test_get_variables_2()
 	printf("Excepted %s\n", ohs_to_string(exp).c_str());
 
 	TS_ASSERT_EQUALS(got, exp);
+
+	logger().info("END TEST: %s", __FUNCTION__);
 }
 
 #undef al
