@@ -278,7 +278,7 @@ void AndBIT::set_leaf2bitnode()
 AndBIT::HandleBITNodeMap::iterator
 AndBIT::insert_bitnode(Handle leaf, const BITNodeFitness& fitness)
 {
-	if (leaf)
+	if (not leaf)
 		return leaf2bitnode.end();
 
 	HandleBITNodeMap::iterator it = leaf2bitnode.find(leaf);
