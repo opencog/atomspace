@@ -209,7 +209,7 @@ bool Rule::is_meta() const
 {
 	Handle implicand = get_implicand();
 
-	if (implicand)
+	if (not implicand)
 		return false;
 
 	Type itype = implicand->getType();
