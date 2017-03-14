@@ -71,7 +71,13 @@ void ScopeLinkUTest::test_get_variables_1()
 
 	ScopeLinkPtr sc = ScopeLinkCast(sch);
 
-	TS_ASSERT_EQUALS(sc->get_variables().varset, OrderedHandleSet{X});
+	auto got = sc->get_variables().varset;
+	auto exp = OrderedHandleSet{X};
+
+	printf("Got %s\n", ohs_to_string(got).c_str());
+	printf("Excepted %s\n", ohs_to_string(exp).c_str());
+
+	TS_ASSERT_EQUALS(got, exp);
 }
 
 void ScopeLinkUTest::test_get_variables_2()
@@ -85,7 +91,13 @@ void ScopeLinkUTest::test_get_variables_2()
 
 	ScopeLinkPtr sc = ScopeLinkCast(sch);
 
-	TS_ASSERT_EQUALS(sc->get_variables().varset, OrderedHandleSet{X});
+	auto got = sc->get_variables().varset;
+	auto exp = OrderedHandleSet{X};
+
+	printf("Got %s\n", ohs_to_string(got).c_str());
+	printf("Excepted %s\n", ohs_to_string(exp).c_str());
+
+	TS_ASSERT_EQUALS(got, exp);
 }
 
 #undef al
