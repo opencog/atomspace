@@ -54,8 +54,10 @@ protected:
 	// Useless for now, but...
 	Handle _implicand;
 public:
-	ImplicationScopeLink(const HandleSeq&);
-	ImplicationScopeLink(const Link &l);
+	ImplicationScopeLink(const HandleSeq&, Type = IMPLICATION_SCOPE_LINK);
+	ImplicationScopeLink(const Link &);
+
+	static Handle factory(const Handle&);
 };
 
 typedef std::shared_ptr<ImplicationScopeLink> ImplicationScopeLinkPtr;

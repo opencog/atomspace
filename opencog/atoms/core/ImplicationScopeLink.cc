@@ -30,8 +30,8 @@ void ImplicationScopeLink::init(void)
 	extract_variables(_outgoing);
 }
 
-ImplicationScopeLink::ImplicationScopeLink(const HandleSeq& hseq)
-	: ScopeLink(hseq, IMPLICATION_SCOPE_LINK)
+ImplicationScopeLink::ImplicationScopeLink(const HandleSeq& hseq, Type t)
+	: ScopeLink(hseq, t)
 {
 	init();
 }
@@ -70,3 +70,5 @@ void ImplicationScopeLink::extract_variables(const HandleSeq& oset)
 	// a variable declaration.
 	_implicand = oset[2];
 }
+
+DEFINE_LINK_FACTORY(ImplicationScopeLink, IMPLICATION_SCOPE_LINK)
