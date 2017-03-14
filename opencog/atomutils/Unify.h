@@ -235,6 +235,13 @@ public:
 	HandleCHandleMap substitution_closure(const HandleCHandleMap& var2val) const;
 
 	/**
+	 * Calculate the variable declaration of the underlying new scope
+	 * link after substitution would have occured given a substitution
+	 * mapping.
+	 */
+	Handle substitution_vardecl(const HandleCHandleMap&	var2val) const;
+
+	/**
 	 * If the quotations are useless or harmful, which might be the
 	 * case if they deprive a ScopeLink from hiding supposedly hidden
 	 * variables, consume them.

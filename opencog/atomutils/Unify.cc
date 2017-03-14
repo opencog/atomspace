@@ -180,12 +180,8 @@ Unify::TypedSubstitution Unify::typed_substitution(const Partition& partition,
 		vcv.second = CHandle(consumed, vcv.second.context);
 	}
 
-	// Build the type declaration for this substitution. For now, the
-	// type is merely lhs_vardecl and rhs_vardecl merged together. To
-	// do well it should be taking into account the possibly more
-	// restrictive types found during unification (i.e. the block
-	// types).
-	Handle vardecl = _variables.get_vardecl();
+	// Calculate its variable declaration
+	Handle vardecl = substitution_vardecl(var2cval);
 
 	// Return the typed substitution
 	return {var2cval, vardecl};
@@ -241,6 +237,25 @@ Unify::HandleCHandleMap Unify::substitution_closure(const HandleCHandleMap& var2
 	// otherwise re-iterate
 	return hchm_content_eq(result, var2cval) ?
 		result : substitution_closure(result);
+}
+
+Handle Unify::substitution_vardecl(const HandleCHandleMap& var2val) const
+{
+	// Build the type declaration for this substitution. For now, the
+	// type is merely lhs_vardecl and rhs_vardecl merged together,
+	// then all variables assigned for substitution other than
+	// themselves are removed. To do well it should be taking into
+	// account the possibly more restrictive types found during
+	// unification (i.e. the block types).
+
+	Variables ts_variables = _variables;
+
+	for (const auto& el : var2val)
+		// Make sure it is not a self substitution
+		if (el.first != el.second.handle)
+			ts_variables.erase(el.first);
+
+	return ts_variables.get_vardecl();
 }
 
 bool Unify::is_pm_connector(const Handle& h)
