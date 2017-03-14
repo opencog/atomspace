@@ -187,7 +187,7 @@ public:
 	typedef std::map<Handle, CHandle> HandleCHandleMap;
 
 	// Subtitution values and their corresponding variable declaration
-	// (cause some values will be variables).
+	// after substitution (cause some values may be variables).
 	typedef std::map<HandleCHandleMap, Handle> TypedSubstitutions;
 	typedef TypedSubstitutions::value_type TypedSubstitution;
 

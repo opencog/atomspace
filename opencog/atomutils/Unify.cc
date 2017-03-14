@@ -1015,8 +1015,9 @@ std::string oc_to_string(const Unify::Block& pb)
 {
 	std::stringstream ss;
 	ss << "size = " << pb.size() << std::endl;
+	int i = 0;
 	for (const auto& el : pb)
-		ss << oc_to_string(el);
+		ss << "catom[" << i++ << "]:" << std::endl << oc_to_string(el);
 	return ss.str();
 }
 
