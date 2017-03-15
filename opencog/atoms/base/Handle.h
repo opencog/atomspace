@@ -102,6 +102,12 @@ public:
         return false;
     }
 
+    inline bool operator==(std::nullptr_t) const noexcept {
+        return get() == 0x0;
+    }
+    inline bool operator!=(std::nullptr_t) const noexcept {
+        return get() != 0x0;
+    }
     inline bool operator==(const Atom* ap) const noexcept {
         return get() == ap;
     }
