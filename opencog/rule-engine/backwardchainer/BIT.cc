@@ -34,8 +34,8 @@
 #include <boost/algorithm/string/join.hpp>
 
 #include <opencog/util/random.h>
-
 #include <opencog/atomutils/FindUtils.h>
+#include <opencog/atoms/execution/ExecutionOutputLink.h>
 
 #include "BIT.h"
 #include "BCLogger.h"
@@ -165,6 +165,7 @@ std::string AndBIT::fcs_to_ascii_art(const Handle& nfcs) const
 std::string AndBIT::fcs_rewrite_to_ascii_art(const Handle& h) const
 {
 	if (h->getType() == EXECUTION_OUTPUT_LINK) {
+		Handle gsn = h->getOutgoingAtom(0);
 		Handle arg = h->getOutgoingAtom(1);
 		if (arg->getType() == LIST_LINK) {
 			// Render the conclusion
@@ -195,8 +196,8 @@ std::string AndBIT::fcs_rewrite_to_ascii_art(const Handle& h) const
 
 				// Put a line over the head of the conclusion, with
 				// the premises over that line.
-				std::string ul(underline(premises_merged_aa,
-				                         unordered_premises ? '=' : '-'));
+				std::string ul(line_seperator(premises_merged_aa, conclusion_aa,
+				                              gsn, unordered_premises));
 				unsigned ulls = leading_spaces(ul);
 				unsigned ullls = ul.size() + ulls;
 				unsigned conclusion_offset = ullls < conclusion_aa.size() ? 0 :
@@ -207,13 +208,13 @@ std::string AndBIT::fcs_rewrite_to_ascii_art(const Handle& h) const
 			} else {
 				// No premises, just put a line over the head of the
 				// conclusion
-				std::string line_str(conclusion_aa.size(), '-');
+				std::string line_str(line_seperator("", conclusion_aa, gsn));
 				return line_str + "\n" + conclusion_aa;
 			}
 		} else {
 			// No premise, put a line over the head of the conclusion
 			std::string conclusion_aa = fcs_rewrite_to_ascii_art(arg);
-			std::string line_str(conclusion_aa.size(), '-');
+			std::string line_str(line_seperator("", conclusion_aa, gsn));
 			return line_str + "\n" + conclusion_aa;
 		}
 	} else return h->idToString();
@@ -545,12 +546,46 @@ unsigned AndBIT::leading_spaces(const std::string& line)
 	return line.size() - left_trimmed_line.size();
 }
 
-std::string AndBIT::underline(const std::string& aa, char c)
+std::string AndBIT::line_seperator(const std::string& up_aa,
+                                   const std::string& low_aa,
+                                   const Handle& gsn,
+                                   bool unordered_premises)
 {
-	std::string bl = bottom_line(aa);
-	size_t bls = bl.size();
-	size_t ls = leading_spaces(bl);
-	return std::string(ls, ' ') + std::string(bls - ls, c);
+	// Calculate the leading space and line seperator sizes.
+	size_t lead_sp_size;        // leading space size
+	size_t line_sep_size;       // line seperator size
+	if (up_aa.empty()) {
+		// If up_aa is empty then we assume low_aa is not empty and so
+		// the line will just have its size. Also assume that low_aa
+		// has no leading space.
+		lead_sp_size = 0;
+		line_sep_size = low_aa.size();
+	} else {
+		// If up_aa is non-empty it is fair to assume that it is either
+		// about the size of low_aa or bigger.
+		std::string up_bl = bottom_line(up_aa);
+		size_t up_bls = up_bl.size();
+		lead_sp_size = leading_spaces(up_bl);
+		line_sep_size = up_bls - lead_sp_size;
+	}
+
+	// Get formula string
+	std::string lang, lib, fun;
+	ExecutionOutputLink::lang_lib_fun(gsn->getName(), lang, lib, fun);
+	std::string formula_str = fun.substr(0, line_sep_size - 2);
+	size_t formula_str_size = formula_str.size();
+
+	// Overlay the formula string on top of the line
+	std::string line_str;
+	size_t offset = (line_sep_size - formula_str_size) / 2;
+	for (size_t i = 0; i < line_sep_size; ++i)
+		if (i < offset or offset + formula_str_size <= i)
+			line_str.push_back(unordered_premises ? '=' : '-');
+		else
+			line_str.push_back(formula_str[i - offset]);
+
+	// Append leading space in front of the line
+	return std::string(lead_sp_size, ' ') + line_str;
 }
 
 /////////
