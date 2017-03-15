@@ -337,7 +337,7 @@ private:
 	 * Given an ascii art, produce a string that seperates the upper
 	 * and lower ascii arts.
 	 */
-	static std::string line_seperator(const std::string& up_aa,
+	static std::string line_separator(const std::string& up_aa,
 	                                  const std::string& low_aa,
 	                                  const Handle& gsn,
 	                                  bool unordered_premises=false);

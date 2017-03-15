@@ -196,7 +196,7 @@ std::string AndBIT::fcs_rewrite_to_ascii_art(const Handle& h) const
 
 				// Put a line over the head of the conclusion, with
 				// the premises over that line.
-				std::string ul(line_seperator(premises_merged_aa, conclusion_aa,
+				std::string ul(line_separator(premises_merged_aa, conclusion_aa,
 				                              gsn, unordered_premises));
 				unsigned ulls = leading_spaces(ul);
 				unsigned ullls = ul.size() + ulls;
@@ -208,13 +208,13 @@ std::string AndBIT::fcs_rewrite_to_ascii_art(const Handle& h) const
 			} else {
 				// No premises, just put a line over the head of the
 				// conclusion
-				std::string line_str(line_seperator("", conclusion_aa, gsn));
+				std::string line_str(line_separator("", conclusion_aa, gsn));
 				return line_str + "\n" + conclusion_aa;
 			}
 		} else {
 			// No premise, put a line over the head of the conclusion
 			std::string conclusion_aa = fcs_rewrite_to_ascii_art(arg);
-			std::string line_str(line_seperator("", conclusion_aa, gsn));
+			std::string line_str(line_separator("", conclusion_aa, gsn));
 			return line_str + "\n" + conclusion_aa;
 		}
 	} else return h->idToString();
@@ -546,14 +546,14 @@ unsigned AndBIT::leading_spaces(const std::string& line)
 	return line.size() - left_trimmed_line.size();
 }
 
-std::string AndBIT::line_seperator(const std::string& up_aa,
+std::string AndBIT::line_separator(const std::string& up_aa,
                                    const std::string& low_aa,
                                    const Handle& gsn,
                                    bool unordered_premises)
 {
-	// Calculate the leading space and line seperator sizes.
+	// Calculate the leading space and line separator sizes.
 	size_t lead_sp_size;        // leading space size
-	size_t line_sep_size;       // line seperator size
+	size_t line_sep_size;       // line separator size
 	if (up_aa.empty()) {
 		// If up_aa is empty then we assume low_aa is not empty and so
 		// the line will just have its size. Also assume that low_aa
