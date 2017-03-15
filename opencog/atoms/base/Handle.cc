@@ -121,7 +121,7 @@ bool Handle::operator>= (const Handle& h) const noexcept
 // http://wiki.opencog.org/w/Development_standards#Print_OpenCog_Objects
 std::string h_to_string(const Handle& h)
 {
-	if (h == (Atom*) nullptr)
+	if (h == nullptr)
 		return "nullatom\n";
 	else
 		return h->toString();
