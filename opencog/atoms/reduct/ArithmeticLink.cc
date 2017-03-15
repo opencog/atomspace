@@ -132,7 +132,7 @@ Handle ArithmeticLink::reorder(void)
 static inline double get_double(AtomSpace *as, Handle h)
 {
 	NumberNodePtr nnn(NumberNodeCast(h));
-	if (nnn == NULL)
+	if (nnn == nullptr)
 		throw RuntimeException(TRACE_INFO,
 			  "Expecting a NumberNode, got %s",
 		     classserver().getTypeName(h->getType()).c_str());
