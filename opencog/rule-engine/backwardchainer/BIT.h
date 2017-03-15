@@ -188,28 +188,28 @@ public:
 	 * unordered premises, the following FCS rewrite term
 	 *
 	 * ExecutionOutputLink
-	 *   <rule-1>
+	 *   <formula-1>
 	 *   ListLink
 	 *     <conclusion-1>
 	 *     <premise-1->
 	 *     <premise-2->
 	 *     ExecutionOutputLink
-	 *       <rule-2>
+	 *       <formula-2>
 	 *       ListLink
 	 *         <conclusion-2>
 	 *         SetLink
 	 *           <premise-3>
 	 *           ExecutionOutputLink
-	 *             <rule-3>
+	 *             <formula-3>
 	 *             <conclusion-3>
 	 *
 	 * Will be displayed as followed
 	 *
-	 *                                    --------------<rule-3>
+	 *                                    --<formula-3>-
 	 *                       <premise-3>  <conclusion-3>
-	 *                       ===========================<rule-2>
+	 *                       ========<formula-2>========
 	 *   <premise-1>  <premise-2>  <conclusion-2>
-	 *   ----------------------------------------<rule-1>
+	 *   --------------<formula-1>---------------
 	 *                <conclusion-1>
 	 *
 	 * TODO: display the rules
@@ -334,10 +334,13 @@ private:
 	static unsigned leading_spaces(const std::string& line);
 
 	/**
-	 * Given an ascii art, produce a string that underlines the bottom
-	 * line with the provided character.
+	 * Given an ascii art, produce a string that seperates the upper
+	 * and lower ascii arts.
 	 */
-	static std::string underline(const std::string& aa, char c='-');
+	static std::string line_separator(const std::string& up_aa,
+	                                  const std::string& low_aa,
+	                                  const Handle& gsn,
+	                                  bool unordered_premises=false);
 };
 
 /**
