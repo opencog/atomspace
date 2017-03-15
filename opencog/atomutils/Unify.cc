@@ -348,17 +348,12 @@ bool Unify::is_bound_to_ancestor(const Variables& variables,
 
 Handle Unify::substitute(BindLinkPtr bl, const TypedSubstitution& ts)
 {
-	HandleMap var2val = strip_context(ts.first);
-
-	// Get the list of values to substitute from ts
-	HandleSeq values = bl->get_variables().make_values(var2val);
-
 	// Perform alpha-conversion, this will work over values that are
 	// non variables as well
 	//
 	// TODO: make sure that ts.second contains the declaration of all
 	// variables
-	Handle h = bl->alpha_conversion(values, ts.second);
+	Handle h = bl->alpha_conversion(strip_context(ts.first), ts.second);
 
 	return Handle(consume_ill_quotations(BindLinkCast(h)));
 }

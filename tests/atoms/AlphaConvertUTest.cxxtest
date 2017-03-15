@@ -346,7 +346,7 @@ void AlphaConvertUTest::test_names_alpha_conversion()
 		expected = LA(SCOPE_LINK, Y, LA(AND_LINK, Y));
 
 	ScopeLinkPtr sc(ScopeLinkCast(hsc));
-	Handle result = _asa.add_atom(sc->alpha_conversion({Y}));
+	Handle result = _asa.add_atom(sc->alpha_conversion({{X, Y}}));
 
 	std::cout << "result = " << oc_to_string(result);
 	std::cout << "expected = " << oc_to_string(expected);
@@ -370,7 +370,7 @@ void AlphaConvertUTest::test_vardecl_alpha_conversion()
 		expected = LA(SCOPE_LINK, Y_vardecl, LA(AND_LINK, Y));
 
 	ScopeLinkPtr sc(ScopeLinkCast(hsc));
-	Handle result = _asa.add_atom(sc->alpha_conversion({Y}, Y_vardecl));
+	Handle result = _asa.add_atom(sc->alpha_conversion({{X, Y}}, Y_vardecl));
 
 	std::cout << "result = " << oc_to_string(result);
 	std::cout << "expected = " << oc_to_string(expected);
@@ -398,14 +398,14 @@ void AlphaConvertUTest::test_vardecl_bindlink_alpha_conversion()
 		              LA(AND_LINK, Y), LA(OR_LINK, Y));
 
 	ScopeLinkPtr sc(ScopeLinkCast(hsc));
-	Handle result_wo_vardecl = _asa.add_atom(sc->alpha_conversion({Y}));
+	Handle result_wo_vardecl = _asa.add_atom(sc->alpha_conversion({{X, Y}}));
 
 	std::cout << "result_wo_vardecl = " << oc_to_string(result_wo_vardecl);
 	std::cout << "expected_wo_vardecl = " << oc_to_string(expected_wo_vardecl);
 
 	TS_ASSERT_EQUALS(result_wo_vardecl, expected_wo_vardecl);
 
-	Handle result = _asa.add_atom(sc->alpha_conversion({Y}, Y_vardecl));
+	Handle result = _asa.add_atom(sc->alpha_conversion({{X, Y}}, Y_vardecl));
 
 	std::cout << "result = " << oc_to_string(result);
 	std::cout << "expected = " << oc_to_string(expected);
@@ -430,7 +430,7 @@ void AlphaConvertUTest::test_values_alpha_conversion()
 		expected = LA(SCOPE_LINK, LA(AND_LINK, A));
 
 	ScopeLinkPtr sc(ScopeLinkCast(hsc));
-	Handle result = _asa.add_atom(sc->alpha_conversion({A}, Y_vardecl));
+	Handle result = _asa.add_atom(sc->alpha_conversion({{X, A}}, Y_vardecl));
 
 	std::cout << "result = " << oc_to_string(result);
 	std::cout << "expected = " << oc_to_string(expected);
