@@ -109,6 +109,7 @@ public:
 	void test_unify_complex_4();
 	void test_unify_complex_5();
 	void test_unify_complex_6();
+	void test_unify_complex_7();
 };
 
 void UnifyUTest::setUp(void)
@@ -774,21 +775,13 @@ void UnifyUTest::test_unify_complex_1()
 
 	TS_ASSERT_EQUALS(result, expected);
 
-	Handle ts_vardecl = _eval.eval_h("(VariableList"
-	                                 "  (TypedVariableLink"
-	                                 "    (VariableNode \"$TyVs\")"
-	                                 "    (TypeChoice"
-	                                 "      (TypeNode \"TypedVariableLink\")"
-	                                 "      (TypeNode \"VariableNode\")"
-	                                 "      (TypeNode \"VariableList\")))"
-	                                 "  (TypedVariableLink"
-	                                 "    (VariableNode \"$A1\")"
-	                                 "    (TypeNode \"EvaluationLink\"))"
-	                                 "  (TypedVariableLink"
-	                                 "    (VariableNode \"$A2\")"
-	                                 "    (TypeNode \"EvaluationLink\"))"
-	                                 "  (VariableNode \"$P\")"
-	                                 "  (VariableNode \"$Q\"))");
+	Handle A1_vardecl = _eval.eval_h("(TypedVariableLink"
+	                                 "  (VariableNode \"$A1\")"
+	                                 "  (TypeNode \"EvaluationLink\"))");
+
+	Handle A2_vardecl = _eval.eval_h("(TypedVariableLink"
+	                                 "  (VariableNode \"$A2\")"
+	                                 "  (TypeNode \"EvaluationLink\"))");
 
 	Handle consumed_LA1 =
 		_eval.eval_h("(LambdaLink"
@@ -811,12 +804,12 @@ void UnifyUTest::test_unify_complex_1()
 		                            {TyVs, Cimplicant_vardecl},
 		                            {A2, Cimplicant_body},
 		                            {Q, consumed_LA1}},
-		                           ts_vardecl},
+		                           A1_vardecl},
 		                          {{{P, implicant},
 		                            {TyVs, Cimplicant_vardecl},
 		                            {A1, Cimplicant_body},
 		                            {Q, consumed_LA2}},
-		                           ts_vardecl}};
+		                           A2_vardecl}};
 
 	std::cout << "ts_result = " << oc_to_string(ts_result) << std::endl;
 	std::cout << "ts_expected = " << oc_to_string(ts_expected) << std::endl;
@@ -897,11 +890,9 @@ void UnifyUTest::test_unify_complex_2()
 
 	TS_ASSERT_EQUALS(result, expected);
 
-	Handle ts_vardecl = _eval.eval_h("(VariableList"
-	                                 "  (VariableNode \"$P-55ebe96e\")"
-	                                 "  (TypedVariableLink"
-	                                 "    (VariableNode \"$Y-6f50cc6a\")"
-	                                 "    (TypeNode \"ConceptNode\")))");
+	Handle ts_vardecl = _eval.eval_h("(TypedVariableLink"
+	                                 "  (VariableNode \"$Y-6f50cc6a\")"
+	                                 "  (TypeNode \"ConceptNode\"))");
 
 	Unify::TypedSubstitutions tss_result =
 		unify.typed_substitutions(result, lhs);
@@ -1394,6 +1385,94 @@ void UnifyUTest::test_unify_complex_6()
 	std::cout << "expected = " << oc_to_string(expected) << std::endl;
 
 	TS_ASSERT_EQUALS(result, expected);
+}
+
+void UnifyUTest::test_unify_complex_7()
+{
+	Handle target =
+		_eval.eval_h("(LambdaLink"
+		             "  (TypedVariableLink"
+		             "    (VariableNode \"$X\")"
+		             "    (TypeNode \"ConceptNode\")"
+		             "  )"
+		             "  (EvaluationLink"
+		             "    (PredicateNode \"contain\")"
+		             "    (ListLink"
+		             "      (ConceptNode \"treatment-1\")"
+		             "      (ConceptNode \"compound-A\")"
+		             "    )"
+		             "  )"
+		             ")");
+
+	Handle alpha_pat =
+        _eval.eval_h("(QuoteLink"
+                     "  (LambdaLink"
+                     "    (UnquoteLink"
+                     "      (VariableNode \"$V-6c74a409\")"
+                     "    )"
+                     "    (UnquoteLink"
+                     "      (VariableNode \"$B-6266d6f2\")"
+                     "    )"
+                     "  )"
+                     ")");
+
+	Handle vardecl;
+
+	Handle alpha_vardecl =
+        _eval.eval_h("(VariableList"
+                     "  (TypedVariableLink"
+                     "    (VariableNode \"$V-6c74a409\")"
+                     "    (TypeChoice"
+                     "      (TypeNode \"TypedVariableLink\")"
+                     "      (TypeNode \"VariableNode\")"
+                     "      (TypeNode \"VariableList\")"
+                     "    )"
+                     "  )"
+                     "  (VariableNode \"$B-6266d6f2\")"
+                     ")");
+
+	Handle V = _eval.eval_h("(VariableNode \"$V-6c74a409\")");
+	Handle B = _eval.eval_h("(VariableNode \"$B-6266d6f2\")");
+	Handle X_vardecl =
+		_eval.eval_h("(TypedVariableLink"
+		             "  (VariableNode \"$X\")"
+		             "  (TypeNode \"ConceptNode\")"
+		             ")");
+	Handle body =
+		_eval.eval_h("(EvaluationLink"
+		             "  (PredicateNode \"contain\")"
+		             "  (ListLink"
+		             "    (ConceptNode \"treatment-1\")"
+		             "    (ConceptNode \"compound-A\")"
+		             "  )"
+		             ")");
+
+	Unify::Context C(Quotation(), {X});
+	Unify::CHandle CX_vardecl(X_vardecl, C), Cbody(body, C);
+
+	Unify unify(target, alpha_pat, vardecl, alpha_vardecl);
+	Unify::SolutionSet result = unify(),
+		expected = Unify::SolutionSet(true, {{{{V, CX_vardecl}, X_vardecl},
+					                          {{B, Cbody}, body}}});
+
+	std::cout << "result = " << oc_to_string(result) << std::endl;
+	std::cout << "expected = " << oc_to_string(expected) << std::endl;
+
+	TS_ASSERT_EQUALS(result, expected);
+
+	Handle ts_vardecl;
+
+	Unify::TypedSubstitutions ts_result =
+		unify.typed_substitutions(result, target);
+	Unify::TypedSubstitutions ts_expected =
+		Unify::TypedSubstitutions{{{{V, CX_vardecl},
+		                            {B, Cbody}},
+		                           ts_vardecl}};
+
+	std::cout << "ts_result = " << oc_to_string(ts_result) << std::endl;
+	std::cout << "ts_expected = " << oc_to_string(ts_expected) << std::endl;
+
+	TS_ASSERT(tss_content_eq(ts_result, ts_expected));
 }
 
 #undef al

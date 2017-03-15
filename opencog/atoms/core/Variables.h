@@ -94,6 +94,9 @@ struct FreeVariables
 	// sequence to be passed to substitute
 	HandleSeq make_values(const HandleMap&) const;
 
+	// Erase the given variable, if exist
+	void erase(const Handle&);
+
 	// Given the tree `tree` containing variables in it, create and
 	// return a new tree with the indicated values `vals` substituted
 	// for the variables.  "nocheck" == no type checking is done.
@@ -182,6 +185,9 @@ struct Variables : public FreeVariables
 
 	// Extend this variable set by adding in the given variable set.
 	void extend(const Variables&);
+
+	// Erase the given variable, if exist
+	void erase(const Handle&);
 
 	/// This is the dual of VariableList::validate_vartype. convert a
 	/// Variables object into a Handle variable declaration usable by

@@ -180,12 +180,8 @@ Unify::TypedSubstitution Unify::typed_substitution(const Partition& partition,
 		vcv.second = CHandle(consumed, vcv.second.context);
 	}
 
-	// Build the type declaration for this substitution. For now, the
-	// type is merely lhs_vardecl and rhs_vardecl merged together. To
-	// do well it should be taking into account the possibly more
-	// restrictive types found during unification (i.e. the block
-	// types).
-	Handle vardecl = _variables.get_vardecl();
+	// Calculate its variable declaration
+	Handle vardecl = substitution_vardecl(var2cval);
 
 	// Return the typed substitution
 	return {var2cval, vardecl};
@@ -241,6 +237,25 @@ Unify::HandleCHandleMap Unify::substitution_closure(const HandleCHandleMap& var2
 	// otherwise re-iterate
 	return hchm_content_eq(result, var2cval) ?
 		result : substitution_closure(result);
+}
+
+Handle Unify::substitution_vardecl(const HandleCHandleMap& var2val) const
+{
+	// Build the type declaration for this substitution. For now, the
+	// type is merely lhs_vardecl and rhs_vardecl merged together,
+	// then all variables assigned for substitution other than
+	// themselves are removed. To do well it should be taking into
+	// account the possibly more restrictive types found during
+	// unification (i.e. the block types).
+
+	Variables ts_variables = _variables;
+
+	for (const auto& el : var2val)
+		// Make sure it is not a self substitution
+		if (el.first != el.second.handle)
+			ts_variables.erase(el.first);
+
+	return ts_variables.get_vardecl();
 }
 
 bool Unify::is_pm_connector(const Handle& h)
@@ -333,17 +348,12 @@ bool Unify::is_bound_to_ancestor(const Variables& variables,
 
 Handle Unify::substitute(BindLinkPtr bl, const TypedSubstitution& ts)
 {
-	HandleMap var2val = strip_context(ts.first);
-
-	// Get the list of values to substitute from ts
-	HandleSeq values = bl->get_variables().make_values(var2val);
-
 	// Perform alpha-conversion, this will work over values that are
 	// non variables as well
 	//
 	// TODO: make sure that ts.second contains the declaration of all
 	// variables
-	Handle h = bl->alpha_conversion(values, ts.second);
+	Handle h = bl->alpha_conversion(strip_context(ts.first), ts.second);
 
 	return Handle(consume_ill_quotations(BindLinkCast(h)));
 }
@@ -1015,8 +1025,9 @@ std::string oc_to_string(const Unify::Block& pb)
 {
 	std::stringstream ss;
 	ss << "size = " << pb.size() << std::endl;
+	int i = 0;
 	for (const auto& el : pb)
-		ss << oc_to_string(el);
+		ss << "catom[" << i++ << "]:" << std::endl << oc_to_string(el);
 	return ss.str();
 }
 

@@ -127,6 +127,24 @@ HandleSeq FreeVariables::make_values(const HandleMap& varmap) const
 	return values;
 }
 
+void FreeVariables::erase(const Handle& var)
+{
+	// Remove from varset
+	varset.erase(var);
+
+	// Remove from index
+	index.erase(var);
+
+	// Remove from varseq and update all values in the subsequent
+	// index as they have changed.
+	auto it = std::find(varseq.begin(), varseq.end(), var);
+	if (it != varseq.end()) {
+		it = varseq.erase(it);
+		for (; it != varseq.end(); ++it)
+			index.find(*it)->second--;
+	}
+}
+
 /* ================================================================= */
 
 Handle FreeVariables::substitute_nocheck(const Handle& term,
@@ -574,6 +592,17 @@ void Variables::extend(const Variables& vset)
 			catch(const std::out_of_range&) {}
 		}
 	}
+}
+
+void Variables::erase(const Handle& var)
+{
+	// Remove from the type maps
+	_simple_typemap.erase(var);
+	_deep_typemap.erase(var);
+	_fuzzy_typemap.erase(var);
+
+	// Remove FreeVariables
+	FreeVariables::erase(var);
 }
 
 Handle Variables::get_vardecl() const

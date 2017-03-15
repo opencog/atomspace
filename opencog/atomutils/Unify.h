@@ -187,7 +187,7 @@ public:
 	typedef std::map<Handle, CHandle> HandleCHandleMap;
 
 	// Subtitution values and their corresponding variable declaration
-	// (cause some values will be variables).
+	// after substitution (cause some values may be variables).
 	typedef std::map<HandleCHandleMap, Handle> TypedSubstitutions;
 	typedef TypedSubstitutions::value_type TypedSubstitution;
 
@@ -233,6 +233,13 @@ public:
 	 * (Variable "$Q") -> (Concept "B")
 	 */
 	HandleCHandleMap substitution_closure(const HandleCHandleMap& var2val) const;
+
+	/**
+	 * Calculate the variable declaration of the underlying new scope
+	 * link after substitution would have occured given a substitution
+	 * mapping.
+	 */
+	Handle substitution_vardecl(const HandleCHandleMap&	var2val) const;
 
 	/**
 	 * If the quotations are useless or harmful, which might be the

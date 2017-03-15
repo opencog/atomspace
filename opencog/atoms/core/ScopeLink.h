@@ -71,6 +71,12 @@ protected:
 	                      Quotation quotation = Quotation()) const;
 	virtual ContentHash compute_hash() const;
 
+private:
+	// Replace the variables names in vardecl by the given vars,
+	// ignoring values to not create a ill-formed vardecl.
+	Handle substitute_vardecl(const Handle& vardecl,
+	                          const HandleMap& var2val) const;
+
 public:
 	ScopeLink(const HandleSeq&, Type=SCOPE_LINK);
 	ScopeLink(const Handle& varcdecls, const Handle& body);
@@ -135,8 +141,8 @@ public:
 	 * be modified in case they are empty or undefined, see
 	 * alpha_conversion implementation.
 	 */
-	Handle alpha_conversion(HandleSeq vars = HandleSeq(),
-	                        Handle vardecl = Handle::UNDEFINED) const;
+	Handle alpha_conversion(HandleMap var2val=HandleMap(),
+	                        Handle vardecl=Handle::UNDEFINED) const;
 
 	// Overload equality check!
 	virtual bool operator==(const Atom&) const;
