@@ -39,6 +39,7 @@ private:
 	static Handle do_execute(AtomSpace*, const Handle& schema,
 	                                     const Handle& args);
 
+public:
 	/**
 	 * Given a grounded schema name like "py: foo", extract
 	 * 1. the language, like "py"
@@ -49,7 +50,7 @@ private:
 	                         std::string& lang,
 	                         std::string& lib,
 	                         std::string& fun);;
-public:
+
 	ExecutionOutputLink(const HandleSeq&, Type=EXECUTION_OUTPUT_LINK);
 	ExecutionOutputLink(const Handle& schema, const Handle& args);
 	ExecutionOutputLink(const Link& l);
