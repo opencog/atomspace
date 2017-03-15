@@ -163,10 +163,10 @@ void BasicSCMUTest::check_node(const char * tipo, const char * nodename, float t
 
 	Type t = classserver().getType(tipo);
 	Handle h = as->get_handle(t, nodename);
-	TSM_ASSERT("Failed to find handle", h != NULL);
+	TSM_ASSERT("Failed to find handle", h != nullptr);
 
 	NodePtr n = NodeCast(h);
-	TSM_ASSERT("Failed to find node", n != NULL);
+	TSM_ASSERT("Failed to find node", n != nullptr);
 
 	if (n)
 	{
@@ -202,7 +202,7 @@ void BasicSCMUTest::test_single_atom(void)
 
 	Type t = classserver().getType("Node");
 	Handle h = as->get_handle(t, "My First Node");
-	TSM_ASSERT("Failed to find handle for first atom", h != NULL);
+	TSM_ASSERT("Failed to find handle for first atom", h != nullptr);
 
 	// Load the utility definitions
 	eval->eval("(add-to-load-path \"..\")");
@@ -404,17 +404,17 @@ void BasicSCMUTest::check_link(const char * tipo, Type type,
 
 	Type t1 = classserver().getType(nodename1);
 	Handle h1 = as->get_handle(t1, value1);
-	TSM_ASSERT("Failed to find handle", h1 != NULL);
+	TSM_ASSERT("Failed to find handle", h1 != nullptr);
 
 	NodePtr n1 = NodeCast(h1);
-	TSM_ASSERT("Failed to find node", n1 != NULL);
+	TSM_ASSERT("Failed to find node", n1 != nullptr);
 
 	Type t2 = classserver().getType(nodename2);
 	Handle h2 = as->get_handle(t2, value2 );
-	TSM_ASSERT("Failed to find handle", h2 != NULL);
+	TSM_ASSERT("Failed to find handle", h2 != nullptr);
 
 	NodePtr n2 = NodeCast(h2);
-	TSM_ASSERT("Failed to find node", n2 != NULL);
+	TSM_ASSERT("Failed to find node", n2 != nullptr);
 }
 
 // ============================================================
@@ -545,10 +545,10 @@ void BasicSCMUTest::check_parse_link(const char * tipo, Type type,
 
 	Type t1 = classserver().getType(nodename1);
 	Handle h1 = as->get_handle(t1, value1);
-	TSM_ASSERT("Failed to find handle", h1 != NULL);
+	TSM_ASSERT("Failed to find handle", h1 != nullptr);
 
 	NodePtr n1 = NodeCast(h1);
-	TSM_ASSERT("Failed to find node", n1 != NULL);
+	TSM_ASSERT("Failed to find node", n1 != nullptr);
 
 	if (n1)
 	{
@@ -561,10 +561,10 @@ void BasicSCMUTest::check_parse_link(const char * tipo, Type type,
 
 	Type t2 = classserver().getType(nodename2);
 	Handle h2 = as->get_handle(t2, value2 );
-	TSM_ASSERT("Failed to find handle", h2 != NULL);
+	TSM_ASSERT("Failed to find handle", h2 != nullptr);
 
 	NodePtr n2 = NodeCast(h2);
-	TSM_ASSERT("Failed to find node", n2 != NULL);
+	TSM_ASSERT("Failed to find node", n2 != nullptr);
 }
 
 void BasicSCMUTest::test_lemma_link()
