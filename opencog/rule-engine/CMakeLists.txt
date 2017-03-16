@@ -7,10 +7,9 @@ ADD_LIBRARY(ruleengine
 	backwardchainer/BIT
 	backwardchainer/Fitness
 	backwardchainer/UnifyPMCB
-	backwardchainer/BCLogger
 	forwardchainer/FCStat
 	forwardchainer/ForwardChainer
-	forwardchainer/FCLogger
+	URELogger
 	ChainerUtils.cc
 	InferenceSCM.cc
 	Rule.cc
@@ -39,6 +38,7 @@ INSTALL (TARGETS ruleengine DESTINATION "lib${LIB_DIR_SUFFIX}/opencog")
 INSTALL (FILES
 	UREConfigReader.h
 	URECommons.h
+    URELogger.h
 	Rule.h
 	UREConfigReader.h
 	DESTINATION "include/opencog/rule-engine"

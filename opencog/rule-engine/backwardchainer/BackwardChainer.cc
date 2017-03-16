@@ -41,7 +41,7 @@
 #include "BackwardChainer.h"
 #include "BackwardChainerPMCB.h"
 #include "UnifyPMCB.h"
-#include "BCLogger.h"
+#include "../URELogger.h"
 
 using namespace opencog;
 
@@ -72,15 +72,21 @@ const UREConfigReader& BackwardChainer::get_config() const
 
 void BackwardChainer::do_chain()
 {
+	ure_logger().debug("Start Backward Chaining");
+	ure_logger().debug() << "With rule set:"
+	                     << std::endl << oc_to_string(_rules);
+
 	while (not termination())
 	{
 		do_step();
 	}
+
+	ure_logger().debug("Finished Backward Chaining");
 }
 
 void BackwardChainer::do_step()
 {
-	bc_logger().debug("Iteration %d", _iteration);
+	ure_logger().debug("Iteration %d", _iteration);
 	_iteration++;
 
 	expand_bit();
@@ -110,9 +116,9 @@ void BackwardChainer::expand_bit()
 	// flags.
 	if (rules_size != _rules.size()) {
 		_bit.reset_exhausted_flags();
-		bc_logger().debug() << "The rule set has gone from "
-		                    << rules_size << " rules to " << _rules.size()
-		                    << ". All exhausted flags have been reset.";
+		ure_logger().debug() << "The rule set has gone from "
+		                     << rules_size << " rules to " << _rules.size()
+		                     << ". All exhausted flags have been reset.";
 	}
 
 	// Reset _last_expansion_fcs
@@ -123,8 +129,8 @@ void BackwardChainer::expand_bit()
 	} else {
 		// Select an FCS (i.e. and-BIT) and expand it
 		AndBIT* andbit = select_expansion_andbit();
-		LAZY_BC_LOG_DEBUG << "Selected and-BIT for expansion:" << std::endl
-		                  << andbit->to_string();
+		LAZY_URE_LOG_DEBUG << "Selected and-BIT for expansion:" << std::endl
+		                   << andbit->to_string();
 		expand_bit(*andbit);
 	}
 }
@@ -134,11 +140,11 @@ void BackwardChainer::expand_bit(AndBIT& andbit)
 	// Select leaf
 	BITNode* bitleaf = andbit.select_leaf();
 	if (bitleaf) {
-		LAZY_BC_LOG_DEBUG << "Selected BIT-node for expansion:" << std::endl
-		                  << bitleaf->to_string();
+		LAZY_URE_LOG_DEBUG << "Selected BIT-node for expansion:" << std::endl
+		                   << bitleaf->to_string();
 	} else {
-		bc_logger().debug() << "All BIT-nodes of this and-BIT are exhausted "
-		                    << "(or possibly fulfilled). Abort expansion.";
+		ure_logger().debug() << "All BIT-nodes of this and-BIT are exhausted "
+		                     << "(or possibly fulfilled). Abort expansion.";
 		andbit.exhausted = true;
 		return;
 	}
@@ -157,11 +163,11 @@ void BackwardChainer::expand_bit(AndBIT& andbit)
 	// as well as logging more consistent.
 	rule.add(_bit.bit_as);
 	if (not rule.is_valid()) {
-		bc_logger().debug("No valid rule for the selected BIT-node, abort expansion");
+		ure_logger().debug("No valid rule for the selected BIT-node, abort expansion");
 		return;
 	}
-	LAZY_BC_LOG_DEBUG << "Selected rule for BIT expansion:" << std::endl
-	                  << rule.to_string();
+	LAZY_URE_LOG_DEBUG << "Selected rule for BIT expansion:" << std::endl
+	                   << rule.to_string();
 
 	_last_expansion_andbit = _bit.expand(andbit, *bitleaf, {rule, ts});
 }
@@ -169,19 +175,19 @@ void BackwardChainer::expand_bit(AndBIT& andbit)
 void BackwardChainer::fulfill_bit()
 {
 	if (_bit.empty()) {
-		bc_logger().warn("Cannot fulfill an empty BIT!");
+		ure_logger().warn("Cannot fulfill an empty BIT!");
 		return;
 	}
 
 	// Select an and-BIT for fulfillment
 	const AndBIT* andbit = select_fulfillment_andbit();
 	if (andbit == nullptr) {
-		bc_logger().debug() << "Cannot fulfill an empty and-BIT. "
+		ure_logger().debug() << "Cannot fulfill an empty and-BIT. "
 		                    << "Abort BIT fulfillment";
 		return;
 	}
-	LAZY_BC_LOG_DEBUG << "Selected and-BIT for fulfillment (fcs value):"
-	                  << std::endl << andbit->fcs->idToString();
+	LAZY_URE_LOG_DEBUG << "Selected and-BIT for fulfillment (fcs value):"
+	                   << std::endl << andbit->fcs->idToString();
 	fulfill_fcs(andbit->fcs);
 }
 
@@ -196,7 +202,7 @@ void BackwardChainer::fulfill_fcs(const Handle& fcs)
 	HandleSeq results;
 	for (const Handle& result : hresult->getOutgoingSet())
 		results.push_back(_as.add_atom(result));
-	LAZY_BC_LOG_DEBUG << "Results:" << std::endl << results;
+	LAZY_URE_LOG_DEBUG << "Results:" << std::endl << results;
 	_results.insert(results.begin(), results.end());
 }
 
@@ -213,14 +219,14 @@ AndBIT* BackwardChainer::select_expansion_andbit()
 	std::vector<double> weights = expansion_anbit_weights();
 
 	// Debug log
-	if (bc_logger().is_debug_enabled()) {
+	if (ure_logger().is_debug_enabled()) {
 		OC_ASSERT(weights.size() == _bit.andbits.size());
 		std::stringstream ss;
 		ss << "Weighted and-BITs:";
 		for (size_t i = 0; i < weights.size(); i++)
 			ss << std::endl << weights[i] << " "
 			   << _bit.andbits[i].fcs->idToString();
-		bc_logger().debug() << ss.str();
+		ure_logger().debug() << ss.str();
 	}
 
 	// Sample andbits according to this distribution
@@ -257,8 +263,8 @@ void BackwardChainer::reduce_bit()
 			// FCS from the bit atomspace.
 			auto it = std::next(_bit.andbits.begin(),
 			                    randGen().randint(_bit.size()));
-			LAZY_BC_LOG_DEBUG << "Remove " << it->fcs->idToString()
-			                  << " from the BIT";
+			LAZY_URE_LOG_DEBUG << "Remove " << it->fcs->idToString()
+			                   << " from the BIT";
 			_bit.erase(it);
 		}
 	}
@@ -276,12 +282,12 @@ RuleTypedSubstitutionPair BackwardChainer::select_rule(BITNode& target,
 	}
 
 	// Log all valid rules and their weights
-	if (bc_logger().is_debug_enabled()) {
+	if (ure_logger().is_debug_enabled()) {
 		std::stringstream ss;
 		ss << "The following weighted rules are valid:";
 		for (const auto& r : valid_rules)
 			ss << std::endl << r.first.get_weight() << " " << r.first.get_name();
-		LAZY_BC_LOG_DEBUG << ss.str();
+		LAZY_URE_LOG_DEBUG << ss.str();
 	}
 
 	return select_rule(valid_rules);

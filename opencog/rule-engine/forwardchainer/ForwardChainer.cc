@@ -36,7 +36,7 @@
 
 #include "ForwardChainer.h"
 #include "FocusSetPMCB.h"
-#include "FCLogger.h"
+#include "../URELogger.h"
 
 using namespace opencog;
 
@@ -97,6 +97,8 @@ void ForwardChainer::init(const Handle& hsource, const HandleSeq& focus_set)
 
 void ForwardChainer::do_chain()
 {
+    ure_logger().debug("Start Forward Chaining");
+
     // Relex2Logic uses this. TODO make a separate class to handle
     // this robustly.
     if(_potential_sources.empty())
@@ -110,22 +112,22 @@ void ForwardChainer::do_chain()
         do_step();
     }
 
-    fc_logger().debug("Finished forwarch chaining");
+    ure_logger().debug("Finished Forward Chaining");
 }
 
 void ForwardChainer::do_step()
 {
-	fc_logger().debug("Iteration %d", _iteration);
+	ure_logger().debug("Iteration %d", _iteration);
 	_iteration++;
 
 	// Select source
 	_cur_source = select_source();
-	LAZY_FC_LOG_DEBUG << "Source:" << std::endl << _cur_source->toString();
+	LAZY_URE_LOG_DEBUG << "Source:" << std::endl << _cur_source->toString();
 
 	// Select rule
 	Rule rule = select_rule(_cur_source);
 	if (not rule.is_valid()) {
-		fc_logger().debug("No selected rule, abort step");
+		ure_logger().debug("No selected rule, abort step");
 		return;
 	}
 
@@ -153,7 +155,7 @@ bool ForwardChainer::termination()
 void ForwardChainer::apply_all_rules()
 {
     for (const Rule& rule : _rules) {
-        fc_logger().debug("Apply rule %s", rule.get_name().c_str());
+        ure_logger().debug("Apply rule %s", rule.get_name().c_str());
         UnorderedHandleSet uhs = apply_rule(rule);
 
         // Update
@@ -175,8 +177,8 @@ Handle ForwardChainer::select_source()
 	// If all sources have been selected then insert the sources'
 	// children in the set of potential sources
 	if (_unselected_sources.empty()) {
-		fc_logger().debug() << "All " << selsrc_size
-		                    << " sources have already been selected";
+		ure_logger().debug() << "All " << selsrc_size
+		                     << " sources have already been selected";
 
 		// Hack to help to exhaust sources with
 		// multiple matching rules. This would be
@@ -196,17 +198,17 @@ Handle ForwardChainer::select_source()
 					update_potential_sources(no_free_vars_outgoings);
 				}
 			}
-			fc_logger().debug() << (_potential_sources.size() - selsrc_size)
-			                    << " sources' children have been added as "
-			                    << "potential sources";
+			ure_logger().debug() << (_potential_sources.size() - selsrc_size)
+			                     << " sources' children have been added as "
+			                     << "potential sources";
 		} else {
-			fc_logger().debug() << "No added sources, "
-			                    << "retry existing sources instead";
+			ure_logger().debug() << "No added sources, "
+			                     << "retry existing sources instead";
 		}
 	}
 
-	fc_logger().debug() << "Selected sources so far "
-	                    << selsrc_size << "/" << _potential_sources.size();
+	ure_logger().debug() << "Selected sources so far "
+	                     << selsrc_size << "/" << _potential_sources.size();
 
 	URECommons urec(_as);
 	map<Handle, float> tournament_elem;
@@ -254,8 +256,8 @@ Rule ForwardChainer::select_rule(const Handle& hsource)
 	for (const Rule& r : _rules)
 		rule_weight[&r] = r.get_weight();
 
-	fc_logger().debug("%d rules to be searched as matched against the source",
-	                  rule_weight.size());
+	ure_logger().debug("%d rules to be searched as matched against the source",
+	                   rule_weight.size());
 
 	// Select a rule among the admissible rules in the rule-base via stochastic
 	// selection, based on the weights of the rules in the current context.
@@ -263,8 +265,8 @@ Rule ForwardChainer::select_rule(const Handle& hsource)
 
 	while (not rule_weight.empty()) {
 		const Rule *temp = _rec.tournament_select(rule_weight);
-		fc_logger().fine("Selected rule %s to match against the source",
-		                 temp->get_name().c_str());
+		ure_logger().fine("Selected rule %s to match against the source",
+		                  temp->get_name().c_str());
 
 		RuleSet unified_rules =
 			Rule::strip_typed_substitution(temp->unify_source(hsource));
@@ -274,12 +276,12 @@ Rule ForwardChainer::select_rule(const Handle& hsource)
 			rule = *std::next(unified_rules.begin(),
 			                  randGen().randint(unified_rules.size()));
 
-			fc_logger().debug("Rule %s matched the source",
-			                  rule.get_name().c_str());
+			ure_logger().debug("Rule %s matched the source",
+			                   rule.get_name().c_str());
 			break;
 		} else {
-			fc_logger().debug("Rule %s is not a match. Looking for another rule",
-			                  temp->get_name().c_str());
+			ure_logger().debug("Rule %s is not a match. Looking for another rule",
+			                   temp->get_name().c_str());
 		}
 
 		rule_weight.erase(temp);
@@ -339,8 +341,8 @@ UnorderedHandleSet ForwardChainer::apply_rule(const Rule& rule)
 	    add_results(_as);
     }
 
-    LAZY_FC_LOG_DEBUG << "Result is:" << std::endl
-                      << _as.add_link(SET_LINK, results)->toShortString();
+    LAZY_URE_LOG_DEBUG << "Result is:" << std::endl
+                       << _as.add_link(SET_LINK, results)->toShortString();
 
     return UnorderedHandleSet(results.begin(), results.end());
 }

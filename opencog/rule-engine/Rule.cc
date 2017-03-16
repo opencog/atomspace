@@ -39,6 +39,8 @@
 
 #include <opencog/query/BindLinkAPI.h>
 
+#include "URELogger.h"
+
 #include "Rule.h"
 
 namespace opencog {
@@ -50,7 +52,11 @@ void RuleSet::expand_meta_rules(AtomSpace& as)
 			Handle result = rule.apply(as);
 			for (const Handle& produced_h : result->getOutgoingSet()) {
 				Rule produced(rule.get_alias(), produced_h, rule.get_rbs());
-				this->insert(produced);
+				if (find(produced) == end()) {
+					insert(produced);
+					ure_logger().debug() << "New rule produced from meta rule:"
+					                     << std::endl << oc_to_string(produced);
+				}
 			}
 		}
 	}

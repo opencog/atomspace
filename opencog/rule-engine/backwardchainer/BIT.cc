@@ -38,7 +38,7 @@
 #include <opencog/atoms/execution/ExecutionOutputLink.h>
 
 #include "BIT.h"
-#include "BCLogger.h"
+#include "../URELogger.h"
 
 namespace opencog {
 
@@ -261,10 +261,10 @@ Handle AndBIT::expand_fcs(const Handle& leaf,
 	nfcs = fcs->getAtomSpace()->add_link(BIND_LINK, noutgoings);
 
 	// Log expansion
-	LAZY_BC_LOG_DEBUG << "Expanded forward chainer strategy:" << std::endl
-	                  << nfcs;
-	LAZY_BC_LOG_DEBUG << "With inference tree:" << std::endl << std::endl
-	                  << fcs_to_ascii_art(nfcs) << std::endl;
+	LAZY_URE_LOG_DEBUG << "Expanded forward chainer strategy:" << std::endl
+	                   << nfcs;
+	LAZY_URE_LOG_DEBUG << "With inference tree:" << std::endl << std::endl
+	                   << fcs_to_ascii_art(nfcs) << std::endl;
 
 	return nfcs;
 }
@@ -616,8 +616,8 @@ AndBIT* BIT::init()
 {
 	andbits.emplace_back(bit_as, _init_target, _init_vardecl, _init_fitness);
 
-	LAZY_BC_LOG_DEBUG << "Initialize BIT with:" << std::endl
-	                  << andbits.begin()->to_string();
+	LAZY_URE_LOG_DEBUG << "Initialize BIT with:" << std::endl
+	                   << andbits.begin()->to_string();
 
 	return &*andbits.begin();
 }
@@ -627,8 +627,8 @@ AndBIT* BIT::expand(AndBIT& andbit, BITNode& bitleaf,
 {
 	// Make sure that the rule is not already an or-child of bitleaf.
 	if (is_in(rule, bitleaf)) {
-		bc_logger().debug() << "An equivalent rule has already expanded "
-		                    << "that BIT-node, abort expansion";
+		ure_logger().debug() << "An equivalent rule has already expanded "
+		                     << "that BIT-node, abort expansion";
 		return nullptr;
 	}
 
@@ -643,18 +643,18 @@ AndBIT* BIT::insert(const AndBIT& andbit)
 {
 	// Check that it isn't already in the BIT
 	if (boost::binary_search(andbits, andbit)) {
-		LAZY_BC_LOG_DEBUG << "The following and-BIT is already in the BIT:"
-		                  << std::endl << andbit.to_string();
+		LAZY_URE_LOG_DEBUG << "The following and-BIT is already in the BIT:"
+		                   << std::endl << andbit.to_string();
 		return nullptr;
 	} else {
 		// Check that it is not alpha-equivalent either
 		for (const AndBIT& ab : andbits) {
 			if (ScopeLinkCast(andbit.fcs)->is_equal(ab.fcs)) {
-				LAZY_BC_LOG_DEBUG << "The following and-BIT:"
-				                  << std::endl << andbit.to_string()
-				                  << "is alpha-equivalent to another one "
-				                  << "already in the BIT:"
-				                  << std::endl << ab.to_string();
+				LAZY_URE_LOG_DEBUG << "The following and-BIT:"
+				                   << std::endl << andbit.to_string()
+				                   << "is alpha-equivalent to another one "
+				                   << "already in the BIT:"
+				                   << std::endl << ab.to_string();
 				return nullptr;
 			}
 		}
