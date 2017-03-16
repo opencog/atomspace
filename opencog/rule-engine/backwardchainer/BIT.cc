@@ -551,22 +551,15 @@ std::string AndBIT::line_separator(const std::string& up_aa,
                                    const Handle& gsn,
                                    bool unordered_premises)
 {
-	// Calculate the leading space and line separator sizes.
-	size_t lead_sp_size;        // leading space size
-	size_t line_sep_size;       // line separator size
-	if (up_aa.empty()) {
-		// If up_aa is empty then we assume low_aa is not empty and so
-		// the line will just have its size. Also assume that low_aa
-		// has no leading space.
-		lead_sp_size = 0;
-		line_sep_size = low_aa.size();
-	} else {
-		// If up_aa is non-empty it is fair to assume that it is either
-		// about the size of low_aa or bigger.
+	// Calculate the leading space and line separator sizes. We assume
+	// that low_aa has no leading space.
+	size_t lead_sp_size = 0;                // Leading space size
+	size_t line_sep_size = low_aa.size(); 	// Line separator size
+	if (not up_aa.empty()) {
 		std::string up_bl = bottom_line(up_aa);
 		size_t up_bls = up_bl.size();
 		lead_sp_size = leading_spaces(up_bl);
-		line_sep_size = up_bls - lead_sp_size;
+		line_sep_size = std::max(line_sep_size, up_bls - lead_sp_size);
 	}
 
 	// Get formula string
