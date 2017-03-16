@@ -279,7 +279,9 @@ class SQLAtomStorage::Response
 		bool get_value_cb(void)
 		{
 			rs->foreach_column(&Response::get_value_column_cb, this);
-			return false;
+			// Returning true halts the callback after one row.  The
+			// ODBC driver will clobber empty rows, so this is needed.
+			return true;
 		}
 		bool get_value_column_cb(const char *colname, const char * colvalue)
 		{
