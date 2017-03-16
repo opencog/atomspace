@@ -22,7 +22,7 @@
 
 #include "Fitness.h"
 #include "BIT.h"
-#include "BCLogger.h"
+#include "../URELogger.h"
 
 #include <opencog/util/algorithm.h>
 
@@ -39,7 +39,7 @@ BITNodeFitness::BITNodeFitness(FitnessType ft) : type(ft)
 		upper = 1;
 		break;
 	default:
-		bc_logger().error() << "Not implemented";
+		ure_logger().error() << "Not implemented";
 	}
 }
 
@@ -64,7 +64,7 @@ AndBITFitness::AndBITFitness(FitnessType ft, const std::set<ContentHash>& tr)
 		upper = 1.0;
 		break;
 	default:
-		bc_logger().error() << "Not implemented";
+		ure_logger().error() << "Not implemented";
 	}
 }
 

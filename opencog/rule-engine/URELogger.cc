@@ -1,5 +1,5 @@
 /*
- * FCLogger.cc
+ * URELogger.cc
  *
  * Copyright (C) 2016 OpenCog Foundation
  *
@@ -21,19 +21,19 @@
  * 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
  */
 
-#include "FCLogger.h"
+#include "URELogger.h"
 
 using namespace opencog;
 
 // Create and return the single instance
-Logger& opencog::fc_logger()
+Logger& opencog::ure_logger()
 {
-	auto fc_logger_instantiate = []() {
+	auto bc_logger_instantiate = []() {
 		Logger tmp(logger());
-		tmp.set_component("ForwardChainer");
+		tmp.set_component("URE");
 		// tmp.set_level(Logger::FINE);
 		return tmp;
 	};
-	static Logger fc_instance(fc_logger_instantiate());
-    return fc_instance;
+	static Logger bc_instance(bc_logger_instantiate());
+    return bc_instance;
 }

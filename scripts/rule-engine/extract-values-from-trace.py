@@ -18,13 +18,13 @@ usage = "Usage: " + sys.argv[0] + " LOG_TRACE_FILE"
 # Useful regex
 timestamp_re = r'\[\d{4}-\d{2}-\d{2} \d{2}:\d{2}:\d{2}:\d{3}\]'
 debug_re = r'\[DEBUG\]'
-bc_re = r'\[BackwardChainer\]'
+ure_re = r'\[URE\]'
 select_andbit_re = r'Selected and-BIT for expansion:'
-from_re = r'({} )?{} {} {}'.format(timestamp_re, debug_re, bc_re, select_andbit_re)
+from_re = r'({} )?{} {} {}'.format(timestamp_re, debug_re, ure_re, select_andbit_re)
 from_cre = re.compile(from_re)
 expand_andbit_re = r'Expanded forward chainer strategy:'
 select_bn_re = r'Selected BIT-node for expansion:'
-inter_re = r'({} )?{} {} {}'.format(timestamp_re, debug_re, bc_re, select_bn_re)
+inter_re = r'({} )?{} {} {}'.format(timestamp_re, debug_re, ure_re, select_bn_re)
 inter_cre = re.compile(inter_re)
 handle_re = r'\) ; \[(\d+)\]\[\d+\]'
 handle_cre = re.compile(handle_re)

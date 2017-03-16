@@ -1,5 +1,5 @@
 /*
- * BCLogger.h
+ * URELogger.h
  *
  * Copyright (C) 2016 OpenCog Foundation
  *
@@ -21,8 +21,8 @@
  * 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
  */
 
-#ifndef BCLOGGER_H_
-#define BCLOGGER_H_
+#ifndef URELOGGER_H_
+#define URELOGGER_H_
 
 #include <opencog/util/Logger.h>
 
@@ -30,15 +30,15 @@ namespace opencog
 {
 
 // singleton instance (following Meyer's design pattern)
-Logger& bc_logger();
+Logger& ure_logger();
 
 // Macros to not evaluate the stream if log level is disabled
-#define LAZY_BC_LOG_ERROR if(bc_logger().is_error_enabled()) bc_logger().error()
-#define LAZY_BC_LOG_WARN if(bc_logger().is_warn_enabled()) bc_logger().warn()
-#define LAZY_BC_LOG_INFO if(bc_logger().is_info_enabled()) bc_logger().info()
-#define LAZY_BC_LOG_DEBUG if(bc_logger().is_debug_enabled()) bc_logger().debug()
-#define LAZY_BC_LOG_FINE if(bc_logger().is_fine_enabled()) bc_logger().fine()
+#define LAZY_URE_LOG_ERROR if(ure_logger().is_error_enabled()) ure_logger().error()
+#define LAZY_URE_LOG_WARN if(ure_logger().is_warn_enabled()) ure_logger().warn()
+#define LAZY_URE_LOG_INFO if(ure_logger().is_info_enabled()) ure_logger().info()
+#define LAZY_URE_LOG_DEBUG if(ure_logger().is_debug_enabled()) ure_logger().debug()
+#define LAZY_URE_LOG_FINE if(ure_logger().is_fine_enabled()) ure_logger().fine()
 
 } // ~namespace opencog
 
-#endif /* BCLOGGER_H_ */
+#endif /* URELOGGER_H_ */
