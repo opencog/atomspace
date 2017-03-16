@@ -162,6 +162,13 @@
     (if (eq? rule-type 'ListLink) (gar rule) rule))
 )
 
+;; Very handy and frequently used rule precondition.
+(define (gt-zero-confidence A)
+"
+  Return TrueTV iff A's confidence is greater than 0
+"
+  (bool->tv (> (cog-stv-confidence A) 0)))
+
 (define (export-rule-engine-utils)
   (export ure-add-rule
           ure-add-rules
