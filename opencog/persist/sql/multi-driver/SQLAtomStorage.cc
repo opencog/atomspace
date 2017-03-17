@@ -148,7 +148,7 @@ class SQLAtomStorage::Response
 			// printf ("---- New atom found ----\n");
 			rs->foreach_column(&Response::create_atom_column_cb, this);
 
-			return false;
+			return true;
 		}
 
 		AtomTable *table;
