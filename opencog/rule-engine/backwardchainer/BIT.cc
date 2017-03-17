@@ -262,7 +262,7 @@ Handle AndBIT::expand_fcs(const Handle& leaf,
 
 	// Log expansion
 	LAZY_URE_LOG_DEBUG << "Expanded forward chainer strategy:" << std::endl
-	                   << nfcs;
+	                   << nfcs->toString();
 	LAZY_URE_LOG_DEBUG << "With inference tree:" << std::endl << std::endl
 	                   << fcs_to_ascii_art(nfcs) << std::endl;
 
