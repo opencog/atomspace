@@ -287,13 +287,6 @@ std::string oc_to_string(const AtomPtr& aptr)
 
 namespace std {
 
-ostream& operator<<(ostream& out, const opencog::Handle& h)
-{
-    if (h) out << h->toString();
-    else out << "Invalid Handle";
-    return out;
-}
-
 // Hack around the lack template use in Handle.h due to circular dependencies
 #define GEN_HANDLE_CONTAINER_OSTREAM_OPERATOR(T) \
 ostream& operator<<(ostream& out, const T& hs) { \
