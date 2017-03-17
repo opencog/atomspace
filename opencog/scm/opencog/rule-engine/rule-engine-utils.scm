@@ -176,5 +176,6 @@
           ure-set-fuzzy-bool-parameter
           ure-define-rbs
           ure-get-forward-rule
+          gt-zero-confidence
           export-rule-engine-utils)
 )
