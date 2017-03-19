@@ -112,6 +112,8 @@ std::string SchemeSmob::handle_to_string(const Handle& h, int indent)
 std::string SchemeSmob::protom_to_string(SCM node)
 {
 	ProtoAtomPtr pa(scm_to_protom(node));
+	if (nullptr == pa) return "#<Invalid handle>";
+
 	if (not pa->isAtom())
 		return pa->toString();  // XXX FIXME this is temporary hack
 
