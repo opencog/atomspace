@@ -301,7 +301,7 @@ ContentHash ScopeLink::term_hash(const Handle& h,
 	// Quotation
 	quotation.update(t);
 
-	// Other embedded ScopeLinks might be hiding some of our varialbes...
+	// Other embedded ScopeLinks might be hiding some of our variables...
 	bool issco = classserver().isA(t, SCOPE_LINK);
 	UnorderedHandleSet bsave;
 	if (issco)
@@ -318,7 +318,7 @@ ContentHash ScopeLink::term_hash(const Handle& h,
 
 	// Prevent mixing for UnorderedLinks. The `mixer` var will be zero
 	// for UnorderedLinks. The problem is that two UnorderdLinks might
-	// be alpha-equivalent, but have thier atoms presented in a
+	// be alpha-equivalent, but have their atoms presented in a
 	// different order. Thus, the hash must be computed in a purely
 	// commutative fashion: using only addition, so as never create
 	// any entropy, until the end.
