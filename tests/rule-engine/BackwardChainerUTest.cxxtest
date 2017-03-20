@@ -55,7 +55,6 @@ public:
 	void test_conditional_instantiation_2();
 	void test_conditional_instantiation_tv_query();
 	void test_impossible_criminal();
-	// TODO: re-enable as soon as it passes
 	void test_criminal();
 	void test_criminal_trace();
 	// TODO: re-enable the following tests
@@ -180,8 +179,8 @@ void BackwardChainerUTest::test_deduction()
 		AD = al(INHERITANCE_LINK, A, D),
 		expected = al(SET_LINK, CD, BD, AD);
 
-	logger().debug() << "results = " << results;
-	logger().debug() << "expected = " << expected;
+	logger().debug() << "results = " << results->toString();
+	logger().debug() << "expected = " << expected->toString();
 
 	TS_ASSERT_EQUALS(results, expected);
 
@@ -415,8 +414,8 @@ void BackwardChainerUTest::test_impossible_criminal()
 	Handle results = bc.get_results(),
 		expected = al(SET_LINK, HandleSeq());
 
-	logger().debug() << "results = " << results;
-	logger().debug() << "expected = " << expected;
+	logger().debug() << "results = " << results->toString();
+	logger().debug() << "expected = " << expected->toString();
 
 	TS_ASSERT_EQUALS(results, expected);
 
@@ -609,7 +608,7 @@ void BackwardChainerUTest::test_focus_set()
 	Handle results = bc.get_results(),
 		expected = al(SET_LINK, soln1);
 
-	// Re-enable when focu set is supported
+	// Re-enable when focus set is supported
 	TS_ASSERT(true);
 	// TS_ASSERT_EQUALS(results, expected);
 
