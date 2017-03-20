@@ -327,7 +327,7 @@ ContentHash ScopeLink::term_hash(const Handle& h,
 	ContentHash hsh = ((1UL<<8) - 59) * t;
 	for (const Handle& ho: h->getOutgoingSet())
 	{
-		hsh += mixer * (1UL<<5) + term_hash(ho, bound_vars, quotation);
+		hsh += mixer * (hsh<<5) + term_hash(ho, bound_vars, quotation);
 	}
 	hsh %= (1UL<<63) - 471;
 
