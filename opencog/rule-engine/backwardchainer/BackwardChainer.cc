@@ -73,15 +73,15 @@ const UREConfigReader& BackwardChainer::get_config() const
 void BackwardChainer::do_chain()
 {
 	ure_logger().debug("Start Backward Chaining");
-	ure_logger().debug() << "With rule set:"
-	                     << std::endl << oc_to_string(_rules);
+	LAZY_URE_LOG_DEBUG << "With rule set:" << std::endl << oc_to_string(_rules);
 
 	while (not termination())
 	{
 		do_step();
 	}
 
-	ure_logger().debug("Finished Backward Chaining");
+	LAZY_URE_LOG_DEBUG << "Finished Backward Chaining with solutions:"
+	                   << get_results()->toString();
 }
 
 void BackwardChainer::do_step()
