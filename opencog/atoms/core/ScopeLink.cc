@@ -314,9 +314,9 @@ ContentHash ScopeLink::term_hash(const Handle& h,
 	UnorderedHandleSet bsave;
 	if (issco)
 	{
-		// Prevent current hidden vars from harm.
+		// Protect current hidden vars from harm.
 		bsave = bound_vars;
-		// Add the Scope links vars to the hidden set.
+		// Add the Scope link vars to the hidden set.
 		ScopeLinkPtr sco(ScopeLinkCast(h));
 		if (nullptr == sco)
 			sco = ScopeLinkCast(classserver().factory(h));
@@ -328,8 +328,16 @@ ContentHash ScopeLink::term_hash(const Handle& h,
 	// for UnorderedLinks. The problem is that two UnorderdLinks might
 	// be alpha-equivalent, but have their atoms presented in a
 	// different order. Thus, the hash must be computed in a purely
-	// commutative fashion: using only addition, so as never create
+	// commutative fashion: using only addition, so as to never create
 	// any entropy, until the end.
+	//
+	// XXX As discussed in issue #1176, a better fix would be to
+	// compute the individual term_hashes first, then sort them,
+	// and then mix them!  This provides the desired qualities:
+	// different unordered links can be directly compared, and also
+	// have good mixing/avalanching properties. The code below
+	// only allows for compare; it fails to mix.
+	//
 	bool is_ordered = not classserver().isA(t, UNORDERED_LINK);
 	ContentHash mixer = (ContentHash) is_ordered;
 	ContentHash hsh = ((1UL<<8) - 59) * t;
