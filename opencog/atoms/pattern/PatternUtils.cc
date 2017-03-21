@@ -76,7 +76,7 @@ bool remove_constants(const OrderedHandleSet &vars,
 		    or contains_atomtype(clause, GROUNDED_SCHEMA_NODE)
 		    or contains_atomtype(clause, IDENTICAL_LINK)
 		    or contains_atomtype(clause, EQUAL_LINK)
-		    or classserver().isA(clause->getType(), EVALUATABLE_LINK)
+		    or classserver().isA(clause->getType(), EVALUATABLE_LINK))
 		{
 			++i;
 		}
