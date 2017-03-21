@@ -48,6 +48,14 @@ namespace opencog {
  * DefinedPredicate or DefinedSchema nodes are simply not known until
  * runtime evaluation/execution.
  *
+ * The match for EvaluatableLink's is meant to solve the problem of
+ * evaluating (SatisfactionLink (AndLink (TrueLink))) vs. evaluating
+ * (SatisfactionLink (AndLink (FalseLink))), with the first returning
+ * TRUE_TV, and the second returning FALSE_TV. Removing these 'constant'
+ * terms would alter the result of the evaluation, potentially even
+ * leaving an empty (undefined) AndLink. So we cannot really remove
+ * them.
+ *
  * Returns true if the list of clauses was modified, else returns false.
  */
 bool remove_constants(const OrderedHandleSet &vars,
@@ -67,7 +75,8 @@ bool remove_constants(const OrderedHandleSet &vars,
 		    or contains_atomtype(clause, GROUNDED_PREDICATE_NODE)
 		    or contains_atomtype(clause, GROUNDED_SCHEMA_NODE)
 		    or contains_atomtype(clause, IDENTICAL_LINK)
-		    or contains_atomtype(clause, EQUAL_LINK))
+		    or contains_atomtype(clause, EQUAL_LINK)
+		    or classserver().isA(clause->getType(), EVALUATABLE_LINK))
 		{
 			++i;
 		}
