@@ -636,23 +636,10 @@ AndBIT* BIT::insert(const AndBIT& andbit)
 {
 	// Check that it isn't already in the BIT
 	if (boost::binary_search(andbits, andbit)) {
-		LAZY_URE_LOG_DEBUG << "The following and-BIT is already in the BIT:"
-		                   << std::endl << andbit.to_string();
+		LAZY_URE_LOG_DEBUG << "The following and-BIT is already in the BIT: "
+		                   << andbit.fcs->idToString();
 		return nullptr;
-	} else {
-		// Check that it is not alpha-equivalent either
-		for (const AndBIT& ab : andbits) {
-			if (ScopeLinkCast(andbit.fcs)->is_equal(ab.fcs)) {
-				LAZY_URE_LOG_DEBUG << "The following and-BIT:"
-				                   << std::endl << andbit.to_string()
-				                   << "is alpha-equivalent to another one "
-				                   << "already in the BIT:"
-				                   << std::endl << ab.to_string();
-				return nullptr;
-			}
-		}
 	}
-
 	// Insert while keeping the order
 	auto it = andbits.insert(boost::lower_bound(andbits, andbit), andbit);
 
