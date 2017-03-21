@@ -21,6 +21,10 @@ ADD_LIBRARY (logger
 	LoggerSCM.cc
 )
 
+ADD_LIBRARY (randgen
+	RandGenSCM.cc
+)
+
 TARGET_LINK_LIBRARIES(smob
 	attentionbank
 	atomspace
@@ -29,6 +33,12 @@ TARGET_LINK_LIBRARIES(smob
 )
 
 TARGET_LINK_LIBRARIES(logger
+	smob
+	${GUILE_LIBRARIES}
+	${COGUTIL_LIBRARY}
+)
+
+TARGET_LINK_LIBRARIES(randgen
 	smob
 	${GUILE_LIBRARIES}
 	${COGUTIL_LIBRARY}
@@ -47,6 +57,7 @@ TARGET_LINK_LIBRARIES(logger
 # ... but which one?  what a pain.
 INSTALL (TARGETS smob DESTINATION "lib${LIB_DIR_SUFFIX}/opencog")
 INSTALL (TARGETS logger DESTINATION "lib${LIB_DIR_SUFFIX}/opencog")
+INSTALL (TARGETS randgen DESTINATION "lib${LIB_DIR_SUFFIX}/opencog")
 
 INSTALL (FILES
 	SchemeEval.h
