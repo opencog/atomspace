@@ -449,8 +449,13 @@ void PatternLink::validate_clauses(OrderedHandleSet& vars,
 	bool bogus = remove_constants(vars, clauses, constants);
 	if (bogus)
 	{
-		logger().warn("%s: Constant clauses removed from pattern",
-		              __FUNCTION__);
+		logger().warn("%s: Constant clauses removed from pattern %s",
+		              __FUNCTION__, toShortString().c_str());
+		for (const Handle& h: constants)
+		{
+			logger().warn("%s: Removed %s",
+		              __FUNCTION__, h->toShortString().c_str());
+		}
 	}
 
 	// Make sure that each declared variable appears in some clause.
