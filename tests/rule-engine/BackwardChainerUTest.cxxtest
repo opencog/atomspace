@@ -55,7 +55,6 @@ public:
 	void test_conditional_instantiation_2();
 	void test_conditional_instantiation_tv_query();
 	void test_impossible_criminal();
-	// TODO: re-enable as soon as it passes
 	void test_criminal();
 	void test_criminal_trace();
 	// TODO: re-enable the following tests
@@ -180,8 +179,8 @@ void BackwardChainerUTest::test_deduction()
 		AD = al(INHERITANCE_LINK, A, D),
 		expected = al(SET_LINK, CD, BD, AD);
 
-	logger().debug() << "results = " << results;
-	logger().debug() << "expected = " << expected;
+	logger().debug() << "results = " << results->toString();
+	logger().debug() << "expected = " << expected->toString();
 
 	TS_ASSERT_EQUALS(results, expected);
 
@@ -415,8 +414,8 @@ void BackwardChainerUTest::test_impossible_criminal()
 	Handle results = bc.get_results(),
 		expected = al(SET_LINK, HandleSeq());
 
-	logger().debug() << "results = " << results;
-	logger().debug() << "expected = " << expected;
+	logger().debug() << "results = " << results->toString();
+	logger().debug() << "expected = " << expected->toString();
 
 	TS_ASSERT_EQUALS(results, expected);
 
@@ -471,6 +470,9 @@ void BackwardChainerUTest::test_criminal()
 
 // Like test_criminal but the trace is provided for guidance (thus
 // speeding up the inference tremendously.)
+//
+// WARNING: this test is dependent on the hash algorithm. If the latter
+// changes, then the trace must be updated.
 void BackwardChainerUTest::test_criminal_trace()
 {
 	logger().debug("BEGIN TEST: %s", __FUNCTION__);
@@ -495,9 +497,23 @@ void BackwardChainerUTest::test_criminal_trace()
 	                 "   (Type \"ConceptNode\"))");
 	Handle soln = _eval.eval_h("(ConceptNode \"West\")");
 
+	// Warning: if the hash algorithm changes you need to update the
+	// trace. To do that, run test_criminal() with DEBUG log level,
+	// then apply the following on the obtained opencog.log (make sure
+	// that you have deleted the old opencog.log before running
+	// test_crimila())
+	//
+	// <ATOMSPACE_ROOT>/scripts/rule-engine/extract-bc-trace.py <FCS_SOLUTION>' opencog.log > opencog-<FCS_SOLUTION>.log
+	// <ATOMSPACE_ROOT>/scripts/rule-engine/extract-values-from-trace.py opencog-<FCS_SOLUTION>.log > <FCS_SOLUTION>.trace
+	//
+	// where <FCS_SOLUTION> is the hash value of the FCS solving the
+	// criminal test.
+	//
+	// Don't forget to happen U at the end of each value otherwise gcc
+	// is gonna complain.
 	std::set<ContentHash> trace{
-		17025922669676845447U, 16614943084392332374U, 11212916129283751828U,
-			10949984483832709559U, 11497264560755749902U, 12954237869795736199U};
+		17025922688105268679U, 12614994268038677483U, 15944815478163286971U,
+			10803065885026726015U, 18332049782089667106U};
 	AndBITFitness trace_fitness(AndBITFitness::Trace, trace);
 	BackwardChainer bc(_as, top_rbs, target, vardecl, Handle::UNDEFINED,
 	                   BITNodeFitness(), trace_fitness);
@@ -609,7 +625,7 @@ void BackwardChainerUTest::test_focus_set()
 	Handle results = bc.get_results(),
 		expected = al(SET_LINK, soln1);
 
-	// Re-enable when focu set is supported
+	// Re-enable when focus set is supported
 	TS_ASSERT(true);
 	// TS_ASSERT_EQUALS(results, expected);
 

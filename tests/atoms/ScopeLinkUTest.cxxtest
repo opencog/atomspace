@@ -51,6 +51,9 @@ public:
 		P = an(PREDICATE_NODE, "P");
 		Q = an(PREDICATE_NODE, "Q");
 		CT = an(TYPE_NODE, "ConceptNode");
+
+		_eval.eval("(add-to-load-path \"..\")");
+		_eval.eval("(add-to-load-path \"../../..\")");
 	}
 
 	void setUp() {}
@@ -60,6 +63,8 @@ public:
 	void test_get_variables_1();
 	void test_get_variables_2();
 	void test_get_variables_3();
+	void test_compute_hash_1();
+	void test_compute_hash_2();
 };
 
 void ScopeLinkUTest::test_get_variables_1()
@@ -129,6 +134,36 @@ void ScopeLinkUTest::test_get_variables_3()
 	printf("Excepted %s\n", ohs_to_string(exp).c_str());
 
 	TS_ASSERT_EQUALS(got, exp);
+
+	logger().info("END TEST: %s", __FUNCTION__);
+}
+
+void ScopeLinkUTest::test_compute_hash_1()
+{
+	logger().info("BEGIN TEST: %s", __FUNCTION__);
+
+	std::string result =
+		_eval.eval("(load-from-path \"tests/atoms/scopelinks.scm\")");
+
+	Handle bl1 = _eval.eval_h("bl-1"),
+		bl2 = _eval.eval_h("bl-2");
+
+	TS_ASSERT_DIFFERS(bl1.value(), bl2.value());
+
+	logger().info("END TEST: %s", __FUNCTION__);
+}
+
+void ScopeLinkUTest::test_compute_hash_2()
+{
+	logger().info("BEGIN TEST: %s", __FUNCTION__);
+
+	std::string result =
+		_eval.eval("(load-from-path \"tests/atoms/scopelinks.scm\")");
+
+	Handle gl1 = _eval.eval_h("gl-1"),
+		gl2 = _eval.eval_h("gl-2");
+
+	TS_ASSERT_DIFFERS(gl1.value(), gl2.value());
 
 	logger().info("END TEST: %s", __FUNCTION__);
 }
