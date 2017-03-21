@@ -81,7 +81,7 @@ void BackwardChainer::do_chain()
 	}
 
 	LAZY_URE_LOG_DEBUG << "Finished Backward Chaining with solutions:"
-	                   << get_results()->toString();
+	                   << std::endl << get_results()->toString();
 }
 
 void BackwardChainer::do_step()
