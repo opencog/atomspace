@@ -175,6 +175,7 @@ class SchemePrimitive : public PrimitiveEnviron
 			Handle (T::*h_siddd)(const std::string&,int,double,double,double);
 			HandleSeq (T::*q_htib)(Handle, Type, int, bool);
 			HandleSeqSeq (T::*k_h)(Handle);
+			int (T::*i_v)(void);
 			int (T::*i_s)(const std::string&);
 			int (T::*i_shhhi)(const std::string&, Handle, Handle,Handle,int);
 			std::string (T::*s_as)(AtomSpace*, const std::string&);
@@ -186,6 +187,7 @@ class SchemePrimitive : public PrimitiveEnviron
 			std::string (T::*s_v)(void);
 			TruthValuePtr (T::*p_h)(Handle);
 			void (T::*v_b)(bool);
+			void (T::*v_i)(int);
 			void (T::*v_h)(Handle);
 			void (T::*v_s)(const std::string&);
 			void (T::*v_sa)(const std::string&, AtomSpace*);
@@ -226,6 +228,7 @@ class SchemePrimitive : public PrimitiveEnviron
 			H_SHDDD,
 			H_SHI,
 			H_SIDDD,
+			I_V,   // return int, take void
 			I_S,
 			I_SHHHI,
 			Q_HTIB,// return HandleSeq, take handle, type, and bool
@@ -237,6 +240,7 @@ class SchemePrimitive : public PrimitiveEnviron
 			S_V,   // return string, take void
 			P_H,   // return truth value, take Handle
 			V_B,   // return void, take bool
+			V_I,   // return void, take int
 			V_H,   // return void, take Handle
 			V_S,   // return void, take string
 			V_SA,  // return void, take string, Atomspace
@@ -470,6 +474,12 @@ class SchemePrimitive : public PrimitiveEnviron
 						rc = SchemeSmob::handle_to_scm(rh);
 						break;
 				}
+				case I_V:
+				{
+					int i = (that->*method.i_v)();
+					rc = scm_from_int(i);
+					break;
+				}
 				case I_S:
 				{
 					std::string str = SchemeSmob::verify_string(scm_car(args), scheme_name, 1);
@@ -593,6 +603,13 @@ class SchemePrimitive : public PrimitiveEnviron
 				{
 					bool b = scm_to_bool(scm_car(args));
 					(that->*method.v_b)(b);
+					break;
+				}
+				case V_I:
+				{
+					int i = SchemeSmob::verify_int(scm_car(args), scheme_name);
+
+					(that->*method.v_i)(i);
 					break;
 				}
 				case V_H:
@@ -802,6 +819,7 @@ class SchemePrimitive : public PrimitiveEnviron
 		DECLARE_CONSTR_3(H_SHI,  h_shi,Handle,const std::string&,Handle,int)
 		DECLARE_CONSTR_5(H_SHDDD, h_shddd,Handle,const std::string&,Handle,double,double,double)
 		DECLARE_CONSTR_5(H_SIDDD, h_siddd,Handle,const std::string&,int,double,double,double)
+		DECLARE_CONSTR_0(I_V,    i_v, int)
 		DECLARE_CONSTR_1(I_S,    i_s, int, const std::string&)
 		DECLARE_CONSTR_5(I_SHHHI,i_shhhi, int, const std::string&,Handle,Handle,Handle,int)
 		DECLARE_CONSTR_4(Q_HTIB, q_htib, HandleSeq, Handle, Type, int, bool)
@@ -816,6 +834,7 @@ class SchemePrimitive : public PrimitiveEnviron
 		DECLARE_CONSTR_0(S_V,   s_v,  std::string)
 		DECLARE_CONSTR_1(P_H,   p_h,  TruthValuePtr, Handle)
 		DECLARE_CONSTR_1(V_B,   v_b,  void, bool)
+		DECLARE_CONSTR_1(V_I,   v_i,  void, int)
 		DECLARE_CONSTR_1(V_H,	v_h,  void, Handle)
 		DECLARE_CONSTR_1(V_S,   v_s,  void, const std::string&)
 		DECLARE_CONSTR_2(V_SA,  v_sa, void, const std::string&,
@@ -885,11 +904,13 @@ DECLARE_DECLARE_1(double, const std::string&)
 DECLARE_DECLARE_1(Handle, Handle)
 DECLARE_DECLARE_1(HandleSeq, Handle)
 DECLARE_DECLARE_1(HandleSeqSeq, Handle)
+DECLARE_DECLARE_1(int, void)
 DECLARE_DECLARE_1(int, const std::string&)
 DECLARE_DECLARE_1(std::string, const std::string&)
 DECLARE_DECLARE_1(std::string, void)
 DECLARE_DECLARE_1(TruthValuePtr, Handle)
 DECLARE_DECLARE_1(void, bool)
+DECLARE_DECLARE_1(void, int)
 DECLARE_DECLARE_1(void, Handle)
 DECLARE_DECLARE_1(void, const std::string&)
 DECLARE_DECLARE_1(void, Type)

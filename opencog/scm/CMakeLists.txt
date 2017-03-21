@@ -19,6 +19,7 @@ INSTALL (FILES
 	opencog/exec.scm
 	opencog/extension.scm
 	opencog/logger.scm
+	opencog/randgen.scm
 	opencog/persist.scm
 	opencog/query.scm
 	opencog/rule-engine.scm
