@@ -24,6 +24,7 @@
  */
 
 #include <opencog/atoms/base/ClassServer.h>
+#include <opencog/atomutils/TypeUtils.h>
 
 #include "BindLink.h"
 
@@ -101,6 +102,87 @@ void BindLink::extract_variables(const HandleSeq& oset)
 
 	// Initialize _varlist with the scoped variables
 	init_scoped_variables(oset[0]);
+}
+
+Handle BindLink::substitute(const HandleMap& var2val, Handle vardecl) const
+{
+	// Perform alpha conversion over the variable declaration, if exist
+	HandleSeq hs;
+	Arity i = 0;
+	if (_vardecl) {
+		hs.push_back(substitute_vardecl(_vardecl, var2val));
+		++i;
+	}
+
+	// Turn the map into a vector of new variable names/values
+	HandleSeq values = _varlist.make_values(var2val);
+
+	// Perform alpha conversion over the bodies
+	for (; i < getArity(); ++i)
+		hs.push_back(_varlist.substitute_nocheck(getOutgoingAtom(i), values));
+
+	// Replace vardecl by the substituted version if any
+	if (!vardecl and _vardecl)
+		vardecl = hs[0];
+
+	// Remove the optional variable declaration from hs
+	if (_vardecl)
+		hs.erase(hs.begin());
+
+	// Filter vardecl
+	vardecl = filter_vardecl(vardecl, hs);
+
+	// Insert vardecl back in hs if defined
+	if (vardecl)
+		hs.insert(hs.begin(), vardecl);
+
+	// Create the alpha converted scope link
+	return classserver().factory(Handle(createLink(hs, getType())));
+}
+
+Handle BindLink::substitute_vardecl(const Handle& vardecl,
+                                    const HandleMap& var2val) const
+{
+	if (not vardecl)
+		return Handle::UNDEFINED;
+
+	Type t = vardecl->getType();
+
+	// Base cases
+
+	if (t == VARIABLE_NODE) {
+		auto it = var2val.find(vardecl);
+		// Only substitute if the variable is substituted by another variable
+		if (it != var2val.end() and it->second->getType() == VARIABLE_NODE)
+			return it->second;
+		return Handle::UNDEFINED;
+	}
+
+	// Recursive cases
+
+	HandleSeq oset;
+
+	if (t == VARIABLE_LIST) {
+		for (const Handle& h : vardecl->getOutgoingSet()) {
+			Handle nh = substitute_vardecl(h, var2val);
+			if (nh)
+				oset.push_back(nh);
+		}
+		if (oset.empty())
+			return Handle::UNDEFINED;
+	}
+	else if (t == TYPED_VARIABLE_LINK) {
+		Handle new_var = substitute_vardecl(vardecl->getOutgoingAtom(0),
+		                                    var2val);
+		if (new_var) {
+			oset.push_back(new_var);
+			oset.push_back(vardecl->getOutgoingAtom(1));
+		} else return Handle::UNDEFINED;
+	}
+	else {
+		OC_ASSERT(false, "Not implemented");
+	}
+	return classserver().factory(Handle(createLink(oset, t)));
 }
 
 /* ================================================================= */

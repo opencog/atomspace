@@ -51,7 +51,75 @@ public:
 	bool imply(PatternMatchCallback&, bool check_connectivity=true);
 	const Handle& get_implicand(void) { return _implicand; }
 
+	/**
+	 * Given a mapping from variables to values, return a copy of
+	 * itself with variables substituted by the values. Values could
+	 * be variable as well. The variable declaration is automatically
+	 * adjusted so only the new variables remain. Optionally, if the
+	 * types have changed, a new variable declaration is provided to
+	 * replace the existing one. Constant clauses are automatically
+	 * removed from the BindLink. If no clause remains then the
+	 * pattern body is left with an empty AndLink.
+	 *
+	 * Examples:
+	 *
+	 * Assume the instance is:
+	 *
+	 * (BindLink
+	 *   (VariableList (Variable "$X") (Variable "$Y"))
+	 *   (Inheritance (Variable "$X") (Variable "$Y"))
+	 *   (ExecutionOutputLink
+	 *     (GroundedSchemaNode "gsn")
+	 *     (Inheritance (Variable "$X") (Variable "$Y"))))
+	 *
+	 * 1. substitute([(Variable "$W"), (Variable "$Z")]) returns:
+	 *
+	 * (BindLink
+	 *   (VariableList (Variable "$W") (Variable "$Z"))
+	 *   (Inheritance (Variable "$W") (Variable "$Z"))
+	 *   (ExecutionOutputLink
+	 *     (GroundedSchemaNode "gsn")
+	 *     (Inheritance (Variable "$W") (Variable "$Z"))))
+	 *
+	 * 2. substitute([(Variable "$W"), (Variable "$Z")], variables)
+	 *    such that variables associates a ConceptNode type to $W and $Z
+	 *    returns:
+	 *
+	 * (BindLink
+	 *   (VariableList
+	 *     (TypedVariable (Variable "$W") (Type "ConceptNode"))
+	 *     (TypedVariable (Variable "$Z") (Type "ConceptNode")))
+	 *   (Inheritance (Variable "$W") (Variable "$Z")))
+	 *   (ExecutionOutputLink
+	 *     (GroundedSchemaNode "gsn")
+	 *     (Inheritance (Variable "$W") (Variable "$Z"))))
+	 *
+	 * 3. substitute([(Variable "$W"), (Concept "B")]) returns:
+	 *
+	 * (BindLink
+	 *   (Variable "$W")
+	 *   (Inheritance (Variable "$W") (Concept "B"))
+	 *   (ExecutionOutputLink
+	 *     (GroundedSchemaNode "gsn")
+	 *     (Inheritance (Variable "$W") (Concept "B"))))
+	 *
+	 * 4. substitute([(Concept "A"), (Concept "B")]) returns:
+	 *
+	 * (BindLink
+	 *   (AndLink)
+	 *   (ExecutionOutputLink
+	 *     (GroundedSchemaNode "gsn")
+	 *     (Inheritance (Concept "$A") (Concept "B"))))
+	 */
+	Handle substitute(const HandleMap& var2val,
+	                  Handle vardecl=Handle::UNDEFINED) const;
+
 	static Handle factory(const Handle&);
+
+private:
+	// Helper of substitute
+	Handle substitute_vardecl(const Handle& vardecl,
+	                          const HandleMap& var2val) const;
 };
 
 typedef std::shared_ptr<BindLink> BindLinkPtr;

@@ -353,7 +353,7 @@ Handle Unify::substitute(BindLinkPtr bl, const TypedSubstitution& ts)
 	//
 	// TODO: make sure that ts.second contains the declaration of all
 	// variables
-	Handle h = bl->alpha_conversion(strip_context(ts.first), ts.second);
+	Handle h = bl->substitute(strip_context(ts.first), ts.second);
 
 	return Handle(consume_ill_quotations(BindLinkCast(h)));
 }
