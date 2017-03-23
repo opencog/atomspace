@@ -186,6 +186,11 @@ std::set<Type> type_intersection(const std::set<Type>& lhs,
 VariableListPtr gen_varlist(const Handle& h);
 
 /**
+ * Generate a variable declaration of the free variables of a given atom h.
+ */
+Handle gen_vardecl(const Handle& h);
+
+/**
  * Given an atom h and its variable declaration vardecl, turn the
  * vardecl into a VariableList if not already, and if undefined,
  * generate a VariableList of the free variables of h.

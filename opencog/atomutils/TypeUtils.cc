@@ -364,6 +364,11 @@ VariableListPtr gen_varlist(const Handle& h)
 	return createVariableList(HandleSeq(vars.begin(), vars.end()));
 }
 
+Handle gen_vardecl(const Handle& h)
+{
+	return Handle(gen_varlist(h));
+}
+
 /**
  * Given an atom h and its variable declaration vardecl, turn the
  * vardecl into a VariableList if not already, and if undefined,
