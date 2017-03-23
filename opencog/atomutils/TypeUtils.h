@@ -197,6 +197,11 @@ Handle gen_vardecl(const Handle& h);
  */
 VariableListPtr gen_varlist(const Handle& h, const Handle& vardecl);
 
+/**
+ * Like above but return a Handle variable declaration instead.
+ */
+Handle gen_vardecl(const Handle& h, const Handle& vardecl);
+
 /** @}*/
 }
 
