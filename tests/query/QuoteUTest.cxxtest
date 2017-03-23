@@ -41,6 +41,7 @@ public:
     {
         logger().set_level(Logger::DEBUG);
         logger().set_print_to_stdout_flag(true);
+        logger().set_timestamp_flag(false);
 
         as = new AtomSpace();
         eval = new SchemeEval(as);
@@ -221,7 +222,7 @@ void QuoteUTest::test_double_quote(void)
     logger().debug("END TEST: %s", __FUNCTION__);
 }
 
-// Test bug bug #1531
+// Test bug #1531
 void QuoteUTest::test_impossible(void)
 {
     logger().debug("BEGIN TEST: %s", __FUNCTION__);

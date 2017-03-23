@@ -355,6 +355,41 @@ std::set<Type> type_intersection(const std::set<Type>& lhs,
 	return res;
 }
 
+/**
+ * Generate a VariableList of the free variables of a given atom h.
+ */
+VariableListPtr gen_varlist(const Handle& h)
+{
+	OrderedHandleSet vars = get_free_variables(h);
+	return createVariableList(HandleSeq(vars.begin(), vars.end()));
+}
+
+Handle gen_vardecl(const Handle& h)
+{
+	return Handle(gen_varlist(h));
+}
+
+/**
+ * Given an atom h and its variable declaration vardecl, turn the
+ * vardecl into a VariableList if not already, and if undefined,
+ * generate a VariableList of the free variables of h.
+ */
+VariableListPtr gen_varlist(const Handle& h, const Handle& vardecl)
+{
+	if (not vardecl)
+		return gen_varlist(h);
+	else {
+		Type vardecl_t = vardecl->getType();
+		if (vardecl_t == VARIABLE_LIST)
+			return VariableListCast(vardecl);
+		else {
+			OC_ASSERT(vardecl_t == VARIABLE_NODE
+			          or vardecl_t == TYPED_VARIABLE_LINK);
+			return createVariableList(vardecl);
+		}
+	}
+}
+
 } // ~namespace opencog
 
 /* ===================== END OF FILE ===================== */

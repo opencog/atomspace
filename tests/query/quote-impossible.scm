@@ -7,7 +7,9 @@
 ;
 (define imp
   (SatisfactionLink
-    (VariableNode "$A")
+    (TypedVariable
+      (VariableNode "$A")
+      (TypeNode "PredicateNode"))
     (AndLink
       (VariableNode "$A")
       (ImplicationScopeLink

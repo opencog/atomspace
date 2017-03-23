@@ -93,56 +93,14 @@ public:
 	bool is_equal(const Handle&, bool silent=false) const;
 
 	/**
-	 * Return an alpha converted copy of itself. One can provide in
-	 * argument a list of new variable names, possibly with a new
-	 * variable declaration. If not the variable names are randomly
-	 * generated (a random string is appended to the old variable
-	 * names). One may choose as well to have the variables replaced
-	 * by non variable atoms, in such cases the missing variables are
-	 * filtered out.
+	 * Return an alpha converted copy of itself. New variable names
+	 * can be optionally provided, otherwise there are randomly
+	 * generated.
 	 *
-	 * Examples:
-	 *
-	 * Assume the instance is:
-	 *
-	 * (ScopeLink
-	 *    (VariableList (Variable "$X") (Variable "$Y"))
-	 *    (Inheritance (Variable "$X") (Variable "$Y")))
-	 *
-	 * 1. alpha_conversion() (i.e. called with no argument) returns:
-	 *
-	 * (ScopeLink
-	 *    (VariableList (Variable "$X-af45") (Variable "$Y-2b5a"))
-	 *    (Inheritance (Variable "$X-af45") (Variable "$Y-2b5a")))
-	 *
-	 * 2. alpha_conversion([(Variable "$W"), (Variable "$Z")]) returns:
-	 *
-	 * (ScopeLink
-	 *    (VariableList (Variable "$W") (Variable "$Z"))
-	 *    (Inheritance (Variable "$W") (Variable "$Z")))
-	 *
-	 * 3. alpha_conversion([(Variable "$W"), (Variable "$Z")], variables)
-	 *    such that variables associates a ConceptNode type to $W and $Z
-	 *    returns:
-	 *
-	 * (ScopeLink
-	 *    (VariableList
-	 *       (TypedVariable (Variable "$W") (Type "ConceptNode"))
-	 *       (TypedVariable (Variable "$Z") (Type "ConceptNode")))
-	 *    (Inheritance (Variable "$W") (Variable "$Z")))
-	 *
-	 * 4. alpha_conversion([(Variable "$W"), (Concept "B")]) returns:
-	 *
-	 * (ScopeLink
-	 *    (Variable "$W")
-	 *    (Inheritance (Variable "$W") (Concept "B")))
-	 *
-	 * Note: the arguments are passed by copy because their copy might
-	 * be modified in case they are empty or undefined, see
-	 * alpha_conversion implementation.
+	 * Warning: the alpha converted handle is not insert in the
+	 * atomspace, it is up to the user to do so.
 	 */
-	Handle alpha_conversion(HandleMap var2val=HandleMap(),
-	                        Handle vardecl=Handle::UNDEFINED) const;
+	Handle alpha_conversion(HandleSeq vars=HandleSeq()) const;
 
 	// Overload equality check!
 	virtual bool operator==(const Atom&) const;

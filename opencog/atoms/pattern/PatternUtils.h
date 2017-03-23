@@ -38,10 +38,12 @@ namespace opencog {
 
 // Make sure that variables can be found in the clauses.
 // See C file for description
-bool remove_constants(const OrderedHandleSet &vars,
-                      HandleSeq &clauses,
-                      HandleSeq &constants);
+bool remove_constants(const OrderedHandleSet& vars,
+                      HandleSeq& clauses,
+                      HandleSeq& constants);
 
+// Return true if the clause is constant
+bool is_constant(const OrderedHandleSet& vars, const Handle& clause);
 
 // See C file for description
 void get_connected_components(const OrderedHandleSet& vars,

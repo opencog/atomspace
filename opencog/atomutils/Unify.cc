@@ -30,6 +30,7 @@
 #include <opencog/atoms/base/Node.h>
 #include <opencog/atoms/core/ScopeLink.h>
 #include <opencog/atomutils/FindUtils.h>
+#include <opencog/atoms/pattern/PatternUtils.h>
 
 namespace opencog {
 
@@ -292,6 +293,12 @@ BindLinkPtr Unify::consume_ill_quotations(BindLinkPtr bl)
 		: createBindLink(pattern, rewrite);
 }
 
+Handle Unify::consume_ill_quotations(const Handle& vardecl, const Handle& h)
+{
+	const Variables variables = createVariableList(vardecl)->get_variables();
+	return consume_ill_quotations(variables, h);
+}
+
 Handle Unify::consume_ill_quotations(const Variables& variables, Handle h,
                                      Quotation quotation, bool escape)
 {
@@ -348,14 +355,126 @@ bool Unify::is_bound_to_ancestor(const Variables& variables,
 
 Handle Unify::substitute(BindLinkPtr bl, const TypedSubstitution& ts)
 {
-	// Perform alpha-conversion, this will work over values that are
-	// non variables as well
-	//
 	// TODO: make sure that ts.second contains the declaration of all
 	// variables
-	Handle h = bl->alpha_conversion(strip_context(ts.first), ts.second);
+	return substitute(bl, strip_context(ts.first), ts.second);
+}
 
-	return Handle(consume_ill_quotations(BindLinkCast(h)));
+Handle Unify::substitute(BindLinkPtr bl, const HandleMap& var2val,
+                         Handle vardecl)
+{
+	// Perform substitution over the existing variable declaration, if
+	// no new alternative is provided.
+	if (not vardecl) {
+		// If the bind link has no variable declaration either then
+		// infer one
+		Handle old_vardecl = bl->get_vardecl() ? bl->get_vardecl()
+			: gen_vardecl(bl->get_body());
+		// Substitute the variables in the old vardecl to obtain the
+		// new one.
+		vardecl = substitute_vardecl(bl->get_vardecl(), var2val);
+	}
+
+	const Variables variables = bl->get_variables();
+
+	// Turn the map into a vector of new variable names/values
+	HandleSeq values = variables.make_values(var2val);
+
+	// Substituted BindLink outgoings
+	HandleSeq hs;
+
+	// Perform substitution over the pattern term, then remove
+	// constant clauses
+	Handle clauses = variables.substitute_nocheck(bl->get_body(), values);
+	clauses = consume_ill_quotations(vardecl, clauses);
+	clauses = remove_constant_clauses(vardecl, clauses);
+	hs.push_back(clauses);
+
+	// Perform substitution over the rewrite term
+	Handle rewrite = variables.substitute_nocheck(bl->get_implicand(), values);
+	rewrite = consume_ill_quotations(vardecl, rewrite);
+	hs.push_back(rewrite);
+
+	// Filter vardecl
+	vardecl = filter_vardecl(vardecl, hs);
+
+	// Insert vardecl in hs if defined
+	if (vardecl)
+		hs.insert(hs.begin(), vardecl);
+
+	// Create the substituted BindLink
+	return classserver().factory(Handle(createLink(hs, bl->getType())));
+}
+
+Handle Unify::substitute_vardecl(const Handle& vardecl,
+                                 const HandleMap& var2val)
+{
+	if (not vardecl)
+		return Handle::UNDEFINED;
+
+	Type t = vardecl->getType();
+
+	// Base cases
+
+	if (t == VARIABLE_NODE) {
+		auto it = var2val.find(vardecl);
+		// Only substitute if the variable is substituted by another variable
+		if (it != var2val.end() and it->second->getType() == VARIABLE_NODE)
+			return it->second;
+		return Handle::UNDEFINED;
+	}
+
+	// Recursive cases
+
+	HandleSeq oset;
+
+	if (t == VARIABLE_LIST) {
+		for (const Handle& h : vardecl->getOutgoingSet()) {
+			Handle nh = substitute_vardecl(h, var2val);
+			if (nh)
+				oset.push_back(nh);
+		}
+		if (oset.empty())
+			return Handle::UNDEFINED;
+	}
+	else if (t == TYPED_VARIABLE_LINK) {
+		Handle new_var = substitute_vardecl(vardecl->getOutgoingAtom(0),
+		                                    var2val);
+		if (new_var) {
+			oset.push_back(new_var);
+			oset.push_back(vardecl->getOutgoingAtom(1));
+		} else return Handle::UNDEFINED;
+	}
+	else {
+		OC_ASSERT(false, "Not implemented");
+	}
+	return classserver().factory(Handle(createLink(oset, t)));
+}
+
+// TODO: for now it is assumed clauses are connected by an AndLink
+// only. To fix that one needs to generalize
+// PatternLink::unbundle_clauses to make it usable in that code too.
+//
+// TODO: maybe replace Handle vardecl by Variables variables.
+Handle Unify::remove_constant_clauses(const Handle& vardecl,
+                                      const Handle& clauses)
+{
+	VariableListPtr vl = createVariableList(vardecl);
+	OrderedHandleSet vars = vl->get_variables().varset;
+
+	// Remove constant clauses
+	Type t = clauses->getType();
+	HandleSeq hs;
+	if (t == AND_LINK) {
+		for (const Handle& clause : clauses->getOutgoingSet()) {
+			if (not is_constant(vars, clause)) {
+				hs.push_back(clause);
+			}
+		}
+	} else if (not is_constant(vars, clauses)) {
+		return clauses;
+	}
+	return Handle(createLink(hs, AND_LINK));
 }
 
 Unify::SolutionSet Unify::operator()()
@@ -824,6 +943,16 @@ HandleMap strip_context(const Unify::HandleCHandleMap& hchm)
 	return result;
 }
 
+/**
+ * Generate a VariableList of the free variables of a given contextual
+ * atom ch.
+ */
+VariableListPtr gen_varlist(const Unify::CHandle& ch)
+{
+	OrderedHandleSet free_vars = ch.get_free_variables();
+	return createVariableList(HandleSeq(free_vars.begin(), free_vars.end()));
+}
+
 Handle Unify::type_intersection(const CHandle& lch, const CHandle& rch) const
 {
 	return type_intersection(lch.handle, rch.handle, lch.context, rch.context);
@@ -933,50 +1062,6 @@ bool Unify::inherit(const std::set<Type>& lhs, const std::set<Type>& rhs) const
 		if (not inherit(ty, rhs))
 			return false;
 	return true;
-}
-
-/**
- * Generate a VariableList of the free variables of a given atom h.
- */
-VariableListPtr gen_varlist(const Handle& h)
-{
-	OrderedHandleSet vars = get_free_variables(h);
-	return createVariableList(HandleSeq(vars.begin(), vars.end()));
-}
-Handle gen_vardecl(const Handle& h)
-{
-	return Handle(gen_varlist(h));
-}
-
-/**
- * Generate a VariableList of the free variables of a given contextual
- * atom ch.
- */
-VariableListPtr gen_varlist(const Unify::CHandle& ch)
-{
-	OrderedHandleSet free_vars = ch.get_free_variables();
-	return createVariableList(HandleSeq(free_vars.begin(), free_vars.end()));
-}
-
-/**
- * Given an atom h and its variable declaration vardecl, turn the
- * vardecl into a VariableList if not already, and if undefined,
- * generate a VariableList of the free variables of h.
- */
-VariableListPtr gen_varlist(const Handle& h, const Handle& vardecl)
-{
-	if (not vardecl)
-		return gen_varlist(h);
-	else {
-		Type vardecl_t = vardecl->getType();
-		if (vardecl_t == VARIABLE_LIST)
-			return VariableListCast(vardecl);
-		else {
-			OC_ASSERT(vardecl_t == VARIABLE_NODE
-			          or vardecl_t == TYPED_VARIABLE_LINK);
-			return createVariableList(vardecl);
-		}
-	}
 }
 
 Variables merge_variables(const Variables& lhs, const Variables& rhs)

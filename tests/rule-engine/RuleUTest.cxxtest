@@ -377,7 +377,7 @@ void RuleUTest::test_unify_target_implication_scope_to_implication_1()
 		rewrite = al(EXECUTION_OUTPUT_LINK,
 		             schema,
 		             al(LIST_LINK, target, body)),
-		expected = al(BIND_LINK, body, rewrite);
+		expected = al(BIND_LINK, al(AND_LINK), rewrite);
 
 	std::cout << "rule = " << oc_to_string(rule);
 	std::cout << "expected = " << oc_to_string(expected);
@@ -587,36 +587,7 @@ void RuleUTest::test_unify_target_implication_and_lambda_factorization()
 	Handle rule = rules.begin()->first.get_rule();
 	Handle expected =
 		_eval.eval_h("(BindLink"
-		             "  (LocalQuoteLink"
-		             "    (AndLink"
-		             "      (LambdaLink"
-		             "        (TypedVariableLink"
-		             "          (VariableNode \"$X\")"
-		             "          (TypeNode \"ConceptNode\")"
-		             "        )"
-		             "        (EvaluationLink"
-		             "          (PredicateNode \"contain\")"
-		             "          (ListLink"
-		             "            (ConceptNode \"treatment-1\")"
-		             "            (ConceptNode \"compound-A\")"
-		             "          )"
-		             "        )"
-		             "      )"
-		             "      (LambdaLink"
-		             "        (TypedVariableLink"
-		             "          (VariableNode \"$X\")"
-		             "          (TypeNode \"ConceptNode\")"
-		             "        )"
-		             "        (EvaluationLink"
-		             "          (PredicateNode \"take\")"
-		             "          (ListLink"
-		             "            (VariableNode \"$X\")"
-		             "            (ConceptNode \"treatment-1\")"
-		             "          )"
-		             "        )"
-		             "      )"
-		             "    )"
-		             "  )"
+		             "  (AndLink)"
 		             "  (ExecutionOutputLink"
 		             "    (GroundedSchemaNode \"scm: implication-and-lambda-factorization-formula\")"
 		             "    (ImplicationLink"
@@ -703,7 +674,6 @@ void RuleUTest::test_unify_target_lambda_closed_construction()
 	Handle rule = rules.begin()->first.get_rule();
 	Handle expected =
 		_eval.eval_h("(BindLink"
-		             "  (VariableList)"
 		             "  (AndLink"
 		             "    (EvaluationLink"
 		             "      (GroundedPredicateNode \"scm: lambda-closed-construction-precondition\")"
@@ -714,17 +684,6 @@ void RuleUTest::test_unify_target_lambda_closed_construction()
 		             "          (ConceptNode \"compound-A\")"
 		             "        )"
 		             "      )"
-		             "    )"
-		             "    (EvaluationLink (stv 1.000000 1.000000)"
-		             "      (PredicateNode \"contain\")"
-		             "      (ListLink"
-		             "        (ConceptNode \"treatment-1\")"
-		             "        (ConceptNode \"compound-A\")"
-		             "      )"
-		             "    )"
-		             "    (TypedVariableLink"
-		             "      (VariableNode \"$X\")"
-		             "      (TypeNode \"ConceptNode\")"
 		             "    )"
 		             "  )"
 		             "  (ExecutionOutputLink"

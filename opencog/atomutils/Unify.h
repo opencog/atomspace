@@ -188,6 +188,9 @@ public:
 
 	// Subtitution values and their corresponding variable declaration
 	// after substitution (cause some values may be variables).
+	//
+	// TODO: maybe we could simplify a great deal of code by replacing
+	// Handle by Variables.
 	typedef std::map<HandleCHandleMap, Handle> TypedSubstitutions;
 	typedef TypedSubstitutions::value_type TypedSubstitution;
 
@@ -260,6 +263,7 @@ public:
 	 * No other use of quotation is assumed besides the 2 above.
 	 */
 	static BindLinkPtr consume_ill_quotations(BindLinkPtr bl);
+	static Handle consume_ill_quotations(const Handle& vardecl, const Handle& h);
 	static Handle consume_ill_quotations(const Variables& variables, Handle h,
 	                                     Quotation quotation=Quotation(),
 	                                     bool escape=false /* ignore the next
@@ -285,6 +289,91 @@ public:
 	 * link (for now only BindLinks are supported).
 	 */
 	static Handle substitute(BindLinkPtr bl, const TypedSubstitution& ts);
+
+	/**
+	 * Given a mapping from variables to values, return a copy of
+	 * itself with variables substituted by the values. Values could
+	 * be variable as well. The variable declaration is automatically
+	 * adjusted so only the new variables remain. Optionally, if the
+	 * types have changed, a new variable declaration is provided to
+	 * replace the existing one. Constant clauses are automatically
+	 * removed from the BindLink. If no clause remains then the
+	 * pattern body is left with an empty AndLink.
+	 *
+	 * Examples:
+	 *
+	 * Assume the instance is:
+	 *
+	 * (BindLink
+	 *   (VariableList (Variable "$X") (Variable "$Y"))
+	 *   (Inheritance (Variable "$X") (Variable "$Y"))
+	 *   (ExecutionOutputLink
+	 *     (GroundedSchemaNode "gsn")
+	 *     (Inheritance (Variable "$X") (Variable "$Y"))))
+	 *
+	 * 1. substitute([(Variable "$W"), (Variable "$Z")]) returns:
+	 *
+	 * (BindLink
+	 *   (VariableList (Variable "$W") (Variable "$Z"))
+	 *   (Inheritance (Variable "$W") (Variable "$Z"))
+	 *   (ExecutionOutputLink
+	 *     (GroundedSchemaNode "gsn")
+	 *     (Inheritance (Variable "$W") (Variable "$Z"))))
+	 *
+	 * 2. substitute([(Variable "$W"), (Variable "$Z")], variables)
+	 *    such that variables associates a ConceptNode type to $W and $Z
+	 *    returns:
+	 *
+	 * (BindLink
+	 *   (VariableList
+	 *     (TypedVariable (Variable "$W") (Type "ConceptNode"))
+	 *     (TypedVariable (Variable "$Z") (Type "ConceptNode")))
+	 *   (Inheritance (Variable "$W") (Variable "$Z")))
+	 *   (ExecutionOutputLink
+	 *     (GroundedSchemaNode "gsn")
+	 *     (Inheritance (Variable "$W") (Variable "$Z"))))
+	 *
+	 * 3. substitute([(Variable "$W"), (Concept "B")]) returns:
+	 *
+	 * (BindLink
+	 *   (Variable "$W")
+	 *   (Inheritance (Variable "$W") (Concept "B"))
+	 *   (ExecutionOutputLink
+	 *     (GroundedSchemaNode "gsn")
+	 *     (Inheritance (Variable "$W") (Concept "B"))))
+	 *
+	 * 4. substitute([(Concept "A"), (Concept "B")]) returns:
+	 *
+	 * (BindLink
+	 *   (AndLink)
+	 *   (ExecutionOutputLink
+	 *     (GroundedSchemaNode "gsn")
+	 *     (Inheritance (Concept "$A") (Concept "B"))))
+	 */
+	static Handle substitute(BindLinkPtr bl, const HandleMap& var2val,
+	                         Handle vardecl=Handle::UNDEFINED);
+
+	/**
+	 * Substitute the variable declaration of a BindLink. Remove
+	 * variables that are substituted by values. If all variables are
+	 * removed it returns Handle::UNDEFINED.
+	 */
+	static Handle substitute_vardecl(const Handle& vardecl,
+	                                 const HandleMap& var2val);
+
+	/**
+	 * Given a pattern term (a conjunction of clauses) and a variable
+	 * declaration, remove the constant clauses. If all clauses are
+	 * constants then return an empty AndLink.
+	 *
+	 * The variable declaration is assumed defined. That is if there
+	 * are no variable, rather than Handle::UNDEFINED the vardecl will
+	 * have to be a empty VariableList. That is because an undefined
+	 * variable declaration is ambiguous as we don't know what whether
+	 * it means empty or containing all free variables.
+	 */
+	static Handle remove_constant_clauses(const Handle& vardecl,
+	                                      const Handle& clauses);
 
 	/**
 	 * Perform unification by recursively
@@ -642,23 +731,10 @@ bool tss_content_eq(const Unify::TypedSubstitutions& lhs,
 HandleMap strip_context(const Unify::HandleCHandleMap& hchm);
 
 /**
- * Generate a VariableList of the free variables of a given atom h.
- */
-VariableListPtr gen_varlist(const Handle& h);
-Handle gen_vardecl(const Handle& h);
-
-/**
  * Generate a VariableList of the free variables of a given contextual
  * atom ch.
  */
 VariableListPtr gen_varlist(const Unify::CHandle& ch);
-
-/**
- * Given an atom h and its variable declaration vardecl, turn the
- * vardecl into a VariableList if not already, and if undefined,
- * generate a VariableList of the free variables of h.
- */
-VariableListPtr gen_varlist(const Handle& h, const Handle& vardecl);
 
 /**
  * Merge two vardecls into one. If a variable is present in both

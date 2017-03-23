@@ -69,13 +69,17 @@ void VariableList::validate_vardecl(const HandleSeq& oset)
 	build_index();
 }
 
-VariableList::VariableList(const Handle& hvardecls)
+VariableList::VariableList(const Handle& vardecl)
 	: Link(
-	    // Either it is a VariableList, or its a naked variable, or
-	    // its a typed variable.
-	    hvardecls->getType() == VARIABLE_LIST ?
-	          hvardecls->getOutgoingSet() : HandleSeq({hvardecls}),
-	    VARIABLE_LIST)
+		not vardecl ?
+		// If vardecl is undefined then construct an empty variable list
+		HandleSeq({})
+		:
+		// Otherwise vardecl is either a VariableList, or a naked or
+		// typed variable.
+		vardecl->getType() == VARIABLE_LIST ?
+		vardecl->getOutgoingSet() : HandleSeq({vardecl}),
+		VARIABLE_LIST)
 {
 	validate_vardecl(getOutgoingSet());
 }
