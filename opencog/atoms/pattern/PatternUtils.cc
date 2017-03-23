@@ -94,8 +94,8 @@ bool is_constant(const OrderedHandleSet& vars, const Handle& clause)
 	            or contains_atomtype(clause, IDENTICAL_LINK)
 	            or contains_atomtype(clause, EQUAL_LINK)
 	            // If it is an EvaluatableLink then is is not a
-	            // constant, unless it is an EvaluationLink over a
-	            // PredicateNode.
+	            // constant, unless it is a closed EvaluationLink over
+	            // a PredicateNode.
 	            or (classserver().isA(clause->getType(), EVALUATABLE_LINK)
 	                and (0 == clause->getArity()
 	                     or
