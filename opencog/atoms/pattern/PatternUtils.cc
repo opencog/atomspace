@@ -69,26 +69,37 @@ bool remove_constants(const OrderedHandleSet &vars,
 	for (i = clauses.begin(); i != clauses.end(); )
 	{
 		Handle clause(*i);
-		if (any_unquoted_in_tree(clause, vars)
-		    or contains_atomtype(clause, DEFINED_PREDICATE_NODE)
-		    or contains_atomtype(clause, DEFINED_SCHEMA_NODE)
-		    or contains_atomtype(clause, GROUNDED_PREDICATE_NODE)
-		    or contains_atomtype(clause, GROUNDED_SCHEMA_NODE)
-		    or contains_atomtype(clause, IDENTICAL_LINK)
-		    or contains_atomtype(clause, EQUAL_LINK)
-		    or classserver().isA(clause->getType(), EVALUATABLE_LINK))
-		{
-			++i;
-		}
-		else
+		if (is_constant(vars, clause))
 		{
 			constants.emplace_back(clause);
 			i = clauses.erase(i);
 			modified = true;
 		}
+		else
+		{
+			++i;
+		}
 	}
 
 	return modified;
+}
+
+bool is_constant(const OrderedHandleSet& vars, const Handle& clause)
+{
+	return not (any_unquoted_in_tree(clause, vars) // TODO: why does the following fails the QuoteUTest any_unquoted_unscoped_in_tree(clause, vars)
+	            or contains_atomtype(clause, DEFINED_PREDICATE_NODE)
+	            or contains_atomtype(clause, DEFINED_SCHEMA_NODE)
+	            or contains_atomtype(clause, GROUNDED_PREDICATE_NODE)
+	            or contains_atomtype(clause, GROUNDED_SCHEMA_NODE)
+	            or contains_atomtype(clause, IDENTICAL_LINK)
+	            or contains_atomtype(clause, EQUAL_LINK)
+	            // If it is an EvaluatableLink then is is not a
+	            // constant, unless it is an EvaluationLink over a
+	            // PredicateNode.
+	            or (classserver().isA(clause->getType(), EVALUATABLE_LINK)
+	                and (0 == clause->getArity()
+	                     or
+	                     clause->getOutgoingAtom(0)->getType() != PREDICATE_NODE)));
 }
 
 /* ======================================================== */
