@@ -53,7 +53,7 @@ public:
 	void test_bindlink();
 	void test_rand_alpha_conversion();
 	void test_names_alpha_conversion();
-	void test_vardecl_bindlink_substitute();
+	void test_vardecl_bindlink_alpha_conversion();
 	void test_unordered();
 };
 
@@ -358,7 +358,7 @@ void AlphaConvertUTest::test_names_alpha_conversion()
 
 // Like test_vardecl_bindlink_alpha_conversion but using a BindLink
 // instead of a ScopeLink
-void AlphaConvertUTest::test_vardecl_bindlink_substitute()
+void AlphaConvertUTest::test_vardecl_bindlink_alpha_conversion()
 {
 	logger().info("BEGIN TEST: %s", __FUNCTION__);
 
@@ -380,13 +380,6 @@ void AlphaConvertUTest::test_vardecl_bindlink_substitute()
 	std::cout << "expected_wo_vardecl = " << oc_to_string(expected_wo_vardecl);
 
 	TS_ASSERT_EQUALS(result_wo_vardecl, expected_wo_vardecl);
-
-	Handle result = _asa.add_atom(bl->substitute({{X, Y}}, Y_vardecl));
-
-	std::cout << "result = " << oc_to_string(result);
-	std::cout << "expected = " << oc_to_string(expected);
-
-	TS_ASSERT_EQUALS(result, expected);
 
 	logger().info("END TEST: %s", __FUNCTION__);
 }

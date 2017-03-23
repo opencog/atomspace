@@ -102,6 +102,8 @@ public:
 	void test_unify_unordered_7();
 	void test_unify_unordered_8();
 
+	void test_substitute_1();
+
 	// Various complex unify queries
 	void test_unify_complex_1();
 	void test_unify_complex_2();
@@ -639,6 +641,27 @@ void UnifyUTest::test_unify_unordered_8()
 
 	std::cout << "result = " << oc_to_string(result) << std::endl;
 	std::cout << "expected = " << oc_to_string(expected) << std::endl;
+
+	TS_ASSERT_EQUALS(result, expected);
+}
+
+void UnifyUTest::test_substitute_1()
+{
+	// Test simple BindLink
+	Handle X = an(VARIABLE_NODE, "$X"),
+		Y = an(VARIABLE_NODE, "$Y"),
+		CT = an(TYPE_NODE, "ConceptNode"),
+		Y_vardecl = al(TYPED_VARIABLE_LINK, Y, CT),
+		hbl = al(BIND_LINK, al(AND_LINK, X), al(OR_LINK, X)),
+		expected = al(BIND_LINK, Y_vardecl,
+		              al(AND_LINK, Y), al(OR_LINK, Y));
+
+	BindLinkPtr bl(BindLinkCast(hbl));
+
+	Handle result = _as.add_atom(Unify::substitute(bl, {{X, Y}}, Y_vardecl));
+
+	std::cout << "result = " << oc_to_string(result);
+	std::cout << "expected = " << oc_to_string(expected);
 
 	TS_ASSERT_EQUALS(result, expected);
 }
