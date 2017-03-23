@@ -222,7 +222,7 @@ void QuoteUTest::test_double_quote(void)
     logger().debug("END TEST: %s", __FUNCTION__);
 }
 
-// Test bug bug #1531
+// Test bug #1531
 void QuoteUTest::test_impossible(void)
 {
     logger().debug("BEGIN TEST: %s", __FUNCTION__);
