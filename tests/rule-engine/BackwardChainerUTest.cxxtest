@@ -503,7 +503,7 @@ void BackwardChainerUTest::test_criminal_trace()
 	// that you have deleted the old opencog.log before running
 	// test_crimila())
 	//
-	// <ATOMSPACE_ROOT>/scripts/rule-engine/extract-bc-trace.py <FCS_SOLUTION>' opencog.log > opencog-<FCS_SOLUTION>.log
+	// <ATOMSPACE_ROOT>/scripts/rule-engine/extract-bc-trace.py <FCS_SOLUTION> opencog.log > opencog-<FCS_SOLUTION>.log
 	// <ATOMSPACE_ROOT>/scripts/rule-engine/extract-values-from-trace.py opencog-<FCS_SOLUTION>.log > <FCS_SOLUTION>.trace
 	//
 	// where <FCS_SOLUTION> is the hash value of the FCS solving the
@@ -513,7 +513,7 @@ void BackwardChainerUTest::test_criminal_trace()
 	// is gonna complain.
 	std::set<ContentHash> trace{
 		17025922688105268679U, 12614994268038677483U, 15944815478163286971U,
-			10803065885026726015U, 18332049782089667106U};
+			10803065885026726015U, 11572169445021132283U};
 	AndBITFitness trace_fitness(AndBITFitness::Trace, trace);
 	BackwardChainer bc(_as, top_rbs, target, vardecl, Handle::UNDEFINED,
 	                   BITNodeFitness(), trace_fitness);
