@@ -86,7 +86,7 @@ bool remove_constants(const OrderedHandleSet &vars,
 
 bool is_constant(const OrderedHandleSet& vars, const Handle& clause)
 {
-	return not (any_unquoted_in_tree(clause, vars) // TODO: why does the following fails the QuoteUTest any_unquoted_unscoped_in_tree(clause, vars)
+	return not (any_unquoted_unscoped_in_tree(clause, vars)
 	            or contains_atomtype(clause, DEFINED_PREDICATE_NODE)
 	            or contains_atomtype(clause, DEFINED_SCHEMA_NODE)
 	            or contains_atomtype(clause, GROUNDED_PREDICATE_NODE)
