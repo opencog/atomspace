@@ -36,6 +36,7 @@
 #include <opencog/util/random.h>
 #include <opencog/atomutils/FindUtils.h>
 #include <opencog/atoms/execution/ExecutionOutputLink.h>
+#include <opencog/atoms/pattern/PatternUtils.h>
 
 #include "BIT.h"
 #include "../URELogger.h"
@@ -80,11 +81,14 @@ std::string	BITNode::to_string() const
 
 AndBIT::AndBIT() : exhausted(false) {}
 
-AndBIT::AndBIT(AtomSpace& as, const Handle& target, const Handle& vardecl,
+AndBIT::AndBIT(AtomSpace& as, const Handle& target, Handle vardecl,
                const BITNodeFitness& fitness) : exhausted(false)
 {
 	// Create initial FCS
-	HandleSeq bl{target, target};
+	vardecl = gen_vardecl(target, vardecl); // in case it is undefined
+	Handle body = Unify::remove_constant_clauses(vardecl, target);
+	HandleSeq bl{body, target};
+	vardecl = filter_vardecl(vardecl, body); // remove useless vardecl
 	if (vardecl)
 		bl.insert(bl.begin(), vardecl);
 	fcs = as.add_link(BIND_LINK, bl);

@@ -100,7 +100,7 @@ public:
 	 * fitness and add it in as.
 	 */
 	AndBIT();
-	AndBIT(AtomSpace& as, const Handle& target, const Handle& vardecl,
+	AndBIT(AtomSpace& as, const Handle& target, Handle vardecl,
 	       const BITNodeFitness& fitness=BITNodeFitness());
 	/**
 	 * @brief construct a and-BIT given its FCS and complexity.
