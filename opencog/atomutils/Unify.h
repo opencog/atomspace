@@ -188,6 +188,9 @@ public:
 
 	// Subtitution values and their corresponding variable declaration
 	// after substitution (cause some values may be variables).
+	//
+	// TODO: maybe we could simplify a great deal of code by replacing
+	// Handle by Variables.
 	typedef std::map<HandleCHandleMap, Handle> TypedSubstitutions;
 	typedef TypedSubstitutions::value_type TypedSubstitution;
 
@@ -260,6 +263,7 @@ public:
 	 * No other use of quotation is assumed besides the 2 above.
 	 */
 	static BindLinkPtr consume_ill_quotations(BindLinkPtr bl);
+	static Handle consume_ill_quotations(const Handle& vardecl, const Handle& h);
 	static Handle consume_ill_quotations(const Variables& variables, Handle h,
 	                                     Quotation quotation=Quotation(),
 	                                     bool escape=false /* ignore the next
@@ -349,13 +353,25 @@ public:
 	static Handle substitute(BindLinkPtr bl, const HandleMap& var2val,
 	                         Handle vardecl=Handle::UNDEFINED);
 
-	// Substitute helper
+	/**
+	 * Substitute the variable declaration of a BindLink. Remove
+	 * variables that are substituted by values. If all variables are
+	 * removed it returns Handle::UNDEFINED.
+	 */
 	static Handle substitute_vardecl(const Handle& vardecl,
 	                                 const HandleMap& var2val);
 
-	// Given a pattern term (a conjunction of clauses) and a variable
-	// declaration, remove the constant clauses. If all clauses are
-	// constants then return an empty AndLink.
+	/**
+	 * Given a pattern term (a conjunction of clauses) and a variable
+	 * declaration, remove the constant clauses. If all clauses are
+	 * constants then return an empty AndLink.
+	 *
+	 * The variable declaration is assumed defined. That is if there
+	 * are no variable, rather than Handle::UNDEFINED the vardecl will
+	 * have to be a empty VariableList. That is because an undefined
+	 * variable declaration is ambiguous as we don't know what whether
+	 * it means empty or containing all free variables.
+	 */
 	static Handle remove_constant_clauses(const Handle& vardecl,
 	                                      const Handle& clauses);
 

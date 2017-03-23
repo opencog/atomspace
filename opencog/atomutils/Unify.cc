@@ -293,6 +293,12 @@ BindLinkPtr Unify::consume_ill_quotations(BindLinkPtr bl)
 		: createBindLink(pattern, rewrite);
 }
 
+Handle Unify::consume_ill_quotations(const Handle& vardecl, const Handle& h)
+{
+	const Variables variables = createVariableList(vardecl)->get_variables();
+	return consume_ill_quotations(variables, h);
+}
+
 Handle Unify::consume_ill_quotations(const Variables& variables, Handle h,
                                      Quotation quotation, bool escape)
 {
@@ -349,26 +355,25 @@ bool Unify::is_bound_to_ancestor(const Variables& variables,
 
 Handle Unify::substitute(BindLinkPtr bl, const TypedSubstitution& ts)
 {
-	// Perform alpha-conversion, this will work over values that are
-	// non variables as well
-	//
 	// TODO: make sure that ts.second contains the declaration of all
 	// variables
-	Handle h = substitute(bl, strip_context(ts.first), ts.second);
-
-	// TODO move that back into the substitute function as to not
-	// create a BindLink with ill quotations in it in the meantime.
-	return Handle(consume_ill_quotations(BindLinkCast(h)));
+	return substitute(bl, strip_context(ts.first), ts.second);
 }
 
-// TODO: add unit test in UnifyUTest for it
 Handle Unify::substitute(BindLinkPtr bl, const HandleMap& var2val,
                          Handle vardecl)
 {
 	// Perform substitution over the existing variable declaration, if
-	// no alternative is provided
-	if (!vardecl and bl->get_vardecl())
+	// no new alternative is provided.
+	if (not vardecl) {
+		// If the bind link has no variable declaration either then
+		// infer one
+		Handle old_vardecl = bl->get_vardecl() ? bl->get_vardecl()
+			: gen_vardecl(bl->get_body());
+		// Substitute the variables in the old vardecl to obtain the
+		// new one.
 		vardecl = substitute_vardecl(bl->get_vardecl(), var2val);
+	}
 
 	const Variables variables = bl->get_variables();
 
@@ -381,10 +386,14 @@ Handle Unify::substitute(BindLinkPtr bl, const HandleMap& var2val,
 	// Perform substitution over the pattern term, then remove
 	// constant clauses
 	Handle clauses = variables.substitute_nocheck(bl->get_body(), values);
-	hs.push_back(remove_constant_clauses(vardecl, clauses));
+	clauses = consume_ill_quotations(vardecl, clauses);
+	clauses = remove_constant_clauses(vardecl, clauses);
+	hs.push_back(clauses);
 
 	// Perform substitution over the rewrite term
-	hs.push_back(variables.substitute_nocheck(bl->get_implicand(), values));
+	Handle rewrite = variables.substitute_nocheck(bl->get_implicand(), values);
+	rewrite = consume_ill_quotations(vardecl, rewrite);
+	hs.push_back(rewrite);
 
 	// Filter vardecl
 	vardecl = filter_vardecl(vardecl, hs);
@@ -445,12 +454,13 @@ Handle Unify::substitute_vardecl(const Handle& vardecl,
 // TODO: for now it is assumed clauses are connected by an AndLink
 // only. To fix that one needs to generalize
 // PatternLink::unbundle_clauses to make it usable in that code too.
+//
+// TODO: maybe replace Handle vardecl by Variables variables.
 Handle Unify::remove_constant_clauses(const Handle& vardecl,
                                       const Handle& clauses)
 {
-	// Extract variables
-	VariableListPtr vl = gen_varlist(clauses, vardecl);
-	const OrderedHandleSet& vars = vl->get_variables().varset;
+	VariableListPtr vl = createVariableList(vardecl);
+	OrderedHandleSet vars = vl->get_variables().varset;
 
 	// Remove constant clauses
 	Type t = clauses->getType();
