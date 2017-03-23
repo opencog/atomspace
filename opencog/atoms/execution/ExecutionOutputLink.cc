@@ -189,6 +189,16 @@ Handle ExecutionOutputLink::do_execute(AtomSpace* as,
 		                       gsn->toString().c_str());
 	}
 
+	// Check for a not-uncommon user-error.  If the user-defined
+	// code returns nothing, then a null-pointer-dereference is
+	// likely, a bit later down the line, leading to a crash.
+	// So head this off at the pass.
+	if (nullptr == result)
+		throw RuntimeException(TRACE_INFO,
+		        "Invalid return value from schema %s\nArgs: %s",
+		        gsn->toString().c_str(),
+		        cargs->toString().c_str());
+
 	LAZY_LOG_FINE << "Result: " << oc_to_string(result);
 	return result;
 }
