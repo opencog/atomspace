@@ -193,6 +193,8 @@ struct Variables : public FreeVariables
 	/// Variables object into a Handle variable declaration usable by
 	/// by ScopeLink.
 	///
+	/// If empty then return the empty VariableList.
+	///
 	/// TODO: support deep and fuzzy typemaps.
 	Handle get_vardecl() const;
 
