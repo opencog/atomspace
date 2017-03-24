@@ -639,9 +639,6 @@ Handle Variables::get_vardecl() const
 		vars.push_back(var);
 	}
 
-	if (vars.empty())
-		return Handle::UNDEFINED; // or throw an exception???
-
 	if (vars.size() == 1)
 		return vars[0];
 
