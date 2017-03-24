@@ -543,48 +543,6 @@ public:
     {
         return _atom_table.TVChangedSignal().connect(function);
     }
-
-    /* ----------------------------------------------------------- */
-    /* Deprecated and obsolete code */
-
-#ifdef DEPRECATED_ATOMSPACE_CALLS
-    /**
-     * DEPRECATED! DO NOT USE IN NEW CODE!
-     * If you need this function, just cut and paste the code below into
-     * whatever you are doing!
-     */
-    bool is_node(Handle h) const { return h != nullptr and h->isNode(); }
-    bool is_link(Handle h) const { return h != nullptr and h->isLink(); }
-
-    /** DEPRECATED! Do NOT USE IN NEW CODE!
-     * If you need this, just copy the code below into your app! */
-    std::string atom_as_string(Handle h, bool terse = true) const {
-        if (terse) return h->toShortString();
-        return h->toString();
-    }
-
-    /** DEPRECATED! Do NOT USE IN NEW CODE! (in use by pattern miner)
-     * If you need this, just copy the code below into your app! */
-    const std::string& get_name(Handle h) const {
-        static std::string noname;
-        NodePtr nnn(NodeCast(h));
-        if (nnn) return nnn->getName();
-        return noname;
-    }
-
-    /** DEPRECATED! Do NOT USE IN NEW CODE! (in use by pattern miner)
-     * If you need this, just copy the code below into your app! */
-    Type get_type(Handle h) const {
-        return h->getType();
-    }
-
-    /** DEPRECATED! Do NOT USE IN NEW CODE! (in use by pattern miner)
-     * If you need this, just copy the code below into your app! */
-    TruthValuePtr get_TV(Handle h) const
-    {
-        return h->getTruthValue();
-    }
-#endif // DEPRECATED_ATOMSPACE_CALLS
 };
 
 /** @}*/
