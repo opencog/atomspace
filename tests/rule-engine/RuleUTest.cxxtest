@@ -62,7 +62,8 @@ public:
 	void test_unify_target_implication_scope_to_implication_4();
 	// TODO provide a unit tests when some quotation should be not consumed
 	void test_unify_target_implication_and_lambda_factorization();
-	void test_unify_target_lambda_closed_construction();
+	void test_unify_target_lambda_closed_construction_1();
+	void test_unify_target_lambda_closed_construction_2();
 };
 
 void RuleUTest::setUp()
@@ -653,7 +654,7 @@ void RuleUTest::test_unify_target_implication_and_lambda_factorization()
 	TS_ASSERT(expected_sc->is_equal(rule));
 }
 
-void RuleUTest::test_unify_target_lambda_closed_construction()
+void RuleUTest::test_unify_target_lambda_closed_construction_1()
 {
 	Rule lambda_closed_construction_rule(lambda_closed_construction_rule_h);
 	Handle target =
@@ -712,6 +713,62 @@ void RuleUTest::test_unify_target_lambda_closed_construction()
 		             "    )"
 		             "  )"
 		             ")");
+
+	std::cout << "rule = " << oc_to_string(rule);
+	std::cout << "expected = " << oc_to_string(expected);
+
+	ScopeLinkPtr expected_sc = ScopeLinkCast(expected);
+
+	TS_ASSERT(expected_sc->is_equal(rule));
+}
+
+void RuleUTest::test_unify_target_lambda_closed_construction_2()
+{
+	Rule lambda_closed_construction_rule(lambda_closed_construction_rule_h);
+	Handle target =
+		_eval.eval_h("(LambdaLink"
+		             "  (TypedVariableLink"
+		             "    (VariableNode \"$X\")"
+		             "    (TypeNode \"ConceptNode\"))"
+		             "  (EvaluationLink"
+		             "    (PredicateNode \"take\")"
+		             "    (ListLink"
+		             "      (VariableNode \"$X\")"
+		             "      (ConceptNode \"compound-A\"))))");
+	RuleTypedSubstitutionMap rules =
+		lambda_closed_construction_rule.unify_target(target);
+
+	TS_ASSERT_EQUALS(rules.size(), 1);
+
+	Handle rule = rules.begin()->first.get_rule();
+	Handle expected =
+		_eval.eval_h("(BindLink"
+		             "  (VariableList)"
+		             "  (AndLink"
+		             "    (EvaluationLink"
+		             "      (GroundedPredicateNode \"scm: lambda-closed-construction-precondition\")"
+		             "      (EvaluationLink"
+		             "        (PredicateNode \"take\")"
+		             "        (ListLink"
+		             "          (VariableNode \"$X\")"
+		             "          (ConceptNode \"compound-A\")))))"
+		             "  (ExecutionOutputLink"
+		             "    (GroundedSchemaNode \"scm: lambda-closed-construction-formula\")"
+		             "    (ListLink"
+		             "      (LambdaLink"
+		             "        (TypedVariableLink"
+		             "          (VariableNode \"$X\")"
+		             "          (TypeNode \"ConceptNode\"))"
+		             "        (EvaluationLink"
+		             "          (PredicateNode \"take\")"
+		             "          (ListLink"
+		             "            (VariableNode \"$X\")"
+		             "            (ConceptNode \"compound-A\"))))"
+		             "      (EvaluationLink"
+		             "        (PredicateNode \"take\")"
+		             "        (ListLink"
+		             "          (VariableNode \"$X\")"
+		             "          (ConceptNode \"compound-A\"))))))");
 
 	std::cout << "rule = " << oc_to_string(rule);
 	std::cout << "expected = " << oc_to_string(expected);
