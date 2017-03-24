@@ -1483,7 +1483,7 @@ void UnifyUTest::test_unify_complex_7()
 
 	TS_ASSERT_EQUALS(result, expected);
 
-	Handle ts_vardecl;
+	Handle ts_vardecl = al(VARIABLE_LIST);
 
 	Unify::TypedSubstitutions ts_result =
 		unify.typed_substitutions(result, target);
