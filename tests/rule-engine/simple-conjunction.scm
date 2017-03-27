@@ -1,4 +1,4 @@
-;; Useful for testing conjunction-fuzzy-evaluation rule
+;; Useful for testing fuzzy-conjunction-construction rule
 
 (Evaluation (stv 0.4 0.6)
   (Predicate "P")

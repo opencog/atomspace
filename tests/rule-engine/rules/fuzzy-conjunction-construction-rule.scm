@@ -1,5 +1,5 @@
 ; =============================================================================
-; ConjunctionEvaluationRule
+; FuzzyConjunctionConstructionRule
 ;
 ; A1
 ; ...
@@ -28,9 +28,9 @@
       (append (gen-variables prefix (- n 1))
               (list (gen-variable prefix (- n 1))))))
 
-;; Generate a conjunction fuzzy evaluation rule for an n-ary
+;; Generate a fuzzy conjunction construction rule for an n-ary
 ;; conjunction
-(define (gen-conjunction-fuzzy-evaluation-rule nary)
+(define (gen-fuzzy-conjunction-construction-rule nary)
   (let* ((variables (gen-variables "$X" nary))
          (EvaluationT (Type "EvaluationLink"))
          (InheritanceT (Type "InheritanceLink"))
@@ -39,7 +39,7 @@
          (vardecl (VariableList (map gen-typed-variable variables)))
          (pattern (And variables))
          (rewrite (ExecutionOutput
-                    (GroundedSchema "scm: conjunction-fuzzy-evaluation-formula")
+                    (GroundedSchema "scm: fuzzy-conjunction-construction-formula")
                     ;; We wrap the variables in Set because the order
                     ;; doesn't matter and that way alpha-conversion
                     ;; works better.
@@ -49,7 +49,7 @@
       pattern
       rewrite)))
 
-(define (conjunction-fuzzy-evaluation-formula A S)
+(define (fuzzy-conjunction-construction-formula A S)
   (let* ((andees (cog-outgoing-set S))
          (min-s-atom (min-element-by-key andees cog-stv-strength))
          (min-c-atom (min-element-by-key andees cog-stv-confidence))
@@ -60,28 +60,28 @@
 ;; Name the rules
 ;;
 ;; Lame enumeration, maybe scheme can do better?
-(define conjunction-fuzzy-evaluation-1ary-rule-name
-  (DefinedSchema "conjunction-fuzzy-evaluation-1ary-rule"))
+(define fuzzy-conjunction-construction-1ary-rule-name
+  (DefinedSchema "fuzzy-conjunction-construction-1ary-rule"))
 (DefineLink
-  conjunction-fuzzy-evaluation-1ary-rule-name
-  (gen-conjunction-fuzzy-evaluation-rule 1))
-(define conjunction-fuzzy-evaluation-2ary-rule-name
-  (DefinedSchema "conjunction-fuzzy-evaluation-2ary-rule"))
+  fuzzy-conjunction-construction-1ary-rule-name
+  (gen-fuzzy-conjunction-construction-rule 1))
+(define fuzzy-conjunction-construction-2ary-rule-name
+  (DefinedSchema "fuzzy-conjunction-construction-2ary-rule"))
 (DefineLink
-  conjunction-fuzzy-evaluation-2ary-rule-name
-  (gen-conjunction-fuzzy-evaluation-rule 2))
-(define conjunction-fuzzy-evaluation-3ary-rule-name
-  (DefinedSchema "conjunction-fuzzy-evaluation-3ary-rule"))
+  fuzzy-conjunction-construction-2ary-rule-name
+  (gen-fuzzy-conjunction-construction-rule 2))
+(define fuzzy-conjunction-construction-3ary-rule-name
+  (DefinedSchema "fuzzy-conjunction-construction-3ary-rule"))
 (DefineLink
-  conjunction-fuzzy-evaluation-3ary-rule-name
-  (gen-conjunction-fuzzy-evaluation-rule 3))
-(define conjunction-fuzzy-evaluation-4ary-rule-name
-  (DefinedSchema "conjunction-fuzzy-evaluation-4ary-rule"))
+  fuzzy-conjunction-construction-3ary-rule-name
+  (gen-fuzzy-conjunction-construction-rule 3))
+(define fuzzy-conjunction-construction-4ary-rule-name
+  (DefinedSchema "fuzzy-conjunction-construction-4ary-rule"))
 (DefineLink
-  conjunction-fuzzy-evaluation-4ary-rule-name
-  (gen-conjunction-fuzzy-evaluation-rule 4))
-(define conjunction-fuzzy-evaluation-5ary-rule-name
-  (DefinedSchema "conjunction-fuzzy-evaluation-5ary-rule"))
+  fuzzy-conjunction-construction-4ary-rule-name
+  (gen-fuzzy-conjunction-construction-rule 4))
+(define fuzzy-conjunction-construction-5ary-rule-name
+  (DefinedSchema "fuzzy-conjunction-construction-5ary-rule"))
 (DefineLink
-  conjunction-fuzzy-evaluation-5ary-rule-name
-  (gen-conjunction-fuzzy-evaluation-rule 5))
+  fuzzy-conjunction-construction-5ary-rule-name
+  (gen-fuzzy-conjunction-construction-rule 5))
