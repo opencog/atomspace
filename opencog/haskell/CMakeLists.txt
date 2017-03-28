@@ -2,7 +2,7 @@ ADD_LIBRARY (atomspace-cwrapper
     AtomSpace_CWrapper.cpp
     PatternMatcher_CWrapper.cpp
     Exec_CWrapper.cpp
-    Utils_CWrapper.cpp
+    TruthValue_CWrapper.cpp
 )
 
 ADD_DEPENDENCIES(atomspace-cwrapper atomspace query)

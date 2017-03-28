@@ -19,5 +19,5 @@ library
                        , opencog-atomspace
   c-sources:             hsbracket.c
   ghc-options:           -dynamic -shared -fPIC
-  extra-libraries:       HSrts-ghc8.0.1
+  --extra-libraries:       HSrts-ghc8.0.1
   default-language:      Haskell2010

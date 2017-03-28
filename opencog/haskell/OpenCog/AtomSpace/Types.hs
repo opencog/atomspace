@@ -26,6 +26,8 @@ data Atom = Link AtomType [Atom] TruthVal
           | Node AtomType AtomName TruthVal
           deriving (Eq,Show,Read)
 
+--data Value = FloatValue AtomType [Double] | LinkValue AtomType [Value]
+
 -- | 'TruthVal' represent the different types of TruthValues.
 data TruthVal = SimpleTV { tvMean       :: Double
                          , tvConfidence :: Double

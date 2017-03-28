@@ -170,8 +170,7 @@ getNode aType aName = do
     case m of
       Nothing -> return Nothing
       Just h  -> do
-          asRef <- getAtomSpace
-          res <- liftIO $ getTruthValue asRef h
+          res <- liftIO $ getTruthValue h
           return $ case res of
               Just tv -> Just (tv,h)
               Nothing -> Nothing
@@ -204,8 +203,7 @@ getLink aType aOutgoing = do
     case m of
       Nothing -> return Nothing
       Just h  -> do
-          asRef <- getAtomSpace
-          res <- liftIO $ getTruthValue asRef h
+          res <- liftIO $ getTruthValue h
           return $ case res of
               Just tv -> Just (tv,h)
               Nothing -> Nothing
@@ -275,7 +273,7 @@ execute atom = do
 foreign import ccall "Exec_evaluate"
     c_exec_evaluate :: AtomSpaceRef
                     -> Handle
-                    -> Ptr CInt
+                    -> Ptr CString
                     -> Ptr CDouble
                     -> IO CInt
 
@@ -307,7 +305,7 @@ foreign import ccall "AtomSpace_getAtomByHandle"
 getByHandle :: Handle -> AtomSpace (Maybe Atom)
 getByHandle h = do
     asRef <- getAtomSpace
-    resTv <- liftIO $ getTruthValue asRef h
+    resTv <- liftIO $ getTruthValue h
     case resTv of
       Nothing -> return Nothing
       Just tv -> do
@@ -346,22 +344,20 @@ getByHandle h = do
 
 --------------------------------------------------------------------------------
 
-foreign import ccall "AtomSpace_getTruthValue"
-  c_atomspace_getTruthValue :: AtomSpaceRef
-                            -> Handle
-                            -> Ptr CInt
+foreign import ccall "TruthValue_getFromAtom"
+  c_truthvalue_getFromAtom :: Handle
+                            -> Ptr CString
                             -> Ptr CDouble
                             -> IO CInt
 
 -- Internal function to get an atom's truth value.
-getTruthValue :: AtomSpaceRef -> Handle -> IO (Maybe TruthVal)
-getTruthValue asRef handle = do
-    liftIO $ getTVfromC (c_atomspace_getTruthValue asRef handle)
+getTruthValue :: Handle -> IO (Maybe TruthVal)
+getTruthValue handle = do
+    liftIO $ getTVfromC (c_truthvalue_getFromAtom handle)
 
-foreign import ccall "AtomSpace_setTruthValue"
-  c_atomspace_setTruthValue :: AtomSpaceRef
-                            -> Handle
-                            -> CInt
+foreign import ccall "TruthValue_setOnAtom"
+  c_truthvalue_setOnAtom :: Handle
+                            -> CString
                             -> Ptr CDouble
                             -> IO CInt
 
@@ -369,10 +365,10 @@ foreign import ccall "AtomSpace_setTruthValue"
 setTruthValue :: Handle -> TruthVal -> AtomSpace Bool
 setTruthValue handle tv = do
     let (TVRaw tvtype list) = toTVRaw tv
-    asRef <- getAtomSpace
     liftIO $ withArray (map realToFrac list) $
-      \lptr -> do
-          res <- c_atomspace_setTruthValue asRef handle (fromIntegral $ fromEnum tvtype) lptr
+      \lptr -> withCString tvtype $
+      \tptr -> do
+          res <- c_truthvalue_setOnAtom handle tptr lptr
           return $ res == sUCCESS
 
 -- Helpfer function for creating function that can be called from C

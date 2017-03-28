@@ -153,42 +153,5 @@ extern "C"
      */
     void AtomSpace_debug( AtomSpace* this_ptr );
 
-    /**
-     * AtomSpace_getTruthValue  Gets the truthvalue of
-     *                          an atom on the atomspace.
-     * XXX FIXME the truth-value of atoms is independent of the
-     * atomspace. Truth-value is property of the atom, only.
-     * Why is this here?
-     *
-     * @param      this_ptr    Pointer to AtomSpace instance.
-     * @param      handle      Handle id of target atom.
-     * @param[out] tv_type     TruthValue type.
-     * @param[out] parameters  List of parameters of TruthValue result instance.
-     *
-     * @return  0 if success.
-     */
-    int AtomSpace_getTruthValue( AtomSpace* this_ptr
-                               , Handle* handle
-                               , Type* tv_type
-                               , double* parameters );
-
-    /**
-     * AtomSpace_setTruthValue  Sets the truthvalue of
-     *                          an atom on the atomspace.
-     * XXX FIXME the truth-value of atoms is independent of the
-     * atomspace. Truth-value is property of the atom, only.
-     * Why is this here?
-     *
-     * @param      this_ptr    Pointer to AtomSpace instance.
-     * @param      handle      Handle id of target atom.
-     * @param      type        TruthValue type to be set.
-     * @param      parameters  List of parameters of TruthValue to be set.
-     *
-     * @return  0 if success.
-     */
-    int AtomSpace_setTruthValue( AtomSpace* this_ptr
-                               , Handle* handle
-                               , Type type
-                               , double* parameters );
 }
 

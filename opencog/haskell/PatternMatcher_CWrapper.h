@@ -25,7 +25,7 @@ extern "C"
     Handle* PatternMatcher_BindLink(AtomSpace* this_ptr, Handle* handle);
     int PatternMatcher_SatisfactionLink(AtomSpace* this_ptr
                                         , Handle* handle
-                                        , Type* tv_type
+                                        , char** tv_type
                                         , double* parameters);
 
 }

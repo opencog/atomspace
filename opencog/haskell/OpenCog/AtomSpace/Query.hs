@@ -8,6 +8,7 @@ module OpenCog.AtomSpace.Query where
 import Control.Monad.IO.Class      (liftIO)
 import Foreign                     (Ptr)
 import Foreign.C.Types             (CULong(..),CInt(..),CDouble(..))
+import Foreign.C.String             (CString,withCString,peekCString)
 import OpenCog.AtomSpace.Api       (getByHandle,getWithHandle)
 import OpenCog.AtomSpace.Types     (TruthVal,Atom(..))
 import OpenCog.AtomSpace.Env       (AtomSpaceRef(..),AtomSpace,getAtomSpace)
@@ -37,7 +38,7 @@ cogBind at = do
 foreign import ccall "PatternMatcher_SatisfactionLink"
   c_pmatcher_satisfactionlink :: AtomSpaceRef
                       -> Handle
-                      -> Ptr CInt
+                      -> Ptr CString
                       -> Ptr CDouble
                       -> IO CInt
 
