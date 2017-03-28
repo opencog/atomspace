@@ -650,7 +650,7 @@ AndBIT* BIT::expand(AndBIT& andbit, BITNode& bitleaf,
 AndBIT* BIT::insert(const AndBIT& andbit)
 {
 	// Check that it isn't already in the BIT
-	if (boost::binary_search(andbits, andbit)) {
+	if (boost::find(andbits, andbit) != andbits.end()) {
 		LAZY_URE_LOG_DEBUG << "The following and-BIT is already in the BIT: "
 		                   << andbit.fcs->idToString();
 		return nullptr;
