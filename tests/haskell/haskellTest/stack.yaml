@@ -1,7 +1,7 @@
 # For more information, see: https://github.com/commercialhaskell/stack/blob/master/doc/yaml_configuration.md
 
 # Specifies the GHC version and set of packages available (e.g., lts-3.5, nightly-2015-09-21, ghc-7.10.2)
-resolver: lts-7.3
+resolver: lts-8.5
 
 # Local packages, usually specified by relative directory name
 packages:
@@ -27,4 +27,4 @@ flags: {}
 
 # Extra directories used by stack for building
 # extra-include-dirs: [/path/to/dir]
-# extra-lib-dirs: [/path/to/dir]
+# extra-lib-dirs: ["/home/roman/OpenCog/atomspace/build/opencog/haskell"]
