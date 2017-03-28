@@ -90,7 +90,7 @@
       )
     )
     (EvaluationLink
-      (GroundedPredicateNode "scm: implication-construction-precondition")
+      (GroundedPredicateNode "scm: implication-introduction-precondition")
       (ListLink
         (VariableNode "$B-a083600")
         (VariableNode "$Q-5fa8b92b")
@@ -194,7 +194,7 @@
                     )
                   )
                   (ExecutionOutputLink
-                    (GroundedSchemaNode "scm: implication-construction-formula")
+                    (GroundedSchemaNode "scm: implication-introduction-formula")
                     (ListLink
                       (ImplicationLink
                         (VariableNode "$B-a083600")
@@ -308,7 +308,7 @@
       )
     )
     (EvaluationLink
-      (GroundedPredicateNode "scm: implication-construction-precondition")
+      (GroundedPredicateNode "scm: implication-introduction-precondition")
       (ListLink
         (VariableNode "$B-a083600")
         (VariableNode "$Q-1d91711a")
@@ -437,7 +437,7 @@
                 )
               )
               (ExecutionOutputLink
-                (GroundedSchemaNode "scm: implication-construction-formula")
+                (GroundedSchemaNode "scm: implication-introduction-formula")
                 (ListLink
                   (ImplicationLink
                     (VariableNode "$B-a083600")
@@ -567,7 +567,7 @@
       )
     )
     (EvaluationLink
-      (GroundedPredicateNode "scm: implication-construction-precondition")
+      (GroundedPredicateNode "scm: implication-introduction-precondition")
       (ListLink
         (VariableNode "$B-a083600")
         (VariableNode "$Q-5fa8b92b")
@@ -675,7 +675,7 @@
       )
     )
     (EvaluationLink
-      (GroundedPredicateNode "scm: implication-construction-precondition")
+      (GroundedPredicateNode "scm: implication-introduction-precondition")
       (ListLink
         (VariableNode "$B-a083600")
         (VariableNode "$Q-1d91711a")

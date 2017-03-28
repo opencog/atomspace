@@ -1,5 +1,5 @@
 ;; =====================================================================
-;; Implication construction rule
+;; Implication introduction rule
 ;; 
 ;; P
 ;; Q
@@ -17,7 +17,7 @@
 ;;
 ;; ----------------------------------------------------------------------
 
-(define implication-construction-variables
+(define implication-introduction-variables
   (VariableList
      (TypedVariableLink
         (VariableNode "$P")
@@ -30,7 +30,7 @@
            (TypeNode "PredicateNode")
            (TypeNode "LambdaLink")))))
 
-(define implication-construction-body
+(define implication-introduction-body
   (AndLink
      (VariableNode "$P")
      (VariableNode "$Q")
@@ -39,20 +39,20 @@
            (VariableNode "$P")
            (VariableNode "$Q")))))
 
-(define implication-construction-rewrite
+(define implication-introduction-rewrite
   (ExecutionOutputLink
-     (GroundedSchemaNode "scm: implication-construction-formula")
+     (GroundedSchemaNode "scm: implication-introduction-formula")
      (ListLink
         (VariableNode "$P")
         (VariableNode "$Q"))))
 
-(define implication-construction-rule
+(define implication-introduction-rule
   (BindLink
-     implication-construction-variables
-     implication-construction-body
-     implication-construction-rewrite))
+     implication-introduction-variables
+     implication-introduction-body
+     implication-introduction-rewrite))
 
-(define (implication-construction-formula P Q)
+(define (implication-introduction-formula P Q)
   (let* (
          (P-s (cog-stv-strength P))
          (P-c (cog-stv-confidence P))
@@ -75,7 +75,7 @@
          (cog-new-stv Impl-s Impl-c)))))
 
 ;; Name the rule
-(define implication-construction-rule-name
-  (DefinedSchemaNode "implication-construction-rule"))
-(DefineLink implication-construction-rule-name
-  implication-construction-rule)
+(define implication-introduction-rule-name
+  (DefinedSchemaNode "implication-introduction-rule"))
+(DefineLink implication-introduction-rule-name
+  implication-introduction-rule)
