@@ -2,14 +2,14 @@
 
 ## Introduction
 
-The unified rule engine (URE) project aims at building a generic opencog
-rule engine on top of the Pattern Matcher, applicable to rules written
-in a scheme representation, such as for PLN and R2L. The main components
-of the URE includes a forward chainer and a backward chiainer. This will enable
-the usage of Backward and Forward chaining inferences.  At the moment,
-these rules are written as Pattern Matcher's BindLink, though that can
-be changed in the future as these rules are not applied as strict
-Pattern Matching query.
+The unified rule engine (URE) is a generic opencog rule engine mostly
+built on top of the Pattern Matcher, applicable to rules written in a
+scheme/atomese representation, such as for PLN and R2L. The main
+components of the URE includes a forward chainer and a backward
+chainer. This enables the usage of Backward and Forward chaining
+inferences.  At the moment, these rules are written as Pattern
+Matcher's BindLink, though that can be changed in the future as these
+rules are not applied as strict Pattern Matching query.
 
 Rules are organized inside a "Rule Base", which customizable control
 policy for controlling the inferences (such as the number of steps, 
@@ -18,6 +18,8 @@ the weight of a rule, etc).
 The overall design can be found on the wiki pages below:
 
   [http://wiki.opencog.org/w/Unified_Rule_Engine](http://wiki.opencog.org/w/Unified_Rule_Engine)
+
+  [http://wiki.opencog.org/w/URE_Configuration_Format](http://wiki.opencog.org/w/URE_Configuration_Format)
 
   [http://wiki.opencog.org/w/Control_policy](http://wiki.opencog.org/w/Control_policy)
 
@@ -43,11 +45,11 @@ described below.
 
 *rule-base* - Is a
  [ConceptNode](http://wiki.opencog.org/wikihome/index.php/ConceptNode)
- with a particular name describing the rule base.
+ with a particular name describing the rule base. See [URE_Configuration_Format](http://wiki.opencog.org/w/URE_Configuration_Format).
 
-*focus-set* - A set of atoms wrapped in a SetLink.If the SetLink is
+*focus-set* - A set of atoms wrapped in a SetLink. If the SetLink is
 not empty, the forward chainer will apply selected rules on the atoms
-inside the focus set.otherwise rules will be applied on the entire
+inside the focus set, otherwise rules will be applied on the entire
 atomspace.
 
 When both source and focus set are empty, all rules on the whole atomspace will be applied iteratively.
