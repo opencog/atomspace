@@ -751,8 +751,6 @@ SCM SchemeEval::do_scm_eval(SCM sexpr, SCM (*evo)(void *))
 	                 SchemeEval::catch_handler_wrapper, this,
 	                 SchemeEval::preunwind_handler_wrapper, this);
 
-	_eval_done = true;
-
 	// Restore the outport
 	if (_in_shell)
 		restore_output();
