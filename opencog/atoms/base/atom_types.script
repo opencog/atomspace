@@ -366,9 +366,7 @@ GROUNDED_PREDICATE_NODE <- PREDICATE_NODE,GROUNDED_PROCEDURE_NODE
 // It can evaluate to true, if something is of the indicated type,
 // else it would evaluate to false.
 //
-// XXX this inheritance seems to be making the bakcward chainer fail???
-// TYPE_NODE <- PREDICATE_NODE
-TYPE_NODE <- NODE
+TYPE_NODE <- PREDICATE_NODE
 
 // Non-strict versions of aove. See the wiki.
 TYPE_INH_NODE <- TYPE_NODE
@@ -380,34 +378,26 @@ TYPE_CO_INH_NODE <- TYPE_NODE
 DEFINED_TYPE_NODE <- TYPE_NODE
 
 // Used for type polymorphism.
-// XXX this inheritance seems to be making the bakcward chainer fail???
-// TYPE_CHOICE <- OR_LINK,EVALUATABLE_LINK
-TYPE_CHOICE <- OR_LINK
+TYPE_CHOICE <- OR_LINK,EVALUATABLE_LINK
 
 // Type constructor. Forces a boolean-and of all of the type defintions
 // (signatures) that it contains.  Mostly useful only when used with
 // the IntervalLink, so specify the length of a list or the size of a
 // set.  This, in turn, is mostly useful only for Regex matching using
 // the GlobNode.
-// XXX this inheritance seems to be making the bakcward chainer fail???
-// TYPE_SET_LINK <- SET_LINK,EVALUATABLE_LINK
-TYPE_SET_LINK <- SET_LINK
+TYPE_SET_LINK <- SET_LINK,EVALUATABLE_LINK
 
 // Type constructor.  Corresponds to right-arrow of functional
 // programming languages, viz. arity-2, first arg is input, 2nd
 // arg is output.
-// XXX this inheritance seems to be making the bakcward chainer fail???
-// ARROW_LINK <- ORDERED_LINK,EVALUATABLE_LINK
-ARROW_LINK <- ORDERED_LINK
+ARROW_LINK <- ORDERED_LINK,EVALUATABLE_LINK
 
 // Type constructor.
 // The SignatureLink implements "deep types", a way for specifying
 // the type of an entire graph, and not just some node or link.
 // The type specification is "precise", in contrast to the fuzzy
 // type specification, below.
-// XXX this inheritance seems to be making the bakcward chainer fail???
-// SIGNATURE_LINK <- ORDERED_LINK,EVALUATABLE_LINK
-SIGNATURE_LINK <- ORDERED_LINK
+SIGNATURE_LINK <- ORDERED_LINK,EVALUATABLE_LINK
 
 // The FuzzyLink is a kind of type specification that can be imprecise.
 // It is used to specify a pattern that is then matched only
@@ -427,9 +417,7 @@ FUZZY_LINK <- SIGNATURE_LINK
 // it evaluates to "false".  The predicate specifying the concrete
 // test is the signature (SignatureLink, etc) that is tested.
 // XXX Perhaps this should inherit from EvaluationLink, instead ??
-// XXX this inheritance seems to be making the bakcward chainer fail???
-// TYPED_VARIABLE_LINK <- ORDERED_LINK,EVALUATABLE_LINK
-TYPED_VARIABLE_LINK <- ORDERED_LINK
+TYPED_VARIABLE_LINK <- ORDERED_LINK,EVALUATABLE_LINK
 
 // A type binder for non-variable atoms. It binds a type to an atom
 // at a "global" level.  Always arity-2, the first position must be
