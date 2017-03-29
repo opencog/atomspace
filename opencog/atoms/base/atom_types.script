@@ -377,19 +377,26 @@ TYPE_COINH_NODE <- TYPE_NODE
 DEFINED_TYPE_NODE <- TYPE_NODE
 
 // Used for type polymorphism.
-TYPE_CHOICE <- OR_LINK
+TYPE_CHOICE <- OR_LINK,EVALUATABLE_LINK
+
+// Type constructor. Forces a boolean-and of all of the type defintions
+// (signatures) that it contains.  Mostly useful only when used with
+// the IntervalLink, so specify the length of a list or the size of a
+// set.  This, in turn, is mostly useful only for Regex matching using
+// the GlobNode.
+TYPE_SET_LINK <- SET_LINK,EVALUATABLE_LINK
 
 // Type constructor.  Corresponds to right-arrow of functional
 // programming languages, viz. arity-2, first arg is input, 2nd
 // arg is output.
-ARROW_LINK <- ORDERED_LINK
+ARROW_LINK <- ORDERED_LINK,EVALUATABLE_LINK
 
 // Type constructor.
 // The SignatureLink implements "deep types", a way for specifying
 // the type of an entire graph, and not just some node or link.
 // The type specification is "precise", in contrast to the fuzzy
 // type specification, below.
-SIGNATURE_LINK <- ORDERED_LINK
+SIGNATURE_LINK <- ORDERED_LINK,EVALUATABLE_LINK
 
 // The FuzzyLink is a kind of type specification that can be imprecise.
 // It is used to specify a pattern that is then matched only
