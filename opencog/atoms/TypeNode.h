@@ -61,7 +61,8 @@ public:
 		: Node(n),
 		  value(classserver().getType(n.getName()))
 	{
-		OC_ASSERT(TYPE_NODE == n.getType(), "Bad TypeNode constructor!");
+		OC_ASSERT(classserver().isA(n.getType(), TYPE_NODE),
+			"Bad TypeNode constructor!");
 
 		if (NOTYPE == value)
 			throw InvalidParamException(TRACE_INFO,
