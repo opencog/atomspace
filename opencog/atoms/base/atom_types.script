@@ -403,7 +403,12 @@ FUZZY_LINK <- SIGNATURE_LINK
 // Note that this is always scoped, i.e. used in lambdas and places
 // where variables are not free. Thus, unlike TypedAtomLink, this is
 // never globally unique.
-TYPED_VARIABLE_LINK <- ORDERED_LINK
+//
+// It hinherits from Evaluatable, because it typically obtains a value
+// of "true", if the indicated variable is of the given type, else
+// it evaluates to "false".  The predicate specifying the concrete
+// test is the signature (SignatureLink, etc) that is tested.
+TYPED_VARIABLE_LINK <- EVALUATABLE_LINK
 
 // A type binder for non-variable atoms. It binds a type to an atom
 // at a "global" level.  Always arity-2, the first position must be
