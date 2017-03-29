@@ -366,7 +366,9 @@ GROUNDED_PREDICATE_NODE <- PREDICATE_NODE,GROUNDED_PROCEDURE_NODE
 // It can evaluate to true, if something is of the indicated type,
 // else it would evaluate to false.
 //
-TYPE_NODE <- PREDICATE_NODE
+// XXX fixme .. except that this breaks RuleUTest?
+// TYPE_NODE <- PREDICATE_NODE
+TYPE_NODE <- NODE
 
 // Non-strict versions of aove. See the wiki.
 TYPE_INH_NODE <- TYPE_NODE
