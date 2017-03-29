@@ -440,9 +440,10 @@ ANCHOR_NODE <- NODE
 INTERVAL_LINK <- ORDERED_LINK
 
 // Link for mathematics. (???) Huh? What is this? What does it do?
-// Is this actually used anywheer? Is this documented anywhere?
+// Is this actually used anywhere? Is this documented anywhere?
 QUANTITY_LINK <- ORDERED_LINK
 
+// ====================================================================
 // A VirtualLink is equivalent to an EvaluationLink, with a
 // GroundedPredicateNode in it, except that the GPN is "built in".
 // So, for example, GreaterThanLink is equivalent to an EvaluationLink
