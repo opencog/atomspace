@@ -369,7 +369,7 @@ TYPE_NODE <- PREDICATE_NODE
 
 // Non-strict versions of aove. See the wiki.
 TYPE_INH_NODE <- TYPE_NODE
-TYPE_COINH_NODE <- TYPE_NODE
+TYPE_CO_INH_NODE <- TYPE_NODE
 
 // User-defined type.  This is meant to be used with DefineLink
 // to give a name to a type defintion; for example, a type definition
