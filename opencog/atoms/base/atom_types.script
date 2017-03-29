@@ -283,53 +283,6 @@ BIND_LINK <- SATISFYING_LINK       // Finds all groundings, substitutes.
 DUAL_LINK <- SATISFYING_LINK
 
 // ==============================================================
-// Types and type constructors.
-
-// A TypeNode can hold only core (in-built) type declarations, such
-// as that in this file. Viz it just holds an integer.
-TYPE_NODE <- NODE
-
-// User-defined type.  This is meant to be used with DefineLink
-// to give a name to a type defintion; for example, a type definition
-// specificed with SignatureLink or ArrowLink.
-DEFINED_TYPE_NODE <- TYPE_NODE
-
-// Used for type polymorphism.
-TYPE_CHOICE <- OR_LINK
-
-// Type constructor.  Corresponds to right-arrow of functional
-// programming languages, viz. arity-2, first arg is input, 2nd
-// arg is output.
-ARROW_LINK <- ORDERED_LINK
-
-// Type constructor.
-// The SignatureLink implements "deep types", a way for specifying
-// the type of an entire graph, and not just some node or link.
-// The type specification is "precise", in contrast to the fuzzy
-// type specification, below.
-SIGNATURE_LINK <- ORDERED_LINK
-
-// The FuzzyLink is a kind of type specification that can be imprecise.
-// It is used to specify a pattern that is then matched only
-// approximately by the pattern matcher, to find "similar" graphs.
-// See also GlobNode, which performs a more narrow kind of matching.
-// (viz. bunch-in-a-row globbing)
-FUZZY_LINK <- SIGNATURE_LINK
-
-// A type binder: it binds a type to a VariableNode. Always arity-2,
-// the first position must be a VariableNode, the second must be a type.
-// Note that this is always scoped, i.e. used in lambdas and places
-// where variables are not free. Thus, unlike TypedAtomLink, this is
-// never globally unique.
-TYPED_VARIABLE_LINK <- ORDERED_LINK
-
-// A type binder for non-variable atoms. It binds a type to an atom
-// at a "global" level.  Always arity-2, the first position must be
-// a Variablenode, the second must be a type.  A given atom can only
-// ever have just one type, thus, this is unique.
-TYPED_ATOM_LINK <- UNIQUE_LINK
-
-// ==============================================================
 // Assorted PLN link types.
 
 // Logical quantifiers
@@ -380,17 +333,19 @@ EXECUTION_LINK <- ORDERED_LINK
 
 // Procedure, schema and predicate nodes.
 // These are used to define functions and predicates (relations)
-// Procedures are generic terms; they can be either atom-valued
-// or TV-valued. This is narrowed down, below.
+// Procedures are generic terms; they can return any value, for example,
+// either Atoms or TruthValues (or values in general). This is narrowed
+// down, below.
 PROCEDURE_NODE <- NODE
 GROUNDED_PROCEDURE_NODE <- PROCEDURE_NODE
 
-// SchemaNodes are atom-valued.
+// SchemaNodes are atom-valued.  The must return something deriving
+// from Atom.
 SCHEMA_NODE <- PROCEDURE_NODE
 DEFINED_SCHEMA_NODE <- SCHEMA_NODE
 GROUNDED_SCHEMA_NODE <- SCHEMA_NODE,GROUNDED_PROCEDURE_NODE
 
-// PredicateNodes are TV-valued.
+// PredicateNodes are TV-valued.  They must return a TV.
 PREDICATE_NODE <- PROCEDURE_NODE
 // Cannot be both a node and a link! Have to be one or the other!
 DEFINED_PREDICATE_NODE <- PREDICATE_NODE// ,EVALUATABLE_LINK
@@ -401,6 +356,60 @@ GROUNDED_PREDICATE_NODE <- PREDICATE_NODE,GROUNDED_PROCEDURE_NODE
 // Not clear how a schema can be evaluated ...
 // SCHEMA_EXECUTION_LINK <- INHERITANCE_LINK
 // SCHEMA_EVALUATION_LINK <- SCHEMA_EXECUTION_LINK
+
+// ==============================================================
+// Types and type constructors.
+
+// A TypeNode can hold only core (in-built) type declarations, such
+// as that in this file. Viz it just holds an integer.
+// It inherits from PredicateNode because it is a kind of predicate:
+// It can evaluate to true, if something is of the indicated type,
+// else it would evaluate to false.
+TYPE_NODE <- PREDICATE_NODE
+
+// Non-strict versions of aove. See the wiki.
+TYPE_INH_NODE <- TYPE_NODE
+TYPE_COINH_NODE <- TYPE_NODE
+
+// User-defined type.  This is meant to be used with DefineLink
+// to give a name to a type defintion; for example, a type definition
+// specificed with SignatureLink or ArrowLink.
+DEFINED_TYPE_NODE <- TYPE_NODE
+
+// Used for type polymorphism.
+TYPE_CHOICE <- OR_LINK
+
+// Type constructor.  Corresponds to right-arrow of functional
+// programming languages, viz. arity-2, first arg is input, 2nd
+// arg is output.
+ARROW_LINK <- ORDERED_LINK
+
+// Type constructor.
+// The SignatureLink implements "deep types", a way for specifying
+// the type of an entire graph, and not just some node or link.
+// The type specification is "precise", in contrast to the fuzzy
+// type specification, below.
+SIGNATURE_LINK <- ORDERED_LINK
+
+// The FuzzyLink is a kind of type specification that can be imprecise.
+// It is used to specify a pattern that is then matched only
+// approximately by the pattern matcher, to find "similar" graphs.
+// See also GlobNode, which performs a more narrow kind of matching.
+// (viz. bunch-in-a-row globbing)
+FUZZY_LINK <- SIGNATURE_LINK
+
+// A type binder: it binds a type to a VariableNode. Always arity-2,
+// the first position must be a VariableNode, the second must be a type.
+// Note that this is always scoped, i.e. used in lambdas and places
+// where variables are not free. Thus, unlike TypedAtomLink, this is
+// never globally unique.
+TYPED_VARIABLE_LINK <- ORDERED_LINK
+
+// A type binder for non-variable atoms. It binds a type to an atom
+// at a "global" level.  Always arity-2, the first position must be
+// a Variablenode, the second must be a type.  A given atom can only
+// ever have just one type, thus, this is unique.
+TYPED_ATOM_LINK <- UNIQUE_LINK
 
 // ====================================================================
 // Synchronization primitive, used to mark stages of a processing
