@@ -427,7 +427,13 @@ TYPED_ATOM_LINK <- UNIQUE_LINK
 ANCHOR_NODE <- NODE
 
 // ====================================================================
+//
+// An arity-2 link, used for specifying numeric intervals, such
+// as time intervals, or the lower and upper bounds of some range.
+INTERVAL_LINK <- ORDERED_LINK
+
 // Link for mathematics. (???) Huh? What is this? What does it do?
+// Is this actually used anywheer? Is this documented anywhere?
 QUANTITY_LINK <- ORDERED_LINK
 
 // A VirtualLink is equivalent to an EvaluationLink, with a
