@@ -512,8 +512,8 @@ void BackwardChainerUTest::test_criminal_trace()
 	// Don't forget to happen U at the end of each value otherwise gcc
 	// is gonna complain.
 	std::set<ContentHash> trace{
-		17025922688105268679U, 12614994268038677483U, 9373222830191988540U,
-			15486283875688410660U, 9555300898903888406U};
+		17025922688105268679U, 11393942473175869335U, 17449852466089946383U,
+			17584481988653238397U, 12287146385062948742U};
 	AndBITFitness trace_fitness(AndBITFitness::Trace, trace);
 	BackwardChainer bc(_as, top_rbs, target, vardecl, Handle::UNDEFINED,
 	                   BITNodeFitness(), trace_fitness);
