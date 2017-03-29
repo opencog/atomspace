@@ -125,7 +125,7 @@ void PutLink::static_typecheck_values(void)
 		return;
 
 	// If its part of a signature, there is nothing to do.
-	if (TYPE_NODE == btype or TYPE_CHOICE == btype)
+	if (classserver().isA(btype, TYPE_NODE) or TYPE_CHOICE == btype)
 		return;
 
 	size_t sz = _varlist.varseq.size();

@@ -46,7 +46,7 @@ void TypedAtomLink::init()
 			"You are not allowed to globally type a variable");
 
 	Type dtype = _outgoing[1]->getType();
-	if (TYPE_NODE != dtype and
+	if (not classserver().isA(dtype, TYPE_NODE) and
 	    DEFINED_TYPE_NODE != dtype and
 	    TYPE_CHOICE != dtype and
 	    SIGNATURE_LINK != dtype and
