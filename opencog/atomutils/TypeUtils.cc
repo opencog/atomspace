@@ -64,6 +64,19 @@ bool value_is_type(const Handle& spec, const Handle& val)
 		Type deeptype = TypeNodeCast(deep)->get_value();
 		return (valtype == deeptype);
 	}
+	else if (TYPE_INH_NODE == dpt)
+	{
+		// Just like above, but allows derived types.
+		Type deeptype = TypeNodeCast(deep)->get_value();
+		return classserver().isA(valtype, deeptype);
+	}
+	else if (TYPE_CO_INH_NODE == dpt)
+	{
+		// Just like above, but in the other direction.
+		// That is, it allows base tyes.
+		Type deeptype = TypeNodeCast(deep)->get_value();
+		return classserver().isA(deeptype, valtype);
+	}
 	else if (TYPE_CHOICE == dpt)
 	{
 		for (const Handle& choice : deep->getOutgoingSet())
@@ -144,6 +157,8 @@ static bool type_match_rec(const Handle& left_, const Handle& right_, bool tople
 	Type rtype = right_->getType();
 	if (toplevel and
 	    TYPE_NODE != rtype and
+	    TYPE_INH_NODE != rtype and
+	    TYPE_CO_INH_NODE != rtype and
 	    TYPE_CHOICE != rtype and
 	    SIGNATURE_LINK != rtype and
 	    DEFINED_TYPE_NODE != rtype and
@@ -191,6 +206,18 @@ static bool type_match_rec(const Handle& left_, const Handle& right_, bool tople
 	if (TYPE_NODE == ltype)
 	{
 		return TypeNodeCast(left)->get_value() == rtype;
+	}
+
+	// Like above but allows derived tyes.
+	if (TYPE_INH_NODE == ltype)
+	{
+		return classserver().isA(rtype, TypeNodeCast(left)->get_value());
+	}
+
+	// Like above, but in the opposite direction: allows base types.
+	if (TYPE_CO_INH_NODE == ltype)
+	{
+		return classserver().isA(TypeNodeCast(left)->get_value(), rtype);
 	}
 
 	// If left is a type choice, right must match a choice.

@@ -68,7 +68,7 @@ Type RandomAtomGenerator::random_type(Type parent_type)
         candidate_type == VARIABLE_LIST or
         candidate_type == DEFINE_LINK or
         candidate_type == NUMBER_NODE or
-        candidate_type == TYPE_NODE);
+        classserver().isA(candidate_type,TYPE_NODE));
 
     return candidate_type;
 }

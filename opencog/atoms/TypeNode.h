@@ -61,16 +61,25 @@ public:
 		: Node(n),
 		  value(classserver().getType(n.getName()))
 	{
-		OC_ASSERT(TYPE_NODE == n.getType(), "Bad TypeNode constructor!");
+		OC_ASSERT(classserver().isA(n.getType(), TYPE_NODE),
+			"Bad TypeNode constructor!");
 
-		if (NOTYPE == value)
+		if (DEFINED_TYPE_NODE != _type and NOTYPE == value)
 			throw InvalidParamException(TRACE_INFO,
 				"Not a valid typename: '%s'", n.getName().c_str());
+
+		if (DEFINED_TYPE_NODE == _type and NOTYPE != value)
+			throw InvalidParamException(TRACE_INFO,
+				"Redefinition of a built-in typename: '%s'", n.getName().c_str());
 	}
 
 	static void validate(const std::string& str)
 	{
 		Type t = classserver().getType(str);
+		// XXX TODO ... Some types are defined. In this case,
+		// verify that the string occurs as a name inside
+		// some DefineLink... if it does, then it's valid.
+		// If it does not, then it's invalid.
 		if (NOTYPE == t)
 			throw InvalidParamException(TRACE_INFO,
 				"Not a valid typename: '%s'", str.c_str());

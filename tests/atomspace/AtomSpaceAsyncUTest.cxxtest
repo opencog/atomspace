@@ -213,7 +213,7 @@ public:
                or classserver().isA(randomType, FREE_LINK)
                or classserver().isA(randomType, SCOPE_LINK)
                or NUMBER_NODE == randomType
-               or TYPE_NODE == randomType)
+               or classserver().isA(randomType, TYPE_NODE))
             randomType = ATOM + rng->randint(numberOfTypes-1);
         return randomType;
     }

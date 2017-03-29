@@ -227,7 +227,7 @@ Handle AtomTable::getHandle(Type t, const std::string& n) const
     AtomPtr a;
     try {
         if (NUMBER_NODE == t) a = createNumberNode(n);
-        else if (TYPE_NODE == t) a = createTypeNode(n);
+        else if (classserver().isA(t, TYPE_NODE)) a = createTypeNode(n);
         else a = createNode(t,n);
     }
     catch (...) { return Handle::UNDEFINED; }
@@ -383,7 +383,7 @@ AtomPtr AtomTable::clone_factory(Type atom_type, AtomPtr atom)
     // Nodes of various kinds -----------
     if (NUMBER_NODE == atom_type)
         return createNumberNode(*NodeCast(atom));
-    if (TYPE_NODE == atom_type)
+    if (classserver().isA(atom_type, TYPE_NODE))
         return createTypeNode(*NodeCast(atom));
     if (classserver().isA(atom_type, NODE))
         return createNode(*NodeCast(atom));
