@@ -368,7 +368,7 @@ GROUNDED_PREDICATE_NODE <- PREDICATE_NODE,GROUNDED_PROCEDURE_NODE
 //
 TYPE_NODE <- PREDICATE_NODE
 
-// Non-strict versions of aove. See the wiki.
+// Non-strict versions of above. See the wiki.
 TYPE_INH_NODE <- TYPE_NODE
 TYPE_CO_INH_NODE <- TYPE_NODE
 
