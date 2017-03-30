@@ -197,7 +197,17 @@ void BackwardChainer::fulfill_fcs(const Handle& fcs)
 	// results
 	AtomSpace tmp_as(&_as);
 
-	// Run the FCS and add the results in _as
+	// Run the FCS and add the results, if any, in _as.
+	//
+	// Warning: since tmp_as is a child of _as, TVs of existing atoms
+	// in _as, that are modified by running fcs will be modified on
+	// _as as well. This can create involontary TVs changes, hopefully
+	// mitigated by the merging the TVs properly (for now the one with
+	// the highest confidence wins). To avoid that side effect, we
+	// could operate on a copy the atomspace, of its zone of focus. Or
+	// alternatively modify some HypotheticalLink wrapping the atoms
+	// of concerns instead of the atoms themselves, and only modify
+	// the atoms if there are existing results to copy back to _as.
 	Handle hresult = bindlink(&tmp_as, fcs);
 	HandleSeq results;
 	for (const Handle& result : hresult->getOutgoingSet())
