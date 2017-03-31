@@ -278,6 +278,12 @@ void VariableList::get_vartype(const Handle& htypelink)
 		ts.insert(vartype);
 		_varlist._fuzzy_typemap.insert({varname, ts});
 	}
+	else if (VARIABLE_NODE == t)
+	{
+		// This occurs when the variable type is a variable to be
+		// matched by the pattern matcher. There's nothing to do
+		// except not throwing an exception.
+	}
 	else
 	{
 		throw SyntaxException(TRACE_INFO,
