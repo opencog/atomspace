@@ -54,6 +54,7 @@ public:
 	void test_conditional_instantiation_1();
 	void test_conditional_instantiation_2();
 	void test_conditional_instantiation_tv_query();
+	void test_conditional_partial_instantiation();
 	void test_impossible_criminal();
 	void test_criminal();
 	void test_criminal_trace();
@@ -375,6 +376,61 @@ void BackwardChainerUTest::test_conditional_instantiation_tv_query()
 	logger().debug("END TEST: %s", __FUNCTION__);
 }
 
+void BackwardChainerUTest::test_conditional_partial_instantiation()
+{
+	logger().debug("BEGIN TEST: %s", __FUNCTION__);
+
+	_as.clear();
+
+	string result = _eval.eval("(load-from-path \"tests/rule-engine/conditional-partial-instantiation-config.scm\")");
+
+	logger().debug() << "result = " << result;
+
+	result = _eval.eval("(load-from-path \"tests/rule-engine/bc-friends.scm\")");
+	randGen().seed(0);
+
+	Handle top_rbs = _as.get_node(CONCEPT_NODE, UREConfigReader::top_rbs_name);
+
+	Handle target = _eval.eval_h("(ImplicationScope"
+	                             "   (TypedVariable"
+	                             "      (Variable \"$X\")"
+	                             "      (Type \"ConceptNode\"))"
+	                             "   (And"
+	                             "      (Evaluation"
+	                             "         (Predicate \"are-friends\")"
+	                             "         (List"
+	                             "            (Variable \"$X\")"
+	                             "            (Concept \"John\")))"
+	                             "      (Evaluation"
+	                             "         (Predicate \"are-friends\")"
+	                             "         (List"
+	                             "            (Concept \"John\")"
+	                             "            (Concept \"Mary\")))"
+	                             "      (Evaluation"
+	                             "         (Predicate \"is-musician\")"
+	                             "         (Variable \"$X\"))"
+	                             "      (Evaluation"
+	                             "         (Predicate \"is-musician\")"
+	                             "         (Concept \"John\"))"
+	                             "      (Evaluation"
+	                             "         (Predicate \"is-musician\")"
+	                             "         (Concept \"Mary\")))"
+	                             "   (Evaluation"
+	                             "      (Predicate \"are-friends\")"
+	                             "      (List"
+	                             "         (Variable \"$X\")"
+	                             "         (Concept \"Mary\"))))");
+
+	BackwardChainer bc(_as, top_rbs, target);
+	bc.get_config().set_maximum_iterations(5);
+	bc.do_chain();
+
+	TS_ASSERT_DELTA(target->getTruthValue()->getMean(), 1, 1e-10);
+	TS_ASSERT_DELTA(target->getTruthValue()->getConfidence(), 1, 1e-10);
+
+	logger().debug("END TEST: %s", __FUNCTION__);
+}
+
 void BackwardChainerUTest::test_impossible_criminal()
 {
 	logger().debug("BEGIN TEST: %s", __FUNCTION__);
@@ -584,7 +640,7 @@ void BackwardChainerUTest::test_focus_set()
 		             " (InheritanceLink"
 		             "   (ConceptNode \"tree\")"
 		             "   (ConceptNode \"plant\"))"
-		             " (ImplicationLink (stv 1.0 1.0)"
+		             " (ImplicationLink"
 		             "   (InheritanceLink"
 		             "     (VariableNode \"$P\")"
 		             "     (ConceptNode \"plant\")"
