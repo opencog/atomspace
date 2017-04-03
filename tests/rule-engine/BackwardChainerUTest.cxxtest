@@ -376,6 +376,43 @@ void BackwardChainerUTest::test_conditional_instantiation_tv_query()
 	logger().debug("END TEST: %s", __FUNCTION__);
 }
 
+// This test is for rules that requires the pattern matcher to look
+// inside a variable declaration, to for instance extract the type of
+// some variable. For instance if you have the grounded data
+//
+// ImplicationScopeLink
+//   VariableList
+//     TypedVariable
+//       Variable "$X"
+//       Type "ConceptNode"
+//     TypedVariable
+//       Variable "$Y"
+//       Type "PredicateNode"
+//   <implicant>
+//   <implicand>
+//
+// the conditional-partial-instantiation-meta-rule will want to look
+// inside the scope link's vardecl and know that $X is of type
+// ConceptNode and $Y is of type PredicateNode. In order to do that it
+// requires to write a pattern describing the variable declaration,
+// thus having the type itself be a variable, like
+//
+// BindLink
+//   VariableList
+//     TypedVariable
+//       Variable "$XVar"
+//       Type "VariableNode"
+//     TypedVariable
+//       Variable "$XType"
+//       Type "TypeNode"
+//   Quote
+//     ScopeLink
+//       Unquote
+//         VariableList
+//           TypedVariable
+//             Variable "$XVar"
+//             Variable "$XType"
+//         ...
 void BackwardChainerUTest::test_conditional_partial_instantiation()
 {
 	logger().debug("BEGIN TEST: %s", __FUNCTION__);
