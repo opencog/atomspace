@@ -1,3 +1,6 @@
+(use-modules (opencog query))
+(use-modules (opencog rule-engine))
+
 (define rule1
 	(BindLink
 		(VariableList
