@@ -194,11 +194,12 @@ Handle ExecutionOutputLink::do_execute(AtomSpace* as,
 	// likely, a bit later down the line, leading to a crash.
 	// So head this off at the pass.
 	if (nullptr == result) {
+		bool silent = true;
 		// If silent is true, return a simpler and non-logged
 		// exception, which may, in some contexts, be considerably
 		// faster than the one below.
 		if (silent)
-			throw NotEvaluatableException;
+			throw NotEvaluatableException();
 
 		throw RuntimeException(TRACE_INFO,
 		        "Invalid return value from schema %s\nArgs: %s",
