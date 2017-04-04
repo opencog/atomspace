@@ -42,22 +42,27 @@ using namespace opencog;
 
 ForwardChainer::ForwardChainer(AtomSpace& as, const Handle& rbs,
                                const Handle& source,
-                               const Handle& target,
+                               const Handle& vardecl,
                                const HandleSeq& focus_set,
                                source_selection_mode sm) :
     _as(as), _rec(as), _rbs(rbs), _configReader(as, rbs), _fcstat(as)
 {
     _ts_mode = sm;
-    init(source, focus_set);
+    init(source, vardecl, focus_set);
 }
 
 ForwardChainer::~ForwardChainer()
 {
 }
 
-void ForwardChainer::init(const Handle& hsource, const HandleSeq& focus_set)
+void ForwardChainer::init(const Handle& source,
+                          const Handle& vardecl,
+                          const HandleSeq& focus_set)
 {
-    validate(hsource, focus_set);
+    validate(source);
+
+    _init_source = source;
+    _init_vardecl = vardecl;
 
     _search_in_af = _configReader.get_attention_allocation();
     _search_focus_set = not focus_set.empty();
@@ -66,10 +71,10 @@ void ForwardChainer::init(const Handle& hsource, const HandleSeq& focus_set)
     HandleSeq init_sources;
 
     // Accept set of initial sources wrapped in a SET_LINK.
-    if (hsource->getType() == SET_LINK) {
-        init_sources = hsource->getOutgoingSet();
+    if (source->getType() == SET_LINK) {
+        init_sources = source->getOutgoingSet();
     } else {
-        init_sources.push_back(hsource);
+        init_sources.push_back(source);
     }
     update_potential_sources(init_sources);
 
@@ -251,7 +256,7 @@ An attentionbank is needed in order to get the STI...
 	return hchosen;
 }
 
-Rule ForwardChainer::select_rule(const Handle& hsource)
+Rule ForwardChainer::select_rule(const Handle& source)
 {
 	std::map<const Rule*, float> rule_weight;
 	for (const Rule& r : _rules)
@@ -269,8 +274,12 @@ Rule ForwardChainer::select_rule(const Handle& hsource)
 		ure_logger().fine("Selected rule %s to match against the source",
 		                  temp->get_name().c_str());
 
+		// If the source is the initial source then we may use its
+		// variable declaration during rule unification
+		Handle vardecl = source == _init_source ? _init_vardecl : Handle::UNDEFINED;
+
 		RuleSet unified_rules =
-			Rule::strip_typed_substitution(temp->unify_source(hsource));
+			Rule::strip_typed_substitution(temp->unify_source(source, vardecl));
 
 		if (not unified_rules.empty()) {
 			// Randomly select a rule amongst the unified ones
@@ -348,10 +357,8 @@ UnorderedHandleSet ForwardChainer::apply_rule(const Rule& rule)
     return UnorderedHandleSet(results.begin(), results.end());
 }
 
-
-void ForwardChainer::validate(const Handle& hsource, const HandleSeq& hfocus_set)
+void ForwardChainer::validate(const Handle& source)
 {
-    if (hsource == Handle::UNDEFINED)
+    if (source == Handle::UNDEFINED)
         throw RuntimeException(TRACE_INFO, "ForwardChainer - Invalid source.");
-    // Any other validation here
 }

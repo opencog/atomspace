@@ -64,6 +64,8 @@ private:
     source_selection_mode _ts_mode;
     bool _search_in_af;
     bool _search_focus_set;
+    Handle _init_source;
+    Handle _init_vardecl;
     Handle _cur_source;
 
     // We maintain both selected and unselected sources, to speed up
@@ -73,7 +75,9 @@ private:
 
     FCStat _fcstat;
 
-    void init(const Handle& hsource, const HandleSeq& focus_set);
+    void init(const Handle& source,
+              const Handle& vardecl,
+              const HandleSeq& focus_set);
 
     void apply_all_rules();
 
@@ -89,7 +93,8 @@ private:
         _unselected_sources.insert(input_minus_selected.begin(),
                                    input_minus_selected.end());
     }
-    void validate(const Handle& hsource, const HandleSeq& hfocus_set);
+
+    void validate(const Handle& source);
 
 protected:
     RuleSet _rules; /* loaded rules */
@@ -111,7 +116,7 @@ protected:
      *
      * @return  A rule that in which @param source could ground.
      */
-    Rule select_rule(const Handle& hsource);
+    Rule select_rule(const Handle& source);
 
     /**
      * Apply rule.
