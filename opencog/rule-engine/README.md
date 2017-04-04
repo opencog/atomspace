@@ -30,8 +30,8 @@ The overall design can be found on the wiki pages below:
 
 #### How to call the forward chainer from a scheme interface?
 
-One can use the `(cog-fc *source* *rule-base* *focus-set*)` scheme binding
-to start forward chaining.
+One can use the `(cog-fc *rule-base* *source* *vardecl* *focus-set*)`
+scheme binding to start forward chaining.
 
 *source* - Could be one of the follow:
  - An empty [SetLink](http://wiki.opencog.org/wikihome/index.php/SetLink)
@@ -72,7 +72,7 @@ updated via inference.
 The main C++ entry point for the backward chainer is the `do_chain`
 function.
 
-There exist a scheme primitive `(cog-bc *target* *rule-base* *focus-set*)`
+There exist a scheme primitive `(cog-bc *rule-base* *target* *vardecl* *focus-set*)`
 for using the Backward Chainer in scheme.
 
 Here's how the criminal example located at

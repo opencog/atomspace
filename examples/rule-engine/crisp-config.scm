@@ -17,9 +17,12 @@
 
 ; Create helper functions to call the forward and backward chainer on
 ; that system
-(define default-focus-set (SetLink))
-(define (crisp-fc source) (cog-fc source crisp-rbs default-focus-set))
-(define (crisp-bc target) (cog-bc target crisp-rbs default-focus-set))
+(define undefined-focus-set (cog-undefined-handle))
+(define undefined-vardecl (cog-undefined-handle))
+(define (crisp-fc source)
+  (cog-fc crisp-rbs source undefined-vardecl undefined-focus-set))
+(define (crisp-bc target)
+  (cog-bc crisp-rbs target undefined-vardecl undefined-focus-set))
 
 ; Associate the rules to the rule base (with weights, their semantics
 ; is currently undefined, we might settled with probabilities but it's

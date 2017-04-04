@@ -83,7 +83,7 @@ void forward_chain(AtomSpace& as)
     //focus set atoms; when the focus set is not empty, the forward chainer
     //is constrained to apply rules only on the focus set atoms and applies
     //on the entire atomspace when focus set is empty.
-    ForwardChainer fc(as, rbs,source, HandleSeq { });
+    ForwardChainer fc(as, rbs, source, Handle::UNDEFINED, HandleSeq{});
 
     //Start chaining.
     //fc.do_step(); //Single step forward chaining.
