@@ -211,6 +211,7 @@ class SchemePrimitive : public PrimitiveEnviron
 			V_B,   // return void, take bool
 			V_I,   // return void, take int
 			V_H,   // return void, take Handle
+			V_S,   // return void, take string
 			V_SA,  // return void, take string, Atomspace
 			V_SS,  // return void, take two strings
 			V_SSS, // return void, take three strings
@@ -452,6 +453,13 @@ class SchemePrimitive : public PrimitiveEnviron
 					(that->*method.v_h)(h);
 					break;
 				} 
+				case V_S:
+				{
+					std::string str(SchemeSmob::verify_string(scm_car(args), scheme_name, 1));
+
+					(that->*method.v_s)(str);
+					break;
+				}
 				case V_SA:
 				{
 					// First argument is a string
@@ -459,7 +467,7 @@ class SchemePrimitive : public PrimitiveEnviron
 
 					// Second argument is an AtomSpace
 					AtomSpace* as = SchemeSmob::verify_atomspace(scm_cadr(args), scheme_name, 2);
-					(that->*method.v_sa)(str,as);
+					(that->*method.v_sa)(str, as);
 					break;
 				}
 				case V_SS:
@@ -623,6 +631,7 @@ class SchemePrimitive : public PrimitiveEnviron
 		DECLARE_CONSTR_1(V_B,   v_b,  void, bool)
 		DECLARE_CONSTR_1(V_I,   v_i,  void, int)
 		DECLARE_CONSTR_1(V_H,	v_h,  void, Handle)
+		DECLARE_CONSTR_1(V_S,   v_s,  void, const std::string&)
 		DECLARE_CONSTR_2(V_SA,  v_sa, void, const std::string&,
 		                              AtomSpace*)
 		DECLARE_CONSTR_2(V_SS,  v_ss, void, const std::string&,
@@ -683,6 +692,7 @@ DECLARE_DECLARE_1(TruthValuePtr, Handle)
 DECLARE_DECLARE_1(void, bool)
 DECLARE_DECLARE_1(void, int)
 DECLARE_DECLARE_1(void, Handle)
+DECLARE_DECLARE_1(void, const std::string&)
 DECLARE_DECLARE_1(void, Type)
 DECLARE_DECLARE_1(void, void)
 
