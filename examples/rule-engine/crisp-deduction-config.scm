@@ -16,8 +16,8 @@
 
 ;; Create helper functions to call the forward and backward chainer on
 ;; that system
-(define undefined-focus-set (cog-undefined-handle))
-(define undefined-vardecl (cog-undefined-handle))
+(define undefined-focus-set (Set))
+(define undefined-vardecl (List))
 (define (crisp-deduction-fc source)
   (cog-fc crisp-deduction-rbs source undefined-vardecl undefined-focus-set))
 (define (crisp-deduction-bc target)

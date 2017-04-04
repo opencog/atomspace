@@ -26,12 +26,16 @@ The overall design can be found on the wiki pages below:
   [http://wiki.opencog.org/w/Pattern_Matcher](http://wiki.opencog.org/w/Pattern_Matcher)
 
 
-### Forward chaining (Sept 2015)
+### Forward chaining
 
 #### How to call the forward chainer from a scheme interface?
 
 One can use the `(cog-fc *rule-base* *source* *vardecl* *focus-set*)`
 scheme binding to start forward chaining.
+
+*rule-base* - Is a
+ [ConceptNode](http://wiki.opencog.org/wikihome/index.php/ConceptNode)
+ with a particular name describing the rule base. See [URE_Configuration_Format](http://wiki.opencog.org/w/URE_Configuration_Format).
 
 *source* - Could be one of the follow:
  - An empty [SetLink](http://wiki.opencog.org/wikihome/index.php/SetLink)
@@ -43,9 +47,9 @@ rules leaving aside source and rule selection steps on the specified
 focus set or on entire atomspace based on the size of the focus set as
 described below.
 
-*rule-base* - Is a
- [ConceptNode](http://wiki.opencog.org/wikihome/index.php/ConceptNode)
- with a particular name describing the rule base. See [URE_Configuration_Format](http://wiki.opencog.org/w/URE_Configuration_Format).
+*vardecl* - Could be
+ - An empty List, in such case it remains undefined
+ - A VariableNode, VariableList or TypedVariable
 
 *focus-set* - A set of atoms wrapped in a SetLink. If the SetLink is
 not empty, the forward chainer will apply selected rules on the atoms
@@ -56,9 +60,14 @@ When both source and focus set are empty, all rules on the whole atomspace will 
 
 **Example**: suppose there is some knowledges about the ConceptNode
 Socrates then one can do a bunch of forward chaining inference by
-calling `(cog-fc (ConceptNode "Socrates") (ConceptNode "rb-pln")
-(SetLink [ATOMS_ASSOCIATED]))` from the scheme shell interface. All
-results of the inferences are returned wrapped in a ListLink.
+calling
+
+```scheme
+(cog-fc (ConceptNode "rb-pln") (ConceptNode "Socrates") (List) (SetLink [ATOMS_ASSOCIATED]))
+```
+
+from the scheme shell interface. All results of the inferences are
+returned wrapped in a ListLink.
 
 ### Backward chaining
 

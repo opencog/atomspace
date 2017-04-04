@@ -141,22 +141,20 @@ We need to define one of the above known information as a source
 )
 ```
 
-As well as its variable declaration. Since the source has no variable
-the variable declaration is let undefined. It may always let
-undefined, but if possible it is strongly recommanded to be defined as
-it may speed up the URE
+As well as its variable declaration. To let the variable declaration
+undefined use an empty List. No to be confused with the empty
+VariableList which would defined an empty variable declaration.
 ```scheme
 (define vardecl
-  (cog-undefined-handle)
+  (List)
 )
 ```
 
 Finally the focus set has to be defined. To set the focus over the
-whole atomspace, either an undefined focus set, or an empty SetLink
-may do, as below
+whole atomspace define an empty set as below
 ```scheme
 (define focus-set
-  (cog-undefined-handle)
+  (Set)
 )
 ```
 
