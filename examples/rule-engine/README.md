@@ -4,7 +4,7 @@ Unified Rule Engine examples
 Overview
 --------
 
-Collection of examples (for now one) using the unified rule engine.
+Collection of examples using the unified rule engine.
 
 Usage
 -----

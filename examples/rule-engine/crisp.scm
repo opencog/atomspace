@@ -39,14 +39,9 @@
 ;;    (PredicateNode "C" (stv 1 0.99999982))
 ;; )
 
-; 2. WARNING: not currently working.
-;    Test backward chaining (based on the modus ponens rule)
+; 2. Test backward chaining (based on the modus ponens rule)
 
 ;; scheme@(guile-user)> (crisp-bc C)
-;; $1 = (ListLink
+;; $2 = (SetLink
+;;    (PredicateNode "C" (stv 1 1))
 ;; )
-
-; while the TV of C will be suitably updated.
-
-;; scheme@(guile-user)> C
-;; $2 = (PredicateNode "C" (stv 1 0.99999982))

@@ -90,10 +90,47 @@ Now if we create the known information that thing fritz coaks and eats flies
 )
 ```
 
-Then running `(cog-bind rule1)` gives us the fact that fritz is a frog, after that
-running `(cog-bind rule2)` gives us the result that fritz is green.
+Then running `(cog-bind rule1)` gives us the fact that fritz is a
+frog, after that running `(cog-bind rule2)` gives us the result that
+fritz is green.
 
-If we want to do this by using forward chaining (which helps when there exist large number of chain iterations to assert.)
+If we want to do this by using forward chaining (which helps when
+there exist large number of chain iterations to assert.) we first need
+to define the rule-based system used to build the forward inference
+
+Then we set the required information for forward chaining
+```scheme
+;-------------------------------------------
+(define wiki (ConceptNode "wikipedia-rbs"))
+
+(define rule1-name (DefinedSchemaNode "rule1"))
+(DefineLink rule1-name rule1)
+
+(define rule2-name (DefinedSchemaNode "rule2"))
+(DefineLink rule2-name rule2)
+
+(InheritanceLink  ; Defining a rule base
+  wiki
+  (ConceptNode "URE") ;; Special concept indicating the top rule-base
+)
+
+(ExecutionLink
+   (SchemaNode "URE:maximum-iterations")
+   wiki
+   (NumberNode "100")
+)
+
+(MemberLink (stv 0.9 1)
+  rule1-name
+  wiki
+)
+
+(MemberLink (stv 0.5 1)
+  rule2-name
+  wiki
+)
+```
+
 We need to define one of the above known information as a source
 ```scheme
 (define source
@@ -104,46 +141,46 @@ We need to define one of the above known information as a source
 )
 ```
 
-Then we set the required information for forward chaining
+As well as its variable declaration. To let the variable declaration
+undefined use an empty List. No to be confused with the empty
+VariableList which would defined an empty variable declaration.
 ```scheme
-;-------------------------------------------
-(define wiki (ConceptNode "wikipedia-fc"))
-
-(define rule1-name (DefinedSchemaNode "rule1"))
-(DefineLink rule1-name rule1)
-
-(define rule2-name (DefinedSchemaNode "rule2"))
-(DefineLink rule2-name rule2)
-
-(InheritanceLink  ; Defining a rule base
-  (ConceptNode "wikipedia-fc")
-  (ConceptNode "URE")
+(define vardecl
+  (List)
 )
+```
 
-(ExecutionLink
-   (SchemaNode "URE:maximum-iterations")
-   (ConceptNode "wikipedia-fc")
-   (NumberNode "100")
-)
-
-(MemberLink (stv 0.9 1)
-  rule1-name
-  (ConceptNode "wikipedia-fc")
-)
-
-(MemberLink (stv 0.5 1)
-  rule2-name
-  (ConceptNode "wikipedia-fc")
+Finally the focus set has to be defined. To set the focus over the
+whole atomspace define an empty set as below
+```scheme
+(define focus-set
+  (Set)
 )
 ```
 
 Then we run the forward chainer by
 ```scheme
-(cog-fc source wiki (SetLink))
+(cog-fc wiki source vardecl focus-set)
 ```
 to get the result that fritz is a frog and fritz is green.
 
-Additionally, we can run the backward chainer to find out "What is green?" by
+Additionally, we can run the backward chainer to find out "What is
+green?" by defining a target instead of a source
 ```scheme
-(cog-bc (InheritanceLink (VariableNode "$what") (ConceptNode "green")) wiki (SetLink))
+(define target
+  (InheritanceLink (VariableNode "$what") (ConceptNode "green"))
+)
+```
+
+with the following variable declaration
+```scheme
+(define vardecl
+  (TypedVariable (VariableNode "$what") (TypeNode "ConceptNode"))
+)
+```
+
+and call the backward chainer as follows (re-using the undefined focus
+set defined above)
+```scheme
+(cog-bc wiki target vardel focus-set)
 ```
