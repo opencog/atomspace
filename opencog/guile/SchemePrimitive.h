@@ -585,18 +585,6 @@ class SchemePrimitive : public PrimitiveEnviron
 		do_register(module, name, 4); /* cb has 4 args */ \
 	}
 
-#define DECLARE_CONSTR_5(SIG, LSIG, RET_TYPE, ARG1_TYPE, ARG2_TYPE, ARG3_TYPE, ARG4_TYPE, ARG5_TYPE) \
-		SchemePrimitive(const char* module, const char* name, \
-				RET_TYPE (T::*cb)(ARG1_TYPE, ARG2_TYPE, ARG3_TYPE, ARG4_TYPE, ARG5_TYPE), T *data) \
-		{ \
-				that = data; \
-				method.LSIG = cb; \
-				scheme_module = module; \
-				scheme_name = name; \
-				signature = SIG; \
-				do_register(module, name, 5); /* cb has 5 args */ \
-		}
-
 		// Declare and define the constructors for this class. They all have
 		// the same basic form, except for the types.
 // XXX FIXME This is all deeply bad and broken and wrong -- there
@@ -684,29 +672,17 @@ inline void define_scheme_primitive(const char *name, RET (T::*cb)(ARG1,ARG2,ARG
 	new SchemePrimitive<T>(module, name, cb, data); \
 }
 
-#define DECLARE_DECLARE_5(RET,ARG1,ARG2,ARG3,ARG4,ARG5) \
-template<class T> \
-inline void define_scheme_primitive(const char *name, RET (T::*cb)(ARG1,ARG2,ARG3,ARG4,ARG5), T *data, const char* module = "extension") \
-{ \
-		/* Note: this is freed automatically by scheme garbage collection */ \
-		/* when it is no longer needed. */ \
-		new SchemePrimitive<T>(module, name, cb, data); \
-}
-
 DECLARE_DECLARE_1(bool, bool)
-DECLARE_DECLARE_1(double, const std::string&)
 DECLARE_DECLARE_1(Handle, Handle)
 DECLARE_DECLARE_1(HandleSeq, Handle)
 DECLARE_DECLARE_1(HandleSeqSeq, Handle)
 DECLARE_DECLARE_1(int, void)
-DECLARE_DECLARE_1(int, const std::string&)
 DECLARE_DECLARE_1(std::string, const std::string&)
 DECLARE_DECLARE_1(std::string, void)
 DECLARE_DECLARE_1(TruthValuePtr, Handle)
 DECLARE_DECLARE_1(void, bool)
 DECLARE_DECLARE_1(void, int)
 DECLARE_DECLARE_1(void, Handle)
-DECLARE_DECLARE_1(void, const std::string&)
 DECLARE_DECLARE_1(void, Type)
 DECLARE_DECLARE_1(void, void)
 
@@ -714,38 +690,24 @@ DECLARE_DECLARE_2(bool, Handle, Handle)
 DECLARE_DECLARE_2(Handle, Handle, Handle)
 DECLARE_DECLARE_2(Handle, Handle, const std::string&)
 DECLARE_DECLARE_2(Handle, Handle, size_t)
-DECLARE_DECLARE_2(Handle, const std::string&, Handle)
 DECLARE_DECLARE_2(Handle, const std::string&, const HandleSeq&)
 DECLARE_DECLARE_2(std::string, AtomSpace*, const std::string&)
 DECLARE_DECLARE_2(std::string, const std::string&, const std::string&)
 DECLARE_DECLARE_2(void, const std::string&, AtomSpace*)
 DECLARE_DECLARE_2(void, const std::string&, const std::string&)
 DECLARE_DECLARE_2(void, Type, int)
-DECLARE_DECLARE_2(void, const std::string&, Handle)
 
-DECLARE_DECLARE_3(void, const std::string&, Handle, int)
 DECLARE_DECLARE_3(Handle, Handle, Handle, Handle)
-DECLARE_DECLARE_3(Handle, const std::string&, Handle, int)
 DECLARE_DECLARE_3(std::string, const std::string&,
                   const std::string&, const std::string&)
 DECLARE_DECLARE_3(void, const std::string&,
                   const std::string&, const std::string&)
 
-DECLARE_DECLARE_4(bool, const std::string&, double, double, double)
-DECLARE_DECLARE_4(bool, const std::string&, double, int, int)
-DECLARE_DECLARE_4(double, const std::string&, Handle, Handle, int)
 DECLARE_DECLARE_4(double, Handle, Handle, Type, bool)
 DECLARE_DECLARE_4(Handle, Handle, Type, const HandleSeq&, bool)
-DECLARE_DECLARE_4(Handle, const std::string&, double, double, double)
 DECLARE_DECLARE_4(HandleSeq, Handle, Type, int, bool)
 DECLARE_DECLARE_4(void, Type, int, double, int)
 DECLARE_DECLARE_4(Handle, Handle, Handle, Handle, Handle)
-
-DECLARE_DECLARE_5(bool, const std::string&, Handle, double, double, double)
-DECLARE_DECLARE_5(bool, const std::string&, int, double, double, double)
-DECLARE_DECLARE_5(Handle, const std::string&, Handle, double, double, double)
-DECLARE_DECLARE_5(Handle, const std::string&, int, double, double, double)
-DECLARE_DECLARE_5(int, const std::string&, Handle, Handle, Handle, int)
 //** @}*/
 }
 
