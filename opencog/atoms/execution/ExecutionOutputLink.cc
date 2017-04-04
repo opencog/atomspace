@@ -193,11 +193,18 @@ Handle ExecutionOutputLink::do_execute(AtomSpace* as,
 	// code returns nothing, then a null-pointer-dereference is
 	// likely, a bit later down the line, leading to a crash.
 	// So head this off at the pass.
-	if (nullptr == result)
+	if (nullptr == result) {
+		// If silent is true, return a simpler and non-logged
+		// exception, which may, in some contexts, be considerably
+		// faster than the one below.
+		if (silent)
+			throw NotEvaluatableException;
+
 		throw RuntimeException(TRACE_INFO,
 		        "Invalid return value from schema %s\nArgs: %s",
 		        gsn->toString().c_str(),
 		        cargs->toString().c_str());
+	}
 
 	LAZY_LOG_FINE << "Result: " << oc_to_string(result);
 	return result;
