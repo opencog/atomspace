@@ -51,9 +51,11 @@ public:
 	                                     AtomSpace* scratch,
 	                                     bool silent=false);
 	static TruthValuePtr do_evaluate(AtomSpace*,
-	                                 const HandleSeq& schema_and_args);
+	                                 const HandleSeq& schema_and_args,
+	                                 bool silent=false);
 	static TruthValuePtr do_evaluate(AtomSpace*,
-	                                const Handle& schema, const Handle& args);
+	                                 const Handle& schema, const Handle& args,
+	                                 bool silent=false);
 
 	static Handle factory(const Handle&);
 };

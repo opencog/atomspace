@@ -79,8 +79,8 @@ private:
 	 * by default.
 	 */
 	bool _eager = true;
-	Handle walk_tree(const Handle& tree);
-	bool walk_sequence(HandleSeq&, const HandleSeq&);
+	Handle walk_tree(const Handle& tree, bool silent=false);
+	bool walk_sequence(HandleSeq&, const HandleSeq&, bool silent=false);
 
 public:
 	Instantiator(AtomSpace* as) : _as(as), _vmap(nullptr) {}
@@ -97,10 +97,10 @@ public:
 		_vmap = nullptr;
 	}
 
-	Handle instantiate(const Handle& expr, const HandleMap &vars);
-	Handle execute(const Handle& expr)
+	Handle instantiate(const Handle& expr, const HandleMap &vars, bool silent=false);
+	Handle execute(const Handle& expr, bool silent=false)
 	{
-		return instantiate(expr, HandleMap());
+		return instantiate(expr, HandleMap(), silent);
 	}
 };
 
