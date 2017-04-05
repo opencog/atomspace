@@ -97,7 +97,8 @@ public:
 		_vmap = nullptr;
 	}
 
-	Handle instantiate(const Handle& expr, const HandleMap &vars, bool silent=false);
+	Handle instantiate(const Handle& expr, const HandleMap &vars,
+	                   bool silent=false);
 	Handle execute(const Handle& expr, bool silent=false)
 	{
 		return instantiate(expr, HandleMap(), silent);
