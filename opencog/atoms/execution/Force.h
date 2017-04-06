@@ -32,7 +32,7 @@ namespace opencog
  */
 
 // Handy-dandy utility function
-Handle force_execute(AtomSpace*, const Handle&);
+Handle force_execute(AtomSpace*, const Handle&, bool silent=false);
 
 /** @}*/
 }

@@ -36,8 +36,8 @@ namespace opencog
 class ExecutionOutputLink : public FunctionLink
 {
 private:
-	static Handle do_execute(AtomSpace*, const Handle& schema,
-	                                     const Handle& args);
+	static Handle do_execute(AtomSpace*, const Handle& schema, const Handle& args,
+	                         bool silent=false);
 
 public:
 	/**
@@ -55,7 +55,7 @@ public:
 	ExecutionOutputLink(const Handle& schema, const Handle& args);
 	ExecutionOutputLink(const Link& l);
 
-	virtual Handle execute(AtomSpace* = NULL) const;
+	virtual Handle execute(AtomSpace* as=NULL, bool silent=false) const;
 
 	Handle get_schema(void) const { return getOutgoingAtom(0); }
 	Handle get_args(void) const { return getOutgoingAtom(1); }

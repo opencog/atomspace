@@ -181,7 +181,7 @@ struct Variables : public FreeVariables
 	// filtering, where type mis-checks are expected and normal.
 	Handle substitute(const Handle& tree,
 	                  const HandleSeq& vals,
-	                  bool silent = false) const;
+	                  bool silent=false) const;
 
 	// Extend this variable set by adding in the given variable set.
 	void extend(const Variables&);

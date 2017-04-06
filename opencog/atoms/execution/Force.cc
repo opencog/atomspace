@@ -48,13 +48,13 @@ using namespace opencog;
 /// Users who do not want to pollute the atomspace should use a
 /// temporary (scratch) atomspace.
 ///
-Handle opencog::force_execute(AtomSpace* as, const Handle& cargs)
+Handle opencog::force_execute(AtomSpace* as, const Handle& cargs, bool silent)
 {
 	Instantiator inst(as);
 
 	if (LIST_LINK != cargs->getType())
 	{
-	   Handle args(inst.execute(cargs));
+		Handle args(inst.execute(cargs, silent));
 		if (args != cargs)
 			args = as->add_atom(args);
 		return args;
@@ -65,7 +65,7 @@ Handle opencog::force_execute(AtomSpace* as, const Handle& cargs)
 	bool changed = false;
 	for (const Handle& ho : cargs->getOutgoingSet())
 	{
-		Handle nh(inst.execute(ho));
+		Handle nh(inst.execute(ho, silent));
 		// nh might be NULL if ho was a DeleteLink
 		if (nullptr == nh)
 		{

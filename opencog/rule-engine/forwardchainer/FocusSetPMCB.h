@@ -56,7 +56,7 @@ public:
     virtual bool grounding(const HandleMap &var_soln,
                            const HandleMap &term_soln)
     {
-        Handle h = _inst->instantiate(implicand, var_soln);
+        Handle h = _inst->instantiate(implicand, var_soln, true);
 
         if (h != Handle::UNDEFINED)
             _result_list.push_back(h);
