@@ -161,6 +161,8 @@ class SchemePrimitive : public PrimitiveEnviron
 			int (T::*i_shhhi)(const std::string&, Handle, Handle,Handle,int);
 			std::string (T::*s_as)(AtomSpace*, const std::string&);
 			std::string (T::*s_s)(const std::string&);
+            std::string (T::*s_i)(int);
+            std::string (T::*s_b)(bool);
 			std::string (T::*s_ss)(const std::string&, const std::string&);
 			std::string (T::*s_sss)(const std::string&,
 			                        const std::string&,
@@ -204,6 +206,8 @@ class SchemePrimitive : public PrimitiveEnviron
 			K_H,   // return HandleSeqSeq, take Handle
 			S_AS,  // return string, take AtomSpace* and string
 			S_S,   // return string, take string
+            S_I,   // return string, take int
+            S_B,   // return string, take bool
 			S_SS,  // return string, take two strings
 			S_SSS, // return string, take three strings
 			S_V,   // return string, take void
@@ -407,6 +411,20 @@ class SchemePrimitive : public PrimitiveEnviron
 					rc = scm_from_utf8_string(rs.c_str());
 					break;
 				}
+                case S_I:
+                {
+                    int i = SchemeSmob::verify_int(scm_car(args), scheme_name);
+                    std::string rs = (that->*method.s_i)(i);
+                    rc = scm_from_utf8_string(rs.c_str());
+                    break;
+                }
+                case S_B:
+                {
+                    bool b = scm_to_bool(scm_car(args));
+                    std::string rs = (that->*method.s_b)(b);
+                    rc = scm_from_utf8_string(rs.c_str());
+                    break;
+                }
 				case S_SS:
 				{
 					// All args are strings
@@ -686,6 +704,8 @@ DECLARE_DECLARE_1(Handle, Handle)
 DECLARE_DECLARE_1(HandleSeq, Handle)
 DECLARE_DECLARE_1(HandleSeqSeq, Handle)
 DECLARE_DECLARE_1(int, void)
+DECLARE_DECLARE_1(std::string, int)
+DECLARE_DECLARE_1(std::string, bool)
 DECLARE_DECLARE_1(std::string, const std::string&)
 DECLARE_DECLARE_1(std::string, void)
 DECLARE_DECLARE_1(TruthValuePtr, Handle)
