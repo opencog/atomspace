@@ -5,7 +5,7 @@
 ;; Before running any inference you must load that file
 
 ;; Load the rules (use load for relative path w.r.t. to that file)
-(load "rules/crisp-deduction-rule.scm")
+(load "../rules/crisp-deduction-rule.scm")
 
 ;; Define a new rule base (aka rule-based system)
 (define crisp-deduction-rbs (ConceptNode "crisp-deduction-rule-base"))
