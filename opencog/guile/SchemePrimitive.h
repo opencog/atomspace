@@ -640,6 +640,8 @@ class SchemePrimitive : public PrimitiveEnviron
 		DECLARE_CONSTR_2(S_AS,   s_as, std::string, AtomSpace*,
 		                               const std::string&)
 		DECLARE_CONSTR_1(S_S,    s_s,  std::string, const std::string&)
+        DECLARE_CONSTR_1(S_I,    s_i,  std::string, int)
+        DECLARE_CONSTR_1(S_B,    s_b,  std::string, bool)
 		DECLARE_CONSTR_2(S_SS,   s_ss, std::string, const std::string&,
 		                               const std::string&)
 		DECLARE_CONSTR_3(S_SSS,  s_sss, std::string, const std::string&,
