@@ -391,17 +391,13 @@ class SchemePrimitive : public PrimitiveEnviron
 					rc = SchemeSmob::tv_to_scm(tv);
 					break;
 				}
-				case S_AS:
-				{
-					// First argument is an AtomSpace ptr.
-					AtomSpace* as = SchemeSmob::verify_atomspace(scm_car(args), scheme_name, 1);
-					// Second argument is a string
-					std::string str(SchemeSmob::verify_string(scm_cadr(args), scheme_name, 2));
 
-					std::string rs = (that->*method.s_as)(as, str);
-					rc = scm_from_utf8_string(rs.c_str());
-					break;
-				}
+                case S_V:
+                {
+                    std::string rs = (that->*method.s_v)();
+                    rc = scm_from_utf8_string(rs.c_str());
+                    break;
+                }
 				case S_S:
 				{
 					// First argument is a string
@@ -425,6 +421,17 @@ class SchemePrimitive : public PrimitiveEnviron
                     rc = scm_from_utf8_string(rs.c_str());
                     break;
                 }
+                case S_AS:
+                {
+                    // First argument is an AtomSpace ptr.
+                    AtomSpace* as = SchemeSmob::verify_atomspace(scm_car(args), scheme_name, 1);
+                    // Second argument is a string
+                    std::string str(SchemeSmob::verify_string(scm_cadr(args), scheme_name, 2));
+
+                    std::string rs = (that->*method.s_as)(as, str);
+                    rc = scm_from_utf8_string(rs.c_str());
+                    break;
+                }
 				case S_SS:
 				{
 					// All args are strings
@@ -443,12 +450,6 @@ class SchemePrimitive : public PrimitiveEnviron
 					std::string str3(SchemeSmob::verify_string(scm_caddr(args), scheme_name, 3));
 
 					std::string rs = (that->*method.s_sss)(str1, str2, str3);
-					rc = scm_from_utf8_string(rs.c_str());
-					break;
-				}
-				case S_V:
-				{
-					std::string rs = (that->*method.s_v)();
 					rc = scm_from_utf8_string(rs.c_str());
 					break;
 				}
