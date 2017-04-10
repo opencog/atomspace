@@ -54,6 +54,7 @@ public:
 
 		_eval.eval("(use-modules (opencog))");
 		_eval.eval("(use-modules (opencog rule-engine))");
+		_eval.eval("(use-modules (opencog logger))");
 		CHKERR;
 
 		// Load the simple deduction rbs to test it
@@ -111,9 +112,9 @@ void ForwardChainerUTest::test_do_chain_deduction()
 
 void ForwardChainerUTest::test_do_chain_animals()
 {
-	string result = _eval.eval("(load-from-path \"tests/rule-engine/conditional-instantiation-config.scm\")");
+	string result = _eval.eval("(load-from-path \"tests/rule-engine/fc-animals-config.scm\")");
 	logger().debug() << "result = " << result;
-	_eval.eval("(load-from-path \"tests/rule-engine/bc-animals.scm\")");
+	_eval.eval("(load-from-path \"tests/rule-engine/animals.scm\")");
 	randGen().seed(0);
 
 	Handle top_rbs = _as.get_node(CONCEPT_NODE, UREConfigReader::top_rbs_name);
@@ -122,10 +123,10 @@ void ForwardChainerUTest::test_do_chain_animals()
 		croaks = an(PREDICATE_NODE, "croaks"),
 		green = an(CONCEPT_NODE, "green"),
 		source = al(EVALUATION_LINK, croaks, Fritz),
-		vardecl = al(LIST_LINK);
+		vardecl = Handle::UNDEFINED;
 
 	ForwardChainer fc(_as, top_rbs, source, vardecl);
-	fc.get_config().set_maximum_iterations(20);
+	fc.get_config().set_maximum_iterations(50);
 	fc.do_chain();
 
 	UnorderedHandleSet results = fc.get_chaining_result();

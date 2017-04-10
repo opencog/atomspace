@@ -75,7 +75,8 @@ void BackwardChainerUTest::setUp()
 		_eval.eval(eval_str);
 	}
 	_eval.eval("(use-modules (opencog))");
-	// _eval.eval("(use-modules (opencog rule-engine))");
+	_eval.eval("(use-modules (opencog rule-engine))");
+	_eval.eval("(use-modules (opencog logger))");
 }
 
 void BackwardChainerUTest::tearDown()
@@ -276,7 +277,7 @@ void BackwardChainerUTest::test_conditional_instantiation_1()
 
 	logger().debug() << "result = " << result;
 
-	result = _eval.eval("(load-from-path \"tests/rule-engine/bc-friends.scm\")");
+	result = _eval.eval("(load-from-path \"tests/rule-engine/friends.scm\")");
 	randGen().seed(0);
 
 	Handle top_rbs = _as.get_node(CONCEPT_NODE, UREConfigReader::top_rbs_name);
@@ -321,7 +322,7 @@ void BackwardChainerUTest::test_conditional_instantiation_2()
 
 	string result = _eval.eval("(load-from-path \"tests/rule-engine/conditional-instantiation-config.scm\")");
 	logger().debug() << "result = " << result;
-	_eval.eval("(load-from-path \"tests/rule-engine/bc-animals.scm\")");
+	_eval.eval("(load-from-path \"tests/rule-engine/animals.scm\")");
 	randGen().seed(0);
 
 	Handle top_rbs = _as.get_node(CONCEPT_NODE, UREConfigReader::top_rbs_name);
@@ -355,7 +356,7 @@ void BackwardChainerUTest::test_conditional_instantiation_tv_query()
 	_as.clear();
 
 	_eval.eval("(load-from-path \"tests/rule-engine/conditional-instantiation-config.scm\")");
-	_eval.eval("(load-from-path \"tests/rule-engine/bc-animals.scm\")");
+	_eval.eval("(load-from-path \"tests/rule-engine/animals.scm\")");
 	randGen().seed(500);
 
 	Handle top_rbs = _as.get_node(CONCEPT_NODE, UREConfigReader::top_rbs_name);
@@ -422,7 +423,7 @@ void BackwardChainerUTest::test_conditional_partial_instantiation()
 
 	logger().debug() << "result = " << result;
 
-	result = _eval.eval("(load-from-path \"tests/rule-engine/bc-friends.scm\")");
+	result = _eval.eval("(load-from-path \"tests/rule-engine/friends.scm\")");
 	randGen().seed(0);
 
 	Handle top_rbs = _as.get_node(CONCEPT_NODE, UREConfigReader::top_rbs_name);
@@ -474,7 +475,7 @@ void BackwardChainerUTest::test_impossible_criminal()
 	_as.clear();
 
 	_eval.eval("(load-from-path \"tests/rule-engine/bc-criminal-without-deduction-config.scm\")");
-	_eval.eval("(load-from-path \"tests/rule-engine/bc-criminal.scm\")");
+	_eval.eval("(load-from-path \"tests/rule-engine/criminal.scm\")");
 	randGen().seed(0);
 
 	Handle top_rbs = _as.get_node(CONCEPT_NODE, UREConfigReader::top_rbs_name);
@@ -513,7 +514,7 @@ void BackwardChainerUTest::test_criminal()
 	_as.clear();
 
 	_eval.eval("(load-from-path \"tests/rule-engine/bc-criminal-config.scm\")");
-	_eval.eval("(load-from-path \"tests/rule-engine/bc-criminal.scm\")");
+	_eval.eval("(load-from-path \"tests/rule-engine/criminal.scm\")");
 	randGen().seed(0);
 
 	Handle top_rbs = _as.get_node(CONCEPT_NODE, UREConfigReader::top_rbs_name);
@@ -563,7 +564,7 @@ void BackwardChainerUTest::test_criminal_trace()
 	_as.clear();
 
 	_eval.eval("(load-from-path \"tests/rule-engine/bc-criminal-config.scm\")");
-	_eval.eval("(load-from-path \"tests/rule-engine/bc-criminal.scm\")");
+	_eval.eval("(load-from-path \"tests/rule-engine/criminal.scm\")");
 	randGen().seed(0);
 
 	Handle top_rbs = _as.get_node(CONCEPT_NODE, UREConfigReader::top_rbs_name);
@@ -659,7 +660,7 @@ void BackwardChainerUTest::test_focus_set()
 	_as.clear();
 
 	_eval.eval("(load-from-path \"tests/rule-engine/conditional-instantiation-config.scm\")");
-	_eval.eval("(load-from-path \"tests/rule-engine/bc-animals.scm\")");
+	_eval.eval("(load-from-path \"tests/rule-engine/animals.scm\")");
 	randGen().seed(500);
 
 	Handle top_rbs = _as.get_node(CONCEPT_NODE, UREConfigReader::top_rbs_name);
