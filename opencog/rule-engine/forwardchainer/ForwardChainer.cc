@@ -269,8 +269,10 @@ An attentionbank is needed in order to get the STI...
 Rule ForwardChainer::select_rule(const Handle& source)
 {
 	std::map<const Rule*, float> rule_weight;
-	for (const Rule& r : _rules)
-		rule_weight[&r] = r.get_weight();
+	for (const Rule& r : _rules) {
+		if (not r.is_meta())
+			rule_weight[&r] = r.get_weight();
+	}
 
 	ure_logger().debug("%d rules to be searched as matched against the source",
 	                   rule_weight.size());
