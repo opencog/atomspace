@@ -21,13 +21,17 @@ have the following relations defined
 Let's say the thing in black box is named Fritz and from above
 relations we need to deduce its color.
 
-## Pattern Matcher
+In the following sections will show different ways to solve this
+problem. But before that some modules must be loaded first, the query
+module for using the pattern matcher, and the rule-engine module for
+using URE.
 
-First load the query and the rule-engine modules
 ```scheme
 (use-modules (opencog query))
 (use-modules (opencog rule-engine))
 ```
+
+## Pattern Matcher
 
 Then load the knowledge based containing the 2 relationships above,
 plus the fact that Fritz coaks and eats flies
@@ -41,6 +45,8 @@ to solve the inference problem
 ```scheme
 (load "rule-base.scm")
 ```
+
+TODO: use fuzzy-conjunction-evaluation-2ary-rule instead of introduction.
 
 We apply the rules manually to understand what they do. The following
 ```scheme
@@ -76,6 +82,39 @@ which gives us the fact that Fritz is a frog. Running again
 (map cog-bind (cog-outgoing-set (cog-bind conditional-full-instantiation-meta-rule)))
 ```
 finally gives us the result that Fritz is green.
+
+## Pattern Matcher (using the frog rule base)
+
+Similar to the above but the implications are directly represented as
+URE rules. This may not necessarily be the typical way to use the URE
+but it shows a different perspective on how to solve this problem.
+
+But let's first clear the atomspace to remove the solutions found in
+the previous section
+```scheme
+(clear)
+```
+
+Then load the frog knowledge base
+```scheme
+(load "frog-rule-base.scm")
+```
+
+The user is obviously invited to compare `knowledge-base.scm` and
+`frog-kb.scm` to understand how implications can be coded as rules.
+
+Then we apply the rules
+```scheme
+(cog-bind if-croaks-and-eats-flies-then-frog-rule)
+(cog-bind if-frog-then-green-rule)
+```
+to produce the answer.
+
+Note that these rules do not assigne a truth value to their
+output. This can be remedied by wrapping the rewrite term in a
+ExecutionOutputLink with a grounded schema node that would assign the
+truth value of the produced atom. But that is only optional, at least
+for the pattern matcher and the forward chainer.
 
 ## Forward Chainer
 
@@ -119,6 +158,31 @@ We can now run the forward chainer
 ```
 to get the result that fritz is a frog and fritz is green.
 
+## Forward Chainer (using the frog rule base)
+
+Let's clear the atomspace and load the frog rule base
+```scheme
+(clear)
+(load "frog-rule-base.scm")
+```
+
+Next, we re-define the source, its variable declaration and focus-set
+as above
+```scheme
+(define source
+  (Evaluation (stv 1.0 1.0)
+     (Predicate "croaks")
+     (Concept "Fritz")))
+(define vardecl (List))
+(define focus-set (Set))
+```
+
+We can now run the forward chainer
+```scheme
+(cog-fc frog-rb source vardecl focus-set)
+```
+to get the result that fritz is a frog and fritz is green.
+
 ## Backward Chainer
 
 Let's clear the atomspace to remove the solutions and reload the
@@ -154,6 +218,9 @@ We can now call the backward chainer as follows
 (cog-bc ci-rbs target vardecl focus-set)
 ```
 and get the answer that Fritz is green.
+
+The alternate way using the frog rule base does not work with the
+backward chainer because it requires the rewrite term to be a formula.
 
 ## Authors
 
