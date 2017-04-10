@@ -1,7 +1,3 @@
-(use-modules (opencog query))
-(use-modules (opencog rule-engine))
-
-
 ;;;;;;;;;;;;;;;;;;;;
 ;; Knowledge base ;;
 ;;;;;;;;;;;;;;;;;;;;
@@ -81,6 +77,8 @@
 ;;;;;;;;;;;;;;;
 ;; Rule base ;;
 ;;;;;;;;;;;;;;;
+
+;; TODO
 
 (define rule1
 	(BindLink

@@ -20,10 +20,6 @@
    ci-rbs
 )
 (MemberLink (stv 1 1)
-   fuzzy-conjunction-introduction-1ary-rule-name
-   ci-rbs
-)
-(MemberLink (stv 1 1)
    fuzzy-conjunction-introduction-2ary-rule-name
    ci-rbs
 )

@@ -13,6 +13,7 @@
 ; Where A1 to An are atoms with a fuzzy TV
 ; -----------------------------------------------------------------------------
 
+(use-modules (opencog rule-engine))
 (use-modules (srfi srfi-1))
 
 ;; Generate variable (Variable prefix + "-" + to_string(i))
@@ -49,39 +50,36 @@
       pattern
       rewrite)))
 
+;; Return true if all elements of the list are unique
+(define (is-set l)
+  (cond ((null? l) #t)
+        ((member (car l) (cdr l)) #f)
+        (else (is-set (cdr l)))))
+
+;; Check that they all are different, and have positive confidences
+(define (fuzzy-conjunction-introduction-precondition S)
+  (bool->tv (is-confident-enough-set (cog-outgoing-set S))))
+
+(define (is-confident-enough-set andees)
+  (let* ((confident-enough (lambda (A) (> (cog-stv-confidence A) 0))))
+    (and (is-set andees)
+         (every confident-enough andees))))
+
 (define (fuzzy-conjunction-introduction-formula A S)
   (let* ((andees (cog-outgoing-set S))
          (min-s-atom (min-element-by-key andees cog-stv-strength))
          (min-c-atom (min-element-by-key andees cog-stv-confidence))
          (min-s (cog-stv-strength min-s-atom))
          (min-c (cog-stv-confidence min-c-atom)))
-    (cog-set-tv! A (stv min-s min-c))))
+    (if (is-confident-enough-set andees)       ; only introduce meaningful
+                                               ; conjunction of unique andees
+        (cog-set-tv! A (stv min-s min-c)))))
 
 ;; Name the rules
-;;
-;; Lame enumeration, maybe scheme can do better?
-(define fuzzy-conjunction-introduction-1ary-rule-name
-  (DefinedSchema "fuzzy-conjunction-introduction-1ary-rule"))
-(DefineLink
-  fuzzy-conjunction-introduction-1ary-rule-name
-  (gen-fuzzy-conjunction-introduction-rule 1))
+(define fuzzy-conjunction-introduction-2ary-rule
+  (gen-fuzzy-conjunction-introduction-rule 2))
 (define fuzzy-conjunction-introduction-2ary-rule-name
   (DefinedSchema "fuzzy-conjunction-introduction-2ary-rule"))
 (DefineLink
   fuzzy-conjunction-introduction-2ary-rule-name
-  (gen-fuzzy-conjunction-introduction-rule 2))
-(define fuzzy-conjunction-introduction-3ary-rule-name
-  (DefinedSchema "fuzzy-conjunction-introduction-3ary-rule"))
-(DefineLink
-  fuzzy-conjunction-introduction-3ary-rule-name
-  (gen-fuzzy-conjunction-introduction-rule 3))
-(define fuzzy-conjunction-introduction-4ary-rule-name
-  (DefinedSchema "fuzzy-conjunction-introduction-4ary-rule"))
-(DefineLink
-  fuzzy-conjunction-introduction-4ary-rule-name
-  (gen-fuzzy-conjunction-introduction-rule 4))
-(define fuzzy-conjunction-introduction-5ary-rule-name
-  (DefinedSchema "fuzzy-conjunction-introduction-5ary-rule"))
-(DefineLink
-  fuzzy-conjunction-introduction-5ary-rule-name
-  (gen-fuzzy-conjunction-introduction-rule 5))
+  fuzzy-conjunction-introduction-2ary-rule)
