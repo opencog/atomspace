@@ -135,6 +135,10 @@ void ForwardChainer::do_step()
 	ure_logger().debug("Iteration %d", _iteration);
 	_iteration++;
 
+	// Expand meta rules. This should probably be done on-the-fly in
+	// the select_rule method, but for now it's here
+	expand_meta_rules();
+
 	// Select source
 	_cur_source = select_source();
 	LAZY_URE_LOG_DEBUG << "Source:" << std::endl << _cur_source->toString();
@@ -372,4 +376,17 @@ void ForwardChainer::validate(const Handle& source)
 {
 	if (source == Handle::UNDEFINED)
 		throw RuntimeException(TRACE_INFO, "ForwardChainer - Invalid source.");
+}
+
+void ForwardChainer::expand_meta_rules()
+{
+	// This is kinda of hack before meta rules are fully supported by
+	// the Rule class.
+	size_t rules_size = _rules.size();
+	_rules.expand_meta_rules(_as);
+
+	if (rules_size != _rules.size()) {
+		ure_logger().debug() << "The rule set has gone from "
+		                     << rules_size << " rules to " << _rules.size();
+	}
 }

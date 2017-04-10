@@ -95,6 +95,8 @@ private:
 
 	void validate(const Handle& source);
 
+	void expand_meta_rules();
+
 protected:
 	RuleSet _rules; /* loaded rules */
 	UnorderedHandleSet _potential_sources;
