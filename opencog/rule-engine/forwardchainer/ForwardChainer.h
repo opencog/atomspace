@@ -60,7 +60,6 @@ private:
 	UREConfigReader _configReader;
 
 	int _iteration;
-	int _max_iteration;
 	source_selection_mode _ts_mode;
 	bool _search_in_af;
 	bool _search_focus_set;

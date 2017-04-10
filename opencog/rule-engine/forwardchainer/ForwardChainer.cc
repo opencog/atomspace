@@ -98,7 +98,6 @@ void ForwardChainer::init(const Handle& source,
 
 	// Reset the iteration count and max count
 	_iteration = 0;
-	_max_iteration = _configReader.get_maximum_iterations();
 }
 
 UREConfigReader& ForwardChainer::get_config()
@@ -160,7 +159,7 @@ void ForwardChainer::do_step()
 
 bool ForwardChainer::termination()
 {
-	return _max_iteration <= _iteration;
+	return _configReader.get_maximum_iterations() <= _iteration;
 }
 
 /**
