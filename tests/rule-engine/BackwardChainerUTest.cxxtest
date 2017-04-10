@@ -303,8 +303,7 @@ void BackwardChainerUTest::test_conditional_instantiation_1()
 		expected = al(SET_LINK,
 		              friend_with_john(mary),
 		              friend_with_john(edward),
-		              friend_with_john(cyril),
-		              friend_with_john(john));
+		              friend_with_john(cyril));
 
 	logger().debug() << "results = " << results->toString();
 	logger().debug() << "expected = " << expected->toString();
