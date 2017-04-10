@@ -129,6 +129,8 @@ public:
 	Handle get_results() const;
 
 private:
+	void expand_meta_rules();
+
 	// Expand the BIT
 	void expand_bit();
 
