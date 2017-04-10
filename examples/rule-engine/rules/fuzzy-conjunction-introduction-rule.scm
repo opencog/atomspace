@@ -13,6 +13,7 @@
 ; Where A1 to An are atoms with a fuzzy TV
 ; -----------------------------------------------------------------------------
 
+(use-modules (opencog rule-engine))
 (use-modules (srfi srfi-1))
 
 ;; Generate variable (Variable prefix + "-" + to_string(i))
@@ -75,30 +76,10 @@
         (cog-set-tv! A (stv min-s min-c)))))
 
 ;; Name the rules
-;;
-;; Lame enumeration, maybe scheme can do better?
-(define fuzzy-conjunction-introduction-1ary-rule-name
-  (DefinedSchema "fuzzy-conjunction-introduction-1ary-rule"))
-(DefineLink
-  fuzzy-conjunction-introduction-1ary-rule-name
-  (gen-fuzzy-conjunction-introduction-rule 1))
+(define fuzzy-conjunction-introduction-2ary-rule
+  (gen-fuzzy-conjunction-introduction-rule 2))
 (define fuzzy-conjunction-introduction-2ary-rule-name
   (DefinedSchema "fuzzy-conjunction-introduction-2ary-rule"))
 (DefineLink
   fuzzy-conjunction-introduction-2ary-rule-name
-  (gen-fuzzy-conjunction-introduction-rule 2))
-(define fuzzy-conjunction-introduction-3ary-rule-name
-  (DefinedSchema "fuzzy-conjunction-introduction-3ary-rule"))
-(DefineLink
-  fuzzy-conjunction-introduction-3ary-rule-name
-  (gen-fuzzy-conjunction-introduction-rule 3))
-(define fuzzy-conjunction-introduction-4ary-rule-name
-  (DefinedSchema "fuzzy-conjunction-introduction-4ary-rule"))
-(DefineLink
-  fuzzy-conjunction-introduction-4ary-rule-name
-  (gen-fuzzy-conjunction-introduction-rule 4))
-(define fuzzy-conjunction-introduction-5ary-rule-name
-  (DefinedSchema "fuzzy-conjunction-introduction-5ary-rule"))
-(DefineLink
-  fuzzy-conjunction-introduction-5ary-rule-name
-  (gen-fuzzy-conjunction-introduction-rule 5))
+  fuzzy-conjunction-introduction-2ary-rule)

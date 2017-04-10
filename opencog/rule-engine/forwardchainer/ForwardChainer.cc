@@ -98,7 +98,16 @@ void ForwardChainer::init(const Handle& source,
 
 	// Reset the iteration count and max count
 	_iteration = 0;
-	_max_iteration = _configReader.get_maximum_iterations();
+}
+
+UREConfigReader& ForwardChainer::get_config()
+{
+	return _configReader;
+}
+
+const UREConfigReader& ForwardChainer::get_config() const
+{
+	return _configReader;
 }
 
 void ForwardChainer::do_chain()
@@ -126,6 +135,10 @@ void ForwardChainer::do_step()
 	ure_logger().debug("Iteration %d", _iteration);
 	_iteration++;
 
+	// Expand meta rules. This should probably be done on-the-fly in
+	// the select_rule method, but for now it's here
+	expand_meta_rules();
+
 	// Select source
 	_cur_source = select_source();
 	LAZY_URE_LOG_DEBUG << "Source:" << std::endl << _cur_source->toString();
@@ -150,7 +163,7 @@ void ForwardChainer::do_step()
 
 bool ForwardChainer::termination()
 {
-	return _max_iteration <= _iteration;
+	return _configReader.get_maximum_iterations() <= _iteration;
 }
 
 /**
@@ -259,8 +272,10 @@ An attentionbank is needed in order to get the STI...
 Rule ForwardChainer::select_rule(const Handle& source)
 {
 	std::map<const Rule*, float> rule_weight;
-	for (const Rule& r : _rules)
-		rule_weight[&r] = r.get_weight();
+	for (const Rule& r : _rules) {
+		if (not r.is_meta())
+			rule_weight[&r] = r.get_weight();
+	}
 
 	ure_logger().debug("%d rules to be searched as matched against the source",
 	                   rule_weight.size());
@@ -361,4 +376,17 @@ void ForwardChainer::validate(const Handle& source)
 {
 	if (source == Handle::UNDEFINED)
 		throw RuntimeException(TRACE_INFO, "ForwardChainer - Invalid source.");
+}
+
+void ForwardChainer::expand_meta_rules()
+{
+	// This is kinda of hack before meta rules are fully supported by
+	// the Rule class.
+	size_t rules_size = _rules.size();
+	_rules.expand_meta_rules(_as);
+
+	if (rules_size != _rules.size()) {
+		ure_logger().debug() << "The rule set has gone from "
+		                     << rules_size << " rules to " << _rules.size();
+	}
 }

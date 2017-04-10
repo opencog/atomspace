@@ -105,7 +105,7 @@ Handle BackwardChainer::get_results() const
 	return _as.add_link(SET_LINK, results);
 }
 
-void BackwardChainer::expand_bit()
+void BackwardChainer::expand_meta_rules()
 {
 	// This is kinda of hack before meta rules are fully supported by
 	// the Rule class.
@@ -120,6 +120,12 @@ void BackwardChainer::expand_bit()
 		                     << rules_size << " rules to " << _rules.size()
 		                     << ". All exhausted flags have been reset.";
 	}
+}
+
+void BackwardChainer::expand_bit()
+{
+	// Expand meta rules, before they are fully supported
+	expand_meta_rules();
 
 	// Reset _last_expansion_fcs
 	_last_expansion_andbit = nullptr;

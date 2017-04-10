@@ -60,7 +60,6 @@ private:
 	UREConfigReader _configReader;
 
 	int _iteration;
-	int _max_iteration;
 	source_selection_mode _ts_mode;
 	bool _search_in_af;
 	bool _search_focus_set;
@@ -95,6 +94,8 @@ private:
 		}
 
 	void validate(const Handle& source);
+
+	void expand_meta_rules();
 
 protected:
 	RuleSet _rules; /* loaded rules */
@@ -132,6 +133,12 @@ public:
 	               const HandleSeq& focus_set=HandleSeq(),
 	               source_selection_mode sm=source_selection_mode::UNIFORM);
 	~ForwardChainer();
+
+	/**
+	 * URE configuration accessors
+	 */
+	UREConfigReader& get_config();
+	const UREConfigReader& get_config() const;
 
 	/**
 	 * Perform forward chaining inference till the termination
