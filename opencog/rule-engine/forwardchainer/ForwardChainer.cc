@@ -101,6 +101,16 @@ void ForwardChainer::init(const Handle& source,
 	_max_iteration = _configReader.get_maximum_iterations();
 }
 
+UREConfigReader& ForwardChainer::get_config()
+{
+	return _configReader;
+}
+
+const UREConfigReader& ForwardChainer::get_config() const
+{
+	return _configReader;
+}
+
 void ForwardChainer::do_chain()
 {
 	ure_logger().debug("Start Forward Chaining");

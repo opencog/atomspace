@@ -134,6 +134,12 @@ public:
 	~ForwardChainer();
 
 	/**
+	 * URE configuration accessors
+	 */
+	UREConfigReader& get_config();
+	const UREConfigReader& get_config() const;
+
+	/**
 	 * Perform forward chaining inference till the termination
 	 * criteria have been met.
 	 */
