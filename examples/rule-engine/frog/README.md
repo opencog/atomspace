@@ -5,10 +5,10 @@ Unified Rule Engine (URE).
 
 ## Overview
 
-This example comes from wikipedia article example on forward chaining.
-https://en.wikipedia.org/wiki/Forward_chaining In this example we have
-a black box for which we know there is something in it, and it makes
-croaking sounds and eats flies.
+This example comes from the wikipedia article example on forward
+chaining.  https://en.wikipedia.org/wiki/Forward_chaining In this
+example we have a black box for which we know there is something in
+it, and it makes croaking sounds and eats flies.
 
 The objective is to find the color of the thing in the black box. We
 have the following relations defined
@@ -22,9 +22,9 @@ Let's say the thing in black box is named Fritz and from above
 relations we need to deduce its color.
 
 In the following sections will show different ways to solve this
-problem. But before that some modules must be loaded first, the query
-module for using the pattern matcher, and the rule-engine module for
-using URE.
+problem. But before that some modules must be loaded, the query module
+for using the pattern matcher, and the rule-engine module for using
+URE.
 
 ```scheme
 (use-modules (opencog query))
@@ -45,8 +45,6 @@ to solve the inference problem
 ```scheme
 (load "rule-base.scm")
 ```
-
-TODO: use fuzzy-conjunction-evaluation-2ary-rule instead of introduction.
 
 We apply the rules manually to understand what they do. The following
 ```scheme
@@ -70,14 +68,16 @@ produces conjunctions including the fact that Fritz croaks and eats flies
 )
 ```
 
-Then we apply the conditional full instantiation meta rule. Since it
+We then apply the conditional full instantiation meta rule. Since it
 is a meta rule, that is it produces rules, we need to call `cog-bind`
 twice, over the meta-rule, and then over the rules produced by the
 meta-rule, thus the use of the scheme function `map`
 ```scheme
 (map cog-bind (cog-outgoing-set (cog-bind conditional-full-instantiation-meta-rule)))
 ```
-which gives us the fact that Fritz is a frog. Running again
+which gives us the fact that Fritz is a frog.
+
+Running again
 ```scheme
 (map cog-bind (cog-outgoing-set (cog-bind conditional-full-instantiation-meta-rule)))
 ```
@@ -85,9 +85,10 @@ finally gives us the result that Fritz is green.
 
 ## Pattern Matcher (using the frog rule base)
 
-Similar to the above but the implications are directly represented as
-URE rules. This may not necessarily be the typical way to use the URE
-but it shows a different perspective on how to solve this problem.
+This is similar to the above but the implications are directly
+represented as URE rules. This may not be the typical way to use the
+URE but it shows a different perspective on how to use the URE to this
+problem.
 
 But let's first clear the atomspace to remove the solutions found in
 the previous section
@@ -127,8 +128,8 @@ previous section, and reload the knowledge and rule bases
 ```
 
 To use the forward chainer we first need to define a source. Let's use
-the fact Fritz croaks. The fact that Fritz eats flies could have been
-used too.
+the fact that Fritz croaks. The fact that Fritz eats flies could have
+been used too.
 ```scheme
 (define source
   (Evaluation (stv 1.0 1.0)
@@ -160,7 +161,8 @@ to get the result that fritz is a frog and fritz is green.
 
 ## Forward Chainer (using the frog rule base)
 
-Let's clear the atomspace and load the frog rule base
+Let's clear the atomspace and load the frog rule base that encodes the
+relationships as rules.
 ```scheme
 (clear)
 (load "frog-rule-base.scm")
