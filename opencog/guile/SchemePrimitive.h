@@ -176,6 +176,7 @@ class SchemePrimitive : public PrimitiveEnviron
 			void (T::*v_sa)(const std::string&, AtomSpace*);
 			void (T::*v_sh)(const std::string&, Handle);
 			void (T::*v_shi)(const std::string&, Handle, int);
+            void (T::*v_si)(const std::string&, int);
 			void (T::*v_ss)(const std::string&,
 			                const std::string&);
 			void (T::*v_sss)(const std::string&,
@@ -221,6 +222,7 @@ class SchemePrimitive : public PrimitiveEnviron
 			V_SSS, // return void, take three strings
 			V_T,   // return void, take Type
 			V_TI,  // return void, take Type and int
+            V_SI,  // return void, take string and int
 			V_TIDI,// return void, take Type, int, double, and int
 			V_V    // return void, take void
 		} signature;
@@ -523,6 +525,15 @@ class SchemePrimitive : public PrimitiveEnviron
 					(that->*method.v_ti)(t, i);
 					break;
 				}
+                case V_SI:
+                {
+                    std::string str(SchemeSmob::verify_string(scm_car(args), scheme_name, 1));
+
+                    int i = SchemeSmob::verify_int(scm_cadr(args), scheme_name, 2);
+
+                    (that->*method.v_si)(str, i);
+                    break;
+                }
 				case V_TIDI:
 				{
 					Type t = SchemeSmob::verify_atom_type(scm_car(args), scheme_name, 1);
@@ -661,6 +672,7 @@ class SchemePrimitive : public PrimitiveEnviron
 		                              const std::string&, const std::string&)
 		DECLARE_CONSTR_1(V_T,	v_t,  void, Type)
 		DECLARE_CONSTR_2(V_TI,  v_ti, void, Type, int)
+        DECLARE_CONSTR_2(V_SI,  v_si, void, const std::string&, int)
 		DECLARE_CONSTR_4(V_TIDI, v_tidi, void, Type, int, double, int)
 
 		DECLARE_CONSTR_0(V_V,   v_v,  void);
@@ -729,6 +741,7 @@ DECLARE_DECLARE_2(std::string, const std::string&, const std::string&)
 DECLARE_DECLARE_2(void, const std::string&, AtomSpace*)
 DECLARE_DECLARE_2(void, const std::string&, const std::string&)
 DECLARE_DECLARE_2(void, Type, int)
+DECLARE_DECLARE_2(void, const std::string&, int)
 
 DECLARE_DECLARE_3(Handle, Handle, Handle, Handle)
 DECLARE_DECLARE_3(std::string, const std::string&,
