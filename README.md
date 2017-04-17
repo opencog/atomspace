@@ -1,5 +1,6 @@
 OpenCog AtomSpace
 =================
+[![Build Status](https://travis-ci.org/opencog/atomspace.svg?branch=master)](https://travis-ci.org/opencog/atomspace)
 
 master:
 [![Build Status](http://61.92.69.39:8080/buildStatus/icon?job=ci-atomspace-master)](http://61.92.69.39:8080/job/ci-atomspace-master)

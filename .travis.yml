@@ -1,0 +1,57 @@
+os:
+  - linux
+
+# TODO: one day when container infrastructure works better change to
+# sudo: false
+sudo: required
+
+# sets the environment variable and can be use to set build matrix aswell
+# Refer to http://docs.travis-ci.com/user/environment-variables/
+env:
+    global:
+        - CXX="g++-4.8"
+        - CC="gcc-4.8"
+
+# With the exception of opencog's ppa the rest are required because travis vms
+# have Ubuntu 12.04 as os.
+before_install:
+    - sudo apt-add-repository -y ppa:boost-latest/ppa
+    - sudo apt-add-repository -y ppa:kalakris/cmake
+    - sudo apt-add-repository -y ppa:ubuntu-toolchain-r/test
+    # for atomspace only
+    - sudo apt-add-repository -y ppa:cython-dev/master-ppa
+    - sudo apt-get update
+    - wget http://mirrors.kernel.org/ubuntu/pool/universe/c/cxxtest/cxxtest_4.3-1_all.deb
+    - wget http://buildbot.opencog.org/downloads/for-ci-only/guile-2.0.9-amd64.deb
+    - wget -O setup.sh https://raw.githubusercontent.com/opencog/opencog/master/scripts/ocpkg
+    - chmod +x setup.sh
+
+install:
+    #  python-ply is needed for cxxtest
+    - sudo apt-get install -y -qq boost1.54 cmake gcc-4.8 g++-4.8
+    - sudo apt-get install -y -qq cython libtbb-dev libgsl0-dev unixodbc-dev
+    - sudo apt-get install -y -qq python-nose  python-ply
+    # The following line installs dependencies required by guile-2.0.9
+    # TODO: imporve the guile package created
+    - sudo apt-get install -y -qq libgc-dev libunistring-dev
+    - sudo dpkg -i guile-2.0.9-amd64.deb
+    - sudo dpkg -i cxxtest_4.3-1_all.deb
+    - sudo ldconfig
+    # the following from http://ubuntuhandbook.org/index.php/2013/08/install-gcc-4-8-via-ppa-in-ubuntu-12-04-13-04/
+    - sudo update-alternatives --install /usr/bin/gcc gcc /usr/bin/gcc-4.8 20
+    - sudo update-alternatives --install /usr/bin/g++ g++ /usr/bin/g++-4.8 20
+    - sudo update-alternatives --config gcc
+    - sudo update-alternatives --config g++
+     # Install cogutils
+    - sudo ./setup.sh -c
+
+before_script:
+    - mkdir build
+    - cd build
+    - cmake ..
+
+script:
+    - make
+    - make examples
+    - make tests
+    - make test
