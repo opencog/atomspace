@@ -27,6 +27,7 @@
 #include <boost/operators.hpp>
 #include <opencog/rule-engine/Rule.h>
 #include <opencog/atoms/base/Handle.h>
+#include <opencog/atomspaceutils/AtomSpaceUtils.h>
 #include "Fitness.h"
 
 namespace opencog
@@ -428,7 +429,7 @@ private:
 template<typename It>
 BIT::AndBITs::iterator BIT::erase(It pos)
 {
-	bit_as.remove_atom(pos->fcs);
+	remove_hypergraph(bit_as, pos->fcs);
 	return andbits.erase(pos);
 }
 
