@@ -260,30 +260,45 @@ void BackwardChainer::reduce_bit()
 	if (0 < _configReader.get_max_bit_size()) {
 		// If the BIT size has reached its maximum, randomly remove
 		// and-BITs so that the BIT size gets back below or equal to
-		// its maximum. The and-BITs to remove are selected so that
-		// the least likely and-BITs to be selected for expansion are
-		// removed first.
+		// its maximum.
 		while (_configReader.get_max_bit_size() < _bit.size()) {
-			// Calculate negated distribution of selecting an and-BIT
-			// for expansion
-			std::vector<double> weights = expansion_anbit_weights();
-			std::discrete_distribution<size_t> dist(weights.begin(),
-			                                        weights.end());
-			std::vector<double> neg_p;
-			for (double p : dist.probabilities())
-				neg_p.push_back(1 - p);
-			std::discrete_distribution<size_t> neg_dist(neg_p.begin(),
-			                                            neg_p.end());
-
-			// Pick the and-BIT, remove it from the BIT and remove its
-			// FCS from the bit atomspace.
-			auto it = std::next(_bit.andbits.begin(),
-			                    randGen().randint(_bit.size()));
-			LAZY_URE_LOG_DEBUG << "Remove " << it->fcs->idToString()
-			                   << " from the BIT";
-			_bit.erase(it);
+			// Randomly select an and-BIT that is unlikely to be used
+			// for the remaining of the inferenceThe and-BITs to remove are
+			// selected so that the least likely and-BITs to be
+			// selected for expansion are removed first.
+			remove_unlikely_expandable_andbit();
 		}
 	}
+}
+
+void BackwardChainer::remove_unlikely_expandable_andbit()
+{
+	std::vector<double> weights = expansion_anbit_weights();
+	std::discrete_distribution<size_t> dist(weights.begin(), weights.end());
+	std::vector<double> never_expand_probs;
+
+	// Calculate the probability of never being expanded for the
+	// remainder of the inference, thus (1-p) raised to the power of
+	// _configReader.get_maximum_iterations() - _iteration. This makes
+	// the assumption that the BIT (i.e. its and-BIT population) is
+	// not gonna change from this point on, a false but OK assumption
+	// for now.
+	for (double p : dist.probabilities()) {
+		double remaining_iterations =
+			_configReader.get_maximum_iterations() - _iteration;
+		double nep = std::pow(1 - p, remaining_iterations);
+		never_expand_probs.push_back(nep);
+	}
+
+	std::discrete_distribution<size_t>
+		never_expand_dist(never_expand_probs.begin(), never_expand_probs.end());
+
+	// Pick the and-BIT, remove it from the BIT and remove its
+	// FCS from the bit atomspace.
+	auto it = std::next(_bit.andbits.begin(), never_expand_dist(randGen()));
+	LAZY_URE_LOG_DEBUG << "Remove " << it->fcs->idToString()
+	                   << " from the BIT";
+	_bit.erase(it);
 }
 
 RuleTypedSubstitutionPair BackwardChainer::select_rule(BITNode& target,
