@@ -290,6 +290,17 @@ void BackwardChainer::remove_unlikely_expandable_andbit()
 		never_expand_probs.push_back(nep);
 	}
 
+	// Fine log
+	if (ure_logger().is_fine_enabled()) {
+		OC_ASSERT(never_expand_probs.size() == _bit.andbits.size());
+		std::stringstream ss;
+		ss << "Never expand probs and-BITs:";
+		for (size_t i = 0; i < never_expand_probs.size(); i++)
+			ss << std::endl << never_expand_probs[i] << " "
+			   << _bit.andbits[i].fcs->idToString();
+		ure_logger().fine() << ss.str();
+	}
+
 	std::discrete_distribution<size_t>
 		never_expand_dist(never_expand_probs.begin(), never_expand_probs.end());
 
