@@ -43,6 +43,18 @@ public:
     static void* getFunc(std::string libName,std::string funcName);
 };
 
+void ExecutionOutputLink::check_schema(const Handle& schema) const
+{
+	if (DEFINED_SCHEMA_NODE != schema->getType() and
+	    LAMBDA_LINK != schema->getType() and
+	    GROUNDED_SCHEMA_NODE != schema->getType())
+	{
+		throw SyntaxException(TRACE_INFO,
+		                      "ExecutionOutputLink must have schema! Got %s",
+		                      schema->toString().c_str());
+	}
+}
+
 ExecutionOutputLink::ExecutionOutputLink(const HandleSeq& oset, Type t)
 	: FunctionLink(oset, t)
 {
@@ -55,29 +67,14 @@ ExecutionOutputLink::ExecutionOutputLink(const HandleSeq& oset, Type t)
 			"ExecutionOutputLink must have schema and args! Got arity=%d",
 			oset.size());
 
-	if (DEFINED_SCHEMA_NODE != oset[0]->getType() and
-	    LAMBDA_LINK != oset[0]->getType() and
-	    GROUNDED_SCHEMA_NODE != oset[0]->getType())
-	{
-		throw SyntaxException(TRACE_INFO,
-			"ExecutionOutputLink must have schema! Got %s",
-			oset[0]->toString().c_str());
-	}
+	check_schema(oset[0]);
 }
 
 ExecutionOutputLink::ExecutionOutputLink(const Handle& schema,
                                          const Handle& args)
 	: FunctionLink(EXECUTION_OUTPUT_LINK, schema, args)
 {
-	Type stype = schema->getType();
-	if (GROUNDED_SCHEMA_NODE != stype and
-	    LAMBDA_LINK != stype and
-	    DEFINED_SCHEMA_NODE != stype)
-	{
-		throw SyntaxException(TRACE_INFO,
-			"ExecutionOutputLink expecting schema, got %s",
-			schema->toString().c_str());
-	}
+	check_schema(schema);
 }
 
 ExecutionOutputLink::ExecutionOutputLink(const Link& l)
