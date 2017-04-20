@@ -45,9 +45,8 @@ public:
 
 void ExecutionOutputLink::check_schema(const Handle& schema) const
 {
-	if (DEFINED_SCHEMA_NODE != schema->getType() and
-	    LAMBDA_LINK != schema->getType() and
-	    GROUNDED_SCHEMA_NODE != schema->getType())
+	if (not classserver().isA(schema->getType(), SCHEMA_NODE) and
+	    LAMBDA_LINK != schema->getType())
 	{
 		throw SyntaxException(TRACE_INFO,
 		                      "ExecutionOutputLink must have schema! Got %s",
