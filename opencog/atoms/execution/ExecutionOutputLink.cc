@@ -101,14 +101,19 @@ ExecutionOutputLink::ExecutionOutputLink(const Link& l)
 ///
 Handle ExecutionOutputLink::execute(AtomSpace* as, bool silent) const
 {
+	if (_outgoing[0]->getType() != GROUNDED_SCHEMA_NODE) {
+		LAZY_LOG_FINE << "Not a grounded schema. Do not execute it";
+		return getHandle();
+	}
+
 	return do_execute(as, _outgoing[0], _outgoing[1], silent);
 }
 
 /// do_execute -- execute the SchemaNode of the ExecutionOutputLink
 ///
 /// Expects "gsn" to be a GroundedSchemaNode or a DefinedSchemaNode
-/// Expects "args" to be a ListLink
-/// Executes the GroundedSchemaNode, supplying the args as argument
+/// Expects "cargs" to be a ListLink unless there is only one argument
+/// Executes the GroundedSchemaNode, supplying cargs as arguments
 ///
 Handle ExecutionOutputLink::do_execute(AtomSpace* as,
                                        const Handle& gsn,
