@@ -11,11 +11,14 @@
 -- THIS HAS NEVER BEEN USED OR TESTED. IT MAY DESTROY YOUR DATA.
 --
 -- You may need to fiddle with the UUID for the *-TruthValueKey-*
---
+-- You WILL need to fiddle with the type number chosen for the
+-- SimpleTruthValue and CountTruthValue, below.
 
 -- Backup the affectede table
 ALTER TABLE Atoms RENAME TO Atoms_Backup;
 CREATE TABLE Atoms AS SELECT * FROM Atoms_Backup;
+
+CREATE UNIQUE INDEX ON Atoms(uuid);
 
 -- Create the new, needed tables
 CREATE TABLE Valuations (
@@ -61,17 +64,24 @@ INSERT INTO Atoms (uuid, space, type, height, name) VALUES
 -- however, YMMV, so check to make sure. The below copies
 -- these two types.
 
+-- hackery, to not re-write the typecodes table.
+INSERT INTO typecodes (type, typename) VALUES
+	(176, 'SimpleTruthValue');
+
+INSERT INTO typecodes (type, typename) VALUES
+	(177, 'CountTruthValue');
+
 INSERT INTO Valuations
 	(SELECT 1 AS key,  -- 1 here is the predicate node
 		uuid AS atom,
-		6 as type,
+		176 as type,
 		ARRAY[stv_mean, stv_confidence] as floatvalue
 		FROM Atoms WHERE tv_type = 1);
 
 INSERT INTO Valuations
 	(SELECT 1 AS key, -- 1 here is the predicate node
 		uuid AS atom,
-		7 as type,
+		177 as type,
 		ARRAY[stv_mean, stv_confidence, stv_count] as floatvalue
 		FROM Atoms WHERE tv_type = 2);
 
