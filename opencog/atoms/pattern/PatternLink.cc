@@ -642,16 +642,25 @@ void PatternLink::unbundle_virtual(const OrderedHandleSet& vars,
 
 		for (const Handle& sh : feol.varset)
 		{
-			_pat.executable_terms.insert(sh);
-			_pat.executable_holders.insert(sh);
-			add_to_map(_pat.in_executable, sh, sh);
-			// But they're virtual only if they have two or more
-			// unquoted, bound variables in them. Otherwise, they
-			// can be evaluated on the spot.
-			if (2 <= num_unquoted_in_tree(sh, vars))
+			// There is an exception with ExecutionOutputLink that
+			// needs to have a grounded schema node in order to be
+			// executable. If they have non grounded schema node then
+			// their execution is themselves (i.e. they are not
+			// executable).
+			if (sh->getType() != EXECUTION_OUTPUT_LINK or
+			    sh->getOutgoingAtom(0)->getType() == GROUNDED_SCHEMA_NODE)
 			{
-				is_virtual = true;
-				is_black = true;
+				_pat.executable_terms.insert(sh);
+				_pat.executable_holders.insert(sh);
+				add_to_map(_pat.in_executable, sh, sh);
+				// But they're virtual only if they have two or more
+				// unquoted, bound variables in them. Otherwise, they
+				// can be evaluated on the spot.
+				if (2 <= num_unquoted_in_tree(sh, vars))
+				{
+					is_virtual = true;
+					is_black = true;
+				}
 			}
 		}
 		for (const Handle& sh : feol.holders)

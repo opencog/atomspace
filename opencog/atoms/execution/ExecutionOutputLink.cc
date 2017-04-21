@@ -43,6 +43,17 @@ public:
     static void* getFunc(std::string libName,std::string funcName);
 };
 
+void ExecutionOutputLink::check_schema(const Handle& schema) const
+{
+	if (not classserver().isA(schema->getType(), SCHEMA_NODE) and
+	    LAMBDA_LINK != schema->getType())
+	{
+		throw SyntaxException(TRACE_INFO,
+		                      "ExecutionOutputLink must have schema! Got %s",
+		                      schema->toString().c_str());
+	}
+}
+
 ExecutionOutputLink::ExecutionOutputLink(const HandleSeq& oset, Type t)
 	: FunctionLink(oset, t)
 {
@@ -55,29 +66,14 @@ ExecutionOutputLink::ExecutionOutputLink(const HandleSeq& oset, Type t)
 			"ExecutionOutputLink must have schema and args! Got arity=%d",
 			oset.size());
 
-	if (DEFINED_SCHEMA_NODE != oset[0]->getType() and
-	    LAMBDA_LINK != oset[0]->getType() and
-	    GROUNDED_SCHEMA_NODE != oset[0]->getType())
-	{
-		throw SyntaxException(TRACE_INFO,
-			"ExecutionOutputLink must have schema! Got %s",
-			oset[0]->toString().c_str());
-	}
+	check_schema(oset[0]);
 }
 
 ExecutionOutputLink::ExecutionOutputLink(const Handle& schema,
                                          const Handle& args)
 	: FunctionLink(EXECUTION_OUTPUT_LINK, schema, args)
 {
-	Type stype = schema->getType();
-	if (GROUNDED_SCHEMA_NODE != stype and
-	    LAMBDA_LINK != stype and
-	    DEFINED_SCHEMA_NODE != stype)
-	{
-		throw SyntaxException(TRACE_INFO,
-			"ExecutionOutputLink expecting schema, got %s",
-			schema->toString().c_str());
-	}
+	check_schema(schema);
 }
 
 ExecutionOutputLink::ExecutionOutputLink(const Link& l)
@@ -105,14 +101,19 @@ ExecutionOutputLink::ExecutionOutputLink(const Link& l)
 ///
 Handle ExecutionOutputLink::execute(AtomSpace* as, bool silent) const
 {
+	if (_outgoing[0]->getType() != GROUNDED_SCHEMA_NODE) {
+		LAZY_LOG_FINE << "Not a grounded schema. Do not execute it";
+		return getHandle();
+	}
+
 	return do_execute(as, _outgoing[0], _outgoing[1], silent);
 }
 
 /// do_execute -- execute the SchemaNode of the ExecutionOutputLink
 ///
 /// Expects "gsn" to be a GroundedSchemaNode or a DefinedSchemaNode
-/// Expects "args" to be a ListLink
-/// Executes the GroundedSchemaNode, supplying the args as argument
+/// Expects "cargs" to be a ListLink unless there is only one argument
+/// Executes the GroundedSchemaNode, supplying cargs as arguments
 ///
 Handle ExecutionOutputLink::do_execute(AtomSpace* as,
                                        const Handle& gsn,

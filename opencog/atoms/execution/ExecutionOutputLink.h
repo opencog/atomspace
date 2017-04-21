@@ -39,6 +39,8 @@ private:
 	static Handle do_execute(AtomSpace*, const Handle& schema, const Handle& args,
 	                         bool silent=false);
 
+	void check_schema(const Handle& schema) const;
+
 public:
 	/**
 	 * Given a grounded schema name like "py: foo", extract
