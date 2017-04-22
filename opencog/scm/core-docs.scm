@@ -659,6 +659,58 @@
        ((sti . 99) (lti . 88) (vlti . 0))
 ")
 
+(set-procedure-property! cog-new-value 'documentation
+"
+ cog-new-value TYPE LIST
+    Create a new value of type TYPE, hold the LIST of strings, floats
+    or values.  The TYPE must be either 'StringValue, 'FloatValue
+    or 'LinkValue. The LIST must be an ordinary guile list, consisting
+    entirely of guile strings, guile numbers, or opencog values,
+    respectively, for each of the three types.
+
+    Example:
+       guile> (cog-new-value 'FloatValue 1 2 3))
+       (FloatValue 1.000000 2.000000 3.00000)
+
+       guile> (cog-new-value 'StringValue \"foo\" \"bar\")
+       (StringValue \"foo\" \"bar\")
+
+       guile> (cog-new-value 'LinkValue
+             (Concept \"foo\") (StringValue \"bar\"))
+       (LinkValue
+           (ConceptNode \"foo\")
+           (StringValue \"bar\")
+       )
+")
+
+(set-procedure-property! cog-value 'documentation
+"
+ cog-value ATOM KEY
+    Return the value of of KEY for ATOM. Both ATOM and KEY must be
+    atoms.
+
+    Example:
+       guile> (cog-set-value!
+                 (Concept \"abc\") (Concept \"key\")
+                 (FloatValue 1 2 3))
+       guile> (cog-value (Concept \"abc\") (Concept \"key\"))
+       (FloatValue 1.000000 2.000000 3.00000)
+")
+
+(set-procedure-property! cog-set-value! 'documentation
+"
+ cog-set-value! ATOM KEY VALUE
+    Set the value of KEY for ATOM to VALUE. Both ATOM and KEY must be
+    atoms.
+
+    Example:
+       guile> (cog-set-value!
+                 (Concept \"abc\") (Concept \"key\")
+                 (FloatValue 1 2 3))
+       guile> (cog-value (Concept \"abc\") (Concept \"key\"))
+       (FloatValue 1.000000 2.000000 3.00000)
+")
+
 (set-procedure-property! cog-as 'documentation
 "
  cog-as ATOM
