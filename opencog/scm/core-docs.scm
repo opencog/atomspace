@@ -700,6 +700,20 @@
        #f
 ")
 
+(set-procedure-property! cog-value->list 'documentation
+"
+ cog-value->list VALUE
+    Return a guile list holding the values in the opencog VALUE.
+    If VALUE is a Link, this returns the outgoing set.
+    If VALUE is a Node, this returns list containing the node name.
+    If VALUE is a StringValue, FloatValue or LinkValue, this returns
+    the associated list of values.
+
+    Example:
+       guile> (cog-value->list (FloatValue 0.1 0.2 0.3))
+       (0.1 0.2 0.3)
+")
+
 (set-procedure-property! cog-as 'documentation
 "
  cog-as ATOM
