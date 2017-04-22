@@ -265,9 +265,6 @@ void SchemeSmob::module_init(void*)
 
 void SchemeSmob::register_procs()
 {
-	register_proc("cog-atom",              1, 0, 0, C(ss_atom));
-	register_proc("cog-handle",            1, 0, 0, C(ss_handle));
-	register_proc("cog-undefined-handle",  0, 0, 0, C(ss_undefined_handle));
 	register_proc("cog-new-value",         1, 0, 1, C(ss_new_value));
 	register_proc("cog-new-node",          2, 0, 1, C(ss_new_node));
 	register_proc("cog-new-link",          1, 0, 1, C(ss_new_link));
@@ -277,10 +274,14 @@ void SchemeSmob::register_procs()
 	register_proc("cog-delete-recursive",  1, 0, 1, C(ss_delete_recursive));
 	register_proc("cog-extract",           1, 0, 1, C(ss_extract));
 	register_proc("cog-extract-recursive", 1, 0, 1, C(ss_extract_recursive));
-	register_proc("cog-value?",            1, 0, 1, C(ss_value_p));
-	register_proc("cog-atom?",             1, 0, 1, C(ss_atom_p));
-	register_proc("cog-node?",             1, 0, 1, C(ss_node_p));
-	register_proc("cog-link?",             1, 0, 1, C(ss_link_p));
+
+	register_proc("cog-value?",            1, 0, 0, C(ss_value_p));
+	register_proc("cog-atom?",             1, 0, 0, C(ss_atom_p));
+	register_proc("cog-node?",             1, 0, 0, C(ss_node_p));
+	register_proc("cog-link?",             1, 0, 0, C(ss_link_p));
+
+	register_proc("cog-handle",            1, 0, 0, C(ss_handle));
+	register_proc("cog-value->list",       1, 0, 0, C(ss_value_to_list));
 
 	// Generic property setter on atoms
 	register_proc("cog-set-value!",        3, 0, 0, C(ss_set_value));

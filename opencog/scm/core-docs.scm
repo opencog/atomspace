@@ -330,39 +330,16 @@
     ordinary scheme list.
 ")
 
-(set-procedure-property! cog-atom 'documentation
-"
- cog-atom UUID
-    Reference the atom identified by the integer-valued UUID.
-")
-
 (set-procedure-property! cog-handle 'documentation
 "
  cog-handle ATOM
-    Return the UUID (which is an integer) of ATOM.
-
-    It may be useful to remember that scheme indicates hexadecimal
-    numbers by preceeding them with #x, and so, for example,
-    (cog-atom #x2c949b) gets the handle associated with hex 2c949b.
+    Return the hash of ATOM. The hash is a 64-bit integer, computed
+    from the component parts of the atom (but not it's values), that
+    can be used in hash tables or other algorithms that require a hash.
 
     Example:
-       ; Create two atoms, and get thier handles:
-       guile> (define x (cog-new-node 'ConceptNode \"abc\"))
-       guile> (define y (cog-new-node 'ConceptNode \"def\"))
-       guile> (cog-handle x)
-       113
-       guile> (cog-handle y)
-       114
-
-       ; Get the atom corresponding to handle number 114
-       guile> (cog-atom 114)
-       (ConceptNode \"abc\")
-
-       ; Verify that handles are truly integers
-       guile> (integer? x)
-       #f
-       guile> (integer? (cog-handle x))
-       #t
+       guile> (cog-handle (Concept \"abc\"))
+       999283543311182409
 ")
 
 (set-procedure-property! cog-inc-count! 'documentation
@@ -721,6 +698,20 @@
        #t
        guile> (cog-value? 42)
        #f
+")
+
+(set-procedure-property! cog-value->list 'documentation
+"
+ cog-value->list VALUE
+    Return a guile list holding the values in the opencog VALUE.
+    If VALUE is a Link, this returns the outgoing set.
+    If VALUE is a Node, this returns list containing the node name.
+    If VALUE is a StringValue, FloatValue or LinkValue, this returns
+    the associated list of values.
+
+    Example:
+       guile> (cog-value->list (FloatValue 0.1 0.2 0.3))
+       (0.1 0.2 0.3)
 ")
 
 (set-procedure-property! cog-as 'documentation

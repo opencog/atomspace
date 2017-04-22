@@ -44,11 +44,10 @@ class SchemeSmob
 private:
 
 	enum {
-		COG_UUID = 1, // unsigned long int
-		COG_PROTOM,   // values or atoms - smart pointer
-		COG_AV,       // attention values
-		COG_AS,       // atom spaces
-		COG_EXTEND    // callbacks into C++ code.
+		COG_PROTOM = 1, // values or atoms - smart pointer
+		COG_AV,         // attention values
+		COG_AS,         // atom spaces
+		COG_EXTEND      // callbacks into C++ code.
 	};
 
 	static std::atomic_flag is_inited;
@@ -79,7 +78,7 @@ private:
 	static std::vector<ProtoAtomPtr> scm_to_protom_list (SCM);
 	static std::vector<std::string> scm_to_string_list (SCM);
 
-	// Atom creation and deletion functions
+	// Value, atom creation and deletion functions
 	static SCM ss_new_value(SCM, SCM);
 	static SCM ss_new_node(SCM, SCM, SCM);
 	static SCM ss_new_link(SCM, SCM);
@@ -95,12 +94,11 @@ private:
 	static SCM ss_link_p(SCM);
 	static SCM _radix_ten;
 
-	// Atoms to ints, and back.
-	static SCM ss_atom(SCM);
+	// Return the hash value of the atom.
 	static SCM ss_handle(SCM);
 
-	// return the int of Handle::UNDEFINED
-	static SCM ss_undefined_handle(void);
+	// Get list endcoded in a value
+	static SCM ss_value_to_list(SCM);
 
 	// Set properties of atoms
 	static SCM ss_set_av(SCM, SCM);
@@ -179,6 +177,7 @@ private:
 	static SCM ss_av_get_value(SCM);
 
 	// AttentionalFocus and AttentionalFocus Boundary
+	// XXX FIXME these should move to the attention bank!
 	static SCM ss_af_boundary(void);
 	static SCM ss_set_af_boundary(SCM);
 	static SCM ss_af(void);
@@ -186,9 +185,6 @@ private:
 	// Free variables
 	static SCM ss_get_free_variables(SCM);
 	static SCM ss_is_closed(SCM);
-
-	// Callback into misc C++ code.
-	static SCM ss_ad_hoc(SCM, SCM);
 
 	// Misc utilities
 	static std::string to_string(SCM);

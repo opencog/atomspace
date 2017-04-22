@@ -85,6 +85,7 @@ class BasicSCMUTest :  public CxxTest::TestSuite
 
 	// Values
 	void test_values(void);
+	void test_value_list(void);
 
 	// TVs
 	void check_truth_value(const TruthValuePtr& tv);
@@ -368,6 +369,52 @@ void BasicSCMUTest::test_values(void)
 	ProtoAtomPtr lv3 = eval->eval_v("(cog-value h k)");
 	TSM_ASSERT("Failed to get value", not eval->eval_error());
 	TSM_ASSERT("Failed to get correct value", *l == *lv3);
+}
+
+// ============================================================
+
+void BasicSCMUTest::test_value_list(void)
+{
+	logger().debug("BEGIN TEST: %s", __FUNCTION__);
+
+	eval->eval("(define h (Concept \"foo\"))");
+	TSM_ASSERT("Failed to create atom", not eval->eval_error());
+	eval->eval("(define k (Predicate \"key\"))");
+	TSM_ASSERT("Failed to create key", not eval->eval_error());
+	eval->eval("(define ll (ListLink h k h))");
+	TSM_ASSERT("Failed to create key", not eval->eval_error());
+	eval->eval("(define f (FloatValue 0.1 0.2 0.3))");
+	TSM_ASSERT("Failed to create float", not eval->eval_error());
+	eval->eval("(define s (StringValue \"a\" \"bb\" \"ccc\"))");
+	TSM_ASSERT("Failed to create string", not eval->eval_error());
+	eval->eval("(define ss (StringValue \"ddd\" \"eee\" \"fff\"))");
+	TSM_ASSERT("Failed to create string", not eval->eval_error());
+	eval->eval("(define t (stv 0.5 0.8))");
+	TSM_ASSERT("Failed to create TV", not eval->eval_error());
+	eval->eval("(define l (LinkValue f h s k t))");
+	TSM_ASSERT("Failed to create string", not eval->eval_error());
+
+	// -------
+	std::string boo = eval->eval("(equal? (cog-value->list f) '(0.1 0.2 0.3))");
+	TSM_ASSERT("Failed float list equality", boo == "#t\n");
+
+	boo = eval->eval("(equal? (cog-value->list s) '(\"a\" \"bb\" \"ccc\"))");
+	TSM_ASSERT("Failed string list equality", boo == "#t\n");
+
+	boo = eval->eval("(equal? (cog-value->list l) (list f h s k t))");
+	TSM_ASSERT("Failed value list equality", boo == "#t\n");
+
+	boo = eval->eval("(equal? (cog-value->list ll) (list h k h))");
+	TSM_ASSERT("Failed ListLink equality", boo == "#t\n");
+
+	boo = eval->eval("(equal? (cog-value->list ll) (cog-outgoing-set ll))");
+	TSM_ASSERT("Failed outgoing set equality", boo == "#t\n");
+
+	boo = eval->eval("(equal? (cog-value->list h) '(\"foo\"))");
+	TSM_ASSERT("Failed name list equality", boo == "#t\n");
+
+	boo = eval->eval("(equal? (cog-value->list k) '(\"key\"))");
+	TSM_ASSERT("Failed key name equality", boo == "#t\n");
 }
 
 // ============================================================
