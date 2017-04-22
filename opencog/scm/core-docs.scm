@@ -711,6 +711,18 @@
        (FloatValue 1.000000 2.000000 3.00000)
 ")
 
+(set-procedure-property! cog-value? 'documentation
+"
+ cog-value? EXP
+    Return #t if EXP is an opencog value, else return #f
+
+    Example:
+       guile> (cog-value? (FloatValue 42))
+       #t
+       guile> (cog-value? 42)
+       #f
+")
+
 (set-procedure-property! cog-as 'documentation
 "
  cog-as ATOM
