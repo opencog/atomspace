@@ -173,28 +173,7 @@ Handle SchemeSmob::scm_to_handle (SCM sh)
 
 /* ============================================================== */
 /**
- * Create a new scheme object, holding the atom uuid
- */
-SCM SchemeSmob::ss_atom (SCM suuid)
-{
-	scm_misc_error("cog-atom", "Obsolete! Do not use!", suuid);
-	return SCM_EOL;
-#ifdef OLD_DEAD_CODE
-	if (scm_is_false(scm_integer_p(suuid)))
-		scm_wrong_type_arg_msg("cog-atom", 1, suuid, "integer opencog uuid");
-
-	// SCM_RETURN_NEWSMOB (cog_uuid_tag, suuid);
-	UUID uuid = scm_to_ulong(suuid);
-	if (INVALID_UUID == uuid)
-		scm_wrong_type_arg_msg("cog-atom", 1, suuid, "valid opencog uuid");
-
-	return handle_to_scm(Handle(uuid));
-#endif
-}
-
-/* ============================================================== */
-/**
- * Return uuid of atom
+ * Return hash of atom
  */
 SCM SchemeSmob::ss_handle (SCM satom)
 {
