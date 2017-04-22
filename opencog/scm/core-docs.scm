@@ -330,39 +330,16 @@
     ordinary scheme list.
 ")
 
-(set-procedure-property! cog-atom 'documentation
-"
- cog-atom UUID
-    Reference the atom identified by the integer-valued UUID.
-")
-
 (set-procedure-property! cog-handle 'documentation
 "
  cog-handle ATOM
-    Return the UUID (which is an integer) of ATOM.
-
-    It may be useful to remember that scheme indicates hexadecimal
-    numbers by preceeding them with #x, and so, for example,
-    (cog-atom #x2c949b) gets the handle associated with hex 2c949b.
+    Return the hash of ATOM. The hash is a 64-bit integer, computed
+    from the component parts of the atom (but not it's values), that
+    can be used in hash tables or other algorithms that require a hash.
 
     Example:
-       ; Create two atoms, and get thier handles:
-       guile> (define x (cog-new-node 'ConceptNode \"abc\"))
-       guile> (define y (cog-new-node 'ConceptNode \"def\"))
-       guile> (cog-handle x)
-       113
-       guile> (cog-handle y)
-       114
-
-       ; Get the atom corresponding to handle number 114
-       guile> (cog-atom 114)
-       (ConceptNode \"abc\")
-
-       ; Verify that handles are truly integers
-       guile> (integer? x)
-       #f
-       guile> (integer? (cog-handle x))
-       #t
+       guile> (cog-handle (Concept \"abc\"))
+       999283543311182409
 ")
 
 (set-procedure-property! cog-inc-count! 'documentation

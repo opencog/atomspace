@@ -185,15 +185,6 @@ SCM SchemeSmob::ss_handle (SCM satom)
 }
 
 /* ============================================================== */
-/**
- * Return 0 -- WTF what for?? who uses this?
- */
-SCM SchemeSmob::ss_undefined_handle (void)
-{
-	return scm_from_ulong(0);
-}
-
-/* ============================================================== */
 /** Return true if s is an atom. Invalid handles are not atoms. */
 
 SCM SchemeSmob::ss_atom_p (SCM s)

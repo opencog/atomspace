@@ -83,3 +83,7 @@
 (load-from-path "av-tv.scm")
 (load-from-path "file-utils.scm")
 (load-from-path "debug-trace.scm")
+
+; Obsolete function
+(define-public (cog-atom X) '())
+(define-public (cog-undefined-handle X) '())

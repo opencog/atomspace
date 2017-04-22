@@ -266,7 +266,6 @@ void SchemeSmob::module_init(void*)
 void SchemeSmob::register_procs()
 {
 	register_proc("cog-handle",            1, 0, 0, C(ss_handle));
-	register_proc("cog-undefined-handle",  0, 0, 0, C(ss_undefined_handle));
 	register_proc("cog-new-value",         1, 0, 1, C(ss_new_value));
 	register_proc("cog-new-node",          2, 0, 1, C(ss_new_node));
 	register_proc("cog-new-link",          1, 0, 1, C(ss_new_link));

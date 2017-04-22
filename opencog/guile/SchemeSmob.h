@@ -97,9 +97,6 @@ private:
 	// Return the hash value of the atom.
 	static SCM ss_handle(SCM);
 
-	// return the int of Handle::UNDEFINED
-	static SCM ss_undefined_handle(void);
-
 	// Set properties of atoms
 	static SCM ss_set_av(SCM, SCM);
 	static SCM ss_set_tv(SCM, SCM);
