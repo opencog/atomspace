@@ -243,4 +243,11 @@ SCM SchemeSmob::ss_value (SCM satom, SCM skey)
 	return SCM_EOL;
 }
 
+/* ============================================================== */
+/** Return a scheme list of the values associated with the value */
+
+SCM SchemeSmob::ss_value_to_list (SCM s)
+{
+	return SCM_EOL;
+}
 /* ===================== END OF FILE ============================ */

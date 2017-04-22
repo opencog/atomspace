@@ -97,6 +97,9 @@ private:
 	// Return the hash value of the atom.
 	static SCM ss_handle(SCM);
 
+	// Get list endcoded in a value
+	static SCM ss_value_to_list(SCM);
+
 	// Set properties of atoms
 	static SCM ss_set_av(SCM, SCM);
 	static SCM ss_set_tv(SCM, SCM);
@@ -174,6 +177,7 @@ private:
 	static SCM ss_av_get_value(SCM);
 
 	// AttentionalFocus and AttentionalFocus Boundary
+	// XXX FIXME these should move to the attention bank!
 	static SCM ss_af_boundary(void);
 	static SCM ss_set_af_boundary(SCM);
 	static SCM ss_af(void);
@@ -181,9 +185,6 @@ private:
 	// Free variables
 	static SCM ss_get_free_variables(SCM);
 	static SCM ss_is_closed(SCM);
-
-	// Callback into misc C++ code.
-	static SCM ss_ad_hoc(SCM, SCM);
 
 	// Misc utilities
 	static std::string to_string(SCM);
