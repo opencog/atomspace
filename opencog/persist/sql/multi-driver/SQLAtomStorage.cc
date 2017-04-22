@@ -2054,10 +2054,13 @@ void SQLAtomStorage::print_stats(void)
 
 	// Some basic TLB statistics; could be improved;
 	// The TLB remapping theory needs some work...
-	size_t noh = 0;
+	// size_t noh = 0;
 	// size_t remap = 0;
 
 	UUID mad = _tlbuf.getMaxUUID();
+#if DONT_COUNT
+	This loop can lead to an apparent hang, when max UUID gets
+	// above a quarter-billion or so.  So don't do this.
 	for (UUID uuid = 1; uuid < mad; uuid++)
 	{
 		Handle h = _tlbuf.getAtom(uuid);
@@ -2069,6 +2072,7 @@ void SQLAtomStorage::print_stats(void)
 		if (hr != h) { remap++; }
 #endif
 	}
+#endif
 
 	printf("\n");
 	printf("sql-stats: tlbuf holds %lu atoms\n", _tlbuf.size());
@@ -2082,9 +2086,10 @@ void SQLAtomStorage::print_stats(void)
 	       remap, frac);
 #endif
 
-	frac = 100.0 * noh / ((double) mad);
-	printf("sql-stats: %lu of %lu uuids unused (%f pct)\n",
-	       noh, mad, frac);
+	size_t used = _tlbuf.size();
+	frac = 100.0 * used / ((double) mad);
+	printf("sql-stats: %lu of %lu reserved uuids used (%f pct)\n",
+	       used, mad, frac);
 }
 
 #endif /* HAVE_SQL_STORAGE */
