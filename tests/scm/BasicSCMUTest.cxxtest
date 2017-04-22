@@ -401,10 +401,13 @@ void BasicSCMUTest::test_value_list(void)
 	boo = eval->eval("(equal? (cog-value->list s) '(\"a\" \"bb\" \"ccc\"))");
 	TSM_ASSERT("Failed string list equality", boo == "#t\n");
 
-	boo = eval->eval("(equal? (cog-value->list l) '(f h s k t))");
+	boo = eval->eval("(equal? (cog-value->list l) (list f h s k t))");
 	TSM_ASSERT("Failed value list equality", boo == "#t\n");
 
-	boo = eval->eval("(equal? (cog-value->list ll) '(h k h))");
+	boo = eval->eval("(equal? (cog-value->list ll) (list h k h))");
+	TSM_ASSERT("Failed ListLink equality", boo == "#t\n");
+
+	boo = eval->eval("(equal? (cog-value->list ll) (cog-outgoing-set ll))");
 	TSM_ASSERT("Failed outgoing set equality", boo == "#t\n");
 
 	boo = eval->eval("(equal? (cog-value->list h) '(\"foo\"))");
