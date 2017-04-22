@@ -12,6 +12,8 @@
 #include <opencog/atoms/base/FloatValue.h>
 #include <opencog/atoms/base/LinkValue.h>
 #include <opencog/atoms/base/StringValue.h>
+#include <opencog/atoms/base/Atom.h>
+#include <opencog/atoms/base/ClassServer.h>
 
 #include <opencog/guile/SchemeSmob.h>
 
@@ -246,8 +248,55 @@ SCM SchemeSmob::ss_value (SCM satom, SCM skey)
 /* ============================================================== */
 /** Return a scheme list of the values associated with the value */
 
-SCM SchemeSmob::ss_value_to_list (SCM s)
+#define CPPL_TO_SCML(VAL, FN) \
+	SCM list = SCM_EOL; \
+	for (int i = VAL.size()-1; i >= 0; i--) { \
+		SCM smob = FN(VAL[i]); \
+		list = scm_cons (smob, list); \
+	} \
+	return list;
+
+static SCM scm_from_string(const std::string& str)
 {
+	return scm_from_utf8_string(str.c_str());
+}
+
+SCM SchemeSmob::ss_value_to_list (SCM svalue)
+{
+	ProtoAtomPtr pa(verify_protom(svalue, "cog-value->list"));
+	Type t = pa->getType();
+
+	if (FLOAT_VALUE == t)
+	{
+		const std::vector<double>& v = FloatValueCast(pa)->value();
+		CPPL_TO_SCML(v, scm_from_double)
+	}
+
+	if (STRING_VALUE == t)
+	{
+		const std::vector<std::string>& v = StringValueCast(pa)->value();
+		CPPL_TO_SCML(v, scm_from_string)
+	}
+
+	if (LINK_VALUE == t)
+	{
+		const std::vector<ProtoAtomPtr>& v = LinkValueCast(pa)->value();
+		CPPL_TO_SCML(v, protom_to_scm)
+	}
+
+	if (classserver().isA(t, LINK))
+	{
+		const HandleSeq& v = AtomCast(pa)->getOutgoingSet();
+		CPPL_TO_SCML(v, handle_to_scm)
+	}
+
+	if (classserver().isA(t, NODE))
+	{
+		const std::string& name = AtomCast(pa)->getName();
+		return scm_cons(scm_from_utf8_string(name.c_str()), SCM_EOL);
+	}
+
 	return SCM_EOL;
 }
+
 /* ===================== END OF FILE ============================ */
