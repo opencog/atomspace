@@ -19,6 +19,9 @@ ALTER TABLE Atoms RENAME TO Atoms_Backup;
 CREATE TABLE Atoms AS SELECT * FROM Atoms_Backup;
 
 CREATE UNIQUE INDEX ON Atoms(uuid);
+CREATE UNIQUE INDEX ON Atoms(type, name);
+CREATE UNIQUE INDEX ON Atoms(type, outgoing);
+
 
 -- Create the new, needed tables
 CREATE TABLE Valuations (
