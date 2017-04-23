@@ -651,7 +651,7 @@ void SQLAtomStorage::storeValuation(const Handle& key,
 	STMT("atom", aidbuff);
 
 	Type vtype = pap->getType();
-	STMTI("type", vtype);
+	STMTI("type", storing_typemap[vtype]);
 
 	if (classserver().isA(vtype, FLOAT_VALUE))
 	{
@@ -710,7 +710,7 @@ SQLAtomStorage::VUID SQLAtomStorage::storeValue(const ProtoAtomPtr& pap)
 	STMT("vuid", std::to_string(vuid));
 
 	Type vtype = pap->getType();
-	STMTI("type", vtype);
+	STMTI("type", storing_typemap[vtype]);
 
 	if (classserver().isA(vtype, FLOAT_VALUE))
 	{
