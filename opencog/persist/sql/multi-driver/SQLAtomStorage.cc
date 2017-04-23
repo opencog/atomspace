@@ -582,6 +582,7 @@ void SQLAtomStorage::store_atomtable_id(const AtomTable& at)
 /// It also simplifies, ever-so-slightly, the update of valuations.
 void SQLAtomStorage::deleteValuation(const Handle& key, const Handle& atom)
 {
+xxxxxxx
 	char buff[BUFSZ];
 	snprintf(buff, BUFSZ,
 		"SELECT * FROM Valuations WHERE key = %lu AND atom = %lu;",
@@ -1509,13 +1510,7 @@ HandleSeq SQLAtomStorage::getIncomingSet(const Handle& h)
 {
 	HandleSeq iset;
 
-	// Get the correct UUID; its possible that we don't know it yet.
-	UUID uuid = _tlbuf.getUUID(h);
-	if (TLB::INVALID_UUID == uuid)
-	{
-		Handle hg(doGetAtom(h));
-		uuid = _tlbuf.getUUID(hg);
-	}
+	UUID uuid = get_uuid(h);
 
 	char buff[BUFSZ];
 	snprintf(buff, BUFSZ,
@@ -1540,6 +1535,7 @@ HandleSeq SQLAtomStorage::getIncomingSet(const Handle& h)
 	_num_get_inatoms += iset.size();
 #endif // STORAGE_DEBUG
 
+xxxxxxxxx
 	return iset;
 }
 
@@ -1634,21 +1630,6 @@ Handle SQLAtomStorage::getLink(Type t, const HandleSeq& hs)
 	Handle hg(doGetLink(t, hs));
 	if (hg) get_atom_values(hg);
 	return hg;
-}
-
-Handle SQLAtomStorage::doGetAtom(const Handle& h)
-{
-	if (h->isNode())
-	{
-		Handle hg(doGetNode(h->getType(), h->getName().c_str()));
-		return hg;
-	}
-	if (h->isLink())
-	{
-		Handle hg(doGetLink(h->getType(), h->getOutgoingSet()));
-		return hg;
-	}
-	return Handle::UNDEFINED;
 }
 
 /**
