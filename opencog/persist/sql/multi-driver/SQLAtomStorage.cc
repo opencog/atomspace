@@ -1509,9 +1509,14 @@ HandleSeq SQLAtomStorage::getIncomingSet(const Handle& h)
 {
 	HandleSeq iset;
 
-	setup_typemap();
+	// Get the correct UUID; its possible that we don't know it yet.
+	UUID uuid = _tlbuf.getUUID(h);
+	if (TLB::INVALID_UUID == uuid)
+	{
+		Handle hg(doGetAtom(h));
+		uuid = _tlbuf.getUUID(hg);
+	}
 
-	UUID uuid = _tlbuf.addAtom(h, TLB::INVALID_UUID);
 	char buff[BUFSZ];
 	snprintf(buff, BUFSZ,
 		"SELECT * FROM Atoms WHERE outgoing @> ARRAY[CAST(%lu AS BIGINT)];",
@@ -1629,6 +1634,21 @@ Handle SQLAtomStorage::getLink(Type t, const HandleSeq& hs)
 	Handle hg(doGetLink(t, hs));
 	if (hg) get_atom_values(hg);
 	return hg;
+}
+
+Handle SQLAtomStorage::doGetAtom(const Handle& h)
+{
+	if (h->isNode())
+	{
+		Handle hg(doGetNode(h->getType(), h->getName().c_str()));
+		return hg;
+	}
+	if (h->isLink())
+	{
+		Handle hg(doGetLink(h->getType(), h->getOutgoingSet()));
+		return hg;
+	}
+	return Handle::UNDEFINED;
 }
 
 /**

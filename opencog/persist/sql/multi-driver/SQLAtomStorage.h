@@ -91,6 +91,7 @@ class SQLAtomStorage : public AtomStorage
 		PseudoPtr getAtom(const char *, int);
 		PseudoPtr petAtom(UUID);
 
+		Handle doGetAtom(const Handle&);
 		Handle doGetNode(Type, const char *);
 		Handle doGetLink(Type, const HandleSeq&);
 
