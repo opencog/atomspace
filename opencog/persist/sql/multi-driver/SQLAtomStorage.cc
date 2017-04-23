@@ -781,10 +781,13 @@ ProtoAtomPtr SQLAtomStorage::doGetValue(const char * buff)
 /// fetch is performed.
 ProtoAtomPtr SQLAtomStorage::doUnpackValue(Response& rp)
 {
+	// Convert from databasse type to C++ runtime type
+	Type vtype = loading_typemap[rp.vtype];
+
 	// We expect rp.strval to be of the form
 	// {aaa,"bb bb bb","ccc ccc ccc"}
 	// Split it along the commas.
-	if (rp.vtype == STRING_VALUE)
+	if (vtype == STRING_VALUE)
 	{
 		std::vector<std::string> strarr;
 		char *s = strdup(rp.strval);
@@ -813,8 +816,8 @@ ProtoAtomPtr SQLAtomStorage::doUnpackValue(Response& rp)
 
 	// We expect rp.fltval to be of the form
 	// {1.1,2.2,3.3}
-	if ((rp.vtype == FLOAT_VALUE)
-	    or classserver().isA(rp.vtype, TRUTH_VALUE))
+	if ((vtype == FLOAT_VALUE)
+	    or classserver().isA(vtype, TRUTH_VALUE))
 	{
 		std::vector<double> fltarr;
 		char *p = (char *) rp.fltval;
@@ -826,15 +829,15 @@ ProtoAtomPtr SQLAtomStorage::doUnpackValue(Response& rp)
 			fltarr.emplace_back(flt);
 			p++; // skip over  comma
 		}
-		if (rp.vtype == FLOAT_VALUE)
+		if (vtype == FLOAT_VALUE)
 			return createFloatValue(fltarr);
 		else
-			return ProtoAtomCast(TruthValue::factory(rp.vtype, fltarr));
+			return ProtoAtomCast(TruthValue::factory(vtype, fltarr));
 	}
 
 	// We expect rp.lnkval to be a comma-separated list of
 	// vuid's, which we then fetch recursively.
-	if (rp.vtype == LINK_VALUE)
+	if (vtype == LINK_VALUE)
 	{
 		std::vector<ProtoAtomPtr> lnkarr;
 		const char *p = rp.lnkval;
@@ -851,7 +854,7 @@ ProtoAtomPtr SQLAtomStorage::doUnpackValue(Response& rp)
 		return createLinkValue(lnkarr);
 	}
 
-	throw IOException(TRACE_INFO, "Unexpected value type!");
+	throw IOException(TRACE_INFO, "Unexpected value type=%d", rp.vtype);
 	return nullptr;
 }
 
