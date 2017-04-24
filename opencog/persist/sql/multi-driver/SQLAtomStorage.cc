@@ -161,7 +161,7 @@ class SQLAtomStorage::Response
 			rs->foreach_column(&Response::create_atom_column_cb, this);
 
 			PseudoPtr p(store->makeAtom(*this, uuid));
-			AtomPtr atom(get_recursive_if_not_exists(p));
+			Handle atom(store->get_recursive_if_not_exists(p));
 			Handle h(table->add(atom, false));
 			store->get_atom_values(h);
 
@@ -183,7 +183,7 @@ class SQLAtomStorage::Response
 			if (nullptr == store->_tlbuf.getAtom(uuid))
 			{
 				PseudoPtr p(store->makeAtom(*this, uuid));
-				AtomPtr atom(get_recursive_if_not_exists(p));
+				Handle atom(store->get_recursive_if_not_exists(p));
 				Handle h = table->getHandle(atom);
 				if (nullptr == h)
 				{
@@ -194,7 +194,7 @@ class SQLAtomStorage::Response
 			return false;
 		}
 
-		HandleSeq *hvec;
+		std::vector<PseudoPtr> *pvec;
 		bool fetch_incoming_set_cb(void)
 		{
 			// printf ("---- New atom found ----\n");
@@ -203,40 +203,8 @@ class SQLAtomStorage::Response
 			// Note, unlike the above 'load' routines, this merely fetches
 			// the atoms, and returns a vector of them.  They are loaded
 			// into the atomspace later, by the caller.
-			PseudoPtr p(store->makeAtom(*this, uuid));
-			AtomPtr atom(get_recursive_if_not_exists(p));
-			hvec->emplace_back(atom->getHandle());
+			pvec->emplace_back(store->makeAtom(*this, uuid));
 			return false;
-		}
-
-		// Helper function for above.  The problem is that, when
-		// adding links of unknown provenance, it could happen that
-		// the outgoing set of the link has not yet been loaded.  In
-		// that case, we have to load the outgoing set first.
-		AtomPtr get_recursive_if_not_exists(PseudoPtr p)
-		{
-			if (classserver().isA(p->type, NODE))
-			{
-				NodePtr node(createNode(p->type, p->name));
-				store->_tlbuf.addAtom(node, p->uuid);
-				return node;
-			}
-			HandleSeq resolved_oset;
-			for (UUID idu : p->oset)
-			{
-				Handle h = store->_tlbuf.getAtom(idu);
-				if (h)
-				{
-					resolved_oset.emplace_back(h);
-					continue;
-				}
-				PseudoPtr po(store->petAtom(idu));
-				AtomPtr ra = get_recursive_if_not_exists(po);
-				resolved_oset.emplace_back(ra->getHandle());
-			}
-			LinkPtr link(createLink(resolved_oset, p->type));
-			store->_tlbuf.addAtom(link, p->uuid);
-			return link;
 		}
 
 		bool row_exists;
@@ -319,7 +287,7 @@ class SQLAtomStorage::Response
 			if (nullptr == hkey)
 			{
 				PseudoPtr pu(store->petAtom(key));
-				hkey = get_recursive_if_not_exists(pu);
+				hkey = store->get_recursive_if_not_exists(pu);
 			}
 
 			ProtoAtomPtr pap = store->doUnpackValue(*this);
@@ -1504,13 +1472,41 @@ SQLAtomStorage::PseudoPtr SQLAtomStorage::petAtom(UUID uuid)
 	return getAtom(buff, -1);
 }
 
+/// Get the full outgoing set, recursively.
+/// When adding links of unknown provenance, it could happen that
+/// the outgoing set of the link has not yet been loaded.  In
+/// that case, we have to load the outgoing set first.
+Handle SQLAtomStorage::get_recursive_if_not_exists(PseudoPtr p)
+{
+	if (classserver().isA(p->type, NODE))
+	{
+		NodePtr node(createNode(p->type, p->name));
+		_tlbuf.addAtom(node, p->uuid);
+		return node->getHandle();
+	}
+	HandleSeq resolved_oset;
+	for (UUID idu : p->oset)
+	{
+		Handle h(_tlbuf.getAtom(idu));
+		if (h)
+		{
+			resolved_oset.emplace_back(h);
+			continue;
+		}
+		PseudoPtr po(petAtom(idu));
+		Handle ha(get_recursive_if_not_exists(po));
+		resolved_oset.emplace_back(ha);
+	}
+	LinkPtr link(createLink(resolved_oset, p->type));
+	_tlbuf.addAtom(link, p->uuid);
+	return link->getHandle();
+}
+
 /**
  * Retreive the entire incoming set of the indicated atom.
  */
 HandleSeq SQLAtomStorage::getIncomingSet(const Handle& h)
 {
-	HandleSeq iset;
-
 	UUID uuid = get_uuid(h);
 
 	char buff[BUFSZ];
@@ -1524,27 +1520,32 @@ HandleSeq SQLAtomStorage::getIncomingSet(const Handle& h)
 	// The cast to BIGINT is needed, as otherwise on gets
 	// ERROR:  operator does not exist: bigint[] @> integer[]
 
+	std::vector<PseudoPtr> pset;
 	Response rp(conn_pool);
 	rp.store = this;
 	rp.height = -1;
-	rp.hvec = &iset;
+	rp.pvec = &pset;
 	rp.exec(buff);
 	rp.rs->foreach_row(&Response::fetch_incoming_set_cb, &rp);
+
+	HandleSeq iset;
+	std::mutex iset_mutex;
+
+	// A parallel fetch is much much faster, esp for big osets.
+	// std::for_each(std::execution::par_unseq, ... requires C++17
+	OMP_ALGO::for_each(pset.begin(), pset.end(),
+		[&] (const PseudoPtr& p)
+	{
+		Handle hi(get_recursive_if_not_exists(p));
+		get_atom_values(hi);
+		std::lock_guard<std::mutex> lck(iset_mutex);
+		iset.emplace_back(hi);
+	});
 
 #ifdef STORAGE_DEBUG
 	_num_get_insets++;
 	_num_get_inatoms += iset.size();
 #endif // STORAGE_DEBUG
-
-#if DO_IT_SERIALLY
-	for (Handle& hi : iset)
-		get_atom_values(hi);
-#else
-	// A parallel fetch is much much faster, esp for big osets.
-	// std::for_each(std::execution::par_unseq, ... requires C++17
-	OMP_ALGO::for_each(iset.begin(), iset.end(),
-		[&] (Handle& hi) { get_atom_values(hi);});
-#endif
 
 	return iset;
 }
