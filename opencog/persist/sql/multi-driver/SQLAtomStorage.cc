@@ -585,7 +585,7 @@ void SQLAtomStorage::deleteValuation(const Handle& key, const Handle& atom)
 	char buff[BUFSZ];
 	snprintf(buff, BUFSZ,
 		"SELECT * FROM Valuations WHERE key = %lu AND atom = %lu;",
-		_tlbuf.getUUID(key), _tlbuf.getUUID(atom));
+		get_uuid(key), get_uuid(atom));
 
 	Response rp(conn_pool);
 	rp.vtype = 0;
@@ -610,7 +610,7 @@ void SQLAtomStorage::deleteValuation(const Handle& key, const Handle& atom)
 	{
 		snprintf(buff, BUFSZ,
 			"DELETE FROM Valuations WHERE key = %lu AND atom = %lu;",
-			_tlbuf.getUUID(key), _tlbuf.getUUID(atom));
+			get_uuid(key), get_uuid(atom));
 
 		rp.exec(buff);
 	}
@@ -636,10 +636,10 @@ void SQLAtomStorage::storeValuation(const Handle& key,
 
 	// Get UUID from the TLB.
 	char kidbuff[BUFSZ];
-	snprintf(kidbuff, BUFSZ, "%lu", _tlbuf.getUUID(key));
+	snprintf(kidbuff, BUFSZ, "%lu", get_uuid(key));
 
 	char aidbuff[BUFSZ];
-	UUID auid = _tlbuf.getUUID(atom);
+	UUID auid = get_uuid(atom);
 	snprintf(aidbuff, BUFSZ, "%lu", auid);
 
 	// The prior valuation, if any, will be deleted firest,
@@ -759,8 +759,8 @@ ProtoAtomPtr SQLAtomStorage::getValuation(const Handle& key,
 	char buff[BUFSZ];
 	snprintf(buff, BUFSZ,
 		"SELECT * FROM Valuations WHERE key = %lu AND atom = %lu;",
-		_tlbuf.getUUID(key),
-		_tlbuf.getUUID(atom));
+		get_uuid(key),
+		get_uuid(atom));
 
 	return doGetValue(buff);
 }
@@ -920,7 +920,7 @@ void SQLAtomStorage::get_atom_values(Handle& atom)
 	char buff[BUFSZ];
 	snprintf(buff, BUFSZ,
 		"SELECT * FROM Valuations WHERE atom = %lu;",
-		_tlbuf.getUUID(atom));
+		get_uuid(atom));
 
 	Response rp(conn_pool);
 	rp.exec(buff);
@@ -1509,13 +1509,7 @@ HandleSeq SQLAtomStorage::getIncomingSet(const Handle& h)
 {
 	HandleSeq iset;
 
-	// Get the correct UUID; its possible that we don't know it yet.
-	UUID uuid = _tlbuf.getUUID(h);
-	if (TLB::INVALID_UUID == uuid)
-	{
-		Handle hg(doGetAtom(h));
-		uuid = _tlbuf.getUUID(hg);
-	}
+	UUID uuid = get_uuid(h);
 
 	char buff[BUFSZ];
 	snprintf(buff, BUFSZ,
@@ -1539,6 +1533,9 @@ HandleSeq SQLAtomStorage::getIncomingSet(const Handle& h)
 	_num_get_insets++;
 	_num_get_inatoms += iset.size();
 #endif // STORAGE_DEBUG
+
+	for (Handle& hi : iset)
+		get_atom_values(hi);
 
 	return iset;
 }
@@ -1634,21 +1631,6 @@ Handle SQLAtomStorage::getLink(Type t, const HandleSeq& hs)
 	Handle hg(doGetLink(t, hs));
 	if (hg) get_atom_values(hg);
 	return hg;
-}
-
-Handle SQLAtomStorage::doGetAtom(const Handle& h)
-{
-	if (h->isNode())
-	{
-		Handle hg(doGetNode(h->getType(), h->getName().c_str()));
-		return hg;
-	}
-	if (h->isLink())
-	{
-		Handle hg(doGetLink(h->getType(), h->getOutgoingSet()));
-		return hg;
-	}
-	return Handle::UNDEFINED;
 }
 
 /**

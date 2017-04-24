@@ -51,8 +51,8 @@ private:
 	// Single, global mutex for locking the indexes.
 	mutable std::mutex _mtx;
 
-	std::map<std::pair<Handle, Handle>, ValuationPtr> _vindex;
-	std::map<Handle, std::set<Handle>> _keyset;
+	std::unordered_map<HandlePair, ValuationPtr> _vindex;
+	std::unordered_map<Handle, std::set<Handle>> _keyset;
 
 	/**
 	 * Override and declare copy constructor and equals operator as
