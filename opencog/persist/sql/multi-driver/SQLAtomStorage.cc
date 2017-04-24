@@ -582,11 +582,10 @@ void SQLAtomStorage::store_atomtable_id(const AtomTable& at)
 /// It also simplifies, ever-so-slightly, the update of valuations.
 void SQLAtomStorage::deleteValuation(const Handle& key, const Handle& atom)
 {
-xxxxxxx
 	char buff[BUFSZ];
 	snprintf(buff, BUFSZ,
 		"SELECT * FROM Valuations WHERE key = %lu AND atom = %lu;",
-		_tlbuf.getUUID(key), _tlbuf.getUUID(atom));
+		get_uuid(key), get_uuid(atom));
 
 	Response rp(conn_pool);
 	rp.vtype = 0;
@@ -611,7 +610,7 @@ xxxxxxx
 	{
 		snprintf(buff, BUFSZ,
 			"DELETE FROM Valuations WHERE key = %lu AND atom = %lu;",
-			_tlbuf.getUUID(key), _tlbuf.getUUID(atom));
+			get_uuid(key), get_uuid(atom));
 
 		rp.exec(buff);
 	}
@@ -637,10 +636,10 @@ void SQLAtomStorage::storeValuation(const Handle& key,
 
 	// Get UUID from the TLB.
 	char kidbuff[BUFSZ];
-	snprintf(kidbuff, BUFSZ, "%lu", _tlbuf.getUUID(key));
+	snprintf(kidbuff, BUFSZ, "%lu", get_uuid(key));
 
 	char aidbuff[BUFSZ];
-	UUID auid = _tlbuf.getUUID(atom);
+	UUID auid = get_uuid(atom);
 	snprintf(aidbuff, BUFSZ, "%lu", auid);
 
 	// The prior valuation, if any, will be deleted firest,
@@ -760,8 +759,8 @@ ProtoAtomPtr SQLAtomStorage::getValuation(const Handle& key,
 	char buff[BUFSZ];
 	snprintf(buff, BUFSZ,
 		"SELECT * FROM Valuations WHERE key = %lu AND atom = %lu;",
-		_tlbuf.getUUID(key),
-		_tlbuf.getUUID(atom));
+		get_uuid(key),
+		get_uuid(atom));
 
 	return doGetValue(buff);
 }
@@ -921,7 +920,7 @@ void SQLAtomStorage::get_atom_values(Handle& atom)
 	char buff[BUFSZ];
 	snprintf(buff, BUFSZ,
 		"SELECT * FROM Valuations WHERE atom = %lu;",
-		_tlbuf.getUUID(atom));
+		get_uuid(atom));
 
 	Response rp(conn_pool);
 	rp.exec(buff);
