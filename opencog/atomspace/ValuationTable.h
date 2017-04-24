@@ -51,7 +51,7 @@ private:
 	// Single, global mutex for locking the indexes.
 	mutable std::mutex _mtx;
 
-	std::map<std::pair<Handle, Handle>, ValuationPtr> _vindex;
+	std::unordered_map<HandlePair, ValuationPtr> _vindex;
 	std::unordered_map<Handle, std::set<Handle>> _keyset;
 
 	/**

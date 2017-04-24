@@ -174,10 +174,7 @@ typedef std::vector<HandleSeq> HandleSeqSeq;
 //! a set of handles
 typedef std::set<Handle> OrderedHandleSet;
 
-//! a pair of handles
-typedef std::pair<Handle, Handle> HandlePair;
-
-//! a hash that associates the handle to its unique identificator
+//! a hash table
 typedef std::unordered_set<Handle> UnorderedHandleSet;
 
 //! an ordered map from Handle to Handle set
@@ -191,9 +188,6 @@ typedef std::vector<HandleMap> HandleMapSeq;
 
 //! a set of ordered handle maps
 typedef std::set<HandleMap> HandleMapSet;
-
-//! a pair of handles
-typedef std::pair<Handle, Handle> HandlePair;
 
 //! a sequence of handle pairs
 typedef std::vector<HandlePair> HandlePairSeq;
@@ -352,6 +346,16 @@ struct equal_to<opencog::Handle>
         if (nullptr == lh or nullptr == rh) return false;
         return opencog::content_eq(lh, rh);
     }
+};
+
+template<>
+struct hash<opencog::HandlePair>
+{
+    typedef std::size_t result_type;
+    typedef opencog::HandlePair argument_type;
+    std::size_t
+    operator()(const opencog::HandlePair& hp) const noexcept
+    { return hash_value(hp.first) + hash_value(hp.second); }
 };
 
 #endif // THIS_USED_TO_WORK_GREAT_BUT_IS_BROKEN_IN_GCC472
