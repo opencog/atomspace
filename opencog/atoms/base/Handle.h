@@ -154,16 +154,6 @@ bool content_eq(const opencog::Handle& lh,
 //! Boost needs this function to be called by exactly this name.
 std::size_t hash_value(Handle const&);
 
-//! gcc-4.7.2 needs this, because std::hash<opencog::Handle> no longer works.
-//! (See very bottom of this file).
-struct handle_hash : public std::unary_function<Handle, size_t>
-{
-   size_t operator()(const Handle& h) const
-   {
-       return hash_value(h);
-   }
-};
-
 struct handle_less
 {
    bool operator()(const Handle& hl, const Handle& hr) const
@@ -188,7 +178,7 @@ typedef std::set<Handle> OrderedHandleSet;
 typedef std::pair<Handle, Handle> HandlePair;
 
 //! a hash that associates the handle to its unique identificator
-typedef std::unordered_set<Handle, handle_hash> UnorderedHandleSet;
+typedef std::unordered_set<Handle> UnorderedHandleSet;
 
 //! an ordered map from Handle to Handle set
 typedef std::map<Handle, UnorderedHandleSet> HandleMultimap;
@@ -325,9 +315,7 @@ ostream& operator<<(ostream&, const opencog::UnorderedHandleSet&);
 // broke is that it fails to typedef result_type and argument_type,
 // which ... somehow used to work automagically?? It doesn't any more.
 // I have no clue why gcc-4.7.2 broke this, and neither does google or
-// stackoverflow.  You have two choices: use handle_hash, above, or
-// cross your fingers, and hope the definition in the #else clause,
-// below, works.
+// stackoverflow.
 
 template<>
 inline std::size_t
