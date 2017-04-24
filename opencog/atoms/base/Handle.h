@@ -358,6 +358,24 @@ struct hash<opencog::HandlePair>
     { return hash_value(hp.first) + hash_value(hp.second); }
 };
 
+// content-based equality
+template<>
+struct equal_to<opencog::HandlePair>
+{
+    typedef bool result_type;
+    typedef opencog::HandlePair first_argument;
+    typedef opencog::HandlePair second_argument;
+    bool
+    operator()(const opencog::HandlePair& lhp,
+               const opencog::HandlePair& rhp) const noexcept
+    {
+        if (lhp == rhp) return true;
+        std::equal_to<opencog::Handle> eq;
+        return eq.operator()(lhp.first, rhp.first) and
+               eq.operator()(lhp.second, rhp.second);
+    }
+};
+
 #endif // THIS_USED_TO_WORK_GREAT_BUT_IS_BROKEN_IN_GCC472
 
 } // ~namespace std
