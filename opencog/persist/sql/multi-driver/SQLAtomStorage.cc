@@ -1534,7 +1534,9 @@ HandleSeq SQLAtomStorage::getIncomingSet(const Handle& h)
 	_num_get_inatoms += iset.size();
 #endif // STORAGE_DEBUG
 
-xxxxxxxxx
+	for (const Handle& hi : iset)
+		get_atom_values(hi);
+
 	return iset;
 }
 
