@@ -38,6 +38,8 @@
 #include <thread>
 
 #include <opencog/util/oc_assert.h>
+#include <opencog/util/oc_omp.h>
+
 #include <opencog/atoms/base/Atom.h>
 #include <opencog/atoms/base/ClassServer.h>
 #include <opencog/atoms/base/Link.h>
@@ -1534,8 +1536,15 @@ HandleSeq SQLAtomStorage::getIncomingSet(const Handle& h)
 	_num_get_inatoms += iset.size();
 #endif // STORAGE_DEBUG
 
+#if DO_IT_SERIALLY
 	for (Handle& hi : iset)
 		get_atom_values(hi);
+#else
+	// A parallel fetch is much much faster, esp for big osets.
+	// std::for_each(std::execution::par_unseq, ... requires C++17
+	OMP_ALGO::for_each(iset.begin(), iset.end(),
+		[&] (Handle& hi) { get_atom_values(hi);});
+#endif
 
 	return iset;
 }
