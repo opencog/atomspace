@@ -154,16 +154,6 @@ bool content_eq(const opencog::Handle& lh,
 //! Boost needs this function to be called by exactly this name.
 std::size_t hash_value(Handle const&);
 
-//! gcc-4.7.2 needs this, because std::hash<opencog::Handle> no longer works.
-//! (See very bottom of this file).
-struct handle_hash : public std::unary_function<Handle, size_t>
-{
-   size_t operator()(const Handle& h) const
-   {
-       return hash_value(h);
-   }
-};
-
 struct handle_less
 {
    bool operator()(const Handle& hl, const Handle& hr) const
@@ -184,11 +174,8 @@ typedef std::vector<HandleSeq> HandleSeqSeq;
 //! a set of handles
 typedef std::set<Handle> OrderedHandleSet;
 
-//! a pair of handles
-typedef std::pair<Handle, Handle> HandlePair;
-
-//! a hash that associates the handle to its unique identificator
-typedef std::unordered_set<Handle, handle_hash> UnorderedHandleSet;
+//! a hash table
+typedef std::unordered_set<Handle> UnorderedHandleSet;
 
 //! an ordered map from Handle to Handle set
 typedef std::map<Handle, UnorderedHandleSet> HandleMultimap;
@@ -201,9 +188,6 @@ typedef std::vector<HandleMap> HandleMapSeq;
 
 //! a set of ordered handle maps
 typedef std::set<HandleMap> HandleMapSet;
-
-//! a pair of handles
-typedef std::pair<Handle, Handle> HandlePair;
 
 //! a sequence of handle pairs
 typedef std::vector<HandlePair> HandlePairSeq;
@@ -325,9 +309,7 @@ ostream& operator<<(ostream&, const opencog::UnorderedHandleSet&);
 // broke is that it fails to typedef result_type and argument_type,
 // which ... somehow used to work automagically?? It doesn't any more.
 // I have no clue why gcc-4.7.2 broke this, and neither does google or
-// stackoverflow.  You have two choices: use handle_hash, above, or
-// cross your fingers, and hope the definition in the #else clause,
-// below, works.
+// stackoverflow.
 
 template<>
 inline std::size_t
@@ -363,6 +345,34 @@ struct equal_to<opencog::Handle>
         if (lh == rh) return true;
         if (nullptr == lh or nullptr == rh) return false;
         return opencog::content_eq(lh, rh);
+    }
+};
+
+template<>
+struct hash<opencog::HandlePair>
+{
+    typedef std::size_t result_type;
+    typedef opencog::HandlePair argument_type;
+    std::size_t
+    operator()(const opencog::HandlePair& hp) const noexcept
+    { return hash_value(hp.first) + hash_value(hp.second); }
+};
+
+// content-based equality
+template<>
+struct equal_to<opencog::HandlePair>
+{
+    typedef bool result_type;
+    typedef opencog::HandlePair first_argument;
+    typedef opencog::HandlePair second_argument;
+    bool
+    operator()(const opencog::HandlePair& lhp,
+               const opencog::HandlePair& rhp) const noexcept
+    {
+        if (lhp == rhp) return true;
+        std::equal_to<opencog::Handle> eq;
+        return eq.operator()(lhp.first, rhp.first) and
+               eq.operator()(lhp.second, rhp.second);
     }
 };
 
