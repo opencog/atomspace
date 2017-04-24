@@ -1769,49 +1769,42 @@ void SQLAtomStorage::loadType(AtomTable &table, Type atom_type)
 		max_height = 0;
 	else
 		max_height = getMaxObservedHeight();
-	logger().debug("SQLAtomStorage::loadType: Max Height is %d\n", max_height);
 
 	setup_typemap();
 	int db_atom_type = storing_typemap[atom_type];
 
-	Response rp(conn_pool);
-	rp.table = &table;
-	rp.store = this;
+
+#define NCHUNKS 300
+#define MINSTEP 10123
+	std::vector<unsigned long> steps;
+	unsigned long stepsize = MINSTEP + max_nrec/NCHUNKS;
+	for (unsigned long rec = 0; rec <= max_nrec; rec += stepsize)
+		steps.push_back(rec);
+
+	logger().debug("SQLAtomStorage::loadType: "
+		"Max Height is %d stepsize=%lu chunks=%lu\n",
+		 max_height, stepsize, steps.size());
 
 	for (int hei=0; hei<=max_height; hei++)
 	{
 		unsigned long cur = _load_count;
 
-#if GET_ONE_BIG_BLOB
-		char buff[BUFSZ];
-		snprintf(buff, BUFSZ,
-		         "SELECT * FROM Atoms WHERE height = %d AND type = %d;",
-		         hei, db_atom_type);
-		rp.height = hei;
-		rp.exec(buff);
-		rp.rs->foreach_row(&Response::load_if_not_exists_cb, &rp);
-#else
-		// It appears that, when the select statment returns more than
-		// about a 100K to a million atoms or so, some sort of heap
-		// corruption occurs in the iodbc code, causing future mallocs
-		// to fail. So limit the number of records processed in one go.
-		// It also appears that asking for lots of records increases
-		// the memory fragmentation (and/or there's a memory leak in iodbc??)
-		// XXX Not clear is UnixSQL suffers from this same problem.
-#define STEP 12003
-		unsigned long rec;
-		for (rec = 0; rec <= max_nrec; rec += STEP)
+		OMP_ALGO::for_each(steps.begin(), steps.end(),
+			[&](unsigned long rec)
 		{
+			Response rp(conn_pool);
+			rp.table = &table;
+			rp.store = this;
 			char buff[BUFSZ];
 			snprintf(buff, BUFSZ, "SELECT * FROM Atoms WHERE type = %d "
 			         "AND height = %d AND uuid > %lu AND uuid <= %lu;",
-			         db_atom_type, hei, rec, rec+STEP);
+			         db_atom_type, hei, rec, rec+stepsize);
 			rp.height = hei;
 			rp.exec(buff);
 			rp.rs->foreach_row(&Response::load_if_not_exists_cb, &rp);
-		}
-#endif
-		logger().debug("SQLAtomStorage::loadType: Loaded %lu atoms of type %d at height %d\n",
+		});
+		logger().debug("SQLAtomStorage::loadType: "
+		               "Loaded %lu atoms of type %d at height %d\n",
 			_load_count - cur, db_atom_type, hei);
 	}
 	logger().debug("SQLAtomStorage::loadType: Finished loading %lu atoms in total\n",
