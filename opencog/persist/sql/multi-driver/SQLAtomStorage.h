@@ -101,14 +101,16 @@ class SQLAtomStorage : public AtomStorage
 
 		// --------------------------
 		// Storing of atoms
+		std::mutex _store_mutex;
+
 		int do_store_atom(const Handle&);
 		void vdo_store_atom(const Handle&);
 		void do_store_single_atom(const Handle&, int);
 
+		UUID check_uuid(const Handle&);
 		UUID get_uuid(const Handle&);
 		std::string oset_to_string(const HandleSeq&);
 
-		void store_cb(const Handle&);
 		bool bulk_load;
 
 		// --------------------------
@@ -118,21 +120,8 @@ class SQLAtomStorage : public AtomStorage
 
 		// --------------------------
 		// UUID management
-		// Track UUID's that are in use. Needed to determine
-		// whether to UPDATE or INSERT.
-		std::mutex id_cache_mutex;
-		bool local_id_cache_is_inited;
-		std::set<UUID> local_id_cache;
-		void add_id_to_cache(UUID);
-		void get_ids(void);
-
-		std::mutex id_create_mutex;
-		std::set<UUID> id_create_cache;
-		std::unique_lock<std::mutex> maybe_create_id(UUID);
-
 		UUID getMaxObservedUUID(void);
 		int getMaxObservedHeight(void);
-		bool idExists(const char *);
 		TLB _tlbuf;
 
 		// --------------------------
@@ -169,14 +158,14 @@ class SQLAtomStorage : public AtomStorage
 		// Performance statistics
 		std::atomic<size_t> _num_get_nodes;
 		std::atomic<size_t> _num_got_nodes;
+		std::atomic<size_t> _num_rec_nodes;
 		std::atomic<size_t> _num_get_links;
 		std::atomic<size_t> _num_got_links;
+		std::atomic<size_t> _num_rec_links;
 		std::atomic<size_t> _num_get_insets;
-		std::atomic<size_t> _num_get_inatoms;
+		std::atomic<size_t> _num_get_inlinks;
 		std::atomic<size_t> _num_node_inserts;
-		std::atomic<size_t> _num_node_updates;
 		std::atomic<size_t> _num_link_inserts;
-		std::atomic<size_t> _num_link_updates;
 		std::atomic<size_t> _load_count;
 		std::atomic<size_t> _store_count;
 
