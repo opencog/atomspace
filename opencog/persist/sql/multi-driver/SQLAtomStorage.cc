@@ -375,6 +375,9 @@ void SQLAtomStorage::init(const char * uri)
 		do_store_single_atom(tvpred, 0);
 	}
 
+	// Special case for the pre-defined atomspaces.
+	table_id_cache.insert(1);
+
 #define STORAGE_DEBUG 1
 #ifdef STORAGE_DEBUG
 	_num_get_nodes = 0;
@@ -467,8 +470,6 @@ void SQLAtomStorage::extract_callback(const AtomPtr& atom)
 
 void SQLAtomStorage::store_atomtable_id(const AtomTable& at)
 {
-	// Multi-atomspace support not implemented.
-return;
 	UUID tab_id = at.get_uuid();
 	if (table_id_cache.count(tab_id)) return;
 
