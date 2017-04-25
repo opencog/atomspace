@@ -1814,7 +1814,6 @@ void SQLAtomStorage::loadType(AtomTable &table, Type atom_type)
 
 void SQLAtomStorage::store_cb(const Handle& h)
 {
-	get_ids();
 	int height = get_height(h);
 	do_store_single_atom(h, height);
 	store_atom_values(h);
@@ -1842,6 +1841,7 @@ void SQLAtomStorage::store(const AtomTable &table)
 	setup_typemap();
 	store_atomtable_id(table);
 
+	// XXX TODO -- create and use a parallel loop, here.
 	table.foreachHandleByType(
 		[&](const Handle& h)->void { store_cb(h); }, ATOM, true);
 
