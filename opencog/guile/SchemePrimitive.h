@@ -161,6 +161,8 @@ class SchemePrimitive : public PrimitiveEnviron
 			int (T::*i_shhhi)(const std::string&, Handle, Handle,Handle,int);
 			std::string (T::*s_as)(AtomSpace*, const std::string&);
 			std::string (T::*s_s)(const std::string&);
+            std::string (T::*s_i)(int);
+            std::string (T::*s_b)(bool);
 			std::string (T::*s_ss)(const std::string&, const std::string&);
 			std::string (T::*s_sss)(const std::string&,
 			                        const std::string&,
@@ -174,6 +176,7 @@ class SchemePrimitive : public PrimitiveEnviron
 			void (T::*v_sa)(const std::string&, AtomSpace*);
 			void (T::*v_sh)(const std::string&, Handle);
 			void (T::*v_shi)(const std::string&, Handle, int);
+            void (T::*v_si)(const std::string&, int);
 			void (T::*v_ss)(const std::string&,
 			                const std::string&);
 			void (T::*v_sss)(const std::string&,
@@ -204,6 +207,8 @@ class SchemePrimitive : public PrimitiveEnviron
 			K_H,   // return HandleSeqSeq, take Handle
 			S_AS,  // return string, take AtomSpace* and string
 			S_S,   // return string, take string
+            S_I,   // return string, take int
+            S_B,   // return string, take bool
 			S_SS,  // return string, take two strings
 			S_SSS, // return string, take three strings
 			S_V,   // return string, take void
@@ -217,6 +222,7 @@ class SchemePrimitive : public PrimitiveEnviron
 			V_SSS, // return void, take three strings
 			V_T,   // return void, take Type
 			V_TI,  // return void, take Type and int
+            V_SI,  // return void, take string and int
 			V_TIDI,// return void, take Type, int, double, and int
 			V_V    // return void, take void
 		} signature;
@@ -387,17 +393,13 @@ class SchemePrimitive : public PrimitiveEnviron
 					rc = SchemeSmob::tv_to_scm(tv);
 					break;
 				}
-				case S_AS:
-				{
-					// First argument is an AtomSpace ptr.
-					AtomSpace* as = SchemeSmob::verify_atomspace(scm_car(args), scheme_name, 1);
-					// Second argument is a string
-					std::string str(SchemeSmob::verify_string(scm_cadr(args), scheme_name, 2));
 
-					std::string rs = (that->*method.s_as)(as, str);
-					rc = scm_from_utf8_string(rs.c_str());
-					break;
-				}
+                case S_V:
+                {
+                    std::string rs = (that->*method.s_v)();
+                    rc = scm_from_utf8_string(rs.c_str());
+                    break;
+                }
 				case S_S:
 				{
 					// First argument is a string
@@ -407,6 +409,31 @@ class SchemePrimitive : public PrimitiveEnviron
 					rc = scm_from_utf8_string(rs.c_str());
 					break;
 				}
+                case S_I:
+                {
+                    int i = SchemeSmob::verify_int(scm_car(args), scheme_name);
+                    std::string rs = (that->*method.s_i)(i);
+                    rc = scm_from_utf8_string(rs.c_str());
+                    break;
+                }
+                case S_B:
+                {
+                    bool b = scm_to_bool(scm_car(args));
+                    std::string rs = (that->*method.s_b)(b);
+                    rc = scm_from_utf8_string(rs.c_str());
+                    break;
+                }
+                case S_AS:
+                {
+                    // First argument is an AtomSpace ptr.
+                    AtomSpace* as = SchemeSmob::verify_atomspace(scm_car(args), scheme_name, 1);
+                    // Second argument is a string
+                    std::string str(SchemeSmob::verify_string(scm_cadr(args), scheme_name, 2));
+
+                    std::string rs = (that->*method.s_as)(as, str);
+                    rc = scm_from_utf8_string(rs.c_str());
+                    break;
+                }
 				case S_SS:
 				{
 					// All args are strings
@@ -425,12 +452,6 @@ class SchemePrimitive : public PrimitiveEnviron
 					std::string str3(SchemeSmob::verify_string(scm_caddr(args), scheme_name, 3));
 
 					std::string rs = (that->*method.s_sss)(str1, str2, str3);
-					rc = scm_from_utf8_string(rs.c_str());
-					break;
-				}
-				case S_V:
-				{
-					std::string rs = (that->*method.s_v)();
 					rc = scm_from_utf8_string(rs.c_str());
 					break;
 				}
@@ -504,6 +525,15 @@ class SchemePrimitive : public PrimitiveEnviron
 					(that->*method.v_ti)(t, i);
 					break;
 				}
+                case V_SI:
+                {
+                    std::string str(SchemeSmob::verify_string(scm_car(args), scheme_name, 1));
+
+                    int i = SchemeSmob::verify_int(scm_cadr(args), scheme_name, 2);
+
+                    (that->*method.v_si)(str, i);
+                    break;
+                }
 				case V_TIDI:
 				{
 					Type t = SchemeSmob::verify_atom_type(scm_car(args), scheme_name, 1);
@@ -622,6 +652,8 @@ class SchemePrimitive : public PrimitiveEnviron
 		DECLARE_CONSTR_2(S_AS,   s_as, std::string, AtomSpace*,
 		                               const std::string&)
 		DECLARE_CONSTR_1(S_S,    s_s,  std::string, const std::string&)
+        DECLARE_CONSTR_1(S_I,    s_i,  std::string, int)
+        DECLARE_CONSTR_1(S_B,    s_b,  std::string, bool)
 		DECLARE_CONSTR_2(S_SS,   s_ss, std::string, const std::string&,
 		                               const std::string&)
 		DECLARE_CONSTR_3(S_SSS,  s_sss, std::string, const std::string&,
@@ -640,6 +672,7 @@ class SchemePrimitive : public PrimitiveEnviron
 		                              const std::string&, const std::string&)
 		DECLARE_CONSTR_1(V_T,	v_t,  void, Type)
 		DECLARE_CONSTR_2(V_TI,  v_ti, void, Type, int)
+        DECLARE_CONSTR_2(V_SI,  v_si, void, const std::string&, int)
 		DECLARE_CONSTR_4(V_TIDI, v_tidi, void, Type, int, double, int)
 
 		DECLARE_CONSTR_0(V_V,   v_v,  void);
@@ -686,6 +719,8 @@ DECLARE_DECLARE_1(Handle, Handle)
 DECLARE_DECLARE_1(HandleSeq, Handle)
 DECLARE_DECLARE_1(HandleSeqSeq, Handle)
 DECLARE_DECLARE_1(int, void)
+DECLARE_DECLARE_1(std::string, int)
+DECLARE_DECLARE_1(std::string, bool)
 DECLARE_DECLARE_1(std::string, const std::string&)
 DECLARE_DECLARE_1(std::string, void)
 DECLARE_DECLARE_1(TruthValuePtr, Handle)
@@ -706,6 +741,7 @@ DECLARE_DECLARE_2(std::string, const std::string&, const std::string&)
 DECLARE_DECLARE_2(void, const std::string&, AtomSpace*)
 DECLARE_DECLARE_2(void, const std::string&, const std::string&)
 DECLARE_DECLARE_2(void, Type, int)
+DECLARE_DECLARE_2(void, const std::string&, int)
 
 DECLARE_DECLARE_3(Handle, Handle, Handle, Handle)
 DECLARE_DECLARE_3(std::string, const std::string&,
