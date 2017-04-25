@@ -81,6 +81,7 @@ public:
     void clear_resolver(const AtomTable*);
 
     size_t size() { return _uuid_map.size(); }
+    void clear();
 
     /**
      * Adds a new atom to the TLB.
