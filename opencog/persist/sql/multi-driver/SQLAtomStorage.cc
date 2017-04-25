@@ -924,7 +924,7 @@ int SQLAtomStorage::get_height(const Handle& atom)
 
 /* ================================================================ */
 
-UUID SQLAtomStorage::get_uuid(const Handle& h)
+UUID SQLAtomStorage::check_uuid(const Handle& h)
 {
 	UUID uuid = _tlbuf.getUUID(h);
 	if (TLB::INVALID_UUID != uuid) return uuid;
@@ -941,6 +941,15 @@ UUID SQLAtomStorage::get_uuid(const Handle& h)
 	}
 	// If it was found, then the TLB got updated.
 	if (dbh) return _tlbuf.getUUID(h);
+
+	// If it was not found, then say so.
+	return TLB::INVALID_UUID;
+}
+
+UUID SQLAtomStorage::get_uuid(const Handle& h)
+{
+	UUID uuid = check_uuid(h);
+	if (TLB::INVALID_UUID != uuid) return uuid;
 
 	// If it was not found, then issue a brand-spankin new UUID.
 	return _tlbuf.addAtom(h, TLB::INVALID_UUID);
@@ -1100,11 +1109,16 @@ void SQLAtomStorage::do_store_single_atom(const Handle& h, int aheight)
 	std::string vals;
 	std::string coda;
 
-	// Use the TLB Handle as the UUID.
-	UUID uuid = _tlbuf.addAtom(h, TLB::INVALID_UUID);
+	// Lets see if we already know about this
+	UUID uuid = check_uuid(h);
+	if (TLB::INVALID_UUID != uuid) return;
+
+	// If it was not found, then issue a brand-spankin new UUID.
+	uuid = _tlbuf.addAtom(h, TLB::INVALID_UUID);
 
 	std::string uuidbuff = std::to_string(uuid);
 
+	// XXX I don't think this is needed...
 	std::unique_lock<std::mutex> lck = maybe_create_id(uuid);
 	if (not lck.owns_lock()) return;
 

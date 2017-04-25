@@ -105,6 +105,7 @@ class SQLAtomStorage : public AtomStorage
 		void vdo_store_atom(const Handle&);
 		void do_store_single_atom(const Handle&, int);
 
+		UUID check_uuid(const Handle&);
 		UUID get_uuid(const Handle&);
 		std::string oset_to_string(const HandleSeq&);
 
