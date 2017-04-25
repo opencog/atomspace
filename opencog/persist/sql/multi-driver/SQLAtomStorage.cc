@@ -569,8 +569,14 @@ void SQLAtomStorage::storeValuation(const Handle& key,
 	std::string coda;
 
 	// Get UUID from the TLB.
+	UUID kuid = check_uuid(key);
+	if (TLB::INVALID_UUID == kuid)
+	{
+		do_store_atom(key);
+		kuid = get_uuid(key);
+	}
 	char kidbuff[BUFSZ];
-	snprintf(kidbuff, BUFSZ, "%lu", get_uuid(key));
+	snprintf(kidbuff, BUFSZ, "%lu", kuid);
 
 	char aidbuff[BUFSZ];
 	UUID auid = get_uuid(atom);
