@@ -101,6 +101,8 @@ class SQLAtomStorage : public AtomStorage
 
 		// --------------------------
 		// Storing of atoms
+		std::mutex _store_mutex;
+
 		int do_store_atom(const Handle&);
 		void vdo_store_atom(const Handle&);
 		void do_store_single_atom(const Handle&, int);
@@ -119,21 +121,8 @@ class SQLAtomStorage : public AtomStorage
 
 		// --------------------------
 		// UUID management
-		// Track UUID's that are in use. Needed to determine
-		// whether to UPDATE or INSERT.
-		std::mutex id_cache_mutex;
-		bool local_id_cache_is_inited;
-		std::set<UUID> local_id_cache;
-		void add_id_to_cache(UUID);
-		void get_ids(void);
-
-		std::mutex id_create_mutex;
-		std::set<UUID> id_create_cache;
-		std::unique_lock<std::mutex> maybe_create_id(UUID);
-
 		UUID getMaxObservedUUID(void);
 		int getMaxObservedHeight(void);
-		bool idExists(const char *);
 		TLB _tlbuf;
 
 		// --------------------------
