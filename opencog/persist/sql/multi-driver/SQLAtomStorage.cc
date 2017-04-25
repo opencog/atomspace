@@ -1706,8 +1706,9 @@ void SQLAtomStorage::store(const AtomTable &table)
 	setup_typemap();
 	store_atomtable_id(table);
 
-	// XXX TODO -- create and use a parallel loop, here.
+	// XXX TODO -- use the parallel loop, here.
 	table.foreachHandleByType(
+	// table.foreachParallelByType(
 		[&](const Handle& h)->void
 	{
 		do_store_atom(h);
