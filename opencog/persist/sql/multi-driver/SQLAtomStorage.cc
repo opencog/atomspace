@@ -329,7 +329,7 @@ void SQLAtomStorage::init(const char * uri)
 	if (not use_libpq and not use_odbc)
 		throw IOException(TRACE_INFO, "Unknown URI '%s'\n", uri);
 
-	// Allow for one connection ber database-reader, and one connection
+	// Allow for one connection per database-reader, and one connection
 	// for each writer.  Make sure that there are more connections than
 	// there are writers, else both readers and writers starve.
 	_initial_conn_pool_size = std::thread::hardware_concurrency();
@@ -467,6 +467,8 @@ void SQLAtomStorage::extract_callback(const AtomPtr& atom)
 
 void SQLAtomStorage::store_atomtable_id(const AtomTable& at)
 {
+	// Multi-atomspace support not implemented.
+return;
 	UUID tab_id = at.get_uuid();
 	if (table_id_cache.count(tab_id)) return;
 
@@ -1806,6 +1808,7 @@ void SQLAtomStorage::kill_data(void)
 	rp.exec("INSERT INTO Spaces VALUES (1,1);");
 
 	// Special case for TruthValues - must always have this atom.
+	_tlbuf.clear();
 	do_store_single_atom(tvpred, 0);
 }
 
