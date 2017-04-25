@@ -267,7 +267,7 @@ class SQLAtomStorage::Response
 			}
 			else if (!strcmp(colname, "key"))
 			{
-				key = atoi(colvalue);
+				key = atol(colvalue);
 			}
 			return false;
 		}
@@ -538,7 +538,7 @@ void SQLAtomStorage::deleteValuation(const Handle& key, const Handle& atom)
 		while (p)
 		{
 			if (*p == '}' or *p == '\0') break;
-			VUID vu = atoi(p);
+			VUID vu = atol(p);
 			deleteValue(vu);
 			p = strchr(p, ',');
 			if (p) p++;
@@ -790,7 +790,7 @@ ProtoAtomPtr SQLAtomStorage::doUnpackValue(Response& rp)
 		while (p)
 		{
 			if (*p == '}' or *p == '\0') break;
-			VUID vu = atoi(p);
+			VUID vu = atol(p);
 			ProtoAtomPtr pap = getValue(vu);
 			lnkarr.emplace_back(pap);
 			p = strchr(p, ',');
@@ -822,7 +822,7 @@ void SQLAtomStorage::deleteValue(VUID vuid)
 		while (p)
 		{
 			if (*p == '}' or *p == '\0') break;
-			VUID vu = atoi(p);
+			VUID vu = atol(p);
 			deleteValue(vu);
 			p = strchr(p, ',');
 			if (p) p++;
