@@ -1078,11 +1078,6 @@ void SQLAtomStorage::do_store_single_atom(const Handle& h, int aheight)
 {
 	setup_typemap();
 
-	bool notfirst = false;
-	std::string cols;
-	std::string vals;
-	std::string coda;
-
 	std::lock_guard<std::mutex> create_lock(_store_mutex);
 
 	// Lets see if we already know about this
@@ -1093,6 +1088,11 @@ void SQLAtomStorage::do_store_single_atom(const Handle& h, int aheight)
 	uuid = _tlbuf.addAtom(h, TLB::INVALID_UUID);
 
 	std::string uuidbuff = std::to_string(uuid);
+
+	bool notfirst = false;
+	std::string cols;
+	std::string vals;
+	std::string coda;
 
 	cols = "INSERT INTO Atoms (";
 	vals = ") VALUES (";
@@ -1690,18 +1690,6 @@ void SQLAtomStorage::loadType(AtomTable &table, Type atom_type)
 	table.barrier();
 }
 
-void SQLAtomStorage::store_cb(const Handle& h)
-{
-	int height = get_height(h);
-	do_store_single_atom(h, height);
-	store_atom_values(h);
-
-	if (_store_count%1000 == 0)
-	{
-		printf("\tStored %lu atoms.\n", (unsigned long) _store_count);
-	}
-}
-
 void SQLAtomStorage::store(const AtomTable &table)
 {
 	max_height = 0;
@@ -1720,7 +1708,13 @@ void SQLAtomStorage::store(const AtomTable &table)
 
 	// XXX TODO -- create and use a parallel loop, here.
 	table.foreachHandleByType(
-		[&](const Handle& h)->void { store_cb(h); }, ATOM, true);
+		[&](const Handle& h)->void
+	{
+		do_store_atom(h);
+		if (_store_count%1000 == 0)
+			printf("\tStored %lu atoms.\n", (unsigned long) _store_count);
+
+	}, ATOM, true);
 
 	Response rp(conn_pool);
 	rp.exec("VACUUM ANALYZE Atoms;");

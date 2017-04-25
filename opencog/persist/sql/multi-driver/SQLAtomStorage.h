@@ -111,7 +111,6 @@ class SQLAtomStorage : public AtomStorage
 		UUID get_uuid(const Handle&);
 		std::string oset_to_string(const HandleSeq&);
 
-		void store_cb(const Handle&);
 		bool bulk_load;
 
 		// --------------------------
