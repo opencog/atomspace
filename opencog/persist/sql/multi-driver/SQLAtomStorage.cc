@@ -417,9 +417,7 @@ void SQLAtomStorage::init(const char * uri)
 	_num_got_links = 0;
 	_num_get_insets = 0;
 	_num_get_inatoms = 0;
-	_num_node_updates = 0;
 	_num_node_inserts = 0;
-	_num_link_updates = 0;
 	_num_link_inserts = 0;
 #endif // STORAGE_DEBUG
 }
@@ -548,7 +546,7 @@ void SQLAtomStorage::store_atomtable_id(const AtomTable& at)
 /* ================================================================ */
 
 /// Delete the valuation, if it exists. This is required, in order
-/// to prevent garbage from accumulating in theValues table.
+/// to prevent garbage from accumulating in the Values table.
 /// It also simplifies, ever-so-slightly, the update of valuations.
 void SQLAtomStorage::deleteValuation(const Handle& key, const Handle& atom)
 {
@@ -1997,9 +1995,7 @@ void SQLAtomStorage::print_stats(void)
 	size_t num_get_insets = _num_get_insets;
 	size_t num_get_inatoms = _num_get_inatoms;
 	size_t num_node_inserts = _num_node_inserts;
-	size_t num_node_updates = _num_node_updates;
 	size_t num_link_inserts = _num_link_inserts;
-	size_t num_link_updates = _num_link_updates;
 
 	frac = 100.0 * num_got_nodes / ((double) num_get_nodes);
 	printf("num_get_nodes=%lu num_got_nodes=%lu (%f pct)\n",
@@ -2013,16 +2009,8 @@ void SQLAtomStorage::print_stats(void)
 	printf("num_get_insets=%lu num_get_inatoms=%lu ratio=%f\n",
 	       num_get_insets, num_get_inatoms, frac);
 
-	frac = num_node_updates / ((double) num_node_inserts);
-	printf("num_node_inserts=%lu num_node_updates=%lu ratio=%f\n",
-	       num_node_inserts, num_node_updates, frac);
-
-	frac = num_link_updates / ((double) num_link_inserts);
-	printf("num_link_inserts=%lu num_link_updates=%lu ratio=%f\n",
-	       num_link_inserts, num_link_updates, frac);
-
-	unsigned long tot_node = num_node_inserts + num_node_updates;
-	unsigned long tot_link = num_link_inserts + num_link_updates;
+	unsigned long tot_node = num_node_inserts;
+	unsigned long tot_link = num_link_inserts;
 	frac = tot_node / ((double) tot_link);
 	printf("total stores for node=%lu link=%lu ratio=%f\n",
 	       tot_node, tot_link, frac);
