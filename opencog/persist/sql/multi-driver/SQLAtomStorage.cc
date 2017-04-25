@@ -379,10 +379,12 @@ void SQLAtomStorage::init(const char * uri)
 #ifdef STORAGE_DEBUG
 	_num_get_nodes = 0;
 	_num_got_nodes = 0;
+	_num_rec_nodes = 0;
 	_num_get_links = 0;
 	_num_got_links = 0;
+	_num_rec_links = 0;
 	_num_get_insets = 0;
-	_num_get_inatoms = 0;
+	_num_get_inlinks = 0;
 	_num_node_inserts = 0;
 	_num_link_inserts = 0;
 #endif // STORAGE_DEBUG
@@ -1355,6 +1357,7 @@ Handle SQLAtomStorage::get_recursive_if_not_exists(PseudoPtr p)
 	{
 		NodePtr node(createNode(p->type, p->name));
 		_tlbuf.addAtom(node, p->uuid);
+		_num_rec_nodes ++;
 		return node->getHandle();
 	}
 	HandleSeq resolved_oset;
@@ -1372,6 +1375,7 @@ Handle SQLAtomStorage::get_recursive_if_not_exists(PseudoPtr p)
 	}
 	LinkPtr link(createLink(resolved_oset, p->type));
 	_tlbuf.addAtom(link, p->uuid);
+	_num_rec_links++;
 	return link->getHandle();
 }
 
@@ -1417,7 +1421,7 @@ HandleSeq SQLAtomStorage::getIncomingSet(const Handle& h)
 
 #ifdef STORAGE_DEBUG
 	_num_get_insets++;
-	_num_get_inatoms += iset.size();
+	_num_get_inlinks += iset.size();
 #endif // STORAGE_DEBUG
 
 	return iset;
@@ -1861,24 +1865,28 @@ void SQLAtomStorage::print_stats(void)
 #ifdef STORAGE_DEBUG
 	size_t num_get_nodes = _num_get_nodes;
 	size_t num_got_nodes = _num_got_nodes;
+	size_t num_rec_nodes = _num_rec_nodes;
 	size_t num_get_links = _num_get_links;
 	size_t num_got_links = _num_got_links;
+	size_t num_rec_links = _num_rec_links;
 	size_t num_get_insets = _num_get_insets;
-	size_t num_get_inatoms = _num_get_inatoms;
+	size_t num_get_inlinks = _num_get_inlinks;
 	size_t num_node_inserts = _num_node_inserts;
 	size_t num_link_inserts = _num_link_inserts;
 
 	frac = 100.0 * num_got_nodes / ((double) num_get_nodes);
 	printf("num_get_nodes=%lu num_got_nodes=%lu (%f pct)\n",
 	       num_get_nodes, num_got_nodes, frac);
+	printf("num_recursive_nodes=%lu\n", num_rec_nodes);
 
 	frac = 100.0 * num_got_links / ((double) num_get_links);
 	printf("num_get_links=%lu num_got_links=%lu (%f pct)\n",
 	       num_get_links, num_got_links, frac);
+	printf("num_recursive_links=%lu\n", num_rec_links);
 
-	frac = num_get_inatoms / ((double) num_get_insets);
-	printf("num_get_insets=%lu num_get_inatoms=%lu ratio=%f\n",
-	       num_get_insets, num_get_inatoms, frac);
+	frac = num_get_inlinks / ((double) num_get_insets);
+	printf("num_get_incoming_sets=%lu set total=%lu avg set size=%f\n",
+	       num_get_insets, num_get_inlinks, frac);
 
 	unsigned long tot_node = num_node_inserts;
 	unsigned long tot_link = num_link_inserts;

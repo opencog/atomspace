@@ -159,10 +159,12 @@ class SQLAtomStorage : public AtomStorage
 		// Performance statistics
 		std::atomic<size_t> _num_get_nodes;
 		std::atomic<size_t> _num_got_nodes;
+		std::atomic<size_t> _num_rec_nodes;
 		std::atomic<size_t> _num_get_links;
 		std::atomic<size_t> _num_got_links;
+		std::atomic<size_t> _num_rec_links;
 		std::atomic<size_t> _num_get_insets;
-		std::atomic<size_t> _num_get_inatoms;
+		std::atomic<size_t> _num_get_inlinks;
 		std::atomic<size_t> _num_node_inserts;
 		std::atomic<size_t> _num_link_inserts;
 		std::atomic<size_t> _load_count;
