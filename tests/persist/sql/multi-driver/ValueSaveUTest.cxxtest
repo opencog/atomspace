@@ -419,25 +419,25 @@ void ValueSaveUTest::do_test_load_by_type()
 	af->setTruthValue(tf);
 
 	// --------------------
-	ProtoAtomPtr pvs = createStringValue(
+	ProtoAtomPtr pvt = createStringValue(
 		std::vector<std::string>({"aaa", "bb bb bb", "ccc ccc ccc"}));
-	at->setValue(key, pvs);
+	at->setValue(key, pvt);
 
-	TruthValuePtr ts(SimpleTruthValue::createTV(0.22, 200));
-	at->setTruthValue(ts);
+	TruthValuePtr tt(SimpleTruthValue::createTV(0.22, 200));
+	at->setTruthValue(tt);
 
 	// --------------------
 	ProtoAtomPtr pvl = createLinkValue(
-		std::vector<ProtoAtomPtr>({pvf, pvs}));
+		std::vector<ProtoAtomPtr>({pvf, pvt}));
 	al->setValue(key, pvl);
 
 	TruthValuePtr tl(SimpleTruthValue::createTV(0.33, 300));
 	al->setTruthValue(tl);
 
 	// --------------------
-	ProtoAtomPtr pvl2 = createLinkValue(
-		std::vector<ProtoAtomPtr>({pvl, pvl, pvf, pvs}));
-	av->setValue(key, pvl2);
+	ProtoAtomPtr pvv = createLinkValue(
+		std::vector<ProtoAtomPtr>({pvl, pvl, pvf, pvt}));
+	av->setValue(key, pvv);
 
 	TruthValuePtr tv(SimpleTruthValue::createTV(0.44, 400));
 	av->setTruthValue(tv);
@@ -469,15 +469,35 @@ void ValueSaveUTest::do_test_load_by_type()
 	// Fetch by type. This is what we are testing.
 	as->fetch_all_atoms_of_type(CONCEPT_NODE);
 
-	Handle faf = as->add_node(CONCEPT_NODE, "float node");
-	Handle fat = as->add_node(CONCEPT_NODE, "string node");
-	Handle fal = as->add_node(CONCEPT_NODE, "link depth-1 node");
-	Handle fav = as->add_node(CONCEPT_NODE, "link depth-2 node");
+	Handle gaf = as->add_node(CONCEPT_NODE, "float node");
+	Handle gat = as->add_node(CONCEPT_NODE, "string node");
+	Handle gal = as->add_node(CONCEPT_NODE, "link depth-1 node");
+	Handle gav = as->add_node(CONCEPT_NODE, "link depth-2 node");
 
-	TS_ASSERT(faf == af);
-	TS_ASSERT(fat == at);
-	TS_ASSERT(fal == al);
-	TS_ASSERT(fav == av);
+	TS_ASSERT(*gaf == *af);
+	TS_ASSERT(*gat == *at);
+	TS_ASSERT(*gal == *al);
+	TS_ASSERT(*gav == *av);
+
+	TruthValuePtr gtf = gaf->getTruthValue();
+	TruthValuePtr gtt = gat->getTruthValue();
+	TruthValuePtr gtl = gal->getTruthValue();
+	TruthValuePtr gtv = gav->getTruthValue();
+
+	TS_ASSERT(*gtf == *tf);
+	TS_ASSERT(*gtt == *tt);
+	TS_ASSERT(*gtl == *tl);
+	TS_ASSERT(*gtv == *tv);
+
+	ProtoAtomPtr gpf = gaf->getValue(key);
+	ProtoAtomPtr gpt = gat->getValue(key);
+	ProtoAtomPtr gpl = gal->getValue(key);
+	ProtoAtomPtr gpv = gav->getValue(key);
+
+	TS_ASSERT(*gpf == *pvf);
+	TS_ASSERT(*gpt == *pvt);
+	TS_ASSERT(*gpl == *pvl);
+	TS_ASSERT(*gpv == *pvv);
 
 	// --------------------
 	store->kill_data();
