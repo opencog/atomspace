@@ -188,6 +188,38 @@ pre-fetch has not been implemented.  But that's because pre-fetch is
 easy: the user can do it in their own thread :-)
 
 
+Semantics
+=========
+Exactly what to save, when saving and restoring atoms, is not entirely
+obvious.  The alternatives, and thier implications, are discussed below.
+
+* Saving a single node. Should all associated values be saved? Should
+the user get to pick which values get saved?  Its possible that the user
+only wants to save one particular value, only, so as not to clobber
+other values already in the database.  The current default is to save
+all associated values, when storing a single node.  This is only weakly
+unit-tested.
+
+* Saving a single link. When a link is saved, the outgoing set of the
+link must also be saved. Thus, the above considerations for node-values
+also apply to the outgoing set of the link, and so on, recursively, for
+the nested links.  The current default is to save all associated values,
+on the entire outgoing set, recursively, when storing a single link.
+This is only weakly unit-tested.
+
+The alternative would be to save only the outgoing set atoms, but not
+the values on them.  For the SQL backend, not saving all values could
+decrease the amount of database traffic, and thus improve performance.
+For other backends, this may not be the case, as the increased complexity
+of specifying what, exactly, to save, could really hurt performance.
+
+Its possible that some users may want to save *only* the values on the
+immediate link, but not on any of the outgoing set. There is currently no
+API for this.
+
+
+
+
 Install, Setup and Usage HOWTO
 ==============================
 There are many steps needed to install and use this. Sorry!
@@ -1104,3 +1136,9 @@ TODO
    decrease the SQL table sizes significantly, and decrease server I/O
    by factors of 2x-3x.  Another table, designed just for simple pairs,
    might help a lot, too.
+
+ * Create an API to allow the user to save only seleced values on an
+   atom.
+
+ * Create an API to allow the user to NOT perform the recursive save of
+   values in the outgoing set (of a link).

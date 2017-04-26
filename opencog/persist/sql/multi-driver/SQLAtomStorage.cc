@@ -1013,10 +1013,9 @@ void SQLAtomStorage::flushStoreQueue()
 
 /* ================================================================ */
 /**
- * Recursively store the indicated atom, and all that it points to.
- * Store its truth values too. The recursive store is unconditional;
- * its assumed that all sorts of underlying truuth values have changed,
- * so that the whole thing needs to be stored.
+ * Recursively store the indicated atom and all of the values attached
+ * to it.  Also store it's outgoing set, and all of the values attached
+ * to those atoms.  The recursive store is unconditional.
  *
  * By default, the actual store is done asynchronously (in a different
  * thread); this routine merely queues up the atom. If the synchronous
@@ -1037,6 +1036,7 @@ void SQLAtomStorage::storeAtom(const Handle& h, bool synchronous)
 /**
  * Synchronously store a single atom. That is, the actual store is done
  * in the calling thread.  All values attached to the atom are also
+ * stored. All values attached to atoms in the outgoing set are also
  * stored.
  *
  * Returns the height of the atom.
