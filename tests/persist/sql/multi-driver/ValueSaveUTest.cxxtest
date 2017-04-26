@@ -390,6 +390,55 @@ void ValueSaveUTest::do_test_save_restore(bool fkey)
 
 void ValueSaveUTest::do_test_load_by_type()
 {
+	SQLAtomStorage *store = new SQLAtomStorage(uri);
+	TS_ASSERT(store->connected())
+
+	// Clear out left-over junk, just in case.
+	store->kill_data();
+
+	AtomSpace* as = new AtomSpace();
+	SQLBackingStore* backing = new SQLBackingStore();
+	backing->set_store(store);
+	backing->registerWith(as);
+
+	Handle key = as->add_node(PREDICATE_NODE, "some pred key");
+	Handle af = as->add_node(CONCEPT_NODE, "float node");
+	Handle as = as->add_node(CONCEPT_NODE, "string node");
+	Handle al = as->add_node(CONCEPT_NODE, "link depth-1 node");
+	Handle av = as->add_node(CONCEPT_NODE, "link depth-2 node");
+
+	// --------------------
+	// Now set some values
+	ProtoAtomPtr pvf = createFloatValue(
+		std::vector<double>({1.14, 2.24, 3.34}));
+	af->setValue(pvf);
+
+	// --------------------
+	ProtoAtomPtr pvs = createStringValue(
+		std::vector<std::string>({"aaa", "bb bb bb", "ccc ccc ccc"}));
+	as->setValue(pvs);
+
+	// --------------------
+	ProtoAtomPtr pvl = createLinkValue(
+		std::vector<ProtoAtomPtr>({pvf, pvs}));
+	al->setValue(pvl);
+
+	// --------------------
+	ProtoAtomPtr pvl2 = createLinkValue(
+		std::vector<ProtoAtomPtr>({pvl, pvl, pvf, pvs}));
+	av->setValue(pvl2);
+
+	as->store_atom(af);
+	as->store_atom(as);
+	as->store_atom(al);
+	as->store_atom(av);
+	as->barrier();
+
+	// --------------------
+	store->kill_data();
+	delete as;
+	delete backing;
+	delete store;
 }
 
 /* ============================= END OF FILE ================= */
