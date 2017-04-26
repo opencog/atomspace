@@ -556,50 +556,78 @@ void ValueSaveUTest::do_test_link_by_type()
 	backing->registerWith(as);
 
 	Handle key = as->add_node(PREDICATE_NODE, "some pred key");
-	Handle af = as->add_node(CONCEPT_NODE, "float node");
-	Handle at = as->add_node(CONCEPT_NODE, "string node");
-	Handle al = as->add_node(CONCEPT_NODE, "link depth-1 node");
-	Handle av = as->add_node(CONCEPT_NODE, "link depth-2 node");
+	Handle af = as->add_node(CONCEPT_NODE, "a float node");
+	Handle at = as->add_node(CONCEPT_NODE, "a string node");
+	Handle al = as->add_node(CONCEPT_NODE, "a depth-1 node");
+	Handle av = as->add_node(CONCEPT_NODE, "a depth-2 node");
+
+	Handle bf = as->add_node(CONCEPT_NODE, "b float node");
+	Handle bt = as->add_node(CONCEPT_NODE, "b string node");
+	Handle bl = as->add_node(CONCEPT_NODE, "b depth-1 node");
+	Handle bv = as->add_node(CONCEPT_NODE, "b depth-2 node");
+
+	Handle cf = as->add_link(LIST_LINK, {af, bf});
+	Handle ct = as->add_link(LIST_LINK, {at, bt});
+	Handle cl = as->add_link(LIST_LINK, {al, bl});
+	Handle cv = as->add_link(LIST_LINK, {av, bv});
 
 	// --------------------
 	// Now set some values
 	ProtoAtomPtr pvf = createFloatValue(
 		std::vector<double>({1.14, 2.24, 3.34}));
 	af->setValue(key, pvf);
+	bf->setValue(key, pvf);
+	cf->setValue(key, pvf);
 
 	TruthValuePtr tf(SimpleTruthValue::createTV(0.11, 100));
 	af->setTruthValue(tf);
+	bf->setTruthValue(tf);
+	cf->setTruthValue(tf);
 
 	// --------------------
 	ProtoAtomPtr pvt = createStringValue(
 		std::vector<std::string>({"aaa", "bb bb bb", "ccc ccc ccc"}));
 	at->setValue(key, pvt);
+	bt->setValue(key, pvt);
+	ct->setValue(key, pvt);
 
 	TruthValuePtr tt(SimpleTruthValue::createTV(0.22, 200));
 	at->setTruthValue(tt);
+	bt->setTruthValue(tt);
+	ct->setTruthValue(tt);
 
 	// --------------------
 	ProtoAtomPtr pvl = createLinkValue(
 		std::vector<ProtoAtomPtr>({pvf, pvt}));
 	al->setValue(key, pvl);
+	bl->setValue(key, pvl);
+	cl->setValue(key, pvl);
 
 	TruthValuePtr tl(SimpleTruthValue::createTV(0.33, 300));
 	al->setTruthValue(tl);
+	bl->setTruthValue(tl);
+	cl->setTruthValue(tl);
 
 	// --------------------
 	ProtoAtomPtr pvv = createLinkValue(
 		std::vector<ProtoAtomPtr>({pvl, pvl, pvf, pvt}));
 	av->setValue(key, pvv);
+	bv->setValue(key, pvv);
+	cv->setValue(key, pvv);
 
 	TruthValuePtr tv(SimpleTruthValue::createTV(0.44, 400));
 	av->setTruthValue(tv);
+	bv->setTruthValue(tv);
+	cv->setTruthValue(tv);
 
 	// --------------------
 	// Save, and close things down.
-	as->store_atom(af);
-	as->store_atom(at);
-	as->store_atom(al);
-	as->store_atom(av);
+	// Note that this store will also *recursively* store the
+	// values on the outgoing atoms, as well.
+	as->store_atom(cf);
+	as->store_atom(ct);
+	as->store_atom(cl);
+	as->store_atom(cv);
 	as->barrier();
 
 	delete as;
@@ -619,33 +647,90 @@ void ValueSaveUTest::do_test_link_by_type()
 
 	// --------------------
 	// Fetch by type. This is what we are testing.
-	as->fetch_all_atoms_of_type(CONCEPT_NODE);
 
 	Handle gkey = as->add_node(PREDICATE_NODE, "some pred key");
-	Handle gaf = as->add_node(CONCEPT_NODE, "float node");
-	Handle gat = as->add_node(CONCEPT_NODE, "string node");
-	Handle gal = as->add_node(CONCEPT_NODE, "link depth-1 node");
-	Handle gav = as->add_node(CONCEPT_NODE, "link depth-2 node");
+	Handle gaf = as->add_node(CONCEPT_NODE, "a float node");
+	Handle gat = as->add_node(CONCEPT_NODE, "a string node");
+	Handle gal = as->add_node(CONCEPT_NODE, "a depth-1 node");
+	Handle gav = as->add_node(CONCEPT_NODE, "a depth-2 node");
 
-	TS_ASSERT(*gaf == *af);
-	TS_ASSERT(*gat == *at);
-	TS_ASSERT(*gal == *al);
-	TS_ASSERT(*gav == *av);
+	// Note that the A-nodes above are added *before* the fetch;
+	// therefore, the fetch should NOT clobber the values there.
+	// However, the values on the B-nodes and the C-links should
+	// be fetched.
+	as->fetch_all_atoms_of_type(CONCEPT_NODE);
+
+	Handle gbf = as->add_node(CONCEPT_NODE, "b float node");
+	Handle gbt = as->add_node(CONCEPT_NODE, "b string node");
+	Handle gbl = as->add_node(CONCEPT_NODE, "b link depth-1 node");
+	Handle gbv = as->add_node(CONCEPT_NODE, "b link depth-2 node");
+
+	Handle gcf = as->add_link(LIST_LINK, {gaf, gbf});
+	Handle gct = as->add_link(LIST_LINK, {gat, gbt});
+	Handle gcl = as->add_link(LIST_LINK, {gal, gbl});
+	Handle gcv = as->add_link(LIST_LINK, {gav, gbv});
+
+	TS_ASSERT(*gcf == *cf);
+	TS_ASSERT(*gct == *ct);
+	TS_ASSERT(*gcl == *cl);
+	TS_ASSERT(*gcv == *cv);
 
 	TruthValuePtr gtf = gaf->getTruthValue();
 	TruthValuePtr gtt = gat->getTruthValue();
 	TruthValuePtr gtl = gal->getTruthValue();
 	TruthValuePtr gtv = gav->getTruthValue();
 
+	TS_ASSERT(*gtf == *TruthValue::DEFAULT_TV());
+	TS_ASSERT(*gtt == *TruthValue::DEFAULT_TV());
+	TS_ASSERT(*gtl == *TruthValue::DEFAULT_TV());
+	TS_ASSERT(*gtv == *TruthValue::DEFAULT_TV());
+
+	gtf = gbf->getTruthValue();
+	gtt = gbt->getTruthValue();
+	gtl = gbl->getTruthValue();
+	gtv = gbv->getTruthValue();
+
 	TS_ASSERT(*gtf == *tf);
 	TS_ASSERT(*gtt == *tt);
 	TS_ASSERT(*gtl == *tl);
 	TS_ASSERT(*gtv == *tv);
 
+	gtf = gcf->getTruthValue();
+	gtt = gct->getTruthValue();
+	gtl = gcl->getTruthValue();
+	gtv = gcv->getTruthValue();
+
+	TS_ASSERT(*gtf == *tf);
+	TS_ASSERT(*gtt == *tt);
+	TS_ASSERT(*gtl == *tl);
+	TS_ASSERT(*gtv == *tv);
+
+	// --------------------
+
 	ProtoAtomPtr gpf = gaf->getValue(gkey);
 	ProtoAtomPtr gpt = gat->getValue(gkey);
 	ProtoAtomPtr gpl = gal->getValue(gkey);
 	ProtoAtomPtr gpv = gav->getValue(gkey);
+
+	TS_ASSERT(*gpf == *pvf);
+	TS_ASSERT(*gpt == *pvt);
+	TS_ASSERT(*gpl == *pvl);
+	TS_ASSERT(*gpv == *pvv);
+
+	gpf = gbf->getValue(gkey);
+	gpt = gbt->getValue(gkey);
+	gpl = gbl->getValue(gkey);
+	gpv = gbv->getValue(gkey);
+
+	TS_ASSERT(*gpf == *pvf);
+	TS_ASSERT(*gpt == *pvt);
+	TS_ASSERT(*gpl == *pvl);
+	TS_ASSERT(*gpv == *pvv);
+
+	gpf = gcf->getValue(gkey);
+	gpt = gct->getValue(gkey);
+	gpl = gcl->getValue(gkey);
+	gpv = gcv->getValue(gkey);
 
 	TS_ASSERT(*gpf == *pvf);
 	TS_ASSERT(*gpt == *pvt);
