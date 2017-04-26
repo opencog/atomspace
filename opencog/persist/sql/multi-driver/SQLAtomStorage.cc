@@ -170,27 +170,27 @@ class SQLAtomStorage::Response
 			return false;
 		}
 
-		// Load an atom into the atom table, but only if it's not in
-		// it already.  The goal is to avoid clobbering the truth value
-		// that is currently in the AtomTable.  Adding an atom to the
-		// atom table that already exists causes the two TV's to be
-		// merged, which is probably not what was wanted...
+		// Load an atom into the atom table. Clobber (don't merge)
+		// the truth values.
 		bool load_if_not_exists_cb(void)
 		{
 			// printf ("---- New atom found ----\n");
 			rs->foreach_column(&Response::create_atom_column_cb, this);
 
-			if (nullptr == store->_tlbuf.getAtom(uuid))
+			Handle h(store->_tlbuf.getAtom(uuid));
+			if (nullptr == h)
 			{
 				PseudoPtr p(store->makeAtom(*this, uuid));
 				Handle atom(store->get_recursive_if_not_exists(p));
-				Handle h = table->getHandle(atom);
+				h = table->getHandle(atom);
 				if (nullptr == h)
 				{
 					h = table->add(atom, false);
 					store->_tlbuf.addAtom(h, uuid);
 				}
+				// Clobber all values, including truth values.
 			}
+			store->get_atom_values(h);
 			return false;
 		}
 
