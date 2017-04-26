@@ -192,9 +192,6 @@ Install, Setup and Usage HOWTO
 ==============================
 There are many steps needed to install and use this. Sorry!
 
-07-05-2015: Updated instructions below to be slightly more instructive
-	    and up-to-date for PostgreSQL 9.3 and Ubuntu 14.04.
-
 Compiling
 ---------
 Download and install the `libpq-dev` packages, which provide the
@@ -208,8 +205,10 @@ C-language bindings to the Postgres client library.
 
 Optional ODBC drivers
 ---------------------
-Optionally, download and install UnixODBC devel packages.
-Do NOT use IODBC, it fails to support UTF-8.
+Optionally, download and install UnixODBC devel packages.  Do NOT use
+IODBC, it fails to support UTF-8!  It's also buggy when more than a few
+100K atoms need to be fetched.
+
 The Postgres drivers seem to be considerably faster; the use of the
 ODBC driver is discouraged, unless you really need it or really like it.
 
@@ -244,7 +243,7 @@ Optional: ODBC Device Driver Setup
 ----------------------------------
 If you want to use ODBC, then you need to configure the ODBC driver.
 Again: the use of ODBC is optional and discouraged; its slower clunkier
-and more complex.
+and more complex. Skip this section if you are not using ODBC.
 
 After install, verify that `/etc/odbcinst.ini` contains the stanza
 below (or something similar).  If it is missing, then edit this file
@@ -286,10 +285,19 @@ mess with it, then add the below:
 
 Performance tweaks
 ------------------
-The Postgres default configuration can be/should be tweaked for
-performance.  Newer version of Postgres seem to be OK (??) but in
-some cases, performance will be a disaster if the database is not
-tuned.
+The Postgres default configuration can be (and should be) tweaked for
+performance.  The performance will be disasterously slow if the database
+is not tuned.  The primary performance bottleneck is the default of
+synchronous commits during writing. On spinning disk drives, this can
+lead to delays of tens of milliseconds to write handfuls of atoms, as
+that is the seek time (latency) for spinning disk media.  Solid state
+disks are probably a lot faster, but you still want to avoid reflashing
+large (64KByte) sectors just to storre a handful of atoms (a few hundred
+bytes).  Thus, synchronous commits should be disabled.
+
+(The postgres default is intended to minimize data loss in the case
+of accidental power loss.  This is NOT a concern for running opencog
+workloads).
 
 Edit `postgresql.conf` (a typical location is
 `/etc/postgresql/9.3/main/postgresql.conf`) and make the changes below.
@@ -308,11 +316,10 @@ http://wiki.postgresql.org/wiki/Tuning_Your_PostgreSQL_Server
    autovacuum = on
    track_counts = on
 ```
-A large value for `wal_buffers` is needed because much of the database
-traffic consists of updates.  Enabling vacuum is very important, for
-the same reason; performance degrades substantially (by factors of
-3x-10x) without regular vacuuming. (Newer versions of Postgres vacuum
-automatically. YMMV.)
+The large value for `wal_buffers` might not be needed.
+Enabling vacuum is very important, for the same reason; performance
+degrades substantially (by factors of 3x-10x) without regular vacuuming.
+(Current versions of Postgres vacuum automatically. YMMV.)
 
 Restarting the server might lead to errors stating that max shared mem
 usage has been exceeded. This can be fixed by telling the kernel to use
@@ -353,13 +360,15 @@ try doing this, replacing 'alex' with your username.
    template1=# ALTER ROLE alex WITH LOGIN;
 ```
 
-Verify that worked out by typing \dg to see:
+Verify that worked out by typing `\dg` to see:
 
+```
                              List of roles
  Role name |                   Attributes                   | Member of
 -----------+------------------------------------------------+-----------
  alex      | Superuser                                      | {}
  postgres  | Superuser, Create role, Create DB, Replication | {}
+```
 
 Then do Ctrl+D to exit, ignoring any message about `psql_history`, and
 return to your own account:
@@ -368,12 +377,14 @@ return to your own account:
    $ exit
 ```
 
-If you ran into the error above you still need to create the database of
-course (no output if successful):
+If you ran into the error above, you still need to go back and create
+the database:
 
 ```
    $ createdb mycogdata
 ```
+There is no output if the command is successful.
+
 You should be able to access that database using the so-called `peer`
 authentication method. This command:
 ```
@@ -466,7 +477,7 @@ Create the database tables:
 ```
 
 If you are using a different user-id than your login, then you will
-have to add the `-U opencog_user` flag to the `psql` command.  If you
+Have to add the `-U opencog_user` flag to the `psql` command.  If you
 created a distinct user, and did not set up the `hba.conf` file as
 above, then you also need a `-h localhost` flag, to access the database
 using TCP/IP sockets on the local network.
@@ -639,7 +650,8 @@ So here's a super-short recap:
 
 
 After the above steps, `BasicSaveUTest`, `PersistUTest`,
-`MultiPersistUTest` and `FetchUTest` should run and pass.
+`MultiPersistUTest`,`FetchUTest` and `ValueSaveUTest` should run and
+pass.
 
 
 Unit Test Status
@@ -1078,9 +1090,6 @@ TODO
    found in the `postgres-dead` directory, but the code there is badly
    broken. Its probably simplest to just ignore the code in
    `postgres-dead`, and design something from scratch.
-
- * Store ProtoAtoms. Work is underway, see issue #513 for progress.
-   Right now, its not thread-safe....
 
  * Consider an alternate implementation, using JSONB to do an EAV-like
    storage: For details, see
