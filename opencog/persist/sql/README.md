@@ -198,7 +198,8 @@ the user get to pick which values get saved?  Its possible that the user
 only wants to save one particular value, only, so as not to clobber
 other values already in the database.  The current default is to save
 all associated values, when storing a single node.  This is only weakly
-unit-tested.
+unit-tested; the tests are not thorough, and do not check all possible
+permuations.
 
 * Saving a single link. When a link is saved, the outgoing set of the
 link must also be saved. Thus, the above considerations for node-values
@@ -217,6 +218,40 @@ Its possible that some users may want to save *only* the values on the
 immediate link, but not on any of the outgoing set. There is currently no
 API for this.
 
+* Restoring a single node or link. The above considerations for saving
+run in the opposite direction, when restoring. Thus, for example, when
+restoring a single node, should all associated values in the AtomSpace
+be clobbered, or not?
+
+Currently, when an atom is restored, all of the associated values are
+pulled from the database, and placed in the AtomSpace, clobbering the
+previous AtomSpace contents.  This is done recursively, for links.
+This is tested, but only weakly and incompletely, in the unit tests.
+
+* Restoring by atom type; restoring incoming sets.  Groups of atoms
+can be fetched from the database: in the first case, all atoms of a
+given type; in the second case, all atoms in the incoming set of a
+given atom.  There are four possibilities here: (a) fetch only the
+atoms, but not any of the associated values. (b) fetch the atoms
+and the associated values, but not the values in the recursive outoging
+sets. (c) fetch the atoms and values, and all atoms and values,
+recursively, in thier outgoing set. (d) fetch the atoms, but update
+the values only if they are atoms are new to the atomspace; i.e. do
+not clobber existing values in the atomsapce.
+
+Currently, option (c) is implemented, and is weakly unit-tested.
+It is plausible that some users may want options (a), (b) or (d).
+Note that option (d) has several variations.
+
+* Restoring by pattern. This is not implemented, not done.  However,
+one can imagine a situation where a pattern-matcher-like interface
+is provided for the backend, so that only certain values, on certain
+atoms, in certain locations in a given pattern, are fetched.
+
+This is not doen because the pattern matcher is really quite commplex,
+and it seems kind-of crazy to try to put this in the backend.  There
+currently aren't any plausible scenarios, and plausible algorithms,
+that would need this capability.
 
 
 
@@ -1137,8 +1172,19 @@ TODO
    by factors of 2x-3x.  Another table, designed just for simple pairs,
    might help a lot, too.
 
- * Create an API to allow the user to save only seleced values on an
+ * Create an API to allow the user to save only selected values on an
    atom.
 
  * Create an API to allow the user to NOT perform the recursive save of
-   values in the outgoing set (of a link).
+   all values in the outgoing set (of a link).
+
+ * Create an API to allow the user to restore only selected values on an
+   atom.
+
+ * Create an API to allow the user to NOT perform the recursive restore
+   of all values in the outgoing set (of a link).
+
+ * Create an API that provides fine-grained control over what values
+   are fetched, when fetching atoms by type, or by incoming set.  See
+   the section entitles "Semantics", above, for the various different
+   options.
