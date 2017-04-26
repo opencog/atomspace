@@ -662,8 +662,8 @@ void ValueSaveUTest::do_test_link_by_type()
 
 	Handle gbf = as->add_node(CONCEPT_NODE, "b float node");
 	Handle gbt = as->add_node(CONCEPT_NODE, "b string node");
-	Handle gbl = as->add_node(CONCEPT_NODE, "b link depth-1 node");
-	Handle gbv = as->add_node(CONCEPT_NODE, "b link depth-2 node");
+	Handle gbl = as->add_node(CONCEPT_NODE, "b depth-1 node");
+	Handle gbv = as->add_node(CONCEPT_NODE, "b depth-2 node");
 
 	Handle gcf = as->add_link(LIST_LINK, {gaf, gbf});
 	Handle gct = as->add_link(LIST_LINK, {gat, gbt});
