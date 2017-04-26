@@ -712,10 +712,10 @@ void ValueSaveUTest::do_test_link_by_type()
 	ProtoAtomPtr gpl = gal->getValue(gkey);
 	ProtoAtomPtr gpv = gav->getValue(gkey);
 
-	TS_ASSERT(*gpf == *pvf);
-	TS_ASSERT(*gpt == *pvt);
-	TS_ASSERT(*gpl == *pvl);
-	TS_ASSERT(*gpv == *pvv);
+	TS_ASSERT(gpf == nullptr);
+	TS_ASSERT(gpt == nullptr);
+	TS_ASSERT(gpl == nullptr);
+	TS_ASSERT(gpv == nullptr);
 
 	gpf = gbf->getValue(gkey);
 	gpt = gbt->getValue(gkey);
