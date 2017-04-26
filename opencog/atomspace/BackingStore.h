@@ -66,7 +66,7 @@ class BackingStore
 		 * Return a vector containing the handles of the entire incoming
 		 * set of the indicated handle.
 		 */
-		virtual HandleSeq getIncomingSet(const Handle&) const = 0;
+		virtual void getIncomingSet(AtomTable&, const Handle&) = 0;
 
 		/**
 		 * Recursively store the atom and anything in it's outgoing set.

@@ -356,20 +356,17 @@ Handle AtomSpace::fetch_incoming_set(Handle h, bool recursive)
         throw RuntimeException(TRACE_INFO, "No backing store");
 
     h = get_atom(h);
-
-    if (nullptr == h) return Handle::UNDEFINED;
+    if (nullptr == h) return h;
 
     // Get everything from the backing store.
-    HandleSeq iset = _backing_store->getIncomingSet(h);
-    size_t isz = iset.size();
-    for (size_t i=0; i<isz; i++) {
-        Handle hi(iset[i]);
-        if (recursive) {
-            fetch_incoming_set(hi, true);
-        } else {
-            add_atom(hi);
-        }
-    }
+    _backing_store->getIncomingSet(_atom_table, h);
+
+    if (not recursive) return h;
+
+    IncomingSet vh(h->getIncomingSet());
+    for (const LinkPtr& lp : vh)
+        fetch_incoming_set(Handle(lp), true);
+
     return h;
 }
 

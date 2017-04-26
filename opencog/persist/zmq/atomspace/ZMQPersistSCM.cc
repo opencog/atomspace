@@ -48,9 +48,9 @@ class ZMQBackingStore : public BackingStore
 		virtual Handle getNode(Type, const char *) const;
 		virtual Handle getLink(Type, const HandleSeq&) const;
 		virtual AtomPtr getAtom(UUID) const;
-		virtual HandleSeq getIncomingSet(const Handle&) const;
 		virtual void storeAtom(const Handle&);
 		virtual void loadType(AtomTable&, Type);
+		virtual void getIncomingSet(AtomTable&, const Handle&);
 		virtual void barrier();
 };
 
@@ -82,9 +82,9 @@ AtomPtr ZMQBackingStore::getAtom(UUID uuid) const
 	return _store->getAtom(uuid);
 }
 
-HandleSeq ZMQBackingStore::getIncomingSet(const Handle& h) const
+void ZMQBackingStore::getIncomingSet(AtomTable& table, const Handle& h)
 {
-	return _store->getIncomingSet(h);
+	_store->getIncomingSet(table, h);
 }
 
 void ZMQBackingStore::storeAtom(const Handle& h)

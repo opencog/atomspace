@@ -170,27 +170,28 @@ class SQLAtomStorage::Response
 			return false;
 		}
 
-		// Load an atom into the atom table, but only if it's not in
-		// it already.  The goal is to avoid clobbering the truth value
-		// that is currently in the AtomTable.  Adding an atom to the
-		// atom table that already exists causes the two TV's to be
-		// merged, which is probably not what was wanted...
+		// Load an atom into the atom table. Fetch all values on the
+		// atom, but NOT on its outgoing set!
 		bool load_if_not_exists_cb(void)
 		{
 			// printf ("---- New atom found ----\n");
 			rs->foreach_column(&Response::create_atom_column_cb, this);
 
-			if (nullptr == store->_tlbuf.getAtom(uuid))
+			Handle h(store->_tlbuf.getAtom(uuid));
+			if (nullptr == h)
 			{
 				PseudoPtr p(store->makeAtom(*this, uuid));
 				Handle atom(store->get_recursive_if_not_exists(p));
-				Handle h = table->getHandle(atom);
+				h = table->getHandle(atom);
 				if (nullptr == h)
 				{
 					h = table->add(atom, false);
 					store->_tlbuf.addAtom(h, uuid);
 				}
 			}
+
+			// Clobber all values, including truth values.
+			store->get_atom_values(h);
 			return false;
 		}
 
@@ -1013,10 +1014,9 @@ void SQLAtomStorage::flushStoreQueue()
 
 /* ================================================================ */
 /**
- * Recursively store the indicated atom, and all that it points to.
- * Store its truth values too. The recursive store is unconditional;
- * its assumed that all sorts of underlying truuth values have changed,
- * so that the whole thing needs to be stored.
+ * Recursively store the indicated atom and all of the values attached
+ * to it.  Also store it's outgoing set, and all of the values attached
+ * to those atoms.  The recursive store is unconditional.
  *
  * By default, the actual store is done asynchronously (in a different
  * thread); this routine merely queues up the atom. If the synchronous
@@ -1037,6 +1037,7 @@ void SQLAtomStorage::storeAtom(const Handle& h, bool synchronous)
 /**
  * Synchronously store a single atom. That is, the actual store is done
  * in the calling thread.  All values attached to the atom are also
+ * stored. All values attached to atoms in the outgoing set are also
  * stored.
  *
  * Returns the height of the atom.
@@ -1354,6 +1355,8 @@ SQLAtomStorage::PseudoPtr SQLAtomStorage::petAtom(UUID uuid)
 /// When adding links of unknown provenance, it could happen that
 /// the outgoing set of the link has not yet been loaded.  In
 /// that case, we have to load the outgoing set first.
+///
+/// Note that this does NOT fetch any values!
 Handle SQLAtomStorage::get_recursive_if_not_exists(PseudoPtr p)
 {
 	if (classserver().isA(p->type, NODE))
@@ -1385,7 +1388,7 @@ Handle SQLAtomStorage::get_recursive_if_not_exists(PseudoPtr p)
 /**
  * Retreive the entire incoming set of the indicated atom.
  */
-HandleSeq SQLAtomStorage::getIncomingSet(const Handle& h)
+void SQLAtomStorage::getIncomingSet(AtomTable& table, const Handle& h)
 {
 	UUID uuid = get_uuid(h);
 
@@ -1417,6 +1420,7 @@ HandleSeq SQLAtomStorage::getIncomingSet(const Handle& h)
 		[&] (const PseudoPtr& p)
 	{
 		Handle hi(get_recursive_if_not_exists(p));
+		hi = table.add(hi, false);
 		get_atom_values(hi);
 		std::lock_guard<std::mutex> lck(iset_mutex);
 		iset.emplace_back(hi);
@@ -1426,8 +1430,6 @@ HandleSeq SQLAtomStorage::getIncomingSet(const Handle& h)
 	_num_get_insets++;
 	_num_get_inlinks += iset.size();
 #endif // STORAGE_DEBUG
-
-	return iset;
 }
 
 /**

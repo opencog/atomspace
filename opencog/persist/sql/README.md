@@ -6,8 +6,8 @@ SQL Persist
 + Status update Dec 2013
 + Status update Jan 2017
 
-A simple implementation of atom persistence in SQL.  This allows not
-only saving and restoring of the atomspace, but it also allows multiple
+An implementation of atom persistence in SQL.  This allows not only
+saving and restoring of the atomspace, but it also allows multiple
 cogservers to share a common set of data.  That is, it implements a
 basic form of a distributed atomspace.
 
@@ -15,23 +15,21 @@ Status
 ======
 It works and has been used with databases containing millions of atoms,
 accessed by cogservers that ran for months to perform computations. It
-has scaled trouble-free, without any slowdown, up to four cogservers.
+has scaled, trouble-free, without any slowdown, up to four cogservers.
 No one has tried anything larger than that, yet.
 
 Features
 --------
- * Save and restore of individual atoms, and several kinds of truth values.
+ * Save and restore of individual atoms and values.
  * Bulk save-and-restore of entire AtomSpace contents.
- * Incremental save/restore (i.e. update the SQL contents as AtomSpace
-   changes).
  * Generic API, useful for inter-server communications.
 
 Missing features/ToDo items
 ---------------------------
+ * Clarify value save/restore semantics.
  * Add support for multiple atom spaces.
  * Provide optimized table layout for EvaluationLinks.
  * Add support for Space/TimeServer data.
- * Implement ProtoAtom storage.
  * See also TODO list at very bottom.
 
 Performance status
@@ -85,24 +83,51 @@ The goal of this implementation is to:
    strength of the current design is supposed to be simplicity, not
    scalability or raw performance.
 
-4) A non-design-goal (at this time) is to build a system that can scale
+4) Provide a reference implementation for save and restore semantics.
+   When saving or fetching outgoing sets, there are several choices
+   of how to handle the associated values: these can also be saved
+   or fetched, clobbering the atomspace contents, or some more
+   fine-grained control can be provided.  The choices have both
+   usability and performance implications. The choices are discussed
+   in a separate section, below.
+
+5) Discover the most minimal, simplest backingstore API. This API is
+   the API between the AtomSpace, and the persistance backend.  The
+   reason for keeping it as simple as possible is to minimize the work
+   needed to create other backends, as well as all the standard software
+   development reasons: lower complexity means fewer bugs and better
+   performance.  Lower complexity means the code is easier to understand
+   and use correctly.
+
+6) A non-design-goal (at this time) is to build a system that can scale
    to more than 100 cogserver instances.  The current design might be
    able to scale to this many, but probably not much more.  Scaling
    larger than this would probably require a fundamental redesign of
    all of opencog, starting with the atomspace.
 
-5) A non-design-goal is fully automatic save-restore of atoms.  Both
-   the save and restore of atoms must be triggered by calls to the
-   atomspace API.  The reason for this design point is that the
-   atomspace is at too low a level to be fully automatic.  It cannot
-   guess what the user really wants to do.  If it did guess, it would
-   probably guess wrong: saving atoms before the user is done with them,
-   saving atoms that get deleted microseconds later, fetching atoms
-   that the user is completely disinterested in, clogging up RAM and
-   wasting CPU time.  Some other layer, a higher level layer, needs to
-   implement a policy for save/restore.  This layer only provides a
-   mechanism.  It would be very very wrong to implement an automatic
-   policy at this layer.
+7) A non-design-goal is fully automatic save-restore of atoms.  The
+   save and restore of atoms are performed under the explicit control
+   by user-written code, invoking the save/restore API. There is no
+   automation. Control is in the user's hands.
+
+   The reason for this design point is that the atomspace is at too low
+   a level to be fully automatic.  It cannot guess what the user really
+   wants to do.  If it did try to guess, it would probably guess wrong:
+   saving atoms before the user is done with them, saving atoms that get
+   deleted microseconds later, fetching atoms that the user is completely
+   disinterested in, clogging up RAM and wasting CPU time.  The policy
+   for what to save, and when, needs to be left in control of the user
+   algorithms.
+
+   This layer only provides a mechanism.  It would be very very wrong to
+   implement an automatic policy at this layer.
+
+8) A fundamental non-goal is to provide any sort of generic object
+   persistence.  The code here is meant only to save and restore atoms
+   and values, and not generic C++ objects. The design of the AtomSpace
+   has been carefully crafted to provide two classes of objects: the
+   immutable, globally unique atoms, and the mutable valuations
+   associated to atoms.  This backend mirrors this functional split.
 
 
 Current Design
@@ -110,25 +135,14 @@ Current Design
 The core design defines only a few very simple SQL tables, and some
 readers and writers to save and restore atoms from an SQL database.
 
-Note that the core design does *not* make use of object reflection,
-nor can it store arbitrary kinds of objects. It is very definitely
-hard-wired. Yes, this can be considered to be a short-coming.
-A more general, persistent object framework (for C) can be found
-at http://estron.alioth.debian.org/  However, simplicity, at the
-cost of missing flexibility, seems more important.
-
 The current design can save/restore individual atoms, and it can
-bulk-save/bulk-restore the entire contents of an AtomTable.
-A semi-realized goal of the prototype is to implement incremental save
-and restore -- that is, to fetch atoms in a "just in time" fashion, and
-to save away atoms that are not needed in RAM (e.g. atoms with
-low/non-existent attention values). The AtomSpace BackingStore provides
-the current, minimalistic, low-function API for this.
+bulk-save/bulk-restore the entire contents of the AtomSpace. The above
+listed goals seem to be met, more or less.
 
 Features
 --------
- * The AtomStorage class is thread-safe, according to the unit tests
-and limited personal experience.
+ * The AtomStorage class is thread-safe, and multi-threaded use is
+tested in several unit tests.
 
  * Fully automated mapping of in-RAM atoms to in-storage universal
 unique identifiers (UUID's), using the TLB mechanism.
@@ -141,14 +155,14 @@ There is existing infrastructure that enables this, e.g. one can
 "malloc" ranges of UUID's.  The code has bit-rotted, for lack of use.
 
  * This implementation automatically handles clashing atom types.  That
-is, if the database is written with one set of atom types, and then the
+is, if the data is written with one set of atom types, and then the
 cogserver is stopped, the atomtypes are all changed (with some added,
-some deleted), then pulling from the database will automatically
-translate and use the new atom types. (The deleted atom types will not
-be removed from the database.  Restoring atoms with deleted atomtypes
-will cause an exception to be thrown.)
+some deleted), then during the load of the old data, the types will
+be automatically translated to use the new atom types. (The deleted
+atom types will not be removed from the database.  Restoring atoms with
+deleted atomtypes will cause an exception to be thrown.)
 
- * Non-blocking atom store requests are implemented.  Four asynchronous
+ * Non-blocking atom store requests are implemented.  Eight asynchronous
 write-back threads are used, with hi/lo watermarks for queue management.
 That is, if a user asks that an atom be stored, then the atom will be
 queued for storage, and one of these threads will perform the actual
@@ -159,11 +173,14 @@ full; in that case, the user will be blocked until the queue drains
 below the low watermark. The number of connections can be raised by
 editing the AtomStorage constructor, and recompiling.
 
-The fire-n-forget algo is implemented in the C++
+This fire-n-forget queue management algo is implemented in the C++
 `AtomStorage::storeAtom()` method.  If the backlog of unwritten atoms
 gets too large, the storeAtom() method may stall. Its currently designed
 to stall if there's a backlog of 100 or more unwritten atoms.  This can
 be changed by searching for `HIGH_WATER_MARK`, changing it and recompiling.
+
+Queue performance statistics can be printed with the `(sql-stats)`
+scheme command.
 
  * Reading always blocks: if the user asks for an atom, the call will
 not return to the user until the atom is available.  At this time,
@@ -171,12 +188,80 @@ pre-fetch has not been implemented.  But that's because pre-fetch is
 easy: the user can do it in their own thread :-)
 
 
+Semantics
+=========
+Exactly what to save, when saving and restoring atoms, is not entirely
+obvious.  The alternatives, and thier implications, are discussed below.
+
+* Saving a single node. Should all associated values be saved? Should
+the user get to pick which values get saved?  Its possible that the user
+only wants to save one particular value, only, so as not to clobber
+other values already in the database.  The current default is to save
+all associated values, when storing a single node.  This is only weakly
+unit-tested; the tests are not thorough, and do not check all possible
+permuations.
+
+* Saving a single link. When a link is saved, the outgoing set of the
+link must also be saved. Thus, the above considerations for node-values
+also apply to the outgoing set of the link, and so on, recursively, for
+the nested links.  The current default is to save all associated values,
+on the entire outgoing set, recursively, when storing a single link.
+This is only weakly unit-tested.
+
+The alternative would be to save only the outgoing set atoms, but not
+the values on them.  For the SQL backend, not saving all values could
+decrease the amount of database traffic, and thus improve performance.
+For other backends, this may not be the case, as the increased complexity
+of specifying what, exactly, to save, could really hurt performance.
+
+Its possible that some users may want to save *only* the values on the
+immediate link, but not on any of the outgoing set. There is currently no
+API for this.
+
+* Restoring a single node or link. The above considerations for saving
+run in the opposite direction, when restoring. Thus, for example, when
+restoring a single node, should all associated values in the AtomSpace
+be clobbered, or not?
+
+Currently, when an atom is restored, all of the associated values are
+pulled from the database, and placed in the AtomSpace, clobbering the
+previous AtomSpace contents.  This is done recursively, for links.
+This is tested, but only weakly and incompletely, in the unit tests.
+
+* Restoring by atom type; restoring incoming sets.  Groups of atoms
+can be fetched from the database: in the first case, all atoms of a
+given type; in the second case, all atoms in the incoming set of a
+given atom.  There are four possibilities here: (a) fetch only the
+atoms, but not any of the associated values. (b) fetch the atoms
+and the associated values, but not the values in the recursive outgoing
+sets. (c) fetch the atoms and values, and all atoms and values,
+recursively, in thier outgoing set. (d) fetch the atoms, but update
+the values only if they are atoms are new to the atomspace; i.e. do
+not clobber existing values in the atomsapce.
+
+Currently, option (b) is implemented, and is weakly unit-tested.
+It is plausible that some users may want options (a), (c) or (d).
+Note that option (d) has several variations.
+
+In the SQL backend, option (b) mostly minimizes the network and database
+traffic.  For other kinds of backends, it might be more efficient to
+implement option (c), and just get all the data in one big gulp.
+
+* Restoring by pattern. This is not implemented, not done.  However,
+one can imagine a situation where a pattern-matcher-like interface
+is provided for the backend, so that only certain values, on certain
+atoms, in certain locations in a given pattern, are fetched.
+
+This is not done because the pattern matcher is really quite commplex,
+and it seems kind-of crazy to try to put this in the backend.  There
+currently aren't any plausible scenarios, and plausible algorithms,
+that would need this capability.
+
+
+
 Install, Setup and Usage HOWTO
 ==============================
 There are many steps needed to install and use this. Sorry!
-
-07-05-2015: Updated instructions below to be slightly more instructive
-	    and up-to-date for PostgreSQL 9.3 and Ubuntu 14.04.
 
 Compiling
 ---------
@@ -191,8 +276,10 @@ C-language bindings to the Postgres client library.
 
 Optional ODBC drivers
 ---------------------
-Optionally, download and install UnixODBC devel packages.
-Do NOT use IODBC, it fails to support UTF-8.
+Optionally, download and install UnixODBC devel packages.  Do NOT use
+IODBC, it fails to support UTF-8!  It's also buggy when more than a few
+100K atoms need to be fetched.
+
 The Postgres drivers seem to be considerably faster; the use of the
 ODBC driver is discouraged, unless you really need it or really like it.
 
@@ -227,7 +314,7 @@ Optional: ODBC Device Driver Setup
 ----------------------------------
 If you want to use ODBC, then you need to configure the ODBC driver.
 Again: the use of ODBC is optional and discouraged; its slower clunkier
-and more complex.
+and more complex. Skip this section if you are not using ODBC.
 
 After install, verify that `/etc/odbcinst.ini` contains the stanza
 below (or something similar).  If it is missing, then edit this file
@@ -269,10 +356,19 @@ mess with it, then add the below:
 
 Performance tweaks
 ------------------
-The Postgres default configuration can be/should be tweaked for
-performance.  Newer version of Postgres seem to be OK (??) but in
-some cases, performance will be a disaster if the database is not
-tuned.
+The Postgres default configuration can be (and should be) tweaked for
+performance.  The performance will be disasterously slow if the database
+is not tuned.  The primary performance bottleneck is the default of
+synchronous commits during writing. On spinning disk drives, this can
+lead to delays of tens of milliseconds to write handfuls of atoms, as
+that is the seek time (latency) for spinning disk media.  Solid state
+disks are probably a lot faster, but you still want to avoid reflashing
+large (64KByte) sectors just to storre a handful of atoms (a few hundred
+bytes).  Thus, synchronous commits should be disabled.
+
+(The postgres default is intended to minimize data loss in the case
+of accidental power loss.  This is NOT a concern for running opencog
+workloads).
 
 Edit `postgresql.conf` (a typical location is
 `/etc/postgresql/9.3/main/postgresql.conf`) and make the changes below.
@@ -291,11 +387,10 @@ http://wiki.postgresql.org/wiki/Tuning_Your_PostgreSQL_Server
    autovacuum = on
    track_counts = on
 ```
-A large value for `wal_buffers` is needed because much of the database
-traffic consists of updates.  Enabling vacuum is very important, for
-the same reason; performance degrades substantially (by factors of
-3x-10x) without regular vacuuming. (Newer versions of Postgres vacuum
-automatically. YMMV.)
+The large value for `wal_buffers` might not be needed.
+Enabling vacuum is very important, for the same reason; performance
+degrades substantially (by factors of 3x-10x) without regular vacuuming.
+(Current versions of Postgres vacuum automatically. YMMV.)
 
 Restarting the server might lead to errors stating that max shared mem
 usage has been exceeded. This can be fixed by telling the kernel to use
@@ -336,13 +431,15 @@ try doing this, replacing 'alex' with your username.
    template1=# ALTER ROLE alex WITH LOGIN;
 ```
 
-Verify that worked out by typing \dg to see:
+Verify that worked out by typing `\dg` to see:
 
+```
                              List of roles
  Role name |                   Attributes                   | Member of
 -----------+------------------------------------------------+-----------
  alex      | Superuser                                      | {}
  postgres  | Superuser, Create role, Create DB, Replication | {}
+```
 
 Then do Ctrl+D to exit, ignoring any message about `psql_history`, and
 return to your own account:
@@ -351,12 +448,14 @@ return to your own account:
    $ exit
 ```
 
-If you ran into the error above you still need to create the database of
-course (no output if successful):
+If you ran into the error above, you still need to go back and create
+the database:
 
 ```
    $ createdb mycogdata
 ```
+There is no output if the command is successful.
+
 You should be able to access that database using the so-called `peer`
 authentication method. This command:
 ```
@@ -449,7 +548,7 @@ Create the database tables:
 ```
 
 If you are using a different user-id than your login, then you will
-have to add the `-U opencog_user` flag to the `psql` command.  If you
+Have to add the `-U opencog_user` flag to the `psql` command.  If you
 created a distinct user, and did not set up the `hba.conf` file as
 above, then you also need a `-h localhost` flag, to access the database
 using TCP/IP sockets on the local network.
@@ -622,7 +721,8 @@ So here's a super-short recap:
 
 
 After the above steps, `BasicSaveUTest`, `PersistUTest`,
-`MultiPersistUTest` and `FetchUTest` should run and pass.
+`MultiPersistUTest`,`FetchUTest` and `ValueSaveUTest` should run and
+pass.
 
 
 Unit Test Status
@@ -1062,9 +1162,6 @@ TODO
    broken. Its probably simplest to just ignore the code in
    `postgres-dead`, and design something from scratch.
 
- * Store ProtoAtoms. Work is underway, see issue #513 for progress.
-   Right now, its not thread-safe....
-
  * Consider an alternate implementation, using JSONB to do an EAV-like
    storage: For details, see
    http://coussej.github.io/2016/01/14/Replacing-EAV-with-JSONB-in-PostgreSQL/
@@ -1078,3 +1175,20 @@ TODO
    decrease the SQL table sizes significantly, and decrease server I/O
    by factors of 2x-3x.  Another table, designed just for simple pairs,
    might help a lot, too.
+
+ * Create an API to allow the user to save only selected values on an
+   atom.
+
+ * Create an API to allow the user to NOT perform the recursive save of
+   all values in the outgoing set (of a link).
+
+ * Create an API to allow the user to restore only selected values on an
+   atom.
+
+ * Create an API to allow the user to NOT perform the recursive restore
+   of all values in the outgoing set (of a link).
+
+ * Create an API that provides fine-grained control over what values
+   are fetched, when fetching atoms by type, or by incoming set.  See
+   the section entitles "Semantics", above, for the various different
+   options.

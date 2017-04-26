@@ -55,9 +55,9 @@ class SQLBackingStore : public BackingStore
 
         virtual Handle getNode(Type, const char *) const;
         virtual Handle getLink(Type, const HandleSeq&) const;
-        virtual HandleSeq getIncomingSet(const Handle&) const;
         virtual void storeAtom(const Handle&);
         virtual void loadType(AtomTable&, Type);
+        virtual void getIncomingSet(AtomTable&, const Handle&);
         virtual void barrier();
 
         void registerWith(AtomSpace*);
