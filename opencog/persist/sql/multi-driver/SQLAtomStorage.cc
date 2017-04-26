@@ -513,7 +513,7 @@ void SQLAtomStorage::store_atomtable_id(const AtomTable& at)
 
 #define STMTF(colname,fval) { \
 	char buff[BUFSZ]; \
-	snprintf(buff, BUFSZ, "%12.8g", fval); \
+	snprintf(buff, BUFSZ, "%22.16g", fval); \
 	STMT(colname, buff); \
 }
 
