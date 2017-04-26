@@ -1388,7 +1388,7 @@ Handle SQLAtomStorage::get_recursive_if_not_exists(PseudoPtr p)
 /**
  * Retreive the entire incoming set of the indicated atom.
  */
-HandleSeq SQLAtomStorage::getIncomingSet(const Handle& h)
+void SQLAtomStorage::getIncomingSet(AtomTable& table, const Handle& h)
 {
 	UUID uuid = get_uuid(h);
 
@@ -1420,6 +1420,7 @@ HandleSeq SQLAtomStorage::getIncomingSet(const Handle& h)
 		[&] (const PseudoPtr& p)
 	{
 		Handle hi(get_recursive_if_not_exists(p));
+		hi = table.add(hi, false);
 		get_atom_values(hi);
 		std::lock_guard<std::mutex> lck(iset_mutex);
 		iset.emplace_back(hi);
@@ -1429,8 +1430,6 @@ HandleSeq SQLAtomStorage::getIncomingSet(const Handle& h)
 	_num_get_insets++;
 	_num_get_inlinks += iset.size();
 #endif // STORAGE_DEBUG
-
-	return iset;
 }
 
 /**

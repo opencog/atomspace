@@ -210,7 +210,7 @@ class SQLAtomStorage : public AtomStorage
 		// AtomStorage interface
 		Handle getNode(Type, const char *);
 		Handle getLink(Type, const HandleSeq&);
-		HandleSeq getIncomingSet(const Handle&);
+		void getIncomingSet(AtomTable&, const Handle&);
 		void storeAtom(const Handle&, bool synchronous = false);
 		void loadType(AtomTable&, Type);
 		void flushStoreQueue();

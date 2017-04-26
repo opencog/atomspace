@@ -161,11 +161,9 @@ void ZMQClient::load(AtomTable &table) {
 /**
  * Retrieve the entire incoming set of the indicated atom.
  */
-HandleSeq ZMQClient::getIncomingSet(const Handle& h)
+void ZMQClient::getIncomingSet(AtomTable& table, const Handle& h)
 {
 	// TODO: implement
-	HandleSeq handles;
-	return handles;
 }
 
 /**
