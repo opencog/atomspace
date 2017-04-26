@@ -655,10 +655,10 @@ void ValueSaveUTest::do_test_link_by_type()
 	Handle gav = as->add_node(CONCEPT_NODE, "a depth-2 node");
 
 	// Note that the A-nodes above are added *before* the fetch;
-	// therefore, the fetch should NOT clobber the values there.
-	// However, the values on the B-nodes and the C-links should
-	// be fetched.
-	as->fetch_all_atoms_of_type(CONCEPT_NODE);
+	// The B-nodes are added after the fetch. In either case,
+	// there should not be any values fetched for either A or B;
+	// only the values on the C-links should be fetched.
+	as->fetch_all_atoms_of_type(LIST_LINK);
 
 	Handle gbf = as->add_node(CONCEPT_NODE, "b float node");
 	Handle gbt = as->add_node(CONCEPT_NODE, "b string node");
@@ -680,20 +680,20 @@ void ValueSaveUTest::do_test_link_by_type()
 	TruthValuePtr gtl = gal->getTruthValue();
 	TruthValuePtr gtv = gav->getTruthValue();
 
-	TS_ASSERT(*gtf == *TruthValue::DEFAULT_TV());
-	TS_ASSERT(*gtt == *TruthValue::DEFAULT_TV());
-	TS_ASSERT(*gtl == *TruthValue::DEFAULT_TV());
-	TS_ASSERT(*gtv == *TruthValue::DEFAULT_TV());
+	TS_ASSERT(gtf == TruthValue::DEFAULT_TV());
+	TS_ASSERT(gtt == TruthValue::DEFAULT_TV());
+	TS_ASSERT(gtl == TruthValue::DEFAULT_TV());
+	TS_ASSERT(gtv == TruthValue::DEFAULT_TV());
 
 	gtf = gbf->getTruthValue();
 	gtt = gbt->getTruthValue();
 	gtl = gbl->getTruthValue();
 	gtv = gbv->getTruthValue();
 
-	TS_ASSERT(*gtf == *tf);
-	TS_ASSERT(*gtt == *tt);
-	TS_ASSERT(*gtl == *tl);
-	TS_ASSERT(*gtv == *tv);
+	TS_ASSERT(gtf == TruthValue::DEFAULT_TV());
+	TS_ASSERT(gtt == TruthValue::DEFAULT_TV());
+	TS_ASSERT(gtl == TruthValue::DEFAULT_TV());
+	TS_ASSERT(gtv == TruthValue::DEFAULT_TV());
 
 	gtf = gcf->getTruthValue();
 	gtt = gct->getTruthValue();
@@ -707,25 +707,30 @@ void ValueSaveUTest::do_test_link_by_type()
 
 	// --------------------
 
-	ProtoAtomPtr gpf = gaf->getValue(gkey);
-	ProtoAtomPtr gpt = gat->getValue(gkey);
-	ProtoAtomPtr gpl = gal->getValue(gkey);
-	ProtoAtomPtr gpv = gav->getValue(gkey);
+	ProtoAtomPtr gpf;
+	ProtoAtomPtr gpt;
+	ProtoAtomPtr gpl;
+	ProtoAtomPtr gpv;
+
+	try { gpf = gaf->getValue(gkey); } catch(const RuntimeException&) {}
+	try { gpt = gat->getValue(gkey); } catch(const RuntimeException&) {}
+	try { gpl = gal->getValue(gkey); } catch(const RuntimeException&) {}
+	try { gpv = gav->getValue(gkey); } catch(const RuntimeException&) {}
 
 	TS_ASSERT(gpf == nullptr);
 	TS_ASSERT(gpt == nullptr);
 	TS_ASSERT(gpl == nullptr);
 	TS_ASSERT(gpv == nullptr);
 
-	gpf = gbf->getValue(gkey);
-	gpt = gbt->getValue(gkey);
-	gpl = gbl->getValue(gkey);
-	gpv = gbv->getValue(gkey);
+	try { gpf = gbf->getValue(gkey); } catch(const RuntimeException&) {}
+	try { gpt = gbt->getValue(gkey); } catch(const RuntimeException&) {}
+	try { gpl = gbl->getValue(gkey); } catch(const RuntimeException&) {}
+	try { gpv = gbv->getValue(gkey); } catch(const RuntimeException&) {}
 
-	TS_ASSERT(*gpf == *pvf);
-	TS_ASSERT(*gpt == *pvt);
-	TS_ASSERT(*gpl == *pvl);
-	TS_ASSERT(*gpv == *pvv);
+	TS_ASSERT(gpf == nullptr);
+	TS_ASSERT(gpt == nullptr);
+	TS_ASSERT(gpl == nullptr);
+	TS_ASSERT(gpv == nullptr);
 
 	gpf = gcf->getValue(gkey);
 	gpt = gct->getValue(gkey);

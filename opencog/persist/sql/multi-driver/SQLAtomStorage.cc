@@ -170,8 +170,8 @@ class SQLAtomStorage::Response
 			return false;
 		}
 
-		// Load an atom into the atom table. Clobber (don't merge)
-		// the truth values.
+		// Load an atom into the atom table. Fetch all values on the
+		// atom, but NOT on its outgoing set!
 		bool load_if_not_exists_cb(void)
 		{
 			// printf ("---- New atom found ----\n");
@@ -188,8 +188,9 @@ class SQLAtomStorage::Response
 					h = table->add(atom, false);
 					store->_tlbuf.addAtom(h, uuid);
 				}
-				// Clobber all values, including truth values.
 			}
+
+			// Clobber all values, including truth values.
 			store->get_atom_values(h);
 			return false;
 		}
@@ -1354,6 +1355,8 @@ SQLAtomStorage::PseudoPtr SQLAtomStorage::petAtom(UUID uuid)
 /// When adding links of unknown provenance, it could happen that
 /// the outgoing set of the link has not yet been loaded.  In
 /// that case, we have to load the outgoing set first.
+///
+/// Note that this does NOT fetch any values!
 Handle SQLAtomStorage::get_recursive_if_not_exists(PseudoPtr p)
 {
 	if (classserver().isA(p->type, NODE))

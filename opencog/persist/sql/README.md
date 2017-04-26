@@ -233,22 +233,26 @@ can be fetched from the database: in the first case, all atoms of a
 given type; in the second case, all atoms in the incoming set of a
 given atom.  There are four possibilities here: (a) fetch only the
 atoms, but not any of the associated values. (b) fetch the atoms
-and the associated values, but not the values in the recursive outoging
+and the associated values, but not the values in the recursive outgoing
 sets. (c) fetch the atoms and values, and all atoms and values,
 recursively, in thier outgoing set. (d) fetch the atoms, but update
 the values only if they are atoms are new to the atomspace; i.e. do
 not clobber existing values in the atomsapce.
 
-Currently, option (c) is implemented, and is weakly unit-tested.
-It is plausible that some users may want options (a), (b) or (d).
+Currently, option (b) is implemented, and is weakly unit-tested.
+It is plausible that some users may want options (a), (c) or (d).
 Note that option (d) has several variations.
+
+In the SQL backend, option (b) mostly minimizes the network and database
+traffic.  For other kinds of backends, it might be more efficient to
+implement option (c), and just get all the data in one big gulp.
 
 * Restoring by pattern. This is not implemented, not done.  However,
 one can imagine a situation where a pattern-matcher-like interface
 is provided for the backend, so that only certain values, on certain
 atoms, in certain locations in a given pattern, are fetched.
 
-This is not doen because the pattern matcher is really quite commplex,
+This is not done because the pattern matcher is really quite commplex,
 and it seems kind-of crazy to try to put this in the backend.  There
 currently aren't any plausible scenarios, and plausible algorithms,
 that would need this capability.
