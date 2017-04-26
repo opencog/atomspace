@@ -69,7 +69,7 @@ ProbabilisticTruthValue::ProbabilisticTruthValue(const ProtoAtomPtr& source)
             "Source must be a ProbabilisticTruthValue");
 
     FloatValuePtr fp(FloatValueCast(source));
-    _value.resize(2);
+    _value.resize(3);
     _value[MEAN] = fp->value()[MEAN];
     _value[CONFIDENCE] = fp->value()[CONFIDENCE];
     _value[COUNT] = fp->value()[COUNT];

@@ -849,7 +849,7 @@ void SQLAtomStorage::store_atom_values(const Handle& atom)
 	// Special-case for TruthValues. Can we get rid of this someday?
 	TruthValuePtr tv(atom->getTruthValue());
 
-	// XXX This is wasteful of performance; do we really
+	// XXX This is if-check costs cycles; do we really
 	// need to do this?
 	if (tv->isDefaultTV())
 	{
