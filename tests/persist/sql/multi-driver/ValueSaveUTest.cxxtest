@@ -469,6 +469,7 @@ void ValueSaveUTest::do_test_load_by_type()
 	// Fetch by type. This is what we are testing.
 	as->fetch_all_atoms_of_type(CONCEPT_NODE);
 
+	Handle gkey = as->add_node(PREDICATE_NODE, "some pred key");
 	Handle gaf = as->add_node(CONCEPT_NODE, "float node");
 	Handle gat = as->add_node(CONCEPT_NODE, "string node");
 	Handle gal = as->add_node(CONCEPT_NODE, "link depth-1 node");
@@ -489,10 +490,10 @@ void ValueSaveUTest::do_test_load_by_type()
 	TS_ASSERT(*gtl == *tl);
 	TS_ASSERT(*gtv == *tv);
 
-	ProtoAtomPtr gpf = gaf->getValue(key);
-	ProtoAtomPtr gpt = gat->getValue(key);
-	ProtoAtomPtr gpl = gal->getValue(key);
-	ProtoAtomPtr gpv = gav->getValue(key);
+	ProtoAtomPtr gpf = gaf->getValue(gkey);
+	ProtoAtomPtr gpt = gat->getValue(gkey);
+	ProtoAtomPtr gpl = gal->getValue(gkey);
+	ProtoAtomPtr gpv = gav->getValue(gkey);
 
 	TS_ASSERT(*gpf == *pvf);
 	TS_ASSERT(*gpt == *pvt);
