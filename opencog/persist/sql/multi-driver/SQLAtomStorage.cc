@@ -163,10 +163,12 @@ class SQLAtomStorage::Response
 			PseudoPtr p(store->makeAtom(*this, uuid));
 			Handle atom(store->get_recursive_if_not_exists(p));
 			Handle h(table->add(atom, false));
-			store->get_atom_values(h);
 
 			// Force resolution in TLB, so that later removes work.
 			store->_tlbuf.addAtom(h, uuid);
+
+			// Get the values only after TLB insertion!!
+			store->get_atom_values(h);
 			return false;
 		}
 
