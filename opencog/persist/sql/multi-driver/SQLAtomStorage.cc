@@ -935,8 +935,8 @@ UUID SQLAtomStorage::get_uuid(const Handle& h)
 	UUID uuid = check_uuid(h);
 	if (TLB::INVALID_UUID != uuid) return uuid;
 
-	throw IOException(TRACE_INFO,
-		"Error: get_uuid(): cannot find %s\n", h->toString().c_str());
+	// Throw a silent exception; don't clutter log-files with this!
+	throw NotFoundException(TRACE_INFO, "");
 
 	return TLB::INVALID_UUID;
 }
@@ -1507,7 +1507,7 @@ Handle SQLAtomStorage::doGetLink(Type t, const HandleSeq& hseq)
 	{
 		ostr = oset_to_string(hseq);
 	}
-	catch (const IOException& ex)
+	catch (const NotFoundException& ex)
 	{
 		return Handle();
 	}
