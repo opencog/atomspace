@@ -247,26 +247,41 @@ void* c_wrap_init_only_once(void* p)
 	return nullptr;
 }
 
-// Initialization that needs to be performed only once, for the entire
-// process.
-static void init_only_once(void)
+static volatile bool done_with_init = false;
+
+static void immortal_thread(void)
 {
-	static volatile bool done_with_init = false;
-	if (done_with_init) return;
-
-	// Enter initalization only once. All other threads spin, until
-	// it is completed.
-	if (eval_is_inited.test_and_set())
-	{
-		while (not done_with_init) { usleep(1000); }
-		return;
-	}
-
 	scm_with_guile(c_wrap_init_only_once, NULL);
 
 	// Tell compiler to set flag dead-last, after above has executed.
 	asm volatile("": : :"memory");
 	done_with_init = true;
+
+	// sleep forever-and-ever.
+	while (true) { pause(); }
+}
+
+// Initialization that needs to be performed only once, for the entire
+// process.
+static void init_only_once(void)
+{
+	if (done_with_init) return;
+
+	// Enter initalization only once. All other threads spin, until
+	// it is completed.
+	//
+	// The first time that guile is initialized, it MUST be done in some
+	// thread that will never-ever exit. If this thread exits, the bdwgc
+	// will not ever find out about it, and this will scramble it's
+	// state.  This is documented in two related bugs:
+	// https://debbugs.gnu.org/cgi/bugreport.cgi?bug=26711  and
+	// https://github.com/opencog/atomspace/issues/1054
+	if (not eval_is_inited.test_and_set())
+	{
+		new std::thread(immortal_thread);
+	}
+
+	while (not done_with_init) { usleep(1000); }
 }
 
 SchemeEval::SchemeEval(AtomSpace* as)
