@@ -904,6 +904,8 @@ int SQLAtomStorage::get_height(const Handle& atom)
 
 /* ================================================================ */
 
+/// Return the UUID of the handle, if it is known.
+/// Else return the invalid UUID.
 UUID SQLAtomStorage::check_uuid(const Handle& h)
 {
 	UUID uuid = _tlbuf.getUUID(h);
@@ -926,6 +928,8 @@ UUID SQLAtomStorage::check_uuid(const Handle& h)
 	return TLB::INVALID_UUID;
 }
 
+/// Return the UUID of the handle, if it is known.
+/// Else issue a brand-new one.
 UUID SQLAtomStorage::get_uuid(const Handle& h)
 {
 	UUID uuid = check_uuid(h);
@@ -1496,6 +1500,18 @@ Handle SQLAtomStorage::doGetLink(Type t, const HandleSeq& hseq)
 	if (TLB::INVALID_UUID != uuid)
 		return _tlbuf.getAtom(uuid);
 
+	// If the outgoing set is not yet known, then the link
+	// itself cannot possibly be known.
+	std::string ostr;
+	try
+	{
+		ostr = oset_to_string(hseq);
+	}
+	catch (const IOException& ex)
+	{
+		return Handle();
+	}
+
 	// If we don't know it, then go get it's UUID.
 	setup_typemap();
 
@@ -1504,14 +1520,14 @@ Handle SQLAtomStorage::doGetLink(Type t, const HandleSeq& hseq)
 		"SELECT * FROM Atoms WHERE type = %hu AND outgoing = ",
 		storing_typemap[t]);
 
-	std::string ostr = buff;
-	ostr += oset_to_string(hseq);
-	ostr += ";";
+	std::string qstr = buff;
+	qstr += ostr;
+	qstr += ";";
 
 #ifdef STORAGE_DEBUG
 	_num_get_links++;
 #endif // STORAGE_DEBUG
-	PseudoPtr p = getAtom(ostr.c_str(), 1);
+	PseudoPtr p = getAtom(qstr.c_str(), 1);
 	if (nullptr == p) return Handle();
 
 #ifdef STORAGE_DEBUG
