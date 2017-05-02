@@ -34,43 +34,6 @@
 
 namespace opencog {
 
-Unify::Context::Context(const Quotation& q, const OrderedHandleSet& s)
-	: quotation(q), shadow(s) {}
-
-void Unify::Context::update(const Handle& h)
-{
-	Type t = h->getType();
-
-	// Update shadow
-	if (quotation.is_unquoted() and classserver().isA(t, SCOPE_LINK)) {
-		// Insert the new shadowing variables from the scope link
-		const Variables& variables = ScopeLinkCast(h)->get_variables();
-		shadow.insert(variables.varset.begin(), variables.varset.end());
-	}
-
-	// Update quotation
-	quotation.update(t);
-}
-
-bool Unify::Context::is_free_variable(const Handle& h) const
-{
-	return (h->getType() == VARIABLE_NODE)
-		and quotation.is_unquoted()
-		and not is_in(h, shadow);
-}
-
-bool Unify::Context::operator==(const Context& context) const
-{
-	return (quotation == context.quotation)
-		and ohs_content_eq(shadow, context.shadow);
-}
-
-bool Unify::Context::operator<(const Context& context) const
-{
-	return quotation < context.quotation
-		or (quotation == context.quotation and shadow < context.shadow);
-}
-
 Unify::CHandle::CHandle(const Handle& h, const Context& c)
 	: handle(h), context(c) {}
 
@@ -863,21 +826,6 @@ bool Unify::is_satisfiable(const TypedBlock& block) const
 	return (bool)block.second;
 }
 
-bool ohs_content_eq(const OrderedHandleSet& lhs, const OrderedHandleSet& rhs)
-{
-	if (lhs.size() != rhs.size())
-		return false;
-
-	auto lit = lhs.begin();
-	auto rit = rhs.begin();
-	while (lit != lhs.end()) {
-		if (not content_eq(*lit, *rit))
-			return false;
-		++lit; ++rit;
-	}
-	return true;
-}
-
 bool hm_content_eq(const HandleMap& lhs, const HandleMap& rhs)
 {
 	if (lhs.size() != rhs.size())
@@ -1085,17 +1033,6 @@ Handle merge_vardecl(const Handle& lhs_vardecl, const Handle& rhs_vardecl)
 	Variables new_vars =
 		merge_variables(lhs_vl.get_variables(), rhs_vl.get_variables());
 	return new_vars.get_vardecl();
-}
-
-std::string oc_to_string(const Unify::Context& c)
-{
-	std::stringstream ss;
-	if (c == Unify::Context())
-		ss << "none" << std::endl;
-	else
-		ss << "quotation: " << oc_to_string(c.quotation) << std::endl
-		   << "shadow:" << std::endl << oc_to_string(c.shadow);
-	return ss.str();
 }
 
 std::string oc_to_string(const Unify::CHandle& ch)

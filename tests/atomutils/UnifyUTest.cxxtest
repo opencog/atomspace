@@ -24,6 +24,7 @@
 #include <opencog/util/Logger.h>
 
 #include <opencog/atomutils/Unify.h>
+#include <opencog/atoms/base/Context.h>
 #include <opencog/atomspace/AtomSpace.h>
 #include <opencog/guile/SchemeEval.h>
 
@@ -238,7 +239,7 @@ void UnifyUTest::test_join_2()
 		             "    (VariableNode \"$X\")"
 		             "    (ConceptNode \"treatment-1\")))");
 
-	Unify::Context C(Quotation(), {X});
+	Context C(Quotation(), {X});
 	Unify::CHandle Cimplicant_vardecl(implicant_vardecl, C),
 		Cimplicant_body(implicant_body, C);
 
@@ -310,7 +311,7 @@ void UnifyUTest::test_join_3()
 		             "    (VariableNode \"$X\")"
 		             "    (ConceptNode \"treatment-1\")))");
 
-	Unify::Context C(Quotation(), {X});
+	Context C(Quotation(), {X});
 	Unify::CHandle Cimplicant_vardecl(implicant_vardecl, C),
 		Cimplicant_body(implicant_body, C);
 
@@ -770,7 +771,7 @@ void UnifyUTest::test_unify_complex_1()
 		             "    (VariableNode \"$X\")"
 		             "    (ConceptNode \"treatment-1\")))");
 
-	Unify::Context C(Quotation(), {X});
+	Context C(Quotation(), {X});
 	Unify::CHandle Cimplicant_vardecl(implicant_vardecl, C),
 		Cimplicant_body(implicant_body, C);
 
@@ -898,7 +899,7 @@ void UnifyUTest::test_unify_complex_2()
 		             "    (ListLink"
 		             "      (VariableNode \"$X\")"
 		             "      (VariableNode \"$Y-6f50cc6a\"))))");
-	Unify::Context C(Quotation(), {X});
+	Context C(Quotation(), {X});
 	Unify::CHandle CP(P, C);
 	Unify::CHandle Cconjunction(conjunction, C);
 
@@ -1004,7 +1005,7 @@ void UnifyUTest::test_unify_complex_3()
 		             "    (VariableNode \"$X\")"
 		             "    (ConceptNode \"compound-A\")))");
 
-	Unify::Context C(Quotation(), {X});
+	Context C(Quotation(), {X});
 	Unify::CHandle Cvardecl(vardecl, C), Cimplicant_body(implicant_body, C);
 
 	Unify unify(lhs, rhs, lhs_vardecl, rhs_vardecl);
@@ -1155,7 +1156,7 @@ void UnifyUTest::test_unify_complex_4()
 		             "    (VariableNode \"$X\")"
 		             "    (ConceptNode \"treatment-1\")))");
 
-	Unify::Context C(Quotation(), {X});
+	Context C(Quotation(), {X});
 	Unify::CHandle Cimplicant_vardecl(implicant_vardecl, C),
 		Cimplicant_body(implicant_body, C);
 
@@ -1242,7 +1243,7 @@ void UnifyUTest::test_unify_complex_5()
 		             "    (VariableNode \"$X\")"
 		             "    (ConceptNode \"treatment-1\")))");
 
-	Unify::Context C(Quotation(), {X});
+	Context C(Quotation(), {X});
 	Unify::CHandle CQ(Q, C),
         Clambda_vardecl(lambda_vardecl, C),
 		Ctake_treatment_1(take_treatment_1, C);
@@ -1382,7 +1383,7 @@ void UnifyUTest::test_unify_complex_6()
 		             "    (VariableNode \"$X\")"
 		             "    (ConceptNode \"treatment-1\")))");
 
-	Unify::Context C(Quotation(), {X});
+	Context C(Quotation(), {X});
 	Unify::CHandle CQ(Q, C),
         Clambda_vardecl(lambda_vardecl, C),
 		Ctake_treatment_1(take_treatment_1, C);
@@ -1470,7 +1471,7 @@ void UnifyUTest::test_unify_complex_7()
 		             "  )"
 		             ")");
 
-	Unify::Context C(Quotation(), {X});
+	Context C(Quotation(), {X});
 	Unify::CHandle CX_vardecl(X_vardecl, C), Cbody(body, C);
 
 	Unify unify(target, alpha_pat, vardecl, alpha_vardecl);
