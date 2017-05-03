@@ -121,6 +121,7 @@ private:
 	static SCM ss_incoming_set(SCM);
 	static SCM ss_incoming_by_type(SCM, SCM);
 	static SCM ss_outgoing_set(SCM);
+	static SCM ss_outgoing_by_type(SCM, SCM);
 	static SCM ss_outgoing_atom(SCM, SCM);
 
 	// Type query functions
