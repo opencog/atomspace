@@ -14,6 +14,8 @@
 ; -- ure-define-rbs -- Create a rbs that runs for a particular number of
 ;                      iterations.
 ; -- ure-get-forward-rule -- Return the forward form of a rule
+; -- gt-zero-confidence -- Return TrueTV iff A's confidence is greater than 0
+; -- meta-bind -- Fully apply a meta rule. Convenient for testing meta-rules
 ;
 ; If you add more utilities don't forget to add them in the
 ; export-rule-engine-utils function.
@@ -24,6 +26,7 @@
 
 (use-modules (opencog))
 (use-modules (opencog query))
+(use-modules (srfi srfi-1))
 
 (define-public (ure-define-add-rule rbs rule-name rule weight)
 "
@@ -162,12 +165,25 @@
     (if (eq? rule-type 'ListLink) (gar rule) rule))
 )
 
-;; Very handy and frequently used rule precondition.
+;; Very handy and frequent rule precondition.
 (define (gt-zero-confidence A)
 "
   Return TrueTV iff A's confidence is greater than 0
 "
   (bool->tv (> (cog-stv-confidence A) 0)))
+
+(define (meta-bind bl)
+"
+  Fully apply a meta rule, once for generating rules, another for
+  applying the generated rules to the atomspace. Convenient for testing
+  meta-rules.
+"
+  (let* ((rules (cog-bind bl))
+         (result-sets (map cog-bind (cog-outgoing-set rules)))
+         (result-lists (map cog-outgoing-set result-sets))
+         (equal-lset-union (lambda (x y) (lset-union equal? x y)))
+         (results (fold equal-lset-union '() result-lists)))
+    (Set results)))
 
 (define (export-rule-engine-utils)
   (export ure-add-rule
@@ -177,5 +193,7 @@
           ure-define-rbs
           ure-get-forward-rule
           gt-zero-confidence
-          export-rule-engine-utils)
+          meta-bind
+          export-rule-engine-utils,
+          )
 )
