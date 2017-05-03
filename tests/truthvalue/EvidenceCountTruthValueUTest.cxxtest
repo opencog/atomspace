@@ -30,9 +30,6 @@
 
 using namespace opencog;
 
-// Workaround for isnan scope problem: https://github.com/opencog/atomspace/issues/1215
-using namespace std;
-
 #define NUM_TVS 3
 #define TV1_POS_COUNT 10
 #define TV2_POS_COUNT 0
@@ -82,7 +79,7 @@ public:
 				                pos_counts[i] / total_counts[i],
 				                FLOAT_ACCEPTABLE_ERROR);
 			} else {
-				TS_ASSERT_IS_NAN(ectvs[i]->getMean());
+				TS_ASSERT(std::isnan(ectvs[i]->getMean()));
 			}
 		}
 	}
