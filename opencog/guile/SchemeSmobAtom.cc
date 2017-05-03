@@ -266,7 +266,7 @@ SCM SchemeSmob::ss_incoming_set (SCM satom)
 SCM SchemeSmob::ss_incoming_by_type (SCM satom, SCM stype)
 {
 	Handle h = verify_handle(satom, "cog-incoming-by-type");
-	Type t = verify_atom_type (stype, "cog-incoming-by-type");
+	Type t = verify_atom_type(stype, "cog-incoming-by-type", 2);
 
 	HandleSeq iset;
 	h->getIncomingSetByType(std::back_inserter(iset), t, false);

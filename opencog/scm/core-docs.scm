@@ -289,9 +289,9 @@
 
     Example:
        ; Define two nodes and a link between them:
-       guile> (define x (cog-new-node 'ConceptNode \"abc\"))
-       guile> (define y (cog-new-node 'ConceptNode \"def\"))
-       guile> (define l (cog-new-link 'Link x y))
+       guile> (define x (ConceptNode \"abc\"))
+       guile> (define y (ConceptNode \"def\"))
+       guile> (define l (Link x y))
 
        ; Get the incoming sets of nodes x and y (which is the link l):
        guile> (cog-incoming-set x)
@@ -321,6 +321,35 @@
        ; Verify that the returned value is a true list:
        guile> (list? (cog-incoming-set x))
        #t
+")
+
+(set-procedure-property! cog-incoming-by-type 'documentation
+"
+ cog-incoming-by-type ATOM TYPE
+    Return the incoming set of ATOM that consists only of atoms of
+    type TYPE.  This set is returned as an ordinary scheme list.
+
+    Example:
+       ; Define two nodes and two links between them:
+       guile> (define x (ConceptNode \"abc\"))
+       guile> (define y (ConceptNode \"def\"))
+       guile> (ListLink x y)
+       guile> (UnorderedLink x y)
+
+       ; Get the incoming sets of nodes x and y:
+       guile> (cog-incoming-by-type x 'ListLink)
+       ((ListLink
+          (ConceptNode \"abc\")
+          (ConceptNode \"def\")
+       )
+       )
+
+       guile> (cog-incoming-by-type x 'UnorderedLink)
+       ((UnorderedLink
+          (ConceptNode \"abc\")
+          (ConceptNode \"def\")
+       )
+       )
 ")
 
 (set-procedure-property! cog-outgoing-set 'documentation
