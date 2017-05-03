@@ -67,17 +67,17 @@ bool Instantiator::walk_sequence(HandleSeq& oset_results,
                                  bool silent)
 {
 	bool changed = false;
-	Quotation quotation = _quotation;
+	Context cp_context = _context;
 	for (const Handle& h : expr)
 	{
 		Handle hg(walk_tree(h, silent));
-		_quotation = quotation;
+		_context = cp_context;
 		if (hg != h) changed = true;
 
 		// GlobNodes are grounded by a ListLink of everything that
 		// the GlobNode matches. Unwrap the list, and insert each
 		// of the glob elements in sequence.
-		if (_quotation.is_unquoted() and GLOB_NODE == h->getType() and hg != h)
+		if (_context.is_unquoted() and GLOB_NODE == h->getType() and hg != h)
 		{
 			for (const Handle& gloe: hg->getOutgoingSet())
 			{
@@ -102,14 +102,14 @@ Handle Instantiator::walk_tree(const Handle& expr, bool silent)
 {
 	Type t = expr->getType();
 
-	// Keep track of the current quotation so we can update it for
-	// subsequent recursive calls of walk_tree.
-	Quotation cquotation(_quotation);
-	_quotation.update(t);
+	// Store the current context so we can update it for subsequent
+	// recursive calls of walk_tree.
+	Context context_cp(_context);
+	_context.update(expr);
 
 	// Discard the following QuoteLink, UnquoteLink or LocalQuoteLink
 	// as it is serving its quoting or unquoting function.
-	if (_avoid_discarding_quotes_level == 0 and cquotation.consumable(t))
+	if (_avoid_discarding_quotes_level == 0 and context_cp.consumable(t))
 	{
 		if (1 != expr->getArity())
 			throw InvalidParamException(TRACE_INFO,
@@ -120,7 +120,7 @@ Handle Instantiator::walk_tree(const Handle& expr, bool silent)
 
 	if (expr->isNode())
 	{
-		if (cquotation.is_quoted())
+		if (context_cp.is_quoted())
 			return expr;
 
 		// If we are here, we are a Node.
@@ -132,9 +132,14 @@ Handle Instantiator::walk_tree(const Handle& expr, bool silent)
 		if (VARIABLE_NODE != t and GLOB_NODE != t)
 			return expr;
 
-		// If we are here, we found a variable. Look it up. Return a
-		// grounding if it has one, otherwise return the variable
-		// itself.
+		// If it is a quoted or shadowed variable don't substitute.
+		// TODO: what about globs?
+		if (VARIABLE_NODE == t and not context_cp.is_free_variable(expr))
+			return expr;
+
+		// If we are here, we found a free variable (or glob?). Look
+		// it up. Return a grounding if it has one, otherwise return
+		// the variable itself.
 		HandleMap::const_iterator it = _vmap->find(expr);
 		if (_vmap->end() == it) return expr;
 
@@ -158,7 +163,7 @@ Handle Instantiator::walk_tree(const Handle& expr, bool silent)
 	// We must be careful to substitute only for free variables, and
 	// never for bound ones.
 
-	if (cquotation.is_quoted())
+	if (context_cp.is_quoted())
 		goto mere_recursive_call;
 
 	// Reduce PutLinks. There are two ways to do this: eager execution
@@ -457,7 +462,7 @@ Handle Instantiator::instantiate(const Handle& expr,
 		throw InvalidParamException(TRACE_INFO,
 			"Asked to ground a null expression");
 
-	_quotation = Quotation();
+	_context = Context();
 	_avoid_discarding_quotes_level = 0;
 
 	_vmap = &vars;
