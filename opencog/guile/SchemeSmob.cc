@@ -304,6 +304,7 @@ void SchemeSmob::register_procs()
 	register_proc("cog-incoming-set",      1, 0, 0, C(ss_incoming_set));
 	register_proc("cog-incoming-by-type",  2, 0, 0, C(ss_incoming_by_type));
 	register_proc("cog-outgoing-set",      1, 0, 0, C(ss_outgoing_set));
+	register_proc("cog-outgoing-by-type",  2, 0, 0, C(ss_outgoing_by_type));
 	register_proc("cog-outgoing-atom",     2, 0, 0, C(ss_outgoing_atom));
 	register_proc("cog-value",             2, 0, 0, C(ss_value));
 	register_proc("cog-tv",                1, 0, 0, C(ss_tv));
