@@ -569,7 +569,7 @@
 	; We assume that anchor is a single atom, or empty list...
 	(if (null? anchor)
 		'()
-		(map get-endpoint (cog-filter link-type (cog-incoming-set anchor)))
+		(map get-endpoint (cog-incoming-by-type anchor link-type))
 	)
 )
 
@@ -587,7 +587,7 @@
 	; We assume that anchor is a single atom, or empty list...
 	(if (null? anchor)
 		'()
-		(par-map get-endpoint (cog-filter link-type (cog-incoming-set anchor)))
+		(par-map get-endpoint (cog-incoming-by-type anchor link-type))
 	)
 )
 
@@ -708,7 +708,7 @@
 	(if (not (eq? '() dbg-lmsg)) (display dbg-lmsg))
 	(if (null? anchor)
 		'()
-		(for-each get-endpoint (cog-filter link-type (cog-incoming-set anchor)))
+		(for-each get-endpoint (cog-incoming-by-type anchor link-type))
 	)
 )
 
@@ -722,12 +722,10 @@
   on the endpoint, but rather on the link leading to the endpoint.
 "
 	(define (get-link l)
-		(define (apply-link e)
-			(proc l)
-		)
+		(define (apply-link e) (proc l))
 		(for-each apply-link (cog-filter endpoint-type (cog-outgoing-set l)))
 	)
-	(for-each get-link (cog-filter link-type (cog-incoming-set anchor)))
+	(for-each get-link (cog-incoming-by-type anchor link-type))
 )
 
 (define-public (cog-get-link link-type endpoint-type anchor)
@@ -783,8 +781,7 @@
 		(append!
 			(map
 				(lambda (lnk) (cog-get-link 'EvaluationLink pred-type lnk))
-				;; append removes null's
-				(append! (cog-filter 'ListLink (cog-incoming-set inst)))
+				(cog-incoming-by-type inst 'ListLink)
 			)
 		)
 	)
