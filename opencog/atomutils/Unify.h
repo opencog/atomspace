@@ -31,6 +31,7 @@
 #include <opencog/atoms/base/Handle.h>
 #include <opencog/atoms/base/atom_types.h>
 #include <opencog/atoms/base/Quotation.h>
+#include <opencog/atoms/base/Context.h>
 #include <opencog/atoms/core/Variables.h>
 #include <opencog/atoms/core/VariableList.h>
 #include <opencog/atoms/pattern/BindLink.h>
@@ -43,48 +44,6 @@ class Unify
 	friend class UnifyUTest;
 
 public:
-	// A context holds the quotation state and the current shadowing
-	// variables of a atom (typically coming from ancestor scopes).
-	//
-	// The context is important to have for both unification, in
-	// particular sub-unification, see Unify::subunify, and closure,
-	// see Unify::substitution_closure, because quoted or shadowed
-	// variables should not be substituted.
-	//
-	// This notion of context is distinct and unrelated to
-	// ContextLink.
-	struct Context : public boost::totally_ordered<Context>
-	{
-		// Default ctor
-		Context(const Quotation& quotation=Quotation(),
-		        const OrderedHandleSet& shadow=OrderedHandleSet());
-
-		// Quotation state
-		Quotation quotation;
-
-		// Set of shadowing variables
-		OrderedHandleSet shadow;
-
-		/**
-		 * Update the context over an atom. That is if the atom is a
-		 * consumable quotation then update the context quotation. If
-		 * the atom is a scope link then update the context shadow.
-		 */
-		void update(const Handle& h);
-
-		/**
-		 * Return true iff the given atom in that context is a free
-		 * variable, that is unquoted and unshadowed.
-		 */
-		bool is_free_variable(const Handle& h) const;
-
-		/**
-		 * Comparison.
-		 */
-		bool operator==(const Context& context) const;
-		bool operator<(const Context& context) const;
-	};
-
 	// Contextual Handle
 	//
 	// TODO: the notion of equality between 2 CHandles might one where
@@ -716,7 +675,6 @@ private:
 /**
  * Till content equality between atoms become the default.
  */
-bool ohs_content_eq(const OrderedHandleSet& lhs, const OrderedHandleSet& rhs);
 bool hm_content_eq(const HandleMap& lhs, const HandleMap& rhs);
 bool hchm_content_eq(const Unify::HandleCHandleMap& lhs,
                      const Unify::HandleCHandleMap& rhs);
@@ -746,7 +704,6 @@ VariableListPtr gen_varlist(const Unify::CHandle& ch);
 Variables merge_variables(const Variables& lv, const Variables& rv);
 Handle merge_vardecl(const Handle& l_vardecl, const Handle& r_vardecl);
 
-std::string oc_to_string(const Unify::Context& c);
 std::string oc_to_string(const Unify::CHandle& ch);
 std::string oc_to_string(const Unify::Block& pb);
 std::string oc_to_string(const Unify::Partition& hshm);

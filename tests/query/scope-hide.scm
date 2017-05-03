@@ -22,3 +22,71 @@
 ;; defined after the above, for this unit test to actually test
 ;; something valid.
 (define getv (Get (LocalQuote (ForAllLink (Variable "$V") (Variable "$B")))))
+
+;; This is to make sure that the following ill-formed scope link isn't
+;; created
+;;
+;; (ImplicationScopeLink
+;;   (TypedVariableLink
+;;     (ConceptNode "ChurchOfEngland")
+;;     (TypeChoice
+;;       (TypeNode "ConceptNode")
+;;       (TypeNode "SchemaNode")
+;;       (TypeNode "PredicateNode")
+;;     )
+;;   )
+;;   (MemberLink
+;;     (ConceptNode "ChurchOfEngland")
+;;     (ConceptNode "AnglicanChurch")
+;;   )
+;;   (EvaluationLink
+;;     (PredicateNode "subOrganization")
+;;     (ListLink
+;;       (ConceptNode "ChurchOfEngland")
+;;       (ConceptNode "ChurchOfEngland")
+;;     )
+;;   )
+;; )
+
+(MemberLink
+  (ConceptNode "ChurchOfEngland")
+  (ConceptNode "AnglicanChurch")
+)
+
+(define rule
+   (BindLink
+      (TypedVariableLink
+         (VariableNode "?C")
+         (TypeChoice
+            (TypeNode "ConceptNode")
+            (TypeNode "SchemaNode")
+            (TypeNode "PredicateNode")
+         )
+      )
+      (MemberLink
+         (VariableNode "?C")
+         (ConceptNode "AnglicanChurch")
+      )
+      (ImplicationScopeLink
+         (TypedVariableLink
+            (VariableNode "?C")
+            (TypeChoice
+               (TypeNode "ConceptNode")
+               (TypeNode "SchemaNode")
+               (TypeNode "PredicateNode")
+            )
+         )
+         (MemberLink
+            (VariableNode "?C")
+            (ConceptNode "AnglicanChurch")
+         )
+         (EvaluationLink
+            (PredicateNode "subOrganization")
+            (ListLink
+               (VariableNode "?C")
+               (ConceptNode "ChurchOfEngland")
+            )
+         )
+      )
+   )
+)
