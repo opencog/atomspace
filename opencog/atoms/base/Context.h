@@ -71,6 +71,14 @@ struct Context : public boost::totally_ordered<Context>
 	void update(const Handle& h);
 
 	/**
+	 * Short hands for usual Quotation class methods. Note all
+	 * Quotations methods are here, feel free to add as convenient.
+	 */
+	bool is_quoted() const;
+	bool is_unquoted() const;
+	bool consumable(Type t) const;
+
+	/**
 	 * Return true iff the given atom in that context is a free
 	 * variable, that is unquoted and unshadowed.
 	 */

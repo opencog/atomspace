@@ -51,6 +51,21 @@ void Context::update(const Handle& h)
 	quotation.update(t);
 }
 
+bool Context::is_quoted() const
+{
+	return quotation.is_quoted();
+}
+
+bool Context::is_unquoted() const
+{
+	return quotation.is_unquoted();
+}
+
+bool Context::consumable(Type t) const
+{
+	return quotation.consumable(t);
+}
+
 bool Context::is_free_variable(const Handle& h) const
 {
 	return (h->getType() == VARIABLE_NODE)
