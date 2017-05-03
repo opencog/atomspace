@@ -30,6 +30,9 @@
 
 using namespace opencog;
 
+// Workaround for isnan scope problem: https://github.com/opencog/atomspace/issues/1215
+using namespace std;
+
 #define NUM_TVS 3
 #define TV1_POS_COUNT 10
 #define TV2_POS_COUNT 0
