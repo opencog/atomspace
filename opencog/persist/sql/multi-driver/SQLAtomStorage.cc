@@ -1909,7 +1909,7 @@ void SQLAtomStorage::print_stats(void)
 
 	unsigned long tot_node = num_node_inserts;
 	unsigned long tot_link = num_link_inserts;
-	frac = tot_node / ((double) tot_link);
+	frac = tot_link / ((double) tot_node);
 	printf("total stores for node=%lu link=%lu ratio=%f\n",
 	       tot_node, tot_link, frac);
 #endif // STORAGE_DEBUG
