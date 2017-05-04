@@ -61,6 +61,7 @@ public:
     void do_store(void);
 
     void do_stats(void);
+    void do_clear(void);
 
 }; // class
 
