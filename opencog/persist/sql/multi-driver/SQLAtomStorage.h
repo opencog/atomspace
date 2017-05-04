@@ -201,6 +201,7 @@ class SQLAtomStorage : public AtomStorage
 		bool connected(void); // connection to DB is alive
 
 		void kill_data(void); // destroy DB contents
+		void clear_cache(void); // clear out the TLB.
 
 		void registerWith(AtomSpace*);
 		void unregisterWith(AtomSpace*);

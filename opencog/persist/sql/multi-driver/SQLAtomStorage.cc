@@ -1869,6 +1869,12 @@ void SQLAtomStorage::reserve(void)
 	_tlbuf.reserve_upto(max_observed_id);
 }
 
+void SQLAtomStorage::clear_cache(void)
+{
+	_tlbuf.clear();
+	reserve();
+}
+
 /* ================================================================ */
 
 void SQLAtomStorage::print_stats(void)
