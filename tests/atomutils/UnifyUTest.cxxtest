@@ -103,8 +103,10 @@ public:
 	void test_unify_unordered_7();
 	void test_unify_unordered_8();
 
-	void test_substitute_1();
+	void test_unify_alpha_equivalence();
 
+	void test_substitute();
+	
 	// Various complex unify queries
 	void test_unify_complex_1();
 	void test_unify_complex_2();
@@ -646,7 +648,63 @@ void UnifyUTest::test_unify_unordered_8()
 	TS_ASSERT_EQUALS(result, expected);
 }
 
-void UnifyUTest::test_substitute_1()
+void UnifyUTest::test_unify_alpha_equivalence()
+{
+	Handle lhs =
+		_eval.eval_h("(ExistsLink"
+		             "  (TypedVariableLink"
+		             "    (VariableNode \"?MEMBER\")"
+		             "    (TypeChoice"
+		             "      (TypeNode \"ConceptNode\")"
+		             "      (TypeNode \"SchemaNode\")"
+		             "      (TypeNode \"PredicateNode\")"
+		             "    )"
+		             "  )"
+		             "  (MemberLink"
+		             "    (VariableNode \"?MEMBER\")"
+		             "    (ConceptNode \"Org1-1\")"
+		             "  )"
+		             ")");
+
+	Handle rhs =
+        _eval.eval_h("(ExistsLink"
+                     "  (TypedVariableLink"
+                     "    (VariableNode \"?OBJ\")"
+                     "    (TypeChoice"
+                     "      (TypeNode \"ConceptNode\")"
+                     "      (TypeNode \"SchemaNode\")"
+                     "      (TypeNode \"PredicateNode\")"
+                     "    )"
+                     "  )"
+                     "  (MemberLink"
+                     "    (VariableNode \"?OBJ\")"
+                     "    (VariableNode \"?COLL-6c74a409\")"
+                     "  )"
+                     ")");
+
+	Handle lhs_vardecl;
+
+	Handle rhs_vardecl =
+        _eval.eval_h("(TypedVariableLink"
+                     "  (VariableNode \"?COLL-6c74a409\")"
+                     "  (TypeChoice"
+                     "    (TypeNode \"ConceptNode\")"
+                     "    (TypeNode \"SchemaNode\")"
+                     "    (TypeNode \"PredicateNode\")"
+                     "  )"
+                     ")");
+
+	Unify unify(lhs, rhs, lhs_vardecl, rhs_vardecl);
+	Unify::SolutionSet result = unify(),
+		expected = Unify::SolutionSet(); // TODO
+
+	std::cout << "result = " << oc_to_string(result) << std::endl;
+	std::cout << "expected = " << oc_to_string(expected) << std::endl;
+
+	TS_ASSERT_EQUALS(result, expected);
+}
+
+void UnifyUTest::test_substitute()
 {
 	// Test simple BindLink
 	Handle X = an(VARIABLE_NODE, "$X"),
