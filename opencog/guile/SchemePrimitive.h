@@ -84,11 +84,13 @@ class PrimitiveEnviron
 // H_HHHH -- do_backward_chaining, do_forward_chaining
 // H_HT   -- fetch-incoming-by-type
 // H_HZ   -- cog-bind-first-n
+// P_H    -- FunctionWrapper
 // S_AS   -- CogServerSCM::start_server()
 // S_S    -- cogutils logger API, see guile/LoggerSCM.h
 // S_SS   -- DistSCM  (Gearman server)
 // S_V    -- CogServerSCM::stop_server()
 //        -- cogutils logger get_level(), etc.
+// V_I    -- cogutils do_randgen_set_seed
 // V_S    -- cogutils logger setters
 //        -- SQLPersistSCM::do_open()
 //        -- ZMQPersistSCM::do_open()
@@ -118,11 +120,10 @@ class PrimitiveEnviron
 // S_I    -- PatternMiner
 // S_V    -- PatternMiner
 // V_SI   -- PatternMiner
-
-// H_HTQB -- ??
-// V_I    -- ?
-// V_S    -- ??
-// V_SS   -- not used anywhere
+//
+// B_B    -- ??
+// B_HH   -- ??
+// V_B    -- ???
 
 template<class T>
 class SchemePrimitive : public PrimitiveEnviron
@@ -175,14 +176,7 @@ class SchemePrimitive : public PrimitiveEnviron
 			void (T::*v_h)(Handle);
 			void (T::*v_s)(const std::string&);
 			void (T::*v_sa)(const std::string&, AtomSpace*);
-			void (T::*v_sh)(const std::string&, Handle);
-			void (T::*v_shi)(const std::string&, Handle, int);
 			void (T::*v_si)(const std::string&, int);
-			void (T::*v_ss)(const std::string&,
-			                const std::string&);
-			void (T::*v_sss)(const std::string&,
-			                 const std::string&,
-			                 const std::string&);
 			void (T::*v_t)(Type);
 			void (T::*v_ti)(Type, int);
 			void (T::*v_tidi)(Type, int, double, int);
@@ -219,7 +213,6 @@ class SchemePrimitive : public PrimitiveEnviron
 			V_S,   // return void, take string
 			V_SA,  // return void, take string, Atomspace
 			V_SI,  // return void, take string and int
-			V_SS,  // return void, take two strings
 			V_T,   // return void, take Type
 			V_TI,  // return void, take Type and int
 			V_TIDI,// return void, take Type, int, double, and int
@@ -488,15 +481,6 @@ class SchemePrimitive : public PrimitiveEnviron
 					(that->*method.v_si)(str, i);
 					break;
 				}
-				case V_SS:
-				{
-					// All args are strings
-					std::string str1(SchemeSmob::verify_string(scm_car(args), scheme_name, 1));
-					std::string str2(SchemeSmob::verify_string(scm_cadr(args), scheme_name, 2));
-
-					(that->*method.v_ss)(str1, str2);
-					break;
-				}
 				case V_T:
 				{
 					Type t = SchemeSmob::verify_atom_type(scm_car(args), scheme_name, 1);
@@ -637,14 +621,12 @@ class SchemePrimitive : public PrimitiveEnviron
 		DECLARE_CONSTR_0(S_V,   s_v,  std::string)
 		DECLARE_CONSTR_1(P_H,   p_h,  TruthValuePtr, Handle)
 		DECLARE_CONSTR_1(V_B,   v_b,  void, bool)
-		DECLARE_CONSTR_1(V_I,   v_i,  void, int)
 		DECLARE_CONSTR_1(V_H,	v_h,  void, Handle)
+		DECLARE_CONSTR_1(V_I,   v_i,  void, int)
 		DECLARE_CONSTR_1(V_S,   v_s,  void, const std::string&)
 		DECLARE_CONSTR_2(V_SA,  v_sa, void, const std::string&,
 		                              AtomSpace*)
 		DECLARE_CONSTR_2(V_SI,  v_si, void, const std::string&, int)
-		DECLARE_CONSTR_2(V_SS,  v_ss, void, const std::string&,
-		                              const std::string&)
 		DECLARE_CONSTR_1(V_T,	v_t,  void, Type)
 		DECLARE_CONSTR_2(V_TI,  v_ti, void, Type, int)
 		DECLARE_CONSTR_4(V_TIDI, v_tidi, void, Type, int, double, int)
@@ -699,8 +681,8 @@ DECLARE_DECLARE_1(std::string, const std::string&)
 DECLARE_DECLARE_1(std::string, void)
 DECLARE_DECLARE_1(TruthValuePtr, Handle)
 DECLARE_DECLARE_1(void, bool)
-DECLARE_DECLARE_1(void, int)
 DECLARE_DECLARE_1(void, Handle)
+DECLARE_DECLARE_1(void, int)
 DECLARE_DECLARE_1(void, const std::string&)
 DECLARE_DECLARE_1(void, Type)
 DECLARE_DECLARE_1(void, void)
@@ -714,7 +696,6 @@ DECLARE_DECLARE_2(Handle, const std::string&, const HandleSeq&)
 DECLARE_DECLARE_2(std::string, AtomSpace*, const std::string&)
 DECLARE_DECLARE_2(std::string, const std::string&, const std::string&)
 DECLARE_DECLARE_2(void, const std::string&, AtomSpace*)
-DECLARE_DECLARE_2(void, const std::string&, const std::string&)
 DECLARE_DECLARE_2(void, Type, int)
 DECLARE_DECLARE_2(void, const std::string&, int)
 
