@@ -84,6 +84,7 @@ class PrimitiveEnviron
 // H_HHHH -- do_backward_chaining, do_forward_chaining
 // H_HT   -- fetch-incoming-by-type
 // H_HZ   -- cog-bind-first-n
+// I_V    -- cogutils RandGen
 // P_H    -- FunctionWrapper
 // S_AS   -- CogServerSCM::start_server()
 // S_S    -- cogutils logger API, see guile/LoggerSCM.h
@@ -119,11 +120,8 @@ class PrimitiveEnviron
 // S_B    -- PatternMiner
 // S_I    -- PatternMiner
 // S_V    -- PatternMiner
+// V_B    -- PatternMiner
 // V_SI   -- PatternMiner
-//
-// B_B    -- ??
-// B_HH   -- ??
-// V_B    -- ???
 
 template<class T>
 class SchemePrimitive : public PrimitiveEnviron
