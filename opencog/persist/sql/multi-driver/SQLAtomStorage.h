@@ -99,6 +99,7 @@ class SQLAtomStorage : public AtomStorage
 		int get_height(const Handle&);
 		int max_height;
 
+		void getIncoming(AtomTable&, const char *);
 		// --------------------------
 		// Storing of atoms
 		std::mutex _store_mutex;
@@ -212,6 +213,7 @@ class SQLAtomStorage : public AtomStorage
 		Handle getNode(Type, const char *);
 		Handle getLink(Type, const HandleSeq&);
 		void getIncomingSet(AtomTable&, const Handle&);
+		void getIncomingByType(AtomTable&, const Handle&, Type t);
 		void storeAtom(const Handle&, bool synchronous = false);
 		void loadType(AtomTable&, Type);
 		void flushStoreQueue();

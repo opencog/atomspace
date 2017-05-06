@@ -370,6 +370,20 @@ Handle AtomSpace::fetch_incoming_set(Handle h, bool recursive)
     return h;
 }
 
+Handle AtomSpace::fetch_incoming_by_type(Handle h, Type t)
+{
+    if (nullptr == _backing_store)
+        throw RuntimeException(TRACE_INFO, "No backing store");
+
+    h = get_atom(h);
+    if (nullptr == h) return h;
+
+    // Get everything from the backing store.
+    _backing_store->getIncomingByType(_atom_table, h, t);
+
+    return h;
+}
+
 bool AtomSpace::remove_atom(Handle h, bool recursive)
 {
     if (_backing_store) {
