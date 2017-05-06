@@ -99,6 +99,7 @@ class SQLAtomStorage : public AtomStorage
 		int get_height(const Handle&);
 		int max_height;
 
+		void getIncoming(AtomTable&, const char *);
 		// --------------------------
 		// Storing of atoms
 		std::mutex _store_mutex;

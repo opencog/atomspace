@@ -118,6 +118,7 @@ class PrimitiveEnviron
 // S_V    -- PatternMiner
 // V_SI   -- PatternMiner
 
+// H_HHHH -- ??
 // H_HTQB -- ??
 // S_SSS  -- ??
 // V_I    -- ?
@@ -156,6 +157,7 @@ class SchemePrimitive : public PrimitiveEnviron
 			Handle (T::*h_hhh)(Handle, Handle, Handle);
 			Handle (T::*h_hhhh)(Handle, Handle, Handle, Handle);
 			Handle (T::*h_hs)(Handle, const std::string&);
+			Handle (T::*h_ht)(Handle, Type);
 			Handle (T::*h_htqb)(Handle, Type, const HandleSeq&, bool);
 			Handle (T::*h_hz)(Handle, size_t);
 			HandleSeq (T::*q_htib)(Handle, Type, int, bool);
@@ -202,6 +204,7 @@ class SchemePrimitive : public PrimitiveEnviron
 			H_HS,  // return handle, take handle and string
 			H_HHH, // return handle, take handle, handle and Handle
 			H_HHHH, // return handle, take handle, handle, Handle and Handle
+			H_HT,  // return handle, take handle, type
 			H_HTQB, // return handle, take handle, type, HandleSeq and boolean
 			H_HZ,  // return handle, take handle and size_t
 			I_V,   // return int, take void
@@ -311,6 +314,17 @@ class SchemePrimitive : public PrimitiveEnviron
 					rc = SchemeSmob::handle_to_scm(rh);
 					break;
 				}
+				case H_HT:
+				{
+					Handle h(SchemeSmob::verify_handle(scm_car(args),
+					                                   scheme_name, 1));
+
+					Type t = SchemeSmob::verify_atom_type(scm_cadr(args),
+					                                      scheme_name, 2);
+					Handle rh((that->*method.h_ht)(h, t));
+					rc = SchemeSmob::handle_to_scm(rh);
+					break;
+				}
 				case H_HTQB:
 				{
 					Handle h(SchemeSmob::verify_handle(scm_car(args), scheme_name, 1));
@@ -326,7 +340,6 @@ class SchemePrimitive : public PrimitiveEnviron
 					rc = SchemeSmob::handle_to_scm(rh);
 					break;
 				}
-
 				case H_HZ:
 				{
 					Handle h(SchemeSmob::verify_handle(scm_car(args), scheme_name, 1));
@@ -643,6 +656,7 @@ class SchemePrimitive : public PrimitiveEnviron
 		DECLARE_CONSTR_1(H_H,    h_h,  Handle, Handle)
 		DECLARE_CONSTR_2(H_HH,   h_hh, Handle, Handle, Handle)
 		DECLARE_CONSTR_2(H_HS,   h_hs, Handle, Handle, const std::string&)
+		DECLARE_CONSTR_2(H_HT,   h_ht, Handle, Handle, Type)
 		DECLARE_CONSTR_4(H_HTQB, h_htqb, Handle, Handle, Type, const HandleSeq&, bool)
 		DECLARE_CONSTR_3(H_HHH,  h_hhh, Handle, Handle, Handle, Handle)
 		DECLARE_CONSTR_4(H_HHHH, h_hhhh, Handle, Handle, Handle, Handle, Handle)
@@ -652,9 +666,9 @@ class SchemePrimitive : public PrimitiveEnviron
 		DECLARE_CONSTR_1(K_H,    k_h,  HandleSeqSeq, Handle)
 		DECLARE_CONSTR_2(S_AS,   s_as, std::string, AtomSpace*,
 		                               const std::string&)
+		DECLARE_CONSTR_1(S_B,    s_b,  std::string, bool)
+		DECLARE_CONSTR_1(S_I,    s_i,  std::string, int)
 		DECLARE_CONSTR_1(S_S,    s_s,  std::string, const std::string&)
-        DECLARE_CONSTR_1(S_I,    s_i,  std::string, int)
-        DECLARE_CONSTR_1(S_B,    s_b,  std::string, bool)
 		DECLARE_CONSTR_2(S_SS,   s_ss, std::string, const std::string&,
 		                               const std::string&)
 		DECLARE_CONSTR_3(S_SSS,  s_sss, std::string, const std::string&,
@@ -667,13 +681,13 @@ class SchemePrimitive : public PrimitiveEnviron
 		DECLARE_CONSTR_1(V_S,   v_s,  void, const std::string&)
 		DECLARE_CONSTR_2(V_SA,  v_sa, void, const std::string&,
 		                              AtomSpace*)
+		DECLARE_CONSTR_2(V_SI,  v_si, void, const std::string&, int)
 		DECLARE_CONSTR_2(V_SS,  v_ss, void, const std::string&,
 		                              const std::string&)
 		DECLARE_CONSTR_3(V_SSS, v_sss,void, const std::string&,
 		                              const std::string&, const std::string&)
 		DECLARE_CONSTR_1(V_T,	v_t,  void, Type)
 		DECLARE_CONSTR_2(V_TI,  v_ti, void, Type, int)
-        DECLARE_CONSTR_2(V_SI,  v_si, void, const std::string&, int)
 		DECLARE_CONSTR_4(V_TIDI, v_tidi, void, Type, int, double, int)
 
 		DECLARE_CONSTR_0(V_V,   v_v,  void);
@@ -735,6 +749,7 @@ DECLARE_DECLARE_1(void, void)
 DECLARE_DECLARE_2(bool, Handle, Handle)
 DECLARE_DECLARE_2(Handle, Handle, Handle)
 DECLARE_DECLARE_2(Handle, Handle, const std::string&)
+DECLARE_DECLARE_2(Handle, Handle, Type)
 DECLARE_DECLARE_2(Handle, Handle, size_t)
 DECLARE_DECLARE_2(Handle, const std::string&, const HandleSeq&)
 DECLARE_DECLARE_2(std::string, AtomSpace*, const std::string&)
@@ -753,8 +768,8 @@ DECLARE_DECLARE_3(void, const std::string&,
 DECLARE_DECLARE_4(double, Handle, Handle, Type, bool)
 DECLARE_DECLARE_4(Handle, Handle, Type, const HandleSeq&, bool)
 DECLARE_DECLARE_4(HandleSeq, Handle, Type, int, bool)
-DECLARE_DECLARE_4(void, Type, int, double, int)
 DECLARE_DECLARE_4(Handle, Handle, Handle, Handle, Handle)
+DECLARE_DECLARE_4(void, Type, int, double, int)
 //** @}*/
 }
 

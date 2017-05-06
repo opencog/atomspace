@@ -1392,23 +1392,10 @@ Handle SQLAtomStorage::get_recursive_if_not_exists(PseudoPtr p)
 }
 
 /**
- * Retreive the entire incoming set of the indicated atom.
+ * Retreive the incoming set of the indicated atom.
  */
-void SQLAtomStorage::getIncomingSet(AtomTable& table, const Handle& h)
+void SQLAtomStorage::getIncoming(AtomTable& table, const char *buff)
 {
-	UUID uuid = get_uuid(h);
-
-	char buff[BUFSZ];
-	snprintf(buff, BUFSZ,
-		"SELECT * FROM Atoms WHERE outgoing @> ARRAY[CAST(%lu AS BIGINT)];",
-		uuid);
-
-	// Note: "select * from atoms where outgoing@>array[556];" will return
-	// all links with atom 556 in the outgoing set -- i.e. the incoming set of 556.
-	// Could also use && here instead of @> Don't know if one is faster or not.
-	// The cast to BIGINT is needed, as otherwise on gets
-	// ERROR:  operator does not exist: bigint[] @> integer[]
-
 	std::vector<PseudoPtr> pset;
 	Response rp(conn_pool);
 	rp.store = this;
@@ -1439,9 +1426,43 @@ void SQLAtomStorage::getIncomingSet(AtomTable& table, const Handle& h)
 #endif // STORAGE_DEBUG
 }
 
+/**
+ * Retreive the entire incoming set of the indicated atom.
+ */
+void SQLAtomStorage::getIncomingSet(AtomTable& table, const Handle& h)
+{
+	UUID uuid = get_uuid(h);
+
+	char buff[BUFSZ];
+	snprintf(buff, BUFSZ,
+		"SELECT * FROM Atoms WHERE outgoing @> ARRAY[CAST(%lu AS BIGINT)];",
+		uuid);
+
+	// Note: "select * from atoms where outgoing@>array[556];" will
+	// return all links with atom 556 in the outgoing set -- i.e. the
+	// incoming set of 556.  We could also use && here instead of @>
+	// but I don't know if this one is faster.
+	// The cast to BIGINT is needed, as otherwise one gets
+	// ERROR:  operator does not exist: bigint[] @> integer[]
+
+	getIncoming(table, buff);
+}
+
+/**
+ * Retreive the incoming set of the indicated atom, but only those atoms
+ * of type t.
+ */
 void SQLAtomStorage::getIncomingByType(AtomTable& table, const Handle& h, Type t)
 {
 	UUID uuid = get_uuid(h);
+	int dbtype = storing_typemap[t];
+
+	char buff[BUFSZ];
+	snprintf(buff, BUFSZ,
+		"SELECT * FROM Atoms WHERE type = %d AND outgoing @> ARRAY[CAST(%lu AS BIGINT)];",
+		dbtype, uuid);
+
+	getIncoming(table, buff);
 }
 
 
