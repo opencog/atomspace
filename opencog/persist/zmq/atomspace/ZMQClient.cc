@@ -166,6 +166,11 @@ void ZMQClient::getIncomingSet(AtomTable& table, const Handle& h)
 	// TODO: implement
 }
 
+void ZMQClient::getIncomingByType(AtomTable& table, const Handle& h, Type t)
+{
+	// TODO: implement
+}
+
 /**
  * Fetch Node from database, with the indicated type and name.
  * If there is no such node, NULL is returned.

@@ -1439,6 +1439,12 @@ void SQLAtomStorage::getIncomingSet(AtomTable& table, const Handle& h)
 #endif // STORAGE_DEBUG
 }
 
+void SQLAtomStorage::getIncomingByType(AtomTable& table, const Handle& h, Type t)
+{
+	UUID uuid = get_uuid(h);
+}
+
+
 /**
  * Fetch the Node with the indicated type and name.
  * If there is no such node, NULL is returned.

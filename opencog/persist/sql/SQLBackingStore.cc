@@ -54,6 +54,11 @@ void SQLBackingStore::getIncomingSet(AtomTable& table, const Handle& h)
 	_store->getIncomingSet(table, h);
 }
 
+void SQLBackingStore::getIncomingByType(AtomTable& table, const Handle& h, Type t)
+{
+	_store->getIncomingByType(table, h, t);
+}
+
 void SQLBackingStore::storeAtom(const Handle& h)
 {
 	_store->storeAtom(h);

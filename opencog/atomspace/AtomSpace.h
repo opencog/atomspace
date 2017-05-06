@@ -263,7 +263,14 @@ public:
      * contain this one in their outgoing sets. All of these atoms are
      * then loaded into this atomtable/atomspace.
      */
-    Handle fetch_incoming_set(Handle, bool);
+    Handle fetch_incoming_set(Handle, bool = false);
+
+    /**
+     * Use the backing store to load the incoming set of the
+     * atom, but only those atoms of the given type.
+     * The fetch is not recursive.
+     */
+    Handle fetch_incoming_by_type(Handle, Type);
 
     /**
      * Recursively store the atom to the backing store.

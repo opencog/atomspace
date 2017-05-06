@@ -48,6 +48,7 @@ class AtomStorage
         virtual Handle getNode(Type, const char *) = 0;
         virtual Handle getLink(Type, const HandleSeq&) = 0;
         virtual void getIncomingSet(AtomTable&, const Handle&) = 0;
+        virtual void getIncomingByType(AtomTable&, const Handle&, Type) = 0;
         virtual void storeAtom(const Handle&, bool synchronous = false) = 0;
         virtual void loadType(AtomTable&, Type) = 0;
         virtual void flushStoreQueue() = 0;
