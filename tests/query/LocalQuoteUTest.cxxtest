@@ -95,8 +95,8 @@ void LocalQuoteUTest::test_get()
 	Handle result = satisfying_set(&_as, forall_get),
 	    expected = al(SET_LINK, al(LIST_LINK, X, P_X));
 
-	logger().debug() << "result = " << result;
-	logger().debug() << "expected = " << expected;
+	logger().debug() << "result = " << oc_to_string(result);
+	logger().debug() << "expected = " << oc_to_string(expected);
 
 	TS_ASSERT_EQUALS(result, expected);
 

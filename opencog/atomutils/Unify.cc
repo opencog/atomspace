@@ -37,6 +37,11 @@ namespace opencog {
 Unify::CHandle::CHandle(const Handle& h, const Context& c)
 	: handle(h), context(c) {}
 
+bool Unify::CHandle::is_variable() const
+{
+	return handle->getType() == VARIABLE_NODE;
+}
+
 bool Unify::CHandle::is_free_variable() const
 {
 	return context.is_free_variable(handle);
@@ -47,6 +52,16 @@ OrderedHandleSet Unify::CHandle::get_free_variables() const
 	OrderedHandleSet free_vars =
 		opencog::get_free_variables(handle, context.quotation);
 	return set_difference(free_vars, context.shadow);
+}
+
+Context::VariablesStack::const_iterator
+Unify::CHandle::find_variables(const Handle& h) const
+{
+	return std::find_if(context.scope_variables.cbegin(),
+	                    context.scope_variables.cend(),
+	                    [&](const Variables& variables) {
+		                    return variables.is_in_varset(h);
+	                    });
 }
 
 bool Unify::CHandle::is_consumable() const
@@ -72,10 +87,34 @@ void Unify::CHandle::update()
 		handle = handle->getOutgoingAtom(0);
 }
 
-bool Unify::CHandle::is_satisfiable(const CHandle& ch) const
+bool Unify::CHandle::is_node_satisfiable(const CHandle& other) const
 {
-	return content_eq(handle, ch.handle)
-		and (get_free_variables() == ch.get_free_variables());
+	// If both are variable check whether they could be alpha
+	// equivalent, otherwise merely check for equality
+	if (is_variable() and other.is_variable())	{
+		// Make sure scope variable declarations are stored
+		OC_ASSERT(context.store_scope_variables,
+		          "You must store the scope variable declarations "
+		          "in order to use this method");
+
+		// Search variable declarations associated to the variables
+		Context::VariablesStack::const_iterator it = find_variables(handle),
+			other_it = other.find_variables(other.handle);
+		OC_ASSERT(it != context.scope_variables.cend(),
+		          "Contradicts the assumption that this->handle is not free");
+		OC_ASSERT(other_it != other.context.scope_variables.cend(),
+		          "Contradicts the assumption that other.handle is not free");
+
+		// Check that both variable declarations occured at the same level
+		if (std::distance(context.scope_variables.cbegin(), it)
+		    != std::distance(other.context.scope_variables.cbegin(), other_it))
+			return false;
+
+		// Check that the other variable is alpha convertible
+		return it->is_alpha_convertible(handle, other.handle, *other_it, true);
+	} else {
+		return content_eq(handle, other.handle);
+	}
 }
 
 bool Unify::CHandle::operator==(const CHandle& ch) const
@@ -85,7 +124,8 @@ bool Unify::CHandle::operator==(const CHandle& ch) const
 
 bool Unify::CHandle::operator<(const CHandle& ch) const
 {
-	return (handle < ch.handle) or (handle == ch.handle and context < ch.context);
+	return (handle < ch.handle) or
+		(handle == ch.handle and context < ch.context);
 }
 
 Unify::SolutionSet::SolutionSet(bool s, const Unify::Partitions& p)
@@ -169,7 +209,7 @@ Unify::CHandle Unify::find_least_abstract(const TypedBlock& block,
 		if (inherit(ch, least_abstract) and
 		    // If h is a variable, only consider it as value
 		    // if it is in pre (stands for precedence)
-		    (ch.handle->getType() != VARIABLE_NODE
+		    (not ch.is_variable()
 		     or is_unquoted_unscoped_in_tree(pre, ch.handle))) {
 			least_abstract = ch;
 		}
@@ -476,12 +516,21 @@ Unify::SolutionSet Unify::unify(const Handle& lh, const Handle& rh,
 	if (lh->isNode() or rh->isNode()) {
 		// If one is a free variable and they are different, then
 		// unifies.
-		if ((lch.is_free_variable() or rch.is_free_variable())
-            // Ignore solutions like {X}->X
-            and lch != rch) {
-			return mkvarsol(lch, rch);
+		if (lch.is_free_variable() or rch.is_free_variable()) {
+			if (lch == rch) {
+				// Do not construct a solution like {X}->X to not
+				// overload the solution set.
+				//
+				// Since the context is taken into account they have
+				// the same context, thus if one of them is free, the
+				// other is free as well, therefore they are
+				// satisfiable.
+				return SolutionSet(true);
+			} else {
+				return mkvarsol(lch, rch);
+			}
 		} else
-			return SolutionSet(lch.is_satisfiable(rch));
+			return SolutionSet(lch.is_node_satisfiable(rch));
 	}
 
 	////////////////////////

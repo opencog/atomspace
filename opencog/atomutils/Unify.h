@@ -58,6 +58,12 @@ public:
 		Context context;
 
 		/**
+		 * Return true iff the atom in that context is a variable,
+		 * free or not.
+		 */
+		bool is_variable() const;
+
+		/**
 		 * Return true iff the atom in that context is a free
 		 * variable, that is unquoted and unshadowed.
 		 */
@@ -67,6 +73,13 @@ public:
 		 * Return the set of free visible variables from that context.
 		 */
 		OrderedHandleSet get_free_variables() const;
+
+		/**
+		 * Return iterator of the variable declaration containing a given
+		 * variable, if so.
+		 */
+		Context::VariablesStack::const_iterator
+		find_variables(const Handle& h) const;
 
 		/**
 		 * Return true iff has a consumable quotation
@@ -91,16 +104,22 @@ public:
 
 		/**
 		 * Return true if 2 contextual handles are satisfiable in some
-		 * restricted sense, it only covers the cases where atoms are
-		 * equal and have the same free variables.
+		 * restricted sense, it assumes that
+		 *
+		 * 1. at least one of them is a node
+		 * 2. none is a free variable (i.e. unfree or not a variable)
+		 *
+		 * Given these 2 assumptions fulfilled it will check whether
+		 * the 2 atoms are equal, and if there are not could there be
+		 * alpha equivalent (assuming they are variables).
 		 */
-		bool is_satisfiable(const CHandle& ch) const;
+		bool is_node_satisfiable(const CHandle& other) const;
 
 		/**
 		 * Comparison.
 		 */
-		bool operator==(const CHandle& ch) const;
-		bool operator<(const CHandle& ch) const;
+		bool operator==(const CHandle& other) const;
+		bool operator<(const CHandle& other) const;
 	};
 
 	// Pair of CHandles
