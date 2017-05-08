@@ -462,7 +462,7 @@ Handle Instantiator::instantiate(const Handle& expr,
 		throw InvalidParamException(TRACE_INFO,
 			"Asked to ground a null expression");
 
-	_context = Context();
+	_context = Context(false);
 	_avoid_discarding_quotes_level = 0;
 
 	_vmap = &vars;

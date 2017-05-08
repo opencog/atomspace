@@ -145,6 +145,11 @@ void FreeVariables::erase(const Handle& var)
 	}
 }
 
+bool FreeVariables::operator<(const FreeVariables& other) const
+{
+	return varseq < other.varseq;
+}
+
 /* ================================================================= */
 
 Handle FreeVariables::substitute_nocheck(const Handle& term,
@@ -304,41 +309,48 @@ bool Variables::is_equal(const Variables& other) const
 	if (other.varseq.size() != sz) return false;
 
 	// Side-by-side comparison
-	for (size_t i=0; i<sz; i++)
+	for (size_t i = 0; i < sz; i++)
 	{
-		const Handle& vme(varseq[i]);
-		const Handle& voth(other.varseq[i]);
-
-		// If one is a GlobNode, and the other a VariableNode,
-		// then its a mismatch.
-		if (vme->getType() != voth->getType()) return false;
-
-		// If typed, types must match.
-		auto sime = _simple_typemap.find(vme);
-		auto soth = other._simple_typemap.find(voth);
-		if (sime == _simple_typemap.end() and
-		    soth != other._simple_typemap.end()) return false;
-
-		if (sime != _simple_typemap.end())
-		{
-			if (soth == other._simple_typemap.end()) return false;
-			if (sime->second != soth->second) return false;
-		}
-
-		// If typed, types must match.
-		auto dime = _deep_typemap.find(vme);
-		auto doth = other._deep_typemap.find(voth);
-		if (dime == _deep_typemap.end() and
-		    doth != other._deep_typemap.end()) return false;
-
-		if (dime != _deep_typemap.end())
-		{
-			if (doth == other._deep_typemap.end()) return false;
-			if (dime->second != doth->second) return false;
-		}
-
-		// XXX TODO fuzzy?
+		if (not is_equal(other, i))
+			return false;
 	}
+	return true;
+}
+
+bool Variables::is_equal(const Variables& other, size_t index) const
+{
+	const Handle& vme(varseq[index]);
+	const Handle& voth(other.varseq[index]);
+
+	// If one is a GlobNode, and the other a VariableNode,
+	// then its a mismatch.
+	if (vme->getType() != voth->getType()) return false;
+
+	// If typed, types must match.
+	auto sime = _simple_typemap.find(vme);
+	auto soth = other._simple_typemap.find(voth);
+	if (sime == _simple_typemap.end() and
+	    soth != other._simple_typemap.end()) return false;
+
+	if (sime != _simple_typemap.end())
+	{
+		if (soth == other._simple_typemap.end()) return false;
+		if (sime->second != soth->second) return false;
+	}
+
+	// If typed, types must match.
+	auto dime = _deep_typemap.find(vme);
+	auto doth = other._deep_typemap.find(voth);
+	if (dime == _deep_typemap.end() and
+	    doth != other._deep_typemap.end()) return false;
+
+	if (dime != _deep_typemap.end())
+	{
+		if (doth == other._deep_typemap.end()) return false;
+		if (dime->second != doth->second) return false;
+	}
+
+	// XXX TODO fuzzy?
 
 	// If we got to here, everything must be OK.
 	return true;
@@ -353,12 +365,13 @@ bool Variables::is_equal(const Variables& other) const
 
 bool Variables::is_alpha_convertible(const Handle& var,
                                      const Handle& othervar,
-                                     const Variables& other) const
+                                     const Variables& other,
+                                     bool check_type) const
 {
 	IndexMap::const_iterator idx = other.index.find(othervar);
-	if (other.index.end() == idx) return false;
-	if (varseq.at(idx->second) == var) return true;
-	return false;
+	return other.index.end() != idx
+		and varseq.at(idx->second) == var
+		and (not check_type or is_equal(other, idx->second));
 }
 
 /* ================================================================= */
@@ -603,6 +616,20 @@ void Variables::erase(const Handle& var)
 
 	// Remove FreeVariables
 	FreeVariables::erase(var);
+}
+
+bool Variables::operator==(const Variables& other) const
+{
+	return is_equal(other);
+}
+
+bool Variables::operator<(const Variables& other) const
+{
+	return (FreeVariables::operator<(other))
+		or ((_simple_typemap == other._simple_typemap
+		     and _deep_typemap < other._deep_typemap)
+		    or (_deep_typemap == other._deep_typemap
+		        and _fuzzy_typemap < other._fuzzy_typemap));
 }
 
 Handle Variables::get_vardecl() const

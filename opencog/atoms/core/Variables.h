@@ -97,6 +97,9 @@ struct FreeVariables
 	// Erase the given variable, if exist
 	void erase(const Handle&);
 
+	// Comparison operators. Convenient to define containers of Variables
+	bool operator<(const FreeVariables& other) const;
+
 	// Given the tree `tree` containing variables in it, create and
 	// return a new tree with the indicated values `vals` substituted
 	// for the variables.  "nocheck" == no type checking is done.
@@ -145,11 +148,12 @@ struct Variables : public FreeVariables
 	// type restrictions, but different actual variable names.
 	// Same as satisfying this->is_type(other->varseq) and also
 	// other->is_type(this->varseq) -- the equality is symmetric.
-	bool is_equal(const Variables&) const;
-	inline bool operator==(const Variables& other) const
-	{ return is_equal(other); }
-	inline bool operator!=(const Variables& other) const
-	{ return not is_equal(other); }
+	bool is_equal(const Variables& other) const;
+	bool is_equal(const Variables& other, size_t index) const;
+	bool operator==(const Variables& other) const;
+
+	// Comparison operators. Convenient to define containers of Variables
+	bool operator<(const Variables& other) const;
 
 	// Return true if the variable `othervar` in `other` is
 	// alpha-convertible to the variable `var` in this. That is,
@@ -157,7 +161,8 @@ struct Variables : public FreeVariables
 	// in name.
 	bool is_alpha_convertible(const Handle& var,
 	                          const Handle& othervar,
-	                          const Variables& other) const;
+	                          const Variables& other,
+	                          bool check_type=false) const;
 
 	// Return true if we are holding a single variable, and the handle
 	// given as the argument satisfies the type restrictions (if any).

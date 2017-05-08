@@ -30,7 +30,10 @@
 #include <opencog/atoms/base/Handle.h>
 #include <opencog/atoms/base/atom_types.h>
 #include <opencog/atoms/base/Quotation.h>
+#include <opencog/atoms/core/Variables.h>
+
 #include <string>
+#include <list>
 
 namespace opencog
 {
@@ -44,24 +47,37 @@ namespace opencog
  * variables of a atom (typically coming from ancestor scopes).
  *
  * The context is important to have for both unification, in
- * particular sub-unification, see Unify::subunify, and closure,
- * see Unify::substitution_closure, because quoted or shadowed
- * variables should not be substituted.
+ * particular sub-unification, see Unify::subunify, and closure, see
+ * Unify::substitution_closure, because quoted or shadowed variables
+ * should not be substituted.
  *
- * This notion of context is distinct and unrelated to
- * ContextLink.
+ * This notion of context is distinct and unrelated to ContextLink.
  */
 struct Context : public boost::totally_ordered<Context>
 {
+	typedef std::list<Variables> VariablesStack;
+
 	// Default ctor
 	Context(const Quotation& quotation=Quotation(),
-	        const OrderedHandleSet& shadow=OrderedHandleSet());
+	        const OrderedHandleSet& shadow=OrderedHandleSet(),
+	        bool store_scope_variables=true,
+	        const VariablesStack& scope_variables=VariablesStack());
+	Context(bool store_scope_variables);
 
 	// Quotation state
 	Quotation quotation;
 
 	// Set of shadowing variables
 	OrderedHandleSet shadow;
+
+	// Flag to ignore pushing scope variables to avoid that cost when
+	// not necessary
+	bool store_scope_variables;
+
+	// Stack of variable declarations corresponding to each ancestor
+	// unquoted scopes, pushed in encountering order from the current
+	// handle to the root.
+	VariablesStack scope_variables;
 
 	/**
 	 * Update the context over an atom. That is if the atom is a
@@ -91,7 +107,7 @@ struct Context : public boost::totally_ordered<Context>
 	bool operator<(const Context& context) const;
 };
 
-// Compare by context instead of pointer. We probably want this to be
+// Compare by content instead of pointer. We probably want this to be
 // the default, until then this function is here for that.
 bool ohs_content_eq(const OrderedHandleSet& lhs, const OrderedHandleSet& rhs);
 

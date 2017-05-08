@@ -33,8 +33,12 @@
 
 namespace opencog {
 
-Context::Context(const Quotation& q, const OrderedHandleSet& s)
-	: quotation(q), shadow(s) {}
+Context::Context(const Quotation& q,
+                 const OrderedHandleSet& s,
+                 bool i, const VariablesStack& v)
+	: quotation(q), shadow(s), store_scope_variables(i), scope_variables(v) {}
+
+Context::Context(bool s) : store_scope_variables(s) {}
 
 void Context::update(const Handle& h)
 {
@@ -42,9 +46,14 @@ void Context::update(const Handle& h)
 
 	// Update shadow
 	if (quotation.is_unquoted() and classserver().isA(t, SCOPE_LINK)) {
-		// Insert the new shadowing variables from the scope link
 		const Variables& variables = ScopeLinkCast(h)->get_variables();
+
+		// Insert the new shadowing variables from the scope link
 		shadow.insert(variables.varset.begin(), variables.varset.end());
+
+		// Push the variables to scope_variables
+		if (store_scope_variables)
+			scope_variables.push_front(variables);
 	}
 
 	// Update quotation
@@ -73,16 +82,22 @@ bool Context::is_free_variable(const Handle& h) const
 		and not is_in(h, shadow);
 }
 
-bool Context::operator==(const Context& context) const
+bool Context::operator==(const Context& other) const
 {
-	return (quotation == context.quotation)
-		and ohs_content_eq(shadow, context.shadow);
+	return (quotation == other.quotation)
+		and ohs_content_eq(shadow, other.shadow)
+		and // only look at scope variables if both care about it
+		(not store_scope_variables or not other.store_scope_variables or
+		 scope_variables == other.scope_variables);
 }
 
-bool Context::operator<(const Context& context) const
+bool Context::operator<(const Context& other) const
 {
-	return quotation < context.quotation
-		or (quotation == context.quotation and shadow < context.shadow);
+	return (quotation < other.quotation)
+		or ((quotation == other.quotation and shadow < other.shadow)
+		    // only look at scope variables if both care about it
+		    or not store_scope_variables or not other.store_scope_variables
+		    or (shadow == other.shadow and scope_variables < other.scope_variables));
 }
 
 bool ohs_content_eq(const OrderedHandleSet& lhs, const OrderedHandleSet& rhs)
@@ -100,14 +115,32 @@ bool ohs_content_eq(const OrderedHandleSet& lhs, const OrderedHandleSet& rhs)
 	return true;
 }
 
+std::string oc_to_string(const Context::VariablesStack& scope_variables)
+{
+	std::stringstream ss;
+	ss << "size = " << scope_variables.size() << std::endl;
+	int i = 0;
+	for (const Variables& variables : scope_variables) {
+		ss << "variables[" << i++ << "]:" << std::endl
+		   << variables.to_string();
+	}
+	return ss.str();
+}
+
 std::string oc_to_string(const Context& c)
 {
 	std::stringstream ss;
-	if (c == Context())
+	if (c == Context()) {
 		ss << "none" << std::endl;
-	else
+	} else {
 		ss << "quotation: " << oc_to_string(c.quotation) << std::endl
 		   << "shadow:" << std::endl << oc_to_string(c.shadow);
+		ss << "scope_variables:" << std::endl;
+		if (c.store_scope_variables)
+			ss << oc_to_string(c.scope_variables);
+		else
+			ss << "ignored" << std::endl;
+	}
 	return ss.str();
 }
 
