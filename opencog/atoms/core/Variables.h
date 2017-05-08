@@ -161,7 +161,8 @@ struct Variables : public FreeVariables
 	// in name.
 	bool is_alpha_convertible(const Handle& var,
 	                          const Handle& othervar,
-	                          const Variables& other) const;
+	                          const Variables& other,
+	                          bool check_type=false) const;
 
 	// Return true if we are holding a single variable, and the handle
 	// given as the argument satisfies the type restrictions (if any).

@@ -365,12 +365,13 @@ bool Variables::is_equal(const Variables& other, size_t index) const
 
 bool Variables::is_alpha_convertible(const Handle& var,
                                      const Handle& othervar,
-                                     const Variables& other) const
+                                     const Variables& other,
+                                     bool check_type) const
 {
 	IndexMap::const_iterator idx = other.index.find(othervar);
-	if (other.index.end() == idx) return false;
-	if (varseq.at(idx->second) == var) return true;
-	return false;
+	return other.index.end() != idx
+		and varseq.at(idx->second) == var
+		and (not check_type or is_equal(other, idx->second));
 }
 
 /* ================================================================= */
