@@ -81,6 +81,8 @@ class PrimitiveEnviron
 // B_B    -- cogutils logger boolean setters/getters.
 // B_HH   -- PatternSCM::value_is_type(), etc.
 //        -- LGDictSCM::do_lg_conn_type_match(), etc.
+// H_HH   -- ?? someoene??
+// H_HHH  -- pointmem (the 3D spatial API)
 // H_HHHH -- do_backward_chaining, do_forward_chaining
 // H_HT   -- fetch-incoming-by-type
 // H_HZ   -- cog-bind-first-n
@@ -151,6 +153,7 @@ class SchemePrimitive : public PrimitiveEnviron
 			double (T::*d_hhtb)(Handle, Handle, Type, bool);
 			Handle (T::*h_h)(Handle);
 			Handle (T::*h_hh)(Handle, Handle);
+			Handle (T::*h_hhh)(Handle, Handle, Handle);
 			Handle (T::*h_hhhh)(Handle, Handle, Handle, Handle);
 			Handle (T::*h_hs)(Handle, const std::string&);
 			Handle (T::*h_ht)(Handle, Type);
@@ -190,8 +193,9 @@ class SchemePrimitive : public PrimitiveEnviron
 			D_HHTB,// return double, take handle, handle, and type
 			H_H,   // return handle, take handle
 			H_HH,  // return handle, take handle and handle
+			H_HHH, // return handle, take handle, handle and handle
+			H_HHHH, // return handle, take handle, handle, handle and handle
 			H_HS,  // return handle, take handle and string
-			H_HHHH, // return handle, take handle, handle, Handle and Handle
 			H_HT,  // return handle, take handle, type
 			H_HTQB, // return handle, take handle, type, HandleSeq and boolean
 			H_HZ,  // return handle, take handle and size_t
@@ -267,6 +271,15 @@ class SchemePrimitive : public PrimitiveEnviron
 					Handle h2(SchemeSmob::verify_handle(scm_cadr(args),
 														scheme_name, 2));
 					Handle rh((that->*method.h_hh)(h1, h2));
+					rc = SchemeSmob::handle_to_scm(rh);
+					break;
+				}
+				case H_HHH:
+				{
+					Handle h1(SchemeSmob::verify_handle(scm_car(args), scheme_name, 1));
+					Handle h2(SchemeSmob::verify_handle(scm_cadr(args), scheme_name, 2));
+					Handle h3(SchemeSmob::verify_handle(scm_caddr(args), scheme_name, 3));
+					Handle rh((that->*method.h_hhh)(h1, h2, h3));
 					rc = SchemeSmob::handle_to_scm(rh);
 					break;
 				}
@@ -601,10 +614,11 @@ class SchemePrimitive : public PrimitiveEnviron
 		DECLARE_CONSTR_4(D_HHTB, d_hhtb, double, Handle, Handle, Type, bool)
 		DECLARE_CONSTR_1(H_H,    h_h,  Handle, Handle)
 		DECLARE_CONSTR_2(H_HH,   h_hh, Handle, Handle, Handle)
+		DECLARE_CONSTR_3(H_HHH,  h_hhh, Handle, Handle, Handle, Handle)
+		DECLARE_CONSTR_4(H_HHHH, h_hhhh, Handle, Handle, Handle, Handle, Handle)
 		DECLARE_CONSTR_2(H_HS,   h_hs, Handle, Handle, const std::string&)
 		DECLARE_CONSTR_2(H_HT,   h_ht, Handle, Handle, Type)
 		DECLARE_CONSTR_4(H_HTQB, h_htqb, Handle, Handle, Type, const HandleSeq&, bool)
-		DECLARE_CONSTR_4(H_HHHH, h_hhhh, Handle, Handle, Handle, Handle, Handle)
 		DECLARE_CONSTR_2(H_HZ,   h_hz, Handle, Handle, size_t)
 		DECLARE_CONSTR_0(I_V,    i_v, int)
 		DECLARE_CONSTR_4(Q_HTIB, q_htib, HandleSeq, Handle, Type, int, bool)
@@ -696,6 +710,8 @@ DECLARE_DECLARE_2(std::string, const std::string&, const std::string&)
 DECLARE_DECLARE_2(void, const std::string&, AtomSpace*)
 DECLARE_DECLARE_2(void, Type, int)
 DECLARE_DECLARE_2(void, const std::string&, int)
+
+DECLARE_DECLARE_3(Handle, Handle, Handle, Handle)
 
 DECLARE_DECLARE_4(double, Handle, Handle, Type, bool)
 DECLARE_DECLARE_4(Handle, Handle, Handle, Handle, Handle)
