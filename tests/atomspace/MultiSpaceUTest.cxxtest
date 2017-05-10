@@ -474,7 +474,7 @@ public:
 
 		// Add (Exists (Member X A))
 		Handle as_A = as.add_node(CONCEPT_NODE, "A");
-		Handle as_X = ex.add_node(VARIABLE_NODE, "X");
+		Handle as_X = as.add_node(VARIABLE_NODE, "X");
 		Handle as_XA = as.add_link(MEMBER_LINK, as_X, as_A);
 		Handle as_S = as.add_link(SCOPE_LINK, as_XA);
 
