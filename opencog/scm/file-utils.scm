@@ -121,19 +121,15 @@
 ; ---------------------------------------------------------------------
 (define-public (prt-atom-list port lst)
 "
- prt-atom-list          Send to port the list of atoms.
+ prt-atom-list PORT LST     Print a list LST of atoms to PORT.
 
- Sends a list of atoms 'lst' to the open port 'port', if the atoms have
- no incoming-set.
+ Prints the list of atoms LST to PORT, but only those atoms
+ without an incoming set.
 "
-    (if (not (null? lst))
-        (let()
-            (if (= (length (cog-incoming-set (car lst))) 0)
-                (display (car lst) port)
-            )
-            (prt-atom-list port (cdr lst))
-        )
-    )
+	(for-each
+		(lambda (atom)
+			(if (null? (cog-incoming-set atom)) (display atom port)))
+		lst)
 )
 
 ; ---------------------------------------------------------------------
