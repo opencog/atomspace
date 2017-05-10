@@ -127,17 +127,11 @@
  no incoming-set.
 "
     (if (not (null? lst))
-        ; try to protect against undefined handles, although note that
-        ; this isn't guaranteed as some other process could delete the
-        ; handle between the if statement and the display statement
-        ; the only way to truely fix this is to block the atomspace
-        (if (not (eq? (cog-undefined-handle) (car lst)))
-            (let()
-                (if (= (length (cog-incoming-set (car lst))) 0)
-                    (display (car lst) port)
-                )
-                (prt-atom-list port (cdr lst))
+        (let()
+            (if (= (length (cog-incoming-set (car lst))) 0)
+                (display (car lst) port)
             )
+            (prt-atom-list port (cdr lst))
         )
     )
 )
