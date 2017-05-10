@@ -479,18 +479,22 @@ public:
 		Handle as_S = as.add_link(SCOPE_LINK, as_XA);
 
 		// Add (Exists (Member Y A))
-		Handle ex_Y = as.add_node(VARIABLE_NODE, "Y");
-		Handle ex_YA = ex.add_link(MEMBER_LINK, ex_Y, as_A);
+		Handle ex_A = ex.add_node(CONCEPT_NODE, "A");
+		Handle ex_Y = ex.add_node(VARIABLE_NODE, "Y");
+		Handle ex_YA = ex.add_link(MEMBER_LINK, ex_Y, ex_A);
 		Handle ex_S = ex.add_link(SCOPE_LINK, ex_YA);
 
-		// Modify (Exists (Member Y A)) truth value.
+		// Modify ex_A truth value, add it back to as and check that
+		// its tv has been updated as well.
+		ex_A->setTruthValue(SimpleTruthValue::createSTV(1.0, 1.0));
+		Handle as_ex_A = as.add_atom(ex_A);
+		TS_ASSERT(as_ex_A->getTruthValue()->getConfidence() > 0.9);
+
+		// Modify (Exists (Member Y A)) truth value, add it back to
+		// as, and (since it is alpha equivalent) check that its tv
+		// has been updated as well.
 		ex_S->setTruthValue(SimpleTruthValue::createSTV(1.0, 1.0));
-
-		// Add (Exists (Member Y A)) back to as. Since it is alpha
-		// equivalent to (Exists (Member X A)) it should modifies its
-		// truth value.
 		Handle as_ex_S = as.add_atom(ex_S);
-
 		TS_ASSERT(as_ex_S->getTruthValue()->getConfidence() > 0.9);
 	}
 };
