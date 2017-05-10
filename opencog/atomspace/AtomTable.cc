@@ -279,17 +279,20 @@ Handle AtomTable::getLinkHandle(const AtomPtr& orig, Quotation quotation) const
     quotation.update(t);
 
     // Make sure all the atoms in the outgoing set are in a valid
-    // format. One of the troublemakers here is the NumberNode,
-    // which will hash incorrectly, unless its in proper format.
-    // The other troublemaker is any ScopeLink.
-    HandleSeq resolved_seq;
-    for (const Handle& ho : seq) {
-        Handle rh(getHandle(ho, quotation));
-        if (not rh) return Handle::UNDEFINED;
-        resolved_seq.emplace_back(rh);
-    }
+    // format. One of the troublemakers here is the NumberNode, which
+    // will hash incorrectly, unless its in proper format. We exclude
+    // unquoted scope links from it, otherwise it will prematurely
+    // abort and possibly miss alpha equivalent atom in _atom_store.
+    if (not unquoted or not classserver().isA(t, SCOPE_LINK)) {
+        HandleSeq resolved_seq;
+        for (const Handle& ho : seq) {
+            Handle rh(getHandle(ho, quotation));
+            if (not rh) return Handle::UNDEFINED;
+            resolved_seq.emplace_back(rh);
+        }
 
-    a = createLink(resolved_seq, t);
+        a = createLink(resolved_seq, t);
+    }
 
     // Start searching to see if we have this atom.
     ContentHash ch = a->get_hash();
