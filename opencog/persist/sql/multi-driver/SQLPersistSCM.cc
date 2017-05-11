@@ -68,7 +68,8 @@ void SQLPersistSCM::init(void)
     define_scheme_primitive("sql-load", &SQLPersistSCM::do_load, this, "persist-sql");
     define_scheme_primitive("sql-store", &SQLPersistSCM::do_store, this, "persist-sql");
     define_scheme_primitive("sql-stats", &SQLPersistSCM::do_stats, this, "persist-sql");
-    define_scheme_primitive("sql-clear-cache", &SQLPersistSCM::do_clear, this, "persist-sql");
+    define_scheme_primitive("sql-clear-cache", &SQLPersistSCM::do_clear_cache, this, "persist-sql");
+    define_scheme_primitive("sql-clear-stats", &SQLPersistSCM::do_clear_stats, this, "persist-sql");
 }
 
 SQLPersistSCM::~SQLPersistSCM()
@@ -151,7 +152,7 @@ void SQLPersistSCM::do_stats(void)
     _store->print_stats();
 }
 
-void SQLPersistSCM::do_clear(void)
+void SQLPersistSCM::do_clear_cache(void)
 {
     if (_store == NULL) {
         printf("sql-stats: Database not open\n");
@@ -159,6 +160,16 @@ void SQLPersistSCM::do_clear(void)
     }
 
     _store->clear_cache();
+}
+
+void SQLPersistSCM::do_clear_stats(void)
+{
+    if (_store == NULL) {
+        printf("sql-stats: Database not open\n");
+        return;
+    }
+
+    _store->clear_stats();
 }
 
 void opencog_persist_sql_init(void)

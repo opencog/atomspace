@@ -225,6 +225,7 @@ class SQLAtomStorage : public AtomStorage
 
 		// Debugging and perforamnce monitoring
 		void print_stats(void);
+		void clear_stats(void); // reset stats counters.
 };
 
 
