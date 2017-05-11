@@ -627,6 +627,8 @@ void SQLAtomStorage::storeValuation(const Handle& key,
 
 	rp.exec(insert.c_str());
 	rp.exec("COMMIT");
+
+	_valuation_stores++;
 }
 
 // Almost a cut-n-passte of the above, but different.
@@ -672,6 +674,7 @@ SQLAtomStorage::VUID SQLAtomStorage::storeValue(const ProtoAtomPtr& pap)
 	Response rp(conn_pool);
 	rp.exec(qry.c_str());
 
+	_value_stores++;
 	return vuid;
 }
 
@@ -1895,6 +1898,8 @@ void SQLAtomStorage::clear_stats(void)
 {
 	_load_count = 0;
 	_store_count = 0;
+	_valuation_stores = 0;
+	_value_stores = 0;
 
 	_write_queue.clear_stats();
 
@@ -1914,12 +1919,16 @@ void SQLAtomStorage::clear_stats(void)
 
 void SQLAtomStorage::print_stats(void)
 {
-	printf("\n");
 	size_t load_count = _load_count;
 	size_t store_count = _store_count;
 	double frac = store_count / ((double) load_count);
 	printf("sql-stats: total loads = %lu total stores = %lu ratio=%f\n",
 	       load_count, store_count, frac);
+
+	size_t valuation_stores = _valuation_stores;
+	size_t value_stores = _value_stores;
+	printf("sql-stats: valuation updates = %lu value updates = %lu\n",
+	       valuation_stores, value_stores);
 	printf("\n");
 
 #ifdef STORAGE_DEBUG
@@ -1979,7 +1988,6 @@ void SQLAtomStorage::print_stats(void)
 	printf("avg drain time=%f seconds; longest drain time=%f\n",
 	       drain_secs, slowest);
 
-	printf("\n");
 	printf("currently in_drain=%d num_busy=%lu queue_size=%lu\n",
 	       _write_queue._in_drain, _write_queue.get_busy_writers(),
 	       _write_queue.get_queue_size());
