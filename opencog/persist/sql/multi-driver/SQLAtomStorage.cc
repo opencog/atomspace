@@ -321,6 +321,8 @@ class SQLAtomStorage::Response
 // I dunno -- std::thread::hardware_concurrency()  ???
 #define NUM_WB_QUEUES 8
 
+#define STORAGE_DEBUG 1
+
 void SQLAtomStorage::init(const char * uri)
 {
 	bool use_libpq = (0 == strncmp(uri, "postgres", 8));
@@ -357,8 +359,7 @@ void SQLAtomStorage::init(const char * uri)
 
 	max_height = 0;
 	bulk_load = false;
-	_load_count = 0;
-	_store_count = 0;
+	clear_stats();
 
 	for (int i=0; i< TYPEMAP_SZ; i++)
 	{
@@ -380,20 +381,6 @@ void SQLAtomStorage::init(const char * uri)
 
 	// Special case for the pre-defined atomspaces.
 	table_id_cache.insert(1);
-
-#define STORAGE_DEBUG 1
-#ifdef STORAGE_DEBUG
-	_num_get_nodes = 0;
-	_num_got_nodes = 0;
-	_num_rec_nodes = 0;
-	_num_get_links = 0;
-	_num_got_links = 0;
-	_num_rec_links = 0;
-	_num_get_insets = 0;
-	_num_get_inlinks = 0;
-	_num_node_inserts = 0;
-	_num_link_inserts = 0;
-#endif // STORAGE_DEBUG
 }
 
 SQLAtomStorage::SQLAtomStorage(std::string uri)
@@ -1903,6 +1890,25 @@ void SQLAtomStorage::clear_cache(void)
 }
 
 /* ================================================================ */
+
+void SQLAtomStorage::clear_stats(void)
+{
+	_load_count = 0;
+	_store_count = 0;
+
+#ifdef STORAGE_DEBUG
+	_num_get_nodes = 0;
+	_num_got_nodes = 0;
+	_num_rec_nodes = 0;
+	_num_get_links = 0;
+	_num_got_links = 0;
+	_num_rec_links = 0;
+	_num_get_insets = 0;
+	_num_get_inlinks = 0;
+	_num_node_inserts = 0;
+	_num_link_inserts = 0;
+#endif // STORAGE_DEBUG
+}
 
 void SQLAtomStorage::print_stats(void)
 {
