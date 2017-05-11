@@ -1896,6 +1896,8 @@ void SQLAtomStorage::clear_stats(void)
 	_load_count = 0;
 	_store_count = 0;
 
+	_write_queue.clear_stats();
+
 #ifdef STORAGE_DEBUG
 	_num_get_nodes = 0;
 	_num_got_nodes = 0;
