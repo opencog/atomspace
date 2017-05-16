@@ -895,7 +895,8 @@ int SQLAtomStorage::get_height(const Handle& atom)
 /* ================================================================ */
 
 /// Return the UUID of the handle, if it is known.
-/// Else return the invalid UUID.
+/// If the handle is in the database, then the correct UUID is returned.
+/// If the handle is NOT in the database, this returns the invalid UUID.
 UUID SQLAtomStorage::check_uuid(const Handle& h)
 {
 	UUID uuid = _tlbuf.getUUID(h);
@@ -918,8 +919,9 @@ UUID SQLAtomStorage::check_uuid(const Handle& h)
 	return TLB::INVALID_UUID;
 }
 
-/// Return the UUID of the handle, if it is known.
-/// Else issue a brand-new one.
+/// Return the UUID of the handle, if it is known, else throw exception.
+/// If the handle is in the database, then the correct UUID is returned.
+/// If the handle is NOT in the database, this throws a silent exception.
 UUID SQLAtomStorage::get_uuid(const Handle& h)
 {
 	UUID uuid = check_uuid(h);
@@ -1421,7 +1423,10 @@ void SQLAtomStorage::getIncoming(AtomTable& table, const char *buff)
  */
 void SQLAtomStorage::getIncomingSet(AtomTable& table, const Handle& h)
 {
-	UUID uuid = get_uuid(h);
+	// If the uuid is not known, then the atom is not in storage,
+	// and therefore, cannot have an incoming set.  Just return.
+	UUID uuid = check_uuid(h);
+	if (TLB::INVALID_UUID == uuid) return;
 
 	char buff[BUFSZ];
 	snprintf(buff, BUFSZ,
@@ -1444,7 +1449,11 @@ void SQLAtomStorage::getIncomingSet(AtomTable& table, const Handle& h)
  */
 void SQLAtomStorage::getIncomingByType(AtomTable& table, const Handle& h, Type t)
 {
-	UUID uuid = get_uuid(h);
+	// If the uuid is not known, then the atom is not in storage,
+	// and therefore, cannot have an incoming set.  Just return.
+	UUID uuid = check_uuid(h);
+	if (TLB::INVALID_UUID == uuid) return;
+
 	int dbtype = storing_typemap[t];
 
 	char buff[BUFSZ];
