@@ -280,8 +280,12 @@ void SchemeSmob::register_procs()
 	register_proc("cog-node?",             1, 0, 0, C(ss_node_p));
 	register_proc("cog-link?",             1, 0, 0, C(ss_link_p));
 
+	// hash-value of the atom
 	register_proc("cog-handle",            1, 0, 0, C(ss_handle));
+
+	// Value API
 	register_proc("cog-value->list",       1, 0, 0, C(ss_value_to_list));
+	register_proc("cog-value-ref",         2, 0, 0, C(ss_value_ref));
 
 	// Generic property setter on atoms
 	register_proc("cog-set-value!",        3, 0, 0, C(ss_set_value));

@@ -299,4 +299,52 @@ SCM SchemeSmob::ss_value_to_list (SCM svalue)
 	return SCM_EOL;
 }
 
+SCM SchemeSmob::ss_value_ref (SCM svalue, SCM sindex)
+{
+	ProtoAtomPtr pa(verify_protom(svalue, "cog-value-ref"));
+   size_t index = verify_size(sindex, "cog-value-ref", 2);
+	Type t = pa->getType();
+
+	if (FLOAT_VALUE == t)
+	{
+		const std::vector<double>& v = FloatValueCast(pa)->value();
+		if (index < v.size()) return scm_from_double(v[index]);
+	}
+
+	if (STRING_VALUE == t)
+	{
+		const std::vector<std::string>& v = StringValueCast(pa)->value();
+		if (index < v.size()) return scm_from_string(v[index]);
+	}
+
+	if (LINK_VALUE == t)
+	{
+		const std::vector<ProtoAtomPtr>& v = LinkValueCast(pa)->value();
+		if (index < v.size()) return protom_to_scm(v[index]);
+	}
+
+	if (classserver().isA(t, LINK))
+	{
+		const HandleSeq& v = AtomCast(pa)->getOutgoingSet();
+		if (index < v.size()) return handle_to_scm(v[index]);
+	}
+
+	if (classserver().isA(t, NODE))
+	{
+		const std::string& name = AtomCast(pa)->getName();
+		if (0 == index) return scm_from_string(name);
+	}
+
+	SCM ilist = scm_cons(scm_from_int(index), SCM_EOL);
+	scm_error_scm(
+		scm_from_utf8_symbol("out-of-range"),
+		scm_from_utf8_string("cog-value-ref"),
+		scm_from_utf8_string("Index of ~A is out of range"),
+		ilist,
+		ilist);
+
+	// Hmm. scm_error never returns.
+	return SCM_EOL;
+}
+
 /* ===================== END OF FILE ============================ */

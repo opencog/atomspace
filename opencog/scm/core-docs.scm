@@ -751,15 +751,33 @@
 (set-procedure-property! cog-value->list 'documentation
 "
  cog-value->list VALUE
-    Return a guile list holding the values in the opencog VALUE.
+    Return a scheme list holding the values in the opencog VALUE.
     If VALUE is a Link, this returns the outgoing set.
     If VALUE is a Node, this returns list containing the node name.
     If VALUE is a StringValue, FloatValue or LinkValue, this returns
-    the associated list of values.
+        the associated list of values.
 
     Example:
        guile> (cog-value->list (FloatValue 0.1 0.2 0.3))
        (0.1 0.2 0.3)
+")
+
+(set-procedure-property! cog-value-ref 'documentation
+"
+ cog-value-ref VALUE N
+    Return the N'th entry in the opencog VALUE.
+    If VALUE is a Link, this returns the N'th atom in the outgoing set.
+        That is, it returns the same atom as cog-outgoing-atom.
+    If VALUE is a Node, and N is zero, this returns the node name.
+    If VALUE is a StringValue, FloatValue or LinkValue, this returns
+        the N'th entry in the value.
+
+    This returns the same result as
+        (list-ref (cog-value->list VALUE) N)
+
+    Example:
+       guile> (cog-value-ref (FloatValue 0.1 0.2 0.3) 2)
+       0.3
 ")
 
 (set-procedure-property! cog-as 'documentation

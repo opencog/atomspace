@@ -99,6 +99,7 @@ private:
 
 	// Get list endcoded in a value
 	static SCM ss_value_to_list(SCM);
+	static SCM ss_value_ref(SCM, SCM);
 
 	// Set properties of atoms
 	static SCM ss_set_av(SCM, SCM);
