@@ -389,9 +389,17 @@ http://wiki.postgresql.org/wiki/Tuning_Your_PostgreSQL_Server
 ```
 
 For write-mostly databases, such as in the language-learning project,
-you will get better results with checkpoint_segments = 100. If you
-have postgres 9.0 or newer, set max_wal_size to 8GB, to avoid the
-"checkpoints are occurring too frequently" warning message.
+you will get better results with `checkpoint_segments = 100`.
+
+If you have postgres 9.0 or newer, there are no checkpoint_segments.
+Instead, do this:
+```
+checkpoint_timeout = 1h
+max_wal_size = 8GB
+checkpoint_completion_target = 1.0
+```
+This should be enough to avoid the "checkpoints are occurring too frequently"
+warning message.
 
 Enabling vacuum is very important, for the same reason; performance
 degrades substantially (by factors of 3x-10x) without regular vacuuming.
