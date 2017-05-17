@@ -387,7 +387,12 @@ http://wiki.postgresql.org/wiki/Tuning_Your_PostgreSQL_Server
    autovacuum = on
    track_counts = on
 ```
-The large value for `wal_buffers` might not be needed.
+
+For write-mostly databases, such as in the language-learning project,
+you will get better results with checkpoint_segments = 100. If you
+have postgres 9.0 or newer, set max_wal_size to 8GB, to avoid the
+"checkpoints are occurring too frequently" warning message.
+
 Enabling vacuum is very important, for the same reason; performance
 degrades substantially (by factors of 3x-10x) without regular vacuuming.
 (Current versions of Postgres vacuum automatically. YMMV.)
