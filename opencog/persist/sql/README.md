@@ -1179,7 +1179,16 @@ TODO
    storage: For details, see
    http://coussej.github.io/2016/01/14/Replacing-EAV-with-JSONB-in-PostgreSQL/
 
- * Add support for multiple atomspaces.
+ * Extend the typecodes table to recording the type-inherintance
+   hierarchy, so that types can be fully saved and restored from the
+   database. Not clear how to resolve conflicts, if they occur, between
+   the type inheritance hierarchy defined in C++, and the hierarchy
+   defined in the database.
+
+ * Extend the standard table to hold count truth-values. Since almost
+   all atoms have count TV's on them, this can lead to a more compact
+   database format, and also could improve load and store performance,
+   by reducing access to the valuations table.
 
  * Create custom table, tailored for EvaluationLink triples.
    Since majority of nodes/links in the DB will be in the form of
@@ -1187,7 +1196,9 @@ TODO
    by creating a custom table, and shunting queries to that.  This would
    decrease the SQL table sizes significantly, and decrease server I/O
    by factors of 2x-3x.  Another table, designed just for simple pairs,
-   might help a lot, too.
+   might help a lot, too.  This is easier said than done, however.
+
+ * Add support for multiple atomspaces.
 
  * Create an API to allow the user to save only selected values on an
    atom.
