@@ -1674,6 +1674,9 @@ void SQLAtomStorage::load(AtomTable &table)
 		"Max Height is %d stepsize=%lu chunks=%lu\n",
 		 max_height, stepsize, steps.size());
 
+	// Parallelize always.
+	opencog::setting_omp(opencog::num_threads(), 1);
+
 	for (int hei=0; hei<=max_height; hei++)
 	{
 		unsigned long cur = _load_count;
@@ -1694,9 +1697,13 @@ void SQLAtomStorage::load(AtomTable &table)
 		});
 		printf("Loaded %lu atoms at height %d\n", _load_count - cur, hei);
 	}
+
 	printf("Finished loading %lu atoms in total\n",
 		(unsigned long) _load_count);
 	bulk_load = false;
+
+	// Put it back as it was.
+	opencog::setting_omp(opencog::num_threads());
 
 	// synchrnonize!
 	table.barrier();
