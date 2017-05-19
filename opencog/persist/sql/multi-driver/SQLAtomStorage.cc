@@ -31,6 +31,7 @@
 #ifdef HAVE_SQL_STORAGE
 
 #include <stdlib.h>
+#include <time.h>
 #include <unistd.h>
 
 #include <chrono>
@@ -160,15 +161,28 @@ class SQLAtomStorage::Response
 			// printf ("---- New atom found ----\n");
 			rs->foreach_column(&Response::create_atom_column_cb, this);
 
-			PseudoPtr p(store->makeAtom(*this, uuid));
-			Handle atom(store->get_recursive_if_not_exists(p));
-			Handle h(table->add(atom, false));
+			// Two different throws mighht be caught here:
+			// 1) DB has an atom type that is not defined in the atomspace.
+			//    In this case, makeAtom throws IOException.
+			// 2) Corrupted databases can cause get_recursive_if_not_exists
+			//    to throw, because a uuid does not exist. Yes, this can
+			//    happen.
+			// Either way, skip the offending atom, and carry on.
+			try
+			{
+				PseudoPtr p(store->makeAtom(*this, uuid));
 
-			// Force resolution in TLB, so that later removes work.
-			store->_tlbuf.addAtom(h, uuid);
+				Handle atom(store->get_recursive_if_not_exists(p));
+				Handle h(table->add(atom, false));
 
-			// Get the values only after TLB insertion!!
-			store->get_atom_values(h);
+				// Force resolution in TLB, so that later removes work.
+				store->_tlbuf.addAtom(h, uuid);
+
+				// Get the values only after TLB insertion!!
+				store->get_atom_values(h);
+			}
+			catch (const IOException& ex) {}
+
 			return false;
 		}
 
@@ -1374,6 +1388,15 @@ Handle SQLAtomStorage::get_recursive_if_not_exists(PseudoPtr p)
 			continue;
 		}
 		PseudoPtr po(petAtom(idu));
+
+		// Corrupted databases can have outoging sets that refer
+		// to non-existent atoms. This is rare, but has happened.
+		// WIthout this check, the null-pointer deref will crash.
+		if (nullptr == po)
+			throw IOException(TRACE_INFO,
+				"SQLAtomStorage::get_recursive_if_not_exists: "
+				"Corrupt database; no atom for uuid=%lu", idu);
+
 		Handle ha(get_recursive_if_not_exists(po));
 		resolved_oset.emplace_back(ha);
 	}
@@ -1616,7 +1639,10 @@ SQLAtomStorage::PseudoPtr SQLAtomStorage::makeAtom(Response &rp, UUID uuid)
 	_load_count ++;
 	if (bulk_load and _load_count%10000 == 0)
 	{
-		printf("\tLoaded %lu atoms.\n", (unsigned long) _load_count);
+		time_t secs = time(0) - bulk_start;
+		double rate = ((double) _load_count) / secs;
+		printf("\tLoaded %lu atoms (%f per second).\n",
+			(unsigned long) _load_count, rate);
 	}
 
 	return atom;
@@ -1633,50 +1659,51 @@ void SQLAtomStorage::load(AtomTable &table)
 	max_height = getMaxObservedHeight();
 	printf("Max Height is %d\n", max_height);
 	bulk_load = true;
+	bulk_start = time(0);
 
 	setup_typemap();
 
-	Response rp(conn_pool);
-	rp.table = &table;
-	rp.store = this;
+#define NCHUNKS 300
+#define MINSTEP 10123
+	std::vector<unsigned long> steps;
+	unsigned long stepsize = MINSTEP + max_nrec/NCHUNKS;
+	for (unsigned long rec = 0; rec <= max_nrec; rec += stepsize)
+		steps.push_back(rec);
+
+	printf("Loading all atoms: "
+		"Max Height is %d stepsize=%lu chunks=%lu\n",
+		 max_height, stepsize, steps.size());
+
+	// Parallelize always.
+	opencog::setting_omp(opencog::num_threads(), 1);
 
 	for (int hei=0; hei<=max_height; hei++)
 	{
 		unsigned long cur = _load_count;
 
-#if GET_ONE_BIG_BLOB
-		char buff[BUFSZ];
-		snprintf(buff, BUFSZ, "SELECT * FROM Atoms WHERE height = %d;", hei);
-		rp.height = hei;
-		rp.exec(buff);
-		rp.rs->foreach_row(&Response::load_all_atoms_cb, &rp);
-#else
-		// It appears that, when the select statement returns more than
-		// about a 100K to a million atoms or so, some sort of heap
-		// corruption occurs in the iodbc code, causing future mallocs
-		// to fail. So limit the number of records processed in one go.
-		// It also appears that asking for lots of records increases
-		// the memory fragmentation (and/or there's a memory leak in iodbc??)
-		// XXX Not clear is UnixSQL suffers from this same problem.
-		// Whatever, seems to be a better strategy overall, anyway.
-#define STEP 12003
-		unsigned long rec;
-		for (rec = 0; rec <= max_nrec; rec += STEP)
+		OMP_ALGO::for_each(steps.begin(), steps.end(),
+			[&](unsigned long rec)
 		{
+			Response rp(conn_pool);
+			rp.table = &table;
+			rp.store = this;
 			char buff[BUFSZ];
 			snprintf(buff, BUFSZ, "SELECT * FROM Atoms WHERE "
 			         "height = %d AND uuid > %lu AND uuid <= %lu;",
-			         hei, rec, rec+STEP);
+			         hei, rec, rec+stepsize);
 			rp.height = hei;
 			rp.exec(buff);
 			rp.rs->foreach_row(&Response::load_all_atoms_cb, &rp);
-		}
-#endif
+		});
 		printf("Loaded %lu atoms at height %d\n", _load_count - cur, hei);
 	}
+
 	printf("Finished loading %lu atoms in total\n",
 		(unsigned long) _load_count);
 	bulk_load = false;
+
+	// Put it back as it was.
+	opencog::setting_omp(opencog::num_threads());
 
 	// synchrnonize!
 	table.barrier();
