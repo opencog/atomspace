@@ -1649,8 +1649,9 @@ SQLAtomStorage::PseudoPtr SQLAtomStorage::makeAtom(Response &rp, UUID uuid)
 	{
 		time_t secs = time(0) - bulk_start;
 		double rate = ((double) _load_count) / secs;
-		printf("\tLoaded %lu atoms in %d seconds (%d per second).\n",
-			(unsigned long) _load_count, (int) secs, (int) rate);
+		unsigned long kays = ((unsigned long) _load_count) / 1000;
+		printf("\tLoaded %luK atoms in %d seconds (%d per second).\n",
+			kays, (int) secs, (int) rate);
 	}
 
 	return atom;
@@ -1813,8 +1814,9 @@ void SQLAtomStorage::store_parallel(const HandleSeq& seq)
 			{
 				time_t secs = time(0) - bulk_start;
 				double rate = ((double) _store_count) / secs;
-				printf("\tStored %lu atoms in %d seconds (%d per second)\n",
-					(unsigned long) _store_count, (int) secs, (int) rate);
+				unsigned long kays = ((unsigned long) _store_count) / 1000;
+				printf("\tStored %luK atoms in %d seconds (%d per second)\n",
+					kays, (int) secs, (int) rate);
 			}
 		}
 	});
