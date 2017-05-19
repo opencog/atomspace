@@ -107,12 +107,14 @@ class SQLAtomStorage : public AtomStorage
 		int do_store_atom(const Handle&);
 		void vdo_store_atom(const Handle&);
 		void do_store_single_atom(const Handle&, int);
+		void store_parallel(const HandleSeq&);
 
 		UUID check_uuid(const Handle&);
 		UUID get_uuid(const Handle&);
 		std::string oset_to_string(const HandleSeq&);
 
 		bool bulk_load;
+		bool bulk_store;
 		time_t bulk_start;
 
 		// --------------------------

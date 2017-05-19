@@ -373,6 +373,7 @@ void SQLAtomStorage::init(const char * uri)
 
 	max_height = 0;
 	bulk_load = false;
+	bulk_store = false;
 	clear_stats();
 
 	for (int i=0; i< TYPEMAP_SZ; i++)
@@ -916,6 +917,11 @@ UUID SQLAtomStorage::check_uuid(const Handle& h)
 	UUID uuid = _tlbuf.getUUID(h);
 	if (TLB::INVALID_UUID != uuid) return uuid;
 
+	// Optimize for bulk stores. That is, we know for a fact that
+	// the database cannot possibly contain this atom yet, so do
+	// not query for it!
+	if (bulk_store) return TLB::INVALID_UUID;
+
 	// Ooops. We need to find out what this is.
 	Handle dbh;
 	if (h->isNode())
@@ -1086,7 +1092,7 @@ void SQLAtomStorage::vdo_store_atom(const Handle& h)
 
 /* ================================================================ */
 /**
- * Store just this one single atom (and its truth value).
+ * Store just this one single atom.
  * Atoms in the outgoing set are NOT stored!
  * The store is performed synchronously (in the calling thread).
  */
@@ -1096,7 +1102,6 @@ void SQLAtomStorage::do_store_single_atom(const Handle& h, int aheight)
 
 	std::lock_guard<std::mutex> create_lock(_store_mutex);
 
-	// Lets see if we already know about this
 	UUID uuid = check_uuid(h);
 	if (TLB::INVALID_UUID != uuid) return;
 
@@ -1141,7 +1146,7 @@ void SQLAtomStorage::do_store_single_atom(const Handle& h, int aheight)
 	STMTI("type", dbtype);
 
 	// Store the node name, if its a node
-	if (h->isNode())
+	if (0 == aheight)
 	{
 		// Use postgres $-quoting to make unicode strings
 		// easier to deal with.
@@ -1644,8 +1649,9 @@ SQLAtomStorage::PseudoPtr SQLAtomStorage::makeAtom(Response &rp, UUID uuid)
 	{
 		time_t secs = time(0) - bulk_start;
 		double rate = ((double) _load_count) / secs;
-		printf("\tLoaded %lu atoms (%d per second).\n",
-			(unsigned long) _load_count, (int) rate);
+		unsigned long kays = ((unsigned long) _load_count) / 1000;
+		printf("\tLoaded %luK atoms in %d seconds (%d per second).\n",
+			kays, (int) secs, (int) rate);
 	}
 
 	return atom;
@@ -1731,7 +1737,6 @@ void SQLAtomStorage::loadType(AtomTable &table, Type atom_type)
 	setup_typemap();
 	int db_atom_type = storing_typemap[atom_type];
 
-
 #define NCHUNKS 300
 #define MINSTEP 10123
 	std::vector<unsigned long> steps;
@@ -1742,6 +1747,9 @@ void SQLAtomStorage::loadType(AtomTable &table, Type atom_type)
 	logger().debug("SQLAtomStorage::loadType: "
 		"Max Height is %d stepsize=%lu chunks=%lu\n",
 		 max_height, stepsize, steps.size());
+
+	// Parallelize always.
+	opencog::setting_omp(opencog::num_threads(), 1);
 
 	for (int hei=0; hei<=max_height; hei++)
 	{
@@ -1768,10 +1776,56 @@ void SQLAtomStorage::loadType(AtomTable &table, Type atom_type)
 	logger().debug("SQLAtomStorage::loadType: Finished loading %lu atoms in total\n",
 		(unsigned long) _load_count);
 
+	// Put it back as it was.
+	opencog::setting_omp(opencog::num_threads());
+
 	// Synchronize!
 	table.barrier();
 }
 
+/// Store all of the atoms in the list, in parallel
+void SQLAtomStorage::store_parallel(const HandleSeq& seq)
+{
+	size_t natoms = seq.size();
+
+#define ST_NCHUNKS 300
+#define ST_MINSTEP 10123
+	std::vector<unsigned long> steps;
+	unsigned long stepsize = ST_MINSTEP + natoms/ST_NCHUNKS;
+	for (unsigned long rec = 0; rec <= natoms; rec += stepsize)
+		steps.push_back(rec);
+
+	printf("Storing %lu atoms, stepsize=%lu chunks=%lu\n",
+		 natoms, stepsize, steps.size());
+
+	// Parallelize always.
+	opencog::setting_omp(opencog::num_threads(), 1);
+
+	OMP_ALGO::for_each(steps.begin(), steps.end(),
+			[&](unsigned long rec)
+	{
+		size_t last = std::min(rec+stepsize, natoms);
+
+		// Blast out a bunch of them, at once, in this thread.
+		for (size_t i=rec; i<last; i++)
+		{
+			do_store_atom(seq[i]);
+			if (_store_count%10000 == 0)
+			{
+				time_t secs = time(0) - bulk_start;
+				double rate = ((double) _store_count) / secs;
+				unsigned long kays = ((unsigned long) _store_count) / 1000;
+				printf("\tStored %luK atoms in %d seconds (%d per second)\n",
+					kays, (int) secs, (int) rate);
+			}
+		}
+	});
+
+	// Put it back as it was.
+	opencog::setting_omp(opencog::num_threads());
+}
+
+/// Store all of the atoms in the atom table.
 void SQLAtomStorage::store(const AtomTable &table)
 {
 	max_height = 0;
@@ -1785,24 +1839,42 @@ void SQLAtomStorage::store(const AtomTable &table)
 	UUID max_uuid = _tlbuf.getMaxUUID();
 	printf("Max UUID is %lu\n", max_uuid);
 
+	// If we are storing to an absolutely empty database, then
+	// skip all UUID lookups completely!  This is not a safe
+	// operation for non-empty databases, but has a big performance
+	// impact for clean stores.
+	if (1 == max_uuid) bulk_store = true;
+
 	setup_typemap();
 	store_atomtable_id(table);
 
-	// table.foreachHandleByType(
-	table.foreachParallelByType(
-		[&](const Handle& h)->void
-	{
-		do_store_atom(h);
-		if (_store_count%1000 == 0)
-			printf("\tStored %lu atoms.\n", (unsigned long) _store_count);
+	bulk_start = time(0);
 
-	}, ATOM, true);
+	// Try to knock out the nodes first, then the links.
+	HandleSeq all_atoms;
+	table.foreachHandleByType(
+		[&](const Handle& h)->void { all_atoms.push_back(h); },
+		NODE, true);
+
+	store_parallel(all_atoms);
+
+	all_atoms.clear();
+
+	table.foreachHandleByType(
+		[&](const Handle& h)->void { all_atoms.push_back(h); },
+		LINK, true);
+
+	store_parallel(all_atoms);
+
+	bulk_store = false;
 
 	Response rp(conn_pool);
-	rp.exec("VACUUM ANALYZE Atoms;");
+	rp.exec("VACUUM;");
 
-	printf("\tFinished storing %lu atoms total.\n",
-		(unsigned long) _store_count);
+	time_t secs = time(0) - bulk_start;
+	double rate = ((double) _store_count) / secs;
+	printf("\tFinished storing %lu atoms total, in %d seconds (%d per second)\n",
+		(unsigned long) _store_count, (int) secs, (int) rate);
 }
 
 /* ================================================================ */
