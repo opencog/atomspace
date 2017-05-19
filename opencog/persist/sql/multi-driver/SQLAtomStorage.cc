@@ -1823,8 +1823,10 @@ void SQLAtomStorage::store(const AtomTable &table)
 	Response rp(conn_pool);
 	rp.exec("VACUUM ANALYZE Atoms;");
 
-	printf("\tFinished storing %lu atoms total.\n",
-		(unsigned long) _store_count);
+	time_t secs = time(0) - bulk_start;
+	double rate = ((double) _load_count) / secs;
+	printf("\tFinished storing %lu atoms total, in %d seconds (%d per second)\n",
+		(unsigned long) _store_count, (int) secs, (int) rate);
 }
 
 /* ================================================================ */
