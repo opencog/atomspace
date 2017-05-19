@@ -161,14 +161,23 @@ class SQLAtomStorage::Response
 			rs->foreach_column(&Response::create_atom_column_cb, this);
 
 			PseudoPtr p(store->makeAtom(*this, uuid));
-			Handle atom(store->get_recursive_if_not_exists(p));
-			Handle h(table->add(atom, false));
 
-			// Force resolution in TLB, so that later removes work.
-			store->_tlbuf.addAtom(h, uuid);
+			// Corrupted databases can cause get_recursive_if_not_exists
+			// to throw an exception. Skip the offending atom, and carry
+			// on.
+			try
+			{
+				Handle atom(store->get_recursive_if_not_exists(p));
+				Handle h(table->add(atom, false));
 
-			// Get the values only after TLB insertion!!
-			store->get_atom_values(h);
+				// Force resolution in TLB, so that later removes work.
+				store->_tlbuf.addAtom(h, uuid);
+
+				// Get the values only after TLB insertion!!
+				store->get_atom_values(h);
+			}
+			catch (const IOException& ex) {}
+
 			return false;
 		}
 
