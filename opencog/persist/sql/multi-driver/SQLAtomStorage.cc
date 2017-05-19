@@ -161,13 +161,17 @@ class SQLAtomStorage::Response
 			// printf ("---- New atom found ----\n");
 			rs->foreach_column(&Response::create_atom_column_cb, this);
 
-			PseudoPtr p(store->makeAtom(*this, uuid));
-
-			// Corrupted databases can cause get_recursive_if_not_exists
-			// to throw an exception. Skip the offending atom, and carry
-			// on.
+			// Two different throws mighht be caught here:
+			// 1) DB has an atom type that is not defined in the atomspace.
+			//    In this case, makeAtom throws IOException.
+			// 2) Corrupted databases can cause get_recursive_if_not_exists
+			//    to throw, because a uuid does not exist. Yes, this can
+			//    happen.
+			// Either way, skip the offending atom, and carry on.
 			try
 			{
+				PseudoPtr p(store->makeAtom(*this, uuid));
+
 				Handle atom(store->get_recursive_if_not_exists(p));
 				Handle h(table->add(atom, false));
 
