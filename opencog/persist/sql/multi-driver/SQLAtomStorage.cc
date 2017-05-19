@@ -1649,8 +1649,8 @@ SQLAtomStorage::PseudoPtr SQLAtomStorage::makeAtom(Response &rp, UUID uuid)
 	{
 		time_t secs = time(0) - bulk_start;
 		double rate = ((double) _load_count) / secs;
-		printf("\tLoaded %lu atoms (%d per second).\n",
-			(unsigned long) _load_count, (int) rate);
+		printf("\tLoaded %lu atoms in %d seconds (%d per second).\n",
+			(unsigned long) _load_count, (int) secs, (int) rate);
 	}
 
 	return atom;
