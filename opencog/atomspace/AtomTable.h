@@ -263,11 +263,16 @@ public:
         std::lock_guard<std::recursive_mutex> lck(_mtx);
         if (parent && _environ)
             _environ->foreachHandleByType(func, type, subclass);
+
+        // Parallelize, always, no matter what!
+        opencog::setting_omp(opencog::num_threads(), 1);
         OMP_ALGO::for_each(typeIndex.begin(type, subclass),
                       typeIndex.end(),
              [&](const Handle& h)->void {
                   (func)(h);
              });
+        // Reset to default.
+        opencog::setting_omp(opencog::num_threads());
     }
 
     /* Exposes the type iterators so we can do more complicated 

@@ -1086,7 +1086,7 @@ void SQLAtomStorage::vdo_store_atom(const Handle& h)
 
 /* ================================================================ */
 /**
- * Store just this one single atom (and its truth value).
+ * Store just this one single atom.
  * Atoms in the outgoing set are NOT stored!
  * The store is performed synchronously (in the calling thread).
  */
@@ -1141,7 +1141,7 @@ void SQLAtomStorage::do_store_single_atom(const Handle& h, int aheight)
 	STMTI("type", dbtype);
 
 	// Store the node name, if its a node
-	if (h->isNode())
+	if (0 == aheight)
 	{
 		// Use postgres $-quoting to make unicode strings
 		// easier to deal with.
