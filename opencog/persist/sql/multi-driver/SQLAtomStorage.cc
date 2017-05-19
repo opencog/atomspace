@@ -373,6 +373,7 @@ void SQLAtomStorage::init(const char * uri)
 
 	max_height = 0;
 	bulk_load = false;
+	bulk_store = false;
 	clear_stats();
 
 	for (int i=0; i< TYPEMAP_SZ; i++)
@@ -1096,9 +1097,15 @@ void SQLAtomStorage::do_store_single_atom(const Handle& h, int aheight)
 
 	std::lock_guard<std::mutex> create_lock(_store_mutex);
 
-	// Lets see if we already know about this
-	UUID uuid = check_uuid(h);
-	if (TLB::INVALID_UUID != uuid) return;
+	UUID uuid = TLB::INVALID_UUID;
+
+	// Lets see if we already know about this atom.
+	// Skip this check for bulk stores; its expensive.
+	if (not bulk_store)
+	{
+		uuid = check_uuid(h);
+		if (TLB::INVALID_UUID != uuid) return;
+	}
 
 	// If it was not found, then issue a brand-spankin new UUID.
 	uuid = _tlbuf.addAtom(h, TLB::INVALID_UUID);
@@ -1785,6 +1792,12 @@ void SQLAtomStorage::store(const AtomTable &table)
 	UUID max_uuid = _tlbuf.getMaxUUID();
 	printf("Max UUID is %lu\n", max_uuid);
 
+	// If we are storing to an absolutely empty database, then
+	// skip all UUID lookups completely!  This is not a safe
+	// operation for non-empty databases, but has a big performance
+	// impact for clean stores.
+	if (1 == max_uuid) bulk_store = true;
+
 	setup_typemap();
 	store_atomtable_id(table);
 
@@ -1819,6 +1832,8 @@ void SQLAtomStorage::store(const AtomTable &table)
 		}
 
 	}, LINK, true);
+
+	bulk_store = false;
 
 	Response rp(conn_pool);
 	rp.exec("VACUUM ANALYZE Atoms;");

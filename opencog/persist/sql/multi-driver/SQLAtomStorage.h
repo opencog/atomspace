@@ -113,6 +113,7 @@ class SQLAtomStorage : public AtomStorage
 		std::string oset_to_string(const HandleSeq&);
 
 		bool bulk_load;
+		bool bulk_store;
 		time_t bulk_start;
 
 		// --------------------------
