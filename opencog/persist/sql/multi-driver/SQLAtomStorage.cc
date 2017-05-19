@@ -1803,7 +1803,7 @@ void SQLAtomStorage::store_parallel(const HandleSeq& seq)
 	OMP_ALGO::for_each(steps.begin(), steps.end(),
 			[&](unsigned long rec)
 	{
-		size_t last = min(rec+stepsize, natoms);
+		size_t last = std::min(rec+stepsize, natoms);
 
 		// Blast out a bunch of them, at once, in this thread.
 		for (size_t i=rec; i<last; i++)
@@ -1817,7 +1817,7 @@ void SQLAtomStorage::store_parallel(const HandleSeq& seq)
 					(unsigned long) _store_count, (int) secs, (int) rate);
 			}
 		}
-	}
+	});
 
 	// Put it back as it was.
 	opencog::setting_omp(opencog::num_threads());
@@ -1851,7 +1851,7 @@ void SQLAtomStorage::store(const AtomTable &table)
 	// Try to knock out the nodes first, then the links.
 	HandleSeq all_atoms;
 	table.foreachHandleByType(
-		[&](const Handle& h)->void { all_atomspush_back(h); },
+		[&](const Handle& h)->void { all_atoms.push_back(h); },
 		NODE, true);
 
 	store_parallel(all_atoms);
@@ -1859,7 +1859,7 @@ void SQLAtomStorage::store(const AtomTable &table)
 	all_atoms.clear();
 
 	table.foreachHandleByType(
-		[&](const Handle& h)->void { all_atomspush_back(h); },
+		[&](const Handle& h)->void { all_atoms.push_back(h); },
 		LINK, true);
 
 	store_parallel(all_atoms);
