@@ -1640,7 +1640,7 @@ SQLAtomStorage::PseudoPtr SQLAtomStorage::makeAtom(Response &rp, UUID uuid)
 	atom->uuid = uuid;
 
 	_load_count ++;
-	if (bulk_load and _load_count%10000 == 0)
+	if (bulk_load and _load_count%100000 == 0)
 	{
 		time_t secs = time(0) - bulk_start;
 		double rate = ((double) _load_count) / secs;
