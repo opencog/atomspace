@@ -31,6 +31,7 @@
 #ifdef HAVE_SQL_STORAGE
 
 #include <stdlib.h>
+#include <times.h>
 #include <unistd.h>
 
 #include <chrono>
@@ -1634,7 +1635,10 @@ SQLAtomStorage::PseudoPtr SQLAtomStorage::makeAtom(Response &rp, UUID uuid)
 	_load_count ++;
 	if (bulk_load and _load_count%10000 == 0)
 	{
-		printf("\tLoaded %lu atoms.\n", (unsigned long) _load_count);
+		time_t secs = time(0) - bulk_start;
+		double rate = ((double) _load_count) / secs;
+		printf("\tLoaded %lu atoms (%f per second).\n",
+			(unsigned long) _load_count, rate);
 	}
 
 	return atom;
@@ -1651,6 +1655,7 @@ void SQLAtomStorage::load(AtomTable &table)
 	max_height = getMaxObservedHeight();
 	printf("Max Height is %d\n", max_height);
 	bulk_load = true;
+	bulk_start = time(0);
 
 	setup_typemap();
 
