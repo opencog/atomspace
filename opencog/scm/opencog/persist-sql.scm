@@ -6,6 +6,9 @@
 
 (load-extension "libpersist-sql" "opencog_persist_sql_init")
 
+(export sql-clear-cache sql-clear-stats sql-close sql-load sql-open
+	sql-store sql-stats)
+
 (set-procedure-property! sql-clear-cache 'documentation
 "
  sql-clear-cache - clear the TLB of cached data
