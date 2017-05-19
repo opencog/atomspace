@@ -1390,7 +1390,7 @@ Handle SQLAtomStorage::get_recursive_if_not_exists(PseudoPtr p)
 		if (nullptr == po)
 			throw IOException(TRACE_INFO,
 				"SQLAtomStorage::get_recursive_if_not_exists: "
-				"Corrupt database; no atom for uuid=%lu", idu)'
+				"Corrupt database; no atom for uuid=%lu", idu);
 
 		Handle ha(get_recursive_if_not_exists(po));
 		resolved_oset.emplace_back(ha);
@@ -1654,42 +1654,35 @@ void SQLAtomStorage::load(AtomTable &table)
 
 	setup_typemap();
 
-	Response rp(conn_pool);
-	rp.table = &table;
-	rp.store = this;
+#define NCHUNKS 300
+#define MINSTEP 10123
+	std::vector<unsigned long> steps;
+	unsigned long stepsize = MINSTEP + max_nrec/NCHUNKS;
+	for (unsigned long rec = 0; rec <= max_nrec; rec += stepsize)
+		steps.push_back(rec);
+
+	printf("Loading all atoms: "
+		"Max Height is %d stepsize=%lu chunks=%lu\n",
+		 max_height, stepsize, steps.size());
 
 	for (int hei=0; hei<=max_height; hei++)
 	{
 		unsigned long cur = _load_count;
 
-#if GET_ONE_BIG_BLOB
-		char buff[BUFSZ];
-		snprintf(buff, BUFSZ, "SELECT * FROM Atoms WHERE height = %d;", hei);
-		rp.height = hei;
-		rp.exec(buff);
-		rp.rs->foreach_row(&Response::load_all_atoms_cb, &rp);
-#else
-		// It appears that, when the select statement returns more than
-		// about a 100K to a million atoms or so, some sort of heap
-		// corruption occurs in the iodbc code, causing future mallocs
-		// to fail. So limit the number of records processed in one go.
-		// It also appears that asking for lots of records increases
-		// the memory fragmentation (and/or there's a memory leak in iodbc??)
-		// XXX Not clear is UnixSQL suffers from this same problem.
-		// Whatever, seems to be a better strategy overall, anyway.
-#define STEP 12003
-		unsigned long rec;
-		for (rec = 0; rec <= max_nrec; rec += STEP)
+		OMP_ALGO::for_each(steps.begin(), steps.end(),
+			[&](unsigned long rec)
 		{
+			Response rp(conn_pool);
+			rp.table = &table;
+			rp.store = this;
 			char buff[BUFSZ];
 			snprintf(buff, BUFSZ, "SELECT * FROM Atoms WHERE "
 			         "height = %d AND uuid > %lu AND uuid <= %lu;",
-			         hei, rec, rec+STEP);
+			         hei, rec, rec+stepsize);
 			rp.height = hei;
 			rp.exec(buff);
 			rp.rs->foreach_row(&Response::load_all_atoms_cb, &rp);
-		}
-#endif
+		});
 		printf("Loaded %lu atoms at height %d\n", _load_count - cur, hei);
 	}
 	printf("Finished loading %lu atoms in total\n",
