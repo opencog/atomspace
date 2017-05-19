@@ -1809,7 +1809,7 @@ void SQLAtomStorage::store(const AtomTable &table)
 		if (_store_count%10000 == 0)
 		{
 			time_t secs = time(0) - bulk_start;
-			double rate = ((double) _load_count) / secs;
+			double rate = ((double) _store_count) / secs;
 			printf("\tStored %lu atoms in %d seconds (%d per second)\n",
 				(unsigned long) _store_count, (int) secs, (int) rate);
 		}
@@ -1824,7 +1824,7 @@ void SQLAtomStorage::store(const AtomTable &table)
 		if (_store_count%10000 == 0)
 		{
 			time_t secs = time(0) - bulk_start;
-			double rate = ((double) _load_count) / secs;
+			double rate = ((double) _store_count) / secs;
 			printf("\tStored %lu atoms in %d seconds (%d per second)\n",
 				(unsigned long) _store_count, (int) secs, (int) rate);
 		}
@@ -1837,7 +1837,7 @@ void SQLAtomStorage::store(const AtomTable &table)
 	rp.exec("VACUUM ANALYZE Atoms;");
 
 	time_t secs = time(0) - bulk_start;
-	double rate = ((double) _load_count) / secs;
+	double rate = ((double) _store_count) / secs;
 	printf("\tFinished storing %lu atoms total, in %d seconds (%d per second)\n",
 		(unsigned long) _store_count, (int) secs, (int) rate);
 }
