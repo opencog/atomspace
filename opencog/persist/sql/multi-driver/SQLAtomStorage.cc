@@ -1736,7 +1736,6 @@ void SQLAtomStorage::loadType(AtomTable &table, Type atom_type)
 	setup_typemap();
 	int db_atom_type = storing_typemap[atom_type];
 
-
 #define NCHUNKS 300
 #define MINSTEP 10123
 	std::vector<unsigned long> steps;
@@ -1747,6 +1746,9 @@ void SQLAtomStorage::loadType(AtomTable &table, Type atom_type)
 	logger().debug("SQLAtomStorage::loadType: "
 		"Max Height is %d stepsize=%lu chunks=%lu\n",
 		 max_height, stepsize, steps.size());
+
+	// Parallelize always.
+	opencog::setting_omp(opencog::num_threads(), 1);
 
 	for (int hei=0; hei<=max_height; hei++)
 	{
@@ -1773,10 +1775,55 @@ void SQLAtomStorage::loadType(AtomTable &table, Type atom_type)
 	logger().debug("SQLAtomStorage::loadType: Finished loading %lu atoms in total\n",
 		(unsigned long) _load_count);
 
+	// Put it back as it was.
+	opencog::setting_omp(opencog::num_threads());
+
 	// Synchronize!
 	table.barrier();
 }
 
+/// Store all of the atoms in the list, in parallel
+void SQLAtomStorage::store_parallel(const HandleSeq& seq)
+{
+	size_t natoms = seq.size();
+
+#define ST_NCHUNKS 300
+#define ST_MINSTEP 10123
+	std::vector<unsigned long> steps;
+	unsigned long stepsize = ST_MINSTEP + natoms/ST_NCHUNKS;
+	for (unsigned long rec = 0; rec <= natoms; rec += stepsize)
+		steps.push_back(rec);
+
+	printf("Storing %lu atoms, stepsize=%lu chunks=%lu\n",
+		 natoms, stepsize, steps.size());
+
+	// Parallelize always.
+	opencog::setting_omp(opencog::num_threads(), 1);
+
+	OMP_ALGO::for_each(steps.begin(), steps.end(),
+			[&](unsigned long rec)
+	{
+		size_t last = min(rec+stepsize, natoms);
+
+		// Blast out a bunch of them, at once, in this thread.
+		for (size_t i=rec; i<last; i++)
+		{
+			do_store_atom(seq[i]);
+			if (_store_count%10000 == 0)
+			{
+				time_t secs = time(0) - bulk_start;
+				double rate = ((double) _store_count) / secs;
+				printf("\tStored %lu atoms in %d seconds (%d per second)\n",
+					(unsigned long) _store_count, (int) secs, (int) rate);
+			}
+		}
+	}
+
+	// Put it back as it was.
+	opencog::setting_omp(opencog::num_threads());
+}
+
+/// Store all of the atoms in the atom table.
 void SQLAtomStorage::store(const AtomTable &table)
 {
 	max_height = 0;
