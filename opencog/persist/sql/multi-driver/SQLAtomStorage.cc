@@ -1788,15 +1788,37 @@ void SQLAtomStorage::store(const AtomTable &table)
 	setup_typemap();
 	store_atomtable_id(table);
 
+	bulk_start = time(0);
+
+	// Try to knock out the nodes first, then the links.
+	table.foreachParallelByType(
+		[&](const Handle& h)->void
+	{
+		do_store_atom(h);
+		if (_store_count%10000 == 0)
+		{
+			time_t secs = time(0) - bulk_start;
+			double rate = ((double) _load_count) / secs;
+			printf("\tStored %lu atoms in %d seconds (%d per second)\n",
+				(unsigned long) _store_count, (int) secs, (int) rate);
+		}
+
+	}, NODE, true);
+
 	// table.foreachHandleByType(
 	table.foreachParallelByType(
 		[&](const Handle& h)->void
 	{
 		do_store_atom(h);
-		if (_store_count%1000 == 0)
-			printf("\tStored %lu atoms.\n", (unsigned long) _store_count);
+		if (_store_count%10000 == 0)
+		{
+			time_t secs = time(0) - bulk_start;
+			double rate = ((double) _load_count) / secs;
+			printf("\tStored %lu atoms in %d seconds (%d per second)\n",
+				(unsigned long) _store_count, (int) secs, (int) rate);
+		}
 
-	}, ATOM, true);
+	}, LINK, true);
 
 	Response rp(conn_pool);
 	rp.exec("VACUUM ANALYZE Atoms;");
