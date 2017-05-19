@@ -1373,6 +1373,9 @@ Handle SQLAtomStorage::get_recursive_if_not_exists(PseudoPtr p)
 {
 	if (classserver().isA(p->type, NODE))
 	{
+		Handle h(_tlbuf.getAtom(p->uuid));
+		if (h) return h;
+
 		NodePtr node(createNode(p->type, p->name));
 		_tlbuf.addAtom(node, p->uuid);
 		_num_rec_nodes ++;
