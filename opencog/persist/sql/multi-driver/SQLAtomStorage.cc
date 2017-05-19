@@ -31,7 +31,7 @@
 #ifdef HAVE_SQL_STORAGE
 
 #include <stdlib.h>
-#include <times.h>
+#include <time.h>
 #include <unistd.h>
 
 #include <chrono>
