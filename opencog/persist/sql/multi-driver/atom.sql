@@ -55,7 +55,8 @@ CREATE TABLE Atoms (
     name    TEXT,
 
     -- An array of the outgoing edges; non-empty only for links
-    outgoing BIGINT[],
+    -- The ELEMENT REFERENCES has not been implemented yet.
+    outgoing BIGINT[], -- ELEMENT REFERENCES uuid,
 
     -- Force the uniqueness of atoms!!
     -- This has the side-effect of creating indexes for fast lookup by
@@ -105,7 +106,7 @@ CREATE TABLE Valuations (
     -- non-empty; the other two should be empty. We could have three
     -- different tables, one each for each of these, but then the
     -- UNIQUE constraint is harder to force.
-    -- The linkevalue should be an array of vuid's from the Values
+    -- The linkvalue should be an array of vuid's from the Values
     -- table. The "ELEMENT REFERENCES" would do the trick, but it's
     -- not yet implemented in postgres.
     floatvalue DOUBLE PRECISION[],
@@ -130,7 +131,7 @@ CREATE TABLE Values (
     -- An array of values associated with the vuid.
     -- Only one of the three of float, or string or link should be
     -- non-empty; the other two should be empty.
-    -- The linkevalue should be an array of vuid's for other rows
+    -- The linkvalue should be an array of vuid's for other rows
     -- in this table. The "ELEMENT REFERENCES" would do the trick,
     -- but it's not yet implemented in postgres.
     floatvalue DOUBLE PRECISION[],
