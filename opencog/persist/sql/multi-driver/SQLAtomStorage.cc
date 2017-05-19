@@ -917,6 +917,11 @@ UUID SQLAtomStorage::check_uuid(const Handle& h)
 	UUID uuid = _tlbuf.getUUID(h);
 	if (TLB::INVALID_UUID != uuid) return uuid;
 
+	// Optimize for bulk stores. That is, we know for a fact that
+	// the database cannot possibly contain this atom yet, so do
+	// not query for it!
+	if (bulk_store) return TLB::INVALID_UUID;
+
 	// Ooops. We need to find out what this is.
 	Handle dbh;
 	if (h->isNode())
@@ -1097,15 +1102,8 @@ void SQLAtomStorage::do_store_single_atom(const Handle& h, int aheight)
 
 	std::lock_guard<std::mutex> create_lock(_store_mutex);
 
-	UUID uuid = TLB::INVALID_UUID;
-
-	// Lets see if we already know about this atom.
-	// Skip this check for bulk stores; its expensive.
-	if (not bulk_store)
-	{
-		uuid = check_uuid(h);
-		if (TLB::INVALID_UUID != uuid) return;
-	}
+	UUID uuid = check_uuid(h);
+	if (TLB::INVALID_UUID != uuid) return;
 
 	// If it was not found, then issue a brand-spankin new UUID.
 	uuid = _tlbuf.addAtom(h, TLB::INVALID_UUID);
