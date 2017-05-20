@@ -2102,8 +2102,9 @@ void SQLAtomStorage::print_stats(void)
 	       remap, frac);
 #endif
 
+	mad -= 1;
 	size_t used = _tlbuf.size();
-	frac = 100.0 * used / ((double) mad - 1);
+	frac = 100.0 * used / ((double) mad);
 	printf("sql-stats: %lu of %lu reserved uuids used (%f pct)\n",
 	       used, mad, frac);
 }
