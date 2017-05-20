@@ -107,6 +107,8 @@ public:
     }
     void removeAtom(const Handle&);
 
+    /// Get the next UN-issued uuid.  The max issued UUID
+    /// is one less than this.
     UUID getMaxUUID(void) { return _brk_uuid; }
 
     /// Reserve a range of UUID's.  The range is inclusive; both `lo`

@@ -1222,7 +1222,7 @@ void SQLAtomStorage::do_store_single_atom(const Handle& h, int aheight)
 
 	_store_count ++;
 
-	if (bulk_store and _store_count%10000 == 0)
+	if (bulk_store and _store_count%100000 == 0)
 	{
 		time_t secs = time(0) - bulk_start;
 		double rate = ((double) _store_count) / secs;
@@ -1810,6 +1810,8 @@ void SQLAtomStorage::store(const AtomTable &table)
 	// skip all UUID lookups completely!  This is not a safe
 	// operation for non-empty databases, but has a big performance
 	// impact for clean stores.
+	// uuid==1 is PredicateNode TruthValueKey
+	// uuid==2 is unissued.
 	if (2 >= max_uuid) bulk_store = true;
 
 	setup_typemap();
@@ -2101,7 +2103,7 @@ void SQLAtomStorage::print_stats(void)
 #endif
 
 	size_t used = _tlbuf.size();
-	frac = 100.0 * used / ((double) mad);
+	frac = 100.0 * used / ((double) mad - 1);
 	printf("sql-stats: %lu of %lu reserved uuids used (%f pct)\n",
 	       used, mad, frac);
 }
