@@ -1014,7 +1014,7 @@ std::string SQLAtomStorage::link_to_string(const LinkValuePtr& lvle)
 
 /// Drain the pending store queue.
 ///
-/// Caution: this is ptentially racey in two different ways.
+/// Caution: this is potentially racey in two different ways.
 /// First, there is a small window in the async_caller implementation,
 /// where, if the timing is just so, the barrier might return before
 /// the last element is written.  Technically, that's a bug, but its
@@ -1221,6 +1221,15 @@ void SQLAtomStorage::do_store_single_atom(const Handle& h, int aheight)
 	}
 
 	_store_count ++;
+
+	if (bulk_store and _store_count%10000 == 0)
+	{
+		time_t secs = time(0) - bulk_start;
+		double rate = ((double) _store_count) / secs;
+		unsigned long kays = ((unsigned long) _store_count) / 1000;
+		printf("\tStored %luK atoms in %d seconds (%d per second)\n",
+			kays, (int) secs, (int) rate);
+	}
 }
 
 /* ================================================================ */
@@ -1783,48 +1792,6 @@ void SQLAtomStorage::loadType(AtomTable &table, Type atom_type)
 	table.barrier();
 }
 
-/// Store all of the atoms in the list, in parallel
-void SQLAtomStorage::store_parallel(const HandleSeq& seq)
-{
-	size_t natoms = seq.size();
-
-#define ST_NCHUNKS 300
-#define ST_MINSTEP 10123
-	std::vector<unsigned long> steps;
-	unsigned long stepsize = ST_MINSTEP + natoms/ST_NCHUNKS;
-	for (unsigned long rec = 0; rec <= natoms; rec += stepsize)
-		steps.push_back(rec);
-
-	printf("Storing %lu atoms, stepsize=%lu chunks=%lu\n",
-		 natoms, stepsize, steps.size());
-
-	// Parallelize always.
-	opencog::setting_omp(opencog::num_threads(), 1);
-
-	OMP_ALGO::for_each(steps.begin(), steps.end(),
-			[&](unsigned long rec)
-	{
-		size_t last = std::min(rec+stepsize, natoms);
-
-		// Blast out a bunch of them, at once, in this thread.
-		for (size_t i=rec; i<last; i++)
-		{
-			do_store_atom(seq[i]);
-			if (_store_count%10000 == 0)
-			{
-				time_t secs = time(0) - bulk_start;
-				double rate = ((double) _store_count) / secs;
-				unsigned long kays = ((unsigned long) _store_count) / 1000;
-				printf("\tStored %luK atoms in %d seconds (%d per second)\n",
-					kays, (int) secs, (int) rate);
-			}
-		}
-	});
-
-	// Put it back as it was.
-	opencog::setting_omp(opencog::num_threads());
-}
-
 /// Store all of the atoms in the atom table.
 void SQLAtomStorage::store(const AtomTable &table)
 {
@@ -1843,7 +1810,7 @@ void SQLAtomStorage::store(const AtomTable &table)
 	// skip all UUID lookups completely!  This is not a safe
 	// operation for non-empty databases, but has a big performance
 	// impact for clean stores.
-	if (1 == max_uuid) bulk_store = true;
+	if (2 >= max_uuid) bulk_store = true;
 
 	setup_typemap();
 	store_atomtable_id(table);
@@ -1851,25 +1818,16 @@ void SQLAtomStorage::store(const AtomTable &table)
 	bulk_start = time(0);
 
 	// Try to knock out the nodes first, then the links.
-	HandleSeq all_atoms;
 	table.foreachHandleByType(
-		[&](const Handle& h)->void { all_atoms.push_back(h); },
+		[&](const Handle& h)->void { storeAtom(h); },
 		NODE, true);
 
-	store_parallel(all_atoms);
-
-	all_atoms.clear();
-
 	table.foreachHandleByType(
-		[&](const Handle& h)->void { all_atoms.push_back(h); },
+		[&](const Handle& h)->void { storeAtom(h); },
 		LINK, true);
 
-	store_parallel(all_atoms);
-
+	flushStoreQueue();
 	bulk_store = false;
-
-	Response rp(conn_pool);
-	rp.exec("VACUUM;");
 
 	time_t secs = time(0) - bulk_start;
 	double rate = ((double) _store_count) / secs;
