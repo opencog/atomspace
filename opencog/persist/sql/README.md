@@ -389,6 +389,9 @@ http://wiki.postgresql.org/wiki/Tuning_Your_PostgreSQL_Server
    ssl = off
 ```
 
+For spinning media, `synchronous_commit=off` is 120x faster than
+`synchronous_commit=local`(about 400 atoms/sec vs 3 atoms/sec)
+
 For write-mostly databases, such as in the language-learning project,
 you will get better results with `checkpoint_segments = 100`.
 
