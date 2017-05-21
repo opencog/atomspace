@@ -397,7 +397,7 @@ Instead, do this:
 ```
 checkpoint_timeout = 1h
 max_wal_size = 8GB
-checkpoint_completion_target = 1.0
+checkpoint_completion_target = 0.9
 ```
 This will avoid the "checkpoints are occurring too frequently"
 warning message.
