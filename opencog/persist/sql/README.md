@@ -383,7 +383,6 @@ http://wiki.postgresql.org/wiki/Tuning_Your_PostgreSQL_Server
    effective_cache_size = default was 128MB, change to 50%-75% of installed RAM
    synchronous_commit = default on change to off
    wal_buffers = default 64kB change to 2MB or even 32MB
-   commit_delay = default 0 change to 10000 (10K) microseconds
    checkpoint_segments = 64 (each one takes up 16MB disk space)
 	max_connections = 130 (each opencog instance needs 32)
 	max_worker_processes = 32 (one per CPU core)
