@@ -361,31 +361,33 @@ performance.  The performance will be disasterously slow if the database
 is not tuned.  The primary performance bottleneck is the default of
 synchronous commits during writing. On spinning disk drives, this can
 lead to delays of tens of milliseconds to write handfuls of atoms, as
-that is the seek time (latency) for spinning disk media.  Solid state
-disks are probably a lot faster, but you still want to avoid reflashing
-large (64KByte) sectors just to storre a handful of atoms (a few hundred
-bytes).  Thus, synchronous commits should be disabled.
+that is the seek time (latency) for spinning disk media. Thus,
+synchronous commits should be disabled.
 
-(The postgres default is intended to minimize data loss in the case
-of accidental power loss.  This is NOT a concern for running opencog
-workloads).
+Solid state disks are a lot faster; it's not clear if this would still
+be a bottleneck.
+
+Disabling synchronous commits may cause the latest database updates
+to be lost, if power goes out, or the system unexpectedly reboots.
+This kind of loss is usually not a problem for most opencog apps,
+... all of the current apps are gathering statistics from generated
+data, and so this kind of loss is almost surely inconsequential.
 
 Edit `postgresql.conf` (a typical location is
 `/etc/postgresql/9.3/main/postgresql.conf`) and make the changes below.
 The first two changes are recommended by
 http://wiki.postgresql.org/wiki/Tuning_Your_PostgreSQL_Server
 ```
-   shared_buffers = default was 32MB, change to 25% of install RAM
+   shared_buffers = default was 32MB, change to 25% of installed RAM
    work_mem = default was 1MB change to 32MB
    effective_cache_size = default was 128MB, change to 50%-75% of installed RAM
-   fsync = default on  change to off
    synchronous_commit = default on change to off
    wal_buffers = default 64kB change to 2MB or even 32MB
    commit_delay = default 0 change to 10000 (10K) microseconds
-   checkpoint_segments = 32 (each one takes up 16MB disk space)
+   checkpoint_segments = 64 (each one takes up 16MB disk space)
+	max_connections = 130 (each opencog instance needs 32)
+	max_worker_processes = 32 (one per CPU core)
    ssl = off
-   autovacuum = on
-   track_counts = on
 ```
 
 For write-mostly databases, such as in the language-learning project,
@@ -398,12 +400,8 @@ checkpoint_timeout = 1h
 max_wal_size = 8GB
 checkpoint_completion_target = 1.0
 ```
-This should be enough to avoid the "checkpoints are occurring too frequently"
+This will avoid the "checkpoints are occurring too frequently"
 warning message.
-
-Enabling vacuum is very important, for the same reason; performance
-degrades substantially (by factors of 3x-10x) without regular vacuuming.
-(Current versions of Postgres vacuum automatically. YMMV.)
 
 Restarting the server might lead to errors stating that max shared mem
 usage has been exceeded. This can be fixed by telling the kernel to use
@@ -416,10 +414,25 @@ save file contents, then:
 ```
    sysctl -p /etc/sysctl.conf
 ```
-If you continue to get errors after that, read this for help fixing them:
 
-   http://stackoverflow.com/questions/12616935/postgresql-shared-memory-settings
+For SSD drives, the following might help:
+```
+seq_page_cost = 0.1
+random_page_cost = 0.15
+effective_io_concurrency = 5
+```
 
+Unsafe performance tweaks
+-------------------------
+There is one very unsafe performance optimization: disabling fsync.
+It's not clear how much this helps; youd' have to measure. Disabbling
+it is very dangerous: in case of a power loss, or a spontaneous reboot,
+before all data has been written to disk, this can result in database
+corruption.  Yes, this happens. THE BELOW IS NOT RECOMMENDED!
+
+```
+   fsync = default on  change to off
+```
 
 Database Setup
 --------------
