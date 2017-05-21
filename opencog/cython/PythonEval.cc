@@ -48,6 +48,9 @@ using namespace opencog;
 //#define DPRINTF printf
 #define DPRINTF(...)
 
+
+
+
 PythonEval* PythonEval::singletonInstance = NULL;
 
 const int NO_SIGNAL_HANDLERS = 0;
@@ -636,9 +639,90 @@ void PythonEval::execute_string(const char* command)
     // Because of this, I don't know how to write a valid command
     // interpreter for the python shell ...
     PyObject* pyRootDictionary = PyModule_GetDict(_pyRootModule);
+    
+
+
+// Work-around some printing madness. See issue
+// https://github.com/opencog/atomspace/issues/629
+// This is kind of complicated to explain, so pay attention:
+// When runnning scheme, or python code, from the cogserver
+// shell, that code might cause all sorts of things to happen,
+// including possibly printing to the stdout file descriptor.
+// The stdout descriptor goes to the terminal in which the
+// cogserver was started. Which is nice, and all that, but
+// is usually not quite what the user expected --- and so we
+// actually want to redirect stdout to the shell, where the user
+// can see it.
+//
+// The code below, ifdefed PERFORM_STDOUT_DUPLICATION, does this.
+// It's a bit of a trick: make a backup copy of stdout,
+// then attach stdout to a pipe, perform the evaluation, then
+// restore stdout from the backup. Finally, drain the pipe,
+// printing both to stdout and to the shell socket.
+#define PERFORM_STDOUT_DUPLICATION 1
+#ifdef PERFORM_STDOUT_DUPLICATION
+static std::mutex _stdout_redirect_mutex;
+
+    // What used to be stdout will now go to the pipe.
+    int pipefd[2];
+    int stdout_backup = -1;
+{    
+    std::lock_guard<std::mutex> lock(_stdout_redirect_mutex);
+    int rc = pipe2(pipefd, 0);  // O_NONBLOCK);
+    OC_ASSERT(0 == rc, "GenericShell pipe creation failure");
+    stdout_backup = dup(fileno(stdout));
+    OC_ASSERT(0 < stdout_backup, "GenericShell stdout dup failure");
+    rc = dup2(pipefd[1], fileno(stdout));
+    OC_ASSERT(0 < rc, "GenericShell pipe splice failure");
+}
+#endif // PERFORM_STDOUT_DUPLICATION
+
     PyObject* pyResult = PyRun_StringFlags(command,
             Py_file_input, pyRootDictionary, pyRootDictionary,
             nullptr);
+
+
+#ifdef PERFORM_STDOUT_DUPLICATION
+ {   
+    std::lock_guard<std::mutex> lock(_stdout_redirect_mutex);
+    // Restore stdout
+    fflush(stdout);
+    int rc = write(pipefd[1], "", 1); // null-terminated string!
+    OC_ASSERT(0 < rc, "GenericShell pipe termination failure");
+    rc = close(pipefd[1]);
+    OC_ASSERT(0 == rc, "GenericShell pipe close failure");
+    rc = dup2(stdout_backup, fileno(stdout)); // restore stdout
+    OC_ASSERT(0 < rc, "GenericShell restore stdout failure");
+
+    // Drain the pipe
+    auto drain_wrapper = [&](void)
+    {
+        char buf[4097];
+        int nr = read(pipefd[0], buf, sizeof(buf)-1);
+        OC_ASSERT(0 < rc, "GenericShell pipe read failure");
+        while (0 < nr)
+        {
+            buf[nr] = 0;
+            if (1 < nr or 0 != buf[0])
+            {
+                //printf("hey hye hey %s", buf); // print to the cogservers
+                _result =  buf;//socket->Send(buf);
+            }
+            nr = read(pipefd[0], buf, sizeof(buf)-1);
+            OC_ASSERT(0 < rc, "GenericShell pipe read failure");
+        }
+
+        // Cleanup.
+        close(pipefd[0]);
+        close(stdout_backup);
+    };
+
+    drain_wrapper();
+}  
+  // stdout_thr = new std::thread(drain_wrapper);
+#endif // PERFORM_STDOUT_DUPLICATION
+
+
 
     if (pyResult)
         Py_DECREF(pyResult);
@@ -1331,19 +1415,15 @@ void PythonEval::begin_eval()
 
 void PythonEval::eval_expr(const std::string& partial_expr)
 {
-    // XXX FIXME this does a lot of wasteful string copying.
-    std::string expr = partial_expr;
-    size_t nl = expr.find_first_of("\n\r");
-    while (std::string::npos != nl)
-    {
-        if ('\r' == expr[nl]) nl++;
-        if ('\n' == expr[nl]) nl++;
-        std::string part = expr.substr(0, nl);
-        eval_expr_line(part);
-        expr = expr.substr(nl);
-        nl = expr.find_first_of("\n\r");
-    }
-    eval_expr_line(expr);
+    /*
+        I'm assuming since this is the python shell, one wouldn't put 
+        empty lines in scopes and not expect exiting the scope. 
+
+        if an empty line i.e. only a "\n" character from pressing return 
+        is passed then eval_expr_line would recieve just an empty string 
+        so it could end the scope. 
+    */
+    eval_expr_line((strcmp(partial_expr.c_str(), "\n")==0)? "" : partial_expr);
 }
 
 /// Like eval_expr(), except that it assumes that there is only
