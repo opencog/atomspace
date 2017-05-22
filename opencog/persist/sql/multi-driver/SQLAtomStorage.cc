@@ -1975,6 +1975,16 @@ void SQLAtomStorage::clear_cache(void)
 
 /* ================================================================ */
 
+void SQLAtomStorage::set_hilo_watermarks(int hi, int lo)
+{
+	_write_queue.set_watermarks(hi, lo);
+}
+
+void SQLAtomStorage::set_stall_writers(bool stall)
+{
+	_write_queue.stall(stall);
+}
+
 void SQLAtomStorage::clear_stats(void)
 {
 	_load_count = 0;

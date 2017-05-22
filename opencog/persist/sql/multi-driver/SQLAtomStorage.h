@@ -229,9 +229,11 @@ class SQLAtomStorage : public AtomStorage
 		void store(const AtomTable &); // Store entire contents of AtomTable
 		void reserve(void);     // reserve range of UUID's
 
-		// Debugging and perforamnce monitoring
+		// Debugging and performance monitoring
 		void print_stats(void);
 		void clear_stats(void); // reset stats counters.
+		void set_hilo_watermarks(int, int);
+		void set_stall_writers(bool);
 };
 
 
