@@ -142,21 +142,31 @@ public:
 	// satisfiable when used in standalone.
 	typedef std::set<Partition> Partitions;
 
+	// Empty partition set
+	static const Partitions empty_partitions;
+
+	// Partition set singleton containing an empty partition. This is
+	// the simplest satisfiable solution set.
+	static const Partitions empty_partition_singleton;
+
 	// TODO: the type of a typed block is currently a handle of the
 	// variable or ground it is exists, instead of an actual type.
 	struct SolutionSet : public boost::equality_comparable<SolutionSet>
 	{
 		// Default ctor
-		SolutionSet(bool s=true, const Partitions& p=Partitions());
+		SolutionSet(const Partitions& p);
+		// Helper ctor. Initialize with empty partition, i.e. a
+		// satisfiable solution, iff s == true.
+		SolutionSet(bool s=false);
 
-		// Whether the unification satisfiable. Not that satisfiable is
-		// different than empty. An empty solution set may still be
-		// satisfiable, that would be the case of two candidates that
-		// match but have no variables.
-		bool satisfiable;
-
-		// Set of typed partitions
+		// Set of typed partitions. An empty set indicates that it is
+		// not satisfiable. A satisfiable set with no variable to
+		// unify would contain the empty partition.
 		Partitions partitions;
+
+		// Return true iff the solution set is satisfiable which is
+		// indicated by whether it is empty or not.
+		bool is_satisfiable() const;
 
 		bool operator==(const SolutionSet& other) const;
 	};
@@ -529,19 +539,19 @@ private:
 	/**
 	 * Join a satisfiable partition sets with a satisfiable partition.
 	 */
-	Partitions join(const Partitions& lhs, const Partition& rhs) const;
+	SolutionSet join(const SolutionSet& lhs, const Partition& rhs) const;
 
 	/**
 	 * Join 2 partitions. The result can be set of partitions (see
 	 * join(const Partition&, const TypedBlock&) for explanation).
 	 */
-	Partitions join(const Partition& lhs, const Partition& rhs) const;
+	SolutionSet join(const Partition& lhs, const Partition& rhs) const;
 
 	/**
 	 * Join a block with a partition set. The partition set is assumed
 	 * non empty and satisfiable.
 	 */
-	Partitions join(const Partitions& partitions, const TypedBlock& block) const;
+	SolutionSet join(const SolutionSet& sol, const TypedBlock& block) const;
 
 	/**
 	 * Join a partition and a block. If the block has no element in
@@ -551,7 +561,7 @@ private:
 	 * (TODO: explain why) thus possibly multiple partitions will be
 	 * returned.
 	*/
-	Partitions join(const Partition& partition, const TypedBlock &block) const;
+	SolutionSet join(const Partition& partition, const TypedBlock &block) const;
 
 	/**
 	 * Join a block to a partition to form a single block. It is
