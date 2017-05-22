@@ -57,14 +57,14 @@
 
 (set-procedure-property! cog-logger-set-stdout! 'documentation
 "
- cog-logger-set-stdout BOOL
+ cog-logger-set-stdout! BOOL
     If BOOL is #t, send log messages to stdout; else don't.
     Returns the previous setting.
 ")
 
 (set-procedure-property! cog-logger-set-sync! 'documentation
 "
- cog-logger-set-sync BOOL
+ cog-logger-set-sync! BOOL
     If BOOL is #t, write message to log file synchronously; else don't.
     That is, if sync is set, then the message will be written and the
     file flushed, before the log request returns. Otherwise, logging
@@ -76,7 +76,7 @@
 
 (set-procedure-property! cog-logger-set-timestamp! 'documentation
 "
- cog-logger-set-timestamp BOOL
+ cog-logger-set-timestamp! BOOL
     If BOOL is #t, then a timetampe will be written with each log
     message; else not.
 
