@@ -31,7 +31,8 @@
 #include <thread>
 #include <vector>
 
-#include <opencog/util/async_method_caller.h>
+// #include <opencog/util/async_method_caller.h>
+#include <opencog/util/async_buffer.h>
 
 #include <opencog/atoms/base/Atom.h>
 #include <opencog/atoms/base/Link.h>
@@ -196,7 +197,8 @@ class SQLAtomStorage : public AtomStorage
 		std::mutex _typemap_mutex;
 
 		// Provider of asynchronous store of atoms.
-		async_caller<SQLAtomStorage, Handle> _write_queue;
+		// async_caller<SQLAtomStorage, Handle> _write_queue;
+		async_buffer<SQLAtomStorage, Handle> _write_queue;
 
 	public:
 		SQLAtomStorage(std::string uri);

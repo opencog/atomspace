@@ -1051,7 +1051,8 @@ void SQLAtomStorage::storeAtom(const Handle& h, bool synchronous)
 		store_atom_values(h);
 		return;
 	}
-	_write_queue.enqueue(h);
+	// _write_queue.enqueue(h);
+	_write_queue.insert(h);
 }
 
 /**
@@ -2064,7 +2065,7 @@ void SQLAtomStorage::print_stats(void)
 
 	printf("currently in_drain=%d num_busy=%lu queue_size=%lu\n",
 	       _write_queue._in_drain, _write_queue.get_busy_writers(),
-	       _write_queue.get_queue_size());
+	       _write_queue.get_size());
 
 	printf("current conn_pool free=%u of %d\n", conn_pool.size(),
 	       _initial_conn_pool_size);
