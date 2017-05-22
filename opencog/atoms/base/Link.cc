@@ -74,20 +74,17 @@ std::string Link::toShortString(const std::string& indent) const
     std::string more_indent = indent + "  ";
 
     answer << indent << "(" << classserver().getTypeName(_type);
+
     if (not getTruthValue()->isDefaultTV())
         answer << " " << getTruthValue()->toString();
     answer << "\n";
 
     // Here the target string is made. If a target is a node, its name is
     // concatenated. If it's a link, all its properties are concatenated.
-    for (const Handle& h : _outgoing) {
-        if (h.operator->() != NULL)
-            answer << h->toShortString(more_indent);
-        else
-            answer << more_indent << "Undefined Atom!\n";
-    }
+    for (const Handle& h : _outgoing)
+        answer << h->toShortString(more_indent);
 
-    answer << indent << ") ; " + idToString() + "\n";
+    answer << indent << ")\n";
 
     return answer.str();
 }
@@ -106,12 +103,8 @@ std::string Link::toString(const std::string& indent) const
     answer += "\n";
     // Here, the outset string is made. If a target is a node,
     // its name is concatenated. If it's a link, then recurse.
-    for (const Handle& h : _outgoing) {
-        if (h.operator->() != NULL)
-            answer += h->toString(more_indent);
-        else
-            answer += more_indent + "Undefined Atom!\n";
-    }
+    for (const Handle& h : _outgoing)
+        answer += h->toString(more_indent);
 
     answer += indent + ") ; " + idToString() + "\n";
 
