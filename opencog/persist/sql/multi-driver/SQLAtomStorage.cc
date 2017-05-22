@@ -2067,6 +2067,7 @@ void SQLAtomStorage::print_stats(void)
 	int low_water = _write_queue.get_low_watermark();
 	bool stalling = _write_queue.stalling();
 
+	double dupe_frac = duplicate_count / ((double) (item_count - duplicate_count));
 	double flush_frac = (item_count - duplicate_count) / ((double) flush_count);
 	double fill_frac = (item_count - duplicate_count) / ((double) drain_count);
 
@@ -2078,8 +2079,8 @@ void SQLAtomStorage::print_stats(void)
 	printf("\n");
 	printf("hi-water=%d low-water=%d stalling=%s\n", high_water,
 	       low_water, stalling? "true" : "false");
-	printf("write items=%lu duplicates=%lu flushes=%lu flush_ratio=%f\n",
-	       item_count, duplicate_count, flush_count, flush_frac);
+	printf("write items=%lu dup=%lu dupe_frac=%f flushes=%lu flush_ratio=%f\n",
+	       item_count, duplicate_count, dupe_frac, flush_count, flush_frac);
 	printf("drains=%lu fill_fraction=%f concurrency=%f\n",
 	       drain_count, fill_frac, drain_ratio);
 	printf("avg drain time=%f seconds; longest drain time=%f\n",
