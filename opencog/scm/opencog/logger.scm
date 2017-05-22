@@ -11,6 +11,23 @@
 
 (load-extension "liblogger" "opencog_logger_init")
 
+; Declare everything the C++ library provides; this avoid compile-time
+; warnings when this file gets compiled.
+(export
+	cog-logger-get-filename
+	cog-logger-get-level
+	cog-logger-set-filename!
+	cog-logger-set-level!
+	cog-logger-set-stdout!
+	cog-logger-set-sync!
+	cog-logger-set-timestamp!
+	cog-logger-error-str
+	cog-logger-warn-str
+	cog-logger-info-str
+	cog-logger-debug-str
+	cog-logger-fine-str
+)
+
 ; Documentation for the functions implemented as C++ code
 (set-procedure-property! cog-logger-get-filename 'documentation
 "
