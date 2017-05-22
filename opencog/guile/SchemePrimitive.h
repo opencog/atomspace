@@ -471,8 +471,8 @@ class SchemePrimitive : public PrimitiveEnviron
 				}
 				case V_II:
 				{
-					int i = SchemeSmob::verify_int(scm_car(args), scheme_name);
-					int j = SchemeSmob::verify_int(scm_car(args), scheme_name, 2);
+					int i = SchemeSmob::verify_int(scm_car(args), scheme_name, 1);
+					int j = SchemeSmob::verify_int(scm_cadr(args), scheme_name, 2);
 
 					(that->*method.v_ii)(i, j);
 					break;
