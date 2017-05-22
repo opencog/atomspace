@@ -847,6 +847,8 @@ void SQLAtomStorage::store_atom_values(const Handle& atom)
 	std::set<Handle> keys = atom->getKeys();
 	for (const Handle& key: keys)
 	{
+		// Skip the truth-value; it's special-cased below.
+		if (key == tvpred) continue;
 		ProtoAtomPtr pap = atom->getValue(key);
 		storeValuation(key, atom, pap);
 	}
@@ -854,8 +856,7 @@ void SQLAtomStorage::store_atom_values(const Handle& atom)
 	// Special-case for TruthValues. Can we get rid of this someday?
 	TruthValuePtr tv(atom->getTruthValue());
 
-	// XXX This is if-check costs cycles; do we really
-	// need to do this?
+	// Don't clog storage with default TV's
 	if (tv->isDefaultTV())
 	{
 		deleteValuation(tvpred, atom);
