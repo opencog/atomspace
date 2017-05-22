@@ -49,7 +49,11 @@ std::string Node::toShortString(const std::string& indent) const
     answer += "(" + classserver().getTypeName(_type);
     answer += " \"" + _name + "\"";
 
-    answer += ") ; " + idToString() + "\n";
+    // Print the TV only if its not the default.
+    if (not getTruthValue()->isDefaultTV())
+        answer += " " + getTruthValue()->toString();
+
+    answer += ")\n";
 
     return answer;
 }
