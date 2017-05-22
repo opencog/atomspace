@@ -1047,6 +1047,7 @@ void SQLAtomStorage::storeAtom(const Handle& h, bool synchronous)
 	if (synchronous)
 	{
 		do_store_atom(h);
+		store_atom_values(h);
 		return;
 	}
 	_write_queue.enqueue(h);
@@ -1065,7 +1066,6 @@ int SQLAtomStorage::do_store_atom(const Handle& h)
 	if (h->isNode())
 	{
 		do_store_single_atom(h, 0);
-		store_atom_values(h);
 		return 0;
 	}
 
@@ -1081,13 +1081,13 @@ int SQLAtomStorage::do_store_atom(const Handle& h)
 	// atom in outgoing set.
 	lheight ++;
 	do_store_single_atom(h, lheight);
-	store_atom_values(h);
 	return lheight;
 }
 
 void SQLAtomStorage::vdo_store_atom(const Handle& h)
 {
 	do_store_atom(h);
+	store_atom_values(h);
 }
 
 /* ================================================================ */
