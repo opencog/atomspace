@@ -198,9 +198,9 @@ void UnifyUTest::test_join_1()
 {
 	Unify unify(A, B);          // dummy unify construction to test join
 	Unify::Block pb1{X, A};
-	Unify::SolutionSet s1 = Unify::SolutionSet(true, {{{pb1, A}}});
+	Unify::SolutionSet s1 = Unify::SolutionSet({{{pb1, A}}});
 	Unify::Block pb2{X, B};
-	Unify::SolutionSet s2 = Unify::SolutionSet(true, {{{pb2, B}}}),
+	Unify::SolutionSet s2 = Unify::SolutionSet({{{pb2, B}}}),
 		result = unify.join(s1, s2),
 		expected = Unify::SolutionSet(false);
 
@@ -254,17 +254,17 @@ void UnifyUTest::test_join_2()
 
 	Unify unify(P, quoted_implicant); // dummy unify construction to test join
 	Unify::Block pb1{P, implicant};
-	Unify::SolutionSet s1 = Unify::SolutionSet(true, {{{pb1, implicant}}});
+	Unify::SolutionSet s1 = Unify::SolutionSet({{{pb1, implicant}}});
 	Unify::Block pb2{P, quoted_implicant};
-	Unify::SolutionSet s2 = Unify::SolutionSet(true, {{{pb2, quoted_implicant}}});
+	Unify::SolutionSet s2 = Unify::SolutionSet({{{pb2, quoted_implicant}}});
 	Unify::SolutionSet result = unify.join(s1, s2);
 	Unify::Block pb1_expected{P, implicant, quoted_implicant};
 	Unify::Block pb2_expected{TyVs, Cimplicant_vardecl};
 	Unify::Block pb3_expected{A1, Cimplicant_body};
 	Unify::SolutionSet expected =
-		Unify::SolutionSet(true, {{{pb1_expected, implicant},
-					               {pb2_expected, implicant_vardecl},
-						           {pb3_expected, implicant_body}}});
+		Unify::SolutionSet({{{pb1_expected, implicant},
+					         {pb2_expected, implicant_vardecl},
+					         {pb3_expected, implicant_body}}});
 
 	std::cout << "result = " << oc_to_string(result) << std::endl;
 	std::cout << "expected = " << oc_to_string(expected) << std::endl;
@@ -328,29 +328,29 @@ void UnifyUTest::test_join_3()
 	Unify unify(al(AND_LINK, P, Q), al(AND_LINK, quoted_LA1, quoted_LA2));
 
 	Unify::SolutionSet
-		s1 = Unify::SolutionSet(true, {{{{P, implicant}, implicant}}}),
-		s2 = Unify::SolutionSet(true,
+		s1 = Unify::SolutionSet({{{{P, implicant}, implicant}}}),
+		s2 = Unify::SolutionSet(
 		           {{{{P, quoted_LA1}, quoted_LA1},
 					 {{Q, quoted_LA2}, quoted_LA2}},
 		            {{{Q, quoted_LA1}, quoted_LA1},
 					 {{P, quoted_LA2}, quoted_LA2}}}),
 		result = unify.join(s1, s2),
-		expected = Unify::SolutionSet(true, {{{{P, implicant, quoted_LA2},
-						 	                   implicant},
-						                      {{TyVs, Cimplicant_vardecl},
-						 	                   implicant_vardecl},
-						                      {{A2, Cimplicant_body},
-								               implicant_body},
-						                      {{Q, quoted_LA1},
-								               quoted_LA1}},
-				                             {{{P, implicant, quoted_LA1},
-						 	                   implicant},
-						                      {{TyVs, Cimplicant_vardecl},
-						 	                   implicant_vardecl},
-						                      {{A1, Cimplicant_body},
-								               implicant_body},
-						                      {{Q, quoted_LA2},
-								               quoted_LA2}}});
+		expected = Unify::SolutionSet({{{{P, implicant, quoted_LA2},
+						 	             implicant},
+						                {{TyVs, Cimplicant_vardecl},
+						 	             implicant_vardecl},
+						                {{A2, Cimplicant_body},
+								         implicant_body},
+						                {{Q, quoted_LA1},
+								         quoted_LA1}},
+				                       {{{P, implicant, quoted_LA1},
+						 	             implicant},
+						                {{TyVs, Cimplicant_vardecl},
+						 	             implicant_vardecl},
+						                {{A1, Cimplicant_body},
+								         implicant_body},
+						                {{Q, quoted_LA2},
+								         quoted_LA2}}});
 
 	std::cout << "result = " << oc_to_string(result) << std::endl;
 	std::cout << "expected = " << oc_to_string(expected) << std::endl;
@@ -368,6 +368,10 @@ void UnifyUTest::test_unify_without_var_1()
 	std::cout << "expected = " << oc_to_string(expected) << std::endl;
 
 	TS_ASSERT_EQUALS(result, expected);
+
+	// On top of that make sure that the solution is empty as it is
+	// how failing is represented
+	TS_ASSERT(result.empty());
 }
 
 void UnifyUTest::test_unify_without_var_2()
@@ -380,13 +384,17 @@ void UnifyUTest::test_unify_without_var_2()
 	std::cout << "expected = " << oc_to_string(expected) << std::endl;
 
 	TS_ASSERT_EQUALS(result, expected);
+
+	// On top of that make sure that the solution is not empty as it
+	// is how success is represented
+	TS_ASSERT(not result.empty());
 }
 
 void UnifyUTest::test_unify_basic_1()
 {
 	Unify unify(X, A);
 	Unify::SolutionSet result = unify(),
-		expected = Unify::SolutionSet(true, {{{{X, A}, A}}});
+		expected = Unify::SolutionSet({{{{X, A}, A}}});
 
 	std::cout << "result = " << oc_to_string(result) << std::endl;
 	std::cout << "expected = " << oc_to_string(expected) << std::endl;
@@ -398,7 +406,7 @@ void UnifyUTest::test_unify_basic_2()
 {
 	Unify unify(A, X);
 	Unify::SolutionSet result = unify(),
-		expected = Unify::SolutionSet(true, {{{{X, A}, A}}});
+		expected = Unify::SolutionSet({{{{X, A}, A}}});
 
 	std::cout << "result = " << oc_to_string(result) << std::endl;
 	std::cout << "expected = " << oc_to_string(expected) << std::endl;
@@ -410,7 +418,7 @@ void UnifyUTest::test_unify_basic_3()
 {
 	Unify unify(X, AB);
 	Unify::SolutionSet result = unify(),
-		expected = Unify::SolutionSet(true, {{{{X, AB}, AB}}});
+		expected = Unify::SolutionSet({{{{X, AB}, AB}}});
 	
 	std::cout << "result = " << oc_to_string(result) << std::endl;
 	std::cout << "expected = " << oc_to_string(expected) << std::endl;
@@ -422,7 +430,7 @@ void UnifyUTest::test_unify_basic_4()
 {
 	Unify unify(XB, AY);
 	Unify::SolutionSet result = unify(),
-		expected = Unify::SolutionSet(true, {{{{X, A}, A}, {{Y, B}, B}}});
+		expected = Unify::SolutionSet({{{{X, A}, A}, {{Y, B}, B}}});
 	
 	std::cout << "result = " << oc_to_string(result) << std::endl;
 	std::cout << "expected = " << oc_to_string(expected) << std::endl;
@@ -434,7 +442,7 @@ void UnifyUTest::test_unify_basic_5()
 {
 	Unify unify(XY, AY);
 	Unify::SolutionSet result = unify(),
-		expected = Unify::SolutionSet(true, {{{{X, A}, A}}});
+		expected = Unify::SolutionSet({{{{X, A}, A}}});
 
 	std::cout << "result = " << oc_to_string(result) << std::endl;
 	std::cout << "expected = " << oc_to_string(expected) << std::endl;
@@ -450,7 +458,7 @@ void UnifyUTest::test_unify_basic_6()
 
 	std::cout << "result = " << oc_to_string(result) << std::endl;
 
-	TS_ASSERT(not result.satisfiable);
+	TS_ASSERT(not result.is_satisfiable());
 }
 
 void UnifyUTest::test_unify_basic_7()
@@ -459,14 +467,14 @@ void UnifyUTest::test_unify_basic_7()
 	Unify unify(XB, B);
 	Unify::SolutionSet result = unify();
 
-	TS_ASSERT(not result.satisfiable);
+	TS_ASSERT(not result.is_satisfiable());
 }
 
 void UnifyUTest::test_unify_basic_8()
 {
 	Unify unify(XY, AZ);
 	Unify::SolutionSet result = unify(),
-		expected = Unify::SolutionSet(true, {{{{X, A}, A}, {{Y, Z}, Y}}});
+		expected = Unify::SolutionSet({{{{X, A}, A}, {{Y, Z}, Y}}});
 
 	std::cout << "result = " << oc_to_string(result) << std::endl;
 	std::cout << "expected = " << oc_to_string(expected) << std::endl;
@@ -478,7 +486,7 @@ void UnifyUTest::test_unify_vardecl_1()
 {
 	Unify unify(XY, AY, XY_vardecl, Y_vardecl);
 	Unify::SolutionSet result = unify(),
-		expected = Unify::SolutionSet(true, {{{{X, A}, A}}});
+		expected = Unify::SolutionSet({{{{X, A}, A}}});
 
 	std::cout << "result = " << oc_to_string(result) << std::endl;
 	std::cout << "expected = " << oc_to_string(expected) << std::endl;
@@ -490,7 +498,7 @@ void UnifyUTest::test_unify_vardecl_2()
 {
 	Unify unify(XY, AY, XY_vardecl, Y_vardecl);
 	Unify::SolutionSet result = unify(),
-		expected = Unify::SolutionSet(true, {{{{X, A}, A}}});
+		expected = Unify::SolutionSet({{{{X, A}, A}}});
 
 	std::cout << "result = " << oc_to_string(result) << std::endl;
 	std::cout << "expected = " << oc_to_string(expected) << std::endl;
@@ -502,7 +510,7 @@ void UnifyUTest::test_unify_vardecl_3()
 {
 	Unify unify(XB, AY, X_vardecl, Y_vardecl);
 	Unify::SolutionSet result = unify(),
-		expected = Unify::SolutionSet(true, {{{{X, A}, A}, {{Y, B}, B}}});
+		expected = Unify::SolutionSet({{{{X, A}, A}, {{Y, B}, B}}});
 
 	TS_ASSERT_EQUALS(result, expected);
 }
@@ -511,7 +519,7 @@ void UnifyUTest::test_unify_vardecl_4()
 {
 	Unify unify(XY, AZ, XY_vardecl, Z_vardecl);
 	Unify::SolutionSet result = unify(),
-		expected = Unify::SolutionSet(true, {{{{X, A}, A}, {{Y, Z}, Y}}});
+		expected = Unify::SolutionSet({{{{X, A}, A}, {{Y, Z}, Y}}});
 
 	std::cout << "result = " << oc_to_string(result) << std::endl;
 	std::cout << "expected = " << oc_to_string(expected) << std::endl;
@@ -528,7 +536,7 @@ void UnifyUTest::test_unify_vardecl_5()
 
 	std::cout << "result = " << oc_to_string(result) << std::endl;
 
-	TS_ASSERT(not result.satisfiable);
+	TS_ASSERT(not result.is_satisfiable());
 }
 
 // void UnifyUTest::test_unify_cyclic_dependence_1()
@@ -539,13 +547,13 @@ void UnifyUTest::test_unify_vardecl_5()
 
 // 	std::cout << "result = " << oc_to_string(result) << std::endl;
 
-// 	TS_ASSERT(not result.satisfiable);
+// 	TS_ASSERT(not result.is_satisfiable());
 // }
 
 // void UnifyUTest::test_unify_type_union_1()
 // {
 // 	Unify::SolutionSet result = Unify()(XY, AV, XY_vardecl, V_vardecl),
-// 		expected = Unify::SolutionSet(true, {{{{X, A}, A}, {{Y, V}, Y}}});
+// 		expected = Unify::SolutionSet({{{{X, A}, A}, {{Y, V}, Y}}});
 
 // 	std::cout << "result = " << oc_to_string(result) << std::endl;
 // 	std::cout << "expected = " << oc_to_string(expected) << std::endl;
@@ -560,14 +568,14 @@ void UnifyUTest::test_unify_unordered_1()
 
 	std::cout << "result = " << oc_to_string(result) << std::endl;
 
-	TS_ASSERT(not result.satisfiable);
+	TS_ASSERT(not result.is_satisfiable());
 }
 
 void UnifyUTest::test_unify_unordered_2()
 {
 	Unify unify(AndAB, AndAY, Handle::UNDEFINED, Y_vardecl);
 	Unify::SolutionSet result = unify(),
-		expected = Unify::SolutionSet(true, {{{{Y, B}, B}}});
+		expected = Unify::SolutionSet({{{{Y, B}, B}}});
 
 	std::cout << "result = " << oc_to_string(result) << std::endl;
 	std::cout << "expected = " << oc_to_string(expected) << std::endl;
@@ -579,7 +587,7 @@ void UnifyUTest::test_unify_unordered_3()
 {
 	Unify unify(AndAY, AndXB);
 	Unify::SolutionSet result = unify(),
-		expected = Unify::SolutionSet(true, {{{{X, A}, A}, {{Y, B}, B}}});
+		expected = Unify::SolutionSet({{{{X, A}, A}, {{Y, B}, B}}});
 
 	std::cout << "result = " << oc_to_string(result) << std::endl;
 	std::cout << "expected = " << oc_to_string(expected) << std::endl;
@@ -591,8 +599,7 @@ void UnifyUTest::test_unify_unordered_4()
 {
 	Unify unify(AndAB, AndXY, Handle::UNDEFINED, XY_vardecl);
 	Unify::SolutionSet result = unify(),
-		expected = Unify::SolutionSet(true,
-		                              {{{{X, A}, A}, {{Y, B}, B}},
+		expected = Unify::SolutionSet({{{{X, A}, A}, {{Y, B}, B}},
 			                           {{{Y, A}, A}, {{X, B}, B}}});
 
 	std::cout << "result = " << oc_to_string(result) << std::endl;
@@ -603,8 +610,7 @@ void UnifyUTest::test_unify_unordered_5()
 {
 	Unify unify(AndAABB, AndXYAB);
 	Unify::SolutionSet result = unify(),
-		expected = Unify::SolutionSet(true,
-		                              {{{{X, A}, A}, {{Y, B}, B}},
+		expected = Unify::SolutionSet({{{{X, A}, A}, {{Y, B}, B}},
 			                           {{{Y, A}, A}, {{X, B}, B}}});
 
 	std::cout << "result = " << oc_to_string(result) << std::endl;
@@ -617,8 +623,7 @@ void UnifyUTest::test_unify_unordered_6()
 {
 	Unify unify(AndAAABBB, AndXXYYAB);
 	Unify::SolutionSet result = unify(),
-		expected = Unify::SolutionSet(true,
-		                              {{{{X, A}, A}, {{Y, B}, B}},
+		expected = Unify::SolutionSet({{{{X, A}, A}, {{Y, B}, B}},
 			                           {{{Y, A}, A}, {{X, B}, B}}});
 
 	std::cout << "result = " << oc_to_string(result) << std::endl;
@@ -631,8 +636,7 @@ void UnifyUTest::test_unify_unordered_7()
 {
 	Unify unify(AndAAAABBBB, AndXXXYYYAB);
 	Unify::SolutionSet result = unify(),
-		expected = Unify::SolutionSet(true,
-		                              {{{{X, A}, A}, {{Y, B}, B}},
+		expected = Unify::SolutionSet({{{{X, A}, A}, {{Y, B}, B}},
 			                           {{{Y, A}, A}, {{X, B}, B}}});
 
 	std::cout << "result = " << oc_to_string(result) << std::endl;
@@ -645,8 +649,7 @@ void UnifyUTest::test_unify_unordered_8()
 {
 	Unify unify(AndAAAAABBBBB, AndXXXXYYYYAB);
 	Unify::SolutionSet result = unify(),
-		expected = Unify::SolutionSet(true,
-		                              {{{{X, A}, A}, {{Y, B}, B}},
+		expected = Unify::SolutionSet({{{{X, A}, A}, {{Y, B}, B}},
 			                           {{{Y, A}, A}, {{X, B}, B}}});
 
 	std::cout << "result = " << oc_to_string(result) << std::endl;
@@ -711,7 +714,7 @@ void UnifyUTest::test_unify_alpha_equivalence()
 
 	Unify unify(lhs, rhs, lhs_vardecl, rhs_vardecl);
 	Unify::SolutionSet result = unify(),
-		expected = Unify::SolutionSet({true, {{{{C1Org1, C2COLL}, Org1}}}});
+		expected = Unify::SolutionSet({{{{C1Org1, C2COLL}, Org1}}});
 
 	std::cout << "result = " << oc_to_string(result) << std::endl;
 	std::cout << "expected = " << oc_to_string(expected) << std::endl;
@@ -852,22 +855,22 @@ void UnifyUTest::test_unify_complex_1()
 
 	Unify unify(lhs, rhs, lhs_vardecl, rhs_vardecl);
 	Unify::SolutionSet result = unify(),
-		expected = Unify::SolutionSet(true, {{{{P, implicant, quoted_LA2},
-						 	                   implicant},
-						                      {{TyVs, Cimplicant_vardecl},
-						 	                   implicant_vardecl},
-						                      {{A2, Cimplicant_body},
-								               implicant_body},
-						                      {{Q, quoted_LA1},
-								               quoted_LA1}},
-				                             {{{P, implicant, quoted_LA1},
-						 	                   implicant},
-						                      {{TyVs, Cimplicant_vardecl},
-						 	                   implicant_vardecl},
-						                      {{A1, Cimplicant_body},
-								               implicant_body},
-						                      {{Q, quoted_LA2},
-								               quoted_LA2}}});
+		expected = Unify::SolutionSet({{{{P, implicant, quoted_LA2},
+						 	             implicant},
+						                {{TyVs, Cimplicant_vardecl},
+						 	             implicant_vardecl},
+						                {{A2, Cimplicant_body},
+								         implicant_body},
+						                {{Q, quoted_LA1},
+								         quoted_LA1}},
+				                       {{{P, implicant, quoted_LA1},
+						 	             implicant},
+						                {{TyVs, Cimplicant_vardecl},
+						 	             implicant_vardecl},
+						                {{A1, Cimplicant_body},
+								         implicant_body},
+						                {{Q, quoted_LA2},
+								         quoted_LA2}}});
 
 	std::cout << "result = " << oc_to_string(result) << std::endl;
 	std::cout << "expected = " << oc_to_string(expected) << std::endl;
@@ -983,7 +986,7 @@ void UnifyUTest::test_unify_complex_2()
 	Unify::SolutionSet result = unify();
 	Unify::Block pb_expected{CP, Cconjunction};
 	Unify::Partition partition_expected{{pb_expected, conjunction}};
-	Unify::SolutionSet expected = Unify::SolutionSet(true, {partition_expected});
+	Unify::SolutionSet expected = Unify::SolutionSet({partition_expected});
 
 	std::cout << "result = " << oc_to_string(result) << std::endl;
 	std::cout << "expected = " << oc_to_string(expected) << std::endl;
@@ -1086,8 +1089,7 @@ void UnifyUTest::test_unify_complex_3()
 
 	Unify unify(lhs, rhs, lhs_vardecl, rhs_vardecl);
 	Unify::SolutionSet result = unify(),
-		expected = Unify::SolutionSet(true,
-		                              {{{{TyVs1, TyVs2, Cvardecl}, vardecl},
+		expected = Unify::SolutionSet({{{{TyVs1, TyVs2, Cvardecl}, vardecl},
 				                        {{Q1, P}, Q1},
 				                        {{Q2, Cimplicant_body}, implicant_body}}});
 
@@ -1238,22 +1240,22 @@ void UnifyUTest::test_unify_complex_4()
 
 	Unify unify(target, alpha_pat, vardecl, alpha_vardecl);
 	Unify::SolutionSet result = unify(),
-		expected = Unify::SolutionSet(true, {{{{P, implicant, quoted_LA2},
-						 	                   implicant},
-						                      {{TyVs, Cimplicant_vardecl},
-						 	                   implicant_vardecl},
-						                      {{A2, Cimplicant_body},
-								               implicant_body},
-						                      {{Q, quoted_LA1},
-								               quoted_LA1}},
-				                             {{{P, implicant, quoted_LA1},
-						 	                   implicant},
-						                      {{TyVs, Cimplicant_vardecl},
-						 	                   implicant_vardecl},
-						                      {{A1, Cimplicant_body},
-								               implicant_body},
-						                      {{Q, quoted_LA2},
-								               quoted_LA2}}});
+		expected = Unify::SolutionSet({{{{P, implicant, quoted_LA2},
+						 	             implicant},
+						                {{TyVs, Cimplicant_vardecl},
+						 	             implicant_vardecl},
+						                {{A2, Cimplicant_body},
+								         implicant_body},
+						                {{Q, quoted_LA1},
+								         quoted_LA1}},
+				                       {{{P, implicant, quoted_LA1},
+						 	             implicant},
+						                {{TyVs, Cimplicant_vardecl},
+						 	             implicant_vardecl},
+						                {{A1, Cimplicant_body},
+								         implicant_body},
+						                {{Q, quoted_LA2},
+								         quoted_LA2}}});
 
 	std::cout << "result = " << oc_to_string(result) << std::endl;
 	std::cout << "expected = " << oc_to_string(expected) << std::endl;
@@ -1326,9 +1328,9 @@ void UnifyUTest::test_unify_complex_5()
 
 	Unify unify(target, alpha_pat, vardecl, alpha_vardecl);
 	Unify::SolutionSet result = unify(),
-		expected = Unify::SolutionSet(true, {{{{CQ, A2}, A2},
-						                      {{TyVs, Clambda_vardecl},
-                                               lambda_vardecl}}});
+		expected = Unify::SolutionSet({{{{CQ, A2}, A2},
+						                {{TyVs, Clambda_vardecl},
+                                         lambda_vardecl}}});
 
 	std::cout << "result = " << oc_to_string(result) << std::endl;
 	std::cout << "expected = " << oc_to_string(expected) << std::endl;
@@ -1466,20 +1468,20 @@ void UnifyUTest::test_unify_complex_6()
 
 	Unify unify(target, alpha_pat, vardecl, alpha_vardecl);
 	Unify::SolutionSet result = unify(),
-		expected = Unify::SolutionSet(true, {{{{CQ, A1}, A1},
-						                      {{TyVs, Clambda_vardecl},
-						 	                   lambda_vardecl},
-						                      {{A2, Ctake_treatment_1},
-                                               take_treatment_1}},
-				                             {{{CQ, A1, A2, Ctake_treatment_1},
-							                   take_treatment_1},
-						                      {{TyVs, Clambda_vardecl},
-								               lambda_vardecl}},
-                                             {{{CQ, A2}, A2},
-						                      {{TyVs, Clambda_vardecl},
-						 	                   lambda_vardecl},
-						                      {{A1, Ctake_treatment_1},
-                                               take_treatment_1}}});
+		expected = Unify::SolutionSet({{{{CQ, A1}, A1},
+						                {{TyVs, Clambda_vardecl},
+						 	             lambda_vardecl},
+						                {{A2, Ctake_treatment_1},
+                                         take_treatment_1}},
+				                       {{{CQ, A1, A2, Ctake_treatment_1},
+							             take_treatment_1},
+						                {{TyVs, Clambda_vardecl},
+								         lambda_vardecl}},
+                                       {{{CQ, A2}, A2},
+						                {{TyVs, Clambda_vardecl},
+						 	             lambda_vardecl},
+						                {{A1, Ctake_treatment_1},
+                                         take_treatment_1}}});
 
 	std::cout << "result = " << oc_to_string(result) << std::endl;
 	std::cout << "expected = " << oc_to_string(expected) << std::endl;
@@ -1552,8 +1554,8 @@ void UnifyUTest::test_unify_complex_7()
 
 	Unify unify(target, alpha_pat, vardecl, alpha_vardecl);
 	Unify::SolutionSet result = unify(),
-		expected = Unify::SolutionSet(true, {{{{V, CX_vardecl}, X_vardecl},
-					                          {{B, Cbody}, body}}});
+		expected = Unify::SolutionSet({{{{V, CX_vardecl}, X_vardecl},
+					                    {{B, Cbody}, body}}});
 
 	std::cout << "result = " << oc_to_string(result) << std::endl;
 	std::cout << "expected = " << oc_to_string(expected) << std::endl;

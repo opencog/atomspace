@@ -133,19 +133,14 @@ bool Unify::CHandle::operator<(const CHandle& ch) const
 }
 
 Unify::SolutionSet::SolutionSet(bool s)
-	: partitions(s ? empty_partition_singleton : empty_partitions) {}
+	: Partitions(s ? empty_partition_singleton : empty_partitions) {}
 
 Unify::SolutionSet::SolutionSet(const Unify::Partitions& p)
-	: partitions(p) {}
+	: Partitions(p) {}
 
 bool Unify::SolutionSet::is_satisfiable() const
 {
-	return not partitions.empty();
-}
-
-bool Unify::SolutionSet::operator==(const SolutionSet& other) const
-{
-	return partitions == other.partitions;
+	return not empty();
 }
 
 Unify::Unify(const Handle& lhs, const Handle& rhs,
@@ -165,7 +160,7 @@ Unify::TypedSubstitutions Unify::typed_substitutions(const SolutionSet& sol,
 	OC_ASSERT(sol.is_satisfiable());
 
 	TypedSubstitutions result;
-	for (const Partition& partition : sol.partitions)
+	for (const Partition& partition : sol)
 		result.insert(typed_substitution(partition, pre));
 	return result;
 }
@@ -609,8 +604,7 @@ Unify::SolutionSet Unify::unordered_unify(const HandleSeq& lhs,
 			auto tail_sol = unordered_unify(lhs_tail, rhs_tail, lc, rc);
 			SolutionSet perm_sol = join(head_sol, tail_sol);
 			// Union merge satisfiable permutations
-			sol.partitions.insert(perm_sol.partitions.begin(),
-			                      perm_sol.partitions.end());
+			sol.insert(perm_sol.begin(), perm_sol.end());
 		}
 	}
 	return sol;
@@ -715,9 +709,9 @@ Unify::SolutionSet Unify::join(const SolutionSet& lhs,
 
 	// By now both are satisfiable, thus non empty, join them
 	SolutionSet result;
-	for (const Partition& rp : rhs.partitions) {
+	for (const Partition& rp : rhs) {
 		SolutionSet sol(join(lhs, rp));
-		result.partitions.insert(sol.partitions.begin(), sol.partitions.end());
+		result.insert(sol.begin(), sol.end());
 	}
 
 	return result;
@@ -731,9 +725,9 @@ Unify::SolutionSet Unify::join(const SolutionSet& lhs, const Partition& rhs) con
 
 	// Recursive case (a loop actually)
 	SolutionSet result;
-	for (const auto& par : lhs.partitions) {
+	for (const auto& par : lhs) {
 		SolutionSet jps = join(par, rhs);
-		result.partitions.insert(jps.partitions.begin(), jps.partitions.end());
+		result.insert(jps.begin(), jps.end());
 	}
 	return result;
 }
@@ -760,10 +754,9 @@ Unify::SolutionSet Unify::join(const SolutionSet& sol,
                                const TypedBlock& block) const
 {
 	SolutionSet result;
-	for (const Partition& partition : sol.partitions) {
+	for (const Partition& partition : sol) {
 		SolutionSet jps = join(partition, block);
-		result.partitions.insert(jps.partitions.begin(),
-		                         jps.partitions.end());
+		result.insert(jps.begin(), jps.end());
 	}
 	return result;
 }
@@ -796,7 +789,7 @@ Unify::SolutionSet Unify::join(const Partition& partition,
 			// block and join the solution set to jp
 			SolutionSet sol = subunify(common_blocks, block);
 			if (sol.is_satisfiable())
-				return join(sol.partitions, jp);
+				return join(sol, jp);
 		}
 		return SolutionSet(false);
 	}
@@ -866,8 +859,6 @@ Unify::SolutionSet Unify::subunify(const TypedBlock& lhs,
 {
 	return comb_unify(set_symmetric_difference(lhs.first, rhs.first));
 }
-
-// TODO: overload for SolutionSet or Partitions
 
 bool Unify::is_satisfiable(const TypedBlock& block) const
 {
@@ -1141,13 +1132,6 @@ std::string oc_to_string(const Unify::Partitions& par)
 		ss << "typed partition[" << i << "]:" << std::endl << oc_to_string(el);
 		i++;
 	}
-	return ss.str();
-}
-
-std::string oc_to_string(const Unify::SolutionSet& sol)
-{
-	std::stringstream ss;
-	ss << "partitions: " << std::endl << oc_to_string(sol.partitions);
 	return ss.str();
 }
 

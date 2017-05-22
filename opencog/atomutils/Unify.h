@@ -151,24 +151,18 @@ public:
 
 	// TODO: the type of a typed block is currently a handle of the
 	// variable or ground it is exists, instead of an actual type.
-	struct SolutionSet : public boost::equality_comparable<SolutionSet>
+	struct SolutionSet : Partitions
 	{
 		// Default ctor
 		SolutionSet(const Partitions& p);
-		// Helper ctor. Initialize with empty partition, i.e. a
-		// satisfiable solution, iff s == true.
+		// Helper ctor. Initialize with the empty partition as
+		// singleton, i.e. a satisfiable solution, if s == true, or
+		// the empty partition set if unsatisfiable.
 		SolutionSet(bool s=false);
-
-		// Set of typed partitions. An empty set indicates that it is
-		// not satisfiable. A satisfiable set with no variable to
-		// unify would contain the empty partition.
-		Partitions partitions;
 
 		// Return true iff the solution set is satisfiable which is
 		// indicated by whether it is empty or not.
 		bool is_satisfiable() const;
-
-		bool operator==(const SolutionSet& other) const;
 	};
 
 	// Mapping from Handle (typically a variable) to a contextual handle
@@ -739,7 +733,6 @@ std::string oc_to_string(const Unify::Partition& hshm);
 std::string oc_to_string(const Unify::TypedBlock& tb);
 std::string oc_to_string(const Unify::TypedBlockSeq& tbs);
 std::string oc_to_string(const Unify::Partitions& par);
-std::string oc_to_string(const Unify::SolutionSet& sol);
 std::string oc_to_string(const Unify::HandleCHandleMap& hchm);
 std::string oc_to_string(const Unify::TypedSubstitution& ts);
 std::string oc_to_string(const Unify::TypedSubstitutions& tss);

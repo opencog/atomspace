@@ -362,7 +362,7 @@ RuleTypedSubstitutionMap Rule::unify_source(const Handle& source,
 	{
 		Unify unify(source, premise, vardecl, rule_vardecl);
 		Unify::SolutionSet sol = unify();
-		if (sol.satisfiable) {
+		if (sol.is_satisfiable()) {
 			Unify::TypedSubstitutions tss =
 				unify.typed_substitutions(sol, source);
 			// For each typed substitution produce a new rule by
@@ -393,14 +393,15 @@ RuleTypedSubstitutionMap Rule::unify_target(const Handle& target,
 	{
 		Unify unify(target, alpha_pat, vardecl, alpha_vardecl);
 		Unify::SolutionSet sol = unify();
-		if (sol.satisfiable) {
+		if (sol.is_satisfiable()) {
 			Unify::TypedSubstitutions tss =
 				unify.typed_substitutions(sol, target);
 			// For each typed substitution produce a new rule by
 			// substituting all variables by their associated
 			// values.
-			for (const auto& ts : tss)
+			for (const auto& ts : tss) {
 				unified_rules.insert({alpha_rule.substituted(ts), ts});
+			}
 		}
 	}
 
