@@ -93,7 +93,9 @@ class PrimitiveEnviron
 // S_SS   -- DistSCM  (Gearman server)
 // S_V    -- CogServerSCM::stop_server()
 //        -- cogutils logger get_level(), etc.
+// V_B    -- SQLPersistSCM:do_set_stall, PatternMiner
 // V_I    -- cogutils do_randgen_set_seed
+// V_II   -- SQLPersistSCM:do_set_hilo
 // V_S    -- cogutils logger setters
 //        -- SQLPersistSCM::do_open()
 //        -- ZMQPersistSCM::do_open()
@@ -122,7 +124,6 @@ class PrimitiveEnviron
 // S_B    -- PatternMiner
 // S_I    -- PatternMiner
 // S_V    -- PatternMiner
-// V_B    -- PatternMiner
 // V_SI   -- PatternMiner
 
 template<class T>
@@ -173,8 +174,9 @@ class SchemePrimitive : public PrimitiveEnviron
 			std::string (T::*s_v)(void);
 			TruthValuePtr (T::*p_h)(Handle);
 			void (T::*v_b)(bool);
-			void (T::*v_i)(int);
 			void (T::*v_h)(Handle);
+			void (T::*v_i)(int);
+			void (T::*v_ii)(int, int);
 			void (T::*v_s)(const std::string&);
 			void (T::*v_sa)(const std::string&, AtomSpace*);
 			void (T::*v_si)(const std::string&, int);
@@ -210,8 +212,9 @@ class SchemePrimitive : public PrimitiveEnviron
 			S_V,   // return string, take void
 			P_H,   // return truth value, take Handle
 			V_B,   // return void, take bool
-			V_I,   // return void, take int
 			V_H,   // return void, take Handle
+			V_I,   // return void, take int
+			V_II,  // return void, take int, int
 			V_S,   // return void, take string
 			V_SA,  // return void, take string, Atomspace
 			V_SI,  // return void, take string and int
@@ -466,6 +469,14 @@ class SchemePrimitive : public PrimitiveEnviron
 					(that->*method.v_i)(i);
 					break;
 				}
+				case V_II:
+				{
+					int i = SchemeSmob::verify_int(scm_car(args), scheme_name, 1);
+					int j = SchemeSmob::verify_int(scm_cadr(args), scheme_name, 2);
+
+					(that->*method.v_ii)(i, j);
+					break;
+				}
 				case V_S:
 				{
 					std::string str(SchemeSmob::verify_string(scm_car(args), scheme_name, 1));
@@ -635,6 +646,7 @@ class SchemePrimitive : public PrimitiveEnviron
 		DECLARE_CONSTR_1(V_B,   v_b,  void, bool)
 		DECLARE_CONSTR_1(V_H,	v_h,  void, Handle)
 		DECLARE_CONSTR_1(V_I,   v_i,  void, int)
+		DECLARE_CONSTR_2(V_II,  v_ii, void, int, int)
 		DECLARE_CONSTR_1(V_S,   v_s,  void, const std::string&)
 		DECLARE_CONSTR_2(V_SA,  v_sa, void, const std::string&,
 		                              AtomSpace*)
@@ -707,6 +719,7 @@ DECLARE_DECLARE_2(Handle, Handle, size_t)
 DECLARE_DECLARE_2(Handle, const std::string&, const HandleSeq&)
 DECLARE_DECLARE_2(std::string, AtomSpace*, const std::string&)
 DECLARE_DECLARE_2(std::string, const std::string&, const std::string&)
+DECLARE_DECLARE_2(void, int, int)
 DECLARE_DECLARE_2(void, const std::string&, AtomSpace*)
 DECLARE_DECLARE_2(void, Type, int)
 DECLARE_DECLARE_2(void, const std::string&, int)

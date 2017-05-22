@@ -7,7 +7,7 @@
 (load-extension "libpersist-sql" "opencog_persist_sql_init")
 
 (export sql-clear-cache sql-clear-stats sql-close sql-load sql-open
-	sql-store sql-stats)
+	sql-store sql-stats sql-set-hilo-watermarks! sql-set-stall-writers!)
 
 (set-procedure-property! sql-clear-cache 'documentation
 "
@@ -68,6 +68,23 @@
      (sql-open \"postgres:///opencog_test?user=opencog_tester\")
      (sql-open \"postgres:///opencog_test?user=opencog_tester&host=localhost\")
      (sql-open \"postgres:///opencog_test?user=opencog_tester&password=cheese\")
+")
+
+(set-procedure-property! sql-set-hilo-watermarks! 'documentation
+"
+ sql-set-hilo-watermarks! HI LO - Set the high and low watermarks on the
+    writeback queues.  Any threads that are storing atoms will block
+    if the backlog of unwritten atoms exceeds the high watermark.
+    The threads will unblock once the queues drain below the low
+    watermark level.
+")
+
+(set-procedure-property! sql-set-stall-writers! 'documentation
+"
+ sql-set-stall-writers! BOOL - Set the stall flag on the writeback
+    queues. If the flag is set, then the writers will 'stall', i.e.
+    avoid doing any actual stores until the writeback queues have
+    at least the low-watermark pending writes in them.
 ")
 
 (set-procedure-property! sql-store 'documentation
