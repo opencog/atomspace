@@ -60,7 +60,6 @@ public:
 	void test_unify_target_implication_scope_to_implication_2();
 	void test_unify_target_implication_scope_to_implication_3();
 	void test_unify_target_implication_scope_to_implication_4();
-	// TODO provide a unit tests when some quotation should be not consumed
 	void test_unify_target_implication_and_lambda_factorization();
 	void test_unify_target_closed_lambda_introduction_1();
 	void test_unify_target_closed_lambda_introduction_2();

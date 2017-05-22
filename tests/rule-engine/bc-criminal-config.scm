@@ -5,7 +5,7 @@
 ;; To be loaded first
 
 ;; Load the rules (use load for relative path w.r.t. to that file)
-(load-from-path "tests/rule-engine/meta-rules/conditional-instantiation-meta-rule.scm")
+(load-from-path "tests/rule-engine/meta-rules/conditional-full-instantiation-meta-rule.scm")
 (load-from-path "tests/rule-engine/rules/bc-deduction-rule.scm")
 (load-from-path "tests/rule-engine/rules/fuzzy-conjunction-introduction-rule.scm")
 
