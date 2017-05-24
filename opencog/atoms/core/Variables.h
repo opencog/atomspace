@@ -114,6 +114,7 @@ protected:
 
 typedef std::map<Handle, const std::set<Type>> VariableTypeMap;
 typedef std::map<Handle, const OrderedHandleSet> VariableDeepTypeMap;
+typedef std::map<Handle, const std::pair<double, double>> GlobIntervalMap;
 
 /// The Variables struct defines a list of typed variables "unbundled"
 /// from the hypergraph in which they normally occur. The goal of this
@@ -137,6 +138,10 @@ struct Variables : public FreeVariables
 	VariableTypeMap _simple_typemap;
 	VariableDeepTypeMap _deep_typemap;
 	VariableDeepTypeMap _fuzzy_typemap;
+
+	/// To restrict how many atoms should be matched for each of the
+	/// GlobNodes in the pattern.
+	GlobIntervalMap _glob_intervalmap;
 
 	/// Return true iff all variables are well typed. For now only
 	/// simple types are supported, specifically if some variable is
