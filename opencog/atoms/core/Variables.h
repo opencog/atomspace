@@ -183,6 +183,10 @@ struct Variables : public FreeVariables
 	// restrictions (if any).
 	bool is_type(const HandleSeq& hseq) const;
 
+	// Return true if the it satisfies the interval restrictions.
+	// Return false otherwise.
+	bool is_interval(const Handle& glob, size_t n) const;
+
 	// Given the tree `tree` containing variables in it, create and
 	// return a new tree with the indicated values `vals` substituted
 	// for the variables. The vals must pass the typecheck, else an

@@ -252,6 +252,8 @@ bool PatternMatchEngine::ordered_compare(const PatternTermPtr& ptm,
 					post_glob = osp[ip+1];
 				}
 
+// JJJ TODO: 0 (lower bound) check somewhere around here??
+
 				// Match at least one.
 				tc = tree_compare(glob, osg[jg], CALL_GLOB);
 				if (not tc)
@@ -259,6 +261,7 @@ bool PatternMatchEngine::ordered_compare(const PatternTermPtr& ptm,
 					match = false;
 					break;
 				}
+
 				glob_seq.push_back(osg[jg]);
 				jg++;
 
@@ -271,7 +274,11 @@ bool PatternMatchEngine::ordered_compare(const PatternTermPtr& ptm,
 						tc = tree_compare(post_glob, osg[jg], CALL_GLOB);
 						if (tc) break;
 					}
-					tc = tree_compare(glob, osg[jg], CALL_GLOB);
+
+					// Check both the type (via tree_compare -> variable_match)
+					// and interval (via is_terval) restrictions
+					tc = (tree_compare(glob, osg[jg], CALL_GLOB) and
+					      _varlist->is_interval(ohp, glob_seq.size()+1));
 					if (tc) glob_seq.push_back(osg[jg]);
 					jg ++;
 				}
@@ -438,7 +445,7 @@ This is complicated, so we write it out.  When ascending from below (i.e.
 from do_term_up()), unordered links may be found in two different
 places: The parent term may be unordered, or the parent link may hold
 another link (a sibling to us) that is unordered. Traversal needs to
-handle both cases.  Thus, the upwards-movement methods (do_term_sup(),
+handle both cases.  Thus, the upwards-movement methods (do_term_up(),
 explore_up_branches(), etc.) are incapable of discovering unordered links,
 as they cannot "see" the siblings.  Siblings can only be found during
 tree-compare, moving downwards.  Thus, tree_compare must do a lot of
@@ -457,7 +464,7 @@ do after running tree_compare downwards. These are handled by two
 truth tables.
 
 The topmost routine to call tree_compare must *always* set have_more=F
-and take_step=T before calling tree compare.  This will cause
+and take_step=T before calling tree_compare.  This will cause
 tree_compare to advance to the next matching permuation, or to run until
 all permuations are exhausted, and no match was found.
 
@@ -490,7 +497,7 @@ case step  more    Comments / Action to be Taken
                   If we hold an evaluatable, we must call down.
   D    F    F     Perform same as C above.
 
-Footnote: case C: Well, thr reasoning there is almost riht, but not
+Footnote: case C: Well, the reasoning there is almost right, but not
 quite. If the unordered link contains a variable, and it is also not in
 the direct line of exploration (i.e. its grounding is NOT recorded)
 then its truthiness holds only for a grounding that no longer exists.

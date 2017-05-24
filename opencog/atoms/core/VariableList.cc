@@ -218,9 +218,6 @@ void VariableList::get_vartype(const Handle& htypelink)
 				"Expected only IntervalLink and TypeNode, got %s",
 				h->toString().c_str());
 		}
-
-// JJJ
-std::cout << "Exiting... vartype:\n" << vartype->toShortString() << std::endl;
 	}
 
 	// The vartype is either a single type name, or a list of typenames.
