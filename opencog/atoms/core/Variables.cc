@@ -352,6 +352,18 @@ bool Variables::is_equal(const Variables& other, size_t index) const
 
 	// XXX TODO fuzzy?
 
+	// If intervals specified, intervals must match.
+	auto iime = _glob_intervalmap.find(vme);
+	auto ioth = other._glob_intervalmap.find(voth);
+	if (iime == _glob_intervalmap.end() and
+	    ioth != other._glob_intervalmap.end()) return false;
+
+	if (iime != _glob_intervalmap.end())
+	{
+		if (ioth == other._glob_intervalmap.end()) return false;
+		if (iime->second != ioth->second) return false;
+	}
+
 	// If we got to here, everything must be OK.
 	return true;
 }
@@ -692,6 +704,8 @@ Handle Variables::get_vardecl() const
 			OC_ASSERT(false, "TODO: support fuzzy type info");
 			continue;
 		}
+
+		// TODO: _glob_intervalmap?
 
 		// No type info
 		vars.push_back(var);
