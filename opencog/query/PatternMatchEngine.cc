@@ -252,11 +252,27 @@ bool PatternMatchEngine::ordered_compare(const PatternTermPtr& ptm,
 					post_glob = osp[ip+1];
 				}
 
-// JJJ TODO: 0 (lower bound) check somewhere around here??
-
 				// Match at least one.
 				tc = tree_compare(glob, osg[jg], CALL_GLOB);
 				if (not tc)
+				{
+					// If the lower bound is zero, it can be grounded
+					// to nothing, so accept it and move on.
+					if (_varlist->is_interval(ohp, 0))
+					{
+						LinkPtr glp(createLink(glob_seq, LIST_LINK));
+						var_grounding[glob->getHandle()] = glp->getHandle();
+						continue;
+					}
+
+					// Else it's not a match
+					match = false;
+					break;
+				}
+
+				// Before accepting it, check the intervals, if any,
+				// just in case someone put a zero as the upper bound...
+				if (not _varlist->is_interval(ohp, 1))
 				{
 					match = false;
 					break;
@@ -276,7 +292,7 @@ bool PatternMatchEngine::ordered_compare(const PatternTermPtr& ptm,
 					}
 
 					// Check both the type (via tree_compare -> variable_match)
-					// and interval (via is_terval) restrictions
+					// and interval (via is_interval) restrictions
 					tc = (tree_compare(glob, osg[jg], CALL_GLOB) and
 					      _varlist->is_interval(ohp, glob_seq.size()+1));
 					if (tc) glob_seq.push_back(osg[jg]);

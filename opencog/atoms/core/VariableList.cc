@@ -215,7 +215,7 @@ void VariableList::get_vartype(const Handle& htypelink)
 
 			else throw SyntaxException(TRACE_INFO,
 				"Unexpected contents in TypedSetLink\n"
-				"Expected only IntervalLink and TypeNode, got %s",
+				"Expected IntervalLink and TypeNode, got %s",
 				h->toString().c_str());
 		}
 	}
