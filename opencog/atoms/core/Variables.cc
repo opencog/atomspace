@@ -501,7 +501,7 @@ bool Variables::is_interval(const Handle& glob, size_t n) const
 	{
 		const std::pair<double, double>& intervals = iit->second;
 
-		// Return true if it's within the itnerval
+		// Return true if it's within the interval
 		// lower bound = intervals.first
 		// upper bound = intervals.second (negative value means infinity)
 		if (n >= intervals.first and

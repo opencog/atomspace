@@ -252,54 +252,144 @@ bool PatternMatchEngine::ordered_compare(const PatternTermPtr& ptm,
 					post_glob = osp[ip+1];
 				}
 
-				// Match at least one.
-				tc = tree_compare(glob, osg[jg], CALL_GLOB);
-				if (not tc)
+				if (_varlist->is_interval(ohp, 0))
 				{
-					// If the lower bound is zero, it can be grounded
-					// to nothing, so accept it and move on.
-					if (_varlist->is_interval(ohp, 0))
+					// If we are here, that means the lower bound of the
+					// interval is zero, which means the glob can be
+					// be grounded to nothing.
+
+					// This should be true most of the time, if not all,
+					// unless someone put a zero as the upper bound,
+					// or we are having something new, so just in case...
+					if (tree_compare(glob, osg[jg], CALL_GLOB) and
+					    _varlist->is_interval(ohp, 1))
 					{
-						LinkPtr glp(createLink(glob_seq, LIST_LINK));
-						var_grounding[glob->getHandle()] = glp->getHandle();
-						continue;
+						// TODO XXX JJJ: Simplify the below...
+						// If the post-glob matches with post-candidate,
+						// accept the current candidate for the glob.
+						if (have_post and jg+1 < osg_size)
+						{
+							tc = tree_compare(post_glob, osg[jg+1], CALL_GLOB);
+
+							if (tc)
+							{
+								glob_seq.push_back(osg[jg]);
+								jg++;
+							}
+
+							// Can match more?
+							while (tc and jg+1 < osg_size)
+							{
+								tc = tree_compare(post_glob, osg[jg+1], CALL_GLOB);
+
+								if (tc)
+								{
+									// Check for more
+									if (_varlist->is_interval(ohp, glob_seq.size()+1))
+									{
+										glob_seq.push_back(osg[jg]);
+										jg ++;
+									}
+									// It's beyond the upper limit -- reject
+									else
+									{
+										match = false;
+										break;
+									}
+								}
+								// No more, done
+								else break;
+							}
+							jg --;
+							if (not tc)
+							{
+								match = false;
+								break;
+							}
+						}
+						// Else if the post-glob matches with the current
+						// candidate, this glob is grounded to nothing,
+						// we are done here.
+						else if (have_post and tree_compare(post_glob, osg[jg], CALL_GLOB))
+						{
+							jg --;
+							continue;
+						}
 					}
-
-					// Else it's not a match
-					match = false;
-					break;
-				}
-
-				// Before accepting it, check the intervals, if any,
-				// just in case someone put a zero as the upper bound...
-				if (not _varlist->is_interval(ohp, 1))
-				{
-					match = false;
-					break;
-				}
-
-				glob_seq.push_back(osg[jg]);
-				jg++;
-
-				// Can we match more?
-				while (tc and jg<osg_size)
-				{
-					if (have_post)
+					else
 					{
-						// If the atom after the glob matches, then we are done.
-						tc = tree_compare(post_glob, osg[jg], CALL_GLOB);
-						if (tc) break;
+						match = false;
+						break;
 					}
-
-					// Check both the type (via tree_compare -> variable_match)
-					// and interval (via is_interval) restrictions
+				}
+				else
+				{
+					// If we are here, the glob we are looking at has to be
+					// grounded to at least one atom.
 					tc = (tree_compare(glob, osg[jg], CALL_GLOB) and
-					      _varlist->is_interval(ohp, glob_seq.size()+1));
-					if (tc) glob_seq.push_back(osg[jg]);
-					jg ++;
+					      _varlist->is_interval(ohp, 1));
+					if (not tc)
+					{
+						match = false;
+						break;
+					}
+
+					glob_seq.push_back(osg[jg]);
+					jg++;
+
+					// Can we match more?
+					while (tc and jg<osg_size)
+					{
+						if (have_post)
+						{
+							// If the atom after the glob matches, then we are done.
+							tc = tree_compare(post_glob, osg[jg], CALL_GLOB);
+							if (tc) break;
+						}
+						tc = (tree_compare(glob, osg[jg], CALL_GLOB) and
+						      _varlist->is_interval(ohp, glob_seq.size()+1));
+						if (tc) glob_seq.push_back(osg[jg]);
+						jg ++;
+					}
+					jg --;
+					if (not tc)
+					{
+						match = false;
+						break;
+					}
 				}
-				jg --;
-				if (not tc)
+
+				// If we have gone through all the atoms in the pattern
+				// while the candidate still has more, not a match!
+				if (ip+1 == osp_size and jg+1 < osg_size)
+				{
+					match = false;
+					break;
+				}
+
+				// Finally if we have gone through all the atoms in the
+				// candidate but not in the pattern, and what's left
+				// in the pattern is just a zero-to-* glob, accept it.
+				// Otherwise reject it.
+				// It's a loop in case someone put more than one globs
+				// at the end...
+				bool end_with_zero_glob = true;
+				while (ip+1 < osp_size and jg+1 == osg_size)
+				{
+					const Handle& pg = osp[ip+1]->getHandle();
+					if (GLOB_NODE == pg->getType() and
+						_varlist->is_interval(pg, 0))
+					{
+						ip ++;
+						jg ++;
+					}
+					else
+					{
+						end_with_zero_glob = false;
+						break;
+					}
+				}
+				if (not end_with_zero_glob)
 				{
 					match = false;
 					break;
