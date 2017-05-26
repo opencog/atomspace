@@ -242,7 +242,6 @@ void SchemeSmob::module_init(void*)
 #endif
 
 	scm_primitive_load_path(scm_from_utf8_string("opencog/base/core_types.scm"));
-	scm_primitive_load_path(scm_from_utf8_string("opencog/base/config.scm"));
 	scm_primitive_load_path(scm_from_utf8_string("opencog/base/core-docs.scm"));
 	scm_primitive_load_path(scm_from_utf8_string("opencog/base/utilities.scm"));
 	scm_primitive_load_path(scm_from_utf8_string("opencog/base/apply.scm"));
