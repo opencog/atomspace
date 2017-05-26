@@ -290,7 +290,7 @@ bool PatternMatchEngine::ordered_compare(const PatternTermPtr& ptm,
 										glob_seq.push_back(osg[jg]);
 										jg ++;
 									}
-									// It's beyond the upper limit -- reject
+									// It's beyond the upper bound; reject
 									else
 									{
 										match = false;
@@ -315,6 +315,13 @@ bool PatternMatchEngine::ordered_compare(const PatternTermPtr& ptm,
 							jg --;
 							continue;
 						}
+					}
+					else if (not _varlist->is_interval(ohp, 1))
+					{
+						// If we are here, we get a glob that has zero as
+						// the upper bound of the interval, why not...
+						jg --;
+						continue;
 					}
 					else
 					{
