@@ -58,6 +58,8 @@
 ; called a second time; this will almost surely be the cogserver
 ; atomspace. Ugh. What a mess.
 
+(export cog-atomspace cog-new-atomspace cog-set-atomspace!)
+
 (define-public cog-initial-as (cog-atomspace))
 (if (eq? cog-initial-as #f)
 	(begin
