@@ -2,12 +2,16 @@
 #ADD_SUBDIRECTORY (wires)
 
 INSTALL (FILES
+	opencog.scm
+	DESTINATION "${DATADIR}/scm/"
+)
+
+INSTALL (FILES
 	opencog/base/apply.scm
 	opencog/base/av-tv.scm
 	opencog/base/core-docs.scm
 	opencog/base/debug-trace.scm
 	opencog/base/file-utils.scm
-	opencog/base/opencog.scm
 	opencog/base/repl-shell.scm
 	opencog/base/utilities.scm
 	DESTINATION "${DATADIR}/scm/opencog/base"
