@@ -67,22 +67,21 @@
 
 ; Load core atom types.
 ; The remaining atom types from the cogserver are in (opencog atom-types)
-(load-from-path "core_types.scm")
+(load-from-path "opencog/base/core_types.scm")
 
 ; Load other grunge too.
 ; Some of these things could possibly be modules ...?
 ; ATTENTION: if you add a file here, then be sure to ALSO add it to
-; /opencog/guile/SchemeSmob.cc SchemeSmob::module_init() circa line 202
-(load-from-path "config.scm")
+; ../opencog/guile/SchemeSmob.cc SchemeSmob::module_init() circa line 257
 
-(load-from-path "core-docs.scm")
+(load-from-path "opencog/base/core-docs.scm")
 
-(load-from-path "utilities.scm")
+(load-from-path "opencog/base/utilities.scm")
 
-(load-from-path "apply.scm")
-(load-from-path "av-tv.scm")
-(load-from-path "file-utils.scm")
-(load-from-path "debug-trace.scm")
+(load-from-path "opencog/base/apply.scm")
+(load-from-path "opencog/base/av-tv.scm")
+(load-from-path "opencog/base/file-utils.scm")
+(load-from-path "opencog/base/debug-trace.scm")
 
 ; Obsolete function
 (define-public (cog-atom X) '())

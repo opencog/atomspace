@@ -2,17 +2,19 @@
 #ADD_SUBDIRECTORY (wires)
 
 INSTALL (FILES
-	apply.scm
-	av-tv.scm
-	config.scm
-	core-docs.scm
-	debug-trace.scm
-	example-dbi.scm
-	file-utils.scm
 	opencog.scm
-	repl-shell.scm
-	utilities.scm
-	DESTINATION "${DATADIR}/scm"
+	DESTINATION "${DATADIR}/scm/"
+)
+
+INSTALL (FILES
+	opencog/base/apply.scm
+	opencog/base/av-tv.scm
+	opencog/base/core-docs.scm
+	opencog/base/debug-trace.scm
+	opencog/base/file-utils.scm
+	opencog/base/repl-shell.scm
+	opencog/base/utilities.scm
+	DESTINATION "${DATADIR}/scm/opencog/base"
 )
 
 INSTALL (FILES
@@ -36,19 +38,20 @@ IF (HAVE_GEARMAN)
 	)
 ENDIF (HAVE_GEARMAN)
 
-IF (ODBC_FOUND)
+IF (PGSQL_FOUND OR ODBC_FOUND)
 	INSTALL (FILES
 		opencog/persist-sql.scm
 		DESTINATION "${DATADIR}/scm/opencog"
 	)
-ENDIF (ODBC_FOUND)
+ENDIF (PGSQL_FOUND OR ODBC_FOUND)
 
-IF (PGSQL_FOUND)
-	INSTALL (FILES
-		opencog/persist-pgsql.scm
-		DESTINATION "${DATADIR}/scm/opencog"
-	)
-ENDIF (PGSQL_FOUND)
+# Currently, this is broken, and doesn't work. Don't isntall it.
+# IF (PGSQL_FOUND)
+# 	INSTALL (FILES
+# 		opencog/persist-pgsql.scm
+# 		DESTINATION "${DATADIR}/scm/opencog"
+# 	)
+# ENDIF (PGSQL_FOUND)
 
 IF (HAVE_CYTHON)
 	INSTALL (FILES

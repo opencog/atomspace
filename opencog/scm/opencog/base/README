@@ -1,0 +1,23 @@
+
+                          opencog base
+                          ------------
+
+This repository contains assorted routines, written in scheme, for
+manipulating OpenCog atoms, in various general ways. These utilities
+include:
+
+-- debug.scm
+   + debugger/backtrace support.
+
+-- file-utils.scm
+   + list files in directory
+   + load scheme code from file
+   + execute scheme code from a string or a port.
+
+-- utilities.scm
+   + increment a CountTruthValue
+   + delete an OpenCog hypergraph, from the top-node downwards
+   + get all atoms of a certain given type
+   + get all incoming/outgoing atoms of a given type
+   + apply filter to a list of atoms
+   + get "partner" atoms connected by links in various ways

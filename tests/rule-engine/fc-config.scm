@@ -10,8 +10,6 @@
 (use-modules (opencog rule-engine))
 
 ;; Useful to run the unit tests without having to install opencog
-(load-from-path "utilities.scm")
-(load-from-path "av-tv.scm")
 (load-from-path "rule-engine-utils.scm")
 
 ;;;;;;;;;;;;;;;;
