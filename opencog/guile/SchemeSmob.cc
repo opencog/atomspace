@@ -238,7 +238,7 @@ void SchemeSmob::module_init(void*)
 	// Too lazy to fix.  See issue
 	// https://github.com/opencog/atomspace/issues/705 for details.
 	scm_c_eval_string("(add-to-load-path \"" PROJECT_SOURCE_DIR "/opencog/scm\")");
-	scm_c_eval_string("(add-to-load-path \"" PROJECT_BINARY_DIR "/opencog/atoms/base\")");
+	scm_c_eval_string("(add-to-load-path \"" PROJECT_BINARY_DIR "\")");
 #endif
 
 	scm_primitive_load_path(scm_from_utf8_string("opencog/base/core_types.scm"));

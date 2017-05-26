@@ -6,4 +6,4 @@
 ; from the build directory.
 ; Specifically, the build/opencog/atoms/base/core_types.scm file.
 ;
-(load-from-path "core_types.scm")
+(load-from-path "opencog/atoms/base/core_types.scm")
