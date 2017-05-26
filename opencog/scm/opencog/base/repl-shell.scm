@@ -10,8 +10,14 @@
 (use-modules (system repl server))
 (use-modules (system repl common))
 
-; localhost, port number 18001  (shell-port is set in config.scm)
-(spawn-server (make-tcp-server-socket  #:port shell-port))
+; localhost, port number 18001
+(spawn-server (make-tcp-server-socket  #:port 18001))
+
+; A plain simple prompt
+; (define shell-prompt "opencog-scheme> ")
+
+; An ANSI-terminal colorized prompt!  This one is blue.
+(define shell-prompt "[0;34mopencog-scheme[1;34m> [0m")
 
 (repl-default-prompt-set! shell-prompt)
 ; --------------------------------------------------------------------

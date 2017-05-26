@@ -73,7 +73,6 @@
 ; Some of these things could possibly be modules ...?
 ; ATTENTION: if you add a file here, then be sure to ALSO add it to
 ; ../opencog/guile/SchemeSmob.cc SchemeSmob::module_init() circa line 257
-(load-from-path "opencog/base/config.scm")
 
 (load-from-path "opencog/base/core-docs.scm")
 
