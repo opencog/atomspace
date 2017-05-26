@@ -42,6 +42,31 @@
 
 (use-modules (system base compile))
 
+; We need to list everything that was already exported by the shared
+; library; failure to do so causes warning messages to be printed,
+; because other scheme code cannot guess what names the shared lib
+; actually exported.  So we list them here.
+(export
+	cog-arity
+	cog-atomspace
+	cog-get-atoms
+	cog-incoming-by-type
+	cog-link
+	cog-new-atomspace
+	cog-new-ctv
+	cog-new-stv
+	cog-node
+	cog-outgoing-set
+	cog-set-atomspace!
+	cog-set-tv!
+	cog-set-value!
+	cog-tv
+	cog-tv-count
+	cog-type
+	cog-value
+	cog-value-ref
+)
+
 ; Create a global to hold the atomspace ... to (try to) prevent guile
 ; GC from collecting it.  Unfortunately, there appears to be a GC bug
 ; in guile-2.1 that causes this to be collected, anyway.  Its as if
@@ -57,8 +82,6 @@
 ; to avoid problems by simply grabbing the existing atomspace, when
 ; called a second time; this will almost surely be the cogserver
 ; atomspace. Ugh. What a mess.
-
-(export cog-atomspace cog-new-atomspace cog-set-atomspace!)
 
 (define-public cog-initial-as (cog-atomspace))
 (if (eq? cog-initial-as #f)
@@ -85,6 +108,6 @@
 (load-from-path "opencog/base/file-utils.scm")
 (load-from-path "opencog/base/debug-trace.scm")
 
-; Obsolete function
+; Obsolete functions
 (define-public (cog-atom X) '())
 (define-public (cog-undefined-handle X) '())
