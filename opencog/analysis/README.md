@@ -178,3 +178,21 @@ functions to arebitrary sets of rows or columns. The simplest examples
 include taking the sums and differences of columns, taking the
 element-by-element min or max of a set of columns, counting the number
 of entries that are simultaneously non-zero in sets of columns, etc.
+
+Tensors, in general
+-------------------
+Suppose you have more than just pairs. Suppose you have triples that
+you want to work with. Then what?
+
+The current best idea seems to be to break down the triples into
+disjuncts of connectors, which can be obtained by performing a
+minimum-spanning-tree parse of the tensor dataset.  I won't explain
+what a connector, a disjunct, or a spanning tree parse is here; take
+a peek at opencog/nlp/learn to read more about these.  Although that
+code there is specific to natural language, the idea of using it to
+work with generic tensor data is .. generic. Most of the theory has
+nothing to do with spoken lanuages, it can work for any kind of data
+in which correlations are observed.
+
+Thus, a to-do item is to port the MST parser over to here, so that
+it can be applied to general data streams.  Later, someday.
