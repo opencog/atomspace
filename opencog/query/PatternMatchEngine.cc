@@ -230,7 +230,13 @@ bool PatternMatchEngine::ordered_compare(const PatternTermPtr& ptm,
 		for (size_t ip=0, jg=0; ip<osp_size or jg<osg_size; ip++, jg++)
 		{
 			if (ip == osp_size) ip --;
-			if (jg == osg_size) jg --;
+
+			bool grd_end = false;
+			if (jg == osg_size)
+			{
+				grd_end = true;
+				jg --;
+			}
 
 			bool tc = false;
 			const Handle& ohp(osp[ip]->getHandle());
@@ -261,7 +267,7 @@ bool PatternMatchEngine::ordered_compare(const PatternTermPtr& ptm,
 					// interval is zero, so the glob can be grounded
 					// to nothing.
 
-					// Just in case someone put a zero as the upper bound...
+					// Just in case if the upper bound is zero...
 					if (not _varlist->is_interval(ohp, 1))
 					{
 						jg --;
@@ -269,7 +275,7 @@ bool PatternMatchEngine::ordered_compare(const PatternTermPtr& ptm,
 					}
 
 					// If the post_glob matches with the current candidate,
-					// the glob is grounded to nothing.
+					// we are done.
 					if (tree_compare(glob, osg[jg], CALL_GLOB) and
 					    have_post and
 					    tree_compare(post_glob, osg[jg], CALL_GLOB))
@@ -278,9 +284,10 @@ bool PatternMatchEngine::ordered_compare(const PatternTermPtr& ptm,
 						continue;
 					}
 
-					// If we have gone through all the candidates and
-					// the glob has a lower bound of zero, we are done.
-					if (jg+1 == osg_size) continue;
+					// Since the glob has a lower bound of zero, if we
+					// already have gone through all the candidates at
+					// this point, we are done.
+					if (grd_end) continue;
 				}
 
 				// If we are here, the glob we are looking at has to be
@@ -318,8 +325,8 @@ bool PatternMatchEngine::ordered_compare(const PatternTermPtr& ptm,
 				}
 
 				// If up to this point there are still atoms in
-				// either the osp or osg, this is probably not
-				// a match, so reject it.
+				// either osp or osg, this is probably not a
+				// match, so reject it.
 				if ((ip+1 == osp_size and jg+1 < osg_size) or
 				    (ip+1 < osp_size  and jg+1 == osg_size))
 				{
