@@ -295,8 +295,11 @@ EXISTS_LINK <- SCOPE_LINK
 // manipulate a predicate as if it were universally averaged quantified.
 // AVERAGE_LINK <- SCOPE_LINK
 
+// Concept constructor
+SATISFYING_SET_SCOPE_LINK <- SCOPE_LINK
+
 // Convert predicate into concept
-SATISFYING_SET_LINK <- SCOPE_LINK
+SATISFYING_SET_LINK <- LINK
 
 // Basic first-order logic operations
 
