@@ -84,8 +84,7 @@
          (P (cadr Impl-outgoings))
          (Q (caddr Impl-outgoings))
          (terms (select-conditioned-substitution-terms TyVs P)))
-    (if (equal? terms (cog-undefined-handle))
-        terms
+    (if terms
         ;; Substitute the variables by the terms in the body
         (let* ((put (PutLink (LambdaLink TyVs Q) terms))
                (inst (cog-execute! put)))
@@ -162,8 +161,7 @@
          (TyVs-remain-list (rm-list-ref TyVs-outgoings rnd-index))
          (TyVs-remain-len (length TyVs-remain-list))
          (TyVs-remain (apply cog-new-link 'VariableList TyVs-remain-list)))
-    (if (equal? terms (cog-undefined-handle))
-        terms
+    (if terms
         (cog-set-tv!
          (let* (
                                         ; Take the corresponding term
