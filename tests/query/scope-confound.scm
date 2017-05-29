@@ -30,7 +30,7 @@
                 (ListLink
                     (MemberLink
                         (VariableNode "$A")
-                        (SatisfyingSetLink
+                        (SatisfyingSetScopeLink
                             (VariableNode "$X")
                             (EvaluationLink
                                 (VariableNode "$D")
@@ -40,7 +40,7 @@
 
                     (MemberLink
                         (VariableNode "$B")
-                        (SatisfyingSetLink
+                        (SatisfyingSetScopeLink
                             (VariableNode "$Y")
                             (EvaluationLink
                                 (VariableNode "$D")
@@ -81,7 +81,7 @@
                 (ListLink
                     (MemberLink
                         (VariableNode "$A")
-                        (SatisfyingSetLink
+                        (SatisfyingSetScopeLink
                             (VariableNode "$X")
                             (EvaluationLink
                                 (VariableNode "$D")
@@ -91,7 +91,7 @@
 
                     (MemberLink
                         (VariableNode "$B")
-                        (SatisfyingSetLink
+                        (SatisfyingSetScopeLink
                             (VariableNode "$Y")
                             (EvaluationLink
                                 (VariableNode "$D")
