@@ -65,9 +65,8 @@
                         Q-c
                         (* P-c Q-c)))) ; Big hack because the naive
                                        ; formula sucks
-    (if (= Impl-c 0) ; Try to avoid constructing informationless
+    (if (< 0 Impl-c) ; Try to avoid constructing informationless
                      ; knowledge
-        (cog-undefined-handle)
         (cog-merge-hi-conf-tv!
          (ImplicationLink
             P
