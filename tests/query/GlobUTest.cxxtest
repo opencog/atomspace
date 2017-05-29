@@ -62,6 +62,9 @@ _exit(rc); // XXX hack to avoid double-free in __run_exit_handlers
 	void test_glob_middle(void);
 	void test_glob_final(void);
 	void test_glob_type(void);
+	void test_glob_interval(void);
+	void test_glob_typeset(void);
+	void test_glob_three_globs(void);
 };
 
 void GlobUTest::tearDown(void)
@@ -172,6 +175,117 @@ void GlobUTest::test_glob_type(void)
 		"    (ConceptNode \"I\")"
 		"    (ConceptNode \"like\")"
 		"    (NumberNode  42)"
+		"    (ConceptNode \"also\")))"
+	);
+	TS_ASSERT_EQUALS(love, response);
+
+	// ----
+	logger().debug("END TEST: %s", __FUNCTION__);
+}
+
+/*
+ * Test a glob with interval restrictions
+ */
+void GlobUTest::test_glob_interval(void)
+{
+	logger().debug("BEGIN TEST: %s", __FUNCTION__);
+
+	eval->eval("(load-from-path \"tests/query/glob-basic.scm\")");
+
+	Handle love = eval->eval_h("(cog-execute! love-interval-glob)");
+	printf("love-interval-glob %s\n", love->toString().c_str());
+	TS_ASSERT_EQUALS(2, love->getArity());
+
+	Handle response = eval->eval_h(
+		"(SetLink"
+		"  (ListLink"
+		"    (ConceptNode \"Hey!\")"
+		"    (ConceptNode \"I\")"
+		"    (ConceptNode \"like\")"
+		"    (NumberNode  42)"
+		"    (ConceptNode \"also\"))"
+		"  (ListLink"
+		"    (ConceptNode \"Hey!\")"
+		"    (ConceptNode \"I\")"
+		"    (ConceptNode \"like\")"
+		"    (Concept \"you\")"
+		"    (ConceptNode \"also\")))"
+	);
+	TS_ASSERT_EQUALS(love, response);
+
+	// ----
+	logger().debug("END TEST: %s", __FUNCTION__);
+}
+
+/*
+ * Test a glob with both type and interval restrictions
+ */
+void GlobUTest::test_glob_typeset(void)
+{
+	logger().debug("BEGIN TEST: %s", __FUNCTION__);
+
+	eval->eval("(load-from-path \"tests/query/glob-basic.scm\")");
+
+	Handle love = eval->eval_h("(cog-execute! love-typeset-glob)");
+	printf("love-typeset-glob %s\n", love->toString().c_str());
+	TS_ASSERT_EQUALS(2, love->getArity());
+
+	Handle response = eval->eval_h(
+		"(SetLink"
+		"  (ListLink"
+		"    (ConceptNode \"Hey!\")"
+		"    (ConceptNode \"I\")"
+		"    (ConceptNode \"like\")"
+		"    (ConceptNode \"teddy\")"
+		"    (ConceptNode \"bears\")"
+		"    (ConceptNode \"a\")"
+		"    (ConceptNode \"lot\")"
+		"    (ConceptNode \"also\"))"
+		"  (ListLink"
+		"    (ConceptNode \"Hey!\")"
+		"    (ConceptNode \"I\")"
+		"    (ConceptNode \"like\")"
+		"    (Concept \"you\")"
+		"    (ConceptNode \"also\")))"
+	);
+	TS_ASSERT_EQUALS(love, response);
+
+	// ----
+	logger().debug("END TEST: %s", __FUNCTION__);
+}
+
+/*
+ * A slightly more complicated case
+ */
+void GlobUTest::test_glob_three_globs(void)
+{
+	logger().debug("BEGIN TEST: %s", __FUNCTION__);
+
+	eval->eval("(load-from-path \"tests/query/glob-basic.scm\")");
+
+	Handle love = eval->eval_h("(cog-execute! love-three-globs)");
+	printf("love-three-globs %s\n", love->toString().c_str());
+	TS_ASSERT_EQUALS(3, love->getArity());
+
+	Handle response = eval->eval_h(
+		"(SetLink"
+		"  (ListLink"
+		"    (ConceptNode \"Hey!\")"
+		"    (ConceptNode \"I\")"
+		"    (ConceptNode \"hate\")"
+		"    (Concept \"you\")"
+		"    (ConceptNode \"also\"))"
+		"  (ListLink"
+		"    (ConceptNode \"Hey!\")"
+		"    (ConceptNode \"I\")"
+		"    (ConceptNode \"need\")"
+		"    (Concept \"you\")"
+		"    (ConceptNode \"also\"))"
+		"  (ListLink"
+		"    (ConceptNode \"Hey!\")"
+		"    (ConceptNode \"I\")"
+		"    (ConceptNode \"love\")"
+		"    (Concept \"you\")"
 		"    (ConceptNode \"also\")))"
 	);
 	TS_ASSERT_EQUALS(love, response);
