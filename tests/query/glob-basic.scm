@@ -85,7 +85,7 @@
 			(Concept "also"))))
 
 ; -----------------------------------------------------------------
-; Globs that have interval restriction
+; Globs can have interval restriction
 
 (define love-interval-glob
 	(BindLink
@@ -102,7 +102,7 @@
 			(Concept "also"))))
 
 ; -----------------------------------------------------------------
-; Globs that have both type and interval restrictions
+; Globs can have both type and interval restrictions by using TypeSetLink
 ; type == ConceptNode and interval == zero to infinity
 
 (define love-typeset-glob
