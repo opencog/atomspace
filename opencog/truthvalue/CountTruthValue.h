@@ -42,33 +42,39 @@ typedef std::shared_ptr<const CountTruthValue> CountTruthValuePtr;
 class CountTruthValue : public TruthValue
 {
 protected:
-
-    strength_t mean;
-    confidence_t confidence;
-    count_t count;
+    enum {
+        MEAN, /// Mean of the strength of the TV over all observations.
+        CONFIDENCE, /// Estimate of confidence of the observation.
+        COUNT /// Raw count
+    };
 
 public:
 
     CountTruthValue(strength_t, confidence_t, count_t);
     CountTruthValue(const TruthValue&);
     CountTruthValue(CountTruthValue const&);
+    CountTruthValue(const ProtoAtomPtr&);
 
-    virtual bool operator==(const TruthValue& rhs) const;
+    virtual bool operator==(const ProtoAtom& rhs) const;
 
-    std::string toString() const;
-    TruthValueType getType() const;
+    virtual std::string toString(const std::string& = "") const;
 
     strength_t getMean() const;
     count_t getCount() const;
     confidence_t getConfidence() const;
 
-    virtual TruthValuePtr merge(TruthValuePtr,
+    virtual TruthValuePtr merge(const TruthValuePtr&,
                                 const MergeCtrl& mc=MergeCtrl()) const;
 
     static TruthValuePtr createTV(strength_t s, confidence_t f, count_t c)
     {
-        return std::static_pointer_cast<TruthValue>(
-            std::make_shared<CountTruthValue>(s, f, c));
+        return std::static_pointer_cast<const TruthValue>(
+            std::make_shared<const CountTruthValue>(s, f, c));
+    }
+    static TruthValuePtr createTV(const ProtoAtomPtr& pap)
+    {
+        return std::static_pointer_cast<const TruthValue>(
+            std::make_shared<const CountTruthValue>(pap));
     }
 
     TruthValuePtr clone() const
@@ -80,6 +86,10 @@ public:
         return new CountTruthValue(*this);
     }
 };
+
+static inline CountTruthValuePtr CountTruthValueCast(const TruthValuePtr& tv)
+    { return std::dynamic_pointer_cast<const CountTruthValue>(tv); }
+
 
 /** @}*/
 } // namespace opencog

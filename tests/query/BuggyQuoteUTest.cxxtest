@@ -20,12 +20,9 @@
  * 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
  */
 
-#include <opencog/guile/load-file.h>
 #include <opencog/guile/SchemeEval.h>
-#include <opencog/guile/SchemeSmob.h>
 #include <opencog/atomspace/AtomSpace.h>
 #include <opencog/query/BindLinkAPI.h>
-#include <opencog/util/Config.h>
 #include <opencog/util/Logger.h>
 
 using namespace opencog;
@@ -44,6 +41,8 @@ public:
 
         as = new AtomSpace();
         eval = new SchemeEval(as);
+        eval->eval("(add-to-load-path \"..\")");
+        eval->eval("(add-to-load-path \"../../..\")");
     }
 
     ~BuggyQuoteUTest()
@@ -51,7 +50,7 @@ public:
         delete as;
         // Erase the log file if no assertions failed.
         if (!CxxTest::TestTracker::tracker().suiteFailed())
-                std::remove(logger().get_filename().c_str());
+            std::remove(logger().get_filename().c_str());
     }
 
     void setUp(void);
@@ -71,7 +70,7 @@ void BuggyQuoteUTest::setUp(void)
     as->clear();
 }
 
-#define getarity(hand) LinkCast(hand)->getArity()
+#define getarity(hand) hand->getArity()
 
 /*
  * BuggyQuote unit test.  Test binding to unquoted links.
@@ -86,8 +85,7 @@ void BuggyQuoteUTest::test_bad_quote(void)
 {
     logger().debug("BEGIN TEST: %s", __FUNCTION__);
 
-    config().set("SCM_PRELOAD", "tests/query/buggy-crime.scm");
-    load_scm_files_from_config(*as);
+    eval->eval("(load-from-path \"tests/query/buggy-crime.scm\")");
 
     // This should throw an exception from scheme.
     // Disable logging so as to avoid the hopeless spew of errors.
@@ -115,8 +113,7 @@ void BuggyQuoteUTest::test_good_form(void)
 {
     logger().debug("BEGIN TEST: %s", __FUNCTION__);
 
-    config().set("SCM_PRELOAD", "tests/query/buggy-crime.scm");
-    load_scm_files_from_config(*as);
+    eval->eval("(load-from-path \"tests/query/buggy-crime.scm\")");
 
     Handle qrule = eval->eval_h("query_rule_good");
     TSM_ASSERT("Failed to load test data", Handle::UNDEFINED != qrule);

@@ -32,13 +32,13 @@
 #include <boost/bind.hpp>
 
 #include <opencog/atomspace/AtomSpace.h>
+#include <opencog/attentionbank/AttentionBank.h>
 #include <opencog/atoms/base/Node.h>
 #include <opencog/truthvalue/SimpleTruthValue.h>
 #include <opencog/util/Logger.h>
 #include <opencog/util/RandGen.h>
 #include <opencog/util/mt19937ar.h>
 #include <opencog/util/platform.h>
-#include <opencog/util/Config.h>
 
 using namespace opencog;
 using namespace std;
@@ -47,7 +47,8 @@ class AtomSpaceAsyncUTest :  public CxxTest::TestSuite
 {
 private:
 
-    AtomSpace *atomSpace;
+    AtomSpace* atomSpace;
+    AttentionBank* ab;
 
     // Counters must be atomic; we are incrementing them inside threads
     std::atomic_size_t __testSignalsCounter;
@@ -65,12 +66,12 @@ private:
     void setSTI(Handle h, AttentionValue::sti_t stiValue) const
     {
         /* Make a copy */
-        AttentionValuePtr old_av = h->getAttentionValue();
+        AttentionValuePtr old_av = ab->get_av(h);
         AttentionValuePtr new_av = createAV(
             stiValue,
             old_av->getLTI(),
             old_av->getVLTI());
-        h->setAttentionValue(new_av);
+        ab->change_av(h, new_av);
     }
 
 public:
@@ -87,11 +88,13 @@ public:
     void setUp()
     {
         atomSpace = new AtomSpace();
+        ab = &attentionbank(atomSpace);
         rng = new opencog::MT19937RandGen((unsigned long) time(NULL));
     }
 
     void tearDown()
     {
+        attentionbank(nullptr);
         delete atomSpace;
         delete rng;
     }
@@ -172,7 +175,7 @@ public:
         TS_ASSERT(atomSpace->get_size() == 1);
 
         logger().debug("before atom remove, table size = %u", atomSpace->get_size());
-        atomSpace->purge_atom(wnHandle, true);
+        atomSpace->extract_atom(wnHandle, true);
         TS_ASSERT(__testSignalsCounter == 111111);
         TS_ASSERT(atomSpace->get_size() == 0);
 
@@ -184,7 +187,7 @@ public:
         wnHandle = atomSpace->add_node(NUMBER_NODE, "1.41421356");
         atomSpace->add_node(NUMBER_NODE, "1.41421356");
         TS_ASSERT(__testSignalsCounter == 10);
-        atomSpace->purge_atom(wnHandle, true);
+        atomSpace->extract_atom(wnHandle, true);
         TS_ASSERT(__testSignalsCounter == 100010);
 
         __testSignalsCounter = 0;
@@ -194,7 +197,7 @@ public:
         wnHandle = atomSpace->add_node(NUMBER_NODE, "1.41421356");
         atomSpace->add_node(NUMBER_NODE, "1.41421356");
         TS_ASSERT(__testSignalsCounter == 0);
-        atomSpace->purge_atom(wnHandle, true);
+        atomSpace->extract_atom(wnHandle, true);
         TS_ASSERT(__testSignalsCounter == 0);
     }
 
@@ -210,7 +213,7 @@ public:
                or classserver().isA(randomType, FREE_LINK)
                or classserver().isA(randomType, SCOPE_LINK)
                or NUMBER_NODE == randomType
-               or TYPE_NODE == randomType)
+               or classserver().isA(randomType, TYPE_NODE))
             randomType = ATOM + rng->randint(numberOfTypes-1);
         return randomType;
     }
@@ -231,7 +234,8 @@ public:
             oss << "thread " << thread_id << " node " << counter;
             counter++;
 
-            TruthValuePtr tv(SimpleTruthValue::createTV(((double) i) / ((double) N), i));
+            confidence_t cnf = ((double) i) / ((double) i + 800.0);
+            TruthValuePtr tv(SimpleTruthValue::createTV(((double) i) / ((double) N), cnf));
             atomSpace->add_node(t, oss.str())->setTruthValue(tv);
         }
     }
@@ -291,7 +295,7 @@ public:
             TS_ASSERT_EQUALS(hs.size(), 1);
             if (hs.size() != 0) {
                 //std::cout << " handle " << hs[0] << std::endl;
-                atomSpace->purge_atom(hs[0], true);
+                atomSpace->extract_atom(hs[0], true);
             }
         }
     }
@@ -364,7 +368,8 @@ public:
             bogus ++;
             bogus %= N;
 
-            TruthValuePtr tv(SimpleTruthValue::createTV((double) bogus / (double) N, bogus+i));
+            confidence_t cnf = ((double) bogus+i) / ((double) (bogus+i) + 800.0);
+            TruthValuePtr tv(SimpleTruthValue::createTV((double) bogus / (double) N, cnf));
             h->setTruthValue(tv);
         }
     }
@@ -435,7 +440,8 @@ public:
             bogus ++;
             bogus %= N;
 
-            TruthValuePtr tv(SimpleTruthValue::createTV((double) bogus / (double) N, bogus+i));
+            confidence_t cnf = ((double) bogus+i) / ((double) (bogus+i) + 800.0);
+            TruthValuePtr tv(SimpleTruthValue::createTV((double) bogus / (double) N, cnf));
 
             Type t = LIST_LINK;
             hs.push_back(ha);
@@ -493,28 +499,27 @@ public:
     void testAFSignals()
     {
         boost::signals2::connection addAFConnection =
-            atomSpace->AddAFSignal(
+            ab->AddAFSignal().connect(
                     boost::bind(&AtomSpaceAsyncUTest::addAFSignal,
                                 this, _1, _2, _3));
         boost::signals2::connection removeAFConnection =
-            atomSpace->RemoveAFSignal(
+            ab->RemoveAFSignal().connect(
                     boost::bind(&AtomSpaceAsyncUTest::removeAFSignal,
                                 this, _1, _2, _3));
 
         __testAFSignalsCounter = 0;
-        atomSpace->set_attentional_focus_boundary(100);
+        ab->setAttentionalFocusBoundary(100);
 
         // Add a node to the AttentionalFocus
         Handle h = atomSpace->add_node(CONCEPT_NODE,
                                        "test");
-        h->setTruthValue(SimpleTruthValue::createTV(0.01,
-                         SimpleTruthValue::confidenceToCount(1)));
-        h->setSTI(200);
-        TS_ASSERT(__testAFSignalsCounter == 1);
+        h->setTruthValue(SimpleTruthValue::createTV(0.01, 1));
+        ab->set_sti(h, 200);
+        TS_ASSERT_EQUALS((int)__testAFSignalsCounter, 1);
 
         // Remove the node from the AttentionalFocus
-        h->setSTI(90);
-        TS_ASSERT(__testAFSignalsCounter == 2);
+        ab->set_sti(h, 90);
+        TS_ASSERT_EQUALS((int)__testAFSignalsCounter, 2);
 
         addAFConnection.disconnect();
     }
@@ -549,7 +554,8 @@ public:
 
             bogus ++;
             bogus %= N;
-            TruthValuePtr tv(SimpleTruthValue::createTV((double) bogus / (double) N, bogus+i));
+            confidence_t cnf = ((double) bogus+i) / ((double) (bogus+i) + 800.0);
+            TruthValuePtr tv(SimpleTruthValue::createTV((double) bogus / (double) N, cnf));
             atomSpace->add_link(EVALUATION_LINK, hp, hl)->setTruthValue(tv);
         }
     }
@@ -591,7 +597,7 @@ public:
             // size_t j = (i+111*thread_id) % nc;
             size_t j = (i+11*thread_id) % nc;
             // size_t j = i;
-            atomSpace->purge_atom((*seq)[j], true);
+            atomSpace->extract_atom((*seq)[j], true);
         }
     }
 
@@ -657,7 +663,7 @@ public:
             TS_ASSERT(h != Handle::UNDEFINED);
             if (h) {
                 //std::cout << " handle " << h << std::endl;
-                atomSpace->purge_atom(h, true);
+                atomSpace->extract_atom(h, true);
             }
         }
     }
@@ -701,9 +707,8 @@ public:
         __totalPurged = 0;
         __altTotalPurged = 0;
 
-        boost::signals2::connection del =
-            atomSpace->removeAtomSignal(boost::bind(&AtomSpaceAsyncUTest::countAtomPurged, this, _1));
-            atomSpace->removeAtomSignal(boost::bind(&AtomSpaceAsyncUTest::simpleCountPurged, this, _1));
+        atomSpace->removeAtomSignal(boost::bind(&AtomSpaceAsyncUTest::countAtomPurged, this, _1));
+        atomSpace->removeAtomSignal(boost::bind(&AtomSpaceAsyncUTest::simpleCountPurged, this, _1));
 
         spinwait = true;
         std::vector<std::thread> thread_pool;

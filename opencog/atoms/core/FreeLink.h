@@ -38,6 +38,8 @@ namespace opencog
  * sequential order in _varseq. An index is placed in _index. That is,
  * given a variable, its ordinal number is placed in _index.
  */
+class FreeLink;
+typedef std::shared_ptr<FreeLink> FreeLinkPtr;
 class FreeLink : public Link
 {
 protected:
@@ -45,33 +47,22 @@ protected:
 
 	void init(void);
 
-	FreeLink(Type, const HandleSeq& oset,
-	         TruthValuePtr tv = TruthValue::DEFAULT_TV(),
-	         AttentionValuePtr av = AttentionValue::DEFAULT_AV());
+protected:
+	FreeLink(Type, const Handle& a);
+	FreeLink(Type, const Handle& a, const Handle& b);
 
-	FreeLink(Type, const Handle& a,
-	         TruthValuePtr tv = TruthValue::DEFAULT_TV(),
-	         AttentionValuePtr av = AttentionValue::DEFAULT_AV());
-
-	FreeLink(Type, const Handle& a, const Handle& b,
-	         TruthValuePtr tv = TruthValue::DEFAULT_TV(),
-	         AttentionValuePtr av = AttentionValue::DEFAULT_AV());
 public:
-	FreeLink(const HandleSeq& oset,
-	         TruthValuePtr tv = TruthValue::DEFAULT_TV(),
-	         AttentionValuePtr av = AttentionValue::DEFAULT_AV());
-	FreeLink(const Handle& a,
-	         TruthValuePtr tv = TruthValue::DEFAULT_TV(),
-	         AttentionValuePtr av = AttentionValue::DEFAULT_AV());
-
-	FreeLink(Link& l);
+	FreeLink(const HandleSeq& oset, Type=FREE_LINK);
+	FreeLink(const Handle& a);
+	FreeLink(const Link& l);
 	virtual ~FreeLink() {}
 
 	const FreeVariables& get_vars() const
 	{ return  _vars; }
+
+	static Handle factory(const Handle&);
 };
 
-typedef std::shared_ptr<FreeLink> FreeLinkPtr;
 static inline FreeLinkPtr FreeLinkCast(const Handle& h)
    { return std::dynamic_pointer_cast<FreeLink>(AtomCast(h)); }
 static inline FreeLinkPtr FreeLinkCast(const AtomPtr& a)

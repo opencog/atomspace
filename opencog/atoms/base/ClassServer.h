@@ -2,6 +2,7 @@
  * opencog/atoms/base/ClassServer.h
  *
  * Copyright (C) 2011 by The OpenCog Foundation
+ * Copyright (C) 2017 by Linas Vepstas
  * All Rights Reserved
  *
  * This program is free software; you can redistribute it and/or modify
@@ -31,6 +32,7 @@
 
 #include <opencog/atoms/base/types.h>
 #include <opencog/atoms/base/atom_types.h>
+#include <opencog/atoms/base/Handle.h>
 
 namespace opencog
 {
@@ -38,18 +40,20 @@ namespace opencog
  *  @{
  */
 
-class ClassServer;
-
-typedef ClassServer* ClassServerFactory(void);
+typedef boost::signals2::signal<void (Type)> TypeSignal;
 
 /**
- * This class keeps track of the complete atom class hierarchy.
- * The current implementation is hardwired. Future versions may include
- * different structures based on run-time type identification.
+ * This class keeps track of the complete protoatom (value and atom)
+ * class hierarchy. It also provides factories for those atom types
+ * that have non-trivial C++ objects behind them.
  */
-typedef boost::signals2::signal<void (Type)> TypeSignal;
 class ClassServer
 {
+public:
+    // Currently, we provide factories only for atoms, not for
+    // values. TruthValues could use a factory, but, for now,
+    // we don't have a pressing reason to add that.
+    typedef Handle (AtomFactory)(const Handle&);
 private:
 
     /** Private default constructor for this class to make it a singleton. */
@@ -66,21 +70,40 @@ private:
     mutable std::mutex type_mutex;
 
     Type nTypes;
+    Type _maxDepth;
 
     std::vector< std::vector<bool> > inheritanceMap;
     std::vector< std::vector<bool> > recursiveMap;
     std::unordered_map<std::string, Type> name2CodeMap;
     std::unordered_map<Type, const std::string*> code2NameMap;
+    std::unordered_map<Type, AtomFactory*> _atomFactory;
     TypeSignal _addTypeSignal;
 
-    void setParentRecursively(Type parent, Type type);
+    void setParentRecursively(Type parent, Type type, Type& maxd);
+
+    AtomFactory* searchToDepth(Type, int);
 
 public:
-    /** Returns a new ClassServer instance */
-    static ClassServer* createInstance(void);
+    /** Gets the singleton instance (following meyer's design pattern) */
+    friend ClassServer& classserver();
 
-    /** Adds a new atom type with the given name and parent type */
+    /**
+     * Adds a new atom type with the given name and parent type.
+     * Return a numeric value that is assigned to the new type.
+     */
     Type addType(const Type parent, const std::string& name);
+
+    /**
+     * Declare a factory for an atom type.
+     */
+    void addFactory(Type, AtomFactory*);
+    AtomFactory* getFactory(Type);
+
+    /**
+     * Convert the indicated Atom into a C++ instance of the
+     * same type.
+     */
+    Handle factory(const Handle&);
 
     /** Provides ability to get type-added signals.
      * @warning methods connected to this signal must not call ClassServer::addType or
@@ -89,15 +112,15 @@ public:
     TypeSignal& addTypeSignal();
 
     /**
-     * Stores the children types on the OutputIterator 'result'. Returns the
-     * number of children types.
+     * Stores the children types on the OutputIterator 'result'.
+     * Returns the number of children types.
      */
     template<typename OutputIterator>
     unsigned long getChildren(Type type, OutputIterator result)
     {
         unsigned long n_children = 0;
         for (Type i = 0; i < nTypes; ++i) {
-            if (inheritanceMap[type][i] && (type != i)) {
+            if (inheritanceMap[type][i] and (type != i)) {
                 *(result++) = i;
                 n_children++;
             }
@@ -105,12 +128,29 @@ public:
         return n_children;
     }
 
+    /**
+     * Stores the parent types on the OutputIterator 'result'.
+     * Returns the number of parent types.
+     */
+    template<typename OutputIterator>
+    unsigned long getParents(Type type, OutputIterator result)
+    {
+        unsigned long n_parents = 0;
+        for (Type i = 0; i < nTypes; ++i) {
+            if (inheritanceMap[i][type] and (type != i)) {
+                *(result++) = i;
+                n_parents++;
+            }
+        }
+        return n_parents;
+    }
+
     template <typename OutputIterator>
     unsigned long getChildrenRecursive(Type type, OutputIterator result)
     {
         unsigned long n_children = 0;
         for (Type i = 0; i < nTypes; ++i) {
-            if (recursiveMap[type][i] && (type != i)) {
+            if (recursiveMap[type][i] and (type != i)) {
                 *(result++) = i;
                 n_children++;
             }
@@ -211,8 +251,22 @@ public:
     const std::string& getTypeName(Type type);
 };
 
-/** Gets the singleton instance (following meyer's design pattern) */
-ClassServer& classserver(ClassServerFactory* = ClassServer::createInstance);
+ClassServer& classserver();
+
+#define DEFINE_LINK_FACTORY(CNAME,CTYPE)                          \
+                                                                  \
+Handle CNAME::factory(const Handle& base)                         \
+{                                                                 \
+   if (CNAME##Cast(base)) return base;                            \
+   Handle h(create##CNAME(base->getOutgoingSet(), base->getType())); \
+   return h;                                                      \
+}                                                                 \
+                                                                  \
+/* This runs when the shared lib is loaded. */                    \
+static __attribute__ ((constructor)) void init(void)              \
+{                                                                 \
+   classserver().addFactory(CTYPE, &CNAME::factory);              \
+}
 
 /** @}*/
 } // namespace opencog

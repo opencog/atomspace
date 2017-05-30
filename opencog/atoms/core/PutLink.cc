@@ -29,28 +29,21 @@
 
 using namespace opencog;
 
-PutLink::PutLink(const HandleSeq& oset,
-                 TruthValuePtr tv,
-                 AttentionValuePtr av)
-    : ScopeLink(PUT_LINK, oset, tv, av)
+PutLink::PutLink(const HandleSeq& oset, Type t)
+    : ScopeLink(oset, t)
 {
 	init();
 }
 
-PutLink::PutLink(const Handle& a,
-                 TruthValuePtr tv,
-                 AttentionValuePtr av)
-    : ScopeLink(PUT_LINK, a, tv, av)
+PutLink::PutLink(const Handle& a)
+    : ScopeLink(PUT_LINK, a)
 {
 	init();
 }
 
-PutLink::PutLink(Link& l)
+PutLink::PutLink(const Link& l)
     : ScopeLink(l)
 {
-	Type tscope = l.getType();
-	if (not classserver().isA(tscope, PUT_LINK))
-		throw InvalidParamException(TRACE_INFO, "Expecting a PutLink");
 	init();
 }
 
@@ -91,6 +84,9 @@ PutLink::PutLink(Link& l)
 ///
 void PutLink::init(void)
 {
+	if (not classserver().isA(getType(), PUT_LINK))
+		throw InvalidParamException(TRACE_INFO, "Expecting a PutLink");
+
 	size_t sz = _outgoing.size();
 	if (2 != sz and 3 != sz)
 		throw InvalidParamException(TRACE_INFO,
@@ -100,7 +96,13 @@ void PutLink::init(void)
 	ScopeLink::extract_variables(_outgoing);
 
 	if (2 == sz)
+	{
+		// If the body is just a single variable, and there are no
+		// type declarations for it, then ScopeLink gets confused.
+		_vardecl = Handle::UNDEFINED;
+		_body = _outgoing[0];
 		_values = _outgoing[1];
+	}
 	else
 		_values = _outgoing[2];
 
@@ -110,8 +112,8 @@ void PutLink::init(void)
 
 /// Check that the values in the PutLink obey the type constraints.
 /// This only performs "static" typechecking, at construction-time;
-/// the values may be dynamically obtained at run-time, we cannot check
-/// these here.
+/// since the values may be dynamically obtained at run-time, we cannot
+/// check these here.
 void PutLink::static_typecheck_values(void)
 {
 	// Cannot typecheck at this pont in time, because the schema
@@ -123,7 +125,7 @@ void PutLink::static_typecheck_values(void)
 		return;
 
 	// If its part of a signature, there is nothing to do.
-	if (TYPE_NODE == btype or TYPE_CHOICE == btype)
+	if (classserver().isA(btype, TYPE_NODE) or TYPE_CHOICE == btype)
 		return;
 
 	size_t sz = _varlist.varseq.size();
@@ -132,7 +134,9 @@ void PutLink::static_typecheck_values(void)
 	if (1 == sz)
 	{
 		if (not _varlist.is_type(_values)
-		    and SET_LINK != vtype)
+		    and SET_LINK != vtype
+		    and PUT_LINK != vtype
+		    and not (classserver().isA(vtype, SATISFYING_LINK)))
 		{
 				throw InvalidParamException(TRACE_INFO,
 					"PutLink mismatched type!");
@@ -159,8 +163,8 @@ void PutLink::static_typecheck_values(void)
 		return;
 	}
 
-	// GetLinks are evaluated dynamically, later.
-	if (GET_LINK == vtype)
+	// GetLinks (and the like) are evaluated dynamically, later.
+	if (classserver().isA(vtype, SATISFYING_LINK))
 		return;
 
 	// If its part of a signature, there is nothing to do.
@@ -196,6 +200,7 @@ void PutLink::static_typecheck_values(void)
 					"PutLink bad type!");
 	}
 }
+
 /* ================================================================= */
 
 /**
@@ -228,9 +233,9 @@ void PutLink::static_typecheck_values(void)
  *         ConceptNode "hot patootie"
  *
  * Type checking is performed during substitution; if the values fail to
- * have the desired types, no substituion is performed.  In this case,
+ * have the desired types, no substitution is performed.  In this case,
  * an undefined handle is returned. For set substitutions, this acts as
- * a filter, removeing (filtering out) the mismatched types.
+ * a filter, removing (filtering out) the mismatched types.
  *
  * Again, only a substitution is performed, there is no execution or
  * evaluation.  Note also that the resulting tree is NOT placed into
@@ -245,16 +250,20 @@ Handle PutLink::do_reduce(void) const
 	if (DEFINED_SCHEMA_NODE == btype or
 	    DEFINED_PREDICATE_NODE == btype)
 	{
-		Handle dfn(DefineLink::get_definition(_body));
+		bods = DefineLink::get_definition(bods);
+		btype = bods->getType();
 		// XXX TODO we should perform a type-check on the function.
-		if (not classserver().isA(dfn->getType(), LAMBDA_LINK))
+		if (not classserver().isA(btype, LAMBDA_LINK))
 			throw InvalidParamException(TRACE_INFO,
 					"Expecting a LambdaLink, got %s",
-			      dfn->toString().c_str());
+			      bods->toString().c_str());
+	}
 
-		LambdaLinkPtr lam(LambdaLinkCast(dfn));
+	if (classserver().isA(btype, LAMBDA_LINK))
+	{
+		LambdaLinkPtr lam(LambdaLinkCast(bods));
 		if (NULL == lam)
-			lam = createLambdaLink(*LinkCast(dfn));
+			lam = createLambdaLink(*LinkCast(bods));
 		bods = lam->get_body();
 		vars = lam->get_variables();
 	}
@@ -269,9 +278,9 @@ Handle PutLink::do_reduce(void) const
 			oset.emplace_back(_values);
 			try
 			{
-				return vars.substitute(bods, oset);
+				return vars.substitute(bods, oset, /* silent */ true);
 			}
-			catch (...)
+			catch (const TypeCheckException& ex)
 			{
 				return Handle::UNDEFINED;
 			}
@@ -285,20 +294,20 @@ Handle PutLink::do_reduce(void) const
 			oset.emplace_back(h);
 			try
 			{
-				bset.emplace_back(vars.substitute(bods, oset));
+				bset.emplace_back(vars.substitute(bods, oset, /* silent */ true));
 			}
-			catch (...) {}
+			catch (const TypeCheckException& ex) {}
 		}
-		return Handle(createLink(SET_LINK, bset));
+		return Handle(createLink(bset, SET_LINK));
 	}
 	if (LIST_LINK == vtype)
 	{
 		const HandleSeq& oset = _values->getOutgoingSet();
 		try
 		{
-			return vars.substitute(bods, oset);
+			return vars.substitute(bods, oset, /* silent */ true);
 		}
-		catch (...)
+		catch (const TypeCheckException& ex)
 		{
 			return Handle::UNDEFINED;
 		}
@@ -313,16 +322,18 @@ Handle PutLink::do_reduce(void) const
 		const HandleSeq& oset = h->getOutgoingSet();
 		try
 		{
-			bset.emplace_back(vars.substitute(bods, oset));
+			bset.emplace_back(vars.substitute(bods, oset, /* silent */ true));
 		}
-		catch (...) {}
+		catch (const TypeCheckException& ex) {}
 	}
-	return Handle(createLink(SET_LINK, bset));
+	return Handle(createLink(bset, SET_LINK));
 }
 
 Handle PutLink::reduce(void)
 {
 	return do_reduce();
 }
+
+DEFINE_LINK_FACTORY(PutLink, PUT_LINK)
 
 /* ===================== END OF FILE ===================== */

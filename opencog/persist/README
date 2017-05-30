@@ -6,11 +6,9 @@
 The AtomSpace may be converted from its native, in-memory C++ object
 format, into any one of a number of "flattened", non-object formats.
 These formats allow atoms to be sent to and received from remote systems,
-as well as to be saved and restored from disk, file, database, network.
+as well as to be saved and restored from various databases.
 
 Systems include:
-
-file       -- File-based storage. Strongly deprecated. Probably broken.
 
 gearman    -- Experimental support for distributed operation, using
               GearMan.
@@ -36,6 +34,16 @@ currently, needs test cases, and general work to enable/support).
 Note that additional i/o methods can be found in the "visualization"
 directory, which e.g. dump the entire atomspace into various graphics
 formats.
+
+Semantics
+---------
+The correct semantics for the save and restore of values, including
+truth values, an be subtle: during recrusive saves or loads of outgoing
+sets, should values be clobbered? Left untouched? Merged?  The various
+possibilities all have different performance implications, as well as
+usability implications. These are discussed in the README.md file for
+the SQL implementation, and semantics are explicitly tested in the SQL
+unit tests.
 
 
 Future directions:

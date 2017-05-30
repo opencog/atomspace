@@ -29,6 +29,11 @@ using namespace opencog;
 
 void DefineLink::init()
 {
+	if (not classserver().isA(getType(), DEFINE_LINK))
+		throw SyntaxException(TRACE_INFO,
+			"Expecting a DefineLink, got %s",
+				classserver().getTypeName(getType()).c_str());
+
 	// Must have name and body
 	if (2 != _outgoing.size())
 		throw SyntaxException(TRACE_INFO,
@@ -38,7 +43,7 @@ void DefineLink::init()
 	UniqueLink::init(false);
 
 	// Type-check. The execution and FunctionLink's only expand
-	// definitions anchored with these type; other definitions won't
+	// definitions anchored with these types; other definitions won't
 	// work during execution.
 	Type dtype = _outgoing[0]->getType();
 	if (DEFINED_SCHEMA_NODE != dtype and
@@ -49,21 +54,19 @@ void DefineLink::init()
 				classserver().getTypeName(dtype).c_str());
 }
 
-DefineLink::DefineLink(const HandleSeq& oset,
-                       TruthValuePtr tv, AttentionValuePtr av)
-	: UniqueLink(DEFINE_LINK, oset, tv, av)
+DefineLink::DefineLink(const HandleSeq& oset, Type t)
+	: UniqueLink(oset, t)
 {
 	init();
 }
 
-DefineLink::DefineLink(const Handle& name, const Handle& defn,
-                       TruthValuePtr tv, AttentionValuePtr av)
-	: UniqueLink(DEFINE_LINK, HandleSeq({name, defn}), tv, av)
+DefineLink::DefineLink(const Handle& name, const Handle& defn)
+	: UniqueLink(HandleSeq({name, defn}), DEFINE_LINK)
 {
 	init();
 }
 
-DefineLink::DefineLink(Link &l)
+DefineLink::DefineLink(const Link &l)
 	: UniqueLink(l)
 {
 	init();
@@ -79,5 +82,7 @@ Handle DefineLink::get_definition(const Handle& alias)
 	Handle uniq(get_unique(alias, DEFINE_LINK, false));
 	return uniq->getOutgoingAtom(1);
 }
+
+DEFINE_LINK_FACTORY(DefineLink, DEFINE_LINK)
 
 /* ===================== END OF FILE ===================== */

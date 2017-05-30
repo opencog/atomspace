@@ -26,7 +26,7 @@
 #include <stdio.h>
 
 #include <opencog/atoms/base/Node.h>
-#include <opencog/atomspace/TLB.h>
+#include <opencog/atomspaceutils/TLB.h>
 #include <opencog/atoms/base/atom_types.h>
 #include <opencog/util/exceptions.h>
 
@@ -48,8 +48,20 @@ public:
     }
 
     void testAdd() {
+
+        TLB tlb;
+
         NodePtr n(createNode(CONCEPT_NODE, "test"));
-        TLB::addAtom(n);
-        TS_ASSERT_THROWS(TLB::addAtom(n),InvalidParamException);
+        UUID uuid = tlb.addAtom(n, TLB::INVALID_UUID);
+        TS_ASSERT(TLB::INVALID_UUID != uuid);
+
+        NodePtr nb(createNode(CONCEPT_NODE, "test"));
+
+        // content-compare should work
+        TS_ASSERT( *n == *nb);
+
+        UUID uuidb = tlb.addAtom(nb, TLB::INVALID_UUID);
+        printf("expected: %lu got: %lu\n", uuid, uuidb);
+        TS_ASSERT(uuidb == uuid);
     }
 };

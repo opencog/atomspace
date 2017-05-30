@@ -36,28 +36,29 @@ namespace opencog
  */
 
 class FuzzyTruthValue;
-typedef std::shared_ptr<FuzzyTruthValue> FuzzyTruthValuePtr;
+typedef std::shared_ptr<const FuzzyTruthValue> FuzzyTruthValuePtr;
 
-//! a TruthValue that stores a mean and the number of observations (strength and confidence)
+//! A TruthValue that stores a mean and the number of observations
+//! (strength and confidence)
 class FuzzyTruthValue : public TruthValue
 {
 protected:
-
-    /// Mean of the strength of the TV over all observations
-    strength_t mean;
-
-    /// Total number of observations used to estimate the mean 
-    count_t count;
+    enum {
+        MEAN, /// Mean of the strength of the TV over all observations
+        COUNT /// Total number of observations used to estimate the mean
+    };
 
     void init(strength_t mean, count_t count);
 
+    static count_t DEFAULT_K;
 public:
 
     FuzzyTruthValue(strength_t mean, count_t count);
     FuzzyTruthValue(const TruthValue&);
     FuzzyTruthValue(FuzzyTruthValue const&);
+    FuzzyTruthValue(const ProtoAtomPtr&);
 
-    virtual bool operator==(const TruthValue& rhs) const;
+    virtual bool operator==(const ProtoAtom&) const;
 
     /// Heuristic to compute the count given the confidence (according
     /// to the PLN book)
@@ -71,8 +72,7 @@ public:
     /// where k is the look-ahead
     static confidence_t countToConfidence(count_t);
 
-    std::string toString() const;
-    TruthValueType getType() const;
+    std::string toString(const std::string&) const;
 
     strength_t getMean() const;
     count_t getCount() const;
@@ -85,7 +85,7 @@ public:
      * the resulting TV is either tv1 or tv2, the result being the one
      * with the highest confidence.
      */
-    TruthValuePtr merge(TruthValuePtr,
+    TruthValuePtr merge(const TruthValuePtr&,
                         const MergeCtrl& mc=MergeCtrl()) const;
 
     static FuzzyTruthValuePtr createSTV(strength_t mean, count_t count)
@@ -94,7 +94,12 @@ public:
     }
     static TruthValuePtr createTV(strength_t mean, count_t count)
     {
-        return std::static_pointer_cast<TruthValue>(createSTV(mean, count));
+        return std::static_pointer_cast<const TruthValue>(createSTV(mean, count));
+    }
+    static TruthValuePtr createTV(const ProtoAtomPtr& pap)
+    {
+        return std::static_pointer_cast<const TruthValue>(
+            std::make_shared<const FuzzyTruthValue>(pap));
     }
 
     TruthValuePtr clone() const

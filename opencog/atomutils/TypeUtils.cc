@@ -26,17 +26,19 @@
 
 #include <opencog/atoms/TypeNode.h>
 #include <opencog/atoms/core/DefineLink.h>
+#include <opencog/atoms/core/VariableList.h>
+
+#include "FindUtils.h"
 
 #include "TypeUtils.h"
 
-using namespace opencog;
-
+namespace opencog {
 
 /* ================================================================= */
 /**
  * Type checker.  Returns true if `val` is of type `deep`.
  */
-bool opencog::value_is_type(const Handle& spec, const Handle& val)
+bool value_is_type(const Handle& spec, const Handle& val)
 {
 	Handle deep(spec);
 
@@ -61,6 +63,19 @@ bool opencog::value_is_type(const Handle& spec, const Handle& val)
 	{
 		Type deeptype = TypeNodeCast(deep)->get_value();
 		return (valtype == deeptype);
+	}
+	else if (TYPE_INH_NODE == dpt)
+	{
+		// Just like above, but allows derived types.
+		Type deeptype = TypeNodeCast(deep)->get_value();
+		return classserver().isA(valtype, deeptype);
+	}
+	else if (TYPE_CO_INH_NODE == dpt)
+	{
+		// Just like above, but in the other direction.
+		// That is, it allows base tyes.
+		Type deeptype = TypeNodeCast(deep)->get_value();
+		return classserver().isA(deeptype, valtype);
 	}
 	else if (TYPE_CHOICE == dpt)
 	{
@@ -142,6 +157,8 @@ static bool type_match_rec(const Handle& left_, const Handle& right_, bool tople
 	Type rtype = right_->getType();
 	if (toplevel and
 	    TYPE_NODE != rtype and
+	    TYPE_INH_NODE != rtype and
+	    TYPE_CO_INH_NODE != rtype and
 	    TYPE_CHOICE != rtype and
 	    SIGNATURE_LINK != rtype and
 	    DEFINED_TYPE_NODE != rtype and
@@ -191,6 +208,18 @@ static bool type_match_rec(const Handle& left_, const Handle& right_, bool tople
 		return TypeNodeCast(left)->get_value() == rtype;
 	}
 
+	// Like above but allows derived tyes.
+	if (TYPE_INH_NODE == ltype)
+	{
+		return classserver().isA(rtype, TypeNodeCast(left)->get_value());
+	}
+
+	// Like above, but in the opposite direction: allows base types.
+	if (TYPE_CO_INH_NODE == ltype)
+	{
+		return classserver().isA(TypeNodeCast(left)->get_value(), rtype);
+	}
+
 	// If left is a type choice, right must match a choice.
 	if (TYPE_CHOICE == ltype)
 	{
@@ -238,16 +267,153 @@ static bool type_match_rec(const Handle& left_, const Handle& right_, bool tople
 	return true;
 }
 
-bool opencog::type_match(const Handle& left_, const Handle& right_)
+bool type_match(const Handle& left_, const Handle& right_)
 {
 	return type_match_rec(left_, right_, true);
 }
 
-Handle opencog::type_compose(const Handle& left, const Handle& right)
+Handle type_compose(const Handle& left, const Handle& right)
 {
 	return Handle::UNDEFINED;
 }
 
+Handle filter_vardecl(const Handle& vardecl, const Handle& body)
+{
+	return filter_vardecl(vardecl, HandleSeq{body});
+}
 
+Handle filter_vardecl(const Handle& vardecl, const HandleSeq& hs)
+{
+	// Base cases
+
+	if (not vardecl)
+		// Return Handle::UNDEFINED to indicate that this variable
+		// declaration is nonexistent.
+		return Handle::UNDEFINED;
+
+	Type t = vardecl->getType();
+	if (VARIABLE_NODE == t)
+	{
+		if (is_free_in_any_tree(hs, vardecl))
+			return vardecl;
+	}
+
+	// Recursive cases
+
+	else if (TYPED_VARIABLE_LINK == t)
+	{
+		Handle var = vardecl->getOutgoingAtom(0);
+		Type t = var->getType();
+		if (t == VARIABLE_NODE and filter_vardecl(var, hs))
+			return vardecl;
+	}
+
+	else if (VARIABLE_LIST == t)
+	{
+		HandleSeq subvardecls;
+		for (const Handle& v : vardecl->getOutgoingSet())
+		{
+			if (filter_vardecl(v, hs))
+				subvardecls.push_back(v);
+		}
+		if (subvardecls.empty() and get_free_variables(hs).empty())
+			return Handle::UNDEFINED;
+		if (subvardecls.size() == 1)
+			return subvardecls[0];
+		return Handle(createVariableList(subvardecls));
+	}
+
+	// If we're here we have failed to recognize vardecl as a useful
+	// and well formed variable declaration, so Handle::UNDEFINED is
+	// returned.
+	return Handle::UNDEFINED;
+}
+
+bool is_well_typed(Type t)
+{
+	return t != NOTYPE;
+}
+
+bool is_well_typed(const std::set<Type>& ts)
+{
+	for (Type t : ts)
+		if (not is_well_typed(t))
+			return false;
+	return true;
+}
+
+Type type_intersection(Type lhs, Type rhs)
+{
+	ClassServer& cs = classserver();
+	if (cs.isA(lhs, rhs))
+		return lhs;
+	if (cs.isA(rhs, lhs))
+		return rhs;
+	return NOTYPE;              // represent the bottom type
+}
+
+std::set<Type> type_intersection(Type lhs, const std::set<Type>& rhs)
+{
+	std::set<Type> res;
+	// Distribute the intersection over the union type rhs
+	for (Type rhst : rhs) {
+		Type ty = type_intersection(lhs, rhst);
+		if (ty != NOTYPE)
+			res.insert(ty);
+	}
+	return res;
+}
+
+std::set<Type> type_intersection(const std::set<Type>& lhs,
+                                 const std::set<Type>& rhs)
+{
+	// Base cases
+	if (lhs.empty())
+		return rhs;
+	if (rhs.empty())
+		return lhs;
+
+	// Recursive cases
+	std::set<Type> res;
+	for (Type ty : lhs) {
+		std::set<Type> itr = type_intersection(ty, rhs);
+		res.insert(itr.begin(), itr.end());
+	}
+	return res;
+}
+
+VariableListPtr gen_varlist(const Handle& h)
+{
+	OrderedHandleSet vars = get_free_variables(h);
+	return createVariableList(HandleSeq(vars.begin(), vars.end()));
+}
+
+Handle gen_vardecl(const Handle& h)
+{
+	return Handle(gen_varlist(h));
+}
+
+VariableListPtr gen_varlist(const Handle& h, const Handle& vardecl)
+{
+	if (not vardecl)
+		return gen_varlist(h);
+
+	Type vardecl_t = vardecl->getType();
+	if (vardecl_t == VARIABLE_LIST)
+		return VariableListCast(vardecl);
+
+	OC_ASSERT(vardecl_t == VARIABLE_NODE
+	          or vardecl_t == TYPED_VARIABLE_LINK);
+	return createVariableList(vardecl);
+}
+
+Handle gen_vardecl(const Handle& h, const Handle& vardecl)
+{
+	if (not vardecl)
+		return gen_vardecl(h);
+	return vardecl;
+}
+
+} // ~namespace opencog
 
 /* ===================== END OF FILE ===================== */

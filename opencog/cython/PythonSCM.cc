@@ -21,6 +21,7 @@
  * Free Software Foundation, Inc.,
  * 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
  */
+#ifdef HAVE_GUILE
 
 #ifndef _OPENCOG_PYTHON_SCM_H
 #define _OPENCOG_PYTHON_SCM_H
@@ -42,7 +43,7 @@ private:
 	void init(void);
 public:
 	PythonSCM();
-	const std::string& eval(const std::string&);
+	std::string eval(const std::string&);
 	void apply_as(const std::string&, AtomSpace*);
 }; // class
 
@@ -65,20 +66,20 @@ using namespace opencog;
 
 PythonSCM::PythonSCM()
 {
-#ifdef HAVE_GUILE
 	static bool is_init = false;
 	if (is_init) return;
 	is_init = true;
 	scm_with_guile(init_in_guile, this);
-#endif
 }
 
 void* PythonSCM::init_in_guile(void* self)
 {
-#ifdef HAVE_GUILE
 	scm_c_define_module("opencog python", init_in_module, self);
 	scm_c_use_module("opencog python");
-#endif
+
+	// Make sure that guile and python are using the same atomspace.
+	// This will avoid assorted confusion.
+	PythonEval::instance(SchemeSmob::ss_get_env_as("python-eval"));
 	return NULL;
 }
 
@@ -90,23 +91,14 @@ void PythonSCM::init_in_module(void* data)
 
 void PythonSCM::init(void)
 {
-#ifdef HAVE_GUILE
 	define_scheme_primitive("python-eval", &PythonSCM::eval, this, "python");
 	define_scheme_primitive("python-call-with-as", &PythonSCM::apply_as, this, "python");
-#endif
 }
 
-const std::string& PythonSCM::eval(const std::string& pystr)
+std::string PythonSCM::eval(const std::string& pystr)
 {
 	static PythonEval& pyev = PythonEval::instance();
-
-	// Because we are returning a reference to string(!!), we need to
-	// keep a thread-local copy of it around, for the caller to fetch.
-	// Note that PythonEval appears to be thread-safe, so we don't
-	// need any locks here.
-	thread_local std::string rv;
-	rv = pyev.eval(pystr);
-	return rv;
+	return pyev.eval(pystr);
 }
 
 void PythonSCM::apply_as(const std::string& pystr, AtomSpace* as)
@@ -120,3 +112,5 @@ void opencog_python_init(void)
 {
 	static PythonSCM patty;
 }
+
+#endif // HAVE_GUILE

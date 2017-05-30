@@ -34,7 +34,7 @@ HandleSeq get_predicates(const Handle& target,
                          Type predicateType,
                          bool subClasses)
 {
-    if (target == NULL) {
+    if (target == nullptr) {
         throw InvalidParamException(TRACE_INFO,
             "get_predicates: Target handle %d doesn't refer to an Atom", target.value());
     }
@@ -76,11 +76,11 @@ HandleSeq get_predicates(const Handle& target,
 HandleSeq get_predicates_for(const Handle& target, 
                              const Handle& predicate)
 {
-    if (target == NULL) {
+    if (target == nullptr) {
         throw InvalidParamException(TRACE_INFO,
             "get_predicates_for: Target handle %d doesn't refer to an Atom", target.value());
     }
-    if (predicate == NULL) {
+    if (predicate == nullptr) {
         throw InvalidParamException(TRACE_INFO,
             "get_predicates_for: Predicate handle %d doesn't refer to an Atom", predicate.value());
     }

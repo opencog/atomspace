@@ -3,7 +3,8 @@
  *
  * Copyright (C) 2015 OpenCog Foundation
  *
- * Author: Misgana Bayetta <misgana.bayetta@gmail.com> 2015
+ * Authors: Misgana Bayetta <misgana.bayetta@gmail.com> 2015
+ *          Nil Geisweiller 2015-2016
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU Affero General Public License v3 as
@@ -27,106 +28,163 @@
 #include <boost/uuid/uuid_generators.hpp>
 
 #include <opencog/atomspace/AtomSpace.h>
+#include <opencog/atoms/base/Node.h>
+#include <opencog/atoms/base/Link.h>
+#include <opencog/atoms/base/Quotation.h>
 #include <opencog/atoms/core/DefineLink.h>
 #include <opencog/atoms/pattern/BindLink.h>
 
+#include <opencog/atomutils/TypeUtils.h>
+#include <opencog/atomutils/Unify.h>
+
+#include <opencog/query/BindLinkAPI.h>
+
+#include "URELogger.h"
+
 #include "Rule.h"
 
-using namespace opencog;
+namespace opencog {
 
-Rule::Rule(Handle rule)
+void RuleSet::expand_meta_rules(AtomSpace& as)
 {
-	init(rule);
-}
-
-Rule::Rule(Handle rule_name, Handle rbs)
-{
-	AtomSpace* as = rule_name->getAtomSpace();
-	init(as->get_link(MEMBER_LINK, rule_name, rbs));
-}
-
-void Rule::init(Handle rule)
-{
-	if (rule == Handle::UNDEFINED)
-		rule_handle_ = Handle::UNDEFINED;
-	else
-	{
-		if (not classserver().isA(rule->getType(), MEMBER_LINK))
-			throw InvalidParamException(TRACE_INFO,
-		                                "Rule '%s' is expected to be a MemberLink",
-		                                rule->toString().c_str());
-
-		rule_alias_ = rule->getOutgoingAtom(0);
-		Handle rbs = rule->getOutgoingAtom(1);
-
-		rule_handle_ = DefineLink::get_definition(rule_alias_);
-		name_ = rule_alias_->getName();
-		category_ = rbs->getName();
-		weight_ = rule->getTruthValue()->getMean();
+	for (const Rule& rule : *this) {
+		if (rule.is_meta()) {
+			Handle result = rule.apply(as);
+			for (const Handle& produced_h : result->getOutgoingSet()) {
+				Rule produced(rule.get_alias(), produced_h, rule.get_rbs());
+				if (find(produced) == end()) {
+					insert(produced);
+					ure_logger().debug() << "New rule produced from meta rule:"
+					                     << std::endl << oc_to_string(produced);
+				}
+			}
+		}
 	}
 }
 
-float Rule::get_weight() const
+Rule::Rule()
+	: premises_as_clauses(false), _rule_alias(Handle::UNDEFINED) {}
+
+Rule::Rule(const Handle& rule_member)
 {
-	return weight_;
+	init(rule_member);
 }
 
-void Rule::set_category(const string& name)
+Rule::Rule(const Handle& rule_alias, const Handle& rbs)
 {
-	category_ = name;
+	init(rule_alias, rbs);
 }
 
-string& Rule::get_category()
+Rule::Rule(const Handle& rule_alias, const Handle& rule, const Handle& rbs)
 {
-	return category_;
+	init(rule_alias, rule, rbs);
 }
 
-const string& Rule::get_category() const
+void Rule::init(const Handle& rule_member)
 {
-	return category_;
+	OC_ASSERT(rule_member != Handle::UNDEFINED);
+	if (not classserver().isA(rule_member->getType(), MEMBER_LINK))
+		throw InvalidParamException(TRACE_INFO,
+		                            "Rule '%s' is expected to be a MemberLink",
+		                            rule_member->toString().c_str());
+
+	Handle rule_alias = rule_member->getOutgoingAtom(0);
+	Handle rbs = rule_member->getOutgoingAtom(1);
+	init(rule_alias, rbs);
 }
 
-void Rule::set_name(const string& name)
+void Rule::init(const Handle& rule_alias, const Handle& rbs)
 {
-	name_ = name;
+	Handle rule = DefineLink::get_definition(rule_alias);
+	init(rule_alias, rule, rbs);
 }
 
-string& Rule::get_name()
+void Rule::init(const Handle& rule_alias, const Handle& rule, const Handle& rbs)
 {
-	return name_;
+	OC_ASSERT(rule->getType() == BIND_LINK);
+	_rule = BindLinkCast(rule);
+
+	_rule_alias = rule_alias;
+	_name = _rule_alias->getName();
+	_rbs = rbs;
+	AtomSpace& as = *rule_alias->getAtomSpace();
+	Handle ml = as.get_link(MEMBER_LINK, rule_alias, rbs);
+	_weight = ml->getTruthValue()->getMean();
 }
 
-const string& Rule::get_name() const
+bool Rule::operator==(const Rule& r) const
 {
-	return name_;
+	return r._rule == _rule;
 }
 
-void Rule::set_handle(Handle h)
+bool Rule::operator<(const Rule& r) const
 {
-	rule_handle_ = h;
+	return _weight == r._weight ?
+		Handle(_rule).value() < Handle(r._rule).value()
+		: _weight < r._weight;
 }
 
-Handle Rule::get_handle() const
+bool Rule::is_alpha_equivalent(const Rule& r) const
 {
-	return rule_handle_;
+	return _rule->is_equal(Handle(r._rule));
+}
+
+double Rule::get_weight() const
+{
+	return _weight;
+}
+
+void Rule::set_name(const std::string& name)
+{
+	_name = name;
+}
+
+std::string& Rule::get_name()
+{
+	return _name;
+}
+
+const std::string& Rule::get_name() const
+{
+	return _name;
+}
+
+void Rule::set_rule(const Handle& h)
+{
+	_rule = BindLinkCast(h);
+}
+
+Handle Rule::get_rule() const
+{
+	return Handle(_rule);
 }
 
 Handle Rule::get_alias() const
 {
-	return rule_alias_;
+	return _rule_alias;
 }
-/**
- * Get the typed variable list of the Rule.
- *
- * @return the VariableList or the lone VariableNode
- */
+
+Handle Rule::get_rbs() const
+{
+	return _rbs;
+}
+
+void Rule::add(AtomSpace& as)
+{
+	if (!_rule)
+		return;
+
+	HandleSeq outgoings;
+	for (const Handle& h : _rule->getOutgoingSet())
+		outgoings.push_back(as.add_atom(h));
+	_rule = createBindLink(outgoings);
+}
+
 Handle Rule::get_vardecl() const
 {
-	// if the rule's handle has not been set yet
-	if (rule_handle_ == Handle::UNDEFINED)
-		return Handle::UNDEFINED;
-
-	return rule_handle_->getOutgoingAtom(0);
+	if (_rule)
+		return _rule->get_vardecl();
+	return Handle::UNDEFINED;
 }
 
 /**
@@ -136,11 +194,33 @@ Handle Rule::get_vardecl() const
  */
 Handle Rule::get_implicant() const
 {
-	// if the rule's handle has not been set yet
-	if (rule_handle_ == Handle::UNDEFINED)
-		return Handle::UNDEFINED;
+	if (_rule)
+		return _rule->get_body();
+	return Handle::UNDEFINED;
+}
 
-	return BindLinkCast(rule_handle_)->get_body();
+Handle Rule::get_implicand() const
+{
+	if (_rule)
+		return _rule->get_implicand();
+	return Handle::UNDEFINED;
+}
+
+bool Rule::is_valid() const
+{
+	return (bool)_rule;
+}
+
+bool Rule::is_meta() const
+{
+	Handle implicand = get_implicand();
+
+	if (not implicand)
+		return false;
+
+	Type itype = implicand->getType();
+	return (Quotation::is_quotation_type(itype) ?
+	        implicand->getOutgoingAtom(0)->getType() : itype) == BIND_LINK;
 }
 
 /**
@@ -149,10 +229,10 @@ Handle Rule::get_implicant() const
  *
  * @return HandleSeq of members of the implicant
  */
-HandleSeq Rule::get_implicant_seq() const
+HandleSeq Rule::get_clauses() const
 {
-	// if the rule's handle has not been set yet
-	if (rule_handle_ == Handle::UNDEFINED)
+	// If the rule's handle has not been set yet
+	if (not is_valid())
 		return HandleSeq();
 
     Handle implicant = get_implicant();
@@ -166,97 +246,90 @@ HandleSeq Rule::get_implicant_seq() const
 
     return hs;
 }
-/**
- * Get the implicand (output) of the rule defined in a BindLink.
- *
- * @return the Handle of the implicand
- */
-Handle Rule::get_implicand() const
-{
-	// if the rule's handle has not been set yet
-	if (rule_handle_ == Handle::UNDEFINED)
-		return Handle::UNDEFINED;
 
-	return BindLinkCast(rule_handle_)->get_implicand();
-}
-
-/**
- * Get the implicand (output) of the rule defined in a BindLink.
- *
- * This function does extra processing to find the real output over an
- * ExecutionOutputLink.  ie, skip to the ListLink under the ExLink.
- *
- * @return the HandleSeq of the implicand
- */
-HandleSeq Rule::get_implicand_seq() const
+HandleSeq Rule::get_premises() const
 {
-	// if the rule's handle has not been set yet
-	if (rule_handle_ == Handle::UNDEFINED)
+	// If the rule's handle has not been set yet
+	if (not is_valid())
 		return HandleSeq();
 
-	Handle implicand = BindLinkCast(rule_handle_)->get_implicand();
+	Handle rewrite = _rule->get_implicand();
+	Type rewrite_type = rewrite->getType();
 
-	std::queue<Handle> pre_output;
-	HandleSeq final_output;
+	// Return the clauses
+	if (premises_as_clauses or rewrite_type != EXECUTION_OUTPUT_LINK)
+		return get_clauses();
 
-	// skip the top level ListLink
-	if (implicand->getType() == LIST_LINK)
-	{
-		for (const Handle& h : implicand->getOutgoingSet())
-			pre_output.push(h);
-	}
-	else
-	{
-		pre_output.push(implicand);
-	}
-
-	// check all output of ExecutionOutputLink
-	while (not pre_output.empty())
-	{
-		Handle hfront = pre_output.front();
-		pre_output.pop();
-
-		if (hfront->getType() == EXECUTION_OUTPUT_LINK)
-		{
-			// get the ListLink containing the arguments of the ExecutionOutputLink
-			Handle harg = hfront->getOutgoingSet()[1];
-
-			for (const Handle& h : harg->getOutgoingSet())
-				pre_output.push(h);
-
-			continue;
+	// Search the premises in the rewrite term's ExecutionOutputLink
+	HandleSeq premises;
+	if (rewrite_type == EXECUTION_OUTPUT_LINK) {
+		Handle args = rewrite->getOutgoingAtom(1);
+		if (args->getType() == LIST_LINK) {
+			OC_ASSERT(args->getArity() > 0);
+			for (Arity i = 1; i < args->getArity(); i++) {
+				Handle argi = args->getOutgoingAtom(i);
+				// Return unordered premises
+				if (argi->getType() == SET_LINK) {
+					for (Arity i = 1; i < argi->getArity(); i++)
+						premises.push_back(args->getOutgoingAtom(i));
+				}
+				// Return ordered premise
+				else {
+					premises.push_back(argi);
+				}
+			}
 		}
-
-		// if not an ExecutionOutputLink, it is a final output
-		final_output.push_back(hfront);
 	}
-
-	return final_output;
-}
-
-void Rule::set_weight(float p)
-{
-	weight_ = p;
+	return premises;
 }
 
 /**
- * Create a new rule where all variables are renamed.
+ * Get the conclusion (output) of the rule.  defined in a BindLink.
  *
- * @param as  pointer to the atomspace where the new BindLink will be added
- * @return    a new Rule object with its own new BindLink
+ * @return the Handle of the implicand
+ *
+ * TODO: indentical to get_implicand()
  */
+Handle Rule::get_conclusion() const
+{
+	if (_rule)
+		return _rule->get_implicand();
+	return Handle::UNDEFINED;
+}
+
+HandlePairSeq Rule::get_conclusions() const
+{
+	HandlePairSeq results;
+
+	// If the rule's handle has not been set yet
+	if (not is_valid())
+		return HandlePairSeq();
+
+	Handle vardecl = get_vardecl();
+	for (const Handle& c : get_conclusion_patterns())
+		results.push_back({filter_vardecl(vardecl, c), c});
+
+	return results;
+}
+
+void Rule::set_weight(double p)
+{
+	_weight = p;
+}
+
 Rule Rule::gen_standardize_apart(AtomSpace* as)
 {
-	if (rule_handle_ == Handle::UNDEFINED)
+	if (!_rule)
 		throw InvalidParamException(TRACE_INFO,
-		                            "Attempted standardized-apart on invalid Rule");
+		                            "Attempted standardized-apart on "
+		                            "invalid Rule");
 
 	// clone the Rule
 	Rule st_ver = *this;
-	std::map<Handle, Handle> dict;
+	HandleMap dict;
 
 	Handle vdecl = get_vardecl();
-	std::set<Handle> varset;
+	OrderedHandleSet varset;
 
 	if (VariableListCast(vdecl))
 		varset = VariableListCast(vdecl)->get_variables().varset;
@@ -266,10 +339,106 @@ Rule Rule::gen_standardize_apart(AtomSpace* as)
 	for (auto& h : varset)
 		dict[h] = Handle::UNDEFINED;
 
-	Handle st_bindlink = standardize_helper(as, rule_handle_, dict);
-	st_ver.set_handle(st_bindlink);
+	Handle st_bindlink = standardize_helper(as, Handle(_rule), dict);
+	st_ver.set_rule(st_bindlink);
 
 	return st_ver;
+}
+
+RuleTypedSubstitutionMap Rule::unify_source(const Handle& source,
+                                            const Handle& vardecl) const
+{
+	// If the rule's handle has not been set yet
+	if (not is_valid())
+		return {};
+
+	// To guaranty that the rule variable does not share any variable
+	// with the source.
+	Rule alpha_rule = rand_alpha_converted();
+
+	RuleTypedSubstitutionMap unified_rules;
+	Handle rule_vardecl = alpha_rule.get_vardecl();
+	for (const Handle& premise : alpha_rule.get_premises())
+	{
+		Unify unify(source, premise, vardecl, rule_vardecl);
+		Unify::SolutionSet sol = unify();
+		if (sol.is_satisfiable()) {
+			Unify::TypedSubstitutions tss =
+				unify.typed_substitutions(sol, source);
+			// For each typed substitution produce a new rule by
+			// substituting all variables by their associated
+			// values.
+			for (const auto& ts : tss)
+				unified_rules.insert({alpha_rule.substituted(ts), ts});
+		}
+	}
+
+	return unified_rules;
+}
+
+RuleTypedSubstitutionMap Rule::unify_target(const Handle& target,
+                                            const Handle& vardecl) const
+{
+	// If the rule's handle has not been set yet
+	if (not is_valid())
+		return {};
+
+	// To guaranty that the rule variable does not share any variable
+	// of the target.
+	Rule alpha_rule = rand_alpha_converted();
+
+	RuleTypedSubstitutionMap unified_rules;
+	Handle alpha_vardecl = alpha_rule.get_vardecl();
+	for (const Handle& alpha_pat : alpha_rule.get_conclusion_patterns())
+	{
+		Unify unify(target, alpha_pat, vardecl, alpha_vardecl);
+		Unify::SolutionSet sol = unify();
+		if (sol.is_satisfiable()) {
+			Unify::TypedSubstitutions tss =
+				unify.typed_substitutions(sol, target);
+			// For each typed substitution produce a new rule by
+			// substituting all variables by their associated
+			// values.
+			for (const auto& ts : tss) {
+				unified_rules.insert({alpha_rule.substituted(ts), ts});
+			}
+		}
+	}
+
+	return unified_rules;
+}
+
+RuleSet Rule::strip_typed_substitution(const RuleTypedSubstitutionMap& rules)
+{
+	RuleSet rs;
+	for (const auto& r : rules)
+		rs.insert(r.first);
+
+	return rs;
+}
+
+Handle Rule::apply(AtomSpace& as) const
+{
+	return bindlink(&as, Handle(_rule));
+}
+
+std::string Rule::to_string() const
+{
+	std::stringstream ss;
+	ss << "name: " << _name << std::endl
+	   << "rule:" << std::endl << _rule->toString();
+	return ss.str();
+}
+
+Rule Rule::rand_alpha_converted() const
+{
+	// Clone the rule
+	Rule result = *this;
+
+	// Alpha convert the rule
+	result.set_rule(_rule->alpha_conversion());
+
+	return result;
 }
 
 /**
@@ -281,7 +450,7 @@ Rule Rule::gen_standardize_apart(AtomSpace* as)
  * @return       the new atom
  */
 Handle Rule::standardize_helper(AtomSpace* as, const Handle& h,
-                                std::map<Handle, Handle>& dict)
+                                HandleMap& dict)
 {
 	if (h->isLink())
 	{
@@ -291,7 +460,9 @@ Handle Rule::standardize_helper(AtomSpace* as, const Handle& h,
 		for (auto ho : old_outgoing)
 			new_outgoing.push_back(standardize_helper(as, ho, dict));
 
-		return as->add_atom(createLink(h->getType(), new_outgoing, h->getTruthValue()));
+		Handle hcpy(as->add_atom(createLink(new_outgoing, h->getType())));
+		hcpy->copyValues(h);
+		return hcpy;
 	}
 
 	// normal node does not need to be changed
@@ -303,11 +474,14 @@ Handle Rule::standardize_helper(AtomSpace* as, const Handle& h,
 	// want to generate a completely unique variable
 	if (dict.count(h) == 0)
 	{
-		std::string new_name = h->getName() + "-" + to_string(boost::uuids::random_generator()());
-		Handle hcpy = as->add_atom(createNode(h->getType(), new_name, h->getTruthValue()));
+		// TODO: use opencog's random generator
+		std::string new_name = h->getName() + "-"
+			+ boost::uuids::to_string(boost::uuids::random_generator()());
+
+		Handle hcpy(as->add_atom(createNode(h->getType(), new_name)));
+		hcpy->copyValues(h);
 
 		dict[h] = hcpy;
-
 		return hcpy;
 	}
 
@@ -315,10 +489,89 @@ Handle Rule::standardize_helper(AtomSpace* as, const Handle& h,
 	if (dict.at(h) != Handle::UNDEFINED)
 		return dict[h];
 
-	std::string new_name = h->getName() + "-" + name_;
-	Handle hcpy = as->add_atom(createNode(h->getType(), new_name, h->getTruthValue()));
+	std::string new_name = h->getName() + "-" + _name;
+	Handle hcpy(as->add_atom(createNode(h->getType(), new_name)));
+	hcpy->copyValues(h);
 
 	dict[h] = hcpy;
-
 	return hcpy;
 }
+
+HandleSeq Rule::get_conclusion_patterns() const
+{
+	HandleSeq results;
+	Handle implicand = get_implicand();
+	Type t = implicand->getType();
+	if (LIST_LINK == t)
+		for (const Handle& h : implicand->getOutgoingSet())
+			results.push_back(get_conclusion_pattern(h));
+	else
+		results.push_back(get_conclusion_pattern(implicand));
+
+	return results;
+}
+
+Handle Rule::get_conclusion_pattern(const Handle& h) const
+{
+	Type t = h->getType();
+	if (EXECUTION_OUTPUT_LINK == t)
+		return get_execution_output_first_argument(h);
+	else
+		return h;
+}
+
+Handle Rule::get_execution_output_first_argument(const Handle& h) const
+{
+	OC_ASSERT(h->getType() == EXECUTION_OUTPUT_LINK);
+	Handle args = h->getOutgoingAtom(1);
+	if (args->getType() == LIST_LINK) {
+		OC_ASSERT(args->getArity() > 0);
+		return args->getOutgoingAtom(0);
+	} else
+		return args;
+}
+
+Rule Rule::substituted(const Unify::TypedSubstitution& ts) const
+{
+	Rule new_rule(*this);
+	new_rule.set_rule(Unify::substitute(_rule, ts));
+	return new_rule;
+}
+
+std::string oc_to_string(const Rule& rule)
+{
+	return rule.to_string();
+}
+
+std::string oc_to_string(const RuleSet& rules)
+{
+	std::stringstream ss;
+	ss << "size = " << rules.size() << std::endl;
+	size_t i = 0;
+	for (const Rule& rule : rules)
+		ss << "rule[" << i++ << "]:" << std::endl
+		   << oc_to_string(rule) << std::endl;
+	return ss.str();
+}
+
+std::string oc_to_string(const RuleTypedSubstitutionPair& rule_ts)
+{
+	std::stringstream ss;
+	ss << "rule:" << std::endl << oc_to_string(rule_ts.first) << std::endl;
+	ss << "typed substitutions:" << std::endl
+	   << oc_to_string(rule_ts.second) << std::endl;
+	return ss.str();
+}
+
+std::string oc_to_string(const RuleTypedSubstitutionMap& rules)
+{
+	std::stringstream ss;
+	ss << "size = " << rules.size() << std::endl;
+	size_t i = 0;
+	for (const RuleTypedSubstitutionPair& rule : rules)
+		ss << "rule[" << i++ << "]:" << std::endl
+		   << oc_to_string(rule) << std::endl;
+	return ss.str();
+}
+
+} // ~namespace opencog

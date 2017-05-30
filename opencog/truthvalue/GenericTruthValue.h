@@ -25,7 +25,6 @@
 #define _OPENCOG_GENERIC_TRUTH_VALUE_H
 
 #include <string>
-#include <memory>
 
 #include <opencog/util/exceptions.h>
 #include <opencog/truthvalue/TruthValue.h>
@@ -33,9 +32,6 @@
 namespace opencog
 {
 
-typedef float strength_t;
-typedef float confidence_t;
-typedef double count_t;
 typedef double entropy_t;
 
 class GenericTruthValue;
@@ -53,8 +49,8 @@ class GenericTruthValue : public TruthValue
                           strength_t, strength_t,
                           confidence_t, entropy_t);
         GenericTruthValue(GenericTruthValue const&);
+        GenericTruthValue(const ProtoAtomPtr&);
 
-        TruthValueType getType() const;
         strength_t getMean() const;
         count_t getCount() const;
         confidence_t getConfidence() const;
@@ -75,11 +71,18 @@ class GenericTruthValue : public TruthValue
 
         entropy_t getEntropy() const;
 
-        TruthValuePtr merge(TruthValuePtr, const MergeCtrl& = MergeCtrl()) const;
+        TruthValuePtr merge(const TruthValuePtr&,
+                            const MergeCtrl& = MergeCtrl()) const;
+
+        static TruthValuePtr createTV(const ProtoAtomPtr& pap)
+        {
+            return std::static_pointer_cast<const TruthValue>(
+                std::make_shared<const GenericTruthValue>(pap));
+        }
 
         TruthValuePtr clone() const
         {
-            return std::make_shared<GenericTruthValue>(*this);
+            return std::make_shared<const GenericTruthValue>(*this);
         }
 
         TruthValue* rawclone() const
@@ -87,25 +90,18 @@ class GenericTruthValue : public TruthValue
             return new GenericTruthValue(*this);
         }
 
-        bool operator==(const TruthValue&) const;
-        std::string toString() const;
+        bool operator==(const ProtoAtom&) const;
+        std::string toString(const std::string&) const;
 
     protected:
-        count_t positiveEvidence;
-
-        // PLN count
-        count_t totalEvidence;
-
-        // Probabilistic strength
-        strength_t frequency;
-
-        // Fuzzy set membership strength
-        strength_t fuzzyStrength;
-
-        confidence_t confidence;
-
-        entropy_t entropy;
-
+        enum {
+            POSITIVE_EVIDENCE,
+            TOTAL_EVIDENCE, // PLN count
+            FREQUENCY, // Probabilistic strength
+            FUZZY_STRENGTH, // Fuzzy set membership strength
+            CONFIDENCE,
+            ENTROPY
+        };
 };
 } // namespace opencog
 

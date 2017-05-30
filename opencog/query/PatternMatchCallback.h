@@ -28,8 +28,9 @@
 #include <set>
 #include <opencog/atoms/base/Handle.h>
 #include <opencog/atoms/base/Link.h>
-#include <opencog/query/Pattern.h> // for VariableTypeMap
 #include <opencog/atoms/core/VariableList.h> // for VariableTypeMap
+#include <opencog/atoms/pattern/Pattern.h> // for VariableTypeMap
+#include <opencog/atoms/pattern/PatternTerm.h> // for pattern context
 
 namespace opencog {
 class PatternMatchEngine;
@@ -68,6 +69,21 @@ class PatternMatchCallback
 		                            const Handle& grnd_node) = 0;
 
 		/**
+		 * Called when there is a variable in the template
+		 * pattern, but it is not bound into the template
+		 * itself: its just some other variable, not eligable
+		 * for handling by variable_match() above. This variable
+		 * is possibly free in the template, and it is possibly
+		 * a bound variable that the matcher has stumbled across.
+		 * If its a free variable, this callback can do as it
+		 * wishes, but if it is a bound variable, this callback
+		 * should probably respect that, and allow a match if and
+		 * only if it is alpha-convertible to the proposed grounding.
+		 */
+		virtual bool scope_match(const Handle& patt_node,
+		                         const Handle& grnd_node) = 0;
+
+		/**
 		 * Called right before link in the template pattern
 		 * is to be compared to a possibly matching link in
 		 * the atomspace. The first argument is a link from
@@ -92,8 +108,8 @@ class PatternMatchCallback
 		 * type, and to proceed with the search, or cut it
 		 * off, based on these values.
 		 */
-		virtual bool link_match(const LinkPtr& patt_link,
-		                        const LinkPtr& grnd_link) = 0;
+		virtual bool link_match(const PatternTermPtr& patt_link,
+		                        const Handle& grnd_link) = 0;
 
 		/**
 		 * Called after a candidate grounding has been found
@@ -111,11 +127,25 @@ class PatternMatchCallback
 		 * The first link is from the pattern, the second is
 		 * from the proposed grounding.
 		 */
-		virtual bool post_link_match(const LinkPtr& patt_link,
-		                             const LinkPtr& grnd_link)
+		virtual bool post_link_match(const Handle& patt_link,
+		                             const Handle& grnd_link)
 		{
 			return true; // Accept the match, by default.
 		}
+
+		/**
+		 * Called after a failed attempt to ground a link.
+		 * After every call to link_match(), above, there will
+		 * be a call either to post_link_match() above, or to
+		 * this method. Thus, the total number of calls to these
+		 * methods will always be balanced. This allows the
+		 * callback system to maintain a per-link stack, where a
+		 * stack push is performed by link_match(), and a stack
+		 * pop is done either in post_link_match() or here.
+		 */
+		virtual void post_link_mismatch(const Handle& patt_link,
+		                                const Handle& grnd_link)
+		{}
 
 		/**
 		 * Called when the template pattern and the candidate grounding
@@ -180,7 +210,7 @@ class PatternMatchCallback
 		 * grounding, and forces a backtrack.
 		 */
 		virtual bool evaluate_sentence(const Handle& eval,
-		                      const std::map<Handle,Handle>& gnds) = 0;
+		                               const HandleMap& gnds) = 0;
 
 		/**
 		 * Called when a top-level clause has been fully grounded.
@@ -192,16 +222,18 @@ class PatternMatchCallback
 		 * variable_match(), link_match() and post_link_match() in
 		 * that clause have returned true.
 		 *
+		 * The term_gnds map shows which terms in any ChoiceLinks
+		 * were actually grounded.
+		 *
 		 * Return false to reject this clause as a valid grounding,
 		 * return true to accept this grounding.
 		 */
 		virtual bool clause_match(const Handle& pattrn_link_h,
-		                          const Handle& grnd_link_h)
+		                          const Handle& grnd_link_h,
+		                          const HandleMap& term_gnds)
 		{
-			// By default, reject a clause that is grounded by itself.
-			// XXX someone commented this out... why??? Do you really
-			// want self-grounding???
-			//	if (pattrn_link_h == grnd_link_h) return false;
+			// Reject templates grounded by themselves.
+			if (pattrn_link_h == grnd_link_h) return false;
 			return true;
 		}
 
@@ -220,7 +252,8 @@ class PatternMatchCallback
 		 * any optional clauses are examined.
 		 */
 		virtual bool optional_clause_match(const Handle& pattrn,
-		                                   const Handle& grnd) = 0;
+		                                   const Handle& grnd,
+		                                   const HandleMap& term_gnds) = 0;
 
 		/**
 		 * Called when a complete grounding for all clauses is found.
@@ -231,11 +264,12 @@ class PatternMatchCallback
 		 * solution has been found; thus, in order to force it to search
 		 * for more, a return value of false is needed.)
 		 *
-		 * Note that the callback may be called many times reporting
-		 * the same result.
+		 * Note that this callback may be called multiple times, to report
+		 * the same result.  This can happen, for example, if there are
+		 * mutiple ways for the pattern to match up to the result.
 		 */
-		virtual bool grounding(const std::map<Handle, Handle> &var_soln,
-		                       const std::map<Handle, Handle> &term_soln) = 0;
+		virtual bool grounding(const HandleMap &var_soln,
+		                       const HandleMap &term_soln) = 0;
 
 		/**
 		 * Called whenever the incoming set of an atom is to be explored.

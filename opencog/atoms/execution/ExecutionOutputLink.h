@@ -23,6 +23,7 @@
 #ifndef _OPENCOG_EXECUTION_OUTPUT_LINK_H
 #define _OPENCOG_EXECUTION_OUTPUT_LINK_H
 
+#include <stdlib.h>
 #include <opencog/atomspace/AtomSpace.h>
 #include <opencog/atoms/core/FunctionLink.h>
 
@@ -35,23 +36,33 @@ namespace opencog
 class ExecutionOutputLink : public FunctionLink
 {
 private:
-	static Handle do_execute(AtomSpace*, const Handle& schema,
-	                                     const Handle& args);
+	static Handle do_execute(AtomSpace*, const Handle& schema, const Handle& args,
+	                         bool silent=false);
+
+	void check_schema(const Handle& schema) const;
+
 public:
-	ExecutionOutputLink(const HandleSeq& oset,
-	     TruthValuePtr tv = TruthValue::DEFAULT_TV(),
-	     AttentionValuePtr av = AttentionValue::DEFAULT_AV());
+	/**
+	 * Given a grounded schema name like "py: foo", extract
+	 * 1. the language, like "py"
+	 * 2. the library, like "" if there is none
+	 * 3. the function, like "foo"
+	 */
+	static void lang_lib_fun(const std::string& schema,
+	                         std::string& lang,
+	                         std::string& lib,
+	                         std::string& fun);;
 
-	ExecutionOutputLink(const Handle& schema, const Handle& args,
-	     TruthValuePtr tv = TruthValue::DEFAULT_TV(),
-	     AttentionValuePtr av = AttentionValue::DEFAULT_AV());
+	ExecutionOutputLink(const HandleSeq&, Type=EXECUTION_OUTPUT_LINK);
+	ExecutionOutputLink(const Handle& schema, const Handle& args);
+	ExecutionOutputLink(const Link& l);
 
-	ExecutionOutputLink(Link& l);
-
-	virtual Handle execute(AtomSpace* = NULL) const;
+	virtual Handle execute(AtomSpace* as=NULL, bool silent=false) const;
 
 	Handle get_schema(void) const { return getOutgoingAtom(0); }
 	Handle get_args(void) const { return getOutgoingAtom(1); }
+
+	static Handle factory(const Handle&);
 };
 
 typedef std::shared_ptr<ExecutionOutputLink> ExecutionOutputLinkPtr;

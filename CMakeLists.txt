@@ -18,6 +18,11 @@ IF (COMMAND CMAKE_POLICY)
 	CMAKE_POLICY(SET CMP0005 OLD)
 ENDIF (COMMAND CMAKE_POLICY)
 
+
+IF(CMAKE_VERSION VERSION_GREATER 3.0.2)
+	CMAKE_POLICY(SET CMP0037 OLD)
+ENDIF(CMAKE_VERSION VERSION_GREATER 3.0.2)
+
 PROJECT(atomspace)
 
 # To supress Cygwin warning "CMake no longer defines WIN32 on Cygwin!"
@@ -75,7 +80,17 @@ IF (CMAKE_COMPILER_IS_GNUCXX)
 		# SET(CMAKE_C_FLAGS "-Wl,--copy-dt-needed-entries")
 		SET(CMAKE_C_FLAGS_DEBUG "-ggdb3 -fstack-protector")
 		SET(CMAKE_C_FLAGS_PROFILE "-O2 -g3 -fstack-protector -pg")
+		# -flto is good for performance, but wow is it slow to link...
+		# XXX disable for now ... its just to painful, in daily life.
+		# ... except that the buildbot needs this, to pass unit tests.
+		# Current failure is in libatomcore, which depends on atomspace.
+		# (ldd -r libatomcore shows unresolved symbols.)
+		# This will someday be fiaxable by moving the factories out
+		# of the atomtable, and into the class server. But for now,
+		# we use -flto as a work-around.
+		# SET(CMAKE_C_FLAGS_RELEASE "-O3 -g -fstack-protector")
 		SET(CMAKE_C_FLAGS_RELEASE "-O3 -g -fstack-protector -flto")
+		# SET(CMAKE_C_FLAGS_RELEASE "-O3 -g -fstack-protector -flto=8")
 		LINK_LIBRARIES(pthread)
 
 		# Workaround for circular dependencies problem. This causes
@@ -92,8 +107,8 @@ IF (CMAKE_COMPILER_IS_GNUCXX)
 	#
 	# 2) -fopenmp for multithreading support
 	#
-	# 3) -std=gnu++0x for C++0x and GNU extensions support
-	SET(CMAKE_CXX_FLAGS "${CMAKE_C_FLAGS} -Wno-variadic-macros -fopenmp -std=gnu++0x")
+	# 3) -std=gnu++11 for C++11 and GNU extensions support
+	SET(CMAKE_CXX_FLAGS "${CMAKE_C_FLAGS} -Wno-variadic-macros -fopenmp -std=gnu++11")
 
 	SET(CMAKE_CXX_FLAGS_DEBUG ${CMAKE_C_FLAGS_DEBUG})
 	SET(CMAKE_CXX_FLAGS_PROFILE ${CMAKE_C_FLAGS_PROFILE})
@@ -177,8 +192,8 @@ ENDIF(105100 EQUAL ${Boost_VERSION})
 MESSAGE(STATUS "Boost version ${Boost_VERSION} found.")
 
 # Optional boost packages; can build without these.
-FIND_PACKAGE(Boost 1.46 COMPONENTS python program_options QUIET)
-FIND_PACKAGE(Boost 1.46 COMPONENTS math_c99 QUIET)
+# FIND_PACKAGE(Boost 1.46 COMPONENTS python program_options QUIET)
+# FIND_PACKAGE(Boost 1.46 COMPONENTS math_c99 QUIET)
 
 # Arghhh. Except cmake is treating above as required, not optional. #$%**&
 IF(Boost_FOUND_SAVE)
@@ -254,8 +269,7 @@ ENDIF (HYPERTABLE_FOUND)
 # FIND_PACKAGE(LibMemCached)
 
 # Google Protobuf library
-# The protocol buffer compiler is a separately installable package, and
-# it is also needed for building embodiment PAI. So check for that, too.
+# The protocol buffer compiler is needed for ZMQ-based persistence.
 FIND_PACKAGE(Protobuf)
 IF (PROTOBUF_FOUND
 		AND PROTOBUF_LIBRARY
@@ -274,9 +288,9 @@ ELSE (PROTOBUF_FOUND
 	# If we are here, then we are missing either the libraries, or the
 	# compiler. React appropriately.
 	IF (PROTOBUF_PROTOC_EXECUTABLE)
-		SET(PROTOBUF_DIR_MESSAGE "Protobuf was not found; the new message decoding functions would not work.\n	To over-ride, make sure PROTOBUF_LIBRARIES and PROTOBUF_INCLUDE_DIRS are set.")
+		SET(PROTOBUF_DIR_MESSAGE "Protobuf libraries were not found; these are needed to link the ZMQ-based persistence backend.\n	To over-ride, make sure PROTOBUF_LIBRARIES and PROTOBUF_INCLUDE_DIRS are set.")
 	ELSE (PROTOBUF_PROTOC_EXECUTABLE)
-		SET(PROTOBUF_DIR_MESSAGE "Protobuf compiler was not found; embodiment PAI can't be built without it.\n	To over-ride, make sure PROTOBUF_PROTOC_EXECUTABLE is set.")
+		SET(PROTOBUF_DIR_MESSAGE "Protobuf compiler was not found; the ZMQ-based persistence backend can't be built without it.\n	To over-ride, make sure PROTOBUF_PROTOC_EXECUTABLE is set.")
 	ENDIF (PROTOBUF_PROTOC_EXECUTABLE)
 
 ENDIF (PROTOBUF_FOUND
@@ -286,45 +300,64 @@ ENDIF (PROTOBUF_FOUND
 
 MESSAGE(STATUS "${PROTOBUF_DIR_MESSAGE}")
 
-# Python needed for PLN !???
-FIND_PACKAGE(PythonInterp)
+# -----------------------------------------------------------------------------
+# Python and Cython
+#
+# NOTE: Python interpreter is needed for runing python unit tests, and for
+# running the FindCython and FindCxxtest cmake modules.
+
+FIND_PACKAGE(PythonInterp 2.7)
+IF (2.7.0 VERSION_LESS ${PYTHON_VERSION_STRING} AND
+	3.0.0 VERSION_GREATER ${PYTHON_VERSION_STRING})
+	SET (HAVE_PY_INTERP 1)
+	MESSAGE(STATUS "Python ${PYTHON_VERSION_STRING} interpreter found.")
+ENDIF()
+
 FIND_PACKAGE(PythonLibs 2.7)
-IF(PYTHONLIBS_FOUND)
-	MESSAGE(STATUS "Python libs found.")
-ELSE(PYTHONLIBS_FOUND)
-	MESSAGE(STATUS "Python libs NOT found.")
-ENDIF(PYTHONLIBS_FOUND)
+IF (PYTHONLIBS_FOUND AND
+	2.7.0 VERSION_LESS ${PYTHONLIBS_VERSION_STRING} AND
+	3.0.0 VERSION_GREATER ${PYTHONLIBS_VERSION_STRING})
+	SET (HAVE_PY_LIBS 1)
+	MESSAGE(STATUS "Python ${PYTHONLIBS_VERSION_STRING} libraries found.")
+ELSE()
+	MESSAGE(STATUS "Python libraries NOT found.")
+ENDIF()
 
-# Python bindings using Cython
-# Cython is used to generate bindings
-FIND_PACKAGE(Cython 0.19.0)
-IF (CYTHON_FOUND AND PYTHONLIBS_FOUND)
-	# find python destination dir for python bindings
-	ADD_DEFINITIONS(-DHAVE_CYTHON)
-	SET(HAVE_CYTHON 1)
-	EXECUTE_PROCESS(
-		COMMAND ${PYTHON_EXECUTABLE} -c "from distutils.sysconfig import *;print(get_python_lib())"
-		OUTPUT_VARIABLE PYTHON_DEST
-	)
+# Cython is used to generate python bindings.
+IF(HAVE_PY_INTERP)
+	FIND_PACKAGE(Cython 0.19.0)
 
-	# replace new line at end
-	STRING(REPLACE "\n" "" PYTHON_DEST "${PYTHON_DEST}")
-	IF ("${PYTHON_DEST}" STREQUAL "")
-		MESSAGE(FATAL_ERROR "Python destination dir not found")
-	ELSE ("${PYTHON_DEST}" STREQUAL "")
-		MESSAGE(STATUS "Python destination dir found: ${PYTHON_DEST}" )
-	ENDIF ("${PYTHON_DEST}" STREQUAL "")
-ELSE (CYTHON_FOUND AND PYTHONLIBS_FOUND)
-	IF(NOT CYTHON_FOUND)
-		MESSAGE(STATUS "Cython executable not found.")
-	ENDIF(NOT CYTHON_FOUND)
-ENDIF (CYTHON_FOUND AND PYTHONLIBS_FOUND)
+	IF (CYTHON_FOUND AND HAVE_PY_LIBS)
+		# Find python destination dir for python bindings because it may
+		# differ on each operating system.
+		ADD_DEFINITIONS(-DHAVE_CYTHON)
+		SET(HAVE_CYTHON 1)
+		EXECUTE_PROCESS(
+			COMMAND ${PYTHON_EXECUTABLE} -c "from distutils.sysconfig import *;print(get_python_lib())"
+			OUTPUT_VARIABLE PYTHON_DEST
+		)
 
-# Nosetests will find and automatically run python tests.
-FIND_PROGRAM(NOSETESTS_EXECUTABLE nosetests)
-IF (NOSETESTS_EXECUTABLE AND CYTHON_FOUND AND PYTHONLIBS_FOUND)
-	SET(HAVE_NOSETESTS 1)
-ENDIF (NOSETESTS_EXECUTABLE AND CYTHON_FOUND AND PYTHONLIBS_FOUND)
+		# Replace new line at end.
+		STRING(REPLACE "\n" "" PYTHON_DEST "${PYTHON_DEST}")
+		IF ("${PYTHON_DEST}" STREQUAL "")
+			MESSAGE(FATAL_ERROR "Python destination dir not found")
+		ELSE ("${PYTHON_DEST}" STREQUAL "")
+			MESSAGE(STATUS "Python destination dir found: ${PYTHON_DEST}" )
+		ENDIF ("${PYTHON_DEST}" STREQUAL "")
+	ELSE (CYTHON_FOUND AND HAVE_PY_LIBS)
+		IF(NOT CYTHON_FOUND)
+			MESSAGE(STATUS "Cython executable not found.")
+		ENDIF(NOT CYTHON_FOUND)
+	ENDIF (CYTHON_FOUND AND HAVE_PY_LIBS)
+
+	# Nosetests will find and automatically run python tests.
+	FIND_PROGRAM(NOSETESTS_EXECUTABLE nosetests)
+	IF (NOSETESTS_EXECUTABLE AND CYTHON_FOUND AND HAVE_PY_LIBS)
+		SET(HAVE_NOSETESTS 1)
+	ENDIF (NOSETESTS_EXECUTABLE AND CYTHON_FOUND AND HAVE_PY_LIBS)
+ENDIF(HAVE_PY_INTERP)
+
+# -----------------------------------------------------------------------------
 
 # Glasgow Haskell compiler
 FIND_PACKAGE(Stack)
@@ -337,6 +370,7 @@ FIND_PACKAGE(UnixODBC QUIET)
 IF (UnixODBC_FOUND)
 	ADD_DEFINITIONS(-DHAVE_SQL_STORAGE)
 	SET(HAVE_SQL_STORAGE 1)
+	ADD_DEFINITIONS(-DHAVE_ODBC_STORAGE)
 	SET(ODBC_FOUND 1)
 	SET(ODBC_INCLUDE_DIRS ${UnixODBC_INCLUDE_DIRS})
 	SET(ODBC_LIBRARIES ${UnixODBC_LIBRARIES})
@@ -393,10 +427,6 @@ IF(HAVE_COGUTIL)
 	SET(HAVE_ATOMSPACE 1)
 ENDIF(HAVE_COGUTIL)
 
-IF(HAVE_ATOMSPACE AND ODBC_FOUND) # SQL persistance
-	SET(HAVE_PERSIST 1)
-ENDIF(HAVE_ATOMSPACE AND ODBC_FOUND)
-
 # Both protobuf and also zmq are needed to build ZMQ API.
 IF(HAVE_PROTOBUF AND HAVE_ZMQLIB)
 	SET(HAVE_ZMQ 1)
@@ -426,6 +456,7 @@ SET (MAN_INSTALL_DIR "${CMAKE_INSTALL_PREFIX}/share/man")
 
 # include custom opencog cmake macros
 INCLUDE("${CMAKE_SOURCE_DIR}/lib/OpenCogMacros.cmake")
+INCLUDE("${CMAKE_SOURCE_DIR}/lib/OpenCogFunctions.cmake")
 
 # small hack to handle unixes that use "/usr/lib64" instead of "/usr/lib" as the
 # default lib path on 64 bit archs
@@ -447,7 +478,8 @@ INCLUDE_DIRECTORIES(${PROJECT_SOURCE_DIR} ${CMAKE_BINARY_DIR}
 # rpath handling
 SET(CMAKE_SKIP_BUILD_RPATH	FALSE)
 SET(CMAKE_BUILD_WITH_INSTALL_RPATH FALSE)
-SET(CMAKE_INSTALL_RPATH "${CMAKE_INSTALL_PREFIX}/lib/opencog")
+SET(CMAKE_INSTALL_RPATH "${CMAKE_INSTALL_PREFIX}/lib/opencog"
+	"${CMAKE_INSTALL_PREFIX}/lib/python2.7/dist-packages/opencog")
 SET(CMAKE_INSTALL_RPATH_USE_LINK_PATH TRUE)
 
 ADD_SUBDIRECTORY(lib)
@@ -557,7 +589,7 @@ SET(CPACK_SOURCE_TBZ2 "ON")
 SET(CPACK_SOURCE_TGZ "OFF")
 SET(CPACK_SOURCE_TZ "OFF")
 SET(CPACK_PACKAGE_CONTACT "opencog@googlegroups.com")
-SET(CPACK_GENERATOR "TBZ2")
+SET(CPACK_GENERATOR "TBZ2;DEB")
 SET(CPACK_SOURCE_GENERATOR "TBZ2")
 SET(CPACK_PACKAGE_FILE_NAME "${CPACK_PACKAGE_NAME}-${CPACK_PACKAGE_VERSION}")
 SET(CPACK_SOURCE_PACKAGE_FILE_NAME "${CPACK_PACKAGE_FILE_NAME}")
@@ -637,7 +669,8 @@ SUMMARY_ADD("Hypertable" "HyperTable for scalable persistance (experimental)" HA
 SUMMARY_ADD("Python bindings" "Python (cython) bindings" HAVE_CYTHON)
 SUMMARY_ADD("Python tests" "Python bindings nose tests" HAVE_NOSETESTS)
 SUMMARY_ADD("Scheme bindings" "Scheme bindings and shell" HAVE_GUILE)
-SUMMARY_ADD("SQL persistance" "Save/Restore of AtomSpace to database" HAVE_PERSIST)
+SUMMARY_ADD("SQL ODBC bindings" "Save/Restore of AtomSpace to database via ODBC" ODBC_FOUND)
+SUMMARY_ADD("SQL Postgres bindings" "Save/Restore of AtomSpace to Postgres database" PGSQL_FOUND)
 SUMMARY_ADD("ZeroMQ persistence" "Save/Restore of AtomSpace to ZeroMQ server" HAVE_ZMQ)
 SUMMARY_ADD("Unit tests" "Unit tests" CXXTEST_FOUND)
 SUMMARY_SHOW()

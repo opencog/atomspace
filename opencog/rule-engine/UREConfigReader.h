@@ -44,22 +44,40 @@ namespace opencog {
 class UREConfigReader
 {
 public:
-	// Ctor
+	/////////////
+	// Ctor    //
+	/////////////
 
 	// rbs is a Handle pointing to a rule-based system is as
-	UREConfigReader(AtomSpace& as, Handle rbs);
+	UREConfigReader(AtomSpace& as, const Handle& rbs);
 
-	// Access methods, return parameters given a rule-based system
-	const std::vector<Rule>& get_rules() const;
-	std::vector<Rule>& get_rules();
-	const Rule& get_rule(const Handle& h);
+	///////////////
+	// Accessors //
+	///////////////
+
+	// Common
+	const RuleSet& get_rules() const;
+	RuleSet& get_rules();
 	bool get_attention_allocation() const;
 	int get_maximum_iterations() const;
+	// BC
+	double get_complexity_penalty() const;
+	double get_max_bit_size() const;
 
-	// Modifiers. WARNING: Those changes are not reflected in the
-	// AtomSpace, only in the UREConfigReader object.
+	///////////////////////////////////////////////////////////////////
+	// Modifiers. WARNING: Those changes are not reflected in the    //
+	// AtomSpace, only in the UREConfigReader object.                //
+	///////////////////////////////////////////////////////////////////
+
+	// Common
 	void set_attention_allocation(bool);
 	void set_maximum_iterations(int);
+	// BC
+	void set_complexity_penalty(double);
+
+	//////////////////
+	// Constants    //
+	//////////////////
 
 	// Name of the top rule base from which all rule-based systems
 	// inherit. It should corresponds to a ConceptNode in the
@@ -73,6 +91,13 @@ public:
 	// Name of the SchemaNode outputing the maximum iterations
 	// parameter
 	static const std::string max_iter_name;
+
+	// Name of the complexity penalty parameter for the Backward
+	// Chainer
+	static const std::string bc_complexity_penalty_name;
+
+	// Name of the maximum number of and-BITs in the BIT parameter
+	static const std::string bc_max_bit_size_name;
 private:
 
 	// Fetch from the AtomSpace all rules of a given rube-based
@@ -81,27 +106,35 @@ private:
 	// MemberLink <TV>
 	//    <rule name>
 	//    <rbs>
-	HandleSeq fetch_rule_names(Handle rbs);
+	HandleSeq fetch_rule_names(const Handle& rbs);
 
 	AtomSpace& _as;
 
-	struct RuleBaseParameters {
-		std::vector<Rule> rules;
+	// Parameter common to the forward and backward chainer.
+	struct CommonParameters {
+		RuleSet rules;
 		bool attention_alloc;
 		int max_iter;
-
-		const Rule& get_rule(const Handle& h) const
-		{
-			for (const auto& rule : rules) {
-				if (rule.get_handle() == h)
-					return rule;
-			}
-
-			throw InvalidParamException(
-			        TRACE_INFO, "No rule with the given handle was found.");
-		}
 	};
-	RuleBaseParameters _rbparams;
+	CommonParameters _common_params;
+
+	// Parameter specific to the forward chainer.
+	struct FCParameters {};
+	FCParameters _fc_params;
+
+	// Parameter specific to the backward chainer.
+	struct BCParameters {
+		// This parameter biases select_expansion_andbit towards
+		// simpler FCS. Range from 0 to +inf. 0 means there is no
+		// complexity penalty, the greater value the greater the
+		// complexity penalty.
+		double complexity_penalty;
+
+		// This put an upper boundary on the maximum number of
+		// and-BITs the BIT can hold. Negative means unlimited.
+		int max_bit_size;
+	};
+	BCParameters _bc_params;
 
 	// Given <schema>, an <input> and optionally an output <type> (or
 	// subtype), return the <output>s in
@@ -116,7 +149,8 @@ private:
 	// The type (or subtype) can be used to avoid fetching patterns
 	// (if <type> is choosen not to have VARIABLE_NODE inherit from
 	// it).
-	HandleSeq fetch_execution_outputs(Handle schema, Handle input,
+	HandleSeq fetch_execution_outputs(const Handle& schema,
+	                                  const Handle& input,
 	                                  Type type = ATOM);
 
 	// Similar to above but takes instead the schema name instead of
@@ -132,7 +166,8 @@ private:
 	//
 	// Return the number associated to <num> or default_value in case
 	// no such ExecutionLink exists.
-	double fetch_num_param(const std::string& schema_name, Handle input,
+	double fetch_num_param(const std::string& schema_name,
+	                       const Handle& input,
 	                       double default_value = 0.0);
 
 	// Given <pred_name> and <input> in
@@ -143,7 +178,7 @@ private:
 	//
 	// Return TV.mean > 0.5 or default_value in case no such
 	// EvaluationLink exists.
-	bool fetch_bool_param(const std::string& pred_name, Handle input);
+	bool fetch_bool_param(const std::string& pred_name, const Handle& input);
 };
 
 } // ~namespace opencog

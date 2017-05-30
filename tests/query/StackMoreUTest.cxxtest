@@ -20,11 +20,9 @@
  * 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
  */
 
-#include <opencog/guile/load-file.h>
 #include <opencog/guile/SchemeEval.h>
 #include <opencog/guile/SchemeSmob.h>
 #include <opencog/query/BindLinkAPI.h>
-#include <opencog/util/Config.h>
 #include <opencog/util/Logger.h>
 
 #include "test-types.h"
@@ -74,21 +72,20 @@ class StackMoreUTest :  public CxxTest::TestSuite
 void StackMoreUTest::setUp(void)
 {
 	as = new AtomSpace();
+	SchemeEval* eval = new SchemeEval(as);
 
-	config().set("SCM_PRELOAD",
-      "tests/query/test_types.scm, "
-		"tests/query/stackmore-o-o.scm, "
-		"tests/query/stackmore-o-u.scm, "
-		"tests/query/stackmany-o-u.scm, "
-		"tests/query/stackmore-o-uu.scm, "
-		"tests/query/stackmore-u-o.scm, "
-		"tests/query/stackmore-u-u.scm, "
-		"tests/query/stackmore-u-uu.scm");
-
-	load_scm_files_from_config(*as);
+	eval->eval("(add-to-load-path \"..\")");
+	eval->eval("(add-to-load-path \"../../..\")");
+	eval->eval("(load-from-path \"tests/query/test_types.scm\")");
+	eval->eval("(load-from-path \"tests/query/stackmore-o-o.scm\")");
+	eval->eval("(load-from-path \"tests/query/stackmore-o-u.scm\")");
+	eval->eval("(load-from-path \"tests/query/stackmany-o-u.scm\")");
+	eval->eval("(load-from-path \"tests/query/stackmore-o-uu.scm\")");
+	eval->eval("(load-from-path \"tests/query/stackmore-u-o.scm\")");
+	eval->eval("(load-from-path \"tests/query/stackmore-u-u.scm\")");
+	eval->eval("(load-from-path \"tests/query/stackmore-u-uu.scm\")");
 
 	// Create an implication link that will be tested.
-	SchemeEval* eval = new SchemeEval(as);
 	bind_oo = eval->apply("bind_oo", Handle::UNDEFINED);
 	bind_ou = eval->apply("bind_ou", Handle::UNDEFINED);
 	many_ou = eval->apply("many_ou", Handle::UNDEFINED);
@@ -103,8 +100,8 @@ void StackMoreUTest::setUp(void)
  * Test of pattern matching on multi-variable matches with
  * confounding intermediate data.
  */
-#define getlink(hand,pos) LinkCast(hand)->getOutgoingAtom(pos)
-#define getarity(hand) LinkCast(hand)->getArity()
+#define getlink(hand,pos) hand->getOutgoingAtom(pos)
+#define getarity(hand) hand->getArity()
 
 void StackMoreUTest::test_oo(void)
 {

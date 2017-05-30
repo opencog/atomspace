@@ -26,6 +26,7 @@
 #define _OPENCOG_DEFAULT_PATTERN_MATCH_H
 
 #include <opencog/atoms/base/types.h>
+#include <opencog/atoms/base/Quotation.h>
 #include <opencog/atomspace/AtomSpace.h>
 #include <opencog/atoms/execution/Instantiator.h>
 #include <opencog/query/PatternMatchCallback.h>
@@ -60,15 +61,20 @@ class DefaultPatternMatchCB : public virtual PatternMatchCallback
 
 		virtual bool node_match(const Handle&, const Handle&);
 		virtual bool variable_match(const Handle&, const Handle&);
-		virtual bool link_match(const LinkPtr&, const LinkPtr&);
-		virtual bool post_link_match(const LinkPtr&, const LinkPtr&);
+		virtual bool scope_match(const Handle&, const Handle&);
 
-		virtual bool clause_match(const Handle&, const Handle&);
+		virtual bool link_match(const PatternTermPtr&, const Handle&);
+		virtual bool post_link_match(const Handle&, const Handle&);
+		virtual void post_link_mismatch(const Handle&, const Handle&);
+
+		virtual bool clause_match(const Handle&, const Handle&,
+		                          const HandleMap&);
 		/**
 		 * Typically called for AbsentLink
 		 */
 		virtual bool optional_clause_match(const Handle& pattrn,
-		                                   const Handle& grnd);
+		                                   const Handle& grnd,
+		                                   const HandleMap&);
 
 		virtual IncomingSet get_incoming_set(const Handle&);
 
@@ -76,8 +82,7 @@ class DefaultPatternMatchCB : public virtual PatternMatchCallback
 		 * Called when a virtual link is encountered. Returns false
 		 * to reject the match.
 		 */
-		virtual bool evaluate_sentence(const Handle& pat,
-		                           const std::map<Handle,Handle>& gnds)
+		virtual bool evaluate_sentence(const Handle& pat, const HandleMap& gnds)
 		{ return eval_sentence(pat, gnds); }
 
 		virtual const std::set<Type>& get_connectives(void)
@@ -88,30 +93,36 @@ class DefaultPatternMatchCB : public virtual PatternMatchCallback
 		bool optionals_present(void) { return _optionals_present; }
 	protected:
 
-	    /**
-	     * The mutex used to control access to the transient atomspace cache.
-	     */
-	    static std::mutex s_transient_cache_mutex;
-
-	    /**
-	     * The transient atomspace cache.
-	     */
-		static std::vector<AtomSpace*> s_transient_cache;
-
 		ClassServer& _classserver;
 
 		const Variables* _vars = NULL;
-		const std::set<Handle>* _dynamic = NULL;
+		const OrderedHandleSet* _dynamic = NULL;
 		bool _have_evaluatables = false;
-		const std::set<Handle>* _globs = NULL;
+		const OrderedHandleSet* _globs = NULL;
 
 		bool _have_variables;
 		Handle _pattern_body;
+
+		bool is_self_ground(const Handle&, const Handle&,
+		                    const HandleMap&, const OrderedHandleSet&,
+		                    Quotation quotation=Quotation());
+
+		// Variables that should be ignored, because they are bound
+		// (scoped) in the current context (i.e. appear in a ScopeLink
+		// that is being matched.)
+		const Variables* _pat_bound_vars;
+		const Variables* _gnd_bound_vars;
 
 		// Temp atomspace used for test-groundings of virtual links.
 		AtomSpace* _temp_aspace;
 		Instantiator* _instor;
 
+		// The transient atomspace cache. The goal here is to
+		// avoid the overhead of constantly creating/deleting
+		// the temp atomspaces above. So instead, just keep a
+		// cache of empty ones, ready to go.
+		static std::mutex s_transient_cache_mutex;
+		static std::vector<AtomSpace*> s_transient_cache;
 		static AtomSpace* grab_transient_atomspace(AtomSpace* parent);
 		static void release_transient_atomspace(AtomSpace* atomspace);
 
@@ -121,10 +132,8 @@ class DefaultPatternMatchCB : public virtual PatternMatchCallback
 #endif
 		// Crisp-logic evaluation of evaluatable terms
 		std::set<Type> _connectives;
-		bool eval_term(const Handle& pat,
-		             const std::map<Handle,Handle>& gnds);
-		bool eval_sentence(const Handle& pat,
-		             const std::map<Handle,Handle>& gnds);
+		bool eval_term(const Handle& pat, const HandleMap& gnds);
+		bool eval_sentence(const Handle& pat, const HandleMap& gnds);
 
 		bool _optionals_present = false;
 		AtomSpace* _as;

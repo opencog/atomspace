@@ -5,6 +5,13 @@
 module OpenCog.AtomSpace.Utils (
       showAtom
     , printAtom
+    , atomMap
+    , atomMapM
+    , atomFold
+    , atomElem
+    , nodeName
+    , atomType
+    , atomGetAllNodes
     ) where
 
 import OpenCog.AtomSpace.Types      (Atom(..),TruthVal(..))
@@ -59,3 +66,43 @@ showAtom at = concatWNewline $ list 0 at
 -- | 'printAtom' prints the given atom on stdout.
 printAtom :: Atom -> IO ()
 printAtom at = putStrLn $ showAtom at
+
+
+-- Atoms can build a tree structure
+-- the following functions make it easier to
+-- apply functions to all Atoms in such a tree
+
+atomMap :: (Atom -> Atom) -> Atom -> Atom
+atomMap f (Link t ls tv) = f $ Link t (map (atomMap f) ls) tv
+atomMap f n@(Node _ _ _) = f n
+
+atomMapM :: Monad m => (Atom -> m Atom) -> Atom -> m Atom
+atomMapM f (Link t ls tv) = do
+    nls <- (mapM (atomMapM f) ls)
+    f $ Link t nls tv
+atomMapM f n@(Node _ _ _) = f n
+
+atomFold :: (a -> Atom -> a) -> a -> Atom -> a
+atomFold f v a@(Link t ls tv) = f (foldl (atomFold f) v ls) a
+atomFold f v a@(Node _ _ _)   = f v a
+
+atomElem :: Atom -> Atom -> Bool
+atomElem n@(Node _ _ _) a@(Node _ _ _) = n == a
+atomElem n@(Node _ _ _) a@(Link _ _ _) =
+    atomFold (\b a -> a == n || b) False a
+atomElem n@(Link _ _ _) a@(Node _ _ _) = False
+atomElem n@(Link _ _ _) a@(Link _ _ _) =
+    atomFold (\ b a -> a == n || b) False a
+
+atomGetAllNodes :: Atom -> [Atom]
+atomGetAllNodes n@(Node _ _ _) = [n]
+atomGetAllNodes (Link _ ls _)  = concatMap atomGetAllNodes ls
+
+nodeName :: Atom -> String
+nodeName (Node _ n _) = n
+nodeName (Link _ _ _) = error "nodeName expects a Node."
+
+atomType :: Atom -> String
+atomType (Node t _ _) = t
+atomType (Link t _ _) = t
+

@@ -22,23 +22,21 @@
  * 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
  */
 
-#ifdef HAVE_GUILE
-
 #include <cstddef>
 #include <libguile.h>
 
 #include <opencog/guile/SchemeSmob.h>
+#include <opencog/attentionbank/AttentionBank.h>
 
 using namespace opencog;
 
 /**
  * Return AttentionalFocus Boundary
  */
-
 SCM SchemeSmob::ss_af_boundary (void)
 {
 	AtomSpace* atomspace = ss_get_env_as("cog-af-boundary");
-	return scm_from_short(atomspace->get_attentional_focus_boundary());
+	return scm_from_short(attentionbank(atomspace).getAttentionalFocusBoundary());
 }
 
 /**
@@ -52,7 +50,7 @@ SCM SchemeSmob::ss_set_af_boundary (SCM sboundary)
 			"integer opencog AttentionalFocus Boundary");
 
 	short bdy = scm_to_short(sboundary);
-	return scm_from_short(atomspace->set_attentional_focus_boundary(bdy));
+	return scm_from_short(attentionbank(atomspace).setAttentionalFocusBoundary(bdy));
 }
 
 /**
@@ -60,21 +58,18 @@ SCM SchemeSmob::ss_set_af_boundary (SCM sboundary)
  */
 SCM SchemeSmob::ss_af (void)
 {
-    AtomSpace* atomspace = ss_get_env_as("cog-af");
-
-    HandleSeq attentionalFocus;
-    atomspace->get_handle_set_in_attentional_focus(back_inserter(attentionalFocus));
-    size_t isz = attentionalFocus.size();
+	AtomSpace* atomspace = ss_get_env_as("cog-af");
+	HandleSeq attentionalFocus;
+	attentionbank(atomspace).get_handle_set_in_attentional_focus(back_inserter(attentionalFocus));
+	size_t isz = attentionalFocus.size();
 	if (0 == isz) return SCM_EOL;
 
-    SCM head = SCM_EOL;
-    for (size_t i = 0; i < isz; i++) {
-        Handle hi = attentionalFocus[i];
-        SCM smob = handle_to_scm(hi);
-        head = scm_cons(smob, head);
-    }
+	SCM head = SCM_EOL;
+	for (size_t i = 0; i < isz; i++) {
+		Handle hi = attentionalFocus[i];
+		SCM smob = handle_to_scm(hi);
+		head = scm_cons(smob, head);
+	}
 
 	return head;
 }
-
-#endif /* HAVE_GUILE */

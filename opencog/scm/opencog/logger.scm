@@ -1,7 +1,7 @@
 ;
 ; OpenCog Logger module
 ;
-; Copyright (c) 2015, OpenCog Foundation
+; Copyright (c) 2015 OpenCog Foundation
 ;
 
 (define-module (opencog logger))
@@ -9,7 +9,24 @@
 ; We need this to set the LTDL_LIBRARY_PATH
 (use-modules (opencog))
 
-(load-extension "libsmob" "opencog_logger_init")
+(load-extension "liblogger" "opencog_logger_init")
+
+; Declare everything the C++ library provides; this avoid compile-time
+; warnings when this file gets compiled.
+(export
+	cog-logger-get-filename
+	cog-logger-get-level
+	cog-logger-set-filename!
+	cog-logger-set-level!
+	cog-logger-set-stdout!
+	cog-logger-set-sync!
+	cog-logger-set-timestamp!
+	cog-logger-error-str
+	cog-logger-warn-str
+	cog-logger-info-str
+	cog-logger-debug-str
+	cog-logger-fine-str
+)
 
 ; Documentation for the functions implemented as C++ code
 (set-procedure-property! cog-logger-get-filename 'documentation
@@ -24,22 +41,46 @@
     Return the current logging level.
 ")
 
-(set-procedure-property! cog-logger-set-filename 'documentation
+(set-procedure-property! cog-logger-set-filename! 'documentation
 "
- cog-logger-set-filename FILENAME
+ cog-logger-set-filename! FILENAME
     Change the current logger file to FILENAME.
+    Return the previous filename.
 ")
 
-(set-procedure-property! cog-logger-set-level 'documentation
+(set-procedure-property! cog-logger-set-level! 'documentation
 "
- cog-logger-set-level LEVEL
+ cog-logger-set-level! LEVEL
     Set the current logging level to LEVEL.
+    Returns the previous logging level.
 ")
 
-(set-procedure-property! cog-logger-set-stdout 'documentation
+(set-procedure-property! cog-logger-set-stdout! 'documentation
 "
- cog-logger-set-stdout BOOL
+ cog-logger-set-stdout! BOOL
     If BOOL is #t, send log messages to stdout; else don't.
+    Returns the previous setting.
+")
+
+(set-procedure-property! cog-logger-set-sync! 'documentation
+"
+ cog-logger-set-sync! BOOL
+    If BOOL is #t, write message to log file synchronously; else don't.
+    That is, if sync is set, then the message will be written and the
+    file flushed, before the log request returns. Otherwise, logging
+    is carried out in a separate thread (to minimize latency impact on
+    the current thread).
+
+    Returns the previous setting.
+")
+
+(set-procedure-property! cog-logger-set-timestamp! 'documentation
+"
+ cog-logger-set-timestamp! BOOL
+    If BOOL is #t, then a timetampe will be written with each log
+    message; else not.
+
+    Returns the previous setting.
 ")
 
 ; Helper functions, using ice-9 format in logger functions.

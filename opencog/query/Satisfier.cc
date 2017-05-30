@@ -22,7 +22,6 @@
  */
 
 #include <opencog/atomspace/AtomSpace.h>
-#include <opencog/truthvalue/SimpleTruthValue.h>
 #include <opencog/atoms/pattern/PatternLink.h>
 
 #include "BindLinkAPI.h"
@@ -30,8 +29,8 @@
 
 using namespace opencog;
 
-bool Satisfier::grounding(const std::map<Handle, Handle> &var_soln,
-                          const std::map<Handle, Handle> &term_soln)
+bool Satisfier::grounding(const HandleMap &var_soln,
+                          const HandleMap &term_soln)
 {
 	// PatternMatchEngine::print_solution(var_soln, term_soln);
 	_result = TruthValue::TRUE_TV();
@@ -60,7 +59,7 @@ bool Satisfier::search_finished(bool done)
 	// If there were no variables to be grounded, we have nothing to do.
 	if (not _have_variables) return done;
 
-	// If there was a grounding, then don't don't re-run; we're here
+	// If there was a grounding, then don't re-run; we're here
 	// only to handle the no-groundings case.
 	if (TruthValue::TRUE_TV() == _result) return done;
 
@@ -68,14 +67,19 @@ bool Satisfier::search_finished(bool done)
 	// was grounded. Ergo, its not the no-grounding case.
 	if (_optionals_present) return done;
 
-	// Evaluating the pattern bod only makes sense if it is sequential
-	// (ordered) -- if the body is an unordered AdLik, or if its a
+	// Multi-component patterns will not have distinct bodies.
+	// A failure to match one of the components is benign, and is
+	// treated appropriately upstream. Just return.
+	if (nullptr == _pattern_body) return done;
+
+	// Evaluating the pattern body only makes sense if it is sequential
+	// (ordered) -- if the body is an unordered AndLink, or if its a
 	// ChoiceLink, etc, this makes no sense.
 	Type btype = _pattern_body->getType();
 	if (SEQUENTIAL_AND_LINK != btype and SEQUENTIAL_OR_LINK != btype)
 		return done;
 
-	std::map<Handle,Handle> empty;
+	HandleMap empty;
 	bool rc = eval_sentence(_pattern_body, empty);
 	if (rc)
 		_result = TruthValue::TRUE_TV();
@@ -85,10 +89,10 @@ bool Satisfier::search_finished(bool done)
 
 // ===========================================================
 
-bool SatisfyingSet::grounding(const std::map<Handle, Handle> &var_soln,
-                              const std::map<Handle, Handle> &term_soln)
+bool SatisfyingSet::grounding(const HandleMap &var_soln,
+                              const HandleMap &term_soln)
 {
-	// PatternMatchEngine::print_solution(var_soln, term_soln);
+	// PatternMatchEngine::log_solution(var_soln, term_soln);
 
 	// Do not accept new solution if maximum number has been already reached
 	if (_satisfying_set.size() >= max_results)
@@ -109,7 +113,7 @@ bool SatisfyingSet::grounding(const std::map<Handle, Handle> &var_soln,
 	{
 		vargnds.push_back(var_soln.at(hv));
 	}
-	_satisfying_set.emplace(Handle(createLink(LIST_LINK, vargnds)));
+	_satisfying_set.emplace(Handle(createLink(vargnds, LIST_LINK)));
 
 	// If we found as many as we want, then stop looking for more.
 	return (_satisfying_set.size() >= max_results);
@@ -137,7 +141,7 @@ TruthValuePtr opencog::satisfaction_link(AtomSpace* as, const Handle& hlink)
 Handle opencog::satisfying_set(AtomSpace* as, const Handle& hlink, size_t max_results)
 {
 	// Special case the BindLink. We probably shouldn't have to, and
-	// the C++ code for handling this case could maybe be rafactored
+	// the C++ code for handling this case could maybe be refactored
 	// to handle BindLink as well as GetLink in one place... but right
 	// now, it doesn't.
 	Type blt = hlink->getType();
@@ -145,16 +149,15 @@ Handle opencog::satisfying_set(AtomSpace* as, const Handle& hlink, size_t max_re
 	{
 		return bindlink(as, hlink, max_results);
 	}
+	if (DUAL_LINK == blt)
+	{
+		return recognize(as, hlink);
+	}
 
 	PatternLinkPtr bl(PatternLinkCast(hlink));
 	if (NULL == bl)
 	{
-		// If it is a BindLink (for example), we want to use that ctor
-		// instead of the default ctor.  Note BindLink isA GetLink.
-		if (classserver().isA(blt, GET_LINK))
-			bl = createPatternLink(*LinkCast(hlink));
-		else
-			bl = createPatternLink(hlink);
+		bl = createPatternLink(*LinkCast(hlink));
 	}
 
 	SatisfyingSet sater(as);

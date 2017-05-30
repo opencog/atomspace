@@ -21,6 +21,61 @@
  * 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
  */
 
+#ifdef HAVE_GUILE
+
+#include <opencog/guile/SchemeModule.h>
+
+namespace opencog {
+
+class InferenceSCM : public ModuleWrap
+{
+protected:
+	virtual void init();
+
+	/**
+	 * The scheme (cog-fc) function calls this, to perform forward-chaining.
+	 *
+	 * @param rbs          A node, holding the name of the rulebase.
+	 * @param source       The source atom with which to start the chaining.
+	 * @param vardecl      The variable declaration, if any, of the source.
+	 * @param focus_set    A SetLink containing the atoms to which forward
+	 *                     chaining will be applied.  If the set link is
+	 *                     empty, chaining will be invoked on the entire
+	 *                     atomspace.
+	 *
+	 * @return             A SetLink containing the results of FC inference.
+	 */
+	Handle do_forward_chaining(Handle rbs,
+	                           Handle source,
+	                           Handle vardecl,
+	                           Handle focus_set);
+
+	/**
+	 * The scheme (cog-bc) function calls this, to perform forward-chaining.
+	 *
+	 * @param rbs          A node, holding the name of the rulebase.
+	 * @param target       The target atom with which to start the chaining from.
+	 * @param vardecl      The variable declaration, if any, of the target.
+	 * @param focus_set    A SetLink containing the atoms to which forward
+	 *                     chaining will be applied.  If the set link is
+	 *                     empty, chaining will be invoked on the entire
+	 *                     atomspace.
+	 *
+	 * @return             A SetLink containing the results of FC inference.
+	 */
+	Handle do_backward_chaining(Handle rbs,
+	                            Handle target,
+	                            Handle vardecl,
+	                            Handle focus_set);
+
+	Handle get_rulebase_rules(Handle rbs);
+
+public:
+	InferenceSCM();
+};
+
+} /*end of namespace opencog*/
+
 #include <opencog/atomspace/AtomSpace.h>
 #include <opencog/guile/SchemePrimitive.h>
 
@@ -28,7 +83,6 @@
 #include <opencog/rule-engine/backwardchainer/BackwardChainer.h>
 
 #include "UREConfigReader.h"
-#include "InferenceSCM.h"
 using namespace opencog;
 
 InferenceSCM::InferenceSCM() : ModuleWrap("opencog rule-engine") {}
@@ -47,73 +101,52 @@ void InferenceSCM::init(void)
 		&InferenceSCM::get_rulebase_rules, this, "rule-engine");
 }
 
-namespace opencog {
-
-/**
- * A scheme cog-fc call back handler method which invokes the forward
- * chainer with the arguments passed to cog-fc.
- *
- * @param hsource      The source atom to start the forward chaining with.
- * @param rbs          A handle to the rule base ConceptNode.
- * @param hfoucs_set   A handle to a set link containing the set of focus sets.
- *                     if the set link is empty, FC will be invoked on the entire
- *                     atomspace.
- *
- * @return             A ListLink containing the result of FC inference.
- */
-Handle InferenceSCM::do_forward_chaining(Handle hsource,
-                                         Handle rbs,
-                                         Handle hfocus_set)
+Handle InferenceSCM::do_forward_chaining(Handle rbs,
+                                         Handle source,
+                                         Handle vardecl,
+                                         Handle focus_set_h)
 {
     AtomSpace *as = SchemeSmob::ss_get_env_as("cog-fc");
     HandleSeq focus_set = {};
 
-    if (hfocus_set->getType() == SET_LINK)
-        focus_set = hfocus_set->getOutgoingSet();
-    else
-        throw RuntimeException(
-                TRACE_INFO,
-                "InferenceSCM::do_forward_chaining - focus set should be SET_LINK type!");
+    // A ListLink means that the variable declaration is undefined
+    if (vardecl->getType() == LIST_LINK)
+	    vardecl = Handle::UNDEFINED;
 
-    ForwardChainer fc(*as, rbs, hsource, focus_set);
+    if (focus_set_h->getType() == SET_LINK)
+	    focus_set = focus_set_h->getOutgoingSet();
+    else
+	    throw RuntimeException(
+		    TRACE_INFO,
+		    "InferenceSCM::do_forward_chaining - focus set should be SET_LINK type!");
+
+    ForwardChainer fc(*as, rbs, source, vardecl, focus_set);
     fc.do_chain();
     UnorderedHandleSet result = fc.get_chaining_result();
 
     return as->add_link(SET_LINK, HandleSeq(result.begin(), result.end()));
 }
 
-Handle InferenceSCM::do_backward_chaining(Handle h,
-                                          Handle rbs,
+Handle InferenceSCM::do_backward_chaining(Handle rbs,
+                                          Handle target,
+                                          Handle vardecl,
                                           Handle focus_link)
 {
-    if (Handle::UNDEFINED == rbs)
-        throw RuntimeException(TRACE_INFO,
-            "InferenceSCM::do_backward_chaining - invalid rulebase!");
+    // A ListLink means that the variable declaration is undefined
+    if (vardecl->getType() == LIST_LINK)
+	    vardecl = Handle::UNDEFINED;
 
     AtomSpace *as = SchemeSmob::ss_get_env_as("cog-bc");
-    BackwardChainer bc(*as, rbs);
-    bc.set_target(h, focus_link);
-
-    logger().debug("[BackwardChainer] Before do_chain");
+    BackwardChainer bc(*as, rbs, target, vardecl, focus_link);
 
     bc.do_chain();
 
-    logger().debug("[BackwardChainer] After do_chain");
-    map<Handle, UnorderedHandleSet> soln = bc.get_chaining_result();
-
-    HandleSeq soln_list_link;
-    for (auto it = soln.begin(); it != soln.end(); ++it) {
-        HandleSeq hs;
-        hs.push_back(it->first);
-        hs.insert(hs.end(), it->second.begin(), it->second.end());
-
-        soln_list_link.push_back(as->add_link(LIST_LINK, hs));
-    }
-
-    return as->add_link(LIST_LINK, soln_list_link);
+    return bc.get_results();
 }
 
-HandleSeq InferenceSCM::get_rulebase_rules(Handle rbs)
+// XXX FIXME -- this appears to be dead code, that no one uses.
+// Can this be removed?
+Handle InferenceSCM::get_rulebase_rules(Handle rbs)
 {
     if (Handle::UNDEFINED == rbs)
         throw RuntimeException(TRACE_INFO,
@@ -124,21 +157,23 @@ HandleSeq InferenceSCM::get_rulebase_rules(Handle rbs)
     auto rules = ure_config.get_rules();
     HandleSeq hs;
 
-    // Copy handles from a rule vector to a handle vector as there are no
-    // scheme-primitive signature for rule vector.
-    // TODO: create a rule-vector scheme-primitive signature, if Rule.h isn't
-    // converted to a sub-class of PatternLink.
+    // Copy handles from a rule vector to a handle vector
     for (auto i = rules.begin(); i != rules.end(); i++){
         hs.push_back((*i).get_alias());
     }
 
-    return hs;
+    return Handle(createLink(hs, SET_LINK));
 }
 
-}
+
+extern "C" {
+void opencog_ruleengine_init(void);
+};
 
 void opencog_ruleengine_init(void)
 {
     static InferenceSCM inference;
     inference.module_init();
 }
+
+#endif // HAVE_GUILE

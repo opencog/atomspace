@@ -62,14 +62,13 @@ namespace opencog
 class RandomChoiceLink : public FunctionLink
 {
 public:
-	RandomChoiceLink(const HandleSeq&,
-	           TruthValuePtr tv = TruthValue::DEFAULT_TV(),
-	           AttentionValuePtr av = AttentionValue::DEFAULT_AV());
-
-	RandomChoiceLink(Link &l);
+	RandomChoiceLink(const HandleSeq&, Type=RANDOM_CHOICE_LINK);
+	RandomChoiceLink(const Link &l);
 
 	// Return a pointer to the atom being specified.
 	virtual Handle execute(AtomSpace* = NULL) const;
+
+	static Handle factory(const Handle&);
 };
 
 typedef std::shared_ptr<RandomChoiceLink> RandomChoiceLinkPtr;

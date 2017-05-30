@@ -1,0 +1,172 @@
+/*
+ * tests/atoms/ScopeLinkUTest.cxxtest
+ *
+ * Copyright (C) 2017 OpenCog Foundation
+ * All Rights Reserved
+ *
+ * This program is free software; you can redistribute it and/or modify
+ * it under the terms of the GNU Affero General Public License v3 as
+ * published by the Free Software Foundation and including the exceptions
+ * at http://opencog.org/wiki/Licenses
+ *
+ * This program is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ * GNU General Public License for more details.
+ *
+ * You should have received a copy of the GNU Affero General Public License
+ * along with this program; if not, write to:
+ * Free Software Foundation, Inc.,
+ * 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
+ */
+
+#include <opencog/guile/SchemeEval.h>
+#include <opencog/atoms/base/Atom.h>
+#include <opencog/atomspace/AtomSpace.h>
+#include <opencog/atoms/core/ScopeLink.h>
+
+#include <cxxtest/TestSuite.h>
+
+using namespace opencog;
+
+#define al _as.add_link
+#define an _as.add_node
+
+// Test ScopeLink.
+//
+class ScopeLinkUTest :  public CxxTest::TestSuite
+{
+private:
+	AtomSpace _as;
+	SchemeEval _eval;
+	Handle X, Y, P, Q, CT;
+
+public:
+	ScopeLinkUTest() : _eval(&_as)
+	{
+		logger().set_print_to_stdout_flag(true);
+
+		X = an(VARIABLE_NODE, "$X");
+		Y = an(VARIABLE_NODE, "$Y");
+		P = an(PREDICATE_NODE, "P");
+		Q = an(PREDICATE_NODE, "Q");
+		CT = an(TYPE_NODE, "ConceptNode");
+
+		_eval.eval("(add-to-load-path \"..\")");
+		_eval.eval("(add-to-load-path \"../../..\")");
+	}
+
+	void setUp() {}
+
+	void tearDown() {}
+
+	void test_get_variables_1();
+	void test_get_variables_2();
+	void test_get_variables_3();
+	void test_compute_hash_1();
+	void test_compute_hash_2();
+};
+
+void ScopeLinkUTest::test_get_variables_1()
+{
+	logger().info("BEGIN TEST: %s", __FUNCTION__);
+
+	Handle sch = al(SCOPE_LINK,
+	                X,
+	                al(AND_LINK,
+	                   al(EVALUATION_LINK, P, X),
+	                   al(EVALUATION_LINK, Q, Y)));
+
+	ScopeLinkPtr sc = ScopeLinkCast(sch);
+
+	auto got = sc->get_variables().varset;
+	auto exp = OrderedHandleSet{X};
+
+	printf("Got %s\n", ohs_to_string(got).c_str());
+	printf("Excepted %s\n", ohs_to_string(exp).c_str());
+
+	TS_ASSERT_EQUALS(got, exp);
+
+	logger().info("END TEST: %s", __FUNCTION__);
+}
+
+void ScopeLinkUTest::test_get_variables_2()
+{
+	logger().info("BEGIN TEST: %s", __FUNCTION__);
+
+	Handle sch = al(SCOPE_LINK,
+	                al(TYPED_VARIABLE_LINK, X, CT),
+	                an(VARIABLE_NODE, "$P-55ebe96e"),
+	                al(EVALUATION_LINK,
+	                   an(PREDICATE_NODE, "take"),
+	                   an(CONCEPT_NODE, "compound-A")));
+
+	ScopeLinkPtr sc = ScopeLinkCast(sch);
+
+	auto got = sc->get_variables().varset;
+	auto exp = OrderedHandleSet{X};
+
+	printf("Got %s\n", ohs_to_string(got).c_str());
+	printf("Excepted %s\n", ohs_to_string(exp).c_str());
+
+	TS_ASSERT_EQUALS(got, exp);
+
+	logger().info("END TEST: %s", __FUNCTION__);
+}
+
+void ScopeLinkUTest::test_get_variables_3()
+{
+	logger().info("BEGIN TEST: %s", __FUNCTION__);
+
+	Handle sch = al(IMPLICATION_SCOPE_LINK,
+	                al(TYPED_VARIABLE_LINK, X, CT),
+	                an(VARIABLE_NODE, "$P-55ebe96e"),
+	                al(EVALUATION_LINK,
+	                   an(PREDICATE_NODE, "take"),
+	                   an(CONCEPT_NODE, "compound-A")));
+
+	ScopeLinkPtr sc = ScopeLinkCast(sch);
+
+	auto got = sc->get_variables().varset;
+	auto exp = OrderedHandleSet{X};
+
+	printf("Got %s\n", ohs_to_string(got).c_str());
+	printf("Excepted %s\n", ohs_to_string(exp).c_str());
+
+	TS_ASSERT_EQUALS(got, exp);
+
+	logger().info("END TEST: %s", __FUNCTION__);
+}
+
+void ScopeLinkUTest::test_compute_hash_1()
+{
+	logger().info("BEGIN TEST: %s", __FUNCTION__);
+
+	std::string result =
+		_eval.eval("(load-from-path \"tests/atoms/scopelinks.scm\")");
+
+	Handle bl1 = _eval.eval_h("bl-1"),
+		bl2 = _eval.eval_h("bl-2");
+
+	TS_ASSERT_DIFFERS(bl1.value(), bl2.value());
+
+	logger().info("END TEST: %s", __FUNCTION__);
+}
+
+void ScopeLinkUTest::test_compute_hash_2()
+{
+	logger().info("BEGIN TEST: %s", __FUNCTION__);
+
+	std::string result =
+		_eval.eval("(load-from-path \"tests/atoms/scopelinks.scm\")");
+
+	Handle gl1 = _eval.eval_h("gl-1"),
+		gl2 = _eval.eval_h("gl-2");
+
+	TS_ASSERT_DIFFERS(gl1.value(), gl2.value());
+
+	logger().info("END TEST: %s", __FUNCTION__);
+}
+
+#undef al
+#undef an

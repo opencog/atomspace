@@ -6,8 +6,6 @@
  * Copyright (c) 2008,2009,2014 Linas Vepstas <linas@linas.org>
  */
 
-#ifdef HAVE_GUILE
-
 #include <cstddef>
 #include <libguile.h>
 
@@ -74,8 +72,6 @@ void SchemeSmob::release_as (AtomSpace *as)
 		AtomSpace* env = as->get_environ();
 		deleteable_as.erase(has);
 		lck.unlock();
-		scm_gc_unregister_collectable_memory (as,
-	                  sizeof(*as), "opencog atomspace");
 		delete as;
 
 		// (Recursively) decrement the use count on the parent.
@@ -95,8 +91,7 @@ SCM SchemeSmob::ss_new_as (SCM s)
 
 	AtomSpace *as = new AtomSpace(parent);
 
-	scm_gc_register_collectable_memory (as,
-	                 sizeof(*as), "opencog atomspace");
+	scm_gc_register_allocation(sizeof(*as));
 
 	// Only the internally-created atomspaces are trackable.
 	std::lock_guard<std::mutex> lck(as_mtx);
@@ -112,11 +107,11 @@ SCM SchemeSmob::ss_new_as (SCM s)
 
 #define WORK_AROUND_GUILE_20_GC_BUG
 #ifdef WORK_AROUND_GUILE_20_GC_BUG
-	// Below is a wrk-around to a bug.  You can trigger this bug
-	// with the code below;  if will crash, because the initial
+	// Below is a work-around to a bug.  You can trigger this bug
+	// with the code below;  it will crash, because the initial
 	// AS gets erroneously garbage-collected.  Guile is trying
 	// to release the main AS every time through the loop.  I can't
-	// tell why.
+	// figure out why.
 /******
 (use-modules (opencog))
 (use-modules (opencog exec))
@@ -210,7 +205,7 @@ SCM SchemeSmob::ss_as_uuid(SCM sas)
 	{
 		// Special care for atom whose atomspace was null
 		if (scm_is_null(sas))
-			return scm_from_ulong(Handle::INVALID_UUID);
+			return scm_from_ulong(ULONG_MAX);
 		scm_wrong_type_arg_msg("cog-atomspace-uuid", 1, sas, "atomspace");
 	}
 
@@ -345,6 +340,10 @@ void SchemeSmob::ss_set_env_as(AtomSpace *nas)
 
 AtomSpace* SchemeSmob::ss_get_env_as(const char* subr)
 {
+   // There are weird test-case scenarios where the fluid is not
+   // initalized. Those will crash-n-burn without this test.
+	if (0x0 == atomspace_fluid) return nullptr;
+
 	SCM ref = scm_fluid_ref(atomspace_fluid);
 	AtomSpace* as = ss_to_atomspace(ref);
 	// if (NULL == as)
@@ -373,6 +372,4 @@ AtomSpace* SchemeSmob::get_as_from_list(SCM slist)
 	return NULL;
 }
 
-
-#endif /* HAVE_GUILE */
 /* ===================== END OF FILE ============================ */

@@ -23,7 +23,6 @@
 #include <opencog/atomspace/AtomSpace.h>
 #include <opencog/atomutils/FindUtils.h>
 #include <opencog/util/Logger.h>
-#include <opencog/util/Config.h>
 #include <cxxtest/TestSuite.h>
 
 using namespace opencog;
@@ -32,7 +31,8 @@ class FindUtilsUTest :  public CxxTest::TestSuite
 {
 private:
 	AtomSpace as;
-	Handle X, Y, P, free_evaluation, scoped_implication, quotation;
+	Handle X, Y, P, free_evaluation, scoped_implication, quotation,
+	    quoted_lambda;
 
 public:
 	FindUtilsUTest()
@@ -46,6 +46,9 @@ public:
 	void test_is_unscoped_in_tree();
 	void test_min_quotation_level();
 	void test_max_quotation_level();
+	void test_is_closed();
+	void test_is_free_in_tree();
+	void test_get_free_variables();
 };
 
 void FindUtilsUTest::setUp(void)
@@ -61,10 +64,9 @@ void FindUtilsUTest::setUp(void)
 		al(EVALUATION_LINK, P, X);
 
 	scoped_implication =
-		al(IMPLICATION_LINK, P,
-		   al(LAMBDA_LINK,
-		      X,
-		      free_evaluation));
+		al(IMPLICATION_LINK,
+		   P,
+		   al(LAMBDA_LINK, X, free_evaluation));
 
 	quotation =
 		al(QUOTE_LINK,
@@ -74,6 +76,13 @@ void FindUtilsUTest::setUp(void)
 		         al(OR_LINK,
 		            X,
 		            al(UNQUOTE_LINK, Y)))));
+
+	quoted_lambda =
+		al(QUOTE_LINK,
+		   al(LAMBDA_LINK,
+		      al(UNQUOTE_LINK, X),
+		         al(UNQUOTE_LINK,
+		         al(AND_LINK, X, Y))));
 
 #undef al
 #undef an
@@ -101,4 +110,24 @@ void FindUtilsUTest::test_max_quotation_level()
 {
 	TS_ASSERT_EQUALS(max_quotation_level(quotation, X), 2);
 	TS_ASSERT_EQUALS(max_quotation_level(quotation, Y), 1);
+}
+
+// Test is_closed()
+void FindUtilsUTest::test_is_closed()
+{
+	TS_ASSERT(not is_closed(free_evaluation));
+	TS_ASSERT(is_closed(scoped_implication));
+	TS_ASSERT(not is_closed(quotation));
+}
+
+// Test is_free_in_any_tree(). More specifically the interplay between
+// scope and quotation.
+void FindUtilsUTest::test_is_free_in_tree()
+{
+	TS_ASSERT(is_free_in_tree(quoted_lambda, X));
+}
+
+void FindUtilsUTest::test_get_free_variables()
+{
+	TS_ASSERT_EQUALS(get_free_variables(quoted_lambda), OrderedHandleSet({X, Y}));
 }

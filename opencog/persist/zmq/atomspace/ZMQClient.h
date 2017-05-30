@@ -36,7 +36,6 @@
 #include <vector>
 
 #include <zmq.hpp>
-#include <opencog/util/async_method_caller.h>
 #include <opencog/atoms/base/Atom.h>
 #include <opencog/atomspace/AtomTable.h>
 #include <opencog/atoms/base/Link.h>
@@ -79,23 +78,15 @@ class ZMQClient
 		void flushStoreQueue();
 
 		// Fetch atoms from DB
-//		bool atomExists(Handle);
 		AtomPtr getAtom(UUID);
-		std::vector<Handle> getIncomingSet(Handle);
-		NodePtr getNode(Type, const char *);
-		NodePtr getNode(const Node &n)
-		{
-			return getNode(n.getType(), n.getName().c_str());
-		}
-		LinkPtr getLink(Type, const std::vector<Handle>&);
-		LinkPtr getLink(const Link &l)
-		{
-			return getLink(l.getType(), l.getOutgoingSet());
-		}
+		Handle getNode(Type, const char *);
+		Handle getLink(Type, const HandleSeq&);
 
 		// Large-scale loads and saves
 		void loadType(AtomTable &, Type); // Load *all* atoms of type
 		void load(AtomTable &); // Load entire contents of DB
+		void getIncomingSet(AtomTable&, const Handle&);
+		void getIncomingByType(AtomTable&, const Handle&, Type);
 		void store(const AtomTable &); // Store entire contents of AtomTable
 		void reserve(void);     // reserve range of UUID's
 

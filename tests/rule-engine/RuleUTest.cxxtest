@@ -1,0 +1,778 @@
+/*
+ * RuleUTest.cxxtest
+ *
+ * Copyright (C) 2016 OpenCog Foundation
+ *
+ * Author: Nil Geisweiller
+ *
+ * This program is free software; you can redistribute it and/or modify
+ * it under the terms of the GNU Affero General Public License v3 as
+ * published by the Free Software Foundation and including the exceptions
+ * at http://opencog.org/wiki/Licenses
+ *
+ * This program is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ * GNU General Public License for more details.
+ *
+ * You should have received a copy of the GNU Affero General Public License
+ * along with this program; if not, write to:
+ * Free Software Foundation, Inc.,
+ * 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
+ */
+
+#include <cxxtest/TestSuite.h>
+
+#include <opencog/guile/SchemeEval.h>
+#include <opencog/atomspace/AtomSpace.h>
+#include <opencog/rule-engine/Rule.h>
+
+using namespace std;
+using namespace opencog;
+
+#define al _as.add_link
+#define an _as.add_node
+
+class RuleUTest: public CxxTest::TestSuite
+{
+private:
+	AtomSpace _as;
+	SchemeEval _eval;
+	Handle deduction_rule_h,
+		deduction_implication_rule_h, deduction_inheritance_rule_h,
+		implication_scope_to_implication_rule_h,
+		implication_and_lambda_factorization_rule_h,
+		closed_lambda_introduction_rule_h,
+		X, A, V, CT, Typed_X, P_body_var, P, Q, Eval_P, Eval_Q;
+
+public:
+	RuleUTest() : _eval(&_as)
+	{
+	}
+
+	void setUp();
+	void tearDown();
+
+	void test_unify_target_deduction_1();
+	void test_unify_target_deduction_2();
+	void test_unify_target_deduction_3();
+	void test_unify_target_implication_scope_to_implication_1();
+	void test_unify_target_implication_scope_to_implication_2();
+	void test_unify_target_implication_scope_to_implication_3();
+	void test_unify_target_implication_scope_to_implication_4();
+	void test_unify_target_implication_and_lambda_factorization();
+	void test_unify_target_closed_lambda_introduction_1();
+	void test_unify_target_closed_lambda_introduction_2();
+};
+
+void RuleUTest::setUp()
+{
+	string cur_pp_dir = string(PROJECT_SOURCE_DIR),
+		cur_p_dir = cur_pp_dir + "/tests",
+		cur_dir = cur_p_dir + "/rule-engine",
+		rule_dir = cur_dir + "/rules";
+	vector<string> load_paths = {cur_pp_dir, cur_p_dir, cur_dir, rule_dir};
+	for (string& p : load_paths)
+	{
+		string eval_str = string("(add-to-load-path \"") + p + string("\")");
+		_eval.eval(eval_str);
+	}
+	_eval.eval("(use-modules (opencog))");
+	// _eval.eval("(use-modules (opencog rule-engine))");
+
+	string eval_result =        // useful for debugging
+		_eval.eval("(load-from-path \"bc-config.scm\")");
+	eval_result = _eval.eval("(load-from-path \"crisp-deduction-rule.scm\")");
+	eval_result = _eval.eval("(load-from-path \"implication-scope-to-implication-rule.scm\")");
+	eval_result = _eval.eval("(load-from-path \"implication-and-lambda-factorization-rule.scm\")");
+	eval_result = _eval.eval("(load-from-path \"closed-lambda-introduction-rule.scm\")");
+
+	deduction_rule_h =
+		_eval.eval_h("(MemberLink (stv 1 1)"
+		             "   bc-deduction-rule-name"
+		             "   (ConceptNode \"URE\"))");
+	deduction_implication_rule_h =
+		_eval.eval_h("(MemberLink (stv 1 1)"
+		             "   crisp-deduction-implication-rule-name"
+		             "   (ConceptNode \"URE\"))");
+	implication_scope_to_implication_rule_h =
+		_eval.eval_h("(MemberLink (stv 1 1)"
+		             "   implication-scope-to-implication-rule-name"
+		             "   (ConceptNode \"URE\"))");
+	implication_and_lambda_factorization_rule_h =
+		_eval.eval_h("(MemberLink (stv 1 1)"
+		             "   implication-and-lambda-factorization-rule-name"
+		             "   (ConceptNode \"URE\"))");
+	closed_lambda_introduction_rule_h =
+		_eval.eval_h("(MemberLink (stv 1 1)"
+		             "   closed-lambda-introduction-rule-name"
+		             "   (ConceptNode \"URE\"))");
+
+	X = an(VARIABLE_NODE, "$X");
+	A = an(CONCEPT_NODE, "$A");
+	V = an(VARIABLE_NODE, "$V");
+	CT = an(TYPE_NODE, "ConceptNode");
+	Typed_X = al(TYPED_VARIABLE_LINK, X, CT);
+	P = an(PREDICATE_NODE, "P");
+	P_body_var = an(VARIABLE_NODE, "$P");
+	Q = an(PREDICATE_NODE, "Q");
+	Eval_P = al(EVALUATION_LINK, P, X);
+	Eval_Q = al(EVALUATION_LINK, Q, X);
+}
+
+void RuleUTest::tearDown()
+{
+	_as.clear();
+}
+
+void RuleUTest::test_unify_target_deduction_1()
+{
+	Rule deduction_rule(deduction_rule_h);
+	Handle target = al(INHERITANCE_LINK, X, A);
+	RuleTypedSubstitutionMap rules = deduction_rule.unify_target(target);
+
+	TS_ASSERT_EQUALS(rules.size(), 1);
+
+	Handle rule = rules.begin()->first.get_rule(),
+		// Expected up to an alpha conversion
+		vardecl = al(VARIABLE_LIST,
+		             // TODO: unify needs to be upgraded so it can
+		             // infer that X is in fact a ConceptNode
+		             //
+		             // al(TYPED_VARIABLE_LINK, X, CT),
+		             X,
+		             al(TYPED_VARIABLE_LINK, V, CT)),
+		XV = al(INHERITANCE_LINK, X, V),
+		VA = al(INHERITANCE_LINK, V, A),
+		XA = al(INHERITANCE_LINK, X, A),
+		XnotA = al(NOT_LINK, al(IDENTICAL_LINK, X, A)),
+		true_enough = an(GROUNDED_PREDICATE_NODE, "scm: true-enough"),
+		true_enough_XV = al(EVALUATION_LINK, true_enough, XV),
+		true_enough_VA = al(EVALUATION_LINK, true_enough, VA),
+		body = al(AND_LINK, XV, VA, XnotA, true_enough_XV, true_enough_VA),
+		schema = an(GROUNDED_SCHEMA_NODE, "scm: bc-deduction-formula"),
+		rewrite = al(EXECUTION_OUTPUT_LINK,
+		             schema,
+		             al(LIST_LINK, XA, XV, VA)),
+		expected = al(BIND_LINK, vardecl, body, rewrite);
+
+	std::cout << "rule = " << oc_to_string(rule);
+	std::cout << "expected = " << oc_to_string(expected);
+
+	ScopeLinkPtr expected_sc = ScopeLinkCast(expected);
+
+	TS_ASSERT(expected_sc->is_equal(rule));
+}
+
+// Like test_unify_target_deduction_1 but with a variable declaration
+void RuleUTest::test_unify_target_deduction_2()
+{
+	Rule deduction_rule(deduction_rule_h);
+	Handle target = al(INHERITANCE_LINK, X, A),
+		target_vardecl = al(TYPED_VARIABLE_LINK, X, CT);
+	RuleTypedSubstitutionMap rules =
+		deduction_rule.unify_target(target, target_vardecl);
+
+	TS_ASSERT_EQUALS(rules.size(), 1);
+
+	Handle rule = rules.begin()->first.get_rule(),
+		// Expected up to an alpha conversion
+		vardecl = al(VARIABLE_LIST,
+		             al(TYPED_VARIABLE_LINK, X, CT),
+		             al(TYPED_VARIABLE_LINK, V, CT)),
+		XV = al(INHERITANCE_LINK, X, V),
+		VA = al(INHERITANCE_LINK, V, A),
+		XA = al(INHERITANCE_LINK, X, A),
+		XnotA = al(NOT_LINK, al(IDENTICAL_LINK, X, A)),
+		true_enough = an(GROUNDED_PREDICATE_NODE, "scm: true-enough"),
+		true_enough_XV = al(EVALUATION_LINK, true_enough, XV),
+		true_enough_VA = al(EVALUATION_LINK, true_enough, VA),
+		body = al(AND_LINK, XV, VA, XnotA, true_enough_XV, true_enough_VA),
+		schema = an(GROUNDED_SCHEMA_NODE, "scm: bc-deduction-formula"),
+		rewrite = al(EXECUTION_OUTPUT_LINK,
+		             schema,
+		             al(LIST_LINK, XA, XV, VA)),
+		expected = al(BIND_LINK, vardecl, body, rewrite);
+
+	std::cout << "rule = " << oc_to_string(rule);
+	std::cout << "expected = " << oc_to_string(expected);
+
+	ScopeLinkPtr expected_sc = ScopeLinkCast(expected);
+
+	TS_ASSERT(expected_sc->is_equal(rule));
+}
+
+void RuleUTest::test_unify_target_deduction_3()
+{
+	Rule deduction_implication_rule(deduction_implication_rule_h);
+	Handle target =
+		_eval.eval_h("(ImplicationLink"
+		             "  (LambdaLink"
+		             "    (TypedVariableLink"
+		             "      (VariableNode \"$X\")"
+		             "      (TypeNode \"ConceptNode\"))"
+		             "    (EvaluationLink"
+		             "      (PredicateNode \"take\")"
+		             "      (ListLink"
+		             "        (VariableNode \"$X\")"
+		             "        (ConceptNode \"treatment-1\"))))"
+		             "  (QuoteLink"
+		             "    (LambdaLink"
+		             "      (UnquoteLink"
+		             "        (VariableNode \"$TyVs-bdfd20a\"))"
+		             "      (UnquoteLink"
+		             "        (VariableNode \"$P-25868310\")))))");
+	Handle vardecl =
+		_eval.eval_h("(VariableList"
+		             "  (TypedVariableLink"
+		             "    (VariableNode \"$TyVs-bdfd20a\")"
+		             "    (TypeChoice"
+		             "      (TypeNode \"TypedVariableLink\")"
+		             "      (TypeNode \"VariableList\")))"
+		             "  (VariableNode \"$P-25868310\"))");
+
+	RuleTypedSubstitutionMap rules =
+		deduction_implication_rule.unify_target(target, vardecl);
+
+	TS_ASSERT_EQUALS(rules.size(), 1);
+
+	Handle rule = rules.begin()->first.get_rule();
+	// Expected up to an alpha conversion
+	// TODO
+	Handle expected =
+		_eval.eval_h("(BindLink"
+		             "  (VariableList"
+		             "    (TypedVariableLink"
+		             "      (VariableNode \"$TyVs-bdfd20a\")"
+		             "      (TypeChoice"
+		             "        (TypeNode \"TypedVariableLink\")"
+		             "        (TypeNode \"VariableList\")))"
+		             "    (VariableNode \"$P-25868310\")"
+		             "    (VariableNode \"$B-6c74a409\"))"
+		             "  (AndLink"
+		             "    (EvaluationLink"
+		             "      (GroundedPredicateNode \"scm: true-enough\")"
+		             "      (ImplicationLink"
+		             "        (VariableNode \"$B-6c74a409\")"
+		             "        (QuoteLink"
+		             "          (LambdaLink"
+		             "            (UnquoteLink"
+		             "              (VariableNode \"$TyVs-bdfd20a\"))"
+		             "            (UnquoteLink"
+		             "              (VariableNode \"$P-25868310\"))))))"
+		             "    (NotLink"
+		             "      (IdenticalLink"
+		             "        (LambdaLink"
+		             "          (TypedVariableLink"
+		             "            (VariableNode \"$X\")"
+		             "            (TypeNode \"ConceptNode\"))"
+		             "          (EvaluationLink"
+		             "            (PredicateNode \"take\")"
+		             "            (ListLink"
+		             "              (VariableNode \"$X\")"
+		             "              (ConceptNode \"treatment-1\"))))"
+		             "        (QuoteLink"
+		             "          (LambdaLink"
+		             "            (UnquoteLink"
+		             "              (VariableNode \"$TyVs-bdfd20a\"))"
+		             "            (UnquoteLink"
+		             "              (VariableNode \"$P-25868310\"))))))"
+		             "    (EvaluationLink"
+		             "      (GroundedPredicateNode \"scm: true-enough\")"
+		             "      (ImplicationLink"
+		             "        (LambdaLink"
+		             "          (TypedVariableLink"
+		             "            (VariableNode \"$X\")"
+		             "            (TypeNode \"ConceptNode\"))"
+		             "          (EvaluationLink"
+		             "            (PredicateNode \"take\")"
+		             "            (ListLink"
+		             "              (VariableNode \"$X\")"
+		             "              (ConceptNode \"treatment-1\"))))"
+		             "        (VariableNode \"$B-6c74a409\")))"
+		             "    (ImplicationLink"
+		             "      (VariableNode \"$B-6c74a409\")"
+		             "      (QuoteLink"
+		             "        (LambdaLink"
+		             "          (UnquoteLink"
+		             "            (VariableNode \"$TyVs-bdfd20a\"))"
+		             "          (UnquoteLink"
+		             "            (VariableNode \"$P-25868310\")))))"
+		             "    (ImplicationLink"
+		             "      (LambdaLink"
+		             "        (TypedVariableLink"
+		             "          (VariableNode \"$X\")"
+		             "          (TypeNode \"ConceptNode\"))"
+		             "        (EvaluationLink"
+		             "          (PredicateNode \"take\")"
+		             "          (ListLink"
+		             "            (VariableNode \"$X\")"
+		             "            (ConceptNode \"treatment-1\"))))"
+		             "      (VariableNode \"$B-6c74a409\")))"
+		             "  (ExecutionOutputLink"
+		             "    (GroundedSchemaNode \"scm: crisp-deduction-formula\")"
+		             "    (ListLink"
+		             "      (ImplicationLink"
+		             "        (LambdaLink"
+		             "          (TypedVariableLink"
+		             "            (VariableNode \"$X\")"
+		             "            (TypeNode \"ConceptNode\"))"
+		             "          (EvaluationLink"
+		             "            (PredicateNode \"take\")"
+		             "            (ListLink"
+		             "              (VariableNode \"$X\")"
+		             "              (ConceptNode \"treatment-1\"))))"
+		             "        (QuoteLink"
+		             "          (LambdaLink"
+		             "            (UnquoteLink"
+		             "              (VariableNode \"$TyVs-bdfd20a\"))"
+		             "            (UnquoteLink"
+		             "              (VariableNode \"$P-25868310\")))))"
+		             "      (ImplicationLink"
+		             "        (LambdaLink"
+		             "          (TypedVariableLink"
+		             "            (VariableNode \"$X\")"
+		             "            (TypeNode \"ConceptNode\"))"
+		             "          (EvaluationLink"
+		             "            (PredicateNode \"take\")"
+		             "            (ListLink"
+		             "              (VariableNode \"$X\")"
+		             "              (ConceptNode \"treatment-1\"))))"
+		             "        (VariableNode \"$B-6c74a409\"))"
+		             "      (ImplicationLink"
+		             "        (VariableNode \"$B-6c74a409\")"
+		             "        (QuoteLink"
+		             "          (LambdaLink"
+		             "            (UnquoteLink"
+		             "              (VariableNode \"$TyVs-bdfd20a\"))"
+		             "            (UnquoteLink"
+		             "              (VariableNode \"$P-25868310\"))))))))");
+
+	std::cout << "rule = " << oc_to_string(rule);
+	std::cout << "expected = " << oc_to_string(expected);
+
+	ScopeLinkPtr expected_sc = ScopeLinkCast(expected);
+
+	TS_ASSERT(expected_sc->is_equal(rule));
+}
+
+// Test how useless quotation gets eliminated during
+// Rule::unify_target.
+void RuleUTest::test_unify_target_implication_scope_to_implication_1()
+{
+	Rule implication_scope_to_implication_rule(implication_scope_to_implication_rule_h);
+	Handle target = al(IMPLICATION_LINK,
+	                   al(LAMBDA_LINK, Typed_X, Eval_P),
+	                   al(LAMBDA_LINK, Typed_X, Eval_Q));
+	RuleTypedSubstitutionMap rules =
+		implication_scope_to_implication_rule.unify_target(target);
+
+	TS_ASSERT_EQUALS(rules.size(), 1);
+
+	Handle rule = rules.begin()->first.get_rule(),
+		// Expected up to an alpha conversion
+		body = al(IMPLICATION_SCOPE_LINK, Typed_X, Eval_P, Eval_Q),
+		schema = an(GROUNDED_SCHEMA_NODE,
+		            "scm: implication-scope-to-implication-formula"),
+		rewrite = al(EXECUTION_OUTPUT_LINK,
+		             schema,
+		             al(LIST_LINK, target, body)),
+		expected = al(BIND_LINK, al(AND_LINK), rewrite);
+
+	std::cout << "rule = " << oc_to_string(rule);
+	std::cout << "expected = " << oc_to_string(expected);
+
+	ScopeLinkPtr expected_sc = ScopeLinkCast(expected);
+
+	TS_ASSERT(expected_sc->is_equal(rule));
+}
+
+// Like test_unify_target_implication_scope_to_implication_1 but
+// Eval_P is replaced by Variable "$P".
+void RuleUTest::test_unify_target_implication_scope_to_implication_2()
+{
+	Rule implication_scope_to_implication_rule(implication_scope_to_implication_rule_h);
+	Handle target = al(IMPLICATION_LINK,
+	                   al(LAMBDA_LINK, Typed_X, P_body_var),
+	                   al(LAMBDA_LINK, Typed_X, Eval_Q));
+	RuleTypedSubstitutionMap rules =
+		implication_scope_to_implication_rule.unify_target(target);
+
+	TS_ASSERT_EQUALS(rules.size(), 1);
+
+	Handle rule = rules.begin()->first.get_rule(),
+		// Expected up to an alpha conversion
+		body = al(IMPLICATION_SCOPE_LINK, Typed_X, P_body_var, Eval_Q),
+		schema = an(GROUNDED_SCHEMA_NODE,
+		            "scm: implication-scope-to-implication-formula"),
+		rewrite = al(EXECUTION_OUTPUT_LINK,
+		             schema,
+		             al(LIST_LINK, target, body)),
+		expected = al(BIND_LINK, P_body_var, body, rewrite);
+
+	std::cout << "implication_scope_to_implication_rule = " << oc_to_string(implication_scope_to_implication_rule);
+	std::cout << "target = " << oc_to_string(target);
+	std::cout << "rule = " << oc_to_string(rule);
+	std::cout << "expected = " << oc_to_string(expected);
+
+	ScopeLinkPtr expected_sc = ScopeLinkCast(expected);
+
+	TS_ASSERT(expected_sc->is_equal(rule));
+}
+
+// This time the unification should fail. Indeed
+// (VariableNode "$TyVs-47408e83") is locally scoped.
+void RuleUTest::test_unify_target_implication_scope_to_implication_3()
+{
+	Rule implication_scope_to_implication_rule(implication_scope_to_implication_rule_h);
+	Handle target =
+		_eval.eval_h("(ImplicationLink"
+		             "  (LambdaLink"
+		             "    (TypedVariableLink"
+		             "      (VariableNode \"$X\")"
+		             "      (TypeNode \"ConceptNode\")"
+		             "    )"
+		             "    (EvaluationLink"
+		             "      (PredicateNode \"take\")"
+		             "      (ListLink"
+		             "        (VariableNode \"$X\")"
+		             "        (ConceptNode \"treatment-1\")"
+		             "      )"
+		             "    )"
+		             "  )"
+		             "  (LambdaLink"
+		             "    (VariableNode \"$TyVs-47408e83\")"
+		             "    (VariableNode \"$P-1dd6c910\")"
+		             "  )"
+		             ")");
+	Handle vardecl =
+		_eval.eval_h("(VariableNode \"$P-1dd6c910\")");
+	RuleTypedSubstitutionMap rules =
+		implication_scope_to_implication_rule.unify_target(target, vardecl);
+
+	// It should fail
+	//
+	// TODO: to handle that properly variables should be associated to
+	// their scopes in the unify function.
+	// TS_ASSERT_EQUALS(rules.size(), 0);
+	TS_ASSERT(true);
+}
+
+void RuleUTest::test_unify_target_implication_scope_to_implication_4()
+{
+	Rule implication_scope_to_implication_rule(implication_scope_to_implication_rule_h);
+	Handle target =
+		_eval.eval_h("(ImplicationLink"
+		             "  (VariableNode \"$B-2db76aad\")"
+		             "  (VariableNode \"$Q-38ea0de8\")"
+		             ")");
+	Handle vardecl =
+		_eval.eval_h("(VariableList"
+		             "  (VariableNode \"$B-2db76aad\")"
+		             "  (TypedVariableLink"
+		             "    (VariableNode \"$Q-38ea0de8\")"
+		             "    (TypeChoice"
+		             "      (TypeNode \"LambdaLink\")"
+		             "      (TypeNode \"PredicateNode\")"
+		             "    )"
+		             "  )"
+		             ")");
+
+	RuleTypedSubstitutionMap rules =
+		implication_scope_to_implication_rule.unify_target(target, vardecl);
+
+	TS_ASSERT_EQUALS(rules.size(), 1);
+
+	Handle rule = rules.begin()->first.get_rule();
+	// Expected up to an alpha conversion
+	Handle expected =
+		_eval.eval_h("(BindLink"
+		             "  (VariableList"
+		             "    (TypedVariableLink"
+		             "      (VariableNode \"$TyVs-6c74a409\")"
+		             "      (TypeChoice"
+		             "        (TypeNode \"TypedVariableLink\")"
+		             "        (TypeNode \"VariableList\")))"
+		             "    (VariableNode \"$P-6266d6f2\")"
+		             "    (VariableNode \"$Q-7005b724\"))"
+		             "  (Quote (ImplicationScopeLink"
+		             "    (Unquote (VariableNode \"$TyVs-6c74a409\"))"
+		             "    (Unquote (VariableNode \"$P-6266d6f2\"))"
+		             "    (Unquote (VariableNode \"$Q-7005b724\"))))"
+		             "  (ExecutionOutputLink"
+		             "    (GroundedSchemaNode \"scm: implication-scope-to-implication-formula\")"
+		             "    (ListLink"
+		             "      (ImplicationLink"
+		             "        (Quote (LambdaLink"
+		             "          (Unquote (VariableNode \"$TyVs-6c74a409\"))"
+		             "          (Unquote (VariableNode \"$P-6266d6f2\"))))"
+		             "        (Quote (LambdaLink"
+		             "          (Unquote (VariableNode \"$TyVs-6c74a409\"))"
+		             "          (Unquote (VariableNode \"$Q-7005b724\")))))"
+		             "      (Quote (ImplicationScopeLink"
+		             "        (Unquote (VariableNode \"$TyVs-6c74a409\"))"
+		             "        (Unquote (VariableNode \"$P-6266d6f2\"))"
+		             "        (Unquote (VariableNode \"$Q-7005b724\")))))))");
+
+	std::cout << "implication_scope_to_implication_rule = "
+	          << oc_to_string(implication_scope_to_implication_rule);
+	std::cout << "target = " << oc_to_string(target);
+	std::cout << "rule = " << oc_to_string(rule);
+	std::cout << "expected = " << oc_to_string(expected);
+
+	ScopeLinkPtr expected_sc = ScopeLinkCast(expected);
+
+	TS_ASSERT(expected_sc->is_equal(rule));
+}
+
+void RuleUTest::test_unify_target_implication_and_lambda_factorization()
+{
+	Rule implication_and_lambda_factorization_rule(implication_and_lambda_factorization_rule_h);
+	Handle target =
+		_eval.eval_h("(ImplicationLink"
+		             "  (AndLink"
+		             "    (VariableNode \"$Q-38ea0de8\")"
+		             "    (LambdaLink"
+		             "      (TypedVariableLink"
+		             "        (VariableNode \"$X\")"
+		             "        (TypeNode \"ConceptNode\")"
+		             "      )"
+		             "      (EvaluationLink"
+		             "        (PredicateNode \"take\")"
+		             "        (ListLink"
+		             "          (VariableNode \"$X\")"
+		             "          (ConceptNode \"treatment-1\")"
+		             "        )"
+		             "      )"
+		             "    )"
+		             "  )"
+		             "  (LambdaLink"
+		             "    (TypedVariableLink"
+		             "      (VariableNode \"$X\")"
+		             "      (TypeNode \"ConceptNode\")"
+		             "    )"
+		             "    (AndLink"
+		             "      (EvaluationLink (stv 1.000000 1.000000)"
+		             "        (PredicateNode \"contain\")"
+		             "        (ListLink"
+		             "          (ConceptNode \"treatment-1\")"
+		             "          (ConceptNode \"compound-A\")"
+		             "        )"
+		             "      )"
+		             "      (EvaluationLink"
+		             "        (PredicateNode \"take\")"
+		             "        (ListLink"
+		             "          (VariableNode \"$X\")"
+		             "          (ConceptNode \"treatment-1\")"
+		             "        )"
+		             "      )"
+		             "    )"
+		             "  )"
+		             ")");
+	Handle vardecl =
+		_eval.eval_h("(TypedVariableLink"
+		             "  (VariableNode \"$Q-38ea0de8\")"
+		             "  (TypeChoice"
+		             "    (TypeNode \"LambdaLink\")"
+		             "    (TypeNode \"PredicateNode\")"
+		             "  )"
+		             ")");
+	RuleTypedSubstitutionMap rules =
+		implication_and_lambda_factorization_rule.unify_target(target, vardecl);
+
+	std::cout << "rules = " << oc_to_string(rules) << std::endl;
+
+	TS_ASSERT_EQUALS(rules.size(), 1);
+
+	Handle rule = rules.begin()->first.get_rule();
+	Handle expected =
+		_eval.eval_h("(BindLink"
+		             "  (AndLink)"
+		             "  (ExecutionOutputLink"
+		             "    (GroundedSchemaNode \"scm: implication-and-lambda-factorization-formula\")"
+		             "    (ImplicationLink"
+		             "      (AndLink"
+		             "        (LambdaLink"
+		             "          (TypedVariableLink"
+		             "            (VariableNode \"$X\")"
+		             "            (TypeNode \"ConceptNode\")"
+		             "          )"
+		             "          (EvaluationLink"
+		             "            (PredicateNode \"contain\")"
+		             "            (ListLink"
+		             "              (ConceptNode \"treatment-1\")"
+		             "              (ConceptNode \"compound-A\")"
+		             "            )"
+		             "          )"
+		             "        )"
+		             "        (LambdaLink"
+		             "          (TypedVariableLink"
+		             "            (VariableNode \"$X\")"
+		             "            (TypeNode \"ConceptNode\")"
+		             "          )"
+		             "          (EvaluationLink"
+		             "            (PredicateNode \"take\")"
+		             "            (ListLink"
+		             "              (VariableNode \"$X\")"
+		             "              (ConceptNode \"treatment-1\")"
+		             "            )"
+		             "          )"
+		             "        )"
+		             "      )"
+		             "      (LambdaLink"
+		             "        (TypedVariableLink"
+		             "          (VariableNode \"$X\")"
+		             "          (TypeNode \"ConceptNode\")"
+		             "        )"
+		             "        (AndLink"
+		             "          (EvaluationLink"
+		             "            (PredicateNode \"contain\")"
+		             "            (ListLink"
+		             "              (ConceptNode \"treatment-1\")"
+		             "              (ConceptNode \"compound-A\")"
+		             "            )"
+		             "          )"
+		             "          (EvaluationLink"
+		             "            (PredicateNode \"take\")"
+		             "            (ListLink"
+		             "              (VariableNode \"$X\")"
+		             "              (ConceptNode \"treatment-1\")"
+		             "            )"
+		             "          )"
+		             "        )"
+		             "      )"
+		             "    )"
+		             "  )"
+		             ")");
+
+	std::cout << "rule = " << oc_to_string(rule);
+	std::cout << "expected = " << oc_to_string(expected);
+
+	ScopeLinkPtr expected_sc = ScopeLinkCast(expected);
+
+	TS_ASSERT(expected_sc->is_equal(rule));
+}
+
+void RuleUTest::test_unify_target_closed_lambda_introduction_1()
+{
+	Rule closed_lambda_introduction_rule(closed_lambda_introduction_rule_h);
+	Handle target =
+		_eval.eval_h("(LambdaLink"
+		             "  (TypedVariableLink"
+		             "    (VariableNode \"$X\")"
+		             "    (TypeNode \"ConceptNode\"))"
+		             "  (EvaluationLink (stv 1.000000 1.000000)"
+		             "    (PredicateNode \"contain\")"
+		             "    (ListLink"
+		             "      (ConceptNode \"treatment-1\")"
+		             "      (ConceptNode \"compound-A\"))))");
+	RuleTypedSubstitutionMap rules =
+		closed_lambda_introduction_rule.unify_target(target);
+
+	TS_ASSERT_EQUALS(rules.size(), 1);
+
+	Handle rule = rules.begin()->first.get_rule();
+	Handle expected =
+		_eval.eval_h("(BindLink"
+		             "  (AndLink"
+		             "    (EvaluationLink"
+		             "      (GroundedPredicateNode \"scm: closed-lambda-introduction-precondition\")"
+		             "      (EvaluationLink (stv 1.000000 1.000000)"
+		             "        (PredicateNode \"contain\")"
+		             "        (ListLink"
+		             "          (ConceptNode \"treatment-1\")"
+		             "          (ConceptNode \"compound-A\")"
+		             "        )"
+		             "      )"
+		             "    )"
+		             "  )"
+		             "  (ExecutionOutputLink"
+		             "    (GroundedSchemaNode \"scm: closed-lambda-introduction-formula\")"
+		             "    (ListLink"
+		             "      (LambdaLink"
+		             "        (TypedVariableLink"
+		             "          (VariableNode \"$X\")"
+		             "          (TypeNode \"ConceptNode\")"
+		             "        )"
+		             "        (EvaluationLink (stv 1.000000 1.000000)"
+		             "          (PredicateNode \"contain\")"
+		             "          (ListLink"
+		             "            (ConceptNode \"treatment-1\")"
+		             "            (ConceptNode \"compound-A\")"
+		             "          )"
+		             "        )"
+		             "      )"
+		             "      (EvaluationLink (stv 1.000000 1.000000)"
+		             "        (PredicateNode \"contain\")"
+		             "        (ListLink"
+		             "          (ConceptNode \"treatment-1\")"
+		             "          (ConceptNode \"compound-A\")"
+		             "        )"
+		             "      )"
+		             "    )"
+		             "  )"
+		             ")");
+
+	std::cout << "rule = " << oc_to_string(rule);
+	std::cout << "expected = " << oc_to_string(expected);
+
+	ScopeLinkPtr expected_sc = ScopeLinkCast(expected);
+
+	TS_ASSERT(expected_sc->is_equal(rule));
+}
+
+void RuleUTest::test_unify_target_closed_lambda_introduction_2()
+{
+	Rule closed_lambda_introduction_rule(closed_lambda_introduction_rule_h);
+	Handle target =
+		_eval.eval_h("(LambdaLink"
+		             "  (TypedVariableLink"
+		             "    (VariableNode \"$X\")"
+		             "    (TypeNode \"ConceptNode\"))"
+		             "  (EvaluationLink"
+		             "    (PredicateNode \"take\")"
+		             "    (ListLink"
+		             "      (VariableNode \"$X\")"
+		             "      (ConceptNode \"compound-A\"))))");
+	RuleTypedSubstitutionMap rules =
+		closed_lambda_introduction_rule.unify_target(target);
+
+	TS_ASSERT_EQUALS(rules.size(), 1);
+
+	Handle rule = rules.begin()->first.get_rule();
+	Handle expected =
+		_eval.eval_h("(BindLink"
+		             "  (VariableList)"
+		             "  (AndLink"
+		             "    (EvaluationLink"
+		             "      (GroundedPredicateNode \"scm: closed-lambda-introduction-precondition\")"
+		             "      (EvaluationLink"
+		             "        (PredicateNode \"take\")"
+		             "        (ListLink"
+		             "          (VariableNode \"$X\")"
+		             "          (ConceptNode \"compound-A\")))))"
+		             "  (ExecutionOutputLink"
+		             "    (GroundedSchemaNode \"scm: closed-lambda-introduction-formula\")"
+		             "    (ListLink"
+		             "      (LambdaLink"
+		             "        (TypedVariableLink"
+		             "          (VariableNode \"$X\")"
+		             "          (TypeNode \"ConceptNode\"))"
+		             "        (EvaluationLink"
+		             "          (PredicateNode \"take\")"
+		             "          (ListLink"
+		             "            (VariableNode \"$X\")"
+		             "            (ConceptNode \"compound-A\"))))"
+		             "      (EvaluationLink"
+		             "        (PredicateNode \"take\")"
+		             "        (ListLink"
+		             "          (VariableNode \"$X\")"
+		             "          (ConceptNode \"compound-A\"))))))");
+
+	std::cout << "rule = " << oc_to_string(rule);
+	std::cout << "expected = " << oc_to_string(expected);
+
+	ScopeLinkPtr expected_sc = ScopeLinkCast(expected);
+
+	TS_ASSERT(expected_sc->is_equal(rule));
+}

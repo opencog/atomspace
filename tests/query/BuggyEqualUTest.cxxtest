@@ -20,11 +20,9 @@
  * 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
  */
 
-#include <opencog/guile/load-file.h>
+#include <opencog/atomspace/AtomSpace.h>
 #include <opencog/guile/SchemeEval.h>
-#include <opencog/guile/SchemeSmob.h>
 #include <opencog/query/BindLinkAPI.h>
-#include <opencog/util/Config.h>
 #include <opencog/util/Logger.h>
 
 using namespace opencog;
@@ -44,6 +42,9 @@ class BuggyEqual :  public CxxTest::TestSuite
 
 			as = new AtomSpace();
 			eval = new SchemeEval(as);
+			eval->eval("(use-modules (opencog query))");
+			eval->eval("(add-to-load-path \"..\")");
+			eval->eval("(add-to-load-path \"../../..\")");
 		}
 
 		~BuggyEqual()
@@ -53,6 +54,8 @@ class BuggyEqual :  public CxxTest::TestSuite
 			// Erase the log file if no assertions failed.
 			if (!CxxTest::TestTracker::tracker().suiteFailed())
 				std::remove(logger().get_filename().c_str());
+int rc = CxxTest::TestTracker::tracker().suiteFailed();
+_exit(rc); // XXX hack to avoid double-free in __run_exit_handlers
 		}
 
 		void setUp(void);
@@ -66,11 +69,10 @@ class BuggyEqual :  public CxxTest::TestSuite
 void BuggyEqual::setUp(void)
 {
 	as->clear();
-	eval->eval("(use-modules (opencog query))");
 }
 
 #define getlink(hand,pos) hand->getOutgoingAtom(pos)
-#define getarity(hand) LinkCast(hand)->getArity()
+#define getarity(hand) hand->getArity()
 
 /*
  * NotLink causing weird trouble.
@@ -79,8 +81,7 @@ void BuggyEqual::test_bugeq(void)
 {
 	logger().debug("BEGIN TEST: %s", __FUNCTION__);
 
-	config().set("SCM_PRELOAD", "tests/query/buggy-equal.scm");
-	load_scm_files_from_config(*as);
+	eval->eval("(load-from-path \"tests/query/buggy-equal.scm\")");
 
 	Handle pln = eval->eval_h("(cog-bind pln-rule-deduction)");
 	printf("Deduction results:\n%s\n", pln->toShortString().c_str());
@@ -95,8 +96,7 @@ void BuggyEqual::test_bugalt(void)
 {
 	logger().debug("BEGIN TEST: %s", __FUNCTION__);
 
-	config().set("SCM_PRELOAD", "tests/query/buggy-equal.scm");
-	load_scm_files_from_config(*as);
+	eval->eval("(load-from-path \"tests/query/buggy-equal.scm\")");
 
 	Handle alt = eval->eval_h("(cog-bind pln-alt)");
 	printf("Alt results:\n%s\n", alt->toShortString().c_str());

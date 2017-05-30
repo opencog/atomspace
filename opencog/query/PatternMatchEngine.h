@@ -31,7 +31,7 @@
 #include <vector>
 
 #include <opencog/atoms/base/ClassServer.h>
-#include <opencog/query/Pattern.h>
+#include <opencog/atoms/pattern/Pattern.h>
 #include <opencog/query/PatternMatchCallback.h>
 
 namespace opencog {
@@ -89,9 +89,9 @@ private:
 	// Map of current groundings of variables to their grounds
 	// Also contains grounds of subclauses (not sure why, this seems
 	// to be needed)
-	std::map<Handle, Handle> var_grounding;
+	HandleMap var_grounding;
 	// Map of clauses to their current groundings
-	std::map<Handle, Handle> clause_grounding;
+	HandleMap clause_grounding;
 
 	void clear_current_state(void);  // clear the stuff above
 
@@ -134,11 +134,11 @@ private:
 	bool clause_accepted;
 	void get_next_untried_clause(void);
 	bool get_next_thinnest_clause(bool, bool, bool);
-	unsigned int thickness(const Handle&, const std::set<Handle>&);
+	unsigned int thickness(const Handle&, const OrderedHandleSet&);
 	Handle next_clause;
 	Handle next_joint;
 	// Set of clauses for which a grounding is currently being attempted.
-	typedef std::set<Handle> IssuedSet;
+	typedef OrderedHandleSet IssuedSet;
 	IssuedSet issued;     // stacked on issued_stack
 
 	// -------------------------------------------
@@ -152,7 +152,7 @@ private:
 	void solution_drop(void);
 
 	// Stacks containing partial groundings.
-	typedef std::map<Handle, Handle> SolnMap;
+	typedef HandleMap SolnMap;
 	std::stack<SolnMap> var_solutn_stack;
 	std::stack<SolnMap> term_solutn_stack;
 
@@ -188,13 +188,9 @@ private:
 	bool variable_compare(const Handle&, const Handle&);
 	bool self_compare(const PatternTermPtr&);
 	bool node_compare(const Handle&, const Handle&);
-	bool redex_compare(const LinkPtr&, const LinkPtr&);
-	bool choice_compare(const PatternTermPtr&, const Handle&,
-	                    const LinkPtr&, const LinkPtr&);
-	bool ordered_compare(const PatternTermPtr&, const Handle&,
-	                     const LinkPtr&, const LinkPtr&);
-	bool unorder_compare(const PatternTermPtr&, const Handle&,
-	                     const LinkPtr&, const LinkPtr&);
+	bool choice_compare(const PatternTermPtr&, const Handle&);
+	bool ordered_compare(const PatternTermPtr&, const Handle&);
+	bool unorder_compare(const PatternTermPtr&, const Handle&);
 	bool clause_compare(const PatternTermPtr&, const Handle&);
 
 	// -------------------------------------------
@@ -223,12 +219,17 @@ public:
 	// matches.
 	bool explore_neighborhood(const Handle&, const Handle&, const Handle&);
 
-	// Handy-dandy utilities
-	static void log_solution(const std::map<Handle, Handle> &vars,
-	                         const std::map<Handle, Handle> &clauses);
+	// Evaluate constant evaluatable and ground it via the
+	// PatternMatchCallback. It is assumed that all clauses are
+	// connected by an AndLink.
+	bool explore_constant_evaluatables(const HandleSeq& clauses);
 
-	static void log_term(const std::set<Handle> &vars,
-	                     const std::vector<Handle> &clauses);
+	// Handy-dandy utilities
+	static void log_solution(const HandleMap &vars,
+	                         const HandleMap &clauses);
+
+	static void log_term(const OrderedHandleSet &vars,
+	                     const HandleSeq &clauses);
 };
 
 } // namespace opencog

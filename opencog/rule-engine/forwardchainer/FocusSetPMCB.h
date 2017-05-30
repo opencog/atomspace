@@ -53,12 +53,13 @@ public:
         delete _inst;
     }
 
-    virtual bool grounding(const std::map<Handle, Handle> &var_soln,
-                           const std::map<Handle, Handle> &term_soln)
+    virtual bool grounding(const HandleMap &var_soln,
+                           const HandleMap &term_soln)
     {
-        Handle h = _inst->instantiate(implicand, var_soln);
+        Handle h = _inst->instantiate(implicand, var_soln, true);
 
-        _result_list.push_back(h);
+        if (h != Handle::UNDEFINED)
+            _result_list.push_back(h);
 
         return false;
     }

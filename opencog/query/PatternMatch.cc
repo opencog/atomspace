@@ -36,6 +36,8 @@
 
 using namespace opencog;
 
+#define DEBUG 1
+
 /* ================================================================= */
 /// A pass-through class, which wraps a regular callback, but captures
 /// all of the different possible groundings that result.  This class is
@@ -55,24 +57,34 @@ class PMCGroundings : public PatternMatchCallback
 		bool variable_match(const Handle& node1, const Handle& node2) {
 			return _cb.variable_match(node1, node2);
 		}
-		bool link_match(const LinkPtr& link1, const LinkPtr& link2) {
+		bool scope_match(const Handle& node1, const Handle& node2) {
+			return _cb.scope_match(node1, node2);
+		}
+		bool link_match(const PatternTermPtr& link1, const Handle& link2) {
 			return _cb.link_match(link1, link2);
 		}
-		bool post_link_match(const LinkPtr& link1, const LinkPtr& link2) {
+		bool post_link_match(const Handle& link1, const Handle& link2) {
 			return _cb.post_link_match(link1, link2);
 		}
 		bool fuzzy_match(const Handle& h1, const Handle& h2) {
 			return _cb.fuzzy_match(h1, h2);
 		}
 		bool evaluate_sentence(const Handle& link_h,
-		                       const std::map<Handle, Handle> &gnds) {
+		                       const HandleMap &gnds)
+		{
 			return _cb.evaluate_sentence(link_h,gnds);
 		}
-		bool clause_match(const Handle& pattrn_link_h, const Handle& grnd_link_h) {
-			return _cb.clause_match(pattrn_link_h, grnd_link_h);
+		bool clause_match(const Handle& pattrn_link_h,
+		                  const Handle& grnd_link_h,
+		                  const HandleMap& term_gnds)
+		{
+			return _cb.clause_match(pattrn_link_h, grnd_link_h, term_gnds);
 		}
-		bool optional_clause_match(const Handle& pattrn, const Handle& grnd) {
-			return _cb.optional_clause_match(pattrn, grnd);
+		bool optional_clause_match(const Handle& pattrn,
+		                           const Handle& grnd,
+		                           const HandleMap& term_gnds)
+		{
+			return _cb.optional_clause_match(pattrn, grnd, term_gnds);
 		}
 		IncomingSet get_incoming_set(const Handle& h) {
 			return _cb.get_incoming_set(h);
@@ -97,16 +109,16 @@ class PMCGroundings : public PatternMatchCallback
 
 		// This one we don't pass through. Instead, we collect the
 		// groundings.
-		bool grounding(const std::map<Handle, Handle> &var_soln,
-		               const std::map<Handle, Handle> &term_soln)
+		bool grounding(const HandleMap &var_soln,
+		               const HandleMap &term_soln)
 		{
 			_term_groundings.push_back(term_soln);
 			_var_groundings.push_back(var_soln);
 			return false;
 		}
 
-		std::vector<std::map<Handle, Handle>> _term_groundings;
-		std::vector<std::map<Handle, Handle>> _var_groundings;
+		HandleMapSeq _term_groundings;
+		HandleMapSeq _var_groundings;
 };
 
 /**
@@ -128,13 +140,13 @@ class PMCGroundings : public PatternMatchCallback
  * Return false if no solution is found, true otherwise.
  */
 bool PatternMatch::recursive_virtual(PatternMatchCallback& cb,
-            const std::vector<Handle>& virtuals,
-            const std::vector<Handle>& negations, // currently ignored
-            const std::map<Handle, Handle>& var_gnds,
-            const std::map<Handle, Handle>& term_gnds,
+            const HandleSeq& virtuals,
+            const HandleSeq& negations, // currently ignored
+            const HandleMap& var_gnds,
+            const HandleMap& term_gnds,
             // copies, NOT references!
-            std::vector<std::vector<std::map<Handle, Handle>>> comp_var_gnds,
-            std::vector<std::vector<std::map<Handle, Handle>>> comp_term_gnds)
+            std::vector<HandleMapSeq> comp_var_gnds,
+            std::vector<HandleMapSeq> comp_term_gnds)
 {
 	// If we are done with the recursive step, then we have one of the
 	// many combinatoric possibilities in the var_gnds and term_gnds
@@ -142,6 +154,7 @@ bool PatternMatch::recursive_virtual(PatternMatchCallback& cb,
 	// what they've got to say about it.
 	if (0 == comp_var_gnds.size())
 	{
+#ifdef DEBUG
 		if (logger().is_fine_enabled())
 		{
 			logger().fine("Explore one possible combinatoric grounding "
@@ -149,6 +162,7 @@ bool PatternMatch::recursive_virtual(PatternMatchCallback& cb,
 			              var_gnds.size(), term_gnds.size());
 			PatternMatchEngine::log_solution(var_gnds, term_gnds);
 		}
+#endif
 
 		// Note, FYI, that if there are no virtual clauses at all,
 		// then this loop falls straight-through, and the grounding
@@ -186,7 +200,9 @@ bool PatternMatch::recursive_virtual(PatternMatchCallback& cb,
 		// pattern! See what the callback thinks of it.
 		return cb.grounding(var_gnds, term_gnds);
 	}
+#ifdef DEBUG
 	LAZY_LOG_FINE << "Component recursion: num comp=" << comp_var_gnds.size();
+#endif
 
 	// Recurse over all components. If component k has N_k groundings,
 	// and there are m components, then we have to explore all
@@ -197,9 +213,9 @@ bool PatternMatch::recursive_virtual(PatternMatchCallback& cb,
 	// vg and vp will be the collection of all of the different possible
 	// groundings for one of the components (well, its for component m,
 	// in the above notation.) So the loop below tries every possibility.
-	std::vector<std::map<Handle, Handle>> vg = comp_var_gnds.back();
+	HandleMapSeq vg = comp_var_gnds.back();
 	comp_var_gnds.pop_back();
-	std::vector<std::map<Handle, Handle>> pg = comp_term_gnds.back();
+	HandleMapSeq pg = comp_term_gnds.back();
 	comp_term_gnds.pop_back();
 
 	size_t ngnds = vg.size();
@@ -208,11 +224,11 @@ bool PatternMatch::recursive_virtual(PatternMatchCallback& cb,
 		// Given a set of groundings, tack on those for this component,
 		// and recurse, with one less component. We need to make a copy,
 		// of course.
-		std::map<Handle, Handle> rvg(var_gnds);
-		std::map<Handle, Handle> rpg(term_gnds);
+		HandleMap rvg(var_gnds);
+		HandleMap rpg(term_gnds);
 
-		const std::map<Handle, Handle>& cand_vg(vg[i]);
-		const std::map<Handle, Handle>& cand_pg(pg[i]);
+		const HandleMap& cand_vg(vg[i]);
+		const HandleMap& cand_pg(pg[i]);
 		rvg.insert(cand_vg.begin(), cand_vg.end());
 		rpg.insert(cand_pg.begin(), cand_pg.end());
 
@@ -329,17 +345,21 @@ bool PatternLink::satisfy(PatternMatchCallback& pmcb) const
 	// If there is just one connected component, we don't have to
 	// do anything special to find a grounding for it.  Proceed
 	// in a direct fashion.
-	if (1 == _num_comps)
+	if (_num_comps <= 1)
 	{
 		PatternMatchEngine pme(pmcb);
 
+#ifdef DEBUG
 		debug_log();
+#endif
 
 		pme.set_pattern(_varlist, _pat);
 		pmcb.set_pattern(_varlist, _pat);
 		bool found = pmcb.initiate_search(&pme);
 
+#ifdef DEBUG
 		logger().fine("================= Done with Search =================");
+#endif
 		found = pmcb.search_finished(found);
 
 		return found;
@@ -357,6 +377,7 @@ bool PatternLink::satisfy(PatternMatchCallback& pmcb) const
 	// grounding combination through the virtual link, for the final
 	// accept/reject determination.
 
+#ifdef DEBUG
 	if (logger().is_fine_enabled())
 	{
 		logger().fine("VIRTUAL PATTERN: ====== "
@@ -370,23 +391,26 @@ bool PatternLink::satisfy(PatternMatchCallback& pmcb) const
 			iii++;
 		}
 	}
+#endif
 
-	std::vector<std::vector<std::map<Handle, Handle>>> comp_term_gnds;
-	std::vector<std::vector<std::map<Handle, Handle>>> comp_var_gnds;
+	std::vector<HandleMapSeq> comp_term_gnds;
+	std::vector<HandleMapSeq> comp_var_gnds;
 
-	for (size_t i=0; i<_num_comps; i++)
+	for (size_t i = 0; i < _num_comps; i++)
 	{
+#ifdef DEBUG
 		LAZY_LOG_FINE << "BEGIN COMPONENT GROUNDING " << i+1
 		              << " of " << _num_comps << ": ===========\n";
+#endif
 
-		Pattern pat = PatternLinkCast(_component_patterns.at(i))->get_pattern();
+		PatternLinkPtr clp(PatternLinkCast(_component_patterns.at(i)));
+		Pattern pat = clp->get_pattern();
 		bool is_pure_optional = false;
 		if (pat.mandatory.size() == 0 and pat.optionals.size() > 0)
 			is_pure_optional = true;
 
 		// Pass through the callbacks, collect up answers.
 		PMCGroundings gcb(pmcb);
-		PatternLinkPtr clp(PatternLinkCast(_component_patterns.at(i)));
 		clp->satisfy(gcb);
 
 		// Special handling for disconnected pure optionals -- Returns false to
@@ -403,8 +427,10 @@ bool PatternLink::satisfy(PatternMatchCallback& pmcb) const
 			// to try to solve the other components, their product
 			// will have no solution.
 			if (gcb._term_groundings.empty()) {
+#ifdef DEBUG
 				logger().fine("No solution for this component. "
 				              "Abort search as no product solution may exist.");
+#endif
 				return false;
 			}
 
@@ -414,17 +440,25 @@ bool PatternLink::satisfy(PatternMatchCallback& pmcb) const
 	}
 
 	// And now, try grounding each of the virtual clauses.
+#ifdef DEBUG
 	LAZY_LOG_FINE << "BEGIN component recursion: ====================== "
 	              << "num comp=" << comp_var_gnds.size()
 	              << " num virts=" << _virtual.size();
-	std::map<Handle, Handle> empty_vg;
-	std::map<Handle, Handle> empty_pg;
-	std::vector<Handle> optionals; // currently ignored
+#endif
+	HandleMap empty_vg;
+	HandleMap empty_pg;
+	HandleSeq optionals; // currently ignored
 	pmcb.set_pattern(_varlist, _pat);
 	return PatternMatch::recursive_virtual(pmcb, _virtual, optionals,
 	                                       empty_vg, empty_pg,
 	                                       comp_var_gnds, comp_term_gnds);
 }
 
-/* ===================== END OF FILE ===================== */
+// For gdb, see
+// http://wiki.opencog.org/w/Development_standards#Print_OpenCog_Objects
+std::string oc_to_string(const Pattern& pattern)
+{
+	return pattern.to_string();
+}
 
+/* ===================== END OF FILE ===================== */

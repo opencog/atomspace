@@ -2,58 +2,71 @@
 ; glob-basic.scm
 ;
 
-(use-modules (opencog))
-(use-modules (opencog query))
+(use-modules (opencog) (opencog exec))
 
 ;;; Populate the atomspace with some "sentences".
 (ListLink
-	(ConceptNode "I")
-	(ConceptNode "love")
-	(ConceptNode "you"))
+	(Concept "I")
+	(Concept "love")
+	(Concept "you"))
 
 (ListLink
-	(ConceptNode "I")
-	(ConceptNode "really")
-	(ConceptNode "totally")
-	(ConceptNode "need")
-	(ConceptNode "you"))
+	(Concept "I")
+	(Concept "really")
+	(Concept "totally")
+	(Concept "need")
+	(Concept "you"))
 
 (ListLink
-	(ConceptNode "I")
-	(ConceptNode "love")
-	(ConceptNode "teddy")
-	(ConceptNode "bears")
-	(ConceptNode "a")
-	(ConceptNode "lot"))
+	(Concept "I")
+	(Concept "love")
+	(Concept "teddy")
+	(Concept "bears")
+	(Concept "a")
+	(Concept "lot"))
+
+(ListLink (Concept "I") (Concept "love") (Number 42))
 
 ;; Two different re-write rules. The first rule, immediately below,
 ;; says "I * you" -> "I * you too".
 (define glob-you
 	(BindLink
-	(ListLink
-		(ConceptNode "I")
-		(GlobNode "$star")
-		(ConceptNode "you"))
-	(ListLink
-		(ConceptNode "I")
-		(GlobNode "$star")
-		(ConceptNode "you")
-		(ConceptNode "too"))))
+		(ListLink
+			(Concept "I") (Glob "$star") (Concept "you"))
+		(ListLink
+			(Concept "I") (Glob "$star") (Concept "you") (Concept "too"))))
 
 ;; This one implements "I love *" -> "Hey! I love * too"
 (define love-glob
 	(BindLink
-	(ListLink
-		(ConceptNode "I")
-		(ConceptNode "love")
-		(GlobNode "$star"))
-	(ListLink
-		(ConceptNode "Hey!")
-		(ConceptNode "I")
-		(ConceptNode "like")
-		(GlobNode "$star")
-		(ConceptNode "also"))))
+		(ListLink
+			(Concept "I")
+			(Concept "love")
+			(Glob "$star"))
+		(ListLink
+			(Concept "Hey!")
+			(Concept "I")
+			(Concept "like")
+			(Glob "$star")
+			(Concept "also"))))
 
 ;; Both of these patterns should "work as expected".
-; (cog-bind glob-you)
-; (cog-bind love-glob)
+; (cog-execute! glob-you)
+; (cog-execute! love-glob)
+
+; -----------------------------------------------------------------
+; Globs can be typed, just like variables:
+
+(define love-type-glob
+   (BindLink
+      (TypedVariable (Glob "$star") (Type "NumberNode"))
+      (ListLink
+         (Concept "I")
+         (Concept "love")
+         (Glob "$star"))
+      (ListLink
+         (Concept "Hey!")
+         (Concept "I")
+         (Concept "like")
+         (Glob "$star")
+         (Concept "also"))))

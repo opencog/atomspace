@@ -101,7 +101,7 @@ void AtomCache::storeAtom(Atom *atom)
 		int arity = l->getArity();
 		vlen = snprintf(valbuff, VBSIZE, "(%d", arity);
 
-		std::vector<Handle> out = l->getOutgoingSet();
+		HandleSeq out = l->getOutgoingSet();
 		for (int i=0; i<arity; i++)
 		{
 			vlen += snprintf(valbuff+vlen, VBSIZE-vlen, ", %lu", out[i]);
@@ -178,7 +178,7 @@ Atom * AtomCache::getAtom(Handle h)
 			NCHECK_RC(rc, val);
 
 			int arity = atoi(val+1);
-			std::vector<Handle> outvec;
+			HandleSeq outvec;
 			outvec.resize(arity);
 
 			char *comma = strchr(val+2, ',');
@@ -265,7 +265,7 @@ int AtomCache::depth(Atom *atom)
 	int maxd = 0;
 	int arity = l->getArity();
 
-	std::vector<Handle> out = l->getOutgoingSet();
+	HandleSeq out = l->getOutgoingSet();
 	for (int i=0; i<arity; i++)
 	{
 		Handle h = out[i];

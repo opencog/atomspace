@@ -24,12 +24,10 @@
 #include <opencog/atomspace/AtomSpace.h>
 #include <opencog/atoms/base/Link.h>
 #include <opencog/atoms/base/Node.h>
-#include <opencog/guile/load-file.h>
 #include <opencog/guile/SchemeSmob.h>
 #include <opencog/guile/SchemeEval.h>
 #include <opencog/guile/SchemePrimitive.h>
 #include <opencog/util/Logger.h>
-#include <opencog/util/Config.h>
 #include <opencog/atoms/execution/ExecutionOutputLink.h>
 #include <opencog/atoms/execution/EvaluationLink.h>
 #include <opencog/atoms/execution/ExecSCM.h>
@@ -49,10 +47,6 @@ class SCMExecutionOutputUTest :  public CxxTest::TestSuite
 	{
 		logger().set_level(Logger::DEBUG);
 		logger().set_print_to_stdout_flag(true);
-
-		config().set("SCM_PRELOAD", "opencog/atoms/base/core_types.scm, "
-		                            "opencog/scm/opencog/exec.scm");
-		opencog_exec_init();
 	}
 
 	~SCMExecutionOutputUTest()
@@ -79,13 +73,16 @@ class SCMExecutionOutputUTest :  public CxxTest::TestSuite
 	void test_numeric(void);
 
 	void test_dsn(void);
+
+	void test_execute_single_arg(void);
+	void test_evaluate_single_arg(void);
 };
 
 void SCMExecutionOutputUTest::setUp(void)
 {
 	as = new AtomSpace();
-	load_scm_files_from_config(*as);
 	eval = new SchemeEval(as);
+	eval->eval("(use-modules (opencog exec))");
 }
 
 void SCMExecutionOutputUTest::tearDown(void)
@@ -563,4 +560,82 @@ void SCMExecutionOutputUTest::test_dsn(void)
 	std::cout << "Lambda is " << result->toString() << std::endl;
 	std::cout << "Expected " << expect->toString() << std::endl;
 	TS_ASSERT_EQUALS(result, expect);
+}
+
+// Execute a call with a single argument, by-passing the need for
+// wrapping the arguments in a ListLink.
+void SCMExecutionOutputUTest::test_execute_single_arg(void)
+{
+	// Test scheme execution function taking a single argument
+
+	eval->eval(
+	   "(define (single-arg-fun x)"
+	   "   (And (Concept \"A\") x))"
+	);
+	CHKEV(eval);
+
+	Handle result = eval->eval_h(
+	   "(cog-execute!"
+	   "   (ExecutionOutputLink"
+	   "      (GroundedSchema \"scm: single-arg-fun\")"
+	   "      (Concept \"B\")))"
+	);
+	CHKEV(eval);
+
+	Handle expect =
+		eval->eval_h("(And (Concept \"A\") (Concept \"B\"))");
+	std::cout << "Expression is " << result->toString() << std::endl;
+	std::cout << "Expected " << expect->toString() << std::endl;
+	TS_ASSERT_EQUALS(result, expect);
+
+	// Test scheme execution function taking a single argument that
+	// itself requires to be executed (eagerly by default).
+
+	result = eval->eval_h(
+	   "(cog-execute!"
+	   "   (ExecutionOutputLink"
+	   "      (GroundedSchema \"scm: single-arg-fun\")"
+	   "      (ExecutionOutputLink"
+	   "         (GroundedSchema \"scm: single-arg-fun\")"
+	   "         (Concept \"B\"))))"
+	);
+	CHKEV(eval);
+
+	expect =
+		eval->eval_h("(And (Concept \"A\")"
+		             "     (And (Concept \"A\") (Concept \"B\")))");
+	std::cout << "Expression is " << result->toString() << std::endl;
+	std::cout << "Expected " << expect->toString() << std::endl;
+	TS_ASSERT_EQUALS(result, expect);
+}
+
+void SCMExecutionOutputUTest::test_evaluate_single_arg(void)
+{
+	// Define a Scheme procedure that return a TV
+	eval->eval("(define (grab-tv x) (cog-tv x))");
+	CHKEV(eval);
+
+	// Wrap the proceedure, returning a TV
+	eval->eval(
+		"(define (single-arg-evl-tv x) "
+		"   (cog-evaluate! "
+		"      (EvaluationLink "
+		"          (GroundedPredicateNode \"scm: grab-tv\") "
+		"          x)))"
+	);
+	CHKEV(eval);
+
+	// Compare the TV's that were obtained in two different ways.
+	eval->eval(
+		"(define (chk-tv x) "
+		"  (if (not (equal? (cog-tv x) (single-arg-evl-tv x))) "
+		"     (throw 'bad-tv-compate \"chk-tv\" \"test case failed\")))"
+	);
+	CHKEV(eval);
+
+	// Perform the actual checks
+	eval->eval("(chk-tv (ConceptNode \"bogus\" (cog-new-stv 0.3 0.42)))");
+	CHKEV(eval);
+	eval->eval("(chk-tv (ConceptNode \"glurg\" (cog-new-ctv 0.123 0.456 789)))");
+	CHKEV(eval);
 }

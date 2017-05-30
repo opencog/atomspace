@@ -50,6 +50,9 @@ public:
 	void test_filtering();
 	void test_lambda();
 	void test_lambda_partial_substitution();
+	void test_eval_inheritance();
+	void test_eval_implication_1();
+	void test_eval_implication_2();
 };
 
 #define N _as.add_node
@@ -92,7 +95,10 @@ void PutLinkUTest::test_filtering()
 {
 	logger().info("BEGIN TEST: %s", __FUNCTION__);
 
-	// copied from /examples/guile/filter.scm
+	// Copied from /examples/guile/filter.scm
+	// This test must pass; it is used in multiple wiki pages
+	// as an example, including PutLink, LambdaLink,
+	// DefinedSchemaLink, etc.
 	Handle foo, bar;
 	Handle filt =
 		L(PUT_LINK,
@@ -117,9 +123,9 @@ void PutLinkUTest::test_filtering()
 	printf("Filtered %s\n", cncpts->toString().c_str());
 	TS_ASSERT_EQUALS(SET_LINK, cncpts->getType());
 	LinkPtr lset(LinkCast(cncpts));
-	TS_ASSERT_EQUALS(2, lset->getArity());
-	Handle a = lset->getOutgoingAtom(0);
-	Handle b = lset->getOutgoingAtom(1);
+	TS_ASSERT_EQUALS(2, cncpts->getArity());
+	Handle a = cncpts->getOutgoingAtom(0);
+	Handle b = cncpts->getOutgoingAtom(1);
 	TS_ASSERT(foo == a or foo == b);
 	TS_ASSERT(bar == a or bar == b);
 	TS_ASSERT(a != b);
@@ -190,6 +196,221 @@ void PutLinkUTest::test_lambda_partial_substitution()
 	printf("Expecting %s\n", expected_putted->toString().c_str());
 	printf("Got %s\n", putted->toString().c_str());
 	TS_ASSERT_EQUALS(putted, expected_putted);
+
+	logger().info("END TEST: %s", __FUNCTION__);
+}
+
+/**
+ * This test is for the case where PutLink has to evaluate the beta
+ * reduced pattern and this pattern contains an inheritance link. For
+ * instance
+ *
+ * (PutLink
+ *    (LambdaLink
+ *       (VariableList
+ *          (TypedVariableLink
+ *             (VariableNode "$X")
+ *             (TypeNode "ConceptNode")
+ *          )
+ *          (TypedVariableLink
+ *             (VariableNode "$Y")
+ *             (TypeNode "ConceptNode")
+ *          )
+ *       )
+ *       (AndLink
+ *          (InheritanceLink
+ *             (VariableNode "$X")
+ *             (ConceptNode "human")
+ *          )
+ *          (InheritanceLink
+ *             (VariableNode "$Y")
+ *             (ConceptNode "human")
+ *          )
+ *          (EvaluationLink
+ *             (PredicateNode "acquainted")
+ *             (ListLink
+ *                (VariableNode "$X")
+ *                (VariableNode "$Y")
+ *             )
+ *          )
+ *       )
+ *    )
+ *    (ListLink
+ *       (ConceptNode "Self")
+ *       (ConceptNode "Bob")
+ *    )
+ * )
+ */
+void PutLinkUTest::test_eval_inheritance()
+{
+	logger().info("BEGIN TEST: %s", __FUNCTION__);
+
+	Handle X = N(VARIABLE_NODE, "$X"),
+		Y = N(VARIABLE_NODE, "$Y"),
+		Concept = N(TYPE_NODE, "ConceptNode"),
+		human = N(CONCEPT_NODE, "human"),
+		Self = N(CONCEPT_NODE, "Self"),
+		Bob = N(CONCEPT_NODE, "Bob"),
+		acquainted = N(PREDICATE_NODE, "acquainted"),
+		X_human = L(INHERITANCE_LINK, X, human),
+		Y_human = L(INHERITANCE_LINK, Y, human),
+		Self_human = L(INHERITANCE_LINK, Self, human),
+		Bob_human = L(INHERITANCE_LINK, Bob, human),
+		X_Y_acquainted = L(EVALUATION_LINK,
+		                   acquainted,
+		                   L(LIST_LINK, X, Y)),
+		Self_Bob_acquainted = L(EVALUATION_LINK,
+		                        acquainted,
+		                        L(LIST_LINK, Self, Bob)),
+		vardecl = L(VARIABLE_LIST,
+		            L(TYPED_VARIABLE_LINK, X, Concept),
+		            L(TYPED_VARIABLE_LINK, Y, Concept)),
+		body = L(AND_LINK, X_human, Y_human, X_Y_acquainted),
+		args = L(LIST_LINK, Self, Bob),
+		put = L(PUT_LINK, L(LAMBDA_LINK, vardecl, body), args);
+
+	Instantiator inst(&_as);
+	Handle putted = inst.execute(put);
+	Handle expected = L(AND_LINK, Self_human, Bob_human, Self_Bob_acquainted);
+
+	printf("Expecting %s\n", expected->toString().c_str());
+	printf("Got %s\n", putted->toString().c_str());
+	TS_ASSERT_EQUALS(putted, expected);
+
+	logger().info("END TEST: %s", __FUNCTION__);
+}
+
+/**
+ * Another test for the case where PutLink has to evaluate the beta
+ * reduced pattern and this pattern contains an implication link. For
+ * instance
+ *
+ * (PutLink
+ *    (LambdaLink
+ *       (TypedVariableLink
+ *          (VariableNode "$X")
+ *          (TypeNode "ConceptNode")
+ *       )
+ *       (ImplicationScopeLink
+ *          (EvaluationLink
+ *             (PredicateNode "P")
+ *             (VariableNode "$X")
+ *          )
+ *          (EvaluationLink
+ *             (PredicateNode "P")
+ *             (VariableNode "$X")
+ *          )
+ *       )
+ *    )
+ *    (ConceptNode "A")
+ * )
+ */
+void PutLinkUTest::test_eval_implication_1()
+{
+	logger().info("BEGIN TEST: %s", __FUNCTION__);
+
+	Handle X = N(VARIABLE_NODE, "$X"),
+		A = N(CONCEPT_NODE, "A"),
+		CT = N(TYPE_NODE, "ConceptNode"),
+		P = N(PREDICATE_NODE, "P"),
+		P_X = L(EVALUATION_LINK, P, X),
+		P_A = L(EVALUATION_LINK, P, A),
+		body = L(QUOTE_LINK,
+		         L(IMPLICATION_SCOPE_LINK,
+		           L(UNQUOTE_LINK, P_X),
+		           L(UNQUOTE_LINK, P_X))),
+		vardecl = L(TYPED_VARIABLE_LINK, X, CT),
+		put = L(PUT_LINK, L(LAMBDA_LINK, vardecl, body), A);
+
+	Instantiator inst(&_as);
+	Handle putted = inst.execute(put);
+	Handle expected = L(IMPLICATION_SCOPE_LINK, P_A, P_A);
+
+	printf("Executing %s\n", put->toString().c_str());
+	printf("Expecting %s\n", expected->toString().c_str());
+	printf("Got %s\n", putted->toString().c_str());
+	TS_ASSERT_EQUALS(putted, expected);
+	
+	logger().info("END TEST: %s", __FUNCTION__);
+}
+
+/**
+ * This test is for the case where PutLink has to evaluate the beta
+ * reduced pattern and this pattern contains an implication link. For
+ * instance
+ *
+ * (PutLink
+ *    (LambdaLink
+ *       (VariableList
+ *          (TypedVariableLink
+ *             (VariableNode "$X")
+ *             (TypeNode "PredicateNode")
+ *          )
+ *          (TypedVariableLink
+ *             (VariableNode "$Y")
+ *             (TypeNode "PredicateNode")
+ *          )
+ *       )
+ *       (AndLink
+ *          (ImplicationLink
+ *             (VariableNode "$X")
+ *             (PredicateNode "is-human")
+ *          )
+ *          (ImplicationLink
+ *             (VariableNode "$Y")
+ *             (PredicateNode "is-human")
+ *          )
+ *          (EvaluationLink
+ *             (PredicateNode "acquainted")
+ *             (ListLink
+ *                (VariableNode "$X")
+ *                (VariableNode "$Y")
+ *             )
+ *          )
+ *       )
+ *    )
+ *    (ListLink
+ *       (PredicateNode "is-Self")
+ *       (PredicateNode "is-Bob")
+ *    )
+ * )
+ */
+void PutLinkUTest::test_eval_implication_2()
+{
+	logger().info("BEGIN TEST: %s", __FUNCTION__);
+
+	Handle X = N(VARIABLE_NODE, "$X"),
+		Y = N(VARIABLE_NODE, "$Y"),
+		Predicate = N(TYPE_NODE, "PredicateNode"),
+		human = N(PREDICATE_NODE, "is-human"),
+		Self = N(PREDICATE_NODE, "is-Self"),
+		Bob = N(PREDICATE_NODE, "is-Bob"),
+		acquainted = N(PREDICATE_NODE, "acquainted"),
+		X_human = L(IMPLICATION_LINK, X, human),
+		Y_human = L(IMPLICATION_LINK, Y, human),
+		Self_human = L(IMPLICATION_LINK, Self, human),
+		Bob_human = L(IMPLICATION_LINK, Bob, human),
+		X_Y_acquainted = L(EVALUATION_LINK,
+		                   acquainted,
+		                   L(LIST_LINK, X, Y)),
+		Self_Bob_acquainted = L(EVALUATION_LINK,
+		                        acquainted,
+		                        L(LIST_LINK, Self, Bob)),
+		vardecl = L(VARIABLE_LIST,
+		            L(TYPED_VARIABLE_LINK, X, Predicate),
+		            L(TYPED_VARIABLE_LINK, Y, Predicate)),
+		body = L(AND_LINK, X_human, Y_human, X_Y_acquainted),
+		args = L(LIST_LINK, Self, Bob),
+		put = L(PUT_LINK, L(LAMBDA_LINK, vardecl, body), args);
+
+	Instantiator inst(&_as);
+	Handle putted = inst.execute(put);
+	Handle expected = L(AND_LINK, Self_human, Bob_human, Self_Bob_acquainted);
+
+	printf("Executing %s\n", put->toString().c_str());
+	printf("Expecting %s\n", expected->toString().c_str());
+	printf("Got %s\n", putted->toString().c_str());
+	TS_ASSERT_EQUALS(putted, expected);
 
 	logger().info("END TEST: %s", __FUNCTION__);
 }

@@ -28,53 +28,36 @@
 
 using namespace opencog;
 
-MinusLink::MinusLink(const HandleSeq& oset,
-                   TruthValuePtr tv,
-                   AttentionValuePtr av)
-    : PlusLink(MINUS_LINK, oset, tv, av)
+MinusLink::MinusLink(const HandleSeq& oset, Type t)
+    : PlusLink(oset, t)
 {
 	init();
 }
 
-MinusLink::MinusLink(Type t, const HandleSeq& oset,
-                   TruthValuePtr tv,
-                   AttentionValuePtr av)
-    : PlusLink(t, oset, tv, av)
-{
-	if (not classserver().isA(t, MINUS_LINK))
-		throw InvalidParamException(TRACE_INFO, "Expecting a MinusLink");
-	init();
-}
-
-MinusLink::MinusLink(const Handle& a, const Handle& b,
-                   TruthValuePtr tv,
-                   AttentionValuePtr av)
-    : PlusLink(MINUS_LINK, a, b, tv, av)
+MinusLink::MinusLink(const Handle& a, const Handle& b)
+    : PlusLink(MINUS_LINK, a, b)
 {
 	init();
 }
 
-MinusLink::MinusLink(Type t, const Handle& a, const Handle& b,
-                   TruthValuePtr tv,
-                   AttentionValuePtr av)
-    : PlusLink(t, a, b, tv, av)
+MinusLink::MinusLink(Type t, const Handle& a, const Handle& b)
+    : PlusLink(t, a, b)
 {
-	if (not classserver().isA(t, MINUS_LINK))
-		throw InvalidParamException(TRACE_INFO, "Expecting a MinusLink");
 	init();
 }
 
-MinusLink::MinusLink(Link& l)
+MinusLink::MinusLink(const Link& l)
     : PlusLink(l)
 {
-	Type tscope = l.getType();
-	if (not classserver().isA(tscope, MINUS_LINK))
-		throw InvalidParamException(TRACE_INFO, "Expecting a MinusLink");
 	init();
 }
 
 void MinusLink::init(void)
 {
+	Type tscope = getType();
+	if (not classserver().isA(tscope, MINUS_LINK))
+		throw InvalidParamException(TRACE_INFO, "Expecting a MinusLink");
+
 	size_t sz = _outgoing.size();
 	if (2 < sz or 0 == sz)
 		throw InvalidParamException(TRACE_INFO,
@@ -93,5 +76,7 @@ Handle MinusLink::do_execute(AtomSpace* as, const HandleSeq& oset) const
 	NumberNodePtr nb(unwrap_set(oset[1]));
 	return createNumberNode(na->get_value() - nb->get_value())->getHandle();
 }
+
+DEFINE_LINK_FACTORY(MinusLink, MINUS_LINK)
 
 // ============================================================

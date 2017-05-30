@@ -23,31 +23,17 @@
 #include <opencog/atoms/base/atom_types.h>
 #include <opencog/atoms/base/ClassServer.h>
 #include "FreeLink.h"
-#include "ScopeLink.h"
-#include "VariableList.h"
 
 using namespace opencog;
 
-FreeLink::FreeLink(const HandleSeq& oset,
-                   TruthValuePtr tv,
-                   AttentionValuePtr av)
-    : Link(FREE_LINK, oset, tv, av)
+FreeLink::FreeLink(const Handle& a)
+    : Link(FREE_LINK, a)
 {
 	init();
 }
 
-FreeLink::FreeLink(const Handle& a,
-                   TruthValuePtr tv,
-                   AttentionValuePtr av)
-    : Link(FREE_LINK, a, tv, av)
-{
-	init();
-}
-
-FreeLink::FreeLink(Type t, const HandleSeq& oset,
-                   TruthValuePtr tv,
-                   AttentionValuePtr av)
-    : Link(t, oset, tv, av)
+FreeLink::FreeLink(const HandleSeq& oset, Type t)
+    : Link(oset, t)
 {
 	if (not classserver().isA(t, FREE_LINK))
 		throw InvalidParamException(TRACE_INFO, "Expecting a FreeLink");
@@ -57,10 +43,8 @@ FreeLink::FreeLink(Type t, const HandleSeq& oset,
 	init();
 }
 
-FreeLink::FreeLink(Type t, const Handle& a,
-                   TruthValuePtr tv,
-                   AttentionValuePtr av)
-    : Link(t, a, tv, av)
+FreeLink::FreeLink(Type t, const Handle& a)
+    : Link(t, a)
 {
 	if (not classserver().isA(t, FREE_LINK))
 		throw InvalidParamException(TRACE_INFO, "Expecting a FreeLink");
@@ -70,10 +54,8 @@ FreeLink::FreeLink(Type t, const Handle& a,
 	init();
 }
 
-FreeLink::FreeLink(Type t, const Handle& a, const Handle& b,
-                   TruthValuePtr tv,
-                   AttentionValuePtr av)
-    : Link(t, a, b, tv, av)
+FreeLink::FreeLink(Type t, const Handle& a, const Handle& b)
+    : Link(t, a, b)
 {
 	if (not classserver().isA(t, FREE_LINK))
 		throw InvalidParamException(TRACE_INFO, "Expecting a FreeLink");
@@ -83,7 +65,7 @@ FreeLink::FreeLink(Type t, const Handle& a, const Handle& b,
 	init();
 }
 
-FreeLink::FreeLink(Link& l)
+FreeLink::FreeLink(const Link& l)
     : Link(l)
 {
 	Type tscope = l.getType();
@@ -101,3 +83,7 @@ void FreeLink::init(void)
 {
 	_vars.find_variables(_outgoing);
 }
+
+DEFINE_LINK_FACTORY(FreeLink, FREE_LINK);
+
+/* ===================== END OF FILE ===================== */

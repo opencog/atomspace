@@ -33,7 +33,7 @@ const AttentionValue::vlti_t AttentionValue::DEFAULTATOMVLTI = 0;
 std::string AttentionValue::toString() const
 {
     char buffer[256];
-    sprintf(buffer, "[%d, %d, %s]", (int)m_STI, (int)m_LTI,
+    sprintf(buffer, "[%f, %f, %s]", m_STI, m_LTI,
             m_VLTI ? "SAVABLE" : "DISPOSABLE");
     return buffer;
 }

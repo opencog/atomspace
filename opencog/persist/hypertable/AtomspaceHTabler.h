@@ -51,7 +51,7 @@ class AtomspaceHTabler : public BackingStore
         TableMutatorPtr m_outset_mutator;
         
         KeySpec make_key(Handle);
-        KeySpec make_key(Type, const std::vector<Handle>&);
+        KeySpec make_key(Type, const HandleSeq&);
         KeySpec make_key(Type, const char*);
         
         void initTables();
@@ -74,7 +74,7 @@ class AtomspaceHTabler : public BackingStore
          * Return a pointer to a link of the indicated type and outset,
          * if it exists; else return NULL.
          */
-        virtual Link * getLink(Type, const std::vector<Handle>&) const;
+        virtual Link * getLink(Type, const HandleSeq&) const;
 
         /** 
          * Return a pointer to a node of the indicated type and name,
@@ -93,7 +93,7 @@ class AtomspaceHTabler : public BackingStore
          * Return a vector containing the handles of the entire incoming
          * set of the indicated handle. 
          */
-        virtual std::vector<Handle> getIncomingSet(Handle) const;
+        virtual HandleSeq getIncomingSet(Handle) const;
 
         /** 
          * Return a pointer to an Atom associated with the given

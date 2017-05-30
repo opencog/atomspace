@@ -43,43 +43,62 @@ void VariableList::validate_vardecl(const HandleSeq& oset)
 		{
 			get_vartype(h);
 		}
+
+		// Sigh. This UnquoteLink check is a bit of hackery. It can
+		// happen, during pattern-recognition, that we are *searching*
+		// for BindLink's/GetLink's, and need to construct a dummy
+		// variable to match a variable list.  This dummy will be
+		// unquoted first.  Its not unquoting an actual VariableList,
+		// though, its just unquoting a dummy, and so there's nothing
+		// there, its empty, there's nothing to do.  So just pass on
+		// the whole she-bang.  See the `recog.scm` example for a
+		// a real-world example of this happening.
+		else if (UNQUOTE_LINK == t)
+		{
+			return;
+		}
 		else
+		{
 			throw InvalidParamException(TRACE_INFO,
-				"Expected a VariableNode or a TypedVariableLink, got: %s",
-					classserver().getTypeName(t).c_str());
+				"Expected a VariableNode or a TypedVariableLink, got: %s"
+				"\nVariableList is %s",
+					classserver().getTypeName(t).c_str(),
+					toString().c_str());
+		}
 	}
 	build_index();
 }
 
-VariableList::VariableList(const Handle& hvardecls,
-                           TruthValuePtr tv, AttentionValuePtr av)
-	: Link(VARIABLE_LIST,
-	    // Either it is a VariableList, or its a naked variable, or
-	    // its a typed variable.
-	    hvardecls->getType() == VARIABLE_LIST ?
-	          hvardecls->getOutgoingSet() : HandleSeq({hvardecls}),
-	    tv, av)
+VariableList::VariableList(const Handle& vardecl)
+	: Link(
+		not vardecl ?
+		// If vardecl is undefined then construct an empty variable list
+		HandleSeq({})
+		:
+		// Otherwise vardecl is either a VariableList, or a naked or
+		// typed variable.
+		vardecl->getType() == VARIABLE_LIST ?
+		vardecl->getOutgoingSet() : HandleSeq({vardecl}),
+		VARIABLE_LIST)
 {
 	validate_vardecl(getOutgoingSet());
 }
 
-VariableList::VariableList(const HandleSeq& oset,
-                           TruthValuePtr tv, AttentionValuePtr av)
-	: Link(VARIABLE_LIST, oset, tv, av)
+VariableList::VariableList(const HandleSeq& oset, Type t)
+	: Link(oset, t)
 {
-	validate_vardecl(oset);
-}
-
-VariableList::VariableList(Type t, const HandleSeq& oset,
-                           TruthValuePtr tv, AttentionValuePtr av)
-	: Link(t, oset, tv, av)
-{
+	if (not classserver().isA(t, VARIABLE_LIST))
+	{
+		const std::string& tname = classserver().getTypeName(t);
+		throw InvalidParamException(TRACE_INFO,
+			"Expecting a VariableList, got %s", tname.c_str());
+	}
 	// derived classes have a different initialization order
 	if (VARIABLE_LIST != t) return;
 	validate_vardecl(oset);
 }
 
-VariableList::VariableList(Link &l)
+VariableList::VariableList(const Link &l)
 	: Link(l)
 {
 	// Type must be as expected
@@ -138,7 +157,7 @@ VariableList::VariableList(Link &l)
  */
 void VariableList::get_vartype(const Handle& htypelink)
 {
-	const std::vector<Handle>& oset = htypelink->getOutgoingSet();
+	const HandleSeq& oset = htypelink->getOutgoingSet();
 	if (2 != oset.size())
 	{
 		throw InvalidParamException(TRACE_INFO,
@@ -166,11 +185,27 @@ void VariableList::get_vartype(const Handle& htypelink)
 			_varlist._simple_typemap.insert({varname, ts});
 		}
 	}
+	else if (TYPE_INH_NODE == t)
+	{
+		Type vt = TypeNodeCast(vartype)->get_value();
+		std::set<Type> ts;
+		std::set<Type>::iterator it = ts.begin();
+		classserver().getChildren(vt, std::inserter(ts, it));
+		_varlist._simple_typemap.insert({varname, ts});
+	}
+	else if (TYPE_CO_INH_NODE == t)
+	{
+		Type vt = TypeNodeCast(vartype)->get_value();
+		std::set<Type> ts;
+		std::set<Type>::iterator it = ts.begin();
+		classserver().getChildren(vt, std::inserter(ts, it));
+		_varlist._simple_typemap.insert({varname, ts});
+	}
 	else if (TYPE_CHOICE == t)
 	{
 		std::set<Type> typeset;
-		std::set<Handle> deepset;
-		std::set<Handle> fuzzset;
+		OrderedHandleSet deepset;
+		OrderedHandleSet fuzzset;
 
 		const HandleSeq& tset = vartype->getOutgoingSet();
 		size_t tss = tset.size();
@@ -227,7 +262,7 @@ void VariableList::get_vartype(const Handle& htypelink)
 				"Unexpected contents in SignatureLink\n"
 				"Expected arity==1, got %s", vartype->toString().c_str());
 
-		std::set<Handle> ts;
+		OrderedHandleSet ts;
 		ts.insert(vartype);
 		_varlist._deep_typemap.insert({varname, ts});
 	}
@@ -239,9 +274,15 @@ void VariableList::get_vartype(const Handle& htypelink)
 				"Unexpected contents in FuzzyLink\n"
 				"Expected arity==1, got %s", vartype->toString().c_str());
 
-		std::set<Handle> ts;
+		OrderedHandleSet ts;
 		ts.insert(vartype);
 		_varlist._fuzzy_typemap.insert({varname, ts});
+	}
+	else if (VARIABLE_NODE == t)
+	{
+		// This occurs when the variable type is a variable to be
+		// matched by the pattern matcher. There's nothing to do
+		// except not throwing an exception.
 	}
 	else
 	{
@@ -295,7 +336,7 @@ void VariableList::validate_vardecl(const Handle& hdecls)
 	{
 		// The list of variable declarations should be .. a list of
 		// variables! Make sure its as expected.
-		const std::vector<Handle>& dset = hdecls->getOutgoingSet();
+		const HandleSeq& dset = hdecls->getOutgoingSet();
 		validate_vardecl(dset);
 	}
 	else
@@ -322,5 +363,15 @@ void VariableList::build_index(void)
 		_varlist.index.insert(std::pair<Handle, unsigned int>(_varlist.varseq[i], i));
 	}
 }
+
+std::string opencog::oc_to_string(const VariableListPtr& vlp)
+{
+	if (vlp == nullptr)
+		return "nullvariablelist\n";
+	else
+		return oc_to_string(vlp->getHandle());
+}
+
+DEFINE_LINK_FACTORY(VariableList, VARIABLE_LIST)
 
 /* ===================== END OF FILE ===================== */

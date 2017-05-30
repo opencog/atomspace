@@ -46,7 +46,7 @@ void TypedAtomLink::init()
 			"You are not allowed to globally type a variable");
 
 	Type dtype = _outgoing[1]->getType();
-	if (TYPE_NODE != dtype and
+	if (not classserver().isA(dtype, TYPE_NODE) and
 	    DEFINED_TYPE_NODE != dtype and
 	    TYPE_CHOICE != dtype and
 	    SIGNATURE_LINK != dtype and
@@ -57,21 +57,19 @@ void TypedAtomLink::init()
 
 }
 
-TypedAtomLink::TypedAtomLink(const HandleSeq& oset,
-                             TruthValuePtr tv, AttentionValuePtr av)
-	: UniqueLink(TYPED_ATOM_LINK, oset, tv, av)
+TypedAtomLink::TypedAtomLink(const HandleSeq& oset, Type t)
+	: UniqueLink(oset, t)
 {
 	init();
 }
 
-TypedAtomLink::TypedAtomLink(const Handle& name, const Handle& defn,
-                             TruthValuePtr tv, AttentionValuePtr av)
-	: UniqueLink(TYPED_ATOM_LINK, HandleSeq({name, defn}), tv, av)
+TypedAtomLink::TypedAtomLink(const Handle& name, const Handle& defn)
+	: UniqueLink(HandleSeq({name, defn}), TYPED_ATOM_LINK)
 {
 	init();
 }
 
-TypedAtomLink::TypedAtomLink(Link &l)
+TypedAtomLink::TypedAtomLink(const Link &l)
 	: UniqueLink(l)
 {
 	init();
@@ -87,5 +85,7 @@ Handle TypedAtomLink::get_type(const Handle& atom)
 	Handle uniq(get_unique(atom, TYPED_ATOM_LINK, false));
 	return uniq->getOutgoingAtom(1);
 }
+
+DEFINE_LINK_FACTORY(TypedAtomLink, TYPED_ATOM_LINK);
 
 /* ===================== END OF FILE ===================== */

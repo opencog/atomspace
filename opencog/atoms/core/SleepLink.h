@@ -38,14 +38,13 @@ namespace opencog
 class SleepLink : public FunctionLink
 {
 public:
-	SleepLink(const HandleSeq&,
-	           TruthValuePtr tv = TruthValue::DEFAULT_TV(),
-	           AttentionValuePtr av = AttentionValue::DEFAULT_AV());
-
-	SleepLink(Link &l);
+	SleepLink(const HandleSeq&, Type=SLEEP_LINK);
+	SleepLink(const Link &l);
 
 	// Return a pointer to the atom being specified.
 	virtual Handle execute(AtomSpace* = NULL) const;
+
+	static Handle factory(const Handle&);
 };
 
 typedef std::shared_ptr<SleepLink> SleepLinkPtr;

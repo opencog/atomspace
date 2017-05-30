@@ -27,56 +27,38 @@
 #include <climits>
 #include <opencog/atoms/base/Handle.h>
 #include <opencog/atoms/base/Atom.h>
-#include <opencog/atomspace/AtomTable.h>
+#include <opencog/atoms/base/Link.h>
 
-using namespace opencog;
+namespace opencog {
 
 const Handle Handle::UNDEFINED;
 const AtomPtr Handle::NULL_POINTER;
 
-Handle::Handle(const UUID u)
+ContentHash Handle::value(void) const
 {
-	_ptr = do_res(u)._ptr;
-}
-
-UUID Handle::value(void) const
-{
-    const Atom* a = operator->();
-    if (a) return a->getUUID();
-    return ULONG_MAX;
+    if (get()) return get()->get_hash();
+    return INVALID_HASH;
 }
 
 // ===================================================
 // Atom comparison.
 
-#if 0
-bool Handle::atoms_eq(const AtomPtr& a, const AtomPtr& b)
+bool content_eq(const Handle& lh, const Handle& rh) noexcept
 {
-    if (a == b) return true;
-    if (NULL == a or NULL == b) return false;
-    return *a == *b;
+    if (lh == rh) return true;
+    if (nullptr == lh or nullptr == rh) return false;
+    if (lh->get_hash() != rh->get_hash()) return false;
+
+    return *((AtomPtr) lh) == *((AtomPtr) rh);
 }
-#endif
 
-bool Handle::atoms_less(const Atom* pa, const Atom* pb)
+bool Handle::atoms_less(const Atom* a, const Atom* b)
 {
-    if (pa == pb) return false;
-    if (NULL == pa) return true;
-    if (NULL == pb) return false;
+    if (a == b) return false;
+    if (nullptr == a) return true;
+    if (nullptr == b) return false;
 
-    const Atom* a(dynamic_cast<const Atom*>(pa));
-    const Atom* b(dynamic_cast<const Atom*>(pb));
-    UUID ua = a->getUUID();
-    UUID ub = b->getUUID();
-    if (INVALID_UUID != ua or INVALID_UUID != ub) return ua < ub;
-
-    // If both UUID's are invalid, we still need to compare
-    // the atoms somehow. The need to compare in some "reasonable"
-    // way, so that std::set<Handle> works correctly when it uses
-    // the std::less<Handle> operator, which calls this function.
-    // Performing an address-space comparison is all I can think
-    // of...
-    // if (*a == *b) return false; lets not do this cpu-time-waster...
+    // Pointer compare
     return a < b;
 }
 
@@ -94,41 +76,224 @@ bool Handle::content_based_atoms_less(const Atom* a, const Atom* b)
 // ===================================================
 // Handle resolution stuff.
 
-// Its a vector, not a set, because its priority ranked.
-std::vector<const AtomTable*> Handle::_resolver;
-
-void Handle::set_resolver(const AtomTable* tab)
+std::size_t hash_value(Handle const& h)
 {
-    _resolver.push_back(tab);
+	if (nullptr == h) return 0;
+	return h->get_hash();
 }
 
-void Handle::clear_resolver(const AtomTable* tab)
+int Handle::compare(const Handle& h1, const Handle& h2)
 {
-    auto it = std::find(_resolver.begin(), _resolver.end(), tab);
-    if (it != _resolver.end())
-        _resolver.erase(it);
+	ContentHash ch1 = hash_value(h1);
+	ContentHash ch2 = hash_value(h2);
+	if (ch1 < ch2) return -1;
+	if (ch1 > ch2) return 1;
+	return 0;
 }
 
-// Search several atomspaces, in order.  First one to come up with
-// the atom wins.  Seems to work, for now.
-inline Handle Handle::do_res(UUID uuid)
+bool Handle::operator< (const Handle& h) const noexcept
 {
-    for (const AtomTable* at : _resolver) {
-        Handle h(at->getHandle(uuid));
-        if (NULL != h) return h;
-    }
-    return Handle();
+	return hash_value(*this) < hash_value(h);
 }
+
+bool Handle::operator<= (const Handle& h) const noexcept
+{
+	return hash_value(*this) <= hash_value(h);
+}
+
+bool Handle::operator> (const Handle& h) const noexcept
+{
+	return hash_value(*this) > hash_value(h);
+}
+
+bool Handle::operator>= (const Handle& h) const noexcept
+{
+	return hash_value(*this) >= hash_value(h);
+}
+
+
+// The rest of this file is devoted to printing utilities used only
+// during GDB debugging.  Thus, you won't find these anywhere in the
+// code base. You may call that directly from gdb
+// (opencog::h_to_string, etc), but very likely your version of GDB
+// supports overloading and in this case you can simply configure GDB
+// as follows
+// http://wiki.opencog.org/w/Development_standards#Print_OpenCog_Objects
+std::string h_to_string(const Handle& h)
+{
+	if (h == nullptr)
+		return "nullatom\n";
+	else
+		return h->toString();
+}
+std::string hp_to_string(const HandlePair& hp)
+{
+	std::stringstream ss;
+	ss << "first:" << std::endl << h_to_string(hp.first);
+	ss << "second:" << std::endl << h_to_string(hp.second);
+	return ss.str();
+}
+std::string hs_to_string(const HandleSeq& hs)
+{
+	std::stringstream ss; std::operator<<(ss, hs); return ss.str();
+}
+std::string hss_to_string(const HandleSeqSeq& hss)
+{
+	std::stringstream ss;
+	ss << "size = " << hss.size() << std::endl;
+	size_t i = 0;
+	for (const HandleSeq& hs : hss) {
+		ss << "atoms[" << i << "]:" << std::endl << hs_to_string(hs);
+		i++;
+	}
+	return ss.str();
+}
+std::string ohs_to_string(const OrderedHandleSet& ohs)
+{
+	std::stringstream ss; std::operator<<(ss, ohs); return ss.str();
+}
+std::string uhs_to_string(const UnorderedHandleSet& uhs)
+{
+	std::stringstream ss; std::operator<<(ss, uhs); return ss.str();
+}
+std::string hmap_to_string(const HandleMap& hmap)
+{
+	std::stringstream ss;
+	ss << "size = " << hmap.size() << std::endl;
+	int i = 0;
+	for (const auto& p : hmap) {
+		ss << "key[" << i << "]:" << std::endl << h_to_string(p.first)
+		   << "value[" << i << "]:" << std::endl << h_to_string(p.second);
+		i++;
+	}
+	return ss.str();
+}
+std::string hmultimap_to_string(const HandleMultimap& hmultimap)
+{
+	std::stringstream ss;
+	ss << "size = " << hmultimap.size() << std::endl;
+	int i = 0;
+	for (const auto& p : hmultimap) {
+		ss << "key[" << i << "]:" << std::endl << h_to_string(p.first)
+		   << "value[" << i << "]:" << std::endl;
+		for (const auto s : p.second)
+			ss << h_to_string(s);
+		i++;
+	}
+	return ss.str();
+}
+std::string hmaps_to_string(const HandleMapSeq& hms)
+{
+	std::stringstream ss;
+	ss << "size = " << hms.size() << std::endl;
+	for (unsigned i = 0; i < hms.size(); i++)
+		ss << "--- map[" << i << "] ---" << std::endl
+		   << hmap_to_string(hms[i]);
+	return ss.str();
+}
+std::string hmapset_to_string(const HandleMapSet& hms)
+{
+	std::stringstream ss;
+	ss << "size = " << hms.size() << std::endl;
+	unsigned i = 0;
+	for (const HandleMap& hm : hms) {
+		ss << "--- map[" << i << "] ---" << std::endl
+		   << hmap_to_string(hm);
+		++i;
+	}
+	return ss.str();
+}
+std::string hps_to_string(const HandlePairSeq& hps)
+{
+	std::stringstream ss;
+	ss << "size = " << hps.size() << std::endl;
+	size_t i = 0;
+	for (const std::pair<Handle, Handle>& hp : hps) {
+		ss << "atom.first[" << i << "]:" << std::endl << h_to_string(hp.first);
+		ss << "atom.second[" << i << "]:" << std::endl << h_to_string(hp.second);
+		i++;
+	}
+	return ss.str();
+}
+std::string atomtype_to_string(Type type)
+{
+	std::stringstream ss;
+	ss << classserver().getTypeName(type) << std::endl;
+	return ss.str();
+}
+std::string aptr_to_string(const AtomPtr& aptr)
+{
+	return h_to_string(aptr->getHandle());
+}
+std::string lptr_to_string(const LinkPtr& lptr)
+{
+	return h_to_string(lptr->getHandle());
+}
+
+std::string oc_to_string(const Handle& h)
+{
+	return h_to_string(h);
+}
+std::string oc_to_string(const HandlePair& hp)
+{
+	return hp_to_string(hp);
+}
+std::string oc_to_string(const HandleSeq& hs)
+{
+	return hs_to_string(hs);
+}
+std::string oc_to_string(const HandleSeqSeq& hss)
+{
+	return hss_to_string(hss);
+}
+std::string oc_to_string(const OrderedHandleSet& ohs)
+{
+	return ohs_to_string(ohs);
+}
+std::string oc_to_string(const UnorderedHandleSet& uhs)
+{
+	return uhs_to_string(uhs);
+}
+std::string oc_to_string(const HandleMap& hm)
+{
+	return hmap_to_string(hm);
+}
+std::string oc_to_string(const HandleMultimap& hmm)
+{
+	return hmultimap_to_string(hmm);
+}
+std::string oc_to_string(const HandleMapSeq& hms)
+{
+	return hmaps_to_string(hms);
+}
+std::string oc_to_string(const HandleMapSet& hms)
+{
+	return hmapset_to_string(hms);
+}
+std::string oc_to_string(const HandlePairSeq& hps)
+{
+	return hps_to_string(hps);
+}
+std::string oc_to_string(Type type)
+{
+	return atomtype_to_string(type);
+}
+std::string oc_to_string(const AtomPtr& aptr)
+{
+	return aptr_to_string(aptr);
+}
+
+} // ~namespace opencog
 
 namespace std {
 
 // Hack around the lack template use in Handle.h due to circular dependencies
 #define GEN_HANDLE_CONTAINER_OSTREAM_OPERATOR(T) \
 ostream& operator<<(ostream& out, const T& hs) { \
+	out << "size = " << hs.size() << endl; \
 	size_t i = 0; \
-	for (const Handle& h : hs) { \
-		out << "atom[" << i << "]:" << endl; \
-		if ((AtomPtr)h != nullptr) out << h->toString(); \
+	for (const opencog::Handle& h : hs) { \
+		out << "atom[" << i << "]:" << endl << h_to_string(h); \
 		i++; \
 	} \
 	return out; \
@@ -137,46 +302,4 @@ GEN_HANDLE_CONTAINER_OSTREAM_OPERATOR(opencog::HandleSeq)
 GEN_HANDLE_CONTAINER_OSTREAM_OPERATOR(opencog::OrderedHandleSet)
 GEN_HANDLE_CONTAINER_OSTREAM_OPERATOR(opencog::UnorderedHandleSet)
 
-string hs_to_string(const HandleSeq& hs)
-{
-	stringstream ss; ss << hs; return ss.str();
-}
-string ohs_to_string(const OrderedHandleSet& ohs)
-{
-	stringstream ss; ss << ohs; return ss.str();
-}
-string uhs_to_string(const UnorderedHandleSet& uhs)
-{
-	stringstream ss; ss << uhs; return ss.str();
-}
-std::string varmap_to_string(const VarMap& varmap)
-{
-	stringstream ss;
-	int i = 0;
-	for (const auto& p : varmap) {
-		ss << "key[" << i << "]:" << std::endl << p.first->toString()
-		   << "value[" << i << "]:" << std::endl << p.second->toString();
-		i++;
-	}
-	return ss.str();
-}
-std::string varmultimap_to_string(const VarMultimap& varmultimap)
-{
-	stringstream ss;
-	int i = 0;
-	for (const auto& p : varmultimap) {
-		ss << "key[" << i << "]:" << std::endl << p.first->toString()
-		   << "value[" << i << "]:" << std::endl;
-		for (const auto s : p.second)
-			ss << s->toString();
-		i++;
-	}
-	return ss.str();
-}
-std::string atomtype_to_string(Type type)
-{
-	return classserver().getTypeName(type);
-}
-
 } // ~namespace std
-

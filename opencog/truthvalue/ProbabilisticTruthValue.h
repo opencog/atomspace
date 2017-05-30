@@ -42,38 +42,44 @@ typedef std::shared_ptr<const ProbabilisticTruthValue> ProbabilisticTruthValuePt
 class ProbabilisticTruthValue : public TruthValue
 {
 protected:
-
-    strength_t mean;
-    confidence_t confidence;
-    count_t count;
+    enum {
+        MEAN, /// Mean of the strength of the TV over all observations.
+        CONFIDENCE, /// Estimate of confidence of the observation.
+        COUNT /// Raw count
+    };
 
 public:
 
     ProbabilisticTruthValue(strength_t, confidence_t, count_t);
     ProbabilisticTruthValue(const TruthValue&);
     ProbabilisticTruthValue(ProbabilisticTruthValue const&);
+    ProbabilisticTruthValue(const ProtoAtomPtr&);
 
-    virtual bool operator==(const TruthValue& rhs) const;
+    virtual bool operator==(const ProtoAtom&) const;
 
-    std::string toString() const;
-    TruthValueType getType() const;
+    std::string toString(const std::string&) const;
 
     strength_t getMean() const;
     count_t getCount() const;
     confidence_t getConfidence() const;
 
-    virtual TruthValuePtr merge(TruthValuePtr,
+    virtual TruthValuePtr merge(const TruthValuePtr&,
                                 const MergeCtrl& mc=MergeCtrl()) const;
 
     static TruthValuePtr createTV(strength_t s, confidence_t f, count_t c)
     {
         return std::static_pointer_cast<const TruthValue>(
-            std::make_shared<ProbabilisticTruthValue>(s, f, c));
+            std::make_shared<const ProbabilisticTruthValue>(s, f, c));
+    }
+    static TruthValuePtr createTV(const ProtoAtomPtr& pap)
+    {
+        return std::static_pointer_cast<const TruthValue>(
+            std::make_shared<const ProbabilisticTruthValue>(pap));
     }
 
     TruthValuePtr clone() const
     {
-        return std::make_shared<ProbabilisticTruthValue>(*this);
+        return std::make_shared<const ProbabilisticTruthValue>(*this);
     }
     TruthValue* rawclone() const
     {

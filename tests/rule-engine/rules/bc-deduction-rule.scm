@@ -6,69 +6,46 @@
 ;; |-
 ;; Inheritance A C
 ;; -----------------------------------------------------------------------------
-(define bc-deduction-rule
-    (BindLink
-        (VariableList
-            (TypedVariableLink
-                (VariableNode "$A")
-                (TypeNode "ConceptNode"))
-            (TypedVariableLink
-                (VariableNode "$B")
-                (TypeNode "ConceptNode"))
-            (TypedVariableLink
-                (VariableNode "$C")
-                (TypeNode "ConceptNode")))
-        (AndLink
-            (InheritanceLink
-                (VariableNode "$A")
-                (VariableNode "$B")
-            )
-            (InheritanceLink
-                (VariableNode "$B")
-                (VariableNode "$C")
-            )
-            ;; To avoid matching (Inheritance A B) and (Inheritance B A)
-            (NotLink
-                (IdenticalLink
-                    (VariableNode "$A")
-                    (VariableNode "$C")
-                )
-            )
-        )
-        (ExecutionOutputLink
-            (GroundedSchemaNode "scm: bc-deduction-formula")
-            (ListLink
-                (InheritanceLink
-                    (VariableNode "$A")
-                    (VariableNode "$B"))
-                (InheritanceLink
-                    (VariableNode "$B")
-                    (VariableNode "$C")
-                )
-                (InheritanceLink
-                    (VariableNode "$A")
-                    (VariableNode "$C")
-                )
-            )
-        )
-    )
-)
 
+(define bc-deduction-rule
+  (let* ((A (Variable "$A"))
+         (B (Variable "$B"))
+         (C (Variable "$C"))
+         (AB (Inheritance A B))
+         (BC (Inheritance B C))
+         (AC (Inheritance A C))
+         (Concept (Type "ConceptNode"))
+         (vardecl (VariableList
+                     (TypedVariable A Concept)
+                     (TypedVariable B Concept)
+                     (TypedVariable C Concept)))
+         (precon1 (Evaluation (GroundedPredicate "scm: true-enough") AB))
+         (precon2 (Evaluation (GroundedPredicate "scm: true-enough") BC))
+         (precon3 (Not (Identical A C)))
+         (pattern (And AB BC precon1 precon2 precon3))
+         (rewrite (ExecutionOutput
+                     (GroundedSchema "scm: bc-deduction-formula")
+                     (List AC AB BC))))
+    (Bind
+       vardecl
+       pattern
+       rewrite)))
 
 ; -----------------------------------------------------------------------------
 ; Deduction Formula
 ; -----------------------------------------------------------------------------
 
-(define (bc-deduction-formula AB BC AC)
-    (let
-        ((sAB (cog-stv-strength AB))
-         (cAB (cog-stv-confidence AB))
-         (sBC (cog-stv-strength BC))
-         (cBC (cog-stv-confidence BC)))
-      (if (and (>= sAB 0.5) (>= cAB 0.5) (>= sBC 0.5) (>= cBC 0.5))
-          (cog-set-tv! AC (stv 1 1)))
-    )
-)
+(define (true-enough-bool a)
+  (let ((s (cog-stv-strength a)) (c (cog-stv-confidence a)))
+    (and (> s 0.5) (> c 0.5))))
+
+(define (true-enough a)
+  (bool->tv (true-enough-bool a)))
+
+(define (bc-deduction-formula AC AB BC)
+  ;; We keep this precondition here again just in case
+  (if (and (true-enough-bool AB) (true-enough-bool BC))
+      (cog-set-tv! AC (stv 1 1))))
 
 ; Associate a name to the rule
 (define bc-deduction-rule-name (DefinedSchema "bc-deduction-rule"))

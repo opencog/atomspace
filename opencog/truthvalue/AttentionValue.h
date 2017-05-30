@@ -49,9 +49,9 @@ class AttentionValue
     : public std::enable_shared_from_this<AttentionValue>
 {
 public:
-    typedef short sti_t;   //!< short-term importance type
-    typedef short lti_t;   //!< long-term importance type
-    typedef short vlti_t;  //!< very long-term importance type
+    typedef double sti_t;   //!< short-term importance type
+    typedef double lti_t;   //!< long-term importance type
+    typedef double vlti_t;  //!< very long-term importance type
 
     static const int DISPOSABLE = 0; //!< Status flag for vlti
 
@@ -60,10 +60,10 @@ public:
     static const lti_t DEFAULTATOMLTI;   //!< long-term importance default
     static const vlti_t DEFAULTATOMVLTI; //!< very long-term default
 
-    static const sti_t MAXSTI = SHRT_MAX;
-    static const lti_t MAXLTI = SHRT_MAX;
-    static const sti_t MINSTI = SHRT_MIN;
-    static const lti_t MINLTI = SHRT_MIN;
+    static constexpr sti_t MAXSTI = SHRT_MAX;
+    static constexpr lti_t MAXLTI = SHRT_MAX;
+    static constexpr sti_t MINSTI = SHRT_MIN;
+    static constexpr lti_t MINLTI = SHRT_MIN;
 
     //! to be used as default attention value
     static AttentionValuePtr DEFAULT_AV() {

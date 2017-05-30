@@ -26,6 +26,8 @@
 
 #include <opencog/atomspace/AtomSpace.h>
 
+#include <opencog/atoms/base/Context.h>
+
 /**
  * class Instantiator -- create grounded expressions from ungrounded ones.
  * Given an ungrounded expression (i.e. an expression containing variables)
@@ -43,7 +45,7 @@ class Instantiator
 {
 private:
 	AtomSpace *_as;
-	const std::map<Handle, Handle> *_vmap;
+	const HandleMap *_vmap;
 	bool _halt = false;
 
 	/**
@@ -51,9 +53,9 @@ private:
 	 * returns verbatim atoms. This is incorrect when the QuoteLink
 	 * occurs in any scoped link (anything inheriting from ScopeLink,
 	 * (e.g. GetLink, BindLink), since these handle QuoteLinks within
-	 * thier own scope. We must avoid damaging quotes for these atoms.
+	 * their own scope. We must avoid damaging quotes for these atoms.
 	 */
-	int _quotation_level = 0;
+	Context _context;
 	int _avoid_discarding_quotes_level = 0;
 
 	/**
@@ -77,8 +79,8 @@ private:
 	 * by default.
 	 */
 	bool _eager = true;
-	Handle walk_tree(const Handle& tree);
-	bool walk_sequence(HandleSeq&, const HandleSeq&);
+	Handle walk_tree(const Handle& tree, bool silent=false);
+	bool walk_sequence(HandleSeq&, const HandleSeq&, bool silent=false);
 
 public:
 	Instantiator(AtomSpace* as) : _as(as), _vmap(nullptr) {}
@@ -95,10 +97,11 @@ public:
 		_vmap = nullptr;
 	}
 
-	Handle instantiate(const Handle& expr, const std::map<Handle, Handle> &vars);
-	Handle execute(const Handle& expr)
+	Handle instantiate(const Handle& expr, const HandleMap &vars,
+	                   bool silent=false);
+	Handle execute(const Handle& expr, bool silent=false)
 	{
-		return instantiate(expr, std::map<Handle, Handle>());
+		return instantiate(expr, HandleMap(), silent);
 	}
 };
 

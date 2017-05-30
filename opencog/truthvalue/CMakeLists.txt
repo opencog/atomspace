@@ -1,14 +1,17 @@
 ADD_LIBRARY (truthvalue
 	AttentionValue.cc
 	CountTruthValue.cc
+	EvidenceCountTruthValue.cc
 	FuzzyTruthValue.cc
 	GenericTruthValue.cc
 	IndefiniteTruthValue.cc
-	NullTruthValue.cc
 	ProbabilisticTruthValue.cc
 	SimpleTruthValue.cc
 	TruthValue.cc
 )
+
+# Without this, parallel make will race and crap up the generated files.
+ADD_DEPENDENCIES(truthvalue opencog_atom_types)
 
 TARGET_LINK_LIBRARIES(truthvalue
 	${COGUTIL_LIBRARY}
@@ -24,9 +27,9 @@ INSTALL (FILES
 	FuzzyTruthValue.h
 	GenericTruthValue.h
 	IndefiniteTruthValue.h
-	NullTruthValue.h
 	ProbabilisticTruthValue.h
 	SimpleTruthValue.h
+	EvidenceCountTruthValue.h
 	TruthValue.h
 	DESTINATION "include/opencog/truthvalue"
 )

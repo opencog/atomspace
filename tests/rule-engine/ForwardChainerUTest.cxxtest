@@ -6,9 +6,8 @@
  */
 #include <boost/range/algorithm/find.hpp>
 
-#include <opencog/util/Config.h>
 #include <opencog/atomspace/AtomSpace.h>
-#include <opencog/guile/load-file.h>
+#include <opencog/attentionbank/AttentionBank.h>
 #include <opencog/guile/SchemeEval.h>
 
 #include <opencog/rule-engine/forwardchainer/ForwardChainer.h>
@@ -22,87 +21,83 @@ using namespace opencog;
 
 #define CHKERR \
    TSM_ASSERT("Caught scm error during eval", \
-      (false == eval.eval_error()));
+      (false == _eval.eval_error()));
 
 class ForwardChainerUTest: public CxxTest::TestSuite
 {
 private:
 	AtomSpace _as;
-	SchemeEval eval;
+	SchemeEval _eval;
 
 public:
-	ForwardChainerUTest() : eval(&_as)
+	ForwardChainerUTest() : _eval(&_as)
 	{
 #undef DEBUG
 		logger().set_level(Logger::DEBUG);
+		logger().set_timestamp_flag(false);
 		logger().set_print_to_stdout_flag(true);
 
 		// Disable the AF mechanism during testing!
-		_as.set_attentional_focus_boundary(AttentionValue::MINSTI);
-		config().set("SCM_PRELOAD",
-		             "opencog/atoms/base/core_types.scm, "
-		             "opencog/scm/utilities.scm, "
-		             "opencog/scm/av-tv.scm");
-		load_scm_files_from_config(_as);
+		attentionbank(&_as).setAttentionalFocusBoundary(AttentionValue::MINSTI);
 
-		eval.eval("(use-modules (opencog))");
+		string source_dir = string(PROJECT_SOURCE_DIR),
+			test_dir = source_dir + "/tests",
+			test_ure_dir = test_dir + "/rule-engine",
+			ure_dir = source_dir + "/opencog/scm/opencog/rule-engine";
+		vector<string> load_paths = {source_dir, test_dir, test_ure_dir,
+		                             ure_dir};
+		for (string& p : load_paths)
+		{
+			string eval_str = string("(add-to-load-path \"") + p + string("\")");
+			_eval.eval(eval_str);
+		}
+
+		_eval.eval("(use-modules (opencog))");
+		_eval.eval("(use-modules (opencog rule-engine))");
+		_eval.eval("(use-modules (opencog logger))");
 		CHKERR;
 
-		eval.eval("(use-modules (opencog rule-engine))");
+		// Load the simple deduction rbs to test it
+		string result; // to be able to read load errors
+		result = _eval.eval("(load-from-path \"fc-deduction-config.scm\")");
 		CHKERR;
 
-		// add the following so that utilities.scm and av-tv.scm are
-		// correctly loaded from crisp-deduction.scm
-		eval.eval("(add-to-load-path \"" PROJECT_SOURCE_DIR "/opencog/scm\")");
+		// Load the simple deduction + modus ponens rbs to test it
+		result = _eval.eval("(load-from-path \"fc-config.scm\")");
 		CHKERR;
-
-		// Load utilities.scm and rule-engine-utils.scm. Apparently
-		// the modules' functions are not loaded
-		eval.eval("(load-from-path \"utilities.scm\")");
-		CHKERR;
-		eval.eval("(load-from-path \"opencog/rule-engine/rule-engine-utils.scm\")");
-		CHKERR;
-
-		// Load the simple deduction example to test it
-		eval.eval("(load-from-path \"" PROJECT_SOURCE_DIR
-		          "/tests/rule-engine/crisp-deduction.scm\")");
-		eval.eval("(load-from-path \"" PROJECT_SOURCE_DIR
-		          "/tests/rule-engine/crisp-deduction-config.scm\")");
-		CHKERR;
-
-		eval.eval("(load-from-path \"" PROJECT_SOURCE_DIR
-		          "/tests/rule-engine/bc-config.scm\")");
 	}
-	void test_do_chain();
-	void test_choose_rule();
-	void test_apply_rule();
-	void test_substitute_rule_part();
-	void test_unify_1();
-	void test_unify_2();
-	void test_derive_rules_1();
-	void test_derive_rules_2();
+	~ForwardChainerUTest()
+	{
+int rc = CxxTest::TestTracker::tracker().suiteFailed();
+_exit(rc); // XXX hack to avoid double-free in __run_exit_handlers
+	}
+
+	void test_do_chain_deduction();
+	void test_do_chain_animals();
+	void test_select_rule();
 };
 
-void ForwardChainerUTest::test_do_chain()
+void ForwardChainerUTest::test_do_chain_deduction()
 {
 	// Test simple deduction
 	//
-	// InheritanceLink A B
-	// InheritanceLink B C
-	// |-
-	// InheritanceLink A C
-	Handle A = eval.eval_h("(PredicateNode \"A\" (stv 1 1))"),
-		B = eval.eval_h("(PredicateNode \"B\" (stv 1 1))"),
-		C = eval.eval_h("(PredicateNode \"C\" (stv 1 1))"),
-		AB = eval.eval_h("(ImplicationLink (stv 1 1)"
-		                  "    (PredicateNode \"A\")"
-		                  "    (PredicateNode \"B\"))"),
-		BC = eval.eval_h("(ImplicationLink (stv 1 1)"
-		                  "    (PredicateNode \"B\")"
-		                  "    (PredicateNode \"C\"))");
+	//   InheritanceLink A B
+	//   InheritanceLink B C
+	//   |-
+	//   InheritanceLink A C
+	//
+	Handle A = _eval.eval_h("(ConceptNode \"A\" (stv 1 1))"),
+		B = _eval.eval_h("(ConceptNode \"B\")"),
+		C = _eval.eval_h("(ConceptNode \"C\")"),
+		AB = _eval.eval_h("(InheritanceLink (stv 1 1)"
+		                  "   (ConceptNode \"A\")"
+		                  "   (ConceptNode \"B\"))"),
+		BC = _eval.eval_h("(InheritanceLink (stv 1 1)"
+		                  "   (ConceptNode \"B\")"
+		                  "   (ConceptNode \"C\"))");
 
     // Get the ConceptNode corresponding to the rule-based system to test
-    Handle rbs = eval.eval_h("(ConceptNode \"crisp-deduction-rule-base\")");
+	Handle rbs = an(CONCEPT_NODE, "fc-deduction-rule-base");
     ForwardChainer fc(_as, rbs, AB);
 	// Run forward chainer
 	fc.do_chain();
@@ -111,213 +106,51 @@ void ForwardChainerUTest::test_do_chain()
 	UnorderedHandleSet results = fc.get_chaining_result();
 
 	// Check that AC is in the results
-	Handle AC = _as.add_link(IMPLICATION_LINK, A, C);
+	Handle AC = _as.add_link(INHERITANCE_LINK, A, C);
 	TS_ASSERT_DIFFERS(results.find(AC), results.end());
 }
 
-void ForwardChainerUTest::test_choose_rule(void)
+void ForwardChainerUTest::test_do_chain_animals()
 {
-    Handle h = eval.eval_h("(ImplicationLink"
-                           "   (PredicateNode \"is_cat\")"
-                           "   (PredicateNode \"is_animal\"))");
+	string result = _eval.eval("(load-from-path \"tests/rule-engine/fc-animals-config.scm\")");
+	logger().debug() << "result = " << result;
+	_eval.eval("(load-from-path \"tests/rule-engine/animals.scm\")");
+	randGen().seed(0);
+
+	Handle top_rbs = _as.get_node(CONCEPT_NODE, UREConfigReader::top_rbs_name);
+
+	Handle Fritz = an(CONCEPT_NODE, "Fritz"),
+		croaks = an(PREDICATE_NODE, "croaks"),
+		green = an(CONCEPT_NODE, "green"),
+		source = al(EVALUATION_LINK, croaks, Fritz),
+		vardecl = Handle::UNDEFINED;
+
+	ForwardChainer fc(_as, top_rbs, source, vardecl);
+	fc.get_config().set_maximum_iterations(50);
+	fc.do_chain();
+
+	UnorderedHandleSet results = fc.get_chaining_result();
+	Handle Fritz_green = al(INHERITANCE_LINK, Fritz, green);
+
+	std::cout << "results = " << oc_to_string(results);
+
+	// Check that AC is in the results
+	TS_ASSERT_DIFFERS(results.find(Fritz_green), results.end());
+}
+
+void ForwardChainerUTest::test_select_rule(void)
+{
+    Handle h = _eval.eval_h("(InheritanceLink"
+                            "   (ConceptNode \"Cat\")"
+                            "   (ConceptNode \"Animal\"))");
     TS_ASSERT_DIFFERS(h, Handle::UNDEFINED);
 
-    Handle rbs = eval.eval_h("(ConceptNode \"crisp-deduction-rule-base\")");
+    Handle rbs = _eval.eval_h("(ConceptNode \"fc-rule-base\")");
     ForwardChainer fc(_as, rbs, h);
 
     // Full unification
-    Rule* rule = fc.choose_rule(h);
-    TS_ASSERT_DIFFERS(nullptr, rule);
-}
-
-void ForwardChainerUTest::test_apply_rule(void)
-{
-	// Apply rule x and see if all the inferences made
-	// are a direct result of source being part of input/premise
-	config().set(
-		"SCM_PRELOAD",
-		"tests/rule-engine/simple-assertions.scm");
-	load_scm_files_from_config(_as);
-
-	Handle rule_handle = eval.eval_h("(MemberLink"
-	                                 "   bc-deduction-rule-name"
-	                                 "   (ConceptNode \"URE\"))");
-	Rule rule(rule_handle);
-	Handle source = eval.eval_h("(InheritanceLink"
-	                            "  (ConceptNode \"Socrates\")"
-	                            "  (ConceptNode \"man\"))");
-
-	Handle rbs = _as.get_node(CONCEPT_NODE, "URE");
-	ForwardChainer fc(_as, rbs, source);
-
-	UnorderedHandleSet derules = fc.derive_rules(source, &rule);
-	TS_ASSERT_EQUALS(2, derules.size());
-
-	HandleSeq hs;
-	for(Handle h : derules)
-	{
-		HandleSeq tmp = fc.apply_rule(h);
-		hs.insert(hs.end(), tmp.begin(), tmp.end());
-	}
-
-	TS_ASSERT_EQUALS(1, hs.size());
-}
-
-void ForwardChainerUTest::test_substitute_rule_part(void)
-{
-	config().set("SCM_PRELOAD",
-	             "tests/rule-engine/dfc-tests.scm");
-	load_scm_files_from_config(_as);
-
-	Handle rule_handle = eval.eval_h("bc-deduction-rule");
-
-	Handle var_a = eval.eval_h("(VariableNode \"$A\")");
-	Handle var_b = eval.eval_h("(VariableNode \"$B\")");
-	Handle var_c = eval.eval_h("(VariableNode \"$C\")");
-
-	Handle grnd_1 = eval.eval_h("(ConceptNode \"Cat\")");
-	Handle grnd_2 = eval.eval_h("(ConceptNode \"Animal\")");
-
-	// When the first premise of deduction rule is matched
-	std::map<Handle, Handle> vg_map_1 = { { var_a, grnd_1 }, { var_b, grnd_2 } };
-	// Then the second premise of deduction rule is matched
-	std::map<Handle, Handle> vg_map_2 = { { var_b, grnd_1 }, { var_c, grnd_2 } };
-
-	std::vector<std::map<Handle, Handle>> var_groundings = { vg_map_1 };
-	std::set<Handle> vars_case_1 = { var_a, var_b };
-
-	Handle rbs = _as.get_node(CONCEPT_NODE, "crisp-deduction-rule-base");
-	ForwardChainer fc(_as, rbs, grnd_2);
-
-	HandleSeq rule_derivatives = fc.substitute_rule_part(_as, rule_handle,
-	                                                     vars_case_1,
-	                                                     var_groundings);
-	TS_ASSERT_EQUALS(rule_derivatives.size(), 1);
-	Handle hx = _as.add_atom(rule_derivatives[0]);
-	Handle hexpected = eval.eval_h("deduction-ab-substitute-1");
-	TS_ASSERT_EQUALS(hexpected, hx);
-
-	var_groundings = { vg_map_2 };
-	std::set<Handle> vars_case_2 = { var_b, var_c };
-	rule_derivatives = fc.substitute_rule_part(_as, rule_handle, vars_case_2,
-	                                           var_groundings);
-
-	TS_ASSERT_EQUALS(rule_derivatives.size(), 1);
-	hx = _as.add_atom(rule_derivatives[0]);
-	hexpected = eval.eval_h("deduction-ab-substitute-2");
-	TS_ASSERT_EQUALS(hexpected, hx);
-}
-
-void ForwardChainerUTest::test_unify_1(void)
-{
-    Handle source = eval.eval_h("(ImplicationLink"
-                                "   (PredicateNode \"is_cat\")"
-                                "   (PredicateNode \"is_animal\"))");
-
-    Handle rbs = eval.eval_h("(ConceptNode \"crisp-deduction-rule-base\")");
-
-	Handle rule_handle = eval.eval_h("(MemberLink"
-	                                 "   crisp-deduction-rule-name"
-	                                 "   (ConceptNode \"crisp-deduction-rule-base\"))");
-	Rule rule(rule_handle);
-	Handle premise_pat = eval.eval_h("(ImplicationLink"
-	                                 "   (VariableNode \"$A\")"
-	                                 "   (VariableNode \"$B\"))");
-
-	ForwardChainer fc(_as, rbs, source);
-
-	bool result = fc.unify(source, premise_pat, &rule);
-	TS_ASSERT(result);
-}
-
-void ForwardChainerUTest::test_unify_2(void)
-{
-	config().set("SCM_PRELOAD", "tests/rule-engine/rules/pln-implication-and-lambda-factorization-rule.scm");
-	load_scm_files_from_config(_as);
-
-	Handle source = eval.eval_h
-		("(AndLink"
-		 "  (LambdaLink"
-		 "    (TypedVariableLink"
-		 "      (VariableNode \"$X\")"
-		 "      (TypeNode \"ConceptNode\"))"
-		 "    (PredicateNode \"P\"))"
-		 "  (LambdaLink"
-		 "    (TypedVariableLink"
-		 "      (VariableNode \"$X\")"
-		 "      (TypeNode \"ConceptNode\"))"
-		 "    (EvaluationLink"
-		 "      (PredicateNode \"Q\")"
-		 "      (VariableNode \"$X\"))))");
-
-    Handle rbs = eval.eval_h("(ConceptNode \"PLN\")");
-
-	Handle rule_handle = eval.eval_h("(MemberLink"
-	                                 "   implication-and-lambda-factorization-rule-name"
-	                                 "   (ConceptNode \"PLN\"))");
-	Rule rule(rule_handle);
-	Handle premise_pat = eval.eval_h("implication-and-lambda-factorization-body");
-
-	ForwardChainer fc(_as, rbs, source);
-
-	bool result = fc.unify(source, premise_pat, &rule);
-	TS_ASSERT(result);
-}
-
-void ForwardChainerUTest::test_derive_rules_1(void)
-{
-	config().set("SCM_PRELOAD", "tests/rule-engine/rules/bc-deduction.scm,"
-	             "tests/rule-engine/simple-assertions.scm");
-	load_scm_files_from_config(_as);
-
-	Handle rule_handle = eval.eval_h("(MemberLink"
-	                                 "   bc-deduction-rule-name"
-	                                 "   (ConceptNode \"URE\"))");
-	Rule rule(rule_handle);
-	Handle source = eval.eval_h(R"((ConceptNode "Socrates"))");
-	Handle source2 =  eval.eval_h("(InheritanceLink"
-	                              "   (ConceptNode \"Cat\")"
-	                              "   (ConceptNode \"Animal\"))");
-
-	Handle rbs = _as.get_node(CONCEPT_NODE, "URE");
-	ForwardChainer fc(_as, rbs, source);
-
-	// is not unifiable
-	UnorderedHandleSet hrules = fc.derive_rules(source, &rule);
-	TS_ASSERT_EQUALS(0, hrules.size());
-
-	hrules = fc.derive_rules(source2, &rule);
-	TS_ASSERT_EQUALS(2, hrules.size());
-}
-
-void ForwardChainerUTest::test_derive_rules_2()
-{
-	_as.clear();
-
-	config().set("SCM_PRELOAD",
-	             "tests/rule-engine/rules/implication-construction-rule.scm");
-	load_scm_files_from_config(_as);
-
-	Handle source = eval.eval_h("(LambdaLink"
-	                            "   (TypedVariableLink"
-	                            "      (VariableNode \"$X\")"
-	                            "      (TypeNode \"ConceptNode\"))"
-	                            "   (EvaluationLink"
-	                            "      (PredicateNode \"take\")"
-	                            "      (ListLink"
-	                            "         (VariableNode \"$X\")"
-	                            "         (ConceptNode \"treatment-1\"))))");
-	Handle rule_handle = eval.eval_h("(MemberLink"
-	                                 "   implication-construction-rule-name"
-	                                 "   (ConceptNode \"URE\"))");
-	Rule rule(rule_handle);
-
-	Handle rbs = _as.get_node(CONCEPT_NODE, "URE");
-
-	ForwardChainer fc(_as, rbs, source);
-
-	UnorderedHandleSet hrules = fc.derive_rules(source, &rule);
-	TS_ASSERT_EQUALS(2, hrules.size());
+    Rule rule = fc.select_rule(h);
+    TS_ASSERT(rule.is_valid());
 }
 
 #undef al

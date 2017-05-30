@@ -20,12 +20,8 @@
  * 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
  */
 
-#include <opencog/guile/load-file.h>
 #include <opencog/guile/SchemeEval.h>
-#include <opencog/guile/SchemeSmob.h>
 #include <opencog/atomspace/AtomSpace.h>
-#include <opencog/query/BindLinkAPI.h>
-#include <opencog/util/Config.h>
 #include <opencog/util/Logger.h>
 
 using namespace opencog;
@@ -33,8 +29,8 @@ using namespace opencog;
 class RandomUTest: public CxxTest::TestSuite
 {
 private:
-        AtomSpace *as;
-        SchemeEval* eval;
+    AtomSpace *as;
+    SchemeEval* eval;
 
 public:
     RandomUTest(void)
@@ -44,6 +40,8 @@ public:
 
         as = new AtomSpace();
         eval = new SchemeEval(as);
+        eval->eval("(add-to-load-path \"..\")");
+        eval->eval("(add-to-load-path \"../../..\")");
     }
 
     ~RandomUTest()
@@ -52,7 +50,9 @@ public:
         delete as;
         // Erase the log file if no assertions failed.
         if (!CxxTest::TestTracker::tracker().suiteFailed())
-                std::remove(logger().get_filename().c_str());
+            std::remove(logger().get_filename().c_str());
+int rc = CxxTest::TestTracker::tracker().suiteFailed();
+_exit(rc); // XXX hack to avoid double-free in __run_exit_handlers
     }
 
     void setUp(void);
@@ -70,12 +70,6 @@ void RandomUTest::tearDown(void)
 void RandomUTest::setUp(void)
 {
     as->clear();
-    config().set("SCM_PRELOAD",
-        "opencog/atoms/base/core_types.scm, "
-        "opencog/scm/utilities.scm, "
-        "opencog/scm/opencog/exec.scm");
-
-    load_scm_files_from_config(*as);
 }
 
 /*
@@ -85,8 +79,7 @@ void RandomUTest::test_weights(void)
 {
     logger().debug("BEGIN TEST: %s", __FUNCTION__);
 
-    config().set("SCM_PRELOAD", "tests/atoms/random-choice.scm");
-    load_scm_files_from_config(*as);
+    eval->eval("(load-from-path \"tests/atoms/random-choice.scm\")");
 
     eval->eval_tv("(cog-evaluate! (DefinedPredicate \"loop a lot of times\"))");
 

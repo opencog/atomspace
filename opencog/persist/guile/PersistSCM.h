@@ -42,6 +42,7 @@ private:
 
 	Handle fetch_atom(Handle);
 	Handle fetch_incoming_set(Handle);
+	Handle fetch_incoming_by_type(Handle, Type);
 	Handle store_atom(Handle);
 	void load_type(Type);
 	void barrier(void);

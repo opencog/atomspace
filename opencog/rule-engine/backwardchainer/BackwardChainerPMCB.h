@@ -39,8 +39,8 @@ protected:
 	VariableListPtr _int_vars;
 	bool _enable_var_name_check;
 
-	std::vector<std::map<Handle, Handle>> var_solns_;
-	std::vector<std::map<Handle, Handle>> pred_solns_;
+	HandleMapSeq var_solns_;
+	HandleMapSeq pred_solns_;
 
 public:
 	BackwardChainerPMCB(AtomSpace*, VariableListPtr, bool);
@@ -53,16 +53,15 @@ public:
 		DefaultPatternMatchCB::set_pattern(vars, pat);
 	}
 
-	virtual bool node_match(const Handle&, const Handle&);
-	virtual bool grounding(const std::map<Handle, Handle> &var_soln,
-			const std::map<Handle, Handle> &pred_soln);
+	virtual bool grounding(const HandleMap &var_soln,
+	                       const HandleMap &pred_soln);
 
     /**
      * Return list of matching results found by the pattern matcher
      * @return
      */
-	std::vector<std::map<Handle, Handle>> get_var_list();
-	std::vector<std::map<Handle, Handle>> get_pred_list();
+	const HandleMapSeq& get_var_list() const;
+	const HandleMapSeq& get_pred_list() const;
 };
 
 } // ~namespace opencog

@@ -6,16 +6,19 @@
  * Copyright (c) 2008,2009 Linas Vepstas <linas@linas.org>
  */
 
-#ifdef HAVE_GUILE
-
 #include <vector>
 
 #include <cstddef>
 #include <libguile.h>
 
 #include <opencog/atoms/base/ClassServer.h>
+#include <opencog/atoms/base/ProtoAtom.h>
+#include <opencog/truthvalue/AttentionValue.h>
+#include <opencog/truthvalue/CountTruthValue.h>
 #include <opencog/truthvalue/TruthValue.h>
+#include <opencog/atomutils/FindUtils.h>
 #include <opencog/guile/SchemeSmob.h>
+#include <opencog/attentionbank/AttentionBank.h>
 
 using namespace opencog;
 
@@ -41,7 +44,23 @@ Handle SchemeSmob::verify_handle (SCM satom, const char * subrname, int pos)
 	if (nullptr == h)
 		scm_wrong_type_arg_msg(subrname, pos, satom, "opencog atom");
 
+	// In the current C++ code, handles can also be pointers to
+	// protoAtoms.  Howerver, in the guile wrapper, we expect all
+	// handles to be pointers to atoms; use verify_protom() instead,
+	// if you just want ProtoAtoms.
+	if (not (h->isLink() or h->isNode()))
+		scm_wrong_type_arg_msg(subrname, pos, satom, "opencog atom");
+
 	return h;
+}
+
+ProtoAtomPtr SchemeSmob::verify_protom (SCM satom, const char * subrname, int pos)
+{
+	ProtoAtomPtr pv(scm_to_protom(satom));
+	if (nullptr == pv)
+		scm_wrong_type_arg_msg(subrname, pos, satom, "opencog value");
+
+	return pv;
 }
 
 /* ============================================================== */
@@ -79,20 +98,21 @@ SCM SchemeSmob::ss_arity (SCM satom)
 	return sari;
 }
 
+/* ============================================================== */
+/* Truth value setters/getters */
+
 SCM SchemeSmob::ss_tv (SCM satom)
 {
 	Handle h = verify_handle(satom, "cog-tv");
-	TruthValuePtr tv(h->getTruthValue());
-	TruthValue *stv = tv->rawclone();
-	return take_tv(stv);
+	return tv_to_scm(h->getTruthValue());
 }
 
 SCM SchemeSmob::ss_set_tv (SCM satom, SCM stv)
 {
 	Handle h = verify_handle(satom, "cog-set-tv!");
-	TruthValue *tv = verify_tv(stv, "cog-set-tv!", 2);
+	TruthValuePtr tv = verify_tv(stv, "cog-set-tv!", 2);
 
-	h->setTruthValue(tv->clone());
+	h->setTruthValue(tv);
 	scm_remember_upto_here_1(stv);
 	return satom;
 }
@@ -100,27 +120,54 @@ SCM SchemeSmob::ss_set_tv (SCM satom, SCM stv)
 SCM SchemeSmob::ss_merge_tv (SCM satom, SCM stv)
 {
 	Handle h = verify_handle(satom, "cog-merge-tv!");
-	TruthValue *tv = verify_tv(stv, "cog-merge-tv!", 2);
+	TruthValuePtr tv = verify_tv(stv, "cog-merge-tv!", 2);
 
-	h->merge(tv->clone());
+	h->merge(tv);
 	scm_remember_upto_here_1(stv);
 	return satom;
 }
 
+// XXX FIXME -- this should NOT be a part of the API, it should be
+// a utility function!
 SCM SchemeSmob::ss_merge_hi_conf_tv (SCM satom, SCM stv)
 {
 	Handle h = verify_handle(satom, "cog-merge-hi-conf-tv!");
-	TruthValue *tv = verify_tv(stv, "cog-merge-hi-conf-tv!", 2);
+	TruthValuePtr tv = verify_tv(stv, "cog-merge-hi-conf-tv!", 2);
 
-	h->merge(tv->clone(), MergeCtrl(MergeCtrl::TVFormula::HIGHER_CONFIDENCE));
+	h->merge(tv, MergeCtrl(MergeCtrl::TVFormula::HIGHER_CONFIDENCE));
 	scm_remember_upto_here_1(stv);
 	return satom;
 }
+
+// Increment the count, keeping mean and confidence as-is.
+// Converts existing truth value to a CountTruthValue.
+SCM SchemeSmob::ss_inc_count (SCM satom, SCM scnt)
+{
+	Handle h = verify_handle(satom, "cog-inc-count!");
+	double cnt = verify_real(scnt, "cog-inc-count!", 2);
+
+	TruthValuePtr tv = h->getTruthValue();
+	if (COUNT_TRUTH_VALUE == tv->getType())
+	{
+		cnt += tv->getCount();
+	}
+	tv = CountTruthValue::createTV(
+		tv->getMean(), tv->getConfidence(), cnt);
+
+	h->setTruthValue(tv);
+	return satom;
+}
+
+/* ============================================================== */
+/* Attention-Value stuff */
+// XXX FIXME all this should move to attentionbank/AttentionBankSCM.cc
 
 SCM SchemeSmob::ss_av (SCM satom)
 {
 	Handle h = verify_handle(satom, "cog-av");
-	AttentionValue *sav = h->getAttentionValue()->rawclone();
+	AtomSpace* atomspace = ss_get_env_as("cog-av");
+
+	AttentionValue *sav = attentionbank(atomspace).get_av(h)->rawclone();
 	return take_av(sav);
 }
 
@@ -128,24 +175,27 @@ SCM SchemeSmob::ss_set_av (SCM satom, SCM sav)
 {
 	Handle h = verify_handle(satom, "cog-set-av!");
 	AttentionValue *av = verify_av(sav, "cog-set-av!", 2);
+	AtomSpace* atomspace = ss_get_env_as("cog-set-av!");
 
-	h->setAttentionValue(av->clone());
+	attentionbank(atomspace).change_av(h, av->clone());
 	return satom;
 }
 
 SCM SchemeSmob::ss_inc_vlti (SCM satom)
 {
 	Handle h = verify_handle(satom, "cog-inc-vlti!");
+	AtomSpace* atomspace = ss_get_env_as("cog-inc-vlti!");
 
-	h->incVLTI();
+	attentionbank(atomspace).inc_vlti(h);
 	return satom;
 }
 
 SCM SchemeSmob::ss_dec_vlti (SCM satom)
 {
 	Handle h = verify_handle(satom, "cog-dec-vlti!");
+	AtomSpace* atomspace = ss_get_env_as("cog-dec-vlti!");
 
-	h->decVLTI();
+	attentionbank(atomspace).dec_vlti(h);
 	return satom;
 }
 
@@ -164,12 +214,53 @@ SCM SchemeSmob::ss_outgoing_set (SCM satom)
 	SCM list = SCM_EOL;
 	for (int i = oset.size()-1; i >= 0; i--)
 	{
-		Handle h = oset[i];
-		SCM smob = handle_to_scm(h);
+		SCM smob = handle_to_scm(oset[i]);
 		list = scm_cons (smob, list);
 	}
 
 	return list;
+}
+
+/* ============================================================== */
+/**
+ * Convert the outgoing set of an atom into a list;
+ * filter-accept only type, and return the list.
+ */
+SCM SchemeSmob::ss_outgoing_by_type (SCM satom, SCM stype)
+{
+	Handle h = verify_handle(satom, "cog-outgoing-by-type");
+	Type t = verify_atom_type(stype, "cog-outgoing-by-type", 2);
+
+	if (not h->isLink()) return SCM_EOL;
+
+	const HandleSeq& oset = h->getOutgoingSet();
+
+	SCM list = SCM_EOL;
+	for (int i = oset.size()-1; i >= 0; i--)
+	{
+		if (oset[i]->getType() != t) continue;
+		SCM smob = handle_to_scm(oset[i]);
+		list = scm_cons (smob, list);
+	}
+
+	return list;
+}
+
+/* ============================================================== */
+/**
+ * Return the n'th atom of the outgoing set..
+ */
+SCM SchemeSmob::ss_outgoing_atom (SCM satom, SCM spos)
+{
+	Handle h = verify_handle(satom, "cog-outgoing-atom");
+	size_t pos = verify_size(spos, "cog-outgoing-atom", 2);
+
+	if (not h->isLink()) return SCM_EOL;
+
+	const HandleSeq& oset = h->getOutgoingSet();
+	if (oset.size() <= pos) return SCM_EOL;
+
+	return handle_to_scm(oset[pos]);
 }
 
 /* ============================================================== */
@@ -186,6 +277,27 @@ SCM SchemeSmob::ss_incoming_set (SCM satom)
 	for (const LinkPtr& l : iset)
 	{
 		SCM smob = handle_to_scm(l->getHandle());
+		head = scm_cons(smob, head);
+	}
+
+	return head;
+}
+
+/* ============================================================== */
+/**
+ * Convert the incoming set of an atom into a list; return the list.
+ */
+SCM SchemeSmob::ss_incoming_by_type (SCM satom, SCM stype)
+{
+	Handle h = verify_handle(satom, "cog-incoming-by-type");
+	Type t = verify_atom_type(stype, "cog-incoming-by-type", 2);
+
+	HandleSeq iset;
+	h->getIncomingSetByType(std::back_inserter(iset), t, false);
+	SCM head = SCM_EOL;
+	for (const Handle& ih : iset)
+	{
+		SCM smob = handle_to_scm(ih);
 		head = scm_cons(smob, head);
 	}
 
@@ -429,6 +541,24 @@ SCM SchemeSmob::ss_subtype_p (SCM stype, SCM schild)
 	return SCM_BOOL_F;
 }
 
-#endif
+SCM SchemeSmob::ss_get_free_variables(SCM satom)
+{
+	Handle h = verify_handle(satom, "cog-free-variables");
+
+	SCM list = SCM_EOL;
+	for (const Handle& fv : get_free_variables(h))
+		list = scm_cons(handle_to_scm(fv), list);
+
+	return list;
+}
+
+/**
+ * Return true if the atom is closed (has no variable)
+ */
+SCM SchemeSmob::ss_is_closed(SCM satom)
+{
+	Handle h = verify_handle(satom, "cog-closed?");
+	return is_closed(h) ? SCM_BOOL_T : SCM_BOOL_F;
+}
 
 /* ===================== END OF FILE ============================ */

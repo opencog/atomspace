@@ -62,15 +62,11 @@ class DefineLink : public UniqueLink
 protected:
 	void init();
 public:
-	DefineLink(const HandleSeq&,
-	           TruthValuePtr tv = TruthValue::DEFAULT_TV(),
-	           AttentionValuePtr av = AttentionValue::DEFAULT_AV());
+	DefineLink(const HandleSeq&, Type=DEFINE_LINK);
 
-	DefineLink(const Handle& alias, const Handle& body,
-	           TruthValuePtr tv = TruthValue::DEFAULT_TV(),
-	           AttentionValuePtr av = AttentionValue::DEFAULT_AV());
+	DefineLink(const Handle& alias, const Handle& body);
 
-	DefineLink(Link &l);
+	DefineLink(const Link &l);
 	Handle get_alias(void) const { return _outgoing[0]; }
 	Handle get_definition(void) const { return _outgoing[1]; }
 
@@ -84,6 +80,8 @@ public:
 	 * return <body>
 	 */
 	static Handle get_definition(const Handle& alias);
+
+	static Handle factory(const Handle&);
 };
 
 typedef std::shared_ptr<DefineLink> DefineLinkPtr;

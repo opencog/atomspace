@@ -20,6 +20,8 @@
  * Free Software Foundation, Inc.,
  * 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
  */
+
+#include <opencog/attentionbank/AttentionBank.h>
 #include "AttentionalFocusCB.h"
 
 using namespace opencog;
@@ -34,14 +36,17 @@ AttentionalFocusCB::AttentionalFocusCB(AtomSpace* as) :
 bool AttentionalFocusCB::node_match(const Handle& node1, const Handle& node2)
 {
 	return node1 == node2 and
-		node2->getSTI() > _as->get_attentional_focus_boundary();
+		attentionbank(_as).get_sti(node2) >
+		attentionbank(_as).getAttentionalFocusBoundary();
 }
 
-bool AttentionalFocusCB::link_match(const LinkPtr& lpat, const LinkPtr& lsoln)
+bool AttentionalFocusCB::link_match(const PatternTermPtr& ptm, const Handle& lsoln)
 {
-	return DefaultPatternMatchCB::link_match(lpat, lsoln)
-		and lsoln->getSTI() > _as->get_attentional_focus_boundary();
+	return DefaultPatternMatchCB::link_match(ptm, lsoln) and
+		attentionbank(_as).get_sti(lsoln) >
+		attentionbank(_as).getAttentionalFocusBoundary();
 }
+
 
 IncomingSet AttentionalFocusCB::get_incoming_set(const Handle& h)
 {
@@ -53,7 +58,7 @@ IncomingSet AttentionalFocusCB::get_incoming_set(const Handle& h)
 	// parts of the hypergraph.
 	IncomingSet filtered_set;
 	for (const auto& l : incoming_set)
-		if (l->getSTI() > _as->get_attentional_focus_boundary())
+		if (attentionbank(_as).get_sti(Handle(l)) > attentionbank(_as).getAttentionalFocusBoundary())
 			filtered_set.push_back(l);
 
 	// If nothing is in AF
@@ -64,6 +69,12 @@ IncomingSet AttentionalFocusCB::get_incoming_set(const Handle& h)
 		// ... and that is exactly what should be happening.
 		return filtered_set;
 	}
+
+	auto compare_sti = [&](const LinkPtr& lptr1, const LinkPtr& lptr2)->bool
+	{
+		return attentionbank(_as).get_sti(Handle(lptr1)) >
+			attentionbank(_as).get_sti(Handle(lptr2));
+	};
 
 	// The exploration of the set of patterns proceeds by going through
 	// the incoming set, one by one.  So sorting the incoming set will

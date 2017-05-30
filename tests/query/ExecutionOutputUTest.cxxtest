@@ -20,9 +20,9 @@
  * 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
  */
 
+#include <opencog/atoms/base/Link.h>
 #include <opencog/atomspace/AtomSpace.h>
 #include <opencog/guile/SchemeEval.h>
-#include <opencog/util/Config.h>
 #include <opencog/util/Logger.h>
 
 #include "imply.h"
@@ -58,8 +58,8 @@ class ExecutionOutputUTest :  public CxxTest::TestSuite
 
 #define an as->add_node
 #define al as->add_link
-#define getarity(hand) LinkCast(hand)->getArity()
-#define getlink(hand,pos) LinkCast(hand)->getOutgoingAtom(pos)
+#define getarity(hand) hand->getArity()
+#define getlink(hand,pos) hand->getOutgoingAtom(pos)
 
 void ExecutionOutputUTest::tearDown(void)
 {

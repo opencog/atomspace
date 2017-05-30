@@ -56,21 +56,13 @@ protected:
 	void validate_vardecl(const Handle&);
 	void validate_vardecl(const HandleSeq&);
 
-	VariableList(Type, const HandleSeq&,
-	           TruthValuePtr tv = TruthValue::DEFAULT_TV(),
-	           AttentionValuePtr av = AttentionValue::DEFAULT_AV());
+	VariableList(Type, const HandleSeq&);
 
 	void build_index(void);
 public:
-	VariableList(const Handle& hvardecls,
-	             TruthValuePtr tv = TruthValue::DEFAULT_TV(),
-	             AttentionValuePtr av = AttentionValue::DEFAULT_AV());
-
-	VariableList(const HandleSeq& vardecls,
-	             TruthValuePtr tv = TruthValue::DEFAULT_TV(),
-	             AttentionValuePtr av = AttentionValue::DEFAULT_AV());
-
-	VariableList(Link&);
+	VariableList(const HandleSeq& vardecls, Type=VARIABLE_LIST);
+	VariableList(const Handle& hvardecls);
+	VariableList(const Link&);
 
 	// Return the list of variables we are holding.
 	const Variables& get_variables(void) const { return _varlist; }
@@ -79,6 +71,11 @@ public:
 	// given as the argument satisfies the type restrictions (if any).
 	// Else return false.
 	bool is_type(const Handle& h) const { return _varlist.is_type(h); }
+
+	// Return true if we are holding the variable `var`, and `val`
+	// satisfies the type restrictions that apply to `var`.
+	bool is_type(const Handle& var, const Handle& val) const
+		{ return _varlist.is_type(var, val); }
 
 	// Return true if the sequence is of the same length as the variable
 	// declarations we are holding, and if they satisfy all of the type
@@ -91,6 +88,8 @@ public:
 	// exception is thrown.
 	Handle substitute(const Handle& tree, const HandleSeq& vals) const
 		{ return _varlist.substitute(tree, vals); }
+
+	static Handle factory(const Handle&);
 };
 
 typedef std::shared_ptr<VariableList> VariableListPtr;
@@ -101,6 +100,10 @@ static inline VariableListPtr VariableListCast(const AtomPtr& a)
 
 // XXX temporary hack ...
 #define createVariableList std::make_shared<VariableList>
+
+// For gdb, see
+// http://wiki.opencog.org/w/Development_standards#Print_OpenCog_Objects
+std::string oc_to_string(const VariableListPtr& vlp);
 
 /** @}*/
 }

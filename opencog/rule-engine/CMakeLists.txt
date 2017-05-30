@@ -4,14 +4,12 @@
 ADD_LIBRARY(ruleengine
 	backwardchainer/BackwardChainer
 	backwardchainer/BackwardChainerPMCB
-	backwardchainer/Target
+	backwardchainer/BIT
+	backwardchainer/Fitness
 	backwardchainer/UnifyPMCB
-	backwardchainer/BCLogger
 	forwardchainer/FCStat
-	forwardchainer/FocusSetPMCB
 	forwardchainer/ForwardChainer
-	forwardchainer/VarGroundingPMCB
-	forwardchainer/FCLogger
+	URELogger
 	ChainerUtils.cc
 	InferenceSCM.cc
 	Rule.cc
@@ -26,19 +24,21 @@ ADD_DEPENDENCIES(ruleengine
 TARGET_LINK_LIBRARIES(ruleengine
 	lambda
 	query
-	smob
 	execution
 	atomutils
 	atomspace
 	atomspaceutils
 )
+IF (HAVE_GUILE)
+	TARGET_LINK_LIBRARIES(ruleengine smob)
+ENDIF (HAVE_GUILE)
 
 INSTALL (TARGETS ruleengine DESTINATION "lib${LIB_DIR_SUFFIX}/opencog")
 
 INSTALL (FILES
-	InferenceSCM.h
 	UREConfigReader.h
 	URECommons.h
+    URELogger.h
 	Rule.h
 	UREConfigReader.h
 	DESTINATION "include/opencog/rule-engine"

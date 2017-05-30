@@ -26,6 +26,7 @@
 
 #include <opencog/atoms/base/Handle.h>
 #include <opencog/atoms/base/types.h>
+#include <opencog/atoms/core/VariableList.h>
 
 namespace opencog
 {
@@ -107,6 +108,99 @@ bool type_match(const Handle&, const Handle&);
  *   result = (Arrow (Type "Evaluation") (Type "Number"))
  */
 Handle type_compose(const Handle&, const Handle&);
+
+/**
+ * Given a variable declaration (VariableList) and a pattern body,
+ * filter out all variables in the declaration that are not present in
+ * the pattern body.
+ *
+ * For instance filter_vardecl applied to
+ *
+ * var_decl
+ * =
+ * (VariableList
+ *    (TypedVariableLink
+ *       (VariableNode "$X")
+ *       (TypeNode "ConceptNode"))
+ *    (TypedVariableLink
+ *       (VariableNode "$Y")
+ *       (TypeNode "ConceptNode")))
+ *
+ * body
+ * =
+ * (InheritanceLink
+ *    (ConceptNode "human")
+ *    (VariableNode "$Y"))
+ *
+ * will return
+ *
+ * (TypedVariableLink
+ *    (VariableNode "$Y")
+ *    (TypeNode "ConceptNode"))
+ *
+ * Special cases:
+ *
+ * 1. The VariableListLink is discarded if the resulting variable
+ *    declaration contains only one variable.
+ *
+ * 2. If nothing is left after filtering it returns Handle::UNDEFINED
+ *
+ * Also, the resulting variable declaration will not be added to any
+ * AtomSpace, it's up to the user to possibly do it.
+ */
+Handle filter_vardecl(const Handle& vardecl, const Handle& body);
+
+/**
+ * Like filter_vardecl(const Handle& vardecl, const Handle& body)
+ * except that the variable needs to be in at least one body of hs.
+ */
+Handle filter_vardecl(const Handle& vardecl, const HandleSeq& hs);
+
+/**
+ * Return true if t is different than NOTYPE
+ */
+bool is_well_typed(Type t);
+
+/**
+ * Return true if all type in ts are well typed.
+ *
+ * This might too strict. One might argue that NOTYPE is akin to the
+ * empty set, thus the union of a valid type and NOTYPE should merely
+ * amount to the valid type. We may want to relax that definition in
+ * the future.
+ */
+bool is_well_typed(const std::set<Type>& ts);
+
+/**
+ * Return shallow type intersection between lhs and rhs. Take into
+ * account type inheritance as well.
+ */
+Type type_intersection(Type lhs, Type rhs);
+std::set<Type> type_intersection(Type lhs, const std::set<Type>& rhs);
+std::set<Type> type_intersection(const std::set<Type>& lhs,
+                                 const std::set<Type>& rhs);
+
+/**
+ * Generate a VariableList of the free variables of a given atom h.
+ */
+VariableListPtr gen_varlist(const Handle& h);
+
+/**
+ * Generate a variable declaration of the free variables of a given atom h.
+ */
+Handle gen_vardecl(const Handle& h);
+
+/**
+ * Given an atom h and its variable declaration vardecl, turn the
+ * vardecl into a VariableList if not already, and if undefined,
+ * generate a VariableList of the free variables of h.
+ */
+VariableListPtr gen_varlist(const Handle& h, const Handle& vardecl);
+
+/**
+ * Like above but return a Handle variable declaration instead.
+ */
+Handle gen_vardecl(const Handle& h, const Handle& vardecl);
 
 /** @}*/
 }

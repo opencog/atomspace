@@ -9,6 +9,7 @@
 
 
 #include <opencog/atomspace/AtomSpace.h>
+#include <opencog/atoms/base/Node.h>
 #include <opencog/guile/SchemeEval.h>
 #include <opencog/guile/SchemePrimitive.h>
 

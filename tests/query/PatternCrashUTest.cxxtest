@@ -20,13 +20,12 @@
  * 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
  */
 
-#include <opencog/util/Config.h>
 #include <opencog/util/Logger.h>
 #include <opencog/atomspace/AtomSpace.h>
+#include <opencog/attentionbank/AttentionBank.h>
 #include <opencog/atoms/pattern/PatternLink.h>
 #include <opencog/atomutils/FindUtils.h>
 #include <opencog/guile/SchemeEval.h>
-#include <opencog/guile/load-file.h>
 #include <opencog/query/DefaultPatternMatchCB.h>
 #include <opencog/query/InitiateSearchCB.h>
 
@@ -47,6 +46,7 @@ class PatternCrashUTest: public CxxTest::TestSuite
 			logger().set_level(Logger::DEBUG);
 			logger().set_print_to_stdout_flag(true);
 			_as = new AtomSpace();
+			attentionbank(_as);
 			_eval = new SchemeEval(_as);
 		}
 
@@ -79,15 +79,15 @@ class PMCB : public InitiateSearchCB, public DefaultPatternMatchCB
 			DefaultPatternMatchCB::set_pattern(vars, pat);
 		}
 
-		virtual bool grounding(const std::map<Handle, Handle> &var_soln,
-		                       const std::map<Handle, Handle> &pred_soln);
+		virtual bool grounding(const HandleMap &var_soln,
+		                       const HandleMap &pred_soln);
 
-		std::map<Handle, Handle> preds;
-		std::map<Handle, Handle> vars;
+		HandleMap preds;
+		HandleMap vars;
 };
 
-bool PMCB::grounding(const std::map<Handle, Handle> &var_soln,
-                     const std::map<Handle, Handle> &pred_soln)
+bool PMCB::grounding(const HandleMap &var_soln,
+                     const HandleMap &pred_soln)
 {
 	logger().debug("Inside grounding with %z var_soln", var_soln.size());
 
@@ -97,7 +97,7 @@ bool PMCB::grounding(const std::map<Handle, Handle> &var_soln,
 	return true;
 }
 
-#define getlink(hand,pos) LinkCast(hand)->getOutgoingAtom(pos)
+#define getlink(hand,pos) hand->getOutgoingAtom(pos)
 
 void PatternCrashUTest::tearDown(void)
 {

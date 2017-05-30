@@ -12,9 +12,9 @@ LINK_DIRECTORIES (
 
 LINK_LIBRARIES (
 	query
-	atomspace
 	clearbox
 	execution
+	atomspace
 )
 
 # We want to run the tests in the order below;
@@ -22,20 +22,21 @@ LINK_LIBRARIES (
 # features that the later tests depend on.
 
 ADD_CXXTEST(PatternUTest)
-ADD_CXXTEST(PatternCrashUTest)
 ADD_CXXTEST(StackUTest)
 ADD_CXXTEST(BigPatternUTest)
 ADD_CXXTEST(BiggerPatternUTest)
 ADD_CXXTEST(LoopPatternUTest)
 ADD_CXXTEST(BooleanUTest)
 ADD_CXXTEST(Boolean2NotUTest)
+ADD_CXXTEST(ConstantClausesUTest)
 
 
 # These are NOT in alphabetical order; they are in order of
-# simpler to more complex.  Later test cses assume features
+# simpler to more complex.  Later test cases assume features
 # that are tested in earlier test cases.  DO NOT reorder this
 # list unless you are sure of what you are doing.
 IF (HAVE_GUILE)
+	ADD_CXXTEST(PatternCrashUTest)
 	ADD_CXXTEST(DisconnectedUTest)
 	ADD_CXXTEST(ImplicationUTest)
 	ADD_CXXTEST(ExecutionOutputUTest)
@@ -50,6 +51,7 @@ IF (HAVE_GUILE)
 	ADD_CXXTEST(ArcanaUTest)
 	ADD_CXXTEST(SubstitutionUTest)
 	ADD_CXXTEST(GetLinkUTest)
+	ADD_CXXTEST(GetStateUTest)
 	ADD_CXXTEST(DeepTypeUTest)
 
 	ADD_CXXTEST(GreaterThanUTest)
@@ -58,6 +60,7 @@ IF (HAVE_GUILE)
 	ADD_CXXTEST(EvaluationUTest)
 	ADD_CXXTEST(QuoteUTest)
 	ADD_CXXTEST(UnquoteUTest)
+	ADD_CXXTEST(LocalQuoteUTest)
 	ADD_CXXTEST(BuggyLinkUTest)
 	ADD_CXXTEST(BuggyQuoteUTest)
 	ADD_CXXTEST(BuggyEqualUTest)
@@ -67,11 +70,15 @@ IF (HAVE_GUILE)
 	ADD_CXXTEST(FiniteStateMachineUTest)
 	ADD_CXXTEST(AbsentUTest)
 	ADD_CXXTEST(SingleUTest)
+	ADD_CXXTEST(ScopeUTest)
+
 	ADD_CXXTEST(FirstNUTest)
 	ADD_CXXTEST(AttentionalFocusCBUTest)
 	ADD_CXXTEST(SudokuUTest)
 	ADD_CXXTEST(EinsteinUTest)
 	ADD_CXXTEST(TypeChoiceUTest)
+
+	ADD_CXXTEST(NoExceptionUTest)
 
 	TARGET_LINK_LIBRARIES(VarTypeNotUTest
 		${COGUTIL_LIBRARY}
@@ -163,3 +170,5 @@ CONFIGURE_FILE(${CMAKE_SOURCE_DIR}/tests/query/unordered-exhaust.scm
     ${PROJECT_BINARY_DIR}/tests/query/unordered-exhaust.scm)
 CONFIGURE_FILE(${CMAKE_SOURCE_DIR}/tests/query/var-type-not.scm
     ${PROJECT_BINARY_DIR}/tests/query/var-type-not.scm)
+CONFIGURE_FILE(${CMAKE_SOURCE_DIR}/tests/query/no-exception.scm
+    ${PROJECT_BINARY_DIR}/tests/query/no-exception.scm)

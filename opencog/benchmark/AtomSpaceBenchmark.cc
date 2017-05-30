@@ -13,12 +13,14 @@
 #include <opencog/util/random.h>
 
 #include <opencog/atoms/base/types.h>
+#include <opencog/atoms/base/Node.h>
+#include <opencog/atoms/base/Link.h>
 #include <opencog/truthvalue/AttentionValue.h>
 #include <opencog/truthvalue/CountTruthValue.h>
 #include <opencog/truthvalue/IndefiniteTruthValue.h>
 #include <opencog/truthvalue/SimpleTruthValue.h>
-#include <opencog/atomspace/TLB.h>
 #include <opencog/truthvalue/TruthValue.h>
+#include <opencog/atomspaceutils/TLB.h>
 #include <opencog/cython/PythonEval.h>
 #include <opencog/guile/SchemeEval.h>
 
@@ -38,6 +40,8 @@ using std::time;
 
 #define DIVIDER_LINE "------------------------------"
 #define PROGRESS_BAR_LENGTH 10
+
+TLB tlbuf;
 
 AtomSpaceBenchmark::AtomSpaceBenchmark()
 {
@@ -84,31 +88,23 @@ AtomSpaceBenchmark::~AtomSpaceBenchmark()
     delete randomGenerator;
 }
 
-// This is wrong, because it fails to also count the amount of RAM
-// used by the AtomTable to store indexes.
+// This is wrong, because it fails to count also the amount of RAM
+// used by the AtomTable to store indexes, as well as the AttentionBank
+// to store the AttentionValues.
 size_t AtomSpaceBenchmark::estimateOfAtomSize(Handle h)
 {
     size_t total = 0;
     if (h->getTruthValue() != TruthValue::DEFAULT_TV())
     {
-        switch (h->getTruthValue()->getType()) {
-        case SIMPLE_TRUTH_VALUE:
+        Type tvt = h->getTruthValue()->getType();
+        if (tvt == SIMPLE_TRUTH_VALUE)
             total += sizeof(SimpleTruthValue);
-            break;
-        case COUNT_TRUTH_VALUE:
+        else
+        if (tvt == COUNT_TRUTH_VALUE)
             total += sizeof(CountTruthValue);
-            break;
-        case INDEFINITE_TRUTH_VALUE:
+        else
+        if (tvt == INDEFINITE_TRUTH_VALUE)
             total += sizeof(IndefiniteTruthValue);
-            break;
-        default:
-            break;
-        }
-    }
-
-    if (h->getAttentionValue() != AttentionValue::DEFAULT_AV())
-    {
-        total += sizeof(AttentionValue);
     }
 
     NodePtr n(NodeCast(h));
@@ -174,7 +170,7 @@ void AtomSpaceBenchmark::printTypeSizes()
          << estimateOfAtomSize(h) << endl;
 
     HandleSeq empty;
-    h = Handle(createLink(LIST_LINK, empty));
+    h = Handle(createLink(empty, LIST_LINK));
     cout << "Empty ListLink = " << estimateOfAtomSize(h) << endl;
 
     Handle na = ND(CONCEPT_NODE, "first atom");
@@ -331,12 +327,14 @@ void AtomSpaceBenchmark::doBenchmark(const std::string& methodName,
     Nclock = baseNclock;
     Nloops = baseNloops;
     Nreps = baseNreps / Nclock;
+#ifdef HAVE_GUILE
     if (BENCH_SCM == testKind /* or BENCH_PYTHON == testKind */)
     {
         // Try to avoid excessive compilation times.
         Nclock /= 100;
         Nreps *= 100;
     }
+#endif // HAVE_GUILE
 
     // Must not remove more atoms than there are
     if (methodToCall == &AtomSpaceBenchmark::bm_rmAtom)
@@ -453,8 +451,8 @@ void AtomSpaceBenchmark::startBenchmark(int numThreads)
     if (showTypeSizes) printTypeSizes();
 
     for (unsigned int i = 0; i < methodNames.size(); i++) {
-        UUID_begin = TLB::getMaxUUID();
-        UUID_end = TLB::getMaxUUID();
+        UUID_begin = tlbuf.getMaxUUID();
+        UUID_end = tlbuf.getMaxUUID();
         if (testKind == BENCH_TABLE) {
             atab = new AtomTable();
         }
@@ -486,7 +484,7 @@ void AtomSpaceBenchmark::startBenchmark(int numThreads)
         numberOfTypes = classserver().getNumberOfClasses();
 
         if (buildTestData) buildAtomSpace(atomCount, percentLinks, false);
-        UUID_end = TLB::getMaxUUID();
+        UUID_end = tlbuf.getMaxUUID();
 
         doBenchmark(methodNames[i], methodsToTest[i]);
 
@@ -552,10 +550,11 @@ Type AtomSpaceBenchmark::randomType(Type t)
     } while (!classserver().isA(candidateType, t) or
         classserver().isA(candidateType, FREE_LINK) or
         classserver().isA(candidateType, SCOPE_LINK) or
+        classserver().isA(candidateType, UNIQUE_LINK) or
         candidateType == VARIABLE_LIST or
         candidateType == DEFINE_LINK or
         candidateType == NUMBER_NODE or
-        candidateType == TYPE_NODE);
+        classserver().isA(candidateType, TYPE_NODE));
 
     return candidateType;
 }
@@ -792,7 +791,7 @@ clock_t AtomSpaceBenchmark::makeRandomLinks()
     case BENCH_TABLE: {
         clock_t tAddLinkStart = clock();
         for (unsigned int i=0; i<Nclock; i++)
-            atab->add(createLink(ta[i], og[i]), false);
+            atab->add(createLink(og[i], ta[i]), false);
         return clock() - tAddLinkStart;
     }
     case BENCH_AS: {
@@ -834,7 +833,15 @@ void AtomSpaceBenchmark::buildAtomSpace(long atomspaceSize,
         makeRandomNodes("");
         if (display && i % diff == 0) cerr << "." << flush;
     }
-    UUID_end = TLB::getMaxUUID();
+
+    /* Place all the atoms in the TLB too, so that we can later
+     * pick some, randomly, just by picking a random int. */
+    HandleSeq alln;
+    asp->get_all_nodes(alln);
+    for (const Handle& h : alln)
+        tlbuf.addAtom(h, TLB::INVALID_UUID);
+
+    UUID_end = tlbuf.getMaxUUID();
 
     // Add links
     if (display) cout << endl << "Adding " << atomspaceSize - nodeCount << " links " << flush;
@@ -852,7 +859,13 @@ void AtomSpaceBenchmark::buildAtomSpace(long atomspaceSize,
         cout << DIVIDER_LINE << endl;
     }
 
-    UUID_end = TLB::getMaxUUID();
+    /* Place all the links into the TLB */
+    HandleSeq alli;
+    asp->get_all_links(alli);
+    for (const Handle& h : alli)
+        tlbuf.addAtom(h, TLB::INVALID_UUID);
+
+    UUID_end = tlbuf.getMaxUUID();
     testKind = saveKind;
 }
 
@@ -979,11 +992,13 @@ timepair_t AtomSpaceBenchmark::bm_rmAtom()
 
 Handle AtomSpaceBenchmark::getRandomHandle()
 {
-    Handle h(UUID_begin + randomGenerator->randint(UUID_end-1-UUID_begin));
+    UUID ranu = UUID_begin + randomGenerator->randint(UUID_end-1-UUID_begin);
+    Handle h(tlbuf.getAtom(ranu));
     // operator->() can return NULL when there's no atom for the uuid,
     // because the atom was deleted in a previous pass! Dohh!
     while (NULL == h.operator->()) {
-        h = getRandomHandle();
+        ranu = UUID_begin + randomGenerator->randint(UUID_end-1-UUID_begin);
+        h = tlbuf.getAtom(ranu);
     }
     return h;
 }

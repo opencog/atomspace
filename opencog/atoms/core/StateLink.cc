@@ -35,21 +35,19 @@ void StateLink::init()
 	FreeLink::init();
 }
 
-StateLink::StateLink(const HandleSeq& oset,
-                     TruthValuePtr tv, AttentionValuePtr av)
-	: UniqueLink(STATE_LINK, oset, tv, av)
+StateLink::StateLink(const HandleSeq& oset, Type t)
+	: UniqueLink(oset, t)
 {
 	init();
 }
 
-StateLink::StateLink(const Handle& name, const Handle& defn,
-                     TruthValuePtr tv, AttentionValuePtr av)
-	: UniqueLink(STATE_LINK, HandleSeq({name, defn}), tv, av)
+StateLink::StateLink(const Handle& name, const Handle& defn)
+	: UniqueLink(HandleSeq({name, defn}), STATE_LINK)
 {
 	init();
 }
 
-StateLink::StateLink(Link &l)
+StateLink::StateLink(const Link &l)
 	: UniqueLink(l)
 {
 	init();
@@ -75,32 +73,6 @@ Handle StateLink::get_link(const Handle& alias)
 	return get_unique(alias, STATE_LINK, true);
 }
 
-/**
- * If there is a *second* StateLink, equivalent to this one,
- * return it.  This is used for managing state in the AtomSpace.
- */
-Handle StateLink::get_other(void) const
-{
-	// No-op if this has variables!
-	if (0 < this->_vars.varseq.size()) return Handle();
-
-	// Get all StateLinks associated with the alias. Ignore this one.
-	const Handle& alias = _outgoing[0];
-	IncomingSet defs = alias->getIncomingSetByType(STATE_LINK);
-
-	// Return any non-unique definition that isn't this one,
-	// and doesn't have variables in it.  Multiple "open terms"
-	// are OK, and naturally occur in patterns.
-	for (const LinkPtr& defl : defs)
-	{
-		if (defl->getOutgoingAtom(0) == alias and defl.get() != this)
-		{
-			FreeLinkPtr flp(FreeLinkCast(defl));
-			if (0 < flp->get_vars().varseq.size()) continue;
-			return defl->getHandle();
-		}
-	}
-	return Handle();
-}
+DEFINE_LINK_FACTORY(StateLink, STATE_LINK);
 
 /* ===================== END OF FILE ===================== */

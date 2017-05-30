@@ -1,12 +1,11 @@
 #include <string>
 #include <cstdio>
 
-#include <opencog/util/Config.h>
 #include <opencog/atomspace/AtomSpace.h>
 #include <opencog/cython/PythonEval.h>
 #include <opencog/guile/SchemeEval.h>
-#include <opencog/guile/SchemeSmob.h>
-#include <opencog/guile/load-file.h>
+
+#include <cxxtest/TestSuite.h>
 
 using std::string;
 
@@ -14,33 +13,16 @@ using namespace opencog;
 
 const int NO_SIGNAL_HANDLERS = 0;
 
-
 class PythonEvalUTest :  public CxxTest::TestSuite
 {
-
-private:
-
-
 public:
-
     PythonEvalUTest()
     {
-        // Load special config file for the test
-        string configFile = PROJECT_BINARY_DIR"/tests/cython/pythoneval.conf";
-        try {
-            config().load(configFile.c_str(), false);
-        } catch (RuntimeException &e) {
-            std::cerr << e.get_message() << std::endl;
-            exit(1);
-        }
-
         logger().set_print_to_stdout_flag(true);
 
         // setup global logger
-        logger().set_filename(config()["LOG_FILE"]);
-        logger().set_level(Logger::get_level_from_string(config()["LOG_LEVEL"]));
-        logger().set_backtrace_level(Logger::get_level_from_string(config()["BACK_TRACE_LOG_LEVEL"]));
-        logger().set_print_to_stdout_flag(config().get_bool("LOG_TO_STDOUT"));
+        logger().set_level(Logger::DEBUG);
+        logger().set_print_to_stdout_flag(true);
     }
 
     ~PythonEvalUTest() {}
@@ -63,7 +45,6 @@ public:
         // Stop Python.
         Py_Finalize();
 
-
         // Try it again to make sure the Python library cleans up properly.
 
         // Start up Python.
@@ -75,7 +56,6 @@ public:
 
         // Stop Python.
         Py_Finalize();
-
 
         // And again...
 
@@ -89,8 +69,8 @@ public:
         // Stop Python.
         Py_Finalize();
 
-         logger().debug("[PythonEvalUTest] testRawPythonInitialization() DONE");
-   }
+        logger().debug("[PythonEvalUTest] testRawPythonInitialization() DONE");
+    }
 
     void testRawPythonInitializeWithGetSys()
     {
@@ -109,7 +89,7 @@ public:
         pySysPath = PySys_GetObject((char*)"path");
 
         if (logger().is_debug_enabled()) {
-            logger().debug("    Python 'sys.path' after OpenCog config adds is:");
+            logger().debug("    unit-test Python 'sys.path' is:");
             Py_ssize_t pathSize = PyList_Size(pySysPath);
             for (int pathIndex = 0; pathIndex < pathSize; pathIndex++) {
                 PyObject* pySysPathLine = PyList_GetItem(pySysPath, pathIndex);
@@ -262,13 +242,9 @@ public:
         // Initialize Python.
         global_python_initialize();
 
-        config().set("SCM_PRELOAD",
-                     "opencog/atoms/base/core_types.scm, "
-		               "opencog/scm/opencog/exec.scm");
         AtomSpace *as = new AtomSpace();
         PythonEval::create_singleton_instance(as);
         PythonEval* python = &PythonEval::instance();
-        load_scm_files_from_config(*as);
 
         // Define python functions for use by scheme.
         python->eval(
@@ -280,9 +256,10 @@ public:
 
             "def return_truth(atom1, atom2):\n"
             "    print 'return_truth TruthValue(0.75, 100.0)'\n"
-            "    return TruthValue(0.75, 100.0)\n"
+            "    return TruthValue(0.75, 100.0)\n\n"
             );
 
+#ifdef HAVE_GUILE
         // Create a scheme evaluator to trigger cog-evaluate and cog-execute.
         SchemeEval* scheme = new SchemeEval(as);
 
@@ -319,6 +296,36 @@ public:
         error = scheme->eval_error();
         scheme->clear_pending();
         TSM_ASSERT("Failed cog-evaluate!", !error);
+#endif // HAVE_GUILE
+
+        // Cleanup Python.
+        global_python_finalize();
+    }
+
+    void testCodeBlockWithNewline()
+    {
+        // Initialize Python.
+        global_python_initialize();
+
+        AtomSpace *as = new AtomSpace();
+        PythonEval::create_singleton_instance(as);
+        PythonEval* python = &PythonEval::instance();
+
+        // Define python functions with newline within the code block
+        string result = python->eval(
+            "def fun(x):\n"
+            "    y = x + 1\n"
+            "\n"
+            "    return y\n"
+            "\n"
+            "fun(1)\n\n"
+            );
+
+        std::cout << "result = " << result << std::endl;
+
+        // Because results are ignored this cannot be tested as of now
+        // TS_ASSERT_EQUALS(result, "3");
+        TS_ASSERT(true);
 
         // Cleanup Python.
         global_python_finalize();

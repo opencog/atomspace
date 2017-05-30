@@ -1,5 +1,5 @@
 /*
- * opencog/atomspace/SimpleTruthValue.cc
+ * opencog/truthvalue/SimpleTruthValue.cc
  *
  * Copyright (C) 2002-2007 Novamente LLC
  * All Rights Reserved
@@ -37,70 +37,99 @@
 
 using namespace opencog;
 
-#define CVAL  0.2f
+count_t SimpleTruthValue::DEFAULT_K = 800.0;
 
-SimpleTruthValue::SimpleTruthValue(strength_t m, count_t c)
+SimpleTruthValue::SimpleTruthValue(strength_t m, confidence_t c)
+	: TruthValue(SIMPLE_TRUTH_VALUE)
 {
-    mean = m;
-    count = c;
+    _value.resize(2);
+    _value[MEAN] = m;
+    _value[CONFIDENCE] = c;
 }
 
 SimpleTruthValue::SimpleTruthValue(const TruthValue& source)
+	: TruthValue(SIMPLE_TRUTH_VALUE)
 {
-    mean = source.getMean();
-    count = source.getCount();
+    _value.resize(2);
+    _value[MEAN] = source.getMean();
+    _value[CONFIDENCE] = source.getConfidence();
 }
-SimpleTruthValue::SimpleTruthValue(SimpleTruthValue const& source)
+
+SimpleTruthValue::SimpleTruthValue(const SimpleTruthValue& source)
+	: TruthValue(SIMPLE_TRUTH_VALUE)
 {
-    mean = source.mean;
-    count = source.count;
+    _value.resize(2);
+    _value[MEAN] = source._value[MEAN];
+    _value[CONFIDENCE] = source._value[CONFIDENCE];
+}
+
+SimpleTruthValue::SimpleTruthValue(const ProtoAtomPtr& source)
+	: TruthValue(SIMPLE_TRUTH_VALUE)
+{
+	if (source->getType() != SIMPLE_TRUTH_VALUE)
+		throw RuntimeException(TRACE_INFO,
+			"Source must be a SimpleTruthValue");
+
+	FloatValuePtr fp(FloatValueCast(source));
+	_value.resize(2);
+	_value[MEAN] = fp->value()[MEAN];
+	_value[CONFIDENCE] = fp->value()[CONFIDENCE];
 }
 
 strength_t SimpleTruthValue::getMean() const
 {
-    return mean;
+    return _value[MEAN];
 }
 
 count_t SimpleTruthValue::getCount() const
 {
-    return count;
+    // Formula from PLN book.
+    confidence_t cf = std::min(_value[CONFIDENCE], 0.9999998);
+    return static_cast<count_t>(DEFAULT_K * cf / (1.0f - cf));
 }
 
 confidence_t SimpleTruthValue::getConfidence() const
 {
-    return countToConfidence(count);
+    return _value[CONFIDENCE];
 }
 
 // This is the merge formula appropriate for PLN.
-TruthValuePtr SimpleTruthValue::merge(TruthValuePtr other,
+TruthValuePtr SimpleTruthValue::merge(const TruthValuePtr& other,
                                       const MergeCtrl& mc) const
 {
-    switch(mc.tv_formula) {
-    case MergeCtrl::TVFormula::HIGHER_CONFIDENCE:
-        return higher_confidence_merge(other);
-    case MergeCtrl::TVFormula::PLN_BOOK_REVISION:
+    switch (mc.tv_formula)
     {
-        // Based on Section 5.10.2(A heuristic revision rule for STV)
-        // of the PLN book
-        if (other->getType() != SIMPLE_TRUTH_VALUE)
-            throw RuntimeException(TRACE_INFO,
+        case MergeCtrl::TVFormula::HIGHER_CONFIDENCE:
+            return higher_confidence_merge(other);
+
+        case MergeCtrl::TVFormula::PLN_BOOK_REVISION:
+        {
+            // Based on Section 5.10.2(A heuristic revision rule for STV)
+            // of the PLN book
+            if (other->getType() != SIMPLE_TRUTH_VALUE)
+                throw RuntimeException(TRACE_INFO,
                                    "Don't know how to merge %s into a "
                                    "SimpleTruthValue using the default style",
                                    typeid(*other).name());
-        auto count2 = other->getCount();
-        auto count_new = count + count2 - std::min(count, count2) * CVAL;
-        auto mean_new = (mean * count + other->getMean() * count2)
-            / (count + count2);
-        return std::make_shared<SimpleTruthValue>(mean_new, count_new);
-    }
-    default:
-        throw RuntimeException(TRACE_INFO,
-                               "SimpleTruthValue::merge: case not implemented");
-        return nullptr;
-    }
+
+            confidence_t cf = std::min(getConfidence(), 0.9999998);
+            auto count = DEFAULT_K * cf / (1.0 - cf);
+            auto count2 = other->getCount();
+#define CVAL  0.2f
+            auto count_new = count + count2 - std::min(count, count2) * CVAL;
+            auto mean_new = (getMean() * count + other->getMean() * count2)
+                / (count + count2);
+            confidence_t confidence_new = (count_new / (count_new + DEFAULT_K));
+            return createTV(mean_new, confidence_new);
+        }
+        default:
+            throw RuntimeException(TRACE_INFO,
+                                   "SimpleTruthValue::merge: case not implemented");
+            return nullptr;
+       }
 }
 
-std::string SimpleTruthValue::toString() const
+std::string SimpleTruthValue::toString(const std::string& indent) const
 {
     char buf[1024];
     sprintf(buf, "(stv %f %f)",
@@ -109,39 +138,14 @@ std::string SimpleTruthValue::toString() const
     return buf;
 }
 
-bool SimpleTruthValue::operator==(const TruthValue& rhs) const
+bool SimpleTruthValue::operator==(const ProtoAtom& rhs) const
 {
     const SimpleTruthValue *stv = dynamic_cast<const SimpleTruthValue *>(&rhs);
     if (NULL == stv) return false;
 
-#define FLOAT_ACCEPTABLE_MEAN_ERROR 0.000001
-    if (FLOAT_ACCEPTABLE_MEAN_ERROR < fabs(mean - stv->mean)) return false;
+#define FLOAT_ACCEPTABLE_ERROR 0.000001
+    if (FLOAT_ACCEPTABLE_ERROR < fabs(_value[MEAN] - stv->_value[MEAN])) return false;
 
-// Converting from confidence to count and back again using single-precision
-// float is a real accuracy killer.  In particular, 2/802 = 0.002494 but
-// converting back gives 800*0.002494/(1.0-0.002494) = 2.000188 and so
-// comparison tests can only be accurate to about 0.000188 or
-// thereabouts.
-#define FLOAT_ACCEPTABLE_COUNT_ERROR 0.0002
-
-    if (FLOAT_ACCEPTABLE_COUNT_ERROR < fabs(1.0 - (stv->count/count))) return false;
+    if (FLOAT_ACCEPTABLE_ERROR < fabs(_value[CONFIDENCE] - stv->_value[CONFIDENCE])) return false;
     return true;
-}
-
-TruthValueType SimpleTruthValue::getType() const
-{
-    return SIMPLE_TRUTH_VALUE;
-}
-
-count_t SimpleTruthValue::confidenceToCount(confidence_t cf)
-{
-    // There are not quite 16 digits in double precision
-    // not quite 7 in single-precision float
-    cf = std::min(cf, 0.9999998f);
-    return static_cast<count_t>(DEFAULT_K * cf / (1.0f - cf));
-}
-
-confidence_t SimpleTruthValue::countToConfidence(count_t cn)
-{
-    return static_cast<confidence_t>(cn / (cn + DEFAULT_K));
 }

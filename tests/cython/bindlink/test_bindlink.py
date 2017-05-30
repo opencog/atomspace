@@ -8,8 +8,8 @@ from opencog.bindlink import stub_bindlink, bindlink, single_bindlink,\
                              satisfying_element, first_n_satisfying_set, \
                              execute_atom, evaluate_atom
 
-from opencog.utilities import initialize_opencog, finalize_opencog
 from opencog.type_constructors import *
+from opencog.utilities import initialize_opencog, finalize_opencog
 
 from test_functions import green_count, red_count
 
@@ -29,13 +29,8 @@ class BindlinkTest(TestCase):
         # Clear atoms from previous test
         self.atomspace.clear()
 
-        # Get the config file name in a manner not dependent on the
-        # starting working directory.
-        full_path = os.path.realpath(__file__)
-        config_file_name = os.path.dirname(full_path) + "/bindlink_test.conf"
-
         # Initialize Python
-        initialize_opencog(self.atomspace, config_file_name)
+        initialize_opencog(self.atomspace)
         set_type_ctor_atomspace(self.atomspace)
 
         # Define several animals and something of a different type as well
@@ -92,7 +87,7 @@ class BindlinkTest(TestCase):
 
         # Run bindlink.
         atom = stub_bindlink(self.atomspace, self.bindlink_atom)
-        self.assertTrue(atom is not None and atom.value() > 0)
+        self.assertTrue(atom is not None)
 
         # Check the ending atomspace size, it should be the same.
         ending_size = self.atomspace.size()
@@ -101,7 +96,7 @@ class BindlinkTest(TestCase):
     def _check_result_setlink(self, atom, expected_arity):
 
         # Check if the atom is a SetLink
-        self.assertTrue(atom is not None and atom.value() > 0)
+        self.assertTrue(atom is not None)
         self.assertEquals(atom.type, types.SetLink)
 
         # Check the ending atomspace size, it should have added one SetLink.

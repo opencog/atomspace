@@ -22,8 +22,6 @@
  */
 
 #include <opencog/atoms/base/ClassServer.h>
-#include <opencog/atomspace/AtomSpace.h>
-#include <opencog/atomspace/AtomTable.h>
 #include <opencog/atomutils/FindUtils.h>
 
 #include "DeleteLink.h"
@@ -64,14 +62,13 @@ Handle DeleteLink::execute(AtomSpace * as) const
 }
 #endif
 
-DeleteLink::DeleteLink(const HandleSeq& oset,
-                       TruthValuePtr tv, AttentionValuePtr av)
-	: FreeLink(DELETE_LINK, oset, tv, av)
+DeleteLink::DeleteLink(const HandleSeq& oset)
+	: FreeLink(oset, DELETE_LINK)
 {
 	init();
 }
 
-DeleteLink::DeleteLink(Link &l)
+DeleteLink::DeleteLink(const Link &l)
 	: FreeLink(l)
 {
 	// Type must be as expected

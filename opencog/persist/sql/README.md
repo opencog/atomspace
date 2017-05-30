@@ -1,12 +1,13 @@
-                                Persist
-                                -------
-                   Linas Vepstas <linasvepstas@gmail.com>
-                    Basic implementation Feb-June 2008
-                         Status update May 2009
-                         Status update Dec 2013
+SQL Persist
+===========
++ Linas Vepstas <linasvepstas@gmail.com>
++ Basic implementation Feb-June 2008
++ Status update May 2009
++ Status update Dec 2013
++ Status update Jan 2017
 
-A simple implementation of atom persistence into SQL.  This allows not
-only saving and restoring of the atomspace, but it also allows multiple
+An implementation of atom persistence in SQL.  This allows not only
+saving and restoring of the atomspace, but it also allows multiple
 cogservers to share a common set of data.  That is, it implements a
 basic form of a distributed atomspace.
 
@@ -14,23 +15,22 @@ Status
 ======
 It works and has been used with databases containing millions of atoms,
 accessed by cogservers that ran for months to perform computations. It
-has scaled trouble-free, without any slowdown, up to four cogserrvers.
+has scaled, trouble-free, without any slowdown, up to four cogservers.
 No one has tried anything larger than that, yet.
 
 Features
 --------
- * Save and restore of atoms, and several kinds of truth values.
+ * Save and restore of individual atoms and values.
  * Bulk save-and-restore of entire AtomSpace contents.
- * Incremental save/restore (i.e. updates the SQL contents as AtomSpace
-   changes).
  * Generic API, useful for inter-server communications.
 
 Missing features/ToDo items
 ---------------------------
+ * Clarify value save/restore semantics.
  * Add support for multiple atom spaces.
- * Add full support for attention values. (??)
  * Provide optimized table layout for EvaluationLinks.
  * Add support for Space/TimeServer data.
+ * See also TODO list at very bottom.
 
 Performance status
 ------------------
@@ -49,8 +49,8 @@ The loaded hypergraphs were all EvaluationLinks, viz:
 
 The above measurements were made on a busy server that was doing many
 other CPU & RAM intensive things; there was no performance tuning of
-the postgress server.  A section below explains how to performance tune
-the postgres server for better results.  The above was also done through
+the Postgres server.  A section below explains how to performance tune
+the Postgres server for better results.  The above was also done through
 the scheme interface; since then, garbage collection has been tuned a
 little bit, and so RAM usage should drop a bit.
 
@@ -70,11 +70,11 @@ The goal of this implementation is to:
 
 2) Provide an API for inter-server communications and atom exchange.
    Multiple cogservers can share data simply by sending atoms to,
-   and retreiving atoms from the database.  Although this may not be
+   and retrieving atoms from the database.  Although this may not be
    the fastest way to send just single atoms, most algorithms do not
    need to send just single atoms: they just need to share some atoms,
    but its not clear which ones need to be shared.  Since all atoms are
-   in the database, only the ones that are needed can be retreived.
+   in the database, only the ones that are needed can be retrieved.
 
 3) Provide a baseline/reference implementation by which other
    persistence designs can be measured. It is hoped that other systems
@@ -83,76 +83,86 @@ The goal of this implementation is to:
    strength of the current design is supposed to be simplicity, not
    scalability or raw performance.
 
-4) A non-design-goal (at this time) is to build a system that can scale
+4) Provide a reference implementation for save and restore semantics.
+   When saving or fetching outgoing sets, there are several choices
+   of how to handle the associated values: these can also be saved
+   or fetched, clobbering the atomspace contents, or some more
+   fine-grained control can be provided.  The choices have both
+   usability and performance implications. The choices are discussed
+   in a separate section, below.
+
+5) Discover the most minimal, simplest backingstore API. This API is
+   the API between the AtomSpace, and the persistance backend.  The
+   reason for keeping it as simple as possible is to minimize the work
+   needed to create other backends, as well as all the standard software
+   development reasons: lower complexity means fewer bugs and better
+   performance.  Lower complexity means the code is easier to understand
+   and use correctly.
+
+6) A non-design-goal (at this time) is to build a system that can scale
    to more than 100 cogserver instances.  The current design might be
    able to scale to this many, but probably not much more.  Scaling
    larger than this would probably require a fundamental redesign of
    all of opencog, starting with the atomspace.
 
-5) A non-design-goal is fully automatic save-restore of atoms.  Both
-   the save and restore of atoms must be triggered by calls to the
-   atomspace API.  The reason for this design point is that the
-   atomspace is at too low a level to be fully automatic.  It cannot
-   guess what the user really wants to do.  If it did guess, it would
-   probably guess wrong: saving atoms before the user is done with them,
-   saving atoms that get deleted microseconds later, fetching atoms
-   that the user is completely disinterested in, clogging up RAM and
-   wasting CPU time.  Some other layer, a higher level layer, needs to
-   implement a policy for save/restore.  This layer only provides a
-   mechanism.  It would be very very wrong to implement an automatic
-   policy at this layer.
+7) A non-design-goal is fully automatic save-restore of atoms.  The
+   save and restore of atoms are performed under the explicit control
+   by user-written code, invoking the save/restore API. There is no
+   automation. Control is in the user's hands.
+
+   The reason for this design point is that the atomspace is at too low
+   a level to be fully automatic.  It cannot guess what the user really
+   wants to do.  If it did try to guess, it would probably guess wrong:
+   saving atoms before the user is done with them, saving atoms that get
+   deleted microseconds later, fetching atoms that the user is completely
+   disinterested in, clogging up RAM and wasting CPU time.  The policy
+   for what to save, and when, needs to be left in control of the user
+   algorithms.
+
+   This layer only provides a mechanism.  It would be very very wrong to
+   implement an automatic policy at this layer.
+
+8) A fundamental non-goal is to provide any sort of generic object
+   persistence.  The code here is meant only to save and restore atoms
+   and values, and not generic C++ objects. The design of the AtomSpace
+   has been carefully crafted to provide two classes of objects: the
+   immutable, globally unique atoms, and the mutable valuations
+   associated to atoms.  This backend mirrors this functional split.
 
 
 Current Design
 ==============
 The core design defines only a few very simple SQL tables, and some
-simple readers and writers to save and restore atoms from an SQL
-database.
-
-Note that the core design does *not* make use of object reflection,
-nor can it store arbitrary kinds of objects. It is very definitely
-hard-wired. Yes, this can be considered to be a short-coming.
-A more general, persistent object framework (for C) can be found
-at http://estron.alioth.debian.org/  However, simplicity, at the
-cost of missing flexibility, seems more important.
+readers and writers to save and restore atoms from an SQL database.
 
 The current design can save/restore individual atoms, and it can
-bulk-save/bulk-restore the entire contents of an AtomTable.
-A semi-realized goal of the prototype is to implement incremental save
-and restore -- that is, to fetch atoms in a "just in time" fashion, and
-to save away atoms that are not needed in RAM (e.g. atoms with
-low/non-existent attention values). The AtomSpace BackingStore provides
-the current, minimalistic, low-function API for this.
+bulk-save/bulk-restore the entire contents of the AtomSpace. The above
+listed goals seem to be met, more or less.
 
 Features
 --------
- * The AtomStorage class should be completely thread-safe (I think ...
-only lightly tested).
+ * The AtomStorage class is thread-safe, and multi-threaded use is
+tested in several unit tests.
 
- * This implementation avoids UUID collisions, and automatically thunks
-UUID's as needed if an accidental collision with the database occurs.
-In order to avoid excess thunking, it is strongly recommended that
-the SQL database should be opened immediately on cogserver start, before
-any atoms are created.  This will automatically reserve the range of
-UUID's that are stored in the DB, and thus avoid collisions as new atoms
-are created.
+ * Fully automated mapping of in-RAM atoms to in-storage universal
+unique identifiers (UUID's), using the TLB mechanism.
 
- * UUID's are reseved in blocks, or ranges. That is, UUID's are issued
-in blocks of a million each.  This way, multiple different cogservers
-can have some reasonable chance of using UUID's that do not collide with
-one-another.  That is, UUID's can be "malloced" in ranges.  XXX Caution:
-this mechanism may be broken or incomplete.  Ask Linas for the current
-status.
+ * Multi-user issuance and management of UUID's is un-tested and is
+probably broken at this time.  That is, if multiple cogservers connect
+to the atomspace at the same time, it probably won't work.  It used to
+work, but there have been some major changes that probably broke this.
+There is existing infrastructure that enables this, e.g. one can
+"malloc" ranges of UUID's.  The code has bit-rotted, for lack of use.
 
  * This implementation automatically handles clashing atom types.  That
-is, if the database is written with one set of atom types, and then the
+is, if the data is written with one set of atom types, and then the
 cogserver is stopped, the atomtypes are all changed (with some added,
-some deleted), then pulling from the database will automatically
-translate and use the new atom types. (The deleted atom types will not
-be removed from the database.  Restoring atoms with deleted atomtypes
-will cause an exception to be thrown.)
+some deleted), then during the load of the old data, the types will
+be automatically translated to use the new atom types. (The deleted
+atom types will not be removed from the database.  Restoring atoms with
+deleted atomtypes will cause an exception to be thrown.)
 
- * Non-blocking atom store requests are implemented.  Four asynchronous
+ * Non-blocking atom store requests are implemented.  Eight asynchronous
 write-back threads are used, with hi/lo watermarks for queue management.
 That is, if a user asks that an atom be stored, then the atom will be
 queued for storage, and one of these threads will perform the actual
@@ -163,51 +173,121 @@ full; in that case, the user will be blocked until the queue drains
 below the low watermark. The number of connections can be raised by
 editing the AtomStorage constructor, and recompiling.
 
-The fire-n-forget algo is implemented in the C++
+This fire-n-forget queue management algo is implemented in the C++
 `AtomStorage::storeAtom()` method.  If the backlog of unwritten atoms
 gets too large, the storeAtom() method may stall. Its currently designed
 to stall if there's a backlog of 100 or more unwritten atoms.  This can
 be changed by searching for `HIGH_WATER_MARK`, changing it and recompiling.
 
+Queue performance statistics can be printed with the `(sql-stats)`
+scheme command.
+
  * Reading always blocks: if the user asks for an atom, the call will
 not return to the user until the atom is available.  At this time,
 pre-fetch has not been implemented.  But that's because pre-fetch is
-easy: the user can do it in thier own thread :-)
+easy: the user can do it in their own thread :-)
 
 
-Issues
-------
- * The TV merge issue. Right now, the AtomSpace/AtomTable is designed to
-merge truth values between an atom that is added to the table, and any
-atom that is already present in the table.  This can lead to unexpected
-truth-value changes when atoms are being fetched from the backend.  The
-correct solution is probably to change the table to not auto-merge. This
-still leaves the question of what to do with the two TV's, since
-different users are likely to want different behaviors.
+Semantics
+=========
+Exactly what to save, when saving and restoring atoms, is not entirely
+obvious.  The alternatives, and thier implications, are discussed below.
 
- * The AV issue.  Two issues, here.  First, if the AV changes to a non
-zero VLTI, the atom should be auto-saved to the backend.  This has not
-been implemented.  Second, if the VLTI is positive, and the TV changes,
-should this trigger an auto-save?  Conceptually, it probably should;
-practically, it may hurt performance. At any rate, this can be handled
-in a "policy" thread (a thread that implements some sort of policy) that
-is independent of the storage mechanism here.  Again: we implement
-mechanism, here, not policy.
+* Saving a single node. Should all associated values be saved? Should
+the user get to pick which values get saved?  Its possible that the user
+only wants to save one particular value, only, so as not to clobber
+other values already in the database.  The current default is to save
+all associated values, when storing a single node.  This is only weakly
+unit-tested; the tests are not thorough, and do not check all possible
+permuations.
+
+* Saving a single link. When a link is saved, the outgoing set of the
+link must also be saved. Thus, the above considerations for node-values
+also apply to the outgoing set of the link, and so on, recursively, for
+the nested links.  The current default is to save all associated values,
+on the entire outgoing set, recursively, when storing a single link.
+This is only weakly unit-tested.
+
+The alternative would be to save only the outgoing set atoms, but not
+the values on them.  For the SQL backend, not saving all values could
+decrease the amount of database traffic, and thus improve performance.
+For other backends, this may not be the case, as the increased complexity
+of specifying what, exactly, to save, could really hurt performance.
+
+Its possible that some users may want to save *only* the values on the
+immediate link, but not on any of the outgoing set. There is currently no
+API for this.
+
+* Restoring a single node or link. The above considerations for saving
+run in the opposite direction, when restoring. Thus, for example, when
+restoring a single node, should all associated values in the AtomSpace
+be clobbered, or not?
+
+Currently, when an atom is restored, all of the associated values are
+pulled from the database, and placed in the AtomSpace, clobbering the
+previous AtomSpace contents.  This is done recursively, for links.
+This is tested, but only weakly and incompletely, in the unit tests.
+
+* Restoring by atom type; restoring incoming sets.  Groups of atoms
+can be fetched from the database: in the first case, all atoms of a
+given type; in the second case, all atoms in the incoming set of a
+given atom.  There are four possibilities here: (a) fetch only the
+atoms, but not any of the associated values. (b) fetch the atoms
+and the associated values, but not the values in the recursive outgoing
+sets. (c) fetch the atoms and values, and all atoms and values,
+recursively, in thier outgoing set. (d) fetch the atoms, but update
+the values only if they are atoms are new to the atomspace; i.e. do
+not clobber existing values in the atomsapce.
+
+Currently, option (b) is implemented, and is weakly unit-tested.
+It is plausible that some users may want options (a), (c) or (d).
+Note that option (d) has several variations.
+
+In the SQL backend, option (b) mostly minimizes the network and database
+traffic.  For other kinds of backends, it might be more efficient to
+implement option (c), and just get all the data in one big gulp.
+
+* Restoring by pattern. This is not implemented, not done.  However,
+one can imagine a situation where a pattern-matcher-like interface
+is provided for the backend, so that only certain values, on certain
+atoms, in certain locations in a given pattern, are fetched.
+
+This is not done because the pattern matcher is really quite commplex,
+and it seems kind-of crazy to try to put this in the backend.  There
+currently aren't any plausible scenarios, and plausible algorithms,
+that would need this capability.
+
 
 
 Install, Setup and Usage HOWTO
 ==============================
 There are many steps needed to install and use this. Sorry!
 
-07-05-2015: Updated instructions below to be slightly more instructive
-	    and up to date for PostgreSQL 9.3 and Ubuntu 14.04.
-
 Compiling
 ---------
-Download and install UnixODBC devel packages. Run cmake; make.
-Do NOT use IODBC, it fails to support UTF-8.
+Download and install the `libpq-dev` packages, which provide the
+C-language bindings to the Postgres client library.
 
-sudo apt-get install unixodbc-dev
+```
+  sudo apt-get install libpq-dev
+  cmake
+  make
+```
+
+Optional ODBC drivers
+---------------------
+Optionally, download and install UnixODBC devel packages.  Do NOT use
+IODBC, it fails to support UTF-8!  It's also buggy when more than a few
+100K atoms need to be fetched.
+
+The Postgres drivers seem to be considerably faster; the use of the
+ODBC driver is discouraged, unless you really need it or really like it.
+
+```
+  sudo apt-get install unixodbc-dev odbc-postgresql
+  cmake
+  make
+```
 
 Database Setup
 --------------
@@ -224,20 +304,26 @@ Same holds true for SQLite.  Sorry. There is some work in the
 code-base to support these other databases, but the work-arounds for
 the missing features are kind-of complicated, and likely to be slow.
 
-Be sure to install the postgres server, the postgres client, and the
-odbc-postgresql device driver.
+Be sure to install the Postgres server and the Postgres client.
 
-sudo apt-get install postgresql-9.3
+```
+    sudo apt-get install postgresql-9.3
+```
 
-Device Driver Setup
--------------------
-Configure the ODBC driver. After install, verify that /etc/odbcinst.ini
-contains the stanza below (or something similar).  If it is missing,
-then edit this file (as root) and add the stanza.  Notice that it uses
-the Unicode drivers, and NOT the ANSI (ASCII) drivers.  Opencog uses
-unicode!
+Optional: ODBC Device Driver Setup
+----------------------------------
+If you want to use ODBC, then you need to configure the ODBC driver.
+Again: the use of ODBC is optional and discouraged; its slower clunkier
+and more complex. Skip this section if you are not using ODBC.
 
-sudo gedit /etc/odbcinst.ini &
+After install, verify that `/etc/odbcinst.ini` contains the stanza
+below (or something similar).  If it is missing, then edit this file
+(as root) and add the stanza.  Notice that it uses the Unicode drivers,
+and NOT the ANSI (ASCII) drivers.  Opencog uses Unicode!
+
+```
+    sudo vi /etc/odbcinst.ini &
+```
 
 ```
     [PostgreSQL Unicode]
@@ -248,10 +334,10 @@ sudo gedit /etc/odbcinst.ini &
     CommLog     = 0
 ```
 
-The above stanza associates the name `PostgreSQL Unicode` with a particular 
-driver. This name is needed for later steps.  Notice that this is a quite 
-long name, with spaces!  You can change the name, (e.g. to shorten it) if 
-you wish, however, it **MUST** be consistent with the name given in the 
+The above stanza associates the name `PostgreSQL Unicode` with a particular
+driver. This name is needed for later steps.  Notice that this is a quite
+long name, with spaces!  You can change the name, (e.g. to shorten it) if
+you wish, however, it **MUST** be consistent with the name given in the
 `.odbc.ini` file (explained below in 'ODBC Setup, Part the Second').
 
 MySQL users need the stanza below; the `/etc/odbcinst.ini` file can
@@ -270,32 +356,54 @@ mess with it, then add the below:
 
 Performance tweaks
 ------------------
-The Postgres default configuration can be/should be tweaked for
-performance.  Newer version of Postgress seem to be OK (??) but in
-some cases, performance will be a disaster if the database is not tuned.
+The Postgres default configuration can be (and should be) tweaked for
+performance.  The performance will be disasterously slow if the database
+is not tuned.  The primary performance bottleneck is the default of
+synchronous commits during writing. On spinning disk drives, this can
+lead to delays of tens of milliseconds to write handfuls of atoms, as
+that is the seek time (latency) for spinning disk media. Thus,
+synchronous commits should be disabled.
+
+Solid state disks are a lot faster; it's not clear if this would still
+be a bottleneck.
+
+Disabling synchronous commits may cause the latest database updates
+to be lost, if power goes out, or the system unexpectedly reboots.
+This kind of loss is usually not a problem for most opencog apps,
+... all of the current apps are gathering statistics from generated
+data, and so this kind of loss is almost surely inconsequential.
 
 Edit `postgresql.conf` (a typical location is
 `/etc/postgresql/9.3/main/postgresql.conf`) and make the changes below.
 The first two changes are recommended by
 http://wiki.postgresql.org/wiki/Tuning_Your_PostgreSQL_Server
 ```
-   shared_buffers = default was 32MB, change to 25% of install RAM
+   shared_buffers = default was 32MB, change to 25% of installed RAM
    work_mem = default was 1MB change to 32MB
    effective_cache_size = default was 128MB, change to 50%-75% of installed RAM
-   fsync = default on  change to off
    synchronous_commit = default on change to off
    wal_buffers = default 64kB change to 2MB or even 32MB
-   commit_delay = default 0 change to 10000 (10K) microseconds
-   checkpoint_segments = 32 (each one takes up 16MB disk space)
+   checkpoint_segments = 64 (each one takes up 16MB disk space)
+	max_connections = 130 (each opencog instance needs 32)
+	max_worker_processes = 32 (one per CPU core)
    ssl = off
-   autovacuum = on
-   track_counts = on
 ```
-A large value for `wal_buffers` is needed because much of the database
-traffic consists of updates.  Enabling vacuum is very important, for
-the same reason; performance degrades substantially (by factors of
-3x-10x) without regular vacuuming. (Newer versions of postrgres vacuum
-automatically. YMMV.)
+
+For spinning media, `synchronous_commit=off` is 120x faster than
+`synchronous_commit=local`(about 400 atoms/sec vs 3 atoms/sec)
+
+For write-mostly databases, such as in the language-learning project,
+you will get better results with `checkpoint_segments = 100`.
+
+If you have postgres 9.0 or newer, there are no checkpoint_segments.
+Instead, do this:
+```
+checkpoint_timeout = 1h
+max_wal_size = 8GB
+checkpoint_completion_target = 0.9
+```
+This will avoid the "checkpoints are occurring too frequently"
+warning message.
 
 Restarting the server might lead to errors stating that max shared mem
 usage has been exceeded. This can be fixed by telling the kernel to use
@@ -308,20 +416,32 @@ save file contents, then:
 ```
    sysctl -p /etc/sysctl.conf
 ```
-If you continue to get errors after that, read this for help fixing them:
 
-   http://stackoverflow.com/questions/12616935/postgresql-shared-memory-settings
+For SSD drives, the following might help:
+```
+seq_page_cost = 0.1
+random_page_cost = 0.15
+effective_io_concurrency = 5
+```
 
+Unsafe performance tweaks
+-------------------------
+There is one very unsafe performance optimization: disabling fsync.
+It's not clear how much this helps; youd' have to measure. Disabbling
+it is very dangerous: in case of a power loss, or a spontaneous reboot,
+before all data has been written to disk, this can result in database
+corruption.  Yes, this happens. THE BELOW IS NOT RECOMMENDED!
 
-User and Database Setup
------------------------
-A database user needs to be created; the database tables need to be
-created. The database user is NOT the same thing as a unix user:
-the user login is for the database, not the OS. Do NOT use the same
-login and password!
+```
+   fsync = default on  change to off
+```
 
-Multiple databases can be created.  In this example, the database
-name will be "mycogdata".  Change this as desired.
+Database Setup
+--------------
+A database to hold the opencog data needs to be created.  Multiple
+databases can be created.  In this example, the database name will
+be "mycogdata".  Change this as desired.  The unit tests require a
+scratch database called "opencog_test".
 
 So, at the Unix command line:
 
@@ -335,37 +455,71 @@ try doing this, replacing 'alex' with your username.
 ```
    $ sudo su - postgres
    $ psql template1
-   template1=# CREATE ROLE alex superuser;
+   template1=# CREATE ROLE alex WITH SUPERUSER;
    template1=# ALTER ROLE alex WITH LOGIN;
-
 ```
 
-Verify that worked out by typing \dg to see:
+Verify that worked out by typing `\dg` to see:
 
+```
                              List of roles
- Role name |                   Attributes                   | Member of 
+ Role name |                   Attributes                   | Member of
 -----------+------------------------------------------------+-----------
  alex      | Superuser                                      | {}
  postgres  | Superuser, Create role, Create DB, Replication | {}
+```
 
-Then do Ctrl+D to exit, ignoring any message about psql_history, and return to
-your own account:
+Then do Ctrl+D to exit, ignoring any message about `psql_history`, and
+return to your own account:
 
 ```
    $ exit
 ```
 
-If you ran into the error above you still need to create the database of
-course (no output if succesful):
+If you ran into the error above, you still need to go back and create
+the database:
 
 ```
    $ createdb mycogdata
 ```
+There is no output if the command is successful.
 
-Next, create a database user named `opencog_user` with password `cheese`.
-You can pick a different username and password, but it must be consistent
-with the `~/.odbc.ini` file. Do NOT use your unix login password!  Pick
-something else! Create the user at the shell prompt:
+You should be able to access that database using the so-called `peer`
+authentication method. This command:
+```
+   $  psql mycogdata
+```
+should place you at the postgres-client prompt; you are now ready to
+create the opencog tables.  If the above didn't work, then you will
+have to create an explicit database user login, as explained below;
+otherwise, creating a user is optional.
+
+
+User setup
+----------
+(Optional)  You can continue without creating a database user, if you
+wish; postgres automatically provides password-less `peer`
+authentication to your unix username. However, the unit-tests do require
+that a distinct user be created, called `opencog_tester`, although you
+can bypass this, too, by altering the opencog test configuration file.
+
+The database user is NOT the same thing as a unix user: the login is for
+the database (only), not the OS. In general, you will want to pick a
+password that is DIFFERENT than your unix-password. This is because some
+of the database login methods require a clear-text password to be
+supplied. The full set of postgres login styles are supported, as long
+as you use the postgres URI format.  The ODBC logins require cleartext
+passwords to be used.
+
+See the [postgres
+documentation]((https://www.postgresql.org/docs/9.6/static/libpq-connect.html)
+for details on the allowed URI format.
+
+In the following, a database user named `opencog_user` is created, and
+given the password `cheese`.  You can pick a different username and
+password.  If you are using ODBC (not recommended), then these two must
+be consistent with the `~/.odbc.ini` file. Do NOT use your unix password!
+Pick something else! Create the user at the shell prompt:
 
 ```
    $ psql -c "CREATE USER opencog_user WITH PASSWORD 'cheese'" -d mycogdata
@@ -379,22 +533,58 @@ Check that the above worked, by manually logging in:
 
 If you can't login, something up above failed.
 
+Next, see if you can login using unix-domain sockets, instead of
+TCP-IP sockets to `localhost`:
+
+```
+   $  psql mycogdata -U opencog_user
+```
+
+For most users, this will fail with the message
+```
+psql: FATAL:  Peer authentication failed for user "opencog_user"
+```
+To fix this, you need to edit the file
+```
+   /etc/postgresql/9.3/main/pg_hba.conf
+```
+as unix user `postgres`, and add the following line. It will allow
+password logins for all local users. (A local user is a user on the
+same machine, connecting to the database by means of unix-domain
+sockets, instead of tcp/ip sockets.)
+```
+   local   all      all           md5
+```
+Be sure to reload or restart the postgres server after the above change:
+```
+   service postgresql reload
+```
+
+Table initialization
+--------------------
+Next, you need to populate the database with OpenCog-specific tables.
 Navigate to the atomspace folder you cloned from GitHub:
 
 ```
    $  cd ~/atomspace
 ```
 
-So we can create the database tables:
+Create the database tables:
 
 ```
-   $ cat opencog/persist/sql/atom.sql | psql mycogdata -U opencog_user -W -h localhost
+   $ cat opencog/persist/sql/multi-driver/atom.sql | psql mycogdata
 ```
+
+If you are using a different user-id than your login, then you will
+Have to add the `-U opencog_user` flag to the `psql` command.  If you
+created a distinct user, and did not set up the `hba.conf` file as
+above, then you also need a `-h localhost` flag, to access the database
+using TCP/IP sockets on the local network.
 
 Verify that the tables were created. Login as before:
 
 ```
-   $  psql mycogdata -U opencog_user -W -h localhost
+   $  psql mycogdata
 ```
 
 Then enter `\d` at the postgres prompt.  You should see this:
@@ -405,22 +595,21 @@ Then enter `\d` at the postgres prompt.  You should see this:
      Schema |   Name    | Type  |     Owner
     --------+-----------+-------+----------------
      public | atoms     | table | opencog_user
-     public | global    | table | opencog_user
      public | spaces    | table | opencog_user
      public | typecodes | table | opencog_user
-    (4 rows)
+    (3 rows)
 ```
 
 If the above doesn't work, go back, and try again.
 
-Verify that `opencog_user` has write permissions to the tables. Do this
+Verify that you have write permissions to the tables. Do this by
 entering the below.
 
 ```
     mycogdata=> INSERT INTO TypeCodes (type, typename) VALUES (97, 'SemanticRelationNode');
 ```
 
-You should see the appropriate respone:
+You should see the appropriate response:
 
 ```
     INSERT 0 1
@@ -431,11 +620,12 @@ If the above doesn't work, go back, and try again. Exit with Ctrl+D.
 
 ODBC Setup, Part the Second
 ---------------------------
+(Optional, required only if you are using the deprecated ODBC bindings.)
 Edit `~/.odbc.ini` in your home directory to add a stanza of the form
 below. You MUST create one of these for EACH repository you plan to
 use! The name of the stanza, and of the database, can be whatever you
-wish. The name given for `Driver`, here `PostgreSQL Unicode`, **must** 
-match a stanza name in `/etc/odbcinst.ini`.  Failure to have it match 
+wish. The name given for `Driver`, here `PostgreSQL Unicode`, **must**
+match a stanza name in `/etc/odbcinst.ini`.  Failure to have it match
 will cause an error message:
 
 ```
@@ -453,15 +643,14 @@ correspond to a database created with postgres. In the examples above,
 it was `mycogdata`.
 
 IMPORTANT: MAKE SURE THERE ARE NO SPACES AT THE START OF EVERY LINE!
-           IF YOU COPY PASTE THE TEXT BELOW YOU WILL HAVE SPACES!
+           IF YOU COPY-PASTE THE TEXT BELOW YOU WILL HAVE SPACES!
            REMOVE THEM! OR YOU WILL ALSO GET THE ERROR ABOVE!
 
 ```
    [mycogdata]
    Description       = My Favorite Database
    Driver            = PostgreSQL Unicode
-   Trace             = No
-   TraceFile         =
+   CommLog           = No
    Database          = mycogdata
    Servername        = localhost
    Port              = 5432
@@ -477,9 +666,9 @@ IMPORTANT: MAKE SURE THERE ARE NO SPACES AT THE START OF EVERY LINE!
 
 Opencog Setup
 -------------
-Edit `~/opencog/build/lib/opencog.conf` and set the `STORAGE`, 
-`STORAGE_USERNAME` and `STORAGE_PASSWD` there to the same values as 
-in `~/.odbc.ini`. 
+Edit `~/opencog/build/lib/opencog.conf` and set the `STORAGE`,
+`STORAGE_USERNAME` and `STORAGE_PASSWD` there to the same values as
+in `~/.odbc.ini`.
 
 ```
 STORAGE               = "mycogdata"
@@ -494,7 +683,7 @@ start the opencog server from your build folder as:
    $ ./opencog/server/cogserver -c my.conf
 ```
 
-Verify that everything works. Start the cogserver, and bulk-save. 
+Verify that everything works. Start the cogserver, and bulk-save.
 (Actually this didn't work for me, I had to do sql-open before sql-store
 worked, as shown below, even though my opencog.conf was correct and when
 using a custom my.conf file.)
@@ -511,7 +700,7 @@ Some output should be printed in the COGSERVER window:
    Finished storing 55 atoms total.
 ```
 
-The typical nuber of atoms stored will differ from this.
+The typical number of atoms stored will differ from this.
 
 You don't have to put the database credentials into the `opencog.conf`
 file.  In this case, the database would need to be opened manually,
@@ -527,17 +716,21 @@ in the `~/.odbc.ini` file.  These are NOT (and should not be) your unix
 username and password!
 
 
-How To Pass the Unit Test
-=========================
-There are two unit tests for this API, called BasicSaveUTest and
-PersistUTest.  The CMakefile will not run compile or run these tests
-unless postgres is configured just-so.  To run and past these tests,
-you should:
+How To Pass the Unit Tests
+==========================
+There are four unit tests for this API, `BasicSaveUTest`, `PersistUTest`,
+`MultiPersistUTest` and `FetchUTest`.  The CMakefile will not compile or
+run these tests unless you have either:
+* created an `opencog_tester` user and an `opencog_test` database, or
+* altered the `lib/opencog-test.conf` file, and placed a different
+  user/database login combination in there.
+
+To run and past these tests, you should:
 
  * Read tests/persist/sql/README and follow the instructions there.
    They are almost identical to the instructions above, except that
-   they call for a test user to be set up. You can do that, or you
-   can use your current DB user.
+   they require a user called `opencog_tester` to be set up. You can
+   do that, or alter the config file to use your current DB user.
  * To compile and run:
 ```
     $ make test
@@ -548,14 +741,16 @@ So here's a super-short recap:
  * Create a user 'opencog_tester' with password 'cheese'.
  * Create a new database: e.g.  `$ createdb opencog_test`
  * Create the tables: `$ cat atom.sql | psql `
- * Create an entry in `~/.odbc.ini`, as explained above.  The entry
-   should be called `opencot_test`, and use `opencog_tester` as the user.
+ * (Optional) Create an entry in `~/.odbc.ini`, as explained above.
+   The entry should be called `opencog_test`, and use `opencog_tester`
+   as the user. Password is `cheese`.
  * The file `lib/opencog-test.conf` already has the above as the default
    username and database names.  Stick to these.
 
 
-After the above steps, `BasicSaveUTest` and `PersistUTest` should run
-and pass.
+After the above steps, `BasicSaveUTest`, `PersistUTest`,
+`MultiPersistUTest`,`FetchUTest` and `ValueSaveUTest` should run and
+pass.
 
 
 Unit Test Status
@@ -564,16 +759,54 @@ Unit Test Status
 * As of 2013-11-26 BasicSaveUTest works and passes, again.
 * As of 2014-06-19 both unit tests work and pass.
 * As of 2015-04-23 both unit tests work and pass.
+* As of 2017-01-20 all four unit tests work and pass.
 
 
 Using the System
 ================
 Some example walkthroughs of some typical usage scenarios.
 
+Access via guile
+----------------
+Start the guile shell, and load the needed modules:
+```
+$ guile
+scheme@(guile-user)> (use-modules (opencog))
+scheme@(guile-user)> (use-modules (opencog persist) (opencog persist-sql))
+```
+Open a database with `sql-open`:
+```
+scheme@(guile-user)> (sql-open "postgres:///opencog_test?user=opencog_tester")
+Reserving UUID up to 3
+```
+There are other, alternate forms for the URI. See the [postgres
+documentation](https://www.postgresql.org/docs/9.6/static/libpq-connect.html)
+for details.
+```
+> (sql-open "odbc://opencog_tester:cheese/opencog_test")
+> (sql-open "postgres://opencog_tester@localhost/opencog_test")
+> (sql-open "postgres://opencog_tester:cheese@localhost/opencog_test")
+> (sql-open "postgres:///opencog_test?user=opencog_tester")
+> (sql-open "postgres:///opencog_test?user=opencog_tester&host=localhost")
+> (sql-open "postgres:///opencog_test?user=opencog_tester&password=cheese")
+```
+
+Save an atom with `store-atom`:
+```
+scheme@(guile-user)> (define x (ConceptNode "asdfasdf" (stv 0.123 0.789)))
+scheme@(guile-user)> (store-atom x)
+```
+
+Other useful scheme functions: `fetch-atom` and `fetch-incoming-set`.
+A debugging print: `sql-stats`
+
+Bulk load and restore: `sql-load` `sql-store` `sql-close`
+
+
 Bulk Save and Restore
 ---------------------
-At last! bulk save of atoms that were previous created is done by
-getting to the opencog prompt (`telnet localhost 17001`) and issuing the
+Bulk save and restore of atoms can also be done from the cogserver
+command line -- `rlwrap telnet -8 localhost 17001` and issuing the
 commands:
 ```
     opencog> ?
@@ -589,7 +822,7 @@ commands:
     opencog> sql-store
     SQL data store thread started
 ```
-At this point, a progres indicator will be printed by the opencog
+At this point, a progress indicator will be printed by the opencog
 server, on the OpenCog server's stdout. It  will say something like:
 Stored 236000 atoms. When finished, its nice to say:
 ```
@@ -609,21 +842,11 @@ The completion message will be on the server output, for example:
 
 Individual-atom save and restore
 --------------------------------
-There is an interface to save and restore individual atoms. It may be
-used as follows:
+Individual atoms can be saved and fetched, using the guile interface.
+Either the guile shell, or the cogserver shell can be used.  If the
+guile shell is used, then you do NOT! need to start the cogserver!
 
-Start the server:
 ```
-    $ opencog/server/cogserver -c ../lib/opencog.conf
-```
-Open a shell:
-```
-    $ telnet localhost 17001
-    Trying 127.0.0.1...
-    opencog> sql-open mycogdata opencog_user cheese
-    Database opened
-    opencog> scm
-    Entering scheme shell; use ^D or a single . on a line by itself to exit.
     guile> (define x (ConceptNode "asdfasdf" (stv 0.123 0.789)))
     guile> (store-atom x)
     (ConceptNode "asdfasdf" (stv 0.123 0.78899997))
@@ -639,66 +862,58 @@ It's presence can be verified by examining the database directly:
         2 |    3 |       1 |    0.123 |     0.78899997 | 2991.4688 |      0 | asdfasdf |
     (1 row)
 ```
-The backing-store mechanism can now automatically retrieve this atom at
-a later time.  Thus, for example, shut down the server, restart it,
-re-open the database, and enter the scheme shell again. Then,
+The backing-store mechanism can now retrieve this atom at a later time.
+Thus, for example, exit, restart, and re-open the database again. Then,
 ```
-    guile> (define y (ConceptNode "asdfasdf"))
-    guile> y
+    guile> (ConceptNode "asdfasdf")
+    (ConceptNode "asdfasdf")
+
+    guile> (cog-fetch (ConceptNode "asdfasdf"))
     (ConceptNode "asdfasdf" (stv 0.123 0.78899997))
 ```
-Note that, this time, when the node was created, the database was
-searched for a ConceptNode with the same string name. If it was found
-in the database, then it is automatically loaded into the AtomSpace,
-with the appropriate truth value taken from the database.
+When the atom is first recreated, it just has the default TV on it. The
+TV is not updated until it is explicitly fetched. The existing TV on
+the atom is clobbered when it is fetched; no attempt is made to merge.
 
 If the truth value is modified, the atom is *not* automatically saved
 to the database.  The modified atom would need to be explicitly saved
-again. If you need this to happen, you probably should design a thread
-whose only job it is is to handle truth-value changes. Note: this could
-be slow.
+again.
 
 Once stored, the atom may be deleted from the AtomSpace; it will
 remain in storage, and can be recreated at will:
 ```
-    guile> (cog-purge y)
+    guile> (cog-extract y)
     #t
     guile> y
     #<Invalid handle>
     guile> (define y (ConceptNode "asdfasdf"))
-    guile> y
+    guile> (cog-fetch y)
     (ConceptNode "asdfasdf" (stv 0.123 0.78899997))
 ```
 Notice, in the above, that the truth value is the same as it was before.
 That is because the truth value was fetched from the database when the
 atom is recreated.
 
-The UUID associated with the atom will NOT change between purges
-and server restarts. This can be verified with the cog-handle command,
-which returns the UUID:
-```
-    guile> (cog-handle y)
-    2
-```
 
-Purging vs. Deletion
---------------------
-There are four related but distinct concepts of atom deletion: purge and
-delete, each of which may also be done recursively. "Purge" with remove
-the atom from the atomspace; it will NOT remove it from the database!
-"Delete" will remove the atom from both the atomspace, and from the
-database; thus, deletion is permanent!  (Well, if there are two
-cogservers attached to one database, and one cogserver deletes the atom
-from the database, it will still not be deleted from the second
-cogserver, and so that second cogserver could still save that atom.
-There is currently no way to broadcast a distributed system-wide
-delete message. Its not even obvious that such a broadcast is evn a good
-idea.)
+Extraction vs. Deletion
+-----------------------
+There are four related but distinct concepts of atom deletion: extract
+and delete, each of which may also be done recursively. "Extract" will
+remove the atom from the (local, in-RAM) atomspace; it will NOT remove
+it from the database!  "Delete" will remove the atom from both the
+atomspace, and from the database; thus, deletion is permanent!
+(Caution: there are pathological situations. For example, if there are
+two atomspaces attached to one database, and delete is used in one
+atomspace (thus deleting the atom in the database), there may still be
+a copy in the second atomspace.  If the second atomspace stores that
+atom, it will be re-created in the database.  There is no way to
+broadcast a distributed system-wide delete message.  Such a message
+does not seem to be a good idea, anyway.)
 
-Atoms can also be deleted or purged recusrively. Thus, normally, a
-purge/delete will succeed only if the atom has no incoming set.
-The recursive forms, `cog-purge-recursive` and `cog-delete-recursive`
-purge/delete the atom and avery link that contains that atom, and so
+Atoms can also be extracted or deleted recursively. Thus, normally, a
+extract/delete will succeed only if the atom has no incoming set.
+The recursive forms, `cog-extract-recursive` and `cog-delete-recursive`
+extract/delete the atom and every link that contains that atom, and so
 on.
 
 
@@ -708,16 +923,11 @@ SQL fetch from store is not automatic!  That is because this layer
 cannot guess the user's intentions. There is no way for this layer
 to guess which atoms might be deleted in a few milliseconds from now,
 or to guess which atoms need to loaded into RAM (do you really want ALL
-of them to be loaded ??)  Some higher level management and policy thread
-will need to make the fetch and store decisions. This layer only
-implements the raw capability: it does not implement the policy.
+of them to be loaded ??)  Some higher level management and policy will
+need to make the fetch and store decisions. This layer only implements
+the raw capability: it does not implement the policy.
 
-There is one thing that is automatic: when a new atom is added to the
-atomspace, then the database is automatically searched, to see if this
-atom already exists.  If it does, then its truth value is restored.
-However, **AND THIS IS IMPORTANT**, the incoming set of the atom is not
-automatically fecthed from storage.  This must be done manually, using
-either C++:
+Incoming sets of an atom can be fetched by using either C++:
 ```
    AtomSpace::fetchIncomingSet(h, true);
 ```
@@ -725,17 +935,6 @@ or the scheme call
 ```
   (fetch-incoming-set atom)
 ```
-
-Since UUID's are assigned uniquely, they can be used for out-of-band
-communication of atoms between cogservers.  Thus, if by some magic, the
-numeric uuid for an atom is known, but the atom itself is not, then the
-scheme call
-```
-   (fetch-atom (cog-atom uuid))
-```
-can be used to pull an atom into the AtomSpace from the database server.
-(You can also do this from C++, by creating a `Handle` with that UUID in
-it, and then forcing resolution of the handle).
 
 To force an atom to be saved, call:
 ```
@@ -914,11 +1113,97 @@ Much much better!
 ```
 
 
+ProtoAtoms
+==========
+ProtoAtoms were invented to solve the representational issues associated
+with TV's. Narrowly, there is a need to store TV's of different kinds,
+including TV's with counts, relative entropies, value ranges, etc.
+Broadly, there is a need to store generic entity-attribute-value
+information with each atom (where the atom is the entity).  ProtoAtoms
+are the intended EAV solution for the atomspace.
+
+The ProtoAtom implementation, in the main atomspace, is incomplete.
+Much of the work has been done, but open design issues remain.
+
+
+JSONB
+=====
+The storage problem for the atomspace is essentially the problem of
+storing a graph, for which the EAV (Entity-Attribute-Value) pattern
+seems to be the best fit.  See
+https://en.wikipedia.org/wiki/Entity%E2%80%93attribute%E2%80%93value_model
+
+A workable design point, using postgres 9.4 or newer, is JSONB. See
+http://coussej.github.io/2016/01/14/Replacing-EAV-with-JSONB-in-PostgreSQL/
+
+The goal here is to deal with protoatom storage (i.e. as a replacement
+for the current TV representation problem.)
+
+The representation of the atomspace would then look vaguely like this
+(this is a rough sketch):
+
+CREATE TABLE atomspace (
+    uuid  SERIAL PRIMARY KEY,
+    type  INT,    ;; the atom type.
+    atom  JSONB
+);
+
+A node would be:
+{
+   id:   42
+   type:  3   ; a ConceptNode
+   atom: {
+       name:    "this is a node name"
+   }
+}
+
+A link would be:
+{
+   id:   43
+   type: 4     ; an OrderedLink
+   atom: {
+       outgoing:  [1,2,3]
+   }
+}
+
+ProtoAtom updates would look like this (e.g. for stv==SimpleTruthValue)
+
+UPDATE atomspace
+SET atom = jsonb_set(properties, '{"stv"}', '[0.2, 0.54]')
+WHERE id = 42;
+
+Critically important observations:
+----------------------------------
+Performance depends crucially on the use of the containment (@>)
+operator in the WHERE clause. This causes the GIN index to be used,
+and thus can run thousands (!) of times faster than an ordinary
+EAV table structure.
+
+
+
 TODO
 ====
  * See also to-do list way up top.
 
- * Store attention values. (??) maybe ??
+ * Implement the large-outgoing-set extension. A version of this can be
+   found in the `postgres-dead` directory, but the code there is badly
+   broken. Its probably simplest to just ignore the code in
+   `postgres-dead`, and design something from scratch.
+
+ * Consider an alternate implementation, using JSONB to do an EAV-like
+   storage: For details, see
+   http://coussej.github.io/2016/01/14/Replacing-EAV-with-JSONB-in-PostgreSQL/
+
+ * Extend the typecodes table to recording the type-inherintance
+   hierarchy, so that types can be fully saved and restored from the
+   database. Not clear how to resolve conflicts, if they occur, between
+   the type inheritance hierarchy defined in C++, and the hierarchy
+   defined in the database.
+
+ * Extend the standard table to hold count truth-values. Since almost
+   all atoms have count TV's on them, this can lead to a more compact
+   database format, and also could improve load and store performance,
+   by reducing access to the valuations table.
 
  * Create custom table, tailored for EvaluationLink triples.
    Since majority of nodes/links in the DB will be in the form of
@@ -926,6 +1211,23 @@ TODO
    by creating a custom table, and shunting queries to that.  This would
    decrease the SQL table sizes significantly, and decrease server I/O
    by factors of 2x-3x.  Another table, designed just for simple pairs,
-   might help a lot, too.
+   might help a lot, too.  This is easier said than done, however.
 
  * Add support for multiple atomspaces.
+
+ * Create an API to allow the user to save only selected values on an
+   atom.
+
+ * Create an API to allow the user to NOT perform the recursive save of
+   all values in the outgoing set (of a link).
+
+ * Create an API to allow the user to restore only selected values on an
+   atom.
+
+ * Create an API to allow the user to NOT perform the recursive restore
+   of all values in the outgoing set (of a link).
+
+ * Create an API that provides fine-grained control over what values
+   are fetched, when fetching atoms by type, or by incoming set.  See
+   the section entitles "Semantics", above, for the various different
+   options.

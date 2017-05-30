@@ -13,10 +13,26 @@
 (setlocale LC_CTYPE "")
 
 ; libsmob won't be found unless we setenv where to find it!
+; In theory, we should have installed it into one of these locations:
+;    /usr/lib/guile/2.0/extensions
+;    /usr/local/lib/guile/2.0/extensions
+;    /usr/lib64/guile/2.0/extensions
+;    /usr/local/lib64/guile/2.0/extensions
+;    /usr/lib/guile/2.2/extensions
+;    /usr/local/lib/guile/2.2/extensions
+;    /usr/lib64/guile/2.2/extensions
+;    /usr/local/lib64/guile/2.2/extensions
+;
+; But which one? Its a pain, so we wing it, below, and use
+; LTDL_LIBRARY_PATH
+;
+
+; lib64 is used by various versions of CentOS
+(define path "/usr/local/lib/opencog:/usr/local/lib64/opencog")
 (setenv "LTDL_LIBRARY_PATH"
 	(if (getenv "LTDL_LIBRARY_PATH")
-		(string-append (getenv "LTDL_LIBRARY_PATH") ":/usr/local/lib/opencog")
-		"/usr/local/lib/opencog"))
+		(string-append (getenv "LTDL_LIBRARY_PATH") ":" path)
+		path))
 
 ; Work-around another common usability issue...
 (add-to-load-path "/usr/local/share/opencog/scm")
@@ -25,6 +41,31 @@
 (load-extension "libsmob" "opencog_guile_init")
 
 (use-modules (system base compile))
+
+; We need to list everything that was already exported by the shared
+; library; failure to do so causes warning messages to be printed,
+; because other scheme code cannot guess what names the shared lib
+; actually exported.  So we list them here.
+(export
+	cog-arity
+	cog-atomspace
+	cog-get-atoms
+	cog-incoming-by-type
+	cog-link
+	cog-new-atomspace
+	cog-new-ctv
+	cog-new-stv
+	cog-node
+	cog-outgoing-set
+	cog-set-atomspace!
+	cog-set-tv!
+	cog-set-value!
+	cog-tv
+	cog-tv-count
+	cog-type
+	cog-value
+	cog-value-ref
+)
 
 ; Create a global to hold the atomspace ... to (try to) prevent guile
 ; GC from collecting it.  Unfortunately, there appears to be a GC bug
@@ -51,19 +92,22 @@
 
 ; Load core atom types.
 ; The remaining atom types from the cogserver are in (opencog atom-types)
-(load-from-path "core_types.scm")
+(load-from-path "opencog/base/core_types.scm")
 
 ; Load other grunge too.
 ; Some of these things could possibly be modules ...?
 ; ATTENTION: if you add a file here, then be sure to ALSO add it to
-; /opencog/guile/SchemeSmob.cc SchemeSmob::module_init() circa line 202
-(load-from-path "config.scm")
+; ../opencog/guile/SchemeSmob.cc SchemeSmob::module_init() circa line 257
 
-(load-from-path "core-docs.scm")
+(load-from-path "opencog/base/core-docs.scm")
 
-(load-from-path "utilities.scm")
+(load-from-path "opencog/base/utilities.scm")
 
-(load-from-path "apply.scm")
-(load-from-path "av-tv.scm")
-(load-from-path "file-utils.scm")
-(load-from-path "debug-trace.scm")
+(load-from-path "opencog/base/apply.scm")
+(load-from-path "opencog/base/av-tv.scm")
+(load-from-path "opencog/base/file-utils.scm")
+(load-from-path "opencog/base/debug-trace.scm")
+
+; Obsolete functions
+(define-public (cog-atom X) '())
+(define-public (cog-undefined-handle X) '())

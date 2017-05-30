@@ -20,12 +20,11 @@
  * 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
  */
 
-#include <opencog/guile/load-file.h>
-#include <opencog/guile/SchemeEval.h>
-#include <opencog/guile/SchemeSmob.h>
+#include <opencog/atoms/base/Link.h>
+#include <opencog/atoms/base/Node.h>
 #include <opencog/atomspace/AtomSpace.h>
+#include <opencog/guile/SchemeEval.h>
 #include <opencog/query/BindLinkAPI.h>
-#include <opencog/util/Config.h>
 #include <opencog/util/Logger.h>
 #include <cxxtest/TestSuite.h>
 
@@ -42,9 +41,12 @@ public:
     {
         logger().set_level(Logger::DEBUG);
         logger().set_print_to_stdout_flag(true);
+        logger().set_timestamp_flag(false);
 
         as = new AtomSpace();
         eval = new SchemeEval(as);
+        eval->eval("(add-to-load-path \"..\")");
+        eval->eval("(add-to-load-path \"../../..\")");
     }
 
     ~QuoteUTest()
@@ -80,9 +82,9 @@ void QuoteUTest::setUp(void)
     as->clear();
 }
 
-#define getarity(hand) LinkCast(hand)->getArity()
-#define getlink(hand,pos) LinkCast(hand)->getOutgoingAtom(pos)
-#define getname(hand) NodeCast(hand)->getName()
+#define getarity(hand) hand->getArity()
+#define getlink(hand,pos) hand->getOutgoingAtom(pos)
+#define getname(hand) hand->getName()
 
 /*
  * QuoteLink unit test.  Test quoted variables.
@@ -91,8 +93,7 @@ void QuoteUTest::test_quoted_variable(void)
 {
     logger().debug("BEGIN TEST: %s", __FUNCTION__);
 
-    config().set("SCM_PRELOAD", "tests/query/quote-var.scm");
-    load_scm_files_from_config(*as);
+    eval->eval("(load-from-path \"tests/query/quote-var.scm\")");
 
     Handle bindy = eval->eval_h("bindy");
 
@@ -135,8 +136,7 @@ void QuoteUTest::test_nest(void)
 {
     logger().debug("BEGIN TEST: %s", __FUNCTION__);
 
-    config().set("SCM_PRELOAD", "tests/query/quote-nest.scm");
-    load_scm_files_from_config(*as);
+    eval->eval("(load-from-path \"tests/query/quote-nest.scm\")");
 
     Handle bindy = eval->eval_h("bindy");
 
@@ -187,8 +187,7 @@ void QuoteUTest::test_gpn(void)
 {
     logger().debug("BEGIN TEST: %s", __FUNCTION__);
 
-    config().set("SCM_PRELOAD", "tests/query/quote-gpn.scm");
-    load_scm_files_from_config(*as);
+    eval->eval("(load-from-path \"tests/query/quote-gpn.scm\")");
 
     Handle bindy = eval->eval_h("bindy");
 
@@ -209,8 +208,7 @@ void QuoteUTest::test_double_quote(void)
 {
     logger().debug("BEGIN TEST: %s", __FUNCTION__);
 
-    config().set("SCM_PRELOAD", "tests/query/quote-quote.scm");
-    load_scm_files_from_config(*as);
+    eval->eval("(load-from-path \"tests/query/quote-quote.scm\")");
 
     Handle bindy = eval->eval_h("bindy");
 
@@ -224,13 +222,12 @@ void QuoteUTest::test_double_quote(void)
     logger().debug("END TEST: %s", __FUNCTION__);
 }
 
-// Test bug bug #1531
+// Test bug #1531
 void QuoteUTest::test_impossible(void)
 {
     logger().debug("BEGIN TEST: %s", __FUNCTION__);
 
-    config().set("SCM_PRELOAD", "tests/query/quote-impossible.scm");
-    load_scm_files_from_config(*as);
+    eval->eval("(load-from-path \"tests/query/quote-impossible.scm\")");
 
     Handle imp = eval->eval_h("imp");
 
@@ -253,8 +250,7 @@ void QuoteUTest::test_numeric_greater(void)
 {
     logger().debug("BEGIN TEST: %s", __FUNCTION__);
 
-    config().set("SCM_PRELOAD", "tests/query/quote-greater.scm");
-    load_scm_files_from_config(*as);
+    eval->eval("(load-from-path \"tests/query/quote-greater.scm\")");
 
     Handle richer_than_george = eval->eval_h("(richer-than-george)");
     Handle richer_than_susan = eval->eval_h("(richer-than-susan)");
@@ -278,9 +274,7 @@ void QuoteUTest::test_crash(void)
 {
     logger().debug("BEGIN TEST: %s", __FUNCTION__);
 
-    config().set("SCM_PRELOAD", "tests/query/quote-crash.scm");
-
-    load_scm_files_from_config(*as);
+    eval->eval("(load-from-path \"tests/query/quote-crash.scm\")");
 
     // If we can execute this without crashing, the test is succesful.
     Handle cr = eval->eval_h("(cog-bind crasher)");
@@ -307,8 +301,7 @@ void QuoteUTest::test_exec_getlink(void)
 {
     logger().debug("BEGIN TEST: %s", __FUNCTION__);
 
-    config().set("SCM_PRELOAD", "tests/query/quote-exec-getlink.scm");
-    load_scm_files_from_config(*as);
+    eval->eval("(load-from-path \"tests/query/quote-exec-getlink.scm\")");
 
     Handle exe = eval->eval_h("(cog-execute! z-get)");
     TS_ASSERT_EQUALS(1, getarity(exe));

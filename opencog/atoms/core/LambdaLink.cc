@@ -27,39 +27,28 @@
 
 using namespace opencog;
 
-LambdaLink::LambdaLink(const HandleSeq& oset,
-                       TruthValuePtr tv, AttentionValuePtr av)
-	: ScopeLink(LAMBDA_LINK, oset, tv, av)
+LambdaLink::LambdaLink(const Handle& vars, const Handle& body)
+	: ScopeLink(HandleSeq({vars, body}), LAMBDA_LINK)
 {
-	ScopeLink::init();
 }
 
-LambdaLink::LambdaLink(const Handle& vars, const Handle& body,
-                       TruthValuePtr tv, AttentionValuePtr av)
-	: ScopeLink(LAMBDA_LINK, HandleSeq({vars, body}), tv, av)
+LambdaLink::LambdaLink(Type t, const Handle& body)
+	: ScopeLink(HandleSeq({body}), t)
 {
-	ScopeLink::init();
 }
 
-LambdaLink::LambdaLink(Type t, const Handle& body,
-                       TruthValuePtr tv, AttentionValuePtr av)
-	: ScopeLink(t, HandleSeq({body}), tv, av)
+LambdaLink::LambdaLink(const HandleSeq& oset, Type t)
+	: ScopeLink(oset, t)
 {
-	// Derived types have a different initialization sequence.
-	if (LAMBDA_LINK != t) return;
-	ScopeLink::init();
+	if (not classserver().isA(t, LAMBDA_LINK))
+	{
+		const std::string& tname = classserver().getTypeName(t);
+		throw SyntaxException(TRACE_INFO,
+			"Expecting a LambdaLink, got %s", tname.c_str());
+	}
 }
 
-LambdaLink::LambdaLink(Type t, const HandleSeq& oset,
-                       TruthValuePtr tv, AttentionValuePtr av)
-	: ScopeLink(t, oset, tv, av)
-{
-	// Derived types have a different initialization sequence.
-	if (LAMBDA_LINK != t) return;
-	ScopeLink::init();
-}
-
-LambdaLink::LambdaLink(Link &l)
+LambdaLink::LambdaLink(const Link &l)
 	: ScopeLink(l)
 {
 	// Type must be as expected
@@ -70,10 +59,8 @@ LambdaLink::LambdaLink(Link &l)
 		throw SyntaxException(TRACE_INFO,
 			"Expecting a LambdaLink, got %s", tname.c_str());
 	}
-
-	// Derived types have a different initialization sequence.
-	if (LAMBDA_LINK != tscope) return;
-	ScopeLink::init();
 }
+
+DEFINE_LINK_FACTORY(LambdaLink, LAMBDA_LINK)
 
 /* ===================== END OF FILE ===================== */

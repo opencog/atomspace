@@ -1,0 +1,287 @@
+/*
+ * tests/query/ScopeUTest.cxxtest
+ *
+ * Copyright (C) 2016 Linas Vepstas
+ * All Rights Reserved
+ *
+ * This program is free software; you can redistribute it and/or modify
+ * it under the terms of the GNU Affero General Public License v3 as
+ * published by the Free Software Foundation and including the exceptions
+ * at http://opencog.org/wiki/Licenses
+ *
+ * This program is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the
+ * GNU General Public License for more details.
+ *
+ * You should have received a copy of the GNU Affero General Public License
+ * along with this program; if not, write to:
+ * Free Software Foundation, Inc.,
+ * 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
+ */
+
+#include <opencog/guile/SchemeEval.h>
+#include <opencog/atomspace/AtomSpace.h>
+#include <opencog/query/BindLinkAPI.h>
+#include <opencog/util/Logger.h>
+
+using namespace opencog;
+
+#define an as->add_node
+#define al as->add_link
+
+class ScopeUTest: public CxxTest::TestSuite
+{
+private:
+	AtomSpace *as;
+	SchemeEval* eval;
+
+public:
+	ScopeUTest(void)
+	{
+		logger().set_level(Logger::DEBUG);
+		logger().set_print_to_stdout_flag(true);
+
+		as = new AtomSpace();
+		eval = new SchemeEval(as);
+		eval->eval("(add-to-load-path \"..\")");
+		eval->eval("(add-to-load-path \"../../..\")");
+		eval->eval("(use-modules (opencog query))");
+	}
+
+	~ScopeUTest()
+	{
+		delete eval;
+		delete as;
+		// Erase the log file if no assertions failed.
+		if (!CxxTest::TestTracker::tracker().suiteFailed())
+			std::remove(logger().get_filename().c_str());
+int rc = CxxTest::TestTracker::tracker().suiteFailed();
+_exit(rc); // XXX hack to avoid double-free in __run_exit_handlers
+	}
+
+	void setUp(void);
+	void tearDown(void);
+
+	void test_alpha(void);
+	void test_alpha_reverse(void);
+	void test_search(void);
+	void test_search_reverse(void);
+	void test_search_alt(void);
+	void test_pushpop(void);
+	void test_quote(void);
+	void test_hide_1(void);
+	void test_hide_2(void);
+};
+
+void ScopeUTest::tearDown(void)
+{
+	as->clear();
+}
+
+void ScopeUTest::setUp(void)
+{
+	as->clear();
+	eval->eval("(load-from-path \"tests/query/test_types.scm\")");
+}
+
+/*
+ * Test alpha conversion.
+ */
+void ScopeUTest::test_alpha(void)
+{
+	logger().debug("BEGIN TEST: %s", __FUNCTION__);
+
+	eval->eval("(load-from-path \"tests/query/scope-search.scm\")");
+
+	Handle c1 = eval->eval_h("(content-1)");
+	Handle c2 = eval->eval_h("(content-2)");
+	printf("c2 %s\n", c2->toString().c_str());
+
+	TS_ASSERT_EQUALS(c1, c2);
+	logger().debug("END TEST: %s", __FUNCTION__);
+}
+
+/*
+ * Test alpha conversion.
+ */
+void ScopeUTest::test_alpha_reverse(void)
+{
+	logger().debug("BEGIN TEST: %s", __FUNCTION__);
+
+	eval->eval("(load-from-path \"tests/query/scope-search.scm\")");
+
+	// Reverse the order of creation
+	Handle c2 = eval->eval_h("(content-2)");
+	Handle c1 = eval->eval_h("(content-1)");
+	printf("c1 %s\n", c1->toString().c_str());
+
+	TS_ASSERT_EQUALS(c1, c2);
+	logger().debug("END TEST: %s", __FUNCTION__);
+}
+
+/*
+ * Test search of embedded scope links
+ */
+void ScopeUTest::test_search(void)
+{
+	logger().debug("BEGIN TEST: %s", __FUNCTION__);
+
+	eval->eval("(load-from-path \"tests/query/scope-search.scm\")");
+
+	Handle c1 = eval->eval_h("(content-1)");
+	Handle r1 = eval->eval_h("(cog-bind (member-to-evaluation-2-1-rule))");
+
+	Handle c2 = eval->eval_h("(content-2)");
+	Handle r2 = eval->eval_h("(cog-bind (member-to-evaluation-2-1-rule))");
+
+	TS_ASSERT_EQUALS(c1, c2);
+	TS_ASSERT_EQUALS(r1, r2);
+	logger().debug("END TEST: %s", __FUNCTION__);
+}
+
+/*
+ * Test search of embedded scope links.
+ * Same as above, but reversed order.
+ */
+void ScopeUTest::test_search_reverse(void)
+{
+	logger().debug("BEGIN TEST: %s", __FUNCTION__);
+
+	eval->eval("(load-from-path \"tests/query/scope-search.scm\")");
+
+	Handle c2 = eval->eval_h("(content-2)");
+	Handle r2 = eval->eval_h("(cog-bind (member-to-evaluation-2-1-rule))");
+
+	Handle c1 = eval->eval_h("(content-1)");
+	Handle r1 = eval->eval_h("(cog-bind (member-to-evaluation-2-1-rule))");
+
+	TS_ASSERT_EQUALS(c1, c2);
+	TS_ASSERT_EQUALS(r1, r2);
+	logger().debug("END TEST: %s", __FUNCTION__);
+}
+
+/*
+ * Test search of embedded scope links, with renamed vars
+ */
+void ScopeUTest::test_search_alt(void)
+{
+	logger().debug("BEGIN TEST: %s", __FUNCTION__);
+
+	eval->eval("(load-from-path \"tests/query/scope-search.scm\")");
+
+	Handle c1 = eval->eval_h("(content-1)");
+	Handle r1 = eval->eval_h("(cog-bind (member-to-evaluation-2-1-alt))");
+
+	Handle c2 = eval->eval_h("(content-2)");
+	Handle r2 = eval->eval_h("(cog-bind (member-to-evaluation-2-1-rule))");
+
+	TS_ASSERT_EQUALS(c1, c2);
+	TS_ASSERT_EQUALS(r1, r2);
+	logger().debug("END TEST: %s", __FUNCTION__);
+}
+
+/*
+ * Test search of embedded scope links.
+ * This time, the dataset includes data that fails to
+ * match, and thus might corrupt the search stack.
+ */
+void ScopeUTest::test_pushpop(void)
+{
+	logger().debug("BEGIN TEST: %s", __FUNCTION__);
+
+	eval->eval("(load-from-path \"tests/query/scope-search.scm\")");
+	eval->eval("(load-from-path \"tests/query/scope-confound.scm\")");
+
+	Handle c1 = eval->eval_h("(content-1)");
+	eval->eval_h("(evaluation-to-member-2-rule-loose)");
+	eval->eval_h("(evaluation-to-member-2-rule)");
+	eval->eval_h("(cog-bind (member-to-evaluation-2-1-rule))");
+
+	Handle em = eval->eval_h("(cog-bind (evaluation-to-member-2-rule))");
+	TS_ASSERT_EQUALS(1, em->getArity());
+	Handle c2 = em->getOutgoingAtom(0);
+
+	TS_ASSERT_EQUALS(c1, c2);
+	logger().debug("END TEST: %s", __FUNCTION__);
+}
+
+/*
+ * Test search of embedded scope links.
+ * The search pattern inculdes QuoteLinks that have to be navigated
+ * correctly, in order for things to work.
+ */
+void ScopeUTest::test_quote(void)
+{
+	logger().debug("BEGIN TEST: %s", __FUNCTION__);
+
+	eval->eval("(load-from-path \"tests/query/scope-quote.scm\")");
+
+	Handle list = eval->eval_h("(cog-bind blist)");
+	Handle andl = eval->eval_h("(cog-bind bland)");
+
+	Handle elist = eval->eval_h("(SetLink (OrderedLink p-lamb q-lamb))");
+	Handle eandl = eval->eval_h("(SetLink (UnorderedLink p-lamb q-lamb))");
+
+	TS_ASSERT_EQUALS(list, elist);
+	TS_ASSERT_EQUALS(andl, eandl);
+	logger().debug("END TEST: %s", __FUNCTION__);
+}
+
+/*
+ * Test the hiding of bound variables.
+ */
+void ScopeUTest::test_hide_1(void)
+{
+	logger().debug("BEGIN TEST: %s", __FUNCTION__);
+
+	eval->eval("(load-from-path \"tests/query/scope-hide.scm\")");
+
+	// Alpha conversion should make for equal.
+	Handle getx = eval->eval_h("getx");
+	Handle getv = eval->eval_h("getv");
+	TS_ASSERT_EQUALS(getx, getv);
+
+	Handle forall = eval->eval_h("forall");
+	Handle varx = forall->getOutgoingAtom(0);
+
+	Handle forpat = getx->getOutgoingAtom(0)->getOutgoingAtom(0);
+	Handle patvar = forpat->getOutgoingAtom(0);
+
+	// This unit test doesn't test anything critical if the pattern
+	// and the ground don't happen to have the same variable.
+	TS_ASSERT_EQUALS(varx, patvar);
+
+	Handle result = eval->eval_h("(cog-satisfying-set getx)");
+	TS_ASSERT_EQUALS(1, result->getArity());
+
+	Handle expected = eval->eval_h(
+		"(SetLink (ListLink"
+				"(VariableNode \"$X\")"
+				"(EvaluationLink (Predicate \"P\") (VariableNode \"$X\"))))"
+	);
+
+	TS_ASSERT_EQUALS(result, expected);
+
+	logger().debug("END TEST: %s", __FUNCTION__);
+}
+
+void ScopeUTest::test_hide_2()
+{
+	logger().debug("BEGIN TEST: %s", __FUNCTION__);
+
+	std::string eval_result = eval->eval("(load-from-path \"tests/query/scope-hide.scm\")");
+	Handle rule = eval->eval_h("rule");
+	Handle result = bindlink(as, rule);
+	Handle expected = al(SET_LINK, rule->getOutgoingAtom(2));
+
+	std::cout << "result = " << oc_to_string(result);
+	std::cout << "expected = " << oc_to_string(expected);
+
+	TS_ASSERT_EQUALS(result, expected);
+
+	logger().debug("END TEST: %s", __FUNCTION__);
+}
+
+#undef an
+#undef al

@@ -27,86 +27,116 @@
 #include <opencog/query/BindLinkAPI.h>
 #include <opencog/atomspaceutils/AtomSpaceUtils.h>
 
+using namespace std;
 using namespace opencog;
 
 const std::string UREConfigReader::top_rbs_name = "URE";
+
+// Parameters
 const std::string UREConfigReader::attention_alloc_name = "URE:attention-allocation";
 const std::string UREConfigReader::max_iter_name = "URE:maximum-iterations";
+const std::string UREConfigReader::bc_complexity_penalty_name = "URE:BC:complexity-penalty";
+const std::string UREConfigReader::bc_max_bit_size_name = "URE:BC:maximum-bit-size";
 
-UREConfigReader::UREConfigReader(AtomSpace& as, Handle rbs) : _as(as)
+UREConfigReader::UREConfigReader(AtomSpace& as, const Handle& rbs) : _as(as)
 {
+	//////////////////////////
+	// Common parameters    //
+	//////////////////////////
+
 	if (Handle::UNDEFINED == rbs)
 		throw RuntimeException(TRACE_INFO,
 			"UREConfigReader - invalid rulebase specified!");
 
 	// Retrieve the rules (MemberLinks) and instantiate them
-	for (Handle rule_name : fetch_rule_names(rbs))
-		_rbparams.rules.emplace_back(rule_name, rbs);
+	for (const Handle& rule_name : fetch_rule_names(rbs))
+		_common_params.rules.emplace(rule_name, rbs);
 
 	// Fetch maximum number of iterations
-	_rbparams.max_iter = fetch_num_param(max_iter_name, rbs);
+	_common_params.max_iter = fetch_num_param(max_iter_name, rbs);
 
 	// Fetch attention allocation parameter
-	_rbparams.attention_alloc = fetch_bool_param(attention_alloc_name, rbs);
+	_common_params.attention_alloc = fetch_bool_param(attention_alloc_name, rbs);
+
+	//////////////////////
+	// FC parameters    //
+	//////////////////////
+
+	//////////////////////
+	// BC parameters    //
+	//////////////////////
+
+	// Fetch BC complexity penalty parameter
+	_bc_params.complexity_penalty = fetch_num_param(bc_complexity_penalty_name, rbs);
+
+	// Fetch BC BIT maximum size parameter
+	_bc_params.max_bit_size = fetch_num_param(bc_max_bit_size_name, rbs, -1);
 }
 
-const std::vector<Rule>& UREConfigReader::get_rules() const
+const RuleSet& UREConfigReader::get_rules() const
 {
-	return _rbparams.rules;
+	return _common_params.rules;
 }
 
-std::vector<Rule>& UREConfigReader::get_rules()
+RuleSet& UREConfigReader::get_rules()
 {
-	return _rbparams.rules;
-}
-
-const Rule& UREConfigReader::get_rule(const Handle& hblink)
-{
-    if (hblink->getType() != BIND_LINK) {
-        throw InvalidParamException(TRACE_INFO,
-                                    "UREConfigReader - Expected a BindLink.");
-    }
-
-    return _rbparams.get_rule(hblink);
+	return _common_params.rules;
 }
 
 bool UREConfigReader::get_attention_allocation() const
 {
-	return _rbparams.attention_alloc;
+	return _common_params.attention_alloc;
 }
 
 int UREConfigReader::get_maximum_iterations() const
 {
-	return _rbparams.max_iter;
+	return _common_params.max_iter;
+}
+
+double UREConfigReader::get_complexity_penalty() const
+{
+	return _bc_params.complexity_penalty;
+}
+
+double UREConfigReader::get_max_bit_size() const
+{
+	return _bc_params.max_bit_size;
 }
 
 void UREConfigReader::set_attention_allocation(bool aa)
 {
-	_rbparams.attention_alloc = aa;
+	_common_params.attention_alloc = aa;
 }
 
 void UREConfigReader::set_maximum_iterations(int mi)
 {
-	_rbparams.max_iter = mi;
+	_common_params.max_iter = mi;
 }
 
-HandleSeq UREConfigReader::fetch_rule_names(Handle rbs)
+void UREConfigReader::set_complexity_penalty(double cp)
+{
+	_bc_params.complexity_penalty = cp;
+}
+
+HandleSeq UREConfigReader::fetch_rule_names(const Handle& rbs)
 {
 	// Retrieve rules
-	Handle rule_var = _as.add_node(VARIABLE_NODE, "__URE_RULE__");
-	Handle rule_pat = _as.add_link(MEMBER_LINK, rule_var, rbs);
-	Handle gl = _as.add_link(GET_LINK, rule_pat);
-	Handle rule_names = satisfying_set(&_as, gl);
+	Handle rule_var = _as.add_node(VARIABLE_NODE, "__URE_RULE__"),
+		rule_pat = _as.add_link(MEMBER_LINK, rule_var, rbs),
+		gl = _as.add_link(GET_LINK, rule_pat),
+		results = satisfying_set(&_as, gl);
+	HandleSeq rule_names = results->getOutgoingSet();
 
-	// Remove the GetLink pattern from the AtomSpace as it is no
-	// longer useful
-	remove_hypergraph(_as, gl);
+	// Remove the GetLink pattern and other no longer useful atoms
+	// from the AtomSpace
+	extract_hypergraph(_as, gl);
+	_as.extract_atom(results);
 
-	return rule_names->getOutgoingSet();
+	return rule_names;
 }
 
-HandleSeq UREConfigReader::fetch_execution_outputs(Handle schema,
-                                                   Handle input,
+HandleSeq UREConfigReader::fetch_execution_outputs(const Handle& schema,
+                                                   const Handle& input,
                                                    Type type)
 {
 	// Retrieve rules
@@ -126,16 +156,19 @@ HandleSeq UREConfigReader::fetch_execution_outputs(Handle schema,
 		                               schema,
 		                               input,
 		                               var_node)),
-		outputs = satisfying_set(&_as, gl);
+		results = satisfying_set(&_as, gl);
+	HandleSeq outputs = results->getOutgoingSet();
 
-	// Remove the GetLink pattern from the AtomSpace as it is no
-	// longer useful
-	remove_hypergraph(_as, gl);
+	// Remove the GetLink pattern and other no longer useful atoms
+	// from the AtomSpace
+	extract_hypergraph(_as, gl);
+	_as.extract_atom(results);
 
-	return outputs->getOutgoingSet();
+	return outputs;
 }
 
-double UREConfigReader::fetch_num_param(const string& schema_name, Handle input,
+double UREConfigReader::fetch_num_param(const string& schema_name,
+                                        const Handle& input,
                                         double default_value)
 {
 	Handle param_schema = _as.add_node(SCHEMA_NODE, schema_name);
@@ -167,7 +200,8 @@ double UREConfigReader::fetch_num_param(const string& schema_name, Handle input,
 	}
 }
 
-bool UREConfigReader::fetch_bool_param(const string& pred_name, Handle input)
+bool UREConfigReader::fetch_bool_param(const string& pred_name,
+                                       const Handle& input)
 {
 	Handle pred = _as.add_node(PREDICATE_NODE, pred_name);
 	TruthValuePtr tv =

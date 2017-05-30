@@ -2,7 +2,9 @@
 LINK_LIBRARIES(
 	atombase
 	atomutils
+	atomspaceutils
 	atomspace
+	attentionbank
 	clearbox
 )
 
@@ -22,4 +24,5 @@ ADD_CXXTEST(AtomSpaceAsyncUTest)
 ADD_CXXTEST(UseCountUTest)
 ADD_CXXTEST(MultiSpaceUTest)
 ADD_CXXTEST(RemoveUTest)
-ADD_CXXTEST(HandleMapUTest)
+ADD_CXXTEST(ThreadSafeHandleMapUTest)
+ADD_CXXTEST(ValuationTableUTest)

@@ -20,11 +20,9 @@
  * 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
  */
 
-#include <opencog/guile/load-file.h>
 #include <opencog/guile/SchemeEval.h>
 #include <opencog/guile/SchemeSmob.h>
 #include <opencog/query/BindLinkAPI.h>
-#include <opencog/util/Config.h>
 #include <opencog/util/Logger.h>
 
 #include "test-types.h"
@@ -53,6 +51,7 @@ class UnorderedUTest :  public CxxTest::TestSuite
 		{
 			logger().set_level(Logger::DEBUG);
 			logger().set_print_to_stdout_flag(true);
+			logger().set_timestamp_flag(false);
 		}
 
 		~UnorderedUTest()
@@ -79,17 +78,15 @@ class UnorderedUTest :  public CxxTest::TestSuite
 void UnorderedUTest::setUp(void)
 {
 	as = new AtomSpace();
-
-	config().set("SCM_PRELOAD",
-		"tests/query/test_types.scm, "
-		"tests/query/unordered.scm, "
-		"tests/query/unordered-more.scm, "
-		"tests/query/unordered-exhaust.scm");
-
-	load_scm_files_from_config(*as);
+	SchemeEval* eval = new SchemeEval(as);
+	eval->eval("(add-to-load-path \"..\")");
+	eval->eval("(add-to-load-path \"../../..\")");
+	eval->eval("(load-from-path \"tests/query/test_types.scm\")");
+	eval->eval("(load-from-path \"tests/query/unordered.scm\")");
+	eval->eval("(load-from-path \"tests/query/unordered-more.scm\")");
+	eval->eval("(load-from-path \"tests/query/unordered-exhaust.scm\")");
 
 	// Create an implication link that will be tested.
-	SchemeEval* eval = new SchemeEval(as);
 	pair = eval->apply("pair", Handle::UNDEFINED);
 	disorder = eval->apply("blink", Handle::UNDEFINED);
 	disordered = eval->apply("blinker", Handle::UNDEFINED);
@@ -111,8 +108,8 @@ void UnorderedUTest::setUp(void)
  * The trick is, of course, not to search too much, and not to search too
  * little.
  */
-#define getlink(hand,pos) LinkCast(hand)->getOutgoingAtom(pos)
-#define getarity(hand) LinkCast(hand)->getArity()
+#define getlink(hand,pos) hand->getOutgoingAtom(pos)
+#define getarity(hand) hand->getArity()
 
 void UnorderedUTest::test_un1(void)
 {

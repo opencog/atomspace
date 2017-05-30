@@ -1,12 +1,10 @@
 /*
- * SchemeSmobMisc.c
+ * SchemeSmobGC.cc
  *
  * Scheme small objects (SMOBS) garbage-collection methods
  *
  * Copyright (c) 2008,2009,2014 Linas Vepstas <linas@linas.org>
  */
-
-#ifdef HAVE_GUILE
 
 #include <cstddef>
 #include <libguile.h>
@@ -23,8 +21,7 @@ SCM SchemeSmob::mark_misc(SCM misc_smob)
 
 	switch (misctype)
 	{
-		case COG_HANDLE: // Nothing to do here ...
-		case COG_TV: // Nothing to do here ...
+		case COG_PROTOM: // Nothing to do here ...
 		case COG_AS: // Nothing to do here ...
 		case COG_AV: // Nothing to do here ...
 		case COG_EXTEND: // Nothing to do here ...
@@ -70,35 +67,20 @@ size_t SchemeSmob::free_misc(SCM node)
 		case COG_AV:
 			AttentionValue *av;
 			av = (AttentionValue *) SCM_SMOB_DATA(node);
-			scm_gc_unregister_collectable_memory (av,
-			                  sizeof(*av), "opencog av");
 			delete av;
 			scm_remember_upto_here_1(node);
 			return 0;
 
-		case COG_HANDLE:
-			Handle* hp;
-			hp = (Handle*) SCM_SMOB_DATA(node);
-			scm_gc_unregister_collectable_memory (hp,
-			                  sizeof(*hp), "opencog handle");
-			delete hp;
-			scm_remember_upto_here_1(node);
-			return 0;
-
-		case COG_TV:
-			TruthValue *tv;
-			tv = (TruthValue *) SCM_SMOB_DATA(node);
-			scm_gc_unregister_collectable_memory (tv,
-			                  sizeof(*tv), "opencog tv");
-			delete tv;
+		case COG_PROTOM:
+			ProtoAtomPtr* pap;
+			pap = (ProtoAtomPtr*) SCM_SMOB_DATA(node);
+			delete pap;
 			scm_remember_upto_here_1(node);
 			return 0;
 
 		case COG_EXTEND:
 			PrimitiveEnviron *pe;
 			pe = (PrimitiveEnviron *) SCM_SMOB_DATA(node);
-			scm_gc_unregister_collectable_memory (pe,
-			                  pe->get_size(), "opencog primitive environ");
 			delete pe;
 			scm_remember_upto_here_1(node);
 			return 0;
@@ -131,15 +113,9 @@ std::string SchemeSmob::misc_to_string(SCM node)
 			scm_remember_upto_here_1(node);
 			return str;
 		}
-		case COG_HANDLE:
-			return handle_to_string(node);
+		case COG_PROTOM:
+			return protom_to_string(node);
 
-		case COG_TV:
-		{
-			std::string str(tv_to_string((TruthValue *) SCM_SMOB_DATA(node)));
-			scm_remember_upto_here_1(node);
-			return str;
-		}
 		case COG_EXTEND:
 		{
 			// return "#<opencog extension>\n";
@@ -158,11 +134,17 @@ std::string SchemeSmob::misc_to_string(SCM node)
 int SchemeSmob::print_misc(SCM node, SCM port, scm_print_state * ps)
 {
 	std::string str = misc_to_string(node);
+
+#ifdef HAVE_GUILE_2_2
+
+	// Deal with a regression in guile-2.1.x See bug report
+	// https://debbugs.gnu.org/cgi/bugreport.cgi?bug=25387
+	scm_display (scm_from_utf8_string (str.c_str()), port);
+#else
 	scm_puts (str.c_str(), port);
+#endif // HAVE_GUILE_2_2
+
 	return 1; //non-zero means success
 }
 
-/* ============================================================== */
-
-#endif /* HAVE_GUILE */
 /* ===================== END OF FILE ============================ */

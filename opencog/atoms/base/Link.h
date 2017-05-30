@@ -52,14 +52,12 @@ private:
     void init(const HandleSeq&);
     void resort(void);
 
-    Link(const Link &l) : Atom(0)
-    { OC_ASSERT(false, "Link: bad use of copy ctor"); }
-
 protected:
-
     //! Array holding actual outgoing set of the link.
     //! Should not change during atom lifespan.
     HandleSeq _outgoing;
+
+    virtual ContentHash compute_hash() const;
 
 public:
     /**
@@ -70,18 +68,14 @@ public:
      *        referenced by this link.
      * @param Link truthvalue.
      */
-    Link(Type t, const HandleSeq& oset,
-         TruthValuePtr tv = TruthValue::DEFAULT_TV(),
-         AttentionValuePtr av = AttentionValue::DEFAULT_AV())
-        : Atom(t, tv, av)
+    Link(const HandleSeq& oset, Type t=LINK)
+        : Atom(t)
     {
         init(oset);
     }
 
-    Link(Type t, const Handle& h,
-         TruthValuePtr tv = TruthValue::DEFAULT_TV(),
-         AttentionValuePtr av = AttentionValue::DEFAULT_AV())
-        : Atom(t, tv, av)
+    Link(Type t, const Handle& h)
+        : Atom(t)
     {
         // reserve+assign is 2x faster than push_back()/emplace_back()
         HandleSeq oset(1);
@@ -89,10 +83,8 @@ public:
         init(oset);
     }
 
-    Link(Type t, const Handle& ha, const Handle &hb,
-         TruthValuePtr tv = TruthValue::DEFAULT_TV(),
-         AttentionValuePtr av = AttentionValue::DEFAULT_AV())
-        : Atom(t, tv, av)
+    Link(Type t, const Handle& ha, const Handle &hb)
+        : Atom(t)
     {
         // reserve+assign is 2x faster than push_back()/emplace_back()
         HandleSeq oset(2);
@@ -101,23 +93,19 @@ public:
         init(oset);
     }
 
-    Link(Type t, const Handle& ha, const Handle &hb, const Handle &hc,
-         TruthValuePtr tv = TruthValue::DEFAULT_TV(),
-         AttentionValuePtr av = AttentionValue::DEFAULT_AV())
-        : Atom(t, tv, av)
+    Link(Type t, const Handle& ha, const Handle &hb, const Handle &hc)
+        : Atom(t)
     {
         // reserve+assign is 2x faster than push_back()/emplace_back()
         HandleSeq oset(3);
         oset[0] = ha;
         oset[1] = hb;
-        oset[3] = hc;
+        oset[2] = hc;
         init(oset);
     }
     Link(Type t, const Handle& ha, const Handle &hb,
-	      const Handle &hc, const Handle &hd,
-         TruthValuePtr tv = TruthValue::DEFAULT_TV(),
-         AttentionValuePtr av = AttentionValue::DEFAULT_AV())
-        : Atom(t, tv, av)
+	      const Handle &hc, const Handle &hd)
+        : Atom(t)
     {
         // reserve+assign is 2x faster than push_back()/emplace_back()
         HandleSeq oset(4);
@@ -129,11 +117,11 @@ public:
     }
 
     /**
-     * Copy constructor, does NOT copy atom table membership!
-     * Cannot be const, because the get() functions can't be,
-     * because thread-safe locking required in the gets. */
-    Link(Link &l)
-        : Atom(l.getType(), l.getTruthValue(), l.getAttentionValue())
+     * Copy constructor, does NOT copy atomspace membership,
+     * or any of the values or truth values.
+     */
+    Link(const Link &l)
+        : Atom(l.getType())
     {
         init(l.getOutgoingSet());
     }
@@ -148,6 +136,13 @@ public:
 
     virtual Arity getArity() const {
         return _outgoing.size();
+    }
+
+    virtual size_t size() const {
+        size_t size = 1;
+        for (const Handle&h : _outgoing)
+            size += h->size();
+        return size;
     }
 
     /**
@@ -195,7 +190,7 @@ public:
      *
      * @return A string representation of the link.
      */
-    std::string toString(const std::string& indent);
+    std::string toString(const std::string& indent) const;
 
     /**
      * Returns a short string representation of the link.
@@ -205,7 +200,7 @@ public:
      *
      * @return A short string representation of the link.
      */
-    std::string toShortString(const std::string& indent);
+    std::string toShortString(const std::string& indent) const;
 
 	// Work around gdb's incapability to build a string on the fly,
 	// see http://stackoverflow.com/questions/16734783 and
@@ -215,17 +210,18 @@ public:
 	using Atom::toShortString;
 	
     /**
-     * Returns whether a given atom is equal to the current link.
+     * Perform a content-based compare of another atom to this one.
+     * Return true if the content is the same for both atoms.
      * @param Atom to be tested.
-     * @return true if they are equal, false otherwise.
+     * @return true if content is equal, false otherwise.
      */
     virtual bool operator==(const Atom&) const;
 
     /**
-     * Returns whether this atom is less than the given atom.
-     *
-     * WARNING: the comparison is based on content, and therefore
-     * potentially expensive.
+     * Provides an ordering operator, based on the atom hash.
+     * performs a simple numeric comparison on the hashes of
+     * this and the other atom. If the hashes are equal, then
+     * it performs a content-based compare.
      *
      * @return true if this atom is less than the given one, false otherwise.
      */

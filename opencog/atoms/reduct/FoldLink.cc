@@ -25,52 +25,34 @@
 #include <opencog/atoms/base/atom_types.h>
 #include <opencog/atoms/base/ClassServer.h>
 #include <opencog/atoms/NumberNode.h>
-#include "DivideLink.h"
 #include "FoldLink.h"
-#include "MinusLink.h"
-#include "PlusLink.h"
-#include "TimesLink.h"
 
 using namespace opencog;
 
-FoldLink::FoldLink(const HandleSeq& oset,
-                   TruthValuePtr tv,
-                   AttentionValuePtr av)
-    : FunctionLink(FOLD_LINK, oset, tv, av)
+FoldLink::FoldLink(const HandleSeq& oset, Type t)
+    : FunctionLink(oset, t)
 {
 	init();
 }
 
-FoldLink::FoldLink(Type t, const HandleSeq& oset,
-                   TruthValuePtr tv,
-                   AttentionValuePtr av)
-    : FunctionLink(t, oset, tv, av)
+FoldLink::FoldLink(Type t, const Handle& a, const Handle& b)
+    : FunctionLink(t, a, b)
 {
-	if (not classserver().isA(t, FOLD_LINK))
-		throw InvalidParamException(TRACE_INFO, "Expecting a FoldLink");
 	init();
 }
 
-FoldLink::FoldLink(Type t, const Handle& a, const Handle& b,
-                   TruthValuePtr tv,
-                   AttentionValuePtr av)
-    : FunctionLink(t, a, b, tv, av)
-{
-	if (not classserver().isA(t, FOLD_LINK))
-		throw InvalidParamException(TRACE_INFO, "Expecting a FoldLink");
-	init();
-}
-
-FoldLink::FoldLink(Link& l)
+FoldLink::FoldLink(const Link& l)
     : FunctionLink(l)
 {
-	Type tscope = l.getType();
-	if (not classserver().isA(tscope, FOLD_LINK))
-		throw InvalidParamException(TRACE_INFO, "Expecting a FoldLink");
 	init();
 }
 
-void FoldLink::init(void) {}
+void FoldLink::init(void)
+{
+	Type tscope = getType();
+	if (not classserver().isA(tscope, FOLD_LINK))
+		throw InvalidParamException(TRACE_INFO, "Expecting a FoldLink");
+}
 
 // ===============================================================
 
@@ -79,9 +61,8 @@ void FoldLink::init(void) {}
 // the atomspace with intermediate results. This needs to
 // be fixed somehow. Right now, I don't know how.
 #define DO_RETURN(result) { \
-	if (not _atomTable) return (result); \
-	AtomSpace* as = _atomTable->getAtomSpace(); \
-	return as->add_atom(result); \
+	if (not _atom_space) return (result); \
+	return _atom_space->add_atom(result); \
 }
 
 /// reduce() -- reduce the expression by summing constants, etc.
@@ -130,8 +111,8 @@ Handle FoldLink::reduce(void)
 {
 	// The atom table is typically not set when the ctor runs.
 	// So fix it up now.
-	if (_atomTable)
-		knil = _atomTable->getAtomSpace()->add_atom(knil);
+	if (_atom_space)
+		knil = _atom_space->add_atom(knil);
 
 	HandleSeq reduct;
 	bool did_reduce = false;
@@ -145,7 +126,8 @@ Handle FoldLink::reduce(void)
 
 		if (classserver().isA(t, FOLD_LINK))
 		{
-			FoldLinkPtr fff(factory(h));
+			auto fact = classserver().getFactory(t);
+			FoldLinkPtr fff(FoldLinkCast((*fact)(h)));
 			Handle redh = fff->reduce();
 			if (h != redh)
 			{
@@ -218,11 +200,15 @@ Handle FoldLink::reduce(void)
 			// so that knil gets placed into the atomspace
 			// when reduce is called; else the knil
 			// compares up above fail.
-			Handle foo(createLink(getType(), rere));
-			if (_atomTable)
-				foo = _atomTable->getAtomSpace()->add_atom(foo);
+			Handle foo(createLink(rere, getType()));
+			if (_atom_space)
+				foo = _atom_space->add_atom(foo);
+			else
+			{
+				foo = classserver().factory(foo);
+			}
+			FoldLinkPtr flp(FoldLinkCast(foo));
 
-			FoldLinkPtr flp = factory(foo);
 			DO_RETURN(Handle(flp->reduce()));
 		}
 	}
@@ -231,35 +217,7 @@ Handle FoldLink::reduce(void)
 	if (not did_reduce)
 		return getHandle();
 
-	DO_RETURN(Handle(createLink(getType(), reduct)));
+	DO_RETURN(Handle(createLink(reduct, getType())));
 }
 
 // ===========================================================
-
-FoldLinkPtr FoldLink::factory(const Handle& h)
-{
-	// If h is of the right form already, its just a matter of calling
-	// it.  Otherwise, we have to create
-	FoldLinkPtr flp(FoldLinkCast(h));
-	if (flp) return flp;
-
-	if (nullptr == h)
-		throw RuntimeException(TRACE_INFO, "Null FoldLink handle!");
-
-	return FoldLink::factory(h->getType(), h->getOutgoingSet());
-}
-
-// Basic type factory.
-FoldLinkPtr FoldLink::factory(Type t, const HandleSeq& seq)
-{
-	if (DIVIDE_LINK == t)
-		return createDivideLink(seq);
-	if (MINUS_LINK == t)
-		return createMinusLink(seq);
-	if (PLUS_LINK == t)
-		return createPlusLink(seq);
-	if (TIMES_LINK == t)
-		return createTimesLink(seq);
-
-	throw RuntimeException(TRACE_INFO, "Not a FoldLink!");
-}

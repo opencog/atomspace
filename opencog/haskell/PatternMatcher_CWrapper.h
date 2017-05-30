@@ -22,10 +22,10 @@ extern "C"
      *
      * @return  Handle id of the atom.
      */
-    UUID PatternMatcher_BindLink(AtomSpace* this_ptr, UUID handle);
+    Handle* PatternMatcher_BindLink(AtomSpace* this_ptr, Handle* handle);
     int PatternMatcher_SatisfactionLink(AtomSpace* this_ptr
-                                        , UUID handle
-                                        , TruthValueType* tv_type
+                                        , Handle* handle
+                                        , char** tv_type
                                         , double* parameters);
 
 }

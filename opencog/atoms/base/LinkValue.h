@@ -45,32 +45,18 @@ protected:
 	std::vector<ProtoAtomPtr> _value;
 
 public:
-	LinkValue(std::vector<ProtoAtomPtr> v) : ProtoAtom(LINK_VALUE), _value(v) {}
+	LinkValue(const std::vector<ProtoAtomPtr>& v)
+		: ProtoAtom(LINK_VALUE), _value(v) {}
 
 	virtual ~LinkValue() {}
 
-	std::vector<ProtoAtomPtr>& value() { return _value; }
+	const std::vector<ProtoAtomPtr>& value() const { return _value; }
 
-	/** Returns a string representation of the value.
-	 *
-	 * @return A string representation of the value.
-	 */
-	virtual std::string toString(const std::string& indent);
-	virtual std::string toShortString(const std::string& indent)
-	{ return toString(indent); }
+	/** Returns a string representation of the value.  */
+	virtual std::string toString(const std::string& indent) const;
 
-	/** Returns whether two atoms are equal.
-	 *
-	 * @return true if the atoms are equal, false otherwise.
-	 */
+	/** Returns true if the two atoms are equal, else false.  */
 	virtual bool operator==(const ProtoAtom&) const;
-
-	/** Returns whether two atoms are different.
-	 *
-	 * @return true if the atoms are different, false otherwise.
-	 */
-	bool operator!=(const ProtoAtom& other) const
-	{  return not operator==(other); }
 };
 
 typedef std::shared_ptr<LinkValue> LinkValuePtr;

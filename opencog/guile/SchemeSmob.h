@@ -44,12 +44,10 @@ class SchemeSmob
 private:
 
 	enum {
-		COG_UUID = 1, // unsigned long int
-		COG_HANDLE,   // smart pointer
-		COG_TV,       // truth values
-		COG_AV,       // attention values
-		COG_AS,       // atom spaces
-		COG_EXTEND    // callbacks into C++ code.
+		COG_PROTOM = 1, // values or atoms - smart pointer
+		COG_AV,         // attention values
+		COG_AS,         // atom spaces
+		COG_EXTEND      // callbacks into C++ code.
 	};
 
 	static std::atomic_flag is_inited;
@@ -71,9 +69,16 @@ private:
 
 	static SCM handle_to_scm(const Handle&);
 	static SCM protom_to_scm(const ProtoAtomPtr&);
+	static SCM tv_to_scm(const TruthValuePtr&);
 	static Handle scm_to_handle(SCM);
+	static ProtoAtomPtr scm_to_protom(SCM);
+	static TruthValuePtr scm_to_tv(SCM);
 
-	// Atom creation and deletion functions
+	static std::vector<double> scm_to_float_list (SCM);
+	static std::vector<ProtoAtomPtr> scm_to_protom_list (SCM);
+	static std::vector<std::string> scm_to_string_list (SCM);
+
+	// Value, atom creation and deletion functions
 	static SCM ss_new_value(SCM, SCM);
 	static SCM ss_new_node(SCM, SCM, SCM);
 	static SCM ss_new_link(SCM, SCM);
@@ -81,26 +86,28 @@ private:
 	static SCM ss_link(SCM, SCM);
 	static SCM ss_delete(SCM, SCM);
 	static SCM ss_delete_recursive(SCM, SCM);
-	static SCM ss_purge(SCM, SCM);
-	static SCM ss_purge_recursive(SCM, SCM);
+	static SCM ss_extract(SCM, SCM);
+	static SCM ss_extract_recursive(SCM, SCM);
 	static SCM ss_value_p(SCM);
 	static SCM ss_atom_p(SCM);
 	static SCM ss_node_p(SCM);
 	static SCM ss_link_p(SCM);
 	static SCM _radix_ten;
 
-	// Atoms to ints, and back.
-	static SCM ss_atom(SCM);
+	// Return the hash value of the atom.
 	static SCM ss_handle(SCM);
 
-	// return the int of Handle::UNDEFINED
-	static SCM ss_undefined_handle(void);
+	// Get list endcoded in a value
+	static SCM ss_value_to_list(SCM);
+	static SCM ss_value_ref(SCM, SCM);
 
 	// Set properties of atoms
 	static SCM ss_set_av(SCM, SCM);
 	static SCM ss_set_tv(SCM, SCM);
+	static SCM ss_set_value(SCM, SCM, SCM);
 	static SCM ss_merge_tv(SCM, SCM);
 	static SCM ss_merge_hi_conf_tv(SCM, SCM);
+	static SCM ss_inc_count(SCM, SCM);
 	static SCM ss_inc_vlti(SCM);
 	static SCM ss_dec_vlti(SCM);
 
@@ -111,8 +118,12 @@ private:
 	static SCM ss_as(SCM);
 	static SCM ss_av(SCM);
 	static SCM ss_tv(SCM);
+	static SCM ss_value(SCM, SCM);
 	static SCM ss_incoming_set(SCM);
+	static SCM ss_incoming_by_type(SCM, SCM);
 	static SCM ss_outgoing_set(SCM);
+	static SCM ss_outgoing_by_type(SCM, SCM);
+	static SCM ss_outgoing_atom(SCM, SCM);
 
 	// Type query functions
 	static SCM ss_map_type(SCM, SCM);
@@ -131,15 +142,15 @@ private:
 	static SCM ss_new_itv(SCM, SCM, SCM);
 	static SCM ss_new_ptv(SCM, SCM, SCM);
 	static SCM ss_new_ftv(SCM, SCM);
+	static SCM ss_new_etv(SCM, SCM);
 	static SCM ss_tv_p(SCM);
-	static SCM tv_p(SCM, TruthValueType);
+	static SCM tv_p(SCM, Type);
 	static SCM ss_stv_p(SCM);
 	static SCM ss_ctv_p(SCM);
 	static SCM ss_itv_p(SCM);
 	static SCM ss_ptv_p(SCM);
 	static SCM ss_ftv_p(SCM);
-	static SCM take_tv(TruthValue *);
-	static SCM tv_to_scm(TruthValuePtr);
+	static SCM ss_etv_p(SCM);
 	static SCM ss_tv_get_value(SCM);
 	static SCM ss_tv_get_mean(SCM);
 	static SCM ss_tv_get_confidence(SCM);
@@ -162,40 +173,45 @@ private:
 
 	// Attention values
 	static SCM ss_new_av(SCM, SCM, SCM);
+	static SCM ss_stimulate(SCM, SCM);
 	static SCM ss_av_p(SCM);
 	static SCM take_av(AttentionValue *);
 	static SCM ss_av_get_value(SCM);
 
 	// AttentionalFocus and AttentionalFocus Boundary
+	// XXX FIXME these should move to the attention bank!
 	static SCM ss_af_boundary(void);
 	static SCM ss_set_af_boundary(SCM);
 	static SCM ss_af(void);
 
-	// Callback into misc C++ code.
-	static SCM ss_ad_hoc(SCM, SCM);
+	// Free variables
+	static SCM ss_get_free_variables(SCM);
+	static SCM ss_is_closed(SCM);
 
 	// Misc utilities
 	static std::string to_string(SCM);
-	static TruthValuePtr to_tv(SCM);
-	static std::string handle_to_string(SCM);
-	static std::string handle_to_string(Handle, int);
+	static std::string protom_to_string(SCM);
+	static std::string handle_to_string(const Handle&, int);
 	static std::string misc_to_string(SCM);
-	static TruthValue *get_tv_from_list(SCM);
+	static TruthValuePtr get_tv_from_list(SCM);
 	static AttentionValue *get_av_from_list(SCM);
 	static AtomSpace *get_as_from_list(SCM);
 
 	// validate arguments coming from scheme passing into C++
-	static void throw_exception(const std::exception&, const char *);
+	static void throw_exception(const std::exception&, const char *, SCM);
 	static AtomSpace* verify_atomspace(SCM, const char *, int pos = 1);
 	static Type verify_atom_type(SCM, const char *, int pos = 1);
 	static Handle verify_handle(SCM, const char *, int pos = 1);
-	static TruthValue* verify_tv(SCM, const char *, int pos = 1);
+	static ProtoAtomPtr verify_protom(SCM, const char *, int pos = 1);
+	static TruthValuePtr verify_tv(SCM, const char *, int pos = 1);
 	static AttentionValue* verify_av(SCM, const char *, int pos = 1);
-	static std::vector<Handle> verify_handle_list (SCM, const char *,
+	static HandleSeq verify_handle_list (SCM, const char *,
 	                                               int pos = 1);
 	static std::vector<double> verify_float_list (SCM, const char *,
 	                                               int pos = 1);
 	static std::vector<ProtoAtomPtr> verify_protom_list (SCM, const char *,
+	                                               int pos = 1);
+	static std::vector<std::string> verify_string_list (SCM, const char *,
 	                                               int pos = 1);
 	static std::string verify_string (SCM, const char *, int pos = 1,
 	                                  const char *msg = "string");
@@ -219,10 +235,10 @@ public:
 public:
 
 	// Utility printing functions
-	static std::string to_string(Handle);
+	static std::string to_string(const Handle&);
 	static std::string as_to_string(const AtomSpace *);
 	static std::string av_to_string(const AttentionValue *);
-	static std::string tv_to_string(const TruthValue *);
+	static std::string tv_to_string(const TruthValuePtr&);
 };
 
 /** @}*/

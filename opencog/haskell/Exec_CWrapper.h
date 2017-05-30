@@ -5,10 +5,10 @@ extern "C"
 {
     using namespace opencog;
 
-    UUID Exec_execute(AtomSpace* atomspace, UUID handle);
+    int Exec_execute(AtomSpace* atomspace, Handle* handle,Handle* out);
 
     int Exec_evaluate(AtomSpace* atomspace
-                     , UUID handle
-                     , TruthValueType* tv_type
+                     , Handle* handle
+                     , char** tv_type
                      , double* parameters);
 }

@@ -27,6 +27,7 @@
 #include <set>
 
 #include <opencog/atoms/base/Handle.h>
+#include <opencog/atoms/base/Quotation.h>
 
 namespace opencog
 {
@@ -53,12 +54,21 @@ struct FreeVariables
 	///
 	/// The index is a reversed index into varseq: given a variable,
 	/// it returns the ordinal of that variable in the varseq. It is
-	/// used to implement the variable substitution (aka beta-reducation
+	/// used to implement the variable substitution (aka beta-reduction
 	/// aka "PutLink") method.
 	HandleSeq varseq;
-	std::set<Handle> varset;
+	OrderedHandleSet varset;
 	typedef std::map<Handle, unsigned int> IndexMap;
 	IndexMap index;
+
+	/// Return true if the variables in this, and other, are the same
+	/// variables (have exactly the same variable names.)
+	bool is_identical(const FreeVariables& other) const;
+
+	/// Return true if variable `var` is in this variableset.
+	bool is_in_varset(const Handle& v) const {
+		return varset.end() != varset.find(v);
+	}
 
 	/// Create an ordered set of the free variables in the given oset.
 	///
@@ -80,19 +90,30 @@ struct FreeVariables
 	void find_variables(const Handle&);
 	void find_variables(const HandleSeq&);
 
+	// Given a mapping from variables to values to create values
+	// sequence to be passed to substitute
+	HandleSeq make_values(const HandleMap&) const;
+
+	// Erase the given variable, if exist
+	void erase(const Handle&);
+
+	// Comparison operators. Convenient to define containers of Variables
+	bool operator<(const FreeVariables& other) const;
+
 	// Given the tree `tree` containing variables in it, create and
 	// return a new tree with the indicated values `vals` substituted
 	// for the variables.  "nocheck" == no type checking is done.
 	// This performs an almost pure, syntactic beta-reduction; its
 	// almost-pure because it does honour the semantics of QuoteLink.
-	Handle substitute_nocheck(const Handle&, const HandleSeq&) const;
+	Handle substitute_nocheck(const Handle&, const HandleSeq&, bool silent=false) const;
 protected:
-	Handle substitute_scoped(const Handle&, const HandleSeq&,
-	                         const IndexMap&, int) const;
+	Handle substitute_scoped(const Handle&, const HandleSeq&, bool,
+	                         const IndexMap&,
+	                         Quotation quotation=Quotation()) const;
 };
 
-typedef std::map<Handle, const std::set<Type> > VariableTypeMap;
-typedef std::map<Handle, const std::set<Handle> > VariableDeepTypeMap;
+typedef std::map<Handle, const std::set<Type>> VariableTypeMap;
+typedef std::map<Handle, const OrderedHandleSet> VariableDeepTypeMap;
 
 /// The Variables struct defines a list of typed variables "unbundled"
 /// from the hypergraph in which they normally occur. The goal of this
@@ -117,14 +138,31 @@ struct Variables : public FreeVariables
 	VariableDeepTypeMap _deep_typemap;
 	VariableDeepTypeMap _fuzzy_typemap;
 
+	/// Return true iff all variables are well typed. For now only
+	/// simple types are supported, specifically if some variable is
+	/// simple typed NOTYPE, then it returns false.
+	bool is_well_typed() const;
+
 	// Return true if the other Variables struct is equal to this one,
 	// up to alpha-conversion. That is, same number of variables, same
 	// type restrictions, but different actual variable names.
-	bool is_equal(const Variables&) const;
-	inline bool operator==(const Variables& other) const
-	{ return is_equal(other); }
-	inline bool operator!=(const Variables& other) const
-	{ return not is_equal(other); }
+	// Same as satisfying this->is_type(other->varseq) and also
+	// other->is_type(this->varseq) -- the equality is symmetric.
+	bool is_equal(const Variables& other) const;
+	bool is_equal(const Variables& other, size_t index) const;
+	bool operator==(const Variables& other) const;
+
+	// Comparison operators. Convenient to define containers of Variables
+	bool operator<(const Variables& other) const;
+
+	// Return true if the variable `othervar` in `other` is
+	// alpha-convertible to the variable `var` in this. That is,
+	// return true if they are the same variable, differing only
+	// in name.
+	bool is_alpha_convertible(const Handle& var,
+	                          const Handle& othervar,
+	                          const Variables& other,
+	                          bool check_type=false) const;
 
 	// Return true if we are holding a single variable, and the handle
 	// given as the argument satisfies the type restrictions (if any).
@@ -143,16 +181,36 @@ struct Variables : public FreeVariables
 	// Given the tree `tree` containing variables in it, create and
 	// return a new tree with the indicated values `vals` substituted
 	// for the variables. The vals must pass the typecheck, else an
-	// exception is thrown. An exception is thrown if the vals are not
-	// of the types specified in this class.
-	Handle substitute(const Handle& tree, const HandleSeq& vals) const;
+	// exception is thrown. If "silent" is true, then the exception
+	// will not be logged; this allows this method to be used for
+	// filtering, where type mis-checks are expected and normal.
+	Handle substitute(const Handle& tree,
+	                  const HandleSeq& vals,
+	                  bool silent=false) const;
 
 	// Extend this variable set by adding in the given variable set.
 	void extend(const Variables&);
 
+	// Erase the given variable, if exist
+	void erase(const Handle&);
+
+	/// This is the dual of VariableList::validate_vartype. convert a
+	/// Variables object into a Handle variable declaration usable by
+	/// by ScopeLink.
+	///
+	/// If empty then return the empty VariableList.
+	///
+	/// TODO: support deep and fuzzy typemaps.
+	Handle get_vardecl() const;
+
 	// Useful for debugging
 	std::string to_string() const;
 };
+
+// For gdb, see
+// http://wiki.opencog.org/w/Development_standards#Print_OpenCog_Objects
+std::string oc_to_string(const Variables& var);
+std::string oc_to_string(const FreeVariables::IndexMap& imap);
 
 /** @}*/
 }

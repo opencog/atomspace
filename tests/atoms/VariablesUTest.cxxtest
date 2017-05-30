@@ -1,0 +1,76 @@
+/*
+ * tests/atoms/VariablesUTest.cxxtest
+ *
+ * Copyright (C) 2016 OpenCog Foundation
+ * All Rights Reserved
+ * Author: Nil Geisweiller
+ *
+ * This program is free software; you can redistribute it and/or modify
+ * it under the terms of the GNU Affero General Public License v3 as
+ * published by the Free Software Foundation and including the exceptions
+ * at http://opencog.org/wiki/Licenses
+ *
+ * This program is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ * GNU General Public License for more details.
+ *
+ * You should have received a copy of the GNU Affero General Public License
+ * along with this program; if not, write to:
+ * Free Software Foundation, Inc.,
+ * 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
+ */
+
+#include <opencog/atoms/core/Variables.h>
+#include <opencog/atoms/core/VariableList.h>
+#include <opencog/atomspace/AtomSpace.h>
+
+#include <cxxtest/TestSuite.h>
+
+using namespace opencog;
+
+#define al _as.add_link
+#define an _as.add_node
+
+class VariablesUTest : public CxxTest::TestSuite
+{
+private:
+	Handle X, Y, NT, PNT, CNT;
+	
+	AtomSpace _as;
+	
+public:
+	VariablesUTest() {
+		X = an(VARIABLE_NODE, "$X");
+		Y = an(VARIABLE_NODE, "$Y");
+		NT = an(TYPE_NODE, "Node");
+		PNT = an(TYPE_NODE, "PredicateNode");
+		CNT = an(TYPE_NODE, "ConceptNode");
+	}
+
+	void test_extend() {
+		Handle
+			vardecl1 = al(VARIABLE_LIST,
+			              al(TYPED_VARIABLE_LINK, X, NT),
+			              al(TYPED_VARIABLE_LINK, Y, CNT)),
+			vardecl2 = al(VARIABLE_LIST,
+			              al(TYPED_VARIABLE_LINK, X, PNT),
+			              al(TYPED_VARIABLE_LINK, Y, al(TYPE_CHOICE, PNT, CNT))),
+			expected = al(VARIABLE_LIST,
+			              al(TYPED_VARIABLE_LINK, X, PNT),
+			              al(TYPED_VARIABLE_LINK, Y, CNT));
+
+		VariableList vl1(vardecl1), vl2(vardecl2);
+
+		Variables v1(vl1.get_variables()), v2(vl2.get_variables());
+
+		v1.extend(v2);
+
+		Handle result = _as.add_atom(v1.get_vardecl());
+
+		std::cout << "expected = " << expected;
+		std::cout << "result = " << result;
+
+		TS_ASSERT_EQUALS(expected, result);
+	}
+};

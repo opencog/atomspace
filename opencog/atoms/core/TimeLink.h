@@ -37,14 +37,13 @@ namespace opencog
 class TimeLink : public FunctionLink
 {
 public:
-	TimeLink(const HandleSeq&,
-	           TruthValuePtr tv = TruthValue::DEFAULT_TV(),
-	           AttentionValuePtr av = AttentionValue::DEFAULT_AV());
-
-	TimeLink(Link &l);
+	TimeLink(const HandleSeq&, Type=TIME_LINK);
+	TimeLink(const Link&);
 
 	// Return a pointer to the atom being specified.
 	virtual Handle execute(AtomSpace* = NULL) const;
+
+	static Handle factory(const Handle&);
 };
 
 typedef std::shared_ptr<TimeLink> TimeLinkPtr;

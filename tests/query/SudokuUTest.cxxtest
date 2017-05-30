@@ -20,11 +20,9 @@
  * 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
  */
 
-#include <opencog/guile/load-file.h>
 #include <opencog/guile/SchemeEval.h>
 #include <opencog/guile/SchemeSmob.h>
 #include <opencog/query/BindLinkAPI.h>
-#include <opencog/util/Config.h>
 #include <opencog/util/Logger.h>
 
 #include "test-types.h"
@@ -46,6 +44,9 @@ class SudokuPuzzle :  public CxxTest::TestSuite
 
 			as = new AtomSpace();
 			eval = new SchemeEval(as);
+			eval->eval("(add-to-load-path \"..\")");
+			eval->eval("(add-to-load-path \"../../..\")");
+			eval->eval("(use-modules (opencog query))");
 		}
 
 		~SudokuPuzzle()
@@ -56,6 +57,8 @@ class SudokuPuzzle :  public CxxTest::TestSuite
 			// Erase the log file if no assertions failed.
 			if (!CxxTest::TestTracker::tracker().suiteFailed())
 				std::remove(logger().get_filename().c_str());
+int rc = CxxTest::TestTracker::tracker().suiteFailed();
+_exit(rc); // XXX hack to avoid double-free in __run_exit_handlers
 		}
 
 		void setUp(void);
@@ -76,12 +79,10 @@ class SudokuPuzzle :  public CxxTest::TestSuite
 void SudokuPuzzle::setUp(void)
 {
 	as->clear();
-
-	eval->eval("(use-modules (opencog query))");
 }
 
-#define getlink(hand,pos) LinkCasts(hand)->getOutgoingAtom(pos)
-#define getarity(hand) LinkCast(hand)->getArity()
+#define getlink(hand,pos) hand->getOutgoingAtom(pos)
+#define getarity(hand) hand->getArity()
 
 /* ========================================================================
  * Extremely simple 2x2 puzzle solver
@@ -90,9 +91,7 @@ void SudokuPuzzle::test_2x2_puzzle(void)
 {
 	logger().debug("BEGIN TEST: %s", __FUNCTION__);
 
-	config().set("SCM_PRELOAD",
-		"tests/query/sudoku-simple.scm");
-	load_scm_files_from_config(*as);
+	eval->eval("(load-from-path \"tests/query/sudoku-simple.scm\")");
 
 	// Create an implication link that will be tested.
 	Handle puzzle = eval->eval_h("(x2-puzzle)");
@@ -119,9 +118,7 @@ void SudokuPuzzle::xtest_2x2_any(void)
 {
 	logger().debug("BEGIN TEST: %s", __FUNCTION__);
 
-	config().set("SCM_PRELOAD",
-		"tests/query/sudoku-simple.scm");
-	load_scm_files_from_config(*as);
+	eval->eval("(load-from-path \"tests/query/sudoku-simple.scm\")");
 
 	// Create an implication link that will be tested.
 	Handle puzzle = eval->eval_h("(x2-any)");
@@ -146,9 +143,7 @@ void SudokuPuzzle::test_3x3_puzzle(void)
 {
 	logger().debug("BEGIN TEST: %s", __FUNCTION__);
 
-	config().set("SCM_PRELOAD",
-		"tests/query/sudoku-simple.scm");
-	load_scm_files_from_config(*as);
+	eval->eval("(load-from-path \"tests/query/sudoku-simple.scm\")");
 
 	// Create an implication link that will be tested.
 	Handle puzzle = eval->eval_h("(x3-puzzle)");
@@ -174,10 +169,8 @@ void SudokuPuzzle::xxx_borken_test_puzzle(void)
 {
 	logger().debug("BEGIN TEST: %s", __FUNCTION__);
 
-	config().set("SCM_PRELOAD",
-		"tests/query/sudoku-rules.scm, "
-		"tests/query/sudoku-puzzle.scm");
-	load_scm_files_from_config(*as);
+	eval->eval("(load-from-path \"tests/query/sudoku-rules.scm\")");
+	eval->eval("(load-from-path \"tests/query/sudoku-puzzle.scm\")");
 
 	// Create an implication link that will be tested.
 	Handle puzzle = eval->eval_h("(puzzle)");

@@ -1,5 +1,5 @@
 /*
- * opencog/atomspace/IndefiniteTruthValue.cc
+ * opencog/truthvalue/IndefiniteTruthValue.cc
  *
  * Copyright (C) 2002-2007 Novamente LLC
  * All Rights Reserved
@@ -37,6 +37,7 @@ confidence_t IndefiniteTruthValue::DEFAULT_CONFIDENCE_LEVEL = 0.9;
 strength_t IndefiniteTruthValue::diffError = 0.001;
 strength_t IndefiniteTruthValue::s = 0.5;
 
+count_t IndefiniteTruthValue::DEFAULT_K = 800.0;
 
 // Formula defined in the integral of one step (x-L1)^ks * (U1-x)^k(1-s)
 static double integralFormula (double x, void * params)
@@ -75,23 +76,24 @@ static strength_t DensityIntegral(strength_t lower, strength_t upper,
 
 void IndefiniteTruthValue::init(strength_t l, strength_t u, confidence_t c)
 {
-    L = l;
-    U = u;
-    confidenceLevel = c;
+    _value.resize(4);
+    _value[L] = l;
+    _value[U] = u;
+    _value[CONFIDENCE_LEVEL] = c;
 
     firstOrderDistribution.clear();
     symmetric = true;
 
-    mean = (L + U) / 2;
+    _value[MEAN] = (l + u) / 2.0;
 
-    strength_t W = U-L;
+    strength_t W = u-l;
     // to avoid division by zero
     W = std::max(W, static_cast<strength_t>(0.0000001));
     // This is a bad heuristic that comes from c = N / (N+k). By
     // assuming c is an estimate of 1 - W we end up with this
     // formula. The problem is that c is definitely not a good
     // estimate for 1 - W.
-    count = (DEFAULT_K * (1 - W) / W);
+    count = (DEFAULT_K * (1.0 - W) / W);
 
     confidence = count / (count + DEFAULT_K);
 
@@ -106,58 +108,75 @@ void IndefiniteTruthValue::init(strength_t l, strength_t u, confidence_t c)
 
 void IndefiniteTruthValue::copy(const IndefiniteTruthValue& source)
 {
-    L = source.L;
-    U = source.U;
-    confidenceLevel = source.confidenceLevel;
+    _value[L] = source.getL();
+    _value[U] = source.getU();
+    _value[CONFIDENCE_LEVEL] = source.getConfidenceLevel();
     diff = source.diff;
-    mean = source.mean;
+    _value[MEAN] = source.getMean();
     count = source.count;
     confidence = source.confidence;
     symmetric = source.symmetric;
 }
 
 IndefiniteTruthValue::IndefiniteTruthValue()
+	: TruthValue(INDEFINITE_TRUTH_VALUE)
 {
     init();
 }
 
 IndefiniteTruthValue::IndefiniteTruthValue(strength_t l, strength_t u,
                                            confidence_t c)
+	: TruthValue(INDEFINITE_TRUTH_VALUE)
 {
     init(l, u, c);
 }
 
 IndefiniteTruthValue::IndefiniteTruthValue(IndefiniteTruthValue const& source)
+	: TruthValue(INDEFINITE_TRUTH_VALUE)
 {
     copy(source);
 }
 
-bool IndefiniteTruthValue::operator==(const TruthValue& rhs) const
+IndefiniteTruthValue::IndefiniteTruthValue(const ProtoAtomPtr& source)
+       : TruthValue(INDEFINITE_TRUTH_VALUE)
+{
+    if (source->getType() != INDEFINITE_TRUTH_VALUE)
+        throw RuntimeException(TRACE_INFO,
+            "Source must be a IndefiniteTruthValue");
+
+    FloatValuePtr fp(FloatValueCast(source));
+    _value.resize(4);
+    _value[L] = fp->value()[L];
+    _value[U] = fp->value()[U];
+    _value[MEAN] = fp->value()[MEAN];
+    _value[CONFIDENCE_LEVEL] = fp->value()[CONFIDENCE_LEVEL];
+}
+
+bool IndefiniteTruthValue::operator==(const ProtoAtom& rhs) const
 {
     const IndefiniteTruthValue* itv = dynamic_cast<const IndefiniteTruthValue*>(&rhs);
-    if (NULL == itv) {
+    if (NULL == itv)
         return false;
-    } else {
-        return  (U == itv->U && L == itv->L 
-                 && confidenceLevel == itv->confidenceLevel);
-    }
+
+    return (getU() == itv->getU() and getL() == itv->getL()
+            and getConfidenceLevel() == itv->getConfidenceLevel());
 }
 
 strength_t IndefiniteTruthValue::findDiff(strength_t idiff) const
 {
     strength_t min = 0.0;
-    strength_t max = 0.5; //diff cannot be larger than 1/2 cause symmetric case
+    strength_t max = 0.5; // Diff cannot be larger than 1/2 cause symmetric case
     strength_t L1, U1;
     strength_t numerator, denominator, result;
-    strength_t expected = (1.0 - confidenceLevel) / 2.0;
-    bool lte, gte; //smaller than expected, greater than expected
+    strength_t expected = (1.0 - getConfidenceLevel()) / 2.0;
+    bool lte, gte; // Smaller than expected, greater than expected
 
-    //loop until convergence
+    // Loop until convergence
     do {
-        U1 = U + idiff;
-        L1 = L - idiff;
+        U1 = getU() + idiff;
+        L1 = getL() - idiff;
 
-        numerator = DensityIntegral(U, U1, L1, U1, DEFAULT_K, s);
+        numerator = DensityIntegral(getU(), U1, L1, U1, DEFAULT_K, s);
         denominator = DensityIntegral(L1, U1, L1, U1, DEFAULT_K, s);
 
         if (denominator > 0.0) result = numerator / denominator;
@@ -184,26 +203,21 @@ const std::vector<strength_t*>& IndefiniteTruthValue::getFirstOrderDistribution(
     return firstOrderDistribution;
 }
 
-TruthValueType IndefiniteTruthValue::getType() const
-{
-    return INDEFINITE_TRUTH_VALUE;
-}
-
 // Merge formula, as specified by PLN.
-TruthValuePtr IndefiniteTruthValue::merge(TruthValuePtr other,
+TruthValuePtr IndefiniteTruthValue::merge(const TruthValuePtr& other,
                                           const MergeCtrl& mc) const
 {
     return higher_confidence_merge(other);
 }
 
-std::string IndefiniteTruthValue::toString() const
+std::string IndefiniteTruthValue::toString(const std::string& indent) const
 {
     char buf[1024];
     sprintf(buf, "[%f,%f,%f,%f,%f,%d]",
-            static_cast<float>(mean),
-            static_cast<float>(L),
-            static_cast<float>(U),
-            static_cast<float>(confidenceLevel),
+            static_cast<float>(getMean()),
+            static_cast<float>(getL()),
+            static_cast<float>(getU()),
+            static_cast<float>(getConfidenceLevel()),
             static_cast<float>(diff),
             symmetric);
     return buf;

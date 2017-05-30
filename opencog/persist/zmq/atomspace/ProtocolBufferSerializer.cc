@@ -30,13 +30,13 @@
 #include "opencog/truthvalue/AttentionValue.h"
 #include "opencog/truthvalue/TruthValue.h"
 #include "opencog/truthvalue/CountTruthValue.h"
-#include "opencog/truthvalue/NullTruthValue.h"
 #include "opencog/truthvalue/IndefiniteTruthValue.h"
 #include "opencog/truthvalue/SimpleTruthValue.h"
+#include "opencog/atomspaceutils/TLB.h"
 
 using namespace opencog;
 
-//TODO move this file to the persist directory
+TLB tlbuf;
 
 ProtocolBufferSerializer::ProtocolBufferSerializer()
 {
@@ -52,7 +52,10 @@ void ProtocolBufferSerializer::deserializeAtom(
 {
     //deserializeAttentionValueHolder(atomMessage.attentionvalueholder(), atom);
 
-    atom._atomTable = NULL;
+    // XXX FIXME This is truly a bad and illegal design -- screwing
+    // around with the Atom internals is just plain the wrong thing to
+    // do.  Please use the Atom ctors correctly!
+    atom._atom_space = NULL;
     if (atomMessage.incoming_size() == 0)
     {
         atom._incoming_set = NULL;
@@ -216,7 +219,7 @@ void ProtocolBufferSerializer::serializeIndefiniteTruthValue(
     singleTruthValue->set_mean(tv.getMean());
     singleTruthValue->set_count(tv.getCount());
     singleTruthValue->set_confidence(tv.getConfidence());
-    for (float *f : tv.getFirstOrderDistribution())
+    for (const double *f: tv.getFirstOrderDistribution())
     {
         singleTruthValue->add_firstorderdistribution(*f);
     }
@@ -225,14 +228,13 @@ void ProtocolBufferSerializer::serializeIndefiniteTruthValue(
 NodePtr ProtocolBufferSerializer::deserializeNode(
         const ZMQAtomMessage& atomMessage)
 {
-    TruthValuePtr tv;
+	NodePtr nodePtr(createNode(atomMessage.type(), atomMessage.name()));
     if (atomMessage.has_truthvalue()) {
+    TruthValuePtr tv;
     	tv = deserialize(atomMessage.truthvalue());
-    } else {
-    	tv = TruthValue::DEFAULT_TV();
+		nodePtr->setTruthValue(tv);
     }
-	NodePtr nodePtr(new Node(atomMessage.type(), atomMessage.name(), tv));
-	nodePtr->_uuid = atomMessage.handle();
+	tlbuf.addAtom(nodePtr, atomMessage.handle());
     deserializeAtom(atomMessage, *nodePtr);
 
     return nodePtr;
@@ -241,21 +243,19 @@ NodePtr ProtocolBufferSerializer::deserializeNode(
 LinkPtr ProtocolBufferSerializer::deserializeLink(
         const ZMQAtomMessage& atomMessage)
 {
-
 	HandleSeq oset(atomMessage.outgoing_size());
     for(int i = 0; i < atomMessage.outgoing_size(); i++)
     {
-    	oset[i] = Handle(atomMessage.outgoing(i));
+		// oset[i] = Handle(atomMessage.outgoing(i));
     }
 
-    TruthValuePtr tv;
+	LinkPtr linkPtr(createLink(oset, atomMessage.type()));
     if (atomMessage.has_truthvalue()) {
+    TruthValuePtr tv;
     	tv = deserialize(atomMessage.truthvalue());
-    } else {
-    	tv = TruthValue::DEFAULT_TV();
+	linkPtr->setTruthValue(tv);
     }
-	LinkPtr linkPtr(new Link(atomMessage.type(), oset, tv));
-	linkPtr->_uuid = atomMessage.handle();
+	tlbuf.addAtom(linkPtr, atomMessage.handle());
     deserializeAtom(atomMessage, *linkPtr);
 
     return linkPtr;
@@ -285,17 +285,12 @@ LinkPtr ProtocolBufferSerializer::deserializeLink(
 //    atomMessage->set_name(node.name);
 //}
 
-void ProtocolBufferSerializer::serializeNullTruthValue(
-        NullTruthValue& tv, ZMQTruthValueMessage* truthValueMessage)
-{
-    ZMQSingleTruthValueMessage *singleTruthValue = truthValueMessage->add_singletruthvalue();
-    singleTruthValue->set_truthvaluetype(ZMQTruthValueTypeNull);
-}
-
 SimpleTruthValuePtr ProtocolBufferSerializer::deserializeSimpleTruthValue(
         const ZMQSingleTruthValueMessage& singleTruthValue)
 {
-	SimpleTruthValuePtr tv(new SimpleTruthValue(singleTruthValue.mean(), singleTruthValue.count()));
+	count_t cn = singleTruthValue.count();
+	confidence_t cf = cn / (cn + SimpleTruthValue::DEFAULT_K);
+	SimpleTruthValuePtr tv(new SimpleTruthValue(singleTruthValue.mean(), cf));
 	return tv;
 }
 
@@ -324,13 +319,6 @@ void ProtocolBufferSerializer::serialize(TruthValue &tv, ZMQTruthValueMessage* t
         return;
     }
 
-    NullTruthValue* nulltv = dynamic_cast<NullTruthValue*>(&tv);
-    if(nulltv)
-    {
-        serializeNullTruthValue(*nulltv, truthValueMessage);
-        return;
-    }
-
     SimpleTruthValue* simple = dynamic_cast<SimpleTruthValue*>(&tv);
     if(simple)
     {
@@ -355,17 +343,12 @@ TruthValuePtr ProtocolBufferSerializer::deserialize(
 TruthValuePtr ProtocolBufferSerializer::deserialize(
         const ZMQSingleTruthValueMessage& singleTruthValueMessage)
 {
-    switch(singleTruthValueMessage.truthvaluetype())
+    switch (singleTruthValueMessage.truthvaluetype())
     {
     case ZMQTruthValueTypeSimple:
         return deserializeSimpleTruthValue(singleTruthValueMessage);
     case ZMQTruthValueTypeCount:
         return deserializeCountTruthValue(singleTruthValueMessage);
-    case ZMQTruthValueTypeNull:
-    {
-        shared_ptr<NullTruthValue> tv(new NullTruthValue());
-        return tv;
-    }
     case ZMQTruthValueTypeIndefinite:
         return deserializeIndefiniteTruthValue(singleTruthValueMessage);
     default:

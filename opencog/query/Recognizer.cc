@@ -43,13 +43,12 @@ namespace opencog {
  * The file /examples/aiml/recog.scm provides a very simple example.
  * The implementation here is very minimalistic, and does many things
  * wrong:
- * -- it fails to identify the actual GetLink/BindLink that was matched.
  * -- it fails to perform any type-checking to make sure the variable
  *    constraints are satisfied.
  * -- AIML wants a left-to-right traversal, this does an omni-
  *    directional exploration. (which is OK, but is not how AIML is
  *    defined...)
- * -- This hasn't been thought through thoroughly There are almost
+ * -- This hasn't been thought through thoroughly. There are almost
  *    surely some weird gotcha's.
  */
 class Recognizer :
@@ -65,13 +64,13 @@ class Recognizer :
 		bool loose_match(const Handle&, const Handle&);
 
 	public:
-		std::set<Handle> _rules;
+		OrderedHandleSet _rules;
 
 		Recognizer(AtomSpace* as) :
 			DefaultPatternMatchCB(as) {}
 
 		virtual void set_pattern(const Variables& vars,
-										 const Pattern& pat)
+		                         const Pattern& pat)
 		{
 			_pattern = &pat;
 			DefaultPatternMatchCB::set_pattern(vars, pat);
@@ -79,10 +78,10 @@ class Recognizer :
 
 		virtual bool initiate_search(PatternMatchEngine*);
 		virtual bool node_match(const Handle&, const Handle&);
-		virtual bool link_match(const LinkPtr&, const LinkPtr&);
+		virtual bool link_match(const PatternTermPtr&, const Handle&);
 		virtual bool fuzzy_match(const Handle&, const Handle&);
-		virtual bool grounding(const std::map<Handle, Handle> &var_soln,
-		                       const std::map<Handle, Handle> &term_soln);
+		virtual bool grounding(const HandleMap &var_soln,
+		                       const HandleMap &term_soln);
 };
 
 } // namespace opencog
@@ -92,7 +91,7 @@ class Recognizer :
 using namespace opencog;
 
 // Uncomment below to enable debug print
-#define DEBUG
+#define DEBUG 1
 #ifdef DEBUG
 #define dbgprt(f, varargs...) logger().fine(f, ##varargs)
 #else
@@ -157,8 +156,10 @@ bool Recognizer::node_match(const Handle& npat_h, const Handle& nsoln_h)
 	return false;
 }
 
-bool Recognizer::link_match(const LinkPtr& lpat, const LinkPtr& lsoln)
+bool Recognizer::link_match(const PatternTermPtr& ptm, const Handle& lsoln)
 {
+	const Handle& lpat = ptm->getHandle();
+
 	// Self-compares always proceed.
 	if (lpat == lsoln) return true;
 
@@ -167,7 +168,7 @@ bool Recognizer::link_match(const LinkPtr& lpat, const LinkPtr& lsoln)
 
 	// Globs are arity-changing. But there is a minimum length.
 	// Note that the inequality is backwards, here: the soln has the
-	// globs!
+	// globs! (and so lpat must have arity equal or greater than soln)
 	if (lpat->getArity() < lsoln->getArity()) return false;
 	return true;
 }
@@ -178,11 +179,11 @@ bool Recognizer::loose_match(const Handle& npat_h, const Handle& nsoln_h)
 	// Variable matches anything; move to next.
 	if (VARIABLE_NODE == gtype) return true;
 
-	// Strict match for link types
+	// Strict match for link types.
 	if (npat_h->getType() != gtype) return false;
 	if (not npat_h->isNode()) return true;
 
-	// if we are here, we know we have nodes. Ask for a strick match.
+	// If we are here, we know we have nodes. Ask for a strict match.
 	if (npat_h != nsoln_h) return false;
 	return true;
 }
@@ -190,9 +191,8 @@ bool Recognizer::loose_match(const Handle& npat_h, const Handle& nsoln_h)
 bool Recognizer::fuzzy_match(const Handle& npat_h, const Handle& nsoln_h)
 {
 	// If we are here, then there are probably glob nodes in the soln.
-	// Try to match them, rigorously. This might be a bad idea, though;
-	// if we are too rigorouos here, and have a bug, we may fail to find
-	// a good pattern.
+	// Try to match them, fairly rigorously. Exactly what constitutes
+	// an OK match is still a bit up in the air.
 
 	if (not npat_h->isLink() or not nsoln_h->isLink()) return false;
 
@@ -218,7 +218,8 @@ bool Recognizer::fuzzy_match(const Handle& npat_h, const Handle& nsoln_h)
 	// Do a side-by-side compare. This is not as rigorous as
 	// PatternMatchEngine::tree_compare() nor does it handle the bells
 	// and whistles (ChoiceLink, QuoteLink, etc).
-	for (size_t ip=0, jg=0; ip<osp_size and jg<osg_size; ip++, jg++)
+	size_t ip=0, jg=0;
+	for (; ip<osp_size and jg<osg_size; ip++, jg++)
 	{
 		if (GLOB_NODE != osg[jg]->getType())
 		{
@@ -231,7 +232,7 @@ bool Recognizer::fuzzy_match(const Handle& npat_h, const Handle& nsoln_h)
 		// matching at the end of the glob.
 		if ((jg+1) == osg_size) return true;
 
-		Handle post(osg[jg+1]);
+		const Handle& post(osg[jg+1]);
 		ip++;
 		while (ip < max_size and not loose_match(osp[ip], post))
 		{
@@ -240,17 +241,27 @@ bool Recognizer::fuzzy_match(const Handle& npat_h, const Handle& nsoln_h)
 		// If ip ran past the end, then the post was not found. This is
 		// a mismatch.
 		if (not (ip < max_size)) return false;
+
+		// Go around again, look for more GlobNodes. Back up by one, so
+		// that the for-loop increment gets us back on track.
+		ip--;
 	}
 
+	// If we are here, then we should have matched up all the atoms;
+	// if we exited the loop because pattern or grounding was short,
+	// then its a mis-match.
+	if (ip != osp_size or jg != osg_size) return false;
 	return true;
 }
 
-bool Recognizer::grounding(const std::map<Handle, Handle> &var_soln,
-                           const std::map<Handle, Handle> &term_soln)
+bool Recognizer::grounding(const HandleMap& var_soln,
+                           const HandleMap& term_soln)
 {
 	Handle rule = term_soln.at(_root);
 
-	_rules.insert(rule);
+	if (rule != _root) {
+		_rules.insert(rule);
+	}
 
 	// Look for more groundings.
 	return false;
@@ -260,7 +271,7 @@ Handle opencog::recognize(AtomSpace* as, const Handle& hlink)
 {
 	PatternLinkPtr bl(PatternLinkCast(hlink));
 	if (NULL == bl)
-		bl = createPatternLink(hlink);
+		bl = createPatternLink(*LinkCast(hlink));
 
 	Recognizer reco(as);
 	bl->satisfy(reco);

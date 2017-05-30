@@ -1,10 +1,11 @@
 /*
  * BackwardChainer.h
  *
- * Copyright (C) 2015 OpenCog Foundation
+ * Copyright (C) 2014-2016 OpenCog Foundation
  *
- * Author: Misgana Bayetta <misgana.bayetta@gmail.com>  October 2014
- *         William Ma <https://github.com/williampma>
+ * Authors: Misgana Bayetta <misgana.bayetta@gmail.com>  October 2014
+ *          William Ma <https://github.com/williampma>
+ *          Nil Geisweiller 2016
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU Affero General Public License v3 as
@@ -27,7 +28,7 @@
 #include <opencog/rule-engine/Rule.h>
 #include <opencog/rule-engine/UREConfigReader.h>
 
-#include "Target.h"
+#include "BIT.h"
 
 class BackwardChainerUTest;
 
@@ -35,6 +36,8 @@ namespace opencog
 {
 
 /**
+ * TODO: update that comment
+ *
  * Backward chaining falls into two cases
  *
  * 1. Truth value query - Given a target atom whose truth value is not
@@ -89,17 +92,19 @@ class BackwardChainer
     friend class ::BackwardChainerUTest;
 
 public:
-	BackwardChainer(AtomSpace& as, const Handle& rbs);
-
-	void set_target(const Handle& init_target,
-	                const Handle& focus_link = Handle::UNDEFINED);
-	UREConfigReader& get_config();
-	const UREConfigReader& get_config() const;
+	BackwardChainer(AtomSpace& as, const Handle& rbs,
+	                const Handle& target,
+	                const Handle& vardecl=Handle::UNDEFINED,
+	                const Handle& focus_set=Handle::UNDEFINED,
+	                // TODO: maybe wrap all fitnesses in a Fitness class
+	                const BITNodeFitness& bitnode_fitness=BITNodeFitness(),
+	                const AndBITFitness& andbit_fitness=AndBITFitness());
 
 	/**
-	 * Perform a single backward chaining inference step.
+	 * URE configuration accessors
 	 */
-	void do_step();
+	UREConfigReader& get_config();
+	const UREConfigReader& get_config() const;
 
 	/**
 	 * Perform backward chaining inference till the termination
@@ -108,54 +113,102 @@ public:
 	void do_chain();
 
 	/**
+	 * Perform a single backward chaining inference step.
+	 */
+	void do_step();
+
+	/**
 	 * @return true if the termination criteria have been met.
 	 */
 	bool termination();
 
-	VarMultimap get_chaining_result();
+	/**
+	 * Get the current result on the initial target, a SetLink with
+	 * all inferred atoms matching the target.
+	 */
+	Handle get_results() const;
 
 private:
+	void expand_meta_rules();
 
-	void process_target(Target& target);
+	// Expand the BIT
+	void expand_bit();
 
-	bool select_rule(const Target& target,
-	                 Rule& selected_rule,
-	                 Rule& standardized_rule,
-	                 std::vector<VarMap>& all_implicand_to_target_mappings);
+	// Expand a selected and-BIT. It is not passed by const because it
+	// will keep a record of the expansion if successful.
+	void expand_bit(AndBIT& andbit);
 
-	HandleSeq match_knowledge_base(Handle htarget,
-	                               Handle htarget_vardecl,
-	                               std::vector<VarMap>& vmap,
-	                               bool enable_var_name_check = false);
-	HandleSeq find_premises(const Rule& standardized_rule,
-	                        const VarMap& implicand_mapping,
-	                        const std::set<Handle>& additional_free_varset,
-	                        Handle& hrule_implicant_reverse_grounded,
-	                        std::vector<VarMap>& premises_vmap_list);
-	HandleSeq ground_premises(const Handle& htarget, const VarMap& vmap,
-	                          std::vector<VarMap>& vmap_list);
-	bool unify(const Handle& hsource, const Handle& hmatch,
-	           const Handle& hsource_vardecl, const Handle& hmatch_vardecl,
-	           VarMap& result);
+	// Fulfill the BIT. That is run some or all its and-BITs
+	void fulfill_bit();
 
-	Handle garbage_substitute(const Handle& term, const VarMap& vm);
-	
-	Handle gen_varlist(const Handle& target);
+	// Fulfill an FCS (i.e and-BIT). That is run its forward chaining
+	// strategy.
+	void fulfill_fcs(const Handle& fcs);
 
-	Handle gen_sub_varlist(const Handle& parent, const Handle& parent_varlist,
-	                       std::set<Handle> additional_free_varset);
+	// Reduce the BIT. Remove some and-BITs.
+	void reduce_bit();
+
+	// Pick up an and-BIT randomly, biased so that this and-BIT is
+	// unlikely to be expanded for the remainder of the inference.
+	void remove_unlikely_expandable_andbit();
+
+	// Calculate distribution based on a (poor) estimate of the
+	// probablity of a and-BIT being within the path of the solution.
+	std::vector<double> expansion_anbit_weights();
+
+	// Select an and-BIT for expansion
+	AndBIT* select_expansion_andbit();
+
+	// Select an and-BIT for fulfilment. Return nullptr if none have
+	// been selected.
+	const AndBIT* select_fulfillment_andbit() const;
+
+	// Select a valid rule given a target. The selected is a new
+	// object because a new rule is created, its variables are
+	// uniquely renamed, possibly some partial substitutions are
+	// applied.
+	//
+	// The Selection is random amongst the valid rules and weighted
+	// according to their weights.
+	//
+	// The target is not const because if the rules are exhausted it
+	// will set its exhausted flag to false.
+	RuleTypedSubstitutionPair select_rule(BITNode& target,
+	                                      const Handle& vardecl=Handle::UNDEFINED);
+	RuleTypedSubstitutionPair select_rule(const RuleTypedSubstitutionMap& rules);
+
+	// Return all valid rules, in the sense that they may possibly be
+	// used to infer the target.
+	RuleTypedSubstitutionMap get_valid_rules(const BITNode& target,
+	                                         const Handle& vardecl);
+
+	// Return the complexity factor of an andbit. The formula is
+	//
+	// exp(-complexity_penalty * andbit.complexity())
+	double complexity_factor(const AndBIT& andbit) const;
+
+	// Return an very crude estimate of the probability that expanding
+	// this and-BIT may lead to a successful inference.
+	double operator()(const AndBIT& andbit) const;
 
 	AtomSpace& _as;
 	UREConfigReader _configReader;
-	AtomSpace _garbage_superspace;
-	Handle _init_target;
-	AtomSpace _focus_space;
+
+	// Structure holding the Back Inference Tree
+	BIT _bit;
+
+	// TODO: perhaps move that under BIT
+	AndBITFitness _andbit_fitness;
+
 	int _iteration;
 
-	TargetSet _targets_set;
+	// Keep track of the and-BIT of the last expansion. Null if the
+	// last expansion has failed.
+	const AndBIT* _last_expansion_andbit;
 
-	// XXX any additional link should be reflected
-	unordered_set<Type> _logical_link_types = { AND_LINK, OR_LINK, NOT_LINK };
+	RuleSet _rules;
+
+	OrderedHandleSet _results;
 };
 
 

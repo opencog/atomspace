@@ -47,14 +47,13 @@ namespace opencog
 class ArityLink : public FunctionLink
 {
 public:
-	ArityLink(const HandleSeq&,
-	           TruthValuePtr tv = TruthValue::DEFAULT_TV(),
-	           AttentionValuePtr av = AttentionValue::DEFAULT_AV());
-
-	ArityLink(Link &l);
+	ArityLink(const HandleSeq&, Type = ARITY_LINK);
+	ArityLink(const Link &l);
 
 	// Return a pointer to the atom being specified.
 	virtual Handle execute(AtomSpace* = NULL) const;
+
+	static Handle factory(const Handle&);
 };
 
 typedef std::shared_ptr<ArityLink> ArityLinkPtr;

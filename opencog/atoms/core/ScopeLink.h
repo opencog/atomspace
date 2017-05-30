@@ -24,6 +24,7 @@
 #define _OPENCOG_SCOPE_LINK_H
 
 #include <opencog/atoms/core/VariableList.h>
+#include <opencog/atoms/base/Quotation.h>
 
 namespace opencog
 {
@@ -45,6 +46,8 @@ namespace opencog
 /// the point of unpacked variables is to act as a memo or cache,
 /// speeding up later calculations.
 ///
+class ScopeLink;
+typedef std::shared_ptr<ScopeLink> ScopeLinkPtr;
 class ScopeLink : public Link
 {
 protected:
@@ -53,37 +56,31 @@ protected:
 	/// Handle of the body of the expression.
 	Handle _body;
 
-
 	/// Variables bound in the body.
 	Variables _varlist;
 
-	ScopeLink(Type, const Handle&,
-	          TruthValuePtr tv = TruthValue::DEFAULT_TV(),
-	          AttentionValuePtr av = AttentionValue::DEFAULT_AV());
+	ScopeLink(Type, const Handle&);
 
-	ScopeLink(Type, const HandleSeq&,
-	          TruthValuePtr tv = TruthValue::DEFAULT_TV(),
-	          AttentionValuePtr av = AttentionValue::DEFAULT_AV());
-
+protected:
 	void init(void);
 	void extract_variables(const HandleSeq& oset);
 	void init_scoped_variables(const Handle& hvar);
 
-	// utility debug print
-	static void prt(const Handle& h)
-	{
-		printf("%s\n", h->toShortString().c_str());
-	}
+	bool skip_init(Type);
+	ContentHash term_hash(const Handle&, UnorderedHandleSet&,
+	                      Quotation quotation = Quotation()) const;
+	virtual ContentHash compute_hash() const;
+
+private:
+	// Replace the variables names in vardecl by the given vars,
+	// ignoring values to not create a ill-formed vardecl.
+	Handle substitute_vardecl(const Handle& vardecl,
+	                          const HandleMap& var2val) const;
+
 public:
-	ScopeLink(const HandleSeq&,
-	          TruthValuePtr tv = TruthValue::DEFAULT_TV(),
-	          AttentionValuePtr av = AttentionValue::DEFAULT_AV());
-
-	ScopeLink(const Handle& varcdecls, const Handle& body,
-	          TruthValuePtr tv = TruthValue::DEFAULT_TV(),
-	          AttentionValuePtr av = AttentionValue::DEFAULT_AV());
-
-	ScopeLink(Link &l);
+	ScopeLink(const HandleSeq&, Type=SCOPE_LINK);
+	ScopeLink(const Handle& varcdecls, const Handle& body);
+	ScopeLink(const Link &l);
 
 	// Return the list of variables we are holding.
 	const Variables& get_variables(void) const { return _varlist; }
@@ -93,14 +90,25 @@ public:
 	// Return true if the other Handle is equal to this one,
 	// i.e. is the same, up to alpha conversion. i.e. is the same,
 	// up to a renaming of the bound variables.
-	bool is_equal(const Handle&) const;
+	bool is_equal(const Handle&, bool silent=false) const;
+
+	/**
+	 * Return an alpha converted copy of itself. New variable names
+	 * can be optionally provided, otherwise there are randomly
+	 * generated.
+	 *
+	 * Warning: the alpha converted handle is not insert in the
+	 * atomspace, it is up to the user to do so.
+	 */
+	Handle alpha_conversion(HandleSeq vars=HandleSeq()) const;
 
 	// Overload equality check!
 	virtual bool operator==(const Atom&) const;
 	virtual bool operator!=(const Atom&) const;
+
+	static Handle factory(const Handle&);
 };
 
-typedef std::shared_ptr<ScopeLink> ScopeLinkPtr;
 static inline ScopeLinkPtr ScopeLinkCast(const Handle& h)
 	{ return std::dynamic_pointer_cast<ScopeLink>(AtomCast(h)); }
 static inline ScopeLinkPtr ScopeLinkCast(const AtomPtr& a)

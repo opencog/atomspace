@@ -30,6 +30,8 @@
 #include <opencog/atoms/base/Node.h>
 #include <opencog/atomspace/AtomTable.h>
 
+#include <boost/range/algorithm.hpp>
+
 #include "Link.h"
 
 //#define DPRINTF printf
@@ -45,7 +47,7 @@ void Link::resort(void)
     std::sort(_outgoing.begin(), _outgoing.end(), handle_less());
 }
 
-void Link::init(const std::vector<Handle>& outgoingVector)
+void Link::init(const HandleSeq& outgoingVector)
 {
     if (not classserver().isA(_type, LINK)) {
         throw InvalidParamException(TRACE_INFO,
@@ -66,118 +68,117 @@ Link::~Link()
     DPRINTF("Deleting link:\n%s\n", this->toString().c_str());
 }
 
-std::string Link::toShortString(const std::string& indent)
+std::string Link::toShortString(const std::string& indent) const
 {
     std::stringstream answer;
     std::string more_indent = indent + "  ";
 
     answer << indent << "(" << classserver().getTypeName(_type);
+
     if (not getTruthValue()->isDefaultTV())
         answer << " " << getTruthValue()->toString();
     answer << "\n";
 
     // Here the target string is made. If a target is a node, its name is
     // concatenated. If it's a link, all its properties are concatenated.
-    for (const Handle& h : _outgoing) {
-        if (h.operator->() != NULL)
-            answer << h->toShortString(more_indent);
-        else
-            answer << more_indent << "Undefined Atom!\n";
-    }
+    for (const Handle& h : _outgoing)
+        answer << h->toShortString(more_indent);
 
-    answer << indent << ") ; [" << _uuid << "]";
-
-    if (_atomTable)
-        answer << "[" << _atomTable->get_uuid() << "]\n";
-    else
-        answer << "[NULL]\n";
+    answer << indent << ")\n";
 
     return answer.str();
 }
 
-std::string Link::toString(const std::string& indent)
+std::string Link::toString(const std::string& indent) const
 {
     std::string answer = indent;
     std::string more_indent = indent + "  ";
 
     answer += "(" + classserver().getTypeName(_type);
 
-    // Print the TV and AV only if its not the default.
-    if (not getAttentionValue()->isDefaultAV())
-        answer += " (av " +
-             std::to_string(getAttentionValue()->getSTI()) + " " +
-             std::to_string(getAttentionValue()->getLTI()) + " " +
-             std::to_string(getAttentionValue()->getVLTI()) + ")";
-
+    // Print the TV only if its not the default.
     if (not getTruthValue()->isDefaultTV())
         answer += " " + getTruthValue()->toString();
 
     answer += "\n";
     // Here, the outset string is made. If a target is a node,
     // its name is concatenated. If it's a link, then recurse.
-    for (const Handle& h : _outgoing) {
-        if (h.operator->() != NULL)
-            answer += h->toString(more_indent);
-        else
-            answer += more_indent + "Undefined Atom!\n";
-    }
+    for (const Handle& h : _outgoing)
+        answer += h->toString(more_indent);
 
-    answer += indent + ") ; [" +
-            std::to_string(_uuid) + "][" +
-            std::to_string(_atomTable? _atomTable->get_uuid() : -1) +
-            "]\n";
+    answer += indent + ") ; " + idToString() + "\n";
 
     return answer;
 }
 
+// Content-based comparison.
 bool Link::operator==(const Atom& other) const
 {
+    // If other points to this, then have equality.
+    if (this == &other) return true;
+
+    // Rule out obvious mis-matches, based on the hash.
+    if (get_hash() != other.get_hash()) return false;
     if (getType() != other.getType()) return false;
-    const Link& olink = dynamic_cast<const Link&>(other);
 
-    Arity arity = getArity();
-    if (arity != olink.getArity()) return false;
-    for (Arity i = 0; i < arity; i++)
+    Arity sz = getArity();
+    if (sz != other.getArity()) return false;
+
+    // Perform a content-compare on the outgoing set.
+    const HandleSeq& rhs = other.getOutgoingSet();
+    for (Arity i = 0; i < sz; i++)
     {
-        if (_outgoing[i]->getType() != olink._outgoing[i]->getType())
+        if (*((AtomPtr)_outgoing[i]) != *((AtomPtr)rhs[i]))
             return false;
-
-        if (_outgoing[i]->isNode())
-        {
-            NodePtr tn(NodeCast(_outgoing[i]));
-            NodePtr on(NodeCast(olink._outgoing[i]));
-            if (*tn != *on) return false;
-        }
-        else if (_outgoing[i]->isLink())
-        {
-            LinkPtr tl(LinkCast(_outgoing[i]));
-            LinkPtr ol(LinkCast(olink._outgoing[i]));
-            if (*tl != *ol) return false;
-        }
     }
     return true;
 }
 
+// Content-based ordering.
 bool Link::operator<(const Atom& other) const
 {
-    if (getType() == other.getType()) {
-        const HandleSeq& outgoing = getOutgoingSet();
-        const HandleSeq& other_outgoing = other.getOutgoingSet();
-        Arity arity = outgoing.size();
-        Arity other_arity = other_outgoing.size();
-        if (arity == other_arity) {
-            Arity i = 0;
-            while (i < arity) {
-                Handle ll = outgoing[i];
-                Handle rl = other_outgoing[i];
-                if (ll == rl)
-                    i++;
-                else
-                    return ll->operator<(*rl.atom_ptr());
-            }
-            return false;
-        } else
-            return arity < other_arity;
-    } else
+    if (get_hash() < other.get_hash()) return true;
+    if (other.get_hash() < get_hash()) return false;
+
+    // We get to here only if the hashes are equal.
+    // Compare the contents directly, for this
+    // (hopefully rare) case.
+    if (getType() != other.getType())
         return getType() < other.getType();
+
+    const HandleSeq& outgoing = getOutgoingSet();
+    const HandleSeq& other_outgoing = other.getOutgoingSet();
+    Arity arity = outgoing.size();
+    Arity other_arity = other_outgoing.size();
+    if (arity != other_arity)
+        return arity < other_arity;
+
+    for (Arity i=0; i < arity; i++)
+    {
+        const Handle& ll(outgoing[i]);
+        const AtomPtr& rl(other_outgoing[i]);
+        if (ll->operator!=(*rl))
+            return ll->operator<(*rl);
+    }
+    return false;
+}
+
+/// Returns a Merkle tree hash -- that is, the hash of this link
+/// chains the hash values of the child atoms, as well.
+ContentHash Link::compute_hash() const
+{
+	// 1<<44 - 377 is prime
+	ContentHash hsh = ((1UL<<44) - 377) * getType();
+	for (const Handle& h: _outgoing)
+	{
+		hsh += (hsh <<5) + h->get_hash(); // recursive!
+	}
+
+	// Links will always have the MSB set.
+	ContentHash mask = ((ContentHash) 1UL) << (8*sizeof(ContentHash) - 1);
+	hsh |= mask;
+
+	if (Handle::INVALID_HASH == hsh) hsh -= 1;
+	_content_hash = hsh;
+	return _content_hash;
 }

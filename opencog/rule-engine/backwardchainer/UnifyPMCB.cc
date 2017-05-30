@@ -31,9 +31,12 @@ using namespace opencog;
  * Constructor for the Unify PMCB.
  *
  * @param as        the AtomSpace pointer
- * @param ext_vars  a VariableList of external variables that typed variables can map to
+ *
+ * @param ext_vars  a VariableList of external variables that typed
+ *                  variables can map to
  */
-UnifyPMCB::UnifyPMCB(AtomSpace* as, VariableListPtr int_vars, VariableListPtr ext_vars)
+UnifyPMCB::UnifyPMCB(AtomSpace* as, VariableListPtr int_vars,
+                     VariableListPtr ext_vars)
     : BackwardChainerPMCB(as, int_vars, false), _ext_vars(ext_vars)
 {
 
@@ -44,13 +47,29 @@ UnifyPMCB::~UnifyPMCB()
 
 }
 
+bool UnifyPMCB::node_match(const Handle& npat_h, const Handle& nsoln_h)
+{
+	if (npat_h == nsoln_h)
+		return true;
+
+	// If the pattern is not a variable and the solution is a variable
+	// then only check whether the type of the pattern matches the one
+	// of the variable (if it has any)
+	if (nsoln_h->getType() == VARIABLE_NODE) {
+		return _ext_vars->is_type(nsoln_h, npat_h);
+	}
+
+	return false;
+}
+
 bool UnifyPMCB::variable_match(const Handle& npat_h,
                                const Handle& nsoln_h)
 {
 	Type soltype = nsoln_h->getType();
 
 	// special case to allow any typed variable to match to a variable
-	if (soltype == VARIABLE_NODE && _ext_vars->get_variables().varset.count(nsoln_h) == 1)
+	if (soltype == VARIABLE_NODE
+	    and _ext_vars->get_variables().varset.count(nsoln_h) == 1)
 	{
 		// if the variable is untyped, match immediately
 		if (_ext_vars->get_variables()._simple_typemap.count(nsoln_h) == 0
@@ -70,10 +89,10 @@ bool UnifyPMCB::variable_match(const Handle& npat_h,
 	return BackwardChainerPMCB::variable_match(npat_h, nsoln_h);
 }
 
-bool UnifyPMCB::grounding(const std::map<Handle, Handle> &var_soln,
-                          const std::map<Handle, Handle> &pred_soln)
+bool UnifyPMCB::grounding(const HandleMap &var_soln,
+                          const HandleMap &pred_soln)
 {
-	std::map<Handle, Handle> true_var_soln;
+	HandleMap true_var_soln;
 
 	// get rid of non-var mapping
 	for (const auto& p : var_soln)

@@ -23,50 +23,43 @@
  * 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
  */
 
-#include <typeinfo>
-
 #include <stdio.h>
-#include <stdlib.h>
 
 #include <opencog/truthvalue/CountTruthValue.h>
+#include <opencog/truthvalue/FuzzyTruthValue.h>
+#include <opencog/truthvalue/GenericTruthValue.h>
 #include <opencog/truthvalue/IndefiniteTruthValue.h>
-#include <opencog/truthvalue/NullTruthValue.h>
+#include <opencog/truthvalue/ProbabilisticTruthValue.h>
 #include <opencog/truthvalue/SimpleTruthValue.h>
 #include <opencog/truthvalue/TruthValue.h>
-#include <opencog/util/platform.h>
-
-//#define DPRINTF printf
-#define DPRINTF(...)
 
 using namespace opencog;
 
-const strength_t MAX_TRUTH  = 1.0f;
-count_t TruthValue::DEFAULT_K = 800.0;
+const strength_t MAX_TRUTH  = 1.0;
 
-TruthValuePtr TruthValue::NULL_TV()
+std::string TruthValue::toShortString(const std::string& indent) const
 {
-    static TruthValuePtr instance(std::make_shared<NullTruthValue>());
-    return instance;
+    return toString(indent);
 }
 
 TruthValuePtr TruthValue::DEFAULT_TV()
 {
     // True, but no confidence.
-    static TruthValuePtr instance(std::make_shared<SimpleTruthValue>(MAX_TRUTH, 0.0));
+    static TruthValuePtr instance(std::make_shared<SimpleTruthValue>(MAX_TRUTH, 0.0f));
     return instance;
 }
 
 TruthValuePtr TruthValue::TRUE_TV()
 {
     // True, with maximum confidence.
-    static TruthValuePtr instance(std::make_shared<SimpleTruthValue>(MAX_TRUTH, 1.0e35));
+    static TruthValuePtr instance(std::make_shared<SimpleTruthValue>(MAX_TRUTH, 1.0f));
     return instance;
 }
 
 TruthValuePtr TruthValue::FALSE_TV()
 {
     // False, with maximum confidence.
-    static TruthValuePtr instance(std::make_shared<SimpleTruthValue>(0.0f, 1.0e35));
+    static TruthValuePtr instance(std::make_shared<SimpleTruthValue>(0.0f, 1.0f));
     return instance;
 }
 
@@ -77,18 +70,13 @@ TruthValuePtr TruthValue::TRIVIAL_TV()
     return instance;
 }
 
-bool TruthValue::isNullTv() const
-{
-    return false;
-}
-
 bool TruthValue::isDefaultTV() const
 {
     TruthValuePtr dtv = DEFAULT_TV();
     if (dtv.get() == this) return true;
     if (getType() == dtv->getType() and
         getMean() == dtv->getMean() and
-        getCount() == dtv->getCount())
+        getConfidence() == dtv->getConfidence())
     {
         return true;
     }
@@ -104,7 +92,7 @@ bool TruthValue::isDefinedTV() const
     if (dtv.get() == this) return true;
     if (getType() == dtv->getType() and
         getMean() == dtv->getMean() and
-        getCount() == dtv->getCount())
+        getConfidence() == dtv->getConfidence())
     {
         return true;
     }
@@ -121,7 +109,7 @@ bool TruthValue::isDefinedTV() const
     dtv = TRUE_TV();
     if (getType() == dtv->getType() and
         getMean() == dtv->getMean() and
-        getCount() == dtv->getCount())
+        getConfidence() == dtv->getConfidence())
     {
         return true;
     }
@@ -129,7 +117,7 @@ bool TruthValue::isDefinedTV() const
     dtv = FALSE_TV();
     if (getType() == dtv->getType() and
         getMean() == dtv->getMean() and
-        getCount() == dtv->getCount())
+        getConfidence() == dtv->getConfidence())
     {
         return true;
     }
@@ -137,17 +125,45 @@ bool TruthValue::isDefinedTV() const
     dtv = TRIVIAL_TV();
     if (getType() == dtv->getType() and
         getMean() == dtv->getMean() and
-        getCount() == dtv->getCount())
+        getConfidence() == dtv->getConfidence())
     {
         return true;
     }
     return false;
 }
 
-TruthValuePtr TruthValue::higher_confidence_merge(TruthValuePtr other) const
+TruthValuePtr
+TruthValue::higher_confidence_merge(const TruthValuePtr& other) const
 {
     if (other->getConfidence() > getConfidence()) {
         return other;
     }
-    return shared_from_this();
+    return std::dynamic_pointer_cast<const TruthValue>(shared_from_this());
+}
+
+TruthValuePtr TruthValue::factory(Type t, const std::vector<double>& v)
+{
+	ProtoAtomPtr pap = createFloatValue(t,v);
+	return factory(pap);
+}
+
+TruthValuePtr TruthValue::factory(const ProtoAtomPtr& pap)
+{
+	Type t = pap->getType();
+	if (SIMPLE_TRUTH_VALUE == t)
+		return SimpleTruthValue::createTV(pap);
+	if (COUNT_TRUTH_VALUE == t)
+		return CountTruthValue::createTV(pap);
+	if (FUZZY_TRUTH_VALUE == t)
+		return FuzzyTruthValue::createTV(pap);
+	if (GENERIC_TRUTH_VALUE == t)
+		return GenericTruthValue::createTV(pap);
+	if (INDEFINITE_TRUTH_VALUE == t)
+		return IndefiniteTruthValue::createTV(pap);
+	if (PROBABILISTIC_TRUTH_VALUE == t)
+		return ProbabilisticTruthValue::createTV(pap);
+
+	throw RuntimeException(TRACE_INFO,
+		"Unknown TruthValue type %d", t);
+	return nullptr;
 }

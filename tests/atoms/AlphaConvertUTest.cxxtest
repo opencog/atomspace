@@ -23,6 +23,7 @@
 #include <opencog/atoms/base/Atom.h>
 #include <opencog/atomspace/AtomSpace.h>
 #include <opencog/atoms/core/ScopeLink.h>
+#include <opencog/atoms/pattern/BindLink.h>
 
 using namespace opencog;
 
@@ -38,6 +39,7 @@ public:
 	AlphaConvertUTest()
 	{
 		logger().set_print_to_stdout_flag(true);
+		logger().set_timestamp_flag(false);
 	}
 
 	void setUp() {}
@@ -48,6 +50,11 @@ public:
 	void test_variable();
 	void test_body();
 	void test_atomspace();
+	void test_bindlink();
+	void test_rand_alpha_conversion();
+	void test_names_alpha_conversion();
+	void test_vardecl_bindlink_alpha_conversion();
+	void test_unordered();
 };
 
 #define NA _asa.add_node
@@ -217,12 +224,13 @@ void AlphaConvertUTest::test_atomspace()
 		LA(AND_LINK, NA(VARIABLE_NODE, "$Y")));
 
 	// x and y should be equal
-	// TS_ASSERT(hscox == hscoy);
+	TS_ASSERT(hscox == hscoy);
 
 	printf("Expecting same atom: x=%s vs y=%s\n",
 		hscox->toString().c_str(), hscoy->toString().c_str());
 
-#if 0
+	ScopeLinkPtr scox(ScopeLinkCast(hscox));
+
 	Handle hscoz =
 	LA(SCOPE_LINK,
 		LA(VARIABLE_LIST, NA(VARIABLE_NODE, "$Z")),
@@ -252,7 +260,162 @@ void AlphaConvertUTest::test_atomspace()
 
 	// x and t should be equal
 	TS_ASSERT(scox->is_equal(hscot));
-#endif
+
+	logger().info("END TEST: %s", __FUNCTION__);
+}
+
+// Test is_equal for BindLink.
+void AlphaConvertUTest::test_bindlink()
+{
+	logger().info("BEGIN TEST: %s", __FUNCTION__);
+
+	// Create BindLink
+	Handle hscox =
+	LA(BIND_LINK,
+		NA(VARIABLE_NODE, "$X"),
+		LA(OR_LINK, NA(VARIABLE_NODE, "$X")),
+		LA(AND_LINK, NA(VARIABLE_NODE, "$X")));
+
+	ScopeLinkPtr scox(ScopeLinkCast(hscox));
+	TS_ASSERT(scox != nullptr);
+
+	_asb.clear();
+	Handle hscoy =
+	LB(BIND_LINK,
+		NB(VARIABLE_NODE, "$X"),
+		LB(OR_LINK, NB(VARIABLE_NODE, "$X")),
+		LB(AND_LINK, NB(VARIABLE_NODE, "$X")));
+
+	// x and y should be equal
+	TS_ASSERT(scox->is_equal(hscoy));
+
+	_asb.clear();
+	hscoy =
+	LB(BIND_LINK,
+		LB(OR_LINK, NB(VARIABLE_NODE, "$X")),
+		LB(AND_LINK, NB(VARIABLE_NODE, "$X")));
+
+	// x and y should be equal
+	TS_ASSERT(scox->is_equal(hscoy));
+
+	_asb.clear();
+	hscoy =
+	LB(BIND_LINK,
+		NB(VARIABLE_NODE, "$X"),
+		LB(OR_LINK, NA(VARIABLE_NODE, "$X")),
+		LB(OR_LINK, NB(VARIABLE_NODE, "$X")));
+
+	// x and y should be NOT equal because their implicants are not
+	// alpha-equivalent.
+	TS_ASSERT(not scox->is_equal(hscoy));
+
+	logger().info("END TEST: %s", __FUNCTION__);
+}
+
+// Test ScopeLink::alpha_conversion with no arguments
+void AlphaConvertUTest::test_rand_alpha_conversion()
+{
+	logger().info("BEGIN TEST: %s", __FUNCTION__);
+
+	// Test simple ScopeLink
+	Handle hsc =
+	LA(SCOPE_LINK,
+		NA(VARIABLE_NODE, "$X"),
+		LA(AND_LINK, NA(VARIABLE_NODE, "$X")));
+
+	ScopeLinkPtr sc(ScopeLinkCast(hsc));
+	Handle scac = sc->alpha_conversion();
+
+	std::cout << "sc = " << oc_to_string(sc);
+	std::cout << "scac = " << oc_to_string(scac);
+
+	TS_ASSERT(sc->is_equal(scac));
+
+	logger().info("END TEST: %s", __FUNCTION__);
+}
+
+// Test ScopeLink::alpha_conversion with provided variable names
+void AlphaConvertUTest::test_names_alpha_conversion()
+{
+	logger().info("BEGIN TEST: %s", __FUNCTION__);
+
+	// Test simple ScopeLink
+	Handle X = NA(VARIABLE_NODE, "$X"),
+		Y = NA(VARIABLE_NODE, "$Y"),
+		hsc = LA(SCOPE_LINK, X, LA(AND_LINK, X)),
+		expected = LA(SCOPE_LINK, Y, LA(AND_LINK, Y));
+
+	ScopeLinkPtr sc(ScopeLinkCast(hsc));
+	Handle result = _asa.add_atom(sc->alpha_conversion({{X, Y}}));
+
+	std::cout << "result = " << oc_to_string(result);
+	std::cout << "expected = " << oc_to_string(expected);
+
+	TS_ASSERT_EQUALS(result, expected);
+
+	logger().info("END TEST: %s", __FUNCTION__);
+}
+
+// Like test_vardecl_bindlink_alpha_conversion but using a BindLink
+// instead of a ScopeLink
+void AlphaConvertUTest::test_vardecl_bindlink_alpha_conversion()
+{
+	logger().info("BEGIN TEST: %s", __FUNCTION__);
+
+	// Test simple ScopeLink
+	Handle X = NA(VARIABLE_NODE, "$X"),
+		Y = NA(VARIABLE_NODE, "$Y"),
+		CT = NA(TYPE_NODE, "ConceptNode"),
+		Y_vardecl = LA(TYPED_VARIABLE_LINK, Y, CT),
+		hbl = LA(BIND_LINK, LA(AND_LINK, X), LA(OR_LINK, X)),
+		expected_wo_vardecl = LA(BIND_LINK,
+		                         LA(AND_LINK, Y), LA(OR_LINK, Y)),
+		expected = LA(BIND_LINK, Y_vardecl,
+		              LA(AND_LINK, Y), LA(OR_LINK, Y));
+
+	BindLinkPtr bl(BindLinkCast(hbl));
+	Handle result_wo_vardecl = _asa.add_atom(bl->alpha_conversion({Y}));
+
+	std::cout << "result_wo_vardecl = " << oc_to_string(result_wo_vardecl);
+	std::cout << "expected_wo_vardecl = " << oc_to_string(expected_wo_vardecl);
+
+	TS_ASSERT_EQUALS(result_wo_vardecl, expected_wo_vardecl);
+
+	logger().info("END TEST: %s", __FUNCTION__);
+}
+
+// Test ScopeLink::is_equal with undordered links
+void AlphaConvertUTest::test_unordered()
+{
+	logger().info("BEGIN TEST: %s", __FUNCTION__);
+
+	Handle
+		X = NA(VARIABLE_NODE, "$X-origin"),
+		Y = NA(VARIABLE_NODE, "$Y-origin"),
+		Z = NA(VARIABLE_NODE, "$Z-origin"),
+		and1 = LA(AND_LINK, X, Y),
+		and2 = LA(AND_LINK, Z, Y),
+		vardecl = LA(VARIABLE_LIST, X, Y, Z),
+		body = LA(OR_LINK, and1, and2),
+		sc = LA(SCOPE_LINK, vardecl, body);
+
+	ScopeLinkPtr sc_p(ScopeLinkCast(sc));
+	TS_ASSERT(sc_p != nullptr);
+
+	Handle
+		alpha_X = NA(VARIABLE_NODE, "$X-alpha"),
+		alpha_Y = NA(VARIABLE_NODE, "$Y-alpha"),
+		alpha_Z = NA(VARIABLE_NODE, "$Z-alpha"),
+		alpha_and2 = LA(AND_LINK, alpha_Z, alpha_Y),
+		alpha_and1 = LA(AND_LINK, alpha_X, alpha_Y),
+		alpha_vardecl = LA(VARIABLE_LIST, alpha_X, alpha_Y, alpha_Z),
+		alpha_body = LA(OR_LINK, alpha_and1, alpha_and2),
+		alpha_sc = LA(SCOPE_LINK, alpha_vardecl, alpha_body);
+
+	std::cout << "sc = " << oc_to_string(sc);
+	std::cout << "alpha_sc = " << oc_to_string(alpha_sc);
+	
+	TS_ASSERT(sc_p->is_equal(alpha_sc));
 
 	logger().info("END TEST: %s", __FUNCTION__);
 }

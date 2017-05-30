@@ -19,6 +19,10 @@ ADD_LIBRARY (atombase
 	Link.cc
 	LinkValue.cc
 	Node.cc
+	Quotation.cc
+	Context.cc
+	StringValue.cc
+	Valuation.cc
 )
 
 # Without this, parallel make will race and crap up the generated files.
@@ -44,12 +48,16 @@ INSTALL (FILES
 	LinkValue.h
 	Node.h
 	ProtoAtom.h
+	Quotation.h
+	Context.h
+	StringValue.h
 	types.h
+	Valuation.h
 	DESTINATION "include/opencog/atoms/base"
 )
 
-# Install the auto-gened atom types as well
+# Install the auto-generated atom types as well
 INSTALL (FILES
 	${CMAKE_CURRENT_BINARY_DIR}/core_types.scm
-   DESTINATION "${DATADIR}/scm"
+   DESTINATION "${DATADIR}/scm/opencog/base"
 )

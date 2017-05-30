@@ -27,8 +27,6 @@
 #include <set>
 
 #include <opencog/atoms/base/Atom.h>
-#include <opencog/atoms/base/Link.h>
-#include <opencog/atoms/base/Node.h>
 
 namespace opencog
 {
@@ -41,43 +39,47 @@ namespace opencog
  * storing/retreiving atoms from disk or other remote location or
  * process. This class focuses on "on-demand" atom retreival,
  * rather than on bulk-save/restore (although perhaps that should
- * be provided as well.)  
+ * be provided as well.)
  */
 class BackingStore
 {
 	public:
 		virtual ~BackingStore() {}
 
-		/** 
-		 * Return a pointer to a link of the indicated type and outset,
-		 * if it exists; else return NULL.
+		/**
+		 * Return a Link with the indicated type and outset,
+		 * if it exists; else return nullptr. The returned atom
+		 * will have all values attached to it, that the backing
+		 * store knows about.
 		 */
-		virtual LinkPtr getLink(Type, const HandleSeq&) const = 0;
-
-		/** 
-		 * Return a pointer to a node of the indicated type and name,
-		 * if it exists; else return NULL.
-		 */
-		virtual NodePtr getNode(Type, const char *) const = 0;
-
-		/** 
-		 * Return a pointer to an Atom associated with the given
-		 * handle, if it exists; else return NULL.
-		 */
-		virtual AtomPtr getAtom(UUID) const = 0;
+		virtual Handle getLink(Type, const HandleSeq&) const = 0;
 
 		/**
-		 * Return a vector containing the handles of the entire incoming
-		 * set of the indicated handle. 
+		 * Return a Node with the indicated type and name, if it
+		 * exists; else return nullptr. The returned atom will have
+		 * all values attached to it, that the backing store knows
+		 * about.
 		 */
-		virtual HandleSeq getIncomingSet(Handle) const = 0;
+		virtual Handle getNode(Type, const char *) const = 0;
+
+		/**
+		 * Put the entire incoming set of the indicated handle into
+		 * the atom table.
+		 */
+		virtual void getIncomingSet(AtomTable&, const Handle&) = 0;
+
+		/**
+		 * Put all atoms of the given type in the incoming set of the
+		 * indicated handle into the atom table.
+		 */
+		virtual void getIncomingByType(AtomTable&, const Handle&, Type) = 0;
 
 		/**
 		 * Recursively store the atom and anything in it's outgoing set.
-		 * If the atom is already in storage, this will update it's 
-		 * truth value, etc. 
+		 * If the atom is already in storage, this will update it's
+		 * truth value, etc.
 		 */
-		virtual void storeAtom(Handle) = 0;
+		virtual void storeAtom(const Handle&) = 0;
 
 		/**
 		 * Load *all* atoms of the given type, but only if they are not
@@ -121,12 +123,12 @@ class BackingStore
 		/**
 		 * Register this backing store with the atomspace.
 		 */
-		void registerWith(AtomSpace* atomspace);
+		void registerWith(AtomSpace*);
 
 		/**
 		 * Unregister this backing store with the atomspace.
 		 */
-		void unregisterWith(AtomSpace* atomspace);
+		void unregisterWith(AtomSpace*);
 };
 
 /** @}*/

@@ -75,7 +75,7 @@
 		)))
 
 ;; This one is a bit perverted, and similar expressions are guaranteed
-;; to fail in the general case, cause teh pattern matcher treats
+;; to fail in the general case, cause the pattern matcher treats
 ;; AbsentLinks in a fundamentally different way. But we test this
 ;; anyway, for now.  Like the above, its currently broken. Its too
 ;; weird right now for me to want to fix it, so I am punting on this.

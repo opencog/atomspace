@@ -93,7 +93,7 @@ satisfaction_handle = SatisfactionLink(
             )
         )
     )
-).h
+)
 
 # Perform the actual satisfiability search.
 result = satisfaction_link(atomspace, satisfaction_handle)

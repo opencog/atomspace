@@ -40,12 +40,12 @@ class PatternMatch
 
 	protected:
 		static bool recursive_virtual(PatternMatchCallback& cb,
-		            const std::vector<Handle>& virtuals,
-		            const std::vector<Handle>& negations,
-		            const std::map<Handle, Handle>& var_gnds,
-		            const std::map<Handle, Handle>& term_gnds,
-		            std::vector<std::vector<std::map<Handle, Handle>>> comp_var_gnds,
-		            std::vector<std::vector<std::map<Handle, Handle>>> comp_term_gnds);
+		            const HandleSeq& virtuals,
+		            const HandleSeq& negations,
+		            const HandleMap& var_gnds,
+		            const HandleMap& term_gnds,
+		            std::vector<HandleMapSeq> comp_var_gnds,
+		            std::vector<HandleMapSeq> comp_term_gnds);
 };
 
 } // namespace opencog

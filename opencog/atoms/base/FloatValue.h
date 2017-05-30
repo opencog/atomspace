@@ -43,39 +43,29 @@ class FloatValue
 protected:
 	std::vector<double> _value;
 
+	FloatValue(Type t) : ProtoAtom(t) {}
+public: // XXX should be protected...
+	FloatValue(Type t, const std::vector<double>& v) : ProtoAtom(t), _value(v) {}
+
 public:
 	FloatValue(double v) : ProtoAtom(FLOAT_VALUE) { _value.push_back(v); }
-	FloatValue(std::vector<double> v) : ProtoAtom(FLOAT_VALUE), _value(v) {}
+	FloatValue(const std::vector<double>& v)
+		: ProtoAtom(FLOAT_VALUE), _value(v) {}
 
 	virtual ~FloatValue() {}
 
-	std::vector<double>& value() { return _value; }
+	const std::vector<double>& value() const { return _value; }
 
-	/** Returns a string representation of the value.
-	 *
-	 * @return A string representation of the value.
-	 */
-	virtual std::string toString(const std::string& indent);
-	virtual std::string toShortString(const std::string& indent)
-	{ return toString(indent); }
+	/** Returns a string representation of the value.  */
+	virtual std::string toString(const std::string& indent = "") const;
 
-	/** Returns whether two atoms are equal.
-	 *
-	 * @return true if the atoms are equal, false otherwise.
-	 */
+	/** Returns true if two atoms are equal.  */
 	virtual bool operator==(const ProtoAtom&) const;
-
-	/** Returns whether two atoms are different.
-	 *
-	 * @return true if the atoms are different, false otherwise.
-	 */
-	bool operator!=(const ProtoAtom& other) const
-	{  return not operator==(other); }
 };
 
-typedef std::shared_ptr<FloatValue> FloatValuePtr;
+typedef std::shared_ptr<const FloatValue> FloatValuePtr;
 static inline FloatValuePtr FloatValueCast(const ProtoAtomPtr& a)
-	{ return std::dynamic_pointer_cast<FloatValue>(a); }
+	{ return std::dynamic_pointer_cast<const FloatValue>(a); }
 
 // XXX temporary hack ...
 #define createFloatValue std::make_shared<FloatValue>

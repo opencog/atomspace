@@ -26,7 +26,6 @@
 #ifndef _OPENCOG_INDEFINITE_TRUTH_VALUE_H
 #define _OPENCOG_INDEFINITE_TRUTH_VALUE_H
 
-#include <memory>
 #include <vector>
 
 #include <opencog/truthvalue/TruthValue.h>
@@ -50,10 +49,12 @@ static inline IndefiniteTruthValuePtr IndefiniteTVCast(TruthValuePtr tv)
 class IndefiniteTruthValue : public TruthValue
 {
 private:
-
-    strength_t U;
-    strength_t L;
-    confidence_t confidenceLevel; //!< referred as "b" in the paper
+    enum {
+        MEAN,
+        U,
+        L,
+        CONFIDENCE_LEVEL //!< referred as "b" in the paper
+    };
     bool symmetric;
 
     //! used in inference rule procedure in order to compute L1 and U1
@@ -70,7 +71,6 @@ private:
      * is correct
 	 */
 	///@{
-    strength_t mean;
     count_t count;
     confidence_t confidence;
 	///@}
@@ -85,32 +85,37 @@ private:
     strength_t findDiff(strength_t idiff) const;
 
 public:
+    static count_t DEFAULT_K;
+    static void setDefaultK(count_t k) {
+        DEFAULT_K = k;
+    }
+
     IndefiniteTruthValue();
     IndefiniteTruthValue(strength_t l, strength_t u,
                          confidence_t c = DEFAULT_CONFIDENCE_LEVEL);
     IndefiniteTruthValue(IndefiniteTruthValue const&);
+    IndefiniteTruthValue(const ProtoAtomPtr&);
 
     //! it is a strict equality comparison, without error interval tolerance
-    virtual bool operator==(const TruthValue& rhs) const;
+    virtual bool operator==(const ProtoAtom&) const;
 
-    strength_t getMean() const { return mean; }
-    strength_t getU() const { return U; }
-    strength_t getL() const { return L; }
-    confidence_t getConfidenceLevel() const { return confidenceLevel; }
+    strength_t getMean() const { return _value[MEAN]; }
+    strength_t getU() const { return _value[U]; }
+    strength_t getL() const { return _value[L]; }
+    confidence_t getConfidenceLevel() const { return _value[CONFIDENCE_LEVEL]; }
     strength_t getDiff() const { return diff; }
     const std::vector<strength_t*>& getFirstOrderDistribution() const;
 
     count_t getCount() const { return count; }
     confidence_t getConfidence() const { return confidence; }
-    strength_t getU_() const { return U + diff; }
-    strength_t getL_() const { return L - diff; }
+    strength_t getU_() const { return _value[U] + diff; }
+    strength_t getL_() const { return _value[L] - diff; }
     bool isSymmetric() const { return symmetric; }
 
-    TruthValuePtr merge(TruthValuePtr,
+    TruthValuePtr merge(const TruthValuePtr&,
                         const MergeCtrl& mc=MergeCtrl()) const;
 
-    std::string toString() const;
-    TruthValueType getType() const;
+    std::string toString(const std::string&) const;
 
     // clone method
     static IndefiniteTruthValuePtr createITV(TruthValuePtr tv)
@@ -129,13 +134,18 @@ public:
     static IndefiniteTruthValuePtr createITV(strength_t l, strength_t u,
                          confidence_t c = DEFAULT_CONFIDENCE_LEVEL)
     {
-        return std::make_shared<IndefiniteTruthValue>(l, u, c);
+        return std::make_shared<const IndefiniteTruthValue>(l, u, c);
     }
 
     static TruthValuePtr createTV(strength_t l, strength_t u,
                          confidence_t c = DEFAULT_CONFIDENCE_LEVEL)
     {
         return std::static_pointer_cast<const TruthValue>(createITV(l, u, c));
+    }
+    static TruthValuePtr createTV(const ProtoAtomPtr& pap)
+    {
+        return std::static_pointer_cast<const TruthValue>(
+            std::make_shared<const IndefiniteTruthValue>(pap));
     }
 
     TruthValuePtr clone() const

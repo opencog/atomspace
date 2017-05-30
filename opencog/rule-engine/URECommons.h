@@ -45,47 +45,12 @@ public:
 	URECommons(AtomSpace& as);
 
 	/**
-	 * creates a BindLink instance that could be passed to to
-	 * PatternMatching module
-	 *
-	 * @param himplicant - an implicant part of the BindLink must have
-	 *                     a variable node.
-	 * @return - a Handle to the BindLink instance created
-	 */
-	Handle create_bindLink(Handle himplicant, bool is_quoted = false);
-
-	/**
-	 * checks if a handle already exists in a HandleSeq
-	 */
-	bool exists_in(const Handle& hlink, const Handle& h) const;
-
-	/*
-	 * Generate UUID
-	 */
-	string get_unique_name(const Handle& h) const;
-
-	/**
-	 * create a copy of the given implicatoin link with unique variables
-	 */
-	Handle replace_nodes_with_varnode(const Handle& himplication_link, Type t =
-			VARIABLE_NODE);
-
-	/**
-	 * Create a copy of the handle with a different variable name
-	 * passed in @param var_uniq_var map input.
-	 */
-	Handle change_node_types(const Handle& h, map<Handle, Handle>& replacement_map);
-
-	/**
-	 * Get top level parent of the handle
-	 * @return a Link or Handle::UNDEFINED if there is no
-	 */
-	void get_root_links(const Handle& h, HandleSeq& parents) const;
-
-	/**
 	 * Randomly pick about half of the elements, and amongst those
 	 * return the fittest (higher is better). If tfitness_map is
 	 * empty, then return the default value (build with Type()).
+	 *
+	 * TODO: generalize and move this method to
+	 * opencog/util/selection.h
 	 */
 	template<class Type>
 	Type tournament_select(const map<Type, float>& tfitnes_map) {
@@ -108,13 +73,14 @@ public:
 		}
 		return winners.rbegin()->second;
 	}
+
 	/**
 	 * Calculates fitness values in source_list_atom_space (or
 	 * target_list_atom_space for the BC) using the formula
 	 *
 	 * F = s^x * c^(2-x)
 	 *
-	 * where s is strength,c is confidence and x is some fixed value
+	 * where s is strength, c is confidence and x is some fixed value
 	 *
 	 * @param h - a handle
 	 * @return a fitness value

@@ -2,6 +2,7 @@
 ADD_LIBRARY (atomspaceutils
 	AtomSpaceUtils
 	RandomAtomGenerator
+	TLB
 )
 
 ADD_DEPENDENCIES(atomspaceutils opencog_atom_types)
@@ -24,5 +25,6 @@ ENDIF (CYGWIN)
 
 INSTALL (FILES
 	AtomSpaceUtils.h
+	TLB.h
 	DESTINATION "include/opencog/atomspaceutils"
 )

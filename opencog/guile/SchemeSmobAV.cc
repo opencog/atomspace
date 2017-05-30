@@ -6,11 +6,10 @@
  * Copyright (c) 2008,2009 Linas Vepstas <linas@linas.org>
  */
 
-#ifdef HAVE_GUILE
-
 #include <cstddef>
 #include <libguile.h>
 
+#include <opencog/attentionbank/AttentionBank.h>
 #include <opencog/truthvalue/AttentionValue.h>
 #include <opencog/guile/SchemeSmob.h>
 
@@ -52,7 +51,7 @@ std::string SchemeSmob::av_to_string(const AttentionValue *av)
 #define BUFLEN 120
 	char buff[BUFLEN];
 
-	snprintf(buff, BUFLEN, "(av %d %d %u)",
+	snprintf(buff, BUFLEN, "(av %f %f %f)",
 	         av->getSTI(), av->getLTI(), av->getVLTI());
 
 	return buff;
@@ -64,8 +63,7 @@ std::string SchemeSmob::av_to_string(const AttentionValue *av)
  */
 SCM SchemeSmob::take_av (AttentionValue *av)
 {
-	scm_gc_register_collectable_memory (av,
-	                 sizeof(*av), "opencog av");
+	scm_gc_register_allocation(sizeof(*av));
 
 	SCM smob;
 	SCM_NEWSMOB (smob, cog_misc_tag, av);
@@ -93,6 +91,18 @@ SCM SchemeSmob::ss_new_av (SCM ssti, SCM slti, SCM svlti)
 	AttentionValue::vlti_t vlti = scm_to_ushort(svlti);
 	AttentionValue *av = new AttentionValue(sti, lti, vlti);
 	return take_av(av);
+}
+
+/**
+ *  Stimulate an atom with given stimulus amount.
+ */
+SCM SchemeSmob::ss_stimulate (SCM satom, SCM sstimulus)
+{
+	Handle h(scm_to_handle(satom));
+	double stimulus = scm_to_double(sstimulus);
+	AtomSpace* atomspace = ss_get_env_as("cog-stimulate");
+	attentionbank(atomspace).stimulate(h, stimulus);
+	return satom;
 }
 
 /* ============================================================== */
@@ -154,5 +164,4 @@ SCM SchemeSmob::ss_av_get_value (SCM s)
 	return rc;
 }
 
-#endif /* HAVE_GUILE */
 /* ===================== END OF FILE ============================ */

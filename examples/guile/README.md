@@ -35,10 +35,10 @@ After the opencog module is loaded, you can create atoms "as usual" e.g.
 (ConceptNode "asdf")
 ```
 
-You can load other scm files (for example, "utilities.scm") by saying:
+You can load other scm files (for example, "foobar.scm") by saying:
 
 ```
-(load-from-path "utilities.scm")
+(load-from-path "foobar.scm")
 ```
 
 Some, but not all functions have documentation, which can be viewed by
@@ -68,6 +68,7 @@ The current list of modules that wrap C++ code includes:
 (use-modules (opencog rule-engine))
 (use-modules (opencog atom-types))
 (use-modules (opencog cogserver))
+(use-modules (opencog nlp aiml))
 (use-modules (opencog nlp chatbot))
 (use-modules (opencog nlp chatbot-eva))
 (use-modules (opencog nlp fuzzy))
@@ -86,6 +87,7 @@ The current list of modules that wrap C++ code includes:
 * `get-put.scm` -- An example of asserting facts in the AtomSpace.
 * `state.scm`   -- Maintaining unique state.
 * `property.scm`-- Setting properies on atoms.
+* `values.scm`  -- Using ProtoAtoms aka Values.
 * `filter.scm`  -- Filtering sets of atoms.
 * `map.scm`     -- Applying a map function to a set or list.
 * `random-choice.scm`  -- Numerical programming, including loops.

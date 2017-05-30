@@ -19,23 +19,17 @@
             )
         )
         (ExecutionOutputLink
-            (GroundedSchemaNode "scm: bc-deduction-formula")
+            (GroundedSchemaNode "scm: fc-deduction-formula")
             (ListLink
                 (InheritanceLink
                     (ConceptNode "Cat")
                     (ConceptNode "Animal"))
                 (InheritanceLink
                     (ConceptNode "Animal")
-                    (VariableNode "$C")
-                )
+                    (VariableNode "$C"))
                 (InheritanceLink
                     (ConceptNode "Cat")
-                    (VariableNode "$C")
-                )
-            )
-        )
-    )
-  )
+                    (VariableNode "$C"))))))
 
 ; Substitution case where $B = Cat and $C = Animal
 (define deduction-ab-substitute-2
@@ -58,20 +52,14 @@
             )
         )
         (ExecutionOutputLink
-            (GroundedSchemaNode "scm: bc-deduction-formula")
+            (GroundedSchemaNode "scm: fc-deduction-formula")
             (ListLink
                 (InheritanceLink
                     (VariableNode "$A")
                     (ConceptNode  "Cat"))
                 (InheritanceLink
                     (ConceptNode  "Cat")
-                    (ConceptNode  "Animal")
-                )
+                    (ConceptNode  "Animal"))
                 (InheritanceLink
                     (VariableNode "$A")
-                    (ConceptNode  "Animal")
-                )
-            )
-        )
-    )
-)
+                    (ConceptNode  "Animal"))))))

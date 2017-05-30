@@ -39,8 +39,8 @@ int atomCompare(Atom *a, Atom *b)
 	}
 	if (0 < a->getArity())
 	{
-		std::vector<Handle> outa = a->getOutgoingSet();
-		std::vector<Handle> outb = b->getOutgoingSet();
+		HandleSeq outa = a->getOutgoingSet();
+		HandleSeq outb = b->getOutgoingSet();
 		for (int i =0; i< a->getArity(); i++)
 		{
 			if (outa[i] != outb[i])
@@ -98,7 +98,7 @@ void single_atom_test(std::string id)
 	TLB::addAtom(a2);
 	store->storeAtom(a2);
 
-	std::vector<Handle> hvec;
+	HandleSeq hvec;
 	hvec.push_back(a->getHandle());
 	hvec.push_back(a2->getHandle());
 
@@ -134,7 +134,7 @@ void add_to_table(AtomTable *table, std::string id)
 	a3->setTruthValue(stv3);
 	table->add(a3);
 
-	std::vector<Handle> hvec;
+	HandleSeq hvec;
 	hvec.push_back(a->getHandle());
 	hvec.push_back(a2->getHandle());
 	hvec.push_back(a3->getHandle());

@@ -5,6 +5,7 @@
  * Copyright (c) 2008, 2014, 2015 Linas Vepstas <linas@linas.org>
  */
 
+#ifdef HAVE_GUILE
 
 #include <cstddef>
 #include <opencog/atoms/base/Link.h>
@@ -15,7 +16,6 @@
 #include <opencog/guile/SchemeModule.h>
 
 #include "ExecSCM.h"
-
 
 // ========================================================
 
@@ -51,15 +51,14 @@ static TruthValuePtr ss_evaluate(AtomSpace* atomspace, const Handle& h)
 static Handle ss_reduce(AtomSpace* atomspace, const Handle& h)
 {
 	Type t = h->getType();
-	if (NUMBER_NODE == t) return Handle(h);
+	if (NUMBER_NODE == t) return h;
 
 	if (not classserver().isA(t, FOLD_LINK))
-	{
 		throw InvalidParamException(TRACE_INFO,
 			"Expecting a FoldLink (PlusLink, TimesLink, etc");
-	}
 
-	FoldLinkPtr fff(FoldLink::factory(h));
+	auto fact = classserver().getFactory(t);
+	FoldLinkPtr fff(FoldLinkCast((*fact)(h)));
 	Handle hr(fff->reduce());
 
 	if (DELETE_LINK == hr->getType())
@@ -90,7 +89,7 @@ ExecSCM::ExecSCM(void) :
 void ExecSCM::init(void)
 {
 	_binders.push_back(new FunctionWrap(ss_execute,
-	                    "cog-execute!", "exec"));
+	                   "cog-execute!", "exec"));
 
 	_binders.push_back(new FunctionWrap(ss_evaluate,
 	                   "cog-evaluate!", "exec"));
@@ -113,3 +112,4 @@ void opencog_exec_init(void)
 	static ExecSCM exy;
 	exy.module_init();
 }
+#endif // HAVE_GUILE

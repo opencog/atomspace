@@ -34,135 +34,132 @@ class ForwardChainerUTest;
 namespace opencog
 {
 
-enum class source_selection_mode {
+enum class source_selection_mode
+{
 	TV_FITNESS, STI, UNIFORM
 };
 
-class FCMemory;
 class Rule;
 
-class ForwardChainer {
+class ForwardChainer
+{
 private:
-    friend class ::ForwardChainerUTest;
+	friend class ::ForwardChainerUTest;
 
-    AtomSpace& _as;
-    //This restricts PM to look only in the focus set
-    AtomSpace _focus_set_as;
+	AtomSpace& _as;
 
-    URECommons _rec;            // utility class
-    Handle _rbs;                // rule-based system
-    UREConfigReader _configReader;
+	// The focus set is copied into this atomspace; during chaining,
+	// the pattern matcher is applied only to this atomspace.  This
+	// is the primary mechanism by which chaining is restricted to
+	// the focus set.  This is effective, but not very efficient;
+	// perhaps there is some better mechanism?
+	AtomSpace _focus_set_as;
 
-    int _iteration;
-    int _max_iteration;
-    source_selection_mode _ts_mode;
-    bool _search_in_af;
-    bool _search_focus_set;
-    Handle _cur_source;
+	URECommons _rec;            // utility class
+	Handle _rbs;                // rule-based system
+	UREConfigReader _configReader;
 
-	// We maintain both a selected and unselected sources to speed up
-	// choose_source
-    UnorderedHandleSet _selected_sources;
-    UnorderedHandleSet _unselected_sources;
+	int _iteration;
+	source_selection_mode _ts_mode;
+	bool _search_in_af;
+	bool _search_focus_set;
+	Handle _init_source;
+	Handle _init_vardecl;
+	Handle _cur_source;
 
-    FCStat _fcstat;
+	// We maintain both selected and unselected sources, to speed up
+	// choose_source()
+	UnorderedHandleSet _selected_sources;
+	UnorderedHandleSet _unselected_sources;
 
-    void init(const Handle& hsource, const HandleSeq& focus_set);
+	FCStat _fcstat;
 
-    void apply_all_rules();
+	void init(const Handle& source,
+	          const Handle& vardecl,
+	          const HandleSeq& focus_set);
 
-    Handle gen_sub_varlist(const Handle& parent, const Handle& parent_varlist);
-    bool is_constant_clause(const Handle& hvarlist, const Handle& hclause) const;
-    Handle remove_constant_clauses(const Handle& hvarlist,
-                                   const Handle& himplicand);
-    HandleSeq substitute_rule_part(AtomSpace& as, const Handle& hrule,
-                                   const std::set<Handle>& vars,
-                                   const std::vector<std::map<Handle, Handle>>&
-                                   var_groundings);
-    bool unify(const Handle& source, const Handle& pattern, const Rule* rule);
-    UnorderedHandleSet derive_rules(const Handle& source, const Handle& pattern,
-                                    const Rule* rule);
+	void apply_all_rules();
+
 	template<typename HandleContainer>
-    void update_potential_sources(const HandleContainer& input) {
-		UnorderedHandleSet input_minus_selected;
-		for (const Handle& h : input)
-			if (_selected_sources.find(h) == _selected_sources.end())
-				input_minus_selected.insert(h);
-		_potential_sources.insert(input_minus_selected.begin(),
-		                          input_minus_selected.end());
-        _unselected_sources.insert(input_minus_selected.begin(),
-                                   input_minus_selected.end());
-    }
-    bool is_valid_implicant(const Handle& h);
-    void validate(const Handle& hsource, const HandleSeq& hfocus_set);
+	void update_potential_sources(const HandleContainer& input)
+		{
+			UnorderedHandleSet input_minus_selected;
+			for (const Handle& h : input)
+				if (_selected_sources.find(h) == _selected_sources.end())
+					input_minus_selected.insert(h);
+			_potential_sources.insert(input_minus_selected.begin(),
+			                          input_minus_selected.end());
+			_unselected_sources.insert(input_minus_selected.begin(),
+			                           input_minus_selected.end());
+		}
+
+	void validate(const Handle& source);
+
+	void expand_meta_rules();
 
 protected:
-    vector<Rule*> _rules; /*<loaded rules*/
-    UnorderedHandleSet _potential_sources;
-    HandleSeq _focus_set;
-
-    /**
-     * choose next source from the source list
-     *
-     * @return  A handle to the chosen source from source list
-     */
-    virtual Handle choose_source();
+	RuleSet _rules; /* loaded rules */
+	UnorderedHandleSet _potential_sources;
+	HandleSeq _focus_set;
 
 	/**
-     * Choose an applicable rules from the rule base by selecting
-     * rules whose premise structurally matches with the source.
-     *
-     * If no rule can be chosen return nullptr.
-     *
-     * @return  A rule that in which @param source could ground.
-     */
-    virtual Rule* choose_rule(const Handle& hsource);
-
-	/**
-	 * Apply rule on the current source. Creating derived rules if
-	 * necessary.
+	 * choose next source from the source list
+	 *
+	 * @return  A handle to the chosen source from source list
 	 */
-    virtual UnorderedHandleSet apply_rule(const Rule* rule);
+	Handle select_source();
 
 	/**
-     * Apply rule handle (BindLink).
-     *
-     * @return  A set of handles created as a result of applying current
-     *          choosen rule.
-     */
-    virtual HandleSeq apply_rule(const Handle& rhandle);
+	 * Choose an applicable rules from the rule base by selecting
+	 * rules whose premise structurally matches with the source.
+	 *
+	 * If no rule can be chosen return nullptr.
+	 *
+	 * @return  A rule that in which @param source could ground.
+	 */
+	Rule select_rule(const Handle& source);
 
-    UnorderedHandleSet derive_rules(const Handle& source, const Rule* rule);
+	/**
+	 * Apply rule.
+	 */
+	UnorderedHandleSet apply_rule(const Rule& rule);
 
 public:
-    /**
-     * Ctor. rbs is a Handle pointing to rule-based system.
-     */
-    ForwardChainer(AtomSpace& as, const Handle& rbs, const Handle& hsource,
-                   const HandleSeq& focus_set = HandleSeq(),
-                   source_selection_mode sm = source_selection_mode::UNIFORM);
-    virtual ~ForwardChainer();
+	/**
+	 * Ctor. rbs is a Handle pointing to rule-based system.
+	 */
+	ForwardChainer(AtomSpace& as, const Handle& rbs, const Handle& source,
+	               const Handle& vardecl=Handle::UNDEFINED,
+	               const HandleSeq& focus_set=HandleSeq(),
+	               source_selection_mode sm=source_selection_mode::UNIFORM);
+	~ForwardChainer();
 
-    /**
-     * Perform a single forward chaining inference step.
-     */
-    void do_step();
+	/**
+	 * URE configuration accessors
+	 */
+	UREConfigReader& get_config();
+	const UREConfigReader& get_config() const;
 
-    /**
-     * Perform forward chaining inference till the termination
-     * criteria have been met.
-     */
-    void do_chain();
+	/**
+	 * Perform forward chaining inference till the termination
+	 * criteria have been met.
+	 */
+	void do_chain();
 
-    /**
-     * @return true if the termination criteria have been met.
-     */
-    bool termination();
+	/**
+	 * Perform a single forward chaining inference step.
+	 */
+	void do_step();
 
-    /**
-     * @return all results in their order of inference.
-     */
-    UnorderedHandleSet get_chaining_result();
+	/**
+	 * @return true if the termination criteria have been met.
+	 */
+	bool termination();
+
+	/**
+	 * @return all results in their order of inference.
+	 */
+	UnorderedHandleSet get_chaining_result();
 };
 
 } // ~namespace opencog

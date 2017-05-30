@@ -1,7 +1,5 @@
 #include <opencog/atomspace/AtomSpace.h>
-#include <opencog/guile/load-file.h>
 #include <opencog/guile/SchemeEval.h>
-#include <opencog/util/Config.h>
 
 #include <opencog/rule-engine/UREConfigReader.h>
 
@@ -15,29 +13,39 @@ private:
 public:
 	UREConfigReaderUTest() : _eval(&_as)
 	{
-		config().set("SCM_PRELOAD",
-		             "opencog/atoms/base/core_types.scm");
-		load_scm_files_from_config(_as);
-
 		// Module loading is borked from the C++ environment, so
 		// add the following paths so that utilities.scm is found.
 		_eval.eval("(add-to-load-path \"" PROJECT_SOURCE_DIR "/opencog/scm\")");
 		_eval.eval("(add-to-load-path \"" PROJECT_SOURCE_DIR "/opencog/scm/opencog\")");
+		_eval.eval("(add-to-load-path \"" PROJECT_SOURCE_DIR "/opencog/scm/opencog/rule-engine\")");
+
+		_eval.eval("(add-to-load-path \"..\")");
+		_eval.eval("(add-to-load-path \"../../..\")");
+		_eval.eval("(use-modules (opencog) (opencog query))");
 
 		// Load the simple crisp system example to test it
-		string eval_output =
+		std::string eval_output =
 			_eval.eval("(load \"" PROJECT_SOURCE_DIR
-			           "/tests/rule-engine/crisp.scm\")");
+			           "/tests/rule-engine/fc.scm\")");
 		std::cout << "eval_output = " << eval_output << std::endl;
 
 		std::cout << "AtomSpace = " << _as << std::endl;
+	}
+
+	~UREConfigReaderUTest()
+	{
+		// Erase the log file if no assertions failed.
+		if (!CxxTest::TestTracker::tracker().suiteFailed())
+			std::remove(logger().get_filename().c_str());
+int rc = CxxTest::TestTracker::tracker().suiteFailed();
+_exit(rc); // XXX hack to avoid double-free in __run_exit_handlers
 	}
 
 	void test_read_config()
 	{
 		// Get the ConceptNode corresponding to the rule-based system
 		// to test
-		Handle rbs = _as.get_node(CONCEPT_NODE, "crisp-rule-base");
+		Handle rbs = _as.get_node(CONCEPT_NODE, "fc-rule-base");
 
 		UREConfigReader cr(_as, rbs);
 

@@ -13,6 +13,9 @@
 ; -- ure-set-fuzzy-bool-parameter -- Set a fuzzy boolean parameter of an rbs
 ; -- ure-define-rbs -- Create a rbs that runs for a particular number of
 ;                      iterations.
+; -- ure-get-forward-rule -- Return the forward form of a rule
+; -- gt-zero-confidence -- Return TrueTV iff A's confidence is greater than 0
+; -- meta-bind -- Fully apply a meta rule. Convenient for testing meta-rules
 ;
 ; If you add more utilities don't forget to add them in the
 ; export-rule-engine-utils function.
@@ -23,10 +26,13 @@
 
 (use-modules (opencog))
 (use-modules (opencog query))
+(use-modules (srfi srfi-1))
 
-(define-public (ure-add-rule rbs rule-name rule weight)
+(define-public (ure-define-add-rule rbs rule-name rule weight)
 "
-  Adds a rule to a rulebase and sets its weight and returns the rule node.
+
+  Associate a rule name and a rule content, and adds it to a rulebase
+  with a given weight and returns the rule alias (DefinedSchemaNode <rule-name>).
 
   rbs: The ConceptNode that represents a rulebase.
 
@@ -49,6 +55,19 @@
     )
 )
 
+(define-public (ure-add-rule rbs rule-alias weight)
+"
+  Adds a rule to a rulebase and sets its weight.
+
+  rbs: The ConceptNode that represents a rulebase.
+
+  rule-alias : A string that names the rule.
+
+  weight: A number that is used to represent the priority of the rule.
+"
+    (MemberLink (stv weight 1) rule-alias rbs)
+)
+
 (define-public (ure-add-rules rbs rules)
 "
   Given a rbs and a list of pairs (rule-alias weight) create for each rule
@@ -64,11 +83,8 @@
 "
   (define (expand-pair weighted-rule)
     (let* ((rule-alias (car weighted-rule))
-           (rule-name (cog-name rule-alias))
-           ; Assuming a rule is a BindLink
-           (rule (car (cog-chase-link 'DefineLink 'BindLink rule-alias)))
            (weight (cadr weighted-rule)))
-        (ure-add-rule rbs rule-name rule weight)
+        (ure-add-rule rbs rule-alias weight)
     )
   )
   (for-each expand-pair rules)
@@ -105,7 +121,7 @@
        ; Delete any previous value for that parameter
        (cog-bind del-prev-val)
        ; Delete pattern to not create to much junk in the atomspace
-       (purge-hypergraph del-prev-val)
+       (extract-hypergraph del-prev-val)
   )
 
   ; Set new value for that parameter
@@ -141,6 +157,33 @@
     rbs
 )
 
+(define-public (ure-get-forward-rule rule)
+"
+  Given a rule return the forward form
+"
+  (let ((rule-type (cog-type rule)))
+    (if (eq? rule-type 'ListLink) (gar rule) rule))
+)
+
+;; Very handy and frequent rule precondition.
+(define (gt-zero-confidence A)
+"
+  Return TrueTV iff A's confidence is greater than 0
+"
+  (bool->tv (> (cog-stv-confidence A) 0)))
+
+(define (meta-bind bl)
+"
+  Fully apply a meta rule, once for generating rules, another for
+  applying the generated rules to the atomspace. Convenient for testing
+  meta-rules.
+"
+  (let* ((rules (cog-bind bl))
+         (result-sets (map cog-bind (cog-outgoing-set rules)))
+         (result-lists (map cog-outgoing-set result-sets))
+         (equal-lset-union (lambda (x y) (lset-union equal? x y)))
+         (results (fold equal-lset-union '() result-lists)))
+    (Set results)))
 
 (define (export-rule-engine-utils)
   (export ure-add-rule
@@ -148,5 +191,9 @@
           ure-set-num-parameter
           ure-set-fuzzy-bool-parameter
           ure-define-rbs
-          export-rule-engine-utils)
+          ure-get-forward-rule
+          gt-zero-confidence
+          meta-bind
+          export-rule-engine-utils,
+          )
 )

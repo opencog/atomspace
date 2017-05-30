@@ -20,18 +20,18 @@
  * 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
  */
 
-#include <opencog/guile/load-file.h>
+#include <opencog/atoms/base/Link.h>
+#include <opencog/atoms/base/Node.h>
+#include <opencog/atomspace/AtomSpace.h>
 #include <opencog/guile/SchemeEval.h>
-#include <opencog/guile/SchemeSmob.h>
 #include <opencog/query/BindLinkAPI.h>
-#include <opencog/util/Config.h>
 #include <opencog/util/Logger.h>
 
 #include "test-types.h"
 
 using namespace opencog;
 
-class Disconnected :  public CxxTest::TestSuite
+class DisconnectedUTest :  public CxxTest::TestSuite
 {
 	private:
 		AtomSpace *as;
@@ -39,13 +39,13 @@ class Disconnected :  public CxxTest::TestSuite
 
 	public:
 
-		Disconnected(void)
+		DisconnectedUTest(void)
 		{
 			logger().set_level(Logger::DEBUG);
 			logger().set_print_to_stdout_flag(true);
 		}
 
-		~Disconnected()
+		~DisconnectedUTest()
 		{
 			// Erase the log file if no assertions failed.
 			if (!CxxTest::TestTracker::tracker().suiteFailed())
@@ -65,16 +65,17 @@ class Disconnected :  public CxxTest::TestSuite
  */
 #define an as->add_node
 #define al as->add_link
-void Disconnected::setUp(void)
+void DisconnectedUTest::setUp(void)
 {
 	as = new AtomSpace();
 	eval = new SchemeEval(as);
 
-	config().set("SCM_PRELOAD", "tests/query/test_types.scm");
-	load_scm_files_from_config(*as);
+	eval->eval("(add-to-load-path \"..\")");
+	eval->eval("(add-to-load-path \"../../..\")");
+	eval->eval("(load-from-path \"tests/query/test_types.scm\")");
 }
 
-void Disconnected::tearDown(void)
+void DisconnectedUTest::tearDown(void)
 {
 	delete as;
 }
@@ -85,13 +86,11 @@ void Disconnected::tearDown(void)
 #define getlink(hand,pos) as->getOutgoing(hand,pos)
 #define getarity(hand) as->getArity(hand)
 
-void Disconnected::test_components(void)
+void DisconnectedUTest::test_components(void)
 {
 	logger().debug("BEGIN TEST: %s", __FUNCTION__);
 
-	config().set("SCM_PRELOAD",
-		"tests/query/disconnected.scm");
-	load_scm_files_from_config(*as);
+	eval->eval("(load-from-path \"tests/query/disconnected.scm\")");
 
 	Handle bindlinkh = eval->apply("get-bindlink", Handle::UNDEFINED);
 	// Make sure the scheme file actually loaded!
@@ -121,14 +120,13 @@ void Disconnected::test_components(void)
 /*
  * Test several patterns carrying ill-formed variable declarations
  */
-void Disconnected::test_variables(void)
+void DisconnectedUTest::test_variables(void)
 {
 	logger().debug("BEGIN TEST: %s", __FUNCTION__);
 
-	config().set("SCM_PRELOAD",
-		"tests/query/disco-vars.scm");
-	load_scm_files_from_config(*as);
+	eval->eval("(load-from-path \"tests/query/disco-vars.scm\")");
 
+#if DO_NOT_TEST_THIS_IS_NOW_LEGAL
 	// We expect to catch an error here. ------------------------------
 	bool caught = false;
 	try
@@ -142,9 +140,10 @@ void Disconnected::test_variables(void)
 	}
 	logger().info("Caught exception? %d\n", caught);
 	TSM_ASSERT("Failed to catch expected exception", caught);
+#endif
 
 	// We expect to catch an error here. ------------------------------
-	caught = false;
+	bool caught = false;
 	try
 	{
 		eval->eval_h("(Ba)");
@@ -176,7 +175,7 @@ void Disconnected::test_variables(void)
 
 // Similar to above, except that the stuff is build up in C++ not in
 // scheme.  See bug #172.
-void Disconnected::test_cvariables(void)
+void DisconnectedUTest::test_cvariables(void)
 {
 	logger().debug("BEGIN TEST: %s", __FUNCTION__);
 
@@ -190,7 +189,7 @@ void Disconnected::test_cvariables(void)
 		Handle blb(createLink(AND_LINK, va));
 		Handle blt(createLink(LIST_LINK, va));
 		HandleSeq bll = {blv, blb, blt};
-		Handle bl_final(createLink(BIND_LINK, bll));
+		Handle bl_final(createLink(bll, BIND_LINK));
 		as->add_atom(bl_final);
 	}
 	catch (const InvalidParamException& ex)

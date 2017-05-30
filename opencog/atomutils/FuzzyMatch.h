@@ -87,8 +87,8 @@ protected:
     virtual RankedHandleSeq finished_search(void) = 0;
 
 private:
-    void find_starters(const Handle& hg);
-    void explore(const LinkPtr&);
+    void find_starters(const Handle&);
+    void explore(const Handle&);
 };
 
 } // namespace opencog

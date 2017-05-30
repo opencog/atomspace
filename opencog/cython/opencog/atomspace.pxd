@@ -9,6 +9,16 @@ cdef extern from "Python.h":
     # Needed to return truth value pointers to C++ callers.
     cdef object PyLong_FromVoidPtr(void *p)
 
+ctypedef public long PANDLE
+
+cdef extern from "opencog/cython/opencog/Cast.h":
+    # Tacky hack to pass atom pointer to Atom ctor.
+    cdef cHandle atom_from_the_void(long p)
+
+    # Tacky hack to convert C objects into Python objects.
+    cdef PANDLE   void_from_candle(const cHandle& h)
+    cdef PANDLE   void_from_cptr(cHandle* hp)
+
 
 # Basic wrapping for std::string conversion.
 cdef extern from "<string>" namespace "std":
@@ -43,14 +53,12 @@ cdef extern from "opencog/truthvalue/TruthValue.h" namespace "opencog":
         confidence_t getConfidence()
         count_t getCount()
         tv_ptr DEFAULT_TV()
-        bint isNullTv()
         string toString()
         bint operator==(cTruthValue h)
         bint operator!=(cTruthValue h)
 
 cdef extern from "opencog/truthvalue/SimpleTruthValue.h" namespace "opencog":
     cdef cppclass cSimpleTruthValue "opencog::SimpleTruthValue":
-        void initialize(float,float)
         cSimpleTruthValue(float, float)
         strength_t getMean()
         confidence_t getConfidence()
@@ -86,6 +94,9 @@ cdef extern from "opencog/atoms/base/atom_types.h" namespace "opencog":
 # Atom
 ctypedef public short av_type
 
+cdef extern from "opencog/atoms/base/Link.h" namespace "opencog":
+    pass
+
 cdef extern from "opencog/atoms/base/Atom.h" namespace "opencog":
     cdef cppclass cAtom "opencog::Atom":
         cAtom()
@@ -102,17 +113,6 @@ cdef extern from "opencog/atoms/base/Atom.h" namespace "opencog":
         tv_ptr getTruthValue()
         void setTruthValue(tv_ptr tvp)
 
-        av_type getSTI()
-        av_type getLTI()
-        av_type getVLTI()
-
-        void setSTI(av_type stiValue)
-        void setLTI(av_type ltiValue)
-        void setVLTI(av_type vltiValue)
-
-        void incVLTI()
-        void decVLTI()
-
         output_iterator getIncomingSetByType(output_iterator, Type type, bint subclass)
 
         # Conditionally-valid methods. Not defined for all atoms.
@@ -121,20 +121,14 @@ cdef extern from "opencog/atoms/base/Atom.h" namespace "opencog":
 
 
 # Handle
-ctypedef public long UUID
-
 cdef extern from "opencog/atoms/base/Handle.h" namespace "opencog":
     cdef cppclass cHandle "opencog::Handle":
         cHandle()
-        cHandle(UUID)
+        cHandle(const cHandle&)
         
         cAtom* atom_ptr()
-        UUID value()
         string toString()
         string toShortString()
-
-        bint is_defined()
-        bint is_undefined()
 
         bint operator==(cHandle h)
         bint operator!=(cHandle h)
@@ -181,18 +175,10 @@ cdef extern from "opencog/atomspace/AtomSpace.h" namespace "opencog":
 
         bint is_valid_handle(cHandle h)
         int get_size()
-        UUID get_uuid()
 
         # ==== query methods ====
         # get by type
         output_iterator get_handles_by_type(output_iterator, Type t, bint subclass)
-
-        # get by STI range
-        output_iterator get_handles_by_AV(output_iterator, short lowerBound, short upperBound)
-        output_iterator get_handles_by_AV(output_iterator, short lowerBound)
-
-        # get from AttentionalFocus
-        output_iterator get_handle_set_in_attentional_focus(output_iterator)
 
         void clear()
         bint remove_atom(cHandle h, bint recursive)
@@ -202,6 +188,26 @@ cdef AtomSpace_factory(cAtomSpace *to_wrap)
 cdef class AtomSpace:
     cdef cAtomSpace *atomspace
     cdef bint owns_atomspace
+
+cdef extern from "opencog/attentionbank/AttentionBank.h" namespace "opencog":
+    cdef cppclass cAttentionBank "opencog::AttentionBank":
+        av_type get_sti(const cHandle&)
+        av_type get_lti(const cHandle&)
+        av_type get_vlti(const cHandle&)
+
+        void set_sti(const cHandle&, av_type stiValue)
+        void set_lti(const cHandle&, av_type ltiValue)
+        void inc_vlti(const cHandle&)
+        void dec_vlti(const cHandle&)
+
+        # get by STI range
+        output_iterator get_handles_by_AV(output_iterator, short lowerBound, short upperBound)
+        output_iterator get_handles_by_AV(output_iterator, short lowerBound)
+
+        # get from AttentionalFocus
+        output_iterator get_handle_set_in_attentional_focus(output_iterator)
+
+    cdef cAttentionBank attentionbank(cAtomSpace*)
 
 
 cdef extern from "opencog/atomutils/AtomUtils.h" namespace "opencog":

@@ -20,12 +20,9 @@
  * 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
  */
 
-#include <opencog/guile/load-file.h>
-#include <opencog/guile/SchemeEval.h>
-#include <opencog/guile/SchemeSmob.h>
 #include <opencog/atomspace/AtomSpace.h>
+#include <opencog/guile/SchemeEval.h>
 #include <opencog/query/BindLinkAPI.h>
-#include <opencog/util/Config.h>
 #include <opencog/util/Logger.h>
 
 using namespace opencog;
@@ -44,6 +41,8 @@ public:
 
         as = new AtomSpace();
         eval = new SchemeEval(as);
+        eval->eval("(add-to-load-path \"..\")");
+        eval->eval("(add-to-load-path \"../../..\")");
     }
 
     ~BuggyLinkUTest()
@@ -70,11 +69,11 @@ void BuggyLinkUTest::setUp(void)
     as->clear();
 }
 
-#define getarity(hand) LinkCast(hand)->getArity()
+#define getarity(hand) hand->getArity()
 
 /*
  * BuggyLink unit test.  Test binding to unquoted links.
- * This test explicitly tests the bug described in 
+ * This test explicitly tests the bug described in
  * https://github.com/opencog/opencog/issues/1025
  * The old pattern matcher would crash with a null-pointer deref.
  * The current one works great.
@@ -83,8 +82,7 @@ void BuggyLinkUTest::test_link(void)
 {
     logger().debug("BEGIN TEST: %s", __FUNCTION__);
 
-    config().set("SCM_PRELOAD", "tests/query/buggy-link.scm");
-    load_scm_files_from_config(*as);
+    eval->eval("(load-from-path \"tests/query/buggy-link.scm\")");
 
     Handle bindy = eval->eval_h("bindy");
     TSM_ASSERT("Failed to load test data", Handle::UNDEFINED != bindy);
@@ -94,4 +92,3 @@ void BuggyLinkUTest::test_link(void)
 
     TS_ASSERT_EQUALS(1, getarity(lily));
 }
-

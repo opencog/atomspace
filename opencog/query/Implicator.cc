@@ -22,7 +22,6 @@
  */
 
 #include <opencog/atomspace/AtomSpace.h>
-#include <opencog/truthvalue/SimpleTruthValue.h>
 #include <opencog/atoms/pattern/BindLink.h>
 
 #include "BindLinkAPI.h"
@@ -41,8 +40,8 @@ using namespace opencog;
  * to continue hunting for more, we return `false` here. We want to
  * find all possible groundings.)
  */
-bool Implicator::grounding(const std::map<Handle, Handle> &var_soln,
-                           const std::map<Handle, Handle> &term_soln)
+bool Implicator::grounding(const HandleMap &var_soln,
+                           const HandleMap &term_soln)
 {
 	// PatternMatchEngine::print_solution(term_soln,var_soln);
 
@@ -50,8 +49,16 @@ bool Implicator::grounding(const std::map<Handle, Handle> &var_soln,
 	if (_result_set.size() >= max_results)
 		return true;
 
-	Handle h = inst.instantiate(implicand, var_soln);
-	insert_result(h);
+	// Ignore the case where the URE creates ill-formed links (due to
+	// rules producing nothing). Ideally this should be treated as a
+	// user error, that is the user should design rule pre-conditions
+	// to prevent them from producing nothing.  In practice it is
+	// difficult to insure so meanwhile this try-catch is used. See
+	// issue #950 and pull req #962. XXX FIXME later.
+	try {
+		Handle h = inst.instantiate(implicand, var_soln, true);
+		insert_result(h);
+	} catch(...) {}
 
 	// If we found as many as we want, then stop looking for more.
 	return (_result_set.size() >= max_results);
@@ -103,7 +110,7 @@ static Handle do_imply(AtomSpace* as,
 		return gl;
 	}
 
-	// If we are here, then there were zero mathces.
+	// If we are here, then there were zero matches.
 	//
 	// There are certain useful queries, where the goal of the query
 	// is to determine that some clause or set of clauses are absent
@@ -122,7 +129,7 @@ static Handle do_imply(AtomSpace* as,
 	if (0 == pat.mandatory.size() and 0 < pat.optionals.size()
 	    and not intu->optionals_present())
 	{
-		Handle h = impl.inst.execute(impl.implicand);
+		Handle h = impl.inst.execute(impl.implicand, true);
 		impl.insert_result(h);
 	}
 

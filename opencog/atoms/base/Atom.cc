@@ -25,6 +25,7 @@
  */
 
 #include <set>
+#include <sstream>
 
 #ifndef WIN32
 #include <unistd.h>
@@ -36,13 +37,12 @@
 #include <opencog/atoms/base/Atom.h>
 #include <opencog/atoms/base/ClassServer.h>
 #include <opencog/atoms/base/Link.h>
-#include <opencog/truthvalue/SimpleTruthValue.h>
 
 #include <opencog/atomspace/AtomSpace.h>
 #include <opencog/atomspace/AtomTable.h>
 
 //! Atom flag
-// #define WRITE_MUTEX             1  //BIT0
+#define FETCHED_RECENTLY        1  //BIT0
 #define MARKED_FOR_REMOVAL      2  //BIT1
 // #define MULTIPLE_TRUTH_VALUES   4  //BIT2
 // #define FIRED_ACTIVATION        8  //BIT3
@@ -55,32 +55,21 @@
 
 #undef Type
 
-using namespace opencog;
-
-#define _avmtx _mtx
+namespace opencog {
 
 Atom::~Atom()
 {
-    _atomTable = NULL;
+    _atom_space = NULL;
     if (0 < getIncomingSetSize()) {
         // This can't ever possibly happen. If it does, then there is
         // some very sick bug with the reference counting that the
         // shared pointers are doing. (Or someone explcitly called the
         // destructor! Which they shouldn't do.)
         OC_ASSERT(0 == getIncomingSet().size(),
-             "Atom deletion failure; incoming set not empty for %s h=%d",
-             classserver().getTypeName(_type).c_str(), _uuid);
+             "Atom deletion failure; incoming set not empty for %s h=%x",
+             classserver().getTypeName(_type).c_str(), get_hash());
     }
     drop_incoming_set();
-}
-
-// ==============================================================
-
-// Return the atomspace in which this atom is inserted.
-AtomSpace* Atom::getAtomSpace() const
-{
-    if (_atomTable) return _atomTable->getAtomSpace();
-    return nullptr;
 }
 
 // ==============================================================
@@ -89,7 +78,10 @@ AtomSpace* Atom::getAtomSpace() const
 
 void Atom::setTruthValue(TruthValuePtr newTV)
 {
-    if (newTV->isNullTv()) return;
+    if (nullptr == newTV) return;
+
+    // If both old and new are e.g. DEFAULT_TV, then do nothing.
+    if (_truthValue.get() == newTV.get()) return;
 
     // We need to guarantee that the signal goes out with the
     // correct truth value.  That is, another setter could be changing
@@ -100,17 +92,17 @@ void Atom::setTruthValue(TruthValuePtr newTV)
     // writing this at a time. std:shared_ptr is NOT thread-safe against
     // multiple writers: see "Example 5" in
     // http://www.boost.org/doc/libs/1_53_0/libs/smart_ptr/shared_ptr.htm#ThreadSafety
-    std::unique_lock<std::mutex> lck (_mtx);
+    std::unique_lock<std::mutex> lck(_mtx);
     _truthValue = newTV;
     lck.unlock();
 
-    if (_atomTable != NULL) {
-        TVCHSigl& tvch = _atomTable->TVChangedSignal();
+    if (_atom_space != nullptr) {
+        TVCHSigl& tvch = _atom_space->_atom_table.TVChangedSignal();
         tvch(getHandle(), oldTV, newTV);
     }
 }
 
-TruthValuePtr Atom::getTruthValue()
+TruthValuePtr Atom::getTruthValue() const
 {
     // OK. The atomic thread-safety of shared-pointers is subtle. See
     // http://www.boost.org/doc/libs/1_53_0/libs/smart_ptr/shared_ptr.htm#ThreadSafety
@@ -126,11 +118,51 @@ TruthValuePtr Atom::getTruthValue()
     std::lock_guard<std::mutex> lck(_mtx);
     TruthValuePtr local(_truthValue);
     return local;
+
+#if THIS_WONT_WORK_AS_NICELY_AS_YOU_MIGHT_GUESS
+
+    // This automatic fetching of TV's from the database seems OK, but
+    // gets really nasty, really quick.  One problem is that getTV is
+    // used everywhere -- printing atoms, you name it, and so gets hit
+    // a lot. Another, more subtle, problem is that the current Atom
+    // ctors accept a TV argument, and so cause the TV to be fetched
+    // during the ctor. This has multiple undeseriable side-effects:
+    // one is that for UnorderredLinks, a badly-ordered version of the
+    // link is inserted into the TLB, before the ctor has finished
+    // sorting the outgoing set! A third issue is that the backend
+    // itself calls this method, when saving the TV! So that's just
+    // kind-of crazy. These are all difficult technical problems to
+    // solve, so the code below, although initially appealing, doesn't
+    // really do the right thing.
+    if (_flags & FETCHED_RECENTLY)
+        return local;
+
+    if (nullptr == _atom_space)
+        return local;
+
+    BackingStore* bs = _atom_space->_backing_store;
+    if (nullptr == bs)
+        return local;
+
+    TruthValuePtr tv;
+    if (isNode()) {
+        tv = bs->getNode(getType(), getName().c_str());
+    } else {
+        Atom* that = (Atom*) this; // cast away constness
+        tv = bs->getLink(that->getHandle());
+    }
+    if (tv) {
+        _flags = _flags | FETCHED_RECENTLY;
+        _truthValue = tv;
+        return tv;
+    }
+    return local;
+#endif
 }
 
-void Atom::merge(TruthValuePtr tvn, const MergeCtrl& mc)
+void Atom::merge(const TruthValuePtr& tvn, const MergeCtrl& mc)
 {
-    if (NULL == tvn or tvn->isDefaultTV() or tvn->isNullTv()) return;
+    if (nullptr == tvn or tvn->isDefaultTV()) return;
 
     // No locking to be done here. It is possible that between the time
     // that we read the TV here (i.e. set currentTV) and the time that
@@ -141,7 +173,7 @@ void Atom::merge(TruthValuePtr tvn, const MergeCtrl& mc)
     // they deserve -- a race. (We still use getTruthValue() to avoid a
     // read-write race on the shared_pointer itself!)
     TruthValuePtr currentTV(getTruthValue());
-    if (currentTV->isDefaultTV() or currentTV->isNullTv()) {
+    if (currentTV->isDefaultTV()) {
         setTruthValue(tvn);
         return;
     }
@@ -151,64 +183,50 @@ void Atom::merge(TruthValuePtr tvn, const MergeCtrl& mc)
 }
 
 // ==============================================================
-
-AttentionValuePtr Atom::getAttentionValue()
+// Setting values associated with this atom.
+void Atom::setValue(const Handle& key, const ProtoAtomPtr& value)
 {
-    // OK. The atomic thread-safety of shared-pointers is subtle. See
-    // http://www.boost.org/doc/libs/1_53_0/libs/smart_ptr/shared_ptr.htm#ThreadSafety
-    // and http://cppwisdom.quora.com/shared_ptr-is-almost-thread-safe
-    // What it boils down to here is that we must *always* make a copy
-    // of _attentionValue before we use it, since it can go out of scope
-    // because it can get set in another thread.  Viz, using it to
-    // dereference can return a raw pointer to an object that has been
-    // deconstructed. Furthermore, we must make a copy while holding
-    // the lock! Got that?
-
-    std::lock_guard<std::mutex> lck(_mtx);
-    AttentionValuePtr local(_attentionValue);
-    return local;
+    if (nullptr == _atom_space) return;
+    _atom_space->_value_table.addValuation(key, getHandle(), value);
 }
 
-void Atom::setAttentionValue(AttentionValuePtr av)
+ProtoAtomPtr Atom::getValue(const Handle& key) const
 {
-    // Must obtain a local copy of the AV, since there may be
-    // parallel writers in other threads.
-    AttentionValuePtr local(getAttentionValue());
-    if (av == local) return;
-    if (*av == *local) return;
+    if (nullptr == _atom_space) return nullptr;
+    return _atom_space->_value_table.getValue(key, getHandle());
+}
 
-    // Need to lock, shared_ptr is NOT atomic!
-    std::unique_lock<std::mutex> lck (_avmtx);
-    local = _attentionValue; // Get it again, to avoid races.
-    _attentionValue = av;
-    lck.unlock();
+std::set<Handle> Atom::getKeys() const
+{
+    if (nullptr == _atom_space) return std::set<Handle>();
+    return _atom_space->_value_table.getKeys(getHandle());
+}
 
-    // If the atom free-floating, we are done.
-    if (NULL == _atomTable) return;
-
-    // Get old and new bins.
-    int oldBin = ImportanceIndex::importanceBin(local->getSTI());
-    int newBin = ImportanceIndex::importanceBin(av->getSTI());
-
-    // If the atom importance has changed its bin,
-    // update the importance index.
-    if (oldBin != newBin) {
-        _atomTable->updateImportanceIndex(getHandle(), oldBin);
+void Atom::copyValues(const Handle& other)
+{
+    std::set<Handle> okeys(other->getKeys());
+    for (const Handle& k: okeys)
+    {
+        ProtoAtomPtr p = other->getValue(k);
+        setValue(k, p);
     }
 
-    // Notify any interested parties that the AV changed.
-    AVCHSigl& avch = _atomTable->AVChangedSignal();
-    avch(getHandle(), local, av);
+    // Special case for truth values
+    setTruthValue(other->getTruthValue());
 }
 
-void Atom::chgVLTI(int unit)
+std::string Atom::valuesToString() const
 {
-    AttentionValuePtr old_av = getAttentionValue();
-    AttentionValuePtr new_av = createAV(
-        old_av->getSTI(),
-        old_av->getLTI(),
-        old_av->getVLTI() + unit);
-    setAttentionValue(new_av);
+    std::string rv;
+
+    std::set<Handle> keys(getKeys());
+    for (const Handle& k: keys)
+    {
+        ProtoAtomPtr p = getValue(k);
+        rv += "; key = " + k->toString();
+        rv += "; val = " + p->toString() + "\n";
+    }
+    return rv;
 }
 
 // ==============================================================
@@ -245,22 +263,23 @@ void Atom::setUnchecked(void)
 
 // ==============================================================
 
-void Atom::setAtomTable(AtomTable *tb)
+void Atom::setAtomSpace(AtomSpace *tb)
 {
-    if (tb == _atomTable) return;
+    if (tb == _atom_space) return;
 
-    // Either the existing _atomTable is null, and tb is not, i.e. this
-    // atom is being inserted into tb, or _atomTable is not null, while
-    // tb is null, i.e. atom is being removed from _atomTable.  It is
+    // Either the existing _atomSpace is null, and tb is not, i.e. this
+    // atom is being inserted into tb, or _atomSpace is not null, while
+    // tb is null, i.e. atom is being removed from _atomSpace.  It is
     // illegal to just switch membership: one or the other of these two
     // pointers must be null.
-    OC_ASSERT (NULL == _atomTable or tb == NULL, "Atom table is not null!");
-    if (NULL != _atomTable) {
-        // Atom is being removed from the atom table.
-        // UUID's belong to the atom table, not the atom. Reclaim it.
-        _uuid = Handle::INVALID_UUID;
-    }
-    _atomTable = tb;
+    OC_ASSERT (nullptr == _atom_space or tb == nullptr,
+               "Atom table is not null!");
+    _atom_space = tb;
+}
+
+AtomTable* Atom::getAtomTable() const
+{
+    return &(_atom_space->_atom_table);
 }
 
 // ==============================================================
@@ -295,7 +314,7 @@ void Atom::drop_incoming_set()
 }
 
 /// Add an atom to the incoming set.
-void Atom::insert_atom(LinkPtr a)
+void Atom::insert_atom(const LinkPtr& a)
 {
     if (NULL == _incoming_set) return;
     std::lock_guard<std::mutex> lck (_mtx);
@@ -306,7 +325,7 @@ void Atom::insert_atom(LinkPtr a)
 }
 
 /// Remove an atom from the incoming set.
-void Atom::remove_atom(LinkPtr a)
+void Atom::remove_atom(const LinkPtr& a)
 {
     if (NULL == _incoming_set) return;
     std::lock_guard<std::mutex> lck (_mtx);
@@ -316,7 +335,24 @@ void Atom::remove_atom(LinkPtr a)
     _incoming_set->_iset.erase(a);
 }
 
-size_t Atom::getIncomingSetSize()
+/// Remove old, and add new, atomically, so that every user
+/// will see either one or the other, but not both/neither in
+/// the incoming set. This is used to manage the StateLink.
+void Atom::swap_atom(const LinkPtr& old, const LinkPtr& neu)
+{
+    if (NULL == _incoming_set) return;
+    std::lock_guard<std::mutex> lck (_mtx);
+#ifdef INCOMING_SET_SIGNALS
+    _incoming_set->_removeAtomSignal(shared_from_this(), old);
+#endif /* INCOMING_SET_SIGNALS */
+    _incoming_set->_iset.erase(old);
+    _incoming_set->_iset.insert(neu);
+#ifdef INCOMING_SET_SIGNALS
+    _incoming_set->_addAtomSignal(shared_from_this(), neu);
+#endif /* INCOMING_SET_SIGNALS */
+}
+
+size_t Atom::getIncomingSetSize() const
 {
     if (NULL == _incoming_set) return 0;
     std::lock_guard<std::mutex> lck (_mtx);
@@ -327,7 +363,7 @@ size_t Atom::getIncomingSetSize()
 // is not thread-safe during reading while simultaneous insertion and
 // deletion.  Besides, the incoming set is weak; we have to make it
 // strong in order to hand it out.
-IncomingSet Atom::getIncomingSet(AtomSpace* as)
+IncomingSet Atom::getIncomingSet(AtomSpace* as) const
 {
     static IncomingSet empty_set;
     if (NULL == _incoming_set) return empty_set;
@@ -337,7 +373,7 @@ IncomingSet Atom::getIncomingSet(AtomSpace* as)
         // Prevent update of set while a copy is being made.
         std::lock_guard<std::mutex> lck (_mtx);
         IncomingSet iset;
-        for (WinkPtr w : _incoming_set->_iset)
+        for (const WinkPtr& w : _incoming_set->_iset)
         {
             LinkPtr l(w.lock());
             if (l and atab->in_environ(l))
@@ -357,7 +393,7 @@ IncomingSet Atom::getIncomingSet(AtomSpace* as)
     return iset;
 }
 
-IncomingSet Atom::getIncomingSetByType(Type type, bool subclass)
+IncomingSet Atom::getIncomingSetByType(Type type, bool subclass) const
 {
     HandleSeq inhs;
     getIncomingSetByType(std::back_inserter(inhs), type, subclass);
@@ -366,3 +402,21 @@ IncomingSet Atom::getIncomingSetByType(Type type, bool subclass)
         inlinks.emplace_back(LinkCast(h));
     return inlinks;
 }
+
+std::string Atom::idToString() const
+{
+    return
+        std::string("[") + std::to_string(get_hash()) + "]" +
+        std::string("[") + std::to_string(_atom_space? _atom_space->_atom_table.get_uuid() : -1) + "]";
+}
+
+std::string oc_to_string(const IncomingSet& iset)
+{
+	std::stringstream ss;
+	ss << "size = " << iset.size() << std::endl;
+	for (unsigned i = 0; i < iset.size(); i++)
+		ss << "link[" << i << "]:" << std::endl << iset[i]->toString();
+	return ss.str();
+}
+
+} // ~namespace opencog

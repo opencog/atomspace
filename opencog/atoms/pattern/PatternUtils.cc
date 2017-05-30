@@ -48,36 +48,58 @@ namespace opencog {
  * DefinedPredicate or DefinedSchema nodes are simply not known until
  * runtime evaluation/execution.
  *
+ * The match for EvaluatableLink's is meant to solve the problem of
+ * evaluating (SatisfactionLink (AndLink (TrueLink))) vs. evaluating
+ * (SatisfactionLink (AndLink (FalseLink))), with the first returning
+ * TRUE_TV, and the second returning FALSE_TV. Removing these 'constant'
+ * terms would alter the result of the evaluation, potentially even
+ * leaving an empty (undefined) AndLink. So we cannot really remove
+ * them.
+ *
  * Returns true if the list of clauses was modified, else returns false.
  */
-bool remove_constants(const std::set<Handle> &vars,
-                      std::vector<Handle> &clauses,
-                      std::vector<Handle> &constants)
+bool remove_constants(const OrderedHandleSet &vars,
+                      HandleSeq &clauses,
+                      HandleSeq &constants)
 {
 	bool modified = false;
 
 	// Caution: this loop modifies the clauses list!
-	std::vector<Handle>::iterator i;
+	HandleSeq::iterator i;
 	for (i = clauses.begin(); i != clauses.end(); )
 	{
 		Handle clause(*i);
-		if (any_unquoted_in_tree(clause, vars)
-		    or contains_atomtype(clause, DEFINED_PREDICATE_NODE)
-		    or contains_atomtype(clause, DEFINED_SCHEMA_NODE)
-		    or contains_atomtype(clause, GROUNDED_PREDICATE_NODE)
-		    or contains_atomtype(clause, GROUNDED_SCHEMA_NODE))
-		{
-			++i;
-		}
-		else
+		if (is_constant(vars, clause))
 		{
 			constants.emplace_back(clause);
 			i = clauses.erase(i);
 			modified = true;
 		}
+		else
+		{
+			++i;
+		}
 	}
 
 	return modified;
+}
+
+bool is_constant(const OrderedHandleSet& vars, const Handle& clause)
+{
+	return not (any_unquoted_unscoped_in_tree(clause, vars)
+	            or contains_atomtype(clause, DEFINED_PREDICATE_NODE)
+	            or contains_atomtype(clause, DEFINED_SCHEMA_NODE)
+	            or contains_atomtype(clause, GROUNDED_PREDICATE_NODE)
+	            or contains_atomtype(clause, GROUNDED_SCHEMA_NODE)
+	            or contains_atomtype(clause, IDENTICAL_LINK)
+	            or contains_atomtype(clause, EQUAL_LINK)
+	            // If it is an EvaluatableLink then is is not a
+	            // constant, unless it is a closed EvaluationLink over
+	            // a PredicateNode.
+	            or (classserver().isA(clause->getType(), EVALUATABLE_LINK)
+	                and (0 == clause->getArity()
+	                     or
+	                     clause->getOutgoingAtom(0)->getType() != PREDICATE_NODE)));
 }
 
 /* ======================================================== */
@@ -113,21 +135,21 @@ bool remove_constants(const std::set<Handle> &vars,
  * course, users will typically never specify clauses in such order.
  *
  * XXX FIXME: It can happen that some clauses have no variables at all
- * in them.  These end up in thier own component, which can be extremely
- * confusing.
+ * in them.  These end up in their own component, which can be
+ * extremely confusing.
  */
-void get_connected_components(const std::set<Handle>& vars,
+void get_connected_components(const OrderedHandleSet& vars,
                               const HandleSeq& clauses,
-                              std::vector<HandleSeq>& components,
-                              std::vector<std::set<Handle>>& component_vars)
+                              HandleSeqSeq& components,
+                              std::vector<OrderedHandleSet>& component_vars)
 {
-	std::vector<Handle> todo(clauses);
+	HandleSeq todo(clauses);
 
 	while (0 < todo.size())
 	{
 		// no_con_yet == clauses that failed to connect to any existing
 		// component.
-		std::vector<Handle> no_con_yet;
+		HandleSeq no_con_yet;
 		bool did_at_least_one = false;
 
 		for (const Handle& cl: todo)
@@ -138,7 +160,7 @@ void get_connected_components(const std::set<Handle>& vars,
 			size_t nc = components.size();
 			for (size_t i = 0; i<nc; i++)
 			{
-				std::set<Handle>& cur_vars(component_vars[i]);
+				OrderedHandleSet& cur_vars(component_vars[i]);
 				// If clause cl is connected to this component, then add it
 				// to this component.
 				if (any_unquoted_in_tree(cl, cur_vars))

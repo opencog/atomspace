@@ -63,36 +63,41 @@ public:
 		return classserver().isA(at, t);
 	}
 
-	/** Returns a string representation of the node.
-	 *
-	 * @return A string representation of the node.
-	 * cannot be const, because observing the TV and AV requires a lock.
+	virtual bool isAtom() const { return false; }
+	virtual bool isNode() const { return false; }
+	virtual bool isLink() const { return false; }
+
+	/**
+	 * Returns a string representation of the proto-atom.
 	 */
-	virtual std::string toString(const std::string& indent) = 0;
-	virtual std::string toShortString(const std::string& indent) = 0;
+	virtual std::string toString(const std::string& indent) const = 0;
+	virtual std::string toShortString(const std::string& indent) const
+		{ return toString(indent); }
 
 	// Work around gdb's inability to build a string on the fly,
 	// see http://stackoverflow.com/questions/16734783 for more
 	// explanation.
-	std::string toString() { return toString(""); }
-	std::string toShortString() { return toShortString(""); }
+	std::string toString() const { return toString(""); }
+	std::string toShortString() const { return toShortString(""); }
 
-	/** Returns whether two atoms are equal.
+	/**
+	 * Returns whether two proto-atoms are equal.
 	 *
-	 * @return true if the atoms are equal, false otherwise.
+	 * @return true if the proto-atoms are equal, false otherwise.
 	 */
 	virtual bool operator==(const ProtoAtom&) const = 0;
 
-	/** Returns whether two atoms are different.
+	/**
+	 * Returns whether two proto-atoms are different.
 	 *
-	 * @return true if the atoms are different, false otherwise.
+	 * @return true if the proto-atoms are different, false otherwise.
 	 */
 	bool operator!=(const ProtoAtom& other) const
 	{ return not operator==(other); }
 };
 
 typedef std::shared_ptr<ProtoAtom> ProtoAtomPtr;
-/*
+#if NOT_RIGHT_NOW
 struct ProtoAtomPtr : public std::shared_ptr<ProtoAtom>
 {
 	ProtoAtomPtr(std::shared_ptr<ProtoAtom> pa) :
@@ -108,11 +113,22 @@ struct ProtoAtomPtr : public std::shared_ptr<ProtoAtom>
 	operator Handle() const
 		{ return Handle(AtomPtr(*this)); }
 };
-*/
+#endif
 
 typedef std::vector<ProtoAtomPtr> ProtomSeq;
 
 /** @}*/
 } // namespace opencog
+
+// overload of operator<< to print ProtoAtoms
+namespace std
+{
+    template<typename Out>
+    Out& operator<<(Out& out, const opencog::ProtoAtomPtr& pa)
+    {
+        out << pa->toString("");
+        return out;
+    }
+} // ~namespace std
 
 #endif // _OPENCOG_PROTO_ATOM_H

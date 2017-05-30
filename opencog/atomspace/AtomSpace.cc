@@ -61,7 +61,6 @@ using namespace opencog;
  */
 AtomSpace::AtomSpace(AtomSpace* parent, bool transient) :
     _atom_table(parent? &parent->_atom_table : NULL, this, transient),
-    _bank(_atom_table, transient),
     _backing_store(NULL),
     _transient(transient)
 {
@@ -69,14 +68,10 @@ AtomSpace::AtomSpace(AtomSpace* parent, bool transient) :
 
 AtomSpace::~AtomSpace()
 {
-    // Be sure to disconnect the attention bank signals before the
-    // atom table destructor runs. XXX FIXME yes this is an ugly hack.
-    _bank.shutdown();
 }
 
 AtomSpace::AtomSpace(const AtomSpace&) :
     _atom_table(NULL),
-    _bank(_atom_table, true),
     _backing_store(NULL)
 {
      throw opencog::RuntimeException(TRACE_INFO,
@@ -264,37 +259,12 @@ void AtomSpace::unregisterBackingStore(BackingStore *bs)
 
 // ====================================================================
 
-Handle AtomSpace::add_atom(AtomPtr atom, bool async)
+Handle AtomSpace::add_atom(const Handle& h, bool async)
 {
-    if (nullptr == atom) return Handle();
-
-    // Is this atom already in the atom table?
-    Handle hexist(_atom_table.getHandle(atom));
-    if (hexist) return hexist;
-
-    // If we are here, the AtomTable does not yet know about this atom.
-    // Maybe the backing store knows about this atom.
-    Type t = atom->getType();
-    if (_backing_store and not _backing_store->ignoreType(t))
-    {
-        AtomPtr ba;
-        if (atom->isNode()) {
-            ba = _backing_store->getNode(t, atom->getName().c_str());
-        } else {
-            if (atom->isLink())
-                 ba = _backing_store->getLink(t, atom->getOutgoingSet());
-        }
-        if (ba) {
-            return _atom_table.add(ba, async);
-        }
-    }
-
-    // If we are here, neither the AtomTable nor backing store know
-    // about this atom. Just add it.  If it is a DeleteLink, then the
-    // addition will fail. Deal with it.
+    // If it is a DeleteLink, then the addition will fail. Deal with it.
     Handle rh;
     try {
-        rh = _atom_table.add(atom, async);
+        rh = _atom_table.add(h, async);
     }
     catch (const DeleteException& ex) {
         // Atom deletion has not been implemented in the backing store
@@ -309,73 +279,20 @@ Handle AtomSpace::add_atom(AtomPtr atom, bool async)
 Handle AtomSpace::add_node(Type t, const string& name,
                            bool async)
 {
-    // Is this atom already in the atom table?
-    Handle hexist(_atom_table.getHandle(t, name));
-    if (hexist) return hexist;
-
-    // If we are here, the AtomTable does not yet know about this atom.
-    // Maybe the backing store knows about this atom.
-    if (_backing_store and not _backing_store->ignoreType(t))
-    {
-        NodePtr n(_backing_store->getNode(t, name.c_str()));
-        if (n) return _atom_table.add(n, async);
-    }
-
-    // If we are here, neither the AtomTable nor backing store know about
-    // this atom. Just add it.
     return _atom_table.add(createNode(t, name), async);
 }
 
 Handle AtomSpace::get_node(Type t, const string& name)
 {
-    // Is this atom already in the atom table?
-    Handle hexist = _atom_table.getHandle(t, name);
-    if (hexist) return hexist;
-
-    // If we are here, the AtomTable does not yet know about this atom.
-    // Maybe the backing store knows about this atom.
-    if (_backing_store and not _backing_store->ignoreType(t))
-    {
-        NodePtr n(_backing_store->getNode(t, name.c_str()));
-        if (n) {
-            return _atom_table.add(n, false);
-        }
-    }
-
-    // If we are here, nobody knows about this.
-    return Handle::UNDEFINED;
+    return _atom_table.getHandle(t, name);
 }
 
 Handle AtomSpace::add_link(Type t, const HandleSeq& outgoing, bool async)
 {
-    // Is this atom already in the atom table?
-    Handle hexist = _atom_table.getHandle(t, outgoing);
-    if (hexist) return hexist;
-
-    // If we are here, the AtomTable does not yet know about this atom.
-    // Maybe the backing store knows about this atom.
-    if (_backing_store and not _backing_store->ignoreType(t))
-    {
-        // If any of the outgoing set is ignorable, we will not
-        // fetch the thing from the backing store.
-        if (not std::any_of(outgoing.begin(), outgoing.end(),
-            [this](Handle ho) { return _backing_store->ignoreAtom(ho); }))
-        {
-            LinkPtr l(_backing_store->getLink(t, outgoing));
-            if (l) {
-                // Put the atom into the atomtable, so it gets placed
-                // in indices, so we can find it quickly next time.
-                return _atom_table.add(l, async);
-            }
-        }
-    }
-
-    // If we are here, neither the AtomTable nor backing store know
-    // about this atom. Just add it.  If it is a DeleteLink, then the
-    // addition will fail. Deal with it.
+    // If it is a DeleteLink, then the addition will fail. Deal with it.
     Handle rh;
     try {
-        rh = _atom_table.add(createLink(t, outgoing), async);
+        rh = _atom_table.add(createLink(outgoing, t), async);
     }
     catch (const DeleteException& ex) {
         // Atom deletion has not been implemented in the backing store
@@ -389,148 +306,81 @@ Handle AtomSpace::add_link(Type t, const HandleSeq& outgoing, bool async)
 
 Handle AtomSpace::get_link(Type t, const HandleSeq& outgoing)
 {
-    // Is this atom already in the atom table?
-    Handle hexist = _atom_table.getHandle(t, outgoing);
-    if (hexist) return hexist;
-
-    // If we are here, the AtomTable does not yet know about this atom.
-    // Maybe the backing store knows about this atom.
-    if (_backing_store and not _backing_store->ignoreType(t))
-    {
-        // If any of the outgoing set is ignorable, we will not
-        // fetch the thing from the backing store.
-        if (not std::any_of(outgoing.begin(), outgoing.end(),
-            [this](Handle ho) { return _backing_store->ignoreAtom(ho); }))
-        {
-            LinkPtr l(_backing_store->getLink(t, outgoing));
-            if (l) {
-                // Register the atom with the atomtable (so it
-                // gets placed in indices)
-                return _atom_table.add(l, false);
-            }
-        }
-    }
-
-    // If we are here, nobody knows about this.
-    return Handle::UNDEFINED;
+    return _atom_table.getHandle(t, outgoing);
 }
 
-void AtomSpace::store_atom(Handle h)
+void AtomSpace::store_atom(const Handle& h)
 {
-    if (NULL == _backing_store)
+    if (nullptr == _backing_store)
         throw RuntimeException(TRACE_INFO, "No backing store");
 
     _backing_store->storeAtom(h);
 }
 
-Handle AtomSpace::fetch_atom(Handle h)
+Handle AtomSpace::fetch_atom(const Handle& h)
 {
-    if (NULL == _backing_store)
+    if (nullptr == _backing_store)
         throw RuntimeException(TRACE_INFO, "No backing store");
-    if (NULL == h) return h;
+    if (nullptr == h) return Handle::UNDEFINED;
 
-    // We deal with two distinct cases.
-    // 1) If atom table already knows about this atom, then this
-    //    function returns the atom-table's version of the atom.
-    //    In particular, no attempt is made to reconcile the possibly
-    //    differing truth values in the atomtable vs. backing store.
-    //    Why?  Because it is likely that the user plans to over-write
-    //    what is in the backend.
-    // 2) If (1) does not hold, i.e. the atom is not in this table, nor
-    //    it's environs, then assume that atom is from some previous
-    //    (recursive) query; do fetch it from backing store (i.e. fetch
-    //    the TV) and add it to the atomtable.
-    // For case 2, if the atom is a link, then it's outgoing set is
-    // fetched as well, as currently, a link cannot be added to the
-    // atomtable, unless all of its outgoing set already is in the
-    // atomtable.
+    // First, make sure the atom is actually in the atomspace.
+    Handle hc(_atom_table.add(h, false));
 
-    // Case 1:
-    Handle hb(_atom_table.getHandle(h));
-    if (_atom_table.holds(hb))
-        return hb;
-
-    // Case 2:
-    // This atom is not yet in any (this??) atomspace; go get it.
-    if (NULL == h->getAtomTable()) {
-        AtomPtr ba;
-        if (h->isNode()) {
-            ba = _backing_store->getNode(h->getType(),
-                                         h->getName().c_str());
-        } else {
-            if (h->isLink())
-                 ba = _backing_store->getLink(h->getType(),
-                                              h->getOutgoingSet());
-        }
-
-        // If we still don't have an atom, then the requested UUID
-        // was "insane", that is, unknown by either the atom table
-        // (case 1) or the backend.
-        if (NULL == ba)
-            throw RuntimeException(TRACE_INFO,
-                "Asked backend for an atom %s\n",
-                h->toString().c_str());
-        h = ba;
+    // Now, get the latest values from the backing store.
+    // The operation here is to CLOBBER the values, NOT to merge them!
+    // The goal of an explicit fetch is to explicitly fetch the values,
+    // and not to play monkey-shines with them.
+    Handle hv;
+    if (h->isNode()) {
+        hv = _backing_store->getNode(h->getType(),
+                                     h->getName().c_str());
+    }
+    else if (h->isLink()) {
+        hv = _backing_store->getLink(h->getType(),
+                                     h->getOutgoingSet());
     }
 
-    return _atom_table.add(h, false);
-}
+    if (hv)
+    {
+        hc->copyValues(hv);
+        TruthValuePtr tv = hv->getTruthValue();
+        hc->setTruthValue(tv);
+    }
 
-Handle AtomSpace::fetch_atom(UUID uuid)
-{
-    if (NULL == _backing_store)
-        throw RuntimeException(TRACE_INFO, "No backing store");
-
-    // OK, we have to handle two distinct cases.
-    // 1) If atom table already knows about this uuid, then this
-    //    function returns the atom-table's version of the atom.
-    //    In particular, no attempt is made to reconcile the possibly
-    //    differing truth values in the atomtable vs. backing store.
-    // 2) Else, get the atom corresponding to the UUID from storage.
-    //    If the atom is a link, then it's outgoing set is fetched as
-    //    well, as currently, a link cannot be added to the atomtable,
-    //    unless all of its outgoing set already is in the atomtable.
-
-    // Case 1:
-    Handle hb(_atom_table.getHandle(uuid));
-    if (_atom_table.holds(hb))
-        return hb;
-
-    // Case 2:
-    // We don't have the atom for this UUID, then go get it.
-    AtomPtr a(_backing_store->getAtom(uuid));
-
-    // If we still don't have an atom, then the requested UUID
-    // was "insane", that is, unknown by either the atom table
-    // (case 1) or the backend.
-    if (NULL == a.operator->())
-        throw RuntimeException(TRACE_INFO,
-            "Asked backend for an unknown handle; UUID=%lu\n",
-            uuid);
-
-    return _atom_table.add(a, false);
+    return hc;
 }
 
 Handle AtomSpace::fetch_incoming_set(Handle h, bool recursive)
 {
-    if (NULL == _backing_store)
+    if (nullptr == _backing_store)
         throw RuntimeException(TRACE_INFO, "No backing store");
 
     h = get_atom(h);
-
-    if (nullptr == h) return Handle::UNDEFINED;
+    if (nullptr == h) return h;
 
     // Get everything from the backing store.
-    HandleSeq iset = _backing_store->getIncomingSet(h);
-    size_t isz = iset.size();
-    for (size_t i=0; i<isz; i++) {
-        Handle hi(iset[i]);
-        if (recursive) {
-            fetch_incoming_set(hi, true);
-        } else {
-            get_atom(hi);
-        }
-    }
+    _backing_store->getIncomingSet(_atom_table, h);
+
+    if (not recursive) return h;
+
+    IncomingSet vh(h->getIncomingSet());
+    for (const LinkPtr& lp : vh)
+        fetch_incoming_set(Handle(lp), true);
+
+    return h;
+}
+
+Handle AtomSpace::fetch_incoming_by_type(Handle h, Type t)
+{
+    if (nullptr == _backing_store)
+        throw RuntimeException(TRACE_INFO, "No backing store");
+
+    h = get_atom(h);
+    if (nullptr == h) return h;
+
+    // Get everything from the backing store.
+    _backing_store->getIncomingByType(_atom_table, h, t);
+
     return h;
 }
 
@@ -545,7 +395,7 @@ bool AtomSpace::remove_atom(Handle h, bool recursive)
     return 0 < _atom_table.extract(h, recursive).size();
 }
 
-std::string AtomSpace::to_string()
+std::string AtomSpace::to_string() const
 {
 	std::stringstream ss;
 	ss << *this;

@@ -34,7 +34,7 @@ namespace opencog
 /// The StateLink is used to maintain unique state. Given an atom,
 /// the atomspace can only contain one instance of a StateLink with
 /// that atom in the first position.  Adding another StateLink with
-/// the same first-atom causes teh previous StateLink to be removed!
+/// the same first-atom causes the previous StateLink to be removed!
 ///
 /// This class is intended for holding single-valued state in a safe,
 /// automated fashion. Of course, a user can also store unique state
@@ -47,18 +47,19 @@ class StateLink : public UniqueLink
 protected:
 	void init();
 public:
-	StateLink(const HandleSeq&,
-	           TruthValuePtr tv = TruthValue::DEFAULT_TV(),
-	           AttentionValuePtr av = AttentionValue::DEFAULT_AV());
+	StateLink(const HandleSeq&, Type=STATE_LINK);
+	StateLink(const Handle& alias, const Handle& body);
 
-	StateLink(const Handle& alias, const Handle& body,
-	           TruthValuePtr tv = TruthValue::DEFAULT_TV(),
-	           AttentionValuePtr av = AttentionValue::DEFAULT_AV());
-
-	StateLink(Link &l);
+	StateLink(const Link&);
 	Handle get_alias(void) const { return _outgoing[0]; }
 	Handle get_state(void) const { return _outgoing[1]; }
-	Handle get_other(void) const;
+
+	/**
+	 * Return false, if the state contains a variable.
+	 * The atomspace can contain multiple open StateLinks,
+	 * but must never have more than one closed StateLink.
+	 */
+	bool is_closed(void) const { return 0 == _vars.varseq.size(); }
 
 	/**
 	 * Given a Handle pointing to <name> in
@@ -71,6 +72,8 @@ public:
 	 */
 	static Handle get_link(const Handle& alias);
 	static Handle get_state(const Handle& alias);
+
+	static Handle factory(const Handle&);
 };
 
 typedef std::shared_ptr<StateLink> StateLinkPtr;

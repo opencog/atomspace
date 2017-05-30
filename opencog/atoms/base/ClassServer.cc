@@ -3,7 +3,7 @@
  *
  * Copyright (C) 2002-2007 Novamente LLC
  * Copyright (C) 2008 by OpenCog Foundation
- * Copyright (C) 2009 Linas Vepstas <linasvepstas@gmail.com>
+ * Copyright (C) 2009,2017 Linas Vepstas <linasvepstas@gmail.com>
  * All Rights Reserved
  *
  * Written by Thiago Maia <thiago@vettatech.com>
@@ -30,11 +30,11 @@
 #include "ClassServer.h"
 
 #include <exception>
-#include <boost/bind.hpp>
 
+#include <opencog/atoms/base/types.h>
 #include <opencog/atoms/base/atom_types.h>
-#include "types.h"
-#include <opencog/util/Logger.h>
+#include <opencog/atoms/base/Atom.h>
+#include <opencog/atoms/base/ProtoAtom.h>
 
 #include "opencog/atoms/base/atom_types.definitions"
 
@@ -45,13 +45,8 @@ using namespace opencog;
 
 ClassServer::ClassServer(void)
 {
-    logger().info("Initializing ClassServer");
     nTypes = 0;
-}
-
-ClassServer* ClassServer::createInstance(void)
-{
-    return new ClassServer();
+    _maxDepth = 0;
 }
 
 Type ClassServer::addType(const Type parent, const std::string& name)
@@ -65,7 +60,10 @@ Type ClassServer::addType(const Type parent, const std::string& name)
         std::lock_guard<std::mutex> l(type_mutex);
         DPRINTF("Type \"%s\" has already been added (%d)\n", name.c_str(), type);
         inheritanceMap[parent][type] = true;
-        setParentRecursively(parent, type);
+
+        Type maxd = 1;
+        setParentRecursively(parent, type, maxd);
+        if (_maxDepth < maxd) _maxDepth = maxd;
         return type;
     }
 
@@ -77,18 +75,18 @@ Type ClassServer::addType(const Type parent, const std::string& name)
     inheritanceMap.resize(nTypes);
     recursiveMap.resize(nTypes);
 
-    std::for_each(inheritanceMap.begin(), inheritanceMap.end(),
-          boost::bind(&std::vector<bool>::resize, _1, nTypes, false));
-
-    std::for_each(recursiveMap.begin(), recursiveMap.end(),
-          boost::bind(&std::vector<bool>::resize, _1, nTypes, false));
+    for (auto& bv: inheritanceMap) bv.resize(nTypes, false);
+    for (auto& bv: recursiveMap) bv.resize(nTypes, false);
 
     inheritanceMap[type][type]   = true;
     inheritanceMap[parent][type] = true;
     recursiveMap[type][type]     = true;
-    setParentRecursively(parent, type);
     name2CodeMap[name]           = type;
     code2NameMap[type]           = &(name2CodeMap.find(name)->first);
+
+    Type maxd = 1;
+    setParentRecursively(parent, type, maxd);
+    if (_maxDepth < maxd) _maxDepth = maxd;
 
     // unlock mutex before sending signal which could call
     l.unlock();
@@ -99,19 +97,88 @@ Type ClassServer::addType(const Type parent, const std::string& name)
     return type;
 }
 
-void ClassServer::setParentRecursively(Type parent, Type type)
+void ClassServer::setParentRecursively(Type parent, Type type, Type& maxd)
 {
+    if (recursiveMap[parent][type]) return;
+
+    bool incr = false;
     recursiveMap[parent][type] = true;
     for (Type i = 0; i < nTypes; ++i) {
-        if ((recursiveMap[i][parent]) && (i != parent)) {
-            setParentRecursively(i, type);
+        if ((recursiveMap[i][parent]) and (i != parent)) {
+            incr = true;
+            setParentRecursively(i, type, maxd);
         }
     }
+    if (incr) maxd++;
 }
 
 boost::signals2::signal<void (Type)>& ClassServer::addTypeSignal()
 {
     return _addTypeSignal;
+}
+
+void ClassServer::addFactory(Type t, AtomFactory* fact)
+{
+    std::unique_lock<std::mutex> l(type_mutex);
+    _atomFactory[t] = fact;
+}
+
+// Perform a depth-first recursive search for a factory,
+// up to a maximum depth.
+ClassServer::AtomFactory* ClassServer::searchToDepth(Type t, int depth)
+{
+	// If there is a factory, then return it.
+	auto fpr = _atomFactory.find(t);
+	if (_atomFactory.end() != fpr)
+		return fpr->second;
+
+	// Perhaps one of the parent types has a factory.
+	// Perform a depth-first recursion.
+	depth--;
+	if (depth < 0) return nullptr;
+
+	std::vector<Type> parents;
+	getParents(t, back_inserter(parents));
+	for (auto p: parents)
+	{
+		AtomFactory* fact = searchToDepth(p, depth);
+		if (fact) return fact;
+	}
+
+	return nullptr;
+}
+
+ClassServer::AtomFactory* ClassServer::getFactory(Type t)
+{
+	// If there is a factory, then return it.
+	auto fpr = _atomFactory.find(t);
+	if (_atomFactory.end() != fpr)
+		return fpr->second;
+
+	// Perhaps one of the parent types has a factory.
+	//
+	// We want to use a breadth-first recursion, and not
+	// the simpler-to-code depth-first recursion.  That is,
+	// we do NOT want some deep parent factory, when there
+	// is some factory at a shallower level.
+	//
+	for (int search_depth = 1; search_depth <= _maxDepth; search_depth++)
+	{
+		AtomFactory* fact = searchToDepth(t, search_depth);
+		if (fact) return fact;
+	}
+
+	return nullptr;
+}
+
+Handle ClassServer::factory(const Handle& h)
+{
+	// If there is a factory, then use it.
+	AtomFactory* fact = getFactory(h->getType());
+	if (fact)
+		return (*fact)(h);
+
+	return h;
 }
 
 Type ClassServer::getNumberOfClasses()
@@ -153,9 +220,9 @@ const std::string& ClassServer::getTypeName(Type type)
     return nullString;
 }
 
-ClassServer& opencog::classserver(ClassServerFactory* factory)
+ClassServer& opencog::classserver()
 {
-    static std::unique_ptr<ClassServer> instance((*factory)());
+    static std::unique_ptr<ClassServer> instance(new ClassServer());
     return *instance;
 }
 

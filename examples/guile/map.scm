@@ -271,8 +271,8 @@
 ; Finally, an example that shows actual mapping taking place!!
 ; This is a variant of the example immediately above, except that,
 ; this time, instead of returning two values for two variables,
-; the values are used in an ImplicationLink, to perform a graph
-; rewrite.  That is, an ImplicationLink is a function P(x)->Q(x),
+; the values are used in an ImplicationScopeLink, to perform a graph
+; rewrite.  That is, an ImplicationScopeLink is a function P(x)->Q(x),
 ; so that, if P(x) matches the input P(v), then Q(v) is returned
 ; (with the value `v` substituted for the variable `x` in Q(x)).
 ; Actually, this example uses two variables, so the implication
@@ -286,8 +286,8 @@
 ;
 (define imply-map
 	(MapLink
-		; The ImplicationLink is the "map" that will be applied.
-		(ImplicationLink
+		; The ImplicationScopeLink is the "map" that will be applied.
+		(ImplicationScopeLink
 			; The implicationLink has two variables in it, both typed.
 			(VariableList
 				(TypedVariable (Variable "$x") (Type "ConceptNode"))
@@ -330,7 +330,7 @@
 
 (define summation
 	(MapLink
-		(ImplicationLink
+		(ImplicationScopeLink
 			(VariableList
 				(TypedVariable (Variable "$x") (Type "NumberNode"))
 				(TypedVariable (Variable "$y") (Type "NumberNode")))

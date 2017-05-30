@@ -45,11 +45,9 @@ class DeleteLink : public FreeLink
 protected:
 	void init(void);
 public:
-	DeleteLink(const HandleSeq&,
-	           TruthValuePtr tv = TruthValue::DEFAULT_TV(),
-	           AttentionValuePtr av = AttentionValue::DEFAULT_AV());
+	DeleteLink(const HandleSeq&);
 
-	DeleteLink(Link &l);
+	DeleteLink(const Link&);
 };
 
 typedef std::shared_ptr<DeleteLink> DeleteLinkPtr;

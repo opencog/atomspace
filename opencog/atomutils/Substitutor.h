@@ -52,9 +52,9 @@ private:
 
 	// Placing vmap first allows the compiler to optimize the stack
 	// frame. That is, expr changes each time, but vmap does not.
-	static Handle walk_tree(const std::map<Handle, Handle> &vmap, const Handle& expr)
+	static Handle walk_tree(const HandleMap &vmap, const Handle& expr)
 	{
-		std::map<Handle,Handle>::const_iterator it = vmap.find(expr);
+		HandleMap::const_iterator it = vmap.find(expr);
 		if (vmap.end() != it )
 			return it->second;
 
@@ -73,8 +73,9 @@ private:
 		if (not changed) return expr;
 
 		// Create a duplicate link with the substitution.
-		return Handle(createLink(expr->getType(), oset_results,
-		                         expr->getTruthValue()));
+		Handle hret(createLink(oset_results, expr->getType()));
+		hret->copyValues(expr);
+		return hret;
 	}
 
 public:
@@ -86,7 +87,7 @@ public:
 	 * @return      a new atom with sub-atoms replaced
 	 */
 	static Handle substitute(const Handle& expr,
-	                         const std::map<Handle, Handle> &vars)
+	                         const HandleMap &vars)
 	{
 		// throw, not assert, because this is a user error ...
 		if (nullptr == expr)

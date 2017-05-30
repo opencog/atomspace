@@ -1,10 +1,11 @@
 /*
  * BackwardChainer.cc
  *
- * Copyright (C) 2015 OpenCog Foundation
+ * Copyright (C) 2014-2017 OpenCog Foundation
  *
- * Author: Misgana Bayetta <misgana.bayetta@gmail.com>  October 2014
- *         William Ma <https://github.com/williampma>
+ * Authors: Misgana Bayetta <misgana.bayetta@gmail.com>  October 2014
+ *          William Ma <https://github.com/williampma>
+ *          Nil Geisweiller 2016-2017
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU Affero General Public License v3 as
@@ -22,54 +23,41 @@
  * 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
  */
 
+#include <random>
+
+#include <boost/range/algorithm/lower_bound.hpp>
+
 #include <opencog/util/random.h>
 
 #include <opencog/atomutils/FindUtils.h>
 #include <opencog/atomutils/Substitutor.h>
+#include <opencog/atomutils/Unify.h>
+#include <opencog/atomutils/TypeUtils.h>
 #include <opencog/atoms/pattern/PatternLink.h>
+#include <opencog/atoms/pattern/BindLink.h>
+
+#include <opencog/query/BindLinkAPI.h>
 
 #include "BackwardChainer.h"
 #include "BackwardChainerPMCB.h"
 #include "UnifyPMCB.h"
-#include "BCLogger.h"
+#include "../URELogger.h"
 
 using namespace opencog;
 
-BackwardChainer::BackwardChainer(AtomSpace& as, const Handle& rbs)
+BackwardChainer::BackwardChainer(AtomSpace& as, const Handle& rbs,
+                                 const Handle& target,
+                                 const Handle& vardecl,
+                                 const Handle& focus_set, // TODO:
+                                                          // support
+                                                          // focus_set
+                                 const BITNodeFitness& bitnode_fitness,
+                                 const AndBITFitness& andbit_fitness)
 	: _as(as), _configReader(as, rbs),
-	  // create a garbage superspace with _as as parent, so codes
-	  // acting on _garbage_superspace will see stuff in _as, but
-	  // codes acting on _as will not see stuff in _garbage_superspace
-	  _garbage_superspace(&_as),
-	  _iteration(0) {}
-
-/**
- * Set the initial target for backward chaining.
- *
- * @param init_target   Handle of the target
- * @param focus_link    The SetLink containing the optional focus set.
- */
-void BackwardChainer::set_target(const Handle& init_target,
-                                 const Handle& focus_link)
-{
-	_init_target = init_target;
-
-	_targets_set.clear();
-	_focus_space.clear();
-
-	_targets_set.emplace(_init_target, gen_varlist(_init_target));
-
-	// get the stuff under the SetLink
-	if (focus_link and focus_link->isLink())
-	{
-		HandleSeq focus_set = focus_link->getOutgoingSet();
-		for (const auto& h : focus_set)
-			_focus_space.add_atom(h);
-
-		// the target itself should be part of the focus set
-		if (focus_set.size() > 0)
-			_focus_space.add_atom(init_target);
-	}
+	  _bit(as, target, vardecl, bitnode_fitness),
+	  _andbit_fitness(andbit_fitness),
+	  _iteration(0), _last_expansion_andbit(nullptr),
+	  _rules(_configReader.get_rules()) {
 }
 
 UREConfigReader& BackwardChainer::get_config()
@@ -84,10 +72,26 @@ const UREConfigReader& BackwardChainer::get_config() const
 
 void BackwardChainer::do_chain()
 {
+	ure_logger().debug("Start Backward Chaining");
+	LAZY_URE_LOG_DEBUG << "With rule set:" << std::endl << oc_to_string(_rules);
+
 	while (not termination())
 	{
 		do_step();
 	}
+
+	LAZY_URE_LOG_DEBUG << "Finished Backward Chaining with solutions:"
+	                   << std::endl << get_results()->toString();
+}
+
+void BackwardChainer::do_step()
+{
+	ure_logger().debug("Iteration %d", _iteration);
+	_iteration++;
+
+	expand_bit();
+	fulfill_bit();
+	reduce_bit();
 }
 
 bool BackwardChainer::termination()
@@ -95,919 +99,289 @@ bool BackwardChainer::termination()
 	return _configReader.get_maximum_iterations() <= _iteration;
 }
 
-/**
- * Do a single step of backward chaining.
- */
-void BackwardChainer::do_step()
-{	
-	bc_logger().debug("Start single BC step.");
-	bc_logger().debug("Iteration %d", _iteration);
-	_iteration++;
-
-	bc_logger().debug("%d potential targets", _targets_set.size());
-	bc_logger().debug("%d in focus set", _focus_space.get_size());
-
-	// do target selection using some criteria
-	// XXX for example, choose target with low TV 50% of the time
-	Target& selected_target = _targets_set.select();
-
-	LAZY_BC_LOG_DEBUG << "Selected target:" << std::endl
-	                  << selected_target.get_handle()->toShortString()
-	                  << "With var_decl:" << std::endl
-	                  << selected_target.get_vardecl()->toShortString();
-
-	if (selected_target.get_varseq().empty())
-		bc_logger().debug("Target is 'Truth Value Query'");
-	else
-		bc_logger().debug("Target is 'Variable Fullfillment Query'");
-
-	process_target(selected_target);
-
-	// Clear the garbage space to avoid lingering copy of atoms that exist
-	// in both the garbage and main atomspace
-	_garbage_superspace.clear();
-
-	bc_logger().debug("End single BC step");
+Handle BackwardChainer::get_results() const
+{
+	HandleSeq results(_results.begin(), _results.end());
+	return _as.add_link(SET_LINK, results);
 }
 
-/**
- * Get the current result on the initial target, if any.
- *
- * @return a VarMultimap mapping each variable to all possible solutions
- */
-VarMultimap BackwardChainer::get_chaining_result()
+void BackwardChainer::expand_meta_rules()
 {
-	VarMultimap temp_result = _targets_set.get(_init_target).get_varmap();
-	VarMultimap result;
-	for (auto& p : temp_result)
-	{
-		UnorderedHandleSet s;
-		for (auto& h : p.second)
-			s.insert(_as.get_atom(h));
-		result[_as.get_atom(p.first)] = s;
-	}
+	// This is kinda of hack before meta rules are fully supported by
+	// the Rule class.
+	size_t rules_size = _rules.size();
+	_rules.expand_meta_rules(_as);
 
-	return result;
+	// If the rule set has changed we need to reset the exhausted
+	// flags.
+	if (rules_size != _rules.size()) {
+		_bit.reset_exhausted_flags();
+		ure_logger().debug() << "The rule set has gone from "
+		                     << rules_size << " rules to " << _rules.size()
+		                     << ". All exhausted flags have been reset.";
+	}
 }
 
-/**
- * The main recursive backward chaining method.
- *
- * @param target   the Target object containing the target atom
- */
-void BackwardChainer::process_target(Target& target)
+void BackwardChainer::expand_bit()
 {
-	Handle htarget = _garbage_superspace.add_atom(target.get_handle());
-	Handle htarget_vardecl = _garbage_superspace.add_atom(target.get_vardecl());
+	// Expand meta rules, before they are fully supported
+	expand_meta_rules();
 
-	// Check whether this target is a virtual link and is useless to explore
-	if (classserver().isA(htarget->getType(), VIRTUAL_LINK))
-	{
-		LAZY_BC_LOG_DEBUG << "Boring virtual link goal, skipping:" << std::endl
-		                  << htarget->toShortString();
+	// Reset _last_expansion_fcs
+	_last_expansion_andbit = nullptr;
+
+	if (_bit.empty()) {
+		_last_expansion_andbit = _bit.init();
+	} else {
+		// Select an FCS (i.e. and-BIT) and expand it
+		AndBIT* andbit = select_expansion_andbit();
+		LAZY_URE_LOG_DEBUG << "Selected and-BIT for expansion:" << std::endl
+		                   << andbit->to_string();
+		expand_bit(*andbit);
+	}
+}
+
+void BackwardChainer::expand_bit(AndBIT& andbit)
+{
+	// Select leaf
+	BITNode* bitleaf = andbit.select_leaf();
+	if (bitleaf) {
+		LAZY_URE_LOG_DEBUG << "Selected BIT-node for expansion:" << std::endl
+		                   << bitleaf->to_string();
+	} else {
+		ure_logger().debug() << "All BIT-nodes of this and-BIT are exhausted "
+		                     << "(or possibly fulfilled). Abort expansion.";
+		andbit.exhausted = true;
 		return;
 	}
 
-	// Check whether this target is a logical link and everything inside are
-	// virtual, and therefore useless to explore (PM cannot match it)
-	if (_logical_link_types.count(htarget->getType()) == 1)
-	{
-		bool all_virtual = true;
-		for (const Handle& h : htarget->getOutgoingSet())
-		{
-			if (classserver().isA(h->getType(), VIRTUAL_LINK))
-				continue;
+	// Get the leaf vardecl from fcs. We don't want to filter it
+	// because otherwise the typed substitution obtained may miss some
+	// variables in the FCS declaration that needs to be substituted
+	// during expension.
+	Handle vardecl = BindLinkCast(andbit.fcs)->get_vardecl();
 
-			all_virtual = false;
-			break;
-		}
-
-		if (all_virtual)
-		{
-			LAZY_BC_LOG_DEBUG << "Boring logical link all virtual, skipping "
-			                  << std::endl << htarget->toShortString();
-			return;
-		}
+	// Select a valid rule
+	RuleTypedSubstitutionPair rule_ts = select_rule(*bitleaf, vardecl);
+	Rule rule(rule_ts.first);
+	Unify::TypedSubstitution ts(rule_ts.second);
+	// Add the rule in the _bit.bit_as to make comparing atoms easier
+	// as well as logging more consistent.
+	rule.add(_bit.bit_as);
+	if (not rule.is_valid()) {
+		ure_logger().debug("No valid rule for the selected BIT-node, abort expansion");
+		return;
 	}
+	LAZY_URE_LOG_DEBUG << "Selected rule for BIT expansion:" << std::endl
+	                   << rule.to_string();
 
-	// before doing any real backward chaining, see if any variables in
-	// vardecl can already be grounded
-	if (not target.get_varseq().empty())
-	{
-		std::vector<VarMap> kb_vmap;
+	_last_expansion_andbit = _bit.expand(andbit, *bitleaf, {rule, ts});
+}
 
-		HandleSeq kb_match = match_knowledge_base(htarget, htarget_vardecl,
-		                                          kb_vmap);
-
-		// Matched something in the knowledge base? Then need to store
-		// any grounding as a possible solution for this target
-		if (not kb_match.empty())
-		{
-			bc_logger().debug("Matched something in knowledge base, "
-			                  "storing the grounding");
-
-			for (size_t i = 0; i < kb_match.size(); ++i)
-			{
-				Handle& soln = kb_match[i];
-				VarMap& vgm = kb_vmap[i];
-
-				LAZY_BC_LOG_DEBUG << "Looking at grounding:" << std::endl
-				                  << soln->toShortString();
-
-				// add whatever it matched as Target (so new variables can be
-				// filled, and TV updated)
-				_targets_set.emplace(soln, gen_varlist(soln));
-
-				target.store_varmap(vgm);
-			}
-		}
-	}
-
-	// If logical link, break it up, add each to new targets and return
-	if (_logical_link_types.count(htarget->getType()) == 1)
-	{
-		bc_logger().debug("Breaking into sub-targets");
-
-		HandleSeq sub_premises = htarget->getOutgoingSet();
-
-		for (Handle& h : sub_premises)
-			_targets_set.emplace(h, gen_sub_varlist(h, htarget_vardecl,
-			                                        std::set<Handle>()));
-
+void BackwardChainer::fulfill_bit()
+{
+	if (_bit.empty()) {
+		ure_logger().warn("Cannot fulfill an empty BIT!");
 		return;
 	}
 
-	/*************************************************/
-	/**** This is where the actual BC step starts ****/
-	/*************************************************/
-
-	Rule selected_rule(Handle::UNDEFINED);
-	Rule standardized_rule(Handle::UNDEFINED);
-	std::vector<VarMap> all_implicand_to_target_mappings;
-
-	// If no rules to backward chain on, no way to solve this target
-	if (not select_rule(target, selected_rule, standardized_rule,
-	                    all_implicand_to_target_mappings))
+	// Select an and-BIT for fulfillment
+	const AndBIT* andbit = select_fulfillment_andbit();
+	if (andbit == nullptr) {
+		ure_logger().debug() << "Cannot fulfill an empty and-BIT. "
+		                    << "Abort BIT fulfillment";
 		return;
+	}
+	LAZY_URE_LOG_DEBUG << "Selected and-BIT for fulfillment (fcs value):"
+	                   << std::endl << andbit->fcs->idToString();
+	fulfill_fcs(andbit->fcs);
+}
 
-	bc_logger().debug("Selected rule %s", selected_rule.get_name().c_str());
-	LAZY_BC_LOG_DEBUG << "Standardized rule:" << std::endl
-	                  << standardized_rule.get_handle()->toShortString();
-	bc_logger().debug("Found %d implicand's output unifiable",
-	                  all_implicand_to_target_mappings.size());
+void BackwardChainer::fulfill_fcs(const Handle& fcs)
+{
+	// Temporary atomspace to not pollute _as with intermediary
+	// results
+	AtomSpace tmp_as(&_as);
 
-	// Randomly select one of the mapping (so that each time the
-	// same target is visited, and the same rule is selected, it is
-	// possible to select a different output to map to)
+	// Run the FCS and add the results, if any, in _as.
 	//
-	// XXX TODO use all possible output mapping instead; ie visit them
-	// all, and add all resulting new targets to targets list; this will
-	// avoid having to visit the target multiple times to get all
-	// possible output mappings
-	VarMap implicand_mapping = rand_element(all_implicand_to_target_mappings);
-	for (auto& p : implicand_mapping)
-		LAZY_BC_LOG_DEBUG << "Chosen mapping is:" << std::endl
-		                  << p.first->toShortString()
-		                  << "to:" << std::endl
-		                  << p.second->toShortString();
-
-	Handle hrule_implicant_reverse_grounded;
-	std::vector<VarMap> premises_vmap_list;
-	std::set<Handle> additional_free_var;
-	for (auto& h : target.get_varset())
-		additional_free_var.insert(_garbage_superspace.get_atom(h));
-	HandleSeq possible_premises = find_premises(standardized_rule,
-	                                            implicand_mapping,
-	                                            additional_free_var,
-	                                            hrule_implicant_reverse_grounded,
-	                                            premises_vmap_list);
-
-	bc_logger().debug("%d possible permises", possible_premises.size());
-
-	// If no possible premises, then the reverse grounded rule's implicant
-	// could be added as potential target.  Note that however, such target are
-	// not yet in the main atomspace, since whatever the grounded implicant
-	// is, it is possible that it is not valid (like the reverse of if-then
-	// is not always true).  It will require some future steps to see if
-	// another rule will generate the target and add it to the main atomspace.
-	// Also note that these targets could contain variables from standardized
-	// apart version of the rule, and should not be added to the main space.
-	if (possible_premises.size() == 0)
-	{
-		bc_logger().debug("Adding rule's grounded input as Target");
-
-		target.store_step(selected_rule, { hrule_implicant_reverse_grounded });
-		_targets_set.emplace(hrule_implicant_reverse_grounded,
-		                     gen_sub_varlist(hrule_implicant_reverse_grounded,
-		                                     standardized_rule.get_vardecl(),
-		                                     additional_free_var));
-		return;
-	}
-
-	// For each set of possible premises, check if they already satisfy the
-	// target, so that we can apply the rule while we are looking at it in the
-	// same step
-	for (size_t i = 0; i < possible_premises.size(); i++)
-	{
-		Handle hp = possible_premises[i];
-		VarMap vm = premises_vmap_list[i];
-
-		LAZY_BC_LOG_DEBUG << "Checking premises:" << std::endl
-		                  << hp->toShortString();
-
-		// Reverse ground the rule's outputs with the mapping to the premise
-		// so that when we ground the premise, we know how to generate
-		// the final output; one version containing the ExecutionOutputLink (if
-		// any), and the other contains the actual output vector sequence.
-		// Adding to _garbage_superspace because the mapping are from within
-		// the garbage space.
-		Handle output_grounded =
-			garbage_substitute(standardized_rule.get_implicand(),
-			                   implicand_mapping);
-		LAZY_BC_LOG_DEBUG << "Output reverse grounded step 1 as:" << std::endl
-		                  << output_grounded->toShortString();
-		output_grounded = garbage_substitute(output_grounded, vm);
-		LAZY_BC_LOG_DEBUG << "Output reverse grounded step 2 as:" << std::endl
-		                  << output_grounded->toShortString();
-
-		HandleSeq output_grounded_seq;
-		for (const auto& h : standardized_rule.get_implicand_seq())
-			output_grounded_seq.push_back(
-				garbage_substitute(garbage_substitute(h, implicand_mapping), vm));
-
-		std::vector<VarMap> vm_list;
-
-		// include the implicand mapping into vm so we can do variable chasing
-		vm.insert(implicand_mapping.begin(), implicand_mapping.end());
-
-		// use pattern matcher to try to ground the variables (if any) in the
-		// selected premises, so we can use this grounding to "apply" the rule
-		// to generate the rule's final output
-		HandleSeq grounded_premises = ground_premises(hp, vm, vm_list);
-
-		// Check each grounding to see if any has no variable
-		for (size_t i = 0; i < grounded_premises.size(); ++i)
-		{
-			VarMultimap results;
-			Handle& g = grounded_premises[i];
-			VarMap& m = vm_list.at(i);
-
-			LAZY_BC_LOG_DEBUG << "Checking possible permises grounding:"
-			                  << std::endl << g->toShortString();
-
-			// XXX should this only search for free var?
-			FindAtoms fv(VARIABLE_NODE);
-			fv.search_set(g);
-
-			// If some grounding cannot solve the goal, will need to BC
-			if (not fv.varset.empty())
-				continue;
-
-			// This is a premise grounding that can solve the target, so
-			// apply it by using the mapping to ground the target, and add
-			// it to _as since this is not garbage; this should generate
-			// all the outputs of the rule, and execute any evaluatable
-			//
-			// XXX TODO the TV of the original "Variable Fullfillment" target
-			// need to be changed here... right?
-			Instantiator inst(&_as);
-			Handle added = inst.instantiate(output_grounded, m);
-
-			LAZY_BC_LOG_DEBUG << "Added:" << std::endl
-			                  << added->toShortString() << "to _as";
-
-			for (const auto& h : output_grounded_seq)
-			{
-				// add each sub-output to _as since the ExecutionOutputLink might
-				// not add them all
-				added = _as.add_atom(Substitutor::substitute(h, m));
-				if (_focus_space.get_size() > 0 )
-					_focus_space.add_atom(added);
-				LAZY_BC_LOG_DEBUG << "Added:" << std::endl
-				                  << added->toShortString() << "to _as";
-			}
-
-			// Add the grounding to the return results
-			for (Handle& h : target.get_varseq())
-				results[h].emplace(m.at(_garbage_superspace.get_atom(h)));
-
-			target.store_varmap(results);
-		}
-
-		// XXX TODO premise selection would be done here to
-		// determine whether to BC on a premise
-
-		// non-logical link can be added straight to targets list
-		if (_logical_link_types.count(hp->getType()) == 0)
-		{			
-			target.store_step(selected_rule, { hp });
-			_targets_set.emplace(hp, gen_varlist(hp));
-			continue;
-		}
-
-		bc_logger().debug("Before breaking apart into sub-premises");
-
-		// Else break out any logical link and add to targets
-		HandleSeq sub_premises = hp->getOutgoingSet();
-		target.store_step(selected_rule, sub_premises);
-
-		for (Handle& s : sub_premises)
-			_targets_set.emplace(s, gen_varlist(s));
-	}
-
-	return;
-}
-
-/**
- * Find all atoms in the AtomSpace matching the pattern.
- *
- * @param hpattern         the atom to pattern match against
- * @param hpattern_vardecl the typed VariableList of the variables in hpattern
- * @param vmap             an output list of mapping for variables in hpattern
- * @return                 a vector of matched atoms
- */
-HandleSeq BackwardChainer::match_knowledge_base(Handle hpattern,
-                                                Handle hpattern_vardecl,
-                                                vector<VarMap>& vmap,
-                                                bool enable_var_name_check)
-{
-	AtomSpace focus_garbage_superspace(&_focus_space);
-	AtomSpace* working_space;
-	AtomSpace* working_garbage_superspace;
-
-	// decide whether to look at a small focus set or whole AtomSpace
-	if (_focus_space.get_size() > 0)
-	{
-		working_space = &_focus_space;
-		working_garbage_superspace = &focus_garbage_superspace;
-	}
-	else
-	{
-		working_space = &_as;
-		working_garbage_superspace = &_garbage_superspace;
-	}
-
-	hpattern = working_garbage_superspace->add_atom(hpattern);
-
-	if (hpattern_vardecl == Handle::UNDEFINED)
-	{
-		HandleSeq vars = get_free_vars_in_tree(hpattern);
-		hpattern_vardecl = working_garbage_superspace->add_atom(createVariableList(vars));
-	}
-	else
-		hpattern_vardecl = working_garbage_superspace->add_atom(hpattern_vardecl);
-
-	LAZY_BC_LOG_DEBUG << "Matching knowledge base with:" << std::endl
-	                  << hpattern->toShortString()
-	                  << "and variables:" << std::endl
-	                  << hpattern_vardecl->toShortString();
-
-	// if no variables at all
-	if (VariableListCast(hpattern_vardecl)->get_variables().varseq.empty())
-	{
-		// If the pattern already in the main atomspace, then itself is a match
-		Handle hself = working_space->get_atom(hpattern);
-		if (hself != Handle::UNDEFINED)
-		{
-			vmap.push_back(VarMap());
-			return { _as.get_atom(hself) };
-		}
-
-		return HandleSeq();
-	}
-
-	// Pattern Match on working_space, assuming PM will work even if some atoms
-	// in hpattern are in the garbage space
-	PatternLinkPtr sl(createPatternLink(hpattern_vardecl, hpattern));
-	BackwardChainerPMCB pmcb(working_space,
-	                         VariableListCast(hpattern_vardecl),
-	                         enable_var_name_check);
-
-	sl->satisfy(pmcb);
-
-	vector<map<Handle, Handle>> var_solns = pmcb.get_var_list();
-	vector<map<Handle, Handle>> pred_solns = pmcb.get_pred_list();
-
+	// Warning: since tmp_as is a child of _as, TVs of existing atoms
+	// in _as, that are modified by running fcs will be modified on
+	// _as as well. This can create involontary TVs changes, hopefully
+	// mitigated by the merging the TVs properly (for now the one with
+	// the highest confidence wins). To avoid that side effect, we
+	// could operate on a copy the atomspace, of its zone of focus. Or
+	// alternatively modify some HypotheticalLink wrapping the atoms
+	// of concerns instead of the atoms themselves, and only modify
+	// the atoms if there are existing results to copy back to _as.
+	Handle hresult = bindlink(&tmp_as, fcs);
 	HandleSeq results;
-
-	bc_logger().debug("Pattern matcher found %d matches", var_solns.size());
-
-	for (size_t i = 0; i < var_solns.size(); i++)
-	{
-		HandleSeq i_pred_soln;
-
-		// check for bad mapping
-		for (auto& p : pred_solns[i])
-		{
-			// don't want matched clause that is part of a rule
-			auto& rules = _configReader.get_rules();
-			if (std::any_of(rules.begin(), rules.end(), [&](Rule& r) {
-						return is_atom_in_tree(r.get_handle(), p.second); }))
-			{
-				bc_logger().debug("matched clause in rule");
-				break;
-			}
-
-			// don't want matched stuff with some part of a rule inside
-			if (std::any_of(rules.begin(), rules.end(), [&](Rule& r) {
-						return is_atom_in_tree(p.second, r.get_handle()); }))
-			{
-				bc_logger().debug("matched clause wrapping rule");
-				break;
-			}
-
-			// don't want matched clause that is not in the focus set or parent _as
-			if (working_space->get_atom(p.second) == Handle::UNDEFINED)
-			{
-				LAZY_BC_LOG_DEBUG << "matched clause:" << std::endl
-				                  << p.second->toShortString()
-				                  << "not in target search space";
-				break;
-			}
-
-			// store the main _as version of the matched atom
-			i_pred_soln.push_back(_as.get_atom(p.second));
-		}
-
-		if (i_pred_soln.size() != pred_solns[i].size())
-			continue;
-
-		// if the original htarget is multi-clause, wrap the solution with the
-		// same logical link
-		// XXX TODO preserve htarget's order (but logical link are unordered...)
-		Handle this_result;
-		if (_logical_link_types.count(hpattern->getType()) == 1)
-			this_result = _garbage_superspace.add_link(hpattern->getType(),
-			                                           i_pred_soln);
-		else
-			this_result = i_pred_soln[0];
-
-		results.push_back(this_result);
-
-		// convert the working_space mapping to _as
-		std::map<Handle, Handle> converted_vmap;
-		for (auto& p : var_solns[i])
-			converted_vmap[_garbage_superspace.get_atom(p.first)]
-			        = _as.get_atom(p.second);
-
-		vmap.push_back(converted_vmap);
-	}
-
-	return results;
+	for (const Handle& result : hresult->getOutgoingSet())
+		results.push_back(_as.add_atom(result));
+	LAZY_URE_LOG_DEBUG << "Results:" << std::endl << results;
+	_results.insert(results.begin(), results.end());
 }
 
-/**
- * Find all possible premises for a specific rule's implicant (input).
- *
- * @param standardized_rule                 the Rule object with the implicant
- * @param implicand_mapping                 the output (implicand) var mapping
- * @param additional_free_varset            additional free variables from the target
- * @param hrule_implicant_reverse_grounded  output grounding of the implicant
- * @param premises_vmap_list                the var mapping of each premise
- * @return                                  a vector of premises
- */
-HandleSeq BackwardChainer::find_premises(const Rule& standardized_rule,
-                                         const VarMap& implicand_mapping,
-                                         const std::set<Handle>& additional_free_varset,
-                                         Handle& hrule_implicant_reverse_grounded,
-                                         std::vector<VarMap>& premises_vmap_list)
+std::vector<double> BackwardChainer::expansion_anbit_weights()
 {
-	Handle hrule_implicant = standardized_rule.get_implicant();
-	Handle hrule_vardecl = standardized_rule.get_vardecl();
-
-	// Reverse ground the implicant with the grounding we found from
-	// unifying the implicand
-	hrule_implicant_reverse_grounded = garbage_substitute(hrule_implicant,
-	                                                      implicand_mapping);
-
-	LAZY_BC_LOG_DEBUG << "Reverse grounded as:" << std::endl
-	                  << hrule_implicant_reverse_grounded->toShortString();
-
-	// Find all matching premises matching the implicant, where
-	// premises_vmap_list will be the mapping from free variables in
-	// himplicant to stuff in a premise
-	HandleSeq possible_premises =
-		match_knowledge_base(hrule_implicant_reverse_grounded,
-		                     gen_sub_varlist(hrule_implicant_reverse_grounded,
-		                                     hrule_vardecl,
-		                                     additional_free_varset),
-	                         premises_vmap_list);
-
-	// Do another match but without the target's free var as variable, so they
-	// are constant; mostly to handle where PM cannot map a variable to itself
-	if (not additional_free_varset.empty())
-	{
-		std::vector<VarMap> premises_vmap_list_alt;
-
-		HandleSeq possible_premises_alt =
-		        match_knowledge_base(hrule_implicant_reverse_grounded,
-		                             gen_sub_varlist(hrule_implicant_reverse_grounded,
-		                                             hrule_vardecl,
-		                                             std::set<Handle>()),
-		                             premises_vmap_list_alt,
-		                             true);
-
-		// collect the possible premises from the two verions of mapping
-		possible_premises.insert(possible_premises.end(),
-		                         possible_premises_alt.begin(),
-		                         possible_premises_alt.end());
-		premises_vmap_list.insert(premises_vmap_list.end(),
-		                          premises_vmap_list_alt.begin(),
-		                          premises_vmap_list_alt.end());
-	}
-
-
-	return possible_premises;
-}
-
-/**
- * Try to ground any free variables in the input target.
- *
- * @param hpremise      the input atom to be grounded
- * @param premise_vmap  the original mapping to the variables in hpremise
- * @param vmap_list     the final output mapping of the variables
- * @return              the mapping of the hpremise
- */
-HandleSeq BackwardChainer::ground_premises(const Handle& hpremise,
-                                           const VarMap& premise_vmap,
-                                           std::vector<VarMap>& vmap_list)
-{
-	HandleSeq results;
-
-	HandleSeq varseq = get_free_vars_in_tree(hpremise);
-
-	// if the target is already fully grounded
-	if (varseq.empty())
-	{
-		VarMap old_map = premise_vmap;
-		VarMap new_map;
-
-		// do variable chasing
-		for (const auto& p : premise_vmap)
-		{
-			if (old_map.count(p.second) == 1)
-			{
-				new_map[p.first] = old_map[p.second];
-				new_map[p.second] = old_map[p.second];
-				old_map.erase(p.second);
-			}
-			else
-				new_map[p.first] = p.second;
-		}
-
-		// add any leftover mapping into final ouput
-		new_map.insert(old_map.begin(), old_map.end());
-
-		vmap_list.push_back(new_map);
-		results.push_back(hpremise);
-
-		return results;
-	}
-
-	Handle premises = hpremise;
-
-	if (_logical_link_types.count(premises->getType()) == 1)
-	{
-		HandleSeq sub_premises;
-		HandleSeq oset = hpremise->getOutgoingSet();
-
-		for (const Handle& h : oset)
-		{
-			// ignore premises with no free var
-			if (get_free_vars_in_tree(h).empty())
-				continue;
-
-			sub_premises.push_back(h);
-		}
-
-		if (sub_premises.size() == 1)
-			premises = sub_premises[0];
-		else
-			premises = _garbage_superspace.add_link(hpremise->getType(),
-			                                        sub_premises);
-	}
-
-	LAZY_BC_LOG_DEBUG << "Grounding:" << std::endl
-	                  << premises->toShortString();
-
-	std::vector<VarMap> temp_vmap_list;
-
-	// XXX TODO when all VariableNode are unique, we will be able to tell what
-	// type a random VariableNode is in the AtomSpace by looking at its
-	// antecedent; so the type should be included in the future
-	HandleSeq temp_results = match_knowledge_base(premises, Handle::UNDEFINED,
-	                                              temp_vmap_list);
-
-	// Chase the variables so that if a variable A were mapped to another
-	// variable B in premise_vmap, and after pattern matching, B now map
-	// to some solution, change A to map to the same solution
-	for (unsigned int i = 0; i < temp_results.size(); ++i)
-	{
-		VarMap& tvm = temp_vmap_list[i];
-		VarMap this_map;
-
-		for (const auto& p : premise_vmap)
-		{
-			if (tvm.count(p.second) == 1)
-			{
-				this_map[p.first] = tvm[p.second];
-				this_map[p.second] = tvm[p.second];
-				tvm.erase(p.second);
-			}
-			else
-				this_map[p.first] = p.second;
-		}
-
-		// add any leftover mapping into final ouput
-		this_map.insert(tvm.begin(), tvm.end());
-
-		vmap_list.push_back(this_map);
-		results.push_back(temp_results[i]);
-	}
-
-	return results;
-}
-
-/**
- * Unify two atoms, finding a mapping that makes them equal.
- *
- * Use the Pattern Matcher to do the heavy lifting of unification from one
- * specific atom to another, let it handles UnorderedLink, VariableNode in
- * QuoteLink, etc.
- *
- * This will in general unify htarget to hmatch in one direction.  However, it
- * allows a typed variable A in htarget to map to another variable B in hmatch,
- * in which case the mapping will be returned reverse (as B->A).
- *
- * @param hsource          the atom from which to unify
- * @param hmatch           the atom to which hsource will be unified to
- * @param hsource_vardecl  the typed VariableList of the variables in hsource
- * @param hmatch_vardecl   the VariableList of the free variables in hmatch
- * @param result           an output VarMap mapping varibles from hsource to hmatch
- * @return                 true if the two atoms can be unified
- */
-bool BackwardChainer::unify(const Handle& hsource,
-                            const Handle& hmatch,
-                            const Handle& hsource_vardecl,
-                            const Handle& hmatch_vardecl,
-                            VarMap& result)
-{
-	// Lazy way of restricting PM to be between two atoms
-	AtomSpace temp_space;
-
-	Handle temp_hsource = temp_space.add_atom(hsource);
-	Handle temp_hmatch = temp_space.add_atom(hmatch);
-	Handle temp_hsource_vardecl = temp_space.add_atom(hsource_vardecl);
-	Handle temp_hmatch_vardecl = temp_space.add_atom(hmatch_vardecl);
-
-	if (temp_hsource_vardecl == Handle::UNDEFINED)
-	{
-		FindAtoms fv(VARIABLE_NODE);
-		fv.search_set(hsource);
-
-		HandleSeq vars;
-		for (const Handle& h : fv.varset)
-			vars.push_back(h);
-
-		temp_hsource_vardecl = temp_space.add_atom(createVariableList(vars));
-	}
-
-	PatternLinkPtr sl(createPatternLink(temp_hsource_vardecl, temp_hsource));
-	UnifyPMCB pmcb(&temp_space, VariableListCast(temp_hsource_vardecl),
-	               VariableListCast(temp_hmatch_vardecl));
-
-	sl->satisfy(pmcb);
-
-	// if no grounding
-	if (pmcb.get_var_list().size() == 0)
-		return false;
-
-	std::vector<std::map<Handle, Handle>> pred_list = pmcb.get_pred_list();
-	std::vector<std::map<Handle, Handle>> var_list = pmcb.get_var_list();
-
-	VarMap good_map;
-
-	// Go thru each solution, and get the first one that map the whole
-	// temp_hmatch
-	//
-	// XXX TODO branch on the various groundings?  how to properly handle
-	// multiple possible unify option????
-	for (size_t i = 0; i < pred_list.size(); ++i)
-	{
-		for (const auto& p : pred_list[i])
-		{
-			if (is_atom_in_tree(p.second, temp_hmatch))
-			{
-				good_map = var_list[i];
-				i = pred_list.size();
-				break;
-			}
-		}
-	}
-
-	// If none of the mapping map the whole temp_hmatch (possible in the case
-	// of sub-atom unification that map a typed variable to another variable)
-	if (good_map.empty())
-		return false;
-
-	// Change the mapping from temp_atomspace to current atomspace
-	for (const auto& p : good_map)
-	{
-		Handle var = p.first;
-		Handle grn = p.second;
-
-		result[_garbage_superspace.get_atom(var)] =
-			_garbage_superspace.get_atom(grn);
-	}
-
-	return true;
-}
-
-/**
- * Get all unique atoms within a link and its sublinks.
- *
- * Similar to getAllAtoms except there will be no repetition.
- *
- * @param h     the top level link
- * @return      a UnorderedHandleSet of atoms
- */
-static void get_all_unique_atoms(const Handle& h, UnorderedHandleSet& atom_set)
-{
-    atom_set.insert(h);
-
-    if (h->isLink())
-        for (const Handle& o : h->getOutgoingSet())
-            get_all_unique_atoms(o, atom_set);
-}
-
-/**
- * Select a candidate rule from all rules.
- *
- * This method will try sub-atom unification if no whole output
- * unification is possible.
- *
- * XXX TODO use the rule weight
- * XXX should these selection functions be in callbacks like the ForwardChainer?
- *
- * @param target             the original target that the rules are going to unify to
- * @param selected_rule      output the selected rule
- * @param standardized_rule  output the standardized-apart version of the selected rule
- * @param all_implicand_to_target_mappings  the output implicand to target mapping
- * @return                   true if a rule is selected
- */
-bool BackwardChainer::select_rule(const Target& target,
-                                  Rule& selected_rule,
-                                  Rule& standardized_rule,
-                                  std::vector<VarMap>& all_implicand_to_target_mappings)
-{
-	Handle htarget = _garbage_superspace.add_atom(target.get_handle());
-	Handle htarget_vardecl = _garbage_superspace.add_atom(target.get_vardecl());
-	std::vector<Rule> rules = _configReader.get_rules();
-
-	// store how many times each rule has been used for the target
 	std::vector<double> weights;
-	std::for_each(rules.begin(), rules.end(),
-	              [&](const Rule& r)
-	              { weights.push_back(target.get_selection_count() - target.rule_count(r) + 1); });
+	for (const AndBIT& andbit : _bit.andbits)
+		weights.push_back(operator()(andbit));
+	return weights;
+}
 
-	while (not rules.empty())
-	{
-		// Select the rule that has been applied least
-		int index = randGen().rand_discrete(weights);
+AndBIT* BackwardChainer::select_expansion_andbit()
+{
+	std::vector<double> weights = expansion_anbit_weights();
 
-		// unify against the standardized version, so the result will match
-		// with what we will be applying against at later step
-		selected_rule = rules[index];
-		standardized_rule = selected_rule.gen_standardize_apart(&_garbage_superspace);
-
-		Handle hrule_vardecl = standardized_rule.get_vardecl();
-		HandleSeq output = standardized_rule.get_implicand_seq();
-
-		all_implicand_to_target_mappings.clear();
-
-		// check if any of the implicand's output can be unified to target
-		for (const Handle& h : output)
-		{
-			VarMap mapping;
-
-			if (not unify(h,
-			              htarget,
-			              gen_sub_varlist(h, hrule_vardecl, std::set<Handle>()),
-			              htarget_vardecl,
-			              mapping))
-				continue;
-
-			all_implicand_to_target_mappings.push_back(mapping);
-		}
-
-		// if not unifiable, try sub-atom unification
-		if (all_implicand_to_target_mappings.empty())
-		{
-			UnorderedHandleSet output_expanded;
-			for (const Handle& h : output)
-			{
-				get_all_unique_atoms(h, output_expanded);
-				output_expanded.erase(h);
-			}
-
-			for (const Handle& h : output_expanded)
-			{
-				VarMap mapping;
-
-				if (not unify(h,
-				              htarget,
-				              gen_sub_varlist(h, hrule_vardecl,
-				                              std::set<Handle>()),
-				              htarget_vardecl,
-				              mapping))
-					continue;
-
-				all_implicand_to_target_mappings.push_back(mapping);
-			}
-		}
-
-		if (not all_implicand_to_target_mappings.empty())
-			return true;
-
-		// move on to next rule if htarget cannot map to the output
-		rules.erase(rules.begin() + index);
-		weights.erase(weights.begin() + index);
+	// Debug log
+	if (ure_logger().is_debug_enabled()) {
+		OC_ASSERT(weights.size() == _bit.andbits.size());
+		std::stringstream ss;
+		ss << "Weighted and-BITs:";
+		for (size_t i = 0; i < weights.size(); i++)
+			ss << std::endl << weights[i] << " "
+			   << _bit.andbits[i].fcs->idToString();
+		ure_logger().debug() << ss.str();
 	}
 
-	return false;
+	// Sample andbits according to this distribution
+	std::discrete_distribution<size_t> dist(weights.begin(), weights.end());
+	return &rand_element(_bit.andbits, dist);
 }
 
-Handle BackwardChainer::garbage_substitute(const Handle& term, const VarMap& vm)
+const AndBIT* BackwardChainer::select_fulfillment_andbit() const
 {
-	return _garbage_superspace.add_atom(Substitutor::substitute(term, vm));
+	return _last_expansion_andbit;
 }
 
-/**
- * Generate a VariableList of the free variables of a given target,
- * and add it to _garbage_superspace.
- */
-Handle BackwardChainer::gen_varlist(const Handle& target)
+void BackwardChainer::reduce_bit()
 {
-	HandleSeq target_vars = get_free_vars_in_tree(target);
-	return _garbage_superspace.add_atom(createVariableList(target_vars));
-}
-
-/**
- * Given a VariableList, generate a new VariableList of only the
- * specific vars and add it to the _garbage_superspace.
- *
- * Mostly to keep the typed definition from the original VariableList.  Also
- * put any "free" variables not inside the original VariableList in the new
- * list.  The "free" variables are passed in as a parameter.
- *
- * VariableNodes not in the original VariableList nor in the free_varset will
- * be considered bound already.
- *
- * @param parent                  the atom the VariableList was for
- * @param parent_varlist          the original VariableList
- * @param additional_free_varset  a set of free VariableNodes to be included
- * @return                        the new sublist
- */
-Handle BackwardChainer::gen_sub_varlist(const Handle& parent,
-                                        const Handle& parent_varlist,
-                                        std::set<Handle> additional_free_varset)
-{
-	FindAtoms fv(VARIABLE_NODE);
-	fv.search_set(parent);
-
-	HandleSeq oset;
-	if (parent_varlist->isLink())
-		oset = parent_varlist->getOutgoingSet();
-	else
-		oset.push_back(parent_varlist);
-
-	HandleSeq final_oset;
-
-	// for each var in varlist, check if it is used in parent
-	for (const Handle& h : oset)
-	{
-		Type t = h->getType();
-		if (VARIABLE_NODE == t && fv.varset.count(h) == 1)
-		{
-			final_oset.push_back(h);
-			additional_free_varset.erase(h);
-		}
-		else if (TYPED_VARIABLE_LINK == t
-			     and fv.varset.count(h->getOutgoingSet()[0]) == 1)
-		{
-			final_oset.push_back(h);
-			additional_free_varset.erase(h->getOutgoingSet()[0]);
+	if (0 < _configReader.get_max_bit_size()) {
+		// If the BIT size has reached its maximum, randomly remove
+		// and-BITs so that the BIT size gets back below or equal to
+		// its maximum.
+		while (_configReader.get_max_bit_size() < _bit.size()) {
+			// Randomly select an and-BIT that is unlikely to be used
+			// for the remaining of the inferenceThe and-BITs to remove are
+			// selected so that the least likely and-BITs to be
+			// selected for expansion are removed first.
+			remove_unlikely_expandable_andbit();
 		}
 	}
-
-	// for each var left in the additional_free_varset, check
-	// if it is used in parent
-	for (const Handle& h : additional_free_varset)
-	{
-		if (fv.varset.count(h) == 1)
-			final_oset.push_back(h);
-	}
-
-	return _garbage_superspace.add_atom(createVariableList(final_oset));
 }
 
+void BackwardChainer::remove_unlikely_expandable_andbit()
+{
+	std::vector<double> weights = expansion_anbit_weights();
+	std::discrete_distribution<size_t> dist(weights.begin(), weights.end());
+	std::vector<double> never_expand_probs;
+
+	// Calculate the probability of never being expanded for the
+	// remainder of the inference, thus (1-p) raised to the power of
+	// _configReader.get_maximum_iterations() - _iteration. This makes
+	// the assumption that the BIT (i.e. its and-BIT population) is
+	// not gonna change from this point on, a false but OK assumption
+	// for now.
+	for (double p : dist.probabilities()) {
+		double remaining_iterations =
+			_configReader.get_maximum_iterations() - _iteration;
+		double nep = std::pow(1 - p, remaining_iterations);
+		never_expand_probs.push_back(nep);
+	}
+
+	// Fine log
+	if (ure_logger().is_fine_enabled()) {
+		OC_ASSERT(never_expand_probs.size() == _bit.andbits.size());
+		std::stringstream ss;
+		ss << "Never expand probs and-BITs:";
+		for (size_t i = 0; i < never_expand_probs.size(); i++)
+			ss << std::endl << never_expand_probs[i] << " "
+			   << _bit.andbits[i].fcs->idToString();
+		ure_logger().fine() << ss.str();
+	}
+
+	std::discrete_distribution<size_t>
+		never_expand_dist(never_expand_probs.begin(), never_expand_probs.end());
+
+	// Pick the and-BIT, remove it from the BIT and remove its
+	// FCS from the bit atomspace.
+	auto it = std::next(_bit.andbits.begin(), never_expand_dist(randGen()));
+	LAZY_URE_LOG_DEBUG << "Remove " << it->fcs->idToString()
+	                   << " from the BIT";
+	_bit.erase(it);
+}
+
+RuleTypedSubstitutionPair BackwardChainer::select_rule(BITNode& target,
+                                                       const Handle& vardecl)
+{
+	// The rule is randomly selected amongst the valid ones, with
+	// probability of selection being proportional to its weight.
+	const RuleTypedSubstitutionMap valid_rules = get_valid_rules(target, vardecl);
+	if (valid_rules.empty()) {
+		target.exhausted = true;
+		return {Rule(), Unify::TypedSubstitution()};;
+	}
+
+	// Log all valid rules and their weights
+	if (ure_logger().is_debug_enabled()) {
+		std::stringstream ss;
+		ss << "The following weighted rules are valid:";
+		for (const auto& r : valid_rules)
+			ss << std::endl << r.first.get_weight() << " " << r.first.get_name();
+		LAZY_URE_LOG_DEBUG << ss.str();
+	}
+
+	return select_rule(valid_rules);
+}
+
+RuleTypedSubstitutionPair BackwardChainer::select_rule(const RuleTypedSubstitutionMap& rules)
+{
+	// Build weight vector to do weighted random selection
+	std::vector<double> weights;
+	for (const auto& rule : rules)
+		weights.push_back(rule.first.get_weight());
+
+	// No rule exhaustion, sample one according to the distribution
+	std::discrete_distribution<size_t> dist(weights.begin(), weights.end());
+	return rand_element(rules, dist);
+}
+
+RuleTypedSubstitutionMap BackwardChainer::get_valid_rules(const BITNode& target,
+                                                          const Handle& vardecl)
+{
+	// Generate all valid rules
+	RuleTypedSubstitutionMap valid_rules;
+	for (const Rule& rule : _rules) {
+		// For now ignore meta rules as they are forwardly applied in
+		// expand_bit()
+		if (rule.is_meta())
+			continue;
+
+		RuleTypedSubstitutionMap unified_rules
+			= rule.unify_target(target.body, vardecl);
+
+		// Insert only rules with positive probability of success
+		RuleTypedSubstitutionMap pos_rules;
+		for (const auto& rule : unified_rules) {
+			double p = (_bit.is_in(rule, target) ? 0.0 : 1.0)
+				* rule.first.get_weight();
+			if (p > 0) pos_rules.insert(rule);
+		}
+
+		valid_rules.insert(pos_rules.begin(), pos_rules.end());
+	}
+	return valid_rules;
+}
+
+double BackwardChainer::complexity_factor(const AndBIT& andbit) const
+{
+	return exp(-_configReader.get_complexity_penalty() * andbit.complexity);
+}
+
+double BackwardChainer::operator()(const AndBIT& andbit) const
+{
+	return (andbit.exhausted ? 0.0 : 1.0)
+		* _andbit_fitness(andbit)
+		* complexity_factor(andbit);
+}

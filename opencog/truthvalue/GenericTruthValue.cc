@@ -26,149 +26,164 @@
 
 using namespace opencog;
 
-#define KKK 800.0f
-#define CVAL  0.2f
+#define KKK 800.0
+#define CVAL  0.2
 
 GenericTruthValue::GenericTruthValue(count_t pe, count_t te,
                                      strength_t f, strength_t fs,
                                      confidence_t c, entropy_t e)
+	: TruthValue(GENERIC_TRUTH_VALUE)
 {
-    positiveEvidence = pe;
-    totalEvidence = te;
-    frequency = f;
-    fuzzyStrength = fs;
-    confidence = c;
-    entropy = e;
+    _value.resize(6);
+    _value[POSITIVE_EVIDENCE] = pe;
+    _value[TOTAL_EVIDENCE] = te;
+    _value[FREQUENCY] = f;
+    _value[FUZZY_STRENGTH] = fs;
+    _value[CONFIDENCE] = c;
+    _value[ENTROPY] = e;
 }
 
 GenericTruthValue::GenericTruthValue(GenericTruthValue const& gtv)
+	: TruthValue(GENERIC_TRUTH_VALUE)
 {
-    positiveEvidence = gtv.positiveEvidence;
-    totalEvidence = gtv.totalEvidence;
-    frequency = gtv.frequency;
-    fuzzyStrength = gtv.fuzzyStrength;
-    confidence = gtv.confidence;
-    entropy = gtv.entropy;
+    _value.resize(6);
+    _value[POSITIVE_EVIDENCE] = gtv.getPositiveEvidence();
+    _value[TOTAL_EVIDENCE] = gtv.getTotalEvidence();
+    _value[FREQUENCY] = gtv.getFrequency();
+    _value[FUZZY_STRENGTH] = gtv.getFuzzyStrength();
+    _value[CONFIDENCE] = gtv.getConfidence();
+    _value[ENTROPY] = gtv.getEntropy();
 }
 
-TruthValueType GenericTruthValue::getType() const
+GenericTruthValue::GenericTruthValue(const ProtoAtomPtr& source)
+       : TruthValue(GENERIC_TRUTH_VALUE)
 {
-    return GENERIC_TRUTH_VALUE;
+    if (source->getType() != GENERIC_TRUTH_VALUE)
+        throw RuntimeException(TRACE_INFO,
+            "Source must be a GenericTruthValue");
+
+    FloatValuePtr fp(FloatValueCast(source));
+    _value.resize(6);
+    _value[POSITIVE_EVIDENCE] = fp->value()[POSITIVE_EVIDENCE];
+    _value[TOTAL_EVIDENCE] = fp->value()[TOTAL_EVIDENCE];
+    _value[FREQUENCY] = fp->value()[FREQUENCY];
+    _value[FUZZY_STRENGTH] = fp->value()[FUZZY_STRENGTH];
+    _value[CONFIDENCE] = fp->value()[CONFIDENCE];
+    _value[ENTROPY] = fp->value()[ENTROPY];
 }
 
 count_t GenericTruthValue::getCount() const
 {
-    return frequency;
+    return _value[FREQUENCY];
 }
 
 confidence_t GenericTruthValue::getConfidence() const
 {
-    return confidence;
+    return _value[CONFIDENCE];
 }
 
 strength_t GenericTruthValue::getMean() const
 {
-    return totalEvidence;
+    return _value[TOTAL_EVIDENCE];
 }
 
 count_t GenericTruthValue::getPositiveEvidence() const
 {
-    return positiveEvidence;
+    return _value[POSITIVE_EVIDENCE];
 }
 
 count_t GenericTruthValue::getLogPositiveEvidence() const
 {
-    return log(positiveEvidence);
+    return log(_value[POSITIVE_EVIDENCE]);
 }
 
 count_t GenericTruthValue::getTotalEvidence() const
 {
-    return totalEvidence;
+    return _value[TOTAL_EVIDENCE];
 }
 
 count_t GenericTruthValue::getLogTotalEvidence() const
 {
-    return log(totalEvidence);
+    return log(_value[TOTAL_EVIDENCE]);
 }
 
 strength_t GenericTruthValue::getFrequency() const
 {
-    return frequency;
+    return _value[FREQUENCY];
 }
 
 strength_t GenericTruthValue::getLogFrequency() const
 {
-    return log(frequency);
+    return log(_value[FREQUENCY]);
 }
 
 strength_t GenericTruthValue::getFuzzyStrength() const
 {
-    return fuzzyStrength;
+    return _value[FUZZY_STRENGTH];
 }
 
 strength_t GenericTruthValue::getLogFuzzyStrength() const
 {
-    return log(fuzzyStrength);
+    return log(_value[FUZZY_STRENGTH]);
 }
 
 confidence_t GenericTruthValue::getLogConfidence() const
 {
-    return log(confidence);
+    return log(_value[CONFIDENCE]);
 }
 
 entropy_t GenericTruthValue::getEntropy() const
 {
-    return entropy;
+    return _value[ENTROPY];
 }
 
-TruthValuePtr GenericTruthValue::merge(TruthValuePtr tv, const MergeCtrl& mc) const
+TruthValuePtr GenericTruthValue::merge(const TruthValuePtr& tv,
+                                       const MergeCtrl& mc) const
 {
     GenericTruthValuePtr gtv = std::dynamic_pointer_cast<const GenericTruthValue>(tv);
     if (NULL == gtv) return tv;
     auto other_te = gtv->getTotalEvidence();
-    auto new_pe = positiveEvidence + gtv->getPositiveEvidence();
-    auto new_te = totalEvidence + other_te
-                  - std::min(totalEvidence, other_te) * CVAL;
-    auto new_f = (frequency * totalEvidence + gtv->getFrequency() * other_te)
-                 / (totalEvidence + other_te);
-    auto new_fs = std::max(fuzzyStrength, gtv->getFuzzyStrength());
+    auto new_pe = getPositiveEvidence() + gtv->getPositiveEvidence();
+    auto new_te = getTotalEvidence() + other_te
+                  - std::min(getTotalEvidence(), other_te) * CVAL;
+    auto new_f = (getFrequency() * getTotalEvidence() + gtv->getFrequency() * other_te)
+                 / (getTotalEvidence() + other_te);
+    auto new_fs = std::max(getFuzzyStrength(), gtv->getFuzzyStrength());
     auto new_c = new_te / (new_te + KKK);
 
     // XXX
-    auto new_e = std::max(entropy, gtv->getEntropy());
+    auto new_e = std::max(getEntropy(), gtv->getEntropy());
 
     return std::make_shared<GenericTruthValue>(new_pe, new_te, new_f, new_fs,
                                                new_c, new_e);
 }
 
 
-bool GenericTruthValue::operator==(const TruthValue& rhs) const
+bool GenericTruthValue::operator==(const ProtoAtom& rhs) const
 {
-    if (NULL == &rhs) return false;
-
     const GenericTruthValue *gtv = dynamic_cast<const GenericTruthValue *>(&rhs);
     if (NULL == gtv) return false;
 
 #define FLOAT_ACCEPTABLE_ERROR 0.000001
-    if (FLOAT_ACCEPTABLE_ERROR < fabs(frequency - gtv->frequency))
+    if (FLOAT_ACCEPTABLE_ERROR < fabs(getFrequency() - gtv->getFrequency()))
         return false;
-    if (FLOAT_ACCEPTABLE_ERROR < fabs(fuzzyStrength - gtv->fuzzyStrength))
+    if (FLOAT_ACCEPTABLE_ERROR < fabs(getFuzzyStrength() - gtv->getFuzzyStrength()))
         return false;
-    if (FLOAT_ACCEPTABLE_ERROR < fabs(confidence - gtv->confidence))
+    if (FLOAT_ACCEPTABLE_ERROR < fabs(getConfidence() - gtv->getConfidence()))
         return false;
 
 #define DOUBLE_ACCEPTABLE_ERROR 1.0e-14
-    if (DOUBLE_ACCEPTABLE_ERROR < fabs(1.0 - (gtv->positiveEvidence/positiveEvidence)))
+    if (DOUBLE_ACCEPTABLE_ERROR < fabs(1.0 - (gtv->getPositiveEvidence()/getPositiveEvidence())))
         return false;
-    if (DOUBLE_ACCEPTABLE_ERROR < fabs(1.0 - (gtv->totalEvidence/totalEvidence)))
+    if (DOUBLE_ACCEPTABLE_ERROR < fabs(1.0 - (gtv->getTotalEvidence()/getTotalEvidence())))
         return false;
-    if (DOUBLE_ACCEPTABLE_ERROR < fabs(1.0 - (gtv->entropy/entropy)))
+    if (DOUBLE_ACCEPTABLE_ERROR < fabs(1.0 - (gtv->getEntropy()/getEntropy())))
         return false;
 
     return true;
 }
 
-std::string GenericTruthValue::toString() const
+std::string GenericTruthValue::toString(const std::string& indent) const
 {
     char buf[1024];
     sprintf(buf, "(gtv %f %f %f %f %f %f)",

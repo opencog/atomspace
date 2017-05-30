@@ -39,7 +39,11 @@ typedef std::unordered_set<Atom*> UnorderedAtomSet;
 // behavior
 typedef std::set<Atom*, content_based_atom_ptr_less> ContentBasedOrderedAtomSet;
 
+#ifdef REPRODUCIBLE_ATOMSPACE
+typedef ContentBasedOrderedAtomSet AtomSet;
+#else
 typedef UnorderedAtomSet AtomSet;
+#endif
 
 /**
  * Implements a vector of atom sets; each set can be found via an
@@ -72,6 +76,11 @@ class FixedIntegerIndex
 		{
 			const AtomSet &s(idx.at(i));
 			return s.size();
+		}
+
+		size_t bin_size(void) const
+		{
+			return idx.size();
 		}
 
 		size_t size(void) const;

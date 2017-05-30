@@ -22,12 +22,8 @@
  * 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
  */
 
-#include <opencog/guile/load-file.h>
 #include <opencog/guile/SchemeEval.h>
-#include <opencog/guile/SchemeSmob.h>
 #include <opencog/atomspace/AtomSpace.h>
-#include <opencog/query/BindLinkAPI.h>
-#include <opencog/util/Config.h>
 #include <opencog/util/Logger.h>
 
 using namespace opencog;
@@ -46,6 +42,8 @@ public:
 
         as = new AtomSpace();
         eval = new SchemeEval(as);
+        eval->eval("(add-to-load-path \"..\")");
+        eval->eval("(add-to-load-path \"../../..\")");
     }
 
     ~FirstNUTest()
@@ -77,12 +75,11 @@ void FirstNUTest::tearDown(void)
 
 void FirstNUTest::setUp(void)
 {
-    config().set("SCM_PRELOAD", "tests/query/firstn.scm");
-    load_scm_files_from_config(*as);
     eval->eval("(use-modules (opencog exec) (opencog query))");
+    eval->eval("(load-from-path \"tests/query/firstn.scm\")");
 }
 
-#define getarity(hand) LinkCast(hand)->getArity()
+#define getarity(hand) hand->getArity()
 
 void FirstNUTest::_test_wrong_args(std::string command)
 {

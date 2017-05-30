@@ -1,13 +1,14 @@
 /*
  * ExecSCM.h
  *
- * Simplified wrapper for creating guile modules.
+ * Guile Scheme bindings for the execution links
  * Copyright (c) 2008, 2014, 2015 Linas Vepstas <linas@linas.org>
  */
 
 #ifndef _OPENCOG_EXEC_SCM_H
 #define _OPENCOG_EXEC_SCM_H
 
+#ifdef HAVE_GUILE
 #include <opencog/guile/SchemeModule.h>
 
 namespace opencog {
@@ -28,4 +29,5 @@ extern "C" {
 void opencog_exec_init(void);
 };
 
+#endif // HAVE_GUILE
 #endif // _OPENCOG_EXEC_SCM_H

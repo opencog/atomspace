@@ -31,6 +31,7 @@
 #include <vector>
 
 #include <opencog/util/exceptions.h>
+#include <opencog/atoms/base/FloatValue.h>
 
 /** \addtogroup grp_atomspace
  *  @{
@@ -42,35 +43,9 @@ namespace opencog
 {
 
 // Truth-value components
-// For essentially all truth-value calculations, float is enough, so
-// we save space here, and use float. For counting, a float is not
-// enough -- it gets up to 16 million (24 bits) and then clamps. So
-// we use a double for counting, which should provide 48 bits. Since
-// SimpleTruthValue does not store count anyway, there is no storage
-// penalty associated with this.
-typedef float strength_t;
-typedef float confidence_t;
+typedef double strength_t;
+typedef double confidence_t;
 typedef double count_t;
-
-//! TruthValue types
-//! XXX TODO This should probably be removed.
-//! The truth-value types are currently used in only two places;
-//! The guile interpreter, and the SQL peristance layer.  Both of
-//! these layers should almost surely use their own private system
-//! for serializing/deserializing truth value types, instead of
-//! using this.  This is unstable, and should be removed ...
-// NUMBER_OF_TRUTH_VALUE_TYPES must be the last one in this enum.
-enum TruthValueType
-{
-    NULL_TRUTH_VALUE = 0,
-    SIMPLE_TRUTH_VALUE = 1,
-    COUNT_TRUTH_VALUE,
-    INDEFINITE_TRUTH_VALUE,
-    FUZZY_TRUTH_VALUE,
-    PROBABILISTIC_TRUTH_VALUE,
-    GENERIC_TRUTH_VALUE,
-    NUMBER_OF_TRUTH_VALUE_TYPES
-};
 
 /// Class to control the TV merging strategy
 struct MergeCtrl
@@ -95,7 +70,6 @@ struct MergeCtrl
     {
         HIGHER_CONFIDENCE,  // TV with higher confidence overwrite the other
         PLN_BOOK_REVISION   // PLN book Section 5.10.2 revision rule
-
     };
 
     TVFormula tv_formula;
@@ -110,7 +84,7 @@ class TruthValue;
 typedef std::shared_ptr<const TruthValue> TruthValuePtr;
 
 class TruthValue
-    : public std::enable_shared_from_this<TruthValue>
+    : public FloatValue
 {
     friend class Atom;
 
@@ -122,24 +96,23 @@ class TruthValue
     TruthValue& operator=(const TruthValue& rhs) {
         throw RuntimeException(TRACE_INFO, "Cannot modify truth values!");
     }
-public:
-    // default lookahead
-    static count_t DEFAULT_K;
-    static void setDefaultK(count_t k) {
-        DEFAULT_K = k;
-    }
 
-	virtual ~TruthValue() {}
+protected:
+    TruthValue(Type t) : FloatValue(t) {}
+
+    // Merge helper method
+    TruthValuePtr higher_confidence_merge(const TruthValuePtr&) const;
+
+public:
+    virtual ~TruthValue() {}
+
+    static TruthValuePtr factory(Type, const std::vector<double>&);
+    static TruthValuePtr factory(const ProtoAtomPtr&);
+
+    virtual std::string toShortString(const std::string&) const;
 
     // Special TVs
 
-    /**
-     * The shared reference to a special NullTruthValue object.
-     * This is supposed to be used only for book-keeping, and it must
-     * not be used as a normal TV object. Calling methods on it will
-     * throw exceptions.
-     */
-    static TruthValuePtr NULL_TV();
     /**
      * The shared reference to a special TRUE (Simple) TruthValue
      * object with MAX_TRUTH mean and MAX_TV_CONFIDENCE count. That is,
@@ -165,27 +138,12 @@ public:
      */
     static TruthValuePtr TRIVIAL_TV();
 
-// PURE VIRTUAL METHODS:
-
     virtual strength_t getMean()  const = 0;
     virtual confidence_t getConfidence()  const = 0;
     virtual count_t getCount()  const = 0;
 
-    virtual std::string toString() const  = 0;
-    virtual TruthValueType getType() const  = 0;
     virtual TruthValuePtr clone() const  = 0;
     virtual TruthValue* rawclone() const  = 0;
-
-    /**
-     * Equality. Used to determine if two truth values are the
-     * same, or not. Primarily useful see if a TV is equal to
-     * NULL_TV, TRUE_TV, FALSE_TV, etc.
-     */
-    virtual bool operator==(const TruthValue& rhs) const = 0;
-    inline bool operator!=(const TruthValue& rhs) const
-         { return !(*this == rhs); }
-
-// VIRTUAL METHODS:
 
     /**
      * Merge this TV object with the given TV object argument.
@@ -194,13 +152,8 @@ public:
      * @param ms the merge style as described in
      *        https://github.com/opencog/opencog/issues/1295
      */
-    virtual TruthValuePtr merge(TruthValuePtr,
+    virtual TruthValuePtr merge(const TruthValuePtr&,
                                 const MergeCtrl& = MergeCtrl()) const = 0;
-
-    /**
-     * Check if this TV is a null TV.
-     */
-    virtual bool isNullTv() const;
 
     /**
      * Check if this TV is equal to the default TV.
@@ -208,24 +161,24 @@ public:
      */
     virtual bool isDefaultTV() const;
     virtual bool isDefinedTV() const;
-
-protected:
-    // Helper merging methods
-    TruthValuePtr higher_confidence_merge(TruthValuePtr) const;
 };
 
+static inline TruthValuePtr TruthValueCast(const ProtoAtomPtr& pa)
+    { return std::dynamic_pointer_cast<const TruthValue>(pa); }
+
+static inline ProtoAtomPtr ProtoAtomCast(const TruthValuePtr& tv)
+{
+    // This should have worked!?
+    // return std::const_pointer_cast<ProtoAtom>(tv);
+
+    // This, too, should have worked!?
+    // return std::shared_ptr<ProtoAtom>(tv, const_cast<ProtoAtom*>(tv.get()));
+
+    // This works...
+    return std::shared_ptr<ProtoAtom>(tv, (ProtoAtom*) tv.get());
+}
+
 } // namespace opencog
-
-// overload of operator<< to print TruthValue
-namespace std {
-    template<typename Out>
-    Out& operator<<(Out& out, const opencog::TruthValue& tv)
-    {
-        out << tv.toString();
-        return out;
-    }
-} // ~namespace std
-
 
 /** @}*/
 #endif // _OPENCOG_TRUTH_VALUE_H

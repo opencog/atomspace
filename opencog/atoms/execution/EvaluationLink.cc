@@ -37,28 +37,49 @@
 #include <opencog/guile/SchemeEval.h>
 #include <opencog/query/BindLinkAPI.h>
 
-#include "Eager.h"
+#include "Force.h"
 #include "EvaluationLink.h"
 
 using namespace opencog;
 
-EvaluationLink::EvaluationLink(const HandleSeq& oset,
-                               TruthValuePtr tv,
-                               AttentionValuePtr av)
-    : FreeLink(EVALUATION_LINK, oset, tv, av)
+EvaluationLink::EvaluationLink(const HandleSeq& oset, Type t)
+    : FreeLink(oset, t)
 {
-	if ((2 != oset.size()) or
-	   (LIST_LINK != oset[1]->getType()))
+	if (EVALUATION_LINK != t)
+		throw RuntimeException(TRACE_INFO,
+		    "Expecting an EvaluationLink");
+
+	// The "canonical" EvaluationLink structure is:
+	//    EvaluationLink
+	//        PredicateNode "foo"
+	//        ListLink
+	//           ...
+	//
+	// However, patterns can have variables for either the
+	// ListLink, or the PredicateNode, or both.
+	//
+	// ... except reality is worse: many examples include
+	// badly-formed EvaluationLinks, on-purpose.  So, before
+	// we can do any sort of strict checking here, we would
+	// need fix all those wiki pages, examples, etc.
+	// As of this writing (March 2017), there are seven unit
+	// tests that create EvaluationLinks whose size() is not 2:
+	//    PutLinkUTest GetLinkUTest BuggySelfGroundUTest
+	//    StackMoreUTest ConstantClausesUTest PersistUTest
+	//    MultiPersistUTest
+	//
+/********
+	if (2 != oset.size())
+	   // or (LIST_LINK != oset[1]->getType()))
 	{
 		throw RuntimeException(TRACE_INFO,
 		    "EvaluationLink must have predicate and args!");
 	}
+*********/
 }
 
-EvaluationLink::EvaluationLink(const Handle& schema, const Handle& args,
-                               TruthValuePtr tv,
-                               AttentionValuePtr av)
-    : FreeLink(EVALUATION_LINK, schema, args, tv, av)
+EvaluationLink::EvaluationLink(const Handle& schema, const Handle& args)
+    : FreeLink(EVALUATION_LINK, schema, args)
 {
 	if (LIST_LINK != args->getType()) {
 		throw RuntimeException(TRACE_INFO,
@@ -66,14 +87,13 @@ EvaluationLink::EvaluationLink(const Handle& schema, const Handle& args,
 	}
 }
 
-EvaluationLink::EvaluationLink(Link& l)
+EvaluationLink::EvaluationLink(const Link& l)
     : FreeLink(l)
 {
 	Type tscope = l.getType();
-	if (EVALUATION_LINK != tscope) {
+	if (EVALUATION_LINK != tscope)
 		throw RuntimeException(TRACE_INFO,
 		    "Expecting an EvaluationLink");
-	}
 }
 
 // Pattern matching hack. The pattern matcher returns sets of atoms;
@@ -197,8 +217,8 @@ static void thread_eval(AtomSpace* as,
 }
 
 static void thread_eval_tv(AtomSpace* as,
-                     const Handle& evelnk, AtomSpace* scratch,
-                     bool silent, TruthValuePtr* tv)
+                           const Handle& evelnk, AtomSpace* scratch,
+                           bool silent, TruthValuePtr* tv)
 {
 	*tv = EvaluationLink::do_eval_scratch(as, evelnk, scratch, silent);
 }
@@ -236,8 +256,9 @@ static void thread_eval_tv(AtomSpace* as,
 /// SequentialAndLink to work correctly, when moving down the sequence.
 ///
 TruthValuePtr EvaluationLink::do_eval_scratch(AtomSpace* as,
-                     const Handle& evelnk, AtomSpace* scratch,
-                     bool silent)
+                                              const Handle& evelnk,
+                                              AtomSpace* scratch,
+                                              bool silent)
 {
 	Type t = evelnk->getType();
 	if (EVALUATION_LINK == t)
@@ -255,9 +276,9 @@ TruthValuePtr EvaluationLink::do_eval_scratch(AtomSpace* as,
 
 		// The arguments may need to be executed...
 		Instantiator inst(scratch);
-		Handle args(inst.execute(sna.at(1)));
+		Handle args(inst.execute(sna.at(1), silent));
 
-		return do_evaluate(scratch, sna.at(0), args);
+		return do_evaluate(scratch, sna.at(0), args, silent);
 	}
 	else if (IDENTICAL_LINK == t)
 	{
@@ -275,7 +296,7 @@ TruthValuePtr EvaluationLink::do_eval_scratch(AtomSpace* as,
 	{
 		TruthValuePtr tv(do_eval_scratch(as, evelnk->getOutgoingAtom(0), scratch));
 		return SimpleTruthValue::createTV(
-		              1.0 - tv->getMean(), tv->getCount());
+		              1.0 - tv->getMean(), tv->getConfidence());
 	}
 	else if (AND_LINK == t)
 	{
@@ -401,7 +422,7 @@ TruthValuePtr EvaluationLink::do_eval_scratch(AtomSpace* as,
 			else
 			{
 				Instantiator inst(as);
-				Handle result(inst.execute(term));
+				Handle result(inst.execute(term, silent));
 				scratch->add_atom(result);
 			}
 		}
@@ -433,7 +454,7 @@ TruthValuePtr EvaluationLink::do_eval_scratch(AtomSpace* as,
 		Handle pvals = pl->get_values();
 		Instantiator inst(as);
 		// Step (1)
-		Handle gvals = inst.execute(pvals);
+		Handle gvals = inst.execute(pvals, silent);
 		if (gvals != pvals)
 		{
 			as->add_atom(gvals);
@@ -454,6 +475,10 @@ TruthValuePtr EvaluationLink::do_eval_scratch(AtomSpace* as,
 	{
 		return do_eval_scratch(as, DefineLink::get_definition(evelnk), scratch);
 	}
+	else if (INHERITANCE_LINK == t or IMPLICATION_LINK == t)
+	{
+		return evelnk->getTruthValue();
+	}
 
 	// We get exceptions here in two differet ways: (a) due to user
 	// error, in which case we need to print an error, and (b) intentionally,
@@ -469,7 +494,7 @@ TruthValuePtr EvaluationLink::do_eval_scratch(AtomSpace* as,
 		throw NotEvaluatableException();
 
 	throw SyntaxException(TRACE_INFO,
-		"Expecting to get an EvaluationLink, got %s",
+		"Either incorrect or not implemented yet. Cannot evaluate %s",
 		evelnk->toString().c_str());
 }
 
@@ -487,14 +512,16 @@ TruthValuePtr EvaluationLink::do_evaluate(AtomSpace* as,
 /// Expects the second handle of the sequence to be a ListLink
 /// Executes the GroundedPredicateNode, supplying the second handle as argument
 ///
-TruthValuePtr EvaluationLink::do_evaluate(AtomSpace* as, const HandleSeq& sna)
+TruthValuePtr EvaluationLink::do_evaluate(AtomSpace* as,
+                                          const HandleSeq& sna,
+                                          bool silent)
 {
 	if (2 != sna.size())
 	{
 		throw RuntimeException(TRACE_INFO,
 		     "Incorrect arity for an EvaluationLink!");
 	}
-	return do_evaluate(as, sna[0], sna[1]);
+	return do_evaluate(as, sna[0], sna[1], silent);
 }
 
 /// do_evaluate -- evaluate the GroundedPredicateNode of the EvaluationLink
@@ -504,31 +531,37 @@ TruthValuePtr EvaluationLink::do_evaluate(AtomSpace* as, const HandleSeq& sna)
 /// Executes the GroundedPredicateNode, supplying the args as argument
 ///
 TruthValuePtr EvaluationLink::do_evaluate(AtomSpace* as,
-                                    const Handle& pn, const Handle& cargs)
+                                          const Handle& pn,
+                                          const Handle& cargs,
+                                          bool silent)
 {
-	if (LIST_LINK != cargs->getType())
-	{
-		throw RuntimeException(TRACE_INFO,
-			"Expecting arguments to EvaluationLink!");
-	}
-
 	Type pntype = pn->getType();
 	if (DEFINED_PREDICATE_NODE == pntype)
 	{
 		Handle defn = DefineLink::get_definition(pn);
+		Type dtype = defn->getType();
+
+		// Allow recursive definitions. This can be handy.
+		while (DEFINED_PREDICATE_NODE == dtype)
+		{
+			defn = DefineLink::get_definition(defn);
+			dtype = defn->getType();
+		}
 
 		// If its not a LambdaLink, then I don't know what to do...
-		Type dtype = defn->getType();
 		if (LAMBDA_LINK != dtype)
 			throw RuntimeException(TRACE_INFO,
-				"Expecting defintion to be a LambdaLink, got %s",
+				"Expecting definition to be a LambdaLink, got %s",
 				defn->toString().c_str());
 
 		// Treat it as if it were a PutLink -- perform the
 		// beta-reduction, and evaluate the result.
 		LambdaLinkPtr lam(LambdaLinkCast(defn));
-		Handle reduct = lam->substitute(cargs->getOutgoingSet());
-		return do_evaluate(as, reduct);
+		Type atype = cargs->getType();
+		Handle reduct = lam->substitute(atype == LIST_LINK ?
+		                                cargs->getOutgoingSet()
+		                                : HandleSeq(1, cargs));
+		return do_evaluate(as, reduct, silent);
 	}
 
 	if (GROUNDED_PREDICATE_NODE != pntype)
@@ -537,12 +570,12 @@ TruthValuePtr EvaluationLink::do_evaluate(AtomSpace* as,
 		throw NotEvaluatableException();
 	}
 
-	// Perform eager execution of the arguments. We have to do this,
-	// because the user-defined functions are black-boxes, and cannot
-	// be trusted to do lazy execution correctly. Right now, this is
-	// the policy. I guess we could add "scm-lazy:" and "py-lazy:" URI's
-	// for user-defined functions smart enough to do lazy evaluation.
-	Handle args = eager_execute(as, cargs);
+	// Force execution of the arguments. We have to do this, because
+	// the user-defined functions are black-boxes, and cannot be trusted
+	// to do lazy execution correctly. Right now, forcing is the policy.
+	// We could add "scm-lazy:" and "py-lazy:" URI's for user-defined
+	// functions smart enough to do lazy evaluation.
+	Handle args = force_execute(as, cargs, silent);
 
 	// Get the schema name.
 	const std::string& schema = pn->getName();
@@ -609,3 +642,9 @@ TruthValuePtr EvaluationLink::do_evaluate(AtomSpace* as,
 	     "Cannot evaluate unknown GroundedPredicateNode: %s",
 	      schema.c_str());
 }
+
+// The EvaluationLink factory, if allowed to run, just screws up
+// all sorts of unit test cases, and causes a large variety of
+// faults.  I suppose that perhaps this needs to be fixed, but its
+// daunting at this time.
+// DEFINE_LINK_FACTORY(EvaluationLink, EVALUATION_LINK)

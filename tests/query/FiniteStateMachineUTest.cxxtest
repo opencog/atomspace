@@ -20,12 +20,8 @@
  * 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
  */
 
-#include <opencog/guile/load-file.h>
 #include <opencog/guile/SchemeEval.h>
-#include <opencog/guile/SchemeSmob.h>
 #include <opencog/atomspace/AtomSpace.h>
-#include <opencog/query/BindLinkAPI.h>
-#include <opencog/util/Config.h>
 #include <opencog/util/Logger.h>
 
 using namespace opencog;
@@ -44,6 +40,9 @@ public:
 
 		as = new AtomSpace();
 		eval = new SchemeEval(as);
+		eval->eval("(use-modules (opencog query))");
+		eval->eval("(add-to-load-path \"..\")");
+		eval->eval("(add-to-load-path \"../../..\")");
 	}
 
 	~FiniteStateMachineUTest()
@@ -52,7 +51,9 @@ public:
 		delete as;
 		// Erase the log file if no assertions failed.
 		if (!CxxTest::TestTracker::tracker().suiteFailed())
-				std::remove(logger().get_filename().c_str());
+			std::remove(logger().get_filename().c_str());
+int rc = CxxTest::TestTracker::tracker().suiteFailed();
+_exit(rc); // XXX hack to avoid double-free in __run_exit_handlers
 	}
 
 	void setUp(void);
@@ -70,16 +71,15 @@ void FiniteStateMachineUTest::tearDown(void)
 void FiniteStateMachineUTest::setUp(void)
 {
 	as->clear();
-	eval->eval("(use-modules (opencog query))");
 }
 
-#define getarity(hand) LinkCast(hand)->getArity()
+#define getarity(hand) hand->getArity()
 
 Handle FiniteStateMachineUTest::get_state(Handle set_link)
 {
-	Handle and_link = LinkCast(set_link)->getOutgoingAtom(0);
-	Handle list_link = LinkCast(and_link)->getOutgoingAtom(0);
-	return LinkCast(list_link)->getOutgoingAtom(1);
+	Handle and_link = set_link->getOutgoingAtom(0);
+	Handle list_link = and_link->getOutgoingAtom(0);
+	return list_link->getOutgoingAtom(1);
 }
 
 /*
@@ -89,8 +89,7 @@ void FiniteStateMachineUTest::test_basic(void)
 {
 	logger().debug("BEGIN TEST: %s", __FUNCTION__);
 
-	config().set("SCM_PRELOAD", "tests/query/finite-state-machine.scm");
-	load_scm_files_from_config(*as);
+	eval->eval("(load-from-path \"tests/query/finite-state-machine.scm\")");
 
 	// We expect the incoming set to have an arity of 3: once for the
 	// real, actual state, and once for each of the two VariableNodes.

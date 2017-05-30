@@ -65,10 +65,12 @@ public:
         counts[2] = TV3_COUNT;
     }
 
+#define countToConfidence(i) ((double) (i)) /((double) (i) + 800.0)
+#define confidenceToCount(x) 800.0 * ((x) / (1.0-(x)))
     void setUp() {
         for (int i = 0; i < NUM_TVS; i++) {
-            tvs[i] = new SimpleTruthValue(means[i], counts[i]);
-            confidences[i] = SimpleTruthValue::countToConfidence(counts[i]);
+            tvs[i] = new SimpleTruthValue(means[i], countToConfidence(counts[i]));
+            confidences[i] = countToConfidence(counts[i]);
         }
     }
 
@@ -120,22 +122,22 @@ public:
     void testConfidenceToCount() {
         float testConfidences[] = {0.0f, 0.00001f, 0.1f, 0.5f, 0.9f, 0.9999999f, 1.0f};
         for (unsigned int i = 0; i < (sizeof(testConfidences) / sizeof(float)) ; i++) {
-            float count  = SimpleTruthValue::confidenceToCount(testConfidences[i]);
+            float count  = confidenceToCount(testConfidences[i]);
             TS_ASSERT(count >= 0);
         }
         for (int i = 0; i < NUM_TVS; i++) {
-            TS_ASSERT(counts[i] - SimpleTruthValue::confidenceToCount(confidences[i]) < FLOAT_ACCEPTABLE_ERROR);
+            TS_ASSERT(counts[i] - confidenceToCount(confidences[i]) < FLOAT_ACCEPTABLE_ERROR);
         }
     }
 
     void testCountToConfidence() {
         float testCounts[] = {0.0f, 0.5f, 1.0f, 5.0f, 10.0f, 1000.0f, 10000000.0f};
         for (unsigned int i = 0; i < (sizeof(testCounts) / sizeof(float)) ; i++) {
-            float confidence  = SimpleTruthValue::countToConfidence(testCounts[i]);
+            float confidence  = countToConfidence(testCounts[i]);
             TS_ASSERT(confidence >= 0 && confidence <= 1.0f);
         }
         for (int i = 0; i < NUM_TVS; i++) {
-            TS_ASSERT(confidences[i] - SimpleTruthValue::countToConfidence(counts[i]) < FLOAT_ACCEPTABLE_ERROR);
+            TS_ASSERT(confidences[i] - countToConfidence(counts[i]) < FLOAT_ACCEPTABLE_ERROR);
         }
     }
 
