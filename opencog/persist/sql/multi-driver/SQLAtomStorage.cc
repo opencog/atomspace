@@ -339,6 +339,8 @@ class SQLAtomStorage::Response
 
 void SQLAtomStorage::init(const char * uri)
 {
+	_uri = uri;
+
 	bool use_libpq = (0 == strncmp(uri, "postgres", 8));
 	bool use_odbc = (0 == strncmp(uri, "odbc", 4));
 
@@ -2010,6 +2012,7 @@ void SQLAtomStorage::clear_stats(void)
 
 void SQLAtomStorage::print_stats(void)
 {
+	printf("sql-stats: currently open URI: %s\n", _uri.c_str());
 	size_t load_count = _load_count;
 	size_t store_count = _store_count;
 	double frac = store_count / ((double) load_count);

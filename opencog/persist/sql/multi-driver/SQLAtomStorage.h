@@ -69,6 +69,7 @@ class SQLAtomStorage : public AtomStorage
 		class Outgoing;
 
 		void init(const char *);
+		std::string _uri;
 
 		// ---------------------------------------------
 		// Handle multiple atomspaces like typecodes: we have to
