@@ -355,6 +355,24 @@
   Here, the LLOBJ is expected to be an object, with methods for
   'item-pair 'make-pair 'left-wildcard and 'right-wildcard on it,
   in the form documented above for the \"low-level API class\".
+
+  The methods are as below.  PAIR is the pair (x,y)
+
+  'pair-freq PAIR   -- return P(x,y)
+  'pair-logli PAIR  -- return -log_2 P(x,y)
+  'pair-entropy     -- return -P(x,y) log_2 P(x,y)
+  'pair-mi          -- return -P(x,y) log_2 P(x,y) / [P(x,*) P(*,y)]
+  'pair-fmi         -- return -log_2 P(x,y) / [P(x,*) P(*,y)]
+
+  'left-wild-freq   -- return P(*,y) == sum_x P(x,y)
+  'left-wild-logli  -- return -log_2 P(*,y)
+  'right-wild-freq  -- return P(x,*) == sum_y P(x,y)
+  'right-wild-logli -- return -log_2 P(x,*)
+
+  'left-wild-entropy   -- return h_left(y) = -sum_x p(x,y) log_2 p(x,y)
+  'left-wild-fentropy  -- return H_left(y) = h_left(y) / P(*,y)
+  'right-wild-entropy  -- return h_right(x) = -sum_y p(x,y) log_2 p(x,y)
+  'right-wild-fentropy -- return H_right(x) = h_right(x) / P(x,*)
 "
 	(let ((llobj LLOBJ))
 
@@ -477,16 +495,24 @@
 
 		; ----------------------------------------------------
 		; Get the left wildcard entropy
+		; This is defined as
+		;   h_left(y) = -sum_x p(x,y) log_2 p(x,y)
 		(define (get-left-wild-entropy ITEM)
 			(get-total-entropy (llobj 'left-wildcard ITEM)))
 
+		; This is defined as
+		;   H_left(y) = h_left(y) / p(*,y)
 		(define (get-left-wild-fentropy ITEM)
 			(get-fractional-entropy (llobj 'left-wildcard ITEM)))
 
 		; Get the right wildcard entropy
+		; This is defined as
+		;   h_right(x) = -sum_y p(x,y) log_2 p(x,y)
 		(define (get-right-wild-entropy ITEM)
 			(get-total-entropy (llobj 'right-wildcard ITEM)))
 
+		; This is defined as
+		;   H_left(y) = h_left(y) / p(*,y)
 		(define (get-right-wild-fentropy ITEM)
 			(get-fractional-entropy (llobj 'right-wildcard ITEM)))
 
