@@ -52,7 +52,8 @@
 "
 	; Need the 'left-stars method, provided by add-pair-stars
 	; Need the 'left-wild-freq method, provided by add-pair-freq-api
-	(let ((star-obj (add-pair-stars LLOBJ))
+	(let ((llobj LLOBJ)
+			(star-obj (add-pair-stars LLOBJ))
 			(frqobj (add-pair-freq-api LLOBJ)))
 
 		; Compute the left-wild entropy summation:
@@ -128,6 +129,19 @@
 			(define fmi (/ mi (frqobj 'right-wild-freq LEFT-ITEM)))
 			(frqobj 'set-right-wild-mi LEFT-ITEM mi fmi))
 
+		; ---------------
+		; Do all four loops.
+		(define (cache-all)
+			(map cache-left-entropy (star-obj 'right-basis))
+			(display "Finished left entropy subtotals\n")
+			(map cache-right-entropy (star-obj 'left-basis))
+			(display "Finished right entropy subtotals\n")
+			(map cache-left-mi (star-obj 'right-basis))
+			(display "Finished left MI subtotals\n")
+			(map cache-right-mi (star-obj 'left-basis))
+			(display "Finished right MI subtotals\n")
+		)
+
 		; Methods on this class.
 		(lambda (message . args)
 			(case message
@@ -135,7 +149,8 @@
 				((cache-right-entropy)  (apply cache-right-entropy args))
 				((cache-left-mi)        (apply cache-left-mi args))
 				((cache-right-mi)       (apply cache-right-mi args))
-				(else (apply frqobj      (cons message args))))
+				((cache-all-subtotals)  (cache-all)
+				(else (apply llobj      (cons message args))))
 		))
 )
 

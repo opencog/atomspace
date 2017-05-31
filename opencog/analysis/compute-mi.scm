@@ -288,7 +288,8 @@
 	; We need 'wild-wild-count, provided by add-pair-count-api
 	; We need 'set-left-wild-freq, provided by add-pair-freq-api
 	; We need 'set-size, provided by add-report-api
-	(let ((cntobj (add-pair-count-api LLOBJ))
+	(let ((llobj LLOBJ)
+			(cntobj (add-pair-count-api LLOBJ))
 			(frqobj (add-pair-freq-api LLOBJ))
 			(wldobj (add-pair-stars LLOBJ))
 			(rptobj (add-report-api LLOBJ))
@@ -389,7 +390,7 @@
 				((cache-all-left-freqs)  (cache-all-left-freqs))
 				((cache-all-right-freqs) (cache-all-right-freqs))
 
-				(else (apply cntobj      (cons message args))))
+				(else (apply llobj       (cons message args))))
 		))
 )
 
@@ -418,7 +419,8 @@
 	; We need 'pair-freq, provided by add-pair-freq-api
 	; We need 'set-pair-mi, provided by add-pair-freq-api
 	; We need 'right-wild-count, provided by add-pair-count-api
-	(let ((star-obj (add-pair-stars LLOBJ))
+	(let ((llobj LLOBJ)
+			(star-obj (add-pair-stars LLOBJ))
 			(cntobj (add-pair-count-api LLOBJ))
 			(frqobj (add-pair-freq-api LLOBJ)))
 
@@ -490,8 +492,8 @@
 		; Methods on this class.
 		(lambda (message . args)
 			(case message
-				((cache-pair-mi)         (compute-n-cache-pair-mi))
-				(else (apply frqobj      (cons message args))))
+				((cache-pair-mi)        (compute-n-cache-pair-mi))
+				(else (apply llobj      (cons message args))))
 		))
 )
 
@@ -549,6 +551,9 @@
 
 	; Decorate the object with methods that can compute the pair-MI.
 	(define batch-mi-obj (make-batch-mi OBJ))
+
+	; Define the object which will compute row and column subtotals.
+	(define subtotal-obj (add-subtotal-mi-compute OBJ))
 
 	(format #t "Support: num left=~A num right=~A\n"
 			(length (wild-obj 'left-basis))
@@ -608,7 +613,7 @@
 
 	(display "Done computing -log P(x,*) and P(*,y)\n")
 
-	; Enfin, the pair mi's
+	; Now, the individual pair mi's
 	(display "Going to do individual pair MI\n")
 
 	(let* ((all-atoms (batch-mi-obj 'cache-pair-mi))
@@ -628,6 +633,9 @@
 		(format #t "Done storing ~A pair MI's in ~A secs\n"
 			num-prs (elapsed-secs))
 	)
+
+	(display "Going to do MI column and row subtotals\n")
+	(subtotal-obj 'cache-all)
 
 	(display "Finished with MI computations\n")
 )
