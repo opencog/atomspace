@@ -1,14 +1,20 @@
 ;
 ; entropy.scm
 ;
-; Assorted objects for computing fractional entropies of pairs.
+; Assorted objects for computing (and caching) fractional entropies
+; of pairs.
 ;
 ; Copyright (c) 2017 Linas Vepstas
 ;
 ; ---------------------------------------------------------------------
-; The objects here assume that a pair-counting batch job has completed.
-; They get cached stats for counts and frequencies taken from the
-; current contents of the atomspace.
+; The object here assumes that a pair-counting batch job has completed.
+; That is, it assumes that there are cached values available for the
+; individual pair frequencies, the wild-card frequencies, and the
+; inddividual pair MI values.
+;
+; It uses these cached stats for frequencies and MI to compute left
+; and right subtotals (row and column subtotals), which are then cached.
+; The cached values become available via the standard frequency API.
 ; ---------------------------------------------------------------------
 ;
 (use-modules (srfi srfi-1))
@@ -16,9 +22,18 @@
 
 ; ---------------------------------------------------------------------
 
-(define-public (add-pair-mi-compute LLOBJ)
+; For now, we are not making this public, I see no point to this.
+; The super whiz-bang batch job will use this, but I just don't see
+; why  the general public would want direct access to this.  So, for
+; now, we hide it.
+;
+; Also -- FYI, we could provide methods to return just the computed
+; values, without caching them, but I don't see the point of this.
+;
+(define (add-subtotal-mi-compute LLOBJ)
 "
-  add-pair-mi-compute LLOBJ - methods for MI and entropy of pairs.
+  add-subtotal-mi-compute LLOBJ - methods for computing and caching
+  the subtotalled MI and entropy of rows and columns.
 
   Extend the LLOBJ with additional methods to compute the one-sided
   entropies and mutual information of pairs.
@@ -26,6 +41,14 @@
   The object must have valid pair-frequency values on it, accessible
   via the standard frequency-object API. These must have been
   pre-computed, before this object can be used.
+
+  The methods on this class are:
+  'cache-left-entropy   -- compute and cache the column entropies
+  'cache-right-entropy  -- compute and cache the row entropies
+  'cache-left-mi        -- compute and cache the column mi
+  'cache-right-mi       -- compute and cache the row mi
+
+  The cahced values are accessible via the standard frequency API.
 "
 	; Need the 'left-stars method, provided by add-pair-stars
 	; Need the 'left-wild-freq method, provided by add-pair-freq-api
@@ -58,14 +81,16 @@
 		;    H_left(y) = h_left(y) / P(*,y)
 		; Note that
 		;    h_total = sum_y P(*,y) H_left(y)
-		(define (compute-left-fractional RIGHT-ITEM)
-			(/ (compute-left-entropy RIGHT-ITEM)
-				(frqobj 'left-wild-freq RIGHT-ITEM)))
+		(define (cache-left-entropy RIGHT-ITEM)
+			(define ent (compute-left-entropy RIGHT-ITEM))
+			(define fent (/ ent (frqobj 'left-wild-freq RIGHT-ITEM)))
+			(frqobj 'set-left-wild-entropy RIGHT-ITEM ent fent))
 
 		; As above, but flipped.
-		(define (compute-right-fractional LEFT-ITEM)
-			(/ (compute-right-entropy LEFT-ITEM)
-				(frqobj 'right-wild-freq LEFT-ITEM)))
+		(define (cache-right-entropy LEFT-ITEM)
+			(define ent (compute-right-entropy LEFT-ITEM))
+			(define fent (/ ent (frqobj 'right-wild-freq LEFT-ITEM)))
+			(frqobj 'set-right-wild-entropy LEFT-ITEM ent fent))
 
 		; ---------------
 		; Compute the left MI summation:
@@ -92,27 +117,24 @@
 		;    MI_left(y) = mi_left(y) / P(*,y)
 		; Note that
 		;    MI_total = sum_y P(*,y) MI_left(y)
-		(define (compute-left-fmi RIGHT-ITEM)
-			(/ (compute-left-mi RIGHT-ITEM)
-				(frqobj 'left-wild-freq RIGHT-ITEM)))
+		(define (cache-left-mi RIGHT-ITEM)
+			(define mi (compute-left-mi RIGHT-ITEM))
+			(define fmi (/ mi (frqobj 'left-wild-freq RIGHT-ITEM)))
+			(frqobj 'set-left-wild-mi RIGHT-ITEM mi fmi))
 
 		; As above, but flipped.
-		(define (compute-right-fmi LEFT-ITEM)
-			(/ (compute-right-mi LEFT-ITEM)
-				(frqobj 'right-wild-freq LEFT-ITEM)))
-
+		(define (cache-right-mi LEFT-ITEM)
+			(define mi (compute-right-mi LEFT-ITEM))
+			(define fmi (/ mi (frqobj 'right-wild-freq LEFT-ITEM)))
+			(frqobj 'set-right-wild-mi LEFT-ITEM mi fmi))
 
 		; Methods on this class.
 		(lambda (message . args)
 			(case message
-				((compute-left-entropy)   (apply compute-left-entropy args))
-				((compute-right-entropy)  (apply compute-right-entropy args))
-				((compute-left-fentropy)  (apply compute-left-fractional args))
-				((compute-right-fentropy) (apply compute-right-fractional args))
-				((compute-left-mi)        (apply compute-left-mi args))
-				((compute-right-mi)       (apply compute-right-mi args))
-				((compute-left-fmi)       (apply compute-left-fmi args))
-				((compute-right-fmi)      (apply compute-right-fmi args))
+				((cache-left-entropy)   (apply cache-left-entropy args))
+				((cache-right-entropy)  (apply cache-right-entropy args))
+				((cache-left-mi)        (apply cache-left-mi args))
+				((cache-right-mi)       (apply cache-right-mi args))
 				(else (apply frqobj      (cons message args))))
 		))
 )

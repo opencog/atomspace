@@ -358,28 +358,43 @@
 
   The methods are as below.  PAIR is the pair (x,y)
 
-  'pair-freq PAIR   -- return P(x,y)
-  'pair-logli PAIR  -- return -log_2 P(x,y)
-  'pair-entropy     -- return -P(x,y) log_2 P(x,y)
-  'pair-mi          -- return -P(x,y) log_2 P(x,y) / [P(x,*) P(*,y)]
-  'pair-fmi         -- return -log_2 P(x,y) / [P(x,*) P(*,y)]
+  'pair-freq PAIR    -- return P(x,y)
+  'pair-logli PAIR   -- return -log_2 P(x,y)
+  'pair-entropy PAIR -- return -P(x,y) log_2 P(x,y)
+  'pair-mi PAIR      -- return -P(x,y) log_2 P(x,y) / [P(x,*) P(*,y)]
+  'pair-fmi PAIR     -- return -log_2 P(x,y) / [P(x,*) P(*,y)]
 
-  'left-wild-freq   -- return P(*,y) == sum_x P(x,y)
-  'left-wild-logli  -- return -log_2 P(*,y)
-  'right-wild-freq  -- return P(x,*) == sum_y P(x,y)
-  'right-wild-logli -- return -log_2 P(x,*)
+  In the methods below, ATOM is either the atom x or the atom y.
 
-  'left-wild-entropy   -- return h_left(y) = -sum_x p(x,y) log_2 p(x,y)
-  'left-wild-fentropy  -- return H_left(y) = h_left(y) / P(*,y)
-  'right-wild-entropy  -- return h_right(x) = -sum_y p(x,y) log_2 p(x,y)
-  'right-wild-fentropy -- return H_right(x) = h_right(x) / P(x,*)
+  'left-wild-freq ATOM   -- return P(*,y) == sum_x P(x,y)
+  'left-wild-logli ATOM  -- return -log_2 P(*,y)
+  'right-wild-freq ATOM  -- return P(x,*) == sum_y P(x,y)
+  'right-wild-logli ATOM -- return -log_2 P(x,*)
+
+  'left-wild-entropy ATOM   -- return h_left(y) = -sum_x p(x,y) log_2 p(x,y)
+  'left-wild-fentropy ATOM  -- return H_left(y) = h_left(y) / P(*,y)
+  'right-wild-entropy ATOM  -- return h_right(x) = -sum_y p(x,y) log_2 p(x,y)
+  'right-wild-fentropy ATOM -- return H_right(x) = h_right(x) / P(x,*)
+
+  Note that H_total = sum_y h_left(y)
+                    = sum_x h_right(x)
+                    = sum_y P(*,y) H_left(y)
+                    = sum_x P(x,*) H_right(x)
+  should hold, up to rounding errors.
 
   For the below, mi(x,y) = -P(x,y) log_2 P(x,y) / [P(x,*) P(*,y)]
 
-  'left-wild-mi    -- return mi_left(y) = sum_x mi(x,y)
-  'left-wild-fmi   -- return MI_left(y) = mi_left(y) / P(*,y)
-  'right-wild-mi   -- return mi_right(x) = sum_y mi(x,y)
-  'right-wild-fmi  -- return MI_right(x) = mi_right(x) / P(x,*)
+  'left-wild-mi ATOM   -- return mi_left(y) = sum_x mi(x,y)
+  'left-wild-fmi ATOM  -- return MI_left(y) = mi_left(y) / P(*,y)
+  'right-wild-mi ATOM  -- return mi_right(x) = sum_y mi(x,y)
+  'right-wild-fmi ATOM -- return MI_right(x) = mi_right(x) / P(x,*)
+
+  Note that MI_total = sum_y mi_left(y)
+                     = sum_x mi_right(x)
+                     = sum_y P(*,y) MI_left(y)
+                     = sum_x P(x,*) MI_right(x)
+  should hold, up to rounding errors.
+
 "
 	(let ((llobj LLOBJ))
 
