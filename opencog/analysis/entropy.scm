@@ -149,8 +149,8 @@
 					(lambda (lipr)
 						; The get-logli below may throw an exception, if
 						; the particular item-pair doesn't have any counts.
-						; XXX does this ever actually happen?  It shouldn't,
-						;right?
+						; XXX Does this ever actually happen?  It shouldn't,
+						; right?
 						(catch #t (lambda ()
 								(define pr-freq (frqobj 'pair-freq lipr))
 								(define pr-logli (frqobj 'pair-logli lipr))

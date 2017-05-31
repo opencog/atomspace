@@ -358,6 +358,7 @@
 "
 	(let ((llobj LLOBJ))
 
+		; ----------------------------------------------------
 		; Key under which the frequency values are stored.
 		(define freq-key (PredicateNode "*-FrequencyKey-*"))
 
@@ -381,23 +382,40 @@
 			(define ent (* FREQ ln2))
 			(cog-set-value! ATOM freq-key (FloatValue FREQ ln2 ent)))
 
-		; ------
+		; ----------------------------------------------------
+		; Key under which the entropy values are stored.
+		(define entropy-key (PredicateNode "*-Entropy Key-*"))
+
+		; Return the total entropy on ATOM
+		(define (get-total-entropy ATOM)
+			(cog-value-ref (cog-value ATOM entropy-key) 0))
+
+		; Return the fractional entropy on ATOM
+		(define (get-fractional-entropy ATOM)
+			(cog-value-ref (cog-value ATOM entropy-key) 1))
+
+		; Set the entropy value for ATOM.
+		(define (set-mi ATOM ENT FRENT)
+			(cog-set-value! ATOM entropy-key (FloatValue ENT FRENT)))
+
+		; ----------------------------------------------------
 		; The key under which the MI is stored.
 		(define mi-key (PredicateNode "*-Mutual Info Key-*"))
 
 		; Get the (floating-point) mutual information on ATOM.
-		(define (get-mi ATOM)
+		(define (get-total-mi ATOM)
 			(cog-value-ref (cog-value ATOM mi-key) 0))
 
 		; Get the (floating-point) fractional mutual information on ATOM.
 		; This is the Yuret "lexical attraction" value.
-		(define (get-fmi ATOM)
+		(define (get-fractional-mi ATOM)
 			(cog-value-ref (cog-value ATOM mi-key) 1))
 
 		; Set the MI value for ATOM.
 		(define (set-mi ATOM MI FMI)
 			(cog-set-value! ATOM mi-key (FloatValue MI FMI)))
 
+		; ----------------------------------------------------
 		; ----------------------------------------------------
 		; Return the observational frequency on PAIR.
 		; If the PAIR does not exist (was not oberved) return 0.
@@ -421,13 +439,13 @@
 		; The MI is defined as
 		; - P(x,y) log_2 P(x,y) / P(x,*) P(*,y)
 		(define (get-pair-mi PAIR)
-			(get-mi (llobj 'item-pair PAIR)))
+			(get-total-mi (llobj 'item-pair PAIR)))
 
 		; Return the fractional MI (lexical atraction) on the pair.
 		; - log_2 P(x,y) / P(x,*) P(*,y)
 		; It differs from the MI above only by the leading probability.
 		(define (get-pair-fmi PAIR)
-			(get-fmi (llobj 'item-pair PAIR)))
+			(get-fractional-mi (llobj 'item-pair PAIR)))
 
 		(define (set-pair-mi PAIR MI FMI)
 			(set-mi (llobj 'item-pair PAIR) MI FMI))
