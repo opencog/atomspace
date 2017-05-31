@@ -395,7 +395,7 @@
 			(cog-value-ref (cog-value ATOM entropy-key) 1))
 
 		; Set the entropy value for ATOM.
-		(define (set-mi ATOM ENT FRENT)
+		(define (set-entropy ATOM ENT FRENT)
 			(cog-set-value! ATOM entropy-key (FloatValue ENT FRENT)))
 
 		; ----------------------------------------------------
@@ -476,6 +476,31 @@
 			(set-freq (llobj 'right-wildcard ITEM) FREQ))
 
 		; ----------------------------------------------------
+		; Get the left wildcard entropy
+		(define (get-left-wild-entropy ITEM)
+			(get-total-entropy (llobj 'left-wildcard ITEM)))
+
+		(define (get-left-wild-fentropy ITEM)
+			(get-fractional-entropy (llobj 'left-wildcard ITEM)))
+
+		; Get the right wildcard entropy
+		(define (get-right-wild-entropy ITEM)
+			(get-total-entropy (llobj 'right-wildcard ITEM)))
+
+		(define (get-right-wild-fentropy ITEM)
+			(get-fractional-entropy (llobj 'right-wildcard ITEM)))
+
+		; Set the left wildcard entropy and fractional entropy.
+		; Return the atom that holds this value.
+		(define (set-left-wild-entropy ITEM ENT FRENT)
+			(set-entropy (llobj 'left-wildcard ITEM) ENT FRENT))
+
+		; Set the right wildcard entropy and fractional entropy.
+		; Return the atom that holds this value.
+		(define (set-right-wild-entropy ITEM ENT FRENT)
+			(set-entropy (llobj 'right-wildcard ITEM) ENT FRENT))
+
+		; ----------------------------------------------------
 		; Methods on this class.
 		(lambda (message . args)
 			(case message
@@ -494,6 +519,14 @@
 				((right-wild-freq)     (apply get-right-wild-freq args))
 				((right-wild-logli)    (apply get-right-wild-logli args))
 				((set-right-wild-freq) (apply set-right-wild-freq args))
+
+				((left-wild-entropy)      (apply get-left-wild-entropy args))
+				((left-wild-fentropy)     (apply get-left-wild-fentropy args))
+				((set-left-wild-entropy)  (apply set-left-wild-entropy args))
+
+				((right-wild-entropy)     (apply get-right-wild-entropy args))
+				((right-wild-fentropy)    (apply get-right-wild-fentropy args))
+				((set-right-wild-entropy) (apply set-right-wild-entropy args))
 
 				(else (apply llobj (cons message args))))
 		))
