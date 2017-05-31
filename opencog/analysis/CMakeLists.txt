@@ -5,5 +5,6 @@ ADD_GUILE_MODULE (FILES
 	fold-api.scm
 	object-api.scm
 	support.scm
+	report-api.scm
 	MODULE_DESTINATION "${DATADIR}/scm/opencog/analysis"
 )

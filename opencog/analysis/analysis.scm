@@ -8,6 +8,7 @@
 ; In general, the later files depend on definitions contained
 ; in the earlier files.
 (load "analysis/object-api.scm")
+(load "analysis/report-api.scm")
 (load "analysis/fold-api.scm")
 (load "analysis/support.scm")
 (load "analysis/entropy.scm")
