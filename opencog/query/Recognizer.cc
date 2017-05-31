@@ -182,7 +182,26 @@ bool Recognizer::node_match(const Handle& npat_h, const Handle& nsoln_h)
 {
 	if (npat_h == nsoln_h) return true;
 	Type tso = nsoln_h->getType();
-	if (VARIABLE_NODE == tso or GLOB_NODE == tso) return true;
+	if (VARIABLE_NODE == tso) return true;
+	if (GLOB_NODE == tso)
+	{
+		if (0 < _soln_vars.size())
+		{
+			// Check if it satisfies the type restrictions, if any
+			if (std::all_of(_soln_vars.begin(), _soln_vars.end(),
+				[&](const Variables& v) {
+					return (not v.is_type(nsoln_h, npat_h)); }))
+				return false;
+
+			// Check if it satisfies the interval restrictions, if any
+			if (std::all_of(_soln_vars.begin(), _soln_vars.end(),
+				[&](const Variables& v) {
+					return (not v.is_interval(nsoln_h, 1)); }))
+				return false;
+		}
+		// No reason to reject
+		return true;
+	}
 	return false;
 }
 
