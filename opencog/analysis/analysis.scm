@@ -10,6 +10,7 @@
 (load "analysis/object-api.scm")
 (load "analysis/report-api.scm")
 (load "analysis/fold-api.scm")
+(load "analysis/bin-count.scm")
 (load "analysis/support.scm")
 (load "analysis/entropy.scm")
 (load "analysis/compute-mi.scm")

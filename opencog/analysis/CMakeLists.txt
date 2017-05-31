@@ -1,5 +1,6 @@
 ADD_GUILE_MODULE (FILES
 	analysis.scm
+	bin-count.scm
 	compute-mi.scm
 	entropy.scm
 	fold-api.scm
