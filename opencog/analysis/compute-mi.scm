@@ -287,8 +287,11 @@
 	; We need 'left-basis, provided by add-pair-stars
 	; We need 'wild-wild-count, provided by add-pair-count-api
 	; We need 'set-left-wild-freq, provided by add-pair-freq-api
-	(let ((cntobj (add-pair-freq-api (add-pair-count-api
-					(add-pair-stars LLOBJ))))
+	; We need 'set-size, provided by add-report-api
+	(let ((cntobj (add-pair-count-api LLOBJ))
+			(frqobj (add-pair-freq-api LLOBJ))
+			(strobj (add-pair-stars LLOBJ))
+			(rptobj (add-report-api LLOBJ))
 			(tot-cnt 0))
 
 		(define (init)
@@ -314,7 +317,7 @@
 		(define (cache-pair-freq PAIR)
 			(define freq (compute-pair-freq PAIR))
 			(if (< 0 freq)
-				(cntobj 'set-pair-freq PAIR freq)
+				(frqobj 'set-pair-freq PAIR freq)
 				'()))
 
 		; Compute and cache the left-side wild-card frequency.
@@ -324,29 +327,39 @@
 		(define (cache-left-freq ITEM)
 			(define freq (compute-left-freq ITEM))
 			(if (< 0 freq)
-				(cntobj 'set-left-wild-freq ITEM freq)
+				(frqobj 'set-left-wild-freq ITEM freq)
 				'()))
 
 		(define (cache-right-freq ITEM)
 			(define freq (compute-right-freq ITEM))
 			(if (< 0 freq)
-				(cntobj 'set-right-wild-freq ITEM freq)
+				(frqobj 'set-right-wild-freq ITEM freq)
 				'()))
 
 		; Compute and cache all of the pair frequencies.
 		; This computes P(x,y) for all (x,y)
 		; This returns a count of the pairs.
+		; Also caches the total dimensions of the matrix.
 		(define (cache-all-pair-freqs)
 			(define cnt 0)
-			(define lefties (cntobj 'left-basis))
+			(define lefties (strobj 'left-basis))
+			(define left-size (length lefties))
+			(define right-size (length (strobj 'right-basis)))
+
+			; The outer-loop.
 			(define (right-loop left-item)
 				(for-each
 					(lambda (pr)
 						(cache-pair-freq pr)
 						(set! cnt (+ cnt 1)))
-					(cntobj 'right-stars left-item)))
+					(strobj 'right-stars left-item)))
 
 			(for-each right-loop lefties)
+
+			; Save the total size of the thing.
+			(rptobj 'set-size left-size right-size cnt)
+
+			; Return the total.
 			cnt)
 
 		; Compute and cache all of the left-side frequencies.
@@ -355,9 +368,9 @@
 		; This method returns a list of all of the atoms holding
 		; those counts; handy for storing in a database.
 		(define (cache-all-left-freqs)
-			(map cache-left-freq (cntobj 'right-basis)))
+			(map cache-left-freq (strobj 'right-basis)))
 		(define (cache-all-right-freqs)
-			(map cache-right-freq (cntobj 'left-basis)))
+			(map cache-right-freq (strobj 'left-basis)))
 
 		; Methods on this class.
 		(lambda (message . args)
