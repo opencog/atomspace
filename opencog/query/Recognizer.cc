@@ -57,7 +57,7 @@ class Recognizer :
    public virtual DefaultPatternMatchCB
 {
 	private:
-		Variables _soln_vars;
+		std::vector<Variables> _soln_vars;
 		void get_glob_decl(const Handle&);
 
 	protected:
@@ -118,7 +118,7 @@ void Recognizer::get_glob_decl(const Handle& h)
 			ScopeLinkPtr sl(ScopeLinkCast(s));
 			if (NULL == sl)
 				sl = createScopeLink(*LinkCast(s));
-			_soln_vars = sl->get_variables();
+			_soln_vars.push_back(sl->get_variables());
 		}
 	}
 	else
@@ -188,6 +188,7 @@ bool Recognizer::node_match(const Handle& npat_h, const Handle& nsoln_h)
 
 bool Recognizer::link_match(const PatternTermPtr& ptm, const Handle& lsoln)
 {
+	_soln_vars.clear();
 	const Handle& lpat = ptm->getHandle();
 
 	// Self-compares always proceed.
