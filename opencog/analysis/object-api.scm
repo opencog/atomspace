@@ -373,6 +373,13 @@
   'left-wild-fentropy  -- return H_left(y) = h_left(y) / P(*,y)
   'right-wild-entropy  -- return h_right(x) = -sum_y p(x,y) log_2 p(x,y)
   'right-wild-fentropy -- return H_right(x) = h_right(x) / P(x,*)
+
+  For the below, mi(x,y) = -P(x,y) log_2 P(x,y) / [P(x,*) P(*,y)]
+
+  'left-wild-mi    -- return mi_left(y) = sum_x mi(x,y)
+  'left-wild-fmi   -- return MI_left(y) = mi_left(y) / P(*,y)
+  'right-wild-mi   -- return mi_right(x) = sum_y mi(x,y)
+  'right-wild-fmi  -- return MI_right(x) = mi_right(x) / P(x,*)
 "
 	(let ((llobj LLOBJ))
 
@@ -527,6 +534,31 @@
 			(set-entropy (llobj 'right-wildcard ITEM) ENT FRENT))
 
 		; ----------------------------------------------------
+		; Get the left wildcard mutual information
+		(define (get-left-wild-mi ITEM)
+			(get-total-mi (llobj 'left-wildcard ITEM)))
+
+		(define (get-left-wild-fmi ITEM)
+			(get-fractional-mi (llobj 'left-wildcard ITEM)))
+
+		; Get the right wildcard mutual information
+		(define (get-right-wild-mi ITEM)
+			(get-total-mi (llobj 'right-wildcard ITEM)))
+
+		(define (get-right-wild-fmi ITEM)
+			(get-fractional-mi (llobj 'right-wildcard ITEM)))
+
+		; Set the left wildcard mi and fractional mi.
+		; Return the atom that holds this value.
+		(define (set-left-wild-mi ITEM MI FRMI)
+			(set-mi (llobj 'left-wildcard ITEM) MI FRMI))
+
+		; Set the right wildcard mi and fractional mi.
+		; Return the atom that holds this value.
+		(define (set-right-wild-mi ITEM MI FRMI)
+			(set-mi (llobj 'right-wildcard ITEM) MI FRMI))
+
+		; ----------------------------------------------------
 		; Methods on this class.
 		(lambda (message . args)
 			(case message
@@ -553,6 +585,14 @@
 				((right-wild-entropy)     (apply get-right-wild-entropy args))
 				((right-wild-fentropy)    (apply get-right-wild-fentropy args))
 				((set-right-wild-entropy) (apply set-right-wild-entropy args))
+
+				((left-wild-mi)      (apply get-left-wild-mi args))
+				((left-wild-fmi)     (apply get-left-wild-fmi args))
+				((set-left-wild-mi)  (apply set-left-wild-mi args))
+
+				((right-wild-mi)     (apply get-right-wild-mi args))
+				((right-wild-fmi)    (apply get-right-wild-fmi args))
+				((set-right-wild-mi) (apply set-right-wild-mi args))
 
 				(else (apply llobj (cons message args))))
 		))
