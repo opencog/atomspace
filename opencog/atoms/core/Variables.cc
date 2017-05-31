@@ -352,6 +352,18 @@ bool Variables::is_equal(const Variables& other, size_t index) const
 
 	// XXX TODO fuzzy?
 
+	// If intervals specified, intervals must match.
+	auto iime = _glob_intervalmap.find(vme);
+	auto ioth = other._glob_intervalmap.find(voth);
+	if (iime == _glob_intervalmap.end() and
+	    ioth != other._glob_intervalmap.end()) return false;
+
+	if (iime != _glob_intervalmap.end())
+	{
+		if (ioth == other._glob_intervalmap.end()) return false;
+		if (iime->second != ioth->second) return false;
+	}
+
 	// If we got to here, everything must be OK.
 	return true;
 }
@@ -473,6 +485,34 @@ bool Variables::is_type(const HandleSeq& hseq) const
 		if (not is_type(varseq[i], hseq[i])) return false;
 	}
 	return true;
+}
+
+/**
+ * Interval checker.
+ *
+ * Returns true/false if the glob satisfies the interval restrictions.
+ */
+bool Variables::is_interval(const Handle& glob, size_t n) const
+{
+	// Interval restrictions?
+	GlobIntervalMap::const_iterator iit = _glob_intervalmap.find(glob);
+
+	if (_glob_intervalmap.end() != iit)
+	{
+		const std::pair<double, double>& intervals = iit->second;
+
+		// Return true if it's within the interval
+		// lower bound = intervals.first
+		// upper bound = intervals.second (negative value means infinity)
+		if (n >= intervals.first and
+		   (n <= intervals.second or intervals.second < 0))
+			return true;
+	}
+	// If there is no interval restrictions, by default it's considered
+	// as 1 to many, so returns true as long as it's larger than 0.
+	else if (n > 0) return true;
+
+	return false;
 }
 
 /* ================================================================= */
@@ -614,6 +654,9 @@ void Variables::erase(const Handle& var)
 	_deep_typemap.erase(var);
 	_fuzzy_typemap.erase(var);
 
+	// Remove from the interval map
+	_glob_intervalmap.erase(var);
+
 	// Remove FreeVariables
 	FreeVariables::erase(var);
 }
@@ -661,6 +704,8 @@ Handle Variables::get_vardecl() const
 			OC_ASSERT(false, "TODO: support fuzzy type info");
 			continue;
 		}
+
+		// TODO: _glob_intervalmap?
 
 		// No type info
 		vars.push_back(var);
