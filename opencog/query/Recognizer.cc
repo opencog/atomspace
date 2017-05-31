@@ -28,6 +28,8 @@
 
 #include <opencog/query/DefaultPatternMatchCB.h>
 #include <opencog/atoms/pattern/PatternLink.h>
+#include <opencog/atoms/core/ScopeLink.h>
+#include <opencog/atomutils/FindUtils.h>
 
 #include "BindLinkAPI.h"
 
@@ -54,6 +56,10 @@ namespace opencog {
 class Recognizer :
    public virtual DefaultPatternMatchCB
 {
+	private:
+		Variables _soln_vars;
+		void get_glob_decl(const Handle&);
+
 	protected:
 		const Pattern* _pattern;
 
@@ -99,6 +105,30 @@ using namespace opencog;
 #endif
 
 /* ======================================================== */
+
+void Recognizer::get_glob_decl(const Handle& h)
+{
+	IncomingSet scop = h->getIncomingSetByType(SCOPE_LINK, true);
+
+	if (0 < scop.size())
+	{
+		for (const LinkPtr& lp : scop)
+		{
+			Handle s(lp);
+			ScopeLinkPtr sl(ScopeLinkCast(s));
+			if (NULL == sl)
+				sl = createScopeLink(*LinkCast(s));
+			_soln_vars = sl->get_variables();
+		}
+	}
+	else
+	{
+		IncomingSet iset = h->getIncomingSet();
+		if (iset.size() == 0) return;
+		for (const LinkPtr& lp : iset)
+			get_glob_decl(lp->getHandle());
+	}
+}
 
 bool Recognizer::do_search(PatternMatchEngine* pme, const Handle& top)
 {
@@ -166,10 +196,10 @@ bool Recognizer::link_match(const PatternTermPtr& ptm, const Handle& lsoln)
 	// mis-matched types are a dead-end.
 	if (lpat->getType() != lsoln->getType()) return false;
 
-	// Globs are arity-changing. But there is a minimum length.
-	// Note that the inequality is backwards, here: the soln has the
-	// globs! (and so lpat must have arity equal or greater than soln)
-	if (lpat->getArity() < lsoln->getArity()) return false;
+	// Find the type and interval restrictions under a ScopeLink, if any
+	if (contains_atomtype(lsoln, GLOB_NODE))
+		get_glob_decl(lsoln);
+
 	return true;
 }
 
