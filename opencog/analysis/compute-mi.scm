@@ -290,7 +290,7 @@
 	; We need 'set-size, provided by add-report-api
 	(let ((cntobj (add-pair-count-api LLOBJ))
 			(frqobj (add-pair-freq-api LLOBJ))
-			(strobj (add-pair-stars LLOBJ))
+			(wldobj (add-pair-stars LLOBJ))
 			(rptobj (add-report-api LLOBJ))
 			(tot-cnt 0))
 
@@ -342,9 +342,9 @@
 		; Also caches the total dimensions of the matrix.
 		(define (cache-all-pair-freqs)
 			(define cnt 0)
-			(define lefties (strobj 'left-basis))
+			(define lefties (wldobj 'left-basis))
 			(define left-size (length lefties))
-			(define right-size (length (strobj 'right-basis)))
+			(define right-size (length (wldobj 'right-basis)))
 
 			; The outer-loop.
 			(define (right-loop left-item)
@@ -352,7 +352,7 @@
 					(lambda (pr)
 						(cache-pair-freq pr)
 						(set! cnt (+ cnt 1)))
-					(strobj 'right-stars left-item)))
+					(wldobj 'right-stars left-item)))
 
 			(for-each right-loop lefties)
 
@@ -368,9 +368,9 @@
 		; This method returns a list of all of the atoms holding
 		; those counts; handy for storing in a database.
 		(define (cache-all-left-freqs)
-			(map cache-left-freq (strobj 'right-basis)))
+			(map cache-left-freq (wldobj 'right-basis)))
 		(define (cache-all-right-freqs)
-			(map cache-right-freq (strobj 'left-basis)))
+			(map cache-right-freq (wldobj 'left-basis)))
 
 		; Methods on this class.
 		(lambda (message . args)
