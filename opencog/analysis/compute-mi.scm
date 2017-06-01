@@ -138,8 +138,10 @@
 			(set! cnt (+ 1 cnt))
 			(if (eqv? 0 (modulo cnt when))
 				(let* ((elapsed (- (current-time) start-time))
-						(rate (/ (exact->inexact when) elapsed)))
-					(format #t msg cnt total elapsed rate)
+						(rate (/ (exact->inexact when) elapsed))
+						(irate (inexact->exact (round rate)))
+					)
+					(format #t msg cnt total elapsed irate)
 					(set! start-time (current-time))))))
 )
 
@@ -552,7 +554,7 @@
 		(define store-rpt
 			(make-progress-rpt store-atom CNT num-prs
 				(string-append
-					"Stored ~A of ~A " MSG " in ~d secs (~6f pairs/sec)\n")))
+					"Stored ~A of ~A " MSG " in ~d secs (~A pairs/sec)\n")))
 
 		(for-each
 			(lambda (atom) (if (not (null? atom)) (store-rpt atom)))
