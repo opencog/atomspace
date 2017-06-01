@@ -57,6 +57,7 @@ class Recognizer :
    public virtual DefaultPatternMatchCB
 {
 	private:
+		bool bypass_node_match = false;
 		std::vector<Variables> _soln_vars;
 		void get_glob_decl(const Handle&);
 
@@ -180,35 +181,22 @@ bool Recognizer::initiate_search(PatternMatchEngine* pme)
 
 bool Recognizer::node_match(const Handle& npat_h, const Handle& nsoln_h)
 {
-	if (npat_h == nsoln_h) return true;
-	Type tso = nsoln_h->getType();
-	if (VARIABLE_NODE == tso) return true;
-	if (GLOB_NODE == tso)
-	{
-		if (0 < _soln_vars.size())
-		{
-			// Check if it satisfies the type restrictions, if any
-			if (std::all_of(_soln_vars.begin(), _soln_vars.end(),
-				[&](const Variables& v) {
-					return (not v.is_type(nsoln_h, npat_h)); }))
-				return false;
+	// Note: It is accepted right away as a side-by-side comparsion
+	// has already been done in fuzzy_match, see link_match below.
+	// So if we reach here, that means it passed already so don't
+	// worry about it.
+	if (bypass_node_match) return true;
 
-			// Check if it satisfies the interval restrictions, if any
-			// This is just to make sure that the upper bound is not zero
-			if (std::all_of(_soln_vars.begin(), _soln_vars.end(),
-				[&](const Variables& v) {
-					return (not v.is_interval(nsoln_h, 1)); }))
-				return false;
-		}
-		// No reason to reject
-		return true;
-	}
+	if (npat_h == nsoln_h) return true;
+	if (VARIABLE_NODE == nsoln_h->getType()) return true;
+
 	return false;
 }
 
 bool Recognizer::link_match(const PatternTermPtr& ptm, const Handle& lsoln)
 {
 	_soln_vars.clear();
+	bypass_node_match = false;
 	const Handle& lpat = ptm->getHandle();
 
 	// Self-compares always proceed.
@@ -219,7 +207,46 @@ bool Recognizer::link_match(const PatternTermPtr& ptm, const Handle& lsoln)
 
 	// Find the type and interval restrictions under a ScopeLink, if any
 	if (contains_atomtype(lsoln, GLOB_NODE))
+	{
 		get_glob_decl(lsoln);
+
+		// TODO: Change to something better if possible...
+		// What is happening here is to manually call the
+		// fuzzy_match callback immediately if and only if
+		// lsoln has one or more GlobNodes AND lpat and lsoln
+		// have the same arity.
+		// The reason is, if the pat and soln are having the
+		// same arity, pattern matcher will then do a
+		// side-by-side comparsion of their outgoing atoms.
+		// In the typical use cases we are facing at the
+		// moment, the comparsion will be done in the node_match
+		// callback. However that will cause problems in some
+		// situations, for example if we have:
+		// === lpat ===      === lsoln ===
+		// Concept "A"       Glob $x
+		// Concept "B"       Concept "A"
+		// Concept "C"       Glob $y
+		// and both of the globs $x and $y have an interval
+		// restriction of zero to infinity, it should be a
+		// match by grounding $x to nothing and $y to Concept
+		// "B" and "C". But a side-by-side comparsion here is
+		// a node-level comparsion (i.e. A-$x, B-A, C-$y),
+		// it makes it really hard to decide whether or not
+		// to ground a particular glob without knowing the
+		// rest of the sibling. And the reasons of calling the
+		// fuzzy_match callback are that it itself is a link-
+		// level comparsion and the glob-matching logic happens
+		// to be all there...
+		if (lpat->getArity() == lsoln->getArity())
+		{
+			if (fuzzy_match(lpat, lsoln))
+			{
+				bypass_node_match = true;
+				return true;
+			}
+			else return false;
+		}
+	}
 
 	return true;
 }
