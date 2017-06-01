@@ -157,9 +157,9 @@
 				((cache-right-entropy)  (apply cache-right-entropy args))
 				((cache-left-mi)        (apply cache-left-mi args))
 				((cache-right-mi)       (apply cache-right-mi args))
-				((cache-all-subtotals)  (cache-all)
+				((cache-all-subtotals)  (cache-all))
 				(else (apply llobj      (cons message args))))
-		)))
+		))
 )
 
 ; ---------------------------------------------------------------------
