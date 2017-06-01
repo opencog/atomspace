@@ -121,14 +121,13 @@
 	(format PORT "Left type: ~A    Right Type: ~A    Pair Type: ~A\n"
 		(LLOBJ 'left-type) (LLOBJ 'right-type) (LLOBJ 'pair-type))
 	(format PORT "Wildcard: ~A\n" (LLOBJ 'wild-wild))
-	(format PORT "\n")
 
-	(format PORT "Rows: ~A Columns: ~A\n"
+	(format PORT "Rows: ~d Columns: ~d\n"
 		(rpt-obj 'left-dim) (rpt-obj 'right-dim))
 
 	(let ((size (rpt-obj 'num-pairs))
 			(tot (* (rpt-obj 'left-dim) (rpt-obj 'right-dim))))
-		(format PORT "Size: ~A of ~A  Fraction: ~7f Sparsity: ~6f\n"
+		(format PORT "Size: ~A of ~A  Fraction: ~9,4g Sparsity: ~6f\n"
 			size tot (/ size tot) (log2 (/ tot size))))
 
 	(format PORT "Left  Entropy: ~6f\n" (rpt-obj 'left-entropy))
