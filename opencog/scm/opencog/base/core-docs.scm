@@ -711,7 +711,9 @@
 (set-procedure-property! cog-keys 'documentation
 "
  cog-keys ATOM
-    Return a list of all of the keys attached to ATOM.
+    Return a list of all of the keys attached to ATOM. In order to get
+    all of the values attached to an atom, one must first find the keys
+    that are used to anchor them. This function returns these.
 
     Example:
        guile> (cog-set-value!
