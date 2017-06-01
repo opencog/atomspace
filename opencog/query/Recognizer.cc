@@ -267,7 +267,9 @@ bool Recognizer::fuzzy_match(const Handle& npat_h, const Handle& nsoln_h)
 	size_t max_size = std::max(osg_size, osp_size);
 
 	size_t ks = 0;
-	Variables svar = _soln_vars[ks];
+	bool is_scoped = (0 < _soln_vars.size());
+	Variables svar;
+	if (is_scoped) svar = _soln_vars[ks];
 
 	// Do a side-by-side compare. This is not as rigorous as
 	// PatternMatchEngine::tree_compare() nor does it handle the bells
@@ -285,9 +287,11 @@ bool Recognizer::fuzzy_match(const Handle& npat_h, const Handle& nsoln_h)
 			// looking at a glob right now, we still
 			// need to do the below check...
 
+			if (not is_scoped)
+				return false;
 			// If we have gone through all the scopes,
 			// it's not a match and we are done.
-			if (ks+1 == _soln_vars.size())
+			else if (ks+1 == _soln_vars.size())
 				return false;
 			// Otherwise reset everything and try again
 			// with the next scope.
@@ -309,6 +313,9 @@ bool Recognizer::fuzzy_match(const Handle& npat_h, const Handle& nsoln_h)
 		// If the glob is at the end, see if it can eat everything.
 		if (jg+1 == osg_size)
 		{
+			// If the glob is not scoped, it eats everything, so its a match.
+			if (not is_scoped) return true;
+
 			while (ip < osp_size)
 			{
 				// Make sure it satisfies both type and interval restrictions.
@@ -325,9 +332,11 @@ bool Recognizer::fuzzy_match(const Handle& npat_h, const Handle& nsoln_h)
 			if (ip == osp_size) return true;
 			else
 			{
+				if (not is_scoped)
+					return false;
 				// If we have gone through all the scopes,
 				// it's not a match and we are done.
-				if (ks+1 == _soln_vars.size())
+				else if (ks+1 == _soln_vars.size())
 					return false;
 				// Otherwise reset everything and try again
 				// with the next scope.
@@ -344,21 +353,27 @@ bool Recognizer::fuzzy_match(const Handle& npat_h, const Handle& nsoln_h)
 		}
 
 		const Handle& post(osg[jg+1]);
-		while (ip < max_size and not loose_match(osp[ip], post) and
-		       svar.is_type(glob, osp[ip]) and
-		       svar.is_interval(glob, match_cnt+1))
+		while (ip < max_size and not loose_match(osp[ip], post))
 		{
+			// If it's scoped and either the type or interval
+			// restirctions is not satisfied, break
+			if (is_scoped and
+			   ((not svar.is_type(glob, osp[ip])) or
+			    (not svar.is_interval(glob, match_cnt+1))))
+				break;
+
 			match_cnt++;
 			ip++;
 		}
-
 		// If ip ran past the end, then the post was not found. This is
 		// a mismatch.
 		if (not (ip < max_size))
 		{
+			if (not is_scoped)
+				return false;
 			// If we have gone through all the scopes,
 			// it's not a match and we are done.
-			if (ks+1 == _soln_vars.size())
+			else if (ks+1 == _soln_vars.size())
 				return false;
 			// Otherwise reset everything and try again
 			// with the next scope.
