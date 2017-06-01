@@ -138,10 +138,11 @@
 			(set! cnt (+ 1 cnt))
 			(if (eqv? 0 (modulo cnt when))
 				(let* ((elapsed (- (current-time) start-time))
+						(ilapsed (inexact->exact (round elapsed)))
 						(rate (/ (exact->inexact when) elapsed))
 						(irate (inexact->exact (round rate)))
 					)
-					(format #t msg cnt total elapsed irate)
+					(format #t msg cnt total ilapsed irate)
 					(set! start-time (current-time))))))
 )
 
