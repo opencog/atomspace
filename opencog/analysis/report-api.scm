@@ -127,6 +127,10 @@
 
 		; ----------------------------------------------------
 		(define (get-total-count) totcnt)
+		(define (get-left-support) (/ (get-num-pairs) (get-left-dim)))
+		(define (get-right-support) (/ (get-num-pairs) (get-right-dim)))
+		(define (get-left-size) (/ (get-total-count) (get-left-dim)))
+		(define (get-right-size) (/ (get-total-count) (get-right-dim)))
 
 		; ----------------------------------------------------
 		; Methods on this class.
@@ -146,6 +150,10 @@
 				((set-mi)              (apply set-mi args))
 
 				((total-count)         (get-total-count))
+				((left-support)        (get-left-support))
+				((right-support)       (get-right-support))
+				((left-size)           (get-left-size))
+				((right-size)          (get-right-size))
 			))
 	)
 )
