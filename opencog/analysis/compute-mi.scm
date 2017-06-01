@@ -644,6 +644,7 @@
 	(display "Going to compute the left, right and total entropy\n")
 	(total-obj 'cache-entropy)
 	(total-obj 'cache-mi)
+	(format #t "Done computing totals in ~A secs\n" (elapsed-secs))
 
 	; Save the totals to the database
 	(store-atom (OBJ 'wild-wild))
