@@ -250,8 +250,12 @@
 			(define fp (llobj 'provides symbol))
 			(if fp fp default))
 
-		; Provide default methods, but only if the low-level
-		; object does not already provide them.
+		; Provide default methods, but only if the low-level object
+		; does not already provide them. In practice, this is used in
+		; two different ways: One is by the fold-api which overloads
+		; the stars methods to work differently.  The other is to
+		; allow an underlying object to provide cached basis, as these
+		; can sometimes take an obscenely long time to compute.
 		(let ((f-left-basis (overload 'left-basis get-left-basis))
 				(f-right-basis (overload 'right-basis get-right-basis))
 				(f-left-stars (overload 'left-stars get-left-stars))
