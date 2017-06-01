@@ -191,6 +191,7 @@
 					(+ sum (frqobj METHOD left-item)))
 				0 (star-obj 'left-basis))
 
+		; ---------------
 		; Compute the total entropy for the set. This loops over all
 		; rows and columns, and computes the sum
 		;   H_tot = sum_x sum_y p(x,y) log_2 p(x,y)
@@ -200,11 +201,11 @@
 		; rounding errors.)
 		(define (compute-total-entropy)
 			(define lsum (left-sum 'left-wild-entropy))
-			(define rsum (right-sum 'left-wild-entropy))
+			(define rsum (right-sum 'right-wild-entropy))
 			(if (< 1.0e-8 (/ (abs (- lsum rsum)) lsum))
 				(throw 'bad-summation 'compute-total-entropy
 					(format #f
-						"Left and right sums fail to be equal: ~A ~A\n"
+						"Left and right entropy sums fail to be equal: ~A ~A\n"
 						lsum rsum)))
 			lsum
 		)
@@ -221,14 +222,44 @@
 		; It returns a single numerical value, for the entire set.
 		(define (compute-right-entropy) (right-sum 'right-wild-logli))
 
+		(define (cache-entropy)
+			(rptobj 'set-entropy
+				(compute-left-entropy)
+				(compute-right-entropy)
+				(compute-total-entropy)))
+
+		; ---------------
+		; Compute the total MI for the set. This loops over all
+		; rows and columns, and computes the sum
+		;   MI_tot = sum_x sum_y mi(x,y)
+		;         = sum_x mi_left(x)
+		;         = sum_y mi_right(y)
+		; It throws an error if the two are not equal (to within guessed
+		; rounding errors.)
+		(define (compute-total-mi)
+			(define lsum (left-sum 'left-wild-mi))
+			(define rsum (right-sum 'left-wild-mi))
+			(if (< 1.0e-8 (/ (abs (- lsum rsum)) lsum))
+				(throw 'bad-summation 'compute-total-mi
+					(format #f
+						"Left and right MI sums fail to be equal: ~A ~A\n"
+						lsum rsum)))
+			lsum
+		)
+
+		(define (cache-mi)
+			(rptobj 'set-mi (compute-total-mi)))
+
+		; ---------------
 		; Methods on this class.
 		(lambda (message . args)
 			(case message
 				((total-entropy)         (compute-total-entropy))
 				((left-entropy)          (compute-left-entropy))
 				((right-entropy)         (compute-right-entropy))
-				(else (apply llobj       (cons message args))))
-		))
+				((cache-entropy)         (cache-entropy))
+				((cache-mi)              (cache-mi))
+			)))
 )
 
 ; ---------------------------------------------------------------------
