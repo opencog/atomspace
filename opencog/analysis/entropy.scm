@@ -52,9 +52,9 @@
 "
 	; Need the 'left-stars method, provided by add-pair-stars
 	; Need the 'left-wild-freq method, provided by add-pair-freq-api
-	(let ((llobj LLOBJ)
+	(let* ((llobj LLOBJ)
 			(star-obj (add-pair-stars LLOBJ))
-			(frqobj (add-pair-freq-api LLOBJ)))
+			(frqobj (add-pair-freq-api star-obj)))
 
 		; Compute the left-wild entropy summation:
 		;    h_left(y) = -sum_x P(x,y) log_2 P(x,y)
@@ -186,22 +186,22 @@
 "
 	; Need the 'left-basis method, provided by add-pair-stars
 	; Need the 'pair-logli method, provided by add-pair-freq-api
-	(let ((llobj LLOBJ)
+	(let* ((llobj LLOBJ)
 			(star-obj (add-pair-stars LLOBJ))
-			(frqobj (add-pair-freq-api LLOBJ))
-			(rptobj (add-report-api LLOBJ))
+			(frqobj (add-pair-freq-api star-obj))
+			(rptobj (add-report-api star-obj))
 		)
 
 		(define (left-sum METHOD)
 			(fold
 				(lambda (right-item sum)
-					(+ sum (frqobj METHOD right-item)))
+					(+ sum (frqobj METHOD (llobj 'left-wildcard right-item))))
 				0 (star-obj 'right-basis)))
 
 		(define (right-sum METHOD)
 			(fold
 				(lambda (left-item sum)
-					(+ sum (frqobj METHOD left-item)))
+					(+ sum (frqobj METHOD (llobj 'right-wildcard left-item))))
 				0 (star-obj 'left-basis)))
 
 		; ---------------
