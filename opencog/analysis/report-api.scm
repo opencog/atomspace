@@ -15,10 +15,7 @@
 ; Each matrix is sparse, and has only a small number of non-zero
 ; entries. These are returned by 'num-pairs.
 ;
-; Each matrix has a total entropy sum_x sum_y p(x,y) log_2 p(x,y)
-; this is returned by
-;
-; Each matrix has
+; And so on. See documentation below.
 
 ; ---------------------------------------------------------------------
 
@@ -39,6 +36,19 @@
   Here, the LLOBJ is expected to be an object, with the 'wild-wild
   method on it.  This is the atom on which these summaries will be
   stored.
+
+  The implemented methods return the following values:
+  'left-dim       -- The number of rows
+  'right-dim      -- The number of columns
+  'num-pairs      -- The number of non-zero entries
+  'left-entropy   -- The sum H_left = -sum_x P(x,*) log_2 P(x,*)
+  'right-entropy  -- The sum H_right = -sum_y P(*,y) log_2 P(*,y)
+  'total-entropy  -- The sum H_tot = sum_x sum_y P(x,y) log_2 P(x,y)
+  'total-mi       -- The sum MI = H_tot - H_left - H_right
+
+  Also of interest, not implemented here, but available on the count-api
+  object is the 'wild-wild-count method, which returns the total number
+  of observatations of all pairs.
 "
 	(let ((llobj LLOBJ)
 			(wild-atom (LLOBJ 'wild-wild)))
