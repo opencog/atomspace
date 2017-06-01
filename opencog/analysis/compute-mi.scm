@@ -157,7 +157,9 @@
 
 	; We need 'left-basis, provided by add-pair-stars
 	; We need 'set-left-wild-count, provided by add-pair-count-api
-	(let ((cntobj (add-pair-count-api (add-pair-stars LLOBJ))))
+	(let ((llobj LLOBK)
+			(cntobj (add-pair-count-api LLOBJ))
+			(star-obj (add-pair-stars LLOBJ)))
 
 		; Compute the left-side wild-card count. This is the number
 		; N(*,y) = sum_x N(x,y) where ITEM==y and N(x,y) is the number
@@ -165,9 +167,9 @@
 		; This returns the count, or zero, if the pair was never observed.
 		(define (compute-left-count ITEM)
 			(fold
-				(lambda (pr sum) (+ sum (cntobj 'pair-count pr)))
+				(lambda (pr sum) (+ sum (llobj 'pair-count pr)))
 				0
-				(cntobj 'left-stars ITEM)))
+				(star-obj 'left-stars ITEM)))
 
 		; Compute and cache the left-side wild-card counts N(*,y).
 		; This returns the atom holding the cached count, thus
@@ -182,9 +184,9 @@
 		; Compute the right-side wild-card count N(x,*).
 		(define (compute-right-count ITEM)
 			(fold
-				(lambda (pr sum) (+ sum (cntobj 'pair-count pr)))
+				(lambda (pr sum) (+ sum (llobj 'pair-count pr)))
 				0
-				(cntobj 'right-stars ITEM)))
+				(star-obj 'right-stars ITEM)))
 
 		; Compute and cache the right-side wild-card counts N(x,*).
 		; This returns the atom holding the cached count, or nil
@@ -201,10 +203,10 @@
 		; This method returns a list of all of the atoms holding
 		; those counts; handy for storing in a database.
 		(define (cache-all-left-counts)
-			(map cache-left-count (cntobj 'right-basis)))
+			(map cache-left-count (star-obj 'right-basis)))
 
 		(define (cache-all-right-counts)
-			(map cache-right-count (cntobj 'left-basis)))
+			(map cache-right-count (star-obj 'left-basis)))
 
 		; Compute the total number of times that all pairs have been
 		; observed. In formulas, return
@@ -219,7 +221,7 @@
 				;;; (lambda (item sum) (+ sum (compute-right-count item)))
 				(lambda (item sum) (+ sum (cntobj 'right-wild-count item)))
 				0
-				(cntobj 'left-basis)))
+				(star-obj 'left-basis)))
 
 		; Compute the total number of times that all pairs have been
 		; observed. That is, return N(*,*) = sum_y N(*,y). Note that
@@ -231,7 +233,7 @@
 				;;; (lambda (item sum) (+ sum (compute-left-count item)))
 				(lambda (item sum) (+ sum (cntobj 'left-wild-count item)))
 				0
-				(cntobj 'right-basis)))
+				(star-obj 'right-basis)))
 
 		; Compute the total number of times that all pairs have been
 		; observed. That is, return N(*,*).  Throws an error if the
@@ -241,6 +243,7 @@
 			(define r-cnt (compute-total-count-from-right))
 
 			; The left and right counts should be equal!
+			; XXX fixme, allow for small rounding errors.
 			(if (not (eqv? l-cnt r-cnt))
 				(throw 'bad-summation 'count-all-pairs
 					(format #f "Error: pair-counts unequal: ~A ~A\n" l-cnt r-cnt)))
@@ -263,7 +266,7 @@
 				((cache-all-right-counts) (cache-all-right-counts))
 				((compute-total-count)    (compute-total-count))
 				((cache-total-count)      (cache-total-count))
-				(else (apply cntobj (cons message args))))
+				(else (apply llobj        (cons message args))))
 			))
 )
 
@@ -641,9 +644,13 @@
 	; Save the totals to the database
 	(store-atom (OBJ 'wild-wild))
 
-	(store-list (star-xxxxrighties "left-wilds" 40000))
+	(store-list
+		(map (lambda (x) (OBJ 'left-wildcard x)) (star-obj 'right-basis))
+		"left-wilds" 40000)
+
+	(store-list
+		(map (lambda (x) (OBJ 'right-wildcard x)) (star-obj 'left-basis))
+		"right-wilds" 40000)
 
 	(display "Finished with MI computations\n")
 )
-
-; ---------------------------------------------------------------------
