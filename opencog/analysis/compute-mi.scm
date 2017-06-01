@@ -543,7 +543,7 @@
 		(set! start-time (current-time))
 		diff)
 
-	(define (store-list all-atoms CNT MSG)
+	(define (store-list all-atoms CNT)
 		(define num-prs (length all-atoms))
 
 		; Create a wrapper around `store-atom` that prints a progress
@@ -551,14 +551,14 @@
 		; stored, and this just takes a long time.
 		(define store-rpt
 			(make-progress-rpt store-atom CNT num-prs
-				"Stored ~A of ~A MSG in ~A secs (~A pairs/sec)\n"))
+				"Stored ~A of ~A items in ~A secs (~A pairs/sec)\n"))
 
 		(for-each
 			(lambda (atom) (if (not (null? atom)) (store-rpt atom)))
 			all-atoms)
 
-		(format #t "Done storing ~A ~A in ~A secs\n"
-			num-prs MSG (elapsed-secs)))
+		(format #t "Done storing ~A items in ~A secs\n"
+			num-prs (elapsed-secs)))
 
 	; Decorate the object with methods that report support.
 	; All the others get to work off of the basis cached by this one.
@@ -613,14 +613,14 @@
 	(let ((lefties (freq-obj 'cache-all-left-freqs)))
 		(format #t "Done computing ~A left-wilds in ~A secs\n"
 			(length lefties) (elapsed-secs))
-		(store-list lefties "left-wilds" 40000))
+		(store-list lefties 40000))
 
 	(display "Done with -log P(*,y), start -log P(x,*)\n")
 
 	(let ((righties (freq-obj 'cache-all-right-freqs)))
 		(format #t "Done computing ~A right-wilds in ~A secs\n"
 			(length righties) (elapsed-secs))
-		(store-list righties "right-wilds" 40000))
+		(store-list righties 40000))
 
 	(display "Done computing -log P(x,*) and P(*,y)\n")
 
@@ -634,7 +634,7 @@
 		(format #t "Done computing ~A pair MI's in ~A secs\n"
 			num-prs (elapsed-secs))
 
-		(store-list all-atoms "pairs" 100000)
+		(store-list all-atoms 100000)
 	)
 
 	(display "Going to do column and row subtotals\n")
@@ -647,13 +647,15 @@
 	; Save the totals to the database
 	(store-atom (OBJ 'wild-wild))
 
+	(display "Start saving left-wildcards\n")
 	(store-list
 		(map (lambda (x) (OBJ 'left-wildcard x)) (wild-obj 'right-basis))
-		"left-wilds" 40000)
+		40000)
 
+	(display "Start saving right-wildcards\n")
 	(store-list
 		(map (lambda (x) (OBJ 'right-wildcard x)) (wild-obj 'left-basis))
-		"right-wilds" 40000)
+		40000)
 
 	(display "Finished with MI computations\n")
 )

@@ -193,6 +193,10 @@
 		; the left-hand-side of a pair.  This is the set of all possible
 		; items x from the pair (x,y) for any y.
 		;
+		; XXX FIXME ... the good-right-pairs check is extremely
+		; CPU-expensive! Its currently taking 3 minutes to get the
+		; list of words!
+		;
 		(define (get-left-basis)
 			(if (null? l-basis)
 				(set! l-basis (get-basis (llobj 'left-type) good-right-pairs)))
