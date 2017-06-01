@@ -257,8 +257,10 @@
 		; It throws an error if the two are not equal (to within guessed
 		; rounding errors.)
 		(define (compute-total-mi)
-			(define lsum (left-sum 'left-wild-mi))
-			(define rsum (right-sum 'left-wild-mi))
+			(define lsum (left-sum
+					(lambda (x) (frqobj 'left-wild-mi x))))
+			(define rsum (right-sum
+					(lambda (x) (frqobj 'right-wild-mi x))))
 			(if (< 1.0e-8 (/ (abs (- lsum rsum)) lsum))
 				(throw 'bad-summation 'compute-total-mi
 					(format #f
