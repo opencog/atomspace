@@ -458,7 +458,7 @@
 							(define pr-logli (frqobj 'pair-logli lipr))
 
 							(define right-item (gdr lipr))
-							(if (< 0 (frqobj 'left-wild-count right-item))
+							(if (< 0 (cntobj 'left-wild-count right-item))
 								(let* ((l-logli (frqobj 'left-wild-logli right-item))
 										(fmi (- pr-logli (+ r-logli l-logli)))
 										(mi (* pr-freq fmi))

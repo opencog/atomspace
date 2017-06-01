@@ -115,6 +115,7 @@
 ;     ; get-left-wildcard method, passing WORD as the argument.
 ;     (lambda (message . args)
 ;        (apply (case message
+;              ((name) "Demo Kind of Object")
 ;              ((left-type) get-left-type)
 ;              ((right-type) get-right-type)
 ;              ((pair-type) get-pair-type)
