@@ -194,6 +194,7 @@ bool Recognizer::node_match(const Handle& npat_h, const Handle& nsoln_h)
 				return false;
 
 			// Check if it satisfies the interval restrictions, if any
+			// This is just to make sure that the upper bound is not zero
 			if (std::all_of(_soln_vars.begin(), _soln_vars.end(),
 				[&](const Variables& v) {
 					return (not v.is_interval(nsoln_h, 1)); }))
@@ -265,6 +266,9 @@ bool Recognizer::fuzzy_match(const Handle& npat_h, const Handle& nsoln_h)
 	size_t osp_size = osp.size();
 	size_t max_size = std::max(osg_size, osp_size);
 
+	size_t ks = 0;
+	Variables svar = _soln_vars[ks];
+
 	// Do a side-by-side compare. This is not as rigorous as
 	// PatternMatchEngine::tree_compare() nor does it handle the bells
 	// and whistles (ChoiceLink, QuoteLink, etc).
@@ -277,20 +281,75 @@ bool Recognizer::fuzzy_match(const Handle& npat_h, const Handle& nsoln_h)
 			return false;
 		}
 
-		// If we are here, we have a glob in the soln. If the glob is at
-		// the end, it eats everything, so its a match. Else, resume
-		// matching at the end of the glob.
-		if ((jg+1) == osg_size) return true;
+		// If we are here, we have a glob in the soln.
+		const Handle& glob = osg[jg];
+		size_t match_cnt = 0;
+
+		// If the glob is at the end, see if it can eat everything.
+		if (jg+1 == osg_size)
+		{
+			while (ip < osp_size)
+			{
+				// Make sure it satisfies both type and interval restrictions.
+				if (svar.is_type(glob, osp[ip]) and
+				    svar.is_interval(glob, match_cnt+1))
+				{
+					match_cnt++;
+					ip++;
+				}
+				else break;
+			}
+
+			// Return true if it managed to eat everything.
+			if (ip == osp_size) return true;
+			else
+			{
+				// If we have gone through all the scopes,
+				// it's not a match and we are done.
+				if (ks+1 == _soln_vars.size())
+					return false;
+				// Otherwise reset everything and try again
+				// with the next scope.
+				else
+				{
+					// The for-loop increment will turn them back to zero.
+					ip = -1;
+					jg = -1;
+					ks++;
+					svar = _soln_vars[ks];
+					continue;
+				}
+			}
+		}
 
 		const Handle& post(osg[jg+1]);
-		ip++;
-		while (ip < max_size and not loose_match(osp[ip], post))
+		while (ip < max_size and not loose_match(osp[ip], post) and
+		       svar.is_type(glob, osp[ip]) and
+		       svar.is_interval(glob, match_cnt+1))
 		{
+			match_cnt++;
 			ip++;
 		}
 		// If ip ran past the end, then the post was not found. This is
 		// a mismatch.
-		if (not (ip < max_size)) return false;
+		if (not (ip < max_size))
+		{
+			// If we have gone through all the scopes,
+			// it's not a match and we are done.
+			if (ks+1 == _soln_vars.size())
+				return false;
+			// Otherwise reset everything and try again
+			// with the next scope.
+			else
+			{
+				// The for-loop increment will turn them back to zero.
+				ip = -1;
+				jg = -1;
+				ks++;
+				svar = _soln_vars[ks];
+				continue;
+			}
+		}
 
 		// Go around again, look for more GlobNodes. Back up by one, so
 		// that the for-loop increment gets us back on track.
