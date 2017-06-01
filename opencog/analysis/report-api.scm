@@ -132,31 +132,41 @@
 	(define rpt-obj (add-report-api LLOBJ))
 	(define cnt-obj (add-pair-count-api LLOBJ))
 
+	(define size (rpt-obj 'num-pairs))
+	(define nrows (rpt-obj 'left-dim))
+	(define ncols (rpt-obj 'right-dim))
+	(define tot (* nrows ncols))
+	(define obs (cnt-obj 'wild-wild-count))
+
 	(format PORT "Summary Report for Correlation Matrix ~A\n"
 		(LLOBJ 'name))
 	(format PORT "Left type: ~A    Right Type: ~A    Pair Type: ~A\n"
 		(LLOBJ 'left-type) (LLOBJ 'right-type) (LLOBJ 'pair-type))
 	(format PORT "Wildcard: ~A" (LLOBJ 'wild-wild))
 
-	(format PORT "Rows: ~d Columns: ~d\n"
-		(rpt-obj 'left-dim) (rpt-obj 'right-dim))
+	(format PORT "Rows: ~d Columns: ~d\n" nrows ncols)
 
-	(let ((size (rpt-obj 'num-pairs))
-			(tot (* (rpt-obj 'left-dim) (rpt-obj 'right-dim)))
-			(obs (cnt-obj 'wild-wild-count))
-		)
-		(format PORT "Size: ~d non-zero entries of ~d possible\n"
-			size tot)
-		(format PORT "Fraction non-zero: ~9,4g Sparsity (-log_2): ~6f\n"
-			(/ size tot) (log2 (/ tot size)))
-		(format PORT "Total observations: ~d  Avg obs per pair: ~6f\n"
-			obs (/ obs size))
+	(format PORT "Size: ~d non-zero entries of ~d possible\n"
+		size tot)
+	(format PORT "Fraction non-zero: ~9,4g Sparsity (-log_2): ~6f\n"
+		(/ size tot) (log2 (/ tot size)))
+	(format PORT "Total observations: ~d  Avg obs per pair: ~6f\n"
+		obs (/ obs size))
+
+	(format PORT "Entropy Total: ~6f   Left: ~6f   Right: ~6f\n"
+		(rpt-obj 'total-entropy)
+		(rpt-obj 'left-entropy)
+		(rpt-obj 'right-entropy)
 	)
-
-	(format PORT "Left  Entropy: ~6f\n" (rpt-obj 'left-entropy))
-	(format PORT "Right Entropy: ~6f\n" (rpt-obj 'right-entropy))
-	(format PORT "Total Entropy: ~6f\n" (rpt-obj 'total-entropy))
 	(format PORT "Total MI: ~6f\n" (rpt-obj 'total-mi))
+
+	(format PORT "\n")
+	(format PORT "               Left   Right\n")
+	(format PORT "               ----   -----\n")
+	(format PORT "Support (l_0)  ~6f    ~6f\n"
+		(/ size nrows) (/ size ncols))
+	(format PORT "Size    (l_1)  ~6f    ~6f\n"
+		(/ obs nrows) (/ obs ncols))
 )
 
 ; ---------------------------------------------------------------------
