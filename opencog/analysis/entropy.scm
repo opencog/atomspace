@@ -156,78 +156,70 @@
 
 ; ---------------------------------------------------------------------
 
-(define-public (add-total-entropy-compute LLOBJ)
+(define (add-total-entropy-compute LLOBJ)
 "
-  add-total-entropy-compute LLOBJ - methods for total and partial entropy.
+  add-total-entropy-compute LLOBJ - methods to compute and cache the
+  partial and total entropy and MI.
 
-  Extend the LLOBJ with additional methods to compute the partial
-  and total entropies of the total set of pairs.
+  Extend the LLOBJ with additional methods to compute the partial and
+  total entropies and MI for the correlation matrix.
 
-  The object must have valid pair-frequency values on it, accessible
-  via the standard frequency-object API. These must have been
+  The object must have valid partial sums for the entropy and MI on it,
+  vize, the cones computed by add-subtotal-mi-compute, above. These are
+  acessed via the standard frequency-object API. These must have been
   pre-computed, before this object can be used.
 
-  These methods loop over all pairs, and so can take a lot of time.
+  These methods loop over all rows and columns to compute the total sums.
 "
 	; Need the 'left-basis method, provided by add-pair-stars
 	; Need the 'pair-logli method, provided by add-pair-freq-api
-	(let ((star-obj (add-pair-stars LLOBJ))
-			(frqobj (add-pair-freq-api LLOBJ)))
+	(let ((llobj LLOBJ)
+			(star-obj (add-pair-stars LLOBJ))
+			(frqobj (add-pair-freq-api LLOBJ))
+			(rptobj (add-report-api LLOBJ))
+		)
+
+		(define (left-sum METHOD)
+			(fold
+				(lambda (right-item sum)
+					(+ sum (frqobj METHOD right-item)))
+				0 (star-obj 'right-basis)))
+
+		(define (right-sum METHOD)
+			(fold
+				(lambda (left-item sum)
+					(+ sum (frqobj METHOD left-item)))
+				0 (star-obj 'left-basis))
 
 		; Compute the total entropy for the set. This loops over all
-		; pairs, and computes the sum
+		; rows and columns, and computes the sum
 		;   H_tot = sum_x sum_y p(x,y) log_2 p(x,y)
-		; It returns a single numerical value, for the entire set.
+		;         = sum_x h_left(x)
+		;         = sum_y h_right(y)
+		; It throws an error if the two are not equal (to within guessed
+		; rounding errors.)
 		(define (compute-total-entropy)
-			(define entropy 0)
-
-			(define (right-loop left-item)
-				(for-each
-					(lambda (lipr)
-						; The get-logli below may throw an exception, if
-						; the particular item-pair doesn't have any counts.
-						; XXX Does this ever actually happen?  It shouldn't,
-						; right?
-						(catch #t (lambda ()
-								(define pr-freq (frqobj 'pair-freq lipr))
-								(define pr-logli (frqobj 'pair-logli lipr))
-								(define h (* pr-freq pr-logli))
-								(set! entropy (+ entropy h))
-							)
-							(lambda (key . args) #f))) ; catch handler
-					(star-obj 'right-stars left-item)))
-
-			(for-each right-loop (star-obj 'left-basis))
-
-			; Return the single number.
-			entropy
+			(define lsum (left-sum 'left-wild-entropy))
+			(define rsum (right-sum 'left-wild-entropy))
+			(if (< 1.0e-8 (/ (abs (- lsum rsum)) lsum))
+				(throw 'bad-summation 'compute-total-entropy
+					(format #f
+						"Left and right sums fail to be equal: ~A ~A\n"
+						lsum rsum)))
+			lsum
 		)
 
 		; Compute the left-wildcard partial entropy for the set. This
 		; loops over all left-wildcards, and computes the sum
 		;   H_left = sum_y p(*,y) log_2 p(*,y)
 		; It returns a single numerical value, for the entire set.
-		(define (compute-left-entropy)
-
-			(fold
-				(lambda (right-item sum)
-					(+ sum (frqobj 'left-wild-logli right-item)))
-				0
-				(star-obj 'right-basis))
-		)
+		(define (compute-left-entropy) (left-sum 'left-wild-logli))
 
 		; Compute the right-wildcard partial entropy for the set. This
 		; loops over all right-wildcards, and computes the sum
 		;   H_right = sum_x p(x,*) log_2 p(x,*)
 		; It returns a single numerical value, for the entire set.
-		(define (compute-right-entropy)
-
-			(fold
-				(lambda (left-item sum)
-					(+ sum (frqobj 'right-wild-logli left-item)))
-				0
-				(star-obj 'left-basis))
-		)
+		(define (compute-right-entropy) (right-sum 'right-wild-logli))
 
 		; Methods on this class.
 		(lambda (message . args)
@@ -235,7 +227,7 @@
 				((total-entropy)         (compute-total-entropy))
 				((left-entropy)          (compute-left-entropy))
 				((right-entropy)         (compute-right-entropy))
-				(else (apply frqobj      (cons message args))))
+				(else (apply llobj       (cons message args))))
 		))
 )
 
