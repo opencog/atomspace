@@ -106,3 +106,35 @@
 )
 
 ; ---------------------------------------------------------------------
+
+(define-public (print-matrix-summary-report LLOBJ PORT)
+"
+  print-matrix-summary-report LLOBJ PORT
+  Print a summary report about the pair dataset LLOBJ to output PORT
+  (typically a string or file port).
+"
+	(define (log2 x) (/ (log x) (log 2)))
+
+	(define rpt-obj (add-report-api LLOBJ))
+	(format PORT "Summary Report for Correlation Matrix ~A\n"
+		(LLOBJ 'name))
+	(format PORT "Left type: ~A    Right Type: ~A    Pair Type: ~A\n"
+		(LLOBJ 'left-type) (LLOBJ 'right-type) (LLOBJ 'pair-type))
+	(format PORT "Wildcard: ~A\n" (LLOBJ 'wild-wild))
+	(format PORT "\n")
+
+	(format PORT "Rows: ~A Columns: ~A\n"
+		(rpt-obj 'left-dim) (rpt-obj 'right-dim))
+
+	(let ((size (rpt-obj 'num-pairs))
+			(tot (* (rpt-obj 'left-dim) (rpt-obj 'right-dim))))
+		(format PORT "Size: ~A of ~A  Fraction: ~7f Sparsity: ~6f\n"
+			size tot (/ size tot) (log2 (/ tot size))))
+
+	(format PORT "Left  Entropy: ~6f\n" (rpt-obj 'left-entropy))
+	(format PORT "Right Entropy: ~6f\n" (rpt-obj 'right-entropy))
+	(format PORT "Total Entropy: ~6f\n" (rpt-obj 'total-entropy))
+	(format PORT "Total MI: ~6f\n" (rpt-obj 'total-mi))
+)
+
+; ---------------------------------------------------------------------
