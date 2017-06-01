@@ -708,6 +708,20 @@
        )
 ")
 
+(set-procedure-property! cog-keys 'documentation
+"
+ cog-keys ATOM
+    Return a list of all of the keys attached to ATOM. In order to get
+    all of the values attached to an atom, one must first find the keys
+    that are used to anchor them. This function returns these.
+
+    Example:
+       guile> (cog-set-value!
+                 (Concept \"abc\") (Predicate \"key\")
+                 (FloatValue 1 2 3))
+       guile> (cog-keys (Concept \"abc\"))
+")
+
 (set-procedure-property! cog-value 'documentation
 "
  cog-value ATOM KEY
@@ -716,9 +730,9 @@
 
     Example:
        guile> (cog-set-value!
-                 (Concept \"abc\") (Concept \"key\")
+                 (Concept \"abc\") (Predicate \"key\")
                  (FloatValue 1 2 3))
-       guile> (cog-value (Concept \"abc\") (Concept \"key\"))
+       guile> (cog-value (Concept \"abc\") (Predicate \"key\"))
        (FloatValue 1.000000 2.000000 3.00000)
 ")
 
