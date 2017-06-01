@@ -157,7 +157,7 @@
 
 	; We need 'left-basis, provided by add-pair-stars
 	; We need 'set-left-wild-count, provided by add-pair-count-api
-	(let ((llobj LLOBK)
+	(let ((llobj LLOBJ)
 			(cntobj (add-pair-count-api LLOBJ))
 			(star-obj (add-pair-stars LLOBJ)))
 
@@ -645,12 +645,14 @@
 	(store-atom (OBJ 'wild-wild))
 
 	(store-list
-		(map (lambda (x) (OBJ 'left-wildcard x)) (star-obj 'right-basis))
+		(map (lambda (x) (OBJ 'left-wildcard x)) (wild-obj 'right-basis))
 		"left-wilds" 40000)
 
 	(store-list
-		(map (lambda (x) (OBJ 'right-wildcard x)) (star-obj 'left-basis))
+		(map (lambda (x) (OBJ 'right-wildcard x)) (wild-obj 'left-basis))
 		"right-wilds" 40000)
 
 	(display "Finished with MI computations\n")
 )
+
+; ---------------------------------------------------------------------
