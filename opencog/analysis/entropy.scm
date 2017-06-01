@@ -132,14 +132,22 @@
 		; ---------------
 		; Do all four loops.
 		(define (cache-all)
+			(define start (current-time))
 			(map cache-left-entropy (star-obj 'right-basis))
-			(display "Finished left entropy subtotals\n")
+			(format #t "Finished left entropy subtotals in ~A secs\n"
+				(- (current-time) start))
+			(set! start (current-time))
 			(map cache-right-entropy (star-obj 'left-basis))
-			(display "Finished right entropy subtotals\n")
+			(format #t "Finished right entropy subtotals in ~A secs\n"
+				(- (current-time) start))
+			(set! start (current-time))
 			(map cache-left-mi (star-obj 'right-basis))
-			(display "Finished left MI subtotals\n")
+			(format #t "Finished left MI subtotals in ~A secs\n"
+				(- (current-time) start))
+			(set! start (current-time))
 			(map cache-right-mi (star-obj 'left-basis))
-			(display "Finished right MI subtotals\n")
+			(format #t "Finished right MI subtotals in ~A secs\n"
+				(- (current-time) start))
 		)
 
 		; Methods on this class.
