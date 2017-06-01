@@ -561,26 +561,29 @@
 			num-prs MSG (elapsed-secs)))
 
 	; Decorate the object with methods that report support.
+	; All the others get to work off of the basis cached by this one.
 	(define wild-obj (add-pair-stars OBJ))
 
 	; Decorate the object with methods that can compute counts.
-	(define count-obj (make-compute-count OBJ))
+	(define count-obj (make-compute-count wild-obj))
 
 	; Decorate the object with methods that can compute frequencies.
-	(define freq-obj (make-compute-freq OBJ))
+	(define freq-obj (make-compute-freq wild-obj))
 
 	; Decorate the object with methods that can compute the pair-MI.
-	(define batch-mi-obj (make-batch-mi OBJ))
+	(define batch-mi-obj (make-batch-mi wild-obj))
 
 	; Define the object which will compute row and column subtotals.
-	(define subtotal-obj (add-subtotal-mi-compute OBJ))
+	(define subtotal-obj (add-subtotal-mi-compute wild-obj))
 
 	; Define the object which will compute total entropy and MI.
-	(define total-obj (add-total-entropy-compute OBJ))
+	(define total-obj (add-total-entropy-compute wild-obj))
 
-	(format #t "Support: num left=~A num right=~A\n"
+	(display "Start computing the basis\n")
+	(format #t "Support: found num left=~A num right=~A in ~A secs\n"
 			(length (wild-obj 'left-basis))
-			(length (wild-obj 'right-basis)))
+			(length (wild-obj 'right-basis))
+			(elapsed-secs))
 
 	; First, compute the summations for the left and right wildcard counts.
 	; That is, compute N(x,*) and N(*,y) for the supports on x and y.
