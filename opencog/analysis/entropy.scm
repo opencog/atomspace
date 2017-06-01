@@ -151,7 +151,7 @@
 				((cache-right-mi)       (apply cache-right-mi args))
 				((cache-all-subtotals)  (cache-all)
 				(else (apply llobj      (cons message args))))
-		))
+		)))
 )
 
 ; ---------------------------------------------------------------------
