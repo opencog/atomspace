@@ -41,84 +41,103 @@
 using namespace opencog;
 
 ForwardChainer::ForwardChainer(AtomSpace& as, const Handle& rbs,
-                               const Handle& hsource,
-                               const HandleSeq& focus_set /* = HandleSeq()*/,
-                               source_selection_mode sm /*= source_selection_mode::UNIFORM */) :
+                               const Handle& source,
+                               const Handle& vardecl,
+                               const HandleSeq& focus_set,
+                               source_selection_mode sm) :
     _as(as), _rec(as), _rbs(rbs), _configReader(as, rbs), _fcstat(as)
 {
-    _ts_mode = sm;
-    init(hsource, focus_set);
+	_ts_mode = sm;
+	init(source, vardecl, focus_set);
 }
 
 ForwardChainer::~ForwardChainer()
 {
 }
 
-void ForwardChainer::init(const Handle& hsource, const HandleSeq& focus_set)
+void ForwardChainer::init(const Handle& source,
+                          const Handle& vardecl,
+                          const HandleSeq& focus_set)
 {
-    validate(hsource, focus_set);
+	validate(source);
 
-    _search_in_af = _configReader.get_attention_allocation();
-    _search_focus_set = not focus_set.empty();
+	_init_source = source;
+	_init_vardecl = vardecl;
 
-    // Set potential source.
-    HandleSeq init_sources;
+	_search_in_af = _configReader.get_attention_allocation();
+	_search_focus_set = not focus_set.empty();
 
-    // Accept set of initial sources wrapped in a SET_LINK.
-    if (hsource->getType() == SET_LINK) {
-        init_sources = hsource->getOutgoingSet();
-    } else {
-        init_sources.push_back(hsource);
-    }
-    update_potential_sources(init_sources);
+	// Set potential source.
+	HandleSeq init_sources;
 
-    // Add focus set atoms and sources to focus_set atomspace
-    if (_search_focus_set) {
-        _focus_set = focus_set;
+	// Accept set of initial sources wrapped in a SET_LINK.
+	if (source->getType() == SET_LINK) {
+		init_sources = source->getOutgoingSet();
+	} else {
+		init_sources.push_back(source);
+	}
+	update_potential_sources(init_sources);
 
-        for (const Handle& h : _focus_set)
-            _focus_set_as.add_atom(h);
+	// Add focus set atoms and sources to focus_set atomspace
+	if (_search_focus_set) {
+		_focus_set = focus_set;
 
-        for (const Handle& h : _potential_sources)
-            _focus_set_as.add_atom(h);
-    }
+		for (const Handle& h : _focus_set)
+			_focus_set_as.add_atom(h);
 
-    // Set rules.
-    _rules = _configReader.get_rules();
-    // TODO: For now the FC follows the old standard. We may move to
-    // the new standard when all rules have been ported to the new one.
-    for (const Rule& rule : _rules)
-        rule.premises_as_clauses = true; // can be modify as mutable
+		for (const Handle& h : _potential_sources)
+			_focus_set_as.add_atom(h);
+	}
 
-    // Reset the iteration count and max count
-    _iteration = 0;
-    _max_iteration = _configReader.get_maximum_iterations();
+	// Set rules.
+	_rules = _configReader.get_rules();
+	// TODO: For now the FC follows the old standard. We may move to
+	// the new standard when all rules have been ported to the new one.
+	for (const Rule& rule : _rules)
+		rule.premises_as_clauses = true; // can be modify as mutable
+
+	// Reset the iteration count and max count
+	_iteration = 0;
+}
+
+UREConfigReader& ForwardChainer::get_config()
+{
+	return _configReader;
+}
+
+const UREConfigReader& ForwardChainer::get_config() const
+{
+	return _configReader;
 }
 
 void ForwardChainer::do_chain()
 {
-    ure_logger().debug("Start Forward Chaining");
+	ure_logger().debug("Start Forward Chaining");
 
-    // Relex2Logic uses this. TODO make a separate class to handle
-    // this robustly.
-    if(_potential_sources.empty())
-    {
-        apply_all_rules();
-        return;
-    }
+	// Relex2Logic uses this. TODO make a separate class to handle
+	// this robustly.
+	if(_potential_sources.empty())
+	{
+		apply_all_rules();
+		return;
+	}
 
-    while (not termination())
-    {
-        do_step();
-    }
+	while (not termination())
+	{
+		do_step();
+	}
 
-    ure_logger().debug("Finished Forward Chaining");
+	ure_logger().debug("Finished Forward Chaining");
 }
 
 void ForwardChainer::do_step()
 {
 	ure_logger().debug("Iteration %d", _iteration);
 	_iteration++;
+
+	// Expand meta rules. This should probably be done on-the-fly in
+	// the select_rule method, but for now it's here
+	expand_meta_rules();
 
 	// Select source
 	_cur_source = select_source();
@@ -137,14 +156,14 @@ void ForwardChainer::do_step()
 	// Store results
 	update_potential_sources(products);
 	_fcstat.add_inference_record(_iteration - 1, // _iteration has
-	                             // already been
-	                             // incremented
+	                                             // already been
+	                                             // incremented
 	                             _cur_source, rule, products);
 }
 
 bool ForwardChainer::termination()
 {
-    return _max_iteration <= _iteration;
+	return _configReader.get_maximum_iterations() <= _iteration;
 }
 
 /**
@@ -154,21 +173,21 @@ bool ForwardChainer::termination()
  */
 void ForwardChainer::apply_all_rules()
 {
-    for (const Rule& rule : _rules) {
-        ure_logger().debug("Apply rule %s", rule.get_name().c_str());
-        UnorderedHandleSet uhs = apply_rule(rule);
+	for (const Rule& rule : _rules) {
+		ure_logger().debug("Apply rule %s", rule.get_name().c_str());
+		UnorderedHandleSet uhs = apply_rule(rule);
 
-        // Update
-        _fcstat.add_inference_record(_iteration,
-                                     _as.add_node(CONCEPT_NODE, "dummy-source"),
-                                     rule, uhs);
-        update_potential_sources(uhs);
-    }
+		// Update
+		_fcstat.add_inference_record(_iteration,
+		                             _as.add_node(CONCEPT_NODE, "dummy-source"),
+		                             rule, uhs);
+		update_potential_sources(uhs);
+	}
 }
 
 UnorderedHandleSet ForwardChainer::get_chaining_result()
 {
-    return _fcstat.get_all_products();
+	return _fcstat.get_all_products();
 }
 
 Handle ForwardChainer::select_source()
@@ -219,10 +238,10 @@ Handle ForwardChainer::select_source()
 	Handle hchosen;
 	switch (_ts_mode) {
 	case source_selection_mode::TV_FITNESS:
-	    for (const Handle& s : to_select_sources)
-		    tournament_elem[s] = urec.tv_fitness(s);
-	    hchosen = urec.tournament_select(tournament_elem);
-	    break;
+		for (const Handle& s : to_select_sources)
+			tournament_elem[s] = urec.tv_fitness(s);
+		hchosen = urec.tournament_select(tournament_elem);
+		break;
 
 /*
 An attentionbank is needed in order to get the STI...
@@ -235,11 +254,11 @@ An attentionbank is needed in order to get the STI...
 
 	case source_selection_mode::UNIFORM:
 		hchosen = rand_element(to_select_sources);
-	    break;
+		break;
 
 	default:
-	    throw RuntimeException(TRACE_INFO, "Unknown source selection mode.");
-	    break;
+		throw RuntimeException(TRACE_INFO, "Unknown source selection mode.");
+		break;
 	}
 
 	OC_ASSERT(hchosen != Handle::UNDEFINED);
@@ -250,11 +269,13 @@ An attentionbank is needed in order to get the STI...
 	return hchosen;
 }
 
-Rule ForwardChainer::select_rule(const Handle& hsource)
+Rule ForwardChainer::select_rule(const Handle& source)
 {
 	std::map<const Rule*, float> rule_weight;
-	for (const Rule& r : _rules)
-		rule_weight[&r] = r.get_weight();
+	for (const Rule& r : _rules) {
+		if (not r.is_meta())
+			rule_weight[&r] = r.get_weight();
+	}
 
 	ure_logger().debug("%d rules to be searched as matched against the source",
 	                   rule_weight.size());
@@ -268,8 +289,12 @@ Rule ForwardChainer::select_rule(const Handle& hsource)
 		ure_logger().fine("Selected rule %s to match against the source",
 		                  temp->get_name().c_str());
 
+		// If the source is the initial source then we may use its
+		// variable declaration during rule unification
+		Handle vardecl = source == _init_source ? _init_vardecl : Handle::UNDEFINED;
+
 		RuleSet unified_rules =
-			Rule::strip_typed_substitution(temp->unify_source(hsource));
+			Rule::strip_typed_substitution(temp->unify_source(source, vardecl));
 
 		if (not unified_rules.empty()) {
 			// Randomly select a rule amongst the unified ones
@@ -292,65 +317,76 @@ Rule ForwardChainer::select_rule(const Handle& hsource)
 
 UnorderedHandleSet ForwardChainer::apply_rule(const Rule& rule)
 {
-    HandleSeq results;
+	HandleSeq results;
 
-    if (_search_focus_set) {
-	    // rule.get_rule() may introduce a new atom that satisfies
-	    // condition for the output. In order to prevent this
-	    // undesirable effect, lets store rule.get_rule() in a child
-	    // atomspace of parent focus_set_as so that PM will never be
-	    // able to find this new undesired atom created from partial
-	    // grounding.
-	    AtomSpace derived_rule_as(&_focus_set_as);
-	    Handle rhcpy = derived_rule_as.add_atom(rule.get_rule());
-	    BindLinkPtr bl = BindLinkCast(rhcpy);
-	    FocusSetPMCB fs_pmcb(&derived_rule_as, &_as);
-	    fs_pmcb.implicand = bl->get_implicand();
-	    bl->imply(fs_pmcb, false);
-	    results = fs_pmcb.get_result_list();
-    }
-    // Search the whole atomspace.
-    else {
-	    AtomSpace derived_rule_as(&_as);
-	    Handle rhcpy = derived_rule_as.add_atom(rule.get_rule());
-	    Handle h = bindlink(&derived_rule_as, rhcpy);
-	    results = h->getOutgoingSet();
-    }
+	if (_search_focus_set) {
+		// rule.get_rule() may introduce a new atom that satisfies
+		// condition for the output. In order to prevent this
+		// undesirable effect, lets store rule.get_rule() in a child
+		// atomspace of parent focus_set_as so that PM will never be
+		// able to find this new undesired atom created from partial
+		// grounding.
+		AtomSpace derived_rule_as(&_focus_set_as);
+		Handle rhcpy = derived_rule_as.add_atom(rule.get_rule());
+		BindLinkPtr bl = BindLinkCast(rhcpy);
+		FocusSetPMCB fs_pmcb(&derived_rule_as, &_as);
+		fs_pmcb.implicand = bl->get_implicand();
+		bl->imply(fs_pmcb, false);
+		results = fs_pmcb.get_result_list();
+	}
+	// Search the whole atomspace.
+	else {
+		AtomSpace derived_rule_as(&_as);
+		Handle rhcpy = derived_rule_as.add_atom(rule.get_rule());
+		Handle h = bindlink(&derived_rule_as, rhcpy);
+		results = h->getOutgoingSet();
+	}
 
-    // Take the results from applying the rule and add them in the
-    // given AtomSpace
-    auto add_results = [&](AtomSpace& as) {
-	    for (Handle& h : results)
-	    {
-		    Type t = h->getType();
-		    // If it's a List then add all the results. That kinda
-		    // means you can't infer List itself, maybe something to
-		    // look after.
-		    if (t == LIST_LINK)
-			    for (const Handle& hc : h->getOutgoingSet())
-				    as.add_atom(hc);
-		    else
-			    h = as.add_atom(h);
-	    }
-    };
+	// Take the results from applying the rule and add them in the
+	// given AtomSpace
+	auto add_results = [&](AtomSpace& as) {
+		for (Handle& h : results)
+		{
+			Type t = h->getType();
+			// If it's a List then add all the results. That kinda
+			// means you can't infer List itself, maybe something to
+			// look after.
+			if (t == LIST_LINK)
+				for (const Handle& hc : h->getOutgoingSet())
+					as.add_atom(hc);
+			else
+				h = as.add_atom(h);
+		}
+	};
 
-    // Add result back to atomspace.
-    if (_search_focus_set) {
-	    add_results(_focus_set_as);
-    } else {
-	    add_results(_as);
-    }
+	// Add result back to atomspace.
+	if (_search_focus_set) {
+		add_results(_focus_set_as);
+	} else {
+		add_results(_as);
+	}
 
-    LAZY_URE_LOG_DEBUG << "Result is:" << std::endl
-                       << _as.add_link(SET_LINK, results)->toShortString();
+	LAZY_URE_LOG_DEBUG << "Result is:" << std::endl
+	                   << _as.add_link(SET_LINK, results)->toShortString();
 
-    return UnorderedHandleSet(results.begin(), results.end());
+	return UnorderedHandleSet(results.begin(), results.end());
 }
 
-
-void ForwardChainer::validate(const Handle& hsource, const HandleSeq& hfocus_set)
+void ForwardChainer::validate(const Handle& source)
 {
-    if (hsource == Handle::UNDEFINED)
-        throw RuntimeException(TRACE_INFO, "ForwardChainer - Invalid source.");
-    // Any other validation here
+	if (source == Handle::UNDEFINED)
+		throw RuntimeException(TRACE_INFO, "ForwardChainer - Invalid source.");
+}
+
+void ForwardChainer::expand_meta_rules()
+{
+	// This is kinda of hack before meta rules are fully supported by
+	// the Rule class.
+	size_t rules_size = _rules.size();
+	_rules.expand_meta_rules(_as);
+
+	if (rules_size != _rules.size()) {
+		ure_logger().debug() << "The rule set has gone from "
+		                     << rules_size << " rules to " << _rules.size();
+	}
 }

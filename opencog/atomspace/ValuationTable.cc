@@ -91,7 +91,7 @@ ProtoAtomPtr ValuationTable::getValue(const Handle& key, const Handle& atom)
 //
 // XXX FIXME this implementation is ... poor. Its probably just enough
 // to store all keys in use, instead of all keys for a given atom.
-// i.e. this uses too much RAM, and we could get away wtih just
+// i.e. this uses too much RAM, and we could get away with just
 // searching the _vindex, instead, which would be slower but more memory
 // efficient.  The point is that the only user of this function is going
 // to be the peristence framework, and so we should optimize for that.

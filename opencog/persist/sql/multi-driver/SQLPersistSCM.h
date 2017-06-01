@@ -61,6 +61,11 @@ public:
     void do_store(void);
 
     void do_stats(void);
+    void do_clear_cache(void);
+    void do_clear_stats(void);
+
+    void do_set_hilo(int, int);
+    void do_set_stall(bool);
 
 }; // class
 

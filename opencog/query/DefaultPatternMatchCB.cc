@@ -276,14 +276,8 @@ bool DefaultPatternMatchCB::link_match(const PatternTermPtr& ptm,
 	if (pattype != soltype) return false;
 
 	// Reject mis-sized compares, unless the pattern has a glob in it.
-	if (0 == _globs->count(lpat))
-	{
-		if (lpat->getArity() != lsoln->getArity()) return false;
-	}
-	else
-	{
-		if (lpat->getArity() > lsoln->getArity()) return false;
-	}
+	if (0 == _globs->count(lpat) and lpat->getArity() != lsoln->getArity())
+		return false;
 
 	// If the link is a ScopeLink, we need to deal with the
 	// alpha-conversion of the bound variables in the scope link.

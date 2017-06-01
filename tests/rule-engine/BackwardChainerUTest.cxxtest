@@ -34,7 +34,7 @@ private:
 public:
 	BackwardChainerUTest() : _eval(&_as)
 	{
-		logger().set_level(Logger::INFO);
+		logger().set_level(Logger::DEBUG);
 		logger().set_timestamp_flag(false);
 		// logger().set_sync_flag(true);
 		// logger().set_print_to_stdout_flag(true);
@@ -54,6 +54,7 @@ public:
 	void test_conditional_instantiation_1();
 	void test_conditional_instantiation_2();
 	void test_conditional_instantiation_tv_query();
+	void test_conditional_partial_instantiation();
 	void test_impossible_criminal();
 	void test_criminal();
 	void test_criminal_trace();
@@ -74,7 +75,8 @@ void BackwardChainerUTest::setUp()
 		_eval.eval(eval_str);
 	}
 	_eval.eval("(use-modules (opencog))");
-	// _eval.eval("(use-modules (opencog rule-engine))");
+	_eval.eval("(use-modules (opencog rule-engine))");
+	_eval.eval("(use-modules (opencog logger))");
 }
 
 void BackwardChainerUTest::tearDown()
@@ -160,7 +162,6 @@ void BackwardChainerUTest::test_deduction()
 	_eval.eval("(load-from-path \"tests/rule-engine/bc-transitive-closure.scm\")");
 	randGen().seed(0);
 
-	// load 1 deduction rule
 	Handle top_rbs = _as.get_node(CONCEPT_NODE, UREConfigReader::top_rbs_name);
 	Handle X = an(VARIABLE_NODE, "$X"),
 		D = an(CONCEPT_NODE, "D"),
@@ -197,7 +198,6 @@ void BackwardChainerUTest::test_deduction_tv_query()
 	_eval.eval("(load-from-path \"tests/rule-engine/bc-transitive-closure.scm\")");
 	randGen().seed(0);
 
-	// load 1 deduction rule
 	Handle top_rbs = _as.get_node(CONCEPT_NODE, UREConfigReader::top_rbs_name);
 	Handle target = _eval.eval_h("(Inheritance"
 	                             "   (Concept \"A\")"
@@ -223,7 +223,6 @@ void BackwardChainerUTest::test_modus_ponens_tv_query()
 	_eval.eval("(load-from-path \"tests/rule-engine/modus-ponens-example.scm\")");
 	randGen().seed(0);
 
-	// load 1 deduction rule
 	Handle top_rbs = _as.get_node(CONCEPT_NODE, UREConfigReader::top_rbs_name);
 	Handle target = an(PREDICATE_NODE, "T");
 
@@ -243,12 +242,11 @@ void BackwardChainerUTest::test_conjunction_fuzzy_evaluation_tv_query()
 
 	_as.clear();
 
-	string result = _eval.eval("(load-from-path \"tests/rule-engine/conjunction-fuzzy-evaluation-config.scm\")");
+	string result = _eval.eval("(load-from-path \"tests/rule-engine/fuzzy-conjunction-introduction-config.scm\")");
 	logger().debug() << "result = " << result;
 	result = _eval.eval("(load-from-path \"tests/rule-engine/simple-conjunction.scm\")");
 	randGen().seed(0);
 
-	// load 1 modus ponens rule
 	Handle top_rbs = _as.get_node(CONCEPT_NODE, UREConfigReader::top_rbs_name);
 
 	Handle P = an(PREDICATE_NODE, "P"),
@@ -279,10 +277,9 @@ void BackwardChainerUTest::test_conditional_instantiation_1()
 
 	logger().debug() << "result = " << result;
 
-	result = _eval.eval("(load-from-path \"tests/rule-engine/bc-friends.scm\")");
+	result = _eval.eval("(load-from-path \"tests/rule-engine/friends.scm\")");
 	randGen().seed(0);
 
-	// load 1 modus ponens rule
 	Handle top_rbs = _as.get_node(CONCEPT_NODE, UREConfigReader::top_rbs_name);
 
 	Handle are_friends = an(PREDICATE_NODE, "are-friends"),
@@ -307,8 +304,7 @@ void BackwardChainerUTest::test_conditional_instantiation_1()
 		expected = al(SET_LINK,
 		              friend_with_john(mary),
 		              friend_with_john(edward),
-		              friend_with_john(cyril),
-		              friend_with_john(john));
+		              friend_with_john(cyril));
 
 	logger().debug() << "results = " << results->toString();
 	logger().debug() << "expected = " << expected->toString();
@@ -326,10 +322,9 @@ void BackwardChainerUTest::test_conditional_instantiation_2()
 
 	string result = _eval.eval("(load-from-path \"tests/rule-engine/conditional-instantiation-config.scm\")");
 	logger().debug() << "result = " << result;
-	_eval.eval("(load-from-path \"tests/rule-engine/bc-animals.scm\")");
+	_eval.eval("(load-from-path \"tests/rule-engine/animals.scm\")");
 	randGen().seed(0);
 
-	// load 1 modus ponens rule
 	Handle top_rbs = _as.get_node(CONCEPT_NODE, UREConfigReader::top_rbs_name);
 
 	Handle green = an(CONCEPT_NODE, "green"),
@@ -361,10 +356,9 @@ void BackwardChainerUTest::test_conditional_instantiation_tv_query()
 	_as.clear();
 
 	_eval.eval("(load-from-path \"tests/rule-engine/conditional-instantiation-config.scm\")");
-	_eval.eval("(load-from-path \"tests/rule-engine/bc-animals.scm\")");
+	_eval.eval("(load-from-path \"tests/rule-engine/animals.scm\")");
 	randGen().seed(500);
 
-	// load modus ponens
 	Handle top_rbs = _as.get_node(CONCEPT_NODE, UREConfigReader::top_rbs_name);
 
 	Handle target =
@@ -382,6 +376,98 @@ void BackwardChainerUTest::test_conditional_instantiation_tv_query()
 	logger().debug("END TEST: %s", __FUNCTION__);
 }
 
+// This test is for rules that requires the pattern matcher to look
+// inside a variable declaration, to for instance extract the type of
+// some variable. For instance if you have the grounded data
+//
+// ImplicationScopeLink
+//   VariableList
+//     TypedVariable
+//       Variable "$X"
+//       Type "ConceptNode"
+//     TypedVariable
+//       Variable "$Y"
+//       Type "PredicateNode"
+//   <implicant>
+//   <implicand>
+//
+// the conditional-partial-instantiation-meta-rule will want to look
+// inside the scope link's vardecl and know that $X is of type
+// ConceptNode and $Y is of type PredicateNode. In order to do that it
+// requires to write a pattern describing the variable declaration,
+// thus having the type itself be a variable, like
+//
+// BindLink
+//   VariableList
+//     TypedVariable
+//       Variable "$XVar"
+//       Type "VariableNode"
+//     TypedVariable
+//       Variable "$XType"
+//       Type "TypeNode"
+//   Quote
+//     ScopeLink
+//       Unquote
+//         VariableList
+//           TypedVariable
+//             Variable "$XVar"
+//             Variable "$XType"
+//         ...
+void BackwardChainerUTest::test_conditional_partial_instantiation()
+{
+	logger().debug("BEGIN TEST: %s", __FUNCTION__);
+
+	_as.clear();
+
+	string result = _eval.eval("(load-from-path \"tests/rule-engine/conditional-partial-instantiation-config.scm\")");
+
+	logger().debug() << "result = " << result;
+
+	result = _eval.eval("(load-from-path \"tests/rule-engine/friends.scm\")");
+	randGen().seed(0);
+
+	Handle top_rbs = _as.get_node(CONCEPT_NODE, UREConfigReader::top_rbs_name);
+
+	Handle target = _eval.eval_h("(ImplicationScope"
+	                             "   (TypedVariable"
+	                             "      (Variable \"$X\")"
+	                             "      (Type \"ConceptNode\"))"
+	                             "   (And"
+	                             "      (Evaluation"
+	                             "         (Predicate \"are-friends\")"
+	                             "         (List"
+	                             "            (Variable \"$X\")"
+	                             "            (Concept \"John\")))"
+	                             "      (Evaluation"
+	                             "         (Predicate \"are-friends\")"
+	                             "         (List"
+	                             "            (Concept \"John\")"
+	                             "            (Concept \"Mary\")))"
+	                             "      (Evaluation"
+	                             "         (Predicate \"is-musician\")"
+	                             "         (Variable \"$X\"))"
+	                             "      (Evaluation"
+	                             "         (Predicate \"is-musician\")"
+	                             "         (Concept \"John\"))"
+	                             "      (Evaluation"
+	                             "         (Predicate \"is-musician\")"
+	                             "         (Concept \"Mary\")))"
+	                             "   (Evaluation"
+	                             "      (Predicate \"are-friends\")"
+	                             "      (List"
+	                             "         (Variable \"$X\")"
+	                             "         (Concept \"Mary\"))))");
+
+	BackwardChainer bc(_as, top_rbs, target);
+	bc.get_config().set_maximum_iterations(5);
+	bc.do_chain();
+
+	TS_ASSERT_DELTA(target->getTruthValue()->getMean(), 1, 1e-10);
+	TS_ASSERT_DELTA(target->getTruthValue()->getConfidence(), 1, 1e-10);
+
+	logger().debug("END TEST: %s", __FUNCTION__);
+}
+
 void BackwardChainerUTest::test_impossible_criminal()
 {
 	logger().debug("BEGIN TEST: %s", __FUNCTION__);
@@ -389,10 +475,9 @@ void BackwardChainerUTest::test_impossible_criminal()
 	_as.clear();
 
 	_eval.eval("(load-from-path \"tests/rule-engine/bc-criminal-without-deduction-config.scm\")");
-	_eval.eval("(load-from-path \"tests/rule-engine/bc-criminal.scm\")");
+	_eval.eval("(load-from-path \"tests/rule-engine/criminal.scm\")");
 	randGen().seed(0);
 
-	// Load modus ponens rule
 	Handle top_rbs = _as.get_node(CONCEPT_NODE, UREConfigReader::top_rbs_name);
 
 	Handle target =
@@ -429,10 +514,9 @@ void BackwardChainerUTest::test_criminal()
 	_as.clear();
 
 	_eval.eval("(load-from-path \"tests/rule-engine/bc-criminal-config.scm\")");
-	_eval.eval("(load-from-path \"tests/rule-engine/bc-criminal.scm\")");
+	_eval.eval("(load-from-path \"tests/rule-engine/criminal.scm\")");
 	randGen().seed(0);
 
-	// load modus ponens & deduction rules
 	Handle top_rbs = _as.get_node(CONCEPT_NODE, UREConfigReader::top_rbs_name);
 
 	Handle target_var = _eval.eval_h("(VariableNode \"$who\")");
@@ -480,10 +564,9 @@ void BackwardChainerUTest::test_criminal_trace()
 	_as.clear();
 
 	_eval.eval("(load-from-path \"tests/rule-engine/bc-criminal-config.scm\")");
-	_eval.eval("(load-from-path \"tests/rule-engine/bc-criminal.scm\")");
+	_eval.eval("(load-from-path \"tests/rule-engine/criminal.scm\")");
 	randGen().seed(0);
 
-	// load modus ponens & deduction rules
 	Handle top_rbs = _as.get_node(CONCEPT_NODE, UREConfigReader::top_rbs_name);
 
 	Handle target_var = _eval.eval_h("(VariableNode \"$who\")");
@@ -512,8 +595,8 @@ void BackwardChainerUTest::test_criminal_trace()
 	// Don't forget to happen U at the end of each value otherwise gcc
 	// is gonna complain.
 	std::set<ContentHash> trace{
-		17025922688105268679U, 12614994268038677483U, 15944815478163286971U,
-			10803065885026726015U, 11572169445021132283U};
+		17025922688105268679U, 16237370205818075250U, 13060619487639450045U,
+			14172591710384300158U, 14741649033484653578U, 11564898315305997225U};
 	AndBITFitness trace_fitness(AndBITFitness::Trace, trace);
 	BackwardChainer bc(_as, top_rbs, target, vardecl, Handle::UNDEFINED,
 	                   BITNodeFitness(), trace_fitness);
@@ -552,7 +635,6 @@ void BackwardChainerUTest::test_induction()
 
 	randGen().seed(500);
 
-	// load modus ponens & deduction rules
 	Handle top_rbs = _as.get_node(CONCEPT_NODE, UREConfigReader::top_rbs_name);
 
 	Handle target = _eval.eval_h("bc-induction-target");
@@ -578,10 +660,9 @@ void BackwardChainerUTest::test_focus_set()
 	_as.clear();
 
 	_eval.eval("(load-from-path \"tests/rule-engine/conditional-instantiation-config.scm\")");
-	_eval.eval("(load-from-path \"tests/rule-engine/bc-animals.scm\")");
+	_eval.eval("(load-from-path \"tests/rule-engine/animals.scm\")");
 	randGen().seed(500);
 
-	// load 1 modus ponens rule
 	Handle top_rbs = _as.get_node(CONCEPT_NODE, UREConfigReader::top_rbs_name);
 
 	Handle green = an(CONCEPT_NODE, "green"),
@@ -596,7 +677,7 @@ void BackwardChainerUTest::test_focus_set()
 		             " (InheritanceLink"
 		             "   (ConceptNode \"tree\")"
 		             "   (ConceptNode \"plant\"))"
-		             " (ImplicationLink (stv 1.0 1.0)"
+		             " (ImplicationLink"
 		             "   (InheritanceLink"
 		             "     (VariableNode \"$P\")"
 		             "     (ConceptNode \"plant\")"

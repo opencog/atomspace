@@ -31,6 +31,7 @@
 #include <opencog/atoms/base/Handle.h>
 #include <opencog/atoms/base/atom_types.h>
 #include <opencog/atoms/base/Quotation.h>
+#include <opencog/atoms/base/Context.h>
 #include <opencog/atoms/core/Variables.h>
 #include <opencog/atoms/core/VariableList.h>
 #include <opencog/atoms/pattern/BindLink.h>
@@ -43,48 +44,6 @@ class Unify
 	friend class UnifyUTest;
 
 public:
-	// A context holds the quotation state and the current shadowing
-	// variables of a atom (typically coming from ancestor scopes).
-	//
-	// The context is important to have for both unification, in
-	// particular sub-unification, see Unify::subunify, and closure,
-	// see Unify::substitution_closure, because quoted or shadowed
-	// variables should not be substituted.
-	//
-	// This notion of context is distinct and unrelated to
-	// ContextLink.
-	struct Context : public boost::totally_ordered<Context>
-	{
-		// Default ctor
-		Context(const Quotation& quotation=Quotation(),
-		        const OrderedHandleSet& shadow=OrderedHandleSet());
-
-		// Quotation state
-		Quotation quotation;
-
-		// Set of shadowing variables
-		OrderedHandleSet shadow;
-
-		/**
-		 * Update the context over an atom. That is if the atom is a
-		 * consumable quotation then update the context quotation. If
-		 * the atom is a scope link then update the context shadow.
-		 */
-		void update(const Handle& h);
-
-		/**
-		 * Return true iff the given atom in that context is a free
-		 * variable, that is unquoted and unshadowed.
-		 */
-		bool is_free_variable(const Handle& h) const;
-
-		/**
-		 * Comparison.
-		 */
-		bool operator==(const Context& context) const;
-		bool operator<(const Context& context) const;
-	};
-
 	// Contextual Handle
 	//
 	// TODO: the notion of equality between 2 CHandles might one where
@@ -99,6 +58,12 @@ public:
 		Context context;
 
 		/**
+		 * Return true iff the atom in that context is a variable,
+		 * free or not.
+		 */
+		bool is_variable() const;
+
+		/**
 		 * Return true iff the atom in that context is a free
 		 * variable, that is unquoted and unshadowed.
 		 */
@@ -108,6 +73,13 @@ public:
 		 * Return the set of free visible variables from that context.
 		 */
 		OrderedHandleSet get_free_variables() const;
+
+		/**
+		 * Return iterator of the variable declaration containing a given
+		 * variable, if so.
+		 */
+		Context::VariablesStack::const_iterator
+		find_variables(const Handle& h) const;
 
 		/**
 		 * Return true iff has a consumable quotation
@@ -132,16 +104,22 @@ public:
 
 		/**
 		 * Return true if 2 contextual handles are satisfiable in some
-		 * restricted sense, it only covers the cases where atoms are
-		 * equal and have the same free variables.
+		 * restricted sense, it assumes that
+		 *
+		 * 1. at least one of them is a node
+		 * 2. none is a free variable (i.e. unfree or not a variable)
+		 *
+		 * Given these 2 assumptions fulfilled it will check whether
+		 * the 2 atoms are equal, and if there are not could there be
+		 * alpha equivalent (assuming they are variables).
 		 */
-		bool is_satisfiable(const CHandle& ch) const;
+		bool is_node_satisfiable(const CHandle& other) const;
 
 		/**
 		 * Comparison.
 		 */
-		bool operator==(const CHandle& ch) const;
-		bool operator<(const CHandle& ch) const;
+		bool operator==(const CHandle& other) const;
+		bool operator<(const CHandle& other) const;
 	};
 
 	// Pair of CHandles
@@ -164,23 +142,27 @@ public:
 	// satisfiable when used in standalone.
 	typedef std::set<Partition> Partitions;
 
+	// Empty partition set
+	static const Partitions empty_partitions;
+
+	// Partition set singleton containing an empty partition. This is
+	// the simplest satisfiable solution set.
+	static const Partitions empty_partition_singleton;
+
 	// TODO: the type of a typed block is currently a handle of the
 	// variable or ground it is exists, instead of an actual type.
-	struct SolutionSet : public boost::equality_comparable<SolutionSet>
+	struct SolutionSet : Partitions
 	{
 		// Default ctor
-		SolutionSet(bool s=true, const Partitions& p=Partitions());
+		SolutionSet(const Partitions& p);
+		// Helper ctor. Initialize with the empty partition as
+		// singleton, i.e. a satisfiable solution, if s == true, or
+		// the empty partition set if unsatisfiable.
+		SolutionSet(bool s=false);
 
-		// Whether the unification satisfiable. Not that satisfiable is
-		// different than empty. An empty solution set may still be
-		// satisfiable, that would be the case of two candidates that
-		// match but have no variables.
-		bool satisfiable;
-
-		// Set of typed partitions
-		Partitions partitions;
-
-		bool operator==(const SolutionSet& other) const;
+		// Return true iff the solution set is satisfiable which is
+		// indicated by whether it is empty or not.
+		bool is_satisfiable() const;
 	};
 
 	// Mapping from Handle (typically a variable) to a contextual handle
@@ -551,19 +533,19 @@ private:
 	/**
 	 * Join a satisfiable partition sets with a satisfiable partition.
 	 */
-	Partitions join(const Partitions& lhs, const Partition& rhs) const;
+	SolutionSet join(const SolutionSet& lhs, const Partition& rhs) const;
 
 	/**
 	 * Join 2 partitions. The result can be set of partitions (see
 	 * join(const Partition&, const TypedBlock&) for explanation).
 	 */
-	Partitions join(const Partition& lhs, const Partition& rhs) const;
+	SolutionSet join(const Partition& lhs, const Partition& rhs) const;
 
 	/**
 	 * Join a block with a partition set. The partition set is assumed
 	 * non empty and satisfiable.
 	 */
-	Partitions join(const Partitions& partitions, const TypedBlock& block) const;
+	SolutionSet join(const SolutionSet& sol, const TypedBlock& block) const;
 
 	/**
 	 * Join a partition and a block. If the block has no element in
@@ -573,7 +555,7 @@ private:
 	 * (TODO: explain why) thus possibly multiple partitions will be
 	 * returned.
 	*/
-	Partitions join(const Partition& partition, const TypedBlock &block) const;
+	SolutionSet join(const Partition& partition, const TypedBlock &block) const;
 
 	/**
 	 * Join a block to a partition to form a single block. It is
@@ -716,7 +698,6 @@ private:
 /**
  * Till content equality between atoms become the default.
  */
-bool ohs_content_eq(const OrderedHandleSet& lhs, const OrderedHandleSet& rhs);
 bool hm_content_eq(const HandleMap& lhs, const HandleMap& rhs);
 bool hchm_content_eq(const Unify::HandleCHandleMap& lhs,
                      const Unify::HandleCHandleMap& rhs);
@@ -746,14 +727,12 @@ VariableListPtr gen_varlist(const Unify::CHandle& ch);
 Variables merge_variables(const Variables& lv, const Variables& rv);
 Handle merge_vardecl(const Handle& l_vardecl, const Handle& r_vardecl);
 
-std::string oc_to_string(const Unify::Context& c);
 std::string oc_to_string(const Unify::CHandle& ch);
 std::string oc_to_string(const Unify::Block& pb);
 std::string oc_to_string(const Unify::Partition& hshm);
 std::string oc_to_string(const Unify::TypedBlock& tb);
 std::string oc_to_string(const Unify::TypedBlockSeq& tbs);
 std::string oc_to_string(const Unify::Partitions& par);
-std::string oc_to_string(const Unify::SolutionSet& sol);
 std::string oc_to_string(const Unify::HandleCHandleMap& hchm);
 std::string oc_to_string(const Unify::TypedSubstitution& ts);
 std::string oc_to_string(const Unify::TypedSubstitutions& tss);

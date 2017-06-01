@@ -36,7 +36,7 @@ namespace opencog
 
 enum class source_selection_mode
 {
-    TV_FITNESS, STI, UNIFORM
+	TV_FITNESS, STI, UNIFORM
 };
 
 class Rule;
@@ -44,109 +44,122 @@ class Rule;
 class ForwardChainer
 {
 private:
-    friend class ::ForwardChainerUTest;
+	friend class ::ForwardChainerUTest;
 
-    AtomSpace& _as;
+	AtomSpace& _as;
 
-    // The focus set is copied into this atomspace; during chaining,
-    // the pattern matcher is applied only to this atomspace.  This
-    // is the primary mechanism by which chaining is restricted to
-    // the focus set.  This is effective, but not very efficient;
-    // perhaps there is some better mechanism?
-    AtomSpace _focus_set_as;
+	// The focus set is copied into this atomspace; during chaining,
+	// the pattern matcher is applied only to this atomspace.  This
+	// is the primary mechanism by which chaining is restricted to
+	// the focus set.  This is effective, but not very efficient;
+	// perhaps there is some better mechanism?
+	AtomSpace _focus_set_as;
 
-    URECommons _rec;            // utility class
-    Handle _rbs;                // rule-based system
-    UREConfigReader _configReader;
+	URECommons _rec;            // utility class
+	Handle _rbs;                // rule-based system
+	UREConfigReader _configReader;
 
-    int _iteration;
-    int _max_iteration;
-    source_selection_mode _ts_mode;
-    bool _search_in_af;
-    bool _search_focus_set;
-    Handle _cur_source;
+	int _iteration;
+	source_selection_mode _ts_mode;
+	bool _search_in_af;
+	bool _search_focus_set;
+	Handle _init_source;
+	Handle _init_vardecl;
+	Handle _cur_source;
 
-    // We maintain both selected and unselected sources, to speed up
-    // choose_source()
-    UnorderedHandleSet _selected_sources;
-    UnorderedHandleSet _unselected_sources;
+	// We maintain both selected and unselected sources, to speed up
+	// choose_source()
+	UnorderedHandleSet _selected_sources;
+	UnorderedHandleSet _unselected_sources;
 
-    FCStat _fcstat;
+	FCStat _fcstat;
 
-    void init(const Handle& hsource, const HandleSeq& focus_set);
+	void init(const Handle& source,
+	          const Handle& vardecl,
+	          const HandleSeq& focus_set);
 
-    void apply_all_rules();
+	void apply_all_rules();
 
-    template<typename HandleContainer>
-    void update_potential_sources(const HandleContainer& input)
-    {
-        UnorderedHandleSet input_minus_selected;
-        for (const Handle& h : input)
-            if (_selected_sources.find(h) == _selected_sources.end())
-                input_minus_selected.insert(h);
-        _potential_sources.insert(input_minus_selected.begin(),
-                                  input_minus_selected.end());
-        _unselected_sources.insert(input_minus_selected.begin(),
-                                   input_minus_selected.end());
-    }
-    void validate(const Handle& hsource, const HandleSeq& hfocus_set);
+	template<typename HandleContainer>
+	void update_potential_sources(const HandleContainer& input)
+		{
+			UnorderedHandleSet input_minus_selected;
+			for (const Handle& h : input)
+				if (_selected_sources.find(h) == _selected_sources.end())
+					input_minus_selected.insert(h);
+			_potential_sources.insert(input_minus_selected.begin(),
+			                          input_minus_selected.end());
+			_unselected_sources.insert(input_minus_selected.begin(),
+			                           input_minus_selected.end());
+		}
+
+	void validate(const Handle& source);
+
+	void expand_meta_rules();
 
 protected:
-    RuleSet _rules; /* loaded rules */
-    UnorderedHandleSet _potential_sources;
-    HandleSeq _focus_set;
-
-    /**
-     * choose next source from the source list
-     *
-     * @return  A handle to the chosen source from source list
-     */
-    Handle select_source();
-
-    /**
-     * Choose an applicable rules from the rule base by selecting
-     * rules whose premise structurally matches with the source.
-     *
-     * If no rule can be chosen return nullptr.
-     *
-     * @return  A rule that in which @param source could ground.
-     */
-    Rule select_rule(const Handle& hsource);
-
-    /**
-     * Apply rule.
-     */
-    UnorderedHandleSet apply_rule(const Rule& rule);
-
-public:
-    /**
-     * Ctor. rbs is a Handle pointing to rule-based system.
-     */
-    ForwardChainer(AtomSpace& as, const Handle& rbs, const Handle& hsource,
-                   const HandleSeq& focus_set=HandleSeq(),
-                   source_selection_mode sm=source_selection_mode::UNIFORM);
-    ~ForwardChainer();
-
-    /**
-     * Perform forward chaining inference till the termination
-     * criteria have been met.
-     */
-    void do_chain();
+	RuleSet _rules; /* loaded rules */
+	UnorderedHandleSet _potential_sources;
+	HandleSeq _focus_set;
 
 	/**
-     * Perform a single forward chaining inference step.
-     */
-    void do_step();
+	 * choose next source from the source list
+	 *
+	 * @return  A handle to the chosen source from source list
+	 */
+	Handle select_source();
 
-    /**
-     * @return true if the termination criteria have been met.
-     */
-    bool termination();
+	/**
+	 * Choose an applicable rules from the rule base by selecting
+	 * rules whose premise structurally matches with the source.
+	 *
+	 * If no rule can be chosen return nullptr.
+	 *
+	 * @return  A rule that in which @param source could ground.
+	 */
+	Rule select_rule(const Handle& source);
 
-    /**
-     * @return all results in their order of inference.
-     */
-    UnorderedHandleSet get_chaining_result();
+	/**
+	 * Apply rule.
+	 */
+	UnorderedHandleSet apply_rule(const Rule& rule);
+
+public:
+	/**
+	 * Ctor. rbs is a Handle pointing to rule-based system.
+	 */
+	ForwardChainer(AtomSpace& as, const Handle& rbs, const Handle& source,
+	               const Handle& vardecl=Handle::UNDEFINED,
+	               const HandleSeq& focus_set=HandleSeq(),
+	               source_selection_mode sm=source_selection_mode::UNIFORM);
+	~ForwardChainer();
+
+	/**
+	 * URE configuration accessors
+	 */
+	UREConfigReader& get_config();
+	const UREConfigReader& get_config() const;
+
+	/**
+	 * Perform forward chaining inference till the termination
+	 * criteria have been met.
+	 */
+	void do_chain();
+
+	/**
+	 * Perform a single forward chaining inference step.
+	 */
+	void do_step();
+
+	/**
+	 * @return true if the termination criteria have been met.
+	 */
+	bool termination();
+
+	/**
+	 * @return all results in their order of inference.
+	 */
+	UnorderedHandleSet get_chaining_result();
 };
 
 } // ~namespace opencog

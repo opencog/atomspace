@@ -62,20 +62,22 @@ static Handle beta_reduce(const Handle& expr, const HandleMap vmap)
 /// instead of a single handle. The returned result is in oset_results.
 /// Returns true if the results differ from the input, i.e. if the
 /// result of execution/evaluation changed something.
-bool Instantiator::walk_sequence(HandleSeq& oset_results, const HandleSeq& expr)
+bool Instantiator::walk_sequence(HandleSeq& oset_results,
+                                 const HandleSeq& expr,
+                                 bool silent)
 {
 	bool changed = false;
-	Quotation quotation = _quotation;
+	Context cp_context = _context;
 	for (const Handle& h : expr)
 	{
-		Handle hg(walk_tree(h));
-		_quotation = quotation;
+		Handle hg(walk_tree(h, silent));
+		_context = cp_context;
 		if (hg != h) changed = true;
 
 		// GlobNodes are grounded by a ListLink of everything that
 		// the GlobNode matches. Unwrap the list, and insert each
 		// of the glob elements in sequence.
-		if (_quotation.is_unquoted() and GLOB_NODE == h->getType() and hg != h)
+		if (_context.is_unquoted() and GLOB_NODE == h->getType() and hg != h)
 		{
 			for (const Handle& gloe: hg->getOutgoingSet())
 			{
@@ -96,43 +98,48 @@ bool Instantiator::walk_sequence(HandleSeq& oset_results, const HandleSeq& expr)
 	return changed;
 }
 
-Handle Instantiator::walk_tree(const Handle& expr)
+Handle Instantiator::walk_tree(const Handle& expr, bool silent)
 {
 	Type t = expr->getType();
 
-	// Keep track of the current quotation so we can update it for
-	// subsequent recursive calls of walk_tree.
-	Quotation cquotation(_quotation);
-	_quotation.update(t);
+	// Store the current context so we can update it for subsequent
+	// recursive calls of walk_tree.
+	Context context_cp(_context);
+	_context.update(expr);
 
 	// Discard the following QuoteLink, UnquoteLink or LocalQuoteLink
 	// as it is serving its quoting or unquoting function.
-	if (_avoid_discarding_quotes_level == 0 and cquotation.consumable(t))
+	if (_avoid_discarding_quotes_level == 0 and context_cp.consumable(t))
 	{
 		if (1 != expr->getArity())
 			throw InvalidParamException(TRACE_INFO,
 			                            "QuoteLink/UnquoteLink has "
 			                            "unexpected arity!");
-		return walk_tree(expr->getOutgoingAtom(0));
+		return walk_tree(expr->getOutgoingAtom(0), silent);
 	}
 
 	if (expr->isNode())
 	{
-		if (cquotation.is_quoted())
+		if (context_cp.is_quoted())
 			return expr;
 
 		// If we are here, we are a Node.
 		if (DEFINED_SCHEMA_NODE == t)
 		{
-			return walk_tree(DefineLink::get_definition(expr));
+			return walk_tree(DefineLink::get_definition(expr), silent);
 		}
 
 		if (VARIABLE_NODE != t and GLOB_NODE != t)
 			return expr;
 
-		// If we are here, we found a variable. Look it up. Return a
-		// grounding if it has one, otherwise return the variable
-		// itself.
+		// If it is a quoted or shadowed variable don't substitute.
+		// TODO: what about globs?
+		if (VARIABLE_NODE == t and not context_cp.is_free_variable(expr))
+			return expr;
+
+		// If we are here, we found a free variable (or glob?). Look
+		// it up. Return a grounding if it has one, otherwise return
+		// the variable itself.
 		HandleMap::const_iterator it = _vmap->find(expr);
 		if (_vmap->end() == it) return expr;
 
@@ -145,7 +152,7 @@ Handle Instantiator::walk_tree(const Handle& expr)
 			return expr;
 
 		_halt = true;
-		Handle hgnd(walk_tree(it->second));
+		Handle hgnd(walk_tree(it->second, silent));
 		_halt = false;
 		return hgnd;
 	}
@@ -156,7 +163,7 @@ Handle Instantiator::walk_tree(const Handle& expr)
 	// We must be careful to substitute only for free variables, and
 	// never for bound ones.
 
-	if (cquotation.is_quoted())
+	if (context_cp.is_quoted())
 		goto mere_recursive_call;
 
 	// Reduce PutLinks. There are two ways to do this: eager execution
@@ -182,7 +189,7 @@ Handle Instantiator::walk_tree(const Handle& expr)
 			// beta-reduction. Execute the body only after the
 			// beta-reduction has been done.
 			Handle pvals = ppp->get_values();
-			Handle gargs = walk_tree(pvals);
+			Handle gargs = walk_tree(pvals, silent);
 			if (gargs != pvals)
 			{
 				HandleSeq groset;
@@ -204,7 +211,7 @@ Handle Instantiator::walk_tree(const Handle& expr)
 		// Step one: beta-reduce.
 		Handle red(ppp->reduce());
 		// Step two: execute the resulting body.
-		Handle rex(walk_tree(red));
+		Handle rex(walk_tree(red, silent));
 		if (nullptr == rex)
 			return rex;
 
@@ -279,7 +286,7 @@ Handle Instantiator::walk_tree(const Handle& expr)
 			if (_eager)
 			{
 				_avoid_discarding_quotes_level++;
-				args = walk_tree(args);
+				args = walk_tree(args, silent);
 				_avoid_discarding_quotes_level--;
 			}
 			else
@@ -289,7 +296,7 @@ Handle Instantiator::walk_tree(const Handle& expr)
 
 			const HandleSeq& oset(args->getOutgoingSet());
 			Handle beta_reduced(vars.substitute_nocheck(body, oset));
-			return walk_tree(beta_reduced);
+			return walk_tree(beta_reduced, silent);
 		}
 
 		// Perform substitution on the args, only.
@@ -301,7 +308,7 @@ Handle Instantiator::walk_tree(const Handle& expr)
 			// be needed -- yet, it is ... Funny thing is, it only
 			// breaks the BackwardChainerUTest ... why?
 			_avoid_discarding_quotes_level++;
-			args = walk_tree(args);
+			args = walk_tree(args, silent);
 			_avoid_discarding_quotes_level--;
 		}
 		else
@@ -310,7 +317,7 @@ Handle Instantiator::walk_tree(const Handle& expr)
 		}
 
 		ExecutionOutputLinkPtr geolp(createExecutionOutputLink(sn, args));
-		return geolp->execute(_as);
+		return geolp->execute(_as, silent);
 	}
 
 	// Handle DeleteLink's before general FunctionLink's; they
@@ -318,7 +325,7 @@ Handle Instantiator::walk_tree(const Handle& expr)
 	if (DELETE_LINK == t)
 	{
 		HandleSeq oset_results;
-		walk_sequence(oset_results, expr->getOutgoingSet());
+		walk_sequence(oset_results, expr->getOutgoingSet(), silent);
 		for (const Handle& h: oset_results)
 		{
 			Type ht = h->getType();
@@ -340,7 +347,7 @@ Handle Instantiator::walk_tree(const Handle& expr)
 			// Perform substitution on all arguments before applying the
 			// function itself.
 			HandleSeq oset_results;
-			walk_sequence(oset_results, expr->getOutgoingSet());
+			walk_sequence(oset_results, expr->getOutgoingSet(), silent);
 			Handle fh(classserver().factory(Handle(createLink(oset_results, t))));
 			FoldLinkPtr flp(FoldLinkCast(fh));
 			return flp->execute(_as);
@@ -369,7 +376,7 @@ Handle Instantiator::walk_tree(const Handle& expr)
 			// So we have to do eager evaluation, here.  This stinks, and
 			// needs fixing.
 			HandleSeq oset_results;
-			walk_sequence(oset_results, expr->getOutgoingSet());
+			walk_sequence(oset_results, expr->getOutgoingSet(), silent);
 
 			FunctionLinkPtr flp(FunctionLinkCast(
 				classserver().factory(Handle(createLink(oset_results, t)))));
@@ -423,7 +430,7 @@ Handle Instantiator::walk_tree(const Handle& expr)
 	// set where the variables have been substituted by their values.
 mere_recursive_call:
 	HandleSeq oset_results;
-	bool changed = walk_sequence(oset_results, expr->getOutgoingSet());
+	bool changed = walk_sequence(oset_results, expr->getOutgoingSet(), silent);
 	if (changed)
 	{
 		LinkPtr subl = createLink(oset_results, t);
@@ -447,14 +454,15 @@ mere_recursive_call:
  * added to the atomspace, and its handle is returned.
  */
 Handle Instantiator::instantiate(const Handle& expr,
-                                 const HandleMap &vars)
+                                 const HandleMap &vars,
+                                 bool silent)
 {
 	// throw, not assert, because this is a user error ...
 	if (nullptr == expr)
 		throw InvalidParamException(TRACE_INFO,
 			"Asked to ground a null expression");
 
-	_quotation = Quotation();
+	_context = Context(false);
 	_avoid_discarding_quotes_level = 0;
 
 	_vmap = &vars;
@@ -463,7 +471,7 @@ Handle Instantiator::instantiate(const Handle& expr,
 	// We do this here, instead of in walk_tree(), because adding
 	// atoms to the atomspace is an expensive process.  We can save
 	// some time by doing it just once, right here, in one big batch.
-	return _as->add_atom(walk_tree(expr));
+	return _as->add_atom(walk_tree(expr, silent));
 }
 
 /* ===================== END OF FILE ===================== */

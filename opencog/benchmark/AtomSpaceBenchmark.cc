@@ -554,7 +554,7 @@ Type AtomSpaceBenchmark::randomType(Type t)
         candidateType == VARIABLE_LIST or
         candidateType == DEFINE_LINK or
         candidateType == NUMBER_NODE or
-        candidateType == TYPE_NODE);
+        classserver().isA(candidateType, TYPE_NODE));
 
     return candidateType;
 }

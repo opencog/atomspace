@@ -24,6 +24,7 @@
 #include <opencog/atoms/base/ClassServer.h>
 #include <opencog/atoms/TypeNode.h>
 #include <opencog/atoms/core/DefineLink.h>
+#include <opencog/atoms/NumberNode.h>
 
 #include "VariableList.h"
 
@@ -167,12 +168,56 @@ void VariableList::get_vartype(const Handle& htypelink)
 	Handle varname(oset[0]);
 	Handle vartype(oset[1]);
 
-	// If its a defined type, unbundle it.
+	Type nt = varname->getType();
 	Type t = vartype->getType();
+
+	// Specifying how many atoms can be matched to a GlobNode, if any
+	HandleSeq intervals;
+
+	// If its a defined type, unbundle it.
 	if (DEFINED_TYPE_NODE == t)
 	{
 		vartype = DefineLink::get_definition(vartype);
 		t = vartype->getType();
+	}
+
+	// For GlobNode, we can specify either the interval or the type, e.g.
+	//
+	// TypedVariableLink
+	//   GlobNode  "$foo"
+	//   IntervalLink
+	//     NumberNode  2
+	//     NumberNode  3
+	//
+	// or both under a TypeSetLink, e.g.
+	//
+	// TypedVariableLink
+	//   GlobNode  "$foo"
+	//   TypeSetLink
+	//     IntervalLink
+	//       NumberNode  2
+	//       NumberNode  3
+	//     TypeNode "ConceptNode"
+	if (GLOB_NODE == nt and TYPE_SET_LINK == t)
+	{
+		for (const Handle& h : vartype->getOutgoingSet())
+		{
+			Type th = h->getType();
+
+			if (INTERVAL_LINK == th)
+				intervals = h->getOutgoingSet();
+
+			else if (TYPE_NODE == th)
+			{
+				vartype = h;
+				t = th;
+			}
+
+			else throw SyntaxException(TRACE_INFO,
+				"Unexpected contents in TypedSetLink\n"
+				"Expected IntervalLink and TypeNode, got %s",
+				h->toString().c_str());
+		}
 	}
 
 	// The vartype is either a single type name, or a list of typenames.
@@ -184,6 +229,22 @@ void VariableList::get_vartype(const Handle& htypelink)
 			std::set<Type> ts = {vt};
 			_varlist._simple_typemap.insert({varname, ts});
 		}
+	}
+	else if (TYPE_INH_NODE == t)
+	{
+		Type vt = TypeNodeCast(vartype)->get_value();
+		std::set<Type> ts;
+		std::set<Type>::iterator it = ts.begin();
+		classserver().getChildren(vt, std::inserter(ts, it));
+		_varlist._simple_typemap.insert({varname, ts});
+	}
+	else if (TYPE_CO_INH_NODE == t)
+	{
+		Type vt = TypeNodeCast(vartype)->get_value();
+		std::set<Type> ts;
+		std::set<Type>::iterator it = ts.begin();
+		classserver().getChildren(vt, std::inserter(ts, it));
+		_varlist._simple_typemap.insert({varname, ts});
 	}
 	else if (TYPE_CHOICE == t)
 	{
@@ -262,12 +323,29 @@ void VariableList::get_vartype(const Handle& htypelink)
 		ts.insert(vartype);
 		_varlist._fuzzy_typemap.insert({varname, ts});
 	}
+	else if (VARIABLE_NODE == t)
+	{
+		// This occurs when the variable type is a variable to be
+		// matched by the pattern matcher. There's nothing to do
+		// except not throwing an exception.
+	}
+	else if (GLOB_NODE == nt and INTERVAL_LINK == t)
+	{
+		intervals = vartype->getOutgoingSet();
+	}
 	else
 	{
 		throw SyntaxException(TRACE_INFO,
 			"Unexpected contents in TypedVariableLink\n"
 			"Expected type specifier (e.g. TypeNode, TypeChoice, etc.), got %s",
 			classserver().getTypeName(t).c_str());
+	}
+
+	if (0 < intervals.size())
+	{
+		_varlist._glob_intervalmap.insert({varname,
+			std::make_pair(NumberNodeCast(intervals[0])->get_value(),
+				NumberNodeCast(intervals[1])->get_value())});
 	}
 
 	_varlist.varset.insert(varname);

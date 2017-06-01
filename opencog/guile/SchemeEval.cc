@@ -112,7 +112,9 @@ void SchemeEval::capture_port(void)
 	_outport = scm_cdr(pair);
 	_outport = scm_gc_protect_object(_outport);
 	// Make the port be unbuffered -- we want bytes right away!
-#if (SCM_MAJOR_VERSION==2 && SCM_MINOR_VERSION==1 && SCM_MICRO_VERSION>=3)
+#if (SCM_MAJOR_VERSION==2 && SCM_MINOR_VERSION==1 && SCM_MICRO_VERSION>=3) \
+    || (SCM_MAJOR_VERSION==2 && SCM_MINOR_VERSION>1)
+
 	// As of version 2.1.3, the API changed in an incompatible way...
 	static SCM no_buffering = scm_from_utf8_symbol("none");
 	scm_setvbuf(_outport, no_buffering, SCM_UNDEFINED);
@@ -245,26 +247,41 @@ void* c_wrap_init_only_once(void* p)
 	return nullptr;
 }
 
-// Initialization that needs to be performed only once, for the entire
-// process.
-static void init_only_once(void)
+static volatile bool done_with_init = false;
+
+static void immortal_thread(void)
 {
-	static volatile bool done_with_init = false;
-	if (done_with_init) return;
-
-	// Enter initalization only once. All other threads spin, until
-	// it is completed.
-	if (eval_is_inited.test_and_set())
-	{
-		while (not done_with_init) { usleep(1000); }
-		return;
-	}
-
 	scm_with_guile(c_wrap_init_only_once, NULL);
 
 	// Tell compiler to set flag dead-last, after above has executed.
 	asm volatile("": : :"memory");
 	done_with_init = true;
+
+	// sleep forever-and-ever.
+	while (true) { pause(); }
+}
+
+// Initialization that needs to be performed only once, for the entire
+// process.
+static void init_only_once(void)
+{
+	if (done_with_init) return;
+
+	// Enter initalization only once. All other threads spin, until
+	// it is completed.
+	//
+	// The first time that guile is initialized, it MUST be done in some
+	// thread that will never-ever exit. If this thread exits, the bdwgc
+	// will not ever find out about it, and this will scramble it's
+	// state.  This is documented in two related bugs:
+	// https://debbugs.gnu.org/cgi/bugreport.cgi?bug=26711  and
+	// https://github.com/opencog/atomspace/issues/1054
+	if (not eval_is_inited.test_and_set())
+	{
+		new std::thread(immortal_thread);
+	}
+
+	while (not done_with_init) { usleep(1000); }
 }
 
 SchemeEval::SchemeEval(AtomSpace* as)
@@ -750,8 +767,6 @@ SCM SchemeEval::do_scm_eval(SCM sexpr, SCM (*evo)(void *))
 	                 evo, (void *) sexpr,
 	                 SchemeEval::catch_handler_wrapper, this,
 	                 SchemeEval::preunwind_handler_wrapper, this);
-
-	_eval_done = true;
 
 	// Restore the outport
 	if (_in_shell)

@@ -145,6 +145,11 @@ void FreeVariables::erase(const Handle& var)
 	}
 }
 
+bool FreeVariables::operator<(const FreeVariables& other) const
+{
+	return varseq < other.varseq;
+}
+
 /* ================================================================= */
 
 Handle FreeVariables::substitute_nocheck(const Handle& term,
@@ -304,40 +309,59 @@ bool Variables::is_equal(const Variables& other) const
 	if (other.varseq.size() != sz) return false;
 
 	// Side-by-side comparison
-	for (size_t i=0; i<sz; i++)
+	for (size_t i = 0; i < sz; i++)
 	{
-		const Handle& vme(varseq[i]);
-		const Handle& voth(other.varseq[i]);
+		if (not is_equal(other, i))
+			return false;
+	}
+	return true;
+}
 
-		// If one is a GlobNode, and the other a VariableNode,
-		// then its a mismatch.
-		if (vme->getType() != voth->getType()) return false;
+bool Variables::is_equal(const Variables& other, size_t index) const
+{
+	const Handle& vme(varseq[index]);
+	const Handle& voth(other.varseq[index]);
 
-		// If typed, types must match.
-		auto sime = _simple_typemap.find(vme);
-		auto soth = other._simple_typemap.find(voth);
-		if (sime == _simple_typemap.end() and
-		    soth != other._simple_typemap.end()) return false;
+	// If one is a GlobNode, and the other a VariableNode,
+	// then its a mismatch.
+	if (vme->getType() != voth->getType()) return false;
 
-		if (sime != _simple_typemap.end())
-		{
-			if (soth == other._simple_typemap.end()) return false;
-			if (sime->second != soth->second) return false;
-		}
+	// If typed, types must match.
+	auto sime = _simple_typemap.find(vme);
+	auto soth = other._simple_typemap.find(voth);
+	if (sime == _simple_typemap.end() and
+	    soth != other._simple_typemap.end()) return false;
 
-		// If typed, types must match.
-		auto dime = _deep_typemap.find(vme);
-		auto doth = other._deep_typemap.find(voth);
-		if (dime == _deep_typemap.end() and
-		    doth != other._deep_typemap.end()) return false;
+	if (sime != _simple_typemap.end())
+	{
+		if (soth == other._simple_typemap.end()) return false;
+		if (sime->second != soth->second) return false;
+	}
 
-		if (dime != _deep_typemap.end())
-		{
-			if (doth == other._deep_typemap.end()) return false;
-			if (dime->second != doth->second) return false;
-		}
+	// If typed, types must match.
+	auto dime = _deep_typemap.find(vme);
+	auto doth = other._deep_typemap.find(voth);
+	if (dime == _deep_typemap.end() and
+	    doth != other._deep_typemap.end()) return false;
 
-		// XXX TODO fuzzy?
+	if (dime != _deep_typemap.end())
+	{
+		if (doth == other._deep_typemap.end()) return false;
+		if (dime->second != doth->second) return false;
+	}
+
+	// XXX TODO fuzzy?
+
+	// If intervals specified, intervals must match.
+	auto iime = _glob_intervalmap.find(vme);
+	auto ioth = other._glob_intervalmap.find(voth);
+	if (iime == _glob_intervalmap.end() and
+	    ioth != other._glob_intervalmap.end()) return false;
+
+	if (iime != _glob_intervalmap.end())
+	{
+		if (ioth == other._glob_intervalmap.end()) return false;
+		if (iime->second != ioth->second) return false;
 	}
 
 	// If we got to here, everything must be OK.
@@ -353,12 +377,13 @@ bool Variables::is_equal(const Variables& other) const
 
 bool Variables::is_alpha_convertible(const Handle& var,
                                      const Handle& othervar,
-                                     const Variables& other) const
+                                     const Variables& other,
+                                     bool check_type) const
 {
 	IndexMap::const_iterator idx = other.index.find(othervar);
-	if (other.index.end() == idx) return false;
-	if (varseq.at(idx->second) == var) return true;
-	return false;
+	return other.index.end() != idx
+		and varseq.at(idx->second) == var
+		and (not check_type or is_equal(other, idx->second));
 }
 
 /* ================================================================= */
@@ -460,6 +485,34 @@ bool Variables::is_type(const HandleSeq& hseq) const
 		if (not is_type(varseq[i], hseq[i])) return false;
 	}
 	return true;
+}
+
+/**
+ * Interval checker.
+ *
+ * Returns true/false if the glob satisfies the interval restrictions.
+ */
+bool Variables::is_interval(const Handle& glob, size_t n) const
+{
+	// Interval restrictions?
+	GlobIntervalMap::const_iterator iit = _glob_intervalmap.find(glob);
+
+	if (_glob_intervalmap.end() != iit)
+	{
+		const std::pair<double, double>& intervals = iit->second;
+
+		// Return true if it's within the interval
+		// lower bound = intervals.first
+		// upper bound = intervals.second (negative value means infinity)
+		if (n >= intervals.first and
+		   (n <= intervals.second or intervals.second < 0))
+			return true;
+	}
+	// If there is no interval restrictions, by default it's considered
+	// as 1 to many, so returns true as long as it's larger than 0.
+	else if (n > 0) return true;
+
+	return false;
 }
 
 /* ================================================================= */
@@ -601,8 +654,25 @@ void Variables::erase(const Handle& var)
 	_deep_typemap.erase(var);
 	_fuzzy_typemap.erase(var);
 
+	// Remove from the interval map
+	_glob_intervalmap.erase(var);
+
 	// Remove FreeVariables
 	FreeVariables::erase(var);
+}
+
+bool Variables::operator==(const Variables& other) const
+{
+	return is_equal(other);
+}
+
+bool Variables::operator<(const Variables& other) const
+{
+	return (FreeVariables::operator<(other))
+		or ((_simple_typemap == other._simple_typemap
+		     and _deep_typemap < other._deep_typemap)
+		    or (_deep_typemap == other._deep_typemap
+		        and _fuzzy_typemap < other._fuzzy_typemap));
 }
 
 Handle Variables::get_vardecl() const
@@ -634,6 +704,8 @@ Handle Variables::get_vardecl() const
 			OC_ASSERT(false, "TODO: support fuzzy type info");
 			continue;
 		}
+
+		// TODO: _glob_intervalmap?
 
 		// No type info
 		vars.push_back(var);

@@ -43,6 +43,17 @@ public:
     static void* getFunc(std::string libName,std::string funcName);
 };
 
+void ExecutionOutputLink::check_schema(const Handle& schema) const
+{
+	if (not classserver().isA(schema->getType(), SCHEMA_NODE) and
+	    LAMBDA_LINK != schema->getType())
+	{
+		throw SyntaxException(TRACE_INFO,
+		                      "ExecutionOutputLink must have schema! Got %s",
+		                      schema->toString().c_str());
+	}
+}
+
 ExecutionOutputLink::ExecutionOutputLink(const HandleSeq& oset, Type t)
 	: FunctionLink(oset, t)
 {
@@ -55,29 +66,14 @@ ExecutionOutputLink::ExecutionOutputLink(const HandleSeq& oset, Type t)
 			"ExecutionOutputLink must have schema and args! Got arity=%d",
 			oset.size());
 
-	if (DEFINED_SCHEMA_NODE != oset[0]->getType() and
-	    LAMBDA_LINK != oset[0]->getType() and
-	    GROUNDED_SCHEMA_NODE != oset[0]->getType())
-	{
-		throw SyntaxException(TRACE_INFO,
-			"ExecutionOutputLink must have schema! Got %s",
-			oset[0]->toString().c_str());
-	}
+	check_schema(oset[0]);
 }
 
 ExecutionOutputLink::ExecutionOutputLink(const Handle& schema,
                                          const Handle& args)
 	: FunctionLink(EXECUTION_OUTPUT_LINK, schema, args)
 {
-	Type stype = schema->getType();
-	if (GROUNDED_SCHEMA_NODE != stype and
-	    LAMBDA_LINK != stype and
-	    DEFINED_SCHEMA_NODE != stype)
-	{
-		throw SyntaxException(TRACE_INFO,
-			"ExecutionOutputLink expecting schema, got %s",
-			schema->toString().c_str());
-	}
+	check_schema(schema);
 }
 
 ExecutionOutputLink::ExecutionOutputLink(const Link& l)
@@ -103,19 +99,26 @@ ExecutionOutputLink::ExecutionOutputLink(const Link& l)
 /// This method will then invoke "func_name" on the provided ListLink
 /// of arguments to the function.
 ///
-Handle ExecutionOutputLink::execute(AtomSpace* as) const
+Handle ExecutionOutputLink::execute(AtomSpace* as, bool silent) const
 {
-	return do_execute(as, _outgoing[0], _outgoing[1]);
+	if (_outgoing[0]->getType() != GROUNDED_SCHEMA_NODE) {
+		LAZY_LOG_FINE << "Not a grounded schema. Do not execute it";
+		return getHandle();
+	}
+
+	return do_execute(as, _outgoing[0], _outgoing[1], silent);
 }
 
 /// do_execute -- execute the SchemaNode of the ExecutionOutputLink
 ///
 /// Expects "gsn" to be a GroundedSchemaNode or a DefinedSchemaNode
-/// Expects "args" to be a ListLink
-/// Executes the GroundedSchemaNode, supplying the args as argument
+/// Expects "cargs" to be a ListLink unless there is only one argument
+/// Executes the GroundedSchemaNode, supplying cargs as arguments
 ///
 Handle ExecutionOutputLink::do_execute(AtomSpace* as,
-                         const Handle& gsn, const Handle& cargs)
+                                       const Handle& gsn,
+                                       const Handle& cargs,
+                                       bool silent)
 {
 	LAZY_LOG_FINE << "Execute gsn: " << gsn->toShortString()
 	              << "with arguments: " << cargs->toShortString();
@@ -125,7 +128,7 @@ Handle ExecutionOutputLink::do_execute(AtomSpace* as,
 	// to do lazy execution correctly. Right now, forcing is the policy.
 	// We could add "scm-lazy:" and "py-lazy:" URI's for user-defined
 	// functions smart enough to do lazy evaluation.
-	Handle args = force_execute(as, cargs);
+	Handle args = force_execute(as, cargs, silent);
 
 	// Get the schema name.
 	const std::string& schema = gsn->getName();
@@ -193,11 +196,18 @@ Handle ExecutionOutputLink::do_execute(AtomSpace* as,
 	// code returns nothing, then a null-pointer-dereference is
 	// likely, a bit later down the line, leading to a crash.
 	// So head this off at the pass.
-	if (nullptr == result)
+	if (nullptr == result) {
+		// If silent is true, return a simpler and non-logged
+		// exception, which may, in some contexts, be considerably
+		// faster than the one below.
+		if (silent)
+			throw NotEvaluatableException();
+
 		throw RuntimeException(TRACE_INFO,
 		        "Invalid return value from schema %s\nArgs: %s",
 		        gsn->toString().c_str(),
 		        cargs->toString().c_str());
+	}
 
 	LAZY_LOG_FINE << "Result: " << oc_to_string(result);
 	return result;

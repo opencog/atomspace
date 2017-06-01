@@ -21,16 +21,16 @@ using namespace opencog;
 
 #define CHKERR \
    TSM_ASSERT("Caught scm error during eval", \
-      (false == eval.eval_error()));
+      (false == _eval.eval_error()));
 
 class ForwardChainerUTest: public CxxTest::TestSuite
 {
 private:
 	AtomSpace _as;
-	SchemeEval eval;
+	SchemeEval _eval;
 
 public:
-	ForwardChainerUTest() : eval(&_as)
+	ForwardChainerUTest() : _eval(&_as)
 	{
 #undef DEBUG
 		logger().set_level(Logger::DEBUG);
@@ -49,20 +49,21 @@ public:
 		for (string& p : load_paths)
 		{
 			string eval_str = string("(add-to-load-path \"") + p + string("\")");
-			eval.eval(eval_str);
+			_eval.eval(eval_str);
 		}
 
-		eval.eval("(use-modules (opencog))");
-		eval.eval("(use-modules (opencog rule-engine))");
+		_eval.eval("(use-modules (opencog))");
+		_eval.eval("(use-modules (opencog rule-engine))");
+		_eval.eval("(use-modules (opencog logger))");
 		CHKERR;
 
 		// Load the simple deduction rbs to test it
 		string result; // to be able to read load errors
-		result = eval.eval("(load-from-path \"fc-deduction-config.scm\")");
+		result = _eval.eval("(load-from-path \"fc-deduction-config.scm\")");
 		CHKERR;
 
 		// Load the simple deduction + modus ponens rbs to test it
-		result = eval.eval("(load-from-path \"fc-config.scm\")");
+		result = _eval.eval("(load-from-path \"fc-config.scm\")");
 		CHKERR;
 	}
 	~ForwardChainerUTest()
@@ -70,11 +71,13 @@ public:
 int rc = CxxTest::TestTracker::tracker().suiteFailed();
 _exit(rc); // XXX hack to avoid double-free in __run_exit_handlers
 	}
-	void test_do_chain();
+
+	void test_do_chain_deduction();
+	void test_do_chain_animals();
 	void test_select_rule();
 };
 
-void ForwardChainerUTest::test_do_chain()
+void ForwardChainerUTest::test_do_chain_deduction()
 {
 	// Test simple deduction
 	//
@@ -83,15 +86,15 @@ void ForwardChainerUTest::test_do_chain()
 	//   |-
 	//   InheritanceLink A C
 	//
-	Handle A = eval.eval_h("(ConceptNode \"A\" (stv 1 1))"),
-		B = eval.eval_h("(ConceptNode \"B\")"),
-		C = eval.eval_h("(ConceptNode \"C\")"),
-		AB = eval.eval_h("(InheritanceLink (stv 1 1)"
-		                 "   (ConceptNode \"A\")"
-		                 "   (ConceptNode \"B\"))"),
-		BC = eval.eval_h("(InheritanceLink (stv 1 1)"
-		                 "   (ConceptNode \"B\")"
-		                 "   (ConceptNode \"C\"))");
+	Handle A = _eval.eval_h("(ConceptNode \"A\" (stv 1 1))"),
+		B = _eval.eval_h("(ConceptNode \"B\")"),
+		C = _eval.eval_h("(ConceptNode \"C\")"),
+		AB = _eval.eval_h("(InheritanceLink (stv 1 1)"
+		                  "   (ConceptNode \"A\")"
+		                  "   (ConceptNode \"B\"))"),
+		BC = _eval.eval_h("(InheritanceLink (stv 1 1)"
+		                  "   (ConceptNode \"B\")"
+		                  "   (ConceptNode \"C\"))");
 
     // Get the ConceptNode corresponding to the rule-based system to test
 	Handle rbs = an(CONCEPT_NODE, "fc-deduction-rule-base");
@@ -107,14 +110,42 @@ void ForwardChainerUTest::test_do_chain()
 	TS_ASSERT_DIFFERS(results.find(AC), results.end());
 }
 
+void ForwardChainerUTest::test_do_chain_animals()
+{
+	string result = _eval.eval("(load-from-path \"tests/rule-engine/fc-animals-config.scm\")");
+	logger().debug() << "result = " << result;
+	_eval.eval("(load-from-path \"tests/rule-engine/animals.scm\")");
+	randGen().seed(0);
+
+	Handle top_rbs = _as.get_node(CONCEPT_NODE, UREConfigReader::top_rbs_name);
+
+	Handle Fritz = an(CONCEPT_NODE, "Fritz"),
+		croaks = an(PREDICATE_NODE, "croaks"),
+		green = an(CONCEPT_NODE, "green"),
+		source = al(EVALUATION_LINK, croaks, Fritz),
+		vardecl = Handle::UNDEFINED;
+
+	ForwardChainer fc(_as, top_rbs, source, vardecl);
+	fc.get_config().set_maximum_iterations(50);
+	fc.do_chain();
+
+	UnorderedHandleSet results = fc.get_chaining_result();
+	Handle Fritz_green = al(INHERITANCE_LINK, Fritz, green);
+
+	std::cout << "results = " << oc_to_string(results);
+
+	// Check that AC is in the results
+	TS_ASSERT_DIFFERS(results.find(Fritz_green), results.end());
+}
+
 void ForwardChainerUTest::test_select_rule(void)
 {
-    Handle h = eval.eval_h("(InheritanceLink"
-                           "   (ConceptNode \"Cat\")"
-                           "   (ConceptNode \"Animal\"))");
+    Handle h = _eval.eval_h("(InheritanceLink"
+                            "   (ConceptNode \"Cat\")"
+                            "   (ConceptNode \"Animal\"))");
     TS_ASSERT_DIFFERS(h, Handle::UNDEFINED);
 
-    Handle rbs = eval.eval_h("(ConceptNode \"fc-rule-base\")");
+    Handle rbs = _eval.eval_h("(ConceptNode \"fc-rule-base\")");
     ForwardChainer fc(_as, rbs, h);
 
     // Full unification

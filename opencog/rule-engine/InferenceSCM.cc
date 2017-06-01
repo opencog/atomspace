@@ -32,13 +32,41 @@ class InferenceSCM : public ModuleWrap
 protected:
 	virtual void init();
 
-	Handle do_forward_chaining(Handle h,
-	                           Handle rbs,
-	                           Handle hfocus_set);
+	/**
+	 * The scheme (cog-fc) function calls this, to perform forward-chaining.
+	 *
+	 * @param rbs          A node, holding the name of the rulebase.
+	 * @param source       The source atom with which to start the chaining.
+	 * @param vardecl      The variable declaration, if any, of the source.
+	 * @param focus_set    A SetLink containing the atoms to which forward
+	 *                     chaining will be applied.  If the set link is
+	 *                     empty, chaining will be invoked on the entire
+	 *                     atomspace.
+	 *
+	 * @return             A SetLink containing the results of FC inference.
+	 */
+	Handle do_forward_chaining(Handle rbs,
+	                           Handle source,
+	                           Handle vardecl,
+	                           Handle focus_set);
 
-	Handle do_backward_chaining(Handle h,
-	                            Handle rbs,
-	                            Handle hfocus_set);
+	/**
+	 * The scheme (cog-bc) function calls this, to perform forward-chaining.
+	 *
+	 * @param rbs          A node, holding the name of the rulebase.
+	 * @param target       The target atom with which to start the chaining from.
+	 * @param vardecl      The variable declaration, if any, of the target.
+	 * @param focus_set    A SetLink containing the atoms to which forward
+	 *                     chaining will be applied.  If the set link is
+	 *                     empty, chaining will be invoked on the entire
+	 *                     atomspace.
+	 *
+	 * @return             A SetLink containing the results of FC inference.
+	 */
+	Handle do_backward_chaining(Handle rbs,
+	                            Handle target,
+	                            Handle vardecl,
+	                            Handle focus_set);
 
 	Handle get_rulebase_rules(Handle rbs);
 
@@ -73,51 +101,43 @@ void InferenceSCM::init(void)
 		&InferenceSCM::get_rulebase_rules, this, "rule-engine");
 }
 
-/**
- * The scheme (cog-fc) function calls this, to perform forward-chaining.
- *
- * @param hsource      The source atom with which to start the chaining.
- * @param rbs          A node, holding the name of the rulebase.
- * @param hfoucs_set   A SetLink containing the atoms to which forward
- *                     chaining will be applied.  If the set link is
- *                     empty, chaining will be invoked on the entire
- *                     atomspace.
- *
- * @return             A SetLink containing the results of FC inference.
- */
-Handle InferenceSCM::do_forward_chaining(Handle hsource,
-                                         Handle rbs,
-                                         Handle hfocus_set)
+Handle InferenceSCM::do_forward_chaining(Handle rbs,
+                                         Handle source,
+                                         Handle vardecl,
+                                         Handle focus_set_h)
 {
     AtomSpace *as = SchemeSmob::ss_get_env_as("cog-fc");
     HandleSeq focus_set = {};
 
-    if (hfocus_set->getType() == SET_LINK)
-        focus_set = hfocus_set->getOutgoingSet();
-    else
-        throw RuntimeException(
-                TRACE_INFO,
-                "InferenceSCM::do_forward_chaining - focus set should be SET_LINK type!");
+    // A ListLink means that the variable declaration is undefined
+    if (vardecl->getType() == LIST_LINK)
+	    vardecl = Handle::UNDEFINED;
 
-    ForwardChainer fc(*as, rbs, hsource, focus_set);
+    if (focus_set_h->getType() == SET_LINK)
+	    focus_set = focus_set_h->getOutgoingSet();
+    else
+	    throw RuntimeException(
+		    TRACE_INFO,
+		    "InferenceSCM::do_forward_chaining - focus set should be SET_LINK type!");
+
+    ForwardChainer fc(*as, rbs, source, vardecl, focus_set);
     fc.do_chain();
     UnorderedHandleSet result = fc.get_chaining_result();
 
     return as->add_link(SET_LINK, HandleSeq(result.begin(), result.end()));
 }
 
-Handle InferenceSCM::do_backward_chaining(Handle h,
-                                          Handle rbs,
+Handle InferenceSCM::do_backward_chaining(Handle rbs,
+                                          Handle target,
+                                          Handle vardecl,
                                           Handle focus_link)
 {
-    if (Handle::UNDEFINED == rbs)
-        throw RuntimeException(TRACE_INFO,
-            "InferenceSCM::do_backward_chaining - invalid rulebase!");
+    // A ListLink means that the variable declaration is undefined
+    if (vardecl->getType() == LIST_LINK)
+	    vardecl = Handle::UNDEFINED;
 
     AtomSpace *as = SchemeSmob::ss_get_env_as("cog-bc");
-    BackwardChainer bc(*as, rbs, h,
-                       Handle::UNDEFINED /*TODO support vardecl*/,
-                       focus_link);
+    BackwardChainer bc(*as, rbs, target, vardecl, focus_link);
 
     bc.do_chain();
 

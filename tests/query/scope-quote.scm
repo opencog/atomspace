@@ -42,6 +42,22 @@
 ; The AndLink variant -- same as above, except uses AndLink.
 (AndLink p-lamb q-lamb)
 
+(define A1-lamb
+  (QuoteLink
+    (LambdaLink
+      (UnquoteLink
+        (VariableNode "$TyVs-one"))
+      (UnquoteLink
+        (VariableNode "$A1")))))
+
+(define A2-lamb
+  (QuoteLink
+    (LambdaLink
+      (UnquoteLink
+        (VariableNode "$TyVs-two"))
+      (UnquoteLink
+        (VariableNode "$A2")))))
+
 ; The pattern matcher, looks for the List variant
 (define blist
   (BindLink
@@ -63,26 +79,12 @@
     )
     ; pattern
     (ListLink
-      (QuoteLink
-        (LambdaLink
-          (UnquoteLink
-            (VariableNode "$TyVs-one"))
-          (UnquoteLink
-            (VariableNode "$A1"))))
-      (QuoteLink
-        (LambdaLink
-          (UnquoteLink
-            (VariableNode "$TyVs-two"))
-          (UnquoteLink
-            (VariableNode "$A2")))))
+      A1-lamb
+      A2-lamb)
     ; result
     (OrderedLink
-      (LambdaLink
-        (VariableNode "$TyVs-one")
-        (VariableNode "$A1"))
-      (LambdaLink
-        (VariableNode "$TyVs-two")
-        (VariableNode "$A2"))))
+      A1-lamb
+      A2-lamb))
 )
 
 ; The pattern matcher, looks for the And variant. Notice that
@@ -121,10 +123,6 @@
             (VariableNode "$A2")))))
     ; output result
     (UnorderedLink
-      (LambdaLink
-        (VariableNode "$TyVs-one")
-        (VariableNode "$A1"))
-      (LambdaLink
-        (VariableNode "$TyVs-two")
-        (VariableNode "$A2"))))
+      A1-lamb
+      A2-lamb))
 )

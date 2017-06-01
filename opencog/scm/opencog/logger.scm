@@ -11,6 +11,23 @@
 
 (load-extension "liblogger" "opencog_logger_init")
 
+; Declare everything the C++ library provides; this avoid compile-time
+; warnings when this file gets compiled.
+(export
+	cog-logger-get-filename
+	cog-logger-get-level
+	cog-logger-set-filename!
+	cog-logger-set-level!
+	cog-logger-set-stdout!
+	cog-logger-set-sync!
+	cog-logger-set-timestamp!
+	cog-logger-error-str
+	cog-logger-warn-str
+	cog-logger-info-str
+	cog-logger-debug-str
+	cog-logger-fine-str
+)
+
 ; Documentation for the functions implemented as C++ code
 (set-procedure-property! cog-logger-get-filename 'documentation
 "
@@ -40,14 +57,14 @@
 
 (set-procedure-property! cog-logger-set-stdout! 'documentation
 "
- cog-logger-set-stdout BOOL
+ cog-logger-set-stdout! BOOL
     If BOOL is #t, send log messages to stdout; else don't.
     Returns the previous setting.
 ")
 
 (set-procedure-property! cog-logger-set-sync! 'documentation
 "
- cog-logger-set-sync BOOL
+ cog-logger-set-sync! BOOL
     If BOOL is #t, write message to log file synchronously; else don't.
     That is, if sync is set, then the message will be written and the
     file flushed, before the log request returns. Otherwise, logging
@@ -59,7 +76,7 @@
 
 (set-procedure-property! cog-logger-set-timestamp! 'documentation
 "
- cog-logger-set-timestamp BOOL
+ cog-logger-set-timestamp! BOOL
     If BOOL is #t, then a timetampe will be written with each log
     message; else not.
 

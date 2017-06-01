@@ -105,7 +105,7 @@ Handle BackwardChainer::get_results() const
 	return _as.add_link(SET_LINK, results);
 }
 
-void BackwardChainer::expand_bit()
+void BackwardChainer::expand_meta_rules()
 {
 	// This is kinda of hack before meta rules are fully supported by
 	// the Rule class.
@@ -120,6 +120,12 @@ void BackwardChainer::expand_bit()
 		                     << rules_size << " rules to " << _rules.size()
 		                     << ". All exhausted flags have been reset.";
 	}
+}
+
+void BackwardChainer::expand_bit()
+{
+	// Expand meta rules, before they are fully supported
+	expand_meta_rules();
 
 	// Reset _last_expansion_fcs
 	_last_expansion_andbit = nullptr;
@@ -197,7 +203,17 @@ void BackwardChainer::fulfill_fcs(const Handle& fcs)
 	// results
 	AtomSpace tmp_as(&_as);
 
-	// Run the FCS and add the results in _as
+	// Run the FCS and add the results, if any, in _as.
+	//
+	// Warning: since tmp_as is a child of _as, TVs of existing atoms
+	// in _as, that are modified by running fcs will be modified on
+	// _as as well. This can create involontary TVs changes, hopefully
+	// mitigated by the merging the TVs properly (for now the one with
+	// the highest confidence wins). To avoid that side effect, we
+	// could operate on a copy the atomspace, of its zone of focus. Or
+	// alternatively modify some HypotheticalLink wrapping the atoms
+	// of concerns instead of the atoms themselves, and only modify
+	// the atoms if there are existing results to copy back to _as.
 	Handle hresult = bindlink(&tmp_as, fcs);
 	HandleSeq results;
 	for (const Handle& result : hresult->getOutgoingSet())
@@ -244,30 +260,56 @@ void BackwardChainer::reduce_bit()
 	if (0 < _configReader.get_max_bit_size()) {
 		// If the BIT size has reached its maximum, randomly remove
 		// and-BITs so that the BIT size gets back below or equal to
-		// its maximum. The and-BITs to remove are selected so that
-		// the least likely and-BITs to be selected for expansion are
-		// removed first.
+		// its maximum.
 		while (_configReader.get_max_bit_size() < _bit.size()) {
-			// Calculate negated distribution of selecting an and-BIT
-			// for expansion
-			std::vector<double> weights = expansion_anbit_weights();
-			std::discrete_distribution<size_t> dist(weights.begin(),
-			                                        weights.end());
-			std::vector<double> neg_p;
-			for (double p : dist.probabilities())
-				neg_p.push_back(1 - p);
-			std::discrete_distribution<size_t> neg_dist(neg_p.begin(),
-			                                            neg_p.end());
-
-			// Pick the and-BIT, remove it from the BIT and remove its
-			// FCS from the bit atomspace.
-			auto it = std::next(_bit.andbits.begin(),
-			                    randGen().randint(_bit.size()));
-			LAZY_URE_LOG_DEBUG << "Remove " << it->fcs->idToString()
-			                   << " from the BIT";
-			_bit.erase(it);
+			// Randomly select an and-BIT that is unlikely to be used
+			// for the remaining of the inferenceThe and-BITs to remove are
+			// selected so that the least likely and-BITs to be
+			// selected for expansion are removed first.
+			remove_unlikely_expandable_andbit();
 		}
 	}
+}
+
+void BackwardChainer::remove_unlikely_expandable_andbit()
+{
+	std::vector<double> weights = expansion_anbit_weights();
+	std::discrete_distribution<size_t> dist(weights.begin(), weights.end());
+	std::vector<double> never_expand_probs;
+
+	// Calculate the probability of never being expanded for the
+	// remainder of the inference, thus (1-p) raised to the power of
+	// _configReader.get_maximum_iterations() - _iteration. This makes
+	// the assumption that the BIT (i.e. its and-BIT population) is
+	// not gonna change from this point on, a false but OK assumption
+	// for now.
+	for (double p : dist.probabilities()) {
+		double remaining_iterations =
+			_configReader.get_maximum_iterations() - _iteration;
+		double nep = std::pow(1 - p, remaining_iterations);
+		never_expand_probs.push_back(nep);
+	}
+
+	// Fine log
+	if (ure_logger().is_fine_enabled()) {
+		OC_ASSERT(never_expand_probs.size() == _bit.andbits.size());
+		std::stringstream ss;
+		ss << "Never expand probs and-BITs:";
+		for (size_t i = 0; i < never_expand_probs.size(); i++)
+			ss << std::endl << never_expand_probs[i] << " "
+			   << _bit.andbits[i].fcs->idToString();
+		ure_logger().fine() << ss.str();
+	}
+
+	std::discrete_distribution<size_t>
+		never_expand_dist(never_expand_probs.begin(), never_expand_probs.end());
+
+	// Pick the and-BIT, remove it from the BIT and remove its
+	// FCS from the bit atomspace.
+	auto it = std::next(_bit.andbits.begin(), never_expand_dist(randGen()));
+	LAZY_URE_LOG_DEBUG << "Remove " << it->fcs->idToString()
+	                   << " from the BIT";
+	_bit.erase(it);
 }
 
 RuleTypedSubstitutionPair BackwardChainer::select_rule(BITNode& target,

@@ -137,8 +137,7 @@
     ;; (cog-logger-debug "[PLN-Induction] TV-strength = ~a" TV-strength)
     ;; (cog-logger-debug "[PLN-Induction] TV-confidence = ~a" TV-confidence)
     (if (> TV-confidence 0)
-        (ImplicationScope (stv TV-strength TV-confidence) vardecl P-body Q-body)
-        (cog-undefined-handle))))
+        (ImplicationScope (stv TV-strength TV-confidence) vardecl P-body Q-body))))
 
 ;; Name the rule
 (define implication-scope-direct-evaluation-rule-name

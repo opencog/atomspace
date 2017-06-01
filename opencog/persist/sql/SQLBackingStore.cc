@@ -49,9 +49,14 @@ Handle SQLBackingStore::getLink(Type t, const HandleSeq& hs) const
 	return _store->getLink(t, hs);
 }
 
-HandleSeq SQLBackingStore::getIncomingSet(const Handle& h) const
+void SQLBackingStore::getIncomingSet(AtomTable& table, const Handle& h)
 {
-	return _store->getIncomingSet(h);
+	_store->getIncomingSet(table, h);
+}
+
+void SQLBackingStore::getIncomingByType(AtomTable& table, const Handle& h, Type t)
+{
+	_store->getIncomingByType(table, h, t);
 }
 
 void SQLBackingStore::storeAtom(const Handle& h)

@@ -289,9 +289,9 @@
 
     Example:
        ; Define two nodes and a link between them:
-       guile> (define x (cog-new-node 'ConceptNode \"abc\"))
-       guile> (define y (cog-new-node 'ConceptNode \"def\"))
-       guile> (define l (cog-new-link 'Link x y))
+       guile> (define x (ConceptNode \"abc\"))
+       guile> (define y (ConceptNode \"def\"))
+       guile> (define l (Link x y))
 
        ; Get the incoming sets of nodes x and y (which is the link l):
        guile> (cog-incoming-set x)
@@ -323,6 +323,45 @@
        #t
 ")
 
+(set-procedure-property! cog-incoming-by-type 'documentation
+"
+ cog-incoming-by-type ATOM TYPE
+    Return the incoming set of ATOM that consists only of atoms of
+    type TYPE.  This set is returned as an ordinary scheme list.
+
+    Equivalent to (cog-filter TYPE (cog-incoming-set ATOM))
+
+    Example:
+       ; Define two nodes and two links between them:
+       guile> (define x (ConceptNode \"abc\"))
+       guile> (define y (ConceptNode \"def\"))
+       guile> (ListLink x y)
+       guile> (UnorderedLink x y)
+
+       ; Get the incoming sets of nodes x and y:
+       guile> (cog-incoming-by-type x 'ListLink)
+       ((ListLink
+          (ConceptNode \"abc\")
+          (ConceptNode \"def\")
+       )
+       )
+
+       guile> (cog-incoming-by-type x 'UnorderedLink)
+       ((UnorderedLink
+          (ConceptNode \"abc\")
+          (ConceptNode \"def\")
+       )
+       )
+")
+
+(set-procedure-property! cog-outgoing-atom 'documentation
+"
+ cog-outgoing-atom ATOM INDEX
+    Return the INDEX'th atom in the outgoing set of ATOM. Indexing
+    is done from a base of zero. This returns the same atom as
+    (list-ref (cog-outgoing-set ATOM) INDEX) but is faster.
+")
+
 (set-procedure-property! cog-outgoing-set 'documentation
 "
  cog-outgoing-set ATOM
@@ -330,39 +369,25 @@
     ordinary scheme list.
 ")
 
-(set-procedure-property! cog-atom 'documentation
+(set-procedure-property! cog-outgoing-by-type 'documentation
 "
- cog-atom UUID
-    Reference the atom identified by the integer-valued UUID.
+ cog-outgoing-by-type ATOM TYPE
+    Return those atoms in the outgoing set of ATOM that are of type TYPE.
+    This set is returned as an ordinary scheme list.
+
+    Equivalent to (cog-filter TYPE (cog-outgoing-set ATOM))
 ")
 
 (set-procedure-property! cog-handle 'documentation
 "
  cog-handle ATOM
-    Return the UUID (which is an integer) of ATOM.
-
-    It may be useful to remember that scheme indicates hexadecimal
-    numbers by preceeding them with #x, and so, for example,
-    (cog-atom #x2c949b) gets the handle associated with hex 2c949b.
+    Return the hash of ATOM. The hash is a 64-bit integer, computed
+    from the component parts of the atom (but not it's values), that
+    can be used in hash tables or other algorithms that require a hash.
 
     Example:
-       ; Create two atoms, and get thier handles:
-       guile> (define x (cog-new-node 'ConceptNode \"abc\"))
-       guile> (define y (cog-new-node 'ConceptNode \"def\"))
-       guile> (cog-handle x)
-       113
-       guile> (cog-handle y)
-       114
-
-       ; Get the atom corresponding to handle number 114
-       guile> (cog-atom 114)
-       (ConceptNode \"abc\")
-
-       ; Verify that handles are truly integers
-       guile> (integer? x)
-       #f
-       guile> (integer? (cog-handle x))
-       #t
+       guile> (cog-handle (Concept \"abc\"))
+       999283543311182409
 ")
 
 (set-procedure-property! cog-inc-count! 'documentation
@@ -657,6 +682,102 @@
        guile> (define x (cog-new-av 99 88 0))
        guile> (cog-av->alist x)
        ((sti . 99) (lti . 88) (vlti . 0))
+")
+
+(set-procedure-property! cog-new-value 'documentation
+"
+ cog-new-value TYPE LIST
+    Create a new value of type TYPE, hold the LIST of strings, floats
+    or values.  The TYPE must be either 'StringValue, 'FloatValue
+    or 'LinkValue. The LIST must be an ordinary guile list, consisting
+    entirely of guile strings, guile numbers, or opencog values,
+    respectively, for each of the three types.
+
+    Example:
+       guile> (cog-new-value 'FloatValue 1 2 3))
+       (FloatValue 1.000000 2.000000 3.00000)
+
+       guile> (cog-new-value 'StringValue \"foo\" \"bar\")
+       (StringValue \"foo\" \"bar\")
+
+       guile> (cog-new-value 'LinkValue
+             (Concept \"foo\") (StringValue \"bar\"))
+       (LinkValue
+           (ConceptNode \"foo\")
+           (StringValue \"bar\")
+       )
+")
+
+(set-procedure-property! cog-value 'documentation
+"
+ cog-value ATOM KEY
+    Return the value of of KEY for ATOM. Both ATOM and KEY must be
+    atoms.
+
+    Example:
+       guile> (cog-set-value!
+                 (Concept \"abc\") (Concept \"key\")
+                 (FloatValue 1 2 3))
+       guile> (cog-value (Concept \"abc\") (Concept \"key\"))
+       (FloatValue 1.000000 2.000000 3.00000)
+")
+
+(set-procedure-property! cog-set-value! 'documentation
+"
+ cog-set-value! ATOM KEY VALUE
+    Set the value of KEY for ATOM to VALUE. Both ATOM and KEY must be
+    atoms.
+
+    Example:
+       guile> (cog-set-value!
+                 (Concept \"abc\") (Concept \"key\")
+                 (FloatValue 1 2 3))
+       guile> (cog-value (Concept \"abc\") (Concept \"key\"))
+       (FloatValue 1.000000 2.000000 3.00000)
+")
+
+(set-procedure-property! cog-value? 'documentation
+"
+ cog-value? EXP
+    Return #t if EXP is an opencog value, else return #f
+
+    Example:
+       guile> (cog-value? (FloatValue 42))
+       #t
+       guile> (cog-value? 42)
+       #f
+")
+
+(set-procedure-property! cog-value->list 'documentation
+"
+ cog-value->list VALUE
+    Return a scheme list holding the values in the opencog VALUE.
+    If VALUE is a Link, this returns the outgoing set.
+    If VALUE is a Node, this returns list containing the node name.
+    If VALUE is a StringValue, FloatValue or LinkValue, this returns
+        the associated list of values.
+
+    Example:
+       guile> (cog-value->list (FloatValue 0.1 0.2 0.3))
+       (0.1 0.2 0.3)
+")
+
+(set-procedure-property! cog-value-ref 'documentation
+"
+ cog-value-ref VALUE N
+    Return the N'th entry in the opencog VALUE.
+    If VALUE is a Link, this returns the N'th atom in the outgoing set.
+        That is, it returns the same atom as cog-outgoing-atom.
+    If VALUE is a Node, and N is zero, this returns the node name.
+    If VALUE is a StringValue, FloatValue or LinkValue, this returns
+        the N'th entry in the value.
+
+    This returns the same result as
+        (list-ref (cog-value->list VALUE) N)
+
+    Example:
+       guile> (cog-value-ref (FloatValue 0.1 0.2 0.3) 2)
+       0.3
 ")
 
 (set-procedure-property! cog-as 'documentation

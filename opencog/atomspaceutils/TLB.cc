@@ -27,6 +27,14 @@ using namespace opencog;
 
 TLB::TLB() : _brk_uuid(1) {}
 
+void TLB::clear()
+{
+    std::lock_guard<std::mutex> lck(_mtx);
+    _handle_map.clear();
+    _uuid_map.clear();
+    _brk_uuid = 1;
+}
+
 // ===================================================
 // Handle resolution stuff.
 

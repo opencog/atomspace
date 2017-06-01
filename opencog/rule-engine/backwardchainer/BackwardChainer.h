@@ -129,6 +129,8 @@ public:
 	Handle get_results() const;
 
 private:
+	void expand_meta_rules();
+
 	// Expand the BIT
 	void expand_bit();
 
@@ -145,6 +147,10 @@ private:
 
 	// Reduce the BIT. Remove some and-BITs.
 	void reduce_bit();
+
+	// Pick up an and-BIT randomly, biased so that this and-BIT is
+	// unlikely to be expanded for the remainder of the inference.
+	void remove_unlikely_expandable_andbit();
 
 	// Calculate distribution based on a (poor) estimate of the
 	// probablity of a and-BIT being within the path of the solution.

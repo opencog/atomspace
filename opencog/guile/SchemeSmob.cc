@@ -231,30 +231,23 @@ void SchemeSmob::module_init(void*)
 
 #define DO_THE_UBER_BAD_HACKERY_FOR_EFFING_UNIT_TESTS_GRRRR
 #ifdef DO_THE_UBER_BAD_HACKERY_FOR_EFFING_UNIT_TESTS_GRRRR
-	// These nasty, icky, broken-design, doomed-cause-endless failures
-	// and confusion and hard-to-debug bugs that everyone has been
-	// cursing, and will continue to curse, from now until forever,
-	// is due to a vain-glorious requreiment that unit tests run
-	// before a valid install step is performed. Which kind-of
-	// invalidates THE WHOLE FUCKING POINT OF HAVING UNIT TESTS.
-	// Duhh. I mean, why the fuck bother running the tests, if they
-	// test you build directory, INSTEAD OF YOUR SYSTEM?  The people
-	// who insist on this stuff clearly don't have a clue about testing.
-	// Whatever.  So we will live with the harm and the pain until
-	// someone else comes along and sees the light.  See issue
+	// Loading files from the project directory is broken by design.
+	// However, teh unit tests are broken by design.
+	// We REALLY should not do this, it violates basic laws of security,
+	// usability, debuggability. But some people think that's OK.
+	// Too lazy to fix.  See issue
 	// https://github.com/opencog/atomspace/issues/705 for details.
 	scm_c_eval_string("(add-to-load-path \"" PROJECT_SOURCE_DIR "/opencog/scm\")");
-	scm_c_eval_string("(add-to-load-path \"" PROJECT_BINARY_DIR "/opencog/atoms/base\")");
+	scm_c_eval_string("(add-to-load-path \"" PROJECT_BINARY_DIR "\")");
 #endif
 
-	scm_primitive_load_path(scm_from_utf8_string("core_types.scm"));
-	scm_primitive_load_path(scm_from_utf8_string("config.scm"));
-	scm_primitive_load_path(scm_from_utf8_string("core-docs.scm"));
-	scm_primitive_load_path(scm_from_utf8_string("utilities.scm"));
-	scm_primitive_load_path(scm_from_utf8_string("apply.scm"));
-	scm_primitive_load_path(scm_from_utf8_string("av-tv.scm"));
-	scm_primitive_load_path(scm_from_utf8_string("file-utils.scm"));
-	scm_primitive_load_path(scm_from_utf8_string("debug-trace.scm"));
+	scm_primitive_load_path(scm_from_utf8_string("opencog/base/core_types.scm"));
+	scm_primitive_load_path(scm_from_utf8_string("opencog/base/core-docs.scm"));
+	scm_primitive_load_path(scm_from_utf8_string("opencog/base/utilities.scm"));
+	scm_primitive_load_path(scm_from_utf8_string("opencog/base/apply.scm"));
+	scm_primitive_load_path(scm_from_utf8_string("opencog/base/av-tv.scm"));
+	scm_primitive_load_path(scm_from_utf8_string("opencog/base/file-utils.scm"));
+	scm_primitive_load_path(scm_from_utf8_string("opencog/base/debug-trace.scm"));
 }
 
 #ifdef HAVE_GUILE2
@@ -265,9 +258,6 @@ void SchemeSmob::module_init(void*)
 
 void SchemeSmob::register_procs()
 {
-	register_proc("cog-atom",              1, 0, 0, C(ss_atom));
-	register_proc("cog-handle",            1, 0, 0, C(ss_handle));
-	register_proc("cog-undefined-handle",  0, 0, 0, C(ss_undefined_handle));
 	register_proc("cog-new-value",         1, 0, 1, C(ss_new_value));
 	register_proc("cog-new-node",          2, 0, 1, C(ss_new_node));
 	register_proc("cog-new-link",          1, 0, 1, C(ss_new_link));
@@ -277,10 +267,18 @@ void SchemeSmob::register_procs()
 	register_proc("cog-delete-recursive",  1, 0, 1, C(ss_delete_recursive));
 	register_proc("cog-extract",           1, 0, 1, C(ss_extract));
 	register_proc("cog-extract-recursive", 1, 0, 1, C(ss_extract_recursive));
-	register_proc("cog-value?",            1, 0, 1, C(ss_value_p));
-	register_proc("cog-atom?",             1, 0, 1, C(ss_atom_p));
-	register_proc("cog-node?",             1, 0, 1, C(ss_node_p));
-	register_proc("cog-link?",             1, 0, 1, C(ss_link_p));
+
+	register_proc("cog-value?",            1, 0, 0, C(ss_value_p));
+	register_proc("cog-atom?",             1, 0, 0, C(ss_atom_p));
+	register_proc("cog-node?",             1, 0, 0, C(ss_node_p));
+	register_proc("cog-link?",             1, 0, 0, C(ss_link_p));
+
+	// hash-value of the atom
+	register_proc("cog-handle",            1, 0, 0, C(ss_handle));
+
+	// Value API
+	register_proc("cog-value->list",       1, 0, 0, C(ss_value_to_list));
+	register_proc("cog-value-ref",         2, 0, 0, C(ss_value_ref));
 
 	// Generic property setter on atoms
 	register_proc("cog-set-value!",        3, 0, 0, C(ss_set_value));
@@ -303,6 +301,7 @@ void SchemeSmob::register_procs()
 	register_proc("cog-incoming-set",      1, 0, 0, C(ss_incoming_set));
 	register_proc("cog-incoming-by-type",  2, 0, 0, C(ss_incoming_by_type));
 	register_proc("cog-outgoing-set",      1, 0, 0, C(ss_outgoing_set));
+	register_proc("cog-outgoing-by-type",  2, 0, 0, C(ss_outgoing_by_type));
 	register_proc("cog-outgoing-atom",     2, 0, 0, C(ss_outgoing_atom));
 	register_proc("cog-value",             2, 0, 0, C(ss_value));
 	register_proc("cog-tv",                1, 0, 0, C(ss_tv));

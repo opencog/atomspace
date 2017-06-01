@@ -97,6 +97,9 @@ struct FreeVariables
 	// Erase the given variable, if exist
 	void erase(const Handle&);
 
+	// Comparison operators. Convenient to define containers of Variables
+	bool operator<(const FreeVariables& other) const;
+
 	// Given the tree `tree` containing variables in it, create and
 	// return a new tree with the indicated values `vals` substituted
 	// for the variables.  "nocheck" == no type checking is done.
@@ -111,6 +114,7 @@ protected:
 
 typedef std::map<Handle, const std::set<Type>> VariableTypeMap;
 typedef std::map<Handle, const OrderedHandleSet> VariableDeepTypeMap;
+typedef std::map<Handle, const std::pair<double, double>> GlobIntervalMap;
 
 /// The Variables struct defines a list of typed variables "unbundled"
 /// from the hypergraph in which they normally occur. The goal of this
@@ -135,6 +139,10 @@ struct Variables : public FreeVariables
 	VariableDeepTypeMap _deep_typemap;
 	VariableDeepTypeMap _fuzzy_typemap;
 
+	/// To restrict how many atoms should be matched for each of the
+	/// GlobNodes in the pattern.
+	GlobIntervalMap _glob_intervalmap;
+
 	/// Return true iff all variables are well typed. For now only
 	/// simple types are supported, specifically if some variable is
 	/// simple typed NOTYPE, then it returns false.
@@ -145,11 +153,12 @@ struct Variables : public FreeVariables
 	// type restrictions, but different actual variable names.
 	// Same as satisfying this->is_type(other->varseq) and also
 	// other->is_type(this->varseq) -- the equality is symmetric.
-	bool is_equal(const Variables&) const;
-	inline bool operator==(const Variables& other) const
-	{ return is_equal(other); }
-	inline bool operator!=(const Variables& other) const
-	{ return not is_equal(other); }
+	bool is_equal(const Variables& other) const;
+	bool is_equal(const Variables& other, size_t index) const;
+	bool operator==(const Variables& other) const;
+
+	// Comparison operators. Convenient to define containers of Variables
+	bool operator<(const Variables& other) const;
 
 	// Return true if the variable `othervar` in `other` is
 	// alpha-convertible to the variable `var` in this. That is,
@@ -157,7 +166,8 @@ struct Variables : public FreeVariables
 	// in name.
 	bool is_alpha_convertible(const Handle& var,
 	                          const Handle& othervar,
-	                          const Variables& other) const;
+	                          const Variables& other,
+	                          bool check_type=false) const;
 
 	// Return true if we are holding a single variable, and the handle
 	// given as the argument satisfies the type restrictions (if any).
@@ -173,6 +183,10 @@ struct Variables : public FreeVariables
 	// restrictions (if any).
 	bool is_type(const HandleSeq& hseq) const;
 
+	// Return true if the it satisfies the interval restrictions.
+	// Return false otherwise.
+	bool is_interval(const Handle& glob, size_t n) const;
+
 	// Given the tree `tree` containing variables in it, create and
 	// return a new tree with the indicated values `vals` substituted
 	// for the variables. The vals must pass the typecheck, else an
@@ -181,7 +195,7 @@ struct Variables : public FreeVariables
 	// filtering, where type mis-checks are expected and normal.
 	Handle substitute(const Handle& tree,
 	                  const HandleSeq& vals,
-	                  bool silent = false) const;
+	                  bool silent=false) const;
 
 	// Extend this variable set by adding in the given variable set.
 	void extend(const Variables&);

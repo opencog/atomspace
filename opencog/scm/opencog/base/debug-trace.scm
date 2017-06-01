@@ -21,7 +21,7 @@
 )
 
 (define-public (start-trace msg)
-" Start tracing, record  the starrt time"
+" Start tracing, record  the start time"
 	(set! dbg-tim (current-time))
 	(set! dbg-cnt 0)
 	(display msg oport)
@@ -34,16 +34,8 @@
 	(force-output oport)
 )
 
-(define-public (trace-msg-num msg num)
-"  PRint msg and num to trace logfile."
-	(display msg oport)
-	(display num oport)
-	(display "\n" oport)
-	(force-output oport)
-)
-
 (define-public (trace-elapsed)
-"  Print elapsed time since trace start."
+"  Print elapsed (wall-clock) time since trace start."
 	(begin
 		(display "Elapsed secs " oport)
 		(display (- (current-time) dbg-tim) oport)

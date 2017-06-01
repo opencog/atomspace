@@ -31,7 +31,8 @@
 #include <thread>
 #include <vector>
 
-#include <opencog/util/async_method_caller.h>
+// #include <opencog/util/async_method_caller.h>
+#include <opencog/util/async_buffer.h>
 
 #include <opencog/atoms/base/Atom.h>
 #include <opencog/atoms/base/Link.h>
@@ -68,6 +69,7 @@ class SQLAtomStorage : public AtomStorage
 		class Outgoing;
 
 		void init(const char *);
+		std::string _uri;
 
 		// ---------------------------------------------
 		// Handle multiple atomspaces like typecodes: we have to
@@ -91,23 +93,30 @@ class SQLAtomStorage : public AtomStorage
 		PseudoPtr getAtom(const char *, int);
 		PseudoPtr petAtom(UUID);
 
+		Handle get_recursive_if_not_exists(PseudoPtr);
+
 		Handle doGetNode(Type, const char *);
 		Handle doGetLink(Type, const HandleSeq&);
 
 		int get_height(const Handle&);
 		int max_height;
 
+		void getIncoming(AtomTable&, const char *);
 		// --------------------------
 		// Storing of atoms
+		std::mutex _store_mutex;
+
 		int do_store_atom(const Handle&);
 		void vdo_store_atom(const Handle&);
 		void do_store_single_atom(const Handle&, int);
 
+		UUID check_uuid(const Handle&);
 		UUID get_uuid(const Handle&);
 		std::string oset_to_string(const HandleSeq&);
 
-		void store_cb(const Handle&);
 		bool bulk_load;
+		bool bulk_store;
+		time_t bulk_start;
 
 		// --------------------------
 		// Table management
@@ -116,21 +125,8 @@ class SQLAtomStorage : public AtomStorage
 
 		// --------------------------
 		// UUID management
-		// Track UUID's that are in use. Needed to determine
-		// whether to UPDATE or INSERT.
-		std::mutex id_cache_mutex;
-		bool local_id_cache_is_inited;
-		std::set<UUID> local_id_cache;
-		void add_id_to_cache(UUID);
-		void get_ids(void);
-
-		std::mutex id_create_mutex;
-		std::set<UUID> id_create_cache;
-		std::unique_lock<std::mutex> maybe_create_id(UUID);
-
 		UUID getMaxObservedUUID(void);
 		int getMaxObservedHeight(void);
-		bool idExists(const char *);
 		TLB _tlbuf;
 
 		// --------------------------
@@ -167,16 +163,18 @@ class SQLAtomStorage : public AtomStorage
 		// Performance statistics
 		std::atomic<size_t> _num_get_nodes;
 		std::atomic<size_t> _num_got_nodes;
+		std::atomic<size_t> _num_rec_nodes;
 		std::atomic<size_t> _num_get_links;
 		std::atomic<size_t> _num_got_links;
+		std::atomic<size_t> _num_rec_links;
 		std::atomic<size_t> _num_get_insets;
-		std::atomic<size_t> _num_get_inatoms;
+		std::atomic<size_t> _num_get_inlinks;
 		std::atomic<size_t> _num_node_inserts;
-		std::atomic<size_t> _num_node_updates;
 		std::atomic<size_t> _num_link_inserts;
-		std::atomic<size_t> _num_link_updates;
 		std::atomic<size_t> _load_count;
 		std::atomic<size_t> _store_count;
+		std::atomic<size_t> _valuation_stores;
+		std::atomic<size_t> _value_stores;
 
 		// -------------------------------
 		// Type management
@@ -200,7 +198,8 @@ class SQLAtomStorage : public AtomStorage
 		std::mutex _typemap_mutex;
 
 		// Provider of asynchronous store of atoms.
-		async_caller<SQLAtomStorage, Handle> _write_queue;
+		// async_caller<SQLAtomStorage, Handle> _write_queue;
+		async_buffer<SQLAtomStorage, Handle> _write_queue;
 
 	public:
 		SQLAtomStorage(std::string uri);
@@ -210,6 +209,7 @@ class SQLAtomStorage : public AtomStorage
 		bool connected(void); // connection to DB is alive
 
 		void kill_data(void); // destroy DB contents
+		void clear_cache(void); // clear out the TLB.
 
 		void registerWith(AtomSpace*);
 		void unregisterWith(AtomSpace*);
@@ -219,7 +219,8 @@ class SQLAtomStorage : public AtomStorage
 		// AtomStorage interface
 		Handle getNode(Type, const char *);
 		Handle getLink(Type, const HandleSeq&);
-		HandleSeq getIncomingSet(const Handle&);
+		void getIncomingSet(AtomTable&, const Handle&);
+		void getIncomingByType(AtomTable&, const Handle&, Type t);
 		void storeAtom(const Handle&, bool synchronous = false);
 		void loadType(AtomTable&, Type);
 		void flushStoreQueue();
@@ -229,8 +230,11 @@ class SQLAtomStorage : public AtomStorage
 		void store(const AtomTable &); // Store entire contents of AtomTable
 		void reserve(void);     // reserve range of UUID's
 
-		// Debugging and perforamnce monitoring
+		// Debugging and performance monitoring
 		void print_stats(void);
+		void clear_stats(void); // reset stats counters.
+		void set_hilo_watermarks(int, int);
+		void set_stall_writers(bool);
 };
 
 

@@ -69,7 +69,7 @@ CountTruthValue::CountTruthValue(const ProtoAtomPtr& source)
             "Source must be a CountTruthValue");
 
     FloatValuePtr fp(FloatValueCast(source));
-    _value.resize(2);
+    _value.resize(3);
     _value[MEAN] = fp->value()[MEAN];
     _value[CONFIDENCE] = fp->value()[CONFIDENCE];
     _value[COUNT] = fp->value()[COUNT];
@@ -95,8 +95,8 @@ std::string CountTruthValue::toString(const std::string& indent) const
     char buf[1024];
     sprintf(buf, "(ctv %f %f %f)",
             static_cast<float>(getMean()),
-            static_cast<float>(getCount()),
-            static_cast<double>(getConfidence()));
+            static_cast<double>(getConfidence()),
+            static_cast<float>(getCount()));
     return buf;
 }
 

@@ -24,13 +24,8 @@ class SchemeTest(TestCase):
 
     def test_a_load_core_types(self):
 
-        # These relative paths are horridly ugly.
-        # There must be a better way ...
-        status = load_scm(self.space, "build/opencog/atoms/base/core_types.scm")
-        self.assertTrue(status)
+        scheme_eval(self.space, "(use-modules (opencog))")
 
-        status = load_scm(self.space, "opencog/scm/utilities.scm")
-        self.assertTrue(status)
 
     # Load a file that results in atoms placed in the atomspace.
     # Make sure the loaded atom is what we think it is.
@@ -71,9 +66,6 @@ class SchemeTest(TestCase):
 
     # Run the pattern-matcher/unifier/query-engine.
     def test_unifier(self):
-
-        status = load_scm(self.space, "opencog/scm/opencog/query.scm")
-        self.assertTrue(status)
 
         scheme_eval(self.space, "(use-modules (opencog query))")
         question = scheme_eval_h(self.space, "find-animals")

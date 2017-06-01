@@ -68,6 +68,10 @@ void SQLPersistSCM::init(void)
     define_scheme_primitive("sql-load", &SQLPersistSCM::do_load, this, "persist-sql");
     define_scheme_primitive("sql-store", &SQLPersistSCM::do_store, this, "persist-sql");
     define_scheme_primitive("sql-stats", &SQLPersistSCM::do_stats, this, "persist-sql");
+    define_scheme_primitive("sql-clear-cache", &SQLPersistSCM::do_clear_cache, this, "persist-sql");
+    define_scheme_primitive("sql-clear-stats", &SQLPersistSCM::do_clear_stats, this, "persist-sql");
+    define_scheme_primitive("sql-set-hilo-watermarks!", &SQLPersistSCM::do_set_hilo, this, "persist-sql");
+    define_scheme_primitive("sql-set-stall-writers!", &SQLPersistSCM::do_set_stall, this, "persist-sql");
 }
 
 SQLPersistSCM::~SQLPersistSCM()
@@ -148,6 +152,46 @@ void SQLPersistSCM::do_stats(void)
     printf("sql-stats: Atomspace holds %lu atoms\n", as->get_size());
 
     _store->print_stats();
+}
+
+void SQLPersistSCM::do_clear_cache(void)
+{
+    if (_store == NULL) {
+        printf("sql-stats: Database not open\n");
+        return;
+    }
+
+    _store->clear_cache();
+}
+
+void SQLPersistSCM::do_clear_stats(void)
+{
+    if (_store == NULL) {
+        printf("sql-stats: Database not open\n");
+        return;
+    }
+
+    _store->clear_stats();
+}
+
+void SQLPersistSCM::do_set_hilo(int hi, int lo)
+{
+    if (_store == NULL) {
+        printf("sql-stats: Database not open\n");
+        return;
+    }
+
+    _store->set_hilo_watermarks(hi, lo);
+}
+
+void SQLPersistSCM::do_set_stall(bool stall)
+{
+    if (_store == NULL) {
+        printf("sql-stats: Database not open\n");
+        return;
+    }
+
+    _store->set_stall_writers(stall);
 }
 
 void opencog_persist_sql_init(void)

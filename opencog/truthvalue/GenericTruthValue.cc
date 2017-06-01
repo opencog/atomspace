@@ -63,7 +63,7 @@ GenericTruthValue::GenericTruthValue(const ProtoAtomPtr& source)
             "Source must be a GenericTruthValue");
 
     FloatValuePtr fp(FloatValueCast(source));
-    _value.resize(2);
+    _value.resize(6);
     _value[POSITIVE_EVIDENCE] = fp->value()[POSITIVE_EVIDENCE];
     _value[TOTAL_EVIDENCE] = fp->value()[TOTAL_EVIDENCE];
     _value[FREQUENCY] = fp->value()[FREQUENCY];

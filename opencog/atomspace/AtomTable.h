@@ -32,6 +32,7 @@
 #include <boost/signals2.hpp>
 
 #include <opencog/util/async_method_caller.h>
+#include <opencog/util/oc_omp.h>
 #include <opencog/util/RandGen.h>
 
 #include <opencog/truthvalue/TruthValue.h>
@@ -251,6 +252,29 @@ public:
              [&](const Handle& h)->void {
                   (func)(h);
              });
+    }
+
+    template <typename Function> void
+    foreachParallelByType(Function func,
+                        Type type,
+                        bool subclass = false,
+                        bool parent = true) const
+    {
+        std::lock_guard<std::recursive_mutex> lck(_mtx);
+        if (parent && _environ)
+            _environ->foreachParallelByType(func, type, subclass);
+
+        // Parallelize, always, no matter what!
+        opencog::setting_omp(opencog::num_threads(), 1);
+
+        OMP_ALGO::for_each(typeIndex.begin(type, subclass),
+                      typeIndex.end(),
+             [&](const Handle& h)->void {
+                  (func)(h);
+             });
+
+        // Reset to default.
+        opencog::setting_omp(opencog::num_threads());
     }
 
     /* Exposes the type iterators so we can do more complicated 

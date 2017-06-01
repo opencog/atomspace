@@ -454,9 +454,9 @@
   of the two atoms in the ListLink, this routine returns the other
   atom in the listLink.
 "
-	; The 'car' appears here because 'cog-filter' is returning
+	; The 'car' appears here because 'cog-outgoing-by-type' is returning
 	; a list, and we want just one atom (the only one in the list)
-	(cog-get-partner (car (cog-filter 'ListLink (cog-outgoing-set rel))) atom)
+	(cog-get-partner (car (cog-outgoing-by-type rel 'ListLink)) atom)
 )
 
 ; -----------------------------------------------------------------------
@@ -563,13 +563,13 @@
   Apply proc to each of these.
 "
 	(define (get-endpoint w)
-		(map proc (cog-filter endpoint-type (cog-outgoing-set w)))
+		(map proc (cog-outgoing-by-type w endpoint-type))
 	)
 
 	; We assume that anchor is a single atom, or empty list...
 	(if (null? anchor)
 		'()
-		(map get-endpoint (cog-filter link-type (cog-incoming-set anchor)))
+		(map get-endpoint (cog-incoming-by-type anchor link-type))
 	)
 )
 
@@ -581,13 +581,13 @@
   distributed over the available CPU's.
 "
 	(define (get-endpoint w)
-		(map proc (cog-filter endpoint-type (cog-outgoing-set w)))
+		(map proc (cog-outgoing-by-type w endpoint-type))
 	)
 
 	; We assume that anchor is a single atom, or empty list...
 	(if (null? anchor)
 		'()
-		(par-map get-endpoint (cog-filter link-type (cog-incoming-set anchor)))
+		(par-map get-endpoint (cog-incoming-by-type anchor link-type))
 	)
 )
 
@@ -703,12 +703,12 @@
 "
 	(define (get-endpoint w)
 		(if (not (eq? '() dbg-emsg)) (display dbg-emsg))
-		(for-each proc (cog-filter endpoint-type (cog-outgoing-set w)))
+		(for-each proc (cog-outgoing-by-type w endpoint-type))
 	)
 	(if (not (eq? '() dbg-lmsg)) (display dbg-lmsg))
 	(if (null? anchor)
 		'()
-		(for-each get-endpoint (cog-filter link-type (cog-incoming-set anchor)))
+		(for-each get-endpoint (cog-incoming-by-type anchor link-type))
 	)
 )
 
@@ -722,12 +722,10 @@
   on the endpoint, but rather on the link leading to the endpoint.
 "
 	(define (get-link l)
-		(define (apply-link e)
-			(proc l)
-		)
-		(for-each apply-link (cog-filter endpoint-type (cog-outgoing-set l)))
+		(define (apply-link e) (proc l))
+		(for-each apply-link (cog-outgoing-by-type l endpoint-type))
 	)
-	(for-each get-link (cog-filter link-type (cog-incoming-set anchor)))
+	(for-each get-link (cog-incoming-by-type anchor link-type))
 )
 
 (define-public (cog-get-link link-type endpoint-type anchor)
@@ -783,8 +781,7 @@
 		(append!
 			(map
 				(lambda (lnk) (cog-get-link 'EvaluationLink pred-type lnk))
-				;; append removes null's
-				(append! (cog-filter 'ListLink (cog-incoming-set inst)))
+				(cog-incoming-by-type inst 'ListLink)
 			)
 		)
 	)

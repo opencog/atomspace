@@ -31,6 +31,7 @@
 #ifdef HAVE_SQL_STORAGE
 
 #include <stdlib.h>
+#include <time.h>
 #include <unistd.h>
 
 #include <chrono>
@@ -38,6 +39,8 @@
 #include <thread>
 
 #include <opencog/util/oc_assert.h>
+#include <opencog/util/oc_omp.h>
+
 #include <opencog/atoms/base/Atom.h>
 #include <opencog/atoms/base/ClassServer.h>
 #include <opencog/atoms/base/Link.h>
@@ -158,41 +161,57 @@ class SQLAtomStorage::Response
 			// printf ("---- New atom found ----\n");
 			rs->foreach_column(&Response::create_atom_column_cb, this);
 
-			PseudoPtr p(store->makeAtom(*this, uuid));
-			AtomPtr atom(get_recursive_if_not_exists(p));
-			Handle h(table->add(atom, false));
-			store->get_atom_values(h);
+			// Two different throws mighht be caught here:
+			// 1) DB has an atom type that is not defined in the atomspace.
+			//    In this case, makeAtom throws IOException.
+			// 2) Corrupted databases can cause get_recursive_if_not_exists
+			//    to throw, because a uuid does not exist. Yes, this can
+			//    happen.
+			// Either way, skip the offending atom, and carry on.
+			try
+			{
+				PseudoPtr p(store->makeAtom(*this, uuid));
 
-			// Force resolution in TLB, so that later removes work.
-			store->_tlbuf.addAtom(h, uuid);
+				Handle atom(store->get_recursive_if_not_exists(p));
+				Handle h(table->add(atom, false));
+
+				// Force resolution in TLB, so that later removes work.
+				store->_tlbuf.addAtom(h, uuid);
+
+				// Get the values only after TLB insertion!!
+				store->get_atom_values(h);
+			}
+			catch (const IOException& ex) {}
+
 			return false;
 		}
 
-		// Load an atom into the atom table, but only if it's not in
-		// it already.  The goal is to avoid clobbering the truth value
-		// that is currently in the AtomTable.  Adding an atom to the
-		// atom table that already exists causes the two TV's to be
-		// merged, which is probably not what was wanted...
+		// Load an atom into the atom table. Fetch all values on the
+		// atom, but NOT on its outgoing set!
 		bool load_if_not_exists_cb(void)
 		{
 			// printf ("---- New atom found ----\n");
 			rs->foreach_column(&Response::create_atom_column_cb, this);
 
-			if (nullptr == store->_tlbuf.getAtom(uuid))
+			Handle h(store->_tlbuf.getAtom(uuid));
+			if (nullptr == h)
 			{
 				PseudoPtr p(store->makeAtom(*this, uuid));
-				AtomPtr atom(get_recursive_if_not_exists(p));
-				Handle h = table->getHandle(atom);
+				Handle atom(store->get_recursive_if_not_exists(p));
+				h = table->getHandle(atom);
 				if (nullptr == h)
 				{
 					h = table->add(atom, false);
 					store->_tlbuf.addAtom(h, uuid);
 				}
 			}
+
+			// Clobber all values, including truth values.
+			store->get_atom_values(h);
 			return false;
 		}
 
-		HandleSeq *hvec;
+		std::vector<PseudoPtr> *pvec;
 		bool fetch_incoming_set_cb(void)
 		{
 			// printf ("---- New atom found ----\n");
@@ -201,46 +220,7 @@ class SQLAtomStorage::Response
 			// Note, unlike the above 'load' routines, this merely fetches
 			// the atoms, and returns a vector of them.  They are loaded
 			// into the atomspace later, by the caller.
-			PseudoPtr p(store->makeAtom(*this, uuid));
-			AtomPtr atom(get_recursive_if_not_exists(p));
-			hvec->emplace_back(atom->getHandle());
-			return false;
-		}
-
-		// Helper function for above.  The problem is that, when
-		// adding links of unknown provenance, it could happen that
-		// the outgoing set of the link has not yet been loaded.  In
-		// that case, we have to load the outgoing set first.
-		AtomPtr get_recursive_if_not_exists(PseudoPtr p)
-		{
-			if (classserver().isA(p->type, NODE))
-			{
-				NodePtr node(createNode(p->type, p->name));
-				store->_tlbuf.addAtom(node, p->uuid);
-				return node;
-			}
-			HandleSeq resolved_oset;
-			for (UUID idu : p->oset)
-			{
-				Handle h = store->_tlbuf.getAtom(idu);
-				if (h)
-				{
-					resolved_oset.emplace_back(h);
-					continue;
-				}
-				PseudoPtr po(store->petAtom(idu));
-				AtomPtr ra = get_recursive_if_not_exists(po);
-				resolved_oset.emplace_back(ra->getHandle());
-			}
-			LinkPtr link(createLink(resolved_oset, p->type));
-			store->_tlbuf.addAtom(link, p->uuid);
-			return link;
-		}
-
-		bool row_exists;
-		bool row_exists_cb(void)
-		{
-			row_exists = true;
+			pvec->emplace_back(store->makeAtom(*this, uuid));
 			return false;
 		}
 
@@ -304,7 +284,7 @@ class SQLAtomStorage::Response
 			}
 			else if (!strcmp(colname, "key"))
 			{
-				key = atoi(colvalue);
+				key = atol(colvalue);
 			}
 			return false;
 		}
@@ -317,7 +297,7 @@ class SQLAtomStorage::Response
 			if (nullptr == hkey)
 			{
 				PseudoPtr pu(store->petAtom(key));
-				hkey = get_recursive_if_not_exists(pu);
+				hkey = store->get_recursive_if_not_exists(pu);
 			}
 
 			ProtoAtomPtr pap = store->doUnpackValue(*this);
@@ -346,33 +326,7 @@ class SQLAtomStorage::Response
 			intval = strtoul(colvalue, NULL, 10);
 			return false;
 		}
-
-		// Get all handles in the database.
-		std::set<UUID>* id_set;
-		bool note_id_cb(void)
-		{
-			rs->foreach_column(&Response::note_id_column_cb, this);
-			return false;
-		}
-		bool note_id_column_cb(const char *colname, const char * colvalue)
-		{
-			// we're not going to bother to check the column name ...
-			UUID id = strtoul(colvalue, NULL, 10);
-			id_set->insert(id);
-			return false;
-		}
 };
-
-/* ================================================================ */
-
-bool SQLAtomStorage::idExists(const char * buff)
-{
-	Response rp(conn_pool);
-	rp.row_exists = false;
-	rp.exec(buff);
-	rp.rs->foreach_row(&Response::row_exists_cb, &rp);
-	return rp.row_exists;
-}
 
 /* ================================================================ */
 // Constructors
@@ -381,8 +335,12 @@ bool SQLAtomStorage::idExists(const char * buff)
 // I dunno -- std::thread::hardware_concurrency()  ???
 #define NUM_WB_QUEUES 8
 
+#define STORAGE_DEBUG 1
+
 void SQLAtomStorage::init(const char * uri)
 {
+	_uri = uri;
+
 	bool use_libpq = (0 == strncmp(uri, "postgres", 8));
 	bool use_odbc = (0 == strncmp(uri, "odbc", 4));
 
@@ -392,7 +350,7 @@ void SQLAtomStorage::init(const char * uri)
 	if (not use_libpq and not use_odbc)
 		throw IOException(TRACE_INFO, "Unknown URI '%s'\n", uri);
 
-	// Allow for one connection ber database-reader, and one connection
+	// Allow for one connection per database-reader, and one connection
 	// for each writer.  Make sure that there are more connections than
 	// there are writers, else both readers and writers starve.
 	_initial_conn_pool_size = std::thread::hardware_concurrency();
@@ -417,15 +375,14 @@ void SQLAtomStorage::init(const char * uri)
 
 	max_height = 0;
 	bulk_load = false;
-	_load_count = 0;
-	_store_count = 0;
+	bulk_store = false;
+	clear_stats();
 
 	for (int i=0; i< TYPEMAP_SZ; i++)
 	{
 		db_typename[i] = NULL;
 	}
 
-	local_id_cache_is_inited = false;
 	if (!connected()) return;
 
 	reserve();
@@ -439,25 +396,20 @@ void SQLAtomStorage::init(const char * uri)
 		do_store_single_atom(tvpred, 0);
 	}
 
-#define STORAGE_DEBUG 1
-#ifdef STORAGE_DEBUG
-	_num_get_nodes = 0;
-	_num_got_nodes = 0;
-	_num_get_links = 0;
-	_num_got_links = 0;
-	_num_get_insets = 0;
-	_num_get_inatoms = 0;
-	_num_node_updates = 0;
-	_num_node_inserts = 0;
-	_num_link_updates = 0;
-	_num_link_inserts = 0;
-#endif // STORAGE_DEBUG
+	// Special case for the pre-defined atomspaces.
+	table_id_cache.insert(1);
 }
 
 SQLAtomStorage::SQLAtomStorage(std::string uri)
 	: _write_queue(this, &SQLAtomStorage::vdo_store_atom, NUM_WB_QUEUES)
 {
 	init(uri.c_str());
+
+	// Use a bigger buffer than the default. Assuming that the hardware
+	// can so 1K atom stores/sec or better, this gives a 1/3 second
+	// backlog of unwritten stuff, which seems like an OK situation,
+	// to me.
+	_write_queue.set_watermarks(300, 50);
 }
 
 SQLAtomStorage::~SQLAtomStorage()
@@ -571,21 +523,21 @@ void SQLAtomStorage::store_atomtable_id(const AtomTable& at)
 
 #define STMTF(colname,fval) { \
 	char buff[BUFSZ]; \
-	snprintf(buff, BUFSZ, "%12.8g", fval); \
+	snprintf(buff, BUFSZ, "%22.16g", fval); \
 	STMT(colname, buff); \
 }
 
 /* ================================================================ */
 
 /// Delete the valuation, if it exists. This is required, in order
-/// to prevent garbage from accumulating in theValues table.
+/// to prevent garbage from accumulating in the Values table.
 /// It also simplifies, ever-so-slightly, the update of valuations.
 void SQLAtomStorage::deleteValuation(const Handle& key, const Handle& atom)
 {
 	char buff[BUFSZ];
 	snprintf(buff, BUFSZ,
 		"SELECT * FROM Valuations WHERE key = %lu AND atom = %lu;",
-		_tlbuf.getUUID(key), _tlbuf.getUUID(atom));
+		get_uuid(key), get_uuid(atom));
 
 	Response rp(conn_pool);
 	rp.vtype = 0;
@@ -599,7 +551,7 @@ void SQLAtomStorage::deleteValuation(const Handle& key, const Handle& atom)
 		while (p)
 		{
 			if (*p == '}' or *p == '\0') break;
-			VUID vu = atoi(p);
+			VUID vu = atol(p);
 			deleteValue(vu);
 			p = strchr(p, ',');
 			if (p) p++;
@@ -610,7 +562,7 @@ void SQLAtomStorage::deleteValuation(const Handle& key, const Handle& atom)
 	{
 		snprintf(buff, BUFSZ,
 			"DELETE FROM Valuations WHERE key = %lu AND atom = %lu;",
-			_tlbuf.getUUID(key), _tlbuf.getUUID(atom));
+			get_uuid(key), get_uuid(atom));
 
 		rp.exec(buff);
 	}
@@ -635,11 +587,17 @@ void SQLAtomStorage::storeValuation(const Handle& key,
 	std::string coda;
 
 	// Get UUID from the TLB.
+	UUID kuid = check_uuid(key);
+	if (TLB::INVALID_UUID == kuid)
+	{
+		do_store_atom(key);
+		kuid = get_uuid(key);
+	}
 	char kidbuff[BUFSZ];
-	snprintf(kidbuff, BUFSZ, "%lu", _tlbuf.getUUID(key));
+	snprintf(kidbuff, BUFSZ, "%lu", kuid);
 
 	char aidbuff[BUFSZ];
-	UUID auid = _tlbuf.getUUID(atom);
+	UUID auid = get_uuid(atom);
 	snprintf(aidbuff, BUFSZ, "%lu", auid);
 
 	// The prior valuation, if any, will be deleted firest,
@@ -651,7 +609,7 @@ void SQLAtomStorage::storeValuation(const Handle& key,
 	STMT("atom", aidbuff);
 
 	Type vtype = pap->getType();
-	STMTI("type", vtype);
+	STMTI("type", storing_typemap[vtype]);
 
 	if (classserver().isA(vtype, FLOAT_VALUE))
 	{
@@ -692,6 +650,8 @@ void SQLAtomStorage::storeValuation(const Handle& key,
 
 	rp.exec(insert.c_str());
 	rp.exec("COMMIT");
+
+	_valuation_stores++;
 }
 
 // Almost a cut-n-passte of the above, but different.
@@ -710,7 +670,7 @@ SQLAtomStorage::VUID SQLAtomStorage::storeValue(const ProtoAtomPtr& pap)
 	STMT("vuid", std::to_string(vuid));
 
 	Type vtype = pap->getType();
-	STMTI("type", vtype);
+	STMTI("type", storing_typemap[vtype]);
 
 	if (classserver().isA(vtype, FLOAT_VALUE))
 	{
@@ -737,6 +697,7 @@ SQLAtomStorage::VUID SQLAtomStorage::storeValue(const ProtoAtomPtr& pap)
 	Response rp(conn_pool);
 	rp.exec(qry.c_str());
 
+	_value_stores++;
 	return vuid;
 }
 
@@ -759,8 +720,8 @@ ProtoAtomPtr SQLAtomStorage::getValuation(const Handle& key,
 	char buff[BUFSZ];
 	snprintf(buff, BUFSZ,
 		"SELECT * FROM Valuations WHERE key = %lu AND atom = %lu;",
-		_tlbuf.getUUID(key),
-		_tlbuf.getUUID(atom));
+		get_uuid(key),
+		get_uuid(atom));
 
 	return doGetValue(buff);
 }
@@ -781,10 +742,13 @@ ProtoAtomPtr SQLAtomStorage::doGetValue(const char * buff)
 /// fetch is performed.
 ProtoAtomPtr SQLAtomStorage::doUnpackValue(Response& rp)
 {
+	// Convert from databasse type to C++ runtime type
+	Type vtype = loading_typemap[rp.vtype];
+
 	// We expect rp.strval to be of the form
 	// {aaa,"bb bb bb","ccc ccc ccc"}
 	// Split it along the commas.
-	if (rp.vtype == STRING_VALUE)
+	if (vtype == STRING_VALUE)
 	{
 		std::vector<std::string> strarr;
 		char *s = strdup(rp.strval);
@@ -813,8 +777,8 @@ ProtoAtomPtr SQLAtomStorage::doUnpackValue(Response& rp)
 
 	// We expect rp.fltval to be of the form
 	// {1.1,2.2,3.3}
-	if ((rp.vtype == FLOAT_VALUE)
-	    or classserver().isA(rp.vtype, TRUTH_VALUE))
+	if ((vtype == FLOAT_VALUE)
+	    or classserver().isA(vtype, TRUTH_VALUE))
 	{
 		std::vector<double> fltarr;
 		char *p = (char *) rp.fltval;
@@ -826,15 +790,15 @@ ProtoAtomPtr SQLAtomStorage::doUnpackValue(Response& rp)
 			fltarr.emplace_back(flt);
 			p++; // skip over  comma
 		}
-		if (rp.vtype == FLOAT_VALUE)
+		if (vtype == FLOAT_VALUE)
 			return createFloatValue(fltarr);
 		else
-			return ProtoAtomCast(TruthValue::factory(rp.vtype, fltarr));
+			return ProtoAtomCast(TruthValue::factory(vtype, fltarr));
 	}
 
 	// We expect rp.lnkval to be a comma-separated list of
 	// vuid's, which we then fetch recursively.
-	if (rp.vtype == LINK_VALUE)
+	if (vtype == LINK_VALUE)
 	{
 		std::vector<ProtoAtomPtr> lnkarr;
 		const char *p = rp.lnkval;
@@ -842,7 +806,7 @@ ProtoAtomPtr SQLAtomStorage::doUnpackValue(Response& rp)
 		while (p)
 		{
 			if (*p == '}' or *p == '\0') break;
-			VUID vu = atoi(p);
+			VUID vu = atol(p);
 			ProtoAtomPtr pap = getValue(vu);
 			lnkarr.emplace_back(pap);
 			p = strchr(p, ',');
@@ -851,7 +815,7 @@ ProtoAtomPtr SQLAtomStorage::doUnpackValue(Response& rp)
 		return createLinkValue(lnkarr);
 	}
 
-	throw IOException(TRACE_INFO, "Unexpected value type!");
+	throw IOException(TRACE_INFO, "Unexpected value type=%d", rp.vtype);
 	return nullptr;
 }
 
@@ -874,7 +838,7 @@ void SQLAtomStorage::deleteValue(VUID vuid)
 		while (p)
 		{
 			if (*p == '}' or *p == '\0') break;
-			VUID vu = atoi(p);
+			VUID vu = atol(p);
 			deleteValue(vu);
 			p = strchr(p, ',');
 			if (p) p++;
@@ -891,6 +855,8 @@ void SQLAtomStorage::store_atom_values(const Handle& atom)
 	std::set<Handle> keys = atom->getKeys();
 	for (const Handle& key: keys)
 	{
+		// Skip the truth-value; it's special-cased below.
+		if (key == tvpred) continue;
 		ProtoAtomPtr pap = atom->getValue(key);
 		storeValuation(key, atom, pap);
 	}
@@ -898,8 +864,7 @@ void SQLAtomStorage::store_atom_values(const Handle& atom)
 	// Special-case for TruthValues. Can we get rid of this someday?
 	TruthValuePtr tv(atom->getTruthValue());
 
-	// XXX This is wasteful of performance; do we really
-	// need to do this?
+	// Don't clog storage with default TV's
 	if (tv->isDefaultTV())
 	{
 		deleteValuation(tvpred, atom);
@@ -917,7 +882,7 @@ void SQLAtomStorage::get_atom_values(Handle& atom)
 	char buff[BUFSZ];
 	snprintf(buff, BUFSZ,
 		"SELECT * FROM Valuations WHERE atom = %lu;",
-		_tlbuf.getUUID(atom));
+		get_uuid(atom));
 
 	Response rp(conn_pool);
 	rp.exec(buff);
@@ -953,10 +918,18 @@ int SQLAtomStorage::get_height(const Handle& atom)
 
 /* ================================================================ */
 
-UUID SQLAtomStorage::get_uuid(const Handle& h)
+/// Return the UUID of the handle, if it is known.
+/// If the handle is in the database, then the correct UUID is returned.
+/// If the handle is NOT in the database, this returns the invalid UUID.
+UUID SQLAtomStorage::check_uuid(const Handle& h)
 {
 	UUID uuid = _tlbuf.getUUID(h);
 	if (TLB::INVALID_UUID != uuid) return uuid;
+
+	// Optimize for bulk stores. That is, we know for a fact that
+	// the database cannot possibly contain this atom yet, so do
+	// not query for it!
+	if (bulk_store) return TLB::INVALID_UUID;
 
 	// Ooops. We need to find out what this is.
 	Handle dbh;
@@ -971,8 +944,22 @@ UUID SQLAtomStorage::get_uuid(const Handle& h)
 	// If it was found, then the TLB got updated.
 	if (dbh) return _tlbuf.getUUID(h);
 
-	// If it was not found, then issue a brand-spankin new UUID.
-	return _tlbuf.addAtom(h, TLB::INVALID_UUID);
+	// If it was not found, then say so.
+	return TLB::INVALID_UUID;
+}
+
+/// Return the UUID of the handle, if it is known, else throw exception.
+/// If the handle is in the database, then the correct UUID is returned.
+/// If the handle is NOT in the database, this throws a silent exception.
+UUID SQLAtomStorage::get_uuid(const Handle& h)
+{
+	UUID uuid = check_uuid(h);
+	if (TLB::INVALID_UUID != uuid) return uuid;
+
+	// Throw a silent exception; don't clutter log-files with this!
+	throw NotFoundException(TRACE_INFO, "");
+
+	return TLB::INVALID_UUID;
 }
 
 std::string SQLAtomStorage::oset_to_string(const HandleSeq& out)
@@ -1036,7 +1023,7 @@ std::string SQLAtomStorage::link_to_string(const LinkValuePtr& lvle)
 
 /// Drain the pending store queue.
 ///
-/// Caution: this is ptentially racey in two different ways.
+/// Caution: this is potentially racey in two different ways.
 /// First, there is a small window in the async_caller implementation,
 /// where, if the timing is just so, the barrier might return before
 /// the last element is written.  Technically, that's a bug, but its
@@ -1054,10 +1041,9 @@ void SQLAtomStorage::flushStoreQueue()
 
 /* ================================================================ */
 /**
- * Recursively store the indicated atom, and all that it points to.
- * Store its truth values too. The recursive store is unconditional;
- * its assumed that all sorts of underlying truuth values have changed,
- * so that the whole thing needs to be stored.
+ * Recursively store the indicated atom and all of the values attached
+ * to it.  Also store it's outgoing set, and all of the values attached
+ * to those atoms.  The recursive store is unconditional.
  *
  * By default, the actual store is done asynchronously (in a different
  * thread); this routine merely queues up the atom. If the synchronous
@@ -1066,20 +1052,21 @@ void SQLAtomStorage::flushStoreQueue()
  */
 void SQLAtomStorage::storeAtom(const Handle& h, bool synchronous)
 {
-	get_ids();
-
 	// If a synchronous store, avoid the queues entirely.
 	if (synchronous)
 	{
 		do_store_atom(h);
+		store_atom_values(h);
 		return;
 	}
-	_write_queue.enqueue(h);
+	// _write_queue.enqueue(h);
+	_write_queue.insert(h);
 }
 
 /**
  * Synchronously store a single atom. That is, the actual store is done
  * in the calling thread.  All values attached to the atom are also
+ * stored. All values attached to atoms in the outgoing set are also
  * stored.
  *
  * Returns the height of the atom.
@@ -1089,7 +1076,6 @@ int SQLAtomStorage::do_store_atom(const Handle& h)
 	if (h->isNode())
 	{
 		do_store_single_atom(h, 0);
-		store_atom_values(h);
 		return 0;
 	}
 
@@ -1105,18 +1091,18 @@ int SQLAtomStorage::do_store_atom(const Handle& h)
 	// atom in outgoing set.
 	lheight ++;
 	do_store_single_atom(h, lheight);
-	store_atom_values(h);
 	return lheight;
 }
 
 void SQLAtomStorage::vdo_store_atom(const Handle& h)
 {
 	do_store_atom(h);
+	store_atom_values(h);
 }
 
 /* ================================================================ */
 /**
- * Store just this one single atom (and its truth value).
+ * Store just this one single atom.
  * Atoms in the outgoing set are NOT stored!
  * The store is performed synchronously (in the calling thread).
  */
@@ -1124,18 +1110,20 @@ void SQLAtomStorage::do_store_single_atom(const Handle& h, int aheight)
 {
 	setup_typemap();
 
+	std::lock_guard<std::mutex> create_lock(_store_mutex);
+
+	UUID uuid = check_uuid(h);
+	if (TLB::INVALID_UUID != uuid) return;
+
+	// If it was not found, then issue a brand-spankin new UUID.
+	uuid = _tlbuf.addAtom(h, TLB::INVALID_UUID);
+
+	std::string uuidbuff = std::to_string(uuid);
+
 	bool notfirst = false;
 	std::string cols;
 	std::string vals;
 	std::string coda;
-
-	// Use the TLB Handle as the UUID.
-	UUID uuid = _tlbuf.addAtom(h, TLB::INVALID_UUID);
-
-	std::string uuidbuff = std::to_string(uuid);
-
-	std::unique_lock<std::mutex> lck = maybe_create_id(uuid);
-	if (not lck.owns_lock()) return;
 
 	cols = "INSERT INTO Atoms (";
 	vals = ") VALUES (";
@@ -1168,7 +1156,7 @@ void SQLAtomStorage::do_store_single_atom(const Handle& h, int aheight)
 	STMTI("type", dbtype);
 
 	// Store the node name, if its a node
-	if (h->isNode())
+	if (0 == aheight)
 	{
 		// Use postgres $-quoting to make unicode strings
 		// easier to deal with.
@@ -1242,9 +1230,16 @@ void SQLAtomStorage::do_store_single_atom(const Handle& h, int aheight)
 		rp.exec(qry.c_str());
 	}
 
-	// Make note of the fact that this atom has been stored.
-	add_id_to_cache(uuid);
 	_store_count ++;
+
+	if (bulk_store and _store_count%100000 == 0)
+	{
+		time_t secs = time(0) - bulk_start;
+		double rate = ((double) _store_count) / secs;
+		unsigned long kays = ((unsigned long) _store_count) / 1000;
+		printf("\tStored %luK atoms in %d seconds (%d per second)\n",
+			kays, (int) secs, (int) rate);
+	}
 }
 
 /* ================================================================ */
@@ -1363,113 +1358,6 @@ void SQLAtomStorage::set_typemap(int dbval, const char * tname)
 /* ================================================================ */
 
 /**
- * Add a single UUID to the ID cache. Thread-safe.
- * This also unlocks the id-creation lock, if it was being held.
- */
-void SQLAtomStorage::add_id_to_cache(UUID uuid)
-{
-	std::unique_lock<std::mutex> lock(id_cache_mutex);
-	local_id_cache.insert(uuid);
-
-	// If we were previously making this ID, then we are done.
-	// The other half of this is in maybe_create_id() below.
-	if (0 < id_create_cache.count(uuid))
-	{
-		id_create_cache.erase(uuid);
-	}
-}
-
-/**
- * This returns a lock that is either locked, or not, depending on
- * whether we think that the database already knows about this UUID,
- * or not.  We do this because we can use an SQL INSERT only once,
- * and we have to avoid the case of two threads, each trying to
- * perform an INSERT in the same ID.  We do this by taking the
- * id_create_mutex, so that only one writer ever gets told that
- * its a new ID.
- */
-std::unique_lock<std::mutex> SQLAtomStorage::maybe_create_id(UUID uuid)
-{
-	std::unique_lock<std::mutex> create_lock(id_create_mutex);
-	std::unique_lock<std::mutex> cache_lock(id_cache_mutex);
-	// Look at the local cache of id's to see if the atom is in storage or not.
-	if (0 < local_id_cache.count(uuid))
-		return std::unique_lock<std::mutex>();
-
-	// Is some other thread in the process of adding this ID?
-	if (0 < id_create_cache.count(uuid))
-	{
-		cache_lock.unlock();
-		while (true)
-		{
-			// If we are here, some other thread is making this UUID,
-			// and so we need to wait till they're done. Wait by stalling
-			// on the creation lock.
-			std::unique_lock<std::mutex> local_create_lock(id_create_mutex);
-			// If we are here, then someone finished creating some UUID.
-			// Was it our ID? If so, we are done; if not, wait some more.
-			cache_lock.lock();
-			if (0 == id_create_cache.count(uuid))
-			{
-				OC_ASSERT(0 < local_id_cache.count(uuid),
-					"Atom for UUID was not created!");
-				return std::unique_lock<std::mutex>();
-			}
-			cache_lock.unlock();
-		}
-	}
-
-	// If we are here, then no one has attempted to make this UUID before.
-	// Grab the maker lock, and make the damned thing already.
-	id_create_cache.insert(uuid);
-	return create_lock;
-}
-
-/**
- * Build up a client-side cache of all atom id's in storage
- */
-void SQLAtomStorage::get_ids(void)
-{
-	std::unique_lock<std::mutex> lock(id_cache_mutex);
-
-	if (local_id_cache_is_inited) return;
-	local_id_cache_is_inited = true;
-
-	local_id_cache.clear();
-	Response rp(conn_pool);
-
-	// It appears that, when the select statment returns more than
-	// about a 100K to a million atoms or so, some sort of heap
-	// corruption occurs in the odbc code, causing future mallocs
-	// to fail. So limit the number of records processed in one go.
-	// It also appears that asking for lots of records increases
-	// the memory fragmentation (and/or there's a memory leak in odbc??)
-#define USTEP 12003
-	unsigned long rec;
-	unsigned long max_nrec = getMaxObservedUUID();
-	for (rec = 0; rec <= max_nrec; rec += USTEP)
-	{
-		char buff[BUFSZ];
-		snprintf(buff, BUFSZ, "SELECT uuid FROM Atoms WHERE "
-		         "uuid > %lu AND uuid <= %lu;",
-		         rec, rec+USTEP);
-
-		rp.id_set = &local_id_cache;
-		rp.exec(buff);
-		rp.rs->foreach_row(&Response::note_id_cb, &rp);
-	}
-
-	// Also get the ID's of the spaces that are in use.
-	table_id_cache.clear();
-
-	rp.id_set = &table_id_cache;
-	rp.exec("SELECT space FROM Spaces;");
-	rp.rs->foreach_row(&Response::note_id_cb, &rp);
-}
-
-/* ================================================================ */
-
-/**
  * One-size-fits-all atom fetcher.
  * Given an SQL query string, this will return a single atom.
  * It does NOT fetch values.
@@ -1499,41 +1387,133 @@ SQLAtomStorage::PseudoPtr SQLAtomStorage::petAtom(UUID uuid)
 	return getAtom(buff, -1);
 }
 
+/// Get the full outgoing set, recursively.
+/// When adding links of unknown provenance, it could happen that
+/// the outgoing set of the link has not yet been loaded.  In
+/// that case, we have to load the outgoing set first.
+///
+/// Note that this does NOT fetch any values!
+Handle SQLAtomStorage::get_recursive_if_not_exists(PseudoPtr p)
+{
+	if (classserver().isA(p->type, NODE))
+	{
+		Handle h(_tlbuf.getAtom(p->uuid));
+		if (h) return h;
+
+		NodePtr node(createNode(p->type, p->name));
+		_tlbuf.addAtom(node, p->uuid);
+		_num_rec_nodes ++;
+		return node->getHandle();
+	}
+	HandleSeq resolved_oset;
+	for (UUID idu : p->oset)
+	{
+		Handle h(_tlbuf.getAtom(idu));
+		if (h)
+		{
+			resolved_oset.emplace_back(h);
+			continue;
+		}
+		PseudoPtr po(petAtom(idu));
+
+		// Corrupted databases can have outoging sets that refer
+		// to non-existent atoms. This is rare, but has happened.
+		// WIthout this check, the null-pointer deref will crash.
+		if (nullptr == po)
+			throw IOException(TRACE_INFO,
+				"SQLAtomStorage::get_recursive_if_not_exists: "
+				"Corrupt database; no atom for uuid=%lu", idu);
+
+		Handle ha(get_recursive_if_not_exists(po));
+		resolved_oset.emplace_back(ha);
+	}
+	LinkPtr link(createLink(resolved_oset, p->type));
+	_tlbuf.addAtom(link, p->uuid);
+	_num_rec_links++;
+	return link->getHandle();
+}
+
+/**
+ * Retreive the incoming set of the indicated atom.
+ */
+void SQLAtomStorage::getIncoming(AtomTable& table, const char *buff)
+{
+	std::vector<PseudoPtr> pset;
+	Response rp(conn_pool);
+	rp.store = this;
+	rp.height = -1;
+	rp.pvec = &pset;
+	rp.exec(buff);
+	rp.rs->foreach_row(&Response::fetch_incoming_set_cb, &rp);
+
+	HandleSeq iset;
+	std::mutex iset_mutex;
+
+	// A parallel fetch is much much faster, esp for big osets.
+	// std::for_each(std::execution::par_unseq, ... requires C++17
+	OMP_ALGO::for_each(pset.begin(), pset.end(),
+		[&] (const PseudoPtr& p)
+	{
+		Handle hi(get_recursive_if_not_exists(p));
+		hi = table.add(hi, false);
+		_tlbuf.addAtom(hi, p->uuid);
+		get_atom_values(hi);
+		std::lock_guard<std::mutex> lck(iset_mutex);
+		iset.emplace_back(hi);
+	});
+
+#ifdef STORAGE_DEBUG
+	_num_get_insets++;
+	_num_get_inlinks += iset.size();
+#endif // STORAGE_DEBUG
+}
+
 /**
  * Retreive the entire incoming set of the indicated atom.
  */
-HandleSeq SQLAtomStorage::getIncomingSet(const Handle& h)
+void SQLAtomStorage::getIncomingSet(AtomTable& table, const Handle& h)
 {
-	HandleSeq iset;
+	// If the uuid is not known, then the atom is not in storage,
+	// and therefore, cannot have an incoming set.  Just return.
+	UUID uuid = check_uuid(h);
+	if (TLB::INVALID_UUID == uuid) return;
 
-	setup_typemap();
-
-	UUID uuid = _tlbuf.addAtom(h, TLB::INVALID_UUID);
 	char buff[BUFSZ];
 	snprintf(buff, BUFSZ,
 		"SELECT * FROM Atoms WHERE outgoing @> ARRAY[CAST(%lu AS BIGINT)];",
 		uuid);
 
-	// Note: "select * from atoms where outgoing@>array[556];" will return
-	// all links with atom 556 in the outgoing set -- i.e. the incoming set of 556.
-	// Could also use && here instead of @> Don't know if one is faster or not.
-	// The cast to BIGINT is needed, as otherwise on gets
+	// Note: "select * from atoms where outgoing@>array[556];" will
+	// return all links with atom 556 in the outgoing set -- i.e. the
+	// incoming set of 556.  We could also use && here instead of @>
+	// but I don't know if this one is faster.
+	// The cast to BIGINT is needed, as otherwise one gets
 	// ERROR:  operator does not exist: bigint[] @> integer[]
 
-	Response rp(conn_pool);
-	rp.store = this;
-	rp.height = -1;
-	rp.hvec = &iset;
-	rp.exec(buff);
-	rp.rs->foreach_row(&Response::fetch_incoming_set_cb, &rp);
-
-#ifdef STORAGE_DEBUG
-	_num_get_insets++;
-	_num_get_inatoms += iset.size();
-#endif // STORAGE_DEBUG
-
-	return iset;
+	getIncoming(table, buff);
 }
+
+/**
+ * Retreive the incoming set of the indicated atom, but only those atoms
+ * of type t.
+ */
+void SQLAtomStorage::getIncomingByType(AtomTable& table, const Handle& h, Type t)
+{
+	// If the uuid is not known, then the atom is not in storage,
+	// and therefore, cannot have an incoming set.  Just return.
+	UUID uuid = check_uuid(h);
+	if (TLB::INVALID_UUID == uuid) return;
+
+	int dbtype = storing_typemap[t];
+
+	char buff[BUFSZ];
+	snprintf(buff, BUFSZ,
+		"SELECT * FROM Atoms WHERE type = %d AND outgoing @> ARRAY[CAST(%lu AS BIGINT)];",
+		dbtype, uuid);
+
+	getIncoming(table, buff);
+}
+
 
 /**
  * Fetch the Node with the indicated type and name.
@@ -1596,6 +1576,18 @@ Handle SQLAtomStorage::doGetLink(Type t, const HandleSeq& hseq)
 	if (TLB::INVALID_UUID != uuid)
 		return _tlbuf.getAtom(uuid);
 
+	// If the outgoing set is not yet known, then the link
+	// itself cannot possibly be known.
+	std::string ostr;
+	try
+	{
+		ostr = oset_to_string(hseq);
+	}
+	catch (const NotFoundException& ex)
+	{
+		return Handle();
+	}
+
 	// If we don't know it, then go get it's UUID.
 	setup_typemap();
 
@@ -1604,14 +1596,14 @@ Handle SQLAtomStorage::doGetLink(Type t, const HandleSeq& hseq)
 		"SELECT * FROM Atoms WHERE type = %hu AND outgoing = ",
 		storing_typemap[t]);
 
-	std::string ostr = buff;
-	ostr += oset_to_string(hseq);
-	ostr += ";";
+	std::string qstr = buff;
+	qstr += ostr;
+	qstr += ";";
 
 #ifdef STORAGE_DEBUG
 	_num_get_links++;
 #endif // STORAGE_DEBUG
-	PseudoPtr p = getAtom(ostr.c_str(), 1);
+	PseudoPtr p = getAtom(qstr.c_str(), 1);
 	if (nullptr == p) return Handle();
 
 #ifdef STORAGE_DEBUG
@@ -1672,12 +1664,15 @@ SQLAtomStorage::PseudoPtr SQLAtomStorage::makeAtom(Response &rp, UUID uuid)
 	atom->uuid = uuid;
 
 	_load_count ++;
-	if (bulk_load and _load_count%10000 == 0)
+	if (bulk_load and _load_count%100000 == 0)
 	{
-		printf("\tLoaded %lu atoms.\n", (unsigned long) _load_count);
+		time_t secs = time(0) - bulk_start;
+		double rate = ((double) _load_count) / secs;
+		unsigned long kays = ((unsigned long) _load_count) / 1000;
+		printf("\tLoaded %luK atoms in %d seconds (%d per second).\n",
+			kays, (int) secs, (int) rate);
 	}
 
-	add_id_to_cache(uuid);
 	return atom;
 }
 
@@ -1692,50 +1687,53 @@ void SQLAtomStorage::load(AtomTable &table)
 	max_height = getMaxObservedHeight();
 	printf("Max Height is %d\n", max_height);
 	bulk_load = true;
+	bulk_start = time(0);
 
 	setup_typemap();
 
-	Response rp(conn_pool);
-	rp.table = &table;
-	rp.store = this;
+#define NCHUNKS 300
+#define MINSTEP 10123
+	std::vector<unsigned long> steps;
+	unsigned long stepsize = MINSTEP + max_nrec/NCHUNKS;
+	for (unsigned long rec = 0; rec <= max_nrec; rec += stepsize)
+		steps.push_back(rec);
+
+	printf("Loading all atoms: "
+		"Max Height is %d stepsize=%lu chunks=%lu\n",
+		 max_height, stepsize, steps.size());
+
+	// Parallelize always.
+	opencog::setting_omp(opencog::num_threads(), 1);
 
 	for (int hei=0; hei<=max_height; hei++)
 	{
 		unsigned long cur = _load_count;
 
-#if GET_ONE_BIG_BLOB
-		char buff[BUFSZ];
-		snprintf(buff, BUFSZ, "SELECT * FROM Atoms WHERE height = %d;", hei);
-		rp.height = hei;
-		rp.exec(buff);
-		rp.rs->foreach_row(&Response::load_all_atoms_cb, &rp);
-#else
-		// It appears that, when the select statement returns more than
-		// about a 100K to a million atoms or so, some sort of heap
-		// corruption occurs in the iodbc code, causing future mallocs
-		// to fail. So limit the number of records processed in one go.
-		// It also appears that asking for lots of records increases
-		// the memory fragmentation (and/or there's a memory leak in iodbc??)
-		// XXX Not clear is UnixSQL suffers from this same problem.
-		// Whatever, seems to be a better strategy overall, anyway.
-#define STEP 12003
-		unsigned long rec;
-		for (rec = 0; rec <= max_nrec; rec += STEP)
+		OMP_ALGO::for_each(steps.begin(), steps.end(),
+			[&](unsigned long rec)
 		{
+			Response rp(conn_pool);
+			rp.table = &table;
+			rp.store = this;
 			char buff[BUFSZ];
 			snprintf(buff, BUFSZ, "SELECT * FROM Atoms WHERE "
 			         "height = %d AND uuid > %lu AND uuid <= %lu;",
-			         hei, rec, rec+STEP);
+			         hei, rec, rec+stepsize);
 			rp.height = hei;
 			rp.exec(buff);
 			rp.rs->foreach_row(&Response::load_all_atoms_cb, &rp);
-		}
-#endif
+		});
 		printf("Loaded %lu atoms at height %d\n", _load_count - cur, hei);
 	}
-	printf("Finished loading %lu atoms in total\n",
-		(unsigned long) _load_count);
+
+	time_t secs = time(0) - bulk_start;
+	double rate = ((double) _load_count) / secs;
+	printf("Finished loading %lu atoms in total in %d seconds (%d per second)\n",
+		(unsigned long) _load_count, (int) secs, (int) rate);
 	bulk_load = false;
+
+	// Put it back as it was.
+	opencog::setting_omp(opencog::num_threads());
 
 	// synchrnonize!
 	table.barrier();
@@ -1754,71 +1752,57 @@ void SQLAtomStorage::loadType(AtomTable &table, Type atom_type)
 		max_height = 0;
 	else
 		max_height = getMaxObservedHeight();
-	logger().debug("SQLAtomStorage::loadType: Max Height is %d\n", max_height);
 
 	setup_typemap();
 	int db_atom_type = storing_typemap[atom_type];
 
-	Response rp(conn_pool);
-	rp.table = &table;
-	rp.store = this;
+#define NCHUNKS 300
+#define MINSTEP 10123
+	std::vector<unsigned long> steps;
+	unsigned long stepsize = MINSTEP + max_nrec/NCHUNKS;
+	for (unsigned long rec = 0; rec <= max_nrec; rec += stepsize)
+		steps.push_back(rec);
+
+	logger().debug("SQLAtomStorage::loadType: "
+		"Max Height is %d stepsize=%lu chunks=%lu\n",
+		 max_height, stepsize, steps.size());
+
+	// Parallelize always.
+	opencog::setting_omp(opencog::num_threads(), 1);
 
 	for (int hei=0; hei<=max_height; hei++)
 	{
 		unsigned long cur = _load_count;
 
-#if GET_ONE_BIG_BLOB
-		char buff[BUFSZ];
-		snprintf(buff, BUFSZ,
-		         "SELECT * FROM Atoms WHERE height = %d AND type = %d;",
-		         hei, db_atom_type);
-		rp.height = hei;
-		rp.exec(buff);
-		rp.rs->foreach_row(&Response::load_if_not_exists_cb, &rp);
-#else
-		// It appears that, when the select statment returns more than
-		// about a 100K to a million atoms or so, some sort of heap
-		// corruption occurs in the iodbc code, causing future mallocs
-		// to fail. So limit the number of records processed in one go.
-		// It also appears that asking for lots of records increases
-		// the memory fragmentation (and/or there's a memory leak in iodbc??)
-		// XXX Not clear is UnixSQL suffers from this same problem.
-#define STEP 12003
-		unsigned long rec;
-		for (rec = 0; rec <= max_nrec; rec += STEP)
+		OMP_ALGO::for_each(steps.begin(), steps.end(),
+			[&](unsigned long rec)
 		{
+			Response rp(conn_pool);
+			rp.table = &table;
+			rp.store = this;
 			char buff[BUFSZ];
 			snprintf(buff, BUFSZ, "SELECT * FROM Atoms WHERE type = %d "
 			         "AND height = %d AND uuid > %lu AND uuid <= %lu;",
-			         db_atom_type, hei, rec, rec+STEP);
+			         db_atom_type, hei, rec, rec+stepsize);
 			rp.height = hei;
 			rp.exec(buff);
 			rp.rs->foreach_row(&Response::load_if_not_exists_cb, &rp);
-		}
-#endif
-		logger().debug("SQLAtomStorage::loadType: Loaded %lu atoms of type %d at height %d\n",
+		});
+		logger().debug("SQLAtomStorage::loadType: "
+		               "Loaded %lu atoms of type %d at height %d\n",
 			_load_count - cur, db_atom_type, hei);
 	}
 	logger().debug("SQLAtomStorage::loadType: Finished loading %lu atoms in total\n",
 		(unsigned long) _load_count);
 
+	// Put it back as it was.
+	opencog::setting_omp(opencog::num_threads());
+
 	// Synchronize!
 	table.barrier();
 }
 
-void SQLAtomStorage::store_cb(const Handle& h)
-{
-	get_ids();
-	int height = get_height(h);
-	do_store_single_atom(h, height);
-	store_atom_values(h);
-
-	if (_store_count%1000 == 0)
-	{
-		printf("\tStored %lu atoms.\n", (unsigned long) _store_count);
-	}
-}
-
+/// Store all of the atoms in the atom table.
 void SQLAtomStorage::store(const AtomTable &table)
 {
 	max_height = 0;
@@ -1829,21 +1813,38 @@ void SQLAtomStorage::store(const AtomTable &table)
 	create_tables();
 #endif
 
-	get_ids();
 	UUID max_uuid = _tlbuf.getMaxUUID();
 	printf("Max UUID is %lu\n", max_uuid);
+
+	// If we are storing to an absolutely empty database, then
+	// skip all UUID lookups completely!  This is not a safe
+	// operation for non-empty databases, but has a big performance
+	// impact for clean stores.
+	// uuid==1 is PredicateNode TruthValueKey
+	// uuid==2 is unissued.
+	if (2 >= max_uuid) bulk_store = true;
 
 	setup_typemap();
 	store_atomtable_id(table);
 
+	bulk_start = time(0);
+
+	// Try to knock out the nodes first, then the links.
 	table.foreachHandleByType(
-		[&](const Handle& h)->void { store_cb(h); }, ATOM, true);
+		[&](const Handle& h)->void { storeAtom(h); },
+		NODE, true);
 
-	Response rp(conn_pool);
-	rp.exec("VACUUM ANALYZE Atoms;");
+	table.foreachHandleByType(
+		[&](const Handle& h)->void { storeAtom(h); },
+		LINK, true);
 
-	printf("\tFinished storing %lu atoms total.\n",
-		(unsigned long) _store_count);
+	flushStoreQueue();
+	bulk_store = false;
+
+	time_t secs = time(0) - bulk_start;
+	double rate = ((double) _store_count) / secs;
+	printf("\tFinished storing %lu atoms total, in %d seconds (%d per second)\n",
+		(unsigned long) _store_count, (int) secs, (int) rate);
 }
 
 /* ================================================================ */
@@ -1926,10 +1927,9 @@ void SQLAtomStorage::kill_data(void)
 
 	rp.exec("INSERT INTO Spaces VALUES (0,0);");
 	rp.exec("INSERT INTO Spaces VALUES (1,1);");
-	id_create_cache.clear();
-	local_id_cache.clear();
 
 	// Special case for TruthValues - must always have this atom.
+	_tlbuf.clear();
 	do_store_single_atom(tvpred, 0);
 }
 
@@ -1969,67 +1969,110 @@ void SQLAtomStorage::reserve(void)
 	_tlbuf.reserve_upto(max_observed_id);
 }
 
+void SQLAtomStorage::clear_cache(void)
+{
+	_tlbuf.clear();
+	reserve();
+}
+
 /* ================================================================ */
+
+void SQLAtomStorage::set_hilo_watermarks(int hi, int lo)
+{
+	_write_queue.set_watermarks(hi, lo);
+}
+
+void SQLAtomStorage::set_stall_writers(bool stall)
+{
+	_write_queue.stall(stall);
+}
+
+void SQLAtomStorage::clear_stats(void)
+{
+	_load_count = 0;
+	_store_count = 0;
+	_valuation_stores = 0;
+	_value_stores = 0;
+
+	_write_queue.clear_stats();
+
+#ifdef STORAGE_DEBUG
+	_num_get_nodes = 0;
+	_num_got_nodes = 0;
+	_num_rec_nodes = 0;
+	_num_get_links = 0;
+	_num_got_links = 0;
+	_num_rec_links = 0;
+	_num_get_insets = 0;
+	_num_get_inlinks = 0;
+	_num_node_inserts = 0;
+	_num_link_inserts = 0;
+#endif // STORAGE_DEBUG
+}
 
 void SQLAtomStorage::print_stats(void)
 {
-	printf("\n");
+	printf("sql-stats: currently open URI: %s\n", _uri.c_str());
 	size_t load_count = _load_count;
 	size_t store_count = _store_count;
 	double frac = store_count / ((double) load_count);
 	printf("sql-stats: total loads = %lu total stores = %lu ratio=%f\n",
 	       load_count, store_count, frac);
+
+	size_t valuation_stores = _valuation_stores;
+	size_t value_stores = _value_stores;
+	printf("sql-stats: valuation updates = %lu value updates = %lu\n",
+	       valuation_stores, value_stores);
 	printf("\n");
 
 #ifdef STORAGE_DEBUG
 	size_t num_get_nodes = _num_get_nodes;
 	size_t num_got_nodes = _num_got_nodes;
+	size_t num_rec_nodes = _num_rec_nodes;
 	size_t num_get_links = _num_get_links;
 	size_t num_got_links = _num_got_links;
+	size_t num_rec_links = _num_rec_links;
 	size_t num_get_insets = _num_get_insets;
-	size_t num_get_inatoms = _num_get_inatoms;
+	size_t num_get_inlinks = _num_get_inlinks;
 	size_t num_node_inserts = _num_node_inserts;
-	size_t num_node_updates = _num_node_updates;
 	size_t num_link_inserts = _num_link_inserts;
-	size_t num_link_updates = _num_link_updates;
 
 	frac = 100.0 * num_got_nodes / ((double) num_get_nodes);
 	printf("num_get_nodes=%lu num_got_nodes=%lu (%f pct)\n",
 	       num_get_nodes, num_got_nodes, frac);
+	printf("num_recursive_nodes=%lu\n", num_rec_nodes);
 
 	frac = 100.0 * num_got_links / ((double) num_get_links);
 	printf("num_get_links=%lu num_got_links=%lu (%f pct)\n",
 	       num_get_links, num_got_links, frac);
+	printf("num_recursive_links=%lu\n", num_rec_links);
 
-	frac = num_get_inatoms / ((double) num_get_insets);
-	printf("num_get_insets=%lu num_get_inatoms=%lu ratio=%f\n",
-	       num_get_insets, num_get_inatoms, frac);
+	frac = num_get_inlinks / ((double) num_get_insets);
+	printf("num_get_incoming_sets=%lu set total=%lu avg set size=%f\n",
+	       num_get_insets, num_get_inlinks, frac);
 
-	frac = num_node_updates / ((double) num_node_inserts);
-	printf("num_node_inserts=%lu num_node_updates=%lu ratio=%f\n",
-	       num_node_inserts, num_node_updates, frac);
-
-	frac = num_link_updates / ((double) num_link_inserts);
-	printf("num_link_inserts=%lu num_link_updates=%lu ratio=%f\n",
-	       num_link_inserts, num_link_updates, frac);
-
-	unsigned long tot_node = num_node_inserts + num_node_updates;
-	unsigned long tot_link = num_link_inserts + num_link_updates;
-	frac = tot_node / ((double) tot_link);
+	unsigned long tot_node = num_node_inserts;
+	unsigned long tot_link = num_link_inserts;
+	frac = tot_link / ((double) tot_node);
 	printf("total stores for node=%lu link=%lu ratio=%f\n",
 	       tot_node, tot_link, frac);
 #endif // STORAGE_DEBUG
 
 	// Store queue performance
 	unsigned long item_count = _write_queue._item_count;
+	unsigned long duplicate_count = _write_queue._duplicate_count;
 	unsigned long flush_count = _write_queue._flush_count;
 	unsigned long drain_count = _write_queue._drain_count;
 	unsigned long drain_msec = _write_queue._drain_msec;
 	unsigned long drain_slowest_msec = _write_queue._drain_slowest_msec;
 	unsigned long drain_concurrent = _write_queue._drain_concurrent;
+	int high_water = _write_queue.get_high_watermark();
+	int low_water = _write_queue.get_low_watermark();
+	bool stalling = _write_queue.stalling();
 
-	double flush_frac = item_count / ((double) flush_count);
-	double fill_frac = item_count / ((double) drain_count);
+	double dupe_frac = duplicate_count / ((double) (item_count - duplicate_count));
+	double flush_frac = (item_count - duplicate_count) / ((double) flush_count);
+	double fill_frac = (item_count - duplicate_count) / ((double) drain_count);
 
 	unsigned long dentries = drain_count + drain_concurrent;
 	double drain_ratio = dentries / ((double) drain_count);
@@ -2037,27 +2080,31 @@ void SQLAtomStorage::print_stats(void)
 	double slowest = 0.001 * drain_slowest_msec;
 
 	printf("\n");
-	printf("write items=%lu flushes=%lu flush_ratio=%f\n",
-	       item_count, flush_count, flush_frac);
+	printf("hi-water=%d low-water=%d stalling=%s\n", high_water,
+	       low_water, stalling? "true" : "false");
+	printf("write items=%lu dup=%lu dupe_frac=%f flushes=%lu flush_ratio=%f\n",
+	       item_count, duplicate_count, dupe_frac, flush_count, flush_frac);
 	printf("drains=%lu fill_fraction=%f concurrency=%f\n",
 	       drain_count, fill_frac, drain_ratio);
 	printf("avg drain time=%f seconds; longest drain time=%f\n",
 	       drain_secs, slowest);
 
-	printf("\n");
 	printf("currently in_drain=%d num_busy=%lu queue_size=%lu\n",
 	       _write_queue._in_drain, _write_queue.get_busy_writers(),
-	       _write_queue.get_queue_size());
+	       _write_queue.get_size());
 
 	printf("current conn_pool free=%u of %d\n", conn_pool.size(),
 	       _initial_conn_pool_size);
 
 	// Some basic TLB statistics; could be improved;
 	// The TLB remapping theory needs some work...
-	size_t noh = 0;
+	// size_t noh = 0;
 	// size_t remap = 0;
 
 	UUID mad = _tlbuf.getMaxUUID();
+#if DONT_COUNT
+	This loop can lead to an apparent hang, when max UUID gets
+	// above a quarter-billion or so.  So don't do this.
 	for (UUID uuid = 1; uuid < mad; uuid++)
 	{
 		Handle h = _tlbuf.getAtom(uuid);
@@ -2069,6 +2116,7 @@ void SQLAtomStorage::print_stats(void)
 		if (hr != h) { remap++; }
 #endif
 	}
+#endif
 
 	printf("\n");
 	printf("sql-stats: tlbuf holds %lu atoms\n", _tlbuf.size());
@@ -2082,9 +2130,11 @@ void SQLAtomStorage::print_stats(void)
 	       remap, frac);
 #endif
 
-	frac = 100.0 * noh / ((double) mad);
-	printf("sql-stats: %lu of %lu uuids unused (%f pct)\n",
-	       noh, mad, frac);
+	mad -= 1;
+	size_t used = _tlbuf.size();
+	frac = 100.0 * used / ((double) mad);
+	printf("sql-stats: %lu of %lu reserved uuids used (%f pct)\n",
+	       used, mad, frac);
 }
 
 #endif /* HAVE_SQL_STORAGE */

@@ -217,8 +217,8 @@ static void thread_eval(AtomSpace* as,
 }
 
 static void thread_eval_tv(AtomSpace* as,
-                     const Handle& evelnk, AtomSpace* scratch,
-                     bool silent, TruthValuePtr* tv)
+                           const Handle& evelnk, AtomSpace* scratch,
+                           bool silent, TruthValuePtr* tv)
 {
 	*tv = EvaluationLink::do_eval_scratch(as, evelnk, scratch, silent);
 }
@@ -256,8 +256,9 @@ static void thread_eval_tv(AtomSpace* as,
 /// SequentialAndLink to work correctly, when moving down the sequence.
 ///
 TruthValuePtr EvaluationLink::do_eval_scratch(AtomSpace* as,
-                     const Handle& evelnk, AtomSpace* scratch,
-                     bool silent)
+                                              const Handle& evelnk,
+                                              AtomSpace* scratch,
+                                              bool silent)
 {
 	Type t = evelnk->getType();
 	if (EVALUATION_LINK == t)
@@ -275,9 +276,9 @@ TruthValuePtr EvaluationLink::do_eval_scratch(AtomSpace* as,
 
 		// The arguments may need to be executed...
 		Instantiator inst(scratch);
-		Handle args(inst.execute(sna.at(1)));
+		Handle args(inst.execute(sna.at(1), silent));
 
-		return do_evaluate(scratch, sna.at(0), args);
+		return do_evaluate(scratch, sna.at(0), args, silent);
 	}
 	else if (IDENTICAL_LINK == t)
 	{
@@ -421,7 +422,7 @@ TruthValuePtr EvaluationLink::do_eval_scratch(AtomSpace* as,
 			else
 			{
 				Instantiator inst(as);
-				Handle result(inst.execute(term));
+				Handle result(inst.execute(term, silent));
 				scratch->add_atom(result);
 			}
 		}
@@ -453,7 +454,7 @@ TruthValuePtr EvaluationLink::do_eval_scratch(AtomSpace* as,
 		Handle pvals = pl->get_values();
 		Instantiator inst(as);
 		// Step (1)
-		Handle gvals = inst.execute(pvals);
+		Handle gvals = inst.execute(pvals, silent);
 		if (gvals != pvals)
 		{
 			as->add_atom(gvals);
@@ -511,14 +512,16 @@ TruthValuePtr EvaluationLink::do_evaluate(AtomSpace* as,
 /// Expects the second handle of the sequence to be a ListLink
 /// Executes the GroundedPredicateNode, supplying the second handle as argument
 ///
-TruthValuePtr EvaluationLink::do_evaluate(AtomSpace* as, const HandleSeq& sna)
+TruthValuePtr EvaluationLink::do_evaluate(AtomSpace* as,
+                                          const HandleSeq& sna,
+                                          bool silent)
 {
 	if (2 != sna.size())
 	{
 		throw RuntimeException(TRACE_INFO,
 		     "Incorrect arity for an EvaluationLink!");
 	}
-	return do_evaluate(as, sna[0], sna[1]);
+	return do_evaluate(as, sna[0], sna[1], silent);
 }
 
 /// do_evaluate -- evaluate the GroundedPredicateNode of the EvaluationLink
@@ -528,7 +531,9 @@ TruthValuePtr EvaluationLink::do_evaluate(AtomSpace* as, const HandleSeq& sna)
 /// Executes the GroundedPredicateNode, supplying the args as argument
 ///
 TruthValuePtr EvaluationLink::do_evaluate(AtomSpace* as,
-                                    const Handle& pn, const Handle& cargs)
+                                          const Handle& pn,
+                                          const Handle& cargs,
+                                          bool silent)
 {
 	Type pntype = pn->getType();
 	if (DEFINED_PREDICATE_NODE == pntype)
@@ -556,7 +561,7 @@ TruthValuePtr EvaluationLink::do_evaluate(AtomSpace* as,
 		Handle reduct = lam->substitute(atype == LIST_LINK ?
 		                                cargs->getOutgoingSet()
 		                                : HandleSeq(1, cargs));
-		return do_evaluate(as, reduct);
+		return do_evaluate(as, reduct, silent);
 	}
 
 	if (GROUNDED_PREDICATE_NODE != pntype)
@@ -570,7 +575,7 @@ TruthValuePtr EvaluationLink::do_evaluate(AtomSpace* as,
 	// to do lazy execution correctly. Right now, forcing is the policy.
 	// We could add "scm-lazy:" and "py-lazy:" URI's for user-defined
 	// functions smart enough to do lazy evaluation.
-	Handle args = force_execute(as, cargs);
+	Handle args = force_execute(as, cargs, silent);
 
 	// Get the schema name.
 	const std::string& schema = pn->getName();

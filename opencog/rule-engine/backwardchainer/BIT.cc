@@ -109,8 +109,17 @@ AndBIT::~AndBIT() {}
 AndBIT AndBIT::expand(const Handle& leaf,
                       const RuleTypedSubstitutionPair& rule) const
 {
-	return AndBIT(expand_fcs(leaf, rule),
-	              expand_complexity(leaf, rule.first));
+	Handle new_fcs = expand_fcs(leaf, rule);
+	double new_cpx = expand_complexity(leaf, rule.first);
+
+	if (content_eq(fcs, new_fcs)) {
+		ure_logger().warn() << "The new FCS is equal to the old one. "
+		                    << "There is probably a bug. This expansion has "
+		                    << "been cancelled.";
+		return AndBIT();
+	}
+
+	return AndBIT(new_fcs, new_cpx);
 }
 
 BITNode* AndBIT::select_leaf()
@@ -632,14 +641,16 @@ AndBIT* BIT::expand(AndBIT& andbit, BITNode& bitleaf,
 	// Insert the rule as or-branch of this bitleaf
 	bitleaf.rules.insert(rule);
 
-	// Expand the and-BIT and insert it in the BIT
-	return insert(andbit.expand(bitleaf.body, rule));
+	// Expand the and-BIT and insert it in the BIT, if the expansion
+	// was successful
+	AndBIT new_andbit = andbit.expand(bitleaf.body, rule);
+	return (bool)new_andbit.fcs ? insert(new_andbit) : nullptr;
 }
 
 AndBIT* BIT::insert(const AndBIT& andbit)
 {
 	// Check that it isn't already in the BIT
-	if (boost::binary_search(andbits, andbit)) {
+	if (boost::find(andbits, andbit) != andbits.end()) {
 		LAZY_URE_LOG_DEBUG << "The following and-BIT is already in the BIT: "
 		                   << andbit.fcs->idToString();
 		return nullptr;

@@ -34,45 +34,17 @@
 
 namespace opencog {
 
-Unify::Context::Context(const Quotation& q, const OrderedHandleSet& s)
-	: quotation(q), shadow(s) {}
+const Unify::Partitions Unify::empty_partitions({});
 
-void Unify::Context::update(const Handle& h)
-{
-	Type t = h->getType();
-
-	// Update shadow
-	if (quotation.is_unquoted() and classserver().isA(t, SCOPE_LINK)) {
-		// Insert the new shadowing variables from the scope link
-		const Variables& variables = ScopeLinkCast(h)->get_variables();
-		shadow.insert(variables.varset.begin(), variables.varset.end());
-	}
-
-	// Update quotation
-	quotation.update(t);
-}
-
-bool Unify::Context::is_free_variable(const Handle& h) const
-{
-	return (h->getType() == VARIABLE_NODE)
-		and quotation.is_unquoted()
-		and not is_in(h, shadow);
-}
-
-bool Unify::Context::operator==(const Context& context) const
-{
-	return (quotation == context.quotation)
-		and ohs_content_eq(shadow, context.shadow);
-}
-
-bool Unify::Context::operator<(const Context& context) const
-{
-	return quotation < context.quotation
-		or (quotation == context.quotation and shadow < context.shadow);
-}
+const Unify::Partitions Unify::empty_partition_singleton({{}});
 
 Unify::CHandle::CHandle(const Handle& h, const Context& c)
 	: handle(h), context(c) {}
+
+bool Unify::CHandle::is_variable() const
+{
+	return handle->getType() == VARIABLE_NODE;
+}
 
 bool Unify::CHandle::is_free_variable() const
 {
@@ -84,6 +56,16 @@ OrderedHandleSet Unify::CHandle::get_free_variables() const
 	OrderedHandleSet free_vars =
 		opencog::get_free_variables(handle, context.quotation);
 	return set_difference(free_vars, context.shadow);
+}
+
+Context::VariablesStack::const_iterator
+Unify::CHandle::find_variables(const Handle& h) const
+{
+	return std::find_if(context.scope_variables.cbegin(),
+	                    context.scope_variables.cend(),
+	                    [&](const Variables& variables) {
+		                    return variables.is_in_varset(h);
+	                    });
 }
 
 bool Unify::CHandle::is_consumable() const
@@ -109,10 +91,34 @@ void Unify::CHandle::update()
 		handle = handle->getOutgoingAtom(0);
 }
 
-bool Unify::CHandle::is_satisfiable(const CHandle& ch) const
+bool Unify::CHandle::is_node_satisfiable(const CHandle& other) const
 {
-	return content_eq(handle, ch.handle)
-		and (get_free_variables() == ch.get_free_variables());
+	// If both are variable check whether they could be alpha
+	// equivalent, otherwise merely check for equality
+	if (is_variable() and other.is_variable())	{
+		// Make sure scope variable declarations are stored
+		OC_ASSERT(context.store_scope_variables,
+		          "You must store the scope variable declarations "
+		          "in order to use this method");
+
+		// Search variable declarations associated to the variables
+		Context::VariablesStack::const_iterator it = find_variables(handle),
+			other_it = other.find_variables(other.handle);
+		OC_ASSERT(it != context.scope_variables.cend(),
+		          "Contradicts the assumption that this->handle is not free");
+		OC_ASSERT(other_it != other.context.scope_variables.cend(),
+		          "Contradicts the assumption that other.handle is not free");
+
+		// Check that both variable declarations occured at the same level
+		if (std::distance(context.scope_variables.cbegin(), it)
+		    != std::distance(other.context.scope_variables.cbegin(), other_it))
+			return false;
+
+		// Check that the other variable is alpha convertible
+		return it->is_alpha_convertible(handle, other.handle, *other_it, true);
+	} else {
+		return content_eq(handle, other.handle);
+	}
 }
 
 bool Unify::CHandle::operator==(const CHandle& ch) const
@@ -122,16 +128,19 @@ bool Unify::CHandle::operator==(const CHandle& ch) const
 
 bool Unify::CHandle::operator<(const CHandle& ch) const
 {
-	return (handle < ch.handle) or (handle == ch.handle and context < ch.context);
+	return (handle < ch.handle) or
+		(handle == ch.handle and context < ch.context);
 }
 
-Unify::SolutionSet::SolutionSet(bool s, const Unify::Partitions& p)
-	: satisfiable(s), partitions(p) {}
+Unify::SolutionSet::SolutionSet(bool s)
+	: Partitions(s ? empty_partition_singleton : empty_partitions) {}
 
-bool Unify::SolutionSet::operator==(const SolutionSet& other) const
+Unify::SolutionSet::SolutionSet(const Unify::Partitions& p)
+	: Partitions(p) {}
+
+bool Unify::SolutionSet::is_satisfiable() const
 {
-	return satisfiable == other.satisfiable
-		and partitions == other.partitions;
+	return not empty();
 }
 
 Unify::Unify(const Handle& lhs, const Handle& rhs,
@@ -148,10 +157,10 @@ Unify::Unify(const Handle& lhs, const Handle& rhs,
 Unify::TypedSubstitutions Unify::typed_substitutions(const SolutionSet& sol,
                                                      const Handle& pre) const
 {
-	OC_ASSERT(sol.satisfiable);
+	OC_ASSERT(sol.is_satisfiable());
 
 	TypedSubstitutions result;
-	for (const Partition& partition : sol.partitions)
+	for (const Partition& partition : sol)
 		result.insert(typed_substitution(partition, pre));
 	return result;
 }
@@ -206,7 +215,7 @@ Unify::CHandle Unify::find_least_abstract(const TypedBlock& block,
 		if (inherit(ch, least_abstract) and
 		    // If h is a variable, only consider it as value
 		    // if it is in pre (stands for precedence)
-		    (ch.handle->getType() != VARIABLE_NODE
+		    (not ch.is_variable()
 		     or is_unquoted_unscoped_in_tree(pre, ch.handle))) {
 			least_abstract = ch;
 		}
@@ -481,7 +490,7 @@ Unify::SolutionSet Unify::operator()()
 {
 	// If the declaration is ill typed, there is no solution
 	if (not _variables.is_well_typed())
-		return SolutionSet(false);
+		return SolutionSet();
 
 	// It is well typed, perform the unification
 	return unify(_lhs, _rhs);
@@ -504,7 +513,7 @@ Unify::SolutionSet Unify::unify(const Handle& lh, const Handle& rh,
 
 	// Make sure both handles are defined
 	if (not lh or not rh)
-		return SolutionSet(false);
+		return SolutionSet();
 
 	CHandle lch(lh, lc);
 	CHandle rch(rh, rc);
@@ -513,12 +522,21 @@ Unify::SolutionSet Unify::unify(const Handle& lh, const Handle& rh,
 	if (lh->isNode() or rh->isNode()) {
 		// If one is a free variable and they are different, then
 		// unifies.
-		if ((lch.is_free_variable() or rch.is_free_variable())
-            // Ignore solutions like {X}->X
-            and lch != rch) {
-			return mkvarsol(lch, rch);
+		if (lch.is_free_variable() or rch.is_free_variable()) {
+			if (lch == rch) {
+				// Do not construct a solution like {X}->X to not
+				// overload the solution set.
+				//
+				// Since the context is taken into account they have
+				// the same context, thus if one of them is free, the
+				// other is free as well, therefore they are
+				// satisfiable.
+				return SolutionSet(true);
+			} else {
+				return mkvarsol(lch, rch);
+			}
 		} else
-			return SolutionSet(lch.is_satisfiable(rch));
+			return SolutionSet(lch.is_node_satisfiable(rch));
 	}
 
 	////////////////////////
@@ -549,14 +567,14 @@ Unify::SolutionSet Unify::unify(const Handle& lh, const Handle& rh,
 	// At least one of them is a link, check if they have the same
 	// type (e.i. do they match so far)
 	if (lt != rt)
-		return SolutionSet(false);
+		return SolutionSet();
 
 	// At this point they are both links of the same type, check that
 	// they have the same arity
 	Arity lh_arity(lh->getArity());
 	Arity rh_arity(rh->getArity());
 	if (lh_arity != rh_arity)
-		return SolutionSet(false);
+		return SolutionSet();
 
 	if (is_unordered(rh))
 		return unordered_unify(lh->getOutgoingSet(), rh->getOutgoingSet(), lc, rc);
@@ -574,23 +592,19 @@ Unify::SolutionSet Unify::unordered_unify(const HandleSeq& lhs,
 
 	// Base case
 	if (lhs_arity == 0)
-		return SolutionSet();
+		return SolutionSet(true);
 
 	// Recursive case
-	SolutionSet sol(false);
+	SolutionSet sol;
 	for (Arity i = 0; i < lhs_arity; ++i) {
 		auto head_sol = unify(lhs[i], rhs[0], lc, rc);
-		if (head_sol.satisfiable) {
+		if (head_sol.is_satisfiable()) {
 			HandleSeq lhs_tail(cp_erase(lhs, i));
 			HandleSeq rhs_tail(cp_erase(rhs, 0));
 			auto tail_sol = unordered_unify(lhs_tail, rhs_tail, lc, rc);
 			SolutionSet perm_sol = join(head_sol, tail_sol);
 			// Union merge satisfiable permutations
-			if (perm_sol.satisfiable) {
-				sol.satisfiable = true;
-				sol.partitions.insert(perm_sol.partitions.begin(),
-				                      perm_sol.partitions.end());
-			}
+			sol.insert(perm_sol.begin(), perm_sol.end());
 		}
 	}
 	return sol;
@@ -604,11 +618,11 @@ Unify::SolutionSet Unify::ordered_unify(const HandleSeq& lhs,
 	Arity rhs_arity(rhs.size());
 	OC_ASSERT(lhs_arity == rhs_arity);
 
-	SolutionSet sol;
+	SolutionSet sol(true);
 	for (Arity i = 0; i < lhs_arity; ++i) {
 		auto rs = unify(lhs[i], rhs[i], lc, rc);
 		sol = join(sol, rs);
-		if (not sol.satisfiable)     // Stop if unification has failed
+		if (not sol.is_satisfiable())     // Stop if unification has failed
 			break;
 	}
 	return sol;
@@ -616,11 +630,11 @@ Unify::SolutionSet Unify::ordered_unify(const HandleSeq& lhs,
 
 Unify::SolutionSet Unify::pairwise_unify(const std::set<CHandlePair>& pchs) const
 {
-	SolutionSet sol;
+	SolutionSet sol(true);
 	for (const CHandlePair& pch : pchs) {
 		auto rs = unify(pch.first, pch.second);
 		sol = join(sol, rs);
-		if (not sol.satisfiable)     // Stop if unification has failed
+		if (not sol.is_satisfiable())     // Stop if unification has failed
 			return sol;
 	}
 	return sol;
@@ -629,12 +643,12 @@ Unify::SolutionSet Unify::pairwise_unify(const std::set<CHandlePair>& pchs) cons
 Unify::SolutionSet Unify::comb_unify(const std::set<CHandle>& lhs,
                                      const std::set<CHandle>& rhs) const
 {
-	SolutionSet sol;
+	SolutionSet sol(true);
 	for (const CHandle& lch : lhs) {
 		for (const CHandle& rch : rhs) {
 			auto rs = unify(lch, rch);
 			sol = join(sol, rs);
-			if (not sol.satisfiable)     // Stop if unification has failed
+			if (not sol.is_satisfiable())     // Stop if unification has failed
 				return sol;
 		}
 	}
@@ -643,12 +657,12 @@ Unify::SolutionSet Unify::comb_unify(const std::set<CHandle>& lhs,
 
 Unify::SolutionSet Unify::comb_unify(const std::set<CHandle>& chs) const
 {
-	SolutionSet sol;
+	SolutionSet sol(true);
 	for (auto lit = chs.begin(); lit != chs.end(); ++lit) {
 		for (auto rit = std::next(lit); rit != chs.end(); ++rit) {
 			auto rs = unify(*lit, *rit);
 			sol = join(sol, rs);
-			if (not sol.satisfiable)     // Stop if unification has failed
+			if (not sol.is_satisfiable())     // Stop if unification has failed
 				return sol;
 		}
 	}
@@ -678,11 +692,11 @@ Unify::SolutionSet Unify::mkvarsol(CHandle lch, CHandle rch) const
 
 	Handle inter = type_intersection(lch, rch);
 	if (not inter)
-		return SolutionSet(false);
+		return SolutionSet();
 	else {
 		Block pblock{lch, rch};
 		Partitions par{{{pblock, inter}}};
-		return SolutionSet(true, par);
+		return SolutionSet(par);
 	}
 }
 
@@ -690,77 +704,65 @@ Unify::SolutionSet Unify::join(const SolutionSet& lhs,
                                const SolutionSet& rhs) const
 {
 	// No need to join if one of them is non satisfiable
-	if (not lhs.satisfiable or not rhs.satisfiable)
-		return SolutionSet(false);
+	if (not lhs.is_satisfiable() or not rhs.is_satisfiable())
+		return SolutionSet();
 
-	// No need to join if one of them is empty
-	if (rhs.partitions.empty())
-		return lhs;
-	if (lhs.partitions.empty())
-		return rhs;
-
-	// By now both are satisfiable and non empty, join them
+	// By now both are satisfiable, thus non empty, join them
 	SolutionSet result;
-	for (const Partition& rp : rhs.partitions) {
-		Partitions sol(join(lhs.partitions, rp));
-		result.partitions.insert(sol.begin(), sol.end());
+	for (const Partition& rp : rhs) {
+		SolutionSet sol(join(lhs, rp));
+		result.insert(sol.begin(), sol.end());
 	}
-
-	// If we get an empty join while the inputs where not empty then
-	// the join has failed
-	result.satisfiable = not result.partitions.empty();
 
 	return result;
 }
 
-Unify::Partitions Unify::join(const Partitions& lhs, const Partition& rhs) const
+Unify::SolutionSet Unify::join(const SolutionSet& lhs, const Partition& rhs) const
 {
 	// Base cases
 	if (rhs.empty())
 		return lhs;
-	if (lhs.empty())
-		return {rhs};
 
 	// Recursive case (a loop actually)
-	Partitions result;
+	SolutionSet result;
 	for (const auto& par : lhs) {
-		Partitions jps = join(par, rhs);
+		SolutionSet jps = join(par, rhs);
 		result.insert(jps.begin(), jps.end());
 	}
 	return result;
 }
 
-Unify::Partitions Unify::join(const Partition& lhs, const Partition& rhs) const
+Unify::SolutionSet Unify::join(const Partition& lhs, const Partition& rhs) const
 {
 	// Don't bother joining if lhs is empty (saves a bit of computation)
 	if (lhs.empty())
-		return {rhs};
+		return SolutionSet({rhs});
 
 	// Join
-	Partitions result{lhs};
+	SolutionSet result({lhs});
 	for (const TypedBlock& rhs_block : rhs) {
 		// For now we assume result has only 0 or 1 partition
 		result = join(result, rhs_block);
-		if (result.empty())
-			break;              // If empty, break cause not satisfiable
+		if (not result.is_satisfiable())
+			return SolutionSet();
 	}
 
 	return result;
 }
 
-Unify::Partitions Unify::join(const Partitions& partitions,
-                              const TypedBlock& block) const
+Unify::SolutionSet Unify::join(const SolutionSet& sol,
+                               const TypedBlock& block) const
 {
-	Partitions result;
-	for (const Partition& partition : partitions) {
-		Partitions jps = join(partition, block);
+	SolutionSet result;
+	for (const Partition& partition : sol) {
+		SolutionSet jps = join(partition, block);
 		result.insert(jps.begin(), jps.end());
 	}
 	return result;
 }
 
-Unify::Partitions Unify::join(const Partition& partition,
-                              const TypedBlock& block) const
+Unify::SolutionSet Unify::join(const Partition& partition,
+                               const TypedBlock& block) const
 {
 	// Find all partition blocks that have elements in common with block
 	TypedBlockSeq common_blocks;
@@ -772,11 +774,11 @@ Unify::Partitions Unify::join(const Partition& partition,
 	if (common_blocks.empty()) {
 		// If none then merely insert the independent block
 		jp.insert(block);
-		return {jp};
+		return SolutionSet({jp});
 	} else {
 		// Otherwise join block with all common blocks and replace
 		// them by the result (if satisfiable, otherwise return the
-		// empty partition)
+		// empty solution set)
 		TypedBlock j_block = join(common_blocks, block);
 		if (is_satisfiable(j_block)) {
 			for (const TypedBlock& rm : common_blocks)
@@ -786,15 +788,15 @@ Unify::Partitions Unify::join(const Partition& partition,
 			// Perform the sub-unification of all common blocks with
 			// block and join the solution set to jp
 			SolutionSet sol = subunify(common_blocks, block);
-			if (sol.satisfiable)
-				return join(sol.partitions, jp);
+			if (sol.is_satisfiable())
+				return join(sol, jp);
 		}
-		return Partitions();
+		return SolutionSet(false);
 	}
 }
 
 Unify::TypedBlock Unify::join(const TypedBlockSeq& common_blocks,
-                         const TypedBlock& block) const
+                              const TypedBlock& block) const
 {
 	std::pair<Block, Handle> result{block};
 	for (const auto& c_block : common_blocks) {
@@ -861,21 +863,6 @@ Unify::SolutionSet Unify::subunify(const TypedBlock& lhs,
 bool Unify::is_satisfiable(const TypedBlock& block) const
 {
 	return (bool)block.second;
-}
-
-bool ohs_content_eq(const OrderedHandleSet& lhs, const OrderedHandleSet& rhs)
-{
-	if (lhs.size() != rhs.size())
-		return false;
-
-	auto lit = lhs.begin();
-	auto rit = rhs.begin();
-	while (lit != lhs.end()) {
-		if (not content_eq(*lit, *rit))
-			return false;
-		++lit; ++rit;
-	}
-	return true;
 }
 
 bool hm_content_eq(const HandleMap& lhs, const HandleMap& rhs)
@@ -1087,17 +1074,6 @@ Handle merge_vardecl(const Handle& lhs_vardecl, const Handle& rhs_vardecl)
 	return new_vars.get_vardecl();
 }
 
-std::string oc_to_string(const Unify::Context& c)
-{
-	std::stringstream ss;
-	if (c == Unify::Context())
-		ss << "none" << std::endl;
-	else
-		ss << "quotation: " << oc_to_string(c.quotation) << std::endl
-		   << "shadow:" << std::endl << oc_to_string(c.shadow);
-	return ss.str();
-}
-
 std::string oc_to_string(const Unify::CHandle& ch)
 {
 	std::stringstream ss;
@@ -1156,14 +1132,6 @@ std::string oc_to_string(const Unify::Partitions& par)
 		ss << "typed partition[" << i << "]:" << std::endl << oc_to_string(el);
 		i++;
 	}
-	return ss.str();
-}
-
-std::string oc_to_string(const Unify::SolutionSet& sol)
-{
-	std::stringstream ss;
-	ss << "satisfiable: " << sol.satisfiable << std::endl
-	   << "partitions: " << std::endl << oc_to_string(sol.partitions);
 	return ss.str();
 }
 

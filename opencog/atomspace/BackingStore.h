@@ -63,10 +63,16 @@ class BackingStore
 		virtual Handle getNode(Type, const char *) const = 0;
 
 		/**
-		 * Return a vector containing the handles of the entire incoming
-		 * set of the indicated handle.
+		 * Put the entire incoming set of the indicated handle into
+		 * the atom table.
 		 */
-		virtual HandleSeq getIncomingSet(const Handle&) const = 0;
+		virtual void getIncomingSet(AtomTable&, const Handle&) = 0;
+
+		/**
+		 * Put all atoms of the given type in the incoming set of the
+		 * indicated handle into the atom table.
+		 */
+		virtual void getIncomingByType(AtomTable&, const Handle&, Type) = 0;
 
 		/**
 		 * Recursively store the atom and anything in it's outgoing set.

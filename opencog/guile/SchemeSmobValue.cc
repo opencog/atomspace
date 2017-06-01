@@ -12,6 +12,8 @@
 #include <opencog/atoms/base/FloatValue.h>
 #include <opencog/atoms/base/LinkValue.h>
 #include <opencog/atoms/base/StringValue.h>
+#include <opencog/atoms/base/Atom.h>
+#include <opencog/atoms/base/ClassServer.h>
 
 #include <opencog/guile/SchemeSmob.h>
 
@@ -240,6 +242,108 @@ SCM SchemeSmob::ss_value (SCM satom, SCM skey)
 	{
 		throw_exception(ex, "cog-value", scm_cons(satom, skey));
 	}
+	return SCM_EOL;
+}
+
+/* ============================================================== */
+/** Return a scheme list of the values associated with the value */
+
+#define CPPL_TO_SCML(VAL, FN) \
+	SCM list = SCM_EOL; \
+	for (int i = VAL.size()-1; i >= 0; i--) { \
+		SCM smob = FN(VAL[i]); \
+		list = scm_cons (smob, list); \
+	} \
+	return list;
+
+static SCM scm_from_string(const std::string& str)
+{
+	return scm_from_utf8_string(str.c_str());
+}
+
+SCM SchemeSmob::ss_value_to_list (SCM svalue)
+{
+	ProtoAtomPtr pa(verify_protom(svalue, "cog-value->list"));
+	Type t = pa->getType();
+
+	if (FLOAT_VALUE == t)
+	{
+		const std::vector<double>& v = FloatValueCast(pa)->value();
+		CPPL_TO_SCML(v, scm_from_double)
+	}
+
+	if (STRING_VALUE == t)
+	{
+		const std::vector<std::string>& v = StringValueCast(pa)->value();
+		CPPL_TO_SCML(v, scm_from_string)
+	}
+
+	if (LINK_VALUE == t)
+	{
+		const std::vector<ProtoAtomPtr>& v = LinkValueCast(pa)->value();
+		CPPL_TO_SCML(v, protom_to_scm)
+	}
+
+	if (classserver().isA(t, LINK))
+	{
+		const HandleSeq& v = AtomCast(pa)->getOutgoingSet();
+		CPPL_TO_SCML(v, handle_to_scm)
+	}
+
+	if (classserver().isA(t, NODE))
+	{
+		const std::string& name = AtomCast(pa)->getName();
+		return scm_cons(scm_from_utf8_string(name.c_str()), SCM_EOL);
+	}
+
+	return SCM_EOL;
+}
+
+SCM SchemeSmob::ss_value_ref (SCM svalue, SCM sindex)
+{
+	ProtoAtomPtr pa(verify_protom(svalue, "cog-value-ref"));
+   size_t index = verify_size(sindex, "cog-value-ref", 2);
+	Type t = pa->getType();
+
+	if (FLOAT_VALUE == t)
+	{
+		const std::vector<double>& v = FloatValueCast(pa)->value();
+		if (index < v.size()) return scm_from_double(v[index]);
+	}
+
+	if (STRING_VALUE == t)
+	{
+		const std::vector<std::string>& v = StringValueCast(pa)->value();
+		if (index < v.size()) return scm_from_string(v[index]);
+	}
+
+	if (LINK_VALUE == t)
+	{
+		const std::vector<ProtoAtomPtr>& v = LinkValueCast(pa)->value();
+		if (index < v.size()) return protom_to_scm(v[index]);
+	}
+
+	if (classserver().isA(t, LINK))
+	{
+		const HandleSeq& v = AtomCast(pa)->getOutgoingSet();
+		if (index < v.size()) return handle_to_scm(v[index]);
+	}
+
+	if (classserver().isA(t, NODE))
+	{
+		const std::string& name = AtomCast(pa)->getName();
+		if (0 == index) return scm_from_string(name);
+	}
+
+	SCM ilist = scm_cons(scm_from_int(index), SCM_EOL);
+	scm_error_scm(
+		scm_from_utf8_symbol("out-of-range"),
+		scm_from_utf8_string("cog-value-ref"),
+		scm_from_utf8_string("Index of ~A is out of range"),
+		ilist,
+		ilist);
+
+	// Hmm. scm_error never returns.
 	return SCM_EOL;
 }
 

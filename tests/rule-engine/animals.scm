@@ -50,7 +50,6 @@
       (Variable "$X")
       (Concept "yellow")))
 
-;KB
 (Evaluation (stv 1.0 1.0)
    (Predicate "croaks")
    (Concept "Fritz"))

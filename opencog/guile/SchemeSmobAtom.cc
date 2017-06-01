@@ -214,8 +214,32 @@ SCM SchemeSmob::ss_outgoing_set (SCM satom)
 	SCM list = SCM_EOL;
 	for (int i = oset.size()-1; i >= 0; i--)
 	{
-		Handle h = oset[i];
-		SCM smob = handle_to_scm(h);
+		SCM smob = handle_to_scm(oset[i]);
+		list = scm_cons (smob, list);
+	}
+
+	return list;
+}
+
+/* ============================================================== */
+/**
+ * Convert the outgoing set of an atom into a list;
+ * filter-accept only type, and return the list.
+ */
+SCM SchemeSmob::ss_outgoing_by_type (SCM satom, SCM stype)
+{
+	Handle h = verify_handle(satom, "cog-outgoing-by-type");
+	Type t = verify_atom_type(stype, "cog-outgoing-by-type", 2);
+
+	if (not h->isLink()) return SCM_EOL;
+
+	const HandleSeq& oset = h->getOutgoingSet();
+
+	SCM list = SCM_EOL;
+	for (int i = oset.size()-1; i >= 0; i--)
+	{
+		if (oset[i]->getType() != t) continue;
+		SCM smob = handle_to_scm(oset[i]);
 		list = scm_cons (smob, list);
 	}
 
@@ -229,7 +253,7 @@ SCM SchemeSmob::ss_outgoing_set (SCM satom)
 SCM SchemeSmob::ss_outgoing_atom (SCM satom, SCM spos)
 {
 	Handle h = verify_handle(satom, "cog-outgoing-atom");
-	size_t pos = verify_size(spos, "cog-outgoing-atom");
+	size_t pos = verify_size(spos, "cog-outgoing-atom", 2);
 
 	if (not h->isLink()) return SCM_EOL;
 
@@ -266,7 +290,7 @@ SCM SchemeSmob::ss_incoming_set (SCM satom)
 SCM SchemeSmob::ss_incoming_by_type (SCM satom, SCM stype)
 {
 	Handle h = verify_handle(satom, "cog-incoming-by-type");
-	Type t = verify_atom_type (stype, "cog-incoming-by-type");
+	Type t = verify_atom_type(stype, "cog-incoming-by-type", 2);
 
 	HandleSeq iset;
 	h->getIncomingSetByType(std::back_inserter(iset), t, false);

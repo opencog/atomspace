@@ -92,8 +92,8 @@ void UnquoteUTest::test_list(void)
 	Handle result = satisfying_set(&as, pat);
 	Handle expected = al(SET_LINK, simple_list);
 
-	logger().fine() << "result = " << result;
-	logger().fine() << "expected = " << expected;
+	logger().fine() << "result = " << result->toString();
+	logger().fine() << "expected = " << expected->toString();
 
 	TS_ASSERT_EQUALS(result, expected);
 
@@ -120,8 +120,8 @@ void UnquoteUTest::test_and_1(void)
 	Handle result = bindlink(&as, pat);
 	Handle expected = al(SET_LINK, simple_and);
 
-	logger().debug() << "result = " << result;
-	logger().debug() << "expected = " << expected;
+	logger().debug() << "result = " << result->toString();
+	logger().debug() << "expected = " << expected->toString();
 
 	TS_ASSERT_EQUALS(result, expected);
 

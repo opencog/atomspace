@@ -5,8 +5,8 @@
 ; Before running any inference you must load that file
 
 ; Load the rules (use load for relative path w.r.t. to that file)
-(load "rules/crisp-modus-ponens-rule.scm")
-(load "rules/crisp-deduction-rule.scm")
+(load "../rules/crisp-modus-ponens-rule.scm")
+(load "../rules/crisp-deduction-rule.scm")
 
 ; Define a new rule base (aka rule-based system)
 (define crisp-rbs (ConceptNode "crisp-rule-base"))
@@ -17,9 +17,12 @@
 
 ; Create helper functions to call the forward and backward chainer on
 ; that system
-(define default-focus-set (SetLink))
-(define (crisp-fc source) (cog-fc source crisp-rbs default-focus-set))
-(define (crisp-bc target) (cog-bc target crisp-rbs default-focus-set))
+(define undefined-focus-set (Set))
+(define undefined-vardecl (List))
+(define (crisp-fc source)
+  (cog-fc crisp-rbs source undefined-vardecl undefined-focus-set))
+(define (crisp-bc target)
+  (cog-bc crisp-rbs target undefined-vardecl undefined-focus-set))
 
 ; Associate the rules to the rule base (with weights, their semantics
 ; is currently undefined, we might settled with probabilities but it's
