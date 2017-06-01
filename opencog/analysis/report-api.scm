@@ -38,20 +38,46 @@
   stored.
 
   The implemented methods return the following values:
-  'left-dim       -- The number of rows
-  'right-dim      -- The number of columns
-  'num-pairs      -- The number of non-zero entries
-  'left-entropy   -- The sum H_left = -sum_x P(x,*) log_2 P(x,*)
-  'right-entropy  -- The sum H_right = -sum_y P(*,y) log_2 P(*,y)
-  'total-entropy  -- The sum H_tot = sum_x sum_y P(x,y) log_2 P(x,y)
-  'total-mi       -- The sum MI = H_tot - H_left - H_right
+  'left-dim         -- The number of rows
+  'right-dim        -- The number of columns
+  'num-pairs        -- The number of non-zero entries
+  'total-count      -- Total number fo observations on all pairs
+                       (Identical to the 'wild-wild-count on the
+                       count-api object)
 
-  Also of interest, not implemented here, but available on the count-api
-  object is the 'wild-wild-count method, which returns the total number
-  of observatations of all pairs.
+  'left-entropy     -- The sum H_left = -sum_x P(x,*) log_2 P(x,*)
+  'right-entropy    -- The sum H_right = -sum_y P(*,y) log_2 P(*,y)
+  'total-entropy    -- The sum H_tot = sum_x sum_y P(x,y) log_2 P(x,y)
+  'total-mi         -- The sum MI = H_tot - H_left - H_right
+
+  'left-support     -- average l_0 norm of rows
+  'left-size        -- average l_1 norm of rows
+  'left-length      -- average l_2 norm of rows
+  'left-hubbiness   -- standard deviation counts in rows
+
+  'right-support    -- average l_0 norm of columns
+  'right-size       -- average l_1 norm of columns
+  'right-length     -- average l_2 norm of columns
+  'right-hubbiness  -- standard deviation counts in columns
+
+  If we imagine each pair as a directed edge, an arrow pointing from
+  left to right, then the left-support is the same as the average
+  out-degree of the left-vertexes. The right-support is the average
+  in-degree of the right-vertexes. Equivalently, the left-support is
+  the average number of non-zero entries in each row, and the
+  right-support is the average number of non-zero entries in each
+  column.
+
+  The left and right sizes are analogous, but are weighted by the
+  number of observations on each vertex.
+
+  The hubbiness is defined as sqrt[ (l_2)^2 - (l_1)^2 ].
 "
-	(let ((llobj LLOBJ)
-			(wild-atom (LLOBJ 'wild-wild)))
+	(let* ((llobj LLOBJ)
+			(cntobj (add-pair-count-api LLOBJ))
+			(totcnt (cntobj 'wild-wild-count))
+			(wild-atom (LLOBJ 'wild-wild))
+		)
 
 		; ----------------------------------------------------
 		; Key under which the matrix dimensions are stored.
@@ -100,6 +126,9 @@
 			(cog-value-ref (cog-value wild-atom mi-key) 0))
 
 		; ----------------------------------------------------
+		(define (get-total-count) totcnt)
+
+		; ----------------------------------------------------
 		; Methods on this class.
 		(lambda (message . args)
 			(case message
@@ -115,6 +144,8 @@
 
 				((total-mi)            (get-total-mi))
 				((set-mi)              (apply set-mi args))
+
+				((total-count)         (get-total-count))
 			))
 	)
 )
