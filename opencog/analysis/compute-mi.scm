@@ -634,8 +634,8 @@
 		(store-list all-atoms "pairs" 100000)
 	)
 
-	(display "Going to do MI column and row subtotals\n")
-	(subtotal-obj 'cache-all)
+	(display "Going to do column and row subtotals\n")
+	(subtotal-obj 'cache-all-subtotals)
 
 	(display "Going to compute the left, right and total entropy\n")
 	(total-obj 'cache-entropy)
