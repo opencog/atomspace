@@ -275,8 +275,16 @@ bool Recognizer::fuzzy_match(const Handle& npat_h, const Handle& nsoln_h)
 	// PatternMatchEngine::tree_compare() nor does it handle the bells
 	// and whistles (ChoiceLink, QuoteLink, etc).
 	size_t ip=0, jg=0;
-	for (; ip<osp_size and jg<osg_size; ip++, jg++)
+	for (; ip<osp_size or jg<osg_size; ip++, jg++)
 	{
+		bool pat_end = false;
+		if (ip == osp_size)
+		{
+			pat_end = true;
+			ip--;
+		}
+		if (jg == osg_size) jg--;
+
 		if (GLOB_NODE != osg[jg]->getType())
 		{
 			if (loose_match(osp[ip], osg[jg])) continue;
@@ -285,7 +293,8 @@ bool Recognizer::fuzzy_match(const Handle& npat_h, const Handle& nsoln_h)
 			// in the previous iteration failed to
 			// match anything, so although we are not
 			// looking at a glob right now, we still
-			// need to do the below check...
+			// need to do the below to see if it can be
+			// rejected yet.
 
 			if (not is_scoped)
 				return false;
@@ -330,6 +339,9 @@ bool Recognizer::fuzzy_match(const Handle& npat_h, const Handle& nsoln_h)
 
 			// Return true if it managed to eat everything.
 			if (ip == osp_size) return true;
+			// If this ending glob can be grounded to nothing, it's a match!
+			else if (svar.is_interval(glob, 0) and pat_end)
+				return true;
 			else
 			{
 				if (not is_scoped)
@@ -394,9 +406,7 @@ bool Recognizer::fuzzy_match(const Handle& npat_h, const Handle& nsoln_h)
 	}
 
 	// If we are here, then we should have matched up all the atoms;
-	// if we exited the loop because pattern or grounding was short,
-	// then its a mis-match.
-	if (ip != osp_size or jg != osg_size) return false;
+	// any mismatch should have rejected already.
 	return true;
 }
 
