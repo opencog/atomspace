@@ -540,6 +540,23 @@
 		(set! start-time (current-time))
 		diff)
 
+	(define (store-list all-atoms CNT MSG)
+		(define num-prs (length all-atoms))
+
+		; Create a wrapper around `store-atom` that prints a progress
+		; report.  The problem is that millions of pairs may need to be
+		; stored, and this just takes a long time.
+		(define store-rpt
+			(make-progress-rpt store-atom CNT num-prs
+				"Stored ~A of ~A MSG in ~A secs (~A pairs/sec)\n"))
+
+		(for-each
+			(lambda (atom) (if (not (null? atom)) (store-rpt atom)))
+			all-atoms)
+
+		(format #t "Done storing ~A ~A in ~A secs\n"
+			num-prs MSG (elapsed-secs)))
+
 	; Decorate the object with methods that report support.
 	(define wild-obj (add-pair-stars OBJ))
 
@@ -554,6 +571,9 @@
 
 	; Define the object which will compute row and column subtotals.
 	(define subtotal-obj (add-subtotal-mi-compute OBJ))
+
+	; Define the object which will compute total entropy and MI.
+	(define total-obj (add-total-entropy-compute OBJ))
 
 	(format #t "Support: num left=~A num right=~A\n"
 			(length (wild-obj 'left-basis))
@@ -585,31 +605,16 @@
 
 	(display "Start computing log P(*,y)\n")
 	(let ((lefties (freq-obj 'cache-all-left-freqs)))
-
-		(define store-rpt
-			(make-progress-rpt store-atom 40000  (length lefties)
-				"Stored ~A of ~A lefties in ~A secs (~A stores/sec)\n"))
-
 		(format #t "Done computing ~A left-wilds in ~A secs\n"
 			(length lefties) (elapsed-secs))
-		(for-each
-			(lambda (atom) (if (not (null? atom)) (store-rpt atom)))
-			lefties)
-		(format #t "Done storing ~A left-wilds in ~A secs\n"
-			(length lefties) (elapsed-secs))
-	)
+		(store-list lefties "left-wilds" 40000))
 
 	(display "Done with -log P(*,y), start -log P(x,*)\n")
 
 	(let ((righties (freq-obj 'cache-all-right-freqs)))
 		(format #t "Done computing ~A right-wilds in ~A secs\n"
 			(length righties) (elapsed-secs))
-		(for-each
-			(lambda (atom) (if (not (null? atom)) (store-atom atom)))
-			righties)
-		(format #t "Done storing ~A right-wilds in ~A secs\n"
-			(length righties) (elapsed-secs))
-	)
+		(store-list righties "right-wilds" 40000))
 
 	(display "Done computing -log P(x,*) and P(*,y)\n")
 
@@ -619,23 +624,24 @@
 	(let* ((all-atoms (batch-mi-obj 'cache-pair-mi))
 			(num-prs (length all-atoms)))
 
-		; Create a wrapper around `store-atom` that prints a progress
-		; report.  The problem is that millions of pairs may need to be
-		; stored, and this just takes a long time.
-		(define store-rpt
-			(make-progress-rpt store-atom 100000 num-prs
-				"Stored ~A of ~A pairs in ~A secs (~A pairs/sec)\n"))
-
 		; This print triggers as soon as the let* above finishes.
 		(format #t "Done computing ~A pair MI's in ~A secs\n"
 			num-prs (elapsed-secs))
-		(for-each store-rpt all-atoms)
-		(format #t "Done storing ~A pair MI's in ~A secs\n"
-			num-prs (elapsed-secs))
+
+		(store-list all-atoms "pairs" 100000)
 	)
 
 	(display "Going to do MI column and row subtotals\n")
 	(subtotal-obj 'cache-all)
+
+	(display "Going to compute the left, right and total entropy\n")
+	(total-obj 'cache-entropy)
+	(total-obj 'cache-mi)
+
+	; Save the totals to the database
+	(store-atom (OBJ 'wild-wild))
+
+	(store-list (star-xxxxrighties "left-wilds" 40000))
 
 	(display "Finished with MI computations\n")
 )
