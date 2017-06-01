@@ -116,6 +116,8 @@
 	(define (log2 x) (/ (log x) (log 2)))
 
 	(define rpt-obj (add-report-api LLOBJ))
+	(define cnt-obj (add-pair-count-api LLOBJ))
+
 	(format PORT "Summary Report for Correlation Matrix ~A\n"
 		(LLOBJ 'name))
 	(format PORT "Left type: ~A    Right Type: ~A    Pair Type: ~A\n"
@@ -126,9 +128,14 @@
 		(rpt-obj 'left-dim) (rpt-obj 'right-dim))
 
 	(let ((size (rpt-obj 'num-pairs))
-			(tot (* (rpt-obj 'left-dim) (rpt-obj 'right-dim))))
-		(format PORT "Size: ~A of ~A  Fraction: ~9,4g Sparsity: ~6f\n"
-			size tot (/ size tot) (log2 (/ tot size))))
+			(tot (* (rpt-obj 'left-dim) (rpt-obj 'right-dim)))
+			(obs (cnt-obj 'wild-wild-count))
+		)
+		(format PORT "Size: ~d of ~d  Fraction: ~9,4g Sparsity: ~6f\n"
+			size tot (/ size tot) (log2 (/ tot size)))
+		(format PORT "Total observations: ~d  Avg obs per pair: ~6f\n"
+			obs (/ obs size))
+	)
 
 	(format PORT "Left  Entropy: ~6f\n" (rpt-obj 'left-entropy))
 	(format PORT "Right Entropy: ~6f\n" (rpt-obj 'right-entropy))
