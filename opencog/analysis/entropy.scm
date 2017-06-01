@@ -189,7 +189,7 @@
 			(fold
 				(lambda (left-item sum)
 					(+ sum (frqobj METHOD left-item)))
-				0 (star-obj 'left-basis))
+				0 (star-obj 'left-basis)))
 
 		; ---------------
 		; Compute the total entropy for the set. This loops over all
@@ -207,8 +207,7 @@
 					(format #f
 						"Left and right entropy sums fail to be equal: ~A ~A\n"
 						lsum rsum)))
-			lsum
-		)
+			lsum)
 
 		; Compute the left-wildcard partial entropy for the set. This
 		; loops over all left-wildcards, and computes the sum
@@ -244,8 +243,7 @@
 					(format #f
 						"Left and right MI sums fail to be equal: ~A ~A\n"
 						lsum rsum)))
-			lsum
-		)
+			lsum)
 
 		(define (cache-mi)
 			(rptobj 'set-mi (compute-total-mi)))
