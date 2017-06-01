@@ -195,13 +195,13 @@
 		(define (left-sum METHOD)
 			(fold
 				(lambda (right-item sum)
-					(+ sum (frqobj METHOD (llobj 'left-wildcard right-item))))
+					(+ sum (frqobj METHOD right-item)))
 				0 (star-obj 'right-basis)))
 
 		(define (right-sum METHOD)
 			(fold
 				(lambda (left-item sum)
-					(+ sum (frqobj METHOD (llobj 'right-wildcard left-item))))
+					(+ sum (frqobj METHOD left-item)))
 				0 (star-obj 'left-basis)))
 
 		; ---------------
