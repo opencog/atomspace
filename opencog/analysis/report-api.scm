@@ -71,9 +71,35 @@
   The left and right sizes are analogous, but are weighted by the
   number of observations on each vertex.
 
+  In formulas:
+    Let |(x,*)| = number of non-zero entries for row x.
+                = sum_y 1 if [0 < N(x,y) ]
+                = l_0 norm of row x.
+        size(x) = sum_y N(x,y)
+                = N(x,*)
+                = l_1 norm of row x.
+        len(x) = sqrt[ sum_y N^2(x,y) ]
+               = l_2 norm of row x.
+               = "length" of row x.
+        with analogous values for columns.
+
+        |(*,*)| = total number of non-zero entries.
+                = sum_x |(x,*)|
+                = sum_y |(*,y)|
+        N(*,*)  = total number of observations.
+
+    Then:
+        left-support = |(*,*)| / num-rows
+        right-support = |(*,*)| / num-columns
+        left-size = N(*,*) / num-rows
+        right-size = N(*,*) / num-columns
+        left-length = [ sum_x len(x) ] / num_rows
+        right-length = [ sum_y len(y) ] / num_columns
+
   The hubbiness is defined as sqrt[ (l_2)^2 - (l_1)^2 ].
 "
 	(let* ((llobj LLOBJ)
+
 			(cntobj (add-pair-count-api LLOBJ))
 			(totcnt (cntobj 'wild-wild-count))
 			(wild-atom (LLOBJ 'wild-wild))
