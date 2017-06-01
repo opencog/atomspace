@@ -192,16 +192,14 @@
 			(rptobj (add-report-api star-obj))
 		)
 
-		(define (left-sum METHOD)
+		(define (left-sum FN)
 			(fold
-				(lambda (right-item sum)
-					(+ sum (frqobj METHOD right-item)))
+				(lambda (right-item sum) (+ sum (FN right-item)))
 				0 (star-obj 'right-basis)))
 
-		(define (right-sum METHOD)
+		(define (right-sum FN)
 			(fold
-				(lambda (left-item sum)
-					(+ sum (frqobj METHOD left-item)))
+				(lambda (left-item sum) (+ sum (FN left-item)))
 				0 (star-obj 'left-basis)))
 
 		; ---------------
@@ -213,8 +211,10 @@
 		; It throws an error if the two are not equal (to within guessed
 		; rounding errors.)
 		(define (compute-total-entropy)
-			(define lsum (left-sum 'left-wild-entropy))
-			(define rsum (right-sum 'right-wild-entropy))
+			(define lsum (left-sum
+					(lambda (x) (frqobj 'left-wild-entropy x))))
+			(define rsum (right-sum
+					(lambda (x) (frqobj 'right-wild-entropy x))))
 			(if (< 1.0e-8 (/ (abs (- lsum rsum)) lsum))
 				(throw 'bad-summation 'compute-total-entropy
 					(format #f
@@ -226,13 +226,21 @@
 		; loops over all left-wildcards, and computes the sum
 		;   H_left = sum_y p(*,y) log_2 p(*,y)
 		; It returns a single numerical value, for the entire set.
-		(define (compute-left-entropy) (left-sum 'left-wild-logli))
+		(define (compute-left-entropy)
+			(left-sum
+				(lambda (x) (*
+						(frqobj 'left-wild-freq x)
+						(frqobj 'left-wild-logli x)))))
 
 		; Compute the right-wildcard partial entropy for the set. This
 		; loops over all right-wildcards, and computes the sum
 		;   H_right = sum_x p(x,*) log_2 p(x,*)
 		; It returns a single numerical value, for the entire set.
-		(define (compute-right-entropy) (right-sum 'right-wild-logli))
+		(define (compute-right-entropy)
+			(right-sum
+				(lambda (x) (*
+						(frqobj 'right-wild-freq x)
+						(frqobj 'right-wild-logli x)))))
 
 		(define (cache-entropy)
 			(rptobj 'set-entropy
