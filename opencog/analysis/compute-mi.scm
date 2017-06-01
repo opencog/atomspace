@@ -552,7 +552,7 @@
 		(define store-rpt
 			(make-progress-rpt store-atom CNT num-prs
 				(string-append
-					"Stored ~A of ~A " MSG " in ~A secs (~5f pairs/sec)\n")))
+					"Stored ~A of ~A " MSG " in ~d secs (~6f pairs/sec)\n")))
 
 		(for-each
 			(lambda (atom) (if (not (null? atom)) (store-rpt atom)))
