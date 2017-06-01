@@ -708,6 +708,15 @@
        )
 ")
 
+(set-procedure-property! cog-keys 'documentation
+"
+ cog-keys ATOM
+    Return a list of all of the keys attached to ATOM.
+
+    Example:
+        guile> (cog-keys (Concept \"abc\"))
+")
+
 (set-procedure-property! cog-value 'documentation
 "
  cog-value ATOM KEY
