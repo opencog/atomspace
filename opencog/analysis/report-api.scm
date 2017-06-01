@@ -50,14 +50,18 @@
 		(define (set-size LEFT RIGHT NPAIRS)
 			(cog-set-value! wild-atom dim-key (FloatValue LEFT RIGHT NPAIRS)))
 
+		; Use round to force return of integer.
 		(define (get-left-dim)
-			(cog-value-ref (cog-value wild-atom dim-key) 0))
+			(inexact->exact (round
+				(cog-value-ref (cog-value wild-atom dim-key) 0))))
 
 		(define (get-right-dim)
-			(cog-value-ref (cog-value wild-atom dim-key) 1))
+			(inexact->exact (round
+				(cog-value-ref (cog-value wild-atom dim-key) 1))))
 
 		(define (get-num-pairs)
-			(cog-value-ref (cog-value wild-atom dim-key) 2))
+			(inexact->exact (round
+				(cog-value-ref (cog-value wild-atom dim-key) 2))))
 
 		; ----------------------------------------------------
 		; Key under which the matrix entropies are stored.
@@ -122,7 +126,7 @@
 		(LLOBJ 'name))
 	(format PORT "Left type: ~A    Right Type: ~A    Pair Type: ~A\n"
 		(LLOBJ 'left-type) (LLOBJ 'right-type) (LLOBJ 'pair-type))
-	(format PORT "Wildcard: ~A\n" (LLOBJ 'wild-wild))
+	(format PORT "Wildcard: ~A" (LLOBJ 'wild-wild))
 
 	(format PORT "Rows: ~d Columns: ~d\n"
 		(rpt-obj 'left-dim) (rpt-obj 'right-dim))
@@ -131,8 +135,10 @@
 			(tot (* (rpt-obj 'left-dim) (rpt-obj 'right-dim)))
 			(obs (cnt-obj 'wild-wild-count))
 		)
-		(format PORT "Size: ~d of ~d  Fraction: ~9,4g Sparsity: ~6f\n"
-			size tot (/ size tot) (log2 (/ tot size)))
+		(format PORT "Size: ~d non-zero entries of ~d possible\n"
+			size tot)
+		(format PORT "Fraction non-zero: ~9,4g Sparsity (-log_2): ~6f\n"
+			(/ size tot) (log2 (/ tot size)))
 		(format PORT "Total observations: ~d  Avg obs per pair: ~6f\n"
 			obs (/ obs size))
 	)
