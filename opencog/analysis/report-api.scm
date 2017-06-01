@@ -34,7 +34,7 @@
   and columns (i.e. the size of the left and right support),
   the total number of pairs (which is the same as the total number
   of non-zero entries in the matrix), the left, right and total
-  entropies and mutual information.
+  entropies and the total mutual information.
 
   Here, the LLOBJ is expected to be an object, with the 'wild-wild
   method on it.  This is the atom on which these summaries will be
@@ -79,17 +79,11 @@
 		; Key under which the matrix MI are stored.
 		(define mi-key (PredicateNode "*-Total MI Key-*"))
 
-		(define (set-mi LEFT RIGHT TOT)
-			(cog-set-value! wild-atom mi-key (FloatValue LEFT RIGHT TOT)))
-
-		(define (get-left-mi)
-			(cog-value-ref (cog-value wild-atom mi-key) 0))
-
-		(define (get-right-mi)
-			(cog-value-ref (cog-value wild-atom mi-key) 1))
+		(define (set-mi TOT)
+			(cog-set-value! wild-atom mi-key (FloatValue TOT)))
 
 		(define (get-total-mi)
-			(cog-value-ref (cog-value wild-atom mi-key) 2))
+			(cog-value-ref (cog-value wild-atom mi-key) 0))
 
 		; ----------------------------------------------------
 		; Methods on this class.
@@ -105,8 +99,6 @@
 				((total-entropy)       (get-total-entropy))
 				((set-entropy)         (apply set-entropy args))
 
-				((left-mi)             (get-left-mi))
-				((right-mi)            (get-right-mi))
 				((total-mi)            (get-total-mi))
 				((set-mi)              (apply set-mi args))
 			))

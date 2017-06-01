@@ -159,13 +159,13 @@
 (define (add-total-entropy-compute LLOBJ)
 "
   add-total-entropy-compute LLOBJ - methods to compute and cache the
-  partial and total entropy and MI.
+  partial and total entropies and the total MI.
 
   Extend the LLOBJ with additional methods to compute the partial and
   total entropies and MI for the correlation matrix.
 
   The object must have valid partial sums for the entropy and MI on it,
-  vize, the cones computed by add-subtotal-mi-compute, above. These are
+  viz, the ones computed by add-subtotal-mi-compute, above. These are
   acessed via the standard frequency-object API. These must have been
   pre-computed, before this object can be used.
 
