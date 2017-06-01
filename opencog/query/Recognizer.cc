@@ -278,7 +278,28 @@ bool Recognizer::fuzzy_match(const Handle& npat_h, const Handle& nsoln_h)
 		if (GLOB_NODE != osg[jg]->getType())
 		{
 			if (loose_match(osp[ip], osg[jg])) continue;
-			return false;
+
+			// Sometimes we end up here because the glob
+			// in the previous iteration failed to
+			// match anything, so although we are not
+			// looking at a glob right now, we still
+			// need to do the below check...
+
+			// If we have gone through all the scopes,
+			// it's not a match and we are done.
+			if (ks+1 == _soln_vars.size())
+				return false;
+			// Otherwise reset everything and try again
+			// with the next scope.
+			else
+			{
+				// The for-loop increment will turn them back to zero.
+				ip = -1;
+				jg = -1;
+				ks++;
+				svar = _soln_vars[ks];
+				continue;
+			}
 		}
 
 		// If we are here, we have a glob in the soln.
@@ -330,6 +351,7 @@ bool Recognizer::fuzzy_match(const Handle& npat_h, const Handle& nsoln_h)
 			match_cnt++;
 			ip++;
 		}
+
 		// If ip ran past the end, then the post was not found. This is
 		// a mismatch.
 		if (not (ip < max_size))
