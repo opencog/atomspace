@@ -230,7 +230,7 @@ struct LTIAboveThreshold : public HandlePredicate
 template<typename InputIterator>
 HandleSeq filter_InAttentionalFocus(AtomSpace* as, InputIterator begin, InputIterator end)
 {
-    STIAboveThreshold sti_above(as, attentionbank(as).getAttentionalFocusBoundary());
+    STIAboveThreshold sti_above(as, attentionbank(as).get_af_max_sti());
     return filter(begin, end, sti_above);
 }
 
