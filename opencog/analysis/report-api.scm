@@ -256,7 +256,7 @@
 							(FN item)
 							(frq-obj 'right-wild-freq item))))
 				0
-				(star-obj 'left-basis)))
+				(wild-obj 'left-basis)))
 
 		(define (do-get-left-avg R-METHOD)
 			(get-left-fn-avg (lambda (x) (len-obj R-METHOD x))))
@@ -272,7 +272,7 @@
 							(FN item)
 							(frq-obj 'left-wild-freq item))))
 				0
-				(star-obj 'right-basis)))
+				(wild-obj 'right-basis)))
 
 		(define (do-get-right-avg L-METHOD)
 			(get-right-fn-avg (lambda (x) (len-obj L-METHOD x))))
