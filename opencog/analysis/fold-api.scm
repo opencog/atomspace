@@ -190,7 +190,7 @@
 				((right-stars) right-star-union)
 				((item-pair) get-pair)
 				((pair-count) get-func-count)
-				(else #f)))
+				(else (llobj 'provides meth))))
 
 		; ---------------
 
