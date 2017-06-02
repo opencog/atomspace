@@ -20,6 +20,7 @@
 ; ---------------------------------------------------------------------
 
 (use-modules (srfi srfi-1))
+(use-modules (ice-9 optargs)) ; for define*-public
 (use-modules (opencog))
 
 ; ---------------------------------------------------------------------
@@ -425,11 +426,12 @@
 		lv rv (/ lv ls) (/ rv rs))
 )
 
-(define-public (print-matrix-summary-report LLOBJ PORT)
+(define*-public (print-matrix-summary-report LLOBJ
+	#:optional (PORT #t))
 "
-  print-matrix-summary-report LLOBJ PORT
-  Print a summary report about the pair dataset LLOBJ to output PORT
-  (typically a string or file port).
+  print-matrix-summary-report LLOBJ #:optional PORT
+  Print a summary report about the pair dataset LLOBJ to the
+  optionally-provided output PORT (e.g. a string or file port).
 "
 	(define (log2 x) (/ (log x) (log 2)))
 
