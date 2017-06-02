@@ -526,6 +526,9 @@
 		; Store all the wild-card atoms; these are exactly the ones
 		; obtained from the object, via the left and right basis.
 		(define (store-all-wildcards)
+(define rights (star-obj 'right-basis))
+(format #t "duuuude wtf get ~A rights took ~A\n" (length rights)
+(elapsed-secs))
 
 			; Store the wild-wild-card atom, first.
 			; This holds the totals for the matrix.

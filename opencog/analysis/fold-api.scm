@@ -11,7 +11,7 @@
 ; There is sometimes a need to take differences and sums of vectors,
 ; or apply other kinds of transforms.  This provides the API to do that.
 ;
-; So, for example, the add-pair-support-compute object adds methods
+; So, for example, the add-support-compute object adds methods
 ; to compute the length of a vector (the l_2 norm) or more generally
 ; the l_p norm.  Suppose, instead, we wanted to take the length of
 ; the difference of two vectors? That is, length(A-B)? How can we do
@@ -30,7 +30,7 @@
 ;
 ;      (define vecty (make-pseudo-cset-api)
 ;      (define subby (add-tuple-math vecty subtract))
-;      (define normy (add-pair-support-compute subby))
+;      (define normy (add-support-compute subby))
 ;
 ; The length of the difference of two vectors can then be computed as
 ; so:
@@ -51,7 +51,7 @@
 ; then
 ;
 ;      (define isect (add-tuple-math vecty intersect))
-;      (define secty (add-pair-support-compute isect))
+;      (define secty (add-support-compute isect))
 ;      (secty 'right-count (list (Word "the") (Word "a")))
 ;
 ; will return how many disjuncts there are shared, in common, with both
@@ -64,7 +64,7 @@
 ; then
 ;
 ;      (define youny (add-tuple-math vecty union))
-;      (define uniny (add-pair-support-compute youny))
+;      (define uniny (add-support-compute youny))
 ;      (uniny 'right-count (list (Word "the") (Word "a")))
 ;
 ; returns the number of disjuncts that appear in the word "the" or in

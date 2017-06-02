@@ -139,7 +139,7 @@ database, so that these results become available later.
 
 Computing support and entropy
 -----------------------------
-The `add-pair-support-compute` class provides methods to compute the
+The `add-support-compute` class provides methods to compute the
 partial sums `N(*,y)` and `N(x,*)`. It also provides methods that
 compute how many non-zero entries there are in each row or column.
 It provides methods for the "length" of a column: that is,

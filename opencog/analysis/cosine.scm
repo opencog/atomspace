@@ -66,10 +66,10 @@
 
 	(let ((llobj LLOBJ)
 			(star-obj (add-pair-stars LLOBJ))
-			(supp-obj (add-pair-support-compute LLOBJ))
-			(min-obj  (add-pair-support-compute
+			(supp-obj (add-support-api LLOBJ))
+			(min-obj  (add-support-compute
 				(add-tuple-math LLOBJ mintu GET-CNT)))
-			(max-obj  (add-pair-support-compute
+			(max-obj  (add-support-compute
 				(add-tuple-math LLOBJ maxtu GET-CNT)))
 			(get-cnt GET-CNT))
 

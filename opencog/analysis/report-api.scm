@@ -240,7 +240,7 @@
 "
 	(let* ((llobj LLOBJ)
 			(wild-obj (add-pair-stars LLOBJ))
-			(len-obj (add-pair-support-compute wild-obj))
+			(len-obj (add-support-api wild-obj))
 			(frq-obj (add-pair-freq-api wild-obj))
 			(rpt-obj (add-report-api wild-obj))
 		)
