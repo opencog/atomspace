@@ -598,6 +598,7 @@
 ;
 (define-public (batch-all-pair-mi OBJ)
 
+	(define overall-start-time (current-time))
 	(define start-time (current-time))
 	(define (elapsed-secs)
 		(define diff (- (current-time) start-time))
@@ -701,7 +702,8 @@
 	(display "Start saving left-wildcards\n")
 	(store-obj 'store-wildcards)
 
-	(display "Finished with MI computations\n")
+	(format #t "Finished with MI computations; this took ~5d hours\n"
+		((- (current-time) overall-start-time) 3600.0))
 )
 
 ; ---------------------------------------------------------------------
