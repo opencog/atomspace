@@ -79,7 +79,7 @@
                 = l_1 norm of row x.
         L(x,*) = sqrt[ sum_y N^2(x,y) ]
                = l_2 norm of row x.
-               = "length" of row x.
+               = 'length' of row x.
         with analogous values for columns.
 
         |(*,*)| = total number of non-zero entries.
@@ -95,13 +95,13 @@
         left-size = sum_x P(x,*) N(x,*)
         left-length = sqrt [ sum_x P(x,*) L(x,*) ]
         left-rms-length = sqrt [ sum_x P(x,*)
-               [ L(x,*) - (N(x,*)^2 ] ]
+               [ L(x,*) - (N(x,*))^2 ] ]
 
     Note that while computing the average length of a row/column,
     this is weighted by the probability of that row/column.
 
     The rms-length is the squeare root of what R. Ferrer i Cancho
-    calls "hubbiness" (his hubbiness is the 2nd central moment, if
+    calls 'hubbiness' (his hubbiness is the 2nd central moment, if
     I recall correctly).
 "
 	(let* ((llobj LLOBJ)
