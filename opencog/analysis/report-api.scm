@@ -296,16 +296,22 @@
 		(define (get-left-rms-length)
 			(get-left-fn-avg
 				(lambda (x)
+					(define sup (len-obj 'right-support x))
+					(define siz (/ (len-obj 'right-count x) sup))
 					(define len (len-obj 'right-length x))
-					(define siz (len-obj 'right-count x))
-					(sqrt (- (* len len) (* siz siz))))))
+					(define lensq (/ (* len len) sup))
+					(define sizsq (* siz siz))
+					(sqrt (* (- lensq sizsq) sup)))))
 
 		(define (get-right-rms-length)
 			(get-right-fn-avg
 				(lambda (x)
+					(define sup (len-obj 'left-support x))
+					(define siz (/ (len-obj 'left-count x) sup))
 					(define len (len-obj 'left-length x))
-					(define siz (len-obj 'left-count x))
-					(sqrt (- (* len len) (* siz siz))))))
+					(define lensq (/ (* len len) sup))
+					(define sizsq (* siz siz))
+					(sqrt (* (- lensq sizsq) sup)))))
 
 		; ----------------------------------------------------
 		; Compute and cache the values of the computation with the
