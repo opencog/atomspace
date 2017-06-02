@@ -386,9 +386,13 @@
 	(format PORT "               Left   Right\n")
 	(format PORT "               ----   -----\n")
 	(format PORT "Support (l_0)  ~6f    ~6f\n"
-		(/ size nrows) (/ size ncols))
+		(rpt-obj 'left-support) (rpt-obj 'right-support))
 	(format PORT "Size    (l_1)  ~6f    ~6f\n"
-		(/ obs nrows) (/ obs ncols))
+		(rpt-obj 'left-size) (rpt-obj 'right-size))
+	(format PORT "Length  (l_2)  ~6f    ~6f\n"
+		(rpt-obj 'left-length) (rpt-obj 'right-length))
+	(format PORT "RMS Length     ~6f    ~6f\n"
+		(rpt-obj 'left-rms-length) (rpt-obj 'right-rms-length))
 )
 
 ; ---------------------------------------------------------------------
