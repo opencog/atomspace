@@ -32,8 +32,10 @@
   which N(x,y) > 0. The right-support-set is the same, for fixed x.
 
   The support is the size of the support-set.  AKA the l_0 norm.
+  The left-support is the number of non-zero entries in a column.
 
   The left-count is the wild-card sum_x N(x,y) for fixed y.
+  That is, for a given column y, this sums all counts in that column.
 
   The left-length is sqrt(sum_x N^2(x,y)) for fixed y.
 

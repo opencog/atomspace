@@ -93,8 +93,11 @@
         right-support = |(*,*)| / num-columns
         left-size = N(*,*) / num-rows
         right-size = N(*,*) / num-columns
-        left-length = [ sum_x len(x) ] / num_rows
-        right-length = [ sum_y len(y) ] / num_columns
+        left-length = [ sum_x p(x) len(x) ]
+        right-length = [ sum_y p(y) len(y) ]
+
+    Note that while computing the average length of a row/column,
+    this is weighted by the probability of that row/column.
 
   The hubbiness is defined as sqrt[ (l_2)^2 - (l_1)^2 ].
 "
@@ -180,6 +183,76 @@
 				((right-support)       (get-right-support))
 				((left-size)           (get-left-size))
 				((right-size)          (get-right-size))
+			))
+	)
+)
+
+; ---------------------------------------------------------------------
+
+(define-public (make-central-compute LLOBJ)
+"
+  add-central-compute LLOBJ - Extend LLOBJ with methods to compute
+  misc graph-centrality statistics.
+"
+	(let* ((llobj LLOBJ)
+			(wild-obj (add-pair-stars LLOBJ))
+			(len-obj (add-pair-support-compute wild-obj))
+			(rpt-obj (add-report-api wild-obj))
+			(l-len 0)
+			(r-len 0)
+		)
+
+		(define (do-get-left-length)
+			; The right-length gives the length of one row.
+			; The sum is over all the columns, divided by the
+			; number of columns.
+			(define len
+				(fold
+					(lambda (sum item)
+						(+ sum (len-obj 'right-length item)))
+					0
+					(star-obj 'left-basis)))
+			(/ len (rpt-obj 'left-dim))
+		)
+		(define (get-left-length)
+			(if (eqv? l-len 0) (set! l-len (do-get-left-length)))
+			l-len)
+
+		(define (do-get-right-length)
+			; The left-length gives the length of one column.
+			; The sum is over all the columns, divided by the
+			; number of columns.
+			(define len
+				(fold
+					(lambda (sum item)
+						(+ sum (len-obj 'left-length item)))
+					0
+					(star-obj 'right-basis)))
+			(/ len (rpt-obj 'right-dim))
+		)
+		(define (get-right-length)
+			(if (eqv? r-len 0) (set! r-len (do-get-right-length)))
+			r-len)
+
+		; ---------
+		(define (get-left-rms-length)
+			(define sz (rpt-obj 'left-size))
+			(- (get-left-length) (* sz sz))
+		)
+
+		(define (get-right-rms-length)
+			(define sz (rpt-obj 'right-size))
+			(- (get-right-length) (* sz sz))
+		)
+
+		; ----------------------------------------------------
+		; Methods on this class.
+		(lambda (message . args)
+			(case message
+				((left-length)       (get-left-length))
+				((right-length)      (get-right-length))
+				((left-rms-length)   (get-left-rms-length))
+				((right-rms-length)  (get-right-rms-length))
 			))
 	)
 )

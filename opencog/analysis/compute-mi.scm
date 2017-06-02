@@ -479,7 +479,6 @@
 						(if (eqv? 0 (modulo cnt-lefties 10000))
 							(format #t "Done ~A of ~A outer loops, pairs=~A\n"
 								cnt-lefties nlefties cnt-pairs))
-
 					))
 			)
 
