@@ -155,7 +155,7 @@
 				(lambda (lopr sum)
 					; 'item-pair returns the atom holding the count
 					(+ sum
-						(if (< 0 (get-cnt (llobj 'item-pair lopr)))
+						(if (< 0 (get-cnt lopr))
 							1 0)))
 				0
 				LIST))
@@ -174,9 +174,7 @@
 		(define (sum-count LIST)
 			(fold
 				(lambda (lopr sum)
-					; 'item-pair returns the atom holding the count
-					(define hipr (llobj 'item-pair lopr))
-					(define cnt (get-cnt hipr))
+					(define cnt (get-cnt lopr))
 					(+ sum cnt))
 				0
 				LIST))
@@ -195,9 +193,7 @@
 			(define tot
 				(fold
 					(lambda (lopr sum)
-						; 'item-pair returns the atom holding the count
-						(define hipr (llobj 'item-pair lopr))
-						(define cnt (get-cnt hipr))
+						(define cnt (get-cnt lopr))
 						(+ sum (* cnt cnt)))
 					0
 					LIST))
@@ -218,9 +214,7 @@
 			(define tot
 				(fold
 					(lambda (lopr sum)
-						; 'item-pair returns the atom holding the count
-						(define hipr (llobj 'item-pair lopr))
-						(define cnt (get-cnt hipr))
+						(define cnt (get-cnt lopr))
 						(+ sum (expt cnt P)))
 					0
 					LIST))
