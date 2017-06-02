@@ -2,6 +2,7 @@ ADD_GUILE_MODULE (FILES
 	analysis.scm
 	bin-count.scm
 	compute-mi.scm
+	cosine.scm
 	entropy.scm
 	fold-api.scm
 	object-api.scm

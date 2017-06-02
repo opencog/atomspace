@@ -12,6 +12,7 @@
 (load "analysis/fold-api.scm")
 (load "analysis/bin-count.scm")
 (load "analysis/support.scm")
+(load "analysis/cosine.scm")
 (load "analysis/entropy.scm")
 (load "analysis/compute-mi.scm")
 
