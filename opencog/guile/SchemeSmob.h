@@ -181,8 +181,6 @@ private:
 
 	// AttentionalFocus and AttentionalFocus Boundary
 	// XXX FIXME these should move to the attention bank!
-	static SCM ss_af_boundary(void);
-	static SCM ss_set_af_boundary(SCM);
 	static SCM ss_af(void);
 
 	// Free variables

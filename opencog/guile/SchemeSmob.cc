@@ -344,8 +344,6 @@ void SchemeSmob::register_procs()
 	register_proc("cog-av->alist",         1, 0, 0, C(ss_av_get_value));
 
 	// AttentionalFocus
-	register_proc("cog-af-boundary",       0, 0, 0, C(ss_af_boundary));
-	register_proc("cog-set-af-boundary!",  1, 0, 0, C(ss_set_af_boundary));
 	register_proc("cog-af",                0, 0, 0, C(ss_af));
 
 	// Atom types

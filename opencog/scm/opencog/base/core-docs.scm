@@ -801,29 +801,7 @@
     any atomspace, null is returned.
 ")
 
-(set-procedure-property! cog-af-boundary 'documentation
-"
- cog-af-boundary
-    Return the AttentionalFocus Boundary of the AtomSpace (which is
-    a short integer STI value).
 
-    Example:
-
-    guile> (cog-af-boundary)
-    100
-")
-
-(set-procedure-property! cog-set-af-boundary! 'documentation
-"
- cog-set-af-boundary! STI
-    Set the AttentionalFocus Boundary of the AtomSpace (which is a
-    short integer STI value). Returns the new AttentionalFocus boundary
-    (which is a short integer STI value).
-
-    Example:
-    guile> (cog-set-af-boundary! 200)
-    200
-")
 
 (set-procedure-property! cog-af 'documentation
 "

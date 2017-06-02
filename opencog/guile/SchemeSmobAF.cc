@@ -31,29 +31,6 @@
 using namespace opencog;
 
 /**
- * Return AttentionalFocus Boundary
- */
-SCM SchemeSmob::ss_af_boundary (void)
-{
-	AtomSpace* atomspace = ss_get_env_as("cog-af-boundary");
-	return scm_from_short(attentionbank(atomspace).getAttentionalFocusBoundary());
-}
-
-/**
- * Set AttentionalFocus Boundary
- */
-SCM SchemeSmob::ss_set_af_boundary (SCM sboundary)
-{
-	AtomSpace* atomspace = ss_get_env_as("cog-set-af-boundary!");
-	if (scm_is_false(scm_integer_p(sboundary)))
-		scm_wrong_type_arg_msg("cog-set-af-boundary", 1, sboundary,
-			"integer opencog AttentionalFocus Boundary");
-
-	short bdy = scm_to_short(sboundary);
-	return scm_from_short(attentionbank(atomspace).setAttentionalFocusBoundary(bdy));
-}
-
-/**
  * Return the list of atoms in the AttentionalFocus
  */
 SCM SchemeSmob::ss_af (void)
