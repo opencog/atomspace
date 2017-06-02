@@ -75,26 +75,25 @@
     Let |(x,*)| = number of non-zero entries for row x.
                 = sum_y 1 if [0 < N(x,y) ]
                 = l_0 norm of row x.
-        size(x) = sum_y N(x,y)
-                = N(x,*)
+        N(x,*)  = sum_y N(x,y)
                 = l_1 norm of row x.
-        len(x) = sqrt[ sum_y N^2(x,y) ]
+        L(x,*) = sqrt[ sum_y N^2(x,y) ]
                = l_2 norm of row x.
                = "length" of row x.
         with analogous values for columns.
 
         |(*,*)| = total number of non-zero entries.
                 = sum_x |(x,*)|
-                = sum_y |(*,y)|
         N(*,*)  = total number of observations.
+                = sum_x N(x,*)
 
-    Then:
-        left-support = |(*,*)| / num-rows
-        right-support = |(*,*)| / num-columns
-        left-size = N(*,*) / num-rows
-        right-size = N(*,*) / num-columns
-        left-length = [ sum_x p(x) len(x) ]
-        right-length = [ sum_y p(y) len(y) ]
+    The probability of observing a row is
+        P(x,*) = N(x,*) / N(*,*)
+
+    Then we define these weighted averages:
+        left-support = sum_x P(x,*) |(x,*)|
+        left-size = sum_x P(x,*) N(x,*)
+        left-length = sqrt [ sum_x P(x,*) L(x,*) ]
 
     Note that while computing the average length of a row/column,
     this is weighted by the probability of that row/column.
@@ -199,41 +198,65 @@
 			(len-obj (add-pair-support-compute wild-obj))
 			(frq-obj (add-pair-freq-api wild-obj))
 			(rpt-obj (add-report-api wild-obj))
+			(l-sup 0)
+			(r-sup 0)
+			(l-siz 0)
+			(r-siz 0)
 			(l-len 0)
 			(r-len 0)
 		)
 
-		(define (do-get-left-length)
-			; The right-length gives the length of one row.
-			; The probability of that row is P(x,*) i.e. right-freq
-			; The sum is over all the columns, weighted by the
-			; liklihood of that column.
+		(define (do-get-left-avg R-METHOD)
+			; The Right-METHOD gives the stat on a row that we want
+			; to take the weighted average of.  The weight is the
+			; probability of that row, which is P(x,*) i.e. right-freq
+			; The sum is over all the rows.
 			(fold
 				(lambda (sum item)
 					(+ sum (*
-							(len-obj 'right-length item)
+							(len-obj R-METHOD item)
 							(frq-obj 'right-wild-freq item))))
 				0
 				(star-obj 'left-basis)))
 
-		(define (get-left-length)
-			(if (eqv? l-len 0) (set! l-len (do-get-left-length)))
-			l-len)
-
-		(define (do-get-right-length)
-			; The left-length gives the length of one column.
-			; The sum is over all the columns, divided by the
-			; number of columns.
+		(define (do-get-right-avg L-METHOD)
+			; The Left-METHOD gives the stat on a column that we want
+			; to take the weighted average of.  The weight is the
+			; probability of that column, which is P(*,y) i.e. left-freq
+			; The sum is over all the columns.
 			(fold
 				(lambda (sum item)
 					(+ sum (*
-							(len-obj 'left-length item)
+							(len-obj L-METHOD item)
 							(frq-obj 'left-wild-freq item))))
 				0
 				(star-obj 'right-basis)))
 
+		; ---------------------
+		(define (get-left-support)
+			(if (eqv? l-sup 0) (set! l-sup (do-get-left-avg 'right-support)))
+			l-sup)
+
+		(define (get-right-support)
+			(if (eqv? r-sup 0) (set! r-sup (do-get-right-avg 'left-support)))
+			r-sup)
+
+		; ---------------------
+		(define (get-left-size)
+			(if (eqv? l-siz 0) (set! l-siz (do-get-left-avg 'right-count)))
+			l-siz)
+
+		(define (get-right-size)
+			(if (eqv? r-siz 0) (set! r-siz (do-get-right-avg 'left-count)))
+			r-siz)
+
+		; ---------------------
+		(define (get-left-length)
+			(if (eqv? l-len 0) (set! l-len (do-get-left-avg 'right-length)))
+			l-len)
+
 		(define (get-right-length)
-			(if (eqv? r-len 0) (set! r-len (do-get-right-length)))
+			(if (eqv? r-len 0) (set! r-len (do-get-right-avg 'left-length)))
 			r-len)
 
 		; ---------
@@ -251,6 +274,10 @@
 		; Methods on this class.
 		(lambda (message . args)
 			(case message
+				((left-support)      (get-left-support))
+				((right-support      (get-right-support))
+				((left-size)         (get-left-size))
+				((right-size)        (get-right-size))
 				((left-length)       (get-left-length))
 				((right-length)      (get-right-length))
 				((left-rms-length)   (get-left-rms-length))
