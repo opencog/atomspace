@@ -236,23 +236,37 @@
 		; Compute and cache all l_0, l_1 and l_2 norms, for later
 		; fast access.
 
-		(define (cache-all-left)
+		(define (cache-all)
+
+			(define start-time (current-time))
+			(define (elapsed-secs)
+				(define diff (- (current-time) start-time))
+				(set! start-time (current-time))
+				diff)
+
 			(for-each
 				(lambda (ITEM)
 					(define l0 (get-left-support-size ITEM))
 					(define l1 (sum-left-count ITEM))
 					(define l2 (sum-left-length ITEM))
 					(api-obj 'set-left-norms ITEM l0 l1 l2))
-				(star-obj 'right-basis)))
+				(star-obj 'right-basis))
 
-		(define (cache-all-right)
+			(format #t "Finished left support subtotals in ~A secs\n"
+				(elapsed-secs))
+
 			(for-each
 				(lambda (ITEM)
 					(define l0 (get-right-support-size ITEM))
 					(define l1 (sum-right-count ITEM))
 					(define l2 (sum-right-length ITEM))
 					(api-obj 'set-right-norms ITEM l0 l1 l2))
-				(star-obj 'left-basis)))
+				(star-obj 'left-basis))
+
+			(format #t "Finished right support subtotals in ~A secs\n"
+				(elapsed-secs))
+		)
+
 
 		; -------------
 		; Methods on this class.
@@ -268,8 +282,7 @@
 				((right-length)       (apply sum-right-length args))
 				((left-lp-norm)       (apply sum-left-lp-norm args))
 				((right-lp-norm)      (apply sum-right-lp-norm args))
-				((cache-all-left)     (cache-all-left))
-				((cache-all-right)    (cache-all-right))
+				((cache-all)          (cache-all))
 				(else (apply llobj    (cons message args))))
 			)))
 
