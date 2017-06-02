@@ -158,11 +158,44 @@
 			(cog-value-ref (cog-value wild-atom mi-key) 0))
 
 		; ----------------------------------------------------
+		; Key under which the matrix l_p norms are stored.
+		(define l-norm-key (PredicateNode "*-Left Norm Key-*"))
+		(define r-norm-key (PredicateNode "*-Right Norm Key-*"))
+
+		(define (set-left-norms L0 L1 L2 RMS)
+			(cog-set-value! wild-atom l-norm-key
+				(FloatValue L0 L1 L2 RMS)))
+
+		(define (get-left-support)
+			(cog-value-ref (cog-value wild-atom l-norm-key) 0))
+
+		(define (get-left-size)
+			(cog-value-ref (cog-value wild-atom l-norm-key) 1))
+
+		(define (get-left-length)
+			(cog-value-ref (cog-value wild-atom l-norm-key) 2))
+
+		(define (get-left-rms-length)
+			(cog-value-ref (cog-value wild-atom l-norm-key) 3))
+
+		(define (set-left-norms L0 L1 L2 RMS)
+			(cog-set-value! wild-atom l-norm-key
+				(FloatValue L0 L1 L2 RMS)))
+
+		(define (get-right-support)
+			(cog-value-ref (cog-value wild-atom r-norm-key) 0))
+
+		(define (get-right-size)
+			(cog-value-ref (cog-value wild-atom r-norm-key) 1))
+
+		(define (get-right-length)
+			(cog-value-ref (cog-value wild-atom r-norm-key) 2))
+
+		(define (get-right-rms-length)
+			(cog-value-ref (cog-value wild-atom r-norm-key) 3))
+
+		; ----------------------------------------------------
 		(define (get-total-count) totcnt)
-		(define (get-left-support) (/ (get-num-pairs) (get-left-dim)))
-		(define (get-right-support) (/ (get-num-pairs) (get-right-dim)))
-		(define (get-left-size) (/ (get-total-count) (get-left-dim)))
-		(define (get-right-size) (/ (get-total-count) (get-right-dim)))
 
 		; ----------------------------------------------------
 		; Methods on this class.
@@ -186,6 +219,12 @@
 				((right-support)       (get-right-support))
 				((left-size)           (get-left-size))
 				((right-size)          (get-right-size))
+				((left-length)         (get-left-length))
+				((right-length)        (get-right-length))
+				((left-rms-length)     (get-left-rms-length))
+				((right-rms-length)    (get-right-rms-length))
+				((set-left-norms)      (set-left-norms))
+				((set-right-norms)     (set-right-norms))
 			))
 	)
 )
@@ -266,6 +305,23 @@
 					(define siz (len-obj 'left-count x))
 					(sqrt (- (* len len) (* siz siz))))))
 
+		; ----------------------------------------------------
+		; Compute and cache the values of the computation with the
+		; report-api can find them.
+
+		(define (cache-left-norms)
+			(rpt-obj 'set-left-norms
+				(get-left-support)
+				(get-left-size)
+				(get-left-length)
+				(get-left-rms-length)))
+
+		(define (cache-right-norms)
+			(rpt-obj 'set-right-norms
+				(get-right-support)
+				(get-right-size)
+				(get-right-length)
+				(get-right-rms-length)))
 
 		; ----------------------------------------------------
 		; Methods on this class.
@@ -279,6 +335,8 @@
 				((right-length)      (get-right-length))
 				((left-rms-length)   (get-left-rms-length))
 				((right-rms-length)  (get-right-rms-length))
+				((cache-left-norms)  (cache-left-norms))
+				((cache-right-norms) (cache-right-norms))
 			))
 	)
 )
