@@ -626,6 +626,9 @@
 	; Define the object which computes left and right row-lengths
 	(define supp-obj (add-support-compute wild-obj))
 
+	; Define the object which will roll up a summary of the supports.
+	(define central-obj (make-central-compute wild-obj))
+
 	; Define the object that can store the computed values
 	(define store-obj (make-store wild-obj))
 
@@ -692,6 +695,7 @@
 	(display "Going to compute the left, right and total entropy\n")
 	(total-obj 'cache-entropy)
 	(total-obj 'cache-mi)
+	(central-obj 'cache-all)
 	(format #t "Done computing totals in ~A secs\n" (elapsed-secs))
 
 	(display "Start saving left-wildcards\n")

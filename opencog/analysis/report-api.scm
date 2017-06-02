@@ -311,19 +311,32 @@
 		; Compute and cache the values of the computation with the
 		; report-api can find them.
 
-		(define (cache-left-norms)
+		(define (cache-all)
+			(define start-time (current-time))
+			(define (elapsed-secs)
+				(define diff (- (current-time) start-time))
+				(set! start-time (current-time))
+				diff)
+
 			(rpt-obj 'set-left-norms
 				(get-left-support)
 				(get-left-size)
 				(get-left-length)
-				(get-left-rms-length)))
+				(get-left-rms-length))
 
-		(define (cache-right-norms)
+			(format #t "Finished left norm totals in ~A secs\n"
+				(elapsed-secs))
+
 			(rpt-obj 'set-right-norms
 				(get-right-support)
 				(get-right-size)
 				(get-right-length)
-				(get-right-rms-length)))
+				(get-right-rms-length))
+
+			(format #t "Finished right norm totals in ~A secs\n"
+				(elapsed-secs))
+		)
+
 
 		; ----------------------------------------------------
 		; Methods on this class.
@@ -337,8 +350,7 @@
 				((right-length)      (get-right-length))
 				((left-rms-length)   (get-left-rms-length))
 				((right-rms-length)  (get-right-rms-length))
-				((cache-left-norms)  (cache-left-norms))
-				((cache-right-norms) (cache-right-norms))
+				((cache-all)         (cache-all))
 
 				(else (apply llobj (cons message args)))
 			))
