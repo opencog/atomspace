@@ -101,7 +101,7 @@
     this is weighted by the probability of that row/column.
 
     The rms-count computation may seem squonky: to get the correct
-    rms, the "mean" must be taken, by dividing by the support. But
+    rms, the 'mean' must be taken, by dividing by the support. But
     after this is done, support is multiplied back in.  The point
     here is that count is not the average-count, and the length
     is not divided by teh support either.  So the rms-count should
@@ -404,19 +404,25 @@
 (define (print-support-summary-report LLOBJ PORT)
 
 	(define rpt-obj (add-report-api LLOBJ))
-	(define fail-before-print (rpt-obj 'left-support))
+	(define ls (rpt-obj 'left-support))
+	(define rs (rpt-obj 'right-support))
+	(define lc (rpt-obj 'left-count))
+	(define rc (rpt-obj 'right-count))
+	(define ll (rpt-obj 'left-length))
+	(define rl (rpt-obj 'right-length))
+	(define lv (rpt-obj 'left-rms-count))
+	(define rv (rpt-obj 'right-rms-count))
 
 	(format PORT "\n")
-	(format PORT "                 Left         Right\n")
-	(format PORT "                 ----         -----\n")
-	(format PORT "Support (l_0)  ~9,4g    ~9,4g\n"
-		(rpt-obj 'left-support) (rpt-obj 'right-support))
-	(format PORT "Size    (l_1)  ~9,4g    ~9,4g\n"
-		(rpt-obj 'left-count) (rpt-obj 'right-count))
-	(format PORT "Length  (l_2)  ~9,4g    ~9,4g\n"
-		(rpt-obj 'left-length) (rpt-obj 'right-length))
-	(format PORT "RMS Length     ~9,4g    ~9,4g\n"
-		(rpt-obj 'left-rms-count) (rpt-obj 'right-rms-count))
+	(format PORT "                 Left         Right     Avg-left     Avg-right\n")
+	(format PORT "                 ----         -----     --------     ---------\n")
+	(format PORT "Support (l_0)  ~9,4g    ~9,4g\n"  ls  rs)
+	(format PORT "Count   (l_1)  ~9,4g    ~9,4g     ~9,4g    ~9,4g\n"
+		lc rc (/ lc ls) (/ rc rs))
+	(format PORT "Length  (l_2)  ~9,4g    ~9,4g     ~9,4g    ~9,4g\n"
+		ll rl (/ ll ls) (/ rl rs))
+	(format PORT "RMS Count      ~9,4g    ~9,4g     ~9,4g    ~9,4g\n"
+		lv rv (/ lv ls) (/ rv rs))
 )
 
 (define-public (print-matrix-summary-report LLOBJ PORT)
