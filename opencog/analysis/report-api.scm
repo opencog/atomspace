@@ -253,7 +253,7 @@
 			(fold
 				(lambda (item sum)
 					(+ sum (*
-							(FN (llobj 'right-wildcard item))
+							(FN item)
 							(frq-obj 'right-wild-freq item))))
 				0
 				(wild-obj 'left-basis)))
@@ -269,7 +269,7 @@
 			(fold
 				(lambda (item sum)
 					(+ sum (*
-							(FN (llobj 'left-wildcard item))
+							(FN item)
 							(frq-obj 'left-wild-freq item))))
 				0
 				(wild-obj 'right-basis)))
