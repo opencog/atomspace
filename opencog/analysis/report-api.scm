@@ -225,6 +225,8 @@
 				((right-rms-length)    (get-right-rms-length))
 				((set-left-norms)      (set-left-norms))
 				((set-right-norms)     (set-right-norms))
+
+				(else (apply llobj (cons message args)))
 			))
 	)
 )
@@ -337,6 +339,8 @@
 				((right-rms-length)  (get-right-rms-length))
 				((cache-left-norms)  (cache-left-norms))
 				((cache-right-norms) (cache-right-norms))
+
+				(else (apply llobj (cons message args)))
 			))
 	)
 )
