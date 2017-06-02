@@ -251,7 +251,7 @@
 			; probability of that row, which is P(x,*) i.e. right-freq
 			; The sum is over all the rows.
 			(fold
-				(lambda (sum item)
+				(lambda (item sum)
 					(+ sum (*
 							(FN (llobj 'right-wildcard item))
 							(frq-obj 'right-wild-freq item))))
@@ -267,7 +267,7 @@
 			; probability of that column, which is P(*,y) i.e. left-freq
 			; The sum is over all the columns.
 			(fold
-				(lambda (sum item)
+				(lambda (item sum)
 					(+ sum (*
 							(FN (llobj 'left-wildcard item))
 							(frq-obj 'left-wild-freq item))))
