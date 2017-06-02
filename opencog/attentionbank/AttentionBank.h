@@ -63,18 +63,23 @@ class AttentionBank
     /** The attention values of all the atoms in the attention bank */
     std::mutex _idx_mtx;
     std::unordered_map<Handle, AttentionValuePtr> _atom_index;
+    std::mutex AFMutex;
+    int minAFSize;
+    struct compare_sti_less{
+        bool operator()(const std::pair<Handle, AttentionValuePtr>& h1,
+                        const std::pair<Handle, AttentionValuePtr>& h2){
+            return  (h1.second)->getSTI() < (h2.second)->getSTI();
+        }
+    };
+    std::set<std::pair<Handle, AttentionValuePtr>, compare_sti_less> attentionalFocus;
 
+    void updateAttentionalFocus(const Handle&, const AttentionValuePtr&, 
+                                const AttentionValuePtr&);
+    
     /** AV changes */
     void AVChanged(const Handle&, const AttentionValuePtr&, const AttentionValuePtr&);
 
     boost::signals2::connection _removeAtomConnection;
-
-    /**
-     * Boundary at which an atom is considered within the attentional
-     * focus of opencog. Atom's with STI less than this value are
-     * not charged STI rent.
-     */
-    AttentionValue::sti_t _attentionalFocusBoundary;
 
     /**
      * Signal emitted when an atom crosses in or out of the
@@ -147,6 +152,21 @@ public:
         return get_av(h)->getVLTI();
     }
 
+    AttentionValue::sti_t get_af_max_sti(void) const {
+        if(attentionalFocus.rbegin() != attentionalFocus.rend())
+            return (attentionalFocus.rbegin()->second)->getSTI();
+        else
+            return 0;
+    }
+
+    void set_af_size(int size) {
+        minAFSize = size;
+    }
+
+    int get_af_size(void) {
+        return minAFSize;
+    }
+
     /**
      * Change the attention value of an atom.
      */
@@ -205,31 +225,6 @@ public:
 
     long updateLTIFunds(AttentionValue::lti_t diff) {
         return fundsLTI += diff;
-    }
-
-    /**
-     * Get attentional focus boundary, generally atoms below
-     * this threshold won't be accessed unless search methods
-     * are unsuccessful on those that are above this value.
-     *
-     * @return Short Term Importance threshold value
-     */
-    AttentionValue::sti_t getAttentionalFocusBoundary() const {
-        return _attentionalFocusBoundary;
-    }
-
-    /**
-     * Change the attentional focus boundary. Some situations
-     * may benefit from less focussed searches.
-     *
-     * @param s New threshold
-     * @return Short Term Importance threshold value
-     */
-    AttentionValue::sti_t setAttentionalFocusBoundary(
-        AttentionValue::sti_t s)
-    {
-        _attentionalFocusBoundary = s;
-        return s;
     }
 
     /**
@@ -299,7 +294,6 @@ public:
      * @see getNormalisedSTI()
      */
     double getNormalisedSTI(AttentionValuePtr) const;
-
     /**
      * Retrieve the linearly normalised Short-Term Importance between 0..1
      * for a given AttentionValue.
@@ -343,15 +337,11 @@ public:
      * @note: This method utilizes the ImportanceIndex
      */
     template <typename OutputIterator> OutputIterator
-    get_handle_set_in_attentional_focus(OutputIterator result) const
+    get_handle_set_in_attentional_focus(OutputIterator result)
     {
-        return get_handles_by_AV(result, getAttentionalFocusBoundary(),
-                                 AttentionValue::AttentionValue::MAXSTI);
-    }
-
-    HandleSeq getTopSTIValuedHandles(void)
-    {
-         return _importanceIndex.getTopSTIValuedHandles();
+         std::lock_guard<std::mutex> lock(AFMutex);
+         std::transform(attentionalFocus.begin(), attentionalFocus.end(),
+                 result, [](std::pair<Handle, AttentionValuePtr> hstp){return hstp.first;});
     }
 
     /**
@@ -359,6 +349,7 @@ public:
      */
     Handle getRandomAtom(void);
 
+    bool atom_is_in_AF(const Handle&);
     /**
      * Updates the importance index for the given atom. According to the
      * new importance of the atom, it may change importance bins.

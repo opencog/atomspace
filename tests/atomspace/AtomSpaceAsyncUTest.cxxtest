@@ -508,13 +508,14 @@ public:
                                 this, _1, _2, _3));
 
         __testAFSignalsCounter = 0;
-        ab->setAttentionalFocusBoundary(100);
+        
+        auto af_sti = ab->get_af_max_sti();
 
         // Add a node to the AttentionalFocus
         Handle h = atomSpace->add_node(CONCEPT_NODE,
                                        "test");
         h->setTruthValue(SimpleTruthValue::createTV(0.01, 1));
-        ab->set_sti(h, 200);
+        ab->set_sti(h, af_sti + 200); //set it high enough to so that it will be in the AF.
         TS_ASSERT_EQUALS((int)__testAFSignalsCounter, 1);
 
         // Remove the node from the AttentionalFocus

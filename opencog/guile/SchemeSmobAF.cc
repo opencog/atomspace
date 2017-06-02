@@ -31,26 +31,27 @@
 using namespace opencog;
 
 /**
- * Return AttentionalFocus Boundary
- */
-SCM SchemeSmob::ss_af_boundary (void)
+ *   Return AttentionalFocus Size
+ **/
+SCM SchemeSmob::ss_af_size (void)
 {
-	AtomSpace* atomspace = ss_get_env_as("cog-af-boundary");
-	return scm_from_short(attentionbank(atomspace).getAttentionalFocusBoundary());
+    AtomSpace* atomspace = ss_get_env_as("cog-af-size");
+    return scm_from_int(attentionbank(atomspace).get_af_size());
 }
 
 /**
- * Set AttentionalFocus Boundary
+ * Set AttentionalFocus Size
  */
-SCM SchemeSmob::ss_set_af_boundary (SCM sboundary)
+SCM SchemeSmob::ss_set_af_size (SCM ssize)
 {
-	AtomSpace* atomspace = ss_get_env_as("cog-set-af-boundary!");
-	if (scm_is_false(scm_integer_p(sboundary)))
-		scm_wrong_type_arg_msg("cog-set-af-boundary", 1, sboundary,
-			"integer opencog AttentionalFocus Boundary");
+    AtomSpace* atomspace = ss_get_env_as("cog-set-af-size!");
+    if (scm_is_false(scm_integer_p(ssize)))
+        scm_wrong_type_arg_msg("cog-set-af-size", 1, ssize,
+                "integer opencog AttentionalFocus size");
 
-	short bdy = scm_to_short(sboundary);
-	return scm_from_short(attentionbank(atomspace).setAttentionalFocusBoundary(bdy));
+    int bdy = scm_to_int(ssize);
+    attentionbank(atomspace).set_af_size(bdy);
+    return scm_from_int(attentionbank(atomspace).get_af_size());
 }
 
 /**
