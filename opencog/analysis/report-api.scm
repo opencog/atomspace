@@ -470,7 +470,7 @@
 		(lambda () (print-support-summary-report LLOBJ PORT))
 		(lambda (key . args)
 			(format PORT
-				"No support statistics are present. Run foobar to get them.\n")
+				"No support statistics are present. Run compute-mi to get them.\n")
 			#f))
 )
 
