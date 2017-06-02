@@ -102,10 +102,11 @@
 
     The rms-count computation may seem squonky: to get the correct
     rms, the "mean" must be taken, by dividing by the support. But
-    after this is done, support is multiplied back in.  The intent
-    here is to allow comparisaon with other rows/columns of different
-    support. Yes, this seems strange, but I think its the right thing to
-    do.
+    after this is done, support is multiplied back in.  The point
+    here is that count is not the average-count, and the length
+    is not divided by teh support either.  So the rms-count should
+    avoid an accidental divide by the support; thus the slightly
+    odd-looking formula above.
 
     The rms-count is the square root of what R. Ferrer i Cancho
     calls 'hubbiness' (his hubbiness is the 2nd central moment, if
@@ -306,27 +307,35 @@
 		; no imaginary part on it at all! WTF! But then we get to
 		; here, and it does!! So we take the real part, else SQL
 		; chokes on the imaginary value.
+		;
+		; Note - the divide by the support can be understood as follows:
+		; avg = len / sup
+		; mean-sq = (len * len) / sup
+		; variance = mean-sq - avg * avg
+		; moment = sup * variance
+		; rms-count = sqrt (moment)
+		; multiple through by sup to get the implementation below.
 		(define (get-left-rms-count)
 			(real-part
 			(get-left-fn-avg
 				(lambda (x)
 					(define sup (len-obj 'right-support x))
-					(define siz (/ (len-obj 'right-count x) sup))
+					(define siz (len-obj 'right-count x))
 					(define len (len-obj 'right-length x))
-					(define lensq (/ (* len len) sup))
-					(define sizsq (* siz siz))
-					(sqrt (* (- lensq sizsq) sup))))))
+					(define lensq (* len len))
+					(define sizsq (/ (* siz siz) sup))
+					(sqrt (- lensq sizsq))))))
 
 		(define (get-right-rms-count)
 			(real-part
 			(get-right-fn-avg
 				(lambda (x)
 					(define sup (len-obj 'left-support x))
-					(define siz (/ (len-obj 'left-count x) sup))
+					(define siz (len-obj 'left-count x))
 					(define len (len-obj 'left-length x))
-					(define lensq (/ (* len len) sup))
-					(define sizsq (* siz siz))
-					(sqrt (* (- lensq sizsq) sup))))))
+					(define lensq (* len len))
+					(define sizsq (/ (* siz siz) sup))
+					(sqrt (- lensq sizsq))))))
 
 		; ----------------------------------------------------
 		; Compute and cache the values of the computation with the
