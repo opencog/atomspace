@@ -347,6 +347,24 @@
 
 ; ---------------------------------------------------------------------
 
+(define (print-support-summary-report LLOBJ PORT)
+
+	(define rpt-obj (add-report-api LLOBJ))
+	(define fail-before-print (rpt-obj 'left-support))
+
+	(format PORT "\n")
+	(format PORT "               Left   Right\n")
+	(format PORT "               ----   -----\n")
+	(format PORT "Support (l_0)  ~6f    ~6f\n"
+		(rpt-obj 'left-support) (rpt-obj 'right-support))
+	(format PORT "Size    (l_1)  ~6f    ~6f\n"
+		(rpt-obj 'left-size) (rpt-obj 'right-size))
+	(format PORT "Length  (l_2)  ~6f    ~6f\n"
+		(rpt-obj 'left-length) (rpt-obj 'right-length))
+	(format PORT "RMS Length     ~6f    ~6f\n"
+		(rpt-obj 'left-rms-length) (rpt-obj 'right-rms-length))
+)
+
 (define-public (print-matrix-summary-report LLOBJ PORT)
 "
   print-matrix-summary-report LLOBJ PORT
@@ -386,17 +404,11 @@
 	)
 	(format PORT "Total MI: ~6f\n" (rpt-obj 'total-mi))
 
-	(format PORT "\n")
-	(format PORT "               Left   Right\n")
-	(format PORT "               ----   -----\n")
-	(format PORT "Support (l_0)  ~6f    ~6f\n"
-		(rpt-obj 'left-support) (rpt-obj 'right-support))
-	(format PORT "Size    (l_1)  ~6f    ~6f\n"
-		(rpt-obj 'left-size) (rpt-obj 'right-size))
-	(format PORT "Length  (l_2)  ~6f    ~6f\n"
-		(rpt-obj 'left-length) (rpt-obj 'right-length))
-	(format PORT "RMS Length     ~6f    ~6f\n"
-		(rpt-obj 'left-rms-length) (rpt-obj 'right-rms-length))
+	(catch #t
+		(lambda () (print-support-summary-report LLOBJ PORT))
+		(lambda (key . args)
+			(format PORT "No support statistics are present\n")
+			#f))
 )
 
 ; ---------------------------------------------------------------------
