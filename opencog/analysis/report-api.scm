@@ -197,6 +197,7 @@
 	(let* ((llobj LLOBJ)
 			(wild-obj (add-pair-stars LLOBJ))
 			(len-obj (add-pair-support-compute wild-obj))
+			(frq-obj (add-pair-freq-api wild-obj))
 			(rpt-obj (add-report-api wild-obj))
 			(l-len 0)
 			(r-len 0)
@@ -204,16 +205,17 @@
 
 		(define (do-get-left-length)
 			; The right-length gives the length of one row.
-			; The sum is over all the columns, divided by the
-			; number of columns.
-			(define len
-				(fold
-					(lambda (sum item)
-						(+ sum (len-obj 'right-length item)))
-					0
-					(star-obj 'left-basis)))
-			(/ len (rpt-obj 'left-dim))
-		)
+			; The probability of that row is P(x,*) i.e. right-freq
+			; The sum is over all the columns, weighted by the
+			; liklihood of that column.
+			(fold
+				(lambda (sum item)
+					(+ sum (*
+							(len-obj 'right-length item)
+							(frq-obj 'right-wild-freq item))))
+				0
+				(star-obj 'left-basis)))
+
 		(define (get-left-length)
 			(if (eqv? l-len 0) (set! l-len (do-get-left-length)))
 			l-len)
@@ -222,14 +224,14 @@
 			; The left-length gives the length of one column.
 			; The sum is over all the columns, divided by the
 			; number of columns.
-			(define len
-				(fold
-					(lambda (sum item)
-						(+ sum (len-obj 'left-length item)))
-					0
-					(star-obj 'right-basis)))
-			(/ len (rpt-obj 'right-dim))
-		)
+			(fold
+				(lambda (sum item)
+					(+ sum (*
+							(len-obj 'left-length item)
+							(frq-obj 'left-wild-freq item))))
+				0
+				(star-obj 'right-basis)))
+
 		(define (get-right-length)
 			(if (eqv? r-len 0) (set! r-len (do-get-right-length)))
 			r-len)
