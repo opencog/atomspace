@@ -29,8 +29,6 @@ using namespace opencog;
 AttentionalFocusCB::AttentionalFocusCB(AtomSpace* as) :
 	DefaultPatternMatchCB(as)
 {
-	// Temporarily disable the AF mechanism during the URE development
-	// _as->setAttentionalFocusBoundary(AttentionValue::MINSTI);
 }
 
 bool AttentionalFocusCB::node_match(const Handle& node1, const Handle& node2)
