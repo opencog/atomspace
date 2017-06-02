@@ -17,14 +17,17 @@ the weight of a rule, etc).
 
 The overall design can be found on the wiki pages below:
 
-  [http://wiki.opencog.org/w/Unified_Rule_Engine](http://wiki.opencog.org/w/Unified_Rule_Engine)
+  [Unified Rule Engine](http://wiki.opencog.org/w/Unified_Rule_Engine)
+  [URE Configuration Format](http://wiki.opencog.org/w/URE_Configuration_Format)
+  [URE Control Policy](http://wiki.opencog.org/w/URE_Control_Policy)
+  [Pattern Matcher](http://wiki.opencog.org/w/Pattern_Matcher)
 
-  [http://wiki.opencog.org/w/URE_Configuration_Format](http://wiki.opencog.org/w/URE_Configuration_Format)
+Examples can be found in this and other repositories:
 
-  [http://wiki.opencog.org/w/Control_policy](http://wiki.opencog.org/w/Control_policy)
-
-  [http://wiki.opencog.org/w/Pattern_Matcher](http://wiki.opencog.org/w/Pattern_Matcher)
-
+  [Rule Engine Examples](https://github.com/opencog/atomspace/tree/master/examples/rule-engine)
+  [PLN Rules](https://github.com/opencog/opencog/tree/master/opencog/pln)
+  [PLN Examples](https://github.com/opencog/opencog/tree/master/examples/pln)
+  [R2L Rules](https://github.com/opencog/opencog/tree/master/opencog/nlp/relex2logic/rules)
 
 ### Forward chaining
 
@@ -73,7 +76,7 @@ returned wrapped in a ListLink.
 
 In the backward chaining inference we are interested in either truth
 value fulfillment query or variable fulfillment query.  For variable
-fullfillment query, variable containing link is passed as an argument
+fulfillment query, variable containing link is passed as an argument
 and the backward chainer tries to find grounding for the variable.
 For truth value fullfillment query, the TV of the original target are
 updated via inference.
@@ -81,92 +84,10 @@ updated via inference.
 The main C++ entry point for the backward chainer is the `do_chain`
 function.
 
-There exist a scheme primitive `(cog-bc *rule-base* *target* *vardecl* *focus-set*)`
-for using the Backward Chainer in scheme.
-
-Here's how the criminal example located at
-https://github.com/opencog/opencog/blob/master/opencog/python/pln_old/examples/backward_chaining/criminal.scm
-could be solved by the Backward Chaining, when only the Modus Ponens
-rule is present (disclaminer: the internal implement will be
-different)
-
-
-```
-t: InhLink $who criminal
--> kb matched
-
-t: InhLink $x crimainl, InhLink $who criminal
--> kb match fail
--> match modus ponens rule
--> output matched: VarNode $B-1 => InhLink $x criminal
--> input became: (AndLink (ImpLink (VarNode $A-1) (QuoteLink (InhLink $x criminal))) (VarNode $A-1))
--> premises selection
--> none of the premises can be grounded to solve for $x
--> add to targets
-
-t: (ImpLink (AndLink ... american ... weapon ...) (InhLink $x criminal)), (AndLink ... american ... weapon ...), InhLink $x crimnal
--> no free var
-
-t: (AndLink ... american ...), InhLink $x criminal, InhLink $who criminal
--> kb match fail
--> break apart the AndLink
-
-t: InhLink $x American, InhLink $y weapon, EvaLink sell $x $y $z, InhLink $z hostile, InhLink $x criminal, InhLink $who criminal
--> kb matched
-
-t: InhLink $y weapon, EvaLink sell $x $y $z, InhLink $z hostile, InhLink $x criminal, InhLink $who criminal
--> kb matched
-
-t: EvaLink sell $x $y $z, InhLink $z hostile, InhLink $x criminal, InhLink $who criminal
--> kb match sell West $a Nono
--> got free var, add to target
-
-t: EvaLink sell West $a Nono, InhLink $z hostile, InhLink $x criminal, InhLink $who criminal
--> kb match fail
--> match modus ponens rule
--> output matched: VarNode $B-2 => EvaLink sell West $a Nono
--> input became: (AndLink (ImplicationLink (VarNode $A-2) (QuoteLink (EvaLink sell West $a Nono))) (VarNode $A-2))
--> premises selection
--> one of the premises can be grounded by missile@123
--> forward chain added (EvaLink sell West missle@123 Nono) to atomspace
--> no premises with free var, this target is solved
-
-t: InhLink $z hostile, InhLink $x criminal, InhLink $who criminal
--> kb match
-
-t: InhLink $b hostile, InhList $z hostile, InhLink $x criminal, InhLink $who criminal
--> kb match fail
--> match modus ponens rule
--> output matched: VarNode $B-3 => InhLink $b hostile
--> input became: (AndLink (ImplicationLink (VarNode $A-3) (QuoteLink (InhLink $b hostile))) (VarNode $A-3))
--> premises selection
--> one of the premises can be grounded by Nono
--> forward chain added (InhLink Nono hostile) to atomspace
--> no premises with free var, this target is solved
-
-t: InhList $z hostile, InhLink $x criminal, InhLink $who criminal
--> kb match
-
-t: InhLink $x criminal, InhLink $who criminal
--> kb match fail
--> matched modus poenes rule
--> output matched: VarNode $B-4 => InhLink $x criminal
--> input became: (AndLink (ImpLink (VarNode $A-4) (QuoteLink (InhLink $x criminal))) (VarNode $A-4))
--> premises selection
--> one of the premises can be grounded by West
--> forward chain added (InhLink West criminal) to atomspace
--> no premises with free var, this target is solved
-
-t: InhLink $who criminal
--> kb match
-
-$who in the end map to West
-
-```
-
-where `t` is a targets stack (left is the front).  In the actual
-implmentation, a list is used and the targets are visited in
-some roulette selection way.
+Similarly to the Forward Chainer there exist a scheme primitive
+`(cog-bc *rule-base* *target* *vardecl* *focus-set*)` for calling the
+Backward Chainer in scheme. The arguments are the same as for a
+Forward Chainer call expect that *source* is replaced by *target*.
 
 ## Control policy
 
@@ -177,89 +98,34 @@ representing the rule-based system (rules + other parameters) is
 passed to the chainers (forward or backward) and loaded at
 construction time.
 
-## Things need to be implemented
+## Improvements
 
-The rule engine as it exists now is in its infancy. There is
-a lot of space for improvement.
+The rule engine is rather mature at this point but there are still a
+few missing things.
 
-* Rule choosing fitness functions
+* The backward chainer needs to better support meta-rule. For now
+  meta-rules in the backward chainer as run forwardly at each
+  iteration and all new produced rules are added to the rule
+  sets. Instead if should build an inference tree that directly call
+  meta-rules. Because of this limitation some reasonings, like
+  induction of conditionals are not possible in a purely backward
+  way. In order to do that we need to integrate unification in atomese
+  so that the inference tree process meta-rules.
 
-* Inference termination
+* Add more inference termination criteria besides maximum number of
+  iterations.
 
-* Refactoring out some codes
+* The unfier needs to support better type intersection. For now if a
+  variable is typed in a variable fulfillment query, and a rule
+  unifies with this variables with another type, the resulting type
+  will be one or the other, as opposed to being its intersection. At
+  worse it invalidates some backward chainer results, at beast it
+  slows down inference tree execution.
 
-* Rules output need to be clearly defined for backward chaining,
-  which is not currently possible if the output in hidden
-  inside some scheme function
+## Authors
 
-* VariableNode need to have the following properties for backward chaining
+Misgana Bayetta, William Ma, Nil Geisweiller.
 
-  1. all usage of VariableNode are unique & well-defined, in that
-     the same named VariableNode is never declared and appears in more than one scope
-  2. atoms like `(SatisfyingSetLink (VariableNode $X) (humans eat $X))`,
-     `(SatisfyingSetLink (VariableNode $Y) (humans eat $Y))` are treated as exactly the same atom
+## Ackowledgement
 
-  This can be done via "canonical label" of the scoping links.  See
-  discussion at https://groups.google.com/forum/#!topic/opencog/dKCYL47fpCQ
- 
-* Both Forward Chainer and Backward Chainer need to handle inferences
-  involving existing variables, possibly subject to some control policy,
-  since it is possible this use case is only applicable to specific rule
-  base such as PLN.
-  
-  For example, given
-  ```
-   SatisfyingSetLink
-     X, Y
-     AndLink
-       InheritanceLink X Y
-       InhertianceLink Y animals
-  ```
-  
-  Then the deduction rule should produce
-  ```
-   SatisfyingSetLink
-     Z
-     InheritanceLink Z animals
-  ```
-  with new variables, instead of the useless `InheritanceLink X animals` that is
-  not inside the original scope.
-  
-  In addition, the premises should all be contained within the same scope, so 
-  if the following exist
-  ```
-   SatisfyingSetLink
-     X
-     AndLink
-       InheritanceLink X animal
-       ...
-
-   BindLink
-     Y
-     AndLink
-       InheritanceLink animal Y
-       ...
-     ...
-  ```
-  We do not want any form of `InheritanceLink X Y` to be generated.  Special
-  care is also needed for nested scopes.
-
-## Rule represenation next steps
-
-- See if these can be implemented to directly use the "side-effect
-  free" versions so that the truth value application occurs inside the
-  ImplicationLink rather than inside the Scheme rule. This was
-  discussed [here](https://groups.google.com/d/msg/opencog/KUptHRvBXu0/YR6oySxLKeMJ).
-
-- See if the link type can be made to allow a dynamic list of valid
-  link types. For example, for the Deduction Rule: {InheritanceLink,
-  SubsetLink, ImplicationLink, ExtensionalImplicationLink}
-
-- Support all the TruthValue types
-
-- Utilize a graph rewriting unit test framework, that is currently
-  being discussed, to assert that the replacement graphs match a
-  predefined expected value for specific test instances
-
-
-***Author*** *Misgana Bayetta*, *William Ma*
+Many thanks to Jim Rutt for supporting the rule-engine developement.
