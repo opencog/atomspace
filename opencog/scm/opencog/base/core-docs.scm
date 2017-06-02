@@ -814,6 +814,30 @@
     (ConceptNode \"Databases\" (av 15752 0 0))
 ")
 
+(set-procedure-property! cog-af-size 'documentation
+ "
+  cog-af-size
+     Return the AttentionalFocus size of the AtomSpace (which is
+     an integer value).
+ 
+     Example:
+ 
+     guile> (cog-af-size)
+     100
+ ")
+  
+ (set-procedure-property! cog-set-af-size! 'documentation
+ "
+  cog-set-af-size! AF Size
+     Set the AttentionalFocus Size of the AtomSpace (which is an
+     integer value). Returns the new AttentionalFocus size
+     (which is an integer value).
+ 
+     Example:
+     guile> (cog-set-af-size! 200)
+     200
+ ")
+
 (set-procedure-property! cog-get-types 'documentation
 "
  cog-get-types
