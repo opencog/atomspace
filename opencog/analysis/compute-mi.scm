@@ -405,12 +405,6 @@
 
 (define (make-batch-mi LLOBJ)
 
-	(define start-nsecs (get-internal-real-time))
-	(define (elapsed-millisecs)
-		(define diff (- (get-internal-real-time) start-nsecs))
-		(set! start-nsecs (get-internal-real-time))
-		(/ (* diff 1000.0) internal-time-units-per-second))
-
 	; We need 'left-basis, provided by add-pair-stars
 	; We need 'pair-freq, provided by add-pair-freq-api
 	; We need 'set-pair-mi, provided by add-pair-freq-api
@@ -499,12 +493,11 @@
   make-store -- Extend the LLOBJ with addtional methods to store
   the left and right wild-card values.
 "
-
-	(define start-nsecs (get-internal-real-time))
-	(define (elapsed-millisecs)
-		(define diff (- (get-internal-real-time) start-nsecs))
-		(set! start-nsecs (get-internal-real-time))
-		(/ (* diff 1000.0) internal-time-units-per-second))
+	(define start-time (current-time))
+	(define (elapsed-secs)
+		(define diff (- (current-time) start-time))
+		(set! start-time (current-time))
+		diff)
 
 	(define (store-list all-atoms CNT MSG)
 		(define num-prs (length all-atoms))
