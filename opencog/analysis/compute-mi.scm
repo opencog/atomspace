@@ -550,11 +550,16 @@
 				40000 "right-wilds")
 		)
 
+		(define (store-pairs all-pairs)
+			(store-list all-pairs 100000 "pairs"))
+
+
 		; Methods on this class.
 		(lambda (message . args)
 			(case message
 				((store-wildcards)      (store-all-wildcards))
-				(else (apply llobj      (cons message args))))
+				((store-pairs)          (apply store-pairs args))
+				(else                   (apply llobj (cons message args))))
 		))
 )
 
@@ -642,7 +647,7 @@
 		(elapsed-secs))
 
 	; Now, compute the grand-total.
-	(store-atom (count-obj 'cache-total-count))
+	(count-obj 'cache-total-count)
 	(format #t "Done computing N(*,*) total-count=~A in ~A secs\n"
 		((add-pair-count-api OBJ) 'wild-wild-count)
 		(elapsed-secs))
@@ -679,7 +684,7 @@
 		(format #t "Done computing ~A pair MI's in ~A secs\n"
 			num-prs (elapsed-secs))
 
-		(store-list all-atoms 100000 "pairs")
+		(store-obj 'store-pairs all-atoms)
 	)
 
 	(display "Going to do column and row subtotals\n")
