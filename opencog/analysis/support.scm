@@ -134,13 +134,13 @@
 				(lambda (lopr)
 					; 'item-pair returns the atom holding the count
 					(define hipr (llobj 'item-pair lopr))
-					(define cnt (get-cnt hipr))
+					(define cnt (get-cnt lopr))
 					(if (< 0 cnt) hipr #f))
 				LIST))
 
 		; Return a list of all pairs (x, y) for y == ITEM for which
 		; N(x,y) > 0.  Specifically, this returns the pairs which
-		; are hiolding the counts (and not the low-level pairs).
+		; are holding the counts (and not the low-level pairs).
 		(define (get-left-support-set ITEM)
 			(non-zero-filter (star-obj 'left-stars ITEM)))
 
