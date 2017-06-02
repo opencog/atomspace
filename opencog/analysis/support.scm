@@ -78,7 +78,7 @@
 				((right-length)       (apply get-right-length args))
 				((set-left-norms)     (apply set-left-norms args))
 				((set-right-norms)    (apply set-right-norms args))
-				(else (apply llobj (cons message args))))
+				(else (apply llobj    (cons message args))))
 			)))
 
 ; ---------------------------------------------------------------------
@@ -123,6 +123,7 @@
 "
 	(let ((llobj LLOBJ)
 			(star-obj (add-pair-stars LLOBJ))
+			(api-obj (add-support-api LLOBJ))
 			(get-cnt GET-CNT))
 
 		; -------------
@@ -231,20 +232,45 @@
 		(define (sum-right-lp-norm P ITEM)
 			(sum-lp-norm P (star-obj 'right-stars ITEM)))
 
-	; Methods on this class.
-	(lambda (message . args)
-		(case message
-			((left-support-set)   (apply get-left-support-set args))
-			((right-support-set)  (apply get-right-support-set args))
-			((left-support)       (apply get-left-support-size args))
-			((right-support)      (apply get-right-support-size args))
-			((left-count)         (apply sum-left-count args))
-			((right-count)        (apply sum-right-count args))
-			((left-length)        (apply sum-left-length args))
-			((right-length)       (apply sum-right-length args))
-			((left-lp-norm)       (apply sum-left-lp-norm args))
-			((right-lp-norm)      (apply sum-right-lp-norm args))
-			(else (apply llobj (cons message args))))
-		)))
+		; -------------
+		; Compute and cache all l_0, l_1 and l_2 norms, for later
+		; fast access.
+
+		(define (cache-all-left)
+			(for-each
+				(lambda (ITEM)
+					(define l0 (get-left-support-size ITEM))
+					(define l1 (sum-left-count ITEM))
+					(define l2 (sum-left-length ITEM))
+					(api-obj 'set-left-norms ITEM l0 l1 l2))
+				(star-obj 'right-basis)))
+
+		(define (cache-all-right)
+			(for-each
+				(lambda (ITEM)
+					(define l0 (get-right-support-size ITEM))
+					(define l1 (sum-right-count ITEM))
+					(define l2 (sum-right-length ITEM))
+					(api-obj 'set-right-norms ITEM l0 l1 l2))
+				(star-obj 'left-basis)))
+
+		; -------------
+		; Methods on this class.
+		(lambda (message . args)
+			(case message
+				((left-support-set)   (apply get-left-support-set args))
+				((right-support-set)  (apply get-right-support-set args))
+				((left-support)       (apply get-left-support-size args))
+				((right-support)      (apply get-right-support-size args))
+				((left-count)         (apply sum-left-count args))
+				((right-count)        (apply sum-right-count args))
+				((left-length)        (apply sum-left-length args))
+				((right-length)       (apply sum-right-length args))
+				((left-lp-norm)       (apply sum-left-lp-norm args))
+				((right-lp-norm)      (apply sum-right-lp-norm args))
+				((cache-all-left)     (cache-all-left))
+				((cache-all-right)    (cache-all-right))
+				(else (apply llobj    (cons message args))))
+			)))
 
 ; ---------------------------------------------------------------------
