@@ -94,11 +94,15 @@
         left-support = sum_x P(x,*) |(x,*)|
         left-size = sum_x P(x,*) N(x,*)
         left-length = sqrt [ sum_x P(x,*) L(x,*) ]
+        left-rms-length = sqrt [ sum_x P(x,*)
+               [ L(x,*) - (N(x,*)^2 ] ]
 
     Note that while computing the average length of a row/column,
     this is weighted by the probability of that row/column.
 
-  The hubbiness is defined as sqrt[ (l_2)^2 - (l_1)^2 ].
+    The rms-length is the squeare root of what R. Ferrer i Cancho
+    calls "hubbiness" (his hubbiness is the 2nd central moment, if
+    I recall correctly).
 "
 	(let* ((llobj LLOBJ)
 
@@ -198,15 +202,9 @@
 			(len-obj (add-pair-support-compute wild-obj))
 			(frq-obj (add-pair-freq-api wild-obj))
 			(rpt-obj (add-report-api wild-obj))
-			(l-sup 0)
-			(r-sup 0)
-			(l-siz 0)
-			(r-siz 0)
-			(l-len 0)
-			(r-len 0)
 		)
 
-		(define (do-get-left-avg R-METHOD)
+		(define (get-left-fn-avg FN)
 			; The Right-METHOD gives the stat on a row that we want
 			; to take the weighted average of.  The weight is the
 			; probability of that row, which is P(x,*) i.e. right-freq
@@ -214,12 +212,15 @@
 			(fold
 				(lambda (sum item)
 					(+ sum (*
-							(len-obj R-METHOD item)
+							(FN item)
 							(frq-obj 'right-wild-freq item))))
 				0
 				(star-obj 'left-basis)))
 
-		(define (do-get-right-avg L-METHOD)
+		(define (do-get-left-avg R-METHOD)
+			(get-left-fn-avg (lambda (x) (len-obj R-METHOD x))))
+
+		(define (get-right-fn-avg FN)
 			; The Left-METHOD gives the stat on a column that we want
 			; to take the weighted average of.  The weight is the
 			; probability of that column, which is P(*,y) i.e. left-freq
@@ -227,48 +228,44 @@
 			(fold
 				(lambda (sum item)
 					(+ sum (*
-							(len-obj L-METHOD item)
+							(FN item)
 							(frq-obj 'left-wild-freq item))))
 				0
 				(star-obj 'right-basis)))
 
-		; ---------------------
-		(define (get-left-support)
-			(if (eqv? l-sup 0) (set! l-sup (do-get-left-avg 'right-support)))
-			l-sup)
-
-		(define (get-right-support)
-			(if (eqv? r-sup 0) (set! r-sup (do-get-right-avg 'left-support)))
-			r-sup)
+		(define (do-get-right-avg L-METHOD)
+			(get-right-fn-avg (lambda (x) (len-obj L-METHOD x))))
 
 		; ---------------------
-		(define (get-left-size)
-			(if (eqv? l-siz 0) (set! l-siz (do-get-left-avg 'right-count)))
-			l-siz)
+		(define (get-left-support) (do-get-left-avg 'right-support))
 
-		(define (get-right-size)
-			(if (eqv? r-siz 0) (set! r-siz (do-get-right-avg 'left-count)))
-			r-siz)
+		(define (get-right-support) (do-get-right-avg 'left-support))
 
 		; ---------------------
-		(define (get-left-length)
-			(if (eqv? l-len 0) (set! l-len (do-get-left-avg 'right-length)))
-			l-len)
+		(define (get-left-size) (do-get-left-avg 'right-count))
 
-		(define (get-right-length)
-			(if (eqv? r-len 0) (set! r-len (do-get-right-avg 'left-length)))
-			r-len)
+		(define (get-right-size) (do-get-right-avg 'left-count))
+
+		; ---------------------
+		(define (get-left-length) (do-get-left-avg 'right-length))
+
+		(define (get-right-length) (do-get-right-avg 'left-length))
 
 		; ---------
 		(define (get-left-rms-length)
-			(define sz (rpt-obj 'left-size))
-			(- (get-left-length) (* sz sz))
-		)
+			(get-left-fn-avg
+				(lambda (x)
+					(define len (len-obj 'right-length x))
+					(define siz (len-obj 'right-count x))
+					(sqrt (- (* len len) (* siz siz))))))
 
 		(define (get-right-rms-length)
-			(define sz (rpt-obj 'right-size))
-			(- (get-right-length) (* sz sz))
-		)
+			(get-right-fn-avg
+				(lambda (x)
+					(define len (len-obj 'left-length x))
+					(define siz (len-obj 'left-count x))
+					(sqrt (- (* len len) (* siz siz))))))
+
 
 		; ----------------------------------------------------
 		; Methods on this class.
