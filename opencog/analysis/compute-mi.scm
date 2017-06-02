@@ -582,6 +582,9 @@
 	; Define the object which will compute total entropy and MI.
 	(define total-obj (add-total-entropy-compute wild-obj))
 
+	; Define the object which computes left and right row-lengths
+	(define supp-obj (add-support-compute wild-obj))
+
 	(display "Start computing the basis\n")
 	(format #t "Support: found num left=~A num right=~A in ~A secs\n"
 			(length (wild-obj 'left-basis))
@@ -642,6 +645,7 @@
 
 	(display "Going to do column and row subtotals\n")
 	(subtotal-obj 'cache-all-subtotals)
+	(supp-obj 'cache-all)
 
 	(display "Going to compute the left, right and total entropy\n")
 	(total-obj 'cache-entropy)
