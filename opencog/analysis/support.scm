@@ -51,7 +51,7 @@
 			(get-length (llobj 'left-wildcard ITEM)))
 
 		(define (set-left-norms ITEM L0 L1 L2)
-			(set-norms (llobj 'left-wildcard ITEM L0 L1 L2)))
+			(set-norms (llobj 'left-wildcard ITEM) L0 L1 L2))
 
 		;--------
 		(define (get-right-support ITEM)
@@ -64,7 +64,7 @@
 			(get-length (llobj 'right-wildcard ITEM)))
 
 		(define (set-right-norms ITEM L0 L1 L2)
-			(set-norms (llobj 'right-wildcard ITEM L0 L1 L2)))
+			(set-norms (llobj 'right-wildcard ITEM) L0 L1 L2))
 
 		;--------
 		; Methods on this class.
