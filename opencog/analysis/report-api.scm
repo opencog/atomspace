@@ -255,7 +255,7 @@
 					(+ sum (*
 							(FN item)
 							(frq-obj 'right-wild-freq item))))
-				0
+				0.0
 				(wild-obj 'left-basis)))
 
 		(define (do-get-left-avg R-METHOD)
@@ -271,7 +271,7 @@
 					(+ sum (*
 							(FN item)
 							(frq-obj 'left-wild-freq item))))
-				0
+				0.0
 				(wild-obj 'right-basis)))
 
 		(define (do-get-right-avg L-METHOD)
@@ -293,7 +293,14 @@
 		(define (get-right-length) (do-get-right-avg 'left-length))
 
 		; ---------
+		; XXX FIXME. This is totally insane, but guile sometimes
+		; returns a small imaginary part for the fold, even though
+		; each and every term, and each and every partial sum had
+		; no imaginary part on it at all! WTF! But then we get to
+		; here, and it does!! So we take the real part, else SQL
+		; chokes on the imaginary value.
 		(define (get-left-rms-length)
+			(real-part
 			(get-left-fn-avg
 				(lambda (x)
 					(define sup (len-obj 'right-support x))
@@ -301,9 +308,10 @@
 					(define len (len-obj 'right-length x))
 					(define lensq (/ (* len len) sup))
 					(define sizsq (* siz siz))
-					(sqrt (* (- lensq sizsq) sup)))))
+					(sqrt (* (- lensq sizsq) sup))))))
 
 		(define (get-right-rms-length)
+			(real-part
 			(get-right-fn-avg
 				(lambda (x)
 					(define sup (len-obj 'left-support x))
@@ -311,7 +319,7 @@
 					(define len (len-obj 'left-length x))
 					(define lensq (/ (* len len) sup))
 					(define sizsq (* siz siz))
-					(sqrt (* (- lensq sizsq) sup)))))
+					(sqrt (* (- lensq sizsq) sup))))))
 
 		; ----------------------------------------------------
 		; Compute and cache the values of the computation with the
