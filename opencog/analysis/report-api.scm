@@ -347,6 +347,18 @@
 
 ; ---------------------------------------------------------------------
 
+(define (print-entropy-summary-report LLOBJ PORT)
+
+	(define rpt-obj (add-report-api LLOBJ))
+
+	(format PORT "Entropy Total: ~6f   Left: ~6f   Right: ~6f\n"
+		(rpt-obj 'total-entropy)
+		(rpt-obj 'left-entropy)
+		(rpt-obj 'right-entropy)
+	)
+	(format PORT "Total MI: ~6f\n" (rpt-obj 'total-mi))
+)
+
 (define (print-support-summary-report LLOBJ PORT)
 
 	(define rpt-obj (add-report-api LLOBJ))
@@ -397,17 +409,18 @@
 	(format PORT "Total observations: ~d  Avg obs per pair: ~6f\n"
 		obs (/ obs size))
 
-	(format PORT "Entropy Total: ~6f   Left: ~6f   Right: ~6f\n"
-		(rpt-obj 'total-entropy)
-		(rpt-obj 'left-entropy)
-		(rpt-obj 'right-entropy)
-	)
-	(format PORT "Total MI: ~6f\n" (rpt-obj 'total-mi))
+	(catch #t
+		(lambda () (print-entropy-summary-report LLOBJ PORT))
+		(lambda (key . args)
+			(format PORT
+				"No MI statistics are present; run compute-mi to get them.\n")
+			#f))
 
 	(catch #t
 		(lambda () (print-support-summary-report LLOBJ PORT))
 		(lambda (key . args)
-			(format PORT "No support statistics are present\n")
+			(format PORT
+				"No support statistics are present. Run foobar to get them.\n")
 			#f))
 )
 
