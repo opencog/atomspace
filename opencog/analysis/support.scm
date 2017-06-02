@@ -17,10 +17,76 @@
 
 ; ---------------------------------------------------------------------
 
-(define*-public (add-pair-support-compute LLOBJ
+(define-public (add-support-api LLOBJ)
+"
+  add-support-api LLOBJ - Extend LLOBJ with methods to retreive
+  cached support, size and length subtotals on rows and columns.
+"
+	(let ((llobj LLOBJ))
+
+		; ----------------------------------------------------
+		; Key under which the matrix l_p norms are stored.
+		(define norm-key (PredicateNode "*-Norm Key-*"))
+
+		(define (set-norms ATOM L0 L1 L2)
+			(cog-set-value! ATOM norm-key (FloatValue L0 L1 L2)))
+
+		(define (get-support ATOM)
+			(cog-value-ref (cog-value ATOM norm-key) 0))
+
+		(define (get-count ATOM)
+			(cog-value-ref (cog-value ATOM norm-key) 1))
+
+		(define (get-length ATOM)
+			(cog-value-ref (cog-value ATOM norm-key) 2))
+
+		;--------
+		(define (get-left-support ITEM)
+			(get-support (llobj 'left-wildcard ITEM))
+
+		(define (get-left-count ITEM)
+			(get-count (llobj 'left-wildcard ITEM))
+
+		(define (get-left-length ITEM)
+			(get-length (llobj 'left-wildcard ITEM))
+
+		(define (set-left-norms ITEM L0 L1 L2)
+			(set-norms (llobj 'left-wildcard ITEM L0 L1 L2))
+
+		;--------
+		(define (get-right-support ITEM)
+			(get-support (llobj 'right-wildcard ITEM))
+
+		(define (get-right-count ITEM)
+			(get-count (llobj 'right-wildcard ITEM))
+
+		(define (get-right-length ITEM)
+			(get-length (llobj 'right-wildcard ITEM))
+
+		(define (set-right-norms ITEM L0 L1 L2)
+			(set-norms (llobj 'right-wildcard ITEM L0 L1 L2))
+
+		;--------
+		; Methods on this class.
+		(lambda (message . args)
+			(case message
+				((left-support)       (apply get-left-support args))
+				((right-support)      (apply get-right-support args))
+				((left-count)         (apply get-left-count args))
+				((right-count)        (apply get-right-count args))
+				((left-length)        (apply get-left-length args))
+				((right-length)       (apply get-right-length args))
+				((set-left-norms)     (apply set-left-norms args))
+				((set-right-norms)    (apply set-right-norms args))
+				(else (apply llobj (cons message args))))
+			)))
+
+; ---------------------------------------------------------------------
+
+(define*-public (add-support-compute LLOBJ
 	 #:optional (GET-CNT (lambda (x) (LLOBJ 'pair-count x))))
 "
-  add-pair-support-compute LLOBJ - Extend LLOBJ with methods to
+  add-support-compute LLOBJ - Extend LLOBJ with methods to
   compute wild-card sums, including the support (lp-norm for p=0),
   the count (lp-norm for p=1), the Eucliden length (lp-norm for p=2)
   and the general lp-norm.  These all work with the counts for the
