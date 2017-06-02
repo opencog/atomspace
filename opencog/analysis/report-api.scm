@@ -391,15 +391,15 @@
 	(define fail-before-print (rpt-obj 'left-support))
 
 	(format PORT "\n")
-	(format PORT "                 Left     Right\n")
-	(format PORT "                 ----     -----\n")
-	(format PORT "Support (l_0)  ~6f    ~6f\n"
+	(format PORT "                 Left         Right\n")
+	(format PORT "                 ----         -----\n")
+	(format PORT "Support (l_0)  ~9,4g    ~9,4g\n"
 		(rpt-obj 'left-support) (rpt-obj 'right-support))
-	(format PORT "Size    (l_1)  ~6f    ~6f\n"
+	(format PORT "Size    (l_1)  ~9,4g    ~9,4g\n"
 		(rpt-obj 'left-size) (rpt-obj 'right-size))
-	(format PORT "Length  (l_2)  ~6f    ~6f\n"
+	(format PORT "Length  (l_2)  ~9,4g    ~9,4g\n"
 		(rpt-obj 'left-length) (rpt-obj 'right-length))
-	(format PORT "RMS Length     ~6f    ~6f\n"
+	(format PORT "RMS Length     ~9,4g    ~9,4g\n"
 		(rpt-obj 'left-rms-length) (rpt-obj 'right-rms-length))
 )
 
