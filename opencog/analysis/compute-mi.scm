@@ -499,7 +499,7 @@
 		(set! start-time (current-time))
 		diff)
 
-	(define (store-list all-atoms CNT MSG)
+	(define (store-list XLATE all-atoms CNT MSG)
 		(define num-prs (length all-atoms))
 
 		; Create a wrapper around `store-atom` that prints a progress
@@ -510,20 +510,21 @@
 				(string-append
 					"Stored ~A of ~A " MSG " in ~d secs (~A pairs/sec)\n")))
 
+		(define (xlate atom) (store-rpt (XLATE atom)))
+
 		(for-each
-			(lambda (atom) (if (not (null? atom)) (store-rpt atom)))
+			(lambda (atom) (if (not (null? atom)) (xlate atom)))
 			all-atoms)
 
 		(format #t "Done storing ~A ~A in ~A secs\n"
 			num-prs MSG (elapsed-secs)))
 
 	; We need 'left-basis, provided by add-pair-stars
-	; We need 'pair-freq, provided by add-pair-freq-api
-	; We need 'set-pair-mi, provided by add-pair-freq-api
-	; We need 'right-wild-count, provided by add-pair-count-api
 	(let ((llobj LLOBJ)
 			(star-obj (add-pair-stars LLOBJ)))
 
+		; Store all the wild-card atoms; these are exactly the ones
+		; obtained from the object, via the left and right basis.
 		(define (store-all-wildcards)
 
 			; Store the wild-wild-card atom, first.
@@ -531,22 +532,24 @@
 			(store-atom (llobj 'wild-wild))
 
 			(store-list
-				(map
-					(lambda (x) (llobj 'left-wildcard  x))
-					(star-obj 'right-basis))
+				(lambda (x) (llobj 'left-wildcard x))
+				(star-obj 'right-basis)
 				40000 "left-wilds")
 
 			(store-list
-				(map
-					(lambda (x) (llobj 'right-wildcard  x))
-					(star-obj 'left-basis))
+				(lambda (x) (llobj 'right-wildcard x))
+				(star-obj 'left-basis)
 				40000 "right-wilds")
 		)
 
+		; Store all the pairs. These must be provided as a list to us,
+		; because, at this time, we don't hve an effective way of working
+		; with the non-zero elements.  Maybe a better solution will become
+		; clear over time...
 		(define (store-pairs all-pairs)
-			(store-list all-pairs 100000 "pairs"))
+			(store-list (lambda (x) x) all-pairs 100000 "pairs"))
 
-
+		; ------------------
 		; Methods on this class.
 		(lambda (message . args)
 			(case message
