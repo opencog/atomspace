@@ -178,8 +178,8 @@
 		(define (get-left-rms-length)
 			(cog-value-ref (cog-value wild-atom l-norm-key) 3))
 
-		(define (set-left-norms L0 L1 L2 RMS)
-			(cog-set-value! wild-atom l-norm-key
+		(define (set-right-norms L0 L1 L2 RMS)
+			(cog-set-value! wild-atom r-norm-key
 				(FloatValue L0 L1 L2 RMS)))
 
 		(define (get-right-support)
@@ -328,7 +328,7 @@
 		(lambda (message . args)
 			(case message
 				((left-support)      (get-left-support))
-				((right-support      (get-right-support))
+				((right-support)     (get-right-support))
 				((left-size)         (get-left-size))
 				((right-size)        (get-right-size))
 				((left-length)       (get-left-length))
