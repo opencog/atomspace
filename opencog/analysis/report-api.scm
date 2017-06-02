@@ -223,8 +223,8 @@
 				((right-length)        (get-right-length))
 				((left-rms-length)     (get-left-rms-length))
 				((right-rms-length)    (get-right-rms-length))
-				((set-left-norms)      (set-left-norms))
-				((set-right-norms)     (set-right-norms))
+				((set-left-norms)      (apply set-left-norms args))
+				((set-right-norms)     (apply set-right-norms args))
 
 				(else (apply llobj (cons message args)))
 			))
