@@ -53,12 +53,12 @@
   'left-support     -- average l_0 norm of rows
   'left-size        -- average l_1 norm of rows
   'left-length      -- average l_2 norm of rows
-  'left-hubbiness   -- standard deviation counts in rows
+  'left-rms-length  -- standard deviation of lengths
 
   'right-support    -- average l_0 norm of columns
   'right-size       -- average l_1 norm of columns
   'right-length     -- average l_2 norm of columns
-  'right-hubbiness  -- standard deviation counts in columns
+  'right-rms-length -- standard deviation of lengths
 
   If we imagine each pair as a directed edge, an arrow pointing from
   left to right, then the left-support is the same as the average
@@ -377,8 +377,8 @@
 	(define fail-before-print (rpt-obj 'left-support))
 
 	(format PORT "\n")
-	(format PORT "               Left   Right\n")
-	(format PORT "               ----   -----\n")
+	(format PORT "                 Left     Right\n")
+	(format PORT "                 ----     -----\n")
 	(format PORT "Support (l_0)  ~6f    ~6f\n"
 		(rpt-obj 'left-support) (rpt-obj 'right-support))
 	(format PORT "Size    (l_1)  ~6f    ~6f\n"
