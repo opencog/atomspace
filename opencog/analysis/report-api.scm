@@ -20,6 +20,7 @@
 ; ---------------------------------------------------------------------
 
 (use-modules (srfi srfi-1))
+(use-modules (ice-9 optargs)) ; for define*-public
 (use-modules (opencog))
 
 ; ---------------------------------------------------------------------
@@ -51,14 +52,14 @@
   'total-mi         -- The sum MI = H_tot - H_left - H_right
 
   'left-support     -- average l_0 norm of rows
-  'left-size        -- average l_1 norm of rows
+  'left-count       -- average l_1 norm of rows
   'left-length      -- average l_2 norm of rows
-  'left-hubbiness   -- standard deviation counts in rows
+  'left-rms-count   -- standard deviation of counts
 
   'right-support    -- average l_0 norm of columns
-  'right-size       -- average l_1 norm of columns
+  'right-count      -- average l_1 norm of columns
   'right-length     -- average l_2 norm of columns
-  'right-hubbiness  -- standard deviation counts in columns
+  'right-rms-count -- standard deviation of counts
 
   If we imagine each pair as a directed edge, an arrow pointing from
   left to right, then the left-support is the same as the average
@@ -92,15 +93,23 @@
 
     Then we define these weighted averages:
         left-support = sum_x P(x,*) |(x,*)|
-        left-size = sum_x P(x,*) N(x,*)
+        left-count = sum_x P(x,*) N(x,*)
         left-length = sqrt [ sum_x P(x,*) L(x,*) ]
-        left-rms-length = sqrt [ sum_x P(x,*)
-               [ L(x,*) - (N(x,*))^2 ] ]
+        left-rms-count = sqrt [ sum_x P(x,*)
+               [ L^2(x,*) - (N(x,*))^2 / |(x*)|| ] ]
 
     Note that while computing the average length of a row/column,
     this is weighted by the probability of that row/column.
 
-    The rms-length is the squeare root of what R. Ferrer i Cancho
+    The rms-count computation may seem squonky: to get the correct
+    rms, the 'mean' must be taken, by dividing by the support. But
+    after this is done, support is multiplied back in.  The point
+    here is that count is not the average-count, and the length
+    is not divided by teh support either.  So the rms-count should
+    avoid an accidental divide by the support; thus the slightly
+    odd-looking formula above.
+
+    The rms-count is the square root of what R. Ferrer i Cancho
     calls 'hubbiness' (his hubbiness is the 2nd central moment, if
     I recall correctly).
 "
@@ -169,13 +178,13 @@
 		(define (get-left-support)
 			(cog-value-ref (cog-value wild-atom l-norm-key) 0))
 
-		(define (get-left-size)
+		(define (get-left-count)
 			(cog-value-ref (cog-value wild-atom l-norm-key) 1))
 
 		(define (get-left-length)
 			(cog-value-ref (cog-value wild-atom l-norm-key) 2))
 
-		(define (get-left-rms-length)
+		(define (get-left-rms-count)
 			(cog-value-ref (cog-value wild-atom l-norm-key) 3))
 
 		(define (set-right-norms L0 L1 L2 RMS)
@@ -185,13 +194,13 @@
 		(define (get-right-support)
 			(cog-value-ref (cog-value wild-atom r-norm-key) 0))
 
-		(define (get-right-size)
+		(define (get-right-count)
 			(cog-value-ref (cog-value wild-atom r-norm-key) 1))
 
 		(define (get-right-length)
 			(cog-value-ref (cog-value wild-atom r-norm-key) 2))
 
-		(define (get-right-rms-length)
+		(define (get-right-rms-count)
 			(cog-value-ref (cog-value wild-atom r-norm-key) 3))
 
 		; ----------------------------------------------------
@@ -217,12 +226,12 @@
 				((total-count)         (get-total-count))
 				((left-support)        (get-left-support))
 				((right-support)       (get-right-support))
-				((left-size)           (get-left-size))
-				((right-size)          (get-right-size))
+				((left-count)          (get-left-count))
+				((right-count)         (get-right-count))
 				((left-length)         (get-left-length))
 				((right-length)        (get-right-length))
-				((left-rms-length)     (get-left-rms-length))
-				((right-rms-length)    (get-right-rms-length))
+				((left-rms-count)      (get-left-rms-count))
+				((right-rms-count)     (get-right-rms-count))
 				((set-left-norms)      (apply set-left-norms args))
 				((set-right-norms)     (apply set-right-norms args))
 
@@ -240,7 +249,7 @@
 "
 	(let* ((llobj LLOBJ)
 			(wild-obj (add-pair-stars LLOBJ))
-			(len-obj (add-pair-support-compute wild-obj))
+			(len-obj (add-support-api wild-obj))
 			(frq-obj (add-pair-freq-api wild-obj))
 			(rpt-obj (add-report-api wild-obj))
 		)
@@ -251,11 +260,11 @@
 			; probability of that row, which is P(x,*) i.e. right-freq
 			; The sum is over all the rows.
 			(fold
-				(lambda (sum item)
+				(lambda (item sum)
 					(+ sum (*
 							(FN item)
 							(frq-obj 'right-wild-freq item))))
-				0
+				0.0
 				(wild-obj 'left-basis)))
 
 		(define (do-get-left-avg R-METHOD)
@@ -267,11 +276,11 @@
 			; probability of that column, which is P(*,y) i.e. left-freq
 			; The sum is over all the columns.
 			(fold
-				(lambda (sum item)
+				(lambda (item sum)
 					(+ sum (*
 							(FN item)
 							(frq-obj 'left-wild-freq item))))
-				0
+				0.0
 				(wild-obj 'right-basis)))
 
 		(define (do-get-right-avg L-METHOD)
@@ -283,9 +292,9 @@
 		(define (get-right-support) (do-get-right-avg 'left-support))
 
 		; ---------------------
-		(define (get-left-size) (do-get-left-avg 'right-count))
+		(define (get-left-count) (do-get-left-avg 'right-count))
 
-		(define (get-right-size) (do-get-right-avg 'left-count))
+		(define (get-right-count) (do-get-right-avg 'left-count))
 
 		; ---------------------
 		(define (get-left-length) (do-get-left-avg 'right-length))
@@ -293,37 +302,72 @@
 		(define (get-right-length) (do-get-right-avg 'left-length))
 
 		; ---------
-		(define (get-left-rms-length)
+		; XXX FIXME. This is totally insane, but guile sometimes
+		; returns a small imaginary part for the fold, even though
+		; each and every term, and each and every partial sum had
+		; no imaginary part on it at all! WTF! But then we get to
+		; here, and it does!! So we take the real part, else SQL
+		; chokes on the imaginary value.
+		;
+		; Note - the divide by the support can be understood as follows:
+		; avg = len / sup
+		; mean-sq = (len * len) / sup
+		; variance = mean-sq - avg * avg
+		; moment = sup * variance
+		; rms-count = sqrt (moment)
+		; multiple through by sup to get the implementation below.
+		(define (get-left-rms-count)
+			(real-part
 			(get-left-fn-avg
 				(lambda (x)
-					(define len (len-obj 'right-length x))
+					(define sup (len-obj 'right-support x))
 					(define siz (len-obj 'right-count x))
-					(sqrt (- (* len len) (* siz siz))))))
+					(define len (len-obj 'right-length x))
+					(define lensq (* len len))
+					(define sizsq (/ (* siz siz) sup))
+					(sqrt (- lensq sizsq))))))
 
-		(define (get-right-rms-length)
+		(define (get-right-rms-count)
+			(real-part
 			(get-right-fn-avg
 				(lambda (x)
-					(define len (len-obj 'left-length x))
+					(define sup (len-obj 'left-support x))
 					(define siz (len-obj 'left-count x))
-					(sqrt (- (* len len) (* siz siz))))))
+					(define len (len-obj 'left-length x))
+					(define lensq (* len len))
+					(define sizsq (/ (* siz siz) sup))
+					(sqrt (- lensq sizsq))))))
 
 		; ----------------------------------------------------
 		; Compute and cache the values of the computation with the
 		; report-api can find them.
 
-		(define (cache-left-norms)
+		(define (cache-all)
+			(define start-time (current-time))
+			(define (elapsed-secs)
+				(define diff (- (current-time) start-time))
+				(set! start-time (current-time))
+				diff)
+
 			(rpt-obj 'set-left-norms
 				(get-left-support)
-				(get-left-size)
+				(get-left-count)
 				(get-left-length)
-				(get-left-rms-length)))
+				(get-left-rms-count))
 
-		(define (cache-right-norms)
+			(format #t "Finished left norm totals in ~A secs\n"
+				(elapsed-secs))
+
 			(rpt-obj 'set-right-norms
 				(get-right-support)
-				(get-right-size)
+				(get-right-count)
 				(get-right-length)
-				(get-right-rms-length)))
+				(get-right-rms-count))
+
+			(format #t "Finished right norm totals in ~A secs\n"
+				(elapsed-secs))
+		)
+
 
 		; ----------------------------------------------------
 		; Methods on this class.
@@ -331,14 +375,13 @@
 			(case message
 				((left-support)      (get-left-support))
 				((right-support)     (get-right-support))
-				((left-size)         (get-left-size))
-				((right-size)        (get-right-size))
+				((left-count)        (get-left-count))
+				((right-count)       (get-right-count))
 				((left-length)       (get-left-length))
 				((right-length)      (get-right-length))
-				((left-rms-length)   (get-left-rms-length))
-				((right-rms-length)  (get-right-rms-length))
-				((cache-left-norms)  (cache-left-norms))
-				((cache-right-norms) (cache-right-norms))
+				((left-rms-count)    (get-left-rms-count))
+				((right-rms-count)   (get-right-rms-count))
+				((cache-all)         (cache-all))
 
 				(else (apply llobj (cons message args)))
 			))
@@ -347,11 +390,48 @@
 
 ; ---------------------------------------------------------------------
 
-(define-public (print-matrix-summary-report LLOBJ PORT)
+(define (print-entropy-summary-report LLOBJ PORT)
+
+	(define rpt-obj (add-report-api LLOBJ))
+
+	(format PORT "Entropy Total: ~6f   Left: ~6f   Right: ~6f\n"
+		(rpt-obj 'total-entropy)
+		(rpt-obj 'left-entropy)
+		(rpt-obj 'right-entropy)
+	)
+	(format PORT "Total MI: ~6f\n" (rpt-obj 'total-mi))
+)
+
+(define (print-support-summary-report LLOBJ PORT)
+
+	(define rpt-obj (add-report-api LLOBJ))
+	(define ls (rpt-obj 'left-support))
+	(define rs (rpt-obj 'right-support))
+	(define lc (rpt-obj 'left-count))
+	(define rc (rpt-obj 'right-count))
+	(define ll (rpt-obj 'left-length))
+	(define rl (rpt-obj 'right-length))
+	(define lv (rpt-obj 'left-rms-count))
+	(define rv (rpt-obj 'right-rms-count))
+
+	(format PORT "\n")
+	(format PORT "                 Left         Right     Avg-left     Avg-right\n")
+	(format PORT "                 ----         -----     --------     ---------\n")
+	(format PORT "Support (l_0)  ~9,4g    ~9,4g\n"  ls  rs)
+	(format PORT "Count   (l_1)  ~9,4g    ~9,4g     ~9,4g    ~9,4g\n"
+		lc rc (/ lc ls) (/ rc rs))
+	(format PORT "Length  (l_2)  ~9,4g    ~9,4g     ~9,4g    ~9,4g\n"
+		ll rl (/ ll ls) (/ rl rs))
+	(format PORT "RMS Count      ~9,4g    ~9,4g     ~9,4g    ~9,4g\n"
+		lv rv (/ lv ls) (/ rv rs))
+)
+
+(define*-public (print-matrix-summary-report LLOBJ
+	#:optional (PORT #t))
 "
-  print-matrix-summary-report LLOBJ PORT
-  Print a summary report about the pair dataset LLOBJ to output PORT
-  (typically a string or file port).
+  print-matrix-summary-report LLOBJ #:optional PORT
+  Print a summary report about the pair dataset LLOBJ to the
+  optionally-provided output PORT (e.g. a string or file port).
 "
 	(define (log2 x) (/ (log x) (log 2)))
 
@@ -379,24 +459,19 @@
 	(format PORT "Total observations: ~d  Avg obs per pair: ~6f\n"
 		obs (/ obs size))
 
-	(format PORT "Entropy Total: ~6f   Left: ~6f   Right: ~6f\n"
-		(rpt-obj 'total-entropy)
-		(rpt-obj 'left-entropy)
-		(rpt-obj 'right-entropy)
-	)
-	(format PORT "Total MI: ~6f\n" (rpt-obj 'total-mi))
+	(catch #t
+		(lambda () (print-entropy-summary-report LLOBJ PORT))
+		(lambda (key . args)
+			(format PORT
+				"No MI statistics are present; run compute-mi to get them.\n")
+			#f))
 
-	(format PORT "\n")
-	(format PORT "               Left   Right\n")
-	(format PORT "               ----   -----\n")
-	(format PORT "Support (l_0)  ~6f    ~6f\n"
-		(rpt-obj 'left-support) (rpt-obj 'right-support))
-	(format PORT "Size    (l_1)  ~6f    ~6f\n"
-		(rpt-obj 'left-size) (rpt-obj 'right-size))
-	(format PORT "Length  (l_2)  ~6f    ~6f\n"
-		(rpt-obj 'left-length) (rpt-obj 'right-length))
-	(format PORT "RMS Length     ~6f    ~6f\n"
-		(rpt-obj 'left-rms-length) (rpt-obj 'right-rms-length))
+	(catch #t
+		(lambda () (print-support-summary-report LLOBJ PORT))
+		(lambda (key . args)
+			(format PORT
+				"No support statistics are present. Run compute-mi to get them.\n")
+			#f))
 )
 
 ; ---------------------------------------------------------------------

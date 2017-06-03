@@ -138,19 +138,19 @@
 				(set! start-time (current-time))
 				diff)
 
-			(map cache-left-entropy (star-obj 'right-basis))
+			(for-each cache-left-entropy (star-obj 'right-basis))
 			(format #t "Finished left entropy subtotals in ~A secs\n"
 				(elapsed-secs))
 
-			(map cache-right-entropy (star-obj 'left-basis))
+			(for-each cache-right-entropy (star-obj 'left-basis))
 			(format #t "Finished right entropy subtotals in ~A secs\n"
 				(elapsed-secs))
 
-			(map cache-left-mi (star-obj 'right-basis))
+			(for-each cache-left-mi (star-obj 'right-basis))
 			(format #t "Finished left MI subtotals in ~A secs\n"
 				(elapsed-secs))
 
-			(map cache-right-mi (star-obj 'left-basis))
+			(for-each cache-right-mi (star-obj 'left-basis))
 			(format #t "Finished right MI subtotals in ~A secs\n"
 				(elapsed-secs))
 		)

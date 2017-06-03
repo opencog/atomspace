@@ -266,6 +266,21 @@
 				(f-left-stars (overload 'left-stars get-left-stars))
 				(f-right-stars (overload 'right-stars get-right-stars)))
 
+			;-------------------------------------------
+			; Explain what it is that I provide. The point here is that
+			; computing the left and right basis can be very expensive,
+			; and so if it has already been computed, that should be used,
+			; by defering to the object that holds those caches. We do
+			; by advertising that .. we hold caches.
+			(define (provides meth)
+				(case meth
+					((left-stars) f-left-stars)
+					((right-stars) f-right-stars)
+					((left-basis) f-left-basis)
+					((right-basis) f-right-basis)
+					(else (llobj 'provides meth))))
+
+			;-------------------------------------------
 			; Methods on this class.
 			(lambda (message . args)
 				(case message
@@ -273,6 +288,7 @@
 					((right-basis)     (f-right-basis))
 					((left-stars)      (apply f-left-stars args))
 					((right-stars)     (apply f-right-stars args))
+					((provides)        (apply provides args))
 					(else (apply llobj (cons message args))))
 			))))
 
