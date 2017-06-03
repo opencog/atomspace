@@ -131,7 +131,6 @@ class SQLAtomStorage : public AtomStorage
 
 		// --------------------------
 		// Values
-
 #define NUMVMUT 16
 		std::mutex _value_mutex[NUMVMUT];
 		void store_atom_values(const Handle &);
@@ -142,23 +141,26 @@ class SQLAtomStorage : public AtomStorage
 		ProtoAtomPtr doUnpackValue(Response&);
 		ProtoAtomPtr doGetValue(const char *);
 
+		VUID storeValue(const ProtoAtomPtr&);
+		ProtoAtomPtr getValue(VUID);
+		void deleteValue(VUID);
+
+		VUID getMaxObservedVUID(void);
+		std::atomic<VUID> _next_valid;
+
+		// --------------------------
+		// Valuations
+		std::mutex _valuation_mutex;
 		void storeValuation(const ValuationPtr&);
 		void storeValuation(const Handle&, const Handle&, const ProtoAtomPtr&);
 		ProtoAtomPtr getValuation(const Handle&, const Handle&);
 		void deleteValuation(const Handle&, const Handle&);
 
-		VUID storeValue(const ProtoAtomPtr&);
-		ProtoAtomPtr getValue(VUID);
-		void deleteValue(VUID);
-
 		std::string float_to_string(const FloatValuePtr&);
 		std::string string_to_string(const StringValuePtr&);
 		std::string link_to_string(const LinkValuePtr&);
 
-		VUID getMaxObservedVUID(void);
-		std::atomic<VUID> _next_valid;
-
-		Handle tvpred;
+		Handle tvpred; // the key to a very special valuation.
 		// --------------------------
 		// Performance statistics
 		std::atomic<size_t> _num_get_nodes;

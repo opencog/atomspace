@@ -587,12 +587,22 @@ void SQLAtomStorage::storeValuation(const Handle& key,
 	std::string coda;
 
 	// Get UUID from the TLB.
-	UUID kuid = check_uuid(key);
-	if (TLB::INVALID_UUID == kuid)
+	UUID kuid;
 	{
-		do_store_atom(key);
-		kuid = get_uuid(key);
+		// We must make sure the key is in the database BEFORE it
+		// is used in any valuation; else a 'foreign key constraint'
+		// error will be thrown.  And to do that, we must make sure
+		// the store completes, before some other thread gets its
+		// fingers on the key.
+		std::lock_guard<std::mutex> create_lock(_valuation_mutex);
+		kuid = check_uuid(key);
+		if (TLB::INVALID_UUID == kuid)
+		{
+			do_store_atom(key);
+			kuid = get_uuid(key);
+		}
 	}
+
 	char kidbuff[BUFSZ];
 	snprintf(kidbuff, BUFSZ, "%lu", kuid);
 
@@ -1021,18 +1031,22 @@ std::string SQLAtomStorage::link_to_string(const LinkValuePtr& lvle)
 
 /* ================================================================ */
 
-/// Drain the pending store queue.
+/// Drain the pending store queue. This is a fencing operation; the
+/// goal is to make sure that all writes that occurred before the
+/// barrier really are performed before before all the writes after
+/// the barrier.
 ///
 /// Caution: this is potentially racey in two different ways.
 /// First, there is a small window in the async_caller implementation,
 /// where, if the timing is just so, the barrier might return before
-/// the last element is written.  Technically, that's a bug, but its
-/// "minor" so we don't fix it.
+/// the last element is written.  (Although everything else will have
+/// gone out; only the last element is in doubt). Technically, that's
+/// a bug, but its sufficiently "minor" so we don't fix it.
 ///
-/// The second issue is much more serious: We are NOT using any of the
-/// transactional features in SQL, and so while we might have drained
-/// the write queues here, on the client side, the SQL server will not
-/// have actually commited the work by the time that this returns.
+/// The second issue is more serious: there's no fence or barrier in
+/// Postgres (that I can find or think of), and so although we've sent
+/// everything to PG, there's no guarantee that PG will process these
+/// requests in order. How likely this could be, I don't know.
 ///
 void SQLAtomStorage::flushStoreQueue()
 {
