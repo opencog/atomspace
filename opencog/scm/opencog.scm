@@ -110,4 +110,4 @@
 
 ; Obsolete functions
 (define-public (cog-atom X) '())
-(define-public (cog-undefined-handle X) '())
+(define-public (cog-undefined-handle) '())
