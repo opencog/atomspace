@@ -701,8 +701,8 @@
 	(display "Done computing totals; start saving wildcards\n"))
 	(store-obj 'store-wildcards)
 
-	(format #t "Finished with MI computations; this took ~5d hours\n"
-		((- (current-time) overall-start-time) 3600.0))
+	(format #t "Finished with MI computations; this took ~4f hours\n"
+		(/ (- (current-time) overall-start-time) 3600.0))
 )
 
 ; ---------------------------------------------------------------------
