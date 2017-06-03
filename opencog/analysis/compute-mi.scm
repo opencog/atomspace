@@ -697,9 +697,8 @@
 	(total-obj 'cache-entropy)
 	(total-obj 'cache-mi)
 	(central-obj 'cache-all)
-	(format #t "Done computing totals in ~A secs\n" (elapsed-secs))
 
-	(display "Start saving left-wildcards\n")
+	(display "Done computing totals; start saving wildcards\n"))
 	(store-obj 'store-wildcards)
 
 	(format #t "Finished with MI computations; this took ~5d hours\n"
