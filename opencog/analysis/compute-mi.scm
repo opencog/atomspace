@@ -428,6 +428,19 @@
 			(define cnt-lefties 0)
 			(define nlefties (length lefties))
 
+			(define start-time (current-time))
+			(define (elapsed-secs)
+				(define diff (- (current-time) start-time))
+				(set! start-time (current-time))
+				diff)
+
+			(define cnt-start 0)
+			(define (elapsed-count cnt)
+				(define diff (- cnt-pairs cnt-start))
+				(set! cnt-start cnt)
+				diff)
+
+
 			(define (right-loop left-item)
 
 				; Check for non-zero counts. A zero here will cause the
@@ -461,8 +474,11 @@
 						; Print some progress statistics.
 						(set! cnt-lefties (+ cnt-lefties 1))
 						(if (eqv? 0 (modulo cnt-lefties 10000))
-							(format #t "Done ~A of ~A outer loops, pairs=~A\n"
-								cnt-lefties nlefties cnt-pairs))
+							(let ((secs (elapsed-secs)))
+								(format #t
+									"Done ~A of ~A outer loops in ~A secs, pairs=~A (~6f pairs/sec)\n"
+									cnt-lefties nlefties secs cnt-pairs
+									(/ (elapsed-count cnt-pairs) secs))))
 					))
 			)
 
