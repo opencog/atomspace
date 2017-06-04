@@ -1069,7 +1069,7 @@ void SQLAtomStorage::storeAtom(const Handle& h, bool synchronous)
 	// If a synchronous store, avoid the queues entirely.
 	if (synchronous)
 	{
-		do_store_atom(h);
+		if (not_yet_stored(h)) do_store_atom(h);
 		store_atom_values(h);
 		return;
 	}
@@ -1086,8 +1086,6 @@ void SQLAtomStorage::storeAtom(const Handle& h, bool synchronous)
  */
 int SQLAtomStorage::do_store_atom(const Handle& h)
 {
-	if (already_stored(h)) return 0;
-
 	if (h->isNode())
 	{
 		do_store_single_atom(h, 0);
@@ -1111,22 +1109,22 @@ int SQLAtomStorage::do_store_atom(const Handle& h)
 
 void SQLAtomStorage::vdo_store_atom(const Handle& h)
 {
-	do_store_atom(h);
+	if (not_yet_stored(h)) do_store_atom(h);
 	store_atom_values(h);
 }
 
 /* ================================================================ */
 
 /**
- * Return true if this atom is already in the database.
- * Note that if must take the _store_mutex lock, as otherwise
+ * Return true if this atom needs to be stored.
+ * Note that it MUST take the _store_mutex lock, as otherwise
  * the database might see out-of-order stores of links, and
  * throw key-constriant errors.
  */
-bool SQLAtomStorage::already_stored(const Handle& h)
+bool SQLAtomStorage::not_yet_stored(const Handle& h)
 {
 	std::lock_guard<std::mutex> create_lock(_store_mutex);
-	return TLB::INVALID_UUID != check_uuid(h);
+	return TLB::INVALID_UUID == check_uuid(h);
 }
 
 /**
