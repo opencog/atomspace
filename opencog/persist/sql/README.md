@@ -205,18 +205,9 @@ permuations.
 link must also be saved. Thus, the above considerations for node-values
 also apply to the outgoing set of the link, and so on, recursively, for
 the nested links.  The current default is to save all associated values,
-on the entire outgoing set, recursively, when storing a single link.
-This is only weakly unit-tested.
-
-The alternative would be to save only the outgoing set atoms, but not
-the values on them.  For the SQL backend, not saving all values could
-decrease the amount of database traffic, and thus improve performance.
-For other backends, this may not be the case, as the increased complexity
-of specifying what, exactly, to save, could really hurt performance.
-
-Its possible that some users may want to save *only* the values on the
-immediate link, but not on any of the outgoing set. There is currently no
-API for this.
+but only on the link itself, and NOT on the entire outgoing set, when
+storing a single link.  This allows granular conrol on the part of the
+user. This is only weakly unit-tested.
 
 * Restoring a single node or link. The above considerations for saving
 run in the opposite direction, when restoring. Thus, for example, when
@@ -225,8 +216,9 @@ be clobbered, or not?
 
 Currently, when an atom is restored, all of the associated values are
 pulled from the database, and placed in the AtomSpace, clobbering the
-previous AtomSpace contents.  This is done recursively, for links.
-This is tested, but only weakly and incompletely, in the unit tests.
+previous AtomSpace contents.  For links, only the values on the specified
+link are fetched, and none of the others.  This is tested, but only
+weakly and incompletely, in the unit tests.
 
 * Restoring by atom type; restoring incoming sets.  Groups of atoms
 can be fetched from the database: in the first case, all atoms of a
