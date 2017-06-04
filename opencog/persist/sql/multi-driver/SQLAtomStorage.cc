@@ -1080,13 +1080,14 @@ void SQLAtomStorage::storeAtom(const Handle& h, bool synchronous)
 /**
  * Synchronously store a single atom. That is, the actual store is done
  * in the calling thread.  All values attached to the atom are also
- * stored. All values attached to atoms in the outgoing set are also
  * stored.
  *
  * Returns the height of the atom.
  */
 int SQLAtomStorage::do_store_atom(const Handle& h)
 {
+	if (already_stored(h)) return 0;
+
 	if (h->isNode())
 	{
 		do_store_single_atom(h, 0);
@@ -1115,6 +1116,19 @@ void SQLAtomStorage::vdo_store_atom(const Handle& h)
 }
 
 /* ================================================================ */
+
+/**
+ * Return true if this atom is already in the database.
+ * Note that if must take the _store_mutex lock, as otherwise
+ * the database might see out-of-order stores of links, and
+ * throw key-constriant errors.
+ */
+bool SQLAtomStorage::already_stored(const Handle& h)
+{
+	std::lock_guard<std::mutex> create_lock(_store_mutex);
+	return TLB::INVALID_UUID != check_uuid(h);
+}
+
 /**
  * Store just this one single atom.
  * Atoms in the outgoing set are NOT stored!
