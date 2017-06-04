@@ -694,7 +694,7 @@
 
 	; Now, the individual pair mi's
 	(display "Going to do individual pair MI\n")
-
+	(elapsed-secs)
 	(let* ((all-atoms (batch-mi-obj 'cache-pair-mi))
 			(num-prs (length all-atoms)))
 
