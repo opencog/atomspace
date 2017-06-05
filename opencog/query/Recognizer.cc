@@ -166,10 +166,6 @@ bool Recognizer::link_match(const PatternTermPtr& ptm, const Handle& lsoln)
 	// mis-matched types are a dead-end.
 	if (lpat->getType() != lsoln->getType()) return false;
 
-	// Globs are arity-changing. But there is a minimum length.
-	// Note that the inequality is backwards, here: the soln has the
-	// globs! (and so lpat must have arity equal or greater than soln)
-	if (lpat->getArity() < lsoln->getArity()) return false;
 	return true;
 }
 
@@ -213,14 +209,16 @@ bool Recognizer::fuzzy_match(const Handle& npat_h, const Handle& nsoln_h)
 
 	const HandleSeq &osp = npat_h->getOutgoingSet();
 	size_t osp_size = osp.size();
-	size_t max_size = std::max(osg_size, osp_size);
 
 	// Do a side-by-side compare. This is not as rigorous as
 	// PatternMatchEngine::tree_compare() nor does it handle the bells
 	// and whistles (ChoiceLink, QuoteLink, etc).
 	size_t ip=0, jg=0;
-	for (; ip<osp_size and jg<osg_size; ip++, jg++)
+	for (; ip<osp_size or jg<osg_size; ip++, jg++)
 	{
+		if (ip == osp_size) ip--;
+		if (jg == osg_size) jg--;
+
 		if (GLOB_NODE != osg[jg]->getType())
 		{
 			if (loose_match(osp[ip], osg[jg])) continue;
@@ -233,24 +231,16 @@ bool Recognizer::fuzzy_match(const Handle& npat_h, const Handle& nsoln_h)
 		if ((jg+1) == osg_size) return true;
 
 		const Handle& post(osg[jg+1]);
-		ip++;
-		while (ip < max_size and not loose_match(osp[ip], post))
+		while (ip < osp_size and not loose_match(osp[ip], post))
 		{
 			ip++;
 		}
-		// If ip ran past the end, then the post was not found. This is
-		// a mismatch.
-		if (not (ip < max_size)) return false;
 
 		// Go around again, look for more GlobNodes. Back up by one, so
 		// that the for-loop increment gets us back on track.
 		ip--;
 	}
 
-	// If we are here, then we should have matched up all the atoms;
-	// if we exited the loop because pattern or grounding was short,
-	// then its a mis-match.
-	if (ip != osp_size or jg != osg_size) return false;
 	return true;
 }
 
