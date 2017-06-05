@@ -1116,15 +1116,18 @@ void SQLAtomStorage::vdo_store_atom(const Handle& h)
 /* ================================================================ */
 
 /**
- * Return true if this atom needs to be stored.
- * Note that it MUST take the _store_mutex lock, as otherwise
- * the database might see out-of-order stores of links, and
- * throw key-constriant errors.
+ * Return true if we don't yet have a UUID for this atom.
+ * Note that it MUST take the _store_mutex lock, as otherwise one
+ * thread might be trying to store a valuation for a UUID that got
+ * issued, but for which the atom itself has not yet been stored.
+ * This inversion of stores *will* cause the database to throw a
+ * foreign-key-constraint error when it sees the valuation without
+ * the corresponding atom.
  */
 bool SQLAtomStorage::not_yet_stored(const Handle& h)
 {
 	std::lock_guard<std::mutex> create_lock(_store_mutex);
-	return TLB::INVALID_UUID == check_uuid(h);
+	return TLB::INVALID_UUID == _tlbuf.getUUID(h);
 }
 
 /**
