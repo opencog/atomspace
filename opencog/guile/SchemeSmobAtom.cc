@@ -293,7 +293,7 @@ SCM SchemeSmob::ss_incoming_by_type (SCM satom, SCM stype)
 	Type t = verify_atom_type(stype, "cog-incoming-by-type", 2);
 
 	HandleSeq iset;
-	h->getIncomingSetByType(std::back_inserter(iset), t, false);
+	h->getIncomingSetByType(std::back_inserter(iset), t);
 	SCM head = SCM_EOL;
 	for (const Handle& ih : iset)
 	{

@@ -408,10 +408,10 @@ IncomingSet Atom::getIncomingSet(AtomSpace* as) const
     return iset;
 }
 
-IncomingSet Atom::getIncomingSetByType(Type type, bool subclass) const
+IncomingSet Atom::getIncomingSetByType(Type type) const
 {
     HandleSeq inhs;
-    getIncomingSetByType(std::back_inserter(inhs), type, subclass);
+    getIncomingSetByType(std::back_inserter(inhs), type);
     IncomingSet inlinks;
     for (const Handle& h : inhs)
         inlinks.emplace_back(LinkCast(h));

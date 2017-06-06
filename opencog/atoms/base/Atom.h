@@ -97,7 +97,11 @@ typedef boost::signals2::signal<void (AtomPtr, LinkPtr)> AtomPairSignal;
 
 // We use std::unordered_set for WincomingSet, because we want three
 // things: good insert, good remove performance, and, importantly,
-// good lookup by type.
+// good lookup by type.  The hash function has been carefully
+// engineered to return the type of the atom, so that all atoms of the
+// same type go into the same hash bucket. This allows for a fast
+// getIncomingByType() method, which is occasionally a bottleneck, esp.
+// for large incoming sets.
 typedef std::unordered_set<WinkPtr> WincomingSet;
 
 /**
@@ -307,8 +311,6 @@ public:
     {
         if (NULL == _incoming_set) return result;
         std::lock_guard<std::mutex> lck(_mtx);
-        // Sigh. I need to compose copy_if with transform. I could
-        // do this wih boost range adaptors, but I don't feel like it.
         auto end = _incoming_set->_iset.end();
         for (auto w = _incoming_set->_iset.begin(); w != end; w++)
         {
@@ -326,7 +328,7 @@ public:
     inline bool foreach_incoming(bool (T::*cb)(const Handle&), T *data)
     {
         // We make a copy of the set, so that we don't call the
-        //callback with locks held.
+        // callback with locks held.
         IncomingSet vh(getIncomingSet());
 
         for (const LinkPtr& lp : vh)
@@ -337,37 +339,33 @@ public:
     /**
      * Return all atoms of type `type` that contain this atom.
      * That is, return all atoms that contain this atom, and are
-     * also of the given type. Optionally subclass the type.
+     * also of the given type.
      *
-     * @param The iternator where the set of atoms will be returned.
+     * @param The iterator where the set of atoms will be returned.
      * @param The type of the parent atom.
-     * @param Whether atom type subclasses should be considered.
      */
     template <typename OutputIterator> OutputIterator
     getIncomingSetByType(OutputIterator result,
-                         Type type, bool subclass = false) const
+                         Type type) const
     {
         if (NULL == _incoming_set) return result;
         std::lock_guard<std::mutex> lck(_mtx);
-        ClassServer& cs(classserver());
-        // Sigh. I need to compose copy_if with transform. I could
-        // do this wih boost range adaptors, but I don't feel like it.
-        auto end = _incoming_set->_iset.end();
-        for (auto w = _incoming_set->_iset.begin(); w != end; w++)
+
+        // If it is empty, we are done. This is a mandatory check,
+        // before the iterators below can be used.
+        if (0 == _incoming_set->_iset.bucket_count()) return result;
+
+        auto end = _incoming_set->_iset.end(type);
+        for (auto w = _incoming_set->_iset.begin(type); w != end; w++)
         {
             Handle h(w->lock());
-            if (nullptr == h) continue;
-            Type at(h->getType());
-            if (type == at or (subclass and cs.isA(at, type))) {
-                *result = h;
-                result ++;
-            }
+            if (h) { *result = h; result ++; }
         }
         return result;
     }
 
     /** Functional version of getIncomingSetByType.  */
-    IncomingSet getIncomingSetByType(Type type, bool subclass = false) const;
+    IncomingSet getIncomingSetByType(Type type) const;
 
     /** Returns a string representation of the node. */
     virtual std::string toString(const std::string& indent) const = 0;
