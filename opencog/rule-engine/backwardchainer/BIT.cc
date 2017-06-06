@@ -113,10 +113,19 @@ AndBIT AndBIT::expand(const Handle& leaf,
 	Handle new_fcs = expand_fcs(leaf, rule);
 	double new_cpx = expand_complexity(leaf, rule.first);
 
+	// Only consider expansions that actually expands
 	if (content_eq(fcs, new_fcs)) {
 		ure_logger().warn() << "The new FCS is equal to the old one. "
 		                    << "There is probably a bug. This expansion has "
 		                    << "been cancelled.";
+		return AndBIT();
+	}
+
+	// Discard expansion with cycle
+	if (has_cycle(BindLinkCast(new_fcs)->get_implicand())) {
+		ure_logger().debug() << "The new FCS has some cycle (some conclusion "
+		                     << "has itself has premise, directly or "
+		                     << "indirectly). This expansion has been cancelled.";
 		return AndBIT();
 	}
 
