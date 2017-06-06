@@ -53,18 +53,14 @@ class AtomTable;
 //! arity of Links, represented as short integer (16 bits)
 typedef unsigned short Arity;
 
+//! We use a std:vector instead of std::set for IncomingSet, because
+//! virtually all access will be either insert, or iterate, so we get
+//! O(1) performance. Note that sometimes incoming sets can be huge,
+//! millions of atoms.
 class Link;
 typedef std::shared_ptr<Link> LinkPtr;
 typedef std::vector<LinkPtr> IncomingSet; // use vector; see below.
-typedef std::weak_ptr<Link> WinkPtr;
-typedef std::set<WinkPtr, std::owner_less<WinkPtr> > WincomingSet;
 typedef boost::signals2::signal<void (AtomPtr, LinkPtr)> AtomPairSignal;
-
-// We use a std:vector instead of std::set for IncomingSet, because
-// virtually all access will be either insert, or iterate, so we get
-// O(1) performance. We use std::set for WincomingSet, because we want
-// both good insert and good remove performance.  Note that sometimes
-// incoming sets can be huge (millions of atoms).
 
 /**
  * Atoms are the basic implementational unit in the system that
@@ -81,7 +77,11 @@ class Atom
     friend class DeleteLink;      // Needs to call getAtomTable()
     friend class ProtocolBufferSerializer; // Needs to de/ser-ialize an Atom
 
-private:
+    // We use std::set for WincomingSet, because we want both good insert
+    // and good remove performance.
+    typedef std::weak_ptr<Link> WinkPtr;
+    typedef std::set<WinkPtr, std::owner_less<WinkPtr> > WincomingSet;
+
     //! Sets the AtomSpace in which this Atom is inserted.
     void setAtomSpace(AtomSpace *);
 
