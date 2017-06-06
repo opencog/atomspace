@@ -55,6 +55,21 @@
 
 #undef Type
 
+namespace std {
+
+// The hash of a weak pointer is just the atom type. Actually,
+// it *has* to be the atom type, as otherwise the hash buckets
+// won't be correct, and getIncomingByType() will fail to be fast.
+opencog::Type
+hash<opencog::WinkPtr>::operator()(const opencog::WinkPtr& w) const noexcept
+{
+    opencog::LinkPtr h(w.lock());
+    if (nullptr == h) return 0;
+    return h->getType();
+}
+
+} // namespace std
+
 namespace opencog {
 
 Atom::~Atom()

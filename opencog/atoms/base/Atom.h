@@ -27,10 +27,11 @@
 #ifndef _OPENCOG_ATOM_H
 #define _OPENCOG_ATOM_H
 
+#include <functional>
 #include <memory>
 #include <mutex>
-#include <set>
 #include <string>
+#include <unordered_set>
 
 #include <boost/signals2.hpp>
 
@@ -39,6 +40,40 @@
 #include <opencog/truthvalue/TruthValue.h>
 
 class AtomUTest;
+
+namespace opencog
+{
+class Link;
+typedef std::shared_ptr<Link> LinkPtr;
+typedef std::weak_ptr<Link> WinkPtr;
+}
+
+namespace std
+{
+
+// The hash of the weak pointer is just the type of the atom.
+template<> struct hash<opencog::WinkPtr>
+{
+    typedef opencog::Type result_type;
+    typedef opencog::WinkPtr argument_type;
+    opencog::Type operator()(const opencog::WinkPtr& w) const noexcept;
+};
+
+// Equality is simple type equality
+template<> struct equal_to<opencog::WinkPtr>
+{
+    typedef bool result_type;
+    typedef opencog::WinkPtr first_argument;
+    typedef opencog::WinkPtr second_argument;
+    bool operator()(const opencog::WinkPtr& lw,
+                    const opencog::WinkPtr& rw) const noexcept
+    {
+        return hash<opencog::WinkPtr>{}(lw) ==
+               hash<opencog::WinkPtr>{}(rw);
+    }
+};
+
+} // namespace std
 
 namespace opencog
 {
@@ -57,10 +92,13 @@ typedef unsigned short Arity;
 //! virtually all access will be either insert, or iterate, so we get
 //! O(1) performance. Note that sometimes incoming sets can be huge,
 //! millions of atoms.
-class Link;
-typedef std::shared_ptr<Link> LinkPtr;
 typedef std::vector<LinkPtr> IncomingSet; // use vector; see below.
 typedef boost::signals2::signal<void (AtomPtr, LinkPtr)> AtomPairSignal;
+
+// We use std::unordered_set for WincomingSet, because we want three
+// things: good insert, good remove performance, and, importantly,
+// good lookup by type.
+typedef std::unordered_set<WinkPtr> WincomingSet;
 
 /**
  * Atoms are the basic implementational unit in the system that
@@ -76,11 +114,6 @@ class Atom
     friend class AtomSpace;       // Needs to call getAtomTable()
     friend class DeleteLink;      // Needs to call getAtomTable()
     friend class ProtocolBufferSerializer; // Needs to de/ser-ialize an Atom
-
-    // We use std::set for WincomingSet, because we want both good insert
-    // and good remove performance.
-    typedef std::weak_ptr<Link> WinkPtr;
-    typedef std::set<WinkPtr, std::owner_less<WinkPtr> > WincomingSet;
 
     //! Sets the AtomSpace in which this Atom is inserted.
     void setAtomSpace(AtomSpace *);
