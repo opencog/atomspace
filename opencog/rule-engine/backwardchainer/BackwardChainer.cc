@@ -168,10 +168,20 @@ void BackwardChainer::expand_bit(AndBIT& andbit)
 	// Add the rule in the _bit.bit_as to make comparing atoms easier
 	// as well as logging more consistent.
 	rule.add(_bit.bit_as);
+
+	// Abort expansion if ill rule
 	if (not rule.is_valid()) {
-		ure_logger().debug("No valid rule for the selected BIT-node, abort expansion");
+		ure_logger().debug("No valid rule for the selected BIT-node, "
+		                   "abort expansion");
+		return;
+	} else if (rule.has_cycle()) {
+		LAZY_URE_LOG_DEBUG << "The following rule has cycle (some premise "
+		                   << "equals to conclusion), abort expansion"
+		                   << rule.to_string();
 		return;
 	}
+
+	// Rule seems well, expand
 	LAZY_URE_LOG_DEBUG << "Selected rule for BIT expansion:" << std::endl
 	                   << rule.to_string();
 

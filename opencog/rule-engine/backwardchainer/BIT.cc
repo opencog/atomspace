@@ -34,6 +34,7 @@
 #include <boost/algorithm/string/join.hpp>
 
 #include <opencog/util/random.h>
+#include <opencog/util/algorithm.h>
 #include <opencog/atomutils/FindUtils.h>
 #include <opencog/atoms/execution/ExecutionOutputLink.h>
 #include <opencog/atoms/pattern/PatternUtils.h>
@@ -112,10 +113,19 @@ AndBIT AndBIT::expand(const Handle& leaf,
 	Handle new_fcs = expand_fcs(leaf, rule);
 	double new_cpx = expand_complexity(leaf, rule.first);
 
+	// Only consider expansions that actually expands
 	if (content_eq(fcs, new_fcs)) {
 		ure_logger().warn() << "The new FCS is equal to the old one. "
 		                    << "There is probably a bug. This expansion has "
 		                    << "been cancelled.";
+		return AndBIT();
+	}
+
+	// Discard expansion with cycle
+	if (has_cycle(BindLinkCast(new_fcs)->get_implicand())) {
+		ure_logger().debug() << "The new FCS has some cycle (some conclusion "
+		                     << "has itself has premise, directly or "
+		                     << "indirectly). This expansion has been cancelled.";
 		return AndBIT();
 	}
 
@@ -149,6 +159,52 @@ void AndBIT::reset_exhausted()
 	for (auto& el : leaf2bitnode)
 		el.second.exhausted = false;
 	exhausted = false;
+}
+
+bool AndBIT::has_cycle() const
+{
+	return has_cycle(BindLinkCast(fcs)->get_implicand());
+}
+
+bool AndBIT::has_cycle(const Handle& h, OrderedHandleSet ancestors) const
+{
+	if (h->getType() == EXECUTION_OUTPUT_LINK) {
+		Handle arg = h->getOutgoingAtom(1);
+		if (arg->getType() == LIST_LINK) {
+			Handle conclusion = arg->getOutgoingAtom(0);
+			if (is_in(conclusion, ancestors))
+				return true;
+
+			ancestors.insert(conclusion);
+			Arity arity = arg->getArity();
+			if (1 < arity) {
+				bool unordered_premises =
+					arg->getOutgoingAtom(1)->getType() == SET_LINK;
+				if (unordered_premises) {
+					OC_ASSERT(arity == 2,
+					          "Mixture of ordered and unordered"
+					          " premises not implemented!");
+					arg = arg->getOutgoingAtom(1);
+					for (const Handle& ph : arg->getOutgoingSet())
+						if (has_cycle(ph, ancestors))
+							return true;
+					return false;
+				} else {
+					for (Arity i = 1; i < arity; ++i) {
+						Handle ph = arg->getOutgoingAtom(i);
+						if (has_cycle(ph, ancestors))
+							return true;
+						return false;
+					}
+				}
+			}
+			return false;
+		} else {
+			return is_in(arg, ancestors);
+		}
+	} else {
+		return is_in(h, ancestors);
+	}
 }
 
 bool AndBIT::operator==(const AndBIT& andbit) const
