@@ -353,13 +353,22 @@ public:
 
         // If it is empty, we are done. This is a mandatory check,
         // before the iterators below can be used.
-        if (0 == _incoming_set->_iset.bucket_count()) return result;
+        Type nbkt = _incoming_set->_iset.bucket_count();
+        if (0 == nbkt) return result;
 
-        auto end = _incoming_set->_iset.end(type);
-        for (auto w = _incoming_set->_iset.begin(type); w != end; w++)
+        // Get the hash bucket that holds atoms of the desired type.
+        // Unfortunately, that bucket might also hold atoms of a type
+        // that we don't want, so we still have to filter. XXX This
+        // kind of wrecks the whole point of this optimization.  We
+        // really really need to have 1-to-1 correspondance between
+        // buckets and types. XXX FIXME.
+        Type bkt = type % nbkt;
+        auto end = _incoming_set->_iset.end(bkt);
+        for (auto w = _incoming_set->_iset.begin(bkt); w != end; w++)
         {
             Handle h(w->lock());
-            if (h) { *result = h; result ++; }
+            if (nullptr == h) continue;
+            if (h->getType() == type) { *result = h; result ++; }
         }
         return result;
     }
