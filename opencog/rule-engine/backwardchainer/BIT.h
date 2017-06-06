@@ -137,6 +137,27 @@ public:
 	void reset_exhausted();
 
 	/**
+	 * Detect whether the expanded fcs rewrite term contains cycles. A
+	 * cycle is defined as having two nodes (intermediary or not
+	 * conclusions or premises) on the same branch path.
+	 *
+	 * For instance
+	 *
+	 * 	             [10587135790209818836][1] [14389148767193402296][1]
+	 *               ---conditional-full-instantiation-scope-formula----
+	 * [13731348359613425443][1] [10211050625380104512][1]
+	 * ======fuzzy-conjunction-introduction-formula=======
+	 *             [12968852461573975386][1] [14389148767193402296][1]
+	 *             ---conditional-full-instantiation-scope-formula----
+	 *                          [10211050625380104512][1]
+	 *
+	 * has cycles because the conclusion [10911677580466648304][1] is
+	 * present in the same branch path, so is [14389148767193402296][1].
+	 */
+	bool has_cycle() const;
+	bool has_cycle(const Handle& h, OrderedHandleSet ancestors = {}) const;
+
+	/**
 	 * Comparison operators. For operator< compare fcs by size, or by
 	 * handle value if they are of the same size.
 	 */
@@ -212,8 +233,6 @@ public:
 	 *   <premise-1>  <premise-2>  <conclusion-2>
 	 *   --------------<formula-1>---------------
 	 *                <conclusion-1>
-	 *
-	 * TODO: display the rules
 	 */
 	std::string fcs_to_ascii_art(const Handle& fcs) const;
 	std::string fcs_rewrite_to_ascii_art(const Handle& h) const;
