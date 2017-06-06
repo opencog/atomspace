@@ -124,7 +124,8 @@ void PatternLink::setup_components(void)
 	for (size_t i = 0; i < _num_comps; i++)
 	{
 		Handle h(createPatternLink(_component_vars[i], _varlist._simple_typemap,
-		                           _components[i], _pat.optionals));
+		                           _varlist._glob_intervalmap, _components[i],
+		                           _pat.optionals));
 		_component_patterns.emplace_back(h);
 	}
 }
@@ -172,6 +173,7 @@ PatternLink::PatternLink(const Variables& vars, const Handle& body)
 /// have to store them.
 PatternLink::PatternLink(const OrderedHandleSet& vars,
                          const VariableTypeMap& typemap,
+                         const GlobIntervalMap& intervalmap,
                          const HandleSeq& compo,
                          const OrderedHandleSet& opts)
 	: ScopeLink(HandleSeq(), PATTERN_LINK)
@@ -190,6 +192,9 @@ PatternLink::PatternLink(const OrderedHandleSet& vars,
 		auto it = typemap.find(v);
 		if (it != typemap.end())
 			_varlist._simple_typemap.insert(*it);
+		auto imit = intervalmap.find(v);
+		if (imit != intervalmap.end())
+			_varlist._glob_intervalmap.insert(*imit);
 	}
 
 	// Next, the body... there's no _body for lambda. The compo is the
