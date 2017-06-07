@@ -325,6 +325,7 @@ void Atom::keep_incoming_set()
     _incoming_set = std::make_shared<InSet>();
     // Disable the load factor entirely.
     _incoming_set->_iset.max_load_factor(1e30);
+    _incoming_set->_least = 65535;
 }
 
 /// Stop tracking the incoming set for this atom.
@@ -338,19 +339,24 @@ void Atom::drop_incoming_set()
     _incoming_set = NULL;
 }
 
+// We must NEVER insert more than one type into a bucket; otherwise
+// getIncomingByType() will find more than one type, which would
+// require filtering, which would destroy performance.
+void Atom::InSet::checksz(Type t)
+{
+    if (_least < t) _least = t;
+    Type wantsz = t - _least + 1;
+    if (_iset.bucket_count() < wantsz)
+        _iset.rehash(wantsz);
+}
+
 /// Add an atom to the incoming set.
 void Atom::insert_atom(const LinkPtr& a)
 {
     if (NULL == _incoming_set) return;
     std::lock_guard<std::mutex> lck (_mtx);
 
-    // We must NEVER insert more than one type into a bucket; otherwise
-    // getIncomingByType() will find more than one type, which would
-    // require filtering, which would destroy performance.
-    Type t = a->getType();
-    if (_incoming_set->_iset.bucket_count() <= t)
-        _incoming_set->_iset.rehash(t+1);
-
+    _incoming_set->checksz(a->getType());
     _incoming_set->_iset.insert(a);
 #ifdef INCOMING_SET_SIGNALS
     _incoming_set->_addAtomSignal(shared_from_this(), a);
@@ -376,13 +382,7 @@ void Atom::swap_atom(const LinkPtr& old, const LinkPtr& neu)
     if (NULL == _incoming_set) return;
     std::lock_guard<std::mutex> lck (_mtx);
 
-    // We must NEVER insert more than one type into a bucket; otherwise
-    // getIncomingByType() will find more than one type, which would
-    // require filtering, which would destroy performance.
-    Type t = neu->getType();
-    if (_incoming_set->_iset.bucket_count() <= t)
-        _incoming_set->_iset.rehash(t+1);
-
+    _incoming_set->checksz(neu->getType());
 #ifdef INCOMING_SET_SIGNALS
     _incoming_set->_removeAtomSignal(shared_from_this(), old);
 #endif /* INCOMING_SET_SIGNALS */

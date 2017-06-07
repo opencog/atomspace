@@ -168,6 +168,7 @@ protected:
         // in this directory for a slightly longer explanation for why
         // weak pointers are needed, and why bdgc cannot be used.
         WincomingSet _iset;
+
 #ifdef INCOMING_SET_SIGNALS
         // Some people want to know if the incoming set has changed...
         // However, these make the atom quite fat, so this is disabled
@@ -176,6 +177,9 @@ protected:
         AtomPairSignal _addAtomSignal;
         AtomPairSignal _removeAtomSignal;
 #endif /* INCOMING_SET_SIGNALS */
+
+        void checksz(Type);
+        Type _least;
     };
     typedef std::shared_ptr<InSet> InSetPtr;
     InSetPtr _incoming_set;
@@ -348,11 +352,13 @@ public:
         if (NULL == _incoming_set) return result;
         std::lock_guard<std::mutex> lck(_mtx);
 
-        // If it is empty, we are done. This is a mandatory check,
-        // before the iterators below can be used.
-        if (_incoming_set->_iset.bucket_count() <= type) return result;
+        // The only occupied buckets are between _least and
+        // bucket_count() - _least.
+        if (type < _incoming_set->_least) return result;
+        Type bkt = type - _incoming_set->_least;
+        if (_incoming_set->_iset.bucket_count() <= bkt) return result;
 
-        auto end = _incoming_set->_iset.end(type);
+        auto end = _incoming_set->_iset.end(bkt);
         for (auto w = _incoming_set->_iset.begin(type); w != end; w++)
         {
             Handle h(w->lock());
