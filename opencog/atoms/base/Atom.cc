@@ -344,7 +344,7 @@ void Atom::drop_incoming_set()
 // require filtering, which would destroy performance.
 void Atom::InSet::checksz(Type t)
 {
-    if (_least < t) _least = t;
+    if (t < _least) _least = t;
     Type wantsz = t - _least + 1;
     if (_iset.bucket_count() < wantsz)
         _iset.rehash(wantsz);
