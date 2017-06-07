@@ -319,13 +319,11 @@ public:
     {
         if (NULL == _incoming_set) return result;
         std::lock_guard<std::mutex> lck(_mtx);
-        auto bend = _incoming_set->_iset.end();
-        for (auto b = _incoming_set->_iset.begin(); b != bend; b++)
+        for (const WincomingSet& bucket : _incoming_set->_iset)
         {
-            auto wend = b->end();
-            for (auto w = b->begin(); w != wend; w++)
+            for (const WinkPtr& w : bucket)
             {
-                Handle h(w->lock());
+                Handle h(w.lock());
                 if (h) { *result = h; result ++; }
             }
         }
@@ -370,10 +368,9 @@ public:
         if (nbkts <= type - _incoming_set->_least) return result;
         Type bkt = type - _incoming_set->_least;
 
-        auto end = _incoming_set->_iset[bkt].end();
-        for (auto w = _incoming_set->_iset[bkt].begin(); w != end; w++)
+        for (const WinkPtr& w : _incoming_set->_iset[bkt])
         {
-            Handle h(w->lock());
+            Handle h(w.lock());
             if (h) { *result = h; result ++; }
         }
         return result;

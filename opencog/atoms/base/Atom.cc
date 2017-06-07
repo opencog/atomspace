@@ -323,8 +323,6 @@ void Atom::keep_incoming_set()
 {
     if (_incoming_set) return;
     _incoming_set = std::make_shared<InSet>();
-    // Disable the load factor entirely.
-    _incoming_set->_iset.max_load_factor(1e30);
     _incoming_set->_least = 65535;
 }
 
@@ -339,20 +337,22 @@ void Atom::drop_incoming_set()
     _incoming_set = NULL;
 }
 
-// We must NEVER insert more than one type into a bucket; otherwise
-// getIncomingByType() will find more than one type, which would
-// require filtering, which would destroy performance.
 void Atom::InSet::checksz(Type t)
 {
-    Type currsz = _iset.bucket_count();
-    Type needsz = t - _least + 1;
     if (t < _least)
     {
-        needsz = currsz + (_least - t);
+        // Grow at the front.
+        auto it = _iset.begin();
+        _iset.insert(it, (_least - t), WincomingSet());
         _least = t;
+        return;
     }
-    if (currsz < needsz)
-        _iset.rehash(needsz);
+
+    Type needsz = t - _least + 1;
+    if (_iset.size() < needsz)
+    {
+        _iset.resize(needsz);
+    }
 }
 
 /// Add an atom to the incoming set.
@@ -361,8 +361,9 @@ void Atom::insert_atom(const LinkPtr& a)
     if (NULL == _incoming_set) return;
     std::lock_guard<std::mutex> lck (_mtx);
 
-    _incoming_set->checksz(a->getType());
-    _incoming_set->_iset.insert(a);
+    Type at = a->getType();
+    _incoming_set->checksz(at);
+    _incoming_set->_iset[at].insert(a);
 #ifdef INCOMING_SET_SIGNALS
     _incoming_set->_addAtomSignal(shared_from_this(), a);
 #endif /* INCOMING_SET_SIGNALS */
@@ -376,7 +377,9 @@ void Atom::remove_atom(const LinkPtr& a)
 #ifdef INCOMING_SET_SIGNALS
     _incoming_set->_removeAtomSignal(shared_from_this(), a);
 #endif /* INCOMING_SET_SIGNALS */
-    _incoming_set->_iset.erase(a);
+    Type at = a->getType();
+    _incoming_set->checksz(at);
+    _incoming_set->_iset[at].erase(a);
 }
 
 /// Remove old, and add new, atomically, so that every user
@@ -387,12 +390,13 @@ void Atom::swap_atom(const LinkPtr& old, const LinkPtr& neu)
     if (NULL == _incoming_set) return;
     std::lock_guard<std::mutex> lck (_mtx);
 
-    _incoming_set->checksz(neu->getType());
+    Type nt = neu->getType();
+    _incoming_set->checksz(nt);
 #ifdef INCOMING_SET_SIGNALS
     _incoming_set->_removeAtomSignal(shared_from_this(), old);
 #endif /* INCOMING_SET_SIGNALS */
-    _incoming_set->_iset.erase(old);
-    _incoming_set->_iset.insert(neu);
+    _incoming_set->_iset[old->getType()].erase(old);
+    _incoming_set->_iset[nt].insert(neu);
 #ifdef INCOMING_SET_SIGNALS
     _incoming_set->_addAtomSignal(shared_from_this(), neu);
 #endif /* INCOMING_SET_SIGNALS */
@@ -402,7 +406,12 @@ size_t Atom::getIncomingSetSize() const
 {
     if (NULL == _incoming_set) return 0;
     std::lock_guard<std::mutex> lck (_mtx);
-    return _incoming_set->_iset.size();
+
+    size_t cnt = 0;
+    auto end = _incoming_set->_iset.end();
+    for (auto it = _incoming_set->_iset.begin(); it != end; it++)
+        cnt += it->size();
+    return cnt;
 }
 
 // We return a copy here, and not a reference, because the set itself
@@ -419,11 +428,14 @@ IncomingSet Atom::getIncomingSet(AtomSpace* as) const
         // Prevent update of set while a copy is being made.
         std::lock_guard<std::mutex> lck (_mtx);
         IncomingSet iset;
-        for (const WinkPtr& w : _incoming_set->_iset)
+        for (const WincomingSet& bucket : _incoming_set->_iset)
         {
-            LinkPtr l(w.lock());
-            if (l and atab->in_environ(l))
-                iset.emplace_back(l);
+            for (const WinkPtr& w : bucket)
+            {
+                LinkPtr l(w.lock());
+                if (l and atab->in_environ(l))
+                    iset.emplace_back(l);
+            }
         }
         return iset;
     }
@@ -431,10 +443,13 @@ IncomingSet Atom::getIncomingSet(AtomSpace* as) const
     // Prevent update of set while a copy is being made.
     std::lock_guard<std::mutex> lck (_mtx);
     IncomingSet iset;
-    for (WinkPtr w : _incoming_set->_iset)
+    for (const WincomingSet& bucket : _incoming_set->_iset)
     {
-        LinkPtr l(w.lock());
-        if (l) iset.emplace_back(l);
+        for (const WinkPtr& w : bucket)
+        {
+            LinkPtr l(w.lock());
+            if (l) iset.emplace_back(l);
+        }
     }
     return iset;
 }
@@ -451,16 +466,15 @@ IncomingSet Atom::getIncomingSetByType(Type type) const
     std::lock_guard<std::mutex> lck(_mtx);
 
     // The only occupied buckets are between _least and
-    // bucket_count() - _least.
+    // size() - _least.
     if (type < _incoming_set->_least) return result;
-    Type nbkts = _incoming_set->_iset.bucket_count();
+    Type nbkts = _incoming_set->_iset.size();
     if (nbkts <= type - _incoming_set->_least) return result;
-    Type bkt = type % nbkts;
+    Type bkt = type - _incoming_set->_least;
 
-    auto end = _incoming_set->_iset.end(bkt);
-    for (auto w = _incoming_set->_iset.begin(bkt); w != end; w++)
+    for (const WinkPtr& w : _incoming_set->_iset[bkt])
     {
-        LinkPtr h(w->lock());
+        LinkPtr h(w.lock());
         if (h) result.emplace_back(h);
     }
     return result;
