@@ -92,7 +92,8 @@ typedef unsigned short Arity;
 typedef std::vector<LinkPtr> IncomingSet; // use vector; see below.
 typedef boost::signals2::signal<void (AtomPtr, LinkPtr)> AtomPairSignal;
 
-typedef std::unordered_set<WinkPtr> WincomingSet;
+// typedef std::unordered_set<WinkPtr> WincomingSet;
+typedef std::set<WinkPtr, std::owner_less<WinkPtr> > WincomingSet;
 
 /**
  * Atoms are the basic implementational unit in the system that
