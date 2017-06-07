@@ -319,11 +319,15 @@ public:
     {
         if (NULL == _incoming_set) return result;
         std::lock_guard<std::mutex> lck(_mtx);
-        auto end = _incoming_set->_iset.end();
-        for (auto w = _incoming_set->_iset.begin(); w != end; w++)
+        auto bend = _incoming_set->_iset.end();
+        for (auto b = _incoming_set->_iset.begin(); b != bend; b++)
         {
-            Handle h(w->lock());
-            if (h) { *result = h; result ++; }
+            auto wend = b->end();
+            for (auto w = b->begin(); w != wend; w++)
+            {
+                Handle h(w->lock());
+                if (h) { *result = h; result ++; }
+            }
         }
         return result;
     }
@@ -360,14 +364,14 @@ public:
         std::lock_guard<std::mutex> lck(_mtx);
 
         // The only occupied buckets are between _least and
-        // bucket_count() - _least.
+        // size() - _least.
         if (type < _incoming_set->_least) return result;
-        Type nbkts = _incoming_set->_iset.bucket_count();
+        Type nbkts = _incoming_set->_iset.size();
         if (nbkts <= type - _incoming_set->_least) return result;
-        Type bkt = type % nbkts;
+        Type bkt = type - _incoming_set->_least;
 
-        auto end = _incoming_set->_iset.end(bkt);
-        for (auto w = _incoming_set->_iset.begin(bkt); w != end; w++)
+        auto end = _incoming_set->_iset[bkt].end();
+        for (auto w = _incoming_set->_iset[bkt].begin(); w != end; w++)
         {
             Handle h(w->lock());
             if (h) { *result = h; result ++; }
