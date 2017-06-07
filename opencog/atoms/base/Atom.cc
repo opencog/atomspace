@@ -374,6 +374,14 @@ void Atom::swap_atom(const LinkPtr& old, const LinkPtr& neu)
 {
     if (NULL == _incoming_set) return;
     std::lock_guard<std::mutex> lck (_mtx);
+
+    // We must NEVER insert more than one type into a bucket; otherwise
+    // getIncomingByType() will find more than one type, which would
+    // require filtering, which would destroy performance.
+    Type t = neu->getType();
+    if (_incoming_set->_iset.bucket_count() <= t)
+        _incoming_set->_iset.rehash(t);
+
 #ifdef INCOMING_SET_SIGNALS
     _incoming_set->_removeAtomSignal(shared_from_this(), old);
 #endif /* INCOMING_SET_SIGNALS */
