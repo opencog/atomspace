@@ -188,11 +188,11 @@ class AtomSpaceTest(TestCase):
 
         # now check links
         l1 = InheritanceLink(a1, a2)
-        result = a1.incoming_by_type(types.Link)
+        result = a1.incoming_by_type(types.InheritanceLink)
         self.assertTrue(l1 in result)
-        result = a2.incoming_by_type(types.Link)
+        result = a2.incoming_by_type(types.InheritanceLink)
         self.assertTrue(l1 in result)
-        result = a3.incoming_by_type(types.Link)
+        result = a3.incoming_by_type(types.InheritanceLink)
         self.assertTrue(l1 not in result)
 
     def test_include_incoming_outgoing(self):
