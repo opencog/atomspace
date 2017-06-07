@@ -113,7 +113,7 @@ cdef extern from "opencog/atoms/base/Atom.h" namespace "opencog":
         tv_ptr getTruthValue()
         void setTruthValue(tv_ptr tvp)
 
-        output_iterator getIncomingSetByType(output_iterator, Type type, bint subclass)
+        output_iterator getIncomingSetByType(output_iterator, Type type)
 
         # Conditionally-valid methods. Not defined for all atoms.
         string getName()

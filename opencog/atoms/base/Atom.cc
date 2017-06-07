@@ -55,6 +55,30 @@
 
 #undef Type
 
+namespace std {
+
+// The hash of a weak pointer is just the atom type. Actually,
+// it *has* to be the atom type, as otherwise the hash buckets
+// won't be correct, and getIncomingByType() will fail to be fast.
+opencog::Type
+hash<opencog::WinkPtr>::operator()(const opencog::WinkPtr& w) const noexcept
+{
+    opencog::LinkPtr h(w.lock());
+    if (nullptr == h) return 0;
+    return h->getType();
+}
+
+bool
+equal_to<opencog::WinkPtr>::operator()(const opencog::WinkPtr& lw,
+                                       const opencog::WinkPtr& rw) const noexcept
+{
+    opencog::Handle hl(lw.lock());
+    opencog::Handle hr(rw.lock());
+    return hl == hr;
+}
+
+} // namespace std
+
 namespace opencog {
 
 Atom::~Atom()
@@ -299,6 +323,9 @@ void Atom::keep_incoming_set()
 {
     if (_incoming_set) return;
     _incoming_set = std::make_shared<InSet>();
+    // Disable the load factor entirely.
+    _incoming_set->_iset.max_load_factor(1e30);
+    _incoming_set->_least = 65535;
 }
 
 /// Stop tracking the incoming set for this atom.
@@ -309,8 +336,23 @@ void Atom::drop_incoming_set()
     if (NULL == _incoming_set) return;
     std::lock_guard<std::mutex> lck (_mtx);
     _incoming_set->_iset.clear();
-    // delete _incoming_set;
     _incoming_set = NULL;
+}
+
+// We must NEVER insert more than one type into a bucket; otherwise
+// getIncomingByType() will find more than one type, which would
+// require filtering, which would destroy performance.
+void Atom::InSet::checksz(Type t)
+{
+    Type currsz = _iset.bucket_count();
+    Type needsz = t - _least + 1;
+    if (t < _least)
+    {
+        needsz = currsz + (_least - t);
+        _least = t;
+    }
+    if (currsz < needsz)
+        _iset.rehash(needsz);
 }
 
 /// Add an atom to the incoming set.
@@ -318,6 +360,8 @@ void Atom::insert_atom(const LinkPtr& a)
 {
     if (NULL == _incoming_set) return;
     std::lock_guard<std::mutex> lck (_mtx);
+
+    _incoming_set->checksz(a->getType());
     _incoming_set->_iset.insert(a);
 #ifdef INCOMING_SET_SIGNALS
     _incoming_set->_addAtomSignal(shared_from_this(), a);
@@ -342,6 +386,8 @@ void Atom::swap_atom(const LinkPtr& old, const LinkPtr& neu)
 {
     if (NULL == _incoming_set) return;
     std::lock_guard<std::mutex> lck (_mtx);
+
+    _incoming_set->checksz(neu->getType());
 #ifdef INCOMING_SET_SIGNALS
     _incoming_set->_removeAtomSignal(shared_from_this(), old);
 #endif /* INCOMING_SET_SIGNALS */
@@ -393,14 +439,31 @@ IncomingSet Atom::getIncomingSet(AtomSpace* as) const
     return iset;
 }
 
-IncomingSet Atom::getIncomingSetByType(Type type, bool subclass) const
+IncomingSet Atom::getIncomingSetByType(Type type) const
 {
-    HandleSeq inhs;
-    getIncomingSetByType(std::back_inserter(inhs), type, subclass);
-    IncomingSet inlinks;
-    for (const Handle& h : inhs)
-        inlinks.emplace_back(LinkCast(h));
-    return inlinks;
+    IncomingSet result;
+
+    // The code below is mostly a cut-n-paste from the header file.
+    // The only difference is that it works with LinkPtr instead of
+    // Handle.  The primary issue is that casting from Handle back
+    // to LinkPtr is slowwwwwww.  So we avoid that, here.
+    if (NULL == _incoming_set) return result;
+    std::lock_guard<std::mutex> lck(_mtx);
+
+    // The only occupied buckets are between _least and
+    // bucket_count() - _least.
+    if (type < _incoming_set->_least) return result;
+    Type nbkts = _incoming_set->_iset.bucket_count();
+    if (nbkts <= type - _incoming_set->_least) return result;
+    Type bkt = type % nbkts;
+
+    auto end = _incoming_set->_iset.end(bkt);
+    for (auto w = _incoming_set->_iset.begin(bkt); w != end; w++)
+    {
+        LinkPtr h(w->lock());
+        if (h) result.emplace_back(h);
+    }
+    return result;
 }
 
 std::string Atom::idToString() const
