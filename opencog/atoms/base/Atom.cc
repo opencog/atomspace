@@ -68,6 +68,15 @@ hash<opencog::WinkPtr>::operator()(const opencog::WinkPtr& w) const noexcept
     return h->getType();
 }
 
+bool
+equal_to<opencog::WinkPtr>::operator()(const opencog::WinkPtr& lw,
+                                       const opencog::WinkPtr& rw) const noexcept
+{
+    opencog::Handle hl(lw.lock());
+    opencog::Handle hr(rw.lock());
+    return hl == hr;
+}
+
 } // namespace std
 
 namespace opencog {

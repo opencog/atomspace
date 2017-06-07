@@ -59,18 +59,15 @@ template<> struct hash<opencog::WinkPtr>
     opencog::Type operator()(const opencog::WinkPtr& w) const noexcept;
 };
 
-// Equality is simple type equality
+// Equality is equality of the underlying atoms. The unordered set
+// uses this to distinguish atoms of the same type.
 template<> struct equal_to<opencog::WinkPtr>
 {
     typedef bool result_type;
     typedef opencog::WinkPtr first_argument;
     typedef opencog::WinkPtr second_argument;
-    bool operator()(const opencog::WinkPtr& lw,
-                    const opencog::WinkPtr& rw) const noexcept
-    {
-        return hash<opencog::WinkPtr>{}(lw) ==
-               hash<opencog::WinkPtr>{}(rw);
-    }
+    bool operator()(const opencog::WinkPtr&,
+                    const opencog::WinkPtr&) const noexcept;
 };
 
 } // namespace std
