@@ -441,14 +441,29 @@ IncomingSet Atom::getIncomingSet(AtomSpace* as) const
 
 IncomingSet Atom::getIncomingSetByType(Type type) const
 {
-// XXX This is totally stupid: fix this.  We already got links,
-// we can skip the cast!!
-    HandleSeq inhs;
-    getIncomingSetByType(std::back_inserter(inhs), type);
-    IncomingSet inlinks;
-    for (const Handle& h : inhs)
-        inlinks.emplace_back(LinkCast(h));
-    return inlinks;
+    IncomingSet result;
+
+    // The code below is mostly a cut-n-paste from the header file.
+    // The only difference is that it works with LinkPtr instead of
+    // Handle.  The primary issue is that casting from Handle back
+    // to LinkPtr is slowwwwwww.  So we avoid that, here.
+    if (NULL == _incoming_set) return result;
+    std::lock_guard<std::mutex> lck(_mtx);
+
+    // The only occupied buckets are between _least and
+    // bucket_count() - _least.
+    if (type < _incoming_set->_least) return result;
+    Type nbkts = _incoming_set->_iset.bucket_count();
+    if (nbkts <= type - _incoming_set->_least) return result;
+    Type bkt = type % nbkts;
+
+    auto end = _incoming_set->_iset.end(bkt);
+    for (auto w = _incoming_set->_iset.begin(bkt); w != end; w++)
+    {
+        LinkPtr h(w->lock());
+        if (h) result.emplace_back(h);
+    }
+    return result;
 }
 
 std::string Atom::idToString() const
