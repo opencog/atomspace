@@ -44,6 +44,14 @@ public:
 	void test_get_predicates_for();
 };
 
+OrderedHandleSet cvt(HandleSeq predlist)
+{
+	OrderedHandleSet preds;
+	for (auto it = predlist.begin(); it != predlist.end(); it++)
+		preds.insert(*it);
+	return preds;
+}
+
 
 // Test get_outgoing_nodes()
 void AtomUtilsUTest::test_get_predicates()
@@ -53,10 +61,12 @@ void AtomUtilsUTest::test_get_predicates()
 	Handle bacon = as.add_node(CONCEPT_NODE, "bacon");
 	Handle programmer_bacon = as.add_link(LIST_LINK, programmer, bacon);
 
+	// eats (programmers, bacon)
 	Handle eats = as.add_node(PREDICATE_NODE, "eats");
 	Handle programmerEatsBacon = as.add_link(EVALUATION_LINK, eats,
 	                                         programmer_bacon);
 
+	// lover (programmers, bacon)
 	Handle lover = as.add_node(GROUNDED_PREDICATE_NODE, "lover");
 	Handle programmerBaconLover = as.add_link(EVALUATION_LINK, lover,
 	                                          programmer_bacon);
@@ -65,8 +75,8 @@ void AtomUtilsUTest::test_get_predicates()
 	Handle anotherLink = as.add_link(LIST_LINK, anotherNode, bacon);
 
 	// Test get_predicates(default).
-	HandleSeq baconReferences {programmerEatsBacon, programmerBaconLover};
-	TS_ASSERT_EQUALS(get_predicates(bacon), baconReferences);
+	OrderedHandleSet baconReferences {programmerEatsBacon, programmerBaconLover};
+	TS_ASSERT_EQUALS(cvt(get_predicates(bacon)), baconReferences);
 
 	// Test get_predicates with specific type.
 	HandleSeq baconLovers {programmerBaconLover};
@@ -109,18 +119,18 @@ void AtomUtilsUTest::test_get_predicates_for()
 		programmerEatsBacon = as.add_link(EVALUATION_LINK, eats, programmer_bacon);
 		
 	// Test for dog IsA.
-	HandleSeq dogIsA {dogIsAMammal, dogIsACanine, dogIsAAnimal};
-	TS_ASSERT_EQUALS(get_predicates_for(dog, isA), dogIsA);
+	OrderedHandleSet dogIsA {dogIsAMammal, dogIsACanine, dogIsAAnimal};
+	TS_ASSERT_EQUALS(cvt(get_predicates_for(dog, isA)), dogIsA);
 
 	// Test for dog eats.
-	HandleSeq dogEats {dogEatsBacon};
-	TS_ASSERT_EQUALS(get_predicates_for(dog, eats), dogEats);
+	OrderedHandleSet dogEats {dogEatsBacon};
+	TS_ASSERT_EQUALS(cvt(get_predicates_for(dog, eats)), dogEats);
 
 	// Test for programmer eats.
-	HandleSeq programmerEats {programmerEatsBacon};
-	TS_ASSERT_EQUALS(get_predicates_for(programmer, eats), programmerEats);
+	OrderedHandleSet programmerEats {programmerEatsBacon};
+	TS_ASSERT_EQUALS(cvt(get_predicates_for(programmer, eats)), programmerEats);
 
 	// Test for eats bacon.
-	HandleSeq eatsBacon {dogEatsBacon, programmerEatsBacon};
-	TS_ASSERT_EQUALS(get_predicates_for(bacon, eats), eatsBacon);
+	OrderedHandleSet eatsBacon {dogEatsBacon, programmerEatsBacon};
+	TS_ASSERT_EQUALS(cvt(get_predicates_for(bacon, eats)), eatsBacon);
 }
