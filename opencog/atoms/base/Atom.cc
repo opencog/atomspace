@@ -323,9 +323,6 @@ void Atom::keep_incoming_set()
 {
     if (_incoming_set) return;
     _incoming_set = std::make_shared<InSet>();
-    // Disable the load factor entirely.
-    _incoming_set->_iset.max_load_factor(1e30);
-    _incoming_set->_least = 65535;
 }
 
 /// Stop tracking the incoming set for this atom.
@@ -339,30 +336,22 @@ void Atom::drop_incoming_set()
     _incoming_set = NULL;
 }
 
-// We must NEVER insert more than one type into a bucket; otherwise
-// getIncomingByType() will find more than one type, which would
-// require filtering, which would destroy performance.
-void Atom::InSet::checksz(Type t)
-{
-    Type currsz = _iset.bucket_count();
-    Type needsz = t - _least + 1;
-    if (t < _least)
-    {
-        needsz = currsz + (_least - t);
-        _least = t;
-    }
-    if (currsz < needsz)
-        _iset.rehash(needsz);
-}
-
 /// Add an atom to the incoming set.
 void Atom::insert_atom(const LinkPtr& a)
 {
     if (NULL == _incoming_set) return;
     std::lock_guard<std::mutex> lck (_mtx);
 
-    _incoming_set->checksz(a->getType());
-    _incoming_set->_iset.insert(a);
+    Type at = a->getType();
+    auto bucket = _incoming_set->_iset.find(at);
+    if (bucket == _incoming_set->_iset.end())
+    {
+        auto pr = _incoming_set->_iset.emplace(
+                   std::make_pair(at, WincomingSet()));
+        bucket = pr.first;
+    }
+    bucket->second.insert(a);
+
 #ifdef INCOMING_SET_SIGNALS
     _incoming_set->_addAtomSignal(shared_from_this(), a);
 #endif /* INCOMING_SET_SIGNALS */
@@ -376,7 +365,9 @@ void Atom::remove_atom(const LinkPtr& a)
 #ifdef INCOMING_SET_SIGNALS
     _incoming_set->_removeAtomSignal(shared_from_this(), a);
 #endif /* INCOMING_SET_SIGNALS */
-    _incoming_set->_iset.erase(a);
+    Type at = a->getType();
+    auto bucket = _incoming_set->_iset.find(at);
+    bucket->second.erase(a);
 }
 
 /// Remove old, and add new, atomically, so that every user
@@ -387,12 +378,23 @@ void Atom::swap_atom(const LinkPtr& old, const LinkPtr& neu)
     if (NULL == _incoming_set) return;
     std::lock_guard<std::mutex> lck (_mtx);
 
-    _incoming_set->checksz(neu->getType());
 #ifdef INCOMING_SET_SIGNALS
     _incoming_set->_removeAtomSignal(shared_from_this(), old);
 #endif /* INCOMING_SET_SIGNALS */
-    _incoming_set->_iset.erase(old);
-    _incoming_set->_iset.insert(neu);
+    Type ot = old->getType();
+    auto bucket = _incoming_set->_iset.find(ot);
+    bucket->second.erase(old);
+
+    Type nt = neu->getType();
+    bucket = _incoming_set->_iset.find(nt);
+    if (bucket == _incoming_set->_iset.end())
+    {
+        auto pr = _incoming_set->_iset.emplace(
+                   std::make_pair(nt, WincomingSet()));
+        bucket = pr.first;
+    }
+    bucket->second.insert(neu);
+
 #ifdef INCOMING_SET_SIGNALS
     _incoming_set->_addAtomSignal(shared_from_this(), neu);
 #endif /* INCOMING_SET_SIGNALS */
@@ -402,7 +404,11 @@ size_t Atom::getIncomingSetSize() const
 {
     if (NULL == _incoming_set) return 0;
     std::lock_guard<std::mutex> lck (_mtx);
-    return _incoming_set->_iset.size();
+
+    size_t cnt = 0;
+    for (const auto pr : _incoming_set->_iset)
+        cnt += pr.second.size();
+    return cnt;
 }
 
 // We return a copy here, and not a reference, because the set itself
@@ -419,11 +425,14 @@ IncomingSet Atom::getIncomingSet(AtomSpace* as) const
         // Prevent update of set while a copy is being made.
         std::lock_guard<std::mutex> lck (_mtx);
         IncomingSet iset;
-        for (const WinkPtr& w : _incoming_set->_iset)
+        for (const auto bucket : _incoming_set->_iset)
         {
-            LinkPtr l(w.lock());
-            if (l and atab->in_environ(l))
-                iset.emplace_back(l);
+            for (const WinkPtr& w : bucket.second)
+            {
+                LinkPtr l(w.lock());
+                if (l and atab->in_environ(l))
+                    iset.emplace_back(l);
+            }
         }
         return iset;
     }
@@ -431,10 +440,13 @@ IncomingSet Atom::getIncomingSet(AtomSpace* as) const
     // Prevent update of set while a copy is being made.
     std::lock_guard<std::mutex> lck (_mtx);
     IncomingSet iset;
-    for (WinkPtr w : _incoming_set->_iset)
+    for (const auto bucket : _incoming_set->_iset)
     {
-        LinkPtr l(w.lock());
-        if (l) iset.emplace_back(l);
+        for (const WinkPtr& w : bucket.second)
+        {
+            LinkPtr l(w.lock());
+            if (l) iset.emplace_back(l);
+        }
     }
     return iset;
 }
@@ -450,17 +462,12 @@ IncomingSet Atom::getIncomingSetByType(Type type) const
     if (NULL == _incoming_set) return result;
     std::lock_guard<std::mutex> lck(_mtx);
 
-    // The only occupied buckets are between _least and
-    // bucket_count() - _least.
-    if (type < _incoming_set->_least) return result;
-    Type nbkts = _incoming_set->_iset.bucket_count();
-    if (nbkts <= type - _incoming_set->_least) return result;
-    Type bkt = type % nbkts;
+    const auto bucket = _incoming_set->_iset.find(type);
+    if (bucket == _incoming_set->_iset.cend()) return result;
 
-    auto end = _incoming_set->_iset.end(bkt);
-    for (auto w = _incoming_set->_iset.begin(bkt); w != end; w++)
+    for (const WinkPtr& w : bucket->second)
     {
-        LinkPtr h(w->lock());
+        LinkPtr h(w.lock());
         if (h) result.emplace_back(h);
     }
     return result;
