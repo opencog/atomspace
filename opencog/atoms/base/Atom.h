@@ -161,11 +161,12 @@ protected:
     // weak pointers are needed, and why bdwgc cannot be used.
     struct InSet
     {
-        // We want four things:
-        // a) excellent insert performance
-        // b) very fast lookup by type.
-        // c) OK remove performance.
-        // d) uniqueness, because atomspace operations can sometimes
+        // We want five things:
+        // a) the smallest possiblem atom.
+        // b) excellent insert performance.
+        // c) very fast lookup by type.
+        // d) good remove performance.
+        // e) uniqueness, because atomspace operations can sometimes
         //    cause an atom to get inserted multiple times.  This is
         //    arguably a bug, though.
         //
@@ -174,11 +175,11 @@ protected:
         // need to be either hash tables or rb-trees. Scanning for
         // uniqueness in a vector is prohibitavely slow.  Note that
         // incoming sets containing 10K atoms are not unusual, and can
-        // be the source of bottlnecks.
-
-        std::vector<WincomingSet> _iset;
-        Type _least;
-        Type checksz(Type);
+        // be the source of bottlnecks.  Note that an atomspace can
+        // contain a hundred-million atoms, so the solution has to be
+        // small. This rules out using using a vector to store the
+        // buckets (I tried).
+        std::map<Type, WincomingSet> _iset;
 
 #ifdef INCOMING_SET_SIGNALS
         // Some people want to know if the incoming set has changed...
@@ -320,9 +321,9 @@ public:
     {
         if (NULL == _incoming_set) return result;
         std::lock_guard<std::mutex> lck(_mtx);
-        for (const WincomingSet& bucket : _incoming_set->_iset)
+        for (const auto bucket : _incoming_set->_iset)
         {
-            for (const WinkPtr& w : bucket)
+            for (const WinkPtr& w : bucket.second)
             {
                 Handle h(w.lock());
                 if (h) { *result = h; result ++; }
@@ -362,14 +363,10 @@ public:
         if (NULL == _incoming_set) return result;
         std::lock_guard<std::mutex> lck(_mtx);
 
-        // The only occupied buckets are between _least and
-        // size() - _least.
-        if (type < _incoming_set->_least) return result;
+        const auto bucket = _incoming_set->_iset.find(type);
+        if (bucket == _incoming_set->_iset.cend()) return result;
 
-        Type bkt = type - _incoming_set->_least;
-        if (_incoming_set->_iset.size() <= bkt) return result;
-
-        for (const WinkPtr& w : _incoming_set->_iset[bkt])
+        for (const WinkPtr& w : bucket->second)
         {
             Handle h(w.lock());
             if (h) { *result = h; result ++; }
