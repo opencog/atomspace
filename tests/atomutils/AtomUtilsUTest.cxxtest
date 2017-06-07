@@ -49,19 +49,21 @@ public:
 void AtomUtilsUTest::test_get_predicates()
 {
 	AtomSpace as;
-	Handle
-		programmer = as.add_node(CONCEPT_NODE, "programmer"),
-		bacon = as.add_node(CONCEPT_NODE, "bacon"),
-		programmer_bacon = as.add_link(LIST_LINK, programmer, bacon),
-		eats = as.add_node(PREDICATE_NODE, "eats"),
-		programmerEatsBacon = as.add_link(EVALUATION_LINK, eats,
-		                                  programmer_bacon),
-		lover = as.add_node(GROUNDED_PREDICATE_NODE, "lover"),
-		programmerBaconLover = as.add_link(EVALUATION_LINK, lover,
-		                                   programmer_bacon),
-		anotherNode = as.add_node(CONCEPT_NODE, "pigs"),
-		anotherLink = as.add_link(LIST_LINK, anotherNode, bacon);
-		
+	Handle programmer = as.add_node(CONCEPT_NODE, "programmer");
+	Handle bacon = as.add_node(CONCEPT_NODE, "bacon");
+	Handle programmer_bacon = as.add_link(LIST_LINK, programmer, bacon);
+
+	Handle eats = as.add_node(PREDICATE_NODE, "eats");
+	Handle programmerEatsBacon = as.add_link(EVALUATION_LINK, eats,
+	                                         programmer_bacon);
+
+	Handle lover = as.add_node(GROUNDED_PREDICATE_NODE, "lover");
+	Handle programmerBaconLover = as.add_link(EVALUATION_LINK, lover,
+	                                          programmer_bacon);
+
+	Handle anotherNode = as.add_node(CONCEPT_NODE, "pigs");
+	Handle anotherLink = as.add_link(LIST_LINK, anotherNode, bacon);
+
 	// Test get_predicates(default).
 	HandleSeq baconReferences {programmerEatsBacon, programmerBaconLover};
 	TS_ASSERT_EQUALS(get_predicates(bacon), baconReferences);
