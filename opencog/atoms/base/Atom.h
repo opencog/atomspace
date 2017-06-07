@@ -355,11 +355,12 @@ public:
         // The only occupied buckets are between _least and
         // bucket_count() - _least.
         if (type < _incoming_set->_least) return result;
-        Type bkts = type - _incoming_set->_least;
-        if (_incoming_set->_iset.bucket_count() <= bkts) return result;
+        Type nbkts = _incoming_set->_iset.bucket_count();
+        if (nbkts <= type - _incoming_set->_least) return result;
+        Type bkt = type % nbkts;
 
-        auto end = _incoming_set->_iset.end(type);
-        for (auto w = _incoming_set->_iset.begin(type); w != end; w++)
+        auto end = _incoming_set->_iset.end(bkt);
+        for (auto w = _incoming_set->_iset.begin(bkt); w != end; w++)
         {
             Handle h(w->lock());
             if (h) { *result = h; result ++; }
