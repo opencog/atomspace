@@ -92,13 +92,6 @@ typedef unsigned short Arity;
 typedef std::vector<LinkPtr> IncomingSet; // use vector; see below.
 typedef boost::signals2::signal<void (AtomPtr, LinkPtr)> AtomPairSignal;
 
-// We use std::unordered_set for WincomingSet, because we want three
-// things: good insert, good remove performance, and, importantly,
-// good lookup by type.  The hash function has been carefully
-// engineered to return the type of the atom, so that all atoms of the
-// same type go into the same hash bucket. This allows for a fast
-// getIncomingByType() method, which is occasionally a bottleneck, esp.
-// for large incoming sets.
 typedef std::unordered_set<WinkPtr> WincomingSet;
 
 /**
@@ -159,15 +152,32 @@ protected:
         _truthValue(TruthValue::DEFAULT_TV())
     {}
 
+    // The incoming set is not tracked by the garbage collector;
+    // this is required, in order to avoid cyclic references.
+    // That is, we use weak pointers here, not strong ones.
+    // std::set<ptr> uses 48 bytes (per atom).  See the README file
+    // in this directory for a slightly longer explanation for why
+    // weak pointers are needed, and why bdwgc cannot be used.
     struct InSet
     {
-        // The incoming set is not tracked by the garbage collector;
-        // this is required, in order to avoid cyclic references.
-        // That is, we use weak pointers here, not strong ones.
-        // std::set<ptr> uses 48 bytes (per atom).  See the README file
-        // in this directory for a slightly longer explanation for why
-        // weak pointers are needed, and why bdgc cannot be used.
-        WincomingSet _iset;
+        // We want four things:
+        // a) excellent insert performance
+        // b) very fast lookup by type.
+        // c) OK remove performance.
+        // d) uniqueness, because atomspace operations can sometimes
+        //    cause an atom to get inserted multiple times.  This is
+        //    arguably a bug, though.
+        //
+        // In order to get b), we have to store atoms in buckets, each
+        // bucket holding only one type.  To satisfy d), the buckets
+        // need to be either hash tables or rb-trees. Scanning for
+        // uniqueness in a vector is prohibitavely slow.  Note that
+        // incoming sets containing 10K atoms are not unusual, and can
+        // be the source of bottlnecks.
+
+        std::vector<WincomingSet> _iset;
+        Type _least;
+        void checksz(Type);
 
 #ifdef INCOMING_SET_SIGNALS
         // Some people want to know if the incoming set has changed...
@@ -177,9 +187,6 @@ protected:
         AtomPairSignal _addAtomSignal;
         AtomPairSignal _removeAtomSignal;
 #endif /* INCOMING_SET_SIGNALS */
-
-        void checksz(Type);
-        Type _least;
     };
     typedef std::shared_ptr<InSet> InSetPtr;
     InSetPtr _incoming_set;
