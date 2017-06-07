@@ -323,6 +323,8 @@ void Atom::keep_incoming_set()
 {
     if (_incoming_set) return;
     _incoming_set = std::make_shared<InSet>();
+    // Disable the load factor entirely.
+    _incoming_set->_iset.max_load_factor(1e30);
 }
 
 /// Stop tracking the incoming set for this atom.
@@ -333,7 +335,6 @@ void Atom::drop_incoming_set()
     if (NULL == _incoming_set) return;
     std::lock_guard<std::mutex> lck (_mtx);
     _incoming_set->_iset.clear();
-    // delete _incoming_set;
     _incoming_set = NULL;
 }
 
@@ -348,7 +349,7 @@ void Atom::insert_atom(const LinkPtr& a)
     // require filtering, which would destroy performance.
     Type t = a->getType();
     if (_incoming_set->_iset.bucket_count() <= t)
-        _incoming_set->_iset.rehash(t);
+        _incoming_set->_iset.rehash(t+1);
 
     _incoming_set->_iset.insert(a);
 #ifdef INCOMING_SET_SIGNALS
@@ -380,7 +381,7 @@ void Atom::swap_atom(const LinkPtr& old, const LinkPtr& neu)
     // require filtering, which would destroy performance.
     Type t = neu->getType();
     if (_incoming_set->_iset.bucket_count() <= t)
-        _incoming_set->_iset.rehash(t);
+        _incoming_set->_iset.rehash(t+1);
 
 #ifdef INCOMING_SET_SIGNALS
     _incoming_set->_removeAtomSignal(shared_from_this(), old);
@@ -435,6 +436,8 @@ IncomingSet Atom::getIncomingSet(AtomSpace* as) const
 
 IncomingSet Atom::getIncomingSetByType(Type type) const
 {
+// XXX This is totally stupid: fix this.  We already got links,
+// we can skip the cast!!
     HandleSeq inhs;
     getIncomingSetByType(std::back_inserter(inhs), type);
     IncomingSet inlinks;
