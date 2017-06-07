@@ -410,9 +410,8 @@ size_t Atom::getIncomingSetSize() const
     std::lock_guard<std::mutex> lck (_mtx);
 
     size_t cnt = 0;
-    auto end = _incoming_set->_iset.end();
-    for (auto it = _incoming_set->_iset.begin(); it != end; it++)
-        cnt += it->size();
+    for (const WincomingSet& is : _incoming_set->_iset)
+        cnt += is.size();
     return cnt;
 }
 
