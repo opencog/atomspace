@@ -38,7 +38,14 @@
 	(Concept "hate")
 	(Concept "you"))
 
-(ListLink (Concept "I") (Concept "love") (Number 42))
+(ListLink
+	(Concept "I")
+	(Concept "love")
+	(Number 42))
+
+(ListLink
+	(Concept "hi")
+	(Concept "Sophia"))
 
 ;; Two different re-write rules. The first rule, immediately below,
 ;; says "I * you" -> "I * you too".
@@ -142,3 +149,21 @@
 			(Glob "$y")
 			(Concept "you")
 			(Concept "also"))))
+
+; Two globs in a row
+(define greet
+	(BindLink
+		(VariableList
+			(TypedVariable (Glob "$x") (IntervalLink (Number 0) (Number -1)))
+			(TypedVariable (Glob "$y") (IntervalLink (Number 1) (Number -1)))
+			(TypedVariable (Glob "$z") (IntervalLink (Number 0) (Number -1))))
+		(ListLink
+			(Glob "$x")
+			(Concept "hi")
+			(Glob "$y")
+			(Glob "$z"))
+		(ListLink
+			(Concept "hi")
+			(Concept "I")
+			(Concept "am")
+			(Glob "$y"))))

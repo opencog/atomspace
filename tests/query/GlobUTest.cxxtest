@@ -65,6 +65,7 @@ _exit(rc); // XXX hack to avoid double-free in __run_exit_handlers
 	void test_glob_interval(void);
 	void test_glob_typeset(void);
 	void test_glob_three_globs(void);
+	void test_glob_two_in_a_row(void);
 };
 
 void GlobUTest::tearDown(void)
@@ -289,6 +290,30 @@ void GlobUTest::test_glob_three_globs(void)
 		"    (ConceptNode \"also\")))"
 	);
 	TS_ASSERT_EQUALS(love, response);
+
+	// ----
+	logger().debug("END TEST: %s", __FUNCTION__);
+}
+
+void GlobUTest::test_glob_two_in_a_row(void)
+{
+	logger().debug("BEGIN TEST: %s", __FUNCTION__);
+
+	eval->eval("(load-from-path \"tests/query/glob-basic.scm\")");
+
+	Handle greet = eval->eval_h("(cog-execute! greet)");
+	printf("greet %s\n", greet->toString().c_str());
+	TS_ASSERT_EQUALS(1, greet->getArity());
+
+	Handle response = eval->eval_h(
+		"(SetLink"
+		"  (ListLink"
+		"    (ConceptNode \"hi\")"
+		"    (ConceptNode \"I\")"
+		"    (ConceptNode \"am\")"
+		"    (Concept \"Sophia\")))"
+	);
+	TS_ASSERT_EQUALS(greet, response);
 
 	// ----
 	logger().debug("END TEST: %s", __FUNCTION__);
