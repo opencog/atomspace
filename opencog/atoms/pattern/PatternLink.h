@@ -153,6 +153,7 @@ public:
 	// DO NOT call this! (unless you are the component handler).
 	PatternLink(const OrderedHandleSet& vars,
 	            const VariableTypeMap& typemap,
+	            const GlobIntervalMap& intervalmap,
 	            const HandleSeq& component,
 	            const OrderedHandleSet& optionals);
 
