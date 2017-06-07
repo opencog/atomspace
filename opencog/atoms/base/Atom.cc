@@ -337,7 +337,7 @@ void Atom::drop_incoming_set()
     _incoming_set = NULL;
 }
 
-void Atom::InSet::checksz(Type t)
+Type Atom::InSet::checksz(Type t)
 {
     if (t < _least)
     {
@@ -345,7 +345,7 @@ void Atom::InSet::checksz(Type t)
         auto it = _iset.begin();
         _iset.insert(it, (_least - t), WincomingSet());
         _least = t;
-        return;
+        return 0;
     }
 
     Type needsz = t - _least + 1;
@@ -353,6 +353,7 @@ void Atom::InSet::checksz(Type t)
     {
         _iset.resize(needsz);
     }
+    return t - _least;
 }
 
 /// Add an atom to the incoming set.
@@ -361,9 +362,8 @@ void Atom::insert_atom(const LinkPtr& a)
     if (NULL == _incoming_set) return;
     std::lock_guard<std::mutex> lck (_mtx);
 
-    Type at = a->getType();
-    _incoming_set->checksz(at);
-    _incoming_set->_iset[at].insert(a);
+    Type bkt = _incoming_set->checksz(a->getType());
+    _incoming_set->_iset[bkt].insert(a);
 #ifdef INCOMING_SET_SIGNALS
     _incoming_set->_addAtomSignal(shared_from_this(), a);
 #endif /* INCOMING_SET_SIGNALS */
@@ -378,8 +378,8 @@ void Atom::remove_atom(const LinkPtr& a)
     _incoming_set->_removeAtomSignal(shared_from_this(), a);
 #endif /* INCOMING_SET_SIGNALS */
     Type at = a->getType();
-    _incoming_set->checksz(at);
-    _incoming_set->_iset[at].erase(a);
+    Type bkt = _incoming_set->checksz(at);
+    _incoming_set->_iset[bkt].erase(a);
 }
 
 /// Remove old, and add new, atomically, so that every user
@@ -390,13 +390,15 @@ void Atom::swap_atom(const LinkPtr& old, const LinkPtr& neu)
     if (NULL == _incoming_set) return;
     std::lock_guard<std::mutex> lck (_mtx);
 
-    Type nt = neu->getType();
-    _incoming_set->checksz(nt);
 #ifdef INCOMING_SET_SIGNALS
     _incoming_set->_removeAtomSignal(shared_from_this(), old);
 #endif /* INCOMING_SET_SIGNALS */
-    _incoming_set->_iset[old->getType()].erase(old);
-    _incoming_set->_iset[nt].insert(neu);
+    Type obkt = old->getType() - _incoming_set->_least;
+    _incoming_set->_iset[obkt].erase(old);
+
+    Type nt = neu->getType();
+    Type nbkt = _incoming_set->checksz(nt);
+    _incoming_set->_iset[nbkt].insert(neu);
 #ifdef INCOMING_SET_SIGNALS
     _incoming_set->_addAtomSignal(shared_from_this(), neu);
 #endif /* INCOMING_SET_SIGNALS */

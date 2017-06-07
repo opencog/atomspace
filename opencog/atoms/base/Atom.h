@@ -177,7 +177,7 @@ protected:
 
         std::vector<WincomingSet> _iset;
         Type _least;
-        void checksz(Type);
+        Type checksz(Type);
 
 #ifdef INCOMING_SET_SIGNALS
         // Some people want to know if the incoming set has changed...
@@ -364,9 +364,9 @@ public:
         // The only occupied buckets are between _least and
         // size() - _least.
         if (type < _incoming_set->_least) return result;
-        Type nbkts = _incoming_set->_iset.size();
-        if (nbkts <= type - _incoming_set->_least) return result;
+
         Type bkt = type - _incoming_set->_least;
+        if (_incoming_set->_iset.size() <= bkt) return result;
 
         for (const WinkPtr& w : _incoming_set->_iset[bkt])
         {

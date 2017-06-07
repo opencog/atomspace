@@ -67,8 +67,8 @@ public:
 
     void testConstructor() {
         HandleSeq outgoing = { sortedHandles[2],
-                                         sortedHandles[0],
-                                         sortedHandles[1] };
+                               sortedHandles[0],
+                               sortedHandles[1] };
 
         Atom* atom = new ConcreteAtom(ORDERED_LINK, outgoing);
         Link *link = dynamic_cast<Link *>(atom);
@@ -105,13 +105,17 @@ public:
         TS_ASSERT_EQUALS(std::set<LinkPtr>(i1.begin(), i1.end()), expected_i1);
     }
 
-    void test_getIncomingSetByType() {
-        // We use an actual set to compare sorted objects
+    void test_getIncomingSetByType()
+    {
+        // We use a set to compare sorted objects
 
         // {inh01} is the incoming set of ConceptNode "0" by type
         // InheritanceLink
         IncomingSet i0 = sortedHandles[0]->getIncomingSetByType(INHERITANCE_LINK);
         std::set<LinkPtr> expected_i0 = {LinkCast(inh01)};
+        printf("Expected %s\n", inh01->toString().c_str());
+        printf("got a set of size %lu\n", i0.size());
+
         TS_ASSERT_EQUALS(std::set<LinkPtr>(i0.begin(), i0.end()), expected_i0);
 
         // {inh01, inh12} is the incoming set of ConceptNode "1" by
