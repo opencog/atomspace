@@ -58,6 +58,7 @@ public:
 	void test_word_phrase(void);
 	void test_double_glob(void);
 	void test_generic(void);
+	void test_zero_to_many(void);
 };
 
 void RecognizerUTest::tearDown(void)
@@ -151,6 +152,32 @@ void RecognizerUTest::test_generic(void)
 		"   (AndLink (Variable \"$x\") (Concept \"A\")))");
 
 	TS_ASSERT_EQUALS(anb, response);
+
+	// ----
+	logger().debug("END TEST: %s", __FUNCTION__);
+}
+
+void RecognizerUTest::test_zero_to_many(void)
+{
+	logger().debug("BEGIN TEST: %s", __FUNCTION__);
+
+	eval->eval("(load-from-path \"tests/query/recognizer.scm\")");
+
+	Handle ztm = eval->eval_h("(cog-execute! (DualLink ztm))");
+	printf("Zero to many %s\n", ztm->toString().c_str());
+	TS_ASSERT_EQUALS(7, getarity(ztm));
+
+	Handle response = eval->eval_h(
+		"(SetLink "
+		"   (List (Concept \"A\") (Glob \"$x\"))"
+		"   (List (Glob \"$y\") (Concept \"B\"))"
+		"   (List (Concept \"A\") (Glob \"$z\") (Concept \"B\"))"
+		"   (List (Glob \"$a\") (Concept \"A\") (Glob \"$b\") (Concept \"B\") (Glob \"$c\"))"
+		"   (List (Glob \"$d\") (Concept \"A\") (Concept \"B\") (Glob \"$e\"))"
+		"   (List (Glob \"$f\") (Glob \"$g\") (Concept \"A\") (Concept \"B\") (Glob \"$h\"))"
+		"   (List (Glob \"$i\") (Concept \"A\") (Concept \"B\") (Glob \"$j\") (Glob \"$k\")))");
+
+	TS_ASSERT_EQUALS(ztm, response);
 
 	// ----
 	logger().debug("END TEST: %s", __FUNCTION__);

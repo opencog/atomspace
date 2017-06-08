@@ -102,5 +102,18 @@
 
 
 ;-------------------------------------------------------
+; Globs as zero to many in generic patterns.
+
+(List (Concept "A") (Glob "$x"))
+(List (Glob "$y") (Concept "B"))
+(List (Concept "A") (Glob "$z") (Concept "B"))
+(List (Glob "$a") (Concept "A") (Glob "$b") (Concept "B") (Glob "$c"))
+(List (Glob "$d") (Concept "A") (Concept "B") (Glob "$e"))
+(List (Glob "$f") (Glob "$g") (Concept "A") (Concept "B") (Glob "$h"))
+(List (Glob "$i") (Concept "A") (Concept "B") (Glob "$j") (Glob "$k"))
+
+(define ztm (List (Concept "A") (Concept "B")))
+
+;-------------------------------------------------------
 
 *unspecified*
