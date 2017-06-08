@@ -21,6 +21,8 @@
  * 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
  */
 
+#include <math.h>
+
 #include <opencog/atoms/base/ClassServer.h>
 #include <opencog/atoms/TypeNode.h>
 #include <opencog/atoms/core/DefineLink.h>
@@ -343,9 +345,9 @@ void VariableList::get_vartype(const Handle& htypelink)
 
 	if (0 < intervals.size())
 	{
-		_varlist._glob_intervalmap.insert({varname,
-			std::make_pair(NumberNodeCast(intervals[0])->get_value(),
-				NumberNodeCast(intervals[1])->get_value())});
+		_varlist._glob_intervalmap.insert({varname, std::make_pair(
+			std::round(NumberNodeCast(intervals[0])->get_value()),
+			std::round(NumberNodeCast(intervals[1])->get_value()))});
 	}
 
 	_varlist.varset.insert(varname);
