@@ -33,15 +33,16 @@
 ;
 ; Because P is sparse, it makes the most sense to compute the inner sum
 ; "on demand", for only those index values where the outer sum is
-; non-vanishing.
+; non-vanishing. Here, "on-demand" is what scheme (or functional languages
+; in general) excell in: lazy evaluation.  That is, we won't calulate
+; anything until you ask for it; and it seems that because P is sparse,
+; chances are good you'll never ever ask for it.
 ;
-; How should the vectors 'b' and 's' be represented?  From the point of
-; view of scheme, a list of pairs (num . Atom) is adequate and fast.
-; The other alternative is a list of Atom, with a numeric value attached
-; to some Value on that Atom. Both can be supprted with a getter.
-;
-; In the following a list of pairs (num . Atom) will be called an "fvec",
-; and this will be the primary internal-use format.
+; So: How should the vectors 'b' and 's' be represented?  As "on demand",
+; lazy-evaluation functions.  Give it an argument, and it will return a
+; value... after computing it.  We won't compute a value until you ask
+; for it.  Thus, most of the functions below just set up other functions
+; that would compute a value, if they were ever asked.
 ;
 ; See the FAQ for why heavy-weight numerical calculations are being done
 ; in scheme instead of C++.
@@ -57,19 +58,22 @@
 		; --------------------
 		; Return an fvec of items with uniform weighting. This is a
 		; unit vector. i.e. its dot-product with itself is 1.0.
-		(define (unit-fvec ITEM-LIST)
-			(define weight (/ 1 (sqrt (length ITEM-LIST))))
-			(map
-				(lambda (item) (cons weight item))
-				ITEM-LIST))
+
+		; What this actually returns is a function, that when
+		; called with any argument, returns a constant.
+		(define (unit-fvec BASIS-SIZE)
+			(define weight (/ 1 (sqrt BASIS-SIZE)))
+
+			(lambda (ITEM) weight))
 
 		; Apply equal weighting to all elements of the left-basis
 		; This is the starting vector for one step of left-iterate.
 		(define (left-init)
-			(unit-vec (star-obj 'left-basis)))
+			(unit-vec (star-obj 'left-basis-size)))
 
 		(define (right-init)
-			(unit-vec (star-obj 'right-basis)))
+			(unit-vec (star-obj 'right-basis-size)))
+
 		; --------------------
 		(define 
 

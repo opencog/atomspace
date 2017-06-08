@@ -156,6 +156,8 @@
 	(let ((llobj LLOBJ)
 			(l-basis '())
 			(r-basis '())
+			(l-size 0)
+			(r-size 0)
 		)
 
 		; Return a list of all atoms of TYPE which appear in a Link
@@ -208,6 +210,15 @@
 				(set! r-basis (get-basis (llobj 'right-type) good-left-pairs)))
 			r-basis)
 
+		(define (get-left-size)
+			(if (eq? 0 l-size) (set! l-size (length (get-left-basis))))
+			l-size)
+
+		(define (get-right-size)
+			(if (eq? 0 r-size) (set! r-size (length (get-right-basis))))
+			r-size)
+
+		;-------------------------------------------
 		; Return a list of all pairs with the ITEM on the right side,
 		; and an object of type (LLOBJ 'left-type) on the left.
 		; The point of this function is to find and return the complete
@@ -263,6 +274,8 @@
 		; can sometimes take an obscenely long time to compute.
 		(let ((f-left-basis (overload 'left-basis get-left-basis))
 				(f-right-basis (overload 'right-basis get-right-basis))
+				(f-left-basis-size (overload 'left-basis-size get-left-size))
+				(f-right-basis-size (overload 'right-basis-size get-right-size))
 				(f-left-stars (overload 'left-stars get-left-stars))
 				(f-right-stars (overload 'right-stars get-right-stars)))
 
@@ -274,22 +287,26 @@
 			; by advertising that .. we hold caches.
 			(define (provides meth)
 				(case meth
-					((left-stars) f-left-stars)
-					((right-stars) f-right-stars)
-					((left-basis) f-left-basis)
-					((right-basis) f-right-basis)
-					(else (llobj 'provides meth))))
+					((left-stars)       f-left-stars)
+					((right-stars)      f-right-stars)
+					((left-basis)       f-left-basis)
+					((right-basis)      f-right-basis)
+					((left-basis-size)  f-left-basis-size)
+					((right-basis-size) f-right-basis-size)
+					(else               (llobj 'provides meth))))
 
 			;-------------------------------------------
 			; Methods on this class.
 			(lambda (message . args)
 				(case message
-					((left-basis)      (f-left-basis))
-					((right-basis)     (f-right-basis))
-					((left-stars)      (apply f-left-stars args))
-					((right-stars)     (apply f-right-stars args))
-					((provides)        (apply provides args))
-					(else (apply llobj (cons message args))))
+					((left-basis)       (f-left-basis))
+					((right-basis)      (f-right-basis))
+					((left-basis-size)  (f-left-basis-size))
+					((right-basis-size) (f-right-basis-size))
+					((left-stars)       (apply f-left-stars args))
+					((right-stars)      (apply f-right-stars args))
+					((provides)         (apply provides args))
+					(else               (apply llobj (cons message args))))
 			))))
 
 ; ---------------------------------------------------------------------

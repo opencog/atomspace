@@ -49,6 +49,15 @@ A: Its not yet clear just, what, exactly, is to be accomplished here,
    fast developement and the ability to run experiments quickly is more
    important than speed of calculations.
 
+Q: Really? It sounds like you don't know what you are doing.
+
+A: All of the matrixes are sparse. That means that the most efficient
+   kind of calculation is lazy-evaluation: don't compute a value, until
+   it is asked for.  Lazy evaluation requires recursion: its something
+   that functional langguages like scheme are good at, and C++ is
+   terrible at. Thus, some lazy evaluation could easily end up being
+   faster than brute-force, compute-everything-up-front in C++.
+
 
 Generic Programming
 -------------------
