@@ -37,6 +37,19 @@ to obtain it.  In most cases, it is simply stored in a CountTruthValue
 attached to the EvaluationLink.  It's doesn't have to be, it could be
 placed elsewhere.
 
+FAQ
+---
+Q: Why isn't this in C++?  Surely, numericaal computations would be
+   a lot faster in C++, right?
+
+A: Its not yet clear just, what, exactly, is to be accomplished here,
+   and what the dominant, important data structures are, here. Once
+   it becomes clear what the important calculations are, these can be
+   optimized (i.e. re-implemented in C++). But for now, flexibility,
+   fast developement and the ability to run experiments quickly is more
+   important than speed of calculations.
+
+
 Generic Programming
 -------------------
 In order to perform some sort of generic analysis of the correlation
