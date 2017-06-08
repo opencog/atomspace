@@ -127,6 +127,24 @@
 			(right-mult (left-mult FVEC))
 		)
 
+		(define (right-iter-once FVEC)
+			(left-mult (right-mult FVEC))
+		)
+
+		; --------------------
+		(define (left-norm FVEC)
+			(define start (current-time))
+			(define sumsq
+				(fold
+					(lambda (item sum)
+						(define val (FVEC item))
+						(+ sum (* val val)))
+					0
+					(star-obj 'left-basis)))
+			(format #t "left-norm took %d seconds\n" (- (current-time) start))
+			(sqrt sumsq))
+
+		; --------------------
 		; Methods on this class.
 		(lambda (message . args)
 			(case message
@@ -135,6 +153,8 @@
 				((left-mult)              (apply left-mult args))
 				((right-mult)             (apply right-mult args))
 				((left-iterate)           (apply left-iter-once args))
+				((right-iterate)          (apply right-iter-once args))
+				((left-norm)              (apply left-norm args))
 				(else (apply llobj        (cons message args))))))
 )
 
