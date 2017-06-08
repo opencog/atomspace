@@ -231,6 +231,11 @@ bool Recognizer::fuzzy_match(const Handle& npat_h, const Handle& nsoln_h)
 		if ((jg+1) == osg_size) return true;
 
 		const Handle& post(osg[jg+1]);
+
+		// If the post is also a GlobNode, we are done for this one.
+		if (GLOB_NODE == post->getType()) return true;
+
+		// Match as much as possible.
 		while (ip < osp_size and not loose_match(osp[ip], post))
 		{
 			ip++;
