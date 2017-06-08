@@ -28,6 +28,7 @@
 
 #include <opencog/query/DefaultPatternMatchCB.h>
 #include <opencog/atoms/pattern/PatternLink.h>
+#include <opencog/atomutils/FindUtils.h>
 
 #include "BindLinkAPI.h"
 
@@ -54,6 +55,9 @@ namespace opencog {
 class Recognizer :
    public virtual DefaultPatternMatchCB
 {
+	private:
+		bool match = false;
+
 	protected:
 		const Pattern* _pattern;
 
@@ -150,14 +154,18 @@ bool Recognizer::initiate_search(PatternMatchEngine* pme)
 
 bool Recognizer::node_match(const Handle& npat_h, const Handle& nsoln_h)
 {
+	// If it's a match, we can accept it right away, the comparison
+	// is done already, see link_match below.
+	if (match) return true;
+
 	if (npat_h == nsoln_h) return true;
-	Type tso = nsoln_h->getType();
-	if (VARIABLE_NODE == tso or GLOB_NODE == tso) return true;
+	if (VARIABLE_NODE == nsoln_h->getType()) return true;
 	return false;
 }
 
 bool Recognizer::link_match(const PatternTermPtr& ptm, const Handle& lsoln)
 {
+	match = false;
 	const Handle& lpat = ptm->getHandle();
 
 	// Self-compares always proceed.
@@ -165,6 +173,41 @@ bool Recognizer::link_match(const PatternTermPtr& ptm, const Handle& lsoln)
 
 	// mis-matched types are a dead-end.
 	if (lpat->getType() != lsoln->getType()) return false;
+
+	// TODO: Change to something better if possible...
+	// What is happening here is to manually call the
+	// fuzzy_match callback immediately if and only if
+	// lsoln has one or more GlobNodes AND lpat and lsoln
+	// have the same arity.
+	// The reason is, if the pat and soln are having the
+	// size, pattern matcher will then do a side-by-side
+	// comparison on their outgoing atoms.
+	// In the typical use cases we have at the moment,
+	// the comparison will be done in the node_match
+	// callback. However that will cause problems in some
+	// situations, for example if we have:
+	// === lpat ===      === lsoln ===
+	// Concept "A"       Glob $x
+	// Concept "B"       Concept "A"
+	// Concept "C"       Glob $y
+	// and both of the globs $x and $y have an interval
+	// restriction of zero to infinity, it should be a
+	// match by grounding $x to nothing and $y to Concept
+	// "B" and "C". But a side-by-side comparison here
+	// only compares their nodes at the same position
+	// (i.e. A-$x, B-A, C-$y) once, and decide whether
+	// or not to accept it. As a result it skips a lot
+	// of candidates that we are expecting...
+	if (contains_atomtype(lsoln, GLOB_NODE) and
+	    lpat->getArity() == lsoln->getArity())
+	{
+		if (fuzzy_match(lpat, lsoln))
+		{
+			match = true;
+			return true;
+		}
+		else return false;
+	}
 
 	return true;
 }
