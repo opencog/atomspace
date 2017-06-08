@@ -44,13 +44,27 @@
 ; for it.  Thus, most of the functions below just set up other functions
 ; that would compute a value, if they were ever asked.
 ;
+; In the below, these lazy vectors are called "fvec"'s.
+;
 ; See the FAQ for why heavy-weight numerical calculations are being done
 ; in scheme instead of C++.
 ;
 ; ---------------------------------------------------------------------
 ;
 
-(define (make-thresh-pca LLOBJ)
+(define*-public (make-thresh-pca LLOBJ #:optional
+	; Default is to use the pair-freq method
+	(get-value 'pair-freq))
+"
+  make-thresh-pca LLOBJ - Do the thresholding PCA thing.
+
+  Optionally, the name of a method can be supplied, from which the matrix
+  values will be fetched.  If not supplied, it defaults to 'pair-freq,
+  and so this object can be used with the default pair-freq-api object
+  to work with plain-old frequencies.  But you can get fancier if yo wish.
+  Using the MI could be interesting, for example: this would result in
+  a MaxEnt style computation, instead of a PCA-style computation.
+"
 	(let ((llobj LLOBJ)
 			(star-obj (add-pair-stars LLOBJ))
 		)
@@ -75,7 +89,16 @@
 			(unit-vec (star-obj 'right-basis-size)))
 
 		; --------------------
-		(define 
+		; Multiply matrix on the left by FVEC
+		(define (left-mult LEFT-FVEC)
+			(lambda (ITEM)
+				(fold
+					(lambda (sum PAIR)
+						(+ sum
+							(* (llobj get-value PAIR)
+								(LEFT-FVEC (gdr PAIR)))))
+					0
+					(star-obj 'left-stars ITEM))))
 
 		; --------------------
 

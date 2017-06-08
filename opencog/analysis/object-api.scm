@@ -73,7 +73,7 @@
 ; into the database, or to return various statistics.
 ;
 ; The `make-pair-count-get-set` class, below, is a typical user
-; of this class; it provides getters and setters for teh counts.
+; of this class; it provides getters and setters for the counts.
 ;
 ; See `make-any-link-link` for a working example.
 ;
