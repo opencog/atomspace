@@ -93,21 +93,38 @@
 			(unit-fvec (star-obj 'right-basis-size)))
 
 		; --------------------
-		; Multiply matrix on the left by FVEC
+		; Multiply matrix on the left by FVEC.  That is, return the
+		; function
+		;     result(y) = sum_x p(x,y) FVEC(x)
+		; As always, this returns the function `result`. Call this
+		; function with an arguement to force the computation to
+		; happen.  Note that this is effectively the transpose of P.
 		(define (left-mult LEFT-FVEC)
 			(lambda (ITEM)
 				(fold
-					(lambda (sum PAIR)
+					(lambda (PAIR sum)
 						(+ sum
 							(* (llobj get-value PAIR)
 								(LEFT-FVEC (gdr PAIR)))))
 					0
 					(star-obj 'left-stars ITEM))))
 
+		; Just like above, but returns the function
+		;     result(x) = sum_y p(x,y) FVEC(y)
+		(define (right-mult RIGHT-FVEC)
+			(lambda (ITEM)
+				(fold
+					(lambda (PAIR sum)
+						(+ sum
+							(* (llobj get-value PAIR)
+								(RIGHT-FVEC (gdr PAIR)))))
+					0
+					(star-obj 'right-stars ITEM))))
+
 		; --------------------
 
 		(define (left-iter-once FVEC)
-'()
+			(right-mult (left-mult FVEC))
 		)
 
 		; Methods on this class.
@@ -115,6 +132,8 @@
 			(case message
 				((left-initial)           (left-init))
 				((right-initial)          (right-init))
+				((left-mult)              (apply left-mult args))
+				((right-mult)             (apply right-mult args))
 				((left-iterate)           (apply left-iter-once args))
 				(else (apply llobj        (cons message args))))))
 )
