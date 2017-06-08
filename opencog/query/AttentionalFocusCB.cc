@@ -33,13 +33,13 @@ AttentionalFocusCB::AttentionalFocusCB(AtomSpace* as) :
 
 bool AttentionalFocusCB::node_match(const Handle& node1, const Handle& node2)
 {
-	return node1 == node2 and attentionbank(_as).atom_is_in_AF(node2);
+	return attentionbank(_as).atom_is_in_AF(node2) and node1 == node2;
 }
 
 bool AttentionalFocusCB::link_match(const PatternTermPtr& ptm, const Handle& lsoln)
 {
-	return DefaultPatternMatchCB::link_match(ptm, lsoln) and
-           attentionbank(_as).atom_is_in_AF(lsoln);
+	return attentionbank(_as).atom_is_in_AF(lsoln) and 
+           DefaultPatternMatchCB::link_match(ptm, lsoln);
 }
 
 
