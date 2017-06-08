@@ -333,16 +333,9 @@ bool PatternMatchEngine::ordered_compare(const PatternTermPtr& ptm,
 				// If we are here, we are not comparing to a glob.
 
 				// If we have already gone through all the atoms in
-				// the candidate but there is still non-glob atoms
-				// in the pattern, then clearly it's not a match.
-				if (grd_end)
-				{
-					match = false;
-					break;
-				}
-
-				tc = tree_compare(osp[ip], osg[jg], CALL_ORDER);
-				if (not tc)
+				// the candidate, or the current pair does not match,
+				// reject it.
+				if (grd_end or not tree_compare(osp[ip], osg[jg], CALL_ORDER))
 				{
 					match = false;
 					break;

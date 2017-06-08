@@ -311,7 +311,7 @@ void GlobUTest::test_glob_two_in_a_row(void)
 		"    (ConceptNode \"hi\")"
 		"    (ConceptNode \"I\")"
 		"    (ConceptNode \"am\")"
-		"    (Concept \"Sophia\")))"
+		"    (ConceptNode \"Sophia\")))"
 	);
 	TS_ASSERT_EQUALS(greet, response);
 

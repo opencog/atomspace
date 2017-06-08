@@ -155,7 +155,8 @@
 	(BindLink
 		(VariableList
 			(TypedVariable (Glob "$x") (IntervalLink (Number 0) (Number -1)))
-			(TypedVariable (Glob "$y") (IntervalLink (Number 1) (Number -1)))
+			(TypedVariable (Glob "$y")
+				(TypeSet (Type "ConceptNode") (IntervalLink (Number 1) (Number -1))))
 			(TypedVariable (Glob "$z") (IntervalLink (Number 0) (Number -1))))
 		(ListLink
 			(Glob "$x")
