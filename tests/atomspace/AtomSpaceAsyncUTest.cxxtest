@@ -510,7 +510,7 @@ public:
         __testAFSignalsCounter = 0;
         
         auto af_sti = ab->get_af_max_sti();
-
+        ab->set_af_size(1);
         // Add a node to the AttentionalFocus
         Handle h = atomSpace->add_node(CONCEPT_NODE,
                                        "test");
@@ -519,8 +519,9 @@ public:
         TS_ASSERT_EQUALS((int)__testAFSignalsCounter, 1);
 
         // Remove the node from the AttentionalFocus
-        ab->set_sti(h, 90);
-        TS_ASSERT_EQUALS((int)__testAFSignalsCounter, 2);
+        Handle h2 = atomSpace->add_node(CONCEPT_NODE, "TakeOverAF"); 
+        ab->set_sti(h2, af_sti + 300); // AFadded and AFRemoved signal emitted here.
+        TS_ASSERT_EQUALS((int)__testAFSignalsCounter, 3);
 
         addAFConnection.disconnect();
     }
