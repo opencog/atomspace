@@ -28,6 +28,7 @@
 
 #include <opencog/query/DefaultPatternMatchCB.h>
 #include <opencog/atoms/pattern/PatternLink.h>
+#include <opencog/atomutils/FindUtils.h>
 
 #include "BindLinkAPI.h"
 
@@ -54,6 +55,9 @@ namespace opencog {
 class Recognizer :
    public virtual DefaultPatternMatchCB
 {
+	private:
+		bool match = false;
+
 	protected:
 		const Pattern* _pattern;
 
@@ -150,14 +154,18 @@ bool Recognizer::initiate_search(PatternMatchEngine* pme)
 
 bool Recognizer::node_match(const Handle& npat_h, const Handle& nsoln_h)
 {
+	// If it's a match, we can accept it right away, the comparison
+	// is done already, see link_match below.
+	if (match) return true;
+
 	if (npat_h == nsoln_h) return true;
-	Type tso = nsoln_h->getType();
-	if (VARIABLE_NODE == tso or GLOB_NODE == tso) return true;
+	if (VARIABLE_NODE == nsoln_h->getType()) return true;
 	return false;
 }
 
 bool Recognizer::link_match(const PatternTermPtr& ptm, const Handle& lsoln)
 {
+	match = false;
 	const Handle& lpat = ptm->getHandle();
 
 	// Self-compares always proceed.
@@ -166,10 +174,45 @@ bool Recognizer::link_match(const PatternTermPtr& ptm, const Handle& lsoln)
 	// mis-matched types are a dead-end.
 	if (lpat->getType() != lsoln->getType()) return false;
 
-	// Globs are arity-changing. But there is a minimum length.
-	// Note that the inequality is backwards, here: the soln has the
-	// globs! (and so lpat must have arity equal or greater than soln)
-	if (lpat->getArity() < lsoln->getArity()) return false;
+	// TODO: Change to something better if possible...
+	// What is happening here is to manually call the
+	// fuzzy_match callback immediately if and only if
+	// lsoln has one or more GlobNodes AND lpat and lsoln
+	// have the same arity.
+	// The reason is, if the pat and soln are having the
+	// size, pattern matcher will then do a side-by-side
+	// comparison on their outgoing atoms.
+	// In the typical use cases we have at the moment,
+	// the comparison will be done in the node_match
+	// callback. However that will cause problems in some
+	// situations, for example if we have:
+	// === lpat ===      === lsoln ===
+	// Concept "A"       Glob $x
+	// Concept "B"       Concept "A"
+	// Concept "C"       Glob $y
+	// and both of the globs $x and $y have an interval
+	// restriction of zero to infinity, it should be a
+	// match by grounding $x to nothing and $y to Concept
+	// "B" and "C". But a side-by-side comparison here
+	// only compares their nodes at the same position
+	// (i.e. A-$x, B-A, C-$y), and decide whether to
+	// reject it when there is a mis-match. As a result
+	// a lot of candidates that we are expecting are
+	// rejected...
+	// And the reason of going to fuzzy_match is that
+	// all the glob-matching logic is there, so it
+	// should be able to handle this better.
+	if (contains_atomtype(lsoln, GLOB_NODE) and
+	    lpat->getArity() == lsoln->getArity())
+	{
+		if (fuzzy_match(lpat, lsoln))
+		{
+			match = true;
+			return true;
+		}
+		else return false;
+	}
+
 	return true;
 }
 
@@ -213,14 +256,16 @@ bool Recognizer::fuzzy_match(const Handle& npat_h, const Handle& nsoln_h)
 
 	const HandleSeq &osp = npat_h->getOutgoingSet();
 	size_t osp_size = osp.size();
-	size_t max_size = std::max(osg_size, osp_size);
 
 	// Do a side-by-side compare. This is not as rigorous as
 	// PatternMatchEngine::tree_compare() nor does it handle the bells
 	// and whistles (ChoiceLink, QuoteLink, etc).
 	size_t ip=0, jg=0;
-	for (; ip<osp_size and jg<osg_size; ip++, jg++)
+	for (; ip<osp_size or jg<osg_size; ip++, jg++)
 	{
+		if (ip == osp_size) ip--;
+		if (jg == osg_size) jg--;
+
 		if (GLOB_NODE != osg[jg]->getType())
 		{
 			if (loose_match(osp[ip], osg[jg])) continue;
@@ -233,24 +278,22 @@ bool Recognizer::fuzzy_match(const Handle& npat_h, const Handle& nsoln_h)
 		if ((jg+1) == osg_size) return true;
 
 		const Handle& post(osg[jg+1]);
-		ip++;
-		while (ip < max_size and not loose_match(osp[ip], post))
+
+		// If the post is also a GlobNode, we are done for this one.
+		if (GLOB_NODE == post->getType()) return true;
+
+		// Match as many as possible.
+		while (ip < osp_size and not loose_match(osp[ip], post))
 		{
 			ip++;
 		}
-		// If ip ran past the end, then the post was not found. This is
-		// a mismatch.
-		if (not (ip < max_size)) return false;
 
 		// Go around again, look for more GlobNodes. Back up by one, so
 		// that the for-loop increment gets us back on track.
 		ip--;
 	}
 
-	// If we are here, then we should have matched up all the atoms;
-	// if we exited the loop because pattern or grounding was short,
-	// then its a mis-match.
-	if (ip != osp_size or jg != osg_size) return false;
+	// If we are here, then we should have matched up all the atoms.
 	return true;
 }
 
