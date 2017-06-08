@@ -48,39 +48,44 @@
 ;
 ; ---------------------------------------------------------------------
 ;
-; Multiple matrix times vector.
-;
-; Compute    sum_y MAT(ITEM, y) VEC(y)
-;
-; where the set of y to be summed over is ITEM-LIST,
-; and GET-VEC-VAL is a function that returns a numeric VEC(y)
-; and GET-MAT-VAL is a function that returns a numeric MAT(ITEM, y)
-;
-(define (multiply-mat-vec ITEM GET-MAT-VAL ITEM-LIST GET-VEC-VAL)
-	(fold
-		(lambda (sum, item)
-			(+ sum (* (GET-MAT-VAL ITEM item) (GET-VEC-VAL item))))
-		0.0
-		ITEM-LIST)
+
+(define (make-thresh-pca LLOBJ)
+	(let ((llobj LLOBJ)
+			(star-obj (add-pair-stars LLOBJ))
+		)
+
+		; --------------------
+		; Return an fvec of items with uniform weighting. This is a
+		; unit vector. i.e. its dot-product with itself is 1.0.
+		(define (unit-fvec ITEM-LIST)
+			(define weight (/ 1 (sqrt (length ITEM-LIST))))
+			(map
+				(lambda (item) (cons weight item))
+				ITEM-LIST))
+
+		; Apply equal weighting to all elements of the left-basis
+		; This is the starting vector for one step of left-iterate.
+		(define (left-init)
+			(unit-vec (star-obj 'left-basis)))
+
+		(define (right-init)
+			(unit-vec (star-obj 'right-basis)))
+		; --------------------
+		(define 
+
+		; --------------------
+
+		(define (left-iter-once FVEC)
+		)
+
+		; Methods on this class.
+		(lambda (message . args)
+			(case message
+				((left-initial)           (left-init)
+				((right-initial)          (right-init)
+				((left-iterate)	        (apply left-iter-once))
+				(else (apply llobj        (cons message args))))))
 )
 
 ; ---------------------------------------------------------------------
-;
-; Return an fvec of items with uniform weighting. This is a unit vector.
-; i.e. its dot-product with itself is 1.0.
-;
-(define (unit-fvec ITEM-LIST)
-	(define weight (sqrt (length ITEM-LIST)))
-	(map
-		(lambda (item) (cons weight item))
-		ITEM-LIST)
-)
-
-; ---------------------------------------------------------------------
-
-(define (do-it)
-	(
-
-)
-
 ; ---------------------------------------------------------------------
