@@ -132,6 +132,10 @@
 		)
 
 		; --------------------
+
+		; Compute the normalization of the vector; that is, compute
+		; it's length.  This returns a single floating-point value.
+		; Caution: it can be extremely time-consuming!
 		(define (left-norm FVEC)
 			(define start (current-time))
 			(define sumsq
@@ -141,7 +145,19 @@
 						(+ sum (* val val)))
 					0
 					(star-obj 'left-basis)))
-			(format #t "left-norm took %d seconds\n" (- (current-time) start))
+			(format #t "left-norm took ~d seconds\n" (- (current-time) start))
+			(sqrt sumsq))
+
+		(define (right-norm FVEC)
+			(define start (current-time))
+			(define sumsq
+				(fold
+					(lambda (item sum)
+						(define val (FVEC item))
+						(+ sum (* val val)))
+					0
+					(star-obj 'right-basis)))
+			(format #t "right-norm took ~d seconds\n" (- (current-time) start))
 			(sqrt sumsq))
 
 		; --------------------
@@ -155,6 +171,7 @@
 				((left-iterate)           (apply left-iter-once args))
 				((right-iterate)          (apply right-iter-once args))
 				((left-norm)              (apply left-norm args))
+				((right-norm)             (apply right-norm args))
 				(else (apply llobj        (cons message args))))))
 )
 
