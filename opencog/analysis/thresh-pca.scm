@@ -51,6 +51,10 @@
 ;
 ; ---------------------------------------------------------------------
 ;
+(use-modules (srfi srfi-1))
+(use-modules (ice-9 optargs)) ; for define*-public
+
+; ---------------------------------------------------------------------
 
 (define*-public (make-thresh-pca LLOBJ #:optional
 	; Default is to use the pair-freq method
@@ -83,10 +87,10 @@
 		; Apply equal weighting to all elements of the left-basis
 		; This is the starting vector for one step of left-iterate.
 		(define (left-init)
-			(unit-vec (star-obj 'left-basis-size)))
+			(unit-fvec (star-obj 'left-basis-size)))
 
 		(define (right-init)
-			(unit-vec (star-obj 'right-basis-size)))
+			(unit-fvec (star-obj 'right-basis-size)))
 
 		; --------------------
 		; Multiply matrix on the left by FVEC
@@ -103,14 +107,15 @@
 		; --------------------
 
 		(define (left-iter-once FVEC)
+'()
 		)
 
 		; Methods on this class.
 		(lambda (message . args)
 			(case message
-				((left-initial)           (left-init)
-				((right-initial)          (right-init)
-				((left-iterate)	        (apply left-iter-once))
+				((left-initial)           (left-init))
+				((right-initial)          (right-init))
+				((left-iterate)           (apply left-iter-once args))
 				(else (apply llobj        (cons message args))))))
 )
 
