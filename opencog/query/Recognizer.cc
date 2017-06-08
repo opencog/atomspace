@@ -195,9 +195,13 @@ bool Recognizer::link_match(const PatternTermPtr& ptm, const Handle& lsoln)
 	// match by grounding $x to nothing and $y to Concept
 	// "B" and "C". But a side-by-side comparison here
 	// only compares their nodes at the same position
-	// (i.e. A-$x, B-A, C-$y) once, and decide whether
-	// or not to accept it. As a result it skips a lot
-	// of candidates that we are expecting...
+	// (i.e. A-$x, B-A, C-$y), and decide whether to
+	// reject it when there is a mis-match. As a result
+	// a lot of candidates that we are expecting are
+	// rejected...
+	// And the reason of going to fuzzy_match is that
+	// all the glob-matching logic is there, so it
+	// should be able to handle this better.
 	if (contains_atomtype(lsoln, GLOB_NODE) and
 	    lpat->getArity() == lsoln->getArity())
 	{
@@ -278,7 +282,7 @@ bool Recognizer::fuzzy_match(const Handle& npat_h, const Handle& nsoln_h)
 		// If the post is also a GlobNode, we are done for this one.
 		if (GLOB_NODE == post->getType()) return true;
 
-		// Match as much as possible.
+		// Match as many as possible.
 		while (ip < osp_size and not loose_match(osp[ip], post))
 		{
 			ip++;
@@ -289,6 +293,7 @@ bool Recognizer::fuzzy_match(const Handle& npat_h, const Handle& nsoln_h)
 		ip--;
 	}
 
+	// If we are here, then we should have matched up all the atoms.
 	return true;
 }
 
