@@ -1,7 +1,7 @@
 ;
-; power-iter.scm
+; thresh-pca.scm
 ;
-; Perform feed-forward neural-net + PCA analysis.
+; Perform a Thresholding Principal Component Analsysis
 ;
 ; Copyright (c) 2017 Linas Vepstas
 ;
@@ -74,6 +74,13 @@
 	(map
 		(lambda (item) (cons weight item))
 		ITEM-LIST)
+)
+
+; ---------------------------------------------------------------------
+
+(define (do-it)
+	(
+
 )
 
 ; ---------------------------------------------------------------------
