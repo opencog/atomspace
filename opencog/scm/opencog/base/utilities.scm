@@ -1202,6 +1202,26 @@
 )
 
 ; -----------------------------------------------------------------------
+(define-public (cog-cp LST AS)
+"
+  cog-cp LST AS - Copys the atoms in LST to the given atomspace AS and returns #t on success.
+"
+  (define initial-as (cog-atomspace))
+
+  (if (equal? AS initial-as)
+    (error "Destination atomspace is the same as the current atomspace\n"))
+
+  ; Switch to destination atomspace.
+  (cog-set-atomspace! AS)
+
+  ; The creation of a SetLink or any other link would result in the atoms
+  ; being inserted in the current atomspace.
+  (Set LST)
+  ; Switch back to initial atomspace.
+  (cog-set-atomspace! initial-as)
+  #t
+)
+; -----------------------------------------------------------------------
 
 ; A list of all the public (exported) utilities in this file
 (define cog-utilities (list
