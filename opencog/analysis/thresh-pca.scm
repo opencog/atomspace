@@ -120,35 +120,37 @@
 		; function with an arguement to force the computation to
 		; happen.  Note that this is effectively the transpose of P.
 		(define (left-mult LEFT-FVEC)
+			(define fvec (make-fvec-cache LEFT-FVEC))
 			(lambda (ITEM)
 				(fold
 					(lambda (PAIR sum)
 						(+ sum
 							(* (llobj get-value PAIR)
-								(LEFT-FVEC (gdr PAIR)))))
+								(fvec (gdr PAIR)))))
 					0
 					(star-obj 'left-stars ITEM))))
 
 		; Just like above, but returns the function
 		;     result(x) = sum_y p(x,y) FVEC(y)
 		(define (right-mult RIGHT-FVEC)
+			(define fvec (make-fvec-cache RIGHT-FVEC))
 			(lambda (ITEM)
 				(fold
 					(lambda (PAIR sum)
 						(+ sum
 							(* (llobj get-value PAIR)
-								(RIGHT-FVEC (gdr PAIR)))))
+								(fvec (gar PAIR)))))
 					0
 					(star-obj 'right-stars ITEM))))
 
 		; --------------------
 
 		(define (left-iter-once FVEC)
-			(right-mult (make-fvec-cache (left-mult (make-fvec-cache FVEC))))
+			(right-mult (left-mult FVEC))
 		)
 
 		(define (right-iter-once FVEC)
-			(left-mult (make-fvec-cache (right-mult (make-fvec-cache FVEC))))
+			(left-mult (right-mult FVEC))
 		)
 
 		; --------------------
