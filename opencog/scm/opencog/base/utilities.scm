@@ -1216,7 +1216,7 @@
 
   ; The creation of a SetLink or any other link would result in the atoms
   ; being inserted in the current atomspace.
-  (Set LST)
+  (cog-delete (Set LST))
   ; Switch back to initial atomspace.
   (cog-set-atomspace! initial-as)
   #t
