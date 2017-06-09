@@ -74,40 +74,38 @@
 		)
 
 		; --------------------
-		; Return an fvec of items with uniform weighting. This is a
+		; Return a wvec of items with uniform weighting. This is a
 		; unit vector. i.e. its dot-product with itself is 1.0.
 
-		; What this actually returns is a function, that when
-		; called with any argument, returns a constant.
-		(define (unit-fvec BASIS-SIZE)
-			(define weight (/ 1 (sqrt BASIS-SIZE)))
-
-			(lambda (ITEM) weight))
+		(define (unit-wvec BASIS)
+			(define weight (/ 1 (sqrt (length BASIS))))
+			(map (lambda (item) (cons weight item)) BASIS))
 
 		; Apply equal weighting to all elements of the left-basis
 		; This is the starting vector for one step of left-iterate.
 		(define (left-init)
-			(unit-fvec (star-obj 'left-basis-size)))
+			(unit-wvec (star-obj 'left-basis)))
 
 		(define (right-init)
-			(unit-fvec (star-obj 'right-basis-size)))
+			(unit-wvec (star-obj 'right-basis)))
 
 		; --------------------
-		; Multiply matrix on the left by FVEC.  That is, return the
-		; function
-		;     result(y) = sum_x p(x,y) FVEC(x)
-		; As always, this returns the function `result`. Call this
-		; function with an arguement to force the computation to
-		; happen.  Note that this is effectively the transpose of P.
-		(define (left-mult LEFT-FVEC)
-			(lambda (ITEM)
+		; Multiply matrix on the left by WVEC.  That is, return the
+		; result wvec
+		;     result(y) = sum_x p(x,y) WVEC(x)
+		; Note that this is effectively the transpose of P.
+		(define (left-mult LEFT-WVEC)
+			(define (do-one ITEM)
 				(fold
-					(lambda (PAIR sum)
+					(lambda (wcns sum)
 						(+ sum
 							(* (llobj get-value PAIR)
-								(LEFT-FVEC (gdr PAIR)))))
+								(car wcns)
 					0
-					(star-obj 'left-stars ITEM))))
+					LEFT-WVEC))
+
+			(filter-map
+				(star-obj 'left-basis))))
 
 		; Just like above, but returns the function
 		;     result(x) = sum_y p(x,y) FVEC(y)
