@@ -227,8 +227,17 @@ bool PatternMatchEngine::ordered_compare(const PatternTermPtr& ptm,
 		// If we are here, then the pattern contains globs. A glob can
 		// match one or more atoms in a row. Thus, we have a more
 		// complicated search ...
-		for (size_t ip=0, jg=0; ip<osp_size and jg<osg_size; ip++, jg++)
+		for (size_t ip=0, jg=0; ip<osp_size or jg<osg_size; ip++, jg++)
 		{
+			if (ip == osp_size) ip --;
+
+			bool grd_end = false;
+			if (jg == osg_size)
+			{
+				grd_end = true;
+				jg --;
+			}
+
 			bool tc = false;
 			const Handle& ohp(osp[ip]->getHandle());
 			Type ptype = ohp->getType();
@@ -252,13 +261,45 @@ bool PatternMatchEngine::ordered_compare(const PatternTermPtr& ptm,
 					post_glob = osp[ip+1];
 				}
 
-				// Match at least one.
-				tc = tree_compare(glob, osg[jg], CALL_GLOB);
+				if (_varlist->is_interval(ohp, 0))
+				{
+					// If we are here, that means the lower bound of the
+					// interval is zero, so the glob can be grounded
+					// to nothing.
+
+					// Just in case if the upper bound is zero...
+					if (not _varlist->is_interval(ohp, 1))
+					{
+						jg --;
+						continue;
+					}
+
+					// If the post_glob matches with the current candidate,
+					// we are done.
+					if (tree_compare(glob, osg[jg], CALL_GLOB) and
+					    have_post and
+					    tree_compare(post_glob, osg[jg], CALL_GLOB))
+					{
+						jg --;
+						continue;
+					}
+
+					// Since the glob has a lower bound of zero, if we
+					// already have gone through all the candidates at
+					// this point, we are done.
+					if (grd_end) continue;
+				}
+
+				// If we are here, the glob we are looking at has to be
+				// grounded to at least one atom.
+				tc = (tree_compare(glob, osg[jg], CALL_GLOB) and
+				      _varlist->is_interval(ohp, 1));
 				if (not tc)
 				{
 					match = false;
 					break;
 				}
+
 				glob_seq.push_back(osg[jg]);
 				jg++;
 
@@ -271,12 +312,23 @@ bool PatternMatchEngine::ordered_compare(const PatternTermPtr& ptm,
 						tc = tree_compare(post_glob, osg[jg], CALL_GLOB);
 						if (tc) break;
 					}
-					tc = tree_compare(glob, osg[jg], CALL_GLOB);
+					tc = (tree_compare(glob, osg[jg], CALL_GLOB) and
+					      _varlist->is_interval(ohp, glob_seq.size()+1));
 					if (tc) glob_seq.push_back(osg[jg]);
 					jg ++;
 				}
 				jg --;
 				if (not tc)
+				{
+					match = false;
+					break;
+				}
+
+				// If up to this point there are still atoms in
+				// either osp or osg, this is probably not a
+				// match, so reject it.
+				if ((ip+1 == osp_size and jg+1 < osg_size) or
+				    (ip+1 < osp_size  and jg+1 == osg_size))
 				{
 					match = false;
 					break;
@@ -438,7 +490,7 @@ This is complicated, so we write it out.  When ascending from below (i.e.
 from do_term_up()), unordered links may be found in two different
 places: The parent term may be unordered, or the parent link may hold
 another link (a sibling to us) that is unordered. Traversal needs to
-handle both cases.  Thus, the upwards-movement methods (do_term_sup(),
+handle both cases.  Thus, the upwards-movement methods (do_term_up(),
 explore_up_branches(), etc.) are incapable of discovering unordered links,
 as they cannot "see" the siblings.  Siblings can only be found during
 tree-compare, moving downwards.  Thus, tree_compare must do a lot of
@@ -457,7 +509,7 @@ do after running tree_compare downwards. These are handled by two
 truth tables.
 
 The topmost routine to call tree_compare must *always* set have_more=F
-and take_step=T before calling tree compare.  This will cause
+and take_step=T before calling tree_compare.  This will cause
 tree_compare to advance to the next matching permuation, or to run until
 all permuations are exhausted, and no match was found.
 
@@ -490,7 +542,7 @@ case step  more    Comments / Action to be Taken
                   If we hold an evaluatable, we must call down.
   D    F    F     Perform same as C above.
 
-Footnote: case C: Well, thr reasoning there is almost riht, but not
+Footnote: case C: Well, the reasoning there is almost right, but not
 quite. If the unordered link contains a variable, and it is also not in
 the direct line of exploration (i.e. its grounding is NOT recorded)
 then its truthiness holds only for a grounding that no longer exists.

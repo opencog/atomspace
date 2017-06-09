@@ -6,9 +6,9 @@ option java_package = "org.opencog.atomspace";
 option java_outer_classname = "AtomSpaceProtos";
 
 message ZMQAttentionValueHolderMessage {
-    required int32 STI=1;
-    required int32 LTI=2;
-    required int32 VLTI=3;
+    required double STI=1;
+    required double LTI=2;
+    required double VLTI=3;
 }
 
 enum ZMQTruthValueType {

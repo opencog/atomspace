@@ -303,6 +303,7 @@ void SchemeSmob::register_procs()
 	register_proc("cog-outgoing-set",      1, 0, 0, C(ss_outgoing_set));
 	register_proc("cog-outgoing-by-type",  2, 0, 0, C(ss_outgoing_by_type));
 	register_proc("cog-outgoing-atom",     2, 0, 0, C(ss_outgoing_atom));
+	register_proc("cog-keys",              1, 0, 0, C(ss_keys));
 	register_proc("cog-value",             2, 0, 0, C(ss_value));
 	register_proc("cog-tv",                1, 0, 0, C(ss_tv));
 	register_proc("cog-av",                1, 0, 0, C(ss_av));
@@ -343,9 +344,9 @@ void SchemeSmob::register_procs()
 	register_proc("cog-av->alist",         1, 0, 0, C(ss_av_get_value));
 
 	// AttentionalFocus
-	register_proc("cog-af-boundary",       0, 0, 0, C(ss_af_boundary));
-	register_proc("cog-set-af-boundary!",  1, 0, 0, C(ss_set_af_boundary));
 	register_proc("cog-af",                0, 0, 0, C(ss_af));
+	register_proc("cog-af-size",           0, 0, 0, C(ss_af_size));
+	register_proc("cog-set-af-size!",      1, 0, 0, C(ss_set_af_size));
 
 	// Atom types
 	register_proc("cog-get-types",         0, 0, 0, C(ss_get_types));

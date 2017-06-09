@@ -37,9 +37,6 @@ public:
 		logger().set_timestamp_flag(false);
 		logger().set_print_to_stdout_flag(true);
 
-		// Disable the AF mechanism during testing!
-		attentionbank(&_as).setAttentionalFocusBoundary(AttentionValue::MINSTI);
-
 		string source_dir = string(PROJECT_SOURCE_DIR),
 			test_dir = source_dir + "/tests",
 			test_ure_dir = test_dir + "/rule-engine",

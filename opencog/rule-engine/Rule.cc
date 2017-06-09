@@ -223,6 +223,16 @@ bool Rule::is_meta() const
 	        implicand->getOutgoingAtom(0)->getType() : itype) == BIND_LINK;
 }
 
+bool Rule::has_cycle() const
+{
+	// Return true iff at least one premise is equal to the conclusion
+	bool res = false;
+	const Handle c = get_conclusion();
+	for (const Handle& h : get_premises())
+		res = content_eq(c, h);
+	return res;
+}
+
 /**
  * Get the set of members of the implicant which are
  * connected by a root logical link.

@@ -70,7 +70,6 @@ void AttentionalFocusCBUTest::setUp(void)
 void AttentionalFocusCBUTest::test_af_bindlink(void)
 {
 	logger().debug("BEGIN TEST: %s", __FUNCTION__);
-	attentionbank(as).setAttentionalFocusBoundary(20); //for test purpose
 	eval->eval("(load-from-path \"tests/query/af-filtering-test.scm\")");
 
 	Handle findMan = eval->eval_h("find-man");
@@ -78,5 +77,4 @@ void AttentionalFocusCBUTest::test_af_bindlink(void)
 	// first match
 	Handle answersSingle = af_bindlink(as, findMan);
 	TS_ASSERT_EQUALS(1, getarity(answersSingle));
-	TS_ASSERT_EQUALS(20, attentionbank(as).getAttentionalFocusBoundary());
 }

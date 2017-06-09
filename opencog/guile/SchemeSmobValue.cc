@@ -245,6 +245,20 @@ SCM SchemeSmob::ss_value (SCM satom, SCM skey)
 	return SCM_EOL;
 }
 
+/** Return all of the keys on the atom */
+SCM SchemeSmob::ss_keys (SCM satom)
+{
+	Handle atom(verify_handle(satom, "cog-value"));
+
+	SCM rv = SCM_EOL;
+	std::set<Handle> keys = atom->getKeys();
+	for (const Handle& k : keys)
+	{
+		rv = scm_cons (handle_to_scm(k), rv);
+	}
+	return rv;
+}
+
 /* ============================================================== */
 /** Return a scheme list of the values associated with the value */
 

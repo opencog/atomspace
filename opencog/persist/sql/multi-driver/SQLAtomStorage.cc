@@ -339,6 +339,8 @@ class SQLAtomStorage::Response
 
 void SQLAtomStorage::init(const char * uri)
 {
+	_uri = uri;
+
 	bool use_libpq = (0 == strncmp(uri, "postgres", 8));
 	bool use_odbc = (0 == strncmp(uri, "odbc", 4));
 
@@ -585,12 +587,22 @@ void SQLAtomStorage::storeValuation(const Handle& key,
 	std::string coda;
 
 	// Get UUID from the TLB.
-	UUID kuid = check_uuid(key);
-	if (TLB::INVALID_UUID == kuid)
+	UUID kuid;
 	{
-		do_store_atom(key);
-		kuid = get_uuid(key);
+		// We must make sure the key is in the database BEFORE it
+		// is used in any valuation; else a 'foreign key constraint'
+		// error will be thrown.  And to do that, we must make sure
+		// the store completes, before some other thread gets its
+		// fingers on the key.
+		std::lock_guard<std::mutex> create_lock(_valuation_mutex);
+		kuid = check_uuid(key);
+		if (TLB::INVALID_UUID == kuid)
+		{
+			do_store_atom(key);
+			kuid = get_uuid(key);
+		}
 	}
+
 	char kidbuff[BUFSZ];
 	snprintf(kidbuff, BUFSZ, "%lu", kuid);
 
@@ -1019,18 +1031,22 @@ std::string SQLAtomStorage::link_to_string(const LinkValuePtr& lvle)
 
 /* ================================================================ */
 
-/// Drain the pending store queue.
+/// Drain the pending store queue. This is a fencing operation; the
+/// goal is to make sure that all writes that occurred before the
+/// barrier really are performed before before all the writes after
+/// the barrier.
 ///
 /// Caution: this is potentially racey in two different ways.
 /// First, there is a small window in the async_caller implementation,
 /// where, if the timing is just so, the barrier might return before
-/// the last element is written.  Technically, that's a bug, but its
-/// "minor" so we don't fix it.
+/// the last element is written.  (Although everything else will have
+/// gone out; only the last element is in doubt). Technically, that's
+/// a bug, but its sufficiently "minor" so we don't fix it.
 ///
-/// The second issue is much more serious: We are NOT using any of the
-/// transactional features in SQL, and so while we might have drained
-/// the write queues here, on the client side, the SQL server will not
-/// have actually commited the work by the time that this returns.
+/// The second issue is more serious: there's no fence or barrier in
+/// Postgres (that I can find or think of), and so although we've sent
+/// everything to PG, there's no guarantee that PG will process these
+/// requests in order. How likely this could be, I don't know.
 ///
 void SQLAtomStorage::flushStoreQueue()
 {
@@ -1053,7 +1069,7 @@ void SQLAtomStorage::storeAtom(const Handle& h, bool synchronous)
 	// If a synchronous store, avoid the queues entirely.
 	if (synchronous)
 	{
-		do_store_atom(h);
+		if (not_yet_stored(h)) do_store_atom(h);
 		store_atom_values(h);
 		return;
 	}
@@ -1064,7 +1080,6 @@ void SQLAtomStorage::storeAtom(const Handle& h, bool synchronous)
 /**
  * Synchronously store a single atom. That is, the actual store is done
  * in the calling thread.  All values attached to the atom are also
- * stored. All values attached to atoms in the outgoing set are also
  * stored.
  *
  * Returns the height of the atom.
@@ -1094,11 +1109,27 @@ int SQLAtomStorage::do_store_atom(const Handle& h)
 
 void SQLAtomStorage::vdo_store_atom(const Handle& h)
 {
-	do_store_atom(h);
+	if (not_yet_stored(h)) do_store_atom(h);
 	store_atom_values(h);
 }
 
 /* ================================================================ */
+
+/**
+ * Return true if we don't yet have a UUID for this atom.
+ * Note that it MUST take the _store_mutex lock, as otherwise one
+ * thread might be trying to store a valuation for a UUID that got
+ * issued, but for which the atom itself has not yet been stored.
+ * This inversion of stores *will* cause the database to throw a
+ * foreign-key-constraint error when it sees the valuation without
+ * the corresponding atom.
+ */
+bool SQLAtomStorage::not_yet_stored(const Handle& h)
+{
+	std::lock_guard<std::mutex> create_lock(_store_mutex);
+	return TLB::INVALID_UUID == _tlbuf.getUUID(h);
+}
+
 /**
  * Store just this one single atom.
  * Atoms in the outgoing set are NOT stored!
@@ -2010,6 +2041,7 @@ void SQLAtomStorage::clear_stats(void)
 
 void SQLAtomStorage::print_stats(void)
 {
+	printf("sql-stats: currently open URI: %s\n", _uri.c_str());
 	size_t load_count = _load_count;
 	size_t store_count = _store_count;
 	double frac = store_count / ((double) load_count);

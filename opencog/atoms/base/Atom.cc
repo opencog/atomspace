@@ -55,6 +55,30 @@
 
 #undef Type
 
+namespace std {
+
+// The hash of a weak pointer is just the atom type. Actually,
+// it *has* to be the atom type, as otherwise the hash buckets
+// won't be correct, and getIncomingByType() will fail to be fast.
+opencog::Type
+hash<opencog::WinkPtr>::operator()(const opencog::WinkPtr& w) const noexcept
+{
+    opencog::LinkPtr h(w.lock());
+    if (nullptr == h) return 0;
+    return h->getType();
+}
+
+bool
+equal_to<opencog::WinkPtr>::operator()(const opencog::WinkPtr& lw,
+                                       const opencog::WinkPtr& rw) const noexcept
+{
+    opencog::Handle hl(lw.lock());
+    opencog::Handle hr(rw.lock());
+    return hl == hr;
+}
+
+} // namespace std
+
 namespace opencog {
 
 Atom::~Atom()
@@ -309,7 +333,6 @@ void Atom::drop_incoming_set()
     if (NULL == _incoming_set) return;
     std::lock_guard<std::mutex> lck (_mtx);
     _incoming_set->_iset.clear();
-    // delete _incoming_set;
     _incoming_set = NULL;
 }
 
@@ -318,7 +341,17 @@ void Atom::insert_atom(const LinkPtr& a)
 {
     if (NULL == _incoming_set) return;
     std::lock_guard<std::mutex> lck (_mtx);
-    _incoming_set->_iset.insert(a);
+
+    Type at = a->getType();
+    auto bucket = _incoming_set->_iset.find(at);
+    if (bucket == _incoming_set->_iset.end())
+    {
+        auto pr = _incoming_set->_iset.emplace(
+                   std::make_pair(at, WincomingSet()));
+        bucket = pr.first;
+    }
+    bucket->second.insert(a);
+
 #ifdef INCOMING_SET_SIGNALS
     _incoming_set->_addAtomSignal(shared_from_this(), a);
 #endif /* INCOMING_SET_SIGNALS */
@@ -332,7 +365,9 @@ void Atom::remove_atom(const LinkPtr& a)
 #ifdef INCOMING_SET_SIGNALS
     _incoming_set->_removeAtomSignal(shared_from_this(), a);
 #endif /* INCOMING_SET_SIGNALS */
-    _incoming_set->_iset.erase(a);
+    Type at = a->getType();
+    auto bucket = _incoming_set->_iset.find(at);
+    bucket->second.erase(a);
 }
 
 /// Remove old, and add new, atomically, so that every user
@@ -342,11 +377,24 @@ void Atom::swap_atom(const LinkPtr& old, const LinkPtr& neu)
 {
     if (NULL == _incoming_set) return;
     std::lock_guard<std::mutex> lck (_mtx);
+
 #ifdef INCOMING_SET_SIGNALS
     _incoming_set->_removeAtomSignal(shared_from_this(), old);
 #endif /* INCOMING_SET_SIGNALS */
-    _incoming_set->_iset.erase(old);
-    _incoming_set->_iset.insert(neu);
+    Type ot = old->getType();
+    auto bucket = _incoming_set->_iset.find(ot);
+    bucket->second.erase(old);
+
+    Type nt = neu->getType();
+    bucket = _incoming_set->_iset.find(nt);
+    if (bucket == _incoming_set->_iset.end())
+    {
+        auto pr = _incoming_set->_iset.emplace(
+                   std::make_pair(nt, WincomingSet()));
+        bucket = pr.first;
+    }
+    bucket->second.insert(neu);
+
 #ifdef INCOMING_SET_SIGNALS
     _incoming_set->_addAtomSignal(shared_from_this(), neu);
 #endif /* INCOMING_SET_SIGNALS */
@@ -356,7 +404,11 @@ size_t Atom::getIncomingSetSize() const
 {
     if (NULL == _incoming_set) return 0;
     std::lock_guard<std::mutex> lck (_mtx);
-    return _incoming_set->_iset.size();
+
+    size_t cnt = 0;
+    for (const auto pr : _incoming_set->_iset)
+        cnt += pr.second.size();
+    return cnt;
 }
 
 // We return a copy here, and not a reference, because the set itself
@@ -373,11 +425,14 @@ IncomingSet Atom::getIncomingSet(AtomSpace* as) const
         // Prevent update of set while a copy is being made.
         std::lock_guard<std::mutex> lck (_mtx);
         IncomingSet iset;
-        for (const WinkPtr& w : _incoming_set->_iset)
+        for (const auto bucket : _incoming_set->_iset)
         {
-            LinkPtr l(w.lock());
-            if (l and atab->in_environ(l))
-                iset.emplace_back(l);
+            for (const WinkPtr& w : bucket.second)
+            {
+                LinkPtr l(w.lock());
+                if (l and atab->in_environ(l))
+                    iset.emplace_back(l);
+            }
         }
         return iset;
     }
@@ -385,22 +440,37 @@ IncomingSet Atom::getIncomingSet(AtomSpace* as) const
     // Prevent update of set while a copy is being made.
     std::lock_guard<std::mutex> lck (_mtx);
     IncomingSet iset;
-    for (WinkPtr w : _incoming_set->_iset)
+    for (const auto bucket : _incoming_set->_iset)
     {
-        LinkPtr l(w.lock());
-        if (l) iset.emplace_back(l);
+        for (const WinkPtr& w : bucket.second)
+        {
+            LinkPtr l(w.lock());
+            if (l) iset.emplace_back(l);
+        }
     }
     return iset;
 }
 
-IncomingSet Atom::getIncomingSetByType(Type type, bool subclass) const
+IncomingSet Atom::getIncomingSetByType(Type type) const
 {
-    HandleSeq inhs;
-    getIncomingSetByType(std::back_inserter(inhs), type, subclass);
-    IncomingSet inlinks;
-    for (const Handle& h : inhs)
-        inlinks.emplace_back(LinkCast(h));
-    return inlinks;
+    IncomingSet result;
+
+    // The code below is mostly a cut-n-paste from the header file.
+    // The only difference is that it works with LinkPtr instead of
+    // Handle.  The primary issue is that casting from Handle back
+    // to LinkPtr is slowwwwwww.  So we avoid that, here.
+    if (NULL == _incoming_set) return result;
+    std::lock_guard<std::mutex> lck(_mtx);
+
+    const auto bucket = _incoming_set->_iset.find(type);
+    if (bucket == _incoming_set->_iset.cend()) return result;
+
+    for (const WinkPtr& w : bucket->second)
+    {
+        LinkPtr h(w.lock());
+        if (h) result.emplace_back(h);
+    }
+    return result;
 }
 
 std::string Atom::idToString() const

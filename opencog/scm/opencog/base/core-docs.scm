@@ -708,6 +708,20 @@
        )
 ")
 
+(set-procedure-property! cog-keys 'documentation
+"
+ cog-keys ATOM
+    Return a list of all of the keys attached to ATOM. In order to get
+    all of the values attached to an atom, one must first find the keys
+    that are used to anchor them. This function returns these.
+
+    Example:
+       guile> (cog-set-value!
+                 (Concept \"abc\") (Predicate \"key\")
+                 (FloatValue 1 2 3))
+       guile> (cog-keys (Concept \"abc\"))
+")
+
 (set-procedure-property! cog-value 'documentation
 "
  cog-value ATOM KEY
@@ -716,9 +730,9 @@
 
     Example:
        guile> (cog-set-value!
-                 (Concept \"abc\") (Concept \"key\")
+                 (Concept \"abc\") (Predicate \"key\")
                  (FloatValue 1 2 3))
-       guile> (cog-value (Concept \"abc\") (Concept \"key\"))
+       guile> (cog-value (Concept \"abc\") (Predicate \"key\"))
        (FloatValue 1.000000 2.000000 3.00000)
 ")
 
@@ -787,29 +801,7 @@
     any atomspace, null is returned.
 ")
 
-(set-procedure-property! cog-af-boundary 'documentation
-"
- cog-af-boundary
-    Return the AttentionalFocus Boundary of the AtomSpace (which is
-    a short integer STI value).
 
-    Example:
-
-    guile> (cog-af-boundary)
-    100
-")
-
-(set-procedure-property! cog-set-af-boundary! 'documentation
-"
- cog-set-af-boundary! STI
-    Set the AttentionalFocus Boundary of the AtomSpace (which is a
-    short integer STI value). Returns the new AttentionalFocus boundary
-    (which is a short integer STI value).
-
-    Example:
-    guile> (cog-set-af-boundary! 200)
-    200
-")
 
 (set-procedure-property! cog-af 'documentation
 "
@@ -821,6 +813,30 @@
     (ConceptNode \"ArtificialIntelligence\" (av 15752 0 0))
     (ConceptNode \"Databases\" (av 15752 0 0))
 ")
+
+(set-procedure-property! cog-af-size 'documentation
+ "
+  cog-af-size
+     Return the AttentionalFocus size of the AtomSpace (which is
+     an integer value).
+ 
+     Example:
+ 
+     guile> (cog-af-size)
+     100
+ ")
+  
+ (set-procedure-property! cog-set-af-size! 'documentation
+ "
+  cog-set-af-size! AF Size
+     Set the AttentionalFocus Size of the AtomSpace (which is an
+     integer value). Returns the new AttentionalFocus size
+     (which is an integer value).
+ 
+     Example:
+     guile> (cog-set-af-size! 200)
+     200
+ ")
 
 (set-procedure-property! cog-get-types 'documentation
 "

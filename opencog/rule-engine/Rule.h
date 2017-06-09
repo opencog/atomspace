@@ -158,8 +158,9 @@ public:
 	Handle get_implicand() const;
 
 	// Properties
-	bool is_valid() const;
-	bool is_meta() const;       // does that rule produces a rule
+	bool is_valid() const;      // is it a proper BindLink?
+	bool is_meta() const;       // does that rule produces a rule?
+	bool has_cycle() const;     // is some premise equal to conclusion?
 
 	/**
 	 * Return the pattern matcher clauses of the rule. This may not

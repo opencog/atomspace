@@ -138,8 +138,11 @@
 			(set! cnt (+ 1 cnt))
 			(if (eqv? 0 (modulo cnt when))
 				(let* ((elapsed (- (current-time) start-time))
-						(rate (/ (exact->inexact when) elapsed)))
-					(format #t msg cnt total elapsed rate)
+						(ilapsed (inexact->exact (round elapsed)))
+						(rate (/ (exact->inexact when) elapsed))
+						(irate (inexact->exact (round rate)))
+					)
+					(format #t msg cnt total ilapsed irate)
 					(set! start-time (current-time))))))
 )
 
@@ -157,7 +160,9 @@
 
 	; We need 'left-basis, provided by add-pair-stars
 	; We need 'set-left-wild-count, provided by add-pair-count-api
-	(let ((cntobj (add-pair-count-api (add-pair-stars LLOBJ))))
+	(let ((llobj LLOBJ)
+			(cntobj (add-pair-count-api LLOBJ))
+			(star-obj (add-pair-stars LLOBJ)))
 
 		; Compute the left-side wild-card count. This is the number
 		; N(*,y) = sum_x N(x,y) where ITEM==y and N(x,y) is the number
@@ -165,9 +170,9 @@
 		; This returns the count, or zero, if the pair was never observed.
 		(define (compute-left-count ITEM)
 			(fold
-				(lambda (pr sum) (+ sum (cntobj 'pair-count pr)))
+				(lambda (pr sum) (+ sum (llobj 'pair-count pr)))
 				0
-				(cntobj 'left-stars ITEM)))
+				(star-obj 'left-stars ITEM)))
 
 		; Compute and cache the left-side wild-card counts N(*,y).
 		; This returns the atom holding the cached count, thus
@@ -182,9 +187,9 @@
 		; Compute the right-side wild-card count N(x,*).
 		(define (compute-right-count ITEM)
 			(fold
-				(lambda (pr sum) (+ sum (cntobj 'pair-count pr)))
+				(lambda (pr sum) (+ sum (llobj 'pair-count pr)))
 				0
-				(cntobj 'right-stars ITEM)))
+				(star-obj 'right-stars ITEM)))
 
 		; Compute and cache the right-side wild-card counts N(x,*).
 		; This returns the atom holding the cached count, or nil
@@ -201,10 +206,10 @@
 		; This method returns a list of all of the atoms holding
 		; those counts; handy for storing in a database.
 		(define (cache-all-left-counts)
-			(map cache-left-count (cntobj 'right-basis)))
+			(map cache-left-count (star-obj 'right-basis)))
 
 		(define (cache-all-right-counts)
-			(map cache-right-count (cntobj 'left-basis)))
+			(map cache-right-count (star-obj 'left-basis)))
 
 		; Compute the total number of times that all pairs have been
 		; observed. In formulas, return
@@ -219,7 +224,7 @@
 				;;; (lambda (item sum) (+ sum (compute-right-count item)))
 				(lambda (item sum) (+ sum (cntobj 'right-wild-count item)))
 				0
-				(cntobj 'left-basis)))
+				(star-obj 'left-basis)))
 
 		; Compute the total number of times that all pairs have been
 		; observed. That is, return N(*,*) = sum_y N(*,y). Note that
@@ -231,7 +236,7 @@
 				;;; (lambda (item sum) (+ sum (compute-left-count item)))
 				(lambda (item sum) (+ sum (cntobj 'left-wild-count item)))
 				0
-				(cntobj 'right-basis)))
+				(star-obj 'right-basis)))
 
 		; Compute the total number of times that all pairs have been
 		; observed. That is, return N(*,*).  Throws an error if the
@@ -241,6 +246,7 @@
 			(define r-cnt (compute-total-count-from-right))
 
 			; The left and right counts should be equal!
+			; XXX fixme, allow for small rounding errors.
 			(if (not (eqv? l-cnt r-cnt))
 				(throw 'bad-summation 'count-all-pairs
 					(format #f "Error: pair-counts unequal: ~A ~A\n" l-cnt r-cnt)))
@@ -263,7 +269,7 @@
 				((cache-all-right-counts) (cache-all-right-counts))
 				((compute-total-count)    (compute-total-count))
 				((cache-total-count)      (cache-total-count))
-				(else (apply cntobj (cons message args))))
+				(else (apply llobj        (cons message args))))
 			))
 )
 
@@ -287,8 +293,12 @@
 	; We need 'left-basis, provided by add-pair-stars
 	; We need 'wild-wild-count, provided by add-pair-count-api
 	; We need 'set-left-wild-freq, provided by add-pair-freq-api
-	(let ((cntobj (add-pair-freq-api (add-pair-count-api
-					(add-pair-stars LLOBJ))))
+	; We need 'set-size, provided by add-report-api
+	(let ((llobj LLOBJ)
+			(cntobj (add-pair-count-api LLOBJ))
+			(frqobj (add-pair-freq-api LLOBJ))
+			(wldobj (add-pair-stars LLOBJ))
+			(rptobj (add-report-api LLOBJ))
 			(tot-cnt 0))
 
 		(define (init)
@@ -314,50 +324,50 @@
 		(define (cache-pair-freq PAIR)
 			(define freq (compute-pair-freq PAIR))
 			(if (< 0 freq)
-				(cntobj 'set-pair-freq PAIR freq)
+				(frqobj 'set-pair-freq PAIR freq)
 				'()))
 
 		; Compute and cache the left-side wild-card frequency.
-		; This returns the atom holding the cached count, thus
-		; making it convient to persist (store) this cache in
-		; the database. It returns nil if the count was zero.
 		(define (cache-left-freq ITEM)
 			(define freq (compute-left-freq ITEM))
-			(if (< 0 freq)
-				(cntobj 'set-left-wild-freq ITEM freq)
-				'()))
+			(if (< 0 freq) (frqobj 'set-left-wild-freq ITEM freq)))
 
 		(define (cache-right-freq ITEM)
 			(define freq (compute-right-freq ITEM))
-			(if (< 0 freq)
-				(cntobj 'set-right-wild-freq ITEM freq)
-				'()))
+			(if (< 0 freq) (frqobj 'set-right-wild-freq ITEM freq)))
 
 		; Compute and cache all of the pair frequencies.
 		; This computes P(x,y) for all (x,y)
 		; This returns a count of the pairs.
+		; Also caches the total dimensions of the matrix.
 		(define (cache-all-pair-freqs)
 			(define cnt 0)
-			(define lefties (cntobj 'left-basis))
+			(define lefties (wldobj 'left-basis))
+			(define left-size (length lefties))
+			(define right-size (length (wldobj 'right-basis)))
+
+			; The outer-loop.
 			(define (right-loop left-item)
 				(for-each
 					(lambda (pr)
 						(cache-pair-freq pr)
 						(set! cnt (+ cnt 1)))
-					(cntobj 'right-stars left-item)))
+					(wldobj 'right-stars left-item)))
 
 			(for-each right-loop lefties)
+
+			; Save the total size of the thing.
+			(rptobj 'set-size left-size right-size cnt)
+
+			; Return the total.
 			cnt)
 
 		; Compute and cache all of the left-side frequencies.
 		; This computes P(*,y) for all y, in parallel.
-		;
-		; This method returns a list of all of the atoms holding
-		; those counts; handy for storing in a database.
 		(define (cache-all-left-freqs)
-			(map cache-left-freq (cntobj 'right-basis)))
+			(for-each cache-left-freq (wldobj 'right-basis)))
 		(define (cache-all-right-freqs)
-			(map cache-right-freq (cntobj 'left-basis)))
+			(for-each cache-right-freq (wldobj 'left-basis)))
 
 		; Methods on this class.
 		(lambda (message . args)
@@ -376,7 +386,7 @@
 				((cache-all-left-freqs)  (cache-all-left-freqs))
 				((cache-all-right-freqs) (cache-all-right-freqs))
 
-				(else (apply cntobj      (cons message args))))
+				(else (apply llobj       (cons message args))))
 		))
 )
 
@@ -395,17 +405,12 @@
 
 (define (make-batch-mi LLOBJ)
 
-	(define start-nsecs (get-internal-real-time))
-	(define (elapsed-millisecs)
-		(define diff (- (get-internal-real-time) start-nsecs))
-		(set! start-nsecs (get-internal-real-time))
-		(/ (* diff 1000.0) internal-time-units-per-second))
-
 	; We need 'left-basis, provided by add-pair-stars
 	; We need 'pair-freq, provided by add-pair-freq-api
 	; We need 'set-pair-mi, provided by add-pair-freq-api
 	; We need 'right-wild-count, provided by add-pair-count-api
-	(let ((star-obj (add-pair-stars LLOBJ))
+	(let ((llobj LLOBJ)
+			(star-obj (add-pair-stars LLOBJ))
 			(cntobj (add-pair-count-api LLOBJ))
 			(frqobj (add-pair-freq-api LLOBJ)))
 
@@ -422,6 +427,19 @@
 			(define cnt-pairs 0)
 			(define cnt-lefties 0)
 			(define nlefties (length lefties))
+
+			(define start-time (current-time))
+			(define (elapsed-secs)
+				(define diff (- (current-time) start-time))
+				(set! start-time (current-time))
+				diff)
+
+			(define cnt-start 0)
+			(define (elapsed-count cnt)
+				(define diff (- cnt-pairs cnt-start))
+				(set! cnt-start cnt)
+				diff)
+
 
 			(define (right-loop left-item)
 
@@ -440,7 +458,7 @@
 							(define pr-logli (frqobj 'pair-logli lipr))
 
 							(define right-item (gdr lipr))
-							(if (< 0 (frqobj 'left-wild-count right-item))
+							(if (< 0 (cntobj 'left-wild-count right-item))
 								(let* ((l-logli (frqobj 'left-wild-logli right-item))
 										(fmi (- pr-logli (+ r-logli l-logli)))
 										(mi (* pr-freq fmi))
@@ -456,9 +474,11 @@
 						; Print some progress statistics.
 						(set! cnt-lefties (+ cnt-lefties 1))
 						(if (eqv? 0 (modulo cnt-lefties 10000))
-							(format #t "Done ~A of ~A outer loops, pairs=~A\n"
-								cnt-lefties nlefties cnt-pairs))
-
+							(let ((secs (elapsed-secs)))
+								(format #t
+									"Done ~A of ~A outer loops in ~A secs, pairs=~A (~6f pairs/sec)\n"
+									cnt-lefties nlefties secs cnt-pairs
+									(/ (elapsed-count cnt-pairs) secs))))
 					))
 			)
 
@@ -477,8 +497,83 @@
 		; Methods on this class.
 		(lambda (message . args)
 			(case message
-				((cache-pair-mi)         (compute-n-cache-pair-mi))
-				(else (apply frqobj      (cons message args))))
+				((cache-pair-mi)        (compute-n-cache-pair-mi))
+				(else (apply llobj      (cons message args))))
+		))
+)
+
+; ---------------------------------------------------------------------
+
+(define-public (make-store LLOBJ)
+"
+  make-store -- Extend the LLOBJ with addtional methods to store
+  the left and right wild-card values.
+"
+	(define start-time (current-time))
+	(define (elapsed-secs)
+		(define diff (- (current-time) start-time))
+		(set! start-time (current-time))
+		diff)
+
+	(define (store-list XLATE all-atoms CNT MSG)
+		(define num-prs (length all-atoms))
+
+		; Create a wrapper around `store-atom` that prints a progress
+		; report.  The problem is that millions of pairs may need to be
+		; stored, and this just takes a long time.
+		(define store-rpt
+			(make-progress-rpt store-atom CNT num-prs
+				(string-append
+					"Stored ~A of ~A " MSG " in ~d secs (~A pairs/sec)\n")))
+
+		(define (xlate atom) (store-rpt (XLATE atom)))
+
+		; Reset the timer.
+		(elapsed-secs)
+
+		(for-each
+			(lambda (atom) (if (not (null? atom)) (xlate atom)))
+			all-atoms)
+
+		(format #t "Done storing ~A ~A in ~A secs\n"
+			num-prs MSG (elapsed-secs)))
+
+	; We need 'left-basis, provided by add-pair-stars
+	(let ((llobj LLOBJ)
+			(star-obj (add-pair-stars LLOBJ)))
+
+		; Store all the wild-card atoms; these are exactly the ones
+		; obtained from the object, via the left and right basis.
+		(define (store-all-wildcards)
+			; Store the wild-wild-card atom, first.
+			; This holds the totals for the matrix.
+			(store-atom (llobj 'wild-wild))
+
+			(store-list
+				(lambda (x) (llobj 'left-wildcard x))
+				(star-obj 'right-basis)
+				40000 "left-wilds")
+
+			(store-list
+				(lambda (x) (llobj 'right-wildcard x))
+				(star-obj 'left-basis)
+				40000 "right-wilds")
+		)
+
+		; Store all the pairs. These must be provided as a list to us,
+		; because, at this time, we don't hve an effective way of working
+		; with the non-zero elements.  Maybe a better solution will become
+		; clear over time...
+		(define (store-pairs all-pairs)
+			(store-list (lambda (x) x) all-pairs 100000 "pairs"))
+
+		; ------------------
+		; Methods on this class.
+		(lambda (message . args)
+			(case message
+				((store-wildcards)      (store-all-wildcards))
+				((store-pairs)          (apply store-pairs args))
+				(else                   (apply llobj (cons message args))))
 		))
 )
 
@@ -519,6 +614,7 @@
 ;
 (define-public (batch-all-pair-mi OBJ)
 
+	(define overall-start-time (current-time))
 	(define start-time (current-time))
 	(define (elapsed-secs)
 		(define diff (- (current-time) start-time))
@@ -526,20 +622,38 @@
 		diff)
 
 	; Decorate the object with methods that report support.
+	; All the others get to work off of the basis cached by this one.
 	(define wild-obj (add-pair-stars OBJ))
 
 	; Decorate the object with methods that can compute counts.
-	(define count-obj (make-compute-count OBJ))
+	(define count-obj (make-compute-count wild-obj))
 
 	; Decorate the object with methods that can compute frequencies.
-	(define freq-obj (make-compute-freq OBJ))
+	(define freq-obj (make-compute-freq wild-obj))
 
 	; Decorate the object with methods that can compute the pair-MI.
-	(define batch-mi-obj (make-batch-mi OBJ))
+	(define batch-mi-obj (make-batch-mi wild-obj))
 
-	(format #t "Support: num left=~A num right=~A\n"
+	; Define the object which will compute row and column subtotals.
+	(define subtotal-obj (add-subtotal-mi-compute wild-obj))
+
+	; Define the object which will compute total entropy and MI.
+	(define total-obj (add-total-entropy-compute wild-obj))
+
+	; Define the object which computes left and right row-lengths
+	(define supp-obj (add-support-compute wild-obj))
+
+	; Define the object which will roll up a summary of the supports.
+	(define central-obj (make-central-compute wild-obj))
+
+	; Define the object that can store the computed values
+	(define store-obj (make-store wild-obj))
+
+	(display "Start computing the basis\n")
+	(format #t "Support: found num left=~A num right=~A in ~A secs\n"
 			(length (wild-obj 'left-basis))
-			(length (wild-obj 'right-basis)))
+			(length (wild-obj 'right-basis))
+			(elapsed-secs))
 
 	; First, compute the summations for the left and right wildcard counts.
 	; That is, compute N(x,*) and N(*,y) for the supports on x and y.
@@ -551,7 +665,7 @@
 		(elapsed-secs))
 
 	; Now, compute the grand-total.
-	(store-atom (count-obj 'cache-total-count))
+	(count-obj 'cache-total-count)
 	(format #t "Done computing N(*,*) total-count=~A in ~A secs\n"
 		((add-pair-count-api OBJ) 'wild-wild-count)
 		(elapsed-secs))
@@ -566,57 +680,45 @@
 				pair-cnt (elapsed-secs)))
 
 	(display "Start computing log P(*,y)\n")
-	(let ((lefties (freq-obj 'cache-all-left-freqs)))
-
-		(define store-rpt
-			(make-progress-rpt store-atom 40000  (length lefties)
-				"Stored ~A of ~A lefties in ~A secs (~A stores/sec)\n"))
-
-		(format #t "Done computing ~A left-wilds in ~A secs\n"
-			(length lefties) (elapsed-secs))
-		(for-each
-			(lambda (atom) (if (not (null? atom)) (store-rpt atom)))
-			lefties)
-		(format #t "Done storing ~A left-wilds in ~A secs\n"
-			(length lefties) (elapsed-secs))
-	)
+	(freq-obj 'cache-all-left-freqs)
+	(format #t "Done computing ~A left-wilds in ~A secs\n"
+		(length (wild-obj 'left-basis)) (elapsed-secs))
 
 	(display "Done with -log P(*,y), start -log P(x,*)\n")
+	(freq-obj 'cache-all-right-freqs)
+	(format #t "Done computing ~A right-wilds in ~A secs\n"
+		(length (wild-obj 'right-basis)) (elapsed-secs))
 
-	(let ((righties (freq-obj 'cache-all-right-freqs)))
-		(format #t "Done computing ~A right-wilds in ~A secs\n"
-			(length righties) (elapsed-secs))
-		(for-each
-			(lambda (atom) (if (not (null? atom)) (store-atom atom)))
-			righties)
-		(format #t "Done storing ~A right-wilds in ~A secs\n"
-			(length righties) (elapsed-secs))
-	)
+	(store-obj 'store-wildcards)
+	(display "Done computing and saving -log P(x,*) and P(*,y)\n")
 
-	(display "Done computing -log P(x,*) and P(*,y)\n")
-
-	; Enfin, the pair mi's
+	; Now, the individual pair mi's
 	(display "Going to do individual pair MI\n")
-
+	(elapsed-secs)
 	(let* ((all-atoms (batch-mi-obj 'cache-pair-mi))
 			(num-prs (length all-atoms)))
-
-		; Create a wrapper around `store-atom` that prints a progress
-		; report.  The problem is that millions of pairs may need to be
-		; stored, and this just takes a long time.
-		(define store-rpt
-			(make-progress-rpt store-atom 100000 num-prs
-				"Stored ~A of ~A pairs in ~A secs (~A pairs/sec)\n"))
 
 		; This print triggers as soon as the let* above finishes.
 		(format #t "Done computing ~A pair MI's in ~A secs\n"
 			num-prs (elapsed-secs))
-		(for-each store-rpt all-atoms)
-		(format #t "Done storing ~A pair MI's in ~A secs\n"
-			num-prs (elapsed-secs))
+
+		(store-obj 'store-pairs all-atoms)
 	)
 
-	(display "Finished with MI computations\n")
+	(display "Going to do column and row subtotals\n")
+	(subtotal-obj 'cache-all-subtotals)
+	(supp-obj 'cache-all)
+
+	(display "Going to compute the left, right and total entropy\n")
+	(total-obj 'cache-entropy)
+	(total-obj 'cache-mi)
+	(central-obj 'cache-all)
+
+	(display "Done computing totals; start saving wildcards\n")
+	(store-obj 'store-wildcards)
+
+	(format #t "Finished with MI computations; this took ~4f hours\n"
+		(/ (- (current-time) overall-start-time) 3600.0))
 )
 
 ; ---------------------------------------------------------------------

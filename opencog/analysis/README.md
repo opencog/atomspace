@@ -93,6 +93,12 @@ is defined, by default, to be `p(x,y) = N(x,y)/N(*,*)`.  The row and
 column sums are `p(x,*) = sum_y p(x,y)`.  By default, these total to
 one, as all good probabilities should: `1 = sum_x sum_y p(x,y)`.
 
+The `add-report-api` class provides an API to report summary information
+about the matrix, including the dimensions of the matrix (the number of
+rows and columns), the total number of non-zero entries (which is the
+same as the total number of unique pairs), the left, right and total
+entropies and mutual information.
+
 Computing basic statistics
 --------------------------
 These `add-pair-*-api` classes simply provide methods to fetch these
@@ -133,7 +139,7 @@ database, so that these results become available later.
 
 Computing support and entropy
 -----------------------------
-The `add-pair-support-compute` class provides methods to compute the
+The `add-support-compute` class provides methods to compute the
 partial sums `N(*,y)` and `N(x,*)`. It also provides methods that
 compute how many non-zero entries there are in each row or column.
 It provides methods for the "length" of a column: that is,

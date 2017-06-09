@@ -118,6 +118,7 @@ private:
 	static SCM ss_as(SCM);
 	static SCM ss_av(SCM);
 	static SCM ss_tv(SCM);
+	static SCM ss_keys(SCM);
 	static SCM ss_value(SCM, SCM);
 	static SCM ss_incoming_set(SCM);
 	static SCM ss_incoming_by_type(SCM, SCM);
@@ -180,9 +181,9 @@ private:
 
 	// AttentionalFocus and AttentionalFocus Boundary
 	// XXX FIXME these should move to the attention bank!
-	static SCM ss_af_boundary(void);
-	static SCM ss_set_af_boundary(SCM);
 	static SCM ss_af(void);
+	static SCM ss_af_size(void);
+	static SCM ss_set_af_size(SCM);
 
 	// Free variables
 	static SCM ss_get_free_variables(SCM);

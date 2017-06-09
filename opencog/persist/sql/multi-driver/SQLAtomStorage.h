@@ -69,6 +69,7 @@ class SQLAtomStorage : public AtomStorage
 		class Outgoing;
 
 		void init(const char *);
+		std::string _uri;
 
 		// ---------------------------------------------
 		// Handle multiple atomspaces like typecodes: we have to
@@ -109,6 +110,7 @@ class SQLAtomStorage : public AtomStorage
 		void vdo_store_atom(const Handle&);
 		void do_store_single_atom(const Handle&, int);
 
+		bool not_yet_stored(const Handle&);
 		UUID check_uuid(const Handle&);
 		UUID get_uuid(const Handle&);
 		std::string oset_to_string(const HandleSeq&);
@@ -130,7 +132,6 @@ class SQLAtomStorage : public AtomStorage
 
 		// --------------------------
 		// Values
-
 #define NUMVMUT 16
 		std::mutex _value_mutex[NUMVMUT];
 		void store_atom_values(const Handle &);
@@ -141,23 +142,26 @@ class SQLAtomStorage : public AtomStorage
 		ProtoAtomPtr doUnpackValue(Response&);
 		ProtoAtomPtr doGetValue(const char *);
 
+		VUID storeValue(const ProtoAtomPtr&);
+		ProtoAtomPtr getValue(VUID);
+		void deleteValue(VUID);
+
+		VUID getMaxObservedVUID(void);
+		std::atomic<VUID> _next_valid;
+
+		// --------------------------
+		// Valuations
+		std::mutex _valuation_mutex;
 		void storeValuation(const ValuationPtr&);
 		void storeValuation(const Handle&, const Handle&, const ProtoAtomPtr&);
 		ProtoAtomPtr getValuation(const Handle&, const Handle&);
 		void deleteValuation(const Handle&, const Handle&);
 
-		VUID storeValue(const ProtoAtomPtr&);
-		ProtoAtomPtr getValue(VUID);
-		void deleteValue(VUID);
-
 		std::string float_to_string(const FloatValuePtr&);
 		std::string string_to_string(const StringValuePtr&);
 		std::string link_to_string(const LinkValuePtr&);
 
-		VUID getMaxObservedVUID(void);
-		std::atomic<VUID> _next_valid;
-
-		Handle tvpred;
+		Handle tvpred; // the key to a very special valuation.
 		// --------------------------
 		// Performance statistics
 		std::atomic<size_t> _num_get_nodes;

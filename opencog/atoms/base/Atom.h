@@ -27,10 +27,11 @@
 #ifndef _OPENCOG_ATOM_H
 #define _OPENCOG_ATOM_H
 
+#include <functional>
 #include <memory>
 #include <mutex>
-#include <set>
 #include <string>
+#include <unordered_set>
 
 #include <boost/signals2.hpp>
 
@@ -39,6 +40,37 @@
 #include <opencog/truthvalue/TruthValue.h>
 
 class AtomUTest;
+
+namespace opencog
+{
+class Link;
+typedef std::shared_ptr<Link> LinkPtr;
+typedef std::weak_ptr<Link> WinkPtr;
+}
+
+namespace std
+{
+
+// The hash of the weak pointer is just the type of the atom.
+template<> struct hash<opencog::WinkPtr>
+{
+    typedef opencog::Type result_type;
+    typedef opencog::WinkPtr argument_type;
+    opencog::Type operator()(const opencog::WinkPtr& w) const noexcept;
+};
+
+// Equality is equality of the underlying atoms. The unordered set
+// uses this to distinguish atoms of the same type.
+template<> struct equal_to<opencog::WinkPtr>
+{
+    typedef bool result_type;
+    typedef opencog::WinkPtr first_argument;
+    typedef opencog::WinkPtr second_argument;
+    bool operator()(const opencog::WinkPtr&,
+                    const opencog::WinkPtr&) const noexcept;
+};
+
+} // namespace std
 
 namespace opencog
 {
@@ -53,18 +85,15 @@ class AtomTable;
 //! arity of Links, represented as short integer (16 bits)
 typedef unsigned short Arity;
 
-class Link;
-typedef std::shared_ptr<Link> LinkPtr;
+//! We use a std:vector instead of std::set for IncomingSet, because
+//! virtually all access will be either insert, or iterate, so we get
+//! O(1) performance. Note that sometimes incoming sets can be huge,
+//! millions of atoms.
 typedef std::vector<LinkPtr> IncomingSet; // use vector; see below.
-typedef std::weak_ptr<Link> WinkPtr;
-typedef std::set<WinkPtr, std::owner_less<WinkPtr> > WincomingSet;
 typedef boost::signals2::signal<void (AtomPtr, LinkPtr)> AtomPairSignal;
 
-// We use a std:vector instead of std::set for IncomingSet, because
-// virtually all access will be either insert, or iterate, so we get
-// O(1) performance. We use std::set for WincomingSet, because we want
-// both good insert and good remove performance.  Note that sometimes
-// incoming sets can be huge (millions of atoms).
+// typedef std::unordered_set<WinkPtr> WincomingSet;
+typedef std::set<WinkPtr, std::owner_less<WinkPtr> > WincomingSet;
 
 /**
  * Atoms are the basic implementational unit in the system that
@@ -81,7 +110,6 @@ class Atom
     friend class DeleteLink;      // Needs to call getAtomTable()
     friend class ProtocolBufferSerializer; // Needs to de/ser-ialize an Atom
 
-private:
     //! Sets the AtomSpace in which this Atom is inserted.
     void setAtomSpace(AtomSpace *);
 
@@ -125,15 +153,34 @@ protected:
         _truthValue(TruthValue::DEFAULT_TV())
     {}
 
+    // The incoming set is not tracked by the garbage collector;
+    // this is required, in order to avoid cyclic references.
+    // That is, we use weak pointers here, not strong ones.
+    // std::set<ptr> uses 48 bytes (per atom).  See the README file
+    // in this directory for a slightly longer explanation for why
+    // weak pointers are needed, and why bdwgc cannot be used.
     struct InSet
     {
-        // The incoming set is not tracked by the garbage collector;
-        // this is required, in order to avoid cyclic references.
-        // That is, we use weak pointers here, not strong ones.
-        // std::set<ptr> uses 48 bytes (per atom).  See the README file
-        // in this directory for a slightly longer explanation for why
-        // weak pointers are needed, and why bdgc cannot be used.
-        WincomingSet _iset;
+        // We want five things:
+        // a) the smallest possiblem atom.
+        // b) excellent insert performance.
+        // c) very fast lookup by type.
+        // d) good remove performance.
+        // e) uniqueness, because atomspace operations can sometimes
+        //    cause an atom to get inserted multiple times.  This is
+        //    arguably a bug, though.
+        //
+        // In order to get b), we have to store atoms in buckets, each
+        // bucket holding only one type.  To satisfy d), the buckets
+        // need to be either hash tables or rb-trees. Scanning for
+        // uniqueness in a vector is prohibitavely slow.  Note that
+        // incoming sets containing 10K atoms are not unusual, and can
+        // be the source of bottlnecks.  Note that an atomspace can
+        // contain a hundred-million atoms, so the solution has to be
+        // small. This rules out using using a vector to store the
+        // buckets (I tried).
+        std::map<Type, WincomingSet> _iset;
+
 #ifdef INCOMING_SET_SIGNALS
         // Some people want to know if the incoming set has changed...
         // However, these make the atom quite fat, so this is disabled
@@ -274,13 +321,13 @@ public:
     {
         if (NULL == _incoming_set) return result;
         std::lock_guard<std::mutex> lck(_mtx);
-        // Sigh. I need to compose copy_if with transform. I could
-        // do this wih boost range adaptors, but I don't feel like it.
-        auto end = _incoming_set->_iset.end();
-        for (auto w = _incoming_set->_iset.begin(); w != end; w++)
+        for (const auto bucket : _incoming_set->_iset)
         {
-            Handle h(w->lock());
-            if (h) { *result = h; result ++; }
+            for (const WinkPtr& w : bucket.second)
+            {
+                Handle h(w.lock());
+                if (h) { *result = h; result ++; }
+            }
         }
         return result;
     }
@@ -293,7 +340,7 @@ public:
     inline bool foreach_incoming(bool (T::*cb)(const Handle&), T *data)
     {
         // We make a copy of the set, so that we don't call the
-        //callback with locks held.
+        // callback with locks held.
         IncomingSet vh(getIncomingSet());
 
         for (const LinkPtr& lp : vh)
@@ -304,37 +351,31 @@ public:
     /**
      * Return all atoms of type `type` that contain this atom.
      * That is, return all atoms that contain this atom, and are
-     * also of the given type. Optionally subclass the type.
+     * also of the given type.
      *
-     * @param The iternator where the set of atoms will be returned.
+     * @param The iterator where the set of atoms will be returned.
      * @param The type of the parent atom.
-     * @param Whether atom type subclasses should be considered.
      */
     template <typename OutputIterator> OutputIterator
     getIncomingSetByType(OutputIterator result,
-                         Type type, bool subclass = false) const
+                         Type type) const
     {
         if (NULL == _incoming_set) return result;
         std::lock_guard<std::mutex> lck(_mtx);
-        ClassServer& cs(classserver());
-        // Sigh. I need to compose copy_if with transform. I could
-        // do this wih boost range adaptors, but I don't feel like it.
-        auto end = _incoming_set->_iset.end();
-        for (auto w = _incoming_set->_iset.begin(); w != end; w++)
+
+        const auto bucket = _incoming_set->_iset.find(type);
+        if (bucket == _incoming_set->_iset.cend()) return result;
+
+        for (const WinkPtr& w : bucket->second)
         {
-            Handle h(w->lock());
-            if (nullptr == h) continue;
-            Type at(h->getType());
-            if (type == at or (subclass and cs.isA(at, type))) {
-                *result = h;
-                result ++;
-            }
+            Handle h(w.lock());
+            if (h) { *result = h; result ++; }
         }
         return result;
     }
 
     /** Functional version of getIncomingSetByType.  */
-    IncomingSet getIncomingSetByType(Type type, bool subclass = false) const;
+    IncomingSet getIncomingSetByType(Type type) const;
 
     /** Returns a string representation of the node. */
     virtual std::string toString(const std::string& indent) const = 0;

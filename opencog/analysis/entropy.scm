@@ -1,14 +1,20 @@
 ;
 ; entropy.scm
 ;
-; Assorted objects for computing fractional entropies of pairs.
+; Assorted objects for computing (and caching) fractional entropies
+; of pairs.
 ;
 ; Copyright (c) 2017 Linas Vepstas
 ;
 ; ---------------------------------------------------------------------
-; The objects here assume that a pair-counting batch job has completed.
-; They get cached stats for counts and frequencies taken from the
-; current contents of the atomspace.
+; The object here assumes that a pair-counting batch job has completed.
+; That is, it assumes that there are cached values available for the
+; individual pair frequencies, the wild-card frequencies, and the
+; inddividual pair MI values.
+;
+; It uses these cached stats for frequencies and MI to compute left
+; and right subtotals (row and column subtotals), which are then cached.
+; The cached values become available via the standard frequency API.
 ; ---------------------------------------------------------------------
 ;
 (use-modules (srfi srfi-1))
@@ -16,9 +22,18 @@
 
 ; ---------------------------------------------------------------------
 
-(define-public (add-pair-mi-compute LLOBJ)
+; For now, we are not making this public, I see no point to this.
+; The super whiz-bang batch job will use this, but I just don't see
+; why  the general public would want direct access to this.  So, for
+; now, we hide it.
+;
+; Also -- FYI, we could provide methods to return just the computed
+; values, without caching them, but I don't see the point of this.
+;
+(define (add-subtotal-mi-compute LLOBJ)
 "
-  add-pair-mi-compute LLOBJ - methods for MI and entropy of pairs.
+  add-subtotal-mi-compute LLOBJ - methods for computing and caching
+  the subtotalled MI and entropy of rows and columns.
 
   Extend the LLOBJ with additional methods to compute the one-sided
   entropies and mutual information of pairs.
@@ -26,11 +41,20 @@
   The object must have valid pair-frequency values on it, accessible
   via the standard frequency-object API. These must have been
   pre-computed, before this object can be used.
+
+  The methods on this class are:
+  'cache-left-entropy   -- compute and cache the column entropies
+  'cache-right-entropy  -- compute and cache the row entropies
+  'cache-left-mi        -- compute and cache the column mi
+  'cache-right-mi       -- compute and cache the row mi
+
+  The cahced values are accessible via the standard frequency API.
 "
 	; Need the 'left-stars method, provided by add-pair-stars
 	; Need the 'left-wild-freq method, provided by add-pair-freq-api
-	(let ((star-obj (add-pair-stars LLOBJ))
-			(frqobj (add-pair-freq-api LLOBJ)))
+	(let* ((llobj LLOBJ)
+			(star-obj (add-pair-stars LLOBJ))
+			(frqobj (add-pair-freq-api star-obj)))
 
 		; Compute the left-wild entropy summation:
 		;    h_left(y) = -sum_x P(x,y) log_2 P(x,y)
@@ -58,14 +82,16 @@
 		;    H_left(y) = h_left(y) / P(*,y)
 		; Note that
 		;    h_total = sum_y P(*,y) H_left(y)
-		(define (compute-left-fractional RIGHT-ITEM)
-			(/ (compute-left-entropy RIGHT-ITEM)
-				(frqobj 'left-wild-freq RIGHT-ITEM)))
+		(define (cache-left-entropy RIGHT-ITEM)
+			(define ent (compute-left-entropy RIGHT-ITEM))
+			(define fent (/ ent (frqobj 'left-wild-freq RIGHT-ITEM)))
+			(frqobj 'set-left-wild-entropy RIGHT-ITEM ent fent))
 
 		; As above, but flipped.
-		(define (compute-right-fractional LEFT-ITEM)
-			(/ (compute-right-entropy LEFT-ITEM)
-				(frqobj 'right-wild-freq LEFT-ITEM)))
+		(define (cache-right-entropy LEFT-ITEM)
+			(define ent (compute-right-entropy LEFT-ITEM))
+			(define fent (/ ent (frqobj 'right-wild-freq LEFT-ITEM)))
+			(frqobj 'set-right-wild-entropy LEFT-ITEM ent fent))
 
 		; ---------------
 		; Compute the left MI summation:
@@ -92,114 +118,169 @@
 		;    MI_left(y) = mi_left(y) / P(*,y)
 		; Note that
 		;    MI_total = sum_y P(*,y) MI_left(y)
-		(define (compute-left-fmi RIGHT-ITEM)
-			(/ (compute-left-mi RIGHT-ITEM)
-				(frqobj 'left-wild-freq RIGHT-ITEM)))
+		(define (cache-left-mi RIGHT-ITEM)
+			(define mi (compute-left-mi RIGHT-ITEM))
+			(define fmi (/ mi (frqobj 'left-wild-freq RIGHT-ITEM)))
+			(frqobj 'set-left-wild-mi RIGHT-ITEM mi fmi))
 
 		; As above, but flipped.
-		(define (compute-right-fmi LEFT-ITEM)
-			(/ (compute-right-mi LEFT-ITEM)
-				(frqobj 'right-wild-freq LEFT-ITEM)))
+		(define (cache-right-mi LEFT-ITEM)
+			(define mi (compute-right-mi LEFT-ITEM))
+			(define fmi (/ mi (frqobj 'right-wild-freq LEFT-ITEM)))
+			(frqobj 'set-right-wild-mi LEFT-ITEM mi fmi))
 
+		; ---------------
+		; Do all four loops.
+		(define (cache-all)
+			(define start-time (current-time))
+			(define (elapsed-secs)
+				(define diff (- (current-time) start-time))
+				(set! start-time (current-time))
+				diff)
+
+			(for-each cache-left-entropy (star-obj 'right-basis))
+			(format #t "Finished left entropy subtotals in ~A secs\n"
+				(elapsed-secs))
+
+			(for-each cache-right-entropy (star-obj 'left-basis))
+			(format #t "Finished right entropy subtotals in ~A secs\n"
+				(elapsed-secs))
+
+			(for-each cache-left-mi (star-obj 'right-basis))
+			(format #t "Finished left MI subtotals in ~A secs\n"
+				(elapsed-secs))
+
+			(for-each cache-right-mi (star-obj 'left-basis))
+			(format #t "Finished right MI subtotals in ~A secs\n"
+				(elapsed-secs))
+		)
 
 		; Methods on this class.
 		(lambda (message . args)
 			(case message
-				((compute-left-entropy)   (apply compute-left-entropy args))
-				((compute-right-entropy)  (apply compute-right-entropy args))
-				((compute-left-fentropy)  (apply compute-left-fractional args))
-				((compute-right-fentropy) (apply compute-right-fractional args))
-				((compute-left-mi)        (apply compute-left-mi args))
-				((compute-right-mi)       (apply compute-right-mi args))
-				((compute-left-fmi)       (apply compute-left-fmi args))
-				((compute-right-fmi)      (apply compute-right-fmi args))
-				(else (apply frqobj      (cons message args))))
+				((cache-left-entropy)   (apply cache-left-entropy args))
+				((cache-right-entropy)  (apply cache-right-entropy args))
+				((cache-left-mi)        (apply cache-left-mi args))
+				((cache-right-mi)       (apply cache-right-mi args))
+				((cache-all-subtotals)  (cache-all))
+				(else (apply llobj      (cons message args))))
 		))
 )
 
 ; ---------------------------------------------------------------------
 
-(define-public (add-total-entropy-compute LLOBJ)
+(define (add-total-entropy-compute LLOBJ)
 "
-  add-total-entropy-compute LLOBJ - methods for total and partial entropy.
+  add-total-entropy-compute LLOBJ - methods to compute and cache the
+  partial and total entropies and the total MI.
 
-  Extend the LLOBJ with additional methods to compute the partial
-  and total entropies of the total set of pairs.
+  Extend the LLOBJ with additional methods to compute the partial and
+  total entropies and MI for the correlation matrix.
 
-  The object must have valid pair-frequency values on it, accessible
-  via the standard frequency-object API. These must have been
+  The object must have valid partial sums for the entropy and MI on it,
+  viz, the ones computed by add-subtotal-mi-compute, above. These are
+  acessed via the standard frequency-object API. These must have been
   pre-computed, before this object can be used.
 
-  These methods loop over all pairs, and so can take a lot of time.
+  These methods loop over all rows and columns to compute the total sums.
 "
 	; Need the 'left-basis method, provided by add-pair-stars
 	; Need the 'pair-logli method, provided by add-pair-freq-api
-	(let ((star-obj (add-pair-stars LLOBJ))
-			(frqobj (add-pair-freq-api LLOBJ)))
-
-		; Compute the total entropy for the set. This loops over all
-		; pairs, and computes the sum
-		;   H_tot = sum_x sum_y p(x,y) log_2 p(x,y)
-		; It returns a single numerical value, for the entire set.
-		(define (compute-total-entropy)
-			(define entropy 0)
-
-			(define (right-loop left-item)
-				(for-each
-					(lambda (lipr)
-						; The get-logli below may throw an exception, if
-						; the particular item-pair doesn't have any counts.
-						; XXX does this ever actually happen?  It shouldn't,
-						;right?
-						(catch #t (lambda ()
-								(define pr-freq (frqobj 'pair-freq lipr))
-								(define pr-logli (frqobj 'pair-logli lipr))
-								(define h (* pr-freq pr-logli))
-								(set! entropy (+ entropy h))
-							)
-							(lambda (key . args) #f))) ; catch handler
-					(star-obj 'right-stars left-item)))
-
-			(for-each right-loop (star-obj 'left-basis))
-
-			; Return the single number.
-			entropy
+	(let* ((llobj LLOBJ)
+			(star-obj (add-pair-stars LLOBJ))
+			(frqobj (add-pair-freq-api star-obj))
+			(rptobj (add-report-api star-obj))
 		)
+
+		(define (left-sum FN)
+			(fold
+				(lambda (right-item sum) (+ sum (FN right-item)))
+				0 (star-obj 'right-basis)))
+
+		(define (right-sum FN)
+			(fold
+				(lambda (left-item sum) (+ sum (FN left-item)))
+				0 (star-obj 'left-basis)))
+
+		; ---------------
+		; Compute the total entropy for the set. This loops over all
+		; rows and columns, and computes the sum
+		;   H_tot = sum_x sum_y p(x,y) log_2 p(x,y)
+		;         = sum_x h_left(x)
+		;         = sum_y h_right(y)
+		; It throws an error if the two are not equal (to within guessed
+		; rounding errors.)
+		(define (compute-total-entropy)
+			(define lsum (left-sum
+					(lambda (x) (frqobj 'left-wild-entropy x))))
+			(define rsum (right-sum
+					(lambda (x) (frqobj 'right-wild-entropy x))))
+			(if (< 1.0e-8 (/ (abs (- lsum rsum)) lsum))
+				(throw 'bad-summation 'compute-total-entropy
+					(format #f
+						"Left and right entropy sums fail to be equal: ~A ~A\n"
+						lsum rsum)))
+			lsum)
 
 		; Compute the left-wildcard partial entropy for the set. This
 		; loops over all left-wildcards, and computes the sum
 		;   H_left = sum_y p(*,y) log_2 p(*,y)
 		; It returns a single numerical value, for the entire set.
 		(define (compute-left-entropy)
-
-			(fold
-				(lambda (right-item sum)
-					(+ sum (frqobj 'left-wild-logli right-item)))
-				0
-				(star-obj 'right-basis))
-		)
+			(left-sum
+				(lambda (x) (*
+						(frqobj 'left-wild-freq x)
+						(frqobj 'left-wild-logli x)))))
 
 		; Compute the right-wildcard partial entropy for the set. This
 		; loops over all right-wildcards, and computes the sum
 		;   H_right = sum_x p(x,*) log_2 p(x,*)
 		; It returns a single numerical value, for the entire set.
 		(define (compute-right-entropy)
+			(right-sum
+				(lambda (x) (*
+						(frqobj 'right-wild-freq x)
+						(frqobj 'right-wild-logli x)))))
 
-			(fold
-				(lambda (left-item sum)
-					(+ sum (frqobj 'right-wild-logli left-item)))
-				0
-				(star-obj 'left-basis))
-		)
+		(define (cache-entropy)
+			(rptobj 'set-entropy
+				(compute-left-entropy)
+				(compute-right-entropy)
+				(compute-total-entropy)))
 
+		; ---------------
+		; Compute the total MI for the set. This loops over all
+		; rows and columns, and computes the sum
+		;   MI_tot = sum_x sum_y mi(x,y)
+		;         = sum_x mi_left(x)
+		;         = sum_y mi_right(y)
+		; It throws an error if the two are not equal (to within guessed
+		; rounding errors.)
+		(define (compute-total-mi)
+			(define lsum (left-sum
+					(lambda (x) (frqobj 'left-wild-mi x))))
+			(define rsum (right-sum
+					(lambda (x) (frqobj 'right-wild-mi x))))
+			(if (< 1.0e-8 (/ (abs (- lsum rsum)) lsum))
+				(throw 'bad-summation 'compute-total-mi
+					(format #f
+						"Left and right MI sums fail to be equal: ~A ~A\n"
+						lsum rsum)))
+			lsum)
+
+		(define (cache-mi)
+			(rptobj 'set-mi (compute-total-mi)))
+
+		; ---------------
 		; Methods on this class.
 		(lambda (message . args)
 			(case message
 				((total-entropy)         (compute-total-entropy))
 				((left-entropy)          (compute-left-entropy))
 				((right-entropy)         (compute-right-entropy))
-				(else (apply frqobj      (cons message args))))
-		))
+				((cache-entropy)         (cache-entropy))
+				((cache-mi)              (cache-mi))
+			)))
 )
 
 ; ---------------------------------------------------------------------

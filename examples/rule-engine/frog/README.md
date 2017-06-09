@@ -165,6 +165,7 @@ Let's clear the atomspace and load the frog rule base that encodes the
 relationships as rules.
 ```scheme
 (clear)
+(load "knowledge-base.scm")
 (load "frog-rule-base.scm")
 ```
 

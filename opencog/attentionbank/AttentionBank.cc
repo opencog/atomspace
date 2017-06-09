@@ -42,8 +42,7 @@ AttentionBank::AttentionBank(AtomSpace* asp) :
     targetSTI = config().get_int("TARGET_STI_FUNDS", 10000);
     STIAtomWage = config().get_int("ECAN_STARTING_ATOM_STI_WAGE", 10);
     LTIAtomWage = config().get_int("ECAN_STARTING_ATOM_LTI_WAGE", 10);
-
-    _attentionalFocusBoundary = 1;
+    minAFSize = config().get_int("ECAN_MIN_AF_SIZE", 100);
 
     _removeAtomConnection =
         asp->removeAtomSignal(
@@ -191,20 +190,8 @@ void AttentionBank::AVChanged(const Handle& h,
     // Notify any interested parties that the AV changed.
     _AVChangedSignal(h, old_av, new_av);
 
-    // Check if the atom crossed into or out of the AttentionalFocus
-    // and notify any interested parties
-    if (oldSti < getAttentionalFocusBoundary() and
-        newSti >= getAttentionalFocusBoundary())
-    {
-        AFCHSigl& afch = AddAFSignal();
-        afch(h, old_av, new_av);
-    }
-    else if (newSti < getAttentionalFocusBoundary() and
-             oldSti >= getAttentionalFocusBoundary())
-    {
-        AFCHSigl& afch = RemoveAFSignal();
-        afch(h, old_av, new_av);
-    }
+    //update AF
+    updateAttentionalFocus(h, old_av, new_av);
 }
 
 void AttentionBank::stimulate(const Handle& h, double stimulus)
@@ -282,14 +269,14 @@ double AttentionBank::getNormalisedSTI(AttentionValuePtr av,
     double val;
     // get normalizer (maxSTI - attention boundary)
     AttentionValue::sti_t s = av->getSTI();
-    if (s > getAttentionalFocusBoundary()) {
-        int normaliser = (int) getMaxSTI(average) - getAttentionalFocusBoundary();
+    if (s > get_af_max_sti()) {
+        int normaliser = (int) getMaxSTI(average) - get_af_max_sti();
         if (normaliser == 0) return 0.0;
-        val = (s - getAttentionalFocusBoundary()) / (double) normaliser;
+        val = (s - get_af_max_sti()) / (double) normaliser;
     } else {
-        int normaliser = -((int) getMinSTI(average) + getAttentionalFocusBoundary());
+        int normaliser = -((int) getMinSTI(average) + get_af_max_sti());
         if (normaliser == 0) return 0.0;
-        val = (s + getAttentionalFocusBoundary()) / (double) normaliser;
+        val = (s + get_af_max_sti()) / (double) normaliser;
     }
 
     if (clip) return std::max(-1.0, std::min(val, 1.0));
@@ -300,7 +287,7 @@ double AttentionBank::getNormalisedSTI(AttentionValuePtr av) const
 {
     AttentionValue::sti_t s = av->getSTI();
     auto normaliser =
-            s > getAttentionalFocusBoundary() ? getMaxSTI() : getMinSTI();
+            s > get_af_max_sti() ? getMaxSTI() : getMinSTI();
 
     return (s / normaliser);
 }
@@ -347,5 +334,52 @@ AttentionBank& opencog::attentionbank(AtomSpace* asp)
 Handle AttentionBank::getRandomAtom()
 {
    return _importanceIndex.getRandomAtom();
+}
+
+bool AttentionBank::atom_is_in_AF(const Handle& h)
+{
+    auto it = std::find_if(attentionalFocus.begin(), attentionalFocus.end(),
+            [h](std::pair<Handle, AttentionValuePtr> p)
+            { if(p.first == h )
+                      return true;
+               return false;
+            });
+    return  (it != attentionalFocus.end());
+}
+
+/**
+ *  Updates list of top K important atoms based on STI value.
+ */
+void AttentionBank::updateAttentionalFocus(const Handle& h, 
+                    const AttentionValuePtr& old_av,
+                    const AttentionValuePtr& new_av)
+{
+    std::lock_guard<std::mutex> lock(AFMutex);
+    AttentionValue::sti_t sti = new_av->getSTI();
+    auto least = attentionalFocus.begin();
+    bool insertable = false;
+    auto it = std::find_if(attentionalFocus.begin(), attentionalFocus.end(),
+            [h](std::pair<Handle, AttentionValuePtr> p)
+            { if(p.first == h ) return true; return false;});
+
+    // Update the STI value if atoms was already in AF
+    if(it != attentionalFocus.end()){
+        attentionalFocus.erase(it);
+        attentionalFocus.insert(std::make_pair(h, new_av));
+        return;
+    } else if(attentionalFocus.size() < minAFSize){
+        insertable = true;
+    } else if( sti > (least->second)->getSTI()){
+        attentionalFocus.erase(least);
+        AFCHSigl& afch = RemoveAFSignal();
+        afch(least->first, least->second, get_av(least->first));
+        insertable = true;
+    }
+
+    if(insertable){
+        attentionalFocus.insert(std::make_pair(h, new_av));
+        AFCHSigl& afch = AddAFSignal();
+        afch(h, old_av, new_av);
+    }
 }
 
