@@ -54,7 +54,7 @@
 ; -- check-name? -- Check if a there is a node with the given name.
 ; -- random-string -- Generate a random string of given length.
 ; -- random-node-name  -- Generate a random name for a node of given type.
-; -- choose-var-name --Generate a random name for a variable.
+; -- choose-var-name -- Generate a random name for a variable.
 ; -- cog-new-flattened-link -- Create flattened link
 ;
 ;;; Code:

@@ -2,6 +2,10 @@
 ; thresh-pca.scm
 ;
 ; Perform a Thresholding Principal Component Analsysis
+; XXX This is an earlier version that is interesting, but will not
+; provide adequate performance as written. A caching stunt could
+; improve, this, but it would still be handicapped.  I'm temporarily
+; stashing the code here, just in case.
 ;
 ; Copyright (c) 2017 Linas Vepstas
 ;
@@ -38,13 +42,13 @@
 ; anything until you ask for it; and it seems that because P is sparse,
 ; chances are good you'll never ever ask for it.
 ;
-; So: How should the vectors 'b' and 's' be represented? Currently, the
-; intternal form will be a "wvec", consisting of a list of pairs
-; (cons numeric-value  Atom), so that the first can be accessed with
-; car and the second with cadr. Its also possible to provide a generic
-; format, but am not doing this just right now.
+; So: How should the vectors 'b' and 's' be represented?  As "on demand",
+; lazy-evaluation functions.  Give it an argument, and it will return a
+; value... after computing it.  We won't compute a value until you ask
+; for it.  Thus, most of the functions below just set up other functions
+; that would compute a value, if they were ever asked.
 ;
-; In the below, these vectors are called "wvec"'s.
+; In the below, these lazy vectors are called "fvec"'s.
 ;
 ; See the FAQ for why heavy-weight numerical calculations are being done
 ; in scheme instead of C++.
