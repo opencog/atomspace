@@ -126,7 +126,7 @@
 					(lambda (PAIR sum)
 						(+ sum
 							(* (llobj get-value PAIR)
-								(fvec (gdr PAIR)))))
+								(fvec (gar PAIR)))))
 					0
 					(star-obj 'left-stars ITEM))))
 
@@ -139,7 +139,7 @@
 					(lambda (PAIR sum)
 						(+ sum
 							(* (llobj get-value PAIR)
-								(fvec (gar PAIR)))))
+								(fvec (gdr PAIR)))))
 					0
 					(star-obj 'right-stars ITEM))))
 
