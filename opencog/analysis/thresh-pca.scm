@@ -2,10 +2,6 @@
 ; thresh-pca.scm
 ;
 ; Perform a Thresholding Principal Component Analsysis
-; XXX This is an earlier version that is interesting, but will not
-; provide adequate performance as written. A caching stunt could
-; improve, this, but it would still be handicapped.  I'm temporarily
-; stashing the code here, just in case.
 ;
 ; Copyright (c) 2017 Linas Vepstas
 ;
@@ -43,10 +39,12 @@
 ; chances are good you'll never ever ask for it.
 ;
 ; So: How should the vectors 'b' and 's' be represented?  As "on demand",
-; lazy-evaluation functions.  Give it an argument, and it will return a
-; value... after computing it.  We won't compute a value until you ask
-; for it.  Thus, most of the functions below just set up other functions
-; that would compute a value, if they were ever asked.
+; lazy-evaluation functions.  Give it an argument, that is always an Atom
+; of some kind, and it will return a floating-point value ... after
+; computing it.  We won't compute a value until you ask for it. (A special
+; caching wrapper even avoids a computation, if its been done before).
+; Thus, most of the functions below just set up other functions that
+; would compute a value, if they were ever asked.
 ;
 ; In the below, these lazy vectors are called "fvec"'s.
 ;
@@ -76,6 +74,24 @@
 	(let ((llobj LLOBJ)
 			(star-obj (add-pair-stars LLOBJ))
 		)
+
+		; --------------------
+		; Return a caching version of FVEC.  That is, it does what FVEC
+		; would do, for the same argument; but if a cached value is
+		; available, then return just that.  Recall that the argument
+		; to FVEC is always an Atom, and the returned value is always a
+		; float, and that the call is  side-effect free, so that the
+		; cached value is always valid.
+		(define (make-fvec-cache FVEC)
+			(define cache (make-hash-table))
+			(define fvec FVEC)
+			(lambda (ITEM)
+				(define val (hash-ref cache ITEM))
+				(if val val
+					(begin
+						(let ((fv (fvec ITEM)))
+							(hash-set! cache ITEM fv)
+							fv)))))
 
 		; --------------------
 		; Return an fvec of items with uniform weighting. This is a
@@ -128,11 +144,11 @@
 		; --------------------
 
 		(define (left-iter-once FVEC)
-			(right-mult (left-mult FVEC))
+			(right-mult (make-fvec-cache (left-mult (make-fvec-cache FVEC))))
 		)
 
 		(define (right-iter-once FVEC)
-			(left-mult (right-mult FVEC))
+			(left-mult (make-fvec-cache (right-mult (make-fvec-cache FVEC))))
 		)
 
 		; --------------------
