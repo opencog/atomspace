@@ -2,6 +2,10 @@
 ; thresh-pca.scm
 ;
 ; Perform a Thresholding Principal Component Analsysis
+; XXX This is an earlier version that is interesting, but will not
+; provide adequate performance as written. A caching stunt could
+; improve, this, but it would still be handicapped.  I'm temporarily
+; stashing the code here, just in case.
 ;
 ; Copyright (c) 2017 Linas Vepstas
 ;
@@ -38,13 +42,13 @@
 ; anything until you ask for it; and it seems that because P is sparse,
 ; chances are good you'll never ever ask for it.
 ;
-; So: How should the vectors 'b' and 's' be represented? Currently, the
-; intternal form will be a "wvec", consisting of a list of pairs
-; (cons numeric-value  Atom), so that the first can be accessed with
-; car and the second with cadr. Its also possible to provide a generic
-; format, but am not doing this just right now.
+; So: How should the vectors 'b' and 's' be represented?  As "on demand",
+; lazy-evaluation functions.  Give it an argument, and it will return a
+; value... after computing it.  We won't compute a value until you ask
+; for it.  Thus, most of the functions below just set up other functions
+; that would compute a value, if they were ever asked.
 ;
-; In the below, these vectors are called "wvec"'s.
+; In the below, these lazy vectors are called "fvec"'s.
 ;
 ; See the FAQ for why heavy-weight numerical calculations are being done
 ; in scheme instead of C++.
@@ -74,38 +78,40 @@
 		)
 
 		; --------------------
-		; Return a wvec of items with uniform weighting. This is a
+		; Return an fvec of items with uniform weighting. This is a
 		; unit vector. i.e. its dot-product with itself is 1.0.
 
-		(define (unit-wvec BASIS)
-			(define weight (/ 1 (sqrt (length BASIS))))
-			(map (lambda (item) (cons weight item)) BASIS))
+		; What this actually returns is a function, that when
+		; called with any argument, returns a constant.
+		(define (unit-fvec BASIS-SIZE)
+			(define weight (/ 1 (sqrt BASIS-SIZE)))
+
+			(lambda (ITEM) weight))
 
 		; Apply equal weighting to all elements of the left-basis
 		; This is the starting vector for one step of left-iterate.
 		(define (left-init)
-			(unit-wvec (star-obj 'left-basis)))
+			(unit-fvec (star-obj 'left-basis-size)))
 
 		(define (right-init)
-			(unit-wvec (star-obj 'right-basis)))
+			(unit-fvec (star-obj 'right-basis-size)))
 
 		; --------------------
-		; Multiply matrix on the left by WVEC.  That is, return the
-		; result wvec
-		;     result(y) = sum_x p(x,y) WVEC(x)
-		; Note that this is effectively the transpose of P.
-		(define (left-mult LEFT-WVEC)
-			(define (do-one ITEM)
+		; Multiply matrix on the left by FVEC.  That is, return the
+		; function
+		;     result(y) = sum_x p(x,y) FVEC(x)
+		; As always, this returns the function `result`. Call this
+		; function with an arguement to force the computation to
+		; happen.  Note that this is effectively the transpose of P.
+		(define (left-mult LEFT-FVEC)
+			(lambda (ITEM)
 				(fold
-					(lambda (wcns sum)
+					(lambda (PAIR sum)
 						(+ sum
 							(* (llobj get-value PAIR)
-								(car wcns)
+								(LEFT-FVEC (gdr PAIR)))))
 					0
-					LEFT-WVEC))
-
-			(filter-map
-				(star-obj 'left-basis))))
+					(star-obj 'left-stars ITEM))))
 
 		; Just like above, but returns the function
 		;     result(x) = sum_y p(x,y) FVEC(y)
