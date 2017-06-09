@@ -83,14 +83,23 @@
 		; float, and that the call is  side-effect free, so that the
 		; cached value is always valid.
 		(define (make-fvec-cache FVEC)
+
+			; Define the local hash table we will use.
 			(define cache (make-hash-table))
 			(define fvec FVEC)
+
+			; Guile needs help computing the hash of an atom.
+			(define (atom-hash ATOM SZ)
+				(modulo (cog-handle ATOM) SZ))
+			(define (atom-assoc ATOM ALIST)
+				(find (lambda (pr) (equal? ATOM (car pr))) ALIST))
+
 			(lambda (ITEM)
-				(define val (hash-ref cache ITEM))
+				(define val (hashx-ref atom-hash atom-assoc cache ITEM))
 				(if val val
 					(begin
 						(let ((fv (fvec ITEM)))
-							(hash-set! cache ITEM fv)
+							(hashx-set! atom-hash atom-assoc cache ITEM fv)
 							fv)))))
 
 		; --------------------
