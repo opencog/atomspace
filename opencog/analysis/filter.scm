@@ -23,23 +23,33 @@
 
 ; ---------------------------------------------------------------------
 
-(define*-public (add-subtotal-filter LLOBJ LEFT-CUT RIGHT-CUT)
+(define*-public (add-subtotal-filter LLOBJ LEFT-CUT RIGHT-CUT PAIR-CUT)
 "
   add-subtotal-filter LLOBJ - Modify LLOBJ so that any columns and
-  rows with counts less than LEFT-CUT and RIGHT-CUT are removed. This
+  rows with counts less than LEFT-CUT and RIGHT-CUT are removed, and that
+  individual entries with counts less than PAIR-CUT are removed. This
   provides an API compatible with the star-object API; i.e. it provides
   the same row and column addressability that star-object does, but
   just returns fewer rows and columns.
 
-  Thhe filtering is done 'on demands', on a row-by-row, column-by-column
-  basis.
+  Thhe filtering is done 'on demand', on a row-by-row, column-by-column
+  basis.  Currenly, computations for the left and right stars are not
+  cached, and are recomputed for each request.  Currently, this seems
+  like a reasonable thing to do.
+
+  Note that by removing rows and columns, the frequencies will no longer
+  sum to 1.0. Likewise, row and column subtotals, entropies and mutual
+  information will no long sum or behave as in the whole dataset.  If
+  accurate values for these are needed, then they would need to be
+  recomputed for the reduced matrix.
 
   Some terminology: Let N(x,y) be the observed count for the pair (x,y).
   Let N(*,y) be the column subtotals, AKA the left-subtotals.
   Let N(x,*) be the row subtotals, AKA the right subtotals.
 
   This object removes all columns where  N(*,y) <= LEFT-CUT and where
-  N(x,*) <= RIGHT-CUT.
+  N(x,*) <= RIGHT-CUT.  Pairs are not reported in the 'left-stars and
+  'right-stars methods when N(x,y) <= PAIR-CUT.
 "
 	(let* ((llobj LLOBJ)
 			(stars-obj (add-pair-stars LLOBJ))
@@ -87,13 +97,17 @@
 		(define (do-left-stars ITEM)
 			(filter
 				(lambda (PAIR)
-					(< LEFT-CUT (cnt-obj 'left-wild-count (gar PAIR))))
+					(and
+						(< PAIR-CUT (llobj 'pair-count PAIR))
+						(< LEFT-CUT (cnt-obj 'left-wild-count (gar PAIR)))))
 				(stars-obj 'left-stars ITEM)))
 
 		(define (do-right-stars ITEM)
 			(filter
 				(lambda (PAIR)
-					(< RIGHT-CUT (cnt-obj 'right-wild-count (gar PAIR))))
+					(and
+						(< PAIR-CUT (llobj 'pair-count PAIR))
+						(< RIGHT-CUT (cnt-obj 'right-wild-count (gar PAIR)))))
 				(stars-obj 'right-stars ITEM)))
 
 		; ---------------
