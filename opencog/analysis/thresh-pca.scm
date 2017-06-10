@@ -205,13 +205,21 @@
 
 		; --------------------
 
+		; Perform a single step of power-iteration.
 		(define (left-iter-once FVEC)
-			(left-renormalize (right-mult (left-mult FVEC)))
-		)
+			(left-renormalize (right-mult (left-mult FVEC))))
 
 		(define (right-iter-once FVEC)
-			(right-renormalize (left-mult (right-mult FVEC)))
-		)
+			(right-renormalize (left-mult (right-mult FVEC))))
+
+		; Perform K steps of power-iteration.
+		(define (left-iter FVEC K)
+			(if (>= 0 K) FVEC
+				(left-iter (left-iter-once FVEC) (- K 1))))
+
+		(define (left-iter FVEC K)
+			(if (>= 0 K) FVEC
+				(left-iter (left-iter-once FVEC) (- K 1))))
 
 		; --------------------
 		; Print the top-k values of the vector
@@ -243,8 +251,8 @@
 				((right-initial)          (right-init))
 				((left-mult)              (apply left-mult args))
 				((right-mult)             (apply right-mult args))
-				((left-iterate)           (apply left-iter-once args))
-				((right-iterate)          (apply right-iter-once args))
+				((left-iterate)           (apply left-iter args))
+				((right-iterate)          (apply right-iter args))
 				((left-norm)              (apply left-norm args))
 				((right-norm)             (apply right-norm args))
 				((left-renormalize)       (apply left-renormalize args))
