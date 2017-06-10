@@ -217,9 +217,9 @@
 			(if (>= 0 K) FVEC
 				(left-iter (left-iter-once FVEC) (- K 1))))
 
-		(define (left-iter FVEC K)
+		(define (right-iter FVEC K)
 			(if (>= 0 K) FVEC
-				(left-iter (left-iter-once FVEC) (- K 1))))
+				(right-iter (right-iter-once FVEC) (- K 1))))
 
 		; --------------------
 		; Print the top-k values of the vector
