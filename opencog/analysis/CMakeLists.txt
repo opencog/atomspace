@@ -4,6 +4,7 @@ ADD_GUILE_MODULE (FILES
 	compute-mi.scm
 	cosine.scm
 	entropy.scm
+	filter.scm
 	fold-api.scm
 	object-api.scm
 	support.scm
