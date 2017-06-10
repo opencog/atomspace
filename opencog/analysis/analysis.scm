@@ -15,4 +15,4 @@
 (load "analysis/cosine.scm")
 (load "analysis/entropy.scm")
 (load "analysis/compute-mi.scm")
-
+(load "analysis/thresh-pca.scm")

@@ -8,5 +8,6 @@ ADD_GUILE_MODULE (FILES
 	object-api.scm
 	support.scm
 	report-api.scm
+	thresh-pca.scm
 	MODULE_DESTINATION "${DATADIR}/scm/opencog/analysis"
 )
