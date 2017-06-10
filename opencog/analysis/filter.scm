@@ -31,7 +31,7 @@
   the same row and column addressability that star-object does, but
   just returns fewer rows and columns.
 
-  Thhe filtering is done "on demand", on a row-by-row, column-by-column
+  Thhe filtering is done 'on demands', on a row-by-row, column-by-column
   basis.
 
   Some terminology: Let N(x,y) be the observed count for the pair (x,y).
@@ -46,17 +46,19 @@
 			(cnt-obj (add-pair-count-api stars-obj))
 			(l-basis '())
 			(r-basis '())
+			(l-size 0)
+			(r-size 0)
 		)
 
 		; ---------------
 		; Filter out rows and columns that are below-count.
-		(define (do-get-left)
+		(define (do-left-basis)
 			(filter
 				(lambda (ITEM)
 					(< RIGHT-CUT (cnt-obj 'right-wild-count ITEM)))
 				(stars-obj 'left-basis)))
 
-		(define (do-get-right)
+		(define (do-right-basis)
 			(filter
 				(lambda (ITEM)
 					(< LEFT-CUT (cnt-obj 'left-wild-count ITEM)))
@@ -65,12 +67,25 @@
 		; ---------------
 		; Use the cached value, if its there.
 		(define (get-left-basis)
-			(if (null? l-basis) (set! l-basis (do-get-left)))
+			(if (null? l-basis) (set! l-basis (do-left-basis)))
 			l-basis)
 
 		(define (get-right-basis)
-			(if (null? r-basis) (set! r-basis (do-get-right)))
+			(if (null? r-basis) (set! r-basis (do-right-basis)))
 			r-basis)
+
+		(define (get-left-size)
+			(if (eq? 0 l-size) (set! l-size (length (get-left-basis))))
+			l-size)
+
+		(define (get-right-size)
+			(if (eq? 0 r-size) (set! r-size (length (get-right-basis))))
+			r-size)
+
+		; ---------------
+		; Return only those stars that
+		(define (do-left-stars ITEM)
+		)
 
 		; ---------------
 		; Return a pointer to each method that this class overloads.
@@ -78,6 +93,8 @@
 			(case meth
 				((left-basis)       get-left-basis)
 				((right-basis)      get-right-basis)
+				((left-basis-size)  get-left-size)
+				((right-basis-size) get-right-size)
 				(else               (llobj 'provides meth))))
 
 		; -------------
@@ -86,6 +103,8 @@
 			(case message
 				((left-basis)       (get-left-basis))
 				((right-basis)      (get-right-basis))
+				((left-basis-size)  (get-left-size))
+				((right-basis-size) (get-right-size))
 				((provides)         (apply provides args))
 				(else               (apply llobj (cons message args))))
 		)))
