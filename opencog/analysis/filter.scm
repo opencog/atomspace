@@ -83,14 +83,25 @@
 			r-size)
 
 		; ---------------
-		; Return only those stars that
+		; Return only those stars that pass the cutoff.
 		(define (do-left-stars ITEM)
-		)
+			(filter
+				(lambda (PAIR)
+					(< LEFT-CUT (cnt-obj 'left-wild-count (gar PAIR))))
+				(stars-obj 'left-stars ITEM)))
+
+		(define (do-right-stars ITEM)
+			(filter
+				(lambda (PAIR)
+					(< RIGHT-CUT (cnt-obj 'right-wild-count (gar PAIR))))
+				(stars-obj 'right-stars ITEM)))
 
 		; ---------------
 		; Return a pointer to each method that this class overloads.
 		(define (provides meth)
 			(case meth
+				((left-stars)       do-left-stars)
+				((right-stars)      do-right-stars)
 				((left-basis)       get-left-basis)
 				((right-basis)      get-right-basis)
 				((left-basis-size)  get-left-size)
@@ -101,6 +112,8 @@
 		; Methods on this class.
 		(lambda (message . args)
 			(case message
+				((left-stars)       (apply do-left-stars args)
+				((right-stars)      (apply do-right-stars args)
 				((left-basis)       (get-left-basis))
 				((right-basis)      (get-right-basis))
 				((left-basis-size)  (get-left-size))
