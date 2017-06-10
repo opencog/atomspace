@@ -222,21 +222,29 @@
 				(right-iter (right-iter-once FVEC) (- K 1))))
 
 		; --------------------
-		; Print the top-k values of the vector
+		; Get an explicit vector, formatted as a list of pairs,
+		; each pair being (item . value)
+		(define (get-fvec FVEC BASIS)
+			(map
+				(lambda (item) (cons item (FVEC item)))
+				(star-obj BASIS)))
+
+		(define (get-left-vec FVEC) (get-fvec FVEC 'left-basis))
+		(define (get-right-vec FVEC) (get-fvec FVEC 'right-basis))
+
+		; --------------------
+		; Print the top-K values of the vector
 		(define (print-fvec FVEC K BASIS)
 			(define start (current-time))
-			(define vals
-				(map
-					(lambda (item) (cons item (FVEC item)))
-					(star-obj BASIS)))
 			(define sorted-vals
-					(sort vals (lambda (a b) (> (cdr a) (cdr b)))))
+				(sort
+					(get-fvec FVEC BASIS)
+					(lambda (a b) (> (cdr a) (cdr b)))))
 
 			(for-each
 				(lambda (item) (format #t "~A\n" item))
 				(take sorted-vals K))
-
-			(format #t "left-print took ~d seconds\n" (- (current-time) start))
+			(format #t "get-fvec took ~d seconds\n" (- (current-time) start))
 		)
 
 		(define (left-print FVEC K) (print-fvec FVEC K 'left-basis))
@@ -257,6 +265,8 @@
 				((right-norm)             (apply right-norm args))
 				((left-renormalize)       (apply left-renormalize args))
 				((right-renormalize)      (apply right-renormalize args))
+				((left-vec)               (apply get-left-vec args))
+				((right-vec)              (apply get-right-vec args))
 				((left-print)             (apply left-print args))
 				((right-print)            (apply right-print args))
 				(else (apply llobj        (cons message args))))))
