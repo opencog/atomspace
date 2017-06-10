@@ -85,6 +85,8 @@ protected:
      */
     void registerBackingStore(BackingStore*);
     void unregisterBackingStore(BackingStore*);
+
+public:
     bool isAttachedToBackingStore();
 
 public:
