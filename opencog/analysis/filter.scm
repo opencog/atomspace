@@ -112,8 +112,8 @@
 		; Methods on this class.
 		(lambda (message . args)
 			(case message
-				((left-stars)       (apply do-left-stars args)
-				((right-stars)      (apply do-right-stars args)
+				((left-stars)       (apply do-left-stars args))
+				((right-stars)      (apply do-right-stars args))
 				((left-basis)       (get-left-basis))
 				((right-basis)      (get-right-basis))
 				((left-basis-size)  (get-left-size))
