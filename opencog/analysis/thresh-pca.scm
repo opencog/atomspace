@@ -129,6 +129,8 @@
 		; function with an arguement to force the computation to
 		; happen.  Note that this is effectively the transpose of P.
 		(define (left-mult LEFT-FVEC)
+
+			; We are going to cache it, because we know we will hit it hard.
 			(define fvec (make-fvec-cache LEFT-FVEC))
 			(lambda (ITEM)
 				(fold
@@ -163,10 +165,10 @@
 		)
 
 		; --------------------
-
 		; Compute the normalization of the vector; that is, compute
 		; it's length.  This returns a single floating-point value.
-		; Caution: it can be extremely time-consuming!
+		; Caution: it's time-consuming, because it runs over the
+		; entire left-dimension, when it's invoked.
 		(define (left-norm FVEC)
 			(define start (current-time))
 			(define sumsq
@@ -192,9 +194,30 @@
 			(sqrt sumsq))
 
 		; --------------------
+		; Renormalize the vector.  Given the input FVEC, return an
+		; fvec that is of unit length.
+		(define (left-renormalize FVEC)
+			(define norm #f)
+			; Look we gotta call FVEC at least once; we may as well
+			; cache the result.
+			(define fvec (make-fvec-cache FVEC))
+			(lambda (ITEM)
+				(if (not norm) (set! norm (/ 1 (left-norm fvec))))
+				(* norm (fvec ITEM))))
+
+		; Same as above.
+		(define (right-renormalize FVEC)
+			(define norm #f)
+			(define fvec (make-fvec-cache FVEC))
+			(lambda (ITEM)
+				(if (not norm) (set! norm (/ 1 (right-norm fvec))))
+				(* norm (fvec ITEM))))
+
+		; --------------------
 		; Methods on this class.
 		(lambda (message . args)
 			(case message
+				((make-cache)             (apply make-fvec-cache args))
 				((left-initial)           (left-init))
 				((right-initial)          (right-init))
 				((left-mult)              (apply left-mult args))
@@ -203,6 +226,8 @@
 				((right-iterate)          (apply right-iter-once args))
 				((left-norm)              (apply left-norm args))
 				((right-norm)             (apply right-norm args))
+				((left-normalize)         (apply left-normalize args))
+				((right-normalize)        (apply right-normalize args))
 				(else (apply llobj        (cons message args))))))
 )
 
