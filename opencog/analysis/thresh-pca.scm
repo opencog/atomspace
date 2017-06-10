@@ -155,16 +155,6 @@
 					(star-obj 'right-stars ITEM))))
 
 		; --------------------
-
-		(define (left-iter-once FVEC)
-			(right-mult (left-mult FVEC))
-		)
-
-		(define (right-iter-once FVEC)
-			(left-mult (right-mult FVEC))
-		)
-
-		; --------------------
 		; Compute the normalization of the vector; that is, compute
 		; it's length.  This returns a single floating-point value.
 		; Caution: it's time-consuming, because it runs over the
@@ -214,6 +204,37 @@
 				(* norm (fvec ITEM))))
 
 		; --------------------
+
+		(define (left-iter-once FVEC)
+			(left-renormalize (right-mult (left-mult FVEC)))
+		)
+
+		(define (right-iter-once FVEC)
+			(right-renormalize (left-mult (right-mult FVEC)))
+		)
+
+		; --------------------
+		; Print the top-k values of the vector
+		(define (print-fvec FVEC K BASIS)
+			(define start (current-time))
+			(define vals
+				(map
+					(lambda (item) (cons item (FVEC item)))
+					(star-obj BASIS)))
+			(define sorted-vals
+					(sort vals (lambda (a b) (> (cdr a) (cdr b)))))
+
+			(for-each
+				(lambda (item) (format #t "~A\n" item))
+				(take sorted-vals K))
+
+			(format #t "left-print took ~d seconds\n" (- (current-time) start))
+		)
+
+		(define (left-print FVEC K) (print-fvec FVEC K 'left-basis))
+		(define (right-print FVEC K) (print-fvec FVEC K 'right-basis))
+
+		; --------------------
 		; Methods on this class.
 		(lambda (message . args)
 			(case message
@@ -226,8 +247,10 @@
 				((right-iterate)          (apply right-iter-once args))
 				((left-norm)              (apply left-norm args))
 				((right-norm)             (apply right-norm args))
-				((left-normalize)         (apply left-normalize args))
-				((right-normalize)        (apply right-normalize args))
+				((left-renormalize)       (apply left-renormalize args))
+				((right-renormalize)      (apply right-renormalize args))
+				((left-print)             (apply left-print args))
+				((right-print)            (apply right-print args))
 				(else (apply llobj        (cons message args))))))
 )
 
