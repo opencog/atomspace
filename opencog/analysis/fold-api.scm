@@ -194,16 +194,16 @@
 
 		; ---------------
 
-	; Methods on this class.
-	(lambda (message . args)
-		(case message
-			((left-stars)      (apply left-star-union args))
-			((right-stars)     (apply right-star-union args))
-			((item-pair)       (apply get-pair args))
-			((pair-count)      (apply get-func-count args))
-			((provides)        (apply provides args))
-			(else (apply llobj (cons message args))))
-		)))
+		; Methods on this class.
+		(lambda (message . args)
+			(case message
+				((left-stars)      (apply left-star-union args))
+				((right-stars)     (apply right-star-union args))
+				((item-pair)       (apply get-pair args))
+				((pair-count)      (apply get-func-count args))
+				((provides)        (apply provides args))
+				(else (apply llobj (cons message args))))
+			)))
 
 ; ---------------------------------------------------------------------
 ; ---------------------------------------------------------------------

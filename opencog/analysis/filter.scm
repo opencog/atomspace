@@ -41,15 +41,53 @@
   This object removes all columns where  N(*,y) <= LEFT-CUT and where
   N(x,*) <= RIGHT-CUT.
 "
-	(let ((llobj LLOBJ)
-			)
+	(let* ((llobj LLOBJ)
+			(stars-obj (add-pair-stars LLOBJ))
+			(cnt-obj (add-pair-count-api stars-obj))
+			(l-basis '())
+			(r-basis '())
+		)
+
+		; ---------------
+		; Filter out rows and columns that are below-count.
+		(define (do-get-left)
+			(filter
+				(lambda (ITEM)
+					(< RIGHT-CUT (cnt-obj 'right-wild-count ITEM)))
+				(stars-obj 'left-basis)))
+
+		(define (do-get-right)
+			(filter
+				(lambda (ITEM)
+					(< LEFT-CUT (cnt-obj 'left-wild-count ITEM)))
+				(stars-obj 'right-basis)))
+
+		; ---------------
+		; Use the cached value, if its there.
+		(define (get-left-basis)
+			(if (null? l-basis) (set! l-basis (do-get-left)))
+			l-basis)
+
+		(define (get-right-basis)
+			(if (null? r-basis) (set! r-basis (do-get-right)))
+			r-basis)
+
+		; ---------------
+		; Return a pointer to each method that this class overloads.
+		(define (provides meth)
+			(case meth
+				((left-basis)       get-left-basis)
+				((right-basis)      get-right-basis)
+				(else               (llobj 'provides meth))))
 
 		; -------------
 		; Methods on this class.
 		(lambda (message . args)
 			(case message
-				((filter)    (apply compute-left-product args))
-				(else            (apply llobj (cons message args))))
+				((left-basis)       (get-left-basis))
+				((right-basis)      (get-right-basis))
+				((provides)         (apply provides args))
+				(else               (apply llobj (cons message args))))
 		)))
 
 ; ---------------------------------------------------------------------
