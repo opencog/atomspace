@@ -119,12 +119,16 @@
 						(< RIGHT-CUT (cnt-obj 'left-wild-count (gdr PAIR)))))
 				(stars-obj 'right-stars ITEM)))
 
+		; Cache the results above, so that we don't recompute over and over.
+		(define cache-left-stars (make-afunc-cache do-left-stars))
+		(define cache-right-stars (make-afunc-cache do-right-stars))
+
 		; ---------------
 		; Return a pointer to each method that this class overloads.
 		(define (provides meth)
 			(case meth
-				((left-stars)       do-left-stars)
-				((right-stars)      do-right-stars)
+				((left-stars)       cache-left-stars)
+				((right-stars)      cache-right-stars)
 				((left-basis)       get-left-basis)
 				((right-basis)      get-right-basis)
 				((left-basis-size)  get-left-size)
@@ -135,8 +139,8 @@
 		; Methods on this class.
 		(lambda (message . args)
 			(case message
-				((left-stars)       (apply do-left-stars args))
-				((right-stars)      (apply do-right-stars args))
+				((left-stars)       (apply cache-left-stars args))
+				((right-stars)      (apply cache-right-stars args))
 				((left-basis)       (get-left-basis))
 				((right-basis)      (get-right-basis))
 				((left-basis-size)  (get-left-size))
