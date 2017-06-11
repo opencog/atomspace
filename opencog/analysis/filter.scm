@@ -36,8 +36,7 @@
   accept left and right wild-card pairs, and return #t if they should
   be kept.
 "
-	(let* ((llobj LLOBJ)
-			(stars-obj (add-pair-stars LLOBJ))
+	(let ((stars-obj (add-pair-stars LLOBJ))
 			(l-basis '())
 			(r-basis '())
 			(l-size 0)
@@ -48,10 +47,10 @@
 		; Filter out rows and columns that pass the left and right
 		; predicates.
 		(define (do-left-basis)
-			(filter LEFT-PRED (stars-obj 'left-basis)))
+			(filter LEFT-BASIS-PRED (stars-obj 'left-basis)))
 
 		(define (do-right-basis)
-			(filter RIGHT-PRED (stars-obj 'right-basis)))
+			(filter RIGHT-BASIS-PRED (stars-obj 'right-basis)))
 
 		; ---------------
 		; Use the cached value, if its there.
@@ -99,7 +98,7 @@
 				((right-basis)      get-right-basis)
 				((left-basis-size)  get-left-size)
 				((right-basis-size) get-right-size)
-				(else               (llobj 'provides meth))))
+				(else               (LLOBJ 'provides meth))))
 
 		; -------------
 		; Methods on this class.
@@ -112,7 +111,7 @@
 				((left-basis-size)  (get-left-size))
 				((right-basis-size) (get-right-size))
 				((provides)         (apply provides args))
-				(else               (apply llobj (cons message args))))
+				(else               (apply LLOBJ (cons message args))))
 		)))
 
 ; ---------------------------------------------------------------------
@@ -170,12 +169,12 @@
 		; See comments above: LEFT-CUT < right-wild-count is correct.
 		(define (left-stars-pred PAIR)
 			(and
-				(< PAIR-CUT (llobj 'pair-count PAIR))
+				(< PAIR-CUT (LLOBJ 'pair-count PAIR))
 				(< LEFT-CUT (cnt-obj 'right-wild-count (gar PAIR)))))
 
 		(define (right-stars-pred PAIR)
 			(and
-				(< PAIR-CUT (llobj 'pair-count PAIR))
+				(< PAIR-CUT (LLOBJ 'pair-count PAIR))
 				(< RIGHT-CUT (cnt-obj 'left-wild-count (gdr PAIR)))))
 
 		; ---------------
