@@ -196,14 +196,14 @@
 	; Filter out rows and columns in the knockout lists.
 	;
 	(define (left-basis-pred ITEM)
-		(any
+		(not (any
 			(lambda (knockout) (equal? knockout ITEM))
-			LEFT-KNOCKOUT))
+			LEFT-KNOCKOUT)))
 
 	(define (right-basis-pred ITEM)
-		(any
+		(not (any
 			(lambda (knockout) (equal? knockout ITEM))
-			RIGHT-KNOCKOUT))
+			RIGHT-KNOCKOUT)))
 
 	; ---------------
 	; Return only those stars that pass the cutoff.
