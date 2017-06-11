@@ -47,9 +47,12 @@
   Let N(*,y) be the column subtotals, AKA the left-subtotals.
   Let N(x,*) be the row subtotals, AKA the right subtotals.
 
-  This object removes all columns where  N(*,y) <= LEFT-CUT and where
-  N(x,*) <= RIGHT-CUT.  Pairs are not reported in the 'left-stars and
+  This object removes all columns where  N(*,y) <= RIGHT-CUT and where
+  N(x,*) <= LEFT-CUT.  Pairs are not reported in the 'left-stars and
   'right-stars methods when N(x,y) <= PAIR-CUT.
+
+  The net effect of the cuts is that when LEFT-CUT is increased, the
+  left-dimension of the dataset drops; likewise on the right.
 "
 	(let* ((llobj LLOBJ)
 			(stars-obj (add-pair-stars LLOBJ))
@@ -62,16 +65,20 @@
 
 		; ---------------
 		; Filter out rows and columns that are below-count.
+		;
+		; Yes, we want LEFT-CUT < right-wild-count this looks weird,
+		; but is correct: as LEFT-CUT gets larger, the size of the
+		; left-basis shrinks.
 		(define (do-left-basis)
 			(filter
 				(lambda (ITEM)
-					(< RIGHT-CUT (cnt-obj 'right-wild-count ITEM)))
+					(< LEFT-CUT (cnt-obj 'right-wild-count ITEM)))
 				(stars-obj 'left-basis)))
 
 		(define (do-right-basis)
 			(filter
 				(lambda (ITEM)
-					(< LEFT-CUT (cnt-obj 'left-wild-count ITEM)))
+					(< RIGHT-CUT (cnt-obj 'left-wild-count ITEM)))
 				(stars-obj 'right-basis)))
 
 		; ---------------
@@ -94,12 +101,14 @@
 
 		; ---------------
 		; Return only those stars that pass the cutoff.
+		;
+		; See comments above: LEFT-CUT < right-wild-count is correct.
 		(define (do-left-stars ITEM)
 			(filter
 				(lambda (PAIR)
 					(and
 						(< PAIR-CUT (llobj 'pair-count PAIR))
-						(< RIGHT-CUT (cnt-obj 'right-wild-count (gar PAIR)))))
+						(< LEFT-CUT (cnt-obj 'right-wild-count (gar PAIR)))))
 				(stars-obj 'left-stars ITEM)))
 
 		(define (do-right-stars ITEM)
@@ -107,7 +116,7 @@
 				(lambda (PAIR)
 					(and
 						(< PAIR-CUT (llobj 'pair-count PAIR))
-						(< LEFT-CUT (cnt-obj 'left-wild-count (gdr PAIR)))))
+						(< RIGHT-CUT (cnt-obj 'left-wild-count (gdr PAIR)))))
 				(stars-obj 'right-stars ITEM)))
 
 		; ---------------
