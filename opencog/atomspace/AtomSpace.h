@@ -87,6 +87,9 @@ protected:
     void unregisterBackingStore(BackingStore*);
 
 public:
+    bool isAttachedToBackingStore();
+
+public:
     AtomSpace(AtomSpace* parent = NULL, bool transient = false);
     ~AtomSpace();
 
