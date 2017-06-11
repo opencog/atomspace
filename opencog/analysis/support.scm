@@ -107,6 +107,12 @@
 
   The left-lp-norm is |sum_x N^p(x,y)|^1/p for fixed y.
 
+  The total-support is sum_x sum_y 1
+  That is, the total number of non-zero entries in the matrix.
+
+  The total-count is N(*,*) = sum_x sum_y N(x,y)
+  That is, the total of all count entries in the matrix.
+
   Here, the LLOBJ is expected to be an object, with valid
   counts associated with each pair. LLOBJ is expected to have
   working, functional methods for 'left-type and 'right-type
