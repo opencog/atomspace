@@ -179,9 +179,7 @@
 		; Return the sum of the counts on the list
 		(define (sum-count LIST)
 			(fold
-				(lambda (lopr sum)
-					(define cnt (get-cnt lopr))
-					(+ sum cnt))
+				(lambda (lopr sum) (+ sum (get-cnt lopr)))
 				0
 				LIST))
 
