@@ -247,14 +247,28 @@ bool AtomSpace::operator!=(const AtomSpace& other) const
 
 // ====================================================================
 
+bool AtomSpace::isAttachedToBackingStore()
+{
+    if (nullptr != _backing_store) return true;
+    return false;
+}
+
 void AtomSpace::registerBackingStore(BackingStore *bs)
 {
+    if (isAttachedToBackingStore())
+        throw RuntimeException(TRACE_INFO,
+            "AtomSpace is already connected to a BackingStore.");
+
     _backing_store = bs;
 }
 
 void AtomSpace::unregisterBackingStore(BackingStore *bs)
 {
-    if (bs == _backing_store) _backing_store = NULL;
+    if (not isAttachedToBackingStore())
+        throw RuntimeException(TRACE_INFO,
+            "AtomSpace is not connected to a BackingStore.");
+
+    if (bs == _backing_store) _backing_store = nullptr;
 }
 
 // ====================================================================
