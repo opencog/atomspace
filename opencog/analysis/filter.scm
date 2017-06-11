@@ -99,7 +99,7 @@
 				(lambda (PAIR)
 					(and
 						(< PAIR-CUT (llobj 'pair-count PAIR))
-						(< LEFT-CUT (cnt-obj 'left-wild-count (gar PAIR)))))
+						(< LEFT-CUT (cnt-obj 'left-wild-count (gdr PAIR)))))
 				(stars-obj 'left-stars ITEM)))
 
 		(define (do-right-stars ITEM)
