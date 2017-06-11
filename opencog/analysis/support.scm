@@ -227,6 +227,24 @@
 			(sum-lp-norm P (star-obj 'right-stars ITEM)))
 
 		; -------------
+		; Compute grand-totals for the whole matrix.
+		; These are computed from the right; there is an equivalent
+		; computation from the left that should give exactly the same
+		; results. We could/should be not lazy and doulbe-check these
+		; results in this way.
+		(define (compute-total-support)
+			(fold
+				(lambda (item sum) (+ sum (get-left-support-size item)))
+				0
+				(star-obj 'right-basis)))
+
+		(define (compute-total-count)
+			(fold
+				(lambda (item sum) (+ sum (sum-left-count item)))
+				0
+				(star-obj 'right-basis)))
+
+		; -------------
 		; Compute and cache all l_0, l_1 and l_2 norms, for later
 		; fast access.
 
@@ -276,6 +294,10 @@
 				((right-length)       (apply sum-right-length args))
 				((left-lp-norm)       (apply sum-left-lp-norm args))
 				((right-lp-norm)      (apply sum-right-lp-norm args))
+
+				((total-support)      (compute-total-support))
+				((total-count)        (compute-total-count))
+
 				((cache-all)          (cache-all))
 				(else (apply llobj    (cons message args))))
 			)))
