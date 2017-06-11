@@ -233,6 +233,11 @@
 		; ITEM should be an atom of (LLOBJ 'right-type); if it isn't,
 		; the the behavior is undefined.
 		;
+		; Currently, this implementation always goes back to the
+		; atomspace, and re-filters the results eaach time.  Some
+		; performance could be gained, at the expense of greater
+		; memory usage, by using the atom cache to save these results.
+		;
 		(define (get-left-stars ITEM)
 			(define want-type (llobj 'left-type))
 			(define pair-type (llobj 'pair-type))

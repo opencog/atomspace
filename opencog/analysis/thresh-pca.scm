@@ -76,33 +76,6 @@
 		)
 
 		; --------------------
-		; Return a caching version of FVEC.  That is, it does what FVEC
-		; would do, for the same argument; but if a cached value is
-		; available, then return just that.  Recall that the argument
-		; to FVEC is always an Atom, and the returned value is always a
-		; float, and that the call is  side-effect free, so that the
-		; cached value is always valid.
-		(define (make-fvec-cache FVEC)
-
-			; Define the local hash table we will use.
-			(define cache (make-hash-table))
-			(define fvec FVEC)
-
-			; Guile needs help computing the hash of an atom.
-			(define (atom-hash ATOM SZ)
-				(modulo (cog-handle ATOM) SZ))
-			(define (atom-assoc ATOM ALIST)
-				(find (lambda (pr) (equal? ATOM (car pr))) ALIST))
-
-			(lambda (ITEM)
-				(define val (hashx-ref atom-hash atom-assoc cache ITEM))
-				(if val val
-					(begin
-						(let ((fv (fvec ITEM)))
-							(hashx-set! atom-hash atom-assoc cache ITEM fv)
-							fv)))))
-
-		; --------------------
 		; Return an fvec of items with uniform weighting. This is a
 		; unit vector. i.e. its dot-product with itself is 1.0.
 
@@ -131,7 +104,7 @@
 		(define (left-mult LEFT-FVEC)
 
 			; We are going to cache it, because we know we will hit it hard.
-			(define fvec (make-fvec-cache LEFT-FVEC))
+			(define fvec (make-afunc-cache LEFT-FVEC))
 			(lambda (ITEM)
 				(fold
 					(lambda (PAIR sum)
@@ -144,7 +117,7 @@
 		; Just like above, but returns the function
 		;     result(x) = sum_y p(x,y) FVEC(y)
 		(define (right-mult RIGHT-FVEC)
-			(define fvec (make-fvec-cache RIGHT-FVEC))
+			(define fvec (make-afunc-cache RIGHT-FVEC))
 			(lambda (ITEM)
 				(fold
 					(lambda (PAIR sum)
@@ -190,7 +163,7 @@
 			(define norm #f)
 			; Look we gotta call FVEC at least once; we may as well
 			; cache the result.
-			(define fvec (make-fvec-cache FVEC))
+			(define fvec (make-afunc-cache FVEC))
 			(lambda (ITEM)
 				(if (not norm) (set! norm (/ 1 (left-norm fvec))))
 				(* norm (fvec ITEM))))
@@ -198,7 +171,7 @@
 		; Same as above.
 		(define (right-renormalize FVEC)
 			(define norm #f)
-			(define fvec (make-fvec-cache FVEC))
+			(define fvec (make-afunc-cache FVEC))
 			(lambda (ITEM)
 				(if (not norm) (set! norm (/ 1 (right-norm fvec))))
 				(* norm (fvec ITEM))))
@@ -254,7 +227,6 @@
 		; Methods on this class.
 		(lambda (message . args)
 			(case message
-				((make-cache)             (apply make-fvec-cache args))
 				((left-initial)           (left-init))
 				((right-initial)          (right-init))
 				((left-mult)              (apply left-mult args))
