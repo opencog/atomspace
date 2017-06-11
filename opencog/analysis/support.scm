@@ -234,21 +234,21 @@
 
 		; -------------
 		; Compute grand-totals for the whole matrix.
-		; These are computed from the right; there is an equivalent
-		; computation from the left that should give exactly the same
-		; results. We could/should be not lazy and doulbe-check these
+		; These are computed from the left; there is an equivalent
+		; computation from the right that should give exactly the same
+		; results. We could/should be not lazy and double-check these
 		; results in this way.
 		(define (compute-total-support)
 			(fold
-				(lambda (item sum) (+ sum (get-left-support-size item)))
+				(lambda (item sum) (+ sum (get-right-support-size item)))
 				0
-				(star-obj 'right-basis)))
+				(star-obj 'left-basis)))
 
 		(define (compute-total-count)
 			(fold
-				(lambda (item sum) (+ sum (sum-left-count item)))
+				(lambda (item sum) (+ sum (sum-right-count item)))
 				0
-				(star-obj 'right-basis)))
+				(star-obj 'left-basis)))
 
 		; -------------
 		; Compute and cache all l_0, l_1 and l_2 norms, for later
