@@ -70,6 +70,13 @@
   with plain-old frequencies.  But you can get fancier if you wish.
   Using the MI could be interesting, for example: this would result in
   a MaxEnt style computation, instead of a PCA-style computation.
+
+  Methods:
+  'make-left-unit ITEM-LIST: Given a list of items from the left, create
+            a unit vector, in which only the those items on the list are
+            non-zero. That is, those vector elements have a value of
+            1 / sqrt (length ITEM-LIST).
+
 "
 	(let ((llobj LLOBJ)
 			(star-obj (add-pair-stars LLOBJ))
@@ -81,18 +88,18 @@
 
 		; What this actually returns is a function, that when
 		; called with any argument, returns a constant.
-		(define (unit-fvec BASIS-SIZE)
-			(define weight (/ 1 (sqrt BASIS-SIZE)))
+		(define (unit-fvec ELT-LIST)
+			(define weight (/ 1 (sqrt (length ELT-LIST))))
+			(lambda (ITEM)
+				(if (any (lambda (elt) (equal? elt ITEM)) ELT-LIST)
+					weight  0.0)))
 
-			(lambda (ITEM) weight))
-
-		; Apply equal weighting to all elements of the left-basis
-		; This is the starting vector for one step of left-iterate.
-		(define (left-init)
-			(unit-fvec (star-obj 'left-basis-size)))
-
-		(define (right-init)
-			(unit-fvec (star-obj 'right-basis-size)))
+		; Apply equal weighting to all elements specified in the
+		; ELT-LIST. It's expected, (but not checked) that all
+		; elements in ELT-LIST belong either to (star-obj 'left-basis)
+		; or to (star-obj 'right-basis), as appropriate
+		(define (make-unit ELT-LIST)
+			(make-afunc-cache (unit-fvec ELT-LIST)))
 
 		; --------------------
 		; Multiply matrix on the left by FVEC.  That is, return the
@@ -227,8 +234,8 @@
 		; Methods on this class.
 		(lambda (message . args)
 			(case message
-				((left-initial)      (left-init))
-				((right-initial)     (right-init))
+				((make-left-unit)    (apply make-unit args))
+				((make-right-unit)   (apply make-unit args))
 				((left-mult)         (apply left-mult args))
 				((right-mult)        (apply right-mult args))
 				((left-iterate)      (apply left-iter args))
