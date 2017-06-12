@@ -61,13 +61,13 @@
 	(define (mintu TUPLE)  (min (first TUPLE) (second TUPLE)))
 	(define (maxtu TUPLE)  (max (first TUPLE) (second TUPLE)))
 
-	(let ((star-obj (add-pair-stars LLOBJ))
-			(supp-obj (add-support-api LLOBJ))
+	(let* ((star-obj (add-pair-stars LLOBJ))
+			(supp-obj (add-support-api star-obj))
 			(min-obj  (add-support-compute
-				(add-tuple-math LLOBJ mintu GET-CNT)))
+				(add-tuple-math star0obj mintu GET-CNT)))
 			(max-obj  (add-support-compute
-				(add-tuple-math LLOBJ maxtu GET-CNT)))
-			(get-cnt (lambda (x) (LLOBJ GET-CNT x))))
+				(add-tuple-math star-obj maxtu GET-CNT)))
+			(get-cnt (lambda (x) (LLOBJ GET-CNT x)))
 		)
 
 		; -------------
