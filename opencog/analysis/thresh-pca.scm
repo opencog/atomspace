@@ -258,23 +258,42 @@
 
   which has the property that L(x,y) is a vector of unit length when y is
   treated as a paramter (i.e. when y is held fixed).  The dot-product of
-  two unit-length vectors is just the cosine of teh angle between them, and
+  two unit-length vectors is just the cosine of the angle between them, and
   so this can be used to construct the left cosine-similarity as
 
      sim(y_1, y_2) = sum_x L(x, y_1) L(x, y_2)
 
   We call it the "left similarity" to emphasize that the summation is
   taking place over the left index.
+
+  The LLOBJ object needs to provide the 'pair-freq method.
 "
-	(let ((llobj LLOBJ)
-			(star-obj (add-pair-stars LLOBJ))
+	(let* ((star-obj (add-pair-stars LLOBJ))
+			(supp-obj (add-support-compute star-obj))
 		)
+
+		; --------------------
+		(define (do-left-unit PAIR)
+			(define frq (LLOBJ 'pair-freq PAIR))
+			(define len (supp-obj 'left-length (gdr PAIR)))
+			(/ frq len)
+		)
+
+		(define (do-right-unit PAIR)
+			(define frq (LLOBJ 'pair-freq PAIR))
+			(define len (supp-obj 'right-length (gar PAIR)))
+			(/ frq len)
+		)
+
+		(define cache-left-unit (make-afunc-cache do-left-unit))
+		(define cache-right-unit (make-afunc-cache do-right-unit))
+
 		; --------------------
 		; Methods on this class.
 		(lambda (message . args)
 			(case message
-				((left-unit)         (apply left-unit args))
-				((right-unit)        (apply right-unit args))
+				((left-unit)         (apply cache-left-unit args))
+				((right-unit)        (apply cache-right-unit args))
 				(else                (apply llobj (cons message args))))))
 )
 
