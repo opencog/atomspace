@@ -263,7 +263,7 @@
 
      sim(y_1, y_2) = sum_x L(x, y_1) L(x, y_2)
 
-  We call it the "left similarity" to emphasize that the summation is
+  We call it the 'left similarity' to emphasize that the summation is
   taking place over the left index.
 
   The LLOBJ object needs to provide the 'pair-freq method.
@@ -294,7 +294,7 @@
 			(case message
 				((left-unit)         (apply cache-left-unit args))
 				((right-unit)        (apply cache-right-unit args))
-				(else                (apply llobj (cons message args))))))
+				(else                (apply LLOBJ (cons message args))))))
 )
 
 ; ---------------------------------------------------------------------
