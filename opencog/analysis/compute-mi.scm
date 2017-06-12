@@ -270,7 +270,7 @@
 				((compute-total-count)    (compute-total-count))
 				((cache-total-count)      (cache-total-count))
 				(else (apply llobj        (cons message args))))
-			))
+		))
 )
 
 ; ---------------------------------------------------------------------

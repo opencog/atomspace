@@ -1,6 +1,6 @@
 
-Correlation Matrix Analysis Tools
-=================================
+Correlation/Covariance Matrix Analysis Tools
+============================================
 
 In this project, there's a generic theme of "pairs of things" that
 are statistically related. These can be pairs of words, they can be
@@ -36,6 +36,60 @@ The count can be stored anywhere, as the `'pair-count` method is used
 to obtain it.  In most cases, it is simply stored in a CountTruthValue
 attached to the EvaluationLink.  It's doesn't have to be, it could be
 placed elsewhere.
+
+The core idea is that the atomspace can hold sparse matrix data; in a
+certain sense, it was designed from the get-go to do exactly that. Once
+you can see that its a matrix, you can then apply a variety of generic
+matrix analysis tools to it.  The tools implemented here include:
+
+*) row and column subtotals
+*) computing and caching frequencies from counts.
+*) computing and caching mutual information between rows and columns
+*) computing cosine similarity between rows or columns.
+*) performing PCA (principal component analysis) in the matrix.
+
+Planed, not implemented:
+*) performing a minimum spanning tree parse (MST parse) based on
+   athe pairwise distance measures held in the matrix.
+
+FAQ
+---
+Q: Why isn't this in C++?  Surely, numericaal computations would be
+   a lot faster in C++, right?
+
+A: Its not yet clear just, what, exactly, is to be accomplished here,
+   and what the dominant, important data structures are, here. Once
+   it becomes clear what the important calculations are, these can be
+   optimized (i.e. re-implemented in C++). But for now, flexibility,
+   fast developement and the ability to run experiments quickly is more
+   important than speed of calculations.
+
+Q: Really? It sounds like you don't know what you are doing.
+
+A: All of the matrixes are sparse. That means that the most efficient
+   kind of calculation is lazy-evaluation: don't compute a value, until
+   it is asked for.  Lazy evaluation requires recursion: its something
+   that functional langguages like scheme are good at, and C++ is
+   terrible at. Thus, some lazy evaluation could easily end up being
+   faster than brute-force, compute-everything-up-front in C++.
+
+Q: Why don't you just export all your data to SciPy or to Gnu R, or to
+   Octave, or MatLab, for that matter, and just do your data analysis
+   there?  That way, you don't need to re-implement all these basic
+   statistical algorithms.
+
+A: That sounds nice, but frankly, it's too much work for me. Maybe you
+   can do this.  Seriously, its just a lot easier (for me) to create
+   and use the code here, than to struggle mightlily with those packages.
+
+   Also: realize that the end-goal of opencog is not to export data
+   once, analyze it once, and be done. Rather, the goal is to constantly
+   and continuously monitor external, real-world events, pull them into
+   the atomspace, crunch it incessently, and update knowledge of the
+   external world as a result. This rules out GUI tools for data
+   processing (because there's no GUI in a server) and it rules out
+   popsicle-stick architectures as being a bit hokey.
+
 
 Generic Programming
 -------------------
@@ -184,6 +238,23 @@ functions to arebitrary sets of rows or columns. The simplest examples
 include taking the sums and differences of columns, taking the
 element-by-element min or max of a set of columns, counting the number
 of entries that are simultaneously non-zero in sets of columns, etc.
+
+
+Principle Component Analysis
+----------------------------
+A power iteration object is provided by the `make-power-iter-pca` object.
+Once a matrix X has been specified, this will iterate on either X^T X
+or on XX^T for K iterations.  The result of this iteration is the principal
+component of X (equivalently, the Frobenius-Peron eigenvector of X^T X
+or XX^T).
+
+The code designed to work fast for sparse matrices, and can obtain
+eigenvectors in under 20 seconds or so for 15K by 15K matrices with
+100K non-zero entries.
+
+The code is beta, in active development: only a bare minimum of function
+is provided.
+
 
 Tensors, in general
 -------------------

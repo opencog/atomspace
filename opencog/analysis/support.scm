@@ -107,6 +107,12 @@
 
   The left-lp-norm is |sum_x N^p(x,y)|^1/p for fixed y.
 
+  The total-support is sum_x sum_y 1
+  That is, the total number of non-zero entries in the matrix.
+
+  The total-count is N(*,*) = sum_x sum_y N(x,y)
+  That is, the total of all count entries in the matrix.
+
   Here, the LLOBJ is expected to be an object, with valid
   counts associated with each pair. LLOBJ is expected to have
   working, functional methods for 'left-type and 'right-type
@@ -173,9 +179,7 @@
 		; Return the sum of the counts on the list
 		(define (sum-count LIST)
 			(fold
-				(lambda (lopr sum)
-					(define cnt (get-cnt lopr))
-					(+ sum cnt))
+				(lambda (lopr sum) (+ sum (get-cnt lopr)))
 				0
 				LIST))
 
@@ -227,6 +231,24 @@
 			(sum-lp-norm P (star-obj 'right-stars ITEM)))
 
 		; -------------
+		; Compute grand-totals for the whole matrix.
+		; These are computed from the left; there is an equivalent
+		; computation from the right that should give exactly the same
+		; results. We could/should be not lazy and double-check these
+		; results in this way.
+		(define (compute-total-support)
+			(fold
+				(lambda (item sum) (+ sum (get-right-support-size item)))
+				0
+				(star-obj 'left-basis)))
+
+		(define (compute-total-count)
+			(fold
+				(lambda (item sum) (+ sum (sum-right-count item)))
+				0
+				(star-obj 'left-basis)))
+
+		; -------------
 		; Compute and cache all l_0, l_1 and l_2 norms, for later
 		; fast access.
 
@@ -276,6 +298,10 @@
 				((right-length)       (apply sum-right-length args))
 				((left-lp-norm)       (apply sum-left-lp-norm args))
 				((right-lp-norm)      (apply sum-right-lp-norm args))
+
+				((total-support)      (compute-total-support))
+				((total-count)        (compute-total-count))
+
 				((cache-all)          (cache-all))
 				(else (apply llobj    (cons message args))))
 			)))
