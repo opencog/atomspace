@@ -83,16 +83,15 @@
 ; ---------------------------------------------------------------------
 ;
 (define*-public (add-tuple-math LLOBJ FUNC
-	#:optional (GET-CNT (lambda (x) (LLOBJ 'pair-count x))))
+	#:optional (GET-CNT 'pair-count))
 "
   add-tuple-math LLOBJ FUNC - Extend LLOBJ with ability to take
   tuples of items, and then call FUNC on that tuple, whenever
   the 'pair-count method is invoked.
 "
-	(let ((llobj LLOBJ)
-			(star-obj (add-pair-stars LLOBJ))
+	(let ((star-obj (add-pair-stars LLOBJ))
 			(sum-func FUNC)
-			(get-cnt GET-CNT)
+			(get-cnt (lambda (x) (LLOBJ GET-CNT)))
 		)
 
 		; ---------------
@@ -116,13 +115,13 @@
 		; in the TUPLE.  If such a pair does not exist, the
 		; returned tuple will contain an empty list at that locus.
 		(define (get-left-lopr-tuple LEFTY TUPLE)
-			(define prty (llobj 'pair-type))
+			(define prty (LLOBJ 'pair-type))
 			(map
 				(lambda (rght) (cog-link prty LEFTY rght))
 				TUPLE))
 
 		(define (get-right-lopr-tuple RIGHTY TUPLE)
-			(define prty (llobj 'pair-type))
+			(define prty (LLOBJ 'pair-type))
 			(map
 				(lambda (left) (cog-link prty left RIGHTY))
 				TUPLE))
@@ -171,7 +170,7 @@
 		; Given a TUPLE of low-level pairs, return a tuple of high-level
 		; pairs.
 		(define (get-pair TUPLE)
-			(map (lambda (lopr) (llobj 'item-pair lopr)) TUPLE))
+			(map (lambda (lopr) (LLOBJ 'item-pair lopr)) TUPLE))
 
 		; Given a TUPLE of high-level pairs, return a single number.
 		; The sum-func is applied to reduce the counts on each pair
@@ -186,11 +185,11 @@
 		; Return a pointer to each method that this class overloads.
 		(define (provides meth)
 			(case meth
-				((left-stars) left-star-union)
+				((left-stars)  left-star-union)
 				((right-stars) right-star-union)
-				((item-pair) get-pair)
-				((pair-count) get-func-count)
-				(else (llobj 'provides meth))))
+				((item-pair)   get-pair)
+				((pair-count)  get-func-count)
+				(else          (LLOBJ 'provides meth))))
 
 		; ---------------
 
@@ -202,7 +201,7 @@
 				((item-pair)       (apply get-pair args))
 				((pair-count)      (apply get-func-count args))
 				((provides)        (apply provides args))
-				(else (apply llobj (cons message args))))
+				(else              (apply LLOBJ (cons message args))))
 			)))
 
 ; ---------------------------------------------------------------------

@@ -78,13 +78,13 @@
 				((right-length)       (apply get-right-length args))
 				((set-left-norms)     (apply set-left-norms args))
 				((set-right-norms)    (apply set-right-norms args))
-				(else (apply llobj    (cons message args))))
+				(else                 (apply llobj (cons message args))))
 			)))
 
 ; ---------------------------------------------------------------------
 
 (define*-public (add-support-compute LLOBJ
-	 #:optional (GET-CNT (lambda (x) (LLOBJ 'pair-count x))))
+	 #:optional (GET-CNT 'pair-count))
 "
   add-support-compute LLOBJ - Extend LLOBJ with methods to
   compute wild-card sums, including the support (lp-norm for p=0),
@@ -113,24 +113,21 @@
   The total-count is N(*,*) = sum_x sum_y N(x,y)
   That is, the total of all count entries in the matrix.
 
-  Here, the LLOBJ is expected to be an object, with valid
-  counts associated with each pair. LLOBJ is expected to have
-  working, functional methods for 'left-type and 'right-type
-  on it.
+  Here, the LLOBJ is expected to be an object, with valid counts
+  associated with each pair. LLOBJ is expected to have working,
+  functional methods for 'left-type and 'right-type on it.
 
-  By default, the N(x,y) is taken to be the 'get-count method
-  on LLOBJ, i.e. it is literally the count. The optional argument
-  GET-CNT allows this to be over-ridden with any other method
-  that returns a number.  For example, to compute the lengths
-  and norms for frequencies, pass this lambda as the second
-  argument:
-     (lambda (x) ((add-pair-freq-api LLOBJ) 'pair-freq x))
-  Any function that takes a pair and returns a number is allowed.
+  By default, the N(x,y) is taken to be the 'get-count method on LLOBJ,
+  i.e. it is literally the count. The optional argument GET-CNT allows
+  this to be over-ridden with any other method that returns a number.
+  For example, to compute the lengths and norms for frequencies, simply
+  pass 'pair-freq as the second argument: Any method that takes a pair
+  and returns a number is allowed.
 "
-	(let ((llobj LLOBJ)
-			(star-obj (add-pair-stars LLOBJ))
+	(let ((star-obj (add-pair-stars LLOBJ))
 			(api-obj (add-support-api LLOBJ))
-			(get-cnt GET-CNT))
+			(get-cnt (lambda (x) (LLOBJ GET-CNT x)))
+		)
 
 		; -------------
 		; Given a list of low-level pairs, return list of high-level
@@ -139,7 +136,7 @@
 			(filter-map
 				(lambda (lopr)
 					; 'item-pair returns the atom holding the count
-					(define hipr (llobj 'item-pair lopr))
+					(define hipr (LLOBJ 'item-pair lopr))
 					(define cnt (get-cnt lopr))
 					(if (< 0 cnt) hipr #f))
 				LIST))
@@ -303,7 +300,7 @@
 				((total-count)        (compute-total-count))
 
 				((cache-all)          (cache-all))
-				(else (apply llobj    (cons message args))))
+				(else                 (apply LLOBJ (cons message args))))
 			)))
 
 ; ---------------------------------------------------------------------

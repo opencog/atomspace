@@ -18,7 +18,7 @@
 ; ---------------------------------------------------------------------
 
 (define*-public (add-pair-cosine-compute LLOBJ
-	#:optional (GET-CNT (lambda (x) (LLOBJ 'pair-count x))))
+	#:optional (GET-CNT 'pair-count))
 "
   add-pair-cosine-compute LLOBJ - Extend LLOBJ with methods to compute
   vector dot-products and cosine angles.  None of these use cached
@@ -45,38 +45,35 @@
       left-jacc-sim(y,z) = sum_x min (N(x,y), N(x,z)) /
                sum_x max (N(x,y), N(x,z))
 
-  Here, the LLOBJ is expected to be an object, with valid
-  counts associated with each pair. LLOBJ is expected to have
-  working, functional methods for 'left-type and 'right-type
-  on it.
+  Here, the LLOBJ is expected to be an object, with valid counts
+  associated with each pair. LLOBJ is expected to have working,
+  functional methods for 'left-type and 'right-type on it.
 
-  By default, the N(x,y) is taken to be the 'get-count method
-  on LLOBJ, i.e. it is literally the count. The optional argument
-  GET-CNT allows this to be over-ridden with any other method
-  that returns a number.  For example, to compute the lengths
-  and norms for frequencies, pass this lambda as the second
-  argument:
-     (lambda (x) ((add-pair-freq-api LLOBJ) 'pair-freq x))
-  Any function that takes a pair and returns a number is allowed.
+  By default, the N(x,y) is taken to be the 'get-count method on LLOBJ,
+  i.e. it is literally the count. The optional argument GET-CNT allows
+  this to be over-ridden with any other method that returns a number.
+  For example, to compute the lengths and norms for frequencies, pass
+  'pair-freq as the second argument.  Any method that takes a pair and
+  returns a number is allowed.
 "
 
 	; Min and max of individual elements
 	(define (mintu TUPLE)  (min (first TUPLE) (second TUPLE)))
 	(define (maxtu TUPLE)  (max (first TUPLE) (second TUPLE)))
 
-	(let ((llobj LLOBJ)
-			(star-obj (add-pair-stars LLOBJ))
+	(let ((star-obj (add-pair-stars LLOBJ))
 			(supp-obj (add-support-api LLOBJ))
 			(min-obj  (add-support-compute
 				(add-tuple-math LLOBJ mintu GET-CNT)))
 			(max-obj  (add-support-compute
 				(add-tuple-math LLOBJ maxtu GET-CNT)))
-			(get-cnt GET-CNT))
+			(get-cnt (lambda (x) (LLOBJ GET-CNT x))))
+		)
 
 		; -------------
 		; Given the low-level pair LOPR, return the numeric count for it.
 		(define (get-lo-cnt LOPR)
-			(get-cnt (llobj 'item-pair LOPR)))
+			(get-cnt (LLOBJ 'item-pair LOPR)))
 
 		; Compute the dot-product, summing over items from the
 		; LIST, (which are pairs containing ITEM-A) and using the
@@ -100,7 +97,7 @@
 		; Return the low-level pair (x,y) if it exists, else
 		; return the empty list '()
 		(define (have-lopr? X Y)
-			(cog-link (llobj 'pair-type) X Y))
+			(cog-link (LLOBJ 'pair-type) X Y))
 
 		; Get the "other pair", for lefty wild
 		(define (get-other-left LOPR OTHER)
@@ -151,17 +148,17 @@
 			(- 1.0 (/ right-min right-max))
 		)
 
-	; -------------
-	; Methods on this class.
-	(lambda (message . args)
-		(case message
-			((left-product)    (apply compute-left-product args))
-			((right-product)   (apply compute-right-product args))
-			((left-cosine)     (apply compute-left-cosine args))
-			((right-cosine)    (apply compute-right-cosine args))
-			((left-jaccard)    (apply compute-left-jaccard-dist args))
-			((right-jaccard)   (apply compute-right-jaccard-dist args))
-			(else (apply llobj (cons message args))))
-		)))
+		; -------------
+		; Methods on this class.
+		(lambda (message . args)
+			(case message
+				((left-product)    (apply compute-left-product args))
+				((right-product)   (apply compute-right-product args))
+				((left-cosine)     (apply compute-left-cosine args))
+				((right-cosine)    (apply compute-right-cosine args))
+				((left-jaccard)    (apply compute-left-jaccard-dist args))
+				((right-jaccard)   (apply compute-right-jaccard-dist args))
+				(else              (apply LLOBJ (cons message args))))
+			)))
 
 ; ---------------------------------------------------------------------
