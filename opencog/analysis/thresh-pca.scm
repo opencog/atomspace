@@ -58,16 +58,16 @@
 
 ; ---------------------------------------------------------------------
 
-(define*-public (make-thresh-pca LLOBJ #:optional
+(define*-public (make-power-iter-pca LLOBJ #:optional
 	; Default is to use the pair-freq method
 	(get-value 'pair-freq))
 "
-  make-thresh-pca LLOBJ - Do the thresholding PCA thing.
+  make-power-iter-pca LLOBJ - Implement a power-iteration form of PCA.
 
   Optionally, the name of a method can be supplied, from which the matrix
   values will be fetched.  If not supplied, it defaults to 'pair-freq,
-  and so this object can be used with the default pair-freq-api object
-  to work with plain-old frequencies.  But you can get fancier if yo wish.
+  and so this object can be used with the default freq-api object to work
+  with plain-old frequencies.  But you can get fancier if you wish.
   Using the MI could be interesting, for example: this would result in
   a MaxEnt style computation, instead of a PCA-style computation.
 "
@@ -227,21 +227,55 @@
 		; Methods on this class.
 		(lambda (message . args)
 			(case message
-				((left-initial)           (left-init))
-				((right-initial)          (right-init))
-				((left-mult)              (apply left-mult args))
-				((right-mult)             (apply right-mult args))
-				((left-iterate)           (apply left-iter args))
-				((right-iterate)          (apply right-iter args))
-				((left-norm)              (apply left-norm args))
-				((right-norm)             (apply right-norm args))
-				((left-renormalize)       (apply left-renormalize args))
-				((right-renormalize)      (apply right-renormalize args))
-				((left-vec)               (apply get-left-vec args))
-				((right-vec)              (apply get-right-vec args))
-				((left-print)             (apply left-print args))
-				((right-print)            (apply right-print args))
-				(else (apply llobj        (cons message args))))))
+				((left-initial)      (left-init))
+				((right-initial)     (right-init))
+				((left-mult)         (apply left-mult args))
+				((right-mult)        (apply right-mult args))
+				((left-iterate)      (apply left-iter args))
+				((right-iterate)     (apply right-iter args))
+				((left-norm)         (apply left-norm args))
+				((right-norm)        (apply right-norm args))
+				((left-renormalize)  (apply left-renormalize args))
+				((right-renormalize) (apply right-renormalize args))
+				((left-vec)          (apply get-left-vec args))
+				((right-vec)         (apply get-right-vec args))
+				((left-print)        (apply left-print args))
+				((right-print)       (apply right-print args))
+				(else                (apply llobj (cons message args))))))
+)
+
+; ---------------------------------------------------------------------
+
+(define-public (make-cosine-matrix LLOBJ)
+"
+  make-cosine-matrix LLOBJ - Provide a cosine-matrix form of LLOBJ.
+
+  Given an LLOBJ whose 'pair-freq returns values p(x,y), one can define
+  another matrix such that the rows or columns are normailized to be unit
+  vectors.  That is, one can define the left-unit
+
+     L(x,y) = p(x,y) / sqrt(sum_u p^2(u,y))
+
+  which has the property that L(x,y) is a vector of unit length when y is
+  treated as a paramter (i.e. when y is held fixed).  The dot-product of
+  two unit-length vectors is just the cosine of teh angle between them, and
+  so this can be used to construct the left cosine-similarity as
+
+     sim(y_1, y_2) = sum_x L(x, y_1) L(x, y_2)
+
+  We call it the "left similarity" to emphasize that the summation is
+  taking place over the left index.
+"
+	(let ((llobj LLOBJ)
+			(star-obj (add-pair-stars LLOBJ))
+		)
+		; --------------------
+		; Methods on this class.
+		(lambda (message . args)
+			(case message
+				((left-unit)         (apply left-unit args))
+				((right-unit)        (apply right-unit args))
+				(else                (apply llobj (cons message args))))))
 )
 
 ; ---------------------------------------------------------------------
