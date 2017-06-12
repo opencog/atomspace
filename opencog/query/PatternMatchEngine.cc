@@ -324,16 +324,6 @@ bool PatternMatchEngine::ordered_compare(const PatternTermPtr& ptm,
 					break;
 				}
 
-				// If up to this point there are still atoms in
-				// either osp or osg, this is probably not a
-				// match, so reject it.
-				if ((ip+1 == osp_size and jg+1 < osg_size) or
-				    (ip+1 < osp_size  and jg+1 == osg_size))
-				{
-					match = false;
-					break;
-				}
-
 				// If we are here, we've got a match; record the glob.
 				LinkPtr glp(createLink(glob_seq, LIST_LINK));
 				var_grounding[glob->getHandle()] = glp->getHandle();
@@ -341,8 +331,11 @@ bool PatternMatchEngine::ordered_compare(const PatternTermPtr& ptm,
 			else
 			{
 				// If we are here, we are not comparing to a glob.
-				tc = tree_compare(osp[ip], osg[jg], CALL_ORDER);
-				if (not tc)
+
+				// If we have already gone through all the atoms in
+				// the candidate, or the current pair does not match,
+				// reject it.
+				if (grd_end or not tree_compare(osp[ip], osg[jg], CALL_ORDER))
 				{
 					match = false;
 					break;
