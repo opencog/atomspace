@@ -64,7 +64,7 @@
 	(let* ((star-obj (add-pair-stars LLOBJ))
 			(supp-obj (add-support-api star-obj))
 			(min-obj  (add-support-compute
-				(add-tuple-math star0obj mintu GET-CNT)))
+				(add-tuple-math star-obj mintu GET-CNT)))
 			(max-obj  (add-support-compute
 				(add-tuple-math star-obj maxtu GET-CNT)))
 			(get-cnt (lambda (x) (LLOBJ GET-CNT x)))
