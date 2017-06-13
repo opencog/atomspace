@@ -23,7 +23,9 @@
 ; ---------------------------------------------------------------------
 
 (define-public (add-generic-filter LLOBJ
-	LEFT-BASIS-PRED RIGHT-BASIS-PRED LEFT-STAR-PRED RIGHT-STAR-PRED)
+	LEFT-BASIS-PRED RIGHT-BASIS-PRED
+	LEFT-STAR-PRED RIGHT-STAR-PRED
+	PAIR-PRED)
 "
   add-generic-filter LLOBJ - Modify LLOBJ so that only the columns and
   rows that satisfy the predicates are retained.
@@ -35,6 +37,10 @@
   The LEFT-STAR-PRED and RIGHT-STAR-PRED should be functions that
   accept left and right wild-card pairs, and return #t if they should
   be kept.
+
+  The PAIR-PRED should be a function to that accepts individual matrix
+  entries. It is applied whenever the 'item-pair or 'pair-count methods
+  are invoked.  Like the others, it should return #t to keep the pair.
 "
 	(let ((stars-obj (add-pair-stars LLOBJ))
 			(l-basis '())
@@ -73,20 +79,29 @@
 		; ---------------
 		; Return only those stars that pass the cutoff.
 		;
-		; See comments above: LEFT-CUT < right-wild-count is correct.
 		(define (do-left-stars ITEM)
 			(filter
-				(lambda (PAIR) LEFT-STAR-PRED)
+				(lambda (PAIR)
+					(and (LEFT-STAR-PRED PAIR) (PAIR-PRED PAIR)))
 				(stars-obj 'left-stars ITEM)))
 
 		(define (do-right-stars ITEM)
 			(filter
-				(lambda (PAIR) RIGHT-STAR-PRED)
+				(lambda (PAIR)
+					(and (RIGHT-STAR-PRED PAIR) (PAIR-PRED PAIR)))
 				(stars-obj 'right-stars ITEM)))
 
 		; Cache the results above, so that we don't recompute over and over.
 		(define cache-left-stars (make-afunc-cache do-left-stars))
 		(define cache-right-stars (make-afunc-cache do-right-stars))
+
+		; ---------------
+		; Apply the pair-cut to each pair.
+		(define (get-item-pair PAIR)
+			(if (PAIR-PRED PAIR) (LLOBJ 'item-pair PAIR) '()))
+
+		(define (get-pair-count PAIR)
+			(if (PAIR-PRED PAIR) (LLOBJ 'pair-count PAIR) 0))
 
 		; ---------------
 		; Return a pointer to each method that this class overloads.
@@ -110,6 +125,8 @@
 				((right-basis)      (get-right-basis))
 				((left-basis-size)  (get-left-size))
 				((right-basis-size) (get-right-size))
+				((item-pair)        (get-item-pair))
+				((pair-count)       (get-pair-count))
 				((provides)         (apply provides args))
 				(else               (apply LLOBJ (cons message args))))
 		)))
@@ -168,19 +185,19 @@
 		;
 		; See comments above: LEFT-CUT < right-wild-count is correct.
 		(define (left-stars-pred PAIR)
-			(and
-				(< PAIR-CUT (LLOBJ 'pair-count PAIR))
-				(< LEFT-CUT (cnt-obj 'right-wild-count (gar PAIR)))))
+			(< LEFT-CUT (cnt-obj 'right-wild-count (gar PAIR))))
 
 		(define (right-stars-pred PAIR)
-			(and
-				(< PAIR-CUT (LLOBJ 'pair-count PAIR))
-				(< RIGHT-CUT (cnt-obj 'left-wild-count (gdr PAIR)))))
+			(< RIGHT-CUT (cnt-obj 'left-wild-count (gdr PAIR))))
+
+		(define (pair-pred PAIR)
+			(< PAIR-CUT (LLOBJ 'pair-count PAIR)))
 
 		; ---------------
 		(add-generic-filter LLOBJ
 			left-basis-pred right-basis-pred
-			left-stars-pred right-stars-pred)
+			left-stars-pred right-stars-pred
+			pair-pred)
 	)
 )
 
@@ -206,18 +223,20 @@
 
 	; ---------------
 	; Return only those stars that pass the cutoff.
-	;
-	; See comments above: LEFT-CUT < right-wild-count is correct.
 	(define (left-stars-pred PAIR)
 		(left-basis-pred (gar PAIR)))
 
 	(define (right-stars-pred PAIR)
 		(right-basis-pred (gdr PAIR)))
 
+	(define (pair-pred PAIR)
+		(and (left-stars-pred PAIR) (right-stars-pred PAIR)))
+
 	; ---------------
 	(add-generic-filter LLOBJ
 		left-basis-pred right-basis-pred
-		left-stars-pred right-stars-pred)
+		left-stars-pred right-stars-pred
+		pair-pred)
 )
 
 ; ---------------------------------------------------------------------
