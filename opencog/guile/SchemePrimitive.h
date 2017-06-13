@@ -658,80 +658,14 @@ class SchemePrimitive : public PrimitiveEnviron
 		DECLARE_CONSTR_0(V_V,   v_v,  void);
 };
 
-#define DECLARE_DECLARE_1(RET,ARG) \
-template<class T> \
-inline void define_scheme_primitive(const char *name, RET (T::*cb)(ARG), T *data, const char* module = "extension") \
-{ \
-	/* Note: this is freed automatically by scheme garbage collection */ \
-	/* when it is no longer needed. */ \
-	new SchemePrimitive<T>(module, name, cb, data); \
+template<class T, typename M>
+inline void define_scheme_primitive(const char *name, M method, T *data, const char* module = "extension")
+{
+	/* Note: this is freed automatically by scheme garbage collection */
+	/* when it is no longer needed. */
+	new SchemePrimitive<T>(module, name, method, data);
 }
 
-#define DECLARE_DECLARE_2(RET,ARG1,ARG2) \
-template<class T> \
-inline void define_scheme_primitive(const char *name, RET (T::*cb)(ARG1,ARG2), T *data, const char* module = "extension") \
-{ \
-	/* Note: this is freed automatically by scheme garbage collection */ \
-	/* when it is no longer needed. */ \
-	new SchemePrimitive<T>(module, name, cb, data); \
-}
-
-#define DECLARE_DECLARE_3(RET,ARG1,ARG2,ARG3) \
-template<class T> \
-inline void define_scheme_primitive(const char *name, RET (T::*cb)(ARG1,ARG2,ARG3), T *data, const char* module = "extension") \
-{ \
-	/* Note: this is freed automatically by scheme garbage collection */ \
-	/* when it is no longer needed. */ \
-	new SchemePrimitive<T>(module, name, cb, data); \
-}
-
-#define DECLARE_DECLARE_4(RET,ARG1,ARG2,ARG3,ARG4) \
-template<class T> \
-inline void define_scheme_primitive(const char *name, RET (T::*cb)(ARG1,ARG2,ARG3,ARG4), T *data, const char* module = "extension") \
-{ \
-	/* Note: this is freed automatically by scheme garbage collection */ \
-	/* when it is no longer needed. */ \
-	new SchemePrimitive<T>(module, name, cb, data); \
-}
-
-DECLARE_DECLARE_1(bool, bool)
-DECLARE_DECLARE_1(Handle, Handle)
-DECLARE_DECLARE_1(HandleSeq, Handle)
-DECLARE_DECLARE_1(HandleSeqSeq, Handle)
-DECLARE_DECLARE_1(int, void)
-DECLARE_DECLARE_1(std::string, int)
-DECLARE_DECLARE_1(std::string, bool)
-DECLARE_DECLARE_1(std::string, const std::string&)
-DECLARE_DECLARE_1(std::string, void)
-DECLARE_DECLARE_1(TruthValuePtr, Handle)
-DECLARE_DECLARE_1(void, bool)
-DECLARE_DECLARE_1(void, Handle)
-DECLARE_DECLARE_1(void, int)
-DECLARE_DECLARE_1(void, const std::string&)
-DECLARE_DECLARE_1(void, Type)
-DECLARE_DECLARE_1(void, void)
-
-DECLARE_DECLARE_2(bool, Handle, Handle)
-DECLARE_DECLARE_2(Handle, Handle, Handle)
-DECLARE_DECLARE_2(Handle, Handle, const std::string&)
-DECLARE_DECLARE_2(Handle, Handle, Type)
-DECLARE_DECLARE_2(Handle, Handle, size_t)
-DECLARE_DECLARE_2(Handle, const std::string&, const HandleSeq&)
-DECLARE_DECLARE_2(std::string, AtomSpace*, const std::string&)
-DECLARE_DECLARE_2(std::string, const std::string&, const std::string&)
-DECLARE_DECLARE_2(void, int, int)
-DECLARE_DECLARE_2(void, const std::string&, AtomSpace*)
-DECLARE_DECLARE_2(void, Type, int)
-DECLARE_DECLARE_2(void, const std::string&, int)
-
-DECLARE_DECLARE_3(Handle, Handle, Handle, Handle)
-
-DECLARE_DECLARE_4(double, Handle, Handle, Type, bool)
-DECLARE_DECLARE_4(Handle, Handle, Handle, Handle, Handle)
-DECLARE_DECLARE_4(Handle, Handle, Type, const HandleSeq&, bool)
-DECLARE_DECLARE_4(HandleSeq, Handle, Type, int, bool)
-DECLARE_DECLARE_4(void, Type, int, double, int)
-//** @}*/
 }
 
 #endif // _OPENCOG_SCHEME_PRIMITIVE_H
