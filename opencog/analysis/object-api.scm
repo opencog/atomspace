@@ -186,8 +186,7 @@
   ListLink's), with the desired item on the left or right, and
   an atom of 'left-type or 'right-type on the other side.
 "
-	(let ((llobj LLOBJ)
-			(l-basis '())
+	(let ((l-basis '())
 			(r-basis '())
 			(l-size 0)
 			(r-size 0)
@@ -196,7 +195,7 @@
 		; Return a list of all atoms of TYPE which appear in a Link
 		; of type 'pair-type
 		(define (get-basis TYPE PAIR-FILT)
-			(define pair-type (llobj 'pair-type))
+			(define pair-type (LLOBJ 'pair-type))
 			(remove!
 				(lambda (item)
 					(null? (PAIR-FILT item (cog-incoming-by-type item pair-type))))
@@ -206,7 +205,7 @@
 		; pairs in which the left-item really is on the left, and
 		; the correct type is on the right.
 		(define (good-right-pairs left-item pair-list)
-			(define right-type (llobj 'right-type))
+			(define right-type (LLOBJ 'right-type))
 			(filter!
 				(lambda (pr)
 					(and
@@ -216,7 +215,7 @@
 				pair-list))
 
 		(define (good-left-pairs right-item pair-list)
-			(define left-type (llobj 'left-type))
+			(define left-type (LLOBJ 'left-type))
 			(filter!
 				(lambda (pr)
 					(and
@@ -235,12 +234,12 @@
 		;
 		(define (get-left-basis)
 			(if (null? l-basis)
-				(set! l-basis (get-basis (llobj 'left-type) good-right-pairs)))
+				(set! l-basis (get-basis (LLOBJ 'left-type) good-right-pairs)))
 			l-basis)
 
 		(define (get-right-basis)
 			(if (null? r-basis)
-				(set! r-basis (get-basis (llobj 'right-type) good-left-pairs)))
+				(set! r-basis (get-basis (LLOBJ 'right-type) good-left-pairs)))
 			r-basis)
 
 		(define (get-left-size)
@@ -272,8 +271,8 @@
 		; memory usage, by using the atom cache to save these results.
 		;
 		(define (get-left-stars ITEM)
-			(define want-type (llobj 'left-type))
-			(define pair-type (llobj 'pair-type))
+			(define want-type (LLOBJ 'left-type))
+			(define pair-type (LLOBJ 'pair-type))
 			(filter
 				(lambda (lnk)
 					(define oset (cog-outgoing-set lnk))
@@ -286,8 +285,8 @@
 
 		; Same as above, but on the right.
 		(define (get-right-stars ITEM)
-			(define want-type (llobj 'right-type))
-			(define pair-type (llobj 'pair-type))
+			(define want-type (LLOBJ 'right-type))
+			(define pair-type (LLOBJ 'pair-type))
 			(filter
 				(lambda (lnk)
 					(define oset (cog-outgoing-set lnk))
@@ -299,9 +298,9 @@
 				(cog-incoming-by-type ITEM pair-type)))
 
 		;-------------------------------------------
-		; Return default, only if llobj does not provide symbol
+		; Return default, only if LLOBJ does not provide symbol
 		(define (overload symbol default)
-			(define fp (llobj 'provides symbol))
+			(define fp (LLOBJ 'provides symbol))
 			(if fp fp default))
 
 		; Provide default methods, but only if the low-level object
@@ -331,7 +330,7 @@
 					((right-basis)      f-right-basis)
 					((left-basis-size)  f-left-basis-size)
 					((right-basis-size) f-right-basis-size)
-					(else               (llobj 'provides meth))))
+					(else               (LLOBJ 'provides meth))))
 
 			;-------------------------------------------
 			; Methods on this class.
@@ -344,7 +343,7 @@
 					((left-stars)       (apply f-left-stars args))
 					((right-stars)      (apply f-right-stars args))
 					((provides)         (apply provides args))
-					(else               (apply llobj (cons message args))))
+					(else               (apply LLOBJ (cons message args))))
 			))))
 
 ; ---------------------------------------------------------------------
@@ -371,52 +370,50 @@
   'item-pair 'make-pair 'left-wildcard 'right-wildcard and 'wild-wild
   on it, in the form documented above for the \"low-level API class\".
 "
-	(let ((llobj LLOBJ))
+	(define (get-count ATOM)
+		(cog-tv-count (cog-tv ATOM)))
 
-		(define (get-count ATOM)
-			(cog-tv-count (cog-tv ATOM)))
+	(define (set-count ATOM CNT)
+		(cog-set-tv! ATOM (cog-new-ctv 0 0 CNT)))
 
-		(define (set-count ATOM CNT)
-			(cog-set-tv! ATOM (cog-new-ctv 0 0 CNT)))
+	; Get the left wildcard count
+	(define (get-left-wild-count ITEM)
+		(get-count (LLOBJ 'left-wildcard ITEM)))
 
-		; Get the left wildcard count
-		(define (get-left-wild-count ITEM)
-			(get-count (llobj 'left-wildcard ITEM)))
+	; Get the right wildcard count
+	(define (get-right-wild-count ITEM)
+		(get-count (LLOBJ 'right-wildcard ITEM)))
 
-		; Get the right wildcard count
-		(define (get-right-wild-count ITEM)
-			(get-count (llobj 'right-wildcard ITEM)))
+	; Set the left wildcard count
+	; Return the atom that holds this count.
+	(define (set-left-wild-count ITEM CNT)
+		(set-count (LLOBJ 'left-wildcard ITEM) CNT))
 
-		; Set the left wildcard count
-		; Return the atom that holds this count.
-		(define (set-left-wild-count ITEM CNT)
-			(set-count (llobj 'left-wildcard ITEM) CNT))
+	; Set the right wildcard count
+	; Return the atom that holds this count.
+	(define (set-right-wild-count ITEM CNT)
+		(set-count (LLOBJ 'right-wildcard ITEM) CNT))
 
-		; Set the right wildcard count
-		; Return the atom that holds this count.
-		(define (set-right-wild-count ITEM CNT)
-			(set-count (llobj 'right-wildcard ITEM) CNT))
+	; Get the wildcard-wildcard count
+	(define (get-wild-wild-count)
+		(get-count (LLOBJ 'wild-wild)))
 
-		; Get the wildcard-wildcard count
-		(define (get-wild-wild-count)
-			(get-count (llobj 'wild-wild)))
+	; Set the wildcard-wildcard count
+	; Return the atom that holds this count.
+	(define (set-wild-wild-count CNT)
+		(set-count (LLOBJ 'wild-wild) CNT))
 
-		; Set the wildcard-wildcard count
-		; Return the atom that holds this count.
-		(define (set-wild-wild-count CNT)
-			(set-count (llobj 'wild-wild) CNT))
-
-		; Methods on this class.
-		(lambda (message . args)
-			(case message
-				((left-wild-count)      (apply get-left-wild-count args))
-				((set-left-wild-count)  (apply set-left-wild-count args))
-				((right-wild-count)     (apply get-right-wild-count args))
-				((set-right-wild-count) (apply set-right-wild-count args))
-				((wild-wild-count)      (get-wild-wild-count))
-				((set-wild-wild-count)  (apply set-wild-wild-count args))
-				(else                   (apply llobj (cons message args))))
-		))
+	; Methods on this class.
+	(lambda (message . args)
+		(case message
+			((left-wild-count)      (apply get-left-wild-count args))
+			((set-left-wild-count)  (apply set-left-wild-count args))
+			((right-wild-count)     (apply get-right-wild-count args))
+			((set-right-wild-count) (apply set-right-wild-count args))
+			((wild-wild-count)      (get-wild-wild-count))
+			((set-wild-wild-count)  (apply set-wild-wild-count args))
+			(else                   (apply LLOBJ (cons message args))))
+	)
 )
 
 ; ---------------------------------------------------------------------
