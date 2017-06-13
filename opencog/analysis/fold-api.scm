@@ -138,7 +138,7 @@
   to get the frequency p(x,y) of a pair, instead of the count N(x,y).
 "
 	(let ((star-obj (add-pair-stars LLOBJ))
-			(get-cnt (lambda (x) (LLOBJ GET-CNT)))
+			(get-cnt (lambda (x) (LLOBJ GET-CNT x)))
 		)
 
 		; ---------------
