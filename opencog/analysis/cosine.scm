@@ -1,15 +1,16 @@
 ;
 ; cosine.scm
 ;
-; Define object-oriented class API's for computing the cosine and
-; jaccard distances.
+; Define API for computing the cosine and jaccard distances between two
+; rows or columns of a sparse matrix.
 ;
 ; Copyright (c) 2017 Linas Vepstas
 ;
 ; ---------------------------------------------------------------------
 ; OVERVIEW
 ; --------
-; See object-api.scm for the overview.  Or the README.md file.
+; See object-api.scm for the overview of how sparse matrixes are defined.
+; Or see the README.md file.
 ; ---------------------------------------------------------------------
 
 (use-modules (srfi srfi-1))
@@ -21,15 +22,18 @@
 	#:optional (GET-CNT 'pair-count))
 "
   add-pair-cosine-compute LLOBJ - Extend LLOBJ with methods to compute
-  vector dot-products and cosine angles.  None of these use cached
-  values, instead, they compute these values on the fly.
+  vector dot-products, cosine angles and jaccard distances between two
+  rows or columns of the LLOBJ sparse matrix.
 
   Some terminology: Let N(x,y) be the observed count for the pair (x,y).
-  There are two ways of computing a dot-product: summing on the left, or
-  the right.  Thus we define the left-product as
+  There are two ways of computing a dot-product: summing on the left,
+  to get a dot-product of columns, or summing on the right, to get a
+  product of rows.  Thus we define the left-product as
       left-prod(y,z) = sum_x N(x,y) N(x,z)
-  and the right-product as
+  where y and z are two different column indexes.  Likewise, the right
+  product is
       right-prod(x,u) = sum_y N(x,y) N(u,y)
+  with x and u being two different row indexes.
 
   Similarly, we can define the left and right cosine angles as
       left-cosine(y,z) = left-prod(y,z) /
@@ -45,16 +49,17 @@
       left-jacc-sim(y,z) = sum_x min (N(x,y), N(x,z)) /
                sum_x max (N(x,y), N(x,z))
 
-  Here, the LLOBJ is expected to be an object, with valid counts
-  associated with each pair. LLOBJ is expected to have working,
-  functional methods for 'left-type and 'right-type on it.
+  Here, the LLOBJ is expected to be an object defining a sparse matrix,
+  with valid counts associated with each pair. LLOBJ is expected to have
+  working, functional methods for 'left-type, 'right-type and 'pair-type
+  on it.
 
   By default, the N(x,y) is taken to be the 'get-count method on LLOBJ,
   i.e. it is literally the count. The optional argument GET-CNT allows
   this to be over-ridden with any other method that returns a number.
-  For example, to compute the lengths and norms for frequencies, pass
-  'pair-freq as the second argument.  Any method that takes a pair and
-  returns a number is allowed.
+  For example, to compute the products and cosines for frequencies, pass
+  'pair-freq as the second argument.  Any method that takes a matrix
+  element pair and returns a number is allowed.
 "
 	(let* ((star-obj (add-pair-stars LLOBJ))
 			(supp-obj (add-support-compute star-obj GET-CNT))
