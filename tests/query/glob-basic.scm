@@ -47,6 +47,17 @@
 	(Concept "hi")
 	(Concept "Sophia"))
 
+(ListLink
+	(Concept "they")
+	(Concept "really")
+	(Concept "want")
+	(Concept "it"))
+
+(ListLink
+	(Concept "they")
+	(Concept "want")
+	(Concept "it"))
+
 ;; Two different re-write rules. The first rule, immediately below,
 ;; says "I * you" -> "I * you too".
 (define glob-you
@@ -168,3 +179,17 @@
 			(Concept "I")
 			(Concept "am")
 			(Glob "$y"))))
+
+; Exactly 3 atoms to be grounded
+; Should match "they really want it" but not "they want it" due to the
+; interval restriction
+(define exact
+	(Bind
+		(TypedVariable (Glob "$x") (IntervalLink (Number 3) (Number 3)))
+		(ListLink
+			(Concept "they")
+			(Glob "$x"))
+		(ListLink
+			(Concept "I")
+			(Glob "$x")
+			(Concept "too"))))

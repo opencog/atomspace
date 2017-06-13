@@ -491,7 +491,7 @@ bool Variables::is_type(const HandleSeq& hseq) const
  * Interval checker.
  *
  * Returns true/false if the glob satisfies the lower bound
- * interval restrictions.
+ * interval restriction.
  */
 bool Variables::is_lower_bound(const Handle& glob, size_t n) const
 {
@@ -516,7 +516,7 @@ bool Variables::is_lower_bound(const Handle& glob, size_t n) const
  * Interval checker.
  *
  * Returns true/false if the glob satisfies the upper bound
- * interval restrictions.
+ * interval restriction.
  */
 bool Variables::is_upper_bound(const Handle& glob, size_t n) const
 {

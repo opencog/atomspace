@@ -183,11 +183,11 @@ struct Variables : public FreeVariables
 	// restrictions (if any).
 	bool is_type(const HandleSeq& hseq) const;
 
-	// Return true if the it satisfies the lower bound interval restrictions.
+	// Return true if the it satisfies the lower bound interval restriction.
 	// Return false otherwise.
 	bool is_lower_bound(const Handle& glob, size_t n) const;
 
-	// Return true if the it satisfies the upper bound interval restrictions.
+	// Return true if the it satisfies the upper bound interval restriction.
 	// Return false otherwise.
 	bool is_upper_bound(const Handle& glob, size_t n) const;
 
