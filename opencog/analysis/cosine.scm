@@ -58,6 +58,8 @@
 "
 	(let* ((star-obj (add-pair-stars LLOBJ))
 			(supp-obj (add-support-compute star-obj GET-CNT))
+			(prod-obj  (add-support-compute
+				(add-tuple-math star-obj * GET-CNT)))
 			(min-obj  (add-support-compute
 				(add-tuple-math star-obj min GET-CNT)))
 			(max-obj  (add-support-compute
@@ -66,49 +68,13 @@
 		)
 
 		; -------------
-		; Given the low-level pair LOPR, return the numeric count for it.
-		(define (get-lo-cnt LOPR)
-			(get-cnt (LLOBJ 'item-pair LOPR)))
+		; Return the vector product of column A and column B
+		(define (compute-left-product COL-A COL-B)
+			(prod-obj 'left-count COL-A COL-B)))
 
-		; Compute the dot-product, summing over items from the
-		; LIST, (which are pairs containing ITEM-A) and using the
-		; get-other-lopr function to get the other pair to sum over
-		; (i.e. replacing ITEM-A in the list with ITEM-B)
-		; With a suitable LIST and get-other-lopr, this can do
-		; either the left or the right sums.
-		(define (compute-product get-other-lopr ITEM-B LIST)
-			; Loop over the the LIST
-			(fold
-				(lambda (lopr sum)
-					(define a-cnt (get-lo-cnt lopr))
-					(define b-pr (get-other-lopr lopr ITEM-B))
-
-					(if (null? b-pr)
-						sum
-						(+ sum (* a-cnt (get-lo-cnt b-pr)))))
-				0
-				LIST))
-
-		; Return the low-level pair (x,y) if it exists, else
-		; return the empty list '()
-		(define (have-lopr? X Y)
-			(cog-link (LLOBJ 'pair-type) X Y))
-
-		; Get the "other pair", for lefty wild
-		(define (get-other-left LOPR OTHER)
-			(have-lopr? (gar LOPR) OTHER))
-
-		; Get the "other pair", for righty wild
-		(define (get-other-right LOPR OTHER)
-			(have-lopr? OTHER (gdr LOPR)))
-
-		(define (compute-left-product ITEM-A ITEM-B)
-			(compute-product get-other-left ITEM-B
-				(star-obj 'left-stars ITEM-A)))
-
-		(define (compute-right-product ITEM-A ITEM-B)
-			(compute-product get-other-right ITEM-B
-				(star-obj 'right-stars ITEM-A)))
+		; Return the vector product of row A and row B
+		(define (compute-right-product ROW-A ROW-B)
+			(prod-obj 'right-count ROW-A ROW-B)))
 
 		; -------------
 		(define (do-get-left-length ITEM) (supp-obj 'left-length ITEM))
