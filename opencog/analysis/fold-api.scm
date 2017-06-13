@@ -89,7 +89,7 @@
 "
   add-tuple-math LLOBJ FUNC - Extend LLOBJ with ability to take tuples
   of rows or columns, and then call FUNC on that tuple, in the place of
-  a regular call to the 'pair-count method. This creates a "virtual"
+  a regular call to the 'pair-count method. This creates a 'virtual'
   matrix whose entries are a function FUNC of the rows or columns of
   the original matrix. So, for example, given that LLOBJ holds a matrix
   N(x,y) of pairs, and FUNC taking three arguments, then this object
