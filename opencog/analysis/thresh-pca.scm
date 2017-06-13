@@ -115,9 +115,12 @@
 			(lambda (ITEM)
 				(fold
 					(lambda (PAIR sum)
-						(+ sum
-							(* (llobj get-value PAIR)
-								(fvec (gar PAIR)))))
+						(define vecval (fvec (gar PAIR)))
+						; Avoid fetching teh pair value if its
+						; multiply-by-zero
+						(if (eqv? 0 vecval)
+							sum
+							(+ sum (* (llobj get-value PAIR) vecval))))
 					0
 					(star-obj 'left-stars ITEM))))
 
@@ -128,9 +131,10 @@
 			(lambda (ITEM)
 				(fold
 					(lambda (PAIR sum)
-						(+ sum
-							(* (llobj get-value PAIR)
-								(fvec (gdr PAIR)))))
+						(define vecval (fvec (gdr PAIR)))
+						(if (eqv? 0 vecval)
+							sum
+							(+ sum (* (llobj get-value PAIR) vecval))))
 					0
 					(star-obj 'right-stars ITEM))))
 
