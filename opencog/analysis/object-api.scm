@@ -75,44 +75,76 @@
 ; The `make-pair-count-get-set` class, below, is a typical user
 ; of this class; it provides getters and setters for the counts.
 ;
-; See `make-any-link-link` for a working example.
+; See `make-any-link-api` for a working example.
 ;
 ; When called, this will create a new instance of the class
 ; i.e. will create a new object.
 ;
 ;  (define (make-ll-object-api-example)
-;     (let ()
-;        ; Return the atom-type of the left and right items.
-;        ; For example both may be words, or maybe the right
-;        ; side is a disjunct 'LgAnd
-;        (define (get-left-type) 'WordNode)
-;        (define (get-right-type) 'WordNode)
-;        (define (get-pair-type) 'ListLink)
 ;
-;        ; Return the observed count for PAIR, if it exists,
-;        ; else return zero.
-;        (define (get-pair-count PAIR) 42)
+;     ; Return the atom-type of the left and right items.
+;     ; For example both may be words, or maybe the right
+;     ; side is a disjunct 'LgAnd
+;     (define (get-left-type) 'WordNode)
+;     (define (get-right-type) 'WordNode)
+;     (define (get-pair-type) 'ListLink)
 ;
-;        ; Return the atom holding the count, if it exists,
-;        ; else return nil.
-;        (define (get-pair PAIR) (Node "foobar"))
+;     ; Return the atom holding the count, if it exists, else
+;     ; return nil. In this example, the count is hanging on an
+;     ; EvaluationLink.  The PAIR atom must be of 'pair-type,
+;     ; that is, a ListLink in this example.  Note: the cog-link
+;     ; function does NOT create the atom, if it does not already
+;     ; exist!
+;     (define (get-pair PAIR)
+;        (cog-link 'EvaluationLink (Predicate "foo") PAIR))
 ;
-;        ; Return the atom holding the count, creating it if
-;        ; it does not yet exist.
-;        (define (make-pair PAIR) (Node "foobar"))
+;     ; Return the observed count for PAIR, if it exists, else
+;     ; return zero. The PAIR atom must be of type 'pair-type;
+;     ; that is, a ListLink in this example.
+;     (define (get-pair-count PAIR)
+;        (cog-value-ref
+;           (cog-value (get-pair PAIR) (Predicate "bar")) 42))
 ;
-;        ; Return the atom holding the N(*,y) count
-;        (define (get-left-wildcard ITEM) (Node "foobar"))
+;     ; Return the atom holding the count, creating it if it does
+;     ; not yet exist.  Returns the same structure as the 'item-pair
+;     ; method (the get-pair function, above).
+;     (define (make-pair PAIR)
+;        (EvaluationLink (Predicate "foo") PAIR))
 ;
-;        ; Return the atom holding the N(x,*) count
-;        (define (get-right-wildcard ITEM) (Node "foobar"))
+;     ; Return an atom to which column subtotals can be attached,
+;     ; such as, for example, the subtotal `N(*,y)`. Thus, `y`
+;     ; denotes a column, and the star is on the left (the star
+;     ; ranging over all rows).
+;     (define (get-left-wildcard ITEM)
+;        (EvaluationLink (Predicate "foo")
+;           (ListLink (AnyNode "left-wild") ITEM)))
 ;
-;        ; Return the atom holding the N(*,*) count
-;        (define (get-wild-wild) (Node "foobar"))
+;     ; Return an atom to which row subtotals can be attached,
+;     ; such as, for example, the subtotal `N(x,*)`. Thus, `x`
+;     ; denotes a row, and the star is on the right (the star
+;     ; ranging over all columns).
+;     (define (get-right-wildcard ITEM)
+;        (EvaluationLink (Predicate "foo")
+;           (ListLink ITEM (AnyNode "right-wild"))))
+;
+;     ; Return an atom to which matrix totals can be attached,
+;     ; such as, for example, the total `N(*,*)`. This can be any
+;     ; atom, but must be unique to the specific matrix. It's
+;     ; convenient to use the same style as the subtotals.
+;     (define (get-wild-wild)
+;        (EvaluationLink (Predicate "foo")
+;           (ListLink (AnyNode "left-wild") (AnyNode "right-wild"))))
+;
+;     ; Retreive, from storage, the entire matrix, including the
+;     ; subtotal and total anchor atoms.  In this example, its enough
+;     ; to get the incoming set of (Predicate "foo"), but this need
+;     ; not generally be the case.
+;     (define (fetch-all-pairs)
+;        (cog-incoming-by-type (Predicate "foo") "EvaluationLink))
 ;
 ;     ; Methods on the class. To call these, quote the method name.
 ;     ; Example: (OBJ 'left-wildcard WORD) calls the
-;     ; get-left-wildcard method, passing WORD as the argument.
+;     ; get-left-wildcard function, passing WORD as the argument.
 ;     (lambda (message . args)
 ;        (apply (case message
 ;              ((name) "Demo Kind of Object")
@@ -125,9 +157,10 @@
 ;              ((left-wildcard) get-left-wildcard)
 ;              ((right-wildcard) get-right-wildcard)
 ;              ((wild-wild) get-wild-wild)
+;              ((fetch-pairs) fetch-all-pairs)
 ;              ((provides) (lambda (symb) #f))
 ;              (else (error "Bad method call on low-level API")))
-;           args))))
+;           args)))
 ;
 ;
 ; ---------------------------------------------------------------------
@@ -382,7 +415,7 @@
 				((set-right-wild-count) (apply set-right-wild-count args))
 				((wild-wild-count)      (get-wild-wild-count))
 				((set-wild-wild-count)  (apply set-wild-wild-count args))
-				(else (apply llobj (cons message args))))
+				(else                   (apply llobj (cons message args))))
 		))
 )
 
