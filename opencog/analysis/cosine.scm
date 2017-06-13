@@ -73,12 +73,16 @@
 
 		; -------------
 		; Return the vector product of column A and column B
+		; The prod-obj takes the product of pairs of atrix entries,
+		; and the 'left-count method just adds them up.  Equivalently,
+		; we could just sum over the left-stars ourselves, but this
+		; would take three lines of code instead of one.
 		(define (compute-left-product COL-A COL-B)
-			(prod-obj 'left-count COL-A COL-B)))
+			(prod-obj 'left-count (list COL-A COL-B)))
 
 		; Return the vector product of row A and row B
 		(define (compute-right-product ROW-A ROW-B)
-			(prod-obj 'right-count ROW-A ROW-B)))
+			(prod-obj 'right-count (list ROW-A ROW-B)))
 
 		; -------------
 		(define (do-get-left-length COL) (supp-obj 'left-length COL))
