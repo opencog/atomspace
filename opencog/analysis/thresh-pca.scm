@@ -253,7 +253,9 @@
 
 ; ---------------------------------------------------------------------
 
-(define-public (make-cosine-matrix LLOBJ)
+(define*-public (make-cosine-matrix LLOBJ #:optional
+	; Default is to use the pair-freq method
+	(GET-CNT 'pair-freq))
 "
   make-cosine-matrix LLOBJ - Provide a cosine-matrix form of LLOBJ.
 
@@ -276,7 +278,7 @@
   The LLOBJ object needs to provide the 'pair-freq method.
 "
 	(let* ((star-obj (add-pair-stars LLOBJ))
-			(supp-obj (add-support-compute star-obj))
+			(supp-obj (add-support-compute star-obj GET-CNT))
 		)
 
 		; Very likely to call for the same lengths, so cache them.
