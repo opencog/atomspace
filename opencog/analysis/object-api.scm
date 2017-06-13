@@ -473,221 +473,218 @@
   should hold, up to rounding errors.
 
 "
-	(let ((llobj LLOBJ))
+	; ----------------------------------------------------
+	; Key under which the frequency values are stored.
+	(define freq-key (PredicateNode "*-FrequencyKey-*"))
 
-		; ----------------------------------------------------
-		; Key under which the frequency values are stored.
-		(define freq-key (PredicateNode "*-FrequencyKey-*"))
+	; Return the observed frequency on ATOM
+	(define (get-freq ATOM)
+		(cog-value-ref (cog-value ATOM freq-key) 0))
 
-		; Return the observed frequency on ATOM
-		(define (get-freq ATOM)
-			(cog-value-ref (cog-value ATOM freq-key) 0))
+	; Return the observed - log_2(frequency) on ATOM
+	(define (get-logli ATOM)
+		(cog-value-ref (cog-value ATOM freq-key) 1))
 
-		; Return the observed - log_2(frequency) on ATOM
-		(define (get-logli ATOM)
-			(cog-value-ref (cog-value ATOM freq-key) 1))
+	; Return the observed - frequency * log_2(frequency) on ATOM
+	(define (get-entropy ATOM)
+		(cog-value-ref (cog-value ATOM freq-key) 2))
 
-		; Return the observed - frequency * log_2(frequency) on ATOM
-		(define (get-entropy ATOM)
-			(cog-value-ref (cog-value ATOM freq-key) 2))
+	; Set both a frequency count, and a -log_2(frequency) on
+	; the ATOM.
+	(define (set-freq ATOM FREQ)
+		; 1.4426950408889634 is 1/0.6931471805599453 is 1/log 2
+		(define ln2 (* -1.4426950408889634 (log FREQ)))
+		(define ent (* FREQ ln2))
+		(cog-set-value! ATOM freq-key (FloatValue FREQ ln2 ent)))
 
-		; Set both a frequency count, and a -log_2(frequency) on
-		; the ATOM.
-		(define (set-freq ATOM FREQ)
-			; 1.4426950408889634 is 1/0.6931471805599453 is 1/log 2
-			(define ln2 (* -1.4426950408889634 (log FREQ)))
-			(define ent (* FREQ ln2))
-			(cog-set-value! ATOM freq-key (FloatValue FREQ ln2 ent)))
+	; ----------------------------------------------------
+	; Key under which the entropy values are stored.
+	(define entropy-key (PredicateNode "*-Entropy Key-*"))
 
-		; ----------------------------------------------------
-		; Key under which the entropy values are stored.
-		(define entropy-key (PredicateNode "*-Entropy Key-*"))
+	; Return the total entropy on ATOM
+	(define (get-total-entropy ATOM)
+		(cog-value-ref (cog-value ATOM entropy-key) 0))
 
-		; Return the total entropy on ATOM
-		(define (get-total-entropy ATOM)
-			(cog-value-ref (cog-value ATOM entropy-key) 0))
+	; Return the fractional entropy on ATOM
+	(define (get-fractional-entropy ATOM)
+		(cog-value-ref (cog-value ATOM entropy-key) 1))
 
-		; Return the fractional entropy on ATOM
-		(define (get-fractional-entropy ATOM)
-			(cog-value-ref (cog-value ATOM entropy-key) 1))
+	; Set the entropy value for ATOM.
+	(define (set-entropy ATOM ENT FRENT)
+		(cog-set-value! ATOM entropy-key (FloatValue ENT FRENT)))
 
-		; Set the entropy value for ATOM.
-		(define (set-entropy ATOM ENT FRENT)
-			(cog-set-value! ATOM entropy-key (FloatValue ENT FRENT)))
+	; ----------------------------------------------------
+	; The key under which the MI is stored.
+	(define mi-key (PredicateNode "*-Mutual Info Key-*"))
 
-		; ----------------------------------------------------
-		; The key under which the MI is stored.
-		(define mi-key (PredicateNode "*-Mutual Info Key-*"))
+	; Get the (floating-point) mutual information on ATOM.
+	(define (get-total-mi ATOM)
+		(cog-value-ref (cog-value ATOM mi-key) 0))
 
-		; Get the (floating-point) mutual information on ATOM.
-		(define (get-total-mi ATOM)
-			(cog-value-ref (cog-value ATOM mi-key) 0))
+	; Get the (floating-point) fractional mutual information on ATOM.
+	; This is the Yuret "lexical attraction" value.
+	(define (get-fractional-mi ATOM)
+		(cog-value-ref (cog-value ATOM mi-key) 1))
 
-		; Get the (floating-point) fractional mutual information on ATOM.
-		; This is the Yuret "lexical attraction" value.
-		(define (get-fractional-mi ATOM)
-			(cog-value-ref (cog-value ATOM mi-key) 1))
+	; Set the MI value for ATOM.
+	(define (set-mi ATOM MI FMI)
+		(cog-set-value! ATOM mi-key (FloatValue MI FMI)))
 
-		; Set the MI value for ATOM.
-		(define (set-mi ATOM MI FMI)
-			(cog-set-value! ATOM mi-key (FloatValue MI FMI)))
+	; ----------------------------------------------------
+	; ----------------------------------------------------
+	; Return the observational frequency on PAIR.
+	; If the PAIR does not exist (was not oberved) return 0.
+	(define (get-pair-freq PAIR)
+		(get-freq (LLOBJ 'item-pair PAIR)))
 
-		; ----------------------------------------------------
-		; ----------------------------------------------------
-		; Return the observational frequency on PAIR.
-		; If the PAIR does not exist (was not oberved) return 0.
-		(define (get-pair-freq PAIR)
-			(get-freq (llobj 'item-pair PAIR)))
+	(define (get-pair-logli PAIR)
+		(get-logli (LLOBJ 'item-pair PAIR)))
 
-		(define (get-pair-logli PAIR)
-			(get-logli (llobj 'item-pair PAIR)))
+	(define (get-pair-entropy PAIR)
+		(get-entropy (LLOBJ 'item-pair PAIR)))
 
-		(define (get-pair-entropy PAIR)
-			(get-entropy (llobj 'item-pair PAIR)))
+	; Set the frequency and log-frequency on PAIR
+	; Return the atom that holds this count.
+	(define (set-pair-freq PAIR FREQ)
+		(set-freq (LLOBJ 'make-pair PAIR) FREQ))
 
-		; Set the frequency and log-frequency on PAIR
-		; Return the atom that holds this count.
-		(define (set-pair-freq PAIR FREQ)
-			(set-freq (llobj 'make-pair PAIR) FREQ))
+	; ----------------------------------------------------
 
-		; ----------------------------------------------------
+	; Return the MI value on the pair.
+	; The MI is defined as
+	; - P(x,y) log_2 P(x,y) / P(x,*) P(*,y)
+	(define (get-pair-mi PAIR)
+		(get-total-mi (LLOBJ 'item-pair PAIR)))
 
-		; Return the MI value on the pair.
-		; The MI is defined as
-		; - P(x,y) log_2 P(x,y) / P(x,*) P(*,y)
-		(define (get-pair-mi PAIR)
-			(get-total-mi (llobj 'item-pair PAIR)))
+	; Return the fractional MI (lexical atraction) on the pair.
+	; - log_2 P(x,y) / P(x,*) P(*,y)
+	; It differs from the MI above only by the leading probability.
+	(define (get-pair-fmi PAIR)
+		(get-fractional-mi (LLOBJ 'item-pair PAIR)))
 
-		; Return the fractional MI (lexical atraction) on the pair.
-		; - log_2 P(x,y) / P(x,*) P(*,y)
-		; It differs from the MI above only by the leading probability.
-		(define (get-pair-fmi PAIR)
-			(get-fractional-mi (llobj 'item-pair PAIR)))
+	(define (set-pair-mi PAIR MI FMI)
+		(set-mi (LLOBJ 'item-pair PAIR) MI FMI))
 
-		(define (set-pair-mi PAIR MI FMI)
-			(set-mi (llobj 'item-pair PAIR) MI FMI))
+	; ----------------------------------------------------
+	; Get the left wildcard frequency
+	(define (get-left-wild-freq ITEM)
+		(get-freq (LLOBJ 'left-wildcard ITEM)))
 
-		; ----------------------------------------------------
-		; Get the left wildcard frequency
-		(define (get-left-wild-freq ITEM)
-			(get-freq (llobj 'left-wildcard ITEM)))
+	(define (get-left-wild-logli ITEM)
+		(get-logli (LLOBJ 'left-wildcard ITEM)))
 
-		(define (get-left-wild-logli ITEM)
-			(get-logli (llobj 'left-wildcard ITEM)))
+	; Get the right wildcard frequency
+	(define (get-right-wild-freq ITEM)
+		(get-freq (LLOBJ 'right-wildcard ITEM)))
 
-		; Get the right wildcard frequency
-		(define (get-right-wild-freq ITEM)
-			(get-freq (llobj 'right-wildcard ITEM)))
+	(define (get-right-wild-logli ITEM)
+		(get-logli (LLOBJ 'right-wildcard ITEM)))
 
-		(define (get-right-wild-logli ITEM)
-			(get-logli (llobj 'right-wildcard ITEM)))
+	; Set the left wildcard frequency.
+	; Return the atom that holds this value.
+	(define (set-left-wild-freq ITEM FREQ)
+		(set-freq (LLOBJ 'left-wildcard ITEM) FREQ))
 
-		; Set the left wildcard frequency.
-		; Return the atom that holds this value.
-		(define (set-left-wild-freq ITEM FREQ)
-			(set-freq (llobj 'left-wildcard ITEM) FREQ))
+	; Set the right wildcard frequency.
+	; Return the atom that holds this value.
+	(define (set-right-wild-freq ITEM FREQ)
+		(set-freq (LLOBJ 'right-wildcard ITEM) FREQ))
 
-		; Set the right wildcard frequency.
-		; Return the atom that holds this value.
-		(define (set-right-wild-freq ITEM FREQ)
-			(set-freq (llobj 'right-wildcard ITEM) FREQ))
+	; ----------------------------------------------------
+	; Get the left wildcard entropy
+	; This is defined as
+	;   h_left(y) = -sum_x p(x,y) log_2 p(x,y)
+	(define (get-left-wild-entropy ITEM)
+		(get-total-entropy (LLOBJ 'left-wildcard ITEM)))
 
-		; ----------------------------------------------------
-		; Get the left wildcard entropy
-		; This is defined as
-		;   h_left(y) = -sum_x p(x,y) log_2 p(x,y)
-		(define (get-left-wild-entropy ITEM)
-			(get-total-entropy (llobj 'left-wildcard ITEM)))
+	; This is defined as
+	;   H_left(y) = h_left(y) / p(*,y)
+	(define (get-left-wild-fentropy ITEM)
+		(get-fractional-entropy (LLOBJ 'left-wildcard ITEM)))
 
-		; This is defined as
-		;   H_left(y) = h_left(y) / p(*,y)
-		(define (get-left-wild-fentropy ITEM)
-			(get-fractional-entropy (llobj 'left-wildcard ITEM)))
+	; Get the right wildcard entropy
+	; This is defined as
+	;   h_right(x) = -sum_y p(x,y) log_2 p(x,y)
+	(define (get-right-wild-entropy ITEM)
+		(get-total-entropy (LLOBJ 'right-wildcard ITEM)))
 
-		; Get the right wildcard entropy
-		; This is defined as
-		;   h_right(x) = -sum_y p(x,y) log_2 p(x,y)
-		(define (get-right-wild-entropy ITEM)
-			(get-total-entropy (llobj 'right-wildcard ITEM)))
+	; This is defined as
+	;   H_left(y) = h_left(y) / p(*,y)
+	(define (get-right-wild-fentropy ITEM)
+		(get-fractional-entropy (LLOBJ 'right-wildcard ITEM)))
 
-		; This is defined as
-		;   H_left(y) = h_left(y) / p(*,y)
-		(define (get-right-wild-fentropy ITEM)
-			(get-fractional-entropy (llobj 'right-wildcard ITEM)))
+	; Set the left wildcard entropy and fractional entropy.
+	; Return the atom that holds this value.
+	(define (set-left-wild-entropy ITEM ENT FRENT)
+		(set-entropy (LLOBJ 'left-wildcard ITEM) ENT FRENT))
 
-		; Set the left wildcard entropy and fractional entropy.
-		; Return the atom that holds this value.
-		(define (set-left-wild-entropy ITEM ENT FRENT)
-			(set-entropy (llobj 'left-wildcard ITEM) ENT FRENT))
+	; Set the right wildcard entropy and fractional entropy.
+	; Return the atom that holds this value.
+	(define (set-right-wild-entropy ITEM ENT FRENT)
+		(set-entropy (LLOBJ 'right-wildcard ITEM) ENT FRENT))
 
-		; Set the right wildcard entropy and fractional entropy.
-		; Return the atom that holds this value.
-		(define (set-right-wild-entropy ITEM ENT FRENT)
-			(set-entropy (llobj 'right-wildcard ITEM) ENT FRENT))
+	; ----------------------------------------------------
+	; Get the left wildcard mutual information
+	(define (get-left-wild-mi ITEM)
+		(get-total-mi (LLOBJ 'left-wildcard ITEM)))
 
-		; ----------------------------------------------------
-		; Get the left wildcard mutual information
-		(define (get-left-wild-mi ITEM)
-			(get-total-mi (llobj 'left-wildcard ITEM)))
+	(define (get-left-wild-fmi ITEM)
+		(get-fractional-mi (LLOBJ 'left-wildcard ITEM)))
 
-		(define (get-left-wild-fmi ITEM)
-			(get-fractional-mi (llobj 'left-wildcard ITEM)))
+	; Get the right wildcard mutual information
+	(define (get-right-wild-mi ITEM)
+		(get-total-mi (LLOBJ 'right-wildcard ITEM)))
 
-		; Get the right wildcard mutual information
-		(define (get-right-wild-mi ITEM)
-			(get-total-mi (llobj 'right-wildcard ITEM)))
+	(define (get-right-wild-fmi ITEM)
+		(get-fractional-mi (LLOBJ 'right-wildcard ITEM)))
 
-		(define (get-right-wild-fmi ITEM)
-			(get-fractional-mi (llobj 'right-wildcard ITEM)))
+	; Set the left wildcard mi and fractional mi.
+	; Return the atom that holds this value.
+	(define (set-left-wild-mi ITEM MI FRMI)
+		(set-mi (LLOBJ 'left-wildcard ITEM) MI FRMI))
 
-		; Set the left wildcard mi and fractional mi.
-		; Return the atom that holds this value.
-		(define (set-left-wild-mi ITEM MI FRMI)
-			(set-mi (llobj 'left-wildcard ITEM) MI FRMI))
+	; Set the right wildcard mi and fractional mi.
+	; Return the atom that holds this value.
+	(define (set-right-wild-mi ITEM MI FRMI)
+		(set-mi (LLOBJ 'right-wildcard ITEM) MI FRMI))
 
-		; Set the right wildcard mi and fractional mi.
-		; Return the atom that holds this value.
-		(define (set-right-wild-mi ITEM MI FRMI)
-			(set-mi (llobj 'right-wildcard ITEM) MI FRMI))
+	; ----------------------------------------------------
+	; Methods on this class.
+	(lambda (message . args)
+		(case message
+			((pair-freq)           (apply get-pair-freq args))
+			((pair-logli)          (apply get-pair-logli args))
+			((pair-entropy)        (apply get-pair-entropy args))
+			((pair-mi)             (apply get-pair-mi args))
+			((pair-fmi)            (apply get-pair-fmi args))
+			((set-pair-freq)       (apply set-pair-freq args))
+			((set-pair-mi)         (apply set-pair-mi args))
 
-		; ----------------------------------------------------
-		; Methods on this class.
-		(lambda (message . args)
-			(case message
-				((pair-freq)           (apply get-pair-freq args))
-				((pair-logli)          (apply get-pair-logli args))
-				((pair-entropy)        (apply get-pair-entropy args))
-				((pair-mi)             (apply get-pair-mi args))
-				((pair-fmi)            (apply get-pair-fmi args))
-				((set-pair-freq)       (apply set-pair-freq args))
-				((set-pair-mi)         (apply set-pair-mi args))
+			((left-wild-freq)      (apply get-left-wild-freq args))
+			((left-wild-logli)     (apply get-left-wild-logli args))
+			((set-left-wild-freq)  (apply set-left-wild-freq args))
 
-				((left-wild-freq)      (apply get-left-wild-freq args))
-				((left-wild-logli)     (apply get-left-wild-logli args))
-				((set-left-wild-freq)  (apply set-left-wild-freq args))
+			((right-wild-freq)     (apply get-right-wild-freq args))
+			((right-wild-logli)    (apply get-right-wild-logli args))
+			((set-right-wild-freq) (apply set-right-wild-freq args))
 
-				((right-wild-freq)     (apply get-right-wild-freq args))
-				((right-wild-logli)    (apply get-right-wild-logli args))
-				((set-right-wild-freq) (apply set-right-wild-freq args))
+			((left-wild-entropy)      (apply get-left-wild-entropy args))
+			((left-wild-fentropy)     (apply get-left-wild-fentropy args))
+			((set-left-wild-entropy)  (apply set-left-wild-entropy args))
 
-				((left-wild-entropy)      (apply get-left-wild-entropy args))
-				((left-wild-fentropy)     (apply get-left-wild-fentropy args))
-				((set-left-wild-entropy)  (apply set-left-wild-entropy args))
+			((right-wild-entropy)     (apply get-right-wild-entropy args))
+			((right-wild-fentropy)    (apply get-right-wild-fentropy args))
+			((set-right-wild-entropy) (apply set-right-wild-entropy args))
 
-				((right-wild-entropy)     (apply get-right-wild-entropy args))
-				((right-wild-fentropy)    (apply get-right-wild-fentropy args))
-				((set-right-wild-entropy) (apply set-right-wild-entropy args))
+			((left-wild-mi)      (apply get-left-wild-mi args))
+			((left-wild-fmi)     (apply get-left-wild-fmi args))
+			((set-left-wild-mi)  (apply set-left-wild-mi args))
 
-				((left-wild-mi)      (apply get-left-wild-mi args))
-				((left-wild-fmi)     (apply get-left-wild-fmi args))
-				((set-left-wild-mi)  (apply set-left-wild-mi args))
+			((right-wild-mi)     (apply get-right-wild-mi args))
+			((right-wild-fmi)    (apply get-right-wild-fmi args))
+			((set-right-wild-mi) (apply set-right-wild-mi args))
 
-				((right-wild-mi)     (apply get-right-wild-mi args))
-				((right-wild-fmi)    (apply get-right-wild-fmi args))
-				((set-right-wild-mi) (apply set-right-wild-mi args))
-
-				(else (apply llobj (cons message args))))
-		))
+			(else                (apply LLOBJ (cons message args)))))
 )
 
 ; ---------------------------------------------------------------------
