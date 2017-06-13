@@ -490,9 +490,10 @@ bool Variables::is_type(const HandleSeq& hseq) const
 /**
  * Interval checker.
  *
- * Returns true/false if the glob satisfies the interval restrictions.
+ * Returns true/false if the glob satisfies the lower bound
+ * interval restrictions.
  */
-bool Variables::is_interval(const Handle& glob, size_t n) const
+bool Variables::is_lower_bound(const Handle& glob, size_t n) const
 {
 	// Interval restrictions?
 	GlobIntervalMap::const_iterator iit = _glob_intervalmap.find(glob);
@@ -501,11 +502,32 @@ bool Variables::is_interval(const Handle& glob, size_t n) const
 	{
 		const std::pair<double, double>& intervals = iit->second;
 
-		// Return true if it's within the interval
-		// lower bound = intervals.first
-		// upper bound = intervals.second (negative value means infinity)
-		if (n >= intervals.first and
-		   (n <= intervals.second or intervals.second < 0))
+		if (n >= intervals.first)
+			return true;
+	}
+	// If there is no interval restrictions, by default it's considered
+	// as 1 to many, so returns true as long as it's larger than 0.
+	else if (n > 0) return true;
+
+	return false;
+}
+
+/**
+ * Interval checker.
+ *
+ * Returns true/false if the glob satisfies the upper bound
+ * interval restrictions.
+ */
+bool Variables::is_upper_bound(const Handle& glob, size_t n) const
+{
+	// Interval restrictions?
+	GlobIntervalMap::const_iterator iit = _glob_intervalmap.find(glob);
+
+	if (_glob_intervalmap.end() != iit)
+	{
+		const std::pair<double, double>& intervals = iit->second;
+
+		if (n <= intervals.second or intervals.second < 0)
 			return true;
 	}
 	// If there is no interval restrictions, by default it's considered

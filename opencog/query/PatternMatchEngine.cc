@@ -261,14 +261,14 @@ bool PatternMatchEngine::ordered_compare(const PatternTermPtr& ptm,
 					post_glob = osp[ip+1];
 				}
 
-				if (_varlist->is_interval(ohp, 0))
+				if (_varlist->is_lower_bound(ohp, 0))
 				{
 					// If we are here, that means the lower bound of the
 					// interval is zero, so the glob can be grounded
 					// to nothing.
 
 					// Just in case if the upper bound is zero...
-					if (not _varlist->is_interval(ohp, 1))
+					if (not _varlist->is_upper_bound(ohp, 1))
 					{
 						jg --;
 						continue;
@@ -293,7 +293,7 @@ bool PatternMatchEngine::ordered_compare(const PatternTermPtr& ptm,
 				// If we are here, the glob we are looking at has to be
 				// grounded to at least one atom.
 				tc = (tree_compare(glob, osg[jg], CALL_GLOB) and
-				      _varlist->is_interval(ohp, 1));
+				      _varlist->is_upper_bound(ohp, 1));
 				if (not tc)
 				{
 					match = false;
@@ -313,12 +313,12 @@ bool PatternMatchEngine::ordered_compare(const PatternTermPtr& ptm,
 						if (tc) break;
 					}
 					tc = (tree_compare(glob, osg[jg], CALL_GLOB) and
-					      _varlist->is_interval(ohp, glob_seq.size()+1));
+					      _varlist->is_upper_bound(ohp, glob_seq.size()+1));
 					if (tc) glob_seq.push_back(osg[jg]);
 					jg ++;
 				}
 				jg --;
-				if (not tc)
+				if (not tc or not _varlist->is_lower_bound(ohp, glob_seq.size()))
 				{
 					match = false;
 					break;
