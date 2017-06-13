@@ -82,19 +82,30 @@
 ;
 ;  (define (make-ll-object-api-example)
 ;
-;     ; Return the atom-type of the left and right items.
-;     ; For example both may be words, or maybe the right
-;     ; side is a disjunct 'LgAnd
+;     ; Return the atom-type of the matrix rows, i.e. the type of
+;     ; the left side of the (row, column) pairs.
 ;     (define (get-left-type) 'WordNode)
+;
+;     ; Return the atom-type of the matrix columns, i.e. the type of
+;     ; the right side of the (row, column) pairs.
 ;     (define (get-right-type) 'WordNode)
+;
+;     ; Return the type of the pair itself.  In this example, each pair
+;     ; will be of the form (ListLink (Word "row") (Word "col"))
 ;     (define (get-pair-type) 'ListLink)
 ;
-;     ; Return the atom holding the count, if it exists, else
-;     ; return nil. In this example, the count is hanging on an
-;     ; EvaluationLink.  The PAIR atom must be of 'pair-type,
-;     ; that is, a ListLink in this example.  Note: the cog-link
-;     ; function does NOT create the atom, if it does not already
-;     ; exist!
+;     ; Return the atom for a matrix (row,column) pair, if it exists,
+;     ; else return nil. In this example, the matrix is defined by an
+;     ; EvaluationLink holding the ListLink. This atom is where all
+;     ; values associated with this matrix are held.  This includes not
+;     ; only the count (the number of observations of the pair) but also
+;     ; any dervides values, such as frequency, mutual information, and
+;     ; so on. Users are free to (are encouraged to) use this atom to
+;     ; attach additional information and statistics.
+;     ;
+;     ; The PAIR atom must be of 'pair-type, that is, a ListLink in this
+;     ; example.  Note: the cog-link function does NOT create the atom,
+;     ; if it does not already exist!
 ;     (define (get-pair PAIR)
 ;        (cog-link 'EvaluationLink (Predicate "foo") PAIR))
 ;
