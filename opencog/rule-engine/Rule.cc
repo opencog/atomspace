@@ -226,11 +226,11 @@ bool Rule::is_meta() const
 bool Rule::has_cycle() const
 {
 	// Return true iff at least one premise is equal to the conclusion
-	bool res = false;
 	const Handle c = get_conclusion();
 	for (const Handle& h : get_premises())
-		res = content_eq(c, h);
-	return res;
+		if (content_eq(c, h))
+			return true;
+	return false;
 }
 
 /**
@@ -266,11 +266,11 @@ HandleSeq Rule::get_premises() const
 	Handle rewrite = _rule->get_implicand();
 	Type rewrite_type = rewrite->getType();
 
-	// Return the clauses
+	// If not an ExecutionOutputLink then return the clauses
 	if (premises_as_clauses or rewrite_type != EXECUTION_OUTPUT_LINK)
 		return get_clauses();
 
-	// Search the premises in the rewrite term's ExecutionOutputLink
+	// Otherwise search the premises in the rewrite term's ExecutionOutputLink
 	HandleSeq premises;
 	if (rewrite_type == EXECUTION_OUTPUT_LINK) {
 		Handle args = rewrite->getOutgoingAtom(1);
@@ -280,8 +280,8 @@ HandleSeq Rule::get_premises() const
 				Handle argi = args->getOutgoingAtom(i);
 				// Return unordered premises
 				if (argi->getType() == SET_LINK) {
-					for (Arity i = 1; i < argi->getArity(); i++)
-						premises.push_back(args->getOutgoingAtom(i));
+					for (Arity j = 0; j < argi->getArity(); j++)
+						premises.push_back(argi->getOutgoingAtom(j));
 				}
 				// Return ordered premise
 				else {
@@ -293,18 +293,27 @@ HandleSeq Rule::get_premises() const
 	return premises;
 }
 
-/**
- * Get the conclusion (output) of the rule.  defined in a BindLink.
- *
- * @return the Handle of the implicand
- *
- * TODO: indentical to get_implicand()
- */
 Handle Rule::get_conclusion() const
 {
-	if (_rule)
-		return _rule->get_implicand();
-	return Handle::UNDEFINED;
+	// If the rule's handle has not been set yet
+	if (not is_valid())
+		return Handle::UNDEFINED;
+
+	Handle rewrite = _rule->get_implicand();
+	Type rewrite_type = rewrite->getType();
+
+	// If not an ExecutionOutputLink then return the rewrite term
+	if (rewrite_type != EXECUTION_OUTPUT_LINK)
+		return rewrite;
+
+	Handle args = rewrite->getOutgoingAtom(1);
+	if (args->getType() == LIST_LINK) {
+		OC_ASSERT(args->getArity() > 0);
+		return args->getOutgoingAtom(0);
+	} else {
+		return args;
+	}
+
 }
 
 HandlePairSeq Rule::get_conclusions() const
