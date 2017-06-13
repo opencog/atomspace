@@ -183,19 +183,41 @@
 
 (define-public (add-pair-stars LLOBJ)
 "
-  add-pair-stars LLOBJ - Extend LLOBJ with wildcard access methods.
+  add-pair-stars LLOBJ - Extend LLOBJ with row and column access
+  methods (aka wildcard methods); specifically, to get all non-zero
+  elements in a given row or column.
 
-  Extend the LLOBJ with additional methods to get wild-card lists,
-  that is, lists of all pairs with a specific item on the left,
-  or on the right.  This generates these lists in a generic way,
-  that probably work for most kinds of pairs.
+  The supported methods are:
+  'left-basis - Return all items (atoms) that can be used to index
+      a row in the matrix.  That is, given a matrix N(x,y), this
+      returns the set {x | (x,y) exists in the atomspace for some y}.
+      All of the elements of this set will be atoms of type
+      (LLOBJ 'left-type).  A check is made to verify that (x,y) is
+      a valid pair, viz that it is an atom whose type is
+      (LLOBJ 'pair-type) and that y is of type (LLOBJ 'right-type).
+      This only verifies that such pairs exist in the atomspace; it
+      does NOT verify that they have a nonzero count!
+
+  'right-basis - Likewise, but for columns.
+
+  'left-basis-size - the size of the 'left-basis set; i.e. the number
+      of unique, distinct atoms in that set.
+
+  'right-basis-size - Likewise.
+
+  'left-stars COL - Return the set of pairs (row, column) for
+      which the column is COL, and the pair exists in the atomspace.
+      That is, return the set
+         (*, COL) == { (x,COL) | (x,COL) exists in the atomspace }
+      The returned pairs will all be of type (LLOBJ 'pair-type),
+      and the x's will all be of type (LLOBJ 'left-type). The
+      input COL atom must be of type (LLOBJ 'right-type).  This does
+      NOT verify that these pairs have a non-zero count.
+
+  'right-stars ROW - Likewise, but returns the set (ROW, *).
 
   Here, the LLOBJ is expected to be an object, with methods for
-  'left-type and 'right-type on it, just as described above.
-
-  The lists of pairs will be lists of type 'pair-type (usually
-  ListLink's), with the desired item on the left or right, and
-  an atom of 'left-type or 'right-type on the other side.
+  'left-type, 'right-type and 'pair-type on it.
 "
 	(let ((l-basis '())
 			(r-basis '())
