@@ -8,19 +8,28 @@
 ; ---------------------------------------------------------------------
 ; OVERVIEW
 ; --------
-; There is sometimes a need to take differences and sums of vectors,
-; or apply other kinds of transforms.  This provides the API to do that.
+; There is sometimes a need to take the difference or sum, min or max,
+; or maybe the product of two different rows or columns in a matrix.
+; This provides the API to do that.
 ;
-; So, for example, the add-support-compute object adds methods
-; to compute the length of a vector (the l_2 norm) or more generally
-; the l_p norm.  Suppose, instead, we wanted to take the length of
-; the difference of two vectors? That is, length(A-B)? How can we do
-; that?  This class provides a generic way of doing this.
+; So, for example, say we have a matrix N(x,y) of pairs, and want to
+; apply some function F taking two arguments, and apply this function
+; to two rows or columns.  The API here creates a new "virtual" matrix
+; holding values
 ;
-; Suppose that some pair object is providing the vectors. Any of
-; the classes make-pseudo-cset-api, make-any-link-api,
-; make-clique-pair-api, etc. will do. To take the difference
-; of two vectors, define the function
+;      N(x, [y,z]) = F(N(x,y), N(x,z))
+;
+; when addressed by columns, and
+;
+;      N([u,x], y) = F(N(u,y), N(x,y))
+;
+; when address by rows. Here, F computes the sum, difference, min, max,
+; etc. as desired.
+;
+; In practice, the function F is a scheme function that takes a list
+; of numbers as an argument. (This makes things slightly awkward, and
+; needs to be fixed.)  For example, to take the difference of two rows
+; or columns, define a function
 ;
 ;     (define (subtract TUPLE)  (- (first TUPLE) (second TUPLE)))
 ;
@@ -82,12 +91,54 @@
 
 ; ---------------------------------------------------------------------
 ;
-(define*-public (add-tuple-math LLOBJ FUNC
-	#:optional (GET-CNT 'pair-count))
+(define*-public (add-tuple-math LLOBJ FUNC #:optional
+	(GET-CNT 'pair-count))
 "
-  add-tuple-math LLOBJ FUNC - Extend LLOBJ with ability to take
-  tuples of items, and then call FUNC on that tuple, whenever
-  the 'pair-count method is invoked.
+  add-tuple-math LLOBJ FUNC - Extend LLOBJ with ability to take tuples
+  of rows or columns, and then call FUNC on that tuple, in the place of
+  a regular call to the 'pair-count method. This creates a "virtual"
+  matrix whose entries are a function FUNC of the rows or columns of
+  the original matrix. So, for example, given that LLOBJ holds a matrix
+  N(x,y) of pairs, and FUNC taking three arguments, then this object
+  creates a new matrix holding values
+
+      N(x, [y,z,w]) = FUNC(N(x,y), N(x,z), N(x,w))
+
+  Typically, FUNC takes only two rows or columns, and returns the sum
+  or the difference, the min or the max, or the product of these two
+  rows or columns.
+
+  The basic trick is accomplished by overloading the 'left-stars and
+  'right-stars methods to take tuples of rows or columns, and then
+  return a tuple of matrix entries.
+
+  For example, given three columns [y,z,w], the 'left-stars method
+  will return the set
+
+     { [(x,y), (x,z), (x,w)] | at least one of (x,y), (x,z), (x,w)
+                               exists in the atomspace. }
+  Here, [(x,y), (x,z), (x,w)] is a triple of matrix entries,
+  specifically, three matrix entries for the same row but three
+  different columns.
+
+  If one of the matrix entries does not exist, it is replaced by
+  nil in the tuple.  So, for the above example, if (x,y) did not exist,
+  then the returned triple would be [(), (x,z), (x,w)].  At least one
+  of the entries in the tuple is non-nil.
+
+  The 'item-pair method just distributes over the tuples. In the
+  above example, 'item-pair [(x,y), (x,z), (x,w)] will return the
+  triple ['item-pair (x,y), 'item-pair (x,z), 'item-pair (x,w)]
+
+  The 'pair-count method will apply FUNC to the tuple. In the above
+  example, the 'pair-count method will return a number, specifically,
+  the single number
+     FUNC('pair-count (x,y), 'pair-count (x,z), 'pair-count (x,w))
+
+  To simplify the usage, an optional argument can be provided: the
+  name of a method to use, instead of 'pair-count, for obtaining
+  numeric values. A typical example would be to use 'pair-freq
+  to get the frequency p(x,y) of a pair, instead of the count N(x,y).
 "
 	(let ((star-obj (add-pair-stars LLOBJ))
 			(sum-func FUNC)
@@ -153,7 +204,7 @@
 		; In the above, the union of the left support was {foo, bar, zed}
 		; and the intersection of the left support was just {foo}.  This
 		; will be the typical case: the intersection will be typically
-		; non-empty, and hethe union will typically be strictly alrger.
+		; non-empty, and the union will typically be strictly larger.
 
 		(define (left-star-union TUPLE)
 			(map
