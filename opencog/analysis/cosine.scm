@@ -64,7 +64,6 @@
 				(add-tuple-math star-obj min GET-CNT)))
 			(max-obj  (add-support-compute
 				(add-tuple-math star-obj max GET-CNT)))
-			(get-cnt (lambda (x) (LLOBJ GET-CNT x)))
 		)
 
 		; -------------
@@ -77,40 +76,40 @@
 			(prod-obj 'right-count ROW-A ROW-B)))
 
 		; -------------
-		(define (do-get-left-length ITEM) (supp-obj 'left-length ITEM))
+		(define (do-get-left-length COL) (supp-obj 'left-length COL))
 		(define get-left-length (make-afunc-cache do-get-left-length))
-		(define (do-get-right-length ITEM) (supp-obj 'right-length ITEM))
+		(define (do-get-right-length ROW) (supp-obj 'right-length ROW))
 		(define get-right-length (make-afunc-cache do-get-right-length))
 
-		; Return the cosine of the left-angle between ITEM-A and B.
-		; The cosine as defined above.
-		(define (compute-left-cosine ITEM-A ITEM-B)
-			(define prod (compute-left-product ITEM-A ITEM-B))
+		; Return the cosine of the angle between column A and B.
+		; The cosine as defined above (the usual textbook definition).
+		(define (compute-left-cosine COL-A COL-B)
+			(define prod (compute-left-product COL-A COL-B))
 			(define deno (*
-				(get-left-length ITEM-A)
-				(get-left-length ITEM-B)))
+				(get-left-length COL-A)
+				(get-left-length COL-B)))
 			(if (eqv? 0.0 deno) 0.0 (/ prod deno)))
 
-		; As above, but for the right.
-		(define (compute-right-cosine ITEM-A ITEM-B)
-			(define prod (compute-right-product ITEM-A ITEM-B))
+		; As above, but for the rows.
+		(define (compute-right-cosine ROW-A ROW-B)
+			(define prod (compute-right-product ROW-A ROW-B))
 			(define deno (*
-				(get-right-length ITEM-A)
-				(get-right-length ITEM-B)))
+				(get-right-length ROW-A)
+				(get-right-length ROW-B)))
 			(if (eqv? 0.0 deno) 0.0 (/ prod deno)))
 
 		; -------------
 		; Return the left-jaccard distance
-		(define (compute-left-jaccard-dist ITEM-A ITEM-B)
-			(define left-min (min-obj 'left-count (list ITEM-A ITEM-B)))
-			(define left-max (max-obj 'left-count (list ITEM-A ITEM-B)))
+		(define (compute-left-jaccard-dist COL-A COL-B)
+			(define left-min (min-obj 'left-count (list COL-A COL-B)))
+			(define left-max (max-obj 'left-count (list COL-A COL-B)))
 			(- 1.0 (/ left-min left-max))
 		)
 
 		; Return the right-jaccard distance
-		(define (compute-right-jaccard-dist ITEM-A ITEM-B)
-			(define right-min (min-obj 'right-count (list ITEM-A ITEM-B)))
-			(define right-max (max-obj 'right-count (list ITEM-A ITEM-B)))
+		(define (compute-right-jaccard-dist ROW-A ROW-B)
+			(define right-min (min-obj 'right-count (list ROW-A ROW-B)))
+			(define right-max (max-obj 'right-count (list ROW-A ROW-B)))
 			(- 1.0 (/ right-min right-max))
 		)
 
