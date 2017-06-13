@@ -273,3 +273,12 @@ in which correlations are observed.
 
 Thus, a to-do item is to port the MST parser over to here, so that
 it can be applied to general data streams.  Later, someday.
+
+TODO
+----
+To-do list items.
+ * The "api" objects need to be redesigned. They fetch stuff out of
+   the atomspace, which can only work if no filtering is applied. But
+   if there are pre-filters, then the returned values are necessarily
+   garbage. Yucko.  Can we fail-safe this for now?
+ 

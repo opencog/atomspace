@@ -56,13 +56,12 @@
   'pair-freq as the second argument.  Any method that takes a pair and
   returns a number is allowed.
 "
-
 	; Min and max of individual elements
 	(define (mintu TUPLE)  (min (first TUPLE) (second TUPLE)))
 	(define (maxtu TUPLE)  (max (first TUPLE) (second TUPLE)))
 
 	(let* ((star-obj (add-pair-stars LLOBJ))
-			(supp-obj (add-support-api star-obj))
+			(supp-obj (add-support-compute star-obj GET-CNT))
 			(min-obj  (add-support-compute
 				(add-tuple-math star-obj mintu GET-CNT)))
 			(max-obj  (add-support-compute
@@ -116,21 +115,26 @@
 				(star-obj 'right-stars ITEM-A)))
 
 		; -------------
+		(define (do-get-left-length ITEM) (supp-obj 'left-length ITEM))
+		(define get-left-length (make-afunc-cache do-get-left-length))
+		(define (do-get-right-length ITEM) (supp-obj 'right-length ITEM))
+		(define get-right-length (make-afunc-cache do-get-right-length))
+
 		; Return the cosine of the left-angle between ITEM-A and B.
 		; The cosine as defined above.
 		(define (compute-left-cosine ITEM-A ITEM-B)
 			(define prod (compute-left-product ITEM-A ITEM-B))
 			(define deno (*
-				(supp-obj 'left-length ITEM-A)
-				(supp-obj 'left-length ITEM-B)))
+				(get-left-length ITEM-A)
+				(get-left-length ITEM-B)))
 			(if (eqv? 0.0 deno) 0.0 (/ prod deno)))
 
 		; As above, but for the right.
 		(define (compute-right-cosine ITEM-A ITEM-B)
 			(define prod (compute-right-product ITEM-A ITEM-B))
 			(define deno (*
-				(supp-obj 'right-length ITEM-A)
-				(supp-obj 'right-length ITEM-B)))
+				(get-right-length ITEM-A)
+				(get-right-length ITEM-B)))
 			(if (eqv? 0.0 deno) 0.0 (/ prod deno)))
 
 		; -------------
