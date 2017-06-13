@@ -279,19 +279,26 @@
 			(supp-obj (add-support-compute star-obj))
 		)
 
+		; Very likely to call for the same lengths, so cache them.
+		(define (do-get-left-length ITEM) (supp-obj 'left-length ITEM))
+		(define get-left-length (make-afunc-cache do-get-left-length))
+		(define (do-get-right-length ITEM) (supp-obj 'right-length ITEM))
+		(define get-right-length (make-afunc-cache do-get-right-length))
+
 		; --------------------
 		(define (do-left-unit PAIR)
 			(define frq (LLOBJ 'pair-freq PAIR))
-			(define len (supp-obj 'left-length (gdr PAIR)))
+			(define len (get-left-length (gdr PAIR)))
 			(/ frq len)
 		)
 
 		(define (do-right-unit PAIR)
 			(define frq (LLOBJ 'pair-freq PAIR))
-			(define len (supp-obj 'right-length (gar PAIR)))
+			(define len (get-right-length (gar PAIR)))
 			(/ frq len)
 		)
 
+		; Likely, I beleive, to get called again, so cache.
 		(define cache-left-unit (make-afunc-cache do-left-unit))
 		(define cache-right-unit (make-afunc-cache do-right-unit))
 
