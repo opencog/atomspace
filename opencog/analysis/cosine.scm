@@ -56,16 +56,12 @@
   'pair-freq as the second argument.  Any method that takes a pair and
   returns a number is allowed.
 "
-	; Min and max of individual elements
-	(define (mintu TUPLE)  (min (first TUPLE) (second TUPLE)))
-	(define (maxtu TUPLE)  (max (first TUPLE) (second TUPLE)))
-
 	(let* ((star-obj (add-pair-stars LLOBJ))
 			(supp-obj (add-support-compute star-obj GET-CNT))
 			(min-obj  (add-support-compute
-				(add-tuple-math star-obj mintu GET-CNT)))
+				(add-tuple-math star-obj min GET-CNT)))
 			(max-obj  (add-support-compute
-				(add-tuple-math star-obj maxtu GET-CNT)))
+				(add-tuple-math star-obj max GET-CNT)))
 			(get-cnt (lambda (x) (LLOBJ GET-CNT x)))
 		)
 

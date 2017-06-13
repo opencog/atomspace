@@ -26,23 +26,15 @@
 ; when address by rows. Here, F computes the sum, difference, min, max,
 ; etc. as desired.
 ;
-; In practice, the function F is a scheme function that takes a list
-; of numbers as an argument. (This makes things slightly awkward, and
-; needs to be fixed.)  For example, to take the difference of two rows
-; or columns, define a function
-;
-;     (define (subtract TUPLE)  (- (first TUPLE) (second TUPLE)))
-;
-; which just takes the numeric difference of a list of two numbers.
-; For example: (subtract (list 7 2)) returns 5.  This can be used to
-; subtract vectors, like so:
+; For example, to take differences of rows or columns of the
+; connector-set matrix, do this:
 ;
 ;      (define vecty (make-pseudo-cset-api)
-;      (define subby (add-tuple-math vecty subtract))
+;      (define subby (add-tuple-math vecty -))
 ;      (define normy (add-support-compute subby))
 ;
-; The length of the difference of two vectors can then be computed as
-; so:
+; The length of the difference of two rows can then be computed as:
+;
 ;      (normy 'right-length (list (Word "the") (Word "a")))
 ;
 ; which will take the disjunct-vectors for the two words "the" and "a",
@@ -54,8 +46,8 @@
 ; that these two words have in common, define a set-intersection
 ; function:
 ;
-;    (define (intersect TUPLE)
-;       (if (and (< 0 (abs (first TUPLE))) (< 0 (abs (second TUPLE)))) 1 0))
+;    (define (intersect A-WORD-CNT B-WORD-CNT)
+;       (if (and (< 0 A-WORD-CNT) (< 0 B-WORD-CNT)) 1 0))
 ;
 ; then
 ;
@@ -67,8 +59,8 @@
 ; of these words.  Similarly, the set union will count how many
 ; disjuncts are used, between the two:
 ;
-;    (define (union TUPLE)
-;       (if (or (< 0 (abs (first TUPLE))) (< 0 (abs (second TUPLE)))) 1 0))
+;    (define (union A-WORD-CNT B-WORD-CNT)
+;       (if (or (< 0 A-WORD-CNT) (< 0 B-WORD-CNT)) 1 0))
 ;
 ; then
 ;
@@ -76,12 +68,13 @@
 ;      (define uniny (add-support-compute youny))
 ;      (uniny 'right-count (list (Word "the") (Word "a")))
 ;
-; returns the number of disjuncts that appear in the word "the" or in
-; the word "a".
+; returns the number of disjuncts that appear in either the word "the"
+; or in the word "a".
 ;
-; The function provided to add-tuple-math can be any tuple. i.e. can
-; take any arbitrary list.  The only constraint is that all elements of
-; the list must all be items associated with the same vector.
+; The function provided to add-tuple-math can be any function taking
+; a tuple of numbers, and returning a single number. The only constraint
+; is that the arity of the function must match the arity of the tuple
+; provided to the stars methods.
 ;
 ; ---------------------------------------------------------------------
 
@@ -135,13 +128,16 @@
   the single number
      FUNC('pair-count (x,y), 'pair-count (x,z), 'pair-count (x,w))
 
+  The function FUNC must take a tuple of numbers, and return a single
+  number as a result. The function FUNC must be able to take the same
+  number of arguments as the arity of the tuple.
+
   To simplify the usage, an optional argument can be provided: the
   name of a method to use, instead of 'pair-count, for obtaining
   numeric values. A typical example would be to use 'pair-freq
   to get the frequency p(x,y) of a pair, instead of the count N(x,y).
 "
 	(let ((star-obj (add-pair-stars LLOBJ))
-			(sum-func FUNC)
 			(get-cnt (lambda (x) (LLOBJ GET-CNT)))
 		)
 
@@ -224,10 +220,10 @@
 			(map (lambda (lopr) (LLOBJ 'item-pair lopr)) TUPLE))
 
 		; Given a TUPLE of high-level pairs, return a single number.
-		; The sum-func is applied to reduce the counts on each pair
+		; The FUNC is applied to reduce the counts on each pair
 		; in the tuple down to just one number.
 		(define (get-func-count TUPLE)
-			(sum-func
+			(apply FUNC
 				(map
 					(lambda (pr) (if (null? pr) 0 (get-cnt pr)))
 					TUPLE)))
