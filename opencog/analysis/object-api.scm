@@ -512,15 +512,18 @@
 
 	; Return the observed frequency on ATOM
 	(define (get-freq ATOM)
-		(cog-value-ref (cog-value ATOM freq-key) 0))
+		(if (null? ATOM) 0
+			(cog-value-ref (cog-value ATOM freq-key) 0)))
 
-	; Return the observed - log_2(frequency) on ATOM
+	; Return the observed -log_2(frequency) on ATOM
 	(define (get-logli ATOM)
-		(cog-value-ref (cog-value ATOM freq-key) 1))
+		(if (null? ATOM) +inf.0
+			(cog-value-ref (cog-value ATOM freq-key) 1)))
 
-	; Return the observed - frequency * log_2(frequency) on ATOM
+	; Return the observed -frequency * log_2(frequency) on ATOM
 	(define (get-entropy ATOM)
-		(cog-value-ref (cog-value ATOM freq-key) 2))
+		(if (null? ATOM) 0
+			(cog-value-ref (cog-value ATOM freq-key) 2)))
 
 	; Set both a frequency count, and a -log_2(frequency) on
 	; the ATOM.
