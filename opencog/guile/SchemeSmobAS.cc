@@ -11,6 +11,7 @@
 
 #include <opencog/atomspace/AtomSpace.h>
 #include <opencog/guile/SchemeSmob.h>
+#include <opencog/util/oc_assert.h>
 
 using namespace opencog;
 
@@ -31,6 +32,17 @@ std::string SchemeSmob::as_to_string(const AtomSpace *as)
 	char buff[BUFLEN];
 
 	snprintf(buff, BUFLEN, "#<atomspace %p>", as);
+	return buff;
+}
+
+/* ============================================================== */
+
+std::string SchemeSmob::logger_to_string(const Logger *l)
+{
+#define BUFLEN 120
+	char buff[BUFLEN];
+
+	snprintf(buff, BUFLEN, "#<logger %p>", l);
 	return buff;
 }
 
@@ -184,6 +196,23 @@ AtomSpace* SchemeSmob::ss_to_atomspace(SCM sas)
 }
 
 /* ============================================================== */
+/* Cast SCM to logger */
+
+Logger* SchemeSmob::ss_to_logger(SCM sl)
+{
+	if (not SCM_SMOB_PREDICATE(SchemeSmob::cog_misc_tag, sl))
+		return nullptr;
+
+	scm_t_bits misctype = SCM_SMOB_FLAGS(sl);
+	if (COG_LOGGER != misctype)
+		return nullptr;
+
+	Logger* l = (Logger *) SCM_SMOB_DATA(sl);
+	scm_remember_upto_here_1(sl);
+	return l;
+}
+
+/* ============================================================== */
 
 AtomSpace* SchemeSmob::verify_atomspace(SCM sas, const char * subrname, int pos)
 {
@@ -192,6 +221,17 @@ AtomSpace* SchemeSmob::verify_atomspace(SCM sas, const char * subrname, int pos)
       scm_wrong_type_arg_msg(subrname, pos, sas, "opencog atomspace");
 
    return as;
+}
+
+/* ============================================================== */
+
+Logger* SchemeSmob::verify_logger(SCM sl, const char * subrname, int pos)
+{
+   Logger* l = ss_to_logger(sl);
+   if (nullptr == l)
+      scm_wrong_type_arg_msg(subrname, pos, sl, "opencog logger");
+
+   return l;
 }
 
 /* ============================================================== */

@@ -23,6 +23,7 @@ SCM SchemeSmob::mark_misc(SCM misc_smob)
 	{
 		case COG_PROTOM: // Nothing to do here ...
 		case COG_AS: // Nothing to do here ...
+		case COG_LOGGER: // Nothing to do here ...
 		case COG_AV: // Nothing to do here ...
 		case COG_EXTEND: // Nothing to do here ...
 			return SCM_BOOL_F;
@@ -104,6 +105,12 @@ std::string SchemeSmob::misc_to_string(SCM node)
 		case COG_AS:
 		{
 			std::string str(as_to_string((AtomSpace *) SCM_SMOB_DATA(node)));
+			scm_remember_upto_here_1(node);
+			return str;
+		}
+		case COG_LOGGER:
+		{
+			std::string str(logger_to_string((Logger *) SCM_SMOB_DATA(node)));
 			scm_remember_upto_here_1(node);
 			return str;
 		}

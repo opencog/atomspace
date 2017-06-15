@@ -117,6 +117,16 @@ SCM SchemeSmob::equalp_misc(SCM a, SCM b)
 			if (as == bs) return SCM_BOOL_T;
 			return SCM_BOOL_F;
 		}
+		case COG_LOGGER:
+		{
+			Logger* al = (Logger *) SCM_SMOB_DATA(a);
+			Logger* bl = (Logger *) SCM_SMOB_DATA(b);
+			scm_remember_upto_here_1(a);
+			scm_remember_upto_here_1(b);
+			/* Just a simple pointer comparison */
+			if (al == bl) return SCM_BOOL_T;
+			return SCM_BOOL_F;
+		}
 		case COG_AV:
 		{
 			AttentionValue* av = (AttentionValue *) SCM_SMOB_DATA(a);

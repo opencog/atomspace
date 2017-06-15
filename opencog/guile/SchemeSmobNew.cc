@@ -144,6 +144,14 @@ SCM SchemeSmob::protom_to_scm (const ProtoAtomPtr& pa)
 	return smob;
 }
 
+SCM SchemeSmob::logger_to_scm (Logger* lg)
+{
+	SCM smob;
+	SCM_NEWSMOB (smob, cog_misc_tag, lg);
+	SCM_SET_SMOB_FLAGS(smob, COG_LOGGER);
+	return smob;
+}
+
 ProtoAtomPtr SchemeSmob::scm_to_protom (SCM sh)
 {
 	if (not SCM_SMOB_PREDICATE(SchemeSmob::cog_misc_tag, sh))

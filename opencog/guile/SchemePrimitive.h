@@ -16,10 +16,13 @@
 #include <tuple>
 #include <utility>
 
+#include <libguile.h>
+
+#include <opencog/util/Logger.h>
+
 #include <opencog/atoms/base/Handle.h>
 #include <opencog/truthvalue/TruthValue.h>
 #include <opencog/guile/SchemeSmob.h>
-#include <libguile.h>
 #include <opencog/atoms/base/ClassServer.h>
 
 // Copied/pasted from gcc 4.9 utility. Remove as soon as C++14 is
@@ -27,7 +30,7 @@
 #if __cplusplus <= 201103L
 
 namespace std {
-	  /// Class template integer_sequence
+  /// Class template integer_sequence
   template<typename _Tp, _Tp... _Idx>
     struct integer_sequence
     {
@@ -272,6 +275,11 @@ protected:
 		SCM arg = scm_list_ref(args, scm_from_size_t(idx));
 		return SchemeSmob::verify_atomspace(arg, scheme_name, idx);
 	}
+	Logger* scm_to(SCM args, size_t idx, const Logger*) const
+	{
+		SCM arg = scm_list_ref(args, scm_from_size_t(idx));
+		return SchemeSmob::verify_logger(arg, scheme_name, idx);
+	}
 
 	// Get the Ith argument and convert it to a C++ object.
 	template<std::size_t I>
@@ -367,6 +375,10 @@ protected:
 	SCM scm_from(TruthValuePtr tv)
 	{
 		return SchemeSmob::tv_to_scm(tv);
+	}
+	SCM scm_from(Logger* lg)
+	{
+		return SchemeSmob::logger_to_scm(lg);
 	}
 
 	virtual SCM invoke (SCM args)

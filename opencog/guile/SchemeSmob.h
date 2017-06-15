@@ -48,6 +48,7 @@ private:
 		COG_PROTOM = 1, // values or atoms - smart pointer
 		COG_AV,         // attention values
 		COG_AS,         // atom spaces
+		COG_LOGGER,     // logger
 		COG_EXTEND      // callbacks into C++ code.
 	};
 
@@ -71,6 +72,7 @@ private:
 	static SCM handle_to_scm(const Handle&);
 	static SCM protom_to_scm(const ProtoAtomPtr&);
 	static SCM tv_to_scm(const TruthValuePtr&);
+	static SCM logger_to_scm(Logger* lg);
 	static Handle scm_to_handle(SCM);
 	static ProtoAtomPtr scm_to_protom(SCM);
 	static TruthValuePtr scm_to_tv(SCM);
@@ -169,6 +171,7 @@ private:
 	static SCM make_as(AtomSpace *);
 	static void release_as(AtomSpace *);
 	static AtomSpace* ss_to_atomspace(SCM);
+	static Logger* ss_to_logger(SCM);
 	static std::mutex as_mtx;
 	static std::map<AtomSpace*, int> deleteable_as;
 	static void as_ref_count(SCM, AtomSpace *);
@@ -202,6 +205,7 @@ private:
 	// validate arguments coming from scheme passing into C++
 	static void throw_exception(const std::exception&, const char *, SCM);
 	static AtomSpace* verify_atomspace(SCM, const char *, int pos = 1);
+	static Logger* verify_logger(SCM, const char *, int pos = 1);
 	static Type verify_atom_type(SCM, const char *, int pos = 1);
 	static Handle verify_handle(SCM, const char *, int pos = 1);
 	static ProtoAtomPtr verify_protom(SCM, const char *, int pos = 1);
@@ -239,6 +243,7 @@ public:
 	// Utility printing functions
 	static std::string to_string(const Handle&);
 	static std::string as_to_string(const AtomSpace *);
+	static std::string logger_to_string(const Logger *);
 	static std::string av_to_string(const AttentionValue *);
 	static std::string tv_to_string(const TruthValuePtr&);
 };
