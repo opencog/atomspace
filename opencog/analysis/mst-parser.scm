@@ -149,8 +149,8 @@
 	(define (pick-best-cost-left-pair left-numa numa-list)
 		(fold
 			(lambda (right-numa max-pair)
-				(define best-pair (first max-pair))
-				(define max-mi (second max-pair))
+				(define best-pair (car max-pair))
+				(define max-mi (cdr max-pair))
 				(define cur-mi
 					(SCORE-FN (cdr left-numa) (cdr right-numa)
 						(- (car right-numa) (car left-numa))))
@@ -181,8 +181,8 @@
 	(define (pick-best-cost-right-pair right-numa numa-list)
 		(fold
 			(lambda (left-numa max-pair)
-				(define best-pair (first max-pair))
-				(define max-mi (second max-pair))
+				(define best-pair (car max-pair))
+				(define max-mi (cdr max-pair))
 				(define cur-mi
 					(SCORE-FN (cdr left-numa) (cdr right-numa)
 						(- (car right-numa) (car left-numa))))
@@ -216,7 +216,7 @@
 			; possibilities -- those that start with left-most numa, and
 			; something else.
 			(let ((best-rest (pick-best-cost-pair (cdr numa-list))))
-				(if (< (second best-left) (second best-rest))
+				(if (< (cdr best-left) (cdr best-rest))
 					best-rest
 					best-left
 				)
@@ -247,11 +247,11 @@
 
 		; The tail-recursive helper that does all the work.
 		(define (*pick-best choice-list best-so-far)
-			(define so-far-mi (second best-so-far))
+			(define so-far-mi (cdr best-so-far))
 			(if (null? choice-list)
 				best-so-far  ; we are done!
 				(let* ((first-choice (car choice-list))
-						(first-mi (second first-choice))
+						(first-mi (cdr first-choice))
 						(curr-best
 							; use greater-than-or-equal; want to reject
 							; bad-pair as soon as possible.
@@ -324,12 +324,12 @@
 
 	; Return true if a pair of links cross, else return false.
 	(define (cross? cost-pair-a cost-pair-b)
-		(define pair-a (first cost-pair-a)) ; throw away MI
-		(define pair-b (first cost-pair-b)) ; throw away MI
-		(define lwa (first pair-a))  ; left numa of numa-pair
-		(define rwa (second pair-a)) ; right numa of numa-pair
-		(define lwb (first pair-b))
-		(define rwb (second pair-b))
+		(define pair-a (car cost-pair-a)) ; throw away MI
+		(define pair-b (car cost-pair-b)) ; throw away MI
+		(define lwa (car pair-a))  ; left numa of numa-pair
+		(define rwa (cdr pair-a)) ; right numa of numa-pair
+		(define lwb (car pair-b))
+		(define rwb (cdr pair-b))
 		(define ila (car lwa))     ; ordinal number of the atom
 		(define ira (car rwa))
 		(define ilb (car lwb))
@@ -361,9 +361,9 @@
 
 	; Which numa of the pair is in the numa-list?
 	(define (get-fresh cost-pair numa-list)
-		(define numa-pair (first cost-pair)) ; throw away MI
-		(define left-numa (first numa-pair))
-		(define right-numa (second numa-pair))
+		(define numa-pair (car cost-pair)) ; throw away MI
+		(define left-numa (car numa-pair))
+		(define right-numa (cdr numa-pair))
 		(if (any (lambda (numa) (equal? numa left-numa)) numa-list)
 			left-numa
 			right-numa
@@ -404,7 +404,7 @@
 		; There is no such "best link" i.e. we've never obseved it
 		; and so have no MI for it, then we are done.  That is, none
 		; of the remaining numas can be connected to the existing graph.
-		(if (> -1e10 (second best))
+		(if (> -1e10 (cdr best))
 			graph-links
 			(let* (
 
@@ -440,10 +440,10 @@
 			(start-cost-pair (pick-best-cost-pair numa-list))
 
 			; Discard the MI.
-			(start-pair (first start-cost-pair))
+			(start-pair (car start-cost-pair))
 
 			; Add both of these atoms to the connected-list.
-			(nected-list (list (first start-pair) (second start-pair)))
+			(nected-list (list (car start-pair) (cdr start-pair)))
 
 			; Remove both of these atoms from the atom-list
 			(smaller-list (set-sub numa-list nected-list))
@@ -458,21 +458,21 @@
 ; unpack each data strcture.
 ;
 ; Get the score of the link.
-(define-public (mst-link-get-score lnk) (second lnk))
+(define-public (mst-link-get-score lnk) (cdr lnk))
 
 ; Get the left numbered-atom (numa) in the link. The num is a scheme
 ; pair of the form (number . atom)
 (define-public (mst-link-get-left-numa lnk)
-	(first (first lnk)))
+	(car (car lnk)))
 
 (define-public (mst-link-get-right-numa lnk)
-	(second (first lnk)))
+	(cdr (car lnk)))
 
 ; Get the index number out of the numa.
-(define-public (mst-numa-get-index numa) (first numa))
+(define-public (mst-numa-get-index numa) (car numa))
 
 ; Get the atom from the numa.
-(define-public (mst-numa-get-atom numa) (second numa))
+(define-public (mst-numa-get-atom numa) (cdr numa))
 
 ; Get the left atom in the scored link.
 (define-public (mst-link-get-left-atom lnk)
