@@ -541,11 +541,11 @@ MAP_LINK <- FUNCTION_LINK
 // ====================================================================
 // Grammatical inference on time series
 // The generic structure encoded here would be:
-//     CSet
+//     Section
 //         LexicalAtom "something"
 //         ConnectorSeq
 //             Connector
-//                 LexicalAtom "its"
+//                 LexicalAtom "it's"
 //                 ConnectorDir "-"
 //             Connector
 //                 LexicalAtom "curious"
@@ -554,4 +554,4 @@ MAP_LINK <- FUNCTION_LINK
 CONNECTOR <- LINK              // Link-grammar connector
 CONNECTOR_DIR <- NODE          // Connector direction
 CONNECTOR_SEQ <- ORDERED_LINK  // Sequence of connectors
-CSET <- ORDERED_LINK "CSet"    // Connector set
+SECTION <- ORDERED_LINK        // Sheaf section, connector set

@@ -129,25 +129,53 @@ traditionally, it is enough to just list all of the vertexes and all
 of the edges. However, by looking at a graph in terms of sections,
 one can hope to apply all of the tools of sheaf theory to the problem.
 
-Stalks and Germs
-----------------
-In particular, by making a large number of statistical observations of
-graphs, and then collecting statistics on sections, one can hope to
-discern how that vertex typically connects into a typical graph. This
+Thus, a typical section might look like this:
+```
+    Section
+        LexicalAtom "something"
+        ConnectorSeq
+            Connector
+                LexicalAtom "it's"
+                ConnectorDir "-"
+            Connector
+                LexicalAtom "curious"
+                ConnectorDir "+"
+```
+
+The above encodes the idea that the vertex "something" has an edge that
+connects it to the vertex "it's", and another edge that connects it to
+the vertex "curious".
+
+The `Section`, `ConnectorSeq`, `Connector` and `ConnectorDir` are real
+atom types.  The `LexicalAtom` is not: its just an exammple. The word
+"lexical" is used here to suggest that the above has the form of a
+dictionary entry: one can look up "something" in the dictionary, and,
+obtain as it's defintion, the `ConnectorSeq` of everything it attaches
+to.
+
+The `ConnectorDir` will be explained later. In general, one may want to
+include additional information about a connector: a weight, a distance,
+its commutativity properties, etc. 
+
+
+Stalks, Germs, Lexical Items
+----------------------------
+By making a large number of statistical observations of graphs, and
+then collecting statistics on sections, one can hope to discern how that
+vertex typically connects into a typical graph. In sheaf theory, this
 information about the typical behavior of a vertex is called the "stalk"
-or the "germ" of a vertex. (A "stalk", because its like a plant, with
+or the "germ" of the vertex. (A "stalk", because its like a plant, with
 different branches forking out from the main trunk.  A "germ", because
-it can grow and "germinate" different connections.)
+it can grow and "germinate" different connections.) In linguistics, it
+is called a "lexical entry" or "lexical item", because it resembles an
+entry in a dictionary (a "lexis"): one can look up the vertex in the
+dictionary, and get, as it's definition, a list of the kinds of edges it
+participates in.
 
+In Link Grammar, the disjoint union of all sections are called "connector
+sets", and connector sequences are called "disjuncts". (Viz, each
+connector sequence is disjoined from the other: to parse a graph, one
+must choose one section, and discard all the others.)
 
+Language is the  étalé space 
 
-Each vertex in the tree can have one or more edges attached to it. The
-edges are called "links".  Each "link" can be viewed as the union of two
-"connectors", with one connector coming from one vertex, and the other
-connector coming from the other vertex. When these two connectors come
-together, they form a link.  The sequnce of connectors attached to a
-vertex is called a "disjunct".  The vertex itself, otherther with it's
-disjunct is called a "connector set".  These are all concepts stolen
-from Link Grammar, where they are applied in a linguistic context;
-however, these concepts are generic; thus, the code here attempts to be
-generic.
