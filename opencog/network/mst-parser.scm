@@ -151,7 +151,6 @@
 	(define (pick-best-cost-left-pair left-numa numa-list)
 		(fold
 			(lambda (right-numa max-pair)
-				(define best-pair (car max-pair))
 				(define max-mi (cdr max-pair))
 				(define cur-mi
 					(SCORE-FN (cdr left-numa) (cdr right-numa)
@@ -183,7 +182,6 @@
 	(define (pick-best-cost-right-pair right-numa numa-list)
 		(fold
 			(lambda (left-numa max-pair)
-				(define best-pair (car max-pair))
 				(define max-mi (cdr max-pair))
 				(define cur-mi
 					(SCORE-FN (cdr left-numa) (cdr right-numa)
