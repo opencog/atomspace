@@ -120,6 +120,9 @@
 	; Define a losing score.
 	(define bad-mi -1e30)
 
+	; Define a losing numa-pair
+	(define bad-pair (cons (cons (cons 0 '()) (cons 0 '())) bad-mi))
+
 	; Given a list of atoms, create a numbered list of atoms.
 	; The numbering provides a unique ID, needed for the graph algos.
 	; i.e. if the same atom appears twice in a sequence, we need to
@@ -163,7 +166,7 @@
 					max-pair
 				)
 			)
-			(cons '() bad-mi)
+			bad-pair
 			numa-list
 		)
 	)
@@ -194,7 +197,7 @@
 					max-pair
 				)
 			)
-			(cons '() bad-mi)
+			bad-pair
 			numa-list
 		)
 	)
@@ -242,8 +245,6 @@
 	; The choice-list is assumed to be a list of costed numa-pairs,
 	; each costed pair of the form ((left-numa . right-num) . mi).
 	(define (max-of-pair-list choice-list)
-		; An awful numa-pair
-		(define bad-pair (cons (cons (cons 0 '()) (cons 0 '())) bad-mi))
 
 		; The tail-recursive helper that does all the work.
 		(define (*pick-best choice-list best-so-far)
