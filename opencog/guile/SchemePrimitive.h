@@ -169,6 +169,11 @@ protected:
 		SCM arg = scm_list_ref(args, scm_from_size_t(idx));
 		return SchemeSmob::verify_handle(arg, scheme_name, idx);
 	}
+	HandleSeq scm_to(SCM args, size_t idx, const HandleSeq&) const
+	{
+		SCM arg = scm_list_ref(args, scm_from_size_t(idx));
+		return SchemeSmob::verify_handle_list(arg, scheme_name, idx);
+	}
 	AtomSpace* scm_to(SCM args, size_t idx, const AtomSpace*) const
 	{
 		SCM arg = scm_list_ref(args, scm_from_size_t(idx));
