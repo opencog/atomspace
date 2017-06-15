@@ -501,10 +501,9 @@ Handle AtomTable::add(AtomPtr atom, bool async)
     // the same atom.
     std::unique_lock<std::recursive_mutex> lck(_store_mtx);
 
-    // Search again, this isn't much extra work and it lets us reduce
-    // contention on the lock.
-
-    // So ... check to see if we have it or not.
+    // Search again, now that we hold the lock. This is necessary for
+    // the case where another atom was just inserted by another
+    // thread while we were cloning and copying values in this thread.
     auto range = _atom_store.equal_range(ch);
     auto bkt = range.first;
     auto end = range.second;
@@ -522,18 +521,19 @@ Handle AtomTable::add(AtomPtr atom, bool async)
     Handle h(atom->getHandle());
     _atom_store.insert({ch, h});
 
-    // We can now unlock, since we are done.
+    // We can now unlock, since we are done updating the store
+    // and counts.
     lck.unlock();
 
     // Note: we don't need to hold the lock for the
-    // index since we won't have a duplicate due to
-    // the critical section above including a search.
-    if (not _transient and not async)
-        put_atom_into_index(atom);
-
-    // Update the indexes asynchronously
-    if (not _transient and async)
-        _index_queue.enqueue(atom);
+    // index since it locks an index-specific mutex.
+    if (not _transient)
+        {
+        if (async)
+            _index_queue.enqueue(atom);
+        else
+            put_atom_into_index(atom);
+        }
 
     DPRINTF("Atom added: %s\n", atom->toString().c_str());
     return h;
@@ -581,7 +581,7 @@ size_t AtomTable::getNumLinks() const
 
 size_t AtomTable::getNumAtomsOfType(Type type, bool subclass) const
 {
-    std::lock_guard<std::recursive_mutex> lck(_index_mtx);
+    std::lock_guard<std::recursive_mutex> lck(_store_mtx);
 
     size_t result = _size_by_type[type];
     if (subclass)
@@ -764,6 +764,8 @@ AtomPtrSet AtomTable::extract(Handle& handle, bool recursive)
     _removeAtomSignal(atom);
     // lck.lock();
 
+    std::unique_lock<std::recursive_mutex> store_lock(_store_mtx);
+
     // Decrements the size of the table
     _size--;
     if (atom->isNode()) _num_nodes--;
@@ -779,12 +781,15 @@ AtomPtrSet AtomTable::extract(Handle& handle, bool recursive)
             break;
         }
     }
+    store_lock.unlock();
 
     std::unique_lock<std::recursive_mutex> index_lock(_index_mtx);
     Atom* pat = atom.operator->();
     typeIndex.removeAtom(pat);
     index_lock.unlock();
 
+    // Remove this atom from the incoming set of all the atoms
+    // in this link's outgoing set.
     if (atom->isLink()) {
         LinkPtr lll(LinkCast(atom));
         for (AtomPtr a : lll->_outgoing) {
@@ -792,10 +797,8 @@ AtomPtrSet AtomTable::extract(Handle& handle, bool recursive)
         }
     }
 
-    // XXX Setting the atom table causes AVChanged signals to be emitted.
-    // We should really do this unlocked, but I'm too lazy to fix, and
-    // am hoping no one will notice. This will probably need to be fixed
-    // someday.
+    // Setting the atom table causes AVChanged signals to be emitted.
+    // So do this unlocked.
     atom->setAtomSpace(nullptr);
 
     result.insert(atom);
@@ -805,7 +808,9 @@ AtomPtrSet AtomTable::extract(Handle& handle, bool recursive)
 // This is the resize callback, when a new type is dynamically added.
 void AtomTable::typeAdded(Type t)
 {
-    std::lock_guard<std::recursive_mutex> lck(_index_mtx);
+    std::lock_guard<std::recursive_mutex> store_lock(_store_mtx);
+    std::lock_guard<std::recursive_mutex> index_lock(_index_mtx);
+
     //resize all Type-based indexes
     size_t new_size = classserver().getNumberOfClasses();
     _size_by_type.resize(new_size);

@@ -79,11 +79,12 @@ class AtomTable
 
 private:
 
+    mutable std::recursive_mutex _store_mtx;
+
     // Single, global mutex for locking the indexes.
     // Its recursive because we need to lock twice during atom insertion
     // and removal: we need to keep the indexes stable while we search
     // them during add/remove.
-    mutable std::recursive_mutex _store_mtx;
     mutable std::recursive_mutex _index_mtx;
 
     // Cached count of the number of atoms in the table.
