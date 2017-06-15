@@ -38,19 +38,16 @@ attached to the EvaluationLink.  It's doesn't have to be, it could be
 placed elsewhere.
 
 The core idea is that the atomspace can hold sparse matrix data; in a
-certain sense, it was designed from the get-go to do exactly that. Once
-you can see that its a matrix, you can then apply a variety of generic
-matrix analysis tools to it.  The tools implemented here include:
+certain sense, the atomspace was designed from the get-go to do exactly
+that. Once you can see that its a matrix, you can then apply a variety
+of generic matrix analysis tools to it.  The tools implemented here
+include:
 
 *) row and column subtotals
 *) computing and caching frequencies from counts.
 *) computing and caching mutual information between rows and columns
 *) computing cosine similarity between rows or columns.
 *) performing PCA (principal component analysis) in the matrix.
-
-Planed, not implemented:
-*) performing a minimum spanning tree parse (MST parse) based on
-   athe pairwise distance measures held in the matrix.
 
 FAQ
 ---
@@ -259,15 +256,9 @@ is provided.
 Tensors, in general
 -------------------
 Suppose you have more than just pairs. Suppose you have triples that
-you want to work with. Then what?
+you want to work with. Then what?  Answer: use the network analysis
+tools in the (opencog network) module.
 
-The current best idea seems to be to take any sequence of atoms (of
-arbitrary but finite length), perform a maximum spanning-tree parse
-of the sequence, then extract connectors and disjuncts from the parse.
-This effectively factors or decomposes the tensor, in general, into
-a number of parts, called disjuncts.
-
-More explanation for what this is needs to go here.
 
 
 TODO
