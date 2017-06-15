@@ -44,6 +44,9 @@
 	(Number 42))
 
 (ListLink
+	(Concept "hi"))
+
+(ListLink
 	(Concept "hi")
 	(Concept "Sophia"))
 
@@ -162,6 +165,7 @@
 			(Concept "also"))))
 
 ; Two globs in a row
+; Should match to "hi Sophia" but not "hi" as we need to ground $y
 (define greet
 	(BindLink
 		(VariableList
