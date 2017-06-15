@@ -183,17 +183,33 @@ are.
 
 Cause and effect
 ----------------
-Note that, in such systems, the observed "cause" can sometimes come after
-the "effect".  For example: to build a high-rise building, a foundation
-must be dug first.  Observed as events in time, the construction comes
-after the foundation is built: it would be incorrect to say that a hole
-in the ground "causes" a sky-scraper to appear.  This is because the
-formal cause of the skyscraper is the will of a real-estate developer;
-however, this will is not observed; only the construction events are.
-From the point of view of the network analysis being done here, the
-skyscraper should be viewed as the "head", and the hole in the ground
-as the "dependent", with the head dominating the dependent in a
-dependency grammar.
+Whenever a sequence of events is observed for a system, the apparent
+order of "cause" and "effect" can be reversed, with the apparent "cause"
+coming long after the "effect".
+
+For example: to build a high-rise building, a foundation must be dug
+first.  Observed as events in time, the construction comes after the
+foundation is built. However, it would be incorrect to say that a hole
+in the ground "causes" a sky-scraper to appear, even though it came
+earlier.  This is because the formal cause of the skyscraper is the
+will of a real-estate developer; yet, this will is not observed; only
+the construction events are.  From the point of view of a dependency
+grammar describing the sequence of events, the skyscraper should be
+viewed as the "head", and the hole in the ground as the "dependent",
+with the head dominating the dependent, or "causing" the dependent,
+even though the dependent comes earlier.
+
+This example demonstrates why Hidden Markov Model (HMM) and Bayesian
+network models of human langauge fail: The earlier words in a sentence
+do not, cannot "cause" later words to appear; rather, it is often the
+case that the later words "cause" or "force" the earlier words to appear.
+
+More generally, this example shows why a dependency grammar approach,
+with events assocaited with "sites", "germs", "stalks", "lexical
+entries" is more appropriate for the analysis of a network, and is more
+powerful, than HMM, Bayesian networks or Latent Semantic Analysis (LSA)
+can be.
+
 
 MST parsing
 -----------
