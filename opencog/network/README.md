@@ -210,6 +210,16 @@ entries" is more appropriate for the analysis of a network, and is more
 powerful, than HMM, Bayesian networks or Latent Semantic Analysis (LSA)
 can be.
 
+Random jab: this is also why Hutter's naive AIXI is incorrect: it only
+considers past events, thus incorrectly inferring in a forward time-like
+direction.  Clearly, this leads to incorrect conclusions about
+skyscrapers, and fails to induce the Aristotelian "formal cause" of
+events.
+
+
+Infering Grammar
+----------------
+To observationally infer the grammar of a network, one must
 
 MST parsing
 -----------
