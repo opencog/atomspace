@@ -34,6 +34,7 @@ go under the name of:
 See the respective Wikipedia articles on each of these topics. A
 lightning review of these concepts is given below.
 
+
 Networks and Sheaf theory
 -------------------------
 The topological structure of a graph can be understood locally in terms
@@ -101,6 +102,7 @@ sets", and connector sequences are called "disjuncts". (Viz, each
 connector sequence is disjoined from the other: to parse a graph, one
 must choose one section, and discard all the others.)
 
+
 Grammar
 -------
 In linguistics and in computer science, the stalk/germ can be viewed as
@@ -125,6 +127,7 @@ and vice versa.  The lexis of a dependency grammar can be written as a
 collection of sections; this is made very explicit in Link Grammar.
 
 A language is then the same thing as the "étalé space" of a sheaf.
+
 
 Trace theory
 ------------
@@ -159,6 +162,7 @@ as the result of computations being performed by distinct agents or
 actors exchanging messages between one-another; the ordering of some
 messages does not matter; the order of others do.  The sequence of
 observed messages is the "trace".
+
 
 Trace and History Monoids
 -------------------------
@@ -219,7 +223,38 @@ events.
 
 Infering Grammar
 ----------------
-To observationally infer the grammar of a network, one must
+To observationally infer the grammar of a network, one must observe a
+lot of networks. With each network observation, one may create a set
+of sections summarizing that network.  To get a view of the general
+network, counts can be maintained for each observed section.  The result
+of such counting is a frequency distribution over sections. To induce a
+grammar, one may then compare the distributions on different vertexes;
+if they are sufficiently similar, the vertexes can be grouped together
+into a class. Since vertexes also occur as the end-points of connectors,
+a grouping also has to be observed there.
+
+If the network is not apparent (if it is latent or hidden), then one
+cannot directly generate sections, because one cannot directly observe
+the edges. In this case, a more round-about route is required, as
+follows:
+
+1) Assume all possible networks occur with equal probability.
+2) Oberve a lot of sequences, and count the frequency with which edges
+   occur.
+3) Compute the mutual information (MI) for each edge. That is, each edge
+   has two endpoints, and the co-occurance of these endpoints can be
+   captured as the mutual information between them.  The MI serves as
+   a kind of measure of covariance or correlation.
+4) Re-observe a lot of sequences, this time over-laying them with a
+   maximal spanning tree (MST). So unlike step 1, where each network was
+   assumed to be a clique, this time, the network is assumed to be a
+   tree.  The "correct" tree is the tree that maximizs the sum of the
+   MI of the edges.
+5) Compute the sections of the MST, and accumulate these to obtain a
+   distribution of sections.
+
+The grammar can then be infered from the distribution of the sections.
+
 
 MST parsing
 -----------
@@ -249,3 +284,5 @@ The MST parse just creates a tree connecting all of the atoms in a
 sequnce, such that the sum-total (addition) of the scores of all the
 edges in the tree is maximal, as compared to any other tree.
 
+After the MST parse, the section for each vertex in the parse can be
+computed.
