@@ -65,58 +65,58 @@
 )
 
 ; ---------------------------------------------------------------------
-;
-; Maximum Spanning Tree parser.
-;
-; Given a sequence of atoms, find an (unlabelled) dependency parse
-; of the sequence, by finding a dependency tree that maximizes the
-; pair-wise scoring function. This returns a list of atom-pairs,
-; together with associated score.
-;
-; The ATOM-LIST should be a scheme-list of atoms, all presumably of
-; a uniform atom type.
-;
-; The SCORE-FN should be a function that, when give a left-right ordered
-; pair of atoms, and the distance between them, returns a numeric score
-; for that pair. This numeric score will be maximized during the parse.
-; The most basic choice is to use the mutual information between the
-; pair of atoms.  The SCORE-FN should take three arguments: left-atom,
-; right-atom and (numeric) distance.
-;
-; The M in MST normally stands for "minimum", but this code maximizes.
-;
-; There are many MST algorithms; the choice was made as follows:
-; Prim is very easy; but seems too simple to give good results.
-; Kruskal is good, but seems hard to control a no-link-cross constraint. (?)
-; This implements a variant of Borůvka's algo, which seems to be robust,
-; and fast enough for the current needs.
-;
-; The no-links-cross constraint might not be required, see
-; R. Ferrer-i-Cancho (2006) “Why do syntactic links not cross?”
-; However, that would require changing the metric from mutual information
-; to something else, perhaps incorporating the dependency distance
-; (as defined by Ferrer-i-Cancho), or possibly the "hubiness", or some
-; combination.  Since I really, really want to stick to entropy concepts,
-; the mean-dependency-distance metric needs to be re-phrased as some
-; sort of graph entropy. Hmmm...
-;
-; Another idea is to apply the Dick Hudson Word Grammar landmark
-; transitivity idea, but exactly how this could work for unlabelled
-; trees has not been explored.
-;
-; So, for now, a no-links-cross constraint is handed-coded into the algo.
-; Without it, it seems that the pair-MI scores alone give rather unruly
-; dependencies (unclear, needs exploration).  So, in the long-run, it
-; might be better to instead pick something that combines MI scores with
-; mean-dependency-distance or with hubbiness. See, for example:
-; Haitao Liu (2008) “Dependency distance as a metric of language
-; comprehension difficulty” Journal of Cognitive Science, 2008 9(2): 159-191.
-; or also:
-; Ramon Ferrer-i-Cancho (2013) “Hubiness, length, crossings and their
-; relationships in dependency trees”, ArXiv 1304.4086
 
 (define-public (mst-parse-atom-seq ATOM-LIST SCORE-FN)
+"
+  Maximum Spanning Tree parser.
 
+  Given a sequence of atoms, find an (unlabelled) dependency parse
+  of the sequence, by finding a dependency tree that maximizes the
+  pair-wise scoring function. This returns a list of atom-pairs,
+  together with associated score.
+
+  The ATOM-LIST should be a scheme-list of atoms, all presumably of
+  a uniform atom type.
+
+  The SCORE-FN should be a function that, when give a left-right ordered
+  pair of atoms, and the distance between them, returns a numeric score
+  for that pair. This numeric score will be maximized during the parse.
+  The most basic choice is to use the mutual information between the
+  pair of atoms.  The SCORE-FN should take three arguments: left-atom,
+  right-atom and (numeric) distance.
+
+  The M in MST normally stands for 'minimum', but this code maximizes.
+
+  There are many MST algorithms; the choice was made as follows:
+  Prim is very easy; but seems too simple to give good results.
+  Kruskal is good, but seems hard to control a no-link-cross constraint. (?)
+  This implements a variant of Borůvka's algo, which seems to be robust,
+  and fast enough for the current needs.
+
+  The no-links-cross constraint might not be required, see
+  R. Ferrer-i-Cancho (2006) “Why do syntactic links not cross?”
+  However, that would require changing the metric from mutual information
+  to something else, perhaps incorporating the dependency distance
+  (as defined by Ferrer-i-Cancho), or possibly the 'hubiness', or some
+  combination.  Since I really, really want to stick to entropy concepts,
+  the mean-dependency-distance metric needs to be re-phrased as some
+  sort of graph entropy. Hmmm...
+
+  Another idea is to apply the Dick Hudson Word Grammar landmark
+  transitivity idea, but exactly how this could work for unlabelled
+  trees has not been explored.
+
+  So, for now, a no-links-cross constraint is handed-coded into the algo.
+  Without it, it seems that the pair-MI scores alone give rather unruly
+  dependencies (unclear, needs exploration).  So, in the long-run, it
+  might be better to instead pick something that combines MI scores with
+  mean-dependency-distance or with hubbiness. See, for example:
+  Haitao Liu (2008) “Dependency distance as a metric of language
+  comprehension difficulty” Journal of Cognitive Science, 2008 9(2): 159-191.
+  or also:
+  Ramon Ferrer-i-Cancho (2013) “Hubiness, length, crossings and their
+  relationships in dependency trees”, ArXiv 1304.4086
+"
 	; Define a losing score.
 	(define bad-mi -1e30)
 
