@@ -40,78 +40,8 @@ order in a sequence is important, and sometimes it is not. Viz.,
 sometimes things "happen at the same time", for no reason, and sometimes
 there is a cause-and-effect relationship.
 
-Cause and effect
-----------------
-Note that, in such systems, the observed "cause" can sometimes come after
-the "effect".  For example: to build a high-rise building, a foundation
-must be dug first.  Observed as events in time, the construction comes
-after the foundation is built: it would be incorrect to say that a hole
-in the ground "causes" a sky-scraper to appear.  This is because the
-formal cause of the skyscraper is the will of a real-estate developer;
-however, this will is not observed; only the construction events are.
-From the point of view of the network analysis being done here, the
-skyscraper should be viewed as the "head", and the hole in the ground
-as the "dependent", with the head dominating the dependent in a
-dependency grammar.
-
-Dependency Grammar
-------------------
-The skyscraper construction analysis provides a reasonable example of
-the type of network being analyzed here. The dependency grammar captures
-the relationship between a sequence of events: namely some events must
-occur before others, some are necessarily after, and sometimes, many
-things have to be accomplished at roughly the same time, before the
-later stages can take place.  This can be analyzed as a directed graph
-or network, with head-dependent relationships.  These relationships
-form a grammar, a "dependency grammar" (DG).  The prototypical example
-of a dependency grammar comes from linguistics, and describes the
-relationship between sequences of words; it need not be words, the
-generic idea is generic.
-
-Grammar Inference
------------------
-After observing a large number of skyscraper construction jobs, one can
-eventually discern the general relationship between construction events.
-One can view these events as being the outcome of "messages" passed
-between "actors". The grammar is the set of interlocks displayed on a
-Gantt chart showing the dependencies in the construction schedule.
-The goal of grammar inference is to discern a grammar, given a large
-number of observations of a sequence of events.
-
-The prototyical example, at this point, is from linguistics: the
-inference of a natural language grammar from the observation of a
-sequence of sentences.
-
-MST parsing
------------
-The primary tool in this directory is an MST parser. Given a specific
-sequence of events, viz a sequence of atoms, all of the same type, and
-given a large pool of observed dependencies between pairs of events, the
-MST parser will construct a dependency tree such that the score of the
-edges of the dependency tree are maximized.
-
-Typical pair-wise relationships might be indicated as follows, in the
-atomspace:
-```
-    EvaluationLink   (MI=24.3189)
-        PredicateNode "word-pair"
-        ListLink
-            WordNode "foo"
-            WordNode "bar"
-```
-which indicates that the word-pair (foo,bar) was observed with a mutual
-information (MI) of 24.3189.
-
-The atomspace can hold sparse matrix of such pair-wise data; in a
-certain sense, the atomspace was designed from the get-go to do exactly
-that.
-
-The MST parse just creates a tree connecting all of the atoms in a
-sequnce, such that the sum-total (addition) of the scores of all the
-edges in the tree is maximal, as compared to any other tree.
-
-Sheaf theory
-------------
+Networks and Sheaf theory
+-------------------------
 The topological structure of a graph can be understood locally in terms
 of "sheaf theory". In this framework, instead of looking at a graph as
 whole, one instead looks at it locally, in terms of how any given vertex
@@ -177,5 +107,109 @@ sets", and connector sequences are called "disjuncts". (Viz, each
 connector sequence is disjoined from the other: to parse a graph, one
 must choose one section, and discard all the others.)
 
+Grammar
+-------
+In linguistics and in computer science, the stalk/germ can be viewed as
+a grammatical entry in a grammar.  A grammar describes how a "word" in
+a "language" can be related to other words in the language.
+
+In the theory of language, one is presented with a linear sequence of
+words, a "sentence".  There are two primary styles for expressing
+grammars: production grammars and dependency grammars. Production
+grammars ("constituency grammars", "head-phrase structure grammars"
+(HPSG) and so on) are expressed in terms of re-write or production rules.
+These kinds of grammars are often classified according to the Chomsky
+hierarchy: regular grammars that describe regular expressions (finite
+state machines), context-free grammars that describe push-down automata,
+etc.
+
+A dependency grammar describes links or dependencies between the words
+in a sentence. The prototypical dependency grammar is that of Tesnière.
+Link Grammar is an example of a dependency grammar.  Note that, for
+every production grammar, there is an equivalent dependency grammar,
+and vice versa.
+
+
+traces
+
+a  étalé space 
+ First,
+
+Chomsky
+
+Grammar Inference
+-----------------
+
+
+After observing a large number of skyscraper construction jobs, one can
+eventually discern the general relationship between construction events.
+One can view these events as being the outcome of "messages" passed
+between "actors". The grammar is the set of interlocks displayed on a
+Gantt chart showing the dependencies in the construction schedule.
+The goal of grammar inference is to discern a grammar, given a large
+number of observations of a sequence of events.
+
+The prototyical example, at this point, is from linguistics: the
+inference of a natural language grammar from the observation of a
+sequence of sentences.
+
+==================
+
 Language is the  étalé space 
+
+Cause and effect
+----------------
+Note that, in such systems, the observed "cause" can sometimes come after
+the "effect".  For example: to build a high-rise building, a foundation
+must be dug first.  Observed as events in time, the construction comes
+after the foundation is built: it would be incorrect to say that a hole
+in the ground "causes" a sky-scraper to appear.  This is because the
+formal cause of the skyscraper is the will of a real-estate developer;
+however, this will is not observed; only the construction events are.
+From the point of view of the network analysis being done here, the
+skyscraper should be viewed as the "head", and the hole in the ground
+as the "dependent", with the head dominating the dependent in a
+dependency grammar.
+
+Dependency Grammar
+------------------
+The skyscraper construction analysis provides a reasonable example of
+the type of network being analyzed here. The dependency grammar captures
+the relationship between a sequence of events: namely some events must
+occur before others, some are necessarily after, and sometimes, many
+things have to be accomplished at roughly the same time, before the
+later stages can take place.  This can be analyzed as a directed graph
+or network, with head-dependent relationships.  These relationships
+form a grammar, a "dependency grammar" (DG).  The prototypical example
+of a dependency grammar comes from linguistics, and describes the
+relationship between sequences of words; it need not be words, the
+generic idea is generic.
+
+MST parsing
+-----------
+The primary tool in this directory is an MST parser. Given a specific
+sequence of events, viz a sequence of atoms, all of the same type, and
+given a large pool of observed dependencies between pairs of events, the
+MST parser will construct a dependency tree such that the score of the
+edges of the dependency tree are maximized.
+
+Typical pair-wise relationships might be indicated as follows, in the
+atomspace:
+```
+    EvaluationLink   (MI=24.3189)
+        PredicateNode "word-pair"
+        ListLink
+            WordNode "foo"
+            WordNode "bar"
+```
+which indicates that the word-pair (foo,bar) was observed with a mutual
+information (MI) of 24.3189.
+
+The atomspace can hold sparse matrix of such pair-wise data; in a
+certain sense, the atomspace was designed from the get-go to do exactly
+that.
+
+The MST parse just creates a tree connecting all of the atoms in a
+sequnce, such that the sum-total (addition) of the scores of all the
+edges in the tree is maximal, as compared to any other tree.
 
