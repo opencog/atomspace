@@ -85,7 +85,7 @@ to.
 
 The `ConnectorDir` will be explained later. In general, one may want to
 include additional information about a connector: a weight, a distance,
-its commutativity properties, etc. 
+its commutativity properties, etc.
 
 
 Stalks, Germs, Lexical Items
@@ -127,15 +127,48 @@ A dependency grammar describes links or dependencies between the words
 in a sentence. The prototypical dependency grammar is that of Tesnière.
 Link Grammar is an example of a dependency grammar.  Note that, for
 every production grammar, there is an equivalent dependency grammar,
-and vice versa.
+and vice versa.  The lexis of a dependency grammar can be written as a
+collection of sections; this is made very explicit in Link Grammar.
 
+A language is then the same thing as the "étalé space" of a sheaf.
 
-traces
+Trace theory
+------------
+In a language, sentences are linear sequences of words. The constraint
+of linear. ordered sequnces is loosened in trace theory, CSP and CCS.
+Those theories describe "partially-commutative monoids", where the
+concept of a sentence is replaced by the concept of a "trace". A trace
+is a sequence, where the order of some of the items in the sequence is
+not important.
 
-a  étalé space 
- First,
+An example from natural language might be:
+```
+   "This (maybe, is) an example."
+```
+which encodes the idea that the two sentences: "This maybe is an
+example." is "This is maybe an example." have more or less the same
+meaning, and that the word-order for `(maybe, is)` essentially did not
+matter.
 
-Chomsky
+Relative order dependence/independence typically occurs in any situation
+where there are instructions for performing actions.  Thus, "place
+flour, salt and water in a bowl" does not specify what order these
+ingredients are placed in the bowl; what does matter is that this is
+performed before placing the mixture in the oven.  In computer science,
+this describes the notion of parallel processing: some computations can
+be done in parallel, as long as they are all completed before some other
+computation is performed.  Serialization primitives are mutexes and
+semaphores.
+
+In trace theory, one has the general idea that one is observing traces
+as the result of computations being performed by distinct agents or
+actors exchanging messages between one-another; the ordering of some
+messages does not matter; the order of others do.  The sequence of
+observed messages is the "trace".
+
+Trace and History Monoids
+-------------------------
+
 
 Grammar Inference
 -----------------
@@ -155,7 +188,7 @@ sequence of sentences.
 
 ==================
 
-Language is the  étalé space 
+Language is the  étalé space
 
 Cause and effect
 ----------------
