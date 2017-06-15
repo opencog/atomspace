@@ -458,7 +458,7 @@
 ; unpack each data strcture.
 ;
 ; Get the score of the link.
-(define-public (mst-link-get-mi lnk) (second lnk))
+(define-public (mst-link-get-score lnk) (second lnk))
 
 ; Get the left numbered-atom (numa) in the link. The num is a scheme
 ; pair of the form (number . atom)
