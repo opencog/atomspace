@@ -70,6 +70,13 @@
   with plain-old frequencies.  But you can get fancier if you wish.
   Using the MI could be interesting, for example: this would result in
   a MaxEnt style computation, instead of a PCA-style computation.
+
+  Methods:
+  'make-left-unit ITEM-LIST: Given a list of items from the left, create
+            a unit vector, in which only the those items on the list are
+            non-zero. That is, those vector elements have a value of
+            1 / sqrt (length ITEM-LIST).
+
 "
 	(let ((llobj LLOBJ)
 			(star-obj (add-pair-stars LLOBJ))
@@ -81,18 +88,18 @@
 
 		; What this actually returns is a function, that when
 		; called with any argument, returns a constant.
-		(define (unit-fvec BASIS-SIZE)
-			(define weight (/ 1 (sqrt BASIS-SIZE)))
+		(define (unit-fvec ELT-LIST)
+			(define weight (/ 1 (sqrt (length ELT-LIST))))
+			(lambda (ITEM)
+				(if (any (lambda (elt) (equal? elt ITEM)) ELT-LIST)
+					weight  0.0)))
 
-			(lambda (ITEM) weight))
-
-		; Apply equal weighting to all elements of the left-basis
-		; This is the starting vector for one step of left-iterate.
-		(define (left-init)
-			(unit-fvec (star-obj 'left-basis-size)))
-
-		(define (right-init)
-			(unit-fvec (star-obj 'right-basis-size)))
+		; Apply equal weighting to all elements specified in the
+		; ELT-LIST. It's expected, (but not checked) that all
+		; elements in ELT-LIST belong either to (star-obj 'left-basis)
+		; or to (star-obj 'right-basis), as appropriate
+		(define (make-unit ELT-LIST)
+			(make-afunc-cache (unit-fvec ELT-LIST)))
 
 		; --------------------
 		; Multiply matrix on the left by FVEC.  That is, return the
@@ -108,9 +115,12 @@
 			(lambda (ITEM)
 				(fold
 					(lambda (PAIR sum)
-						(+ sum
-							(* (llobj get-value PAIR)
-								(fvec (gar PAIR)))))
+						(define vecval (fvec (gar PAIR)))
+						; Avoid fetching teh pair value if its
+						; multiply-by-zero
+						(if (eqv? 0 vecval)
+							sum
+							(+ sum (* (llobj get-value PAIR) vecval))))
 					0
 					(star-obj 'left-stars ITEM))))
 
@@ -121,9 +131,10 @@
 			(lambda (ITEM)
 				(fold
 					(lambda (PAIR sum)
-						(+ sum
-							(* (llobj get-value PAIR)
-								(fvec (gdr PAIR)))))
+						(define vecval (fvec (gdr PAIR)))
+						(if (eqv? 0 vecval)
+							sum
+							(+ sum (* (llobj get-value PAIR) vecval))))
 					0
 					(star-obj 'right-stars ITEM))))
 
@@ -227,8 +238,8 @@
 		; Methods on this class.
 		(lambda (message . args)
 			(case message
-				((left-initial)      (left-init))
-				((right-initial)     (right-init))
+				((make-left-unit)    (apply make-unit args))
+				((make-right-unit)   (apply make-unit args))
 				((left-mult)         (apply left-mult args))
 				((right-mult)        (apply right-mult args))
 				((left-iterate)      (apply left-iter args))
@@ -246,7 +257,9 @@
 
 ; ---------------------------------------------------------------------
 
-(define-public (make-cosine-matrix LLOBJ)
+(define*-public (make-cosine-matrix LLOBJ #:optional
+	; Default is to use the pair-freq method
+	(GET-CNT 'pair-freq))
 "
   make-cosine-matrix LLOBJ - Provide a cosine-matrix form of LLOBJ.
 
@@ -269,22 +282,29 @@
   The LLOBJ object needs to provide the 'pair-freq method.
 "
 	(let* ((star-obj (add-pair-stars LLOBJ))
-			(supp-obj (add-support-compute star-obj))
+			(supp-obj (add-support-compute star-obj GET-CNT))
 		)
+
+		; Very likely to call for the same lengths, so cache them.
+		(define (do-get-left-length ITEM) (supp-obj 'left-length ITEM))
+		(define get-left-length (make-afunc-cache do-get-left-length))
+		(define (do-get-right-length ITEM) (supp-obj 'right-length ITEM))
+		(define get-right-length (make-afunc-cache do-get-right-length))
 
 		; --------------------
 		(define (do-left-unit PAIR)
 			(define frq (LLOBJ 'pair-freq PAIR))
-			(define len (supp-obj 'left-length (gdr PAIR)))
+			(define len (get-left-length (gdr PAIR)))
 			(/ frq len)
 		)
 
 		(define (do-right-unit PAIR)
 			(define frq (LLOBJ 'pair-freq PAIR))
-			(define len (supp-obj 'right-length (gar PAIR)))
+			(define len (get-right-length (gar PAIR)))
 			(/ frq len)
 		)
 
+		; Likely, I beleive, to get called again, so cache.
 		(define cache-left-unit (make-afunc-cache do-left-unit))
 		(define cache-right-unit (make-afunc-cache do-right-unit))
 

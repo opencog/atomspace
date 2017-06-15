@@ -75,44 +75,87 @@
 ; The `make-pair-count-get-set` class, below, is a typical user
 ; of this class; it provides getters and setters for the counts.
 ;
-; See `make-any-link-link` for a working example.
+; See `make-any-link-api` for a working example.
 ;
 ; When called, this will create a new instance of the class
 ; i.e. will create a new object.
 ;
 ;  (define (make-ll-object-api-example)
-;     (let ()
-;        ; Return the atom-type of the left and right items.
-;        ; For example both may be words, or maybe the right
-;        ; side is a disjunct 'LgAnd
-;        (define (get-left-type) 'WordNode)
-;        (define (get-right-type) 'WordNode)
-;        (define (get-pair-type) 'ListLink)
 ;
-;        ; Return the observed count for PAIR, if it exists,
-;        ; else return zero.
-;        (define (get-pair-count PAIR) 42)
+;     ; Return the atom-type of the matrix rows, i.e. the type of
+;     ; the left side of the (row, column) pairs.
+;     (define (get-left-type) 'WordNode)
 ;
-;        ; Return the atom holding the count, if it exists,
-;        ; else return nil.
-;        (define (get-pair PAIR) (Node "foobar"))
+;     ; Return the atom-type of the matrix columns, i.e. the type of
+;     ; the right side of the (row, column) pairs.
+;     (define (get-right-type) 'WordNode)
 ;
-;        ; Return the atom holding the count, creating it if
-;        ; it does not yet exist.
-;        (define (make-pair PAIR) (Node "foobar"))
+;     ; Return the type of the pair itself.  In this example, each pair
+;     ; will be of the form (ListLink (Word "row") (Word "col"))
+;     (define (get-pair-type) 'ListLink)
 ;
-;        ; Return the atom holding the N(*,y) count
-;        (define (get-left-wildcard ITEM) (Node "foobar"))
+;     ; Return the atom for a matrix (row,column) pair, if it exists,
+;     ; else return nil. In this example, the matrix is defined by an
+;     ; EvaluationLink holding the ListLink. This atom is where all
+;     ; values associated with this matrix are held.  This includes not
+;     ; only the count (the number of observations of the pair) but also
+;     ; any dervides values, such as frequency, mutual information, and
+;     ; so on. Users are free to (are encouraged to) use this atom to
+;     ; attach additional information and statistics.
+;     ;
+;     ; The PAIR atom must be of 'pair-type, that is, a ListLink in this
+;     ; example.  Note: the cog-link function does NOT create the atom,
+;     ; if it does not already exist!
+;     (define (get-pair PAIR)
+;        (cog-link 'EvaluationLink (Predicate "foo") PAIR))
 ;
-;        ; Return the atom holding the N(x,*) count
-;        (define (get-right-wildcard ITEM) (Node "foobar"))
+;     ; Return the observed count for PAIR, if it exists, else
+;     ; return zero. The PAIR atom must be of type 'pair-type;
+;     ; that is, a ListLink in this example.
+;     (define (get-pair-count PAIR)
+;        (cog-value-ref
+;           (cog-value (get-pair PAIR) (Predicate "bar")) 42))
 ;
-;        ; Return the atom holding the N(*,*) count
-;        (define (get-wild-wild) (Node "foobar"))
+;     ; Return the atom holding the count, creating it if it does
+;     ; not yet exist.  Returns the same structure as the 'item-pair
+;     ; method (the get-pair function, above).
+;     (define (make-pair PAIR)
+;        (EvaluationLink (Predicate "foo") PAIR))
+;
+;     ; Return an atom to which column subtotals can be attached,
+;     ; such as, for example, the subtotal `N(*,y)`. Thus, `y`
+;     ; denotes a column, and the star is on the left (the star
+;     ; ranging over all rows).
+;     (define (get-left-wildcard ITEM)
+;        (EvaluationLink (Predicate "foo")
+;           (ListLink (AnyNode "left-wild") ITEM)))
+;
+;     ; Return an atom to which row subtotals can be attached,
+;     ; such as, for example, the subtotal `N(x,*)`. Thus, `x`
+;     ; denotes a row, and the star is on the right (the star
+;     ; ranging over all columns).
+;     (define (get-right-wildcard ITEM)
+;        (EvaluationLink (Predicate "foo")
+;           (ListLink ITEM (AnyNode "right-wild"))))
+;
+;     ; Return an atom to which matrix totals can be attached,
+;     ; such as, for example, the total `N(*,*)`. This can be any
+;     ; atom, but must be unique to the specific matrix. It's
+;     ; convenient to use the same style as the subtotals.
+;     (define (get-wild-wild)
+;        (EvaluationLink (Predicate "foo")
+;           (ListLink (AnyNode "left-wild") (AnyNode "right-wild"))))
+;
+;     ; Retreive, from storage, the entire matrix, including the
+;     ; subtotal and total anchor atoms.  In this example, its enough
+;     ; to get the incoming set of (Predicate "foo"), but this need
+;     ; not generally be the case.
+;     (define (fetch-all-pairs)
+;        (cog-incoming-by-type (Predicate "foo") "EvaluationLink))
 ;
 ;     ; Methods on the class. To call these, quote the method name.
 ;     ; Example: (OBJ 'left-wildcard WORD) calls the
-;     ; get-left-wildcard method, passing WORD as the argument.
+;     ; get-left-wildcard function, passing WORD as the argument.
 ;     (lambda (message . args)
 ;        (apply (case message
 ;              ((name) "Demo Kind of Object")
@@ -125,9 +168,10 @@
 ;              ((left-wildcard) get-left-wildcard)
 ;              ((right-wildcard) get-right-wildcard)
 ;              ((wild-wild) get-wild-wild)
+;              ((fetch-pairs) fetch-all-pairs)
 ;              ((provides) (lambda (symb) #f))
 ;              (else (error "Bad method call on low-level API")))
-;           args))))
+;           args)))
 ;
 ;
 ; ---------------------------------------------------------------------
@@ -139,22 +183,43 @@
 
 (define-public (add-pair-stars LLOBJ)
 "
-  add-pair-stars LLOBJ - Extend LLOBJ with wildcard access methods.
+  add-pair-stars LLOBJ - Extend LLOBJ with row and column access
+  methods (aka wildcard methods); specifically, to get all non-zero
+  elements in a given row or column.
 
-  Extend the LLOBJ with additional methods to get wild-card lists,
-  that is, lists of all pairs with a specific item on the left,
-  or on the right.  This generates these lists in a generic way,
-  that probably work for most kinds of pairs.
+  The supported methods are:
+  'left-basis - Return all items (atoms) that can be used to index
+      a row in the matrix.  That is, given a matrix N(x,y), this
+      returns the set {x | (x,y) exists in the atomspace for some y}.
+      All of the elements of this set will be atoms of type
+      (LLOBJ 'left-type).  A check is made to verify that (x,y) is
+      a valid pair, viz that it is an atom whose type is
+      (LLOBJ 'pair-type) and that y is of type (LLOBJ 'right-type).
+      This only verifies that such pairs exist in the atomspace; it
+      does NOT verify that they have a nonzero count!
+
+  'right-basis - Likewise, but for columns.
+
+  'left-basis-size - the size of the 'left-basis set; i.e. the number
+      of unique, distinct atoms in that set.
+
+  'right-basis-size - Likewise.
+
+  'left-stars COL - Return the set of pairs (row, column) for
+      which the column is COL, and the pair exists in the atomspace.
+      That is, return the set
+         (*, COL) == { (x,COL) | (x,COL) exists in the atomspace }
+      The returned pairs will all be of type (LLOBJ 'pair-type),
+      and the x's will all be of type (LLOBJ 'left-type). The
+      input COL atom must be of type (LLOBJ 'right-type).  This does
+      NOT verify that these pairs have a non-zero count.
+
+  'right-stars ROW - Likewise, but returns the set (ROW, *).
 
   Here, the LLOBJ is expected to be an object, with methods for
-  'left-type and 'right-type on it, just as described above.
-
-  The lists of pairs will be lists of type 'pair-type (usually
-  ListLink's), with the desired item on the left or right, and
-  an atom of 'left-type or 'right-type on the other side.
+  'left-type, 'right-type and 'pair-type on it.
 "
-	(let ((llobj LLOBJ)
-			(l-basis '())
+	(let ((l-basis '())
 			(r-basis '())
 			(l-size 0)
 			(r-size 0)
@@ -163,7 +228,7 @@
 		; Return a list of all atoms of TYPE which appear in a Link
 		; of type 'pair-type
 		(define (get-basis TYPE PAIR-FILT)
-			(define pair-type (llobj 'pair-type))
+			(define pair-type (LLOBJ 'pair-type))
 			(remove!
 				(lambda (item)
 					(null? (PAIR-FILT item (cog-incoming-by-type item pair-type))))
@@ -173,7 +238,7 @@
 		; pairs in which the left-item really is on the left, and
 		; the correct type is on the right.
 		(define (good-right-pairs left-item pair-list)
-			(define right-type (llobj 'right-type))
+			(define right-type (LLOBJ 'right-type))
 			(filter!
 				(lambda (pr)
 					(and
@@ -183,7 +248,7 @@
 				pair-list))
 
 		(define (good-left-pairs right-item pair-list)
-			(define left-type (llobj 'left-type))
+			(define left-type (LLOBJ 'left-type))
 			(filter!
 				(lambda (pr)
 					(and
@@ -202,12 +267,12 @@
 		;
 		(define (get-left-basis)
 			(if (null? l-basis)
-				(set! l-basis (get-basis (llobj 'left-type) good-right-pairs)))
+				(set! l-basis (get-basis (LLOBJ 'left-type) good-right-pairs)))
 			l-basis)
 
 		(define (get-right-basis)
 			(if (null? r-basis)
-				(set! r-basis (get-basis (llobj 'right-type) good-left-pairs)))
+				(set! r-basis (get-basis (LLOBJ 'right-type) good-left-pairs)))
 			r-basis)
 
 		(define (get-left-size)
@@ -239,8 +304,8 @@
 		; memory usage, by using the atom cache to save these results.
 		;
 		(define (get-left-stars ITEM)
-			(define want-type (llobj 'left-type))
-			(define pair-type (llobj 'pair-type))
+			(define want-type (LLOBJ 'left-type))
+			(define pair-type (LLOBJ 'pair-type))
 			(filter
 				(lambda (lnk)
 					(define oset (cog-outgoing-set lnk))
@@ -253,8 +318,8 @@
 
 		; Same as above, but on the right.
 		(define (get-right-stars ITEM)
-			(define want-type (llobj 'right-type))
-			(define pair-type (llobj 'pair-type))
+			(define want-type (LLOBJ 'right-type))
+			(define pair-type (LLOBJ 'pair-type))
 			(filter
 				(lambda (lnk)
 					(define oset (cog-outgoing-set lnk))
@@ -266,9 +331,9 @@
 				(cog-incoming-by-type ITEM pair-type)))
 
 		;-------------------------------------------
-		; Return default, only if llobj does not provide symbol
+		; Return default, only if LLOBJ does not provide symbol
 		(define (overload symbol default)
-			(define fp (llobj 'provides symbol))
+			(define fp (LLOBJ 'provides symbol))
 			(if fp fp default))
 
 		; Provide default methods, but only if the low-level object
@@ -298,7 +363,7 @@
 					((right-basis)      f-right-basis)
 					((left-basis-size)  f-left-basis-size)
 					((right-basis-size) f-right-basis-size)
-					(else               (llobj 'provides meth))))
+					(else               (LLOBJ 'provides meth))))
 
 			;-------------------------------------------
 			; Methods on this class.
@@ -311,7 +376,7 @@
 					((left-stars)       (apply f-left-stars args))
 					((right-stars)      (apply f-right-stars args))
 					((provides)         (apply provides args))
-					(else               (apply llobj (cons message args))))
+					(else               (apply LLOBJ (cons message args))))
 			))))
 
 ; ---------------------------------------------------------------------
@@ -338,52 +403,50 @@
   'item-pair 'make-pair 'left-wildcard 'right-wildcard and 'wild-wild
   on it, in the form documented above for the \"low-level API class\".
 "
-	(let ((llobj LLOBJ))
+	(define (get-count ATOM)
+		(cog-tv-count (cog-tv ATOM)))
 
-		(define (get-count ATOM)
-			(cog-tv-count (cog-tv ATOM)))
+	(define (set-count ATOM CNT)
+		(cog-set-tv! ATOM (cog-new-ctv 0 0 CNT)))
 
-		(define (set-count ATOM CNT)
-			(cog-set-tv! ATOM (cog-new-ctv 0 0 CNT)))
+	; Get the left wildcard count
+	(define (get-left-wild-count ITEM)
+		(get-count (LLOBJ 'left-wildcard ITEM)))
 
-		; Get the left wildcard count
-		(define (get-left-wild-count ITEM)
-			(get-count (llobj 'left-wildcard ITEM)))
+	; Get the right wildcard count
+	(define (get-right-wild-count ITEM)
+		(get-count (LLOBJ 'right-wildcard ITEM)))
 
-		; Get the right wildcard count
-		(define (get-right-wild-count ITEM)
-			(get-count (llobj 'right-wildcard ITEM)))
+	; Set the left wildcard count
+	; Return the atom that holds this count.
+	(define (set-left-wild-count ITEM CNT)
+		(set-count (LLOBJ 'left-wildcard ITEM) CNT))
 
-		; Set the left wildcard count
-		; Return the atom that holds this count.
-		(define (set-left-wild-count ITEM CNT)
-			(set-count (llobj 'left-wildcard ITEM) CNT))
+	; Set the right wildcard count
+	; Return the atom that holds this count.
+	(define (set-right-wild-count ITEM CNT)
+		(set-count (LLOBJ 'right-wildcard ITEM) CNT))
 
-		; Set the right wildcard count
-		; Return the atom that holds this count.
-		(define (set-right-wild-count ITEM CNT)
-			(set-count (llobj 'right-wildcard ITEM) CNT))
+	; Get the wildcard-wildcard count
+	(define (get-wild-wild-count)
+		(get-count (LLOBJ 'wild-wild)))
 
-		; Get the wildcard-wildcard count
-		(define (get-wild-wild-count)
-			(get-count (llobj 'wild-wild)))
+	; Set the wildcard-wildcard count
+	; Return the atom that holds this count.
+	(define (set-wild-wild-count CNT)
+		(set-count (LLOBJ 'wild-wild) CNT))
 
-		; Set the wildcard-wildcard count
-		; Return the atom that holds this count.
-		(define (set-wild-wild-count CNT)
-			(set-count (llobj 'wild-wild) CNT))
-
-		; Methods on this class.
-		(lambda (message . args)
-			(case message
-				((left-wild-count)      (apply get-left-wild-count args))
-				((set-left-wild-count)  (apply set-left-wild-count args))
-				((right-wild-count)     (apply get-right-wild-count args))
-				((set-right-wild-count) (apply set-right-wild-count args))
-				((wild-wild-count)      (get-wild-wild-count))
-				((set-wild-wild-count)  (apply set-wild-wild-count args))
-				(else (apply llobj (cons message args))))
-		))
+	; Methods on this class.
+	(lambda (message . args)
+		(case message
+			((left-wild-count)      (apply get-left-wild-count args))
+			((set-left-wild-count)  (apply set-left-wild-count args))
+			((right-wild-count)     (apply get-right-wild-count args))
+			((set-right-wild-count) (apply set-right-wild-count args))
+			((wild-wild-count)      (get-wild-wild-count))
+			((set-wild-wild-count)  (apply set-wild-wild-count args))
+			(else                   (apply LLOBJ (cons message args))))
+	)
 )
 
 ; ---------------------------------------------------------------------
@@ -443,221 +506,221 @@
   should hold, up to rounding errors.
 
 "
-	(let ((llobj LLOBJ))
+	; ----------------------------------------------------
+	; Key under which the frequency values are stored.
+	(define freq-key (PredicateNode "*-FrequencyKey-*"))
 
-		; ----------------------------------------------------
-		; Key under which the frequency values are stored.
-		(define freq-key (PredicateNode "*-FrequencyKey-*"))
+	; Return the observed frequency on ATOM
+	(define (get-freq ATOM)
+		(if (null? ATOM) 0
+			(cog-value-ref (cog-value ATOM freq-key) 0)))
 
-		; Return the observed frequency on ATOM
-		(define (get-freq ATOM)
-			(cog-value-ref (cog-value ATOM freq-key) 0))
+	; Return the observed -log_2(frequency) on ATOM
+	(define (get-logli ATOM)
+		(if (null? ATOM) +inf.0
+			(cog-value-ref (cog-value ATOM freq-key) 1)))
 
-		; Return the observed - log_2(frequency) on ATOM
-		(define (get-logli ATOM)
-			(cog-value-ref (cog-value ATOM freq-key) 1))
+	; Return the observed -frequency * log_2(frequency) on ATOM
+	(define (get-entropy ATOM)
+		(if (null? ATOM) 0
+			(cog-value-ref (cog-value ATOM freq-key) 2)))
 
-		; Return the observed - frequency * log_2(frequency) on ATOM
-		(define (get-entropy ATOM)
-			(cog-value-ref (cog-value ATOM freq-key) 2))
+	; Set both a frequency count, and a -log_2(frequency) on
+	; the ATOM.
+	(define (set-freq ATOM FREQ)
+		; 1.4426950408889634 is 1/0.6931471805599453 is 1/log 2
+		(define ln2 (* -1.4426950408889634 (log FREQ)))
+		(define ent (* FREQ ln2))
+		(cog-set-value! ATOM freq-key (FloatValue FREQ ln2 ent)))
 
-		; Set both a frequency count, and a -log_2(frequency) on
-		; the ATOM.
-		(define (set-freq ATOM FREQ)
-			; 1.4426950408889634 is 1/0.6931471805599453 is 1/log 2
-			(define ln2 (* -1.4426950408889634 (log FREQ)))
-			(define ent (* FREQ ln2))
-			(cog-set-value! ATOM freq-key (FloatValue FREQ ln2 ent)))
+	; ----------------------------------------------------
+	; Key under which the entropy values are stored.
+	(define entropy-key (PredicateNode "*-Entropy Key-*"))
 
-		; ----------------------------------------------------
-		; Key under which the entropy values are stored.
-		(define entropy-key (PredicateNode "*-Entropy Key-*"))
+	; Return the total entropy on ATOM
+	(define (get-total-entropy ATOM)
+		(cog-value-ref (cog-value ATOM entropy-key) 0))
 
-		; Return the total entropy on ATOM
-		(define (get-total-entropy ATOM)
-			(cog-value-ref (cog-value ATOM entropy-key) 0))
+	; Return the fractional entropy on ATOM
+	(define (get-fractional-entropy ATOM)
+		(cog-value-ref (cog-value ATOM entropy-key) 1))
 
-		; Return the fractional entropy on ATOM
-		(define (get-fractional-entropy ATOM)
-			(cog-value-ref (cog-value ATOM entropy-key) 1))
+	; Set the entropy value for ATOM.
+	(define (set-entropy ATOM ENT FRENT)
+		(cog-set-value! ATOM entropy-key (FloatValue ENT FRENT)))
 
-		; Set the entropy value for ATOM.
-		(define (set-entropy ATOM ENT FRENT)
-			(cog-set-value! ATOM entropy-key (FloatValue ENT FRENT)))
+	; ----------------------------------------------------
+	; The key under which the MI is stored.
+	(define mi-key (PredicateNode "*-Mutual Info Key-*"))
 
-		; ----------------------------------------------------
-		; The key under which the MI is stored.
-		(define mi-key (PredicateNode "*-Mutual Info Key-*"))
+	; Get the (floating-point) mutual information on ATOM.
+	(define (get-total-mi ATOM)
+		(cog-value-ref (cog-value ATOM mi-key) 0))
 
-		; Get the (floating-point) mutual information on ATOM.
-		(define (get-total-mi ATOM)
-			(cog-value-ref (cog-value ATOM mi-key) 0))
+	; Get the (floating-point) fractional mutual information on ATOM.
+	; This is the Yuret "lexical attraction" value.
+	(define (get-fractional-mi ATOM)
+		(cog-value-ref (cog-value ATOM mi-key) 1))
 
-		; Get the (floating-point) fractional mutual information on ATOM.
-		; This is the Yuret "lexical attraction" value.
-		(define (get-fractional-mi ATOM)
-			(cog-value-ref (cog-value ATOM mi-key) 1))
+	; Set the MI value for ATOM.
+	(define (set-mi ATOM MI FMI)
+		(cog-set-value! ATOM mi-key (FloatValue MI FMI)))
 
-		; Set the MI value for ATOM.
-		(define (set-mi ATOM MI FMI)
-			(cog-set-value! ATOM mi-key (FloatValue MI FMI)))
+	; ----------------------------------------------------
+	; ----------------------------------------------------
+	; Return the observational frequency on PAIR.
+	; If the PAIR does not exist (was not oberved) return 0.
+	(define (get-pair-freq PAIR)
+		(get-freq (LLOBJ 'item-pair PAIR)))
 
-		; ----------------------------------------------------
-		; ----------------------------------------------------
-		; Return the observational frequency on PAIR.
-		; If the PAIR does not exist (was not oberved) return 0.
-		(define (get-pair-freq PAIR)
-			(get-freq (llobj 'item-pair PAIR)))
+	(define (get-pair-logli PAIR)
+		(get-logli (LLOBJ 'item-pair PAIR)))
 
-		(define (get-pair-logli PAIR)
-			(get-logli (llobj 'item-pair PAIR)))
+	(define (get-pair-entropy PAIR)
+		(get-entropy (LLOBJ 'item-pair PAIR)))
 
-		(define (get-pair-entropy PAIR)
-			(get-entropy (llobj 'item-pair PAIR)))
+	; Set the frequency and log-frequency on PAIR
+	; Return the atom that holds this count.
+	(define (set-pair-freq PAIR FREQ)
+		(set-freq (LLOBJ 'make-pair PAIR) FREQ))
 
-		; Set the frequency and log-frequency on PAIR
-		; Return the atom that holds this count.
-		(define (set-pair-freq PAIR FREQ)
-			(set-freq (llobj 'make-pair PAIR) FREQ))
+	; ----------------------------------------------------
 
-		; ----------------------------------------------------
+	; Return the MI value on the pair.
+	; The MI is defined as
+	; - P(x,y) log_2 P(x,y) / P(x,*) P(*,y)
+	(define (get-pair-mi PAIR)
+		(get-total-mi (LLOBJ 'item-pair PAIR)))
 
-		; Return the MI value on the pair.
-		; The MI is defined as
-		; - P(x,y) log_2 P(x,y) / P(x,*) P(*,y)
-		(define (get-pair-mi PAIR)
-			(get-total-mi (llobj 'item-pair PAIR)))
+	; Return the fractional MI (lexical atraction) on the pair.
+	; - log_2 P(x,y) / P(x,*) P(*,y)
+	; It differs from the MI above only by the leading probability.
+	(define (get-pair-fmi PAIR)
+		(get-fractional-mi (LLOBJ 'item-pair PAIR)))
 
-		; Return the fractional MI (lexical atraction) on the pair.
-		; - log_2 P(x,y) / P(x,*) P(*,y)
-		; It differs from the MI above only by the leading probability.
-		(define (get-pair-fmi PAIR)
-			(get-fractional-mi (llobj 'item-pair PAIR)))
+	(define (set-pair-mi PAIR MI FMI)
+		(set-mi (LLOBJ 'item-pair PAIR) MI FMI))
 
-		(define (set-pair-mi PAIR MI FMI)
-			(set-mi (llobj 'item-pair PAIR) MI FMI))
+	; ----------------------------------------------------
+	; Get the left wildcard frequency
+	(define (get-left-wild-freq ITEM)
+		(get-freq (LLOBJ 'left-wildcard ITEM)))
 
-		; ----------------------------------------------------
-		; Get the left wildcard frequency
-		(define (get-left-wild-freq ITEM)
-			(get-freq (llobj 'left-wildcard ITEM)))
+	(define (get-left-wild-logli ITEM)
+		(get-logli (LLOBJ 'left-wildcard ITEM)))
 
-		(define (get-left-wild-logli ITEM)
-			(get-logli (llobj 'left-wildcard ITEM)))
+	; Get the right wildcard frequency
+	(define (get-right-wild-freq ITEM)
+		(get-freq (LLOBJ 'right-wildcard ITEM)))
 
-		; Get the right wildcard frequency
-		(define (get-right-wild-freq ITEM)
-			(get-freq (llobj 'right-wildcard ITEM)))
+	(define (get-right-wild-logli ITEM)
+		(get-logli (LLOBJ 'right-wildcard ITEM)))
 
-		(define (get-right-wild-logli ITEM)
-			(get-logli (llobj 'right-wildcard ITEM)))
+	; Set the left wildcard frequency.
+	; Return the atom that holds this value.
+	(define (set-left-wild-freq ITEM FREQ)
+		(set-freq (LLOBJ 'left-wildcard ITEM) FREQ))
 
-		; Set the left wildcard frequency.
-		; Return the atom that holds this value.
-		(define (set-left-wild-freq ITEM FREQ)
-			(set-freq (llobj 'left-wildcard ITEM) FREQ))
+	; Set the right wildcard frequency.
+	; Return the atom that holds this value.
+	(define (set-right-wild-freq ITEM FREQ)
+		(set-freq (LLOBJ 'right-wildcard ITEM) FREQ))
 
-		; Set the right wildcard frequency.
-		; Return the atom that holds this value.
-		(define (set-right-wild-freq ITEM FREQ)
-			(set-freq (llobj 'right-wildcard ITEM) FREQ))
+	; ----------------------------------------------------
+	; Get the left wildcard entropy
+	; This is defined as
+	;   h_left(y) = -sum_x p(x,y) log_2 p(x,y)
+	(define (get-left-wild-entropy ITEM)
+		(get-total-entropy (LLOBJ 'left-wildcard ITEM)))
 
-		; ----------------------------------------------------
-		; Get the left wildcard entropy
-		; This is defined as
-		;   h_left(y) = -sum_x p(x,y) log_2 p(x,y)
-		(define (get-left-wild-entropy ITEM)
-			(get-total-entropy (llobj 'left-wildcard ITEM)))
+	; This is defined as
+	;   H_left(y) = h_left(y) / p(*,y)
+	(define (get-left-wild-fentropy ITEM)
+		(get-fractional-entropy (LLOBJ 'left-wildcard ITEM)))
 
-		; This is defined as
-		;   H_left(y) = h_left(y) / p(*,y)
-		(define (get-left-wild-fentropy ITEM)
-			(get-fractional-entropy (llobj 'left-wildcard ITEM)))
+	; Get the right wildcard entropy
+	; This is defined as
+	;   h_right(x) = -sum_y p(x,y) log_2 p(x,y)
+	(define (get-right-wild-entropy ITEM)
+		(get-total-entropy (LLOBJ 'right-wildcard ITEM)))
 
-		; Get the right wildcard entropy
-		; This is defined as
-		;   h_right(x) = -sum_y p(x,y) log_2 p(x,y)
-		(define (get-right-wild-entropy ITEM)
-			(get-total-entropy (llobj 'right-wildcard ITEM)))
+	; This is defined as
+	;   H_left(y) = h_left(y) / p(*,y)
+	(define (get-right-wild-fentropy ITEM)
+		(get-fractional-entropy (LLOBJ 'right-wildcard ITEM)))
 
-		; This is defined as
-		;   H_left(y) = h_left(y) / p(*,y)
-		(define (get-right-wild-fentropy ITEM)
-			(get-fractional-entropy (llobj 'right-wildcard ITEM)))
+	; Set the left wildcard entropy and fractional entropy.
+	; Return the atom that holds this value.
+	(define (set-left-wild-entropy ITEM ENT FRENT)
+		(set-entropy (LLOBJ 'left-wildcard ITEM) ENT FRENT))
 
-		; Set the left wildcard entropy and fractional entropy.
-		; Return the atom that holds this value.
-		(define (set-left-wild-entropy ITEM ENT FRENT)
-			(set-entropy (llobj 'left-wildcard ITEM) ENT FRENT))
+	; Set the right wildcard entropy and fractional entropy.
+	; Return the atom that holds this value.
+	(define (set-right-wild-entropy ITEM ENT FRENT)
+		(set-entropy (LLOBJ 'right-wildcard ITEM) ENT FRENT))
 
-		; Set the right wildcard entropy and fractional entropy.
-		; Return the atom that holds this value.
-		(define (set-right-wild-entropy ITEM ENT FRENT)
-			(set-entropy (llobj 'right-wildcard ITEM) ENT FRENT))
+	; ----------------------------------------------------
+	; Get the left wildcard mutual information
+	(define (get-left-wild-mi ITEM)
+		(get-total-mi (LLOBJ 'left-wildcard ITEM)))
 
-		; ----------------------------------------------------
-		; Get the left wildcard mutual information
-		(define (get-left-wild-mi ITEM)
-			(get-total-mi (llobj 'left-wildcard ITEM)))
+	(define (get-left-wild-fmi ITEM)
+		(get-fractional-mi (LLOBJ 'left-wildcard ITEM)))
 
-		(define (get-left-wild-fmi ITEM)
-			(get-fractional-mi (llobj 'left-wildcard ITEM)))
+	; Get the right wildcard mutual information
+	(define (get-right-wild-mi ITEM)
+		(get-total-mi (LLOBJ 'right-wildcard ITEM)))
 
-		; Get the right wildcard mutual information
-		(define (get-right-wild-mi ITEM)
-			(get-total-mi (llobj 'right-wildcard ITEM)))
+	(define (get-right-wild-fmi ITEM)
+		(get-fractional-mi (LLOBJ 'right-wildcard ITEM)))
 
-		(define (get-right-wild-fmi ITEM)
-			(get-fractional-mi (llobj 'right-wildcard ITEM)))
+	; Set the left wildcard mi and fractional mi.
+	; Return the atom that holds this value.
+	(define (set-left-wild-mi ITEM MI FRMI)
+		(set-mi (LLOBJ 'left-wildcard ITEM) MI FRMI))
 
-		; Set the left wildcard mi and fractional mi.
-		; Return the atom that holds this value.
-		(define (set-left-wild-mi ITEM MI FRMI)
-			(set-mi (llobj 'left-wildcard ITEM) MI FRMI))
+	; Set the right wildcard mi and fractional mi.
+	; Return the atom that holds this value.
+	(define (set-right-wild-mi ITEM MI FRMI)
+		(set-mi (LLOBJ 'right-wildcard ITEM) MI FRMI))
 
-		; Set the right wildcard mi and fractional mi.
-		; Return the atom that holds this value.
-		(define (set-right-wild-mi ITEM MI FRMI)
-			(set-mi (llobj 'right-wildcard ITEM) MI FRMI))
+	; ----------------------------------------------------
+	; Methods on this class.
+	(lambda (message . args)
+		(case message
+			((pair-freq)           (apply get-pair-freq args))
+			((pair-logli)          (apply get-pair-logli args))
+			((pair-entropy)        (apply get-pair-entropy args))
+			((pair-mi)             (apply get-pair-mi args))
+			((pair-fmi)            (apply get-pair-fmi args))
+			((set-pair-freq)       (apply set-pair-freq args))
+			((set-pair-mi)         (apply set-pair-mi args))
 
-		; ----------------------------------------------------
-		; Methods on this class.
-		(lambda (message . args)
-			(case message
-				((pair-freq)           (apply get-pair-freq args))
-				((pair-logli)          (apply get-pair-logli args))
-				((pair-entropy)        (apply get-pair-entropy args))
-				((pair-mi)             (apply get-pair-mi args))
-				((pair-fmi)            (apply get-pair-fmi args))
-				((set-pair-freq)       (apply set-pair-freq args))
-				((set-pair-mi)         (apply set-pair-mi args))
+			((left-wild-freq)      (apply get-left-wild-freq args))
+			((left-wild-logli)     (apply get-left-wild-logli args))
+			((set-left-wild-freq)  (apply set-left-wild-freq args))
 
-				((left-wild-freq)      (apply get-left-wild-freq args))
-				((left-wild-logli)     (apply get-left-wild-logli args))
-				((set-left-wild-freq)  (apply set-left-wild-freq args))
+			((right-wild-freq)     (apply get-right-wild-freq args))
+			((right-wild-logli)    (apply get-right-wild-logli args))
+			((set-right-wild-freq) (apply set-right-wild-freq args))
 
-				((right-wild-freq)     (apply get-right-wild-freq args))
-				((right-wild-logli)    (apply get-right-wild-logli args))
-				((set-right-wild-freq) (apply set-right-wild-freq args))
+			((left-wild-entropy)      (apply get-left-wild-entropy args))
+			((left-wild-fentropy)     (apply get-left-wild-fentropy args))
+			((set-left-wild-entropy)  (apply set-left-wild-entropy args))
 
-				((left-wild-entropy)      (apply get-left-wild-entropy args))
-				((left-wild-fentropy)     (apply get-left-wild-fentropy args))
-				((set-left-wild-entropy)  (apply set-left-wild-entropy args))
+			((right-wild-entropy)     (apply get-right-wild-entropy args))
+			((right-wild-fentropy)    (apply get-right-wild-fentropy args))
+			((set-right-wild-entropy) (apply set-right-wild-entropy args))
 
-				((right-wild-entropy)     (apply get-right-wild-entropy args))
-				((right-wild-fentropy)    (apply get-right-wild-fentropy args))
-				((set-right-wild-entropy) (apply set-right-wild-entropy args))
+			((left-wild-mi)      (apply get-left-wild-mi args))
+			((left-wild-fmi)     (apply get-left-wild-fmi args))
+			((set-left-wild-mi)  (apply set-left-wild-mi args))
 
-				((left-wild-mi)      (apply get-left-wild-mi args))
-				((left-wild-fmi)     (apply get-left-wild-fmi args))
-				((set-left-wild-mi)  (apply set-left-wild-mi args))
+			((right-wild-mi)     (apply get-right-wild-mi args))
+			((right-wild-fmi)    (apply get-right-wild-fmi args))
+			((set-right-wild-mi) (apply set-right-wild-mi args))
 
-				((right-wild-mi)     (apply get-right-wild-mi args))
-				((right-wild-fmi)    (apply get-right-wild-fmi args))
-				((set-right-wild-mi) (apply set-right-wild-mi args))
-
-				(else (apply llobj (cons message args))))
-		))
+			(else                (apply LLOBJ (cons message args)))))
 )
 
 ; ---------------------------------------------------------------------
