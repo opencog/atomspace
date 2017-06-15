@@ -8,4 +8,4 @@
 ; In general, the later files depend on definitions contained
 ; in the earlier files.
 (load "analysis/mst-parser.scm")
-(load "analysis/make-disjuncts.scm")
+(load "analysis/make-sheaf.scm")

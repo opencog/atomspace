@@ -1,13 +1,22 @@
 ;
-; make-disjuncts.scm
+; make-sheaf.scm
 ;
-; Compute the disjuncts, obtained from an MST parse of a sequence.
+; Compute the sheaf (connector-set disjuncts), obtained from an MST parse
+; of a sequence of atoms.
 ;
 ; Copyright (c) 2017 Linas Vepstas
 ;
 ; ---------------------------------------------------------------------
 ; OVERVIEW
 ; --------
+; The topological structure of a graph can be understood locally in
+; terms of "sheaf theory". In this framework, instead of looking at
+; a graph as whole, one instead looks at it locally, in terms of how
+; any given vertex attaches to the other vertexes around it.
+;
+; Thus, 
+; "sheaf"
+;
 ; After a sequence of atoms has been parsed with the MST parser, the
 ; links between atoms in the parse can be interpreted as Link Grammar
 ; links (connector pairs).  The connector pair is the labelled edge
@@ -25,13 +34,17 @@
 ;        Atom "something"
 ;        ConnectorSeq
 ;            Connector
-;                Atom "its"
+;                Atom "it's"
 ;                ConnectorDir "-"
 ;            Connector
 ;                Atom "curious"
 ;                ConnectorDir "+"
 ;
-; which captures the idea that 
+; which captures the idea that a sequence of atoms was observed:
+; "it's something curious", which was subsequently MST-parsed as
+; "it's" <--> "something" <--> "curious".  The middle vertex,
+; "something", has degree two, as it has edges to the left and to the
+; right. Thus, the local shape of the MST parse tree is that
 ;
 ; ---------------------------------------------------------------------
 
