@@ -59,8 +59,8 @@
 		(define wpr
 			(if (and (not (null? left-atom)) (not (null? right-atom)))
 				(cog-link (LLOBJ 'pair-type) left-atom right-atom)
-				#f))
-		(if wpr (LLOBJ METHOD wpr) bad-mi)
+				'()))
+		(if (null? wpr) bad-mi (LLOBJ METHOD wpr))
 	)
 )
 
