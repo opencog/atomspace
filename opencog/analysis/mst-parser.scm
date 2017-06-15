@@ -49,7 +49,7 @@
 	; Define a losing score.
 	(define bad-mi -1e40)
 
-	(lambda (left-atom right-atom)
+	(lambda (left-atom right-atom distance)
 
 		; We take care here to not actually create the atoms,
 		; if they aren't already in the atomspace. cog-link returns
@@ -70,6 +70,16 @@
 ; of the sequence, by finding a dependency tree that maximizes the
 ; pair-wise scoring function. This returns a list of atom-pairs,
 ; together with associated score.
+;
+; The ATOM-LIST should be a scheme-list of atoms, all presumably of
+; a uniform atom type.
+;
+; The SCORE-FN should be a function that, when give a left-right ordered
+; pair of atoms, and the distance between them, returns a numeric score
+; for that pair. This numeric score will be maximized during the parse.
+; The most basic choice is to use the mutual information between the
+; pair of atoms.  The SCORE-FN should take three arguments: left-atom,
+; right-atom and (numeric) distance.
 ;
 ; The M in MST normally stands for "minimum", but this code maximizes.
 ;
@@ -103,7 +113,7 @@
 ; Ramon Ferrer-i-Cancho (2013) “Hubiness, length, crossings and their
 ; relationships in dependency trees”, ArXiv 1304.4086
 
-(define-public (mst-parse-atom-seq SCORE-FN ATOM-LIST)
+(define-public (mst-parse-atom-seq ATOM-LIST SCORE-FN)
 
 	; Define a losing score.
 	(define bad-mi -1e30)
@@ -141,7 +151,10 @@
 			(lambda (right-numa max-pair)
 				(define best-pair (first max-pair))
 				(define max-mi (second max-pair))
-				(define cur-mi (SCORE-FN (cdr left-numa) (cdr right-numa)))
+				(define cur-mi
+					(SCORE-FN (cdr left-numa) (cdr right-numa)
+						(- (car right-numa) (car left-numa))))
+
 				; Use strict inequality, so that a shorter dependency
 				; length is always prefered.
 				(if (< max-mi cur-mi)
@@ -170,7 +183,10 @@
 			(lambda (left-numa max-pair)
 				(define best-pair (first max-pair))
 				(define max-mi (second max-pair))
-				(define cur-mi (SCORE-FN (cdr left-numa) (cdr right-numa)))
+				(define cur-mi
+					(SCORE-FN (cdr left-numa) (cdr right-numa)
+						(- (car right-numa) (car left-numa))))
+
 				; Use less-or-equal, so that a shorter dependency
 				; length is always prefered.
 				(if (<= max-mi cur-mi)
@@ -275,11 +291,11 @@
 				(if (< try-num brk-num)
 
 					; Returned value: the MI value for the pair, then the pair.
-					(let ((mi (SCORE-FN try-node brk-node)))
+					(let ((mi (SCORE-FN try-node brk-node (- brk-num try-num))))
 						(if (< -1e10 mi)
 							(cons (cons numa brk-numa) mi) #f))
 
-					(let ((mi (SCORE-FN brk-node try-node)))
+					(let ((mi (SCORE-FN brk-node try-node (- try-num brk-num))))
 						(if (< -1e10 mi)
 							(cons (cons brk-numa numa) mi) #f))
 				)
