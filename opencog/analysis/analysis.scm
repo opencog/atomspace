@@ -18,3 +18,4 @@
 (load "analysis/compute-mi.scm")
 (load "analysis/filter.scm")
 (load "analysis/thresh-pca.scm")
+(load "analysis/mst-parser.scm")

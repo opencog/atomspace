@@ -261,18 +261,14 @@ Tensors, in general
 Suppose you have more than just pairs. Suppose you have triples that
 you want to work with. Then what?
 
-The current best idea seems to be to break down the triples into
-disjuncts of connectors, which can be obtained by performing a
-minimum-spanning-tree parse of the tensor dataset.  I won't explain
-what a connector, a disjunct, or a spanning tree parse is here; take
-a peek at opencog/nlp/learn to read more about these.  Although that
-code there is specific to natural language, the idea of using it to
-work with generic tensor data is .. generic. Most of the theory has
-nothing to do with spoken lanuages, it can work for any kind of data
-in which correlations are observed.
+The current best idea seems to be to take any sequence of atoms (of
+arbitrary but finite length), perform a maximum spanning-tree parse
+of the sequence, then extract connectors and disjuncts from the parse.
+This effectively factors or decomposes the tensor, in general, into
+a number of parts, called disjuncts.
 
-Thus, a to-do item is to port the MST parser over to here, so that
-it can be applied to general data streams.  Later, someday.
+More explanation for what this is needs to go here.
+
 
 TODO
 ----
@@ -281,4 +277,3 @@ To-do list items.
    the atomspace, which can only work if no filtering is applied. But
    if there are pre-filters, then the returned values are necessarily
    garbage. Yucko.  Can we fail-safe this for now?
- 

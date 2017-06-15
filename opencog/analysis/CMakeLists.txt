@@ -7,6 +7,7 @@ ADD_GUILE_MODULE (FILES
 	entropy.scm
 	filter.scm
 	fold-api.scm
+	mst-parser.scm
 	object-api.scm
 	support.scm
 	report-api.scm
