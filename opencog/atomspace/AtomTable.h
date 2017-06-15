@@ -83,7 +83,8 @@ private:
     // Its recursive because we need to lock twice during atom insertion
     // and removal: we need to keep the indexes stable while we search
     // them during add/remove.
-    mutable std::recursive_mutex _mtx;
+    mutable std::recursive_mutex _store_mtx;
+    mutable std::recursive_mutex _index_mtx;
 
     // Cached count of the number of atoms in the table.
     size_t _size;
@@ -229,7 +230,7 @@ public:
                      bool subclass = false,
                      bool parent = true) const
     {
-        std::lock_guard<std::recursive_mutex> lck(_mtx);
+        std::lock_guard<std::recursive_mutex> lck(_index_mtx);
         if (parent && _environ)
             _environ->getHandlesByType(result, type, subclass, parent);
         return std::copy(typeIndex.begin(type, subclass),
@@ -244,7 +245,7 @@ public:
                         bool subclass = false,
                         bool parent = true) const
     {
-        std::lock_guard<std::recursive_mutex> lck(_mtx);
+        std::lock_guard<std::recursive_mutex> lck(_index_mtx);
         if (parent && _environ)
             _environ->foreachHandleByType(func, type, subclass);
         std::for_each(typeIndex.begin(type, subclass),
@@ -260,7 +261,7 @@ public:
                         bool subclass = false,
                         bool parent = true) const
     {
-        std::lock_guard<std::recursive_mutex> lck(_mtx);
+        std::lock_guard<std::recursive_mutex> lck(_index_mtx);
         if (parent && _environ)
             _environ->foreachParallelByType(func, type, subclass);
 
