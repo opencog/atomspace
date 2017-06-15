@@ -1,8 +1,8 @@
 ;
-; Correlation matrix analsysis module.
+; Covariance matrix analysis module.
 ; Wraps up the assorted tools and scripts into one module.
 ;
-(define-module (opencog analysis))
+(define-module (opencog matrix))
 
 ; The files are loaded in pipeline order.
 ; In general, the later files depend on definitions contained
@@ -18,4 +18,3 @@
 (load "analysis/compute-mi.scm")
 (load "analysis/filter.scm")
 (load "analysis/thresh-pca.scm")
-(load "analysis/mst-parser.scm")
