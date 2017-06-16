@@ -1,8 +1,8 @@
 ;
-; make-sheaf.scm
+; make-section.scm
 ;
-; Compute the sheaf (connector-set disjuncts), obtained from an MST parse
-; of a sequence of atoms.
+; Compute the sheaf sections (connector-set disjuncts), obtained from
+; an MST parse of a sequence of atoms.
 ;
 ; Copyright (c) 2017 Linas Vepstas
 ;
@@ -12,25 +12,13 @@
 ; The topological structure of a graph can be understood locally in
 ; terms of "sheaf theory". In this framework, instead of looking at
 ; a graph as whole, one instead looks at it locally, in terms of how
-; any given vertex attaches to the other vertexes around it.
+; any given vertex attaches to the other vertexes around it. Each
+; such set of attachments is a "local section" of a sheaf,
+; characterizing how the vertex can attach to a graph.
 ;
-; Thus, 
-; "sheaf"
+; An example of a section is
 ;
-; After a sequence of atoms has been parsed with the MST parser, the
-; links between atoms in the parse can be interpreted as Link Grammar
-; links (connector pairs).  The connector pair is the labelled edge
-; between the two atoms; the label itself is is given by the names of
-; the two endpoints. A single connector is then just a direction (to
-; the left, to the right) plus the vertex atom at the far end.
-;
-; The connector set is then a sequence of conectors; the number of
-; connectors in the set exactly equal to the degree of the vertex in the
-; MST parse: the connector set "describes" the parse tree, locally.
-;
-; An example of a connector set is then
-;
-;    CSet
+;    Section
 ;        Atom "something"
 ;        ConnectorSeq
 ;            Connector
@@ -44,7 +32,31 @@
 ; "it's something curious", which was subsequently MST-parsed as
 ; "it's" <--> "something" <--> "curious".  The middle vertex,
 ; "something", has degree two, as it has edges to the left and to the
-; right. Thus, the local shape of the MST parse tree is that
+; right. Thus, the local shape of the graph is that the vertex
+; "something" connects to two other vertexes, explicitly named in the
+; local section.
+;
+; The code here computes sections for the parse trees created by the
+; MST parser.
+;
+; After a sequence of atoms has been parsed with the MST parser, the
+; links between atoms in the parse can be interpreted as Link Grammar
+; links (connector pairs).  The connector pair is the labelled edge
+; between the two atoms; the label itself is is given by the names of
+; the two endpoints. A single connector is then just a direction (to
+; the left, to the right) plus the vertex atom at the far end.
+;
+; The section (aka connector set) is then a sequence of conectors; the
+; number of connectors in the section exactly equal to the degree of
+; the vertex in the MST parse: the connector set "describes" the parse
+; tree, locally.
+;
+; In the current implementation, the ConnectorDir can be either "-" or
+; "+" indicating whether the connection is to the left or the right.
+; Other values are possible, in principle, including a "don't-care"
+; directional relationship, as well as an indication of a head-dependent
+; relationship, a distance measure, relations other than left/right
+; (e.g. up/down, scissors/paper/rock), etc. 
 ;
 ; ---------------------------------------------------------------------
 
@@ -52,16 +64,16 @@
 
 ; ---------------------------------------------------------------------
 
-(define-public (make-pseudo-disjuncts MST-PARSE)
+(define-public (make-sections MST-PARSE)
 "
-  make-pseudo-disjuncts - create 'decoded' disjuncts.
+  make-sections - create sections of the MST parse tree.
 
-  Given an MST parse of a sentence, return a list of 'decoded'
-  disjuncts for each word in the sentence.
+  Given an MST parse of a sequence, return a list of the sections of 
+  the atoms in that sequence (one section per atom).
 
   It is the nature of MST parses that the links between the words
   have no labels: the links are of the 'any' type. We'd like to
-  disover thier types, and we begin by creating pseudo-disjuncts.
+  discover thier types, and we begin by creating sections.
   These resemble ordinary disjuncts, except that the connectors
   are replaced by the words that they connect to.
 

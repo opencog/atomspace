@@ -85,6 +85,11 @@ its commutativity properties, etc.
 
 Stalks, Germs, Lexical Items
 ----------------------------
+A base presumption here is that a given vertex participates not in just
+one network graph, but in millions of them. A single network can then be
+viewed as a single global section of sheaf; it is the abstract collection
+of all of the networks that comprises the sheaf.
+
 By making a large number of statistical observations of graphs, and
 then collecting statistics on sections, one can hope to discern how that
 vertex typically connects into a typical graph. In sheaf theory, this
