@@ -7,5 +7,5 @@
 ; The files are loaded in pipeline order.
 ; In general, the later files depend on definitions contained
 ; in the earlier files.
-(load "analysis/mst-parser.scm")
-(load "analysis/make-section.scm")
+(load "sheaf/mst-parser.scm")
+(load "sheaf/make-section.scm")
