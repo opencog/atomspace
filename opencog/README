@@ -26,16 +26,17 @@ query           -- Pattern matching for the atomspace. Allows for
                    specific patterns to be extracted from the atomspace.
                    Like SQL, but for graphs, instead of tables.
 
-rule-engine     -- Allows arbitrary collections of rules to be applied
-                   to the atomspace. Provides forward and backward
-                   chainers.
+rule-engine     -- Apply arbitrary collections of rules to the atomspace.
+                   Provides forward and backward chainers.
 
-matrix          -- Allows a subset of the atomspace to be presented
-                   as a covariance matrix, allowing statistical
-                   correlation analysis to be performed on this subset.
+matrix          -- Present a subset of the atomspace as a matrix, e.g.
+                   a covariance/correlation matrix, allowing statistical
+                   matrix analysis (PCA, SVD, etc.) to be performed on
+                   this subset.
 
-network         -- Allows a grammatical network to be infered from a
-                   sequence of events (a sequence of atoms) Currently
+sheaf           -- Infer the grammar of a (hidden) dynamic network, by
+                   means of sections of sheaves. Intended for generic
+                   time series, e.g. natural langauge.  Currently
                    implements a Maximum Spanning Tree (MST) parser.
 
 guile, scm      -- Scheme language bindings.

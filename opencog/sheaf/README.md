@@ -4,7 +4,7 @@ Network Inference and Analysis Tools
 
 In this project, there's a generic theme of infering structure from
 a sequence of events.  That is, a sequence of events is observed in the
-external qorld, and the question arises: are these events correlated?
+external world, and the question arises: are these events correlated?
 Do they mean something when observed together, or is it happenstance?
 What is the relationship between the items in the sequence of events?
 
