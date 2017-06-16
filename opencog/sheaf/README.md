@@ -107,6 +107,12 @@ sets", and connector sequences are called "disjuncts". (Viz, each
 connector sequence is disjoined from the other: to parse a graph, one
 must choose one section, and discard all the others.)
 
+The "gluing axiom" of a sheaf can be thought as describing how different
+connectors can be joined together.  The act of parsing requires selecting
+a single disjunct out of the disjoint union of all of them; thus, the
+disjoint union is a set of 'possibilities' or parts of a 'possible
+world', and so can be understood in terms of Kripke-Joyal semantics.
+
 
 Grammar
 -------
