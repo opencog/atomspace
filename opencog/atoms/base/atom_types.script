@@ -552,6 +552,6 @@ MAP_LINK <- FUNCTION_LINK
 //                 ConnectorDir "+"
 //
 CONNECTOR <- LINK              // Link-grammar connector
-CONNECTOR_DIR <- NODE          // Connector direction
+CONNECTOR_DIR_NODE <- NODE "ConnectorDir" // Connector direction
 CONNECTOR_SEQ <- ORDERED_LINK  // Sequence of connectors
 SECTION <- ORDERED_LINK        // Sheaf section, connector set
