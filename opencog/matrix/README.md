@@ -12,10 +12,11 @@ where `x` and `y` are atoms), and we have some sort of count `N(x,y)`
 of how often that particular pair was observed.  We typically are then
 interested in various statistical measures: usually starting with the
 normalized frequency `p(x,y)` (that is, the probability, likelihood)
-of how often the pair `(x,y)` occured (of observing the pair). These
-counts and frequencies can be viewed as a sparse correlation matrix,
-and the goal here is to do all the typical things that one might do
-with such a matrix.  That's what the code in this directory does.
+of how often the pair `(x,y)` occured (likelihood of observing the pair).
+These counts and frequencies can be viewed as a sparse correlation
+matrix, and the goal here is to do all the typical things that one
+might do with such a matrix.  That's what the code in this directory
+does.
 
 The prototypical example is that of word-pairs. These are stored in the
 atomspace as
@@ -43,11 +44,11 @@ that. Once you can see that its a matrix, you can then apply a variety
 of generic matrix analysis tools to it.  The tools implemented here
 include:
 
-*) row and column subtotals
-*) computing and caching frequencies from counts.
-*) computing and caching mutual information between rows and columns
-*) computing cosine similarity between rows or columns.
-*) performing PCA (principal component analysis) in the matrix.
+ *) row and column subtotals
+ *) computing and caching frequencies from counts.
+ *) computing and caching mutual information between rows and columns
+ *) computing cosine similarity between rows or columns.
+ *) performing PCA (principal component analysis) in the matrix.
 
 FAQ
 ---
@@ -104,6 +105,7 @@ customized. This OO programming style is called "parametric
 polymorphism".
 
 https://en.wikipedia.org/wiki/Parametric_polymorphism
+
 https://en.wikipedia.org/wiki/Generic_programming
 
 This code is written in scheme.  I know some of you want to use python
@@ -123,13 +125,13 @@ count (or other numeric value).
 
 The methods that need to be implemented are described in
 `object-api.scm`. Working examples of the base classes can be found in
-http://github.com/opencog/opencog/opencog/nlp/learn/batch-word-pair.scm
+http://github.com/opencog/opencog/opencog/nlp/learn/scm/batch-word-pair.scm
 and in
-http://github.com/opencog/opencog/opencog/nlp/learn/pseudo-csets.scm
+http://github.com/opencog/opencog/opencog/nlp/learn/scm/pseudo-csets.scm
 
 Basic definitions
 -----------------
-and some notation to go with it:
+... and some notation to go with it:
 
 Let `N(x,y)` be the observed count on the pair of atoms `(x,y)`.
 
@@ -239,11 +241,11 @@ of entries that are simultaneously non-zero in sets of columns, etc.
 
 Principle Component Analysis
 ----------------------------
-A power iteration object is provided by the `make-power-iter-pca` object.
-Once a matrix X has been specified, this will iterate on either X^T X
-or on XX^T for K iterations.  The result of this iteration is the principal
-component of X (equivalently, the Frobenius-Peron eigenvector of X^T X
-or XX^T).
+A power iteration object is provided by the `make-power-iter-pca`
+object.  Once a matrix `X` has been specified, this will iterate on
+either `X^T X` or on `XX^T` for `K` iterations.  The result of this
+iteration is the principal component of `X` (equivalently, the
+Frobenius-Peron eigenvector of `X^T X` or `XX^T`).
 
 The code designed to work fast for sparse matrices, and can obtain
 eigenvectors in under 20 seconds or so for 15K by 15K matrices with
@@ -258,7 +260,6 @@ Tensors, in general
 Suppose you have more than just pairs. Suppose you have triples that
 you want to work with. Then what?  Answer: use the network analysis
 tools in the (opencog network) module.
-
 
 
 TODO
