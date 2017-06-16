@@ -292,6 +292,15 @@ bool PatternMatchEngine::ordered_compare(const PatternTermPtr& ptm,
 
 				// If we are here, the glob we are looking at has to be
 				// grounded to at least one atom.
+
+				// We need to ground the glob but we have gone through
+				// everything in osg already, then it's not a match.
+				if (grd_end)
+				{
+					match = false;
+					break;
+				}
+
 				tc = (tree_compare(glob, osg[jg], CALL_GLOB) and
 				      _varlist->is_upper_bound(ohp, 1));
 				if (not tc)
