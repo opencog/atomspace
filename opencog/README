@@ -36,11 +36,11 @@ matrix          -- Present a subset of the atomspace as a matrix, e.g.
 
 sheaf           -- Infer the grammar of a (hidden) dynamic network, by
                    means of sections of sheaves. Intended for generic
-                   time series, e.g. natural langauge.  Currently
+                   time series, e.g. natural language.  Currently
                    implements a Maximum Spanning Tree (MST) parser.
 
 guile, scm      -- Scheme language bindings.
 haskell         -- Haskell language bindings.
-python,cython   -- Python langauge bindings.
+python,cython   -- Python language bindings.
 
 benchmark       -- Performance benchmarks.

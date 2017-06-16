@@ -2,7 +2,7 @@
 Network Inference and Analysis Tools
 ====================================
 
-In this project, there's a generic theme of infering structure from
+In this project, there's a generic theme of inferring structure from
 a sequence of events.  That is, a sequence of events is observed in the
 external world, and the question arises: are these events correlated?
 Do they mean something when observed together, or is it happenstance?
@@ -18,12 +18,12 @@ is to statistically infer the structure of the network, given a sequence
 of observed events.
 
 Theoretical computer science has explored a number of theories for
-describing the relationships between ordered events, and thier
+describing the relationships between ordered events, and their
 interpretation as a network; these theories are inter-related, and
 go under the name of:
 
  * Sequent Calculus (proof theory)
- * Process Caluclus
+ * Process Calculus
  * Calculus of Communicating Systems (CCS)
  * The theory of Communicating Sequential Processes (CSP)
  * History monoids, trace monoids and Trace theory
@@ -72,10 +72,10 @@ connects it to the vertex "it's", and another edge that connects it to
 the vertex "curious".
 
 The `Section`, `ConnectorSeq`, `Connector` and `ConnectorDir` are real
-atom types.  The `LexicalAtom` is not: its just an exammple. The word
+atom types.  The `LexicalAtom` is not: its just an example. The word
 "lexical" is used here to suggest that the above has the form of a
 dictionary entry: one can look up "something" in the dictionary, and,
-obtain as it's defintion, the `ConnectorSeq` of everything it attaches
+obtain as it's definition, the `ConnectorSeq` of everything it attaches
 to.
 
 The `ConnectorDir` will be explained later. In general, one may want to
@@ -137,7 +137,7 @@ A language is then the same thing as the "étalé space" of a sheaf.
 Trace theory
 ------------
 In a language, sentences are linear sequences of words. The constraint
-of linear. ordered sequnces is loosened in trace theory, CSP and CCS.
+of linear. ordered sequences is loosened in trace theory, CSP and CCS.
 Those theories describe "partially-commutative monoids", where the
 concept of a sentence is replaced by the concept of a "trace". A trace
 is a sequence, where the order of some of the items in the sequence is
@@ -175,7 +175,7 @@ The example
 ```
    "This (maybe, is) an example."
 ```
-is an example of a "trace monoid" (see wikipedia).  For every trace
+is an example of a "trace monoid" (see Wikipedia).  For every trace
 monoid, there is an equivalent (isomorphic) "history monoid". For this
 example, it is
 ```
@@ -186,7 +186,7 @@ which move to the state "This", initially. Then one actor moves to
 the state "maybe", while the other simultaneously moves to the state
 "is". Both then move to the state "an", followed by "example".  The two
 actors presumably exchange messages to accomplish this synchronization;
-those messages are not visible in the trace; only the seqeunce of states
+those messages are not visible in the trace; only the sequence of states
 are.
 
 
@@ -209,12 +209,12 @@ with the head dominating the dependent, or "causing" the dependent,
 even though the dependent comes earlier.
 
 This example demonstrates why Hidden Markov Model (HMM) and Bayesian
-network models of human langauge fail: The earlier words in a sentence
+network models of human language fail: The earlier words in a sentence
 do not, cannot "cause" later words to appear; rather, it is often the
 case that the later words "cause" or "force" the earlier words to appear.
 
 More generally, this example shows why a dependency grammar approach,
-with events assocaited with "sites", "germs", "stalks", "lexical
+with events associated with "sites", "germs", "stalks", "lexical
 entries" is more appropriate for the analysis of a network, and is more
 powerful, than HMM, Bayesian networks or Latent Semantic Analysis (LSA)
 can be.
@@ -226,7 +226,7 @@ skyscrapers, and fails to induce the Aristotelian "formal cause" of
 events.
 
 
-Infering Grammar
+Inferring Grammar
 ----------------
 To observationally infer the grammar of a network, one must observe a
 lot of networks. With each network observation, one may create a set
@@ -244,7 +244,7 @@ the edges. In this case, a more round-about route is required, as
 follows:
 
 1) Assume all possible networks occur with equal probability.
-2) Oberve a lot of sequences, and count the frequency with which edges
+2) Observe a lot of sequences, and count the frequency with which edges
    occur.
 3) Compute the mutual information (MI) for each edge. That is, each edge
    has two endpoints, and the co-occurance of these endpoints can be
@@ -253,12 +253,12 @@ follows:
 4) Re-observe a lot of sequences, this time over-laying them with a
    maximal spanning tree (MST). So unlike step 1, where each network was
    assumed to be a clique, this time, the network is assumed to be a
-   tree.  The "correct" tree is the tree that maximizs the sum of the
+   tree.  The "correct" tree is the tree that maximizes the sum of the
    MI of the edges.
 5) Compute the sections of the MST, and accumulate these to obtain a
    distribution of sections.
 
-The grammar can then be infered from the distribution of the sections.
+The grammar can then be inferred from the distribution of the sections.
 
 
 MST parsing
@@ -286,7 +286,7 @@ certain sense, the atomspace was designed from the get-go to do exactly
 that.
 
 The MST parse just creates a tree connecting all of the atoms in a
-sequnce, such that the sum-total (addition) of the scores of all the
+sequence, such that the sum-total (addition) of the scores of all the
 edges in the tree is maximal, as compared to any other tree.
 
 After the MST parse, the section for each vertex in the parse can be
