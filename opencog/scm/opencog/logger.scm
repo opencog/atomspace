@@ -14,10 +14,14 @@
 ; Declare everything the C++ library provides; this avoid compile-time
 ; warnings when this file gets compiled.
 (export
+	default-logger
+	ure-logger
 	cog-logger-get-filename-ptr
 	cog-logger-get-level-ptr
+	cog-logger-get-component-ptr
 	cog-logger-set-filename-ptr!
 	cog-logger-set-level-ptr!
+	cog-logger-set-component-ptr!
 	cog-logger-set-stdout-ptr!
 	cog-logger-set-sync-ptr!
 	cog-logger-set-timestamp-ptr!
@@ -28,7 +32,13 @@
 	cog-logger-fine-ptr
 )
 
-; Documentation for the functions implemented as C++ code
+;; Documentation for the functions implemented as C++ code
+
+(set-procedure-property! default-logger 'documentation
+"
+
+")
+
 (set-procedure-property! cog-logger-get-filename-ptr 'documentation
 "
  cog-logger-get-filename-ptr LOGGER
