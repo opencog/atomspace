@@ -71,37 +71,37 @@
   Given an MST parse of a sequence, return a list of the sections of 
   the atoms in that sequence (one section per atom).
 
-  It is the nature of MST parses that the links between the words
+  It is the nature of MST parses that the links between the atoms
   have no labels: the links are of the 'any' type. We'd like to
-  discover thier types, and we begin by creating sections.
-  These resemble ordinary disjuncts, except that the connectors
-  are replaced by the words that they connect to.
+  discover thier types, and we begin by creating sections. These
+  resemble Link-Grammar  disjuncts, except that the connectors
+  are replaced by the atoms that they connect to.
 
   So, for example, given the MST parse
      (mst-parse-text 'The game is played on a level playing field')
   the word 'playing' might get this connector set:
 
-    (PseudoWordCset
+    (Section
        (WordNode \"playing\")
-       (PseudoAnd
-          (PseudoConnector
+       (ConnectorSeq
+          (Connector
              (WordNode \"level\")
-             (LgConnDirNode \"-\"))
-          (PseudoConnector
+             (ConnectorDir \"-\"))
+          (Connector
              (WordNode \"field\")
-             (LgConnDirNode \"+\"))))
+             (ConnectorDir \"+\"))))
 
-  Grammatically-speaking, this is not a good connector, but it does
-  show the general idea: that there was a link level<-->playing and
-  a link playing<-->field.
+  As the local section of a single graph, it captures the local
+  structure that there was a link level<-->playing and a link
+  playing<-->field.
 "
 	; Discard links with bad MI values; anything less than
-	; -50 is bad. Heck, anything under minus ten...
+	; -1e6 is bad. Heck, anything under minus ten is bad...
 	(define good-links (filter
-		(lambda (mlink) (< -50 (mst-link-get-score mlink)))
+		(lambda (mlink) (< -1e6 (mst-link-get-score mlink)))
 		MST-PARSE))
 
-	; Create a list of all of the words in the sentence.
+	; Create a list of all of the atoms in the sequence.
 	(define seq-list (delete-duplicates!
 		(fold
 			(lambda (mlnk lst)
@@ -138,7 +138,7 @@
 			(lambda (sa sb)
 				(< (mst-numa-get-index sa) (mst-numa-get-index sb)))))
 
-	; Given a word, the the links, create a pseudo-disjunct
+	; Given an atom, the the links, create a section
 	(define (mk-pseudo seq mlist)
 		(define lefts (sort-seqlist (mk-left-seqlist seq mlist)))
 		(define rights (sort-seqlist (mk-right-seqlist seq mlist)))
@@ -146,22 +146,22 @@
 		; Create a list of left-connectors
 		(define left-cnc
 			(map (lambda (sw)
-					(PseudoConnector
+					(Connector
 						(mst-numa-get-atom sw)
-						(LgConnDirNode "-")))
+						(ConnectorDir "-")))
 			lefts))
 
 		(define right-cnc
 			(map (lambda (sw)
-					(PseudoConnector
+					(Connector
 						(mst-numa-get-atom sw)
-						(LgConnDirNode "+")))
+						(ConnectorDir "+")))
 			rights))
 
 		; return the connector-set
-		(PseudoWordCset
+		(Section
 			(mst-numa-get-atom seq)
-			(PseudoAnd (append left-cnc right-cnc)))
+			(ConnectorSeq (append left-cnc right-cnc)))
 	)
 
 	(map
