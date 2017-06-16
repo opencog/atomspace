@@ -1,5 +1,5 @@
 ADD_GUILE_MODULE (FILES
-	analysis.scm
+	matrix.scm
 	atom-cache.scm
 	bin-count.scm
 	compute-mi.scm
@@ -11,5 +11,5 @@ ADD_GUILE_MODULE (FILES
 	support.scm
 	report-api.scm
 	thresh-pca.scm
-	MODULE_DESTINATION "${DATADIR}/scm/opencog/analysis"
+	MODULE_DESTINATION "${DATADIR}/scm/opencog/matrix"
 )

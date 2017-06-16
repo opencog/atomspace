@@ -537,3 +537,21 @@ SLEEP_LINK <- FUNCTION_LINK
 // list, instead of the entire AtomSpace.  It is more-or-less analogous
 // to the standard functional-programming concept of "map".
 MAP_LINK <- FUNCTION_LINK
+
+// ====================================================================
+// Grammatical inference on time series
+// The generic structure encoded here would be:
+//     Section
+//         LexicalAtom "something"
+//         ConnectorSeq
+//             Connector
+//                 LexicalAtom "it's"
+//                 ConnectorDir "-"
+//             Connector
+//                 LexicalAtom "curious"
+//                 ConnectorDir "+"
+//
+CONNECTOR <- LINK              // Link-grammar connector
+CONNECTOR_DIR <- NODE          // Connector direction
+CONNECTOR_SEQ <- ORDERED_LINK  // Sequence of connectors
+SECTION <- ORDERED_LINK        // Sheaf section, connector set
