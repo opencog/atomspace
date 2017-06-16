@@ -44,11 +44,13 @@ that. Once you can see that its a matrix, you can then apply a variety
 of generic matrix analysis tools to it.  The tools implemented here
 include:
 
- *) row and column subtotals
- *) computing and caching frequencies from counts.
- *) computing and caching mutual information between rows and columns
- *) computing cosine similarity between rows or columns.
- *) performing PCA (principal component analysis) in the matrix.
+ * row and column subtotals
+ * computing and caching frequencies from counts.
+ * computing and caching mutual information between rows and columns
+ * computing cosine similarity between rows or columns.
+ * performing PCA (principal component analysis) in the matrix.
+ * performing cuts, to remove unwanted rows, coumns and individual entries.
+
 
 FAQ
 ---
@@ -125,9 +127,9 @@ count (or other numeric value).
 
 The methods that need to be implemented are described in
 `object-api.scm`. Working examples of the base classes can be found in
-http://github.com/opencog/opencog/opencog/nlp/learn/scm/batch-word-pair.scm
+http://github.com/opencog/opencog/tree/master/opencog/nlp/learn/scm/batch-word-pair.scm
 and in
-http://github.com/opencog/opencog/opencog/nlp/learn/scm/pseudo-csets.scm
+http://github.com/opencog/opencog/tree/master/opencog/nlp/learn/scm/pseudo-csets.scm
 
 Basic definitions
 -----------------
@@ -253,6 +255,17 @@ eigenvectors in under 20 seconds or so for 15K by 15K matrices with
 
 The code is beta, in active development: only a bare minimum of function
 is provided.
+
+
+Data Cuts
+---------
+Data will typically have lots of "noise" in it, which should be masked
+before data analysis starts. The tools in `filter.scm` can do this.  A
+generic filter will mask out arbitrary rows, columns and individual
+entries, depending on the supplied predicates.  Built on top of this is
+a filter that masks out rows, columns and entries that have counts
+below a threshold.  Another filter can mask out explicitly-named rows
+and columns.
 
 
 Tensors, in general
