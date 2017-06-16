@@ -175,37 +175,37 @@ void LoggerSCM::init(void)
 	define_scheme_primitive("cog-ure-logger",
 		&LoggerSCM::do_ure_logger, this, "logger");
 
-	define_scheme_primitive("cog-logger-set-level-with-logger!",
+	define_scheme_primitive("cog-logger-set-level-of-logger!",
 		&LoggerSCM::do_logger_set_level, this, "logger");
-	define_scheme_primitive("cog-logger-get-level-with-logger",
+	define_scheme_primitive("cog-logger-get-level-of-logger",
 		&LoggerSCM::do_logger_get_level, this, "logger");
 
-	define_scheme_primitive("cog-logger-set-filename-with-logger!",
+	define_scheme_primitive("cog-logger-set-filename-of-logger!",
 		&LoggerSCM::do_logger_set_filename, this, "logger");
-	define_scheme_primitive("cog-logger-get-filename-with-logger",
+	define_scheme_primitive("cog-logger-get-filename-of-logger",
 		&LoggerSCM::do_logger_get_filename, this, "logger");
 
-	define_scheme_primitive("cog-logger-set-component-with-logger!",
+	define_scheme_primitive("cog-logger-set-component-of-logger!",
 		&LoggerSCM::do_logger_set_component, this, "logger");
-	define_scheme_primitive("cog-logger-get-component-with-logger",
+	define_scheme_primitive("cog-logger-get-component-of-logger",
 		&LoggerSCM::do_logger_get_component, this, "logger");
 
-	define_scheme_primitive("cog-logger-set-stdout-with-logger!",
+	define_scheme_primitive("cog-logger-set-stdout-of-logger!",
 		&LoggerSCM::do_logger_set_stdout, this, "logger");
-	define_scheme_primitive("cog-logger-set-sync-with-logger!",
+	define_scheme_primitive("cog-logger-set-sync-of-logger!",
 		&LoggerSCM::do_logger_set_sync, this, "logger");
-	define_scheme_primitive("cog-logger-set-timestamp-with-logger!",
+	define_scheme_primitive("cog-logger-set-timestamp-of-logger!",
 		&LoggerSCM::do_logger_set_timestamp, this, "logger");
 
-	define_scheme_primitive("cog-logger-error-with-logger",
+	define_scheme_primitive("cog-logger-error-of-logger",
 		&LoggerSCM::do_logger_error, this, "logger");
-	define_scheme_primitive("cog-logger-warn-with-logger",
+	define_scheme_primitive("cog-logger-warn-of-logger",
 		&LoggerSCM::do_logger_warn, this, "logger");
-	define_scheme_primitive("cog-logger-info-with-logger",
+	define_scheme_primitive("cog-logger-info-of-logger",
 		&LoggerSCM::do_logger_info, this, "logger");
-	define_scheme_primitive("cog-logger-debug-with-logger",
+	define_scheme_primitive("cog-logger-debug-of-logger",
 		&LoggerSCM::do_logger_debug, this, "logger");
-	define_scheme_primitive("cog-logger-fine-with-logger",
+	define_scheme_primitive("cog-logger-fine-of-logger",
 		&LoggerSCM::do_logger_fine, this, "logger");
 }
 

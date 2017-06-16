@@ -16,20 +16,20 @@
 (export
 	cog-default-logger
 	cog-ure-logger
-	cog-logger-get-filename-with-logger
-	cog-logger-get-level-with-logger
-	cog-logger-get-component-with-logger
-	cog-logger-set-filename-with-logger!
-	cog-logger-set-level-with-logger!
-	cog-logger-set-component-with-logger!
-	cog-logger-set-stdout-with-logger!
-	cog-logger-set-sync-with-logger!
-	cog-logger-set-timestamp-with-logger!
-	cog-logger-error-with-logger
-	cog-logger-warn-with-logger
-	cog-logger-info-with-logger
-	cog-logger-debug-with-logger
-	cog-logger-fine-with-logger
+	cog-logger-get-filename-of-logger
+	cog-logger-get-level-of-logger
+	cog-logger-get-component-of-logger
+	cog-logger-set-filename-of-logger!
+	cog-logger-set-level-of-logger!
+	cog-logger-set-component-of-logger!
+	cog-logger-set-stdout-of-logger!
+	cog-logger-set-sync-of-logger!
+	cog-logger-set-timestamp-of-logger!
+	cog-logger-error-of-logger
+	cog-logger-warn-of-logger
+	cog-logger-info-of-logger
+	cog-logger-debug-of-logger
+	cog-logger-fine-of-logger
 )
 
 ;; Documentation for the functions implemented as C++ code
@@ -46,46 +46,46 @@
     Return the rule-engine logger.
 ")
 
-(set-procedure-property! cog-logger-get-filename-with-logger 'documentation
+(set-procedure-property! cog-logger-get-filename-of-logger 'documentation
 "
- cog-logger-get-filename-with-logger LOGGER
+ cog-logger-get-filename-of-logger LOGGER
     Return the filename of LOGGER.
 ")
 
-(set-procedure-property! cog-logger-get-level-with-logger 'documentation
+(set-procedure-property! cog-logger-get-level-of-logger 'documentation
 "
- cog-logger-get-level-with-logger LOGGER
+ cog-logger-get-level-of-logger LOGGER
     Return the logging level of LOGGER.
 ")
 
-(set-procedure-property! cog-logger-get-component-with-logger 'documentation
+(set-procedure-property! cog-logger-get-component-of-logger 'documentation
 "
- cog-logger-get-component-with-logger LOGGER
+ cog-logger-get-component-of-logger LOGGER
     Return the component name of LOGGER.
 ")
 
-(set-procedure-property! cog-logger-set-filename-with-logger! 'documentation
+(set-procedure-property! cog-logger-set-filename-of-logger! 'documentation
 "
- cog-logger-set-filename-with-logger! LOGGER FILENAME
+ cog-logger-set-filename-of-logger! LOGGER FILENAME
     Change the filename of LOGGER to FILENAME.
     Return the previous filename.
 ")
 
-(set-procedure-property! cog-logger-set-level-with-logger! 'documentation
+(set-procedure-property! cog-logger-set-level-of-logger! 'documentation
 "
  cog-logger-set-level! LOGGER LEVEL
     Set the logging level of LOGGER to LEVEL.
     Returns the previous logging level.
 ")
 
-(set-procedure-property! cog-logger-set-stdout-with-logger! 'documentation
+(set-procedure-property! cog-logger-set-stdout-of-logger! 'documentation
 "
  cog-logger-set-stdout! LOGGER BOOL
     If BOOL is #t, send log messages to stdout; else don't.
     Returns the previous setting.
 ")
 
-(set-procedure-property! cog-logger-set-sync-with-logger! 'documentation
+(set-procedure-property! cog-logger-set-sync-of-logger! 'documentation
 "
  cog-logger-set-sync! LOGGER BOOL
     If BOOL is #t, write message to log file synchronously; else don't.
@@ -97,7 +97,7 @@
     Returns the previous setting.
 ")
 
-(set-procedure-property! cog-logger-set-timestamp-with-logger! 'documentation
+(set-procedure-property! cog-logger-set-timestamp-of-logger! 'documentation
 "
  cog-logger-set-timestamp! LOGGER BOOL
     If BOOL is #t, then a timestamp will be written with each log
@@ -127,7 +127,7 @@
     Return the filename of LOGGER if provided.
     If not provided then use the default logger.
 "
-  (apply cog-logger-get-filename-with-logger (add-default-logger args)))
+  (apply cog-logger-get-filename-of-logger (apply add-default-logger args)))
 
 (define (cog-logger-get-level . args)
 "
@@ -135,7 +135,7 @@
     Return the logging level of LOGGER if provided.
     If not provided then use the default logger.
 "
-  (cog-logger-get-level-with-logger (add-default-logger args)))
+  (apply cog-logger-get-level-of-logger (apply add-default-logger args)))
 
 (define (cog-logger-get-component . args)
 "
@@ -143,7 +143,7 @@
     Return the component name of LOGGER if provided.
     If not provided then use the default logger.
 "
-  (cog-logger-get-component-with-logger (add-default-logger args)))
+  (apply cog-logger-get-component-of-logger (apply add-default-logger args)))
 
 (define (cog-logger-set-filename! . args)
 "
@@ -153,7 +153,7 @@
 
     Return the previous filename.
 "
-  cog-logger-set-filename-with-logger! (add-default-logger args)))
+  (apply cog-logger-set-filename-of-logger! (apply add-default-logger args)))
 
 (define (cog-logger-set-level! . args)
 "
@@ -163,7 +163,7 @@
 
     Returns the previous logging level.
 "
-  cog-logger-set-level-with-logger! (add-default-logger args)))
+  (apply cog-logger-set-level-of-logger! (apply add-default-logger args)))
 
 (define (cog-logger-set-component! . args)
 "
@@ -173,7 +173,7 @@
 
     Returns the previous component name.
 "
-  cog-logger-set-component-with-logger! (add-default-logger args)))
+  (apply cog-logger-set-component-of-logger! (apply add-default-logger args)))
 
 (define (cog-logger-set-stdout! . args)
 "
@@ -183,7 +183,7 @@
 
     Returns the previous setting.
 "
-  cog-logger-set-stdout-with-logger! (add-default-logger args)))
+  (apply cog-logger-set-stdout-of-logger! (apply add-default-logger args)))
 
 (define (cog-logger-set-sync! . args)
 "
@@ -197,7 +197,7 @@
 
     Returns the previous setting.
 "
-  cog-logger-set-sync-with-logger! (add-default-logger args)))
+  (apply cog-logger-set-sync-of-logger! (apply add-default-logger args)))
 
 (define (cog-logger-set-timestamp! . args)
 "
@@ -208,7 +208,7 @@
 
     Returns the previous setting.
 "
-  cog-logger-set-timestamp-with-logger! (add-default-logger args)))
+  (apply cog-logger-set-timestamp-of-logger! (apply add-default-logger args)))
 
 (define (cog-logger-error . args)
 "
@@ -217,7 +217,7 @@
     The MSG can be in any ice-9 printing format.
     If LOGGER is not provided then use the default logger.
 "
-  (cog-logger-error-with-format (add-default-logger args)))
+  (apply cog-logger-error-with-format (apply add-default-logger args)))
 
 (define (cog-logger-error-with-format logger msg . args)
 "
@@ -225,7 +225,7 @@
     Print MSG into the log file, at the \"error\" logging level.
     The MSG can be in any ice-9 printing format.
 "
-  (cog-logger-error-with-logger logger (apply format #f msg args)))
+  (cog-logger-error-of-logger logger (apply format #f msg args)))
 
 (define (cog-logger-warn . args)
 "
@@ -234,7 +234,7 @@
     The MSG can be in any ice-9 printing format.
     If LOGGER is not provided then use the default logger.
 "
-  (cog-logger-warn-with-format (add-default-logger args)))
+  (apply cog-logger-warn-with-format (apply add-default-logger args)))
 
 (define (cog-logger-warn-with-format logger msg . args)
 "
@@ -242,7 +242,7 @@
     Print MSG into the log file, at the \"warn\" logging level.
     The MSG can be in any ice-9 printing format.
 "
-  (cog-logger-warn-with-logger logger (apply format #f msg args)))
+  (cog-logger-warn-of-logger logger (apply format #f msg args)))
 
 (define (cog-logger-info . args)
 "
@@ -251,7 +251,7 @@
     The MSG can be in any ice-9 printing format.
     If LOGGER is not provided then use the default logger.
 "
-  (cog-logger-info-with-format (add-default-logger args)))
+  (apply cog-logger-info-with-format (apply add-default-logger args)))
 
 (define (cog-logger-info-with-format logger msg . args)
 "
@@ -259,7 +259,7 @@
     Print MSG into the log file, at the \"info\" logging level.
     The MSG can be in any ice-9 printing format.
 "
-  (cog-logger-info-with-logger logger (apply format #f msg args)))
+  (cog-logger-info-of-logger logger (apply format #f msg args)))
 
 (define (cog-logger-debug . args)
 "
@@ -268,7 +268,7 @@
     The MSG can be in any ice-9 printing format.
     If LOGGER is not provided then use the default logger.
 "
-  (cog-logger-debug-with-format (add-default-logger args)))
+  (apply cog-logger-debug-with-format (apply add-default-logger args)))
 
 (define (cog-logger-debug-with-format logger msg . args)
 "
@@ -276,7 +276,7 @@
     Print MSG into the log file, at the \"debug\" logging level.
     The MSG can be in any ice-9 printing format.
 "
-  (cog-logger-debug-with-logger logger (apply format #f msg args)))
+  (cog-logger-debug-of-logger logger (apply format #f msg args)))
 
 (define (cog-logger-fine . args)
 "
@@ -285,7 +285,7 @@
     The MSG can be in any ice-9 printing format.
     If LOGGER is not provided then use the default logger.
 "
-  (cog-logger-fine-with-format (add-default-logger args)))
+  (apply cog-logger-fine-with-format (apply add-default-logger args)))
 
 (define (cog-logger-fine-with-format logger msg . args)
 "
@@ -293,9 +293,17 @@
     Print MSG into the log file, at the \"fine\" logging level.
     The MSG can be in any ice-9 printing format.
 "
-  (cog-logger-fine-with-logger logger (apply format #f msg args)))
+  (cog-logger-fine-of-logger logger (apply format #f msg args)))
 
 (export cog-logger-get-filename
+        cog-logger-get-level
+        cog-logger-get-component
+        cog-logger-set-filename!
+        cog-logger-set-level!
+        cog-logger-set-component!
+        cog-logger-set-stdout!
+        cog-logger-set-sync!
+        cog-logger-set-timestamp!
         cog-logger-error
         cog-logger-warn
         cog-logger-info
