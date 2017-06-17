@@ -113,8 +113,10 @@
 ;     ; return zero. The PAIR atom must be of type 'pair-type;
 ;     ; that is, a ListLink in this example.
 ;     (define (get-pair-count PAIR)
-;        (cog-value-ref
-;           (cog-value (get-pair PAIR) (Predicate "bar")) 42))
+;        (define stats-atom (get-pair PAIR))
+;        (if (null? stats-atom) 0
+;           (cog-value-ref
+;               (cog-value stats-atom (Predicate "counter")) 42)))
 ;
 ;     ; Return the atom holding the count, creating it if it does
 ;     ; not yet exist.  Returns the same structure as the 'item-pair
@@ -151,7 +153,7 @@
 ;     ; to get the incoming set of (Predicate "foo"), but this need
 ;     ; not generally be the case.
 ;     (define (fetch-all-pairs)
-;        (cog-incoming-by-type (Predicate "foo") "EvaluationLink))
+;        (fetch-incoming-by-type (Predicate "foo") 'EvaluationLink))
 ;
 ;     ; Methods on the class. To call these, quote the method name.
 ;     ; Example: (OBJ 'left-wildcard WORD) calls the
@@ -170,6 +172,7 @@
 ;              ((wild-wild) get-wild-wild)
 ;              ((fetch-pairs) fetch-all-pairs)
 ;              ((provides) (lambda (symb) #f))
+;              ((filters?) (lambda () #f))
 ;              (else (error "Bad method call on low-level API")))
 ;           args)))
 ;
