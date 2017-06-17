@@ -129,6 +129,13 @@
 				((pair-count)       (apply get-pair-count args))
 				((provides)         (apply provides args))
 				((filters?)         (lambda () #t))
+				; Pass through some selected methods
+				((left-type)        (apply LLOBJ (cons message args)))
+				((right-type)       (apply LLOBJ (cons message args)))
+				((pair-type)        (apply LLOBJ (cons message args)))
+				; Block anything that might have to be filtered.
+				; For example: 'pair-freq which we don't, can't filter.
+				; Or any of the variious subtotals.
 				(else               (throw 'bad-use 'add-generic-filter
 					(format #f "Sorry, method ~A not available on filter!" message))))
 		)))
