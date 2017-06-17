@@ -128,7 +128,9 @@
 				((item-pair)        (apply get-item-pair args))
 				((pair-count)       (apply get-pair-count args))
 				((provides)         (apply provides args))
-				(else               (apply LLOBJ (cons message args))))
+				((filters?)         (lambda () #t))
+				(else               (throw 'bad-use 'add-generic-filter
+					(format #f "Sorry, method ~A not available on filter!" message))))
 		)))
 
 ; ---------------------------------------------------------------------
