@@ -59,17 +59,16 @@
 ; ---------------------------------------------------------------------
 
 (define*-public (make-power-iter-pca LLOBJ #:optional
-	; Default is to use the pair-freq method
-	(get-value 'pair-freq))
+	; Default is to use the pair-count method
+	(get-value 'pair-count))
 "
   make-power-iter-pca LLOBJ - Implement a power-iteration form of PCA.
 
   Optionally, the name of a method can be supplied, from which the matrix
-  values will be fetched.  If not supplied, it defaults to 'pair-freq,
-  and so this object can be used with the default freq-api object to work
-  with plain-old frequencies.  But you can get fancier if you wish.
-  Using the MI could be interesting, for example: this would result in
-  a MaxEnt style computation, instead of a PCA-style computation.
+  values will be fetched.  If not supplied, it defaults to 'pair-count.
+  You can get fancier if you wish.  Using the MI could be interesting,
+  for example: this would result in a MaxEnt style computation, instead
+  of a PCA-style computation.
 
   Methods:
   'make-left-unit ITEM-LIST: Given a list of items from the left, create
@@ -191,7 +190,7 @@
 
 		; Perform a single step of power-iteration.
 		(define (left-iter-once FVEC)
-			(left-renormalize (right-mult (left-mult FVEC))))
+			(left-renoralize (right-mult (left-mult FVEC))))
 
 		(define (right-iter-once FVEC)
 			(right-renormalize (left-mult (right-mult FVEC))))
@@ -258,16 +257,16 @@
 ; ---------------------------------------------------------------------
 
 (define*-public (make-cosine-matrix LLOBJ #:optional
-	; Default is to use the pair-freq method
-	(GET-CNT 'pair-freq))
+	; Default is to use the pair-count method
+	(GET-CNT 'pair-count))
 "
   make-cosine-matrix LLOBJ - Provide a cosine-matrix form of LLOBJ.
 
-  Given an LLOBJ whose 'pair-freq returns values p(x,y), one can define
+  Given an LLOBJ whose 'pair-count returns values N(x,y), one can define
   another matrix such that the rows or columns are normailized to be unit
   vectors.  That is, one can define the left-unit
 
-     L(x,y) = p(x,y) / sqrt(sum_u p^2(u,y))
+     L(x,y) = N(x,y) / sqrt(sum_u N^2(u,y))
 
   which has the property that L(x,y) is a vector of unit length when y is
   treated as a paramter (i.e. when y is held fixed).  The dot-product of
@@ -293,15 +292,15 @@
 
 		; --------------------
 		(define (do-left-unit PAIR)
-			(define frq (LLOBJ 'pair-freq PAIR))
+			(define cnt (LLOBJ GET-CNT PAIR))
 			(define len (get-left-length (gdr PAIR)))
-			(/ frq len)
+			(/ cnt len)
 		)
 
 		(define (do-right-unit PAIR)
-			(define frq (LLOBJ 'pair-freq PAIR))
+			(define cnt (LLOBJ GET-CNT PAIR))
 			(define len (get-right-length (gar PAIR)))
-			(/ frq len)
+			(/ cnt len)
 		)
 
 		; Likely, I beleive, to get called again, so cache.
