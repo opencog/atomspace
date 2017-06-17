@@ -396,11 +396,9 @@
   Other classes can overload these methods; these just provide
   a reasonable default.
 
-  These methods do NOT compute the counts! They merely provide a
-  way to access these, as cached values, and they provide a way
-  to set the cached value. Thus, this class is meant to provide
-  support for some computational class, which does compute these
-  counts.
+  These methods do NOT compute the counts! They merely provide fast
+  access to values that were previously computed and stored in the
+  atomspace.  A method is provided to set the value, as well.
 
   Here, the LLOBJ is expected to be an object, with methods for
   'item-pair 'make-pair 'left-wildcard 'right-wildcard and 'wild-wild
@@ -438,6 +436,11 @@
 	; Return the atom that holds this count.
 	(define (set-wild-wild-count CNT)
 		(set-count (LLOBJ 'wild-wild) CNT))
+
+	; This fails totally on filtered datasets.
+	(if (LLOBJ 'filters?)
+		(throw 'bad-use 'add-pair-count-api
+			"Can't use the count API object with filtered datasets!"))
 
 	; Methods on this class.
 	(lambda (message . args)
@@ -686,6 +689,12 @@
 	; Return the atom that holds this value.
 	(define (set-right-wild-mi ITEM MI FRMI)
 		(set-mi (LLOBJ 'right-wildcard ITEM) MI FRMI))
+
+	; ----------------------------------------------------
+	; This fails totally on filtered datasets.
+	(if (LLOBJ 'filters?)
+		(throw 'bad-use 'add-pair-freq-api
+			"Can't use the count API object with filtered datasets!"))
 
 	; ----------------------------------------------------
 	; Methods on this class.
