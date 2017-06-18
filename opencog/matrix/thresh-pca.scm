@@ -190,7 +190,7 @@
 
 		; Perform a single step of power-iteration.
 		(define (left-iter-once FVEC)
-			(left-renoralize (right-mult (left-mult FVEC))))
+			(left-renormalize (right-mult (left-mult FVEC))))
 
 		(define (right-iter-once FVEC)
 			(right-renormalize (left-mult (right-mult FVEC))))
