@@ -650,7 +650,7 @@
 	(define store-obj (make-store wild-obj))
 
 	(display "Start computing the basis\n")
-	(format #t "Support: found num left=~A num right=~A in ~A secs\n"
+	(format #t "Support: found num left= ~A num right= ~A in ~A secs\n"
 			(length (wild-obj 'left-basis))
 			(length (wild-obj 'right-basis))
 			(elapsed-secs))
