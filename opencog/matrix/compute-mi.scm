@@ -666,7 +666,7 @@
 
 	; Now, compute the grand-total.
 	(count-obj 'cache-total-count)
-	(format #t "Done computing N(*,*) total-count=~A in ~A secs\n"
+	(format #t "Done computing N(*,*) total-count= ~A in ~A secs\n"
 		((add-pair-count-api OBJ) 'wild-wild-count)
 		(elapsed-secs))
 
@@ -682,12 +682,12 @@
 	(display "Start computing log P(*,y)\n")
 	(freq-obj 'cache-all-left-freqs)
 	(format #t "Done computing ~A left-wilds in ~A secs\n"
-		(length (wild-obj 'left-basis)) (elapsed-secs))
+		(length (wild-obj 'right-basis)) (elapsed-secs))
 
 	(display "Done with -log P(*,y), start -log P(x,*)\n")
 	(freq-obj 'cache-all-right-freqs)
 	(format #t "Done computing ~A right-wilds in ~A secs\n"
-		(length (wild-obj 'right-basis)) (elapsed-secs))
+		(length (wild-obj 'left-basis)) (elapsed-secs))
 
 	(store-obj 'store-wildcards)
 	(display "Done computing and saving -log P(x,*) and P(*,y)\n")
