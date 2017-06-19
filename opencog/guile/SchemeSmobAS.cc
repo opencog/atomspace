@@ -11,6 +11,7 @@
 
 #include <opencog/atomspace/AtomSpace.h>
 #include <opencog/guile/SchemeSmob.h>
+#include <opencog/util/oc_assert.h>
 
 using namespace opencog;
 
