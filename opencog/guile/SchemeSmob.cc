@@ -117,6 +117,16 @@ SCM SchemeSmob::equalp_misc(SCM a, SCM b)
 			if (as == bs) return SCM_BOOL_T;
 			return SCM_BOOL_F;
 		}
+		case COG_LOGGER:
+		{
+			Logger* al = (Logger *) SCM_SMOB_DATA(a);
+			Logger* bl = (Logger *) SCM_SMOB_DATA(b);
+			scm_remember_upto_here_1(a);
+			scm_remember_upto_here_1(b);
+			/* Just a simple pointer comparison */
+			if (al == bl) return SCM_BOOL_T;
+			return SCM_BOOL_F;
+		}
 		case COG_AV:
 		{
 			AttentionValue* av = (AttentionValue *) SCM_SMOB_DATA(a);
@@ -364,6 +374,10 @@ void SchemeSmob::register_procs()
 	// Free variables
 	register_proc("cog-free-variables",    1, 0, 0, C(ss_get_free_variables));
 	register_proc("cog-closed?",           1, 0, 0, C(ss_is_closed));
+
+	// Logger
+	// Ideally this should be in LoggerSCM.cc
+	register_proc("cog-logger?",           1, 0, 0, C(ss_logger_p));
 }
 
 void SchemeSmob::register_proc(const char* name, int req, int opt, int rst, scm_t_subr fcn)

@@ -16,10 +16,13 @@
 #include <tuple>
 #include <utility>
 
+#include <libguile.h>
+
+#include <opencog/util/Logger.h>
+
 #include <opencog/atoms/base/Handle.h>
 #include <opencog/truthvalue/TruthValue.h>
 #include <opencog/guile/SchemeSmob.h>
-#include <libguile.h>
 #include <opencog/atoms/base/ClassServer.h>
 
 // Copied/pasted from gcc 4.9 utility. Remove as soon as C++14 is
@@ -27,7 +30,7 @@
 #if __cplusplus <= 201103L
 
 namespace std {
-	  /// Class template integer_sequence
+  /// Class template integer_sequence
   template<typename _Tp, _Tp... _Idx>
     struct integer_sequence
     {
@@ -101,6 +104,99 @@ protected:
 	virtual size_t get_size(void) = 0;
 	virtual ~PrimitiveEnviron();
 };
+
+// Before being refactored with variadic templates this class used to
+// enumerate all type signatures of all methods passed to
+// SchemePrimitive ctor. This was ugly but had the advantage that it
+// would discourage people from creating new signatures, in particular
+// ones not using Handles. Indeed, in order to foster reflexivity we
+// prefer functions that take Handles and return Handles, because they
+// can then be called within atomese programs (using
+// ExecutionOutputLink or EvaluationLink).
+//
+// The signatures were represented as (were + indicates one or more):
+//
+// X_X+
+//
+// the first X indicating the return type and the ones after the
+// underscore indicating the input types, with the following type
+// naming conventions:
+//
+// A == AtomSpace*
+// B == bool
+// D == double
+// H == Handle
+// I == int
+// Q == HandleSeq
+// K == HandleSeqSeq
+// S == string
+// P == TruthValuePtr
+// T == Type
+// V == void
+// Z == size_t
+//
+// So for instance the following
+//
+// S_AS
+//
+// would indicate a method that takes an Atomspace* and string as
+// first and second arguments, and return a string.
+//
+// Given that signature representation, below is a list of potential
+// abuse of this API. Again it was never the intent that this would
+// become a free-for-all, anything-goes dumping ground for badly
+// designed API's. But that is what it has become. Can we reverse the
+// decay?
+//
+// Here is a list of some of the users:
+//
+// B_B    -- cogutils logger boolean setters/getters.
+// B_HH   -- PatternSCM::value_is_type(), etc.
+//        -- LGDictSCM::do_lg_conn_type_match(), etc.
+// H_HH   -- ?? someoene??
+// H_HHH  -- pointmem (the 3D spatial API)
+// H_HHHH -- do_backward_chaining, do_forward_chaining
+// H_HT   -- fetch-incoming-by-type
+// H_HZ   -- cog-bind-first-n
+// I_V    -- cogutils RandGen
+// P_H    -- FunctionWrapper
+// S_AS   -- CogServerSCM::start_server()
+// S_S    -- cogutils logger API, see guile/LoggerSCM.h
+// S_SS   -- DistSCM  (Gearman server)
+// S_V    -- CogServerSCM::stop_server()
+//        -- cogutils logger get_level(), etc.
+// V_B    -- SQLPersistSCM:do_set_stall, PatternMiner
+// V_I    -- cogutils do_randgen_set_seed
+// V_II   -- SQLPersistSCM:do_set_hilo
+// V_S    -- cogutils logger setters
+//        -- SQLPersistSCM::do_open()
+//        -- ZMQPersistSCM::do_open()
+// V_V    -- SQLPersistSCM::do_close(), do_load(), do_store()
+//        -- WordSenseProcessor::run_wsd()
+//
+// Users that probably should be fixed:
+// V_SA   -- PythonSCM::apply_as
+//           That's backwards, should probably be V_AS
+// K_H    -- SuRealSCM::do_non_cached_sureal_match(), etc.
+//           Should be re-written to use H_H not K_H
+//
+// This API needs to be re-thought, from scratch. Its offensive.
+// H_HTQB -- FuzzySCM::do_nlp_fuzzy_match()
+//
+// This API needs to be re-thought, from scratch. Its offensive.
+// Its complete and total crap.
+// D_HHTB -- DimEmbedModule::euclidDist()
+// Q_HTIB -- DimEmbedModule::kNearestNeighbors()
+// V_T    -- DimEmbedModule::logAtomEmbedding()
+// V_TI   -- DimEmbedModule::embedAtomSpace()
+// V_TIDI -- DimEmbedModule::addKMeansClusters
+//
+// This API needs to be re-thought, from scratch. Its offensive.
+// S_AS   -- PatternMiner
+// S_B    -- PatternMiner
+// S_I    -- PatternMiner
+// S_V    -- PatternMiner
+// V_SI   -- PatternMiner
 
 template<typename R, typename C, class... Args >
 class SchemePrimitiveBase : public PrimitiveEnviron
@@ -178,6 +274,11 @@ protected:
 	{
 		SCM arg = scm_list_ref(args, scm_from_size_t(idx));
 		return SchemeSmob::verify_atomspace(arg, scheme_name, idx);
+	}
+	Logger* scm_to(SCM args, size_t idx, const Logger*) const
+	{
+		SCM arg = scm_list_ref(args, scm_from_size_t(idx));
+		return SchemeSmob::verify_logger(arg, scheme_name, idx);
 	}
 
 	// Get the Ith argument and convert it to a C++ object.
@@ -274,6 +375,10 @@ protected:
 	SCM scm_from(TruthValuePtr tv)
 	{
 		return SchemeSmob::tv_to_scm(tv);
+	}
+	SCM scm_from(Logger* lg)
+	{
+		return SchemeSmob::logger_to_scm(lg);
 	}
 
 	virtual SCM invoke (SCM args)
