@@ -35,6 +35,7 @@
 		path))
 
 ; Work-around another common usability issue...
+(add-to-load-path "/usr/local/share")
 (add-to-load-path "/usr/local/share/opencog/scm")
 
 (define-module (opencog))
