@@ -331,11 +331,6 @@ class SQLAtomStorage::Response
 /* ================================================================ */
 // Constructors
 
-// During writes, its not uncommon to see 100% of the NUM_WB_QUEUES
-// full and busy, at least, when it's set to 8 or less. So making
-// it larger, equal to the number of cores, should give better results.
-#define NUM_WB_QUEUES std::thread::hardware_concurrency()
-
 #define STORAGE_DEBUG 1
 
 void SQLAtomStorage::init(const char * uri)
@@ -379,9 +374,18 @@ void SQLAtomStorage::init(const char * uri)
 	// _initial_conn_pool_size = std::thread::hardware_concurrency();
 	// if (0 == _initial_conn_pool_size) _initial_conn_pool_size = 8;
 	// _initial_conn_pool_size += NUM_WB_QUEUES;
-#define NUM_OMP_THREADS 12
+#define NUM_OMP_THREADS 8
 
-	_initial_conn_pool_size = NUM_OMP_THREADS + 8;
+	// A large number of write-back queues do not seem to help
+	// performance, because once the queues get above the high-water
+	// mark, they *all* stall, waiting for the drain to complete.
+	// Based on observations, postgres seems to have trouble servicing
+	// more than 2 or 3 concurrent write requests on the same table,
+	// and so anything above about 4 write-back quees seems to serve no
+	// purpose. (Above statements for a 24-core CPU.)
+#define NUM_WB_QUEUES 6
+
+	_initial_conn_pool_size = NUM_OMP_THREADS + NUM_WB_QUEUES;
 	for (int i=0; i<_initial_conn_pool_size; i++)
 	{
 		LLConnection* db_conn = nullptr;
@@ -432,10 +436,10 @@ SQLAtomStorage::SQLAtomStorage(std::string uri)
 	init(uri.c_str());
 
 	// Use a bigger buffer than the default. Assuming that the hardware
-	// can do 1K atom stores/sec or better, this gives a 1/3 second
-	// backlog of unwritten stuff, which seems like an OK situation,
-	// to me.
-	_write_queue.set_watermarks(300, 50);
+	// can do 1K atom stores/sec or better, this gives a backlog of
+	// unwritten stuff less than a second long, which seems like an OK
+	// situation, to me.
+	_write_queue.set_watermarks(800, 150);
 }
 
 SQLAtomStorage::~SQLAtomStorage()
