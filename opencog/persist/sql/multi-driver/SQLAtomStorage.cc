@@ -361,13 +361,27 @@ void SQLAtomStorage::init(const char * uri)
 	// resources.  PSQL does not like this, and complains. Most of the
 	// time, all but a small handful of those connections are idle.
 	// Except during loading, when approx 100% of the pool gets used,
-	// due to the OMP_ALGO  loops below. Likewise, when saving, when
+	// due to the OMP_ALGO loops below. Likewise, when saving, when
 	// just about 100% of the NUM_WB_QUEUES are full and busy.
 	// So basically, the optimal solution seems to be to just set both
 	// to be equal to the total number of cores.
-	_initial_conn_pool_size = std::thread::hardware_concurrency();
-	if (0 == _initial_conn_pool_size) _initial_conn_pool_size = 8;
+	//
+	// Except this doesn't work, for several reasons:
+	// 1) The pool size has to be at least 1 larger than the OMP_ALGO,
+	// otherwise, we'll deadlock. The problem is that during fetches,
+	// two connections get used per OMP_ALGO thread.
+	// 2) Postgres has efficiency problems scaling above 8 or 12
+	// connections, at least, as of postgres 9.5 (2016)
+	// actually, it seems not to be able to service more than 3 or 4
+	// concurrent SELECT statements to the same table...
+	// So, ignore the number of cores, and set things to 12.
+	//
+	// _initial_conn_pool_size = std::thread::hardware_concurrency();
+	// if (0 == _initial_conn_pool_size) _initial_conn_pool_size = 8;
 	// _initial_conn_pool_size += NUM_WB_QUEUES;
+#define NUM_OMP_THREADS 12
+
+	_initial_conn_pool_size = NUM_OMP_THREADS + 8;
 	for (int i=0; i<_initial_conn_pool_size; i++)
 	{
 		LLConnection* db_conn = nullptr;
@@ -418,7 +432,7 @@ SQLAtomStorage::SQLAtomStorage(std::string uri)
 	init(uri.c_str());
 
 	// Use a bigger buffer than the default. Assuming that the hardware
-	// can so 1K atom stores/sec or better, this gives a 1/3 second
+	// can do 1K atom stores/sec or better, this gives a 1/3 second
 	// backlog of unwritten stuff, which seems like an OK situation,
 	// to me.
 	_write_queue.set_watermarks(300, 50);
@@ -1490,6 +1504,9 @@ void SQLAtomStorage::getIncoming(AtomTable& table, const char *buff)
 	HandleSeq iset;
 	std::mutex iset_mutex;
 
+	// Parallelize always.
+	opencog::setting_omp(NUM_OMP_THREADS, NUM_OMP_THREADS);
+
 	// A parallel fetch is much much faster, esp for big osets.
 	// std::for_each(std::execution::par_unseq, ... requires C++17
 	OMP_ALGO::for_each(pset.begin(), pset.end(),
@@ -1744,7 +1761,7 @@ void SQLAtomStorage::load(AtomTable &table)
 		 max_height, stepsize, steps.size());
 
 	// Parallelize always.
-	opencog::setting_omp(opencog::num_threads(), 1);
+	opencog::setting_omp(NUM_OMP_THREADS, NUM_OMP_THREADS);
 
 	for (int hei=0; hei<=max_height; hei++)
 	{
@@ -1772,9 +1789,6 @@ void SQLAtomStorage::load(AtomTable &table)
 	printf("Finished loading %lu atoms in total in %d seconds (%d per second)\n",
 		(unsigned long) _load_count, (int) secs, (int) rate);
 	bulk_load = false;
-
-	// Put it back as it was.
-	opencog::setting_omp(opencog::num_threads());
 
 	// synchrnonize!
 	table.barrier();
@@ -1809,7 +1823,7 @@ void SQLAtomStorage::loadType(AtomTable &table, Type atom_type)
 		 max_height, stepsize, steps.size());
 
 	// Parallelize always.
-	opencog::setting_omp(opencog::num_threads(), 1);
+	opencog::setting_omp(NUM_OMP_THREADS, NUM_OMP_THREADS);
 
 	for (int hei=0; hei<=max_height; hei++)
 	{
@@ -1835,9 +1849,6 @@ void SQLAtomStorage::loadType(AtomTable &table, Type atom_type)
 	}
 	logger().debug("SQLAtomStorage::loadType: Finished loading %lu atoms in total\n",
 		(unsigned long) _load_count);
-
-	// Put it back as it was.
-	opencog::setting_omp(opencog::num_threads());
 
 	// Synchronize!
 	table.barrier();
