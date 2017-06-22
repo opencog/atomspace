@@ -22,69 +22,67 @@
   add-support-api LLOBJ - Extend LLOBJ with methods to retreive
   cached support, size and length subtotals on rows and columns.
 "
-	(let ((llobj LLOBJ))
+	; ----------------------------------------------------
+	; Key under which the matrix l_p norms are stored.
+	(define norm-key (PredicateNode "*-Norm Key-*"))
 
-		; ----------------------------------------------------
-		; Key under which the matrix l_p norms are stored.
-		(define norm-key (PredicateNode "*-Norm Key-*"))
+	(define (set-norms ATOM L0 L1 L2)
+		(cog-set-value! ATOM norm-key (FloatValue L0 L1 L2)))
 
-		(define (set-norms ATOM L0 L1 L2)
-			(cog-set-value! ATOM norm-key (FloatValue L0 L1 L2)))
+	(define (get-support ATOM)
+		(cog-value-ref (cog-value ATOM norm-key) 0))
 
-		(define (get-support ATOM)
-			(cog-value-ref (cog-value ATOM norm-key) 0))
+	(define (get-count ATOM)
+		(cog-value-ref (cog-value ATOM norm-key) 1))
 
-		(define (get-count ATOM)
-			(cog-value-ref (cog-value ATOM norm-key) 1))
+	(define (get-length ATOM)
+		(cog-value-ref (cog-value ATOM norm-key) 2))
 
-		(define (get-length ATOM)
-			(cog-value-ref (cog-value ATOM norm-key) 2))
+	;--------
+	(define (get-left-support ITEM)
+		(get-support (LLOBJ 'left-wildcard ITEM)))
 
-		;--------
-		(define (get-left-support ITEM)
-			(get-support (llobj 'left-wildcard ITEM)))
+	(define (get-left-count ITEM)
+		(get-count (LLOBJ 'left-wildcard ITEM)))
 
-		(define (get-left-count ITEM)
-			(get-count (llobj 'left-wildcard ITEM)))
+	(define (get-left-length ITEM)
+		(get-length (LLOBJ 'left-wildcard ITEM)))
 
-		(define (get-left-length ITEM)
-			(get-length (llobj 'left-wildcard ITEM)))
+	(define (set-left-norms ITEM L0 L1 L2)
+		(set-norms (LLOBJ 'left-wildcard ITEM) L0 L1 L2))
 
-		(define (set-left-norms ITEM L0 L1 L2)
-			(set-norms (llobj 'left-wildcard ITEM) L0 L1 L2))
+	;--------
+	(define (get-right-support ITEM)
+		(get-support (LLOBJ 'right-wildcard ITEM)))
 
-		;--------
-		(define (get-right-support ITEM)
-			(get-support (llobj 'right-wildcard ITEM)))
+	(define (get-right-count ITEM)
+		(get-count (LLOBJ 'right-wildcard ITEM)))
 
-		(define (get-right-count ITEM)
-			(get-count (llobj 'right-wildcard ITEM)))
+	(define (get-right-length ITEM)
+		(get-length (LLOBJ 'right-wildcard ITEM)))
 
-		(define (get-right-length ITEM)
-			(get-length (llobj 'right-wildcard ITEM)))
+	(define (set-right-norms ITEM L0 L1 L2)
+		(set-norms (LLOBJ 'right-wildcard ITEM) L0 L1 L2))
 
-		(define (set-right-norms ITEM L0 L1 L2)
-			(set-norms (llobj 'right-wildcard ITEM) L0 L1 L2))
-
-		;--------
-		; Methods on this class.
-		(lambda (message . args)
-			(case message
-				((left-support)       (apply get-left-support args))
-				((right-support)      (apply get-right-support args))
-				((left-count)         (apply get-left-count args))
-				((right-count)        (apply get-right-count args))
-				((left-length)        (apply get-left-length args))
-				((right-length)       (apply get-right-length args))
-				((set-left-norms)     (apply set-left-norms args))
-				((set-right-norms)    (apply set-right-norms args))
-				(else (apply llobj    (cons message args))))
-			)))
+	;--------
+	; Methods on this class.
+	(lambda (message . args)
+		(case message
+			((left-support)       (apply get-left-support args))
+			((right-support)      (apply get-right-support args))
+			((left-count)         (apply get-left-count args))
+			((right-count)        (apply get-right-count args))
+			((left-length)        (apply get-left-length args))
+			((right-length)       (apply get-right-length args))
+			((set-left-norms)     (apply set-left-norms args))
+			((set-right-norms)    (apply set-right-norms args))
+			(else                 (apply LLOBJ (cons message args)))))
+)
 
 ; ---------------------------------------------------------------------
 
 (define*-public (add-support-compute LLOBJ
-	 #:optional (GET-CNT (lambda (x) (LLOBJ 'pair-count x))))
+	 #:optional (GET-CNT 'pair-count))
 "
   add-support-compute LLOBJ - Extend LLOBJ with methods to
   compute wild-card sums, including the support (lp-norm for p=0),
@@ -107,24 +105,27 @@
 
   The left-lp-norm is |sum_x N^p(x,y)|^1/p for fixed y.
 
-  Here, the LLOBJ is expected to be an object, with valid
-  counts associated with each pair. LLOBJ is expected to have
-  working, functional methods for 'left-type and 'right-type
-  on it.
+  The total-support is sum_x sum_y 1
+  That is, the total number of non-zero entries in the matrix.
 
-  By default, the N(x,y) is taken to be the 'get-count method
-  on LLOBJ, i.e. it is literally the count. The optional argument
-  GET-CNT allows this to be over-ridden with any other method
-  that returns a number.  For example, to compute the lengths
-  and norms for frequencies, pass this lambda as the second
-  argument:
-     (lambda (x) ((add-pair-freq-api LLOBJ) 'pair-freq x))
-  Any function that takes a pair and returns a number is allowed.
+  The total-count is N(*,*) = sum_x sum_y N(x,y)
+  That is, the total of all count entries in the matrix.
+
+  Here, the LLOBJ is expected to be an object, with valid counts
+  associated with each pair. LLOBJ is expected to have working,
+  functional methods for 'left-type and 'right-type on it.
+
+  By default, the N(x,y) is taken to be the 'get-count method on LLOBJ,
+  i.e. it is literally the count. The optional argument GET-CNT allows
+  this to be over-ridden with any other method that returns a number.
+  For example, to compute the lengths and norms for frequencies, simply
+  pass 'pair-freq as the second argument: Any method that takes a pair
+  and returns a number is allowed.
 "
-	(let ((llobj LLOBJ)
-			(star-obj (add-pair-stars LLOBJ))
+	(let ((star-obj (add-pair-stars LLOBJ))
 			(api-obj (add-support-api LLOBJ))
-			(get-cnt GET-CNT))
+			(get-cnt (lambda (x) (LLOBJ GET-CNT x)))
+		)
 
 		; -------------
 		; Given a list of low-level pairs, return list of high-level
@@ -133,7 +134,7 @@
 			(filter-map
 				(lambda (lopr)
 					; 'item-pair returns the atom holding the count
-					(define hipr (llobj 'item-pair lopr))
+					(define hipr (LLOBJ 'item-pair lopr))
 					(define cnt (get-cnt lopr))
 					(if (< 0 cnt) hipr #f))
 				LIST))
@@ -173,9 +174,7 @@
 		; Return the sum of the counts on the list
 		(define (sum-count LIST)
 			(fold
-				(lambda (lopr sum)
-					(define cnt (get-cnt lopr))
-					(+ sum cnt))
+				(lambda (lopr sum) (+ sum (get-cnt lopr)))
 				0
 				LIST))
 
@@ -227,6 +226,24 @@
 			(sum-lp-norm P (star-obj 'right-stars ITEM)))
 
 		; -------------
+		; Compute grand-totals for the whole matrix.
+		; These are computed from the left; there is an equivalent
+		; computation from the right that should give exactly the same
+		; results. We could/should be not lazy and double-check these
+		; results in this way.
+		(define (compute-total-support)
+			(fold
+				(lambda (item sum) (+ sum (get-right-support-size item)))
+				0
+				(star-obj 'left-basis)))
+
+		(define (compute-total-count)
+			(fold
+				(lambda (item sum) (+ sum (sum-right-count item)))
+				0
+				(star-obj 'left-basis)))
+
+		; -------------
 		; Compute and cache all l_0, l_1 and l_2 norms, for later
 		; fast access.
 
@@ -276,8 +293,12 @@
 				((right-length)       (apply sum-right-length args))
 				((left-lp-norm)       (apply sum-left-lp-norm args))
 				((right-lp-norm)      (apply sum-right-lp-norm args))
+
+				((total-support)      (compute-total-support))
+				((total-count)        (compute-total-count))
+
 				((cache-all)          (cache-all))
-				(else (apply llobj    (cons message args))))
+				(else                 (apply LLOBJ (cons message args))))
 			)))
 
 ; ---------------------------------------------------------------------

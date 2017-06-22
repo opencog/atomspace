@@ -1,6 +1,6 @@
 
-Correlation Matrix Analysis Tools
-=================================
+Correlation/Covariance Matrix Analysis Tools
+============================================
 
 In this project, there's a generic theme of "pairs of things" that
 are statistically related. These can be pairs of words, they can be
@@ -12,10 +12,11 @@ where `x` and `y` are atoms), and we have some sort of count `N(x,y)`
 of how often that particular pair was observed.  We typically are then
 interested in various statistical measures: usually starting with the
 normalized frequency `p(x,y)` (that is, the probability, likelihood)
-of how often the pair `(x,y)` occured (of observing the pair). These
-counts and frequencies can be viewed as a sparse correlation matrix,
-and the goal here is to do all the typical things that one might do
-with such a matrix.  That's what the code in this directory does.
+of how often the pair `(x,y)` occured (likelihood of observing the pair).
+These counts and frequencies can be viewed as a sparse correlation
+matrix, and the goal here is to do all the typical things that one
+might do with such a matrix.  That's what the code in this directory
+does.
 
 The prototypical example is that of word-pairs. These are stored in the
 atomspace as
@@ -37,6 +38,59 @@ to obtain it.  In most cases, it is simply stored in a CountTruthValue
 attached to the EvaluationLink.  It's doesn't have to be, it could be
 placed elsewhere.
 
+The core idea is that the atomspace can hold sparse matrix data; in a
+certain sense, the atomspace was designed from the get-go to do exactly
+that. Once you can see that its a matrix, you can then apply a variety
+of generic matrix analysis tools to it.  The tools implemented here
+include:
+
+ * row and column subtotals
+ * computing and caching frequencies from counts.
+ * computing and caching mutual information between rows and columns
+ * computing cosine similarity between rows or columns.
+ * performing PCA (principal component analysis) in the matrix.
+ * performing cuts, to remove unwanted rows, coumns and individual entries.
+
+
+FAQ
+---
+Q: Why isn't this in C++?  Surely, numericaal computations would be
+   a lot faster in C++, right?
+
+A: Its not yet clear just, what, exactly, is to be accomplished here,
+   and what the dominant, important data structures are, here. Once
+   it becomes clear what the important calculations are, these can be
+   optimized (i.e. re-implemented in C++). But for now, flexibility,
+   fast developement and the ability to run experiments quickly is more
+   important than speed of calculations.
+
+Q: Really? It sounds like you don't know what you are doing.
+
+A: All of the matrixes are sparse. That means that the most efficient
+   kind of calculation is lazy-evaluation: don't compute a value, until
+   it is asked for.  Lazy evaluation requires recursion: its something
+   that functional langguages like scheme are good at, and C++ is
+   terrible at. Thus, some lazy evaluation could easily end up being
+   faster than brute-force, compute-everything-up-front in C++.
+
+Q: Why don't you just export all your data to SciPy or to Gnu R, or to
+   Octave, or MatLab, for that matter, and just do your data analysis
+   there?  That way, you don't need to re-implement all these basic
+   statistical algorithms.
+
+A: That sounds nice, but frankly, it's too much work for me. Maybe you
+   can do this.  Seriously, its just a lot easier (for me) to create
+   and use the code here, than to struggle mightlily with those packages.
+
+   Also: realize that the end-goal of opencog is not to export data
+   once, analyze it once, and be done. Rather, the goal is to constantly
+   and continuously monitor external, real-world events, pull them into
+   the atomspace, crunch it incessently, and update knowledge of the
+   external world as a result. This rules out GUI tools for data
+   processing (because there's no GUI in a server) and it rules out
+   popsicle-stick architectures as being a bit hokey.
+
+
 Generic Programming
 -------------------
 In order to perform some sort of generic analysis of the correlation
@@ -53,6 +107,7 @@ customized. This OO programming style is called "parametric
 polymorphism".
 
 https://en.wikipedia.org/wiki/Parametric_polymorphism
+
 https://en.wikipedia.org/wiki/Generic_programming
 
 This code is written in scheme.  I know some of you want to use python
@@ -72,13 +127,13 @@ count (or other numeric value).
 
 The methods that need to be implemented are described in
 `object-api.scm`. Working examples of the base classes can be found in
-http://github.com/opencog/opencog/opencog/nlp/learn/batch-word-pair.scm
+http://github.com/opencog/opencog/tree/master/opencog/nlp/learn/scm/batch-word-pair.scm
 and in
-http://github.com/opencog/opencog/opencog/nlp/learn/pseudo-csets.scm
+http://github.com/opencog/opencog/tree/master/opencog/nlp/learn/scm/pseudo-csets.scm
 
 Basic definitions
 -----------------
-and some notation to go with it:
+... and some notation to go with it:
 
 Let `N(x,y)` be the observed count on the pair of atoms `(x,y)`.
 
@@ -185,20 +240,45 @@ include taking the sums and differences of columns, taking the
 element-by-element min or max of a set of columns, counting the number
 of entries that are simultaneously non-zero in sets of columns, etc.
 
+
+Principle Component Analysis
+----------------------------
+A power iteration object is provided by the `make-power-iter-pca`
+object.  Once a matrix `X` has been specified, this will iterate on
+either `X^T X` or on `XX^T` for `K` iterations.  The result of this
+iteration is the principal component of `X` (equivalently, the
+Frobenius-Peron eigenvector of `X^T X` or `XX^T`).
+
+The code designed to work fast for sparse matrices, and can obtain
+eigenvectors in under 20 seconds or so for 15K by 15K matrices with
+100K non-zero entries.
+
+The code is beta, in active development: only a bare minimum of function
+is provided.
+
+
+Data Cuts
+---------
+Data will typically have lots of "noise" in it, which should be masked
+before data analysis starts. The tools in `filter.scm` can do this.  A
+generic filter will mask out arbitrary rows, columns and individual
+entries, depending on the supplied predicates.  Built on top of this is
+a filter that masks out rows, columns and entries that have counts
+below a threshold.  Another filter can mask out explicitly-named rows
+and columns.
+
+
 Tensors, in general
 -------------------
 Suppose you have more than just pairs. Suppose you have triples that
-you want to work with. Then what?
+you want to work with. Then what?  Answer: use the network analysis
+tools in the (opencog network) module.
 
-The current best idea seems to be to break down the triples into
-disjuncts of connectors, which can be obtained by performing a
-minimum-spanning-tree parse of the tensor dataset.  I won't explain
-what a connector, a disjunct, or a spanning tree parse is here; take
-a peek at opencog/nlp/learn to read more about these.  Although that
-code there is specific to natural language, the idea of using it to
-work with generic tensor data is .. generic. Most of the theory has
-nothing to do with spoken lanuages, it can work for any kind of data
-in which correlations are observed.
 
-Thus, a to-do item is to port the MST parser over to here, so that
-it can be applied to general data streams.  Later, someday.
+TODO
+----
+To-do list items.
+ * The "api" objects need to be redesigned. They fetch stuff out of
+   the atomspace, which can only work if no filtering is applied. But
+   if there are pre-filters, then the returned values are necessarily
+   garbage. Yucko.  Can we fail-safe this for now?

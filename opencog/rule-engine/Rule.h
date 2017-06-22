@@ -179,8 +179,8 @@ public:
 	HandleSeq get_premises() const;
 
 	/**
-	 * Return the conclusion of the rule. Used for applying a forward
-	 * step.
+	 * Return the rule conclusion. That is the first argument of the
+	 * rewrite term's ExecutionOutputLink.
 	 */
 	Handle get_conclusion() const;
 
@@ -188,8 +188,11 @@ public:
 	 * Return the list of conclusion patterns. Each pattern is a pair
 	 * of Handles (variable declaration, body). Used for finding out
 	 * is the rule matches a certain target.
+	 *
+	 * TODO: probably obsolete, should be removed
 	 */
 	HandlePairSeq get_conclusions() const;
+
 	double get_weight() const;
 
 	/**

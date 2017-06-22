@@ -39,7 +39,8 @@ class SchemeSmob
 {
 	friend class SchemeEval;
 	friend class PrimitiveEnviron;
-	template <typename TT> friend class SchemePrimitive;
+	template<typename R, typename T, class... Args> friend class SchemePrimitive;
+	template<typename R, typename T, class... Args> friend class SchemePrimitiveBase;
 
 private:
 
@@ -47,6 +48,7 @@ private:
 		COG_PROTOM = 1, // values or atoms - smart pointer
 		COG_AV,         // attention values
 		COG_AS,         // atom spaces
+		COG_LOGGER,     // logger
 		COG_EXTEND      // callbacks into C++ code.
 	};
 
@@ -198,6 +200,12 @@ private:
 	static AttentionValue *get_av_from_list(SCM);
 	static AtomSpace *get_as_from_list(SCM);
 
+	// Logger
+	static SCM logger_to_scm(Logger* lg);
+	static Logger* ss_to_logger(SCM);
+	static SCM ss_logger_p(SCM s);
+	static std::string logger_to_string(const Logger *);
+	
 	// validate arguments coming from scheme passing into C++
 	static void throw_exception(const std::exception&, const char *, SCM);
 	static AtomSpace* verify_atomspace(SCM, const char *, int pos = 1);
@@ -222,6 +230,7 @@ private:
 	                           const char *msg = "size integer");
 	static double verify_real (SCM, const char *, int pos = 1,
 	                           const char *msg = "real number");
+	static Logger* verify_logger(SCM, const char *, int pos = 1);
 
 	static SCM atomspace_fluid;
 	static void ss_set_env_as(AtomSpace *);

@@ -261,14 +261,14 @@ bool PatternMatchEngine::ordered_compare(const PatternTermPtr& ptm,
 					post_glob = osp[ip+1];
 				}
 
-				if (_varlist->is_interval(ohp, 0))
+				if (_varlist->is_lower_bound(ohp, 0))
 				{
 					// If we are here, that means the lower bound of the
 					// interval is zero, so the glob can be grounded
 					// to nothing.
 
 					// Just in case if the upper bound is zero...
-					if (not _varlist->is_interval(ohp, 1))
+					if (not _varlist->is_upper_bound(ohp, 1))
 					{
 						jg --;
 						continue;
@@ -292,8 +292,17 @@ bool PatternMatchEngine::ordered_compare(const PatternTermPtr& ptm,
 
 				// If we are here, the glob we are looking at has to be
 				// grounded to at least one atom.
+
+				// We need to ground the glob but we have gone through
+				// everything in osg already, then it's not a match.
+				if (grd_end)
+				{
+					match = false;
+					break;
+				}
+
 				tc = (tree_compare(glob, osg[jg], CALL_GLOB) and
-				      _varlist->is_interval(ohp, 1));
+				      _varlist->is_upper_bound(ohp, 1));
 				if (not tc)
 				{
 					match = false;
@@ -313,22 +322,12 @@ bool PatternMatchEngine::ordered_compare(const PatternTermPtr& ptm,
 						if (tc) break;
 					}
 					tc = (tree_compare(glob, osg[jg], CALL_GLOB) and
-					      _varlist->is_interval(ohp, glob_seq.size()+1));
+					      _varlist->is_upper_bound(ohp, glob_seq.size()+1));
 					if (tc) glob_seq.push_back(osg[jg]);
 					jg ++;
 				}
 				jg --;
-				if (not tc)
-				{
-					match = false;
-					break;
-				}
-
-				// If up to this point there are still atoms in
-				// either osp or osg, this is probably not a
-				// match, so reject it.
-				if ((ip+1 == osp_size and jg+1 < osg_size) or
-				    (ip+1 < osp_size  and jg+1 == osg_size))
+				if (not tc or not _varlist->is_lower_bound(ohp, glob_seq.size()))
 				{
 					match = false;
 					break;
@@ -341,8 +340,11 @@ bool PatternMatchEngine::ordered_compare(const PatternTermPtr& ptm,
 			else
 			{
 				// If we are here, we are not comparing to a glob.
-				tc = tree_compare(osp[ip], osg[jg], CALL_ORDER);
-				if (not tc)
+
+				// If we have already gone through all the atoms in
+				// the candidate, or the current pair does not match,
+				// reject it.
+				if (grd_end or not tree_compare(osp[ip], osg[jg], CALL_ORDER))
 				{
 					match = false;
 					break;

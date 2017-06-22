@@ -89,6 +89,11 @@ void SQLPersistSCM::do_open(const std::string& uri)
         throw RuntimeException(TRACE_INFO,
              "sql-open: Error: No atomspace specified!");
 
+    // Allow only one connection at a time.
+    if (_as->isAttachedToBackingStore())
+        throw RuntimeException(TRACE_INFO,
+             "sql-open: Error: Atomspace already connected to a storage backend!");
+
     // Use the postgres driver.
     _store = new SQLAtomStorage(uri);
     if (!_store)
