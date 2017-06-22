@@ -178,6 +178,7 @@ class SQLAtomStorage : public AtomStorage
 		std::atomic<size_t> _store_count;
 		std::atomic<size_t> _valuation_stores;
 		std::atomic<size_t> _value_stores;
+		time_t _stats_time;
 
 		// -------------------------------
 		// Type management

@@ -2045,6 +2045,7 @@ void SQLAtomStorage::set_stall_writers(bool stall)
 
 void SQLAtomStorage::clear_stats(void)
 {
+	_stats_time = time(0);
 	_load_count = 0;
 	_store_count = 0;
 	_valuation_stores = 0;
@@ -2068,7 +2069,12 @@ void SQLAtomStorage::clear_stats(void)
 
 void SQLAtomStorage::print_stats(void)
 {
-	printf("sql-stats: currently open URI: %s\n", _uri.c_str());
+	printf("sql-stats: Currently open URI: %s\n", _uri.c_str());
+	time_t now = time(0);
+	printf("sql-stats: Time since stats reset=%lu secs (at %s)\n",
+		now - _stats_time, ctime(&_stats_time));
+
+
 	size_t load_count = _load_count;
 	size_t store_count = _store_count;
 	double frac = store_count / ((double) load_count);
