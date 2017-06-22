@@ -2094,14 +2094,12 @@ void SQLAtomStorage::print_stats(void)
 	size_t num_link_inserts = _num_link_inserts;
 
 	frac = 100.0 * num_got_nodes / ((double) num_get_nodes);
-	printf("num_get_nodes=%lu num_got_nodes=%lu (%f pct)\n",
-	       num_get_nodes, num_got_nodes, frac);
-	printf("num_recursive_nodes=%lu\n", num_rec_nodes);
+	printf("num_get_nodes=%lu num_got_nodes=%lu (%f pct) recursive=%lu\n",
+	       num_get_nodes, num_got_nodes, frac, num_rec_nodes);
 
 	frac = 100.0 * num_got_links / ((double) num_get_links);
-	printf("num_get_links=%lu num_got_links=%lu (%f pct)\n",
-	       num_get_links, num_got_links, frac);
-	printf("num_recursive_links=%lu\n", num_rec_links);
+	printf("num_get_links=%lu num_got_links=%lu (%f pct) recursive=%lu\n",
+	       num_get_links, num_got_links, frac, num_rec_links);
 
 	frac = num_get_inlinks / ((double) num_get_insets);
 	printf("num_get_incoming_sets=%lu set total=%lu avg set size=%f\n",
