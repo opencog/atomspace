@@ -86,6 +86,11 @@ size_t SchemeSmob::free_misc(SCM node)
 			scm_remember_upto_here_1(node);
 			return 0;
 
+		case COG_LOGGER:
+			// Currently all loggers are static globals, initialized once,
+			// and never-ever freed. So we have nothing to do, here.
+			return 0;
+
 		default:
 			fprintf(stderr, "Error: opencog-guile: "
 			        "don't know how to free this type: %d\n",
