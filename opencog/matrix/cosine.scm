@@ -35,6 +35,8 @@
       right-prod(x,u) = sum_y N(x,y) N(u,y)
   with x and u being two different row indexes.
 
+  Cosines:
+  --------
   Similarly, we can define the left and right cosine angles as
       left-cosine(y,z) = left-prod(y,z) /
              (left-length(y) * left-length(z))
@@ -43,12 +45,24 @@
       left-length(y) = sqrt sum_x N(x,y) N(x,y)
                      = sqrt left-prod(y,y)
 
-  The Jaccard distance can be defined as one minus the Jaccard
+  Jaccard:
+  --------
+  The Jaccard similarity can be defined as one minus the Jaccard
   similarity, which is defined as
 
       left-jacc-sim(y,z) = sum_x min (N(x,y), N(x,z)) /
                sum_x max (N(x,y), N(x,z))
 
+  Overlap:
+  --------
+  The overlap similarity simply counts how many common non-zero entries
+  are shared in common between two rows or columns.  That is, it is
+
+      left-overlap(y,z) = sum_x (0 < N(x,y)) * (0 < N(x,z)) /
+               sum_x (0 < N(x,y) + N(x,z))
+
+  Arguments:
+  ----------
   Here, the LLOBJ is expected to be an object defining a sparse matrix,
   with valid counts associated with each pair. LLOBJ is expected to have
   working, functional methods for 'left-type, 'right-type and 'pair-type
@@ -61,14 +75,21 @@
   'pair-freq as the second argument.  Any method that takes a matrix
   element pair and returns a number is allowed.
 "
+
+	(define (either x y) (or (< 0 x) (0 < y)))
+	(define (both x y) (and (< 0 x) (0 < y)))
 	(let* ((star-obj (add-pair-stars LLOBJ))
-			(supp-obj (add-support-compute star-obj GET-CNT))
+			(supp-obj  (add-support-compute star-obj GET-CNT))
 			(prod-obj  (add-support-compute
 				(add-tuple-math star-obj * GET-CNT)))
-			(min-obj  (add-support-compute
+			(min-obj   (add-support-compute
 				(add-tuple-math star-obj min GET-CNT)))
-			(max-obj  (add-support-compute
+			(max-obj   (add-support-compute
 				(add-tuple-math star-obj max GET-CNT)))
+			(either-obj   (add-support-compute
+				(add-tuple-math star-obj either GET-CNT)))
+			(both-obj   (add-support-compute
+				(add-tuple-math star-obj both GET-CNT)))
 		)
 
 		; -------------
@@ -123,6 +144,21 @@
 		)
 
 		; -------------
+		; Return the left-overlap similarity
+		(define (compute-left-overlap-sim COL-A COL-B)
+			(define left-eith (either-obj 'left-count (list COL-A COL-B)))
+			(define left-both (both-obj 'left-count (list COL-A COL-B)))
+			(/ left-both left-eith)
+		)
+
+		; Return the right-overlap similarity
+		(define (compute-right-overlap-sim COL-A COL-B)
+			(define right-eith (either-obj 'right-count (list COL-A COL-B)))
+			(define right-both (both-obj 'right-count (list COL-A COL-B)))
+			(/ right-both right-eith)
+		)
+
+		; -------------
 		; Methods on this class.
 		(lambda (message . args)
 			(case message
@@ -132,6 +168,8 @@
 				((right-cosine)    (apply compute-right-cosine args))
 				((left-jaccard)    (apply compute-left-jaccard-dist args))
 				((right-jaccard)   (apply compute-right-jaccard-dist args))
+				((left-overlap)    (apply compute-left-overlap-sim args))
+				((right-overlap)   (apply compute-right-overlap-sim args))
 				(else              (apply LLOBJ (cons message args))))
 			)))
 
