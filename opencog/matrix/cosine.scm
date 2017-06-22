@@ -76,8 +76,8 @@
   element pair and returns a number is allowed.
 "
 
-	(define (either x y) (or (< 0 x) (0 < y)))
-	(define (both x y) (and (< 0 x) (0 < y)))
+	(define (either x y) (if (or (< 0.0 x) (< 0.0 y)) 1.0 0.0))
+	(define (both x y) (if (and (< 0.0 x) (< 0.0 y)) 1.0 0.0))
 	(let* ((star-obj (add-pair-stars LLOBJ))
 			(supp-obj  (add-support-compute star-obj GET-CNT))
 			(prod-obj  (add-support-compute
@@ -152,9 +152,9 @@
 		)
 
 		; Return the right-overlap similarity
-		(define (compute-right-overlap-sim COL-A COL-B)
-			(define right-eith (either-obj 'right-count (list COL-A COL-B)))
-			(define right-both (both-obj 'right-count (list COL-A COL-B)))
+		(define (compute-right-overlap-sim ROW-A ROW-B)
+			(define right-eith (either-obj 'right-count (list ROW-A ROW-B)))
+			(define right-both (both-obj 'right-count (list ROW-A ROW-B)))
 			(/ right-both right-eith)
 		)
 
