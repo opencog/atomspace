@@ -224,6 +224,9 @@ bool PatternMatchEngine::ordered_compare(const PatternTermPtr& ptm,
 	}
 	else
 	{
+		// To store how many atoms are grounded to the GlobNodes
+		std::map<Handle, size_t> glob_grd;
+
 		// If we are here, then the pattern contains globs. A glob can
 		// match one or more atoms in a row. Thus, we have a more
 		// complicated search ...
@@ -334,6 +337,7 @@ bool PatternMatchEngine::ordered_compare(const PatternTermPtr& ptm,
 				}
 
 				// If we are here, we've got a match; record the glob.
+				glob_grd[ohp] = glob_seq.size();
 				LinkPtr glp(createLink(glob_seq, LIST_LINK));
 				var_grounding[glob->getHandle()] = glp->getHandle();
 			}
