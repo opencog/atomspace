@@ -113,8 +113,10 @@
 ;     ; return zero. The PAIR atom must be of type 'pair-type;
 ;     ; that is, a ListLink in this example.
 ;     (define (get-pair-count PAIR)
-;        (cog-value-ref
-;           (cog-value (get-pair PAIR) (Predicate "bar")) 42))
+;        (define stats-atom (get-pair PAIR))
+;        (if (null? stats-atom) 0
+;           (cog-value-ref
+;               (cog-value stats-atom (Predicate "counter")) 42)))
 ;
 ;     ; Return the atom holding the count, creating it if it does
 ;     ; not yet exist.  Returns the same structure as the 'item-pair
@@ -151,7 +153,7 @@
 ;     ; to get the incoming set of (Predicate "foo"), but this need
 ;     ; not generally be the case.
 ;     (define (fetch-all-pairs)
-;        (cog-incoming-by-type (Predicate "foo") "EvaluationLink))
+;        (fetch-incoming-by-type (Predicate "foo") 'EvaluationLink))
 ;
 ;     ; Methods on the class. To call these, quote the method name.
 ;     ; Example: (OBJ 'left-wildcard WORD) calls the
@@ -170,6 +172,7 @@
 ;              ((wild-wild) get-wild-wild)
 ;              ((fetch-pairs) fetch-all-pairs)
 ;              ((provides) (lambda (symb) #f))
+;              ((filters?) (lambda () #f))
 ;              (else (error "Bad method call on low-level API")))
 ;           args)))
 ;
@@ -393,11 +396,9 @@
   Other classes can overload these methods; these just provide
   a reasonable default.
 
-  These methods do NOT compute the counts! They merely provide a
-  way to access these, as cached values, and they provide a way
-  to set the cached value. Thus, this class is meant to provide
-  support for some computational class, which does compute these
-  counts.
+  These methods do NOT compute the counts! They merely provide fast
+  access to values that were previously computed and stored in the
+  atomspace.  A method is provided to set the value, as well.
 
   Here, the LLOBJ is expected to be an object, with methods for
   'item-pair 'make-pair 'left-wildcard 'right-wildcard and 'wild-wild
@@ -435,6 +436,11 @@
 	; Return the atom that holds this count.
 	(define (set-wild-wild-count CNT)
 		(set-count (LLOBJ 'wild-wild) CNT))
+
+	; This fails totally on filtered datasets.
+	(if (LLOBJ 'filters?)
+		(throw 'bad-use 'add-pair-count-api
+			"Can't use the count API object with filtered datasets!"))
 
 	; Methods on this class.
 	(lambda (message . args)
@@ -683,6 +689,12 @@
 	; Return the atom that holds this value.
 	(define (set-right-wild-mi ITEM MI FRMI)
 		(set-mi (LLOBJ 'right-wildcard ITEM) MI FRMI))
+
+	; ----------------------------------------------------
+	; This fails totally on filtered datasets.
+	(if (LLOBJ 'filters?)
+		(throw 'bad-use 'add-pair-freq-api
+			"Can't use the count API object with filtered datasets!"))
 
 	; ----------------------------------------------------
 	; Methods on this class.
