@@ -253,16 +253,6 @@ bool PatternMatchEngine::ordered_compare(const PatternTermPtr& ptm,
 
 				HandleSeq glob_seq;
 				PatternTermPtr glob(osp[ip]);
-				// Globs at the end are handled differently than globs
-				// which are followed by other stuff. So, is there
-				// anything after the glob?
-				PatternTermPtr post_glob;
-				bool have_post = false;
-				if (ip+1 < osp_size)
-				{
-					have_post = true;
-					post_glob = osp[ip+1];
-				}
 
 				if (_varlist->is_lower_bound(ohp, 0))
 				{
@@ -272,16 +262,6 @@ bool PatternMatchEngine::ordered_compare(const PatternTermPtr& ptm,
 
 					// Just in case if the upper bound is zero...
 					if (not _varlist->is_upper_bound(ohp, 1))
-					{
-						jg --;
-						continue;
-					}
-
-					// If the post_glob matches with the current candidate,
-					// we are done.
-					if (tree_compare(glob, osg[jg], CALL_GLOB) and
-					    have_post and
-					    tree_compare(post_glob, osg[jg], CALL_GLOB))
 					{
 						jg --;
 						continue;
@@ -318,12 +298,6 @@ bool PatternMatchEngine::ordered_compare(const PatternTermPtr& ptm,
 				// Can we match more?
 				while (tc and jg<osg_size)
 				{
-					if (have_post)
-					{
-						// If the atom after the glob matches, then we are done.
-						tc = tree_compare(post_glob, osg[jg], CALL_GLOB);
-						if (tc) break;
-					}
 					tc = (tree_compare(glob, osg[jg], CALL_GLOB) and
 					      _varlist->is_upper_bound(ohp, glob_seq.size()+1));
 					if (tc) glob_seq.push_back(osg[jg]);
