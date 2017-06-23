@@ -258,19 +258,20 @@ bool PatternMatchEngine::ordered_compare(const PatternTermPtr& ptm,
 				// to the clause_match() callback?
 				if (ohp == osg[jg]) return false;
 
-				// Seen this glob before?
 				size_t last_grd = SIZE_MAX;
 				auto gi = glob_grd.find(ohp);
 				if (gi != glob_grd.end())
 				{
-					// If we are here, that means we have seen this glob before
+					// If we are here, that means we have seen this glob before.
 					last_grd = gi->second;
 
 					// Remove from glob_grd if it can't be grounded
 					// to fewer no. of atoms.
-					if (last_grd == 0 or not _varlist->is_lower_bound(ohp, last_grd-1))
+					if (last_grd == 0 or
+					    not _varlist->is_lower_bound(ohp, last_grd-1))
 					{
 						glob_grd.erase(ohp);
+						last_grd = SIZE_MAX;
 
 						// Reject if we cannot backtrack anymore.
 						if (glob_grd.size() == 0)
@@ -291,16 +292,10 @@ bool PatternMatchEngine::ordered_compare(const PatternTermPtr& ptm,
 					// to nothing.
 
 					// Just in case if the upper bound is zero...
-					if (not _varlist->is_upper_bound(ohp, 1))
-					{
-						jg --;
-						glob_grd[ohp] = 0;
-						continue;
-					}
-
-					// We tried to ground it to something but failed,
-					// so ground it to nothing.
-					if (1 == last_grd)
+					// or we tried to ground it to some atoms but
+					// failed, let it be.
+					if (not _varlist->is_upper_bound(ohp, 1) or
+					    last_grd == 1)
 					{
 						jg --;
 						glob_grd[ohp] = 0;
@@ -342,6 +337,7 @@ bool PatternMatchEngine::ordered_compare(const PatternTermPtr& ptm,
 						// Can't exceed the upper bound
 						if (not _varlist->is_upper_bound(ohp, glob_seq.size()+1))
 							break;
+
 						glob_seq.push_back(osg[jg]);
 					}
 					jg++;
