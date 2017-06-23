@@ -232,6 +232,13 @@ bool PatternMatchEngine::ordered_compare(const PatternTermPtr& ptm,
 		// complicated search ...
 		for (size_t ip=0, jg=0; ip<osp_size or jg<osg_size; ip++, jg++)
 		{
+			auto reset = [&]()
+			{
+				ip = -1;
+				jg = -1;
+				var_grounding.clear();
+			};
+
 			if (ip == osp_size) ip --;
 
 			bool grd_end = false;
@@ -251,6 +258,29 @@ bool PatternMatchEngine::ordered_compare(const PatternTermPtr& ptm,
 				// to the clause_match() callback?
 				if (ohp == osg[jg]) return false;
 
+				// Seen this glob before?
+				size_t last_grd = SIZE_MAX;
+				auto gi = glob_grd.find(ohp);
+				if (gi != glob_grd.end())
+				{
+					// If we are here, that means we have seen this glob before
+					last_grd = gi->second;
+
+					// Remove from glob_grd if it can't be grounded
+					// to fewer no. of atoms.
+					if (last_grd == 0 or not _varlist->is_lower_bound(ohp, last_grd-1))
+					{
+						glob_grd.erase(ohp);
+
+						// Reject if we cannot backtrack anymore.
+						if (glob_grd.size() == 0)
+						{
+							match = false;
+							break;
+						}
+					}
+				}
+
 				HandleSeq glob_seq;
 				PatternTermPtr glob(osp[ip]);
 
@@ -264,13 +294,27 @@ bool PatternMatchEngine::ordered_compare(const PatternTermPtr& ptm,
 					if (not _varlist->is_upper_bound(ohp, 1))
 					{
 						jg --;
+						glob_grd[ohp] = 0;
+						continue;
+					}
+
+					// We tried to ground it to something but failed,
+					// so ground it to nothing.
+					if (1 == last_grd)
+					{
+						jg --;
+						glob_grd[ohp] = 0;
 						continue;
 					}
 
 					// Since the glob has a lower bound of zero, if we
 					// already have gone through all the candidates at
 					// this point, we are done.
-					if (grd_end) continue;
+					if (grd_end)
+					{
+						glob_grd[ohp] = 0;
+						continue;
+					}
 				}
 
 				// If we are here, the glob we are looking at has to be
@@ -280,34 +324,35 @@ bool PatternMatchEngine::ordered_compare(const PatternTermPtr& ptm,
 				// everything in osg already, then it's not a match.
 				if (grd_end)
 				{
-					match = false;
-					break;
+					reset();
+					continue;
 				}
 
-				tc = (tree_compare(glob, osg[jg], CALL_GLOB) and
-				      _varlist->is_upper_bound(ohp, 1));
+				// Try to match as many as possible
+				do
+				{
+					tc = tree_compare(glob, osg[jg], CALL_GLOB);
+
+					if (tc)
+					{
+						// Can't match more than it did last time
+						if (glob_seq.size()+1 >= last_grd)
+							break;
+
+						// Can't exceed the upper bound
+						if (not _varlist->is_upper_bound(ohp, glob_seq.size()+1))
+							break;
+						glob_seq.push_back(osg[jg]);
+					}
+					jg++;
+				} while (tc and jg<osg_size);
+
+				jg --;
+
 				if (not tc)
 				{
-					match = false;
-					break;
-				}
-
-				glob_seq.push_back(osg[jg]);
-				jg++;
-
-				// Can we match more?
-				while (tc and jg<osg_size)
-				{
-					tc = (tree_compare(glob, osg[jg], CALL_GLOB) and
-					      _varlist->is_upper_bound(ohp, glob_seq.size()+1));
-					if (tc) glob_seq.push_back(osg[jg]);
-					jg ++;
-				}
-				jg --;
-				if (not tc or not _varlist->is_lower_bound(ohp, glob_seq.size()))
-				{
-					match = false;
-					break;
+					reset();
+					continue;
 				}
 
 				// If we are here, we've got a match; record the glob.
@@ -324,8 +369,8 @@ bool PatternMatchEngine::ordered_compare(const PatternTermPtr& ptm,
 				// reject it.
 				if (grd_end or not tree_compare(osp[ip], osg[jg], CALL_ORDER))
 				{
-					match = false;
-					break;
+					reset();
+					continue;
 				}
 			}
 		}
