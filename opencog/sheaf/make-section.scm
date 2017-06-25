@@ -71,6 +71,9 @@
   Given an MST parse of a sequence, return a list of the sections of 
   the atoms in that sequence (one section per atom).
 
+  Actually, this works for any "vertex-ordered graph", where the
+  vertex
+
   It is the nature of MST parses that the links between the atoms
   have no labels: the links are of the 'any' type. We'd like to
   discover thier types, and we begin by creating sections. These
