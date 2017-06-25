@@ -1,8 +1,8 @@
 ;
 ; make-section.scm
 ;
-; Compute the sheaf sections (connector-set disjuncts), obtained from
-; an MST parse of a sequence of atoms.
+; Compute the sheaf sections (connector-set disjuncts), given a set of
+; edges connecting ordered vertexes.
 ;
 ; Copyright (c) 2017 Linas Vepstas
 ;
@@ -17,6 +17,31 @@
 ; characterizing how the vertex can attach to a graph.
 ;
 ; An example of a section is
+;
+;    Section
+;        Atom "A"
+;        ConnectorSeq
+;            Connector
+;                Atom "B"
+;            Connector
+;                Atom "C"
+;
+; which indicates that A is connected to B and to C; viz, that there are
+; edges (AB) and (AC).  Note that the ConnectorSeq is independent of the
+; atom "A".  This allows different sections to be compared: e.g. there
+; may be a different atom D with edges (DB) and (DC).  Then D would have
+; the same ConnectorSeq as A. Thus, the ConnectorSeq simpllifies the
+; discovery of subgraph isomorphisms.
+;
+; In everything that follows, it is assumed that all of the vertexes of
+; the graph are sequentially ordered, i.e. can be laid out in sequence
+; from left to right.  In such a case, each connector can also be
+; endowed with a direction, indicating if the connected atom lies to the
+; left or to the right.  The ConnectorDir thus is used to preserve
+; ordering information, while still being flexible enough to help with
+; the subgraph isomorphism problem.
+;
+; An example of a section with ordered vertexes is
 ;
 ;    Section
 ;        Atom "something"
@@ -36,8 +61,8 @@
 ; "something" connects to two other vertexes, explicitly named in the
 ; local section.
 ;
-; The code here computes sections for the parse trees created by the
-; MST parser.
+; The code here computes sections for graphs consisting of ordered
+; vertexes.  The parse trees created by the MST parser are of this type.
 ;
 ; After a sequence of atoms has been parsed with the MST parser, the
 ; links between atoms in the parse can be interpreted as Link Grammar
@@ -64,21 +89,26 @@
 
 ; ---------------------------------------------------------------------
 
-(define-public (make-sections MST-PARSE)
+(define-public (make-sections WEDGE-LIST)
 "
-  make-sections - create sections of the MST parse tree.
+  make-sections - create sections of a graph.
 
-  Given an MST parse of a sequence, return a list of the sections of 
-  the atoms in that sequence (one section per atom).
+  Given a graph, expressed as a set of edges, return a list of sections
+  for the vertexes in the graph. By definition, there is only one
+  section per vertex.
 
-  Actually, this works for any "vertex-ordered graph", where the
-  vertex
+  The WEDGE-LIST is assumed to be a list of weighted edges. The weights
+  are ignored.  The vertexes in the graph are assumed to just be the
+  set of vertexes aht appear at the ends of each edge; these are
+  extracted automatically, below.  XXX FIXME a better API could just
+  pass these in...
 
-  It is the nature of MST parses that the links between the atoms
-  have no labels: the links are of the 'any' type. We'd like to
-  discover thier types, and we begin by creating sections. These
-  resemble Link-Grammar  disjuncts, except that the connectors
-  are replaced by the atoms that they connect to.
+  The returned sections are a list of SectionLinks, one for each vertex.
+  The SectionLink will list (in order) a list of ConnectorLink's, with
+  each connector implicitly specifying an edge, by specifying the atom
+  at the far end of the edge.  The connectors are lablled with direction
+  marks, '+' and '-', indicating whether the far end is to the right or
+  the left of the given vertex.
 
   So, for example, given the MST parse
      (mst-parse-text 'The game is played on a level playing field')
@@ -96,41 +126,45 @@
 
   As the local section of a single graph, it captures the local
   structure that there was a link level<-->playing and a link
-  playing<-->field.
+  playing<-->field. The ConnectorDir indicates whether the link went
+  to the left or to the right.  This allow the ConnectorSeq to be
+  independent of Section itself; that is, the ConnectorSeq never
+  mentions the (WordNode \"playing\").  This allows different
+  ConnectorSeq's to be explicitly compared.
 "
 	; Discard links with bad MI values; anything less than
 	; -1e6 is bad. Heck, anything under minus ten is bad...
 	(define good-links (filter
-		(lambda (mlink) (< -1e6 (mst-link-get-score mlink)))
-		MST-PARSE))
+		(lambda (mlink) (< -1e6 (wedge-get-score mlink)))
+		WEDGE-LIST))
 
 	; Create a list of all of the atoms in the sequence.
 	(define seq-list (delete-duplicates!
 		(fold
 			(lambda (mlnk lst)
-				(cons (mst-link-get-left-overt mlnk)
-					(cons (mst-link-get-right-overt mlnk) lst)))
+				(cons (wedge-get-left-overt mlnk)
+					(cons (wedge-get-right-overt mlnk) lst)))
 			'()
 			good-links)))
 
 	; Return #t if word appears on the left side of mst-lnk
 	(define (is-on-left-side? wrd mlnk)
-		(equal? wrd (mst-link-get-left-atom mlnk)))
+		(equal? wrd (wedge-get-left-atom mlnk)))
 	(define (is-on-right-side? wrd mlnk)
-		(equal? wrd (mst-link-get-right-atom mlnk)))
+		(equal? wrd (wedge-get-right-atom mlnk)))
 
 	; Given a word, and the mst-parse linkset, create a shorter
 	; seq-list which holds only the words linked to the right.
 	(define (mk-right-seqlist seq mparse)
 		(define wrd (overt-get-atom seq))
-		(map mst-link-get-right-overt
+		(map wedge-get-right-overt
 			(filter
 				(lambda (mlnk) (is-on-left-side? wrd mlnk))
 				mparse)))
 
 	(define (mk-left-seqlist seq mparse)
 		(define wrd (overt-get-atom seq))
-		(map mst-link-get-left-overt
+		(map wedge-get-left-overt
 			(filter
 				(lambda (mlnk) (is-on-right-side? wrd mlnk))
 				mparse)))
@@ -168,7 +202,7 @@
 	)
 
 	(map
-		(lambda (seq) (mk-pseudo seq MST-PARSE))
+		(lambda (seq) (mk-pseudo seq WEDGE-LIST))
 		seq-list)
 )
 
