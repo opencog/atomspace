@@ -108,8 +108,8 @@
 	(define seq-list (delete-duplicates!
 		(fold
 			(lambda (mlnk lst)
-				(cons (mst-link-get-left-numa mlnk)
-					(cons (mst-link-get-right-numa mlnk) lst)))
+				(cons (mst-link-get-left-ovirt mlnk)
+					(cons (mst-link-get-right-ovirt mlnk) lst)))
 			'()
 			good-links)))
 
@@ -122,15 +122,15 @@
 	; Given a word, and the mst-parse linkset, create a shorter
 	; seq-list which holds only the words linked to the right.
 	(define (mk-right-seqlist seq mparse)
-		(define wrd (mst-numa-get-atom seq))
-		(map mst-link-get-right-numa
+		(define wrd (ovirt-get-atom seq))
+		(map mst-link-get-right-ovirt
 			(filter
 				(lambda (mlnk) (is-on-left-side? wrd mlnk))
 				mparse)))
 
 	(define (mk-left-seqlist seq mparse)
-		(define wrd (mst-numa-get-atom seq))
-		(map mst-link-get-left-numa
+		(define wrd (ovirt-get-atom seq))
+		(map mst-link-get-left-ovirt
 			(filter
 				(lambda (mlnk) (is-on-right-side? wrd mlnk))
 				mparse)))
@@ -139,7 +139,7 @@
 	(define (sort-seqlist seq-list)
 		(sort seq-list
 			(lambda (sa sb)
-				(< (mst-numa-get-index sa) (mst-numa-get-index sb)))))
+				(< (ovirt-get-index sa) (ovirt-get-index sb)))))
 
 	; Given an atom, the the links, create a section
 	(define (mk-pseudo seq mlist)
@@ -150,20 +150,20 @@
 		(define left-cnc
 			(map (lambda (sw)
 					(Connector
-						(mst-numa-get-atom sw)
+						(ovirt-get-atom sw)
 						(ConnectorDir "-")))
 			lefts))
 
 		(define right-cnc
 			(map (lambda (sw)
 					(Connector
-						(mst-numa-get-atom sw)
+						(ovirt-get-atom sw)
 						(ConnectorDir "+")))
 			rights))
 
 		; return the connector-set
 		(Section
-			(mst-numa-get-atom seq)
+			(ovirt-get-atom seq)
 			(ConnectorSeq (append left-cnc right-cnc)))
 	)
 

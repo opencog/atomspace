@@ -19,8 +19,12 @@
 ; the weights.
 ;
 ; Terminology:
-; A "numa" is a numbered atom; it is an ordered vertex.
-; A "link" is an edge, consisting of an ordered pair of numa's.
+; A "numa" is a numbered atom; it is an ordered vertex. Its an atom,
+;    and an intgeger number indicating it's ordering.
+;
+; An "ovirt" is the same thing as a numa.
+;
+; A "wlink" is an edge, consisting of an ordered pair of numa's.
 ;     Note that ordereing of the vertexes in the edge give that
 ;     edge an implicit directionality. This need NOT correspond
 ;     to the ordinal numbering of the vertexes. That is, an edge
@@ -31,33 +35,33 @@
 (use-modules (opencog))
 
 ; ---------------------------------------------------------------------
-; The MST parser returns a list of word-pair links, tagged with the
-; mutual information between that word-pair. The functions below
-; unpack each data strcture.
+; The MST parser returns a list of weighted edges, each edge consisting
+; of a pair of ordered atoms.
+; The functions below unpack each data strcture.
 ;
 ; Get the score of the link.
 (define-public (mst-link-get-score lnk) (cdr lnk))
 
 ; Get the left numbered-atom (numa) in the link. The num is a scheme
 ; pair of the form (number . atom)
-(define-public (mst-link-get-left-numa lnk)
+(define-public (mst-link-get-left-ovirt lnk)
 	(car (car lnk)))
 
-(define-public (mst-link-get-right-numa lnk)
+(define-public (mst-link-get-right-ovirt lnk)
 	(cdr (car lnk)))
 
 ; Get the index number out of the numa.
-(define-public (mst-numa-get-index numa) (car numa))
+(define-public (ovirt-get-index numa) (car numa))
 
 ; Get the atom from the numa.
-(define-public (mst-numa-get-atom numa) (cdr numa))
+(define-public (ovirt-get-atom numa) (cdr numa))
 
 ; Get the left atom in the scored link.
 (define-public (mst-link-get-left-atom lnk)
-	(mst-numa-get-atom (mst-link-get-left-numa lnk)))
+	(ovirt-get-atom (mst-link-get-left-ovirt lnk)))
 
 ; Get the right word in the link. This returns the WordNode.
 (define-public (mst-link-get-right-atom lnk)
-	(mst-numa-get-atom (mst-link-get-right-numa lnk)))
+	(ovirt-get-atom (mst-link-get-right-ovirt lnk)))
 
 ; ---------------------------------------------------------------------
