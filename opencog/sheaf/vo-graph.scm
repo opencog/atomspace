@@ -22,9 +22,9 @@
 ; A "numa" is a numbered atom; it is an ordered vertex. Its an atom,
 ;    and an intgeger number indicating it's ordering.
 ;
-; An "ovirt" is the same thing as a numa.
+; An "overt" is the same thing as a numa.
 ;
-; A "wlink" is an edge, consisting of an ordered pair of numa's.
+; A "wedge" is an edge, consisting of an ordered pair of numa's.
 ;     Note that ordereing of the vertexes in the edge give that
 ;     edge an implicit directionality. This need NOT correspond
 ;     to the ordinal numbering of the vertexes. That is, an edge
@@ -40,28 +40,28 @@
 ; The functions below unpack each data strcture.
 ;
 ; Get the score of the link.
-(define-public (mst-link-get-score lnk) (cdr lnk))
+(define-public (wedge-get-score lnk) (cdr lnk))
 
 ; Get the left numbered-atom (numa) in the link. The num is a scheme
 ; pair of the form (number . atom)
-(define-public (mst-link-get-left-ovirt lnk)
+(define-public (wedge-get-left-overt lnk)
 	(car (car lnk)))
 
-(define-public (mst-link-get-right-ovirt lnk)
+(define-public (wedge-get-right-overt lnk)
 	(cdr (car lnk)))
 
 ; Get the index number out of the numa.
-(define-public (ovirt-get-index numa) (car numa))
+(define-public (overt-get-index numa) (car numa))
 
 ; Get the atom from the numa.
-(define-public (ovirt-get-atom numa) (cdr numa))
+(define-public (overt-get-atom numa) (cdr numa))
 
 ; Get the left atom in the scored link.
-(define-public (mst-link-get-left-atom lnk)
-	(ovirt-get-atom (mst-link-get-left-ovirt lnk)))
+(define-public (wedge-get-left-atom lnk)
+	(overt-get-atom (wedge-get-left-overt lnk)))
 
 ; Get the right word in the link. This returns the WordNode.
-(define-public (mst-link-get-right-atom lnk)
-	(ovirt-get-atom (mst-link-get-right-ovirt lnk)))
+(define-public (wedge-get-right-atom lnk)
+	(overt-get-atom (wedge-get-right-overt lnk)))
 
 ; ---------------------------------------------------------------------
