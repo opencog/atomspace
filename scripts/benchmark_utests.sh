@@ -11,7 +11,7 @@ set -u
 # set -x
 
 # Number of times to run the unit tests
-N=30
+N=10
 
 # Name of the build directory
 BUILD_DIR_NAME=build
@@ -33,7 +33,7 @@ get_real_time() {
 # Run all query unit tests
 run_utests() {
     cd "$UTEST_DIR";
-    make test ARGS=-j2
+    make -j4 test ARGS=-j4
     cd -
 }
 
@@ -42,5 +42,6 @@ run_utests() {
 ########
 
 for i in $(seq 1 $N); do
-    time -p run_utests 
-done |& get_real_time | st | column -t
+    echo "Run unit test suite ($i/$N)" 1>&2
+    (time -p run_utests 1>/dev/null) 2>&1
+done | get_real_time | st | column -t
