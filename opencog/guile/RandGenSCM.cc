@@ -38,7 +38,7 @@ protected:
 	virtual void init();
 
 	void do_randgen_set_seed(int);
-	int do_randgen_randint();
+	int do_randgen_randint(int);
 
 public:
 	RandGenSCM();
@@ -52,9 +52,9 @@ void RandGenSCM::do_randgen_set_seed(int s)
 }
 
 /// Pick a random integer
-int RandGenSCM::do_randgen_randint()
+int RandGenSCM::do_randgen_randint(int n)
 {
-	return randGen().randint();
+	return randGen().randint(n);
 }
 	
 } /*end of namespace opencog*/
