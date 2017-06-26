@@ -224,21 +224,17 @@ bool PatternMatchEngine::ordered_compare(const PatternTermPtr& ptm,
 	}
 	else
 	{
-		// To store how many atoms are grounded to the GlobNodes
-		std::map<Handle, size_t> glob_grd;
-
 		// If we are here, then the pattern contains globs. A glob can
 		// match one or more atoms in a row. Thus, we have a more
 		// complicated search ...
+
+		// To record how many atoms are grounded to the GlobNodes, and
+		// their positions.
+		std::map<Handle, size_t> glob_grd;
+		std::vector<std::pair<size_t, size_t>> glob_pos;
+
 		for (size_t ip=0, jg=0; ip<osp_size or jg<osg_size; ip++, jg++)
 		{
-			auto reset = [&]()
-			{
-				ip = -1;
-				jg = -1;
-				var_grounding.clear();
-			};
-
 			if (ip == osp_size) ip --;
 
 			bool grd_end = false;
@@ -251,12 +247,30 @@ bool PatternMatchEngine::ordered_compare(const PatternTermPtr& ptm,
 			bool tc = false;
 			const Handle& ohp(osp[ip]->getHandle());
 			Type ptype = ohp->getType();
+
+			auto reset = [&]()
+			{
+				// There is a chance that glob_pos is empty
+				// if we haven't seen any glob in osp so far.
+				if (glob_pos.size() == 0) return;
+
+				ip = glob_pos.back().first - 1;
+				jg = glob_pos.back().second - 1;
+				glob_pos.pop_back();
+
+				// Clear any groundings for this glob.
+				var_grounding.erase(ohp);
+			};
+
 			if (GLOB_NODE == ptype)
 			{
 				// GlobNodes cannot match themselves -- no self-grounding
 				// is allowed. TODO -- maybe this check should be moved
 				// to the clause_match() callback?
 				if (ohp == osg[jg]) return false;
+
+				// Record the position of the glob.
+				glob_pos.push_back(std::make_pair(ip, jg));
 
 				size_t last_grd = SIZE_MAX;
 				auto gi = glob_grd.find(ohp);
@@ -271,14 +285,21 @@ bool PatternMatchEngine::ordered_compare(const PatternTermPtr& ptm,
 					    not _varlist->is_lower_bound(ohp, last_grd-1))
 					{
 						glob_grd.erase(ohp);
+						glob_pos.pop_back();
 						last_grd = SIZE_MAX;
 
-						// Reject if we cannot backtrack anymore.
+						// Reject if we cannot find a possible way to
+						// satisfy all the restrictions of the globs
+						// we have seen.
 						if (glob_grd.size() == 0)
 						{
 							match = false;
 							break;
 						}
+
+						// Go back to the previous glob.
+						reset();
+						continue;
 					}
 				}
 
@@ -299,6 +320,7 @@ bool PatternMatchEngine::ordered_compare(const PatternTermPtr& ptm,
 					{
 						jg --;
 						glob_grd[ohp] = 0;
+						var_grounding.erase(ohp);
 						continue;
 					}
 
@@ -308,6 +330,7 @@ bool PatternMatchEngine::ordered_compare(const PatternTermPtr& ptm,
 					if (grd_end)
 					{
 						glob_grd[ohp] = 0;
+						var_grounding.erase(ohp);
 						continue;
 					}
 				}
@@ -323,18 +346,18 @@ bool PatternMatchEngine::ordered_compare(const PatternTermPtr& ptm,
 					continue;
 				}
 
-				// Try to match as many as possible
+				// Try to match as many as possible.
 				do
 				{
 					tc = tree_compare(glob, osg[jg], CALL_GLOB);
 
 					if (tc)
 					{
-						// Can't match more than it did last time
+						// Can't match more than it did last time.
 						if (glob_seq.size()+1 >= last_grd)
 							break;
 
-						// Can't exceed the upper bound
+						// Can't exceed the upper bound.
 						if (not _varlist->is_upper_bound(ohp, glob_seq.size()+1))
 							break;
 
