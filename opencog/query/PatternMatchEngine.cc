@@ -301,6 +301,7 @@ bool PatternMatchEngine::ordered_compare(const PatternTermPtr& ptm,
 						reset();
 						continue;
 					}
+
 				}
 
 				HandleSeq glob_seq;
@@ -342,6 +343,7 @@ bool PatternMatchEngine::ordered_compare(const PatternTermPtr& ptm,
 				// everything in osg already, then it's not a match.
 				if (grd_end)
 				{
+					glob_grd[ohp] = 0;
 					reset();
 					continue;
 				}
@@ -370,6 +372,14 @@ bool PatternMatchEngine::ordered_compare(const PatternTermPtr& ptm,
 
 				if (not tc)
 				{
+					reset();
+					continue;
+				}
+
+				// Make sure it meets the lower bound restriction as well.
+				if (not _varlist->is_lower_bound(ohp, glob_seq.size()))
+				{
+					glob_grd[ohp] = glob_seq.size();
 					reset();
 					continue;
 				}
