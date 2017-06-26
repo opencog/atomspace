@@ -128,9 +128,8 @@ void ClassServer::addFactory(Type t, AtomFactory* fact)
 ClassServer::AtomFactory* ClassServer::searchToDepth(Type t, int depth)
 {
 	// If there is a factory, then return it.
-	auto fpr = _atomFactory.find(t);
-	if (_atomFactory.end() != fpr)
-		return fpr->second;
+	AtomFactory* fpr = _atomFactory[t];
+	if (fpr) return fpr;
 
 	// Perhaps one of the parent types has a factory.
 	// Perform a depth-first recursion.
@@ -151,9 +150,8 @@ ClassServer::AtomFactory* ClassServer::searchToDepth(Type t, int depth)
 ClassServer::AtomFactory* ClassServer::getFactory(Type t)
 {
 	// If there is a factory, then return it.
-	auto fpr = _atomFactory.find(t);
-	if (_atomFactory.end() != fpr)
-		return fpr->second;
+	AtomFactory* fpr = _atomFactory[t];
+	if (fpr) return fpr;
 
 	// Perhaps one of the parent types has a factory.
 	//

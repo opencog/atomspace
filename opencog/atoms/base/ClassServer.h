@@ -76,7 +76,7 @@ private:
     std::vector< std::vector<bool> > recursiveMap;
     std::unordered_map<std::string, Type> name2CodeMap;
     std::vector<const std::string*> _code2NameMap;
-    std::unordered_map<Type, AtomFactory*> _atomFactory;
+    std::vector<AtomFactory*> _atomFactory;
     TypeSignal _addTypeSignal;
 
     void setParentRecursively(Type parent, Type type, Type& maxd);
