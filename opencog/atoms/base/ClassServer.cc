@@ -82,7 +82,7 @@ Type ClassServer::addType(const Type parent, const std::string& name)
     inheritanceMap[parent][type] = true;
     recursiveMap[type][type]     = true;
     name2CodeMap[name]           = type;
-    code2NameMap[type]           = &(name2CodeMap.find(name)->first);
+    _code2NameMap[type]          = &(name2CodeMap.find(name)->first);
 
     Type maxd = 1;
     setParentRecursively(parent, type, maxd);
@@ -214,9 +214,8 @@ const std::string& ClassServer::getTypeName(Type type)
     static std::string nullString = "*** Unknown Type! ***";
 
     std::lock_guard<std::mutex> l(type_mutex);
-    std::unordered_map<Type, const std::string*>::iterator it;
-    if ((it = code2NameMap.find(type)) != code2NameMap.end())
-        return *(it->second);
+    const std::string* name = _code2NameMap[type];
+    if (name) return *name;
     return nullString;
 }
 

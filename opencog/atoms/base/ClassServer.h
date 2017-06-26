@@ -75,7 +75,7 @@ private:
     std::vector< std::vector<bool> > inheritanceMap;
     std::vector< std::vector<bool> > recursiveMap;
     std::unordered_map<std::string, Type> name2CodeMap;
-    std::unordered_map<Type, const std::string*> code2NameMap;
+    std::vector<const std::string*> _code2NameMap;
     std::unordered_map<Type, AtomFactory*> _atomFactory;
     TypeSignal _addTypeSignal;
 
