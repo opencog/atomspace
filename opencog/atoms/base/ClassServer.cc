@@ -64,6 +64,10 @@ void ClassServer::endTypeDecls(void)
 
 Type ClassServer::declType(const Type parent, const std::string& name)
 {
+    if (1 != tmod%2)
+        throw InvalidParamException(TRACE_INFO,
+            "Improper type declararition; must call beginTypeDecls() first\n");
+
     // Check if a type with this name already exists. If it does, then
     // the second and subsequent calls are to be interpreted as defining
     // multiple inheritance for this type.  A real-life example is the
@@ -94,6 +98,9 @@ Type ClassServer::declType(const Type parent, const std::string& name)
     // Resize inheritanceMap container.
     inheritanceMap.resize(nTypes);
     recursiveMap.resize(nTypes);
+    _code2NameMap.resize(nTypes);
+    _atomFactory.resize(nTypes);
+    _mod.resize(nTypes);
 
     for (auto& bv: inheritanceMap) bv.resize(nTypes, false);
     for (auto& bv: recursiveMap) bv.resize(nTypes, false);
