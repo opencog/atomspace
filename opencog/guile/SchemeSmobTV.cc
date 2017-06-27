@@ -494,16 +494,16 @@ SCM SchemeSmob::ss_tv_get_count(SCM s)
 
 SCM SchemeSmob::ss_tv_merge (SCM sta, SCM stb)
 {
-	TruthValuePtr tva = verify_tv(sta, "cog-tv-merge!", 1);
-	TruthValuePtr tvb = verify_tv(stb, "cog-tv-merge!", 2);
+	TruthValuePtr tva = verify_tv(sta, "cog-tv-merge", 1);
+	TruthValuePtr tvb = verify_tv(stb, "cog-tv-merge", 2);
 
 	return tv_to_scm(tva->merge(tvb));
 }
 
 SCM SchemeSmob::ss_tv_merge_hi_conf (SCM sta, SCM stb)
 {
-	TruthValuePtr tva = verify_tv(sta, "cog-tv-merge-hi-conf!", 1);
-	TruthValuePtr tvb = verify_tv(stb, "cog-tv-merge-hi-conf!", 2);
+	TruthValuePtr tva = verify_tv(sta, "cog-tv-merge-hi-conf", 1);
+	TruthValuePtr tvb = verify_tv(stb, "cog-tv-merge-hi-conf", 2);
 
 	return tv_to_scm(tva->merge(tvb,
 		MergeCtrl(MergeCtrl::TVFormula::HIGHER_CONFIDENCE)));
