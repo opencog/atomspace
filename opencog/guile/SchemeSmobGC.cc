@@ -87,8 +87,10 @@ size_t SchemeSmob::free_misc(SCM node)
 			return 0;
 
 		case COG_LOGGER:
-			// Currently all loggers are static globals, initialized once,
-			// and never-ever freed. So we have nothing to do, here.
+			Logger* logger;
+			logger = (Logger*) SCM_SMOB_DATA(node);
+			delete logger;
+			scm_remember_upto_here_1(node);
 			return 0;
 
 		default:
