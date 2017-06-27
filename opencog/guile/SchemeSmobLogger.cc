@@ -35,27 +35,6 @@ SCM SchemeSmob::logger_to_scm(Logger* lg)
 }
 
 /* ============================================================== */
-/**
- * Return true if the scm is a logger
- */
-SCM SchemeSmob::ss_logger_p(SCM s)
-{
-	if (SCM_SMOB_PREDICATE(SchemeSmob::cog_misc_tag, s))
-	{
-		scm_t_bits misctype = SCM_SMOB_FLAGS(s);
-		switch (misctype)
-		{
-			case COG_LOGGER:
-				return SCM_BOOL_T;
-
-			default:
-				return SCM_BOOL_F;
-		}
-	}
-	return SCM_BOOL_F;
-}
-
-/* ============================================================== */
 /* Cast SCM to logger */
 
 Logger* SchemeSmob::ss_to_logger(SCM sl)
