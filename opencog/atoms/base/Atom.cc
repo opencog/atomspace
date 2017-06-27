@@ -220,15 +220,15 @@ ProtoAtomPtr Atom::getValue(const Handle& key) const
     return _atom_space->_value_table.getValue(key, getHandle());
 }
 
-std::set<Handle> Atom::getKeys() const
+HandleSet Atom::getKeys() const
 {
-    if (nullptr == _atom_space) return std::set<Handle>();
+    if (nullptr == _atom_space) return HandleSet();
     return _atom_space->_value_table.getKeys(getHandle());
 }
 
 void Atom::copyValues(const Handle& other)
 {
-    std::set<Handle> okeys(other->getKeys());
+    HandleSet okeys(other->getKeys());
     for (const Handle& k: okeys)
     {
         ProtoAtomPtr p = other->getValue(k);
@@ -243,7 +243,7 @@ std::string Atom::valuesToString() const
 {
     std::string rv;
 
-    std::set<Handle> keys(getKeys());
+    HandleSet keys(getKeys());
     for (const Handle& k: keys)
     {
         ProtoAtomPtr p = getValue(k);

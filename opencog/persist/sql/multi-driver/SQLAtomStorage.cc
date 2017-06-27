@@ -892,7 +892,7 @@ void SQLAtomStorage::deleteValue(VUID vuid)
 /// Store ALL of the values associated with the atom.
 void SQLAtomStorage::store_atom_values(const Handle& atom)
 {
-	std::set<Handle> keys = atom->getKeys();
+	HandleSet keys = atom->getKeys();
 	for (const Handle& key: keys)
 	{
 		// Skip the truth-value; it's special-cased below.

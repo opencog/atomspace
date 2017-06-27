@@ -88,7 +88,7 @@ public:
 		vtable->addValuation(kb, blah, fvalue);
 		vtable->addValuation(kc, blah, fvalue);
 
-		std::set<Handle> keys = vtable->getKeys(blah);
+		HandleSet keys = vtable->getKeys(blah);
 
 		TS_ASSERT_EQUALS(3, keys.size());
 		TS_ASSERT(keys.end() != keys.find(ka));

@@ -48,7 +48,7 @@ void ValuationTable::addValuation(const ValuationPtr& vp)
 	auto ikeys = _keyset.find(atom);
 	if (ikeys == _keyset.end())
 	{
-		std::set<Handle> keys;
+		HandleSet keys;
 		keys.insert(key);
 		_keyset.insert(make_pair(atom, keys));
 	}
@@ -95,7 +95,7 @@ ProtoAtomPtr ValuationTable::getValue(const Handle& key, const Handle& atom)
 // searching the _vindex, instead, which would be slower but more memory
 // efficient.  The point is that the only user of this function is going
 // to be the peristence framework, and so we should optimize for that.
-std::set<Handle> ValuationTable::getKeys(const Handle& atom)
+HandleSet ValuationTable::getKeys(const Handle& atom)
 {
 	std::lock_guard<std::mutex> lck(_mtx);
 

@@ -251,7 +251,7 @@ SCM SchemeSmob::ss_keys (SCM satom)
 	Handle atom(verify_handle(satom, "cog-value"));
 
 	SCM rv = SCM_EOL;
-	std::set<Handle> keys = atom->getKeys();
+	HandleSet keys = atom->getKeys();
 	for (const Handle& k : keys)
 	{
 		rv = scm_cons (handle_to_scm(k), rv);
