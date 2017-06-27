@@ -400,6 +400,14 @@ bool PatternMatchEngine::ordered_compare(const PatternTermPtr& ptm,
 				// reject it.
 				if (grd_end or not tree_compare(osp[ip], osg[jg], CALL_ORDER))
 				{
+					// If we have never seen any globs before, then no backtracking
+					// can be done, it's just purely a mismatch.
+					if (glob_grd.size() == 0)
+					{
+						match = false;
+						break;
+					}
+
 					reset();
 					continue;
 				}
