@@ -65,8 +65,9 @@ Type ClassServer::declType(const Type parent, const std::string& name)
     Type type = getType(name);
     if (type != NOTYPE) {
         std::lock_guard<std::mutex> l(type_mutex);
-        DPRINTF("Type \"%s\" has already been added (%d)\n", name.c_str(), type);
 
+        // ... unless someone is accidentally declaring the same type
+        // in some different place. In that case, we throw an error.
         if (_mod[type] != tmod)
             throw InvalidParamException(TRACE_INFO,
                 "Type \"%s\" has already been declared (%d)\n",
