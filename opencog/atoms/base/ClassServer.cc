@@ -53,7 +53,13 @@ static int tmod = 0;
 
 void ClassServer::beginTypeDecls(void)
 {
-	tmod++;
+    tmod++;
+}
+
+void ClassServer::endTypeDecls(void)
+{
+    // Valid types are odd-numbered.
+    tmod++;
 }
 
 Type ClassServer::declType(const Type parent, const std::string& name)
