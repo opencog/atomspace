@@ -5,6 +5,8 @@
 ; and the attentional allocation system
 ;
 ; Utilities provided:
+; -- cog-merge-tv! -- merge truth values on atom
+; -- cog-merge-hi-conf-tv! -- different merge style
 ; -- cog-af-length -- Length of list of atoms in the attentional focus
 ; -- cog-av-sti -- Return the STI of an atom
 ; -- cog-sti-above -- Filter atoms with STI above a threshold
@@ -23,6 +25,18 @@
 ;
 ; Copyright (c) 2014 Cosmo Harrigan
 ;
+
+; -----------------------------------------------------------------------
+(define-public (cog-merge-tv! ATOM TV)
+" cog-merge-tv! -- merge truth values on atom"
+	(cog-set-tv! ATOM (cog-tv-merge (cog-tv ATOM) TV))
+)
+
+; -----------------------------------------------------------------------
+(define-public (cog-merge-hi-conf-tv! ATOM TV)
+" cog-merge-hi-conf-tv! -- merge truth values on atom"
+	(cog-set-tv! ATOM (cog-tv-merge-hi-conf (cog-tv ATOM) TV))
+)
 
 ; -----------------------------------------------------------------------
 ; cog-af-length
