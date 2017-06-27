@@ -40,6 +40,7 @@ protected:
 
 	Logger* do_default_logger();
 	Logger* do_ure_logger();
+	Logger* do_new_logger();
 	std::string do_logger_set_level(Logger*, const std::string& level);
 	std::string do_logger_get_level(const Logger*);
 	std::string do_logger_set_filename(Logger*, const std::string& filename);
@@ -70,6 +71,14 @@ Logger* LoggerSCM::do_default_logger()
 Logger* LoggerSCM::do_ure_logger()
 {
 	return &ure_logger();
+}
+
+/// Create a new logger.
+Logger* LoggerSCM::do_new_logger()
+{
+	Logger* lg = new Logger();
+	scm_gc_register_allocation(sizeof(*lg));
+	return lg;
 }
 
 /// Set level, return previous level.
@@ -181,6 +190,8 @@ void LoggerSCM::init(void)
 		&LoggerSCM::do_default_logger, this, "logger");
 	define_scheme_primitive("cog-ure-logger",
 		&LoggerSCM::do_ure_logger, this, "logger");
+	define_scheme_primitive("cog-new-logger",
+		&LoggerSCM::do_new_logger, this, "logger");
 
 	define_scheme_primitive("cog-logger-set-level-of-logger!",
 		&LoggerSCM::do_logger_set_level, this, "logger");
