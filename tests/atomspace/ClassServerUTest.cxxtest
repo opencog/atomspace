@@ -76,14 +76,15 @@ public:
     {
         Type ntypes = classserver().getNumberOfClasses();
 
-        Type CS_UTEST_NODE   = classserver().addType(NODE, "CsUtestNode");
+        classserver().beginTypeDecls();
+        Type CS_UTEST_NODE   = classserver().declType(NODE, "CsUtestNode");
         TS_ASSERT(CS_UTEST_NODE   == ntypes);
         TS_ASSERT(classserver().getNumberOfClasses() == (unsigned int)(ntypes+1));
         TS_ASSERT( classserver().isA(CS_UTEST_NODE, NODE));
         TS_ASSERT(!classserver().isA(CS_UTEST_NODE, NUMBER_NODE));
         TS_ASSERT(!classserver().isA(CS_UTEST_NODE, LINK));
 
-        Type CS_UTEST_LINK   = classserver().addType(LIST_LINK, "CsUtestLink");
+        Type CS_UTEST_LINK   = classserver().declType(LIST_LINK, "CsUtestLink");
         TS_ASSERT(CS_UTEST_LINK   == (ntypes + 1));
         TS_ASSERT(classserver().getNumberOfClasses() == (unsigned int)(ntypes+2));
         TS_ASSERT( classserver().isA(CS_UTEST_LINK, LINK));
@@ -93,7 +94,7 @@ public:
         TS_ASSERT(!classserver().isA(CS_UTEST_LINK, NODE));
         TS_ASSERT(!classserver().isA(CS_UTEST_LINK, NUMBER_NODE));
 
-        Type CS_UTEST_NODE_2 = classserver().addType(NODE, "CsUtestNode");
+        Type CS_UTEST_NODE_2 = classserver().declType(NODE, "CsUtestNode");
         TS_ASSERT(CS_UTEST_NODE_2 == ntypes);
         TS_ASSERT(classserver().getNumberOfClasses() == (unsigned int)(ntypes+2));
         TS_ASSERT( classserver().isA(CS_UTEST_NODE_2, NODE));
@@ -103,7 +104,7 @@ public:
         TS_ASSERT(!classserver().isA(CS_UTEST_NODE, NUMBER_NODE));
         TS_ASSERT(!classserver().isA(CS_UTEST_NODE, LINK));
 
-        Type CS_UTEST_LINK_2 = classserver().addType(UNORDERED_LINK, "CsUtestLink");
+        Type CS_UTEST_LINK_2 = classserver().declType(UNORDERED_LINK, "CsUtestLink");
         TS_ASSERT(CS_UTEST_LINK_2 == (ntypes + 1));
         TS_ASSERT(classserver().getNumberOfClasses() == (unsigned int)(ntypes+2));
         TS_ASSERT( classserver().isA(CS_UTEST_LINK_2, LINK));
@@ -118,6 +119,8 @@ public:
         TS_ASSERT( classserver().isA(CS_UTEST_LINK,   UNORDERED_LINK));
         TS_ASSERT(!classserver().isA(CS_UTEST_LINK,   NODE));
         TS_ASSERT(!classserver().isA(CS_UTEST_LINK,   NUMBER_NODE));
+
+        classserver().endTypeDecls();
     }
 
     void testIteratorMethods()
