@@ -49,7 +49,14 @@ ClassServer::ClassServer(void)
     _maxDepth = 0;
 }
 
-Type ClassServer::addType(const Type parent, const std::string& name)
+static int tmod = 0;
+
+void ClassServer::beginTypeDecls(void)
+{
+	tmod++;
+}
+
+Type ClassServer::declType(const Type parent, const std::string& name)
 {
     // Check if a type with this name already exists. If it does, then
     // the second and subsequent calls are to be interpreted as defining
@@ -59,6 +66,12 @@ Type ClassServer::addType(const Type parent, const std::string& name)
     if (type != NOTYPE) {
         std::lock_guard<std::mutex> l(type_mutex);
         DPRINTF("Type \"%s\" has already been added (%d)\n", name.c_str(), type);
+
+        if (_mod[type] != tmod)
+            throw InvalidParamException(TRACE_INFO,
+                "Type \"%s\" has already been declared (%d)\n",
+                name.c_str(), type);
+
         inheritanceMap[parent][type] = true;
 
         Type maxd = 1;
@@ -83,6 +96,7 @@ Type ClassServer::addType(const Type parent, const std::string& name)
     recursiveMap[type][type]     = true;
     name2CodeMap[name]           = type;
     _code2NameMap[type]          = &(name2CodeMap.find(name)->first);
+    _mod[type]                   = tmod;
 
     Type maxd = 1;
     setParentRecursively(parent, type, maxd);

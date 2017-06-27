@@ -77,6 +77,7 @@ private:
     std::unordered_map<std::string, Type> name2CodeMap;
     std::vector<const std::string*> _code2NameMap;
     std::vector<AtomFactory*> _atomFactory;
+    std::vector<int> _mod;
     TypeSignal _addTypeSignal;
 
     void setParentRecursively(Type parent, Type type, Type& maxd);
@@ -87,11 +88,13 @@ public:
     /** Gets the singleton instance (following meyer's design pattern) */
     friend ClassServer& classserver();
 
+    void beginTypeDecls(void);
+    void endTypeDecls(void);
     /**
      * Adds a new atom type with the given name and parent type.
      * Return a numeric value that is assigned to the new type.
      */
-    Type addType(const Type parent, const std::string& name);
+    Type declType(const Type parent, const std::string& name);
 
     /**
      * Declare a factory for an atom type.
