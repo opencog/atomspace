@@ -175,6 +175,8 @@ ClassServer::AtomFactory* ClassServer::searchToDepth(Type t, int depth)
 
 ClassServer::AtomFactory* ClassServer::getFactory(Type t)
 {
+	if (nTypes <= t) return nullptr;
+
 	// If there is a factory, then return it.
 	AtomFactory* fpr = _atomFactory[t];
 	if (fpr) return fpr;
@@ -236,6 +238,8 @@ Type ClassServer::getType(const std::string& typeName)
 const std::string& ClassServer::getTypeName(Type type)
 {
     static std::string nullString = "*** Unknown Type! ***";
+
+    if (nTypes <= type) return nullString;
 
     std::lock_guard<std::mutex> l(type_mutex);
     const std::string* name = _code2NameMap[type];
