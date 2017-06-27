@@ -67,6 +67,7 @@ public:
         //logger().setLevel(Logger::DEBUG);
         //logger().setPrintToStdoutFlag(true);
 
+#include "../query/test-types.cc"
         atomSpace = new AtomSpace();
         table = (AtomTable*) & (atomSpace->get_atomtable());
     }
