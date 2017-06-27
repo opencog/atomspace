@@ -99,8 +99,8 @@ Type ClassServer::declType(const Type parent, const std::string& name)
     inheritanceMap.resize(nTypes);
     recursiveMap.resize(nTypes);
     _code2NameMap.resize(nTypes);
-    _atomFactory.resize(nTypes);
     _mod.resize(nTypes);
+    if (_atomFactory.size() < nTypes) _atomFactory.resize(nTypes);
 
     for (auto& bv: inheritanceMap) bv.resize(nTypes, false);
     for (auto& bv: recursiveMap) bv.resize(nTypes, false);
@@ -148,6 +148,7 @@ boost::signals2::signal<void (Type)>& ClassServer::addTypeSignal()
 void ClassServer::addFactory(Type t, AtomFactory* fact)
 {
     std::unique_lock<std::mutex> l(type_mutex);
+    if (_atomFactory.size() < (size_t) t+1) _atomFactory.resize(t+1);
     _atomFactory[t] = fact;
 }
 
