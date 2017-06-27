@@ -155,7 +155,7 @@ public:
 	 * present in the same branch path, so is [14389148767193402296][1].
 	 */
 	bool has_cycle() const;
-	bool has_cycle(const Handle& h, OrderedHandleSet ancestors = {}) const;
+	bool has_cycle(const Handle& h, HandleSet ancestors = {}) const;
 
 	/**
 	 * Comparison operators. For operator< compare fcs by size, or by
@@ -282,8 +282,8 @@ private:
 	 * leaves cover the previous intermediary targets), of an
 	 * FCS.
 	 */
-	OrderedHandleSet get_leaves() const;
-	OrderedHandleSet get_leaves(const Handle& h) const;
+	HandleSet get_leaves() const;
+	HandleSet get_leaves(const Handle& h) const;
 
 	/**
 	 * Given a FCS, a leaf of it and a rule and its associated typed

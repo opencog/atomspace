@@ -92,10 +92,10 @@ void BITUTest::tearDown()
 void BITUTest::test_get_leaves()
 {
 	AndBIT andbit(_eval.eval_h("fcs-1"));
-	OrderedHandleSet result;
+	HandleSet result;
 	for (const auto& el : andbit.leaf2bitnode)
 		result.insert(el.first);
-	OrderedHandleSet expected = {
+	HandleSet expected = {
 		_eval.eval_h("(LambdaLink"
 		             "  (TypedVariableLink"
 		             "    (VariableNode \"$X\")"

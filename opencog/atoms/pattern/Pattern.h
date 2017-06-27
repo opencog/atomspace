@@ -92,34 +92,34 @@ struct Pattern
 	// The optional clauses don't have to be grounded, but they might be.
 	// This is where the absent clauses are held, so e.g. if these do get
 	// grounded, they might be rejected (depending on the callback).
-	OrderedHandleSet optionals;    // Optional clauses
+	HandleSet optionals;    // Optional clauses
 
 	// Black-box clauses. These are clauses that contain GPN's. These
 	// have to drop into scheme or python to get evaluated, which means
 	// that they will be slow.  So, we leave these for last, so that the
 	// faster clauses can run first, and rule out un-needed evaluations.
-	OrderedHandleSet black;       // Black-box clauses
+	HandleSet black;       // Black-box clauses
 
 	// Evaluatable terms are those that hold a GroundedPredicateNode
 	// (GPN) in them, or are stand-ins (e.g. GreaterThanLink, EqualLink).
-	OrderedHandleSet evaluatable_terms;   // smallest term that is evaluatable
-	OrderedHandleSet evaluatable_holders; // holds something evaluatable.
+	HandleSet evaluatable_terms;   // smallest term that is evaluatable
+	HandleSet evaluatable_holders; // holds something evaluatable.
 
 	// Executable terms are those that inherit from FunctionLink;
 	// this includes ExecutionOutputLink's.
-	OrderedHandleSet executable_terms;    // smallest term that is executable
-	OrderedHandleSet executable_holders;  // holds something executable.
+	HandleSet executable_terms;    // smallest term that is executable
+	HandleSet executable_holders;  // holds something executable.
 
 	// Defined terms are terms that are a DefinedPredicateNode (DPN)
 	// or a DefineSchemaNode (DSN).
-	OrderedHandleSet defined_terms;    // The DPN/DSN itself.
+	HandleSet defined_terms;    // The DPN/DSN itself.
 
 	// Globby terms are terms that contain a GlobNode
-	OrderedHandleSet globby_terms;     // Smallest term that has a glob.
+	HandleSet globby_terms;     // Smallest term that has a glob.
 
 	// Terms that may be grounded in an imprecise way. Similar to a
 	// GlobNode, but uses a different algorithm.
-	OrderedHandleSet fuzzy_terms;
+	HandleSet fuzzy_terms;
 
 	// Maps; the value is the largest (evaluatable or executable)
 	// term containing the variable. Its a multimap, because

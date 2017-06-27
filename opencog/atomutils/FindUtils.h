@@ -90,14 +90,14 @@ class FindAtoms
 {
 public:
 	std::set<Type> stopset;
-	OrderedHandleSet varset;
-	OrderedHandleSet holders;
-	OrderedHandleSet least_holders;
+	HandleSet varset;
+	HandleSet holders;
+	HandleSet least_holders;
 
 	FindAtoms(Type t, bool subclass = false);
 	FindAtoms(Type ta, Type tb, bool subclass = false);
 	FindAtoms(const Handle& atom);
-	FindAtoms(const OrderedHandleSet& selection);
+	FindAtoms(const HandleSet& selection);
 
 	/**
 	 * Given a handle to be searched, create a set of all of the
@@ -118,7 +118,7 @@ private:
 
 private:
 	std::set<Type> _target_types;
-	OrderedHandleSet _target_atoms;
+	HandleSet _target_atoms;
 };
 
 /**
@@ -224,7 +224,7 @@ bool is_free_in_any_tree(const HandleSeq& hs, const Handle& atom);
  * the tree (that is, in the tree spanned by the outgoing set.)
  */
 bool any_atom_in_tree(const Handle& tree,
-                      const OrderedHandleSet& atoms);
+                      const HandleSet& atoms);
 
 /**
  * Return true if any of the indicated atoms occur somewhere in
@@ -234,21 +234,21 @@ bool any_atom_in_tree(const Handle& tree,
  * longer a variable.
  */
 bool any_unquoted_in_tree(const Handle& tree,
-                          const OrderedHandleSet& atoms);
+                          const HandleSet& atoms);
 
 /**
  * Return true if any of the atoms (variables) occur unscoped
  * somewhere in the tree.
  */
 bool any_unscoped_in_tree(const Handle& tree,
-                          const OrderedHandleSet& atoms);
+                          const HandleSet& atoms);
 
 /**
  * Return true if any of the atoms (variables) occur unquoted and
  * unscoped somewhere in the tree.
  */
 bool any_unquoted_unscoped_in_tree(const Handle& tree,
-                                   const OrderedHandleSet& atoms);
+                                   const HandleSet& atoms);
 
 /**
  * Return how many of the indicated atoms occur somewhere in
@@ -258,7 +258,7 @@ bool any_unquoted_unscoped_in_tree(const Handle& tree,
  * longer a variable.
  */
 unsigned int num_unquoted_in_tree(const Handle& tree,
-                                  const OrderedHandleSet& atoms);
+                                  const HandleSet& atoms);
 
 /**
  * Return true if the indicated atom occurs somewhere in any of the trees.
@@ -297,10 +297,10 @@ bool contains_atomtype(const Handle& clause, Type atom_type,
  * returns {VariableNode "$X"}, because although $X is scoped by the
  * lambda it is also unscoped in the And.
  */
-OrderedHandleSet get_free_variables(const Handle& h,
-                                    Quotation quotation=Quotation());
-OrderedHandleSet get_free_variables(const HandleSeq& hs,
-                                    Quotation quotation=Quotation());
+HandleSet get_free_variables(const Handle& h,
+                             Quotation quotation=Quotation());
+HandleSet get_free_variables(const HandleSeq& hs,
+                             Quotation quotation=Quotation());
 
 /**
  * Return true if h has no free variable (unscoped or unquoted) in it,

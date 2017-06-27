@@ -95,7 +95,7 @@ class SatisfyingSet :
 		SatisfyingSet(AtomSpace* as) :
 			InitiateSearchCB(as), DefaultPatternMatchCB(as), max_results(SIZE_MAX) {}
 		HandleSeq _varseq;
-		OrderedHandleSet _satisfying_set;
+		HandleSet _satisfying_set;
 		size_t max_results;
 
 		virtual void set_pattern(const Variables& vars,

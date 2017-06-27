@@ -72,7 +72,7 @@ public:
 		/**
 		 * Return the set of free visible variables from that context.
 		 */
-		OrderedHandleSet get_free_variables() const;
+		HandleSet get_free_variables() const;
 
 		/**
 		 * Return iterator of the variable declaration containing a given

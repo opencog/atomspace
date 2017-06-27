@@ -93,7 +93,7 @@ protected:
 
 	size_t _num_comps;
 	HandleSeqSeq _components;
-	std::vector<OrderedHandleSet> _component_vars;
+	std::vector<HandleSet> _component_vars;
 	HandleSeq _component_patterns;
 
 	void unbundle_clauses(const Handle& body);
@@ -102,18 +102,18 @@ protected:
 
 	void locate_defines(HandleSeq& clauses);
 	void locate_globs(HandleSeq& clauses);
-	void validate_clauses(OrderedHandleSet& vars,
+	void validate_clauses(HandleSet& vars,
 	                      HandleSeq& clauses,
 	                      HandleSeq& constants);
 
-	void extract_optionals(const OrderedHandleSet &vars,
+	void extract_optionals(const HandleSet &vars,
 	                       const HandleSeq &component);
 
-	void unbundle_virtual(const OrderedHandleSet& vars,
+	void unbundle_virtual(const HandleSet& vars,
 	                      const HandleSeq& clauses,
 	                      HandleSeq& concrete_clauses,
 	                      HandleSeq& virtual_clauses,
-	                      OrderedHandleSet& black_clauses);
+	                      HandleSet& black_clauses);
 
 	bool add_dummies();
 
@@ -124,8 +124,8 @@ protected:
 	void make_connectivity_map(const HandleSeq&);
 	void make_map_recursive(const Handle&, const Handle&);
 	void check_connectivity(const HandleSeqSeq&);
-	void check_satisfiability(const OrderedHandleSet&,
-	                          const std::vector<OrderedHandleSet>&);
+	void check_satisfiability(const HandleSet&,
+	                          const std::vector<HandleSet>&);
 
 	void make_term_trees();
 	void make_term_tree_recursive(const Handle&, Handle,
@@ -151,14 +151,14 @@ public:
 
 	// Used only to set up multi-component links.
 	// DO NOT call this! (unless you are the component handler).
-	PatternLink(const OrderedHandleSet& vars,
+	PatternLink(const HandleSet& vars,
 	            const VariableTypeMap& typemap,
 	            const GlobIntervalMap& intervalmap,
 	            const HandleSeq& component,
-	            const OrderedHandleSet& optionals);
+	            const HandleSet& optionals);
 
 	// A backwards-compatibility constructor. Do not use.
-	PatternLink(const OrderedHandleSet&,
+	PatternLink(const HandleSet&,
 	            const HandleSeq&);
 
 	// Return the list of variables we are holding.

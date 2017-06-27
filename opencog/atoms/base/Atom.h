@@ -274,7 +274,7 @@ public:
     ProtoAtomPtr getValue(const Handle& key) const;
 
     /// Get the set of all keys in use for this Atom.
-    std::set<Handle> getKeys() const;
+    HandleSet getKeys() const;
 
     /// Copy all the values from the other atom to this one.
     void copyValues(const Handle&);

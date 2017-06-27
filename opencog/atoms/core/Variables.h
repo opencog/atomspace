@@ -57,7 +57,7 @@ struct FreeVariables
 	/// used to implement the variable substitution (aka beta-reduction
 	/// aka "PutLink") method.
 	HandleSeq varseq;
-	OrderedHandleSet varset;
+	HandleSet varset;
 	typedef std::map<Handle, unsigned int> IndexMap;
 	IndexMap index;
 
@@ -113,7 +113,7 @@ protected:
 };
 
 typedef std::map<Handle, const std::set<Type>> VariableTypeMap;
-typedef std::map<Handle, const OrderedHandleSet> VariableDeepTypeMap;
+typedef std::map<Handle, const HandleSet> VariableDeepTypeMap;
 typedef std::map<Handle, const std::pair<double, double>> GlobIntervalMap;
 
 /// The Variables struct defines a list of typed variables "unbundled"

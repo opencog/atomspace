@@ -246,7 +246,7 @@ InitiateSearchCB::find_starter_recursive(const Handle& h, size_t& depth,
  * exist in the atomspace, anyway.
  */
 Handle InitiateSearchCB::find_thinnest(const HandleSeq& clauses,
-                                       const OrderedHandleSet& evl,
+                                       const HandleSet& evl,
                                        Handle& starter_term,
                                        size_t& bestclause)
 {

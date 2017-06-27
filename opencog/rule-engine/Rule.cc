@@ -348,7 +348,7 @@ Rule Rule::gen_standardize_apart(AtomSpace* as)
 	HandleMap dict;
 
 	Handle vdecl = get_vardecl();
-	OrderedHandleSet varset;
+	HandleSet varset;
 
 	if (VariableListCast(vdecl))
 		varset = VariableListCast(vdecl)->get_variables().varset;

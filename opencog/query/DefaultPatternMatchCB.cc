@@ -376,7 +376,7 @@ void DefaultPatternMatchCB::post_link_mismatch(const Handle& lpat,
 bool DefaultPatternMatchCB::is_self_ground(const Handle& ptrn,
                                            const Handle& grnd,
                                            const HandleMap& term_gnds,
-                                           const OrderedHandleSet& varset,
+                                           const HandleSet& varset,
                                            Quotation quotation)
 {
 	Type ptype = ptrn->getType();
@@ -445,14 +445,14 @@ bool DefaultPatternMatchCB::is_self_ground(const Handle& ptrn,
 		// Step 1: Look to see if the scope link binds any of the
 		// variables that the pattern also binds.
 		const Variables& slv = ScopeLinkCast(grnd)->get_variables();
-		OrderedHandleSet hidden = opencog::set_intersection(slv.varset, varset);
+		HandleSet hidden = opencog::set_intersection(slv.varset, varset);
 
 		// Step 2: If there are hidden variables, then remove them
 		// before recursing donwards.
 		if (0 < hidden.size())
 		{
 			// Make a copy with visible variables only
-			OrderedHandleSet vcopy = opencog::set_difference(varset, hidden);
+			HandleSet vcopy = opencog::set_difference(varset, hidden);
 
 			// Recurse using only the visible variables.
 			for (size_t i=0; i<pari; i++)
