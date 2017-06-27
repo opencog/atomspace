@@ -142,68 +142,6 @@ TruthValuePtr Atom::getTruthValue() const
     std::lock_guard<std::mutex> lck(_mtx);
     TruthValuePtr local(_truthValue);
     return local;
-
-#if THIS_WONT_WORK_AS_NICELY_AS_YOU_MIGHT_GUESS
-
-    // This automatic fetching of TV's from the database seems OK, but
-    // gets really nasty, really quick.  One problem is that getTV is
-    // used everywhere -- printing atoms, you name it, and so gets hit
-    // a lot. Another, more subtle, problem is that the current Atom
-    // ctors accept a TV argument, and so cause the TV to be fetched
-    // during the ctor. This has multiple undeseriable side-effects:
-    // one is that for UnorderredLinks, a badly-ordered version of the
-    // link is inserted into the TLB, before the ctor has finished
-    // sorting the outgoing set! A third issue is that the backend
-    // itself calls this method, when saving the TV! So that's just
-    // kind-of crazy. These are all difficult technical problems to
-    // solve, so the code below, although initially appealing, doesn't
-    // really do the right thing.
-    if (_flags & FETCHED_RECENTLY)
-        return local;
-
-    if (nullptr == _atom_space)
-        return local;
-
-    BackingStore* bs = _atom_space->_backing_store;
-    if (nullptr == bs)
-        return local;
-
-    TruthValuePtr tv;
-    if (isNode()) {
-        tv = bs->getNode(getType(), getName().c_str());
-    } else {
-        Atom* that = (Atom*) this; // cast away constness
-        tv = bs->getLink(that->getHandle());
-    }
-    if (tv) {
-        _flags = _flags | FETCHED_RECENTLY;
-        _truthValue = tv;
-        return tv;
-    }
-    return local;
-#endif
-}
-
-void Atom::merge(const TruthValuePtr& tvn, const MergeCtrl& mc)
-{
-    if (nullptr == tvn or tvn->isDefaultTV()) return;
-
-    // No locking to be done here. It is possible that between the time
-    // that we read the TV here (i.e. set currentTV) and the time that
-    // we look to see if currentTV is default, that some other thread
-    // will have changed _truthValue. This is a race, but we don't care,
-    // because if two threads are trying to simultaneously set the TV on
-    // one atom, without co-operating with one-another, they get what
-    // they deserve -- a race. (We still use getTruthValue() to avoid a
-    // read-write race on the shared_pointer itself!)
-    TruthValuePtr currentTV(getTruthValue());
-    if (currentTV->isDefaultTV()) {
-        setTruthValue(tvn);
-        return;
-    }
-
-    TruthValuePtr mergedTV(currentTV->merge(tvn, mc));
-    setTruthValue(mergedTV);
 }
 
 // ==============================================================

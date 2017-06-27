@@ -268,19 +268,6 @@ public:
     //! Sets the TruthValue object of the atom.
     void setTruthValue(TruthValuePtr);
 
-    /** merge truth value into this */
-    void merge(const TruthValuePtr&, const MergeCtrl& mc=MergeCtrl());
-
-    /**
-     * Merge truth value, return Handle for this.
-     * This allows oneliners such as:
-     *   Handle h = atomSpace->addNode(FOO_NODE, "foo")->tvmerge(tv);
-     */
-    inline Handle tvmerge(const TruthValuePtr& tv) {
-        merge(tv);
-        return getHandle();
-    }
-
     /// Associate `value` to `key` for this atom.
     void setValue(const Handle& key, const ProtoAtomPtr& value);
     /// Get value at `key` for this atom.

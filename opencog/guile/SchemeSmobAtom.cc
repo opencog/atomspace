@@ -117,28 +117,6 @@ SCM SchemeSmob::ss_set_tv (SCM satom, SCM stv)
 	return satom;
 }
 
-SCM SchemeSmob::ss_merge_tv (SCM satom, SCM stv)
-{
-	Handle h = verify_handle(satom, "cog-merge-tv!");
-	TruthValuePtr tv = verify_tv(stv, "cog-merge-tv!", 2);
-
-	h->merge(tv);
-	scm_remember_upto_here_1(stv);
-	return satom;
-}
-
-// XXX FIXME -- this should NOT be a part of the API, it should be
-// a utility function!
-SCM SchemeSmob::ss_merge_hi_conf_tv (SCM satom, SCM stv)
-{
-	Handle h = verify_handle(satom, "cog-merge-hi-conf-tv!");
-	TruthValuePtr tv = verify_tv(stv, "cog-merge-hi-conf-tv!", 2);
-
-	h->merge(tv, MergeCtrl(MergeCtrl::TVFormula::HIGHER_CONFIDENCE));
-	scm_remember_upto_here_1(stv);
-	return satom;
-}
-
 // Increment the count, keeping mean and confidence as-is.
 // Converts existing truth value to a CountTruthValue.
 SCM SchemeSmob::ss_inc_count (SCM satom, SCM scnt)
