@@ -337,6 +337,8 @@ void SchemeSmob::register_procs()
 	register_proc("cog-tv-mean",           1, 0, 0, C(ss_tv_get_mean));
 	register_proc("cog-tv-confidence",     1, 0, 0, C(ss_tv_get_confidence));
 	register_proc("cog-tv-count",          1, 0, 0, C(ss_tv_get_count));
+	register_proc("cog-tv-merge!",         2, 0, 0, C(ss_tv_merge));
+	register_proc("cog-tv-merge-hi-conf!", 2, 0, 0, C(ss_tv_merge_hi_conf));
 
 	// Atom Spaces
 	register_proc("cog-new-atomspace",     0, 1, 0, C(ss_new_as));

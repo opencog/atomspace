@@ -107,8 +107,8 @@ private:
 	static SCM ss_set_av(SCM, SCM);
 	static SCM ss_set_tv(SCM, SCM);
 	static SCM ss_set_value(SCM, SCM, SCM);
-	static SCM ss_merge_tv(SCM, SCM);
-	static SCM ss_merge_hi_conf_tv(SCM, SCM);
+	static SCM ss_merge_tv(SCM, SCM); // XXX kill thism
+	static SCM ss_merge_hi_conf_tv(SCM, SCM); // XXX kill this
 	static SCM ss_inc_count(SCM, SCM);
 	static SCM ss_inc_vlti(SCM);
 	static SCM ss_dec_vlti(SCM);
@@ -158,6 +158,8 @@ private:
 	static SCM ss_tv_get_mean(SCM);
 	static SCM ss_tv_get_confidence(SCM);
 	static SCM ss_tv_get_count(SCM);
+	static SCM ss_tv_merge(SCM, SCM);
+	static SCM ss_tv_merge_hi_conf(SCM, SCM);
 
 	// Atom Spaces
 	static SCM ss_new_as(SCM);
