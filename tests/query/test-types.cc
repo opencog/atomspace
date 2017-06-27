@@ -1,6 +1,4 @@
 
-#include "test-types.h"
-
 
 classserver().beginTypeDecls();
 AT_TIME_LINK = classserver().declType(ORDERED_LINK, "AtTimeLink");

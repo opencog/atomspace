@@ -1,5 +1,5 @@
 /*
- * tests/query/StackBugUTest.cxxtest
+ * tests/query/BuggyStackUTest.cxxtest
  *
  * Copyright (C) 2009 Linas Vepstas <linasvepstas@gmail.com>
  * All Rights Reserved
@@ -42,6 +42,8 @@ class BuggyStackUTest :  public CxxTest::TestSuite
 		{
 			logger().set_level(Logger::DEBUG);
 			logger().set_print_to_stdout_flag(true);
+
+#include "test-types.cc"
 		}
 
 		~BuggyStackUTest()
