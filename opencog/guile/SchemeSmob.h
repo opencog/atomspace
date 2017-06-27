@@ -42,6 +42,8 @@ class SchemeSmob
 	template<typename R, typename T, class... Args> friend class SchemePrimitive;
 	template<typename R, typename T, class... Args> friend class SchemePrimitiveBase;
 
+	friend class LoggerSCM;
+
 private:
 
 	enum {
@@ -201,9 +203,8 @@ private:
 	static AtomSpace *get_as_from_list(SCM);
 
 	// Logger
-	static SCM logger_to_scm(Logger* lg);
+	static SCM logger_to_scm(Logger*);
 	static Logger* ss_to_logger(SCM);
-	static SCM ss_logger_p(SCM s);
 	static std::string logger_to_string(const Logger *);
 	
 	// validate arguments coming from scheme passing into C++

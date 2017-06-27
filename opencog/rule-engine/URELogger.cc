@@ -31,7 +31,6 @@ Logger& opencog::ure_logger()
 	auto bc_logger_instantiate = []() {
 		Logger tmp(logger());
 		tmp.set_component("URE");
-		// tmp.set_level(Logger::FINE);
 		return tmp;
 	};
 	static Logger bc_instance(bc_logger_instantiate());

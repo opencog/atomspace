@@ -40,6 +40,7 @@ protected:
 
 	Logger* do_default_logger();
 	Logger* do_ure_logger();
+	Logger* do_new_logger();
 	std::string do_logger_set_level(Logger*, const std::string& level);
 	std::string do_logger_get_level(const Logger*);
 	std::string do_logger_set_filename(Logger*, const std::string& filename);
@@ -54,6 +55,7 @@ protected:
 	void do_logger_info(Logger*, const std::string& msg);
 	void do_logger_debug(Logger*, const std::string& msg);
 	void do_logger_fine(Logger*, const std::string& msg);
+	bool is_logger(SCM);
 
 public:
 	LoggerSCM();
@@ -69,6 +71,14 @@ Logger* LoggerSCM::do_default_logger()
 Logger* LoggerSCM::do_ure_logger()
 {
 	return &ure_logger();
+}
+
+/// Create a new logger.
+Logger* LoggerSCM::do_new_logger()
+{
+	Logger* lg = new Logger();
+	scm_gc_register_allocation(sizeof(*lg));
+	return lg;
 }
 
 /// Set level, return previous level.
@@ -162,6 +172,12 @@ void LoggerSCM::do_logger_fine(Logger* lg, const std::string& msg)
 	lg->fine(msg);
 }
 
+bool LoggerSCM::is_logger(SCM s)
+{
+	return SCM_SMOB_PREDICATE(SchemeSmob::cog_misc_tag, s)
+		and SCM_SMOB_FLAGS(s) == SchemeSmob::COG_LOGGER;
+}
+
 } /*end of namespace opencog*/
 
 LoggerSCM::LoggerSCM() : ModuleWrap("opencog logger") {}
@@ -174,6 +190,8 @@ void LoggerSCM::init(void)
 		&LoggerSCM::do_default_logger, this, "logger");
 	define_scheme_primitive("cog-ure-logger",
 		&LoggerSCM::do_ure_logger, this, "logger");
+	define_scheme_primitive("cog-new-logger",
+		&LoggerSCM::do_new_logger, this, "logger");
 
 	define_scheme_primitive("cog-logger-set-level-of-logger!",
 		&LoggerSCM::do_logger_set_level, this, "logger");
@@ -207,6 +225,9 @@ void LoggerSCM::init(void)
 		&LoggerSCM::do_logger_debug, this, "logger");
 	define_scheme_primitive("cog-logger-fine-of-logger",
 		&LoggerSCM::do_logger_fine, this, "logger");
+
+	define_scheme_primitive("cog-logger?",
+		&LoggerSCM::is_logger, this, "logger");
 }
 
 extern "C" {

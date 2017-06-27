@@ -230,6 +230,10 @@ protected:
 	// what overloaded version of scm_to to use. It is a bit of a hack
 	// but not that ugly given that the alternative is to use
 	// specialized templates.
+	SCM scm_to(SCM args, size_t idx, SCM) const
+	{
+		return scm_list_ref(args, scm_from_size_t(idx));
+	}
 	bool scm_to(SCM args, size_t idx, bool) const
 	{
 		SCM arg = scm_list_ref(args, scm_from_size_t(idx));
@@ -321,6 +325,10 @@ public:
 
 protected:
 	// Convert any type to SCM
+	SCM scm_from(SCM scm) const
+	{
+		return scm;
+	}
 	SCM scm_from(bool b)
 	{
 		return b ? SCM_BOOL_T : SCM_BOOL_F;
