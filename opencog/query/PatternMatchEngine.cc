@@ -283,8 +283,7 @@ bool PatternMatchEngine::ordered_compare(const PatternTermPtr& ptm,
 					    not _varlist->is_lower_bound(ohp, last_grd-1))
 					{
 						// If the glob cannot be grounded to fewer no.
-						// of atoms, then check if it's possible to
-						// backtrack.
+						// of atoms, it's not a match.
 						glob_grd.erase(ohp);
 						glob_pos.pop_back();
 						last_grd = SIZE_MAX;
@@ -315,8 +314,8 @@ bool PatternMatchEngine::ordered_compare(const PatternTermPtr& ptm,
 					// to nothing.
 
 					// Since the glob has a lower bound of zero, if we
-					// already have gone through all the candidates at
-					// this point, we are done.
+					// already have gone through all the atoms of
+					// the candidate at this point, we are done.
 					if (grd_end)
 					{
 						glob_grd[ohp] = 0;
@@ -325,8 +324,8 @@ bool PatternMatchEngine::ordered_compare(const PatternTermPtr& ptm,
 					}
 
 					// Just in case if the upper bound is zero...
-					// or we tried to ground it to some atoms but
-					// failed in the previous iterations, let it be.
+					// or we tried to ground it to some atoms in
+					// previous iterations but failed, move on.
 					if (not _varlist->is_upper_bound(ohp, 1) or
 					    last_grd == 1)
 					{
@@ -370,24 +369,17 @@ bool PatternMatchEngine::ordered_compare(const PatternTermPtr& ptm,
 				} while (tc and jg<osg_size);
 
 				jg --;
+				glob_grd[ohp] = glob_seq.size();
 
-				if (not tc)
+				// If we can't match more, or it doesn't satisfy the
+				// lower bound restriction, try again.
+				if (not tc or not _varlist->is_lower_bound(ohp, glob_seq.size()))
 				{
-					glob_grd[ohp] = glob_seq.size();
-					reset();
-					continue;
-				}
-
-				// Make sure it meets the lower bound restriction as well.
-				if (not _varlist->is_lower_bound(ohp, glob_seq.size()))
-				{
-					glob_grd[ohp] = glob_seq.size();
 					reset();
 					continue;
 				}
 
 				// If we are here, we've got a match; record the glob.
-				glob_grd[ohp] = glob_seq.size();
 				LinkPtr glp(createLink(glob_seq, LIST_LINK));
 				var_grounding[glob->getHandle()] = glp->getHandle();
 			}
@@ -401,7 +393,7 @@ bool PatternMatchEngine::ordered_compare(const PatternTermPtr& ptm,
 				if (grd_end or not tree_compare(osp[ip], osg[jg], CALL_ORDER))
 				{
 					// If we have never seen any globs before, then no backtracking
-					// can be done, it's just purely a mismatch.
+					// can be done, we can just reject it now.
 					if (glob_grd.size() == 0)
 					{
 						match = false;
