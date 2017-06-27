@@ -36,8 +36,6 @@
 #include <opencog/atoms/base/Atom.h>
 #include <opencog/atoms/base/ProtoAtom.h>
 
-#include "opencog/atoms/base/atom_types.definitions"
-
 //#define DPRINTF printf
 #define DPRINTF(...)
 
