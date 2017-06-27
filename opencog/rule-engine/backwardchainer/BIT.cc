@@ -166,7 +166,7 @@ bool AndBIT::has_cycle() const
 	return has_cycle(BindLinkCast(fcs)->get_implicand());
 }
 
-bool AndBIT::has_cycle(const Handle& h, OrderedHandleSet ancestors) const
+bool AndBIT::has_cycle(const Handle& h, HandleSet ancestors) const
 {
 	if (h->getType() == EXECUTION_OUTPUT_LINK) {
 		Handle arg = h->getOutgoingAtom(1);
@@ -357,12 +357,12 @@ AndBIT::insert_bitnode(Handle leaf, const BITNodeFitness& fitness)
 	return it;
 }
 
-OrderedHandleSet AndBIT::get_leaves() const
+HandleSet AndBIT::get_leaves() const
 {
 	return get_leaves(fcs);
 }
 
-OrderedHandleSet AndBIT::get_leaves(const Handle& h) const
+HandleSet AndBIT::get_leaves(const Handle& h) const
 {
 	Type t = h->getType();
 	if (t == BIND_LINK) {
@@ -372,20 +372,20 @@ OrderedHandleSet AndBIT::get_leaves(const Handle& h) const
 	} else if (t == EXECUTION_OUTPUT_LINK) {
 		// All arguments except the first one are potential target leaves
 		Handle args = h->getOutgoingAtom(1);
-		OrderedHandleSet leaves;
+		HandleSet leaves;
 		if (args->getType() == LIST_LINK) {
 			OC_ASSERT(args->getArity() > 0);
 			for (Arity i = 1; i < args->getArity(); i++) {
-				OrderedHandleSet aleaves = get_leaves(args->getOutgoingAtom(i));
+				HandleSet aleaves = get_leaves(args->getOutgoingAtom(i));
 				leaves.insert(aleaves.begin(), aleaves.end());
 			}
 		}
 		return leaves;
 	} else if (t == SET_LINK) {
 		// All atoms wrapped in a SetLink are potential target leaves
-		OrderedHandleSet leaves;
+		HandleSet leaves;
 		for (const Handle& el : h->getOutgoingSet()) {
-			OrderedHandleSet el_leaves = get_leaves(el);
+			HandleSet el_leaves = get_leaves(el);
 			leaves.insert(el_leaves.begin(), el_leaves.end());
 		}
 		return leaves;
@@ -394,11 +394,11 @@ OrderedHandleSet AndBIT::get_leaves(const Handle& h) const
 		// not a leaf (maybe it could but it would over complicate the
 		// rest and bring no benefit since we can always expand a
 		// parent and-BIT that has no such ExecutionOutputLink).
-		return OrderedHandleSet{};
+		return HandleSet{};
 	}
 
 	// Here it must be a leaf so return it
-	return OrderedHandleSet{h};
+	return HandleSet{h};
 }
 
 Handle AndBIT::substitute_unified_variables(const Handle& leaf,

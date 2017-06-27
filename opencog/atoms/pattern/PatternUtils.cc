@@ -58,7 +58,7 @@ namespace opencog {
  *
  * Returns true if the list of clauses was modified, else returns false.
  */
-bool remove_constants(const OrderedHandleSet &vars,
+bool remove_constants(const HandleSet &vars,
                       HandleSeq &clauses,
                       HandleSeq &constants)
 {
@@ -84,7 +84,7 @@ bool remove_constants(const OrderedHandleSet &vars,
 	return modified;
 }
 
-bool is_constant(const OrderedHandleSet& vars, const Handle& clause)
+bool is_constant(const HandleSet& vars, const Handle& clause)
 {
 	return not (any_unquoted_unscoped_in_tree(clause, vars)
 	            or contains_atomtype(clause, DEFINED_PREDICATE_NODE)
@@ -138,10 +138,10 @@ bool is_constant(const OrderedHandleSet& vars, const Handle& clause)
  * in them.  These end up in their own component, which can be
  * extremely confusing.
  */
-void get_connected_components(const OrderedHandleSet& vars,
+void get_connected_components(const HandleSet& vars,
                               const HandleSeq& clauses,
                               HandleSeqSeq& components,
-                              std::vector<OrderedHandleSet>& component_vars)
+                              std::vector<HandleSet>& component_vars)
 {
 	HandleSeq todo(clauses);
 
@@ -160,7 +160,7 @@ void get_connected_components(const OrderedHandleSet& vars,
 			size_t nc = components.size();
 			for (size_t i = 0; i<nc; i++)
 			{
-				OrderedHandleSet& cur_vars(component_vars[i]);
+				HandleSet& cur_vars(component_vars[i]);
 				// If clause cl is connected to this component, then add it
 				// to this component.
 				if (any_unquoted_in_tree(cl, cur_vars))

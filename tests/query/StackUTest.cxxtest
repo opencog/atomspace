@@ -179,7 +179,7 @@ void StackUTest::test_stack(void)
 {
 	logger().debug("BEGIN TEST: %s", __FUNCTION__);
 
-	OrderedHandleSet vars;
+	HandleSet vars;
 	vars.insert(svar);
 	vars.insert(wvar);
 

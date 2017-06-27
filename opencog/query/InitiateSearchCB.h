@@ -61,7 +61,7 @@ protected:
 
 	const Variables* _variables;
 	const Pattern* _pattern;
-	const OrderedHandleSet* _dynamic;
+	const HandleSet* _dynamic;
 
 	PatternLinkPtr _pl;
 	void jit_analyze(PatternMatchEngine *);
@@ -82,7 +82,7 @@ protected:
 	virtual Handle find_starter_recursive(const Handle&, size_t&, Handle&,
 	                                      size_t&);
 	virtual Handle find_thinnest(const HandleSeq&,
-	                             const OrderedHandleSet&,
+	                             const HandleSet&,
 	                             Handle&, size_t&);
 	virtual void find_rarest(const Handle&, Handle&, size_t&,
 	                         Quotation quotation=Quotation());

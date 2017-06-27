@@ -44,9 +44,9 @@ public:
 	void test_get_predicates_for();
 };
 
-OrderedHandleSet cvt(HandleSeq predlist)
+HandleSet cvt(HandleSeq predlist)
 {
-	OrderedHandleSet preds;
+	HandleSet preds;
 	for (auto it = predlist.begin(); it != predlist.end(); it++)
 		preds.insert(*it);
 	return preds;
@@ -75,7 +75,7 @@ void AtomUtilsUTest::test_get_predicates()
 	Handle anotherLink = as.add_link(LIST_LINK, anotherNode, bacon);
 
 	// Test get_predicates(default).
-	OrderedHandleSet baconReferences {programmerEatsBacon, programmerBaconLover};
+	HandleSet baconReferences {programmerEatsBacon, programmerBaconLover};
 	TS_ASSERT_EQUALS(cvt(get_predicates(bacon)), baconReferences);
 
 	// Test get_predicates with specific type.
@@ -119,18 +119,18 @@ void AtomUtilsUTest::test_get_predicates_for()
 		programmerEatsBacon = as.add_link(EVALUATION_LINK, eats, programmer_bacon);
 		
 	// Test for dog IsA.
-	OrderedHandleSet dogIsA {dogIsAMammal, dogIsACanine, dogIsAAnimal};
+	HandleSet dogIsA {dogIsAMammal, dogIsACanine, dogIsAAnimal};
 	TS_ASSERT_EQUALS(cvt(get_predicates_for(dog, isA)), dogIsA);
 
 	// Test for dog eats.
-	OrderedHandleSet dogEats {dogEatsBacon};
+	HandleSet dogEats {dogEatsBacon};
 	TS_ASSERT_EQUALS(cvt(get_predicates_for(dog, eats)), dogEats);
 
 	// Test for programmer eats.
-	OrderedHandleSet programmerEats {programmerEatsBacon};
+	HandleSet programmerEats {programmerEatsBacon};
 	TS_ASSERT_EQUALS(cvt(get_predicates_for(programmer, eats)), programmerEats);
 
 	// Test for eats bacon.
-	OrderedHandleSet eatsBacon {dogEatsBacon, programmerEatsBacon};
+	HandleSet eatsBacon {dogEatsBacon, programmerEatsBacon};
 	TS_ASSERT_EQUALS(cvt(get_predicates_for(bacon, eats)), eatsBacon);
 }

@@ -68,7 +68,7 @@ class Recognizer :
 		bool loose_match(const Handle&, const Handle&);
 
 	public:
-		OrderedHandleSet _rules;
+		HandleSet _rules;
 
 		Recognizer(AtomSpace* as) :
 			DefaultPatternMatchCB(as) {}

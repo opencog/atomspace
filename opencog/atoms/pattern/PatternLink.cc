@@ -171,11 +171,11 @@ PatternLink::PatternLink(const Variables& vars, const Handle& body)
 /// Special constructor used only to make single concrete pattern
 /// components.  We are given the pre-computed components; we only
 /// have to store them.
-PatternLink::PatternLink(const OrderedHandleSet& vars,
+PatternLink::PatternLink(const HandleSet& vars,
                          const VariableTypeMap& typemap,
                          const GlobIntervalMap& intervalmap,
                          const HandleSeq& compo,
-                         const OrderedHandleSet& opts)
+                         const HandleSet& opts)
 	: ScopeLink(HandleSeq(), PATTERN_LINK)
 {
 	// First, lets deal with the vars. We have discarded the original
@@ -241,7 +241,7 @@ PatternLink::PatternLink(const OrderedHandleSet& vars,
 /// a list of clauses to solve.  This is currently kind-of crippled,
 /// since no variable type restricions are possible, and no optionals,
 /// either.  This is used only for backwards-compatibility API's.
-PatternLink::PatternLink(const OrderedHandleSet& vars,
+PatternLink::PatternLink(const HandleSet& vars,
                          const HandleSeq& clauses)
 	: ScopeLink(HandleSeq(), PATTERN_LINK)
 {
@@ -441,7 +441,7 @@ void PatternLink::locate_globs(HandleSeq& clauses)
  * Every clause should contain at least one variable in it; clauses
  * that are constants and can be trivially discarded.
  */
-void PatternLink::validate_clauses(OrderedHandleSet& vars,
+void PatternLink::validate_clauses(HandleSet& vars,
                                    HandleSeq& clauses,
                                    HandleSeq& constants)
 
@@ -484,7 +484,7 @@ void PatternLink::validate_clauses(OrderedHandleSet& vars,
  * Given the initial list of variables and clauses, separate these into
  * the mandatory, optional and fuzzy clauses.
  */
-void PatternLink::extract_optionals(const OrderedHandleSet &vars,
+void PatternLink::extract_optionals(const HandleSet &vars,
                                     const HandleSeq &component)
 {
 	// Split in positive and negative clauses
@@ -569,11 +569,11 @@ static void add_to_map(std::unordered_multimap<Handle, Handle>& map,
 /// those variables are grounded by different disconnected graph
 /// components; the combinatoric explosion has to be handled...
 ///
-void PatternLink::unbundle_virtual(const OrderedHandleSet& vars,
+void PatternLink::unbundle_virtual(const HandleSet& vars,
                                    const HandleSeq& clauses,
                                    HandleSeq& fixed_clauses,
                                    HandleSeq& virtual_clauses,
-                                   OrderedHandleSet& black_clauses)
+                                   HandleSet& black_clauses)
 {
 	for (const Handle& clause: clauses)
 	{
@@ -830,12 +830,12 @@ void PatternLink::make_map_recursive(const Handle& root, const Handle& h)
 /// then any clauses in which they appear cannot ever be evaluated,
 /// leading to an undefined condition.  So, explicitly check and throw
 /// an error if a pattern is ill-formed.
-void PatternLink::check_satisfiability(const OrderedHandleSet& vars,
-                                       const std::vector<OrderedHandleSet>& compvars)
+void PatternLink::check_satisfiability(const HandleSet& vars,
+                                       const std::vector<HandleSet>& compvars)
 {
 	// Compute the set-union of all component vars.
-	OrderedHandleSet vunion;
-	for (const OrderedHandleSet& vset : compvars)
+	HandleSet vunion;
+	for (const HandleSet& vset : compvars)
 		vunion.insert(vset.begin(), vset.end());
 
 	// Is every variable in some component? If not, then throw.

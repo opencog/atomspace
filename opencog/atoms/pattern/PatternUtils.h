@@ -38,18 +38,18 @@ namespace opencog {
 
 // Make sure that variables can be found in the clauses.
 // See C file for description
-bool remove_constants(const OrderedHandleSet& vars,
+bool remove_constants(const HandleSet& vars,
                       HandleSeq& clauses,
                       HandleSeq& constants);
 
 // Return true if the clause is constant
-bool is_constant(const OrderedHandleSet& vars, const Handle& clause);
+bool is_constant(const HandleSet& vars, const Handle& clause);
 
 // See C file for description
-void get_connected_components(const OrderedHandleSet& vars,
+void get_connected_components(const HandleSet& vars,
                               const HandleSeq& clauses,
                               HandleSeqSeq& compset,
-                              std::vector<OrderedHandleSet>& compvars);
+                              std::vector<HandleSet>& compvars);
 
 } // namespace opencog
 

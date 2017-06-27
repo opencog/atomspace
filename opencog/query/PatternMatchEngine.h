@@ -134,11 +134,11 @@ private:
 	bool clause_accepted;
 	void get_next_untried_clause(void);
 	bool get_next_thinnest_clause(bool, bool, bool);
-	unsigned int thickness(const Handle&, const OrderedHandleSet&);
+	unsigned int thickness(const Handle&, const HandleSet&);
 	Handle next_clause;
 	Handle next_joint;
 	// Set of clauses for which a grounding is currently being attempted.
-	typedef OrderedHandleSet IssuedSet;
+	typedef HandleSet IssuedSet;
 	IssuedSet issued;     // stacked on issued_stack
 
 	// -------------------------------------------
@@ -228,7 +228,7 @@ public:
 	static void log_solution(const HandleMap &vars,
 	                         const HandleMap &clauses);
 
-	static void log_term(const OrderedHandleSet &vars,
+	static void log_term(const HandleSet &vars,
 	                     const HandleSeq &clauses);
 };
 

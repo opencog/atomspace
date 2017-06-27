@@ -251,8 +251,8 @@ void VariableList::get_vartype(const Handle& htypelink)
 	else if (TYPE_CHOICE == t)
 	{
 		std::set<Type> typeset;
-		OrderedHandleSet deepset;
-		OrderedHandleSet fuzzset;
+		HandleSet deepset;
+		HandleSet fuzzset;
 
 		const HandleSeq& tset = vartype->getOutgoingSet();
 		size_t tss = tset.size();
@@ -309,7 +309,7 @@ void VariableList::get_vartype(const Handle& htypelink)
 				"Unexpected contents in SignatureLink\n"
 				"Expected arity==1, got %s", vartype->toString().c_str());
 
-		OrderedHandleSet ts;
+		HandleSet ts;
 		ts.insert(vartype);
 		_varlist._deep_typemap.insert({varname, ts});
 	}
@@ -321,7 +321,7 @@ void VariableList::get_vartype(const Handle& htypelink)
 				"Unexpected contents in FuzzyLink\n"
 				"Expected arity==1, got %s", vartype->toString().c_str());
 
-		OrderedHandleSet ts;
+		HandleSet ts;
 		ts.insert(vartype);
 		_varlist._fuzzy_typemap.insert({varname, ts});
 	}

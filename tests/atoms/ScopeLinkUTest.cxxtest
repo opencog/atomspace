@@ -80,7 +80,7 @@ void ScopeLinkUTest::test_get_variables_1()
 	ScopeLinkPtr sc = ScopeLinkCast(sch);
 
 	auto got = sc->get_variables().varset;
-	auto exp = OrderedHandleSet{X};
+	auto exp = HandleSet{X};
 
 	printf("Got %s\n", ohs_to_string(got).c_str());
 	printf("Excepted %s\n", ohs_to_string(exp).c_str());
@@ -104,7 +104,7 @@ void ScopeLinkUTest::test_get_variables_2()
 	ScopeLinkPtr sc = ScopeLinkCast(sch);
 
 	auto got = sc->get_variables().varset;
-	auto exp = OrderedHandleSet{X};
+	auto exp = HandleSet{X};
 
 	printf("Got %s\n", ohs_to_string(got).c_str());
 	printf("Excepted %s\n", ohs_to_string(exp).c_str());
@@ -128,7 +128,7 @@ void ScopeLinkUTest::test_get_variables_3()
 	ScopeLinkPtr sc = ScopeLinkCast(sch);
 
 	auto got = sc->get_variables().varset;
-	auto exp = OrderedHandleSet{X};
+	auto exp = HandleSet{X};
 
 	printf("Got %s\n", ohs_to_string(got).c_str());
 	printf("Excepted %s\n", ohs_to_string(exp).c_str());

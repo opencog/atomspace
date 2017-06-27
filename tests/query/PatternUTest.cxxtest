@@ -243,7 +243,7 @@ void PatternUTest::test_simple_link(void)
 	Handle hvar = an(VARIABLE_NODE, "variable node");
 	Handle he = al(INHERITANCE_LINK, hconst_1, hvar);
 
-	OrderedHandleSet vars;
+	HandleSet vars;
 	vars.insert(hvar);
 
 	HandleSeq preds;
@@ -296,7 +296,7 @@ void PatternUTest::test_two_links(void)
 
 	Handle hv = al(VARIABLE_LIST, hx);
 
-	OrderedHandleSet vars;
+	HandleSet vars;
 	vars.insert(hx);
 
 	HandleSeq preds;
@@ -355,7 +355,7 @@ void PatternUTest::test_eval(void)
 
 	heval = al(EVALUATION_LINK, hprn, hl);
 
-	OrderedHandleSet vars;
+	HandleSet vars;
 	vars.insert(hprn);
 	vars.insert(h2);
 
@@ -380,7 +380,7 @@ void PatternUTest::test_eval(void)
 
 	hshort_eval = al(EVALUATION_LINK, hprns, hls);
 
-	OrderedHandleSet svars;
+	HandleSet svars;
 	svars.insert(hprns);
 	svars.insert(h2);
 

@@ -96,15 +96,15 @@ class DefaultPatternMatchCB : public virtual PatternMatchCallback
 		ClassServer& _classserver;
 
 		const Variables* _vars = NULL;
-		const OrderedHandleSet* _dynamic = NULL;
+		const HandleSet* _dynamic = NULL;
 		bool _have_evaluatables = false;
-		const OrderedHandleSet* _globs = NULL;
+		const HandleSet* _globs = NULL;
 
 		bool _have_variables;
 		Handle _pattern_body;
 
 		bool is_self_ground(const Handle&, const Handle&,
-		                    const HandleMap&, const OrderedHandleSet&,
+		                    const HandleMap&, const HandleSet&,
 		                    Quotation quotation=Quotation());
 
 		// Variables that should be ignored, because they are bound
