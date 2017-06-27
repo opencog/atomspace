@@ -49,7 +49,11 @@ std::string FloatValue::toString(const std::string& indent) const
 {
 	std::string rv = indent + "(FloatValue";
 	for (double v :_value)
-		rv += std::string(" ") + std::to_string(v);
+	{
+		char buf[40];
+		snprintf(buf, 40, "%20.17g", v);
+		rv += std::string(" ") + buf;
+	}
 	rv += ")";
 	return rv;
 }
