@@ -295,8 +295,6 @@ void SchemeSmob::register_procs()
 
 	// TV property setters on atoms
 	register_proc("cog-set-tv!",           2, 0, 0, C(ss_set_tv));
-	register_proc("cog-merge-tv!",         2, 0, 0, C(ss_merge_tv));
-	register_proc("cog-merge-hi-conf-tv!", 2, 0, 0, C(ss_merge_hi_conf_tv));
 	register_proc("cog-inc-count!",        2, 0, 0, C(ss_inc_count));
 
 	// Attention values on atoms
