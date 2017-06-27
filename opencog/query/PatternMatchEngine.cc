@@ -258,8 +258,8 @@ bool PatternMatchEngine::ordered_compare(const PatternTermPtr& ptm,
 				jg = glob_pos.back().second - 1;
 				glob_pos.pop_back();
 
-				// Clear any groundings for this glob.
-				var_grounding.erase(ohp);
+				// Clear any groundings for the last glob we've seen.
+				var_grounding.erase(osp[ip+1]->getHandle());
 			};
 
 			if (GLOB_NODE == ptype)
@@ -279,11 +279,12 @@ bool PatternMatchEngine::ordered_compare(const PatternTermPtr& ptm,
 					// If we are here, that means we have seen this glob before.
 					last_grd = gi->second;
 
-					// Remove from glob_grd if it can't be grounded
-					// to fewer no. of atoms.
 					if (last_grd == 0 or
 					    not _varlist->is_lower_bound(ohp, last_grd-1))
 					{
+						// If the glob cannot be grounded to fewer no.
+						// of atoms, then check if it's possible to
+						// backtrack.
 						glob_grd.erase(ohp);
 						glob_pos.pop_back();
 						last_grd = SIZE_MAX;
@@ -297,11 +298,11 @@ bool PatternMatchEngine::ordered_compare(const PatternTermPtr& ptm,
 							break;
 						}
 
-						// Go back to the previous glob.
+						// Resume from the previous glob and
+						// try to find a match again.
 						reset();
 						continue;
 					}
-
 				}
 
 				HandleSeq glob_seq;
@@ -325,7 +326,7 @@ bool PatternMatchEngine::ordered_compare(const PatternTermPtr& ptm,
 
 					// Just in case if the upper bound is zero...
 					// or we tried to ground it to some atoms but
-					// failed, let it be.
+					// failed in the previous iterations, let it be.
 					if (not _varlist->is_upper_bound(ohp, 1) or
 					    last_grd == 1)
 					{
@@ -348,7 +349,7 @@ bool PatternMatchEngine::ordered_compare(const PatternTermPtr& ptm,
 					continue;
 				}
 
-				// Try to match as many as possible.
+				// Try to ground the glob to as many atoms as possible.
 				do
 				{
 					tc = tree_compare(glob, osg[jg], CALL_GLOB);
@@ -372,6 +373,7 @@ bool PatternMatchEngine::ordered_compare(const PatternTermPtr& ptm,
 
 				if (not tc)
 				{
+					glob_grd[ohp] = glob_seq.size();
 					reset();
 					continue;
 				}
