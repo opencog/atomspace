@@ -313,6 +313,16 @@ bool PatternMatchEngine::ordered_compare(const PatternTermPtr& ptm,
 					// interval is zero, so the glob can be grounded
 					// to nothing.
 
+					// Since the glob has a lower bound of zero, if we
+					// already have gone through all the candidates at
+					// this point, we are done.
+					if (grd_end)
+					{
+						glob_grd[ohp] = 0;
+						var_grounding.erase(ohp);
+						continue;
+					}
+
 					// Just in case if the upper bound is zero...
 					// or we tried to ground it to some atoms but
 					// failed, let it be.
@@ -320,16 +330,6 @@ bool PatternMatchEngine::ordered_compare(const PatternTermPtr& ptm,
 					    last_grd == 1)
 					{
 						jg --;
-						glob_grd[ohp] = 0;
-						var_grounding.erase(ohp);
-						continue;
-					}
-
-					// Since the glob has a lower bound of zero, if we
-					// already have gone through all the candidates at
-					// this point, we are done.
-					if (grd_end)
-					{
 						glob_grd[ohp] = 0;
 						var_grounding.erase(ohp);
 						continue;
