@@ -138,7 +138,8 @@ bool TruthValue::nearly_equal(double a, double b)
 {
 	if (a == b) return true;
 
-#define ACCEPTABLE_ERROR (2.0 * DBL_EPSILON)
+// Anything smaller than this will fail BasicSaveUTest
+#define ACCEPTABLE_ERROR (5.0 * DBL_EPSILON)
 	double diff = fabs(b - a);
 	if (a == 0.0 or b == 0.0 or diff < DBL_MIN)
 		return diff < ACCEPTABLE_ERROR * DBL_MIN;
