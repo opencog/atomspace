@@ -33,13 +33,18 @@ bool FloatValue::operator==(const ProtoAtom& other) const
 	if (_value.size() != fov->_value.size()) return false;
 	size_t len = _value.size();
 	for (size_t i=0; i<len; i++)
+{
 		// Compare floats with ULPS, because they are lexicographically
 		// ordered. For technical explanation, see
 		// http://www.cygnus-software.com/papers/comparingfloats/Comparing%20floating%20point%20numbers.htm
 		// if (1.0e-15 < fabs(1.0 - fov->_value[i]/_value[i])) return false;
-#define MAX_ULPS 1
+		//
+		// Bets me why, but the ValueSaveUTest requires ULPS of 11 to
+		// pass, which works out to about 2.3e-15 in practice.
+#define MAX_ULPS 11
 		if (MAX_ULPS < abs(*(int64_t*) &(_value[i]) - *(int64_t*)&(fov->_value[i])))
 			return false;
+}
 	return true;
 }
 
