@@ -61,6 +61,15 @@
 	(Concept "want")
 	(Concept "it"))
 
+(ListLink
+	(Concept "the")
+	(Concept "man")
+	(Concept "we")
+	(Concept "saw")
+	(Concept "saw")
+	(Concept "a")
+	(Concept "saw"))
+
 ;; Two different re-write rules. The first rule, immediately below,
 ;; says "I * you" -> "I * you too".
 (define glob-you
@@ -196,4 +205,19 @@
 		(ListLink
 			(Concept "I")
 			(Glob "$x")
+			(Concept "too"))))
+
+; Match as many as possible, should not stop when it gets to
+; the first "saw"
+(define many
+	(Bind
+		(TypedVariable (Glob "$x")
+			(TypeSet (Type "ConceptNode")
+				(IntervalLink (Number 1) (Number -1))))
+		(ListLink
+			(Glob "$x")
+			(Concept "saw"))
+		(ListLink
+			(Glob "$x")
+			(Concept "cat")
 			(Concept "too"))))
