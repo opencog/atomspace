@@ -44,10 +44,10 @@ class MapLink : public FunctionLink
 protected:
 	ScopeLinkPtr _pattern;
 	const Variables* _mvars;
-	const OrderedHandleSet* _varset;
+	const HandleSet* _varset;
 
 	// Globby terms are terms that contain a GlobNode
-	OrderedHandleSet _globby_terms;     // Smallest term that has a glob.
+	HandleSet _globby_terms;     // Smallest term that has a glob.
 
 	bool _is_impl;
 	Handle _rewrite;

@@ -11,7 +11,7 @@ ADD_CUSTOM_TARGET(opencog_atom_types DEPENDS atom_types.h)
 INCLUDE_DIRECTORIES(${CMAKE_BINARY_DIR})
 
 ADD_LIBRARY (atombase
-	atom_types.h
+	atom_types_init.cc
 	Atom.cc
 	ClassServer.cc
 	FloatValue.cc

@@ -54,7 +54,7 @@ FindAtoms::FindAtoms(const Handle& atom)
 	  _target_atoms({atom})
 {}
 
-FindAtoms::FindAtoms(const OrderedHandleSet& selection)
+FindAtoms::FindAtoms(const HandleSet& selection)
 	: _target_types(),
 	  _target_atoms(selection)
 {}
@@ -167,7 +167,7 @@ bool is_unscoped_in_tree(const Handle& tree, const Handle& atom)
 	if (not tree->isLink()) return false;
 	ScopeLinkPtr stree(ScopeLinkCast(tree));
 	if (nullptr != stree) {
-		const OrderedHandleSet& varset = stree->get_variables().varset;
+		const HandleSet& varset = stree->get_variables().varset;
 		if (varset.find(atom) != varset.cend())
 			return false;
 	}
@@ -203,7 +203,7 @@ bool is_free_in_any_tree(const HandleSeq& hs, const Handle& atom)
 	return is_unquoted_unscoped_in_any_tree(hs, atom);
 }
 
-bool any_atom_in_tree(const Handle& tree, const OrderedHandleSet& atoms)
+bool any_atom_in_tree(const Handle& tree, const HandleSet& atoms)
 {
 	for (const Handle& n: atoms)
 	{
@@ -212,7 +212,7 @@ bool any_atom_in_tree(const Handle& tree, const OrderedHandleSet& atoms)
 	return false;
 }
 
-bool any_unquoted_in_tree(const Handle& tree, const OrderedHandleSet& atoms)
+bool any_unquoted_in_tree(const Handle& tree, const HandleSet& atoms)
 {
 	for (const Handle& n: atoms)
 	{
@@ -221,7 +221,7 @@ bool any_unquoted_in_tree(const Handle& tree, const OrderedHandleSet& atoms)
 	return false;
 }
 
-bool any_unscoped_in_tree(const Handle& tree, const OrderedHandleSet& atoms)
+bool any_unscoped_in_tree(const Handle& tree, const HandleSet& atoms)
 {
 	for (const Handle& n: atoms)
 		if (is_unscoped_in_tree(tree, n)) return true;
@@ -229,7 +229,7 @@ bool any_unscoped_in_tree(const Handle& tree, const OrderedHandleSet& atoms)
 }
 
 bool any_unquoted_unscoped_in_tree(const Handle& tree,
-                                   const OrderedHandleSet& atoms)
+                                   const HandleSet& atoms)
 {
 	for (const Handle& n: atoms)
 		if (is_unquoted_in_tree(tree, n) and is_unscoped_in_tree(tree, n))
@@ -238,7 +238,7 @@ bool any_unquoted_unscoped_in_tree(const Handle& tree,
 }
 
 unsigned int num_unquoted_in_tree(const Handle& tree,
-                                  const OrderedHandleSet& atoms)
+                                  const HandleSet& atoms)
 {
 	unsigned int count = 0;
 	for (const Handle& n: atoms)
@@ -285,7 +285,7 @@ bool contains_atomtype(const Handle& clause, Type atom_type, Quotation quotation
 	return false;
 }
 
-OrderedHandleSet get_free_variables(const Handle& h, Quotation quotation)
+HandleSet get_free_variables(const Handle& h, Quotation quotation)
 {
 	Type t = h->getType();
 
@@ -298,23 +298,23 @@ OrderedHandleSet get_free_variables(const Handle& h, Quotation quotation)
 	// Recursive cases
 	OC_ASSERT(h->isLink());
 	quotation.update(t);
-	OrderedHandleSet results = get_free_variables(h->getOutgoingSet(), quotation);
+	HandleSet results = get_free_variables(h->getOutgoingSet(), quotation);
 	// If the link was a scope link then remove the scoped
 	// variables from the free variables found.
 	ScopeLinkPtr sh(ScopeLinkCast(h));
 	if (nullptr != sh) {
-		const OrderedHandleSet& varset = sh->get_variables().varset;
+		const HandleSet& varset = sh->get_variables().varset;
 		for (auto& v : varset)
 			results.erase(v);
 	}
 	return results;
 }
 
-OrderedHandleSet get_free_variables(const HandleSeq& hs, Quotation quotation)
+HandleSet get_free_variables(const HandleSeq& hs, Quotation quotation)
 {
-	OrderedHandleSet results;
+	HandleSet results;
 	for (const Handle& h : hs) {
-		OrderedHandleSet free_var = get_free_variables(h, quotation);
+		HandleSet free_var = get_free_variables(h, quotation);
 		results.insert(free_var.begin(), free_var.end());
 	}
 	return results;

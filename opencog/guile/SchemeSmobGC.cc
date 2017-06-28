@@ -86,6 +86,13 @@ size_t SchemeSmob::free_misc(SCM node)
 			scm_remember_upto_here_1(node);
 			return 0;
 
+		case COG_LOGGER:
+			Logger* logger;
+			logger = (Logger*) SCM_SMOB_DATA(node);
+			delete logger;
+			scm_remember_upto_here_1(node);
+			return 0;
+
 		default:
 			fprintf(stderr, "Error: opencog-guile: "
 			        "don't know how to free this type: %d\n",

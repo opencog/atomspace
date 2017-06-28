@@ -34,7 +34,7 @@
 namespace opencog {
 
 Context::Context(const Quotation& q,
-                 const OrderedHandleSet& s,
+                 const HandleSet& s,
                  bool i, const VariablesStack& v)
 	: quotation(q), shadow(s), store_scope_variables(i), scope_variables(v) {}
 
@@ -100,7 +100,7 @@ bool Context::operator<(const Context& other) const
 		    or (shadow == other.shadow and scope_variables < other.scope_variables));
 }
 
-bool ohs_content_eq(const OrderedHandleSet& lhs, const OrderedHandleSet& rhs)
+bool ohs_content_eq(const HandleSet& lhs, const HandleSet& rhs)
 {
 	if (lhs.size() != rhs.size())
 		return false;

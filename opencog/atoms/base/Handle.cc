@@ -148,7 +148,7 @@ std::string hss_to_string(const HandleSeqSeq& hss)
 	}
 	return ss.str();
 }
-std::string ohs_to_string(const OrderedHandleSet& ohs)
+std::string ohs_to_string(const HandleSet& ohs)
 {
 	std::stringstream ss; std::operator<<(ss, ohs); return ss.str();
 }
@@ -246,7 +246,7 @@ std::string oc_to_string(const HandleSeqSeq& hss)
 {
 	return hss_to_string(hss);
 }
-std::string oc_to_string(const OrderedHandleSet& ohs)
+std::string oc_to_string(const HandleSet& ohs)
 {
 	return ohs_to_string(ohs);
 }
@@ -299,7 +299,7 @@ ostream& operator<<(ostream& out, const T& hs) { \
 	return out; \
 }
 GEN_HANDLE_CONTAINER_OSTREAM_OPERATOR(opencog::HandleSeq)
-GEN_HANDLE_CONTAINER_OSTREAM_OPERATOR(opencog::OrderedHandleSet)
+GEN_HANDLE_CONTAINER_OSTREAM_OPERATOR(opencog::HandleSet)
 GEN_HANDLE_CONTAINER_OSTREAM_OPERATOR(opencog::UnorderedHandleSet)
 
 } // ~namespace std

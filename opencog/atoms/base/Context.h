@@ -59,7 +59,7 @@ struct Context : public boost::totally_ordered<Context>
 
 	// Default ctor
 	Context(const Quotation& quotation=Quotation(),
-	        const OrderedHandleSet& shadow=OrderedHandleSet(),
+	        const HandleSet& shadow=HandleSet(),
 	        bool store_scope_variables=true,
 	        const VariablesStack& scope_variables=VariablesStack());
 	Context(bool store_scope_variables);
@@ -68,7 +68,7 @@ struct Context : public boost::totally_ordered<Context>
 	Quotation quotation;
 
 	// Set of shadowing variables
-	OrderedHandleSet shadow;
+	HandleSet shadow;
 
 	// Flag to ignore pushing scope variables to avoid that cost when
 	// not necessary
@@ -109,7 +109,7 @@ struct Context : public boost::totally_ordered<Context>
 
 // Compare by content instead of pointer. We probably want this to be
 // the default, until then this function is here for that.
-bool ohs_content_eq(const OrderedHandleSet& lhs, const OrderedHandleSet& rhs);
+bool ohs_content_eq(const HandleSet& lhs, const HandleSet& rhs);
 
 // For gdb, see
 // http://wiki.opencog.org/w/Development_standards#Print_OpenCog_Objects

@@ -295,8 +295,6 @@ void SchemeSmob::register_procs()
 
 	// TV property setters on atoms
 	register_proc("cog-set-tv!",           2, 0, 0, C(ss_set_tv));
-	register_proc("cog-merge-tv!",         2, 0, 0, C(ss_merge_tv));
-	register_proc("cog-merge-hi-conf-tv!", 2, 0, 0, C(ss_merge_hi_conf_tv));
 	register_proc("cog-inc-count!",        2, 0, 0, C(ss_inc_count));
 
 	// Attention values on atoms
@@ -337,6 +335,8 @@ void SchemeSmob::register_procs()
 	register_proc("cog-tv-mean",           1, 0, 0, C(ss_tv_get_mean));
 	register_proc("cog-tv-confidence",     1, 0, 0, C(ss_tv_get_confidence));
 	register_proc("cog-tv-count",          1, 0, 0, C(ss_tv_get_count));
+	register_proc("cog-tv-merge",          2, 0, 0, C(ss_tv_merge));
+	register_proc("cog-tv-merge-hi-conf",  2, 0, 0, C(ss_tv_merge_hi_conf));
 
 	// Atom Spaces
 	register_proc("cog-new-atomspace",     0, 1, 0, C(ss_new_as));
@@ -374,10 +374,6 @@ void SchemeSmob::register_procs()
 	// Free variables
 	register_proc("cog-free-variables",    1, 0, 0, C(ss_get_free_variables));
 	register_proc("cog-closed?",           1, 0, 0, C(ss_is_closed));
-
-	// Logger
-	// Ideally this should be in LoggerSCM.cc
-	register_proc("cog-logger?",           1, 0, 0, C(ss_logger_p));
 }
 
 void SchemeSmob::register_proc(const char* name, int req, int opt, int rst, scm_t_subr fcn)

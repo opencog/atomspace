@@ -384,7 +384,7 @@ std::set<Type> type_intersection(const std::set<Type>& lhs,
 
 VariableListPtr gen_varlist(const Handle& h)
 {
-	OrderedHandleSet vars = get_free_variables(h);
+	HandleSet vars = get_free_variables(h);
 	return createVariableList(HandleSeq(vars.begin(), vars.end()));
 }
 

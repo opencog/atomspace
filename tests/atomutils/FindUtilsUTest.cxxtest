@@ -129,5 +129,5 @@ void FindUtilsUTest::test_is_free_in_tree()
 
 void FindUtilsUTest::test_get_free_variables()
 {
-	TS_ASSERT_EQUALS(get_free_variables(quoted_lambda), OrderedHandleSet({X, Y}));
+	TS_ASSERT_EQUALS(get_free_variables(quoted_lambda), HandleSet({X, Y}));
 }

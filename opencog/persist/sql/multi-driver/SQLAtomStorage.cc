@@ -892,7 +892,7 @@ void SQLAtomStorage::deleteValue(VUID vuid)
 /// Store ALL of the values associated with the atom.
 void SQLAtomStorage::store_atom_values(const Handle& atom)
 {
-	std::set<Handle> keys = atom->getKeys();
+	HandleSet keys = atom->getKeys();
 	for (const Handle& key: keys)
 	{
 		// Skip the truth-value; it's special-cased below.
@@ -1024,7 +1024,10 @@ std::string SQLAtomStorage::float_to_string(const FloatValuePtr& fvle)
 	{
 		if (not_first) str += ", ";
 		not_first = true;
-		str += std::to_string(v);
+
+		char buf[40];
+		snprintf(buf, 40, "%20.17g", v);
+		str += buf;
 	}
 	str += "}\'";
 	return str;
@@ -1261,7 +1264,8 @@ void SQLAtomStorage::do_store_single_atom(const Handle& h, int aheight)
 			if (330 < h->getArity())
 			{
 				throw IOException(TRACE_INFO,
-					"Error: do_store_single_atom: Maxiumum Link size is 330.\n");
+					"Error: do_store_single_atom: Maxiumum Link size is 330. "
+					"Atom was: %s\n", h->toString().c_str());
 			}
 
 			cols += ", outgoing";
@@ -2045,6 +2049,7 @@ void SQLAtomStorage::set_stall_writers(bool stall)
 
 void SQLAtomStorage::clear_stats(void)
 {
+	_stats_time = time(0);
 	_load_count = 0;
 	_store_count = 0;
 	_valuation_stores = 0;
@@ -2068,7 +2073,12 @@ void SQLAtomStorage::clear_stats(void)
 
 void SQLAtomStorage::print_stats(void)
 {
-	printf("sql-stats: currently open URI: %s\n", _uri.c_str());
+	printf("sql-stats: Currently open URI: %s\n", _uri.c_str());
+	time_t now = time(0);
+	printf("sql-stats: Time since stats reset=%lu secs (at %s)\n",
+		now - _stats_time, ctime(&_stats_time));
+
+
 	size_t load_count = _load_count;
 	size_t store_count = _store_count;
 	double frac = store_count / ((double) load_count);
@@ -2094,14 +2104,12 @@ void SQLAtomStorage::print_stats(void)
 	size_t num_link_inserts = _num_link_inserts;
 
 	frac = 100.0 * num_got_nodes / ((double) num_get_nodes);
-	printf("num_get_nodes=%lu num_got_nodes=%lu (%f pct)\n",
-	       num_get_nodes, num_got_nodes, frac);
-	printf("num_recursive_nodes=%lu\n", num_rec_nodes);
+	printf("num_get_nodes=%lu num_got_nodes=%lu (%f pct) recursive=%lu\n",
+	       num_get_nodes, num_got_nodes, frac, num_rec_nodes);
 
 	frac = 100.0 * num_got_links / ((double) num_get_links);
-	printf("num_get_links=%lu num_got_links=%lu (%f pct)\n",
-	       num_get_links, num_got_links, frac);
-	printf("num_recursive_links=%lu\n", num_rec_links);
+	printf("num_get_links=%lu num_got_links=%lu (%f pct) recursive=%lu\n",
+	       num_get_links, num_got_links, frac, num_rec_links);
 
 	frac = num_get_inlinks / ((double) num_get_insets);
 	printf("num_get_incoming_sets=%lu set total=%lu avg set size=%f\n",

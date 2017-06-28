@@ -208,7 +208,7 @@ private:
 
 	RuleSet _rules;
 
-	OrderedHandleSet _results;
+	HandleSet _results;
 };
 
 

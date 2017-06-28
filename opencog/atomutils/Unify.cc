@@ -51,9 +51,9 @@ bool Unify::CHandle::is_free_variable() const
 	return context.is_free_variable(handle);
 }
 
-OrderedHandleSet Unify::CHandle::get_free_variables() const
+HandleSet Unify::CHandle::get_free_variables() const
 {
-	OrderedHandleSet free_vars =
+	HandleSet free_vars =
 		opencog::get_free_variables(handle, context.quotation);
 	return set_difference(free_vars, context.shadow);
 }
@@ -469,7 +469,7 @@ Handle Unify::remove_constant_clauses(const Handle& vardecl,
                                       const Handle& clauses)
 {
 	VariableListPtr vl = createVariableList(vardecl);
-	OrderedHandleSet vars = vl->get_variables().varset;
+	HandleSet vars = vl->get_variables().varset;
 
 	// Remove constant clauses
 	Type t = clauses->getType();
@@ -936,7 +936,7 @@ HandleMap strip_context(const Unify::HandleCHandleMap& hchm)
  */
 VariableListPtr gen_varlist(const Unify::CHandle& ch)
 {
-	OrderedHandleSet free_vars = ch.get_free_variables();
+	HandleSet free_vars = ch.get_free_variables();
 	return createVariableList(HandleSeq(free_vars.begin(), free_vars.end()));
 }
 

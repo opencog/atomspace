@@ -8,4 +8,5 @@
 ; In general, the later files depend on definitions contained
 ; in the earlier files.
 (load "sheaf/mst-parser.scm")
+(load "sheaf/vo-graph.scm")
 (load "sheaf/make-section.scm")

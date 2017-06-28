@@ -52,7 +52,7 @@ private:
 	mutable std::mutex _mtx;
 
 	std::unordered_map<HandlePair, ValuationPtr> _vindex;
-	std::unordered_map<Handle, std::set<Handle>> _keyset;
+	std::unordered_map<Handle, HandleSet> _keyset;
 
 	/**
 	 * Override and declare copy constructor and equals operator as
@@ -66,12 +66,12 @@ public:
 	ValuationTable();
 	~ValuationTable();
 
-   void addValuation(const ValuationPtr&);
-   void addValuation(const Handle&, const Handle&, const ProtoAtomPtr&);
+	void addValuation(const ValuationPtr&);
+	void addValuation(const Handle&, const Handle&, const ProtoAtomPtr&);
 	ValuationPtr getValuation(const Handle&, const Handle&);
 	ProtoAtomPtr getValue(const Handle&, const Handle&);
 
-	std::set<Handle> getKeys(const Handle&);
+	HandleSet getKeys(const Handle&);
 };
 
 /** @}*/

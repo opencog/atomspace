@@ -42,6 +42,8 @@ class SchemeSmob
 	template<typename R, typename T, class... Args> friend class SchemePrimitive;
 	template<typename R, typename T, class... Args> friend class SchemePrimitiveBase;
 
+	friend class LoggerSCM;
+
 private:
 
 	enum {
@@ -107,8 +109,6 @@ private:
 	static SCM ss_set_av(SCM, SCM);
 	static SCM ss_set_tv(SCM, SCM);
 	static SCM ss_set_value(SCM, SCM, SCM);
-	static SCM ss_merge_tv(SCM, SCM);
-	static SCM ss_merge_hi_conf_tv(SCM, SCM);
 	static SCM ss_inc_count(SCM, SCM);
 	static SCM ss_inc_vlti(SCM);
 	static SCM ss_dec_vlti(SCM);
@@ -158,6 +158,8 @@ private:
 	static SCM ss_tv_get_mean(SCM);
 	static SCM ss_tv_get_confidence(SCM);
 	static SCM ss_tv_get_count(SCM);
+	static SCM ss_tv_merge(SCM, SCM);
+	static SCM ss_tv_merge_hi_conf(SCM, SCM);
 
 	// Atom Spaces
 	static SCM ss_new_as(SCM);
@@ -201,9 +203,8 @@ private:
 	static AtomSpace *get_as_from_list(SCM);
 
 	// Logger
-	static SCM logger_to_scm(Logger* lg);
+	static SCM logger_to_scm(Logger*);
 	static Logger* ss_to_logger(SCM);
-	static SCM ss_logger_p(SCM s);
 	static std::string logger_to_string(const Logger *);
 	
 	// validate arguments coming from scheme passing into C++

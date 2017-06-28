@@ -37,8 +37,8 @@ namespace opencog {
 struct VarScraper
 {
 	Quotation _quotation;
-	OrderedHandleSet _bound_vars;
-	void find_vars(HandleSeq&, OrderedHandleSet&, const HandleSeq&);
+	HandleSet _bound_vars;
+	void find_vars(HandleSeq&, HandleSet&, const HandleSeq&);
 };
 
 /* ================================================================= */
@@ -50,7 +50,7 @@ struct VarScraper
 // Note: the algo used here is nearly identical to that in
 // ScopeLink::term_hash() -- if you modify this, then modify that
 // one too.
-void VarScraper::find_vars(HandleSeq& varseq, OrderedHandleSet& varset,
+void VarScraper::find_vars(HandleSeq& varseq, HandleSet& varset,
                            const HandleSeq& oset)
 {
 	for (const Handle& h : oset)
@@ -70,7 +70,7 @@ void VarScraper::find_vars(HandleSeq& varseq, OrderedHandleSet& varset,
 
 		bool issco = _quotation.is_unquoted()
 			and classserver().isA(t, SCOPE_LINK);
-		OrderedHandleSet bsave;
+		HandleSet bsave;
 		if (issco)
 		{
 			// Save the current set of bound variables...
@@ -436,7 +436,7 @@ bool Variables::is_type(const Handle& var, const Handle& val) const
 		_deep_typemap.find(var);
 	if (_deep_typemap.end() != dit)
 	{
-		const OrderedHandleSet &sigset = dit->second;
+		const HandleSet &sigset = dit->second;
 		for (const Handle& sig : sigset)
 		{
 			if (value_is_type(sig, val)) return true;
@@ -449,7 +449,7 @@ bool Variables::is_type(const Handle& var, const Handle& val) const
 		_fuzzy_typemap.find(var);
 	if (_fuzzy_typemap.end() != fit)
 	{
-		// const OrderedHandleSet &fuzzset = dit->second;
+		// const HandleSet &fuzzset = dit->second;
 		throw RuntimeException(TRACE_INFO,
 			"Not implemented! TODO XXX FIXME");
 		ret = false;

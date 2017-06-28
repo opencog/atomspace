@@ -171,10 +171,11 @@ typedef std::vector<Handle> HandleSeq;
 //! a list of lists of handles
 typedef std::vector<HandleSeq> HandleSeqSeq;
 
-//! a set of handles
-typedef std::set<Handle> OrderedHandleSet;
+//! a set of handles. Default handle set container. Usually takes less
+//! RAM and has faster iteration.
+typedef std::set<Handle> HandleSet;
 
-//! a hash table
+//! a hash table. Usually has faster insertion.
 typedef std::unordered_set<Handle> UnorderedHandleSet;
 
 //! an ordered map from Handle to Handle set
@@ -268,7 +269,7 @@ std::string h_to_string(const Handle& h);
 std::string hp_to_string(const HandlePair& hp);
 std::string hs_to_string(const HandleSeq& hs);
 std::string hss_to_string(const HandleSeqSeq& hss);
-std::string ohs_to_string(const OrderedHandleSet& ohs);
+std::string ohs_to_string(const HandleSet& ohs);
 std::string uhs_to_string(const UnorderedHandleSet& uhs);
 std::string hmap_to_string(const HandleMap& hm);
 std::string hmultimap_to_string(const HandleMultimap& hmm);
@@ -287,7 +288,7 @@ std::string oc_to_string(const Handle& h);
 std::string oc_to_string(const HandlePair& hp);
 std::string oc_to_string(const HandleSeq& hs);
 std::string oc_to_string(const HandleSeqSeq& hss);
-std::string oc_to_string(const OrderedHandleSet& ohs);
+std::string oc_to_string(const HandleSet& ohs);
 std::string oc_to_string(const UnorderedHandleSet& uhs);
 std::string oc_to_string(const HandleMap& hm);
 std::string oc_to_string(const HandleMultimap& hmm);
@@ -301,7 +302,7 @@ std::string oc_to_string(const AtomPtr& aptr);
 
 namespace std {
 ostream& operator<<(ostream&, const opencog::HandleSeq&);
-ostream& operator<<(ostream&, const opencog::OrderedHandleSet&);
+ostream& operator<<(ostream&, const opencog::HandleSet&);
 ostream& operator<<(ostream&, const opencog::UnorderedHandleSet&);
 
 #ifdef THIS_USED_TO_WORK_GREAT_BUT_IS_BROKEN_IN_GCC472

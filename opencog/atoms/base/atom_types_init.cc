@@ -1,9 +1,8 @@
 /*
- * URELogger.cc
+ * atom_types_init.cc
  *
- * Copyright (C) 2016 OpenCog Foundation
- *
- * Author: Nil Geisweiller
+ * Copyright (C) 2014 Linas Vepstas
+ * All Rights Reserved
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU Affero General Public License v3 as
@@ -21,18 +20,9 @@
  * 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
  */
 
-#include "URELogger.h"
+#include "opencog/atoms/base/atom_types.definitions"
 
-using namespace opencog;
+#define INHERITANCE_FILE "opencog/atoms/base/atom_types.inheritance"
+#define INITNAME base_types_init
 
-// Create and return the single instance
-Logger& opencog::ure_logger()
-{
-	auto bc_logger_instantiate = []() {
-		Logger tmp(logger());
-		tmp.set_component("URE");
-		return tmp;
-	};
-	static Logger bc_instance(bc_logger_instantiate());
-    return bc_instance;
-}
+#include <opencog/atoms/base/atom_types.cc>
