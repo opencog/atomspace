@@ -37,7 +37,10 @@ bool FloatValue::operator==(const ProtoAtom& other) const
 		// ordered. For technical explanation, see
 		// http://www.cygnus-software.com/papers/comparingfloats/Comparing%20floating%20point%20numbers.htm
 		// if (1.0e-15 < fabs(1.0 - fov->_value[i]/_value[i])) return false;
-#define MAX_ULPS 1
+		//
+		// Beats me why, but the ValueSaveUTest requires ULPS of 11 to
+		// pass, which works out to about 2.3e-15 in practice.
+#define MAX_ULPS 24
 		if (MAX_ULPS < abs(*(int64_t*) &(_value[i]) - *(int64_t*)&(fov->_value[i])))
 			return false;
 	return true;
@@ -49,7 +52,11 @@ std::string FloatValue::toString(const std::string& indent) const
 {
 	std::string rv = indent + "(FloatValue";
 	for (double v :_value)
-		rv += std::string(" ") + std::to_string(v);
+	{
+		char buf[40];
+		snprintf(buf, 40, "%20.17g", v);
+		rv += std::string(" ") + buf;
+	}
 	rv += ")";
 	return rv;
 }

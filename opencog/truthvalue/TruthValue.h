@@ -103,6 +103,8 @@ protected:
     // Merge helper method
     TruthValuePtr higher_confidence_merge(const TruthValuePtr&) const;
 
+    static bool nearly_equal(double, double);
+
 public:
     virtual ~TruthValue() {}
 

@@ -1024,7 +1024,10 @@ std::string SQLAtomStorage::float_to_string(const FloatValuePtr& fvle)
 	{
 		if (not_first) str += ", ";
 		not_first = true;
-		str += std::to_string(v);
+
+		char buf[40];
+		snprintf(buf, 40, "%20.17g", v);
+		str += buf;
 	}
 	str += "}\'";
 	return str;
