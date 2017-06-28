@@ -23,6 +23,8 @@
  * 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
  */
 
+#include <float.h>
+#include <math.h>
 #include <stdio.h>
 
 #include <opencog/truthvalue/CountTruthValue.h>
@@ -130,6 +132,20 @@ bool TruthValue::isDefinedTV() const
         return true;
     }
     return false;
+}
+
+bool TruthValue::nearly_equal(double a, double b)
+{
+	if (a == b) return true;
+
+#define ACCEPTABLE_ERROR (2.0 * DBL_EPSILON)
+	double diff = fabs(b - a);
+	if (a == 0.0 or b == 0.0 or diff < DBL_MIN)
+		return diff < ACCEPTABLE_ERROR * DBL_MIN;
+
+	double absa = fabs(a);
+	double absb = fabs(b);
+	return diff / fmin (absa+absb, DBL_MAX) < ACCEPTABLE_ERROR;
 }
 
 TruthValuePtr

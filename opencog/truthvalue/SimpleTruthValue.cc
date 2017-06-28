@@ -143,9 +143,10 @@ bool SimpleTruthValue::operator==(const ProtoAtom& rhs) const
     const SimpleTruthValue *stv = dynamic_cast<const SimpleTruthValue *>(&rhs);
     if (NULL == stv) return false;
 
-#define FLOAT_ACCEPTABLE_ERROR 0.000001
-    if (FLOAT_ACCEPTABLE_ERROR < fabs(_value[MEAN] - stv->_value[MEAN])) return false;
+    if (not nearly_equal(stv->_value[MEAN], _value[MEAN]))
+        return false;
 
-    if (FLOAT_ACCEPTABLE_ERROR < fabs(_value[CONFIDENCE] - stv->_value[CONFIDENCE])) return false;
+    if (not nearly_equal(stv->_value[CONFIDENCE], _value[CONFIDENCE])) 
+        return false;
     return true;
 }

@@ -118,8 +118,7 @@ bool FuzzyTruthValue::operator==(const ProtoAtom& rhs) const
     const FuzzyTruthValue *stv = dynamic_cast<const FuzzyTruthValue *>(&rhs);
     if (NULL == stv) return false;
 
-#define FLOAT_ACCEPTABLE_MEAN_ERROR 0.000001
-    if (FLOAT_ACCEPTABLE_MEAN_ERROR < fabs(getMean() - stv->getMean())) return false;
+    if (not nearly_equal(getMean(), stv->getMean())) return false;
 
 // Converting from confidence to count and back again using single-precision
 // float is a real accuracy killer.  In particular, 2/802 = 0.002494 but
