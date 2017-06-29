@@ -206,6 +206,10 @@ private:
 	static SCM logger_to_scm(Logger*);
 	static Logger* ss_to_logger(SCM);
 	static std::string logger_to_string(const Logger *);
+	static void release_logger(Logger*);
+	static Logger* new_logger();
+	static std::mutex lgr_mtx;
+	static std::set<Logger*> deleteable_lgr;
 	
 	// validate arguments coming from scheme passing into C++
 	static void throw_exception(const std::exception&, const char *, SCM);

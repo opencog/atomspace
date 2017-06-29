@@ -15,6 +15,9 @@
 
 using namespace opencog;
 
+std::mutex SchemeSmob::lgr_mtx;
+std::set<Logger*> SchemeSmob::deleteable_lgr;
+
 /* ============================================================== */
 
 std::string SchemeSmob::logger_to_string(const Logger *l)
@@ -53,11 +56,39 @@ Logger* SchemeSmob::ss_to_logger(SCM sl)
 
 /* ============================================================== */
 
+void SchemeSmob::release_logger (Logger* lgr)
+{
+	std::unique_lock<std::mutex> lck(lgr_mtx);
+	auto it = deleteable_lgr.find(lgr);
+	if (it != deleteable_lgr.end())
+	{
+		deleteable_lgr.erase(it);
+		lck.unlock();
+		delete lgr;
+	}
+}
+
+/* ============================================================== */
+
+Logger* SchemeSmob::new_logger()
+{
+	Logger* lgr = new Logger();
+	scm_gc_register_allocation(sizeof(*lgr));
+
+	// Only the internally-created logger are deleteable.
+	std::lock_guard<std::mutex> lck(lgr_mtx);
+	deleteable_lgr.insert(lgr);
+
+	return lgr;
+}
+
+/* ============================================================== */
+
 Logger* SchemeSmob::verify_logger(SCM sl, const char * subrname, int pos)
 {
-   Logger* l = ss_to_logger(sl);
-   if (nullptr == l)
-      scm_wrong_type_arg_msg(subrname, pos, sl, "opencog logger");
+	Logger* l = ss_to_logger(sl);
+	if (nullptr == l)
+		scm_wrong_type_arg_msg(subrname, pos, sl, "opencog logger");
 
-   return l;
+	return l;
 }
