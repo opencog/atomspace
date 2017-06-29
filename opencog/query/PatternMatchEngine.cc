@@ -227,6 +227,12 @@ bool PatternMatchEngine::ordered_compare(const PatternTermPtr& ptm,
 		// If we are here, then the pattern contains globs. A glob can
 		// match one or more atoms in a row. Thus, we have a more
 		// complicated search ...
+
+		// To record how many atoms are grounded to the GlobNodes, and
+		// their positions.
+		std::map<Handle, size_t> glob_grd;
+		std::vector<std::pair<size_t, size_t>> glob_pos;
+
 		for (size_t ip=0, jg=0; ip<osp_size or jg<osg_size; ip++, jg++)
 		{
 			if (ip == osp_size) ip --;
@@ -241,6 +247,17 @@ bool PatternMatchEngine::ordered_compare(const PatternTermPtr& ptm,
 			bool tc = false;
 			const Handle& ohp(osp[ip]->getHandle());
 			Type ptype = ohp->getType();
+
+			auto reset = [&]()
+			{
+				ip = glob_pos.back().first - 1;
+				jg = glob_pos.back().second - 1;
+				glob_pos.pop_back();
+
+				// Clear any groundings for the last glob we've seen.
+				var_grounding.erase(osp[ip+1]->getHandle());
+			};
+
 			if (GLOB_NODE == ptype)
 			{
 				// GlobNodes cannot match themselves -- no self-grounding
@@ -248,18 +265,43 @@ bool PatternMatchEngine::ordered_compare(const PatternTermPtr& ptm,
 				// to the clause_match() callback?
 				if (ohp == osg[jg]) return false;
 
+				glob_pos.push_back({ip, jg});
+
+				size_t last_grd = SIZE_MAX;
+				auto gi = glob_grd.find(ohp);
+				if (gi != glob_grd.end())
+				{
+					// If we are here, that means we have seen this glob
+					// in previous iterations.
+					last_grd = gi->second;
+
+					if (last_grd == 0 or
+					    not _varlist->is_lower_bound(ohp, last_grd-1))
+					{
+						// If the glob cannot be grounded to fewer no.
+						// of atoms, it's not a match.
+						glob_grd.erase(ohp);
+						glob_pos.pop_back();
+						last_grd = SIZE_MAX;
+
+						// Reject the candidate if we cannot find a
+						// possible way to satisfy all the restrictions
+						// of the globs we have seen.
+						if (glob_grd.size() == 0)
+						{
+							match = false;
+							break;
+						}
+
+						// Resume from the previous glob and
+						// try to find a match again.
+						reset();
+						continue;
+					}
+				}
+
 				HandleSeq glob_seq;
 				PatternTermPtr glob(osp[ip]);
-				// Globs at the end are handled differently than globs
-				// which are followed by other stuff. So, is there
-				// anything after the glob?
-				PatternTermPtr post_glob;
-				bool have_post = false;
-				if (ip+1 < osp_size)
-				{
-					have_post = true;
-					post_glob = osp[ip+1];
-				}
 
 				if (_varlist->is_lower_bound(ohp, 0))
 				{
@@ -267,70 +309,67 @@ bool PatternMatchEngine::ordered_compare(const PatternTermPtr& ptm,
 					// interval is zero, so the glob can be grounded
 					// to nothing.
 
-					// Just in case if the upper bound is zero...
-					if (not _varlist->is_upper_bound(ohp, 1))
-					{
-						jg --;
-						continue;
-					}
-
-					// If the post_glob matches with the current candidate,
-					// we are done.
-					if (tree_compare(glob, osg[jg], CALL_GLOB) and
-					    have_post and
-					    tree_compare(post_glob, osg[jg], CALL_GLOB))
-					{
-						jg --;
-						continue;
-					}
-
 					// Since the glob has a lower bound of zero, if we
-					// already have gone through all the candidates at
-					// this point, we are done.
-					if (grd_end) continue;
-				}
+					// already have gone through all the atoms of
+					// the candidate at this point, we are done.
+					if (grd_end)
+					{
+						glob_grd[ohp] = 0;
+						var_grounding.erase(ohp);
+						continue;
+					}
 
-				// If we are here, the glob we are looking at has to be
-				// grounded to at least one atom.
+					// Just in case if the upper bound is zero...
+					// or we tried to ground it in previous
+					// iterations but failed, move on.
+					if (not _varlist->is_upper_bound(ohp, 1) or
+					    last_grd == 1)
+					{
+						jg --;
+						glob_grd[ohp] = 0;
+						var_grounding.erase(ohp);
+						continue;
+					}
+				}
 
 				// We need to ground the glob but we have gone through
 				// everything in osg already, then it's not a match.
 				if (grd_end)
 				{
-					match = false;
-					break;
+					glob_grd[ohp] = 0;
+					reset();
+					continue;
 				}
 
-				tc = (tree_compare(glob, osg[jg], CALL_GLOB) and
-				      _varlist->is_upper_bound(ohp, 1));
-				if (not tc)
+				// Try to match as many atoms as possible.
+				do
 				{
-					match = false;
-					break;
-				}
+					tc = tree_compare(glob, osg[jg], CALL_GLOB);
 
-				glob_seq.push_back(osg[jg]);
-				jg++;
-
-				// Can we match more?
-				while (tc and jg<osg_size)
-				{
-					if (have_post)
+					if (tc)
 					{
-						// If the atom after the glob matches, then we are done.
-						tc = tree_compare(post_glob, osg[jg], CALL_GLOB);
-						if (tc) break;
+						// Can't match more than it did last time.
+						if (glob_seq.size()+1 >= last_grd)
+							break;
+
+						// Can't exceed the upper bound.
+						if (not _varlist->is_upper_bound(ohp, glob_seq.size()+1))
+							break;
+
+						glob_seq.push_back(osg[jg]);
 					}
-					tc = (tree_compare(glob, osg[jg], CALL_GLOB) and
-					      _varlist->is_upper_bound(ohp, glob_seq.size()+1));
-					if (tc) glob_seq.push_back(osg[jg]);
-					jg ++;
-				}
+					jg++;
+				} while (tc and jg<osg_size);
+
 				jg --;
+				glob_grd[ohp] = glob_seq.size();
+
+				// If we can't match more, or it doesn't satisfy the
+				// lower bound restriction, try again.
 				if (not tc or not _varlist->is_lower_bound(ohp, glob_seq.size()))
 				{
-					match = false;
-					break;
+					reset();
+					continue;
 				}
 
 				// If we are here, we've got a match; record the glob.
@@ -343,11 +382,19 @@ bool PatternMatchEngine::ordered_compare(const PatternTermPtr& ptm,
 
 				// If we have already gone through all the atoms in
 				// the candidate, or the current pair does not match,
-				// reject it.
+				// try again.
 				if (grd_end or not tree_compare(osp[ip], osg[jg], CALL_ORDER))
 				{
-					match = false;
-					break;
+					// If we have never seen any globs before, no backtracking
+					// can be done, we can just reject it now.
+					if (glob_grd.size() == 0)
+					{
+						match = false;
+						break;
+					}
+
+					reset();
+					continue;
 				}
 			}
 		}
