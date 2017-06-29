@@ -87,10 +87,13 @@ size_t SchemeSmob::free_misc(SCM node)
 			return 0;
 
 		case COG_LOGGER:
-			Logger* logger;
-			logger = (Logger*) SCM_SMOB_DATA(node);
-			delete logger;
-			scm_remember_upto_here_1(node);
+			Logger* lgr;
+			lgr = (Logger*) SCM_SMOB_DATA(node);
+			// Only delete if it is a scm allocated logger
+			if (lgr != &logger()) {
+				delete lgr;
+				scm_remember_upto_here_1(node);
+			}
 			return 0;
 
 		default:
