@@ -209,7 +209,7 @@
 
 ; Match as many as possible, should not stop when it gets to
 ; the first "saw"
-(define many
+(define greedy
 	(Bind
 		(TypedVariable (Glob "$x")
 			(TypeSet (Type "ConceptNode")

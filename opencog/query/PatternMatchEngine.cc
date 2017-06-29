@@ -250,10 +250,6 @@ bool PatternMatchEngine::ordered_compare(const PatternTermPtr& ptm,
 
 			auto reset = [&]()
 			{
-				// There is a chance that glob_pos is empty
-				// if we haven't seen any glob in osp so far.
-				if (glob_pos.size() == 0) return;
-
 				ip = glob_pos.back().first - 1;
 				jg = glob_pos.back().second - 1;
 				glob_pos.pop_back();
@@ -269,14 +265,14 @@ bool PatternMatchEngine::ordered_compare(const PatternTermPtr& ptm,
 				// to the clause_match() callback?
 				if (ohp == osg[jg]) return false;
 
-				// Record the position of the glob.
-				glob_pos.push_back(std::make_pair(ip, jg));
+				glob_pos.push_back({ip, jg});
 
 				size_t last_grd = SIZE_MAX;
 				auto gi = glob_grd.find(ohp);
 				if (gi != glob_grd.end())
 				{
-					// If we are here, that means we have seen this glob before.
+					// If we are here, that means we have seen this glob
+					// in previous iterations.
 					last_grd = gi->second;
 
 					if (last_grd == 0 or
@@ -288,9 +284,9 @@ bool PatternMatchEngine::ordered_compare(const PatternTermPtr& ptm,
 						glob_pos.pop_back();
 						last_grd = SIZE_MAX;
 
-						// Reject if we cannot find a possible way to
-						// satisfy all the restrictions of the globs
-						// we have seen.
+						// Reject the candidate if we cannot find a
+						// possible way to satisfy all the restrictions
+						// of the globs we have seen.
 						if (glob_grd.size() == 0)
 						{
 							match = false;
@@ -324,8 +320,8 @@ bool PatternMatchEngine::ordered_compare(const PatternTermPtr& ptm,
 					}
 
 					// Just in case if the upper bound is zero...
-					// or we tried to ground it to some atoms in
-					// previous iterations but failed, move on.
+					// or we tried to ground it in previous
+					// iterations but failed, move on.
 					if (not _varlist->is_upper_bound(ohp, 1) or
 					    last_grd == 1)
 					{
@@ -336,9 +332,6 @@ bool PatternMatchEngine::ordered_compare(const PatternTermPtr& ptm,
 					}
 				}
 
-				// If we are here, the glob we are looking at has to be
-				// grounded to at least one atom.
-
 				// We need to ground the glob but we have gone through
 				// everything in osg already, then it's not a match.
 				if (grd_end)
@@ -348,7 +341,7 @@ bool PatternMatchEngine::ordered_compare(const PatternTermPtr& ptm,
 					continue;
 				}
 
-				// Try to ground the glob to as many atoms as possible.
+				// Try to match as many atoms as possible.
 				do
 				{
 					tc = tree_compare(glob, osg[jg], CALL_GLOB);
@@ -389,10 +382,10 @@ bool PatternMatchEngine::ordered_compare(const PatternTermPtr& ptm,
 
 				// If we have already gone through all the atoms in
 				// the candidate, or the current pair does not match,
-				// reject it.
+				// try again.
 				if (grd_end or not tree_compare(osp[ip], osg[jg], CALL_ORDER))
 				{
-					// If we have never seen any globs before, then no backtracking
+					// If we have never seen any globs before, no backtracking
 					// can be done, we can just reject it now.
 					if (glob_grd.size() == 0)
 					{

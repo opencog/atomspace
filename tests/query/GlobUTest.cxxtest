@@ -67,7 +67,7 @@ _exit(rc); // XXX hack to avoid double-free in __run_exit_handlers
 	void test_glob_three_globs(void);
 	void test_glob_two_in_a_row(void);
 	void test_glob_exact(void);
-	void test_glob_many(void);
+	void test_glob_greedy(void);
 };
 
 void GlobUTest::tearDown(void)
@@ -346,7 +346,7 @@ void GlobUTest::test_glob_exact(void)
 	logger().debug("END TEST: %s", __FUNCTION__);
 }
 
-void GlobUTest::test_glob_many(void)
+void GlobUTest::test_glob_greedy(void)
 {
 	logger().debug("BEGIN TEST: %s", __FUNCTION__);
 
