@@ -352,9 +352,9 @@ void GlobUTest::test_glob_greedy(void)
 
 	eval->eval("(load-from-path \"tests/query/glob-basic.scm\")");
 
-	Handle many = eval->eval_h("(cog-execute! many)");
-	printf("many %s\n", many->toString().c_str());
-	TS_ASSERT_EQUALS(1, many->getArity());
+	Handle greedy = eval->eval_h("(cog-execute! greedy)");
+	printf("greedy %s\n", greedy->toString().c_str());
+	TS_ASSERT_EQUALS(1, greedy->getArity());
 
 	Handle response = eval->eval_h(
 		"(SetLink"
@@ -368,7 +368,7 @@ void GlobUTest::test_glob_greedy(void)
 		"    (ConceptNode \"cat\")"
 		"    (ConceptNode \"too\")))"
 	);
-	TS_ASSERT_EQUALS(many, response);
+	TS_ASSERT_EQUALS(greedy, response);
 
 	// ----
 	logger().debug("END TEST: %s", __FUNCTION__);
