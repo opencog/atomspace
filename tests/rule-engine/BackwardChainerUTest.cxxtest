@@ -598,8 +598,8 @@ void BackwardChainerUTest::test_criminal_trace()
 		17025922688105268679U, 16237370205818075250U, 13060619487639450045U,
 			14172591710384300158U, 14741649033484653578U, 11564898315305997225U};
 	AndBITFitness trace_fitness(AndBITFitness::Trace, trace);
-	BackwardChainer bc(_as, top_rbs, target, vardecl, Handle::UNDEFINED,
-	                   BITNodeFitness(), trace_fitness);
+	BackwardChainer bc(_as, top_rbs, target, vardecl, nullptr,
+	                   Handle::UNDEFINED, BITNodeFitness(), trace_fitness);
 	bc.get_config().set_maximum_iterations(50);
 	bc.do_chain();
 
@@ -689,7 +689,7 @@ void BackwardChainerUTest::test_focus_set()
 		             " )"
 		             ")");
 
-	BackwardChainer bc(_as, top_rbs, target, vardecl, focus_set);
+	BackwardChainer bc(_as, top_rbs, target, vardecl, nullptr, focus_set);
 
 	Handle soln1 = _eval.eval_h("(InheritanceLink"
 	                            "  (ConceptNode \"tree\")"

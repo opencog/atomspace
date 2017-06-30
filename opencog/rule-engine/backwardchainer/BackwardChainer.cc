@@ -48,12 +48,13 @@ using namespace opencog;
 BackwardChainer::BackwardChainer(AtomSpace& as, const Handle& rbs,
                                  const Handle& target,
                                  const Handle& vardecl,
+                                 AtomSpace* trace_as,
                                  const Handle& focus_set, // TODO:
                                                           // support
                                                           // focus_set
                                  const BITNodeFitness& bitnode_fitness,
                                  const AndBITFitness& andbit_fitness)
-	: _as(as), _configReader(as, rbs),
+	: _as(as), _trace_as(trace_as), _configReader(as, rbs),
 	  _bit(as, target, vardecl, bitnode_fitness),
 	  _andbit_fitness(andbit_fitness),
 	  _iteration(0), _last_expansion_andbit(nullptr),
@@ -186,6 +187,23 @@ void BackwardChainer::expand_bit(AndBIT& andbit)
 	                   << rule.to_string();
 
 	_last_expansion_andbit = _bit.expand(andbit, *bitleaf, {rule, ts});
+
+	// Record expansion
+	if (_trace_as)
+		record_expansion(andbit, *bitleaf, rule, *_last_expansion_andbit);
+}
+
+void BackwardChainer::record_expansion(const AndBIT& andbit,
+                                       const BITNode& bitleaf,
+                                       const Rule& rule,
+                                       const AndBIT& resulting_andbit) const
+{
+	_trace_as->add_link(EXECUTION_LINK,
+	                    _trace_as->add_link(LIST_LINK,
+	                                        andbit.fcs,
+	                                        bitleaf.body,
+	                                        rule.get_definition()),
+	                    resulting_andbit.fcs);
 }
 
 void BackwardChainer::fulfill_bit()

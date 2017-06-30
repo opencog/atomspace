@@ -137,7 +137,7 @@ Handle InferenceSCM::do_backward_chaining(Handle rbs,
 	    vardecl = Handle::UNDEFINED;
 
     AtomSpace *as = SchemeSmob::ss_get_env_as("cog-bc");
-    BackwardChainer bc(*as, rbs, target, vardecl, focus_link);
+    BackwardChainer bc(*as, rbs, target, vardecl, nullptr, focus_link);
 
     bc.do_chain();
 
