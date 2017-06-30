@@ -33,7 +33,8 @@ protected:
 	virtual void init();
 
 	/**
-	 * The scheme (cog-fc) function calls this, to perform forward-chaining.
+	 * The scheme (cog-mandatory-args-fc) function calls this, to
+	 * perform forward-chaining.
 	 *
 	 * @param rbs          A node, holding the name of the rulebase.
 	 * @param source       The source atom with which to start the chaining.
@@ -51,7 +52,8 @@ protected:
 	                           Handle focus_set);
 
 	/**
-	 * The scheme (cog-bc) function calls this, to perform forward-chaining.
+	 * The scheme (cog-mandatory-args-bc) function calls this, to
+	 * perform forward-chaining.
 	 *
 	 * @param rbs          A node, holding the name of the rulebase.
 	 * @param target       The target atom with which to start the chaining from.
@@ -91,13 +93,13 @@ InferenceSCM::InferenceSCM() : ModuleWrap("opencog rule-engine") {}
 /// Thus, all the definitions below happen in that module.
 void InferenceSCM::init(void)
 {
-	define_scheme_primitive("cog-fc",
+	define_scheme_primitive("cog-mandatory-args-fc",
 		&InferenceSCM::do_forward_chaining, this, "rule-engine");
 
-	define_scheme_primitive("cog-bc",
+	define_scheme_primitive("cog-mandatory-args-bc",
 		&InferenceSCM::do_backward_chaining, this, "rule-engine");
 
-	define_scheme_primitive("ure-rbs-rules",
+	define_scheme_primitive("cog-rbs-rules",
 		&InferenceSCM::get_rulebase_rules, this, "rule-engine");
 }
 
@@ -106,7 +108,7 @@ Handle InferenceSCM::do_forward_chaining(Handle rbs,
                                          Handle vardecl,
                                          Handle focus_set_h)
 {
-    AtomSpace *as = SchemeSmob::ss_get_env_as("cog-fc");
+    AtomSpace *as = SchemeSmob::ss_get_env_as("cog-mandatory-args-fc");
     HandleSeq focus_set = {};
 
     // A ListLink means that the variable declaration is undefined
@@ -136,7 +138,7 @@ Handle InferenceSCM::do_backward_chaining(Handle rbs,
     if (vardecl->getType() == LIST_LINK)
 	    vardecl = Handle::UNDEFINED;
 
-    AtomSpace *as = SchemeSmob::ss_get_env_as("cog-bc");
+    AtomSpace *as = SchemeSmob::ss_get_env_as("cog-mandatory-args-bc");
     BackwardChainer bc(*as, rbs, target, vardecl, nullptr, focus_link);
 
     bc.do_chain();
@@ -152,7 +154,7 @@ Handle InferenceSCM::get_rulebase_rules(Handle rbs)
         throw RuntimeException(TRACE_INFO,
             "InferenceSCM::get_rulebase_rules - invalid rulebase!");
 
-    AtomSpace *as = SchemeSmob::ss_get_env_as("ure-rbs-rules");
+    AtomSpace *as = SchemeSmob::ss_get_env_as("cog-rbs-rules");
     UREConfigReader ure_config(*as, rbs);
     auto rules = ure_config.get_rules();
     HandleSeq hs;

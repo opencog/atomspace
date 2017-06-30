@@ -28,6 +28,43 @@
 (use-modules (opencog query))
 (use-modules (srfi srfi-1))
 
+(define* (cog-fc rbs source #:key (vardecl (List)) (focus-set (Set)))
+"
+  Forward Chainer call.
+
+  Usage: (cog-fc rbs source #:vardecl vd #:focus-set fs)
+
+  rbs: ConceptNode representing a rulebase.
+
+  source: Source from where to start forward chaining. If a SetLink
+          then multiple sources are considered.
+
+  vardecl: optional variable declaration of the source (in case it has
+           variables)
+
+  focus-set: optional focus-set, a SetLink with all atoms to consider
+             for forward chaining
+"
+  (cog-mandatory-args-fc rbs source vardecl focus-set))
+
+(define* (cog-bc rbs target #:key (vardecl (List)) (focus-set (Set)))
+"
+  Backward Chainer call.
+
+  Usage: (cog-bc rbs target #:vardecl vd #:focus-set fs)
+
+  rbs: ConceptNode representing a rulebase.
+
+  target: Target to proof.
+
+  vardecl: optional variable declaration of the target (in case it has
+           variables)
+
+  focus-set: optional focus-set, a SetLink with all atoms to consider
+             for forward chaining (NOT IMPLEMENTED).
+"
+  (cog-mandatory-args-bc rbs target vardecl focus-set))
+
 (define-public (ure-define-add-rule rbs rule-name rule weight)
 "
 
@@ -186,7 +223,11 @@
     (Set results)))
 
 (define (export-rule-engine-utils)
-  (export ure-add-rule
+  (export
+          cog-fc
+          cog-bc
+          ure-define-add-rule
+          ure-add-rule
           ure-add-rules
           ure-set-num-parameter
           ure-set-fuzzy-bool-parameter

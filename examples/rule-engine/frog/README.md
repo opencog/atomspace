@@ -138,24 +138,14 @@ been used too.
 )
 ```
 
-We need to define its variable declaration as well. Since the source
-has no variable we can let it undefined by using the empty List, which
-should not be confused with the empty VariableList which would define
-an empty variable declaration. Though here it's irrelevant since the
-source has no variable anyway
-```scheme
-(define vardecl (List))
-```
-
-Finally the focus set has to be defined. To set the focus to the whole
-atomspace we define it as the empty set as below
-```scheme
-(define focus-set (Set))
-```
+We may optionally define its variable declaration if the source had
+some variables, since it has none we can let that aside for
+now. Similarily a focus set can be defined but here we let the focus
+set being the wholoe atomspace.
 
 We can now run the forward chainer
 ```scheme
-(cog-fc ci-rbs source vardecl focus-set)
+(cog-fc ci-rbs source)
 ```
 to get the result that fritz is a frog and fritz is green.
 
@@ -176,13 +166,11 @@ as above
   (Evaluation (stv 1.0 1.0)
      (Predicate "croaks")
      (Concept "Fritz")))
-(define vardecl (List))
-(define focus-set (Set))
 ```
 
 We can now run the forward chainer
 ```scheme
-(cog-fc frog-rb source vardecl focus-set)
+(cog-fc frog-rb source)
 ```
 to get the result that fritz is a frog and fritz is green.
 
@@ -206,19 +194,14 @@ defining a target instead of a source
 
 with the following variable declaration
 ```scheme
-(define vardecl
+(define vd
   (TypedVariable (VariableNode "$what") (TypeNode "ConceptNode"))
 )
 ```
 
-and empty focus set (i.e. whole atomspace) a before
-```scheme
-(define focus-set (Set))
-```
-
 We can now call the backward chainer as follows
 ```scheme
-(cog-bc ci-rbs target vardecl focus-set)
+(cog-bc ci-rbs target #:vardecl vd)
 ```
 and get the answer that Fritz is green.
 

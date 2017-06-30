@@ -33,7 +33,7 @@ Examples can be found in this and other repositories:
 
 #### How to call the forward chainer from a scheme interface?
 
-One can use the `(cog-fc *rule-base* *source* *vardecl* *focus-set*)`
+One can use the `(cog-fc *rule-base* *source* *#:vardecl* *#:focus-set*)`
 scheme binding to start forward chaining.
 
 *rule-base* - Is a
@@ -50,14 +50,13 @@ rules leaving aside source and rule selection steps on the specified
 focus set or on entire atomspace based on the size of the focus set as
 described below.
 
-*vardecl* - Could be
- - An empty List, in such case it remains undefined
+*vardecl* - Optional argument
  - A VariableNode, VariableList or TypedVariable
 
-*focus-set* - A set of atoms wrapped in a SetLink. If the SetLink is
-not empty, the forward chainer will apply selected rules on the atoms
-inside the focus set, otherwise rules will be applied on the entire
-atomspace.
+*focus-set* - Optional argument A set of atoms wrapped in a
+SetLink. If the SetLink is not empty, the forward chainer will apply
+selected rules on the atoms inside the focus set, otherwise rules will
+be applied on the entire atomspace.
 
 When both source and focus set are empty, all rules on the whole atomspace will be applied iteratively.
 
@@ -66,7 +65,7 @@ Socrates then one can do a bunch of forward chaining inference by
 calling
 
 ```scheme
-(cog-fc (ConceptNode "rb-pln") (ConceptNode "Socrates") (List) (SetLink [ATOMS_ASSOCIATED]))
+(cog-fc (ConceptNode "rb-pln") (ConceptNode "Socrates") #:focus-set (SetLink [ATOMS_ASSOCIATED]))
 ```
 
 from the scheme shell interface. All results of the inferences are
@@ -85,7 +84,7 @@ The main C++ entry point for the backward chainer is the `do_chain`
 function.
 
 Similarly to the Forward Chainer there exist a scheme primitive
-`(cog-bc *rule-base* *target* *vardecl* *focus-set*)` for calling the
+`(cog-bc *rule-base* *target* *#:vardecl* *#:focus-set*)` for calling the
 Backward Chainer in scheme. The arguments are the same as for a
 Forward Chainer call expect that *source* is replaced by *target*.
 
