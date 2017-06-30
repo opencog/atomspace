@@ -58,6 +58,7 @@ protected:
 	 * @param rbs          A node, holding the name of the rulebase.
 	 * @param target       The target atom with which to start the chaining from.
 	 * @param vardecl      The variable declaration, if any, of the target.
+	 * @param trace_as     AtomSpace where to record the back-inference traces
 	 * @param focus_set    A SetLink containing the atoms to which forward
 	 *                     chaining will be applied.  If the set link is
 	 *                     empty, chaining will be invoked on the entire
@@ -68,6 +69,8 @@ protected:
 	Handle do_backward_chaining(Handle rbs,
 	                            Handle target,
 	                            Handle vardecl,
+	                            bool trace_enabled,
+	                            AtomSpace* trace_as,
 	                            Handle focus_set);
 
 	Handle get_rulebase_rules(Handle rbs);
@@ -132,14 +135,19 @@ Handle InferenceSCM::do_forward_chaining(Handle rbs,
 Handle InferenceSCM::do_backward_chaining(Handle rbs,
                                           Handle target,
                                           Handle vardecl,
+                                          bool trace_enabled,
+                                          AtomSpace* trace_as,
                                           Handle focus_link)
 {
     // A ListLink means that the variable declaration is undefined
     if (vardecl->getType() == LIST_LINK)
 	    vardecl = Handle::UNDEFINED;
 
+    if (not trace_enabled)
+	    trace_as = nullptr;
+
     AtomSpace *as = SchemeSmob::ss_get_env_as("cog-mandatory-args-bc");
-    BackwardChainer bc(*as, rbs, target, vardecl, nullptr, focus_link);
+    BackwardChainer bc(*as, rbs, target, vardecl, trace_as, focus_link);
 
     bc.do_chain();
 
