@@ -152,18 +152,18 @@ private:
 	void record_expansion(const Handle& andbit_fcs, const Handle& bitleaf_body,
 	                      const Rule& rule, const AndBIT& new_andbit);
 
-	// Record whether a certain and-BIT is a proof
+	// Record whether a certain and-BIT is a proof of a certain target result
 	//
 	// EvaluationLink <TV>
 	//   PredicateNode "URE:BC:proof"
 	//   List
-	//     <andbit>
-	//     <target> <TV>
+	//     <andbit_fcs>
+	//     <target_result> <TV>
 	//
 	// If the TV on the target has a greater than zero confidence it
 	// is reported to the EvaluationLink, otherwise it is not
 	// recorded.
-	void record_proof(const AndBIT& andbit, const Handle& target);
+	void record_proof(const Handle& andbit_fcs, const Handle& target_result);
 
 	// Fulfill the BIT. That is run some or all its and-BITs
 	void fulfill_bit();

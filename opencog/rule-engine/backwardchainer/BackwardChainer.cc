@@ -215,16 +215,17 @@ void BackwardChainer::record_expansion(const Handle& andbit_fcs,
 	}
 }
 
-void BackwardChainer::record_proof(const AndBIT& andbit, const Handle& target)
+void BackwardChainer::record_proof(const Handle& andbit_fcs,
+                                   const Handle& target_result)
 {
 	if (_trace_as) {
-		TruthValuePtr tv = target->getTruthValue();
+		TruthValuePtr tv = target_result->getTruthValue();
 		if (0 < tv->getConfidence()) {
 			Handle proof_pred = _trace_as->add_node(PREDICATE_NODE, "URE:BC:proof");
 			Handle proof = _trace_as->add_link(PREDICATE_NODE, proof_pred,
 			                                   _trace_as->add_link(LIST_LINK,
-			                                                       andbit.fcs,
-			                                                       target));
+			                                                       andbit_fcs,
+			                                                       target_result));
 			proof->setTruthValue(tv);
 		}
 	}
