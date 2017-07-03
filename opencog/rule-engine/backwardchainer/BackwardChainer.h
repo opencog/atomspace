@@ -145,12 +145,12 @@ private:
 	// ExecutionLink (stv 1 1)
 	//   SchemaNode "URE:BC:expand-bit"
 	//   List
-	//     <andbit>
-	//     <bitleaf>
+	//     <andbit_fcs>
+	//     <bitleaf_body>
 	//     <rule>
-	//   <resulting_andbit>
-	void record_expansion(const AndBIT& andbit, const BITNode& bitleaf,
-	                      const Rule& rule, const AndBIT& resulting_andbit);
+	//   <new_andbit>
+	void record_expansion(const Handle& andbit_fcs, const Handle& bitleaf_body,
+	                      const Rule& rule, const AndBIT& new_andbit);
 
 	// Record whether a certain and-BIT is a proof
 	//

@@ -186,25 +186,33 @@ void BackwardChainer::expand_bit(AndBIT& andbit)
 	LAZY_URE_LOG_DEBUG << "Selected rule for BIT expansion:" << std::endl
 	                   << rule.to_string();
 
+	// Expand andbit. Warning: after this call the reference on andbit
+	// and bitleaf may no longer be valid because the container of
+	// and-BITs might have been resorted. so we keep track of their
+	// bodies for future use.
+	Handle andbit_fcs = andbit.fcs;
+	Handle bitleaf_body = bitleaf->body;
 	_last_expansion_andbit = _bit.expand(andbit, *bitleaf, {rule, ts});
-
+	
 	// Record expansion
-	record_expansion(andbit, *bitleaf, rule, *_last_expansion_andbit);
+	if (_last_expansion_andbit)
+		record_expansion(andbit_fcs, bitleaf_body, rule, *_last_expansion_andbit);
 }
 
-void BackwardChainer::record_expansion(const AndBIT& andbit,
-                                       const BITNode& bitleaf,
+void BackwardChainer::record_expansion(const Handle& andbit_fcs,
+                                       const Handle& bitleaf_body,
                                        const Rule& rule,
-                                       const AndBIT& resulting_andbit)
+                                       const AndBIT& new_andbit)
 {
-	if (_trace_as)
-		_trace_as->add_link(EXECUTION_LINK,
-		                    _trace_as->add_node(SCHEMA_NODE, "URE:BC:expand-bit"),
-		                    _trace_as->add_link(LIST_LINK,
-		                                        andbit.fcs,
-		                                        bitleaf.body,
-		                                        rule.get_definition()),
-		                    resulting_andbit.fcs);
+	if (_trace_as) {
+		Handle schema = _trace_as->add_node(SCHEMA_NODE, "URE:BC:expand-bit");
+		Handle input = _trace_as->add_link(LIST_LINK,
+		                                  andbit_fcs,
+		                                  bitleaf_body,
+		                                  rule.get_definition());
+		Handle output = new_andbit.fcs;
+		_trace_as->add_link(EXECUTION_LINK, schema, input, output);
+	}
 }
 
 void BackwardChainer::record_proof(const AndBIT& andbit, const Handle& target)
