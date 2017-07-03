@@ -189,21 +189,37 @@ void BackwardChainer::expand_bit(AndBIT& andbit)
 	_last_expansion_andbit = _bit.expand(andbit, *bitleaf, {rule, ts});
 
 	// Record expansion
-	if (_trace_as)
-		record_expansion(andbit, *bitleaf, rule, *_last_expansion_andbit);
+	record_expansion(andbit, *bitleaf, rule, *_last_expansion_andbit);
 }
 
 void BackwardChainer::record_expansion(const AndBIT& andbit,
                                        const BITNode& bitleaf,
                                        const Rule& rule,
-                                       const AndBIT& resulting_andbit) const
+                                       const AndBIT& resulting_andbit)
 {
-	_trace_as->add_link(EXECUTION_LINK,
-	                    _trace_as->add_link(LIST_LINK,
-	                                        andbit.fcs,
-	                                        bitleaf.body,
-	                                        rule.get_definition()),
-	                    resulting_andbit.fcs);
+	if (_trace_as)
+		_trace_as->add_link(EXECUTION_LINK,
+		                    _trace_as->add_node(SCHEMA_NODE, "URE:BC:expand-bit"),
+		                    _trace_as->add_link(LIST_LINK,
+		                                        andbit.fcs,
+		                                        bitleaf.body,
+		                                        rule.get_definition()),
+		                    resulting_andbit.fcs);
+}
+
+void BackwardChainer::record_proof(const AndBIT& andbit, const Handle& target)
+{
+	if (_trace_as) {
+		TruthValuePtr tv = target->getTruthValue();
+		if (0 < tv->getConfidence()) {
+			Handle proof_pred = _trace_as->add_node(PREDICATE_NODE, "URE:BC:proof");
+			Handle proof = _trace_as->add_link(PREDICATE_NODE, proof_pred,
+			                                   _trace_as->add_link(LIST_LINK,
+			                                                       andbit.fcs,
+			                                                       target));
+			proof->setTruthValue(tv);
+		}
+	}
 }
 
 void BackwardChainer::fulfill_bit()
@@ -248,6 +264,10 @@ void BackwardChainer::fulfill_fcs(const Handle& fcs)
 		results.push_back(_as.add_atom(result));
 	LAZY_URE_LOG_DEBUG << "Results:" << std::endl << results;
 	_results.insert(results.begin(), results.end());
+
+	// Record the results in _trace_as
+	for (const Handle& result : results)
+		record_proof(fcs, result);
 }
 
 std::vector<double> BackwardChainer::expansion_anbit_weights()

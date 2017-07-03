@@ -140,7 +140,7 @@ private:
 	// will keep a record of the expansion if successful.
 	void expand_bit(AndBIT& andbit);
 
-	// Record expansion to _trace_as
+	// Record and-BIT expansion to _trace_as
 	//
 	// ExecutionLink (stv 1 1)
 	//   SchemaNode "URE:BC:expand-bit"
@@ -150,7 +150,20 @@ private:
 	//     <rule>
 	//   <resulting_andbit>
 	void record_expansion(const AndBIT& andbit, const BITNode& bitleaf,
-	                      const Rule& rule, const AndBIT& resulting_andbit) const;
+	                      const Rule& rule, const AndBIT& resulting_andbit);
+
+	// Record whether a certain and-BIT is a proof
+	//
+	// EvaluationLink <TV>
+	//   PredicateNode "URE:BC:proof"
+	//   List
+	//     <andbit>
+	//     <target> <TV>
+	//
+	// If the TV on the target has a greater than zero confidence it
+	// is reported to the EvaluationLink, otherwise it is not
+	// recorded.
+	void record_proof(const AndBIT& andbit, const Handle& target);
 
 	// Fulfill the BIT. That is run some or all its and-BITs
 	void fulfill_bit();
