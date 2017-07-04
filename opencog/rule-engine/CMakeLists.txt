@@ -6,7 +6,6 @@ ADD_LIBRARY(ruleengine
 	backwardchainer/BackwardChainerPMCB
 	backwardchainer/BIT
 	backwardchainer/Fitness
-	backwardchainer/UnifyPMCB
 	forwardchainer/FCStat
 	forwardchainer/ForwardChainer
 	URELogger

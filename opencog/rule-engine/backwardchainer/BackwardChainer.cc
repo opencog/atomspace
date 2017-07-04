@@ -40,7 +40,6 @@
 
 #include "BackwardChainer.h"
 #include "BackwardChainerPMCB.h"
-#include "UnifyPMCB.h"
 #include "../URELogger.h"
 
 using namespace opencog;
