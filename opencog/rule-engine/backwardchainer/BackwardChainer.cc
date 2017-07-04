@@ -204,7 +204,7 @@ void BackwardChainer::record_expansion(const Handle& andbit_fcs,
                                        const AndBIT& new_andbit)
 {
 	if (_trace_as) {
-		Handle schema = _trace_as->add_node(SCHEMA_NODE, "URE:BC:expand-bit");
+		Handle schema = _trace_as->add_node(SCHEMA_NODE, "URE:BC:expand-and-BIT");
 		Handle input = _trace_as->add_link(LIST_LINK,
 		                                  andbit_fcs,
 		                                  bitleaf_body,

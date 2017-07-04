@@ -143,7 +143,7 @@ private:
 	// Record and-BIT expansion to _trace_as
 	//
 	// ExecutionLink (stv 1 1)
-	//   SchemaNode "URE:BC:expand-bit"
+	//   SchemaNode "URE:BC:expand-and-BIT"
 	//   List
 	//     <andbit_fcs>
 	//     <bitleaf_body>
