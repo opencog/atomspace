@@ -263,7 +263,7 @@
   make-cosine-matrix LLOBJ - Provide a cosine-matrix form of LLOBJ.
 
   Given an LLOBJ whose 'pair-count returns values N(x,y), one can define
-  another matrix such that the rows or columns are normailized to be unit
+  another matrix such that the rows or columns are normalized to be unit
   vectors.  That is, one can define the left-unit
 
      L(x,y) = N(x,y) / sqrt(sum_u N^2(u,y))
@@ -278,7 +278,7 @@
   We call it the 'left similarity' to emphasize that the summation is
   taking place over the left index.
 
-  The LLOBJ object needs to provide the 'pair-freq method.
+  The LLOBJ object needs to provide the 'pair-count method.
 "
 	(let* ((star-obj (add-pair-stars LLOBJ))
 			(supp-obj (add-support-compute star-obj GET-CNT))
