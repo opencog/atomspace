@@ -56,6 +56,8 @@
 ; -- random-node-name  -- Generate a random name for a node of given type.
 ; -- choose-var-name -- Generate a random name for a variable.
 ; -- cog-new-flattened-link -- Create flattened link
+; -- cog-cp -- Copy list of atoms from one atomspace to another
+; -- cog-cp-all -- Copy all atoms from one atomspace to another
 ;
 ;;; Code:
 ; Copyright (c) 2008, 2013, 2014 Linas Vepstas <linasvepstas@gmail.com>
@@ -1204,7 +1206,7 @@
 ; -----------------------------------------------------------------------
 (define-public (cog-cp LST AS)
 "
-  cog-cp LST AS - Copys the atoms in LST to the given atomspace AS and returns #t on success.
+  cog-cp LST AS - Copy the atoms in LST to the given atomspace AS and returns #t on success.
 "
   (define initial-as (cog-atomspace))
 
@@ -1221,6 +1223,15 @@
   (cog-set-atomspace! initial-as)
   #t
 )
+
+; -----------------------------------------------------------------------
+(define-public (cog-cp-all AS)
+"
+  cog-cp-all AS - Copy all atoms in the current atomspace to the given atomspace AS and returns #t on success.
+"
+  (cog-cp (apply append (map cog-get-atoms (cog-get-types))) AS)
+)
+
 ; -----------------------------------------------------------------------
 
 ; A list of all the public (exported) utilities in this file
@@ -1289,6 +1300,8 @@
 'random-node-name
 'choose-var-name
 'cog-new-flattened-link
+'cog-cp
+'cog-cp-all
 ))
 
 ; Compile 'em all.  This should improve performance a bit.
