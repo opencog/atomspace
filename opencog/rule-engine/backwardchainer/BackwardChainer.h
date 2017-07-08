@@ -29,6 +29,7 @@
 #include <opencog/rule-engine/UREConfigReader.h>
 
 #include "BIT.h"
+#include "TraceRecorder.h"
 
 class BackwardChainerUTest;
 
@@ -223,7 +224,7 @@ private:
 	AtomSpace& _as;
 
 	// Optional atomspace where the inference traces will be recorded
-	AtomSpace* _trace_as;
+	TraceRecorder _trace_recorder;
 
 	// Contain the configuration
 	UREConfigReader _configReader;

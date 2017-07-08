@@ -3,6 +3,7 @@
 #
 ADD_LIBRARY(ruleengine
 	backwardchainer/BackwardChainer
+	backwardchainer/TraceRecorder
 	backwardchainer/BackwardChainerPMCB
 	backwardchainer/BIT
 	backwardchainer/Fitness

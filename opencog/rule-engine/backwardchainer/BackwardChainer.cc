@@ -53,7 +53,7 @@ BackwardChainer::BackwardChainer(AtomSpace& as, const Handle& rbs,
                                                           // focus_set
                                  const BITNodeFitness& bitnode_fitness,
                                  const AndBITFitness& andbit_fitness)
-	: _as(as), _trace_as(trace_as), _configReader(as, rbs),
+	: _as(as), _trace_recorder(trace_as), _configReader(as, rbs),
 	  _bit(as, target, vardecl, bitnode_fitness),
 	  _andbit_fitness(andbit_fitness),
 	  _iteration(0), _last_expansion_andbit(nullptr),
@@ -195,39 +195,8 @@ void BackwardChainer::expand_bit(AndBIT& andbit)
 	
 	// Record expansion
 	if (_last_expansion_andbit)
-		record_expansion(andbit_fcs, bitleaf_body, rule, *_last_expansion_andbit);
-}
-
-void BackwardChainer::record_expansion(const Handle& andbit_fcs,
-                                       const Handle& bitleaf_body,
-                                       const Rule& rule,
-                                       const AndBIT& new_andbit)
-{
-	if (_trace_as) {
-		Handle schema = _trace_as->add_node(SCHEMA_NODE, "URE:BC:expand-and-BIT");
-		Handle input = _trace_as->add_link(LIST_LINK,
-		                                  andbit_fcs,
-		                                  bitleaf_body,
-		                                  rule.get_definition());
-		Handle output = new_andbit.fcs;
-		_trace_as->add_link(EXECUTION_LINK, schema, input, output);
-	}
-}
-
-void BackwardChainer::record_proof(const Handle& andbit_fcs,
-                                   const Handle& target_result)
-{
-	if (_trace_as) {
-		TruthValuePtr tv = target_result->getTruthValue();
-		if (0 < tv->getConfidence()) {
-			Handle proof_pred = _trace_as->add_node(PREDICATE_NODE, "URE:BC:proof");
-			Handle proof = _trace_as->add_link(PREDICATE_NODE, proof_pred,
-			                                   _trace_as->add_link(LIST_LINK,
-			                                                       andbit_fcs,
-			                                                       target_result));
-			proof->setTruthValue(tv);
-		}
-	}
+		_trace_recorder.record_expansion(andbit_fcs, bitleaf_body,
+		                                 rule, *_last_expansion_andbit);
 }
 
 void BackwardChainer::fulfill_bit()
@@ -275,7 +244,7 @@ void BackwardChainer::fulfill_fcs(const Handle& fcs)
 
 	// Record the results in _trace_as
 	for (const Handle& result : results)
-		record_proof(fcs, result);
+		_trace_recorder.record_proof(fcs, result);
 }
 
 std::vector<double> BackwardChainer::expansion_anbit_weights()
