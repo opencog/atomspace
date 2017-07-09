@@ -195,8 +195,8 @@ void BackwardChainer::expand_bit(AndBIT& andbit)
 	
 	// Record expansion
 	if (_last_expansion_andbit)
-		_trace_recorder.record_expansion(andbit_fcs, bitleaf_body,
-		                                 rule, *_last_expansion_andbit);
+		_trace_recorder.expansion(andbit_fcs, bitleaf_body,
+		                          rule, *_last_expansion_andbit);
 }
 
 void BackwardChainer::fulfill_bit()
@@ -244,7 +244,7 @@ void BackwardChainer::fulfill_fcs(const Handle& fcs)
 
 	// Record the results in _trace_as
 	for (const Handle& result : results)
-		_trace_recorder.record_proof(fcs, result);
+		_trace_recorder.proof(fcs, result);
 }
 
 std::vector<double> BackwardChainer::expansion_anbit_weights()

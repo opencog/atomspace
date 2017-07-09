@@ -36,6 +36,25 @@ class TraceRecorder
 public:
 	TraceRecorder(AtomSpace* tr_as);
 
+	const std::string target_predicate_name = "URE:BC:target";
+	const std::string andbit_predicate_name = "URE:BC:and-BIT";
+	const std::string expand_andbit_predicate_name = "URE:BC:expand-and-BIT";
+	const std::string proof_predicate_name = "URE:BC:proof";
+	
+	// Record that an atom is a target
+	//
+	// Evaluation (stv 1 1)
+	//   Predicate "URE:BC:target"
+	//   <target>
+	void target(const Handle& target);
+
+	// Record that an atom is an and-BIT
+	//
+	// Evaluation (stv 1 1)
+	//   Predicate "URE:BC:and-BIT"
+	//   <and-BIT>
+	void andbit(const AndBIT& andbit);
+
 	// Record and-BIT expansion to _trace_as
 	//
 	// ExecutionLink (stv 1 1)
@@ -45,8 +64,12 @@ public:
 	//     <bitleaf_body>
 	//     <rule>
 	//   <new_andbit>
-	void record_expansion(const Handle& andbit_fcs, const Handle& bitleaf_body,
-	                      const Rule& rule, const AndBIT& new_andbit);
+	//
+	// The andbit and its bitleaf are passed as Handles because by the
+	// time this called they have gotten corrupted (but not their
+	// handles).
+	void expansion(const Handle& andbit_fcs, const Handle& bitleaf_body,
+	               const Rule& rule, const AndBIT& new_andbit);
 
 	// Record whether a certain and-BIT is a proof of a certain target result
 	//
@@ -59,10 +82,60 @@ public:
 	// If the TV on the target has a greater than zero confidence it
 	// is reported to the EvaluationLink, otherwise it is not
 	// recorded.
-	void record_proof(const Handle& andbit_fcs, const Handle& target_result);
+	//
+	// TODO: the TV on the evaluation link should be more carefully
+	// thought. For instance maybe it was already proved to begin
+	// with.
+	void proof(const Handle& andbit_fcs, const Handle& target_result);
 
 private:
 	AtomSpace* _trace_as;
+
+	// Add
+	//
+	// Execution <tv>
+	//   Schema <schema_name>
+	//   <input>
+	//   <output>
+	Handle add_execution(const std::string& schema_name,
+	                     const Handle& input, const Handle& output,
+	                     TruthValuePtr tv);
+
+	// Add
+	//
+	// Execution <tv>
+	//   Schema <schema_name>
+	//   List
+	//     <input1>
+	//     <input2>
+	//     <input3>
+	//   <output>
+	Handle add_execution(const std::string& schema_name,
+	                     const Handle& input1,
+	                     const Handle& input2,
+	                     const Handle& input3,
+	                     const Handle& output,
+	                     TruthValuePtr tv);
+
+	// Add
+	//
+	// Evaluation <tv>
+	//   Predicate <predicate_name>
+	//   <argument>
+	Handle add_evaluation(const std::string& predicate_name,
+	                      const Handle& argument,
+	                      TruthValuePtr tv);
+
+	// Add
+	//
+	// Evaluation <tv>
+	//   Predicate <predicate_name>
+	//   List
+	//     <arg1>
+	//     <arg2>
+	Handle add_evaluation(const std::string& predicate_name,
+	                      const Handle& arg1, const Handle& arg2,
+	                      TruthValuePtr tv);
 };
 
 

@@ -27,34 +27,78 @@ using namespace opencog;
 
 TraceRecorder::TraceRecorder(AtomSpace* tr_as) : _trace_as(tr_as) {}
 
-void TraceRecorder::record_expansion(const Handle& andbit_fcs,
-                                     const Handle& bitleaf_body,
-                                     const Rule& rule,
-                                     const AndBIT& new_andbit)
+void TraceRecorder::target(const Handle& target)
 {
-	if (_trace_as) {
-		Handle schema = _trace_as->add_node(SCHEMA_NODE, "URE:BC:expand-and-BIT");
-		Handle input = _trace_as->add_link(LIST_LINK,
-		                                  andbit_fcs,
-		                                  bitleaf_body,
-		                                  rule.get_definition());
-		Handle output = new_andbit.fcs;
-		_trace_as->add_link(EXECUTION_LINK, schema, input, output);
-	}
+	add_evaluation(target_predicate_name, target, TruthValue::TRUE_TV());
 }
 
-void TraceRecorder::record_proof(const Handle& andbit_fcs,
-                                 const Handle& target_result)
+void TraceRecorder::andbit(const AndBIT& andbit)
 {
-	if (_trace_as) {
-		TruthValuePtr tv = target_result->getTruthValue();
-		if (0 < tv->getConfidence()) {
-			Handle proof_pred = _trace_as->add_node(PREDICATE_NODE, "URE:BC:proof");
-			Handle proof = _trace_as->add_link(PREDICATE_NODE, proof_pred,
-			                                   _trace_as->add_link(LIST_LINK,
-			                                                       andbit_fcs,
-			                                                       target_result));
-			proof->setTruthValue(tv);
-		}
-	}
+	add_evaluation(andbit_predicate_name, andbit.fcs, TruthValue::TRUE_TV());
+}
+
+void TraceRecorder::expansion(const Handle& andbit_fcs, const Handle& bitleaf_body,
+                              const Rule& rule, const AndBIT& new_andbit)
+{
+	add_execution(expand_andbit_predicate_name,
+	              andbit_fcs, bitleaf_body, rule.get_definition(),
+	              new_andbit.fcs, TruthValue::TRUE_TV());
+}
+
+void TraceRecorder::proof(const Handle& andbit_fcs, const Handle& target_result)
+{
+	add_evaluation(proof_predicate_name,
+	               andbit_fcs, target_result,
+	               target_result->getTruthValue());
+}
+
+Handle TraceRecorder::add_execution(const std::string& schema_name,
+                                    const Handle& input, const Handle& output,
+                                    TruthValuePtr tv)
+{
+	if (not _trace_as)
+		return Handle::UNDEFINED;
+
+	Handle schema = _trace_as->add_node(SCHEMA_NODE, schema_name);
+	Handle execution = _trace_as->add_link(EXECUTION_LINK, schema, input, output);
+	execution->setTruthValue(tv);
+	return execution;
+}
+
+Handle TraceRecorder::add_execution(const std::string& schema_name,
+                                    const Handle& input1,
+                                    const Handle& input2,
+                                    const Handle& input3,
+                                    const Handle& output,
+                                    TruthValuePtr tv)
+{
+	if (not _trace_as)
+		return Handle::UNDEFINED;
+
+	Handle inputs = _trace_as->add_link(LIST_LINK, input1, input2, input3);
+	return add_execution(schema_name, inputs, output, tv);
+}
+
+Handle TraceRecorder::add_evaluation(const std::string& predicate_name,
+                                     const Handle& argument,
+                                     TruthValuePtr tv)
+{
+	if (not _trace_as)
+		return Handle::UNDEFINED;
+	
+	Handle predicate = _trace_as->add_node(PREDICATE_NODE, predicate_name);
+	Handle evaluation = _trace_as->add_link(EVALUATION_LINK, predicate, argument);
+	evaluation->setTruthValue(tv);
+	return evaluation;
+}
+
+Handle TraceRecorder::add_evaluation(const std::string& predicate_name,
+                                     const Handle& arg1, const Handle& arg2,
+                                     TruthValuePtr tv)
+{
+	if (not _trace_as)
+		return Handle::UNDEFINED;
+
+	Handle arguments = _trace_as->add_link(LIST_LINK, arg1, arg2);
+	return add_evaluation(predicate_name, arguments, tv);
 }
