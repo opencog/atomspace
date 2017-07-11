@@ -40,7 +40,7 @@ public:
 	const std::string andbit_predicate_name = "URE:BC:and-BIT";
 	const std::string expand_andbit_predicate_name = "URE:BC:expand-and-BIT";
 	const std::string proof_predicate_name = "URE:BC:proof";
-	
+
 	// Record that an atom is a target
 	//
 	// Evaluation (stv 1 1)

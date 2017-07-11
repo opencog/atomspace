@@ -58,6 +58,8 @@ BackwardChainer::BackwardChainer(AtomSpace& as, const Handle& rbs,
 	  _andbit_fitness(andbit_fitness),
 	  _iteration(0), _last_expansion_andbit(nullptr),
 	  _rules(_configReader.get_rules()) {
+	// Record the target in the trace atomspace
+	_trace_recorder.target(target);
 }
 
 UREConfigReader& BackwardChainer::get_config()
@@ -132,6 +134,8 @@ void BackwardChainer::expand_bit()
 
 	if (_bit.empty()) {
 		_last_expansion_andbit = _bit.init();
+		// Record the initial and-BIT in the trace atomspace
+		_trace_recorder.andbit(*_last_expansion_andbit);
 	} else {
 		// Select an FCS (i.e. and-BIT) and expand it
 		AndBIT* andbit = select_expansion_andbit();
@@ -193,8 +197,9 @@ void BackwardChainer::expand_bit(AndBIT& andbit)
 	Handle bitleaf_body = bitleaf->body;
 	_last_expansion_andbit = _bit.expand(andbit, *bitleaf, {rule, ts});
 	
-	// Record expansion
+	// Record the expansion in the trace atomspace
 	if (_last_expansion_andbit)
+		_trace_recorder.andbit(*_last_expansion_andbit);
 		_trace_recorder.expansion(andbit_fcs, bitleaf_body,
 		                          rule, *_last_expansion_andbit);
 }
