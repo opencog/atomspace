@@ -460,7 +460,7 @@
 							(define right-item (gdr lipr))
 							(if (< 0 (cntobj 'left-wild-count right-item))
 								(let* ((l-logli (frqobj 'left-wild-logli right-item))
-										(fmi (- pr-logli (+ r-logli l-logli)))
+										(fmi (- (+ r-logli l-logli) pr-logli))
 										(mi (* pr-freq fmi))
 										(atom (frqobj 'set-pair-mi lipr mi fmi)))
 									(set! all-atoms (cons atom all-atoms))
