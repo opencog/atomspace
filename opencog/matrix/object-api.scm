@@ -480,6 +480,9 @@
   'pair-mi PAIR      -- return +P(x,y) log_2 P(x,y) / [P(x,*) P(*,y)]
   'pair-fmi PAIR     -- return +log_2 P(x,y) / [P(x,*) P(*,y)]
 
+  Note the sign convention for the mutual information - it is PLUS log.
+  This agrees with both Deniz Yuret and with  Wikipedia!
+
   In the methods below, ATOM is either the atom x or the atom y.
 
   'left-wild-freq ATOM   -- return P(*,y) == sum_x P(x,y)
