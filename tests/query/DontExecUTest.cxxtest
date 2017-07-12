@@ -83,7 +83,7 @@ void DontExecUTest::test_DontExecLink_consumption()
 	Handle bl = eval.eval_h("bl");
 	Handle result = bindlink(&as, bl);
 	Handle simple_bl = eval.eval_h("simple-bl");
-	Handle expected = al(SET_LINK, simple_bl);
+	Handle expected = al(SET_LINK, al(DONT_EXEC_LINK, simple_bl));
 
 	logger().debug() << "result = " << oc_to_string(result);
 	logger().debug() << "expected = " << oc_to_string(expected);
