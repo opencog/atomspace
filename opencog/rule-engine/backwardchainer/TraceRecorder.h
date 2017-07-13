@@ -91,6 +91,12 @@ public:
 private:
 	AtomSpace* _trace_as;
 
+	// Wrap a DontExecLink around h
+	//
+	// DontExecLink
+	//   h
+	Handle dont_exec(const Handle& h);
+
 	// Add
 	//
 	// Execution <tv>

@@ -34,22 +34,33 @@ void TraceRecorder::target(const Handle& target)
 
 void TraceRecorder::andbit(const AndBIT& andbit)
 {
-	add_evaluation(andbit_predicate_name, andbit.fcs, TruthValue::TRUE_TV());
+	add_evaluation(andbit_predicate_name,
+	               dont_exec(andbit.fcs),
+	               TruthValue::TRUE_TV());
 }
 
 void TraceRecorder::expansion(const Handle& andbit_fcs, const Handle& bitleaf_body,
                               const Rule& rule, const AndBIT& new_andbit)
 {
 	add_execution(expand_andbit_predicate_name,
-	              andbit_fcs, bitleaf_body, rule.get_definition(),
-	              new_andbit.fcs, TruthValue::TRUE_TV());
+	              dont_exec(andbit_fcs), bitleaf_body,
+	              dont_exec(rule.get_definition()),
+	              dont_exec(new_andbit.fcs), TruthValue::TRUE_TV());
 }
 
 void TraceRecorder::proof(const Handle& andbit_fcs, const Handle& target_result)
 {
 	add_evaluation(proof_predicate_name,
-	               andbit_fcs, target_result,
+	               dont_exec(andbit_fcs), target_result,
 	               target_result->getTruthValue());
+}
+
+Handle TraceRecorder::dont_exec(const Handle& h)
+{
+	if (not _trace_as)
+		return Handle::UNDEFINED;
+
+	return _trace_as->add_link(DONT_EXEC_LINK, h);
 }
 
 Handle TraceRecorder::add_execution(const std::string& schema_name,
