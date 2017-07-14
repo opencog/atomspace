@@ -169,6 +169,12 @@ This is called the `right-star` because the right-side of the pair is
 a wild-card.  These methods are useful for iterating over all rows and
 columns of the correlation matrix.
 
+The `add-loop-api` class provides methods to loop over all non-zero
+pairs in the matrix, and invoke a function on them. There are two
+methods:  `for-each-pair`, which simply calls the function for each
+pair, and a `map-pair` method which returns a list of the results of
+calling the function on each pair.
+
 The `make-compute-count` class provides methods to compute the partial
 sums `N(*,y)` and `N(x,*)` and cache the resulting values on atoms where
 they can be quickly retreived. The location of the cached values are
