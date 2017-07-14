@@ -32,7 +32,7 @@
 ; Extend the LLOBJ with additional methods to loop over all pairs
 ; in a matrix.
 ;
-(define (add-loop-api LLOBJ)
+(define-public (add-loop-api LLOBJ)
 
 	; We need 'left-basis, provided by add-pair-stars
 	(let ((wldobj (add-pair-stars LLOBJ)))
