@@ -33,23 +33,25 @@ In the general, generic case, we might want to observe not just these
 predicates. We are interested, perhaps, not just in `WordNode`'s but
 in relations between, say, `ConceptNodes` and `ContextLink`s.
 
-The count can be stored anywhere, as the `'pair-count` method is used
-to obtain it.  In most cases, it is simply stored in a CountTruthValue
-attached to the EvaluationLink.  It's doesn't have to be, it could be
-placed elsewhere.
-
 The core idea is that the atomspace can hold sparse matrix data; in a
 certain sense, the atomspace was designed from the get-go to do exactly
-that. Once you can see that its a matrix, you can then apply a variety
-of generic matrix analysis tools to it.  The tools implemented here
-include:
+that. Once you realize that your data can be seen as a kind of matrix,
+you can then apply a variety of generic matrix analysis tools to it.
+The tools implemented here include:
 
- * row and column subtotals
+ * row and column subtotals (i.e. "marginals")
  * computing and caching frequencies from counts.
  * computing and caching mutual information between rows and columns
  * computing cosine similarity between rows or columns.
  * performing PCA (principal component analysis) in the matrix.
  * performing cuts, to remove unwanted rows, coumns and individual entries.
+
+To use these tools, all you need to do is to specify a low-level
+object that describes the matrix. It needs to provide some very simple
+but important mthods: the `'left-type` and `'right-type` methods,
+that return the atom type of the rows and the columns; a `'pair-type`
+method that returns the atom-type of the pair, and a `'pair-count`
+method that returns the count, given the pair.
 
 
 FAQ
