@@ -1,19 +1,20 @@
 ;
 ; loop-api.scm
 ;
-; Loop over all pairs of items.
+; Loop over all pairs of items in a sparse matrix.
 ;
 ; Copyright (c) 2017 Linas Vepstas
 ;
 ; ---------------------------------------------------------------------
 ; OVERVIEW
 ; --------
-; The matrix object API below provides several different looping
-; constructs, to vist every non-zero entry in a sparse matrix.
-; The matrix is accessed using the wild-card stars object.
+; Sometimes, one needs to loop over all matrix entries. This is not
+; hard to do, and most users can easily do this. However, if you are
+; lazy, and prefer reading docs, then the below provides two methods
+; to visit every non-zero entry in a sparse matrix.
 ;
-; In the general case, access to this structure is provided by methods
-; on the "low-level API". These include:
+; The matrix is accessed using the wild-card stars object, and
+; specifically uses thse methods:
 ;   'item-pair, which should return high-level pair, given the
 ;        low-level pair.
 ;   'left-basis and 'right-basis, providing a list of all rows and columns
@@ -28,13 +29,8 @@
 ; ---------------------------------------------------------------------
 ; ---------------------------------------------------------------------
 ;
-; Extend the LLOBJ with additional methods to compute observation
-; frequencies and entropies for pairs, including partial-sum entropies
-; (mutual information) for the left and right side of each pair.
-;
-; The LLOBJ must have valid left and right wild-card counts on it.
-; These need to have been previously computed, before methods on
-; this class are called.
+; Extend the LLOBJ with additional methods to loop over all pairs
+; in a matrix.
 ;
 (define (loop-api LLOBJ)
 
