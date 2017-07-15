@@ -138,7 +138,7 @@ https://en.wikipedia.org/wiki/Generic_programming
 
 This code is written in scheme.  I know some of you want to use python
 instead, while others would prefer C++.  More generally, it would
-proably be useful to set things up so that external, third-party
+probably be useful to set things up so that external, third-party
 software systems (such as scipy or Gnu Octave or tensorflow) could
 be used to perform the analysis.  Now that you've got the general
 idea... you can go do this!
@@ -167,6 +167,8 @@ The `add-pair-count-api` class provides an API to report the parital
 sums `N(x,*) = sum_y N(x,y)` and likewise `N(*,y)`.  If you think of
 `N(x,y)` as a matrix, these are the totals for the entries in each
 row or column of the matrix. Likewise, `N(*,*) = sum_x sum_y N(x,y)`.
+In statistics, these are called "marginals", because you write the
+subtotals in the "margins" of your table.
 
 The `add-pair-freq-api` class provides an API to report the frequencies
 of pairs, and the partial sums over rows and columns. The frequency
@@ -273,7 +275,7 @@ element-by-element min or max of a set of columns, counting the number
 of entries that are simultaneously non-zero in sets of columns, etc.
 
 
-Principle Component Analysis
+Principal Component Analysis
 ----------------------------
 A power iteration object is provided by the `make-power-iter-pca`
 object.  Once a matrix `X` has been specified, this will iterate on
