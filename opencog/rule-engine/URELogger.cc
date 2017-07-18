@@ -29,7 +29,7 @@ using namespace opencog;
 Logger& opencog::ure_logger()
 {
 	auto bc_logger_instantiate = []() {
-		Logger tmp(logger());
+		Logger tmp;
 		tmp.set_component("URE");
 		return tmp;
 	};
