@@ -40,7 +40,6 @@
 
 #include "BackwardChainer.h"
 #include "BackwardChainerPMCB.h"
-#include "UnifyPMCB.h"
 #include "../URELogger.h"
 
 using namespace opencog;
@@ -54,11 +53,13 @@ BackwardChainer::BackwardChainer(AtomSpace& as, const Handle& rbs,
                                                           // focus_set
                                  const BITNodeFitness& bitnode_fitness,
                                  const AndBITFitness& andbit_fitness)
-	: _as(as), _trace_as(trace_as), _configReader(as, rbs),
+	: _as(as), _trace_recorder(trace_as), _configReader(as, rbs),
 	  _bit(as, target, vardecl, bitnode_fitness),
 	  _andbit_fitness(andbit_fitness),
 	  _iteration(0), _last_expansion_andbit(nullptr),
 	  _rules(_configReader.get_rules()) {
+	// Record the target in the trace atomspace
+	_trace_recorder.target(target);
 }
 
 UREConfigReader& BackwardChainer::get_config()
@@ -133,6 +134,8 @@ void BackwardChainer::expand_bit()
 
 	if (_bit.empty()) {
 		_last_expansion_andbit = _bit.init();
+		// Record the initial and-BIT in the trace atomspace
+		_trace_recorder.andbit(*_last_expansion_andbit);
 	} else {
 		// Select an FCS (i.e. and-BIT) and expand it
 		AndBIT* andbit = select_expansion_andbit();
@@ -186,24 +189,19 @@ void BackwardChainer::expand_bit(AndBIT& andbit)
 	LAZY_URE_LOG_DEBUG << "Selected rule for BIT expansion:" << std::endl
 	                   << rule.to_string();
 
+	// Expand andbit. Warning: after this call the reference on andbit
+	// and bitleaf may no longer be valid because the container of
+	// and-BITs might have been resorted. so we keep track of their
+	// bodies for future use.
+	Handle andbit_fcs = andbit.fcs;
+	Handle bitleaf_body = bitleaf->body;
 	_last_expansion_andbit = _bit.expand(andbit, *bitleaf, {rule, ts});
-
-	// Record expansion
-	if (_trace_as)
-		record_expansion(andbit, *bitleaf, rule, *_last_expansion_andbit);
-}
-
-void BackwardChainer::record_expansion(const AndBIT& andbit,
-                                       const BITNode& bitleaf,
-                                       const Rule& rule,
-                                       const AndBIT& resulting_andbit) const
-{
-	_trace_as->add_link(EXECUTION_LINK,
-	                    _trace_as->add_link(LIST_LINK,
-	                                        andbit.fcs,
-	                                        bitleaf.body,
-	                                        rule.get_definition()),
-	                    resulting_andbit.fcs);
+	
+	// Record the expansion in the trace atomspace
+	if (_last_expansion_andbit)
+		_trace_recorder.andbit(*_last_expansion_andbit);
+		_trace_recorder.expansion(andbit_fcs, bitleaf_body,
+		                          rule, *_last_expansion_andbit);
 }
 
 void BackwardChainer::fulfill_bit()
@@ -248,6 +246,10 @@ void BackwardChainer::fulfill_fcs(const Handle& fcs)
 		results.push_back(_as.add_atom(result));
 	LAZY_URE_LOG_DEBUG << "Results:" << std::endl << results;
 	_results.insert(results.begin(), results.end());
+
+	// Record the results in _trace_as
+	for (const Handle& result : results)
+		_trace_recorder.proof(fcs, result);
 }
 
 std::vector<double> BackwardChainer::expansion_anbit_weights()

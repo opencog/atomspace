@@ -417,9 +417,10 @@ public:
 	/**
 	 * Insert a new andbit in the BIT and return its pointer, nullptr
 	 * if not inserted (which may happen if an equivalent one is
-	 * already in it).
+	 * already in it). Warning: the reference on andbit will likely be
+	 * invalid after this call because the container is modified.
 	 */
-	AndBIT* insert(const AndBIT& andbit);
+	AndBIT* insert(AndBIT& andbit);
 
 	/**
 	 * Erase the given and-BIT from the BIT and remove its FCS from
