@@ -198,10 +198,11 @@ void BackwardChainer::expand_bit(AndBIT& andbit)
 	_last_expansion_andbit = _bit.expand(andbit, *bitleaf, {rule, ts});
 	
 	// Record the expansion in the trace atomspace
-	if (_last_expansion_andbit)
+	if (_last_expansion_andbit) {
 		_trace_recorder.andbit(*_last_expansion_andbit);
 		_trace_recorder.expansion(andbit_fcs, bitleaf_body,
 		                          rule, *_last_expansion_andbit);
+	}
 }
 
 void BackwardChainer::fulfill_bit()
