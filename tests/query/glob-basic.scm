@@ -70,6 +70,11 @@
 	(Concept "a")
 	(Concept "saw"))
 
+(SetLink
+	(Concept "honeydew")
+	(Concept "lime")
+	(Concept "apple"))
+
 ;; Two different re-write rules. The first rule, immediately below,
 ;; says "I * you" -> "I * you too".
 (define glob-you
@@ -221,3 +226,13 @@
 			(Glob "$x")
 			(Concept "cat")
 			(Concept "too"))))
+
+; Match in any order
+(define unorder
+	(Bind
+		(TypedVariable (Glob "$x") (Type "ConceptNode"))
+		(SetLink
+			(Glob "$x")
+			(Concept "apple"))
+		(ListLink
+			(Glob "$x"))))
