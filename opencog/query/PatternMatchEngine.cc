@@ -498,10 +498,11 @@ bool PatternMatchEngine::unorder_compare(const PatternTermPtr& ptm,
 	const HandleSeq& osg = hg->getOutgoingSet();
 	PatternTermSeq osp = ptm->getOutgoingSet();
 	size_t arity = osp.size();
+	bool has_glob = (0 < _pat->globby_terms.count(ptm->getHandle()));
 
 	// They've got to be the same size, at the least!
-	// We con't currently support globs, here.
-	if (osg.size() != arity)
+	// unless there are globs in the pattern
+	if (osg.size() != arity and not has_glob)
 		return _pmc.fuzzy_match(ptm->getHandle(), hg);
 
 	// Test for case A, described above.
@@ -534,12 +535,19 @@ bool PatternMatchEngine::unorder_compare(const PatternTermPtr& ptm,
 		solution_push();
 		bool match = true;
 
-		for (size_t i=0; i<arity; i++)
+		if (has_glob)
 		{
-			if (not tree_compare(mutation[i], osg[i], CALL_UNORDER))
+			match = glob_compare(mutation, osg);
+		}
+		else
+		{
+			for (size_t i=0; i<arity; i++)
 			{
-				match = false;
-				break;
+				if (not tree_compare(mutation[i], osg[i], CALL_UNORDER))
+				{
+					match = false;
+					break;
+				}
 			}
 		}
 
