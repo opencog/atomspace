@@ -54,6 +54,9 @@ void TLB::clear_resolver(const AtomTable* tab)
 // the atom wins.  Seems to work, for now.
 Handle TLB::do_res(const Handle& h)
 {
+    // No-op if it's already in an atomspace.
+    if (h->getAtomSpace()) return h->getHandle();
+
     for (const AtomTable* at : _resolver) {
         Handle hr(at->getHandle(h));
         if (nullptr != hr) return hr;
