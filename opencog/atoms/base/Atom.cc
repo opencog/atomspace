@@ -133,7 +133,9 @@ void Atom::setTruthValue(const TruthValuePtr& newTV)
 
 TruthValuePtr Atom::getTruthValue() const
 {
-    return TruthValueCast(getValue(truth_key()));
+    ProtoAtomPtr pap(getValue(truth_key()));
+    if (nullptr == pap) return TruthValue::DEFAULT_TV();
+    return TruthValueCast(pap);
 }
 
 // ==============================================================
