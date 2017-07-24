@@ -1293,7 +1293,7 @@ void SQLAtomStorage::do_store_single_atom(const Handle& h, int aheight)
 		rp.exec(qry.c_str());
 	}
 
-	_store_count ++;
+	_store_count++;
 
 	if (bulk_store and _store_count%100000 == 0)
 	{
