@@ -25,4 +25,6 @@ ADD_CXXTEST(UseCountUTest)
 ADD_CXXTEST(MultiSpaceUTest)
 ADD_CXXTEST(RemoveUTest)
 ADD_CXXTEST(ThreadSafeHandleMapUTest)
-ADD_CXXTEST(ValuationTableUTest)
+
+# The ValuationTable is no longer used or even built, so don't test it.
+# ADD_CXXTEST(ValuationTableUTest)

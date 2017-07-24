@@ -9,7 +9,9 @@ ADD_LIBRARY (atomspace
 	BackingStore.cc
 	FixedIntegerIndex.cc
 	TypeIndex.cc
-	ValuationTable.cc
+
+	# Valuations are now stored in the atom itself.
+	# ValuationTable.cc
 
 	# The below are no longer used, but we will
 	# keep them around for a little while longer... just in case!?
@@ -46,7 +48,6 @@ INSTALL (FILES
 	BackingStore.h
 	FixedIntegerIndex.h
 	TypeIndex.h
-	ValuationTable.h
 	version.h
 	DESTINATION "include/opencog/atomspace"
 )
