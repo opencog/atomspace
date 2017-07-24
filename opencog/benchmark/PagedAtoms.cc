@@ -164,44 +164,44 @@ void EdgePage::add_edge(AtomHandle in, AtomHandle out)
 }
 
 
-struct PageSlot {
+struct IndexSlot {
     uint64_t    key;
     void*       page;
 };
 
-#define MAX_PAGES_PER_PAGE      ((PAGE_SIZE / sizeof(PageSlot)) - 2)
+#define MAX_PAGES_PER_PAGE      ((PAGE_SIZE / sizeof(IndexSlot)) - 2)
 
-struct PagePage {
+struct IndexPage {
     std::mutex      page_lock;
     uint16_t        flags;
     uint16_t        count;
     uint16_t        next;
     uint16_t        free;
-    PagePage*       parent;
-    PageSlot        page_slots[MAX_PAGES_PER_PAGE];
+    IndexPage*      parent;
+    IndexSlot       page_slots[MAX_PAGES_PER_PAGE];
 
-    PagePage();
+    IndexPage();
 
     void add_page(uint64_t key, void* page);
     bool can_add_page();
 
-    typedef std::vector<PagePage*>  PagePageVector;
+    typedef std::vector<IndexPage*>  IndexPageVector;
 
-    static PagePageVector page_pages;
+    static IndexPageVector index_pages;
     static uint64_t page_count;
-    static PagePage* root_page_page;
-    static PagePage* current_page_page;
+    static IndexPage* root_index_page;
+    static IndexPage* current_index_page;
 
     static uint64_t total_pages() { return page_count; }
     static void add_new_page(uint64_t key, void* page);
 };
 
-uint64_t PagePage::page_count = 0;
-PagePage::PagePageVector PagePage::page_pages;
-PagePage* PagePage::current_page_page = new PagePage();
-PagePage* PagePage::root_page_page = current_page_page;
+uint64_t IndexPage::page_count = 0;
+IndexPage::IndexPageVector IndexPage::index_pages;
+IndexPage* IndexPage::current_index_page = new IndexPage();
+IndexPage* IndexPage::root_index_page = current_index_page;
 
-PagePage::PagePage()
+IndexPage::IndexPage()
 {
     flags = 0;
     count = 0;
@@ -211,7 +211,7 @@ PagePage::PagePage()
     page_count++;
 }
 
-bool PagePage::can_add_page()
+bool IndexPage::can_add_page()
 {
     if (free >= 1)
         return true;
@@ -219,7 +219,7 @@ bool PagePage::can_add_page()
         return false;
 }
 
-void PagePage::add_page(uint64_t key, void* page)
+void IndexPage::add_page(uint64_t key, void* page)
 {
     if (!can_add_page())
     {
@@ -230,7 +230,7 @@ void PagePage::add_page(uint64_t key, void* page)
     std::lock_guard<std::mutex> lock(page_lock);
 
     // Save the edge pair.
-    PageSlot* slot_ptr = &page_slots[next];
+    IndexSlot* slot_ptr = &page_slots[next];
     slot_ptr->key = (uint64_t) key;
     slot_ptr->page = (void*) page;
     
@@ -239,7 +239,7 @@ void PagePage::add_page(uint64_t key, void* page)
     {
         size_t slots_to_move = randomGenerator->randint(MAX_PAGES_PER_PAGE - next);
         size_t move_start = randomGenerator->randint(next - 1);
-        std::memmove(&page_slots[next], &page_slots[move_start], (slots_to_move * sizeof(PageSlot)));
+        std::memmove(&page_slots[next], &page_slots[move_start], (slots_to_move * sizeof(IndexSlot)));
     }
 
     // Update the next and free.
@@ -247,17 +247,17 @@ void PagePage::add_page(uint64_t key, void* page)
     free--;
 }
 
-void PagePage::add_new_page(uint64_t key, void* page)
+void IndexPage::add_new_page(uint64_t key, void* page)
 {
-    if (!current_page_page->can_add_page())
+    if (!current_index_page->can_add_page())
     {
         // Record the page.
-        current_page_page = new PagePage();
-        page_pages.push_back(current_page_page);
+        current_index_page = new IndexPage();
+        index_pages.push_back(current_index_page);
      }
 
      // Add this key and page to the current page page.
-     current_page_page->add_page(key, page);
+     current_index_page->add_page(key, page);
 }
 
 
@@ -494,7 +494,7 @@ AtomHandle Benchmark::add_node(Type type, const std::string& name)
     {
         current_atom_page = new AtomPage();
         atom_pages.push_back(current_atom_page);
-        PagePage::add_new_page(type, current_atom_page);
+        IndexPage::add_new_page(type, current_atom_page);
     }
     return current_atom_page->add_node(type, name);
 #endif
@@ -509,7 +509,7 @@ AtomHandle Benchmark::add_link(Type type, const AtomVector& outgoing)
     {
         current_atom_page = new AtomPage();
         atom_pages.push_back(current_atom_page);
-        PagePage::add_new_page(type, current_atom_page);
+        IndexPage::add_new_page(type, current_atom_page);
     }
     AtomHandle link = current_atom_page->add_link(type, outgoing);
     for (size_t out = 0; out < outgoing.size(); out++)
@@ -648,7 +648,7 @@ void Benchmark::run_test()
     std::cout << std::chrono::duration <double, std::micro> (elapsed).count() << " μs per predicate" << std::endl;
     std::cout << "Created " << AtomPage::total_pages() << " atom pages." << std::endl;
     std::cout << "Created " << EdgePage::total_pages() << " edge pages." << std::endl;
-    std::cout << "Created " << PagePage::total_pages() << " page pages." << std::endl;
+    std::cout << "Created " << IndexPage::total_pages() << " page pages." << std::endl;
 
     std::cout << std::endl << "done creating" << std::endl;
     std::cout << std::endl;
