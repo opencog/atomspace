@@ -57,6 +57,7 @@ ENDIF (HAVE_GUILE)
 
 ADD_EXECUTABLE (atom_bench
 	PagedAtoms.cc
+	atom_bench.cc
 )
 
 TARGET_LINK_LIBRARIES (atom_bench
