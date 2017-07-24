@@ -32,7 +32,6 @@
 
 #include <opencog/atomspace/AtomTable.h>
 #include <opencog/atomspace/BackingStore.h>
-#include <opencog/atomspace/ValuationTable.h>
 
 namespace opencog
 {
@@ -69,7 +68,6 @@ class AtomSpace
     AtomSpace(const AtomSpace&);
 
     AtomTable _atom_table;
-    ValuationTable _value_table;
     /**
      * Used to fetch atoms from disk.
      */
