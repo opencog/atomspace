@@ -101,14 +101,18 @@ Atom::~Atom()
 // Whole lotta truthiness going on here.  Does it really need to be
 // this complicated!?
 
-static Handle truth_key(createNode(PREDICATE_NODE, "*-TruthValueKey-*"));
+static const Handle& truth_key(void)
+{
+	static Handle tk(createNode(PREDICATE_NODE, "*-TruthValueKey-*"));
+	return tk;
+}
 
 void Atom::setTruthValue(const TruthValuePtr& newTV)
 {
     if (nullptr == newTV) return;
 
     // If both old and new are e.g. DEFAULT_TV, then do nothing.
-    if (getValue(truth_key).get() == newTV.get()) return;
+    if (getValue(truth_key()).get() == newTV.get()) return;
 
     // We need to guarantee that the signal goes out with the
     // correct truth value.  That is, another setter could be changing
@@ -119,7 +123,7 @@ void Atom::setTruthValue(const TruthValuePtr& newTV)
     // writing this at a time. std:shared_ptr is NOT thread-safe against
     // multiple writers: see "Example 5" in
     // http://www.boost.org/doc/libs/1_53_0/libs/smart_ptr/shared_ptr.htm#ThreadSafety
-    setValue (truth_key, ProtoAtomCast(newTV));
+    setValue (truth_key(), ProtoAtomCast(newTV));
 
     if (_atom_space != nullptr) {
         TVCHSigl& tvch = _atom_space->_atom_table.TVChangedSignal();
@@ -129,7 +133,7 @@ void Atom::setTruthValue(const TruthValuePtr& newTV)
 
 TruthValuePtr Atom::getTruthValue() const
 {
-    return TruthValueCast(getValue(truth_key));
+    return TruthValueCast(getValue(truth_key()));
 }
 
 // ==============================================================
