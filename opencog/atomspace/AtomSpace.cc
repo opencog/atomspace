@@ -354,7 +354,9 @@ Handle AtomSpace::fetch_atom(const Handle& h)
                                      h->getOutgoingSet());
     }
 
-    if (hv)
+    // Hmm I don't quite get it ...  shouldn't hv and hc be the same
+    // atom, by now? So the below should not be needed...!?
+    if (hv and hv != hc)
     {
         hc->copyValues(hv);
         TruthValuePtr tv = hv->getTruthValue();
