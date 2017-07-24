@@ -82,7 +82,7 @@ UUID TLB::addAtom(const Handle& h, UUID uuid)
 
     // If we hold something that isn't the atomspace's version,
     // then remove it. Only the atomspace's version has the
-    // correct TV on it.
+    // correct values (including the TV) on it.
     if (hr != h)
     {
         auto pr = _handle_map.find(h);
@@ -116,7 +116,20 @@ UUID TLB::addAtom(const Handle& h, UUID uuid)
             if (uuid != pr->second)
                 throw InvalidParamException(TRACE_INFO,
                      "Atom is already in the TLB, and UUID's don't match!");
-            return uuid;
+
+            // If the atom that we are holding is in the same atomspace
+            // as the resolved atom, then we are done. Otherwise, we
+            // need to replace it with the version with the indicated
+            // atomspace. That is because atoms in different atomspaces
+            // will hold different values and TV's.
+
+            AtomSpace* has = hr->getAtomSpace();
+            AtomSpace* pas = pr->first->getAtomSpace();
+            if (pas and has and pas == has)
+                return uuid;
+
+            _handle_map.erase(pr);
+            _uuid_map.erase(uuid);
         }
         reserve_upto(uuid);
     }
