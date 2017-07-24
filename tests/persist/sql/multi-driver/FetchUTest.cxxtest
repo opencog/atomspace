@@ -264,7 +264,7 @@ void FetchUTest::test_stuff(void)
 	eval = SchemeEval::get_evaluator(_as);
 	eval->eval(sql_open);
 
-	// AAA should have been update, as above.
+	// AAA should have been updated, as above.
 	eval->eval(R"((fetch-atom (Concept "AAA")))");
 	tv = eval->eval_tv(R"((cog-tv (Concept "AAA")))");
 	etv = SimpleTruthValue::createTV(0.3, 0.33);
