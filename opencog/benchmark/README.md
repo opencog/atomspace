@@ -211,3 +211,13 @@ This will take the binary profiling information in gmon.out and format
 it so that you can read it in a file called `analysis.txt`. Open
 `analysis.txt` in a text viewer and you will see the results of the
 profiling.
+
+## Experimental ##
+
+### atom_bench ###
+The atom_bench tool tests some prototype methods for potential Atom implementation that uses RAM pages of a fixed size to store Atoms. It is intended to show potential performance gains which might be useful for an enterprise-class distributed OpenCog. It is not designed for real-world use but rather to model the performance characteristics of a potential new method for storing atoms.
+
+The atom_bench tool can be compiled and run with two modes, if USE_ATOMSPACE is defined true, the code will test the existing atomspace using the same data and  benchmark algorithm. When USE_ATOMSPACE is false, the benchmark implements and benchmarks the speed of a paged-memory implementation.
+
+The atom_bench includes a test which creates 1 million atoms, and one that searches all 1 million atoms for a particular value that is in the data, and one that searches for a value which will not be found to benchmark the speed of traversing links and outgoing sets.
+
