@@ -269,7 +269,7 @@
      L(x,y) = N(x,y) / sqrt(sum_u N^2(u,y))
 
   which has the property that L(x,y) is a vector of unit length when y is
-  treated as a paramter (i.e. when y is held fixed).  The dot-product of
+  treated as a parameter (i.e. when y is held fixed).  The dot-product of
   two unit-length vectors is just the cosine of the angle between them, and
   so this can be used to construct the left cosine-similarity as
 
