@@ -33,23 +33,25 @@ In the general, generic case, we might want to observe not just these
 predicates. We are interested, perhaps, not just in `WordNode`'s but
 in relations between, say, `ConceptNodes` and `ContextLink`s.
 
-The count can be stored anywhere, as the `'pair-count` method is used
-to obtain it.  In most cases, it is simply stored in a CountTruthValue
-attached to the EvaluationLink.  It's doesn't have to be, it could be
-placed elsewhere.
-
 The core idea is that the atomspace can hold sparse matrix data; in a
 certain sense, the atomspace was designed from the get-go to do exactly
-that. Once you can see that its a matrix, you can then apply a variety
-of generic matrix analysis tools to it.  The tools implemented here
-include:
+that. Once you realize that your data can be seen as a kind of matrix,
+you can then apply a variety of generic matrix analysis tools to it.
+The tools implemented here include:
 
- * row and column subtotals
+ * row and column subtotals (i.e. "marginals")
  * computing and caching frequencies from counts.
  * computing and caching mutual information between rows and columns
  * computing cosine similarity between rows or columns.
  * performing PCA (principal component analysis) in the matrix.
  * performing cuts, to remove unwanted rows, coumns and individual entries.
+
+To use these tools, all you need to do is to specify a low-level
+object that describes the matrix. It needs to provide some very simple
+but important mthods: the `'left-type` and `'right-type` methods,
+that return the atom type of the rows and the columns; a `'pair-type`
+method that returns the atom-type of the pair, and a `'pair-count`
+method that returns the count, given the pair.
 
 
 FAQ
@@ -57,24 +59,23 @@ FAQ
 Q: Why isn't this in C++?  Surely, numericaal computations would be
    a lot faster in C++, right?
 
-A: Its not yet clear just, what, exactly, is to be accomplished here,
-   and what the dominant, important data structures are, here. Once
-   it becomes clear what the important calculations are, these can be
-   optimized (i.e. re-implemented in C++). But for now, flexibility,
-   fast developement and the ability to run experiments quickly is more
-   important than speed of calculations.
+A: Yes, probably. But its a lot easier to write scheme code than
+   it is to write C++ code, and so prototyping in scheme just made
+   more sense. It was just-plain simpler, faster, esier. You are
+   invited to take the lessons learned, and re-implement in C++.
+   The number #1 most important lesson is that the filter object
+   is the most important object: it controls what data you want
+   to keep, and what data you want to discard, and it needs to
+   run "underneath", as a foundation to everything else.
 
-Q: Really? It sounds like you don't know what you are doing.
+Q: Really, C++ is sooo fast...
 
-A: All of the matrixes are sparse. That means that the most efficient
-   kind of calculation is lazy-evaluation: don't compute a value, until
-   it is asked for.  Lazy evaluation requires recursion: its something
-   that functional langguages like scheme are good at, and C++ is
-   terrible at. Thus, some lazy evaluation could easily end up being
-   faster than brute-force, compute-everything-up-front in C++.
+A: Yes, but since the data is stored in values assocaited with
+   atoms in the atomspace, adding numbers together is NOT the
+   bottleneck. Accessing Atom Values *is* the bottleneck. Soooo...
 
 Q: Why don't you just export all your data to SciPy or to Gnu R, or to
-   Octave, or MatLab, for that matter, and just do your data analysis
+   Octave, or MatLab, for that matter, and just do your data analytics
    there?  That way, you don't need to re-implement all these basic
    statistical algorithms.
 
@@ -89,6 +90,31 @@ A: That sounds nice, but frankly, it's too much work for me. Maybe you
    external world as a result. This rules out GUI tools for data
    processing (because there's no GUI in a server) and it rules out
    popsicle-stick architectures as being a bit hokey.
+
+   Also: many of these structures have millions of rows and columns,
+   and ten-million or a hundred-million non-zero entries in the matrix.
+   This can blow through huge amounts of RAM. Can SciPy actually deal
+   with datasets this big?  It gets worse, because typically, you want
+   to work with different cuts and filters, where you discard much of
+   the data, or average together different parts: can you relly afford
+   the RAM needed to export all of these different cut and filtered
+   datasets?  Maybe you can, its just not trivial.
+
+Q: But if I did want to do it for Gnu R, how could I do it?
+
+A: You would use Rcpp at http://dirk.eddelbuettel.com/code/rcpp.html
+   Quote:
+   The Rcpp package provides C++ classes that greatly facilitate
+   interfacing C or C++ code in R packages using the .Call() interface
+   provided by R. Rcpp provides matching C++ classes for a large
+   number of basic R data types. Hence, a package author can keep his
+   data in normal R data structures without having to worry about
+   translation or transfering to C++. At the same time, the data
+   structures can be accessed as easily at the C++ level, and used in
+   the normal manner. The mapping of data types works in both
+   directions. It is as straightforward to pass data from R to C++,
+   as it is it return data from C++ to R. The following two sections
+   list supported data types.
 
 
 Generic Programming
@@ -112,7 +138,7 @@ https://en.wikipedia.org/wiki/Generic_programming
 
 This code is written in scheme.  I know some of you want to use python
 instead, while others would prefer C++.  More generally, it would
-proably be useful to set things up so that external, third-party
+probably be useful to set things up so that external, third-party
 software systems (such as scipy or Gnu Octave or tensorflow) could
 be used to perform the analysis.  Now that you've got the general
 idea... you can go do this!
@@ -141,6 +167,8 @@ The `add-pair-count-api` class provides an API to report the parital
 sums `N(x,*) = sum_y N(x,y)` and likewise `N(*,y)`.  If you think of
 `N(x,y)` as a matrix, these are the totals for the entries in each
 row or column of the matrix. Likewise, `N(*,*) = sum_x sum_y N(x,y)`.
+In statistics, these are called "marginals", because you write the
+subtotals in the "margins" of your table.
 
 The `add-pair-freq-api` class provides an API to report the frequencies
 of pairs, and the partial sums over rows and columns. The frequency
@@ -168,6 +196,12 @@ Another method returns the wild-card pairs: that is, the set
 This is called the `right-star` because the right-side of the pair is
 a wild-card.  These methods are useful for iterating over all rows and
 columns of the correlation matrix.
+
+The `add-loop-api` class provides methods to loop over all non-zero
+pairs in the matrix, and invoke a function on them. There are two
+methods:  `for-each-pair`, which simply calls the function for each
+pair, and a `map-pair` method which returns a list of the results of
+calling the function on each pair.
 
 The `make-compute-count` class provides methods to compute the partial
 sums `N(*,y)` and `N(x,*)` and cache the resulting values on atoms where
@@ -241,7 +275,7 @@ element-by-element min or max of a set of columns, counting the number
 of entries that are simultaneously non-zero in sets of columns, etc.
 
 
-Principle Component Analysis
+Principal Component Analysis
 ----------------------------
 A power iteration object is provided by the `make-power-iter-pca`
 object.  Once a matrix `X` has been specified, this will iterate on

@@ -12,6 +12,7 @@
 (load "matrix/support.scm")
 (load "matrix/report-api.scm")
 (load "matrix/fold-api.scm")
+(load "matrix/loop-api.scm")
 (load "matrix/bin-count.scm")
 (load "matrix/cosine.scm")
 (load "matrix/entropy.scm")

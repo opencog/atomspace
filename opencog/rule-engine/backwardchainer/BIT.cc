@@ -703,7 +703,7 @@ AndBIT* BIT::expand(AndBIT& andbit, BITNode& bitleaf,
 	return (bool)new_andbit.fcs ? insert(new_andbit) : nullptr;
 }
 
-AndBIT* BIT::insert(const AndBIT& andbit)
+AndBIT* BIT::insert(AndBIT& andbit)
 {
 	// Check that it isn't already in the BIT
 	if (boost::find(andbits, andbit) != andbits.end()) {

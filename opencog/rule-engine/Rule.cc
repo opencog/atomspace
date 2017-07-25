@@ -164,6 +164,11 @@ Handle Rule::get_alias() const
 	return _rule_alias;
 }
 
+Handle Rule::get_definition() const
+{
+	return DefineLink::get_definition(_rule_alias);
+}
+
 Handle Rule::get_rbs() const
 {
 	return _rbs;

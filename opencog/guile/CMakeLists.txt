@@ -37,7 +37,7 @@ TARGET_LINK_LIBRARIES(logger
 	smob
 	${GUILE_LIBRARIES}
 	${COGUTIL_LIBRARY}
-    ruleengine # for the ure logger
+    ruleengine # for cog-ure-logger
 )
 
 TARGET_LINK_LIBRARIES(randgen

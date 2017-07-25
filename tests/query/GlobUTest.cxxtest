@@ -67,6 +67,8 @@ _exit(rc); // XXX hack to avoid double-free in __run_exit_handlers
 	void test_glob_three_globs(void);
 	void test_glob_two_in_a_row(void);
 	void test_glob_exact(void);
+	void test_glob_greedy(void);
+	void test_glob_unorder(void);
 };
 
 void GlobUTest::tearDown(void)
@@ -340,6 +342,56 @@ void GlobUTest::test_glob_exact(void)
 		"    (ConceptNode \"too\")))"
 	);
 	TS_ASSERT_EQUALS(exact, response);
+
+	// ----
+	logger().debug("END TEST: %s", __FUNCTION__);
+}
+
+void GlobUTest::test_glob_greedy(void)
+{
+	logger().debug("BEGIN TEST: %s", __FUNCTION__);
+
+	eval->eval("(load-from-path \"tests/query/glob-basic.scm\")");
+
+	Handle greedy = eval->eval_h("(cog-execute! greedy)");
+	printf("greedy %s\n", greedy->toString().c_str());
+	TS_ASSERT_EQUALS(1, greedy->getArity());
+
+	Handle response = eval->eval_h(
+		"(SetLink"
+		"  (ListLink"
+		"    (ConceptNode \"the\")"
+		"    (ConceptNode \"man\")"
+		"    (ConceptNode \"we\")"
+		"    (ConceptNode \"saw\")"
+		"    (ConceptNode \"saw\")"
+		"    (ConceptNode \"a\")"
+		"    (ConceptNode \"cat\")"
+		"    (ConceptNode \"too\")))"
+	);
+	TS_ASSERT_EQUALS(greedy, response);
+
+	// ----
+	logger().debug("END TEST: %s", __FUNCTION__);
+}
+
+void GlobUTest::test_glob_unorder(void)
+{
+	logger().debug("BEGIN TEST: %s", __FUNCTION__);
+
+	eval->eval("(load-from-path \"tests/query/glob-basic.scm\")");
+
+	Handle unorder = eval->eval_h("(cog-execute! unorder)");
+	printf("unorder %s\n", unorder->toString().c_str());
+	TS_ASSERT_EQUALS(1, unorder->getArity());
+
+	Handle response = eval->eval_h(
+		"(SetLink"
+		"  (ListLink"
+		"    (ConceptNode \"honeydew\")"
+		"    (ConceptNode \"lime\")))"
+	);
+	TS_ASSERT_EQUALS(unorder, response);
 
 	// ----
 	logger().debug("END TEST: %s", __FUNCTION__);

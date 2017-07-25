@@ -76,9 +76,7 @@ Logger* LoggerSCM::do_ure_logger()
 /// Create a new logger.
 Logger* LoggerSCM::do_new_logger()
 {
-	Logger* lg = new Logger();
-	scm_gc_register_allocation(sizeof(*lg));
-	return lg;
+	return SchemeSmob::new_logger();
 }
 
 /// Set level, return previous level.

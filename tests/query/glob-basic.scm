@@ -61,6 +61,20 @@
 	(Concept "want")
 	(Concept "it"))
 
+(ListLink
+	(Concept "the")
+	(Concept "man")
+	(Concept "we")
+	(Concept "saw")
+	(Concept "saw")
+	(Concept "a")
+	(Concept "saw"))
+
+(SetLink
+	(Concept "honeydew")
+	(Concept "lime")
+	(Concept "apple"))
+
 ;; Two different re-write rules. The first rule, immediately below,
 ;; says "I * you" -> "I * you too".
 (define glob-you
@@ -197,3 +211,28 @@
 			(Concept "I")
 			(Glob "$x")
 			(Concept "too"))))
+
+; Match as many as possible, should not stop when it gets to
+; the first "saw"
+(define greedy
+	(Bind
+		(TypedVariable (Glob "$x")
+			(TypeSet (Type "ConceptNode")
+				(IntervalLink (Number 1) (Number -1))))
+		(ListLink
+			(Glob "$x")
+			(Concept "saw"))
+		(ListLink
+			(Glob "$x")
+			(Concept "cat")
+			(Concept "too"))))
+
+; Match in any order
+(define unorder
+	(Bind
+		(TypedVariable (Glob "$x") (Type "ConceptNode"))
+		(SetLink
+			(Glob "$x")
+			(Concept "apple"))
+		(ListLink
+			(Glob "$x"))))

@@ -477,8 +477,11 @@
   'pair-freq PAIR    -- return P(x,y)
   'pair-logli PAIR   -- return -log_2 P(x,y)
   'pair-entropy PAIR -- return -P(x,y) log_2 P(x,y)
-  'pair-mi PAIR      -- return -P(x,y) log_2 P(x,y) / [P(x,*) P(*,y)]
-  'pair-fmi PAIR     -- return -log_2 P(x,y) / [P(x,*) P(*,y)]
+  'pair-mi PAIR      -- return +P(x,y) log_2 P(x,y) / [P(x,*) P(*,y)]
+  'pair-fmi PAIR     -- return +log_2 P(x,y) / [P(x,*) P(*,y)]
+
+  Note the sign convention for the mutual information - it is PLUS log.
+  This agrees with both Deniz Yuret and with  Wikipedia!
 
   In the methods below, ATOM is either the atom x or the atom y.
 
@@ -594,12 +597,12 @@
 
 	; Return the MI value on the pair.
 	; The MI is defined as
-	; - P(x,y) log_2 P(x,y) / P(x,*) P(*,y)
+	; + P(x,y) log_2 P(x,y) / P(x,*) P(*,y)
 	(define (get-pair-mi PAIR)
 		(get-total-mi (LLOBJ 'item-pair PAIR)))
 
 	; Return the fractional MI (lexical atraction) on the pair.
-	; - log_2 P(x,y) / P(x,*) P(*,y)
+	; + log_2 P(x,y) / P(x,*) P(*,y)
 	; It differs from the MI above only by the leading probability.
 	(define (get-pair-fmi PAIR)
 		(get-fractional-mi (LLOBJ 'item-pair PAIR)))

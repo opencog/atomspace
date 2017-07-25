@@ -127,7 +127,8 @@ protected:
 
     AtomSpace *_atom_space;
 
-    mutable TruthValuePtr _truthValue;
+    /// All of the values on the atom, including the TV.
+    mutable std::map<const Handle, ProtoAtomPtr> _values;
 
     // Lock, used to serialize changes.
     // This costs 40 bytes per atom.  Tried using a single, global lock,
@@ -149,8 +150,7 @@ protected:
       : ProtoAtom(t),
         _flags(0),
         _content_hash(Handle::INVALID_HASH),
-        _atom_space(nullptr),
-        _truthValue(TruthValue::DEFAULT_TV())
+        _atom_space(nullptr)
     {}
 
     // The incoming set is not tracked by the garbage collector;
@@ -266,7 +266,7 @@ public:
     TruthValuePtr getTruthValue() const;
 
     //! Sets the TruthValue object of the atom.
-    void setTruthValue(TruthValuePtr);
+    void setTruthValue(const TruthValuePtr&);
 
     /// Associate `value` to `key` for this atom.
     void setValue(const Handle& key, const ProtoAtomPtr& value);

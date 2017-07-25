@@ -126,6 +126,7 @@ public:
 	const std::string& get_name() const;
 	Handle get_rule() const;
 	Handle get_alias() const;
+	Handle get_definition() const;
 	Handle get_rbs() const;
 
 	/**

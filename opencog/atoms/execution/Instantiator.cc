@@ -419,7 +419,7 @@ Handle Instantiator::walk_tree(const Handle& expr, bool silent)
 	}
 
 	// If an atom is wrapped by the DontExecLink, then unwrap it,
-	// beta-reduce it, but don't execute it.
+	// beta-reduce it, but don't execute it. Consume the DontExecLink.
 	if (DONT_EXEC_LINK == t)
 	{
 		if (_vmap->empty()) return expr;

@@ -3,10 +3,10 @@
 #
 ADD_LIBRARY(ruleengine
 	backwardchainer/BackwardChainer
+	backwardchainer/TraceRecorder
 	backwardchainer/BackwardChainerPMCB
 	backwardchainer/BIT
 	backwardchainer/Fitness
-	backwardchainer/UnifyPMCB
 	forwardchainer/FCStat
 	forwardchainer/ForwardChainer
 	URELogger

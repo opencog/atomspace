@@ -37,6 +37,7 @@
 #include <opencog/atoms/base/Atom.h>
 #include <opencog/atoms/base/ClassServer.h>
 #include <opencog/atoms/base/Link.h>
+#include <opencog/atoms/base/Node.h>
 
 #include <opencog/atomspace/AtomSpace.h>
 #include <opencog/atomspace/AtomTable.h>
@@ -100,12 +101,18 @@ Atom::~Atom()
 // Whole lotta truthiness going on here.  Does it really need to be
 // this complicated!?
 
-void Atom::setTruthValue(TruthValuePtr newTV)
+static const Handle& truth_key(void)
+{
+	static Handle tk(createNode(PREDICATE_NODE, "*-TruthValueKey-*"));
+	return tk;
+}
+
+void Atom::setTruthValue(const TruthValuePtr& newTV)
 {
     if (nullptr == newTV) return;
 
     // If both old and new are e.g. DEFAULT_TV, then do nothing.
-    if (_truthValue.get() == newTV.get()) return;
+    if (getValue(truth_key()).get() == newTV.get()) return;
 
     // We need to guarantee that the signal goes out with the
     // correct truth value.  That is, another setter could be changing
@@ -116,9 +123,7 @@ void Atom::setTruthValue(TruthValuePtr newTV)
     // writing this at a time. std:shared_ptr is NOT thread-safe against
     // multiple writers: see "Example 5" in
     // http://www.boost.org/doc/libs/1_53_0/libs/smart_ptr/shared_ptr.htm#ThreadSafety
-    std::unique_lock<std::mutex> lck(_mtx);
-    _truthValue = newTV;
-    lck.unlock();
+    setValue (truth_key(), ProtoAtomCast(newTV));
 
     if (_atom_space != nullptr) {
         TVCHSigl& tvch = _atom_space->_atom_table.TVChangedSignal();
@@ -128,40 +133,47 @@ void Atom::setTruthValue(TruthValuePtr newTV)
 
 TruthValuePtr Atom::getTruthValue() const
 {
-    // OK. The atomic thread-safety of shared-pointers is subtle. See
-    // http://www.boost.org/doc/libs/1_53_0/libs/smart_ptr/shared_ptr.htm#ThreadSafety
-    // and http://cppwisdom.quora.com/shared_ptr-is-almost-thread-safe
-    // What it boils down to here is that we must *always* make a copy
-    // of _truthValue before we use it, since it can go out of scope
-    // because it can get set in another thread.  Viz, using it to
-    // dereference can return a raw pointer to an object that has been
-    // deconstructed.  The AtomSpaceAsyncUTest will hit this, as will
-    // the multi-threaded async atom store in the SQL peristance backend.
-    // Furthermore, we must make a copy while holding the lock! Got that?
-
-    std::lock_guard<std::mutex> lck(_mtx);
-    TruthValuePtr local(_truthValue);
-    return local;
+    ProtoAtomPtr pap(getValue(truth_key()));
+    if (nullptr == pap) return TruthValue::DEFAULT_TV();
+    return TruthValueCast(pap);
 }
 
 // ==============================================================
 // Setting values associated with this atom.
 void Atom::setValue(const Handle& key, const ProtoAtomPtr& value)
 {
-    if (nullptr == _atom_space) return;
-    _atom_space->_value_table.addValuation(key, getHandle(), value);
+    std::lock_guard<std::mutex> lck(_mtx);
+    _values[key] = value;
 }
 
 ProtoAtomPtr Atom::getValue(const Handle& key) const
 {
-    if (nullptr == _atom_space) return nullptr;
-    return _atom_space->_value_table.getValue(key, getHandle());
+    // OK. The atomic thread-safety of shared-pointers is subtle. See
+    // http://www.boost.org/doc/libs/1_53_0/libs/smart_ptr/shared_ptr.htm#ThreadSafety
+    // and http://cppwisdom.quora.com/shared_ptr-is-almost-thread-safe
+    // What it boils down to here is that we must *always* make a copy
+    // of the value before we use it, since it can go out of scope
+    // because it can get set in another thread.  Viz, using it to
+    // dereference can return a raw pointer to an object that has been
+    // deconstructed.  The AtomSpaceAsyncUTest will hit this, as will
+    // the multi-threaded async atom store in the SQL peristance backend.
+    // Furthermore, we must make a copy while holding the lock! Got that?
+
+    ProtoAtomPtr pap;
+    std::lock_guard<std::mutex> lck(_mtx);
+    auto pr = _values.find(key);
+    if (_values.end() != pr) pap = pr->second;
+    return pap;
 }
 
 HandleSet Atom::getKeys() const
 {
-    if (nullptr == _atom_space) return HandleSet();
-    return _atom_space->_value_table.getKeys(getHandle());
+    HandleSet keyset;
+    std::lock_guard<std::mutex> lck(_mtx);
+    for (const auto& pr : _values)
+        keyset.insert(pr.first);
+
+    return keyset;
 }
 
 void Atom::copyValues(const Handle& other)
@@ -172,9 +184,6 @@ void Atom::copyValues(const Handle& other)
         ProtoAtomPtr p = other->getValue(k);
         setValue(k, p);
     }
-
-    // Special case for truth values
-    setTruthValue(other->getTruthValue());
 }
 
 std::string Atom::valuesToString() const

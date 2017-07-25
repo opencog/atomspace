@@ -29,6 +29,7 @@
 #include <opencog/rule-engine/UREConfigReader.h>
 
 #include "BIT.h"
+#include "TraceRecorder.h"
 
 class BackwardChainerUTest;
 
@@ -95,6 +96,8 @@ public:
 	BackwardChainer(AtomSpace& as, const Handle& rbs,
 	                const Handle& target,
 	                const Handle& vardecl=Handle::UNDEFINED,
+	                AtomSpace* trace_as=nullptr, // Where to record the trace
+	                // TODO: maybe move the focus set to the rbs configuration
 	                const Handle& focus_set=Handle::UNDEFINED,
 	                // TODO: maybe wrap all fitnesses in a Fitness class
 	                const BITNodeFitness& bitnode_fitness=BITNodeFitness(),
@@ -137,6 +140,31 @@ private:
 	// Expand a selected and-BIT. It is not passed by const because it
 	// will keep a record of the expansion if successful.
 	void expand_bit(AndBIT& andbit);
+
+	// Record and-BIT expansion to _trace_as
+	//
+	// ExecutionLink (stv 1 1)
+	//   SchemaNode "URE:BC:expand-and-BIT"
+	//   List
+	//     <andbit_fcs>
+	//     <bitleaf_body>
+	//     <rule>
+	//   <new_andbit>
+	void record_expansion(const Handle& andbit_fcs, const Handle& bitleaf_body,
+	                      const Rule& rule, const AndBIT& new_andbit);
+
+	// Record whether a certain and-BIT is a proof of a certain target result
+	//
+	// EvaluationLink <TV>
+	//   PredicateNode "URE:BC:proof"
+	//   List
+	//     <andbit_fcs>
+	//     <target_result> <TV>
+	//
+	// If the TV on the target has a greater than zero confidence it
+	// is reported to the EvaluationLink, otherwise it is not
+	// recorded.
+	void record_proof(const Handle& andbit_fcs, const Handle& target_result);
 
 	// Fulfill the BIT. That is run some or all its and-BITs
 	void fulfill_bit();
@@ -191,7 +219,14 @@ private:
 	// this and-BIT may lead to a successful inference.
 	double operator()(const AndBIT& andbit) const;
 
+	// Atomspace containing the knowledge base, the rule base and
+	// where the final results will be dumped.
 	AtomSpace& _as;
+
+	// Optional atomspace where the inference traces will be recorded
+	TraceRecorder _trace_recorder;
+
+	// Contain the configuration
 	UREConfigReader _configReader;
 
 	// Structure holding the Back Inference Tree

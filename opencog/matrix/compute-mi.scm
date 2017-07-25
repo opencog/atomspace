@@ -453,6 +453,9 @@
 					(let ((r-logli (frqobj 'right-wild-logli left-item)))
 
 						; Compute the MI for exactly one pair.
+						; Note the sign: it is PLUS log p(x,y)/p(*,y)p(x,*) !!
+						; This sign convention agrees with both Yuret and with
+						; wikipedia!
 						(define (do-one-pair lipr)
 							(define pr-freq (frqobj 'pair-freq lipr))
 							(define pr-logli (frqobj 'pair-logli lipr))
@@ -460,7 +463,7 @@
 							(define right-item (gdr lipr))
 							(if (< 0 (cntobj 'left-wild-count right-item))
 								(let* ((l-logli (frqobj 'left-wild-logli right-item))
-										(fmi (- pr-logli (+ r-logli l-logli)))
+										(fmi (- (+ r-logli l-logli) pr-logli))
 										(mi (* pr-freq fmi))
 										(atom (frqobj 'set-pair-mi lipr mi fmi)))
 									(set! all-atoms (cons atom all-atoms))

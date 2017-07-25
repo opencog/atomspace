@@ -28,11 +28,11 @@ using namespace opencog;
 // Create and return the single instance
 Logger& opencog::ure_logger()
 {
-	auto bc_logger_instantiate = []() {
-		Logger tmp(logger());
+	auto ure_logger_instantiate = []() {
+		Logger tmp;
 		tmp.set_component("URE");
 		return tmp;
 	};
-	static Logger bc_instance(bc_logger_instantiate());
-    return bc_instance;
+	static Logger ure_instance(ure_logger_instantiate());
+    return ure_instance;
 }

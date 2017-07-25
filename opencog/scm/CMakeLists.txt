@@ -6,6 +6,20 @@ INSTALL (FILES
 	DESTINATION "${DATADIR}/scm/"
 )
 
+# Create a symlink to load-path for site packages
+# NOTE: This is the first of the two symlinks required for this to work, as per
+# https://www.gnu.org/software/guile/manual/guile.html#Installing-Site-Packages
+# TODO: When guile-2.2 is supported by distros update the paths accordingly.
+INSTALL (CODE
+	"EXECUTE_PROCESS(
+		COMMAND ${CMAKE_COMMAND} -E make_directory
+		\"/usr/share/guile/site/2.0\"
+		COMMAND ${CMAKE_COMMAND} -E create_symlink \"${DATADIR}/scm/opencog.scm\" \"/usr/share/guile/site/2.0/opencog.scm\"
+		COMMAND ${CMAKE_COMMAND} -E make_directory \"/usr/local/share/guile/site/2.2\"
+		COMMAND ${CMAKE_COMMAND} -E create_symlink \"${DATADIR}/scm/opencog.scm\" \"/usr/local/share/guile/site/2.2/opencog.scm\"
+	)"
+)
+
 INSTALL (FILES
 	opencog/base/apply.scm
 	opencog/base/av-tv.scm
@@ -26,6 +40,14 @@ INSTALL (FILES
 	opencog/query.scm
 	opencog/rule-engine.scm
 	DESTINATION "${DATADIR}/scm/opencog"
+)
+
+# NOTE: This is the second of the two symlinks required for this to work.
+INSTALL (CODE
+	"EXECUTE_PROCESS(
+		COMMAND ${CMAKE_COMMAND} -E create_symlink \"${DATADIR}/scm/opencog/\" \"/usr/share/guile/site/2.0/opencog\"
+		COMMAND ${CMAKE_COMMAND} -E create_symlink \"${DATADIR}/scm/opencog/\" \"/usr/local/share/guile/site/2.2/opencog\"
+	)"
 )
 
 # These guile modules spew "libBlahBlah.so not found" errors,

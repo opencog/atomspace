@@ -115,17 +115,18 @@
 		; The cosine as defined above (the usual textbook definition).
 		(define (compute-left-cosine COL-A COL-B)
 			(define prod (compute-left-product COL-A COL-B))
-			(define deno (*
+			; If the length is exactly zero, then (eqv? 0.0 0) fails!!
+			(define deno (exact->inexact (*
 				(get-left-length COL-A)
-				(get-left-length COL-B)))
+				(get-left-length COL-B))))
 			(if (eqv? 0.0 deno) 0.0 (/ prod deno)))
 
 		; As above, but for the rows.
 		(define (compute-right-cosine ROW-A ROW-B)
 			(define prod (compute-right-product ROW-A ROW-B))
-			(define deno (*
+			(define deno (exact->inexact (*
 				(get-right-length ROW-A)
-				(get-right-length ROW-B)))
+				(get-right-length ROW-B))))
 			(if (eqv? 0.0 deno) 0.0 (/ prod deno)))
 
 		; -------------

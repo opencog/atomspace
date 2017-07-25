@@ -302,13 +302,6 @@ class SQLAtomStorage::Response
 
 			ProtoAtomPtr pap = store->doUnpackValue(*this);
 			atom->setValue(hkey, pap);
-
-			// Special case for truth values
-			if (classserver().isA(pap->getType(), TRUTH_VALUE))
-			{
-				TruthValuePtr tv(std::dynamic_pointer_cast<TruthValue>(pap));
-				atom->setTruthValue(tv);
-			}
 			return false;
 		}
 
@@ -895,23 +888,14 @@ void SQLAtomStorage::store_atom_values(const Handle& atom)
 	HandleSet keys = atom->getKeys();
 	for (const Handle& key: keys)
 	{
-		// Skip the truth-value; it's special-cased below.
-		if (key == tvpred) continue;
 		ProtoAtomPtr pap = atom->getValue(key);
 		storeValuation(key, atom, pap);
 	}
 
 	// Special-case for TruthValues. Can we get rid of this someday?
+	// Delete default TV's, else storage will get clogged with them.
 	TruthValuePtr tv(atom->getTruthValue());
-
-	// Don't clog storage with default TV's
-	if (tv->isDefaultTV())
-	{
-		deleteValuation(tvpred, atom);
-		return;
-	}
-
-	storeValuation(tvpred, atom, ProtoAtomCast(tv));
+	if (tv->isDefaultTV()) deleteValuation(tvpred, atom);
 }
 
 /// Get ALL of the values associated with an atom.

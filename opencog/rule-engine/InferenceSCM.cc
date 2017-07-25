@@ -33,7 +33,8 @@ protected:
 	virtual void init();
 
 	/**
-	 * The scheme (cog-fc) function calls this, to perform forward-chaining.
+	 * The scheme (cog-mandatory-args-fc) function calls this, to
+	 * perform forward-chaining.
 	 *
 	 * @param rbs          A node, holding the name of the rulebase.
 	 * @param source       The source atom with which to start the chaining.
@@ -51,11 +52,13 @@ protected:
 	                           Handle focus_set);
 
 	/**
-	 * The scheme (cog-bc) function calls this, to perform forward-chaining.
+	 * The scheme (cog-mandatory-args-bc) function calls this, to
+	 * perform forward-chaining.
 	 *
 	 * @param rbs          A node, holding the name of the rulebase.
 	 * @param target       The target atom with which to start the chaining from.
 	 * @param vardecl      The variable declaration, if any, of the target.
+	 * @param trace_as     AtomSpace where to record the back-inference traces
 	 * @param focus_set    A SetLink containing the atoms to which forward
 	 *                     chaining will be applied.  If the set link is
 	 *                     empty, chaining will be invoked on the entire
@@ -66,6 +69,8 @@ protected:
 	Handle do_backward_chaining(Handle rbs,
 	                            Handle target,
 	                            Handle vardecl,
+	                            bool trace_enabled,
+	                            AtomSpace* trace_as,
 	                            Handle focus_set);
 
 	Handle get_rulebase_rules(Handle rbs);
@@ -91,13 +96,13 @@ InferenceSCM::InferenceSCM() : ModuleWrap("opencog rule-engine") {}
 /// Thus, all the definitions below happen in that module.
 void InferenceSCM::init(void)
 {
-	define_scheme_primitive("cog-fc",
+	define_scheme_primitive("cog-mandatory-args-fc",
 		&InferenceSCM::do_forward_chaining, this, "rule-engine");
 
-	define_scheme_primitive("cog-bc",
+	define_scheme_primitive("cog-mandatory-args-bc",
 		&InferenceSCM::do_backward_chaining, this, "rule-engine");
 
-	define_scheme_primitive("ure-rbs-rules",
+	define_scheme_primitive("cog-rbs-rules",
 		&InferenceSCM::get_rulebase_rules, this, "rule-engine");
 }
 
@@ -106,7 +111,7 @@ Handle InferenceSCM::do_forward_chaining(Handle rbs,
                                          Handle vardecl,
                                          Handle focus_set_h)
 {
-    AtomSpace *as = SchemeSmob::ss_get_env_as("cog-fc");
+    AtomSpace *as = SchemeSmob::ss_get_env_as("cog-mandatory-args-fc");
     HandleSeq focus_set = {};
 
     // A ListLink means that the variable declaration is undefined
@@ -130,14 +135,19 @@ Handle InferenceSCM::do_forward_chaining(Handle rbs,
 Handle InferenceSCM::do_backward_chaining(Handle rbs,
                                           Handle target,
                                           Handle vardecl,
+                                          bool trace_enabled,
+                                          AtomSpace* trace_as,
                                           Handle focus_link)
 {
     // A ListLink means that the variable declaration is undefined
     if (vardecl->getType() == LIST_LINK)
 	    vardecl = Handle::UNDEFINED;
 
-    AtomSpace *as = SchemeSmob::ss_get_env_as("cog-bc");
-    BackwardChainer bc(*as, rbs, target, vardecl, focus_link);
+    if (not trace_enabled)
+	    trace_as = nullptr;
+
+    AtomSpace *as = SchemeSmob::ss_get_env_as("cog-mandatory-args-bc");
+    BackwardChainer bc(*as, rbs, target, vardecl, trace_as, focus_link);
 
     bc.do_chain();
 
@@ -152,7 +162,7 @@ Handle InferenceSCM::get_rulebase_rules(Handle rbs)
         throw RuntimeException(TRACE_INFO,
             "InferenceSCM::get_rulebase_rules - invalid rulebase!");
 
-    AtomSpace *as = SchemeSmob::ss_get_env_as("ure-rbs-rules");
+    AtomSpace *as = SchemeSmob::ss_get_env_as("cog-rbs-rules");
     UREConfigReader ure_config(*as, rbs);
     auto rules = ure_config.get_rules();
     HandleSeq hs;
