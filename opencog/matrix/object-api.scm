@@ -521,7 +521,12 @@
 "
 	; ----------------------------------------------------
 	; Key under which the frequency values are stored.
-	(define freq-key (PredicateNode "*-FrequencyKey-*"))
+	(define freq-name
+		(if (LLOBJ 'filters?)
+			(string-append "*-FrequencyKey " (LLOBJ 'id))
+			"*-FrequencyKey-*"))
+
+	(define freq-key (PredicateNode freq-name))
 
 	; Return the observed frequency on ATOM
 	(define (get-freq ATOM)
@@ -548,7 +553,12 @@
 
 	; ----------------------------------------------------
 	; Key under which the entropy values are stored.
-	(define entropy-key (PredicateNode "*-Entropy Key-*"))
+	(define entr-name
+		(if (LLOBJ 'filters?)
+			(string-append "*-Entropy Key " (LLOBJ 'id))
+			"*-Entropy Key-*"))
+
+	(define entropy-key (PredicateNode entr-name))
 
 	; Return the total entropy on ATOM
 	(define (get-total-entropy ATOM)
@@ -564,7 +574,12 @@
 
 	; ----------------------------------------------------
 	; The key under which the MI is stored.
-	(define mi-key (PredicateNode "*-Mutual Info Key-*"))
+	(define mi-name
+		(if (LLOBJ 'filters?)
+			(string-append "*-Mutual Info Key " (LLOBJ 'id))
+			"*-Mutual Info Key-*"))
+
+	(define mi-key (PredicateNode mi-name))
 
 	; Get the (floating-point) mutual information on ATOM.
 	(define (get-total-mi ATOM)
@@ -696,12 +711,6 @@
 	; Return the atom that holds this value.
 	(define (set-right-wild-mi ITEM MI FRMI)
 		(set-mi (LLOBJ 'right-wildcard ITEM) MI FRMI))
-
-	; ----------------------------------------------------
-	; This fails totally on filtered datasets.
-	(if (LLOBJ 'filters?)
-		(throw 'bad-use 'add-pair-freq-api
-			"Can't use the count API object with filtered datasets!"))
 
 	; ----------------------------------------------------
 	; Methods on this class.
