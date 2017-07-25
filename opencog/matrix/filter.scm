@@ -40,7 +40,7 @@
 (define-public (add-generic-filter LLOBJ
 	LEFT-BASIS-PRED RIGHT-BASIS-PRED
 	LEFT-STAR-PRED RIGHT-STAR-PRED
-	PAIR-PRED)
+	PAIR-PRED ID-STR)
 "
   add-generic-filter LLOBJ - Modify LLOBJ so that only the columns and
   rows that satisfy the predicates are retained.
@@ -56,6 +56,10 @@
   The PAIR-PRED should be a function to that accepts individual matrix
   entries. It is applied whenever the 'item-pair or 'pair-count methods
   are invoked.  Like the others, it should return #t to keep the pair.
+
+  The ID-STR should be a string; it is appended to the dataset name and
+  id, so that unique identifier names can be constructed for each
+  filtered dataset.
 "
 	(let ((stars-obj (add-pair-stars LLOBJ))
 			(l-basis '())
@@ -150,7 +154,7 @@
 				((pair-type)        (apply LLOBJ (cons message args)))
 				; Block anything that might have to be filtered.
 				; For example: 'pair-freq which we don't, can't filter.
-				; Or any of the variious subtotals.
+				; Or any of the variious subtotals and marginals.
 				(else               (throw 'bad-use 'add-generic-filter
 					(format #f "Sorry, method ~A not available on filter!" message))))
 		)))
@@ -164,7 +168,7 @@
   individual entries with counts less than PAIR-CUT are removed. This
   provides an API compatible with the star-object API; i.e. it provides
   the same row and column addressability that star-object does, but
-  just returns fewer rows and columns.
+  just returns fewer rows, columns and individual entries.
 
   The filtering is done 'on demand', on a row-by-row, column-by-column
   basis.  Currenly, computations for the left and right stars are not
@@ -217,11 +221,15 @@
 		(define (pair-pred PAIR)
 			(< PAIR-CUT (LLOBJ 'pair-count PAIR)))
 
+		(define id-str
+			(format #f "cut-~D-~D-~D"
+				LEFT-CUT RIGHT-CUT PAIR-CUT))
+
 		; ---------------
 		(add-generic-filter LLOBJ
 			left-basis-pred right-basis-pred
 			left-stars-pred right-stars-pred
-			pair-pred)
+			pair-pred id-str)
 	)
 )
 
@@ -230,7 +238,8 @@
 (define-public (add-knockout-filter LLOBJ LEFT-KNOCKOUT RIGHT-KNOCKOUT)
 "
   add-knockout-filter LLOBJ - Modify LLOBJ so that the explicitly
-  indicated rows and columns are removed.
+  indicated rows and columns are removed. The LEFT-KNOCKOUT and
+  RIGHT-KNOCKOUT should be lists of left and right basis elements.
 "
 	; ---------------
 	; Filter out rows and columns in the knockout lists.
@@ -256,11 +265,15 @@
 	(define (pair-pred PAIR)
 		(and (left-stars-pred PAIR) (right-stars-pred PAIR)))
 
+	(define id-str
+		(format #f "knockout-~D-~D"
+			(length LEFT-KNOCKOUT) (length RIGHT-KNOCKOUT)))
+
 	; ---------------
 	(add-generic-filter LLOBJ
 		left-basis-pred right-basis-pred
 		left-stars-pred right-stars-pred
-		pair-pred)
+		pair-pred id-str)
 )
 
 ; ---------------------------------------------------------------------
