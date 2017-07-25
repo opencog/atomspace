@@ -409,7 +409,7 @@ void AtomSpace::fetch_valuations(Handle key, bool get_all_values)
     if (nullptr == key) return;
 
     // Get everything from the backing store.
-    _backing_store->getValutations(_atom_table, key, get_all_values);
+    _backing_store->getValuations(_atom_table, key, get_all_values);
 }
 
 bool AtomSpace::remove_atom(Handle h, bool recursive)
