@@ -44,7 +44,7 @@ void TraceRecorder::expansion(const Handle& andbit_fcs, const Handle& bitleaf_bo
 {
 	add_execution(expand_andbit_predicate_name,
 	              dont_exec(andbit_fcs), bitleaf_body,
-	              dont_exec(rule.get_definition()),
+	              dont_exec(rule.get_alias()),
 	              dont_exec(new_andbit.fcs), TruthValue::TRUE_TV());
 }
 
