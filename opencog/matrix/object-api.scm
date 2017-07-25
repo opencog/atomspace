@@ -394,11 +394,15 @@
   add-pair-count-api LLOBJ - Extend LLOBJ with count-getters.
 
   Extend the LLOBJ with additional methods to get and set
-  the count values for wild-card counts, and total counts.
+  marginal counts (subtotal wild-card counts), and total counts.
   Basically, this decorates the class with additional methods
   that get and set these counts in \"standardized\" places.
   Other classes can overload these methods; these just provide
   a reasonable default.
+
+  If the dataset is not filtered, the counts are stored in the
+  CountTruthValue assocaited with the atom; else they are stored
+  in a value specific to the filter-id.
 
   These methods do NOT compute the counts! They merely provide fast
   access to values that were previously computed and stored in the
@@ -408,11 +412,27 @@
   'item-pair 'make-pair 'left-wildcard 'right-wildcard and 'wild-wild
   on it, in the form documented above for the \"low-level API class\".
 "
-	(define (get-count ATOM)
-		(cog-tv-count (cog-tv ATOM)))
+	; ----------------------------------------------------
+	; Key under which the count values are stored.
+	(define is-filtered? (LLOBJ 'filters?))
 
+	(define cnt-name (string-append "*-CountKey " (LLOBJ 'id)))
+
+	(define cnt-key (PredicateNode cnt-name))
+
+	; Return the count on ATOM. Use the CountTruthValue if not
+	; filtered, else use the CountKey predicate.
+	(define (get-count ATOM)
+		(if (null? ATOM) 0
+			(if is-filtered?
+				(cog-value-ref (cog-value ATOM cnt-key) 0)
+				(cog-tv-count (cog-tv ATOM)))))
+
+	; Set a count on the ATOM.
 	(define (set-count ATOM CNT)
-		(cog-set-tv! ATOM (cog-new-ctv 0 0 CNT)))
+		(if is-filtered?
+			(cog-set-value! ATOM cnt-key (FloatValue CNT))
+			(cog-set-tv! ATOM (cog-new-ctv 0 0 CNT))))
 
 	; Get the left wildcard count
 	(define (get-left-wild-count ITEM)
@@ -440,11 +460,6 @@
 	; Return the atom that holds this count.
 	(define (set-wild-wild-count CNT)
 		(set-count (LLOBJ 'wild-wild) CNT))
-
-	; This fails totally on filtered datasets.
-	(if (LLOBJ 'filters?)
-		(throw 'bad-use 'add-pair-count-api
-			"Can't use the count API object with filtered datasets!"))
 
 	; Methods on this class.
 	(lambda (message . args)
