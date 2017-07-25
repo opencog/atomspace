@@ -1564,6 +1564,10 @@ void SQLAtomStorage::getIncomingByType(AtomTable& table, const Handle& h, Type t
 	getIncoming(table, buff);
 }
 
+void SQLAtomStorage::getValuations(AtomTable& table,
+                                   const Handle& key, bool get_all_values)
+{
+}
 
 /**
  * Fetch the Node with the indicated type and name.

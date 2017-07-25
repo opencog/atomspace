@@ -59,6 +59,11 @@ void SQLBackingStore::getIncomingByType(AtomTable& table, const Handle& h, Type 
 	_store->getIncomingByType(table, h, t);
 }
 
+void SQLBackingStore::getValuations(AtomTable& table, const Handle& key, bool get_all)
+{
+	_store->getValuations(table, key, get_all);
+}
+
 void SQLBackingStore::storeAtom(const Handle& h)
 {
 	_store->storeAtom(h);

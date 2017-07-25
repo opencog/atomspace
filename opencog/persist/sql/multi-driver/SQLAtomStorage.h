@@ -225,6 +225,7 @@ class SQLAtomStorage : public AtomStorage
 		Handle getLink(Type, const HandleSeq&);
 		void getIncomingSet(AtomTable&, const Handle&);
 		void getIncomingByType(AtomTable&, const Handle&, Type t);
+		void getValuations(AtomTable&, const Handle&, bool get_all);
 		void storeAtom(const Handle&, bool synchronous = false);
 		void loadType(AtomTable&, Type);
 		void flushStoreQueue();
