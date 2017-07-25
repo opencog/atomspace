@@ -148,7 +148,7 @@
 ;        (EvaluationLink (Predicate "foo")
 ;           (ListLink (AnyNode "left-wild") (AnyNode "right-wild"))))
 ;
-;     ; Retreive, from storage, the entire matrix, including the
+;     ; Retrieve, from storage, the entire matrix, including the
 ;     ; subtotal and total anchor atoms.  In this example, its enough
 ;     ; to get the incoming set of (Predicate "foo"), but this need
 ;     ; not generally be the case.
@@ -158,9 +158,13 @@
 ;     ; Methods on the class. To call these, quote the method name.
 ;     ; Example: (OBJ 'left-wildcard WORD) calls the
 ;     ; get-left-wildcard function, passing WORD as the argument.
+;     ;
+;     ; The name is a string printed at the top of generated reports.
+;     ; The id is a short string used to create unique filter ids and names.
 ;     (lambda (message . args)
 ;        (apply (case message
-;              ((name) "Demo Kind of Object")
+;              ((name) "A Kind of Demonstration Object")
+;              ((id)   "demo")
 ;              ((left-type) get-left-type)
 ;              ((right-type) get-right-type)
 ;              ((pair-type) get-pair-type)
@@ -390,11 +394,15 @@
   add-pair-count-api LLOBJ - Extend LLOBJ with count-getters.
 
   Extend the LLOBJ with additional methods to get and set
-  the count values for wild-card counts, and total counts.
+  marginal counts (subtotal wild-card counts), and total counts.
   Basically, this decorates the class with additional methods
   that get and set these counts in \"standardized\" places.
   Other classes can overload these methods; these just provide
   a reasonable default.
+
+  If the dataset is not filtered, the counts are stored in the
+  CountTruthValue assocaited with the atom; else they are stored
+  in a value specific to the filter-id.
 
   These methods do NOT compute the counts! They merely provide fast
   access to values that were previously computed and stored in the
@@ -404,11 +412,27 @@
   'item-pair 'make-pair 'left-wildcard 'right-wildcard and 'wild-wild
   on it, in the form documented above for the \"low-level API class\".
 "
-	(define (get-count ATOM)
-		(cog-tv-count (cog-tv ATOM)))
+	; ----------------------------------------------------
+	; Key under which the count values are stored.
+	(define is-filtered? (LLOBJ 'filters?))
 
+	(define cnt-name (string-append "*-CountKey " (LLOBJ 'id)))
+
+	(define cnt-key (PredicateNode cnt-name))
+
+	; Return the count on ATOM. Use the CountTruthValue if not
+	; filtered, else use the CountKey predicate.
+	(define (get-count ATOM)
+		(if (null? ATOM) 0
+			(if is-filtered?
+				(cog-value-ref (cog-value ATOM cnt-key) 0)
+				(cog-tv-count (cog-tv ATOM)))))
+
+	; Set a count on the ATOM.
 	(define (set-count ATOM CNT)
-		(cog-set-tv! ATOM (cog-new-ctv 0 0 CNT)))
+		(if is-filtered?
+			(cog-set-value! ATOM cnt-key (FloatValue CNT))
+			(cog-set-tv! ATOM (cog-new-ctv 0 0 CNT))))
 
 	; Get the left wildcard count
 	(define (get-left-wild-count ITEM)
@@ -436,11 +460,6 @@
 	; Return the atom that holds this count.
 	(define (set-wild-wild-count CNT)
 		(set-count (LLOBJ 'wild-wild) CNT))
-
-	; This fails totally on filtered datasets.
-	(if (LLOBJ 'filters?)
-		(throw 'bad-use 'add-pair-count-api
-			"Can't use the count API object with filtered datasets!"))
 
 	; Methods on this class.
 	(lambda (message . args)
@@ -517,7 +536,12 @@
 "
 	; ----------------------------------------------------
 	; Key under which the frequency values are stored.
-	(define freq-key (PredicateNode "*-FrequencyKey-*"))
+	(define freq-name
+		(if (LLOBJ 'filters?)
+			(string-append "*-FrequencyKey " (LLOBJ 'id))
+			"*-FrequencyKey-*"))
+
+	(define freq-key (PredicateNode freq-name))
 
 	; Return the observed frequency on ATOM
 	(define (get-freq ATOM)
@@ -544,7 +568,12 @@
 
 	; ----------------------------------------------------
 	; Key under which the entropy values are stored.
-	(define entropy-key (PredicateNode "*-Entropy Key-*"))
+	(define entr-name
+		(if (LLOBJ 'filters?)
+			(string-append "*-Entropy Key " (LLOBJ 'id))
+			"*-Entropy Key-*"))
+
+	(define entropy-key (PredicateNode entr-name))
 
 	; Return the total entropy on ATOM
 	(define (get-total-entropy ATOM)
@@ -560,7 +589,12 @@
 
 	; ----------------------------------------------------
 	; The key under which the MI is stored.
-	(define mi-key (PredicateNode "*-Mutual Info Key-*"))
+	(define mi-name
+		(if (LLOBJ 'filters?)
+			(string-append "*-Mutual Info Key " (LLOBJ 'id))
+			"*-Mutual Info Key-*"))
+
+	(define mi-key (PredicateNode mi-name))
 
 	; Get the (floating-point) mutual information on ATOM.
 	(define (get-total-mi ATOM)
@@ -692,12 +726,6 @@
 	; Return the atom that holds this value.
 	(define (set-right-wild-mi ITEM MI FRMI)
 		(set-mi (LLOBJ 'right-wildcard ITEM) MI FRMI))
-
-	; ----------------------------------------------------
-	; This fails totally on filtered datasets.
-	(if (LLOBJ 'filters?)
-		(throw 'bad-use 'add-pair-freq-api
-			"Can't use the count API object with filtered datasets!"))
 
 	; ----------------------------------------------------
 	; Methods on this class.

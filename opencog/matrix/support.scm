@@ -24,7 +24,12 @@
 "
 	; ----------------------------------------------------
 	; Key under which the matrix l_p norms are stored.
-	(define norm-key (PredicateNode "*-Norm Key-*"))
+	(define key-name
+		(if (LLOBJ 'filters?)
+			(string-append "*-Norm Key " (LLOBJ 'id))
+			"*-Norm Key-*"))
+
+	(define norm-key (PredicateNode key-name))
 
 	(define (set-norms ATOM L0 L1 L2)
 		(cog-set-value! ATOM norm-key (FloatValue L0 L1 L2)))

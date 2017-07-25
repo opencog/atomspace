@@ -9,13 +9,28 @@
 ; ---------------------------------------------------------------------
 ; OVERVIEW
 ; --------
-; Some types of analysis, e.g. the thresholding-PCA code, will provide
-; better results if some of the noise in the data is removed.  In this
-; case, noise is considered to be any rows or columns that have subtotal
-; column counts below a certain value: anything that was observed very
-; infrequently.
+; Large datasets are inherently likely to contain "noise" and spurious
+; data that might be unwanted during data analysis. For example, the
+; dataset might contian a large number of atoms that were observed only
+; once or twice; these are likely to be junk and should be removed
+; before data analysis begins.
 ;
-; This overloads the "star" API to provide the filtered dataset.
+; The code here provides this filtering ability. Several types of
+; filters are provided:
+; -- a knockout filter, that knocks out designated rows and columns.
+; -- a min-count filter, that knocks out rows and columns whose
+;    marginal counts are below a minimum, as well as individual matrix
+;    entries that are below a per-entry minimum.
+; -- a generic callback-defined filter, that knocks out rows, columns
+;    and individual entries based on callback predicates.
+;
+; Note that these filters are all "on demand": they do NOT copy the
+; dataset and then compute a smaller version of it.  Instead, they
+; overload the "star" API, altering the methods used to fetch rows,
+; columns and individual entries.  Since all the other matrix access
+; routines use the "star" API to gain access to the matrix and it's
+; marginals, this works!
+;
 ; ---------------------------------------------------------------------
 
 (use-modules (srfi srfi-1))
@@ -25,7 +40,7 @@
 (define-public (add-generic-filter LLOBJ
 	LEFT-BASIS-PRED RIGHT-BASIS-PRED
 	LEFT-STAR-PRED RIGHT-STAR-PRED
-	PAIR-PRED)
+	PAIR-PRED ID-STR)
 "
   add-generic-filter LLOBJ - Modify LLOBJ so that only the columns and
   rows that satisfy the predicates are retained.
@@ -41,6 +56,10 @@
   The PAIR-PRED should be a function to that accepts individual matrix
   entries. It is applied whenever the 'item-pair or 'pair-count methods
   are invoked.  Like the others, it should return #t to keep the pair.
+
+  The ID-STR should be a string; it is appended to the dataset name and
+  id, so that unique identifier names can be constructed for each
+  filtered dataset.
 "
 	(let ((stars-obj (add-pair-stars LLOBJ))
 			(l-basis '())
@@ -104,6 +123,12 @@
 			(if (PAIR-PRED PAIR) (LLOBJ 'pair-count PAIR) 0))
 
 		; ---------------
+		(define (get-name)
+			(string-append (LLOBJ 'name) " " ID-STR))
+		(define (get-id)
+			(string-append (LLOBJ 'id) " " ID-STR))
+
+		; ---------------
 		; Return a pointer to each method that this class overloads.
 		(define (provides meth)
 			(case meth
@@ -119,6 +144,8 @@
 		; Methods on this class.
 		(lambda (message . args)
 			(case message
+				((name)             (get-name))
+				((id)               (get-id))
 				((left-stars)       (apply cache-left-stars args))
 				((right-stars)      (apply cache-right-stars args))
 				((left-basis)       (get-left-basis))
@@ -135,7 +162,7 @@
 				((pair-type)        (apply LLOBJ (cons message args)))
 				; Block anything that might have to be filtered.
 				; For example: 'pair-freq which we don't, can't filter.
-				; Or any of the variious subtotals.
+				; Or any of the variious subtotals and marginals.
 				(else               (throw 'bad-use 'add-generic-filter
 					(format #f "Sorry, method ~A not available on filter!" message))))
 		)))
@@ -149,12 +176,11 @@
   individual entries with counts less than PAIR-CUT are removed. This
   provides an API compatible with the star-object API; i.e. it provides
   the same row and column addressability that star-object does, but
-  just returns fewer rows and columns.
+  just returns fewer rows, columns and individual entries.
 
-  Thhe filtering is done 'on demand', on a row-by-row, column-by-column
-  basis.  Currenly, computations for the left and right stars are not
-  cached, and are recomputed for each request.  Currently, this seems
-  like a reasonable thing to do.
+  The filtering is done 'on demand', on a row-by-row, column-by-column
+  basis.  Computations of the left and right stars are cached, sot that
+  they are not recomputed for each request.
 
   Note that by removing rows and columns, the frequencies will no longer
   sum to 1.0. Likewise, row and column subtotals, entropies and mutual
@@ -202,11 +228,15 @@
 		(define (pair-pred PAIR)
 			(< PAIR-CUT (LLOBJ 'pair-count PAIR)))
 
+		(define id-str
+			(format #f "cut-~D-~D-~D"
+				LEFT-CUT RIGHT-CUT PAIR-CUT))
+
 		; ---------------
 		(add-generic-filter LLOBJ
 			left-basis-pred right-basis-pred
 			left-stars-pred right-stars-pred
-			pair-pred)
+			pair-pred id-str)
 	)
 )
 
@@ -215,7 +245,8 @@
 (define-public (add-knockout-filter LLOBJ LEFT-KNOCKOUT RIGHT-KNOCKOUT)
 "
   add-knockout-filter LLOBJ - Modify LLOBJ so that the explicitly
-  indicated rows and columns are removed.
+  indicated rows and columns are removed. The LEFT-KNOCKOUT and
+  RIGHT-KNOCKOUT should be lists of left and right basis elements.
 "
 	; ---------------
 	; Filter out rows and columns in the knockout lists.
@@ -241,11 +272,15 @@
 	(define (pair-pred PAIR)
 		(and (left-stars-pred PAIR) (right-stars-pred PAIR)))
 
+	(define id-str
+		(format #f "knockout-~D-~D"
+			(length LEFT-KNOCKOUT) (length RIGHT-KNOCKOUT)))
+
 	; ---------------
 	(add-generic-filter LLOBJ
 		left-basis-pred right-basis-pred
 		left-stars-pred right-stars-pred
-		pair-pred)
+		pair-pred id-str)
 )
 
 ; ---------------------------------------------------------------------

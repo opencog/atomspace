@@ -12,7 +12,7 @@ where `x` and `y` are atoms), and we have some sort of count `N(x,y)`
 of how often that particular pair was observed.  We typically are then
 interested in various statistical measures: usually starting with the
 normalized frequency `p(x,y)` (that is, the probability, likelihood)
-of how often the pair `(x,y)` occured (likelihood of observing the pair).
+of how often the pair `(x,y)` occurred (likelihood of observing the pair).
 These counts and frequencies can be viewed as a sparse correlation
 matrix, and the goal here is to do all the typical things that one
 might do with such a matrix.  That's what the code in this directory
@@ -44,11 +44,11 @@ The tools implemented here include:
  * computing and caching mutual information between rows and columns
  * computing cosine similarity between rows or columns.
  * performing PCA (principal component analysis) in the matrix.
- * performing cuts, to remove unwanted rows, coumns and individual entries.
+ * performing cuts, to remove unwanted rows, columns and individual entries.
 
 To use these tools, all you need to do is to specify a low-level
 object that describes the matrix. It needs to provide some very simple
-but important mthods: the `'left-type` and `'right-type` methods,
+but important methods: the `'left-type` and `'right-type` methods,
 that return the atom type of the rows and the columns; a `'pair-type`
 method that returns the atom-type of the pair, and a `'pair-count`
 method that returns the count, given the pair.
@@ -56,12 +56,12 @@ method that returns the count, given the pair.
 
 FAQ
 ---
-Q: Why isn't this in C++?  Surely, numericaal computations would be
+Q: Why isn't this in C++?  Surely, numerical computations would be
    a lot faster in C++, right?
 
 A: Yes, probably. But its a lot easier to write scheme code than
    it is to write C++ code, and so prototyping in scheme just made
-   more sense. It was just-plain simpler, faster, esier. You are
+   more sense. It was just-plain simpler, faster, easier. You are
    invited to take the lessons learned, and re-implement in C++.
    The number #1 most important lesson is that the filter object
    is the most important object: it controls what data you want
@@ -70,23 +70,23 @@ A: Yes, probably. But its a lot easier to write scheme code than
 
 Q: Really, C++ is sooo fast...
 
-A: Yes, but since the data is stored in values assocaited with
+A: Yes, but since the data is stored in values associated with
    atoms in the atomspace, adding numbers together is NOT the
    bottleneck. Accessing Atom Values *is* the bottleneck. Soooo...
 
 Q: Why don't you just export all your data to SciPy or to Gnu R, or to
    Octave, or MatLab, for that matter, and just do your data analytics
    there?  That way, you don't need to re-implement all these basic
-   statistical algorithms.
+   statistical algorithms!
 
 A: That sounds nice, but frankly, it's too much work for me. Maybe you
    can do this.  Seriously, its just a lot easier (for me) to create
-   and use the code here, than to struggle mightlily with those packages.
+   and use the code here, than to struggle mightily with those packages.
 
-   Also: realize that the end-goal of opencog is not to export data
+   Also: realize that the end-goal of OpenCog is not to export data
    once, analyze it once, and be done. Rather, the goal is to constantly
    and continuously monitor external, real-world events, pull them into
-   the atomspace, crunch it incessently, and update knowledge of the
+   the atomspace, crunch it incessantly, and update knowledge of the
    external world as a result. This rules out GUI tools for data
    processing (because there's no GUI in a server) and it rules out
    popsicle-stick architectures as being a bit hokey.
@@ -96,7 +96,7 @@ A: That sounds nice, but frankly, it's too much work for me. Maybe you
    This can blow through huge amounts of RAM. Can SciPy actually deal
    with datasets this big?  It gets worse, because typically, you want
    to work with different cuts and filters, where you discard much of
-   the data, or average together different parts: can you relly afford
+   the data, or average together different parts: can you really afford
    the RAM needed to export all of these different cut and filtered
    datasets?  Maybe you can, its just not trivial.
 
@@ -109,7 +109,7 @@ A: You would use Rcpp at http://dirk.eddelbuettel.com/code/rcpp.html
    provided by R. Rcpp provides matching C++ classes for a large
    number of basic R data types. Hence, a package author can keep his
    data in normal R data structures without having to worry about
-   translation or transfering to C++. At the same time, the data
+   translation or transferring to C++. At the same time, the data
    structures can be accessed as easily at the C++ level, and used in
    the normal manner. The mapping of data types works in both
    directions. It is as straightforward to pass data from R to C++,
@@ -139,7 +139,7 @@ https://en.wikipedia.org/wiki/Generic_programming
 This code is written in scheme.  I know some of you want to use python
 instead, while others would prefer C++.  More generally, it would
 probably be useful to set things up so that external, third-party
-software systems (such as scipy or Gnu Octave or tensorflow) could
+software systems (such as SciPy or Gnu Octave or tensorflow) could
 be used to perform the analysis.  Now that you've got the general
 idea... you can go do this!
 
@@ -163,7 +163,7 @@ Basic definitions
 
 Let `N(x,y)` be the observed count on the pair of atoms `(x,y)`.
 
-The `add-pair-count-api` class provides an API to report the parital
+The `add-pair-count-api` class provides an API to report the partial
 sums `N(x,*) = sum_y N(x,y)` and likewise `N(*,y)`.  If you think of
 `N(x,y)` as a matrix, these are the totals for the entries in each
 row or column of the matrix. Likewise, `N(*,*) = sum_x sum_y N(x,y)`.
@@ -205,7 +205,7 @@ calling the function on each pair.
 
 The `make-compute-count` class provides methods to compute the partial
 sums `N(*,y)` and `N(x,*)` and cache the resulting values on atoms where
-they can be quickly retreived. The location of the cached values are
+they can be quickly retrieved. The location of the cached values are
 exactly where they can be found by the `add-pair-count-api`, above.
 
 The `make-compute-freq` class provides methods to compute and cache
@@ -223,7 +223,7 @@ three classes above, and unleashes them on a dataset: first computing
 the row and column partial counts, then computing the frequencies, and
 then computing and caching the mutual information.  For large datasets,
 e.g. tens of millions of atoms, this can take hours to run.  Thus, for
-this reaso, the cached values are then saved to the currrently-open
+this reason, the cached values are then saved to the currently-open
 database, so that these results become available later.
 
 Computing support and entropy
@@ -268,8 +268,8 @@ The class also provides the Jaccard similarity
             sum_x max (N(x,y), N(x,z))
 ```
 
-The `add-tuple-math` class provides methods for applying aribitrary
-functions to arebitrary sets of rows or columns. The simplest examples
+The `add-tuple-math` class provides methods for applying arbitrary
+functions to arbitrary sets of rows or columns. The simplest examples
 include taking the sums and differences of columns, taking the
 element-by-element min or max of a set of columns, counting the number
 of entries that are simultaneously non-zero in sets of columns, etc.

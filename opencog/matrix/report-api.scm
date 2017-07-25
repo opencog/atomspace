@@ -42,7 +42,7 @@
   'left-dim         -- The number of rows
   'right-dim        -- The number of columns
   'num-pairs        -- The number of non-zero entries
-  'total-count      -- Total number fo observations on all pairs
+  'total-count      -- Total number of observations on all pairs
                        (Identical to the 'wild-wild-count on the
                        count-api object)
 
@@ -113,16 +113,18 @@
     calls 'hubbiness' (his hubbiness is the 2nd central moment, if
     I recall correctly).
 "
-	(let* ((llobj LLOBJ)
-
-			(cntobj (add-pair-count-api LLOBJ))
+	(let* ((cntobj (add-pair-count-api LLOBJ))
 			(totcnt (cntobj 'wild-wild-count))
 			(wild-atom (LLOBJ 'wild-wild))
+			(is-filtered? (LLOBJ 'filters?))
 		)
 
 		; ----------------------------------------------------
 		; Key under which the matrix dimensions are stored.
-		(define dim-key (PredicateNode "*-Dimension Key-*"))
+		(define dim-key (PredicateNode
+			(if is-filtered?
+				(string-append "*-Dimension Key " (LLOBJ 'id))
+				"*-Dimension Key-*")))
 
 		(define (set-size LEFT RIGHT NPAIRS)
 			(cog-set-value! wild-atom dim-key (FloatValue LEFT RIGHT NPAIRS)))
@@ -142,7 +144,10 @@
 
 		; ----------------------------------------------------
 		; Key under which the matrix entropies are stored.
-		(define ent-key (PredicateNode "*-Total Entropy Key-*"))
+		(define ent-key (PredicateNode
+			(if is-filtered?
+				(string-append "*-Total Entropy Key " (LLOBJ 'id))
+				"*-Total Entropy Key-*")))
 
 		(define (set-entropy LEFT RIGHT TOT)
 			(cog-set-value! wild-atom ent-key (FloatValue LEFT RIGHT TOT)))
@@ -158,7 +163,10 @@
 
 		; ----------------------------------------------------
 		; Key under which the matrix MI are stored.
-		(define mi-key (PredicateNode "*-Total MI Key-*"))
+		(define mi-key (PredicateNode
+			(if is-filtered?
+				(string-append "*-Total MI Key " (LLOBJ 'id))
+				"*-Total MI Key-*")))
 
 		(define (set-mi TOT)
 			(cog-set-value! wild-atom mi-key (FloatValue TOT)))
@@ -168,8 +176,14 @@
 
 		; ----------------------------------------------------
 		; Key under which the matrix l_p norms are stored.
-		(define l-norm-key (PredicateNode "*-Left Norm Key-*"))
-		(define r-norm-key (PredicateNode "*-Right Norm Key-*"))
+		(define l-norm-key (PredicateNode
+			(if is-filtered?
+				(string-append "*-Left Norm Key " (LLOBJ 'id))
+				"*-Left Norm Key-*")))
+		(define r-norm-key (PredicateNode
+			(if is-filtered?
+				(string-append "*-Right Norm Key " (LLOBJ 'id))
+				"*-Right Norm Key-*")))
 
 		(define (set-left-norms L0 L1 L2 RMS)
 			(cog-set-value! wild-atom l-norm-key
@@ -235,7 +249,7 @@
 				((set-left-norms)      (apply set-left-norms args))
 				((set-right-norms)     (apply set-right-norms args))
 
-				(else (apply llobj (cons message args)))
+				(else                  (apply LLOBJ (cons message args)))
 			))
 	)
 )
@@ -247,8 +261,7 @@
   add-central-compute LLOBJ - Extend LLOBJ with methods to compute
   misc graph-centrality statistics.
 "
-	(let* ((llobj LLOBJ)
-			(wild-obj (add-pair-stars LLOBJ))
+	(let* ((wild-obj (add-pair-stars LLOBJ))
 			(len-obj (add-support-api wild-obj))
 			(frq-obj (add-pair-freq-api wild-obj))
 			(rpt-obj (add-report-api wild-obj))
@@ -383,7 +396,7 @@
 				((right-rms-count)   (get-right-rms-count))
 				((cache-all)         (cache-all))
 
-				(else (apply llobj (cons message args)))
+				(else                (apply LLOBJ (cons message args)))
 			))
 	)
 )
