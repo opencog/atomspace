@@ -1,5 +1,5 @@
 /*
- * opencog/nlp/learn/ObserveSentence.h
+ * atomspace/opencog/benchmark/PagedAtoms.h
  *
  * Copyright (C) 2017 by OpenCog Foundation
  * All Rights Reserved
