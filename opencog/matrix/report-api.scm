@@ -42,7 +42,7 @@
   'left-dim         -- The number of rows
   'right-dim        -- The number of columns
   'num-pairs        -- The number of non-zero entries
-  'total-count      -- Total number fo observations on all pairs
+  'total-count      -- Total number of observations on all pairs
                        (Identical to the 'wild-wild-count on the
                        count-api object)
 
@@ -113,9 +113,7 @@
     calls 'hubbiness' (his hubbiness is the 2nd central moment, if
     I recall correctly).
 "
-	(let* ((llobj LLOBJ)
-
-			(cntobj (add-pair-count-api LLOBJ))
+	(let* ((cntobj (add-pair-count-api LLOBJ))
 			(totcnt (cntobj 'wild-wild-count))
 			(wild-atom (LLOBJ 'wild-wild))
 		)
@@ -235,7 +233,7 @@
 				((set-left-norms)      (apply set-left-norms args))
 				((set-right-norms)     (apply set-right-norms args))
 
-				(else (apply llobj (cons message args)))
+				(else                  (apply LLOBJ (cons message args)))
 			))
 	)
 )
@@ -247,8 +245,7 @@
   add-central-compute LLOBJ - Extend LLOBJ with methods to compute
   misc graph-centrality statistics.
 "
-	(let* ((llobj LLOBJ)
-			(wild-obj (add-pair-stars LLOBJ))
+	(let* ((wild-obj (add-pair-stars LLOBJ))
 			(len-obj (add-support-api wild-obj))
 			(frq-obj (add-pair-freq-api wild-obj))
 			(rpt-obj (add-report-api wild-obj))
@@ -383,7 +380,7 @@
 				((right-rms-count)   (get-right-rms-count))
 				((cache-all)         (cache-all))
 
-				(else (apply llobj (cons message args)))
+				(else                (apply LLOBJ (cons message args)))
 			))
 	)
 )
