@@ -75,6 +75,13 @@ class BackingStore
 		virtual void getIncomingByType(AtomTable&, const Handle&, Type) = 0;
 
 		/**
+		 * Put all atoms having a value for the key into the atomtable.
+		 * If the bool flag is set, then all values on the atom are
+		 * fetched.
+		 */
+		virtual void getValuations(AtomTable&, const Handle&, bool) = 0;
+
+		/**
 		 * Recursively store the atom and anything in it's outgoing set.
 		 * If the atom is already in storage, this will update it's
 		 * truth value, etc.

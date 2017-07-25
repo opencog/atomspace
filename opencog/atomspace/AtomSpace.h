@@ -246,15 +246,13 @@ public:
     Handle get_atom(const Handle& h) const { return _atom_table.getHandle(h); }
 
     /**
-     * Load *all* atoms of the given type, but only if they are not
-     * already in the AtomTable.
+     * Use the backing store to load all atoms of the given atom type.
      */
     void fetch_all_atoms_of_type(Type t) {
         if (NULL == _backing_store)
             throw RuntimeException(TRACE_INFO, "No backing store");
         _backing_store->loadType(_atom_table, t);
     }
-
 
     /**
      * Use the backing store to load the entire incoming set of the
@@ -269,9 +267,22 @@ public:
     /**
      * Use the backing store to load the incoming set of the
      * atom, but only those atoms of the given type.
-     * The fetch is not recursive.
+     * The fetch is not recursive; that is, only the immediate,
+     * single-level incoming set is fetched.
      */
     Handle fetch_incoming_by_type(Handle, Type);
+
+    /**
+     * Use the backing store to load all atoms that have a value
+     * set for the indicated key.  This is typically used to load
+     * up a slice of a dataset: viz, to avoid loading any other atoms.
+     *
+     * If the boolean flag is set to true, then all values on the
+     * atom are fetched; otherwise, only that one value is fetched.
+     * This can save a lot of RAM, if the atoms have a lot of misc.
+     * values attached to them.
+     */
+    void fetch_valuations(Handle, bool = false);
 
     /**
      * Recursively store the atom to the backing store.
