@@ -11,6 +11,7 @@ ADD_EXECUTABLE (atomspace_bm
 	atomspace_bm.cc
 )
 
+
 IF (HAVE_GUILE)
 	TARGET_LINK_LIBRARIES (atomspace_bm smob)
 ENDIF(HAVE_GUILE)
@@ -53,3 +54,15 @@ IF (HAVE_GUILE)
 		dl
 	)
 ENDIF (HAVE_GUILE)
+
+ADD_EXECUTABLE (atom_bench
+	PagedAtoms.cc
+	atom_bench.cc
+)
+
+TARGET_LINK_LIBRARIES (atom_bench
+	atombase
+	atomspace
+	${ATOMSPACE_LIBRARIES}
+	${COGUTIL_LIBRARY}
+)
