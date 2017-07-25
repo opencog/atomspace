@@ -148,7 +148,7 @@
 ;        (EvaluationLink (Predicate "foo")
 ;           (ListLink (AnyNode "left-wild") (AnyNode "right-wild"))))
 ;
-;     ; Retreive, from storage, the entire matrix, including the
+;     ; Retrieve, from storage, the entire matrix, including the
 ;     ; subtotal and total anchor atoms.  In this example, its enough
 ;     ; to get the incoming set of (Predicate "foo"), but this need
 ;     ; not generally be the case.
@@ -158,9 +158,13 @@
 ;     ; Methods on the class. To call these, quote the method name.
 ;     ; Example: (OBJ 'left-wildcard WORD) calls the
 ;     ; get-left-wildcard function, passing WORD as the argument.
+;     ;
+;     ; The name is a string printed at the top of generated reports.
+;     ; The id is a short string used to create unique filter ids and names.
 ;     (lambda (message . args)
 ;        (apply (case message
-;              ((name) "Demo Kind of Object")
+;              ((name) "A Kind of Demonstration Object")
+;              ((id)   "demo")
 ;              ((left-type) get-left-type)
 ;              ((right-type) get-right-type)
 ;              ((pair-type) get-pair-type)

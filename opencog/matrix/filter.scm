@@ -9,13 +9,28 @@
 ; ---------------------------------------------------------------------
 ; OVERVIEW
 ; --------
-; Some types of analysis, e.g. the thresholding-PCA code, will provide
-; better results if some of the noise in the data is removed.  In this
-; case, noise is considered to be any rows or columns that have subtotal
-; column counts below a certain value: anything that was observed very
-; infrequently.
+; Large datasets are inherently likely to contain "noise" and spurious
+; data that might be unwanted during data analysis. For example, the
+; dataset might contian a large number of atoms that were observed only
+; once or twice; these are likely to be junk and should be removed
+; before data analysis begins.
 ;
-; This overloads the "star" API to provide the filtered dataset.
+; The code here provides this filtering ability. Several types of
+; filters are provided:
+; -- a knockout filter, that knocks out designated rows and columns.
+; -- a min-count filter, that knocks out rows and columns whose
+;    marginal counts are below a minimum, as well as individual matrix
+;    entries that are below a per-entry minimum.
+; -- a generic callback-defined filter, that knocks out rows, columns
+;    and individual entries based on callback predicates.
+;
+; Note that these filters are all "on demand": they do NOT copy the
+; dataset and then compute a smaller version of it.  Instead, they
+; overload the "star" API, altering the methods used to fetch rows,
+; columns and individual entries.  Since all the other matrix access
+; routines use the "star" API to gain access to the matrix and it's
+; marginals, this works!
+;
 ; ---------------------------------------------------------------------
 
 (use-modules (srfi srfi-1))
@@ -151,7 +166,7 @@
   the same row and column addressability that star-object does, but
   just returns fewer rows and columns.
 
-  Thhe filtering is done 'on demand', on a row-by-row, column-by-column
+  The filtering is done 'on demand', on a row-by-row, column-by-column
   basis.  Currenly, computations for the left and right stars are not
   cached, and are recomputed for each request.  Currently, this seems
   like a reasonable thing to do.
