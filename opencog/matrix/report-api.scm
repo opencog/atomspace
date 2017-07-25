@@ -116,11 +116,15 @@
 	(let* ((cntobj (add-pair-count-api LLOBJ))
 			(totcnt (cntobj 'wild-wild-count))
 			(wild-atom (LLOBJ 'wild-wild))
+			(is-filtered? (LLOBJ 'filters?))
 		)
 
 		; ----------------------------------------------------
 		; Key under which the matrix dimensions are stored.
-		(define dim-key (PredicateNode "*-Dimension Key-*"))
+		(define dim-key (PredicateNode
+			(if is-filtered?
+				(string-append "*-Dimension Key " (LLOBJ 'id))
+				"*-Dimension Key-*")))
 
 		(define (set-size LEFT RIGHT NPAIRS)
 			(cog-set-value! wild-atom dim-key (FloatValue LEFT RIGHT NPAIRS)))
@@ -140,7 +144,10 @@
 
 		; ----------------------------------------------------
 		; Key under which the matrix entropies are stored.
-		(define ent-key (PredicateNode "*-Total Entropy Key-*"))
+		(define ent-key (PredicateNode
+			(if is-filtered?
+				(string-append "*-Total Entropy Key " (LLOBJ 'id))
+				"*-Total Entropy Key-*")))
 
 		(define (set-entropy LEFT RIGHT TOT)
 			(cog-set-value! wild-atom ent-key (FloatValue LEFT RIGHT TOT)))
@@ -156,7 +163,10 @@
 
 		; ----------------------------------------------------
 		; Key under which the matrix MI are stored.
-		(define mi-key (PredicateNode "*-Total MI Key-*"))
+		(define mi-key (PredicateNode
+			(if is-filtered?
+				(string-append "*-Total MI Key " (LLOBJ 'id))
+				"*-Total MI Key-*")))
 
 		(define (set-mi TOT)
 			(cog-set-value! wild-atom mi-key (FloatValue TOT)))
@@ -166,8 +176,14 @@
 
 		; ----------------------------------------------------
 		; Key under which the matrix l_p norms are stored.
-		(define l-norm-key (PredicateNode "*-Left Norm Key-*"))
-		(define r-norm-key (PredicateNode "*-Right Norm Key-*"))
+		(define l-norm-key (PredicateNode
+			(if is-filtered?
+				(string-append "*-Left Norm Key " (LLOBJ 'id))
+				"*-Left Norm Key-*")))
+		(define r-norm-key (PredicateNode
+			(if is-filtered?
+				(string-append "*-Right Norm Key " (LLOBJ 'id))
+				"*-Right Norm Key-*")))
 
 		(define (set-left-norms L0 L1 L2 RMS)
 			(cog-set-value! wild-atom l-norm-key
