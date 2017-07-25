@@ -123,6 +123,12 @@
 			(if (PAIR-PRED PAIR) (LLOBJ 'pair-count PAIR) 0))
 
 		; ---------------
+		(define (get-name)
+			(string-append (LLOBJ 'name) " " ID-STR))
+		(define (get-id)
+			(string-append (LLOBJ 'id) " " ID-STR))
+
+		; ---------------
 		; Return a pointer to each method that this class overloads.
 		(define (provides meth)
 			(case meth
@@ -138,6 +144,8 @@
 		; Methods on this class.
 		(lambda (message . args)
 			(case message
+				((name)             (get-name))
+				((id)               (get-id))
 				((left-stars)       (apply cache-left-stars args))
 				((right-stars)      (apply cache-right-stars args))
 				((left-basis)       (get-left-basis))
@@ -171,9 +179,8 @@
   just returns fewer rows, columns and individual entries.
 
   The filtering is done 'on demand', on a row-by-row, column-by-column
-  basis.  Currenly, computations for the left and right stars are not
-  cached, and are recomputed for each request.  Currently, this seems
-  like a reasonable thing to do.
+  basis.  Computations of the left and right stars are cached, sot that
+  they are not recomputed for each request.
 
   Note that by removing rows and columns, the frequencies will no longer
   sum to 1.0. Likewise, row and column subtotals, entropies and mutual
