@@ -89,7 +89,25 @@ void EdgePage::add_edge(AtomHandle in, AtomHandle out)
     edge_ptr->inbound = (uint64_t) in;
     edge_ptr->outbound = (uint64_t) out;
     
-    // Move some bytes to emulate the performance of inserts.
+    // Move some bytes to emulate the performance of inserts. This code is
+    // intended to reflect a move of random bytes. It moves bytes past the
+    // end of the used area so these moves will not affect stored atoms. The
+    // work is also reversed in that full pages have less work while empty pages
+    // have more work, unlike a real page where full pages will have inserts
+    // which move half the entries, on average. In an actual implementation,
+    // these pages will likely be stored using an arracy of atom offsets at
+    // the beginning of the page, with the actual edges/atoms/index entries
+    // stored from the back of the page. See: 
+    //
+    // http://rachbelaid.com/introduction-to-postgres-physical-storage/
+    // 
+    // for how this is done with Postgres. This approach means that only the 2-byte
+    // offsets are moved when inserting new rows/edges/atoms/index entries. The actual
+    // rows are kept in place and only the index entries at the start of the page are
+    // kept in sorted order. This will result in less work than this emulation, but
+    // there will be more work binary searching the sorted rows to find the new
+    // insert positions. So the net effect will be that the actual code will 
+    // take more time than this implementation.
     if (free > 2)
     {
         size_t slots_to_move = randomGenerator->randint(MAX_EDGES_PER_PAGE - next);
@@ -141,7 +159,25 @@ void IndexPage::add_page(uint64_t key, void* page)
     slot_ptr->key = (uint64_t) key;
     slot_ptr->page = (void*) page;
     
-    // Move some bytes to emulate the performance of inserts.
+    // Move some bytes to emulate the performance of inserts. This code is
+    // intended to reflect a move of random bytes. It moves bytes past the
+    // end of the used area so these moves will not affect stored atoms. The
+    // work is also reversed in that full pages have less work while empty pages
+    // have more work, unlike a real page where full pages will have inserts
+    // which move half the entries, on average. In an actual implementation,
+    // these pages will likely be stored using an arracy of atom offsets at
+    // the beginning of the page, with the actual edges/atoms/index entries
+    // stored from the back of the page. See: 
+    //
+    // http://rachbelaid.com/introduction-to-postgres-physical-storage/
+    // 
+    // for how this is done with Postgres. This approach means that only the 2-byte
+    // offsets are moved when inserting new rows/edges/atoms/index entries. The actual
+    // rows are kept in place and only the index entries at the start of the page are
+    // kept in sorted order. This will result in less work than this emulation, but
+    // there will be more work binary searching the sorted rows to find the new
+    // insert positions. So the net effect will be that the actual code will 
+    // take more time than this implementation.
     if (free > 2)
     {
         size_t slots_to_move = randomGenerator->randint(MAX_PAGES_PER_PAGE - next);
@@ -190,7 +226,15 @@ AtomHandle AtomPage::add_node(Type type, const std::string& name)
 
     std::lock_guard<std::mutex> lock(page_lock);
 
-    // Save the header information - type and not a node.
+    // This code fills pages 100%. In an actual implementation, the fill factor would
+    // likely be an adjustable setting, especially for bulk inserts. For rarely
+    // changing data, with few new inserts and deletes, one will want a high
+    // fill-factor. Since these pages will be sorted by type and name or outgoing
+    // set, this means that inserts may cause pages to split. Since the current
+    // logic does not implement sorting, it does not implement splitting either. 
+    // An actual implementation will likely have fill factors between 66% and 90%.
+
+    // Save the header information - the type and that this is a node.
     AtomHandle atom = &atom_slots[next];
     atom->as_type = type;
     atom->as_node = true;
@@ -205,8 +249,26 @@ AtomHandle AtomPage::add_node(Type type, const std::string& name)
     count++;
     next += 2;
     free -= 2;
-
-    // Move some bytes to emulate the performance of inserts.
+    
+    // Move some bytes to emulate the performance of inserts. This code is
+    // intended to reflect a move of random bytes. It moves bytes past the
+    // end of the used area so these moves will not affect stored atoms. The
+    // work is also reversed in that full pages have less work while empty pages
+    // have more work, unlike a real page where full pages will have inserts
+    // which move half the entries, on average. In an actual implementation,
+    // these pages will likely be stored using an arracy of atom offsets at
+    // the beginning of the page, with the actual edges/atoms/index entries
+    // stored from the back of the page. See: 
+    //
+    // http://rachbelaid.com/introduction-to-postgres-physical-storage/
+    // 
+    // for how this is done with Postgres. This approach means that only the 2-byte
+    // offsets are moved when inserting new rows/edges/atoms/index entries. The actual
+    // rows are kept in place and only the index entries at the start of the page are
+    // kept in sorted order. This will result in less work than this emulation, but
+    // there will be more work binary searching the sorted rows to find the new
+    // insert positions. So the net effect will be that the actual code will 
+    // take more time than this implementation.
     if (free > 2)
     {
         size_t slots_to_move = randomGenerator->randint(ATOM_SLOTS_PER_PAGE - next);
@@ -231,7 +293,15 @@ AtomHandle AtomPage::add_link(Type type, const AtomVector& outgoing)
 
     std::lock_guard<std::mutex> lock(page_lock);
 
-    // Save the header information - type and not a node.
+    // This code fills pages 100%. In an actual implementation, the fill factor would
+    // likely be an adjustable setting, especially for bulk inserts. For rarely
+    // changing data, with few new inserts and deletes, one will want a high
+    // fill-factor. Since these pages will be sorted by type and name or outgoing
+    // set, this means that inserts may cause pages to split. Since the current
+    // logic does not implement sorting, it does not implement splitting either. 
+    // An actual implementation will likely have fill factors between 66% and 90%.
+
+    // Save the header information - the type, that this is a link, and the arity.
     AtomHandle atom = &atom_slots[next];
     atom->as_type = type;
     atom->as_node = false;
@@ -253,7 +323,25 @@ AtomHandle AtomPage::add_link(Type type, const AtomVector& outgoing)
     next += slots_used;
     free -= slots_used;
 
-    // Move some bytes to emulate the performance of inserts.
+    // Move some bytes to emulate the performance of inserts. This code is
+    // intended to reflect a move of random bytes. It moves bytes past the
+    // end of the used area so these moves will not affect stored atoms. The
+    // work is also reversed in that full pages have less work while empty pages
+    // have more work, unlike a real page where full pages will have inserts
+    // which move half the entries, on average. In an actual implementation,
+    // these pages will likely be stored using an arracy of atom offsets at
+    // the beginning of the page, with the actual edges/atoms/index entries
+    // stored from the back of the page. See: 
+    //
+    // http://rachbelaid.com/introduction-to-postgres-physical-storage/
+    // 
+    // for how this is done with Postgres. This approach means that only the 2-byte
+    // offsets are moved when inserting new rows/edges/atoms/index entries. The actual
+    // rows are kept in place and only the index entries at the start of the page are
+    // kept in sorted order. This will result in less work than this emulation, but
+    // there will be more work binary searching the sorted rows to find the new
+    // insert positions. So the net effect will be that the actual code will 
+    // take more time than this implementation.
     if (free > 2)
     {
         size_t slots_to_move = randomGenerator->randint(ATOM_SLOTS_PER_PAGE - next);

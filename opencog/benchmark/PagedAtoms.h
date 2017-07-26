@@ -35,11 +35,56 @@ namespace opencog
 
 #define RAND_SEED       1505051
 
-
 extern MT19937RandGen* randomGenerator;
+
+
+// Unlike Disk-based pages, where 4K to 16K seems to exhibit better performance, the
+// page size of 1K offers the best performance for inserts. This number should be
+// retested after an actual implementation because this number is senstive to the
+// type of work performed on the page. The benchmark code includes a memmove of 
+// random bytes where the amount moved is dependent on the size of the page, so
+// larger pages result in more memory copying for this part of the test. So at
+// some size the memory moves required to keep a sort order will mitigate against
+// larger and larger page sizes since larger pages more more memory and require
+// more time to do so.
+//
+// In an actual implementation, one would test different pages sizes for EdgePages,
+// IndexPages, and AtomPages, as it may be that the differing access patterns
+// for this different pages will have different optimal sizes. For this test, we
+// are using a single global page size defined here.
 
 #define PAGE_SIZE               (1 * 1024)
 
+
+// There are three different kinds of pages in this system:
+//
+// AtomPages - contain the actual nodes and links. These pages implement an atom
+// memory allocation system.
+//
+// EdgePages - these pages store link edges which can be used to find an incoming
+// set. 
+//
+// IndexPages - used to find the proper AtomPage for a given insert, or to
+// find existing atoms given type/name for nodes or type/outgoing-set for links.
+
+
+
+// AtomPage - This implements a paged memory storage system for atoms. By keeping'
+// the atoms in adjacent memory, you get better locality of reference and increase
+// the likelihood that a given atom will be in a cache line in either L1, L2 or L3
+// cache.
+//
+// Allocating atoms outside of the stdlib C++ new allocation also results in a
+// faster implementation because the work required to find space for a new atom
+// is greatly reduced when compared with the more general memory allocation system.
+//
+// The AtomSlots contain either an 8-byte pointer to another atom, or a union which
+// can contain: a std::string, or the header which will be 4 2-byte integers:
+//
+// Type -  the atom type, e.g. ConceptNode, ListLink, Predicate Node etc.
+// Arity - for nodes, the arity of the outgoing set
+// Node -  a boolean which indicates whether or not this is a node. This is duplicated
+//         for performance to save lookups and could be constructed from the Type.
 
 union AtomSlot {
     std::string as_string;
@@ -55,9 +100,14 @@ union AtomSlot {
 #define as_arity as_16[1]
 #define as_node as_16[3]
 
-
 #define ATOM_SLOTS_PER_PAGE      ((PAGE_SIZE / sizeof(AtomSlot)) - 2)
 
+// NOTE: The USE_ATOMSPACE define is used to allow the same benchmark code
+// to run using the existing AtomSpace code and the new code, The following
+// typedefs are used to encapsulate these differences. Setting USE_ATOMSPACE
+// to false (above) will test AtomPages, setting it to true will test the
+// current AtomSpace implementation.
+//
 #if USE_ATOMSPACE
     typedef Handle AtomHandle;
     typedef HandleSeq AtomVector;
@@ -88,6 +138,13 @@ struct AtomPage {
 };
 typedef std::vector<AtomPage*>  AtomPageVector;
 
+// Edge Pages - These pages store the inbound link edges for nodes and links.
+//
+// This test emulates these pages but does not actually implement the binary
+// search and insert logic. There are some calls to memmove to emulate the type of
+// work required for inserts. These pages will be sorted by incoming ID so all
+// the edge slots pointing to a particular atom will be adjacent in memory.
+
 struct Edge {
     uint64_t    inbound;
     uint64_t    outbound;
@@ -113,6 +170,15 @@ struct EdgePage {
 };
 typedef std::vector<EdgePage*>  EdgePageVector;
 
+// IndexPages - used to find the proper AtomPage for a given insert, or to
+// find existing atoms given type/name for nodes or type/outgoing-set for links.
+// Index pages contain the keys corresponding to each of the atom pages, or
+// other index pages in a b-tree-esque structure. In a full implementation,
+// searches for a new atom will traverse these pages before inserting an atom
+// on the page where the corresponding type/name or type/outgoing-set pairs is
+// to be found. This current test does not implement the binary searching, but
+// does create index pages and perform additional memmove work to emulate the
+// CPU cycles required to place items in pages in correct order.
 
 struct IndexSlot {
     uint64_t    key;

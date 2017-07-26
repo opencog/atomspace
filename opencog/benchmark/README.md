@@ -212,12 +212,114 @@ it so that you can read it in a file called `analysis.txt`. Open
 `analysis.txt` in a text viewer and you will see the results of the
 profiling.
 
-## Experimental ##
+# Experimental #
 
-### atom_bench ###
+## atom_bench ##
 The atom_bench tool tests some prototype methods for potential Atom implementation that uses RAM pages of a fixed size to store Atoms. It is intended to show potential performance gains which might be useful for an enterprise-class distributed OpenCog. It is not designed for real-world use but rather to model the performance characteristics of a potential new method for storing atoms.
 
 The atom_bench tool can be compiled and run with two modes, if USE_ATOMSPACE is defined true, the code will test the existing atomspace using the same data and  benchmark algorithm. When USE_ATOMSPACE is false, the benchmark implements and benchmarks the speed of a paged-memory implementation.
 
 The atom_bench includes a test which creates 1 million atoms, and one that searches all 1 million atoms for a particular value that is in the data, and one that searches for a value which will not be found to benchmark the speed of traversing links and outgoing sets.
+
+### Motivation ###
+Consider the following Atom:
+
+```
+EvaluationLink
+    PredicateNode "breathe"
+    ListLink
+        ConceptNode "birds"
+        ConceptNode "air"
+```
+How many bytes do you think this currently takes per Atom?
+
+To understand the answer, let's look at the current implementation, and in particular, the C++ objects required to instantiate an atom of the above form.
+
+![image](http://i.imgur.com/lxy1o4D.png)
+
+This requires:
+
+- 5 Atoms
+-- 2 - links at 144 bytes
+-- 3 - nodes at 128 bytes
+
+Breaking this down further:
+
+- 2 Links
+-- 2 - outgoing set vectors at 16 bytes
+
+- 3 Nodes
+-- 3 - strings for names
+
+Inbound Links require:
+- 5 - maps of type to sets at 48 bytes
+- 5 - type-based sets of inbound links at 48 bytes
+- 5 - RB Tree nodes for each at 24 bytes plus size of the key string itself
+
+So we have 25 C++ heap-based objects to represent one simple predicate of knowledge: "birds breathe air." Total memory used for this atom is about 1,500 bytes. This for a very simple "birds breathe air".
+
+How does this impact insert performance? In the above example, if one assumes the PredicateNode and ConceptNodes were already in the atomspace, then the addition would add:
+
+- 2 - Links at 144 bytes
+
+and for Inbound Links
+
+- 2 - maps of type to sets at 48 bytes
+- 2 - type-based sets of inbound links at 48 bytes
+- 5 - RB Tree nodes for each at 24 bytes plus size of the key string itself
+
+so 11 heap allocations per atom insert.
+
+
+NOTE: The above does not even include any of the AtomTable index entries for each atom. These entries require more memory.
+
+How about the speed of pattern matching? Consider how many different heap structures need to be traversed to just iterate through the various parts of the atom? Maps of Sets of Handles at every inbound level. Vectors of Handles for outbound. Every level requires a new function call to create the iterators. For the typical small number of elements the overhead of the data structures and various levels of container objects becomes significant.
+
+The predicate statement "birds breathe air" can be represented by a simpler serial encoding like the way that SQL databases represent table rows in B+ or B* trees. The main atom could be stored at the leaves of a B+ tree while there are separate inbound B+ tree indices for inbound links. If done well, inserts would only result in memory management calls when pages overflow. Inbound link indices will be very fast and compact compared to the current implementation.
+
+Consider the following diagram which shows the minimum data required to support efficient inserts, loads and lookup for inbound sets:
+
+![image](http://i.imgur.com/8o023sj.png)
+
+Since, at its core, this predicate example is simply an edge linking the "breathe" predicate with the "birds" and "air" predicate, there should be three entries in the inbound table to facility a search for where "breathe" is used, "birds" are referenced, and "air" is referenced. If we used a mechanism like this, we'd end up with much smaller atoms, and we would have less than one memory allocation per atom insert. It might be as low as an allocation per 100 atom inserts. This compares with a much higher number for our current implementation. 
+
+In the above example, the nodes will already have been created, the B+ tree pages containing the inbound references will likely not exceed a page, and the same for the insert of the statement itself. If one used 4K pages, for example, one might expect to get 100 or more atoms of this size per page. And one would get perhaps 400 to 500 inbound link entries per page, resulting in an average 1 heap allocation per 80 to 100 or so atoms.
+
+Now consider the highest performance serialization suitable for high-speed pattern matching since all of the relevant information is contained in one serial set of entries which will likely be in the same cache line for very high-speed memory access:
+
+![image](http://i.imgur.com/ViQgayz.png)
+
+By flattening out the references to the nodes, a super-atom like this could be easily iterated and compared without having to follow pointers to areas of memory likely to result in cache misses because of poor locality of reference.
+
+Given the above, and the need for thinking about how to serialize atoms into forms suitable for high-speed transmission between server nodes in a distributed AtomSpace, we should at least consider reworking the internals for AtomSpace to fit the performance needs for expected usage patterns.
+
+### Page Based Storage Protopype Experiments ###
+
+Curtis's Notes:
+
+In order to determine how much the Atom's scattered memory data structures is impacting performance to get a feel for the actual improvements we might expect if the format for atoms was changed to use a page-based storage system, I implemented a prototype and benchmark tests which implements some of the above features. These tests provide concrete data that can be used to guide work and prioritize in the future. The tests indicate that gains from these ideas are sufficient to warrant additional work and exploration.
+
+The test code in `atom_bench.cc` and `PagedAtoms.h` and `PagedAtoms.cc` models page based storage. It puts atoms into a serial page form. It adds new pages when pages are full. It does some memory copying to simulate the work required if sorting was done per page, it implements a page-level mutex and locks it while changing, it records edge connections between links and items in the outgoing set in separate edge pages, it keeps several vectors of these pages, as well as a set of index pages which keep references to all the other pages. It models a couple of the access patterns and work that would be performed in a real implementation to study the relative performance when compared with the current implementation: inserts and search / traversals of link and node graphs.
+
+The tests randomly generate atoms for insertions only, the random number and text generation is implemented in the test prep code which is not timed. The tests first create 100,000 ConceptNodes (untimed), and then the timed test creates 1 million EvaluationLink subgraphs which, in turn contain, 1 million references to a PredicateNode and 1 million ListLinks which contains two randomly selected ConceptNodes. So the 1 million atoms below includes the creation of 2 million separate atoms: 1M EvaluationLinks and 1M ListLinks.
+
+For a test of 1 million atoms, time per insert of an atom was:
+
+Current AtomSpace          25.0 μs
+Page-based                  1.3 μs
+
+Total resident memory at the end of the test:
+
+Current AtomSpace                     1.397 G
+Page-based                            0.235 G
+
+The new approach is about 20 times faster with 1/6 the memory footprint. To account for changes that will likely come with a real implementation, an addition 50% should be added to the memory footprint to account for non-full pages. Additional work might also double the time per operation to conservatively account for work missed and some non-trivial work like performing binary searches on each page, and referencing the pages in the index entries which is not implemented in this prototype. 
+
+These tests indicate we'd likely be able to get insert performance of 2.5 μs and a memory footprint of 350 bytes per Atom versus the current 25 μs and 1400 bytes per atom if we changed the AtomSpace implementation to a paged model.
+
+### Greater concurrency ###
+One further factor which could be model tested in a few days more work, is that having locks on each page should allow for much greater concurrency for multi-threaded access. The data structure itself can be modified to allow high-concurrency multi-threading. The granularity of a page is much finer than an entire index. So only the page where the new atom would reside needs to be locked for an insert. Once an atom is created, edge index entries can be added one by one, and again each of these inserts need only lock the affected pages. Other threads can read and update other pages without affecting a particular insert, and vice versa.
+
+### Issues with this approach ###
+The paged-based atom code does not use shared_ptrs. An enterprise-class distributed AtomSpace can still wrap the internal Atoms allocated within pages and return shared_ptrs through the API. However, an approach which does not delete Atoms unless they are explicitly removed is likely a better approach.
 
