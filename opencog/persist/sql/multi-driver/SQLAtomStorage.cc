@@ -335,6 +335,8 @@ class SQLAtomStorage::Response
 			{
 				PseudoPtr pu(store->petAtom(uuid));
 				h = store->get_recursive_if_not_exists(pu);
+				h = table->add(h, false);
+				store->_tlbuf.addAtom(h, uuid);
 			}
 
 			// If user wanted all the values, then go get them.
@@ -1625,6 +1627,7 @@ void SQLAtomStorage::getValuations(AtomTable& table,
 
 	Response rp(conn_pool);
 	rp.store = this;
+	rp.table = &table;
 	rp.katom = key;
 	rp.get_all_values = get_all_values;
 	rp.exec(buff);

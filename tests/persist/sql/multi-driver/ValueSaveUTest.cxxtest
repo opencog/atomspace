@@ -1133,6 +1133,11 @@ void ValueSaveUTest::do_test_load_by_key()
 	ProtoAtomPtr gpl = gal->getValue(gkey);
 	ProtoAtomPtr gpv = gav->getValue(gkey);
 
+	TS_ASSERT(gpf != nullptr);
+	TS_ASSERT(gpt != nullptr);
+	TS_ASSERT(gpl != nullptr);
+	TS_ASSERT(gpv != nullptr);
+
 	TS_ASSERT(*gpf == *pvf);
 	TS_ASSERT(*gpt == *pvt);
 	TS_ASSERT(*gpl == *pvl);
