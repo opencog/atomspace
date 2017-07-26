@@ -89,9 +89,15 @@ Handle PersistSCM::fetch_incoming_by_type(Handle h, Type t)
 	return h;
 }
 
+void PersistSCM::fetch_valuations(Handle key, bool get_all_values)
+{
+	AtomSpace *as = SchemeSmob::ss_get_env_as("fetch-valuations");
+	as->fetch_valuations(key, get_all_values);
+}
+
 /**
  * Store the single atom to the backing store hanging off the
-  atom-space
+ * atom-space.
  */
 Handle PersistSCM::store_atom(Handle h)
 {

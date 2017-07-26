@@ -400,6 +400,18 @@ Handle AtomSpace::fetch_incoming_by_type(Handle h, Type t)
     return h;
 }
 
+void AtomSpace::fetch_valuations(Handle key, bool get_all_values)
+{
+    if (nullptr == _backing_store)
+        throw RuntimeException(TRACE_INFO, "No backing store");
+
+    key = get_atom(key);
+    if (nullptr == key) return;
+
+    // Get everything from the backing store.
+    _backing_store->getValuations(_atom_table, key, get_all_values);
+}
+
 bool AtomSpace::remove_atom(Handle h, bool recursive)
 {
     if (_backing_store) {

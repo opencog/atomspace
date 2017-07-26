@@ -171,6 +171,12 @@ void ZMQClient::getIncomingByType(AtomTable& table, const Handle& h, Type t)
 	// TODO: implement
 }
 
+void ZMQClient::getValuations(AtomTable& table,
+                              const Handle& key, bool get_all_values)
+{
+	// TODO: implement
+}
+
 /**
  * Fetch Node from database, with the indicated type and name.
  * If there is no such node, NULL is returned.

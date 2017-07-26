@@ -127,19 +127,23 @@ class SQLAtomStorage::Response
 		bool create_atom_column_cb(const char *colname, const char * colvalue)
 		{
 			// printf ("%s = %s\n", colname, colvalue);
-			if (!strcmp(colname, "type"))
+			// if (!strcmp(colname, "type"))
+			if ('t' == colname[0])
 			{
 				itype = atoi(colvalue);
 			}
-			else if (!strcmp(colname, "name"))
+			// else if (!strcmp(colname, "name"))
+			else if ('n' == colname[0])
 			{
 				name = colvalue;
 			}
-			else if (!strcmp(colname, "outgoing"))
+			// else if (!strcmp(colname, "outgoing"))
+			else if ('o' == colname[0])
 			{
 				outlist = colvalue;
 			}
-			else if (!strcmp(colname, "uuid"))
+			// else if (!strcmp(colname, "uuid"))
+			else if ('u' == colname[0])
 			{
 				uuid = strtoul(colvalue, NULL, 10);
 			}
@@ -266,25 +270,35 @@ class SQLAtomStorage::Response
 		bool get_value_column_cb(const char *colname, const char * colvalue)
 		{
 			// printf ("value -- %s = %s\n", colname, colvalue);
-			if (!strcmp(colname, "floatvalue"))
+			// if (!strcmp(colname, "floatvalue"))
+			if ('f' == colname[0])
 			{
 				fltval = colvalue;
 			}
-			else if (!strcmp(colname, "stringvalue"))
+			// else if (!strcmp(colname, "stringvalue"))
+			else if ('s' == colname[0])
 			{
 				strval = colvalue;
 			}
-			else if (!strcmp(colname, "linkvalue"))
+			// else if (!strcmp(colname, "linkvalue"))
+			else if ('l' == colname[0])
 			{
 				lnkval = colvalue;
 			}
-			else if (!strcmp(colname, "type"))
+			// else if (!strcmp(colname, "type"))
+			else if ('t' == colname[0])
 			{
 				vtype = atoi(colvalue);
 			}
-			else if (!strcmp(colname, "key"))
+			// else if (!strcmp(colname, "key"))
+			else if ('k' == colname[0])
 			{
 				key = atol(colvalue);
+			}
+			// else if (!strcmp(colname, "atom"))
+			else if ('a' == colname[0])
+			{
+				uuid = atol(colvalue);
 			}
 			return false;
 		}
@@ -305,6 +319,41 @@ class SQLAtomStorage::Response
 			return false;
 		}
 
+		// Valuations --------------------------------------------
+		// Get the values first, and then get the atom they are attached
+		// to. This is backwards from everything up above.
+		Handle katom;
+		bool get_all_values;
+		bool get_valuations_cb(void)
+		{
+			rs->foreach_column(&Response::get_value_column_cb, this);
+
+			// Do we know this atom yet? If not, go get it.
+			// Note: it is very likely we do NOT yet have this atom!
+			Handle h(store->_tlbuf.getAtom(uuid));
+			if (nullptr == h)
+			{
+				PseudoPtr pu(store->petAtom(uuid));
+				h = store->get_recursive_if_not_exists(pu);
+				h = table->add(h, false);
+				store->_tlbuf.addAtom(h, uuid);
+			}
+
+			// If user wanted all the values, then go get them.
+			if (get_all_values)
+			{
+				store->get_atom_values(h);
+				return false;
+			}
+
+			// Otherwise, just get this one and only value.
+			ProtoAtomPtr pap = store->doUnpackValue(*this);
+			h->setValue(katom, pap);
+
+			return false;
+		}
+
+		// Generic things --------------------------------------------
 		// Get generic positive integer values
 		unsigned long intval;
 		bool intval_cb(void)
@@ -1564,6 +1613,27 @@ void SQLAtomStorage::getIncomingByType(AtomTable& table, const Handle& h, Type t
 	getIncoming(table, buff);
 }
 
+void SQLAtomStorage::getValuations(AtomTable& table,
+                                   const Handle& key, bool get_all_values)
+{
+	// If the uuid of the key is not known, the key does not exist
+	// in the database; therefore, there are no values. Just return.
+	UUID kuid = check_uuid(key);
+	if (TLB::INVALID_UUID == kuid) return;
+
+	char buff[BUFSZ];
+	snprintf(buff, BUFSZ,
+		"SELECT * FROM Valuations WHERE key=%lu;", kuid);
+
+	Response rp(conn_pool);
+	rp.store = this;
+	rp.table = &table;
+	rp.katom = key;
+	rp.get_all_values = get_all_values;
+	rp.exec(buff);
+	rp.rs->foreach_row(&Response::get_valuations_cb, &rp);
+	rp.katom = nullptr;
+}
 
 /**
  * Fetch the Node with the indicated type and name.

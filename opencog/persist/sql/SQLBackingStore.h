@@ -59,6 +59,7 @@ class SQLBackingStore : public BackingStore
         virtual void loadType(AtomTable&, Type);
         virtual void getIncomingSet(AtomTable&, const Handle&);
         virtual void getIncomingByType(AtomTable&, const Handle&, Type);
+        virtual void getValuations(AtomTable&, const Handle&, bool);
         virtual void barrier();
 
         void registerWith(AtomSpace*);

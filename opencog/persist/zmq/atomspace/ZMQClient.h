@@ -87,6 +87,7 @@ class ZMQClient
 		void load(AtomTable &); // Load entire contents of DB
 		void getIncomingSet(AtomTable&, const Handle&);
 		void getIncomingByType(AtomTable&, const Handle&, Type);
+		void getValuations(AtomTable&, const Handle&, bool);
 		void store(const AtomTable &); // Store entire contents of AtomTable
 		void reserve(void);     // reserve range of UUID's
 
