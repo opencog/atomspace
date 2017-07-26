@@ -124,7 +124,7 @@ class ValueSaveUTest :  public CxxTest::TestSuite
         void do_test_load_by_type();
         void do_test_link_by_type();
         void do_test_incoming();
-        void do_test_load_by_key();
+        void do_test_load_by_key(bool);
 
         void test_odbc_single_atom_save();
         void test_pq_single_atom_save();
@@ -143,6 +143,9 @@ class ValueSaveUTest :  public CxxTest::TestSuite
 
         void test_odbc_load_by_key();
         void test_pq_load_by_key();
+
+        void test_odbc_load_all_key();
+        void test_pq_load_all_key();
 };
 
 /*
@@ -259,7 +262,7 @@ void ValueSaveUTest::test_odbc_load_by_key(void)
 	logger().debug("BEGIN TEST: %s", __FUNCTION__);
 #if HAVE_ODBC_STORAGE
 	uri = mkuri("odbc", dbname, username, passwd);
-	do_test_load_by_key();
+	do_test_load_by_key(false);
 #endif
 	logger().debug("END TEST: %s", __FUNCTION__);
 }
@@ -269,7 +272,27 @@ void ValueSaveUTest::test_pq_load_by_key(void)
 	logger().debug("BEGIN TEST: %s", __FUNCTION__);
 #if HAVE_PGSQL_STORAGE
 	uri = mkuri("postgres", dbname, username, passwd);
-	do_test_load_by_key();
+	do_test_load_by_key(false);
+#endif // HAVE_PGSQL_STORAGE
+	logger().debug("END TEST: %s", __FUNCTION__);
+}
+
+void ValueSaveUTest::test_odbc_load_all_key(void)
+{
+	logger().debug("BEGIN TEST: %s", __FUNCTION__);
+#if HAVE_ODBC_STORAGE
+	uri = mkuri("odbc", dbname, username, passwd);
+	do_test_load_by_key(true);
+#endif
+	logger().debug("END TEST: %s", __FUNCTION__);
+}
+
+void ValueSaveUTest::test_pq_load_all_key(void)
+{
+	logger().debug("BEGIN TEST: %s", __FUNCTION__);
+#if HAVE_PGSQL_STORAGE
+	uri = mkuri("postgres", dbname, username, passwd);
+	do_test_load_by_key(true);
 #endif // HAVE_PGSQL_STORAGE
 	logger().debug("END TEST: %s", __FUNCTION__);
 }
@@ -1021,7 +1044,7 @@ void ValueSaveUTest::do_test_incoming()
 // Test the fetch_valuations() method in the atomspace.
 // The fetch should restore only certain values, and NOT the
 // truth values.
-void ValueSaveUTest::do_test_load_by_key()
+void ValueSaveUTest::do_test_load_by_key(bool get_all_values)
 {
 	SQLAtomStorage *store = new SQLAtomStorage(uri);
 	TS_ASSERT(store->connected())
@@ -1100,7 +1123,7 @@ void ValueSaveUTest::do_test_load_by_key()
 	// --------------------
 	// Fetch by type. This is what we are testing.
 	Handle gkey = as->add_node(PREDICATE_NODE, "some pred key");
-	as->fetch_valuations(gkey);
+	as->fetch_valuations(gkey, get_all_values);
 
 	Handle gaf = as->add_node(CONCEPT_NODE, "float node");
 	Handle gat = as->add_node(CONCEPT_NODE, "string node");
@@ -1117,16 +1140,26 @@ void ValueSaveUTest::do_test_load_by_key()
 	TruthValuePtr gtl = gal->getTruthValue();
 	TruthValuePtr gtv = gav->getTruthValue();
 
-	TS_ASSERT(*gtf != *tf);
-	TS_ASSERT(*gtt != *tt);
-	TS_ASSERT(*gtl != *tl);
-	TS_ASSERT(*gtv != *tv);
+	if (get_all_values)
+	{
+		TS_ASSERT(*gtf == *tf);
+		TS_ASSERT(*gtt == *tt);
+		TS_ASSERT(*gtl == *tl);
+		TS_ASSERT(*gtv == *tv);
+	}
+	else
+	{
+		TS_ASSERT(*gtf != *tf);
+		TS_ASSERT(*gtt != *tt);
+		TS_ASSERT(*gtl != *tl);
+		TS_ASSERT(*gtv != *tv);
 
-	// We expect the truth values to be untouched.
-	TS_ASSERT(*gtf == *TruthValue::DEFAULT_TV());
-	TS_ASSERT(*gtt == *TruthValue::DEFAULT_TV());
-	TS_ASSERT(*gtl == *TruthValue::DEFAULT_TV());
-	TS_ASSERT(*gtv == *TruthValue::DEFAULT_TV());
+		// We expect the truth values to be untouched.
+		TS_ASSERT(gtf == TruthValue::DEFAULT_TV());
+		TS_ASSERT(gtt == TruthValue::DEFAULT_TV());
+		TS_ASSERT(gtl == TruthValue::DEFAULT_TV());
+		TS_ASSERT(gtv == TruthValue::DEFAULT_TV());
+	}
 
 	ProtoAtomPtr gpf = gaf->getValue(gkey);
 	ProtoAtomPtr gpt = gat->getValue(gkey);
