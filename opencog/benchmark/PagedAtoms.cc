@@ -36,8 +36,6 @@
 using namespace opencog;
 
 
-#define USE_ATOMSPACE   false
-
 #define RAND_SEED       1505051
 
 

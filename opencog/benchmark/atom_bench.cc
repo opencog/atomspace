@@ -53,6 +53,7 @@ public:
     AtomHandle add_node(Type type, const std::string& name);
     AtomHandle add_link(Type type, const AtomVector& outgoing);
     void add_edge(AtomHandle inbound, AtomHandle outbound);
+    bool valid_result(const AtomHandle& result);
 };
 
 #define TEST_SIZE       1000000
@@ -128,7 +129,7 @@ AtomHandle Benchmark::searchAtom(AtomHandle atom, const std::string& target)
         {
             Handle out_atom = atom->getOutgoingAtom(index);
             Handle result = searchAtom(out_atom, target);
-            if (result)
+            if (result != Handle::UNDEFINED)
                 return atom;
         }
 
@@ -148,7 +149,7 @@ AtomHandle Benchmark::search(const std::string& target)
     for (auto atom : atoms)
     {
         AtomHandle result = searchAtom(atom, target);
-        if (result)
+        if (result != Handle::UNDEFINED)
             return result; 
     }
     return Handle::UNDEFINED;
@@ -214,6 +215,15 @@ void Benchmark::prep_test()
     predicate = add_node(PREDICATE_NODE, "Sentence Word Pair");
 }
 
+bool Benchmark::valid_result(const AtomHandle& result)
+{
+#if USE_ATOMSPACE
+    return (result != Handle::UNDEFINED);
+#else
+    return (result != nullptr);
+#endif
+
+}
 
 void Benchmark::run_test()
 {
@@ -248,9 +258,10 @@ void Benchmark::run_test()
     std::cout << std::endl << "begin search node 99999" << std::endl;
     start = std::chrono::system_clock::now();
     AtomHandle result = search("node 99999");
-    if (result)
+
+    if (valid_result(result))
         std::cout << "Found " << result << " in pages." << std::endl;
-    
+
     end = std::chrono::system_clock::now();
     elapsed = end - start;
     std::cout << std::chrono::duration <double> (elapsed).count() << " s" << std::endl;
@@ -272,7 +283,7 @@ void Benchmark::run_test()
     std::cout << std::endl << "begin full traversal search" << std::endl;
     start = std::chrono::system_clock::now();
     result = search("not in atomspace");
-    if (result)
+    if (valid_result(result))
         std::cout << "Found " << result << " in pages." << std::endl;
     
     end = std::chrono::system_clock::now();
