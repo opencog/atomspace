@@ -1,6 +1,7 @@
 INSTALL (FILES
 	BackwardChainer.h
 	TraceRecorder.h
+	ControlPolicy.h
 	BackwardChainerPMCB.h
 	BIT.h
     Fitness.h

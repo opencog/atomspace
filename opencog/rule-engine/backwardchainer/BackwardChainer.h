@@ -22,14 +22,15 @@
  * Free Software Foundation, Inc.,
  * 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
  */
-#ifndef BACKWARDCHAINER_H_
-#define BACKWARDCHAINER_H_
+#ifndef OPENCOG_BACKWARDCHAINER_H_
+#define OPENCOG_BACKWARDCHAINER_H_
 
 #include <opencog/rule-engine/Rule.h>
 #include <opencog/rule-engine/UREConfigReader.h>
 
 #include "BIT.h"
 #include "TraceRecorder.h"
+#include "ControlPolicy.h"
 
 class BackwardChainerUTest;
 
@@ -97,7 +98,9 @@ public:
 	                const Handle& target,
 	                const Handle& vardecl=Handle::UNDEFINED,
 	                AtomSpace* trace_as=nullptr, // Where to record the trace
-	                // TODO: maybe move the focus set to the rbs configuration
+	                // TODO: maybe move the control and focus set to
+	                // the rbs configuration
+	                AtomSpace* control_as=nullptr, // Inference Control Rules
 	                const Handle& focus_set=Handle::UNDEFINED,
 	                // TODO: maybe wrap all fitnesses in a Fitness class
 	                const BITNodeFitness& bitnode_fitness=BITNodeFitness(),
@@ -141,31 +144,6 @@ private:
 	// will keep a record of the expansion if successful.
 	void expand_bit(AndBIT& andbit);
 
-	// Record and-BIT expansion to _trace_as
-	//
-	// ExecutionLink (stv 1 1)
-	//   SchemaNode "URE:BC:expand-and-BIT"
-	//   List
-	//     <andbit_fcs>
-	//     <bitleaf_body>
-	//     <rule>
-	//   <new_andbit>
-	void record_expansion(const Handle& andbit_fcs, const Handle& bitleaf_body,
-	                      const Rule& rule, const AndBIT& new_andbit);
-
-	// Record whether a certain and-BIT is a proof of a certain target result
-	//
-	// EvaluationLink <TV>
-	//   PredicateNode "URE:BC:proof"
-	//   List
-	//     <andbit_fcs>
-	//     <target_result> <TV>
-	//
-	// If the TV on the target has a greater than zero confidence it
-	// is reported to the EvaluationLink, otherwise it is not
-	// recorded.
-	void record_proof(const Handle& andbit_fcs, const Handle& target_result);
-
 	// Fulfill the BIT. That is run some or all its and-BITs
 	void fulfill_bit();
 
@@ -191,25 +169,6 @@ private:
 	// been selected.
 	const AndBIT* select_fulfillment_andbit() const;
 
-	// Select a valid rule given a target. The selected is a new
-	// object because a new rule is created, its variables are
-	// uniquely renamed, possibly some partial substitutions are
-	// applied.
-	//
-	// The Selection is random amongst the valid rules and weighted
-	// according to their weights.
-	//
-	// The target is not const because if the rules are exhausted it
-	// will set its exhausted flag to false.
-	RuleTypedSubstitutionPair select_rule(BITNode& target,
-	                                      const Handle& vardecl=Handle::UNDEFINED);
-	RuleTypedSubstitutionPair select_rule(const RuleTypedSubstitutionMap& rules);
-
-	// Return all valid rules, in the sense that they may possibly be
-	// used to infer the target.
-	RuleTypedSubstitutionMap get_valid_rules(const BITNode& target,
-	                                         const Handle& vardecl);
-
 	// Return the complexity factor of an andbit. The formula is
 	//
 	// exp(-complexity_penalty * andbit.complexity())
@@ -223,9 +182,6 @@ private:
 	// where the final results will be dumped.
 	AtomSpace& _as;
 
-	// Optional atomspace where the inference traces will be recorded
-	TraceRecorder _trace_recorder;
-
 	// Contain the configuration
 	UREConfigReader _configReader;
 
@@ -235,13 +191,20 @@ private:
 	// TODO: perhaps move that under BIT
 	AndBITFitness _andbit_fitness;
 
+	// In charge of recording the inference traces
+	TraceRecorder _trace_recorder;
+
+	// Inference Control Policy. Determine how to expand the BIT.
+	ControlPolicy _control;
+
+	// Reference to the control policy rule set
+	RuleSet& _rules;
+
 	int _iteration;
 
 	// Keep track of the and-BIT of the last expansion. Null if the
 	// last expansion has failed.
 	const AndBIT* _last_expansion_andbit;
-
-	RuleSet _rules;
 
 	HandleSet _results;
 };
@@ -249,4 +212,4 @@ private:
 
 } // namespace opencog
 
-#endif /* BACKWARDCHAINER_H_ */
+#endif /* OPENCOG_BACKWARDCHAINER_H_ */
