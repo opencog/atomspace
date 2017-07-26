@@ -127,19 +127,23 @@ class SQLAtomStorage::Response
 		bool create_atom_column_cb(const char *colname, const char * colvalue)
 		{
 			// printf ("%s = %s\n", colname, colvalue);
-			if (!strcmp(colname, "type"))
+			// if (!strcmp(colname, "type"))
+			if ('t' == colname[0])
 			{
 				itype = atoi(colvalue);
 			}
-			else if (!strcmp(colname, "name"))
+			// else if (!strcmp(colname, "name"))
+			else if ('n' == colname[0])
 			{
 				name = colvalue;
 			}
-			else if (!strcmp(colname, "outgoing"))
+			// else if (!strcmp(colname, "outgoing"))
+			else if ('o' == colname[0])
 			{
 				outlist = colvalue;
 			}
-			else if (!strcmp(colname, "uuid"))
+			// else if (!strcmp(colname, "uuid"))
+			else if ('u' == colname[0])
 			{
 				uuid = strtoul(colvalue, NULL, 10);
 			}
@@ -266,27 +270,33 @@ class SQLAtomStorage::Response
 		bool get_value_column_cb(const char *colname, const char * colvalue)
 		{
 			// printf ("value -- %s = %s\n", colname, colvalue);
-			if (!strcmp(colname, "floatvalue"))
+			// if (!strcmp(colname, "floatvalue"))
+			if ('f' == colname[0])
 			{
 				fltval = colvalue;
 			}
-			else if (!strcmp(colname, "stringvalue"))
+			// else if (!strcmp(colname, "stringvalue"))
+			else if ('s' == colname[0])
 			{
 				strval = colvalue;
 			}
-			else if (!strcmp(colname, "linkvalue"))
+			// else if (!strcmp(colname, "linkvalue"))
+			else if ('l' == colname[0])
 			{
 				lnkval = colvalue;
 			}
-			else if (!strcmp(colname, "type"))
+			// else if (!strcmp(colname, "type"))
+			else if ('t' == colname[0])
 			{
 				vtype = atoi(colvalue);
 			}
-			else if (!strcmp(colname, "key"))
+			// else if (!strcmp(colname, "key"))
+			else if ('k' == colname[0])
 			{
 				key = atol(colvalue);
 			}
-			else if (!strcmp(colname, "atom"))
+			// else if (!strcmp(colname, "atom"))
+			else if ('a' == colname[0])
 			{
 				uuid = atol(colvalue);
 			}
