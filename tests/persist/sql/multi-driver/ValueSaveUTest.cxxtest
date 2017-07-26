@@ -124,6 +124,7 @@ class ValueSaveUTest :  public CxxTest::TestSuite
         void do_test_load_by_type();
         void do_test_link_by_type();
         void do_test_incoming();
+        void do_test_load_by_key();
 
         void test_odbc_single_atom_save();
         void test_pq_single_atom_save();
@@ -139,6 +140,9 @@ class ValueSaveUTest :  public CxxTest::TestSuite
 
         void test_odbc_incoming();
         void test_pq_incoming();
+
+        void test_odbc_load_by_key();
+        void test_pq_load_by_key();
 };
 
 /*
@@ -246,6 +250,26 @@ void ValueSaveUTest::test_pq_incoming(void)
 #if HAVE_PGSQL_STORAGE
 	uri = mkuri("postgres", dbname, username, passwd);
 	do_test_incoming();
+#endif // HAVE_PGSQL_STORAGE
+	logger().debug("END TEST: %s", __FUNCTION__);
+}
+
+void ValueSaveUTest::test_odbc_load_by_key(void)
+{
+	logger().debug("BEGIN TEST: %s", __FUNCTION__);
+#if HAVE_ODBC_STORAGE
+	uri = mkuri("odbc", dbname, username, passwd);
+	do_test_load_by_key();
+#endif
+	logger().debug("END TEST: %s", __FUNCTION__);
+}
+
+void ValueSaveUTest::test_pq_load_by_key(void)
+{
+	logger().debug("BEGIN TEST: %s", __FUNCTION__);
+#if HAVE_PGSQL_STORAGE
+	uri = mkuri("postgres", dbname, username, passwd);
+	do_test_load_by_key();
 #endif // HAVE_PGSQL_STORAGE
 	logger().debug("END TEST: %s", __FUNCTION__);
 }
@@ -442,7 +466,7 @@ void ValueSaveUTest::do_test_save_restore(bool fkey)
 
 // Test the fetch_all_atoms_of_type() method in the atomspace.
 // The fetch should restore the truth values, and the other values,
-// as well.  This tests the fetchinf of nodes.
+// as well.  This tests the fetching of nodes.
 void ValueSaveUTest::do_test_load_by_type()
 {
 	SQLAtomStorage *store = new SQLAtomStorage(uri);
@@ -979,6 +1003,135 @@ void ValueSaveUTest::do_test_incoming()
 	gpt = gct->getValue(gkey);
 	gpl = gcl->getValue(gkey);
 	gpv = gcv->getValue(gkey);
+
+	TS_ASSERT(*gpf == *pvf);
+	TS_ASSERT(*gpt == *pvt);
+	TS_ASSERT(*gpl == *pvl);
+	TS_ASSERT(*gpv == *pvv);
+
+	// --------------------
+	store->kill_data();
+	delete as;
+	delete backing;
+	delete store;
+}
+
+// ============================================================
+
+// Test the fetch_valuations() method in the atomspace.
+// The fetch should restore only certain values, and NOT the
+// truth values.
+void ValueSaveUTest::do_test_load_by_key()
+{
+	SQLAtomStorage *store = new SQLAtomStorage(uri);
+	TS_ASSERT(store->connected())
+
+	// Clear out left-over junk, just in case.
+	store->kill_data();
+
+	AtomSpace* as = new AtomSpace();
+	SQLBackingStore* backing = new SQLBackingStore();
+	backing->set_store(store);
+	backing->registerWith(as);
+
+	Handle key = as->add_node(PREDICATE_NODE, "some pred key");
+	Handle af = as->add_node(CONCEPT_NODE, "float node");
+	Handle at = as->add_node(CONCEPT_NODE, "string node");
+	Handle al = as->add_node(CONCEPT_NODE, "link depth-1 node");
+	Handle av = as->add_node(CONCEPT_NODE, "link depth-2 node");
+
+	// --------------------
+	// Now set some values
+	ProtoAtomPtr pvf = createFloatValue(
+		std::vector<double>({1.1098765432109876, 2.1234567890123456e37,
+		                     3.2109876543210987e-250}));
+	af->setValue(key, pvf);
+
+	TruthValuePtr tf(SimpleTruthValue::createTV(0.11, 100));
+	af->setTruthValue(tf);
+
+	// --------------------
+	ProtoAtomPtr pvt = createStringValue(
+		std::vector<std::string>({"aaa", "bb bb bb", "ccc ccc ccc"}));
+	at->setValue(key, pvt);
+
+	TruthValuePtr tt(SimpleTruthValue::createTV(0.22, 200));
+	at->setTruthValue(tt);
+
+	// --------------------
+	ProtoAtomPtr pvl = createLinkValue(
+		std::vector<ProtoAtomPtr>({pvf, pvt}));
+	al->setValue(key, pvl);
+
+	TruthValuePtr tl(SimpleTruthValue::createTV(0.33, 300));
+	al->setTruthValue(tl);
+
+	// --------------------
+	ProtoAtomPtr pvv = createLinkValue(
+		std::vector<ProtoAtomPtr>({pvl, pvl, pvf, pvt}));
+	av->setValue(key, pvv);
+
+	TruthValuePtr tv(SimpleTruthValue::createTV(0.44, 400));
+	av->setTruthValue(tv);
+
+	// --------------------
+	// Save, and close things down.
+	as->store_atom(af);
+	as->store_atom(at);
+	as->store_atom(al);
+	as->store_atom(av);
+	as->barrier();
+
+	delete as;
+	delete backing;
+	delete store;
+
+	// --------------------
+	// Start it up again.
+
+	store = new SQLAtomStorage(uri);
+	TS_ASSERT(store->connected())
+
+	as = new AtomSpace();
+	backing = new SQLBackingStore();
+	backing->set_store(store);
+	backing->registerWith(as);
+
+	// --------------------
+	// Fetch by type. This is what we are testing.
+	Handle gkey = as->add_node(PREDICATE_NODE, "some pred key");
+	as->fetch_valuations(gkey);
+
+	Handle gaf = as->add_node(CONCEPT_NODE, "float node");
+	Handle gat = as->add_node(CONCEPT_NODE, "string node");
+	Handle gal = as->add_node(CONCEPT_NODE, "link depth-1 node");
+	Handle gav = as->add_node(CONCEPT_NODE, "link depth-2 node");
+
+	TS_ASSERT(*gaf == *af);
+	TS_ASSERT(*gat == *at);
+	TS_ASSERT(*gal == *al);
+	TS_ASSERT(*gav == *av);
+
+	TruthValuePtr gtf = gaf->getTruthValue();
+	TruthValuePtr gtt = gat->getTruthValue();
+	TruthValuePtr gtl = gal->getTruthValue();
+	TruthValuePtr gtv = gav->getTruthValue();
+
+	TS_ASSERT(*gtf != *tf);
+	TS_ASSERT(*gtt != *tt);
+	TS_ASSERT(*gtl != *tl);
+	TS_ASSERT(*gtv != *tv);
+
+	// We expect the truth values to be untouched.
+	TS_ASSERT(*gtf == *TruthValue::DEFAULT_TV());
+	TS_ASSERT(*gtt == *TruthValue::DEFAULT_TV());
+	TS_ASSERT(*gtl == *TruthValue::DEFAULT_TV());
+	TS_ASSERT(*gtv == *TruthValue::DEFAULT_TV());
+
+	ProtoAtomPtr gpf = gaf->getValue(gkey);
+	ProtoAtomPtr gpt = gat->getValue(gkey);
+	ProtoAtomPtr gpl = gal->getValue(gkey);
+	ProtoAtomPtr gpv = gav->getValue(gkey);
 
 	TS_ASSERT(*gpf == *pvf);
 	TS_ASSERT(*gpt == *pvt);
