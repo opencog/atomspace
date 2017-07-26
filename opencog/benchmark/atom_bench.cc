@@ -27,6 +27,9 @@
 #include <string>
 #include <sys/sysinfo.h>
 
+#include <opencog/atoms/base/Node.h>
+#include <opencog/atoms/base/Link.h>
+
 #include "PagedAtoms.h"
 
 using namespace opencog;
@@ -326,7 +329,6 @@ typedef std::weak_ptr<Link> WinkPtr;
 typedef std::set<WinkPtr, std::owner_less<WinkPtr> > WincomingSet;
 typedef std::map<Type, WincomingSet> InMap;
 typedef std::shared_ptr<InMap> InSetPtr;
-
 
 int main(int argc, char *argv[])
 {
