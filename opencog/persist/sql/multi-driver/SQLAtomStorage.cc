@@ -286,6 +286,10 @@ class SQLAtomStorage::Response
 			{
 				key = atol(colvalue);
 			}
+			else if (!strcmp(colname, "atom"))
+			{
+				uuid = atol(colvalue);
+			}
 			return false;
 		}
 		Handle atom;
@@ -305,6 +309,39 @@ class SQLAtomStorage::Response
 			return false;
 		}
 
+		// Valuations --------------------------------------------
+		// Get the values first, and then get the atom they are attached
+		// to. This is backwards from everything up above.
+		Handle katom;
+		bool get_all_values;
+		bool get_valuations_cb(void)
+		{
+			rs->foreach_column(&Response::get_value_column_cb, this);
+
+			// Do we know this atom yet? If not, go get it.
+			// Note: it is very likely we do NOT yet have this atom!
+			Handle h(store->_tlbuf.getAtom(uuid));
+			if (nullptr == h)
+			{
+				PseudoPtr pu(store->petAtom(uuid));
+				h = store->get_recursive_if_not_exists(pu);
+			}
+
+			// If user wanted all the values, then go get them.
+			if (get_all_values)
+			{
+				store->get_atom_values(h);
+				return false;
+			}
+
+			// Otherwise, just get this one and only value.
+			ProtoAtomPtr pap = store->doUnpackValue(*this);
+			h->setValue(katom, pap);
+
+			return false;
+		}
+
+		// Generic things --------------------------------------------
 		// Get generic positive integer values
 		unsigned long intval;
 		bool intval_cb(void)
@@ -1567,6 +1604,22 @@ void SQLAtomStorage::getIncomingByType(AtomTable& table, const Handle& h, Type t
 void SQLAtomStorage::getValuations(AtomTable& table,
                                    const Handle& key, bool get_all_values)
 {
+	// If the uuid of the key is not known, the key does not exist
+	// in the database; therefore, there are no values. Just return.
+	UUID kuid = check_uuid(key);
+	if (TLB::INVALID_UUID == kuid) return;
+
+	char buff[BUFSZ];
+	snprintf(buff, BUFSZ,
+		"SELECT * FROM Valuations WHERE key=%lu;", kuid);
+
+	Response rp(conn_pool);
+	rp.store = this;
+	rp.katom = key;
+	rp.get_all_values = get_all_values;
+	rp.exec(buff);
+	rp.rs->foreach_row(&Response::get_valuations_cb, &rp);
+	rp.katom = nullptr;
 }
 
 /**
