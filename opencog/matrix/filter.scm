@@ -34,13 +34,14 @@
 ; ---------------------------------------------------------------------
 
 (use-modules (srfi srfi-1))
+(use-modules (ice-9 optargs)) ; for define*-public
 
 ; ---------------------------------------------------------------------
 
 (define-public (add-generic-filter LLOBJ
 	LEFT-BASIS-PRED RIGHT-BASIS-PRED
 	LEFT-STAR-PRED RIGHT-STAR-PRED
-	PAIR-PRED ID-STR)
+	PAIR-PRED ID-STR RENAME)
 "
   add-generic-filter LLOBJ - Modify LLOBJ so that only the columns and
   rows that satisfy the predicates are retained.
@@ -60,6 +61,9 @@
   The ID-STR should be a string; it is appended to the dataset name and
   id, so that unique identifier names can be constructed for each
   filtered dataset.
+
+  The RENAME argument should be #f or #t, it is used to determine how
+  other API's generate predicate keys to obtain values.
 "
 	(let ((stars-obj (add-pair-stars LLOBJ))
 			(l-basis '())
@@ -155,7 +159,7 @@
 				((item-pair)        (apply get-item-pair args))
 				((pair-count)       (apply get-pair-count args))
 				((provides)         (apply provides args))
-				((filters?)         (lambda () #t))
+				((filters?)         (lambda () RENAME))
 				; Pass through some selected methods
 				((left-type)        (apply LLOBJ (cons message args)))
 				((right-type)       (apply LLOBJ (cons message args)))
@@ -169,7 +173,7 @@
 
 ; ---------------------------------------------------------------------
 
-(define-public (add-subtotal-filter LLOBJ LEFT-CUT RIGHT-CUT PAIR-CUT)
+(define-public (add-subtotal-filter LLOBJ LEFT-CUT RIGHT-CUT PAIR-CUT RENAME)
 "
   add-subtotal-filter LLOBJ - Modify LLOBJ so that any columns and
   rows with counts less than LEFT-CUT and RIGHT-CUT are removed, and that
@@ -182,11 +186,25 @@
   basis.  Computations of the left and right stars are cached, sot that
   they are not recomputed for each request.
 
-  Note that by removing rows and columns, the frequencies will no longer
-  sum to 1.0. Likewise, row and column subtotals, entropies and mutual
-  information will no long sum or behave as in the whole dataset.  If
+  Note that by removing rows and columns, the frequencies that were
+  computed for the entire matrix will no longer sum to 1.0 for the
+  filtered submatrix.  Likewise, row and column subtotals, and any
+  marginals will no long sum or behave as in the whole dataset.  If
   accurate values for these are needed, then they would need to be
-  recomputed for the reduced matrix.
+  recomputed for the reduced matrix. The 'filters? method, and the
+  RENAME argument provide a way for dealing with this.
+
+  If the RENAME argument is #t, then the other various API's will use
+  an special key name, created from the 'id of this filter, to access
+  frequencies and marginals. This allows filtered frequencies and
+  marginals to be stored with the matrix.  If the RENAME argument is #f,
+  then all access to the frequencies and marginals will be through the
+  primary, main predicate keys.
+
+  Thus, set RENAME to #f if you just want to cut down on the number of
+  rows and columns, but otherwise use the normal data.  But if you need
+  to recompute new values and marginals for the filtered matrix, then
+  set RENAME to #t.
 
   Some terminology: Let N(x,y) be the observed count for the pair (x,y).
   Let N(*,y) be the column subtotals, AKA the left-subtotals.
@@ -236,17 +254,20 @@
 		(add-generic-filter LLOBJ
 			left-basis-pred right-basis-pred
 			left-stars-pred right-stars-pred
-			pair-pred id-str)
+			pair-pred id-str RENAME)
 	)
 )
 
 ; ---------------------------------------------------------------------
 
-(define-public (add-knockout-filter LLOBJ LEFT-KNOCKOUT RIGHT-KNOCKOUT)
+(define-public (add-knockout-filter LLOBJ LEFT-KNOCKOUT RIGHT-KNOCKOUT RENAME)
 "
   add-knockout-filter LLOBJ - Modify LLOBJ so that the explicitly
   indicated rows and columns are removed. The LEFT-KNOCKOUT and
   RIGHT-KNOCKOUT should be lists of left and right basis elements.
+
+  The RENAME argument should be #f or #t, it is used to determine how
+  other API's generate predicate keys to obtain values.
 "
 	; ---------------
 	; Filter out rows and columns in the knockout lists.
@@ -280,7 +301,7 @@
 	(add-generic-filter LLOBJ
 		left-basis-pred right-basis-pred
 		left-stars-pred right-stars-pred
-		pair-pred id-str)
+		pair-pred id-str RENAME)
 )
 
 ; ---------------------------------------------------------------------
