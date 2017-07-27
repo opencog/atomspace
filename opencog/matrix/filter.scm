@@ -159,7 +159,7 @@
 				((item-pair)        (apply get-item-pair args))
 				((pair-count)       (apply get-pair-count args))
 				((provides)         (apply provides args))
-				((filters?)         (lambda () RENAME))
+				((filters?)         RENAME)
 				; Pass through some selected methods
 				((left-type)        (apply LLOBJ (cons message args)))
 				((right-type)       (apply LLOBJ (cons message args)))
