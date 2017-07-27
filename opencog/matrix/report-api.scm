@@ -25,7 +25,8 @@
 
 ; ---------------------------------------------------------------------
 
-(define-public (add-report-api LLOBJ)
+(define*-public (add-report-api LLOBJ
+   #:optional (ID (LLOBJ 'id)))
 "
   add-report-api LLOBJ - Extend LLOBJ with API to provide summary
   statistics for the set of pairs, including the number of rows
@@ -37,6 +38,9 @@
   Here, the LLOBJ is expected to be an object, with the 'wild-wild
   method on it.  This is the atom on which these summaries will be
   stored.
+
+  The optional ID argument should be #f or a string, used to construct
+  the key under which the values are stored.
 
   The implemented methods return the following values:
   'left-dim         -- The number of rows
@@ -116,14 +120,14 @@
 	(let* ((cntobj (add-pair-count-api LLOBJ))
 			(totcnt (cntobj 'wild-wild-count))
 			(wild-atom (LLOBJ 'wild-wild))
-			(is-filtered? (LLOBJ 'filters?))
+			(is-filtered? (and ID (LLOBJ 'filters?)))
 		)
 
 		; ----------------------------------------------------
 		; Key under which the matrix dimensions are stored.
 		(define dim-key (PredicateNode
 			(if is-filtered?
-				(string-append "*-Dimension Key " (LLOBJ 'id))
+				(string-append "*-Dimension Key " ID)
 				"*-Dimension Key-*")))
 
 		(define (set-size LEFT RIGHT NPAIRS)
@@ -146,7 +150,7 @@
 		; Key under which the matrix entropies are stored.
 		(define ent-key (PredicateNode
 			(if is-filtered?
-				(string-append "*-Total Entropy Key " (LLOBJ 'id))
+				(string-append "*-Total Entropy Key " ID)
 				"*-Total Entropy Key-*")))
 
 		(define (set-entropy LEFT RIGHT TOT)
@@ -165,7 +169,7 @@
 		; Key under which the matrix MI are stored.
 		(define mi-key (PredicateNode
 			(if is-filtered?
-				(string-append "*-Total MI Key " (LLOBJ 'id))
+				(string-append "*-Total MI Key " ID)
 				"*-Total MI Key-*")))
 
 		(define (set-mi TOT)
@@ -178,11 +182,11 @@
 		; Key under which the matrix l_p norms are stored.
 		(define l-norm-key (PredicateNode
 			(if is-filtered?
-				(string-append "*-Left Norm Key " (LLOBJ 'id))
+				(string-append "*-Left Norm Key " ID)
 				"*-Left Norm Key-*")))
 		(define r-norm-key (PredicateNode
 			(if is-filtered?
-				(string-append "*-Right Norm Key " (LLOBJ 'id))
+				(string-append "*-Right Norm Key " ID)
 				"*-Right Norm Key-*")))
 
 		(define (set-left-norms L0 L1 L2 RMS)

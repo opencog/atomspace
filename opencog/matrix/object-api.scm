@@ -184,6 +184,7 @@
 ; ---------------------------------------------------------------------
 
 (use-modules (srfi srfi-1))
+(use-modules (ice-9 optargs)) ; for define*-public
 (use-modules (opencog))
 
 ; ---------------------------------------------------------------------
@@ -389,9 +390,10 @@
 ; ---------------------------------------------------------------------
 ; ---------------------------------------------------------------------
 
-(define-public (add-pair-count-api LLOBJ)
+(define*-public (add-pair-count-api LLOBJ
+    #:optional (ID (LLOBJ 'id)))
 "
-  add-pair-count-api LLOBJ - Extend LLOBJ with count-getters.
+  add-pair-count-api LLOBJ ID - Extend LLOBJ with count-getters.
 
   Extend the LLOBJ with additional methods to get and set
   marginal counts (subtotal wild-card counts), and total counts.
@@ -399,6 +401,9 @@
   that get and set these counts in \"standardized\" places.
   Other classes can overload these methods; these just provide
   a reasonable default.
+
+  The optional ID argument should be #f or a string, used to construct
+  the key under which the values are stored.
 
   If the dataset is not filtered, the counts are stored in the
   CountTruthValue assocaited with the atom; else they are stored
@@ -414,9 +419,9 @@
 "
 	; ----------------------------------------------------
 	; Key under which the count values are stored.
-	(define is-filtered? (LLOBJ 'filters?))
+	(define is-filtered? (and ID (LLOBJ 'filters?)))
 
-	(define cnt-name (string-append "*-CountKey " (LLOBJ 'id)))
+	(define cnt-name (string-append "*-CountKey " ID))
 
 	(define cnt-key (PredicateNode cnt-name))
 
@@ -476,9 +481,10 @@
 
 ; ---------------------------------------------------------------------
 
-(define-public (add-pair-freq-api LLOBJ)
+(define*-public (add-pair-freq-api LLOBJ
+    #:optional (ID (LLOBJ 'id)))
 "
-  add-pair-freq-api LLOBJ - Extend LLOBJ with frequency getters.
+  add-pair-freq-api LLOBJ ID - Extend LLOBJ with frequency getters.
 
   Extend the LLOBJ with additional methods to get and set
   the observation frequencies, entropies and mutual infomation.
@@ -490,6 +496,9 @@
   Here, the LLOBJ is expected to be an object, with methods for
   'item-pair 'make-pair 'left-wildcard and 'right-wildcard on it,
   in the form documented above for the \"low-level API class\".
+
+  The optional ID argument should be #f or a string, used to construct
+  the key under which the values are stored.
 
   The methods are as below.  PAIR is the pair (x,y)
 
@@ -537,8 +546,8 @@
 	; ----------------------------------------------------
 	; Key under which the frequency values are stored.
 	(define freq-name
-		(if (LLOBJ 'filters?)
-			(string-append "*-FrequencyKey " (LLOBJ 'id))
+		(if (and ID (LLOBJ 'filters?))
+			(string-append "*-FrequencyKey " ID)
 			"*-FrequencyKey-*"))
 
 	(define freq-key (PredicateNode freq-name))
@@ -569,8 +578,8 @@
 	; ----------------------------------------------------
 	; Key under which the entropy values are stored.
 	(define entr-name
-		(if (LLOBJ 'filters?)
-			(string-append "*-Entropy Key " (LLOBJ 'id))
+		(if (and ID (LLOBJ 'filters?))
+			(string-append "*-Entropy Key " ID)
 			"*-Entropy Key-*"))
 
 	(define entropy-key (PredicateNode entr-name))
@@ -590,8 +599,8 @@
 	; ----------------------------------------------------
 	; The key under which the MI is stored.
 	(define mi-name
-		(if (LLOBJ 'filters?)
-			(string-append "*-Mutual Info Key " (LLOBJ 'id))
+		(if (and ID (LLOBJ 'filters?))
+			(string-append "*-Mutual Info Key " ID)
 			"*-Mutual Info Key-*"))
 
 	(define mi-key (PredicateNode mi-name))

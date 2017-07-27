@@ -17,16 +17,20 @@
 
 ; ---------------------------------------------------------------------
 
-(define-public (add-support-api LLOBJ)
+(define*-public (add-support-api LLOBJ
+	 #:optional (ID (LLOBJ 'id)))
 "
-  add-support-api LLOBJ - Extend LLOBJ with methods to retreive
+  add-support-api LLOBJ ID - Extend LLOBJ with methods to retreive
   cached support, size and length subtotals on rows and columns.
+
+  Optional argument ID is #f to use the default value key;
+  otherwise a filtered key is used.
 "
 	; ----------------------------------------------------
 	; Key under which the matrix l_p norms are stored.
 	(define key-name
-		(if (LLOBJ 'filters?)
-			(string-append "*-Norm Key " (LLOBJ 'id))
+		(if (and ID (LLOBJ 'filters?))
+			(string-append "*-Norm Key " ID)
 			"*-Norm Key-*"))
 
 	(define norm-key (PredicateNode key-name))
