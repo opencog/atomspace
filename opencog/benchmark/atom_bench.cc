@@ -53,9 +53,9 @@ public:
 
     AtomHandle search(const std::string& target);
     AtomHandle searchAtom(AtomHandle atom, const std::string& target);
+    void add_edge(Type type, AtomHandle inbound, AtomHandle outbound);
     AtomHandle add_node(Type type, const std::string& name);
     AtomHandle add_link(Type type, const AtomVector& outgoing);
-    void add_edge(AtomHandle inbound, AtomHandle outbound);
     bool valid_result(const AtomHandle& result);
 };
 
@@ -80,6 +80,16 @@ Benchmark::~Benchmark()
 {
     delete atomspace;
     atomspace = nullptr;
+}
+
+void Benchmark::add_edge(Type type, AtomHandle inbound, AtomHandle outbound)
+{
+    if (!current_edge_page->can_add_edge())
+    {
+        current_edge_page = new EdgePage();
+        edge_pages.push_back(current_edge_page);
+    }
+    current_edge_page->add_edge(type, inbound, outbound);
 }
 
 AtomHandle Benchmark::add_node(Type type, const std::string& name)
@@ -110,7 +120,7 @@ AtomHandle Benchmark::add_link(Type type, const AtomVector& outgoing)
     }
     AtomHandle link = current_atom_page->add_link(type, outgoing);
     for (size_t out = 0; out < outgoing.size(); out++)
-        add_edge(link, outgoing[out]);
+        add_edge(type, link, outgoing[out]);
     return link;
 #endif
 }
@@ -165,16 +175,6 @@ AtomHandle Benchmark::search(const std::string& target)
     }
     return nullptr;
 #endif
-}
-
-void Benchmark::add_edge(AtomHandle inbound, AtomHandle outbound)
-{
-    if (!current_edge_page->can_add_edge())
-    {
-        current_edge_page = new EdgePage();
-        edge_pages.push_back(current_edge_page);
-    }
-    current_edge_page->add_edge(inbound, outbound);
 }
 
 void Benchmark::prep_test()

@@ -146,6 +146,8 @@ typedef std::vector<AtomPage*>  AtomPageVector;
 // the edge slots pointing to a particular atom will be adjacent in memory.
 
 struct Edge {
+    uint16_t    type;
+    uint16_t    unused;
     uint64_t    inbound;
     uint64_t    outbound;
 };
@@ -164,7 +166,7 @@ struct EdgePage {
 
     EdgePage();
 
-    void add_edge(AtomHandle in, AtomHandle out);
+    void add_edge(Type type, AtomHandle in, AtomHandle out);
     bool can_add_edge();
     static uint64_t total_pages() { return page_count; } 
 };

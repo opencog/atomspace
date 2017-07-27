@@ -71,7 +71,7 @@ bool EdgePage::can_add_edge()
         return false;
 }
 
-void EdgePage::add_edge(AtomHandle in, AtomHandle out)
+void EdgePage::add_edge(Type type, AtomHandle in, AtomHandle out)
 {
 #if ! USE_ATOMSPACE
     if (!can_add_edge())
@@ -84,6 +84,7 @@ void EdgePage::add_edge(AtomHandle in, AtomHandle out)
 
     // Save the edge pair.
     Edge* edge_ptr = &edge_slots[next];
+    edge_ptr->inbound = (uint16_t) type;
     edge_ptr->inbound = (uint64_t) in;
     edge_ptr->outbound = (uint64_t) out;
     
