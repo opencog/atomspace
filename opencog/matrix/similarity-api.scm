@@ -175,9 +175,9 @@
 		; Loop over the entire list of items, and compute similarity
 		; scores between pairs of them.  This might take a very long time!
 		; Serial version, see also parallel version below.
-		(define (batch-sim-pairs ITM-LIST)
+		(define (batch-sim-pairs ITEM-LIST)
 
-			(define len (length ITM-LIST))
+			(define len (length ITEM-LIST))
 			(define tot (* 0.5 len (- len 1)))
 			(define done 0)
 			(define prs 0)
@@ -207,17 +207,13 @@
 				)))
 
 			; tail-recursive list-walker.
-			(define (make-pairs WRD-LST)
-				(if (not (null? WRD-LST))
+			(define (make-pairs ITM-LST)
+				(if (not (null? ITM-LST))
 					(begin
-						(do-one-and-rpt WRD-LST)
-						(make-pairs (cdr WRD-LST)))))
+						(do-one-and-rpt ITM-LST)
+						(make-pairs (cdr ITM-LST)))))
 
-			(make-pairs WORD-LIST)
-)
-		; batch-sim-pairs - batch compute a bunch of them.
-		(define (batch-sim-pairs)
-			(define 
+			(make-pairs ITEM-LIST)
 		)
 
 		; Methods on this class.
@@ -234,16 +230,11 @@
 ; ---------------------------------------------------------------------
 ; ---------------------------------------------------------------------
 
-; ---------------------------------------------------------------------
-
-
-; ---------------------------------------------------------------------
-
 ; Loop over the entire list of words, and compute similarity scores
 ; for them.  Hacked parallel version.
-(define (para-batch-sim-pairs WORD-LIST CUTOFF)
+(define (para-batch-sim-pairs ITEM-LIST CUTOFF)
 
-	(define len (length WORD-LIST))
+	(define len (length ITEM-LIST))
 	(define tot (* 0.5 len (- len 1)))
 	(define done 0)
 	(define prs 0)
@@ -290,32 +281,7 @@
 				(call-with-new-thread (lambda () (make-pairs WRD-LST)))
 				(launch (cdr WRD-LST) (- CNT 1)))))
 
-	(launch WORD-LIST nthreads)
+	(launch ITEM-LIST nthreads)
 
 	(format #t "Started ~d threads\n" nthreads)
 )
-
-; ---------------------------------------------------------------------
-; Example usage:
-;
-; (use-modules (opencog) (opencog persist) (opencog persist-sql))
-; (use-modules (opencog nlp) (opencog nlp learn))
-; (sql-open "postgres:///en_pairs_sim?user=linas")
-; (sql-open "postgres:///en_pairs_supersim?user=linas")
-; (use-modules (opencog cogserver))
-; (start-cogserver "opencog2.conf")
-; (fetch-all-words)
-; (define pca (make-pseudo-cset-api))
-; (pca 'fetch-pairs)
-; (define ac (get-all-cset-words))
-; (length ac)
-; 37413
-; (define ad (get-all-disjuncts))
-; (length ad)
-; 291637
-;
-; (define firm (filter (lambda (wrd) (< 8.0 (cset-vec-word-len wrd))) ac))
-; (length firm)
-; 1985
-;
-; (batch-sim-pairs firm)
