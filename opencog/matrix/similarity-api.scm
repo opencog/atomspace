@@ -40,27 +40,23 @@
 ; ---------------------------------------------------------------------
 ; ---------------------------------------------------------------------
 ;
-; Extend the LLOBJ with additional methods to loop over all pairs
-; in a matrix.
+; Extend the LLOBJ with additional methods to access similarity scores.
 ;
 (define*-public (add-similarity-api LLOBJ MTM?
-	#:optional
-	(ID #f)
-	(CUTOFF 0.5)
-	(SIM-FUN
-		(if MTM?
-			(lambda (x y) (LLOBJ 'left-cosine x y))
-			(lambda (x y) (LLOBJ 'right-cosine x y))))
-	)
+	#:optional (ID #f)
 "
-  add-similarity-api - Add API to batch-compute and access similarity
-  values between rows or columns of the LLOBJ.  This creates
-  a new NON-sparse matrix that can be understood as a kind-of matrix
-  product of LLOBJ with it's transpose.
+  add-similarity-api - Add API to access similarity values between
+  rows or columns of the LLOBJ.  This creates a new NON-sparse matrix
+  that can be understood as a kind-of matrix product of LLOBJ with
+  it's transpose.
 
   If MTM? is #t, then the similarity matrix is the product M^T M
   for LLOBJ = M, otherwise, the product is MM^T.  Here, M^T is the
   matrix-transpose.
+
+  If the optional argument ID is present, it is used to cosntruct the
+  key under which the similarity scores are accessed.  This is needed
+  if the similarity scores are not the default cosine similarity scores.
 "
 	; We need 'left-basis, provided by add-pair-stars
 	(let ((wldobj (add-pair-stars LLOBJ)))
@@ -96,19 +92,6 @@
 		(define (set-sim ATOM SIM)
 			(cog-set-value! ATOM sim-key (FloatValue SIM)))
 
-		; Fetch or compute the similarity value.
-		; If the sim value is stored already, return that,
-		; else compute it. If the computed value is greater than
-		; CUTOFF, then save it.
-		(define (compute-sim A B)
-			(define mpr (cog-link pair-sim-type A B))
-			(if (not (null? mpr))
-				(get-sim mpr)
-				(let ((simv (SIM-FUN A B)))
-					(if (< 0.5 simv)
-						(set-sim (cog-new-link pair-sim-type A B) simv))
-					simv)))
-
 		; fetch-sim-pairs - fetch all SimilarityLinks from the database.
 		(define (fetch-sim-pairs)
 			(define start-time (current-time))
@@ -127,6 +110,65 @@
 
 				((pair-similarity)     (apply get-sim args))
 				((set-pair-similarity) (apply set-sim args))
+
+				; (else             (apply LLOBJ (cons message args)))
+				(else (error "Bad method call on similarity API:" message))
+		)))
+)
+
+; ---------------------------------------------------------------------
+; ---------------------------------------------------------------------
+;
+; Extend the LLOBJ with additional methods to batch-compute similarity
+; scores.
+;
+(define*-public (batch-similarity LLOBJ MTM?
+	#:optional
+	(ID #f)
+	(CUTOFF 0.5)
+	(SIM-FUN
+		(if MTM?
+			(lambda (x y) (LLOBJ 'left-cosine x y))
+			(lambda (x y) (LLOBJ 'right-cosine x y))))
+	)
+"
+  batch-similarity - Add API to batch-compute similarity values between
+  rows or columns of the LLOBJ.  This creates a new NON-sparse matrix
+  that can be understood as a kind-of matrix product of LLOBJ with it's
+  transpose.
+
+  If MTM? is #t, then the similarity matrix is the product M^T M
+  for LLOBJ = M, otherwise, the product is MM^T.  Here, M^T is the
+  matrix-transpose.
+"
+	; We need 'left-basis, provided by add-pair-stars
+	(let* ((wldobj (add-pair-stars LLOBJ))
+			(simobj (add-similarity-api wldobj))
+			(pair-sim-type (simobj 'pair-type))
+		)
+
+		; Fetch or compute the similarity value.
+		; If the sim value is stored already, return that,
+		; else compute it. If the computed value is greater than
+		; CUTOFF, then save it.
+		(define (compute-sim A B)
+			(define mpr (cog-link pair-sim-type A B))
+			(if (not (null? mpr))
+				(sim-obj 'pair-similarity mpr)
+				(let ((simv (SIM-FUN A B)))
+					(if (< 0.5 simv)
+						(sim-obj 'set-pair-similarity (cog-new-link pair-sim-type A B) simv))
+					simv)))
+
+		; batch-sim-pairs - batch compute a bunch of them.
+		(define (batch-sim-pairs)
+			(define 
+		)
+
+		; Methods on this class.
+		(lambda (message . args)
+			(case message
+
 				((compute-similarity)  (apply compute-sim args))
 
 				; (else             (apply LLOBJ (cons message args)))
