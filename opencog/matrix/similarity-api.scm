@@ -294,8 +294,7 @@
 				((batch-compute)       (batch))
 				((paralel-batch)       (apply para-batch args))
 
-				; (else             (apply LLOBJ (cons message args)))
-				(else (error "Bad method call on similarity API:" message))
+				(else                  (apply LLOBJ (cons message args)))
 		)))
 )
 
