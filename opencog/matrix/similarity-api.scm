@@ -44,7 +44,9 @@
 ; in a matrix.
 ;
 (define-public (add-similarity-api LLOBJ MTM?
-	#:optional (SIM-FUN
+	#:optional
+	(ID #f)
+	(SIM-FUN
 		(if MTM?
 			(lambda (x y) (LLOBJ 'left-cosine x y))
 			(lambda (x y) (LLOBJ 'right-cosine x y))))
@@ -55,14 +57,19 @@
   a new NON-sparse matrix that can be understood as a kind-of matrix
   product of LLOBJ with it's transpose.
 
-  If MTM? is #t, then the similarity matrix is the product M^T M 
+  If MTM? is #t, then the similarity matrix is the product M^T M
   for LLOBJ = M, otherwise, the product is MM^T.  Here, M^T is the
   matrix-transpose.
 "
 	; We need 'left-basis, provided by add-pair-stars
 	(let ((wldobj (add-pair-stars LLOBJ)))
 
-		(define name "Similarity Matrix of Some Kind")
+		(define name
+			(if ID
+				(string-append "Similarity Matrix " ID)
+				(string-append
+					(if MTM? "Left" "Right")
+					(" Cosine Similarity Matrix"))))
 
 		; The type of the rows and columns in the composite matrix.
 		(define item-type
@@ -71,7 +78,20 @@
 				(LLOBJ 'left-type)))
 
 		(define pair-sim-type 'SimilarityLink)
-		(define cos-key (PredicateNode "*-Cosine Distance Key-*"))
+
+		(define sim-key (PredicateNode
+			(if ID
+				(string-append "*-SimKey " ID)
+				"*-Cosine Sim Key-*")))
+
+		; Return the precomputed similarity on ATOM
+		(define (get-sim ATOM)
+			(if (null? ATOM) 0
+				(cog-value-ref (cog-value ATOM sim-key) 0)))
+
+		; Save a precomputed similarity on ATOM
+		(define (set-sim ATOM SIM)
+			(cog-set-value! ATOM sim-key (FloatValue SIM)))
 
 		; fetch-sim-pairs - fetch all SimilarityLinks from the database.
 		(define (fetch-sim-pairs)
@@ -88,6 +108,9 @@
 				((right-type)     item-type)
 				((pair-type)      pair-sim-type)
 				((fetch-pairs)    (fetch-sim-pairs))
+
+				((pair-similarity)     (apply get-sim args))
+				((set-pair-similarity) (apply set-sim args))
 
 				; (else             (apply LLOBJ (cons message args))))
 				(else (error "Bad method call on similarity API:" message))))
