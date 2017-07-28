@@ -1,5 +1,5 @@
 ;
-; cosine-api.scm
+; similarity-api.scm
 ;
 ; Provide framework to fetch/store similarity values.
 ;
@@ -34,6 +34,7 @@
 ; ---------------------------------------------------------------------
 ;
 (use-modules (srfi srfi-1))
+(use-modules (ice-9 optargs)) ; for define*-public
 (use-modules (opencog))
 
 ; ---------------------------------------------------------------------
@@ -42,17 +43,32 @@
 ; Extend the LLOBJ with additional methods to loop over all pairs
 ; in a matrix.
 ;
-(define-public (add-similarity-api LLOBJ)
+(define-public (add-similarity-api LLOBJ MTM?
+	#:optional (SIM-FUN
+		(if MTM?
+			(lambda (x y) (LLOBJ 'left-cosine x y))
+			(lambda (x y) (LLOBJ 'right-cosine x y))))
+	)
 "
   add-similarity-api - Add API to batch-compute and access similarity
   values between rows or columns of the LLOBJ.  This creates
   a new NON-sparse matrix that can be understood as a kind-of matrix
   product of LLOBJ with it's transpose.
 
-  If TRANSP? is #f, then the matrix 
+  If MTM? is #t, then the similarity matrix is the product M^T M 
+  for LLOBJ = M, otherwise, the product is MM^T.  Here, M^T is the
+  matrix-transpose.
 "
 	; We need 'left-basis, provided by add-pair-stars
 	(let ((wldobj (add-pair-stars LLOBJ)))
+
+		(define name "Similarity Matrix of Some Kind")
+
+		; The type of the rows and columns in the composite matrix.
+		(define item-type
+			(if MTM?
+				(LLOBJ 'right-type)
+				(LLOBJ 'left-type)))
 
 		(define pair-sim-type 'SimilarityLink)
 		(define cos-key (PredicateNode "*-Cosine Distance Key-*"))
@@ -67,6 +83,9 @@
 		; Methods on this class.
 		(lambda (message . args)
 			(case message
+				((name)           name)
+				((left-type)      item-type)
+				((right-type)     item-type)
 				((pair-type)      pair-sim-type)
 				((fetch-pairs)    (fetch-sim-pairs))
 
