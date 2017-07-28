@@ -43,7 +43,7 @@
 ; Extend the LLOBJ with additional methods to access similarity scores.
 ;
 (define*-public (add-similarity-api LLOBJ MTM?
-	#:optional (ID #f)
+	#:optional (ID #f))
 "
   add-similarity-api - Add API to access similarity values between
   rows or columns of the LLOBJ.  This creates a new NON-sparse matrix
@@ -143,7 +143,7 @@
 "
 	; We need 'left-basis, provided by add-pair-stars
 	(let* ((wldobj (add-pair-stars LLOBJ))
-			(simobj (add-similarity-api wldobj))
+			(simobj (add-similarity-api wldobj MTM? ID))
 			(pair-sim-type (simobj 'pair-type))
 		)
 
@@ -154,10 +154,10 @@
 		(define (compute-sim A B)
 			(define mpr (cog-link pair-sim-type A B))
 			(if (not (null? mpr))
-				(sim-obj 'pair-similarity mpr)
+				(simobj 'pair-similarity mpr)
 				(let ((simv (SIM-FUN A B)))
 					(if (< 0.5 simv)
-						(sim-obj 'set-pair-similarity (cog-new-link pair-sim-type A B) simv))
+						(simobj 'set-pair-similarity (cog-new-link pair-sim-type A B) simv))
 					simv)))
 
 		; Compute and store the similarity between the ITEM, and the
@@ -168,7 +168,7 @@
 		(define (batch-simlist ITEM ITEM-LIST)
 			(for-each
 				(lambda (item) (compute-sim ITEM item))
-				WORD-LIST)
+				ITEM-LIST)
 			(length ITEM-LIST) ; bogus return value
 		)
 
@@ -230,7 +230,7 @@
 
 			(define (do-one-and-rpt ITM-LST)
 				; These sets are not thread-safe but I don't care.
-				(set! prs (+ prs (batch-simlist (car ITM-LST) (cdr ITM-LST) CUTOFF)))
+				(set! prs (+ prs (batch-simlist (car ITM-LST) (cdr ITM-LST))))
 				(set! done (+ done 1))
 				(if (eqv? 0 (modulo done 20))
 					(let* ((elapsed (- (current-time) start))
