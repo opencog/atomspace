@@ -9,6 +9,7 @@ ADD_GUILE_MODULE (FILES
 	fold-api.scm
 	loop-api.scm
 	object-api.scm
+	similarity-api.scm
 	support.scm
 	report-api.scm
 	thresh-pca.scm
