@@ -161,37 +161,14 @@
 					simv)))
 
 		; Compute and store the similarity between the ITRM, and the
-		; other items in the ITEM-LIST.  Do NOT actually cache the similarity
-		; value, if it is less than CUTOFF.  This is used to avoid having
-		; N-squared pairs cluttering the atomspace.
+		; other items in the ITEM-LIST.  Do NOT actually cache the
+		; similarity value, if it is less than CUTOFF.  This is used
+		; to avoid having N-squared pairs cluttering the atomspace.
 		;
-		(define (batch-sim WORD WORD-LIST CUTOFF)
-
-			(define cnt 0)
-
-			(define (get-angle SIM)
-				(define pi 3.14159265358979)
-				; Stupid-ass guile return a small imaginary number when taking
-				; the arccos of 1.0. WTF.  So we need to take the real part!!
-				(* 2.0 (/ (real-part (acos SIM)) pi))
-			)
-
-			(define (set-sim WORD-A WORD-B SIM)
-				(cog-set-value!
-					(sim-pair WORD-A WORD-B) cos-key
-					(FloatValue SIM (get-angle SIM))))
-
+		(define (batch-simlist ITEM ITEM-LIST)
 			(for-each
-				(lambda (wrd)
-					(define sim (cset-vec-cosine WORD wrd))
-					(if (and (< CUTOFF sim) (not (equal? WORD wrd)))
-						(begin
-							(set! cnt (+ 1 cnt))
-							(store-atom (set-sim WORD wrd sim)))))
-				WORD-LIST)
-		
-			cnt
-		)
+				(lambda (item) (compute-sim ITEM item))
+				WORD-LIST))
 
 		; batch-sim-pairs - batch compute a bunch of them.
 		(define (batch-sim-pairs)
