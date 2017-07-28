@@ -66,7 +66,7 @@
 				(string-append "Similarity Matrix " ID)
 				(string-append
 					(if MTM? "Left" "Right")
-					(" Cosine Similarity Matrix"))))
+					" Cosine Similarity Matrix")))
 
 		; The type of the rows and columns in the composite matrix.
 		(define item-type
