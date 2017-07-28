@@ -134,6 +134,8 @@ SCM SchemeSmob::handle_to_scm (const Handle& h)
 
 SCM SchemeSmob::protom_to_scm (const ProtoAtomPtr& pa)
 {
+	if (nullptr == pa) return SCM_EOL;
+
 	// Use new so that the smart pointer increments!
 	ProtoAtomPtr* pap = new ProtoAtomPtr(pa);
 	scm_gc_register_allocation(sizeof(pa));
