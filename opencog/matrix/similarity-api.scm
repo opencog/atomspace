@@ -46,6 +46,7 @@
 (define-public (add-similarity-api LLOBJ MTM?
 	#:optional
 	(ID #f)
+	(CUTOFF 0.5)
 	(SIM-FUN
 		(if MTM?
 			(lambda (x y) (LLOBJ 'left-cosine x y))
@@ -87,11 +88,26 @@
 		; Return the precomputed similarity on ATOM
 		(define (get-sim ATOM)
 			(if (null? ATOM) 0
-				(cog-value-ref (cog-value ATOM sim-key) 0)))
+				(let ((val (cog-value ATOM sim-key)))
+					(if (null? val) 0
+						(cog-value-ref val 0)))))
 
 		; Save a precomputed similarity on ATOM
 		(define (set-sim ATOM SIM)
 			(cog-set-value! ATOM sim-key (FloatValue SIM)))
+
+		; Fetch or compute the similarity value.
+		; If the sim value is stored already, return that,
+		; else compute it. If the computed value is greater than
+		; CUTOFF, then save it.
+		(define (compute-sim A B)
+			(define mpr (cog-link pair-sim-type A B))
+			(if (not (null? mpr))
+				(get-sim mpr)
+				(let ((simv (SIM-FUN A B)))
+					(if (< 0.5 simv)
+						(set-sim (cog-new-link pair-sim-type A B) simv))
+					simv)))
 
 		; fetch-sim-pairs - fetch all SimilarityLinks from the database.
 		(define (fetch-sim-pairs)
@@ -111,6 +127,7 @@
 
 				((pair-similarity)     (apply get-sim args))
 				((set-pair-similarity) (apply set-sim args))
+				((compute-similarity)  (apply compute-sim args))
 
 				; (else             (apply LLOBJ (cons message args))))
 				(else (error "Bad method call on similarity API:" message))))
