@@ -35,7 +35,7 @@
 ;
 (use-modules (srfi srfi-1))
 (use-modules (ice-9 optargs)) ; for define*-public
-(use-modules (opencog))
+(use-modules (opencog) (opencog persist))
 
 ; ---------------------------------------------------------------------
 ; ---------------------------------------------------------------------
@@ -43,7 +43,7 @@
 ; Extend the LLOBJ with additional methods to loop over all pairs
 ; in a matrix.
 ;
-(define-public (add-similarity-api LLOBJ MTM?
+(define*-public (add-similarity-api LLOBJ MTM?
 	#:optional
 	(ID #f)
 	(CUTOFF 0.5)
@@ -129,9 +129,9 @@
 				((set-pair-similarity) (apply set-sim args))
 				((compute-similarity)  (apply compute-sim args))
 
-				; (else             (apply LLOBJ (cons message args))))
-				(else (error "Bad method call on similarity API:" message))))
-		))
+				; (else             (apply LLOBJ (cons message args)))
+				(else (error "Bad method call on similarity API:" message))
+		)))
 )
 
 ; ---------------------------------------------------------------------
