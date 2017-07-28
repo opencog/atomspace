@@ -160,6 +160,39 @@
 						(sim-obj 'set-pair-similarity (cog-new-link pair-sim-type A B) simv))
 					simv)))
 
+		; Compute and store the similarity between the ITRM, and the
+		; other items in the ITEM-LIST.  Do NOT actually cache the similarity
+		; value, if it is less than CUTOFF.  This is used to avoid having
+		; N-squared pairs cluttering the atomspace.
+		;
+		(define (batch-sim WORD WORD-LIST CUTOFF)
+
+			(define cnt 0)
+
+			(define (get-angle SIM)
+				(define pi 3.14159265358979)
+				; Stupid-ass guile return a small imaginary number when taking
+				; the arccos of 1.0. WTF.  So we need to take the real part!!
+				(* 2.0 (/ (real-part (acos SIM)) pi))
+			)
+
+			(define (set-sim WORD-A WORD-B SIM)
+				(cog-set-value!
+					(sim-pair WORD-A WORD-B) cos-key
+					(FloatValue SIM (get-angle SIM))))
+
+			(for-each
+				(lambda (wrd)
+					(define sim (cset-vec-cosine WORD wrd))
+					(if (and (< CUTOFF sim) (not (equal? WORD wrd)))
+						(begin
+							(set! cnt (+ 1 cnt))
+							(store-atom (set-sim WORD wrd sim)))))
+				WORD-LIST)
+		
+			cnt
+		)
+
 		; batch-sim-pairs - batch compute a bunch of them.
 		(define (batch-sim-pairs)
 			(define 
@@ -178,3 +211,132 @@
 
 ; ---------------------------------------------------------------------
 ; ---------------------------------------------------------------------
+
+; ---------------------------------------------------------------------
+
+; Loop over the entire list of words, and compute similarity scores
+; for them.  This might take a very long time!
+; Serial version, see also parallel version below.
+(define (batch-sim-pairs WORD-LIST CUTOFF)
+
+	(define len (length WORD-LIST))
+	(define tot (* 0.5 len (- len 1)))
+	(define done 0)
+	(define prs 0)
+	(define prevf 0)
+	(define start (current-time))
+	(define prevt start)
+
+	(define (do-one-and-rpt WRD-LST)
+		(set! prs (+ prs (batch-sim (car WRD-LST) (cdr WRD-LST) CUTOFF)))
+		(set! done (+  done 1))
+		(if (eqv? 0 (modulo done 10))
+			(let* ((elapsed (- (current-time) start))
+					(togo (* 0.5 (- len done) (- len (+ done 1))))
+					(frt (- tot togo))
+					(rate (* 0.001 (/ (- frt prevf) (- elapsed prevt))))
+					)
+				(format #t
+					 "Done ~A/~A frac=~5f% Time: ~A Done: ~4f% rate=~5f K prs/sec\n"
+					done len
+					(* 100.0 (/ prs frt))
+					elapsed
+					(* 100.0 (/ frt tot))
+					rate
+				)
+				(set! prevt (- elapsed 1.0e-6))
+				(set! prevf frt)
+		)))
+
+	; tail-recursive list-walker.
+	(define (make-pairs WRD-LST)
+		(if (not (null? WRD-LST))
+			(begin
+				(do-one-and-rpt WRD-LST)
+				(make-pairs (cdr WRD-LST)))))
+
+	(make-pairs WORD-LIST)
+)
+
+; ---------------------------------------------------------------------
+
+; Loop over the entire list of words, and compute similarity scores
+; for them.  Hacked parallel version.
+(define (para-batch-sim-pairs WORD-LIST CUTOFF)
+
+	(define len (length WORD-LIST))
+	(define tot (* 0.5 len (- len 1)))
+	(define done 0)
+	(define prs 0)
+	(define prevf 0)
+	(define start (current-time))
+	(define prevt start)
+
+	(define nthreads 3)
+
+	(define (do-one-and-rpt WRD-LST)
+		; These sets are not thread-safe but I don't care.
+		(set! prs (+ prs (batch-sim (car WRD-LST) (cdr WRD-LST) CUTOFF)))
+		(set! done (+ done 1))
+		(if (eqv? 0 (modulo done 20))
+			(let* ((elapsed (- (current-time) start))
+					(togo (* 0.5 (- len done) (- len (+ done 1))))
+					(frt (- tot togo))
+					(rate (* 0.001 (/ (- frt prevf) (- elapsed prevt))))
+					)
+				(format #t
+					 "Done ~A/~A frac=~5f% Time: ~A Done: ~4f% rate=~5f K prs/sec\n"
+					done len
+					(* 100.0 (/ prs frt))
+					elapsed
+					(* 100.0 (/ frt tot))
+					rate
+				)
+				(set! prevt (- elapsed 1.0e-6))
+				(set! prevf frt)
+			)))
+
+	; tail-recursive list-walker.
+	(define (make-pairs WRD-LST)
+		(if (not (null? WRD-LST))
+			(begin
+				(do-one-and-rpt WRD-LST)
+				(if (< nthreads (length WRD-LST))
+					(make-pairs (drop WRD-LST nthreads))))))
+
+	; thread launcher
+	(define (launch WRD-LST CNT)
+		(if (< 0 CNT)
+			(begin
+				(call-with-new-thread (lambda () (make-pairs WRD-LST)))
+				(launch (cdr WRD-LST) (- CNT 1)))))
+
+	(launch WORD-LIST nthreads)
+
+	(format #t "Started ~d threads\n" nthreads)
+)
+
+; ---------------------------------------------------------------------
+; Example usage:
+;
+; (use-modules (opencog) (opencog persist) (opencog persist-sql))
+; (use-modules (opencog nlp) (opencog nlp learn))
+; (sql-open "postgres:///en_pairs_sim?user=linas")
+; (sql-open "postgres:///en_pairs_supersim?user=linas")
+; (use-modules (opencog cogserver))
+; (start-cogserver "opencog2.conf")
+; (fetch-all-words)
+; (define pca (make-pseudo-cset-api))
+; (pca 'fetch-pairs)
+; (define ac (get-all-cset-words))
+; (length ac)
+; 37413
+; (define ad (get-all-disjuncts))
+; (length ad)
+; 291637
+;
+; (define firm (filter (lambda (wrd) (< 8.0 (cset-vec-word-len wrd))) ac))
+; (length firm)
+; 1985
+;
+; (batch-sim-pairs firm)
