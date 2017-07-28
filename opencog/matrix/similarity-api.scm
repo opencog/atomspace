@@ -216,11 +216,83 @@
 			(make-pairs ITEM-LIST)
 		)
 
+		; Loop over the entire list of items, and compute similarity
+		; scores for them.  Hacked parallel version.
+		(define (para-batch-sim-pairs ITEM-LIST NTHREADS)
+
+			(define len (length ITEM-LIST))
+			(define tot (* 0.5 len (- len 1)))
+			(define done 0)
+			(define prs 0)
+			(define prevf 0)
+			(define start (current-time))
+			(define prevt start)
+
+			(define (do-one-and-rpt ITM-LST)
+				; These sets are not thread-safe but I don't care.
+				(set! prs (+ prs (batch-simlist (car ITM-LST) (cdr ITM-LST) CUTOFF)))
+				(set! done (+ done 1))
+				(if (eqv? 0 (modulo done 20))
+					(let* ((elapsed (- (current-time) start))
+							(togo (* 0.5 (- len done) (- len (+ done 1))))
+							(frt (- tot togo))
+							(rate (* 0.001 (/ (- frt prevf) (- elapsed prevt))))
+							)
+						(format #t
+							 "Done ~A/~A frac=~5f% Time: ~A Done: ~4f% rate=~5f K prs/sec\n"
+							done len
+							(* 100.0 (/ prs frt))
+							elapsed
+							(* 100.0 (/ frt tot))
+							rate
+						)
+						(set! prevt (- elapsed 1.0e-6))
+						(set! prevf frt)
+					)))
+
+			; tail-recursive list-walker.
+			(define (make-pairs ITM-LST)
+				(if (not (null? ITM-LST))
+					(begin
+						(do-one-and-rpt ITM-LST)
+						(if (< NTHREADS (length ITM-LST))
+							(make-pairs (drop ITM-LST NTHREADS))))))
+
+			; thread launcher
+			(define (launch ITM-LST CNT)
+				(if (< 0 CNT)
+					(begin
+						(call-with-new-thread (lambda () (make-pairs ITM-LST)))
+						(launch (cdr ITM-LST) (- CNT 1)))))
+
+			(launch ITEM-LIST NTHREADS)
+
+			(format #t "Started ~d threads\n" NTHREADS)
+		)
+
+		; Loop over basis elements
+		(define (batch)
+			(batch-sim-pairs
+				(if MTM?
+					(wldobj 'right-basis)
+					(wldobj 'left-basis))))
+
+
+		; Loop over basis elements
+		(define (para-batch NTHREADS)
+			(para-batch-sim-pairs
+				(if MTM?
+					(wldobj 'right-basis)
+					(wldobj 'left-basis))
+				NTHREADS))
+
 		; Methods on this class.
 		(lambda (message . args)
 			(case message
 
 				((compute-similarity)  (apply compute-sim args))
+				((batch-compute)       (batch))
+				((paralel-batch)       (apply para-batch args))
 
 				; (else             (apply LLOBJ (cons message args)))
 				(else (error "Bad method call on similarity API:" message))
@@ -229,59 +301,3 @@
 
 ; ---------------------------------------------------------------------
 ; ---------------------------------------------------------------------
-
-; Loop over the entire list of words, and compute similarity scores
-; for them.  Hacked parallel version.
-(define (para-batch-sim-pairs ITEM-LIST CUTOFF)
-
-	(define len (length ITEM-LIST))
-	(define tot (* 0.5 len (- len 1)))
-	(define done 0)
-	(define prs 0)
-	(define prevf 0)
-	(define start (current-time))
-	(define prevt start)
-
-	(define nthreads 3)
-
-	(define (do-one-and-rpt WRD-LST)
-		; These sets are not thread-safe but I don't care.
-		(set! prs (+ prs (batch-sim (car WRD-LST) (cdr WRD-LST) CUTOFF)))
-		(set! done (+ done 1))
-		(if (eqv? 0 (modulo done 20))
-			(let* ((elapsed (- (current-time) start))
-					(togo (* 0.5 (- len done) (- len (+ done 1))))
-					(frt (- tot togo))
-					(rate (* 0.001 (/ (- frt prevf) (- elapsed prevt))))
-					)
-				(format #t
-					 "Done ~A/~A frac=~5f% Time: ~A Done: ~4f% rate=~5f K prs/sec\n"
-					done len
-					(* 100.0 (/ prs frt))
-					elapsed
-					(* 100.0 (/ frt tot))
-					rate
-				)
-				(set! prevt (- elapsed 1.0e-6))
-				(set! prevf frt)
-			)))
-
-	; tail-recursive list-walker.
-	(define (make-pairs WRD-LST)
-		(if (not (null? WRD-LST))
-			(begin
-				(do-one-and-rpt WRD-LST)
-				(if (< nthreads (length WRD-LST))
-					(make-pairs (drop WRD-LST nthreads))))))
-
-	; thread launcher
-	(define (launch WRD-LST CNT)
-		(if (< 0 CNT)
-			(begin
-				(call-with-new-thread (lambda () (make-pairs WRD-LST)))
-				(launch (cdr WRD-LST) (- CNT 1)))))
-
-	(launch ITEM-LIST nthreads)
-
-	(format #t "Started ~d threads\n" nthreads)
-)
