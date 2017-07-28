@@ -127,9 +127,10 @@
 	(ID #f)
 	(CUTOFF 0.5)
 	(SIM-FUN
-		(if MTM?
-			(lambda (x y) (LLOBJ 'left-cosine x y))
-			(lambda (x y) (LLOBJ 'right-cosine x y))))
+		(let ((acc (add-pair-cosine-compute LLOBJ)))
+			(if MTM?
+				(lambda (x y) (acc 'left-cosine x y))
+				(lambda (x y) (acc 'right-cosine x y)))))
 	)
 "
   batch-similarity - Add API to batch-compute similarity values between
