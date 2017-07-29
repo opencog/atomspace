@@ -61,9 +61,13 @@ Q: Why isn't this in C++?  Surely, numerical computations would be
 
 A: Yes, probably. But its a lot easier to write scheme code than
    it is to write C++ code, and so prototyping in scheme just made
-   more sense. It was just-plain simpler, faster, easier. You are
-   invited to take the lessons learned, and re-implement in C++.
-   The number #1 most important lesson is that the filter object
+   more sense. It was just-plain simpler, faster, easier (for me).
+   You are invited to take the lessons learned, and re-implement
+   in C++.
+
+Q: What were the lessons learned?
+
+A: The number #1 most important lesson is that the filter object
    is the most important object: it controls what data you want
    to keep, and what data you want to discard, and it needs to
    run "underneath", as a foundation to everything else.
@@ -72,7 +76,9 @@ Q: Really, C++ is sooo fast...
 
 A: Yes, but since the data is stored in values associated with
    atoms in the atomspace, adding numbers together is NOT the
-   bottleneck. Accessing Atom Values *is* the bottleneck. Soooo...
+   bottleneck. Accessing Atom Values *is* the bottleneck. Finding
+   a good performance optimization for the atom values framework
+   is a lot harder.
 
 Q: Why don't you just export all your data to SciPy or to Gnu R, or to
    Octave, or MatLab, for that matter, and just do your data analytics
@@ -113,8 +119,7 @@ A: You would use Rcpp at http://dirk.eddelbuettel.com/code/rcpp.html
    structures can be accessed as easily at the C++ level, and used in
    the normal manner. The mapping of data types works in both
    directions. It is as straightforward to pass data from R to C++,
-   as it is it return data from C++ to R. The following two sections
-   list supported data types.
+   as it is it return data from C++ to R.
 
 
 Generic Programming

@@ -18,4 +18,5 @@
 (load "matrix/entropy.scm")
 (load "matrix/compute-mi.scm")
 (load "matrix/filter.scm")
+(load "matrix/similarity-api.scm")
 (load "matrix/thresh-pca.scm")
