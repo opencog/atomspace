@@ -66,7 +66,7 @@
 	; Do the actual bin-counting
 	(for-each
 		(lambda (item)
-			(define bin (value->bin (car item)))
+			(define bin (value->bin (item->value item)))
 			(array-set! bins
 				(+ (array-ref bins bin) (item->count item))
 				bin))
