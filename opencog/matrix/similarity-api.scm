@@ -43,7 +43,8 @@
 ; Extend the LLOBJ with additional methods to access similarity scores.
 ;
 (define*-public (add-similarity-api LLOBJ MTM?
-	#:optional (ID #f))
+	#:optional
+	(ID (if (LLOBJ 'filters?) (LLOBJ 'id) #f)))
 "
   add-similarity-api - Add API to access similarity values between
   rows or columns of the LLOBJ.  This creates a new NON-sparse matrix
@@ -54,7 +55,7 @@
   for LLOBJ = M, otherwise, the product is MM^T.  Here, M^T is the
   matrix-transpose.
 
-  If the optional argument ID is present, it is used to cosntruct the
+  If the optional argument ID is present, it is used to construct the
   key under which the similarity scores are accessed.  This is needed
   if the similarity scores are not the default cosine similarity scores.
 "
@@ -124,7 +125,7 @@
 ;
 (define*-public (batch-similarity LLOBJ MTM?
 	#:optional
-	(ID #f)
+	(ID (if (LLOBJ 'filters?) (LLOBJ 'id) #f))
 	(CUTOFF 0.5)
 	(SIM-FUN
 		(let ((acc (add-pair-cosine-compute LLOBJ)))
