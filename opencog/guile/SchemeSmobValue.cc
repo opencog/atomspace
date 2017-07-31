@@ -220,7 +220,10 @@ SCM SchemeSmob::ss_set_value (SCM satom, SCM skey, SCM svalue)
 				"a list of protoatom values");
 		}
 	}
-	else if (scm_is_true(svalue))
+	// Strange! According to my reading of the guile source code,
+	// scm_is_true() should return 0 if svalue is nill, but strangely
+	// it doesn't actually do that, so we need to explicitly test.
+	else if (scm_is_true(svalue) and scm_is_false(scm_nil_p(svalue)))
 	{
 		pa = verify_protom(svalue, "cog-set-value!", 3);
 	}
