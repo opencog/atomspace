@@ -139,11 +139,21 @@ TruthValuePtr Atom::getTruthValue() const
 }
 
 // ==============================================================
-// Setting values associated with this atom.
+/// Setting values associated with this atom.
+/// If the value is a null pointer, then the key is removed.
 void Atom::setValue(const Handle& key, const ProtoAtomPtr& value)
 {
-    std::lock_guard<std::mutex> lck(_mtx);
-    _values[key] = value;
+	std::lock_guard<std::mutex> lck(_mtx);
+	if (nullptr != value)
+	{
+		_values[key] = value;
+	}
+	else
+	{
+		// If the value is a null pointer, then the value at
+		// this key should be blanked out, i.e. unset.
+		_values.erase(key);
+	}
 }
 
 ProtoAtomPtr Atom::getValue(const Handle& key) const
