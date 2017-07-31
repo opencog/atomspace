@@ -220,11 +220,13 @@ SCM SchemeSmob::ss_set_value (SCM satom, SCM skey, SCM svalue)
 				"a list of protoatom values");
 		}
 	}
-	else
+	else if (scm_is_true(svalue))
 	{
 		pa = verify_protom(svalue, "cog-set-value!", 3);
 	}
 
+	// Note that pa might be a null pointer, if svalue is '() or #f
+	// In this case, the key is removed.
 	atom->setValue(key, pa);
 	return satom;
 }
