@@ -147,6 +147,7 @@
 	(let* ((wldobj (add-pair-stars LLOBJ))
 			(simobj (add-similarity-api wldobj MTM? ID))
 			(pair-sim-type (simobj 'pair-type))
+			(goodcnt 0)
 		)
 
 		; Fetch or compute the similarity value.
@@ -158,8 +159,11 @@
 			(if (not (null? mpr))
 				(simobj 'pair-similarity mpr)
 				(let ((simv (SIM-FUN A B)))
-					(if (< 0.5 simv)
-						(simobj 'set-pair-similarity (cog-new-link pair-sim-type A B) simv))
+					(if (<= CUTOFF simv)
+						(begin
+							(set! goodcnt (+ goodcnt 1))
+							(simobj 'set-pair-similarity
+								(cog-new-link pair-sim-type A B) simv)))
 					simv)))
 
 		; Compute and store the similarity between the ITEM, and the
@@ -168,10 +172,11 @@
 		; to avoid having N-squared pairs cluttering the atomspace.
 		;
 		(define (batch-simlist ITEM ITEM-LIST)
+			(set! goodcnt 0)
 			(for-each
 				(lambda (item) (compute-sim ITEM item))
 				ITEM-LIST)
-			(length ITEM-LIST) ; bogus return value
+			goodcnt
 		)
 
 		; Loop over the entire list of items, and compute similarity
@@ -243,7 +248,7 @@
 						(format #t
 							 "Done ~A/~A frac=~5f% Time: ~A Done: ~4f% rate=~5f K prs/sec\n"
 							done len
-							(* 100.0 (/ prs frt))
+							(* 100.0 (/ (* NTHREADS prs) frt))
 							elapsed
 							(* 100.0 (/ frt tot))
 							rate
