@@ -195,7 +195,7 @@
 		;          (ListLink (Word "bar") (Word "a")))
 		;      (list
 		;          (ListLink (Word "zed") (Word "the"))
-		;          '()))  ; Note the par zed-a does not exist.
+		;          '()))  ; Note the pair zed-a does not exist.
 		;
 		; In the above, the union of the left support was {foo, bar, zed}
 		; and the intersection of the left support was just {foo}.  This
