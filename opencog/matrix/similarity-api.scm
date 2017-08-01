@@ -82,16 +82,16 @@
 				(string-append "*-SimKey " ID)
 				"*-Cosine Sim Key-*")))
 
-		; Return the precomputed similarity on ATOM
+		; Return the precomputed similarity value on ATOM
+		; This returns the Value on the atom, and not a number!
 		(define (get-sim ATOM)
-			(if (null? ATOM) 0
-				(let ((val (cog-value ATOM sim-key)))
-					(if (null? val) 0
-						(cog-value-ref val 0)))))
+			(if (null? ATOM) '()
+				(cog-value ATOM sim-key)))
 
-		; Save a precomputed similarity on ATOM
+		; Save a precomputed similarity on ATOM. The SIM should be a
+		; Value, e.g. a FloatValue.
 		(define (set-sim ATOM SIM)
-			(cog-set-value! ATOM sim-key (FloatValue SIM)))
+			(cog-set-value! ATOM sim-key SIM))
 
 		; fetch-sim-pairs - fetch all SimilarityLinks from the database.
 		(define (fetch-sim-pairs)
@@ -156,14 +156,16 @@
 		; CUTOFF, then save it.
 		(define (compute-sim A B)
 			(define mpr (cog-link pair-sim-type A B))
-			(if (not (null? mpr))
-				(simobj 'pair-similarity mpr)
+			(define prs (simobj 'pair-similarity mpr))
+			(if (not (null? prs))
+				(cog-value-ref prs 0)
 				(let ((simv (SIM-FUN A B)))
 					(if (<= CUTOFF simv)
 						(begin
 							(set! goodcnt (+ goodcnt 1))
 							(simobj 'set-pair-similarity
-								(cog-new-link pair-sim-type A B) simv)))
+								(cog-new-link pair-sim-type A B)
+									(FloatValue simv))))
 					simv)))
 
 		; Compute and store the similarity between the ITEM, and the
