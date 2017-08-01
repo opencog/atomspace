@@ -13,10 +13,10 @@
 ; Thus, this implements a simple cache, where the atom serves as a key,
 ; and an abitrary scheme object can be associated with it.
 ;
-; Thhis differs from atomspace values, in several ways:
+; This differs from atomspace values, in several ways:
 ; * any arbitary scheme object can be associated with an atom
-; * these caches are never saved to the database, unlike atomspace values.
-; * these caches are anonymous.  You have to have a handle to the function
+; * these caches are never saved to the database, unlike atom values.
+; * these caches are anonymous.  You must have a handle to the function
 ;   to make use of them.  They are automatically garbage collected.
 ;
 ; ---------------------------------------------------------------------
