@@ -145,16 +145,33 @@
 		; Return the set-union of all atoms that might be paired
 		; with one of the atoms from TUPLE on the right.
 		(define (get-left-union TUPLE)
-			(delete-dup-atoms
-				(append-map!
-					(lambda (item) (map! gar (star-obj 'left-stars item)))
-					TUPLE)))
+			; The set the will hold the union of atoms.
+			(define atom-set (make-atom-set))
+
+			; Add the left-side of the pair to the set.
+			(define (add-left-to-set LIST)
+				(for-each
+					(lambda (star-pair) (atom-set (gar star-pair)))
+					LIST))
+
+			; loop over verything in the tuple.
+			(for-each
+				(lambda (item) (add-left-to-set (star-obj 'left-stars item)))
+				TUPLE)
+
+			; Return the union of all left-stars in the tuple.
+			(atom-set #f))
 
 		(define (get-right-union TUPLE)
-			(delete-dup-atoms
-				(append-map!
-					(lambda (item) (map! gdr (star-obj 'right-stars item)))
-					TUPLE)))
+			(define atom-set (make-atom-set))
+			(define (add-right-to-set LIST)
+				(for-each
+					(lambda (star-pair) (atom-set (gdr star-pair)))
+					LIST))
+			(for-each
+				(lambda (item) (add-right-to-set (star-obj 'right-stars item)))
+				TUPLE)
+			(atom-set #f))
 
 		; ---------------
 		; Given a TUPLE of items of 'right-type, this returns
