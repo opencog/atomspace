@@ -9,17 +9,6 @@ ADD_LIBRARY (atomspace
 	BackingStore.cc
 	FixedIntegerIndex.cc
 	TypeIndex.cc
-
-	# Valuations are now stored in the atom itself.
-	# ValuationTable.cc
-
-	# The below are no longer used, but we will
-	# keep them around for a little while longer... just in case!?
-	# HandleSeqIndex.cc
-	# HandleSetIndex.cc
-	# IncomingIndex.cc
-	# LinkIndex.cc
-	# NodeIndex.cc
 )
 
 # Without this, parallel make will race and crap up the generated files.
