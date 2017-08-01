@@ -26,17 +26,20 @@
 
 ; ---------------------------------------------------------------------
 
-; Return a caching version of AFUNC. Here, AFUNC is a function that
-; takes a single atom as an argument, and returns some object
-; associated with that atom.
-;
-; This returns a function that returns the same values that AFUNC would
-; return, for the same argument; but if a cached value is available,
-; then return just that.  In order for the cache to be valid, the AFUNC
-; must be side-effect-free.
-;
-(define (make-afunc-cache AFUNC)
+(define-public (make-afunc-cache AFUNC)
+"
+  make-afunc-cache AFUNC -- Return a caching version of AFUNC.
 
+  Here, AFUNC is a function that takes a single atom as an argument,
+  and returns some object associated with that atom.
+
+  This returns a function that returns the same values that AFUNC would
+  return, for the same argument; but if a cached value is available,
+  then return just that, instead of calling AFUNC a second time.  This
+  is useful whenever AFUNC is cpu-intensive, taking a long time to
+  compute.  In order for the cache to be valid, the value of AFUNC must
+  not depend on side-effects, because it will be called at most once.
+"
 	; Define the local hash table we will use.
 	(define cache (make-hash-table))
 
@@ -52,3 +55,24 @@
 				(hashx-set! atom-hash atom-assoc cache ITEM fv)
 				fv)))
 )
+
+; ---------------------------------------------------------------------
+
+(define-public (make-atom-set)
+	(define cache (make-hash-table))
+	(define (atom-hash ATOM SZ) (modulo (cog-handle ATOM) SZ))
+	(define (atom-assoc ATOM ALIST)
+		(find (lambda (pr) (equal? ATOM (car pr))) ALIST))
+
+	(lambda (ITEM)
+		(if ITEM
+			(hashx-set! atom-hash atom-assoc cache ITEM #f)
+			(let ((ats '()))
+				(hash-for-each-handle
+					(lambda (PR) (set! ats (cons (car PR) ats)))
+					cache)
+				ats))))
+
+
+; ---------------------------------------------------------------------
+; ---------------------------------------------------------------------
