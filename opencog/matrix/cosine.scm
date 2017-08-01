@@ -106,10 +106,8 @@
 			(prod-obj 'right-count (list ROW-A ROW-B)))
 
 		; -------------
-		(define (do-get-left-length COL) (supp-obj 'left-length COL))
-		(define get-left-length (make-afunc-cache do-get-left-length))
-		(define (do-get-right-length ROW) (supp-obj 'right-length ROW))
-		(define get-right-length (make-afunc-cache do-get-right-length))
+		(define (get-left-length COL) (supp-obj 'left-length COL))
+		(define (get-right-length ROW) (supp-obj 'right-length ROW))
 
 		; Return the cosine of the angle between column A and B.
 		; The cosine as defined above (the usual textbook definition).
