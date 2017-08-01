@@ -1,9 +1,9 @@
 ;
-; dbi-example.scm
+; dbi-database.scm
 ;
 ; Example code for using guile-dbi to access an SQL database, and
-; use it with opencog. Pre-requisites: you must have guile-dbi installed,
-; you must have a database you want to connect to, etc.
+; using it with opencog. Pre-requisites: you must have guile-dbi
+; installed, you must have a database you want to connect to, etc.
 ;
 ; 
 (use-modules (dbi dbi))
@@ -41,4 +41,3 @@
 	(display row) (newline)
 	(set! row (dbi-get_row my-connect))
 )
-
