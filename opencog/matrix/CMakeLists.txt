@@ -1,6 +1,5 @@
 ADD_GUILE_MODULE (FILES
 	matrix.scm
-	atom-cache.scm
 	bin-count.scm
 	compute-mi.scm
 	cosine.scm

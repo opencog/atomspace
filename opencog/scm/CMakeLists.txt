@@ -22,6 +22,7 @@ INSTALL (CODE
 
 INSTALL (FILES
 	opencog/base/apply.scm
+	opencog/base/atom-cache.scm
 	opencog/base/av-tv.scm
 	opencog/base/core-docs.scm
 	opencog/base/debug-trace.scm

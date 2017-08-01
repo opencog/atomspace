@@ -8,11 +8,6 @@ of various sorts. Soome of the major ones include the pattern matcher
 (in the `opencog query` module), the rule engine, the SQL interfaces,
 etc.
 
-In addition, there are some examples:
-
--- example-dbi.scm: How to use the dbi interface to access SQL tables.
-
-
 ==WIRES
 The "wires" directory contains a currently abandoned, but interesting
 implementation of a "constraint propagation system", wherein OpenCog 

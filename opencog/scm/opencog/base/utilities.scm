@@ -790,6 +790,8 @@
 )
 
 ; -----------------------------------------------------------------------
+;
+; XXX This should probably be made obsolete.
 (define-public (cog-get-reference refptr)
 "
   Given a reference structure, return the referenced list entries.
@@ -806,6 +808,9 @@
 
   XXX! Caution/error! This implictly assumes that there is only one
   such ReferenceLink in the system, total. This is wrong !!!
+
+  XXX! You probably want to be using either StateLink or DefineLink
+  for this.
 "
 	(let ((lst (cog-chase-link 'ReferenceLink 'ListLink refptr)))
 		(if (null? lst)
@@ -999,10 +1004,13 @@
 
 ; ---------------------------------------------------------------------
 
+; XXX The below should be removed from the geeneric opencog utilities,
+; and should be copied directly into the code that actually needs this.
 (define-public (approx-eq? x y)
 "
  approx-eq? X Y
-    Returns true when X is equal to Y up to an epsilon.
+    Returns true when the absolute value of the difference of
+    floating-point values X and Y is less than 0.000001.
 "
 	(let ((diff (- x y))
 			(minus-epsilon -0.000001)
@@ -1011,6 +1019,8 @@
 	)
 )
 
+; XXX The below should be removed from the geeneric opencog utilities,
+; and should be copied directly into the code that actually needs this.
 (define-public (bool->tv b)
 "
   Convert #t to TRUE_TV and #f to FALSE_TV
@@ -1021,6 +1031,8 @@
     )
 )
 
+; XXX The below should be removed from the geeneric opencog utilities,
+; and should be copied directly into the code that actually needs this.
 (define-public (tv->bool tv)
 "
   Convert TRUE_TV to #t, anything else to #f
@@ -1030,6 +1042,9 @@
         #f))
 
 ; ---------------------------------------------------------------------
+
+; XXX The below should be removed from the geeneric opencog utilities,
+; and should be copied directly into the code that actually needs this.
 (define-public (cog-equal? atom-1 atom-2)
 "
   Checks whether two nodes are equal. If they are equal then it will return
@@ -1105,11 +1120,14 @@
 
 
 ; ---------------------------------------------------------------------
+
+; XXX The below should be removed from the geeneric opencog utilities,
+; and should be copied directly into the code that actually needs this.
 (define-public (check-name? node-name node-type)
 "
  Return #t if there is a node of type node-type with a name "node-name".
 "
-        (not (null? (cog-node node-type node-name)))
+	(not (null? (cog-node node-type node-name)))
 )
 
 ; ---------------------------------------------------------------------
@@ -1161,38 +1179,41 @@
 
 ; -----------------------------------------------------------------------
 
+; XXX The below should be removed from the geeneric opencog utilities,
+; and should be copied directly into the code that actually needs this.
 (define-public (cog-new-flattened-link link-type . args)
 "
  Creates a new flattened link, for instance
 
- (cog-new-flattened-link 'AndLink (AndLink A B) C)
+   (cog-new-flattened-link 'AndLink (AndLink A B) C)
 
  will create the following
 
- (AndLink A B C)
+    (AndLink A B C)
 
- It will not however attempt to flatten the children. So for instance
+ This is not recursive. So, for instance
 
- (cog-new-flattened-link 'AndLink (AndLink A (AndLink B)) C)
+   (cog-new-flattened-link 'AndLink (AndLink A (AndLink B)) C)
 
  will not produce
 
- (AndLink A B C)
+   (AndLink A B C)
 
  but will produce instead
 
- (AndLink A (AndLink B) C)
+   (AndLink A (AndLink B) C)
 
  Note that it will also remove duplicates, for instance
 
- (cog-new-flattened-link 'AndLink (AndLink A B C) C)
+   (cog-new-flattened-link 'AndLink (AndLink A B C) C)
 
  will create the following
 
- (AndLink A B C)
+   (AndLink A B C)
 
- WARNING: TVs are not ignored. There is absolutely no guaranty that
-          the flattened link will have the right TV on it.
+ WARNING: TVs and other values attached to the atoms are ignored.
+   The TV's and values are not copied to the new link, nor are they
+   recomputed in any way.
 "
   (define (flatten e r)
     (append r (if (and (cog-link? e)
@@ -1204,9 +1225,14 @@
 )
 
 ; -----------------------------------------------------------------------
+;
+; XXX FIXME. The two arguments to this function are backwards.
+; The AS should come first, then the list.
+; XXX FIXME why is #t being returned ???
 (define-public (cog-cp LST AS)
 "
-  cog-cp LST AS - Copy the atoms in LST to the given atomspace AS and returns #t on success.
+  cog-cp LST AS - Copy the atoms in LST to the given atomspace AS and
+  returns #t on success.
 "
   (define initial-as (cog-atomspace))
 
