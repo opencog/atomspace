@@ -145,13 +145,13 @@
 		; Return the set-union of all atoms that might be paired
 		; with one of the atoms from TUPLE on the right.
 		(define (get-left-union TUPLE)
-			(delete-duplicates!
+			(delete-dup-atoms
 				(append-map!
 					(lambda (item) (map! gar (star-obj 'left-stars item)))
 					TUPLE)))
 
 		(define (get-right-union TUPLE)
-			(delete-duplicates!
+			(delete-dup-atoms
 				(append-map!
 					(lambda (item) (map! gdr (star-obj 'right-stars item)))
 					TUPLE)))
