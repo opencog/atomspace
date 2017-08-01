@@ -221,9 +221,9 @@ SCM SchemeSmob::ss_set_value (SCM satom, SCM skey, SCM svalue)
 		}
 	}
 	// Strange! According to my reading of the guile source code,
-	// scm_is_true() should return 0 if svalue is nill, but strangely
+	// scm_is_true() should return 0 if svalue is null, but strangely
 	// it doesn't actually do that, so we need to explicitly test.
-	else if (scm_is_true(svalue) and scm_is_false(scm_nil_p(svalue)))
+	else if (scm_is_true(svalue) and scm_is_false(scm_null_p(svalue)))
 	{
 		pa = verify_protom(svalue, "cog-set-value!", 3);
 	}
