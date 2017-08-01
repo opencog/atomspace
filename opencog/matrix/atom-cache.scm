@@ -59,6 +59,17 @@
 ; ---------------------------------------------------------------------
 
 (define-public (make-atom-set)
+"
+  make-atom-set - Return a function that can hold set of atoms.
+
+  This is used to maintain a set of atoms, free of duplicate entries.
+  In most cases, it is faster than calling delete-duplicates! on a
+  list of atoms.
+
+  Calling the returned function with an atom in the argument places the
+  atom into the set. Calling it with #f as theargument erturns the
+  entire set as a list.
+"
 	(define cache (make-hash-table))
 	(define (atom-hash ATOM SZ) (modulo (cog-handle ATOM) SZ))
 	(define (atom-assoc ATOM ALIST)
@@ -73,6 +84,21 @@
 					cache)
 				ats))))
 
+
+; ---------------------------------------------------------------------
+
+(define-public (delete-dup-atoms ATOM-LIST)
+"
+  delete-dup-atoms - Return ATOM-LIST, with duplicate atoms deleted.
+
+  This will usually be faster than calling delete-duplicates! whenever
+  the ATOM-LIST is large (probably when its longer than 10 atoms long??)
+"
+
+	(define atom-set (make-atom-set))
+	(for-each atom-set ATOM-LIST)
+	(atom-set #f)
+)
 
 ; ---------------------------------------------------------------------
 ; ---------------------------------------------------------------------
