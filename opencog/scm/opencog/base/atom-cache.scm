@@ -1,20 +1,20 @@
 ;
 ; atom-cache.scm
 ;
-; Create a local cache to pairing objects to atoms.
+; Create a local cache that pairs objects to atoms.
 ;
 ; Copyright (c) 2017 Linas Vepstas
 ;
 ; ---------------------------------------------------------------------
 ; OVERVIEW
 ; --------
-; Many of the analytic computations done here require a lot of CPU-effort;
-; thus, its usually a big win to perform them only once, and not recompute.
-; Thus, this implements a simple cache, where the atom serves as a key,
-; and an abitrary scheme object can be associated with it.
+; Many analytic computations require a lot of CPU-effort, and it is
+; usually a big win to perform them only once, and not recompute.
+; Below is a simple cache, where the atom serves as a key, allowing
+; some abitrary scheme object to be associated with it.
 ;
 ; This differs from atomspace values, in several ways:
-; * any arbitary scheme object can be associated with an atom
+; * any arbitary scheme object can be associated with an atom.
 ; * these caches are never saved to the database, unlike atom values.
 ; * these caches are anonymous.  You must have a handle to the function
 ;   to make use of them.  They are automatically garbage collected.

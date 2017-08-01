@@ -7,7 +7,6 @@
 ; The files are loaded in pipeline order.
 ; In general, the later files depend on definitions contained
 ; in the earlier files.
-(load "matrix/atom-cache.scm")
 (load "matrix/object-api.scm")
 (load "matrix/support.scm")
 (load "matrix/report-api.scm")

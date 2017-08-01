@@ -104,6 +104,7 @@
 
 (load-from-path "opencog/base/utilities.scm")
 
+(load-from-path "opencog/base/atom-cache.scm")
 (load-from-path "opencog/base/apply.scm")
 (load-from-path "opencog/base/av-tv.scm")
 (load-from-path "opencog/base/file-utils.scm")
