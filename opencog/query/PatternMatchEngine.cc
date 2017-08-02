@@ -498,11 +498,11 @@ bool PatternMatchEngine::unorder_compare(const PatternTermPtr& ptm,
 	const HandleSeq& osg = hg->getOutgoingSet();
 	PatternTermSeq osp = ptm->getOutgoingSet();
 	size_t arity = osp.size();
-	bool has_glob = (0 < _pat->globby_terms.count(ptm->getHandle()));
+	bool has_glob_in_pat = has_glob(ptm->getHandle());
 
 	// They've got to be the same size, at the least!
 	// unless there are globs in the pattern
-	if (osg.size() != arity and not has_glob)
+	if (osg.size() != arity and not has_glob_in_pat)
 		return _pmc.fuzzy_match(ptm->getHandle(), hg);
 
 	// Test for case A, described above.
@@ -535,7 +535,7 @@ bool PatternMatchEngine::unorder_compare(const PatternTermPtr& ptm,
 		solution_push();
 		bool match = true;
 
-		if (has_glob)
+		if (has_glob_in_pat)
 		{
 			match = glob_compare(mutation, osg);
 		}
@@ -683,15 +683,29 @@ bool PatternMatchEngine::glob_compare(const PatternTermSeq& osp,
                                       const HandleSeq& osg)
 {
 	bool match = true;
+	GlobSeq gseq = {osp, osg};
 	size_t osp_size = osp.size();
 	size_t osg_size = osg.size();
 
 	// To record how many atoms are grounded to the GlobNodes, and
 	// their positions.
-	std::map<Handle, size_t> glob_grd;
-	std::vector<std::pair<size_t, size_t>> glob_pos;
+	GlobGrd glob_grd;
+	GlobPosStack glob_pos;
 
-	for (size_t ip=0, jg=0; ip<osp_size or jg<osg_size; ip++, jg++)
+	size_t ip = 0;
+	size_t jg = 0;
+
+	// Resume from the previous state, if any
+	auto ss = glob_state.find(gseq);
+	if (ss != glob_state.end())
+	{
+		glob_grd = (ss->second).first;
+		glob_pos = (ss->second).second;
+		ip = glob_pos.top().first;
+		jg = glob_pos.top().second;
+	}
+
+	for (; ip<osp_size or jg<osg_size; ip++, jg++)
 	{
 		if (ip == osp_size) ip --;
 
@@ -708,9 +722,10 @@ bool PatternMatchEngine::glob_compare(const PatternTermSeq& osp,
 
 		auto reset = [&]()
 		{
-			ip = glob_pos.back().first - 1;
-			jg = glob_pos.back().second - 1;
-			glob_pos.pop_back();
+			ip = glob_pos.top().first - 1;
+			jg = glob_pos.top().second - 1;
+			glob_pos.pop();
+			glob_state[gseq] = {glob_grd, glob_pos};
 
 			// Clear any groundings for the last glob we've seen.
 			var_grounding.erase(osp[ip+1]->getHandle());
@@ -723,7 +738,8 @@ bool PatternMatchEngine::glob_compare(const PatternTermSeq& osp,
 			// to the clause_match() callback?
 			if (ohp == osg[jg]) return false;
 
-			glob_pos.push_back({ip, jg});
+			glob_pos.push({ip, jg});
+			glob_state[gseq] = {glob_grd, glob_pos};
 
 			size_t last_grd = SIZE_MAX;
 			auto gi = glob_grd.find(ohp);
@@ -739,7 +755,8 @@ bool PatternMatchEngine::glob_compare(const PatternTermSeq& osp,
 					// If the glob cannot be grounded to fewer no.
 					// of atoms, it's not a match.
 					glob_grd.erase(ohp);
-					glob_pos.pop_back();
+					glob_pos.pop();
+					glob_state[gseq] = {glob_grd, glob_pos};
 					last_grd = SIZE_MAX;
 
 					// Reject the candidate if we cannot find a
@@ -750,7 +767,6 @@ bool PatternMatchEngine::glob_compare(const PatternTermSeq& osp,
 						match = false;
 						break;
 					}
-
 					// Resume from the previous glob and
 					// try to find a match again.
 					reset();
@@ -773,6 +789,7 @@ bool PatternMatchEngine::glob_compare(const PatternTermSeq& osp,
 				if (grd_end)
 				{
 					glob_grd[ohp] = 0;
+					glob_state[gseq] = {glob_grd, glob_pos};
 					var_grounding.erase(ohp);
 					continue;
 				}
@@ -785,6 +802,7 @@ bool PatternMatchEngine::glob_compare(const PatternTermSeq& osp,
 				{
 					jg --;
 					glob_grd[ohp] = 0;
+					glob_state[gseq] = {glob_grd, glob_pos};
 					var_grounding.erase(ohp);
 					continue;
 				}
@@ -795,6 +813,7 @@ bool PatternMatchEngine::glob_compare(const PatternTermSeq& osp,
 			if (grd_end)
 			{
 				glob_grd[ohp] = 0;
+				glob_state[gseq] = {glob_grd, glob_pos};
 				reset();
 				continue;
 			}
@@ -821,6 +840,7 @@ bool PatternMatchEngine::glob_compare(const PatternTermSeq& osp,
 
 			jg --;
 			glob_grd[ohp] = glob_seq.size();
+			glob_state[gseq] = {glob_grd, glob_pos};
 
 			// If we can't match more, or it doesn't satisfy the
 			// lower bound restriction, try again.
@@ -837,6 +857,11 @@ bool PatternMatchEngine::glob_compare(const PatternTermSeq& osp,
 		else
 		{
 			// If we are here, we are not comparing to a glob.
+
+			// TODO
+			// If this is a VariableNode that we have seen before,
+			// clear its previous grounding before doing any
+			// comparison?? But...
 
 			// If we have already gone through all the atoms in
 			// the candidate, or the current pair does not match,
@@ -1431,7 +1456,7 @@ bool PatternMatchEngine::clause_accept(const Handle& clause_root,
 }
 
 // This is called when all previous clauses have been grounded; so
-// we search for the next one, and try to round that.
+// we search for the next one, and try to ground that.
 bool PatternMatchEngine::do_next_clause(void)
 {
 	clause_stacks_push();
@@ -1943,6 +1968,11 @@ void PatternMatchEngine::clear_current_state(void)
 	_perm_state.clear();
 
 	issued.clear();
+
+// TODO
+	// Clear the glob state
+//	glob_grd.clear();
+//	glob_state.clear();
 }
 
 bool PatternMatchEngine::explore_constant_evaluatables(const HandleSeq& clauses)

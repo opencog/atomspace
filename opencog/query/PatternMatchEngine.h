@@ -70,6 +70,9 @@ private:
 	bool is_black(const Handle& h) {
 		return (_pat->black.count(h) != 0); }
 
+	bool has_glob(const Handle& h) {
+		return (_pat->globby_terms.count(h) != 0); }
+
 	// -------------------------------------------
 	// Recursive redex support. These are stacks of the clauses
 	// above, that are being searched.
@@ -111,7 +114,7 @@ private:
 	bool choose_next;
 
 	// -------------------------------------------
-	// Unordered Link suppoprt
+	// Unordered Link support
 	typedef std::pair<PatternTermPtr, Handle> Unorder; // Choice
 	typedef PatternTermSeq Permutation;
 	typedef std::map<Unorder, Permutation> PermState; // ChoiceState
@@ -126,6 +129,23 @@ private:
 	bool have_more;
 	std::map<Unorder, int> perm_count;
 	std::stack<std::map<Unorder, int>> perm_count_stack;
+
+	// --------------------------------------------
+	// Glob state management
+
+	// Record what sequences we are comparing now
+	typedef std::pair<PatternTermSeq, HandleSeq> GlobSeq;
+
+	// Record where the glob is (a branchpoint)
+	typedef std::pair<size_t, size_t> GlobPos;
+	typedef std::stack<GlobPos> GlobPosStack;
+
+	// Record how many atoms has been gruonded to the glob
+	typedef std::map<Handle, size_t> GlobGrd;
+
+	typedef std::pair<GlobGrd, GlobPosStack> GlobState;
+
+	std::map<GlobSeq, GlobState> glob_state;
 
 	// --------------------------------------------
 	// Methods and state that select the next clause to be grounded.
