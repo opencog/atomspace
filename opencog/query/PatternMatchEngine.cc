@@ -683,7 +683,7 @@ bool PatternMatchEngine::glob_compare(const PatternTermSeq& osp,
                                       const HandleSeq& osg)
 {
 	bool match = true;
-	GlobSeq gseq = {osp, osg};
+	GlobSeq gpair = {osp, osg};
 	size_t osp_size = osp.size();
 	size_t osg_size = osg.size();
 
@@ -696,7 +696,7 @@ bool PatternMatchEngine::glob_compare(const PatternTermSeq& osp,
 	size_t jg = 0;
 
 	// Resume from the previous state, if any
-	auto ss = glob_state.find(gseq);
+	auto ss = glob_state.find(gpair);
 	if (ss != glob_state.end())
 	{
 		glob_grd = (ss->second).first;
@@ -725,7 +725,7 @@ bool PatternMatchEngine::glob_compare(const PatternTermSeq& osp,
 			ip = glob_pos.top().first - 1;
 			jg = glob_pos.top().second - 1;
 			glob_pos.pop();
-			glob_state[gseq] = {glob_grd, glob_pos};
+			glob_state[gpair] = {glob_grd, glob_pos};
 
 			// Clear any groundings for the last glob we've seen.
 			var_grounding.erase(osp[ip+1]->getHandle());
@@ -739,7 +739,7 @@ bool PatternMatchEngine::glob_compare(const PatternTermSeq& osp,
 			if (ohp == osg[jg]) return false;
 
 			glob_pos.push({ip, jg});
-			glob_state[gseq] = {glob_grd, glob_pos};
+			glob_state[gpair] = {glob_grd, glob_pos};
 
 			size_t last_grd = SIZE_MAX;
 			auto gi = glob_grd.find(ohp);
@@ -756,7 +756,7 @@ bool PatternMatchEngine::glob_compare(const PatternTermSeq& osp,
 					// of atoms, it's not a match.
 					glob_grd.erase(ohp);
 					glob_pos.pop();
-					glob_state[gseq] = {glob_grd, glob_pos};
+					glob_state[gpair] = {glob_grd, glob_pos};
 					last_grd = SIZE_MAX;
 
 					// Reject the candidate if we cannot find a
@@ -789,7 +789,7 @@ bool PatternMatchEngine::glob_compare(const PatternTermSeq& osp,
 				if (grd_end)
 				{
 					glob_grd[ohp] = 0;
-					glob_state[gseq] = {glob_grd, glob_pos};
+					glob_state[gpair] = {glob_grd, glob_pos};
 					var_grounding.erase(ohp);
 					continue;
 				}
@@ -802,7 +802,7 @@ bool PatternMatchEngine::glob_compare(const PatternTermSeq& osp,
 				{
 					jg --;
 					glob_grd[ohp] = 0;
-					glob_state[gseq] = {glob_grd, glob_pos};
+					glob_state[gpair] = {glob_grd, glob_pos};
 					var_grounding.erase(ohp);
 					continue;
 				}
@@ -813,7 +813,7 @@ bool PatternMatchEngine::glob_compare(const PatternTermSeq& osp,
 			if (grd_end)
 			{
 				glob_grd[ohp] = 0;
-				glob_state[gseq] = {glob_grd, glob_pos};
+				glob_state[gpair] = {glob_grd, glob_pos};
 				reset();
 				continue;
 			}
@@ -840,7 +840,7 @@ bool PatternMatchEngine::glob_compare(const PatternTermSeq& osp,
 
 			jg --;
 			glob_grd[ohp] = glob_seq.size();
-			glob_state[gseq] = {glob_grd, glob_pos};
+			glob_state[gpair] = {glob_grd, glob_pos};
 
 			// If we can't match more, or it doesn't satisfy the
 			// lower bound restriction, try again.
@@ -1969,10 +1969,8 @@ void PatternMatchEngine::clear_current_state(void)
 
 	issued.clear();
 
-// TODO
 	// Clear the glob state
-//	glob_grd.clear();
-//	glob_state.clear();
+	glob_state.clear();
 }
 
 bool PatternMatchEngine::explore_constant_evaluatables(const HandleSeq& clauses)
