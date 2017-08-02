@@ -764,6 +764,7 @@ bool PatternMatchEngine::glob_compare(const PatternTermSeq& osp,
 					// of the globs we have seen.
 					if (glob_grd.size() == 0)
 					{
+						glob_state.erase(gpair);
 						match = false;
 						break;
 					}
@@ -872,6 +873,7 @@ bool PatternMatchEngine::glob_compare(const PatternTermSeq& osp,
 				// can be done, we can just reject it now.
 				if (glob_grd.size() == 0)
 				{
+					glob_state.erase(gpair);
 					match = false;
 					break;
 				}
