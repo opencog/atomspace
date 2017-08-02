@@ -498,11 +498,11 @@ bool PatternMatchEngine::unorder_compare(const PatternTermPtr& ptm,
 	const HandleSeq& osg = hg->getOutgoingSet();
 	PatternTermSeq osp = ptm->getOutgoingSet();
 	size_t arity = osp.size();
-	bool has_glob_in_pat = has_glob(ptm->getHandle());
+	bool has_glob = (0 < _pat->globby_terms.count(ptm->getHandle()));
 
 	// They've got to be the same size, at the least!
 	// unless there are globs in the pattern
-	if (osg.size() != arity and not has_glob_in_pat)
+	if (osg.size() != arity and not has_glob)
 		return _pmc.fuzzy_match(ptm->getHandle(), hg);
 
 	// Test for case A, described above.
@@ -535,7 +535,7 @@ bool PatternMatchEngine::unorder_compare(const PatternTermPtr& ptm,
 		solution_push();
 		bool match = true;
 
-		if (has_glob_in_pat)
+		if (has_glob)
 		{
 			match = glob_compare(mutation, osg);
 		}
@@ -858,11 +858,6 @@ bool PatternMatchEngine::glob_compare(const PatternTermSeq& osp,
 		else
 		{
 			// If we are here, we are not comparing to a glob.
-
-			// TODO
-			// If this is a VariableNode that we have seen before,
-			// clear its previous grounding before doing any
-			// comparison?? But...
 
 			// If we have already gone through all the atoms in
 			// the candidate, or the current pair does not match,

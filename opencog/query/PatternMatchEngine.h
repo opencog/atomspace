@@ -70,9 +70,6 @@ private:
 	bool is_black(const Handle& h) {
 		return (_pat->black.count(h) != 0); }
 
-	bool has_glob(const Handle& h) {
-		return (_pat->globby_terms.count(h) != 0); }
-
 	// -------------------------------------------
 	// Recursive redex support. These are stacks of the clauses
 	// above, that are being searched.
