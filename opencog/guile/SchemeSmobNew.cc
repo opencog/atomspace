@@ -514,8 +514,8 @@ SCM SchemeSmob::ss_delete (SCM satom, SCM kv_pairs)
 	Handle h = verify_handle(satom, "cog-delete");
 
 	// It can happen that the atom has already been deleted, but we're
-	// still holding on to its UUID.  This is rare... but possible. So
-	// don't crash when it happens. XXX Is it really possible? How?
+	// still holding on to a pointer to it.  This is rare... but possible.
+	// So don't crash when it happens. XXX Is it really possible? How?
 	if (NULL == h.operator->()) return SCM_BOOL_F;
 
 	// The remove will fail/log warning if the incoming set isn't null.

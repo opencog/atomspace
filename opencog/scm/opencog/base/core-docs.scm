@@ -143,18 +143,18 @@
 (set-procedure-property! cog-delete 'documentation
 "
  cog-delete ATOM
-    Delete the indicated ATOM, but only if it has no incoming links.
+    Remove the indicated ATOM from the AtomSpace, but only if it has no
+    incoming links. If it has incoming links, the remove fails.  If SQL
+    or other data storage is attached, the ATOM is also removed from
+    the storage.
 
-    Returns #t if the atom was deleted, else returns #f if not deleted.
-")
+    Returns #t if the atom was removed, else returns #f if not removed.
 
-(set-procedure-property! cog-delete-recursive 'documentation
-"
- cog-delete-recursive ATOM
-    Delete the indicated ATOM, and all atoms that point at it.
+    Use cog-extract to remove from the AtomSpace only, leaving storage
+    unaffected.
 
-    Both functions return #t on success, else they return #f.
-    If #f is returned, then the delete failed.
+    Use cog-delete-recursive to force removal of this atom, together
+    with any links that might be holding this atom.
 
     Example:
        ; Define two nodes and a link between them:
@@ -187,6 +187,74 @@
        ; Verify that the node y still exists:
        guile> y
        (ConceptNode \"def\")
+")
+
+(set-procedure-property! cog-delete-recursive 'documentation
+"
+ cog-delete-recursive ATOM
+    Remove the indicated ATOM from the AtomSpace, and all atoms that
+    point at it.  If SQL or other data storage is attached, the ATOM is
+    also removed from the storage.
+
+    Return #t on success, else return #f if not removed.
+")
+
+(set-procedure-property! cog-extract 'documentation
+"
+ cog-extract ATOM
+    Remove the indicated ATOM from the AtomSpace, but only if it has no
+    incoming links. If it has incoming links, the remove fails.
+
+    Returns #t if the atom was removed, else returns #f if not removed.
+
+    This does NOT remove the atom from any attached storage (e.g. SQL
+    storage).  Use cog-delete to remove from atoms from storage.
+
+    Use cog-extract-recursive to force removal of this atom, together
+    with any links that might be holding this atom.
+
+    Example:
+       ; Define two nodes and a link between them:
+       guile> (define x (cog-new-node 'ConceptNode \"abc\"))
+       guile> (define y (cog-new-node 'ConceptNode \"def\"))
+       guile> (define l (cog-new-link 'Link x y))
+
+       ; Verify that there's an atom called x:
+       guile> x
+       (ConceptNode \"abc\")
+
+       ; Try to extract x. This should fail, since there's a link
+       ; containing x.
+       guile> (cog-extract x)
+       #f
+
+       ; Delete x, and everything pointing to it. This should extract
+       ; both x, and the link l.
+       guile> (cog-extract-recursive x)
+       #t
+
+       ; Verify that the link l is gone:
+       guile> l
+       Invalid handle
+
+       ; Verify that the node x is gone:
+       guile> x
+       Invalid handle
+
+       ; Verify that the node y still exists:
+       guile> y
+       (ConceptNode \"def\")
+")
+
+(set-procedure-property! cog-extract-recursive 'documentation
+"
+ cog-extract-recursive ATOM
+    Remove the indicated ATOM from the AtomSpace, and all atoms that
+    point at it.  Return #t on success, else return #f if not removed.
+
+    The atom is NOT removed from SQL or other attached data storage.
+    If you need to delete from storage, use cog-delete and
+    cog-delete-recursive.
 ")
 
 (set-procedure-property! cog-atom? 'documentation
@@ -819,20 +887,20 @@
   cog-af-size
      Return the AttentionalFocus size of the AtomSpace (which is
      an integer value).
- 
+
      Example:
- 
+
      guile> (cog-af-size)
      100
  ")
-  
+
  (set-procedure-property! cog-set-af-size! 'documentation
  "
   cog-set-af-size! AF Size
      Set the AttentionalFocus Size of the AtomSpace (which is an
      integer value). Returns the new AttentionalFocus size
      (which is an integer value).
- 
+
      Example:
      guile> (cog-set-af-size! 200)
      200
