@@ -31,6 +31,26 @@ using namespace opencog;
 
 static std::mutex init_mtx;
 
+#define WORK_AROUND_GUILE_185_BUG
+#ifdef WORK_AROUND_GUILE_185_BUG
+/* There's a bug in guile-1.8.5, where the second and subsequent
+ * threads run in guile mode with a bogus/broken current-module.
+ * This cannot be worked around by anything as simple as saying
+ * "(set-current-module the-root-module)" because dynwind undoes
+ * any module-setting that we do.
+ *
+ * So we work around it here, by explicitly setting the module
+ * outside of a dynwind context.
+ */
+static SCM guile_user_module;
+
+static void * do_bogus_scm(void *p)
+{
+	scm_c_eval_string ("(+ 2 2)\n");
+	return p;
+}
+#endif /* WORK_AROUND_GUILE_185_BUG */
+
 /**
  * This init is called once for every time that this class
  * is instantiated -- i.e. it is a per-instance initializer.
@@ -253,6 +273,11 @@ static void immortal_thread(void)
 {
 	scm_with_guile(c_wrap_init_only_once, NULL);
 
+#ifdef WORK_AROUND_GUILE_185_BUG
+   scm_with_guile(do_bogus_scm, NULL);
+   guile_user_module = scm_current_module();
+#endif /* WORK_AROUND_GUILE_185_BUG */
+
 	// Tell compiler to set flag dead-last, after above has executed.
 	asm volatile("": : :"memory");
 	done_with_init = true;
@@ -298,6 +323,10 @@ void SchemeEval::per_thread_init(void)
 	/* Avoid more than one call per thread. */
 	if (thread_is_inited) return;
 	thread_is_inited = true;
+
+#ifdef WORK_AROUND_GUILE_185_BUG
+   scm_set_current_module(guile_user_module);
+#endif /* WORK_AROUND_GUILE_185_BUG */
 
 #ifdef WORK_AROUND_GUILE_UTF8_BUGS
 	// Arghhh!  Avoid ongoing utf8 fruitcake nutiness in guile-2.0
@@ -970,6 +999,9 @@ void * SchemeEval::c_wrap_eval_as(void * p)
 
 static SCM thunk_scm_eval(void * expr)
 {
+#ifdef WORK_AROUND_GUILE_185_BUG
+	return scm_eval((SCM)expr, guile_user_module);
+#endif /* WORK_AROUND_GUILE_185_BUG */
 	return scm_eval((SCM)expr, scm_interaction_environment());
 }
 
