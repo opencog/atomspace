@@ -207,7 +207,7 @@
 )
 
 ;; Very handy and frequent rule precondition.
-(define (gt-zero-confidence A)
+(define-public (gt-zero-confidence A)
 "
   Return TrueTV iff A's confidence is greater than 0
 "
