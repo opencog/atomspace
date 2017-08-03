@@ -696,9 +696,11 @@ bool PatternMatchEngine::glob_compare(const PatternTermSeq& osp,
 	size_t jg = 0;
 
 	// Resume from the previous state, if any
+	bool resume = false;
 	auto ss = glob_state.find(gpair);
 	if (ss != glob_state.end())
 	{
+		resume = true;
 		glob_grd = (ss->second).first;
 		glob_pos = (ss->second).second;
 		ip = glob_pos.top().first;
@@ -707,6 +709,10 @@ bool PatternMatchEngine::glob_compare(const PatternTermSeq& osp,
 
 	for (; ip<osp_size or jg<osg_size; ip++, jg++)
 	{
+		// If we are resuming from a previous state, increase
+		// both ip and jg by 1, mimic what the for-loop does.
+		if (resume) { ip++; jg++; }
+
 		if (ip == osp_size) ip --;
 
 		bool grd_end = false;
@@ -754,7 +760,12 @@ bool PatternMatchEngine::glob_compare(const PatternTermSeq& osp,
 				{
 					// If the glob cannot be grounded to fewer no.
 					// of atoms, it's not a match.
-					glob_grd.erase(ohp);
+
+					// Keep a record of this glob if we are resuming
+					// from a previous state (i.e. the value grounded
+					// to this glob in the previous state does not
+					// match with other terms in the same pattern.)
+					if (not resume) glob_grd.erase(ohp);
 					glob_pos.pop();
 					glob_state[gpair] = {glob_grd, glob_pos};
 					last_grd = SIZE_MAX;
@@ -768,6 +779,19 @@ bool PatternMatchEngine::glob_compare(const PatternTermSeq& osp,
 						match = false;
 						break;
 					}
+
+					// Similar to the above, we found a match
+					// before but it doesn't satisfy the other
+					// terms in the same pattern, and we could
+					// not find any other way to ground the
+					// globs, reject.
+					if (resume and glob_pos.size() == 0)
+					{
+						glob_state.erase(gpair);
+						match = false;
+						break;
+					}
+
 					// Resume from the previous glob and
 					// try to find a match again.
 					reset();
