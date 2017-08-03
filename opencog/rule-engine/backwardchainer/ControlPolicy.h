@@ -39,11 +39,12 @@ public:
 
 	const std::string preproof_predicate_name = "URE:BC:preproof";
 
+	// Inference rule set for expanding and-BITs.
 	RuleSet rules;
 
 	/**
-	 * Select a valid rule given a target. The selected is a new
-	 * object because a new rule is created, its variables are
+	 * Select a valid inference rule given a target. The selected is a
+	 * new object because a new rule is created, its variables are
 	 * uniquely renamed, possibly some partial substitutions are
 	 * applied.
 	 *
@@ -66,12 +67,19 @@ private:
 
 	// AtomSpace holding the inference control rules (or simply
 	// control rules for short).
+	//
+	// Inference control rules are classified according to the
+	// decision of the inference control they affect. For now the
+	// following are supported:
+	//
+	// 1. Expansion Control Rules: for choosing the inference rule to
+	//    expand an and-BIT.
 	AtomSpace* _control_as;
 
 	// AtomSpace holding the pattern matcher queries to fetch the
 	// various control rule
 	AtomSpace _query_as;
-	
+
 	/**
 	 * Return all valid rules, in the sense that they may possibly be
 	 * used to infer the target.
@@ -87,22 +95,69 @@ private:
 	                                      const RuleTypedSubstitutionMap& rules);
 
 	/**
-	 * Given a list of valid rules, use the control rules in
-	 * _control_as to infer/learn the weights of the optimal policy
-	 * (in Thomson sampling sense).
-	 *
-	 * TODO: add documentation (taken from the pln
-	 * inference-control-learning README.md example).
+	 * Calculate the default weights, as provided by the URE
+	 * configuration, for each rule instance.
 	 */
-	std::vector<double> learn_rule_weights(const AndBIT& andbit,
-	                                       const BITNode& bitleaf,
-	                                       const RuleTypedSubstitutionMap& rules);
+	std::vector<double> default_rule_weights(const RuleTypedSubstitutionMap& rules);
+
+	/**
+	 * Calculate the rule weights according to the control rules
+	 * present in _control_as.
+	 */
+	std::vector<double> control_rule_weights(const AndBIT& andbit, const BITNode& bitleaf,
+	                                         const RuleTypedSubstitutionMap& rules);
+
+	/**
+	 * Given the weights (action probability) of each inference rule
+	 * alias, return the weights over rule instantiations (unified to
+	 * the target). Unifying a rule to a target can lead to multiple
+	 * rules, each one will have a equal fraction of weight so that
+	 * the sum of weights of all unified rules equals the rule alias
+	 * weight.
+	 *
+	 * Later on this might be replaced by performing action selection
+	 * on the rules themselves rather than their aliases.
+	 */
+	std::vector<double> rule_weights(const HandleCounter& alias_weights,
+	                                 const RuleTypedSubstitutionMap& inf_rules) const;
 
 	/**
 	 * Return the set of rule aliases, as aliases of inference rules
 	 * are used in control rules.
 	 */
-	HandleSet rule_aliases(const RuleTypedSubstitutionMap& rules);
+	HandleSet rule_aliases(const RuleTypedSubstitutionMap& rules) const;
+
+	/**
+	 * Return the map from rule aliases to their default weights.
+	 */
+	HandleCounter default_alias_weights(const RuleTypedSubstitutionMap& rules) const;
+
+	/**
+	 * Fetch from _control_as all active expansion control rules for
+	 * this inference rule.
+	 */
+	HandleSet fetch_active_expansion_control_rules(const Handle& inf_rule);
+
+	/**
+	 * Return true iff the given control is current active, that is
+	 * the case of an expansion control rule whether the pattern is
+	 * true.
+	 */
+	bool control_rule_active(const Handle& ctrl_rule);
+
+	/**
+	 * Return the pattern in a given expansion control rule, if it has
+	 * any.
+	 */
+	Handle get_expansion_control_rule_pattern(const Handle& ctrl_rule);
+
+	/**
+	 * Given an inference rule, fetch both pattern and pattern free
+	 * expansion control rules. See comments of
+	 * fetch_pattern_free_expansion_control_rules and
+	 * fetch_pattern_expansion_control_rules
+	 */
+	HandleSet fetch_expansion_control_rules(const Handle& inf_rule);
 
 	/**
 	 * Fetch control rules from _control_as involved in BIT
@@ -125,7 +180,7 @@ private:
 	 *    List
 	 *      BontExec Variable "$A"
 	 *      Variable "$L"
-	 *      DontExec <rule>
+	 *      DontExec <inf_rule>
 	 *    DontExec Variable "$B"
 	 *  Evaluation
 	 *    Predicate "preproof"
@@ -133,14 +188,14 @@ private:
 	 *      DontExec Variable "$B"
 	 *      Variable "$T"
 	 *
-	 * Although this rule is likely to be very useful in practice we
-	 * still keep it as it may provide some initial guidance when no
-	 * predictive patterns have been extracted from the inference
-	 * history so far. It may also provide a reference when building
-	 * the mixture model in case the so called patterns are actually
-	 * overfit.
+	 * Although this control rule is not likely to be very useful in
+	 * practice we still keep it as it may provide some initial
+	 * guidance when no predictive patterns have been extracted from
+	 * the inference history so far. It may also provide a reference
+	 * when building the mixture model in case the so called patterns
+	 * are actually overfit.
 	 */
-	HandleSet fetch_pattern_free_expansion_control_rules(Handle rule);
+	HandleSet fetch_pattern_free_expansion_control_rules(const Handle& inf_rule);
 
 	/**
 	 * Fetch control rules from _control_as involved in BIT
@@ -164,7 +219,7 @@ private:
 	 *      List
 	 *        BontExec Variable "$A"
 	 *        Variable "$L"
-	 *        DontExec <rule>
+	 *        DontExec <inf_rule>
 	 *      DontExec Variable "$B"
 	 *    <pattern>
 	 *  Evaluation
@@ -173,17 +228,17 @@ private:
 	 *      DontExec Variable "$B"
 	 *      Variable "$T"
 	 */
-	HandleSet fetch_pattern_expansion_control_rules(Handle rule);
+	HandleSet fetch_pattern_expansion_control_rules(const Handle& inf_rule);
 
 	/**
 	 * Helpers to build various hypergraphs used to build various queries
 	 */
-	Handle mk_vardecl_vardecl(Handle vardecl_var);
-	Handle mk_list_of_args_vardecl(Handle args_var);
-	Handle mk_expand_exec(Handle expand_args_var);
-	Handle mk_preproof_eval(Handle preproof_args_var);
-	Handle mk_pattern_free_expansion_control_rules_query(Handle rule);
-	Handle mk_pattern_expansion_control_rules_query(Handle rule);
+	Handle mk_vardecl_vardecl(const Handle& vardecl_var);
+	Handle mk_list_of_args_vardecl(const Handle& args_var);
+	Handle mk_expand_exec(const Handle& expand_args_var);
+	Handle mk_preproof_eval(const Handle& preproof_args_var);
+	Handle mk_pattern_free_expansion_control_rules_query(const Handle& inf_rule);
+	Handle mk_pattern_expansion_control_rules_query(const Handle& inf_rule);
 };
 
 

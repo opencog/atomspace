@@ -5,6 +5,8 @@ ADD_LIBRARY(ruleengine
 	backwardchainer/BackwardChainer
 	backwardchainer/TraceRecorder
 	backwardchainer/ControlPolicy
+	backwardchainer/MixtureModel
+	backwardchainer/ActionSelection
 	backwardchainer/BackwardChainerPMCB
 	backwardchainer/BIT
 	backwardchainer/Fitness

@@ -24,7 +24,11 @@
 #include "ControlPolicy.h"
 
 #include <opencog/util/random.h>
+#include <opencog/util/algorithm.h>
 #include <opencog/query/BindLinkAPI.h>
+
+#include "MixtureModel.h"
+#include "ActionSelection.h"
 
 #include "TraceRecorder.h"
 #include "../URELogger.h"
@@ -83,65 +87,92 @@ RuleTypedSubstitutionMap ControlPolicy::get_valid_rules(const AndBIT& andbit,
 		RuleTypedSubstitutionMap unified_rules
 			= rule.unify_target(bitleaf.body, vardecl);
 
-		// Remove rules already in the BIT, or that happen to have a
-		// null weight.
-		for (RuleTypedSubstitutionMap::iterator it = unified_rules.begin();
-		     it != unified_rules.end();) {
-			double w = (_bit.is_in(*it, bitleaf) ? 0.0 : 1.0)
-				* it->first.get_weight();
-			if (w <= 0)
-				it = unified_rules.erase(it);
-			else
-				++it;
+		// Insert only rules with positive probability of success
+		RuleTypedSubstitutionMap pos_rules;
+		for (const auto& rule : unified_rules) {
+			double p = (_bit.is_in(rule, bitleaf) ? 0.0 : 1.0)
+				* rule.first.get_weight();
+			if (p > 0) pos_rules.insert(rule);
 		}
 
-		// Reweight and insert
-		double N(unified_rules.size());
-		for (std::pair<Rule, Unify::TypedSubstitution> pos_rule : unified_rules) {
-			// Divide the weights of the rules by their numbers so
-		    // that the sum equals the initial rule weight.
-			pos_rule.first.set_weight(pos_rule.first.get_weight() / N);
-			valid_rules.insert(pos_rule);
-		}
+		valid_rules.insert(pos_rules.begin(), pos_rules.end());
 	}
 	return valid_rules;
 }
 
 RuleTypedSubstitutionPair ControlPolicy::select_rule(const AndBIT& andbit,
                                                      const BITNode& bitleaf,
-                                                     const RuleTypedSubstitutionMap& rules)
+                                                     const RuleTypedSubstitutionMap& inf_rules)
 {
 	// Build weight vector to do weighted random selection
 	std::vector<double> weights;
 
 	// If a control policy atomspace is provided then calculate the
-	// distribution according to the provided control rules. Otherwise
-	// use the default rule weights.
+	// distribution according to the provided control rules.
+	// Otherwise use the default rule weights. Alternatively this
+	// could be a linear combination of the two.
 	if (_control_as)
-		weights = learn_rule_weights(andbit, bitleaf, rules);
+		weights = control_rule_weights(andbit, bitleaf, inf_rules);
 	else
-		for (const auto& rule : rules)
-			weights.push_back(rule.first.get_weight());
+		weights = default_rule_weights(inf_rules);
 
 	// Sample one according to the distribution
 	std::discrete_distribution<size_t> dist(weights.begin(), weights.end());
-	return rand_element(rules, dist);
+	return rand_element(inf_rules, dist);
 }
 
-std::vector<double> ControlPolicy::learn_rule_weights(const AndBIT& andbit,
-                                                      const BITNode& bitleaf,
-                                                      const RuleTypedSubstitutionMap& rules)
+std::vector<double> ControlPolicy::default_rule_weights(const RuleTypedSubstitutionMap& inf_rules)
 {
+	return rule_weights(default_alias_weights(inf_rules), inf_rules);
+}
+
+std::vector<double> ControlPolicy::control_rule_weights(
+	const AndBIT& andbit, const BITNode& bitleaf,
+	const RuleTypedSubstitutionMap& inf_rules)
+{
+	// For each rule alias, calculate the TV that selecting it will
+	// produce a preproof
+	HandleTVMap success_tvs;
+	for (const Handle& rule : rule_aliases(inf_rules)) {
+		// Get all active expansion control rules
+		HandleSet active_ctrl_rules =
+			fetch_active_expansion_control_rules(rule);
+
+		// Calculate the truth value of its mixture model
+		// TODO: set cpx_penalty and compressability.
+		success_tvs[rule] = MixtureModel(active_ctrl_rules)();
+	}
+
+	// Given success_tvs calculate the action distribution over rule
+	// alias, as to (supposedly) optimally balance exploration and
+	// exploitation.
+	ActionSelection action_selection(success_tvs);
+	HandleCounter alias_weights = action_selection.distribution();
+
+	// Reweight over rule instances
+	return rule_weights(alias_weights, inf_rules);
+}
+
+std::vector<double> ControlPolicy::rule_weights(
+	const HandleCounter& alias_weights,
+	const RuleTypedSubstitutionMap& inf_rules) const
+{
+	// Count how many rules has each alias
+	HandleCounter alias_counter;
+	for (const auto& rule : inf_rules)
+		alias_counter[rule.first.get_alias()] += 1.0;
+
+	// Divide the weight of each rule by its alias count
 	std::vector<double> weights;
-	HandleSet ra = rule_aliases(rules);
-	for (const Handle& rule : ra)
-		HandleSet pattern_free_control_rules =
-			fetch_pattern_free_expansion_control_rules(rule);
-	// TODO
+	for (const auto& rule : inf_rules) {
+		const Handle& alias = rule.first.get_alias();
+		weights.push_back(alias_weights.get(alias) / alias_counter[alias]);
+	}
+
 	return weights;
 }
 
-HandleSet ControlPolicy::rule_aliases(const RuleTypedSubstitutionMap& rules)
+HandleSet ControlPolicy::rule_aliases(const RuleTypedSubstitutionMap& rules) const
 {
 	HandleSet aliases;
 	for (auto& rule : rules)
@@ -149,25 +180,80 @@ HandleSet ControlPolicy::rule_aliases(const RuleTypedSubstitutionMap& rules)
 	return aliases;
 }
 
-HandleSet ControlPolicy::fetch_pattern_free_expansion_control_rules(Handle rule)
+HandleCounter ControlPolicy::default_alias_weights(const RuleTypedSubstitutionMap& rules) const
 {
-	Handle query = mk_pattern_free_expansion_control_rules_query(rule);
+	HandleCounter res;
+	for (auto& rule : rules)
+		res[rule.first.get_alias()] = rule.first.get_weight();
+	return res;
+}
+
+HandleSet ControlPolicy::fetch_active_expansion_control_rules(const Handle& inf_rule)
+{
+	HandleSet results;
+	for (const Handle& ctrl_rule : fetch_expansion_control_rules(inf_rule))
+		if (control_rule_active(ctrl_rule))
+			results.insert(ctrl_rule);
+	return results;
+}
+
+bool ControlPolicy::control_rule_active(const Handle& ctrl_rule)
+{
+	// For now we assume that it is an expansion control rule
+	Handle expansion_pattern = get_expansion_control_rule_pattern(ctrl_rule);
+	if (expansion_pattern) {
+		// TODO
+		OC_ASSERT(false, "Not implemented");
+		return true;
+	}
+
+	return true;
+}
+
+Handle ControlPolicy::get_expansion_control_rule_pattern(const Handle& ctrl_rule)
+{
+	// Check that it is indeed an expansion control rule
+	OC_ASSERT(ctrl_rule->getType() == IMPLICATION_SCOPE_LINK);
+	OC_ASSERT(ctrl_rule->getArity() == 3);
+
+	// The pattern is in the implicant, if any
+	Handle implicant = ctrl_rule->getOutgoingAtom(1);
+
+	// If present it must be inside a conjunction of an ExecutionLink
+	// and a pattern
+	if (implicant->getType() == AND_LINK)
+		for (const Handle& child : implicant->getOutgoingSet())
+			if (child->getType() != EXECUTION_LINK)
+				return child;
+
+	return Handle::UNDEFINED;
+}
+
+HandleSet ControlPolicy::fetch_expansion_control_rules(const Handle& inf_rule)
+{
+	return set_union(fetch_pattern_free_expansion_control_rules(inf_rule),
+	                 fetch_pattern_expansion_control_rules(inf_rule));
+}
+
+HandleSet ControlPolicy::fetch_pattern_free_expansion_control_rules(const Handle& inf_rule)
+{
+	Handle query = mk_pattern_free_expansion_control_rules_query(inf_rule);
 	Handle result = bindlink(_control_as, query);
 	HandleSeq outgoings(result->getOutgoingSet());
 	HandleSet results(outgoings.begin(), outgoings.end());
 	return results;
 }
 
-HandleSet ControlPolicy::fetch_pattern_expansion_control_rules(Handle rule)
+HandleSet ControlPolicy::fetch_pattern_expansion_control_rules(const Handle& inf_rule)
 {
-	Handle query = mk_pattern_expansion_control_rules_query(rule);
+	Handle query = mk_pattern_expansion_control_rules_query(inf_rule);
 	Handle result = bindlink(_control_as, query);
 	HandleSeq outgoings(result->getOutgoingSet());
 	HandleSet results(outgoings.begin(), outgoings.end());
 	return results;
 }
 
-Handle ControlPolicy::mk_vardecl_vardecl(Handle vardecl_var)
+Handle ControlPolicy::mk_vardecl_vardecl(const Handle& vardecl_var)
 {
 	return al(TYPED_VARIABLE_LINK,
 	          vardecl_var,
@@ -177,14 +263,14 @@ Handle ControlPolicy::mk_vardecl_vardecl(Handle vardecl_var)
 	             an(TYPE_NODE, "TypedVariableLink")));
 }
 
-Handle ControlPolicy::mk_list_of_args_vardecl(Handle args_var)
+Handle ControlPolicy::mk_list_of_args_vardecl(const Handle& args_var)
 {
 	return al(TYPED_VARIABLE_LINK,
 	          args_var,
 	          an(TYPE_NODE, "ListLink"));
 }
 
-Handle ControlPolicy::mk_expand_exec(Handle expand_args_var)
+Handle ControlPolicy::mk_expand_exec(const Handle& expand_args_var)
 {
 	Handle expand_schema = an(SCHEMA_NODE,
 	                          TraceRecorder::expand_andbit_predicate_name);
@@ -193,7 +279,7 @@ Handle ControlPolicy::mk_expand_exec(Handle expand_args_var)
 	          al(UNQUOTE_LINK, expand_args_var));
 }
 
-Handle ControlPolicy::mk_preproof_eval(Handle preproof_args_var)
+Handle ControlPolicy::mk_preproof_eval(const Handle& preproof_args_var)
 {
 	Handle preproof_pred = an(PREDICATE_NODE, preproof_predicate_name);
 	return al(EVALUATION_LINK,
@@ -201,7 +287,7 @@ Handle ControlPolicy::mk_preproof_eval(Handle preproof_args_var)
 	          al(UNQUOTE_LINK, preproof_args_var));
 }
 
-Handle ControlPolicy::mk_pattern_free_expansion_control_rules_query(Handle rule)
+Handle ControlPolicy::mk_pattern_free_expansion_control_rules_query(const Handle& inf_rule)
 {
 	Handle vardecl_var = an(VARIABLE_NODE, "$vardecl"),
 		vardecl_vardecl = mk_vardecl_vardecl(vardecl_var),
@@ -233,7 +319,7 @@ Handle ControlPolicy::mk_pattern_free_expansion_control_rules_query(Handle rule)
 	return expand_preproof_impl_bl;
 }
 
-Handle ControlPolicy::mk_pattern_expansion_control_rules_query(Handle rule)
+Handle ControlPolicy::mk_pattern_expansion_control_rules_query(const Handle& inf_rule)
 {
 	Handle vardecl_var = an(VARIABLE_NODE, "$vardecl"),
 		vardecl_vardecl = mk_vardecl_vardecl(vardecl_var),
