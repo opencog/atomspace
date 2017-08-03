@@ -999,6 +999,9 @@ void * SchemeEval::c_wrap_eval_as(void * p)
 
 static SCM thunk_scm_eval(void * expr)
 {
+#ifdef WORK_AROUND_GUILE_185_BUG
+	return scm_eval((SCM)expr, guile_user_module);
+#endif /* WORK_AROUND_GUILE_185_BUG */
 	return scm_eval((SCM)expr, scm_interaction_environment());
 }
 
