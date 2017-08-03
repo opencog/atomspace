@@ -398,6 +398,12 @@ bool InitiateSearchCB::neighbor_search(PatternMatchEngine *pme)
 			              << h->toShortString();})
 			bool found = pme->explore_neighborhood(_root, _starter_term, h);
 
+			// If the starter term has globs in it and it's possible to
+			// ground it to the same candidate in a different way, go for
+			// it, before moving on to the next candidates.
+			if (not found and pme->has_more_to_explore())
+				pme->explore_neighborhood(_root, _starter_term, h);
+
 			// Terminate search if satisfied.
 			if (found) return true;
 		}

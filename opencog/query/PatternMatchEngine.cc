@@ -1965,9 +1965,6 @@ void PatternMatchEngine::clear_current_state(void)
 	_perm_state.clear();
 
 	issued.clear();
-
-	// Clear the glob state
-	glob_state.clear();
 }
 
 bool PatternMatchEngine::explore_constant_evaluatables(const HandleSeq& clauses)
