@@ -303,6 +303,11 @@ HandleSet get_free_variables(const HandleSeq& hs,
                              Quotation quotation=Quotation());
 
 /**
+ * Return the set of all atoms in h, itself and all its descendents.
+ */
+HandleSet get_all_uniq_atoms(const Handle& h);
+
+/**
  * Return true if h has no free variable (unscoped or unquoted) in it,
  * false otherwise.
  */
