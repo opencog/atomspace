@@ -402,7 +402,7 @@ bool InitiateSearchCB::neighbor_search(PatternMatchEngine *pme)
 			// in it and it's possible to ground it to the same candidate
 			// differently, go for it, before moving on to the next candidates.
 			if (not found and pme->has_more_to_explore())
-				pme->explore_neighborhood(_root, _starter_term, h);
+				found = pme->explore_neighborhood(_root, _starter_term, h);
 
 			// Terminate search if satisfied.
 			if (found) return true;
@@ -648,7 +648,7 @@ bool InitiateSearchCB::link_type_search(PatternMatchEngine *pme)
 		// in it and it's possible to ground it to the same candidate
 		// differently, go for it, before moving on to the next candidates.
 		if (not found and pme->has_more_to_explore())
-			pme->explore_neighborhood(_root, _starter_term, h);
+			found = pme->explore_neighborhood(_root, _starter_term, h);
 
 		if (found) return true;
 	}
@@ -826,7 +826,7 @@ bool InitiateSearchCB::variable_search(PatternMatchEngine *pme)
 		// in it and it's possible to ground it to the same candidate
 		// differently, go for it, before moving on to the next candidates.
 		if (not found and pme->has_more_to_explore())
-			pme->explore_neighborhood(_root, _starter_term, h);
+			found = pme->explore_neighborhood(_root, _starter_term, h);
 
 		if (found) return true;
 	}
