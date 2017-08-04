@@ -690,12 +690,17 @@ bool PatternMatchEngine::glob_compare(const PatternTermSeq& osp,
 	// To record how many atoms are grounded to the GlobNodes, and
 	// their positions.
 	GlobGrd glob_grd;
+	GlobGrd glob_prev_grd;
 	GlobPosStack glob_pos;
 
 	size_t ip = 0;
 	size_t jg = 0;
 
-	// Resume from the previous state, if any
+	// Resume from the previous state, i.e. the value grounded
+	// to the globs in the previous state does not match with
+	// some other term in the same pattern. So we come back
+	// and see if those globs can be grounded differently and
+	// as a result may then satisfy other terms.
 	bool resume = false;
 	auto ss = glob_state.find(gpair);
 	if (ss != glob_state.end())
@@ -709,10 +714,6 @@ bool PatternMatchEngine::glob_compare(const PatternTermSeq& osp,
 
 	for (; ip<osp_size or jg<osg_size; ip++, jg++)
 	{
-		// If we are resuming from a previous state, increase
-		// both ip and jg by 1, mimic what the for-loop does.
-		if (resume) { ip++; jg++; }
-
 		if (ip == osp_size) ip --;
 
 		bool grd_end = false;
@@ -735,6 +736,12 @@ bool PatternMatchEngine::glob_compare(const PatternTermSeq& osp,
 
 			// Clear any groundings for the last glob we've seen.
 			var_grounding.erase(osp[ip+1]->getHandle());
+		};
+
+		auto mismatch = [&]()
+		{
+			glob_state.erase(gpair);
+			match = false;
 		};
 
 		if (GLOB_NODE == ptype)
@@ -761,11 +768,11 @@ bool PatternMatchEngine::glob_compare(const PatternTermSeq& osp,
 					// If the glob cannot be grounded to fewer no.
 					// of atoms, it's not a match.
 
-					// Keep a record of this glob if we are resuming
-					// from a previous state (i.e. the value grounded
-					// to this glob in the previous state does not
-					// match with other terms in the same pattern.)
-					if (not resume) glob_grd.erase(ohp);
+					// Do not remove this glob from glob_grd just yet
+					// if we are resuming from a previous state, until
+					// we found a glob that can be grounded differently.
+					if (resume) glob_prev_grd[ohp] = last_grd;
+					else glob_grd.erase(ohp);
 					glob_pos.pop();
 					glob_state[gpair] = {glob_grd, glob_pos};
 					last_grd = SIZE_MAX;
@@ -775,8 +782,7 @@ bool PatternMatchEngine::glob_compare(const PatternTermSeq& osp,
 					// of the globs we have seen.
 					if (glob_grd.size() == 0)
 					{
-						glob_state.erase(gpair);
-						match = false;
+						mismatch();
 						break;
 					}
 
@@ -784,11 +790,10 @@ bool PatternMatchEngine::glob_compare(const PatternTermSeq& osp,
 					// before but it doesn't satisfy the other
 					// terms in the same pattern, and we could
 					// not find any other way to ground the
-					// globs, reject.
+					// globs, reject it.
 					if (resume and glob_pos.size() == 0)
 					{
-						glob_state.erase(gpair);
-						match = false;
+						mismatch();
 						break;
 					}
 
@@ -796,6 +801,19 @@ bool PatternMatchEngine::glob_compare(const PatternTermSeq& osp,
 					// try to find a match again.
 					reset();
 					continue;
+				}
+
+				if (resume)
+				{
+					// If we are here, that means the previous
+					// grounding is rejected by other terms in
+					// the pattern, and we found a glob in the
+					// term that can be grounded differently.
+					for (auto g : glob_prev_grd)
+						glob_grd.erase(g.first);
+
+					// Reset the flag, do the matching again.
+					resume = false;
 				}
 			}
 
@@ -892,8 +910,16 @@ bool PatternMatchEngine::glob_compare(const PatternTermSeq& osp,
 				// can be done, we can just reject it now.
 				if (glob_grd.size() == 0)
 				{
-					glob_state.erase(gpair);
-					match = false;
+					mismatch();
+					break;
+				}
+
+				// Or if there is no more possible way to ground
+				// the globs to satisfy other terms in the pattern,
+				// reject it.
+				if (resume and glob_pos.size() == 0)
+				{
+					mismatch();
 					break;
 				}
 
