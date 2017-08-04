@@ -683,15 +683,36 @@ bool PatternMatchEngine::glob_compare(const PatternTermSeq& osp,
                                       const HandleSeq& osg)
 {
 	bool match = true;
+	GlobSeq gpair = {osp, osg};
 	size_t osp_size = osp.size();
 	size_t osg_size = osg.size();
 
 	// To record how many atoms are grounded to the GlobNodes, and
 	// their positions.
-	std::map<Handle, size_t> glob_grd;
-	std::vector<std::pair<size_t, size_t>> glob_pos;
+	GlobGrd glob_grd;
+	GlobGrd glob_prev_grd;
+	GlobPosStack glob_pos;
 
-	for (size_t ip=0, jg=0; ip<osp_size or jg<osg_size; ip++, jg++)
+	size_t ip = 0;
+	size_t jg = 0;
+
+	// Resume from the previous state, i.e. the value grounded
+	// to the globs in the previous state does not match with
+	// some other term in the same pattern. So we come back
+	// and see if those globs can be grounded differently and
+	// as a result may then satisfy other terms.
+	bool resume = false;
+	auto ss = glob_state.find(gpair);
+	if (ss != glob_state.end())
+	{
+		resume = true;
+		glob_grd = (ss->second).first;
+		glob_pos = (ss->second).second;
+		ip = glob_pos.top().first;
+		jg = glob_pos.top().second;
+	}
+
+	for (; ip<osp_size or jg<osg_size; ip++, jg++)
 	{
 		if (ip == osp_size) ip --;
 
@@ -708,12 +729,19 @@ bool PatternMatchEngine::glob_compare(const PatternTermSeq& osp,
 
 		auto reset = [&]()
 		{
-			ip = glob_pos.back().first - 1;
-			jg = glob_pos.back().second - 1;
-			glob_pos.pop_back();
+			ip = glob_pos.top().first - 1;
+			jg = glob_pos.top().second - 1;
+			glob_pos.pop();
+			glob_state[gpair] = {glob_grd, glob_pos};
 
 			// Clear any groundings for the last glob we've seen.
 			var_grounding.erase(osp[ip+1]->getHandle());
+		};
+
+		auto mismatch = [&]()
+		{
+			glob_state.erase(gpair);
+			match = false;
 		};
 
 		if (GLOB_NODE == ptype)
@@ -723,7 +751,8 @@ bool PatternMatchEngine::glob_compare(const PatternTermSeq& osp,
 			// to the clause_match() callback?
 			if (ohp == osg[jg]) return false;
 
-			glob_pos.push_back({ip, jg});
+			glob_pos.push({ip, jg});
+			glob_state[gpair] = {glob_grd, glob_pos};
 
 			size_t last_grd = SIZE_MAX;
 			auto gi = glob_grd.find(ohp);
@@ -738,8 +767,14 @@ bool PatternMatchEngine::glob_compare(const PatternTermSeq& osp,
 				{
 					// If the glob cannot be grounded to fewer no.
 					// of atoms, it's not a match.
-					glob_grd.erase(ohp);
-					glob_pos.pop_back();
+
+					// Do not remove this glob from glob_grd just yet
+					// if we are resuming from a previous state, until
+					// we found a glob that can be grounded differently.
+					if (resume) glob_prev_grd[ohp] = last_grd;
+					else glob_grd.erase(ohp);
+					glob_pos.pop();
+					glob_state[gpair] = {glob_grd, glob_pos};
 					last_grd = SIZE_MAX;
 
 					// Reject the candidate if we cannot find a
@@ -747,7 +782,18 @@ bool PatternMatchEngine::glob_compare(const PatternTermSeq& osp,
 					// of the globs we have seen.
 					if (glob_grd.size() == 0)
 					{
-						match = false;
+						mismatch();
+						break;
+					}
+
+					// Similar to the above, we found a match
+					// before but it doesn't satisfy the other
+					// terms in the same pattern, and we could
+					// not find any other way to ground the
+					// globs, reject it.
+					if (resume and glob_pos.size() == 0)
+					{
+						mismatch();
 						break;
 					}
 
@@ -755,6 +801,19 @@ bool PatternMatchEngine::glob_compare(const PatternTermSeq& osp,
 					// try to find a match again.
 					reset();
 					continue;
+				}
+
+				if (resume)
+				{
+					// If we are here, that means the previous
+					// grounding is rejected by other terms in
+					// the pattern, and we found a glob in the
+					// term that can be grounded differently.
+					for (auto g : glob_prev_grd)
+						glob_grd.erase(g.first);
+
+					// Reset the flag, do the matching again.
+					resume = false;
 				}
 			}
 
@@ -773,6 +832,7 @@ bool PatternMatchEngine::glob_compare(const PatternTermSeq& osp,
 				if (grd_end)
 				{
 					glob_grd[ohp] = 0;
+					glob_state[gpair] = {glob_grd, glob_pos};
 					var_grounding.erase(ohp);
 					continue;
 				}
@@ -785,6 +845,7 @@ bool PatternMatchEngine::glob_compare(const PatternTermSeq& osp,
 				{
 					jg --;
 					glob_grd[ohp] = 0;
+					glob_state[gpair] = {glob_grd, glob_pos};
 					var_grounding.erase(ohp);
 					continue;
 				}
@@ -795,6 +856,7 @@ bool PatternMatchEngine::glob_compare(const PatternTermSeq& osp,
 			if (grd_end)
 			{
 				glob_grd[ohp] = 0;
+				glob_state[gpair] = {glob_grd, glob_pos};
 				reset();
 				continue;
 			}
@@ -821,6 +883,7 @@ bool PatternMatchEngine::glob_compare(const PatternTermSeq& osp,
 
 			jg --;
 			glob_grd[ohp] = glob_seq.size();
+			glob_state[gpair] = {glob_grd, glob_pos};
 
 			// If we can't match more, or it doesn't satisfy the
 			// lower bound restriction, try again.
@@ -847,7 +910,16 @@ bool PatternMatchEngine::glob_compare(const PatternTermSeq& osp,
 				// can be done, we can just reject it now.
 				if (glob_grd.size() == 0)
 				{
-					match = false;
+					mismatch();
+					break;
+				}
+
+				// Or if there is no more possible way to ground
+				// the globs to satisfy other terms in the pattern,
+				// reject it.
+				if (resume and glob_pos.size() == 0)
+				{
+					mismatch();
 					break;
 				}
 
@@ -1431,7 +1503,7 @@ bool PatternMatchEngine::clause_accept(const Handle& clause_root,
 }
 
 // This is called when all previous clauses have been grounded; so
-// we search for the next one, and try to round that.
+// we search for the next one, and try to ground that.
 bool PatternMatchEngine::do_next_clause(void)
 {
 	clause_stacks_push();
@@ -1445,6 +1517,12 @@ bool PatternMatchEngine::do_next_clause(void)
 	if (nullptr == curr_root)
 	{
 		found = _pmc.grounding(var_grounding, clause_grounding);
+
+		// Since the PM may move on and try to search for more groundings,
+		// clear the glob_state here to prevent it from going back to the
+		// exact same candidate again, we are done with it by now.
+		glob_state.clear();
+
 		DO_LOG(logger().fine("==================== FINITO! accepted=%d", found);)
 		DO_LOG(log_solution(var_grounding, clause_grounding);)
 	}
