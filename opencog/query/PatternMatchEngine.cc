@@ -1517,6 +1517,12 @@ bool PatternMatchEngine::do_next_clause(void)
 	if (nullptr == curr_root)
 	{
 		found = _pmc.grounding(var_grounding, clause_grounding);
+
+		// Since the PM may move on and try to search for more groundings,
+		// clear the glob_state here to prevent it from going back to the
+		// exact same candidate again, we are done with it by now.
+		glob_state.clear();
+
 		DO_LOG(logger().fine("==================== FINITO! accepted=%d", found);)
 		DO_LOG(log_solution(var_grounding, clause_grounding);)
 	}
