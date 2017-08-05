@@ -128,6 +128,23 @@ private:
 	std::stack<std::map<Unorder, int>> perm_count_stack;
 
 	// --------------------------------------------
+	// Glob state management
+
+	// Record what sequences we are comparing now
+	typedef std::pair<PatternTermSeq, HandleSeq> GlobSeq;
+
+	// Record where the globs are (branchpoints)
+	typedef std::pair<Handle, std::pair<size_t, size_t>> GlobPos;
+	typedef std::stack<GlobPos> GlobPosStack;
+
+	// Record how many atoms have been grounded to the globs
+	typedef std::map<Handle, size_t> GlobGrd;
+
+	typedef std::pair<GlobGrd, GlobPosStack> GlobState;
+
+	std::map<GlobSeq, GlobState> glob_state;
+
+	// --------------------------------------------
 	// Methods and state that select the next clause to be grounded.
 
 	bool do_next_clause(void);
