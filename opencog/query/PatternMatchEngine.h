@@ -130,8 +130,8 @@ private:
 	// --------------------------------------------
 	// Glob state management
 
-	// Record what sequences we are comparing now
-	typedef std::pair<PatternTermSeq, HandleSeq> GlobSeq;
+	// Record the glob-pattern and the candidate we are comparing
+	typedef std::pair<PatternTermSeq, HandleSeq> GlobPair;
 
 	// Record where the globs are (branchpoints)
 	typedef std::pair<Handle, std::pair<size_t, size_t>> GlobPos;
@@ -142,7 +142,7 @@ private:
 
 	typedef std::pair<GlobGrd, GlobPosStack> GlobState;
 
-	std::map<GlobSeq, GlobState> glob_state;
+	std::map<GlobPair, GlobState> glob_state;
 
 	// --------------------------------------------
 	// Methods and state that select the next clause to be grounded.
@@ -241,6 +241,11 @@ public:
 	// PatternMatchCallback. It is assumed that all clauses are
 	// connected by an AndLink.
 	bool explore_constant_evaluatables(const HandleSeq& clauses);
+
+	// It's possible to have more than one valid way to ground
+	// a term with globs in it, so this returns true if that
+	// is the case.
+	bool has_more_to_explore() { return glob_state.size() > 0; }
 
 	// Handy-dandy utilities
 	static void log_solution(const HandleMap &vars,
