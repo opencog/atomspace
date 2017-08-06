@@ -401,7 +401,7 @@ bool InitiateSearchCB::neighbor_search(PatternMatchEngine *pme)
 			// If the starter term (or any other term we've explored) has globs
 			// in it and it's possible to ground it to the same candidate
 			// differently, go for it, before moving on to the next candidates.
-			if (not found and pme->has_more_to_explore())
+			while (not found and pme->has_more_to_explore())
 				found = pme->explore_neighborhood(_root, _starter_term, h);
 
 			// Terminate search if satisfied.
@@ -647,7 +647,7 @@ bool InitiateSearchCB::link_type_search(PatternMatchEngine *pme)
 		// If the starter term (or any other term we've explored) has globs
 		// in it and it's possible to ground it to the same candidate
 		// differently, go for it, before moving on to the next candidates.
-		if (not found and pme->has_more_to_explore())
+		while (not found and pme->has_more_to_explore())
 			found = pme->explore_neighborhood(_root, _starter_term, h);
 
 		if (found) return true;
@@ -825,7 +825,7 @@ bool InitiateSearchCB::variable_search(PatternMatchEngine *pme)
 		// If the starter term (or any other term we've explored) has globs
 		// in it and it's possible to ground it to the same candidate
 		// differently, go for it, before moving on to the next candidates.
-		if (not found and pme->has_more_to_explore())
+		while (not found and pme->has_more_to_explore())
 			found = pme->explore_neighborhood(_root, _starter_term, h);
 
 		if (found) return true;
