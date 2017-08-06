@@ -808,8 +808,6 @@ bool PatternMatchEngine::glob_compare(const PatternTermSeq& osp,
 				{
 					glob_grd[ohp] = 0;
 					glob_state[gp] = {glob_grd, glob_pos_stack};
-					// TODO: Need?
-					// var_grounding.erase(ohp);
 					ip++;
 					continue;
 				}
@@ -819,8 +817,6 @@ bool PatternMatchEngine::glob_compare(const PatternTermSeq& osp,
 				{
 					glob_grd[ohp] = 0;
 					glob_state[gp] = {glob_grd, glob_pos_stack};
-					// TODO: Need?
-					// var_grounding.erase(ohp);
 					ip++;
 					continue;
 				}
@@ -877,6 +873,14 @@ bool PatternMatchEngine::glob_compare(const PatternTermSeq& osp,
 			// Try again if we can't ground enough atoms to satisfy
 			// the lower bound restriction.
 			if (not _varlist->is_lower_bound(ohp, glob_seq.size()))
+			{
+				backtrack(true);
+				continue;
+			}
+
+			// Try again if there is no more osp to explore but
+			// we haven't finished osg yet.
+			if (ip+1 == osp_size and jg+1 < osg_size)
 			{
 				backtrack(true);
 				continue;
@@ -1472,7 +1476,7 @@ bool PatternMatchEngine::clause_accept(const Handle& clause_root,
 }
 
 // This is called when all previous clauses have been grounded; so
-// we search for the next one, and try to round that.
+// we search for the next one, and try to ground that.
 bool PatternMatchEngine::do_next_clause(void)
 {
 	clause_stacks_push();
