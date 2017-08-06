@@ -794,15 +794,26 @@ bool PatternMatchEngine::glob_compare(const PatternTermSeq& osp,
 			if (_varlist->is_lower_bound(ohp, 0))
 			{
 				// Try again, find another glob that can be grounded
-				// in a different way.
+				// in a different way. Probably because we are
+				// resuming from a different state.
 				if (0 == last_grd)
 				{
 					backtrack(true);
 					continue;
 				}
 
-				// Since the glob has a lower bound of zero, if we
-				// already have gone through all the atoms of
+				// On the other hand, if we failed to ground this glob
+				// in the previous iteration, just let it ground to
+				// nothing then and we are done with it.
+				if (1 == last_grd)
+				{
+					glob_grd[ohp] = 0;
+					glob_state[gp] = {glob_grd, glob_pos_stack};
+					ip++;
+					continue;
+				}
+
+				// If we already have gone through all the atoms of
 				// the candidate at this point, we are done.
 				if (jg >= osg_size)
 				{
@@ -898,7 +909,22 @@ bool PatternMatchEngine::glob_compare(const PatternTermSeq& osp,
 		else
 		{
 			// If we are here, we are not looking at a glob.
-			// TODO
+
+			// Try again if we have already gone through all the
+			// atoms in osg.
+			if (jg >= osg_size)
+			{
+				backtrack(false);
+				continue;
+			}
+
+			// Try again if this one is not a match.
+			if (not tree_compare(osp[ip], osg[jg], CALL_ORDER))
+			{
+				backtrack(false);
+				continue;
+			}
+			ip++; jg++;
 		}
 	}
 
