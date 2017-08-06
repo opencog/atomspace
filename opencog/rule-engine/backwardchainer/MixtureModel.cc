@@ -28,7 +28,7 @@
 using namespace opencog;
 
 MixtureModel::MixtureModel(const HandleSet& mds, double cpx, double cmp) :
-	models(mds), cpx_penalty(cpx), compressability(cmp)
+	models(mds), cpx_penalty(cpx), compressiveness(cmp)
 {
 	data_set_size = infer_data_set_size();
 }
@@ -36,7 +36,33 @@ MixtureModel::MixtureModel(const HandleSet& mds, double cpx, double cmp) :
 TruthValuePtr MixtureModel::operator()()
 {
 	// TODO
+	std::vector<double> weights;
 	return TruthValuePtr();
+}
+
+TruthValuePtr MixtureModel::weighted_average(const std::vector<TruthValuePtr>& tvs,
+                                             const std::vector<double>& weights) const
+{
+	// TODO
+	return TruthValuePtr();
+}
+
+double MixtureModel::prior_estimate(const Handle& model)
+{
+	HandleSet all_atoms(get_all_uniq_atoms(model));
+	double partial_length = all_atoms.size();
+	double remain_data_size = data_set_size - model->getTruthValue()->getCount();
+	return prior(partial_length + kolmogorov_estimate(remain_data_size));
+}
+
+double MixtureModel::kolmogorov_estimate(double remain_count)
+{
+	return std::pow(remain_count, 1.0 - compressiveness);
+}
+
+double MixtureModel::prior(double length)
+{
+	return exp(-cpx_penalty*length);
 }
 
 double MixtureModel::infer_data_set_size()
@@ -45,22 +71,4 @@ double MixtureModel::infer_data_set_size()
 	for (const Handle& model : models)
 		max_count = std::max(max_count, model->getTruthValue()->getCount());
 	return max_count;
-}
-
-double MixtureModel::prior_estimate(const Handle& model)
-{
-	HandleSet all_atoms(get_all_uniq_atoms(model));
-	double partial_length = all_atoms.size();
-	double remain_count = data_set_size - model->getTruthValue()->getCount();
-	return prior(partial_length + compressed_estimate(remain_count));
-}
-
-double MixtureModel::compressed_estimate(double remain_count)
-{
-	return std::pow(remain_count, 1.0 - compressability);
-}
-
-double MixtureModel::prior(double length)
-{
-	return exp(-cpx_penalty*length);
 }

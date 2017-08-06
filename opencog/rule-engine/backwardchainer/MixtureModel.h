@@ -52,9 +52,9 @@ public:
 
 	// Parameter to estimate the length of a whole model given a
 	// partial model + unexplained data. Ranges from 0 to 1, 0 being
-	// no compressability at all of the unexplained data, 1 being full
-	// compressability.
-	double compressability;
+	// no compressiveness at all of the unexplained data, 1 being full
+	// compressiveness.
+	double compressiveness;
 
 	// Size of the complete data set, including all observations used
 	// to build the models. For simplicity we're gonna assume that it
@@ -68,18 +68,80 @@ public:
 	 */
 	MixtureModel(const HandleSet& models,
 	             double cpx_penalty=1.0,
-	             double compressability=0.0);
+	             double compressiveness=0.0);
 
 	/**
-	 * Calculate the TV of the consequent of the mixture model.
+	 * Calculate the TV of the mixture model. According to Universal
+	 * Operator Induction, assuming complete models, the equation
+	 * rewritten for TVs is
+	 *
+	 * TV_MM(D') = Sum_i=0^n TV_Mi(D') * P(Mi) / Sum_i=0^n P(Mi)
+	 *
+	 * where
+	 * - D' is the new data to explain
+	 * - TV_MM(D') is the TV of the mixture model explaining D'
+	 * - TV_Mi(D') is the TV of model Mi explaining D'
+	 * - P(Mi) is the prior probability of model Mi
+	 *
+	 * TVs already captures the likelihood of the training data (the
+	 * binomial part of the beta-binomial distribution underlying a
+	 * TV, see Section 4.5.1 of the PLN book) which is why it doesn't
+	 * appear in the equation.
+	 *
+	 * However, most of the time the models are partial, they are only
+	 * active on a subset of observations. Ignoring the unexplained
+	 * data would give an unfair advantage to partial models. Indeed
+	 * the multiplicative factor to have the TV exactly equal to the
+	 * likelihood of explaining the historical data could be ignored
+	 * in the equation above because it is constant for all complete
+	 * models, but it can no longer be ignored for partial
+	 * models. Assuming Ni and Xi are respectively the number of total
+	 * and positive observations defined in model Mi, this factor is
+	 *
+	 * 1 / (Ni+1)*(choose Ni Xi)
+	 *
+	 * which grows quadratically to exponentially as N goes down.
+	 *
+	 * In principle a way to deal with that would be to complete these
+	 * partial models with as many models as possible. As it is
+	 * costly, if not impractical, we will attempt to avoid that
+	 * entirely and assume instead a fictive completion that perfectly
+	 * explains the remaining data, leading to a likelihood of 1. It
+	 * seems acceptable as such a fictive completion dominates all
+	 * others in terms of fitness (pior*likelihood). However to do
+	 * well we need to estimate its size, the Kolmogorov complexity of
+	 * the unexplained data. Which almost brings us back to square
+	 * one. For now we will use the following simplistic heuristic to
+	 * estimate its Kolmogorov complexity
+	 *
+	 * K(D) = |D|^(1-c)
+	 *
+	 * where c is a compressiveness parameter, that ranges from 0, no
+	 * compression, to 1, full compression.
+	 *
+	 * So for partial models the TV of the mixture model can be
+	 * defined as followed
+	 *
+	 * TV_MM(D') = Sum_i=0^n TV_Mi(D') * P(Li + K(Di)) * ((Ni+1)*(choose Ni Xi))
+	 *           / Sum_i=0^n P(Li + K(Di)) * ((Ni+1)*(choose Ni Xi))
+	 *
+	 * where
+	 * - Li is the length of model Mi
+	 * - Di are the unexplained data by model Mi
+	 * - P(Li + K(Di)) is the prior of model Mi + perfect fictive completion
 	 */
 	TruthValuePtr operator()();
 
 	/**
-	 * Infer the data set size by taking the max count of all models
-	 * (it works assuming that one of them is complete).
+	 * Given a list of TVs and a list of associated weights, produce a
+	 * TVs that approximate the weighted average of the given TVs.
+	 *
+	 * For now a Simple Truth Value will be produced, meaning that it
+	 * will probably badly reflect the actually distribution, but
+	 * should at least have the same mean and variance.
 	 */
-	double infer_data_set_size();
+	TruthValuePtr weighted_average(const std::vector<TruthValuePtr>& tvs,
+	                               const std::vector<double>& weights) const;
 
 	/**
 	 * Given a model, calculate it's prior estimate. In the case of a
@@ -92,14 +154,14 @@ public:
 	 * estimate the complexity of a model that would explain them
 	 * perfectly. The heuristic used here is
 	 *
-	 * remaing_count^(1 - compressability)
+	 * remain_data_size^(1 - compressiveness)
 	 *
-	 * One can see that if compressability is null, then no compress
-	 * occurs, the model is the data set itself, if compressability
-	 * equals 1, then it return 1, which is the maximum compression,
-	 * all data can be explained with just one bit.
+	 * If compressiveness is null, then no compression occurs, the
+	 * model is the data set itself, if compressiveness equals 1, then
+	 * it return 1, which is the maximum compression, all data can be
+	 * explained with just one bit.
 	 */
-	double compressed_estimate(double remaining_count);
+	double kolmogorov_estimate(double remain_data_size);
 
 	/**
 	 * Given the length of a model, calculate its prior
@@ -115,6 +177,14 @@ public:
 	 * estimates are normalized.
 	 */
 	double prior(double length);
+
+private:
+	/**
+	 * Infer the data set size by taking the max count of all models
+	 * (it works assuming that one of them is complete).
+	 */
+	double infer_data_set_size();
+
 };
 
 } // namespace opencog

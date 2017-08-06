@@ -139,7 +139,7 @@ std::vector<double> ControlPolicy::control_rule_weights(
 			fetch_active_expansion_control_rules(rule);
 
 		// Calculate the truth value of its mixture model
-		// TODO: set cpx_penalty and compressability.
+		// TODO: set cpx_penalty and compressiveness.
 		success_tvs[rule] = MixtureModel(active_ctrl_rules)();
 	}
 
