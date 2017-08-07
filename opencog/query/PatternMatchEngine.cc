@@ -699,9 +699,6 @@ bool PatternMatchEngine::glob_compare(const PatternTermSeq& osp,
 	{
 		backtracking = true;
 
-		// TODO: Remove all the groundings of all the globs
-		// and vars after the glob that we are going back?
-
 		// If we are looking at a glob right now and fail
 		// to ground it, pop and go back to the previous
 		// one to try again.
@@ -776,6 +773,11 @@ bool PatternMatchEngine::glob_compare(const PatternTermSeq& osp,
 
 		if (GLOB_NODE == ptype)
 		{
+			// GlobNodes cannot match themselves -- no self-grounding
+			// is allowed. TODO -- maybe this check should be moved
+			// to the clause_match() callback?
+			if (ohp == osg[jg]) return false;
+
 			// No need to push to stack if we are backtracking or resuming.
 			if (backtracking or resuming)
 			{
