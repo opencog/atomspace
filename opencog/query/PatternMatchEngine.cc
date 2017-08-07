@@ -817,8 +817,9 @@ bool PatternMatchEngine::glob_compare(const PatternTermSeq& osp,
 
 				// On the other hand, if we failed to ground this glob
 				// in the previous iteration, just let it ground to
-				// nothing then and we are done with it.
-				if (1 == last_grd)
+				// nothing (as long as it is not the last one in osp)
+				// and we are done with it.
+				if (1 == last_grd and ip+1 < osp_size)
 				{
 					record_match(glob, glob_seq);
 					ip++;
