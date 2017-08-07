@@ -25,13 +25,63 @@
 
 using namespace opencog;
 
-ActionSelection::ActionSelection(const HandleTVMap& action_tvs)
-{
-	// TODO
-}
+ActionSelection::ActionSelection(const HandleTVMap& a2tv)
+	: action2tv(a2tv) {}
 
 HandleCounter ActionSelection::distribution()
 {
-	// TODO
-	return HandleCounter();
+	HandleCounter action2prob;
+	const int bins = 100;             // Number of bins used for discretization
+	const double step = 1.0 / bins;   // Step size
+
+	// Generate all beta distributions of all TVs
+	std::vector<BetaDistribution> betas;
+	for (const auto& atv : action2tv)
+		betas.push_back(tv2beta(atv.second));
+
+	// Calculate cdfs for all TV
+	std::vector<std::vector<double>> cdfs;
+	for (const auto& beta : betas)
+		cdfs.push_back(beta2cdf(beta, bins));
+
+	// Calculate Pi for all actions
+	// Pi = I_0^1 fi(x)
+	// where fi(x) = pdfi(x) Prod_j!=i cdfj(x) dx
+	for (size_t i = 0; i < action2tv.size(); i++) {
+		const BetaDistribution& beta = betas[i];
+		double Pi = 0;
+		for (int x_idx = 1; x_idx <= bins; x_idx++) {
+			double x = (double)x_idx / (double)bins;
+			double f_x = boost::math::pdf(beta, 1.0) * step;
+			for (size_t j = 0; j < action2tv.size(); j++ )
+				if (j != i)
+					f_x *= boost::math::cdf(cdfs[j], x);
+			Pi += f_x;
+		}
+		action2prob[std::next(action2tv.begin(), i)->first] = Pi;
+	}
+	return action2prob;
+}
+
+BetaDistribution ActionSelection::tv2beta(const TruthValuePtr& tv)
+{
+	double count = tv->getCount(),
+		pos_count = tv->getMean() * count; // TODO correct when mean is fixed
+
+	// Assuming the prior is Beta(1, 1)
+	double alpha = 1 + pos_count;
+	double beta = 1 + count - pos_count;
+
+	return BetaDistribution(alpha, beta);
+}
+
+std::vector<double> ActionSelection::beta2cdf(const BetaDistribution& beta,
+                                              int bins)
+{
+	std::vector<double> cdf;
+	for (int x_idx = 1; x_idx <= bins; x_idx++) {
+		double x = (double)x_idx / (double)bins;
+		cdf.push_back(boost::math::cdf(beta, std::min(1.0, x)));
+	}
+	return cdf;
 }
