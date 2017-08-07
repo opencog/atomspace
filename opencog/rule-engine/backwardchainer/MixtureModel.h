@@ -133,8 +133,9 @@ public:
 	TruthValuePtr operator()();
 
 	/**
-	 * Given a list of TVs and a list of associated weights, produce a
-	 * TVs that approximate the weighted average of the given TVs.
+	 * Given a list of TVs and a list of associated weights, that do
+	 * not need to sum up to 1, produce a TVs that approximates the
+	 * normalized weighted average of the given TVs.
 	 *
 	 * For now a Simple Truth Value will be produced, meaning that it
 	 * will probably badly reflect the actually distribution, but
