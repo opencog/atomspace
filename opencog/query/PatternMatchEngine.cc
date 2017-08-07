@@ -730,6 +730,16 @@ bool PatternMatchEngine::glob_compare(const PatternTermSeq& osp,
 		}
 	};
 
+	auto record_match = [&](const PatternTermPtr& glob,
+	                        const HandleSeq& glob_seq)
+	{
+		glob_grd[glob->getHandle()] = glob_seq.size();
+		glob_state[gp] = {glob_grd, glob_pos_stack};
+
+		LinkPtr glp(createLink(glob_seq, LIST_LINK));
+		var_grounding[glob->getHandle()] = glp->getHandle();
+	};
+
 	auto mismatch = [&]()
 	{
 		match = false;
@@ -780,6 +790,9 @@ bool PatternMatchEngine::glob_compare(const PatternTermSeq& osp,
 				glob_state[gp] = {glob_grd, glob_pos_stack};
 			}
 
+			HandleSeq glob_seq;
+			PatternTermPtr glob(osp[ip]);
+
 			// First of all, see if we have seen this glob in
 			// previous iterations.
 			size_t last_grd = SIZE_MAX;
@@ -807,8 +820,7 @@ bool PatternMatchEngine::glob_compare(const PatternTermSeq& osp,
 				// nothing then and we are done with it.
 				if (1 == last_grd)
 				{
-					glob_grd[ohp] = 0;
-					glob_state[gp] = {glob_grd, glob_pos_stack};
+					record_match(glob, glob_seq);
 					ip++;
 					continue;
 				}
@@ -817,8 +829,7 @@ bool PatternMatchEngine::glob_compare(const PatternTermSeq& osp,
 				// the candidate at this point, we are done.
 				if (jg >= osg_size)
 				{
-					glob_grd[ohp] = 0;
-					glob_state[gp] = {glob_grd, glob_pos_stack};
+					record_match(glob, glob_seq);
 					ip++;
 					continue;
 				}
@@ -826,8 +837,7 @@ bool PatternMatchEngine::glob_compare(const PatternTermSeq& osp,
 				// Just in case if the upper bound is zero...
 				if (not _varlist->is_upper_bound(ohp, 1))
 				{
-					glob_grd[ohp] = 0;
-					glob_state[gp] = {glob_grd, glob_pos_stack};
+					record_match(glob, glob_seq);
 					ip++;
 					continue;
 				}
@@ -843,11 +853,8 @@ bool PatternMatchEngine::glob_compare(const PatternTermSeq& osp,
 				continue;
 			}
 
-			bool tc;
-			HandleSeq glob_seq;
-			PatternTermPtr glob(osp[ip]);
-
 			// Try to match as many atoms as possible.
+			bool tc;
 			do
 			{
 				tc = tree_compare(glob, osg[jg], CALL_GLOB);
@@ -898,10 +905,7 @@ bool PatternMatchEngine::glob_compare(const PatternTermSeq& osp,
 			}
 
 			// If we are here, we've got a match; record the glob.
-			glob_grd[ohp] = glob_seq.size();
-			glob_state[gp] = {glob_grd, glob_pos_stack};
-			LinkPtr glp(createLink(glob_seq, LIST_LINK));
-			var_grounding[glob->getHandle()] = glp->getHandle();
+			record_match(glob, glob_seq);
 
 			// Try to match another one.
 			ip++; jg++;
