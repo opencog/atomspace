@@ -899,7 +899,7 @@ bool PatternMatchEngine::glob_compare(const PatternTermSeq& osp,
 				continue;
 			}
 
-			// Try again if there is no more osp to explore but
+			// Try again if there is no more osp to be explored but
 			// we haven't finished osg yet.
 			if (ip+1 == osp_size and jg+1 < osg_size)
 			{
@@ -925,12 +925,22 @@ bool PatternMatchEngine::glob_compare(const PatternTermSeq& osp,
 				continue;
 			}
 
-			// Try again if this one is not a match.
+			// Or if we are reaching the end of osp but there
+			// are two or more atoms to be matched in osg,
+			// try again.
+			if (ip+1 == osp_size and jg+1 < osg_size)
+			{
+				backtrack(false);
+				continue;
+			}
+
+			// Try again if this pair is not a match.
 			if (not tree_compare(osp[ip], osg[jg], CALL_ORDER))
 			{
 				backtrack(false);
 				continue;
 			}
+
 			ip++; jg++;
 		}
 	}
