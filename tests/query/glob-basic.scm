@@ -236,3 +236,42 @@
 			(Concept "apple"))
 		(ListLink
 			(Glob "$x"))))
+
+; -----------------------------------------------------------------
+; Backtrack + black box link
+(List
+	(Concept "A")
+	(Concept "B")
+	(Concept "C")
+	(Concept "D")
+	(Concept "E")
+	(Concept "F")
+	(Concept "G")
+	(Concept "H")
+	(Concept "I"))
+
+; Only returns true if ATOM is "C"
+(define-public (match-c ATOM)
+	(if (equal? (Concept "C") ATOM)
+		(stv 1 1)
+		(stv 0 1)))
+
+(define backtrack
+	(Bind
+		(VariableList
+			(TypedVariable (Glob "$x")
+				(TypeSet (Type "ConceptNode")
+					(IntervalLink (Number 0) (Number -1))))
+			(TypedVariable (Glob "$y")
+				(TypeSet (Type "ConceptNode")
+					(IntervalLink (Number 1) (Number 1))))
+			(TypedVariable (Glob "$z")
+				(TypeSet (Type "ConceptNode")
+					(IntervalLink (Number 0) (Number -1)))))
+		(And
+			(List (Glob "$x") (Glob "$y") (Glob "$z"))
+			(Evaluation (GroundedPredicate "scm: match-c") (List (Glob "$y"))))
+		(List
+			(List (Glob "$x"))
+			(List (Glob "$y"))
+			(List (Glob "$z")))))
