@@ -25,6 +25,11 @@
 
 using namespace opencog;
 
+const std::string TraceRecorder::target_predicate_name = "URE:BC:target";
+const std::string TraceRecorder::andbit_predicate_name = "URE:BC:and-BIT";
+const std::string TraceRecorder::expand_andbit_predicate_name = "URE:BC:expand-and-BIT";
+const std::string TraceRecorder::proof_predicate_name = "URE:BC:proof";
+
 TraceRecorder::TraceRecorder(AtomSpace* tr_as) : _trace_as(tr_as) {}
 
 void TraceRecorder::target(const Handle& target)

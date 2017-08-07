@@ -320,6 +320,28 @@ HandleSet get_free_variables(const HandleSeq& hs, Quotation quotation)
 	return results;
 }
 
+HandleSet get_all_uniq_atoms(const Handle& h)
+{
+	// Base cases
+	if (!h)
+		return {};
+	if (h->isNode())
+		return {h};
+
+	// Recursive cases
+	if (h->isLink()) {
+		HandleSet results({h});
+		for (const Handle& child : h->getOutgoingSet()) {
+			HandleSet aas = get_all_uniq_atoms(child);
+			results.insert(aas.begin(), aas.end());
+		}
+		return results;
+	}
+
+	// Please the compiler
+	return {};
+}
+
 bool is_closed(const Handle& h, Quotation quotation)
 {
 	return get_free_variables(h, quotation).empty();

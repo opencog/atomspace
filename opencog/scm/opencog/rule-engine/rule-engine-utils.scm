@@ -47,7 +47,9 @@
 "
   (cog-mandatory-args-fc rbs source vardecl focus-set))
 
-(define* (cog-bc rbs target #:key (vardecl (List)) (trace-as #f) (focus-set (Set)))
+(define* (cog-bc rbs target
+                 #:key
+                 (vardecl (List)) (trace-as #f) (control-as #f) (focus-set (Set)))
 "
   Backward Chainer call.
 
@@ -57,17 +59,22 @@
 
   target: Target to proof.
 
-  tas: optional AtomSpace to record the back-inference traces.
+  vardecl: optional variable declaration of the target (in case it has
+           variables)
 
-  vd: optional variable declaration of the target (in case it has
-      variables)
+  trace-as: optional AtomSpace to record the back-inference traces.
 
-  fs: optional focus-set, a SetLink with all atoms to consider
-      for forward chaining (NOT IMPLEMENTED).
+  control-as: optional AtomSpace storing inference control rules.
+
+  focus-set: optional focus-set, a SetLink with all atoms to consider
+             for forward chaining (NOT IMPLEMENTED).
 "
   (let* ((trace-enabled (cog-atomspace? trace-as))
-         (tas (if trace-enabled trace-as (cog-atomspace))))
-  (cog-mandatory-args-bc rbs target vardecl trace-enabled tas focus-set)))
+         (control-enabled (cog-atomspace? control-as))
+         (tas (if trace-enabled trace-as (cog-atomspace)))
+         (cas (if control-enabled control-as (cog-atomspace))))
+  (cog-mandatory-args-bc rbs target vardecl
+                         trace-enabled tas control-enabled cas focus-set)))
 
 (define-public (ure-define-add-rule rbs rule-name rule weight)
 "

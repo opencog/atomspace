@@ -20,8 +20,8 @@
  * Free Software Foundation, Inc.,
  * 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
  */
-#ifndef TRACERECORDER_H_
-#define TRACERECORDER_H_
+#ifndef OPENCOG_TRACERECORDER_H_
+#define OPENCOG_TRACERECORDER_H_
 
 #include <opencog/atomspace/AtomSpace.h>
 
@@ -34,12 +34,12 @@ namespace opencog
 class TraceRecorder
 {
 public:
-	TraceRecorder(AtomSpace* tr_as);
+	static const std::string target_predicate_name;
+	static const std::string andbit_predicate_name;
+	static const std::string expand_andbit_predicate_name;
+	static const std::string proof_predicate_name;
 
-	const std::string target_predicate_name = "URE:BC:target";
-	const std::string andbit_predicate_name = "URE:BC:and-BIT";
-	const std::string expand_andbit_predicate_name = "URE:BC:expand-and-BIT";
-	const std::string proof_predicate_name = "URE:BC:proof";
+	TraceRecorder(AtomSpace* tr_as);
 
 	// Record that an atom is a target
 	//
@@ -147,4 +147,4 @@ private:
 
 } // namespace opencog
 
-#endif /* BACKWARDCHAINER_H_ */
+#endif /* OPENCOG_TRACERECORDER_H_ */

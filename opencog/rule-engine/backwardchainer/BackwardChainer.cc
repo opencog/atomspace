@@ -48,16 +48,20 @@ BackwardChainer::BackwardChainer(AtomSpace& as, const Handle& rbs,
                                  const Handle& target,
                                  const Handle& vardecl,
                                  AtomSpace* trace_as,
+                                 AtomSpace* control_as,
                                  const Handle& focus_set, // TODO:
                                                           // support
                                                           // focus_set
                                  const BITNodeFitness& bitnode_fitness,
                                  const AndBITFitness& andbit_fitness)
-	: _as(as), _trace_recorder(trace_as), _configReader(as, rbs),
+	: _as(as), _configReader(as, rbs),
 	  _bit(as, target, vardecl, bitnode_fitness),
 	  _andbit_fitness(andbit_fitness),
-	  _iteration(0), _last_expansion_andbit(nullptr),
-	  _rules(_configReader.get_rules()) {
+	  _trace_recorder(trace_as),
+	  _control(_configReader.get_rules(), _bit, control_as),
+	  _rules(_control.rules),
+	  _iteration(0), _last_expansion_andbit(nullptr)
+{
 	// Record the target in the trace atomspace
 	_trace_recorder.target(target);
 }
@@ -159,16 +163,11 @@ void BackwardChainer::expand_bit(AndBIT& andbit)
 		return;
 	}
 
-	// Get the leaf vardecl from fcs. We don't want to filter it
-	// because otherwise the typed substitution obtained may miss some
-	// variables in the FCS declaration that needs to be substituted
-	// during expension.
-	Handle vardecl = BindLinkCast(andbit.fcs)->get_vardecl();
-
-	// Select a valid rule
-	RuleTypedSubstitutionPair rule_ts = select_rule(*bitleaf, vardecl);
+	// Select rule for expansion
+	RuleTypedSubstitutionPair rule_ts = _control.select_rule(andbit, *bitleaf);
 	Rule rule(rule_ts.first);
 	Unify::TypedSubstitution ts(rule_ts.second);
+
 	// Add the rule in the _bit.bit_as to make comparing atoms easier
 	// as well as logging more consistent.
 	rule.add(_bit.bit_as);
@@ -341,68 +340,6 @@ void BackwardChainer::remove_unlikely_expandable_andbit()
 	LAZY_URE_LOG_DEBUG << "Remove " << it->fcs->idToString()
 	                   << " from the BIT";
 	_bit.erase(it);
-}
-
-RuleTypedSubstitutionPair BackwardChainer::select_rule(BITNode& target,
-                                                       const Handle& vardecl)
-{
-	// The rule is randomly selected amongst the valid ones, with
-	// probability of selection being proportional to its weight.
-	const RuleTypedSubstitutionMap valid_rules = get_valid_rules(target, vardecl);
-	if (valid_rules.empty()) {
-		target.exhausted = true;
-		return {Rule(), Unify::TypedSubstitution()};;
-	}
-
-	// Log all valid rules and their weights
-	if (ure_logger().is_debug_enabled()) {
-		std::stringstream ss;
-		ss << "The following weighted rules are valid:";
-		for (const auto& r : valid_rules)
-			ss << std::endl << r.first.get_weight() << " " << r.first.get_name();
-		LAZY_URE_LOG_DEBUG << ss.str();
-	}
-
-	return select_rule(valid_rules);
-}
-
-RuleTypedSubstitutionPair BackwardChainer::select_rule(const RuleTypedSubstitutionMap& rules)
-{
-	// Build weight vector to do weighted random selection
-	std::vector<double> weights;
-	for (const auto& rule : rules)
-		weights.push_back(rule.first.get_weight());
-
-	// No rule exhaustion, sample one according to the distribution
-	std::discrete_distribution<size_t> dist(weights.begin(), weights.end());
-	return rand_element(rules, dist);
-}
-
-RuleTypedSubstitutionMap BackwardChainer::get_valid_rules(const BITNode& target,
-                                                          const Handle& vardecl)
-{
-	// Generate all valid rules
-	RuleTypedSubstitutionMap valid_rules;
-	for (const Rule& rule : _rules) {
-		// For now ignore meta rules as they are forwardly applied in
-		// expand_bit()
-		if (rule.is_meta())
-			continue;
-
-		RuleTypedSubstitutionMap unified_rules
-			= rule.unify_target(target.body, vardecl);
-
-		// Insert only rules with positive probability of success
-		RuleTypedSubstitutionMap pos_rules;
-		for (const auto& rule : unified_rules) {
-			double p = (_bit.is_in(rule, target) ? 0.0 : 1.0)
-				* rule.first.get_weight();
-			if (p > 0) pos_rules.insert(rule);
-		}
-
-		valid_rules.insert(pos_rules.begin(), pos_rules.end());
-	}
-	return valid_rules;
 }
 
 double BackwardChainer::complexity_factor(const AndBIT& andbit) const

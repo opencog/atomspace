@@ -65,6 +65,7 @@ public:
 
 void BackwardChainerUTest::setUp()
 {
+	// TODO: move that in the ctor
 	string cur_pp_dir = string(PROJECT_SOURCE_DIR),
 		cur_p_dir = cur_pp_dir + "/tests",
 		cur_dir = cur_p_dir + "/rule-engine";
@@ -104,14 +105,17 @@ void BackwardChainerUTest::test_select_rule_1()
 {
 	logger().debug("BEGIN TEST: %s", __FUNCTION__);
 
+	// TODO: move that in setUp
 	reset_bc();
 
 	Handle target_h = _eval.eval_h("(Inheritance"
 	                               "   (Concept \"A\")"
 	                               "   (Concept \"B\"))");
 	BITNode target(target_h);
+	AndBIT andbit;
 
-	RuleTypedSubstitutionPair selected_rule = _bc->select_rule(target);
+	RuleTypedSubstitutionPair selected_rule =
+		_bc->_control.select_rule(andbit, target);
 
 	TS_ASSERT_EQUALS(selected_rule.first.get_name(), "bc-deduction-rule");
 }
@@ -127,8 +131,10 @@ void BackwardChainerUTest::test_select_rule_2()
 	                               "   (Concept \"A\")"
 	                               "   (Variable \"$X\"))");
 	BITNode target(target_h);
+	AndBIT andbit;
 
-	RuleTypedSubstitutionPair selected_rule = _bc->select_rule(target);
+	RuleTypedSubstitutionPair selected_rule =
+		_bc->_control.select_rule(andbit, target);
 
 	TS_ASSERT_EQUALS(selected_rule.first.get_name(), "bc-deduction-rule");
 }
@@ -146,8 +152,10 @@ void BackwardChainerUTest::test_select_rule_3()
 		                         "   (Variable \"$C\")"
 		                         "   (Type \"InheritanceLink\"))");
 	BITNode target(target_h);
+	AndBIT andbit(_as, target_h, vardecl_h);
 
-	RuleTypedSubstitutionPair selected_rule = _bc->select_rule(target, vardecl_h);
+	RuleTypedSubstitutionPair selected_rule =
+		_bc->_control.select_rule(andbit, target);
 
 	TS_ASSERT_EQUALS(selected_rule.first.get_name(), "bc-deduction-rule");
 }
@@ -598,7 +606,7 @@ void BackwardChainerUTest::test_criminal_trace()
 		17025922688105268679U, 16237370205818075250U, 13060619487639450045U,
 			14172591710384300158U, 14741649033484653578U, 11564898315305997225U};
 	AndBITFitness trace_fitness(AndBITFitness::Trace, trace);
-	BackwardChainer bc(_as, top_rbs, target, vardecl, nullptr,
+	BackwardChainer bc(_as, top_rbs, target, vardecl, nullptr, nullptr,
 	                   Handle::UNDEFINED, BITNodeFitness(), trace_fitness);
 	bc.get_config().set_maximum_iterations(50);
 	bc.do_chain();
@@ -689,7 +697,7 @@ void BackwardChainerUTest::test_focus_set()
 		             " )"
 		             ")");
 
-	BackwardChainer bc(_as, top_rbs, target, vardecl, nullptr, focus_set);
+	BackwardChainer bc(_as, top_rbs, target, vardecl, nullptr, nullptr, focus_set);
 
 	Handle soln1 = _eval.eval_h("(InheritanceLink"
 	                            "  (ConceptNode \"tree\")"

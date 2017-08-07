@@ -38,6 +38,7 @@
 #include <unordered_set>
 #include <vector>
 
+#include <opencog/util/Counter.h>
 #include <opencog/atoms/base/types.h>
 
 // Comment this out if you want to enforce more determinism in the
@@ -192,6 +193,9 @@ typedef std::set<HandleMap> HandleMapSet;
 
 //! a sequence of handle pairs
 typedef std::vector<HandlePair> HandlePairSeq;
+
+//! a map from handle to double
+typedef Counter<Handle, double> HandleCounter;
 
 //! a handle iterator
 typedef std::iterator<std::forward_iterator_tag, Handle> HandleIterator;

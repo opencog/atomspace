@@ -245,7 +245,7 @@ public:
     }
 
     // Return the size of an atom. 1 if a node, 1 + sizes of its
-    // outgoings if a link.
+    // outgoings if a link. It does not discount redundant atoms.
     virtual size_t size() const = 0;
 
     virtual const HandleSeq& getOutgoingSet() const {
