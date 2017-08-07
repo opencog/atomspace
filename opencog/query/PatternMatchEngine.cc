@@ -693,6 +693,7 @@ bool PatternMatchEngine::glob_compare(const PatternTermSeq& osp,
 	GlobGrd glob_grd;
 	GlobPosStack glob_pos_stack;
 
+	// Common things needed to be done when we backtrack.
 	bool backtracking = false;
 	bool cannot_backtrack_anymore = false;
 	auto backtrack = [&](bool is_glob)
@@ -700,8 +701,8 @@ bool PatternMatchEngine::glob_compare(const PatternTermSeq& osp,
 		backtracking = true;
 
 		// If we are looking at a glob right now and fail
-		// to ground it, pop and go back to the previous
-		// one to try again.
+		// to ground it, pop the stack, go back to the
+		// previous one and try again.
 		if (is_glob)
 		{
 			// Erase the grounding record of the glob before
@@ -713,7 +714,8 @@ bool PatternMatchEngine::glob_compare(const PatternTermSeq& osp,
 			glob_state[gp] = {glob_grd, glob_pos_stack};
 		}
 
-		// Now go back to the previous glob and try again.
+		// See where the previous glob is and try again
+		// from there.
 		if (0 == glob_pos_stack.size())
 			cannot_backtrack_anymore = true;
 		else
@@ -727,6 +729,7 @@ bool PatternMatchEngine::glob_compare(const PatternTermSeq& osp,
 		}
 	};
 
+	// Common things needed to be done when it's a match.
 	auto record_match = [&](const PatternTermPtr& glob,
 	                        const HandleSeq& glob_seq)
 	{
@@ -737,6 +740,7 @@ bool PatternMatchEngine::glob_compare(const PatternTermSeq& osp,
 		var_grounding[glob->getHandle()] = glp->getHandle();
 	};
 
+	// Common things needed to be done when it's not a match.
 	auto mismatch = [&]()
 	{
 		match = false;
@@ -744,10 +748,10 @@ bool PatternMatchEngine::glob_compare(const PatternTermSeq& osp,
 	};
 
 	// Resume the matching from a previous state.
-	// i.e. we had successfully grounded the whole term,
-	// but it turns out the groundings do not satisfy
-	// the other terms in the same pattern, so we try to
-	// see if the globs in this term can be grounded differently.
+	// i.e. we had successfully grounded osp to osg, but it
+	// turns out the groundings do not satisfy some other terms
+	// in the same pattern, so we try again and see if the globs
+	// in osp can be grounded differently.
 	bool resuming = false;
 	auto r = glob_state.find(gp);
 	if (r != glob_state.end())
@@ -814,13 +818,13 @@ bool PatternMatchEngine::glob_compare(const PatternTermSeq& osp,
 				last_grd = gi->second;
 			}
 
-			// If the lower bound of the interval is zero, so the glob
+			// If the lower bound of the interval is zero, the glob
 			// can be grounded to nothing.
 			if (_varlist->is_lower_bound(ohp, 0))
 			{
 				// Try again, find another glob that can be grounded
-				// in a different way. Probably because we are
-				// resuming from a different state.
+				// in a different way. (we are probably resuming the
+				// search from a previous state)
 				if (0 == last_grd)
 				{
 					backtrack(true);
@@ -829,7 +833,7 @@ bool PatternMatchEngine::glob_compare(const PatternTermSeq& osp,
 
 				// On the other hand, if we failed to ground this glob
 				// in the previous iteration, just let it ground to
-				// nothing (as long as it is not the last one in osp)
+				// nothing (as long as it is not the last one in osp),
 				// and we are done with it.
 				if (1 == last_grd and ip+1 < osp_size)
 				{
@@ -838,7 +842,7 @@ bool PatternMatchEngine::glob_compare(const PatternTermSeq& osp,
 					continue;
 				}
 
-				// If we already have gone through all the atoms of
+				// If we have already gone through all the atoms of
 				// the candidate at this point, we are done.
 				if (jg >= osg_size)
 				{
@@ -889,12 +893,12 @@ bool PatternMatchEngine::glob_compare(const PatternTermSeq& osp,
 
 					glob_seq.push_back(osg[jg]);
 
-					// Move to the next one.
+					// See if we can match the next one.
 					jg++;
 				}
 			} while (tc and jg<osg_size);
 
-			// Try again if we can't ground the glob.
+			// Try again if we can't ground the glob after all.
 			if (0 == glob_seq.size())
 			{
 				backtrack(true);
@@ -925,7 +929,7 @@ bool PatternMatchEngine::glob_compare(const PatternTermSeq& osp,
 		}
 		else
 		{
-			// If we are here, we are not looking at a glob.
+			// If we are here, we are not comparing to a glob.
 
 			// Try again if we have already gone through all the
 			// atoms in osg.
@@ -951,6 +955,7 @@ bool PatternMatchEngine::glob_compare(const PatternTermSeq& osp,
 				continue;
 			}
 
+			// We've got a match, move on.
 			ip++; jg++;
 		}
 	}
@@ -1547,10 +1552,10 @@ bool PatternMatchEngine::do_next_clause(void)
 		DO_LOG(log_solution(var_grounding, clause_grounding);)
 
 		// Since the PM may move on and try to search for more solutions,
-		// clear the glob_state here to prevent it from going back to the
-		// exact same candidate again.
-		// Without this, it will find all possible ways of grounding the same
-		// term to the same candidate before moving to the next candidate.
+		// clear the glob_state here to prevent it from comparing the
+		// exact same term to the exact same candidate again.
+		// Otherwise, all possible ways to ground the globs in the term
+		// will be explored before moving to the next candidate.
 		glob_state.clear();
 	}
 	else

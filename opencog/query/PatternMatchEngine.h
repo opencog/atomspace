@@ -244,8 +244,7 @@ public:
 	bool explore_constant_evaluatables(const HandleSeq& clauses);
 
 	// It's possible to have more than one valid way to ground
-	// a term with globs in it, so this returns true if that
-	// is the case.
+	// a term with globs in it, returns true if that's the case.
 	bool has_more_to_explore() { return glob_state.size() > 0; }
 
 	// Handy-dandy utilities
