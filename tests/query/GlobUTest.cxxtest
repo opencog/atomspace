@@ -69,6 +69,7 @@ _exit(rc); // XXX hack to avoid double-free in __run_exit_handlers
 	void test_glob_exact(void);
 	void test_glob_greedy(void);
 	void test_glob_unorder(void);
+	void test_glob_backtrack(void);
 };
 
 void GlobUTest::tearDown(void)
@@ -392,6 +393,38 @@ void GlobUTest::test_glob_unorder(void)
 		"    (ConceptNode \"lime\")))"
 	);
 	TS_ASSERT_EQUALS(unorder, response);
+
+	// ----
+	logger().debug("END TEST: %s", __FUNCTION__);
+}
+
+void GlobUTest::test_glob_backtrack(void)
+{
+	logger().debug("BEGIN TEST: %s", __FUNCTION__);
+
+	eval->eval("(load-from-path \"tests/query/glob-basic.scm\")");
+
+	Handle backtrack = eval->eval_h("(cog-execute! backtrack)");
+	printf("backtrack %s\n", backtrack->toString().c_str());
+	TS_ASSERT_EQUALS(1, backtrack->getArity());
+
+	Handle response = eval->eval_h(
+		"(SetLink"
+		"  (ListLink"
+		"    (ListLink"
+		"      (ConceptNode \"A\")"
+		"      (ConceptNode \"B\"))"
+		"    (ListLink"
+		"      (ConceptNode \"C\"))"
+		"    (ListLink"
+		"      (ConceptNode \"D\")"
+		"      (ConceptNode \"E\")"
+		"      (ConceptNode \"F\")"
+		"      (ConceptNode \"G\")"
+		"      (ConceptNode \"H\")"
+		"      (ConceptNode \"I\"))))"
+	);
+	TS_ASSERT_EQUALS(backtrack, response);
 
 	// ----
 	logger().debug("END TEST: %s", __FUNCTION__);

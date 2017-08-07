@@ -128,6 +128,24 @@ private:
 	std::stack<std::map<Unorder, int>> perm_count_stack;
 
 	// --------------------------------------------
+	// Glob state management
+
+	// Record the glob-pattern and the candidate we are comparing
+	typedef std::pair<PatternTermSeq, HandleSeq> GlobPair;
+
+	// Record where the globs are (branchpoints)
+	typedef std::pair<Handle, std::pair<size_t, size_t>> GlobPos;
+	typedef std::stack<GlobPos> GlobPosStack;
+
+	// Record how many atoms have been grounded to the globs
+	typedef std::map<Handle, size_t> GlobGrd;
+
+	typedef std::pair<GlobGrd, GlobPosStack> GlobState;
+
+	std::map<GlobPair, GlobState> glob_state;
+	std::set<GlobPair> glob_prev_pairs;
+
+	// --------------------------------------------
 	// Methods and state that select the next clause to be grounded.
 
 	bool do_next_clause(void);
@@ -224,6 +242,10 @@ public:
 	// PatternMatchCallback. It is assumed that all clauses are
 	// connected by an AndLink.
 	bool explore_constant_evaluatables(const HandleSeq& clauses);
+
+	// It's possible to have more than one valid way to ground
+	// a term with globs in it, returns true if that's the case.
+	bool has_more_to_explore() { return glob_state.size() > 0; }
 
 	// Handy-dandy utilities
 	static void log_solution(const HandleMap &vars,

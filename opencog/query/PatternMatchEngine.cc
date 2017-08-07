@@ -683,38 +683,107 @@ bool PatternMatchEngine::glob_compare(const PatternTermSeq& osp,
                                       const HandleSeq& osg)
 {
 	bool match = true;
+	GlobPair gp = {osp, osg};
 	size_t osp_size = osp.size();
 	size_t osg_size = osg.size();
 
-	// To record how many atoms are grounded to the GlobNodes, and
-	// their positions.
-	std::map<Handle, size_t> glob_grd;
-	std::vector<std::pair<size_t, size_t>> glob_pos;
+	size_t ip = 0;
+	size_t jg = 0;
 
-	for (size_t ip=0, jg=0; ip<osp_size or jg<osg_size; ip++, jg++)
+	GlobGrd glob_grd;
+	GlobPosStack glob_pos_stack;
+
+	// Common things needed to be done when we backtrack.
+	bool backtracking = false;
+	bool cannot_backtrack_anymore = false;
+	auto backtrack = [&](bool is_glob)
 	{
-		if (ip == osp_size) ip --;
+		backtracking = true;
 
-		bool grd_end = false;
-		if (jg == osg_size)
+		// If we are looking at a glob right now and fail
+		// to ground it, pop the stack, go back to the
+		// previous one and try again.
+		if (is_glob)
 		{
-			grd_end = true;
-			jg --;
+			// Erase the grounding record of the glob before
+			// popping it out from the stack.
+			glob_grd.erase(glob_pos_stack.top().first);
+			var_grounding.erase(glob_pos_stack.top().first);
+
+			glob_pos_stack.pop();
+			glob_state[gp] = {glob_grd, glob_pos_stack};
 		}
 
-		bool tc = false;
+		// See where the previous glob is and try again
+		// from there.
+		if (0 == glob_pos_stack.size())
+			cannot_backtrack_anymore = true;
+		else
+		{
+			ip = glob_pos_stack.top().second.first;
+			jg = glob_pos_stack.top().second.second;
+
+			// Erase the previous grounding of the glob before
+			// we try again.
+			var_grounding.erase(glob_pos_stack.top().first);
+		}
+	};
+
+	// Common things needed to be done when it's a match.
+	auto record_match = [&](const PatternTermPtr& glob,
+	                        const HandleSeq& glob_seq)
+	{
+		glob_grd[glob->getHandle()] = glob_seq.size();
+		glob_state[gp] = {glob_grd, glob_pos_stack};
+
+		LinkPtr glp(createLink(glob_seq, LIST_LINK));
+		var_grounding[glob->getHandle()] = glp->getHandle();
+	};
+
+	// Common things needed to be done when it's not a match.
+	auto mismatch = [&]()
+	{
+		match = false;
+		glob_state.erase(gp);
+	};
+
+	// Resume the matching from a previous state.
+	// i.e. we had successfully grounded osp to osg, but it
+	// turns out the groundings do not satisfy some other terms
+	// in the same pattern, so we try again and see if the globs
+	// in osp can be grounded differently.
+	bool resuming = false;
+	auto r = glob_state.find(gp);
+	if (r != glob_state.end())
+	{
+		resuming = true;
+		glob_grd = r->second.first;
+		glob_pos_stack = r->second.second;
+		ip = glob_pos_stack.top().second.first;
+		jg = glob_pos_stack.top().second.second;
+	}
+	// If it's not in glob_state but we have seen this before?
+	else if (glob_prev_pairs.find(gp) != glob_prev_pairs.end())
+	{
+		// FIXME: This check should not be needed, as the search
+		// should have finished by now?
+		return true;
+	}
+
+	// Keep a record of all pairs that we have ever seen.
+	glob_prev_pairs.insert(gp);
+
+	while (ip<osp_size)
+	{
+		// Reject if no more backtracking is possible.
+		if (cannot_backtrack_anymore)
+		{
+			mismatch();
+			break;
+		}
+
 		const Handle& ohp(osp[ip]->getHandle());
 		Type ptype = ohp->getType();
-
-		auto reset = [&]()
-		{
-			ip = glob_pos.back().first - 1;
-			jg = glob_pos.back().second - 1;
-			glob_pos.pop_back();
-
-			// Clear any groundings for the last glob we've seen.
-			var_grounding.erase(osp[ip+1]->getHandle());
-		};
 
 		if (GLOB_NODE == ptype)
 		{
@@ -723,137 +792,171 @@ bool PatternMatchEngine::glob_compare(const PatternTermSeq& osp,
 			// to the clause_match() callback?
 			if (ohp == osg[jg]) return false;
 
-			glob_pos.push_back({ip, jg});
-
-			size_t last_grd = SIZE_MAX;
-			auto gi = glob_grd.find(ohp);
-			if (gi != glob_grd.end())
+			// No need to push to stack if we are backtracking or resuming.
+			if (backtracking or resuming)
 			{
-				// If we are here, that means we have seen this glob
-				// in previous iterations.
-				last_grd = gi->second;
-
-				if (last_grd == 0 or
-				    not _varlist->is_lower_bound(ohp, last_grd-1))
-				{
-					// If the glob cannot be grounded to fewer no.
-					// of atoms, it's not a match.
-					glob_grd.erase(ohp);
-					glob_pos.pop_back();
-					last_grd = SIZE_MAX;
-
-					// Reject the candidate if we cannot find a
-					// possible way to satisfy all the restrictions
-					// of the globs we have seen.
-					if (glob_grd.size() == 0)
-					{
-						match = false;
-						break;
-					}
-
-					// Resume from the previous glob and
-					// try to find a match again.
-					reset();
-					continue;
-				}
+				// Reset the flags, so that the next glob will be
+				// pushed to the stack.
+				backtracking = false;
+				resuming = false;
+			}
+			else
+			{
+				glob_pos_stack.push({ohp, {ip, jg}});
+				glob_state[gp] = {glob_grd, glob_pos_stack};
 			}
 
 			HandleSeq glob_seq;
 			PatternTermPtr glob(osp[ip]);
 
+			// First of all, see if we have seen this glob in
+			// previous iterations.
+			size_t last_grd = SIZE_MAX;
+			auto gi = glob_grd.find(ohp);
+			if (gi != glob_grd.end())
+			{
+				last_grd = gi->second;
+			}
+
+			// If the lower bound of the interval is zero, the glob
+			// can be grounded to nothing.
 			if (_varlist->is_lower_bound(ohp, 0))
 			{
-				// If we are here, that means the lower bound of the
-				// interval is zero, so the glob can be grounded
-				// to nothing.
-
-				// Since the glob has a lower bound of zero, if we
-				// already have gone through all the atoms of
-				// the candidate at this point, we are done.
-				if (grd_end)
+				// Try again, find another glob that can be grounded
+				// in a different way. (we are probably resuming the
+				// search from a previous state)
+				if (0 == last_grd)
 				{
-					glob_grd[ohp] = 0;
-					var_grounding.erase(ohp);
+					backtrack(true);
+					continue;
+				}
+
+				// On the other hand, if we failed to ground this glob
+				// in the previous iteration, just let it ground to
+				// nothing (as long as it is not the last one in osp),
+				// and we are done with it.
+				if (1 == last_grd and ip+1 < osp_size)
+				{
+					record_match(glob, glob_seq);
+					ip++;
+					continue;
+				}
+
+				// If we have already gone through all the atoms of
+				// the candidate at this point, we are done.
+				if (jg >= osg_size)
+				{
+					record_match(glob, glob_seq);
+					ip++;
 					continue;
 				}
 
 				// Just in case if the upper bound is zero...
-				// or we tried to ground it in previous
-				// iterations but failed, move on.
-				if (not _varlist->is_upper_bound(ohp, 1) or
-				    last_grd == 1)
+				if (not _varlist->is_upper_bound(ohp, 1))
 				{
-					jg --;
-					glob_grd[ohp] = 0;
-					var_grounding.erase(ohp);
+					record_match(glob, glob_seq);
+					ip++;
 					continue;
 				}
 			}
 
-			// We need to ground the glob but we have gone through
-			// everything in osg already, then it's not a match.
-			if (grd_end)
+			// If we are here, that means we have to ground the glob to
+			// at least one atom.
+
+			// Try again if we have already gone through everything in osg.
+			if (jg >= osg_size)
 			{
-				glob_grd[ohp] = 0;
-				reset();
+				backtrack(true);
 				continue;
 			}
 
 			// Try to match as many atoms as possible.
+			bool tc;
 			do
 			{
 				tc = tree_compare(glob, osg[jg], CALL_GLOB);
-
 				if (tc)
 				{
 					// Can't match more than it did last time.
 					if (glob_seq.size()+1 >= last_grd)
+					{
+						jg--;
 						break;
+					}
 
 					// Can't exceed the upper bound.
 					if (not _varlist->is_upper_bound(ohp, glob_seq.size()+1))
+					{
+						jg--;
 						break;
+					}
 
 					glob_seq.push_back(osg[jg]);
+
+					// See if we can match the next one.
+					jg++;
 				}
-				jg++;
 			} while (tc and jg<osg_size);
 
-			jg --;
-			glob_grd[ohp] = glob_seq.size();
-
-			// If we can't match more, or it doesn't satisfy the
-			// lower bound restriction, try again.
-			if (not tc or not _varlist->is_lower_bound(ohp, glob_seq.size()))
+			// Try again if we can't ground the glob after all.
+			if (0 == glob_seq.size())
 			{
-				reset();
+				backtrack(true);
+				continue;
+			}
+
+			// Try again if we can't ground enough atoms to satisfy
+			// the lower bound restriction.
+			if (not _varlist->is_lower_bound(ohp, glob_seq.size()))
+			{
+				backtrack(true);
+				continue;
+			}
+
+			// Try again if there is no more osp to be explored but
+			// we haven't finished osg yet.
+			if (ip+1 == osp_size and jg+1 < osg_size)
+			{
+				backtrack(true);
 				continue;
 			}
 
 			// If we are here, we've got a match; record the glob.
-			LinkPtr glp(createLink(glob_seq, LIST_LINK));
-			var_grounding[glob->getHandle()] = glp->getHandle();
+			record_match(glob, glob_seq);
+
+			// Try to match another one.
+			ip++; jg++;
 		}
 		else
 		{
 			// If we are here, we are not comparing to a glob.
 
-			// If we have already gone through all the atoms in
-			// the candidate, or the current pair does not match,
-			// try again.
-			if (grd_end or not tree_compare(osp[ip], osg[jg], CALL_ORDER))
+			// Try again if we have already gone through all the
+			// atoms in osg.
+			if (jg >= osg_size)
 			{
-				// If we have never seen any globs before, no backtracking
-				// can be done, we can just reject it now.
-				if (glob_grd.size() == 0)
-				{
-					match = false;
-					break;
-				}
-
-				reset();
+				backtrack(false);
 				continue;
 			}
+
+			// Or if we are reaching the end of osp but there
+			// are two or more atoms to be matched in osg,
+			// try again.
+			if (ip+1 == osp_size and jg+1 < osg_size)
+			{
+				backtrack(false);
+				continue;
+			}
+
+			// Try again if this pair is not a match.
+			if (not tree_compare(osp[ip], osg[jg], CALL_ORDER))
+			{
+				backtrack(false);
+				continue;
+			}
+
+			// We've got a match, move on.
+			ip++; jg++;
 		}
 	}
 
@@ -1431,7 +1534,7 @@ bool PatternMatchEngine::clause_accept(const Handle& clause_root,
 }
 
 // This is called when all previous clauses have been grounded; so
-// we search for the next one, and try to round that.
+// we search for the next one, and try to ground that.
 bool PatternMatchEngine::do_next_clause(void)
 {
 	clause_stacks_push();
@@ -1447,6 +1550,13 @@ bool PatternMatchEngine::do_next_clause(void)
 		found = _pmc.grounding(var_grounding, clause_grounding);
 		DO_LOG(logger().fine("==================== FINITO! accepted=%d", found);)
 		DO_LOG(log_solution(var_grounding, clause_grounding);)
+
+		// Since the PM may move on and try to search for more solutions,
+		// clear the glob_state here to prevent it from comparing the
+		// exact same term to the exact same candidate again.
+		// Otherwise, all possible ways to ground the globs in the term
+		// will be explored before moving to the next candidate.
+		glob_state.clear();
 	}
 	else
 	{
