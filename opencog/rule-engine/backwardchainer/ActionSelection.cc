@@ -23,6 +23,8 @@
 
 #include "ActionSelection.h"
 
+#include <opencog/util/Logger.h>
+
 using namespace opencog;
 
 ActionSelection::ActionSelection(const HandleTVMap& a2tv)
@@ -53,9 +55,9 @@ HandleCounter ActionSelection::distribution()
 		for (int x_idx = 1; x_idx <= bins; x_idx++) {
 			double x = (double)x_idx / (double)bins;
 			double f_x = boost::math::pdf(beta, 1.0) * step;
-			for (size_t j = 0; j < action2tv.size(); j++ )
+			for (size_t j = 0; j < action2tv.size(); j++)
 				if (j != i)
-					f_x *= boost::math::cdf(cdfs[j], x);
+					f_x *= cdfs[j][x_idx];
 			Pi += f_x;
 		}
 		action2prob[std::next(action2tv.begin(), i)->first] = Pi;
