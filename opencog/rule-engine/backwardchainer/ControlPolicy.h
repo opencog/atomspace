@@ -80,6 +80,10 @@ private:
 	// various control rule
 	AtomSpace _query_as;
 
+	// Map each action (inference rule expansion) to the set of
+	// control rules involving it.
+	std::map<Handle, HandleSet> _expansion_control_rules;
+
 	/**
 	 * Return all valid rules, in the sense that they may possibly be
 	 * used to infer the target.
@@ -125,6 +129,7 @@ private:
 	 * Return the set of rule aliases, as aliases of inference rules
 	 * are used in control rules.
 	 */
+	HandleSet rule_aliases(const RuleSet& rules) const;
 	HandleSet rule_aliases(const RuleTypedSubstitutionMap& rules) const;
 
 	/**
@@ -133,23 +138,23 @@ private:
 	HandleCounter default_alias_weights(const RuleTypedSubstitutionMap& rules) const;
 
 	/**
-	 * Fetch from _control_as all active expansion control rules for
-	 * this inference rule.
+	 * Get all active expansion control rules concerning the given
+	 * inference rule.
 	 */
-	HandleSet fetch_active_expansion_control_rules(const Handle& inf_rule);
+	HandleSet active_expansion_control_rules(const Handle& inf_rule_alias) const;
 
 	/**
 	 * Return true iff the given control is current active, that is
 	 * the case of an expansion control rule whether the pattern is
 	 * true.
 	 */
-	bool control_rule_active(const Handle& ctrl_rule);
+	bool control_rule_active(const Handle& ctrl_rule) const;
 
 	/**
 	 * Return the pattern in a given expansion control rule, if it has
 	 * any.
 	 */
-	Handle get_expansion_control_rule_pattern(const Handle& ctrl_rule);
+	Handle get_expansion_control_rule_pattern(const Handle& ctrl_rule) const;
 
 	/**
 	 * Given an inference rule, fetch both pattern and pattern free

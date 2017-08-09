@@ -40,7 +40,18 @@ using namespace opencog;
 
 ControlPolicy::ControlPolicy(const RuleSet& rs, const BIT& bit,
                              AtomSpace* control_as) :
-	rules(rs), _bit(bit), _control_as(control_as) {}
+	rules(rs), _bit(bit), _control_as(control_as)
+{
+	// Fetches expansion control rules from _control_as
+	for (const Handle& rule_alias : rule_aliases(rules)) {
+		_expansion_control_rules[rule_alias] =
+			fetch_expansion_control_rules(rule_alias);
+
+		ure_logger().debug() << "Expansion control rules for "
+		                     << rule_alias->toString()
+		                     << oc_to_string(_expansion_control_rules[rule_alias]);
+	}
+}
 
 RuleTypedSubstitutionPair ControlPolicy::select_rule(AndBIT& andbit,
                                                      BITNode& bitleaf)
@@ -135,8 +146,7 @@ std::vector<double> ControlPolicy::control_rule_weights(
 	HandleTVMap success_tvs;
 	for (const Handle& rule : rule_aliases(inf_rules)) {
 		// Get all active expansion control rules
-		HandleSet active_ctrl_rules =
-			fetch_active_expansion_control_rules(rule);
+		HandleSet active_ctrl_rules = active_expansion_control_rules(rule);
 
 		// Calculate the truth value of its mixture model
 		// TODO: set cpx_penalty and compressiveness.
@@ -172,6 +182,14 @@ std::vector<double> ControlPolicy::rule_weights(
 	return weights;
 }
 
+HandleSet ControlPolicy::rule_aliases(const RuleSet& rules) const
+{
+	HandleSet aliases;
+	for (auto& rule : rules)
+		aliases.insert(rule.get_alias());
+	return aliases;
+}
+
 HandleSet ControlPolicy::rule_aliases(const RuleTypedSubstitutionMap& rules) const
 {
 	HandleSet aliases;
@@ -188,16 +206,31 @@ HandleCounter ControlPolicy::default_alias_weights(const RuleTypedSubstitutionMa
 	return res;
 }
 
-HandleSet ControlPolicy::fetch_active_expansion_control_rules(const Handle& inf_rule)
+HandleSet ControlPolicy::active_expansion_control_rules(const Handle& inf_rule_alias) const
 {
+	// Filter out inactive expansion control rules
 	HandleSet results;
-	for (const Handle& ctrl_rule : fetch_expansion_control_rules(inf_rule))
+	for (const Handle& ctrl_rule : _expansion_control_rules.at(inf_rule_alias))
 		if (control_rule_active(ctrl_rule))
 			results.insert(ctrl_rule);
+
+	// Log active control rules
+	std::stringstream ss;
+	ss << "Active expansion control rules for "
+	   << inf_rule_alias->toString();
+	if (results.empty())
+		ss << "none";
+	else {
+		ss << "size = " << results.size();
+		for (const Handle& acr : results)
+			ss << acr->idToString();
+	}
+	ure_logger().debug() << ss.str();
+
 	return results;
 }
 
-bool ControlPolicy::control_rule_active(const Handle& ctrl_rule)
+bool ControlPolicy::control_rule_active(const Handle& ctrl_rule) const
 {
 	// For now we assume that it is an expansion control rule
 	Handle expansion_pattern = get_expansion_control_rule_pattern(ctrl_rule);
@@ -210,7 +243,7 @@ bool ControlPolicy::control_rule_active(const Handle& ctrl_rule)
 	return true;
 }
 
-Handle ControlPolicy::get_expansion_control_rule_pattern(const Handle& ctrl_rule)
+Handle ControlPolicy::get_expansion_control_rule_pattern(const Handle& ctrl_rule) const
 {
 	// Check that it is indeed an expansion control rule
 	OC_ASSERT(ctrl_rule->getType() == IMPLICATION_SCOPE_LINK);
