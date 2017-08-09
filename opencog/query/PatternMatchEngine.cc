@@ -790,7 +790,11 @@ bool PatternMatchEngine::glob_compare(const PatternTermSeq& osp,
 			// GlobNodes cannot match themselves -- no self-grounding
 			// is allowed. TODO -- maybe this check should be moved
 			// to the clause_match() callback?
-			if (ohp == osg[jg]) return false;
+			if (ohp == osg[jg])
+			{
+				mismatch();
+				break;
+			}
 
 			// No need to push to stack if we are backtracking or resuming.
 			if (backtracking or resuming)
