@@ -762,16 +762,6 @@ bool PatternMatchEngine::glob_compare(const PatternTermSeq& osp,
 		ip = glob_pos_stack.top().second.first;
 		jg = glob_pos_stack.top().second.second;
 	}
-	// If it's not in glob_state but we have seen this before?
-	else if (glob_prev_pairs.find(gp) != glob_prev_pairs.end())
-	{
-		// FIXME: This check should not be needed, as the search
-		// should have finished by now?
-		return true;
-	}
-
-	// Keep a record of all pairs that we have ever seen.
-	glob_prev_pairs.insert(gp);
 
 	while (ip<osp_size)
 	{

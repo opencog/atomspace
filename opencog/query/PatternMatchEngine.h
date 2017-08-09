@@ -143,7 +143,6 @@ private:
 	typedef std::pair<GlobGrd, GlobPosStack> GlobState;
 
 	std::map<GlobPair, GlobState> glob_state;
-	std::set<GlobPair> glob_prev_pairs;
 
 	// --------------------------------------------
 	// Methods and state that select the next clause to be grounded.
