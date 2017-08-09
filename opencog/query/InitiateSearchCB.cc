@@ -398,11 +398,13 @@ bool InitiateSearchCB::neighbor_search(PatternMatchEngine *pme)
 			              << h->toShortString();})
 			bool found = pme->explore_neighborhood(_root, _starter_term, h);
 
-			// If the starter term (or any other term we've explored) has globs
-			// in it and it's possible to ground it to the same candidate
-			// differently, go for it, before moving on to the next candidates.
-			while (not found and pme->has_more_to_explore())
-				found = pme->explore_neighborhood(_root, _starter_term, h);
+		while (not found and pme->has_more_to_explore())
+		{
+			// If the starter term has globs in it and it is possible to ground
+			// it to the same candidate differently, go for it, before moving on
+			// to the next candidates.
+			found = pme->explore_neighborhood(_root, _starter_term, h);
+		}
 
 			// Terminate search if satisfied.
 			if (found) return true;
@@ -644,11 +646,13 @@ bool InitiateSearchCB::link_type_search(PatternMatchEngine *pme)
 		              << h->toShortString();})
 		bool found = pme->explore_neighborhood(_root, _starter_term, h);
 
-		// If the starter term (or any other term we've explored) has globs
-		// in it and it's possible to ground it to the same candidate
-		// differently, go for it, before moving on to the next candidates.
 		while (not found and pme->has_more_to_explore())
+		{
+			// If the starter term has globs in it and it is possible to ground
+			// it to the same candidate differently, go for it, before moving on
+			// to the next candidates.
 			found = pme->explore_neighborhood(_root, _starter_term, h);
+		}
 
 		if (found) return true;
 	}
@@ -822,11 +826,13 @@ bool InitiateSearchCB::variable_search(PatternMatchEngine *pme)
 		              << h->toShortString();})
 		bool found = pme->explore_neighborhood(_root, _starter_term, h);
 
-		// If the starter term (or any other term we've explored) has globs
-		// in it and it's possible to ground it to the same candidate
-		// differently, go for it, before moving on to the next candidates.
 		while (not found and pme->has_more_to_explore())
+		{
+			// If the starter term has globs in it and it is possible to ground
+			// it to the same candidate differently, go for it, before moving on
+			// to the next candidates.
 			found = pme->explore_neighborhood(_root, _starter_term, h);
+		}
 
 		if (found) return true;
 	}

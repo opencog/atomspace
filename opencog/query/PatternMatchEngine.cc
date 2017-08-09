@@ -762,16 +762,6 @@ bool PatternMatchEngine::glob_compare(const PatternTermSeq& osp,
 		ip = glob_pos_stack.top().second.first;
 		jg = glob_pos_stack.top().second.second;
 	}
-	// If it's not in glob_state but we have seen this before?
-	else if (glob_prev_pairs.find(gp) != glob_prev_pairs.end())
-	{
-		// FIXME: This check should not be needed, as the search
-		// should have finished by now?
-		return true;
-	}
-
-	// Keep a record of all pairs that we have ever seen.
-	glob_prev_pairs.insert(gp);
 
 	while (ip<osp_size)
 	{
@@ -790,7 +780,11 @@ bool PatternMatchEngine::glob_compare(const PatternTermSeq& osp,
 			// GlobNodes cannot match themselves -- no self-grounding
 			// is allowed. TODO -- maybe this check should be moved
 			// to the clause_match() callback?
-			if (ohp == osg[jg]) return false;
+			if (ohp == osg[jg])
+			{
+				mismatch();
+				break;
+			}
 
 			// No need to push to stack if we are backtracking or resuming.
 			if (backtracking or resuming)
@@ -1178,12 +1172,37 @@ bool PatternMatchEngine::explore_up_branches(const PatternTermPtr& ptm,
 	size_t sz = iset.size();
 	DO_LOG({LAZY_LOG_FINE << "Looking upward for term=" << ptm->toString()
 	              << " have " << sz << " branches";})
+
+	// Check if the pattern has globs in it.
+	bool has_glob = false;
+	size_t gstate_size = SIZE_MAX;
+	if (contains_atomtype(ptm->getHandle(), GLOB_NODE)) has_glob = true;
+
 	bool found = false;
 	for (size_t i = 0; i < sz; i++) {
 		DO_LOG({LAZY_LOG_FINE << "Try upward branch " << i+1 << " of " << sz
 		              << " for term=" << ptm->toString()
 		              << " propose=" << Handle(iset[i]).value();})
+
+		// Before exploring the link branches, record the current glob_state size.
+		// The idea is, if the ptm & hg is a match, their state will be recorded
+		// in glob_state, so that one can, if needed, resume and try to ground
+		// those globs again in a different way (e.g. backtracking from another
+		// branchpoint). If there is no more possible ways to ground them, they
+		// will be removed from glob_state. So simply by comparing the glob_state
+		// size before and after seems to be an OK way to quickly check if we
+		// can move on to the next one or not.
+		if (has_glob) gstate_size = glob_state.size();
+
 		found = explore_link_branches(ptm, Handle(iset[i]), clause_root);
+
+		// If there may be another way to ground it differently to the same
+		// candidate, do it until exhausted.
+		while (not found and has_glob and glob_state.size() > gstate_size)
+		{
+			found = explore_link_branches(ptm, Handle(iset[i]), clause_root);
+		}
+
 		if (found) break;
 	}
 
