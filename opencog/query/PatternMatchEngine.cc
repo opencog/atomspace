@@ -1199,7 +1199,9 @@ bool PatternMatchEngine::explore_up_branches(const PatternTermPtr& ptm,
 		// If there may be another way to ground it differently to the same
 		// candidate, do it until exhausted.
 		while (not found and has_glob and glob_state.size() > gstate_size)
+		{
 			found = explore_link_branches(ptm, Handle(iset[i]), clause_root);
+		}
 
 		if (found) break;
 	}
@@ -1820,7 +1822,6 @@ bool PatternMatchEngine::get_next_thinnest_clause(bool search_virtual,
 		for (auto it = root_list.first; it != root_list.second; it++)
 		{
 			const Handle& root = it->second;
-
 			if ((issued.end() == issued.find(root))
 			        and (search_virtual or not is_evaluatable(root))
 			        and (search_black or not is_black(root))
