@@ -126,7 +126,7 @@
 (define*-public (batch-similarity LLOBJ MTM?
 	#:optional
 	(ID (if (LLOBJ 'filters?) (LLOBJ 'id) #f))
-	(CUTOFF 0.5)
+	(CUTOFF 0.1)
 	(SIM-FUN
 		(let ((acc (add-pair-cosine-compute LLOBJ)))
 			(if MTM?

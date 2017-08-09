@@ -156,18 +156,16 @@
   gar LINK - return first element of a Link atom.
   Return null if the LINK is empty.
 "
-	(define oset (cog-outgoing-set LINK))
-	(if (null? oset) '() (car oset)) )
+	(cog-outgoing-atom LINK 0)
+)
 
 (define-public (gdr LINK)
 "
   gdr LINK - return second element of a Link atom.
   Return null if the LINK is empty or has only one element.
 "
-	(define oset (cog-outgoing-set LINK))
-	(if (null? oset) '()
-		(let ((dohset (cdr oset)))
-			(if (null? dohset) '() (car dohset)))) )
+	(cog-outgoing-atom LINK 1)
+)
 
 (define-public (gaar x) (gar (gar x)) )
 (define-public (gadr x) (gar (gdr x)) )
