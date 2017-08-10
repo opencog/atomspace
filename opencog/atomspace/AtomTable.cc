@@ -384,12 +384,16 @@ AtomPtr AtomTable::cast_factory(Type atom_type, AtomPtr atom)
 AtomPtr AtomTable::clone_factory(Type atom_type, AtomPtr atom)
 {
     // Nodes of various kinds -----------
+    // XXX TODO: convert TypeNode and NumberNode to use factory as
+    // well.
     if (NUMBER_NODE == atom_type)
         return createNumberNode(*NodeCast(atom));
     if (classserver().isA(atom_type, TYPE_NODE))
         return createTypeNode(*NodeCast(atom));
+
+    // LgDictNode needs a factory to construct it.
     if (classserver().isA(atom_type, NODE))
-        return createNode(*NodeCast(atom));
+        return classserver().factory(Handle(createNode(*NodeCast(atom))));
 
     // The createLink *forces* a copy of the link to be made.
     return classserver().factory(Handle(createLink(*LinkCast(atom))));
