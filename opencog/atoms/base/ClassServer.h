@@ -271,6 +271,21 @@ static __attribute__ ((constructor)) void init(void)              \
    classserver().addFactory(CTYPE, &CNAME::factory);              \
 }
 
+#define DEFINE_NODE_FACTORY(CNAME,CTYPE)                          \
+                                                                  \
+Handle CNAME::factory(const Handle& base)                         \
+{                                                                 \
+   if (CNAME##Cast(base)) return base;                            \
+   Handle h(create##CNAME(base->getType(), base->getName()));     \
+   return h;                                                      \
+}                                                                 \
+                                                                  \
+/* This runs when the shared lib is loaded. */                    \
+static __attribute__ ((constructor)) void init(void)              \
+{                                                                 \
+   classserver().addFactory(CTYPE, &CNAME::factory);              \
+}
+
 /** @}*/
 } // namespace opencog
 
