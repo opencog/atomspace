@@ -194,7 +194,10 @@ public:
 	 */
 	HandlePairSeq get_conclusions() const;
 
-	double get_weight() const;
+	/**
+	 * Get the default TruthValue associated with the rule.
+	 */
+	TruthValuePtr get_tv() const;
 
 	/**
 	 * Create a new rule where all variables are uniquely renamed.
@@ -270,9 +273,15 @@ private:
 	// Rule-based system name
 	Handle _rbs;
 
-	// Rule weight (indicated by the TV strength of the membership of
-	// the rule to the RBS)
-	double _weight;
+	// TruthValue associated to the rule (the TV of the membership of
+	// the rule to the RBS). The semantics of the TV is the
+	// probability of participating in building an inference (forward
+	// or backward) fulfilling the objective.
+	//
+	// It is best to have this TV with a confidence lower than 1,
+	// otherwise, if given the choice between several valid rules, the
+	// URE will always choose the one with the highest confidence.
+	TruthValuePtr _tv;
 
 	// Return a copy of the rule with the variables alpha-converted
 	// into random variable names.

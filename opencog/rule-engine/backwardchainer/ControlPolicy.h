@@ -31,6 +31,14 @@
 namespace opencog
 {
 
+//! a map from handles to truth values
+typedef std::map<Handle, TruthValuePtr> HandleTVMap;
+
+// Hold RuleTypedSubstitutionPair and double, the probability of
+// selecting the rule, which must be passed to the BIT to calculate
+// the and-BIT complexity.
+typedef std::pair<RuleTypedSubstitutionPair, double> RuleSelection;
+
 class ControlPolicy
 {
 public:
@@ -59,11 +67,15 @@ public:
 	 * The andbit and bitleaf are not const because if the rules are
 	 * exhausted it will set its exhausted flag to false.
 	 */
-	RuleTypedSubstitutionPair select_rule(AndBIT& andbit, BITNode& bitleaf);
+	RuleSelection select_rule(AndBIT& andbit, BITNode& bitleaf);
 
 private:
 	// Reference to the BackwardChainer BIT
 	const BIT& _bit;
+
+	// Map alias rule to their default TV. This is used whenever no
+	// control rule can be used to predict inference expansion.
+	HandleTVMap _default_tvs;
 
 	// AtomSpace holding the inference control rules (or simply
 	// control rules for short).
@@ -94,22 +106,18 @@ private:
 	/**
 	 * Select a rule for expansion amongst a set of valid ones.
 	 */
-	RuleTypedSubstitutionPair select_rule(const AndBIT& andbit,
-	                                      const BITNode& bitleaf,
-	                                      const RuleTypedSubstitutionMap& rules);
+	RuleSelection select_rule(const AndBIT& andbit,
+	                          const BITNode& bitleaf,
+	                          const RuleTypedSubstitutionMap& rules);
 
 	/**
-	 * Calculate the default weights, as provided by the URE
-	 * configuration, for each rule instance.
+	 * Calculate the rule weights, according to the control rules
+	 * present is _control_as, or otherwise default rule TVs, to do
+	 * weighted random selection.
 	 */
-	std::vector<double> default_rule_weights(const RuleTypedSubstitutionMap& rules);
-
-	/**
-	 * Calculate the rule weights according to the control rules
-	 * present in _control_as.
-	 */
-	std::vector<double> control_rule_weights(const AndBIT& andbit, const BITNode& bitleaf,
-	                                         const RuleTypedSubstitutionMap& rules);
+	std::vector<double> rule_weights(const AndBIT& andbit,
+	                                 const BITNode& bitleaf,
+	                                 const RuleTypedSubstitutionMap& rules);
 
 	/**
 	 * Given the weights (action probability) of each inference rule
@@ -141,7 +149,7 @@ private:
 	 * Get all active expansion control rules concerning the given
 	 * inference rule.
 	 */
-	HandleSet active_expansion_control_rules(const Handle& inf_rule_alias) const;
+	HandleSet active_expansion_control_rules(const Handle& inf_rule_alias);
 
 	/**
 	 * Return true iff the given control is current active, that is

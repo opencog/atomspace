@@ -114,12 +114,15 @@ public:
 	 *
 	 * @param leaf from which to expand the and-BIT.
 	 * @param rule with which to expand the and-BIT.
+	 * @param prob the probability with which this rule was expanded,
 	 *
 	 * @return A new and-BIT resulting from the expansion.
 	 *
 	 * @todo support fitness function.
 	 */
-	AndBIT expand(const Handle& leaf, const RuleTypedSubstitutionPair& rule) const;
+	AndBIT expand(const Handle& leaf,
+	              const RuleTypedSubstitutionPair& rule,
+	              double prob=1.0) const;
 
 	/**
 	 * @brief Randomly select a leaf of the FCS. Leaves with lower
@@ -247,7 +250,7 @@ private:
 	 * Calculate the complexity of the and-BIT resulting from
 	 * expanding this and-BIT from leaf with rule.
 	 */
-	double expand_complexity(const Handle& leaf, const Rule& rule) const;
+	double expand_complexity(const Handle& leaf, const Rule& rule, double prob) const;
 
 	/**
 	 * Given an FCS, a leaf of it to expand, and a rule, return a new
@@ -412,7 +415,8 @@ public:
 	 * that step.
 	 */
 	AndBIT* expand(AndBIT& andbit, BITNode& bitleaf,
-	               const RuleTypedSubstitutionPair& rule);
+	               const RuleTypedSubstitutionPair& rule,
+	               double prob=1.0);
 
 	/**
 	 * Insert a new andbit in the BIT and return its pointer, nullptr

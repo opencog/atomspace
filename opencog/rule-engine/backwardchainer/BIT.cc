@@ -108,10 +108,11 @@ AndBIT::AndBIT(const Handle& f, double cpx)	:
 AndBIT::~AndBIT() {}
 
 AndBIT AndBIT::expand(const Handle& leaf,
-                      const RuleTypedSubstitutionPair& rule) const
+                      const RuleTypedSubstitutionPair& rule,
+                      double prob) const
 {
 	Handle new_fcs = expand_fcs(leaf, rule);
-	double new_cpx = expand_complexity(leaf, rule.first);
+	double new_cpx = expand_complexity(leaf, rule.first, prob);
 
 	// Only consider expansions that actually expands
 	if (content_eq(fcs, new_fcs)) {
@@ -289,14 +290,15 @@ std::string AndBIT::fcs_rewrite_to_ascii_art(const Handle& h) const
 	} else return h->idToString();
 }
 
-double AndBIT::expand_complexity(const Handle& leaf, const Rule& rule) const
+double AndBIT::expand_complexity(const Handle& leaf, const Rule& rule,
+                                 double prob) const
 {
 	// Calculate the complexity of the expanded and-BIT. Sum up the
 	// complexity of the parent and-BIT with the complexity of the
-	// expanded BIT-node and the complexity of the rule (1 - log(rule-weight))
+	// expanded BIT-node and the complexity of the rule (1 - log(prob))
 	return complexity
 		+ leaf2bitnode.find(leaf)->second.complexity
-		+ 1 - log(rule.get_weight());
+		+ 1 - log(prob);
 }
 
 Handle AndBIT::expand_fcs(const Handle& leaf,
@@ -685,7 +687,7 @@ AndBIT* BIT::init()
 }
 
 AndBIT* BIT::expand(AndBIT& andbit, BITNode& bitleaf,
-                    const RuleTypedSubstitutionPair& rule)
+                    const RuleTypedSubstitutionPair& rule, double prob)
 {
 	// Make sure that the rule is not already an or-child of bitleaf.
 	if (is_in(rule, bitleaf)) {
@@ -699,7 +701,7 @@ AndBIT* BIT::expand(AndBIT& andbit, BITNode& bitleaf,
 
 	// Expand the and-BIT and insert it in the BIT, if the expansion
 	// was successful
-	AndBIT new_andbit = andbit.expand(bitleaf.body, rule);
+	AndBIT new_andbit = andbit.expand(bitleaf.body, rule, prob);
 	return (bool)new_andbit.fcs ? insert(new_andbit) : nullptr;
 }
 

@@ -164,9 +164,10 @@ void BackwardChainer::expand_bit(AndBIT& andbit)
 	}
 
 	// Select rule for expansion
-	RuleTypedSubstitutionPair rule_ts = _control.select_rule(andbit, *bitleaf);
-	Rule rule(rule_ts.first);
-	Unify::TypedSubstitution ts(rule_ts.second);
+	RuleSelection rule_sel = _control.select_rule(andbit, *bitleaf);
+	Rule rule(rule_sel.first.first);
+	Unify::TypedSubstitution ts(rule_sel.first.second);
+	double prob(rule_sel.second);
 
 	// Add the rule in the _bit.bit_as to make comparing atoms easier
 	// as well as logging more consistent.
@@ -194,8 +195,8 @@ void BackwardChainer::expand_bit(AndBIT& andbit)
 	// bodies for future use.
 	Handle andbit_fcs = andbit.fcs;
 	Handle bitleaf_body = bitleaf->body;
-	_last_expansion_andbit = _bit.expand(andbit, *bitleaf, {rule, ts});
-	
+	_last_expansion_andbit = _bit.expand(andbit, *bitleaf, {rule, ts}, prob);
+
 	// Record the expansion in the trace atomspace
 	if (_last_expansion_andbit) {
 		_trace_recorder.andbit(*_last_expansion_andbit);
