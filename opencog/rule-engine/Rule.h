@@ -119,7 +119,6 @@ public:
 	void set_rule(const Handle&);
 	void set_name(const std::string&);
 	void set_category(const std::string&);
-	void set_weight(double);
 
 	// Access
 	std::string& get_name();

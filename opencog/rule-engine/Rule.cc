@@ -114,14 +114,12 @@ void Rule::init(const Handle& rule_alias, const Handle& rule, const Handle& rbs)
 
 bool Rule::operator==(const Rule& r) const
 {
-	return r._rule == _rule;
+	return _rule == r._rule;
 }
 
 bool Rule::operator<(const Rule& r) const
 {
-	return _weight == r._weight ?
-		Handle(_rule).value() < Handle(r._rule).value()
-		: _weight < r._weight;
+	return _rule < r._rule;
 }
 
 bool Rule::is_alpha_equivalent(const Rule& r) const
@@ -334,11 +332,6 @@ HandlePairSeq Rule::get_conclusions() const
 		results.push_back({filter_vardecl(vardecl, c), c});
 
 	return results;
-}
-
-void Rule::set_weight(double p)
-{
-	_weight = p;
 }
 
 Rule Rule::gen_standardize_apart(AtomSpace* as)
