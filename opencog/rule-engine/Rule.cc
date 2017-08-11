@@ -109,19 +109,17 @@ void Rule::init(const Handle& rule_alias, const Handle& rule, const Handle& rbs)
 	_rbs = rbs;
 	AtomSpace& as = *rule_alias->getAtomSpace();
 	Handle ml = as.get_link(MEMBER_LINK, rule_alias, rbs);
-	_weight = ml->getTruthValue()->getMean();
+	_tv = ml->getTruthValue();
 }
 
 bool Rule::operator==(const Rule& r) const
 {
-	return r._rule == _rule;
+	return content_eq(Handle(_rule), Handle(r._rule));
 }
 
 bool Rule::operator<(const Rule& r) const
 {
-	return _weight == r._weight ?
-		Handle(_rule).value() < Handle(r._rule).value()
-		: _weight < r._weight;
+	return content_based_handle_less()(Handle(_rule), Handle(r._rule));
 }
 
 bool Rule::is_alpha_equivalent(const Rule& r) const
@@ -129,9 +127,9 @@ bool Rule::is_alpha_equivalent(const Rule& r) const
 	return _rule->is_equal(Handle(r._rule));
 }
 
-double Rule::get_weight() const
+TruthValuePtr Rule::get_tv() const
 {
-	return _weight;
+	return _tv;
 }
 
 void Rule::set_name(const std::string& name)
@@ -334,11 +332,6 @@ HandlePairSeq Rule::get_conclusions() const
 		results.push_back({filter_vardecl(vardecl, c), c});
 
 	return results;
-}
-
-void Rule::set_weight(double p)
-{
-	_weight = p;
 }
 
 Rule Rule::gen_standardize_apart(AtomSpace* as)

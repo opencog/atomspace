@@ -40,25 +40,47 @@ using namespace opencog;
 
 ControlPolicy::ControlPolicy(const RuleSet& rs, const BIT& bit,
                              AtomSpace* control_as) :
-	rules(rs), _bit(bit), _control_as(control_as) {}
+	rules(rs), _bit(bit), _control_as(control_as)
+{
+	// Fetch default TVs for each inference rule (the TV on the member
+	// link connecting the rule to the rule base
+	for (const Rule& rule : rules) {
+		_default_tvs[rule.get_alias()] = rule.get_tv();
+	}
+	std::stringstream ss;
+	ss << "Default inference rule TVs:" << std::endl;
+	for (const auto& rtv : _default_tvs)
+		ss << rtv.second->toString() << " " << oc_to_string(rtv.first);
+	ure_logger().debug() << ss.str();
 
-RuleTypedSubstitutionPair ControlPolicy::select_rule(AndBIT& andbit,
-                                                     BITNode& bitleaf)
+	// Fetches expansion control rules from _control_as
+	if (_control_as) {
+		for (const Handle& rule_alias : rule_aliases(rules)) {
+			HandleSet exp_ctrl_rules = fetch_expansion_control_rules(rule_alias);
+			_expansion_control_rules[rule_alias] = exp_ctrl_rules;
+
+			ure_logger().debug() << "Expansion control rules for "
+			                     << rule_alias->toString()
+			                     << oc_to_string(exp_ctrl_rules);
+		}
+	}
+}
+
+RuleSelection ControlPolicy::select_rule(AndBIT& andbit, BITNode& bitleaf)
 {
 	// The rule is randomly selected amongst the valid ones, with
 	// probability of selection being proportional to its weight.
 	const RuleTypedSubstitutionMap valid_rules = get_valid_rules(andbit, bitleaf);
 	if (valid_rules.empty()) {
 		bitleaf.exhausted = true;
-		return {Rule(), Unify::TypedSubstitution()};;
+		return RuleSelection();
 	}
 
-	// Log all valid rules and their weights
+	// Log all valid rules
 	if (ure_logger().is_debug_enabled()) {
 		std::stringstream ss;
-		ss << "The following weighted rules are valid:";
-		for (const auto& r : valid_rules)
-			ss << std::endl << r.first.get_weight() << " " << r.first.get_name();
+		ss << "The following rules are valid:" << std::endl
+		   << oc_to_string(rule_aliases(valid_rules));
 		LAZY_URE_LOG_DEBUG << ss.str();
 	}
 
@@ -87,61 +109,61 @@ RuleTypedSubstitutionMap ControlPolicy::get_valid_rules(const AndBIT& andbit,
 		RuleTypedSubstitutionMap unified_rules
 			= rule.unify_target(bitleaf.body, vardecl);
 
-		// Insert only rules with positive probability of success
+		// Only insert unexplored rules for this leaf
 		RuleTypedSubstitutionMap pos_rules;
-		for (const auto& rule : unified_rules) {
-			double p = (_bit.is_in(rule, bitleaf) ? 0.0 : 1.0)
-				* rule.first.get_weight();
-			if (p > 0) pos_rules.insert(rule);
-		}
+		for (const auto& rule : unified_rules)
+			if (not _bit.is_in(rule, bitleaf))
+				pos_rules.insert(rule);
 
 		valid_rules.insert(pos_rules.begin(), pos_rules.end());
 	}
 	return valid_rules;
 }
 
-RuleTypedSubstitutionPair ControlPolicy::select_rule(const AndBIT& andbit,
-                                                     const BITNode& bitleaf,
-                                                     const RuleTypedSubstitutionMap& inf_rules)
+RuleSelection ControlPolicy::select_rule(const AndBIT& andbit,
+                                         const BITNode& bitleaf,
+                                         const RuleTypedSubstitutionMap& inf_rules)
 {
-	// Build weight vector to do weighted random selection
-	std::vector<double> weights;
+	// Build weight vector, based on control rules or otherwise
+	// default rule TVs, to do weighted random selection.
+	std::vector<double> weights = rule_weights(andbit, bitleaf, inf_rules);
 
-	// If a control policy atomspace is provided then calculate the
-	// distribution according to the provided control rules.
-	// Otherwise use the default rule weights. Alternatively this
-	// could be a linear combination of the two.
-	if (_control_as)
-		weights = control_rule_weights(andbit, bitleaf, inf_rules);
-	else
-		weights = default_rule_weights(inf_rules);
-
-	// Sample one according to the distribution
+	// Sample an inference rule according to the distribution
 	std::discrete_distribution<size_t> dist(weights.begin(), weights.end());
-	return rand_element(inf_rules, dist);
+	size_t idx = dist(randGen());
+	return {*std::next(inf_rules.begin(), idx), weights[idx]};
 }
 
-std::vector<double> ControlPolicy::default_rule_weights(const RuleTypedSubstitutionMap& inf_rules)
-{
-	return rule_weights(default_alias_weights(inf_rules), inf_rules);
-}
-
-std::vector<double> ControlPolicy::control_rule_weights(
-	const AndBIT& andbit, const BITNode& bitleaf,
-	const RuleTypedSubstitutionMap& inf_rules)
+std::vector<double> ControlPolicy::rule_weights(const AndBIT& andbit,
+                                                const BITNode& bitleaf,
+                                                const RuleTypedSubstitutionMap& inf_rules)
 {
 	// For each rule alias, calculate the TV that selecting it will
 	// produce a preproof
 	HandleTVMap success_tvs;
-	for (const Handle& rule : rule_aliases(inf_rules)) {
+	for (const auto& rule : rule_aliases(inf_rules)) {
 		// Get all active expansion control rules
-		HandleSet active_ctrl_rules =
-			fetch_active_expansion_control_rules(rule);
+		HandleSet active_ctrl_rules = active_expansion_control_rules(rule);
 
-		// Calculate the truth value of its mixture model
-		// TODO: set cpx_penalty and compressiveness.
-		success_tvs[rule] = MixtureModel(active_ctrl_rules)();
+		if (active_ctrl_rules.empty()) {
+			// If there are no active control rules, use the default
+			// TV on the rule.
+			success_tvs[rule] = _default_tvs[rule];
+		} else {
+			// Otherwise calculate the truth value of its mixture
+			// model.
+			// TODO: set cpx_penalty and compressiveness.
+			success_tvs[rule] = MixtureModel(active_ctrl_rules)();
+		}
 	}
+
+	// Log TVs of representing probability of success (expanding into
+	// a preproof) for each action
+	std::stringstream ss;
+	ss << "Rule TVs:" << std::endl;
+	for (const auto& rtv : success_tvs)
+		ss << rtv.second->toString() << " " << oc_to_string(rtv.first);
+	ure_logger().debug() << ss.str();
 
 	// Given success_tvs calculate the action distribution over rule
 	// alias, as to (supposedly) optimally balance exploration and
@@ -149,8 +171,18 @@ std::vector<double> ControlPolicy::control_rule_weights(
 	ActionSelection action_selection(success_tvs);
 	HandleCounter alias_weights = action_selection.distribution();
 
-	// Reweight over rule instances
-	return rule_weights(alias_weights, inf_rules);
+	// Log rule weights for action selection
+	std::stringstream ssw;
+	ssw << "Rule weights:" << std::endl;
+	for (const auto& rw : alias_weights)
+		ssw << rw.second << " " << oc_to_string(rw.first);
+	ure_logger().debug() << ssw.str();
+
+	// Reweight over rule instances and normalize
+	rule_weights(alias_weights, inf_rules);
+	std::vector<double> norm_weights = rule_weights(alias_weights, inf_rules);
+
+	return norm_weights;
 }
 
 std::vector<double> ControlPolicy::rule_weights(
@@ -172,6 +204,14 @@ std::vector<double> ControlPolicy::rule_weights(
 	return weights;
 }
 
+HandleSet ControlPolicy::rule_aliases(const RuleSet& rules) const
+{
+	HandleSet aliases;
+	for (auto& rule : rules)
+		aliases.insert(rule.get_alias());
+	return aliases;
+}
+
 HandleSet ControlPolicy::rule_aliases(const RuleTypedSubstitutionMap& rules) const
 {
 	HandleSet aliases;
@@ -180,24 +220,34 @@ HandleSet ControlPolicy::rule_aliases(const RuleTypedSubstitutionMap& rules) con
 	return aliases;
 }
 
-HandleCounter ControlPolicy::default_alias_weights(const RuleTypedSubstitutionMap& rules) const
+HandleSet ControlPolicy::active_expansion_control_rules(const Handle& inf_rule_alias)
 {
-	HandleCounter res;
-	for (auto& rule : rules)
-		res[rule.first.get_alias()] = rule.first.get_weight();
-	return res;
-}
+	if (!_control_as)
+		return HandleSet();
 
-HandleSet ControlPolicy::fetch_active_expansion_control_rules(const Handle& inf_rule)
-{
+	// Filter out inactive expansion control rules
 	HandleSet results;
-	for (const Handle& ctrl_rule : fetch_expansion_control_rules(inf_rule))
+	for (const Handle& ctrl_rule : _expansion_control_rules[inf_rule_alias])
 		if (control_rule_active(ctrl_rule))
 			results.insert(ctrl_rule);
+
+	// Log active control rules
+	std::stringstream ss;
+	ss << "Active expansion control rules for "
+	   << inf_rule_alias->toString();
+	if (results.empty())
+		ss << "none";
+	else {
+		ss << "size = " << results.size();
+		for (const Handle& acr : results)
+			ss << acr->idToString();
+	}
+	ure_logger().debug() << ss.str();
+
 	return results;
 }
 
-bool ControlPolicy::control_rule_active(const Handle& ctrl_rule)
+bool ControlPolicy::control_rule_active(const Handle& ctrl_rule) const
 {
 	// For now we assume that it is an expansion control rule
 	Handle expansion_pattern = get_expansion_control_rule_pattern(ctrl_rule);
@@ -210,7 +260,7 @@ bool ControlPolicy::control_rule_active(const Handle& ctrl_rule)
 	return true;
 }
 
-Handle ControlPolicy::get_expansion_control_rule_pattern(const Handle& ctrl_rule)
+Handle ControlPolicy::get_expansion_control_rule_pattern(const Handle& ctrl_rule) const
 {
 	// Check that it is indeed an expansion control rule
 	OC_ASSERT(ctrl_rule->getType() == IMPLICATION_SCOPE_LINK);

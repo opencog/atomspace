@@ -11,6 +11,7 @@
 #include <opencog/atomspace/AtomSpace.h>
 #include <opencog/atoms/pattern/PatternLink.h>
 #include <opencog/util/mt19937ar.h>
+#include <opencog/rule-engine/URELogger.h>
 
 #include <cxxtest/TestSuite.h>
 
@@ -35,9 +36,13 @@ public:
 	BackwardChainerUTest() : _eval(&_as)
 	{
 		logger().set_level(Logger::DEBUG);
-		logger().set_timestamp_flag(false);
+		// logger().set_timestamp_flag(false);
 		// logger().set_sync_flag(true);
 		// logger().set_print_to_stdout_flag(true);
+		ure_logger().set_level(Logger::DEBUG);
+		// ure_logger().set_timestamp_flag(false);
+		// ure_logger().set_sync_flag(true);
+		// ure_logger().set_print_to_stdout_flag(true);
 		randGen().seed(0);
 	}
 
@@ -114,10 +119,10 @@ void BackwardChainerUTest::test_select_rule_1()
 	BITNode target(target_h);
 	AndBIT andbit;
 
-	RuleTypedSubstitutionPair selected_rule =
+	RuleSelection selected_rule =
 		_bc->_control.select_rule(andbit, target);
 
-	TS_ASSERT_EQUALS(selected_rule.first.get_name(), "bc-deduction-rule");
+	TS_ASSERT_EQUALS(selected_rule.first.first.get_name(), "bc-deduction-rule");
 }
 
 // Test select rule with a target with variables
@@ -133,10 +138,10 @@ void BackwardChainerUTest::test_select_rule_2()
 	BITNode target(target_h);
 	AndBIT andbit;
 
-	RuleTypedSubstitutionPair selected_rule =
+	RuleSelection selected_rule =
 		_bc->_control.select_rule(andbit, target);
 
-	TS_ASSERT_EQUALS(selected_rule.first.get_name(), "bc-deduction-rule");
+	TS_ASSERT_EQUALS(selected_rule.first.first.get_name(), "bc-deduction-rule");
 }
 
 // Test select rule with a target with variables with the same name as
@@ -154,10 +159,10 @@ void BackwardChainerUTest::test_select_rule_3()
 	BITNode target(target_h);
 	AndBIT andbit(_as, target_h, vardecl_h);
 
-	RuleTypedSubstitutionPair selected_rule =
+	RuleSelection selected_rule =
 		_bc->_control.select_rule(andbit, target);
 
-	TS_ASSERT_EQUALS(selected_rule.first.get_name(), "bc-deduction-rule");
+	TS_ASSERT_EQUALS(selected_rule.first.first.get_name(), "bc-deduction-rule");
 }
 
 void BackwardChainerUTest::test_deduction()

@@ -12,31 +12,32 @@
 ;; Associate the rules to the rule base (with weights, their semantics
 ;; is currently undefined, we might settled with probabilities but it's
 ;; not sure)
-(MemberLink (stv 1 1)
+(define rule-confidence 0.5)
+(MemberLink (stv 1 rule-confidence)
    conditional-full-instantiation-meta-rule-name
    (ConceptNode "URE")
 )
-(MemberLink (stv 0.6 1)
+(MemberLink (stv 0.6 rule-confidence)
    bc-deduction-rule-name
    (ConceptNode "URE")
 )
-(MemberLink (stv 1 1)
+(MemberLink (stv 1 rule-confidence)
    fuzzy-conjunction-introduction-1ary-rule-name
    (ConceptNode "URE")
 )
-(MemberLink (stv 1 1)
+(MemberLink (stv 1 rule-confidence)
    fuzzy-conjunction-introduction-2ary-rule-name
    (ConceptNode "URE")
 )
-(MemberLink (stv 1 1)
+(MemberLink (stv 1 rule-confidence)
    fuzzy-conjunction-introduction-3ary-rule-name
    (ConceptNode "URE")
 )
-(MemberLink (stv 1 1)
+(MemberLink (stv 1 rule-confidence)
    fuzzy-conjunction-introduction-4ary-rule-name
    (ConceptNode "URE")
 )
-(MemberLink (stv 1 1)
+(MemberLink (stv 1 rule-confidence)
    fuzzy-conjunction-introduction-5ary-rule-name
    (ConceptNode "URE")
 )
