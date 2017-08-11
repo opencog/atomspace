@@ -11,6 +11,7 @@
 #include <opencog/atomspace/AtomSpace.h>
 #include <opencog/atoms/pattern/PatternLink.h>
 #include <opencog/util/mt19937ar.h>
+#include <opencog/rule-engine/URELogger.h>
 
 #include <cxxtest/TestSuite.h>
 
@@ -35,9 +36,13 @@ public:
 	BackwardChainerUTest() : _eval(&_as)
 	{
 		logger().set_level(Logger::DEBUG);
-		logger().set_timestamp_flag(false);
+		// logger().set_timestamp_flag(false);
 		// logger().set_sync_flag(true);
 		// logger().set_print_to_stdout_flag(true);
+		ure_logger().set_level(Logger::DEBUG);
+		// ure_logger().set_timestamp_flag(false);
+		// ure_logger().set_sync_flag(true);
+		// ure_logger().set_print_to_stdout_flag(true);
 		randGen().seed(0);
 	}
 
