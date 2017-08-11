@@ -42,8 +42,19 @@ ControlPolicy::ControlPolicy(const RuleSet& rs, const BIT& bit,
                              AtomSpace* control_as) :
 	rules(rs), _bit(bit), _control_as(control_as)
 {
+	// Fetch default TVs for each inference rule (the TV on the member
+	// link connecting the rule to the rule base
+	for (const Rule& rule : rules) {
+		_default_tvs[rule.get_alias()] = rule.get_tv();
+	}
+	std::stringstream ss;
+	ss << "Default inference rule TVs:" << std::endl;
+	for (const auto& rtv : _default_tvs)
+		ss << rtv.second->toString() << " " << oc_to_string(rtv.first);
+	ure_logger().debug() << ss.str();
+
+	// Fetches expansion control rules from _control_as
 	if (_control_as) {
-		// Fetches expansion control rules from _control_as
 		for (const Handle& rule_alias : rule_aliases(rules)) {
 			HandleSet exp_ctrl_rules = fetch_expansion_control_rules(rule_alias);
 			_expansion_control_rules[rule_alias] = exp_ctrl_rules;
@@ -65,10 +76,10 @@ RuleSelection ControlPolicy::select_rule(AndBIT& andbit, BITNode& bitleaf)
 		return RuleSelection();
 	}
 
-	// Log all valid rules and their weights
+	// Log all valid rules
 	if (ure_logger().is_debug_enabled()) {
 		std::stringstream ss;
-		ss << "The following weighted rules are valid:" << std::endl
+		ss << "The following rules are valid:" << std::endl
 		   << oc_to_string(rule_aliases(valid_rules));
 		LAZY_URE_LOG_DEBUG << ss.str();
 	}
@@ -146,14 +157,32 @@ std::vector<double> ControlPolicy::rule_weights(const AndBIT& andbit,
 		}
 	}
 
+	// Log TVs of representing probability of success (expanding into
+	// a preproof) for each action
+	std::stringstream ss;
+	ss << "Rule TVs:" << std::endl;
+	for (const auto& rtv : success_tvs)
+		ss << rtv.second->toString() << " " << oc_to_string(rtv.first);
+	ure_logger().debug() << ss.str();
+
 	// Given success_tvs calculate the action distribution over rule
 	// alias, as to (supposedly) optimally balance exploration and
 	// exploitation.
 	ActionSelection action_selection(success_tvs);
 	HandleCounter alias_weights = action_selection.distribution();
 
-	// Reweight over rule instances
-	return rule_weights(alias_weights, inf_rules);
+	// Log rule weights for action selection
+	std::stringstream ssw;
+	ssw << "Rule weights:" << std::endl;
+	for (const auto& rw : alias_weights)
+		ssw << rw.second << " " << oc_to_string(rw.first);
+	ure_logger().debug() << ssw.str();
+
+	// Reweight over rule instances and normalize
+	rule_weights(alias_weights, inf_rules);
+	std::vector<double> norm_weights = rule_weights(alias_weights, inf_rules);
+
+	return norm_weights;
 }
 
 std::vector<double> ControlPolicy::rule_weights(
@@ -193,6 +222,9 @@ HandleSet ControlPolicy::rule_aliases(const RuleTypedSubstitutionMap& rules) con
 
 HandleSet ControlPolicy::active_expansion_control_rules(const Handle& inf_rule_alias)
 {
+	if (!_control_as)
+		return HandleSet();
+
 	// Filter out inactive expansion control rules
 	HandleSet results;
 	for (const Handle& ctrl_rule : _expansion_control_rules[inf_rule_alias])
