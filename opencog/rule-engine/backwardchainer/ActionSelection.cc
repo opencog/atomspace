@@ -54,7 +54,7 @@ HandleCounter ActionSelection::distribution()
 		double Pi = 0;
 		for (int x_idx = 1; x_idx <= bins; x_idx++) {
 			double x = (double)x_idx / (double)bins;
-			double f_x = boost::math::pdf(beta, 1.0) * step;
+			double f_x = boost::math::pdf(beta, x) * step;
 			for (size_t j = 0; j < action2tv.size(); j++)
 				if (j != i)
 					f_x *= cdfs[j][x_idx];
