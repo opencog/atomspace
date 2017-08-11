@@ -59,11 +59,11 @@ public:
 	 * balance between exploration and exploitation (Thomson
 	 * sampling).
 	 *
-	 * Pi = I_0^1 pdfi(x) Prod_j!=i cdfj(x) dx
+	 * Pi = I_0^1 pdfi(x) Prod_j!=i cdfj(x) dx / nt
 	 *
 	 * where `Prod_j!=i fi` is the product of all fi with j from 1 to
-	 * n, except i and Pi is the probability that action i is the
-	 * best.
+	 * n, except i, nt is a normalizing factor and Pi is the
+	 * probability that action i is the best.
 	 *
 	 * See Section Inference Rule Selection in the README.md of the
 	 * pln inference-control-learning for more explanations.

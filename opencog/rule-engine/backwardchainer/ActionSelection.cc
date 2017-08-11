@@ -24,6 +24,7 @@
 #include "ActionSelection.h"
 
 #include <opencog/util/Logger.h>
+#include <opencog/util/oc_assert.h>
 
 using namespace opencog;
 
@@ -49,19 +50,31 @@ HandleCounter ActionSelection::distribution()
 	// Calculate Pi for all actions
 	// Pi = I_0^1 fi(x)
 	// where fi(x) = pdfi(x) Prod_j!=i cdfj(x) dx
+	double nt = 0.0;
 	for (size_t i = 0; i < action2tv.size(); i++) {
 		const BetaDistribution& beta = betas[i];
 		double Pi = 0;
-		for (int x_idx = 1; x_idx <= bins; x_idx++) {
-			double x = (double)x_idx / (double)bins;
+		for (int x_idx = 0; x_idx < bins; x_idx++) {
+			double x = (x_idx + 1.0) / bins;
 			double f_x = boost::math::pdf(beta, x) * step;
+			// Only bother calculating Prod_j!=i cdfj(x) is pdfi(x) is
+			// greater than zero
+			if (f_x <= 0.0)
+				continue;
 			for (size_t j = 0; j < action2tv.size(); j++)
 				if (j != i)
 					f_x *= cdfs[j][x_idx];
 			Pi += f_x;
 		}
 		action2prob[std::next(action2tv.begin(), i)->first] = Pi;
+		nt += Pi;
 	}
+
+	// Normalize so that it sums up to 1
+	OC_ASSERT(0.0 < nt, "nt = %g, should be greater than zero", nt);
+	for (auto& ap : action2prob)
+		ap.second /= nt;
+
 	return action2prob;
 }
 
@@ -81,9 +94,10 @@ std::vector<double> ActionSelection::beta2cdf(const BetaDistribution& beta,
                                               int bins)
 {
 	std::vector<double> cdf;
-	for (int x_idx = 1; x_idx <= bins; x_idx++) {
-		double x = (double)x_idx / (double)bins;
-		cdf.push_back(boost::math::cdf(beta, std::min(1.0, x)));
+	for (int x_idx = 0; x_idx < bins; x_idx++) {
+		double x = (x_idx + 1.0) / bins,
+			r = boost::math::cdf(beta, std::min(1.0, x));
+		cdf.push_back(r);
 	}
 	return cdf;
 }
