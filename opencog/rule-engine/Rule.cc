@@ -114,12 +114,12 @@ void Rule::init(const Handle& rule_alias, const Handle& rule, const Handle& rbs)
 
 bool Rule::operator==(const Rule& r) const
 {
-	return _rule == r._rule;
+	return content_eq(Handle(_rule), Handle(r._rule));
 }
 
 bool Rule::operator<(const Rule& r) const
 {
-	return _rule < r._rule;
+	return content_based_handle_less()(Handle(_rule), Handle(r._rule));
 }
 
 bool Rule::is_alpha_equivalent(const Rule& r) const
