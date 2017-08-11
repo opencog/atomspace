@@ -186,7 +186,8 @@ void BackwardChainer::expand_bit(AndBIT& andbit)
 	}
 
 	// Rule seems well, expand
-	LAZY_URE_LOG_DEBUG << "Selected rule for BIT expansion:" << std::endl
+	LAZY_URE_LOG_DEBUG << "Selected rule, with probability " << prob
+	                   << ", for BIT expansion:" << std::endl
 	                   << rule.to_string();
 
 	// Expand andbit. Warning: after this call the reference on andbit
