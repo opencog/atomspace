@@ -64,13 +64,35 @@
 		(define ela (exact->inexact (/ (- (get-internal-real-time) start)
 			 internal-time-units-per-second)))
 		(format #t "Performed ~D ops in ~A seconds, at ~A ops/sec\n"
-			CNT ela (/ CNT ela))))
+			CNT ela (/ CNT ela))
+		ela))
 
 ; Step 1: create a bunch of random pair data.
 (define nvocab 5000)
 (define npairs 101000)
+(format #t "Createing ~D pairs for ~D words ... one moment please...\n"
+	npairs nvocab)
 (report-rate (lambda () (make-pairs npairs nvocab)) 1)
 
-(report-rate
-	(lambda ()
-		(mst-parse-atom-seq (mksent 10 30) score-faux)) 1)
+(define nsents 1000)
+
+; Report performance of parsing sentences of length LEN
+(define (report-perf LEN)
+
+	; Step 2: Measure baseline performance of creating sentences
+	(define (mksents howmany sentlen)
+		(if (< 0 howmany)
+			(mksent sentlen nvocab)
+			(mksents (- howmany 1) sentlen)
+			))
+
+	; Step 3: Measure baseline performance of MST parsing
+	(define (parsesents howmany sentlen)
+		(if (< 0 howmany)
+			(mst-parse-atom-seq (mksent sentlen nvocab) score-faux)
+			(mksents (- howmany 1) sentlen)
+			))
+
+	(report-rate (lambda () (mksents nsents LEN)) nsents)
+	(report-rate (lambda () (parsesents nsents LEN)) nsents)
+)
