@@ -102,10 +102,10 @@
 			(report-all (+ SLEN 1) MAXLEN))))
 
 ; Step 1: create a bunch of random pair data.
-(define nvocab 5000)
-(define npairs 101000)
+(define nvocab 3000)
+(define npairs 1201000)
 (format #t "Createing ~D pairs for ~D words ... one moment please...\n"
 	npairs nvocab)
-; (report-rate (lambda () (make-pairs npairs nvocab)) 1)
+(report-rate (lambda () (make-pairs npairs nvocab)) 1)
 
-; (report-all 2 30)
+(report-all 2 30)

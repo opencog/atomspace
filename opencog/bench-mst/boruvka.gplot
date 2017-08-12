@@ -2,11 +2,14 @@
 set term png small
 set out 'boruvka.png'
 
+set key left
 set logscale x
 set logscale y
+set xrange [2:26]
+set yrange [0.01:50]
 set title "Time to parse"
 set xlabel "Sentence Length"
 set ylabel "Milliseconds"
 plot "boruvka.dat" using 1:2 with lines linewidth 2 title "data", \
-     "boruvka.dat" using 1:(0.002 * $1**2.8) with lines linewidth 2 title "fit"
+     "boruvka.dat" using 1:(0.0017 * $1**2.9) with lines linewidth 2 title "length^2.9"
 
