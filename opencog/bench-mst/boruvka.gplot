@@ -1,0 +1,9 @@
+
+set term png small
+set out 'boruvka.png'
+
+set title "Time to parse"
+set xlabel "Sentence Length"
+set ylabel "Milliseconds"
+plot "boruvka.dat" using 1:2 with lines linewidth 2 title ""
+
