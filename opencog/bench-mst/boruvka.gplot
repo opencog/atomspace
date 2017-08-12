@@ -13,3 +13,15 @@ set ylabel "Milliseconds"
 plot "boruvka-101.dat" using 1:2 with lines linewidth 2 title "data", \
      "boruvka-101.dat" using 1:(0.0017 * $1**2.9) with lines linewidth 2 title "length^2.9"
 
+##########################################
+
+set out 'boruvka-1.2M.png'
+
+set xrange [2:26]
+set yrange [0.02:40]
+set title "Current algo 12 Aug 2017 Vocab mean=5K  Npairs=101K"
+set xlabel "Sentence Length"
+set ylabel "Milliseconds"
+plot "boruvka-1.2M.dat" using 1:2 with lines linewidth 2 title "data", \
+     "boruvka-1.2M.dat" using 1:(0.003 * $1**2.9) with lines linewidth 2 title "length^2.9"
+
