@@ -18,8 +18,8 @@ plot "boruvka-101.dat" using 1:2 with lines linewidth 2 title "data", \
 set out 'boruvka-1.2M.png'
 
 set xrange [2:26]
-set yrange [0.02:40]
-set title "Current algo 12 Aug 2017 Vocab mean=5K  Npairs=101K"
+set yrange [0.02:60]
+set title "Current algo 12 Aug 2017 Vocab mean=3K  Npairs=1.2M"
 set xlabel "Sentence Length"
 set ylabel "Milliseconds"
 plot "boruvka-1.2M.dat" using 1:2 with lines linewidth 2 title "data", \
