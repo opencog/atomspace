@@ -51,6 +51,12 @@
 	(mkwlist '() LEN)
 )
 
-(define (score-faux PAIR)
-	42
+; Create a scoring function that returns the MI, if the pair exists.
+(define (score-faux LEFT RIGHT DIST)
+	(define llpr (cog-link 'ListLink LEFT RIGHT))
+	(if (null? llpr) -10000.0
+		(cog-value-ref
+			(cog-value (Evaluation (Predicate "benchy") llpr) mi-pred) 0))
 )
+
+(mst-parse-atom-seq (mksent 10 30) score-faux)
