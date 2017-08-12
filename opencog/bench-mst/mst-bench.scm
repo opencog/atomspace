@@ -67,32 +67,45 @@
 			CNT ela (/ CNT ela))
 		ela))
 
+; Report performance of parsing sentences of length LEN
+(define (report-perf LEN)
+	(define nsents 9000)
+
+	; Step 2: Measure baseline performance of creating sentences
+	(define (mksents howmany sentlen)
+		(if (< 0 howmany)
+			(begin
+				(mksent sentlen nvocab)
+				(mksents (- howmany 1) sentlen))))
+
+	; Step 3: Measure baseline performance of MST parsing
+	(define (parse-them howmany sentlen)
+		(if (< 0 howmany)
+			(begin
+				(mst-parse-atom-seq (mksent sentlen nvocab) score-faux)
+				(parse-them (- howmany 1) sentlen))))
+
+	(define baseline (report-rate (lambda () (mksents nsents LEN)) nsents))
+	(define measurme (report-rate (lambda () (parse-them nsents LEN)) nsents))
+
+	(define adjusted-time (- measurme baseline))
+	(define millisecs-per (* 1000 (/ adjusted-time nsents)))
+	(format #t "Sentence length = ~D Millisecs/parse = ~8F Parses/sec = ~8F\n"
+		LEN millisecs-per (/ nsents adjusted-time))
+)
+
+; OK Go -- do a bunch of them.
+(define (report-all SLEN MAXLEN)
+	(if (< SLEN MAXLEN)
+		(begin
+			(report-perf SLEN)
+			(report-all (+ SLEN 1) MAXLEN))))
+
 ; Step 1: create a bunch of random pair data.
 (define nvocab 5000)
 (define npairs 101000)
 (format #t "Createing ~D pairs for ~D words ... one moment please...\n"
 	npairs nvocab)
-(report-rate (lambda () (make-pairs npairs nvocab)) 1)
+; (report-rate (lambda () (make-pairs npairs nvocab)) 1)
 
-(define nsents 1000)
-
-; Report performance of parsing sentences of length LEN
-(define (report-perf LEN)
-
-	; Step 2: Measure baseline performance of creating sentences
-	(define (mksents howmany sentlen)
-		(if (< 0 howmany)
-			(mksent sentlen nvocab)
-			(mksents (- howmany 1) sentlen)
-			))
-
-	; Step 3: Measure baseline performance of MST parsing
-	(define (parsesents howmany sentlen)
-		(if (< 0 howmany)
-			(mst-parse-atom-seq (mksent sentlen nvocab) score-faux)
-			(mksents (- howmany 1) sentlen)
-			))
-
-	(report-rate (lambda () (mksents nsents LEN)) nsents)
-	(report-rate (lambda () (parsesents nsents LEN)) nsents)
-)
+; (report-all 2 30)
