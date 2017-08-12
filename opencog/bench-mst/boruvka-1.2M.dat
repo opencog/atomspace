@@ -1,0 +1,9 @@
+#
+# Measurements of the current planar-Boruvka algo.
+# Performed by Linas 12 August 2017
+# Used these settings:
+#     (define nvocab 3000)
+#     (define npairs 1201000)  l i.e. 1.2M
+# This is less sparse I think.
+#
+# columns: sent-length millisecs-per-parse rate
