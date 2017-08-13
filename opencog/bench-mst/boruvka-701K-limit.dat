@@ -1,0 +1,51 @@
+#
+# Measurements of the current planar-Boruvka algo.
+# This one uses a scoring function that kills scores for 
+# edges greater than length 6.
+#
+# Performed by Linas 12 August 2017
+# Used these settings:
+#     (define nvocab 300)
+#     (define npairs 701000)  ; i.e. 701K
+#
+# With the above, a typical
+# 5-word sentence will have 8 edges
+# 10-word sentence will have 24 edges
+# 15-word sentence will have 72 edges
+#
+# So I'm guessing most words will be connected with edges.
+#
+# columns: sent-length millisecs-per-parse rate
+2  0.042559  23496.73
+3  0.175883  5685.604
+4  0.468687  2133.622
+5  0.914569  1093.412
+6  1.553722  643.6158
+7  2.405490  415.7156
+8  3.325082  300.7444
+9  4.489790  222.7276
+10  5.802100  172.3514
+11  7.399263  135.1486
+12  8.972836  111.4475
+13  10.74632  93.05513
+14  12.35079  80.96645
+15  14.01117  71.37162
+16  16.00855  62.46663
+17  18.61023  53.73390
+18  22.86521  43.73457
+19  25.23186  39.63244
+20  27.00240  37.03375
+21  33.40726  29.93361
+22  31.89342  31.35443
+23  37.37183  26.75813
+24  43.12591  23.18792
+25  45.37745  22.03738
+26  52.98642  18.87276
+27  52.80969  18.93592
+28  62.50341  15.99913
+29  62.53924  15.98996
+30  74.30769  13.45756
+31  75.67668  13.21411
+32  80.70227  12.39123
+33  89.27088  11.20186
+34  95.22682  10.50124

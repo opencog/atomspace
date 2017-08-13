@@ -68,12 +68,13 @@
 
 (define-public (mst-parse-atom-seq ATOM-LIST SCORE-FN)
 "
-  Maximum Spanning Tree parser.
+  Projective, Undirected Maximum Spanning Tree parser.
 
-  Given a sequence of atoms, find an (unlabelled) dependency parse
-  of the sequence, by finding a dependency tree that maximizes the
-  pair-wise scoring function. This returns a list of atom-pairs,
-  together with associated score.
+  Given a sequence of atoms, find an unlabelled, undirected, projective
+  dependency parse of the sequence, by finding a dependency tree that
+  maximizes the pair-wise scoring function. This returns a list of
+  atom-pairs, together with associated score.  The tree is projective,
+  in that no edges cross.
 
   The ATOM-LIST should be a scheme-list of atoms, all presumably of
   a uniform atom type.
@@ -93,7 +94,12 @@
   This implements a variant of Borůvka's algo, which seems to be robust,
   and fast enough for the current needs.
 
-  The no-links-cross constraint might not be required, see
+  It has been benchmarked (using the code in `bench-mst`) to run in
+  O(N^3) time, for a sequence of length N. From what I can tell, the
+  state-of-the-art projective algo is Eisner, which runs at O(N^3) time.
+  The code here is NOT Eisner! but seems to have comparable run-time.
+
+  The projective (no-edge-cross) constraint might not be required, see
   R. Ferrer-i-Cancho (2006) “Why do syntactic links not cross?”
   However, that would require changing the metric from mutual information
   to something else, perhaps incorporating the dependency distance

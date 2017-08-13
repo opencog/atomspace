@@ -1,0 +1,41 @@
+
+set term png small
+set out 'boruvka-101.png'
+
+set key left
+set logscale x
+set logscale y
+set xrange [2:26]
+set yrange [0.01:50]
+set title "Current algo 12 Aug 2017 Vocab mean=5K  Npairs=101K"
+set xlabel "Sentence Length"
+set ylabel "Milliseconds"
+plot "boruvka-101.dat" using 1:2 with lines linewidth 2 title "data", \
+     "boruvka-101.dat" using 1:(0.0017 * $1**2.9) with lines linewidth 2 title "length^2.9"
+
+##########################################
+
+set out 'boruvka-701K.png'
+
+set xrange [2:36]
+set yrange [0.02:400]
+set title "Current algo 12 Aug 2017 Vocab mean=300  Npairs=701K"
+set xlabel "Sentence Length"
+set ylabel "Milliseconds"
+plot "boruvka-701K.dat" using 1:2 with lines linewidth 2 title "no length limit", \
+     "boruvka-701K-limit.dat" using 1:2 with lines linewidth 2 title "edge length < 7", \
+     "boruvka-701K.dat" using 1:(0.007 * $1**3) with lines linewidth 2 title "length^3", \
+     "boruvka-701K.dat" using 1:(0.03 * $1**2.3) with lines linewidth 2 title "length^2.3"
+
+##########################################
+
+set out 'boruvka-701K-limit.png'
+
+set xrange [2:36]
+set yrange [0.05:100]
+set title "Current algo 12 Aug 2017 length<7 Vocab mean=300  Npairs=701K"
+set xlabel "Sentence Length"
+set ylabel "Milliseconds"
+plot "boruvka-701K-limit.dat" using 1:2 with lines linewidth 2 title "data", \
+     "boruvka-701K-limit.dat" using 1:(0.007 * $1**3) with lines linewidth 2 title "length^3"
+
