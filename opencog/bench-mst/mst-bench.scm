@@ -49,6 +49,24 @@
 	(mkwlist '() LEN)
 )
 
+; Count the total number of edges in a sentence.
+(define (cnt-edges SENT)
+	(define (cnt-em CNT lst)
+		(define frst (car lst))
+		(define rest (cdr lst))
+		(define nlinks 0)
+		(if (null? rest) CNT
+			(begin
+				(for-each
+					(lambda (rght)
+						(if (not (null? (cog-link 'ListLink frst rght)))
+							(set! nlinks (+ 1 nlinks))))
+					rest)
+				(cnt-em (+ CNT nlinks) rest))))
+	(cnt-em 0 SENT)
+)
+
+
 ; Create a scoring function that returns the MI, if the pair exists.
 (define (score-faux LEFT RIGHT DIST)
 	(define llpr (cog-link 'ListLink LEFT RIGHT))
@@ -69,7 +87,7 @@
 
 ; Report performance of parsing sentences of length LEN
 (define (report-perf LEN)
-	(define nsents 9000)
+	(define nsents 500)
 
 	; Step 2: Measure baseline performance of creating sentences
 	(define (mksents howmany sentlen)
@@ -102,10 +120,16 @@
 			(report-all (+ SLEN 1) MAXLEN))))
 
 ; Step 1: create a bunch of random pair data.
-(define nvocab 3000)
-(define npairs 1201000)
-(format #t "Createing ~D pairs for ~D words ... one moment please...\n"
-	npairs nvocab)
-(report-rate (lambda () (make-pairs npairs nvocab)) 1)
 
-(report-all 2 30)
+; With the below, a typical 
+; 5-word sentence will have 8 edges
+; 10-word sentence will have 24 edges
+; 15-word sentence will have 72 edges
+(define nvocab 300)
+(define npairs 701000)
+
+(format #t "Creating ~D pairs for ~D words ... one moment please...\n"
+	npairs nvocab)
+; (report-rate (lambda () (make-pairs npairs nvocab)) 1)
+
+; (report-all 2 30)
