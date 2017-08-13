@@ -7,12 +7,15 @@ the performance is important.
 
 The only algo currently in the sheaf directory is a modified Boruvka
 algroithm, modified to perform only planar parses.  It runs in O(N^3)
-time, based on the measurements done here.
+time, based on the measurements done here.  This isn't "that bad": Yuret
+published an O(N^3) algo.
 
-State of the art algos are supposed to run at O(N). (???)
-
-Boruvka's is supposed to run at about O(N^2) time,  So .. something is
-wrong with the implementation, it would seem!?
+State of the art algos are supposed to run in O(M) where M is the number
+of edges.
 
 One issue is that there is no a-priori way of knowing which edges exist,
 and which do not, and therefore, N^2 possible edges need to be checked.
+(and therefore, we expect O(N^2) runtimes).
+
+Boruvka's is supposed to run at about O(N^2) time,  So .. something is
+wrong with the implementation, it would seem!?
