@@ -17,5 +17,11 @@ One issue is that there is no a-priori way of knowing which edges exist,
 and which do not, and therefore, N^2 possible edges need to be checked.
 (and therefore, we expect O(N^2) runtimes).
 
-Boruvka's is supposed to run at about O(N^2) time,  So .. something is
-wrong with the implementation, it would seem!?
+Boruvka's is supposed to run at about O(N^2) time, however, we are
+imposing a projective parse.  For what I can tell, the best algos are:
+
+* Chu-Liu-Edmonds MST, runs in O(N^2) time
+* Eisner algorithm, runs in O(N^3) time.
+
+So the algo here runs at the same speed as the "state of the art".
+Actual performance can probably be improved by re-implementing in C++.
