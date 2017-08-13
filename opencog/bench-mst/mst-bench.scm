@@ -93,7 +93,7 @@
 ; Report performance of parsing sentences of length LEN
 (define (report-perf LEN)
 	; Timing loop
-	(define nsents (if (< 10 LEN) (if (< 20 LEN) 50 500) 6000))
+	(define nsents (if (< 10 LEN) (if (< 20 LEN) 140 800) 6000))
 
 	; Step 2: Measure baseline performance of creating sentences
 	(define (mksents howmany sentlen)
@@ -106,8 +106,8 @@
 	(define (parse-them howmany sentlen)
 		(if (< 0 howmany)
 			(begin
-				; (mst-parse-atom-seq (mksent sentlen nvocab) score-faux)
-				(mst-parse-atom-seq (mksent sentlen nvocab) score-dist-limit)
+				(mst-parse-atom-seq (mksent sentlen nvocab) score-faux)
+				; (mst-parse-atom-seq (mksent sentlen nvocab) score-dist-limit)
 				(parse-them (- howmany 1) sentlen))))
 
 	(define baseline (report-rate (lambda () (mksents nsents LEN)) nsents))
