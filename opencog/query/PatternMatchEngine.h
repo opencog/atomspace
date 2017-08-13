@@ -134,13 +134,16 @@ private:
 	typedef std::pair<PatternTermSeq, HandleSeq> GlobPair;
 
 	// Record where the globs are (branchpoints)
-	typedef std::pair<Handle, std::pair<size_t, size_t>> GlobPos;
+	typedef std::pair<PatternTermPtr, std::pair<size_t, size_t>> GlobPos;
 	typedef std::stack<GlobPos> GlobPosStack;
 
 	// Record how many atoms have been grounded to the globs
-	typedef std::map<Handle, size_t> GlobGrd;
+	typedef std::map<PatternTermPtr, size_t> GlobGrd;
 
 	typedef std::pair<GlobGrd, GlobPosStack> GlobState;
+
+	// Record the variables (including globs) grounded by glob_compare()
+	std::set<PatternTermPtr> glob_var_set;
 
 	std::map<GlobPair, GlobState> glob_state;
 
