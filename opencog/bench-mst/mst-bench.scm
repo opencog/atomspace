@@ -66,13 +66,18 @@
 	(cnt-em 0 SENT)
 )
 
-
 ; Create a scoring function that returns the MI, if the pair exists.
 (define (score-faux LEFT RIGHT DIST)
 	(define llpr (cog-link 'ListLink LEFT RIGHT))
 	(if (null? llpr) -10000.0
 		(cog-value-ref
 			(cog-value (Evaluation (Predicate "benchy") llpr) mi-pred) 0))
+)
+
+; Create a scoring function that returns the MI, if the pair exists.
+; It rejects links that are longer than 6 lengths long.
+(define (score-dist-limit LEFT RIGHT DIST)
+	(if (< 6 DIST) -10000.0 (score-faux LEFT RIGHT DIST))
 )
 
 ; A performance measurement function
@@ -87,7 +92,8 @@
 
 ; Report performance of parsing sentences of length LEN
 (define (report-perf LEN)
-	(define nsents 500)
+	; Timing loop
+	(define nsents (if (< 10 LEN) (if (< 20 LEN) 50 500) 6000))
 
 	; Step 2: Measure baseline performance of creating sentences
 	(define (mksents howmany sentlen)
@@ -100,7 +106,8 @@
 	(define (parse-them howmany sentlen)
 		(if (< 0 howmany)
 			(begin
-				(mst-parse-atom-seq (mksent sentlen nvocab) score-faux)
+				; (mst-parse-atom-seq (mksent sentlen nvocab) score-faux)
+				(mst-parse-atom-seq (mksent sentlen nvocab) score-dist-limit)
 				(parse-them (- howmany 1) sentlen))))
 
 	(define baseline (report-rate (lambda () (mksents nsents LEN)) nsents))
@@ -130,6 +137,6 @@
 
 (format #t "Creating ~D pairs for ~D words ... one moment please...\n"
 	npairs nvocab)
-; (report-rate (lambda () (make-pairs npairs nvocab)) 1)
+(report-rate (lambda () (make-pairs npairs nvocab)) 1)
 
-; (report-all 2 30)
+(report-all 2 35)
