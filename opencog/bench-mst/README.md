@@ -12,10 +12,10 @@ parses.  It runs in O(N^3) time, based on the measurements done here.
 * Yuret published an O(N^3) algo.
 
 * The "state of the art" projective MST algo is the "Eisner algo", and
-  its O(N^3). So we currntly match state-of-the-art.
+  its O(N^3). So we currently match state-of-the-art.
 
-In fact, we can beat state of the arrt, if we use a scoring function
-that eliminates edge lenghts of greater than 6. That algo runs at
+In fact, we can beat state of the art, if we use a scoring function
+that eliminates edge lengths of greater than 6. That algo runs at
 O(N^3) up to about N=10, and thereafter runs at O(N^2.3) See
 `boruvka-701K.png` and `boruvka-701K-limit.dat` for the raw data.
 
@@ -40,6 +40,10 @@ is a non-projective algo.  From what I can tell, the best algos are:
 So the algo here runs at the same speed as the "state of the art".
 Better, even, with the right scoring function! Woo hoo!
 Actual performance can probably be improved by re-implementing in C++.
+
+On the other hand, the O(N^2.3) behavior suggests that the algorithm is
+bottlenecked in fetching scores from the atomspace.  If this really is
+true, then re-writing in C++ might not help very much...
 
 == References
 * Eisner, Jason, 1996. “Three New Probabilistic Models for Dependency
