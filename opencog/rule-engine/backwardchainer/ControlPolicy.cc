@@ -290,8 +290,8 @@ HandleSet ControlPolicy::fetch_pattern_free_expansion_control_rules(const Handle
 	Handle query = mk_pattern_free_expansion_control_rules_query(inf_rule);
 	Handle result = bindlink(_control_as, query);
 	HandleSeq outgoings(result->getOutgoingSet());
-	HandleSet results(outgoings.begin(), outgoings.end());
-	return results;
+	_control_as->remove_atom(result); // Remove cruft from _control_as
+	return HandleSet(outgoings.begin(), outgoings.end());
 }
 
 HandleSet ControlPolicy::fetch_pattern_expansion_control_rules(const Handle& inf_rule)
@@ -299,8 +299,8 @@ HandleSet ControlPolicy::fetch_pattern_expansion_control_rules(const Handle& inf
 	Handle query = mk_pattern_expansion_control_rules_query(inf_rule);
 	Handle result = bindlink(_control_as, query);
 	HandleSeq outgoings(result->getOutgoingSet());
-	HandleSet results(outgoings.begin(), outgoings.end());
-	return results;
+	_control_as->remove_atom(result); // Remove cruft from _control_as
+	return HandleSet(outgoings.begin(), outgoings.end());
 }
 
 Handle ControlPolicy::mk_vardecl_vardecl(const Handle& vardecl_var)
