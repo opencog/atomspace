@@ -308,10 +308,10 @@ Handle AtomSpace::add_link(Type t, const HandleSeq& outgoing, bool async)
         rh = _atom_table.add(createLink(outgoing, t), async);
     }
     catch (const DeleteException& ex) {
-        // Atom deletion has not been implemented in the backing store
-        // This is a major to-do item.
-        if (_backing_store)
+        if (_backing_store) {
+           Handle h(createLink(outgoing, t));
            _backing_store->removeAtom(h, false);
+        }
     }
     return rh;
 }

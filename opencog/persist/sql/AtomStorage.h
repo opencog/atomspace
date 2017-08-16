@@ -51,6 +51,7 @@ class AtomStorage
         virtual void getIncomingByType(AtomTable&, const Handle&, Type) = 0;
         virtual void getValuations(AtomTable&, const Handle&, bool) = 0;
         virtual void storeAtom(const Handle&, bool synchronous = false) = 0;
+        virtual void removeAtom(const Handle&, bool recursive) = 0;
         virtual void loadType(AtomTable&, Type) = 0;
         virtual void flushStoreQueue() = 0;
 

@@ -1181,6 +1181,13 @@ void SQLAtomStorage::vdo_store_atom(const Handle& h)
 
 /* ================================================================ */
 
+void SQLAtomStorage::removeAtom(const Handle& h, bool recursive)
+{
+// TODO implement me.
+}
+
+/* ================================================================ */
+
 /**
  * Return true if we don't yet have a UUID for this atom.
  * Note that it MUST take the _store_mutex lock, as otherwise one

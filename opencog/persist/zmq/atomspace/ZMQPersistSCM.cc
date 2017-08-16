@@ -49,6 +49,7 @@ class ZMQBackingStore : public BackingStore
 		virtual Handle getLink(Type, const HandleSeq&) const;
 		virtual AtomPtr getAtom(UUID) const;
 		virtual void storeAtom(const Handle&);
+		virtual void removeAtom(const Handle&, bool);
 		virtual void loadType(AtomTable&, Type);
 		virtual void getIncomingSet(AtomTable&, const Handle&);
 		virtual void getIncomingByType(AtomTable&, const Handle&, Type);
@@ -102,6 +103,11 @@ void ZMQBackingStore::getValuations(AtomTable& table, const Handle& key, bool ge
 void ZMQBackingStore::storeAtom(const Handle& h)
 {
 	_store->storeAtom(h);
+}
+
+void ZMQBackingStore::removeAtom(const Handle& h, bool recursive)
+{
+	_store->removeAtom(h, recursive);
 }
 
 void ZMQBackingStore::loadType(AtomTable& at, Type t)
