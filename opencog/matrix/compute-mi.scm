@@ -417,10 +417,10 @@
 		; Loop over all pairs, computing the MI for each. The loop
 		; is actually two nested loops, with a loop over the
 		; left-basis on the outside, and over right-stars for
-		; the inner loop. This returns a list of all atoms holding
-		; the MI, suitable for iterating for storage.
-		(define (compute-n-cache-pair-mi)
-			(define all-atoms '())
+		; the inner loop.  The CALLBACK is called once per outer
+		; loop, and is passed a list of atoms that hold the MI value,
+		; obtained in the inner loop.
+		(define (compute-n-cache-pair-mi CALLBACK)
 			(define lefties (star-obj 'left-basis))
 
 			; progress stats
@@ -456,6 +456,7 @@
 						; Note the sign: it is PLUS log p(x,y)/p(*,y)p(x,*) !!
 						; This sign convention agrees with both Yuret and with
 						; wikipedia!
+						; Return the atom that is holding the MI value.
 						(define (do-one-pair lipr)
 							(define pr-freq (frqobj 'pair-freq lipr))
 							(define pr-logli (frqobj 'pair-logli lipr))
@@ -464,15 +465,15 @@
 							(if (< 0 (cntobj 'left-wild-count right-item))
 								(let* ((l-logli (frqobj 'left-wild-logli right-item))
 										(fmi (- (+ r-logli l-logli) pr-logli))
-										(mi (* pr-freq fmi))
-										(atom (frqobj 'set-pair-mi lipr mi fmi)))
-									(set! all-atoms (cons atom all-atoms))
-									(set! cnt-pairs (+ cnt-pairs 1)))))
+										(mi (* pr-freq fmi)))
+									(set! cnt-pairs (+ cnt-pairs 1))
+									(frqobj 'set-pair-mi lipr mi fmi))))
 
-						; Run the inner loop
-						(for-each
+						; Run the inner loop. The map returns a list of atoms
+						; that hold the MI values.
+						(CALLBACK (map
 							do-one-pair
-							(star-obj 'right-stars left-item))
+							(star-obj 'right-stars left-item)))
 
 						; Print some progress statistics.
 						(set! cnt-lefties (+ cnt-lefties 1))
@@ -486,21 +487,19 @@
 			)
 
 			;; XXX Maybe FIXME This could be a par-for-each, to run the
-			; calculations in parallel, but then we need to make the
-			; all-atoms list thread-safe.  Two problems: one is that
-			; current guile par-for-each implementation sucks.
-			; The other is that the atom value-fetching is done under
-			; a global lock, thus effectively single-threaded.
+			; calculations in parallel.  Unfortunately, the current guile
+			; par-for-each implementation sucks, and live-locks for more
+			; than about 4-5 threads.
 			(for-each right-loop lefties)
 
-			; Return the list of ALL atoms with MI on them
-			all-atoms
+			; Return a count of the number of pairs.
+			cnt-pairs
 		)
 
 		; Methods on this class.
 		(lambda (message . args)
 			(case message
-				((cache-pair-mi)        (compute-n-cache-pair-mi))
+				((cache-pair-mi)        (apply compute-n-cache-pair-mi args))
 				(else (apply llobj      (cons message args))))
 		))
 )
@@ -509,8 +508,10 @@
 
 (define-public (make-store LLOBJ)
 "
-  make-store -- Extend the LLOBJ with addtional methods to store
-  the left and right wild-card values.
+  make-store -- Extend the LLOBJ with additional methods to store
+  the left and right wild-card values. The primary utility of this
+  class is that it prints a progress report. Its really just a fancy
+  wrapper around store-atom, which does the actual work.
 "
 	(define start-time (current-time))
 	(define (elapsed-secs)
@@ -698,14 +699,12 @@
 	; Now, the individual pair mi's
 	(display "Going to do individual pair MI\n")
 	(elapsed-secs)
-	(let* ((all-atoms (batch-mi-obj 'cache-pair-mi))
-			(num-prs (length all-atoms)))
+	(let* ((num-prs (batch-mi-obj 'cache-pair-mi
+				(lambda (atom-list) (for-each store-atom atom-list)))))
 
 		; This print triggers as soon as the let* above finishes.
 		(format #t "Done computing ~A pair MI's in ~A secs\n"
 			num-prs (elapsed-secs))
-
-		(store-obj 'store-pairs all-atoms)
 	)
 
 	(display "Going to do column and row subtotals\n")
