@@ -284,8 +284,7 @@ Handle AtomSpace::add_atom(const Handle& h, bool async)
         // Atom deletion has not been implemented in the backing store
         // This is a major to-do item.
         if (_backing_store)
-// Under construction ....
-	        throw RuntimeException(TRACE_INFO, "Not implemented!!!");
+           _backing_store->removeAtom(h, false);
     }
     return rh;
 }
@@ -312,8 +311,7 @@ Handle AtomSpace::add_link(Type t, const HandleSeq& outgoing, bool async)
         // Atom deletion has not been implemented in the backing store
         // This is a major to-do item.
         if (_backing_store)
-// Under construction ....
-	        throw RuntimeException(TRACE_INFO, "Not implemented!!!");
+           _backing_store->removeAtom(h, false);
     }
     return rh;
 }
@@ -414,12 +412,8 @@ void AtomSpace::fetch_valuations(Handle key, bool get_all_values)
 
 bool AtomSpace::remove_atom(Handle h, bool recursive)
 {
-    if (_backing_store) {
-        // Atom deletion has not been implemented in the backing store
-        // This is a major to-do item.
-// Under construction ....
-        throw RuntimeException(TRACE_INFO, "Not implemented!!!");
-    }
+    if (_backing_store)
+        _backing_store->removeAtom(h, recursive);
     return 0 < _atom_table.extract(h, recursive).size();
 }
 

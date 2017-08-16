@@ -89,6 +89,15 @@ class BackingStore
 		virtual void storeAtom(const Handle&) = 0;
 
 		/**
+		 * Remove the indicated atom from the backing store.
+		 * If the recursive flag is set, then incoming set of the atom
+		 * will also be removed.  If the recursive flag is not set, and
+		 * the atom has a non-empty incoming set, then the atom will not
+		 * be reomved.
+		 */
+		virtual void removeAtom(const Handle&, bool recursive) = 0;
+
+		/**
 		 * Load *all* atoms of the given type, but only if they are not
 		 * already in the AtomTable.  (This avoids truth value merges
 		 * between truth values stored in the backend, and truth values
