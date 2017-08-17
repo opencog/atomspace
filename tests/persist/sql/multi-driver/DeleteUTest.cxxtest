@@ -470,7 +470,7 @@ void DeleteUTest::do_test_remove(void)
         extract_links(i, _as);
 
     printf("Atomspace size=%lu expect=%d\n", _as->get_size(), 4*idx);
-    TSM_ASSERT("Unexpected atomspace size", ((unsigned)(4*idx)) == _as->get_size());
+    TSM_ASSERT("Post-extract unexpected atomspace size", ((unsigned)(4*idx)) == _as->get_size());
 
     /* Verify that the atoms can still be fetched from storage. */
     for (i=0; i<idx; i++) {
@@ -480,16 +480,16 @@ void DeleteUTest::do_test_remove(void)
 
     /* This time, kill them in the backend too.  */
     for (i=0; i<idx; i++)
-        extract_links(i, _as);
+        delete_links(i, _as);
 
-    TSM_ASSERT("Unexpected atomspace size", ((unsigned)(4*idx)) == _as->get_size());
+    TSM_ASSERT("Post-remove unexpected atomspace size", ((unsigned)(4*idx)) == _as->get_size());
 
     /* Verify that the atoms are really gone from storage. */
     for (i=0; i<idx; i++) {
         fetch_space(i, _as);
     }
 
-    TSM_ASSERT("Unexpected atomspace size", ((unsigned)(4*idx)) == _as->get_size());
+    TSM_ASSERT("Post-refetch unexpected atomspace size", ((unsigned)(4*idx)) == _as->get_size());
 
     /* Kill data for good */
     _as->clear();
