@@ -106,9 +106,9 @@ class DeleteUTest :  public CxxTest::TestSuite
         void delete_links(int, AtomSpace *);
         void atomCompare(AtomPtr, AtomPtr, std::string);
 
-        void do_test_atomspace(void);
-        void test_odbc_atomspace(void);
-        void test_pq_atomspace(void);
+        void do_test_remove(void);
+        void test_odbc_remove(void);
+        void test_pq_remove(void);
 };
 
 DeleteUTest:: DeleteUTest(void)
@@ -386,23 +386,23 @@ void DeleteUTest::delete_links(int idx, AtomSpace *as)
 
 // ============================================================
 
-void DeleteUTest::test_odbc_atomspace(void)
+void DeleteUTest::test_odbc_remove(void)
 {
 #ifdef HAVE_ODBC_STORAGE
     uri = mkuri("odbc", dbname, username, passwd);
-    do_test_atomspace();
+    do_test_remove();
 #endif
 }
 
-void DeleteUTest::test_pq_atomspace(void)
+void DeleteUTest::test_pq_remove(void)
 {
 #ifdef HAVE_PGSQL_STORAGE
     uri = mkuri("postgres", dbname, username, passwd);
-    do_test_atomspace();
+    do_test_remove();
 #endif
 }
 
-void DeleteUTest::do_test_atomspace(void)
+void DeleteUTest::do_test_remove(void)
 {
     logger().debug("BEGIN TEST: %s", __FUNCTION__);
 
