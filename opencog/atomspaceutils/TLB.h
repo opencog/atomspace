@@ -106,6 +106,7 @@ public:
         return removeAtom(a->getHandle());
     }
     void removeAtom(const Handle&);
+    void removeAtom(UUID);
 
     /// Get the next UN-issued uuid.  The max issued UUID
     /// is one less than this.
