@@ -25,7 +25,7 @@
 #include <time.h>
 #include <sys/time.h>
 
-#include <opencog/atoms/NumberNode.h>
+#include <opencog/atoms/core/NumberNode.h>
 #include <opencog/atomspace/AtomSpace.h>
 
 #include "SleepLink.h"

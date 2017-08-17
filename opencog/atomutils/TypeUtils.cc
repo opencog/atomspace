@@ -24,7 +24,7 @@
 #include <opencog/atoms/base/Link.h>
 #include <opencog/atoms/base/ClassServer.h>
 
-#include <opencog/atoms/TypeNode.h>
+#include <opencog/atoms/core/TypeNode.h>
 #include <opencog/atoms/core/DefineLink.h>
 #include <opencog/atoms/core/VariableList.h>
 

@@ -38,8 +38,6 @@
 #include <opencog/atoms/base/ClassServer.h>
 #include <opencog/atoms/base/Link.h>
 #include <opencog/atoms/base/Node.h>
-#include <opencog/atoms/NumberNode.h>
-#include <opencog/atoms/TypeNode.h>
 #include <opencog/atoms/core/DeleteLink.h>
 #include <opencog/atoms/core/ScopeLink.h>
 #include <opencog/atoms/core/StateLink.h>
@@ -223,28 +221,15 @@ AtomTable::AtomTable(const AtomTable& other)
 
 Handle AtomTable::getHandle(Type t, const std::string& n) const
 {
-    // Special types need validation.  XXX The classserver factory
-    // should be used for this.
-    AtomPtr a;
-    try {
-        if (NUMBER_NODE == t) a = createNumberNode(n);
-        else if (classserver().isA(t, TYPE_NODE)) a = createTypeNode(n);
-        else a = createNode(t,n);
-    }
-    catch (...) { return Handle::UNDEFINED; }
-
+    AtomPtr a(createNode(t,n));
     return getNodeHandle(a);
 }
 
 Handle AtomTable::getNodeHandle(const AtomPtr& orig) const
 {
-    AtomPtr a(orig);
     // The hash function will fail to find NumberNodes unless
     // they are in the proper format.
-    if (NUMBER_NODE == a->getType()) {
-       if (nullptr == NumberNodeCast(a))
-           a = createNumberNode(a->getName());
-    }
+    AtomPtr a(classserver().factory(Handle(NodeCast(orig))));
 
     ContentHash ch = a->get_hash();
     std::lock_guard<std::recursive_mutex> lck(_mtx);
@@ -377,29 +362,6 @@ AtomPtr AtomTable::cast_factory(Type atom_type, AtomPtr atom)
     return atom;
 }
 
-/// The purpose of the clone factory is to create a private, unique
-/// copy of the atom, so as to avoid accidental, unintentional
-/// sharing with others. In particular, the atom that we are given
-/// may already exist in some other atomspace; we want our own private
-/// copy, in that case.
-AtomPtr AtomTable::clone_factory(Type atom_type, AtomPtr atom)
-{
-    // Nodes of various kinds -----------
-    // XXX TODO: convert TypeNode and NumberNode to use factory as
-    // well.
-    if (NUMBER_NODE == atom_type)
-        return createNumberNode(*NodeCast(atom));
-    if (classserver().isA(atom_type, TYPE_NODE))
-        return createTypeNode(*NodeCast(atom));
-
-    // LgDictNode needs a factory to construct it.
-    if (classserver().isA(atom_type, NODE))
-        return classserver().factory(Handle(createNode(*NodeCast(atom))));
-
-    // The createLink *forces* a copy of the link to be made.
-    return classserver().factory(Handle(createLink(*LinkCast(atom))));
-}
-
 #if 0
 static void prt_diag(AtomPtr atom, size_t i, size_t arity, const HandleSeq& ogs)
 {
@@ -451,14 +413,19 @@ Handle AtomTable::add(AtomPtr atom, bool async)
             if (nullptr == h.operator->()) return Handle::UNDEFINED;
             closet.emplace_back(add(h, async));
         }
-        atom = createLink(closet, atom_type);
-        atom = clone_factory(atom_type, atom);
+        atom = classserver().factory(Handle(createLink(closet, atom_type)));
     }
 
     // Clone, if we haven't done so already. We MUST maintain our own
     // private copy of the atom, else crazy things go wrong.
     else if (atom == orig)
-        atom = clone_factory(atom_type, atom);
+    {
+        // NumberNode, TypeNode and LgDictNode need a factory to construct.
+        if (classserver().isA(atom_type, NODE))
+            atom = classserver().factory(Handle(createNode(*NodeCast(atom))));
+        else
+            atom = classserver().factory(Handle(createLink(*LinkCast(atom))));
+    }
 
     // Lock before checking to see if this kind of atom is already in
     // the atomspace.  Lock, to prevent two different threads from

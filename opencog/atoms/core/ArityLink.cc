@@ -22,7 +22,7 @@
  */
 
 #include <opencog/atomspace/AtomSpace.h>
-#include <opencog/atoms/NumberNode.h>
+#include <opencog/atoms/core/NumberNode.h>
 
 #include "ArityLink.h"
 

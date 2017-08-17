@@ -141,7 +141,6 @@ private:
     AtomTable(const AtomTable&);
 
     AtomPtr cast_factory(Type atom_type, AtomPtr atom);
-    AtomPtr clone_factory(Type atom_type, AtomPtr atom);
 
 public:
 

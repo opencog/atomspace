@@ -24,8 +24,8 @@
 #include <opencog/util/mt19937ar.h>
 #include <opencog/atomspace/AtomSpace.h>
 
-#include "../NumberNode.h"
 #include "FunctionLink.h"
+#include "NumberNode.h"
 #include "RandomChoice.h"
 
 using namespace opencog;

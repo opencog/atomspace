@@ -334,6 +334,9 @@ get_handles_by_name(AtomSpace* as,
     }
     classserver().foreachRecursive(
         [&](Type t)->void {
+            // Avoid illegal gets.
+            if (classserver().isA(t, NUMBER_NODE)) return;
+            if (classserver().isA(t, TYPE_NODE)) return;
             Handle h(as->get_handle(t, name));
             if (h) *(result++) = h; }, type);
 
@@ -348,7 +351,8 @@ private:
 
 public:
     AtomSpaceUTest() {
-        logger().set_level(Logger::INFO);
+        logger().set_level(Logger::DEBUG);
+        // logger().set_sync_flag(true);
         logger().set_print_to_stdout_flag(true);
     }
 
@@ -374,8 +378,9 @@ public:
         }
     };
 
-    void testMiscellaneous() {
-        logger().debug("\ntestMiscellaneous()\n");
+    void testMiscellaneous()
+    {
+        logger().info("\nBegin testMiscellaneous()");
 
         const char* nodeNames[NUM_NODES] = {
             "Vader",
@@ -385,12 +390,13 @@ public:
             "Force",
             "Human"
         };
+
         Handle h[NUM_NODES];
         for (int i = 0; i < NUM_NODES; i++) {
             h[i] = atomSpace->add_node(CONCEPT_NODE, nodeNames[i]);
             h[i]->setTruthValue(SimpleTruthValue::createTV(0.001f, 0.99f));
         }
-        //logger().debug("Nodes created\n");
+        logger().debug("Nodes created");
 
         float ForceUser[NUM_FORCEUSER_LINKS] = {0.99f, 0.99f, 0.0f, 0.5f};
         Handle FU[NUM_FORCEUSER_LINKS];
@@ -401,7 +407,7 @@ public:
             FU[i] = atomSpace->add_link(SUBSET_LINK, temp);
             FU[i]->setTruthValue(SimpleTruthValue::createTV(ForceUser[i], 0.99f));
         }
-        //logger().debug("ForceUser links created\n");
+        logger().debug("ForceUser links created");
 
         float Human[4] = {0.99f, 0.99f, 0.5f, 0.0f};
         HandleSeq out[4];
@@ -412,36 +418,36 @@ public:
             H[i] = atomSpace->add_link(INHERITANCE_LINK, out[i]);
             H[i]->setTruthValue(SimpleTruthValue::createTV(Human[i], 0.99f));
         }
-        //logger().debug("Human links created\n");
+        logger().debug("Human links created");
 
         // Check TVS
         for (int i = 0; i < NUM_NODES; i++) {
             TruthValuePtr tv = h[i]->getTruthValue();
-            logger().debug("h: tv mean = %f, atomSpace->getMean(h[i]) = %f\n",
+            logger().debug("h: tv mean = %f, atomSpace->getMean(h[i]) = %f",
                  tv->getMean(), h[i]->getTruthValue()->getMean());
             TS_ASSERT(fabs(tv->getMean() - 0.001) < FLOAT_ACCEPTABLE_ERROR);
-            logger().debug("h: confidence = %f, diff = %f, error = %f\n", tv->getConfidence(), fabs(tv->getConfidence() - 0.99), FLOAT_ACCEPTABLE_ERROR);
+            logger().debug("h: confidence = %f, diff = %f, error = %f", tv->getConfidence(), fabs(tv->getConfidence() - 0.99), FLOAT_ACCEPTABLE_ERROR);
             TS_ASSERT(fabs(tv->getConfidence() - 0.99) < FLOAT_ACCEPTABLE_ERROR);
             if (i < NUM_FORCEUSER_LINKS) {
                 TruthValuePtr tv = FU[i]->getTruthValue();
-                logger().debug("h: tv mean = %f, atomSpace->getMean(h[i]) = %f\n",
+                logger().debug("h: tv mean = %f, atomSpace->getMean(h[i]) = %f",
                   tv->getMean(), h[i]->getTruthValue()->getMean());
                 logger().debug("FU: tv mean = %f, atomSpace->getMean(FU[i]) = %f\n",
                  tv->getMean(), FU[i]->getTruthValue()->getMean());
                 TS_ASSERT(fabs(tv->getMean() - ForceUser[i]) < FLOAT_ACCEPTABLE_ERROR);
-                logger().debug("FU: confidence = %f, diff = %f, error = %f\n", tv->getConfidence(), fabs(tv->getConfidence() - 0.99), FLOAT_ACCEPTABLE_ERROR);
+                logger().debug("FU: confidence = %f, diff = %f, error = %f", tv->getConfidence(), fabs(tv->getConfidence() - 0.99), FLOAT_ACCEPTABLE_ERROR);
                 TS_ASSERT(fabs(tv->getConfidence() - 0.99) < FLOAT_ACCEPTABLE_ERROR);
             }
             if (i < NUM_HUMAN_LINKS) {
                 TruthValuePtr tv = H[i]->getTruthValue();
-                logger().debug("h: tv mean = %f, atomSpace->getMean(h[i]) = %f\n",
+                logger().debug("h: tv mean = %f, atomSpace->getMean(h[i]) = %f",
                      tv->getMean(), h[i]->getTruthValue()->getMean());
                 TS_ASSERT(fabs(tv->getMean() - Human[i]) < FLOAT_ACCEPTABLE_ERROR);
-                logger().debug("H: confidence = %f, diff = %f, error = %f\n", tv->getConfidence(), fabs(tv->getConfidence() - 0.99), FLOAT_ACCEPTABLE_ERROR);
+                logger().debug("H: confidence = %f, diff = %f, error = %f", tv->getConfidence(), fabs(tv->getConfidence() - 0.99), FLOAT_ACCEPTABLE_ERROR);
                 TS_ASSERT(fabs(tv->getConfidence() - 0.99) < FLOAT_ACCEPTABLE_ERROR);
             }
         }
-        //logger().debug("TVS checked\n");
+        logger().debug("TVS checked");
 
         TS_ASSERT(atomSpace->get_num_nodes() == NUM_NODES);
         TS_ASSERT(atomSpace->get_num_links() == 8);
@@ -452,6 +458,7 @@ public:
             mean m;
             HandleSeq high_mean;
             getHandleSetFiltered(atomSpace, back_inserter(high_mean), ATOM, true, m);
+            logger().debug("Filter %d checked", vhIdx);
 
             //std::cout << "high mean size " << high_mean.size() << std::endl;
             //for (int jj = 0; jj < high_mean.size(); jj++) {
@@ -460,9 +467,11 @@ public:
 
             HandleSeq nodes;
             atomSpace->get_handles_by_type(back_inserter(nodes), NODE, true);
+            logger().debug("Get nodes by type %d checked", vhIdx);
 
             HandleSeq links;
             atomSpace->get_handles_by_type(back_inserter(links), LINK, true);
+            logger().debug("Get links by type %d checked", vhIdx);
 
             HandleSeq all;
             everything e;
@@ -471,6 +480,7 @@ public:
             HandleSeq AF_nodes = filter_InAttentionalFocus(atomSpace, nodes.begin(), nodes.end());
             HandleSeq AF_links = filter_InAttentionalFocus(atomSpace, links.begin(), links.end());
 
+            logger().debug("Focus %d checked", vhIdx);
             TS_ASSERT(AF_nodes.size() == 0);
             TS_ASSERT(AF_links.size() == 0);
 
@@ -494,6 +504,7 @@ public:
                     TS_ASSERT (find(all.begin(), all.end(), FU[i]) != all.end());
                 }
             }
+            logger().debug("Forceuser %d checked", vhIdx);
 
             for (int i = 0; i < NUM_HUMAN_LINKS; i++) {
                 if (vhIdx == 0 || (i % 4 == vhIdx)) {
@@ -501,6 +512,7 @@ public:
                     TS_ASSERT (find(all.begin(), all.end(), H[i]) != all.end());
                 }
             }
+            logger().debug("Human %d checked", vhIdx);
 
             for (int i = 0; i < NUM_NODES; i++) {
                 if (vhIdx == 0 || (i % 4 == vhIdx)) {
@@ -508,14 +520,17 @@ public:
                     TS_ASSERT (find(nodes.begin(), nodes.end(), h[i]) != nodes.end());
                 }
             }
+            logger().debug("Rest of them %d checked", vhIdx);
         }
 
         // Test getHandleSet
         // OutputIterator getHandleSet(OutputIterator, Type, const string& name, bool acceptSubTypes=true) const;
 
+        logger().debug("Start subset test");
         for (int vhIdx = 0; vhIdx < NUM_VHS; vhIdx++) {
             for (int i = 0; i < NUM_NODES; i++) {
                 HandleSeq nodes;
+                logger().debug("start get handle by name %d %d", vhIdx, i);
                 get_handles_by_name(atomSpace, back_inserter(nodes), nodeNames[i], NODE, true);
                 TS_ASSERT_EQUALS(nodes.size(), 1);
                 for (int j = 0; j < NUM_NODES; j++) {
@@ -527,37 +542,39 @@ public:
                 }
             }
 
+            logger().debug("Subset %d checked", vhIdx);
             TS_ASSERT(classserver().isA(SUBSET_LINK, INHERITANCE_LINK));
 
             // Note: SUBSET_LINK is a subType of INHERITANCE_LINK
             HandleSeq links;
             get_handles_by_name(atomSpace, back_inserter(links), "", LINK, true);
-            logger().debug("1) links.size() = %d Expected = %d\n", (int) links.size(), 8);
+            logger().debug("1) links.size() = %d Expected = %d", (int) links.size(), 8);
             TS_ASSERT(links.size() == 8);
             links.clear();
             get_handles_by_name(atomSpace, back_inserter(links), "", LINK, false);
-            //logger().debug("2) links.size() = %d\n", links.size());
+            logger().debug("2) links.size() = %d", links.size());
             TS_ASSERT(links.size() == 0);
             HandleSeq allInhLinks;
             get_handles_by_name(atomSpace, back_inserter(allInhLinks), "", INHERITANCE_LINK, true);
-            //logger().info("4) allInhLinks.size() = %d (vhIdx: %d)\n", allInhLinks.size(), vhIdx);
+            logger().debug("4) allInhLinks.size() = %d (vhIdx: %d)", allInhLinks.size(), vhIdx);
             //for (unsigned int x = 0; x < allInhLinks.size(); ++x) {
             //    logger().info("allInhLinks[x]: %s\n", allInhLinks[x]->toString().c_str());
             //}
             TS_ASSERT(allInhLinks.size() == 8);
             HandleSeq justInhLinks;
             get_handles_by_name(atomSpace, back_inserter(justInhLinks), "", INHERITANCE_LINK, false);
-            //logger().info("5) justInhLinks.size() = %d (vhIdx: %d)\n", justInhLinks.size(), vhIdx);
+            logger().debug("5) justInhLinks.size() = %d (vhIdx: %d)", justInhLinks.size(), vhIdx);
             TS_ASSERT(justInhLinks.size() == 4);
             HandleSeq partOfLinks;
             get_handles_by_name(atomSpace, back_inserter(partOfLinks), "", SUBSET_LINK, true);
-            //logger().debug("5) partOfLinks.size() = %d\n", partOfLinks.size());
+            logger().debug("6) partOfLinks.size() = %d", partOfLinks.size());
             TS_ASSERT(partOfLinks.size() == 4);
             partOfLinks.clear();
             get_handles_by_name(atomSpace, back_inserter(partOfLinks), "", SUBSET_LINK, false);
-            //logger().debug("6) partOfLinks.size() = %d\n", partOfLinks.size());
+            logger().debug("7) partOfLinks.size() = %d", partOfLinks.size());
             TS_ASSERT(partOfLinks.size() == 4);
         }
+        logger().info("\nEnd testMiscellaneous()");
     }
 
     /**
