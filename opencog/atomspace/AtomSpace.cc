@@ -341,7 +341,9 @@ Handle AtomSpace::fetch_atom(const Handle& h)
     // Now, get the latest values from the backing store.
     // The operation here is to CLOBBER the values, NOT to merge them!
     // The goal of an explicit fetch is to explicitly fetch the values,
-    // and not to play monkey-shines with them.
+    // and not to play monkey-shines with them.  If you want something
+    // else, then save the old TV, fetch the new TV, and combine them
+    // with your favorite algo.
     Handle hv;
     if (h->isNode()) {
         hv = _backing_store->getNode(h->getType(),

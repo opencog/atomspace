@@ -552,9 +552,11 @@ void DeleteUTest::do_test_recurse(void)
     add_to_space(idx++, _as, "EE-ee-wow ");
 
     /* Make sure UTF-8 works fine. */
+/*
     add_to_space(idx++, _as, "Попытка выбраться вызвала слабый стон ");
     add_to_space(idx++, _as, "はにがうりだそうであってるのかはち ");
     add_to_space(idx++, _as, "係拉丁字母");
+*/
 
     /* Verify that the atoms were added */
     int i;
@@ -593,14 +595,17 @@ void DeleteUTest::do_test_recurse(void)
          _as->get_size(), expsz);
     TSM_ASSERT("Unexpected atomspace size", expsz == _as->get_size());
 
+    _as->barrier();
+
     /* Verify that the atoms are really gone from storage. */
     for (i=0; i<idx; i++) {
         fetch_space(i, _as);
     }
 
-    printf("Post-refetch size=%lu expect=%lu\n",
-         _as->get_size(), expsz);
-    TSM_ASSERT("Unexpected atomspace size", expsz == _as->get_size());
+    printf("Post-refetch size=%lu expect=%d\n",
+         _as->get_size(), 7*idx);
+    TSM_ASSERT("Unexpected atomspace size",
+         ((unsigned) 7*idx) == _as->get_size());
 
     /* However, others should still be there. */
     for (i=zap; i<idx; i++) {
