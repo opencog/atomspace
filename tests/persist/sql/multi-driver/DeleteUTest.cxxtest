@@ -574,10 +574,10 @@ void DeleteUTest::do_test_recurse(void)
     for (i=0; i<zap; i++)
         extract_nodes(i, _as);
 
-    printf("Atomspace size=%lu expect=%d\n",
-         _as->get_size(), 4*(idx-zap)-1);
-    TSM_ASSERT("Unexpected atomspace size",
-          ((unsigned)(4*(idx-zap)-1)) == _as->get_size());
+    size_t expsz = 7*(idx-zap) + 3*zap;
+    printf("Atomspace size=%lu expect=%lu\n",
+         _as->get_size(), expsz);
+    TSM_ASSERT("Unexpected atomspace size", expsz == _as->get_size());
 
     /* Verify that the atoms can still be fetched from storage. */
     for (i=0; i<idx; i++) {
@@ -587,18 +587,20 @@ void DeleteUTest::do_test_recurse(void)
 
     /* This time, kill them in the backend too.  */
     for (i=0; i<zap; i++)
-        extract_nodes(i, _as);
+        delete_nodes(i, _as);
 
-    TSM_ASSERT("Unexpected atomspace size",
-          ((unsigned)(4*idx-1)) == _as->get_size());
+    printf("Post-remove size=%lu expect=%lu\n",
+         _as->get_size(), expsz);
+    TSM_ASSERT("Unexpected atomspace size", expsz == _as->get_size());
 
     /* Verify that the atoms are really gone from storage. */
     for (i=0; i<idx; i++) {
         fetch_space(i, _as);
     }
 
-    TSM_ASSERT("Unexpected atomspace size",
-          ((unsigned)(4*idx-1)) == _as->get_size());
+    printf("Post-refetch size=%lu expect=%lu\n",
+         _as->get_size(), expsz);
+    TSM_ASSERT("Unexpected atomspace size", expsz == _as->get_size());
 
     /* However, others should still be there. */
     for (i=zap; i<idx; i++) {
