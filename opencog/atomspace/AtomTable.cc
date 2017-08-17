@@ -229,11 +229,12 @@ Handle AtomTable::getHandle(Type t, const std::string& n) const
 Handle AtomTable::getNodeHandle(const AtomPtr& orig) const
 {
     AtomPtr a(orig);
+    // AtomPtr a(classserver().factory(Handle(*NodeCast(orig))));
     // The hash function will fail to find NumberNodes unless
     // they are in the proper format.
-    if (NUMBER_NODE == a->getType()) {
+    if (classserver().isA(a->getType(), NUMBER_NODE)) {
        if (nullptr == NumberNodeCast(a))
-           a = createNumberNode(a->getName());
+           a = createNumberNode(a->getType(), a->getName());
     }
 
     ContentHash ch = a->get_hash();
