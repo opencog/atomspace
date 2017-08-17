@@ -101,12 +101,14 @@ class DeleteUTest :  public CxxTest::TestSuite
         void add_to_space(int, AtomSpace *, std::string id);
         void fetch_space(int, AtomSpace *);
         void check_space(int, AtomSpace *, std::string dbgmsg);
+        void check_remove(int, AtomSpace *, std::string dbgmsg);
         void check_empty(int, AtomSpace *);
         void extract_links(int, AtomSpace *);
         void delete_links(int, AtomSpace *);
         void extract_nodes(int, AtomSpace *);
         void delete_nodes(int, AtomSpace *);
         void atomCompare(AtomPtr, AtomPtr, std::string);
+        void tvMiscompare(AtomPtr, AtomPtr, std::string);
 
         void do_test_remove(void);
         void test_odbc_remove(void);
@@ -234,6 +236,23 @@ void DeleteUTest::atomCompare(AtomPtr a, AtomPtr b, std::string where)
     }
 }
 
+// Passes only if the TV's are different!
+void DeleteUTest::tvMiscompare(AtomPtr a, AtomPtr b, std::string where)
+{
+    if (nullptr == a or nullptr == b) return;
+
+    TruthValuePtr ta = a->getTruthValue();
+    TruthValuePtr tb = b->getTruthValue();
+    if (ta and tb)
+    {
+        TSM_ASSERT("Truth value should not match!", (*ta)!=(*tb));
+    }
+    if (nullptr==ta and nullptr==tb)
+    {
+        TSM_ASSERT("Truth value null!!", false);
+    }
+}
+
 // ============================================================
 
 void DeleteUTest::add_to_space(int idx, AtomSpace *as, std::string id)
@@ -269,13 +288,19 @@ void DeleteUTest::add_to_space(int idx, AtomSpace *as, std::string id)
     hvec.push_back(h4[idx]);
 
     // Note that SetLink is an unordered link.
+    TruthValuePtr stv5(SimpleTruthValue::createTV(0.55, 500+idx));
     hl[idx] = as->add_link(SET_LINK, hvec);
+    hl[idx]->setTruthValue(stv5);
     l[idx] = LinkCast(hl[idx]);
 
+    TruthValuePtr stv6(SimpleTruthValue::createTV(0.66, 600+idx));
     hl2[idx] = as->add_link(LIST_LINK, hl[idx], h2[idx]);
+    hl2[idx]->setTruthValue(stv6);
     l2[idx] = LinkCast(hl2[idx]);
 
+    TruthValuePtr stv7(SimpleTruthValue::createTV(0.77, 700+idx));
     hl3[idx] = as->add_link(EVALUATION_LINK, h1[idx], hl2[idx], h3[idx]);
+    hl3[idx]->setTruthValue(stv7);
     l3[idx] = LinkCast(hl3[idx]);
 }
 
@@ -348,6 +373,31 @@ void DeleteUTest::check_space(int idx, AtomSpace *space, std::string dbgmsg)
     HandleSeq hv3({hb1, hlb2, hb3});
     Handle hlb3 = space->get_handle(hl3[idx]->getType(), hv3);
     atomCompare(hl3[idx], hlb3, dbgmsg + "-hlinkb3");
+}
+
+void DeleteUTest::check_remove(int idx, AtomSpace *space, std::string dbgmsg)
+{
+    Handle hb1 = space->get_handle(n1[idx]->getType(), n1[idx]->getName());
+    Handle hb2 = space->get_handle(n2[idx]->getType(), n2[idx]->getName());
+    Handle hb3 = space->get_handle(n3[idx]->getType(), n3[idx]->getName());
+    Handle hb4 = space->get_handle(n4[idx]->getType(), n4[idx]->getName());
+
+    HandleSeq hvec;
+    hvec.push_back(hb1);
+    hvec.push_back(hb2);
+    hvec.push_back(hb3);
+    hvec.push_back(hb4);
+
+    Handle hlb = space->get_handle(hl[idx]->getType(), hvec);
+    tvMiscompare(hl[idx], hlb, dbgmsg + "-hlinkb");
+
+    HandleSeq hv2({hlb, hb2});
+    Handle hlb2 = space->get_handle(hl2[idx]->getType(), hv2);
+    tvMiscompare(hl2[idx], hlb2, dbgmsg + "-hlinkb2");
+
+    HandleSeq hv3({hb1, hlb2, hb3});
+    Handle hlb3 = space->get_handle(hl3[idx]->getType(), hv3);
+    tvMiscompare(hl3[idx], hlb3, dbgmsg + "-hlinkb3");
 }
 
 void DeleteUTest::check_empty(int idx, AtomSpace *space)
@@ -491,6 +541,7 @@ void DeleteUTest::do_test_remove(void)
     /* Verify that the atoms are really gone from storage. */
     for (i=0; i<idx; i++) {
         fetch_space(i, _as);
+        check_remove(i, _as, "verify-gone");
     }
 
     printf("Post-referesh size=%lu expect=%d\n", _as->get_size(), 7*idx);
@@ -557,11 +608,9 @@ void DeleteUTest::do_test_recurse(void)
     add_to_space(idx++, _as, "EE-ee-wow ");
 
     /* Make sure UTF-8 works fine. */
-/*
     add_to_space(idx++, _as, "Попытка выбраться вызвала слабый стон ");
     add_to_space(idx++, _as, "はにがうりだそうであってるのかはち ");
     add_to_space(idx++, _as, "係拉丁字母");
-*/
 
     /* Verify that the atoms were added */
     int i;
@@ -611,6 +660,11 @@ void DeleteUTest::do_test_recurse(void)
          _as->get_size(), 7*idx);
     TSM_ASSERT("Unexpected atomspace size",
          ((unsigned) 7*idx) == _as->get_size());
+
+    /* Check that the removed atoms really got zapped. */
+    for (i=0; i<zap; i++) {
+        check_remove(i, _as, "verify-zapped");
+    }
 
     /* However, others should still be there. */
     for (i=zap; i<idx; i++) {
