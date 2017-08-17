@@ -460,6 +460,9 @@ void DeleteUTest::do_test_remove(void)
     /* Push all atoms out to the SQL DB */
     _pm->do_store();
 
+    printf("Initial Atomspace size=%lu expect=%d\n", _as->get_size(), 7*idx);
+    TSM_ASSERT("Initial unexpected atomspace size",
+          ((unsigned)(7*idx)) == _as->get_size());
     /* Delete some atoms with non-empty incoming sets.
      * This should result in thier being removed from the atomspace,
      * but NOT fom the backend!
@@ -482,6 +485,7 @@ void DeleteUTest::do_test_remove(void)
     for (i=0; i<idx; i++)
         delete_links(i, _as);
 
+    printf("Post-remove size=%lu expect=%d\n", _as->get_size(), 4*idx);
     TSM_ASSERT("Post-remove unexpected atomspace size", ((unsigned)(4*idx)) == _as->get_size());
 
     /* Verify that the atoms are really gone from storage. */
@@ -489,7 +493,8 @@ void DeleteUTest::do_test_remove(void)
         fetch_space(i, _as);
     }
 
-    TSM_ASSERT("Post-refetch unexpected atomspace size", ((unsigned)(4*idx)) == _as->get_size());
+    printf("Post-referesh size=%lu expect=%d\n", _as->get_size(), 7*idx);
+    TSM_ASSERT("Post-refetch unexpected atomspace size", ((unsigned)(7*idx)) == _as->get_size());
 
     /* Kill data for good */
     _as->clear();

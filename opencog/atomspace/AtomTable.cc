@@ -552,6 +552,14 @@ void AtomTable::barrier()
 
 size_t AtomTable::getSize() const
 {
+    // No one except the unit tests ever worries about the atom table
+    // size. This sanity check might be able to avoid unpleasant
+    // surprises.
+    if (_size != _atom_store.size())
+        throw RuntimeException(TRACE_INFO,
+            "Internal Error: Inconsistent AtomTable size! %lu vs. %lu",
+            _size, _atom_store.size());
+
     return _size;
 }
 
