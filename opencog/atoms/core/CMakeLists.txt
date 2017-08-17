@@ -10,6 +10,7 @@ ADD_LIBRARY (atomcore
 	FunctionLink.cc
 	ImplicationScopeLink.cc
 	LambdaLink.cc
+	NumberNode.cc
 	PutLink.cc
 	RandomChoice.cc
 	RandomNumber.cc
@@ -18,6 +19,7 @@ ADD_LIBRARY (atomcore
 	StateLink.cc
 	TimeLink.cc
 	TypedAtomLink.cc
+	TypeNode.cc
 	UniqueLink.cc
 	Variables.cc
 	VariableList.cc
@@ -42,6 +44,7 @@ INSTALL (FILES
 	FreeLink.h
 	FunctionLink.h
 	LambdaLink.h
+	NumberNode.h
 	PutLink.h
 	RandomChoice.h
 	RandomNumber.h
@@ -50,6 +53,7 @@ INSTALL (FILES
 	StateLink.h
 	TimeLink.h
 	TypedAtomLink.h
+	TypeNode.h
 	UniqueLink.h
 	Variables.h
 	VariableList.h

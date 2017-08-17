@@ -1,5 +1,5 @@
 /*
- * opencog/atoms/NumberNode.h
+ * opencog/atoms/core/NumberNode.h
  *
  * Copyright (C) 2015 Linas Vepstas
  * All Rights Reserved
@@ -66,6 +66,14 @@ protected:
 	double value;
 
 public:
+	// Please to NOT use this constructor!
+	NumberNode(Type t, const std::string& s)
+		// Convert to number and back to string to avoid miscompares.
+		: Node(t, double_to_string(std::stod(s))),
+		  value(std::stod(s))
+	{}
+
+public:
 	NumberNode(const std::string& s)
 		// Convert to number and back to string to avoid miscompares.
 		: Node(NUMBER_NODE, double_to_string(std::stod(s))),
@@ -91,6 +99,8 @@ public:
 	}
 
 	double get_value(void) { return value; }
+
+	static Handle factory(const Handle&);
 };
 
 typedef std::shared_ptr<NumberNode> NumberNodePtr;

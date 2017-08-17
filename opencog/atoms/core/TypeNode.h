@@ -1,5 +1,5 @@
 /*
- * opencog/atoms/TypeNode.h
+ * opencog/atoms/core/TypeNode.h
  *
  * Copyright (C) 2015 Linas Vepstas
  * All Rights Reserved
@@ -40,6 +40,18 @@ class TypeNode : public Node
 {
 protected:
 	Type value;
+
+public:
+	// Please do NOT use this constructor!
+	TypeNode(Type t, const std::string& s)
+		// Convert to number and back to string to avoid miscompares.
+		: Node(t, s),
+		  value(classserver().getType(s))
+	{
+		if (NOTYPE == value)
+			throw InvalidParamException(TRACE_INFO,
+				"Not a valid typename: '%s'", s.c_str());
+	}
 
 public:
 	TypeNode(const std::string& s)
@@ -86,6 +98,8 @@ public:
 	}
 
 	Type get_value(void) { return value; }
+
+	static Handle factory(const Handle&);
 };
 
 typedef std::shared_ptr<TypeNode> TypeNodePtr;

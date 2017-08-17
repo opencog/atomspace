@@ -26,7 +26,7 @@
 #include <opencog/atoms/base/ClassServer.h>
 #include <opencog/atoms/base/Quotation.h>
 #include <opencog/atomutils/TypeUtils.h>
-#include <opencog/atoms/TypeNode.h>
+#include <opencog/atoms/core/TypeNode.h>
 
 #include "ScopeLink.h"
 #include "VariableList.h"
