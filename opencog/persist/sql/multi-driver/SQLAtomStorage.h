@@ -161,6 +161,8 @@ class SQLAtomStorage : public AtomStorage
 		void storeValuation(const Handle&, const Handle&, const ProtoAtomPtr&);
 		ProtoAtomPtr getValuation(const Handle&, const Handle&);
 		void deleteValuation(const Handle&, const Handle&);
+		void deleteValuation(UUID, UUID);
+		void deleteAllValuations(UUID);
 
 		std::string float_to_string(const FloatValuePtr&);
 		std::string string_to_string(const StringValuePtr&);

@@ -232,17 +232,15 @@ class SQLAtomStorage::Response
 		// Fetching of uuids (for atom deletion) -----------------------
 		bool get_uuid_column_cb(const char *colname, const char * colvalue)
 		{
-			// Don't bother checking the column name...
-			// if (!strcmp(colname, "uuid"))
-			// if ('u' == colname[0])
-			{
-				uuid = strtoul(colvalue, NULL, 10);
-			}
+			// The column name will be either "uuid" or "key".
+			// Since there will be only one column,
+			// don't bother checking the column name...
+			uuid = strtoul(colvalue, NULL, 10);
 			return false;
 		}
 
 		std::vector<UUID> *uvec;
-		bool get_incoming_uuid_cb(void)
+		bool get_uuid_cb(void)
 		{
 			rs->foreach_column(&Response::get_uuid_column_cb, this);
 
@@ -629,10 +627,15 @@ void SQLAtomStorage::store_atomtable_id(const AtomTable& at)
 /// It also simplifies, ever-so-slightly, the update of valuations.
 void SQLAtomStorage::deleteValuation(const Handle& key, const Handle& atom)
 {
+	deleteValuation(get_uuid(key), get_uuid(atom));
+}
+
+void SQLAtomStorage::deleteValuation(UUID key_uid, UUID atom_uid)
+{
 	char buff[BUFSZ];
 	snprintf(buff, BUFSZ,
 		"SELECT * FROM Valuations WHERE key = %lu AND atom = %lu;",
-		get_uuid(key), get_uuid(atom));
+		key_uid, atom_uid);
 
 	Response rp(conn_pool);
 	rp.vtype = 0;
@@ -657,7 +660,7 @@ void SQLAtomStorage::deleteValuation(const Handle& key, const Handle& atom)
 	{
 		snprintf(buff, BUFSZ,
 			"DELETE FROM Valuations WHERE key = %lu AND atom = %lu;",
-			get_uuid(key), get_uuid(atom));
+			key_uid, atom_uid);
 
 		rp.exec(buff);
 	}
@@ -1219,6 +1222,25 @@ void SQLAtomStorage::removeAtom(const Handle& h, bool recursive)
 	// Synchronize. The atom that we are deleting might be sitting
 	// in the store queue.
 	flushStoreQueue();
+	removeAtom(get_uuid(h), recursive);
+}
+
+/// Delete ALL of the values associated with an atom.
+void SQLAtomStorage::deleteAllValuations(UUID uuid)
+{
+	char buff[BUFSZ];
+	snprintf(buff, BUFSZ,
+		"SELECT key FROM Valuations WHERE atom = %lu;", uuid);
+
+	std::vector<UUID> uset;
+	Response rp(conn_pool);
+	rp.uvec = &uset;
+	rp.exec(buff);
+
+	rp.rs->foreach_row(&Response::get_uuid_cb, &rp);
+
+	for (UUID kuid : uset)
+		deleteValuation(kuid, uuid);
 }
 
 void SQLAtomStorage::removeAtom(UUID uuid, bool recursive)
@@ -1235,16 +1257,14 @@ void SQLAtomStorage::removeAtom(UUID uuid, bool recursive)
 		Response rp(conn_pool);
 		rp.uvec = &uset;
 		rp.exec(buff);
-		rp.rs->foreach_row(&Response::get_incoming_uuid_cb, &rp);
+		rp.rs->foreach_row(&Response::get_uuid_cb, &rp);
 
 		for (UUID iud : uset)
 			removeAtom(iud, recursive);
 	}
 
-// xxxxxxxxx
-	// Knock out the values first.
-//	for (const Handle& key : h->getKeys())
-//		deleteValuation(key, h);
+	// Next, knock out the values.
+	deleteAllValuations(uuid);
 
 	// Now, remove the atom itself.
 	deleteSingleAtom(uuid);
