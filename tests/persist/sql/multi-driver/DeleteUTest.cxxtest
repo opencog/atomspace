@@ -104,6 +104,8 @@ class DeleteUTest :  public CxxTest::TestSuite
         void check_empty(int, AtomSpace *);
         void extract_links(int, AtomSpace *);
         void delete_links(int, AtomSpace *);
+        void extract_nodes(int, AtomSpace *);
+        void delete_nodes(int, AtomSpace *);
         void atomCompare(AtomPtr, AtomPtr, std::string);
 
         void do_test_remove(void);
@@ -388,6 +390,19 @@ void DeleteUTest::delete_links(int idx, AtomSpace *as)
 	as->remove_atom(hl[idx]);
 }
 
+// This removes all the links, and one node, from atomspace,
+// but not from the DB.
+void DeleteUTest::extract_nodes(int idx, AtomSpace *as)
+{
+	as->extract_atom(h1[idx], true);
+}
+
+// This should delete all the links and one node from the database.
+void DeleteUTest::delete_nodes(int idx, AtomSpace *as)
+{
+	as->remove_atom(h3[idx], true);
+}
+
 // ============================================================
 
 void DeleteUTest::test_odbc_remove(void)
@@ -549,17 +564,20 @@ void DeleteUTest::do_test_recurse(void)
     /* Push all atoms out to the SQL DB */
     _pm->do_store();
 
-    /* Delete some atoms with non-empty incoming sets.
+    /* Perform recursive extract of some nodes.
      * This should result in thier being removed from the atomspace,
      * but NOT fom the backend!
      */
     _as->barrier();
 
-    for (i=0; i<idx; i++)
-        extract_links(i, _as);
+    int zap = 4;
+    for (i=0; i<zap; i++)
+        extract_nodes(i, _as);
 
-    printf("Atomspace size=%lu expect=%d\n", _as->get_size(), 4*idx);
-    TSM_ASSERT("Unexpected atomspace size", ((unsigned)(4*idx)) == _as->get_size());
+    printf("Atomspace size=%lu expect=%d\n",
+         _as->get_size(), 4*(idx-zap)-1);
+    TSM_ASSERT("Unexpected atomspace size",
+          ((unsigned)(4*(idx-zap)-1)) == _as->get_size());
 
     /* Verify that the atoms can still be fetched from storage. */
     for (i=0; i<idx; i++) {
@@ -568,17 +586,24 @@ void DeleteUTest::do_test_recurse(void)
     }
 
     /* This time, kill them in the backend too.  */
-    for (i=0; i<idx; i++)
-        extract_links(i, _as);
+    for (i=0; i<zap; i++)
+        extract_nodes(i, _as);
 
-    TSM_ASSERT("Unexpected atomspace size", ((unsigned)(4*idx)) == _as->get_size());
+    TSM_ASSERT("Unexpected atomspace size",
+          ((unsigned)(4*idx-1)) == _as->get_size());
 
     /* Verify that the atoms are really gone from storage. */
     for (i=0; i<idx; i++) {
         fetch_space(i, _as);
     }
 
-    TSM_ASSERT("Unexpected atomspace size", ((unsigned)(4*idx)) == _as->get_size());
+    TSM_ASSERT("Unexpected atomspace size",
+          ((unsigned)(4*idx-1)) == _as->get_size());
+
+    /* However, others should still be there. */
+    for (i=zap; i<idx; i++) {
+        check_space(i, _as, "verify-zap");
+    }
 
     /* Kill data for good */
     _as->clear();
