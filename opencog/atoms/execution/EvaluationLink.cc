@@ -24,9 +24,9 @@
 
 #include <opencog/atoms/base/atom_types.h>
 #include <opencog/truthvalue/SimpleTruthValue.h>
-#include <opencog/atoms/NumberNode.h>
 #include <opencog/atoms/core/DefineLink.h>
 #include <opencog/atoms/core/LambdaLink.h>
+#include <opencog/atoms/core/NumberNode.h>
 #include <opencog/atoms/core/PutLink.h>
 #include <opencog/atoms/execution/Instantiator.h>
 #include <opencog/atoms/pattern/PatternLink.h>

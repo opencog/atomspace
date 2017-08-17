@@ -23,9 +23,9 @@
 
 #include "UREConfigReader.h"
 
-#include <opencog/atoms/NumberNode.h>
-#include <opencog/query/BindLinkAPI.h>
+#include <opencog/atoms/core/NumberNode.h>
 #include <opencog/atomspaceutils/AtomSpaceUtils.h>
+#include <opencog/query/BindLinkAPI.h>
 
 using namespace std;
 using namespace opencog;
