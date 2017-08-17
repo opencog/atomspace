@@ -423,9 +423,8 @@ Handle AtomTable::add(AtomPtr atom, bool async)
         // NumberNode, TypeNode and LgDictNode need a factory to construct.
         if (classserver().isA(atom_type, NODE))
             atom = classserver().factory(Handle(createNode(*NodeCast(atom))));
-
-        // The createLink *forces* a copy of the link to be made.
-        atom = classserver().factory(Handle(createLink(*LinkCast(atom))));
+        else
+            atom = classserver().factory(Handle(createLink(*LinkCast(atom))));
     }
 
     // Lock before checking to see if this kind of atom is already in
