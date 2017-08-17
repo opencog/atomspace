@@ -223,7 +223,8 @@ AtomTable::AtomTable(const AtomTable& other)
 
 Handle AtomTable::getHandle(Type t, const std::string& n) const
 {
-    // Special types need validation
+    // Special types need validation.  XXX The classserver factory
+    // should be used for this.
     AtomPtr a;
     try {
         if (NUMBER_NODE == t) a = createNumberNode(n);
@@ -613,6 +614,7 @@ AtomPtrSet AtomTable::extract(Handle& handle, bool recursive)
     // deleting it.
     AtomPtr atom(handle);
     atom = getHandle(atom);
+    handle = atom;
 
     if (nullptr == atom or atom->isMarkedForRemoval()) return result;
 
