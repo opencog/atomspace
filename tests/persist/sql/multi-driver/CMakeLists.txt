@@ -64,9 +64,11 @@ IF (DB_IS_CONFIGURED)
 
     ADD_CXXTEST(BasicSaveUTest)
     ADD_CXXTEST(ValueSaveUTest)
+    ADD_CXXTEST(PersistUTest)
+    ADD_CXXTEST(DeleteUTest)
+    ADD_CXXTEST(MultiPersistUTest)
+
     IF (HAVE_GUILE)
-        ADD_CXXTEST(PersistUTest)
-        ADD_CXXTEST(MultiPersistUTest)
         ADD_CXXTEST(FetchUTest)
 
         # This seems not to work ... why?
