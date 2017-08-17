@@ -334,6 +334,9 @@ get_handles_by_name(AtomSpace* as,
     }
     classserver().foreachRecursive(
         [&](Type t)->void {
+            // Avoid illegal gets.
+            if (NUMBER_NODE == t) return;
+            if (TYPE_NODE == t) return;
             Handle h(as->get_handle(t, name));
             if (h) *(result++) = h; }, type);
 
@@ -349,7 +352,7 @@ private:
 public:
     AtomSpaceUTest() {
         logger().set_level(Logger::DEBUG);
-        logger().set_sync_flag(true);
+        // logger().set_sync_flag(true);
         logger().set_print_to_stdout_flag(true);
     }
 
@@ -523,9 +526,11 @@ public:
         // Test getHandleSet
         // OutputIterator getHandleSet(OutputIterator, Type, const string& name, bool acceptSubTypes=true) const;
 
+        logger().debug("Start subset test");
         for (int vhIdx = 0; vhIdx < NUM_VHS; vhIdx++) {
             for (int i = 0; i < NUM_NODES; i++) {
                 HandleSeq nodes;
+                logger().debug("start get handle by name %d %d", vhIdx, i);
                 get_handles_by_name(atomSpace, back_inserter(nodes), nodeNames[i], NODE, true);
                 TS_ASSERT_EQUALS(nodes.size(), 1);
                 for (int j = 0; j < NUM_NODES; j++) {
