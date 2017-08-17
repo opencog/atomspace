@@ -121,7 +121,8 @@ class SQLAtomStorage : public AtomStorage
 
 		// --------------------------
 		// Atom removal
-		void deleteSingleAtom(const Handle&);
+		void removeAtom(UUID, bool recursive);
+		void deleteSingleAtom(UUID);
 
 		// --------------------------
 		// Table management

@@ -79,8 +79,8 @@ class SQLAtomStorage::Response
 		// Temporary cache of info about atom being assembled.
 		UUID uuid;
 		Type itype;
-		const char * name;
-		const char *outlist;
+		const char* name;
+		const char* outlist;
 		int height;
 
 		// Values
@@ -124,6 +124,7 @@ class SQLAtomStorage::Response
 			rs = _conn->exec(buff);
 		}
 
+		// Fetching of atoms -----------------------------------------
 		bool create_atom_column_cb(const char *colname, const char * colvalue)
 		{
 			// printf ("%s = %s\n", colname, colvalue);
@@ -228,6 +229,28 @@ class SQLAtomStorage::Response
 			return false;
 		}
 
+		// Fetching of uuids (for atom deletion) -----------------------
+		bool get_uuid_column_cb(const char *colname, const char * colvalue)
+		{
+			// Don't bother checking the column name...
+			// if (!strcmp(colname, "uuid"))
+			// if ('u' == colname[0])
+			{
+				uuid = strtoul(colvalue, NULL, 10);
+			}
+			return false;
+		}
+
+		std::vector<UUID> *uvec;
+		bool get_incoming_uuid_cb(void)
+		{
+			rs->foreach_column(&Response::get_uuid_column_cb, this);
+
+			uvec->emplace_back(uuid);
+			return false;
+		}
+
+		// Types ------------------------------------------
 		// deal with the type-to-id map
 		bool type_cb(void)
 		{
@@ -1181,11 +1204,11 @@ void SQLAtomStorage::vdo_store_atom(const Handle& h)
 
 /* ================================================================ */
 
-void SQLAtomStorage::deleteSingleAtom(const Handle& atom)
+void SQLAtomStorage::deleteSingleAtom(UUID uuid)
 {
 	char buff[BUFSZ];
 	snprintf(buff, BUFSZ,
-		"DELETE FROM Atoms WHERE uuid = %lu;", get_uuid(atom));
+		"DELETE FROM Atoms WHERE uuid = %lu;", uuid);
 
 	Response rp(conn_pool);
 	rp.exec(buff);
@@ -1196,16 +1219,38 @@ void SQLAtomStorage::removeAtom(const Handle& h, bool recursive)
 	// Synchronize. The atom that we are deleting might be sitting
 	// in the store queue.
 	flushStoreQueue();
+}
 
+void SQLAtomStorage::removeAtom(UUID uuid, bool recursive)
+{
+	// Knock out the incoming set, first.
+	if (recursive)
+	{
+		char buff[BUFSZ];
+		snprintf(buff, BUFSZ,
+			"SELECT uuid FROM Atoms WHERE outgoing @> ARRAY[CAST(%lu AS BIGINT)];",
+			uuid);
+
+		std::vector<UUID> uset;
+		Response rp(conn_pool);
+		rp.uvec = &uset;
+		rp.exec(buff);
+		rp.rs->foreach_row(&Response::get_incoming_uuid_cb, &rp);
+
+		for (UUID iud : uset)
+			removeAtom(iud, recursive);
+	}
+
+// xxxxxxxxx
 	// Knock out the values first.
-	for (const Handle& key : h->getKeys())
-		deleteValuation(key, h);
+//	for (const Handle& key : h->getKeys())
+//		deleteValuation(key, h);
 
 	// Now, remove the atom itself.
-	deleteSingleAtom(h);
+	deleteSingleAtom(uuid);
 
 	// Finally, remove from the TLB.
-	_tlbuf.removeAtom(h);
+	_tlbuf.removeAtom(uuid);
 }
 
 /* ================================================================ */
