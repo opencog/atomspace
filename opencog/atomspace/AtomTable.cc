@@ -39,7 +39,6 @@
 #include <opencog/atoms/base/Link.h>
 #include <opencog/atoms/base/Node.h>
 #include <opencog/atoms/core/DeleteLink.h>
-#include <opencog/atoms/core/NumberNode.h>
 #include <opencog/atoms/core/ScopeLink.h>
 #include <opencog/atoms/core/StateLink.h>
 #include <opencog/util/exceptions.h>
@@ -228,14 +227,9 @@ Handle AtomTable::getHandle(Type t, const std::string& n) const
 
 Handle AtomTable::getNodeHandle(const AtomPtr& orig) const
 {
-    AtomPtr a(orig);
-    // AtomPtr a(classserver().factory(Handle(*NodeCast(orig))));
     // The hash function will fail to find NumberNodes unless
     // they are in the proper format.
-    if (classserver().isA(a->getType(), NUMBER_NODE)) {
-       if (nullptr == NumberNodeCast(a))
-           a = createNumberNode(a->getType(), a->getName());
-    }
+    AtomPtr a(classserver().factory(Handle(NodeCast(orig))));
 
     ContentHash ch = a->get_hash();
     std::lock_guard<std::recursive_mutex> lck(_mtx);
