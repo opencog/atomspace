@@ -48,7 +48,11 @@ public:
 		: Node(t, s),
 		  value(classserver().getType(s))
 	{
-		if (NOTYPE == value)
+		// Perform strict checking only for TypeNode.  The
+		// DefinedTypeNode, which inherits from this class,
+		// allows user-defined types which the classerver
+		// currently does not know about.
+		if (TYPE_NODE == t and NOTYPE == value)
 			throw InvalidParamException(TRACE_INFO,
 				"Not a valid typename: '%s'", s.c_str());
 	}
