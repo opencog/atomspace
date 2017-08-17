@@ -176,6 +176,8 @@ void SCMPrimitiveUTest::test_throw(void)
 {
 	logger().debug("BEGIN TEST: %s", __FUNCTION__);
 
+	eval->eval("(define nnn (cog-new-node 'ConceptNode \"Hello World!\"))");
+
 	// Test the throw of an assertion. This should cause an evaluation
 	// error. (In the shell, stuff would get printed to terminal)
 	MyExampleClass *mtc = new MyExampleClass(as, 42);
