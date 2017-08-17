@@ -86,8 +86,8 @@ void ZMQClient::reserve() {
 /**
  * In Java: org.opencog.atomspace.zmq.ZmqBackingStore#storeAtomsAsync
  */
-void ZMQClient::storeAtom(const AtomPtr& atomPtr, bool synchronous) {
-
+void ZMQClient::storeAtom(const AtomPtr& atomPtr, bool synchronous)
+{
 	fprintf(stderr, "Storing atom %lu ...", atomPtr->getHandle().value());
 
     ZMQRequestMessage req;
@@ -119,6 +119,11 @@ void ZMQClient::storeAtom(const AtomPtr& atomPtr, bool synchronous) {
     }
 
     sendMessage(req, rep);
+}
+
+void ZMQClient::removeAtom(const Handle& h, bool recursive)
+{
+	// TODO: implement
 }
 
 /* ================================================================ */

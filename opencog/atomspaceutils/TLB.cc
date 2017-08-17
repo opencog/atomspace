@@ -151,6 +151,18 @@ Handle TLB::getAtom(UUID uuid)
     return pr->second;
 }
 
+void TLB::removeAtom(UUID uuid)
+{
+    if (INVALID_UUID == uuid) return;
+    std::lock_guard<std::mutex> lck(_mtx);
+
+    auto pr = _uuid_map.find(uuid);
+    if (_uuid_map.end() == pr) return;
+
+    _uuid_map.erase(uuid);
+    _handle_map.erase(pr->second);
+}
+
 UUID TLB::getUUID(const Handle& h)
 {
     std::lock_guard<std::mutex> lck(_mtx);

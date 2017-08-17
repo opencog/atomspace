@@ -120,6 +120,11 @@ class SQLAtomStorage : public AtomStorage
 		time_t bulk_start;
 
 		// --------------------------
+		// Atom removal
+		void removeAtom(UUID, bool recursive);
+		void deleteSingleAtom(UUID);
+
+		// --------------------------
 		// Table management
 		void rename_tables(void);
 		void create_tables(void);
@@ -156,6 +161,8 @@ class SQLAtomStorage : public AtomStorage
 		void storeValuation(const Handle&, const Handle&, const ProtoAtomPtr&);
 		ProtoAtomPtr getValuation(const Handle&, const Handle&);
 		void deleteValuation(const Handle&, const Handle&);
+		void deleteValuation(UUID, UUID);
+		void deleteAllValuations(UUID);
 
 		std::string float_to_string(const FloatValuePtr&);
 		std::string string_to_string(const StringValuePtr&);
@@ -227,6 +234,7 @@ class SQLAtomStorage : public AtomStorage
 		void getIncomingByType(AtomTable&, const Handle&, Type t);
 		void getValuations(AtomTable&, const Handle&, bool get_all);
 		void storeAtom(const Handle&, bool synchronous = false);
+		void removeAtom(const Handle&, bool recursive);
 		void loadType(AtomTable&, Type);
 		void flushStoreQueue();
 

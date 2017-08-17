@@ -223,7 +223,8 @@ AtomTable::AtomTable(const AtomTable& other)
 
 Handle AtomTable::getHandle(Type t, const std::string& n) const
 {
-    // Special types need validation
+    // Special types need validation.  XXX The classserver factory
+    // should be used for this.
     AtomPtr a;
     try {
         if (NUMBER_NODE == t) a = createNumberNode(n);
@@ -551,6 +552,15 @@ void AtomTable::barrier()
 
 size_t AtomTable::getSize() const
 {
+    // No one except the unit tests ever worries about the atom table
+    // size. This sanity check might be able to avoid unpleasant
+    // surprises.
+    std::lock_guard<std::recursive_mutex> lck(_mtx);
+    if (_size != _atom_store.size())
+        throw RuntimeException(TRACE_INFO,
+            "Internal Error: Inconsistent AtomTable size! %lu vs. %lu",
+            _size, _atom_store.size());
+
     return _size;
 }
 
@@ -613,6 +623,7 @@ AtomPtrSet AtomTable::extract(Handle& handle, bool recursive)
     // deleting it.
     AtomPtr atom(handle);
     atom = getHandle(atom);
+    handle = atom;
 
     if (nullptr == atom or atom->isMarkedForRemoval()) return result;
 

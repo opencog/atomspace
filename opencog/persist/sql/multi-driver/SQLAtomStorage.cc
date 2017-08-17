@@ -79,8 +79,8 @@ class SQLAtomStorage::Response
 		// Temporary cache of info about atom being assembled.
 		UUID uuid;
 		Type itype;
-		const char * name;
-		const char *outlist;
+		const char* name;
+		const char* outlist;
 		int height;
 
 		// Values
@@ -124,6 +124,7 @@ class SQLAtomStorage::Response
 			rs = _conn->exec(buff);
 		}
 
+		// Fetching of atoms -----------------------------------------
 		bool create_atom_column_cb(const char *colname, const char * colvalue)
 		{
 			// printf ("%s = %s\n", colname, colvalue);
@@ -228,6 +229,26 @@ class SQLAtomStorage::Response
 			return false;
 		}
 
+		// Fetching of uuids (for atom deletion) -----------------------
+		bool get_uuid_column_cb(const char *colname, const char * colvalue)
+		{
+			// The column name will be either "uuid" or "key".
+			// Since there will be only one column,
+			// don't bother checking the column name...
+			uuid = strtoul(colvalue, NULL, 10);
+			return false;
+		}
+
+		std::vector<UUID> *uvec;
+		bool get_uuid_cb(void)
+		{
+			rs->foreach_column(&Response::get_uuid_column_cb, this);
+
+			uvec->emplace_back(uuid);
+			return false;
+		}
+
+		// Types ------------------------------------------
 		// deal with the type-to-id map
 		bool type_cb(void)
 		{
@@ -606,10 +627,15 @@ void SQLAtomStorage::store_atomtable_id(const AtomTable& at)
 /// It also simplifies, ever-so-slightly, the update of valuations.
 void SQLAtomStorage::deleteValuation(const Handle& key, const Handle& atom)
 {
+	deleteValuation(get_uuid(key), get_uuid(atom));
+}
+
+void SQLAtomStorage::deleteValuation(UUID key_uid, UUID atom_uid)
+{
 	char buff[BUFSZ];
 	snprintf(buff, BUFSZ,
 		"SELECT * FROM Valuations WHERE key = %lu AND atom = %lu;",
-		get_uuid(key), get_uuid(atom));
+		key_uid, atom_uid);
 
 	Response rp(conn_pool);
 	rp.vtype = 0;
@@ -634,7 +660,7 @@ void SQLAtomStorage::deleteValuation(const Handle& key, const Handle& atom)
 	{
 		snprintf(buff, BUFSZ,
 			"DELETE FROM Valuations WHERE key = %lu AND atom = %lu;",
-			get_uuid(key), get_uuid(atom));
+			key_uid, atom_uid);
 
 		rp.exec(buff);
 	}
@@ -682,7 +708,7 @@ void SQLAtomStorage::storeValuation(const Handle& key,
 	UUID auid = get_uuid(atom);
 	snprintf(aidbuff, BUFSZ, "%lu", auid);
 
-	// The prior valuation, if any, will be deleted firest,
+	// The prior valuation, if any, will be deleted first,
 	// and so an INSERT is sufficient to cover everything.
 	cols = "INSERT INTO Valuations (";
 	vals = ") VALUES (";
@@ -1177,6 +1203,81 @@ void SQLAtomStorage::vdo_store_atom(const Handle& h)
 {
 	if (not_yet_stored(h)) do_store_atom(h);
 	store_atom_values(h);
+}
+
+/* ================================================================ */
+
+void SQLAtomStorage::deleteSingleAtom(UUID uuid)
+{
+	char buff[BUFSZ];
+	snprintf(buff, BUFSZ,
+		"DELETE FROM Atoms WHERE uuid = %lu;", uuid);
+
+	Response rp(conn_pool);
+	rp.exec(buff);
+}
+
+void SQLAtomStorage::removeAtom(const Handle& h, bool recursive)
+{
+	// Synchronize. The atom that we are deleting might be sitting
+	// in the store queue.
+	flushStoreQueue();
+	removeAtom(get_uuid(h), recursive);
+}
+
+/// Delete ALL of the values associated with an atom.
+void SQLAtomStorage::deleteAllValuations(UUID uuid)
+{
+	char buff[BUFSZ];
+	snprintf(buff, BUFSZ,
+		"SELECT key FROM Valuations WHERE atom = %lu;", uuid);
+
+	std::vector<UUID> uset;
+	Response rp(conn_pool);
+	rp.uvec = &uset;
+	rp.exec(buff);
+
+	rp.rs->foreach_row(&Response::get_uuid_cb, &rp);
+
+	for (UUID kuid : uset)
+		deleteValuation(kuid, uuid);
+}
+
+void SQLAtomStorage::removeAtom(UUID uuid, bool recursive)
+{
+	// Verify the status of the incoming set.
+	char buff[BUFSZ];
+	snprintf(buff, BUFSZ,
+		"SELECT uuid FROM Atoms WHERE outgoing @> ARRAY[CAST(%lu AS BIGINT)];",
+		uuid);
+
+	std::vector<UUID> uset;
+	Response rp(conn_pool);
+	rp.uvec = &uset;
+	rp.exec(buff);
+	rp.rs->foreach_row(&Response::get_uuid_cb, &rp);
+
+	// Knock out the incoming set, first.
+	if (recursive)
+	{
+		for (UUID iud : uset)
+			removeAtom(iud, recursive);
+	}
+	else if (0 < uset.size())
+	{
+		// Non-recursive deletes with non-empty incoming sets
+		// are no-ops.
+		return;
+	}
+
+	// Next, knock out the values.
+	deleteAllValuations(uuid);
+
+	// Now, remove the atom itself.
+	deleteSingleAtom(uuid);
+
+	// Finally, remove from the TLB.
+	_tlbuf.removeAtom(uuid);
 }
 
 /* ================================================================ */

@@ -284,8 +284,7 @@ Handle AtomSpace::add_atom(const Handle& h, bool async)
         // Atom deletion has not been implemented in the backing store
         // This is a major to-do item.
         if (_backing_store)
-// Under construction ....
-	        throw RuntimeException(TRACE_INFO, "Not implemented!!!");
+           _backing_store->removeAtom(h, false);
     }
     return rh;
 }
@@ -309,11 +308,10 @@ Handle AtomSpace::add_link(Type t, const HandleSeq& outgoing, bool async)
         rh = _atom_table.add(createLink(outgoing, t), async);
     }
     catch (const DeleteException& ex) {
-        // Atom deletion has not been implemented in the backing store
-        // This is a major to-do item.
-        if (_backing_store)
-// Under construction ....
-	        throw RuntimeException(TRACE_INFO, "Not implemented!!!");
+        if (_backing_store) {
+           Handle h(createLink(outgoing, t));
+           _backing_store->removeAtom(h, false);
+        }
     }
     return rh;
 }
@@ -343,7 +341,9 @@ Handle AtomSpace::fetch_atom(const Handle& h)
     // Now, get the latest values from the backing store.
     // The operation here is to CLOBBER the values, NOT to merge them!
     // The goal of an explicit fetch is to explicitly fetch the values,
-    // and not to play monkey-shines with them.
+    // and not to play monkey-shines with them.  If you want something
+    // else, then save the old TV, fetch the new TV, and combine them
+    // with your favorite algo.
     Handle hv;
     if (h->isNode()) {
         hv = _backing_store->getNode(h->getType(),
@@ -414,12 +414,8 @@ void AtomSpace::fetch_valuations(Handle key, bool get_all_values)
 
 bool AtomSpace::remove_atom(Handle h, bool recursive)
 {
-    if (_backing_store) {
-        // Atom deletion has not been implemented in the backing store
-        // This is a major to-do item.
-// Under construction ....
-        throw RuntimeException(TRACE_INFO, "Not implemented!!!");
-    }
+    if (_backing_store)
+        _backing_store->removeAtom(h, recursive);
     return 0 < _atom_table.extract(h, recursive).size();
 }
 

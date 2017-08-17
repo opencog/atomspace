@@ -69,6 +69,11 @@ void SQLBackingStore::storeAtom(const Handle& h)
 	_store->storeAtom(h);
 }
 
+void SQLBackingStore::removeAtom(const Handle& h, bool recursive)
+{
+	_store->removeAtom(h, recursive);
+}
+
 void SQLBackingStore::loadType(AtomTable& at, Type t)
 {
 	_store->loadType(at, t);

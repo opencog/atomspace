@@ -54,7 +54,6 @@ ENDIF (PSQL_EXECUTABLE)
 # SET(DB_IS_CONFIGURED 1)
 
 LINK_LIBRARIES(
-    execution
     atomspace
     persist-sql
 )
@@ -64,10 +63,13 @@ IF (DB_IS_CONFIGURED)
 
     ADD_CXXTEST(BasicSaveUTest)
     ADD_CXXTEST(ValueSaveUTest)
+    ADD_CXXTEST(PersistUTest)
+    ADD_CXXTEST(DeleteUTest)
+    ADD_CXXTEST(MultiPersistUTest)
+
     IF (HAVE_GUILE)
-        ADD_CXXTEST(PersistUTest)
-        ADD_CXXTEST(MultiPersistUTest)
         ADD_CXXTEST(FetchUTest)
+        TARGET_LINK_LIBRARIES(FetchUTest execution)
 
         # This seems not to work ... why?
         SET_TESTS_PROPERTIES(FetchUTest PROPERTIES
