@@ -38,9 +38,8 @@
 #include <opencog/atoms/base/ClassServer.h>
 #include <opencog/atoms/base/Link.h>
 #include <opencog/atoms/base/Node.h>
-#include <opencog/atoms/NumberNode.h>
-#include <opencog/atoms/TypeNode.h>
 #include <opencog/atoms/core/DeleteLink.h>
+#include <opencog/atoms/core/NumberNode.h>
 #include <opencog/atoms/core/ScopeLink.h>
 #include <opencog/atoms/core/StateLink.h>
 #include <opencog/util/exceptions.h>
@@ -223,16 +222,7 @@ AtomTable::AtomTable(const AtomTable& other)
 
 Handle AtomTable::getHandle(Type t, const std::string& n) const
 {
-    // Special types need validation.  XXX The classserver factory
-    // should be used for this.
-    AtomPtr a;
-    try {
-        if (NUMBER_NODE == t) a = createNumberNode(n);
-        else if (classserver().isA(t, TYPE_NODE)) a = createTypeNode(n);
-        else a = createNode(t,n);
-    }
-    catch (...) { return Handle::UNDEFINED; }
-
+    AtomPtr a(createNode(t,n));
     return getNodeHandle(a);
 }
 
@@ -384,15 +374,7 @@ AtomPtr AtomTable::cast_factory(Type atom_type, AtomPtr atom)
 /// copy, in that case.
 AtomPtr AtomTable::clone_factory(Type atom_type, AtomPtr atom)
 {
-    // Nodes of various kinds -----------
-    // XXX TODO: convert TypeNode and NumberNode to use factory as
-    // well.
-    if (NUMBER_NODE == atom_type)
-        return createNumberNode(*NodeCast(atom));
-    if (classserver().isA(atom_type, TYPE_NODE))
-        return createTypeNode(*NodeCast(atom));
-
-    // LgDictNode needs a factory to construct it.
+    // NumberNode, TypeNode and LgDictNode need a factory to construct.
     if (classserver().isA(atom_type, NODE))
         return classserver().factory(Handle(createNode(*NodeCast(atom))));
 
