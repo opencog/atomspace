@@ -362,21 +362,6 @@ AtomPtr AtomTable::cast_factory(Type atom_type, AtomPtr atom)
     return atom;
 }
 
-/// The purpose of the clone factory is to create a private, unique
-/// copy of the atom, so as to avoid accidental, unintentional
-/// sharing with others. In particular, the atom that we are given
-/// may already exist in some other atomspace; we want our own private
-/// copy, in that case.
-AtomPtr AtomTable::clone_factory(Type atom_type, AtomPtr atom)
-{
-    // NumberNode, TypeNode and LgDictNode need a factory to construct.
-    if (classserver().isA(atom_type, NODE))
-        return classserver().factory(Handle(createNode(*NodeCast(atom))));
-
-    // The createLink *forces* a copy of the link to be made.
-    return classserver().factory(Handle(createLink(*LinkCast(atom))));
-}
-
 #if 0
 static void prt_diag(AtomPtr atom, size_t i, size_t arity, const HandleSeq& ogs)
 {
@@ -428,14 +413,20 @@ Handle AtomTable::add(AtomPtr atom, bool async)
             if (nullptr == h.operator->()) return Handle::UNDEFINED;
             closet.emplace_back(add(h, async));
         }
-        atom = createLink(closet, atom_type);
-        atom = clone_factory(atom_type, atom);
+        atom = classserver().factory(Handle(createLink(closet, atom_type)));
     }
 
     // Clone, if we haven't done so already. We MUST maintain our own
     // private copy of the atom, else crazy things go wrong.
     else if (atom == orig)
-        atom = clone_factory(atom_type, atom);
+    {
+        // NumberNode, TypeNode and LgDictNode need a factory to construct.
+        if (classserver().isA(atom_type, NODE))
+            atom = classserver().factory(Handle(createNode(*NodeCast(atom))));
+
+        // The createLink *forces* a copy of the link to be made.
+        atom = classserver().factory(Handle(createLink(*LinkCast(atom))));
+    }
 
     // Lock before checking to see if this kind of atom is already in
     // the atomspace.  Lock, to prevent two different threads from
