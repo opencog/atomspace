@@ -279,6 +279,8 @@ public:
     {
         classserver().foreachRecursive(
             [&](Type t)->void {
+                if (classserver().isA(t, NUMBER_NODE)) return;
+                if (classserver().isA(t, TYPE_NODE)) return;
                 Handle h(as->get_handle(t, name));
                 if (h) *(result++) = h; }, NODE);
         return result;
