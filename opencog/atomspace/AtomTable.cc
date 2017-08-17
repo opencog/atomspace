@@ -525,8 +525,13 @@ size_t AtomTable::getSize() const
     std::lock_guard<std::recursive_mutex> lck(_mtx);
     if (_size != _atom_store.size())
         throw RuntimeException(TRACE_INFO,
-            "Internal Error: Inconsistent AtomTable size! %lu vs. %lu",
+            "Internal Error: Inconsistent AtomTable hash size! %lu vs. %lu",
             _size, _atom_store.size());
+
+    if (_size != typeIndex.size())
+        throw RuntimeException(TRACE_INFO,
+            "Internal Error: Inconsistent AtomTable typeIndex size! %lu vs. %lu",
+            _size, typeIndex.size());
 
     return _size;
 }
