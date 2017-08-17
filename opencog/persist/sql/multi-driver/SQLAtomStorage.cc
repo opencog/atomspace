@@ -682,7 +682,7 @@ void SQLAtomStorage::storeValuation(const Handle& key,
 	UUID auid = get_uuid(atom);
 	snprintf(aidbuff, BUFSZ, "%lu", auid);
 
-	// The prior valuation, if any, will be deleted firest,
+	// The prior valuation, if any, will be deleted first,
 	// and so an INSERT is sufficient to cover everything.
 	cols = "INSERT INTO Valuations (";
 	vals = ") VALUES (";
@@ -1181,9 +1181,31 @@ void SQLAtomStorage::vdo_store_atom(const Handle& h)
 
 /* ================================================================ */
 
+void SQLAtomStorage::deleteSingleAtom(const Handle& atom)
+{
+	char buff[BUFSZ];
+	snprintf(buff, BUFSZ,
+		"DELETE FROM Atoms WHERE uuid = %lu;", get_uuid(atom));
+
+	Response rp(conn_pool);
+	rp.exec(buff);
+}
+
 void SQLAtomStorage::removeAtom(const Handle& h, bool recursive)
 {
-// TODO implement me.
+	// Synchronize. The atom that we are deleting might be sitting
+	// in the store queue.
+	flushStoreQueue();
+
+	// Knock out the values first.
+	for (const Handle& key : h->getKeys())
+		deleteValuation(key, h);
+
+	// Now, remove the atom itself.
+	deleteSingleAtom(h);
+
+	// Finally, remove from the TLB.
+	_tlbuf.removeAtom(h);
 }
 
 /* ================================================================ */

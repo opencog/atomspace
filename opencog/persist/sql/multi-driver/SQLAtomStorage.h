@@ -120,6 +120,10 @@ class SQLAtomStorage : public AtomStorage
 		time_t bulk_start;
 
 		// --------------------------
+		// Atom removal
+		void deleteSingleAtom(const Handle&);
+
+		// --------------------------
 		// Table management
 		void rename_tables(void);
 		void create_tables(void);
