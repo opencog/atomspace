@@ -70,6 +70,7 @@ class BasicSCMUTest :  public CxxTest::TestSuite
 	// First, check the basics, before doing more advanced stuff!
 	void test_utf8(void);
 	void test_single_atom(void);
+	void test_extract(void);
 
 	// Nodes
 	void check_node(const char *, const char *, float, float);
@@ -225,6 +226,48 @@ void BasicSCMUTest::test_single_atom(void)
 	check_node("WordNode", "The Bird is the Word", 0.7652, 0.1154);
 	check_node("LemmaNode", "When life gives you lemmas, make conjugations", 0.4765, 0.61154);
 	check_node("PartOfSpeechNode", "はにがうりだそうであってるのかはちょっと不安ですが翻訳ソフトでやくし てみました。", 0.34765, 0.33611);
+
+	logger().debug("END TEST: %s", __FUNCTION__);
+}
+
+// ============================================================
+
+void BasicSCMUTest::test_extract(void)
+{
+	logger().debug("BEGIN TEST: %s", __FUNCTION__);
+
+	// Check atom extraction.
+	eval->eval("(define x (Concept \"AAA\"))");
+	bool eval_err = eval->eval_error();
+	eval->clear_pending();
+	TSM_ASSERT("Failed to create AAA!", !eval_err);
+
+	eval->eval("(define y (Concept \"BBB\"))");
+	eval_err = eval->eval_error();
+	eval->clear_pending();
+	TSM_ASSERT("Failed to create BBB!", !eval_err);
+
+	eval->eval("(define l (ListLink x y))");
+	eval_err = eval->eval_error();
+	eval->clear_pending();
+	TSM_ASSERT("Failed to create (Link AAA BBB)!", !eval_err);
+
+	eval->eval("(cog-extract-recursive x)");
+	eval_err = eval->eval_error();
+	eval->clear_pending();
+	TSM_ASSERT("Failed to extract atom AAA!", !eval_err);
+
+	eval->eval("(cog-atom? l)");
+	eval_err = eval->eval_error();
+	eval->clear_pending();
+	TSM_ASSERT("Failed to evaluate scheme predicate!", !eval_err);
+
+	Handle li = eval->eval_h("l");
+	eval_err = eval->eval_error();
+	eval->clear_pending();
+	TSM_ASSERT("Failed to get handle!", !eval_err);
+
+	TSM_ASSERT("Handle is not null!", nullptr == li);
 
 	logger().debug("END TEST: %s", __FUNCTION__);
 }
