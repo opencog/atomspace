@@ -1245,22 +1245,29 @@ void SQLAtomStorage::deleteAllValuations(UUID uuid)
 
 void SQLAtomStorage::removeAtom(UUID uuid, bool recursive)
 {
+	// Verify the status of the incoming set.
+	char buff[BUFSZ];
+	snprintf(buff, BUFSZ,
+		"SELECT uuid FROM Atoms WHERE outgoing @> ARRAY[CAST(%lu AS BIGINT)];",
+		uuid);
+
+	std::vector<UUID> uset;
+	Response rp(conn_pool);
+	rp.uvec = &uset;
+	rp.exec(buff);
+	rp.rs->foreach_row(&Response::get_uuid_cb, &rp);
+
 	// Knock out the incoming set, first.
 	if (recursive)
 	{
-		char buff[BUFSZ];
-		snprintf(buff, BUFSZ,
-			"SELECT uuid FROM Atoms WHERE outgoing @> ARRAY[CAST(%lu AS BIGINT)];",
-			uuid);
-
-		std::vector<UUID> uset;
-		Response rp(conn_pool);
-		rp.uvec = &uset;
-		rp.exec(buff);
-		rp.rs->foreach_row(&Response::get_uuid_cb, &rp);
-
 		for (UUID iud : uset)
 			removeAtom(iud, recursive);
+	}
+	else if (0 < uset.size())
+	{
+		// Non-recursive deletes with non-empty incoming sets
+		// are no-ops.
+		return;
 	}
 
 	// Next, knock out the values.
