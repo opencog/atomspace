@@ -186,8 +186,21 @@ Handle SchemeSmob::scm_to_handle (SCM sh)
 	if (not pa->isAtom())
 		return Handle::UNDEFINED;
 
+	Handle h(HandleCast(pa));
+
+	// Clobber deleted atoms (i.e. atoms that are no longer
+	// in any atomspace). The current guile interface was
+	// designed so that all atoms are in atomspaces, and any
+	// exceptions to this assumption leads to confusion and
+	// unexpected behavior -- i.e. leads to bugs.
+	if (nullptr == h->getAtomSpace())
+	{
+		*((Handle *) SCM_SMOB_DATA(sh)) = Handle::UNDEFINED;
+		scm_remember_upto_here_1(sh);
+		return Handle::UNDEFINED;
+	}
 	scm_remember_upto_here_1(sh);
-	return HandleCast(pa);
+	return h;
 }
 
 /* ============================================================== */
