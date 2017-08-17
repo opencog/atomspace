@@ -114,10 +114,27 @@ std::string SchemeSmob::protom_to_string(SCM node)
 	ProtoAtomPtr pa(scm_to_protom(node));
 	if (nullptr == pa) return "#<Invalid handle>";
 
+	// XXX FIXME; should not use pa->toString() as the print method.
 	if (not pa->isAtom())
-		return pa->toString();  // XXX FIXME this is temporary hack
+		return pa->toString();
 
-	return handle_to_string(HandleCast(pa), 0) + "\n";
+	// Avoid printing atoms that are not in any atomspace.
+	// Doing so, and more generally, keeping these around
+	// just leads to confusion on the part of the user.
+	// The current scheme bindings were designed to assume
+	// that atoms are always in some atomspace, and having
+	// free-floating atoms that aren't anywhere is not helpful
+	// for anyone, as far as I can tell.
+	// See issue opencog/atomspace#127 for one such report.
+	Handle h(HandleCast(pa));
+	if (nullptr == h->getAtomSpace())
+	{
+		h = Handle::UNDEFINED;
+		*((Handle *) SCM_SMOB_DATA(node)) = Handle::UNDEFINED;
+		scm_remember_upto_here_1(node);
+	}
+
+	return handle_to_string(h, 0) + "\n";
 }
 
 /* ============================================================== */
