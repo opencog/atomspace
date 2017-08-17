@@ -335,8 +335,8 @@ get_handles_by_name(AtomSpace* as,
     classserver().foreachRecursive(
         [&](Type t)->void {
             // Avoid illegal gets.
-            if (NUMBER_NODE == t) return;
-            if (TYPE_NODE == t) return;
+            if (classserver().isA(t, NUMBER_NODE)) return;
+            if (classserver().isA(t, TYPE_NODE)) return;
             Handle h(as->get_handle(t, name));
             if (h) *(result++) = h; }, type);
 
