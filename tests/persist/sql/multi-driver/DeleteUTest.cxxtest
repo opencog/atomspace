@@ -109,6 +109,10 @@ class DeleteUTest :  public CxxTest::TestSuite
         void do_test_remove(void);
         void test_odbc_remove(void);
         void test_pq_remove(void);
+
+        void do_test_recurse(void);
+        void test_odbc_recurse(void);
+        void test_pq_recurse(void);
 };
 
 DeleteUTest:: DeleteUTest(void)
@@ -403,6 +407,110 @@ void DeleteUTest::test_pq_remove(void)
 }
 
 void DeleteUTest::do_test_remove(void)
+{
+    logger().debug("BEGIN TEST: %s", __FUNCTION__);
+
+    SQLPersistSCM* _pm = new SQLPersistSCM(_as);
+    TSM_ASSERT("Persist Module not loaded", _pm);
+
+    try {
+        _pm->do_open(uri);
+    }
+    catch (RuntimeException &e)
+    {
+        logger().info("setUp: SQLPersistSCM cannot connect to database");
+        friendlyFailMessage();
+        exit(1);
+    };
+
+    kill_data();
+
+    int idx = 0;
+    add_to_space(idx++, _as, "AA-aa-wow ");
+    add_to_space(idx++, _as, "BB-bb-wow ");
+    add_to_space(idx++, _as, "CC-cc-wow ");
+    add_to_space(idx++, _as, "DD-dd-wow ");
+    add_to_space(idx++, _as, "EE-ee-wow ");
+
+    /* Make sure UTF-8 works fine. */
+    add_to_space(idx++, _as, "Попытка выбраться вызвала слабый стон ");
+    add_to_space(idx++, _as, "はにがうりだそうであってるのかはち ");
+    add_to_space(idx++, _as, "係拉丁字母");
+
+    /* Verify that the atoms were added */
+    int i;
+    for (i=0; i<idx; i++)
+        check_space(i, _as, "verify-add");
+
+    /* Push all atoms out to the SQL DB */
+    _pm->do_store();
+
+    /* Delete some atoms with non-empty incoming sets.
+     * This should result in thier being removed from the atomspace,
+     * but NOT fom the backend!
+     */
+    _as->barrier();
+
+    for (i=0; i<idx; i++)
+        extract_links(i, _as);
+
+    printf("Atomspace size=%lu expect=%d\n", _as->get_size(), 4*idx);
+    TSM_ASSERT("Unexpected atomspace size", ((unsigned)(4*idx)) == _as->get_size());
+
+    /* Verify that the atoms can still be fetched from storage. */
+    for (i=0; i<idx; i++) {
+        fetch_space(i, _as);
+        check_space(i, _as, "verify-fetch");
+    }
+
+    /* This time, kill them in the backend too.  */
+    for (i=0; i<idx; i++)
+        extract_links(i, _as);
+
+    TSM_ASSERT("Unexpected atomspace size", ((unsigned)(4*idx)) == _as->get_size());
+
+    /* Verify that the atoms are really gone from storage. */
+    for (i=0; i<idx; i++) {
+        fetch_space(i, _as);
+    }
+
+    TSM_ASSERT("Unexpected atomspace size", ((unsigned)(4*idx)) == _as->get_size());
+
+    /* Kill data for good */
+    _as->clear();
+    TSM_ASSERT("Non-empty atomspace", 0 == _as->get_size());
+    kill_data();
+
+    /* Verify that the atoms are no longer being found. */
+    for (i=0; i<idx; i++)
+        check_empty(i, _as);
+
+    /* Orderly shutdown avoids warning in Postgres log file. */
+    _pm->do_close();
+
+    delete _pm;
+    logger().debug("END TEST: %s", __FUNCTION__);
+}
+
+// ============================================================
+
+void DeleteUTest::test_odbc_recurse(void)
+{
+#ifdef HAVE_ODBC_STORAGE
+    uri = mkuri("odbc", dbname, username, passwd);
+    do_test_recurse();
+#endif
+}
+
+void DeleteUTest::test_pq_recurse(void)
+{
+#ifdef HAVE_PGSQL_STORAGE
+    uri = mkuri("postgres", dbname, username, passwd);
+    do_test_recurse();
+#endif
+}
+
+void DeleteUTest::do_test_recurse(void)
 {
     logger().debug("BEGIN TEST: %s", __FUNCTION__);
 
