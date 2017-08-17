@@ -555,6 +555,7 @@ size_t AtomTable::getSize() const
     // No one except the unit tests ever worries about the atom table
     // size. This sanity check might be able to avoid unpleasant
     // surprises.
+    std::lock_guard<std::recursive_mutex> lck(_mtx);
     if (_size != _atom_store.size())
         throw RuntimeException(TRACE_INFO,
             "Internal Error: Inconsistent AtomTable size! %lu vs. %lu",
