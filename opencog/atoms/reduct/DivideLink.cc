@@ -22,7 +22,7 @@
 
 #include <opencog/atoms/base/atom_types.h>
 #include <opencog/atoms/base/ClassServer.h>
-#include <opencog/atoms/NumberNode.h>
+#include <opencog/atoms/core/NumberNode.h>
 #include "DivideLink.h"
 #include "TimesLink.h"
 

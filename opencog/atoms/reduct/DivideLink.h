@@ -25,7 +25,7 @@
 
 #include <opencog/atomspace/AtomSpace.h>
 #include <opencog/atoms/reduct/TimesLink.h>
-#include <opencog/atoms/NumberNode.h>
+#include <opencog/atoms/core/NumberNode.h>
 
 namespace opencog
 {
