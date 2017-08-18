@@ -570,6 +570,9 @@ void BackwardChainerUTest::test_criminal()
 //
 // WARNING: this test is dependent on the hash algorithm. If the latter
 // changes, then the trace must be updated.
+//
+// TODO: automate that by storing the trace while running the criminal
+// test, and merge the 2 tests.
 void BackwardChainerUTest::test_criminal_trace()
 {
 	logger().debug("BEGIN TEST: %s", __FUNCTION__);
@@ -605,11 +608,13 @@ void BackwardChainerUTest::test_criminal_trace()
 	// where <FCS_SOLUTION> is the hash value of the FCS solving the
 	// criminal test.
 	//
-	// Don't forget to happen U at the end of each value otherwise gcc
-	// is gonna complain.
-	std::set<ContentHash> trace{
-		17025922688105268679U, 16237370205818075250U, 13060619487639450045U,
-			14172591710384300158U, 14741649033484653578U, 11564898315305997225U};
+	// Replace all hash keys belows by the ones in file
+	// <FCS_SOLUTION>.trace, preserving the order. Don't forget to
+	// happen U at the end of each value otherwise gcc is gonna
+	// complain.
+	std::set<ContentHash> trace {
+		16984875685464684539U, 17184582226150426169U, 14017120182209734443U,
+			10076933217850647252U, 13992810162835024059U };
 	AndBITFitness trace_fitness(AndBITFitness::Trace, trace);
 	BackwardChainer bc(_as, top_rbs, target, vardecl, nullptr, nullptr,
 	                   Handle::UNDEFINED, BITNodeFitness(), trace_fitness);
