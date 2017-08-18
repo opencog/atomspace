@@ -54,10 +54,20 @@ HandleSeqSet TraceRecorder::traces()
 
 HandleSeqSet TraceRecorder::traces(const Handle& fcs)
 {
+	HandleSet expansion_sources(get_expansion_sources(fcs));
+
+	// Unwrap DontExecLink around the fcs
+	Handle exec_fcs = fcs->getOutgoingAtom(0);
+
+	// Base case
+	if (expansion_sources.empty())
+		return HandleSeqSet{{exec_fcs}};
+
+	// Recursive case
 	HandleSeqSet trs;
-	for (const Handle& h : get_expansion_sources(fcs)) {
+	for (const Handle& h : expansion_sources) {
 		for (HandleSeq hs : traces(h)) {
-			hs.push_back(fcs);
+			hs.push_back(exec_fcs);
 			trs.insert(hs);
 		}
 	}
