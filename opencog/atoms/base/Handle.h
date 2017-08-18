@@ -169,6 +169,9 @@ typedef std::pair<Handle, Handle> HandlePair;
 //! a list of handles
 typedef std::vector<Handle> HandleSeq;
 
+//! a set of lists of handles
+typedef std::set<HandleSeq> HandleSeqSet;
+
 //! a list of lists of handles
 typedef std::vector<HandleSeq> HandleSeqSeq;
 
