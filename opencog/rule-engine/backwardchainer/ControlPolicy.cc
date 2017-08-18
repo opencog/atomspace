@@ -322,8 +322,7 @@ Handle ControlPolicy::mk_list_of_args_vardecl(const Handle& args_var)
 
 Handle ControlPolicy::mk_expand_exec(const Handle& expand_args_var)
 {
-	Handle expand_schema = an(SCHEMA_NODE,
-	                          TraceRecorder::expand_andbit_predicate_name);
+	Handle expand_schema = an(SCHEMA_NODE, TraceRecorder::expand_andbit_schema_name);
 	return al(EXECUTION_LINK,
 	          expand_schema,
 	          al(UNQUOTE_LINK, expand_args_var));

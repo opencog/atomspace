@@ -36,10 +36,18 @@ class TraceRecorder
 public:
 	static const std::string target_predicate_name;
 	static const std::string andbit_predicate_name;
-	static const std::string expand_andbit_predicate_name;
+	static const std::string expand_andbit_schema_name;
 	static const std::string proof_predicate_name;
 
 	TraceRecorder(AtomSpace* tr_as);
+
+	// Return the traces of fcs leading to the recorded proofs
+	HandleSeqSet traces();
+
+	// Return traces leading to the given FCS. A trace is a sequence
+	// of Handles, each representing a FCS and chained by
+	// ExecutionLinks as recorded in the expansion method.
+	HandleSeqSet traces(const Handle& fcs);
 
 	// Record that an atom is a target
 	//
@@ -91,6 +99,9 @@ public:
 private:
 	AtomSpace* _trace_as;
 
+	Handle _target_predicate, _andbit_predicate, _expand_andbit_schema,
+		_proof_predicate;
+
 	// Wrap a DontExecLink around h
 	//
 	// DontExecLink
@@ -100,23 +111,23 @@ private:
 	// Add
 	//
 	// Execution <tv>
-	//   Schema <schema_name>
+	//   <schema>
 	//   <input>
 	//   <output>
-	Handle add_execution(const std::string& schema_name,
+	Handle add_execution(const Handle& schema,
 	                     const Handle& input, const Handle& output,
 	                     TruthValuePtr tv);
 
 	// Add
 	//
 	// Execution <tv>
-	//   Schema <schema_name>
+	//   <schema>
 	//   List
 	//     <input1>
 	//     <input2>
 	//     <input3>
 	//   <output>
-	Handle add_execution(const std::string& schema_name,
+	Handle add_execution(const Handle& schema,
 	                     const Handle& input1,
 	                     const Handle& input2,
 	                     const Handle& input3,
@@ -126,22 +137,28 @@ private:
 	// Add
 	//
 	// Evaluation <tv>
-	//   Predicate <predicate_name>
+	//   <predicate>
 	//   <argument>
-	Handle add_evaluation(const std::string& predicate_name,
+	Handle add_evaluation(const Handle& predicate,
 	                      const Handle& argument,
 	                      TruthValuePtr tv);
 
 	// Add
 	//
 	// Evaluation <tv>
-	//   Predicate <predicate_name>
+	//   <predicate>
 	//   List
 	//     <arg1>
 	//     <arg2>
-	Handle add_evaluation(const std::string& predicate_name,
+	Handle add_evaluation(const Handle& predicate,
 	                      const Handle& arg1, const Handle& arg2,
 	                      TruthValuePtr tv);
+
+	// Given a fcs, return all fcs that expands to this fcs target.
+	HandleSet get_expansion_sources(const Handle& fcs_target);
+
+	// Return the set of fcs corresponding to proofs
+	HandleSet get_fcs_proofs();
 };
 
 

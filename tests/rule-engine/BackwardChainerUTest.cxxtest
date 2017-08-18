@@ -36,10 +36,10 @@ public:
 	BackwardChainerUTest() : _eval(&_as)
 	{
 		logger().set_level(Logger::DEBUG);
-		// logger().set_timestamp_flag(false);
+		logger().set_timestamp_flag(false);
 		// logger().set_sync_flag(true);
-		// logger().set_print_to_stdout_flag(true);
-		ure_logger().set_level(Logger::DEBUG);
+		logger().set_print_to_stdout_flag(true);
+		ure_logger().set_level(Logger::INFO);
 		// ure_logger().set_timestamp_flag(false);
 		// ure_logger().set_sync_flag(true);
 		// ure_logger().set_print_to_stdout_flag(true);
@@ -62,7 +62,6 @@ public:
 	void test_conditional_partial_instantiation();
 	void test_impossible_criminal();
 	void test_criminal();
-	void test_criminal_trace();
 	// TODO: re-enable the following tests
 	void test_induction();
 	void test_focus_set();
@@ -524,6 +523,7 @@ void BackwardChainerUTest::test_criminal()
 {
 	logger().debug("BEGIN TEST: %s", __FUNCTION__);
 
+	// TODO: simplify this shit
 	_as.clear();
 
 	_eval.eval("(load-from-path \"tests/rule-engine/bc-criminal-config.scm\")");
@@ -543,7 +543,10 @@ void BackwardChainerUTest::test_criminal()
 	                 "   (Type \"ConceptNode\"))");
 	Handle soln = _eval.eval_h("(ConceptNode \"West\")");
 
-	BackwardChainer bc(_as, top_rbs, target, vardecl);
+	// To record the trace of the inference
+	AtomSpace trace_as;
+
+	BackwardChainer bc(_as, top_rbs, target, vardecl, &trace_as);
 	// See bc-criminal-config.scm to change the number of iterations
 	bc.do_chain();
 
@@ -556,85 +559,54 @@ void BackwardChainerUTest::test_criminal()
 	logger().debug() << "results = " << oc_to_string(results);
 	logger().debug() << "expected = " << oc_to_string(expected);
 
-	// Disable that till fixed
 	TS_ASSERT_EQUALS(results, expected);
 	TS_ASSERT_LESS_THAN(0.9, expected_target->getTruthValue()->getMean());
 	TS_ASSERT_LESS_THAN(0.9, expected_target->getTruthValue()->getConfidence());
-	// TS_ASSERT(true);
 
-	logger().debug("END TEST: %s", __FUNCTION__);
-}
+	// Extract traces and return the backward chainer with these
+	// traces, which should greatly speed it up.
+	HandleSeqSet traces = bc._trace_recorder.traces();
 
-// Like test_criminal but the trace is provided for guidance (thus
-// speeding up the inference tremendously.)
-//
-// WARNING: this test is dependent on the hash algorithm. If the latter
-// changes, then the trace must be updated.
-//
-// TODO: automate that by storing the trace while running the criminal
-// test, and merge the 2 tests.
-void BackwardChainerUTest::test_criminal_trace()
-{
-	logger().debug("BEGIN TEST: %s", __FUNCTION__);
-
+	// Clear the atomspace and reload the problem
 	_as.clear();
-
 	_eval.eval("(load-from-path \"tests/rule-engine/bc-criminal-config.scm\")");
 	_eval.eval("(load-from-path \"tests/rule-engine/criminal.scm\")");
 	randGen().seed(0);
+	target_var = _eval.eval_h("(VariableNode \"$who\")");
+	target = _eval.eval_h("(InheritanceLink"
+	                      "   (VariableNode \"$who\")"
+	                      "   (ConceptNode \"criminal\"))");
+	vardecl = _eval.eval_h("(TypedVariable"
+	                       "   (VariableNode \"$who\")"
+	                       "   (Type \"ConceptNode\"))");
+	soln = _eval.eval_h("(ConceptNode \"West\")");
 
-	Handle top_rbs = _as.get_node(CONCEPT_NODE, UREConfigReader::top_rbs_name);
-
-	Handle target_var = _eval.eval_h("(VariableNode \"$who\")");
-	Handle target =
-		_eval.eval_h("(InheritanceLink"
-		             "   (VariableNode \"$who\")"
-		             "   (ConceptNode \"criminal\"))");
-	Handle vardecl =
-	    _eval.eval_h("(TypedVariable"
-	                 "   (VariableNode \"$who\")"
-	                 "   (Type \"ConceptNode\"))");
-	Handle soln = _eval.eval_h("(ConceptNode \"West\")");
-
-	// Warning: if the hash algorithm changes you need to update the
-	// trace. To do that, run test_criminal() with DEBUG log level,
-	// then apply the following on the obtained opencog.log (make sure
-	// that you have deleted the old opencog.log before running
-	// test_crimila())
-	//
-	// <ATOMSPACE_ROOT>/scripts/rule-engine/extract-bc-trace.py <FCS_SOLUTION> opencog.log > opencog-<FCS_SOLUTION>.log
-	// <ATOMSPACE_ROOT>/scripts/rule-engine/extract-values-from-trace.py opencog-<FCS_SOLUTION>.log > <FCS_SOLUTION>.trace
-	//
-	// where <FCS_SOLUTION> is the hash value of the FCS solving the
-	// criminal test.
-	//
-	// Replace all hash keys belows by the ones in file
-	// <FCS_SOLUTION>.trace, preserving the order. Don't forget to
-	// happen U at the end of each value otherwise gcc is gonna
-	// complain.
-	std::set<ContentHash> trace {
-		16984875685464684539U, 17184582226150426169U, 14017120182209734443U,
-			10076933217850647252U, 13992810162835024059U };
+	// Extract the first trace, as understandable by the trace fitness
+	std::set<ContentHash> trace;
+	logger().debug() << "trace =";
+	for (const Handle& h : *(traces.begin())) {
+		ContentHash ch = h.value();
+		trace.insert(ch);
+		logger().debug() << ch;
+	}
 	AndBITFitness trace_fitness(AndBITFitness::Trace, trace);
-	BackwardChainer bc(_as, top_rbs, target, vardecl, nullptr, nullptr,
-	                   Handle::UNDEFINED, BITNodeFitness(), trace_fitness);
-	bc.get_config().set_maximum_iterations(50);
-	bc.do_chain();
+	BackwardChainer tr_bc(_as, top_rbs, target, vardecl, nullptr, nullptr,
+	                      Handle::UNDEFINED, BITNodeFitness(), trace_fitness);
+	tr_bc.get_config().set_maximum_iterations(50);
+	tr_bc.do_chain();
 
-	Handle results = bc.get_results(),
-		expected_target =  _eval.eval_h("(InheritanceLink"
-		                                "   (ConceptNode \"West\")"
-		                                "   (ConceptNode \"criminal\"))"),
-		expected = al(SET_LINK, expected_target);
+	results = tr_bc.get_results();
+	expected_target =  _eval.eval_h("(InheritanceLink"
+	                                "   (ConceptNode \"West\")"
+	                                "   (ConceptNode \"criminal\"))");
+	expected = al(SET_LINK, expected_target);
 
 	logger().debug() << "results = " << oc_to_string(results);
 	logger().debug() << "expected = " << oc_to_string(expected);
 
-	// Disable that till fixed
 	TS_ASSERT_EQUALS(results, expected);
 	TS_ASSERT_LESS_THAN(0.9, expected_target->getTruthValue()->getMean());
 	TS_ASSERT_LESS_THAN(0.9, expected_target->getTruthValue()->getConfidence());
-	// TS_ASSERT(true);
 
 	logger().debug("END TEST: %s", __FUNCTION__);
 }
