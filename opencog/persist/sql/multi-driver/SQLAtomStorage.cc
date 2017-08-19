@@ -1214,6 +1214,15 @@ void SQLAtomStorage::deleteSingleAtom(Response& rp, UUID uuid)
 	rp.exec(buff);
 }
 
+/// Remove an atom, and all of it's associated values from the database.
+/// If the atom has a non-empty incoming set, then it is NOT removed
+/// unless the recursive flag is set. If the recursive flag is set, then
+/// the atom, and everything in its incoming set is removed.
+///
+/// TODO The deletion is performed synchronously, in single-threaded
+/// fashion.  It might make sense to create a queue for this, so that
+/// if could run in parallel (in the unusual case that someone has
+/// millions of atoms to delete and is impateint about it...)
 void SQLAtomStorage::removeAtom(const Handle& h, bool recursive)
 {
 	// Synchronize. The atom that we are deleting might be sitting
