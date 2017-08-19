@@ -120,7 +120,8 @@ CREATE TABLE Valuations (
 CREATE INDEX ON Valuations (atom);
 
 -- Index for the fast lookup of all valuations with a given key.
-CREATE INDEX ON Valuations (key);
+-- Why ???
+-- CREATE INDEX ON Valuations (key);
 
 -- A recursive overflow table, if recursive values did not directly
 -- fit into the Valuation table.
