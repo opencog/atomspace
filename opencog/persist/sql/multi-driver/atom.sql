@@ -65,6 +65,9 @@ CREATE TABLE Atoms (
     UNIQUE (type, outgoing)
 );
 
+-- Incoming set index. Very important when asking for the incoming set
+-- of some atom.
+CREATE INDEX incoming_idx on Atoms USING GIN(outgoing);
 
 -- -----------------------------------------------------------
 -- Edge table is not used by the postgres driver.  That is because
