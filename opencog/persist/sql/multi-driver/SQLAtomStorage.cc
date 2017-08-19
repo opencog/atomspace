@@ -1220,9 +1220,11 @@ void SQLAtomStorage::removeAtom(const Handle& h, bool recursive)
 	// in the store queue.
 	flushStoreQueue();
 	Response rp(conn_pool);
-	rp.exec("BEGIN;");
+
+	// Using a transaction seems to make it run very slow!!?
+	// rp.exec("BEGIN;");
 	removeAtom(rp, get_uuid(h), recursive);
-	rp.exec("COMMIT;");
+	// rp.exec("COMMIT;");
 }
 
 /// Delete ALL of the values associated with an atom.
