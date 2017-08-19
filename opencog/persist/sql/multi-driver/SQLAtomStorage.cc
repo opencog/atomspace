@@ -627,17 +627,17 @@ void SQLAtomStorage::store_atomtable_id(const AtomTable& at)
 /// It also simplifies, ever-so-slightly, the update of valuations.
 void SQLAtomStorage::deleteValuation(const Handle& key, const Handle& atom)
 {
-	deleteValuation(get_uuid(key), get_uuid(atom));
+	Response rp(conn_pool);
+	deleteValuation(rp, get_uuid(key), get_uuid(atom));
 }
 
-void SQLAtomStorage::deleteValuation(UUID key_uid, UUID atom_uid)
+void SQLAtomStorage::deleteValuation(Response& rp, UUID key_uid, UUID atom_uid)
 {
 	char buff[BUFSZ];
 	snprintf(buff, BUFSZ,
 		"SELECT * FROM Valuations WHERE key = %lu AND atom = %lu;",
 		key_uid, atom_uid);
 
-	Response rp(conn_pool);
 	rp.vtype = 0;
 	rp.exec(buff);
 	rp.rs->foreach_row(&Response::get_value_cb, &rp);
@@ -748,16 +748,14 @@ void SQLAtomStorage::storeValuation(const Handle& key,
 	// users/threads can safely set the same valuation at the same
 	// time. A third thread will always see an appropriate valuation,
 	// either the earlier one, or the newer one.
-	// XXX At least, that was the hope. In practice, this is not working
-	// as designed. fixme later.
 	Response rp(conn_pool);
-	rp.exec("BEGIN");
+	rp.exec("BEGIN;");
 
 	// If there's an existing valuation, delete it.
-	deleteValuation(key, atom);
+	deleteValuation(rp, kuid, auid);
 
 	rp.exec(insert.c_str());
-	rp.exec("COMMIT");
+	rp.exec("COMMIT;");
 
 	_valuation_stores++;
 }
@@ -1207,43 +1205,56 @@ void SQLAtomStorage::vdo_store_atom(const Handle& h)
 
 /* ================================================================ */
 
-void SQLAtomStorage::deleteSingleAtom(UUID uuid)
+void SQLAtomStorage::deleteSingleAtom(Response& rp, UUID uuid)
 {
 	char buff[BUFSZ];
 	snprintf(buff, BUFSZ,
 		"DELETE FROM Atoms WHERE uuid = %lu;", uuid);
 
-	Response rp(conn_pool);
 	rp.exec(buff);
 }
 
+/// Remove an atom, and all of it's associated values from the database.
+/// If the atom has a non-empty incoming set, then it is NOT removed
+/// unless the recursive flag is set. If the recursive flag is set, then
+/// the atom, and everything in its incoming set is removed.
+///
+/// TODO The deletion is performed synchronously, in single-threaded
+/// fashion.  It might make sense to create a queue for this, so that
+/// if could run in parallel (in the unusual case that someone has
+/// millions of atoms to delete and is impateint about it...)
 void SQLAtomStorage::removeAtom(const Handle& h, bool recursive)
 {
 	// Synchronize. The atom that we are deleting might be sitting
 	// in the store queue.
 	flushStoreQueue();
-	removeAtom(get_uuid(h), recursive);
+	Response rp(conn_pool);
+
+	// Use a transaction so that the update looks atomic to other users.
+	// This has no effect on performance, from what I can tell.
+	rp.exec("BEGIN;");
+	removeAtom(rp, get_uuid(h), recursive);
+	rp.exec("COMMIT;");
 }
 
 /// Delete ALL of the values associated with an atom.
-void SQLAtomStorage::deleteAllValuations(UUID uuid)
+void SQLAtomStorage::deleteAllValuations(Response& rp, UUID uuid)
 {
 	char buff[BUFSZ];
 	snprintf(buff, BUFSZ,
 		"SELECT key FROM Valuations WHERE atom = %lu;", uuid);
 
 	std::vector<UUID> uset;
-	Response rp(conn_pool);
 	rp.uvec = &uset;
 	rp.exec(buff);
 
 	rp.rs->foreach_row(&Response::get_uuid_cb, &rp);
 
 	for (UUID kuid : uset)
-		deleteValuation(kuid, uuid);
+		deleteValuation(rp, kuid, uuid);
 }
 
-void SQLAtomStorage::removeAtom(UUID uuid, bool recursive)
+void SQLAtomStorage::removeAtom(Response& rp, UUID uuid, bool recursive)
 {
 	// Verify the status of the incoming set.
 	char buff[BUFSZ];
@@ -1252,7 +1263,6 @@ void SQLAtomStorage::removeAtom(UUID uuid, bool recursive)
 		uuid);
 
 	std::vector<UUID> uset;
-	Response rp(conn_pool);
 	rp.uvec = &uset;
 	rp.exec(buff);
 	rp.rs->foreach_row(&Response::get_uuid_cb, &rp);
@@ -1261,7 +1271,7 @@ void SQLAtomStorage::removeAtom(UUID uuid, bool recursive)
 	if (recursive)
 	{
 		for (UUID iud : uset)
-			removeAtom(iud, recursive);
+			removeAtom(rp, iud, recursive);
 	}
 	else if (0 < uset.size())
 	{
@@ -1271,10 +1281,10 @@ void SQLAtomStorage::removeAtom(UUID uuid, bool recursive)
 	}
 
 	// Next, knock out the values.
-	deleteAllValuations(uuid);
+	deleteAllValuations(rp, uuid);
 
 	// Now, remove the atom itself.
-	deleteSingleAtom(uuid);
+	deleteSingleAtom(rp, uuid);
 
 	// Finally, remove from the TLB.
 	_tlbuf.removeAtom(uuid);

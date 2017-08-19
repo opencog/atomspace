@@ -65,6 +65,9 @@ CREATE TABLE Atoms (
     UNIQUE (type, outgoing)
 );
 
+-- Incoming set index. Very important when asking for the incoming set
+-- of some atom.
+CREATE INDEX incoming_idx on Atoms USING GIN(outgoing);
 
 -- -----------------------------------------------------------
 -- Edge table is not used by the postgres driver.  That is because
@@ -120,7 +123,8 @@ CREATE TABLE Valuations (
 CREATE INDEX ON Valuations (atom);
 
 -- Index for the fast lookup of all valuations with a given key.
-CREATE INDEX ON Valuations (key);
+-- Why ???
+-- CREATE INDEX ON Valuations (key);
 
 -- A recursive overflow table, if recursive values did not directly
 -- fit into the Valuation table.

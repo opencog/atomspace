@@ -89,7 +89,7 @@ class SQLAtomStorage : public AtomStorage
 		};
 		typedef std::shared_ptr<PseudoAtom> PseudoPtr;
 		#define createPseudo std::make_shared<PseudoAtom>
-		PseudoPtr makeAtom(Response &, UUID);
+		PseudoPtr makeAtom(Response&, UUID);
 		PseudoPtr getAtom(const char *, int);
 		PseudoPtr petAtom(UUID);
 
@@ -121,8 +121,8 @@ class SQLAtomStorage : public AtomStorage
 
 		// --------------------------
 		// Atom removal
-		void removeAtom(UUID, bool recursive);
-		void deleteSingleAtom(UUID);
+		void removeAtom(Response&, UUID, bool recursive);
+		void deleteSingleAtom(Response&, UUID);
 
 		// --------------------------
 		// Table management
@@ -161,8 +161,8 @@ class SQLAtomStorage : public AtomStorage
 		void storeValuation(const Handle&, const Handle&, const ProtoAtomPtr&);
 		ProtoAtomPtr getValuation(const Handle&, const Handle&);
 		void deleteValuation(const Handle&, const Handle&);
-		void deleteValuation(UUID, UUID);
-		void deleteAllValuations(UUID);
+		void deleteValuation(Response&, UUID, UUID);
+		void deleteAllValuations(Response&, UUID);
 
 		std::string float_to_string(const FloatValuePtr&);
 		std::string string_to_string(const StringValuePtr&);
