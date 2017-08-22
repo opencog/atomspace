@@ -567,6 +567,19 @@ void BackwardChainerUTest::test_criminal()
 	// traces, which should greatly speed it up.
 	HandleSeqSet traces = bc._trace_recorder.traces();
 
+	// Log traces
+	std::stringstream ss;
+	ss << "Traces:" << std::endl << "size = " << traces.size();
+	int i = 0;
+	for (const auto& trace : traces) {
+		ss << endl << "trace[" << i++ << "] =";
+		for (const Handle& h : trace) {
+			ContentHash ch = h.value();
+			ss << " " << ch;
+		}
+	}
+	logger().debug() << ss.str();
+
 	// Clear the atomspace and reload the problem
 	_as.clear();
 	_eval.eval("(load-from-path \"tests/rule-engine/bc-criminal-config.scm\")");
@@ -583,12 +596,8 @@ void BackwardChainerUTest::test_criminal()
 
 	// Extract the first trace, as understandable by the trace fitness
 	std::set<ContentHash> trace;
-	logger().debug() << "trace =";
-	for (const Handle& h : *(traces.begin())) {
-		ContentHash ch = h.value();
-		trace.insert(ch);
-		logger().debug() << ch;
-	}
+	for (const Handle& h : *(traces.begin()))
+		trace.insert(h.value());
 	AndBITFitness trace_fitness(AndBITFitness::Trace, trace);
 	BackwardChainer tr_bc(_as, top_rbs, target, vardecl, nullptr, nullptr,
 	                      Handle::UNDEFINED, BITNodeFitness(), trace_fitness);
