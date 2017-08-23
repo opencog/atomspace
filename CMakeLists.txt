@@ -78,7 +78,7 @@ IF (CMAKE_COMPILER_IS_GNUCXX)
 	ELSE (APPLE)
 		SET(CMAKE_C_FLAGS "-Wall -fPIC")
 		# SET(CMAKE_C_FLAGS "-Wl,--copy-dt-needed-entries")
-		SET(CMAKE_C_FLAGS_DEBUG "-ggdb3 -fstack-protector")
+		SET(CMAKE_C_FLAGS_DEBUG "-O0 -ggdb3 -fstack-protector")
 		SET(CMAKE_C_FLAGS_PROFILE "-O2 -g3 -fstack-protector -pg")
 		# -flto is good for performance, but wow is it slow to link...
 		# XXX disable for now ... its just to painful, in daily life.
