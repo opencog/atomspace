@@ -153,8 +153,8 @@ public:
      * temporary, scratch results, e.g. as a result of evaluation
      * or inference.
      */
-    AtomTable(AtomTable* parent = NULL, AtomSpace* holder = NULL,
-              bool transient = false);
+    AtomTable(AtomTable* parent=NULL, AtomSpace* holder=NULL,
+              bool transient=false);
     ~AtomTable();
 
     void ready_transient(AtomTable* parent, AtomSpace* holder);
@@ -195,7 +195,7 @@ public:
     size_t getSize() const;
     size_t getNumNodes() const;
     size_t getNumLinks() const;
-    size_t getNumAtomsOfType(Type type, bool subclass = true) const;
+    size_t getNumAtomsOfType(Type type, bool subclass=true) const;
 
     /**
      * Returns the exact atom for the given name and type.
@@ -209,8 +209,8 @@ public:
     Handle getHandle(Type, const std::string&) const;
     Handle getNodeHandle(const AtomPtr&) const;
     Handle getHandle(Type, const HandleSeq&) const;
-    Handle getLinkHandle(const AtomPtr&, Quotation quotation = Quotation()) const;
-    Handle getHandle(const AtomPtr&, Quotation quotation = Quotation()) const;
+    Handle getLinkHandle(const AtomPtr&, Quotation quotation=Quotation()) const;
+    Handle getHandle(const AtomPtr&, Quotation quotation=Quotation()) const;
     Handle getHandle(const Handle& h) const {
         AtomPtr a(h); return getHandle(a);
     }
@@ -225,8 +225,8 @@ public:
     template <typename OutputIterator> OutputIterator
     getHandlesByType(OutputIterator result,
                      Type type,
-                     bool subclass = false,
-                     bool parent = true) const
+                     bool subclass=false,
+                     bool parent=true) const
     {
         std::lock_guard<std::recursive_mutex> lck(_mtx);
         if (parent && _environ)
@@ -240,8 +240,8 @@ public:
     template <typename Function> void
     foreachHandleByType(Function func,
                         Type type,
-                        bool subclass = false,
-                        bool parent = true) const
+                        bool subclass=false,
+                        bool parent=true) const
     {
         std::lock_guard<std::recursive_mutex> lck(_mtx);
         if (parent && _environ)
@@ -256,8 +256,8 @@ public:
     template <typename Function> void
     foreachParallelByType(Function func,
                         Type type,
-                        bool subclass = false,
-                        bool parent = true) const
+                        bool subclass=false,
+                        bool parent=true) const
     {
         std::lock_guard<std::recursive_mutex> lck(_mtx);
         if (parent && _environ)
@@ -340,7 +340,7 @@ public:
      *        incoming set will also be extracted.
      * @return A set of the extracted atoms.
      */
-    AtomPtrSet extract(Handle& handle, bool recursive = true);
+    AtomPtrSet extract(Handle& handle, bool recursive=true);
 
     /**
      * Return a random atom in the AtomTable.
