@@ -23,6 +23,8 @@
 
 #include <math.h>
 
+#include <boost/algorithm/string.hpp>
+
 #include <opencog/atomspace/AtomSpace.h>
 #include <opencog/atoms/base/Atom.h>
 #include <opencog/atoms/base/ClassServer.h>
@@ -71,6 +73,7 @@ class BasicSCMUTest :  public CxxTest::TestSuite
 	void test_utf8(void);
 	void test_single_atom(void);
 	void test_extract(void);
+	void test_clear(void);
 
 	// Nodes
 	void check_node(const char *, const char *, float, float);
@@ -270,6 +273,26 @@ void BasicSCMUTest::test_extract(void)
 	TSM_ASSERT("Handle is not null!", nullptr == li);
 
 	logger().debug("END TEST: %s", __FUNCTION__);
+}
+
+// ============================================================
+
+void BasicSCMUTest::test_clear(void)
+{
+	logger().debug("BEGIN TEST: %s", __FUNCTION__);
+
+	// Number of neasted Lists and Sets
+	int n = 10;
+	Handle lists_sets = as->add_link(LIST_LINK, as->add_link(SET_LINK));
+	for (int i = 0; i < n; ++i)
+		lists_sets = as->add_link(LIST_LINK, as->add_link(SET_LINK, lists_sets));
+
+	std::string rs = eval->eval("(clear)");
+	boost::trim(rs);
+	std::cout << "rs = " << rs << std::endl;
+
+	// Check that there are no error
+	TSM_ASSERT("Failed to clear the atomspace", rs.empty());
 }
 
 // ============================================================
