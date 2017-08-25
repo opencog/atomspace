@@ -246,7 +246,7 @@
   extract-type -- extract all atoms of type 'atom-type'
 
   If any atoms of that type have incoming links, those links will be
-  extractd, and so on recursively.  This only removes the atoms from the
+  extracted, and so on recursively.  This only removes the atoms from the
   atomspace, it does NOT remove it from the backingstore, if attached!
 "
 	(cog-map-type

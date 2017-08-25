@@ -88,7 +88,7 @@ public:
     bool isAttachedToBackingStore();
 
 public:
-    AtomSpace(AtomSpace* parent = NULL, bool transient = false);
+    AtomSpace(AtomSpace* parent=NULL, bool transient=false);
     ~AtomSpace();
 
     void ready_transient(AtomSpace* parent);
@@ -106,8 +106,8 @@ public:
      */
     static bool compare_atomspaces(const AtomSpace& first,
                                    const AtomSpace& second,
-                                   bool check_truth_values = CHECK_TRUTH_VALUES,
-                                   bool emit_diagnostics = DONT_EMIT_DIAGNOSTICS);
+                                   bool check_truth_values=CHECK_TRUTH_VALUES,
+                                   bool emit_diagnostics=DONT_EMIT_DIAGNOSTICS);
     bool operator==(const AtomSpace& other) const;
     bool operator!=(const AtomSpace& other) const;
 
@@ -117,7 +117,7 @@ public:
     inline size_t get_size() const { return _atom_table.getSize(); }
     inline size_t get_num_nodes() const { return _atom_table.getNumNodes(); }
     inline size_t get_num_links() const { return _atom_table.getNumLinks(); }
-    inline size_t get_num_atoms_of_type(Type type, bool subclass = false) const
+    inline size_t get_num_atoms_of_type(Type type, bool subclass=false) const
         { return _atom_table.getNumAtomsOfType(type, subclass); }
     inline UUID get_uuid(void) const { return _atom_table.get_uuid(); }
 
@@ -141,8 +141,7 @@ public:
      * \param t     Type of the node
      * \param name  Name of the node
      */
-    Handle add_node(Type t, const std::string& name = "",
-                    bool async = false);
+    Handle add_node(Type t, const std::string& name="", bool async=false);
 
     /**
      * Add a link to the Atom Table. If the atom already exists, then
@@ -152,7 +151,7 @@ public:
      * @param outgoing  a const reference to a HandleSeq containing
      *                  the outgoing set of the link
      */
-    Handle add_link(Type t, const HandleSeq& outgoing, bool async = false);
+    Handle add_link(Type t, const HandleSeq& outgoing, bool async=false);
 
     inline Handle add_link(Type t)
     {
@@ -262,7 +261,7 @@ public:
      * contain this one in their outgoing sets. All of these atoms are
      * then loaded into this atomtable/atomspace.
      */
-    Handle fetch_incoming_set(Handle, bool = false);
+    Handle fetch_incoming_set(Handle, bool=false);
 
     /**
      * Use the backing store to load the incoming set of the
@@ -282,7 +281,7 @@ public:
      * This can save a lot of RAM, if the atoms have a lot of misc.
      * values attached to them.
      */
-    void fetch_valuations(Handle, bool = false);
+    void fetch_valuations(Handle, bool=false);
 
     /**
      * Recursively store the atom to the backing store.
@@ -315,7 +314,7 @@ public:
      * @return True if the Atom for the given Handle was successfully
      *         removed. False, otherwise.
      */
-    bool extract_atom(Handle h, bool recursive = false) {
+    bool extract_atom(Handle h, bool recursive=false) {
         return 0 < _atom_table.extract(h, recursive).size();
     }
 
@@ -335,7 +334,7 @@ public:
      * @return True if the Atom for the given Handle was successfully
      *         removed. False, otherwise.
      */
-    bool remove_atom(Handle h, bool recursive = false);
+    bool remove_atom(Handle h, bool recursive=false);
 
     /**
      * Get a node from the AtomTable, if it's in there. If its not found
@@ -347,7 +346,7 @@ public:
      * @param t     Type of the node
      * @param str   Name of the node
     */
-    Handle get_node(Type t, const std::string& name = "");
+    Handle get_node(Type t, const std::string& name="");
     inline Handle get_handle(Type t, const std::string& str) {
         return get_node(t, str);
     }
@@ -467,7 +466,7 @@ public:
      */
     void get_handles_by_type(HandleSeq& appendToHandles,
                              Type type,
-                             bool subclass = false) const
+                             bool subclass=false) const
     {
         // Get the initial size of the handles vector.
         size_t initial_size = appendToHandles.size();
@@ -507,7 +506,7 @@ public:
     template <typename OutputIterator> OutputIterator
     get_handles_by_type(OutputIterator result,
                         Type type,
-                        bool subclass = false) const
+                        bool subclass=false) const
     {
         return _atom_table.getHandlesByType(result, type, subclass);
     }
@@ -522,7 +521,7 @@ public:
     template<class T>
     inline bool foreach_handle_of_type(Type atype,
                                        bool (T::*cb)(const Handle&), T *data,
-                                       bool subclass = false)
+                                       bool subclass=false)
     {
         // First we extract, then we loop. This is to avoid holding
         // the lock for too long. (because we don't know how long

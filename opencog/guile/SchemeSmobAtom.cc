@@ -304,6 +304,13 @@ SCM SchemeSmob::ss_map_type (SCM proc, SCM stype)
 	std::list<Handle>::iterator i;
 	for (i = handle_set.begin(); i != handle_set.end(); ++i) {
 		Handle h = *i;
+
+		// In case h got removed from the atomspace between
+		// get_handles_by_type call and now. This may happen either
+		// externally or by proc itself (such as cog-extract-recursive)
+		if (not h->getAtomSpace())
+			continue;
+
 		SCM smob = handle_to_scm(h);
 		SCM rc = scm_call_1(proc, smob);
 		if (!scm_is_false(rc)) return rc;
