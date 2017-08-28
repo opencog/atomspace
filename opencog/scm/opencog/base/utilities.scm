@@ -228,13 +228,17 @@
   encountered.  This only removes the atoms from the atomspace, it
   does NOT remove it from the backingstore, if attached!
 "
-	(if (cog-node? atom)
-		(cog-extract atom)
-		(let* ((oset (cog-outgoing-set atom))
-				(flg (cog-extract atom))
-			)
-			(if flg ;; halt recursion if link was not extract-able
-				(for-each extract-hypergraph oset)
+	(if (cog-atom? atom)     ; Make sure that atom is valid, as it may
+	                         ; already have been extracted by an outer
+	                         ; recursive call
+		(if (cog-node? atom)
+			(cog-extract atom)
+			(let* ((oset (cog-outgoing-set atom))
+					(flg (cog-extract atom))
+				)
+				(if flg ;; halt recursion if link was not extract-able
+					(for-each extract-hypergraph oset)
+				)
 			)
 		)
 	)
