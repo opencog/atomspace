@@ -74,6 +74,7 @@ class BasicSCMUTest :  public CxxTest::TestSuite
 	void test_single_atom(void);
 	void test_extract(void);
 	void test_clear(void);
+	void test_extract_hypergraph(void);
 
 	// Nodes
 	void check_node(const char *, const char *, float, float);
@@ -288,6 +289,23 @@ void BasicSCMUTest::test_clear(void)
 		lists_sets = as->add_link(LIST_LINK, as->add_link(SET_LINK, lists_sets));
 
 	std::string rs = eval->eval("(clear)");
+	boost::trim(rs);
+	std::cout << "rs = " << rs << std::endl;
+
+	// Check that there are no error
+	TSM_ASSERT("Failed to clear the atomspace", rs.empty());
+}
+
+// ============================================================
+
+void BasicSCMUTest::test_extract_hypergraph(void)
+{
+	logger().debug("BEGIN TEST: %s", __FUNCTION__);
+
+	// Number of neasted Lists and Sets
+	std::string rs =
+		eval->eval("(define x (ListLink (Concept \"A\") (Concept \"A\")))");
+	rs = eval->eval("(extract-hypergraph x)");
 	boost::trim(rs);
 	std::cout << "rs = " << rs << std::endl;
 
