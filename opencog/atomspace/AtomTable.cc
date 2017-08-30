@@ -263,7 +263,7 @@ Handle AtomTable::getLinkHandle(const AtomPtr& orig, Quotation quotation) const
     const HandleSeq &seq = a->getOutgoingSet();
 
     // Update quotation for the outgoing given the atom type
-    quotation.update(t);
+    // quotation.update(t);
 
     // Make sure all the atoms in the outgoing set are in the atomspace.
     // If any are not are not, then reject the whhole mess.
