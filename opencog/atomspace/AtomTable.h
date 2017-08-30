@@ -42,6 +42,7 @@
 
 #include <opencog/atomspace/TypeIndex.h>
 
+class AtomSpaceUTest;
 class AtomTableUTest;
 
 namespace opencog
@@ -76,6 +77,7 @@ class AtomSpace;
 class AtomTable
 {
     friend class ::AtomTableUTest;
+    friend class ::AtomSpaceUTest;
 
 private:
 

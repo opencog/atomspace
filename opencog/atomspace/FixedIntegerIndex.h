@@ -24,8 +24,12 @@
 
 #include <vector>
 
+#include <opencog/util/Logger.h>
+
 #include <opencog/atoms/base/Atom.h>
 #include <opencog/atoms/base/Handle.h>
+
+class AtomSpaceUTest;
 
 namespace opencog
 {
@@ -51,6 +55,8 @@ typedef UnorderedAtomSet AtomSet;
  */
 class FixedIntegerIndex
 {
+	friend class ::AtomSpaceUTest;
+
 protected:
 	std::vector<AtomSet> idx;
 	void resize(size_t sz)

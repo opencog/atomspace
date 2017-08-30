@@ -960,6 +960,53 @@ public:
         atomSpace->get_handles_by_type(back_inserter(namedAtoms), NODE, true);
         TS_ASSERT_EQUALS(namedAtoms.size(), 3);
     }
+
+
+    // Helpers for testPreconstructed
+    Handle factory_node(Type type, std::string name)
+    {
+        return classserver().factory(Handle(createNode(type, name)));
+    }
+    Handle factory_link(Type type, Handle h)
+    {
+        return classserver().factory(Handle(createLink(type, h)));
+    }
+    Handle factory_link(Type type, Handle h1, Handle h2)
+    {
+        return classserver().factory(Handle(createLink(type, h1, h2)));
+    }
+    Handle factory_link(Type type, Handle h1, Handle h2, Handle h3)
+    {
+        return classserver().factory(Handle(createLink(type, h1, h2, h3)));
+    }
+    // Create atom structures not in any atomspace, then add the
+    // preconstructed structures to the atomspace.
+    void testPreconstructed()
+    {
+        TypeIndex& type_index = atomSpace->get_atomtable().typeIndex;
+
+        Handle A = factory_node(CONCEPT_NODE, "A"),
+            B = factory_node(CONCEPT_NODE, "B"),
+                AB = factory_link(INHERITANCE_LINK, A, B),
+            DAB = factory_link(AND_LINK, AB, AB);
+        Handle as_DAB = atomSpace->add_atom(DAB);
+        TS_ASSERT(not type_index.contains_duplicate());
+
+        Handle V = factory_node(VARIABLE_NODE, "$V"),
+            P = factory_node(VARIABLE_NODE, "$P"),
+            Q = factory_node(VARIABLE_NODE, "$Q"),
+            UV = factory_link(UNQUOTE_LINK, V),
+            UP = factory_link(UNQUOTE_LINK, P),
+            UQ = factory_link(UNQUOTE_LINK, Q),
+            IS = factory_link(IMPLICATION_SCOPE_LINK, UV, UP, UQ),
+            QIS = factory_link(QUOTE_LINK, IS),
+            GPN = factory_node(GROUNDED_PREDICATE_NODE,
+                              "scm: crisp-contraposition-scope-precondition"),
+            EVAL = factory_link(EVALUATION_LINK, GPN, QIS),
+            AL = factory_link(AND_LINK, QIS, EVAL);
+        Handle as_AL = atomSpace->add_atom(AL);
+        TS_ASSERT(not type_index.contains_duplicate());
+    }
 };
 
-AtomSpace *AtomSpaceUTest::atomSpace = NULL;
+AtomSpace *AtomSpaceUTest::atomSpace = nullptr;
