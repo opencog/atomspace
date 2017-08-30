@@ -41,9 +41,9 @@ bool FixedIntegerIndex::contains_duplicate() const
 
 bool FixedIntegerIndex::contains_duplicate(const AtomSet& atoms) const
 {
-	for (AtomSet::const_iterator lit = atoms.begin(); lit != atoms.end(); ++lit)
-		for (AtomSet::const_iterator rit = lit; rit != atoms.end(); ++rit)
-			if (**lit == **rit)
+	for (AtomSet::const_iterator i = atoms.begin(); i != atoms.end(); ++i)
+		for (AtomSet::const_iterator j = std::next(i); j != atoms.end(); ++j)
+			if (**i == **j)
 				return true;
 	return false;
 }
