@@ -59,6 +59,7 @@ class AtomSpace
     friend class SQLAtomStorage;     // Needs to call get_atomtable()
     friend class ZMQPersistSCM;
     friend class ::AtomTableUTest;
+    friend class ::AtomSpaceUTest;
 
     /**
      * Override and declare copy constructor and equals operator, to

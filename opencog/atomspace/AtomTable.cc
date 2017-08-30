@@ -286,11 +286,7 @@ Handle AtomTable::getLinkHandle(const AtomPtr& orig, Quotation quotation) const
     // Currently, ScopeLinks use a custom hash, and, in order
     // for it to work, we must have an actual instance of the
     // class, so that the correct virtual method can be called.
-    //
-    // However, bad quotation nesting means that some things
-    // that look like ScopeLinks are just invalid fragments
-    // of search patterns. Ignore those.
-    if (unquoted and classserver().isA(t, SCOPE_LINK)) {
+    if (classserver().isA(t, SCOPE_LINK)) {
         ScopeLinkPtr wanted = ScopeLinkCast(a);
         if (nullptr == wanted) {
             wanted = ScopeLinkCast(classserver().factory(Handle(a)));

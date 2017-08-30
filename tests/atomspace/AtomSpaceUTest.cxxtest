@@ -41,6 +41,8 @@
 #include <opencog/util/misc.h>
 #include <opencog/util/oc_assert.h>
 
+#include <cxxtest/TestSuite.h>
+
 #include "makeVirtualAtom.h"
 #include "sorting.h"
 
@@ -101,11 +103,11 @@ static inline Handle addAtomIter(AtomSpace& as, tree<Vertex>& a, tree<Vertex>::i
 {
     Handle* head_handle_ptr = boost::get<Handle>(&(*it));
     Type* head_type_ptr = boost::get<Type>(&(*it));
-    OC_ASSERT((head_handle_ptr != NULL) ^ (head_type_ptr != NULL), "addAtom(): Vertex should be of 'Handle' or 'Type' type.");
+    OC_ASSERT((head_handle_ptr != nullptr) ^ (head_type_ptr != nullptr), "addAtom(): Vertex should be of 'Handle' or 'Type' type.");
 
     HandleSeq handles;
 
-    if (head_handle_ptr != NULL) {
+    if (head_handle_ptr != nullptr) {
         OC_ASSERT(as.is_valid_handle(*head_handle_ptr), "head_handle_ptr is not valid");
         TruthValuePtr currentTV((*head_handle_ptr)->getTruthValue());
         TruthValuePtr mergedTV(currentTV->merge(tvn));
@@ -598,13 +600,13 @@ public:
 
 
         tree<Vertex>* tr = mva(EVALUATION_LINK,
-                               mva(h1, NULL),
+                               mva(h1, nullptr),
                                mva(LIST_LINK,
-                                   mva(h2, NULL),
-                                   mva(h3, NULL),
-                                   NULL
+                                   mva(h2, nullptr),
+                                   mva(h3, nullptr),
+                                   nullptr
                                   ) ,
-                               NULL
+                               nullptr
                               );
 
         HandleSeq links;
@@ -620,7 +622,7 @@ public:
         delete tr;
 
         Handle hn = atomSpace->add_node(PREDICATE_NODE, "barkingAt");
-        tr = mva(hn, NULL);
+        tr = mva(hn, nullptr);
         Handle h1_ = addAtom(*atomSpace, *tr, SimpleTruthValue::createTV(0.5f, 0.5f));
         h1_->setTruthValue(SimpleTruthValue::createTV(0.5f, 0.5f));
         TS_ASSERT(h1_ != Handle::UNDEFINED);
@@ -630,7 +632,7 @@ public:
         TS_ASSERT(h1_->getTruthValue()->getMean() - 0.5f < FLOAT_ACCEPTABLE_ERROR);
         delete tr;
 
-        tr = mva(evalLink, NULL);
+        tr = mva(evalLink, nullptr);
         Handle evalLink_ = addAtom(*atomSpace, *tr, SimpleTruthValue::createTV(0.5f, 0.5f));
         TS_ASSERT(evalLink_ != Handle::UNDEFINED);
         // In this case, the expected behavior is to perform a merge and return the
@@ -958,6 +960,66 @@ public:
         atomSpace->get_handles_by_type(back_inserter(namedAtoms), NODE, true);
         TS_ASSERT_EQUALS(namedAtoms.size(), 3);
     }
+
+    // Helpers for testPreconstructed
+    Handle factory_node(Type type, std::string name)
+    {
+        return classserver().factory(Handle(createNode(type, name)));
+    }
+    Handle factory_link(Type type, Handle h)
+    {
+        return classserver().factory(Handle(createLink(type, h)));
+    }
+    Handle factory_link(Type type, Handle h1, Handle h2)
+    {
+        return classserver().factory(Handle(createLink(type, h1, h2)));
+    }
+    Handle factory_link(Type type, Handle h1, Handle h2, Handle h3)
+    {
+        return classserver().factory(Handle(createLink(type, h1, h2, h3)));
+    }
+    // Create atom structures not in any atomspace, then add the
+    // preconstructed structures to the atomspace.
+    void testPreconstructed()
+    {
+        TypeIndex& type_index = atomSpace->get_atomtable().typeIndex;
+
+        Handle A = factory_node(CONCEPT_NODE, "A"),
+            B = factory_node(CONCEPT_NODE, "B"),
+            AB = factory_link(INHERITANCE_LINK, A, B),
+            DAB = factory_link(AND_LINK, AB, AB),
+            as_DAB = atomSpace->add_atom(DAB);
+        TS_ASSERT(not type_index.contains_duplicate());
+
+        Handle QA = factory_link(QUOTE_LINK, A),
+            QAQA = factory_link(LIST_LINK, QA, QA),
+            as_QAQA= atomSpace->add_atom(QAQA);
+        TS_ASSERT(not type_index.contains_duplicate());
+
+        Handle V = factory_node(VARIABLE_NODE, "$V"),
+            P = factory_node(VARIABLE_NODE, "$P"),
+            Q = factory_node(VARIABLE_NODE, "$Q"),
+            UV = factory_link(UNQUOTE_LINK, V),
+            UP = factory_link(UNQUOTE_LINK, P),
+            UQ = factory_link(UNQUOTE_LINK, Q),
+            IS = factory_link(IMPLICATION_SCOPE_LINK, UV, UP, UQ),
+            QIS = factory_link(QUOTE_LINK, IS),
+            QISQIS = factory_link(LIST_LINK, QIS, QIS),
+            as_QISQIS= atomSpace->add_atom(QISQIS);
+        TS_ASSERT(not type_index.contains_duplicate());
+
+        Handle GPN = factory_node(GROUNDED_PREDICATE_NODE, "GPN"),
+            EVAL = factory_link(EVALUATION_LINK, GPN, QIS),
+            AL = factory_link(AND_LINK, QIS, EVAL),
+            as_AL = atomSpace->add_atom(AL);
+        TS_ASSERT(not type_index.contains_duplicate());
+
+        Handle S = factory_link(SCOPE_LINK, UV, A),
+            QS = factory_link(QUOTE_LINK, S),
+            QSQS = factory_link(LIST_LINK, QS, QS),
+            as_QSQS= atomSpace->add_atom(QSQS);
+        TS_ASSERT(not type_index.contains_duplicate());
+    }
 };
 
-AtomSpace *AtomSpaceUTest::atomSpace = NULL;
+AtomSpace *AtomSpaceUTest::atomSpace = nullptr;

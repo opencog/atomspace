@@ -273,7 +273,7 @@ AtomTable* Atom::getAtomTable() const
 ///
 /// We don't automatically track incoming sets for two reasons:
 /// 1) std::set takes up 48 bytes
-/// 2) adding and remoiving uses up cpu cycles.
+/// 2) adding and removing uses up cpu cycles.
 /// Thus, if the incoming set isn't needed, then don't bother
 /// tracking it.
 void Atom::keep_incoming_set()

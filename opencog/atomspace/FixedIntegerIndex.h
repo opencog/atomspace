@@ -24,8 +24,12 @@
 
 #include <vector>
 
+#include <opencog/util/Logger.h>
+
 #include <opencog/atoms/base/Atom.h>
 #include <opencog/atoms/base/Handle.h>
+
+class AtomSpaceUTest;
 
 namespace opencog
 {
@@ -51,39 +55,46 @@ typedef UnorderedAtomSet AtomSet;
  */
 class FixedIntegerIndex
 {
-	protected:
-		std::vector<AtomSet> idx;
-		void resize(size_t sz)
-		{
-			idx.resize(sz);
-		}
+	friend class ::AtomSpaceUTest;
 
-	public:
-		~FixedIntegerIndex() {}
-		void insert(size_t i, Atom* a)
-		{
-			AtomSet &s(idx.at(i));
-			s.insert(a);
-		}
+protected:
+	std::vector<AtomSet> idx;
+	void resize(size_t sz)
+	{
+		idx.resize(sz);
+	}
 
-		void remove(size_t i, Atom* a)
-		{
-			AtomSet &s = idx.at(i);
-			s.erase(a);
-		}
+public:
+	~FixedIntegerIndex() {}
+	void insert(size_t i, Atom* a)
+	{
+		AtomSet &s(idx.at(i));
+		s.insert(a);
+	}
 
-		size_t size(size_t i) const
-		{
-			const AtomSet &s(idx.at(i));
-			return s.size();
-		}
+	void remove(size_t i, Atom* a)
+	{
+		AtomSet &s = idx.at(i);
+		s.erase(a);
+	}
 
-		size_t bin_size(void) const
-		{
-			return idx.size();
-		}
+	size_t size(size_t i) const
+	{
+		const AtomSet &s(idx.at(i));
+		return s.size();
+	}
 
-		size_t size(void) const;
+	size_t bin_size(void) const
+	{
+		return idx.size();
+	}
+
+	size_t size(void) const;
+
+	// Return true if there exists some index containing duplicated
+	// atoms (equal by content). Used for testing.
+	bool contains_duplicate() const;
+	bool contains_duplicate(const AtomSet& atoms) const;
 };
 
 /** @}*/
