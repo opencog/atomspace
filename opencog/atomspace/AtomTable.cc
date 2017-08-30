@@ -54,14 +54,15 @@ using namespace opencog;
 // "no atomtable" (in the persist code).
 static std::atomic<UUID> _id_pool(1);
 
-AtomTable::AtomTable(AtomTable* parent, AtomSpace* holder, bool transient)
+AtomTable::AtomTable(AtomTable* parent, AtomSpace* holder, bool transient) :
+    _classserver(classserver()),
     // Hmm. Right now async doesn't work anyway, so lets not create
     // threads for it. It just makes using gdb that much harder.
     // FIXME later. Actually, the async idea is not going to work as
     // originally envisioned, anyway.  What we really need are
     // consistent views of the atomtable.
-    // : _index_queue(this, &AtomTable::put_atom_into_index, transient?0:4)
-    : _index_queue(this, &AtomTable::put_atom_into_index, 0)
+    // _index_queue(this, &AtomTable::put_atom_into_index, transient?0:4)
+    _index_queue(this, &AtomTable::put_atom_into_index, 0)
 {
     _as = holder;
     _environ = parent;
@@ -69,13 +70,13 @@ AtomTable::AtomTable(AtomTable* parent, AtomSpace* holder, bool transient)
     _size = 0;
     _num_nodes = 0;
     _num_links = 0;
-    size_t ntypes = classserver().getNumberOfClasses();
+    size_t ntypes = _classserver.getNumberOfClasses();
     _size_by_type.resize(ntypes);
     _transient = transient;
 
     // Connect signal to find out about type additions
     addedTypeConnection =
-        classserver().addTypeSignal().connect(
+        _classserver.addTypeSignal().connect(
             boost::bind(&AtomTable::typeAdded, this, _1));
 }
 
@@ -212,8 +213,9 @@ AtomTable& AtomTable::operator=(const AtomTable& other)
             "AtomTable - Cannot copy an object of this class");
 }
 
-AtomTable::AtomTable(const AtomTable& other)
-    :_index_queue(this, &AtomTable::put_atom_into_index)
+AtomTable::AtomTable(const AtomTable& other) :
+    _classserver(classserver()),
+    _index_queue(this, &AtomTable::put_atom_into_index)
 {
     throw opencog::RuntimeException(TRACE_INFO,
             "AtomTable - Cannot copy an object of this class");
@@ -229,7 +231,7 @@ Handle AtomTable::getNodeHandle(const AtomPtr& orig) const
 {
     // The hash function will fail to find NumberNodes unless
     // they are in the proper format.
-    AtomPtr a(classserver().factory(Handle(NodeCast(orig))));
+    AtomPtr a(_classserver.factory(Handle(orig)));
 
     ContentHash ch = a->get_hash();
     std::lock_guard<std::recursive_mutex> lck(_mtx);
@@ -259,41 +261,27 @@ Handle AtomTable::getLinkHandle(const AtomPtr& orig, Quotation quotation) const
     AtomPtr a(orig);
     Type t = a->getType();
     const HandleSeq &seq = a->getOutgoingSet();
-    bool unquoted = not quotation.is_quoted();
 
     // Update quotation for the outgoing given the atom type
-    quotation.update(t);
+    // quotation.update(t);
 
-    // Make sure all the atoms in the outgoing set are in a valid
-    // format. One of the troublemakers here is the NumberNode, which
-    // will hash incorrectly, unless its in proper format. We exclude
-    // unquoted scope links from it, otherwise it will prematurely
-    // abort and possibly miss alpha equivalent atom in _atom_store.
-    if (not unquoted or not classserver().isA(t, SCOPE_LINK)) {
-        HandleSeq resolved_seq;
-        for (const Handle& ho : seq) {
-            Handle rh(getHandle(ho, quotation));
-            if (not rh) return Handle::UNDEFINED;
-            resolved_seq.emplace_back(rh);
-        }
-
-        a = createLink(resolved_seq, t);
+    // Make sure all the atoms in the outgoing set are in the atomspace.
+    // If any are not are not, then reject the whhole mess.
+    HandleSeq resolved_seq;
+    bool changed = false;
+    for (const Handle& ho : seq) {
+        Handle rh(getHandle(ho, quotation));
+        if (not rh) return rh;
+        if (rh != ho) changed = true;
+        resolved_seq.emplace_back(rh);
     }
+    if (changed) a = createLink(resolved_seq, t);
+
+    // The atom hash is computed by an overloaded virtual function...
+    a = _classserver.factory(Handle(a));
 
     // Start searching to see if we have this atom.
     ContentHash ch = a->get_hash();
-
-    // Currently, ScopeLinks use a custom hash, and, in order
-    // for it to work, we must have an actual instance of the
-    // class, so that the correct virtual method can be called.
-    if (classserver().isA(t, SCOPE_LINK)) {
-        ScopeLinkPtr wanted = ScopeLinkCast(a);
-        if (nullptr == wanted) {
-            wanted = ScopeLinkCast(classserver().factory(Handle(a)));
-        }
-        ch = wanted->get_hash();
-        a = wanted;
-    }
 
     std::lock_guard<std::recursive_mutex> lck(_mtx);
 
@@ -409,7 +397,7 @@ Handle AtomTable::add(AtomPtr atom, bool async)
             if (nullptr == h.operator->()) return Handle::UNDEFINED;
             closet.emplace_back(add(h, async));
         }
-        atom = classserver().factory(Handle(createLink(closet, atom_type)));
+        atom = _classserver.factory(Handle(createLink(closet, atom_type)));
     }
 
     // Clone, if we haven't done so already. We MUST maintain our own
@@ -417,10 +405,10 @@ Handle AtomTable::add(AtomPtr atom, bool async)
     else if (atom == orig)
     {
         // NumberNode, TypeNode and LgDictNode need a factory to construct.
-        if (classserver().isA(atom_type, NODE))
-            atom = classserver().factory(Handle(createNode(*NodeCast(atom))));
+        if (_classserver.isA(atom_type, NODE))
+            atom = _classserver.factory(Handle(createNode(*NodeCast(atom))));
         else
-            atom = classserver().factory(Handle(createLink(*LinkCast(atom))));
+            atom = _classserver.factory(Handle(createLink(*LinkCast(atom))));
     }
 
     // Lock before checking to see if this kind of atom is already in
@@ -553,7 +541,7 @@ size_t AtomTable::getNumAtomsOfType(Type type, bool subclass) const
         Type ntypes = _size_by_type.size();
         for (Type t = ATOM; t<ntypes; t++)
         {
-            if (t != type and classserver().isA(type, t))
+            if (t != type and _classserver.isA(type, t))
                 result += _size_by_type[t];
         }
     }
@@ -769,7 +757,7 @@ void AtomTable::typeAdded(Type t)
 {
     std::lock_guard<std::recursive_mutex> lck(_mtx);
     //resize all Type-based indexes
-    size_t new_size = classserver().getNumberOfClasses();
+    size_t new_size = _classserver.getNumberOfClasses();
     _size_by_type.resize(new_size);
     typeIndex.resize();
 }

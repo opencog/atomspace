@@ -80,6 +80,7 @@ class AtomTable
     friend class ::AtomSpaceUTest;
 
 private:
+    ClassServer& _classserver;
 
     // Single, global mutex for locking the indexes.
     // Its recursive because we need to lock twice during atom insertion
@@ -278,7 +279,7 @@ public:
         opencog::setting_omp(opencog::num_threads());
     }
 
-    /* Exposes the type iterators so we can do more complicated 
+    /* Exposes the type iterators so we can do more complicated
      * looping without having to create a vector to hold the handles.
      *
      * @param The desired type.

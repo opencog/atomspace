@@ -126,17 +126,17 @@ public:
 		TS_ASSERT(*h3->getTruthValue() == *tv);
 
 		// Fetch three atoms in three different atomspaces
-		Handle h1n1 = as1.add_node(CONCEPT_NODE, "uni-1");
-		Handle h1n2 = as1.add_node(NUMBER_NODE, "2.2222");
-		Handle h1n3 = as1.add_node(VARIABLE_NODE, "uni-3");
+		Handle h1n1 = as1.get_node(CONCEPT_NODE, "uni-1");
+		Handle h1n2 = as1.get_node(NUMBER_NODE, "2.2222");
+		Handle h1n3 = as1.get_node(VARIABLE_NODE, "uni-3");
 
-		Handle h2n1 = as2.add_node(CONCEPT_NODE, "uni-1");
-		Handle h2n2 = as2.add_node(NUMBER_NODE, "2.2222");
-		Handle h2n3 = as2.add_node(VARIABLE_NODE, "uni-3");
+		Handle h2n1 = as2.get_node(CONCEPT_NODE, "uni-1");
+		Handle h2n2 = as2.get_node(NUMBER_NODE, "2.2222");
+		Handle h2n3 = as2.get_node(VARIABLE_NODE, "uni-3");
 
-		Handle h3n1 = as3.add_node(CONCEPT_NODE, "uni-1");
-		Handle h3n2 = as3.add_node(NUMBER_NODE, "2.2222");
-		Handle h3n3 = as3.add_node(VARIABLE_NODE, "uni-3");
+		Handle h3n1 = as3.get_node(CONCEPT_NODE, "uni-1");
+		Handle h3n2 = as3.get_node(NUMBER_NODE, "2.2222");
+		Handle h3n3 = as3.get_node(VARIABLE_NODE, "uni-3");
 
 		// They should NOT match one-another
 		// They should have become copies.
@@ -463,38 +463,5 @@ public:
 
 		TS_ASSERT(haa_copy == haa);
 		TS_ASSERT(hec_copy == hec);
-	}
-
-	// Make sure that values are copied if an atom for an inherited
-	// space is copied back to the atomspace it inherits.
-	void testCopyValues()
-	{
-		AtomSpace as;
-		AtomSpace ex(&as);
-
-		// Add (Exists (Member X A))
-		Handle as_A = as.add_node(CONCEPT_NODE, "A");
-		Handle as_X = as.add_node(VARIABLE_NODE, "X");
-		Handle as_XA = as.add_link(MEMBER_LINK, as_X, as_A);
-		Handle as_S = as.add_link(SCOPE_LINK, as_XA);
-
-		// Add (Exists (Member Y A))
-		Handle ex_A = ex.add_node(CONCEPT_NODE, "A");
-		Handle ex_Y = ex.add_node(VARIABLE_NODE, "Y");
-		Handle ex_YA = ex.add_link(MEMBER_LINK, ex_Y, ex_A);
-		Handle ex_S = ex.add_link(SCOPE_LINK, ex_YA);
-
-		// Modify ex_A truth value, add it back to as and check that
-		// its tv has been updated as well.
-		ex_A->setTruthValue(SimpleTruthValue::createSTV(1.0, 1.0));
-		Handle as_ex_A = as.add_atom(ex_A);
-		TS_ASSERT(as_ex_A->getTruthValue()->getConfidence() > 0.9);
-
-		// Modify (Exists (Member Y A)) truth value, add it back to
-		// as, and (since it is alpha equivalent) check that its tv
-		// has been updated as well.
-		ex_S->setTruthValue(SimpleTruthValue::createSTV(1.0, 1.0));
-		Handle as_ex_S = as.add_atom(ex_S);
-		TS_ASSERT(as_ex_S->getTruthValue()->getConfidence() > 0.9);
 	}
 };

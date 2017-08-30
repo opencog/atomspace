@@ -961,7 +961,66 @@ public:
         TS_ASSERT_EQUALS(namedAtoms.size(), 3);
     }
 
-    // Helpers for testPreconstructed
+    // Helpers for testQuoteLink
+    Handle make_node(Type type, std::string name)
+    {
+        return Handle(createNode(type, name));
+    }
+    Handle make_link(Type type, Handle h)
+    {
+        return Handle(createLink(type, h));
+    }
+    Handle make_link(Type type, Handle h1, Handle h2)
+    {
+        return Handle(createLink(type, h1, h2));
+    }
+    Handle make_link(Type type, Handle h1, Handle h2, Handle h3)
+    {
+        return Handle(createLink(type, h1, h2, h3));
+    }
+
+    void testQuoteLink()
+    {
+        TypeIndex& type_index = atomSpace->get_atomtable().typeIndex;
+
+        Handle A = make_node(CONCEPT_NODE, "A"),
+            B = make_node(CONCEPT_NODE, "B"),
+            AB = make_link(INHERITANCE_LINK, A, B),
+            DAB = make_link(AND_LINK, AB, AB),
+            as_DAB = atomSpace->add_atom(DAB);
+        TS_ASSERT(not type_index.contains_duplicate());
+
+        Handle QA = make_link(QUOTE_LINK, A),
+            QAQA = make_link(LIST_LINK, QA, QA),
+            as_QAQA= atomSpace->add_atom(QAQA);
+        TS_ASSERT(not type_index.contains_duplicate());
+
+        Handle V = make_node(VARIABLE_NODE, "$V"),
+            P = make_node(VARIABLE_NODE, "$P"),
+            Q = make_node(VARIABLE_NODE, "$Q"),
+            UV = make_link(UNQUOTE_LINK, V),
+            UP = make_link(UNQUOTE_LINK, P),
+            UQ = make_link(UNQUOTE_LINK, Q),
+            IS = make_link(IMPLICATION_SCOPE_LINK, UV, UP, UQ),
+            QIS = make_link(QUOTE_LINK, IS),
+            QISQIS = make_link(LIST_LINK, QIS, QIS),
+            as_QISQIS= atomSpace->add_atom(QISQIS);
+        TS_ASSERT(not type_index.contains_duplicate());
+
+        Handle GPN = make_node(GROUNDED_PREDICATE_NODE, "GPN"),
+            EVAL = make_link(EVALUATION_LINK, GPN, QIS),
+            AL = make_link(AND_LINK, QIS, EVAL),
+            as_AL = atomSpace->add_atom(AL);
+        TS_ASSERT(not type_index.contains_duplicate());
+
+        Handle S = make_link(SCOPE_LINK, UV, A),
+            QS = make_link(QUOTE_LINK, S),
+            QSQS = make_link(LIST_LINK, QS, QS),
+            as_QSQS= atomSpace->add_atom(QSQS);
+        TS_ASSERT(not type_index.contains_duplicate());
+    }
+
+    // Helpers for testPreconstructedQuote
     Handle factory_node(Type type, std::string name)
     {
         return classserver().factory(Handle(createNode(type, name)));
@@ -978,9 +1037,10 @@ public:
     {
         return classserver().factory(Handle(createLink(type, h1, h2, h3)));
     }
+
     // Create atom structures not in any atomspace, then add the
     // preconstructed structures to the atomspace.
-    void testPreconstructed()
+    void testPreconstructedQuote()
     {
         TypeIndex& type_index = atomSpace->get_atomtable().typeIndex;
 
