@@ -266,24 +266,17 @@ Handle AtomTable::getLinkHandle(const AtomPtr& orig, Quotation quotation) const
     // Make sure all the atoms in the outgoing set are in the atomspace.
     // If any are not are not, then reject the whhole mess.
     HandleSeq resolved_seq;
+    bool changed = false;
     for (const Handle& ho : seq) {
         Handle rh(getHandle(ho, quotation));
         if (not rh) return rh;
+        if (rh != ho) changed = true;
         resolved_seq.emplace_back(rh);
     }
+    if (changed) a = createLink(resolved_seq, t);
 
-    a = createLink(resolved_seq, t);
-
-    // ScopeLinks overload the get_hash() method, in order to do alpha
-    // conversion. So we must use the factory before computing the hash.
-    if (classserver().isA(t, SCOPE_LINK)) {
-        ScopeLinkPtr wanted = ScopeLinkCast(a);
-        if (nullptr != wanted) {
-            a = wanted;
-        } else {
-            a = classserver().factory(Handle(a));
-        }
-    }
+    // The atom hash is computed by an overloaded virtual function...
+    a = classserver().factory(Handle(a));
 
     // Start searching to see if we have this atom.
     ContentHash ch = a->get_hash();
