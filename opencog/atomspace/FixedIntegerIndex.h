@@ -84,6 +84,11 @@ public:
 	}
 
 	size_t size(void) const;
+
+	// Return true if there exists some index containing duplicated
+	// atoms (equal by content). Used for testing.
+	bool contains_duplicate() const;
+	bool contains_duplicate(const AtomSet& atoms) const;
 };
 
 /** @}*/

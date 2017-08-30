@@ -31,4 +31,21 @@ size_t FixedIntegerIndex::size(void) const
 	return cnt;
 }
 
+bool FixedIntegerIndex::contains_duplicate() const
+{
+	for (const AtomSet& atoms : idx)
+		if (contains_duplicate(atoms))
+			return true;
+	return false;
+}
+
+bool FixedIntegerIndex::contains_duplicate(const AtomSet& atoms) const
+{
+	for (AtomSet::const_iterator lit = atoms.begin(); lit != atoms.end(); ++lit)
+		for (AtomSet::const_iterator rit = lit; rit != atoms.end(); ++rit)
+			if (**lit == **rit)
+				return true;
+	return false;
+}
+
 // ================================================================
