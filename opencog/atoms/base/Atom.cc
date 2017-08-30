@@ -194,6 +194,9 @@ void Atom::copyValues(const Handle& other)
         ProtoAtomPtr p = other->getValue(k);
         setValue(k, p);
     }
+
+    // Hacky but true: manually update the truth value, also.
+    setTruthValue(other->getTruthValue());
 }
 
 std::string Atom::valuesToString() const
@@ -434,7 +437,7 @@ std::string Atom::idToString() const
 {
     return
         std::string("[") + std::to_string(get_hash()) + "]" +
-        std::string("[") + std::to_string(_atom_space? _atom_space->_atom_table.get_uuid() : -1) + "]";
+        std::string("[") + (_atom_space? std::to_string(_atom_space->_atom_table.get_uuid()) : std::string("-1")) + "]";
 }
 
 std::string oc_to_string(const IncomingSet& iset)
