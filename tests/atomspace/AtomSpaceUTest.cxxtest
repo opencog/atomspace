@@ -41,6 +41,8 @@
 #include <opencog/util/misc.h>
 #include <opencog/util/oc_assert.h>
 
+#include <cxxtest/TestSuite.h>
+
 #include "makeVirtualAtom.h"
 #include "sorting.h"
 
@@ -101,11 +103,11 @@ static inline Handle addAtomIter(AtomSpace& as, tree<Vertex>& a, tree<Vertex>::i
 {
     Handle* head_handle_ptr = boost::get<Handle>(&(*it));
     Type* head_type_ptr = boost::get<Type>(&(*it));
-    OC_ASSERT((head_handle_ptr != NULL) ^ (head_type_ptr != NULL), "addAtom(): Vertex should be of 'Handle' or 'Type' type.");
+    OC_ASSERT((head_handle_ptr != nullptr) ^ (head_type_ptr != nullptr), "addAtom(): Vertex should be of 'Handle' or 'Type' type.");
 
     HandleSeq handles;
 
-    if (head_handle_ptr != NULL) {
+    if (head_handle_ptr != nullptr) {
         OC_ASSERT(as.is_valid_handle(*head_handle_ptr), "head_handle_ptr is not valid");
         TruthValuePtr currentTV((*head_handle_ptr)->getTruthValue());
         TruthValuePtr mergedTV(currentTV->merge(tvn));
@@ -598,13 +600,13 @@ public:
 
 
         tree<Vertex>* tr = mva(EVALUATION_LINK,
-                               mva(h1, NULL),
+                               mva(h1, nullptr),
                                mva(LIST_LINK,
-                                   mva(h2, NULL),
-                                   mva(h3, NULL),
-                                   NULL
+                                   mva(h2, nullptr),
+                                   mva(h3, nullptr),
+                                   nullptr
                                   ) ,
-                               NULL
+                               nullptr
                               );
 
         HandleSeq links;
@@ -620,7 +622,7 @@ public:
         delete tr;
 
         Handle hn = atomSpace->add_node(PREDICATE_NODE, "barkingAt");
-        tr = mva(hn, NULL);
+        tr = mva(hn, nullptr);
         Handle h1_ = addAtom(*atomSpace, *tr, SimpleTruthValue::createTV(0.5f, 0.5f));
         h1_->setTruthValue(SimpleTruthValue::createTV(0.5f, 0.5f));
         TS_ASSERT(h1_ != Handle::UNDEFINED);
@@ -630,7 +632,7 @@ public:
         TS_ASSERT(h1_->getTruthValue()->getMean() - 0.5f < FLOAT_ACCEPTABLE_ERROR);
         delete tr;
 
-        tr = mva(evalLink, NULL);
+        tr = mva(evalLink, nullptr);
         Handle evalLink_ = addAtom(*atomSpace, *tr, SimpleTruthValue::createTV(0.5f, 0.5f));
         TS_ASSERT(evalLink_ != Handle::UNDEFINED);
         // In this case, the expected behavior is to perform a merge and return the
