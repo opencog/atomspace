@@ -51,39 +51,39 @@ typedef UnorderedAtomSet AtomSet;
  */
 class FixedIntegerIndex
 {
-	protected:
-		std::vector<AtomSet> idx;
-		void resize(size_t sz)
-		{
-			idx.resize(sz);
-		}
+protected:
+	std::vector<AtomSet> idx;
+	void resize(size_t sz)
+	{
+		idx.resize(sz);
+	}
 
-	public:
-		~FixedIntegerIndex() {}
-		void insert(size_t i, Atom* a)
-		{
-			AtomSet &s(idx.at(i));
-			s.insert(a);
-		}
+public:
+	~FixedIntegerIndex() {}
+	void insert(size_t i, Atom* a)
+	{
+		AtomSet &s(idx.at(i));
+		s.insert(a);
+	}
 
-		void remove(size_t i, Atom* a)
-		{
-			AtomSet &s = idx.at(i);
-			s.erase(a);
-		}
+	void remove(size_t i, Atom* a)
+	{
+		AtomSet &s = idx.at(i);
+		s.erase(a);
+	}
 
-		size_t size(size_t i) const
-		{
-			const AtomSet &s(idx.at(i));
-			return s.size();
-		}
+	size_t size(size_t i) const
+	{
+		const AtomSet &s(idx.at(i));
+		return s.size();
+	}
 
-		size_t bin_size(void) const
-		{
-			return idx.size();
-		}
+	size_t bin_size(void) const
+	{
+		return idx.size();
+	}
 
-		size_t size(void) const;
+	size_t size(void) const;
 };
 
 /** @}*/
