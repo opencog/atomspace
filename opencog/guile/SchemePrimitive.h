@@ -298,10 +298,7 @@ protected:
 	template<size_t ...S>
 	R conv_call_method(SCM args, std::index_sequence<S...>)
 	{
-		// Hold the argument plain types
-		PlainTuple params;
-
-		return (that->*method)(get_conv<S>(args, params)...);
+		return (that->*method)(get_conv<S>(args, PlainTuple())...);
 	}
 
 	// Like invoke but return the C++ type instead of its SCM conversion
