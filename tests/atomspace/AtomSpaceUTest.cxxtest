@@ -961,7 +961,6 @@ public:
         TS_ASSERT_EQUALS(namedAtoms.size(), 3);
     }
 
-
     // Helpers for testPreconstructed
     Handle factory_node(Type type, std::string name)
     {
@@ -987,9 +986,14 @@ public:
 
         Handle A = factory_node(CONCEPT_NODE, "A"),
             B = factory_node(CONCEPT_NODE, "B"),
-                AB = factory_link(INHERITANCE_LINK, A, B),
-            DAB = factory_link(AND_LINK, AB, AB);
-        Handle as_DAB = atomSpace->add_atom(DAB);
+            AB = factory_link(INHERITANCE_LINK, A, B),
+            DAB = factory_link(AND_LINK, AB, AB),
+            as_DAB = atomSpace->add_atom(DAB);
+        TS_ASSERT(not type_index.contains_duplicate());
+
+        Handle QA = factory_link(QUOTE_LINK, A),
+            QAQA = factory_link(LIST_LINK, QA, QA),
+            as_QAQA= atomSpace->add_atom(QAQA);
         TS_ASSERT(not type_index.contains_duplicate());
 
         Handle V = factory_node(VARIABLE_NODE, "$V"),
@@ -1000,11 +1004,20 @@ public:
             UQ = factory_link(UNQUOTE_LINK, Q),
             IS = factory_link(IMPLICATION_SCOPE_LINK, UV, UP, UQ),
             QIS = factory_link(QUOTE_LINK, IS),
-            GPN = factory_node(GROUNDED_PREDICATE_NODE,
-                              "scm: crisp-contraposition-scope-precondition"),
+            QISQIS = factory_link(LIST_LINK, QIS, QIS),
+            as_QISQIS= atomSpace->add_atom(QISQIS);
+        TS_ASSERT(not type_index.contains_duplicate());
+
+        Handle GPN = factory_node(GROUNDED_PREDICATE_NODE, "GPN"),
             EVAL = factory_link(EVALUATION_LINK, GPN, QIS),
-            AL = factory_link(AND_LINK, QIS, EVAL);
-        Handle as_AL = atomSpace->add_atom(AL);
+            AL = factory_link(AND_LINK, QIS, EVAL),
+            as_AL = atomSpace->add_atom(AL);
+        TS_ASSERT(not type_index.contains_duplicate());
+
+        Handle S = factory_link(SCOPE_LINK, UV, A),
+            QS = factory_link(QUOTE_LINK, S),
+            QSQS = factory_link(LIST_LINK, QS, QS),
+            as_QSQS= atomSpace->add_atom(QSQS);
         TS_ASSERT(not type_index.contains_duplicate());
     }
 };
