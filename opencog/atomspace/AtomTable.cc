@@ -229,7 +229,7 @@ Handle AtomTable::getNodeHandle(const AtomPtr& orig) const
 {
     // The hash function will fail to find NumberNodes unless
     // they are in the proper format.
-    AtomPtr a(classserver().factory(Handle(NodeCast(orig))));
+    AtomPtr a(classserver().factory(Handle(orig)));
 
     ContentHash ch = a->get_hash();
     std::lock_guard<std::recursive_mutex> lck(_mtx);
@@ -259,41 +259,34 @@ Handle AtomTable::getLinkHandle(const AtomPtr& orig, Quotation quotation) const
     AtomPtr a(orig);
     Type t = a->getType();
     const HandleSeq &seq = a->getOutgoingSet();
-    bool unquoted = not quotation.is_quoted();
 
     // Update quotation for the outgoing given the atom type
     quotation.update(t);
 
-    // Make sure all the atoms in the outgoing set are in a valid
-    // format. One of the troublemakers here is the NumberNode, which
-    // will hash incorrectly, unless its in proper format. We exclude
-    // unquoted scope links from it, otherwise it will prematurely
-    // abort and possibly miss alpha equivalent atom in _atom_store.
-    if (not unquoted or not classserver().isA(t, SCOPE_LINK)) {
-        HandleSeq resolved_seq;
-        for (const Handle& ho : seq) {
-            Handle rh(getHandle(ho, quotation));
-            if (not rh) return Handle::UNDEFINED;
-            resolved_seq.emplace_back(rh);
-        }
+    // Make sure all the atoms in the outgoing set are in the atomspace.
+    // If any are not are not, then reject the whhole mess.
+    HandleSeq resolved_seq;
+    for (const Handle& ho : seq) {
+        Handle rh(getHandle(ho, quotation));
+        if (not rh) return rh;
+        resolved_seq.emplace_back(rh);
+    }
 
-        a = createLink(resolved_seq, t);
+    a = createLink(resolved_seq, t);
+
+    // ScopeLinks overload the get_hash() method, in order to do alpha
+    // conversion. So we must use the factory before computing the hash.
+    if (classserver().isA(t, SCOPE_LINK)) {
+        ScopeLinkPtr wanted = ScopeLinkCast(a);
+        if (nullptr != wanted) {
+            a = wanted;
+        } else {
+            a = classserver().factory(Handle(a));
+        }
     }
 
     // Start searching to see if we have this atom.
     ContentHash ch = a->get_hash();
-
-    // Currently, ScopeLinks use a custom hash, and, in order
-    // for it to work, we must have an actual instance of the
-    // class, so that the correct virtual method can be called.
-    if (classserver().isA(t, SCOPE_LINK)) {
-        ScopeLinkPtr wanted = ScopeLinkCast(a);
-        if (nullptr == wanted) {
-            wanted = ScopeLinkCast(classserver().factory(Handle(a)));
-        }
-        ch = wanted->get_hash();
-        a = wanted;
-    }
 
     std::lock_guard<std::recursive_mutex> lck(_mtx);
 
