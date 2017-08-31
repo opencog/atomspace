@@ -1,5 +1,5 @@
 /*
- * opencog/atoms/base/Quotation.h
+ * opencog/atoms/core/Quotation.h
  *
  * Copyright (C) 2016 OpenCog Foundation
  * All Rights Reserved
@@ -25,10 +25,10 @@
 #ifndef _OPENCOG_QUOTATION_H
 #define _OPENCOG_QUOTATION_H
 
+#include <string>
 #include <boost/operators.hpp>
 
 #include <opencog/atoms/base/atom_types.h>
-#include <string>
 
 namespace opencog
 {
