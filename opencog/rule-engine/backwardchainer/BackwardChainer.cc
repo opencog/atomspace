@@ -180,8 +180,8 @@ void BackwardChainer::expand_bit(AndBIT& andbit)
 		return;
 	} else if (rule.has_cycle()) {
 		LAZY_URE_LOG_DEBUG << "The following rule has cycle (some premise "
-		                   << "equals to conclusion), abort expansion"
-		                   << rule.to_string();
+		                   << "equals to conclusion), abort expansion:"
+		                   << std::endl << rule.to_string();
 		return;
 	}
 
