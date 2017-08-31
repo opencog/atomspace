@@ -37,7 +37,6 @@
 
 #include <opencog/truthvalue/TruthValue.h>
 
-#include <opencog/atoms/base/Quotation.h>
 #include <opencog/atoms/base/ClassServer.h>
 
 #include <opencog/atomspace/TypeIndex.h>
@@ -212,8 +211,8 @@ public:
     Handle getHandle(Type, const std::string&) const;
     Handle getNodeHandle(const AtomPtr&) const;
     Handle getHandle(Type, const HandleSeq&) const;
-    Handle getLinkHandle(const AtomPtr&, Quotation quotation=Quotation()) const;
-    Handle getHandle(const AtomPtr&, Quotation quotation=Quotation()) const;
+    Handle getLinkHandle(const AtomPtr&) const;
+    Handle getHandle(const AtomPtr&) const;
     Handle getHandle(const Handle& h) const {
         AtomPtr a(h); return getHandle(a);
     }
