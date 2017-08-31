@@ -43,6 +43,7 @@ private:
 		implication_scope_to_implication_rule_h,
 		implication_and_lambda_factorization_rule_h,
 		closed_lambda_introduction_rule_h,
+		conditional_direct_evaluation_implication_scope_rule_h,
 		X, A, V, CT, Typed_X, P_body_var, P, Q, Eval_P, Eval_Q;
 
 public:
@@ -63,6 +64,7 @@ public:
 	void test_unify_target_implication_and_lambda_factorization();
 	void test_unify_target_closed_lambda_introduction_1();
 	void test_unify_target_closed_lambda_introduction_2();
+	void test_cycle();
 };
 
 void RuleUTest::setUp()
@@ -86,6 +88,7 @@ void RuleUTest::setUp()
 	eval_result = _eval.eval("(load-from-path \"implication-scope-to-implication-rule.scm\")");
 	eval_result = _eval.eval("(load-from-path \"implication-and-lambda-factorization-rule.scm\")");
 	eval_result = _eval.eval("(load-from-path \"closed-lambda-introduction-rule.scm\")");
+	eval_result = _eval.eval("(load-from-path \"conditional-direct-evaluation.scm\")");
 
 	deduction_rule_h =
 		_eval.eval_h("(MemberLink (stv 1 1)"
@@ -106,6 +109,10 @@ void RuleUTest::setUp()
 	closed_lambda_introduction_rule_h =
 		_eval.eval_h("(MemberLink (stv 1 1)"
 		             "   closed-lambda-introduction-rule-name"
+		             "   (ConceptNode \"URE\"))");
+	conditional_direct_evaluation_implication_scope_rule_h =
+		_eval.eval_h("(MemberLink (stv 1 1)"
+		             "   conditional-direct-evaluation-implication-scope-rule-name"
 		             "   (ConceptNode \"URE\"))");
 
 	X = an(VARIABLE_NODE, "$X");
@@ -775,4 +782,13 @@ void RuleUTest::test_unify_target_closed_lambda_introduction_2()
 	ScopeLinkPtr expected_sc = ScopeLinkCast(expected);
 
 	TS_ASSERT(expected_sc->is_equal(rule));
+}
+
+void RuleUTest::test_cycle()
+{
+	Rule rule(conditional_direct_evaluation_implication_scope_rule_h);
+
+	std::cout << "rule = " << oc_to_string(rule);
+
+	TS_ASSERT(not rule.has_cycle());
 }
