@@ -256,21 +256,18 @@ Handle AtomTable::getHandle(Type t, const HandleSeq& seq) const
     return getLinkHandle(a);
 }
 
-Handle AtomTable::getLinkHandle(const AtomPtr& orig, Quotation quotation) const
+Handle AtomTable::getLinkHandle(const AtomPtr& orig) const
 {
     AtomPtr a(orig);
     Type t = a->getType();
     const HandleSeq &seq = a->getOutgoingSet();
-
-    // Update quotation for the outgoing given the atom type
-    // quotation.update(t);
 
     // Make sure all the atoms in the outgoing set are in the atomspace.
     // If any are not are not, then reject the whhole mess.
     HandleSeq resolved_seq;
     bool changed = false;
     for (const Handle& ho : seq) {
-        Handle rh(getHandle(ho, quotation));
+        Handle rh(getHandle(ho));
         if (not rh) return rh;
         if (rh != ho) changed = true;
         resolved_seq.emplace_back(rh);
@@ -296,7 +293,7 @@ Handle AtomTable::getLinkHandle(const AtomPtr& orig, Quotation quotation) const
     }
 
     if (_environ) {
-        return _environ->getHandle(a, quotation);
+        return _environ->getHandle(a);
     }
     return Handle::UNDEFINED;
 }
@@ -304,7 +301,7 @@ Handle AtomTable::getLinkHandle(const AtomPtr& orig, Quotation quotation) const
 /// Find an equivalent atom that is exactly the same as the arg. If
 /// such an atom is in the table, it is returned, else the return
 /// is the bad handle.
-Handle AtomTable::getHandle(const AtomPtr& a, Quotation quotation) const
+Handle AtomTable::getHandle(const AtomPtr& a) const
 {
     if (nullptr == a) return Handle::UNDEFINED;
 
@@ -314,7 +311,7 @@ Handle AtomTable::getHandle(const AtomPtr& a, Quotation quotation) const
     if (a->isNode())
         return getNodeHandle(a);
     else if (a->isLink())
-        return getLinkHandle(a, quotation);
+        return getLinkHandle(a);
 
     return Handle::UNDEFINED;
 }
