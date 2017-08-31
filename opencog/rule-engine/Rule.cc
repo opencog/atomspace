@@ -66,16 +66,19 @@ Rule::Rule()
 	: premises_as_clauses(false), _rule_alias(Handle::UNDEFINED) {}
 
 Rule::Rule(const Handle& rule_member)
+	: premises_as_clauses(false), _rule_alias(Handle::UNDEFINED)
 {
 	init(rule_member);
 }
 
 Rule::Rule(const Handle& rule_alias, const Handle& rbs)
+	: premises_as_clauses(false), _rule_alias(Handle::UNDEFINED)
 {
 	init(rule_alias, rbs);
 }
 
 Rule::Rule(const Handle& rule_alias, const Handle& rule, const Handle& rbs)
+	: premises_as_clauses(false), _rule_alias(Handle::UNDEFINED)
 {
 	init(rule_alias, rule, rbs);
 }
