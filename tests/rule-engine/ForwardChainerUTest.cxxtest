@@ -123,7 +123,7 @@ void ForwardChainerUTest::test_do_chain_animals()
 		vardecl = Handle::UNDEFINED;
 
 	ForwardChainer fc(_as, top_rbs, source, vardecl);
-	fc.get_config().set_maximum_iterations(400);
+	fc.get_config().set_maximum_iterations(800);
 	fc.do_chain();
 
 	UnorderedHandleSet results = fc.get_chaining_result();

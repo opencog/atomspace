@@ -560,6 +560,9 @@ void BackwardChainerUTest::test_criminal()
 	}
 	logger().debug() << ss.str();
 
+	// Make sure at least one trace has been recorded
+	TS_ASSERT_LESS_THAN(0, traces.size());
+
 	// Clear the atomspace and reload the problem
 	_as.clear();
 	_eval.eval("(load-from-path \"tests/rule-engine/bc-criminal-config.scm\")");
