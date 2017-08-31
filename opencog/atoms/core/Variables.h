@@ -27,7 +27,7 @@
 #include <set>
 
 #include <opencog/atoms/base/Handle.h>
-#include <opencog/atoms/base/Quotation.h>
+#include <opencog/atoms/core/Quotation.h>
 
 namespace opencog
 {

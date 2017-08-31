@@ -30,8 +30,8 @@
 
 #include <opencog/atoms/base/Handle.h>
 #include <opencog/atoms/base/atom_types.h>
-#include <opencog/atoms/base/Quotation.h>
-#include <opencog/atoms/base/Context.h>
+#include <opencog/atoms/core/Quotation.h>
+#include <opencog/atoms/core/Context.h>
 #include <opencog/atoms/core/Variables.h>
 #include <opencog/atoms/core/VariableList.h>
 #include <opencog/atoms/pattern/BindLink.h>

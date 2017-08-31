@@ -1,5 +1,5 @@
 /*
- * opencog/atoms/base/Quotation.h
+ * opencog/atoms/core/Quotation.cc
  *
  * Copyright (C) 2016 OpenCog Foundation
  * All Rights Reserved
@@ -22,8 +22,8 @@
  * 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
  */
 
-#include "Quotation.h"
 #include <sstream>
+#include "Quotation.h"
 
 namespace opencog {
 

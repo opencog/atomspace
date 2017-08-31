@@ -25,10 +25,10 @@
 
 #include <unordered_map>
 
-#include <opencog/atoms/base/Quotation.h>
-#include <opencog/atoms/pattern/Pattern.h>
+#include <opencog/atoms/core/Quotation.h>
 #include <opencog/atoms/core/ScopeLink.h>
 #include <opencog/atoms/core/VariableList.h>
+#include <opencog/atoms/pattern/Pattern.h>
 #include <opencog/query/PatternMatchCallback.h>
 
 namespace opencog

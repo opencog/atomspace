@@ -26,7 +26,7 @@
 #define _OPENCOG_INITIATE_SEARCH_H
 
 #include <opencog/atoms/base/types.h>
-#include <opencog/atoms/base/Quotation.h>
+#include <opencog/atoms/core/Quotation.h>
 #include <opencog/atoms/pattern/PatternLink.h>
 #include <opencog/query/PatternMatchCallback.h>
 #include <opencog/query/PatternMatchEngine.h>

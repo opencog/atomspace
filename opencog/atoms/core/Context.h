@@ -1,5 +1,5 @@
 /*
- * opencog/atoms/base/Context.h
+ * opencog/atoms/core/Context.h
  *
  * Copyright (C) 2017 OpenCog Foundation
  * All Rights Reserved
@@ -25,15 +25,15 @@
 #ifndef _OPENCOG_CONTEXT_H
 #define _OPENCOG_CONTEXT_H
 
+#include <list>
+#include <string>
+
 #include <boost/operators.hpp>
 
-#include <opencog/atoms/base/Handle.h>
 #include <opencog/atoms/base/atom_types.h>
-#include <opencog/atoms/base/Quotation.h>
+#include <opencog/atoms/base/Handle.h>
+#include <opencog/atoms/core/Quotation.h>
 #include <opencog/atoms/core/Variables.h>
-
-#include <string>
-#include <list>
 
 namespace opencog
 {

@@ -19,8 +19,6 @@ ADD_LIBRARY (atombase
 	Link.cc
 	LinkValue.cc
 	Node.cc
-	Quotation.cc
-	Context.cc
 	StringValue.cc
 	Valuation.cc
 )
@@ -48,8 +46,6 @@ INSTALL (FILES
 	LinkValue.h
 	Node.h
 	ProtoAtom.h
-	Quotation.h
-	Context.h
 	StringValue.h
 	types.h
 	Valuation.h
