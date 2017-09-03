@@ -118,10 +118,18 @@ void SQLPersistSCM::do_close(void)
         throw RuntimeException(TRACE_INFO,
              "sql-close: Error: Database not open");
 
+    // The destructor might run for a while before its done.
+    // So null out _store first, and then actuall call the dtor.
+    // We should probably be doing this under a lock, to prevent
+    // two racing threads that are both trying to close the
+    // connection. But who would be crazy enough to want to do that?
+    SQLAtomStorage *sto = _store;
+    _store = NULL;
+
     _backing->unregisterWith(_as);
     _backing->set_store(NULL);
-    delete _store;
-    _store = NULL;
+
+    delete sto;
 }
 
 void SQLPersistSCM::do_load(void)
