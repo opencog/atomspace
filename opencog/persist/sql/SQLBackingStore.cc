@@ -31,7 +31,7 @@ using namespace opencog;
 
 SQLBackingStore::SQLBackingStore()
 {
-	_store = NULL;
+	_store = nullptr;
 }
 
 void SQLBackingStore::set_store(AtomStorage *as)
@@ -41,47 +41,49 @@ void SQLBackingStore::set_store(AtomStorage *as)
 
 Handle SQLBackingStore::getNode(Type t, const char *name) const
 {
+	if (nullptr == _store) return Handle();
 	return _store->getNode(t, name);
 }
 
 Handle SQLBackingStore::getLink(Type t, const HandleSeq& hs) const
 {
+	if (nullptr == _store) return Handle();
 	return _store->getLink(t, hs);
 }
 
 void SQLBackingStore::getIncomingSet(AtomTable& table, const Handle& h)
 {
-	_store->getIncomingSet(table, h);
+	if (_store) _store->getIncomingSet(table, h);
 }
 
 void SQLBackingStore::getIncomingByType(AtomTable& table, const Handle& h, Type t)
 {
-	_store->getIncomingByType(table, h, t);
+	if (_store) _store->getIncomingByType(table, h, t);
 }
 
 void SQLBackingStore::getValuations(AtomTable& table, const Handle& key, bool get_all)
 {
-	_store->getValuations(table, key, get_all);
+	if (_store) _store->getValuations(table, key, get_all);
 }
 
 void SQLBackingStore::storeAtom(const Handle& h)
 {
-	_store->storeAtom(h);
+	if (_store) _store->storeAtom(h);
 }
 
 void SQLBackingStore::removeAtom(const Handle& h, bool recursive)
 {
-	_store->removeAtom(h, recursive);
+	if (_store) _store->removeAtom(h, recursive);
 }
 
 void SQLBackingStore::loadType(AtomTable& at, Type t)
 {
-	_store->loadType(at, t);
+	if (_store) _store->loadType(at, t);
 }
 
 void SQLBackingStore::barrier()
 {
-	_store->flushStoreQueue();
+	if (_store) _store->flushStoreQueue();
 }
 
 void SQLBackingStore::registerWith(AtomSpace* as)
@@ -92,6 +94,10 @@ void SQLBackingStore::registerWith(AtomSpace* as)
 
 void SQLBackingStore::unregisterWith(AtomSpace* as)
 {
+	// First disconnect, and only then shut down.
+	AtomStorage* sto = _store;
+	_store = nullptr;
+
 	BackingStore::unregisterWith(as);
-	_store->unregisterWith(as);
+	sto->unregisterWith(as);
 }
