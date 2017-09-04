@@ -289,12 +289,12 @@ void ScopeUTest::test_implication_scope()
 	logger().debug("BEGIN TEST: %s", __FUNCTION__);
 
 	Handle ground = eval->eval_h(
-		"ImplicationScopeLink"
+		"(ImplicationScopeLink"
 		"  (TypedVariableLink"
 		"    (VariableNode \"$A\")"
 		"    (TypeNode \"BindLink\"))"
 		"  (DontExecLink (DefinedSchemaNode \"deduction-inheritance-rule\"))"
-		"  (DontExecLink (VariableNode \"$A\"))))"
+		"  (DontExecLink (VariableNode \"$A\")))"
 		);
 	Handle query = eval->eval_h(
 		"(GetLink"
