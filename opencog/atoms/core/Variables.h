@@ -26,6 +26,8 @@
 #include <map>
 #include <set>
 
+#include <boost/operators.hpp>
+
 #include <opencog/atoms/base/Handle.h>
 #include <opencog/atoms/core/Quotation.h>
 
@@ -125,7 +127,8 @@ typedef std::map<Handle, const std::pair<double, double>> GlobIntervalMap;
 /// scoped, bound variables; in particular, it is heavily used by the
 /// pattern matcher.
 ///
-struct Variables : public FreeVariables
+struct Variables : public FreeVariables,
+                   public boost::totally_ordered<Variables>
 {
 	/// Unbundled variables and type restrictions for them.
 

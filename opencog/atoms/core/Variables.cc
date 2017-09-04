@@ -21,6 +21,8 @@
  * 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
  */
 
+#include <opencog/util/Logger.h>
+
 #include <opencog/atoms/base/Atom.h>
 #include <opencog/atoms/base/Link.h>
 #include <opencog/atoms/base/ClassServer.h>
@@ -416,8 +418,7 @@ bool Variables::is_type(const Handle& var, const Handle& val) const
 	bool ret = true;
 
 	// Simple type restrictions?
-	VariableTypeMap::const_iterator tit =
-		_simple_typemap.find(var);
+	VariableTypeMap::const_iterator tit = _simple_typemap.find(var);
 	if (_simple_typemap.end() != tit)
 	{
 		const std::set<Type> &tchoice = tit->second;
