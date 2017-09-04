@@ -379,11 +379,11 @@ bool InitiateSearchCB::neighbor_search(PatternMatchEngine *pme)
 		_starter_term = ch.start_term;
 
 		_root = clauses[bestclause];
-		DO_LOG({LAZY_LOG_FINE << "Search start node: " << best_start->toShortString();})
+		DO_LOG({LAZY_LOG_FINE << "Search start node: " << best_start->toString();})
 		DO_LOG({LAZY_LOG_FINE << "Start term is: "
 		              << (_starter_term == (Atom*) nullptr ?
-		                  "UNDEFINED" : _starter_term->toShortString());})
-		DO_LOG({LAZY_LOG_FINE << "Root clause is: " <<  _root->toShortString();})
+		                  "UNDEFINED" : _starter_term->toString());})
+		DO_LOG({LAZY_LOG_FINE << "Root clause is: " <<  _root->toString();})
 
 		// This should be calling the over-loaded virtual method
 		// get_incoming_set(), so that, e.g. it gets sorted by attentional
@@ -395,7 +395,7 @@ bool InitiateSearchCB::neighbor_search(PatternMatchEngine *pme)
 			Handle h(iset[i]);
 			DO_LOG({LAZY_LOG_FINE << "xxxxxxxxxx neighbor_search xxxxxxxxxx\n"
 			              << "Loop candidate (" << i+1 << "/" << sz << "):\n"
-			              << h->toShortString();})
+			              << h->toString();})
 			bool found = pme->explore_neighborhood(_root, _starter_term, h);
 
 			while (not found and pme->has_more_to_explore())
@@ -626,9 +626,9 @@ bool InitiateSearchCB::link_type_search(PatternMatchEngine *pme)
 	}
 
 	DO_LOG({LAZY_LOG_FINE << "Start clause is: " << std::endl
-	              << _root->toShortString();})
+	              << _root->toString();})
 	DO_LOG({LAZY_LOG_FINE << "Start term is: " << std::endl
-	              << _starter_term->toShortString();})
+	              << _starter_term->toString();})
 
 	// Get type of the rarest link
 	Type ptype = _starter_term->getType();
@@ -643,7 +643,7 @@ bool InitiateSearchCB::link_type_search(PatternMatchEngine *pme)
 	{
 		DO_LOG({LAZY_LOG_FINE << "yyyyyyyyyy link_type_search yyyyyyyyyy\n"
 		              << "Loop candidate (" << ++i << "/" << hsz << "):\n"
-		              << h->toShortString();})
+		              << h->toString();})
 		bool found = pme->explore_neighborhood(_root, _starter_term, h);
 
 		while (not found and pme->has_more_to_explore())
@@ -696,7 +696,7 @@ bool InitiateSearchCB::variable_search(PatternMatchEngine *pme)
 	_starter_term = Handle::UNDEFINED;
 	for (const Handle& var: _variables->varset)
 	{
-		DO_LOG({LAZY_LOG_FINE << "Examine variable " << var->toShortString();})
+		DO_LOG({LAZY_LOG_FINE << "Examine variable " << var->toString();})
 
 #ifdef _IMPLEMENT_ME_LATER
 		// XXX TODO FIXME --- if there is a deep type in the mix, that
@@ -823,7 +823,7 @@ bool InitiateSearchCB::variable_search(PatternMatchEngine *pme)
 	{
 		DO_LOG({LAZY_LOG_FINE << "zzzzzzzzzzz variable_search zzzzzzzzzzz\n"
 		              << "Loop candidate (" << ++i << "/" << hsz << "):\n"
-		              << h->toShortString();})
+		              << h->toString();})
 		bool found = pme->explore_neighborhood(_root, _starter_term, h);
 
 		while (not found and pme->has_more_to_explore())

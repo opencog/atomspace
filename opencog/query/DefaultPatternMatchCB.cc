@@ -300,7 +300,8 @@ bool DefaultPatternMatchCB::link_match(const PatternTermPtr& ptm,
 		//     if (not _pat_bound_vars->is_equal(*_gnd_bound_vars))
 		// because that prevents searches for narrowly-typed grounds
 		// (as is done in the ForwardChainerUTest, see bug #934)
-		if (not _pat_bound_vars->is_type(_gnd_bound_vars->varseq))
+		if (*_pat_bound_vars != *_gnd_bound_vars
+		    and not _pat_bound_vars->is_type(_gnd_bound_vars->varseq))
 		{
 			_pat_bound_vars = nullptr;
 			_gnd_bound_vars = nullptr;
