@@ -284,5 +284,44 @@ void ScopeUTest::test_hide_2()
 	logger().debug("END TEST: %s", __FUNCTION__);
 }
 
+void ScopeUTest::test_implication_scope()
+{
+	logger().debug("BEGIN TEST: %s", __FUNCTION__);
+
+	Handle ground = eval->eval_h(
+		"ImplicationScopeLink"
+		"  (TypedVariableLink"
+		"    (VariableNode \"$A\")"
+		"    (TypeNode \"BindLink\"))"
+		"  (DontExecLink (DefinedSchemaNode \"deduction-inheritance-rule\"))"
+		"  (DontExecLink (VariableNode \"$A\"))))"
+		);
+	Handle query = eval->eval_h(
+		"(GetLink"
+		"  (TypedVariableLink"
+		"    (VariableNode \"$Rule\")"
+		"    (TypeNode \"DefinedSchemaNode\")"
+		"  )"
+		"  (ImplicationScopeLink"
+		"    (TypedVariableLink"
+		"      (VariableNode \"$A\")"
+		"      (TypeNode \"BindLink\"))"
+		"    (DontExecLink (VariableNode \"$Rule\"))"
+		"    (DontExecLink (VariableNode \"$A\"))))"
+		);
+
+	Handle result = satisfying_set(as, query);
+	Handle expected =
+		al(SET_LINK,
+		   eval->eval_h("(DefinedSchemaNode \"deduction-inheritance-rule\")"));
+
+	std::cout << "result = " << oc_to_string(result);
+	std::cout << "expected = " << oc_to_string(expected);
+
+	TS_ASSERT_EQUALS(result, expected);
+
+	logger().debug("END TEST: %s", __FUNCTION__);
+}
+
 #undef an
 #undef al
