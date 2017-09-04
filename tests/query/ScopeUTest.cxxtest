@@ -37,7 +37,7 @@ private:
 	SchemeEval* eval;
 
 public:
-	ScopeUTest(void)
+	ScopeUTest()
 	{
 		logger().set_level(Logger::DEBUG);
 		logger().set_print_to_stdout_flag(true);
@@ -60,26 +60,27 @@ int rc = CxxTest::TestTracker::tracker().suiteFailed();
 _exit(rc); // XXX hack to avoid double-free in __run_exit_handlers
 	}
 
-	void setUp(void);
-	void tearDown(void);
+	void setUp();
+	void tearDown();
 
-	void test_alpha(void);
-	void test_alpha_reverse(void);
-	void test_search(void);
-	void test_search_reverse(void);
-	void test_search_alt(void);
-	void test_pushpop(void);
-	void test_quote(void);
-	void test_hide_1(void);
-	void test_hide_2(void);
+	void test_alpha();
+	void test_alpha_reverse();
+	void test_search();
+	void test_search_reverse();
+	void test_search_alt();
+	void test_pushpop();
+	void test_quote();
+	void test_hide_1();
+	void test_hide_2();
+	void test_implication_scope();
 };
 
-void ScopeUTest::tearDown(void)
+void ScopeUTest::tearDown()
 {
 	as->clear();
 }
 
-void ScopeUTest::setUp(void)
+void ScopeUTest::setUp()
 {
 	as->clear();
 	eval->eval("(load-from-path \"tests/query/test_types.scm\")");
@@ -88,7 +89,7 @@ void ScopeUTest::setUp(void)
 /*
  * Test alpha conversion.
  */
-void ScopeUTest::test_alpha(void)
+void ScopeUTest::test_alpha()
 {
 	logger().debug("BEGIN TEST: %s", __FUNCTION__);
 
@@ -105,7 +106,7 @@ void ScopeUTest::test_alpha(void)
 /*
  * Test alpha conversion.
  */
-void ScopeUTest::test_alpha_reverse(void)
+void ScopeUTest::test_alpha_reverse()
 {
 	logger().debug("BEGIN TEST: %s", __FUNCTION__);
 
@@ -123,7 +124,7 @@ void ScopeUTest::test_alpha_reverse(void)
 /*
  * Test search of embedded scope links
  */
-void ScopeUTest::test_search(void)
+void ScopeUTest::test_search()
 {
 	logger().debug("BEGIN TEST: %s", __FUNCTION__);
 
@@ -144,7 +145,7 @@ void ScopeUTest::test_search(void)
  * Test search of embedded scope links.
  * Same as above, but reversed order.
  */
-void ScopeUTest::test_search_reverse(void)
+void ScopeUTest::test_search_reverse()
 {
 	logger().debug("BEGIN TEST: %s", __FUNCTION__);
 
@@ -164,7 +165,7 @@ void ScopeUTest::test_search_reverse(void)
 /*
  * Test search of embedded scope links, with renamed vars
  */
-void ScopeUTest::test_search_alt(void)
+void ScopeUTest::test_search_alt()
 {
 	logger().debug("BEGIN TEST: %s", __FUNCTION__);
 
@@ -186,7 +187,7 @@ void ScopeUTest::test_search_alt(void)
  * This time, the dataset includes data that fails to
  * match, and thus might corrupt the search stack.
  */
-void ScopeUTest::test_pushpop(void)
+void ScopeUTest::test_pushpop()
 {
 	logger().debug("BEGIN TEST: %s", __FUNCTION__);
 
@@ -211,7 +212,7 @@ void ScopeUTest::test_pushpop(void)
  * The search pattern inculdes QuoteLinks that have to be navigated
  * correctly, in order for things to work.
  */
-void ScopeUTest::test_quote(void)
+void ScopeUTest::test_quote()
 {
 	logger().debug("BEGIN TEST: %s", __FUNCTION__);
 
@@ -231,7 +232,7 @@ void ScopeUTest::test_quote(void)
 /*
  * Test the hiding of bound variables.
  */
-void ScopeUTest::test_hide_1(void)
+void ScopeUTest::test_hide_1()
 {
 	logger().debug("BEGIN TEST: %s", __FUNCTION__);
 
@@ -274,6 +275,45 @@ void ScopeUTest::test_hide_2()
 	Handle rule = eval->eval_h("rule");
 	Handle result = bindlink(as, rule);
 	Handle expected = al(SET_LINK, rule->getOutgoingAtom(2));
+
+	std::cout << "result = " << oc_to_string(result);
+	std::cout << "expected = " << oc_to_string(expected);
+
+	TS_ASSERT_EQUALS(result, expected);
+
+	logger().debug("END TEST: %s", __FUNCTION__);
+}
+
+void ScopeUTest::test_implication_scope()
+{
+	logger().debug("BEGIN TEST: %s", __FUNCTION__);
+
+	Handle ground = eval->eval_h(
+		"ImplicationScopeLink"
+		"  (TypedVariableLink"
+		"    (VariableNode \"$A\")"
+		"    (TypeNode \"BindLink\"))"
+		"  (DontExecLink (DefinedSchemaNode \"deduction-inheritance-rule\"))"
+		"  (DontExecLink (VariableNode \"$A\"))))"
+		);
+	Handle query = eval->eval_h(
+		"(GetLink"
+		"  (TypedVariableLink"
+		"    (VariableNode \"$Rule\")"
+		"    (TypeNode \"DefinedSchemaNode\")"
+		"  )"
+		"  (ImplicationScopeLink"
+		"    (TypedVariableLink"
+		"      (VariableNode \"$A\")"
+		"      (TypeNode \"BindLink\"))"
+		"    (DontExecLink (VariableNode \"$Rule\"))"
+		"    (DontExecLink (VariableNode \"$A\"))))"
+		);
+
+	Handle result = satisfying_set(as, query);
+	Handle expected =
+		al(SET_LINK,
+		   eval->eval_h("(DefinedSchemaNode \"deduction-inheritance-rule\")"));
 
 	std::cout << "result = " << oc_to_string(result);
 	std::cout << "expected = " << oc_to_string(expected);
