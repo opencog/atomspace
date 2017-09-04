@@ -7,8 +7,8 @@
 ; configure a rule-based system (rbs).
 ;
 ; Utilities include:
-; -- ure-add-rule -- Associate a rule to a rbs
-; -- ure-add-rules -- Associate  a list of rule-alias and weight pairs to a rbs
+; -- ure-add-rule -- Associate a rule to a rbs with a certain TV
+; -- ure-add-rules -- Associate  a list of rule-alias and TV pairs to a rbs
 ; -- ure-set-num-parameter -- Set a numeric parameter of an rbs
 ; -- ure-set-fuzzy-bool-parameter -- Set a fuzzy boolean parameter of an rbs
 ; -- ure-define-rbs -- Create a rbs that runs for a particular number of
@@ -76,11 +76,11 @@
   (cog-mandatory-args-bc rbs target vardecl
                          trace-enabled tas control-enabled cas focus-set)))
 
-(define-public (ure-define-add-rule rbs rule-name rule weight)
+(define-public (ure-define-add-rule rbs rule-name rule . tv)
 "
 
   Associate a rule name and a rule content, and adds it to a rulebase
-  with a given weight and returns the rule alias (DefinedSchemaNode <rule-name>).
+  with a given TV and returns the rule alias (DefinedSchemaNode <rule-name>).
 
   rbs: The ConceptNode that represents a rulebase.
 
@@ -88,54 +88,66 @@
 
   rule: The BindLink that is run.
 
-  weight: A number that is used to represent the priority of the rule.
+  tv (head): Optional TV representing the probability (uncertainty included) that the rule produces a desire outcome.
 "
     ; Didn't add type checking here b/c the ure-configuration format isn't
     ; set in stone yet. And the best place to do that is in c++ UREConfigReader
     (let ((alias (DefinedSchemaNode rule-name)))
         (DefineLink alias rule)
 
-        (MemberLink (stv weight 1)
-           alias
-           rbs)
+        (if (null? tv)
+            (MemberLink
+               alias
+               rbs)
+            (MemberLink (car tv)
+               alias
+               rbs))
 
         alias
     )
 )
 
-(define-public (ure-add-rule rbs rule-alias weight)
+(define-public (ure-add-rule rbs rule-alias . tv)
 "
-  Adds a rule to a rulebase and sets its weight.
+  Adds a rule to a rulebase and sets its tv.
 
   rbs: The ConceptNode that represents a rulebase.
 
   rule-alias : A string that names the rule.
 
-  weight: A number that is used to represent the priority of the rule.
+  tv (head): Optional TV representing the probability (uncertainty included) that the rule produces a desire outcome.
 "
-    (MemberLink (stv weight 1) rule-alias rbs)
+  (if (null? tv)
+      (MemberLink
+        rule-alias
+        rbs)
+      (MemberLink (car tv)
+        rule-alias
+        rbs))
 )
 
 (define-public (ure-add-rules rbs rules)
 "
-  Given a rbs and a list of pairs (rule-alias weight) create for each rule
+  Given a rbs and a list of pairs (rule-alias tv) create for each rule
 
-  MemberLink (stv weight 1)
+  MemberLink tv
     rule-alias
     rbs
 
   rbs: The ConceptNode that represents a rulebase
 
-  rules: A list of rule-alias and weight pairs, where rule-alias is the node
-         alias of a rule in a DefineLink already created.
+  rules: A list of rule-alias, or rule-alias and tv pairs, where rule-alias
+         is the node alias of a rule in a DefineLink already created.
+         In case the TVs are not provided the default TV is used
 "
-  (define (expand-pair weighted-rule)
-    (let* ((rule-alias (car weighted-rule))
-           (weight (cadr weighted-rule)))
-        (ure-add-rule rbs rule-alias weight)
-    )
-  )
-  (for-each expand-pair rules)
+  (define (add-rule tved-rule)
+    (if (list? tved-rule)
+        (let* ((rule-alias (car tved-rule))
+               (tv (cadr tved-rule)))
+          (ure-add-rule rbs rule-alias tv))
+        (ure-add-rule rbs tved-rule)))
+
+  (for-each add-rule rules)
 )
 
 ; Set numerical parameters. Given an rbs, a parameter name and its

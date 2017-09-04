@@ -28,7 +28,7 @@
 ;; Associate the rules to the rule base (with weights, their semantics
 ;; is currently undefined, we might settled with probabilities but it's
 ;; not sure)
-(ure-add-rules fc-deduction-rbs (list (list fc-deduction-rule-name 0.6)))
+(ure-add-rules fc-deduction-rbs (list fc-deduction-rule-name))
 
 ;; Termination criteria parameters
 (ure-set-num-parameter fc-deduction-rbs "URE:maximum-iterations" 20)

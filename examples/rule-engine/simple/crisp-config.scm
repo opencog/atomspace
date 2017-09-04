@@ -25,9 +25,10 @@
 ; Associate the rules to the rule base (with weights, their semantics
 ; is currently undefined, we might settled with probabilities but it's
 ; not sure)
-(define crisp-rules (list (list crisp-modus-ponens-rule-name 0.4)
-                          (list crisp-deduction-rule-name 0.6))
-)
+(define crisp-modus-ponens-tv (stv 0.4 0.9))
+(define crisp-deduction-tv (stv 0.6 0.9))
+(define crisp-rules (list (list crisp-modus-ponens-rule-name crisp-modus-ponens-tv)
+                          (list crisp-deduction-rule-name crisp-deduction-tv)))
 (ure-add-rules crisp-rbs crisp-rules)
 
 ; Termination criteria parameters
