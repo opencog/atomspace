@@ -281,22 +281,14 @@ Handle ControlPolicy::get_expansion_control_rule_pattern(const Handle& ctrl_rule
 
 HandleSet ControlPolicy::fetch_expansion_control_rules(const Handle& inf_rule)
 {
-	return set_union(fetch_pattern_free_expansion_control_rules(inf_rule),
-	                 fetch_pattern_expansion_control_rules(inf_rule));
+	return set_union(fetch_expansion_control_rules(inf_rule, 1),
+	                 fetch_expansion_control_rules(inf_rule, 2));
 }
 
-HandleSet ControlPolicy::fetch_pattern_free_expansion_control_rules(const Handle& inf_rule)
+HandleSet ControlPolicy::fetch_expansion_control_rules(const Handle& inf_rule,
+                                                       int n)
 {
-	Handle query = mk_pattern_free_expansion_control_rules_query(inf_rule);
-	Handle result = bindlink(_control_as, query);
-	HandleSeq outgoings(result->getOutgoingSet());
-	_control_as->remove_atom(result); // Remove cruft from _control_as
-	return HandleSet(outgoings.begin(), outgoings.end());
-}
-
-HandleSet ControlPolicy::fetch_pattern_expansion_control_rules(const Handle& inf_rule)
-{
-	Handle query = mk_pattern_expansion_control_rules_query(inf_rule);
+	Handle query = mk_expansion_control_rules_query(inf_rule, n);
 	Handle result = bindlink(_control_as, query);
 	HandleSeq outgoings(result->getOutgoingSet());
 	_control_as->remove_atom(result); // Remove cruft from _control_as
@@ -320,12 +312,14 @@ Handle ControlPolicy::mk_list_of_args_vardecl(const Handle& args_var)
 	          an(TYPE_NODE, "ListLink"));
 }
 
-Handle ControlPolicy::mk_expand_exec(const Handle& expand_args_var)
+Handle ControlPolicy::mk_expand_exec(const Handle& input_var,
+                                     const Handle& output_var)
 {
 	Handle expand_schema = an(SCHEMA_NODE, TraceRecorder::expand_andbit_schema_name);
 	return al(EXECUTION_LINK,
 	          expand_schema,
-	          al(UNQUOTE_LINK, expand_args_var));
+	          al(UNQUOTE_LINK, input_var),
+	          al(UNQUOTE_LINK, output_var));
 }
 
 Handle ControlPolicy::mk_preproof_eval(const Handle& preproof_args_var)
@@ -336,74 +330,65 @@ Handle ControlPolicy::mk_preproof_eval(const Handle& preproof_args_var)
 	          al(UNQUOTE_LINK, preproof_args_var));
 }
 
-Handle ControlPolicy::mk_pattern_free_expansion_control_rules_query(const Handle& inf_rule)
+Handle ControlPolicy::mk_expansion_control_rules_query(const Handle& inf_rule,
+                                                       int n)
 {
+	OC_ASSERT(0 < n, "Not supported yet");
+
 	Handle vardecl_var = an(VARIABLE_NODE, "$vardecl"),
 		vardecl_vardecl = mk_vardecl_vardecl(vardecl_var),
 
-		expand_args_var = an(VARIABLE_NODE, "$expand_args"),
-		expand_args_vardecl = mk_list_of_args_vardecl(expand_args_var),
-		expand_exec = mk_expand_exec(expand_args_var),
+		expand_input_var = an(VARIABLE_NODE, "$expand_input"),
+		expand_input_vardecl = mk_list_of_args_vardecl(expand_input_var),
+		expand_output_var = an(VARIABLE_NODE, "$expand_output"),
+		expand_output_vardecl = expand_output_var,
+		expand_exec = mk_expand_exec(expand_input_var, expand_output_var),
 
 		preproof_args_var = an(VARIABLE_NODE, "$preproof_args"),
 		preproof_args_vardecl = mk_list_of_args_vardecl(preproof_args_var),
-		preproof_eval = mk_preproof_eval(preproof_args_var),
+		preproof_eval = mk_preproof_eval(preproof_args_var);
 
-		// ImplicationScope to retrieve
-		expand_preproof_impl = al(QUOTE_LINK,
-		                          al(IMPLICATION_SCOPE_LINK,
-		                             al(UNQUOTE_LINK, vardecl_var),
-		                             expand_exec,
-		                             preproof_eval)),
+	HandleSeq pattern_vars = mk_pattern_vars(n);
 
-		// BindLink of ImplicationScope to retrieve
-		expand_preproof_impl_bl = al(BIND_LINK,
-		                             al(VARIABLE_LIST,
-		                                vardecl_vardecl,
-		                                expand_args_vardecl,
-		                                preproof_args_vardecl),
-		                             expand_preproof_impl,
-		                             expand_preproof_impl);
+	// ImplicationScope with a pattern in its antecedent to
+	// retrieve
+	HandleSeq antecedents{expand_exec};
+	for (const Handle pv : pattern_vars)
+		antecedents.push_back(al(UNQUOTE_LINK, pv));
+	Handle pat_expand_preproof_impl = al(QUOTE_LINK,
+	                                     al(IMPLICATION_SCOPE_LINK,
+	                                        al(UNQUOTE_LINK, vardecl_var),
+	                                        al(AND_LINK, antecedents),
+	                                        preproof_eval));
 
-	return expand_preproof_impl_bl;
-}
+	// Bind of ImplicationScope with a pattern in its antecedent
+	// to retrieve
+	HandleSeq vardecls{vardecl_vardecl,
+	                   expand_input_vardecl,
+	                   expand_output_vardecl,
+	                   preproof_args_vardecl};
+	vardecls.insert(vardecls.end(), pattern_vars.begin(), pattern_vars.end());
 
-Handle ControlPolicy::mk_pattern_expansion_control_rules_query(const Handle& inf_rule)
-{
-	Handle vardecl_var = an(VARIABLE_NODE, "$vardecl"),
-		vardecl_vardecl = mk_vardecl_vardecl(vardecl_var),
-
-		expand_args_var = an(VARIABLE_NODE, "$expand_args"),
-		expand_args_vardecl = mk_list_of_args_vardecl(expand_args_var),
-		expand_exec = mk_expand_exec(expand_args_var),
-
-		preproof_args_var = an(VARIABLE_NODE, "$preproof_args"),
-		preproof_args_vardecl = mk_list_of_args_vardecl(preproof_args_var),
-		preproof_eval = mk_preproof_eval(preproof_args_var),
-
-		// ImplicationScope with a pattern in its antecedent to
-		// retrieve
-		pattern_var = an(VARIABLE_NODE, "$pattern"),
-		pat_expand_preproof_impl = al(QUOTE_LINK,
-		                              al(IMPLICATION_SCOPE_LINK,
-		                                 al(UNQUOTE_LINK, vardecl_var),
-		                                 al(AND_LINK,
-		                                    expand_exec,
-		                                    al(UNQUOTE_LINK, pattern_var)),
-		                                 preproof_eval)),
-
-		// Bind of ImplicationScope with a pattern in its antecedent
-		// to retrieve
-		pat_expand_preproof_impl_bl = al(BIND_LINK,
-		                                 al(VARIABLE_LIST,
-		                                    vardecl_vardecl,
-		                                    expand_args_vardecl,
-		                                    preproof_args_vardecl,
-		                                    pattern_var),
-		                                 pat_expand_preproof_impl,
-		                                 pat_expand_preproof_impl);
+	Handle pat_expand_preproof_impl_bl = al(BIND_LINK,
+	                                        al(VARIABLE_LIST, vardecls),
+	                                        pat_expand_preproof_impl,
+	                                        pat_expand_preproof_impl);
 
 	return pat_expand_preproof_impl_bl;
+}
+
+HandleSeq ControlPolicy::mk_pattern_vars(int n)
+{
+	HandleSeq pattern_vars;
+	for (int i = 0; i < n; i++)
+		pattern_vars.push_back(mk_pattern_var(i));
+	return pattern_vars;
+}
+
+Handle ControlPolicy::mk_pattern_var(int i)
+{
+	std::string name = std::string("$pattern-") + std::to_string(i);
+	return an(VARIABLE_NODE, name);
 }
 
 #undef al

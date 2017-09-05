@@ -175,44 +175,6 @@ private:
 	/**
 	 * Fetch control rules from _control_as involved in BIT
 	 * expansion. Informally that if and-BIT, A, expands into B from L
-	 * with the given rule then B has a probability TV of being a
-	 * preproof of T. Formally
-	 *
-	 * ImplicationScope <TV>
-	 *  VariableList
-	 *    Variable "$T"  ;; Theorem/target to prove
-	 *    TypedVariable  ;; and-BIT to expand
-	 *      Variable "$A"
-	 *      Type "BindLink"
-	 *    Variable "$L"  ;; Leaf from A to expand
-	 *    TypedVariable  ;; Resulting and-BIT from the expansion of L from A with rule R
-	 *      Variable "$B"
-	 *      Type "BindLink"
-	 *  Execution
-	 *    Schema "expand-and-BIT"
-	 *    List
-	 *      BontExec Variable "$A"
-	 *      Variable "$L"
-	 *      DontExec <inf_rule>
-	 *    DontExec Variable "$B"
-	 *  Evaluation
-	 *    Predicate "preproof"
-	 *    List
-	 *      DontExec Variable "$B"
-	 *      Variable "$T"
-	 *
-	 * Although this control rule is not likely to be very useful in
-	 * practice we still keep it as it may provide some initial
-	 * guidance when no predictive patterns have been extracted from
-	 * the inference history so far. It may also provide a reference
-	 * when building the mixture model in case the so called patterns
-	 * are actually overfit.
-	 */
-	HandleSet fetch_pattern_free_expansion_control_rules(const Handle& inf_rule);
-
-	/**
-	 * Fetch control rules from _control_as involved in BIT
-	 * expansion. Informally that if and-BIT, A, expands into B from L
 	 * with the given rule, and follow some pattern, then B has a
 	 * probability TV of being a preproof of T. Formally
 	 *
@@ -234,24 +196,30 @@ private:
 	 *        Variable "$L"
 	 *        DontExec <inf_rule>
 	 *      DontExec Variable "$B"
-	 *    <pattern>
+	 *    <pattern-1>
+	 *    ...
+	 *    <pattern-n>
 	 *  Evaluation
 	 *    Predicate "preproof"
 	 *    List
 	 *      DontExec Variable "$B"
 	 *      Variable "$T"
+	 *
+	 * n is the number of patterns in addition to the expansion itself
+	 * (the Execution link).
 	 */
-	HandleSet fetch_pattern_expansion_control_rules(const Handle& inf_rule);
+	HandleSet fetch_expansion_control_rules(const Handle& inf_rule, int n);
 
 	/**
 	 * Helpers to build various hypergraphs used to build various queries
 	 */
 	Handle mk_vardecl_vardecl(const Handle& vardecl_var);
 	Handle mk_list_of_args_vardecl(const Handle& args_var);
-	Handle mk_expand_exec(const Handle& expand_args_var);
+	Handle mk_expand_exec(const Handle& input_var, const Handle& output_var);
 	Handle mk_preproof_eval(const Handle& preproof_args_var);
-	Handle mk_pattern_free_expansion_control_rules_query(const Handle& inf_rule);
-	Handle mk_pattern_expansion_control_rules_query(const Handle& inf_rule);
+	Handle mk_expansion_control_rules_query(const Handle& inf_rule, int n);
+	HandleSeq mk_pattern_vars(int n);
+	Handle mk_pattern_var(int i);
 };
 
 
