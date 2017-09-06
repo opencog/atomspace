@@ -1,0 +1,81 @@
+/*
+ * ControlPolicyUTest.cxxtest
+ *
+ *  Created on: Sep 6, 2017
+ *      Authors: Nil Geisweiller
+ */
+
+#include <opencog/rule-engine/backwardchainer/ControlPolicy.h>
+#include <opencog/guile/SchemeEval.h>
+#include <opencog/atomspace/AtomSpace.h>
+#include <opencog/util/mt19937ar.h>
+#include <opencog/rule-engine/URELogger.h>
+
+#include <cxxtest/TestSuite.h>
+
+using namespace std;
+using namespace opencog;
+
+#define al _as.add_link
+#define an _as.add_node
+
+class BackwardChainerUTest: public CxxTest::TestSuite
+{
+private:
+	AtomSpace _as;
+	SchemeEval _eval;
+	BackwardChainer* _bc;
+
+	void reset_bc();
+
+public:
+	BackwardChainerUTest();
+
+	void setUp();
+	void tearDown();
+
+	void test_select_rule_1();
+
+void ControlPolicyUTest::test_fetch_control_rule()
+{
+	logger().debug("BEGIN TEST: %s", __FUNCTION__);
+
+	_eval.eval("(load-from-path \"tests/rule-engine/bc-criminal-config.scm\")");
+	_eval.eval("(load-from-path \"tests/rule-engine/criminal.scm\")");
+	randGen().seed(0);
+
+	Handle top_rbs = _as.get_node(CONCEPT_NODE, UREConfigReader::top_rbs_name);
+
+	Handle target_var = _eval.eval_h("(VariableNode \"$who\")");
+	Handle target =
+		_eval.eval_h("(InheritanceLink"
+		             "   (VariableNode \"$who\")"
+		             "   (ConceptNode \"criminal\"))");
+	Handle vardecl =
+	    _eval.eval_h("(TypedVariable"
+	                 "   (VariableNode \"$who\")"
+	                 "   (Type \"ConceptNode\"))");
+	Handle soln = _eval.eval_h("(ConceptNode \"West\")");
+
+	// To record the trace of the inference
+	AtomSpace trace_as;
+
+	BackwardChainer bc(_as, top_rbs, target, vardecl, &trace_as);
+	// See bc-criminal-config.scm to change the number of iterations
+	bc.do_chain();
+
+	Handle results = bc.get_results(),
+		expected_target =  _eval.eval_h("(InheritanceLink"
+		                                "   (ConceptNode \"West\")"
+		                                "   (ConceptNode \"criminal\"))"),
+		expected = al(SET_LINK, expected_target);
+
+	logger().debug() << "results = " << oc_to_string(results);
+	logger().debug() << "expected = " << oc_to_string(expected);
+
+	TS_ASSERT_EQUALS(results, expected);
+	TS_ASSERT_LESS_THAN(0.9, expected_target->getTruthValue()->getMean());
+	TS_ASSERT_LESS_THAN(0.9, expected_target->getTruthValue()->getConfidence());
+
+	logger().debug("END TEST: %s", __FUNCTION__);
+}
