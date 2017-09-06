@@ -507,6 +507,8 @@ SQLAtomStorage::SQLAtomStorage(std::string uri)
 
 SQLAtomStorage::~SQLAtomStorage()
 {
+	flushStoreQueue();
+
 	while (not conn_pool.is_empty())
 	{
 		LLConnection* db_conn = conn_pool.pop();
@@ -558,6 +560,7 @@ void SQLAtomStorage::registerWith(AtomSpace* as)
 
 void SQLAtomStorage::unregisterWith(AtomSpace* as)
 {
+	flushStoreQueue();
 	_tlbuf.clear_resolver(&as->get_atomtable());
 
 #ifdef NOT_NEEDED_RIGHT_NOW
