@@ -19,26 +19,29 @@ using namespace opencog;
 #define al _as.add_link
 #define an _as.add_node
 
-class BackwardChainerUTest: public CxxTest::TestSuite
+class ControlPolicyUTest: public CxxTest::TestSuite
 {
 private:
 	AtomSpace _as;
 	SchemeEval _eval;
-	BackwardChainer* _bc;
+	ControlPolicy* _cp;
 
 	void reset_bc();
 
 public:
-	BackwardChainerUTest();
+	ControlPolicyUTest();
 
 	void setUp();
 	void tearDown();
 
 	void test_select_rule_1();
+};
 
 void ControlPolicyUTest::test_fetch_control_rule()
 {
 	logger().debug("BEGIN TEST: %s", __FUNCTION__);
+
+	// TODO
 
 	_eval.eval("(load-from-path \"tests/rule-engine/bc-criminal-config.scm\")");
 	_eval.eval("(load-from-path \"tests/rule-engine/criminal.scm\")");
