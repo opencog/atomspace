@@ -66,7 +66,7 @@ CREATE TABLE Atoms (
 );
 
 -- Incoming set index. Very important when asking for the incoming set
--- of some atom.
+-- of some atom.  Heavily used to accomplish atom deletion.
 CREATE INDEX incoming_idx on Atoms USING GIN(outgoing);
 
 -- -----------------------------------------------------------
