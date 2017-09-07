@@ -23,8 +23,6 @@ using namespace opencog;
 #define al _as.add_link
 #define an _as.add_node
 
-#define WORKING_DIRECTORY "tests/rule-engine/backwardchainer/"
-
 class BackwardChainerUTest: public CxxTest::TestSuite
 {
 private:
