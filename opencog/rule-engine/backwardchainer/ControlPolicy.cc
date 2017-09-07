@@ -35,12 +35,12 @@
 
 using namespace opencog;
 
-#define al _query_as.add_link
-#define an _query_as.add_node
+#define al _query_as->add_link
+#define an _query_as->add_node
 
 ControlPolicy::ControlPolicy(const RuleSet& rs, const BIT& bit,
                              AtomSpace* control_as) :
-	rules(rs), _bit(bit), _control_as(control_as)
+	rules(rs), _bit(bit), _control_as(control_as), _query_as(nullptr)
 {
 	// Fetch default TVs for each inference rule (the TV on the member
 	// link connecting the rule to the rule base
@@ -55,6 +55,7 @@ ControlPolicy::ControlPolicy(const RuleSet& rs, const BIT& bit,
 
 	// Fetches expansion control rules from _control_as
 	if (_control_as) {
+		_query_as = new AtomSpace(_control_as);
 		for (const Handle& rule_alias : rule_aliases(rules)) {
 			HandleSet exp_ctrl_rules = fetch_expansion_control_rules(rule_alias);
 			_expansion_control_rules[rule_alias] = exp_ctrl_rules;
@@ -64,6 +65,11 @@ ControlPolicy::ControlPolicy(const RuleSet& rs, const BIT& bit,
 			                     << oc_to_string(exp_ctrl_rules);
 		}
 	}
+}
+
+ControlPolicy::~ControlPolicy()
+{
+	delete(_query_as);
 }
 
 RuleSelection ControlPolicy::select_rule(AndBIT& andbit, BITNode& bitleaf)

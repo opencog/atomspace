@@ -28,6 +28,8 @@
 #include "BIT.h"
 #include "../Rule.h"
 
+class ControlPolicyUTest;
+
 namespace opencog
 {
 
@@ -41,9 +43,11 @@ typedef std::pair<RuleTypedSubstitutionPair, double> RuleSelection;
 
 class ControlPolicy
 {
+    friend class ::ControlPolicyUTest;
 public:
 	ControlPolicy(const RuleSet& rules, const BIT& bit,
 	              AtomSpace* control_as=nullptr);
+	~ControlPolicy();
 
 	const std::string preproof_predicate_name = "URE:BC:preproof";
 
@@ -61,8 +65,7 @@ public:
 	 * according to their weights.
 	 *
 	 * TODO: add comments about inference control policy, see
-	 * README.md of
-	 * <OPENCOG_ROOT>/examples/pln/inference-control-learning
+	 * <OPENCOG_ROOT>/examples/pln/inference-control-learning/README.md
 	 *
 	 * The andbit and bitleaf are not const because if the rules are
 	 * exhausted it will set its exhausted flag to false.
@@ -90,7 +93,7 @@ private:
 
 	// AtomSpace holding the pattern matcher queries to fetch the
 	// various control rule
-	AtomSpace _query_as;
+	AtomSpace* _query_as;
 
 	// Map each action (inference rule expansion) to the set of
 	// control rules involving it.
