@@ -29,6 +29,7 @@
 
 #include "MixtureModel.h"
 #include "ActionSelection.h"
+#include "BetaDistribution.h"
 
 #include "TraceRecorder.h"
 #include "../URELogger.h"
@@ -130,19 +131,29 @@ RuleSelection ControlPolicy::select_rule(const AndBIT& andbit,
                                          const BITNode& bitleaf,
                                          const RuleTypedSubstitutionMap& inf_rules)
 {
+	// Build a mapping from rule to their TVs of expansion success
+	HandleTVMap success_tvs = expansion_success_tvs(andbit, bitleaf, inf_rules);
+	std::vector<double> weights = rule_weights(success_tvs, inf_rules);
+
 	// Build weight vector, based on control rules or otherwise
 	// default rule TVs, to do weighted random selection.
-	std::vector<double> weights = rule_weights(andbit, bitleaf, inf_rules);
 
 	// Sample an inference rule according to the distribution
 	std::discrete_distribution<size_t> dist(weights.begin(), weights.end());
 	size_t idx = dist(randGen());
-	return {*std::next(inf_rules.begin(), idx), weights[idx]};
+	const RuleTypedSubstitutionPair& selected_rule = *std::next(inf_rules.begin(), idx);
+
+	// Return the selected rule and its probability of success, will
+	// be used to calculate the TV that the produce and-BIT is a
+	// preproof.
+	double prob = get_actual_mean(success_tvs[selected_rule.first.get_alias()]);
+	return {selected_rule, prob};
 }
 
-std::vector<double> ControlPolicy::rule_weights(const AndBIT& andbit,
-                                                const BITNode& bitleaf,
-                                                const RuleTypedSubstitutionMap& inf_rules)
+HandleTVMap ControlPolicy::expansion_success_tvs(
+	const AndBIT& andbit,
+	const BITNode& bitleaf,
+	const RuleTypedSubstitutionMap& inf_rules)
 {
 	// For each rule alias, calculate the TV that selecting it will
 	// produce a preproof
@@ -166,11 +177,18 @@ std::vector<double> ControlPolicy::rule_weights(const AndBIT& andbit,
 	// Log TVs of representing probability of success (expanding into
 	// a preproof) for each action
 	std::stringstream ss;
-	ss << "Rule TVs:" << std::endl;
+	ss << "Rule TVs expanding a supposed preproof into another preproof:" << std::endl;
 	for (const auto& rtv : success_tvs)
 		ss << rtv.second->toString() << " " << oc_to_string(rtv.first);
 	ure_logger().debug() << ss.str();
 
+	return success_tvs;
+}
+
+
+std::vector<double> ControlPolicy::rule_weights(const HandleTVMap& success_tvs,
+                                                const RuleTypedSubstitutionMap& inf_rules)
+{
 	// Given success_tvs calculate the action distribution over rule
 	// alias, as to (supposedly) optimally balance exploration and
 	// exploitation.
@@ -244,9 +262,9 @@ HandleSet ControlPolicy::active_expansion_control_rules(const Handle& inf_rule_a
 	if (results.empty())
 		ss << "none";
 	else {
-		ss << "size = " << results.size();
+		ss << "size = " << results.size() << ":";
 		for (const Handle& acr : results)
-			ss << acr->idToString();
+			ss << " " << acr->idToString();
 	}
 	ure_logger().debug() << ss.str();
 
@@ -255,14 +273,10 @@ HandleSet ControlPolicy::active_expansion_control_rules(const Handle& inf_rule_a
 
 bool ControlPolicy::control_rule_active(const Handle& ctrl_rule) const
 {
-	// For now we assume that it is an expansion control rule
-	Handle expansion_pattern = get_expansion_control_rule_pattern(ctrl_rule);
-	if (expansion_pattern) {
-		// TODO
-		OC_ASSERT(false, "Not implemented");
-		return true;
-	}
-
+	// For now we assume that any control rules are active. Also in
+	// principle a control is neither active or inactive, it has
+	// instead a certain probability of being true, indeed we need
+	// never know for sure whether a context is satisfied.
 	return true;
 }
 
@@ -318,14 +332,19 @@ Handle ControlPolicy::mk_list_of_args_vardecl(const Handle& args_var)
 	          an(TYPE_NODE, "ListLink"));
 }
 
-Handle ControlPolicy::mk_expand_exec(const Handle& input_var,
-                                     const Handle& output_var)
+Handle ControlPolicy::mk_expand_exec(const Handle& input_andbit_var,
+                                     const Handle& input_leaf_var,
+                                     const Handle& inf_rule,
+                                     const Handle& output_andbit_var)
 {
 	Handle expand_schema = an(SCHEMA_NODE, TraceRecorder::expand_andbit_schema_name);
 	return al(EXECUTION_LINK,
 	          expand_schema,
-	          al(UNQUOTE_LINK, input_var),
-	          al(UNQUOTE_LINK, output_var));
+	          al(LIST_LINK,
+	             al(UNQUOTE_LINK, input_andbit_var),
+	             al(UNQUOTE_LINK, input_leaf_var),
+	             al(DONT_EXEC_LINK, inf_rule)),
+	          al(UNQUOTE_LINK, output_andbit_var));
 }
 
 Handle ControlPolicy::mk_preproof_eval(const Handle& preproof_args_var)
@@ -344,11 +363,11 @@ Handle ControlPolicy::mk_expansion_control_rules_query(const Handle& inf_rule,
 	Handle vardecl_var = an(VARIABLE_NODE, "$vardecl"),
 		vardecl_vardecl = mk_vardecl_vardecl(vardecl_var),
 
-		expand_input_var = an(VARIABLE_NODE, "$expand_input"),
-		expand_input_vardecl = mk_list_of_args_vardecl(expand_input_var),
-		expand_output_var = an(VARIABLE_NODE, "$expand_output"),
-		expand_output_vardecl = expand_output_var,
-		expand_exec = mk_expand_exec(expand_input_var, expand_output_var),
+		input_andbit_var = an(VARIABLE_NODE, "$input_andbit"),
+		input_leaf_var = an(VARIABLE_NODE, "$input_leaf"),
+		output_andbit_var = an(VARIABLE_NODE, "$output_andbit"),
+		expand_exec = mk_expand_exec(input_andbit_var, input_leaf_var, inf_rule,
+		                             output_andbit_var),
 
 		preproof_args_var = an(VARIABLE_NODE, "$preproof_args"),
 		preproof_args_vardecl = mk_list_of_args_vardecl(preproof_args_var),
@@ -370,8 +389,9 @@ Handle ControlPolicy::mk_expansion_control_rules_query(const Handle& inf_rule,
 	// Bind of ImplicationScope with a pattern in its antecedent
 	// to retrieve
 	HandleSeq vardecls{vardecl_vardecl,
-	                   expand_input_vardecl,
-	                   expand_output_vardecl,
+	                   input_andbit_var,
+	                   input_leaf_var,
+	                   output_andbit_var,
 	                   preproof_args_vardecl};
 	vardecls.insert(vardecls.end(), pattern_vars.begin(), pattern_vars.end());
 
@@ -395,6 +415,11 @@ Handle ControlPolicy::mk_pattern_var(int i)
 {
 	std::string name = std::string("$pattern-") + std::to_string(i);
 	return an(VARIABLE_NODE, name);
+}
+
+double ControlPolicy::get_actual_mean(TruthValuePtr tv) const
+{
+	return BetaDistribution(tv).mean();
 }
 
 #undef al

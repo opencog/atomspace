@@ -114,12 +114,19 @@ private:
 	                          const RuleTypedSubstitutionMap& rules);
 
 	/**
+	 * Return the conditional TVs that a given rule expands a supposed
+	 * preproof into another preproof.
+	 */
+	HandleTVMap expansion_success_tvs(const AndBIT& andbit,
+	                                  const BITNode& bitleaf,
+	                                  const RuleTypedSubstitutionMap& rules);
+
+	/**
 	 * Calculate the rule weights, according to the control rules
 	 * present is _control_as, or otherwise default rule TVs, to do
 	 * weighted random selection.
 	 */
-	std::vector<double> rule_weights(const AndBIT& andbit,
-	                                 const BITNode& bitleaf,
+	std::vector<double> rule_weights(const HandleTVMap& success_tvs,
 	                                 const RuleTypedSubstitutionMap& rules);
 
 	/**
@@ -133,8 +140,9 @@ private:
 	 * Later on this might be replaced by performing action selection
 	 * on the rules themselves rather than their aliases.
 	 */
-	std::vector<double> rule_weights(const HandleCounter& alias_weights,
-	                                 const RuleTypedSubstitutionMap& inf_rules) const;
+	std::vector<double> rule_weights(
+		const HandleCounter& alias_weights,
+		const RuleTypedSubstitutionMap& inf_rules) const;
 
 	/**
 	 * Return the set of rule aliases, as aliases of inference rules
@@ -158,6 +166,11 @@ private:
 	 * Return true iff the given control is current active, that is
 	 * the case of an expansion control rule whether the pattern is
 	 * true.
+	 *
+	 * Ultimately this should be replace by a TV because most patterns
+	 * will have a certain probability of being true, or some degree
+	 * of truth. To do well it should rely on a conditional
+	 * instantiation PLN rule.
 	 */
 	bool control_rule_active(const Handle& ctrl_rule) const;
 
@@ -218,11 +231,24 @@ private:
 	 */
 	Handle mk_vardecl_vardecl(const Handle& vardecl_var);
 	Handle mk_list_of_args_vardecl(const Handle& args_var);
-	Handle mk_expand_exec(const Handle& input_var, const Handle& output_var);
+	Handle mk_expand_exec(const Handle& input_andbit_var,
+	                      const Handle& input_leaf_var,
+	                      const Handle& inf_rule,
+	                      const Handle& output_andbit_var);
 	Handle mk_preproof_eval(const Handle& preproof_args_var);
 	Handle mk_expansion_control_rules_query(const Handle& inf_rule, int n);
 	HandleSeq mk_pattern_vars(int n);
 	Handle mk_pattern_var(int i);
+
+	/**
+	 * Calculate the actual mean of a TV. which is to be constracted
+	 * by the mean in the TruthValue class which doesn't correspond to
+	 * the actual mean of the second order distribution.
+	 *
+	 * TODO: replace this by the mean method of the TruthValue once
+	 * this class is properly re-implemented.
+	 */
+	double get_actual_mean(TruthValuePtr tv) const;
 };
 
 
