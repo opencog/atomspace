@@ -7,6 +7,7 @@ ADD_LIBRARY(ruleengine
 	backwardchainer/ControlPolicy
 	backwardchainer/MixtureModel
 	backwardchainer/ActionSelection
+	backwardchainer/BetaDistribution
 	backwardchainer/BackwardChainerPMCB
 	backwardchainer/BIT
 	backwardchainer/Fitness

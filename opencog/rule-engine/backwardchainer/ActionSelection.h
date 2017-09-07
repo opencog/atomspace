@@ -23,19 +23,16 @@
 #ifndef OPENCOG_ACTIONSELECTION_H_
 #define OPENCOG_ACTIONSELECTION_H_
 
-#include <boost/math/distributions/beta.hpp>
-
 #include <opencog/atoms/base/Handle.h>
 #include <opencog/truthvalue/TruthValue.h>
+
+#include "BetaDistribution.h"
 
 namespace opencog
 {
 
 //! a map from handles to truth values
 typedef std::map<Handle, TruthValuePtr> HandleTVMap;
-
-// Beta Distribution
-typedef boost::math::beta_distribution<double> BetaDistribution;
 
 /**
  * Class containing methods to calculate distribution over actions
@@ -75,18 +72,6 @@ public:
 	 * distribution.
 	 */
 	Handle operator()();
-
-private:
-	/**
-	 * Return the beta distribution associated to a TV
-	 */
-	static BetaDistribution tv2beta(const TruthValuePtr& tv);
-
-	/**
-	 * Calculate the cdf of a beta distribution, given the number of
-	 * bins for discretization.
-	 */
-	static std::vector<double> beta2cdf(const BetaDistribution& beta, int bins);
 };
 
 } // namespace opencog
