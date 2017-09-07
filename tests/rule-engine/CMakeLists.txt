@@ -1,3 +1,5 @@
+ADD_SUBDIRECTORY (forwardchainer)
+ADD_SUBDIRECTORY (backwardchainer)
 
 LINK_LIBRARIES(
 	ruleengine
@@ -9,7 +11,4 @@ LINK_LIBRARIES(
 # The URE reader has to work, else the chainers will fail
 ADD_CXXTEST(ChainerUtilsUTest)
 ADD_CXXTEST(UREConfigReaderUTest)
-ADD_CXXTEST(ForwardChainerUTest)
-ADD_CXXTEST(BackwardChainerUTest)
-ADD_CXXTEST(BITUTest)
 ADD_CXXTEST(RuleUTest)

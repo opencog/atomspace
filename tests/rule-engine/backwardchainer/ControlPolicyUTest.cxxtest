@@ -1,0 +1,90 @@
+/*
+ * ControlPolicyUTest.cxxtest
+ *
+ *  Created on: Sep 6, 2017
+ *      Authors: Nil Geisweiller
+ */
+
+#include <opencog/rule-engine/backwardchainer/ControlPolicy.h>
+#include <opencog/rule-engine/backwardchainer/BIT.h>
+#include <opencog/guile/SchemeEval.h>
+#include <opencog/atomspace/AtomSpace.h>
+#include <opencog/util/mt19937ar.h>
+#include <opencog/rule-engine/URELogger.h>
+
+#include <cxxtest/TestSuite.h>
+
+using namespace std;
+using namespace opencog;
+
+#define al _as.add_link
+#define an _as.add_node
+
+class ControlPolicyUTest: public CxxTest::TestSuite
+{
+private:
+	AtomSpace _control_as;
+	SchemeEval _eval;
+	ControlPolicy* _cp;
+
+	void reset_bc();
+
+public:
+	ControlPolicyUTest();
+
+	void setUp();
+	void tearDown();
+
+	void test_fetch_control_rule();
+};
+
+ControlPolicyUTest::ControlPolicyUTest() : _eval(&_control_as)
+{
+	logger().set_level(Logger::DEBUG);
+	logger().set_timestamp_flag(false);
+	// logger().set_sync_flag(true);
+	logger().set_print_to_stdout_flag(true);
+	ure_logger().set_level(Logger::INFO);
+	// ure_logger().set_timestamp_flag(false);
+	// ure_logger().set_sync_flag(true);
+	// ure_logger().set_print_to_stdout_flag(true);
+	randGen().seed(0);
+
+	string cur_ppp_dir = string(PROJECT_SOURCE_DIR),
+		cur_pp_dir = cur_ppp_dir + "/tests",
+		cur_p_dir = cur_pp_dir + "/rule-engine",
+		cur_dir = cur_p_dir + "/backwardchainer";
+	vector<string> load_paths = {cur_ppp_dir, cur_pp_dir, cur_p_dir, cur_dir};
+	for (string& p : load_paths)
+	{
+		string eval_str = string("(add-to-load-path \"") + p + string("\")");
+		_eval.eval(eval_str);
+	}
+}
+
+void ControlPolicyUTest::setUp()
+{
+}
+
+void ControlPolicyUTest::tearDown()
+{
+	_control_as.clear();
+	delete(_cp);
+}
+
+void ControlPolicyUTest::test_fetch_control_rule()
+{
+	logger().debug("BEGIN TEST: %s", __FUNCTION__);
+
+	_eval.eval("(load-from-path \"tests/rule-engine/backwardchainer/control-rules.scm\")");
+	Handle rule_alias = _eval.eval_h("(DefinedSchemaNode \"rule-1\")");
+
+	_cp = new ControlPolicy(RuleSet(), BIT(), &_control_as);
+	HandleSet control_rules = _cp->fetch_expansion_control_rules(rule_alias);
+
+	logger().debug() << "control_rules = " << oc_to_string(control_rules);
+
+	TS_ASSERT_EQUALS(control_rules.size(), 1);
+
+	logger().debug("END TEST: %s", __FUNCTION__);
+}

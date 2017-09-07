@@ -40,9 +40,10 @@ public:
 		string source_dir = string(PROJECT_SOURCE_DIR),
 			test_dir = source_dir + "/tests",
 			test_ure_dir = test_dir + "/rule-engine",
+			test_forwardchainer_dir = test_ure_dir + "/forwardchainer",
 			ure_dir = source_dir + "/opencog/scm/opencog/rule-engine";
 		vector<string> load_paths = {source_dir, test_dir, test_ure_dir,
-		                             ure_dir};
+		                             test_forwardchainer_dir, ure_dir};
 		for (string& p : load_paths)
 		{
 			string eval_str = string("(add-to-load-path \"") + p + string("\")");
@@ -109,9 +110,9 @@ void ForwardChainerUTest::test_do_chain_deduction()
 
 void ForwardChainerUTest::test_do_chain_animals()
 {
-	string result = _eval.eval("(load-from-path \"tests/rule-engine/fc-animals-config.scm\")");
+	string result = _eval.eval("(load-from-path \"fc-animals-config.scm\")");
 	logger().debug() << "result = " << result;
-	_eval.eval("(load-from-path \"tests/rule-engine/animals.scm\")");
+	_eval.eval("(load-from-path \"animals.scm\")");
 	randGen().seed(0);
 
 	Handle top_rbs = _as.get_node(CONCEPT_NODE, UREConfigReader::top_rbs_name);

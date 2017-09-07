@@ -28,6 +28,8 @@
 #include "BIT.h"
 #include "../Rule.h"
 
+class ControlPolicyUTest;
+
 namespace opencog
 {
 
@@ -41,9 +43,11 @@ typedef std::pair<RuleTypedSubstitutionPair, double> RuleSelection;
 
 class ControlPolicy
 {
+    friend class ::ControlPolicyUTest;
 public:
 	ControlPolicy(const RuleSet& rules, const BIT& bit,
 	              AtomSpace* control_as=nullptr);
+	~ControlPolicy();
 
 	const std::string preproof_predicate_name = "URE:BC:preproof";
 
@@ -61,8 +65,7 @@ public:
 	 * according to their weights.
 	 *
 	 * TODO: add comments about inference control policy, see
-	 * README.md of
-	 * <OPENCOG_ROOT>/examples/pln/inference-control-learning
+	 * <OPENCOG_ROOT>/examples/pln/inference-control-learning/README.md
 	 *
 	 * The andbit and bitleaf are not const because if the rules are
 	 * exhausted it will set its exhausted flag to false.
@@ -90,7 +93,7 @@ private:
 
 	// AtomSpace holding the pattern matcher queries to fetch the
 	// various control rule
-	AtomSpace _query_as;
+	AtomSpace* _query_as;
 
 	// Map each action (inference rule expansion) to the set of
 	// control rules involving it.
@@ -111,12 +114,19 @@ private:
 	                          const RuleTypedSubstitutionMap& rules);
 
 	/**
+	 * Return the conditional TVs that a given rule expands a supposed
+	 * preproof into another preproof.
+	 */
+	HandleTVMap expansion_success_tvs(const AndBIT& andbit,
+	                                  const BITNode& bitleaf,
+	                                  const RuleTypedSubstitutionMap& rules);
+
+	/**
 	 * Calculate the rule weights, according to the control rules
 	 * present is _control_as, or otherwise default rule TVs, to do
 	 * weighted random selection.
 	 */
-	std::vector<double> rule_weights(const AndBIT& andbit,
-	                                 const BITNode& bitleaf,
+	std::vector<double> rule_weights(const HandleTVMap& success_tvs,
 	                                 const RuleTypedSubstitutionMap& rules);
 
 	/**
@@ -130,8 +140,9 @@ private:
 	 * Later on this might be replaced by performing action selection
 	 * on the rules themselves rather than their aliases.
 	 */
-	std::vector<double> rule_weights(const HandleCounter& alias_weights,
-	                                 const RuleTypedSubstitutionMap& inf_rules) const;
+	std::vector<double> rule_weights(
+		const HandleCounter& alias_weights,
+		const RuleTypedSubstitutionMap& inf_rules) const;
 
 	/**
 	 * Return the set of rule aliases, as aliases of inference rules
@@ -155,6 +166,11 @@ private:
 	 * Return true iff the given control is current active, that is
 	 * the case of an expansion control rule whether the pattern is
 	 * true.
+	 *
+	 * Ultimately this should be replace by a TV because most patterns
+	 * will have a certain probability of being true, or some degree
+	 * of truth. To do well it should rely on a conditional
+	 * instantiation PLN rule.
 	 */
 	bool control_rule_active(const Handle& ctrl_rule) const;
 
@@ -171,44 +187,6 @@ private:
 	 * fetch_pattern_expansion_control_rules
 	 */
 	HandleSet fetch_expansion_control_rules(const Handle& inf_rule);
-
-	/**
-	 * Fetch control rules from _control_as involved in BIT
-	 * expansion. Informally that if and-BIT, A, expands into B from L
-	 * with the given rule then B has a probability TV of being a
-	 * preproof of T. Formally
-	 *
-	 * ImplicationScope <TV>
-	 *  VariableList
-	 *    Variable "$T"  ;; Theorem/target to prove
-	 *    TypedVariable  ;; and-BIT to expand
-	 *      Variable "$A"
-	 *      Type "BindLink"
-	 *    Variable "$L"  ;; Leaf from A to expand
-	 *    TypedVariable  ;; Resulting and-BIT from the expansion of L from A with rule R
-	 *      Variable "$B"
-	 *      Type "BindLink"
-	 *  Execution
-	 *    Schema "expand-and-BIT"
-	 *    List
-	 *      BontExec Variable "$A"
-	 *      Variable "$L"
-	 *      DontExec <inf_rule>
-	 *    DontExec Variable "$B"
-	 *  Evaluation
-	 *    Predicate "preproof"
-	 *    List
-	 *      DontExec Variable "$B"
-	 *      Variable "$T"
-	 *
-	 * Although this control rule is not likely to be very useful in
-	 * practice we still keep it as it may provide some initial
-	 * guidance when no predictive patterns have been extracted from
-	 * the inference history so far. It may also provide a reference
-	 * when building the mixture model in case the so called patterns
-	 * are actually overfit.
-	 */
-	HandleSet fetch_pattern_free_expansion_control_rules(const Handle& inf_rule);
 
 	/**
 	 * Fetch control rules from _control_as involved in BIT
@@ -234,24 +212,43 @@ private:
 	 *        Variable "$L"
 	 *        DontExec <inf_rule>
 	 *      DontExec Variable "$B"
-	 *    <pattern>
+	 *    <pattern-1>
+	 *    ...
+	 *    <pattern-n>
 	 *  Evaluation
 	 *    Predicate "preproof"
 	 *    List
 	 *      DontExec Variable "$B"
 	 *      Variable "$T"
+	 *
+	 * n is the number of patterns in addition to the expansion itself
+	 * (the Execution link).
 	 */
-	HandleSet fetch_pattern_expansion_control_rules(const Handle& inf_rule);
+	HandleSet fetch_expansion_control_rules(const Handle& inf_rule, int n);
 
 	/**
 	 * Helpers to build various hypergraphs used to build various queries
 	 */
 	Handle mk_vardecl_vardecl(const Handle& vardecl_var);
 	Handle mk_list_of_args_vardecl(const Handle& args_var);
-	Handle mk_expand_exec(const Handle& expand_args_var);
+	Handle mk_expand_exec(const Handle& input_andbit_var,
+	                      const Handle& input_leaf_var,
+	                      const Handle& inf_rule,
+	                      const Handle& output_andbit_var);
 	Handle mk_preproof_eval(const Handle& preproof_args_var);
-	Handle mk_pattern_free_expansion_control_rules_query(const Handle& inf_rule);
-	Handle mk_pattern_expansion_control_rules_query(const Handle& inf_rule);
+	Handle mk_expansion_control_rules_query(const Handle& inf_rule, int n);
+	HandleSeq mk_pattern_vars(int n);
+	Handle mk_pattern_var(int i);
+
+	/**
+	 * Calculate the actual mean of a TV. which is to be constracted
+	 * by the mean in the TruthValue class which doesn't correspond to
+	 * the actual mean of the second order distribution.
+	 *
+	 * TODO: replace this by the mean method of the TruthValue once
+	 * this class is properly re-implemented.
+	 */
+	double get_actual_mean(TruthValuePtr tv) const;
 };
 
 

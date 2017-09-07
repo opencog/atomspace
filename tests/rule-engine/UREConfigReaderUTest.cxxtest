@@ -26,7 +26,7 @@ public:
 		// Load the simple crisp system example to test it
 		std::string eval_output =
 			_eval.eval("(load \"" PROJECT_SOURCE_DIR
-			           "/tests/rule-engine/fc.scm\")");
+			           "/tests/rule-engine/forwardchainer/fc.scm\")");
 		std::cout << "eval_output = " << eval_output << std::endl;
 
 		std::cout << "AtomSpace = " << _as << std::endl;

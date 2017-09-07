@@ -60,8 +60,8 @@ using namespace opencog;
  * are festooned with.
  */
 AtomSpace::AtomSpace(AtomSpace* parent, bool transient) :
-    _atom_table(parent? &parent->_atom_table : NULL, this, transient),
-    _backing_store(NULL),
+    _atom_table(parent? &parent->_atom_table : nullptr, this, transient),
+    _backing_store(nullptr),
     _transient(transient)
 {
 }
@@ -71,8 +71,8 @@ AtomSpace::~AtomSpace()
 }
 
 AtomSpace::AtomSpace(const AtomSpace&) :
-    _atom_table(NULL),
-    _backing_store(NULL)
+    _atom_table(nullptr),
+    _backing_store(nullptr)
 {
      throw opencog::RuntimeException(TRACE_INFO,
          "AtomSpace - Cannot copy an object of this class");
@@ -80,7 +80,7 @@ AtomSpace::AtomSpace(const AtomSpace&) :
 
 void AtomSpace::ready_transient(AtomSpace* parent)
 {
-    _atom_table.ready_transient(parent? &parent->_atom_table : NULL, this);
+    _atom_table.ready_transient(parent? &parent->_atom_table : nullptr, this);
 }
 
 void AtomSpace::clear_transient()
@@ -166,7 +166,7 @@ bool AtomSpace::compare_atomspaces(const AtomSpace& space_first,
         }
         }
 
-        // If the atoms don't match because one of them is NULL.
+        // If the atoms don't match because one of them is null.
         if ((atom_first and not atom_second) or
             (atom_second and not atom_first))
         {

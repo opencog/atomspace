@@ -1,5 +1,5 @@
 /*
- * MixtureModel.cc
+ * ActionSelection.cc
  *
  * Copyright (C) 2017 OpenCog Foundation
  *
@@ -40,12 +40,12 @@ HandleCounter ActionSelection::distribution()
 	// Generate all beta distributions of all TVs
 	std::vector<BetaDistribution> betas;
 	for (const auto& atv : action2tv)
-		betas.push_back(tv2beta(atv.second));
+		betas.emplace_back(atv.second);
 
 	// Calculate cdfs for all TV
 	std::vector<std::vector<double>> cdfs;
 	for (const auto& beta : betas)
-		cdfs.push_back(beta2cdf(beta, bins));
+		cdfs.push_back(beta.cdf(bins));
 
 	// Calculate Pi for all actions
 	// Pi = I_0^1 fi(x)
@@ -56,7 +56,7 @@ HandleCounter ActionSelection::distribution()
 		double Pi = 0;
 		for (int x_idx = 0; x_idx < bins; x_idx++) {
 			double x = (x_idx + 1.0) / bins;
-			double f_x = boost::math::pdf(beta, x) * step;
+			double f_x = beta.pd(x) * step;
 			// Only bother calculating Prod_j!=i cdfj(x) is pdfi(x) is
 			// greater than zero
 			if (f_x <= 0.0)
@@ -76,28 +76,4 @@ HandleCounter ActionSelection::distribution()
 		ap.second /= nt;
 
 	return action2prob;
-}
-
-BetaDistribution ActionSelection::tv2beta(const TruthValuePtr& tv)
-{
-	double count = tv->getCount(),
-		pos_count = tv->getMean() * count; // TODO correct when mean is fixed
-
-	// Assuming the prior is Beta(1, 1)
-	double alpha = 1 + pos_count;
-	double beta = 1 + count - pos_count;
-
-	return BetaDistribution(alpha, beta);
-}
-
-std::vector<double> ActionSelection::beta2cdf(const BetaDistribution& beta,
-                                              int bins)
-{
-	std::vector<double> cdf;
-	for (int x_idx = 0; x_idx < bins; x_idx++) {
-		double x = (x_idx + 1.0) / bins,
-			r = boost::math::cdf(beta, std::min(1.0, x));
-		cdf.push_back(r);
-	}
-	return cdf;
 }
