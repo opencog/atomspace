@@ -6,6 +6,7 @@
  */
 
 #include <opencog/rule-engine/backwardchainer/ControlPolicy.h>
+#include <opencog/rule-engine/backwardchainer/BIT.h>
 #include <opencog/guile/SchemeEval.h>
 #include <opencog/atomspace/AtomSpace.h>
 #include <opencog/util/mt19937ar.h>
@@ -22,7 +23,7 @@ using namespace opencog;
 class ControlPolicyUTest: public CxxTest::TestSuite
 {
 private:
-	AtomSpace _as;
+	AtomSpace _control_as;
 	SchemeEval _eval;
 	ControlPolicy* _cp;
 
@@ -34,51 +35,57 @@ public:
 	void setUp();
 	void tearDown();
 
-	void test_select_rule_1();
+	void test_fetch_control_rule();
 };
+
+ControlPolicyUTest::ControlPolicyUTest() : _eval(&_control_as)
+{
+	logger().set_level(Logger::DEBUG);
+	logger().set_timestamp_flag(false);
+	// logger().set_sync_flag(true);
+	logger().set_print_to_stdout_flag(true);
+	ure_logger().set_level(Logger::INFO);
+	// ure_logger().set_timestamp_flag(false);
+	// ure_logger().set_sync_flag(true);
+	// ure_logger().set_print_to_stdout_flag(true);
+	randGen().seed(0);
+
+	string cur_ppp_dir = string(PROJECT_SOURCE_DIR),
+		cur_pp_dir = cur_ppp_dir + "/tests",
+		cur_p_dir = cur_pp_dir + "/rule-engine",
+		cur_dir = cur_p_dir + "/backwardchainer";
+	vector<string> load_paths = {cur_ppp_dir, cur_pp_dir, cur_p_dir, cur_dir};
+	for (string& p : load_paths)
+	{
+		string eval_str = string("(add-to-load-path \"") + p + string("\")");
+		_eval.eval(eval_str);
+	}
+}
+
+void ControlPolicyUTest::setUp()
+{
+}
+
+void ControlPolicyUTest::tearDown()
+{
+	_control_as.clear();
+	delete(_cp);
+}
 
 void ControlPolicyUTest::test_fetch_control_rule()
 {
 	logger().debug("BEGIN TEST: %s", __FUNCTION__);
 
-	// TODO
+	_eval.eval("(load-from-path \"tests/rule-engine/backwardchainer/control-rules.scm\")");
+	Handle rule = _eval.eval_h("(DefinedSchemaNode \"rule-1\")");
 
-	_eval.eval("(load-from-path \"tests/rule-engine/bc-criminal-config.scm\")");
-	_eval.eval("(load-from-path \"tests/rule-engine/criminal.scm\")");
-	randGen().seed(0);
+	_cp = new ControlPolicy(RuleSet(), BIT(), &_control_as);
 
-	Handle top_rbs = _as.get_node(CONCEPT_NODE, UREConfigReader::top_rbs_name);
+	const HandleSet& control_rules = _cp->_expansion_control_rules[rule];
 
-	Handle target_var = _eval.eval_h("(VariableNode \"$who\")");
-	Handle target =
-		_eval.eval_h("(InheritanceLink"
-		             "   (VariableNode \"$who\")"
-		             "   (ConceptNode \"criminal\"))");
-	Handle vardecl =
-	    _eval.eval_h("(TypedVariable"
-	                 "   (VariableNode \"$who\")"
-	                 "   (Type \"ConceptNode\"))");
-	Handle soln = _eval.eval_h("(ConceptNode \"West\")");
+	logger().debug() << "control_rules = " << oc_to_string(control_rules);
 
-	// To record the trace of the inference
-	AtomSpace trace_as;
-
-	BackwardChainer bc(_as, top_rbs, target, vardecl, &trace_as);
-	// See bc-criminal-config.scm to change the number of iterations
-	bc.do_chain();
-
-	Handle results = bc.get_results(),
-		expected_target =  _eval.eval_h("(InheritanceLink"
-		                                "   (ConceptNode \"West\")"
-		                                "   (ConceptNode \"criminal\"))"),
-		expected = al(SET_LINK, expected_target);
-
-	logger().debug() << "results = " << oc_to_string(results);
-	logger().debug() << "expected = " << oc_to_string(expected);
-
-	TS_ASSERT_EQUALS(results, expected);
-	TS_ASSERT_LESS_THAN(0.9, expected_target->getTruthValue()->getMean());
-	TS_ASSERT_LESS_THAN(0.9, expected_target->getTruthValue()->getConfidence());
+	TS_ASSERT_EQUALS(control_rules.size(), 1);
 
 	logger().debug("END TEST: %s", __FUNCTION__);
 }
