@@ -18,7 +18,7 @@
             (VariableNode "$A")
             (VariableNode "$L")
             (DontExecLink
-               (DefinedSchemaNode "crisp-deduction-inheritance-rule")
+               (DefinedSchemaNode "rule-1")
             )
          )
          (VariableNode "$B")

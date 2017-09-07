@@ -89,7 +89,7 @@ public:
     bool isAttachedToBackingStore();
 
 public:
-    AtomSpace(AtomSpace* parent=NULL, bool transient=false);
+    AtomSpace(AtomSpace* parent=nullptr, bool transient=false);
     ~AtomSpace();
 
     void ready_transient(AtomSpace* parent);
@@ -249,7 +249,7 @@ public:
      * Use the backing store to load all atoms of the given atom type.
      */
     void fetch_all_atoms_of_type(Type t) {
-        if (NULL == _backing_store)
+        if (nullptr == _backing_store)
             throw RuntimeException(TRACE_INFO, "No backing store");
         _backing_store->loadType(_atom_table, t);
     }
@@ -393,7 +393,7 @@ public:
      * (any) atomspace; else return false.
      */
     bool is_valid_handle(const Handle& h) const {
-        return (NULL != h) and (h->getAtomTable() != NULL);
+        return (nullptr != h) and (h->getAtomTable() != nullptr);
     }
 
     /**
