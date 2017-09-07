@@ -387,6 +387,7 @@ public:
 	/**
 	 * Ctor/Dtor
 	 */
+	BIT(); // Dummy BIT, for testing
 	BIT(AtomSpace& as, const Handle& target, const Handle& vardecl,
 	    const BITNodeFitness& fitness=BITNodeFitness());
 	~BIT();

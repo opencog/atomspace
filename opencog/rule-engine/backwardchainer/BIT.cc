@@ -656,6 +656,8 @@ std::string AndBIT::line_separator(const std::string& up_aa,
 // BIT //
 /////////
 
+BIT::BIT() {}
+
 BIT::BIT(AtomSpace& as,
          const Handle& target,
          const Handle& vardecl,
