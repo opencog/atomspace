@@ -77,11 +77,10 @@ void ControlPolicyUTest::test_fetch_control_rule()
 	logger().debug("BEGIN TEST: %s", __FUNCTION__);
 
 	_eval.eval("(load-from-path \"tests/rule-engine/backwardchainer/control-rules.scm\")");
-	Handle rule = _eval.eval_h("(DefinedSchemaNode \"rule-1\")");
+	Handle rule_alias = _eval.eval_h("(DefinedSchemaNode \"rule-1\")");
 
 	_cp = new ControlPolicy(RuleSet(), BIT(), &_control_as);
-
-	const HandleSet& control_rules = _cp->_expansion_control_rules[rule];
+	HandleSet control_rules = _cp->fetch_expansion_control_rules(rule_alias);
 
 	logger().debug() << "control_rules = " << oc_to_string(control_rules);
 
