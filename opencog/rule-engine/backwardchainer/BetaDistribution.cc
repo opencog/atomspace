@@ -50,5 +50,5 @@ std::vector<double> BetaDistribution::cdf(int bins) const
 
 double BetaDistribution::pd(double x) const
 {
-	boost::math::pdf(_beta_distribution, x);
+	return boost::math::pdf(_beta_distribution, x);
 }
