@@ -92,7 +92,7 @@ int Handle::compare(const Handle& h1, const Handle& h2)
 	return 0;
 }
 
-bool Handle::operator< (const Handle& h) const noexcept
+bool Handle::operator<(const Handle& h) const noexcept
 {
 	if (get() == h.get()) return false;
 	if (get() == nullptr) return true;

@@ -236,16 +236,7 @@ struct handle_seq_ptr_less
 {
     bool operator()(const HandleSeq* hsl, const HandleSeq* hsr) const
     {
-        size_t sl = hsl->size();
-        size_t sr = hsr->size();
-        if (sl != sr) return sl < sr;
-        for (size_t i=0; i<sl; i++)
-        {
-            ContentHash chsl = hash_value(hsl->operator[](i));
-            ContentHash chsr = hash_value(hsr->operator[](i));
-            if (chsl != chsr) return chsl < chsr;
-        }
-        return false;
+        return handle_seq_less().operator()(*hsl, *hsr);
     }
 };
 
