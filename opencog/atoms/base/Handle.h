@@ -123,9 +123,6 @@ public:
         return get() != h.get();
     }
     bool operator< (const Handle& h) const noexcept;
-    bool operator> (const Handle& h) const noexcept;
-    bool operator<=(const Handle& h) const noexcept;
-    bool operator>=(const Handle& h) const noexcept;
 
     /**
      * Returns a negative value, zero or a positive value if the first
@@ -159,7 +156,7 @@ struct handle_less
 {
    bool operator()(const Handle& hl, const Handle& hr) const
    {
-       return hash_value(hl) < hash_value(hr);
+       return hl.operator<(hr);
    }
 };
 
@@ -229,9 +226,7 @@ struct handle_seq_less
         if (sl != sr) return sl < sr;
         for (size_t i=0; i<sl; i++)
         {
-            ContentHash chsl = hash_value(hsl[i]);
-            ContentHash chsr = hash_value(hsr[i]);
-            if (chsl != chsr) return chsl < chsr;
+            if (hsl[i] != hsl[i]) return hsl[i].operator<(hsr[i]);
         }
         return false;
     }
@@ -241,16 +236,7 @@ struct handle_seq_ptr_less
 {
     bool operator()(const HandleSeq* hsl, const HandleSeq* hsr) const
     {
-        size_t sl = hsl->size();
-        size_t sr = hsr->size();
-        if (sl != sr) return sl < sr;
-        for (size_t i=0; i<sl; i++)
-        {
-            ContentHash chsl = hash_value(hsl->operator[](i));
-            ContentHash chsr = hash_value(hsr->operator[](i));
-            if (chsl != chsr) return chsl < chsr;
-        }
-        return false;
+        return handle_seq_less().operator()(*hsl, *hsr);
     }
 };
 
@@ -334,8 +320,7 @@ struct hash<opencog::Handle>
 {
     typedef std::size_t result_type;
     typedef opencog::Handle argument_type;
-    std::size_t
-    operator()(const opencog::Handle& h) const noexcept
+    std::size_t operator()(const opencog::Handle& h) const noexcept
     { return hash_value(h); }
 };
 

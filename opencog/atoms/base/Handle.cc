@@ -84,33 +84,21 @@ std::size_t hash_value(Handle const& h)
 
 int Handle::compare(const Handle& h1, const Handle& h2)
 {
-	ContentHash ch1 = hash_value(h1);
-	ContentHash ch2 = hash_value(h2);
-	if (ch1 < ch2) return -1;
-	if (ch1 > ch2) return 1;
+	if (h1.get() == h2.get()) return 0;
+	if (h1.get() == nullptr) return -1;
+	if (h2.get() == nullptr) return +1;
+	if (h1->operator<(*h2)) return -1;
+	if (h2->operator<(*h1)) return +1;
 	return 0;
 }
 
-bool Handle::operator< (const Handle& h) const noexcept
+bool Handle::operator<(const Handle& h) const noexcept
 {
-	return hash_value(*this) < hash_value(h);
+	if (get() == h.get()) return false;
+	if (get() == nullptr) return true;
+	if (h.get() == nullptr) return false;
+	return get()->operator<(*h);
 }
-
-bool Handle::operator<= (const Handle& h) const noexcept
-{
-	return hash_value(*this) <= hash_value(h);
-}
-
-bool Handle::operator> (const Handle& h) const noexcept
-{
-	return hash_value(*this) > hash_value(h);
-}
-
-bool Handle::operator>= (const Handle& h) const noexcept
-{
-	return hash_value(*this) >= hash_value(h);
-}
-
 
 // The rest of this file is devoted to printing utilities used only
 // during GDB debugging.  Thus, you won't find these anywhere in the
