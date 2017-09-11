@@ -137,8 +137,9 @@ bool Link::operator==(const Atom& other) const
 // Content-based ordering.
 bool Link::operator<(const Atom& other) const
 {
-    if (get_hash() < other.get_hash()) return true;
-    if (other.get_hash() < get_hash()) return false;
+    ContentHash cht = get_hash();
+    ContentHash cho = other.get_hash();
+    if (cht != cho) return cht < cho;
 
     // We get to here only if the hashes are equal.
     // Compare the contents directly, for this
