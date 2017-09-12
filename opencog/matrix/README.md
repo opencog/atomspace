@@ -5,15 +5,19 @@ Correlation/Covariance Matrix Analysis Tools
 In this project, there's a generic theme of "pairs of things" that
 are statistically related. These can be pairs of words, they can be
 connector-sets, which are a pair of (word, disjunct), or they can
-be other things. A recurring question is how these things are related.
+any kind of general pairs, correlating events and actions, causes
+and effects, or pair-wise relationships of any sort. A recurring
+problem is to obtain statistics for these pairs, and to manipulate
+them in various ways.
 
-Thus, we are generally interested in pairs `(x,y)` of atoms (that is,
-where `x` and `y` are atoms), and we have some sort of count `N(x,y)`
-of how often that particular pair was observed.  We typically are then
-interested in various statistical measures: usually starting with the
-normalized frequency `p(x,y)` (that is, the probability, likelihood)
-of how often the pair `(x,y)` occurred (likelihood of observing the pair).
-These counts and frequencies can be viewed as a sparse correlation
+That is, the structure of interest are ordered pairs `(x,y)` of atoms
+(that is, where `x` and `y` are atoms), along with any values attached
+to such pairs. The primary value of interest is an observation count
+`N(x,y)` of how often that particular pair was observed.  From this
+observation count, one can compute various statistical measures: first,
+the normalized frequency `p(x,y)` (that is, the probability, likelihood)
+of how often the pair `(x,y)` occurred (the likelihood of observing the
+pair).  These counts and frequencies can be viewed as a sparse correlation
 matrix, and the goal here is to do all the typical things that one
 might do with such a matrix.  That's what the code in this directory
 does.
@@ -37,14 +41,21 @@ The core idea is that the atomspace can hold sparse matrix data; in a
 certain sense, the atomspace was designed from the get-go to do exactly
 that. Once you realize that your data can be seen as a kind of matrix,
 you can then apply a variety of generic matrix analysis tools to it.
+
+Another way to arrive at this idea is to view your data as a graph,
+and then realize that any graph can be described in terms of it's
+adjacency matrix. This directory provides tools to work with a graph
+from the point of view of its being an adjacency matrix.
+
 The tools implemented here include:
 
- * row and column subtotals (i.e. "marginals")
- * computing and caching frequencies from counts.
- * computing and caching mutual information between rows and columns
- * computing cosine similarity between rows or columns.
- * performing PCA (principal component analysis) in the matrix.
- * performing cuts, to remove unwanted rows, columns and individual entries.
+ * Row and column subtotals (i.e. "marginals").
+ * Computing and caching frequencies from counts.
+ * Computing and caching mutual information of pairs.
+ * Computing and caching marginal mutual information.
+ * Computing cosine similarity between rows or columns.
+ * Performing PCA (principal component analysis) in the matrix.
+ * Performing cuts, to remove unwanted rows, columns and individual entries.
 
 To use these tools, all you need to do is to specify a low-level
 object that describes the matrix. It needs to provide some very simple
@@ -120,6 +131,18 @@ A: You would use Rcpp at http://dirk.eddelbuettel.com/code/rcpp.html
    the normal manner. The mapping of data types works in both
    directions. It is as straightforward to pass data from R to C++,
    as it is it return data from C++ to R.
+
+Q: Any other design issues?
+
+A: Yes. As currently structured, all of these classes assume that your
+   data is readily available in RAM. They will not work correctly, if
+   your dataset is too big to fit into RAM.  At the time of this
+   writing, a single atom takes about 1.5KBytes or so, so a dataset
+   consisting of 100M atoms will require about 150GBytes of RAM, plus
+   a bit more for other processes (e.g. postgres). Since most computers
+   max out at about 256 GBytes RAM, this limits datasets to 100M atoms.
+   Some language datasets can be considerably larger than this.
+   The largest Amazon EC2 instances are 256 GBytes.
 
 
 Generic Programming
@@ -273,11 +296,19 @@ The class also provides the Jaccard similarity
             sum_x max (N(x,y), N(x,z))
 ```
 
+Working with rows and columns
+-----------------------------
 The `add-tuple-math` class provides methods for applying arbitrary
 functions to arbitrary sets of rows or columns. The simplest examples
 include taking the sums and differences of columns, taking the
 element-by-element min or max of a set of columns, counting the number
 of entries that are simultaneously non-zero in sets of columns, etc.
+
+The class works by defining a new matrix, whose rows or columns
+are tuples (pairs, triples, etc) of the underlying matix. For example,
+one can ask for the matrix entry `(x, [y,z,w])`.  The value returned
+will be `(x, f((x,y), (x,z), (x,w)))` where the user-defined function
+`f` was used to create the `x` row.
 
 
 Principal Component Analysis
