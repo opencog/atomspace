@@ -234,12 +234,14 @@
 			(r-basis '())
 			(l-size 0)
 			(r-size 0)
+			(pair-type (LLOBJ 'pair-type))
+			(left-type (LLOBJ 'left-type))
+			(right-type (LLOBJ 'right-type))
 		)
 
 		; Return a list of all atoms of TYPE which appear in a Link
 		; of type 'pair-type
 		(define (get-basis TYPE PAIR-FILT)
-			(define pair-type (LLOBJ 'pair-type))
 			(remove!
 				(lambda (item)
 					(null? (PAIR-FILT item (cog-incoming-by-type item pair-type))))
@@ -249,7 +251,6 @@
 		; pairs in which the left-item really is on the left, and
 		; the correct type is on the right.
 		(define (good-right-pairs left-item pair-list)
-			(define right-type (LLOBJ 'right-type))
 			(filter!
 				(lambda (pr)
 					(and
@@ -259,7 +260,6 @@
 				pair-list))
 
 		(define (good-left-pairs right-item pair-list)
-			(define left-type (LLOBJ 'left-type))
 			(filter!
 				(lambda (pr)
 					(and
@@ -278,12 +278,12 @@
 		;
 		(define (get-left-basis)
 			(if (null? l-basis)
-				(set! l-basis (get-basis (LLOBJ 'left-type) good-right-pairs)))
+				(set! l-basis (get-basis left-type good-right-pairs)))
 			l-basis)
 
 		(define (get-right-basis)
 			(if (null? r-basis)
-				(set! r-basis (get-basis (LLOBJ 'right-type) good-left-pairs)))
+				(set! r-basis (get-basis right-type good-left-pairs)))
 			r-basis)
 
 		(define (get-left-size)
@@ -315,29 +315,25 @@
 		; memory usage, by using the atom cache to save these results.
 		;
 		(define (get-left-stars ITEM)
-			(define want-type (LLOBJ 'left-type))
-			(define pair-type (LLOBJ 'pair-type))
 			(filter
 				(lambda (lnk)
 					(define oset (cog-outgoing-set lnk))
 					(and
 						(equal? 2 (cog-arity lnk))
-						(equal? want-type (cog-type (first oset)))
+						(equal? left-type (cog-type (first oset)))
 						(equal? ITEM (second oset))
 					))
 				(cog-incoming-by-type ITEM pair-type)))
 
 		; Same as above, but on the right.
 		(define (get-right-stars ITEM)
-			(define want-type (LLOBJ 'right-type))
-			(define pair-type (LLOBJ 'pair-type))
 			(filter
 				(lambda (lnk)
 					(define oset (cog-outgoing-set lnk))
 					(and
 						(equal? 2 (cog-arity lnk))
 						(equal? ITEM (first oset))
-						(equal? want-type (cog-type (second oset)))
+						(equal? right-type (cog-type (second oset)))
 					))
 				(cog-incoming-by-type ITEM pair-type)))
 
