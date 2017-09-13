@@ -26,9 +26,10 @@ Features
 
 Missing features/ToDo items
 ---------------------------
- * Clarify value save/restore semantics.
- * Add support for multiple atom spaces.
+ * Add incoming-set caching support.  Issue #1373
  * Provide optimized table layout for EvaluationLinks.
+ * Provide optimized layout for sheaf sections.
+ * Add support for multiple atom spaces.
  * Add support for Space/TimeServer data.
  * See also TODO list at very bottom.
 
@@ -1176,6 +1177,15 @@ EAV table structure.
 TODO
 ====
  * See also to-do list way up top.
+
+ * Implement incoming-set caching. When an atomspace is too large to
+   fit into RAM, we must leave some of it on disk.  However, it can
+   become important to make sure that the incoming set of an atom has
+   been loaded into RAM i.e. into the atomspace. Currently, repeatedly
+   loading the incoming set is very slow and wasteful, and so its
+   important to know whether an incoming set has already been loaded
+   or not.  Technically, this caching can be done in the atomspace, I
+   guess... See https://github.com/opencog/atomspace/issues/1373
 
  * Implement the large-outgoing-set extension. A version of this can be
    found in the `postgres-dead` directory, but the code there is badly
