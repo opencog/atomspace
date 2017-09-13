@@ -225,7 +225,10 @@
   'right-stars ROW - Likewise, but returns the set (ROW, *).
 
   Here, the LLOBJ is expected to be an object, with methods for
-  'left-type, 'right-type and 'pair-type on it.
+  'left-type, 'right-type and 'pair-type on it. It is assumed that
+  the pairs are arity-two links having the form
+     (pair-type (left-type right-type))
+  That is, the pair-type is the low-level pair type.
 "
 	(let ((l-basis '())
 			(r-basis '())
