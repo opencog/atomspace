@@ -693,17 +693,6 @@ bool PatternMatchEngine::glob_compare(const PatternTermSeq& osp,
 	GlobGrd glob_grd;
 	GlobPosStack glob_pos_stack;
 
-	// A variable or glob in osp may have been grounded before
-	// reaching here if it exists in some other clause also.
-	// Clear only those that are grounded here in glob_compare().
-	// solution_push/pop is not used as it seems to become a bit
-	// tricky when we are resuming form a previous match...
-	auto clear_grounding = [&](const PatternTermPtr& p)
-	{
-		if (glob_var_set.find(p) != glob_var_set.end())
-			var_grounding.erase(p->getHandle());
-	};
-
 	// Common things needed to be done when we backtrack.
 	bool backtracking = false;
 	bool cannot_backtrack_anymore = false;
@@ -719,7 +708,6 @@ bool PatternMatchEngine::glob_compare(const PatternTermSeq& osp,
 			// Erase the grounding record of the glob before
 			// popping it out from the stack.
 			glob_grd.erase(glob_pos_stack.top().first);
-			clear_grounding(glob_pos_stack.top().first);
 
 			glob_pos_stack.pop();
 			glob_state[gp] = {glob_grd, glob_pos_stack};
@@ -733,12 +721,6 @@ bool PatternMatchEngine::glob_compare(const PatternTermSeq& osp,
 		{
 			ip = glob_pos_stack.top().second.first;
 			jg = glob_pos_stack.top().second.second;
-
-			// Erase the previous grounding of the glob before
-			// we try again.
-			// Variables will also be cleared before reaching
-			// tree_compare(), if needed.
-			clear_grounding(glob_pos_stack.top().first);
 		}
 	};
 
@@ -747,9 +729,6 @@ bool PatternMatchEngine::glob_compare(const PatternTermSeq& osp,
 	auto record_match = [&](const PatternTermPtr& glob,
 	                        const HandleSeq& glob_seq)
 	{
-		if (var_grounding.find(glob->getHandle()) == var_grounding.end())
-			glob_var_set.insert(glob);
-
 		glob_grd[glob] = glob_seq.size();
 		glob_state[gp] = {glob_grd, glob_pos_stack};
 
@@ -959,19 +938,12 @@ bool PatternMatchEngine::glob_compare(const PatternTermSeq& osp,
 				continue;
 			}
 
-			bool var_not_grd = (var_grounding.find(ohp) == var_grounding.end());
-			clear_grounding(osp[ip]);
-
 			// Try again if this pair is not a match.
 			if (not tree_compare(osp[ip], osg[jg], CALL_ORDER))
 			{
 				backtrack(false);
 				continue;
 			}
-
-			// We've got a match, move on.
-			if (VARIABLE_NODE == ptype and var_not_grd)
-				glob_var_set.insert(osp[ip]);
 
 			ip++; jg++;
 		}

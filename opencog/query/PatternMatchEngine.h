@@ -142,9 +142,6 @@ private:
 
 	typedef std::pair<GlobGrd, GlobPosStack> GlobState;
 
-	// Record the variables (including globs) grounded by glob_compare()
-	std::set<PatternTermPtr> glob_var_set;
-
 	std::map<GlobPair, GlobState> glob_state;
 
 	// --------------------------------------------
