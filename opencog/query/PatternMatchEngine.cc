@@ -722,7 +722,7 @@ bool PatternMatchEngine::glob_compare(const PatternTermSeq& osp,
 			ip = glob_pos_stack.top().second.first;
 			jg = glob_pos_stack.top().second.second;
 
-			POPSTK(vargrd_stack, var_grounding);
+			solution_pop();
 		}
 	};
 
@@ -731,7 +731,7 @@ bool PatternMatchEngine::glob_compare(const PatternTermSeq& osp,
 	auto record_match = [&](const PatternTermPtr& glob,
 	                        const HandleSeq& glob_seq)
 	{
-		vargrd_stack.push(var_grounding);
+		solution_push();
 
 		glob_grd[glob] = glob_seq.size();
 		glob_state[gp] = {glob_grd, glob_pos_stack};
@@ -756,7 +756,7 @@ bool PatternMatchEngine::glob_compare(const PatternTermSeq& osp,
 	auto r = glob_state.find(gp);
 	if (r != glob_state.end())
 	{
-		POPSTK(vargrd_stack, var_grounding);
+		solution_pop();
 
 		resuming = true;
 		glob_grd = r->second.first;
@@ -1168,9 +1168,8 @@ bool PatternMatchEngine::explore_up_branches(const PatternTermPtr& ptm,
 	              << " have " << sz << " branches";})
 
 	// Check if the pattern has globs in it.
-	bool has_glob = false;
+	bool has_glob = (contains_atomtype(ptm->getHandle(), GLOB_NODE));
 	size_t gstate_size = SIZE_MAX;
-	if (contains_atomtype(ptm->getHandle(), GLOB_NODE)) has_glob = true;
 
 	bool found = false;
 	for (size_t i = 0; i < sz; i++) {
@@ -1570,7 +1569,6 @@ bool PatternMatchEngine::do_next_clause(void)
 		// Otherwise, all possible ways to ground the globs in the term
 		// will be explored before moving to the next candidate.
 		glob_state.clear();
-		while (0 < vargrd_stack.size()) vargrd_stack.pop();
 	}
 	else
 	{
@@ -2026,8 +2024,19 @@ bool PatternMatchEngine::explore_clause(const Handle& term,
 	// evaluate to true or false.
 	if (not is_evaluatable(clause))
 	{
+		// Check if the pattern has globs in it, and record the glob_state.
+		bool has_glob = (contains_atomtype(term, GLOB_NODE));
+		size_t gstate_size = (has_glob)? glob_state.size() : SIZE_MAX;
+
 		DO_LOG({logger().fine("Clause is matchable; start matching it");})
 		bool found = explore_term_branches(term, grnd, clause);
+
+		// If there may be another way to ground it differently to the same
+		// candidate, do it until exhausted.
+		while (not found and has_glob and glob_state.size() > gstate_size)
+		{
+			found = explore_term_branches(term, grnd, clause);
+		}
 
 		// If found is false, then there's no solution here.
 		// Bail out, return false to try again with the next candidate.
