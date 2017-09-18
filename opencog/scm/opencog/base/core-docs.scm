@@ -458,6 +458,18 @@
        999283543311182409
 ")
 
+(set-procedure-property! cog-atom-less? 'documentation
+"
+ cog-atom-less? L-ATOM R-ATOM
+    Return #t if L-ATOM is less than R-ATOM, else return #f.  This
+    predicate is usefule for creating sorted lists of atoms; for
+    example, to rapidly remove duplicate atoms from a long list.
+
+    Example:
+       guile> (cog-atom-less? (Concept \"abc\") (Concept \"def\"))
+       #f
+")
+
 (set-procedure-property! cog-inc-count! 'documentation
 "
   cog-inc-count! ATOM CNT -- Increment count truth value on ATOM by CNT
