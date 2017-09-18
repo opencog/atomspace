@@ -11,13 +11,25 @@
 ; There is a generic need to work with similarity values between pairs
 ; of things. These are usually CPU-intensive to compute, and are usually
 ; non-sparse: i.e. the similarity between N items requires an NxN
-; matrix.  The below provides an API to work with similarities.
-; Specifically, it provides an API so that similarities can be stored
-; in the atomspace (i.e. so that they don't need to be recomputed).
+; matrix.  For N=one-thousand, NxN=one-million, so this gets out of
+; control pretty quickly.
+;
+; Two things are provided below. First, an API to set and get
+; similarities.  Specifically, it provides an API for storing
+; similarities as Values in the atomspace. This not only avoids
+; recomputation, but also allows them to be persisted in the database.
+;
+; The second tool provided is a batch-compute function, that will
+; compute all NxN similarity values. This is extremely CPU-itensive,
+; and even moderate-sized matrixes can take days or weeks to compute.
+;
+; By default, the similarity measure is assumed to be the cosine
+; similarity; the ctor for the API allows other similairty measures
+; to be specified.
 ;
 ; It is assumed that similarity scores are symmetric, so that exchanging
-; left and right give the same answer.  Thus, an UnorderedLink is best for
-; storing the pair. Specifically, the SimilarityLink.  So,
+; left and right give the same answer.  Thus, an UnorderedLink is best
+; for storing the pair. Specifically, the SimilarityLink.  So,
 ;
 ;    SimilarityLink
 ;        Atom "this"
@@ -29,7 +41,13 @@
 ;        Atom "that"
 ;        Atom "this"
 ;
-; are both exactly the same atom.
+; are both exactly the same atom. The actual similarity values are
+; stored as Values on these atoms.  The specific key used to store
+; the value depennds on the arguments the API is given; by default,
+; the (Predicate "*-Cosine Sim Key-*") is used; if the underlying
+; matrix is filtered, then a filter-name-dependent key is used.
+; Thus, the same API can be sed with both fitlered and non-filtered
+; versions of the dataset.
 ;
 ; ---------------------------------------------------------------------
 ;
@@ -47,9 +65,17 @@
 	(ID (if (LLOBJ 'filters?) (LLOBJ 'id) #f)))
 "
   add-similarity-api - Add API to access similarity values between
-  rows or columns of the LLOBJ.  This creates a new NON-sparse matrix
-  that can be understood as a kind-of matrix product of LLOBJ with
-  it's transpose.
+  rows or columns of the LLOBJ.  This API merely provides access to
+  values that were previously computed, located as Values attached
+  to pairs of Atoms under certain specific keys. That means that this
+  API is appropriate for working with similarity values that were
+  stored in a database.
+
+  The 'set-pair-similarity method is used to set a value.
+  The 'pair-simiarity method is used to fetch it.
+  
+  This creates a new NON-sparse matrix that can be understood as a
+  kind-of matrix product of LLOBJ with it's transpose.
 
   If MTM? is #t, then the similarity matrix is the product M^T M
   for LLOBJ = M, otherwise, the product is MM^T.  Here, M^T is the
@@ -135,9 +161,17 @@
 	)
 "
   batch-similarity - Add API to batch-compute similarity values between
-  rows or columns of the LLOBJ.  This creates a new NON-sparse matrix
-  that can be understood as a kind-of matrix product of LLOBJ with it's
-  transpose.
+  rows or columns of the LLOBJ.  By default, the cosine similarity is
+  computed, unless some alternate function is specified in the ctor.
+
+  Batching is EXTREMELY CPU-intensive.  A typical run will take days or
+  a week or more, even for modest-sized datasets. It will also blow up
+  memory usage, since a SimilarityLink and also an atom Value is created
+  for each pair of atoms. For N=1000, this means N^2=one million
+  SimilarityLinks and values. This might require a few GBytes of RAM.
+
+  This creates a new NON-sparse matrix that can be understood as a
+  kind-of matrix product of LLOBJ with it's transpose.
 
   If MTM? is #t, then the similarity matrix is the product M^T M
   for LLOBJ = M, otherwise, the product is MM^T.  Here, M^T is the
