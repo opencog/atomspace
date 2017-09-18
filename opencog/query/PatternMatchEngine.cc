@@ -779,15 +779,6 @@ bool PatternMatchEngine::glob_compare(const PatternTermSeq& osp,
 
 		if (GLOB_NODE == ptype)
 		{
-			// GlobNodes cannot match themselves -- no self-grounding
-			// is allowed. TODO -- maybe this check should be moved
-			// to the clause_match() callback?
-			if (ohp == osg[jg])
-			{
-				mismatch();
-				break;
-			}
-
 			HandleSeq glob_seq;
 			PatternTermPtr glob(osp[ip]);
 
@@ -892,6 +883,8 @@ bool PatternMatchEngine::glob_compare(const PatternTermSeq& osp,
 					// See if we can match the next one.
 					jg++;
 				}
+				// Can't match more, e.g. a type mis-match
+				else jg--;
 			} while (tc and jg<osg_size);
 
 			// Try again if we can't ground the glob after all.
