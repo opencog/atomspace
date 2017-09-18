@@ -100,6 +100,7 @@ private:
 
 	// Return the hash value of the atom.
 	static SCM ss_handle(SCM);
+	static SCM ss_atom_less_p(SCM, SCM);
 
 	// Get list endcoded in a value
 	static SCM ss_value_to_list(SCM);

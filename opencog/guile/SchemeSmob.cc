@@ -285,6 +285,7 @@ void SchemeSmob::register_procs()
 
 	// hash-value of the atom
 	register_proc("cog-handle",            1, 0, 0, C(ss_handle));
+	register_proc("cog-atom-less?",        2, 0, 0, C(ss_atom_less_p));
 
 	// Value API
 	register_proc("cog-value->list",       1, 0, 0, C(ss_value_to_list));

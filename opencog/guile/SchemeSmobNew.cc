@@ -216,6 +216,20 @@ SCM SchemeSmob::ss_handle (SCM satom)
 	return scm_from_ulong(h.value());
 }
 
+/** Return #t if left < right, else return #f. */
+SCM SchemeSmob::ss_atom_less_p (SCM sleft, SCM sright)
+{
+	Handle hleft(scm_to_handle(sleft));
+	Handle hright(scm_to_handle(sright));
+	if (nullptr == hleft)
+		scm_wrong_type_arg_msg("cog-atom-less?", 1, sleft, "opencog atom");
+	if (nullptr == hright)
+		scm_wrong_type_arg_msg("cog-atom-less?", 1, sright, "opencog atom");
+
+	if (hleft < hright) return SCM_BOOL_T;
+	return SCM_BOOL_F;
+}
+
 /* ============================================================== */
 /** Return true if s is an atom. Invalid handles are not atoms. */
 
