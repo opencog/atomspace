@@ -721,6 +721,8 @@ bool PatternMatchEngine::glob_compare(const PatternTermSeq& osp,
 		{
 			ip = glob_pos_stack.top().second.first;
 			jg = glob_pos_stack.top().second.second;
+
+			POPSTK(vargrd_stack, var_grounding);
 		}
 	};
 
@@ -729,6 +731,8 @@ bool PatternMatchEngine::glob_compare(const PatternTermSeq& osp,
 	auto record_match = [&](const PatternTermPtr& glob,
 	                        const HandleSeq& glob_seq)
 	{
+		vargrd_stack.push(var_grounding);
+
 		glob_grd[glob] = glob_seq.size();
 		glob_state[gp] = {glob_grd, glob_pos_stack};
 
@@ -752,6 +756,8 @@ bool PatternMatchEngine::glob_compare(const PatternTermSeq& osp,
 	auto r = glob_state.find(gp);
 	if (r != glob_state.end())
 	{
+		POPSTK(vargrd_stack, var_grounding);
+
 		resuming = true;
 		glob_grd = r->second.first;
 		glob_pos_stack = r->second.second;
@@ -1571,6 +1577,7 @@ bool PatternMatchEngine::do_next_clause(void)
 		// Otherwise, all possible ways to ground the globs in the term
 		// will be explored before moving to the next candidate.
 		glob_state.clear();
+		while (0 < vargrd_stack.size()) vargrd_stack.pop();
 	}
 	else
 	{
