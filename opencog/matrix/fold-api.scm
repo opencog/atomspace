@@ -146,6 +146,9 @@
 		; with one of the atoms from TUPLE on the right.
 		(define (get-left-union TUPLE)
 			; The set the will hold the union of atoms.
+			; The atom-set guarantees that each item will
+			; appear only once in the set, even if it is
+			; inserted repeatedly.
 			(define atom-set (make-atom-set))
 
 			; Add the left-side of the pair to the set.
@@ -154,7 +157,7 @@
 					(lambda (star-pair) (atom-set (gar star-pair)))
 					LIST))
 
-			; loop over verything in the tuple.
+			; loop over everything in the tuple.
 			(for-each
 				(lambda (item) (add-left-to-set (star-obj 'left-stars item)))
 				TUPLE)
