@@ -67,8 +67,18 @@
   list of atoms.
 
   Calling the returned function with an atom in the argument places the
-  atom into the set. Calling it with #f as theargument erturns the
+  atom into the set. Calling it with #f as the argument returns the
   entire set as a list.
+
+  Example Usage:
+     (define atom-set (make-atom-set))
+     (atom-set (Concept \"ABC\"))
+     (atom-set (Concept \"DEF\"))
+     (atom-set (Concept \"ABC\"))
+     (atom-set #f)
+
+     This last call returns the list
+     ((ConceptNode \"ABC\") (ConceptNode \"DEF\"))
 "
 	(define cache (make-hash-table))
 	(define (atom-hash ATOM SZ) (modulo (cog-handle ATOM) SZ))
@@ -83,7 +93,6 @@
 					(lambda (PR) (set! ats (cons (car PR) ats)))
 					cache)
 				ats))))
-
 
 ; ---------------------------------------------------------------------
 
