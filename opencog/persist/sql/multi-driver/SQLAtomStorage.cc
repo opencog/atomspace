@@ -1210,6 +1210,7 @@ void SQLAtomStorage::vdo_store_atom(const Handle& h)
 
 void SQLAtomStorage::deleteSingleAtom(Response& rp, UUID uuid)
 {
+	// The uuid is the PRIMARY KEY so below shou;ld be fast...
 	char buff[BUFSZ];
 	snprintf(buff, BUFSZ,
 		"DELETE FROM Atoms WHERE uuid = %lu;", uuid);
@@ -1253,6 +1254,7 @@ void SQLAtomStorage::removeAtom(const Handle& h, bool recursive)
 /// Delete ALL of the values associated with an atom.
 void SQLAtomStorage::deleteAllValuations(Response& rp, UUID uuid)
 {
+	// There is an index on just the atom, so the below should be fast.
 	char buff[BUFSZ];
 	snprintf(buff, BUFSZ,
 		"SELECT key FROM Valuations WHERE atom = %lu;", uuid);
@@ -1270,6 +1272,8 @@ void SQLAtomStorage::deleteAllValuations(Response& rp, UUID uuid)
 void SQLAtomStorage::removeAtom(Response& rp, UUID uuid, bool recursive)
 {
 	// Verify the status of the incoming set.
+	// This uses the GIN index and so it should be fast.
+	// CREATE INDEX incoming_idx on Atoms USING GIN(outgoing);
 	char buff[BUFSZ];
 	snprintf(buff, BUFSZ,
 		"SELECT uuid FROM Atoms WHERE outgoing @> ARRAY[CAST(%lu AS BIGINT)];",
