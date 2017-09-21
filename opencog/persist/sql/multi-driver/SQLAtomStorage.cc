@@ -1233,10 +1233,16 @@ void SQLAtomStorage::removeAtom(const Handle& h, bool recursive)
 	flushStoreQueue();
 	Response rp(conn_pool);
 
+	// Its possible that we were asked to delete an atom that we
+	// don't know about. If so, there is nothing to do. (Right?
+	// Wrong....
+	UUID uuid = check_uuid(h);
+	if (TLB::INVALID_UUID == uuid) return;
+
 	// Use a transaction so that the update looks atomic to other users.
 	// This has no effect on performance, from what I can tell.
 	rp.exec("BEGIN;");
-	removeAtom(rp, get_uuid(h), recursive);
+	removeAtom(rp, uuid, recursive);
 	rp.exec("COMMIT;");
 }
 
