@@ -8,6 +8,7 @@
 ; In general, the later files depend on definitions contained
 ; in the earlier files.
 (load "matrix/object-api.scm")
+(load "matrix/dynamic.scm")
 (load "matrix/support.scm")
 (load "matrix/report-api.scm")
 (load "matrix/fold-api.scm")
