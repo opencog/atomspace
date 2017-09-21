@@ -1215,6 +1215,7 @@ void SQLAtomStorage::deleteSingleAtom(Response& rp, UUID uuid)
 		"DELETE FROM Atoms WHERE uuid = %lu;", uuid);
 
 	rp.exec(buff);
+	_num_atom_deletes++;
 }
 
 /// Remove an atom, and all of it's associated values from the database.
@@ -1246,6 +1247,7 @@ void SQLAtomStorage::removeAtom(const Handle& h, bool recursive)
 	rp.exec("BEGIN;");
 	removeAtom(rp, uuid, recursive);
 	rp.exec("COMMIT;");
+	_num_atom_removes++;
 }
 
 /// Delete ALL of the values associated with an atom.
@@ -2244,6 +2246,8 @@ void SQLAtomStorage::clear_stats(void)
 	_num_get_inlinks = 0;
 	_num_node_inserts = 0;
 	_num_link_inserts = 0;
+	_num_atom_removes = 0;
+	_num_atom_deletes = 0;
 #endif // STORAGE_DEBUG
 }
 
@@ -2265,6 +2269,11 @@ void SQLAtomStorage::print_stats(void)
 	size_t value_stores = _value_stores;
 	printf("sql-stats: valuation updates = %lu value updates = %lu\n",
 	       valuation_stores, value_stores);
+
+	size_t num_atom_removes = _num_atom_removes;
+	size_t num_atom_deletes = _num_atom_deletes;
+	printf("sql-stats: atom remove requests = %lu total atom deletes = %lu\n",
+	       num_atom_removes, num_atom_deletes);
 	printf("\n");
 
 #ifdef STORAGE_DEBUG

@@ -181,6 +181,8 @@ class SQLAtomStorage : public AtomStorage
 		std::atomic<size_t> _num_get_inlinks;
 		std::atomic<size_t> _num_node_inserts;
 		std::atomic<size_t> _num_link_inserts;
+		std::atomic<size_t> _num_atom_removes;
+		std::atomic<size_t> _num_atom_deletes;
 		std::atomic<size_t> _load_count;
 		std::atomic<size_t> _store_count;
 		std::atomic<size_t> _valuation_stores;
