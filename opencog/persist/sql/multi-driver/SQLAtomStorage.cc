@@ -1031,7 +1031,7 @@ UUID SQLAtomStorage::check_uuid(const Handle& h)
 	// not query for it!
 	if (bulk_store) return TLB::INVALID_UUID;
 
-	// Ooops. We need to find out what this is.
+	// Ooops. We need to look in the database to find out what this is.
 	Handle dbh;
 	if (h->isNode())
 	{
@@ -1041,10 +1041,10 @@ UUID SQLAtomStorage::check_uuid(const Handle& h)
 	{
 		dbh = doGetLink(h->getType(), h->getOutgoingSet());
 	}
-	// If it was found, then the TLB got updated.
+	// If it was found in the database, then the TLB got updated.
 	if (dbh) return _tlbuf.getUUID(h);
 
-	// If it was not found, then say so.
+	// If it was not found in the database, then say so.
 	return TLB::INVALID_UUID;
 }
 
@@ -1234,8 +1234,10 @@ void SQLAtomStorage::removeAtom(const Handle& h, bool recursive)
 	Response rp(conn_pool);
 
 	// Its possible that we were asked to delete an atom that we
-	// don't know about. If so, there is nothing to do. (Right?
-	// Wrong....
+	// don't know about. If so, there is nothing to do. Please note
+	// that check_uuid does look in the database to see if the atom
+	// is there, so if it's returning an invalid uuid, then it is
+	// not in the database.
 	UUID uuid = check_uuid(h);
 	if (TLB::INVALID_UUID == uuid) return;
 
