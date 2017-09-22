@@ -189,8 +189,8 @@ class PatternMatchCallback
 		 * the probability of A or B, i.e. it would compute P(A or B)
 		 * SetIntersectionLink would compute P(A and B), and so on.
 		 *
-		 * Unlike the other callbacks, this takes arguments in s slightly
-		 * different form.  Here, 'eval' is the evalutatable term, and
+		 * Unlike the other callbacks, this takes arguments in slightly
+		 * different form.  Here, 'eval' is the evaluatable term, and
 		 * 'gnds' contains the currently-proposed grounding for any
 		 * variables occuring within that term. It is a map: the 'key' is
 		 * either a variable, or another term whose grounding is being
@@ -321,7 +321,7 @@ class PatternMatchCallback
 		/**
 		 * Called when the search has completed. In principle, this is not
 		 * really needed, since the above callback "knows" when the search
-		 * is completed: its completed when the above returns. In practice, 
+		 * is completed: its completed when the above returns. In practice,
 		 * the implementation is much simpler if we have a distinct
 		 * callback to handle this situation.  The argument, is the return
 		 * value from initiaitate_search().
