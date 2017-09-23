@@ -38,6 +38,10 @@
 ;      endpoints (legs or vertexes) on all sections having that germ.
 ;      The endpoint is defined as the first atom in the connector.
 ;
+; get-conseq-germs        - given a connector sequence, return all
+;       germs that have this connector sequence in thier section.
+;       There is one connector sequence per section.
+;
 ; ---------------------------------------------------------------------
 
 (use-modules (srfi srfi-1))
@@ -103,6 +107,19 @@
 		(map
 			(lambda (CNCTR) (cog-outgoing-atom CNCTR 0))
 			(get-germ-connectors GERM)))
+)
+
+; ---------------------------------------------------------------
+;
+(define-public (get-conseq-germs CONSEQ)
+"
+  get-conseq-germs CONSEQ - return all germs that have this connector
+  sequence in thier section. There is one connector sequence per section.
+"
+	; Walk over all the Sections on the connector sequence.
+	; The germ is in position 0 in the section.
+	(map (lambda (SEC) (cog-outgoing-atom SEC 0))
+		(cog-incoming-by-type CONSEQ 'Section))
 )
 
 ; ---------------------------------------------------------------
