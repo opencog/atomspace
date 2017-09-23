@@ -12,7 +12,7 @@
 ; vertex-ordered graph". A "vertex-ordered graph" is a graph where
 ; each vertex in the graph is labelled with an ordinal. This ordering
 ; can be imagined to give the vertexes a left-to-right ordering.
-; The graph is weighted if each of teh edges is assigned a weight,
+; The graph is weighted if each of the edges is assigned a weight,
 ; (equivalently, a "cost").
 ;
 ; The functions below simply provide an API to access the ordering and

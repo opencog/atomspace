@@ -23,15 +23,23 @@
 ;        ConnectorSeq
 ;            Connector
 ;                Atom "B"
+;                Label "A-to-B label"
 ;            Connector
 ;                Atom "C"
+;                Label "A-to-C label"
 ;
 ; which indicates that A is connected to B and to C; viz, that there are
 ; edges (AB) and (AC).  Note that the ConnectorSeq is independent of the
 ; atom "A".  This allows different sections to be compared: e.g. there
 ; may be a different atom D with edges (DB) and (DC).  Then D would have
-; the same ConnectorSeq as A. Thus, the ConnectorSeq simpllifies the
+; the same ConnectorSeq as A. Thus, the ConnectorSeq simplifies the
 ; discovery of subgraph isomorphisms.
+;
+; The ConnecorSeq is an ordered link; it is presumed that, in the
+; general case, that the order of the connectors matter.
+;
+; In the above example, the edges carry (optional) edge labels
+; indicating the type of the connector.
 ;
 ; In everything that follows, it is assumed that all of the vertexes of
 ; the graph are sequentially ordered, i.e. can be laid out in sequence
