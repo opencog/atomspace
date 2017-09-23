@@ -9,115 +9,100 @@
 ; Recall what a section looks like:
 ;
 ;     Section
-;         WordNode "foo" ; or possibly a WordClassNode
+;         Atom "foo" ; usually a node of some kind.
 ;         ConnectorSeq
 ;             Connector
-;                WordNode "bar" ; or possibly a WordClassNode
-;                LgConnDirNode "+"
+;                Atom "bar" ; for example, a WordNode.
+;                DirNode "+" ; Some edge label.
 ;             Connector
 ;                ....
 ;
 ; It should be thought of as being shaped like a spider, with a body
 ; at the center, and a bunch of legs. In the above, the body is the
-; word "foo", and "bar" is one of the legs.  Or rather, "bar" is at
+; atom "foo", and "bar" is one of the legs.  Or rather, "bar" is at
 ; the end of one of the legs, so that foo-bar can be though of as an
-; edge connecting these two words. Its a labelled edge - the
-; LgConnDirNode is the label.  Formally, the body iscalled the "germ".
+; edge connecting two vertexes. Its a labelled edge - the
+; DirNode is the label.  Formally, the body is called the "germ".
 ;
 ; The utilities here include:
-; get-germ-endpoints - given the germ, return a list of all endpoints
-;      (legs) on all sections having that germ.
 ;
+; get-germ-connector-seqs - given the germ, return a list of all
+;      ConnectorSeq's appearing in sections on the germ.  The
+;      connector sequences are in one-to-one correspondance with
+;      the sections on the germ.
 ;
-; XXX TODO - most of these utilities should be made generic, someday.
-; They implement generic concepts pertaining to sections, and should
-; not really be tied just to the NLP bits.
+; get-germ-connectors     - given the germ, return a list of all
+;      Connectors that appear in seme section on the germ.
+;
+; get-germ-endpoints      - given the germ, return a list of all
+;      endpoints (legs or vertexes) on all sections having that germ.
+;      The endpoint is defined as the first atom in the connector.
+;
 ; ---------------------------------------------------------------------
 
 (use-modules (srfi srfi-1))
-(use-modules (opencog) (opencog matrix) (opencog persist))
+(use-modules (opencog persist))
 
 ; ---------------------------------------------------------------
 ;
-(define-public (get-germ-connector-seqs WORD)
+(define-public (get-germ-connector-seqs GERM)
 "
-  get-germ-connector-seqs WORD - return all connector seqeucences
-  that appear in sections on the WORD. There is one connector sequence
+  get-germ-connector-seqs GERM - return all connector seqeucences
+  that appear in sections on the GERM. There is one connector sequence
   per section.
 
-  Given a word, the \"germ\", assemble a list of all of the connector
-  sequences that appear in sections for that germ.
-
-  Assumes that the sections for the word are already in the atomspace.
-  These can be loaded by saying (fetch-incoming-by-type WORD 'Section)
+  Assumes that the sections for the germ are already in the atomspace.
+  These can be loaded by saying (fetch-incoming-by-type GERM 'Section)
 "
-	; Walk over all the Sections on the word.
+	; Walk over all the Sections on the germ.
 	; The ConnectorSeq is in position 1 in the section.
 	(map (lambda (SEC) (cog-outgoing-atom SEC 1))
-		(cog-incoming-by-type WORD 'Section))
+		(cog-incoming-by-type GERM 'Section))
 )
 
 ; ---------------------------------------------------------------
 ;
-(define-public (get-germ-connectors WORD)
+(define-public (get-germ-connectors GERM)
 "
-  get-germ-connectors WORD - return all connectors that appear in
-  sections on the WORD.
+  get-germ-connectors GERM - return all connectors that appear in
+  the connector sequences of sections on the GERM.
 
-  Given a word, the \"germ\", assemble a list of all of the connectors
-  that appear in the connector sets (disjuncts) in sections for that
-  germ.
-
-  Assumes that the sections for the word are already in the atomspace.
-  These can be loaded by saying (fetch-incoming-by-type WORD 'Section)
+  Assumes that the sections for the germ are already in the atomspace.
+  These can be loaded by saying (fetch-incoming-by-type GERM 'Section)
 "
-	; Given a Section i.e. (word, connector-set), walk over all
-	; the connectors in the connector set, and add the connector
-	; to the word-list.
-	(define (add-to-list SEQ WORD-LIST)
+	; Given a Section i.e. a (germ, connector-set) pair, walk over
+	; all the connectors in the connector set, and add the connector
+	; to the connector-list.
+	(define (add-to-list SEQ CNTR-LIST)
 		(fold
 			(lambda (CNCTR LST)
 				; Hmm. Is this test for the type really needed?
 				(if (eq? 'Connector (cog-type CNCTR))
 					(cons CNCTR LST) LST))
-			WORD-LIST
+			CNTR-LIST
 			; second atom of Section is a ConnectorSeq
 			(cog-outgoing-set SEQ)))
 
-	; Walk over all the Sections on the word.
+	; Walk over all the Sections on the germ.
 	(delete-dup-atoms
-		(fold add-to-list '() (get-germ-connector-seqs WORD)))
+		(fold add-to-list '() (get-germ-connector-seqs GERM)))
 )
 
 ; ---------------------------------------------------------------
 ;
-(define-public (get-germ-endpoints WORD)
+(define-public (get-germ-endpoints GERM)
 "
-  get-germ-endpoints WORD - return all words that appear in disjuncts.
+  get-germ-endpoints GERM - return all vertexes that appear as
+  endpoints in the connector sets on the GERM.
 
-  Given one word, the \"germ\", assemble a list of all of the words
-  that appear in the connector sets (disjuncts) in sections for that
-  germ.
-
-  Assumes that the sections for the word are already in the atomspace.
-  These can be loaded by saying (fetch-incoming-by-type WORD 'Section)
+  Assumes that the sections for the germ are already in the atomspace.
+  These can be loaded by saying (fetch-incoming-by-type GERM 'Section)
 "
-	; Walk over all the connectors, extracting the words.
+	; Walk over all the connectors, extracting the enpoints.
 	(delete-dup-atoms
 		(map
 			(lambda (CNCTR) (cog-outgoing-atom CNCTR 0))
-			(get-germ-connectors WORD)))
-)
-
-; ---------------------------------------------------------------
-
-(define-public (in-gram-class? WORD GCLS)
-"
-  in-gram-class? WORD GRAM-CLASS - is the WORD a member of the
-  grammatical class CRAM-CLASS? Returns ither #t or #f.
-"
-	(define memlnk (cog-link 'MemberLink WORD GCLS))
-	(if (null? memlnk) #f #t)
+			(get-germ-connectors GERM)))
 )
 
 ; ---------------------------------------------------------------
