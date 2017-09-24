@@ -123,3 +123,17 @@
 )
 
 ; ---------------------------------------------------------------
+;
+(define-public (get-connector-germs CNCTR)
+"
+  get-connector-germs CONNECTOR - return all germs that have this
+  connector appearing in thier section.
+"
+	; get-conseq-germs returns a list, so concatenate them.
+	(delete-dup-atoms
+		(concatenate!
+			(map get-conseq-germs
+				(cog-incoming-by-type CNCTR 'ConnectorSeq))
+)
+
+; ---------------------------------------------------------------
