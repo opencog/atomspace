@@ -162,7 +162,7 @@ In relation to Tensor Algebra
 -----------------------------
 A tensor can also be visualized as a kind-of spider or puzzle-piece: the
 legs or tabs are just the indexes on the tensor, and the number of legs
-is the order of the tensor.  The act of contracting tensor indexes is
+is the degree of the tensor.  The act of contracting tensor indexes is
 the same as connecting together connectors.
 
 More properly, a tensor is a linear combination of such puzzle-pieces;
@@ -179,7 +179,7 @@ attached to each, this can be visualized as a vector. Examples arise
 in linguistics, where one has lists of words, and the associated counts:
 these form a vector.
 
-In the more general case, a tensor of order K is a linear sum of spiders
+In the more general case, a tensor of degree K is a linear sum of spiders
 or puzzle-pieces with K legs/connectors on them.  A tensor is a "stalk"
 with a number attached to each "etale" or section.  Tensors can be
 contracted together to form other tensors simply by connecting some of
@@ -187,7 +187,7 @@ the legs/connectors.  Multiplication and co-multiplication in a tensor
 algebra are just specific rules for connecting connectors so that
 linearity is preserved.
 
-The N-gram in linguistics an example of an order-N tensor. The count of
+The N-gram in linguistics an example of an degree-N tensor. The count of
 the number of occurances that an N-gram is seen is the weight.
 Sometimes the collection of N-grams is called a "vector", but this is
 not quite right, because when multiple N-grams are assebled to form a
@@ -215,6 +215,11 @@ here is to provide a generalized version of Link Grammar suitable for
 the discovery and analysis of generalized networks of relationships
 between concepts and events taken from observations of the external
 world.
+
+In link-grammar, "germs" are called "lexical items". The "conenctor
+sequences" are called "disjuncts". The "stalk" is a lexical entry or
+dictionary entry. The fact that the disjuncts are disjoined is a way of
+saying that each etale (section) of a germ is distinct.
 
 Terminology
 ===========
@@ -282,10 +287,12 @@ list of the N edges that are attached to it.  The graph, as a whole,
 is then described by listing each vertex in it, and the section
 associated with it.
 
-This is not the only way to describe a graph: more simply, more
-traditionally, it is enough to just list all of the vertexes and all
-of the edges. However, by looking at a graph in terms of sections,
-one can hope to apply all of the tools of sheaf theory to the problem.
+This should be contrasted to the traditional, canonical description of
+a graph, as a list all of the vertexes and all of the edges. The problem
+with the canonical description is that the local connectivity of the
+graph is hidden: one has to traverse the entire list of edges to find
+those that are connected to a particular vertex. This is inconvenient
+and inefficient.
 
 Thus, a typical section might look like this:
 ```
@@ -324,23 +331,12 @@ viewed as a single global section of sheaf; it is the abstract collection
 of all of the networks that comprises the sheaf.
 
 By making a large number of statistical observations of graphs, and
-then collecting statistics on sections, one can hope to discern how that
+then collecting statistics on sections, one can hope to discern how a
 vertex typically connects into a typical graph. In sheaf theory, this
 information about the typical behavior of a vertex is called the "stalk"
-or the "germ" of the vertex. (A "stalk", because its like a plant, with
-different branches forking out from the main trunk.  A "germ", because
-it can grow and "germinate" different connections.) In linguistics, it
-is called a "lexical entry" or "lexical item", because it resembles an
-entry in a dictionary (a "lexis"): one can look up the vertex in the
-dictionary, and get, as it's definition, a list of the kinds of edges it
-participates in.
+of the vertex, the vertex being the "germ" from which the stalk grows.
 
-In Link Grammar, the disjoint union of all sections are called "connector
-sets", and connector sequences are called "disjuncts". (Viz, each
-connector sequence is disjoined from the other: to parse a graph, one
-must choose one section, and discard all the others.)
-
-The "gluing axiom" of a sheaf can be thought as describing how different
+The "gluing axioms" of a sheaf can be thought as describing how different
 connectors can be joined together.  The act of parsing requires selecting
 a single disjunct out of the disjoint union of all of them; thus, the
 disjoint union is a set of 'possibilities' or parts of a 'possible
