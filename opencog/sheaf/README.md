@@ -45,6 +45,8 @@ In standard mathematical terminology, the spider-body or jigsaw-label
 is called the "germ". It is meant to evoke the idea of a germinating
 seed, as will become clear below.
 
+Sections in Atomese
+-------------------
 Sections are represented in Atomese as follows:
 ```
      Section
@@ -78,6 +80,8 @@ Connector` structure is more general and can describe more kinds of
 structures more simply than an EvaluationLink can.  This will be made
 clear below).
 
+Connectors
+----------
 Note that `Connector`s are like "half-edges": in isolation, they carry
 the edge-label, and the far endpoint, but not the near endpoint.  The
 term "connector" is used to emphasize that these are meant to behave
@@ -94,6 +98,8 @@ The `ConnectorSeq` link is an ordered link, rather than an unordered
 set.  This is because in many applications, the sequential order of the
 connectors matter.
 
+Germs and Etales
+----------------
 In the above, the germ `(Atom "foo")` can be taken to be a label "foo"
 on the vertex that is the germ of the section.  There is no requirement
 that this label be unique, or that it uniquely identify a vertex.  Thus,
@@ -110,6 +116,8 @@ sections, like jigsaw-puzzle pieces, can be assembled together to make
 a bigger section. Such sub-assemblies are still "etales", in that they
 are all at the same level.
 
+Sheaf Theory
+------------
 The collection of all possible stalks, and the sections on them,
 together with the rules that dictate how the connectors can connect
 is terms a "sheaf".
@@ -124,6 +132,89 @@ application of Sheaf Theory in mathematics deals with sections that
 have an infinite number (countable and uncountable) of connectors, and
 the connector labels form a ring or a field.  That is not the case here,
 and so the situation is conceptually simpler, here.
+
+In relation to Graph Theory
+---------------------------
+Note that the above started by talking about graphs, but ends at a
+somewhat different place.  It is worth reviewing the differences.
+In the canonical description of a graph, it is implicitly assumed,
+without statement, that ecah vertex is unique and unambigous and
+obviously a different vertex than eny of the others. Likewise for
+edges: they join pairs of vertexes, and there is no confusion about
+what is being connected.
+
+This is not the case for sheaves: although a germ can be visualized as
+a single vertex, the fact that there is a stalk above the germ implies
+that many vertexes in the graph are taken to be "the same vertex". Yet,
+despite being the "same vertex", each section connects to the graph in
+different ways.  Thus, a sheaf can be visualized as a graph with a
+certain quotient operation applied, a lumping together of certain
+vertexes into a common set, the "germ".
+
+In graph theory, an edge unambiguously connects two vertexes. By
+contrast, the connectors on a section are a bit more ambiguous: they can
+connect to anything else that is legally connectable: the connectors
+must match, must be contractable.  The connectability of connectors
+are given by rules, but those rules are "user-defined" (although they
+usually match connectors to germs and force edge-label agreement).
+
+In relation to Tensor Algebra
+-----------------------------
+A tensor can also be visualized as a kind-of spider or puzzle-piece: the
+legs or tabs are just the indexes on the tensor, and the number of legs
+is the order of the tensor.  The act of contracting tensor indexes is
+the same as connecting together connectors.
+
+More properly, a tensor is a linear combination of such puzzle-pieces;
+it is a linear combination of the etales of the stalk.  Thus, for
+example, an N-dimensional vector in an N-dimensional space can be
+visualized as a linear sum of N different connectors (that is, as a sum
+of one-legged spiders). Each basis element of the vector space
+corresponds to a single connector. When one takes a dot-product of
+two vectors, one joins connector-to-connector, aligning the basis
+elements of the vector, and sums up the values.
+
+Thus, if one has a list of connectors, and a floating-point value
+attached to each, this can be visualized as a vector. Examples arise
+in linguistics, where one has lists of words, and the associated counts:
+these form a vector.
+
+In the more general case, a tensor of order K is a linear sum of spiders
+or puzzle-pieces with K legs/connectors on them.  A tensor is a "stalk"
+with a number attached to each "etale" or section.  Tensors can be
+contracted together to form other tensors simply by connecting some of
+the legs/connectors.  Multiplication and co-multiplication in a tensor
+algebra are just specific rules for connecting connectors so that
+linearity is preserved.
+
+The N-gram in linguistics an example of an order-N tensor. The count of
+the number of occurances that an N-gram is seen is the weight.
+Sometimes the collection of N-grams is called a "vector", but this is
+not quite right, because when multiple N-grams are assebled to form a
+sentence, the words must match-up correctly: N-grams are tensor
+elements.
+
+In relation to Pregroup Grammars and Category Theory
+----------------------------------------------------
+The contraction rules for the connectors imply that they form a kind of
+pre-group grammar (see the Wikipedia article).  Such grammars are
+examples of non-symmetric monoidal categories.
+
+This viewpoint is rather complex, and is not elaborated here. However,
+it is useful: it provides insight into the nature of parsing, and
+explains the correspondance (Curry-Howard correspondance) between
+categories and internal languages. That is, languages are parsed, and
+the act of parsing is the discovery of those sections that have legal
+joinings of connectors.
+
+In relation to Link Grammar
+---------------------------
+The definition and use of sections and connectors here is directly
+inspired by the theory of Link Grammar.  The intent of the machinery
+here is to provide a generalized version of Link Grammar suitable for
+the discovery and analysis of generalized networks of relationships
+between concepts and events taken from observations of the external
+world.
 
 Terminology
 ===========
