@@ -46,6 +46,13 @@
 ;       germs that have this connector sequence in thier section.
 ;       There is one connector sequence per section.
 ;
+; NOTES:
+; ------
+; This is currently implemented in just plain-old scheme, and should
+; be fine for general use. However, performance could be much improved
+; by re-implementing these in C++. Basically, these just do a lot of
+; very simple atom access, and thus the overhead of guile is
+; proportionatly greater.
 ; ---------------------------------------------------------------------
 
 (use-modules (srfi srfi-1))
@@ -134,6 +141,121 @@
 ; ---------------------------------------------------------------
 ; ---------------------------------------------------------------
 ; ---------------------------------------------------------------
+; ---------------------------------------------------------------
+;
+(define-public (get-conseq-sections CONSEQ)
+"
+  get-conseq-sections CONSEQ - return all sections that have this
+  connector sequence in them.
+
+  Assumes that all sections are already in the atomspace; if not, use
+  `fetch-conseq-sections` instead.
+"
+	; Walk over all the Sections on the connector sequence.
+	; The germ is in position 0 in the section.
+	(cog-incoming-by-type CONSEQ 'Section)
+)
+
+; ---------------------------------------------------------------
+;
+(define-public (fetch-conseq-sections CONSEQ)
+"
+  fetch-conseq-sections CONSEQ - return all sections that have this
+  connector sequence in them.
+
+  Fetches sections from storage (does not assume they have been loaded
+  yet). Use 'get-conseq-sections` if fetching is not needed.
+"
+	(fetch-incoming-by-type CONSEQ 'Section)
+	(get-conseq-sections CONSEQ)
+)
+
+; ---------------------------------------------------------------
+;
+(define-public (get-connector-sections CNCTR)
+"
+  get-connector-sections CONNECTOR - return all sections that have
+  this connector appearing in thier connector sequence.
+
+  Assumes that all connector sequences and sections are already in
+  the atomspace; if not, use `fetch-connnector-sections` instead.
+"
+	; get-conseq-sections returns a list, so concatenate them.
+	(delete-dup-atoms
+		(concatenate!
+			(map get-conseq-sections
+				(cog-incoming-by-type CNCTR 'ConnectorSeq))))
+)
+
+; ---------------------------------------------------------------
+;
+(define-public (fetch-connector-sections CNCTR)
+"
+  fetch-connector-sections CONNECTOR - return all sections that have
+  this connector appearing in thier connector sequence.
+
+  Fetches sections and connector sequences from storage (does not
+  assume they have been loaded yet). Use 'get-connnector-sections`
+  if fetching is not needed.
+"
+	(fetch-incoming-by-type CNCTR 'ConnectorSeq)
+	; fetch-conseq-germs returns a list, so concatenate them.
+	(delete-dup-atoms
+		(concatenate!
+			(map fetch-conseq-sections
+				(cog-incoming-by-type CNCTR 'ConnectorSeq))))
+)
+
+; ---------------------------------------------------------------
+;
+(define-public (get-endpoint-sections END)
+"
+  get-endpoing-sections ENDPOINT - return all sections that have this
+  endpoint appearing in a connector in thier connector sequences.
+
+  Assumes that all connector sequences and sections are already in
+  the atomspace; if not, use `fetch-endpoint-sections` instead.
+"
+	; get-connector-sections returns a list, so concatenate them.
+	(delete-dup-atoms
+		(concatenate!
+			(map get-connector-sections
+				(cog-incoming-by-type END 'Connector))))
+)
+
+; ---------------------------------------------------------------
+;
+(define-public (fetch-endpoint-sections END)
+"
+  fetch-endpoing-sections ENDPOINT - return all sections that have this
+  endpoint appearing in a connector in a connector sequence.
+
+  Fetches connectors, connector sequences and sections from storage
+  (does not assume they have been loaded yet). Use
+  'get-connnector-sections` if fetching is not needed.
+"
+	(fetch-incoming-by-type END 'Connector)
+	; fetch-connector-sections returns a list, so concatenate them.
+	(delete-dup-atoms
+		(concatenate!
+			(map fetch-connector-sections
+				(cog-incoming-by-type END 'Connector))))
+)
+
+; ---------------------------------------------------------------
+; ---------------------------------------------------------------
+; ---------------------------------------------------------------
+; ---------------------------------------------------------------
+; Same as above, but return germs, not sections.
+; Therefore, all of the below have an equivalent implementation
+; having the general form:
+;
+;     (delete-dup-atoms
+;        (map (lambda (SEC) (cog-outgoing-atom SEC 0))
+;           (get-whatever-sections THING)))
+;
+; Unclear which implementation might be faster. Thes have not been
+; tuned for performance.
 ;
 (define-public (get-conseq-germs CONSEQ)
 "
@@ -146,7 +268,7 @@
 	; Walk over all the Sections on the connector sequence.
 	; The germ is in position 0 in the section.
 	(map (lambda (SEC) (cog-outgoing-atom SEC 0))
-		(cog-incoming-by-type CONSEQ 'Section))
+		(get-conseq-sections CONSEQ))
 )
 
 ; ---------------------------------------------------------------
@@ -160,10 +282,7 @@
   yet). Use 'get-conseq-germs` if fetching is not needed.
 "
 	(fetch-incoming-by-type CONSEQ 'Section)
-	; Walk over all the Sections on the connector sequence.
-	; The germ is in position 0 in the section.
-	(map (lambda (SEC) (cog-outgoing-atom SEC 0))
-		(cog-incoming-by-type CONSEQ 'Section))
+	(get-conseq-germs CONSEQ)
 )
 
 ; ---------------------------------------------------------------
@@ -181,6 +300,11 @@
 		(concatenate!
 			(map get-conseq-germs
 				(cog-incoming-by-type CNCTR 'ConnectorSeq))))
+
+	; An alternate implementation would be:
+	; (delete-dup-atoms
+	; 	(map (lambda (SEC) (cog-outgoing-atom SEC 0))
+	; 		(get-connector-sections CNCTR)))
 )
 
 ; ---------------------------------------------------------------
@@ -191,7 +315,7 @@
   connector appearing in thier section.
 
   Fetches sections and connector sequences from storage (does not
-  assume they have been loaded yet). Use 'fetch-connnector-germs`
+  assume they have been loaded yet). Use 'get-connnector-germs`
   if fetching is not needed.
 "
 	(fetch-incoming-by-type CNCTR 'ConnectorSeq)
@@ -227,7 +351,7 @@
   endpoint appearing in a connector in thier section.
 
   Fetches connectors, connector sequences and sections from storage
-  (does not assume they have been loaded yet). Use 'fetch-connnector-germs`
+  (does not assume they have been loaded yet). Use 'get-endpoint-germs`
   if fetching is not needed.
 "
 	(fetch-incoming-by-type END 'Connector)
