@@ -133,7 +133,21 @@
 	(delete-dup-atoms
 		(concatenate!
 			(map get-conseq-germs
-				(cog-incoming-by-type CNCTR 'ConnectorSeq))
+				(cog-incoming-by-type CNCTR 'ConnectorSeq))))
+)
+
+; ---------------------------------------------------------------
+;
+(define-public (get-endpoint-germs END)
+"
+  get-endpoing-germs ENDPOINT - return all germs that have this
+  endpoint appearing in a connector in thier section.
+"
+	; get-connector-germs returns a list, so concatenate them.
+	(delete-dup-atoms
+		(concatenate!
+			(map get-connector-germs
+				(cog-incoming-by-type END 'Connector))))
 )
 
 ; ---------------------------------------------------------------
