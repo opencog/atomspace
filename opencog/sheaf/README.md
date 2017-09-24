@@ -17,7 +17,7 @@ pairs of vertexes.  The problem with this description is that given
 any vertex, one has no idea of what edges are connected to it, without
 scanning the entire set of edges. Another problem is that vertexes and
 edges are not composable; that is, when they are composed together,
-they are no longer vertexes or edges, but a more general type: a 
+they are no longer vertexes or edges, but a more general type: a
 "subgraph".  By contrast, sheaves carry local information, and are
 composable.
 
@@ -33,28 +33,117 @@ that it has a central blob as the spider-body, and a whole bunch of
 legs sticking out. Composing sections in such a way that the edges
 connect only in legal ways is called "parsing".
 
+Another way of visualizing sections is to envision a jigsaw-puzzle
+piece instead of a spider. The vertex V is a label on the puzzle-piece,
+and each leg is a tab or slot on the puzzle-piece. The tabs or slots
+are now obviously connectors: this emphasizes that jigsaw-puzzle pieces
+can be conneted together legally only when the connectors fit togehter.
+Again: the act of fiting together puzzle-pieces in a legal fashion is
+termed "parsing".
+
+In standard mathematical terminology, the spider-body or jigsaw-label
+is called the "germ". It is meant to evoke the idea of a germinating
+seed, as will become clear below.
+
 Sections are represented in Atomese as follows:
 ```
      Section
          Atom "foo" ; usually a Node of some kind.
          ConnectorSeq
              Connector
-                Atom "bar"      ; for example, a WordNode.
-                LabelAtom "foo-to-bar label" ; can be a PredicateNode.
+                 Atom "bar"      ; for example, a WordNode.
+                 LabelAtom "foo-to-bar label" ; can be a PredicateNode.
              Connector
                 ....
 ```
-Here, `(Atom "foo")` is the spider-body. Each leg of the spider is
-represented by a `Connector` link. In the above example, the vertex
+Here, `(Atom "foo")` is the spider-body or germ. Each leg of the spider
+is represented by a `Connector` link. In the above example, the vertex
 "foo" has an edge "foo-bar" attached to it, with `(Atom "bar")` being
 the far-endpoint of that edge. The edge carries an optional label,
 shown as `LabelAtom`, above.
 
+The "foo-bar" edge can also be represented as an `EvaluationLink`,
+which is the structure used in many other parts of OpenCog.
+```
+       EvaluationLink
+           LabelAtom "foo-to-bar label" ; can be a PredicateNode.
+           ListLink
+               Atom "foo"
+               Atom "bar"
+```
+This `EvaluationLink`, and the `Section...Connector` structure are meant
+to be sort-of, more-or-less equivalent and interchangeable. (In many
+cases, thy can be taken to be equivalent; however, the `Section...
+Connector` structure is more general and can describe more kinds of
+structures more simply than an EvaluationLink can.  This will be made
+clear below).
+
+Note that `Connector`s are like "half-edges": in isolation, they carry
+the edge-label, and the far endpoint, but not the near endpoint.  The
+term "connector" is used to emphasize that these are meant to behave
+like the tabs on a jigsaw-puzzle piece: that they serve to connect to
+other connectors on other sections.
+
+There are no explicit or implicit rules for how to connect up
+connectors; this is application-dependent.  However, the above example
+implicitly implies that a connection is legal only when the germ-atom
+of one section is the same as a connector-atom in another section.
+Likewise, the edge-labels should match up or be coherent in some way.
+
+The `ConnectorSeq` link is an ordered link, rather than an unordered
+set.  This is because in many applications, the sequential order of the
+connectors matter.
+
+In the above, the germ `(Atom "foo")` can be taken to be a label "foo"
+on the vertex that is the germ of the section.  There is no requirement
+that this label be unique, or that it uniquely identify a vertex.  Thus,
+in general, there will be many different sections having the same germ.
+
+In this case, it is common to visualize sections as pieces of paper,
+stacked one on top another, aligned so that the germs are always above
+one-another. This stacking is refered to as a "stalk". Alternately, the
+stalk can be visualized as a fir-tree or pine-tree, where annual growths
+define the trunk, and then branches shoot off to the side, on level
+planes or "etales". A single section is then just that etale, that plane
+of branches from that single year of growth.  Unlike a pine-tree, however,
+sections, like jigsaw-puzzle pieces, can be assembled together to make
+a bigger section. Such sub-assemblies are still "etales", in that they
+are all at the same level.
+
+The collection of all possible stalks, and the sections on them,
+together with the rules that dictate how the connectors can connect
+is terms a "sheaf".
+
+The axioms of sheaf theory can be understood as saying that the
+puzzle-pieces can only be assmebled in certain legal ways, and that
+sub-assemblies can be intersected with one-another, as long as they
+are correctly lined up.  The Wikipedia page for Sheaf Theory bears
+very little resemblance to the description above, even though they are
+both taking about the same concepts.  That is because the typical
+application of Sheaf Theory in mathematics deals with sections that
+have an infinite number (countable and uncountable) of connectors, and
+the connector labels form a ring or a field.  That is not the case here,
+and so the situation is conceptually simpler, here.
+
+Terminology
+===========
+Some recurring terms are used in the code, and are defined here:
+
+* "germ"      -- This is the spider-body: the vertex at the center.
+* "section"   -- This is a single spider (jigsaw-piece), having a single
+                 germ at it's center. (Note: this is in conflict with
+                 common mathematical terminlogy, where a section consists
+                 of one or more connected spiders/jigsaw-pieces).
+* "connector" -- As described above; an edge attached to a germ.
+* "stalk"     -- This is the collection of all sections that have the
+                 same germ. The intent is that a stalk can be pictured
+                 as the main stem or stalk of a plant. The connectors
+                 are then like branches on a fir-tree (i.e. are all at
+                 the same level or section).
 
 
 Network Inference and Analysis Tools
 ====================================
-
 In this project, there's a generic theme of inferring structure from
 a sequence of events.  That is, a sequence of events is observed in the
 external world, and the question arises: are these events correlated?
