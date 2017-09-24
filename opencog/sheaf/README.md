@@ -45,6 +45,11 @@ In standard mathematical terminology, the spider-body or jigsaw-label
 is called the "germ". It is meant to evoke the idea of a germinating
 seed, as will become clear below.
 
+Diagramatic illustrations of jig-saw puzzle-pieces can be found here:
+
+* Sleator, Temperley, [Parsing English with a Link Grammar](http://www.cs.cmu.edu/afs/cs.cmu.edu/project/link/pub/www/papers/ps/tr91-196.pdf)
+* Bob Coeke, [New Scientist: Quantum Links Let Computers Read](http://www.cs.ox.ac.uk/people/bob.coecke/NewScientist.pdf)
+
 Sections in Atomese
 -------------------
 Sections are represented in Atomese as follows:
