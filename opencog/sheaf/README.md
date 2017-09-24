@@ -212,6 +212,11 @@ categories and internal languages. That is, languages are parsed, and
 the act of parsing is the discovery of those sections that have legal
 joinings of connectors.
 
+References:
+* John Baez, [Physics, Topology, Logic and Computation: A Rosetta Stone](http://math.ucr.edu/home/baez/rosetta.pdf)
+* Multiple publications from Bob Coecke.
+* Jean-Yves Girard, "Locus Solum"
+
 In relation to Link Grammar
 ---------------------------
 The definition and use of sections and connectors here is directly
