@@ -103,7 +103,27 @@
 "
   get-conseq-germs CONSEQ - return all germs that have this connector
   sequence in thier section. There is one connector sequence per section.
+
+  Assumes that all sections are already in the atomspace; if not, use
+  `fetch-conseq-germs` instead.
 "
+	; Walk over all the Sections on the connector sequence.
+	; The germ is in position 0 in the section.
+	(map (lambda (SEC) (cog-outgoing-atom SEC 0))
+		(cog-incoming-by-type CONSEQ 'Section))
+)
+
+; ---------------------------------------------------------------
+;
+(define-public (fetch-conseq-germs CONSEQ)
+"
+  fetch-conseq-germs CONSEQ - return all germs that have this connector
+  sequence in thier section. There is one connector sequence per section.
+
+  Fetches sections from storage (does not assume they have been loaded
+  yet). Use 'get-conseq-germs` if fetching is not needed.
+"
+	(fetch-incoming-by-type CONSEQ 'Section)
 	; Walk over all the Sections on the connector sequence.
 	; The germ is in position 0 in the section.
 	(map (lambda (SEC) (cog-outgoing-atom SEC 0))
@@ -116,6 +136,9 @@
 "
   get-connector-germs CONNECTOR - return all germs that have this
   connector appearing in thier section.
+
+  Assumes that all connector sequences and sections are already in
+  the atomspace; if not, use `fetch-connnector-germs` instead.
 "
 	; get-conseq-germs returns a list, so concatenate them.
 	(delete-dup-atoms
@@ -126,15 +149,56 @@
 
 ; ---------------------------------------------------------------
 ;
+(define-public (fetch-connector-germs CNCTR)
+"
+  fetch-connector-germs CONNECTOR - return all germs that have this
+  connector appearing in thier section.
+
+  Fetches sections and connector sequences from storage (does not
+  assume they have been loaded yet). Use 'fetch-connnector-germs`
+  if fetching is not needed.
+"
+	(fetch-incoming-by-type CNCTR 'ConnectorSeq)
+	; fetch-conseq-germs returns a list, so concatenate them.
+	(delete-dup-atoms
+		(concatenate!
+			(map fetch-conseq-germs
+				(cog-incoming-by-type CNCTR 'ConnectorSeq))))
+)
+
+; ---------------------------------------------------------------
+;
 (define-public (get-endpoint-germs END)
 "
   get-endpoing-germs ENDPOINT - return all germs that have this
   endpoint appearing in a connector in thier section.
+
+  Assumes that all connector sequences and sections are already in
+  the atomspace; if not, use `fetch-endpoint-germs` instead.
 "
 	; get-connector-germs returns a list, so concatenate them.
 	(delete-dup-atoms
 		(concatenate!
 			(map get-connector-germs
+				(cog-incoming-by-type END 'Connector))))
+)
+
+; ---------------------------------------------------------------
+;
+(define-public (fetch-endpoint-germs END)
+"
+  fetch-endpoing-germs ENDPOINT - return all germs that have this
+  endpoint appearing in a connector in thier section.
+
+  Fetches connectors, connector sequences and sections from storage
+  (does not assume they have been loaded yet). Use 'fetch-connnector-germs`
+  if fetching is not needed.
+"
+	(fetch-incoming-by-type END 'Connector)
+	; fetch-connector-germs returns a list, so concatenate them.
+	(delete-dup-atoms
+		(concatenate!
+			(map fetch-connector-germs
 				(cog-incoming-by-type END 'Connector))))
 )
 
