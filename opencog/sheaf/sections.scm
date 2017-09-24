@@ -74,22 +74,10 @@
   Assumes that the sections for the germ are already in the atomspace.
   These can be loaded by saying (fetch-incoming-by-type GERM 'Section)
 "
-	; Given a Section i.e. a (germ, connector-set) pair, walk over
-	; all the connectors in the connector set, and add the connector
-	; to the connector-list.
-	(define (add-to-list SEQ CNTR-LIST)
-		(fold
-			(lambda (CNCTR LST)
-				; Hmm. Is this test for the type really needed?
-				(if (eq? 'Connector (cog-type CNCTR))
-					(cons CNCTR LST) LST))
-			CNTR-LIST
-			; second atom of Section is a ConnectorSeq
-			(cog-outgoing-set SEQ)))
-
-	; Walk over all the Sections on the germ.
 	(delete-dup-atoms
-		(fold add-to-list '() (get-germ-connector-seqs GERM)))
+		(concatenate!
+			(map cog-outgoing-set
+				(get-germ-connector-seqs GERM))))
 )
 
 ; ---------------------------------------------------------------
