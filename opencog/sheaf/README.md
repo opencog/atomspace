@@ -1,4 +1,57 @@
 
+Sheafs and Network Inference
+============================
+This directory provides two sets of tools. One set, the "sheaves",
+provides a simple and easy API for working with graphs. The second
+toolset extracts graphical relationships from linear data, via an MST
+parser.
+
+Sheafs - Quick Start
+====================
+Sheafs provide a simple and convenient mechanism for working with
+graphs "locally", by making the nearest-neighbors of a vertex apparent.
+
+The traditional textbook-canonical way of specifying a graph is to
+state that it is a set of vertexes, and a set of edges that connect
+pairs of vertexes.  The problem with this description is that given
+any vertex, one has no idea of what edges are connected to it, without
+scanning the entire set of edges. Another problem is that vertexes and
+edges are not composable; that is, when they are composed together,
+they are no longer vertexes or edges, but a more general type: a 
+"subgraph".  By contrast, sheaves carry local information, and are
+composable.
+
+Given a vertex V, a "section" is defined as a set of pairs (V,E) of
+that vertex V and all edges E that are attached to it.  That's it!
+Very simple!  A section can be envisioned as a "spider", with the
+vertex V as the body of the spider, and the edges as the legs of the
+spider.
+
+Sections are composable, in that several can be connected together
+by joining ("connecting") edges.  The result is still a section, in
+that it has a central blob as the spider-body, and a whole bunch of
+legs sticking out. Composing sections in such a way that the edges
+connect only in legal ways is called "parsing".
+
+Sections are represented in Atomese as follows:
+```
+     Section
+         Atom "foo" ; usually a Node of some kind.
+         ConnectorSeq
+             Connector
+                Atom "bar"      ; for example, a WordNode.
+                LabelAtom "foo-to-bar label" ; can be a PredicateNode.
+             Connector
+                ....
+```
+Here, `(Atom "foo")` is the spider-body. Each leg of the spider is
+represented by a `Connector` link. In the above example, the vertex
+"foo" has an edge "foo-bar" attached to it, with `(Atom "bar")` being
+the far-endpoint of that edge. The edge carries an optional label,
+shown as `LabelAtom`, above.
+
+
+
 Network Inference and Analysis Tools
 ====================================
 
