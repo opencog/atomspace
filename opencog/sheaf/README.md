@@ -37,8 +37,8 @@ Another way of visualizing sections is to envision a jigsaw-puzzle
 piece instead of a spider. The vertex V is a label on the puzzle-piece,
 and each leg is a tab or slot on the puzzle-piece. The tabs or slots
 are now obviously connectors: this emphasizes that jigsaw-puzzle pieces
-can be conneted together legally only when the connectors fit togehter.
-Again: the act of fiting together puzzle-pieces in a legal fashion is
+can be connected together legally only when the connectors fit together.
+Again: the act of fitting together puzzle-pieces in a legal fashion is
 termed "parsing".
 
 In standard mathematical terminology, the spider-body or jigsaw-label
@@ -107,7 +107,7 @@ in general, there will be many different sections having the same germ.
 
 In this case, it is common to visualize sections as pieces of paper,
 stacked one on top another, aligned so that the germs are always above
-one-another. This stacking is refered to as a "stalk". Alternately, the
+one-another. This stacking is referred to as a "stalk". Alternately, the
 stalk can be visualized as a fir-tree or pine-tree, where annual growths
 define the trunk, and then branches shoot off to the side, on level
 planes or "etales". A single section is then just that etale, that plane
@@ -123,7 +123,7 @@ together with the rules that dictate how the connectors can connect
 is terms a "sheaf".
 
 The axioms of sheaf theory can be understood as saying that the
-puzzle-pieces can only be assmebled in certain legal ways, and that
+puzzle-pieces can only be assembled in certain legal ways, and that
 sub-assemblies can be intersected with one-another, as long as they
 are correctly lined up.  The Wikipedia page for Sheaf Theory bears
 very little resemblance to the description above, even though they are
@@ -138,8 +138,8 @@ In relation to Graph Theory
 Note that the above started by talking about graphs, but ends at a
 somewhat different place.  It is worth reviewing the differences.
 In the canonical description of a graph, it is implicitly assumed,
-without statement, that ecah vertex is unique and unambigous and
-obviously a different vertex than eny of the others. Likewise for
+without statement, that each vertex is unique and unambiguous and
+obviously a different vertex than any of the others. Likewise for
 edges: they join pairs of vertexes, and there is no confusion about
 what is being connected.
 
@@ -154,7 +154,7 @@ vertexes into a common set, the "germ".
 In graph theory, an edge unambiguously connects two vertexes. By
 contrast, the connectors on a section are a bit more ambiguous: they can
 connect to anything else that is legally connectable: the connectors
-must match, must be contractable.  The connectability of connectors
+must match, must be contractible.  The connectibility of connectors
 are given by rules, but those rules are "user-defined" (although they
 usually match connectors to germs and force edge-label agreement).
 
@@ -188,9 +188,9 @@ algebra are just specific rules for connecting connectors so that
 linearity is preserved.
 
 The N-gram in linguistics an example of an degree-N tensor. The count of
-the number of occurances that an N-gram is seen is the weight.
+the number of occurrences that an N-gram is seen is the weight.
 Sometimes the collection of N-grams is called a "vector", but this is
-not quite right, because when multiple N-grams are assebled to form a
+not quite right, because when multiple N-grams are assembled to form a
 sentence, the words must match-up correctly: N-grams are tensor
 elements.
 
@@ -202,7 +202,7 @@ examples of non-symmetric monoidal categories.
 
 This viewpoint is rather complex, and is not elaborated here. However,
 it is useful: it provides insight into the nature of parsing, and
-explains the correspondance (Curry-Howard correspondance) between
+explains the correspondence (Curry-Howard correspondence) between
 categories and internal languages. That is, languages are parsed, and
 the act of parsing is the discovery of those sections that have legal
 joinings of connectors.
@@ -216,7 +216,7 @@ the discovery and analysis of generalized networks of relationships
 between concepts and events taken from observations of the external
 world.
 
-In link-grammar, "germs" are called "lexical items". The "conenctor
+In link-grammar, "germs" are called "lexical items". The "connector
 sequences" are called "disjuncts". The "stalk" is a lexical entry or
 dictionary entry. The fact that the disjuncts are disjoined is a way of
 saying that each etale (section) of a germ is distinct.
@@ -228,7 +228,7 @@ Some recurring terms are used in the code, and are defined here:
 * "germ"      -- This is the spider-body: the vertex at the center.
 * "section"   -- This is a single spider (jigsaw-piece), having a single
                  germ at it's center. (Note: this is in conflict with
-                 common mathematical terminlogy, where a section consists
+                 common mathematical terminology, where a section consists
                  of one or more connected spiders/jigsaw-pieces).
 * "connector" -- As described above; an edge attached to a germ.
 * "stalk"     -- This is the collection of all sections that have the
@@ -482,7 +482,7 @@ follows:
 2) Observe a lot of sequences, and count the frequency with which edges
    occur.
 3) Compute the mutual information (MI) for each edge. That is, each edge
-   has two endpoints, and the co-occurance of these endpoints can be
+   has two endpoints, and the co-occurrence of these endpoints can be
    captured as the mutual information between them.  The MI serves as
    a kind of measure of covariance or correlation.
 4) Re-observe a lot of sequences, this time over-laying them with a
