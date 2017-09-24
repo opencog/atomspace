@@ -115,7 +115,7 @@
 				(fold
 					(lambda (PAIR sum)
 						(define vecval (fvec (gar PAIR)))
-						; Avoid fetching teh pair value if its
+						; Avoid fetching the pair value if its
 						; multiply-by-zero
 						(if (eqv? 0 vecval)
 							sum
