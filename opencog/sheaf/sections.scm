@@ -24,7 +24,9 @@
 ; edge connecting two vertexes. Its a labelled edge - the
 ; DirNode is the label.  Formally, the body is called the "germ".
 ;
-; The utilities here include:
+; The utilities provide various ways of accessing different parts of
+; the section, given one of the atoms in a section. So, for example:
+; given a germ, find the various parts of sections:
 ;
 ; get-germ-connector-seqs - given the germ, return a list of all
 ;      ConnectorSeq's appearing in sections on the germ.  The
@@ -38,6 +40,8 @@
 ;      endpoints (legs or vertexes) on all sections having that germ.
 ;      The endpoint is defined as the first atom in the connector.
 ;
+; Conversely, given one of the other parts, find the germs:
+;
 ; get-conseq-germs        - given a connector sequence, return all
 ;       germs that have this connector sequence in thier section.
 ;       There is one connector sequence per section.
@@ -49,6 +53,35 @@
 
 ; ---------------------------------------------------------------
 ;
+(define-public (get-germ-sections GERM)
+"
+  get-germ-sections GERM - return all sections that the germ is
+  at the center of.
+
+  Assumes that the sections for the germ are already in the atomspace.
+  Use `fetch-germ-sections` to load them from storage.
+"
+	; This is a trivial wrapper ... but hey.
+	(cog-incoming-by-type GERM 'Section)
+)
+
+; ---------------------------------------------------------------
+;
+(define-public (fetch-germ-sections GERM)
+"
+  fetch-germ-sections GERM - return all sections that the germ is
+  at the center of.
+
+  Fetches the sections from storage; does not assume they are loaded
+  yet.  Use `get-germ-sections` if fetching is not needed.
+"
+	; This is a trivial wrapper ... but hey.
+	(fetch-incoming-by-type GERM 'Section)
+	(cog-incoming-by-type GERM 'Section)
+)
+
+; ---------------------------------------------------------------
+;
 (define-public (get-germ-connector-seqs GERM)
 "
   get-germ-connector-seqs GERM - return all connector seqeucences
@@ -56,12 +89,13 @@
   per section.
 
   Assumes that the sections for the germ are already in the atomspace.
-  These can be loaded by saying (fetch-incoming-by-type GERM 'Section)
+  These can be loaded by saying (fetch-germ-sections GERM)
 "
 	; Walk over all the Sections on the germ.
 	; The ConnectorSeq is in position 1 in the section.
-	(map (lambda (SEC) (cog-outgoing-atom SEC 1))
-		(cog-incoming-by-type GERM 'Section))
+	(map
+		(lambda (SEC) (cog-outgoing-atom SEC 1))
+		(get-germ-sections GERM))
 )
 
 ; ---------------------------------------------------------------
@@ -97,6 +131,8 @@
 			(get-germ-connectors GERM)))
 )
 
+; ---------------------------------------------------------------
+; ---------------------------------------------------------------
 ; ---------------------------------------------------------------
 ;
 (define-public (get-conseq-germs CONSEQ)
