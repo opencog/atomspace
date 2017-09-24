@@ -4,6 +4,8 @@
 ;
 (define-module (opencog sheaf))
 
+(use-modules (opencog))
+
 ; The files are loaded in pipeline order.
 ; In general, the later files depend on definitions contained
 ; in the earlier files.
