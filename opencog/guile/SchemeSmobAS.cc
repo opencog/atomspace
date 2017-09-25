@@ -18,7 +18,7 @@ using namespace opencog;
 // Need a lock to protect the map, since multiple threads may be trying
 // to update this map.  The map contains a use-count for the number of
 // threads that are currently using this atomspace as the current
-// attomspace.  When the count drops to zero, the atomspace will be
+// atomspace.  When the count drops to zero, the atomspace will be
 // reaped if the number of SCM references also drops to zero (and the
 // GC runs).
 std::mutex SchemeSmob::as_mtx;
@@ -347,11 +347,10 @@ AtomSpace* SchemeSmob::ss_get_env_as(const char* subr)
 
 	SCM ref = scm_fluid_ref(atomspace_fluid);
 	AtomSpace* as = ss_to_atomspace(ref);
-	// if (NULL == as)
+	// if (nullptr == as)
 	//	scm_misc_error(subr, "No atomspace was specified!", SCM_BOOL_F);
 	return as;
 }
-
 
 /* ============================================================== */
 
