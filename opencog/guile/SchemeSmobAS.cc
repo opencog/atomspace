@@ -310,14 +310,12 @@ void SchemeSmob::as_ref_count(SCM old_as, AtomSpace *nas)
  */
 SCM SchemeSmob::ss_set_as (SCM new_as)
 {
-	if (not SCM_SMOB_PREDICATE(SchemeSmob::cog_misc_tag, new_as))
-		return SCM_BOOL_F;
-
-	if (COG_AS != SCM_SMOB_FLAGS(new_as))
+	AtomSpace* nas = ss_to_atomspace(new_as);
+	if (!nas)
 		return SCM_BOOL_F;
 
 	SCM old_as = ss_get_as();
-	as_ref_count(old_as, ss_to_atomspace(new_as));
+	as_ref_count(old_as, nas);
 
 	scm_fluid_set_x(atomspace_fluid, new_as);
 
