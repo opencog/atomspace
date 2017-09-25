@@ -20,6 +20,8 @@
  * 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
  */
 
+#include <boost/algorithm/string.hpp>
+
 #include <opencog/atomspace/AtomSpace.h>
 #include <opencog/guile/SchemeEval.h>
 #include <opencog/util/Logger.h>
@@ -28,37 +30,38 @@ using namespace opencog;
 
 class MultiAtomSpace :  public CxxTest::TestSuite
 {
-	private:
-		AtomSpace* main_as;
-		SchemeEval* evaluator;
-		Handle disorder;
-		Handle disordered;
-		Handle disor_more;
+private:
+	AtomSpace* main_as;
+	SchemeEval* evaluator;
+	Handle disorder;
+	Handle disordered;
+	Handle disor_more;
 
-	public:
+public:
 
-		MultiAtomSpace(void)
-		{
-			logger().set_level(Logger::DEBUG);
-			logger().set_print_to_stdout_flag(true);
-		}
+	MultiAtomSpace(void)
+	{
+		logger().set_level(Logger::DEBUG);
+		logger().set_print_to_stdout_flag(true);
+	}
 
-		~MultiAtomSpace()
-		{
-			// erase the log file if no assertions failed
-			if (!CxxTest::TestTracker::tracker().suiteFailed())
-				std::remove(logger().get_filename().c_str());
-		}
+	~MultiAtomSpace()
+	{
+		// erase the log file if no assertions failed
+		if (!CxxTest::TestTracker::tracker().suiteFailed())
+			std::remove(logger().get_filename().c_str());
+	}
 
-		void setUp(void);
-		void tearDown(void);
+	void setUp(void);
+	void tearDown(void);
 
-		void test_two_scm(void);
-		void test_three(void);
-		void test_load(void);
-		void test_nest(void);
-		void test_nest_scm(void);
-		void test_arg_scm(void);
+	void test_two_scm(void);
+	void test_three(void);
+	void test_load(void);
+	void test_nest(void);
+	void test_nest_scm(void);
+	void test_arg_scm(void);
+	void test_pm_scm(void);
 };
 
 /*
@@ -77,9 +80,9 @@ void MultiAtomSpace::setUp(void)
 void MultiAtomSpace::tearDown(void)
 {
 	delete evaluator;
-	evaluator = NULL;
+	evaluator = nullptr;
 	delete main_as;
-	main_as = NULL;
+	main_as = nullptr;
 }
 
 #define CHKERR \
@@ -500,3 +503,19 @@ void MultiAtomSpace::test_arg_scm(void)
 	logger().debug("END TEST: %s", __FUNCTION__);
 }
 
+/**
+ * Create a new atomspace from scheme and work (use the pattern
+ * matcher) inside this atomspace.
+ */
+void MultiAtomSpace::test_pm_scm(void)
+{
+	logger().debug("BEGIN TEST: %s", __FUNCTION__);
+
+	std::string rs = evaluator->eval("(load-from-path \"tests/scm/pm.scm\")");
+	boost::trim(rs);
+	std::cout << "rs = " << rs << std::endl;
+
+	TSM_ASSERT("Crashed while working on the new atomspace", rs.empty());
+
+	logger().debug("END TEST: %s", __FUNCTION__);
+}
