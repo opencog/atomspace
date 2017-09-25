@@ -35,8 +35,9 @@ bool Satisfier::grounding(const HandleMap &var_soln,
 	// PatternMatchEngine::print_solution(var_soln, term_soln);
 	_result = TruthValue::TRUE_TV();
 
-	// Look for more groundings.
-	return false;
+	// No need to look for more groundings as _result isn't going to change
+	// and opencog::satisfaction_link only needs the value of _result.
+	return true;
 }
 
 /// This method handles the case of SequentialAnd, SequentialOr with
