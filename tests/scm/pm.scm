@@ -5,6 +5,10 @@
 (use-modules (opencog query))
 (use-modules (opencog rule-engine))
 
+;; Create a new atomspace to not by-pass the problem (due to
+;; WORK_AROUND_GUILE_20_GC_BUG in SchemeSmobAS.cc)
+(define post-init-as (cog-new-atomspace))
+
 ;; AtomSpace use to produce the bug. It crashes as soon as it gets
 ;; prematurely deleted
 (define bug-as (cog-new-atomspace))
@@ -30,6 +34,7 @@
                     (Variable "$T")))
          ;; Run and-bit-prior-rule over bug-as
          (results (cog-bind and-bit-prior-rule)))  ;; <--- bug
+    (gc) ;; <--- precipitate the bug
     (cog-logger-debug "failed yet?")))
 
 (for-each run-bug (iota 100))
