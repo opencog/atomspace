@@ -119,7 +119,7 @@ bool is_constant(const HandleSet& vars, const Handle& clause)
  * pattern does not contain any "virtual" links, then the pattern
  * matcher works correctly only if there is one single, connected
  * component (this is by design, since we don't want to deal with
- * the combinatoric explosion of grounding multuple distinct components).
+ * the combinatoric explosion of grounding multiple distinct components).
  * If the pattern does contain "virtual" links, then the connected
  * components should be grounded first, and the results then combined
  * by exploring the combinatoric possibilites presented by the virtual
