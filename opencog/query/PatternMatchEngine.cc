@@ -1660,8 +1660,8 @@ bool PatternMatchEngine::do_next_clause(void)
  * sole reason of this set is to avoid infinite resursion, i.e. of
  * re-identifying the same clause over and over as unsolved.
  *
- * The words "solved" and "grounded" are used as synonyms throught the
- * code.
+ * The words "solved" and "grounded" are used as synonyms through out
+ * the code.
  *
  * Additional complications are introduced by the presence of
  * evaluatable terms, black-box terms, and optional clauses. An
@@ -1671,7 +1671,7 @@ bool PatternMatchEngine::do_next_clause(void)
  * "true". Thus, these can only be grounded after all other possible
  * clauses are grounded; thus these are saved for last.  It is always
  * possible to save these for last, because earlier stages have
- * guaranteed that all of he non-virtual clauses are connected.
+ * guaranteed that all of the non-virtual clauses are connected.
  * Anyway, evaluatables come in two forms: those that can be evaluated
  * quickly, and those that require a "black-box" evaluation of some
  * scheme or python code. Of the two, we save "black-box" for last.

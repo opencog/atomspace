@@ -469,9 +469,9 @@ bool InitiateSearchCB::neighbor_search(PatternMatchEngine *pme)
  *    non-variable node in the pattern. So the disucssion below almost
  *    surely does not apply.
  *
- *    But if yhou really want this, there are several possible remedies.
+ *    But if you really want this, there are several possible remedies.
  *    One is to modify the link_type_search() callback to try each
- *    possible link type that is considered bo be equivalent by
+ *    possible link type that is considered to be equivalent by
  *    link_match(). Another alternative is to just leave the
  *    link_match() callback alone, and use variables for links, instead.
  *    This is probably the best strategy, because then the fairly
