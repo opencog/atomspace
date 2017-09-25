@@ -34,6 +34,7 @@
                     (Variable "$T")))
          ;; Run and-bit-prior-rule over bug-as
          (results (cog-bind and-bit-prior-rule)))  ;; <--- bug
+    (gc) ;; <--- precipitate the bug
     (cog-logger-debug "failed yet?")))
 
 (for-each run-bug (iota 100))
