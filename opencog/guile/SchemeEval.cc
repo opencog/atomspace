@@ -547,14 +547,14 @@ void SchemeEval::do_eval(const std::string &expr)
 	per_thread_init();
 
 	// Set global _atomspace variable in the execution environment.
-	AtomSpace* saved_as = NULL;
+	AtomSpace* saved_as = nullptr;
 	if (_atomspace)
 	{
 		saved_as = SchemeSmob::ss_get_env_as("do_eval");
 		if (saved_as != _atomspace)
 			SchemeSmob::ss_set_env_as(_atomspace);
 		else
-			saved_as = NULL;
+			saved_as = nullptr;
 	}
 
 	_input_line += expr;
