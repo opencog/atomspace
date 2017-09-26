@@ -14,70 +14,19 @@
 (define bug-as (cog-new-atomspace))
 (cog-set-atomspace! bug-as) ;; <--- bug
 
+(define (my-precondition X)
+  (stv 1 1))
+
 (define query
-(BindLink
-   (VariableList
-      (VariableNode "$X")
-      (VariableNode "$Y")
-   )
+(Bind
    (AndLink
-      (EvaluationLink
-         (GroundedPredicateNode "scm: gt-zero-confidence")
-         (AndLink
-            (EvaluationLink
-               (PredicateNode "P")
-               (VariableNode "$Y")
-            )
-            (EvaluationLink
-               (PredicateNode "P")
-               (VariableNode "$X")
-            )
-         )
+      (Evaluation ;; <--- bug
+         (GroundedPredicate "scm: my-precondition")
+         (Variable "$X")
       )
-      (AndLink
-         (EvaluationLink
-            (PredicateNode "P")
-            (VariableNode "$Y")
-         )
-         (EvaluationLink
-            (PredicateNode "P")
-            (VariableNode "$X")
-         )
-      )
+      (Concept "I")
    )
-   (ExecutionOutputLink
-      (GroundedSchemaNode "scm: conditional-full-instantiation-scope-formula")
-      (ListLink
-         (PredicateNode "Q")
-         (AndLink
-            (EvaluationLink
-               (PredicateNode "P")
-               (VariableNode "$Y")
-            )
-            (EvaluationLink
-               (PredicateNode "P")
-               (VariableNode "$X")
-            )
-         )
-         (ImplicationScopeLink (stv 0.0001 0.001)
-            (VariableList
-               (VariableNode "$X")
-               (VariableNode "$Y")
-            )
-            (AndLink
-               (EvaluationLink
-                  (PredicateNode "P")
-                  (VariableNode "$Y")
-               )
-               (EvaluationLink
-                  (PredicateNode "P")
-                  (VariableNode "$X")
-               )
-            )
-            (PredicateNode "Q")
-         )
-      )
-   )
+   (Concept "O")
 )
 )
 
@@ -86,7 +35,6 @@
 (define (run-bug i)
   (cog-logger-debug "run-bug ~a" i)
   (cog-bind query)
-  (gc) ;; <--- precipitate the bug
-  (cog-logger-debug "failed yet?"))
+  (gc)) ;; <--- precipitate the bug
 
 (for-each run-bug (iota 100))
