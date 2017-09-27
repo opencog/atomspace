@@ -54,6 +54,11 @@ private:
 		COG_EXTEND      // callbacks into C++ code.
 	};
 
+	// Encrypt and decrypt atomspace pointer, work around to bug
+	// https://github.com/opencog/atomspace/issues/1382
+    static AtomSpace* encrypt(AtomSpace* as);
+    static AtomSpace* decrypt(AtomSpace* as);
+
 	static std::atomic_flag is_inited;
 	static void module_init(void*);
 	static void register_procs();

@@ -24,6 +24,20 @@ using namespace opencog;
 std::mutex SchemeSmob::as_mtx;
 std::map<AtomSpace*, int> SchemeSmob::deleteable_as;
 
+AtomSpace* SchemeSmob::encrypt(AtomSpace* as)
+{
+	if (as == nullptr)
+		return as;
+	return (AtomSpace*)((long int)as xor 0x5555555555555555);
+}
+
+AtomSpace* SchemeSmob::decrypt(AtomSpace* as)
+{
+	// Encryption and decryption happen to be the same
+	return encrypt(as);
+}
+
+
 /* ============================================================== */
 
 std::string SchemeSmob::as_to_string(const AtomSpace *as)
@@ -43,7 +57,7 @@ std::string SchemeSmob::as_to_string(const AtomSpace *as)
 SCM SchemeSmob::make_as (AtomSpace *as)
 {
 	SCM smob;
-	SCM_NEWSMOB (smob, cog_misc_tag, as);
+	SCM_NEWSMOB (smob, cog_misc_tag, encrypt(as));
 	SCM_SET_SMOB_FLAGS(smob, COG_AS);
 	return smob;
 }
@@ -179,7 +193,7 @@ AtomSpace* SchemeSmob::ss_to_atomspace(SCM sas)
 	if (COG_AS != misctype)
 		return nullptr;
 
-	AtomSpace* as = (AtomSpace *) SCM_SMOB_DATA(sas);
+	AtomSpace* as = decrypt((AtomSpace *) SCM_SMOB_DATA(sas));
 	scm_remember_upto_here_1(sas);
 	return as;
 }
