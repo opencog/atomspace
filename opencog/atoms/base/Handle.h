@@ -335,8 +335,6 @@ struct equal_to<opencog::Handle>
     operator()(const opencog::Handle& lh,
                const opencog::Handle& rh) const noexcept
     {
-        if (lh == rh) return true;
-        if (nullptr == lh or nullptr == rh) return false;
         return opencog::content_eq(lh, rh);
     }
 };
