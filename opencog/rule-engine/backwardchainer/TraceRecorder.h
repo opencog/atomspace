@@ -82,7 +82,7 @@ public:
 	// Record whether a certain and-BIT is a proof of a certain target result
 	//
 	// EvaluationLink <TV>
-	//   PredicateNode "URE:BC:proof"
+	//   PredicateNode "URE:BC:proof-of"
 	//   List
 	//     <andbit_fcs>
 	//     <target_result> <TV>
