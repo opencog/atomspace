@@ -1,0 +1,97 @@
+/*
+ * MultiAtomSpaceQueryUTest.cxxtest
+ *
+ * Copyright (C) 2017 OpenCog Foundation
+ *
+ * Author: Nil Geisweiller
+ *
+ * This program is free software; you can redistribute it and/or modify
+ * it under the terms of the GNU Affero General Public License v3 as
+ * published by the Free Software Foundation and including the exceptions
+ * at http://opencog.org/wiki/Licenses
+ *
+ * This program is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ * GNU General Public License for more details.
+ *
+ * You should have received a copy of the GNU Affero General Public License
+ * along with this program; if not, write to:
+ * Free Software Foundation, Inc.,
+ * 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
+ */
+#include <opencog/guile/SchemeEval.h>
+#include <opencog/atomspace/AtomSpace.h>
+#include <opencog/attentionbank/AttentionBank.h>
+#include <opencog/query/BindLinkAPI.h>
+#include <opencog/util/Logger.h>
+
+using namespace opencog;
+
+class MultiAtomSpaceQueryUTest: public CxxTest::TestSuite {
+private:
+	AtomSpace _as;
+	SchemeEval _eval;
+public:
+	MultiAtomSpaceQueryUTest(void) : _eval(&_as)
+	{
+		logger().set_level(Logger::DEBUG);
+		logger().set_print_to_stdout_flag(true);
+
+		_eval.eval("(add-to-load-path \"..\")");
+		_eval.eval("(add-to-load-path \"../../..\")");
+	}
+
+	~MultiAtomSpaceQueryUTest()
+	{
+		// Erase the log file if no assertions failed.
+		if (!CxxTest::TestTracker::tracker().suiteFailed())
+			std::remove(logger().get_filename().c_str());
+	}
+
+	void setUp();
+	void tearDown();
+	void test_query_another_atomspace();
+};
+
+void MultiAtomSpaceQueryUTest::tearDown()
+{
+}
+
+void MultiAtomSpaceQueryUTest::setUp()
+{
+}
+
+#define al _as.add_link
+#define an _as.add_node
+#define qal query_as.add_link
+#define qan query_as.add_node
+
+void MultiAtomSpaceQueryUTest::test_query_another_atomspace()
+{
+	logger().debug("BEGIN TEST: %s", __FUNCTION__);
+
+	AtomSpace query_as;
+	Handle query = qal(BIND_LINK,
+	                   qal(EVALUATION_LINK,
+	                       qan(PREDICATE_NODE, "P"),
+	                       qan(VARIABLE_NODE, "$X")),
+	                   qan(CONCEPT_NODE, "A")),
+		data = al(EVALUATION_LINK,
+		          an(PREDICATE_NODE, "P"),
+		          an(CONCEPT_NODE, "my-arg"));
+
+	Handle results = bindlink(&_as, query),
+		expected = al(SET_LINK, an(CONCEPT_NODE, "A"));
+
+	logger().debug() << "query = " << oc_to_string(query);
+	logger().debug() << "results = " << oc_to_string(results);
+	logger().debug() << "expected = " << oc_to_string(expected);
+
+	TS_ASSERT_EQUALS(results, expected);
+}
+
+#undef al
+#undef an
+#undef qal
+#undef qan

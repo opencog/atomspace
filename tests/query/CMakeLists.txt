@@ -81,6 +81,8 @@ IF (HAVE_GUILE)
 
 	ADD_CXXTEST(NoExceptionUTest)
 
+	ADD_CXXTEST(MultiAtomSpaceQueryUTest)
+
 	TARGET_LINK_LIBRARIES(VarTypeNotUTest
 		${COGUTIL_LIBRARY}
 	)
