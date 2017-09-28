@@ -49,7 +49,7 @@ public:
 	              AtomSpace* control_as=nullptr);
 	~ControlPolicy();
 
-	const std::string preproof_predicate_name = "URE:BC:preproof";
+	const std::string preproof_predicate_name = "URE:BC:preproof-of";
 
 	// Inference rule set for expanding and-BITs.
 	RuleSet rules;

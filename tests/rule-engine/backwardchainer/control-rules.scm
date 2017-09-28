@@ -24,7 +24,7 @@
          (VariableNode "$B")
       )
       (EvaluationLink
-         (PredicateNode "URE:BC:preproof")
+         (PredicateNode "URE:BC:preproof-of")
          (ListLink
             (VariableNode "$A")
             (VariableNode "$T")
@@ -32,7 +32,7 @@
       )
    )
    (EvaluationLink
-      (PredicateNode "URE:BC:preproof")
+      (PredicateNode "URE:BC:preproof-of")
       (ListLink
          (VariableNode "$B")
          (VariableNode "$T")
