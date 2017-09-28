@@ -203,7 +203,7 @@ bool DefaultPatternMatchCB::node_match(const Handle& npat_h,
                                        const Handle& nsoln_h)
 {
 	// If equality, then a match.
-	return npat_h == nsoln_h;
+	return content_eq(npat_h, nsoln_h);
 }
 
 /**
@@ -561,6 +561,9 @@ bool DefaultPatternMatchCB::optional_clause_match(const Handle& ptrn,
 
 IncomingSet DefaultPatternMatchCB::get_incoming_set(const Handle& h)
 {
+	Handle h_in_as = _as->get_atom(h);
+	if (h_in_as)
+		return h_in_as->getIncomingSet(_as);
 	return h->getIncomingSet(_as);
 }
 
