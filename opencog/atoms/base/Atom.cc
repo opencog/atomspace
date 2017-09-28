@@ -84,7 +84,7 @@ namespace opencog {
 
 Atom::~Atom()
 {
-    _atom_space = NULL;
+    _atom_space = nullptr;
     if (0 < getIncomingSetSize()) {
         // This can't ever possibly happen. If it does, then there is
         // some very sick bug with the reference counting that the
@@ -362,7 +362,7 @@ void Atom::swap_atom(const LinkPtr& old, const LinkPtr& neu)
 
 size_t Atom::getIncomingSetSize() const
 {
-    if (NULL == _incoming_set) return 0;
+    if (nullptr == _incoming_set) return 0;
     std::lock_guard<std::mutex> lck (_mtx);
 
     size_t cnt = 0;
@@ -378,7 +378,7 @@ size_t Atom::getIncomingSetSize() const
 IncomingSet Atom::getIncomingSet(AtomSpace* as) const
 {
     static IncomingSet empty_set;
-    if (NULL == _incoming_set) return empty_set;
+    if (nullptr == _incoming_set) return empty_set;
 
     if (as) {
         const AtomTable *atab = &as->get_atomtable();

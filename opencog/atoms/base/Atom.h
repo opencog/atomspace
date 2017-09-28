@@ -294,7 +294,7 @@ public:
     //! That is, this call returns the incoming set as it was att the
     //! time of the call; any deletions that occur afterwards (possibly
     //! in other threads) will not be reflected in the returned set.
-    IncomingSet getIncomingSet(AtomSpace* = NULL) const;
+    IncomingSet getIncomingSet(AtomSpace* as=nullptr) const;
 
     //! Place incoming set into STL container of Handles.
     //! Example usage:
