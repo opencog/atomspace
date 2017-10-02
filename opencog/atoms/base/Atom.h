@@ -82,8 +82,8 @@ namespace opencog
 class AtomSpace;
 class AtomTable;
 
-//! arity of Links, represented as short integer (16 bits)
-typedef unsigned short Arity;
+//! arity of Links, represented as size_t to match outcoming set limit
+typedef std::size_t Arity;
 
 //! We use a std:vector instead of std::set for IncomingSet, because
 //! virtually all access will be either insert, or iterate, so we get
