@@ -150,7 +150,7 @@ protected:
 //
 // Here is a list of some of the users:
 //
-// B_B    -- cogutils logger boolean setters/getters.
+// B_B    -- cogutil logger boolean setters/getters.
 // B_HH   -- PatternSCM::value_is_type(), etc.
 //        -- LGDictSCM::do_lg_conn_type_match(), etc.
 // H_HH   -- ?? someoene??
@@ -158,17 +158,17 @@ protected:
 // H_HHHH -- do_backward_chaining, do_forward_chaining
 // H_HT   -- fetch-incoming-by-type
 // H_HZ   -- cog-bind-first-n
-// I_V    -- cogutils RandGen
+// I_V    -- cogutil RandGen
 // P_H    -- FunctionWrapper
 // S_AS   -- CogServerSCM::start_server()
-// S_S    -- cogutils logger API, see guile/LoggerSCM.h
+// S_S    -- cogutil logger API, see guile/LoggerSCM.h
 // S_SS   -- DistSCM  (Gearman server)
 // S_V    -- CogServerSCM::stop_server()
-//        -- cogutils logger get_level(), etc.
+//        -- cogutil logger get_level(), etc.
 // V_B    -- SQLPersistSCM:do_set_stall, PatternMiner
-// V_I    -- cogutils do_randgen_set_seed
+// V_I    -- cogutil do_randgen_set_seed
 // V_II   -- SQLPersistSCM:do_set_hilo
-// V_S    -- cogutils logger setters
+// V_S    -- cogutil logger setters
 //        -- SQLPersistSCM::do_open()
 //        -- ZMQPersistSCM::do_open()
 // V_V    -- SQLPersistSCM::do_close(), do_load(), do_store()

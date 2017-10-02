@@ -57,7 +57,7 @@ typedef std::set<AtomPtr> AtomPtrSet;
 // comment out the emit-signal functions below, and measure.
 // Alternately, launch gdb, get into the signal, and look at the stack.
 // boost::signals2 uses eleven stack frames to do its thing. Eleven!
-// Really!) Should be enough to use SigSlot in cogutils.  Need to just
+// Really!) Should be enough to use SigSlot in cogutil.  Need to just
 // finish this work.
 typedef boost::signals2::signal<void (const Handle&)> AtomSignal;
 typedef boost::signals2::signal<void (const AtomPtr&)> AtomPtrSignal;
