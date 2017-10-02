@@ -90,7 +90,7 @@ be built and run.
 
 ###### cogutil
 * Common OpenCog C++ utilities.
-* http://github.com/opencog/cogutils
+* http://github.com/opencog/cogutil
 * It uses exactly the same build procedure as this package. Be sure
   to `sudo make install` at the end.
 

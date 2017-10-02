@@ -127,5 +127,5 @@ cdef class Logger:
     def use_stdout(self,use_it=True):
         self.clog.set_print_to_stdout_flag(use_it)
 
-# This is the singlton instance created by cogutils.
+# This is the singleton instance created by cogutil.
 log = Logger()

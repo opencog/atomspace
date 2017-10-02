@@ -2,7 +2,7 @@ Code for  opencog atomspace and related APIs tutorial in C++.
 
 ##Requirements
 
-- [Cogutils](https://github.com/opencog/cogutils)
+- [Cogutil](https://github.com/opencog/cogutil)
 - [AtomSpace](https://github.com/opencog/atomspace)
 - Boost signals 
 
