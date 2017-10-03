@@ -1,5 +1,5 @@
 /*
- * tests/query/ConstantClausesUTest.cxxtest
+ * tests/query/DontExecUTest.cxxtest
  *
  * Copyright (C) 2017 OpenCog Foundation
  * All Rights Reserved
@@ -62,6 +62,7 @@ public:
 	void setUp();
 	void tearDown();
 
+	void test_DontExecLink_simple();
 	void test_DontExecLink_consumption();
 };
 
@@ -76,8 +77,39 @@ void DontExecUTest::setUp()
 /**
  * Test that DontExecLink are properly consumed when executed.
  */
+void DontExecUTest::test_DontExecLink_simple()
+{
+	logger().debug("BEGIN TEST: %s", __FUNCTION__);
+	eval.eval("(load-from-path \"tests/query/dont-exec-simple.scm\")");
+
+	Handle band = eval.eval_h("bad-and");
+	Handle dand = eval.eval_h("dont-and");
+	Handle want_band = eval.eval_h("(cog-execute! dont-and)");
+
+	logger().debug() << "simple result = " << oc_to_string(want_band);
+	// Hmm. Actually, we are not consuming this right now.
+	// logger().debug() << "simple expected = " << oc_to_string(band);
+	logger().debug() << "simple expected = " << oc_to_string(dand);
+
+	// Hmm. Actually, we are not consuming this right now.
+	// TS_ASSERT_EQUALS(want_band, band);
+	TS_ASSERT_EQUALS(want_band, dand);
+
+	Handle put_band = eval.eval_h("(cog-execute! put-and)");
+
+	logger().debug() << "put result = " << oc_to_string(put_band);
+	logger().debug() << "put expected = " << oc_to_string(band);
+
+	TS_ASSERT_EQUALS(put_band, band);
+	logger().debug("END TEST: %s", __FUNCTION__);
+}
+
+/**
+ * Test that DontExecLink are properly consumed when executed.
+ */
 void DontExecUTest::test_DontExecLink_consumption()
 {
+	logger().debug("BEGIN TEST: %s", __FUNCTION__);
 	eval.eval("(load-from-path \"tests/query/dont-exec.scm\")");
 
 	Handle bl = eval.eval_h("bl");
@@ -89,6 +121,7 @@ void DontExecUTest::test_DontExecLink_consumption()
 	logger().debug() << "expected = " << oc_to_string(expected);
 
 	TS_ASSERT_EQUALS(result, expected);
+	logger().debug("END TEST: %s", __FUNCTION__);
 }
 
 #undef al

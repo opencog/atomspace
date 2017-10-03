@@ -210,7 +210,12 @@ Handle Instantiator::walk_tree(const Handle& expr, bool silent)
 
 		// Step one: beta-reduce.
 		Handle red(ppp->reduce());
+
 		// Step two: execute the resulting body.
+		// (unless its not executable)
+		if (DONT_EXEC_LINK == red->getType())
+			return red->getOutgoingAtom(0);
+
 		Handle rex(walk_tree(red, silent));
 		if (nullptr == rex)
 			return rex;
@@ -420,10 +425,18 @@ Handle Instantiator::walk_tree(const Handle& expr, bool silent)
 
 	// If an atom is wrapped by the DontExecLink, then unwrap it,
 	// beta-reduce it, but don't execute it. Consume the DontExecLink.
+	// Actually, don't consume it. See discussion at issue #1303.
+	// XXX FIXME -- not consuming it seems wrong; this needs more
+	// analysis and experimentation.
 	if (DONT_EXEC_LINK == t)
 	{
+#ifdef CONSUME_THE_EXEC
+		if (_vmap->empty()) return expr->getOutgoingAtom(0);
+		return beta_reduce(expr->getOutgoingAtom(0), *_vmap);
+#else
 		if (_vmap->empty()) return expr;
 		return beta_reduce(expr, *_vmap);
+#endif
 	}
 
 	// None of the above. Create a duplicate link, but with an outgoing
