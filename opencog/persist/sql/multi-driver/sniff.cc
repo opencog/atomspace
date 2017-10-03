@@ -41,19 +41,19 @@ int atomCompare(Atom *a, Atom *b)
     }
     if (la->getArity() != lb->getArity())
     {
-        fprintf(stderr, "Error, arity mis-match, a=%d b=%d\n", la->getArity(), lb->getArity());
+        fprintf(stderr, "Error, arity mis-match, a=%lu b=%lu\n", la->getArity(), lb->getArity());
         rc --;
     }
     if (0 < la->getArity())
     {
         HandleSeq outa = la->getOutgoingSet();
         HandleSeq outb = lb->getOutgoingSet();
-        for (int i =0; i< la->getArity(); i++)
+        for (size_t i =0; i< la->getArity(); i++)
         {
             if (outa[i] != outb[i])
             {
                 fprintf(stderr, "Error, outgoing set mis-match, "
-                        "i=%d a=%lx b=%lx\n", i, outa[i].value(), outb[i].value());
+                        "i=%lu a=%lx b=%lx\n", i, outa[i].value(), outb[i].value());
                 rc --;
             }
         }
