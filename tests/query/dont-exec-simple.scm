@@ -1,5 +1,5 @@
 
-(use-modules (opencog))
+(use-modules (opencog) (opencog exec))
 
 (define bad-and (AndLink (Concept "a") (Concept "b")))
 
