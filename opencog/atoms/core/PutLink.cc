@@ -245,7 +245,8 @@ Handle PutLink::do_reduce(void) const
 {
 	Handle bods(_body);
 	Variables vars(_varlist);
-	// Resolve the body, if needed:
+	// Resolve the body, if needed. That is, if the body is
+	// given in a defintion, get that defintion.
 	Type btype = _body->getType();
 	if (DEFINED_SCHEMA_NODE == btype or
 	    DEFINED_PREDICATE_NODE == btype)
@@ -259,6 +260,7 @@ Handle PutLink::do_reduce(void) const
 			      bods->toString().c_str());
 	}
 
+	// If the body is a lambda, work with that.
 	if (classserver().isA(btype, LAMBDA_LINK))
 	{
 		LambdaLinkPtr lam(LambdaLinkCast(bods));
@@ -268,8 +270,10 @@ Handle PutLink::do_reduce(void) const
 		vars = lam->get_variables();
 	}
 
+	// Now get the values that we will plug into the body.
 	Type vtype = _values->getType();
 
+	// If there is only one variable in the PutLink body...
 	if (1 == vars.varseq.size())
 	{
 		if (SET_LINK != vtype)
@@ -286,7 +290,7 @@ Handle PutLink::do_reduce(void) const
 			}
 		}
 
-		// Iterate over the set...
+		// If the values are given in a set, then iterate over the set...
 		HandleSeq bset;
 		for (const Handle& h : _values->getOutgoingSet())
 		{
@@ -300,6 +304,10 @@ Handle PutLink::do_reduce(void) const
 		}
 		return Handle(createLink(bset, SET_LINK));
 	}
+
+	// If we are here, then there are multiple variables in the body.
+	// See how many values there are.  If the values are a ListLink,
+	// then assume that there is only a single set of values to plug in.
 	if (LIST_LINK == vtype)
 	{
 		const HandleSeq& oset = _values->getOutgoingSet();
@@ -313,6 +321,8 @@ Handle PutLink::do_reduce(void) const
 		}
 	}
 
+	// If we are here, then there are multiple values.
+	// These  MUST be given to us as a SetLink.
 	OC_ASSERT(SET_LINK == vtype,
 		"Should have caught this earlier, in the ctor");
 
