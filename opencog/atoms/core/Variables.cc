@@ -547,7 +547,7 @@ bool Variables::is_upper_bound(const Handle& glob, size_t n) const
  *
  * The resulting tree is NOT placed into any atomspace. If you want
  * that, you must do it yourself.  If you want evaluation or execution
- * to happen during sustitution, then use either the EvaluationLink,
+ * to happen during substitution, then use either the EvaluationLink,
  * the ExecutionOutputLink, or the Instantiator.
  *
  * So, for example, if this VariableList contains:
