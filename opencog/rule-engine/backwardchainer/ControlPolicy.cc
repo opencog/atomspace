@@ -255,18 +255,16 @@ HandleSet ControlPolicy::active_expansion_control_rules(const Handle& inf_rule_a
 		if (control_rule_active(ctrl_rule))
 			results.insert(ctrl_rule);
 
-	// Log active control rules
-	std::stringstream ss;
-	ss << "Active expansion control rules for "
-	   << inf_rule_alias->toString();
-	if (results.empty())
-		ss << "none";
-	else {
-		ss << "size = " << results.size() << ":";
+	// Log active control rules, if any
+	if (not results.empty()) {
+		std::stringstream ss;
+		ss << "Active expansion control rules for "
+		   << inf_rule_alias->toString()
+		   << "size = " << results.size() << ":";
 		for (const Handle& acr : results)
 			ss << " " << acr->idToString();
+		ure_logger().debug() << ss.str();
 	}
-	ure_logger().debug() << ss.str();
 
 	return results;
 }
