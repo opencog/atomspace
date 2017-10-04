@@ -92,8 +92,10 @@ void BackwardChainer::do_chain()
 
 void BackwardChainer::do_step()
 {
-	ure_logger().debug("Iteration %d", _iteration);
 	_iteration++;
+
+	ure_logger().debug() << "Iteration " << _iteration
+	                     << "/" << _configReader.get_maximum_iterations();
 
 	expand_bit();
 	fulfill_bit();
