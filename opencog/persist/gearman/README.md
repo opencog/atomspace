@@ -1,10 +1,10 @@
-﻿=Distributed evaluation of Scheme code with Gearman
+﻿# Distributed evaluation of Scheme code with Gearman
 
 This guile module allows scheme code to be evaluated on
 other (non-local, internet-connected, distributed) servers.
 Under the covers, it uses Gearman to perform the distribution.
 
-==Overview
+## Overview
 AtomSpace scheme users can distribute the evaluation of scheme code
 across multiple systems using the Gearman distributed job contol
 system.  Jobs are defined by writing (short) scheme programs, which
@@ -14,15 +14,15 @@ scheme strings.
 See https://en.wikipedia.org/wiki/Gearman for a description of the
 general framework.
 
-==Critique
+## Critique
 As currently implemented, this is a half-baked, incomplete, and mostly
 untested idea.
 
-* There is no job management and not network control.  Currenly,
+* There is no job management and no network control.  Currenly,
   there is no way for scheme job servers to be started on remote
   machines. Servers have to be started and managed by hand.
 
-* Load-balancing concepts are unclear and undocuemnted.
+* Load-balancing concepts are unclear and undocumented.
 
 * The current API only allows workers to be started once. Once the
   worker threads exit, they cannot ever be restarted again.
@@ -47,7 +47,7 @@ untested idea.
   connection to a shared pesistant SQL storage backend.  There is
   no documentation showing how this could best be done.
 
-==Prerequisites
+## Prerequisites
 * The `libgearman-dev` package must be installed before compiling.
 
 * To actually run the system (and run the unit test!) you must also
@@ -60,7 +60,7 @@ and, if necessary,
 sudo service gearman-job-server start
 ```
 
-==Usage
+## Usage
 This guile module can be loaded as:
 ```
    (use-modules (opencog) (opencog dist-gearman))
@@ -82,10 +82,10 @@ and a third function to distribute expressions.
 ```
 (exit-all-workers)
 ```
-   This causes all work handler threads to exit thier dispatch loops.
+   This causes all work handler threads to exit their dispatch loops.
    After this is called, no new queries will be accepted. Any pending
    work being performed in any worker threads will continue to run until
-   completion, and the results will returned to the client. After
+   completion, and the results will be returned to the client. After
    completion, the worker dispatch loop will exit, and callers of
    `start-work-handler`, above, will return.
 
@@ -100,15 +100,15 @@ and a third function to distribute expressions.
    the indicated worker. It will block until a reply is received.
    The reply is expected to be a string.
 
-== Implenetation status
+## Implenetation status
 
-Here's what you can curently do:
+Here's what you can currently do:
 
 1. A particular thread can be put into worker mode, giving the IP
    address of the gearmand job server that should be contacted to
    get work requests.
 
-2. A scheme expression can be sent to a gearmand server, for evalaution.
+2. A scheme expression can be sent to a gearmand server, for evaluation.
    The sender will block until the evaluation is complete, and a
    result is returned.
 
