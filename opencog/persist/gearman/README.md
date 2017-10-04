@@ -100,7 +100,7 @@ and a third function to distribute expressions.
    the indicated worker. It will block until a reply is received.
    The reply is expected to be a string.
 
-## Implenetation status
+## Implementation status
 
 Here's what you can currently do:
 
