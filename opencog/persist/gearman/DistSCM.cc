@@ -36,7 +36,7 @@ class DistSCM : public ModuleWrap
 private:
 	void init(void);
 
-	/// All threads will heep handling work until this is set to false.
+	/// All threads will keep handling work until this is set to false.
 	static bool keep_working;
 	void exit_all_workers(void);
 
@@ -137,7 +137,7 @@ std::string DistSCM::start_work_handler(const std::string& ipaddr_string,
 	std::cout << "Dist start-work-handler ip=" <<  ipaddr_string
 	          << " worker ID=" << workerID << std::endl;
 #endif
-	worker = gearman_worker_create(NULL);
+	worker = gearman_worker_create(nullptr);
 	if (nullptr == worker)
 	{
 		std::cerr << "Memory allocation failure on worker creation." << std::endl;
@@ -148,8 +148,8 @@ std::string DistSCM::start_work_handler(const std::string& ipaddr_string,
 	gearman_worker_add_options(worker, GEARMAN_WORKER_GRAB_UNIQ);
 
 	gearman_return_t rc;
-	rc = gearman_worker_add_server(worker,
-	                   ipaddr_string.c_str(), GEARMAN_DEFAULT_TCP_PORT);
+	rc = gearman_worker_add_server(worker, ipaddr_string.c_str(),
+	                               GEARMAN_DEFAULT_TCP_PORT);
 
 	if (gearman_failed(rc))
 	{
@@ -216,7 +216,7 @@ std::string DistSCM::start_work_handler(const std::string& ipaddr_string,
 /// to the gearmand server.  Wait for a reply, which will be (should be)
 /// a valid scheme expression.
 std::string DistSCM::dist_eval(const std::string& scm_string,
-                              const std::string& clientID)
+                               const std::string& clientID)
 {
 	gearman_client_st* clr;
 

@@ -35,9 +35,10 @@ untested idea.
 * The code is written in such a way that it depends on the atomspace.
   There is no reason for this: this could have just as easily been a
   generic distributed scheme evaluation infrastructure that does not
-  require or assume the atomspace.  In other words, the workers
-  should be redesigned to run the generic scheme evaluator, instead
-  of the AtomSpace evaluator.
+  require or assume the atomspace.  In other words, the workers should
+  be redesigned to run the generic scheme evaluator, instead of the
+  AtomSpace evaluator. The return value of a worker MUST be an atom,
+  other scheme type are currently not supported.
 
 * Security best practices is unclear.  Are users supposed to set up
   a VPN? How is authentication and authorization handled? Under what
