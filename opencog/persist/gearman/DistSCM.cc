@@ -216,7 +216,7 @@ std::string DistSCM::start_work_handler(const std::string& ipaddr_string,
 /// to the gearmand server.  Wait for a reply, which will be (should be)
 /// a valid scheme expression.
 std::string DistSCM::dist_eval(const std::string& scm_string,
-                              const std::string& clientID)
+                               const std::string& clientID)
 {
 	gearman_client_st* clr;
 
