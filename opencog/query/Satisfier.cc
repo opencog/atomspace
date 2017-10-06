@@ -177,8 +177,8 @@ Handle opencog::satisfying_set(AtomSpace* as, const Handle& hlink, size_t max_re
 		satvec.push_back(h);
 
 	// Create the satisfying set, and cache it.
-	Handle satset(createLink(SET_LINK, satvec));
-	set_groundings(satset);
+	Handle satset(createLink(satvec, SET_LINK));
+	bl->set_groundings(satset);
 
 	// No need to actually put it in the atomspace!?
 	return satset;
