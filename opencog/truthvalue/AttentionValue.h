@@ -28,6 +28,8 @@
 #include <limits.h>
 #include <memory>
 
+#include <opencog/atoms/base/FloatValue.h>
+
 namespace opencog
 {
 /** \addtogroup grp_atomspace
@@ -43,11 +45,19 @@ namespace opencog
 
 class AttentionValue;
 typedef std::shared_ptr<const AttentionValue> AttentionValuePtr;
-#define createAV std::make_shared<AttentionValue>
 
 class AttentionValue
-    : public std::enable_shared_from_this<AttentionValue>
+    : public FloatValue
 {
+protected:
+    enum {
+        STI;   //!< short-term importance
+        LTI;   //!< long-term importance
+        VLTI;  //!< represents the number of subsystems that need
+               //!< this atom to persist across system reboots.
+               //!< atoms with VLTI get saved to permanent storage.
+    };
+
 public:
     typedef double sti_t;   //!< short-term importance type
     typedef double lti_t;   //!< long-term importance type
@@ -67,39 +77,32 @@ public:
 
     //! to be used as default attention value
     static AttentionValuePtr DEFAULT_AV() {
-        static AttentionValuePtr instance = createAV();
+        static AttentionValuePtr instance =
+            std::make_shared<AttentionValue>();
         return instance;
     }
 
-private:
-    //CLASS FIELDS
-    sti_t m_STI;   //!< short-term importance
-    lti_t m_LTI;   //!< long-term importance
-    vlti_t m_VLTI; //!< represents the number of subsystems that need
-                   //!< this atom to persist across system reboots.
-                   //!< atoms with VLTI get saved to permanent storage.
 public:
-   /**
-     * @param STI (int): The STI value to set for the atom
-     * @param LTI (int): The LTI value to set for the atom
-     * @param VLTI (unsigned short): The VLTI value to set for this atom
-     */
-    AttentionValue(sti_t STI = DEFAULTATOMSTI,
-                   lti_t LTI = DEFAULTATOMLTI,
-                   vlti_t VLTI = DEFAULTATOMVLTI)
-        : m_STI(STI), m_LTI(LTI), m_VLTI(VLTI<0 ? 0 : VLTI) {}
-
-    ~AttentionValue() {}
+    AttentionValue(sti_t = DEFAULTATOMSTI,
+                   lti_t = DEFAULTATOMLTI,
+                   vlti_t = DEFAULTATOMVLTI);
+    AttentionValue(const AttentionValue&);
+    AttentionValue(const ProtoAtomPtr&);
 
     //! return STI property value
-    sti_t getSTI() const { return m_STI; }
-    float getScaledSTI() const { return (((float) m_STI) + 32768) / 65534; }
+    sti_t getSTI() const;
+
+    //! Return the STI scaled into the range 0.0 to 1.0.
+    double getScaledSTI() const
+    {
+        return (getSTI() + MAXSTI) / (MAXSTI - MINSTI);
+    }
 
     //! return LTI property value
-    lti_t getLTI() const { return m_LTI; }
+    lti_t getLTI() const;
 
     //! return VLTI property value
-    vlti_t getVLTI() const { return m_VLTI; }
+    vlti_t getVLTI() const;
 
     //! Returns const string "[sti_val, lti_val, vlti_val]"
     // @param none
@@ -107,8 +110,14 @@ public:
 
     //! Returns An AttentionValue* cloned from this AttentionValue
     // @param none
-    AttentionValuePtr clone() const { return createAV(m_STI, m_LTI, m_VLTI); }
-    AttentionValue* rawclone() const { return new AttentionValue(m_STI, m_LTI, m_VLTI); }
+    AttentionValuePtr clone() const
+    {
+        return std::make_shared<AttentionValue>(*this);
+    }
+    AttentionValue* rawclone() const
+    {
+        return new AttentionValue(*this);
+    }
 
     //! Compares two AttentionValues and returns true if the
     //! elements are equal false otherwise
