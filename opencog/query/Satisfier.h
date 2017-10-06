@@ -54,11 +54,15 @@ class Satisfier :
 			InitiateSearchCB(as),
 			DefaultPatternMatchCB(as),
 			_result(TruthValue::FALSE_TV()) {}
+
+		HandleSeq _varseq;
+		Handle _ground;
 		TruthValuePtr _result;
 
 		virtual void set_pattern(const Variables& vars,
 		                         const Pattern& pat)
 		{
+			_varseq = vars.varseq;
 			InitiateSearchCB::set_pattern(vars, pat);
 			DefaultPatternMatchCB::set_pattern(vars, pat);
 		}
@@ -93,7 +97,9 @@ class SatisfyingSet :
 {
 	public:
 		SatisfyingSet(AtomSpace* as) :
-			InitiateSearchCB(as), DefaultPatternMatchCB(as), max_results(SIZE_MAX) {}
+			InitiateSearchCB(as), DefaultPatternMatchCB(as),
+			max_results(SIZE_MAX) {}
+
 		HandleSeq _varseq;
 		HandleSet _satisfying_set;
 		size_t max_results;

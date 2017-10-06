@@ -35,6 +35,23 @@ bool Satisfier::grounding(const HandleMap &var_soln,
 	// PatternMatchEngine::print_solution(var_soln, term_soln);
 	_result = TruthValue::TRUE_TV();
 
+	// Record the grounding; we cache this later.
+	if (1 == _varseq.size())
+	{
+		_ground = var_soln_at(_varseq[0]);
+	}
+	else
+	{
+		// If more than one variable, encapsulate in sequential order,
+		// in a ListLink.
+		HandleSeq vargnds;
+		for (const Handle& hv : _varseq)
+		{
+			vargnds.push_back(var_soln.at(hv));
+		}
+		_ground = createLink(vargnds, LIST_LINK);
+	}
+
 	// No need to look for more groundings as _result isn't going to change
 	// and opencog::satisfaction_link only needs the value of _result.
 	return true;
@@ -136,6 +153,8 @@ TruthValuePtr opencog::satisfaction_link(AtomSpace* as, const Handle& hlink)
 	Satisfier sater(as);
 	plp->satisfy(sater);
 
+	// Cache the variable groundings. OpenPsi wants this.
+	plp->set_groundings(sater._ground);
 	return sater._result;
 }
 
