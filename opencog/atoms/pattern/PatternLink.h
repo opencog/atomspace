@@ -135,6 +135,10 @@ protected:
 	void common_init(void);
 	void setup_components(void);
 
+	// Cache the most recnt resuts of the ppatten match
+	void set_groundings(const Handle&);
+	void set_rewrite(const Handle&);
+
 protected:
 	// utility debug print
 	static void prt(const Handle& h)
@@ -170,6 +174,10 @@ public:
 	const HandleSeq& get_virtual(void) const { return _virtual; }
 
 	bool satisfy(PatternMatchCallback&) const;
+
+	// Return the cached variable groundings.
+	Handle get_groundings() const;
+	Handle get_rewrite() const;
 
 	void debug_log(void) const;
 
