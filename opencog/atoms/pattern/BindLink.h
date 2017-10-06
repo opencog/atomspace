@@ -42,6 +42,7 @@ protected:
 	// will initialize the rewrite term _implicand.
 	void extract_variables(const HandleSeq& oset);
 
+public:
 	// Cache the rewrite results
 	void set_rewrite(const Handle&);
 
