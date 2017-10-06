@@ -135,7 +135,7 @@ protected:
 	void common_init(void);
 	void setup_components(void);
 
-	// Cache the most recnt resuts of the ppatten match
+	// Cache the most recnt resuts of the pattern match
 	void set_groundings(const Handle&);
 
 protected:

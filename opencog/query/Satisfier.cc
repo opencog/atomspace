@@ -155,6 +155,11 @@ Handle opencog::satisfying_set(AtomSpace* as, const Handle& hlink, size_t max_re
 		return recognize(as, hlink);
 	}
 
+	// If we are here, then we are a GET_LINK, right?
+	if (GET_LINK != blt)
+		throw RuntimeException(TRACE_INFO,
+			"Unexpected SatisfyingLink type!");
+
 	PatternLinkPtr bl(PatternLinkCast(hlink));
 	if (NULL == bl)
 	{
@@ -171,7 +176,13 @@ Handle opencog::satisfying_set(AtomSpace* as, const Handle& hlink, size_t max_re
 	for (const Handle& h : sater._satisfying_set)
 		satvec.push_back(h);
 
-	return as->add_link(SET_LINK, satvec);
+	// Create the satisfying set, and cache it.
+	Handle satset(createLink(SET_LINK, satvec));
+	set_groundings(satset);
+
+	// No need to actually put it in the atomspace!?
+	return satset;
+	// return as->add_link(SET_LINK, satvec);
 }
 
 /* ===================== END OF FILE ===================== */
