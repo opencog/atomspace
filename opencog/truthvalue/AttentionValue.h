@@ -105,11 +105,16 @@ public:
     vlti_t getVLTI() const;
 
     //! Returns const string "[sti_val, lti_val, vlti_val]"
-    // @param none
+    //! @param none
     std::string toString() const;
 
+    static AttentionValuePtr createAV(sti_t s, lti_t l, vlti_t v)
+    {
+        return std::make_shared<const AttentionValue>(s, l, v);
+    }
+
     //! Returns An AttentionValue* cloned from this AttentionValue
-    // @param none
+    //! @param none
     AttentionValuePtr clone() const
     {
         return std::make_shared<AttentionValue>(*this);
@@ -121,7 +126,7 @@ public:
 
     //! Compares two AttentionValues and returns true if the
     //! elements are equal false otherwise
-    // @param none
+    //! @param none
     bool operator==(const AttentionValue& av) const
     {
         return getSTI() == av.getSTI() and
