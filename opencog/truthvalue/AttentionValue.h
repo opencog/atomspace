@@ -51,9 +51,9 @@ class AttentionValue
 {
 protected:
     enum {
-        STI;   //!< short-term importance
-        LTI;   //!< long-term importance
-        VLTI;  //!< represents the number of subsystems that need
+        STI,   //!< short-term importance
+        LTI,   //!< long-term importance
+        VLTI,  //!< represents the number of subsystems that need
                //!< this atom to persist across system reboots.
                //!< atoms with VLTI get saved to permanent storage.
     };
@@ -122,8 +122,11 @@ public:
     //! Compares two AttentionValues and returns true if the
     //! elements are equal false otherwise
     // @param none
-    bool operator==(const AttentionValue& av) const {
-        return (m_STI == av.getSTI() && m_LTI == av.getLTI() && m_VLTI == av.getVLTI());
+    bool operator==(const AttentionValue& av) const
+    {
+        return getSTI() == av.getSTI() and
+               getLTI() == av.getLTI() and
+               getVLTI() == av.getVLTI();
     }
     inline bool operator!=(const AttentionValue& rhs) const
          { return !(*this == rhs); }
@@ -134,6 +137,9 @@ public:
         return false;
     }
 };
+
+static inline AttentionValuePtr AttentionValueCast(const ProtoAtomPtr& pa)
+    { return std::dynamic_pointer_cast<const AttentionValue>(pa); }
 
 
 /** @}*/

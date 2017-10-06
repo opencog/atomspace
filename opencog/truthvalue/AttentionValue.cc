@@ -22,6 +22,7 @@
  * 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
  */
 
+#include <opencog/util/exceptions.h>
 #include "AttentionValue.h"
 
 using namespace opencog;
@@ -62,17 +63,17 @@ AttentionValue::AttentionValue(const ProtoAtomPtr& source) :
 	_value[VLTI] = ap->value()[VLTI];
 }
 
-sti_t AttentionValue::getSTI() const
+AttentionValue::sti_t AttentionValue::getSTI() const
 {
 	return _value[STI];
 }
 
-sti_t AttentionValue::getLTI() const
+AttentionValue::lti_t AttentionValue::getLTI() const
 {
 	return _value[LTI];
 }
 
-sti_t AttentionValue::getVLTI() const
+AttentionValue::vlti_t AttentionValue::getVLTI() const
 {
 	return _value[VLTI];
 }
