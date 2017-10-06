@@ -105,6 +105,29 @@ void BindLink::extract_variables(const HandleSeq& oset)
 }
 
 /* ================================================================= */
+// Cache of the most results obtained from the most recent run
+// of the pattern matcher.
+
+static const Handle& rewrite_key(void)
+{
+	static Handle rk(createNode(PREDICATE_NODE, "*-PatternRewriteKey-*"));
+	return rk;
+}
+
+/// Store a cache of the most recent pattern rewrite as a value,
+/// obtainable via a "well-known" key: "*-PatternRewriteKey-*"
+void PatternLink::set_rewrite(const Handle& rewr)
+{
+	setValue(rewrite_key(), rewr);
+}
+
+/// Return the cached value of the most recent rewrite.
+Handle PatternLink::get_rewrite(void) const
+{
+	HandleCast(getValue(rewrite_key()));
+}
+
+/* ================================================================= */
 
 DEFINE_LINK_FACTORY(BindLink, BIND_LINK)
 

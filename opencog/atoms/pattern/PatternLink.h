@@ -137,7 +137,6 @@ protected:
 
 	// Cache the most recnt resuts of the ppatten match
 	void set_groundings(const Handle&);
-	void set_rewrite(const Handle&);
 
 protected:
 	// utility debug print
@@ -177,7 +176,6 @@ public:
 
 	// Return the cached variable groundings.
 	Handle get_groundings() const;
-	Handle get_rewrite() const;
 
 	void debug_log(void) const;
 

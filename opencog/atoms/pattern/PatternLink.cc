@@ -926,12 +926,6 @@ static const Handle& groundings_key(void)
 	return gk;
 }
 
-static const Handle& rewrite_key(void)
-{
-	static Handle rk(createNode(PREDICATE_NODE, "*-PatternRewriteKey-*"));
-	return rk;
-}
-
 /// Store a cache of the most recent variable groundings as a value,
 /// obtainable via a "well-known" key: "*-PatternGroundingsKey-*"
 void PatternLink::set_groundings(const Handle& grnd)
@@ -939,23 +933,10 @@ void PatternLink::set_groundings(const Handle& grnd)
 	setValue(groundings_key(), grnd);
 }
 
-/// Store a cache of the most recent pattern rewrite as a value,
-/// obtainable via a "well-known" key: "*-PatternRewriteKey-*"
-void PatternLink::set_rewrite(const Handle& rewr)
-{
-	setValue(rewrite_key(), rewr);
-}
-
 /// Return the cached value of the most recent variable groundings.
 Handle PatternLink::get_groundings(void) const
 {
 	HandleCast(getValue(groundings_key()));
-}
-
-/// Return the cached value of the most recent rewrite.
-Handle PatternLink::get_rewrite(void) const
-{
-	HandleCast(getValue(rewrite_key()));
 }
 
 /* ================================================================= */

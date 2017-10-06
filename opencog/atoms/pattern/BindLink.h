@@ -42,6 +42,9 @@ protected:
 	// will initialize the rewrite term _implicand.
 	void extract_variables(const HandleSeq& oset);
 
+	// Cache the rewrite results
+	void set_rewrite(const Handle&);
+
 public:
 	BindLink(const HandleSeq&, Type=BIND_LINK);
 	BindLink(const Handle& vardecl, const Handle& body, const Handle& rewrite);
@@ -50,6 +53,9 @@ public:
 
 	bool imply(PatternMatchCallback&, bool check_connectivity=true);
 	const Handle& get_implicand(void) { return _implicand; }
+
+	// Return the cached implication results
+	Handle get_rewrite();
 
 	static Handle factory(const Handle&);
 };
