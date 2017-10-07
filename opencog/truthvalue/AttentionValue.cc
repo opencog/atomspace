@@ -37,6 +37,8 @@ AttentionValue::AttentionValue(sti_t s, lti_t l, vlti_t v) :
 	_value.resize(3);
 	_value[STI] = s;
 	_value[LTI] = l;
+
+	if (v < 0.0) v = 0.0;  // This is what the unit test wants...
 	_value[VLTI] = v;
 }
 

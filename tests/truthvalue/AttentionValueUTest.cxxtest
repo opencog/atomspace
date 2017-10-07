@@ -101,7 +101,7 @@ private:
 public:
     AttentionValueUTest() {
         logger().set_level(Logger::DEBUG);
-        logger().set_print_to_stdout_flag(true);
+        // logger().set_print_to_stdout_flag(true);
 
         sti[0] = DEFAULTATOMSTI;
         sti[1] = AV1_STI;
