@@ -108,7 +108,9 @@ public:
     //! @param none
     std::string toString() const;
 
-    static AttentionValuePtr createAV(sti_t s, lti_t l, vlti_t v)
+    static AttentionValuePtr createAV(sti_t s = DEFAULTATOMSTI,
+                                      lti_t l = DEFAULTATOMLTI,
+                                      vlti_t v = DEFAULTATOMVLTI)
     {
         return std::make_shared<const AttentionValue>(s, l, v);
     }
