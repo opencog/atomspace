@@ -29,6 +29,8 @@ FUZZY_TRUTH_VALUE <- TRUTH_VALUE
 PROBABILISTIC_TRUTH_VALUE <- TRUTH_VALUE
 EVIDENCE_COUNT_TRUTH_VALUE <- TRUTH_VALUE
 
+// The AttentionValue
+ATTENTION_VALUE <- FLOAT_VALUE
 
 // Base of hierarchy - NOTE: ATOM will not have a corresponding Python
 // construction function to avoid identifier conflict with the Atom object.

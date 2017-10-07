@@ -18,7 +18,6 @@ public:
 
 class AtomComparator {
 public:
-    AttentionBank* _ab;
     inline bool operator()(const AtomPtr& a, const AtomPtr& b) const
         { return this->test(a,b); }
     virtual bool test(const AtomPtr&, const AtomPtr&) const = 0;
@@ -44,7 +43,7 @@ public:
 
 bool STISort::test(const AtomPtr& h1, const AtomPtr& h2) const
 {
-    return _ab->get_sti(Handle(h1)) > _ab->get_sti(Handle(h2));
+    return get_sti(Handle(h1)) > get_sti(Handle(h2));
 }
 
 bool LTIAndTVAscendingSort::test(const AtomPtr& h1, const AtomPtr& h2) const
@@ -55,8 +54,8 @@ bool LTIAndTVAscendingSort::test(const AtomPtr& h1, const AtomPtr& h2) const
     tv1 = fabs(h1->getTruthValue()->getMean());
     tv2 = fabs(h2->getTruthValue()->getMean());
 
-    lti1 = _ab->get_lti(Handle(h1));
-    lti2 = _ab->get_lti(Handle(h2));
+    lti1 = get_lti(Handle(h1));
+    lti2 = get_lti(Handle(h2));
 
     if (lti1 < 0)
         tv1 = lti1 * (1.0f - tv1);
@@ -74,8 +73,8 @@ bool LTIAndTVAscendingSort::test(const AtomPtr& h1, const AtomPtr& h2) const
 bool LTIThenTVAscendingSort::test(const AtomPtr& h1, const AtomPtr& h2) const
 {
     AttentionValue::lti_t lti1, lti2;
-    lti1 = _ab->get_lti(Handle(h1));
-    lti2 = _ab->get_lti(Handle(h2));
+    lti1 = get_lti(Handle(h1));
+    lti2 = get_lti(Handle(h2));
 
     if (lti1 != lti2) return lti1 < lti2;
 

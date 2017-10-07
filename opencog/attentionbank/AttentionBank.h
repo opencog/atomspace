@@ -2,7 +2,7 @@
  * opencog/attentionbank/AttentionBank.h
  *
  * Copyright (C) 2011 OpenCog Foundation
- * Copyright (C) 2016 Linas Vepstas <linasvepstas@gmail.com>
+ * Copyright (C) 2016, 2017 Linas Vepstas <linasvepstas@gmail.com>
  * All Rights Reserved
  *
  * Written by Joel Pitt <joel@opencog.org>
@@ -32,12 +32,8 @@
 
 #include <boost/signals2.hpp>
 
-#include <opencog/util/async_method_caller.h>
-#include <opencog/util/recent_val.h>
-
 #include <opencog/truthvalue/AttentionValue.h>
 #include <opencog/attentionbank/ImportanceIndex.h>
-#include <opencog/attentionbank/StochasticImportanceDiffusion.h>
 
 namespace opencog
 {
@@ -58,16 +54,12 @@ typedef boost::signals2::signal<void (const Handle&,
 class AtomSpace;
 class AttentionBank
 {
-    friend class ecan::StochasticDiffusionAmountCalculator; //need to access _importanceIndex
-
-    /** The attention values of all the atoms in the attention bank */
-    std::mutex _idx_mtx;
-    std::unordered_map<Handle, AttentionValuePtr> _atom_index;
     std::mutex AFMutex;
     unsigned int minAFSize;
-    struct compare_sti_less{
+    struct compare_sti_less {
         bool operator()(const std::pair<Handle, AttentionValuePtr>& h1,
-                        const std::pair<Handle, AttentionValuePtr>& h2){
+                        const std::pair<Handle, AttentionValuePtr>& h2)
+        {
             return  (h1.second)->getSTI() < (h2.second)->getSTI();
         }
     };
@@ -87,16 +79,6 @@ class AttentionBank
      */
     AFCHSigl _AddAFSignal;
     AFCHSigl _RemoveAFSignal;
-
-    /**
-     * Running average min and max STI, together with locks to
-     * protect updates.
-     */
-    opencog::recent_val<AttentionValue::sti_t> _maxSTI;
-    opencog::recent_val<AttentionValue::sti_t> _minSTI;
-
-    mutable std::mutex _lock_maxSTI;
-    mutable std::mutex _lock_minSTI;
 
     /**
      * The amount importance funds available in the AttentionBank.
@@ -124,6 +106,8 @@ class AttentionBank
     AVCHSigl _AVChangedSignal;
 
     void change_vlti(const Handle&, int);
+    void remove_atom_from_bank(const AtomPtr& atom);
+
 public:
     AttentionBank(AtomSpace*);
     ~AttentionBank();
@@ -138,22 +122,9 @@ public:
     /** Provide ability for others to find out about AV changes */
     AVCHSigl& getAVChangedSignal() { return _AVChangedSignal; }
 
-    /**
-     * Get the attention value of an atom.
-     */
-    AttentionValuePtr get_av(const Handle&);
-    AttentionValue::sti_t get_sti(const Handle& h) {
-        return get_av(h)->getSTI();
-    }
-    AttentionValue::lti_t get_lti(const Handle& h) {
-        return get_av(h)->getLTI();
-    }
-    AttentionValue::vlti_t get_vlti(const Handle& h) {
-        return get_av(h)->getVLTI();
-    }
-
-    AttentionValue::sti_t get_af_max_sti(void) const {
-        if(attentionalFocus.rbegin() != attentionalFocus.rend())
+    AttentionValue::sti_t get_af_max_sti(void) const
+    {
+        if (attentionalFocus.rbegin() != attentionalFocus.rend())
             return (attentionalFocus.rbegin()->second)->getSTI();
         else
             return 0;
@@ -170,11 +141,12 @@ public:
     /**
      * Change the attention value of an atom.
      */
-    void change_av(const Handle&, AttentionValuePtr);
+    void change_av(const Handle&, const AttentionValuePtr& new_av);
     void set_sti(const Handle&, AttentionValue::sti_t);
     void set_lti(const Handle&, AttentionValue::lti_t);
     void inc_vlti(const Handle& h) { change_vlti(h, +1); }
     void dec_vlti(const Handle& h) { change_vlti(h, -1); }
+
 
     /**
      * Stimulate an atom.
@@ -227,54 +199,12 @@ public:
         return fundsLTI += diff;
     }
 
-    /**
-     * Get the maximum STI observed in the AttentionBank.
-     *
-     * @param average If true, return an exponentially decaying
-     *        average of maximum STI, otherwise return the actual
-     *        maximum.
-     * @return Maximum STI
-     */
-    AttentionValue::sti_t getMaxSTI(bool average=true) const;
-
-    /**
-     * Get the minimum STI observed in the AttentionBank.
-     *
-     * @param average If true, return an exponentially decaying
-     *        average of minimum STI, otherwise return the actual
-     *        minimum.
-     * @return Minimum STI
-     */
-    AttentionValue::sti_t getMinSTI(bool average=true) const;
-
     AttentionValue::sti_t calculateSTIWage(void);
 
-    AttentionValue::sti_t calculateLTIWage(void);
-
-    /**
-     * Update the minimum STI observed in the AttentionBank.
-     * Min/max are not updated on setSTI because average is calculate
-     * by lobe cycle, although this could potentially also be handled
-     * by the cogServer.
-     *
-     * @warning Should only be used by attention allocation system.
-     * @param m New minimum STI
-     */
-    void updateMinSTI(AttentionValue::sti_t m);
-
-    /**
-     * Update the maximum STI observed in the AttentionBank.
-     * Min/max are not updated on setSTI because average is calculate
-     * by lobe cycle, although this could potentially also be handled
-     * by the cogServer.
-     *
-     * @warning Should only be used by attention allocation system.
-     * @param m New maximum STI
-     */
-    void updateMaxSTI(AttentionValue::sti_t m);
+    AttentionValue::lti_t calculateLTIWage(void);
 
     /** Change the Very-Long-Term Importance of an attention value holder */
-    //void setVLTI(AttentionValueHolderPtr avh, AttentionValue::vlti_t);
+    //void setVLTI(AttentionValueHolderPtr, AttentionValue::vlti_t);
 
     /**
      * Retrieve the doubly normalised Short-Term Importance between -1..1
@@ -294,6 +224,7 @@ public:
      * @see getNormalisedSTI()
      */
     double getNormalisedSTI(AttentionValuePtr) const;
+
     /**
      * Retrieve the linearly normalised Short-Term Importance between 0..1
      * for a given AttentionValue.
@@ -307,13 +238,46 @@ public:
      */
     double getNormalisedZeroToOneSTI(AttentionValuePtr, bool average, bool clip) const;
 
+    bool atom_is_in_AF(const Handle&);
+
     /**
-     * Returns the set of atoms within the given importance range.
+     * Gets the set of all handles in the Attentional Focus
      *
-     * @param Importance range lower bound (inclusive).
-     * @param Importance range upper bound (inclusive).
-     * @return The set of atoms within the given importance range.
+     * @return The set of all atoms in the Attentional Focus
+     * @note: This method utilizes the ImportanceIndex
      */
+    template <typename OutputIterator> OutputIterator
+    get_handle_set_in_attentional_focus(OutputIterator result)
+    {
+         std::lock_guard<std::mutex> lock(AFMutex);
+         for (const auto p : attentionalFocus) {
+             *result++ = p.first;
+         }
+         return result;
+    }
+
+
+    // =========================================================
+    // Utility wrappers around the Importance Index.
+    // XXX TODO -- Is this really needed? Users can operate thier
+    // own importance index, if they need one, right?
+
+    /// Return a random atom drawn from the importanceBin.
+    Handle getRandomAtom(void) const
+    {
+        return _importanceIndex.getRandomAtom();
+    }
+
+    AttentionValue::sti_t getMinSTI(bool average=true) const
+    {
+        return _importanceIndex.getMinSTI(average);
+    }
+
+    AttentionValue::sti_t getMaxSTI(bool average=true) const
+    {
+        return _importanceIndex.getMaxSTI(average);
+    }
+
     UnorderedHandleSet getHandlesByAV(AttentionValue::sti_t lowerBound,
                   AttentionValue::sti_t upperBound = AttentionValue::MAXSTI) const
     {
@@ -330,42 +294,6 @@ public:
         return std::copy(hs.begin(), hs.end(), result);
     }
 
-    /**
-     * Gets the set of all handles in the Attentional Focus
-     *
-     * @return The set of all atoms in the Attentional Focus
-     * @note: This method utilizes the ImportanceIndex
-     */
-    template <typename OutputIterator> OutputIterator
-    get_handle_set_in_attentional_focus(OutputIterator result)
-    {
-         std::lock_guard<std::mutex> lock(AFMutex);
-         for(const auto p : attentionalFocus){
-             *result++ = p.first;
-         }
-
-         return result;
-    }
-
-    /**
-     * Return a random atom drawn from the importanceBin.
-     */
-    Handle getRandomAtom(void);
-
-    bool atom_is_in_AF(const Handle&);
-    /**
-     * Updates the importance index for the given atom. According to the
-     * new importance of the atom, it may change importance bins.
-     *
-     * @param The atom whose importance index will be updated.
-     * @param The old importance bin where the atom originally was.
-     */
-    void updateImportanceIndex(const Handle& h, int oldbin, int newbin)
-    {
-        _importanceIndex.updateImportance(h.operator->(), oldbin, newbin);
-    }
-
-    void remove_atom_from_index(const AtomPtr& atom);
 };
 
 /* Singleton instance (for now) */

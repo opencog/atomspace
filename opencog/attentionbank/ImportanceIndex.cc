@@ -2,6 +2,7 @@
  * opencog/attentionbank/ImportanceIndex.cc
  *
  * Copyright (C) 2008-2011 OpenCog Foundation
+ * Copyright (C) 2017 Linas Vepstas <linasvepstas@gmail.com>
  * All Rights Reserved
  *
  * This program is free software; you can redistribute it and/or modify
@@ -26,8 +27,8 @@
 #include <opencog/util/functional.h>
 #include <opencog/util/Config.h>
 
+#include <opencog/attentionbank/AVUtils.h>
 #include <opencog/attentionbank/ImportanceIndex.h>
-#include <opencog/attentionbank/AttentionBank.h>
 
 using namespace opencog;
 
@@ -47,14 +48,16 @@ using namespace opencog;
 
 // ==============================================================
 
-ImportanceIndex::ImportanceIndex(AttentionBank& bank)
-    : _bank(bank), _index(IMPORTANCE_INDEX_SIZE+1)
+ImportanceIndex::ImportanceIndex()
+    : _index(IMPORTANCE_INDEX_SIZE+1)
 {
     minAFSize = config().get_int("ECAN_MIN_AF_SIZE", 100);
 }
 
-unsigned int ImportanceIndex::importanceBin(short importance)
+size_t ImportanceIndex::importanceBin(AttentionValue::sti_t impo)
 {
+    short importance = (short) impo;
+
     if (importance < 0)
         return 0;
     if (importance < 2*GROUP_SIZE)
@@ -71,67 +74,142 @@ unsigned int ImportanceIndex::importanceBin(short importance)
         sum = sum + std::pow(2,i);
     }
 
-    int ad = GROUP_SIZE - std::ceil(importance / std::pow(2,(i-1)));
+    int ad = GROUP_SIZE - std::ceil(importance / std::pow(2, (i-1)));
 
-    unsigned int bin = ((i * GROUP_SIZE) - ad);
+    size_t bin = ((i * GROUP_SIZE) - ad);
+#if 0
     if (bin > 104)
         std::cout << "ibin: "<< bin << "\n";
+#endif
     assert(bin <= IMPORTANCE_INDEX_SIZE);
     return bin;
 }
 
-void ImportanceIndex::updateImportance(Atom* atom, int oldbin, int newbin)
+void ImportanceIndex::updateImportance(const Handle& h,
+                                       const AttentionValuePtr& oldav,
+                                       const AttentionValuePtr& newav)
 {
+    int oldbin = importanceBin(oldav->getSTI());
+    int newbin = importanceBin(newav->getSTI());
     if (oldbin == newbin) return;
 
-    _index.remove(oldbin, atom);
-    _index.insert(newbin, atom);
-    updateTopStiValues(atom);
+    _index.remove(oldbin, h);
+    _index.insert(newbin, h);
+    updateTopStiValues(h);
 }
 
-void ImportanceIndex::removeAtom(Atom* atom, int bin)
+// ==============================================================
+
+void ImportanceIndex::removeAtom(const Handle& h)
 {
-    _index.remove(bin, atom);
-    
-    std::lock_guard<std::mutex> lock(topKSTIUpdateMutex);
+    AttentionValuePtr oldav = get_av(h);
+    set_av(h, nullptr);
+
+    int bin = ImportanceIndex::importanceBin(oldav->getSTI());
+
+    std::lock_guard<std::mutex> lock(_mtx);
+    _index.remove(bin, h);
+
     // Also remove from topKSTIValueHandles vector
-    Handle h = atom->getHandle();
-    auto it = std::find_if(topKSTIValuedHandles.begin(), topKSTIValuedHandles.end()
-            ,[&h](HandleSTIPair p){return p.first == h; });
-    if(it != topKSTIValuedHandles.end()) topKSTIValuedHandles.erase(it);
+    auto it = std::find_if(
+            topKSTIValuedHandles.begin(),
+            topKSTIValuedHandles.end(),
+            [&h](const HandleSTIPair& p) {return p.first == h; });
+    if (it != topKSTIValuedHandles.end()) topKSTIValuedHandles.erase(it);
     //TODO Find the next highest STI valued atom to replace the removed one.
 }
 
-void ImportanceIndex::updateTopStiValues(Atom* atom)
-{
-    std::lock_guard<std::mutex> lock(topKSTIUpdateMutex);
+// ==============================================================
 
-    auto insertHandle = [this](Handle h){
+void ImportanceIndex::updateTopStiValues(const Handle& h)
+{
+    std::lock_guard<std::mutex> lock(_mtx);
+
+    auto insertHandle = [this](Handle h)
+    {
         // delete if this handle is already in the vector. TODO find efficient
         // way of doing this.
-        auto it = std::find_if(topKSTIValuedHandles.begin(), topKSTIValuedHandles.end()
-                ,[&h](HandleSTIPair p){return p.first == h; });
-        if(it != topKSTIValuedHandles.end()) topKSTIValuedHandles.erase(it);
+        auto it = std::find_if(topKSTIValuedHandles.begin(),
+                               topKSTIValuedHandles.end(),
+                               [&h](HandleSTIPair p)
+                                    { return p.first == h; });
 
-        HandleSTIPair p(h, _bank.get_sti(h));
+        if (it != topKSTIValuedHandles.end()) topKSTIValuedHandles.erase(it);
+
+        HandleSTIPair p(h, get_sti(h));
         it = std::lower_bound(topKSTIValuedHandles.begin(),
-                topKSTIValuedHandles.end(), p,
-                [=](const HandleSTIPair& hsti1, const HandleSTIPair& hsti2){
-                return hsti1.second < hsti2.second;
+                              topKSTIValuedHandles.end(), p,
+                [=](const HandleSTIPair& hsti1, const HandleSTIPair& hsti2)
+                {
+                      return hsti1.second < hsti2.second;
                 });
-        topKSTIValuedHandles.insert(it,HandleSTIPair(h, _bank.get_sti(h)));
+        topKSTIValuedHandles.insert(it, HandleSTIPair(h, get_sti(h)));
     };
 
-    Handle h = atom->getHandle();
-    AttentionValue::sti_t sti = _bank.get_sti(h);
-    if(static_cast<int>(topKSTIValuedHandles.size()) < minAFSize){
-        insertHandle(atom->getHandle());
-    } else if (topKSTIValuedHandles.begin()->second < sti) {
+    AttentionValue::sti_t sti = get_sti(h);
+    if (static_cast<int>(topKSTIValuedHandles.size()) < minAFSize)
+    {
+        insertHandle(h);
+    }
+    else if (topKSTIValuedHandles.begin()->second < sti)
+    {
         topKSTIValuedHandles.erase(topKSTIValuedHandles.begin());
         insertHandle(h);
     }
 }
 
+// ==============================================================
+
+void ImportanceIndex::update(void)
+{
+    // Update MinMax STI values
+    AttentionValue::sti_t minSTISeen = 0;
+    UnorderedHandleSet minbin = getMinBinContents();
+    auto minit = std::min_element(minbin.begin(), minbin.end(),
+            [&](const Handle& h1, const Handle& h2) {
+                return get_sti(h1) < get_sti(h2);
+            });
+    if (minit != minbin.end()) minSTISeen = get_sti(*minit);
+
+    AttentionValue::sti_t maxSTISeen = 0;
+    UnorderedHandleSet maxbin = getMaxBinContents();
+    auto maxit = std::max_element(maxbin.begin(), maxbin.end(),
+            [&](const Handle& h1, const Handle& h2) {
+                return get_sti(h1) < get_sti(h2);
+            });
+    if (maxit != maxbin.end()) maxSTISeen = get_sti(*maxit);
+
+    if (minSTISeen > maxSTISeen)
+        minSTISeen = maxSTISeen;
+
+    std::lock_guard<std::mutex> lock(_mtx);
+    _minSTI = minSTISeen;
+    _maxSTI = maxSTISeen;
+}
+
+// ==============================================================
+
+AttentionValue::sti_t ImportanceIndex::getMaxSTI(bool average) const
+{
+    std::lock_guard<std::mutex> lock(_mtx);
+    if (average) {
+        return (AttentionValue::sti_t) _maxSTI.recent;
+    } else {
+        return _maxSTI.val;
+    }
+}
+
+AttentionValue::sti_t ImportanceIndex::getMinSTI(bool average) const
+{
+    std::lock_guard<std::mutex> lock(_mtx);
+    if (average) {
+        return (AttentionValue::sti_t) _minSTI.recent;
+    } else {
+        return _minSTI.val;
+    }
+}
+
+// ==============================================================
 
 UnorderedHandleSet ImportanceIndex::getHandleSet(
         AttentionValue::sti_t lowerBound,
@@ -151,47 +229,39 @@ UnorderedHandleSet ImportanceIndex::getHandleSet(
     // because there may be atoms that have the same importanceIndex
     // and whose importance is lower than lowerBound or bigger than
     // upperBound.
-    std::function<bool(Atom *)> pred =
-        [&](Atom* atom)->bool {
-            AttentionValue::sti_t sti = _bank.get_sti(atom->getHandle());
+    std::function<bool(const Handle&)> pred =
+        [&](const Handle& atom)->bool {
+            AttentionValue::sti_t sti = get_sti(atom);
             return (lowerBound <= sti and sti <= upperBound);
         };
 
-    AtomSet set;
-    _index.getContentIf(lowerBin, inserter(set), pred);
+    std::lock_guard<std::mutex> lock(_mtx);
+    _index.getContentIf(lowerBin, inserter(ret), pred);
 
     // If both lower and upper bounds are in the same bin,
     // Then we are done.
-    if (lowerBin == upperBin) {
-        std::transform(set.begin(), set.end(), inserter(ret),
-                       [](Atom* atom)->Handle { return atom->getHandle(); });
-        return ret;
-    }
+    if (lowerBin == upperBin) return ret;
 
     // For every index within lowerBound and upperBound,
     // add to the list.
     while (++lowerBin < upperBin)
-        _index.getContent(lowerBin, inserter(set));
+        _index.getContent(lowerBin, inserter(ret));
 
     // The two lists are concatenated.
-    _index.getContentIf(upperBin, inserter(set), pred);
+    _index.getContentIf(upperBin, inserter(ret), pred);
 
-    std::transform(set.begin(), set.end(), inserter(ret),
-                   [](Atom* atom)->Handle { return atom->getHandle(); });
     return ret;
 }
 
 UnorderedHandleSet ImportanceIndex::getMaxBinContents()
 {
-    AtomSet set;
     UnorderedHandleSet ret;
+    std::lock_guard<std::mutex> lock(_mtx);
     for (int i = IMPORTANCE_INDEX_SIZE ; i >= 0 ; i--)
     {
-        if (_index.size(i) > 0)
+        if (0 < _index.size(i))
         {
-            _index.getContent(i, inserter(set));
-            std::transform(set.begin(), set.end(), inserter(ret),
-                   [](Atom* atom)->Handle { return atom->getHandle(); });
+            _index.getContent(i, inserter(ret));
             return ret;
         }
     }
@@ -200,15 +270,13 @@ UnorderedHandleSet ImportanceIndex::getMaxBinContents()
 
 UnorderedHandleSet ImportanceIndex::getMinBinContents()
 {
-    AtomSet set;
     UnorderedHandleSet ret;
-    for (int i = IMPORTANCE_INDEX_SIZE ; i >= 0 ; i--)
+    std::lock_guard<std::mutex> lock(_mtx);
+    for (int i = 0; i < IMPORTANCE_INDEX_SIZE; i++)
     {
-        if (_index.size(i) > 0)
+        if (0 < _index.size(i))
         {
-            _index.getContent(i, inserter(set));
-            std::transform(set.begin(), set.end(), inserter(ret),
-                   [](Atom* atom)->Handle { return atom->getHandle(); });
+            _index.getContent(i, inserter(ret));
             return ret;
         }
     }
@@ -217,20 +285,21 @@ UnorderedHandleSet ImportanceIndex::getMinBinContents()
 
 HandleSeq ImportanceIndex::getTopSTIValuedHandles()
 {
-    std::lock_guard<std::mutex> lock(topKSTIUpdateMutex);
+    std::lock_guard<std::mutex> lock(_mtx);
     HandleSeq hseq;
-    for(HandleSTIPair p : topKSTIValuedHandles)
+    for (const HandleSTIPair& p : topKSTIValuedHandles)
         hseq.push_back(p.first);
     return  hseq;
 }
 
 size_t ImportanceIndex::bin_size() const
 {
-    return _index.bin_size();
+    std::lock_guard<std::mutex> lock(_mtx);
+    return _index.size();
 }
 
 size_t ImportanceIndex::size(int i) const
 {
+    std::lock_guard<std::mutex> lock(_mtx);
     return _index.size(i);
 }
-

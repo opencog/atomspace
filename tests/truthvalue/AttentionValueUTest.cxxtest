@@ -64,12 +64,12 @@ private:
     AttentionValuePtr avs[NUM_AVS];
 
     AttentionValue::vlti_t getVLTI(Handle h) {
-        return bank->get_vlti(h);
+        return get_vlti(h);
     }
 
     void chgVLTI(Handle h, int unit) {
-        AttentionValuePtr old_av = bank->get_av(h);
-        AttentionValuePtr new_av = createAV(
+        AttentionValuePtr old_av = get_av(h);
+        AttentionValuePtr new_av = AttentionValue::createAV(
             old_av->getSTI(),
             old_av->getLTI(),
             old_av->getVLTI() + unit);
@@ -81,8 +81,8 @@ private:
 
     void setSTI(Handle h, AttentionValue::sti_t stiValue) {
         /* Make a copy */
-        AttentionValuePtr old_av = bank->get_av(h);
-        AttentionValuePtr new_av = createAV(
+        AttentionValuePtr old_av = get_av(h);
+        AttentionValuePtr new_av = AttentionValue::createAV(
             stiValue,
             old_av->getLTI(),
             old_av->getVLTI());
@@ -90,8 +90,8 @@ private:
     }
 
     void setLTI(Handle h, AttentionValue::lti_t ltiValue) {
-        AttentionValuePtr old_av = bank->get_av(h);
-        AttentionValuePtr new_av = createAV(
+        AttentionValuePtr old_av = get_av(h);
+        AttentionValuePtr new_av = AttentionValue::createAV(
             old_av->getSTI(),
             ltiValue,
             old_av->getVLTI());
@@ -100,8 +100,8 @@ private:
 
 public:
     AttentionValueUTest() {
-        //logger().setLevel(Logger::DEBUG);
-        //logger().setPrintToStdoutFlag(true);
+        logger().set_level(Logger::DEBUG);
+        // logger().set_print_to_stdout_flag(true);
 
         sti[0] = DEFAULTATOMSTI;
         sti[1] = AV1_STI;
@@ -117,18 +117,16 @@ public:
         vlti[1] = DEFAULTATOMVLTI;
         vlti[2] = DEFAULTATOMVLTI
         vlti[3] = AV3_VLTI;
-
-        AttentionValuePtr av = createAV();
     }
 
     void setUp() {
         atomSpace = new AtomSpace();
         bank = &attentionbank(atomSpace);
 
-        avs[0] = createAV();
-        avs[1] = createAV(sti[1]);
-        avs[2] = createAV(sti[2], lti[2]);
-        avs[3] = createAV(sti[3], lti[3], vlti[3]);
+        avs[0] = AttentionValue::createAV();
+        avs[1] = AttentionValue::createAV(sti[1]);
+        avs[2] = AttentionValue::createAV(sti[2], lti[2]);
+        avs[3] = AttentionValue::createAV(sti[3], lti[3], vlti[3]);
     }
 
     void tearDown() {
@@ -182,10 +180,10 @@ public:
 
         for (int i = 0; i < NUM_AVS; i++) {
             const AttentionValue& av1 = *avs[i];
-            const AttentionValue& av2 = *av1.clone();
-            //logger().debug("getSTI()=%d, cloned=%d", av1.getSTI(), av2.getSTI());
-            //logger().debug("getLTI()=%d, cloned=%d", av1.getLTI(), av2.getLTI());
-            //logger().debug("getVLTI()=%d, cloned=%d", av1.getVLTI(), av2.getVLTI());
+            const AttentionValue av2(*av1.clone());
+            logger().debug("getSTI()=%f, cloned=%f", av1.getSTI(), av2.getSTI());
+            logger().debug("getLTI()=%f, cloned=%f", av1.getLTI(), av2.getLTI());
+            logger().debug("getVLTI()=%f, cloned=%f", av1.getVLTI(), av2.getVLTI());
             TS_ASSERT(av1 == av2);
         }
     }
@@ -220,7 +218,6 @@ public:
         logger().debug("STISort");
 
         STISort sSort;
-        sSort._ab = bank;
 
         // an atom which has higher sti is strictly before one with lower sti
         TS_ASSERT_EQUALS(sSort(atoms[1], atoms[0]), true);
@@ -233,7 +230,6 @@ public:
         logger().debug("LTIAndTVAscendingSort");
 
         LTIAndTVAscendingSort latvSort;
-        latvSort._ab = bank;
 
         // an atom which has higher LTI*TV is not strictly before one with lower LTI*TV
         TS_ASSERT_EQUALS(latvSort(atoms[1], atoms[0]), false);
@@ -246,7 +242,6 @@ public:
         logger().debug("LTIThenTVAscendingSort");
 
         LTIThenTVAscendingSort lttvSort;
-        lttvSort._ab = bank;
 
         // An atom which has higher LTI is not strictly before one
         // with lower LTI.
@@ -324,22 +319,22 @@ public:
     void testfactory() {
         AttentionValuePtr av;
 
-        av = createAV();
+        av = AttentionValue::createAV();
         TS_ASSERT(av->getSTI() == sti[0]);
         TS_ASSERT(av->getLTI() == lti[0]);
         TS_ASSERT(av->getVLTI() == vlti[0]);
 
-        av = createAV(sti[1]);
+        av = AttentionValue::createAV(sti[1]);
         TS_ASSERT(av->getSTI() == sti[1]);
         TS_ASSERT(av->getLTI() == lti[1]);
         TS_ASSERT(av->getVLTI() == vlti[1]);
 
-        av = createAV(sti[2], lti[2]);
+        av = AttentionValue::createAV(sti[2], lti[2]);
         TS_ASSERT(av->getSTI() == sti[2]);
         TS_ASSERT(av->getLTI() == lti[2]);
         TS_ASSERT(av->getVLTI() == vlti[2]);
 
-        av = createAV(sti[3], lti[3], vlti[3]);
+        av = AttentionValue::createAV(sti[3], lti[3], vlti[3]);
         TS_ASSERT(av->getSTI() == sti[3]);
         TS_ASSERT(av->getLTI() == lti[3]);
         TS_ASSERT(av->getVLTI() == vlti[3]);

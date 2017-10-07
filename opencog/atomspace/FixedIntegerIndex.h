@@ -68,7 +68,7 @@ public:
 	~FixedIntegerIndex() {}
 	void insert(size_t i, Atom* a)
 	{
-		AtomSet &s(idx.at(i));
+		AtomSet& s(idx.at(i));
 		s.insert(a);
 	}
 
@@ -80,7 +80,7 @@ public:
 
 	size_t size(size_t i) const
 	{
-		const AtomSet &s(idx.at(i));
+		const AtomSet& s(idx.at(i));
 		return s.size();
 	}
 

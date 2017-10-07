@@ -1,7 +1,7 @@
 /*
  * opencog/attentionbank/AttentionBank.cc
  *
- * Copyright (C) 2013 Linas Vepstas <linasvepstas@gmail.com>
+ * Copyright (C) 2013,2017 Linas Vepstas <linasvepstas@gmail.com>
  * All Rights Reserved
  *
  * Written by Joel Pitt
@@ -28,11 +28,11 @@
 #include <opencog/atoms/base/Handle.h>
 #include <opencog/atomspace/AtomSpace.h>
 #include "AttentionBank.h"
+#include "AVUtils.h"
 
 using namespace opencog;
 
-AttentionBank::AttentionBank(AtomSpace* asp) :
-    _importanceIndex(*this)
+AttentionBank::AttentionBank(AtomSpace* asp)
 {
     startingFundsSTI = fundsSTI = config().get_int("STARTING_STI_FUNDS", 100000);
     startingFundsLTI = fundsLTI = config().get_int("STARTING_LTI_FUNDS", 100000);
@@ -46,7 +46,7 @@ AttentionBank::AttentionBank(AtomSpace* asp) :
 
     _removeAtomConnection =
         asp->removeAtomSignal(
-            boost::bind(&AttentionBank::remove_atom_from_index, this, _1));
+            boost::bind(&AttentionBank::remove_atom_from_bank, this, _1));
 }
 
 AttentionBank::~AttentionBank()
@@ -54,135 +54,64 @@ AttentionBank::~AttentionBank()
     _removeAtomConnection.disconnect();
 }
 
-void AttentionBank::remove_atom_from_index(const AtomPtr& atom)
+void AttentionBank::remove_atom_from_bank(const AtomPtr& atom)
 {
-    std::unique_lock<std::mutex> lck(_idx_mtx);
-
-    auto pr = _atom_index.find(Handle(atom));
-    if (pr == _atom_index.end()) return;
-    AttentionValuePtr av = pr->second;
-    _atom_index.erase(pr->first);
-    lck.unlock();
-
-    int bin = ImportanceIndex::importanceBin(av->getSTI());
-
-    _importanceIndex.removeAtom(atom.operator->(), bin);
-}
-
-void AttentionBank::change_av(const Handle& h, AttentionValuePtr newav)
-{
-    std::unique_lock<std::mutex> lck(_idx_mtx);
-
-    AttentionValuePtr oldav = AttentionValue::DEFAULT_AV();
-    auto pr = _atom_index.find(h);
-    if (pr != _atom_index.end()) oldav = pr->second;
-
-    _atom_index[h] = newav;
-    lck.unlock();
-
-    // XXX FIXME the code below could be made more efficient,
-    // by avoiding the calls to atom->getAttentionValue() in
-    // the ImportanceIndex code.
-
-    // Get old and new bins.
-    int oldBin = ImportanceIndex::importanceBin(oldav->getSTI());
-    int newBin = ImportanceIndex::importanceBin(newav->getSTI());
-
-    // If the atom importance has changed its bin,
-    // update the importance index.
-    if (oldBin != newBin) updateImportanceIndex(h, oldBin, newBin);
-
-    AVChanged(h, oldav, newav);
+    _importanceIndex.removeAtom(Handle(atom));
 }
 
 void AttentionBank::set_sti(const Handle& h, AttentionValue::sti_t stiValue)
 {
-    AttentionValuePtr old_av = AttentionValue::DEFAULT_AV();
-    AttentionValuePtr new_av = createAV(
-        stiValue, old_av->getLTI(), old_av->getVLTI());
+    AttentionValuePtr oldav = get_av(h);
+    AttentionValuePtr newav = AttentionValue::createAV(
+        stiValue, oldav->getLTI(), oldav->getVLTI());
 
-    change_av(h, new_av);
+    _importanceIndex.updateImportance(h, oldav, newav);
+    AVChanged(h, oldav, newav);
 }
 
 void AttentionBank::set_lti(const Handle& h, AttentionValue::lti_t ltiValue)
 {
-    std::unique_lock<std::mutex> lck(_idx_mtx);
-
-    AttentionValuePtr old_av = AttentionValue::DEFAULT_AV();
-    auto pr = _atom_index.find(h);
-    if (pr != _atom_index.end()) old_av = pr->second;
-
-    AttentionValuePtr new_av = createAV(
+    AttentionValuePtr old_av = get_av(h);
+    AttentionValuePtr new_av = AttentionValue::createAV(
         old_av->getSTI(), ltiValue, old_av->getVLTI());
-    _atom_index[h] = new_av;
-    lck.unlock();
 
     AVChanged(h, old_av, new_av);
 }
 
 void AttentionBank::change_vlti(const Handle& h, int unit)
 {
-    std::unique_lock<std::mutex> lck(_idx_mtx);
-
-    AttentionValuePtr old_av = AttentionValue::DEFAULT_AV();
-    auto pr = _atom_index.find(h);
-    if (pr != _atom_index.end()) old_av = pr->second;
-
-    AttentionValuePtr new_av = createAV(
+    AttentionValuePtr old_av = get_av(h);
+    AttentionValuePtr new_av = AttentionValue::createAV(
         old_av->getSTI(),
         old_av->getLTI(),
         old_av->getVLTI() + unit);
 
-    _atom_index[h] = new_av;
-    lck.unlock();
-
     AVChanged(h, old_av, new_av);
 }
 
-AttentionValuePtr AttentionBank::get_av(const Handle& h)
+void AttentionBank::change_av(const Handle& h, const AttentionValuePtr& new_av)
 {
-    std::lock_guard<std::mutex> lck(_idx_mtx);
-    auto pr = _atom_index.find(h);
-    if (pr == _atom_index.end()) return AttentionValue::DEFAULT_AV();
-
-    return pr->second;
+    AttentionValuePtr old_av = get_av(h);
+    _importanceIndex.updateImportance(h, old_av, new_av);
+    AVChanged(h, old_av, new_av);
 }
 
 void AttentionBank::AVChanged(const Handle& h,
                               const AttentionValuePtr& old_av,
                               const AttentionValuePtr& new_av)
 {
+    // First, update the atom's actual AV.
+    set_av(h, new_av);
+
     AttentionValue::sti_t oldSti = old_av->getSTI();
     AttentionValue::sti_t newSti = new_av->getSTI();
-    
+
     // Add the old attention values to the AttentionBank funds and
     // subtract the new attention values from the AttentionBank funds
     updateSTIFunds(oldSti - newSti);
     updateLTIFunds(old_av->getLTI() - new_av->getLTI());
 
-    // Update MinMax STI values
-    AttentionValue::sti_t minSTISeen = 0;
-    UnorderedHandleSet minbin = _importanceIndex.getMinBinContents();
-    auto minit = std::min_element(minbin.begin(), minbin.end(),
-            [&](const Handle& h1, const Handle& h2) {
-                return get_sti(h1) < get_sti(h2);
-            });
-    if (minit != minbin.end()) minSTISeen = get_sti(*minit);
-
-    AttentionValue::sti_t maxSTISeen = 0;
-    UnorderedHandleSet maxbin = _importanceIndex.getMinBinContents();
-    auto maxit = std::max_element(maxbin.begin(), maxbin.end(),
-            [&](const Handle& h1, const Handle& h2) {
-                return get_sti(h1) < get_sti(h2);
-            });
-    if (maxit != maxbin.end()) maxSTISeen = get_sti(*maxit);
-
-    if (minSTISeen > maxSTISeen) {
-        minSTISeen = maxSTISeen;
-    }
-
-    updateMinSTI(minSTISeen);
-    updateMaxSTI(maxSTISeen);
+    _importanceIndex.update();
 
     logger().fine("AVChanged: fundsSTI = %d, old_av: %d, new_av: %d",
                    fundsSTI.load(), oldSti, newSti);
@@ -190,7 +119,7 @@ void AttentionBank::AVChanged(const Handle& h,
     // Notify any interested parties that the AV changed.
     _AVChangedSignal(h, old_av, new_av);
 
-    //update AF
+    // update AF
     updateAttentionalFocus(h, old_av, new_av);
 }
 
@@ -199,46 +128,17 @@ void AttentionBank::stimulate(const Handle& h, double stimulus)
     // XXX This is not protected or made atomic in any way ...
     // If two different threads stimulate the same atom at the same
     // time, then the calculations will be bad. Does it matter?
-    AttentionValue::sti_t sti   = get_sti(h);
-    AttentionValue::lti_t lti   = get_lti(h);
-    AttentionValue::vlti_t vlti = get_vlti(h);
+    AttentionValuePtr oldav(get_av(h));
+    AttentionValue::sti_t sti   = oldav->getSTI();
+    AttentionValue::lti_t lti   = oldav->getLTI();
+    AttentionValue::vlti_t vlti = oldav->getVLTI();
 
     AttentionValue::sti_t stiWage = calculateSTIWage() * stimulus;
     AttentionValue::lti_t ltiWage = calculateLTIWage() * stimulus;
-    AttentionValuePtr new_av = createAV(sti + stiWage, lti + ltiWage, vlti);
-    change_av(h, new_av);
-}
-
-void AttentionBank::updateMaxSTI(AttentionValue::sti_t m)
-{
-    std::lock_guard<std::mutex> lock(_lock_maxSTI);
-    _maxSTI.update(m);
-}
-
-void AttentionBank::updateMinSTI(AttentionValue::sti_t m)
-{
-    std::lock_guard<std::mutex> lock(_lock_minSTI);
-    _minSTI.update(m);
-}
-
-AttentionValue::sti_t AttentionBank::getMaxSTI(bool average) const
-{
-    std::lock_guard<std::mutex> lock(_lock_maxSTI);
-    if (average) {
-        return (AttentionValue::sti_t) _maxSTI.recent;
-    } else {
-        return _maxSTI.val;
-    }
-}
-
-AttentionValue::sti_t AttentionBank::getMinSTI(bool average) const
-{
-    std::lock_guard<std::mutex> lock(_lock_minSTI);
-    if (average) {
-        return (AttentionValue::sti_t) _minSTI.recent;
-    } else {
-        return _minSTI.val;
-    }
+    AttentionValuePtr newav = AttentionValue::createAV(
+           sti + stiWage, lti + ltiWage, vlti);
+    _importanceIndex.updateImportance(h, oldav, newav);
+    AVChanged(h, oldav, newav);
 }
 
 AttentionValue::sti_t AttentionBank::calculateSTIWage()
@@ -297,6 +197,7 @@ double AttentionBank::getNormalisedZeroToOneSTI(AttentionValuePtr av,
 {
     AttentionValue::sti_t s = av->getSTI();
     int normaliser = getMaxSTI(average) - getMinSTI(average);
+
     if (normaliser == 0) return 0.0;
 
     double val = (s - getMinSTI(average)) / (double) normaliser;
@@ -306,7 +207,7 @@ double AttentionBank::getNormalisedZeroToOneSTI(AttentionValuePtr av,
 
 /** Unique singleton instance (for now) */
 // This implementation is pretty hokey, and is a stop-gap until some
-// sort of moreelegant way of managing the attentionbank is found.
+// sort of more elegant way of managing the attentionbank is found.
 // One of the issues is that access via this function can be CPU-wasteful.
 AttentionBank& opencog::attentionbank(AtomSpace* asp)
 {
@@ -331,17 +232,12 @@ AttentionBank& opencog::attentionbank(AtomSpace* asp)
     return *_instance;
 }
 
-Handle AttentionBank::getRandomAtom()
-{
-   return _importanceIndex.getRandomAtom();
-}
-
 bool AttentionBank::atom_is_in_AF(const Handle& h)
 {
     auto it = std::find_if(attentionalFocus.begin(), attentionalFocus.end(),
             [h](std::pair<Handle, AttentionValuePtr> p)
-            { if(p.first == h )
-                      return true;
+            {
+               if (p.first == h) return true;
                return false;
             });
     return  (it != attentionalFocus.end());
@@ -350,7 +246,7 @@ bool AttentionBank::atom_is_in_AF(const Handle& h)
 /**
  *  Updates list of top K important atoms based on STI value.
  */
-void AttentionBank::updateAttentionalFocus(const Handle& h, 
+void AttentionBank::updateAttentionalFocus(const Handle& h,
                     const AttentionValuePtr& old_av,
                     const AttentionValuePtr& new_av)
 {
@@ -360,19 +256,26 @@ void AttentionBank::updateAttentionalFocus(const Handle& h,
     bool insertable = false;
     auto it = std::find_if(attentionalFocus.begin(), attentionalFocus.end(),
             [h](std::pair<Handle, AttentionValuePtr> p)
-            { if(p.first == h ) return true; return false;});
+            { if (p.first == h) return true; return false;});
 
     // Update the STI value if atoms was already in AF
-    if(it != attentionalFocus.end()){
+    if (it != attentionalFocus.end())
+    {
         attentionalFocus.erase(it);
         attentionalFocus.insert(std::make_pair(h, new_av));
         return;
+    }
+
     // Simply insert the new Atom if AF is not full yet.
-    } else if(attentionalFocus.size() < minAFSize){
+    else if (attentionalFocus.size() < minAFSize)
+    {
         insertable = true;
+    }
+
     // Remove the least sti valued atom in the AF and repace
     // it with the new atom holding higher STI value.
-    } else if( sti > (least->second)->getSTI()){
+    else if (sti > (least->second)->getSTI())
+    {
         Handle hrm = least->first;
         AttentionValuePtr hrm_new_av = get_av(hrm);
         // Value recorded when this atom entered into AF
@@ -385,10 +288,10 @@ void AttentionBank::updateAttentionalFocus(const Handle& h,
     }
 
     // Insert the new atom in to AF and emit the AddAFSignal.
-    if(insertable){
+    if (insertable)
+    {
         attentionalFocus.insert(std::make_pair(h, new_av));
         AFCHSigl& afch = AddAFSignal();
         afch(h, old_av, new_av);
     }
 }
-

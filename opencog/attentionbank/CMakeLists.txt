@@ -1,10 +1,11 @@
 
 
 ADD_LIBRARY (attentionbank
+	AtomBins.cc
 	AttentionBank.cc
+	AVUtils.cc
 	ImportanceIndex.cc
 	StochasticImportanceDiffusion.cc
-	ThreadSafeFixedIntegerIndex.cc
 )
 
 TARGET_LINK_LIBRARIES(attentionbank
@@ -12,7 +13,6 @@ TARGET_LINK_LIBRARIES(attentionbank
 	atombase
 	truthvalue
 	${COGUTIL_LIBRARY}
-	${Boost_THREAD_LIBRARY}
 )
 
 INSTALL (TARGETS attentionbank
@@ -20,9 +20,10 @@ INSTALL (TARGETS attentionbank
 )
 
 INSTALL (FILES
+	AtomBins.h
 	AttentionBank.h
+	AVUtils.h
 	ImportanceIndex.h
 	StochasticImportanceDiffusion.h
-	ThreadSafeFixedIntegerIndex.h
 	DESTINATION "include/opencog/attentionbank"
 )

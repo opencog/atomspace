@@ -92,8 +92,10 @@ void BackwardChainer::do_chain()
 
 void BackwardChainer::do_step()
 {
-	ure_logger().debug("Iteration %d", _iteration);
 	_iteration++;
+
+	ure_logger().debug() << "Iteration " << _iteration
+	                     << "/" << _configReader.get_maximum_iterations();
 
 	expand_bit();
 	fulfill_bit();
@@ -187,7 +189,7 @@ void BackwardChainer::expand_bit(AndBIT& andbit)
 
 	// Rule seems well, expand
 	LAZY_URE_LOG_DEBUG << "Selected rule, with probability " << prob
-	                   << ", for BIT expansion:" << std::endl
+	                   << " of success for BIT expansion:" << std::endl
 	                   << rule.to_string();
 
 	// Expand andbit. Warning: after this call the reference on andbit

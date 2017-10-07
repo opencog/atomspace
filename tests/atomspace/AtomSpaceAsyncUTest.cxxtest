@@ -66,8 +66,8 @@ private:
     void setSTI(Handle h, AttentionValue::sti_t stiValue) const
     {
         /* Make a copy */
-        AttentionValuePtr old_av = ab->get_av(h);
-        AttentionValuePtr new_av = createAV(
+        AttentionValuePtr old_av = get_av(h);
+        AttentionValuePtr new_av = AttentionValue::createAV(
             stiValue,
             old_av->getLTI(),
             old_av->getVLTI());

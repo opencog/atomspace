@@ -68,8 +68,7 @@ IncomingSet AttentionalFocusCB::get_incoming_set(const Handle& h)
 
 	auto compare_sti = [&](const LinkPtr& lptr1, const LinkPtr& lptr2)->bool
 	{
-		return attentionbank(_as).get_sti(Handle(lptr1)) >
-			attentionbank(_as).get_sti(Handle(lptr2));
+		return get_sti(Handle(lptr1)) > get_sti(Handle(lptr2));
 	};
 
 	// The exploration of the set of patterns proceeds by going through
