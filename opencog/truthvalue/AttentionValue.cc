@@ -22,6 +22,7 @@
  * 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
  */
 
+#include <opencog/util/exceptions.h>
 #include "AttentionValue.h"
 
 using namespace opencog;
@@ -30,10 +31,59 @@ const AttentionValue::sti_t AttentionValue::DEFAULTATOMSTI = 0;
 const AttentionValue::lti_t AttentionValue::DEFAULTATOMLTI = 0;
 const AttentionValue::vlti_t AttentionValue::DEFAULTATOMVLTI = 0;
 
+AttentionValue::AttentionValue(sti_t s, lti_t l, vlti_t v) :
+	FloatValue(ATTENTION_VALUE)
+{
+	_value.resize(3);
+	_value[STI] = s;
+	_value[LTI] = l;
+
+	if (v < 0.0) v = 0.0;  // This is what the unit test wants...
+	_value[VLTI] = v;
+}
+
+AttentionValue::AttentionValue(const AttentionValue& source) :
+	FloatValue(ATTENTION_VALUE)
+{
+	_value.resize(3);
+	_value[STI] = source._value[STI];
+	_value[LTI] = source._value[LTI];
+	_value[VLTI] = source._value[VLTI];
+}
+
+AttentionValue::AttentionValue(const ProtoAtomPtr& source) :
+	FloatValue(ATTENTION_VALUE)
+{
+	if (source->getType() != ATTENTION_VALUE)
+		throw RuntimeException(TRACE_INFO,
+			"Source must be an AttentionValue");
+
+	AttentionValuePtr ap(AttentionValueCast(source));
+	_value.resize(3);
+	_value[STI] = ap->value()[STI];
+	_value[LTI] = ap->value()[LTI];
+	_value[VLTI] = ap->value()[VLTI];
+}
+
+AttentionValue::sti_t AttentionValue::getSTI() const
+{
+	return _value[STI];
+}
+
+AttentionValue::lti_t AttentionValue::getLTI() const
+{
+	return _value[LTI];
+}
+
+AttentionValue::vlti_t AttentionValue::getVLTI() const
+{
+	return _value[VLTI];
+}
+
 std::string AttentionValue::toString() const
 {
-    char buffer[256];
-    sprintf(buffer, "[%f, %f, %s]", m_STI, m_LTI,
-            m_VLTI ? "SAVABLE" : "DISPOSABLE");
-    return buffer;
+	char buffer[256];
+	sprintf(buffer, "[%f, %f, %s]", getSTI(), getLTI(),
+			getVLTI() ? "SAVABLE" : "DISPOSABLE");
+	return buffer;
 }

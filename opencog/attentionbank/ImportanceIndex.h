@@ -2,6 +2,7 @@
  * opencog/attentionbank/ImportanceIndex.h
  *
  * Copyright (C) 2008-2011 OpenCog Foundation
+ * Copyright (C) 2017 Linas Vepstas <linasvepstas@gmail.com>
  * All Rights Reserved
  *
  * This program is free software; you can redistribute it and/or modify
@@ -24,8 +25,11 @@
 #define _OPENCOG_IMPORTANCEINDEX_H
 
 #include <mutex>
+#include <opencog/util/recent_val.h>
+
 #include <opencog/truthvalue/AttentionValue.h>
-#include <opencog/attentionbank/ThreadSafeFixedIntegerIndex.h>
+#include <opencog/attentionbank/AtomBins.h>
+#include <opencog/attentionbank/AVUtils.h>
 
 namespace opencog
 {
@@ -33,60 +37,94 @@ namespace opencog
  *  @{
  */
 
-class AttentionBank;
 /**
  * Implements an index with additional routines needed for managing
  * short-term importance.  This index is thread-safe.
  */
-using HandleSTIPair = std::pair<Handle,AttentionValue::sti_t>;
+using HandleSTIPair = std::pair<Handle, AttentionValue::sti_t>;
+
+namespace ecan {
+    class StochasticDiffusionAmountCalculator;
+};
 class ImportanceIndex
 {
+    // Needs to access importanceBin
+    friend class ecan::StochasticDiffusionAmountCalculator;
 private:
-    AttentionBank& _bank;
-    ThreadSafeFixedIntegerIndex _index;
-    std::vector<HandleSTIPair> topKSTIValuedHandles; // TOP K STI values
-    std::mutex topKSTIUpdateMutex;
-    int minAFSize;
+    mutable std::mutex _mtx;
 
-    void updateTopStiValues(Atom* atom);
+    AtomBins _index;
 
-public:
-    ImportanceIndex(AttentionBank&);
-    void removeAtom(Atom*, int);
-
-    /**
-     * Updates the importance index for the given atom.
-     * According to the new importance of the atom, it may change importance
-     * bins.
-     *
-     * @param The atom whose importance index will be updated.
-     * @param The old importance bin where the atom originally was.
-     */
-    void updateImportance(Atom*, int, int);
-
-    UnorderedHandleSet getHandleSet(AttentionValue::sti_t,
-                                    AttentionValue::sti_t) const;
+    /// Running average min and max STI.
+    opencog::recent_val<AttentionValue::sti_t> _maxSTI;
+    opencog::recent_val<AttentionValue::sti_t> _minSTI;
 
     /**
      * This method returns which importance bin an atom with the given
-     * importance should be placed.
+     * STI should be placed.
      *
      * @param Importance value to be mapped.
      * @return The importance bin which an atom of the given importance
      * should be placed.
      */
-    static unsigned int importanceBin(short);
+    static size_t importanceBin(AttentionValue::sti_t);
+
+    std::vector<HandleSTIPair> topKSTIValuedHandles; // TOP K STI values
+    int minAFSize;
+    void updateTopStiValues(const Handle&);
+
+public:
+    ImportanceIndex();
+    void removeAtom(const Handle&);
+
+    void update(void);
 
     /**
-     * Get the content of an ImportanceBin at index i.
-    */
+     * Get the maximum STI observed.
+     *
+     * @param average If true, return an exponentially decaying
+     *        average of maximum STI, otherwise return the actual
+     *        maximum.
+     * @return Maximum STI
+     */
+    AttentionValue::sti_t getMaxSTI(bool average=true) const;
+
+    /**
+     * Get the minimum STI observed.
+     *
+     * @param average If true, return an exponentially decaying
+     *        average of minimum STI, otherwise return the actual
+     *        minimum.
+     * @return Minimum STI
+     */
+    AttentionValue::sti_t getMinSTI(bool average=true) const;
+
+    /**
+     * Updates the importance index for the given atom.
+     */
+    void updateImportance(const Handle&,
+                          const AttentionValuePtr& oldav,
+                          const AttentionValuePtr& newav);
+
+    /**
+     * Returns the set of atoms within the given importance range.
+     *
+     * @param Importance range lower bound (inclusive).
+     * @param Importance range upper bound (inclusive).
+     * @return The set of atoms within the given importance range.
+     */
+    UnorderedHandleSet getHandleSet(AttentionValue::sti_t lowerBound,
+                                    AttentionValue::sti_t upperBound =
+                                         AttentionValue::MAXSTI) const;
+
+    // Get the content of an ImportanceBin at index i.
     template <typename OutputIterator> OutputIterator
     getContent(size_t i,OutputIterator out) const
     {
-            return _index.getContent(i,out);
+        return _index.getContent(i,out);
     }
 
-    Handle getRandomAtom(void)
+    Handle getRandomAtom(void) const
     {
         return _index.getRandomAtom();
     }
