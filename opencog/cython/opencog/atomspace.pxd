@@ -189,12 +189,13 @@ cdef class AtomSpace:
     cdef cAtomSpace *atomspace
     cdef bint owns_atomspace
 
+cdef extern from "opencog/attentionbank/AVUtils.h" namespace "opencog":
+    cdef av_type get_sti(const cHandle&)
+    cdef av_type get_lti(const cHandle&)
+    cdef av_type get_vlti(const cHandle&)
+
 cdef extern from "opencog/attentionbank/AttentionBank.h" namespace "opencog":
     cdef cppclass cAttentionBank "opencog::AttentionBank":
-        av_type get_sti(const cHandle&)
-        av_type get_lti(const cHandle&)
-        av_type get_vlti(const cHandle&)
-
         void set_sti(const cHandle&, av_type stiValue)
         void set_lti(const cHandle&, av_type ltiValue)
         void inc_vlti(const cHandle&)
