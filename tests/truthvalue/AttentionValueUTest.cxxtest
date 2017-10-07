@@ -100,8 +100,8 @@ private:
 
 public:
     AttentionValueUTest() {
-        //logger().setLevel(Logger::DEBUG);
-        //logger().setPrintToStdoutFlag(true);
+        logger().set_level(Logger::DEBUG);
+        logger().set_print_to_stdout_flag(true);
 
         sti[0] = DEFAULTATOMSTI;
         sti[1] = AV1_STI;
@@ -180,10 +180,10 @@ public:
 
         for (int i = 0; i < NUM_AVS; i++) {
             const AttentionValue& av1 = *avs[i];
-            const AttentionValue& av2 = *av1.clone();
-            //logger().debug("getSTI()=%d, cloned=%d", av1.getSTI(), av2.getSTI());
-            //logger().debug("getLTI()=%d, cloned=%d", av1.getLTI(), av2.getLTI());
-            //logger().debug("getVLTI()=%d, cloned=%d", av1.getVLTI(), av2.getVLTI());
+            const AttentionValue av2(*av1.clone());
+            logger().debug("getSTI()=%f, cloned=%f", av1.getSTI(), av2.getSTI());
+            logger().debug("getLTI()=%f, cloned=%f", av1.getLTI(), av2.getLTI());
+            logger().debug("getVLTI()=%f, cloned=%f", av1.getVLTI(), av2.getVLTI());
             TS_ASSERT(av1 == av2);
         }
     }
