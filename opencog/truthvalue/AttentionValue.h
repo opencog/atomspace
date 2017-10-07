@@ -146,6 +146,10 @@ public:
 static inline AttentionValuePtr AttentionValueCast(const ProtoAtomPtr& pa)
     { return std::dynamic_pointer_cast<const AttentionValue>(pa); }
 
+static inline ProtoAtomPtr ProtoAtomCast(const AttentionValuePtr& av)
+{
+    return std::shared_ptr<ProtoAtom>(av, (ProtoAtom*) av.get());
+}
 
 /** @}*/
 } // namespace opencog
