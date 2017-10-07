@@ -697,27 +697,20 @@ public:
         logger().debug("END TEST: getSortedHandleSet");
     }
 
-    /**
-     * Method tested:
-     *
-     * Filter handles from a sequence according to the given criterion.
-     *
-     * @param begin iterator for the sequence
-     * @param end iterator for the sequence
-     * @param struct or function embodying the criterion
-     * @return The handles in the sequence that match the criterion.
-     */
-
-    void testGetNormalisedSTI() {
-        Handle h = atomSpace->add_node(CONCEPT_NODE, "blah");
+    void testGetNormalisedSTI()
+    {
+        Handle hlo = atomSpace->add_node(CONCEPT_NODE, "low");
+        Handle h = atomSpace->add_node(CONCEPT_NODE, "high");
         bool clip = false, average = false;
-        TS_ASSERT_EQUALS(bank->getNormalisedZeroToOneSTI(get_av(h), average, clip), 0.0f);
+        TS_ASSERT_EQUALS(bank->getNormalisedZeroToOneSTI(get_av(h), average, clip), 0.0);
+
+        setSTI(bank, hlo, 1);
+        setSTI(bank, h, 15);
+
         average = true;
-        setSTI(bank, h, 10);
-        // bank->updateMaxSTI(10);
-        TS_ASSERT(bank->getNormalisedZeroToOneSTI(get_av(h), average, clip) > 1.0f);
+        TS_ASSERT(1.0 <= bank->getNormalisedZeroToOneSTI(get_av(h), average, clip));
         clip = true;
-        TS_ASSERT_DELTA(bank->getNormalisedZeroToOneSTI(get_av(h), average, clip), 1.0f, 0.001f);
+        TS_ASSERT_DELTA(bank->getNormalisedZeroToOneSTI(get_av(h), average, clip), 1.0, 0.001);
     }
 
 };
