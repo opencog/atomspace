@@ -38,7 +38,7 @@ bool Satisfier::grounding(const HandleMap &var_soln,
 	// Record the grounding; we cache this later.
 	if (1 == _varseq.size())
 	{
-		_ground = var_soln_at(_varseq[0]);
+		_ground = var_soln.at(_varseq[0]);
 	}
 	else
 	{

@@ -24,6 +24,7 @@
  */
 
 #include <opencog/atoms/base/ClassServer.h>
+#include <opencog/atoms/base/Node.h>
 #include <opencog/atomutils/TypeUtils.h>
 
 #include "BindLink.h"
@@ -116,13 +117,13 @@ static const Handle& rewrite_key(void)
 
 /// Store a cache of the most recent pattern rewrite as a value,
 /// obtainable via a "well-known" key: "*-PatternRewriteKey-*"
-void PatternLink::set_rewrite(const Handle& rewr)
+void BindLink::set_rewrite(const Handle& rewr)
 {
 	setValue(rewrite_key(), rewr);
 }
 
 /// Return the cached value of the most recent rewrite.
-Handle PatternLink::get_rewrite(void) const
+Handle BindLink::get_rewrite(void) const
 {
 	HandleCast(getValue(rewrite_key()));
 }

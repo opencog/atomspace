@@ -136,7 +136,7 @@ protected:
 	void setup_components(void);
 
 public:
-	// Cache the most recnt resuts of the pattern match
+	// Cache the most recent resuts of the pattern match
 	void set_groundings(const Handle&);
 
 protected:
