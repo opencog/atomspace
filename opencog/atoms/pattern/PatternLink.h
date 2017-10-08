@@ -135,6 +135,10 @@ protected:
 	void common_init(void);
 	void setup_components(void);
 
+public:
+	// Cache the most recent resuts of the pattern match
+	void set_groundings(const Handle&);
+
 protected:
 	// utility debug print
 	static void prt(const Handle& h)
@@ -170,6 +174,9 @@ public:
 	const HandleSeq& get_virtual(void) const { return _virtual; }
 
 	bool satisfy(PatternMatchCallback&) const;
+
+	// Return the cached variable groundings.
+	Handle get_groundings() const;
 
 	void debug_log(void) const;
 

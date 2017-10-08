@@ -917,6 +917,29 @@ void PatternLink::check_connectivity(const HandleSeqSeq& components)
 }
 
 /* ================================================================= */
+// Cache of the most results obtained from the most recent run
+// of the pattern matcher.
+
+static const Handle& groundings_key(void)
+{
+	static Handle gk(createNode(PREDICATE_NODE, "*-PatternGroundingsKey-*"));
+	return gk;
+}
+
+/// Store a cache of the most recent variable groundings as a value,
+/// obtainable via a "well-known" key: "*-PatternGroundingsKey-*"
+void PatternLink::set_groundings(const Handle& grnd)
+{
+	setValue(groundings_key(), grnd);
+}
+
+/// Return the cached value of the most recent variable groundings.
+Handle PatternLink::get_groundings(void) const
+{
+	return HandleCast(getValue(groundings_key()));
+}
+
+/* ================================================================= */
 
 void PatternLink::debug_log(void) const
 {

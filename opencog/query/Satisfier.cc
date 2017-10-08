@@ -35,6 +35,23 @@ bool Satisfier::grounding(const HandleMap &var_soln,
 	// PatternMatchEngine::print_solution(var_soln, term_soln);
 	_result = TruthValue::TRUE_TV();
 
+	// Record the grounding; we cache this later.
+	if (1 == _varseq.size())
+	{
+		_ground = var_soln.at(_varseq[0]);
+	}
+	else
+	{
+		// If more than one variable, encapsulate in sequential order,
+		// in a ListLink.
+		HandleSeq vargnds;
+		for (const Handle& hv : _varseq)
+		{
+			vargnds.push_back(var_soln.at(hv));
+		}
+		_ground = createLink(vargnds, LIST_LINK);
+	}
+
 	// No need to look for more groundings as _result isn't going to change
 	// and opencog::satisfaction_link only needs the value of _result.
 	return true;
@@ -136,6 +153,8 @@ TruthValuePtr opencog::satisfaction_link(AtomSpace* as, const Handle& hlink)
 	Satisfier sater(as);
 	plp->satisfy(sater);
 
+	// Cache the variable groundings. OpenPsi wants this.
+	plp->set_groundings(sater._ground);
 	return sater._result;
 }
 
@@ -155,6 +174,11 @@ Handle opencog::satisfying_set(AtomSpace* as, const Handle& hlink, size_t max_re
 		return recognize(as, hlink);
 	}
 
+	// If we are here, then we are a GET_LINK, right?
+	if (GET_LINK != blt)
+		throw RuntimeException(TRACE_INFO,
+			"Unexpected SatisfyingLink type!");
+
 	PatternLinkPtr bl(PatternLinkCast(hlink));
 	if (NULL == bl)
 	{
@@ -171,7 +195,19 @@ Handle opencog::satisfying_set(AtomSpace* as, const Handle& hlink, size_t max_re
 	for (const Handle& h : sater._satisfying_set)
 		satvec.push_back(h);
 
-	return as->add_link(SET_LINK, satvec);
+	// Create the satisfying set, and cache it.
+	Handle satset(createLink(satvec, SET_LINK));
+
+#define PLACE_RESULTS_IN_ATOMSPACE
+#ifdef PLACE_RESULTS_IN_ATOMSPACE
+	// Shoot. XXX FIXME. Most of the unit tests require that the atom
+	// that we return is in the atomspace. But it would be nice if we
+	// could defer this indefinitely, until its really needed.
+	satset = as->add_atom(satset);
+#endif /* PLACE_RESULTS_IN_ATOMSPACE */
+	bl->set_groundings(satset);
+
+	return satset;
 }
 
 /* ===================== END OF FILE ===================== */
