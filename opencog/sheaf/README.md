@@ -50,6 +50,10 @@ Diagramatic illustrations of jig-saw puzzle-pieces can be found here:
 * Sleator, Temperley, [Parsing English with a Link Grammar](http://www.cs.cmu.edu/afs/cs.cmu.edu/project/link/pub/www/papers/ps/tr91-196.pdf)
 * Bob Coeke, [New Scientist: Quantum Links Let Computers Read](http://www.cs.ox.ac.uk/people/bob.coecke/NewScientist.pdf)
 
+A more formal technique for visualizing connected edges in a monoidal or
+tensor category is the [string diagram](https://ncatlab.org/nlab/show/string+diagram).
+
+
 Sections in Atomese
 -------------------
 Sections are represented in Atomese as follows:
