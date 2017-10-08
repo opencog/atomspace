@@ -8,6 +8,7 @@ The first three examples provide a basic introduction to basic
 pattern matching.
 
 * simple.scm: A basic introduction to pattern matching.
+* satisfcation.scm: An example of using the SatisfactionLink
 * glob.scm: Matching multiple atoms at once.
 * choice.scm: Using the ChoiceLink to explore alternatives.
 
