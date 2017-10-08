@@ -125,7 +125,7 @@ void BindLink::set_rewrite(const Handle& rewr)
 /// Return the cached value of the most recent rewrite.
 Handle BindLink::get_rewrite(void) const
 {
-	HandleCast(getValue(rewrite_key()));
+	return HandleCast(getValue(rewrite_key()));
 }
 
 /* ================================================================= */

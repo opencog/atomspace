@@ -936,7 +936,7 @@ void PatternLink::set_groundings(const Handle& grnd)
 /// Return the cached value of the most recent variable groundings.
 Handle PatternLink::get_groundings(void) const
 {
-	HandleCast(getValue(groundings_key()));
+	return HandleCast(getValue(groundings_key()));
 }
 
 /* ================================================================= */
