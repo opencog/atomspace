@@ -197,11 +197,17 @@ Handle opencog::satisfying_set(AtomSpace* as, const Handle& hlink, size_t max_re
 
 	// Create the satisfying set, and cache it.
 	Handle satset(createLink(satvec, SET_LINK));
+
+#define PLACE_RESULTS_IN_ATOMSPACE
+#ifdef PLACE_RESULTS_IN_ATOMSPACE
+	// Shoot. XXX FIXME. Most of the unit tests require that the atom
+	// that we return is in the atomspace. But it would be nice if we
+	// could defer this indefinitely, until its really needed.
+	satset = as->add_atom(satset);
+#endif /* PLACE_RESULTS_IN_ATOMSPACE */
 	bl->set_groundings(satset);
 
-	// No need to actually put it in the atomspace!?
 	return satset;
-	// return as->add_link(SET_LINK, satvec);
 }
 
 /* ===================== END OF FILE ===================== */

@@ -107,9 +107,16 @@ static Handle do_imply(AtomSpace* as,
 		// (The order of the list has no significance, so it's really a set.)
 		// Put the set into a SetLink, cache it, and return that.
 		Handle rewr(createLink(impl.get_result_list(), SET_LINK));
+
+#define PLACE_RESULTS_IN_ATOMSPACE
+#ifdef PLACE_RESULTS_IN_ATOMSPACE
+		// Shoot. XXX FIXME. Most of the unit tests require that the atom
+		// that we return is in the atomspace. But it would be nice if we
+		// could defer this indefinitely, until its really needed.
+		rewr = as->add_atom(rewr);
+#endif /* PLACE_RESULTS_IN_ATOMSPACE */
+
 		bl->set_rewrite(rewr);
-		// No need to actually put it in the atomspace, right!?
-		// Handle gl = as->add_link(SET_LINK, impl.get_result_list());
 		return rewr;
 	}
 
@@ -138,11 +145,16 @@ static Handle do_imply(AtomSpace* as,
 
 	// Create a set holding all results of the implication, and cache it.
 	Handle rewr(createLink(impl.get_result_list(), SET_LINK));
+
+#ifdef PLACE_RESULTS_IN_ATOMSPACE
+	// Shoot. XXX FIXME. Most of the unit tests require that the atom
+	// that we return is in the atomspace. But it would be nice if we
+	// could defer this indefinitely, until its really needed.
+	rewr = as->add_atom(rewr);
+#endif /* PLACE_RESULTS_IN_ATOMSPACE */
 	bl->set_rewrite(rewr);
 
-	// No need to actually put this in the atomspace?
 	return rewr;
-	// return as->add_link(SET_LINK, impl.get_result_list());
 }
 
 /**
