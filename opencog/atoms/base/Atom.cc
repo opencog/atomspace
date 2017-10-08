@@ -111,13 +111,13 @@ void Atom::setTruthValue(const TruthValuePtr& newTV)
 {
     if (nullptr == newTV) return;
 
-    // If both old and new are e.g. DEFAULT_TV, then do nothing.
-    if (getValue(truth_key()).get() == newTV.get()) return;
-
     // We need to guarantee that the signal goes out with the
     // correct truth value.  That is, another setter could be changing
     // this, even as we are.  So make a copy, first.
     TruthValuePtr oldTV(getTruthValue());
+
+    // If both old and new are e.g. DEFAULT_TV, then do nothing.
+    if (oldTV.get() == newTV.get()) return;
 
     // ... and we still need to make sure that only one thread is
     // writing this at a time. std:shared_ptr is NOT thread-safe against
@@ -194,9 +194,6 @@ void Atom::copyValues(const Handle& other)
         ProtoAtomPtr p = other->getValue(k);
         setValue(k, p);
     }
-
-    // Hacky but true: manually update the truth value, also.
-    setTruthValue(other->getTruthValue());
 }
 
 std::string Atom::valuesToString() const
