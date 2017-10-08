@@ -254,12 +254,22 @@ SCM SchemeSmob::ss_value (SCM satom, SCM skey)
 SCM SchemeSmob::ss_keys (SCM satom)
 {
 	Handle atom(verify_handle(satom, "cog-value"));
+	AtomSpace* as = atom->getAtomSpace();
 
 	SCM rv = SCM_EOL;
 	HandleSet keys = atom->getKeys();
 	for (const Handle& k : keys)
 	{
-		rv = scm_cons (handle_to_scm(k), rv);
+		// OK, this is kind-of weird and hacky, but if the keys
+		// are not in any atomspace at the time that we go to
+		// print them, they'll be converted to <undefined handle>.
+		// So we shove them into the same atomspace as the atom
+		// itself. I don't quite like this, but it seems to be
+		// needed to fit user expectations.
+		if (as)
+			rv = scm_cons (handle_to_scm(as->add_atom(k)), rv);
+		else
+			rv = scm_cons (handle_to_scm(k), rv);
 	}
 	return rv;
 }
