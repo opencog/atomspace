@@ -153,8 +153,17 @@ TruthValuePtr opencog::satisfaction_link(AtomSpace* as, const Handle& hlink)
 	Satisfier sater(as);
 	plp->satisfy(sater);
 
+#define PLACE_RESULTS_IN_ATOMSPACE
+#ifdef PLACE_RESULTS_IN_ATOMSPACE
+	// Shoot. XXX FIXME. Most of the unit tests require that the atom
+	// that we return is in the atomspace. But it would be nice if we
+	// could defer this indefinitely, until its really needed.
+	Handle satgrd = as->add_atom(sater._ground);
+#endif /* PLACE_RESULTS_IN_ATOMSPACE */
+
 	// Cache the variable groundings. OpenPsi wants this.
-	plp->set_groundings(sater._ground);
+	plp->set_groundings(satgrd);
+
 	return sater._result;
 }
 
