@@ -78,6 +78,7 @@ private:
 	static SCM handle_to_scm(const Handle&);
 	static SCM protom_to_scm(const ProtoAtomPtr&);
 	static SCM tv_to_scm(const TruthValuePtr&);
+	static SCM av_to_scm(const AttentionValuePtr&);
 	static Handle scm_to_handle(SCM);
 	static ProtoAtomPtr scm_to_protom(SCM);
 	static TruthValuePtr scm_to_tv(SCM);
@@ -183,9 +184,7 @@ private:
 
 	// Attention values
 	static SCM ss_new_av(SCM, SCM, SCM);
-	static SCM ss_stimulate(SCM, SCM);
 	static SCM ss_av_p(SCM);
-	static SCM take_av(AttentionValue *);
 	static SCM ss_av_get_value(SCM);
 
 	// AttentionalFocus and AttentionalFocus Boundary
@@ -193,6 +192,7 @@ private:
 	static SCM ss_af(void);
 	static SCM ss_af_size(void);
 	static SCM ss_set_af_size(SCM);
+	static SCM ss_stimulate(SCM, SCM);
 
 	// Free variables
 	static SCM ss_get_free_variables(SCM);

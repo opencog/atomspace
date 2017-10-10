@@ -60,6 +60,12 @@ std::string SchemeSmob::av_to_string(const AttentionValuePtr& av)
 }
 
 /* ============================================================== */
+
+SCM SchemeSmob::av_to_scm (const AttentionValuePtr& av)
+{
+	return protom_to_scm(ProtoAtomCast(av));
+}
+
 /**
  * Create a new attention value, with indicated sti/lti/vlti
  */
