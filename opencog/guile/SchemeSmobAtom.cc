@@ -143,17 +143,16 @@ SCM SchemeSmob::ss_inc_count (SCM satom, SCM scnt)
 SCM SchemeSmob::ss_av (SCM satom)
 {
 	Handle h = verify_handle(satom, "cog-av");
-	AttentionValue *sav = get_av(h)->rawclone();
-	return take_av(sav);
+	return av_to_scm(get_av(h));
 }
 
 SCM SchemeSmob::ss_set_av (SCM satom, SCM sav)
 {
 	Handle h = verify_handle(satom, "cog-set-av!");
-	AttentionValue *av = verify_av(sav, "cog-set-av!", 2);
+	AttentionValuePtr av = verify_av(sav, "cog-set-av!", 2);
 	AtomSpace* atomspace = ss_get_env_as("cog-set-av!");
 
-	attentionbank(atomspace).change_av(h, av->clone());
+	attentionbank(atomspace).change_av(h, av);
 	return satom;
 }
 

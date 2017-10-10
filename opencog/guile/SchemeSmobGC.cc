@@ -24,7 +24,6 @@ SCM SchemeSmob::mark_misc(SCM misc_smob)
 		case COG_PROTOM: // Nothing to do here ...
 		case COG_AS: // Nothing to do here ...
 		case COG_LOGGER: // Nothing to do here ...
-		case COG_AV: // Nothing to do here ...
 		case COG_EXTEND: // Nothing to do here ...
 			return SCM_BOOL_F;
 
@@ -65,12 +64,6 @@ size_t SchemeSmob::free_misc(SCM node)
 			scm_remember_upto_here_1(node);
 			return 0;
 		}
-		case COG_AV:
-			AttentionValue *av;
-			av = (AttentionValue *) SCM_SMOB_DATA(node);
-			delete av;
-			scm_remember_upto_here_1(node);
-			return 0;
 
 		case COG_PROTOM:
 			ProtoAtomPtr* pap;
@@ -118,12 +111,6 @@ std::string SchemeSmob::misc_to_string(SCM node)
 		case COG_LOGGER:
 		{
 			std::string str(logger_to_string((Logger *) SCM_SMOB_DATA(node)));
-			scm_remember_upto_here_1(node);
-			return str;
-		}
-		case COG_AV:
-		{
-			std::string str(av_to_string((AttentionValue *) SCM_SMOB_DATA(node)));
 			scm_remember_upto_here_1(node);
 			return str;
 		}
