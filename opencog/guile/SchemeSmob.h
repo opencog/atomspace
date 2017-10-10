@@ -48,7 +48,6 @@ private:
 
 	enum {
 		COG_PROTOM = 1, // values or atoms - smart pointer
-		COG_AV,         // attention values
 		COG_AS,         // atom spaces
 		COG_LOGGER,     // logger
 		COG_EXTEND      // callbacks into C++ code.
@@ -205,8 +204,8 @@ private:
 	static std::string handle_to_string(const Handle&, int);
 	static std::string misc_to_string(SCM);
 	static TruthValuePtr get_tv_from_list(SCM);
-	static AttentionValue *get_av_from_list(SCM);
-	static AtomSpace *get_as_from_list(SCM);
+	static AttentionValuePtr get_av_from_list(SCM);
+	static AtomSpace* get_as_from_list(SCM);
 
 	// Logger
 	static SCM logger_to_scm(Logger*);
@@ -224,7 +223,7 @@ private:
 	static Handle verify_handle(SCM, const char *, int pos = 1);
 	static ProtoAtomPtr verify_protom(SCM, const char *, int pos = 1);
 	static TruthValuePtr verify_tv(SCM, const char *, int pos = 1);
-	static AttentionValue* verify_av(SCM, const char *, int pos = 1);
+	static AttentionValuePtr verify_av(SCM, const char *, int pos = 1);
 	static HandleSeq verify_handle_list (SCM, const char *,
 	                                               int pos = 1);
 	static std::vector<double> verify_float_list (SCM, const char *,
@@ -258,7 +257,7 @@ public:
 	// Utility printing functions
 	static std::string to_string(const Handle&);
 	static std::string as_to_string(const AtomSpace *);
-	static std::string av_to_string(const AttentionValue *);
+	static std::string av_to_string(const AttentionValuePtr&);
 	static std::string tv_to_string(const TruthValuePtr&);
 };
 

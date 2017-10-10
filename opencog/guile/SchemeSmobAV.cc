@@ -21,7 +21,7 @@ using namespace opencog;
  * Return the attention value if found, else return null.
  * Throw errors if the list is not stictly just key-value pairs
  */
-AttentionValue * SchemeSmob::get_av_from_list(SCM slist)
+AttentionValuePtr SchemeSmob::get_av_from_list(SCM slist)
 {
 	while (scm_is_pair(slist))
 	{
@@ -31,8 +31,10 @@ AttentionValue * SchemeSmob::get_av_from_list(SCM slist)
 			scm_t_bits misctype = SCM_SMOB_FLAGS(sval);
 			switch (misctype)
 			{
-				case COG_AV:
-					return (AttentionValue *) SCM_SMOB_DATA(sval);
+				case COG_PROTOM: {
+					ProtoAtomPtr pa(scm_to_protom(sval));
+					return AttentionValueCast(pa);
+				}
 				default:
 					break;
 			}
@@ -41,12 +43,12 @@ AttentionValue * SchemeSmob::get_av_from_list(SCM slist)
 		slist = SCM_CDR(slist);
 	}
 
-	return NULL;
+	return nullptr;
 }
 
 /* ============================================================== */
 
-std::string SchemeSmob::av_to_string(const AttentionValue *av)
+std::string SchemeSmob::av_to_string(const AttentionValuePtr& av)
 {
 #define BUFLEN 120
 	char buff[BUFLEN];
@@ -55,20 +57,6 @@ std::string SchemeSmob::av_to_string(const AttentionValue *av)
 	         av->getSTI(), av->getLTI(), av->getVLTI());
 
 	return buff;
-}
-
-/* ============================================================== */
-/**
- * Take over memory management of an attention value
- */
-SCM SchemeSmob::take_av (AttentionValue *av)
-{
-	scm_gc_register_allocation(sizeof(*av));
-
-	SCM smob;
-	SCM_NEWSMOB (smob, cog_misc_tag, av);
-	SCM_SET_SMOB_FLAGS(smob, COG_AV);
-	return smob;
 }
 
 /* ============================================================== */
@@ -89,8 +77,8 @@ SCM SchemeSmob::ss_new_av (SCM ssti, SCM slti, SCM svlti)
 	AttentionValue::sti_t sti = scm_to_short(ssti);
 	AttentionValue::lti_t lti = scm_to_short(slti);
 	AttentionValue::vlti_t vlti = scm_to_ushort(svlti);
-	AttentionValue *av = new AttentionValue(sti, lti, vlti);
-	return take_av(av);
+	AttentionValuePtr av = AttentionValue::createAV(sti, lti, vlti);
+	return av_to_scm(av);
 }
 
 /**
@@ -111,33 +99,26 @@ SCM SchemeSmob::ss_stimulate (SCM satom, SCM sstimulus)
  */
 SCM SchemeSmob::ss_av_p (SCM s)
 {
-	if (SCM_SMOB_PREDICATE(SchemeSmob::cog_misc_tag, s))
-	{
-		scm_t_bits misctype = SCM_SMOB_FLAGS(s);
-		switch (misctype)
-		{
-			case COG_AV:
-				return SCM_BOOL_T;
+	ProtoAtomPtr pa(scm_to_protom(s));
+	if (nullptr == pa) return SCM_BOOL_F;
 
-			default:
-				return SCM_BOOL_F;
-		}
-	}
+	if (pa->getType() == ATTENTION_VALUE)
+		return SCM_BOOL_T;
+
+	scm_remember_upto_here_1(s);
 	return SCM_BOOL_F;
 }
 
 /* ============================================================== */
 
-AttentionValue * SchemeSmob::verify_av(SCM sav, const char *subrname, int pos)
+AttentionValuePtr SchemeSmob::verify_av(SCM sav, const char *subrname, int pos)
 {
-	if (!SCM_SMOB_PREDICATE(SchemeSmob::cog_misc_tag, sav))
+	ProtoAtomPtr pa(scm_to_protom(sav));
+	AttentionValuePtr av(AttentionValueCast(pa));
+
+	if (nullptr == av)
 		scm_wrong_type_arg_msg(subrname, pos, sav, "opencog attention value");
 
-	scm_t_bits misctype = SCM_SMOB_FLAGS(sav);
-	if (COG_AV != misctype)
-		scm_wrong_type_arg_msg(subrname, pos, sav, "opencog attention value");
-
-	AttentionValue *av = (AttentionValue *) SCM_SMOB_DATA(sav);
 	return av;
 }
 
@@ -146,7 +127,7 @@ AttentionValue * SchemeSmob::verify_av(SCM sav, const char *subrname, int pos)
  */
 SCM SchemeSmob::ss_av_get_value (SCM s)
 {
-	AttentionValue *av = verify_av(s, "cog-av->alist");
+	AttentionValuePtr av = verify_av(s, "cog-av->alist");
 
 	SCM sti = scm_from_short(av->getSTI());
 	SCM lti = scm_from_short(av->getLTI());

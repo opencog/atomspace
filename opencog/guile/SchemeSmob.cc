@@ -127,16 +127,6 @@ SCM SchemeSmob::equalp_misc(SCM a, SCM b)
 			if (al == bl) return SCM_BOOL_T;
 			return SCM_BOOL_F;
 		}
-		case COG_AV:
-		{
-			AttentionValue* av = (AttentionValue *) SCM_SMOB_DATA(a);
-			AttentionValue* bv = (AttentionValue *) SCM_SMOB_DATA(b);
-			scm_remember_upto_here_1(a);
-			scm_remember_upto_here_1(b);
-			if (av == bv) return SCM_BOOL_T;
-			if (*av == *bv) return SCM_BOOL_T;
-			return SCM_BOOL_F;
-		}
 		case COG_EXTEND:
 		{
 			// We compare pointers here, only.
