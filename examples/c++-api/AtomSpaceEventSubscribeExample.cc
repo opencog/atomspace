@@ -72,7 +72,7 @@ int main(int argc, char ** args)
     // Update the atom's Attention value. Attention values are managed
     // by ECAN agents. See
     // http://wiki.opencog.org/w/Attention_Allocation
-    bank.change_av(hinheritance, createAV(15, 30, 45));
+    bank.change_av(hinheritance, AttentionValue::createAV(15, 30, 45));
 
     // ListLink is an example of unordered type of Link.
     // Thus order is not guaranteed in this case.
