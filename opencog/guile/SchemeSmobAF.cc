@@ -1,7 +1,7 @@
 /*
  * opencog/guile/SchemeSmobAF.cc
  *
- * Scheme small objects (SMOBS) for AttentionalFocus and AttentionalFocusBoundary.
+ * Scheme small objects (SMOBS) for AttentionBank.
  *
  * Copyright (C) 2014 Cosmo Harrigan
  * All Rights Reserved
@@ -73,4 +73,16 @@ SCM SchemeSmob::ss_af (void)
 	}
 
 	return head;
+}
+
+/**
+ *  Stimulate an atom with given stimulus amount.
+ */
+SCM SchemeSmob::ss_stimulate (SCM satom, SCM sstimulus)
+{
+	Handle h(scm_to_handle(satom));
+	double stimulus = scm_to_double(sstimulus);
+	AtomSpace* atomspace = ss_get_env_as("cog-stimulate");
+	attentionbank(atomspace).stimulate(h, stimulus);
+	return satom;
 }
