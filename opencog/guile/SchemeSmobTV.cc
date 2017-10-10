@@ -110,7 +110,8 @@ TruthValuePtr SchemeSmob::get_tv_from_list(SCM slist)
 			{
 				case COG_PROTOM: {
 					ProtoAtomPtr pa(scm_to_protom(sval));
-					return TruthValueCast(pa);
+					TruthValuePtr tv(TruthValueCast(pa));
+					if (tv) return tv;
 				}
 				default:
 					break;

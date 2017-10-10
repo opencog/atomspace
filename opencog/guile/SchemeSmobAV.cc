@@ -33,7 +33,8 @@ AttentionValuePtr SchemeSmob::get_av_from_list(SCM slist)
 			{
 				case COG_PROTOM: {
 					ProtoAtomPtr pa(scm_to_protom(sval));
-					return AttentionValueCast(pa);
+					AttentionValuePtr av(AttentionValueCast(pa));
+					if (av) return av;
 				}
 				default:
 					break;
