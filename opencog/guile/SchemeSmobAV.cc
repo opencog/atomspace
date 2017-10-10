@@ -54,8 +54,9 @@ std::string SchemeSmob::av_to_string(const AttentionValuePtr& av)
 #define BUFLEN 120
 	char buff[BUFLEN];
 
-	snprintf(buff, BUFLEN, "(av %f %f %f)",
-	         av->getSTI(), av->getLTI(), av->getVLTI());
+	// We pretend that they are actually short integers.
+	snprintf(buff, BUFLEN, "(av %d %d %d)",
+	         (int) av->getSTI(), (int) av->getLTI(), (int) av->getVLTI());
 
 	return buff;
 }
