@@ -196,7 +196,7 @@ std::string hps_to_string(const HandlePairSeq& hps)
 	std::stringstream ss;
 	ss << "size = " << hps.size() << std::endl;
 	size_t i = 0;
-	for (const std::pair<Handle, Handle>& hp : hps) {
+	for (const HandlePair& hp : hps) {
 		ss << "atom.first[" << i << "]:" << std::endl << h_to_string(hp.first);
 		ss << "atom.second[" << i << "]:" << std::endl << h_to_string(hp.second);
 		i++;

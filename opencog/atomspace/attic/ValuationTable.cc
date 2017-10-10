@@ -101,7 +101,7 @@ HandleSet ValuationTable::getKeys(const Handle& atom)
 
 	auto ikeys = _keyset.find(atom);
 	if (ikeys == _keyset.end())
-		return std::set<Handle>();
+		return HandleSet();
 
 	return ikeys->second;
 }
