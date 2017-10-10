@@ -379,8 +379,8 @@ SCM SchemeSmob::ss_new_node (SCM stype, SCM sname, SCM kv_pairs)
 
 		// Was an attention value explicitly specified?
 		// If so, then we've got to set it.
-		AttentionValue *av = get_av_from_list(kv_pairs);
-		if (av) attentionbank(atomspace).change_av(h, av->clone());
+		const AttentionValuePtr av(get_av_from_list(kv_pairs));
+		if (av) attentionbank(atomspace).change_av(h, av);
 		return handle_to_scm(h);
 	}
 	catch (const std::exception& ex)
@@ -416,8 +416,8 @@ SCM SchemeSmob::ss_node (SCM stype, SCM sname, SCM kv_pairs)
 	if (tv) h->setTruthValue(tv);
 
 	// If there was an attention value, change it.
-	const AttentionValue *av = get_av_from_list(kv_pairs);
-	if (av) attentionbank(atomspace).change_av(h, av->clone());
+	const AttentionValuePtr av(get_av_from_list(kv_pairs));
+	if (av) attentionbank(atomspace).change_av(h, av);
 
 	scm_remember_upto_here_1(kv_pairs);
 	return handle_to_scm (h);
@@ -503,8 +503,8 @@ SCM SchemeSmob::ss_new_link (SCM stype, SCM satom_list)
 
 		// Was an attention value explicitly specified?
 		// If so, then we've got to set it.
-		const AttentionValue *av = get_av_from_list(satom_list);
-		if (av) attentionbank(atomspace).change_av(h, av->clone());
+		const AttentionValuePtr av(get_av_from_list(satom_list));
+		if (av) attentionbank(atomspace).change_av(h, av);
 		return handle_to_scm (h);
 	}
 	catch (const std::exception& ex)
@@ -539,8 +539,8 @@ SCM SchemeSmob::ss_link (SCM stype, SCM satom_list)
 	if (tv) h->setTruthValue(tv);
 
 	// If there was an attention value, change it.
-	const AttentionValue *av = get_av_from_list(satom_list);
-	if (av) attentionbank(atomspace).change_av(h, av->clone());
+	const AttentionValuePtr av(get_av_from_list(satom_list));
+	if (av) attentionbank(atomspace).change_av(h, av);
 
 	scm_remember_upto_here_1(satom_list);
 	return handle_to_scm (h);
