@@ -1,3 +1,6 @@
+
+(use-modules (opencog))
+
 ; Socrates, Einstein, and Peirce are all men.
 (ConceptNode "Socrates" (stv .001 1) (cog-new-av 15 10 0))
 (ConceptNode "Einstein" (stv .001 1) (cog-new-av 45 10 0))

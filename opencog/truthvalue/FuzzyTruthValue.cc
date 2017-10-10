@@ -107,7 +107,7 @@ TruthValuePtr FuzzyTruthValue::merge(const TruthValuePtr& other,
 std::string FuzzyTruthValue::toString(const std::string& indent) const
 {
     char buf[1024];
-    sprintf(buf, "(stv %f %f)",
+    sprintf(buf, "(ftv %f %f)",
             static_cast<float>(getMean()),
             static_cast<float>(getConfidence()));
     return buf;
@@ -115,10 +115,10 @@ std::string FuzzyTruthValue::toString(const std::string& indent) const
 
 bool FuzzyTruthValue::operator==(const ProtoAtom& rhs) const
 {
-    const FuzzyTruthValue *stv = dynamic_cast<const FuzzyTruthValue *>(&rhs);
-    if (NULL == stv) return false;
+    const FuzzyTruthValue *ftv = dynamic_cast<const FuzzyTruthValue *>(&rhs);
+    if (NULL == ftv) return false;
 
-    if (not nearly_equal(getMean(), stv->getMean())) return false;
+    if (not nearly_equal(getMean(), ftv->getMean())) return false;
 
 // Converting from confidence to count and back again using single-precision
 // float is a real accuracy killer.  In particular, 2/802 = 0.002494 but
@@ -127,7 +127,7 @@ bool FuzzyTruthValue::operator==(const ProtoAtom& rhs) const
 // thereabouts.
 #define FLOAT_ACCEPTABLE_COUNT_ERROR 0.0002
 
-    if (FLOAT_ACCEPTABLE_COUNT_ERROR < fabs(1.0 - (stv->getCount()/getCount()))) return false;
+    if (FLOAT_ACCEPTABLE_COUNT_ERROR < fabs(1.0 - (ftv->getCount()/getCount()))) return false;
     return true;
 }
 

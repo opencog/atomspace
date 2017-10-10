@@ -80,10 +80,9 @@ AttentionValue::vlti_t AttentionValue::getVLTI() const
 	return _value[VLTI];
 }
 
-std::string AttentionValue::toString() const
+std::string AttentionValue::toString(const str::string& indent) const
 {
 	char buffer[256];
-	sprintf(buffer, "[%f, %f, %s]", getSTI(), getLTI(),
-			getVLTI() ? "SAVABLE" : "DISPOSABLE");
+	sprintf(buffer, "(av %f %f %f)", getSTI(), getLTI(), getVLTI());
 	return buffer;
 }
