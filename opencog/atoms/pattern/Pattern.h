@@ -65,7 +65,7 @@ struct Pattern
 	// Each pointer corresponds to unique position in the pattern. The list of
 	// pointers is stored in PatternTermSeq. Typically the list contains one
 	// element, but it might have more if atom repeats in the same clause.
-	typedef std::pair<Handle,Handle> AtomInClausePair;  // first is atom
+	typedef HandlePair AtomInClausePair;  // first is atom
 	typedef std::map<AtomInClausePair, PatternTermSeq> ConnectTermMap;
 
 	// -------------------------------------------
