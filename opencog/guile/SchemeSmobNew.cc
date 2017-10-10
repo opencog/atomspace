@@ -74,6 +74,11 @@ std::string SchemeSmob::handle_to_string(const Handle& h, int indent)
 			ret += " ";
 			ret += tv_to_string (tv);
 		}
+		AttentionValuePtr av(get_av(h));
+		if (not av->isDefaultAV()) {
+			ret += " ";
+			ret += av_to_string (av);
+		}
 		ret += ")";
 		return ret;
 	}
@@ -88,6 +93,11 @@ std::string SchemeSmob::handle_to_string(const Handle& h, int indent)
 		if (not tv->isDefaultTV()) {
 			ret += " ";
 			ret += tv_to_string(tv);
+		}
+		AttentionValuePtr av(get_av(h));
+		if (not av->isDefaultAV()) {
+			ret += " ";
+			ret += av_to_string (av);
 		}
 
 		// Print the outgoing link set.
