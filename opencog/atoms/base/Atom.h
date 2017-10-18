@@ -294,7 +294,7 @@ public:
     //! That is, this call returns the incoming set as it was att the
     //! time of the call; any deletions that occur afterwards (possibly
     //! in other threads) will not be reflected in the returned set.
-    IncomingSet getIncomingSet(AtomSpace* = NULL) const;
+    IncomingSet getIncomingSet(AtomSpace* as=nullptr) const;
 
     //! Place incoming set into STL container of Handles.
     //! Example usage:
@@ -306,7 +306,7 @@ public:
     template <typename OutputIterator> OutputIterator
     getIncomingSet(OutputIterator result) const
     {
-        if (NULL == _incoming_set) return result;
+        if (nullptr == _incoming_set) return result;
         std::lock_guard<std::mutex> lck(_mtx);
         for (const auto bucket : _incoming_set->_iset)
         {
@@ -344,10 +344,9 @@ public:
      * @param The type of the parent atom.
      */
     template <typename OutputIterator> OutputIterator
-    getIncomingSetByType(OutputIterator result,
-                         Type type) const
+    getIncomingSetByType(OutputIterator result, Type type) const
     {
-        if (NULL == _incoming_set) return result;
+        if (nullptr == _incoming_set) return result;
         std::lock_guard<std::mutex> lck(_mtx);
 
         const auto bucket = _incoming_set->_iset.find(type);

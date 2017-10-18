@@ -48,7 +48,7 @@ HandleSeqSet TraceRecorder::traces()
 {
 	HandleSeqSet trs;
 	for (const Handle& fcs_proof : get_fcs_proofs())
-		set_insertion(trs, traces(fcs_proof));
+		set_union_modify(trs, traces(fcs_proof));
 	return trs;
 }
 
