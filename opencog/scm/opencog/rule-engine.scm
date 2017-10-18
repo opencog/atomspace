@@ -8,5 +8,5 @@
 
 (load-extension "libruleengine" "opencog_ruleengine_init")
 
-(load-from-path "rule-engine/rule-engine-utils.scm")
+(load-from-path "opencog/rule-engine/rule-engine-utils.scm")
 (export-rule-engine-utils)
