@@ -258,6 +258,6 @@
           ure-get-forward-rule
           gt-zero-confidence
           meta-bind
-          export-rule-engine-utils,
-          )
+          ; export-rule-engine-utils
+  )
 )
