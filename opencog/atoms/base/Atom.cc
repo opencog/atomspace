@@ -84,7 +84,7 @@ namespace opencog {
 
 Atom::~Atom()
 {
-    _atom_space = NULL;
+    _atom_space = nullptr;
     if (0 < getIncomingSetSize()) {
         // This can't ever possibly happen. If it does, then there is
         // some very sick bug with the reference counting that the
@@ -287,16 +287,16 @@ void Atom::keep_incoming_set()
 /// be queried; it is erased.
 void Atom::drop_incoming_set()
 {
-    if (NULL == _incoming_set) return;
+    if (nullptr == _incoming_set) return;
     std::lock_guard<std::mutex> lck (_mtx);
     _incoming_set->_iset.clear();
-    _incoming_set = NULL;
+    _incoming_set = nullptr;
 }
 
 /// Add an atom to the incoming set.
 void Atom::insert_atom(const LinkPtr& a)
 {
-    if (NULL == _incoming_set) return;
+    if (nullptr == _incoming_set) return;
     std::lock_guard<std::mutex> lck (_mtx);
 
     Type at = a->getType();
@@ -317,7 +317,7 @@ void Atom::insert_atom(const LinkPtr& a)
 /// Remove an atom from the incoming set.
 void Atom::remove_atom(const LinkPtr& a)
 {
-    if (NULL == _incoming_set) return;
+    if (nullptr == _incoming_set) return;
     std::lock_guard<std::mutex> lck (_mtx);
 #ifdef INCOMING_SET_SIGNALS
     _incoming_set->_removeAtomSignal(shared_from_this(), a);
@@ -332,7 +332,7 @@ void Atom::remove_atom(const LinkPtr& a)
 /// the incoming set. This is used to manage the StateLink.
 void Atom::swap_atom(const LinkPtr& old, const LinkPtr& neu)
 {
-    if (NULL == _incoming_set) return;
+    if (nullptr == _incoming_set) return;
     std::lock_guard<std::mutex> lck (_mtx);
 
 #ifdef INCOMING_SET_SIGNALS
@@ -359,7 +359,7 @@ void Atom::swap_atom(const LinkPtr& old, const LinkPtr& neu)
 
 size_t Atom::getIncomingSetSize() const
 {
-    if (NULL == _incoming_set) return 0;
+    if (nullptr == _incoming_set) return 0;
     std::lock_guard<std::mutex> lck (_mtx);
 
     size_t cnt = 0;
@@ -375,7 +375,7 @@ size_t Atom::getIncomingSetSize() const
 IncomingSet Atom::getIncomingSet(AtomSpace* as) const
 {
     static IncomingSet empty_set;
-    if (NULL == _incoming_set) return empty_set;
+    if (nullptr == _incoming_set) return empty_set;
 
     if (as) {
         const AtomTable *atab = &as->get_atomtable();
@@ -416,7 +416,7 @@ IncomingSet Atom::getIncomingSetByType(Type type) const
     // The only difference is that it works with LinkPtr instead of
     // Handle.  The primary issue is that casting from Handle back
     // to LinkPtr is slowwwwwww.  So we avoid that, here.
-    if (NULL == _incoming_set) return result;
+    if (nullptr == _incoming_set) return result;
     std::lock_guard<std::mutex> lck(_mtx);
 
     const auto bucket = _incoming_set->_iset.find(type);
