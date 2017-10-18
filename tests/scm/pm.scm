@@ -1,6 +1,14 @@
 ;; File to reproduce a bug when operating on multiple atomspaces
 ;; created from scheme.
 
+; Hack to get rule-engine to load in the unit-test environment.
+(define path "/usr/local/lib/opencog:/usr/local/lib64/opencog")
+(setenv "LTDL_LIBRARY_PATH"
+   (if (getenv "LTDL_LIBRARY_PATH")
+      (string-append (getenv "LTDL_LIBRARY_PATH") ":" path)
+      path))
+
+(use-modules (opencog))
 (use-modules (opencog logger))
 (use-modules (opencog query))
 (use-modules (opencog rule-engine))
