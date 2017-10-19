@@ -30,5 +30,3 @@ library
 
   build-depends:     base             >=4.5 && < 5
                    , transformers     >=0.3
-
-  extra-libraries:   atomspace-cwrapper
