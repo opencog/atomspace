@@ -14,5 +14,5 @@ if [ "$(id -u)" -ne 0 ];
 then
   # Build haskell bindings package.
   echo $BIN_DIR
-  stack build --extra-lib-dirs=${BIN_DIR}
+  stack build --allow-different-user --extra-lib-dirs=${BIN_DIR}
 fi
