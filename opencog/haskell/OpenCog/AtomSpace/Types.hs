@@ -26,27 +26,29 @@ data Atom = Link AtomType [Atom] TruthVal
           | Node AtomType AtomName TruthVal
           deriving (Eq,Show,Read)
 
---data Value = FloatValue AtomType [Double] | LinkValue AtomType [Value]
+data Value = FloatValue     AtomType    [Double]
+           | StringValue    AtomType    String
+           | LinkValue      AtomType    [Value]
 
 -- | 'TruthVal' represent the different types of TruthValues.
 data TruthVal = SimpleTV { tvMean       :: Double
                          , tvConfidence :: Double
                          }
               | CountTV  { tvMean       :: Double
-                         , tvCount      :: Double
                          , tvConfidence :: Double
+                         , tvCount      :: Double
                          }
               | IndefTV  { tvMean       :: Double
-                         , tvL          :: Double
                          , tvU          :: Double
+                         , tvL          :: Double
                          , tvConfLevel  :: Double
                          , tvDiff       :: Double
                          }
               | FuzzyTV  { tvMean       :: Double
-                         , tvConfidence :: Double
+                         , tvCount      :: Double
                          }
               | ProbTV   { tvMean       :: Double
-                         , tvCount      :: Double
                          , tvConfidence :: Double
+                         , tvCount      :: Double
                          }
     deriving (Show,Read,Eq)
