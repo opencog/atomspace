@@ -78,7 +78,7 @@ ADD_LIBRARY(atomspace_cython
 ADD_DEPENDENCIES(atomspace_cython opencog_atom_types)
 
 TARGET_LINK_LIBRARIES(atomspace_cython
-	-Wl,--no-as-needed
+	${NO_AS_NEEDED}
 	attentionbank
 	atomspace
 	atomutils
