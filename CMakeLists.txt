@@ -75,6 +75,10 @@ IF (CMAKE_COMPILER_IS_GNUCXX)
 		# Vital to do this otherwise unresolved symbols everywhere:
 		SET(CMAKE_SHARED_LINKER_FLAGS "-Wl,-flat_namespace,-undefined,dynamic_lookup")
 		SET(CMAKE_EXE_LINKER_FLAGS "-Wl,-flat_namespace,-undefined,dynamic_lookup")
+
+		# The Apple linker does not support the --no-as-needed flag.
+		SET(NO_AS_NEEDED "")
+
 	ELSE (APPLE)
 		SET(CMAKE_C_FLAGS "-Wall -fPIC")
 		# SET(CMAKE_C_FLAGS "-Wl,--copy-dt-needed-entries")
@@ -91,6 +95,8 @@ IF (CMAKE_COMPILER_IS_GNUCXX)
 		# SET(CMAKE_C_FLAGS_RELEASE "-O3 -g -fstack-protector")
 		SET(CMAKE_C_FLAGS_RELEASE "-O3 -g -fstack-protector -flto")
 		# SET(CMAKE_C_FLAGS_RELEASE "-O3 -g -fstack-protector -flto=8")
+
+		SET(NO_AS_NEEDED "-Wl,--no-as-needed")
 		LINK_LIBRARIES(pthread)
 
 		# Workaround for circular dependencies problem. This causes

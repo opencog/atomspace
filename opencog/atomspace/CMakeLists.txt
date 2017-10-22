@@ -15,7 +15,7 @@ ADD_LIBRARY (atomspace
 ADD_DEPENDENCIES(atomspace opencog_atom_types)
 
 TARGET_LINK_LIBRARIES(atomspace
-	-Wl,--no-as-needed
+	${NO_AS_NEEDED}
 	attentionbank
 	atomcore
 	lambda
