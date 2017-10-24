@@ -81,11 +81,11 @@ BindLink::BindLink(const Link &l)
 void BindLink::extract_variables(const HandleSeq& oset)
 {
 	size_t sz = oset.size();
-	if (3 < sz)
+	if (sz < 2 or 3 < sz)
 		throw InvalidParamException(TRACE_INFO,
 			"Expecting an outgoing set size of at most two, got %d", sz);
 
-	// If the outgoing set size is one, then there are no variable
+	// If the outgoing set size is two, then there are no variable
 	// declarations; extract all free variables.
 	if (2 == sz)
 	{
