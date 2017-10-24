@@ -37,6 +37,9 @@ UnorderedLink::UnorderedLink(const HandleSeq& oset, Type t)
 		throw InvalidParamException(TRACE_INFO,
 			"Expecting an UnorderedLink, got %s", tname.c_str());
 	}
+
+	// Place into arbitrary, but deterministic order.
+	std::sort(_outgoing.begin(), _outgoing.end(), handle_less());
 }
 
 UnorderedLink::UnorderedLink(const Link &l)

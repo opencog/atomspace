@@ -39,14 +39,6 @@
 
 using namespace opencog;
 
-void Link::resort(void)
-{
-    // Caution: this comparison function MUST BE EXACTLY THE SAME as
-    // the one in AtomTable.cc, used for Unordered links. Changing
-    // this without changing the other one will break things!
-    std::sort(_outgoing.begin(), _outgoing.end(), handle_less());
-}
-
 void Link::init(const HandleSeq& outgoingVector)
 {
     if (not classserver().isA(_type, LINK)) {
@@ -56,11 +48,6 @@ void Link::init(const HandleSeq& outgoingVector)
     }
 
     _outgoing = outgoingVector;
-    // If the link is unordered, it will be normalized by sorting the
-    // elements in the outgoing list.
-    if (classserver().isA(_type, UNORDERED_LINK)) {
-        resort();
-    }
 }
 
 Link::~Link()

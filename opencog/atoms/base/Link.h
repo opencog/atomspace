@@ -50,7 +50,6 @@ class Link : public Atom
 
 private:
     void init(const HandleSeq&);
-    void resort(void);
 
 protected:
     //! Array holding actual outgoing set of the link.

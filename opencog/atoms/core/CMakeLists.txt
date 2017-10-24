@@ -24,6 +24,7 @@ ADD_LIBRARY (atomcore
 	TypedAtomLink.cc
 	TypeNode.cc
 	UniqueLink.cc
+	UnorderedLink.cc
 	Variables.cc
 	VariableList.cc
 )
@@ -61,6 +62,7 @@ INSTALL (FILES
 	TypedAtomLink.h
 	TypeNode.h
 	UniqueLink.h
+	UnorderedLink.h
 	Variables.h
 	VariableList.h
 	DESTINATION "include/opencog/atoms/core"
