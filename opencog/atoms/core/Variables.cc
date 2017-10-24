@@ -78,12 +78,8 @@ void VarScraper::find_vars(HandleSeq& varseq, HandleSet& varset,
 			// Save the current set of bound variables...
 			bsave = _bound_vars;
 
-			// If we can cast to ScopeLink, then do so; otherwise,
-			// take the low road, and let ScopeLink constructor
-			// do the bound-variable extraction.
+			// The ScopeLink ctor did the bound-variable extraction.
 			ScopeLinkPtr sco(ScopeLinkCast(h));
-			if (nullptr == sco)
-				sco = ScopeLinkCast(classserver().factory(h));
 			const Variables& vees = sco->get_variables();
 			for (const Handle& v : vees.varseq) _bound_vars.insert(v);
 		}
