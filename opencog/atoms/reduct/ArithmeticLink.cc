@@ -115,7 +115,7 @@ Handle ArithmeticLink::reorder(void)
 	for (const Handle& h : exprs) result.push_back(h);
 	for (const Handle& h : numbers) result.push_back(h);
 
-	Handle h(classserver().factory(Handle(createLink(result, getType()))));
+	Handle h(createLink(result, getType()));
 	if (NULL == _atom_space) return h;
 
 	return _atom_space->add_atom(h);

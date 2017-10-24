@@ -249,7 +249,7 @@ LinkPtr ProtocolBufferSerializer::deserializeLink(
 		// oset[i] = Handle(atomMessage.outgoing(i));
     }
 
-	LinkPtr linkPtr(createLink(oset, atomMessage.type()));
+	Handle linkPtr(createLink(oset, atomMessage.type()));
     if (atomMessage.has_truthvalue()) {
     TruthValuePtr tv;
     	tv = deserialize(atomMessage.truthvalue());
@@ -258,7 +258,7 @@ LinkPtr ProtocolBufferSerializer::deserializeLink(
 	tlbuf.addAtom(linkPtr, atomMessage.handle());
     deserializeAtom(atomMessage, *linkPtr);
 
-    return linkPtr;
+    return LinkCast(linkPtr);
 }
 
 //void ProtocolBufferSerializer::serializeLink(

@@ -1651,10 +1651,10 @@ Handle SQLAtomStorage::get_recursive_if_not_exists(PseudoPtr p)
 		Handle ha(get_recursive_if_not_exists(po));
 		resolved_oset.emplace_back(ha);
 	}
-	LinkPtr link(createLink(resolved_oset, p->type));
+	Handle link(createLink(resolved_oset, p->type));
 	_tlbuf.addAtom(link, p->uuid);
 	_num_rec_links++;
-	return link->getHandle();
+	return link;
 }
 
 /**

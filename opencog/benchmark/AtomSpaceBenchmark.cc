@@ -170,7 +170,7 @@ void AtomSpaceBenchmark::printTypeSizes()
          << estimateOfAtomSize(h) << endl;
 
     HandleSeq empty;
-    h = Handle(createLink(empty, LIST_LINK));
+    h = createLink(empty, LIST_LINK);
     cout << "Empty ListLink = " << estimateOfAtomSize(h) << endl;
 
     Handle na = ND(CONCEPT_NODE, "first atom");

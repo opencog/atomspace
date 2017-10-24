@@ -348,7 +348,7 @@ Handle Unify::consume_ill_quotations(const Variables& variables, Handle h,
 		consumed.push_back(consume_ill_quotations(variables, outh, quotation,
 		                                          escape));
 
-	return classserver().factory(Handle(createLink(consumed, t)));
+	return createLink(consumed, t);
 }
 
 bool Unify::is_bound_to_ancestor(const Variables& variables,
@@ -412,7 +412,7 @@ Handle Unify::substitute(BindLinkPtr bl, const HandleMap& var2val,
 		hs.insert(hs.begin(), vardecl);
 
 	// Create the substituted BindLink
-	return classserver().factory(Handle(createLink(hs, bl->getType())));
+	return createLink(hs, bl->getType());
 }
 
 Handle Unify::substitute_vardecl(const Handle& vardecl,
@@ -457,7 +457,7 @@ Handle Unify::substitute_vardecl(const Handle& vardecl,
 	else {
 		OC_ASSERT(false, "Not implemented");
 	}
-	return classserver().factory(Handle(createLink(oset, t)));
+	return createLink(oset, t);
 }
 
 // TODO: for now it is assumed clauses are connected by an AndLink
@@ -483,7 +483,7 @@ Handle Unify::remove_constant_clauses(const Handle& vardecl,
 	} else if (not is_constant(vars, clauses)) {
 		return clauses;
 	}
-	return Handle(createLink(hs, AND_LINK));
+	return createLink(hs, AND_LINK);
 }
 
 Unify::SolutionSet Unify::operator()()

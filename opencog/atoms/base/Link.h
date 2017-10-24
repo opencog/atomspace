@@ -233,11 +233,11 @@ static inline LinkPtr LinkCast(const AtomPtr& a)
     { return std::dynamic_pointer_cast<Link>(a); }
 
 template< class... Args >
-LinkPtr createLink( Args&&... args )
+Handle createLink( Args&&... args )
 {
 	// Do we need to say (std::forward<Args>(args)...) instead ???
 	LinkPtr tmp(std::make_shared<Link>(args ...));
-   return LinkCast(classserver().factory(tmp->getHandle()));
+   return classserver().factory(tmp->getHandle());
 }
 
 /** @}*/

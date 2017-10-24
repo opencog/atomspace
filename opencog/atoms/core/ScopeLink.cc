@@ -385,7 +385,7 @@ Handle ScopeLink::alpha_conversion(HandleSeq vars) const
 		hs.push_back(_varlist.substitute_nocheck(getOutgoingAtom(i), vars));
 
 	// Create the alpha converted scope link
-	return classserver().factory(Handle(createLink(hs, getType())));
+	return createLink(hs, getType());
 }
 
 /* ================================================================= */

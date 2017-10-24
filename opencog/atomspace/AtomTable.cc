@@ -229,9 +229,7 @@ Handle AtomTable::getHandle(Type t, const std::string& n) const
 
 Handle AtomTable::getNodeHandle(const AtomPtr& orig) const
 {
-    // The hash function will fail to find NumberNodes unless
-    // they are in the proper format.
-    AtomPtr a(_classserver.factory(Handle(orig)));
+    AtomPtr a(orig);
 
     ContentHash ch = a->get_hash();
     std::lock_guard<std::recursive_mutex> lck(_mtx);
@@ -394,7 +392,7 @@ Handle AtomTable::add(AtomPtr atom, bool async)
             if (nullptr == h.operator->()) return Handle::UNDEFINED;
             closet.emplace_back(add(h, async));
         }
-        atom = _classserver.factory(Handle(createLink(closet, atom_type)));
+        atom = createLink(closet, atom_type);
     }
 
     // Clone, if we haven't done so already. We MUST maintain our own
@@ -405,7 +403,7 @@ Handle AtomTable::add(AtomPtr atom, bool async)
         if (_classserver.isA(atom_type, NODE))
             atom = _classserver.factory(Handle(createNode(*NodeCast(atom))));
         else
-            atom = _classserver.factory(Handle(createLink(*LinkCast(atom))));
+            atom = createLink(*LinkCast(atom));
     }
 
     // Lock before checking to see if this kind of atom is already in

@@ -180,7 +180,7 @@ Handle InferenceSCM::get_rulebase_rules(Handle rbs)
         hs.push_back((*i).get_alias());
     }
 
-    return Handle(createLink(hs, SET_LINK));
+    return createLink(hs, SET_LINK);
 }
 
 

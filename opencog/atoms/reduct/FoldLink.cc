@@ -203,10 +203,6 @@ Handle FoldLink::reduce(void)
 			Handle foo(createLink(rere, getType()));
 			if (_atom_space)
 				foo = _atom_space->add_atom(foo);
-			else
-			{
-				foo = classserver().factory(foo);
-			}
 			FoldLinkPtr flp(FoldLinkCast(foo));
 
 			DO_RETURN(Handle(flp->reduce()));
@@ -217,7 +213,7 @@ Handle FoldLink::reduce(void)
 	if (not did_reduce)
 		return getHandle();
 
-	DO_RETURN(Handle(createLink(reduct, getType())));
+	DO_RETURN(createLink(reduct, getType()));
 }
 
 // ===========================================================
