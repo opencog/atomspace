@@ -109,7 +109,9 @@ void ScopeLink::extract_variables(const HandleSeq& oset)
 	// apply here: either the body is a lambda, in which case, we copy
 	// the variables from the lambda; else we extract all free variables.
 	if (VARIABLE_LIST != decls and
-	    VARIABLE_NODE != decls and
+	    // A VariableNode could a be valid body, if it has no variable
+	    // declaration, that is if the Scope has only one argument.
+	    (VARIABLE_NODE != decls or oset.size() == 1) and
 	    TYPED_VARIABLE_LINK != decls and
 	    GLOB_NODE != decls)
 	{
