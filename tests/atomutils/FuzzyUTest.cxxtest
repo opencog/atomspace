@@ -104,7 +104,7 @@ void FuzzyPatternUTest::test_basic_fuzzy_match(void)
                    );
 
     Handle r1 = find_approximate_match(as, q1);
-    HandleSeq rs1 = LinkCast(r1)->getOutgoingSet();
+    HandleSeq rs1 = r1->getOutgoingSet();
 
     TSM_ASSERT_EQUALS("Wrong number of solutions", rs1.size(), 1);
     TSM_ASSERT_EQUALS("Wrong match", rs1[0].value(), soln.value());
@@ -119,7 +119,7 @@ void FuzzyPatternUTest::test_basic_fuzzy_match(void)
                    );
 
     Handle r2 = find_approximate_match(as, q2);
-    HandleSeq rs2 = LinkCast(r2)->getOutgoingSet();
+    HandleSeq rs2 = r2->getOutgoingSet();
 
     TSM_ASSERT_EQUALS("Wrong number of solutions", rs2.size(), 1);
     TSM_ASSERT_EQUALS("Wrong match", rs2[0].value(), soln.value());
@@ -134,7 +134,7 @@ void FuzzyPatternUTest::test_basic_fuzzy_match(void)
                    );
 
     Handle r3 = find_approximate_match(as, q3);
-    HandleSeq rs3 = LinkCast(r3)->getOutgoingSet();
+    HandleSeq rs3 = r3->getOutgoingSet();
 
     TSM_ASSERT_EQUALS("Wrong number of solutions", rs3.size(), 1);
     TSM_ASSERT_EQUALS("Wrong match", rs3[0].value(), soln.value());
@@ -149,7 +149,7 @@ void FuzzyPatternUTest::test_basic_fuzzy_match(void)
                    );
 
     Handle r4 = find_approximate_match(as, q4);
-    HandleSeq rs4 = LinkCast(r4)->getOutgoingSet();
+    HandleSeq rs4 = r4->getOutgoingSet();
 
     TSM_ASSERT_EQUALS("Wrong number of solutions", rs4.size(), 0);
 

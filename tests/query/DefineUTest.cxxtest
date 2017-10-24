@@ -116,14 +116,12 @@ void DefineLinkUTest::test_schema(void)
 	// return would provide a VariableNode instead, and that would
 	// be wrong.
 
-	LinkPtr lp = LinkCast(timestamp);
-	Handle pred = lp->getOutgoingAtom(0);
+	Handle pred = timestamp->getOutgoingAtom(0);
 	TS_ASSERT_EQUALS(PREDICATE_NODE, pred->getType());
 
-	Handle list = lp->getOutgoingAtom(1);
+	Handle list = timestamp->getOutgoingAtom(1);
 	TS_ASSERT_EQUALS(LIST_LINK, list->getType());
 
-	LinkPtr ll = LinkCast(list);
-	Handle num = ll->getOutgoingAtom(0);
+	Handle num = list->getOutgoingAtom(0);
 	TS_ASSERT_EQUALS(NUMBER_NODE, num->getType());
 }
