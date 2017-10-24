@@ -12,6 +12,7 @@ ADD_LIBRARY (atomcore
 	ImplicationScopeLink.cc
 	LambdaLink.cc
 	NumberNode.cc
+	PresentLink.cc
 	PutLink.cc
 	Quotation.cc
 	RandomChoice.cc
@@ -23,6 +24,7 @@ ADD_LIBRARY (atomcore
 	TypedAtomLink.cc
 	TypeNode.cc
 	UniqueLink.cc
+	UnorderedLink.cc
 	Variables.cc
 	VariableList.cc
 )
@@ -48,6 +50,7 @@ INSTALL (FILES
 	FunctionLink.h
 	LambdaLink.h
 	NumberNode.h
+	PresentLink.h
 	PutLink.h
 	Quotation.h
 	RandomChoice.h
@@ -59,6 +62,7 @@ INSTALL (FILES
 	TypedAtomLink.h
 	TypeNode.h
 	UniqueLink.h
+	UnorderedLink.h
 	Variables.h
 	VariableList.h
 	DESTINATION "include/opencog/atoms/core"
