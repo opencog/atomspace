@@ -29,7 +29,7 @@
 using namespace opencog;
 
 PresentLink::PresentLink(const HandleSeq& oset, Type t)
-	: Link(oset, t)
+	: UnorderedLink(oset, t)
 {
 	if (not classserver().isA(t, PRESENT_LINK))
 	{
@@ -66,7 +66,7 @@ PresentLink::PresentLink(const HandleSeq& oset, Type t)
 }
 
 PresentLink::PresentLink(const Link &l)
-	: Link(l)
+	: UnorderedLink(l)
 {
 	// Type must be as expected
 	Type tscope = l.getType();

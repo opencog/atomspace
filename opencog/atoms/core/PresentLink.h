@@ -23,7 +23,7 @@
 #ifndef _OPENCOG_PRESENT_LINK_H
 #define _OPENCOG_PRESENT_LINK_H
 
-#include <opencog/atoms/base/Link.h>
+#include <opencog/atoms/core/UnorderedLink.h>
 
 namespace opencog
 {
@@ -51,7 +51,12 @@ namespace opencog
 /// and the copies of the duplicated `SomeAtom` is removed during atom
 /// contruction.
 ///
-class PresentLink : public Link
+/// Conceptually, the ctor for PresentLink applies a rule of inference,
+/// called the "Rule of contraction (or idempotency of entailment)"
+/// https://en.wikipedia.org/wiki/Rule_of_inference
+/// https://en.wikipedia.org/wiki/Idempotency_of_entailment
+///
+class PresentLink : public UnorderedLink
 {
 public:
 	PresentLink(const HandleSeq&, Type=PRESENT_LINK);
