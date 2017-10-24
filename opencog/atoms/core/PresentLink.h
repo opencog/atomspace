@@ -23,7 +23,7 @@
 #ifndef _OPENCOG_PRESENT_LINK_H
 #define _OPENCOG_PRESENT_LINK_H
 
-#include <opencog/atoms/core/FunctionLink.h>
+#include <opencog/atoms/base/Link.h>
 
 namespace opencog
 {
