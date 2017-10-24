@@ -120,9 +120,10 @@ CHOICE_LINK <- ORDERED_LINK
 
 // Rounding out the above, we have PresentLink, which is the converse
 // of AbsentLink, and is dual to ChoiceLink, since it requires that all
-// terms are AND'ed together.
+// terms are AND'ed together.  Its not ordered, and it eleminates
+// duplicates.
 //
-PRESENT_LINK <- ORDERED_LINK,EVALUATABLE_LINK
+PRESENT_LINK <- SET_LINK,EVALUATABLE_LINK
 
 // Performance scripting links.
 // ParallelLink launches multiple threads, but does not wait for any of
