@@ -302,7 +302,7 @@ Handle PutLink::do_reduce(void) const
 			}
 			catch (const TypeCheckException& ex) {}
 		}
-		return Handle(createLink(bset, SET_LINK));
+		return createLink(bset, SET_LINK);
 	}
 
 	// If we are here, then there are multiple variables in the body.
@@ -336,7 +336,7 @@ Handle PutLink::do_reduce(void) const
 		}
 		catch (const TypeCheckException& ex) {}
 	}
-	return Handle(createLink(bset, SET_LINK));
+	return createLink(bset, SET_LINK);
 }
 
 Handle PutLink::reduce(void)

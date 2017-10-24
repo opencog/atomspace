@@ -139,11 +139,9 @@ public:
 
         // Add the link.  All the outgoing atoms should get added too.
         Handle hlet = table->add(hle, false);
-        LinkPtr let(LinkCast(hlet));
-        const HandleSeq& hs = let->getOutgoingSet();
+        const HandleSeq& hs = hlet->getOutgoingSet();
 
-        LinkPtr llt(LinkCast(hs[1]));
-        const HandleSeq& hsl = llt->getOutgoingSet();
+        const HandleSeq& hsl = hs[1]->getOutgoingSet();
 
         // Now test resolution.  Given the version of the atom that is
         // not yet in the atomspace, we should be able to find the one
@@ -215,14 +213,14 @@ public:
      * pointing to the same atom twice (or more). */
     void testDoubleLink()
     {
-        NodePtr n1(createNode(NUMBER_NODE, "1"));
-        NodePtr n2(createNode(NUMBER_NODE, "2"));
+        Handle n1(createNode(NUMBER_NODE, "1"));
+        Handle n2(createNode(NUMBER_NODE, "2"));
         Handle hn1 = table->add(n1, false);
         Handle hn2 = table->add(n2, false);
 
         HandleSeq os;
         os.push_back(hn1); os.push_back(hn1); os.push_back(hn2);
-        LinkPtr l1(createLink(os, LIST_LINK));
+        Handle l1(createLink(os, LIST_LINK));
         Handle hl1 = table->add(l1, false);
 
         // Now, remove hn1 from the table ...
@@ -236,8 +234,7 @@ public:
         os.push_back(h3);
 
         Handle l33 = table->add(createLink(os, LIST_LINK), false);
-        LinkPtr lptr33(LinkCast(l33));
-        HandleSeq hs = lptr33->getOutgoingSet();
+        HandleSeq hs = l33->getOutgoingSet();
         printf("hs1 & hs2 ptr's: %p %p\n", hs[0].operator->(), hs[1].operator->());
         TS_ASSERT_EQUALS(hs[0], hs[1]);
     }
@@ -250,14 +247,14 @@ public:
         Type MY_INHERITANCE_LINK = classserver().declType(INHERITANCE_LINK, "MyInheritanceLink");
         classserver().endTypeDecls();
         logger().debug("MY_NUMBER_NODE = %u, MY_CONCEPT_NODE = %u, MY_INHERITANCE_LINK = %u\n", MY_NUMBER_NODE, MY_CONCEPT_NODE, MY_INHERITANCE_LINK);
-        NodePtr wp = createNode(MY_NUMBER_NODE, "1");
+        Handle wp = createNode(MY_NUMBER_NODE, "1");
         Handle word = table->add(wp, false);
-        NodePtr sp = createNode(MY_CONCEPT_NODE, "28675194");
+        Handle sp = createNode(MY_CONCEPT_NODE, "28675194");
         Handle sense = table->add(sp, false);
         HandleSeq os;
         os.push_back(word);
         os.push_back(sense);
-        LinkPtr lp = createLink(os, MY_INHERITANCE_LINK);
+        Handle lp = createLink(os, MY_INHERITANCE_LINK);
         Handle lh = table->add(lp, false);
 
 #define getHandlex(N,T) getHandle(T,N)

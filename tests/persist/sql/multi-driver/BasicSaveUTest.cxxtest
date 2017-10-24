@@ -53,11 +53,11 @@ class BasicSaveUTest :  public CxxTest::TestSuite
         const char * username;
         const char * passwd;
 
-        NodePtr n1[10];
-        NodePtr n2[10];
-        NodePtr n3[10];
-        NodePtr n4[10];
-        LinkPtr l[10];
+        Handle n1[10];
+        Handle n2[10];
+        Handle n3[10];
+        Handle n4[10];
+        Handle   l[10];
         AtomPtr a1[10];
         AtomPtr a2[10];
         AtomPtr a3[10];
@@ -289,7 +289,7 @@ void BasicSaveUTest::single_atom_save_restore(std::string id)
     hvec.push_back(a->getHandle());
     hvec.push_back(a2->getHandle());
 
-    LinkPtr l(createLink(hvec, LIST_LINK));
+    Handle l(createLink(hvec, LIST_LINK));
     store->storeAtom(l->getHandle(), true);
 
     Handle hl = store->getLink(LIST_LINK, hvec);
@@ -307,13 +307,13 @@ void BasicSaveUTest::add_to_table(int idx, AtomTable *table, std::string id)
     n1[idx] = createNode(SCHEMA_NODE, id + "fromNode");
     TruthValuePtr stv(SimpleTruthValue::createTV(0.11, 1.0/(100.0+idx)));
     n1[idx]->setTruthValue(stv);
-    n1[idx] = NodeCast(table->add(n1[idx], false));
+    n1[idx] = table->add(n1[idx], false);
     a1[idx] = n1[idx];
 
     n2[idx] = createNode(SCHEMA_NODE, id + "toNode");
     TruthValuePtr stv2(SimpleTruthValue::createTV(0.22, 1.0/(200.0+idx)));
     n2[idx]->setTruthValue(stv2);
-    n2[idx] = NodeCast(table->add(n2[idx], false));
+    n2[idx] = table->add(n2[idx], false);
     a2[idx] = n2[idx];
 
     // ODBC fails when there is a question mark in the text.
@@ -324,7 +324,7 @@ void BasicSaveUTest::add_to_table(int idx, AtomTable *table, std::string id)
     // We need to test crazy-large and crazy-small float point values.
     TruthValuePtr stv3(SimpleTruthValue::createTV(1.0e33/3.0, (1.0e-30)/(300.0+idx)));
     n3[idx]->setTruthValue(stv3);
-    n3[idx] = NodeCast(table->add(n3[idx], false));
+    n3[idx] = table->add(n3[idx], false);
     a3[idx] = n3[idx];
 
     // The NumberNode will go through the AtomTable clone factory
@@ -335,7 +335,7 @@ void BasicSaveUTest::add_to_table(int idx, AtomTable *table, std::string id)
     // We need to test crazy-large and crazy-small float point values.
     TruthValuePtr stv4(SimpleTruthValue::createTV((4.0e-200)/9.0, 1.0e40/(400.0+idx)));
     n4[idx]->setTruthValue(stv4);
-    n4[idx] = NodeCast(table->add(n4[idx], false));
+    n4[idx] = table->add(n4[idx], false);
     a4[idx] = n4[idx];
 
     HandleSeq hvec;
@@ -345,7 +345,7 @@ void BasicSaveUTest::add_to_table(int idx, AtomTable *table, std::string id)
     hvec.push_back(a4[idx]->getHandle());
 
     l[idx] = createLink(hvec, SET_LINK);
-    l[idx] = LinkCast(table->add(l[idx], false));
+    l[idx] = table->add(l[idx], false);
     al[idx] = l[idx];
 }
 
@@ -369,8 +369,8 @@ void BasicSaveUTest::check_table(int idx, AtomTable *table, std::string id)
     hvec.push_back(hb3);
     hvec.push_back(hb4);
 
-    LinkPtr lb(createLink(hvec, SET_LINK));
-    Handle hlb = table->getHandle(Handle(lb));
+    Handle lb(createLink(hvec, SET_LINK));
+    Handle hlb = table->getHandle(lb);
     atomCompare(al[idx], hlb, "check_table hlb");
 }
 
@@ -418,14 +418,14 @@ void BasicSaveUTest::do_test_fresh_atom(void)
     Handle hb(createNode(CONCEPT_NODE, "energy"));
 
     // Store a ListLink with stuff in it.
-    LinkPtr lf(createLink(LIST_LINK, ha, hb));
+    Handle lf(createLink(LIST_LINK, ha, hb));
     lf->setTruthValue(SimpleTruthValue::createTV(0.55, 0.6));
-    store->storeAtom(lf->getHandle(), true);
+    store->storeAtom(lf, true);
 
     // Store an empty ListLink.
-    LinkPtr le(createLink(HandleSeq(), LIST_LINK));
+    Handle le(createLink(HandleSeq(), LIST_LINK));
     le->setTruthValue(SimpleTruthValue::createTV(0.1, 0.9));
-    store->storeAtom(le->getHandle(), true);
+    store->storeAtom(le, true);
 
     // Now get them back.  Get empty after full.
     Handle hf(store->getLink(LIST_LINK, {ha, hb}));

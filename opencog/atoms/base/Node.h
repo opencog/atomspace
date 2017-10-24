@@ -124,8 +124,14 @@ typedef std::shared_ptr<Node> NodePtr;
 static inline NodePtr NodeCast(const AtomPtr& a)
     { return std::dynamic_pointer_cast<Node>(a); }
 
-// XXX temporary hack ...
-#define createNode std::make_shared<Node>
+template< class... Args >
+Handle createNode( Args&&... args )
+{
+   // Do we need to say (std::forward<Args>(args)...) instead ???
+   NodePtr tmp(std::make_shared<Node>(args ...));
+   return classserver().factory(tmp->getHandle());
+}
+
 
 /** @}*/
 } // namespace opencog

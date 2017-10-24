@@ -51,11 +51,11 @@ public:
 
         TLB tlb;
 
-        NodePtr n(createNode(CONCEPT_NODE, "test"));
+        Handle n(createNode(CONCEPT_NODE, "test"));
         UUID uuid = tlb.addAtom(n, TLB::INVALID_UUID);
         TS_ASSERT(TLB::INVALID_UUID != uuid);
 
-        NodePtr nb(createNode(CONCEPT_NODE, "test"));
+        Handle nb(createNode(CONCEPT_NODE, "test"));
 
         // content-compare should work
         TS_ASSERT( *n == *nb);

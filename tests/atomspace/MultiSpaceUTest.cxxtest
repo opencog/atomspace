@@ -100,22 +100,18 @@ public:
 		TruthValuePtr tv3(SimpleTruthValue::createTV(0.4, 1.0/3.0));
 
 		// Create three nodes
-		NodePtr n1(createNode(CONCEPT_NODE, "uni-1"));
+		Handle n1(createNode(CONCEPT_NODE, "uni-1"));
 		n1->setTruthValue(tv1);
-		NodePtr n2(createNode(NUMBER_NODE, "2.2222"));
+		Handle n2(createNode(NUMBER_NODE, "2.2222"));
 		n2->setTruthValue(tv2);
-		NodePtr n3(createNode(VARIABLE_NODE, "uni-3"));
+		Handle n3(createNode(VARIABLE_NODE, "uni-3"));
 		n3->setTruthValue(tv3);
-
-		Handle hnd1(n1);
-		Handle hnd2(n2);
-		Handle hnd3(n3);
 
 		// Create three links holding these three
 		TruthValuePtr tv(SimpleTruthValue::createTV(0.33, 1.0/3.0));
 
 		// Create three copies of this link in three atomspaces
-		Handle h1 = as1.add_link(LIST_LINK, hnd1, hnd2, hnd3);
+		Handle h1 = as1.add_link(LIST_LINK, n1, n2, n3);
 		h1->setTruthValue(tv);
 		Handle h2 = as2.add_atom(h1);
 		Handle h3 = as3.add_atom(h2);

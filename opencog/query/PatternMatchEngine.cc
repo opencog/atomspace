@@ -736,8 +736,8 @@ bool PatternMatchEngine::glob_compare(const PatternTermSeq& osp,
 		glob_grd[glob] = glob_seq.size();
 		glob_state[gp] = {glob_grd, glob_pos_stack};
 
-		LinkPtr glp(createLink(glob_seq, LIST_LINK));
-		var_grounding[glob->getHandle()] = glp->getHandle();
+		Handle glp(createLink(glob_seq, LIST_LINK));
+		var_grounding[glob->getHandle()] = glp;
 	};
 
 	// Common things needed to be done when it's not a match.

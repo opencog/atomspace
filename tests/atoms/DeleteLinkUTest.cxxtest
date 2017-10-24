@@ -93,9 +93,8 @@ void DeleteLinkUTest::test_free_delete()
 
 	printf("Created link %s\n", prop->toString().c_str());
 	TS_ASSERT_EQUALS(EVALUATION_LINK, prop->getType());
-	LinkPtr lprop(LinkCast(prop));
-	TS_ASSERT_EQUALS(pred, lprop->getOutgoingAtom(0));
-	TS_ASSERT_EQUALS(list, lprop->getOutgoingAtom(1));
+	TS_ASSERT_EQUALS(pred, prop->getOutgoingAtom(0));
+	TS_ASSERT_EQUALS(list, prop->getOutgoingAtom(1));
 
 	// The incoming set should increase by one.
 	TS_ASSERT_EQUALS(2, pred->getIncomingSetSize());

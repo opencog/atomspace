@@ -353,14 +353,13 @@ Handle Instantiator::walk_tree(const Handle& expr, bool silent)
 			// function itself.
 			HandleSeq oset_results;
 			walk_sequence(oset_results, expr->getOutgoingSet(), silent);
-			Handle fh(classserver().factory(Handle(createLink(oset_results, t))));
+			Handle fh(createLink(oset_results, t));
 			FoldLinkPtr flp(FoldLinkCast(fh));
 			return flp->execute(_as);
 		}
 		else
 		{
 			Handle hexpr(beta_reduce(expr, *_vmap));
-			hexpr = classserver().factory(hexpr);
 			FoldLinkPtr flp(FoldLinkCast(hexpr));
 			return flp->execute(_as);
 		}
@@ -383,8 +382,7 @@ Handle Instantiator::walk_tree(const Handle& expr, bool silent)
 			HandleSeq oset_results;
 			walk_sequence(oset_results, expr->getOutgoingSet(), silent);
 
-			FunctionLinkPtr flp(FunctionLinkCast(
-				classserver().factory(Handle(createLink(oset_results, t)))));
+			FunctionLinkPtr flp(FunctionLinkCast(createLink(oset_results, t)));
 			return flp->execute(_as);
 		}
 		else
@@ -394,8 +392,7 @@ Handle Instantiator::walk_tree(const Handle& expr, bool silent)
 			// Also, the number of arguments is not fixed, its always variadic.
 			// Perform substitution on all arguments before applying the
 			// function itself.
-			FunctionLinkPtr flp(FunctionLinkCast(
-				classserver().factory(expr)));
+			FunctionLinkPtr flp(FunctionLinkCast(expr));
 			return flp->execute(_as);
 		}
 	}
@@ -446,7 +443,7 @@ mere_recursive_call:
 	bool changed = walk_sequence(oset_results, expr->getOutgoingSet(), silent);
 	if (changed)
 	{
-		LinkPtr subl = createLink(oset_results, t);
+		Handle subl(createLink(oset_results, t));
 		subl->copyValues(expr);
 		return _as->add_atom(subl);
 	}

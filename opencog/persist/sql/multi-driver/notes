@@ -573,3 +573,25 @@ _backing->set_store(_store);
 
 
 getNode
+
+=======================================
+OK, so 
+verify-fetch-hlinkb2 fails  expecting something not in an atomspace!?
+atomCompare first is expected, b is got.
+hl[ is not in atomspace!?
+
+Oh, because createLink isn't behaving as expected...
+
+Ahh
+AtomPtr a(_classserver.factory(Handle(orig)));
+
+std::sort(_outgoing.begin(), _outgoing.end(), handle_less());
+
+if (classserver().isA(_type, UNORDERED_LINK)) {
+
+get rid of more casts... DONE
+search for all factories ... 
+atoms/execution/Instantiator.cc DONE
+
+convert createNode too DONE 
+remote _class from AtomT DONE

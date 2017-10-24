@@ -297,8 +297,8 @@ bool MapLink::extract(const Handle& termpat,
 			}
 
 			// If we are here, we've got a match. Record it.
-			LinkPtr glp(createLink(glob_seq, LIST_LINK));
-			valmap.emplace(std::make_pair(glob, glp->getHandle()));
+			Handle glp(createLink(glob_seq, LIST_LINK));
+			valmap.emplace(std::make_pair(glob, glp));
 		}
 		else
 		{
@@ -355,7 +355,7 @@ Handle MapLink::rewrite_one(const Handle& cterm, AtomSpace* scratch) const
 	// variable.
 	size_t nv = valseq.size();
 	if (1 < nv)
-		return Handle(createLink(valseq, LIST_LINK));
+		return createLink(valseq, LIST_LINK);
 	else if (1 == nv)
 		return valseq[0];
 	return Handle::UNDEFINED;
@@ -378,7 +378,7 @@ Handle MapLink::execute(AtomSpace* scratch) const
 			Handle mone = rewrite_one(h, scratch);
 			if (nullptr != mone) remap.emplace_back(mone);
 		}
-		return Handle(createLink(remap, argtype));
+		return createLink(remap, argtype);
 	}
 
 	// Its a singleton. Just remap that.

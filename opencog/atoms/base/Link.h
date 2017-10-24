@@ -232,8 +232,13 @@ static inline LinkPtr LinkCast(const Handle& h)
 static inline LinkPtr LinkCast(const AtomPtr& a)
     { return std::dynamic_pointer_cast<Link>(a); }
 
-// XXX temporary hack ...
-#define createLink std::make_shared<Link>
+template< class... Args >
+Handle createLink( Args&&... args )
+{
+	// Do we need to say (std::forward<Args>(args)...) instead ???
+	LinkPtr tmp(std::make_shared<Link>(args ...));
+	return classserver().factory(tmp->getHandle());
+}
 
 /** @}*/
 } // namespace opencog

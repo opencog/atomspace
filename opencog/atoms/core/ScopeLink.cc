@@ -318,8 +318,6 @@ ContentHash ScopeLink::term_hash(const Handle& h,
 		bsave = bound_vars;
 		// Add the Scope link vars to the hidden set.
 		ScopeLinkPtr sco(ScopeLinkCast(h));
-		if (nullptr == sco)
-			sco = ScopeLinkCast(classserver().factory(h));
 		const Variables& vees = sco->get_variables();
 		for (const Handle& v : vees.varseq) bound_vars.insert(v);
 	}
@@ -385,7 +383,7 @@ Handle ScopeLink::alpha_conversion(HandleSeq vars) const
 		hs.push_back(_varlist.substitute_nocheck(getOutgoingAtom(i), vars));
 
 	// Create the alpha converted scope link
-	return classserver().factory(Handle(createLink(hs, getType())));
+	return createLink(hs, getType());
 }
 
 /* ================================================================= */
