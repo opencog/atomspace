@@ -28,16 +28,8 @@
 
 using namespace opencog;
 
-PresentLink::PresentLink(const HandleSeq& oset, Type t)
-	: UnorderedLink(oset, t)
+void PresentLink::init(void)
 {
-	if (not classserver().isA(t, PRESENT_LINK))
-	{
-		const std::string& tname = classserver().getTypeName(t);
-		throw InvalidParamException(TRACE_INFO,
-			"Expecting an PresentLink, got %s", tname.c_str());
-	}
-
 	// The UnorderedLink ctor will have already sorted the outgoing set
 	// for us into some order.  To find duplicates, we merely need to
 	// iterate over the outgoing set, comparing neighbors.
@@ -65,7 +57,20 @@ PresentLink::PresentLink(const HandleSeq& oset, Type t)
 	_outgoing.swap(uniq);
 }
 
-PresentLink::PresentLink(const Link &l)
+PresentLink::PresentLink(const HandleSeq& oset, Type t)
+	: UnorderedLink(oset, t)
+{
+	if (not classserver().isA(t, PRESENT_LINK))
+	{
+		const std::string& tname = classserver().getTypeName(t);
+		throw InvalidParamException(TRACE_INFO,
+			"Expecting an PresentLink, got %s", tname.c_str());
+	}
+
+	init();
+}
+
+PresentLink::PresentLink(const Link& l)
 	: UnorderedLink(l)
 {
 	// Type must be as expected
@@ -76,6 +81,10 @@ PresentLink::PresentLink(const Link &l)
 		throw InvalidParamException(TRACE_INFO,
 			"Expecting an PresentLink, got %s", tname.c_str());
 	}
+
+	// We have to call init here, because the input link l might
+	// not have gone through a PresentLink constructor before.
+	init();
 }
 
 // ---------------------------------------------------------------

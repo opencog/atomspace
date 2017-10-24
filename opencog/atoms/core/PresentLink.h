@@ -58,6 +58,7 @@ namespace opencog
 ///
 class PresentLink : public UnorderedLink
 {
+	void init(void);
 public:
 	PresentLink(const HandleSeq&, Type=PRESENT_LINK);
 	PresentLink(const Link &l);
