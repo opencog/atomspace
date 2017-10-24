@@ -46,17 +46,17 @@ public:
         NodePtr n1(createNode(CONCEPT_NODE, "TEST"));
         NodePtr n2(createNode(CONCEPT_NODE, "TEST"));
         HandleSeq out1;
-        LinkPtr l1(createLink(out1, LIST_LINK));
-        LinkPtr l2(createLink(out1, LIST_LINK));
+        Handle l1(createLink(out1, LIST_LINK));
+        Handle l2(createLink(out1, LIST_LINK));
         TS_ASSERT(l1->getArity() == 0);
         TS_ASSERT(l2->getArity() == 0);
 
         HandleSeq out2;
         out2.push_back(n1->getHandle());
-        LinkPtr l3(createLink(out2, LIST_LINK));
-        LinkPtr l4(createLink(out2, LIST_LINK));
-        LinkPtr l5(createLink(out2, INHERITANCE_LINK));
-        LinkPtr l6(createLink(out2, INHERITANCE_LINK));
+        Handle l3(createLink(out2, LIST_LINK));
+        Handle l4(createLink(out2, LIST_LINK));
+        Handle l5(createLink(out2, INHERITANCE_LINK));
+        Handle l6(createLink(out2, INHERITANCE_LINK));
         TS_ASSERT(l3->getArity() == 1);
         TS_ASSERT(l4->getArity() == 1);
         TS_ASSERT(l5->getArity() == 1);
@@ -65,8 +65,8 @@ public:
         HandleSeq out3;
         out3.push_back(n1->getHandle());
         out3.push_back(n2->getHandle());
-        LinkPtr l7(createLink(out3, INHERITANCE_LINK));
-        LinkPtr l8(createLink(out3, INHERITANCE_LINK));
+        Handle l7(createLink(out3, INHERITANCE_LINK));
+        Handle l8(createLink(out3, INHERITANCE_LINK));
         TS_ASSERT(l7->getArity() == 2);
         TS_ASSERT(l8->getArity() == 2);
 
