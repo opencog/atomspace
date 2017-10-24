@@ -589,8 +589,9 @@ std::sort(_outgoing.begin(), _outgoing.end(), handle_less());
 
 if (classserver().isA(_type, UNORDERED_LINK)) {
 
-convert createNode too DONE 
+get rid of more casts...
 search for all factories ... 
 atoms/execution/Instantiator.cc
 
+convert createNode too DONE 
 remote _class from AtomT DONE

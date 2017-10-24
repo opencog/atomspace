@@ -43,8 +43,8 @@ public:
 
     void testEquals()
     {
-        NodePtr n1(createNode(CONCEPT_NODE, "TEST"));
-        NodePtr n2(createNode(CONCEPT_NODE, "TEST"));
+        Handle n1(createNode(CONCEPT_NODE, "TEST"));
+        Handle n2(createNode(CONCEPT_NODE, "TEST"));
         HandleSeq out1;
         Handle l1(createLink(out1, LIST_LINK));
         Handle l2(createLink(out1, LIST_LINK));
@@ -52,7 +52,7 @@ public:
         TS_ASSERT(l2->getArity() == 0);
 
         HandleSeq out2;
-        out2.push_back(n1->getHandle());
+        out2.push_back(n1);
         Handle l3(createLink(out2, LIST_LINK));
         Handle l4(createLink(out2, LIST_LINK));
         Handle l5(createLink(out2, INHERITANCE_LINK));
@@ -63,8 +63,8 @@ public:
         TS_ASSERT(l6->getArity() == 1);
 
         HandleSeq out3;
-        out3.push_back(n1->getHandle());
-        out3.push_back(n2->getHandle());
+        out3.push_back(n1);
+        out3.push_back(n2);
         Handle l7(createLink(out3, INHERITANCE_LINK));
         Handle l8(createLink(out3, INHERITANCE_LINK));
         TS_ASSERT(l7->getArity() == 2);
