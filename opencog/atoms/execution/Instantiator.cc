@@ -360,7 +360,6 @@ Handle Instantiator::walk_tree(const Handle& expr, bool silent)
 		else
 		{
 			Handle hexpr(beta_reduce(expr, *_vmap));
-			hexpr = classserver().factory(hexpr);
 			FoldLinkPtr flp(FoldLinkCast(hexpr));
 			return flp->execute(_as);
 		}
@@ -393,8 +392,7 @@ Handle Instantiator::walk_tree(const Handle& expr, bool silent)
 			// Also, the number of arguments is not fixed, its always variadic.
 			// Perform substitution on all arguments before applying the
 			// function itself.
-			FunctionLinkPtr flp(FunctionLinkCast(
-				classserver().factory(expr)));
+			FunctionLinkPtr flp(FunctionLinkCast(expr));
 			return flp->execute(_as);
 		}
 	}
