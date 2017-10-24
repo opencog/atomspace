@@ -12,6 +12,7 @@ ADD_LIBRARY (atomcore
 	ImplicationScopeLink.cc
 	LambdaLink.cc
 	NumberNode.cc
+	PresentLink.cc
 	PutLink.cc
 	Quotation.cc
 	RandomChoice.cc
@@ -48,6 +49,7 @@ INSTALL (FILES
 	FunctionLink.h
 	LambdaLink.h
 	NumberNode.h
+	PresentLink.h
 	PutLink.h
 	Quotation.h
 	RandomChoice.h
