@@ -272,9 +272,6 @@ Handle AtomTable::getLinkHandle(const AtomPtr& orig) const
     }
     if (changed) a = createLink(resolved_seq, t);
 
-    // The atom hash is computed by an overloaded virtual function...
-    a = _classserver.factory(Handle(a));
-
     // Start searching to see if we have this atom.
     ContentHash ch = a->get_hash();
 
@@ -401,7 +398,7 @@ Handle AtomTable::add(AtomPtr atom, bool async)
     {
         // NumberNode, TypeNode and LgDictNode need a factory to construct.
         if (_classserver.isA(atom_type, NODE))
-            atom = _classserver.factory(Handle(createNode(*NodeCast(atom))));
+            atom = createNode(*NodeCast(atom));
         else
             atom = createLink(*LinkCast(atom));
     }
