@@ -328,11 +328,7 @@ void ScopeUTest::test_ill_bind()
 {
 	logger().debug("BEGIN TEST: %s", __FUNCTION__);
 
-	Handle ill_bind = eval->eval_h("(Bind (Variable \"$X\"))");
-
-	std::cout << "ill_bind = " << oc_to_string(ill_bind);
-
-	TS_ASSERT(not ill_bind);
+	TS_ASSERT_THROWS_ANYTHING(eval->eval_h("(Bind (Variable \"$X\"))"));
 
 	logger().debug("END TEST: %s", __FUNCTION__);
 }
@@ -341,7 +337,7 @@ void ScopeUTest::test_trivial_scope()
 {
 	logger().debug("BEGIN TEST: %s", __FUNCTION__);
 
-	Handle sc = eval->eval_h("(Scope (Variable \"$X\"))");
+	Handle sc = al(SCOPE_LINK, an(VARIABLE_NODE, "$X"));
 
 	std::cout << "sc = " << oc_to_string(sc);
 
