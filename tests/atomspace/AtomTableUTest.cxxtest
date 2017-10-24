@@ -213,8 +213,8 @@ public:
      * pointing to the same atom twice (or more). */
     void testDoubleLink()
     {
-        NodePtr n1(createNode(NUMBER_NODE, "1"));
-        NodePtr n2(createNode(NUMBER_NODE, "2"));
+        Handle n1(createNode(NUMBER_NODE, "1"));
+        Handle n2(createNode(NUMBER_NODE, "2"));
         Handle hn1 = table->add(n1, false);
         Handle hn2 = table->add(n2, false);
 
@@ -247,9 +247,9 @@ public:
         Type MY_INHERITANCE_LINK = classserver().declType(INHERITANCE_LINK, "MyInheritanceLink");
         classserver().endTypeDecls();
         logger().debug("MY_NUMBER_NODE = %u, MY_CONCEPT_NODE = %u, MY_INHERITANCE_LINK = %u\n", MY_NUMBER_NODE, MY_CONCEPT_NODE, MY_INHERITANCE_LINK);
-        NodePtr wp = createNode(MY_NUMBER_NODE, "1");
+        Handle wp = createNode(MY_NUMBER_NODE, "1");
         Handle word = table->add(wp, false);
-        NodePtr sp = createNode(MY_CONCEPT_NODE, "28675194");
+        Handle sp = createNode(MY_CONCEPT_NODE, "28675194");
         Handle sense = table->add(sp, false);
         HandleSeq os;
         os.push_back(word);

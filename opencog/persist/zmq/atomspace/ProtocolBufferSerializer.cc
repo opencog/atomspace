@@ -228,7 +228,7 @@ void ProtocolBufferSerializer::serializeIndefiniteTruthValue(
 NodePtr ProtocolBufferSerializer::deserializeNode(
         const ZMQAtomMessage& atomMessage)
 {
-	NodePtr nodePtr(createNode(atomMessage.type(), atomMessage.name()));
+	Handle nodePtr(createNode(atomMessage.type(), atomMessage.name()));
     if (atomMessage.has_truthvalue()) {
     TruthValuePtr tv;
     	tv = deserialize(atomMessage.truthvalue());
@@ -237,7 +237,7 @@ NodePtr ProtocolBufferSerializer::deserializeNode(
 	tlbuf.addAtom(nodePtr, atomMessage.handle());
     deserializeAtom(atomMessage, *nodePtr);
 
-    return nodePtr;
+    return NodeCast(nodePtr);
 }
 
 LinkPtr ProtocolBufferSerializer::deserializeLink(
