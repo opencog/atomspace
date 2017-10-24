@@ -48,6 +48,11 @@ void Link::init(const HandleSeq& outgoingVector)
     }
 
     _outgoing = outgoingVector;
+
+    // XXX tmp hack. Replace by _classserver.factory(...)
+    if (classserver().isA(_type, UNORDERED_LINK)) {
+        std::sort(_outgoing.begin(), _outgoing.end(), handle_less());
+    }
 }
 
 Link::~Link()
