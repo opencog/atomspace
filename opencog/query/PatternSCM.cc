@@ -8,6 +8,7 @@
 #ifdef HAVE_GUILE
 
 #include <opencog/guile/SchemeModule.h>
+#include <opencog/atoms/pattern/PatternLink.h>
 
 namespace opencog {
 
@@ -81,6 +82,15 @@ PatternSCM::PatternSCM(void) :
 	ModuleWrap("opencog query")
 {}
 
+static TruthValuePtr do_satlink(AtomSpace* as, const Handle& hlink)
+{
+	Handle plp(hlink);
+	// If not already a PatternLink, then WRAP it in a PattrnLink.
+	if (not classserver().isA(hlink->getType(), PATTERN_LINK))
+		plp = createPatternLink(hlink);
+	return satisfaction_link(as, plp);
+}
+
 /// This is called while (opencog query) is the current module.
 /// Thus, all the definitions below happen in that module.
 void PatternSCM::init(void)
@@ -96,7 +106,7 @@ void PatternSCM::init(void)
 	                   "cog-bind-af", "query"));
 
 	// A bindlink that returns a TV
-	_binders.push_back(new FunctionWrap(satisfaction_link,
+	_binders.push_back(new FunctionWrap(do_satlink,
 	                   "cog-satisfy", "query"));
 
 	// Finds set of all variable groundings, assuming that the first

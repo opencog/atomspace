@@ -141,12 +141,6 @@ TruthValuePtr opencog::satisfaction_link(AtomSpace* as, const Handle& hlink)
 {
 	PatternLinkPtr plp(PatternLinkCast(hlink));
 
-	// OK, this seems weird to me. If its NOT a PatternLink of some
-	// kind, then WRAP it in a PatternLink.  Why is this the correct
-	// thing to do ???
-	if (NULL == plp)
-		plp = createPatternLink(hlink);
-
 	Satisfier sater(as);
 	plp->satisfy(sater);
 
