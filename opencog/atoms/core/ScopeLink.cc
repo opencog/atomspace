@@ -120,8 +120,6 @@ void ScopeLink::extract_variables(const HandleSeq& oset)
 		if (classserver().isA(_body->getType(), LAMBDA_LINK))
 		{
 			LambdaLinkPtr lam(LambdaLinkCast(_body));
-			if (nullptr == lam)
-				lam = createLambdaLink(*LinkCast(_body));
 			_varlist = lam->get_variables();
 			_body = lam->get_body();
 		}
@@ -170,8 +168,6 @@ bool ScopeLink::is_equal(const Handle& other, bool silent) const
 	if (other->getType() != _type) return false;
 
 	ScopeLinkPtr scother(ScopeLinkCast(other));
-	if (nullptr == scother)
-		scother = createScopeLink(*LinkCast(other));
 
 	// If the hashes are not equal, they can't possibly be equivalent.
 	if (get_hash() != scother->get_hash()) return false;

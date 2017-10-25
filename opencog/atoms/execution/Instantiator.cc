@@ -183,8 +183,6 @@ Handle Instantiator::walk_tree(const Handle& expr, bool silent)
 		if (_eager)
 		{
 			ppp = PutLinkCast(expr);
-			if (nullptr == ppp)
-				ppp = createPutLink(*LinkCast(expr));
 			// Execute the values in the PutLink before doing the
 			// beta-reduction. Execute the body only after the
 			// beta-reduction has been done.
@@ -204,8 +202,6 @@ Handle Instantiator::walk_tree(const Handle& expr, bool silent)
 		{
 			Handle hexpr(beta_reduce(expr, *_vmap));
 			ppp = PutLinkCast(hexpr);
-			if (nullptr == ppp)
-				ppp = createPutLink(*LinkCast(hexpr));
 		}
 
 		// Step one: beta-reduce.
@@ -256,11 +252,7 @@ Handle Instantiator::walk_tree(const Handle& expr, bool silent)
 	// ask for. So we always eager-evaluate those args.
 	if (EXECUTION_OUTPUT_LINK == t)
 	{
-		// XXX Force syntax checking; normally this would be done in the
-		// atomspace factory, but that is currently broken, so do it here.
 		ExecutionOutputLinkPtr eolp(ExecutionOutputLinkCast(expr));
-		if (nullptr == eolp)
-			eolp = createExecutionOutputLink(expr->getOutgoingSet());
 
 		// At this time, the GSN or the DSN is always in position 0
 		// of the outgoing set, and the ListLink of arguments is always
@@ -277,8 +269,6 @@ Handle Instantiator::walk_tree(const Handle& expr, bool silent)
 		if (LAMBDA_LINK == sn->getType())
 		{
 			LambdaLinkPtr flp(LambdaLinkCast(sn));
-			if (NULL == flp)
-				flp = createLambdaLink(*LinkCast(sn));
 
 			// Two-step process. First, plug the arguments into the
 			// function; i.e. perform beta-reduction. Second, actually

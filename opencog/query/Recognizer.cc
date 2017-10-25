@@ -313,8 +313,6 @@ bool Recognizer::grounding(const HandleMap& var_soln,
 Handle opencog::recognize(AtomSpace* as, const Handle& hlink)
 {
 	PatternLinkPtr bl(PatternLinkCast(hlink));
-	if (NULL == bl)
-		bl = createPatternLink(*LinkCast(hlink));
 
 	Recognizer reco(as);
 	bl->satisfy(reco);

@@ -189,10 +189,6 @@ Handle opencog::satisfying_set(AtomSpace* as, const Handle& hlink, size_t max_re
 			"Unexpected SatisfyingLink type!");
 
 	PatternLinkPtr bl(PatternLinkCast(hlink));
-	if (NULL == bl)
-	{
-		bl = createPatternLink(*LinkCast(hlink));
-	}
 
 	SatisfyingSet sater(as);
 	sater.max_results = max_results;

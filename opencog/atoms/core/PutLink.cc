@@ -264,8 +264,6 @@ Handle PutLink::do_reduce(void) const
 	if (classserver().isA(btype, LAMBDA_LINK))
 	{
 		LambdaLinkPtr lam(LambdaLinkCast(bods));
-		if (NULL == lam)
-			lam = createLambdaLink(*LinkCast(bods));
 		bods = lam->get_body();
 		vars = lam->get_variables();
 	}

@@ -93,8 +93,6 @@ static Handle do_imply(AtomSpace* as,
                        bool do_conn_check=false)
 {
 	BindLinkPtr bl(BindLinkCast(hbindlink));
-	if (NULL == bl)
-		bl = createBindLink(*LinkCast(hbindlink));
 
 	impl.implicand = bl->get_implicand();
 

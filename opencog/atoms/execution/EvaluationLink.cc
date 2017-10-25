@@ -182,8 +182,6 @@ static bool is_evaluatable_sat(const Handle& satl)
 		return false;
 
 	PatternLinkPtr plp(PatternLinkCast(satl));
-	if (nullptr == plp)
-		plp = createPatternLink(satl);
 
 	return 0 == plp->get_variables().varseq.size();
 }
@@ -444,8 +442,6 @@ TruthValuePtr EvaluationLink::do_eval_scratch(AtomSpace* as,
 	else if (PUT_LINK == t)
 	{
 		PutLinkPtr pl(PutLinkCast(evelnk));
-		if (nullptr == pl)
-			pl = createPutLink(*LinkCast(evelnk));
 
 		// Evalating a PutLink requires three steps:
 		// (1) execute the values, first,
