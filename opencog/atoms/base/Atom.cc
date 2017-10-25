@@ -127,7 +127,7 @@ void Atom::setTruthValue(const TruthValuePtr& newTV)
 
     if (_atom_space != nullptr) {
         TVCHSigl& tvch = _atom_space->_atom_table.TVChangedSignal();
-        tvch(getHandle(), oldTV, newTV);
+        tvch(get_handle(), oldTV, newTV);
     }
 }
 

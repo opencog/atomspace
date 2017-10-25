@@ -39,7 +39,7 @@ void FuzzyMatch::explore(const Handle& h)
 {
 	for (const LinkPtr& lptr : h->getIncomingSet())
 	{
-		Handle soln(lptr->getHandle());
+		Handle soln(lptr->get_handle());
 		bool look_for_more = try_match(soln);
 
 		if (look_for_more) explore(soln);

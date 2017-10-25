@@ -88,14 +88,14 @@ void ZMQClient::reserve() {
  */
 void ZMQClient::storeAtom(const AtomPtr& atomPtr, bool synchronous)
 {
-	fprintf(stderr, "Storing atom %lu ...", atomPtr->getHandle().value());
+	fprintf(stderr, "Storing atom %lu ...", atomPtr->get_handle().value());
 
     ZMQRequestMessage req;
     ZMQReplyMessage rep;
 
     req.set_function(ZMQstoreAtoms);
     ZMQAtomMessage *atomMsg = req.add_atom();
-    atomMsg->set_handle(atomPtr->getHandle().value());
+    atomMsg->set_handle(atomPtr->get_handle().value());
     atomMsg->set_type(atomPtr->get_type());
 
 //    ZMQTruthValueMessage *tvMsg = atomMsg->mutable_truthvalue();

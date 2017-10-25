@@ -64,7 +64,7 @@ void AtomCache::storeAtom(Atom *atom)
 {
 	memcached_return rc;
 
-	Handle h = atom->getHandle();
+	Handle h = atom->get_handle();
 
 	// Set up the basic root of the key
 #define KBSIZE 50
@@ -279,7 +279,7 @@ int AtomCache::depth(Atom *atom)
 
 bool AtomCache::store_cb(Atom *atom)
 {
-	Handle h = atom->getHandle();
+	Handle h = atom->get_handle();
 
 	// Build an index of atoms of a given depth
 	char hbuff[KBSIZE];

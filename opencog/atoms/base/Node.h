@@ -129,7 +129,7 @@ Handle createNode( Args&&... args )
 {
    // Do we need to say (std::forward<Args>(args)...) instead ???
    NodePtr tmp(std::make_shared<Node>(args ...));
-   return classserver().factory(tmp->getHandle());
+   return classserver().factory(tmp->get_handle());
 }
 
 

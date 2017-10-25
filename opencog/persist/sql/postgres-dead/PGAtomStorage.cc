@@ -488,7 +488,7 @@ public:
         // into the atomspace later, by the caller.
         PseudoPtr p(_atom_storage->make_pseudo_atom(*this, uuid));
         AtomPtr atom(get_recursive_if_not_exists(p));
-        hvec->emplace_back(atom->getHandle());
+        hvec->emplace_back(atom->get_handle());
         return false;
     }
 
@@ -516,7 +516,7 @@ public:
             }
             PseudoPtr po = _atom_storage->load_pseudo_atom_with_uuid(idu);
             AtomPtr ra = get_recursive_if_not_exists(po);
-            resolved_oset.emplace_back(ra->getHandle());
+            resolved_oset.emplace_back(ra->get_handle());
         }
         LinkPtr link(createLink(p->type, resolved_oset, p->tv));
         TLB::addAtom(link, p->uuid);
@@ -1142,7 +1142,7 @@ void PGAtomStorage::do_store_atom_single(Database& database,
                                          int height)
 {
     // Use the TLB Handle as the UUID.
-    Handle h(atom->getHandle());
+    Handle h(atom->get_handle());
     if (isInvalidHandle(h))
     {
         throw RuntimeException(TRACE_INFO, 

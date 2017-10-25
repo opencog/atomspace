@@ -75,7 +75,7 @@ class NodeIndex
 			if (not subclass)
 			{
 				Atom* atom = getAtom(type, name);
-				if (atom) *result++ = atom->getHandle();
+				if (atom) *result++ = atom->get_handle();
 			}
 			else
 			{
@@ -83,7 +83,7 @@ class NodeIndex
 				for (Type s = 0; s < max; s++) {
 					if (classserver().isA(s, type)) {
 						Atom* atom = getAtom(s, name);
-						if (atom) *result++ = atom->getHandle();
+						if (atom) *result++ = atom->get_handle();
 					}
 				}
 			}

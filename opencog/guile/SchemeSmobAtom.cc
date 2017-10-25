@@ -251,7 +251,7 @@ SCM SchemeSmob::ss_incoming_set (SCM satom)
 	IncomingSet iset = h->getIncomingSet();
 	for (const LinkPtr& l : iset)
 	{
-		SCM smob = handle_to_scm(l->getHandle());
+		SCM smob = handle_to_scm(l->get_handle());
 		head = scm_cons(smob, head);
 	}
 

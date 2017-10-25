@@ -83,7 +83,7 @@ void ProtocolBufferSerializer::deserializeAtom(
 //{
 //    //serializeAttentionValueHolder(atom, atomMessage->mutable_attentionvalueholder());
 //
-//    atomMessage->set_handle(atom.getHandle().value());
+//    atomMessage->set_handle(atom.get_handle().value());
 //
 //    HandleEntry* next=atom.incoming;
 //    while(next)

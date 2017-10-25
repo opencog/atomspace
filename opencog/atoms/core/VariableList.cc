@@ -427,7 +427,7 @@ std::string opencog::oc_to_string(const VariableListPtr& vlp)
 	if (vlp == nullptr)
 		return "nullvariablelist\n";
 	else
-		return oc_to_string(vlp->getHandle());
+		return oc_to_string(vlp->get_handle());
 }
 
 DEFINE_LINK_FACTORY(VariableList, VARIABLE_LIST)

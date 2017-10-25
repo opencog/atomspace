@@ -117,7 +117,7 @@ Handle UniqueLink::get_unique(const Handle& alias, Type type,
 				UniqueLinkPtr ulp(UniqueLinkCast(defl));
 				if (0 < ulp->get_vars().varseq.size()) continue;
 			}
-			return defl->getHandle();
+			return defl->get_handle();
 		}
 	}
 

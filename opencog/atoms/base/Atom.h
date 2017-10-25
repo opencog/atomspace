@@ -257,7 +257,7 @@ public:
     }
 
     /** Returns the handle of the atom. */
-    inline Handle getHandle() const {
+    inline Handle get_handle() const {
         return Handle(std::dynamic_pointer_cast<Atom>(
              const_cast<Atom*>(this)->shared_from_this()));
     }

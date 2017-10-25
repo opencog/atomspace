@@ -54,12 +54,12 @@ UnorderedHandleSet NodeIndex::getHandleSet(Type type, const std::string& name,
 			if (classserver().isA(s, type)) {
 				Atom* atom = getAtom(s, name);
 				if (atom)
-					hs.insert(atom->getHandle());
+					hs.insert(atom->get_handle());
 			}
 		}
 	} else {
 		Atom* atom = getAtom(type, name);
-		if (atom) hs.insert(atom->getHandle());
+		if (atom) hs.insert(atom->get_handle());
 	}
 
 	return hs;

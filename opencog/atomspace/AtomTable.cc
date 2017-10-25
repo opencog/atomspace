@@ -301,7 +301,7 @@ Handle AtomTable::getHandle(const AtomPtr& a) const
     if (nullptr == a) return Handle::UNDEFINED;
 
     if (in_environ(a))
-        return a->getHandle();
+        return a->get_handle();
 
     if (a->isNode())
         return getNodeHandle(a);
@@ -364,7 +364,7 @@ Handle AtomTable::add(AtomPtr atom, bool async)
 
     // Is the atom already in this table, or one of its environments?
     if (in_environ(atom))
-        return atom->getHandle();
+        return atom->get_handle();
 
     AtomPtr orig(atom);
     Type atom_type = atom->get_type();
@@ -451,7 +451,7 @@ Handle AtomTable::add(AtomPtr atom, bool async)
     if (atom->isLink()) _num_links++;
     _size_by_type[atom->_type] ++;
 
-    Handle h(atom->getHandle());
+    Handle h(atom->get_handle());
     _atom_store.insert({atom->get_hash(), h});
 
     if (not _transient and not async)
@@ -485,7 +485,7 @@ void AtomTable::put_atom_into_index(const AtomPtr& atom)
 
     // Now that we are completely done, emit the added signal.
     // Don't emit signal until after the indexes are updated!
-    _addAtomSignal(atom->getHandle());
+    _addAtomSignal(atom->get_handle());
 }
 
 void AtomTable::barrier()

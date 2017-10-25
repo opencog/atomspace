@@ -130,8 +130,8 @@ bool PMCB::node_match(Node *npat, Node *nsoln)
 	// Reject obvioius mismatches
 	if (pattype != soltype) return false;
 
-	Handle ha = npat->getHandle();
-	Handle hb = nsoln->getHandle();
+	Handle ha = npat->get_handle();
+	Handle hb = nsoln->get_handle();
 	logger().debug("Compare (%zu) %s ==== (%zu) %s",
 		ha.value(), npat->get_name().c_str(),
 		hb.value(), nsoln->get_name().c_str());

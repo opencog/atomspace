@@ -103,7 +103,7 @@ Handle ExecutionOutputLink::execute(AtomSpace* as, bool silent) const
 {
 	if (_outgoing[0]->get_type() != GROUNDED_SCHEMA_NODE) {
 		LAZY_LOG_FINE << "Not a grounded schema. Do not execute it";
-		return getHandle();
+		return get_handle();
 	}
 
 	return do_execute(as, _outgoing[0], _outgoing[1], silent);

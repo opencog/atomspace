@@ -151,7 +151,7 @@ Handle FoldLink::reduce(void)
 	if (1 == osz)
 	{
 		if (not did_reduce)
-			return getHandle();
+			return get_handle();
 		DO_RETURN(reduct[0]);
 	}
 
@@ -211,7 +211,7 @@ Handle FoldLink::reduce(void)
 
 	// If nothing reduced, nothing to do.
 	if (not did_reduce)
-		return getHandle();
+		return get_handle();
 
 	DO_RETURN(createLink(reduct, get_type()));
 }

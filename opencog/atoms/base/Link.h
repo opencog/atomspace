@@ -237,7 +237,7 @@ Handle createLink( Args&&... args )
 {
 	// Do we need to say (std::forward<Args>(args)...) instead ???
 	LinkPtr tmp(std::make_shared<Link>(args ...));
-	return classserver().factory(tmp->getHandle());
+	return classserver().factory(tmp->get_handle());
 }
 
 /** @}*/

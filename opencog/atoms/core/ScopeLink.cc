@@ -388,7 +388,7 @@ bool ScopeLink::operator==(const Atom& ac) const
 {
 	Atom& a = (Atom&) ac; // cast away constness, for smart ptr.
 	try {
-		return is_equal(a.getHandle(), true);
+		return is_equal(a.get_handle(), true);
 	} catch (const NestingException& ex) {}
 	return false;
 }

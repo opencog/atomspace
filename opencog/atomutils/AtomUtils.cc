@@ -65,7 +65,7 @@ HandleSeq get_predicates(const Handle& target,
                 or (subClasses &&
                     classServer.isA(candidateType, predicateType)))
             {
-                answer.emplace_back(evaluationLink->getHandle());
+                answer.emplace_back(evaluationLink->get_handle());
             }
         }
     }
@@ -106,7 +106,7 @@ HandleSeq get_predicates_for(const Handle& target,
             // Check if the first outgoing atom for this EvaluationLink is
             // the desired predicate.
             if (predicate == evaluationLink->getOutgoingAtom(0))
-                answer.emplace_back(evaluationLink->getHandle());
+                answer.emplace_back(evaluationLink->get_handle());
         }
     }
 

@@ -266,7 +266,7 @@ void BasicSaveUTest::single_atom_save_restore(std::string id)
     TruthValuePtr stv(SimpleTruthValue::createTV(0.55, 0.6));
     a->setTruthValue(stv);
 
-    Handle h = a->getHandle();
+    Handle h = a->get_handle();
 
     TSM_ASSERT("Bad Handle", nullptr != h);
 
@@ -283,14 +283,14 @@ void BasicSaveUTest::single_atom_save_restore(std::string id)
     // Create a second atom, connect it to the first
     // with a link. Save it, fetch it ... are they equal?
     AtomPtr a2(createNode(SCHEMA_NODE, id + "otherNode"));
-    store->storeAtom(a2->getHandle(), true);
+    store->storeAtom(a2->get_handle(), true);
 
     HandleSeq hvec;
-    hvec.push_back(a->getHandle());
-    hvec.push_back(a2->getHandle());
+    hvec.push_back(a->get_handle());
+    hvec.push_back(a2->get_handle());
 
     Handle l(createLink(hvec, LIST_LINK));
-    store->storeAtom(l->getHandle(), true);
+    store->storeAtom(l->get_handle(), true);
 
     Handle hl = store->getLink(LIST_LINK, hvec);
     atomCompare(l, hl, "Single link save-restore");
@@ -339,10 +339,10 @@ void BasicSaveUTest::add_to_table(int idx, AtomTable *table, std::string id)
     a4[idx] = n4[idx];
 
     HandleSeq hvec;
-    hvec.push_back(a1[idx]->getHandle());
-    hvec.push_back(a2[idx]->getHandle());
-    hvec.push_back(a3[idx]->getHandle());
-    hvec.push_back(a4[idx]->getHandle());
+    hvec.push_back(a1[idx]->get_handle());
+    hvec.push_back(a2[idx]->get_handle());
+    hvec.push_back(a3[idx]->get_handle());
+    hvec.push_back(a4[idx]->get_handle());
 
     l[idx] = createLink(hvec, SET_LINK);
     l[idx] = table->add(l[idx], false);

@@ -82,7 +82,7 @@ void single_atom_test(std::string id)
 	store->storeAtom(a);
 
 	// Fetch it back ...
-	Handle h = a->getHandle();
+	Handle h = a->get_handle();
 	Atom *b = store->getAtom(h);
 
 	// Are they equal ??
@@ -99,14 +99,14 @@ void single_atom_test(std::string id)
 	store->storeAtom(a2);
 
 	HandleSeq hvec;
-	hvec.push_back(a->getHandle());
-	hvec.push_back(a2->getHandle());
+	hvec.push_back(a->get_handle());
+	hvec.push_back(a2->get_handle());
 
 	Link *l = new Link(SET_LINK, hvec);
 	TLB::addAtom(l);
 	store->storeAtom(l);
 
-	Atom *lb = store->getAtom(l->getHandle());
+	Atom *lb = store->getAtom(l->get_handle());
 	rc = atomCompare(l,lb);
 	if (!rc) 
 	{
@@ -135,9 +135,9 @@ void add_to_table(AtomTable *table, std::string id)
 	table->add(a3);
 
 	HandleSeq hvec;
-	hvec.push_back(a->getHandle());
-	hvec.push_back(a2->getHandle());
-	hvec.push_back(a3->getHandle());
+	hvec.push_back(a->get_handle());
+	hvec.push_back(a2->get_handle());
+	hvec.push_back(a3->get_handle());
 
 	Link *l = new Link(SET_LINK, hvec);
 	table->add(l);

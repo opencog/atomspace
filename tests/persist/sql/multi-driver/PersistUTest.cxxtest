@@ -274,19 +274,19 @@ void PersistUTest::add_to_space(int idx, AtomSpace *as, std::string id)
 void PersistUTest::fetch_space(int idx, AtomSpace *space)
 {
     AtomPtr ab1 = createNode(n1[idx]->get_type(), n1[idx]->get_name());
-    Handle hb1(ab1->getHandle());
+    Handle hb1(ab1->get_handle());
     space->fetch_atom(hb1);
 
     AtomPtr ab2 = createNode(n2[idx]->get_type(), n2[idx]->get_name());
-    Handle hb2(ab2->getHandle());
+    Handle hb2(ab2->get_handle());
     space->fetch_atom(hb2);
 
     AtomPtr ab3 = createNode(n3[idx]->get_type(), n3[idx]->get_name());
-    Handle hb3(ab3->getHandle());
+    Handle hb3(ab3->get_handle());
     space->fetch_atom(hb3);
 
     AtomPtr ab4 = createNode(n4[idx]->get_type(), n4[idx]->get_name());
-    Handle hb4(ab4->getHandle());
+    Handle hb4(ab4->get_handle());
     space->fetch_atom(hb4);
 
     HandleSeq hvec;
@@ -296,17 +296,17 @@ void PersistUTest::fetch_space(int idx, AtomSpace *space)
     hvec.push_back(hb4);
 
     AtomPtr alb = createLink(hvec, hl[idx]->get_type());
-    Handle hlb(alb->getHandle());
+    Handle hlb(alb->get_handle());
     space->fetch_atom(hlb);
 
     HandleSeq hv2({hlb, hb2});
     AtomPtr alb2 = createLink(hv2, hl2[idx]->get_type());
-    Handle hlb2(alb2->getHandle());
+    Handle hlb2(alb2->get_handle());
     space->fetch_atom(hlb2);
 
     HandleSeq hv3({hb1, hlb2, hb3});
     AtomPtr alb3 = createLink(hv3, hl3[idx]->get_type());
-    Handle hlb3(alb3->getHandle());
+    Handle hlb3(alb3->get_handle());
     space->fetch_atom(hlb3);
 }
 
