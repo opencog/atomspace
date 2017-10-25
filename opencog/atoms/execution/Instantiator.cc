@@ -111,7 +111,7 @@ Handle Instantiator::walk_tree(const Handle& expr, bool silent)
 	// as it is serving its quoting or unquoting function.
 	if (_avoid_discarding_quotes_level == 0 and context_cp.consumable(t))
 	{
-		if (1 != expr->getArity())
+		if (1 != expr->get_arity())
 			throw InvalidParamException(TRACE_INFO,
 			                            "QuoteLink/UnquoteLink has "
 			                            "unexpected arity!");

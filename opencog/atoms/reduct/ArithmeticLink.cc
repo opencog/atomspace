@@ -149,7 +149,7 @@ NumberNodePtr ArithmeticLink::unwrap_set(Handle h) const
 	// if that set contains numbers or something numeric, then unwrap it.
 	if (SET_LINK == h->get_type())
 	{
-		if (1 != h->getArity())
+		if (1 != h->get_arity())
 			throw SyntaxException(TRACE_INFO,
 				"Don't know how to do arithmetic with this: %s",
 				h->to_string().c_str());

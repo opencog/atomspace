@@ -276,7 +276,7 @@ bool DefaultPatternMatchCB::link_match(const PatternTermPtr& ptm,
 	if (pattype != soltype) return false;
 
 	// Reject mis-sized compares, unless the pattern has a glob in it.
-	if (0 == _globs->count(lpat) and lpat->getArity() != lsoln->getArity())
+	if (0 == _globs->count(lpat) and lpat->get_arity() != lsoln->get_arity())
 		return false;
 
 	// If the link is a ScopeLink, we need to deal with the
@@ -508,7 +508,7 @@ bool DefaultPatternMatchCB::clause_match(const Handle& ptrn,
 	// It is tested by EvaluationUTest.
 	if (ptrn->get_type() == VARIABLE_NODE and
 	    grnd->get_type() == EVALUATION_LINK and
-	    0 < grnd->getArity() and
+	    0 < grnd->get_arity() and
 	    (grnd->getOutgoingAtom(0)->get_type() == GROUNDED_PREDICATE_NODE or
 	    grnd->getOutgoingAtom(0)->get_type() == DEFINED_PREDICATE_NODE))
 	{

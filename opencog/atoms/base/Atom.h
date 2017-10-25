@@ -240,7 +240,7 @@ public:
         throw RuntimeException(TRACE_INFO, "Not a node!");
     }
 
-    virtual Arity getArity() const {
+    virtual Arity get_arity() const {
         throw RuntimeException(TRACE_INFO, "Not a link!");
     }
 

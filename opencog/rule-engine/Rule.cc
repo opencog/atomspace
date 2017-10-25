@@ -281,12 +281,12 @@ HandleSeq Rule::get_premises() const
 	if (rewrite_type == EXECUTION_OUTPUT_LINK) {
 		Handle args = rewrite->getOutgoingAtom(1);
 		if (args->get_type() == LIST_LINK) {
-			OC_ASSERT(args->getArity() > 0);
-			for (Arity i = 1; i < args->getArity(); i++) {
+			OC_ASSERT(args->get_arity() > 0);
+			for (Arity i = 1; i < args->get_arity(); i++) {
 				Handle argi = args->getOutgoingAtom(i);
 				// Return unordered premises
 				if (argi->get_type() == SET_LINK) {
-					for (Arity j = 0; j < argi->getArity(); j++)
+					for (Arity j = 0; j < argi->get_arity(); j++)
 						premises.push_back(argi->getOutgoingAtom(j));
 				}
 				// Return ordered premise
@@ -314,7 +314,7 @@ Handle Rule::get_conclusion() const
 
 	Handle args = rewrite->getOutgoingAtom(1);
 	if (args->get_type() == LIST_LINK) {
-		OC_ASSERT(args->getArity() > 0);
+		OC_ASSERT(args->get_arity() > 0);
 		return args->getOutgoingAtom(0);
 	} else {
 		return args;
@@ -545,7 +545,7 @@ Handle Rule::get_execution_output_first_argument(const Handle& h) const
 	OC_ASSERT(h->get_type() == EXECUTION_OUTPUT_LINK);
 	Handle args = h->getOutgoingAtom(1);
 	if (args->get_type() == LIST_LINK) {
-		OC_ASSERT(args->getArity() > 0);
+		OC_ASSERT(args->get_arity() > 0);
 		return args->getOutgoingAtom(0);
 	} else
 		return args;

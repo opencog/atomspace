@@ -282,7 +282,7 @@ Handle ControlPolicy::get_expansion_control_rule_pattern(const Handle& ctrl_rule
 {
 	// Check that it is indeed an expansion control rule
 	OC_ASSERT(ctrl_rule->get_type() == IMPLICATION_SCOPE_LINK);
-	OC_ASSERT(ctrl_rule->getArity() == 3);
+	OC_ASSERT(ctrl_rule->get_arity() == 3);
 
 	// The pattern is in the implicant, if any
 	Handle implicant = ctrl_rule->getOutgoingAtom(1);

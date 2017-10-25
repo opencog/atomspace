@@ -94,7 +94,7 @@ void GlobUTest::test_glob_middle(void)
 
 	Handle love = eval->eval_h("(cog-execute! glob-you)");
 	printf("glob-you %s\n", love->to_string().c_str());
-	TS_ASSERT_EQUALS(2, love->getArity());
+	TS_ASSERT_EQUALS(2, love->get_arity());
 
 	Handle response = eval->eval_h(
 		"(SetLink"
@@ -128,7 +128,7 @@ void GlobUTest::test_glob_final(void)
 
 	Handle love = eval->eval_h("(cog-execute! love-glob)");
 	printf("love-glob %s\n", love->to_string().c_str());
-	TS_ASSERT_EQUALS(3, love->getArity());
+	TS_ASSERT_EQUALS(3, love->get_arity());
 
 	Handle response = eval->eval_h(
 		"(SetLink"
@@ -171,7 +171,7 @@ void GlobUTest::test_glob_type(void)
 
 	Handle love = eval->eval_h("(cog-execute! love-type-glob)");
 	printf("love-type-glob %s\n", love->to_string().c_str());
-	TS_ASSERT_EQUALS(1, love->getArity());
+	TS_ASSERT_EQUALS(1, love->get_arity());
 
 	Handle response = eval->eval_h(
 		"(SetLink"
@@ -199,7 +199,7 @@ void GlobUTest::test_glob_interval(void)
 
 	Handle love = eval->eval_h("(cog-execute! love-interval-glob)");
 	printf("love-interval-glob %s\n", love->to_string().c_str());
-	TS_ASSERT_EQUALS(2, love->getArity());
+	TS_ASSERT_EQUALS(2, love->get_arity());
 
 	Handle response = eval->eval_h(
 		"(SetLink"
@@ -233,7 +233,7 @@ void GlobUTest::test_glob_typeset(void)
 
 	Handle love = eval->eval_h("(cog-execute! love-typeset-glob)");
 	printf("love-typeset-glob %s\n", love->to_string().c_str());
-	TS_ASSERT_EQUALS(2, love->getArity());
+	TS_ASSERT_EQUALS(2, love->get_arity());
 
 	Handle response = eval->eval_h(
 		"(SetLink"
@@ -270,7 +270,7 @@ void GlobUTest::test_glob_three_globs(void)
 
 	Handle love = eval->eval_h("(cog-execute! love-three-globs)");
 	printf("love-three-globs %s\n", love->to_string().c_str());
-	TS_ASSERT_EQUALS(3, love->getArity());
+	TS_ASSERT_EQUALS(3, love->get_arity());
 
 	Handle response = eval->eval_h(
 		"(SetLink"
@@ -307,7 +307,7 @@ void GlobUTest::test_glob_two_in_a_row(void)
 
 	Handle greet = eval->eval_h("(cog-execute! greet)");
 	printf("greet %s\n", greet->to_string().c_str());
-	TS_ASSERT_EQUALS(1, greet->getArity());
+	TS_ASSERT_EQUALS(1, greet->get_arity());
 
 	Handle response = eval->eval_h(
 		"(SetLink"
@@ -331,7 +331,7 @@ void GlobUTest::test_glob_exact(void)
 
 	Handle exact = eval->eval_h("(cog-execute! exact)");
 	printf("exact %s\n", exact->to_string().c_str());
-	TS_ASSERT_EQUALS(1, exact->getArity());
+	TS_ASSERT_EQUALS(1, exact->get_arity());
 
 	Handle response = eval->eval_h(
 		"(SetLink"
@@ -356,7 +356,7 @@ void GlobUTest::test_glob_greedy(void)
 
 	Handle greedy = eval->eval_h("(cog-execute! greedy)");
 	printf("greedy %s\n", greedy->to_string().c_str());
-	TS_ASSERT_EQUALS(1, greedy->getArity());
+	TS_ASSERT_EQUALS(1, greedy->get_arity());
 
 	Handle response = eval->eval_h(
 		"(SetLink"
@@ -384,7 +384,7 @@ void GlobUTest::test_glob_unorder(void)
 
 	Handle unorder = eval->eval_h("(cog-execute! unorder)");
 	printf("unorder %s\n", unorder->to_string().c_str());
-	TS_ASSERT_EQUALS(1, unorder->getArity());
+	TS_ASSERT_EQUALS(1, unorder->get_arity());
 
 	Handle response = eval->eval_h(
 		"(SetLink"
@@ -406,7 +406,7 @@ void GlobUTest::test_glob_backtrack(void)
 
 	Handle backtrack = eval->eval_h("(cog-execute! backtrack)");
 	printf("backtrack %s\n", backtrack->to_string().c_str());
-	TS_ASSERT_EQUALS(1, backtrack->getArity());
+	TS_ASSERT_EQUALS(1, backtrack->get_arity());
 
 	Handle response = eval->eval_h(
 		"(SetLink"

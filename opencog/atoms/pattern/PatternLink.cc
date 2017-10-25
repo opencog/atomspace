@@ -388,7 +388,7 @@ void PatternLink::unbundle_clauses_rec(const std::set<Type>& connectives,
 			// We insist on an arity of 1, because anything else is
 			// ambiguous: consider absent(A B) is that: "both A and B must
 			// be absent"?  Or is it "if any of A and B are absent, then .."
-			if (1 != ho->getArity())
+			if (1 != ho->get_arity())
 				throw InvalidParamException(TRACE_INFO,
 					"AbsentLink can have an arity of one only!");
 
@@ -494,7 +494,7 @@ void PatternLink::extract_optionals(const HandleSet &vars,
 			// We insist on an arity of 1, because anything else is
 			// ambiguous: consider absent(A B) is that: "both A and B must
 			// be absent"?  Or is it "if any of A and B are absent, then .."
-			if (1 != h->getArity())
+			if (1 != h->get_arity())
 				throw InvalidParamException(TRACE_INFO,
 					"AbsentLink can have an arity of one only!");
 

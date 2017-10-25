@@ -224,7 +224,7 @@ static void atomCompare(AtomPtr a, AtomPtr b, const char* where)
     LinkPtr lb(LinkCast(b));
     if (la and lb)
     {
-        TSM_ASSERT_EQUALS("Arity mismatch", la->getArity(), lb->getArity());
+        TSM_ASSERT_EQUALS("Arity mismatch", la->get_arity(), lb->get_arity());
         if (*la != *lb)
         {
             printf("Mismatching la = %s\n", la->to_string().c_str());

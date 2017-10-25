@@ -775,7 +775,7 @@ PyObject* PythonEval::call_user_function(const std::string& moduleFunction,
     }
 
     // Now make sure the expected count matches the actual argument count.
-    int actualArgumentCount = arguments->getArity();
+    int actualArgumentCount = arguments->get_arity();
     if (expectedArgumentCount != actualArgumentCount) {
         PyGILState_Release(gstate);
         throw RuntimeException(TRACE_INFO,

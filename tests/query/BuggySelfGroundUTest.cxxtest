@@ -72,7 +72,7 @@ void BuggySelfGroundUTest::setUp(void)
     as->clear();
 }
 
-#define getarity(hand) hand->getArity()
+#define getarity(hand) hand->get_arity()
 
 void BuggySelfGroundUTest::test_crash(void)
 {

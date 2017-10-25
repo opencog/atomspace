@@ -69,10 +69,10 @@ static NumberNodePtr unwrap_set(Handle h)
 {
 	if (SET_LINK == h->get_type())
 	{
-		if (0 == h->getArity())
+		if (0 == h->get_arity())
 			throw SyntaxException(TRACE_INFO,
 				"Expecting a number, got the empty set!\n");
-		if (1 != h->getArity())
+		if (1 != h->get_arity())
 			throw SyntaxException(TRACE_INFO,
 				"Expecting only one number, got more than that: %s",
 				h->to_string().c_str());

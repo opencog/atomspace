@@ -815,7 +815,7 @@ int PGAtomStorage::get_height(AtomPtr atom)
     if (NULL == l) return 0;
 
     int maxd = 0;
-    int arity = l->getArity();
+    int arity = l->get_arity();
 
     const HandleSeq& out = l->getOutgoingSet();
     for (int i=0; i<arity; i++)
@@ -1072,7 +1072,7 @@ std::string PGAtomStorage::build_atom_insert(Database& database,
         database.add_column_unsigned("height", height);
 
         // If this is a link and we're not storing edges separately.
-        int arity = atom->getArity();
+        int arity = atom->get_arity();
         if (_store_edges)
         {
             if (arity)

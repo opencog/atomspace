@@ -42,7 +42,7 @@ PatternTerm::PatternTerm(const PatternTermPtr& parent, const Handle& h)
 	// Discard the following QuoteLink, UnquoteLink or LocalQuoteLink
 	// as it is serving its quoting or unquoting function.
 	if (_quotation.consumable(t)) {
-		if (1 != h->getArity())
+		if (1 != h->get_arity())
 			throw InvalidParamException(TRACE_INFO,
 			                            "QuoteLink/UnquoteLink/LocalQuoteLink has "
 			                            "unexpected arity!");

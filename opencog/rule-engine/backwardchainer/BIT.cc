@@ -177,7 +177,7 @@ bool AndBIT::has_cycle(const Handle& h, HandleSet ancestors) const
 				return true;
 
 			ancestors.insert(conclusion);
-			Arity arity = arg->getArity();
+			Arity arity = arg->get_arity();
 			if (1 < arity) {
 				bool unordered_premises =
 					arg->getOutgoingAtom(1)->get_type() == SET_LINK;
@@ -243,7 +243,7 @@ std::string AndBIT::fcs_rewrite_to_ascii_art(const Handle& h) const
 			std::string conclusion_aa = fcs_rewrite_to_ascii_art(conclusion);
 
 			// Render the premises
-			Arity arity = arg->getArity();
+			Arity arity = arg->get_arity();
 			if (1 < arity) {
 				std::vector<std::string> premises_aas;
 				bool unordered_premises =
@@ -376,8 +376,8 @@ HandleSet AndBIT::get_leaves(const Handle& h) const
 		Handle args = h->getOutgoingAtom(1);
 		HandleSet leaves;
 		if (args->get_type() == LIST_LINK) {
-			OC_ASSERT(args->getArity() > 0);
-			for (Arity i = 1; i < args->getArity(); i++) {
+			OC_ASSERT(args->get_arity() > 0);
+			for (Arity i = 1; i < args->get_arity(); i++) {
 				HandleSet aleaves = get_leaves(args->getOutgoingAtom(i));
 				leaves.insert(aleaves.begin(), aleaves.end());
 			}
@@ -505,7 +505,7 @@ bool AndBIT::is_argument_of(const Handle& eval, const Handle& atom) const
 		if (content_eq(args, atom))
 			return true;
 		if (args->get_type() == LIST_LINK)
-			for (Arity i = 0; i < args->getArity(); i++)
+			for (Arity i = 0; i < args->get_arity(); i++)
 				if (content_eq(args->getOutgoingAtom(i), atom))
 					return true;
 	}

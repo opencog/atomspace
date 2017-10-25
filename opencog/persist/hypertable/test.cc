@@ -21,14 +21,14 @@ int atomCompare(Atom *a, Atom *b) //TODO: Test name, use == ?
     Link *na = dynamic_cast<Link *>(a);
     Link *nb = dynamic_cast<Link *>(b);
     if (na && nb) {
-        if (na->getArity() != nb->getArity()) {
-            fprintf(stderr, "Error, arity mis-match, a=%d b=%d\n", na->getArity(), nb->getArity());
+        if (na->get_arity() != nb->get_arity()) {
+            fprintf(stderr, "Error, arity mis-match, a=%d b=%d\n", na->get_arity(), nb->get_arity());
             --rc;
         }
-            if (0 < na->getArity()) {
+            if (0 < na->get_arity()) {
             HandleSeq outa = na->getOutgoingSet();
             HandleSeq outb = nb->getOutgoingSet();
-            for (int i =0; i< na->getArity(); i++) {
+            for (int i =0; i< na->get_arity(); i++) {
                 if (outa[i] != outb[i]) {
                     fprintf(stderr, "Error, outgoing set mis-match:");
                     fprintf(stderr, "i=%d a[i]=%ld b[i]=%ld\n",i,

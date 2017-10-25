@@ -78,7 +78,7 @@ void AbsentUTest::setUp(void)
 	eval->eval("(load-from-path \"tests/query/test_types.scm\")");
 }
 
-#define getarity(hand) hand->getArity()
+#define getarity(hand) hand->get_arity()
 
 /*
  * Single AbsentLink used to trigger an action that takes

@@ -39,16 +39,16 @@ int atomCompare(Atom *a, Atom *b)
         fprintf(stderr, "Error, type mis-match, a=%d b=%d\n", a->get_type(), b->get_type());
         rc --;
     }
-    if (la->getArity() != lb->getArity())
+    if (la->get_arity() != lb->get_arity())
     {
-        fprintf(stderr, "Error, arity mis-match, a=%lu b=%lu\n", la->getArity(), lb->getArity());
+        fprintf(stderr, "Error, arity mis-match, a=%lu b=%lu\n", la->get_arity(), lb->get_arity());
         rc --;
     }
-    if (0 < la->getArity())
+    if (0 < la->get_arity())
     {
         HandleSeq outa = la->getOutgoingSet();
         HandleSeq outb = lb->getOutgoingSet();
-        for (size_t i =0; i< la->getArity(); i++)
+        for (size_t i =0; i< la->get_arity(); i++)
         {
             if (outa[i] != outb[i])
             {

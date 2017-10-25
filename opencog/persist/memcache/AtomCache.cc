@@ -98,7 +98,7 @@ void AtomCache::storeAtom(Atom *atom)
 	{
 		// Store the outgoing set
 		Link *l = dynamic_cast<Link *>(atom);
-		int arity = l->getArity();
+		int arity = l->get_arity();
 		vlen = snprintf(valbuff, VBSIZE, "(%d", arity);
 
 		HandleSeq out = l->getOutgoingSet();
@@ -263,7 +263,7 @@ int AtomCache::depth(Atom *atom)
 	if (NULL == l) return 0;
 
 	int maxd = 0;
-	int arity = l->getArity();
+	int arity = l->get_arity();
 
 	HandleSeq out = l->getOutgoingSet();
 	for (int i=0; i<arity; i++)

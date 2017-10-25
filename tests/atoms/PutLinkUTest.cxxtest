@@ -122,7 +122,7 @@ void PutLinkUTest::test_filtering()
 
 	printf("Filtered %s\n", cncpts->to_string().c_str());
 	TS_ASSERT_EQUALS(SET_LINK, cncpts->get_type());
-	TS_ASSERT_EQUALS(2, cncpts->getArity());
+	TS_ASSERT_EQUALS(2, cncpts->get_arity());
 	Handle a = cncpts->getOutgoingAtom(0);
 	Handle b = cncpts->getOutgoingAtom(1);
 	TS_ASSERT(foo == a or foo == b);

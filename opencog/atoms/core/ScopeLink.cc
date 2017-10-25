@@ -179,8 +179,8 @@ bool ScopeLink::is_equal(const Handle& other, bool silent) const
 	// that this and other have the same number of body parts.
 	Arity vardecl_offset = _vardecl != Handle::UNDEFINED;
 	Arity other_vardecl_offset = scother->_vardecl != Handle::UNDEFINED;
-	Arity n_scoped_terms = getArity() - vardecl_offset;
-	Arity other_n_scoped_terms = other->getArity() - other_vardecl_offset;
+	Arity n_scoped_terms = get_arity() - vardecl_offset;
+	Arity other_n_scoped_terms = other->get_arity() - other_vardecl_offset;
 	if (n_scoped_terms != other_n_scoped_terms) return false;
 
 	// Variable declarations must match.
@@ -262,7 +262,7 @@ ContentHash ScopeLink::compute_hash() const
 	hsh += (hsh <<5) + (vth % ((1UL<<27) - 235));
 
 	Arity vardecl_offset = _vardecl != Handle::UNDEFINED;
-	Arity n_scoped_terms = getArity() - vardecl_offset;
+	Arity n_scoped_terms = get_arity() - vardecl_offset;
 
 	UnorderedHandleSet hidden;
 	for (Arity i = 0; i < n_scoped_terms; ++i)
@@ -375,7 +375,7 @@ Handle ScopeLink::alpha_conversion(HandleSeq vars) const
 
 	// Perform alpha conversion
 	HandleSeq hs;
-	for (size_t i = 0; i < getArity(); ++i)
+	for (size_t i = 0; i < get_arity(); ++i)
 		hs.push_back(_varlist.substitute_nocheck(getOutgoingAtom(i), vars));
 
 	// Create the alpha converted scope link

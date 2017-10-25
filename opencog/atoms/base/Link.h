@@ -133,7 +133,7 @@ public:
     virtual bool isNode() const { return false; }
     virtual bool isLink() const { return true; }
 
-    virtual Arity getArity() const {
+    virtual Arity get_arity() const {
         return _outgoing.size();
     }
 

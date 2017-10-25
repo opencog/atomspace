@@ -1063,7 +1063,7 @@ bool PatternMatchEngine::tree_compare(const PatternTermPtr& ptm,
 
 	// If the two links are both ordered, its enough to compare
 	// them "side-by-side".
-	if (2 > hp->getArity() or _classserver.isA(tp, ORDERED_LINK))
+	if (2 > hp->get_arity() or _classserver.isA(tp, ORDERED_LINK))
 		return ordered_compare(ptm, hg);
 
 	// If we are here, we are dealing with an unordered link.

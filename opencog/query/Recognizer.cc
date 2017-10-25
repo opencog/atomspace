@@ -203,7 +203,7 @@ bool Recognizer::link_match(const PatternTermPtr& ptm, const Handle& lsoln)
 	// all the glob-matching logic is there, so it
 	// should be able to handle this better.
 	if (contains_atomtype(lsoln, GLOB_NODE) and
-	    lpat->getArity() == lsoln->getArity())
+	    lpat->get_arity() == lsoln->get_arity())
 	{
 		if (fuzzy_match(lpat, lsoln))
 		{

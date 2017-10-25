@@ -68,7 +68,7 @@ void GreaterComputeUTest::setUp(void)
 {
 }
 
-#define getarity(hand) hand->getArity()
+#define getarity(hand) hand->get_arity()
 
 /*
  * Computation unit test. Defines a fairly simple search pattern that

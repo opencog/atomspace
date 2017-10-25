@@ -571,8 +571,8 @@ Unify::SolutionSet Unify::unify(const Handle& lh, const Handle& rh,
 
 	// At this point they are both links of the same type, check that
 	// they have the same arity
-	Arity lh_arity(lh->getArity());
-	Arity rh_arity(rh->getArity());
+	Arity lh_arity(lh->get_arity());
+	Arity rh_arity(rh->get_arity());
 	if (lh_arity != rh_arity)
 		return SolutionSet();
 
@@ -997,8 +997,8 @@ bool Unify::inherit(const Handle& lh, const Handle& rh,
 	// If both are links then check that the outgoings of lhs inherit
 	// the outgoings of rhs.
 	if (lh->isLink() and rh->isLink() and (lt == rt)) {
-		if (lh->getArity() == rh->getArity()) {
-			for (size_t i = 0; i < lh->getArity(); i++) {
+		if (lh->get_arity() == rh->get_arity()) {
+			for (size_t i = 0; i < lh->get_arity(); i++) {
 				if (not inherit(lh->getOutgoingAtom(i),
 				                rh->getOutgoingAtom(i),
 				                lc, rc))

@@ -74,7 +74,7 @@ void RemoveUTest::testSimple()
 
 	// Verify the link is sane
 	LinkPtr pli(LinkCast(hli));
-	TS_ASSERT(pli->getArity() == 2);
+	TS_ASSERT(pli->get_arity() == 2);
 	TS_ASSERT(pli->getOutgoingAtom(0) == hna);
 	TS_ASSERT(pli->getOutgoingAtom(1) == hnb);
 
@@ -86,7 +86,7 @@ void RemoveUTest::testSimple()
 
 	// Handle hli should still point to valid atoms
 	LinkPtr li(LinkCast(hli));
-	TS_ASSERT(li->getArity() == 2);
+	TS_ASSERT(li->get_arity() == 2);
 	TS_ASSERT(li->getOutgoingAtom(0) == hna);
 	TS_ASSERT(li->getOutgoingAtom(1) == hnb);
 
@@ -113,7 +113,7 @@ void RemoveUTest::testDangling()
 
 	// Verify the link is sane
 	LinkPtr pli(LinkCast(hli));
-	TS_ASSERT(pli->getArity() == 2);
+	TS_ASSERT(pli->get_arity() == 2);
 	TS_ASSERT(pli->getOutgoingAtom(0) == hna);
 	TS_ASSERT(pli->getOutgoingAtom(1) == hnb);
 
@@ -124,7 +124,7 @@ void RemoveUTest::testDangling()
 
 	// Both hna and hli should still point to valid atoms
 	LinkPtr li(LinkCast(hli));
-	TS_ASSERT(li->getArity() == 2);
+	TS_ASSERT(li->get_arity() == 2);
 	TS_ASSERT(li->getOutgoingAtom(0) == hna);
 	TS_ASSERT(li->getOutgoingAtom(1) == hnb);
 
@@ -153,7 +153,7 @@ void RemoveUTest::testRecursive()
 
 	// Verify the link is sane
 	LinkPtr pli(LinkCast(hli));
-	TS_ASSERT(pli->getArity() == 2);
+	TS_ASSERT(pli->get_arity() == 2);
 	TS_ASSERT(pli->getOutgoingAtom(0) == hna);
 	TS_ASSERT(pli->getOutgoingAtom(1) == hnb);
 
@@ -165,7 +165,7 @@ void RemoveUTest::testRecursive()
 
 	// Both hna and hli should still point to valid atoms
 	LinkPtr li(LinkCast(hli));
-	TS_ASSERT(li->getArity() == 2);
+	TS_ASSERT(li->get_arity() == 2);
 	TS_ASSERT(li->getOutgoingAtom(0) == hna);
 	TS_ASSERT(li->getOutgoingAtom(1) == hnb);
 
@@ -195,7 +195,7 @@ void RemoveUTest::testCross()
 
 	// Verify the link is sane
 	LinkPtr pli(LinkCast(hli));
-	TS_ASSERT(pli->getArity() == 2);
+	TS_ASSERT(pli->get_arity() == 2);
 	TS_ASSERT(pli->getOutgoingAtom(0) == hna);
 	TS_ASSERT(pli->getOutgoingAtom(1) == hnb);
 
@@ -207,7 +207,7 @@ void RemoveUTest::testCross()
 
 	// Both hna and hli should still point to valid atoms
 	LinkPtr li(LinkCast(hli));
-	TS_ASSERT(li->getArity() == 2);
+	TS_ASSERT(li->get_arity() == 2);
 	TS_ASSERT(li->getOutgoingAtom(0) == hna);
 	TS_ASSERT(li->getOutgoingAtom(1) == hnb);
 
@@ -237,7 +237,7 @@ void RemoveUTest::testReCross()
 
 	// Verify the link is sane
 	LinkPtr pli(LinkCast(hli));
-	TS_ASSERT(pli->getArity() == 2);
+	TS_ASSERT(pli->get_arity() == 2);
 	TS_ASSERT(pli->getOutgoingAtom(0) == hna);
 	TS_ASSERT(pli->getOutgoingAtom(1) == hnb);
 
@@ -249,7 +249,7 @@ void RemoveUTest::testReCross()
 
 	// Both hna and hli should still point to valid atoms
 	LinkPtr li(LinkCast(hli));
-	TS_ASSERT(li->getArity() == 2);
+	TS_ASSERT(li->get_arity() == 2);
 	TS_ASSERT(li->getOutgoingAtom(0) == hna);
 	TS_ASSERT(li->getOutgoingAtom(1) == hnb);
 
@@ -280,7 +280,7 @@ void RemoveUTest::testRepeat()
 
 	// Verify the link is sane
 	LinkPtr pli(LinkCast(hli));
-	TS_ASSERT(pli->getArity() == 2);
+	TS_ASSERT(pli->get_arity() == 2);
 	TS_ASSERT(pli->getOutgoingAtom(0) == hna);
 	TS_ASSERT(pli->getOutgoingAtom(1) == hnb);
 
@@ -292,12 +292,12 @@ void RemoveUTest::testRepeat()
 
 	// Both hna and hli should still point to valid atoms
 	LinkPtr li(LinkCast(hli));
-	TS_ASSERT(li->getArity() == 2);
+	TS_ASSERT(li->get_arity() == 2);
 	TS_ASSERT(li->getOutgoingAtom(0) == hna);
 	TS_ASSERT(li->getOutgoingAtom(1) == hnb);
 
 	LinkPtr lli(LinkCast(hlili));
-	TS_ASSERT(lli->getArity() == 2);
+	TS_ASSERT(lli->get_arity() == 2);
 	TS_ASSERT(lli->getOutgoingAtom(0) == hli);
 	TS_ASSERT(lli->getOutgoingAtom(1) == hli);
 
@@ -341,7 +341,7 @@ void RemoveUTest::testHeads()
 
 	// Verify the link is sane
 	LinkPtr pli(LinkCast(hli));
-	TS_ASSERT(pli->getArity() == 2);
+	TS_ASSERT(pli->get_arity() == 2);
 	TS_ASSERT(pli->getOutgoingAtom(0) == hna);
 	TS_ASSERT(pli->getOutgoingAtom(1) == hnb);
 
@@ -353,7 +353,7 @@ void RemoveUTest::testHeads()
 
 	// Both hna and hli should still point to valid atoms
 	LinkPtr li(LinkCast(hli));
-	TS_ASSERT(li->getArity() == 2);
+	TS_ASSERT(li->get_arity() == 2);
 	TS_ASSERT(li->getOutgoingAtom(0) == hna);
 	TS_ASSERT(li->getOutgoingAtom(1) == hnb);
 

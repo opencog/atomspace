@@ -436,7 +436,7 @@ Handle AtomTable::add(AtomPtr atom, bool async)
         }
 
         // Build the incoming set of outgoing atom h.
-        size_t arity = atom->getArity();
+        size_t arity = atom->get_arity();
         LinkPtr llc(LinkCast(atom));
         for (size_t i = 0; i < arity; i++) {
             llc->_outgoing[i]->insert_atom(llc);

@@ -102,7 +102,7 @@ static NumberNodePtr unwrap_set(Handle h)
 {
 	if (SET_LINK == h->get_type())
 	{
-		if (1 != h->getArity())
+		if (1 != h->get_arity())
 			throw SyntaxException(TRACE_INFO,
 				"Don't know how to do arithmetic with this: %s",
 				h->to_string().c_str());
@@ -178,7 +178,7 @@ static TruthValuePtr equal(AtomSpace* as, const Handle& h)
 
 static bool is_evaluatable_sat(const Handle& satl)
 {
-	if (1 != satl->getArity())
+	if (1 != satl->get_arity())
 		return false;
 
 	PatternLinkPtr plp(PatternLinkCast(satl));
@@ -410,7 +410,7 @@ TruthValuePtr EvaluationLink::do_eval_scratch(AtomSpace* as,
 		// atoms into the atomspace, to signal some event or state.
 		// These cannot be discarded. This is explictly tested by
 		// SequenceUTest::test_or_put().
-		if (0 < evelnk->getArity())
+		if (0 < evelnk->get_arity())
 		{
 			const Handle& term = evelnk->getOutgoingAtom(0);
 			if (classserver().isA(term->get_type(), EVALUATABLE_LINK))
@@ -594,7 +594,7 @@ TruthValuePtr EvaluationLink::do_evaluate(AtomSpace* as,
 	// Hard-coded in C++ for speed. (well, and for convenience ...)
 	if (0 == schema.compare("c++:exclusive"))
 	{
-		Arity sz = args->getArity();
+		Arity sz = args->get_arity();
 		for (Arity i=0; i<sz-1; i++) {
 			Handle h1(args->getOutgoingAtom(i));
 			for (Arity j=i+1; j<sz; j++) {

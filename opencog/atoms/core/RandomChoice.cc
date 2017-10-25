@@ -167,7 +167,7 @@ Handle RandomChoiceLink::execute(AtomSpace * as) const
 		return choices[randy.rand_discrete(weights)];
 
 uniform:
-		ary = ofirst->getArity();
+		ary = ofirst->get_arity();
 		if (0 == ary)
 			throw RuntimeException(TRACE_INFO,
 				"Asked to choose element from empty set!");
@@ -180,7 +180,7 @@ uniform:
 		const Handle& choices(_outgoing[1]);
 
 		// ofirst are the weights
-		if (ofirst->getArity() != choices->getArity())
+		if (ofirst->get_arity() != choices->get_arity())
 			throw SyntaxException(TRACE_INFO,
 				"Weights and choices must be the same size");
 

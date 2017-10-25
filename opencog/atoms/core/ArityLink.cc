@@ -64,7 +64,7 @@ Handle ArityLink::execute(AtomSpace * as) const
 		{
 			h = flp->execute(as);
 		}
-		if (h->isLink()) ary += h->getArity();
+		if (h->isLink()) ary += h->get_arity();
 	}
 
 	// XXX This is probably wrong ... if the as is null, we should

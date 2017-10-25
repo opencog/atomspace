@@ -108,8 +108,8 @@ bool Link::operator==(const Atom& other) const
     if (get_hash() != other.get_hash()) return false;
     if (get_type() != other.get_type()) return false;
 
-    Arity sz = getArity();
-    if (sz != other.getArity()) return false;
+    Arity sz = get_arity();
+    if (sz != other.get_arity()) return false;
 
     // Perform a content-compare on the outgoing set.
     const HandleSeq& rhs = other.getOutgoingSet();

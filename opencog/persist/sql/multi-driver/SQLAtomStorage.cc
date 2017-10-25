@@ -1422,7 +1422,7 @@ void SQLAtomStorage::do_store_single_atom(const Handle& h, int aheight)
 			// redesign.  One could hash together the UUID's in the
 			// outgoing set, and then force a unique constraint on
 			// the hash.
-			if (330 < h->getArity())
+			if (330 < h->get_arity())
 			{
 				throw IOException(TRACE_INFO,
 					"Error: do_store_single_atom: Maxiumum Link size is 330. "
