@@ -188,7 +188,7 @@ DONT_EXEC_LINK <- ORDERED_LINK
 // traversal.  The goal here is to simply know these variables, so that,
 // at the time of evaluation or execution, they are easily located.
 //
-// The variables are necessarily free: they to NOT have type
+// The variables are necessarily free: they do NOT have type
 // declarations or restrictions associated with them.  This is in sharp
 // contrast to ScopeLink, which binds variables by scoping them, and
 // then forcing type restrictions to them.
