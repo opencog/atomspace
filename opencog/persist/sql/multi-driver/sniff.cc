@@ -34,9 +34,9 @@ int atomCompare(Atom *a, Atom *b)
         return -1;
     }
 
-    if (a->getType() != b->getType())
+    if (a->get_type() != b->get_type())
     {
-        fprintf(stderr, "Error, type mis-match, a=%d b=%d\n", a->getType(), b->getType());
+        fprintf(stderr, "Error, type mis-match, a=%d b=%d\n", a->get_type(), b->get_type());
         rc --;
     }
     if (la->getArity() != lb->getArity())

@@ -63,7 +63,7 @@ std::string SchemeSmob::handle_to_string(const Handle& h, int indent)
 	if (h->isNode())
 	{
 		ret += "(";
-		ret += classserver().getTypeName(h->getType());
+		ret += classserver().getTypeName(h->get_type());
 		ret += " \"";
 		ret += h->get_name();
 		ret += "\"";
@@ -86,7 +86,7 @@ std::string SchemeSmob::handle_to_string(const Handle& h, int indent)
 	if (h->isLink())
 	{
 		ret += "(";
-		ret += classserver().getTypeName(h->getType());
+		ret += classserver().getTypeName(h->get_type());
 
 		// If there's a truth value, print it before the other atoms
 		TruthValuePtr tv(h->getTruthValue());

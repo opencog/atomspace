@@ -106,7 +106,7 @@ bool Link::operator==(const Atom& other) const
 
     // Rule out obvious mis-matches, based on the hash.
     if (get_hash() != other.get_hash()) return false;
-    if (getType() != other.getType()) return false;
+    if (get_type() != other.get_type()) return false;
 
     Arity sz = getArity();
     if (sz != other.getArity()) return false;
@@ -133,8 +133,8 @@ bool Link::operator<(const Atom& other) const
     // We get to here only if the hashes are equal.
     // Compare the contents directly, for this
     // (hopefully rare) case.
-    if (getType() != other.getType())
-        return getType() < other.getType();
+    if (get_type() != other.get_type())
+        return get_type() < other.get_type();
 
     const HandleSeq& outgoing = getOutgoingSet();
     const HandleSeq& other_outgoing = other.getOutgoingSet();
@@ -158,7 +158,7 @@ bool Link::operator<(const Atom& other) const
 ContentHash Link::compute_hash() const
 {
 	// 1<<44 - 377 is prime
-	ContentHash hsh = ((1UL<<44) - 377) * getType();
+	ContentHash hsh = ((1UL<<44) - 377) * get_type();
 	for (const Handle& h: _outgoing)
 	{
 		hsh += (hsh <<5) + h->get_hash(); // recursive!

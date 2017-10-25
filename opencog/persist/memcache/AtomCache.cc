@@ -77,7 +77,7 @@ void AtomCache::storeAtom(Atom *atom)
 	char valbuff[VBSIZE];
 
 	// Get the atom type.
-	Type t = atom->getType();
+	Type t = atom->get_type();
 	strcpy(p, "type");
 	int vlen = snprintf(valbuff, VBSIZE, "%d", t);
 

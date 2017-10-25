@@ -39,7 +39,7 @@ ImplicationScopeLink::ImplicationScopeLink(const HandleSeq& hseq, Type t)
 ImplicationScopeLink::ImplicationScopeLink(const Link &l)
 	: ScopeLink(l)
 {
-	Type t = l.getType();
+	Type t = l.get_type();
 	if (not classserver().isA(t, IMPLICATION_SCOPE_LINK))
 	{
 		const std::string& tname = classserver().getTypeName(t);

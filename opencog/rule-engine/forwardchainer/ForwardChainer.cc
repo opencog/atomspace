@@ -71,7 +71,7 @@ void ForwardChainer::init(const Handle& source,
 	HandleSeq init_sources;
 
 	// Accept set of initial sources wrapped in a SET_LINK.
-	if (source->getType() == SET_LINK) {
+	if (source->get_type() == SET_LINK) {
 		init_sources = source->getOutgoingSet();
 	} else {
 		init_sources.push_back(source);
@@ -348,7 +348,7 @@ UnorderedHandleSet ForwardChainer::apply_rule(const Rule& rule)
 	auto add_results = [&](AtomSpace& as) {
 		for (Handle& h : results)
 		{
-			Type t = h->getType();
+			Type t = h->get_type();
 			// If it's a List then add all the results. That kinda
 			// means you can't infer List itself, maybe something to
 			// look after.

@@ -67,7 +67,7 @@ EvidenceCountTruthValue::EvidenceCountTruthValue(EvidenceCountTruthValue const& 
 EvidenceCountTruthValue::EvidenceCountTruthValue(const ProtoAtomPtr& source)
        : TruthValue(EVIDENCE_COUNT_TRUTH_VALUE)
 {
-    if (source->getType() != EVIDENCE_COUNT_TRUTH_VALUE)
+    if (source->get_type() != EVIDENCE_COUNT_TRUTH_VALUE)
         throw RuntimeException(TRACE_INFO,
             "Source must be a EvidenceCountTruthValue");
 
@@ -120,7 +120,7 @@ TruthValuePtr EvidenceCountTruthValue::merge(const TruthValuePtr& other,
 	{
 		// Based on Section 5.10.2 (A heuristic revision rule for STV)
 		// of the PLN book
-		if (other->getType() != EVIDENCE_COUNT_TRUTH_VALUE)
+		if (other->get_type() != EVIDENCE_COUNT_TRUTH_VALUE)
 			throw RuntimeException(TRACE_INFO,
 			                       "Don't know how to merge %s into a "
 			                       "EvidenceCountTruthValue using the default style",

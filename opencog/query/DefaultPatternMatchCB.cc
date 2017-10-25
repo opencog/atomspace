@@ -221,7 +221,7 @@ bool DefaultPatternMatchCB::variable_match(const Handle& npat_h,
 	// accept the match. This allows any kind of node types to be
 	// explicitly bound as variables.  However, the type VariableNode
 	// gets special handling, below.
-	Type pattype = npat_h->getType();
+	Type pattype = npat_h->get_type();
 	if (VARIABLE_NODE != pattype and GLOB_NODE != pattype) return true;
 
 	// If the ungrounded term is a variable, then see if there
@@ -268,11 +268,11 @@ bool DefaultPatternMatchCB::link_match(const PatternTermPtr& ptm,
 
 	// Accept all ChoiceLink's by default! We will get another shot
 	// at it when the contents of the ChoiceLink are examined.
-	Type pattype = lpat->getType();
+	Type pattype = lpat->get_type();
 	if (CHOICE_LINK == pattype) return true;
 
 	// If types differ, no match
-	Type soltype = lsoln->getType();
+	Type soltype = lsoln->get_type();
 	if (pattype != soltype) return false;
 
 	// Reject mis-sized compares, unless the pattern has a glob in it.
@@ -317,7 +317,7 @@ bool DefaultPatternMatchCB::link_match(const PatternTermPtr& ptm,
 bool DefaultPatternMatchCB::post_link_match(const Handle& lpat,
                                             const Handle& lgnd)
 {
-	Type pattype = lpat->getType();
+	Type pattype = lpat->get_type();
 	if (_pat_bound_vars and _classserver.isA(pattype, SCOPE_LINK))
 	{
 		_pat_bound_vars = nullptr;
@@ -357,7 +357,7 @@ bool DefaultPatternMatchCB::post_link_match(const Handle& lpat,
 void DefaultPatternMatchCB::post_link_mismatch(const Handle& lpat,
                                                const Handle& lgnd)
 {
-	Type pattype = lpat->getType();
+	Type pattype = lpat->get_type();
 	if (_pat_bound_vars and _classserver.isA(pattype, SCOPE_LINK))
 	{
 		_pat_bound_vars = nullptr;
@@ -380,7 +380,7 @@ bool DefaultPatternMatchCB::is_self_ground(const Handle& ptrn,
                                            const HandleSet& varset,
                                            Quotation quotation)
 {
-	Type ptype = ptrn->getType();
+	Type ptype = ptrn->get_type();
 
 	// Unwrap quotations, so that they can be compared properly.
 	if (Quotation::is_quotation_type(ptype))
@@ -415,7 +415,7 @@ bool DefaultPatternMatchCB::is_self_ground(const Handle& ptrn,
 		for (const Handle& ch: pset)
 		{
 			const auto pr = term_gnds.find(ch);
-			if (pr != term_gnds.end() or CHOICE_LINK == ch->getType())
+			if (pr != term_gnds.end() or CHOICE_LINK == ch->get_type())
 			{
 				if (is_self_ground(ch, grnd, term_gnds, varset, quotation))
 					return true;
@@ -441,7 +441,7 @@ bool DefaultPatternMatchCB::is_self_ground(const Handle& ptrn,
 	// ScopeLink that happen to have exactly the same name as a bound
 	// variable in the pattern will hide/obscure the variable in the
 	// pattern. Or rather: here is where we hide it.  Tedious.
-	if (_classserver.isA(grnd->getType(), SCOPE_LINK))
+	if (_classserver.isA(grnd->get_type(), SCOPE_LINK))
 	{
 		// Step 1: Look to see if the scope link binds any of the
 		// variables that the pattern also binds.
@@ -506,11 +506,11 @@ bool DefaultPatternMatchCB::clause_match(const Handle& ptrn,
 
 	// This if-statement handles the case given in the callback description.
 	// It is tested by EvaluationUTest.
-	if (ptrn->getType() == VARIABLE_NODE and
-	    grnd->getType() == EVALUATION_LINK and
+	if (ptrn->get_type() == VARIABLE_NODE and
+	    grnd->get_type() == EVALUATION_LINK and
 	    0 < grnd->getArity() and
-	    (grnd->getOutgoingAtom(0)->getType() == GROUNDED_PREDICATE_NODE or
-	    grnd->getOutgoingAtom(0)->getType() == DEFINED_PREDICATE_NODE))
+	    (grnd->getOutgoingAtom(0)->get_type() == GROUNDED_PREDICATE_NODE or
+	    grnd->getOutgoingAtom(0)->get_type() == DEFINED_PREDICATE_NODE))
 	{
 		DO_LOG({LAZY_LOG_FINE << "Evaluate the grounding clause=" << std::endl
 		              << grnd->to_short_string() << std::endl;})
@@ -619,7 +619,7 @@ bool DefaultPatternMatchCB::eval_term(const Handle& virt,
 	//
 	// However, we also want to have a side-effect: the result of
 	// executing one of these things should be placed into the atomspace.
-	Type vty = virt->getType();
+	Type vty = virt->get_type();
 	if (EXECUTION_OUTPUT_LINK == vty or
 	    DEFINED_SCHEMA_NODE == vty or
 	    _classserver.isA(vty, FUNCTION_LINK))
@@ -677,7 +677,7 @@ bool DefaultPatternMatchCB::eval_sentence(const Handle& top,
 	DO_LOG({LAZY_LOG_FINE << "Enter eval_sentence CB with top=" << std::endl
 	              << top->to_short_string() << std::endl;})
 
-	if (top->getType() == VARIABLE_NODE)
+	if (top->get_type() == VARIABLE_NODE)
 	{
 		return eval_term(top, gnds);
 	}
@@ -692,7 +692,7 @@ bool DefaultPatternMatchCB::eval_sentence(const Handle& top,
 		throw InvalidParamException(TRACE_INFO,
 		   "Expecting logical connective to have at least one child!");
 
-	Type term_type = top->getType();
+	Type term_type = top->get_type();
 	if (OR_LINK == term_type or SEQUENTIAL_OR_LINK == term_type)
 	{
 		for (const Handle& h : oset)

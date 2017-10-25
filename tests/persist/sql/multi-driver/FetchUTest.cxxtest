@@ -176,7 +176,7 @@ void FetchUTest::atomCompare(AtomPtr a, AtomPtr b, std::string where)
 
 	if (nullptr == b) return;
 
-	TSM_ASSERT_EQUALS("Type mismatch", a->getType(), b->getType());
+	TSM_ASSERT_EQUALS("Type mismatch", a->get_type(), b->get_type());
 
 	NodePtr na(NodeCast(a));
 	NodePtr nb(NodeCast(b));

@@ -63,7 +63,7 @@ FuzzyTruthValue::FuzzyTruthValue(FuzzyTruthValue const& source)
 FuzzyTruthValue::FuzzyTruthValue(const ProtoAtomPtr& source)
     : TruthValue(FUZZY_TRUTH_VALUE)
 {
-    if (source->getType() != FUZZY_TRUTH_VALUE)
+    if (source->get_type() != FUZZY_TRUTH_VALUE)
         throw RuntimeException(TRACE_INFO,
             "Source must be a FuzzyTruthValue");
 
@@ -92,7 +92,7 @@ confidence_t FuzzyTruthValue::getConfidence() const
 TruthValuePtr FuzzyTruthValue::merge(const TruthValuePtr& other,
                                      const MergeCtrl& mc) const
 {
-    if (other->getType() != SIMPLE_TRUTH_VALUE) {
+    if (other->get_type() != SIMPLE_TRUTH_VALUE) {
         throw RuntimeException(TRACE_INFO,
            "Don't know how to merge %s into a FuzzyTruthValue",
            typeid(*other).name());

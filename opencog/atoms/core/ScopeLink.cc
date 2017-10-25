@@ -80,7 +80,7 @@ ScopeLink::ScopeLink(const HandleSeq& oset, Type t)
 ScopeLink::ScopeLink(const Link &l)
 	: Link(l)
 {
-	if (skip_init(l.getType())) return;
+	if (skip_init(l.get_type())) return;
 	init();
 }
 
@@ -95,7 +95,7 @@ void ScopeLink::extract_variables(const HandleSeq& oset)
 		throw SyntaxException(TRACE_INFO,
 			"Expecting a non-empty outgoing set.");
 
-	Type decls = oset.at(0)->getType();
+	Type decls = oset.at(0)->get_type();
 
 	// If we trip over an unquote immediately, then we can assume that
 	// the whole links appears in some quote context. This cannot be
@@ -117,7 +117,7 @@ void ScopeLink::extract_variables(const HandleSeq& oset)
 	{
 		_body = oset[0];
 
-		if (classserver().isA(_body->getType(), LAMBDA_LINK))
+		if (classserver().isA(_body->get_type(), LAMBDA_LINK))
 		{
 			LambdaLinkPtr lam(LambdaLinkCast(_body));
 			_varlist = lam->get_variables();
@@ -165,7 +165,7 @@ void ScopeLink::init_scoped_variables(const Handle& hvar)
 bool ScopeLink::is_equal(const Handle& other, bool silent) const
 {
 	if (other == this) return true;
-	if (other->getType() != _type) return false;
+	if (other->get_type() != _type) return false;
 
 	ScopeLinkPtr scother(ScopeLinkCast(other));
 
@@ -243,7 +243,7 @@ bool ScopeLink::is_equal(const Handle& other, bool silent) const
 //
 ContentHash ScopeLink::compute_hash() const
 {
-	ContentHash hsh = ((1UL<<35) - 325) * getType();
+	ContentHash hsh = ((1UL<<35) - 325) * get_type();
 	hsh += (hsh <<5) + ((1UL<<47) - 649) * _varlist.varseq.size();
 
 	// It is not safe to mix here, since the sort order of the
@@ -288,7 +288,7 @@ ContentHash ScopeLink::term_hash(const Handle& h,
                                  UnorderedHandleSet& bound_vars,
                                  Quotation quotation) const
 {
-	Type t = h->getType();
+	Type t = h->get_type();
 	if ((VARIABLE_NODE == t or GLOB_NODE == t) and
 	    quotation.is_unquoted() and
 	    0 != _varlist.varset.count(h) and
@@ -379,7 +379,7 @@ Handle ScopeLink::alpha_conversion(HandleSeq vars) const
 		hs.push_back(_varlist.substitute_nocheck(getOutgoingAtom(i), vars));
 
 	// Create the alpha converted scope link
-	return createLink(hs, getType());
+	return createLink(hs, get_type());
 }
 
 /* ================================================================= */

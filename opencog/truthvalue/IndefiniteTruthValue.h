@@ -120,7 +120,7 @@ public:
     // clone method
     static IndefiniteTruthValuePtr createITV(TruthValuePtr tv)
     {
-        if (tv->getType() != INDEFINITE_TRUTH_VALUE)
+        if (tv->get_type() != INDEFINITE_TRUTH_VALUE)
             throw RuntimeException(TRACE_INFO, "Cannot clone non-indefinite TV");
         return std::make_shared<IndefiniteTruthValue>(
             static_cast<const IndefiniteTruthValue&>(*tv));

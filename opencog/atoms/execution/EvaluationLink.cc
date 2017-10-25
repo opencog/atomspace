@@ -70,7 +70,7 @@ EvaluationLink::EvaluationLink(const HandleSeq& oset, Type t)
 	//
 /********
 	if (2 != oset.size())
-	   // or (LIST_LINK != oset[1]->getType()))
+	   // or (LIST_LINK != oset[1]->get_type()))
 	{
 		throw RuntimeException(TRACE_INFO,
 		    "EvaluationLink must have predicate and args!");
@@ -81,7 +81,7 @@ EvaluationLink::EvaluationLink(const HandleSeq& oset, Type t)
 EvaluationLink::EvaluationLink(const Handle& schema, const Handle& args)
     : FreeLink(EVALUATION_LINK, schema, args)
 {
-	if (LIST_LINK != args->getType()) {
+	if (LIST_LINK != args->get_type()) {
 		throw RuntimeException(TRACE_INFO,
 		    "EvaluationLink must have args in a ListLink!");
 	}
@@ -90,7 +90,7 @@ EvaluationLink::EvaluationLink(const Handle& schema, const Handle& args)
 EvaluationLink::EvaluationLink(const Link& l)
     : FreeLink(l)
 {
-	Type tscope = l.getType();
+	Type tscope = l.get_type();
 	if (EVALUATION_LINK != tscope)
 		throw RuntimeException(TRACE_INFO,
 		    "Expecting an EvaluationLink");
@@ -100,7 +100,7 @@ EvaluationLink::EvaluationLink(const Link& l)
 // if that set contains a single number, then unwrap it.
 static NumberNodePtr unwrap_set(Handle h)
 {
-	if (SET_LINK == h->getType())
+	if (SET_LINK == h->get_type())
 	{
 		if (1 != h->getArity())
 			throw SyntaxException(TRACE_INFO,
@@ -188,14 +188,14 @@ static bool is_evaluatable_sat(const Handle& satl)
 
 static bool is_tail_rec(const Handle& thish, const Handle& tail)
 {
-	if (DEFINED_PREDICATE_NODE != tail->getType())
+	if (DEFINED_PREDICATE_NODE != tail->get_type())
 		return false;
 
 	Handle defn(DefineLink::get_definition(tail));
 	if (defn == thish)
 		return true;
 
-	if (SATISFACTION_LINK != defn->getType())
+	if (SATISFACTION_LINK != defn->get_type())
 		return false;
 
 	if (not is_evaluatable_sat(defn))
@@ -258,7 +258,7 @@ TruthValuePtr EvaluationLink::do_eval_scratch(AtomSpace* as,
                                               AtomSpace* scratch,
                                               bool silent)
 {
-	Type t = evelnk->getType();
+	Type t = evelnk->get_type();
 	if (EVALUATION_LINK == t)
 	{
 		const HandleSeq& sna(evelnk->getOutgoingSet());
@@ -269,7 +269,7 @@ TruthValuePtr EvaluationLink::do_eval_scratch(AtomSpace* as,
 				sna.size());
 
 		// An ungrounded predicate evaluates to itself
-		if (sna.at(0)->getType() == PREDICATE_NODE)
+		if (sna.at(0)->get_type() == PREDICATE_NODE)
 			return evelnk->getTruthValue();
 
 		// The arguments may need to be executed...
@@ -413,7 +413,7 @@ TruthValuePtr EvaluationLink::do_eval_scratch(AtomSpace* as,
 		if (0 < evelnk->getArity())
 		{
 			const Handle& term = evelnk->getOutgoingAtom(0);
-			if (classserver().isA(term->getType(), EVALUATABLE_LINK))
+			if (classserver().isA(term->get_type(), EVALUATABLE_LINK))
 			{
 				EvaluationLink::do_eval_scratch(as, term, scratch, silent);
 			}
@@ -535,17 +535,17 @@ TruthValuePtr EvaluationLink::do_evaluate(AtomSpace* as,
                                           const Handle& cargs,
                                           bool silent)
 {
-	Type pntype = pn->getType();
+	Type pntype = pn->get_type();
 	if (DEFINED_PREDICATE_NODE == pntype)
 	{
 		Handle defn = DefineLink::get_definition(pn);
-		Type dtype = defn->getType();
+		Type dtype = defn->get_type();
 
 		// Allow recursive definitions. This can be handy.
 		while (DEFINED_PREDICATE_NODE == dtype)
 		{
 			defn = DefineLink::get_definition(defn);
-			dtype = defn->getType();
+			dtype = defn->get_type();
 		}
 
 		// If its not a LambdaLink, then I don't know what to do...
@@ -557,7 +557,7 @@ TruthValuePtr EvaluationLink::do_evaluate(AtomSpace* as,
 		// Treat it as if it were a PutLink -- perform the
 		// beta-reduction, and evaluate the result.
 		LambdaLinkPtr lam(LambdaLinkCast(defn));
-		Type atype = cargs->getType();
+		Type atype = cargs->get_type();
 		Handle reduct = lam->substitute(atype == LIST_LINK ?
 		                                cargs->getOutgoingSet()
 		                                : HandleSeq(1, cargs));

@@ -26,7 +26,7 @@ using namespace opencog;
 
 bool FloatValue::operator==(const ProtoAtom& other) const
 {
-	if (FLOAT_VALUE != other.getType()) return false;
+	if (FLOAT_VALUE != other.get_type()) return false;
 
    const FloatValue* fov = (const FloatValue*) &other;
 

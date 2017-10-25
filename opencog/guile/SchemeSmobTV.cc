@@ -130,7 +130,7 @@ std::string SchemeSmob::tv_to_string(const TruthValuePtr& tv)
 {
 #define BUFLEN 120
 	char buff[BUFLEN];
-	Type tvt = tv->getType();
+	Type tvt = tv->get_type();
 
 	// Pretend they're floats, not doubles, so print with 8 digits
 	std::string ret = "";
@@ -275,7 +275,7 @@ SCM SchemeSmob::ss_tv_p (SCM s)
 	ProtoAtomPtr pa(scm_to_protom(s));
 	if (nullptr == pa) return SCM_BOOL_F;
 
-	if (classserver().isA(pa->getType(), TRUTH_VALUE))
+	if (classserver().isA(pa->get_type(), TRUTH_VALUE))
 		return SCM_BOOL_T;
 
 	scm_remember_upto_here_1(s);
@@ -290,7 +290,7 @@ inline SCM SchemeSmob::tv_p (SCM s, Type wanted)
 	ProtoAtomPtr pa(scm_to_protom(s));
 	if (nullptr == pa) return SCM_BOOL_F;
 
-	if (wanted == pa->getType()) return SCM_BOOL_T;
+	if (wanted == pa->get_type()) return SCM_BOOL_T;
 	scm_remember_upto_here_1(s);
 	return SCM_BOOL_F;
 }
@@ -352,7 +352,7 @@ TruthValuePtr SchemeSmob::verify_tv(SCM stv, const char *subrname, int pos)
 SCM SchemeSmob::ss_tv_get_value (SCM s)
 {
 	TruthValuePtr tv = verify_tv(s, "cog-tv->alist");
-	Type tvt = tv->getType();
+	Type tvt = tv->get_type();
 
 	if (SIMPLE_TRUTH_VALUE == tvt)
 	{

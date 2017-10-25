@@ -375,7 +375,7 @@ public:
 
     void testGetType() {
         for (int i = 0; i < NUM_TVS; i++) {
-            TS_ASSERT(tvs[i]->getType() == INDEFINITE_TRUTH_VALUE);
+            TS_ASSERT(tvs[i]->get_type() == INDEFINITE_TRUTH_VALUE);
         }
     }
 

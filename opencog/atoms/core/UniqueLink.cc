@@ -84,7 +84,7 @@ UniqueLink::UniqueLink(const Link &l)
 	: FreeLink(l)
 {
 	// Type must be as expected
-	Type type = l.getType();
+	Type type = l.get_type();
 	if (not classserver().isA(type, UNIQUE_LINK))
 	{
 		const std::string& tname = classserver().getTypeName(type);

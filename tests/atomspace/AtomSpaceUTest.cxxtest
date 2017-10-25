@@ -77,17 +77,17 @@ Handle addRealAtom(AtomSpace& as, AtomPtr atom,
     Handle result;
     NodePtr node(NodeCast(atom));
     if (node) {
-        result = as.get_handle(node->getType(), node->get_name());
+        result = as.get_handle(node->get_type(), node->get_name());
         if (result == Handle::UNDEFINED) {
-            result = as.add_node(node->getType(), node->get_name());
+            result = as.add_node(node->get_type(), node->get_name());
             result->setTruthValue(newTV);
             return result;
         }
     } else {
         LinkPtr link(LinkCast(atom));
-        result = as.get_handle(link->getType(), link->getOutgoingSet());
+        result = as.get_handle(link->get_type(), link->getOutgoingSet());
         if (result == Handle::UNDEFINED) {
-            result = as.add_link(link->getType(), link->getOutgoingSet());
+            result = as.add_link(link->get_type(), link->getOutgoingSet());
             result->setTruthValue(newTV);
             return result;
         }

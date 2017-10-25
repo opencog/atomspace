@@ -39,13 +39,13 @@ void TypedAtomLink::init()
 	UniqueLink::init(false);
 
 	// Type-check.
-	Type stype = _outgoing[0]->getType();
+	Type stype = _outgoing[0]->get_type();
 	if (VARIABLE_NODE == stype or
 	    GLOB_NODE == stype)
 		throw SyntaxException(TRACE_INFO,
 			"You are not allowed to globally type a variable");
 
-	Type dtype = _outgoing[1]->getType();
+	Type dtype = _outgoing[1]->get_type();
 	if (not classserver().isA(dtype, TYPE_NODE) and
 	    DEFINED_TYPE_NODE != dtype and
 	    TYPE_CHOICE != dtype and

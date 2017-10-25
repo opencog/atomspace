@@ -81,7 +81,7 @@ bool Node::operator==(const Atom& other) const
     // Rule out obvious mis-matches, based on the hash.
     if (get_hash() != other.get_hash()) return false;
 
-    if (getType() != other.getType()) return false;
+    if (get_type() != other.get_type()) return false;
     return get_name() == other.get_name();
 }
 
@@ -96,10 +96,10 @@ bool Node::operator<(const Atom& other) const
     // We get to here only if the hashes are equal.
     // Compare the contents directly, for this
     // (hopefully rare) case.
-    if (getType() == other.getType())
+    if (get_type() == other.get_type())
         return get_name() < other.get_name();
     else
-        return getType() < other.getType();
+        return get_type() < other.get_type();
 }
 
 ContentHash Node::compute_hash() const
@@ -107,7 +107,7 @@ ContentHash Node::compute_hash() const
 	ContentHash hsh = std::hash<std::string>()(get_name());
 
 	// 1<<43 - 369 is a prime number.
-	hsh += (hsh<<5) + ((1UL<<43)-369) * getType();
+	hsh += (hsh<<5) + ((1UL<<43)-369) * get_type();
 
 	// Nodes will never have the MSB set.
 	ContentHash mask = ~(((ContentHash) 1UL) << (8*sizeof(ContentHash) - 1));

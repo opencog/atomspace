@@ -293,7 +293,7 @@ static SCM scm_from_string(const std::string& str)
 SCM SchemeSmob::ss_value_to_list (SCM svalue)
 {
 	ProtoAtomPtr pa(verify_protom(svalue, "cog-value->list"));
-	Type t = pa->getType();
+	Type t = pa->get_type();
 
 	if (FLOAT_VALUE == t)
 	{
@@ -332,7 +332,7 @@ SCM SchemeSmob::ss_value_ref (SCM svalue, SCM sindex)
 {
 	ProtoAtomPtr pa(verify_protom(svalue, "cog-value-ref"));
    size_t index = verify_size(sindex, "cog-value-ref", 2);
-	Type t = pa->getType();
+	Type t = pa->get_type();
 
 	if (FLOAT_VALUE == t)
 	{

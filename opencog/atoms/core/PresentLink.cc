@@ -74,7 +74,7 @@ PresentLink::PresentLink(const Link& l)
 	: UnorderedLink(l)
 {
 	// Type must be as expected
-	Type tscope = l.getType();
+	Type tscope = l.get_type();
 	if (not classserver().isA(tscope, PRESENT_LINK))
 	{
 		const std::string& tname = classserver().getTypeName(tscope);

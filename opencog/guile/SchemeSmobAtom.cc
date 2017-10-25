@@ -79,7 +79,7 @@ SCM SchemeSmob::ss_name (SCM satom)
 SCM SchemeSmob::ss_type (SCM satom)
 {
 	Handle h = verify_handle(satom, "cog-type");
-	Type t = h->getType();
+	Type t = h->get_type();
 	const std::string &tname = classserver().getTypeName(t);
 	SCM str = scm_from_utf8_string(tname.c_str());
 	SCM sym = scm_string_to_symbol(str);
@@ -125,7 +125,7 @@ SCM SchemeSmob::ss_inc_count (SCM satom, SCM scnt)
 	double cnt = verify_real(scnt, "cog-inc-count!", 2);
 
 	TruthValuePtr tv = h->getTruthValue();
-	if (COUNT_TRUTH_VALUE == tv->getType())
+	if (COUNT_TRUTH_VALUE == tv->get_type())
 	{
 		cnt += tv->getCount();
 	}
@@ -213,7 +213,7 @@ SCM SchemeSmob::ss_outgoing_by_type (SCM satom, SCM stype)
 	SCM list = SCM_EOL;
 	for (int i = oset.size()-1; i >= 0; i--)
 	{
-		if (oset[i]->getType() != t) continue;
+		if (oset[i]->get_type() != t) continue;
 		SCM smob = handle_to_scm(oset[i]);
 		list = scm_cons (smob, list);
 	}

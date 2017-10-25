@@ -67,7 +67,7 @@ public:
      * or any of the values/truthvalues.
      */
     Node(const Node &n)
-        : Atom(n.getType())
+        : Atom(n.get_type())
     {
         init(n._name);
     }

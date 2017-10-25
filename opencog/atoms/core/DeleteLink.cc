@@ -54,7 +54,7 @@ Handle DeleteLink::execute(AtomSpace * as) const
 	const HandleSeq& oset = _outgoing;
 	for (const Handle& h : oset)
 	{
-		Type t = h->getType();
+		Type t = h->get_type();
 		if (VARIABLE_NODE != t)
 			as->removeAtom(h, true);
 	}
@@ -72,7 +72,7 @@ DeleteLink::DeleteLink(const Link &l)
 	: FreeLink(l)
 {
 	// Type must be as expected
-	Type tscope = l.getType();
+	Type tscope = l.get_type();
 	if (not classserver().isA(tscope, DELETE_LINK))
 	{
 		const std::string& tname = classserver().getTypeName(tscope);

@@ -54,7 +54,7 @@ AttentionValue::AttentionValue(const AttentionValue& source) :
 AttentionValue::AttentionValue(const ProtoAtomPtr& source) :
 	FloatValue(ATTENTION_VALUE)
 {
-	if (source->getType() != ATTENTION_VALUE)
+	if (source->get_type() != ATTENTION_VALUE)
 		throw RuntimeException(TRACE_INFO,
 			"Source must be an AttentionValue");
 

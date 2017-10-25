@@ -175,7 +175,7 @@ double UREConfigReader::fetch_num_param(const string& schema_name,
 	HandleSeq outputs = fetch_execution_outputs(param_schema, input, NUMBER_NODE);
 	{
 		string input_name = input->get_name();
-		Type input_type = input->getType();
+		Type input_type = input->get_type();
 		string input_str =
 			classserver().getTypeName(input_type) + " \"" + input_name + "\"";
 		if (outputs.size() == 0) {

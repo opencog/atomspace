@@ -394,7 +394,7 @@ public:
 
     virtual bool operator==(const ProtoAtom& other) const
     {
-        if (_type != other.getType()) return false;
+        if (_type != other.get_type()) return false;
         return operator==(dynamic_cast<const Atom&>(other));
     }
 

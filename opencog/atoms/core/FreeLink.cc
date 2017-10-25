@@ -68,7 +68,7 @@ FreeLink::FreeLink(Type t, const Handle& a, const Handle& b)
 FreeLink::FreeLink(const Link& l)
     : Link(l)
 {
-	Type tscope = l.getType();
+	Type tscope = l.get_type();
 	if (not classserver().isA(tscope, FREE_LINK))
 		throw InvalidParamException(TRACE_INFO, "Expecting a FreeLink");
 

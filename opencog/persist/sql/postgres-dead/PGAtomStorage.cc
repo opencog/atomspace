@@ -981,7 +981,7 @@ void PGAtomStorage::add_truth_value_columns(Database& database,
     TruthValuePtr truth_ptr(atom->getTruthValue());
     TruthValueType truth_type = NULL_TRUTH_VALUE;
     if (truth_ptr)
-        truth_type = truth_ptr->getType();
+        truth_type = truth_ptr->get_type();
     database.add_column_unsigned("tv_type", truth_type);
 
     // Store the mean, confidence and count according to the type.
@@ -1037,7 +1037,7 @@ std::string PGAtomStorage::build_atom_insert(Database& database,
         database.add_column_bigint("space", 0);
 
     // Store the atom type mapped to the database type.
-    Type atom_type = atom->getType();
+    Type atom_type = atom->get_type();
     int database_type = _storing_type_map[atom_type];
     database.add_column_unsigned("type", database_type);
 
@@ -1194,7 +1194,7 @@ void PGAtomStorage::do_store_atom_single(Database& database,
         if (not database.has_results() and _store_edges and atom->isLink())
         {
             // Get a new diffentiator for this atom's uuid.
-            int differentiator = load_max_hash_differentiator(atom->getType(), 
+            int differentiator = load_max_hash_differentiator(atom->get_type(), 
                     atom->getOutgoingSet());
 
             // Try again with an incremented differentiator. We'll return
@@ -1668,7 +1668,7 @@ bool PGAtomStorage::outgoing_matches_uuids(const HandleSeq& outgoing,
  */
 TruthValuePtr PGAtomStorage::getLink(const Handle& h)
 {
-    Type type = h->getType();
+    Type type = h->get_type();
     const HandleSeq& outgoing = h->getOutgoingSet();
     Database database(this);
     database.uuid = TLB::INVALID_UUID;

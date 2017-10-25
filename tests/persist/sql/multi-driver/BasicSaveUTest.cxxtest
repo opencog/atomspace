@@ -205,7 +205,7 @@ static void atomCompare(AtomPtr a, AtomPtr b, const char* where)
     TSM_ASSERT("No atom found", b != NULL);
     if (NULL == b) return;
 
-    TSM_ASSERT_EQUALS("Type mismatch", a->getType(), b->getType());
+    TSM_ASSERT_EQUALS("Type mismatch", a->get_type(), b->get_type());
 
     NodePtr na(NodeCast(a));
     NodePtr nb(NodeCast(b));

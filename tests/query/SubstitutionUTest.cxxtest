@@ -89,7 +89,7 @@ void SubstitutionUTest::test_simple_substitution(void)
 
 	printf("Variable list is %s\n", hvarlist->to_string().c_str());
 
-	Type vt = hvarlist->getType();
+	Type vt = hvarlist->get_type();
 	TSM_ASSERT("Didn't get the variable listtype", vt == VARIABLE_LIST);
 
 	VariableListPtr vlp(VariableListCast(hvarlist));
@@ -121,7 +121,7 @@ void SubstitutionUTest::test_free_substitution(void)
 
 	printf("Variable list is %s\n", hvarlist->to_string().c_str());
 
-	Type vt = hvarlist->getType();
+	Type vt = hvarlist->get_type();
 	TSM_ASSERT("Didn't get the variable listtype", vt == VARIABLE_LIST);
 
 	VariableListPtr vlp(VariableListCast(hvarlist));
@@ -153,7 +153,7 @@ void SubstitutionUTest::test_typed_substitution(void)
 
 	printf("Variable list is %s\n", hvarlist->to_string().c_str());
 
-	Type vt = hvarlist->getType();
+	Type vt = hvarlist->get_type();
 	TSM_ASSERT("Didn't get the variable listtype", vt == VARIABLE_LIST);
 
 	VariableListPtr vlp(VariableListCast(hvarlist));

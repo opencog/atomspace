@@ -153,7 +153,7 @@ InitiateSearchCB::find_starter(const Handle& h, size_t& depth,
                                      Handle& startrm, size_t& width)
 {
 	// If its a node, then we are done.
-	Type t = h->getType();
+	Type t = h->get_type();
 	if (_classserver.isNode(t))
 	{
 		if (VARIABLE_NODE != t and GLOB_NODE != t)
@@ -175,7 +175,7 @@ InitiateSearchCB::find_starter_recursive(const Handle& h, size_t& depth,
 {
 	// If its a node, then we are done. Don't modify either depth or
 	// start.
-	Type t = h->getType();
+	Type t = h->get_type();
 	if (_classserver.isNode(t))
 	{
 		if (VARIABLE_NODE != t and GLOB_NODE != t)
@@ -206,7 +206,7 @@ InitiateSearchCB::find_starter_recursive(const Handle& h, size_t& depth,
 		Handle sbr(h);
 
 		// Blow past the QuoteLinks, since they just screw up the search start.
-		if (Quotation::is_quotation_type(hunt->getType()))
+		if (Quotation::is_quotation_type(hunt->get_type()))
 			hunt = hunt->getOutgoingAtom(0);
 
 		Handle s(find_starter_recursive(hunt, brdepth, sbr, brwid));
@@ -551,7 +551,7 @@ void InitiateSearchCB::find_rarest(const Handle& clause,
                                    size_t& count,
                                    Quotation quotation)
 {
-	Type t = clause->getType();
+	Type t = clause->get_type();
 
 	// Base case
 	if (quotation.is_unquoted() and (CHOICE_LINK == t)) return;
@@ -623,7 +623,7 @@ bool InitiateSearchCB::link_type_search(PatternMatchEngine *pme)
 	              << _starter_term->to_string();})
 
 	// Get type of the rarest link
-	Type ptype = _starter_term->getType();
+	Type ptype = _starter_term->get_type();
 
 	HandleSeq handle_set;
 	_as->get_handles_by_type(handle_set, ptype);
@@ -871,7 +871,7 @@ void InitiateSearchCB::jit_analyze(PatternMatchEngine* pme)
 			// Extract the variables in the definition.
 			// Either they are given in a LambdaLink, or, if absent,
 			// we just hunt down and bind all of them.
-			if (_classserver.isA(LAMBDA_LINK, defn->getType()))
+			if (_classserver.isA(LAMBDA_LINK, defn->get_type()))
 			{
 				LambdaLinkPtr lam = LambdaLinkCast(defn);
 				vset.extend(lam->get_variables());

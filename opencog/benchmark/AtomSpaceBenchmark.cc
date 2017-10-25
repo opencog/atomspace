@@ -96,7 +96,7 @@ size_t AtomSpaceBenchmark::estimateOfAtomSize(Handle h)
     size_t total = 0;
     if (h->getTruthValue() != TruthValue::DEFAULT_TV())
     {
-        Type tvt = h->getTruthValue()->getType();
+        Type tvt = h->getTruthValue()->get_type();
         if (tvt == SIMPLE_TRUTH_VALUE)
             total += sizeof(SimpleTruthValue);
         else
@@ -1055,7 +1055,7 @@ timepair_t AtomSpaceBenchmark::bm_getType()
         // summing prevents the optimizer from optimizing away.
         int sum = 0;
         for (unsigned int i=0; i<Nclock; i++)
-            sum += hs[i]->getType();
+            sum += hs[i]->get_type();
         clock_t time_taken = clock() - t_begin;
         global += sum;
         return timepair_t(time_taken,0);
@@ -1274,7 +1274,7 @@ timepair_t AtomSpaceBenchmark::bm_pointerCast()
         // We want to measure how long it takes to perform a cast.
         // To avoid the optimizer from playing tricks, we hav to do
         // something with the resulting pointer.  We already know that
-        // getType() is very fast -- a method call, so we treat that as
+        // get_type() is very fast -- a method call, so we treat that as
         // a lind-of no-op.
         int sum = 0;
         clock_t t_begin = clock();
@@ -1284,11 +1284,11 @@ timepair_t AtomSpaceBenchmark::bm_pointerCast()
 #ifdef MEASURE_LINKS
             LinkPtr l(LinkCast(hs[i]));
             if (l)
-               sum += l->getType();
+               sum += l->get_type();
 #else
             NodePtr n(NodeCast(hs[i]));
             if (n)
-               sum += n->getType();
+               sum += n->get_type();
 #endif
         }
         clock_t time_taken = clock() - t_begin;

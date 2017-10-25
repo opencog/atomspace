@@ -140,7 +140,7 @@ IndefiniteTruthValue::IndefiniteTruthValue(IndefiniteTruthValue const& source)
 IndefiniteTruthValue::IndefiniteTruthValue(const ProtoAtomPtr& source)
        : TruthValue(INDEFINITE_TRUTH_VALUE)
 {
-    if (source->getType() != INDEFINITE_TRUTH_VALUE)
+    if (source->get_type() != INDEFINITE_TRUTH_VALUE)
         throw RuntimeException(TRACE_INFO,
             "Source must be a IndefiniteTruthValue");
 

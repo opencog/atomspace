@@ -120,7 +120,7 @@ public:
      * or any of the values or truth values.
      */
     Link(const Link &l)
-        : Atom(l.getType())
+        : Atom(l.get_type())
     {
         init(l.getOutgoingSet());
     }

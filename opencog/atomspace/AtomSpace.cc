@@ -151,12 +151,12 @@ bool AtomSpace::compare_atomspaces(const AtomSpace& space_first,
         Handle atom_second;
         if (atom_first->isNode())
         {
-            atom_second = table_second.getHandle(atom_first->getType(),
+            atom_second = table_second.getHandle(atom_first->get_type(),
                         atom_first->get_name());
         }
         else if (atom_first->isLink())
         {
-            atom_second =  table_second.getHandle(atom_first->getType(),
+            atom_second =  table_second.getHandle(atom_first->get_type(),
                         atom_first->getOutgoingSet());
         }
         else
@@ -346,11 +346,11 @@ Handle AtomSpace::fetch_atom(const Handle& h)
     // with your favorite algo.
     Handle hv;
     if (h->isNode()) {
-        hv = _backing_store->getNode(h->getType(),
+        hv = _backing_store->getNode(h->get_type(),
                                      h->get_name().c_str());
     }
     else if (h->isLink()) {
-        hv = _backing_store->getLink(h->getType(),
+        hv = _backing_store->getLink(h->get_type(),
                                      h->getOutgoingSet());
     }
 

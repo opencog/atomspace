@@ -719,7 +719,7 @@ void SQLAtomStorage::storeValuation(const Handle& key,
 	STMT("key", kidbuff);
 	STMT("atom", aidbuff);
 
-	Type vtype = pap->getType();
+	Type vtype = pap->get_type();
 	STMTI("type", storing_typemap[vtype]);
 
 	if (classserver().isA(vtype, FLOAT_VALUE))
@@ -778,7 +778,7 @@ SQLAtomStorage::VUID SQLAtomStorage::storeValue(const ProtoAtomPtr& pap)
 	coda = ");";
 	STMT("vuid", std::to_string(vuid));
 
-	Type vtype = pap->getType();
+	Type vtype = pap->get_type();
 	STMTI("type", storing_typemap[vtype]);
 
 	if (classserver().isA(vtype, FLOAT_VALUE))
@@ -1035,11 +1035,11 @@ UUID SQLAtomStorage::check_uuid(const Handle& h)
 	Handle dbh;
 	if (h->isNode())
 	{
-		dbh = doGetNode(h->getType(), h->get_name().c_str());
+		dbh = doGetNode(h->get_type(), h->get_name().c_str());
 	}
 	else
 	{
-		dbh = doGetLink(h->getType(), h->getOutgoingSet());
+		dbh = doGetLink(h->get_type(), h->getOutgoingSet());
 	}
 	// If it was found in the database, then the TLB got updated.
 	if (dbh) return _tlbuf.getUUID(h);
@@ -1374,7 +1374,7 @@ void SQLAtomStorage::do_store_single_atom(const Handle& h, int aheight)
 	STMT("space", uuidbuff);
 
 	// Store the atom UUID
-	Type t = h->getType();
+	Type t = h->get_type();
 	int dbtype = storing_typemap[t];
 	STMTI("type", dbtype);
 

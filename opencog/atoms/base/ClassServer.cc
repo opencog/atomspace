@@ -200,7 +200,7 @@ ClassServer::AtomFactory* ClassServer::getFactory(Type t)
 Handle ClassServer::factory(const Handle& h)
 {
 	// If there is a factory, then use it.
-	AtomFactory* fact = getFactory(h->getType());
+	AtomFactory* fact = getFactory(h->get_type());
 	if (fact)
 		return (*fact)(h);
 

@@ -131,7 +131,7 @@ bool PatternMatchEngine::variable_compare(const Handle& hp,
 	DO_LOG({LAZY_LOG_FINE << "Found grounding of variable:";})
 	logmsg("$$ variable:", hp);
 	logmsg("$$ ground term:", hg);
-	if (hp->getType() != GLOB_NODE) var_grounding[hp] = hg;
+	if (hp->get_type() != GLOB_NODE) var_grounding[hp] = hg;
 	return true;
 }
 
@@ -626,7 +626,7 @@ bool PatternMatchEngine::clause_compare(const PatternTermPtr& ptm,
                                         const Handle& clause)
 {
 	return ptm->getHandle() == clause
-		or (Quotation::is_quotation_type(clause->getType())
+		or (Quotation::is_quotation_type(clause->get_type())
 		    and ptm->getHandle() == clause->getOutgoingAtom(0));
 }
 
@@ -775,7 +775,7 @@ bool PatternMatchEngine::glob_compare(const PatternTermSeq& osp,
 		}
 
 		const Handle& ohp(osp[ip]->getHandle());
-		Type ptype = ohp->getType();
+		Type ptype = ohp->get_type();
 
 		if (GLOB_NODE == ptype)
 		{
@@ -1008,7 +1008,7 @@ bool PatternMatchEngine::tree_compare(const PatternTermPtr& ptm,
 	if (is_executable(hp))
 		throw RuntimeException(TRACE_INFO, "Not implemented!!");
 
-	Type tp = hp->getType();
+	Type tp = hp->get_type();
 
 	// If the pattern is a DefinedSchemaNode, we need to substitute
 	// its definition. XXX TODO.
@@ -1243,7 +1243,7 @@ bool PatternMatchEngine::explore_link_branches(const PatternTermPtr& ptm,
 
 	// If its not an unordered link, then don't try to iterate over
 	// all permutations.
-	Type tp = hp->getType();
+	Type tp = hp->get_type();
 	if (not _classserver.isA(tp, UNORDERED_LINK))
 		return explore_choice_branches(ptm, hg, clause_root);
 
@@ -1273,7 +1273,7 @@ bool PatternMatchEngine::explore_choice_branches(const PatternTermPtr& ptm,
 {
 	const Handle& hp = ptm->getHandle();
 	// If its not a choice link, then don't try to iterate.
-	if (CHOICE_LINK != hp->getType())
+	if (CHOICE_LINK != hp->get_type())
 		return explore_single_branch(ptm, hg, clause_root);
 
 	DO_LOG({logger().fine("Begin choice branchpoint iteration loop");})
@@ -1477,7 +1477,7 @@ bool PatternMatchEngine::do_term_up(const PatternTermPtr& ptm,
 
 	// Do the simple case first, ChoiceLinks are harder.
 	bool found = false;
-	if (CHOICE_LINK != hi->getType())
+	if (CHOICE_LINK != hi->get_type())
 	{
 		if (explore_up_branches(parent, hg, clause_root)) found = true;
 		DO_LOG({logger().fine("After moving up the clause, found = %d", found);})
@@ -2136,7 +2136,7 @@ void PatternMatchEngine::log_solution(
 	int varcnt = 0;
 	for (const auto& j: vars)
 	{
-		Type vtype = j.first->getType();
+		Type vtype = j.first->get_type();
 		if (VARIABLE_NODE == vtype or GLOB_NODE == vtype) varcnt++;
 	}
 	logger().fine() << "Groundings for " << varcnt << " variables:";
@@ -2148,7 +2148,7 @@ void PatternMatchEngine::log_solution(
 		Handle soln(j.second);
 
 		// Only print grounding for variables.
-		Type vtype = var->getType();
+		Type vtype = var->get_type();
 		if (VARIABLE_NODE != vtype and GLOB_NODE != vtype) continue;
 
 		if (not soln)

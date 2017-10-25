@@ -257,7 +257,7 @@ Handle AtomTable::getHandle(Type t, const HandleSeq& seq) const
 Handle AtomTable::getLinkHandle(const AtomPtr& orig) const
 {
     AtomPtr a(orig);
-    Type t = a->getType();
+    Type t = a->get_type();
     const HandleSeq &seq = a->getOutgoingSet();
 
     // Make sure all the atoms in the outgoing set are in the atomspace.
@@ -367,7 +367,7 @@ Handle AtomTable::add(AtomPtr atom, bool async)
         return atom->getHandle();
 
     AtomPtr orig(atom);
-    Type atom_type = atom->getType();
+    Type atom_type = atom->get_type();
 
     // Certain DeleteLinks can never be added!
     atom = cast_factory(atom_type, atom);

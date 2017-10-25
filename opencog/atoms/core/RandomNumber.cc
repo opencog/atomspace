@@ -35,7 +35,7 @@ static MT19937RandGen randy(616432);
 void RandomNumberLink::init()
 {
 	// Type must be as expected
-	Type tscope = getType();
+	Type tscope = get_type();
 	if (not classserver().isA(tscope, RANDOM_NUMBER_LINK))
 	{
 		const std::string& tname = classserver().getTypeName(tscope);
@@ -67,7 +67,7 @@ RandomNumberLink::RandomNumberLink(const Link &l)
 // if that set contains numbers or something numeric, then unwrap it.
 static NumberNodePtr unwrap_set(Handle h)
 {
-	if (SET_LINK == h->getType())
+	if (SET_LINK == h->get_type())
 	{
 		if (0 == h->getArity())
 			throw SyntaxException(TRACE_INFO,

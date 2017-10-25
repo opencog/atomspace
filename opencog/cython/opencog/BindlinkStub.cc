@@ -24,7 +24,7 @@ Handle opencog::do_execute(AtomSpace* atomspace, Handle handle)
     // dependency of python on itself was somehow broken, but, given
     // what ExecutionOutputLink does, its hard to see how to fix this.
     //
-    if (EXECUTION_OUTPUT_LINK == handle->getType()) {
+    if (EXECUTION_OUTPUT_LINK == handle->get_type()) {
         LinkPtr lp(LinkCast(handle));
         ExecutionOutputLinkPtr eolp(ExecutionOutputLinkCast(lp));
         if (NULL == eolp)

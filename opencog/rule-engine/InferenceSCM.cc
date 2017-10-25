@@ -118,10 +118,10 @@ Handle InferenceSCM::do_forward_chaining(Handle rbs,
     HandleSeq focus_set = {};
 
     // A ListLink means that the variable declaration is undefined
-    if (vardecl->getType() == LIST_LINK)
+    if (vardecl->get_type() == LIST_LINK)
 	    vardecl = Handle::UNDEFINED;
 
-    if (focus_set_h->getType() == SET_LINK)
+    if (focus_set_h->get_type() == SET_LINK)
 	    focus_set = focus_set_h->getOutgoingSet();
     else
 	    throw RuntimeException(
@@ -145,7 +145,7 @@ Handle InferenceSCM::do_backward_chaining(Handle rbs,
                                           Handle focus_link)
 {
     // A ListLink means that the variable declaration is undefined
-    if (vardecl->getType() == LIST_LINK)
+    if (vardecl->get_type() == LIST_LINK)
 	    vardecl = Handle::UNDEFINED;
 
     if (not trace_enabled)

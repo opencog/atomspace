@@ -50,7 +50,7 @@ static TruthValuePtr ss_evaluate(AtomSpace* atomspace, const Handle& h)
  */
 static Handle ss_reduce(AtomSpace* atomspace, const Handle& h)
 {
-	Type t = h->getType();
+	Type t = h->get_type();
 	if (NUMBER_NODE == t) return h;
 
 	if (not classserver().isA(t, FOLD_LINK))
@@ -61,7 +61,7 @@ static Handle ss_reduce(AtomSpace* atomspace, const Handle& h)
 	FoldLinkPtr fff(FoldLinkCast((*fact)(h)));
 	Handle hr(fff->reduce());
 
-	if (DELETE_LINK == hr->getType())
+	if (DELETE_LINK == hr->get_type())
 	{
 		for (const Handle& ho : hr->getOutgoingSet())
 			atomspace->remove_atom(ho, true);

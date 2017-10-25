@@ -79,9 +79,9 @@ public:
 		TS_ASSERT(h3 == hn3);
 
 		// ... and they should refer to the same atoms.
-		TS_ASSERT(hn1->getType() == h1->getType());
-		TS_ASSERT(hn2->getType() == h2->getType());
-		TS_ASSERT(hn3->getType() == h3->getType());
+		TS_ASSERT(hn1->get_type() == h1->get_type());
+		TS_ASSERT(hn2->get_type() == h2->get_type());
+		TS_ASSERT(hn3->get_type() == h3->get_type());
 
 		// The truth value *pointers* should be identical, as they
 		// should point to the same exact truth value instance.

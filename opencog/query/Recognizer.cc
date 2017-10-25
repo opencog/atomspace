@@ -159,7 +159,7 @@ bool Recognizer::node_match(const Handle& npat_h, const Handle& nsoln_h)
 	if (match) return true;
 
 	if (npat_h == nsoln_h) return true;
-	if (VARIABLE_NODE == nsoln_h->getType()) return true;
+	if (VARIABLE_NODE == nsoln_h->get_type()) return true;
 	return false;
 }
 
@@ -172,7 +172,7 @@ bool Recognizer::link_match(const PatternTermPtr& ptm, const Handle& lsoln)
 	if (lpat == lsoln) return true;
 
 	// mis-matched types are a dead-end.
-	if (lpat->getType() != lsoln->getType()) return false;
+	if (lpat->get_type() != lsoln->get_type()) return false;
 
 	// TODO: Change to something better if possible...
 	// What is happening here is to manually call the
@@ -218,12 +218,12 @@ bool Recognizer::link_match(const PatternTermPtr& ptm, const Handle& lsoln)
 
 bool Recognizer::loose_match(const Handle& npat_h, const Handle& nsoln_h)
 {
-	Type gtype = nsoln_h->getType();
+	Type gtype = nsoln_h->get_type();
 	// Variable matches anything; move to next.
 	if (VARIABLE_NODE == gtype) return true;
 
 	// Strict match for link types.
-	if (npat_h->getType() != gtype) return false;
+	if (npat_h->get_type() != gtype) return false;
 	if (not npat_h->isNode()) return true;
 
 	// If we are here, we know we have nodes. Ask for a strict match.
@@ -246,7 +246,7 @@ bool Recognizer::fuzzy_match(const Handle& npat_h, const Handle& nsoln_h)
 	bool have_glob = false;
 	for (size_t j=0; j<osg_size; j++)
 	{
-		if (osg[j]->getType() == GLOB_NODE)
+		if (osg[j]->get_type() == GLOB_NODE)
 		{
 			have_glob = true;
 			break;
@@ -266,7 +266,7 @@ bool Recognizer::fuzzy_match(const Handle& npat_h, const Handle& nsoln_h)
 		if (ip == osp_size) ip--;
 		if (jg == osg_size) jg--;
 
-		if (GLOB_NODE != osg[jg]->getType())
+		if (GLOB_NODE != osg[jg]->get_type())
 		{
 			if (loose_match(osp[ip], osg[jg])) continue;
 			return false;
@@ -280,7 +280,7 @@ bool Recognizer::fuzzy_match(const Handle& npat_h, const Handle& nsoln_h)
 		const Handle& post(osg[jg+1]);
 
 		// If the post is also a GlobNode, we are done for this one.
-		if (GLOB_NODE == post->getType()) return true;
+		if (GLOB_NODE == post->get_type()) return true;
 
 		// Match as many as possible.
 		while (ip < osp_size and not loose_match(osp[ip], post))

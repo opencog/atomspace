@@ -75,7 +75,7 @@ bool TruthValue::isDefaultTV() const
 {
     TruthValuePtr dtv = DEFAULT_TV();
     if (dtv.get() == this) return true;
-    if (getType() == dtv->getType() and
+    if (get_type() == dtv->get_type() and
         getMean() == dtv->getMean() and
         getConfidence() == dtv->getConfidence())
     {
@@ -91,7 +91,7 @@ bool TruthValue::isDefinedTV() const
 {
     TruthValuePtr dtv = DEFAULT_TV();
     if (dtv.get() == this) return true;
-    if (getType() == dtv->getType() and
+    if (get_type() == dtv->get_type() and
         getMean() == dtv->getMean() and
         getConfidence() == dtv->getConfidence())
     {
@@ -108,7 +108,7 @@ bool TruthValue::isDefinedTV() const
     if (dtv.get() == this) return true;
 
     dtv = TRUE_TV();
-    if (getType() == dtv->getType() and
+    if (get_type() == dtv->get_type() and
         getMean() == dtv->getMean() and
         getConfidence() == dtv->getConfidence())
     {
@@ -116,7 +116,7 @@ bool TruthValue::isDefinedTV() const
     }
 
     dtv = FALSE_TV();
-    if (getType() == dtv->getType() and
+    if (get_type() == dtv->get_type() and
         getMean() == dtv->getMean() and
         getConfidence() == dtv->getConfidence())
     {
@@ -124,7 +124,7 @@ bool TruthValue::isDefinedTV() const
     }
 
     dtv = TRIVIAL_TV();
-    if (getType() == dtv->getType() and
+    if (get_type() == dtv->get_type() and
         getMean() == dtv->getMean() and
         getConfidence() == dtv->getConfidence())
     {
@@ -165,7 +165,7 @@ TruthValuePtr TruthValue::factory(Type t, const std::vector<double>& v)
 
 TruthValuePtr TruthValue::factory(const ProtoAtomPtr& pap)
 {
-	Type t = pap->getType();
+	Type t = pap->get_type();
 	if (SIMPLE_TRUTH_VALUE == t)
 		return SimpleTruthValue::createTV(pap);
 	if (COUNT_TRUTH_VALUE == t)

@@ -107,7 +107,7 @@ void GetStateUTest::Getter(void)
 		Handle got = eval->eval_h("(cog-execute! getter)");
 
 		TSM_ASSERT("Expected a valid handle", nullptr != got);
-		TSM_ASSERT("Expected a StateLink", got->getType() == SET_LINK);
+		TSM_ASSERT("Expected a StateLink", got->get_type() == SET_LINK);
 		if (1 != got->getArity())
 		{
 			fail_count++;

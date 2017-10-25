@@ -169,9 +169,9 @@ bool AndBIT::has_cycle() const
 
 bool AndBIT::has_cycle(const Handle& h, HandleSet ancestors) const
 {
-	if (h->getType() == EXECUTION_OUTPUT_LINK) {
+	if (h->get_type() == EXECUTION_OUTPUT_LINK) {
 		Handle arg = h->getOutgoingAtom(1);
-		if (arg->getType() == LIST_LINK) {
+		if (arg->get_type() == LIST_LINK) {
 			Handle conclusion = arg->getOutgoingAtom(0);
 			if (is_in(conclusion, ancestors))
 				return true;
@@ -180,7 +180,7 @@ bool AndBIT::has_cycle(const Handle& h, HandleSet ancestors) const
 			Arity arity = arg->getArity();
 			if (1 < arity) {
 				bool unordered_premises =
-					arg->getOutgoingAtom(1)->getType() == SET_LINK;
+					arg->getOutgoingAtom(1)->get_type() == SET_LINK;
 				if (unordered_premises) {
 					OC_ASSERT(arity == 2,
 					          "Mixture of ordered and unordered"
@@ -234,10 +234,10 @@ std::string AndBIT::fcs_to_ascii_art(const Handle& nfcs) const
 
 std::string AndBIT::fcs_rewrite_to_ascii_art(const Handle& h) const
 {
-	if (h->getType() == EXECUTION_OUTPUT_LINK) {
+	if (h->get_type() == EXECUTION_OUTPUT_LINK) {
 		Handle gsn = h->getOutgoingAtom(0);
 		Handle arg = h->getOutgoingAtom(1);
-		if (arg->getType() == LIST_LINK) {
+		if (arg->get_type() == LIST_LINK) {
 			// Render the conclusion
 			Handle conclusion = arg->getOutgoingAtom(0);
 			std::string conclusion_aa = fcs_rewrite_to_ascii_art(conclusion);
@@ -247,7 +247,7 @@ std::string AndBIT::fcs_rewrite_to_ascii_art(const Handle& h) const
 			if (1 < arity) {
 				std::vector<std::string> premises_aas;
 				bool unordered_premises =
-					arg->getOutgoingAtom(1)->getType() == SET_LINK;
+					arg->getOutgoingAtom(1)->get_type() == SET_LINK;
 				if (unordered_premises) {
 					OC_ASSERT(arity == 2,
 					          "Mixture of ordered and unordered"
@@ -366,7 +366,7 @@ HandleSet AndBIT::get_leaves() const
 
 HandleSet AndBIT::get_leaves(const Handle& h) const
 {
-	Type t = h->getType();
+	Type t = h->get_type();
 	if (t == BIND_LINK) {
 		BindLinkPtr hsc = BindLinkCast(h);
 		Handle rewrite = hsc->get_implicand();
@@ -375,7 +375,7 @@ HandleSet AndBIT::get_leaves(const Handle& h) const
 		// All arguments except the first one are potential target leaves
 		Handle args = h->getOutgoingAtom(1);
 		HandleSet leaves;
-		if (args->getType() == LIST_LINK) {
+		if (args->get_type() == LIST_LINK) {
 			OC_ASSERT(args->getArity() > 0);
 			for (Arity i = 1; i < args->getArity(); i++) {
 				HandleSet aleaves = get_leaves(args->getOutgoingAtom(i));
@@ -425,7 +425,7 @@ Handle AndBIT::expand_fcs_pattern(const Handle& fcs_pattern,
 		                                               clauses.end()));
 
 	// The fcs contains a conjunction of clauses
-	OC_ASSERT(fcs_pattern->getType() == AND_LINK);
+	OC_ASSERT(fcs_pattern->get_type() == AND_LINK);
 
 	// Remove any fcs clause that:
 	//
@@ -467,14 +467,14 @@ Handle AndBIT::expand_fcs_rewrite(const Handle& fcs_rewrite,
 	// Recursive cases
 
 	AtomSpace& as = *fcs->getAtomSpace();
-	Type t = fcs_rewrite->getType();
+	Type t = fcs_rewrite->get_type();
 
 	if (t == EXECUTION_OUTPUT_LINK) {
 		// If it is an ExecutionOutput then skip the first input
 		// argument as it is a conclusion already.
 		Handle gsn = fcs_rewrite->getOutgoingAtom(0);
 		Handle arg = fcs_rewrite->getOutgoingAtom(1);
-		if (arg->getType() == LIST_LINK) {
+		if (arg->get_type() == LIST_LINK) {
 			HandleSeq args = arg->getOutgoingSet();
 			for (size_t i = 1; i < args.size(); i++)
 				args[i] = expand_fcs_rewrite(args[i], rule);
@@ -500,11 +500,11 @@ Handle AndBIT::expand_fcs_rewrite(const Handle& fcs_rewrite,
 
 bool AndBIT::is_argument_of(const Handle& eval, const Handle& atom) const
 {
-	if (eval->getType() == EVALUATION_LINK) {
+	if (eval->get_type() == EVALUATION_LINK) {
 		Handle args = eval->getOutgoingAtom(1);
 		if (content_eq(args, atom))
 			return true;
-		if (args->getType() == LIST_LINK)
+		if (args->get_type() == LIST_LINK)
 			for (Arity i = 0; i < args->getArity(); i++)
 				if (content_eq(args->getOutgoingAtom(i), atom))
 					return true;
@@ -516,8 +516,8 @@ bool AndBIT::is_locally_quoted_eq(const Handle& lhs, const Handle& rhs) const
 {
 	if (content_eq(lhs, rhs))
 		return true;
-	Type lhs_t = lhs->getType();
-	Type rhs_t = rhs->getType();
+	Type lhs_t = lhs->get_type();
+	Type rhs_t = rhs->get_type();
 	if (lhs_t == LOCAL_QUOTE_LINK and rhs_t != LOCAL_QUOTE_LINK)
 		return content_eq(lhs->getOutgoingAtom(0), rhs);
 	if (lhs_t != LOCAL_QUOTE_LINK and rhs_t == LOCAL_QUOTE_LINK)

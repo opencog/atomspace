@@ -33,7 +33,7 @@ using namespace opencog;
 
 void BindLink::init(void)
 {
-	Type t = getType();
+	Type t = get_type();
 	if (not classserver().isA(t, BIND_LINK))
 	{
 		const std::string& tname = classserver().getTypeName(t);

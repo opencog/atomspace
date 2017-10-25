@@ -71,7 +71,7 @@ void FindAtoms::search_set(const HandleSeq& hlist)
 
 FindAtoms::Loco FindAtoms::find_rec(const Handle& h, Quotation quotation)
 {
-	Type t = h->getType();
+	Type t = h->get_type();
 	if (quotation.is_unquoted() and
 	    (1 == _target_types.count(t) or _target_atoms.count(h) == 1))
 	{
@@ -137,7 +137,7 @@ int min_quotation_level(const Handle& tree,
 	if (not tree->isLink()) return std::numeric_limits<int>::max();
 
 	// Recursive case
-	quotation.update(tree->getType());
+	quotation.update(tree->get_type());
 	int result = std::numeric_limits<int>::max();
 	for (const Handle& h : tree->getOutgoingSet())
 		result = std::min(result, min_quotation_level(h, atom, quotation));
@@ -153,7 +153,7 @@ int max_quotation_level(const Handle& tree,
 	if (not tree->isLink()) return std::numeric_limits<int>::min();
 
 	// Recursive case
-	quotation.update(tree->getType());
+	quotation.update(tree->get_type());
 	int result = std::numeric_limits<int>::min();
 	for (const Handle& h : tree->getOutgoingSet())
 		result = std::max(result, max_quotation_level(h, atom, quotation));
@@ -270,7 +270,7 @@ bool is_unquoted_in_any_tree(const HandleSeq& trees,
 
 bool contains_atomtype(const Handle& clause, Type atom_type, Quotation quotation)
 {
-	Type clause_type = clause->getType();
+	Type clause_type = clause->get_type();
 	if (quotation.is_unquoted() and classserver().isA(clause_type, atom_type))
 		return true;
 
@@ -287,7 +287,7 @@ bool contains_atomtype(const Handle& clause, Type atom_type, Quotation quotation
 
 HandleSet get_free_variables(const Handle& h, Quotation quotation)
 {
-	Type t = h->getType();
+	Type t = h->get_type();
 
 	// Base cases
 	if (t == VARIABLE_NODE and quotation.is_unquoted())

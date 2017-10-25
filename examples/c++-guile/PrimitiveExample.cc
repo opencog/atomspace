@@ -30,7 +30,7 @@ class MyTestClass
 		Handle my_func(Handle h)
 		{
 			Handle hlist;
-			Type t = h->getType();
+			Type t = h->get_type();
 			if (classserver().isA(t, NODE))
 			{
 				NodePtr n = NodeCast(h);

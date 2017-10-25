@@ -84,7 +84,7 @@ PutLink::PutLink(const Link& l)
 ///
 void PutLink::init(void)
 {
-	if (not classserver().isA(getType(), PUT_LINK))
+	if (not classserver().isA(get_type(), PUT_LINK))
 		throw InvalidParamException(TRACE_INFO, "Expecting a PutLink");
 
 	size_t sz = _outgoing.size();
@@ -118,7 +118,7 @@ void PutLink::static_typecheck_values(void)
 {
 	// Cannot typecheck at this pont in time, because the schema
 	// might not be defined yet...
-	Type btype = _body->getType();
+	Type btype = _body->get_type();
 	if (DEFINED_SCHEMA_NODE == btype)
 		return;
 	if (DEFINED_PREDICATE_NODE == btype)
@@ -129,7 +129,7 @@ void PutLink::static_typecheck_values(void)
 		return;
 
 	size_t sz = _varlist.varseq.size();
-	Type vtype = _values->getType();
+	Type vtype = _values->get_type();
 
 	if (1 == sz)
 	{
@@ -181,7 +181,7 @@ void PutLink::static_typecheck_values(void)
 		for (const Handle& h : _values->getOutgoingSet())
 		{
 			// If the arity is greater than one, then the values must be in a list.
-		   if (h->getType() != LIST_LINK)
+		   if (h->get_type() != LIST_LINK)
 				throw InvalidParamException(TRACE_INFO,
 					"PutLink expected value list!");
 
@@ -247,12 +247,12 @@ Handle PutLink::do_reduce(void) const
 	Variables vars(_varlist);
 	// Resolve the body, if needed. That is, if the body is
 	// given in a defintion, get that defintion.
-	Type btype = _body->getType();
+	Type btype = _body->get_type();
 	if (DEFINED_SCHEMA_NODE == btype or
 	    DEFINED_PREDICATE_NODE == btype)
 	{
 		bods = DefineLink::get_definition(bods);
-		btype = bods->getType();
+		btype = bods->get_type();
 		// XXX TODO we should perform a type-check on the function.
 		if (not classserver().isA(btype, LAMBDA_LINK))
 			throw InvalidParamException(TRACE_INFO,
@@ -269,7 +269,7 @@ Handle PutLink::do_reduce(void) const
 	}
 
 	// Now get the values that we will plug into the body.
-	Type vtype = _values->getType();
+	Type vtype = _values->get_type();
 
 	// If there is only one variable in the PutLink body...
 	if (1 == vars.varseq.size())

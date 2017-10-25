@@ -37,7 +37,7 @@ PatternTerm::PatternTerm(const PatternTermPtr& parent, const Handle& h)
 	             false /* necessarily false since it is local */),
 	  _has_any_bound_var(false)
 {
-	Type t = h->getType();
+	Type t = h->get_type();
 
 	// Discard the following QuoteLink, UnquoteLink or LocalQuoteLink
 	// as it is serving its quoting or unquoting function.

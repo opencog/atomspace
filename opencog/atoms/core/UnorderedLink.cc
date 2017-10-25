@@ -46,7 +46,7 @@ UnorderedLink::UnorderedLink(const Link& l)
 	: Link(l)
 {
 	// Type must be as expected
-	Type tscope = l.getType();
+	Type tscope = l.get_type();
 	if (not classserver().isA(tscope, UNORDERED_LINK))
 	{
 		const std::string& tname = classserver().getTypeName(tscope);

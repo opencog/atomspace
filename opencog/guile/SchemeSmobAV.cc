@@ -98,7 +98,7 @@ SCM SchemeSmob::ss_av_p (SCM s)
 	ProtoAtomPtr pa(scm_to_protom(s));
 	if (nullptr == pa) return SCM_BOOL_F;
 
-	if (pa->getType() == ATTENTION_VALUE)
+	if (pa->get_type() == ATTENTION_VALUE)
 		return SCM_BOOL_T;
 
 	scm_remember_upto_here_1(s);

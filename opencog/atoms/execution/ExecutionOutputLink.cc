@@ -45,8 +45,8 @@ public:
 
 void ExecutionOutputLink::check_schema(const Handle& schema) const
 {
-	if (not classserver().isA(schema->getType(), SCHEMA_NODE) and
-	    LAMBDA_LINK != schema->getType())
+	if (not classserver().isA(schema->get_type(), SCHEMA_NODE) and
+	    LAMBDA_LINK != schema->get_type())
 	{
 		throw SyntaxException(TRACE_INFO,
 		                      "ExecutionOutputLink must have schema! Got %s",
@@ -79,7 +79,7 @@ ExecutionOutputLink::ExecutionOutputLink(const Handle& schema,
 ExecutionOutputLink::ExecutionOutputLink(const Link& l)
 	: FunctionLink(l)
 {
-	Type tscope = l.getType();
+	Type tscope = l.get_type();
 	if (EXECUTION_OUTPUT_LINK != tscope)
 		throw SyntaxException(TRACE_INFO,
 			"Expection an ExecutionOutputLink!");
@@ -101,7 +101,7 @@ ExecutionOutputLink::ExecutionOutputLink(const Link& l)
 ///
 Handle ExecutionOutputLink::execute(AtomSpace* as, bool silent) const
 {
-	if (_outgoing[0]->getType() != GROUNDED_SCHEMA_NODE) {
+	if (_outgoing[0]->get_type() != GROUNDED_SCHEMA_NODE) {
 		LAZY_LOG_FINE << "Not a grounded schema. Do not execute it";
 		return getHandle();
 	}

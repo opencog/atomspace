@@ -49,12 +49,12 @@ class NodeIndex
 
 		void insertAtom(Atom* a)
 		{
-			NameIndex &ni(idx[a->getType()]);
+			NameIndex &ni(idx[a->get_type()]);
 			ni.insertAtom(a);
 		}
 		void removeAtom(Atom* a)
 		{
-			NameIndex &ni(idx.at(a->getType()));
+			NameIndex &ni(idx.at(a->get_type()));
 			ni.removeAtom(a);
 		}
 		void resize();

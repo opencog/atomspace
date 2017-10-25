@@ -49,7 +49,7 @@ ArithmeticLink::ArithmeticLink(const Link& l)
 
 void ArithmeticLink::init(void)
 {
-	Type tscope = getType();
+	Type tscope = get_type();
 	if (not classserver().isA(tscope, ARITHMETIC_LINK))
 		throw InvalidParamException(TRACE_INFO, "Expecting a ArithmeticLink");
 
@@ -102,9 +102,9 @@ Handle ArithmeticLink::reorder(void)
 
 	for (const Handle& h : _outgoing)
 	{
-		if (h->getType() == VARIABLE_NODE)
+		if (h->get_type() == VARIABLE_NODE)
 			vars.push_back(h);
-		else if (h->getType() == NUMBER_NODE)
+		else if (h->get_type() == NUMBER_NODE)
 			numbers.push_back(h);
 		else
 			exprs.push_back(h);
@@ -115,7 +115,7 @@ Handle ArithmeticLink::reorder(void)
 	for (const Handle& h : exprs) result.push_back(h);
 	for (const Handle& h : numbers) result.push_back(h);
 
-	Handle h(createLink(result, getType()));
+	Handle h(createLink(result, get_type()));
 	if (NULL == _atom_space) return h;
 
 	return _atom_space->add_atom(h);
@@ -135,7 +135,7 @@ static inline double get_double(AtomSpace *as, Handle h)
 	if (nnn == nullptr)
 		throw RuntimeException(TRACE_INFO,
 			  "Expecting a NumberNode, got %s",
-		     classserver().getTypeName(h->getType()).c_str());
+		     classserver().getTypeName(h->get_type()).c_str());
 
 	return nnn->get_value();
 }
@@ -147,7 +147,7 @@ NumberNodePtr ArithmeticLink::unwrap_set(Handle h) const
 
 	// Pattern matching hack. The pattern matcher returns sets of atoms;
 	// if that set contains numbers or something numeric, then unwrap it.
-	if (SET_LINK == h->getType())
+	if (SET_LINK == h->get_type())
 	{
 		if (1 != h->getArity())
 			throw SyntaxException(TRACE_INFO,
@@ -174,7 +174,7 @@ Handle ArithmeticLink::execute(AtomSpace* as) const
 		FunctionLinkPtr flp(FunctionLinkCast(arg));
 		if (flp) arg = flp->execute(as);
 
-		if (SET_LINK == arg->getType())
+		if (SET_LINK == arg->get_type())
 		{
 			return do_execute(as, arg->getOutgoingSet());
 		}

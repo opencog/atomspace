@@ -101,7 +101,7 @@ cdef extern from "opencog/atoms/base/Atom.h" namespace "opencog":
     cdef cppclass cAtom "opencog::Atom":
         cAtom()
 
-        Type getType()
+        Type get_type()
         int isNode()
         int isLink()
 

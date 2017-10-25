@@ -64,7 +64,7 @@ CountTruthValue::CountTruthValue(CountTruthValue const& source)
 CountTruthValue::CountTruthValue(const ProtoAtomPtr& source)
        : TruthValue(COUNT_TRUTH_VALUE)
 {
-    if (source->getType() != COUNT_TRUTH_VALUE)
+    if (source->get_type() != COUNT_TRUTH_VALUE)
         throw RuntimeException(TRACE_INFO,
             "Source must be a CountTruthValue");
 

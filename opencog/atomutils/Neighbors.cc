@@ -39,7 +39,7 @@ HandleSeq get_target_neighbors(const Handle& h, Type desiredLinkType,
     HandleSeq answer;
     for (const LinkPtr& link : h->getIncomingSet())
     {
-        Type t = link->getType();
+        Type t = link->get_type();
         if (not(t == desiredLinkType or
                (match_subtype and classserver().isA(t, desiredLinkType))))
 	    continue;
@@ -64,7 +64,7 @@ HandleSeq get_source_neighbors(const Handle& h, Type desiredLinkType,
 
     for (const LinkPtr& link : h->getIncomingSet())
     {
-        Type t = link->getType();
+        Type t = link->get_type();
         if (not(t == desiredLinkType or
                (match_subtype and classserver().isA(t, desiredLinkType))))
 	    continue;
@@ -85,7 +85,7 @@ HandleSeq get_all_neighbors(const Handle& h,
 
     for (const LinkPtr& link : h->getIncomingSet())
     {
-        if (link->getType() != desiredLinkType) continue;
+        if (link->get_type() != desiredLinkType) continue;
         for (const Handle& handle : link->getOutgoingSet())
         {
             if (handle == h) continue;

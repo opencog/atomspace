@@ -175,7 +175,7 @@ void ArcanaUTest::test_dummy(void)
 	Handle answer = eval->eval_h("(cog-execute! dummy)");
 	printf("dummy=%s\n", answer->to_string().c_str());
 
-	TS_ASSERT_EQUALS(SET_LINK, answer->getType());
+	TS_ASSERT_EQUALS(SET_LINK, answer->get_type());
 	TS_ASSERT_EQUALS(1, getarity(answer));
 	Handle num = answer->getOutgoingAtom(0);
 
@@ -200,7 +200,7 @@ void ArcanaUTest::test_bigger_dummy(void)
 	Handle answer = eval->eval_h("(cog-execute! bigger-dummy)");
 	printf("dummy=%s\n", answer->to_string().c_str());
 
-	TS_ASSERT_EQUALS(SET_LINK, answer->getType());
+	TS_ASSERT_EQUALS(SET_LINK, answer->get_type());
 	TS_ASSERT_EQUALS(1, getarity(answer));
 
 	Handle stfu = eval->eval_h("stfu");

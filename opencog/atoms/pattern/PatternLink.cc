@@ -284,7 +284,7 @@ PatternLink::PatternLink(const Link& l)
 	: ScopeLink(l)
 {
 	// Type must be as expected
-	Type tscope = l.getType();
+	Type tscope = l.get_type();
 	if (not classserver().isA(tscope, PATTERN_LINK))
 	{
 		const std::string& tname = classserver().getTypeName(tscope);
@@ -313,7 +313,7 @@ PatternLink::PatternLink(const Link& l)
 /// say that "these are disjoined", so again, that has to happen later.
 void PatternLink::unbundle_clauses(const Handle& hbody)
 {
-	Type t = hbody->getType();
+	Type t = hbody->get_type();
 	// For just right now, unpack PresentLink, although that is not
 	// technically correct in the long-run. XXX FIXME In the long run,
 	// nothing should be unpacked, since everything should be run-time
@@ -337,7 +337,7 @@ void PatternLink::unbundle_clauses(const Handle& hbody)
 		const HandleSeq& oset = hbody->getOutgoingSet();
 		for (const Handle& ho : oset)
 		{
-			Type ot = ho->getType();
+			Type ot = ho->get_type();
 			// If there is a PresentLink hiding under the AndLink
 			// then pull clauses out of it.
 			if (PRESENT_LINK == ot)
@@ -376,7 +376,7 @@ void PatternLink::unbundle_clauses_rec(const std::set<Type>& connectives,
 {
 	for (const Handle& ho : nest)
 	{
-		Type ot = ho->getType();
+		Type ot = ho->get_type();
 		if (PRESENT_LINK == ot)
 		{
 			const HandleSeq& pset = ho->getOutgoingSet();
@@ -488,7 +488,7 @@ void PatternLink::extract_optionals(const HandleSet &vars,
 	// Split in positive and negative clauses
 	for (const Handle& h : component)
 	{
-		Type t = h->getType();
+		Type t = h->get_type();
 		if (ABSENT_LINK == t)
 		{
 			// We insist on an arity of 1, because anything else is
@@ -516,7 +516,7 @@ void PatternLink::extract_optionals(const HandleSet &vars,
 static void add_to_map(std::unordered_multimap<Handle, Handle>& map,
                        const Handle& key, const Handle& value)
 {
-	if (key->getType() == VARIABLE_NODE) map.insert({key, value});
+	if (key->get_type() == VARIABLE_NODE) map.insert({key, value});
 	if (not key->isLink()) return;
 	const HandleSeq& oset = key->getOutgoingSet();
 	for (const Handle& ho : oset) add_to_map(map, ho, value);
@@ -585,7 +585,7 @@ void PatternLink::unbundle_virtual(const HandleSet& vars,
 		// If a clause is a variable, we have to make the worst-case
 		// assumption that it is evaluatable, so that we can evaluate
 		// it later.
-		if (VARIABLE_NODE == clause->getType())
+		if (VARIABLE_NODE == clause->get_type())
 		{
 			_pat.evaluatable_terms.insert(clause);
 			add_to_map(_pat.in_evaluatable, clause, clause);
@@ -650,8 +650,8 @@ void PatternLink::unbundle_virtual(const HandleSet& vars,
 			// executable. If they have non grounded schema node then
 			// their execution is themselves (i.e. they are not
 			// executable).
-			if (sh->getType() != EXECUTION_OUTPUT_LINK or
-			    sh->getOutgoingAtom(0)->getType() == GROUNDED_SCHEMA_NODE)
+			if (sh->get_type() != EXECUTION_OUTPUT_LINK or
+			    sh->getOutgoingAtom(0)->get_type() == GROUNDED_SCHEMA_NODE)
 			{
 				_pat.executable_terms.insert(sh);
 				_pat.executable_holders.insert(sh);
@@ -723,7 +723,7 @@ bool PatternLink::add_dummies()
 
 	for (const Handle& t : _pat.evaluatable_terms)
 	{
-		Type tt = t->getType();
+		Type tt = t->get_type();
 		if (EQUAL_LINK == tt or
 		    GREATER_THAN_LINK == tt or
 		    IDENTICAL_LINK == tt)
@@ -767,7 +767,7 @@ void PatternLink::trace_connectives(const std::set<Type>& connectives,
 {
 	for (const Handle& term: oset)
 	{
-		Type t = term->getType();
+		Type t = term->get_type();
 
 		quotation.update(t);
 
@@ -875,7 +875,7 @@ void PatternLink::make_term_tree_recursive(const Handle& root,
 	// later checks. The flag telling whether the term subtree contains
 	// any bound variable is set by addBoundVariable() method for all terms
 	// on the path up to the root (unless it has been set already).
-	Type t = h->getType();
+	Type t = h->get_type();
 	if ((VARIABLE_NODE == t or GLOB_NODE == t)
 	    and not ptm->getQuotation().is_quoted()
 	    and _varlist.varset.end() != _varlist.varset.find(h))

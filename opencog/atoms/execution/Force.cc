@@ -52,7 +52,7 @@ Handle opencog::force_execute(AtomSpace* as, const Handle& cargs, bool silent)
 {
 	Instantiator inst(as);
 
-	if (LIST_LINK != cargs->getType())
+	if (LIST_LINK != cargs->get_type())
 	{
 		Handle args(inst.execute(cargs, silent));
 		if (args != cargs)
@@ -76,7 +76,7 @@ Handle opencog::force_execute(AtomSpace* as, const Handle& cargs, bool silent)
 		// Unwrap the top-most DontExecLink's.  Lower ones are left
 		// untouched.  We do this as a sop for issue opencog/atomspace#704
 		// but maybe we should not?
-		if (DONT_EXEC_LINK == nh->getType())
+		if (DONT_EXEC_LINK == nh->get_type())
 		{
 			nh = nh->getOutgoingAtom(0);
 		}

@@ -155,7 +155,7 @@ public:
         mergedTv = simpleTvs[1]->merge(otherTypeTv);
         TS_ASSERT(mergedTv != simpleTvs[1]);
         TS_ASSERT(mergedTv != otherTypeTv);
-        TS_ASSERT(mergedTv->getType() == otherTypeTv->getType());
+        TS_ASSERT(mergedTv->get_type() == otherTypeTv->get_type());
         TS_ASSERT(fabs(mergedTv->getMean()  - simpleMeans[1]) <= FLOAT_ACCEPTABLE_ERROR);
         TS_ASSERT(fabs(mergedTv->getCount()  - simpleCounts[1]) <= FLOAT_ACCEPTABLE_ERROR);
         TS_ASSERT(fabs(mergedTv->getConfidence() - simpleConfidences[1]) < FLOAT_ACCEPTABLE_ERROR);
@@ -163,7 +163,7 @@ public:
         mergedTv = simpleTvs[1]->merge(otherTypeTv);
         TS_ASSERT(mergedTv != simpleTvs[1]);
         TS_ASSERT(mergedTv != otherTypeTv);
-        TS_ASSERT(mergedTv->getType() == otherTypeTv->getType());
+        TS_ASSERT(mergedTv->get_type() == otherTypeTv->get_type());
         TS_ASSERT(fabs(mergedTv->getMean()  - otherTypeTv->getMean()) <= FLOAT_ACCEPTABLE_ERROR);
         TS_ASSERT(fabs(mergedTv->getCount()  - otherTypeTv->getCount()) <= FLOAT_ACCEPTABLE_ERROR);
         TS_ASSERT(fabs(mergedTv->getConfidence() - otherTypeTv->getConfidence()) < FLOAT_ACCEPTABLE_ERROR);
@@ -201,10 +201,10 @@ public:
 
                 TS_ASSERT(fabs(mergedTv->getConfidence() - indefiniteConfidences[i]) < FLOAT_ACCEPTABLE_ERROR);
                 TS_ASSERT(mergedTv.get() != tv.get());
-                TS_ASSERT(mergedTv->getType() == INDEFINITE_TRUTH_VALUE);
+                TS_ASSERT(mergedTv->get_type() == INDEFINITE_TRUTH_VALUE);
             } else {
-                //logger().debug("mergedTv->getType() = %d(%s), tv->getType() = %d(%s)", mergedTv->getType(), TruthValue::typeToStr(mergedTv->getType()), tv->getType(), TruthValue::typeToStr(tv->getType()).c_str());
-                TS_ASSERT(mergedTv->getType() == tv->getType());
+                //logger().debug("mergedTv->get_type() = %d(%s), tv->get_type() = %d(%s)", mergedTv->get_type(), TruthValue::typeToStr(mergedTv->get_type()), tv->get_type(), TruthValue::typeToStr(tv->get_type()).c_str());
+                TS_ASSERT(mergedTv->get_type() == tv->get_type());
                 TS_ASSERT(fabs(mergedTv->getMean()  - means[i]) <= FLOAT_ACCEPTABLE_ERROR);
                 TS_ASSERT(fabs(mergedTv->getCount()  - counts[i]) <= FLOAT_ACCEPTABLE_ERROR);
                 TS_ASSERT(fabs(mergedTv->getConfidence() - confidences[i]) < FLOAT_ACCEPTABLE_ERROR);

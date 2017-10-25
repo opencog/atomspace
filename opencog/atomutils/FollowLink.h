@@ -75,7 +75,7 @@ private:
 	inline bool find_link_type(const Handle& h)
 	{
 		// Make sure that the link is of the desired type.
-		if (link_type != h->getType()) return false;
+		if (link_type != h->get_type()) return false;
 
 		cnt = -1;
 		to_atom = Handle::UNDEFINED;

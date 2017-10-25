@@ -281,7 +281,7 @@ bool ControlPolicy::control_rule_active(const Handle& ctrl_rule) const
 Handle ControlPolicy::get_expansion_control_rule_pattern(const Handle& ctrl_rule) const
 {
 	// Check that it is indeed an expansion control rule
-	OC_ASSERT(ctrl_rule->getType() == IMPLICATION_SCOPE_LINK);
+	OC_ASSERT(ctrl_rule->get_type() == IMPLICATION_SCOPE_LINK);
 	OC_ASSERT(ctrl_rule->getArity() == 3);
 
 	// The pattern is in the implicant, if any
@@ -289,9 +289,9 @@ Handle ControlPolicy::get_expansion_control_rule_pattern(const Handle& ctrl_rule
 
 	// If present it must be inside a conjunction of an ExecutionLink
 	// and a pattern
-	if (implicant->getType() == AND_LINK)
+	if (implicant->get_type() == AND_LINK)
 		for (const Handle& child : implicant->getOutgoingSet())
-			if (child->getType() != EXECUTION_LINK)
+			if (child->get_type() != EXECUTION_LINK)
 				return child;
 
 	return Handle::UNDEFINED;

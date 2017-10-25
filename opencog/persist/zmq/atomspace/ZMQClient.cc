@@ -96,7 +96,7 @@ void ZMQClient::storeAtom(const AtomPtr& atomPtr, bool synchronous)
     req.set_function(ZMQstoreAtoms);
     ZMQAtomMessage *atomMsg = req.add_atom();
     atomMsg->set_handle(atomPtr->getHandle().value());
-    atomMsg->set_type(atomPtr->getType());
+    atomMsg->set_type(atomPtr->get_type());
 
 //    ZMQTruthValueMessage *tvMsg = atomMsg->mutable_truthvalue();
 //    ZMQSingleTruthValueMessage *stvMsg = tvMsg->add_singletruthvalue();

@@ -53,12 +53,12 @@ public:
 
 	virtual ~ProtoAtom() {}
 
-	inline Type getType() const { return _type; }
+	inline Type get_type() const { return _type; }
 
 	/** Basic predicate */
 	bool isType(Type t, bool subclass) const
 	{
-		Type at(getType());
+		Type at(get_type());
 		if (not subclass) return t == at;
 		return classserver().isA(at, t);
 	}

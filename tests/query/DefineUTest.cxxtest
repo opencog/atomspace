@@ -117,11 +117,11 @@ void DefineLinkUTest::test_schema(void)
 	// be wrong.
 
 	Handle pred = timestamp->getOutgoingAtom(0);
-	TS_ASSERT_EQUALS(PREDICATE_NODE, pred->getType());
+	TS_ASSERT_EQUALS(PREDICATE_NODE, pred->get_type());
 
 	Handle list = timestamp->getOutgoingAtom(1);
-	TS_ASSERT_EQUALS(LIST_LINK, list->getType());
+	TS_ASSERT_EQUALS(LIST_LINK, list->get_type());
 
 	Handle num = list->getOutgoingAtom(0);
-	TS_ASSERT_EQUALS(NUMBER_NODE, num->getType());
+	TS_ASSERT_EQUALS(NUMBER_NODE, num->get_type());
 }

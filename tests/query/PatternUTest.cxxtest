@@ -124,8 +124,8 @@ class PMCB : public InitiateSearchCB, public DefaultPatternMatchCB
 
 bool PMCB::node_match(Node *npat, Node *nsoln)
 {
-	Type pattype = npat->getType();
-	Type soltype = nsoln->getType();
+	Type pattype = npat->get_type();
+	Type soltype = nsoln->get_type();
 
 	// Reject obvioius mismatches
 	if (pattype != soltype) return false;

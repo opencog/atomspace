@@ -48,7 +48,7 @@ size_t LinkIndex::size() const
 
 void LinkIndex::insertAtom(const AtomPtr& a)
 {
-	Type t = a->getType();
+	Type t = a->get_type();
 	HandleSeqIndex &hsi = idx[t];
 
 	LinkPtr l(LinkCast(a));
@@ -59,7 +59,7 @@ void LinkIndex::insertAtom(const AtomPtr& a)
 
 void LinkIndex::removeAtom(const AtomPtr& a)
 {
-	Type t = a->getType();
+	Type t = a->get_type();
 	HandleSeqIndex &hsi = idx.at(t);
 
 	LinkPtr l(LinkCast(a));

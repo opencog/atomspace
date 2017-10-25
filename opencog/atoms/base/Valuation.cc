@@ -27,7 +27,7 @@ using namespace opencog;
 
 bool Valuation::operator==(const ProtoAtom& other) const
 {
-	if (VALUATION != other.getType()) return false;
+	if (VALUATION != other.get_type()) return false;
 	Valuation* vp = (Valuation*) &other;
 	if (vp->_key != _key) return false;
 	if (vp->_atom != _atom) return false;

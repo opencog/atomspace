@@ -86,7 +86,7 @@ static TruthValuePtr do_satlink(AtomSpace* as, const Handle& hlink)
 {
 	Handle plp(hlink);
 	// If not already a PatternLink, then WRAP it in a PattrnLink.
-	if (not classserver().isA(hlink->getType(), PATTERN_LINK))
+	if (not classserver().isA(hlink->get_type(), PATTERN_LINK))
 		plp = createPatternLink(hlink);
 	return satisfaction_link(as, plp);
 }

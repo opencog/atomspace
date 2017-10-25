@@ -105,7 +105,7 @@ int AtomSpace_getAtomByHandle( AtomSpace* this_ptr
     if(!h) // Invalid UUID parameter.
         return -1;
 
-    const std::string &str = classserver().getTypeName(h->getType());
+    const std::string &str = classserver().getTypeName(h->get_type());
     *type = (char*) malloc(sizeof(char) * (str.length()+1));
     if(! *type)
         throw RuntimeException(TRACE_INFO,"Failed malloc.");

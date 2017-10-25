@@ -331,7 +331,7 @@ void BasicSCMUTest::check_truth_value(const TruthValuePtr& tv)
 	// set its truth value
 	stringstream ss;
 	ss << "(cog-set-tv! " << add_node_str << "(";
-	Type tvt = tv->getType();
+	Type tvt = tv->get_type();
 	if (tvt == SIMPLE_TRUTH_VALUE)
 		ss << "cog-new-stv " << tv->getMean() << " " << tv->getConfidence();
 	else if (tvt == COUNT_TRUTH_VALUE)

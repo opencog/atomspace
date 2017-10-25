@@ -242,7 +242,7 @@ cdef class Atom(object):
                 atom_ptr = self.handle.atom_ptr()
                 if atom_ptr == NULL:   # avoid null-pointer deref
                     return None
-                self._atom_type = atom_ptr.getType()
+                self._atom_type = atom_ptr.get_type()
             return self._atom_type
 
     property type_name:

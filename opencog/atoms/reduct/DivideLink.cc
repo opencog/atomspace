@@ -54,7 +54,7 @@ DivideLink::DivideLink(const Link& l)
 
 void DivideLink::init(void)
 {
-	Type tscope = getType();
+	Type tscope = get_type();
 	if (not classserver().isA(tscope, DIVIDE_LINK))
 		throw InvalidParamException(TRACE_INFO, "Expecting a DivideLink");
 

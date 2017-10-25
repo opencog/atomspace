@@ -54,7 +54,7 @@ PlusLink::PlusLink(const Link& l)
 
 void PlusLink::init(void)
 {
-	Type tscope = getType();
+	Type tscope = get_type();
 	if (not classserver().isA(tscope, PLUS_LINK))
 		throw InvalidParamException(TRACE_INFO, "Expecting a PlusLink");
 
@@ -82,8 +82,8 @@ static inline double get_double(const Handle& h)
 Handle PlusLink::kons(const Handle& fi, const Handle& fj)
 {
 	// Are they numbers?
-	if (NUMBER_NODE == fi->getType() and
-	    NUMBER_NODE == fj->getType())
+	if (NUMBER_NODE == fi->get_type() and
+	    NUMBER_NODE == fj->get_type())
 	{
 		double sum = get_double(fi) + get_double(fj);
 		return Handle(createNumberNode(sum));
@@ -102,7 +102,7 @@ Handle PlusLink::kons(const Handle& fi, const Handle& fj)
 	// If j is (TimesLink x a) and i is (TimesLink x b)
 	// then create (TimesLink x (a+b))
 	//
-	if (fj->getType() == TIMES_LINK)
+	if (fj->get_type() == TIMES_LINK)
 	{
 		bool do_add = false;
 		HandleSeq rest;
@@ -118,7 +118,7 @@ Handle PlusLink::kons(const Handle& fi, const Handle& fj)
 		}
 
 		// Handle the (a+b) case described above.
-		else if (fi->getType() == TIMES_LINK and
+		else if (fi->get_type() == TIMES_LINK and
 		         fi->getOutgoingAtom(0) == exx)
 		{
 			const HandleSeq& ilpo = fi->getOutgoingSet();

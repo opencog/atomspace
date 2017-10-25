@@ -64,7 +64,7 @@ ProbabilisticTruthValue::ProbabilisticTruthValue(ProbabilisticTruthValue const& 
 ProbabilisticTruthValue::ProbabilisticTruthValue(const ProtoAtomPtr& source)
        : TruthValue(PROBABILISTIC_TRUTH_VALUE)
 {
-    if (source->getType() != PROBABILISTIC_TRUTH_VALUE)
+    if (source->get_type() != PROBABILISTIC_TRUTH_VALUE)
         throw RuntimeException(TRACE_INFO,
             "Source must be a ProbabilisticTruthValue");
 

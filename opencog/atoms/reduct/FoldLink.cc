@@ -49,7 +49,7 @@ FoldLink::FoldLink(const Link& l)
 
 void FoldLink::init(void)
 {
-	Type tscope = getType();
+	Type tscope = get_type();
 	if (not classserver().isA(tscope, FOLD_LINK))
 		throw InvalidParamException(TRACE_INFO, "Expecting a FoldLink");
 }
@@ -122,7 +122,7 @@ Handle FoldLink::reduce(void)
 	// of knil, while we are at it.
 	for (const Handle& h: _outgoing)
 	{
-		Type t = h->getType();
+		Type t = h->get_type();
 
 		if (classserver().isA(t, FOLD_LINK))
 		{
@@ -161,11 +161,11 @@ Handle FoldLink::reduce(void)
 	for (size_t i = 0; i < osz-1; i++)
 	{
 		const Handle& hi = reduct[i];
-		Type it = hi->getType();
+		Type it = hi->get_type();
 
 		size_t j = i+1;
 		const Handle& hj = reduct[j];
-		Type jt = hj->getType();
+		Type jt = hj->get_type();
 
 		// Explore two cases.
 		// i and j are the same type. Apply kons, and then recurse.
@@ -200,7 +200,7 @@ Handle FoldLink::reduce(void)
 			// so that knil gets placed into the atomspace
 			// when reduce is called; else the knil
 			// compares up above fail.
-			Handle foo(createLink(rere, getType()));
+			Handle foo(createLink(rere, get_type()));
 			if (_atom_space)
 				foo = _atom_space->add_atom(foo);
 			FoldLinkPtr flp(FoldLinkCast(foo));
@@ -213,7 +213,7 @@ Handle FoldLink::reduce(void)
 	if (not did_reduce)
 		return getHandle();
 
-	DO_RETURN(createLink(reduct, getType()));
+	DO_RETURN(createLink(reduct, get_type()));
 }
 
 // ===========================================================
