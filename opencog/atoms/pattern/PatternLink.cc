@@ -133,6 +133,14 @@ void PatternLink::init(void)
 	_pat.redex_name = "anonymous PatternLink";
 	ScopeLink::extract_variables(_outgoing);
 
+	// If the _body has not been initialized by ScopeLink, that's
+	// because the PatternLink itself was quoted, and thus not
+	// actually initializable. This seems ... weird... to me.
+	// I'm not convinced its a vaalid use of Quoting. It seems
+	// like a bug. But whatever. System crashes if the body is
+	// not set.
+	if (nullptr == _body) return;
+
 	if (2 < _outgoing.size() or
 	   (2 == _outgoing.size() and _outgoing[1] != _body))
 	{

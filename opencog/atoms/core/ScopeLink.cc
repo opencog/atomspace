@@ -98,7 +98,7 @@ void ScopeLink::extract_variables(const HandleSeq& oset)
 	Type decls = oset.at(0)->getType();
 
 	// If we trip over an unquote immediately, then we can assume that
-	// the whole links appears in some quote context. This cannot be
+	// the whole link appears in some quote context. This cannot be
 	// treated as an ordinary ScopeLink in any way ... halt all further
 	// initialization now.
 	if (UNQUOTE_LINK == decls)
