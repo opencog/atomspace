@@ -93,7 +93,7 @@ bool value_is_type(const Handle& spec, const Handle& val)
 
 	// If it is a node, not a link, then it is a type-constant,
 	// and thus must match perfectly.
-	if (deep->isNode())
+	if (deep->is_node())
 		return (deep == val);
 
 	// If a link, then both must be same link type.
@@ -247,7 +247,7 @@ static bool type_match_rec(const Handle& left_, const Handle& right_, bool tople
 	// e.g. ListLink or EvaluationLink.  Compare these side-by-side.
 	if (ltype != rtype) return false;
 
-	if (not left->isLink() or not right->isLink()) return false;
+	if (not left->is_link() or not right->is_link()) return false;
 
 	// Unordered links are a pain in the butt.
 	if (classserver().isA(ltype, UNORDERED_LINK))

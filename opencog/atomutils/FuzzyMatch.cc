@@ -69,7 +69,7 @@ void FuzzyMatch::find_starters(const Handle& hp)
 
 	// Proposed start was not accepted. Look farther down, at it's
 	// sub-trees.
-	if (hp->isLink())
+	if (hp->is_link())
 		for (const Handle& h : hp->getOutgoingSet())
 			find_starters(h);
 }

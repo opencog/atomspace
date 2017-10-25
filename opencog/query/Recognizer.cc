@@ -106,7 +106,7 @@ using namespace opencog;
 
 bool Recognizer::do_search(PatternMatchEngine* pme, const Handle& top)
 {
-	if (top->isLink())
+	if (top->is_link())
 	{
 		// Recursively drill down and explore every possible node as
 		// a search starting point. This is needed, as the patterns we
@@ -224,7 +224,7 @@ bool Recognizer::loose_match(const Handle& npat_h, const Handle& nsoln_h)
 
 	// Strict match for link types.
 	if (npat_h->get_type() != gtype) return false;
-	if (not npat_h->isNode()) return true;
+	if (not npat_h->is_node()) return true;
 
 	// If we are here, we know we have nodes. Ask for a strict match.
 	if (npat_h != nsoln_h) return false;
@@ -237,7 +237,7 @@ bool Recognizer::fuzzy_match(const Handle& npat_h, const Handle& nsoln_h)
 	// Try to match them, fairly rigorously. Exactly what constitutes
 	// an OK match is still a bit up in the air.
 
-	if (not npat_h->isLink() or not nsoln_h->isLink()) return false;
+	if (not npat_h->is_link() or not nsoln_h->is_link()) return false;
 
 	const HandleSeq &osg = nsoln_h->getOutgoingSet();
 	size_t osg_size = osg.size();

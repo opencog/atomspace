@@ -472,7 +472,7 @@ Rule Rule::rand_alpha_converted() const
 Handle Rule::standardize_helper(AtomSpace* as, const Handle& h,
                                 HandleMap& dict)
 {
-	if (h->isLink())
+	if (h->is_link())
 	{
 		HandleSeq old_outgoing = h->getOutgoingSet();
 		HandleSeq new_outgoing;

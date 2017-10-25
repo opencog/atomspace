@@ -113,7 +113,7 @@ static void get_distant_neighbors_rec(const Handle& h,
                 get_distant_neighbors_rec(in_h, res, dist - 1);
         }
         // 2. Fetch outgoings
-        if (h->isLink()) {
+        if (h->is_link()) {
             for (const Handle& out_h : h->getOutgoingSet()) {
                 if (res.find(out_h) == res.cend()) // Do not re-explore
                     get_distant_neighbors_rec(out_h, res, dist - 1);

@@ -517,7 +517,7 @@ static void add_to_map(std::unordered_multimap<Handle, Handle>& map,
                        const Handle& key, const Handle& value)
 {
 	if (key->get_type() == VARIABLE_NODE) map.insert({key, value});
-	if (not key->isLink()) return;
+	if (not key->is_link()) return;
 	const HandleSeq& oset = key->getOutgoingSet();
 	for (const Handle& ho : oset) add_to_map(map, ho, value);
 }
@@ -775,7 +775,7 @@ void PatternLink::trace_connectives(const std::set<Type>& connectives,
 			continue;
 		_pat.evaluatable_holders.insert(term);
 		add_to_map(_pat.in_evaluatable, term, term);
-		if (term->isLink())
+		if (term->is_link())
 			trace_connectives(connectives, term->getOutgoingSet(), quotation);
 	}
 }
@@ -815,7 +815,7 @@ void PatternLink::make_map_recursive(const Handle& root, const Handle& h)
 {
 	_pat.connectivity_map.emplace(h, root);
 
-	if (h->isLink())
+	if (h->is_link())
 	{
 		for (const Handle& ho: h->getOutgoingSet())
 			make_map_recursive(root, ho);
@@ -884,7 +884,7 @@ void PatternLink::make_term_tree_recursive(const Handle& root,
 		return;
 	}
 
-	if (h->isLink())
+	if (h->is_link())
 	{
 		for (const Handle& ho: h->getOutgoingSet())
 			make_term_tree_recursive(root, ho, ptm);
@@ -988,7 +988,7 @@ void PatternLink::debug_log(void) const
 	// Print out the bound variables in the predicate.
 	for (const Handle& h : _varlist.varset)
 	{
-		if (h->isNode())
+		if (h->is_node())
 			logger().fine() << "Bound var: " << h->to_short_string();
 	}
 

@@ -426,8 +426,8 @@ bool DefaultPatternMatchCB::is_self_ground(const Handle& ptrn,
 
 	// Just assume matches were carried out correctly.
 	// Do not try to get fancy, here.
-	if (not ptrn->isLink()) return false;
-	if (not grnd->isLink()) return false;
+	if (not ptrn->is_link()) return false;
+	if (not grnd->is_link()) return false;
 
 	// Recursive call.
 	const HandleSeq& pset = ptrn->getOutgoingSet();
@@ -682,7 +682,7 @@ bool DefaultPatternMatchCB::eval_sentence(const Handle& top,
 		return eval_term(top, gnds);
 	}
 
-	if (not top->isLink())
+	if (not top->is_link())
 		throw InvalidParamException(TRACE_INFO,
 	            "Not expecting a Node, here %s\n",
 	            top->to_short_string().c_str());

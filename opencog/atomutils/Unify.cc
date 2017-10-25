@@ -312,7 +312,7 @@ Handle Unify::consume_ill_quotations(const Variables& variables, Handle h,
                                      Quotation quotation, bool escape)
 {
 	// Base case
-	if (h->isNode())
+	if (h->is_node())
 		return h;
 
 	// Recursive cases
@@ -519,7 +519,7 @@ Unify::SolutionSet Unify::unify(const Handle& lh, const Handle& rh,
 	CHandle rch(rh, rc);
 
 	// If one is a node
-	if (lh->isNode() or rh->isNode()) {
+	if (lh->is_node() or rh->is_node()) {
 		// If one is a free variable and they are different, then
 		// unifies.
 		if (lch.is_free_variable() or rch.is_free_variable()) {
@@ -996,7 +996,7 @@ bool Unify::inherit(const Handle& lh, const Handle& rh,
 
 	// If both are links then check that the outgoings of lhs inherit
 	// the outgoings of rhs.
-	if (lh->isLink() and rh->isLink() and (lt == rt)) {
+	if (lh->is_link() and rh->is_link() and (lt == rt)) {
 		if (lh->get_arity() == rh->get_arity()) {
 			for (size_t i = 0; i < lh->get_arity(); i++) {
 				if (not inherit(lh->getOutgoingAtom(i),

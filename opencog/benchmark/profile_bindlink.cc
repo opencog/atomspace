@@ -87,7 +87,7 @@ int main(void)
 
     // Do the queries.
     Handle animals = get_animals(animals_query);
-    if (animals->isLink())
+    if (animals->is_link())
     {
         size_t total_animals = animals->getOutgoingSet().size();
         std::cout << "total animals = " << total_animals << std::endl;

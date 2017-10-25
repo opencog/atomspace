@@ -97,7 +97,7 @@ AtomTable::~AtomTable()
         // This is a stinky design, but I see no other way,
         // because it seems that we can't do this in the Atom
         // destructor (which is where this should be happening).
-        if (atom_to_delete->isLink()) {
+        if (atom_to_delete->is_link()) {
             LinkPtr link_to_delete = LinkCast(atom_to_delete);
             for (AtomPtr atom_in_out_set : atom_to_delete->getOutgoingSet()) {
                 atom_in_out_set->remove_atom(link_to_delete);
@@ -159,7 +159,7 @@ void AtomTable::clear_all_atoms()
         // If this is a link we need to remove this atom from the incoming
         // sets for any atoms in this atom's outgoing set. See note in
         // the analogous loop in ~AtomTable above.
-        if (atom_to_clear->isLink()) {
+        if (atom_to_clear->is_link()) {
             LinkPtr link_to_clear = LinkCast(atom_to_clear);
             for (AtomPtr atom_in_out_set : atom_to_clear->getOutgoingSet()) {
                 atom_in_out_set->remove_atom(link_to_clear);
@@ -303,9 +303,9 @@ Handle AtomTable::getHandle(const AtomPtr& a) const
     if (in_environ(a))
         return a->get_handle();
 
-    if (a->isNode())
+    if (a->is_node())
         return getNodeHandle(a);
-    else if (a->isLink())
+    else if (a->is_link())
         return getLinkHandle(a);
 
     return Handle::UNDEFINED;
@@ -377,7 +377,7 @@ Handle AtomTable::add(AtomPtr atom, bool async)
     // then we need to clone it. We cannot insert it into this atomtable
     // as-is.  (We already know that its not in this atomspace, or its
     // environ.)
-    if (atom->isLink()) {
+    if (atom->is_link()) {
         // Well, if the link was in some other atomspace, then
         // the outgoing set will probably be too. (It might not
         // be if the other atomspace is a child of this one).
@@ -412,7 +412,7 @@ Handle AtomTable::add(AtomPtr atom, bool async)
 
     atom->copyValues(Handle(orig));
 
-    if (atom->isLink()) {
+    if (atom->is_link()) {
         if (STATE_LINK == atom_type) {
             // If this is a closed StateLink, (i.e. has no variables)
             // then make sure that the old state gets removed from the
@@ -447,8 +447,8 @@ Handle AtomTable::add(AtomPtr atom, bool async)
     atom->setAtomSpace(_as);
 
     _size++;
-    if (atom->isNode()) _num_nodes++;
-    if (atom->isLink()) _num_links++;
+    if (atom->is_node()) _num_nodes++;
+    if (atom->is_link()) _num_links++;
     _size_by_type[atom->_type] ++;
 
     Handle h(atom->get_handle());
@@ -710,8 +710,8 @@ AtomPtrSet AtomTable::extract(Handle& handle, bool recursive)
 
     // Decrements the size of the table
     _size--;
-    if (atom->isNode()) _num_nodes--;
-    if (atom->isLink()) _num_links--;
+    if (atom->is_node()) _num_nodes--;
+    if (atom->is_link()) _num_links--;
     _size_by_type[atom->_type] --;
 
     auto range = _atom_store.equal_range(atom->get_hash());
@@ -727,7 +727,7 @@ AtomPtrSet AtomTable::extract(Handle& handle, bool recursive)
     Atom* pat = atom.operator->();
     typeIndex.removeAtom(pat);
 
-    if (atom->isLink()) {
+    if (atom->is_link()) {
         LinkPtr lll(LinkCast(atom));
         for (AtomPtr a : lll->_outgoing) {
             a->remove_atom(lll);

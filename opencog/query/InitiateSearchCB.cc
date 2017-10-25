@@ -556,7 +556,7 @@ void InitiateSearchCB::find_rarest(const Handle& clause,
 	// Base case
 	if (quotation.is_unquoted() and (CHOICE_LINK == t)) return;
 
-	if (not clause->isLink()) return;
+	if (not clause->is_link()) return;
 
 	if (not quotation.consumable(t))
 	{

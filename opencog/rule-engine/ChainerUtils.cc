@@ -35,7 +35,7 @@ void get_outgoing_nodes(const Handle& hinput,
                         Type type)
 {
     // Recursive case
-    if (hinput->isLink()) {
+    if (hinput->is_link()) {
         for (const Handle& h : hinput->getOutgoingSet())
             get_outgoing_nodes(h, node_set, type);
         return;
@@ -68,10 +68,10 @@ bool are_similar(const Handle& h1, const Handle& h2, bool strict_type_match)
     if (h1 == h2)
         return true;
 
-    if (h1->isNode() and h2->isNode())
+    if (h1->is_node() and h2->is_node())
         return !strict_type_match or h1->get_type() == h2->get_type();
 
-    if (h1->isLink() and h2->isLink()) {
+    if (h1->is_link() and h2->is_link()) {
         if (strict_type_match and (h1->get_type() != h2->get_type()))
             return false;
 

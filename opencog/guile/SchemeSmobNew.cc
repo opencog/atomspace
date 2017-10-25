@@ -60,7 +60,7 @@ std::string SchemeSmob::handle_to_string(const Handle& h, int indent)
 	// to file, and then restored, as needed.
 	std::string ret = "";
 	for (int i=0; i< indent; i++) ret += "   ";
-	if (h->isNode())
+	if (h->is_node())
 	{
 		ret += "(";
 		ret += classserver().getTypeName(h->get_type());
@@ -83,7 +83,7 @@ std::string SchemeSmob::handle_to_string(const Handle& h, int indent)
 		return ret;
 	}
 
-	if (h->isLink())
+	if (h->is_link())
 	{
 		ret += "(";
 		ret += classserver().getTypeName(h->get_type());
@@ -125,7 +125,7 @@ std::string SchemeSmob::protom_to_string(SCM node)
 	if (nullptr == pa) return "#<Invalid handle>";
 
 	// XXX FIXME; should not use pa->to_string() as the print method.
-	if (not pa->isAtom())
+	if (not pa->is_atom())
 		return pa->to_string();
 
 	// Avoid printing atoms that are not in any atomspace.
@@ -193,7 +193,7 @@ Handle SchemeSmob::scm_to_handle (SCM sh)
 	if (nullptr == pa)
 		return Handle::UNDEFINED;
 
-	if (not pa->isAtom())
+	if (not pa->is_atom())
 		return Handle::UNDEFINED;
 
 	Handle h(HandleCast(pa));
@@ -260,7 +260,7 @@ SCM SchemeSmob::ss_node_p (SCM s)
 	if (nullptr == h)
 		return SCM_BOOL_F;
 
-	if (h->isNode()) return SCM_BOOL_T;
+	if (h->is_node()) return SCM_BOOL_T;
 
 	return SCM_BOOL_F;
 }
@@ -274,7 +274,7 @@ SCM SchemeSmob::ss_link_p (SCM s)
 	if (nullptr == h)
 		return SCM_BOOL_F;
 
-	if (h->isLink()) return SCM_BOOL_T;
+	if (h->is_link()) return SCM_BOOL_T;
 	return SCM_BOOL_F;
 }
 

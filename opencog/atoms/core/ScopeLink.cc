@@ -300,7 +300,7 @@ ContentHash ScopeLink::term_hash(const Handle& h,
 	}
 
 	// Just the plain old hash for all other nodes.
-	if (h->isNode()) return h->get_hash();
+	if (h->is_node()) return h->get_hash();
 
 	// Quotation
 	quotation.update(t);

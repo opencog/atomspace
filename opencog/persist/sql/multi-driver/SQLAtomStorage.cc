@@ -1005,7 +1005,7 @@ void SQLAtomStorage::get_atom_values(Handle& atom)
  */
 int SQLAtomStorage::get_height(const Handle& atom)
 {
-	if (not atom->isLink()) return 0;
+	if (not atom->is_link()) return 0;
 
 	int maxd = 0;
 	for (const Handle& h : atom->getOutgoingSet())
@@ -1033,7 +1033,7 @@ UUID SQLAtomStorage::check_uuid(const Handle& h)
 
 	// Ooops. We need to look in the database to find out what this is.
 	Handle dbh;
-	if (h->isNode())
+	if (h->is_node())
 	{
 		dbh = doGetNode(h->get_type(), h->get_name().c_str());
 	}
@@ -1179,7 +1179,7 @@ void SQLAtomStorage::storeAtom(const Handle& h, bool synchronous)
  */
 int SQLAtomStorage::do_store_atom(const Handle& h)
 {
-	if (h->isNode())
+	if (h->is_node())
 	{
 		do_store_single_atom(h, 0);
 		return 0;
@@ -1411,7 +1411,7 @@ void SQLAtomStorage::do_store_single_atom(const Handle& h, int aheight)
 		if (max_height < aheight) max_height = aheight;
 		STMTI("height", aheight);
 
-		if (h->isLink())
+		if (h->is_link())
 		{
 			// The Atoms table has a UNIQUE constraint on the
 			// outgoing set.  If a link is too large, a postgres

@@ -63,9 +63,9 @@ public:
 		return classserver().isA(at, t);
 	}
 
-	virtual bool isAtom() const { return false; }
-	virtual bool isNode() const { return false; }
-	virtual bool isLink() const { return false; }
+	virtual bool is_atom() const { return false; }
+	virtual bool is_node() const { return false; }
+	virtual bool is_link() const { return false; }
 
 	/**
 	 * Returns a string representation of the proto-atom.

@@ -149,12 +149,12 @@ bool AtomSpace::compare_atomspaces(const AtomSpace& space_first,
         if( false)
         {
         Handle atom_second;
-        if (atom_first->isNode())
+        if (atom_first->is_node())
         {
             atom_second = table_second.getHandle(atom_first->get_type(),
                         atom_first->get_name());
         }
-        else if (atom_first->isLink())
+        else if (atom_first->is_link())
         {
             atom_second =  table_second.getHandle(atom_first->get_type(),
                         atom_first->getOutgoingSet());
@@ -345,11 +345,11 @@ Handle AtomSpace::fetch_atom(const Handle& h)
     // else, then save the old TV, fetch the new TV, and combine them
     // with your favorite algo.
     Handle hv;
-    if (h->isNode()) {
+    if (h->is_node()) {
         hv = _backing_store->getNode(h->get_type(),
                                      h->get_name().c_str());
     }
-    else if (h->isLink()) {
+    else if (h->is_link()) {
         hv = _backing_store->getLink(h->get_type(),
                                      h->getOutgoingSet());
     }

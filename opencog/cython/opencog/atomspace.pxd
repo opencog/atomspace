@@ -102,8 +102,8 @@ cdef extern from "opencog/atoms/base/Atom.h" namespace "opencog":
         cAtom()
 
         Type get_type()
-        int isNode()
-        int isLink()
+        int is_node()
+        int is_link()
 
         string to_string()
         string to_short_string()

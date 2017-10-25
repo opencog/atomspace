@@ -130,8 +130,8 @@ public:
      */
     ~Link();
 
-    virtual bool isNode() const { return false; }
-    virtual bool isLink() const { return true; }
+    virtual bool is_node() const { return false; }
+    virtual bool is_link() const { return true; }
 
     virtual Arity get_arity() const {
         return _outgoing.size();

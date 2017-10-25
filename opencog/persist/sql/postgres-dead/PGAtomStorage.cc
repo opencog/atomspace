@@ -935,10 +935,10 @@ int PGAtomStorage::do_store_atom_recursive(Database& database, AtomPtr atom)
     int height = 0;
 
     // If this is a link...
-    if (atom->isLink())
+    if (atom->is_link())
     {
         // Handle the link case...
-        OC_ASSERT(atom->isLink(), "atom Not Link or Node ???");
+        OC_ASSERT(atom->is_link(), "atom Not Link or Node ???");
 
         // Loop over the outgoing set storing each one and returning the
         // height so we can know this atom's height.
@@ -1042,7 +1042,7 @@ std::string PGAtomStorage::build_atom_insert(Database& database,
     database.add_column_unsigned("type", database_type);
 
     // Store the node name, if its a node
-    if (atom->isNode())
+    if (atom->is_node())
     {
         // The Atoms table has a UNIQUE constraint on the
         // node name.  If a node name is too long, a postgres
@@ -1062,7 +1062,7 @@ std::string PGAtomStorage::build_atom_insert(Database& database,
     else
     {
         // Handle the Link case
-        OC_ASSERT(atom->isLink(), "atom Not Link or Node ???");
+        OC_ASSERT(atom->is_link(), "atom Not Link or Node ???");
 
         // See if this height is a new max.
         if (max_height < height)
@@ -1191,7 +1191,7 @@ void PGAtomStorage::do_store_atom_single(Database& database,
         // If there was still an error, handle the possibility that it
         // was caused by a collision of the hash on the outgoing set if
         // this was a link.
-        if (not database.has_results() and _store_edges and atom->isLink())
+        if (not database.has_results() and _store_edges and atom->is_link())
         {
             // Get a new diffentiator for this atom's uuid.
             int differentiator = load_max_hash_differentiator(atom->get_type(), 
@@ -1212,7 +1212,7 @@ void PGAtomStorage::do_store_atom_single(Database& database,
     if (atom_needs_insert)
     {
         // If this is a link then store it's edges...
-        if (_store_edges and atom->isLink())
+        if (_store_edges and atom->is_link())
             store_outgoing_edges(atom);
     }
 

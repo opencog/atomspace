@@ -72,7 +72,7 @@ UUID TLB::addAtom(const Handle& h, UUID uuid)
     if (nullptr == hr) hr = h;
 
     // Force a resolution of the outgoing set!
-    if (hr != h and h->isLink())
+    if (hr != h and h->is_link())
     {
         for (const Handle& ho: h->getOutgoingSet())
             addAtom(ho, TLB::INVALID_UUID);

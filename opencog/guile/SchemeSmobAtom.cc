@@ -48,7 +48,7 @@ Handle SchemeSmob::verify_handle (SCM satom, const char * subrname, int pos)
 	// protoAtoms.  Howerver, in the guile wrapper, we expect all
 	// handles to be pointers to atoms; use verify_protom() instead,
 	// if you just want ProtoAtoms.
-	if (not (h->isLink() or h->isNode()))
+	if (not (h->is_link() or h->is_node()))
 		scm_wrong_type_arg_msg(subrname, pos, satom, "opencog atom");
 
 	return h;
@@ -71,7 +71,7 @@ SCM SchemeSmob::ss_name (SCM satom)
 {
 	std::string name;
 	Handle h = verify_handle(satom, "cog-name");
-	if (h->isNode()) name = h->get_name();
+	if (h->is_node()) name = h->get_name();
 	SCM str = scm_from_utf8_string(name.c_str());
 	return str;
 }
@@ -91,7 +91,7 @@ SCM SchemeSmob::ss_arity (SCM satom)
 {
 	Handle h = verify_handle(satom, "cog-arity");
 	Arity ari = 0;
-	if (h->isLink()) ari = h->get_arity();
+	if (h->is_link()) ari = h->get_arity();
 
 	/* Arity is currently an unsigned short */
 	SCM sari = scm_from_ushort(ari);
@@ -182,7 +182,7 @@ SCM SchemeSmob::ss_outgoing_set (SCM satom)
 {
 	Handle h = verify_handle(satom, "cog-outgoing-set");
 
-	if (not h->isLink()) return SCM_EOL;
+	if (not h->is_link()) return SCM_EOL;
 
 	const HandleSeq& oset = h->getOutgoingSet();
 
@@ -206,7 +206,7 @@ SCM SchemeSmob::ss_outgoing_by_type (SCM satom, SCM stype)
 	Handle h = verify_handle(satom, "cog-outgoing-by-type");
 	Type t = verify_atom_type(stype, "cog-outgoing-by-type", 2);
 
-	if (not h->isLink()) return SCM_EOL;
+	if (not h->is_link()) return SCM_EOL;
 
 	const HandleSeq& oset = h->getOutgoingSet();
 
@@ -230,7 +230,7 @@ SCM SchemeSmob::ss_outgoing_atom (SCM satom, SCM spos)
 	Handle h = verify_handle(satom, "cog-outgoing-atom");
 	size_t pos = verify_size(spos, "cog-outgoing-atom", 2);
 
-	if (not h->isLink()) return SCM_EOL;
+	if (not h->is_link()) return SCM_EOL;
 
 	const HandleSeq& oset = h->getOutgoingSet();
 	if (oset.size() <= pos) return SCM_EOL;

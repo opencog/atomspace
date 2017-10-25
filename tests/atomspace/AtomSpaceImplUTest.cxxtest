@@ -79,9 +79,9 @@ void setLTI(AttentionBank* ab, Handle h, AttentionValue::lti_t ltiValue)
     ab->change_av(h, new_av);
 }
 
-bool isLink(Handle h) { return h->isLink(); }
+bool isLink(Handle h) { return h->is_link(); }
 
-bool isNode(Handle h) { return h->isNode(); }
+bool isNode(Handle h) { return h->is_node(); }
 
 HandleSeq createSimpleGraph(AtomSpace* atomSpace, const char* baseName)
 {

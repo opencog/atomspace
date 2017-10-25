@@ -207,7 +207,7 @@ Handle ForwardChainer::select_source()
 		// remain a hack anyway.
 		if (biased_randbool(0.01)) {
 			for (const Handle& h : _selected_sources) {
-				if (h->isLink()) {
+				if (h->is_link()) {
 					const HandleSeq& outgoings = h->getOutgoingSet();
 					HandleSeq no_free_vars_outgoings;
 					// Only add children with no free variables in them

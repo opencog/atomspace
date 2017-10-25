@@ -210,7 +210,7 @@ bool MapLink::extract(const Handle& termpat,
 	if (t != ground->get_type()) return false;
 
 	// If they are (non-variable) nodes, they must be identical.
-	if (not termpat->isLink())
+	if (not termpat->is_link())
 		return (termpat == ground);
 
 	const HandleSeq& tlo = termpat->getOutgoingSet();

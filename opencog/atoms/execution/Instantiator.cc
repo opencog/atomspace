@@ -118,7 +118,7 @@ Handle Instantiator::walk_tree(const Handle& expr, bool silent)
 		return walk_tree(expr->getOutgoingAtom(0), silent);
 	}
 
-	if (expr->isNode())
+	if (expr->is_node())
 	{
 		if (context_cp.is_quoted())
 			return expr;

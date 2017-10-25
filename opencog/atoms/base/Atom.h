@@ -223,7 +223,7 @@ private:
 public:
 
     virtual ~Atom();
-    virtual bool isAtom() const { return true; }
+    virtual bool is_atom() const { return true; }
 
     //! Returns the AtomSpace in which this Atom is inserted.
     AtomSpace* getAtomSpace() const { return _atom_space; }

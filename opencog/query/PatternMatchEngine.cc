@@ -116,7 +116,7 @@ bool PatternMatchEngine::variable_compare(const Handle& hp,
 
 	// VariableNode had better be an actual node!
 	// If it's not then we are very very confused ...
-	OC_ASSERT (hp->isNode(),
+	OC_ASSERT (hp->is_node(),
 	           "Expected variable to be a node, got this: %s\n",
 	           hp->to_short_string().c_str());
 
@@ -1040,11 +1040,11 @@ bool PatternMatchEngine::tree_compare(const PatternTermPtr& ptm,
 		return self_compare(ptm);
 
 	// If both are nodes, compare them as such.
-	if (hp->isNode() and hg->isNode())
+	if (hp->is_node() and hg->is_node())
 		return node_compare(hp, hg);
 
 	// If they're not both links, then it is clearly a mismatch.
-	if (not (hp->isLink() and hg->isLink())) return _pmc.fuzzy_match(hp, hg);
+	if (not (hp->is_link() and hg->is_link())) return _pmc.fuzzy_match(hp, hg);
 
 	// Let the callback perform basic checking.
 	bool match = _pmc.link_match(ptm, hg);

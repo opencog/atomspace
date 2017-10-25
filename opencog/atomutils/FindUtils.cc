@@ -86,7 +86,7 @@ FindAtoms::Loco FindAtoms::find_rec(const Handle& h, Quotation quotation)
 		if (classserver().isA(t, stopper)) return NOPE;
 	}
 
-	if (h->isLink())
+	if (h->is_link())
 	{
 		bool held = false;
 		bool imm = false;
@@ -109,7 +109,7 @@ FindAtoms::Loco FindAtoms::find_rec(const Handle& h, Quotation quotation)
 bool is_atom_in_tree(const Handle& tree, const Handle& atom)
 {
 	if (tree == atom) return true;
-	if (not tree->isLink()) return false;
+	if (not tree->is_link()) return false;
 
 	// Recurse downwards...
 	for (const Handle& h: tree->getOutgoingSet()) {
@@ -134,7 +134,7 @@ int min_quotation_level(const Handle& tree,
 {
 	// Base case
 	if (content_eq(tree, atom)) return quotation.level();
-	if (not tree->isLink()) return std::numeric_limits<int>::max();
+	if (not tree->is_link()) return std::numeric_limits<int>::max();
 
 	// Recursive case
 	quotation.update(tree->get_type());
@@ -150,7 +150,7 @@ int max_quotation_level(const Handle& tree,
 {
 	// Base case
 	if (tree == atom) return quotation.level();
-	if (not tree->isLink()) return std::numeric_limits<int>::min();
+	if (not tree->is_link()) return std::numeric_limits<int>::min();
 
 	// Recursive case
 	quotation.update(tree->get_type());
@@ -164,7 +164,7 @@ bool is_unscoped_in_tree(const Handle& tree, const Handle& atom)
 {
 	// Base cases
 	if (content_eq(tree, atom)) return true;
-	if (not tree->isLink()) return false;
+	if (not tree->is_link()) return false;
 	ScopeLinkPtr stree(ScopeLinkCast(tree));
 	if (nullptr != stree) {
 		const HandleSet& varset = stree->get_variables().varset;
@@ -276,7 +276,7 @@ bool contains_atomtype(const Handle& clause, Type atom_type, Quotation quotation
 
 	quotation.update(clause_type);
 
-	if (not clause->isLink()) return false;
+	if (not clause->is_link()) return false;
 
 	for (const Handle& subclause: clause->getOutgoingSet())
 	{
@@ -292,11 +292,11 @@ HandleSet get_free_variables(const Handle& h, Quotation quotation)
 	// Base cases
 	if (t == VARIABLE_NODE and quotation.is_unquoted())
 		return {h};
-	if (h->isNode())
+	if (h->is_node())
 		return {};
 
 	// Recursive cases
-	OC_ASSERT(h->isLink());
+	OC_ASSERT(h->is_link());
 	quotation.update(t);
 	HandleSet results = get_free_variables(h->getOutgoingSet(), quotation);
 	// If the link was a scope link then remove the scoped
@@ -325,11 +325,11 @@ HandleSet get_all_uniq_atoms(const Handle& h)
 	// Base cases
 	if (!h)
 		return {};
-	if (h->isNode())
+	if (h->is_node())
 		return {h};
 
 	// Recursive cases
-	if (h->isLink()) {
+	if (h->is_link()) {
 		HandleSet results({h});
 		for (const Handle& child : h->getOutgoingSet()) {
 			HandleSet aas = get_all_uniq_atoms(child);

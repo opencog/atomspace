@@ -59,7 +59,7 @@ private:
 			return it->second;
 
 		// If not a link, and not mapped, just return it.
-		if (not expr->isLink()) return expr;
+		if (not expr->is_link()) return expr;
 
 		HandleSeq oset_results;
 		bool changed = false;

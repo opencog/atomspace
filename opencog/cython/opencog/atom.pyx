@@ -37,7 +37,7 @@ cdef class Atom(object):
                 atom_ptr = self.handle.atom_ptr()
                 if atom_ptr == NULL:   # avoid null-pointer deref
                     return None
-                if atom_ptr.isNode():
+                if atom_ptr.is_node():
                     self._name = atom_ptr.get_name()
                 else:
                     self._name = ""
@@ -171,7 +171,7 @@ cdef class Atom(object):
                 atom_ptr = self.handle.atom_ptr()
                 if atom_ptr == NULL:   # avoid null-pointer deref
                     return None
-                if atom_ptr.isLink():
+                if atom_ptr.is_link():
                     self._outgoing = self.get_out()
                 else:
                     self._outgoing = []
