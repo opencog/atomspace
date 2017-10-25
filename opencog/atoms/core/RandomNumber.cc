@@ -46,7 +46,7 @@ void RandomNumberLink::init()
 	if (_outgoing.size() != 2)
 		throw SyntaxException(TRACE_INFO,
 			"Expecting a numerical min and max; got %s",
-			toString().c_str());
+			to_string().c_str());
 }
 
 RandomNumberLink::RandomNumberLink(const HandleSeq& oset, Type t)
@@ -75,7 +75,7 @@ static NumberNodePtr unwrap_set(Handle h)
 		if (1 != h->getArity())
 			throw SyntaxException(TRACE_INFO,
 				"Expecting only one number, got more than that: %s",
-				h->toString().c_str());
+				h->to_string().c_str());
 		h = h->getOutgoingAtom(0);
 	}
 
@@ -83,7 +83,7 @@ static NumberNodePtr unwrap_set(Handle h)
 	if (nullptr == na)
 		throw SyntaxException(TRACE_INFO,
 			"Expecting a number, got this: %s",
-			h->toString().c_str());
+			h->to_string().c_str());
 	return na;
 }
 

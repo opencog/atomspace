@@ -127,8 +127,8 @@ bool Recognizer::do_search(PatternMatchEngine* pme, const Handle& top)
 		Handle h(iset[i]);
 		dbgprt("rrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrr\n");
 		dbgprt("Loop candidate (%lu - %s):\n%s\n", _cnt++,
-		       top->toShortString().c_str(),
-		       h->toShortString().c_str());
+		       top->to_short_string().c_str(),
+		       h->to_short_string().c_str());
 		bool found = pme->explore_neighborhood(_root, _starter_term, h);
 
 		// Terminate search if satisfied.

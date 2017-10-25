@@ -189,7 +189,7 @@ public:
      *
      * @return A string representation of the link.
      */
-    std::string toString(const std::string& indent) const;
+    std::string to_string(const std::string& indent) const;
 
     /**
      * Returns a short string representation of the link.
@@ -199,14 +199,14 @@ public:
      *
      * @return A short string representation of the link.
      */
-    std::string toShortString(const std::string& indent) const;
+    std::string to_short_string(const std::string& indent) const;
 
 	// Work around gdb's incapability to build a string on the fly,
 	// see http://stackoverflow.com/questions/16734783 and
 	// http://stackoverflow.com/questions/2973976 for more
 	// explanation.
-	using Atom::toString;
-	using Atom::toShortString;
+	using Atom::to_string;
+	using Atom::to_short_string;
 	
     /**
      * Perform a content-based compare of another atom to this one.

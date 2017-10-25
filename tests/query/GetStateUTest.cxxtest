@@ -112,7 +112,7 @@ void GetStateUTest::Getter(void)
 		{
 			fail_count++;
 			printf("Ohh nooo: failure %d got %s\n", fail_count,
-				got->toString().c_str());
+				got->to_string().c_str());
 		}
 		TSM_ASSERT("Expected arity of one", got->getArity() == 1);
 		// sched_yield();

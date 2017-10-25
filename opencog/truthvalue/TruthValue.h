@@ -111,7 +111,7 @@ public:
     static TruthValuePtr factory(Type, const std::vector<double>&);
     static TruthValuePtr factory(const ProtoAtomPtr&);
 
-    virtual std::string toShortString(const std::string&) const;
+    virtual std::string to_short_string(const std::string&) const;
 
     // Special TVs
 

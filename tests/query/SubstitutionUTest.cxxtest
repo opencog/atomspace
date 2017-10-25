@@ -87,7 +87,7 @@ void SubstitutionUTest::test_simple_substitution(void)
 	Handle harglist = eval->eval_h("arglist");
 	Handle hexpected = eval->eval_h("answer");
 
-	printf("Variable list is %s\n", hvarlist->toString().c_str());
+	printf("Variable list is %s\n", hvarlist->to_string().c_str());
 
 	Type vt = hvarlist->getType();
 	TSM_ASSERT("Didn't get the variable listtype", vt == VARIABLE_LIST);
@@ -101,8 +101,8 @@ void SubstitutionUTest::test_simple_substitution(void)
 	Handle hanswer = vlp->substitute(htemplate, argl->getOutgoingSet());
 	hanswer = as->get_atom(hanswer);
 
-	printf("Expected this: %s\n", hexpected->toString().c_str());
-	printf("Found this answer: %s\n", hanswer->toString().c_str());
+	printf("Expected this: %s\n", hexpected->to_string().c_str());
+	printf("Found this answer: %s\n", hanswer->to_string().c_str());
 
 	TSM_ASSERT("Didn't get the expected grounding", hanswer == hexpected);
 }
@@ -119,7 +119,7 @@ void SubstitutionUTest::test_free_substitution(void)
 	Handle harglist = eval->eval_h("arglist");
 	Handle hexpected = eval->eval_h("free-answer");
 
-	printf("Variable list is %s\n", hvarlist->toString().c_str());
+	printf("Variable list is %s\n", hvarlist->to_string().c_str());
 
 	Type vt = hvarlist->getType();
 	TSM_ASSERT("Didn't get the variable listtype", vt == VARIABLE_LIST);
@@ -133,8 +133,8 @@ void SubstitutionUTest::test_free_substitution(void)
 	Handle hanswer = vlp->substitute(htemplate, argl->getOutgoingSet());
 	hanswer = as->get_atom(hanswer);
 
-	printf("Expected this: %s\n", hexpected->toString().c_str());
-	printf("Found this answer: %s\n", hanswer->toString().c_str());
+	printf("Expected this: %s\n", hexpected->to_string().c_str());
+	printf("Found this answer: %s\n", hanswer->to_string().c_str());
 
 	TSM_ASSERT("Didn't get the expected grounding", hanswer == hexpected);
 }
@@ -151,7 +151,7 @@ void SubstitutionUTest::test_typed_substitution(void)
 	Handle harglist = eval->eval_h("arglist");
 	Handle hexpected = eval->eval_h("answer");
 
-	printf("Variable list is %s\n", hvarlist->toString().c_str());
+	printf("Variable list is %s\n", hvarlist->to_string().c_str());
 
 	Type vt = hvarlist->getType();
 	TSM_ASSERT("Didn't get the variable listtype", vt == VARIABLE_LIST);
@@ -165,8 +165,8 @@ void SubstitutionUTest::test_typed_substitution(void)
 	Handle hanswer = vlp->substitute(htemplate, argl->getOutgoingSet());
 	hanswer = as->get_atom(hanswer);
 
-	printf("Expected this: %s\n", hexpected->toString().c_str());
-	printf("Found this answer: %s\n", hanswer->toString().c_str());
+	printf("Expected this: %s\n", hexpected->to_string().c_str());
+	printf("Found this answer: %s\n", hanswer->to_string().c_str());
 
 	TSM_ASSERT("Didn't get the expected grounding", hanswer == hexpected);
 }

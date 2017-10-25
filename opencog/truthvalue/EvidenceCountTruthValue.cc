@@ -144,7 +144,7 @@ TruthValuePtr EvidenceCountTruthValue::merge(const TruthValuePtr& other,
 	}
 }
 
-std::string EvidenceCountTruthValue::toString(const std::string& indent) const
+std::string EvidenceCountTruthValue::to_string(const std::string& indent) const
 {
 	char buf[1024];
 	sprintf(buf, "(ectv %f %f)",

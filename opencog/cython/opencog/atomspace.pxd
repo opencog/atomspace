@@ -53,7 +53,7 @@ cdef extern from "opencog/truthvalue/TruthValue.h" namespace "opencog":
         confidence_t getConfidence()
         count_t getCount()
         tv_ptr DEFAULT_TV()
-        string toString()
+        string to_string()
         bint operator==(cTruthValue h)
         bint operator!=(cTruthValue h)
 
@@ -66,7 +66,7 @@ cdef extern from "opencog/truthvalue/SimpleTruthValue.h" namespace "opencog":
         count_t confidenceToCount(float)
         confidence_t countToConfidence(float)
         tv_ptr DEFAULT_TV()
-        string toString()
+        string to_string()
         bint operator==(cTruthValue h)
         bint operator!=(cTruthValue h)
 
@@ -105,8 +105,8 @@ cdef extern from "opencog/atoms/base/Atom.h" namespace "opencog":
         int isNode()
         int isLink()
 
-        string toString()
-        string toShortString()
+        string to_string()
+        string to_short_string()
 
         output_iterator getIncomingSet(output_iterator)
 
@@ -127,8 +127,8 @@ cdef extern from "opencog/atoms/base/Handle.h" namespace "opencog":
         cHandle(const cHandle&)
         
         cAtom* atom_ptr()
-        string toString()
-        string toShortString()
+        string to_string()
+        string to_short_string()
 
         bint operator==(cHandle h)
         bint operator!=(cHandle h)

@@ -210,7 +210,7 @@ TruthValuePtr IndefiniteTruthValue::merge(const TruthValuePtr& other,
     return higher_confidence_merge(other);
 }
 
-std::string IndefiniteTruthValue::toString(const std::string& indent) const
+std::string IndefiniteTruthValue::to_string(const std::string& indent) const
 {
     char buf[1024];
     sprintf(buf, "[%f,%f,%f,%f,%f,%d]",

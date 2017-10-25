@@ -346,7 +346,7 @@ public:
             atomSpace->get_handles_by_type(back_inserter(allInhLinks), INHERITANCE_LINK, true);
             //logger().info("4) allInhLinks.size() = %d (vhIdx: %d)\n", allInhLinks.size(), vhIdx);
             //for (unsigned int x = 0; x < allInhLinks.size(); ++x) {
-            //    logger().info("allInhLinks[x]: %s\n", allInhLinks[x]->toString().c_str());
+            //    logger().info("allInhLinks[x]: %s\n", allInhLinks[x]->to_string().c_str());
             //}
             TS_ASSERT(allInhLinks.size() == 8);
             HandleSeq justInhLinks;

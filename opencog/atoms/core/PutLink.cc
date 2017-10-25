@@ -91,7 +91,7 @@ void PutLink::init(void)
 	if (2 != sz and 3 != sz)
 		throw InvalidParamException(TRACE_INFO,
 			"Expecting an outgoing set size of two or three, got %d; %s",
-			sz, toString().c_str());
+			sz, to_string().c_str());
 
 	ScopeLink::extract_variables(_outgoing);
 
@@ -152,13 +152,13 @@ void PutLink::static_typecheck_values(void)
 			if (_vardecl)
 				throw SyntaxException(TRACE_INFO,
 					"PutLink has mismatched value list! vardecl=%s\nvals=%s",
-					_vardecl->toString().c_str(),
-					_values->toString().c_str());
+					_vardecl->to_string().c_str(),
+					_values->to_string().c_str());
 			else
 				throw SyntaxException(TRACE_INFO,
 					"PutLink has mismatched value list! body=%s\nvals=%s",
-					_body->toString().c_str(),
-					_values->toString().c_str());
+					_body->to_string().c_str(),
+					_values->to_string().c_str());
 		}
 		return;
 	}
@@ -257,7 +257,7 @@ Handle PutLink::do_reduce(void) const
 		if (not classserver().isA(btype, LAMBDA_LINK))
 			throw InvalidParamException(TRACE_INFO,
 					"Expecting a LambdaLink, got %s",
-			      bods->toString().c_str());
+			      bods->to_string().c_str());
 	}
 
 	// If the body is a lambda, work with that.

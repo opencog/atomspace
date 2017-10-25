@@ -97,8 +97,8 @@ void GetLinkUTest::test_unary_get(void)
 	Handle hans = eval->eval_h(
 		"(SetLink (ConceptNode \"Ben\") (ConceptNode \"Linas\"))");
 
-	printf("Expected this: %s\n", hans->toString().c_str());
-	printf("Found this answer: %s\n", hgnd->toString().c_str());
+	printf("Expected this: %s\n", hans->to_string().c_str());
+	printf("Found this answer: %s\n", hgnd->to_string().c_str());
 
 	TSM_ASSERT("Didn't get the expected grounding", hans == hgnd);
 
@@ -122,8 +122,8 @@ void GetLinkUTest::test_binary_get(void)
 		"(ListLink (ConceptNode \"Linas\") (ConceptNode \"human\"))"
 		"(ListLink (ConceptNode \"Sparky\") (ConceptNode \"dog\")))");
 
-	printf("Expected this: %s\n", hans->toString().c_str());
-	printf("Found this answer: %s\n", hgnd->toString().c_str());
+	printf("Expected this: %s\n", hans->to_string().c_str());
+	printf("Found this answer: %s\n", hgnd->to_string().c_str());
 
 	TSM_ASSERT("Didn't get the expected grounding", hans == hgnd);
 
@@ -143,8 +143,8 @@ void GetLinkUTest::test_free_bound(void)
 
 	Handle hans = eval->eval_h("(SetLink (ConceptNode \"human\"))");
 
-	printf("Expected this: %s\n", hans->toString().c_str());
-	printf("Found this answer: %s\n", hgnd->toString().c_str());
+	printf("Expected this: %s\n", hans->to_string().c_str());
+	printf("Found this answer: %s\n", hgnd->to_string().c_str());
 
 	TSM_ASSERT("Didn't get the expected grounding", hans == hgnd);
 
@@ -171,8 +171,8 @@ void GetLinkUTest::test_eval_clause(void)
 	                           "         (ConceptNode \"glib\")"
 	                           "         (ConceptNode \"blab\"))))");
 
-	printf("Expected this: %s\n", hans->toString().c_str());
-	printf("Found this answer: %s\n", hgnd->toString().c_str());
+	printf("Expected this: %s\n", hans->to_string().c_str());
+	printf("Found this answer: %s\n", hgnd->to_string().c_str());
 
 	TSM_ASSERT("Didn't get the expected grounding", hans == hgnd);
 
@@ -195,8 +195,8 @@ void GetLinkUTest::test_disconnected_binary_get(void)
 		"(SetLink "
 		"(ListLink (ConceptNode \"John\") (ConceptNode \"compound-A\")))");
 
-	printf("Expected this: %s\n", hans->toString().c_str());
-	printf("Found this answer: %s\n", hgnd->toString().c_str());
+	printf("Expected this: %s\n", hans->to_string().c_str());
+	printf("Found this answer: %s\n", hgnd->to_string().c_str());
 
 	TSM_ASSERT("Didn't get the expected grounding", hans == hgnd);
 
@@ -228,8 +228,8 @@ void GetLinkUTest::test_disconnected_empty(void) {
 		result = satisfying_set(as, gl),
 		expect = al(SET_LINK, HandleSeq());
 
-	printf("Expected this: %s\n", expect->toString().c_str());
-	printf("Found this answer: %s\n", result->toString().c_str());
+	printf("Expected this: %s\n", expect->to_string().c_str());
+	printf("Found this answer: %s\n", result->to_string().c_str());
 
 	TS_ASSERT_EQUALS(result, expect);
 
@@ -264,8 +264,8 @@ void GetLinkUTest::test_not_equal(void) {
 	Handle result = satisfying_set(as, gl);
 	Handle expect = al(SET_LINK, Q);
 
-	printf("Expected this: %s\n", expect->toString().c_str());
-	printf("Found this answer: %s\n", result->toString().c_str());
+	printf("Expected this: %s\n", expect->to_string().c_str());
+	printf("Found this answer: %s\n", result->to_string().c_str());
 
 	TS_ASSERT_EQUALS(result, expect);
 
@@ -302,15 +302,15 @@ void GetLinkUTest::test_disconnected_const_eval(void) {
 	                   al(LIST_LINK,
 	                      an(CONCEPT_NODE, "A"),
 	                      an(CONCEPT_NODE, "B")));
-	printf("Expected this: %s\n", expect->toString().c_str());
-	printf("Found this answer: %s\n", result->toString().c_str());
+	printf("Expected this: %s\n", expect->to_string().c_str());
+	printf("Found this answer: %s\n", result->to_string().c_str());
 	TS_ASSERT_EQUALS(result, expect);
 
 	// Evaluatable constant clause is not satisfied
 	result = satisfying_set(as, getlink_neg);
 	expect = al(SET_LINK, HandleSeq());
-	printf("Expected this: %s\n", expect->toString().c_str());
-	printf("Found this answer: %s\n", result->toString().c_str());
+	printf("Expected this: %s\n", expect->to_string().c_str());
+	printf("Found this answer: %s\n", result->to_string().c_str());
 	TS_ASSERT_EQUALS(result, expect);
 
 	logger().debug("END TEST: %s", __FUNCTION__);

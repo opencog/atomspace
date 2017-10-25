@@ -72,7 +72,7 @@ std::string	BITNode::to_string() const
 	   << "rules: size = " << rules.size();
 	for (const auto& rule : rules)
 		ss << std::endl << rule.first.get_name()
-		   << " " << rule.first.get_rule()->idToString();
+		   << " " << rule.first.get_rule()->id_to_string();
 	return ss.str();
 }
 
@@ -287,7 +287,7 @@ std::string AndBIT::fcs_rewrite_to_ascii_art(const Handle& h) const
 			std::string line_str(line_separator("", conclusion_aa, gsn));
 			return line_str + "\n" + conclusion_aa;
 		}
-	} else return h->idToString();
+	} else return h->id_to_string();
 }
 
 double AndBIT::expand_complexity(const Handle& leaf, const Rule& rule,
@@ -333,7 +333,7 @@ Handle AndBIT::expand_fcs(const Handle& leaf,
 
 	// Log expansion
 	LAZY_URE_LOG_DEBUG << "Expanded forward chainer strategy:" << std::endl
-	                   << nfcs->toString();
+	                   << nfcs->to_string();
 	LAZY_URE_LOG_DEBUG << "With inference tree:" << std::endl << std::endl
 	                   << fcs_to_ascii_art(nfcs) << std::endl;
 
@@ -712,7 +712,7 @@ AndBIT* BIT::insert(AndBIT& andbit)
 	// Check that it isn't already in the BIT
 	if (boost::find(andbits, andbit) != andbits.end()) {
 		LAZY_URE_LOG_DEBUG << "The following and-BIT is already in the BIT: "
-		                   << andbit.fcs->idToString();
+		                   << andbit.fcs->id_to_string();
 		return nullptr;
 	}
 	// Insert while keeping the order

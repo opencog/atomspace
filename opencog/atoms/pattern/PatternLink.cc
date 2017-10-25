@@ -138,7 +138,7 @@ void PatternLink::init(void)
 	{
 		throw InvalidParamException(TRACE_INFO,
 		      "Expecting (optional) variable decls and a body; got %s",
-		      toString().c_str());
+		      to_string().c_str());
 	}
 
 	unbundle_clauses(_body);
@@ -453,11 +453,11 @@ void PatternLink::validate_clauses(HandleSet& vars,
 	if (bogus)
 	{
 		logger().warn("%s: Constant clauses removed from pattern %s",
-		              __FUNCTION__, toShortString().c_str());
+		              __FUNCTION__, to_short_string().c_str());
 		for (const Handle& h: constants)
 		{
 			logger().warn("%s: Removed %s",
-		              __FUNCTION__, h->toShortString().c_str());
+		              __FUNCTION__, h->to_short_string().c_str());
 		}
 	}
 
@@ -472,7 +472,7 @@ void PatternLink::validate_clauses(HandleSet& vars,
 			vars.erase(v);
 			throw InvalidParamException(TRACE_INFO,
 			   "The variable %s does not appear (unquoted) in any clause!",
-			   v->toShortString().c_str());
+			   v->to_short_string().c_str());
 		}
 	}
 }
@@ -843,7 +843,7 @@ void PatternLink::check_satisfiability(const HandleSet& vars,
 		if (vunion.end() == it)
 		{
 			throw InvalidParamException(TRACE_INFO,
-				"Variable not groundable: %s\n", v->toString().c_str());
+				"Variable not groundable: %s\n", v->to_string().c_str());
 		}
 	}
 }
@@ -910,7 +910,7 @@ void PatternLink::check_connectivity(const HandleSeqSeq& components)
 	{
 		ss << "Connected component " << cnt
 		   << " consists of ----------------: \n";
-		for (Handle h : comp) ss << h->toString();
+		for (Handle h : comp) ss << h->to_string();
 		cnt++;
 	}
 	throw InvalidParamException(TRACE_INFO, ss.str().c_str());
@@ -959,7 +959,7 @@ void PatternLink::debug_log(void) const
 		if (_pat.executable_holders.find(h) != _pat.executable_holders.end())
 			ss << " (executable)";
 		ss << std::endl;
-		ss << h->toShortString();
+		ss << h->to_short_string();
 		logger().fine() << ss.str();
 		cl++;
 	}
@@ -977,7 +977,7 @@ void PatternLink::debug_log(void) const
 			if (_pat.executable_holders.find(h) != _pat.executable_holders.end())
 				ss << " (executable)";
 			ss << std::endl;
-			ss << h->toShortString();
+			ss << h->to_short_string();
 			logger().fine() << ss.str();
 			cl++;
 		}
@@ -989,7 +989,7 @@ void PatternLink::debug_log(void) const
 	for (const Handle& h : _varlist.varset)
 	{
 		if (h->isNode())
-			logger().fine() << "Bound var: " << h->toShortString();
+			logger().fine() << "Bound var: " << h->to_short_string();
 	}
 
 	if (_varlist.varset.empty())

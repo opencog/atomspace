@@ -141,7 +141,7 @@ void ForwardChainer::do_step()
 
 	// Select source
 	_cur_source = select_source();
-	LAZY_URE_LOG_DEBUG << "Source:" << std::endl << _cur_source->toString();
+	LAZY_URE_LOG_DEBUG << "Source:" << std::endl << _cur_source->to_string();
 
 	// Select rule
 	Rule rule = select_rule(_cur_source);
@@ -368,7 +368,7 @@ UnorderedHandleSet ForwardChainer::apply_rule(const Rule& rule)
 	}
 
 	LAZY_URE_LOG_DEBUG << "Result is:" << std::endl
-	                   << _as.add_link(SET_LINK, results)->toShortString();
+	                   << _as.add_link(SET_LINK, results)->to_short_string();
 
 	return UnorderedHandleSet(results.begin(), results.end());
 }

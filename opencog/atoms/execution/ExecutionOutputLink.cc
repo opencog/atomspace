@@ -50,7 +50,7 @@ void ExecutionOutputLink::check_schema(const Handle& schema) const
 	{
 		throw SyntaxException(TRACE_INFO,
 		                      "ExecutionOutputLink must have schema! Got %s",
-		                      schema->toString().c_str());
+		                      schema->to_string().c_str());
 	}
 }
 
@@ -120,8 +120,8 @@ Handle ExecutionOutputLink::do_execute(AtomSpace* as,
                                        const Handle& cargs,
                                        bool silent)
 {
-	LAZY_LOG_FINE << "Execute gsn: " << gsn->toShortString()
-	              << "with arguments: " << cargs->toShortString();
+	LAZY_LOG_FINE << "Execute gsn: " << gsn->to_short_string()
+	              << "with arguments: " << cargs->to_short_string();
 
 	// Force execution of the arguments. We have to do this, because
 	// the user-defined functions are black-boxes, and cannot be trusted
@@ -189,7 +189,7 @@ Handle ExecutionOutputLink::do_execute(AtomSpace* as,
 		// Unkown proceedure type
 		throw RuntimeException(TRACE_INFO,
 		                       "Cannot evaluate unknown Schema %s",
-		                       gsn->toString().c_str());
+		                       gsn->to_string().c_str());
 	}
 
 	// Check for a not-uncommon user-error.  If the user-defined
@@ -205,8 +205,8 @@ Handle ExecutionOutputLink::do_execute(AtomSpace* as,
 
 		throw RuntimeException(TRACE_INFO,
 		        "Invalid return value from schema %s\nArgs: %s",
-		        gsn->toString().c_str(),
-		        cargs->toString().c_str());
+		        gsn->to_string().c_str(),
+		        cargs->to_string().c_str());
 	}
 
 	LAZY_LOG_FINE << "Result: " << oc_to_string(result);

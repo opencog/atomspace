@@ -55,9 +55,9 @@ void backward_chain(AtomSpace& as)
 
     Handle results = bc.get_results();
 
-    std::cout << "Query:\n" << target->toShortString() << std::endl;
+    std::cout << "Query:\n" << target->to_short_string() << std::endl;
     std::cout << "Answer:\n";
-    std::cout << results->toShortString() << std::endl;
+    std::cout << results->to_short_string() << std::endl;
 }
 
 /*
@@ -89,8 +89,8 @@ void forward_chain(AtomSpace& as)
     //fc.do_step(); //Single step forward chaining.
     fc.do_chain();
 
-    std::cout << "Forward chaining on source:\n" << source->toShortString() << std::endl;
+    std::cout << "Forward chaining on source:\n" << source->to_short_string() << std::endl;
     std::cout << "FC results:\n";
     for(const auto& h : fc.get_chaining_result())
-        std::cout << h->toShortString() << std::endl;
+        std::cout << h->to_short_string() << std::endl;
 }

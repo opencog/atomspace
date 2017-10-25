@@ -112,7 +112,7 @@ std::string h_to_string(const Handle& h)
 	if (h == nullptr)
 		return "nullatom\n";
 	else
-		return h->toString();
+		return h->to_string();
 }
 std::string hp_to_string(const HandlePair& hp)
 {

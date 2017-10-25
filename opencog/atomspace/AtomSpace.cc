@@ -174,12 +174,12 @@ bool AtomSpace::compare_atomspaces(const AtomSpace& space_first,
             {
                 if (atom_first)
                     std::cout << "compare_atomspaces - first atom " << 
-                            atom_first->toString() << " != NULL " << 
+                            atom_first->to_string() << " != NULL " <<
                             std::endl;
                 if (atom_second)
-                    std::cout << "compare_atomspaces - first atom "  << 
+                    std::cout << "compare_atomspaces - first atom " <<
                             "NULL != second atom " << 
-                            atom_second->toString() << std::endl;
+                            atom_second->to_string() << std::endl;
             }
             return false;
         }
@@ -190,8 +190,8 @@ bool AtomSpace::compare_atomspaces(const AtomSpace& space_first,
         {
             if (emit_diagnostics)
                 std::cout << "compare_atomspaces - first atom " << 
-                        atom_first->toString() << " != second atom " << 
-                        atom_second->toString() << std::endl;
+                        atom_first->to_string() << " != second atom " <<
+                        atom_second->to_string() << std::endl;
             return false;
         }
 
@@ -204,8 +204,8 @@ bool AtomSpace::compare_atomspaces(const AtomSpace& space_first,
             {
                 if (emit_diagnostics)
                     std::cout << "compare_atomspaces - first truth " << 
-                            atom_first->toString() << " != second truth " << 
-                            atom_second->toString() << std::endl;
+                            atom_first->to_string() << " != second truth " <<
+                            atom_second->to_string() << std::endl;
                 return false;
             }
         }
@@ -222,7 +222,7 @@ bool AtomSpace::compare_atomspaces(const AtomSpace& space_first,
         {
             if (emit_diagnostics)
                 std::cout << "compare_atomspaces - unchecked space atom " << 
-                        atom->toString() << std::endl;
+                        atom->to_string() << std::endl;
             all_checked = false;
         }
     }
@@ -433,7 +433,7 @@ ostream& operator<<(ostream& out, const opencog::AtomSpace& as) {
     as.get_handles_by_type(back_inserter(results), opencog::ATOM, true);
     for (const opencog::Handle& h : results)
 	    if (h->getIncomingSetSize() == 0)
-		    out << h->toString() << endl;
+		    out << h->to_string() << endl;
     return out;
 }
 

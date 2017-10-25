@@ -115,7 +115,7 @@ public:
     TruthValuePtr merge(const TruthValuePtr&,
                         const MergeCtrl& mc=MergeCtrl()) const;
 
-    std::string toString(const std::string&) const;
+    std::string to_string(const std::string&) const;
 
     // clone method
     static IndefiniteTruthValuePtr createITV(TruthValuePtr tv)

@@ -93,7 +93,7 @@ void GlobUTest::test_glob_middle(void)
 	eval->eval("(load-from-path \"tests/query/glob-basic.scm\")");
 
 	Handle love = eval->eval_h("(cog-execute! glob-you)");
-	printf("glob-you %s\n", love->toString().c_str());
+	printf("glob-you %s\n", love->to_string().c_str());
 	TS_ASSERT_EQUALS(2, love->getArity());
 
 	Handle response = eval->eval_h(
@@ -127,7 +127,7 @@ void GlobUTest::test_glob_final(void)
 	eval->eval("(load-from-path \"tests/query/glob-basic.scm\")");
 
 	Handle love = eval->eval_h("(cog-execute! love-glob)");
-	printf("love-glob %s\n", love->toString().c_str());
+	printf("love-glob %s\n", love->to_string().c_str());
 	TS_ASSERT_EQUALS(3, love->getArity());
 
 	Handle response = eval->eval_h(
@@ -170,7 +170,7 @@ void GlobUTest::test_glob_type(void)
 	eval->eval("(load-from-path \"tests/query/glob-basic.scm\")");
 
 	Handle love = eval->eval_h("(cog-execute! love-type-glob)");
-	printf("love-type-glob %s\n", love->toString().c_str());
+	printf("love-type-glob %s\n", love->to_string().c_str());
 	TS_ASSERT_EQUALS(1, love->getArity());
 
 	Handle response = eval->eval_h(
@@ -198,7 +198,7 @@ void GlobUTest::test_glob_interval(void)
 	eval->eval("(load-from-path \"tests/query/glob-basic.scm\")");
 
 	Handle love = eval->eval_h("(cog-execute! love-interval-glob)");
-	printf("love-interval-glob %s\n", love->toString().c_str());
+	printf("love-interval-glob %s\n", love->to_string().c_str());
 	TS_ASSERT_EQUALS(2, love->getArity());
 
 	Handle response = eval->eval_h(
@@ -232,7 +232,7 @@ void GlobUTest::test_glob_typeset(void)
 	eval->eval("(load-from-path \"tests/query/glob-basic.scm\")");
 
 	Handle love = eval->eval_h("(cog-execute! love-typeset-glob)");
-	printf("love-typeset-glob %s\n", love->toString().c_str());
+	printf("love-typeset-glob %s\n", love->to_string().c_str());
 	TS_ASSERT_EQUALS(2, love->getArity());
 
 	Handle response = eval->eval_h(
@@ -269,7 +269,7 @@ void GlobUTest::test_glob_three_globs(void)
 	eval->eval("(load-from-path \"tests/query/glob-basic.scm\")");
 
 	Handle love = eval->eval_h("(cog-execute! love-three-globs)");
-	printf("love-three-globs %s\n", love->toString().c_str());
+	printf("love-three-globs %s\n", love->to_string().c_str());
 	TS_ASSERT_EQUALS(3, love->getArity());
 
 	Handle response = eval->eval_h(
@@ -306,7 +306,7 @@ void GlobUTest::test_glob_two_in_a_row(void)
 	eval->eval("(load-from-path \"tests/query/glob-basic.scm\")");
 
 	Handle greet = eval->eval_h("(cog-execute! greet)");
-	printf("greet %s\n", greet->toString().c_str());
+	printf("greet %s\n", greet->to_string().c_str());
 	TS_ASSERT_EQUALS(1, greet->getArity());
 
 	Handle response = eval->eval_h(
@@ -330,7 +330,7 @@ void GlobUTest::test_glob_exact(void)
 	eval->eval("(load-from-path \"tests/query/glob-basic.scm\")");
 
 	Handle exact = eval->eval_h("(cog-execute! exact)");
-	printf("exact %s\n", exact->toString().c_str());
+	printf("exact %s\n", exact->to_string().c_str());
 	TS_ASSERT_EQUALS(1, exact->getArity());
 
 	Handle response = eval->eval_h(
@@ -355,7 +355,7 @@ void GlobUTest::test_glob_greedy(void)
 	eval->eval("(load-from-path \"tests/query/glob-basic.scm\")");
 
 	Handle greedy = eval->eval_h("(cog-execute! greedy)");
-	printf("greedy %s\n", greedy->toString().c_str());
+	printf("greedy %s\n", greedy->to_string().c_str());
 	TS_ASSERT_EQUALS(1, greedy->getArity());
 
 	Handle response = eval->eval_h(
@@ -383,7 +383,7 @@ void GlobUTest::test_glob_unorder(void)
 	eval->eval("(load-from-path \"tests/query/glob-basic.scm\")");
 
 	Handle unorder = eval->eval_h("(cog-execute! unorder)");
-	printf("unorder %s\n", unorder->toString().c_str());
+	printf("unorder %s\n", unorder->to_string().c_str());
 	TS_ASSERT_EQUALS(1, unorder->getArity());
 
 	Handle response = eval->eval_h(
@@ -405,7 +405,7 @@ void GlobUTest::test_glob_backtrack(void)
 	eval->eval("(load-from-path \"tests/query/glob-basic.scm\")");
 
 	Handle backtrack = eval->eval_h("(cog-execute! backtrack)");
-	printf("backtrack %s\n", backtrack->toString().c_str());
+	printf("backtrack %s\n", backtrack->to_string().c_str());
 	TS_ASSERT_EQUALS(1, backtrack->getArity());
 
 	Handle response = eval->eval_h(

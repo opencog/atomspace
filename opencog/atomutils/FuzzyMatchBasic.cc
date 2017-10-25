@@ -108,8 +108,8 @@ bool FuzzyMatchBasic::try_match(const Handle& soln)
 	// 	similarity += 1.0 / common_node->getIncomingSetSize();
 
 	LAZY_LOG_FINE << "\n========================================\n"
-	              << "Comparing:\n" << target->toShortString()
-	              << "----- and:\n" << soln->toShortString() << "\n"
+	              << "Comparing:\n" << target->to_short_string()
+	              << "----- and:\n" << soln->to_short_string() << "\n"
 	              << "Common nodes = " << common_nodes.size() << "\n"
 	              << "Size diff = " << diff << "\n"
 	              << "Similarity = " << similarity << "\n"

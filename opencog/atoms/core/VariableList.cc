@@ -66,7 +66,7 @@ void VariableList::validate_vardecl(const HandleSeq& oset)
 				"Expected a VariableNode or a TypedVariableLink, got: %s"
 				"\nVariableList is %s",
 					classserver().getTypeName(t).c_str(),
-					toString().c_str());
+					to_string().c_str());
 		}
 	}
 	build_index();
@@ -218,7 +218,7 @@ void VariableList::get_vartype(const Handle& htypelink)
 			else throw SyntaxException(TRACE_INFO,
 				"Unexpected contents in TypedSetLink\n"
 				"Expected IntervalLink and TypeNode, got %s",
-				h->toString().c_str());
+				h->to_string().c_str());
 		}
 	}
 
@@ -271,7 +271,7 @@ void VariableList::get_vartype(const Handle& htypelink)
 				if (1 != sig.size())
 					throw SyntaxException(TRACE_INFO,
 						"Unexpected contents in SignatureLink\n"
-						"Expected arity==1, got %s", vartype->toString().c_str());
+						"Expected arity==1, got %s", vartype->to_string().c_str());
 
 				deepset.insert(ht);
 			}
@@ -281,7 +281,7 @@ void VariableList::get_vartype(const Handle& htypelink)
 				if (1 != fuz.size())
 					throw SyntaxException(TRACE_INFO,
 						"Unexpected contents in FuzzyLink\n"
-						"Expected arity==1, got %s", vartype->toString().c_str());
+						"Expected arity==1, got %s", vartype->to_string().c_str());
 
 				fuzzset.insert(ht);
 			}
@@ -307,7 +307,7 @@ void VariableList::get_vartype(const Handle& htypelink)
 		if (1 != tset.size())
 			throw SyntaxException(TRACE_INFO,
 				"Unexpected contents in SignatureLink\n"
-				"Expected arity==1, got %s", vartype->toString().c_str());
+				"Expected arity==1, got %s", vartype->to_string().c_str());
 
 		HandleSet ts;
 		ts.insert(vartype);
@@ -319,7 +319,7 @@ void VariableList::get_vartype(const Handle& htypelink)
 		if (1 != tset.size())
 			throw SyntaxException(TRACE_INFO,
 				"Unexpected contents in FuzzyLink\n"
-				"Expected arity==1, got %s", vartype->toString().c_str());
+				"Expected arity==1, got %s", vartype->to_string().c_str());
 
 		HandleSet ts;
 		ts.insert(vartype);

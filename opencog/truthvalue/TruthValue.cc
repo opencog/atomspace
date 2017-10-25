@@ -38,9 +38,9 @@ using namespace opencog;
 
 const strength_t MAX_TRUTH  = 1.0;
 
-std::string TruthValue::toShortString(const std::string& indent) const
+std::string TruthValue::to_short_string(const std::string& indent) const
 {
-    return toString(indent);
+    return to_string(indent);
 }
 
 TruthValuePtr TruthValue::DEFAULT_TV()

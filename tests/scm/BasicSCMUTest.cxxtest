@@ -359,7 +359,7 @@ void BasicSCMUTest::check_truth_value(const TruthValuePtr& tv)
 	Handle h = as->get_handle(NODE, node_str);
 	TSM_ASSERT("Failed to get the handle", h != Handle::UNDEFINED);
 	// hack to avoid floating error
-	bool tv_eq = tv->toString() == h->getTruthValue()->toString();
+	bool tv_eq = tv->to_string() == h->getTruthValue()->to_string();
 	TSM_ASSERT("TVs are different", tv_eq);
 
 	// remove Node so we can redo the test

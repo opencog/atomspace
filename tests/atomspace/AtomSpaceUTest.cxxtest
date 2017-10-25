@@ -557,7 +557,7 @@ public:
             get_handles_by_name(atomSpace, back_inserter(allInhLinks), "", INHERITANCE_LINK, true);
             logger().debug("4) allInhLinks.size() = %d (vhIdx: %d)", allInhLinks.size(), vhIdx);
             //for (unsigned int x = 0; x < allInhLinks.size(); ++x) {
-            //    logger().info("allInhLinks[x]: %s\n", allInhLinks[x]->toString().c_str());
+            //    logger().info("allInhLinks[x]: %s\n", allInhLinks[x]->to_string().c_str());
             //}
             TS_ASSERT(allInhLinks.size() == 8);
             HandleSeq justInhLinks;

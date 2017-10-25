@@ -89,7 +89,7 @@ void Rule::init(const Handle& rule_member)
 	if (not classserver().isA(rule_member->getType(), MEMBER_LINK))
 		throw InvalidParamException(TRACE_INFO,
 		                            "Rule '%s' is expected to be a MemberLink",
-		                            rule_member->toString().c_str());
+		                            rule_member->to_string().c_str());
 
 	Handle rule_alias = rule_member->getOutgoingAtom(0);
 	Handle rbs = rule_member->getOutgoingAtom(1);
@@ -446,7 +446,7 @@ std::string Rule::to_string() const
 {
 	std::stringstream ss;
 	ss << "name: " << _name << std::endl
-	   << "rule:" << std::endl << _rule->toString();
+	   << "rule:" << std::endl << _rule->to_string();
 	return ss.str();
 }
 

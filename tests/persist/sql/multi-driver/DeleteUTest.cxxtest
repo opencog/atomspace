@@ -189,7 +189,7 @@ void DeleteUTest::kill_data(void)
 
 void DeleteUTest::atomCompare(AtomPtr a, AtomPtr b, std::string where)
 {
-    printf("Check %s expect %s\n", where.c_str(), a->toString().c_str());
+    printf("Check %s expect %s\n", where.c_str(), a->to_string().c_str());
     TSM_ASSERT("No atom found", b != nullptr);
 
     if (nullptr == b) return;
@@ -210,8 +210,8 @@ void DeleteUTest::atomCompare(AtomPtr a, AtomPtr b, std::string where)
         TSM_ASSERT_EQUALS("Arity mismatch", la->getArity(), lb->getArity());
         if (*la != *lb)
         {
-            printf("Mismatching la = %s\n", la->toString().c_str());
-            printf("Mismatching lb = %s\n", lb->toString().c_str());
+            printf("Mismatching la = %s\n", la->to_string().c_str());
+            printf("Mismatching lb = %s\n", lb->to_string().c_str());
             TSM_ASSERT_EQUALS("Link mis-match", la, lb);
         }
     }

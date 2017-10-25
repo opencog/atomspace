@@ -513,7 +513,7 @@ bool DefaultPatternMatchCB::clause_match(const Handle& ptrn,
 	    grnd->getOutgoingAtom(0)->getType() == DEFINED_PREDICATE_NODE))
 	{
 		DO_LOG({LAZY_LOG_FINE << "Evaluate the grounding clause=" << std::endl
-		              << grnd->toShortString() << std::endl;})
+		              << grnd->to_short_string() << std::endl;})
 
 		// We make two awkard asumptions here: the ground term itself
 		// does not contain any variables, and so does not need any
@@ -526,7 +526,7 @@ bool DefaultPatternMatchCB::clause_match(const Handle& ptrn,
 		TruthValuePtr tvp(EvaluationLink::do_eval_scratch(_as, grnd, _temp_aspace));
 
 		DO_LOG({LAZY_LOG_FINE << "Clause_match evaluation yeilded tv"
-		              << std::endl << tvp->toString() << std::endl;})
+		              << std::endl << tvp->to_string() << std::endl;})
 
 		// XXX FIXME: we are making a crisp-logic go/no-go decision
 		// based on the TV strength. Perhaps something more subtle might be
@@ -579,9 +579,9 @@ bool DefaultPatternMatchCB::eval_term(const Handle& virt,
 	Handle gvirt(_instor->instantiate(virt, gnds));
 
 	DO_LOG({LAZY_LOG_FINE << "Enter eval_term CB with virt=" << std::endl
-	              << virt->toShortString() << std::endl;})
+	              << virt->to_short_string() << std::endl;})
 	DO_LOG({LAZY_LOG_FINE << "Grounded by gvirt=" << std::endl
-	              << gvirt->toShortString() << std::endl;})
+	              << gvirt->to_short_string() << std::endl;})
 
 	// At this time, we expect all virutal links to be in one of two
 	// forms: either EvaluationLink's or GreaterThanLink's.  The
@@ -650,10 +650,10 @@ bool DefaultPatternMatchCB::eval_term(const Handle& virt,
 	if (NULL == tvp)
 		throw InvalidParamException(TRACE_INFO,
 	            "Expecting a TruthValue for an evaluatable link: %s\n",
-	            gvirt->toShortString().c_str());
+	            gvirt->to_short_string().c_str());
 
 	DO_LOG({LAZY_LOG_FINE << "Eval_term evaluation yeilded tv="
-	              << tvp->toString() << std::endl;})
+	              << tvp->to_string() << std::endl;})
 
 	// XXX FIXME: we are making a crsip-logic go/no-go decision
 	// based on the TV strength. Perhaps something more subtle might be
@@ -675,7 +675,7 @@ bool DefaultPatternMatchCB::eval_sentence(const Handle& top,
                                           const HandleMap& gnds)
 {
 	DO_LOG({LAZY_LOG_FINE << "Enter eval_sentence CB with top=" << std::endl
-	              << top->toShortString() << std::endl;})
+	              << top->to_short_string() << std::endl;})
 
 	if (top->getType() == VARIABLE_NODE)
 	{
@@ -685,7 +685,7 @@ bool DefaultPatternMatchCB::eval_sentence(const Handle& top,
 	if (not top->isLink())
 		throw InvalidParamException(TRACE_INFO,
 	            "Not expecting a Node, here %s\n",
-	            top->toShortString().c_str());
+	            top->to_short_string().c_str());
 
 	const HandleSeq& oset = top->getOutgoingSet();
 	if (0 == oset.size())
@@ -791,7 +791,7 @@ bool DefaultPatternMatchCB::eval_sentence(const Handle& top,
 	{
 		TruthValuePtr tvp(g->second->getTruthValue());
 		DO_LOG({LAZY_LOG_FINE << "Non-logical atom has tv="
-		              << tvp->toString() << std::endl;})
+		              << tvp->to_string() << std::endl;})
 		// XXX FIXME: we are making a crisp-logic go/no-go decision
 		// based on the TV strength. Perhaps something more subtle might be
 		// wanted, here.

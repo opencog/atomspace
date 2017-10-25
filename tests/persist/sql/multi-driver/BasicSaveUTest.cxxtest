@@ -221,8 +221,8 @@ static void atomCompare(AtomPtr a, AtomPtr b, const char* where)
         TSM_ASSERT_EQUALS("Arity mismatch", la->getArity(), lb->getArity());
         if (*la != *lb)
         {
-            printf("Mismatching la = %s\n", la->toString().c_str());
-            printf("Mismatching lb = %s\n", lb->toString().c_str());
+            printf("Mismatching la = %s\n", la->to_string().c_str());
+            printf("Mismatching lb = %s\n", lb->to_string().c_str());
             TSM_ASSERT_EQUALS("Link mis-match", la, lb);
         }
     }
@@ -433,9 +433,9 @@ void BasicSaveUTest::do_test_fresh_atom(void)
 
     Handle he(store->getLink(LIST_LINK, HandleSeq()));
 
-    printf("Expecting %s\n", le->toString().c_str());
+    printf("Expecting %s\n", le->to_string().c_str());
 
-    if (he) printf("Got %s\n", he->toString().c_str());
+    if (he) printf("Got %s\n", he->to_string().c_str());
     atomCompare(le, he, "Empty Fresh");
 
     store->kill_data();

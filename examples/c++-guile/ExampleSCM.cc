@@ -31,13 +31,13 @@ using namespace opencog;
 static Handle ss_print(AtomSpace* atomspace, const Handle& h)
 {
 	Handle reth = h;
-	printf("Hello I got this atom: %s\n", h->toShortString().c_str());
+	printf("Hello I got this atom: %s\n", h->to_short_string().c_str());
 	return reth;
 }
 
 static TruthValuePtr ss_printmore(AtomSpace* atomspace, const Handle& h)
 {
-	printf("This is the atom: %s\n", h->toString().c_str());
+	printf("This is the atom: %s\n", h->to_string().c_str());
 	return h->getTruthValue();
 }
 

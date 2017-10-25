@@ -227,7 +227,7 @@ void AlphaConvertUTest::test_atomspace()
 	TS_ASSERT(hscox == hscoy);
 
 	printf("Expecting same atom: x=%s vs y=%s\n",
-		hscox->toString().c_str(), hscoy->toString().c_str());
+		hscox->to_string().c_str(), hscoy->to_string().c_str());
 
 	ScopeLinkPtr scox(ScopeLinkCast(hscox));
 

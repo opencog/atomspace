@@ -90,7 +90,7 @@ confidence_t CountTruthValue::getConfidence() const
     return _value[CONFIDENCE];
 }
 
-std::string CountTruthValue::toString(const std::string& indent) const
+std::string CountTruthValue::to_string(const std::string& indent) const
 {
     char buf[1024];
     sprintf(buf, "(ctv %f %f %f)",

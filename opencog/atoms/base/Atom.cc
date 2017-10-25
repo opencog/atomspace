@@ -204,8 +204,8 @@ std::string Atom::valuesToString() const
     for (const Handle& k: keys)
     {
         ProtoAtomPtr p = getValue(k);
-        rv += "; key = " + k->toString();
-        rv += "; val = " + p->toString() + "\n";
+        rv += "; key = " + k->to_string();
+        rv += "; val = " + p->to_string() + "\n";
     }
     return rv;
 }
@@ -430,7 +430,7 @@ IncomingSet Atom::getIncomingSetByType(Type type) const
     return result;
 }
 
-std::string Atom::idToString() const
+std::string Atom::id_to_string() const
 {
     return
         std::string("[") + std::to_string(get_hash()) + "]" +
@@ -442,7 +442,7 @@ std::string oc_to_string(const IncomingSet& iset)
 	std::stringstream ss;
 	ss << "size = " << iset.size() << std::endl;
 	for (unsigned i = 0; i < iset.size(); i++)
-		ss << "link[" << i << "]:" << std::endl << iset[i]->toString();
+		ss << "link[" << i << "]:" << std::endl << iset[i]->to_string();
 	return ss.str();
 }
 

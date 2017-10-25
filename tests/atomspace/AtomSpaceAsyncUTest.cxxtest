@@ -103,28 +103,28 @@ public:
     void atomAdded1(Handle h)
     {
         TS_ASSERT(atomSpace->get_size() == 1);
-        logger().debug("atomAdded1: %s", h->toString().c_str());
+        logger().debug("atomAdded1: %s", h->to_string().c_str());
         __testSignalsCounter += 1;
     }
 
     void atomAdded2(Handle h)
     {
         TS_ASSERT(atomSpace->get_size() == 1);
-        logger().debug("atomAdded2: %s", h->toString().c_str());
+        logger().debug("atomAdded2: %s", h->to_string().c_str());
         __testSignalsCounter += 10;
     }
 
     void atomMerged1(const Handle& h, const TruthValuePtr& tv_old, const TruthValuePtr& tv_new)
     {
         TS_ASSERT(atomSpace->get_size() == 1);
-        logger().debug("atomMerged1: %s", h->toString().c_str());
+        logger().debug("atomMerged1: %s", h->to_string().c_str());
         __testSignalsCounter += 100;
     }
 
     void atomMerged2(const Handle& h, const TruthValuePtr& tv_old, const TruthValuePtr& tv_new)
     {
         TS_ASSERT(atomSpace->get_size() == 1);
-        logger().debug("atomMerged2: %s", h->toString().c_str());
+        logger().debug("atomMerged2: %s", h->to_string().c_str());
         __testSignalsCounter += 1000;
     }
 
@@ -132,7 +132,7 @@ public:
     {
         // Atom is not removed from table until AFTER callbacks are completed
         TS_ASSERT(atomSpace->get_size() == 1);
-        logger().debug("atomRemoved1: %s", atom->toString().c_str());
+        logger().debug("atomRemoved1: %s", atom->to_string().c_str());
         __testSignalsCounter += 10000;
     }
 
@@ -140,7 +140,7 @@ public:
     {
         // Atom is not removed from table until AFTER callbacks are completed
         TS_ASSERT(atomSpace->get_size() == 1);
-        logger().debug("atomRemoved2: %s", atom->toString().c_str());
+        logger().debug("atomRemoved2: %s", atom->to_string().c_str());
         __testSignalsCounter += 100000;
     }
 
@@ -323,13 +323,13 @@ public:
 
     void countAtomAdded(Handle h)
     {
-        //logger().debug("atomAdded: %s", h->toString().c_str());
+        //logger().debug("atomAdded: %s", h->to_string().c_str());
         __totalAdded += 1;
     }
 
     void countAtomChanged(const Handle& h, const TruthValuePtr& tv_old, const TruthValuePtr& tv_new)
     {
-        // logger().debug("atomMerged: %s", h->toString().c_str());
+        // logger().debug("atomMerged: %s", h->to_string().c_str());
         __totalChanged +=1;
     }
 
@@ -486,7 +486,7 @@ public:
                      const AttentionValuePtr& av_old,
                      const AttentionValuePtr& av_new)
     {
-        logger().debug("addAFSignal: %s", h->toString().c_str());
+        logger().debug("addAFSignal: %s", h->to_string().c_str());
         __testAFSignalsCounter += 1;
     }
 
@@ -494,7 +494,7 @@ public:
                         const AttentionValuePtr& av_old,
                         const AttentionValuePtr& av_new)
     {
-        logger().debug("removeAFSignal: %s", h->toString().c_str());
+        logger().debug("removeAFSignal: %s", h->to_string().c_str());
         __testAFSignalsCounter += 1;
     }
 
@@ -607,7 +607,7 @@ public:
 
     void countAtomPurged(AtomPtr a)
     {
-        //logger().debug("atomPurged: %s", h->toString().c_str());
+        //logger().debug("atomPurged: %s", h->to_string().c_str());
         __totalPurged += 1;
 
         // A lock is released, to call this signal handler, and is
@@ -674,7 +674,7 @@ public:
 
     void simpleCountPurged(AtomPtr a)
     {
-        //logger().debug("atomPurged: %s", h->toString().c_str());
+        //logger().debug("atomPurged: %s", h->to_string().c_str());
         __altTotalPurged += 1;
     }
 

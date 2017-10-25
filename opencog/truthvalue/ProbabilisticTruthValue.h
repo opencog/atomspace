@@ -57,7 +57,7 @@ public:
 
     virtual bool operator==(const ProtoAtom&) const;
 
-    std::string toString(const std::string&) const;
+    std::string to_string(const std::string&) const;
 
     strength_t getMean() const;
     count_t getCount() const;

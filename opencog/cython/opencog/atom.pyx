@@ -272,13 +272,13 @@ cdef class Atom(object):
     def long_string(self):
         cdef cAtom* atom_ptr = self.handle.atom_ptr()
         if atom_ptr != NULL:
-            return atom_ptr.toString()
+            return atom_ptr.to_string()
         return ""
 
     def __str__(self):
         cdef cAtom* atom_ptr = self.handle.atom_ptr()
         if atom_ptr != NULL:
-            return atom_ptr.toShortString()
+            return atom_ptr.to_short_string()
         return ""
 
     def __repr__(self):

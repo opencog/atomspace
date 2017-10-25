@@ -197,8 +197,8 @@ void BackwardChainerUTest::test_deduction()
 		AD = al(INHERITANCE_LINK, A, D),
 		expected = al(SET_LINK, CD, BD, AD);
 
-	logger().debug() << "results = " << results->toString();
-	logger().debug() << "expected = " << expected->toString();
+	logger().debug() << "results = " << results->to_string();
+	logger().debug() << "expected = " << expected->to_string();
 
 	TS_ASSERT_EQUALS(results, expected);
 
@@ -315,8 +315,8 @@ void BackwardChainerUTest::test_conditional_instantiation_1()
 		              friend_with_john(edward),
 		              friend_with_john(cyril));
 
-	logger().debug() << "results = " << results->toString();
-	logger().debug() << "expected = " << expected->toString();
+	logger().debug() << "results = " << results->to_string();
+	logger().debug() << "expected = " << expected->to_string();
 
 	TS_ASSERT_EQUALS(results, expected);
 
@@ -348,8 +348,8 @@ void BackwardChainerUTest::test_conditional_instantiation_2()
 	Handle results = bc.get_results(),
 		expected = al(SET_LINK, al(INHERITANCE_LINK, Fritz, green));
 
-	logger().debug() << "results = " << results->toString();
-	logger().debug() << "expected = " << expected->toString();
+	logger().debug() << "results = " << results->to_string();
+	logger().debug() << "expected = " << expected->to_string();
 
 	TS_ASSERT_EQUALS(results, expected);
 
@@ -500,8 +500,8 @@ void BackwardChainerUTest::test_impossible_criminal()
 	Handle results = bc.get_results(),
 		expected = al(SET_LINK, HandleSeq());
 
-	logger().debug() << "results = " << results->toString();
-	logger().debug() << "expected = " << expected->toString();
+	logger().debug() << "results = " << results->to_string();
+	logger().debug() << "expected = " << expected->to_string();
 
 	TS_ASSERT_EQUALS(results, expected);
 

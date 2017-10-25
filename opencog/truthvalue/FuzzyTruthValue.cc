@@ -104,7 +104,7 @@ TruthValuePtr FuzzyTruthValue::merge(const TruthValuePtr& other,
     return std::static_pointer_cast<const TruthValue>(shared_from_this());
 }
 
-std::string FuzzyTruthValue::toString(const std::string& indent) const
+std::string FuzzyTruthValue::to_string(const std::string& indent) const
 {
     char buf[1024];
     sprintf(buf, "(ftv %f %f)",

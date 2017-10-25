@@ -227,8 +227,8 @@ static void atomCompare(AtomPtr a, AtomPtr b, const char* where)
         TSM_ASSERT_EQUALS("Arity mismatch", la->getArity(), lb->getArity());
         if (*la != *lb)
         {
-            printf("Mismatching la = %s\n", la->toString().c_str());
-            printf("Mismatching lb = %s\n", lb->toString().c_str());
+            printf("Mismatching la = %s\n", la->to_string().c_str());
+            printf("Mismatching lb = %s\n", lb->to_string().c_str());
             TSM_ASSERT_EQUALS("Link mis-match", la, lb);
         }
     }

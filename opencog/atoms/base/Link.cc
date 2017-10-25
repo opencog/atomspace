@@ -52,10 +52,10 @@ void Link::init(const HandleSeq& outgoingVector)
 
 Link::~Link()
 {
-    DPRINTF("Deleting link:\n%s\n", this->toString().c_str());
+    DPRINTF("Deleting link:\n%s\n", this->to_string().c_str());
 }
 
-std::string Link::toShortString(const std::string& indent) const
+std::string Link::to_short_string(const std::string& indent) const
 {
     std::stringstream answer;
     std::string more_indent = indent + "  ";
@@ -63,20 +63,20 @@ std::string Link::toShortString(const std::string& indent) const
     answer << indent << "(" << classserver().getTypeName(_type);
 
     if (not getTruthValue()->isDefaultTV())
-        answer << " " << getTruthValue()->toString();
+        answer << " " << getTruthValue()->to_string();
     answer << "\n";
 
     // Here the target string is made. If a target is a node, its name is
     // concatenated. If it's a link, all its properties are concatenated.
     for (const Handle& h : _outgoing)
-        answer << h->toShortString(more_indent);
+        answer << h->to_short_string(more_indent);
 
     answer << indent << ")\n";
 
     return answer.str();
 }
 
-std::string Link::toString(const std::string& indent) const
+std::string Link::to_string(const std::string& indent) const
 {
     std::string answer = indent;
     std::string more_indent = indent + "  ";
@@ -85,15 +85,15 @@ std::string Link::toString(const std::string& indent) const
 
     // Print the TV only if its not the default.
     if (not getTruthValue()->isDefaultTV())
-        answer += " " + getTruthValue()->toString();
+        answer += " " + getTruthValue()->to_string();
 
     answer += "\n";
     // Here, the outset string is made. If a target is a node,
     // its name is concatenated. If it's a link, then recurse.
     for (const Handle& h : _outgoing)
-        answer += h->toString(more_indent);
+        answer += h->to_string(more_indent);
 
-    answer += indent + ") ; " + idToString() + "\n";
+    answer += indent + ") ; " + id_to_string() + "\n";
 
     return answer;
 }

@@ -44,7 +44,7 @@ std::string SchemeSmob::to_string(SCM node)
  * This is NOT optimized for performance, as printing should not
  * be in any performance-critical paths ...
  *
- * This does NOT use the Atom::toString() methods, because those
+ * This does NOT use the Atom::to_string() methods, because those
  * methods are not guaranteed to generate valid scheme.
  */
 std::string SchemeSmob::to_string(const Handle& h)
@@ -124,9 +124,9 @@ std::string SchemeSmob::protom_to_string(SCM node)
 	ProtoAtomPtr pa(scm_to_protom(node));
 	if (nullptr == pa) return "#<Invalid handle>";
 
-	// XXX FIXME; should not use pa->toString() as the print method.
+	// XXX FIXME; should not use pa->to_string() as the print method.
 	if (not pa->isAtom())
-		return pa->toString();
+		return pa->to_string();
 
 	// Avoid printing atoms that are not in any atomspace.
 	// Doing so, and more generally, keeping these around

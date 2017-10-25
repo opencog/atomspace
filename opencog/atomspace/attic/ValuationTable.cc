@@ -78,7 +78,7 @@ ValuationPtr ValuationTable::getValuation(const Handle& key, const Handle& atom)
 	if (vpiter == _vindex.end())
 		throw RuntimeException(TRACE_INFO,
 			"There is no value for key %s on atom %s",
-			key->toString().c_str(), atom->toString().c_str());
+			key->to_string().c_str(), atom->to_string().c_str());
 	return vpiter->second;
 }
 

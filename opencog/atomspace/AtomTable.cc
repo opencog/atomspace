@@ -351,7 +351,7 @@ static void prt_diag(AtomPtr atom, size_t i, size_t arity, const HandleSeq& ogs)
     for (unsigned int fk=0; fk<arity; fk++)
         logger().error() << "outset i=" << fk;
 
-    logger().error() << "link is " << atom->toString();
+    logger().error() << "link is " << atom->to_string();
     logger().flush();
     logger().setBackTraceLevel(save);
 }
@@ -464,7 +464,7 @@ Handle AtomTable::add(AtomPtr atom, bool async)
     if (not _transient and async)
         _index_queue.enqueue(atom);
 
-    DPRINTF("Atom added: %s\n", atom->toString().c_str());
+    DPRINTF("Atom added: %s\n", atom->to_string().c_str());
     return h;
 }
 
@@ -609,7 +609,7 @@ AtomPtrSet AtomTable::extract(Handle& handle, bool recursive)
         {
             Handle his(*is_it);
             DPRINTF("[AtomTable::extract] incoming set: %s",
-                 (his) ? his->toString().c_str() : "INVALID HANDLE");
+                 (his) ? his->to_string().c_str() : "INVALID HANDLE");
 
             // Something is seriously screwed up if the incoming set
             // is not in this atomtable, and its not a child of this
@@ -681,9 +681,9 @@ AtomPtrSet AtomTable::extract(Handle& handle, bool recursive)
                     logger().warn() << "This atomtable=" << ((void*) this)
                                     << " other atomtale=" << ((void*) iset[i]->getAtomTable())
                                     << " in_environ=" << iset[i]->getAtomTable()->in_environ(handle);
-                    logger().warn() << "This atom: " << handle->toString();
+                    logger().warn() << "This atom: " << handle->to_string();
                     for (size_t j=0; j<ilen; j++) {
-                        logger().warn() << "Atom j=" << j << " " << iset[j]->toString();
+                        logger().warn() << "Atom j=" << j << " " << iset[j]->to_string();
                         logger().warn() << "Marked: " << iset[j]->isMarkedForRemoval()
                                         << " Table: " << ((void*) iset[j]->getAtomTable());
                     }

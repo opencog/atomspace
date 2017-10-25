@@ -133,7 +133,7 @@ void ScopeLink::extract_variables(const HandleSeq& oset)
 	if (oset.size() < 2)
 		throw SyntaxException(TRACE_INFO,
 			"Expecting an outgoing set size of at least two; got %s",
-			oset[0]->toString().c_str());
+			oset[0]->to_string().c_str());
 
 	// If we are here, then the first outgoing set member should be
 	// a variable declaration.

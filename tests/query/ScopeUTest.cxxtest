@@ -99,7 +99,7 @@ void ScopeUTest::test_alpha()
 
 	Handle c1 = eval->eval_h("(content-1)");
 	Handle c2 = eval->eval_h("(content-2)");
-	printf("c2 %s\n", c2->toString().c_str());
+	printf("c2 %s\n", c2->to_string().c_str());
 
 	TS_ASSERT_EQUALS(c1, c2);
 	logger().debug("END TEST: %s", __FUNCTION__);
@@ -117,7 +117,7 @@ void ScopeUTest::test_alpha_reverse()
 	// Reverse the order of creation
 	Handle c2 = eval->eval_h("(content-2)");
 	Handle c1 = eval->eval_h("(content-1)");
-	printf("c1 %s\n", c1->toString().c_str());
+	printf("c1 %s\n", c1->to_string().c_str());
 
 	TS_ASSERT_EQUALS(c1, c2);
 	logger().debug("END TEST: %s", __FUNCTION__);

@@ -476,8 +476,8 @@ void DeepTypeUTest::test_get_signature(void)
 		"    (InheritanceLink "
 		"        (ConceptNode \"foo\") (ConceptNode \"bingo\")))");
 
-	printf("Expected this: %s\n", hans->toString().c_str());
-	printf("Found this answer: %s\n", hgnd->toString().c_str());
+	printf("Expected this: %s\n", hans->to_string().c_str());
+	printf("Found this answer: %s\n", hgnd->to_string().c_str());
 
 	TSM_ASSERT("Didn't get the expected grounding", hans == hgnd);
 
@@ -490,8 +490,8 @@ void DeepTypeUTest::test_get_signature(void)
 		"    (InheritanceLink "
 		"        (ConceptNode \"bar\") (ConceptNode \"bingo\")))");
 
-	printf("Expected this: %s\n", hans->toString().c_str());
-	printf("Found this answer: %s\n", hgnd->toString().c_str());
+	printf("Expected this: %s\n", hans->to_string().c_str());
+	printf("Found this answer: %s\n", hgnd->to_string().c_str());
 
 	TSM_ASSERT("Didn't get the expected grounding", hans == hgnd);
 
@@ -510,8 +510,8 @@ void DeepTypeUTest::test_get_signature(void)
 		"         (ConceptNode \"hurrah\")"
 		"         (ConceptNode \"yay!\"))))");
 
-	printf("Expected this: %s\n", hans->toString().c_str());
-	printf("Found this answer: %s\n", hgnd->toString().c_str());
+	printf("Expected this: %s\n", hans->to_string().c_str());
+	printf("Found this answer: %s\n", hgnd->to_string().c_str());
 
 	TSM_ASSERT("Didn't get the expected grounding", hans == hgnd);
 

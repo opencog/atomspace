@@ -108,7 +108,7 @@ gearman_return_t DistSCM::worker_function(gearman_job_st *job, void *context)
 	std::cout << "Dist worker work result is " << result;
 #endif
 
-	std::string reply = result->toString();
+	std::string reply = result->to_string();
 	gearman_return_t rc = gearman_job_send_data(job, reply.c_str(), reply.length());
 
 	if (gearman_failed(rc))

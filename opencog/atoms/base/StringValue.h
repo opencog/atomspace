@@ -55,7 +55,7 @@ public:
 	const std::vector<std::string>& value() const { return _value; }
 
 	/** Returns a string representation of the value.  */
-	virtual std::string toString(const std::string& indent) const;
+	virtual std::string to_string(const std::string& indent) const;
 
 	/** Returns true if the two atoms are equal.  */
 	virtual bool operator==(const ProtoAtom&) const;

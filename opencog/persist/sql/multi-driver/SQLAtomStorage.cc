@@ -1426,7 +1426,7 @@ void SQLAtomStorage::do_store_single_atom(const Handle& h, int aheight)
 			{
 				throw IOException(TRACE_INFO,
 					"Error: do_store_single_atom: Maxiumum Link size is 330. "
-					"Atom was: %s\n", h->toString().c_str());
+					"Atom was: %s\n", h->to_string().c_str());
 			}
 
 			cols += ", outgoing";

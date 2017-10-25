@@ -364,15 +364,15 @@ public:
     IncomingSet getIncomingSetByType(Type type) const;
 
     /** Returns a string representation of the node. */
-    virtual std::string toString(const std::string& indent) const = 0;
-    virtual std::string toShortString(const std::string& indent) const = 0;
-    virtual std::string idToString() const;
+    virtual std::string to_string(const std::string& indent) const = 0;
+    virtual std::string to_short_string(const std::string& indent) const = 0;
+    virtual std::string id_to_string() const;
 
     // Work around gdb's inability to build a string on the fly,
     // see http://stackoverflow.com/questions/16734783 for more
     // explanation.
-    std::string toString() const { return toString(""); }
-    std::string toShortString() const { return toShortString(""); }
+    std::string to_string() const { return to_string(""); }
+    std::string to_short_string() const { return to_short_string(""); }
 
     /**
      * Perform a content-based comparison of two atoms.

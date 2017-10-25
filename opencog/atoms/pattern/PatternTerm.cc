@@ -130,23 +130,23 @@ void PatternTerm::addBoundVariable()
 	}
 }
 
-std::string PatternTerm::toString() const { return toString(":"); }
+std::string PatternTerm::to_string() const { return to_string(":"); }
 
-std::string PatternTerm::toString(std::string indent) const
+std::string PatternTerm::to_string(std::string indent) const
 {
 	if (not _handle) return "-";
-	std::string str = _parent->toString();
+	std::string str = _parent->to_string();
 	str += indent + std::to_string(_handle.value());
 	return str;
 }
 
 std::string oc_to_string(const PatternTerm& pt)
 {
-	return pt.toString();
+	return pt.to_string();
 }
 std::string oc_to_string(const PatternTermPtr& pt_ptr)
 {
-	return pt_ptr->toString();
+	return pt_ptr->to_string();
 }
 
 } // ~namespace opencog

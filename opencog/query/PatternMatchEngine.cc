@@ -61,7 +61,7 @@ using namespace opencog;
 #ifdef DEBUG
 static inline void log(const Handle& h)
 {
-	LAZY_LOG_FINE << h->toShortString();
+	LAZY_LOG_FINE << h->to_short_string();
 }
 
 static inline void logmsg(const char * msg, const Handle& h)
@@ -69,7 +69,7 @@ static inline void logmsg(const char * msg, const Handle& h)
 	LAZY_LOG_FINE << msg << std::endl
 	              << (h == (Atom*) nullptr ?
 	                  std::string("(invalid handle)") :
-	                  h->toShortString());
+	                  h->to_short_string());
 }
 #else
 static inline void logmsg(const char * msg, const Handle& h) {}
@@ -118,7 +118,7 @@ bool PatternMatchEngine::variable_compare(const Handle& hp,
 	// If it's not then we are very very confused ...
 	OC_ASSERT (hp->isNode(),
 	           "Expected variable to be a node, got this: %s\n",
-	           hp->toShortString().c_str());
+	           hp->to_short_string().c_str());
 
 	// Else, we have a candidate grounding for this variable.
 	// The variable_match() callback may implement some tighter
@@ -273,7 +273,7 @@ bool PatternMatchEngine::choice_compare(const PatternTermPtr& ptm,
 	if (fresh) choose_next = false; // took a step, clear the flag
 
 	DO_LOG({LAZY_LOG_FINE << "tree_comp resume choice search at " << icurr
-	              << " of " << iend << " of term=" << ptm->toString()
+	              << " of " << iend << " of term=" << ptm->to_string()
 	              << ", choose_next=" << choose_next;})
 
 	// XXX This is almost surely wrong... if there are two
@@ -524,14 +524,14 @@ bool PatternMatchEngine::unorder_compare(const PatternTermPtr& ptm,
 		logger().fine("tree_comp resume unordered search at %d of %d of term=%s "
 		              "take_step=%d have_more=%d\n",
 		              perm_count[Unorder(ptm, hg)], num_perms,
-		              ptm->toString().c_str(), take_step, have_more);
+		              ptm->to_string().c_str(), take_step, have_more);
 	}
 #endif
 	do
 	{
 		DO_LOG({LAZY_LOG_FINE << "tree_comp explore unordered perm "
 		              << perm_count[Unorder(ptm, hg)] << " of " << num_perms
-		              << " of term=" << ptm->toString();})
+		              << " of term=" << ptm->to_string();})
 		solution_push();
 		bool match = true;
 
@@ -590,7 +590,7 @@ bool PatternMatchEngine::unorder_compare(const PatternTermPtr& ptm,
 				have_more = true;
 				DO_LOG({LAZY_LOG_FINE << "Good permutation "
 				              << perm_count[Unorder(ptm, hg)]
-				              << " for term=" << ptm->toString()
+				              << " for term=" << ptm->to_string()
 				              << " have_more=" << have_more;})
 				_perm_state[Unorder(ptm, hg)] = mutation;
 				return true;
@@ -602,7 +602,7 @@ bool PatternMatchEngine::unorder_compare(const PatternTermPtr& ptm,
 		}
 		// If we are here, we are handling case 8.
 		DO_LOG({LAZY_LOG_FINE << "Above permuation " << perm_count[Unorder(ptm, hg)]
-		              << " failed term=" << ptm->toString();})
+		              << " failed term=" << ptm->to_string();})
 
 take_next_step:
 		take_step = false; // we are taking a step, so clear the flag.
@@ -613,7 +613,7 @@ take_next_step:
 	} while (std::next_permutation(mutation.begin(), mutation.end()));
 
 	// If we are here, we've explored all the possibilities already
-	DO_LOG({LAZY_LOG_FINE << "Exhausted all permuations of term=" << ptm->toString();})
+	DO_LOG({LAZY_LOG_FINE << "Exhausted all permuations of term=" << ptm->to_string();})
 	_perm_state.erase(Unorder(ptm, hg));
 	have_more = false;
 	return false;
@@ -642,7 +642,7 @@ PatternMatchEngine::curr_perm(const PatternTermPtr& ptm,
 	if (_perm_state.end() == ps)
 	{
 		DO_LOG({LAZY_LOG_FINE << "tree_comp fresh start unordered link term="
-		              << ptm->toString();})
+		              << ptm->to_string();})
 		Permutation perm = ptm->getOutgoingSet();
 		sort(perm.begin(), perm.end());
 		fresh = true;
@@ -1120,8 +1120,8 @@ bool PatternMatchEngine::explore_term_branches(const Handle& term,
 	if (_pat->connected_terms_map.end() == pl)
 	{
 		// XXX ???? Isn't this a hard-error ???
-		DO_LOG({LAZY_LOG_FINE << "Pattern term not found for " << term->toShortString()
-		              << ", clause=" << clause_root->toShortString();})
+		DO_LOG({LAZY_LOG_FINE << "Pattern term not found for " << term->to_short_string()
+		              << ", clause=" << clause_root->to_short_string();})
 		return false;
 	}
 
@@ -1164,7 +1164,7 @@ bool PatternMatchEngine::explore_up_branches(const PatternTermPtr& ptm,
 	// Move up the solution graph, looking for a match.
 	IncomingSet iset = _pmc.get_incoming_set(hg);
 	size_t sz = iset.size();
-	DO_LOG({LAZY_LOG_FINE << "Looking upward for term=" << ptm->toString()
+	DO_LOG({LAZY_LOG_FINE << "Looking upward for term=" << ptm->to_string()
 	              << " have " << sz << " branches";})
 
 	// Check if the pattern has globs in it.
@@ -1174,7 +1174,7 @@ bool PatternMatchEngine::explore_up_branches(const PatternTermPtr& ptm,
 	bool found = false;
 	for (size_t i = 0; i < sz; i++) {
 		DO_LOG({LAZY_LOG_FINE << "Try upward branch " << i+1 << " of " << sz
-		              << " for term=" << ptm->toString()
+		              << " for term=" << ptm->to_string()
 		              << " propose=" << Handle(iset[i]).value();})
 
 		// Before exploring the link branches, record the current glob_state size.
@@ -1324,20 +1324,20 @@ bool PatternMatchEngine::explore_single_branch(const PatternTermPtr& ptm,
 {
 	solution_push();
 
-	DO_LOG({LAZY_LOG_FINE << "Checking pattern term=" << ptm->toString()
+	DO_LOG({LAZY_LOG_FINE << "Checking pattern term=" << ptm->to_string()
 	              << " for soln by " << hg.value();})
 
 	bool match = tree_compare(ptm, hg, CALL_SOLN);
 
 	if (not match)
 	{
-		DO_LOG({LAZY_LOG_FINE << "Pattern term=" << ptm->toString()
+		DO_LOG({LAZY_LOG_FINE << "Pattern term=" << ptm->to_string()
 		              << " NOT solved by " << hg.value();})
 		solution_pop();
 		return false;
 	}
 
-	DO_LOG({LAZY_LOG_FINE << "Pattern term=" << ptm->toString()
+	DO_LOG({LAZY_LOG_FINE << "Pattern term=" << ptm->to_string()
 	              << " solved by " << hg.value() << ", move up";})
 
 	// XXX should not do perm_push every time... only selectively.
@@ -1408,7 +1408,7 @@ bool PatternMatchEngine::do_term_up(const PatternTermPtr& ptm,
 	// find its parent in the clause. For an evaluatable term, we find
 	// the parent evaluatable in the clause, which may be many steps
 	// higher.
-	DO_LOG({LAZY_LOG_FINE << "Term = " << ptm->toString() << " of clause UUID = "
+	DO_LOG({LAZY_LOG_FINE << "Term = " << ptm->to_string() << " of clause UUID = "
 	              << clause_root.value() << " has ground, move upwards";})
 
 	if (0 < _pat->in_evaluatable.count(hp))
@@ -2154,13 +2154,13 @@ void PatternMatchEngine::log_solution(
 		if (not soln)
 		{
 			logger().fine("ERROR: ungrounded variable %s\n",
-			              var->toShortString().c_str());
+			              var->to_short_string().c_str());
 			continue;
 		}
 
 		logger().fine("\t%s maps to %s\n",
-		              var->toShortString().c_str(),
-		              soln->toShortString().c_str());
+		              var->to_short_string().c_str(),
+		              soln->to_short_string().c_str());
 	}
 
 	// Print out the full binding to all of the clauses.
@@ -2175,7 +2175,7 @@ void PatternMatchEngine::log_solution(
 			logmsg("ERROR: ungrounded clause", mf);
 			continue;
 		}
-		std::string str = m->second->toShortString();
+		std::string str = m->second->to_short_string();
 		logger().fine("%d.   %s", i, str.c_str());
 	}
 }

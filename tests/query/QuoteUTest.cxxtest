@@ -289,7 +289,7 @@ void QuoteUTest::test_crash(void)
     // ones, at considerable cost...)
     // Handle infloop = eval->eval_h("infloop");
     // Handle inf = bindlink(as, infloop);
-    // printf("infloop is %s\n", inf->toShortString().c_str());
+    // printf("infloop is %s\n", inf->to_short_string().c_str());
     // TS_ASSERT_EQUALS(4, getarity(inf));
 
     logger().debug("END TEST: %s", __FUNCTION__);

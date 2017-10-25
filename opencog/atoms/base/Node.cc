@@ -43,7 +43,7 @@ void Node::init(const std::string& cname)
     _name = cname;
 }
 
-std::string Node::toShortString(const std::string& indent) const
+std::string Node::to_short_string(const std::string& indent) const
 {
     std::string answer = indent;
     answer += "(" + classserver().getTypeName(_type);
@@ -51,14 +51,14 @@ std::string Node::toShortString(const std::string& indent) const
 
     // Print the TV only if its not the default.
     if (not getTruthValue()->isDefaultTV())
-        answer += " " + getTruthValue()->toString();
+        answer += " " + getTruthValue()->to_string();
 
     answer += ")\n";
 
     return answer;
 }
 
-std::string Node::toString(const std::string& indent) const
+std::string Node::to_string(const std::string& indent) const
 {
     std::string answer = indent;
     answer += "(" + classserver().getTypeName(_type);
@@ -66,9 +66,9 @@ std::string Node::toString(const std::string& indent) const
 
     // Print the TV only if its not the default.
     if (not getTruthValue()->isDefaultTV())
-        answer += " " + getTruthValue()->toString();
+        answer += " " + getTruthValue()->to_string();
 
-    answer += ") ; " + idToString() + "\n";
+    answer += ") ; " + id_to_string() + "\n";
 
     return answer;
 }

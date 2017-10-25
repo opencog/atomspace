@@ -83,8 +83,8 @@ void PutLinkUTest::test_define()
 		N(CONCEPT_NODE, "aaa"),
 		N(CONCEPT_NODE, "bbb"));
 
-	printf("Expecting %s\n", pat->toString().c_str());
-	printf("Got %s\n", putted->toString().c_str());
+	printf("Expecting %s\n", pat->to_string().c_str());
+	printf("Got %s\n", putted->to_string().c_str());
 	TS_ASSERT_EQUALS(putted, pat);
 
 	logger().info("END TEST: %s", __FUNCTION__);
@@ -120,7 +120,7 @@ void PutLinkUTest::test_filtering()
 	Instantiator inst(&_as);
 	Handle cncpts = inst.execute(filt);
 
-	printf("Filtered %s\n", cncpts->toString().c_str());
+	printf("Filtered %s\n", cncpts->to_string().c_str());
 	TS_ASSERT_EQUALS(SET_LINK, cncpts->getType());
 	TS_ASSERT_EQUALS(2, cncpts->getArity());
 	Handle a = cncpts->getOutgoingAtom(0);
@@ -161,8 +161,8 @@ void PutLinkUTest::test_lambda()
 		  N(CONCEPT_NODE, "coyote"),
 		  N(CONCEPT_NODE, "animal"));
 
-	printf("Expecting %s\n", expected_putted->toString().c_str());
-	printf("Got %s\n", putted->toString().c_str());
+	printf("Expecting %s\n", expected_putted->to_string().c_str());
+	printf("Got %s\n", putted->to_string().c_str());
 	TS_ASSERT_EQUALS(putted, expected_putted);
 
 	logger().info("END TEST: %s", __FUNCTION__);
@@ -192,8 +192,8 @@ void PutLinkUTest::test_lambda_partial_substitution()
 		  N(VARIABLE_NODE, "$y"),
 		  N(CONCEPT_NODE, "animal"));
 
-	printf("Expecting %s\n", expected_putted->toString().c_str());
-	printf("Got %s\n", putted->toString().c_str());
+	printf("Expecting %s\n", expected_putted->to_string().c_str());
+	printf("Got %s\n", putted->to_string().c_str());
 	TS_ASSERT_EQUALS(putted, expected_putted);
 
 	logger().info("END TEST: %s", __FUNCTION__);
@@ -272,8 +272,8 @@ void PutLinkUTest::test_eval_inheritance()
 	Handle putted = inst.execute(put);
 	Handle expected = L(AND_LINK, Self_human, Bob_human, Self_Bob_acquainted);
 
-	printf("Expecting %s\n", expected->toString().c_str());
-	printf("Got %s\n", putted->toString().c_str());
+	printf("Expecting %s\n", expected->to_string().c_str());
+	printf("Got %s\n", putted->to_string().c_str());
 	TS_ASSERT_EQUALS(putted, expected);
 
 	logger().info("END TEST: %s", __FUNCTION__);
@@ -325,9 +325,9 @@ void PutLinkUTest::test_eval_implication_1()
 	Handle putted = inst.execute(put);
 	Handle expected = L(IMPLICATION_SCOPE_LINK, P_A, P_A);
 
-	printf("Executing %s\n", put->toString().c_str());
-	printf("Expecting %s\n", expected->toString().c_str());
-	printf("Got %s\n", putted->toString().c_str());
+	printf("Executing %s\n", put->to_string().c_str());
+	printf("Expecting %s\n", expected->to_string().c_str());
+	printf("Got %s\n", putted->to_string().c_str());
 	TS_ASSERT_EQUALS(putted, expected);
 	
 	logger().info("END TEST: %s", __FUNCTION__);
@@ -406,9 +406,9 @@ void PutLinkUTest::test_eval_implication_2()
 	Handle putted = inst.execute(put);
 	Handle expected = L(AND_LINK, Self_human, Bob_human, Self_Bob_acquainted);
 
-	printf("Executing %s\n", put->toString().c_str());
-	printf("Expecting %s\n", expected->toString().c_str());
-	printf("Got %s\n", putted->toString().c_str());
+	printf("Executing %s\n", put->to_string().c_str());
+	printf("Expecting %s\n", expected->to_string().c_str());
+	printf("Got %s\n", putted->to_string().c_str());
 	TS_ASSERT_EQUALS(putted, expected);
 
 	logger().info("END TEST: %s", __FUNCTION__);

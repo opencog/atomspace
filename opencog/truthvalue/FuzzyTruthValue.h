@@ -72,7 +72,7 @@ public:
     /// where k is the look-ahead
     static confidence_t countToConfidence(count_t);
 
-    std::string toString(const std::string&) const;
+    std::string to_string(const std::string&) const;
 
     strength_t getMean() const;
     count_t getCount() const;

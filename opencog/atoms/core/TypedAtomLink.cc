@@ -33,7 +33,7 @@ void TypedAtomLink::init()
 	if (2 != _outgoing.size())
 		throw SyntaxException(TRACE_INFO,
 			"Expecting atom and type specification, got size %s",
-			toString().c_str());
+			to_string().c_str());
 
 	// Perform some additional checks in the UniqueLink init method
 	UniqueLink::init(false);

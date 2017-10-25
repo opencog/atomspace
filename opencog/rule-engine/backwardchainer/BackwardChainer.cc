@@ -87,7 +87,7 @@ void BackwardChainer::do_chain()
 	}
 
 	LAZY_URE_LOG_DEBUG << "Finished Backward Chaining with solutions:"
-	                   << std::endl << get_results()->toString();
+	                   << std::endl << get_results()->to_string();
 }
 
 void BackwardChainer::do_step()
@@ -223,7 +223,7 @@ void BackwardChainer::fulfill_bit()
 		return;
 	}
 	LAZY_URE_LOG_DEBUG << "Selected and-BIT for fulfillment (fcs value):"
-	                   << std::endl << andbit->fcs->idToString();
+	                   << std::endl << andbit->fcs->id_to_string();
 	fulfill_fcs(andbit->fcs);
 }
 
@@ -275,7 +275,7 @@ AndBIT* BackwardChainer::select_expansion_andbit()
 		ss << "Weighted and-BITs:";
 		for (size_t i = 0; i < weights.size(); i++)
 			ss << std::endl << weights[i] << " "
-			   << _bit.andbits[i].fcs->idToString();
+			   << _bit.andbits[i].fcs->id_to_string();
 		ure_logger().debug() << ss.str();
 	}
 
@@ -331,7 +331,7 @@ void BackwardChainer::remove_unlikely_expandable_andbit()
 		ss << "Never expand probs and-BITs:";
 		for (size_t i = 0; i < never_expand_probs.size(); i++)
 			ss << std::endl << never_expand_probs[i] << " "
-			   << _bit.andbits[i].fcs->idToString();
+			   << _bit.andbits[i].fcs->id_to_string();
 		ure_logger().fine() << ss.str();
 	}
 
@@ -341,7 +341,7 @@ void BackwardChainer::remove_unlikely_expandable_andbit()
 	// Pick the and-BIT, remove it from the BIT and remove its
 	// FCS from the bit atomspace.
 	auto it = std::next(_bit.andbits.begin(), never_expand_dist(randGen()));
-	LAZY_URE_LOG_DEBUG << "Remove " << it->fcs->idToString()
+	LAZY_URE_LOG_DEBUG << "Remove " << it->fcs->id_to_string()
 	                   << " from the BIT";
 	_bit.erase(it);
 }

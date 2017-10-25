@@ -90,7 +90,7 @@ confidence_t ProbabilisticTruthValue::getConfidence() const
     return _value[CONFIDENCE];
 }
 
-std::string ProbabilisticTruthValue::toString(const std::string& indent) const
+std::string ProbabilisticTruthValue::to_string(const std::string& indent) const
 {
     char buf[1024];
     sprintf(buf, "(ctv %f %f %f)",
