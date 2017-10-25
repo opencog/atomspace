@@ -76,8 +76,8 @@ bool TruthValue::isDefaultTV() const
     TruthValuePtr dtv = DEFAULT_TV();
     if (dtv.get() == this) return true;
     if (get_type() == dtv->get_type() and
-        getMean() == dtv->getMean() and
-        getConfidence() == dtv->getConfidence())
+        get_mean() == dtv->get_mean() and
+        get_confidence() == dtv->get_confidence())
     {
         return true;
     }
@@ -92,8 +92,8 @@ bool TruthValue::isDefinedTV() const
     TruthValuePtr dtv = DEFAULT_TV();
     if (dtv.get() == this) return true;
     if (get_type() == dtv->get_type() and
-        getMean() == dtv->getMean() and
-        getConfidence() == dtv->getConfidence())
+        get_mean() == dtv->get_mean() and
+        get_confidence() == dtv->get_confidence())
     {
         return true;
     }
@@ -109,24 +109,24 @@ bool TruthValue::isDefinedTV() const
 
     dtv = TRUE_TV();
     if (get_type() == dtv->get_type() and
-        getMean() == dtv->getMean() and
-        getConfidence() == dtv->getConfidence())
+        get_mean() == dtv->get_mean() and
+        get_confidence() == dtv->get_confidence())
     {
         return true;
     }
 
     dtv = FALSE_TV();
     if (get_type() == dtv->get_type() and
-        getMean() == dtv->getMean() and
-        getConfidence() == dtv->getConfidence())
+        get_mean() == dtv->get_mean() and
+        get_confidence() == dtv->get_confidence())
     {
         return true;
     }
 
     dtv = TRIVIAL_TV();
     if (get_type() == dtv->get_type() and
-        getMean() == dtv->getMean() and
-        getConfidence() == dtv->getConfidence())
+        get_mean() == dtv->get_mean() and
+        get_confidence() == dtv->get_confidence())
     {
         return true;
     }
@@ -151,7 +151,7 @@ bool TruthValue::nearly_equal(double a, double b)
 TruthValuePtr
 TruthValue::higher_confidence_merge(const TruthValuePtr& other) const
 {
-    if (other->getConfidence() > getConfidence()) {
+    if (other->get_confidence() > get_confidence()) {
         return other;
     }
     return std::dynamic_pointer_cast<const TruthValue>(shared_from_this());

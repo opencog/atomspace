@@ -342,7 +342,7 @@ void AtomspaceHTabler::storeAtom(Handle h)
         return;
     }
     val_len = snprintf(val, BUFF_SIZE, "(%f, %f)",
-                tv.getMean(), tv.getCount());
+                tv.get_mean(), tv.get_count());
     key.column_family = "stv";
     m_handle_mutator->set(key, val, val_len);
 

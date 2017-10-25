@@ -59,9 +59,9 @@ public:
 
 	std::string to_string(const std::string&) const;
 
-	strength_t getMean() const;
-	count_t getCount() const;
-	confidence_t getConfidence() const;
+	strength_t get_mean() const;
+	count_t get_count() const;
+	confidence_t get_confidence() const;
 
 	// Return the positive evidence count
 	count_t getPositiveCount() const;

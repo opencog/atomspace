@@ -101,9 +101,9 @@ void ZMQClient::storeAtom(const AtomPtr& atomPtr, bool synchronous)
 //    ZMQTruthValueMessage *tvMsg = atomMsg->mutable_truthvalue();
 //    ZMQSingleTruthValueMessage *stvMsg = tvMsg->add_singletruthvalue();
 //    stvMsg->set_truthvaluetype(ZMQTruthValueTypeSimple);
-//    stvMsg->set_mean(atomPtr->getTruthValue()->getMean());
-//    stvMsg->set_confidence(atomPtr->getTruthValue()->getConfidence());
-//    stvMsg->set_count(atomPtr->getTruthValue()->getCount());
+//    stvMsg->set_mean(atomPtr->getTruthValue()->get_mean());
+//    stvMsg->set_confidence(atomPtr->getTruthValue()->get_confidence());
+//    stvMsg->set_count(atomPtr->getTruthValue()->get_count());
 //    atomMsg->set_allocated_truthvalue(tvMsg);
 
     LinkPtr linkPtr = dynamic_pointer_cast<Link>(atomPtr);

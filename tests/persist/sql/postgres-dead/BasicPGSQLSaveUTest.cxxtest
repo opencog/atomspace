@@ -206,7 +206,7 @@ static void atomCompare(AtomPtr a, AtomPtr b, const char* where)
             {
                 fprintf(stderr, "Error, truth value miscompare, "
                     "ma=%f mb=%f ca=%f cb=%f\n",
-                    ta->getMean(), tb->getMean(), ta->getConfidence(), tb->getConfidence());
+                    ta->get_mean(), tb->get_mean(), ta->get_confidence(), tb->get_confidence());
             }
         }
     }

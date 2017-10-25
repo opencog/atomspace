@@ -127,10 +127,10 @@ SCM SchemeSmob::ss_inc_count (SCM satom, SCM scnt)
 	TruthValuePtr tv = h->getTruthValue();
 	if (COUNT_TRUTH_VALUE == tv->get_type())
 	{
-		cnt += tv->getCount();
+		cnt += tv->get_count();
 	}
 	tv = CountTruthValue::createTV(
-		tv->getMean(), tv->getConfidence(), cnt);
+		tv->get_mean(), tv->get_confidence(), cnt);
 
 	h->setTruthValue(tv);
 	return satom;

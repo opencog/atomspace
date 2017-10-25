@@ -242,7 +242,7 @@ void MultiAtomSpace::test_load(void)
 	TruthValuePtr tv1 = counter1->getTruthValue();
 
 	TSM_ASSERT_EQUALS("Wrong truth value type", COUNT_TRUTH_VALUE, tv1->get_type());
-	TSM_ASSERT_EQUALS("wrong count found", 4, (int)(tv1->getCount()));
+	TSM_ASSERT_EQUALS("wrong count found", 4, (int)(tv1->get_count()));
 
 	// Count tv in atomspace2 should be unscathed. ----------------------------
 	ev2->eval("(set! counter (ConceptNode \"asdf\"))");
@@ -261,7 +261,7 @@ void MultiAtomSpace::test_load(void)
 	TruthValuePtr tv2 = counter2->getTruthValue();
 
 	TSM_ASSERT_EQUALS("Wrong truth value type", COUNT_TRUTH_VALUE, tv2->get_type());
-	TSM_ASSERT_EQUALS("wrong count found", 1, (int)(tv2->getCount()));
+	TSM_ASSERT_EQUALS("wrong count found", 1, (int)(tv2->get_count()));
 
 	// Count tv in atomspace1 should be unscathed. ----------------------------
 	ev1->eval("(set! counter (ConceptNode \"asdf\"))");
@@ -277,7 +277,7 @@ void MultiAtomSpace::test_load(void)
 	TruthValuePtr tv3 = counter3->getTruthValue();
 
 	TSM_ASSERT_EQUALS("Wrong truth value type", COUNT_TRUTH_VALUE, tv3->get_type());
-	TSM_ASSERT_EQUALS("wrong count found", 4, (int)(tv3->getCount()));
+	TSM_ASSERT_EQUALS("wrong count found", 4, (int)(tv3->get_count()));
 
 	delete ev1;
 	delete ev2;

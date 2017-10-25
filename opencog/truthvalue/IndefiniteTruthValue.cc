@@ -112,7 +112,7 @@ void IndefiniteTruthValue::copy(const IndefiniteTruthValue& source)
     _value[U] = source.getU();
     _value[CONFIDENCE_LEVEL] = source.getConfidenceLevel();
     diff = source.diff;
-    _value[MEAN] = source.getMean();
+    _value[MEAN] = source.get_mean();
     count = source.count;
     confidence = source.confidence;
     symmetric = source.symmetric;
@@ -214,7 +214,7 @@ std::string IndefiniteTruthValue::to_string(const std::string& indent) const
 {
     char buf[1024];
     sprintf(buf, "[%f,%f,%f,%f,%f,%d]",
-            static_cast<float>(getMean()),
+            static_cast<float>(get_mean()),
             static_cast<float>(getL()),
             static_cast<float>(getU()),
             static_cast<float>(getConfidenceLevel()),

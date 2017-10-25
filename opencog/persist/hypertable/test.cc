@@ -43,7 +43,7 @@ int atomCompare(Atom *a, Atom *b) //TODO: Test name, use == ?
         const TruthValue &tb = b->getTruthValue();
         fprintf(stderr, "Error, truth value mis-match, "
                 "ma=%f mb=%f ca=%f cb=%f\n",
-                ta.getMean(), tb.getMean(), ta.getCount(), tb.getCount());
+                ta.get_mean(), tb.get_mean(), ta.get_count(), tb.get_count());
         --rc;
     }
     if (!(a->getAttentionValue() == b->getAttentionValue())) {

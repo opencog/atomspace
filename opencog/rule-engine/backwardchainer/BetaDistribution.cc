@@ -26,7 +26,7 @@
 using namespace opencog;
 
 BetaDistribution::BetaDistribution(const TruthValuePtr& tv, double alpha, double beta)
-	: BetaDistribution(tv->getMean() * tv->getCount(), tv->getCount(), alpha, beta) {}
+	: BetaDistribution(tv->get_mean() * tv->get_count(), tv->get_count(), alpha, beta) {}
 
 BetaDistribution::BetaDistribution(double pos_count, double count,
                                    double alpha, double beta)

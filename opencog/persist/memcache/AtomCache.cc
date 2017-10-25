@@ -122,7 +122,7 @@ void AtomCache::storeAtom(Atom *atom)
 		return;
 	}
 
-	vlen = snprintf(valbuff, VBSIZE, "(%20.16g, %20.16g)", tv.getMean(), tv.getCount());
+	vlen = snprintf(valbuff, VBSIZE, "(%20.16g, %20.16g)", tv.get_mean(), tv.get_count());
 	strcpy(p, "stv");
 	rc = memcached_set (mc, keybuff, rootlen+3, valbuff, vlen, 0, 0);
 	CHECK_RC(rc);

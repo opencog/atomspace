@@ -50,8 +50,8 @@ TruthValuePtr MixtureModel::operator()()
 		tvs.push_back(tv);
 
 		// Calculate model's weight
-		double count = tv->getCount(),
-			pos_count = tv->getMean() * count, // TODO correct when mean is fixed
+		double count = tv->get_count(),
+			pos_count = tv->get_mean() * count, // TODO correct when mean is fixed
 			binom = binomial_coefficient<double>(count, pos_count);
 		weights.push_back(prior_estimate(model) * (count+1) * binom);
 	}
@@ -67,7 +67,7 @@ TruthValuePtr MixtureModel::weighted_average(const std::vector<TruthValuePtr>& t
 	boost::transform(weights, std::back_inserter(norm_weights),
 	                 [total](double w) { return w / total; });
 	boost::transform(tvs, std::back_inserter(means),
-	                 [](const TruthValuePtr& tv) { return tv->getMean(); });
+	                 [](const TruthValuePtr& tv) { return tv->get_mean(); });
 
 	// For now the formula is extremely approximative, instead we
 	// could fit the mixture by a beta distribution, either
@@ -85,7 +85,7 @@ double MixtureModel::prior_estimate(const Handle& model)
 {
 	HandleSet all_atoms(get_all_uniq_atoms(model));
 	double partial_length = all_atoms.size();
-	double remain_data_size = data_set_size - model->getTruthValue()->getCount();
+	double remain_data_size = data_set_size - model->getTruthValue()->get_count();
 	return prior(partial_length + kolmogorov_estimate(remain_data_size));
 }
 
@@ -103,6 +103,6 @@ double MixtureModel::infer_data_set_size()
 {
 	double max_count = 0.0;
 	for (const Handle& model : models)
-		max_count = std::max(max_count, model->getTruthValue()->getCount());
+		max_count = std::max(max_count, model->getTruthValue()->get_count());
 	return max_count;
 }

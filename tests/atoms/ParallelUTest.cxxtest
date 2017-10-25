@@ -200,7 +200,7 @@ void ParallelUTest::test_join(void)
     TS_ASSERT_EQUALS(cnt, 2);
 
     // The Join is an AndLink...
-    double mean = tvp->getMean();
+    double mean = tvp->get_mean();
     TS_ASSERT_LESS_THAN(mean, 0.5);
 
     logger().debug("END TEST: %s", __FUNCTION__);

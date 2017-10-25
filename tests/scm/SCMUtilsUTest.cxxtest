@@ -109,7 +109,7 @@ void SCMUtilsUTest::test_utils(void)
 	TruthValuePtr tv = counter->getTruthValue();
 
 	TSM_ASSERT_EQUALS("Wrong truth value type", COUNT_TRUTH_VALUE, tv->get_type());
-	TSM_ASSERT_EQUALS("wrong count found", 3, (int)(tv->getCount()));
+	TSM_ASSERT_EQUALS("wrong count found", 3, (int)(tv->get_count()));
 
 	// Test cog-get-partner ------------------------------
 	Handle recount = evaluator->eval_h("recount");

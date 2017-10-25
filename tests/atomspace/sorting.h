@@ -51,8 +51,8 @@ bool LTIAndTVAscendingSort::test(const AtomPtr& h1, const AtomPtr& h2) const
     AttentionValue::lti_t lti1, lti2;
     float tv1, tv2;
 
-    tv1 = fabs(h1->getTruthValue()->getMean());
-    tv2 = fabs(h2->getTruthValue()->getMean());
+    tv1 = fabs(h1->getTruthValue()->get_mean());
+    tv2 = fabs(h2->getTruthValue()->get_mean());
 
     lti1 = get_lti(Handle(h1));
     lti2 = get_lti(Handle(h2));
@@ -79,7 +79,7 @@ bool LTIThenTVAscendingSort::test(const AtomPtr& h1, const AtomPtr& h2) const
     if (lti1 != lti2) return lti1 < lti2;
 
     float tv1, tv2;
-    tv1 = h1->getTruthValue()->getMean();
-    tv2 = h2->getTruthValue()->getMean();
+    tv1 = h1->getTruthValue()->get_mean();
+    tv2 = h2->getTruthValue()->get_mean();
     return tv1 < tv2;
 }

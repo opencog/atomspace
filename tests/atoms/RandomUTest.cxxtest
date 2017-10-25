@@ -96,7 +96,7 @@ void RandomUTest::test_weights(void)
     printf("ratio = %s\n", ratio->to_string().c_str());
 
     TruthValuePtr tv = eval->eval_tv("(cog-evaluate! (DefinedPredicate \"test\"))");
-    TS_ASSERT_LESS_THAN(0.5, tv->getMean());
+    TS_ASSERT_LESS_THAN(0.5, tv->get_mean());
 
     logger().debug("END TEST: %s", __FUNCTION__);
 }

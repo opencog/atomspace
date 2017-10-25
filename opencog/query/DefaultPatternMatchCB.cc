@@ -351,7 +351,7 @@ bool DefaultPatternMatchCB::post_link_match(const Handle& lpat,
 	// because we use a greater-than-half for the TV.
 	// This is the same behavior as used in evaluate_term().
 	TruthValuePtr tv(EvaluationLink::do_evaluate(_as, lgnd->get_handle()));
-	return tv->getMean() >= 0.5;
+	return tv->get_mean() >= 0.5;
 }
 
 void DefaultPatternMatchCB::post_link_mismatch(const Handle& lpat,
@@ -531,7 +531,7 @@ bool DefaultPatternMatchCB::clause_match(const Handle& ptrn,
 		// XXX FIXME: we are making a crisp-logic go/no-go decision
 		// based on the TV strength. Perhaps something more subtle might be
 		// wanted, here.
-		bool relation_holds = tvp->getMean() > 0.5;
+		bool relation_holds = tvp->get_mean() > 0.5;
 		return relation_holds;
 	}
 
@@ -658,7 +658,7 @@ bool DefaultPatternMatchCB::eval_term(const Handle& virt,
 	// XXX FIXME: we are making a crsip-logic go/no-go decision
 	// based on the TV strength. Perhaps something more subtle might be
 	// wanted, here.
-	bool relation_holds = tvp->getMean() > 0.5;
+	bool relation_holds = tvp->get_mean() > 0.5;
 	return relation_holds;
 }
 
@@ -795,7 +795,7 @@ bool DefaultPatternMatchCB::eval_sentence(const Handle& top,
 		// XXX FIXME: we are making a crisp-logic go/no-go decision
 		// based on the TV strength. Perhaps something more subtle might be
 		// wanted, here.
-		bool relation_holds = tvp->getMean() > 0.5;
+		bool relation_holds = tvp->get_mean() > 0.5;
 		return relation_holds;
 	}
 

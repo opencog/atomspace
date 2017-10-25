@@ -77,29 +77,29 @@ void EqualLinkUTest::test_equality()
 
 	// -------
 	TruthValuePtr tv = EvaluationLink::do_evaluate(&_as, ident_aa);
-	TS_ASSERT_LESS_THAN(0.5, tv->getMean());  // true
+	TS_ASSERT_LESS_THAN(0.5, tv->get_mean());  // true
 
 	tv = EvaluationLink::do_evaluate(&_as, ident_asa);
-	TS_ASSERT_LESS_THAN(tv->getMean(), 0.5); // false
+	TS_ASSERT_LESS_THAN(tv->get_mean(), 0.5); // false
 
 	tv = EvaluationLink::do_evaluate(&_as, ident_ab);
-	TS_ASSERT_LESS_THAN(tv->getMean(), 0.5); // false
+	TS_ASSERT_LESS_THAN(tv->get_mean(), 0.5); // false
 
 	tv = EvaluationLink::do_evaluate(&_as, ident_asb);
-	TS_ASSERT_LESS_THAN(tv->getMean(), 0.5); // false
+	TS_ASSERT_LESS_THAN(tv->get_mean(), 0.5); // false
 
 	// -------
 	tv = EvaluationLink::do_evaluate(&_as, equal_aa);
-	TS_ASSERT_LESS_THAN(0.5, tv->getMean());  // true
+	TS_ASSERT_LESS_THAN(0.5, tv->get_mean());  // true
 
 	tv = EvaluationLink::do_evaluate(&_as, equal_asa);
-	TS_ASSERT_LESS_THAN(0.5, tv->getMean());  // true
+	TS_ASSERT_LESS_THAN(0.5, tv->get_mean());  // true
 
 	tv = EvaluationLink::do_evaluate(&_as, equal_ab);
-	TS_ASSERT_LESS_THAN(tv->getMean(), 0.5); // false
+	TS_ASSERT_LESS_THAN(tv->get_mean(), 0.5); // false
 
 	tv = EvaluationLink::do_evaluate(&_as, equal_asb);
-	TS_ASSERT_LESS_THAN(tv->getMean(), 0.5); // false
+	TS_ASSERT_LESS_THAN(tv->get_mean(), 0.5); // false
 
 	logger().info("END TEST: %s", __FUNCTION__);
 }

@@ -294,14 +294,14 @@ TruthValuePtr EvaluationLink::do_eval_scratch(AtomSpace* as,
 	{
 		TruthValuePtr tv(do_eval_scratch(as, evelnk->getOutgoingAtom(0), scratch));
 		return SimpleTruthValue::createTV(
-		              1.0 - tv->getMean(), tv->getConfidence());
+		              1.0 - tv->get_mean(), tv->get_confidence());
 	}
 	else if (AND_LINK == t)
 	{
 		for (const Handle& h : evelnk->getOutgoingSet())
 		{
 			TruthValuePtr tv(do_eval_scratch(as, h, scratch));
-			if (tv->getMean() < 0.5)
+			if (tv->get_mean() < 0.5)
 				return tv;
 		}
 		return TruthValue::TRUE_TV();
@@ -311,7 +311,7 @@ TruthValuePtr EvaluationLink::do_eval_scratch(AtomSpace* as,
 		for (const Handle& h : evelnk->getOutgoingSet())
 		{
 			TruthValuePtr tv(do_eval_scratch(as, h, scratch));
-			if (0.5 < tv->getMean())
+			if (0.5 < tv->get_mean())
 				return tv;
 		}
 		return TruthValue::FALSE_TV();
@@ -332,7 +332,7 @@ TruthValuePtr EvaluationLink::do_eval_scratch(AtomSpace* as,
 			for (size_t i=0; i<arity; i++)
 			{
 				TruthValuePtr tv(do_eval_scratch(as, oset[i], scratch));
-				if (tv->getMean() < 0.5)
+				if (tv->get_mean() < 0.5)
 					return tv;
 			}
 		} while (is_trec);
@@ -354,7 +354,7 @@ TruthValuePtr EvaluationLink::do_eval_scratch(AtomSpace* as,
 			for (size_t i=0; i<arity; i++)
 			{
 				TruthValuePtr tv(do_eval_scratch(as, oset[i], scratch));
-				if (0.5 < tv->getMean())
+				if (0.5 < tv->get_mean())
 					return tv;
 			}
 		} while (is_trec);
@@ -380,7 +380,7 @@ TruthValuePtr EvaluationLink::do_eval_scratch(AtomSpace* as,
 		// Return the logical-AND of the returned truth values
 		for (const TruthValuePtr& tv: tvp)
 		{
-			if (0.5 > tv->getMean())
+			if (0.5 > tv->get_mean())
 				return tv;
 		}
 		return TruthValue::TRUE_TV();

@@ -206,5 +206,5 @@ bool UREConfigReader::fetch_bool_param(const string& pred_name,
 	Handle pred = _as.add_node(PREDICATE_NODE, pred_name);
 	TruthValuePtr tv =
 		_as.add_link(EVALUATION_LINK, pred, input)->getTruthValue();
-	return tv->getMean() > 0.5;
+	return tv->get_mean() > 0.5;
 }

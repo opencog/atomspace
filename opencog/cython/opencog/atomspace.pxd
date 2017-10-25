@@ -49,9 +49,9 @@ cdef extern from "opencog/truthvalue/TruthValue.h" namespace "opencog":
         cTruthValue* get()
 
     cdef cppclass cTruthValue "const opencog::TruthValue":
-        strength_t getMean()
-        confidence_t getConfidence()
-        count_t getCount()
+        strength_t get_mean()
+        confidence_t get_confidence()
+        count_t get_count()
         tv_ptr DEFAULT_TV()
         string to_string()
         bint operator==(cTruthValue h)
@@ -60,9 +60,9 @@ cdef extern from "opencog/truthvalue/TruthValue.h" namespace "opencog":
 cdef extern from "opencog/truthvalue/SimpleTruthValue.h" namespace "opencog":
     cdef cppclass cSimpleTruthValue "opencog::SimpleTruthValue":
         cSimpleTruthValue(float, float)
-        strength_t getMean()
-        confidence_t getConfidence()
-        count_t getCount()
+        strength_t get_mean()
+        confidence_t get_confidence()
+        count_t get_count()
         count_t confidenceToCount(float)
         confidence_t countToConfidence(float)
         tv_ptr DEFAULT_TV()

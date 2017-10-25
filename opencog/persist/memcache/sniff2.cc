@@ -57,7 +57,7 @@ int atomCompare(Atom *a, Atom *b)
 		const TruthValue &tb = b->getTruthValue();
 		fprintf(stderr, "Error, truth value miscompare, "
 		        "ma=%f mb=%f ca=%f cb=%f\n",
-		        ta.getMean(), tb.getMean(), ta.getCount(), tb.getCount());
+		        ta.get_mean(), tb.get_mean(), ta.get_count(), tb.get_count());
 		rc --;
 	}
 	return rc;

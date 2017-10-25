@@ -276,7 +276,7 @@ Rule ForwardChainer::select_rule(const Handle& source)
 	std::map<const Rule*, float> rule_weight;
 	for (const Rule& r : _rules)
 		if (not r.is_meta())
-			rule_weight[&r] = r.get_tv()->getMean();
+			rule_weight[&r] = r.get_tv()->get_mean();
 
 	ure_logger().debug("%d rules to be searched as matched against the source",
 	                   rule_weight.size());

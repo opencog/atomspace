@@ -992,10 +992,10 @@ void PGAtomStorage::add_truth_value_columns(Database& database,
         case SIMPLE_TRUTH_VALUE:
         case COUNT_TRUTH_VALUE:
         case PROBABILISTIC_TRUTH_VALUE:
-            database.add_column_double("stv_mean", truth_ptr->getMean());
-            database.add_column_double("stv_count", truth_ptr->getCount());
+            database.add_column_double("stv_mean", truth_ptr->get_mean());
+            database.add_column_double("stv_count", truth_ptr->get_count());
             database.add_column_double("stv_confidence", 
-                    truth_ptr->getConfidence());
+                    truth_ptr->get_confidence());
             break;
         case INDEFINITE_TRUTH_VALUE:
         {

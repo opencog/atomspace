@@ -100,7 +100,7 @@ void SequenceUTest::test_sequence(void)
 
 	// This should not throw any exceptions.
 	TruthValuePtr tv = eval->eval_tv("(cog-satisfy (traffic-lights))");
-	TS_ASSERT_LESS_THAN_EQUALS(tv->getMean(), 0.5);
+	TS_ASSERT_LESS_THAN_EQUALS(tv->get_mean(), 0.5);
 
 	// Check the number of green lights and red lights that were
 	// evaluated. The pattern has two green lights and one red
@@ -116,7 +116,7 @@ void SequenceUTest::test_sequence(void)
 	// ----------------------------------------------------------
 	// There are two green lights here; the TV should be "true".
 	tv = eval->eval_tv("(cog-satisfy (all-green))");
-	TS_ASSERT_LESS_THAN(0.5, tv->getMean());
+	TS_ASSERT_LESS_THAN(0.5, tv->get_mean());
 
 	// Should have seen two more green lights, and no reds.
 	sngreen = eval->eval("num-green");
@@ -131,7 +131,7 @@ void SequenceUTest::test_sequence(void)
 	// by a NotLink.  That should halt the pregression, and return
 	// false.
 	tv = eval->eval_tv("(cog-satisfy (anti-green))");
-	TS_ASSERT_LESS_THAN(tv->getMean(), 0.5);
+	TS_ASSERT_LESS_THAN(tv->get_mean(), 0.5);
 
 	// Should have seen three more green lights, and no reds.
 	sngreen = eval->eval("num-green");
@@ -151,7 +151,7 @@ void SequenceUTest::test_presence(void)
 	eval->eval("(load-from-path \"tests/query/seq-presence.scm\")");
 
 	TruthValuePtr tv = eval->eval_tv("(cog-satisfy empty-sequence)");
-	TS_ASSERT_LESS_THAN_EQUALS(0.5, tv->getMean());
+	TS_ASSERT_LESS_THAN_EQUALS(0.5, tv->get_mean());
 
 	logger().debug("END TEST: %s", __FUNCTION__);
 }
@@ -167,7 +167,7 @@ void SequenceUTest::test_fallback(void)
 
 	// This should not throw any exceptions.
 	TruthValuePtr tv = eval->eval_tv("(cog-satisfy drag-race)");
-	TS_ASSERT_LESS_THAN_EQUALS(0.5, tv->getMean());
+	TS_ASSERT_LESS_THAN_EQUALS(0.5, tv->get_mean());
 
 	// Check the number of green lights and red lights that were
 	// evaluated. The pattern has two green lights and one red
@@ -190,7 +190,7 @@ void SequenceUTest::test_pass_presence(void)
 	eval->eval("(load-from-path \"tests/query/seq-absence.scm\")");
 
 	TruthValuePtr tv = eval->eval_tv("(cog-satisfy or-presence)");
-	TS_ASSERT_LESS_THAN_EQUALS(0.5, tv->getMean());
+	TS_ASSERT_LESS_THAN_EQUALS(0.5, tv->get_mean());
 
 	std::string sntrig = eval->eval("trig");
 	int ntrig = atoi(sntrig.c_str());
@@ -198,7 +198,7 @@ void SequenceUTest::test_pass_presence(void)
 
 	// -------------------------------------------------------
 	tv = eval->eval_tv("(cog-satisfy and-absence)");
-	TS_ASSERT_LESS_THAN_EQUALS(0.5, tv->getMean());
+	TS_ASSERT_LESS_THAN_EQUALS(0.5, tv->get_mean());
 
 	sntrig = eval->eval("trig");
 	ntrig = atoi(sntrig.c_str());
@@ -206,7 +206,7 @@ void SequenceUTest::test_pass_presence(void)
 
 	// -------------------------------------------------------
 	tv = eval->eval_tv("(cog-satisfy and-not-present)");
-	TS_ASSERT_LESS_THAN_EQUALS(0.5, tv->getMean());
+	TS_ASSERT_LESS_THAN_EQUALS(0.5, tv->get_mean());
 
 	sntrig = eval->eval("trig");
 	ntrig = atoi(sntrig.c_str());
@@ -214,7 +214,7 @@ void SequenceUTest::test_pass_presence(void)
 
 	// -------------------------------------------------------
 	tv = eval->eval_tv("(cog-satisfy or-not-absent)");
-	TS_ASSERT_LESS_THAN_EQUALS(0.5, tv->getMean());
+	TS_ASSERT_LESS_THAN_EQUALS(0.5, tv->get_mean());
 
 	sntrig = eval->eval("trig");
 	ntrig = atoi(sntrig.c_str());
@@ -229,14 +229,14 @@ void SequenceUTest::test_pass_presence(void)
 
 	// ----
 	eval->eval_tv("(cog-satisfy or-presence)");
-	TS_ASSERT_LESS_THAN_EQUALS(0.5, tv->getMean()); // return true
+	TS_ASSERT_LESS_THAN_EQUALS(0.5, tv->get_mean()); // return true
 
 	ntrig = atoi(eval->eval("trig").c_str());
 	TS_ASSERT_EQUALS(no_change, ntrig);
 
 	// ----
 	tv = eval->eval_tv("(cog-satisfy and-absence)");
-	TS_ASSERT_LESS_THAN_EQUALS(tv->getMean(), 0.5);  // return false
+	TS_ASSERT_LESS_THAN_EQUALS(tv->get_mean(), 0.5);  // return false
 
 	ntrig = atoi(eval->eval("trig").c_str());
 	TS_ASSERT_EQUALS(no_change, ntrig);
@@ -247,14 +247,14 @@ void SequenceUTest::test_pass_presence(void)
 // just right now, I'm just gonna stub these out instead.
 	// ----
 	tv = eval->eval_tv("(cog-satisfy and-not-present)");
-	TS_ASSERT_LESS_THAN_EQUALS(tv->getMean(), 0.5); // return false
+	TS_ASSERT_LESS_THAN_EQUALS(tv->get_mean(), 0.5); // return false
 
 	ntrig = atoi(eval->eval("trig").c_str());
 	TS_ASSERT_EQUALS(no_change, ntrig);
 
 	// ----
 	tv = eval->eval_tv("(cog-satisfy or-not-absent)");
-	TS_ASSERT_LESS_THAN_EQUALS(0.5, tv->getMean()); // return true
+	TS_ASSERT_LESS_THAN_EQUALS(0.5, tv->get_mean()); // return true
 
 	ntrig = atoi(eval->eval("trig").c_str());
 	TS_ASSERT_EQUALS(no_change, ntrig);
@@ -278,7 +278,7 @@ void SequenceUTest::test_or_put(void)
 		"(EvaluationLink (PredicateNode \"yes-visible\")"
 		"	(ListLink (ConceptNode \"is-vis\")))");
 	TruthValuePtr tv = eval->eval_tv("(cog-satisfy or-visible-put)");
-	TS_ASSERT_LESS_THAN_EQUALS(0.5, tv->getMean());
+	TS_ASSERT_LESS_THAN_EQUALS(0.5, tv->get_mean());
 
 	// Check the state. Should have a list of length 1,
 	// with a variable only; that is, the state was NOT set.
@@ -288,7 +288,7 @@ void SequenceUTest::test_or_put(void)
 
 	// ----
 	tv = eval->eval_tv("(cog-satisfy or-put)");
-	TS_ASSERT_LESS_THAN_EQUALS(0.5, tv->getMean());
+	TS_ASSERT_LESS_THAN_EQUALS(0.5, tv->get_mean());
 
 	// Check the state.
 	Handle not_viz = eval->eval_h("(ConceptNode \"not-vis\")");

@@ -229,13 +229,13 @@ void ArcanaUTest::test_numeric(void)
 	TruthValuePtr too_soon = eval->eval_tv(
 		"(cog-evaluate! (DefinedPredicateNode \"Time to change expression\"))");
 
-	TS_ASSERT_LESS_THAN_EQUALS(too_soon->getMean(), 0.5);
+	TS_ASSERT_LESS_THAN_EQUALS(too_soon->get_mean(), 0.5);
 
 	// The TV needs to change after 2 seconds.... sleep 4 to be safe.
 	sleep(4);
 	TruthValuePtr too_late = eval->eval_tv(
 		"(cog-evaluate! (DefinedPredicateNode \"Time to change expression\"))");
-	TS_ASSERT_LESS_THAN_EQUALS(0.5, too_late->getMean());
+	TS_ASSERT_LESS_THAN_EQUALS(0.5, too_late->get_mean());
 
 	// ----
 	logger().debug("END TEST: %s", __FUNCTION__);
