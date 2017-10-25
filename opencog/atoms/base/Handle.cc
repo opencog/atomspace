@@ -112,7 +112,7 @@ std::string h_to_string(const Handle& h)
 	if (h == nullptr)
 		return "nullatom\n";
 	else
-		return h->toString();
+		return h->to_string();
 }
 std::string hp_to_string(const HandlePair& hp)
 {
@@ -211,11 +211,11 @@ std::string atomtype_to_string(Type type)
 }
 std::string aptr_to_string(const AtomPtr& aptr)
 {
-	return h_to_string(aptr->getHandle());
+	return h_to_string(aptr->get_handle());
 }
 std::string lptr_to_string(const LinkPtr& lptr)
 {
-	return h_to_string(lptr->getHandle());
+	return h_to_string(lptr->get_handle());
 }
 
 std::string oc_to_string(const Handle& h)

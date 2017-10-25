@@ -170,24 +170,24 @@ static void atomCompare(AtomPtr a, AtomPtr b, const char* where)
         return;
     }
 
-    TSM_ASSERT_EQUALS("Type mismatch", a->getType(), b->getType());
+    TSM_ASSERT_EQUALS("Type mismatch", a->get_type(), b->get_type());
 
     NodePtr na(NodeCast(a));
     NodePtr nb(NodeCast(b));
     if (na and nb)
     {
-        TSM_ASSERT_EQUALS("Name mismatch", na->getName(), nb->getName());
+        TSM_ASSERT_EQUALS("Name mismatch", na->get_name(), nb->get_name());
     }
 
     LinkPtr la(LinkCast(a));
     LinkPtr lb(LinkCast(b));
     if (la and lb)
     {
-        TSM_ASSERT_EQUALS("Arity mismatch", la->getArity(), lb->getArity());
+        TSM_ASSERT_EQUALS("Arity mismatch", la->get_arity(), lb->get_arity());
         if (*la != *lb)
         {
-            printf("Mismatching la = %s\n", la->toString().c_str());
-            printf("Mismatching lb = %s\n", lb->toString().c_str());
+            printf("Mismatching la = %s\n", la->to_string().c_str());
+            printf("Mismatching lb = %s\n", lb->to_string().c_str());
             TSM_ASSERT_EQUALS("Link mis-match", la, lb);
         }
     }
@@ -206,7 +206,7 @@ static void atomCompare(AtomPtr a, AtomPtr b, const char* where)
             {
                 fprintf(stderr, "Error, truth value miscompare, "
                     "ma=%f mb=%f ca=%f cb=%f\n",
-                    ta->getMean(), tb->getMean(), ta->getConfidence(), tb->getConfidence());
+                    ta->get_mean(), tb->get_mean(), ta->get_confidence(), tb->get_confidence());
             }
         }
     }
@@ -232,7 +232,7 @@ void BasicSaveUTest::single_atom_save_restore(std::string id)
     a->setTruthValue(stv);
     TLB::addAtom(a, TLB::INVALID_UUID);
 
-    Handle h = a->getHandle();
+    Handle h = a->get_handle();
 
     TSM_ASSERT("Bad Handle", h != Handle::UNDEFINED);
 
@@ -253,15 +253,15 @@ void BasicSaveUTest::single_atom_save_restore(std::string id)
     store->storeAtom(a2, true);
 
     HandleSeq hvec;
-    hvec.push_back(a->getHandle());
-    hvec.push_back(a2->getHandle());
+    hvec.push_back(a->get_handle());
+    hvec.push_back(a2->get_handle());
 
     LinkPtr l(createLink(SET_LINK, hvec));
     TLB::addAtom(l, TLB::INVALID_UUID);
     store->storeAtom(l, true);
 
     LinkPtr ll(createLink(SET_LINK, hvec));
-    Handle hl(ll->getHandle());
+    Handle hl(ll->get_handle());
     AtomPtr lb = store->getLink(hl);
     atomCompare(l, lb, "Single link save-restore");
 
@@ -302,10 +302,10 @@ void BasicSaveUTest::add_to_table(int idx, AtomTable *table, std::string id)
     a4[idx] = n4[idx];
 
     HandleSeq hvec;
-    hvec.push_back(a1[idx]->getHandle());
-    hvec.push_back(a2[idx]->getHandle());
-    hvec.push_back(a3[idx]->getHandle());
-    hvec.push_back(a4[idx]->getHandle());
+    hvec.push_back(a1[idx]->get_handle());
+    hvec.push_back(a2[idx]->get_handle());
+    hvec.push_back(a3[idx]->get_handle());
+    hvec.push_back(a4[idx]->get_handle());
 
     l[idx] = createLink(SET_LINK, hvec);
     l[idx] = LinkCast(table->add(l[idx], false));

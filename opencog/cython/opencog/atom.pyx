@@ -37,8 +37,8 @@ cdef class Atom(object):
                 atom_ptr = self.handle.atom_ptr()
                 if atom_ptr == NULL:   # avoid null-pointer deref
                     return None
-                if atom_ptr.isNode():
-                    self._name = atom_ptr.getName()
+                if atom_ptr.is_node():
+                    self._name = atom_ptr.get_name()
                 else:
                     self._name = ""
             return self._name
@@ -54,7 +54,7 @@ cdef class Atom(object):
                 pytv = TruthValue()
                 pytv.cobj = new tv_ptr(tvp) # make copy of smart pointer
                 return pytv
-            return TruthValue(tvp.get().getMean(), tvp.get().getConfidence())
+            return TruthValue(tvp.get().get_mean(), tvp.get().get_confidence())
 
         def __set__(self, truth_value):
             try:
@@ -171,7 +171,7 @@ cdef class Atom(object):
                 atom_ptr = self.handle.atom_ptr()
                 if atom_ptr == NULL:   # avoid null-pointer deref
                     return None
-                if atom_ptr.isLink():
+                if atom_ptr.is_link():
                     self._outgoing = self.get_out()
                 else:
                     self._outgoing = []
@@ -242,7 +242,7 @@ cdef class Atom(object):
                 atom_ptr = self.handle.atom_ptr()
                 if atom_ptr == NULL:   # avoid null-pointer deref
                     return None
-                self._atom_type = atom_ptr.getType()
+                self._atom_type = atom_ptr.get_type()
             return self._atom_type
 
     property type_name:
@@ -272,13 +272,13 @@ cdef class Atom(object):
     def long_string(self):
         cdef cAtom* atom_ptr = self.handle.atom_ptr()
         if atom_ptr != NULL:
-            return atom_ptr.toString()
+            return atom_ptr.to_string()
         return ""
 
     def __str__(self):
         cdef cAtom* atom_ptr = self.handle.atom_ptr()
         if atom_ptr != NULL:
-            return atom_ptr.toShortString()
+            return atom_ptr.to_short_string()
         return ""
 
     def __repr__(self):

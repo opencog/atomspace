@@ -86,8 +86,8 @@ public:
 	{}
 
 	NumberNode(Node &n)
-		: Node(n.getType(), double_to_string(std::stod(n.getName()))),
-		  value(std::stod(n.getName()))
+		: Node(n.get_type(), double_to_string(std::stod(n.get_name()))),
+		  value(std::stod(n.get_name()))
 	{
 		OC_ASSERT(classserver().isA(_type, NUMBER_NODE),
 			"Bad NumberNode constructor!");

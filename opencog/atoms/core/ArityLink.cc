@@ -43,7 +43,7 @@ ArityLink::ArityLink(const Link &l)
 	: FunctionLink(l)
 {
 	// Type must be as expected
-	Type tscope = l.getType();
+	Type tscope = l.get_type();
 	if (not classserver().isA(tscope, ARITY_LINK))
 	{
 		const std::string& tname = classserver().getTypeName(tscope);
@@ -64,7 +64,7 @@ Handle ArityLink::execute(AtomSpace * as) const
 		{
 			h = flp->execute(as);
 		}
-		if (h->isLink()) ary += h->getArity();
+		if (h->is_link()) ary += h->get_arity();
 	}
 
 	// XXX This is probably wrong ... if the as is null, we should

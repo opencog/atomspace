@@ -99,7 +99,7 @@ void ScopeUTest::test_alpha()
 
 	Handle c1 = eval->eval_h("(content-1)");
 	Handle c2 = eval->eval_h("(content-2)");
-	printf("c2 %s\n", c2->toString().c_str());
+	printf("c2 %s\n", c2->to_string().c_str());
 
 	TS_ASSERT_EQUALS(c1, c2);
 	logger().debug("END TEST: %s", __FUNCTION__);
@@ -117,7 +117,7 @@ void ScopeUTest::test_alpha_reverse()
 	// Reverse the order of creation
 	Handle c2 = eval->eval_h("(content-2)");
 	Handle c1 = eval->eval_h("(content-1)");
-	printf("c1 %s\n", c1->toString().c_str());
+	printf("c1 %s\n", c1->to_string().c_str());
 
 	TS_ASSERT_EQUALS(c1, c2);
 	logger().debug("END TEST: %s", __FUNCTION__);
@@ -202,7 +202,7 @@ void ScopeUTest::test_pushpop()
 	eval->eval_h("(cog-bind (member-to-evaluation-2-1-rule))");
 
 	Handle em = eval->eval_h("(cog-bind (evaluation-to-member-2-rule))");
-	TS_ASSERT_EQUALS(1, em->getArity());
+	TS_ASSERT_EQUALS(1, em->get_arity());
 	Handle c2 = em->getOutgoingAtom(0);
 
 	TS_ASSERT_EQUALS(c1, c2);
@@ -256,7 +256,7 @@ void ScopeUTest::test_hide_1()
 	TS_ASSERT_EQUALS(varx, patvar);
 
 	Handle result = eval->eval_h("(cog-satisfying-set getx)");
-	TS_ASSERT_EQUALS(1, result->getArity());
+	TS_ASSERT_EQUALS(1, result->get_arity());
 
 	Handle expected = eval->eval_h(
 		"(SetLink (ListLink"

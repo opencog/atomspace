@@ -83,7 +83,7 @@ void BetaReduceUTest::test_unquote()
 	TS_ASSERT(nullptr != redox);
 
 	redox = _as.add_atom(redox);
-	printf("reduced set=%s\n", redox->toString().c_str());
+	printf("reduced set=%s\n", redox->to_string().c_str());
 
 	// This is the answer we expect to get:
 	Handle oxy =
@@ -95,7 +95,7 @@ void BetaReduceUTest::test_unquote()
 					N(VARIABLE_NODE, "$X"),
 					L(UNQUOTE_LINK, concept))));
 
-	printf("expected set=%s\n", oxy->toString().c_str());
+	printf("expected set=%s\n", oxy->to_string().c_str());
 
 	// the reduced and the expected sets should be identical.
 	TS_ASSERT(redox == oxy);
@@ -154,7 +154,7 @@ void BetaReduceUTest::test_alpha_hiding()
 	redox = _as.add_atom(redox);
 	TS_ASSERT(nullptr != redox);
 
-	printf("reduced set=%s\n", redox->toString().c_str());
+	printf("reduced set=%s\n", redox->to_string().c_str());
 
 	// What we expect to get.
 	Handle xypect =
@@ -163,7 +163,7 @@ void BetaReduceUTest::test_alpha_hiding()
 			L(QUOTE_LINK, N(VARIABLE_NODE, "$Y")),
 			hscox);
 
-	printf("expected set=%s\n", xypect->toString().c_str());
+	printf("expected set=%s\n", xypect->to_string().c_str());
 
 	// the reduced and the expected sets should be identical.
 	TS_ASSERT(redox == xypect);

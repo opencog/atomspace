@@ -74,7 +74,7 @@ void RecognizerUTest::setUp(void)
 	eval->eval("(load-from-path \"tests/query/test_types.scm\")");
 }
 
-#define getarity(hand) hand->getArity()
+#define getarity(hand) hand->get_arity()
 
 /*
  * Test a glob in the middle of a list. Should match two patterns.
@@ -86,7 +86,7 @@ void RecognizerUTest::test_single_word(void)
 	eval->eval("(load-from-path \"tests/query/recognizer.scm\")");
 
 	Handle love = eval->eval_h("(cog-execute! (DualLink sent))");
-	printf("love-you %s\n", love->toString().c_str());
+	printf("love-you %s\n", love->to_string().c_str());
 	TS_ASSERT_EQUALS(2, getarity(love));
 
 	Handle response = eval->eval_h("(SetLink love-star star-you)");
@@ -106,7 +106,7 @@ void RecognizerUTest::test_word_phrase(void)
 	eval->eval("(load-from-path \"tests/query/recognizer.scm\")");
 
 	Handle love = eval->eval_h("(cog-execute! (DualLink adv-sent))");
-	printf("super-love %s\n", love->toString().c_str());
+	printf("super-love %s\n", love->to_string().c_str());
 	TS_ASSERT_EQUALS(1, getarity(love));
 
 	Handle response = eval->eval_h("(SetLink star-you)");
@@ -126,7 +126,7 @@ void RecognizerUTest::test_double_glob(void)
 	eval->eval("(load-from-path \"tests/query/recognizer.scm\")");
 
 	Handle hate = eval->eval_h("(cog-execute! (DualLink hate-speech))");
-	printf("haters hating %s\n", hate->toString().c_str());
+	printf("haters hating %s\n", hate->to_string().c_str());
 	TS_ASSERT_EQUALS(1, getarity(hate));
 
 	Handle response = eval->eval_h("(SetLink a-hate-b)");
@@ -143,7 +143,7 @@ void RecognizerUTest::test_generic(void)
 	eval->eval("(load-from-path \"tests/query/recognizer.scm\")");
 
 	Handle anb = eval->eval_h("(cog-execute! (DualLink a-and-b))");
-	printf("A and B %s\n", anb->toString().c_str());
+	printf("A and B %s\n", anb->to_string().c_str());
 	TS_ASSERT_EQUALS(2, getarity(anb));
 
 	Handle response = eval->eval_h(
@@ -164,7 +164,7 @@ void RecognizerUTest::test_zero_to_many(void)
 	eval->eval("(load-from-path \"tests/query/recognizer.scm\")");
 
 	Handle ztm = eval->eval_h("(cog-execute! (DualLink ztm))");
-	printf("Zero to many %s\n", ztm->toString().c_str());
+	printf("Zero to many %s\n", ztm->to_string().c_str());
 	TS_ASSERT_EQUALS(7, getarity(ztm));
 
 	Handle response = eval->eval_h(

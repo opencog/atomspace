@@ -91,8 +91,8 @@ void DeleteLinkUTest::test_free_delete()
 	Instantiator inst(&_as);
 	Handle prop = inst.execute(add);
 
-	printf("Created link %s\n", prop->toString().c_str());
-	TS_ASSERT_EQUALS(EVALUATION_LINK, prop->getType());
+	printf("Created link %s\n", prop->to_string().c_str());
+	TS_ASSERT_EQUALS(EVALUATION_LINK, prop->get_type());
 	TS_ASSERT_EQUALS(pred, prop->getOutgoingAtom(0));
 	TS_ASSERT_EQUALS(list, prop->getOutgoingAtom(1));
 

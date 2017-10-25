@@ -39,13 +39,13 @@ static void get_all_atoms(const Handle& h, HandleSeq& nlist, HandleSeq& alist)
 {
 	alist.emplace_back(h);
 
-	if (h->isNode())
+	if (h->is_node())
 	{
 		nlist.emplace_back(h);
 		return;
 	}
 
-	if (h->isLink())
+	if (h->is_link())
 	{
 		for (const Handle& o : h->getOutgoingSet())
 			get_all_atoms(o, nlist, alist);
@@ -73,7 +73,7 @@ void FuzzyMatchBasic::start_search(const Handle& trg)
  */
 bool FuzzyMatchBasic::accept_starter(const Handle& hp)
 {
-	if (hp->isLink()) return false;
+	if (hp->is_link()) return false;
 	return true;
 }
 
@@ -108,8 +108,8 @@ bool FuzzyMatchBasic::try_match(const Handle& soln)
 	// 	similarity += 1.0 / common_node->getIncomingSetSize();
 
 	LAZY_LOG_FINE << "\n========================================\n"
-	              << "Comparing:\n" << target->toShortString()
-	              << "----- and:\n" << soln->toShortString() << "\n"
+	              << "Comparing:\n" << target->to_short_string()
+	              << "----- and:\n" << soln->to_short_string() << "\n"
 	              << "Common nodes = " << common_nodes.size() << "\n"
 	              << "Size diff = " << diff << "\n"
 	              << "Similarity = " << similarity << "\n"

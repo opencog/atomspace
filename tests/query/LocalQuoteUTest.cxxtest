@@ -119,9 +119,9 @@ void LocalQuoteUTest::test_put()
 	Handle putted = inst.execute(put);
 	Handle expected = al(IMPLICATION_SCOPE_LINK, P_A, P_A);
 
-	printf("Executing %s\n", put->toString().c_str());
-	printf("Expecting %s\n", expected->toString().c_str());
-	printf("Got %s\n", putted->toString().c_str());
+	printf("Executing %s\n", put->to_string().c_str());
+	printf("Expecting %s\n", expected->to_string().c_str());
+	printf("Got %s\n", putted->to_string().c_str());
 	TS_ASSERT_EQUALS(putted, expected);
 
 	logger().info("END TEST: %s", __FUNCTION__);
@@ -165,9 +165,9 @@ void LocalQuoteUTest::test_put()
 // 		                    an(PREDICATE_NODE, "Q"),
 // 		                    an(VARIABLE_NODE, "$X"))));
 
-// 	printf("Meta-rule %s\n", bl->toString().c_str());
-// 	printf("Expecting %s\n", expected->toString().c_str());
-// 	printf("Got %s\n", result->toString().c_str());
+// 	printf("Meta-rule %s\n", bl->to_string().c_str());
+// 	printf("Expecting %s\n", expected->to_string().c_str());
+// 	printf("Got %s\n", result->to_string().c_str());
 // 	TS_ASSERT_EQUALS(result, expected);
 
 // 	logger().info("END TEST: %s", __FUNCTION__);

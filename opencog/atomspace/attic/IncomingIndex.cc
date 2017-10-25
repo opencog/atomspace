@@ -36,9 +36,9 @@ void IncomingIndex::resize()
 
 void IncomingIndex::insertAtom(const AtomPtr& a)
 {
-	if (not a->isLink()) return;
+	if (not a->is_link()) return;
 
-	Handle hin = a->getHandle();
+	Handle hin = a->get_handle();
 	for (const Handle& h : a->getOutgoingSet())
 	{
 		const UnorderedHandleSet& oldset = idx.get(h);
@@ -65,9 +65,9 @@ void IncomingIndex::insertAtom(const AtomPtr& a)
 
 void IncomingIndex::removeAtom(const AtomPtr& a)
 {
-	if (not a->isLink()) return;
+	if (not a->is_link()) return;
 
-	Handle hin = a->getHandle();
+	Handle hin = a->get_handle();
 	for (const Handle& h: a->getOutgoingSet())
 	{
 		const UnorderedHandleSet& oldset = idx.get(h);

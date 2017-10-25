@@ -153,7 +153,7 @@ InitiateSearchCB::find_starter(const Handle& h, size_t& depth,
                                      Handle& startrm, size_t& width)
 {
 	// If its a node, then we are done.
-	Type t = h->getType();
+	Type t = h->get_type();
 	if (_classserver.isNode(t))
 	{
 		if (VARIABLE_NODE != t and GLOB_NODE != t)
@@ -175,7 +175,7 @@ InitiateSearchCB::find_starter_recursive(const Handle& h, size_t& depth,
 {
 	// If its a node, then we are done. Don't modify either depth or
 	// start.
-	Type t = h->getType();
+	Type t = h->get_type();
 	if (_classserver.isNode(t))
 	{
 		if (VARIABLE_NODE != t and GLOB_NODE != t)
@@ -206,7 +206,7 @@ InitiateSearchCB::find_starter_recursive(const Handle& h, size_t& depth,
 		Handle sbr(h);
 
 		// Blow past the QuoteLinks, since they just screw up the search start.
-		if (Quotation::is_quotation_type(hunt->getType()))
+		if (Quotation::is_quotation_type(hunt->get_type()))
 			hunt = hunt->getOutgoingAtom(0);
 
 		Handle s(find_starter_recursive(hunt, brdepth, sbr, brwid));
@@ -379,11 +379,11 @@ bool InitiateSearchCB::neighbor_search(PatternMatchEngine *pme)
 		_starter_term = ch.start_term;
 
 		_root = clauses[bestclause];
-		DO_LOG({LAZY_LOG_FINE << "Search start node: " << best_start->toString();})
+		DO_LOG({LAZY_LOG_FINE << "Search start node: " << best_start->to_string();})
 		DO_LOG({LAZY_LOG_FINE << "Start term is: "
 		              << (_starter_term == (Atom*) nullptr ?
-		                  "UNDEFINED" : _starter_term->toString());})
-		DO_LOG({LAZY_LOG_FINE << "Root clause is: " <<  _root->toString();})
+		                  "UNDEFINED" : _starter_term->to_string());})
+		DO_LOG({LAZY_LOG_FINE << "Root clause is: " <<  _root->to_string();})
 
 		// This should be calling the over-loaded virtual method
 		// get_incoming_set(), so that, e.g. it gets sorted by attentional
@@ -395,7 +395,7 @@ bool InitiateSearchCB::neighbor_search(PatternMatchEngine *pme)
 			Handle h(iset[i]);
 			DO_LOG({LAZY_LOG_FINE << "xxxxxxxxxx neighbor_search xxxxxxxxxx\n"
 			              << "Loop candidate (" << i+1 << "/" << sz << "):\n"
-			              << h->toString();})
+			              << h->to_string();})
 			bool found = pme->explore_neighborhood(_root, _starter_term, h);
 
 			// Terminate search if satisfied.
@@ -551,12 +551,12 @@ void InitiateSearchCB::find_rarest(const Handle& clause,
                                    size_t& count,
                                    Quotation quotation)
 {
-	Type t = clause->getType();
+	Type t = clause->get_type();
 
 	// Base case
 	if (quotation.is_unquoted() and (CHOICE_LINK == t)) return;
 
-	if (not clause->isLink()) return;
+	if (not clause->is_link()) return;
 
 	if (not quotation.consumable(t))
 	{
@@ -618,12 +618,12 @@ bool InitiateSearchCB::link_type_search(PatternMatchEngine *pme)
 	}
 
 	DO_LOG({LAZY_LOG_FINE << "Start clause is: " << std::endl
-	              << _root->toString();})
+	              << _root->to_string();})
 	DO_LOG({LAZY_LOG_FINE << "Start term is: " << std::endl
-	              << _starter_term->toString();})
+	              << _starter_term->to_string();})
 
 	// Get type of the rarest link
-	Type ptype = _starter_term->getType();
+	Type ptype = _starter_term->get_type();
 
 	HandleSeq handle_set;
 	_as->get_handles_by_type(handle_set, ptype);
@@ -635,7 +635,7 @@ bool InitiateSearchCB::link_type_search(PatternMatchEngine *pme)
 	{
 		DO_LOG({LAZY_LOG_FINE << "yyyyyyyyyy link_type_search yyyyyyyyyy\n"
 		              << "Loop candidate (" << ++i << "/" << hsz << "):\n"
-		              << h->toString();})
+		              << h->to_string();})
 		bool found = pme->explore_neighborhood(_root, _starter_term, h);
 		if (found) return true;
 	}
@@ -679,7 +679,7 @@ bool InitiateSearchCB::variable_search(PatternMatchEngine *pme)
 	_starter_term = Handle::UNDEFINED;
 	for (const Handle& var: _variables->varset)
 	{
-		DO_LOG({LAZY_LOG_FINE << "Examine variable " << var->toString();})
+		DO_LOG({LAZY_LOG_FINE << "Examine variable " << var->to_string();})
 
 #ifdef _IMPLEMENT_ME_LATER
 		// XXX TODO FIXME --- if there is a deep type in the mix, that
@@ -702,7 +702,7 @@ bool InitiateSearchCB::variable_search(PatternMatchEngine *pme)
 		for (Type t : typeset)
 			num += (size_t) _as->get_num_atoms_of_type(t);
 
-		DO_LOG({LAZY_LOG_FINE << var->toString() << "has "
+		DO_LOG({LAZY_LOG_FINE << var->to_string() << "has "
 		              << num << " atoms in the atomspace";})
 
 		if (0 < num and num < count)
@@ -761,9 +761,9 @@ bool InitiateSearchCB::variable_search(PatternMatchEngine *pme)
 #else
 			logger().warn("Warning: No type restrictions! Your code has a bug in it!");
 			for (const Handle& var: _variables->varset)
-				logger().warn("Offending variable=%s\n", var->toString().c_str());
+				logger().warn("Offending variable=%s\n", var->to_string().c_str());
 			for (const Handle& cl : clauses)
-				logger().warn("Offending clauses=%s\n", cl->toString().c_str());
+				logger().warn("Offending clauses=%s\n", cl->to_string().c_str());
 
 			// Terrible, terrible hack for detecting infinite loops.
 			// When the world is ready for us, we should instead just
@@ -806,7 +806,7 @@ bool InitiateSearchCB::variable_search(PatternMatchEngine *pme)
 	{
 		DO_LOG({LAZY_LOG_FINE << "zzzzzzzzzzz variable_search zzzzzzzzzzz\n"
 		              << "Loop candidate (" << ++i << "/" << hsz << "):\n"
-		              << h->toString();})
+		              << h->to_string();})
 		bool found = pme->explore_neighborhood(_root, _starter_term, h);
 		if (found) return true;
 	}
@@ -871,7 +871,7 @@ void InitiateSearchCB::jit_analyze(PatternMatchEngine* pme)
 			// Extract the variables in the definition.
 			// Either they are given in a LambdaLink, or, if absent,
 			// we just hunt down and bind all of them.
-			if (_classserver.isA(LAMBDA_LINK, defn->getType()))
+			if (_classserver.isA(LAMBDA_LINK, defn->get_type()))
 			{
 				LambdaLinkPtr lam = LambdaLinkCast(defn);
 				vset.extend(lam->get_variables());

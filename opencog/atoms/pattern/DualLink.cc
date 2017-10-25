@@ -30,7 +30,7 @@ using namespace opencog;
 
 void DualLink::init(void)
 {
-	Type t = getType();
+	Type t = get_type();
 	if (not classserver().isA(t, DUAL_LINK))
 	{
 		const std::string& tname = classserver().getTypeName(t);

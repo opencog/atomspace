@@ -42,21 +42,21 @@ bool value_is_type(const Handle& spec, const Handle& val)
 {
 	Handle deep(spec);
 
-	Type valtype = val->getType();
-	Type dpt = deep->getType();
+	Type valtype = val->get_type();
+	Type dpt = deep->get_type();
 
 	// If it's a user-defined type, replace by it's defintion.
 	if (DEFINED_TYPE_NODE == dpt)
 	{
 		deep = DefineLink::get_definition(deep);
-		dpt = deep->getType();
+		dpt = deep->get_type();
 	}
 
 	// If it's a signature, unpack it now.
 	if (SIGNATURE_LINK == dpt)
 	{
 		deep = deep->getOutgoingAtom(0);
-		dpt = deep->getType();
+		dpt = deep->get_type();
 	}
 
 	if (TYPE_NODE == dpt)
@@ -93,7 +93,7 @@ bool value_is_type(const Handle& spec, const Handle& val)
 
 	// If it is a node, not a link, then it is a type-constant,
 	// and thus must match perfectly.
-	if (deep->isNode())
+	if (deep->is_node())
 		return (deep == val);
 
 	// If a link, then both must be same link type.
@@ -134,27 +134,27 @@ static bool type_match_rec(const Handle& left_, const Handle& right_, bool tople
 	if (left_ == right_) return true;
 
 	Handle left(left_);
-	Type ltype = left->getType();
+	Type ltype = left->get_type();
 
 	// If it's a user-defined type, replace by it's defintion.
 	if (DEFINED_TYPE_NODE == ltype)
 	{
 		left = DefineLink::get_definition(left);
-		ltype = left->getType();
+		ltype = left->get_type();
 	}
 
 	// Unpack the arrow; right must match left's input.
 	if (ARROW_LINK == ltype)
 	{
 		left = left->getOutgoingAtom(0); // 0 == input
-		ltype = left->getType();
+		ltype = left->get_type();
 	}
 
 	// If right is not a type, then just use value-check.
 	// We can only do this at the top level; lower levels
 	// can have value-like links (i.e. duck-types which
 	// we have to type-interence).
-	Type rtype = right_->getType();
+	Type rtype = right_->get_type();
 	if (toplevel and
 	    TYPE_NODE != rtype and
 	    TYPE_INH_NODE != rtype and
@@ -173,14 +173,14 @@ static bool type_match_rec(const Handle& left_, const Handle& right_, bool tople
 	if (DEFINED_TYPE_NODE == rtype)
 	{
 		right = DefineLink::get_definition(right);
-		rtype = right->getType();
+		rtype = right->get_type();
 	}
 
 	// Unpack the arrow; right's output must match left.
 	if (ARROW_LINK == rtype)
 	{
 		right = right->getOutgoingAtom(1); // 1 == output
-		rtype = right->getType();
+		rtype = right->get_type();
 	}
 
 	// Should be safe to unpack signatures now.
@@ -188,13 +188,13 @@ static bool type_match_rec(const Handle& left_, const Handle& right_, bool tople
 	if (SIGNATURE_LINK == ltype)
 	{
 		left = left->getOutgoingAtom(0);
-		ltype = left->getType();
+		ltype = left->get_type();
 	}
 
 	if (SIGNATURE_LINK == rtype)
 	{
 		right = right->getOutgoingAtom(0);
-		rtype = right->getType();
+		rtype = right->get_type();
 	}
 
 	// Exact matchees are always good.
@@ -247,7 +247,7 @@ static bool type_match_rec(const Handle& left_, const Handle& right_, bool tople
 	// e.g. ListLink or EvaluationLink.  Compare these side-by-side.
 	if (ltype != rtype) return false;
 
-	if (not left->isLink() or not right->isLink()) return false;
+	if (not left->is_link() or not right->is_link()) return false;
 
 	// Unordered links are a pain in the butt.
 	if (classserver().isA(ltype, UNORDERED_LINK))
@@ -291,7 +291,7 @@ Handle filter_vardecl(const Handle& vardecl, const HandleSeq& hs)
 		// declaration is nonexistent.
 		return Handle::UNDEFINED;
 
-	Type t = vardecl->getType();
+	Type t = vardecl->get_type();
 	if (VARIABLE_NODE == t)
 	{
 		if (is_free_in_any_tree(hs, vardecl))
@@ -303,7 +303,7 @@ Handle filter_vardecl(const Handle& vardecl, const HandleSeq& hs)
 	else if (TYPED_VARIABLE_LINK == t)
 	{
 		Handle var = vardecl->getOutgoingAtom(0);
-		Type t = var->getType();
+		Type t = var->get_type();
 		if (t == VARIABLE_NODE and filter_vardecl(var, hs))
 			return vardecl;
 	}
@@ -398,7 +398,7 @@ VariableListPtr gen_varlist(const Handle& h, const Handle& vardecl)
 	if (not vardecl)
 		return gen_varlist(h);
 
-	Type vardecl_t = vardecl->getType();
+	Type vardecl_t = vardecl->get_type();
 	if (vardecl_t == VARIABLE_LIST)
 		return VariableListCast(vardecl);
 

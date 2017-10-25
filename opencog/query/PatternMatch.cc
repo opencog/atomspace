@@ -387,7 +387,7 @@ bool PatternLink::satisfy(PatternMatchCallback& pmcb) const
 		for (const Handle& v : _virtual)
 		{
 			logger().fine("Virtual clause %zu of %zu:", iii, _num_virts);
-			logger().fine(v->toShortString());
+			logger().fine(v->to_short_string());
 			iii++;
 		}
 	}

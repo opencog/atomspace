@@ -32,13 +32,13 @@ cdef class TruthValue:
         def __get__(self): return self._count()
 
     cdef _mean(self):
-        return self._ptr().getMean()
+        return self._ptr().get_mean()
 
     cdef _confidence(self):
-        return self._ptr().getConfidence()
+        return self._ptr().get_confidence()
 
     cdef _count(self):
-        return self._ptr().getCount()
+        return self._ptr().get_count()
 
     cdef _init(self, float mean, float confidence):
         self.cobj = new tv_ptr(new cSimpleTruthValue(mean, confidence))
@@ -60,10 +60,10 @@ cdef class TruthValue:
         return PyLong_FromVoidPtr(<void*>self.cobj)
 
     def __str__(self):
-        return self._ptr().toString().c_str()
+        return self._ptr().to_string().c_str()
 
     def __repr__(self):
-        return self._ptr().toString().c_str()
+        return self._ptr().to_string().c_str()
 
 #    @staticmethod
 #    def confidence_to_count(float conf):

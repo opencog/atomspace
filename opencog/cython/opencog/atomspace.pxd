@@ -49,24 +49,24 @@ cdef extern from "opencog/truthvalue/TruthValue.h" namespace "opencog":
         cTruthValue* get()
 
     cdef cppclass cTruthValue "const opencog::TruthValue":
-        strength_t getMean()
-        confidence_t getConfidence()
-        count_t getCount()
+        strength_t get_mean()
+        confidence_t get_confidence()
+        count_t get_count()
         tv_ptr DEFAULT_TV()
-        string toString()
+        string to_string()
         bint operator==(cTruthValue h)
         bint operator!=(cTruthValue h)
 
 cdef extern from "opencog/truthvalue/SimpleTruthValue.h" namespace "opencog":
     cdef cppclass cSimpleTruthValue "opencog::SimpleTruthValue":
         cSimpleTruthValue(float, float)
-        strength_t getMean()
-        confidence_t getConfidence()
-        count_t getCount()
+        strength_t get_mean()
+        confidence_t get_confidence()
+        count_t get_count()
         count_t confidenceToCount(float)
         confidence_t countToConfidence(float)
         tv_ptr DEFAULT_TV()
-        string toString()
+        string to_string()
         bint operator==(cTruthValue h)
         bint operator!=(cTruthValue h)
 
@@ -101,12 +101,12 @@ cdef extern from "opencog/atoms/base/Atom.h" namespace "opencog":
     cdef cppclass cAtom "opencog::Atom":
         cAtom()
 
-        Type getType()
-        int isNode()
-        int isLink()
+        Type get_type()
+        int is_node()
+        int is_link()
 
-        string toString()
-        string toShortString()
+        string to_string()
+        string to_short_string()
 
         output_iterator getIncomingSet(output_iterator)
 
@@ -116,7 +116,7 @@ cdef extern from "opencog/atoms/base/Atom.h" namespace "opencog":
         output_iterator getIncomingSetByType(output_iterator, Type type)
 
         # Conditionally-valid methods. Not defined for all atoms.
-        string getName()
+        string get_name()
         vector[cHandle] getOutgoingSet()
 
 
@@ -127,8 +127,8 @@ cdef extern from "opencog/atoms/base/Handle.h" namespace "opencog":
         cHandle(const cHandle&)
         
         cAtom* atom_ptr()
-        string toString()
-        string toShortString()
+        string to_string()
+        string to_short_string()
 
         bint operator==(cHandle h)
         bint operator!=(cHandle h)

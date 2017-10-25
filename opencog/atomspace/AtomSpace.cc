@@ -149,14 +149,14 @@ bool AtomSpace::compare_atomspaces(const AtomSpace& space_first,
         if( false)
         {
         Handle atom_second;
-        if (atom_first->isNode())
+        if (atom_first->is_node())
         {
-            atom_second = table_second.getHandle(atom_first->getType(),
-                        atom_first->getName());
+            atom_second = table_second.getHandle(atom_first->get_type(),
+                        atom_first->get_name());
         }
-        else if (atom_first->isLink())
+        else if (atom_first->is_link())
         {
-            atom_second =  table_second.getHandle(atom_first->getType(),
+            atom_second =  table_second.getHandle(atom_first->get_type(),
                         atom_first->getOutgoingSet());
         }
         else
@@ -174,12 +174,12 @@ bool AtomSpace::compare_atomspaces(const AtomSpace& space_first,
             {
                 if (atom_first)
                     std::cout << "compare_atomspaces - first atom " << 
-                            atom_first->toString() << " != NULL " << 
+                            atom_first->to_string() << " != NULL " <<
                             std::endl;
                 if (atom_second)
-                    std::cout << "compare_atomspaces - first atom "  << 
+                    std::cout << "compare_atomspaces - first atom " <<
                             "NULL != second atom " << 
-                            atom_second->toString() << std::endl;
+                            atom_second->to_string() << std::endl;
             }
             return false;
         }
@@ -190,8 +190,8 @@ bool AtomSpace::compare_atomspaces(const AtomSpace& space_first,
         {
             if (emit_diagnostics)
                 std::cout << "compare_atomspaces - first atom " << 
-                        atom_first->toString() << " != second atom " << 
-                        atom_second->toString() << std::endl;
+                        atom_first->to_string() << " != second atom " <<
+                        atom_second->to_string() << std::endl;
             return false;
         }
 
@@ -204,8 +204,8 @@ bool AtomSpace::compare_atomspaces(const AtomSpace& space_first,
             {
                 if (emit_diagnostics)
                     std::cout << "compare_atomspaces - first truth " << 
-                            atom_first->toString() << " != second truth " << 
-                            atom_second->toString() << std::endl;
+                            atom_first->to_string() << " != second truth " <<
+                            atom_second->to_string() << std::endl;
                 return false;
             }
         }
@@ -222,7 +222,7 @@ bool AtomSpace::compare_atomspaces(const AtomSpace& space_first,
         {
             if (emit_diagnostics)
                 std::cout << "compare_atomspaces - unchecked space atom " << 
-                        atom->toString() << std::endl;
+                        atom->to_string() << std::endl;
             all_checked = false;
         }
     }
@@ -345,12 +345,12 @@ Handle AtomSpace::fetch_atom(const Handle& h)
     // else, then save the old TV, fetch the new TV, and combine them
     // with your favorite algo.
     Handle hv;
-    if (h->isNode()) {
-        hv = _backing_store->getNode(h->getType(),
-                                     h->getName().c_str());
+    if (h->is_node()) {
+        hv = _backing_store->getNode(h->get_type(),
+                                     h->get_name().c_str());
     }
-    else if (h->isLink()) {
-        hv = _backing_store->getLink(h->getType(),
+    else if (h->is_link()) {
+        hv = _backing_store->getLink(h->get_type(),
                                      h->getOutgoingSet());
     }
 
@@ -433,7 +433,7 @@ ostream& operator<<(ostream& out, const opencog::AtomSpace& as) {
     as.get_handles_by_type(back_inserter(results), opencog::ATOM, true);
     for (const opencog::Handle& h : results)
 	    if (h->getIncomingSetSize() == 0)
-		    out << h->toString() << endl;
+		    out << h->to_string() << endl;
     return out;
 }
 

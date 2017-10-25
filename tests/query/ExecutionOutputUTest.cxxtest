@@ -58,7 +58,7 @@ class ExecutionOutputUTest :  public CxxTest::TestSuite
 
 #define an as->add_node
 #define al as->add_link
-#define getarity(hand) hand->getArity()
+#define getarity(hand) hand->get_arity()
 #define getlink(hand,pos) hand->getOutgoingAtom(pos)
 
 void ExecutionOutputUTest::tearDown(void)
@@ -246,7 +246,7 @@ void ExecutionOutputUTest::test_varsub(void)
 
    // The result_list contains a list of the grounded expressions.
    Handle res = simpl.get_result_list()[0];
-	printf("res is %s\n", res->toShortString().c_str());
+	printf("res is %s\n", res->to_short_string().c_str());
 	TSM_ASSERT_EQUALS("incorrect resolution", res, resolution);
 
    // Now perform the search.
@@ -256,7 +256,7 @@ void ExecutionOutputUTest::test_varsub(void)
 
    // The result_list contains a list of the grounded expressions.
    Handle del = pimpl.get_result_list()[0];
-	printf("del is %s\n", del->toShortString().c_str());
+	printf("del is %s\n", del->to_short_string().c_str());
 	TSM_ASSERT_EQUALS("incorrect delivarance", del, deliverance);
 
 	logger().debug("END TEST: %s", __FUNCTION__);

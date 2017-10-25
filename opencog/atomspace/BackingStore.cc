@@ -46,10 +46,10 @@ bool BackingStore::ignoreAtom(const Handle& h) const
 	if (nullptr == h) return false;
 
 	// If the atom is of an ignoreable type, then ignore.
-	if (ignoreType(h->getType())) return true;
+	if (ignoreType(h->get_type())) return true;
 
 	// If its a link, then scan the outgoing set.
-	if (not h->isLink()) return false;
+	if (not h->is_link()) return false;
 
 #if DEBUG_IGNORE
 	s_indent += "  ";

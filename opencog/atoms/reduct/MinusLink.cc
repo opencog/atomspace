@@ -54,7 +54,7 @@ MinusLink::MinusLink(const Link& l)
 
 void MinusLink::init(void)
 {
-	Type tscope = getType();
+	Type tscope = get_type();
 	if (not classserver().isA(tscope, MINUS_LINK))
 		throw InvalidParamException(TRACE_INFO, "Expecting a MinusLink");
 
@@ -69,12 +69,12 @@ Handle MinusLink::do_execute(AtomSpace* as, const HandleSeq& oset) const
 	if (1 == oset.size())
 	{
 		NumberNodePtr na(unwrap_set(oset[0]));
-		return createNumberNode(- na->get_value())->getHandle();
+		return createNumberNode(- na->get_value())->get_handle();
 	}
 
 	NumberNodePtr na(unwrap_set(oset[0]));
 	NumberNodePtr nb(unwrap_set(oset[1]));
-	return createNumberNode(na->get_value() - nb->get_value())->getHandle();
+	return createNumberNode(na->get_value() - nb->get_value())->get_handle();
 }
 
 DEFINE_LINK_FACTORY(MinusLink, MINUS_LINK)

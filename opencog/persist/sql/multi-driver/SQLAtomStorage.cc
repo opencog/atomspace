@@ -719,7 +719,7 @@ void SQLAtomStorage::storeValuation(const Handle& key,
 	STMT("key", kidbuff);
 	STMT("atom", aidbuff);
 
-	Type vtype = pap->getType();
+	Type vtype = pap->get_type();
 	STMTI("type", storing_typemap[vtype]);
 
 	if (classserver().isA(vtype, FLOAT_VALUE))
@@ -778,7 +778,7 @@ SQLAtomStorage::VUID SQLAtomStorage::storeValue(const ProtoAtomPtr& pap)
 	coda = ");";
 	STMT("vuid", std::to_string(vuid));
 
-	Type vtype = pap->getType();
+	Type vtype = pap->get_type();
 	STMTI("type", storing_typemap[vtype]);
 
 	if (classserver().isA(vtype, FLOAT_VALUE))
@@ -1005,7 +1005,7 @@ void SQLAtomStorage::get_atom_values(Handle& atom)
  */
 int SQLAtomStorage::get_height(const Handle& atom)
 {
-	if (not atom->isLink()) return 0;
+	if (not atom->is_link()) return 0;
 
 	int maxd = 0;
 	for (const Handle& h : atom->getOutgoingSet())
@@ -1033,13 +1033,13 @@ UUID SQLAtomStorage::check_uuid(const Handle& h)
 
 	// Ooops. We need to look in the database to find out what this is.
 	Handle dbh;
-	if (h->isNode())
+	if (h->is_node())
 	{
-		dbh = doGetNode(h->getType(), h->getName().c_str());
+		dbh = doGetNode(h->get_type(), h->get_name().c_str());
 	}
 	else
 	{
-		dbh = doGetLink(h->getType(), h->getOutgoingSet());
+		dbh = doGetLink(h->get_type(), h->getOutgoingSet());
 	}
 	// If it was found in the database, then the TLB got updated.
 	if (dbh) return _tlbuf.getUUID(h);
@@ -1179,7 +1179,7 @@ void SQLAtomStorage::storeAtom(const Handle& h, bool synchronous)
  */
 int SQLAtomStorage::do_store_atom(const Handle& h)
 {
-	if (h->isNode())
+	if (h->is_node())
 	{
 		do_store_single_atom(h, 0);
 		return 0;
@@ -1374,7 +1374,7 @@ void SQLAtomStorage::do_store_single_atom(const Handle& h, int aheight)
 	STMT("space", uuidbuff);
 
 	// Store the atom UUID
-	Type t = h->getType();
+	Type t = h->get_type();
 	int dbtype = storing_typemap[t];
 	STMTI("type", dbtype);
 
@@ -1384,7 +1384,7 @@ void SQLAtomStorage::do_store_single_atom(const Handle& h, int aheight)
 		// Use postgres $-quoting to make unicode strings
 		// easier to deal with.
 		std::string qname = " $ocp$";
-		qname += h->getName();
+		qname += h->get_name();
 		qname += "$ocp$ ";
 
 		// The Atoms table has a UNIQUE constraint on the
@@ -1411,7 +1411,7 @@ void SQLAtomStorage::do_store_single_atom(const Handle& h, int aheight)
 		if (max_height < aheight) max_height = aheight;
 		STMTI("height", aheight);
 
-		if (h->isLink())
+		if (h->is_link())
 		{
 			// The Atoms table has a UNIQUE constraint on the
 			// outgoing set.  If a link is too large, a postgres
@@ -1422,11 +1422,11 @@ void SQLAtomStorage::do_store_single_atom(const Handle& h, int aheight)
 			// redesign.  One could hash together the UUID's in the
 			// outgoing set, and then force a unique constraint on
 			// the hash.
-			if (330 < h->getArity())
+			if (330 < h->get_arity())
 			{
 				throw IOException(TRACE_INFO,
 					"Error: do_store_single_atom: Maxiumum Link size is 330. "
-					"Atom was: %s\n", h->toString().c_str());
+					"Atom was: %s\n", h->to_string().c_str());
 			}
 
 			cols += ", outgoing";

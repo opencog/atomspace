@@ -176,12 +176,12 @@ public:
         TS_ASSERT(fabs(tv->getConfidenceLevel()  - IndefiniteTruthValue::DEFAULT_CONFIDENCE_LEVEL) <= FLOAT_ACCEPTABLE_ERROR);
         TS_ASSERT(fabs(tv->getDiff()  - 0) <= FLOAT_ACCEPTABLE_ERROR);
         TS_ASSERT(tv->isSymmetric());
-        TS_ASSERT(fabs(tv->getMean()  - 0) <= FLOAT_ACCEPTABLE_ERROR);
+        TS_ASSERT(fabs(tv->get_mean()  - 0) <= FLOAT_ACCEPTABLE_ERROR);
         count_t expectedCount = count(0, 0);
         confidence_t expectedConfidence = confidence(0, 0);
-        TS_ASSERT(isApproxEq(tv->getCount(), expectedCount, FLOAT_ACCEPTABLE_ERROR));
-        //logger().debug("tv->getCount() = %f, expectedCount = %f", tv->getCount() , expectedCount);
-        TS_ASSERT(fabs(tv->getConfidence() - expectedConfidence) <= ERROR_THRESHOLD);
+        TS_ASSERT(isApproxEq(tv->get_count(), expectedCount, FLOAT_ACCEPTABLE_ERROR));
+        //logger().debug("tv->get_count() = %f, expectedCount = %f", tv->get_count() , expectedCount);
+        TS_ASSERT(fabs(tv->get_confidence() - expectedConfidence) <= ERROR_THRESHOLD);
 
         for (int i = 0; i < NUM_TVS; i++) {
             tv = tvs[i];
@@ -195,11 +195,11 @@ public:
                       << " DIFF : " << tv->getDiff() << std::endl;
             TS_ASSERT(isApproxEq(tv->getDiff(), computedDiff, DIFF_ACCEPTABLE_ERROR));
             TS_ASSERT(tv->isSymmetric());
-            TS_ASSERT(fabs(tv->getMean() - means[i]) <= ERROR_THRESHOLD);
+            TS_ASSERT(fabs(tv->get_mean() - means[i]) <= ERROR_THRESHOLD);
             count_t expectedCount = count(ls[i], us[i]);
             confidence_t expectedConfidence = confidence(ls[i], us[i]);
-            TS_ASSERT(fabs(tv->getCount() - expectedCount) <= ERROR_THRESHOLD);
-            TS_ASSERT(fabs(tv->getConfidence() - expectedConfidence) <= ERROR_THRESHOLD);
+            TS_ASSERT(fabs(tv->get_count() - expectedCount) <= ERROR_THRESHOLD);
+            TS_ASSERT(fabs(tv->get_confidence() - expectedConfidence) <= ERROR_THRESHOLD);
         }
     }
 
@@ -211,12 +211,12 @@ public:
         TS_ASSERT(fabs(tv->getConfidenceLevel()  - IndefiniteTruthValue::DEFAULT_CONFIDENCE_LEVEL) <= FLOAT_ACCEPTABLE_ERROR);
         TS_ASSERT(fabs(tv->getDiff()  - 0) <= FLOAT_ACCEPTABLE_ERROR);
         TS_ASSERT(tv->isSymmetric());
-        TS_ASSERT(fabs(tv->getMean()  - 0) <= FLOAT_ACCEPTABLE_ERROR);
+        TS_ASSERT(fabs(tv->get_mean()  - 0) <= FLOAT_ACCEPTABLE_ERROR);
         count_t expectedCount = count(0, 0);
         confidence_t expectedConfidence = confidence(0, 0);
-        TS_ASSERT(isApproxEq(tv->getCount(), expectedCount, FLOAT_ACCEPTABLE_ERROR));
-        //logger().debug("tv->getCount() = %f, expectedCount = %f", tv->getCount() , expectedCount);
-        TS_ASSERT(fabs(tv->getConfidence() - expectedConfidence) <= ERROR_THRESHOLD);
+        TS_ASSERT(isApproxEq(tv->get_count(), expectedCount, FLOAT_ACCEPTABLE_ERROR));
+        //logger().debug("tv->get_count() = %f, expectedCount = %f", tv->get_count() , expectedCount);
+        TS_ASSERT(fabs(tv->get_confidence() - expectedConfidence) <= ERROR_THRESHOLD);
 
         for (int i = 0; i < NUM_TVS; i++) {
             tv = new IndefiniteTruthValue(*(tvs[i]));
@@ -228,11 +228,11 @@ public:
             strength_t computedDiff = computeDiff(tv->getL(), tv->getU(), default_k, tv->getConfidenceLevel());
             TS_ASSERT(isApproxEq(tv->getDiff(), computedDiff, DIFF_ACCEPTABLE_ERROR));
             TS_ASSERT(tv->isSymmetric());
-            TS_ASSERT(fabs(tv->getMean() - means[i]) <= ERROR_THRESHOLD);
+            TS_ASSERT(fabs(tv->get_mean() - means[i]) <= ERROR_THRESHOLD);
             count_t expectedCount = count(ls[i], us[i]);
             confidence_t expectedConfidence = confidence(ls[i], us[i]);
-            TS_ASSERT(fabs(tv->getCount() - expectedCount) <= ERROR_THRESHOLD);
-            TS_ASSERT(fabs(tv->getConfidence() - expectedConfidence) <= ERROR_THRESHOLD);
+            TS_ASSERT(fabs(tv->get_count() - expectedCount) <= ERROR_THRESHOLD);
+            TS_ASSERT(fabs(tv->get_confidence() - expectedConfidence) <= ERROR_THRESHOLD);
         }
     }
 
@@ -242,13 +242,13 @@ public:
             for (int j = 0; j < 10; j++) {
                 strength_t mean = j * 0.1f;
                 tvs[i]->setMean(mean);
-                TS_ASSERT(fabs(tv->getMean() - mean) <= ERROR_THRESHOLD);
+                TS_ASSERT(fabs(tv->get_mean() - mean) <= ERROR_THRESHOLD);
                 TS_ASSERT(fabs(tv->getL()  - ls[i]) <= FLOAT_ACCEPTABLE_ERROR);
                 TS_ASSERT(fabs(tv->getU()  - us[i]) <= FLOAT_ACCEPTABLE_ERROR);
                 count_t expectedCount = count(ls[i], us[i]);
                 confidence_t expectedConfidence = confidence(ls[i], us[i]);
-                TS_ASSERT(fabs(tv->getCount() - expectedCount) <= ERROR_THRESHOLD);
-                TS_ASSERT(fabs(tv->getConfidence() - expectedConfidence) <= ERROR_THRESHOLD);
+                TS_ASSERT(fabs(tv->get_count() - expectedCount) <= ERROR_THRESHOLD);
+                TS_ASSERT(fabs(tv->get_confidence() - expectedConfidence) <= ERROR_THRESHOLD);
             }
         }
     }
@@ -261,7 +261,7 @@ public:
                 tvs[i]->setL(l);
                 TS_ASSERT(fabs(tv->getL()  - l) <= FLOAT_ACCEPTABLE_ERROR);
                 TS_ASSERT(fabs(tv->getU()  - us[i]) <= FLOAT_ACCEPTABLE_ERROR);
-                TS_ASSERT(isApproxEq(tv->getMean(), (l+us[i])/2, ERROR_THRESHOLD));
+                TS_ASSERT(isApproxEq(tv->get_mean(), (l+us[i])/2, ERROR_THRESHOLD));
                 count_t expectedCount = count(l, us[i]);
                 confidence_t expectedConfidence = confidence(l, us[i]);
 
@@ -269,11 +269,11 @@ public:
                 // and some are large (e.g. 19999998) so take care with diff.
                 // ... and sometimes expected count is zero ...
                 if (1.0 < expectedCount) {
-                    TS_ASSERT(fabs(tv->getCount() / expectedCount - 1.0f) <= FLOAT_ACCEPTABLE_ERROR);
+                    TS_ASSERT(fabs(tv->get_count() / expectedCount - 1.0f) <= FLOAT_ACCEPTABLE_ERROR);
                 } else {
-                    TS_ASSERT(fabs(tv->getCount() - expectedCount) <= FLOAT_ACCEPTABLE_ERROR);
+                    TS_ASSERT(fabs(tv->get_count() - expectedCount) <= FLOAT_ACCEPTABLE_ERROR);
                 }
-                TS_ASSERT(fabs(tv->getConfidence() - expectedConfidence) <= ERROR_THRESHOLD);
+                TS_ASSERT(fabs(tv->get_confidence() - expectedConfidence) <= ERROR_THRESHOLD);
             }
         }
     }
@@ -286,18 +286,18 @@ public:
                 tvs[i]->setU(u);
                 TS_ASSERT(fabs(tv->getL()  - ls[i]) <= FLOAT_ACCEPTABLE_ERROR);
                 TS_ASSERT(fabs(tv->getU()  - u) <= FLOAT_ACCEPTABLE_ERROR);
-                TS_ASSERT(isApproxEq(tv->getMean(), (ls[i]+u)/2, ERROR_THRESHOLD));
+                TS_ASSERT(isApproxEq(tv->get_mean(), (ls[i]+u)/2, ERROR_THRESHOLD));
                 count_t expectedCount = count(ls[i], u);
                 confidence_t expectedConfidence = confidence(ls[i], u);
 
                 // Some of the expectedCount are small (e.g. 0.222...)
                 // and some are large (e.g. 19999998) so take care with diff.
                 if (1.0 < expectedCount) {
-                    TS_ASSERT(fabs(tv->getCount() / expectedCount - 1.0f) <= FLOAT_ACCEPTABLE_ERROR);
+                    TS_ASSERT(fabs(tv->get_count() / expectedCount - 1.0f) <= FLOAT_ACCEPTABLE_ERROR);
                 } else {
-                    TS_ASSERT(fabs(tv->getCount() - expectedCount) <= FLOAT_ACCEPTABLE_ERROR);
+                    TS_ASSERT(fabs(tv->get_count() - expectedCount) <= FLOAT_ACCEPTABLE_ERROR);
                 }
-                TS_ASSERT(fabs(tv->getConfidence() - expectedConfidence) <= ERROR_THRESHOLD);
+                TS_ASSERT(fabs(tv->get_confidence() - expectedConfidence) <= ERROR_THRESHOLD);
             }
         }
     }
@@ -311,11 +311,11 @@ public:
                 TS_ASSERT(fabs(tv->getConfidenceLevel()  - confLevel) <= FLOAT_ACCEPTABLE_ERROR);
                 TS_ASSERT(fabs(tv->getL()  - ls[i]) <= FLOAT_ACCEPTABLE_ERROR);
                 TS_ASSERT(fabs(tv->getU()  - us[i]) <= FLOAT_ACCEPTABLE_ERROR);
-                TS_ASSERT(fabs(tv->getMean() - means[i]) <= ERROR_THRESHOLD);
+                TS_ASSERT(fabs(tv->get_mean() - means[i]) <= ERROR_THRESHOLD);
                 count_t expectedCount = count(ls[i], us[i]);
                 confidence_t expectedConfidence = confidence(ls[i], us[i]);
-                TS_ASSERT(fabs(tv->getCount() - expectedCount) <= ERROR_THRESHOLD);
-                TS_ASSERT(fabs(tv->getConfidence() - expectedConfidence) <= ERROR_THRESHOLD);
+                TS_ASSERT(fabs(tv->get_count() - expectedCount) <= ERROR_THRESHOLD);
+                TS_ASSERT(fabs(tv->get_confidence() - expectedConfidence) <= ERROR_THRESHOLD);
             }
         }
     }
@@ -332,24 +332,24 @@ public:
                 TS_ASSERT(fabs(tv->getU_() - (us[i] + diff)) <= ERROR_THRESHOLD);
                 TS_ASSERT(fabs(tv->getL()  - ls[i]) <= FLOAT_ACCEPTABLE_ERROR);
                 TS_ASSERT(fabs(tv->getU()  - us[i]) <= FLOAT_ACCEPTABLE_ERROR);
-                TS_ASSERT(fabs(tv->getMean() - means[i]) <= ERROR_THRESHOLD);
+                TS_ASSERT(fabs(tv->get_mean() - means[i]) <= ERROR_THRESHOLD);
                 count_t expectedCount = count(ls[i], us[i]);
                 confidence_t expectedConfidence = confidence(ls[i], us[i]);
-                TS_ASSERT(fabs(tv->getCount() - expectedCount) <= ERROR_THRESHOLD);
-                TS_ASSERT(fabs(tv->getConfidence() - expectedConfidence) <= ERROR_THRESHOLD);
+                TS_ASSERT(fabs(tv->get_count() - expectedCount) <= ERROR_THRESHOLD);
+                TS_ASSERT(fabs(tv->get_confidence() - expectedConfidence) <= ERROR_THRESHOLD);
             }
         }
     }
 
     void testGetCount() {
         for (int i = 0; i < NUM_TVS; i++) {
-            TS_ASSERT(fabs(tvs[i]->getCount() - count(ls[i], us[i])) <= ERROR_THRESHOLD);
+            TS_ASSERT(fabs(tvs[i]->get_count() - count(ls[i], us[i])) <= ERROR_THRESHOLD);
         }
     }
 
     void testGetConfidence() {
         for (int i = 0; i < NUM_TVS; i++) {
-            TS_ASSERT(fabs(tvs[i]->getConfidence() - confidence(ls[i], us[i])) <= ERROR_THRESHOLD);
+            TS_ASSERT(fabs(tvs[i]->get_confidence() - confidence(ls[i], us[i])) <= ERROR_THRESHOLD);
         }
     }
 
@@ -375,7 +375,7 @@ public:
 
     void testGetType() {
         for (int i = 0; i < NUM_TVS; i++) {
-            TS_ASSERT(tvs[i]->getType() == INDEFINITE_TRUTH_VALUE);
+            TS_ASSERT(tvs[i]->get_type() == INDEFINITE_TRUTH_VALUE);
         }
     }
 
@@ -391,11 +391,11 @@ public:
                                              default_k, clonedTv->getConfidenceLevel());
             TS_ASSERT(isApproxEq(clonedTv->getDiff(), computedDiff, DIFF_ACCEPTABLE_ERROR));
             TS_ASSERT(clonedTv->isSymmetric());
-            TS_ASSERT(fabs(clonedTv->getMean() - means[i]) <= ERROR_THRESHOLD);
+            TS_ASSERT(fabs(clonedTv->get_mean() - means[i]) <= ERROR_THRESHOLD);
             count_t expectedCount = count(ls[i], us[i]);
             confidence_t expectedConfidence = confidence(ls[i], us[i]);
-            TS_ASSERT(fabs(clonedTv->getCount() - expectedCount) <= ERROR_THRESHOLD);
-            TS_ASSERT(fabs(clonedTv->getConfidence() - expectedConfidence) <= ERROR_THRESHOLD);
+            TS_ASSERT(fabs(clonedTv->get_count() - expectedCount) <= ERROR_THRESHOLD);
+            TS_ASSERT(fabs(clonedTv->get_confidence() - expectedConfidence) <= ERROR_THRESHOLD);
         }
         // Changes all attributes and check if clone still works fine.
         tvs[0]->setL(ls[1]);
@@ -412,11 +412,11 @@ public:
         TS_ASSERT(fabs(clonedTv->getDiff() - 0.1f) <= ERROR_THRESHOLD);
         //TS_ASSERT(!clonedTv->isSymmetric());
         TS_ASSERT(clonedTv->isSymmetric());
-        TS_ASSERT(fabs(clonedTv->getMean() - means[1]) <= ERROR_THRESHOLD);
+        TS_ASSERT(fabs(clonedTv->get_mean() - means[1]) <= ERROR_THRESHOLD);
         count_t expectedCount = count(ls[1], us[1]);
         confidence_t expectedConfidence = confidence(ls[1], us[1]);
-        TS_ASSERT(fabs(clonedTv->getCount() - expectedCount) <= ERROR_THRESHOLD);
-        TS_ASSERT(fabs(clonedTv->getConfidence() - expectedConfidence) <= ERROR_THRESHOLD);
+        TS_ASSERT(fabs(clonedTv->get_count() - expectedCount) <= ERROR_THRESHOLD);
+        TS_ASSERT(fabs(clonedTv->get_confidence() - expectedConfidence) <= ERROR_THRESHOLD);
     }
 
     void testSetAndGetFirstOrderDistribution() {

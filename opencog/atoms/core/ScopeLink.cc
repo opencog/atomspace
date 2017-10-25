@@ -80,7 +80,7 @@ ScopeLink::ScopeLink(const HandleSeq& oset, Type t)
 ScopeLink::ScopeLink(const Link &l)
 	: Link(l)
 {
-	if (skip_init(l.getType())) return;
+	if (skip_init(l.get_type())) return;
 	init();
 }
 
@@ -95,7 +95,7 @@ void ScopeLink::extract_variables(const HandleSeq& oset)
 		throw SyntaxException(TRACE_INFO,
 			"Expecting a non-empty outgoing set.");
 
-	Type decls = oset.at(0)->getType();
+	Type decls = oset.at(0)->get_type();
 
 	// If we trip over an unquote immediately, then we can assume that
 	// the whole link appears in some quote context. This cannot be
@@ -117,7 +117,7 @@ void ScopeLink::extract_variables(const HandleSeq& oset)
 	{
 		_body = oset[0];
 
-		if (classserver().isA(_body->getType(), LAMBDA_LINK))
+		if (classserver().isA(_body->get_type(), LAMBDA_LINK))
 		{
 			LambdaLinkPtr lam(LambdaLinkCast(_body));
 			_varlist = lam->get_variables();
@@ -133,7 +133,7 @@ void ScopeLink::extract_variables(const HandleSeq& oset)
 	if (oset.size() < 2)
 		throw SyntaxException(TRACE_INFO,
 			"Expecting an outgoing set size of at least two; got %s",
-			oset[0]->toString().c_str());
+			oset[0]->to_string().c_str());
 
 	// If we are here, then the first outgoing set member should be
 	// a variable declaration.
@@ -165,7 +165,7 @@ void ScopeLink::init_scoped_variables(const Handle& hvar)
 bool ScopeLink::is_equal(const Handle& other, bool silent) const
 {
 	if (other == this) return true;
-	if (other->getType() != _type) return false;
+	if (other->get_type() != _type) return false;
 
 	ScopeLinkPtr scother(ScopeLinkCast(other));
 
@@ -179,8 +179,8 @@ bool ScopeLink::is_equal(const Handle& other, bool silent) const
 	// that this and other have the same number of body parts.
 	Arity vardecl_offset = _vardecl != Handle::UNDEFINED;
 	Arity other_vardecl_offset = scother->_vardecl != Handle::UNDEFINED;
-	Arity n_scoped_terms = getArity() - vardecl_offset;
-	Arity other_n_scoped_terms = other->getArity() - other_vardecl_offset;
+	Arity n_scoped_terms = get_arity() - vardecl_offset;
+	Arity other_n_scoped_terms = other->get_arity() - other_vardecl_offset;
 	if (n_scoped_terms != other_n_scoped_terms) return false;
 
 	// Variable declarations must match.
@@ -243,7 +243,7 @@ bool ScopeLink::is_equal(const Handle& other, bool silent) const
 //
 ContentHash ScopeLink::compute_hash() const
 {
-	ContentHash hsh = ((1UL<<35) - 325) * getType();
+	ContentHash hsh = ((1UL<<35) - 325) * get_type();
 	hsh += (hsh <<5) + ((1UL<<47) - 649) * _varlist.varseq.size();
 
 	// It is not safe to mix here, since the sort order of the
@@ -262,7 +262,7 @@ ContentHash ScopeLink::compute_hash() const
 	hsh += (hsh <<5) + (vth % ((1UL<<27) - 235));
 
 	Arity vardecl_offset = _vardecl != Handle::UNDEFINED;
-	Arity n_scoped_terms = getArity() - vardecl_offset;
+	Arity n_scoped_terms = get_arity() - vardecl_offset;
 
 	UnorderedHandleSet hidden;
 	for (Arity i = 0; i < n_scoped_terms; ++i)
@@ -288,7 +288,7 @@ ContentHash ScopeLink::term_hash(const Handle& h,
                                  UnorderedHandleSet& bound_vars,
                                  Quotation quotation) const
 {
-	Type t = h->getType();
+	Type t = h->get_type();
 	if ((VARIABLE_NODE == t or GLOB_NODE == t) and
 	    quotation.is_unquoted() and
 	    0 != _varlist.varset.count(h) and
@@ -300,7 +300,7 @@ ContentHash ScopeLink::term_hash(const Handle& h,
 	}
 
 	// Just the plain old hash for all other nodes.
-	if (h->isNode()) return h->get_hash();
+	if (h->is_node()) return h->get_hash();
 
 	// Quotation
 	quotation.update(t);
@@ -361,7 +361,7 @@ inline HandleSeq append_rand_str(const HandleSeq& vars)
 {
 	HandleSeq new_vars;
 	for (const Handle& h : vars) {
-		std::string new_var_name = h->getName() + "-" + rand_hex_str();
+		std::string new_var_name = h->get_name() + "-" + rand_hex_str();
 		new_vars.emplace_back(createNode(VARIABLE_NODE, new_var_name));
 	}
 	return new_vars;
@@ -375,11 +375,11 @@ Handle ScopeLink::alpha_conversion(HandleSeq vars) const
 
 	// Perform alpha conversion
 	HandleSeq hs;
-	for (size_t i = 0; i < getArity(); ++i)
+	for (size_t i = 0; i < get_arity(); ++i)
 		hs.push_back(_varlist.substitute_nocheck(getOutgoingAtom(i), vars));
 
 	// Create the alpha converted scope link
-	return createLink(hs, getType());
+	return createLink(hs, get_type());
 }
 
 /* ================================================================= */
@@ -388,7 +388,7 @@ bool ScopeLink::operator==(const Atom& ac) const
 {
 	Atom& a = (Atom&) ac; // cast away constness, for smart ptr.
 	try {
-		return is_equal(a.getHandle(), true);
+		return is_equal(a.get_handle(), true);
 	} catch (const NestingException& ex) {}
 	return false;
 }

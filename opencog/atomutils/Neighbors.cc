@@ -39,7 +39,7 @@ HandleSeq get_target_neighbors(const Handle& h, Type desiredLinkType,
     HandleSeq answer;
     for (const LinkPtr& link : h->getIncomingSet())
     {
-        Type t = link->getType();
+        Type t = link->get_type();
         if (not(t == desiredLinkType or
                (match_subtype and classserver().isA(t, desiredLinkType))))
 	    continue;
@@ -64,7 +64,7 @@ HandleSeq get_source_neighbors(const Handle& h, Type desiredLinkType,
 
     for (const LinkPtr& link : h->getIncomingSet())
     {
-        Type t = link->getType();
+        Type t = link->get_type();
         if (not(t == desiredLinkType or
                (match_subtype and classserver().isA(t, desiredLinkType))))
 	    continue;
@@ -85,7 +85,7 @@ HandleSeq get_all_neighbors(const Handle& h,
 
     for (const LinkPtr& link : h->getIncomingSet())
     {
-        if (link->getType() != desiredLinkType) continue;
+        if (link->get_type() != desiredLinkType) continue;
         for (const Handle& handle : link->getOutgoingSet())
         {
             if (handle == h) continue;
@@ -108,12 +108,12 @@ static void get_distant_neighbors_rec(const Handle& h,
     if (dist != 0) {
         // 1. Fetch incomings
         for (const LinkPtr& in_l : h->getIncomingSet()) {
-            Handle in_h = in_l->getHandle();
+            Handle in_h = in_l->get_handle();
             if (res.find(in_h) == res.cend()) // Do not re-explore
                 get_distant_neighbors_rec(in_h, res, dist - 1);
         }
         // 2. Fetch outgoings
-        if (h->isLink()) {
+        if (h->is_link()) {
             for (const Handle& out_h : h->getOutgoingSet()) {
                 if (res.find(out_h) == res.cend()) // Do not re-explore
                     get_distant_neighbors_rec(out_h, res, dist - 1);

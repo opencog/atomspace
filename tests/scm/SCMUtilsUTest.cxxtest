@@ -98,7 +98,7 @@ void SCMUtilsUTest::test_utils(void)
 	CHKERR;
 
 	TSM_ASSERT("Failed to find atom", Handle::UNDEFINED != counter);
-	TSM_ASSERT_EQUALS("Wrong atom type", CONCEPT_NODE, counter->getType());
+	TSM_ASSERT_EQUALS("Wrong atom type", CONCEPT_NODE, counter->get_type());
 
 	evaluator->eval("(test-incr-cnt)");
 	CHKERR;
@@ -108,8 +108,8 @@ void SCMUtilsUTest::test_utils(void)
 	CHKERR;
 	TruthValuePtr tv = counter->getTruthValue();
 
-	TSM_ASSERT_EQUALS("Wrong truth value type", COUNT_TRUTH_VALUE, tv->getType());
-	TSM_ASSERT_EQUALS("wrong count found", 3, (int)(tv->getCount()));
+	TSM_ASSERT_EQUALS("Wrong truth value type", COUNT_TRUTH_VALUE, tv->get_type());
+	TSM_ASSERT_EQUALS("wrong count found", 3, (int)(tv->get_count()));
 
 	// Test cog-get-partner ------------------------------
 	Handle recount = evaluator->eval_h("recount");

@@ -205,24 +205,24 @@ static void atomCompare(AtomPtr a, AtomPtr b, const char* where)
     TSM_ASSERT("No atom found", b != NULL);
     if (NULL == b) return;
 
-    TSM_ASSERT_EQUALS("Type mismatch", a->getType(), b->getType());
+    TSM_ASSERT_EQUALS("Type mismatch", a->get_type(), b->get_type());
 
     NodePtr na(NodeCast(a));
     NodePtr nb(NodeCast(b));
     if (na and nb)
     {
-        TSM_ASSERT_EQUALS("Name mismatch", na->getName(), nb->getName());
+        TSM_ASSERT_EQUALS("Name mismatch", na->get_name(), nb->get_name());
     }
 
     LinkPtr la(LinkCast(a));
     LinkPtr lb(LinkCast(b));
     if (la and lb)
     {
-        TSM_ASSERT_EQUALS("Arity mismatch", la->getArity(), lb->getArity());
+        TSM_ASSERT_EQUALS("Arity mismatch", la->get_arity(), lb->get_arity());
         if (*la != *lb)
         {
-            printf("Mismatching la = %s\n", la->toString().c_str());
-            printf("Mismatching lb = %s\n", lb->toString().c_str());
+            printf("Mismatching la = %s\n", la->to_string().c_str());
+            printf("Mismatching lb = %s\n", lb->to_string().c_str());
             TSM_ASSERT_EQUALS("Link mis-match", la, lb);
         }
     }
@@ -241,7 +241,7 @@ static void atomCompare(AtomPtr a, AtomPtr b, const char* where)
             {
                 fprintf(stderr, "Error, truth value miscompare, "
                     "ma=%f mb=%f ca=%f cb=%f\n",
-                    ta->getMean(), tb->getMean(), ta->getCount(), tb->getCount());
+                    ta->get_mean(), tb->get_mean(), ta->get_count(), tb->get_count());
             }
         }
     }
@@ -266,7 +266,7 @@ void BasicSaveUTest::single_atom_save_restore(std::string id)
     TruthValuePtr stv(SimpleTruthValue::createTV(0.55, 0.6));
     a->setTruthValue(stv);
 
-    Handle h = a->getHandle();
+    Handle h = a->get_handle();
 
     TSM_ASSERT("Bad Handle", nullptr != h);
 
@@ -283,14 +283,14 @@ void BasicSaveUTest::single_atom_save_restore(std::string id)
     // Create a second atom, connect it to the first
     // with a link. Save it, fetch it ... are they equal?
     AtomPtr a2(createNode(SCHEMA_NODE, id + "otherNode"));
-    store->storeAtom(a2->getHandle(), true);
+    store->storeAtom(a2->get_handle(), true);
 
     HandleSeq hvec;
-    hvec.push_back(a->getHandle());
-    hvec.push_back(a2->getHandle());
+    hvec.push_back(a->get_handle());
+    hvec.push_back(a2->get_handle());
 
     Handle l(createLink(hvec, LIST_LINK));
-    store->storeAtom(l->getHandle(), true);
+    store->storeAtom(l->get_handle(), true);
 
     Handle hl = store->getLink(LIST_LINK, hvec);
     atomCompare(l, hl, "Single link save-restore");
@@ -339,10 +339,10 @@ void BasicSaveUTest::add_to_table(int idx, AtomTable *table, std::string id)
     a4[idx] = n4[idx];
 
     HandleSeq hvec;
-    hvec.push_back(a1[idx]->getHandle());
-    hvec.push_back(a2[idx]->getHandle());
-    hvec.push_back(a3[idx]->getHandle());
-    hvec.push_back(a4[idx]->getHandle());
+    hvec.push_back(a1[idx]->get_handle());
+    hvec.push_back(a2[idx]->get_handle());
+    hvec.push_back(a3[idx]->get_handle());
+    hvec.push_back(a4[idx]->get_handle());
 
     l[idx] = createLink(hvec, SET_LINK);
     l[idx] = table->add(l[idx], false);
@@ -433,9 +433,9 @@ void BasicSaveUTest::do_test_fresh_atom(void)
 
     Handle he(store->getLink(LIST_LINK, HandleSeq()));
 
-    printf("Expecting %s\n", le->toString().c_str());
+    printf("Expecting %s\n", le->to_string().c_str());
 
-    if (he) printf("Got %s\n", he->toString().c_str());
+    if (he) printf("Got %s\n", he->to_string().c_str());
     atomCompare(le, he, "Empty Fresh");
 
     store->kill_data();

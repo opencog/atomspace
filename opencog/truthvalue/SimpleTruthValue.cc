@@ -51,8 +51,8 @@ SimpleTruthValue::SimpleTruthValue(const TruthValue& source)
 	: TruthValue(SIMPLE_TRUTH_VALUE)
 {
     _value.resize(2);
-    _value[MEAN] = source.getMean();
-    _value[CONFIDENCE] = source.getConfidence();
+    _value[MEAN] = source.get_mean();
+    _value[CONFIDENCE] = source.get_confidence();
 }
 
 SimpleTruthValue::SimpleTruthValue(const SimpleTruthValue& source)
@@ -66,7 +66,7 @@ SimpleTruthValue::SimpleTruthValue(const SimpleTruthValue& source)
 SimpleTruthValue::SimpleTruthValue(const ProtoAtomPtr& source)
 	: TruthValue(SIMPLE_TRUTH_VALUE)
 {
-	if (source->getType() != SIMPLE_TRUTH_VALUE)
+	if (source->get_type() != SIMPLE_TRUTH_VALUE)
 		throw RuntimeException(TRACE_INFO,
 			"Source must be a SimpleTruthValue");
 
@@ -76,19 +76,19 @@ SimpleTruthValue::SimpleTruthValue(const ProtoAtomPtr& source)
 	_value[CONFIDENCE] = fp->value()[CONFIDENCE];
 }
 
-strength_t SimpleTruthValue::getMean() const
+strength_t SimpleTruthValue::get_mean() const
 {
     return _value[MEAN];
 }
 
-count_t SimpleTruthValue::getCount() const
+count_t SimpleTruthValue::get_count() const
 {
     // Formula from PLN book.
     confidence_t cf = std::min(_value[CONFIDENCE], 0.9999998);
     return static_cast<count_t>(DEFAULT_K * cf / (1.0f - cf));
 }
 
-confidence_t SimpleTruthValue::getConfidence() const
+confidence_t SimpleTruthValue::get_confidence() const
 {
     return _value[CONFIDENCE];
 }
@@ -106,18 +106,18 @@ TruthValuePtr SimpleTruthValue::merge(const TruthValuePtr& other,
         {
             // Based on Section 5.10.2(A heuristic revision rule for STV)
             // of the PLN book
-            if (other->getType() != SIMPLE_TRUTH_VALUE)
+            if (other->get_type() != SIMPLE_TRUTH_VALUE)
                 throw RuntimeException(TRACE_INFO,
                                    "Don't know how to merge %s into a "
                                    "SimpleTruthValue using the default style",
                                    typeid(*other).name());
 
-            confidence_t cf = std::min(getConfidence(), 0.9999998);
+            confidence_t cf = std::min(get_confidence(), 0.9999998);
             auto count = DEFAULT_K * cf / (1.0 - cf);
-            auto count2 = other->getCount();
+            auto count2 = other->get_count();
 #define CVAL  0.2f
             auto count_new = count + count2 - std::min(count, count2) * CVAL;
-            auto mean_new = (getMean() * count + other->getMean() * count2)
+            auto mean_new = (get_mean() * count + other->get_mean() * count2)
                 / (count + count2);
             confidence_t confidence_new = (count_new / (count_new + DEFAULT_K));
             return createTV(mean_new, confidence_new);
@@ -129,12 +129,12 @@ TruthValuePtr SimpleTruthValue::merge(const TruthValuePtr& other,
        }
 }
 
-std::string SimpleTruthValue::toString(const std::string& indent) const
+std::string SimpleTruthValue::to_string(const std::string& indent) const
 {
     char buf[1024];
     sprintf(buf, "(stv %f %f)",
-            static_cast<float>(getMean()),
-            static_cast<float>(getConfidence()));
+            static_cast<float>(get_mean()),
+            static_cast<float>(get_confidence()));
     return buf;
 }
 

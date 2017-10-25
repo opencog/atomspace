@@ -32,7 +32,7 @@ void HandleSeqIndex::remove(bool (*filter)(const Handle&))
 	{
 		j = i;
 		++i;
-		if (filter(j->second->getHandle()))
+		if (filter(j->second->get_handle()))
 			idx.erase(j->first);
 	}
 }

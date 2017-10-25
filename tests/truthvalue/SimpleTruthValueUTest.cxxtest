@@ -86,9 +86,9 @@ public:
         for (int i = 0; i < NUM_TVS; i++) {
             tv = tvs[i];
             TS_ASSERT(tv != NULL);
-            TS_ASSERT(tv->getMean() == means[i]);
-            TS_ASSERT(fabs(tv->getCount()  - counts[i]) <= FLOAT_ACCEPTABLE_ERROR);
-            TS_ASSERT(tv->getConfidence() - confidences[i] < FLOAT_ACCEPTABLE_ERROR);
+            TS_ASSERT(tv->get_mean() == means[i]);
+            TS_ASSERT(fabs(tv->get_count()  - counts[i]) <= FLOAT_ACCEPTABLE_ERROR);
+            TS_ASSERT(tv->get_confidence() - confidences[i] < FLOAT_ACCEPTABLE_ERROR);
         }
     }
 
@@ -98,24 +98,24 @@ public:
         for (int i = 0; i < NUM_TVS; i++) {
             tv = new SimpleTruthValue(*(tvs[i]));
             TS_ASSERT(tv != NULL);
-            TS_ASSERT(fabs(tv->getMean()  - means[i]) <= FLOAT_ACCEPTABLE_ERROR);
-            TS_ASSERT(fabs(tv->getCount()  - counts[i]) <= FLOAT_ACCEPTABLE_ERROR);
-            TS_ASSERT(tv->getConfidence() - confidences[i] < FLOAT_ACCEPTABLE_ERROR);
+            TS_ASSERT(fabs(tv->get_mean()  - means[i]) <= FLOAT_ACCEPTABLE_ERROR);
+            TS_ASSERT(fabs(tv->get_count()  - counts[i]) <= FLOAT_ACCEPTABLE_ERROR);
+            TS_ASSERT(tv->get_confidence() - confidences[i] < FLOAT_ACCEPTABLE_ERROR);
         }
     }
 
     void testClone() {
         for (int i = 0; i < NUM_TVS; i++) {
             TruthValuePtr clonedTv = tvs[i]->clone();
-            TS_ASSERT(fabs(clonedTv->getMean()  - means[i]) <= FLOAT_ACCEPTABLE_ERROR);
-            TS_ASSERT(fabs(clonedTv->getCount()  - counts[i]) <= FLOAT_ACCEPTABLE_ERROR);
-            TS_ASSERT(clonedTv->getConfidence() - confidences[i] < FLOAT_ACCEPTABLE_ERROR);
+            TS_ASSERT(fabs(clonedTv->get_mean()  - means[i]) <= FLOAT_ACCEPTABLE_ERROR);
+            TS_ASSERT(fabs(clonedTv->get_count()  - counts[i]) <= FLOAT_ACCEPTABLE_ERROR);
+            TS_ASSERT(clonedTv->get_confidence() - confidences[i] < FLOAT_ACCEPTABLE_ERROR);
         }
     }
 
     void testGetType() {
         for (int i = 0; i < NUM_TVS; i++) {
-            TS_ASSERT(tvs[i]->getType() == SIMPLE_TRUTH_VALUE);
+            TS_ASSERT(tvs[i]->get_type() == SIMPLE_TRUTH_VALUE);
         }
     }
 

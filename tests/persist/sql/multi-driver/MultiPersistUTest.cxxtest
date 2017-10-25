@@ -225,33 +225,33 @@ void MultiPersistUTest::kill_data(void)
 
 void MultiPersistUTest::atomCompare(AtomPtr a, AtomPtr b, std::string where)
 {
-    // printf("Check %s expect %s\n", where.c_str(), a->toString().c_str());
+    // printf("Check %s expect %s\n", where.c_str(), a->to_string().c_str());
     TSM_ASSERT("No atom found", b != nullptr);
 
     if (nullptr == b)
     {
-        printf("Check %s expect %s\n", where.c_str(), a->toString().c_str());
+        printf("Check %s expect %s\n", where.c_str(), a->to_string().c_str());
         return;
     }
 
-    TSM_ASSERT_EQUALS("Type mismatch", a->getType(), b->getType());
+    TSM_ASSERT_EQUALS("Type mismatch", a->get_type(), b->get_type());
 
     NodePtr na(NodeCast(a));
     NodePtr nb(NodeCast(b));
     if (na and nb)
     {
-        TSM_ASSERT_EQUALS("Name mismatch", na->getName(), nb->getName());
+        TSM_ASSERT_EQUALS("Name mismatch", na->get_name(), nb->get_name());
     }
 
     LinkPtr la(LinkCast(a));
     LinkPtr lb(LinkCast(b));
     if (la and lb)
     {
-        TSM_ASSERT_EQUALS("Arity mismatch", la->getArity(), lb->getArity());
+        TSM_ASSERT_EQUALS("Arity mismatch", la->get_arity(), lb->get_arity());
         if (*la != *lb)
         {
-            printf("Mismatching la = %s\n", la->toString().c_str());
-            printf("Mismatching lb = %s\n", lb->toString().c_str());
+            printf("Mismatching la = %s\n", la->to_string().c_str());
+            printf("Mismatching lb = %s\n", lb->to_string().c_str());
             TSM_ASSERT_EQUALS("Link mis-match", la, lb);
         }
     }
@@ -270,7 +270,7 @@ void MultiPersistUTest::atomCompare(AtomPtr a, AtomPtr b, std::string where)
             {
                 fprintf(stderr, "Error, truth value miscompare, "
                     "ma=%f mb=%f ca=%f cb=%f\n",
-                    ta->getMean(), tb->getMean(), ta->getCount(), tb->getCount());
+                    ta->get_mean(), tb->get_mean(), ta->get_count(), tb->get_count());
             }
         }
     }
@@ -334,20 +334,20 @@ void MultiPersistUTest::add_to_space(int idx, AtomSpace *as, std::string id)
 
 void MultiPersistUTest::fetch_space(int idx, AtomSpace *space)
 {
-    AtomPtr ab1 = createNode(n1[idx]->getType(), n1[idx]->getName());
-    Handle hb1(ab1->getHandle());
+    AtomPtr ab1 = createNode(n1[idx]->get_type(), n1[idx]->get_name());
+    Handle hb1(ab1->get_handle());
     space->fetch_atom(hb1);
 
-    AtomPtr ab2 = createNode(n2[idx]->getType(), n2[idx]->getName());
-    Handle hb2(ab2->getHandle());
+    AtomPtr ab2 = createNode(n2[idx]->get_type(), n2[idx]->get_name());
+    Handle hb2(ab2->get_handle());
     space->fetch_atom(hb2);
 
-    AtomPtr ab3 = createNode(n3[idx]->getType(), n3[idx]->getName());
-    Handle hb3(ab3->getHandle());
+    AtomPtr ab3 = createNode(n3[idx]->get_type(), n3[idx]->get_name());
+    Handle hb3(ab3->get_handle());
     space->fetch_atom(hb3);
 
-    AtomPtr ab4 = createNode(n4[idx]->getType(), n4[idx]->getName());
-    Handle hb4(ab4->getHandle());
+    AtomPtr ab4 = createNode(n4[idx]->get_type(), n4[idx]->get_name());
+    Handle hb4(ab4->get_handle());
     space->fetch_atom(hb4);
 
     HandleSeq hvec;
@@ -356,18 +356,18 @@ void MultiPersistUTest::fetch_space(int idx, AtomSpace *space)
     hvec.push_back(hb3);
     hvec.push_back(hb4);
 
-    AtomPtr alb = createLink(hvec, hl[idx]->getType());
-    Handle hlb(alb->getHandle());
+    AtomPtr alb = createLink(hvec, hl[idx]->get_type());
+    Handle hlb(alb->get_handle());
     space->fetch_atom(hlb);
 
     HandleSeq hv2({hlb, hb2});
-    AtomPtr alb2 = createLink(hv2, hl2[idx]->getType());
-    Handle hlb2(alb2->getHandle());
+    AtomPtr alb2 = createLink(hv2, hl2[idx]->get_type());
+    Handle hlb2(alb2->get_handle());
     space->fetch_atom(hlb2);
 
     HandleSeq hv3({hb1, hlb2, hb3});
-    AtomPtr alb3 = createLink(hv3, hl3[idx]->getType());
-    Handle hlb3(alb3->getHandle());
+    AtomPtr alb3 = createLink(hv3, hl3[idx]->get_type());
+    Handle hlb3(alb3->get_handle());
     space->fetch_atom(hlb3);
 }
 
@@ -376,16 +376,16 @@ void MultiPersistUTest::check_space(int idx, AtomSpace *space, std::string dbgms
     // printf("Checking %d\n", idx);
     fflush(stdout);
 
-    Handle hb1 = space->get_handle(n1[idx]->getType(), n1[idx]->getName());
+    Handle hb1 = space->get_handle(n1[idx]->get_type(), n1[idx]->get_name());
     atomCompare(h1[idx], hb1, dbgmsg + "-hb1");
 
-    Handle hb2 = space->get_handle(n2[idx]->getType(), n2[idx]->getName());
+    Handle hb2 = space->get_handle(n2[idx]->get_type(), n2[idx]->get_name());
     atomCompare(h2[idx], hb2, dbgmsg + "-hb2");
 
-    Handle hb3 = space->get_handle(n3[idx]->getType(), n3[idx]->getName());
+    Handle hb3 = space->get_handle(n3[idx]->get_type(), n3[idx]->get_name());
     atomCompare(h3[idx], hb3, dbgmsg + "-hb3");
 
-    Handle hb4 = space->get_handle(n4[idx]->getType(), n4[idx]->getName());
+    Handle hb4 = space->get_handle(n4[idx]->get_type(), n4[idx]->get_name());
     atomCompare(h4[idx], hb4, dbgmsg + "-hb4");
 
     HandleSeq hvec;
@@ -394,30 +394,30 @@ void MultiPersistUTest::check_space(int idx, AtomSpace *space, std::string dbgms
     hvec.push_back(hb3);
     hvec.push_back(hb4);
 
-    Handle hlb = space->get_handle(hl[idx]->getType(), hvec);
+    Handle hlb = space->get_handle(hl[idx]->get_type(), hvec);
     atomCompare(hl[idx], hlb, dbgmsg + "-hlinkb");
 
     HandleSeq hv2({hlb, hb2});
-    Handle hlb2 = space->get_handle(hl2[idx]->getType(), hv2);
+    Handle hlb2 = space->get_handle(hl2[idx]->get_type(), hv2);
     atomCompare(hl2[idx], hlb2, dbgmsg + "-hlinkb2");
 
     HandleSeq hv3({hb1, hlb2, hb3});
-    Handle hlb3 = space->get_handle(hl3[idx]->getType(), hv3);
+    Handle hlb3 = space->get_handle(hl3[idx]->get_type(), hv3);
     atomCompare(hl3[idx], hlb3, dbgmsg + "-hlinkb3");
 }
 
 void MultiPersistUTest::check_empty(int idx, AtomSpace *space)
 {
-    Handle hb1 = space->get_handle(n1[idx]->getType(), n1[idx]->getName());
+    Handle hb1 = space->get_handle(n1[idx]->get_type(), n1[idx]->get_name());
     TSM_ASSERT("Should not find this atom", hb1 == Handle::UNDEFINED);
 
-    Handle hb2 = space->get_handle(n2[idx]->getType(), n2[idx]->getName());
+    Handle hb2 = space->get_handle(n2[idx]->get_type(), n2[idx]->get_name());
     TSM_ASSERT("Should not find this atom", hb2 == Handle::UNDEFINED);
 
-    Handle hb3 = space->get_handle(n3[idx]->getType(), n3[idx]->getName());
+    Handle hb3 = space->get_handle(n3[idx]->get_type(), n3[idx]->get_name());
     TSM_ASSERT("Should not find this atom", hb3 == Handle::UNDEFINED);
 
-    Handle hb4 = space->get_handle(n4[idx]->getType(), n4[idx]->getName());
+    Handle hb4 = space->get_handle(n4[idx]->get_type(), n4[idx]->get_name());
     TSM_ASSERT("Should not find this atom", hb4 == Handle::UNDEFINED);
 
     HandleSeq hvec;
@@ -426,7 +426,7 @@ void MultiPersistUTest::check_empty(int idx, AtomSpace *space)
     hvec.push_back(h3[idx]);
     hvec.push_back(h4[idx]);
 
-    Handle hlb = space->get_handle(hl[idx]->getType(), hvec);
+    Handle hlb = space->get_handle(hl[idx]->get_type(), hvec);
     TSM_ASSERT("Should not find this atom", hlb == Handle::UNDEFINED);
 }
 

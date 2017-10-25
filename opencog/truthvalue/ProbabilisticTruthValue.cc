@@ -47,24 +47,24 @@ ProbabilisticTruthValue::ProbabilisticTruthValue(const TruthValue& source)
 	: TruthValue(PROBABILISTIC_TRUTH_VALUE)
 {
     _value.resize(3);
-    _value[MEAN] = source.getMean();
-    _value[CONFIDENCE] = source.getConfidence();
-    _value[COUNT] = source.getCount();
+    _value[MEAN] = source.get_mean();
+    _value[CONFIDENCE] = source.get_confidence();
+    _value[COUNT] = source.get_count();
 }
 
 ProbabilisticTruthValue::ProbabilisticTruthValue(ProbabilisticTruthValue const& source)
 	: TruthValue(PROBABILISTIC_TRUTH_VALUE)
 {
     _value.resize(3);
-    _value[MEAN] = source.getMean();
-    _value[CONFIDENCE] = source.getConfidence();
-    _value[COUNT] = source.getCount();
+    _value[MEAN] = source.get_mean();
+    _value[CONFIDENCE] = source.get_confidence();
+    _value[COUNT] = source.get_count();
 }
 
 ProbabilisticTruthValue::ProbabilisticTruthValue(const ProtoAtomPtr& source)
        : TruthValue(PROBABILISTIC_TRUTH_VALUE)
 {
-    if (source->getType() != PROBABILISTIC_TRUTH_VALUE)
+    if (source->get_type() != PROBABILISTIC_TRUTH_VALUE)
         throw RuntimeException(TRACE_INFO,
             "Source must be a ProbabilisticTruthValue");
 
@@ -75,28 +75,28 @@ ProbabilisticTruthValue::ProbabilisticTruthValue(const ProtoAtomPtr& source)
     _value[COUNT] = fp->value()[COUNT];
 }
 
-strength_t ProbabilisticTruthValue::getMean() const
+strength_t ProbabilisticTruthValue::get_mean() const
 {
     return _value[MEAN];
 }
 
-count_t ProbabilisticTruthValue::getCount() const
+count_t ProbabilisticTruthValue::get_count() const
 {
     return  _value[COUNT];
 }
 
-confidence_t ProbabilisticTruthValue::getConfidence() const
+confidence_t ProbabilisticTruthValue::get_confidence() const
 {
     return _value[CONFIDENCE];
 }
 
-std::string ProbabilisticTruthValue::toString(const std::string& indent) const
+std::string ProbabilisticTruthValue::to_string(const std::string& indent) const
 {
     char buf[1024];
     sprintf(buf, "(ctv %f %f %f)",
-            static_cast<float>(getMean()),
-            static_cast<float>(getCount()),
-            static_cast<double>(getConfidence()));
+            static_cast<float>(get_mean()),
+            static_cast<float>(get_count()),
+            static_cast<double>(get_confidence()));
     return buf;
 }
 
@@ -106,10 +106,10 @@ bool ProbabilisticTruthValue::operator==(const ProtoAtom& rhs) const
     if (NULL == ctv) return false;
 
 #define FLOAT_ACCEPTABLE_ERROR 0.000001
-    if (FLOAT_ACCEPTABLE_ERROR < fabs(getMean() - ctv->getMean())) return false;
-    if (FLOAT_ACCEPTABLE_ERROR < fabs(getConfidence() - ctv->getConfidence())) return false;
+    if (FLOAT_ACCEPTABLE_ERROR < fabs(get_mean() - ctv->get_mean())) return false;
+    if (FLOAT_ACCEPTABLE_ERROR < fabs(get_confidence() - ctv->get_confidence())) return false;
 #define DOUBLE_ACCEPTABLE_ERROR 1.0e-14
-    if (DOUBLE_ACCEPTABLE_ERROR < fabs(1.0 - (ctv->getCount()/getCount()))) return false;
+    if (DOUBLE_ACCEPTABLE_ERROR < fabs(1.0 - (ctv->get_count()/get_count()))) return false;
 
     return true;
 }
@@ -134,9 +134,9 @@ TruthValuePtr ProbabilisticTruthValue::merge(const TruthValuePtr& other,
     // If both this and other are counts, then accumulate to get the
     // total count, and average together the strengths, using the
     // count as the relative weight.
-    count_t cnt =  getCount() + oc->getCount();
-    strength_t meeny = (getMean() * getCount() +
-                   oc->getMean() * oc->getCount()) / cnt;
+    count_t cnt =  get_count() + oc->get_count();
+    strength_t meeny = (get_mean() * get_count() +
+                   oc->get_mean() * oc->get_count()) / cnt;
 
     // XXX This is not the correct way to handle confidence ...
     // The confidence will typically hold the log probability,
@@ -147,5 +147,5 @@ TruthValuePtr ProbabilisticTruthValue::merge(const TruthValuePtr& other,
     // Argh .. what to do?
     //    confidence = oc->confidence;
 
-    return createTV(meeny, getConfidence(), cnt);
+    return createTV(meeny, get_confidence(), cnt);
 }

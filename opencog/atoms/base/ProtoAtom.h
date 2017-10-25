@@ -53,32 +53,32 @@ public:
 
 	virtual ~ProtoAtom() {}
 
-	inline Type getType() const { return _type; }
+	inline Type get_type() const { return _type; }
 
 	/** Basic predicate */
-	bool isType(Type t, bool subclass) const
+	bool is_type(Type t, bool subclass) const
 	{
-		Type at(getType());
+		Type at(get_type());
 		if (not subclass) return t == at;
 		return classserver().isA(at, t);
 	}
 
-	virtual bool isAtom() const { return false; }
-	virtual bool isNode() const { return false; }
-	virtual bool isLink() const { return false; }
+	virtual bool is_atom() const { return false; }
+	virtual bool is_node() const { return false; }
+	virtual bool is_link() const { return false; }
 
 	/**
 	 * Returns a string representation of the proto-atom.
 	 */
-	virtual std::string toString(const std::string& indent) const = 0;
-	virtual std::string toShortString(const std::string& indent) const
-		{ return toString(indent); }
+	virtual std::string to_string(const std::string& indent) const = 0;
+	virtual std::string to_short_string(const std::string& indent) const
+		{ return to_string(indent); }
 
 	// Work around gdb's inability to build a string on the fly,
 	// see http://stackoverflow.com/questions/16734783 for more
 	// explanation.
-	std::string toString() const { return toString(""); }
-	std::string toShortString() const { return toShortString(""); }
+	std::string to_string() const { return to_string(""); }
+	std::string to_short_string() const { return to_short_string(""); }
 
 	/**
 	 * Returns whether two proto-atoms are equal.
@@ -126,7 +126,7 @@ namespace std
     template<typename Out>
     Out& operator<<(Out& out, const opencog::ProtoAtomPtr& pa)
     {
-        out << pa->toString("");
+        out << pa->to_string("");
         return out;
     }
 } // ~namespace std

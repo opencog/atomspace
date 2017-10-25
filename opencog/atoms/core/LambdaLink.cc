@@ -52,7 +52,7 @@ LambdaLink::LambdaLink(const Link &l)
 	: ScopeLink(l)
 {
 	// Type must be as expected
-	Type tscope = l.getType();
+	Type tscope = l.get_type();
 	if (not classserver().isA(tscope, LAMBDA_LINK))
 	{
 		const std::string& tname = classserver().getTypeName(tscope);

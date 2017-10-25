@@ -93,7 +93,7 @@ bool Satisfier::search_finished(bool done)
 	// Evaluating the pattern body only makes sense if it is sequential
 	// (ordered) -- if the body is an unordered AndLink, or if its a
 	// ChoiceLink, etc, this makes no sense.
-	Type btype = _pattern_body->getType();
+	Type btype = _pattern_body->get_type();
 	if (SEQUENTIAL_AND_LINK != btype and SEQUENTIAL_OR_LINK != btype)
 		return done;
 
@@ -164,7 +164,7 @@ Handle opencog::satisfying_set(AtomSpace* as, const Handle& hlink, size_t max_re
 	// the C++ code for handling this case could maybe be refactored
 	// to handle BindLink as well as GetLink in one place... but right
 	// now, it doesn't.
-	Type blt = hlink->getType();
+	Type blt = hlink->get_type();
 	if (BIND_LINK == blt)
 	{
 		return bindlink(as, hlink, max_results);

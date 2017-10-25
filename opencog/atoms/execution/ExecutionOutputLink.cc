@@ -45,12 +45,12 @@ public:
 
 void ExecutionOutputLink::check_schema(const Handle& schema) const
 {
-	if (not classserver().isA(schema->getType(), SCHEMA_NODE) and
-	    LAMBDA_LINK != schema->getType())
+	if (not classserver().isA(schema->get_type(), SCHEMA_NODE) and
+	    LAMBDA_LINK != schema->get_type())
 	{
 		throw SyntaxException(TRACE_INFO,
 		                      "ExecutionOutputLink must have schema! Got %s",
-		                      schema->toString().c_str());
+		                      schema->to_string().c_str());
 	}
 }
 
@@ -79,7 +79,7 @@ ExecutionOutputLink::ExecutionOutputLink(const Handle& schema,
 ExecutionOutputLink::ExecutionOutputLink(const Link& l)
 	: FunctionLink(l)
 {
-	Type tscope = l.getType();
+	Type tscope = l.get_type();
 	if (EXECUTION_OUTPUT_LINK != tscope)
 		throw SyntaxException(TRACE_INFO,
 			"Expection an ExecutionOutputLink!");
@@ -101,9 +101,9 @@ ExecutionOutputLink::ExecutionOutputLink(const Link& l)
 ///
 Handle ExecutionOutputLink::execute(AtomSpace* as, bool silent) const
 {
-	if (_outgoing[0]->getType() != GROUNDED_SCHEMA_NODE) {
+	if (_outgoing[0]->get_type() != GROUNDED_SCHEMA_NODE) {
 		LAZY_LOG_FINE << "Not a grounded schema. Do not execute it";
-		return getHandle();
+		return get_handle();
 	}
 
 	return do_execute(as, _outgoing[0], _outgoing[1], silent);
@@ -120,8 +120,8 @@ Handle ExecutionOutputLink::do_execute(AtomSpace* as,
                                        const Handle& cargs,
                                        bool silent)
 {
-	LAZY_LOG_FINE << "Execute gsn: " << gsn->toShortString()
-	              << "with arguments: " << cargs->toShortString();
+	LAZY_LOG_FINE << "Execute gsn: " << gsn->to_short_string()
+	              << "with arguments: " << cargs->to_short_string();
 
 	// Force execution of the arguments. We have to do this, because
 	// the user-defined functions are black-boxes, and cannot be trusted
@@ -131,7 +131,7 @@ Handle ExecutionOutputLink::do_execute(AtomSpace* as,
 	Handle args = force_execute(as, cargs, silent);
 
 	// Get the schema name.
-	const std::string& schema = gsn->getName();
+	const std::string& schema = gsn->get_name();
 
 	// Extract the language, library and function
 	std::string lang, lib, fun;
@@ -189,7 +189,7 @@ Handle ExecutionOutputLink::do_execute(AtomSpace* as,
 		// Unkown proceedure type
 		throw RuntimeException(TRACE_INFO,
 		                       "Cannot evaluate unknown Schema %s",
-		                       gsn->toString().c_str());
+		                       gsn->to_string().c_str());
 	}
 
 	// Check for a not-uncommon user-error.  If the user-defined
@@ -205,8 +205,8 @@ Handle ExecutionOutputLink::do_execute(AtomSpace* as,
 
 		throw RuntimeException(TRACE_INFO,
 		        "Invalid return value from schema %s\nArgs: %s",
-		        gsn->toString().c_str(),
-		        cargs->toString().c_str());
+		        gsn->to_string().c_str(),
+		        cargs->to_string().c_str());
 	}
 
 	LAZY_LOG_FINE << "Result: " << oc_to_string(result);

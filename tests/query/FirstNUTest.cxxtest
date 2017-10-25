@@ -79,7 +79,7 @@ void FirstNUTest::setUp(void)
     eval->eval("(load-from-path \"tests/query/firstn.scm\")");
 }
 
-#define getarity(hand) hand->getArity()
+#define getarity(hand) hand->get_arity()
 
 void FirstNUTest::_test_wrong_args(std::string command)
 {

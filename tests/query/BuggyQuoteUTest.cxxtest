@@ -70,7 +70,7 @@ void BuggyQuoteUTest::setUp(void)
     as->clear();
 }
 
-#define getarity(hand) hand->getArity()
+#define getarity(hand) hand->get_arity()
 
 /*
  * BuggyQuote unit test.  Test binding to unquoted links.
@@ -119,7 +119,7 @@ void BuggyQuoteUTest::test_good_form(void)
     TSM_ASSERT("Failed to load test data", Handle::UNDEFINED != qrule);
 
     Handle rslt = bindlink(as, qrule);
-    logger().debug() << "Result is this:\n" << rslt->toString();
+    logger().debug() << "Result is this:\n" << rslt->to_string();
 
     // See buggy-crime.scm for explanation for why this is 1 not 2
     TS_ASSERT_EQUALS(1, getarity(rslt));

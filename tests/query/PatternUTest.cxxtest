@@ -124,17 +124,17 @@ class PMCB : public InitiateSearchCB, public DefaultPatternMatchCB
 
 bool PMCB::node_match(Node *npat, Node *nsoln)
 {
-	Type pattype = npat->getType();
-	Type soltype = nsoln->getType();
+	Type pattype = npat->get_type();
+	Type soltype = nsoln->get_type();
 
 	// Reject obvioius mismatches
 	if (pattype != soltype) return false;
 
-	Handle ha = npat->getHandle();
-	Handle hb = nsoln->getHandle();
+	Handle ha = npat->get_handle();
+	Handle hb = nsoln->get_handle();
 	logger().debug("Compare (%zu) %s ==== (%zu) %s",
-		ha.value(), npat->getName().c_str(),
-		hb.value(), nsoln->getName().c_str());
+		ha.value(), npat->get_name().c_str(),
+		hb.value(), nsoln->get_name().c_str());
 
 	return npat == nsoln;
 }

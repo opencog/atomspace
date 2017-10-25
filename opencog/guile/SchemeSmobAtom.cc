@@ -48,7 +48,7 @@ Handle SchemeSmob::verify_handle (SCM satom, const char * subrname, int pos)
 	// protoAtoms.  Howerver, in the guile wrapper, we expect all
 	// handles to be pointers to atoms; use verify_protom() instead,
 	// if you just want ProtoAtoms.
-	if (not (h->isLink() or h->isNode()))
+	if (not (h->is_link() or h->is_node()))
 		scm_wrong_type_arg_msg(subrname, pos, satom, "opencog atom");
 
 	return h;
@@ -71,7 +71,7 @@ SCM SchemeSmob::ss_name (SCM satom)
 {
 	std::string name;
 	Handle h = verify_handle(satom, "cog-name");
-	if (h->isNode()) name = h->getName();
+	if (h->is_node()) name = h->get_name();
 	SCM str = scm_from_utf8_string(name.c_str());
 	return str;
 }
@@ -79,7 +79,7 @@ SCM SchemeSmob::ss_name (SCM satom)
 SCM SchemeSmob::ss_type (SCM satom)
 {
 	Handle h = verify_handle(satom, "cog-type");
-	Type t = h->getType();
+	Type t = h->get_type();
 	const std::string &tname = classserver().getTypeName(t);
 	SCM str = scm_from_utf8_string(tname.c_str());
 	SCM sym = scm_string_to_symbol(str);
@@ -91,7 +91,7 @@ SCM SchemeSmob::ss_arity (SCM satom)
 {
 	Handle h = verify_handle(satom, "cog-arity");
 	Arity ari = 0;
-	if (h->isLink()) ari = h->getArity();
+	if (h->is_link()) ari = h->get_arity();
 
 	/* Arity is currently an unsigned short */
 	SCM sari = scm_from_ushort(ari);
@@ -125,12 +125,12 @@ SCM SchemeSmob::ss_inc_count (SCM satom, SCM scnt)
 	double cnt = verify_real(scnt, "cog-inc-count!", 2);
 
 	TruthValuePtr tv = h->getTruthValue();
-	if (COUNT_TRUTH_VALUE == tv->getType())
+	if (COUNT_TRUTH_VALUE == tv->get_type())
 	{
-		cnt += tv->getCount();
+		cnt += tv->get_count();
 	}
 	tv = CountTruthValue::createTV(
-		tv->getMean(), tv->getConfidence(), cnt);
+		tv->get_mean(), tv->get_confidence(), cnt);
 
 	h->setTruthValue(tv);
 	return satom;
@@ -182,7 +182,7 @@ SCM SchemeSmob::ss_outgoing_set (SCM satom)
 {
 	Handle h = verify_handle(satom, "cog-outgoing-set");
 
-	if (not h->isLink()) return SCM_EOL;
+	if (not h->is_link()) return SCM_EOL;
 
 	const HandleSeq& oset = h->getOutgoingSet();
 
@@ -206,14 +206,14 @@ SCM SchemeSmob::ss_outgoing_by_type (SCM satom, SCM stype)
 	Handle h = verify_handle(satom, "cog-outgoing-by-type");
 	Type t = verify_atom_type(stype, "cog-outgoing-by-type", 2);
 
-	if (not h->isLink()) return SCM_EOL;
+	if (not h->is_link()) return SCM_EOL;
 
 	const HandleSeq& oset = h->getOutgoingSet();
 
 	SCM list = SCM_EOL;
 	for (int i = oset.size()-1; i >= 0; i--)
 	{
-		if (oset[i]->getType() != t) continue;
+		if (oset[i]->get_type() != t) continue;
 		SCM smob = handle_to_scm(oset[i]);
 		list = scm_cons (smob, list);
 	}
@@ -230,7 +230,7 @@ SCM SchemeSmob::ss_outgoing_atom (SCM satom, SCM spos)
 	Handle h = verify_handle(satom, "cog-outgoing-atom");
 	size_t pos = verify_size(spos, "cog-outgoing-atom", 2);
 
-	if (not h->isLink()) return SCM_EOL;
+	if (not h->is_link()) return SCM_EOL;
 
 	const HandleSeq& oset = h->getOutgoingSet();
 	if (oset.size() <= pos) return SCM_EOL;
@@ -251,7 +251,7 @@ SCM SchemeSmob::ss_incoming_set (SCM satom)
 	IncomingSet iset = h->getIncomingSet();
 	for (const LinkPtr& l : iset)
 	{
-		SCM smob = handle_to_scm(l->getHandle());
+		SCM smob = handle_to_scm(l->get_handle());
 		head = scm_cons(smob, head);
 	}
 

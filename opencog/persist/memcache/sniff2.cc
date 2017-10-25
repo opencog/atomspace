@@ -27,21 +27,21 @@ int atomCompare(Atom *a, Atom *b)
 		return -1;
 	}
 
-	if (a->getType() != b->getType())
+	if (a->get_type() != b->get_type())
 	{
-		fprintf(stderr, "Error, type mis-match, a=%d b=%d\n", a->getType(), b->getType());
+		fprintf(stderr, "Error, type mis-match, a=%d b=%d\n", a->get_type(), b->get_type());
 		rc --;
 	}
-	if (a->getArity() != b->getArity())
+	if (a->get_arity() != b->get_arity())
 	{
-		fprintf(stderr, "Error, arity mis-match, a=%d b=%d\n", a->getArity(), b->getArity());
+		fprintf(stderr, "Error, arity mis-match, a=%d b=%d\n", a->get_arity(), b->get_arity());
 		rc --;
 	}
-	if (0 < a->getArity())
+	if (0 < a->get_arity())
 	{
 		HandleSeq outa = a->getOutgoingSet();
 		HandleSeq outb = b->getOutgoingSet();
-		for (int i =0; i< a->getArity(); i++)
+		for (int i =0; i< a->get_arity(); i++)
 		{
 			if (outa[i] != outb[i])
 			{
@@ -57,7 +57,7 @@ int atomCompare(Atom *a, Atom *b)
 		const TruthValue &tb = b->getTruthValue();
 		fprintf(stderr, "Error, truth value miscompare, "
 		        "ma=%f mb=%f ca=%f cb=%f\n",
-		        ta.getMean(), tb.getMean(), ta.getCount(), tb.getCount());
+		        ta.get_mean(), tb.get_mean(), ta.get_count(), tb.get_count());
 		rc --;
 	}
 	return rc;
@@ -82,7 +82,7 @@ void single_atom_test(std::string id)
 	store->storeAtom(a);
 
 	// Fetch it back ...
-	Handle h = a->getHandle();
+	Handle h = a->get_handle();
 	Atom *b = store->getAtom(h);
 
 	// Are they equal ??
@@ -99,14 +99,14 @@ void single_atom_test(std::string id)
 	store->storeAtom(a2);
 
 	HandleSeq hvec;
-	hvec.push_back(a->getHandle());
-	hvec.push_back(a2->getHandle());
+	hvec.push_back(a->get_handle());
+	hvec.push_back(a2->get_handle());
 
 	Link *l = new Link(SET_LINK, hvec);
 	TLB::addAtom(l);
 	store->storeAtom(l);
 
-	Atom *lb = store->getAtom(l->getHandle());
+	Atom *lb = store->getAtom(l->get_handle());
 	rc = atomCompare(l,lb);
 	if (!rc) 
 	{
@@ -135,9 +135,9 @@ void add_to_table(AtomTable *table, std::string id)
 	table->add(a3);
 
 	HandleSeq hvec;
-	hvec.push_back(a->getHandle());
-	hvec.push_back(a2->getHandle());
-	hvec.push_back(a3->getHandle());
+	hvec.push_back(a->get_handle());
+	hvec.push_back(a2->get_handle());
+	hvec.push_back(a3->get_handle());
 
 	Link *l = new Link(SET_LINK, hvec);
 	table->add(l);

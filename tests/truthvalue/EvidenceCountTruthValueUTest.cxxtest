@@ -75,11 +75,11 @@ public:
 	{
 		for (int i = 0; i < NUM_TVS; i++) {
 			if (ectvs[i]->is_count_valid()) {
-				TS_ASSERT_DELTA(ectvs[i]->getMean(),
+				TS_ASSERT_DELTA(ectvs[i]->get_mean(),
 				                pos_counts[i] / total_counts[i],
 				                FLOAT_ACCEPTABLE_ERROR);
 			} else {
-				TS_ASSERT(std::isnan(ectvs[i]->getMean()));
+				TS_ASSERT(std::isnan(ectvs[i]->get_mean()));
 			}
 		}
 	}

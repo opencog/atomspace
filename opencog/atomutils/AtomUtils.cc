@@ -45,7 +45,7 @@ HandleSeq get_predicates(const Handle& target,
     for (const LinkPtr& link : target->getIncomingSet())
     {
         // Skip any links that aren't subclasses of ListLink.
-        Type linkType = link->getType();
+        Type linkType = link->get_type();
         if (!classServer.isA(linkType, LIST_LINK))
            continue;
  
@@ -53,19 +53,19 @@ HandleSeq get_predicates(const Handle& target,
         for (const LinkPtr& evaluationLink : link->getIncomingSet())
         {
             // Skip any links that aren't subclasses of EvaluationLink.
-            linkType = evaluationLink->getType();
+            linkType = evaluationLink->get_type();
             if (!classServer.isA(linkType, EVALUATION_LINK))
                 continue;
 
             // Check the first outgoing atom for this EvaluationLink against
             // the desired predicate type.
             Handle candidatePredicate = evaluationLink->getOutgoingAtom(0);
-            Type candidateType = candidatePredicate->getType();
+            Type candidateType = candidatePredicate->get_type();
             if ((candidateType == predicateType)
                 or (subClasses &&
                     classServer.isA(candidateType, predicateType)))
             {
-                answer.emplace_back(evaluationLink->getHandle());
+                answer.emplace_back(evaluationLink->get_handle());
             }
         }
     }
@@ -91,7 +91,7 @@ HandleSeq get_predicates_for(const Handle& target,
     for (const LinkPtr& link : target->getIncomingSet())
     {
         // Skip any links that aren't subclasses of ListLink.
-        Type linkType = link->getType();
+        Type linkType = link->get_type();
         if (!classServer.isA(linkType, LIST_LINK))
            continue;
  
@@ -99,14 +99,14 @@ HandleSeq get_predicates_for(const Handle& target,
         for (const LinkPtr& evaluationLink : link->getIncomingSet())
         {
             // Skip any links that aren't subclasses of EvaluationLink.
-            linkType = evaluationLink->getType();
+            linkType = evaluationLink->get_type();
             if (!classServer.isA(linkType, EVALUATION_LINK))
                 continue;
 
             // Check if the first outgoing atom for this EvaluationLink is
             // the desired predicate.
             if (predicate == evaluationLink->getOutgoingAtom(0))
-                answer.emplace_back(evaluationLink->getHandle());
+                answer.emplace_back(evaluationLink->get_handle());
         }
     }
 

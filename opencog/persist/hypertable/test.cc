@@ -14,21 +14,21 @@ int atomCompare(Atom *a, Atom *b) //TODO: Test name, use == ?
         return -1;
     }
 
-    if (a->getType() != b->getType()) {
-        fprintf(stderr, "Error, type mis-match, a=%d b=%d\n", a->getType(), b->getType());
+    if (a->get_type() != b->get_type()) {
+        fprintf(stderr, "Error, type mis-match, a=%d b=%d\n", a->get_type(), b->get_type());
         --rc;
     }
     Link *na = dynamic_cast<Link *>(a);
     Link *nb = dynamic_cast<Link *>(b);
     if (na && nb) {
-        if (na->getArity() != nb->getArity()) {
-            fprintf(stderr, "Error, arity mis-match, a=%d b=%d\n", na->getArity(), nb->getArity());
+        if (na->get_arity() != nb->get_arity()) {
+            fprintf(stderr, "Error, arity mis-match, a=%d b=%d\n", na->get_arity(), nb->get_arity());
             --rc;
         }
-            if (0 < na->getArity()) {
+            if (0 < na->get_arity()) {
             HandleSeq outa = na->getOutgoingSet();
             HandleSeq outb = nb->getOutgoingSet();
-            for (int i =0; i< na->getArity(); i++) {
+            for (int i =0; i< na->get_arity(); i++) {
                 if (outa[i] != outb[i]) {
                     fprintf(stderr, "Error, outgoing set mis-match:");
                     fprintf(stderr, "i=%d a[i]=%ld b[i]=%ld\n",i,
@@ -43,7 +43,7 @@ int atomCompare(Atom *a, Atom *b) //TODO: Test name, use == ?
         const TruthValue &tb = b->getTruthValue();
         fprintf(stderr, "Error, truth value mis-match, "
                 "ma=%f mb=%f ca=%f cb=%f\n",
-                ta.getMean(), tb.getMean(), ta.getCount(), tb.getCount());
+                ta.get_mean(), tb.get_mean(), ta.get_count(), tb.get_count());
         --rc;
     }
     if (!(a->getAttentionValue() == b->getAttentionValue())) {
@@ -87,7 +87,7 @@ int main (int argc, char **argv){
         }
         
         // Get it back through get node
-        Atom *c = table.getNode(a->getType(), ((Node *)a)->getName().c_str());
+        Atom *c = table.getNode(a->get_type(), ((Node *)a)->get_name().c_str());
         rc = atomCompare(a,c);
         if (!rc) {
             printf("node compare success\n");
@@ -120,7 +120,7 @@ int main (int argc, char **argv){
 	    }
 	    
 	    // Get the link back through get link
-	    Atom *lc = table.getLink(l->getType(), l->getOutgoingSet());
+	    Atom *lc = table.getLink(l->get_type(), l->getOutgoingSet());
 	    rc = atomCompare(l,lc);
 	    if (!rc) {
             std::cout << "link compare success" << std::endl;

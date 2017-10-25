@@ -21,7 +21,7 @@ int FloatValue_toRaw(FloatValuePtr ptr
                     , char** valuetype
                     , double* parameters)
 {
-    const std::string & type = classserver().getTypeName(ptr->getType());
+    const std::string & type = classserver().getTypeName(ptr->get_type());
 
     *valuetype = (char*) malloc(sizeof(char) * (type.length()+1));
     if(! *valuetype)

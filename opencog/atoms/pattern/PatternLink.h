@@ -143,7 +143,7 @@ protected:
 	// utility debug print
 	static void prt(const Handle& h)
 	{
-		printf("%s\n", h->toShortString().c_str());
+		printf("%s\n", h->to_short_string().c_str());
 	}
 
 public:

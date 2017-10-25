@@ -52,10 +52,10 @@ void Link::init(const HandleSeq& outgoingVector)
 
 Link::~Link()
 {
-    DPRINTF("Deleting link:\n%s\n", this->toString().c_str());
+    DPRINTF("Deleting link:\n%s\n", this->to_string().c_str());
 }
 
-std::string Link::toShortString(const std::string& indent) const
+std::string Link::to_short_string(const std::string& indent) const
 {
     std::stringstream answer;
     std::string more_indent = indent + "  ";
@@ -63,20 +63,20 @@ std::string Link::toShortString(const std::string& indent) const
     answer << indent << "(" << classserver().getTypeName(_type);
 
     if (not getTruthValue()->isDefaultTV())
-        answer << " " << getTruthValue()->toString();
+        answer << " " << getTruthValue()->to_string();
     answer << "\n";
 
     // Here the target string is made. If a target is a node, its name is
     // concatenated. If it's a link, all its properties are concatenated.
     for (const Handle& h : _outgoing)
-        answer << h->toShortString(more_indent);
+        answer << h->to_short_string(more_indent);
 
     answer << indent << ")\n";
 
     return answer.str();
 }
 
-std::string Link::toString(const std::string& indent) const
+std::string Link::to_string(const std::string& indent) const
 {
     std::string answer = indent;
     std::string more_indent = indent + "  ";
@@ -85,15 +85,15 @@ std::string Link::toString(const std::string& indent) const
 
     // Print the TV only if its not the default.
     if (not getTruthValue()->isDefaultTV())
-        answer += " " + getTruthValue()->toString();
+        answer += " " + getTruthValue()->to_string();
 
     answer += "\n";
     // Here, the outset string is made. If a target is a node,
     // its name is concatenated. If it's a link, then recurse.
     for (const Handle& h : _outgoing)
-        answer += h->toString(more_indent);
+        answer += h->to_string(more_indent);
 
-    answer += indent + ") ; " + idToString() + "\n";
+    answer += indent + ") ; " + id_to_string() + "\n";
 
     return answer;
 }
@@ -106,10 +106,10 @@ bool Link::operator==(const Atom& other) const
 
     // Rule out obvious mis-matches, based on the hash.
     if (get_hash() != other.get_hash()) return false;
-    if (getType() != other.getType()) return false;
+    if (get_type() != other.get_type()) return false;
 
-    Arity sz = getArity();
-    if (sz != other.getArity()) return false;
+    Arity sz = get_arity();
+    if (sz != other.get_arity()) return false;
 
     // Perform a content-compare on the outgoing set.
     const HandleSeq& rhs = other.getOutgoingSet();
@@ -133,8 +133,8 @@ bool Link::operator<(const Atom& other) const
     // We get to here only if the hashes are equal.
     // Compare the contents directly, for this
     // (hopefully rare) case.
-    if (getType() != other.getType())
-        return getType() < other.getType();
+    if (get_type() != other.get_type())
+        return get_type() < other.get_type();
 
     const HandleSeq& outgoing = getOutgoingSet();
     const HandleSeq& other_outgoing = other.getOutgoingSet();
@@ -158,7 +158,7 @@ bool Link::operator<(const Atom& other) const
 ContentHash Link::compute_hash() const
 {
 	// 1<<44 - 377 is prime
-	ContentHash hsh = ((1UL<<44) - 377) * getType();
+	ContentHash hsh = ((1UL<<44) - 377) * get_type();
 	for (const Handle& h: _outgoing)
 	{
 		hsh += (hsh <<5) + h->get_hash(); // recursive!

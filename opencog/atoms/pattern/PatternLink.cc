@@ -146,7 +146,7 @@ void PatternLink::init(void)
 	{
 		throw InvalidParamException(TRACE_INFO,
 		      "Expecting (optional) variable decls and a body; got %s",
-		      toString().c_str());
+		      to_string().c_str());
 	}
 
 	unbundle_clauses(_body);
@@ -292,7 +292,7 @@ PatternLink::PatternLink(const Link& l)
 	: ScopeLink(l)
 {
 	// Type must be as expected
-	Type tscope = l.getType();
+	Type tscope = l.get_type();
 	if (not classserver().isA(tscope, PATTERN_LINK))
 	{
 		const std::string& tname = classserver().getTypeName(tscope);
@@ -321,7 +321,7 @@ PatternLink::PatternLink(const Link& l)
 /// say that "these are disjoined", so again, that has to happen later.
 void PatternLink::unbundle_clauses(const Handle& hbody)
 {
-	Type t = hbody->getType();
+	Type t = hbody->get_type();
 	// For just right now, unpack PresentLink, although that is not
 	// technically correct in the long-run. XXX FIXME In the long run,
 	// nothing should be unpacked, since everything should be run-time
@@ -345,7 +345,7 @@ void PatternLink::unbundle_clauses(const Handle& hbody)
 		const HandleSeq& oset = hbody->getOutgoingSet();
 		for (const Handle& ho : oset)
 		{
-			Type ot = ho->getType();
+			Type ot = ho->get_type();
 			// If there is a PresentLink hiding under the AndLink
 			// then pull clauses out of it.
 			if (PRESENT_LINK == ot)
@@ -384,7 +384,7 @@ void PatternLink::unbundle_clauses_rec(const std::set<Type>& connectives,
 {
 	for (const Handle& ho : nest)
 	{
-		Type ot = ho->getType();
+		Type ot = ho->get_type();
 		if (PRESENT_LINK == ot)
 		{
 			const HandleSeq& pset = ho->getOutgoingSet();
@@ -396,7 +396,7 @@ void PatternLink::unbundle_clauses_rec(const std::set<Type>& connectives,
 			// We insist on an arity of 1, because anything else is
 			// ambiguous: consider absent(A B) is that: "both A and B must
 			// be absent"?  Or is it "if any of A and B are absent, then .."
-			if (1 != ho->getArity())
+			if (1 != ho->get_arity())
 				throw InvalidParamException(TRACE_INFO,
 					"AbsentLink can have an arity of one only!");
 
@@ -461,11 +461,11 @@ void PatternLink::validate_clauses(HandleSet& vars,
 	if (bogus)
 	{
 		logger().warn("%s: Constant clauses removed from pattern %s",
-		              __FUNCTION__, toShortString().c_str());
+		              __FUNCTION__, to_short_string().c_str());
 		for (const Handle& h: constants)
 		{
 			logger().warn("%s: Removed %s",
-		              __FUNCTION__, h->toShortString().c_str());
+		              __FUNCTION__, h->to_short_string().c_str());
 		}
 	}
 
@@ -480,7 +480,7 @@ void PatternLink::validate_clauses(HandleSet& vars,
 			vars.erase(v);
 			throw InvalidParamException(TRACE_INFO,
 			   "The variable %s does not appear (unquoted) in any clause!",
-			   v->toShortString().c_str());
+			   v->to_short_string().c_str());
 		}
 	}
 }
@@ -496,13 +496,13 @@ void PatternLink::extract_optionals(const HandleSet &vars,
 	// Split in positive and negative clauses
 	for (const Handle& h : component)
 	{
-		Type t = h->getType();
+		Type t = h->get_type();
 		if (ABSENT_LINK == t)
 		{
 			// We insist on an arity of 1, because anything else is
 			// ambiguous: consider absent(A B) is that: "both A and B must
 			// be absent"?  Or is it "if any of A and B are absent, then .."
-			if (1 != h->getArity())
+			if (1 != h->get_arity())
 				throw InvalidParamException(TRACE_INFO,
 					"AbsentLink can have an arity of one only!");
 
@@ -524,8 +524,8 @@ void PatternLink::extract_optionals(const HandleSet &vars,
 static void add_to_map(std::unordered_multimap<Handle, Handle>& map,
                        const Handle& key, const Handle& value)
 {
-	if (key->getType() == VARIABLE_NODE) map.insert({key, value});
-	if (not key->isLink()) return;
+	if (key->get_type() == VARIABLE_NODE) map.insert({key, value});
+	if (not key->is_link()) return;
 	const HandleSeq& oset = key->getOutgoingSet();
 	for (const Handle& ho : oset) add_to_map(map, ho, value);
 }
@@ -593,7 +593,7 @@ void PatternLink::unbundle_virtual(const HandleSet& vars,
 		// If a clause is a variable, we have to make the worst-case
 		// assumption that it is evaluatable, so that we can evaluate
 		// it later.
-		if (VARIABLE_NODE == clause->getType())
+		if (VARIABLE_NODE == clause->get_type())
 		{
 			_pat.evaluatable_terms.insert(clause);
 			add_to_map(_pat.in_evaluatable, clause, clause);
@@ -658,8 +658,8 @@ void PatternLink::unbundle_virtual(const HandleSet& vars,
 			// executable. If they have non grounded schema node then
 			// their execution is themselves (i.e. they are not
 			// executable).
-			if (sh->getType() != EXECUTION_OUTPUT_LINK or
-			    sh->getOutgoingAtom(0)->getType() == GROUNDED_SCHEMA_NODE)
+			if (sh->get_type() != EXECUTION_OUTPUT_LINK or
+			    sh->getOutgoingAtom(0)->get_type() == GROUNDED_SCHEMA_NODE)
 			{
 				_pat.executable_terms.insert(sh);
 				_pat.executable_holders.insert(sh);
@@ -731,7 +731,7 @@ bool PatternLink::add_dummies()
 
 	for (const Handle& t : _pat.evaluatable_terms)
 	{
-		Type tt = t->getType();
+		Type tt = t->get_type();
 		if (EQUAL_LINK == tt or
 		    GREATER_THAN_LINK == tt or
 		    IDENTICAL_LINK == tt)
@@ -775,7 +775,7 @@ void PatternLink::trace_connectives(const std::set<Type>& connectives,
 {
 	for (const Handle& term: oset)
 	{
-		Type t = term->getType();
+		Type t = term->get_type();
 
 		quotation.update(t);
 
@@ -783,7 +783,7 @@ void PatternLink::trace_connectives(const std::set<Type>& connectives,
 			continue;
 		_pat.evaluatable_holders.insert(term);
 		add_to_map(_pat.in_evaluatable, term, term);
-		if (term->isLink())
+		if (term->is_link())
 			trace_connectives(connectives, term->getOutgoingSet(), quotation);
 	}
 }
@@ -823,7 +823,7 @@ void PatternLink::make_map_recursive(const Handle& root, const Handle& h)
 {
 	_pat.connectivity_map.emplace(h, root);
 
-	if (h->isLink())
+	if (h->is_link())
 	{
 		for (const Handle& ho: h->getOutgoingSet())
 			make_map_recursive(root, ho);
@@ -851,7 +851,7 @@ void PatternLink::check_satisfiability(const HandleSet& vars,
 		if (vunion.end() == it)
 		{
 			throw InvalidParamException(TRACE_INFO,
-				"Variable not groundable: %s\n", v->toString().c_str());
+				"Variable not groundable: %s\n", v->to_string().c_str());
 		}
 	}
 }
@@ -883,7 +883,7 @@ void PatternLink::make_term_tree_recursive(const Handle& root,
 	// later checks. The flag telling whether the term subtree contains
 	// any bound variable is set by addBoundVariable() method for all terms
 	// on the path up to the root (unless it has been set already).
-	Type t = h->getType();
+	Type t = h->get_type();
 	if ((VARIABLE_NODE == t or GLOB_NODE == t)
 	    and not ptm->getQuotation().is_quoted()
 	    and _varlist.varset.end() != _varlist.varset.find(h))
@@ -892,7 +892,7 @@ void PatternLink::make_term_tree_recursive(const Handle& root,
 		return;
 	}
 
-	if (h->isLink())
+	if (h->is_link())
 	{
 		for (const Handle& ho: h->getOutgoingSet())
 			make_term_tree_recursive(root, ho, ptm);
@@ -918,7 +918,7 @@ void PatternLink::check_connectivity(const HandleSeqSeq& components)
 	{
 		ss << "Connected component " << cnt
 		   << " consists of ----------------: \n";
-		for (Handle h : comp) ss << h->toString();
+		for (Handle h : comp) ss << h->to_string();
 		cnt++;
 	}
 	throw InvalidParamException(TRACE_INFO, ss.str().c_str());
@@ -967,7 +967,7 @@ void PatternLink::debug_log(void) const
 		if (_pat.executable_holders.find(h) != _pat.executable_holders.end())
 			ss << " (executable)";
 		ss << std::endl;
-		ss << h->toShortString();
+		ss << h->to_short_string();
 		logger().fine() << ss.str();
 		cl++;
 	}
@@ -985,7 +985,7 @@ void PatternLink::debug_log(void) const
 			if (_pat.executable_holders.find(h) != _pat.executable_holders.end())
 				ss << " (executable)";
 			ss << std::endl;
-			ss << h->toShortString();
+			ss << h->to_short_string();
 			logger().fine() << ss.str();
 			cl++;
 		}
@@ -996,8 +996,8 @@ void PatternLink::debug_log(void) const
 	// Print out the bound variables in the predicate.
 	for (const Handle& h : _varlist.varset)
 	{
-		if (h->isNode())
-			logger().fine() << "Bound var: " << h->toShortString();
+		if (h->is_node())
+			logger().fine() << "Bound var: " << h->to_short_string();
 	}
 
 	if (_varlist.varset.empty())

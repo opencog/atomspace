@@ -86,10 +86,10 @@ Rule::Rule(const Handle& rule_alias, const Handle& rule, const Handle& rbs)
 void Rule::init(const Handle& rule_member)
 {
 	OC_ASSERT(rule_member != Handle::UNDEFINED);
-	if (not classserver().isA(rule_member->getType(), MEMBER_LINK))
+	if (not classserver().isA(rule_member->get_type(), MEMBER_LINK))
 		throw InvalidParamException(TRACE_INFO,
 		                            "Rule '%s' is expected to be a MemberLink",
-		                            rule_member->toString().c_str());
+		                            rule_member->to_string().c_str());
 
 	Handle rule_alias = rule_member->getOutgoingAtom(0);
 	Handle rbs = rule_member->getOutgoingAtom(1);
@@ -104,11 +104,11 @@ void Rule::init(const Handle& rule_alias, const Handle& rbs)
 
 void Rule::init(const Handle& rule_alias, const Handle& rule, const Handle& rbs)
 {
-	OC_ASSERT(rule->getType() == BIND_LINK);
+	OC_ASSERT(rule->get_type() == BIND_LINK);
 	_rule = BindLinkCast(rule);
 
 	_rule_alias = rule_alias;
-	_name = _rule_alias->getName();
+	_name = _rule_alias->get_name();
 	_rbs = rbs;
 	AtomSpace& as = *rule_alias->getAtomSpace();
 	Handle ml = as.get_link(MEMBER_LINK, rule_alias, rbs);
@@ -224,9 +224,9 @@ bool Rule::is_meta() const
 	if (not implicand)
 		return false;
 
-	Type itype = implicand->getType();
+	Type itype = implicand->get_type();
 	return (Quotation::is_quotation_type(itype) ?
-	        implicand->getOutgoingAtom(0)->getType() : itype) == BIND_LINK;
+	        implicand->getOutgoingAtom(0)->get_type() : itype) == BIND_LINK;
 }
 
 bool Rule::has_cycle() const
@@ -252,7 +252,7 @@ HandleSeq Rule::get_clauses() const
 		return HandleSeq();
 
     Handle implicant = get_implicant();
-    Type t = implicant->getType();
+    Type t = implicant->get_type();
     HandleSeq hs;
 
     if (t == AND_LINK or t == OR_LINK)
@@ -270,7 +270,7 @@ HandleSeq Rule::get_premises() const
 		return HandleSeq();
 
 	Handle rewrite = _rule->get_implicand();
-	Type rewrite_type = rewrite->getType();
+	Type rewrite_type = rewrite->get_type();
 
 	// If not an ExecutionOutputLink then return the clauses
 	if (premises_as_clauses or rewrite_type != EXECUTION_OUTPUT_LINK)
@@ -280,13 +280,13 @@ HandleSeq Rule::get_premises() const
 	HandleSeq premises;
 	if (rewrite_type == EXECUTION_OUTPUT_LINK) {
 		Handle args = rewrite->getOutgoingAtom(1);
-		if (args->getType() == LIST_LINK) {
-			OC_ASSERT(args->getArity() > 0);
-			for (Arity i = 1; i < args->getArity(); i++) {
+		if (args->get_type() == LIST_LINK) {
+			OC_ASSERT(args->get_arity() > 0);
+			for (Arity i = 1; i < args->get_arity(); i++) {
 				Handle argi = args->getOutgoingAtom(i);
 				// Return unordered premises
-				if (argi->getType() == SET_LINK) {
-					for (Arity j = 0; j < argi->getArity(); j++)
+				if (argi->get_type() == SET_LINK) {
+					for (Arity j = 0; j < argi->get_arity(); j++)
 						premises.push_back(argi->getOutgoingAtom(j));
 				}
 				// Return ordered premise
@@ -306,15 +306,15 @@ Handle Rule::get_conclusion() const
 		return Handle::UNDEFINED;
 
 	Handle rewrite = _rule->get_implicand();
-	Type rewrite_type = rewrite->getType();
+	Type rewrite_type = rewrite->get_type();
 
 	// If not an ExecutionOutputLink then return the rewrite term
 	if (rewrite_type != EXECUTION_OUTPUT_LINK)
 		return rewrite;
 
 	Handle args = rewrite->getOutgoingAtom(1);
-	if (args->getType() == LIST_LINK) {
-		OC_ASSERT(args->getArity() > 0);
+	if (args->get_type() == LIST_LINK) {
+		OC_ASSERT(args->get_arity() > 0);
 		return args->getOutgoingAtom(0);
 	} else {
 		return args;
@@ -446,7 +446,7 @@ std::string Rule::to_string() const
 {
 	std::stringstream ss;
 	ss << "name: " << _name << std::endl
-	   << "rule:" << std::endl << _rule->toString();
+	   << "rule:" << std::endl << _rule->to_string();
 	return ss.str();
 }
 
@@ -472,7 +472,7 @@ Rule Rule::rand_alpha_converted() const
 Handle Rule::standardize_helper(AtomSpace* as, const Handle& h,
                                 HandleMap& dict)
 {
-	if (h->isLink())
+	if (h->is_link())
 	{
 		HandleSeq old_outgoing = h->getOutgoingSet();
 		HandleSeq new_outgoing;
@@ -480,13 +480,13 @@ Handle Rule::standardize_helper(AtomSpace* as, const Handle& h,
 		for (auto ho : old_outgoing)
 			new_outgoing.push_back(standardize_helper(as, ho, dict));
 
-		Handle hcpy(as->add_atom(createLink(new_outgoing, h->getType())));
+		Handle hcpy(as->add_atom(createLink(new_outgoing, h->get_type())));
 		hcpy->copyValues(h);
 		return hcpy;
 	}
 
 	// normal node does not need to be changed
-	if (h->getType() != VARIABLE_NODE)
+	if (h->get_type() != VARIABLE_NODE)
 		return h;
 
 	// If the VariableNode is not scoped by the rule's scope, but is
@@ -495,10 +495,10 @@ Handle Rule::standardize_helper(AtomSpace* as, const Handle& h,
 	if (dict.count(h) == 0)
 	{
 		// TODO: use opencog's random generator
-		std::string new_name = h->getName() + "-"
+		std::string new_name = h->get_name() + "-"
 			+ boost::uuids::to_string(boost::uuids::random_generator()());
 
-		Handle hcpy(as->add_atom(createNode(h->getType(), new_name)));
+		Handle hcpy(as->add_atom(createNode(h->get_type(), new_name)));
 		hcpy->copyValues(h);
 
 		dict[h] = hcpy;
@@ -509,8 +509,8 @@ Handle Rule::standardize_helper(AtomSpace* as, const Handle& h,
 	if (dict.at(h) != Handle::UNDEFINED)
 		return dict[h];
 
-	std::string new_name = h->getName() + "-" + _name;
-	Handle hcpy(as->add_atom(createNode(h->getType(), new_name)));
+	std::string new_name = h->get_name() + "-" + _name;
+	Handle hcpy(as->add_atom(createNode(h->get_type(), new_name)));
 	hcpy->copyValues(h);
 
 	dict[h] = hcpy;
@@ -521,7 +521,7 @@ HandleSeq Rule::get_conclusion_patterns() const
 {
 	HandleSeq results;
 	Handle implicand = get_implicand();
-	Type t = implicand->getType();
+	Type t = implicand->get_type();
 	if (LIST_LINK == t)
 		for (const Handle& h : implicand->getOutgoingSet())
 			results.push_back(get_conclusion_pattern(h));
@@ -533,7 +533,7 @@ HandleSeq Rule::get_conclusion_patterns() const
 
 Handle Rule::get_conclusion_pattern(const Handle& h) const
 {
-	Type t = h->getType();
+	Type t = h->get_type();
 	if (EXECUTION_OUTPUT_LINK == t)
 		return get_execution_output_first_argument(h);
 	else
@@ -542,10 +542,10 @@ Handle Rule::get_conclusion_pattern(const Handle& h) const
 
 Handle Rule::get_execution_output_first_argument(const Handle& h) const
 {
-	OC_ASSERT(h->getType() == EXECUTION_OUTPUT_LINK);
+	OC_ASSERT(h->get_type() == EXECUTION_OUTPUT_LINK);
 	Handle args = h->getOutgoingAtom(1);
-	if (args->getType() == LIST_LINK) {
-		OC_ASSERT(args->getArity() > 0);
+	if (args->get_type() == LIST_LINK) {
+		OC_ASSERT(args->get_arity() > 0);
 		return args->getOutgoingAtom(0);
 	} else
 		return args;

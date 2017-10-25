@@ -33,7 +33,7 @@ BITNodeFitness::BITNodeFitness(FitnessType ft) : type(ft)
 	switch(type) {
 	case (MaximizeConfidence):
 		function = [](const BITNode& bitnode) {
-			return bitnode.body->getTruthValue()->getConfidence();
+			return bitnode.body->getTruthValue()->get_confidence();
 		};
 		lower = 0;
 		upper = 1;

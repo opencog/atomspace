@@ -488,7 +488,7 @@ public:
         // into the atomspace later, by the caller.
         PseudoPtr p(_atom_storage->make_pseudo_atom(*this, uuid));
         AtomPtr atom(get_recursive_if_not_exists(p));
-        hvec->emplace_back(atom->getHandle());
+        hvec->emplace_back(atom->get_handle());
         return false;
     }
 
@@ -516,7 +516,7 @@ public:
             }
             PseudoPtr po = _atom_storage->load_pseudo_atom_with_uuid(idu);
             AtomPtr ra = get_recursive_if_not_exists(po);
-            resolved_oset.emplace_back(ra->getHandle());
+            resolved_oset.emplace_back(ra->get_handle());
         }
         LinkPtr link(createLink(p->type, resolved_oset, p->tv));
         TLB::addAtom(link, p->uuid);
@@ -815,7 +815,7 @@ int PGAtomStorage::get_height(AtomPtr atom)
     if (NULL == l) return 0;
 
     int maxd = 0;
-    int arity = l->getArity();
+    int arity = l->get_arity();
 
     const HandleSeq& out = l->getOutgoingSet();
     for (int i=0; i<arity; i++)
@@ -935,10 +935,10 @@ int PGAtomStorage::do_store_atom_recursive(Database& database, AtomPtr atom)
     int height = 0;
 
     // If this is a link...
-    if (atom->isLink())
+    if (atom->is_link())
     {
         // Handle the link case...
-        OC_ASSERT(atom->isLink(), "atom Not Link or Node ???");
+        OC_ASSERT(atom->is_link(), "atom Not Link or Node ???");
 
         // Loop over the outgoing set storing each one and returning the
         // height so we can know this atom's height.
@@ -981,7 +981,7 @@ void PGAtomStorage::add_truth_value_columns(Database& database,
     TruthValuePtr truth_ptr(atom->getTruthValue());
     TruthValueType truth_type = NULL_TRUTH_VALUE;
     if (truth_ptr)
-        truth_type = truth_ptr->getType();
+        truth_type = truth_ptr->get_type();
     database.add_column_unsigned("tv_type", truth_type);
 
     // Store the mean, confidence and count according to the type.
@@ -992,10 +992,10 @@ void PGAtomStorage::add_truth_value_columns(Database& database,
         case SIMPLE_TRUTH_VALUE:
         case COUNT_TRUTH_VALUE:
         case PROBABILISTIC_TRUTH_VALUE:
-            database.add_column_double("stv_mean", truth_ptr->getMean());
-            database.add_column_double("stv_count", truth_ptr->getCount());
+            database.add_column_double("stv_mean", truth_ptr->get_mean());
+            database.add_column_double("stv_count", truth_ptr->get_count());
             database.add_column_double("stv_confidence", 
-                    truth_ptr->getConfidence());
+                    truth_ptr->get_confidence());
             break;
         case INDEFINITE_TRUTH_VALUE:
         {
@@ -1037,12 +1037,12 @@ std::string PGAtomStorage::build_atom_insert(Database& database,
         database.add_column_bigint("space", 0);
 
     // Store the atom type mapped to the database type.
-    Type atom_type = atom->getType();
+    Type atom_type = atom->get_type();
     int database_type = _storing_type_map[atom_type];
     database.add_column_unsigned("type", database_type);
 
     // Store the node name, if its a node
-    if (atom->isNode())
+    if (atom->is_node())
     {
         // The Atoms table has a UNIQUE constraint on the
         // node name.  If a node name is too long, a postgres
@@ -1053,7 +1053,7 @@ std::string PGAtomStorage::build_atom_insert(Database& database,
         // a redesign of the table format, in some way. Maybe
         // we could hash the long node names, store the hash,
         // and make sure that is unique.
-        database.add_column_quoted_string("name", atom->getName(), 
+        database.add_column_quoted_string("name", atom->get_name(), 
                 MAX_NODE_NAME_LENGTH);
 
         // Nodes have a height of zero by definition.
@@ -1062,7 +1062,7 @@ std::string PGAtomStorage::build_atom_insert(Database& database,
     else
     {
         // Handle the Link case
-        OC_ASSERT(atom->isLink(), "atom Not Link or Node ???");
+        OC_ASSERT(atom->is_link(), "atom Not Link or Node ???");
 
         // See if this height is a new max.
         if (max_height < height)
@@ -1072,7 +1072,7 @@ std::string PGAtomStorage::build_atom_insert(Database& database,
         database.add_column_unsigned("height", height);
 
         // If this is a link and we're not storing edges separately.
-        int arity = atom->getArity();
+        int arity = atom->get_arity();
         if (_store_edges)
         {
             if (arity)
@@ -1142,7 +1142,7 @@ void PGAtomStorage::do_store_atom_single(Database& database,
                                          int height)
 {
     // Use the TLB Handle as the UUID.
-    Handle h(atom->getHandle());
+    Handle h(atom->get_handle());
     if (isInvalidHandle(h))
     {
         throw RuntimeException(TRACE_INFO, 
@@ -1191,10 +1191,10 @@ void PGAtomStorage::do_store_atom_single(Database& database,
         // If there was still an error, handle the possibility that it
         // was caused by a collision of the hash on the outgoing set if
         // this was a link.
-        if (not database.has_results() and _store_edges and atom->isLink())
+        if (not database.has_results() and _store_edges and atom->is_link())
         {
             // Get a new diffentiator for this atom's uuid.
-            int differentiator = load_max_hash_differentiator(atom->getType(), 
+            int differentiator = load_max_hash_differentiator(atom->get_type(), 
                     atom->getOutgoingSet());
 
             // Try again with an incremented differentiator. We'll return
@@ -1212,7 +1212,7 @@ void PGAtomStorage::do_store_atom_single(Database& database,
     if (atom_needs_insert)
     {
         // If this is a link then store it's edges...
-        if (_store_edges and atom->isLink())
+        if (_store_edges and atom->is_link())
             store_outgoing_edges(atom);
     }
 
@@ -1668,7 +1668,7 @@ bool PGAtomStorage::outgoing_matches_uuids(const HandleSeq& outgoing,
  */
 TruthValuePtr PGAtomStorage::getLink(const Handle& h)
 {
-    Type type = h->getType();
+    Type type = h->get_type();
     const HandleSeq& outgoing = h->getOutgoingSet();
     Database database(this);
     database.uuid = TLB::INVALID_UUID;

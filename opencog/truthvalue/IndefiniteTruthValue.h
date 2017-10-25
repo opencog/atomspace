@@ -99,15 +99,15 @@ public:
     //! it is a strict equality comparison, without error interval tolerance
     virtual bool operator==(const ProtoAtom&) const;
 
-    strength_t getMean() const { return _value[MEAN]; }
+    strength_t get_mean() const { return _value[MEAN]; }
     strength_t getU() const { return _value[U]; }
     strength_t getL() const { return _value[L]; }
     confidence_t getConfidenceLevel() const { return _value[CONFIDENCE_LEVEL]; }
     strength_t getDiff() const { return diff; }
     const std::vector<strength_t*>& getFirstOrderDistribution() const;
 
-    count_t getCount() const { return count; }
-    confidence_t getConfidence() const { return confidence; }
+    count_t get_count() const { return count; }
+    confidence_t get_confidence() const { return confidence; }
     strength_t getU_() const { return _value[U] + diff; }
     strength_t getL_() const { return _value[L] - diff; }
     bool isSymmetric() const { return symmetric; }
@@ -115,12 +115,12 @@ public:
     TruthValuePtr merge(const TruthValuePtr&,
                         const MergeCtrl& mc=MergeCtrl()) const;
 
-    std::string toString(const std::string&) const;
+    std::string to_string(const std::string&) const;
 
     // clone method
     static IndefiniteTruthValuePtr createITV(TruthValuePtr tv)
     {
-        if (tv->getType() != INDEFINITE_TRUTH_VALUE)
+        if (tv->get_type() != INDEFINITE_TRUTH_VALUE)
             throw RuntimeException(TRACE_INFO, "Cannot clone non-indefinite TV");
         return std::make_shared<IndefiniteTruthValue>(
             static_cast<const IndefiniteTruthValue&>(*tv));

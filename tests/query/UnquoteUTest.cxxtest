@@ -92,8 +92,8 @@ void UnquoteUTest::test_list(void)
 	Handle result = satisfying_set(&as, pat);
 	Handle expected = al(SET_LINK, simple_list);
 
-	logger().fine() << "result = " << result->toString();
-	logger().fine() << "expected = " << expected->toString();
+	logger().fine() << "result = " << result->to_string();
+	logger().fine() << "expected = " << expected->to_string();
 
 	TS_ASSERT_EQUALS(result, expected);
 
@@ -120,8 +120,8 @@ void UnquoteUTest::test_and_1(void)
 	Handle result = bindlink(&as, pat);
 	Handle expected = al(SET_LINK, simple_and);
 
-	logger().debug() << "result = " << result->toString();
-	logger().debug() << "expected = " << expected->toString();
+	logger().debug() << "result = " << result->to_string();
+	logger().debug() << "expected = " << expected->to_string();
 
 	TS_ASSERT_EQUALS(result, expected);
 
@@ -149,8 +149,8 @@ void UnquoteUTest::test_and_2(void)
 	Handle result = bindlink(&as, pat);
 	Handle expected = al(SET_LINK, simple_and);
 
-	logger().fine() << "result = " << result->toString();
-	logger().fine() << "expected = " << expected->toString();
+	logger().fine() << "result = " << result->to_string();
+	logger().fine() << "expected = " << expected->to_string();
 
 	TS_ASSERT_EQUALS(result, expected);
 	
@@ -181,8 +181,8 @@ void UnquoteUTest::test_rewrite(void)
 	                        an(GROUNDED_SCHEMA_NODE, "hs: foo"),
 	                        al(LIST_LINK, A, B)));
 
-	logger().fine() << "result = " << result->toString();
-	logger().fine() << "expected = " << expected->toString();
+	logger().fine() << "result = " << result->to_string();
+	logger().fine() << "expected = " << expected->to_string();
 
 	TS_ASSERT_EQUALS(result, expected);
 

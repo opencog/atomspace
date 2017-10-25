@@ -80,7 +80,7 @@ void ReductUTest::test_arithmetic(void)
 	Handle four = eval->eval_h(
 		"(cog-reduce! (PlusLink (NumberNode 2) (NumberNode 2)))"
 	);
-	printf("expecting four: %s\n", four->toShortString().c_str());
+	printf("expecting four: %s\n", four->to_short_string().c_str());
 
 	Handle efour = eval->eval_h("(NumberNode 4)");
 	TS_ASSERT_EQUALS(four, efour);
@@ -89,7 +89,7 @@ void ReductUTest::test_arithmetic(void)
 	Handle zero = eval->eval_h(
 		"(cog-reduce! (PlusLink (NumberNode 2) (NumberNode -2)))"
 	);
-	printf("expecting zero: %s\n", zero->toShortString().c_str());
+	printf("expecting zero: %s\n", zero->to_short_string().c_str());
 
 	Handle ezero = eval->eval_h("(NumberNode 0)");
 	TS_ASSERT_EQUALS(zero, ezero);
@@ -103,7 +103,7 @@ nightmare is killing me and I can't debug this any more.
 		"(cog-reduce! (PlusLink "
 		"	(NumberNode 2) (VariableNode \"$x\") (NumberNode 3)))"
 	);
-	printf("expecting x+5: %s\n", xplus5->toShortString().c_str());
+	printf("expecting x+5: %s\n", xplus5->to_short_string().c_str());
 
 	Handle explus5 = eval->eval_h(
 		"(PlusLink (VariableNode \"$x\") (NumberNode 5))");
@@ -123,7 +123,7 @@ So I'm punting for now...
 		"(cog-reduce! (PlusLink "
 		"	(NumberNode 2) (VariableNode \"$x\") (NumberNode -2)))"
 	);
-	printf("expecting $x: %s\n", x->toShortString().c_str());
+	printf("expecting $x: %s\n", x->to_short_string().c_str());
 
 	Handle ex = eval->eval_h("(VariableNode \"$x\")");
 	TS_ASSERT_EQUALS(x, ex);
@@ -133,7 +133,7 @@ So I'm punting for now...
 		"(cog-reduce! (PlusLink "
 		"	(VariableNode \"$x\") (VariableNode \"$x\")))"
 	);
-	printf("expecting 2x: %s\n", twox->toShortString().c_str());
+	printf("expecting 2x: %s\n", twox->to_short_string().c_str());
 
 	Handle etwox = eval->eval_h(
 		"(TimesLink (VariableNode \"$x\") (NumberNode 2))");
@@ -150,7 +150,7 @@ nightmare is killing me and I can't debug this any more.
 		"	(TimesLink (NumberNode 38) (VariableNode \"$x\"))"
 		"	(TimesLink (VariableNode \"$x\") (NumberNode 3))))"
 	);
-	printf("expecting x*42: %s\n", xtimes42->toShortString().c_str());
+	printf("expecting x*42: %s\n", xtimes42->to_short_string().c_str());
 
 	Handle extimes42 = eval->eval_h(
 		"(TimesLink (VariableNode \"$x\") (NumberNode 42))");
@@ -161,7 +161,7 @@ nightmare is killing me and I can't debug this any more.
 	Handle six = eval->eval_h(
 		"(cog-reduce! (TimesLink (NumberNode 2) (NumberNode 3)))"
 	);
-	printf("expecting six: %s\n", six->toShortString().c_str());
+	printf("expecting six: %s\n", six->to_short_string().c_str());
 
 	Handle esix = eval->eval_h("(NumberNode 6)");
 	TS_ASSERT_EQUALS(six, esix);
@@ -175,7 +175,7 @@ nightmare is killing me and I can't debug this any more.
 		"(cog-reduce! (TimesLink "
 		"	(NumberNode 2) (VariableNode \"$x\") (NumberNode 3)))"
 	);
-	printf("expecting x * 6: %s\n", sixex->toShortString().c_str());
+	printf("expecting x * 6: %s\n", sixex->to_short_string().c_str());
 
 	Handle esixex = eval->eval_h(
 		"(TimesLink (VariableNode \"$x\") (NumberNode 6))");

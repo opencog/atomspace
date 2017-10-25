@@ -92,7 +92,7 @@ bool PMCB::grounding(const HandleMap &var_soln,
 	logger().debug("Inside grounding with %z var_soln", var_soln.size());
 
 	for (auto& p : var_soln)
-        logger().debug("var_soln map " + p.first->toShortString() + " to " + p.second->toShortString());
+        logger().debug("var_soln map " + p.first->to_short_string() + " to " + p.second->to_short_string());
 
 	return true;
 }

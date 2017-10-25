@@ -67,20 +67,20 @@ public:
      * or any of the values/truthvalues.
      */
     Node(const Node &n)
-        : Atom(n.getType())
+        : Atom(n.get_type())
     {
         init(n._name);
     }
 
-    virtual bool isNode() const { return true; }
-    virtual bool isLink() const { return false; }
+    virtual bool is_node() const { return true; }
+    virtual bool is_link() const { return false; }
 
     /**
      * Gets the name of the node.
      *
      * @return The name of the node.
      */
-    virtual const std::string& getName() const { return _name; }
+    virtual const std::string& get_name() const { return _name; }
 
     virtual size_t size() const { return 1; }
 
@@ -89,15 +89,15 @@ public:
      *
      * @return A string representation of the node.
      */
-    std::string toString(const std::string& indent) const;
-    std::string toShortString(const std::string& indent) const;
+    std::string to_string(const std::string& indent) const;
+    std::string to_short_string(const std::string& indent) const;
 
 	// Work around gdb's incapability to build a string on the fly,
 	// see http://stackoverflow.com/questions/16734783 and
 	// http://stackoverflow.com/questions/2973976 for more
 	// explanation.
-	using Atom::toString;
-	using Atom::toShortString;
+	using Atom::to_string;
+	using Atom::to_short_string;
 
     /**
      * Perform a content-based compare of another atom to this one.
@@ -129,7 +129,7 @@ Handle createNode( Args&&... args )
 {
    // Do we need to say (std::forward<Args>(args)...) instead ???
    NodePtr tmp(std::make_shared<Node>(args ...));
-   return classserver().factory(tmp->getHandle());
+   return classserver().factory(tmp->get_handle());
 }
 
 

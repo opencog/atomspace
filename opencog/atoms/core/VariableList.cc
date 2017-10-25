@@ -36,7 +36,7 @@ void VariableList::validate_vardecl(const HandleSeq& oset)
 {
 	for (const Handle& h: oset)
 	{
-		Type t = h->getType();
+		Type t = h->get_type();
 		if (VARIABLE_NODE == t or GLOB_NODE == t)
 		{
 			_varlist.varset.insert(h);    // tree (unordered)
@@ -66,7 +66,7 @@ void VariableList::validate_vardecl(const HandleSeq& oset)
 				"Expected a VariableNode or a TypedVariableLink, got: %s"
 				"\nVariableList is %s",
 					classserver().getTypeName(t).c_str(),
-					toString().c_str());
+					to_string().c_str());
 		}
 	}
 	build_index();
@@ -80,7 +80,7 @@ VariableList::VariableList(const Handle& vardecl)
 		:
 		// Otherwise vardecl is either a VariableList, or a naked or
 		// typed variable.
-		vardecl->getType() == VARIABLE_LIST ?
+		vardecl->get_type() == VARIABLE_LIST ?
 		vardecl->getOutgoingSet() : HandleSeq({vardecl}),
 		VARIABLE_LIST)
 {
@@ -105,7 +105,7 @@ VariableList::VariableList(const Link &l)
 	: Link(l)
 {
 	// Type must be as expected
-	Type tscope = l.getType();
+	Type tscope = l.get_type();
 	if (not classserver().isA(tscope, VARIABLE_LIST))
 	{
 		const std::string& tname = classserver().getTypeName(tscope);
@@ -170,8 +170,8 @@ void VariableList::get_vartype(const Handle& htypelink)
 	Handle varname(oset[0]);
 	Handle vartype(oset[1]);
 
-	Type nt = varname->getType();
-	Type t = vartype->getType();
+	Type nt = varname->get_type();
+	Type t = vartype->get_type();
 
 	// Specifying how many atoms can be matched to a GlobNode, if any
 	HandleSeq intervals;
@@ -180,7 +180,7 @@ void VariableList::get_vartype(const Handle& htypelink)
 	if (DEFINED_TYPE_NODE == t)
 	{
 		vartype = DefineLink::get_definition(vartype);
-		t = vartype->getType();
+		t = vartype->get_type();
 	}
 
 	// For GlobNode, we can specify either the interval or the type, e.g.
@@ -204,7 +204,7 @@ void VariableList::get_vartype(const Handle& htypelink)
 	{
 		for (const Handle& h : vartype->getOutgoingSet())
 		{
-			Type th = h->getType();
+			Type th = h->get_type();
 
 			if (INTERVAL_LINK == th)
 				intervals = h->getOutgoingSet();
@@ -218,7 +218,7 @@ void VariableList::get_vartype(const Handle& htypelink)
 			else throw SyntaxException(TRACE_INFO,
 				"Unexpected contents in TypedSetLink\n"
 				"Expected IntervalLink and TypeNode, got %s",
-				h->toString().c_str());
+				h->to_string().c_str());
 		}
 	}
 
@@ -259,7 +259,7 @@ void VariableList::get_vartype(const Handle& htypelink)
 		for (size_t i=0; i<tss; i++)
 		{
 			Handle ht(tset[i]);
-			Type var_type = ht->getType();
+			Type var_type = ht->get_type();
 			if (TYPE_NODE == var_type)
 			{
 				Type vt = TypeNodeCast(ht)->get_value();
@@ -271,7 +271,7 @@ void VariableList::get_vartype(const Handle& htypelink)
 				if (1 != sig.size())
 					throw SyntaxException(TRACE_INFO,
 						"Unexpected contents in SignatureLink\n"
-						"Expected arity==1, got %s", vartype->toString().c_str());
+						"Expected arity==1, got %s", vartype->to_string().c_str());
 
 				deepset.insert(ht);
 			}
@@ -281,7 +281,7 @@ void VariableList::get_vartype(const Handle& htypelink)
 				if (1 != fuz.size())
 					throw SyntaxException(TRACE_INFO,
 						"Unexpected contents in FuzzyLink\n"
-						"Expected arity==1, got %s", vartype->toString().c_str());
+						"Expected arity==1, got %s", vartype->to_string().c_str());
 
 				fuzzset.insert(ht);
 			}
@@ -290,7 +290,7 @@ void VariableList::get_vartype(const Handle& htypelink)
 				throw InvalidParamException(TRACE_INFO,
 					"VariableChoice has unexpected content:\n"
 					"Expected TypeNode, got %s",
-					    classserver().getTypeName(ht->getType()).c_str());
+					    classserver().getTypeName(ht->get_type()).c_str());
 			}
 		}
 
@@ -307,7 +307,7 @@ void VariableList::get_vartype(const Handle& htypelink)
 		if (1 != tset.size())
 			throw SyntaxException(TRACE_INFO,
 				"Unexpected contents in SignatureLink\n"
-				"Expected arity==1, got %s", vartype->toString().c_str());
+				"Expected arity==1, got %s", vartype->to_string().c_str());
 
 		HandleSet ts;
 		ts.insert(vartype);
@@ -319,7 +319,7 @@ void VariableList::get_vartype(const Handle& htypelink)
 		if (1 != tset.size())
 			throw SyntaxException(TRACE_INFO,
 				"Unexpected contents in FuzzyLink\n"
-				"Expected arity==1, got %s", vartype->toString().c_str());
+				"Expected arity==1, got %s", vartype->to_string().c_str());
 
 		HandleSet ts;
 		ts.insert(vartype);
@@ -380,7 +380,7 @@ void VariableList::validate_vardecl(const Handle& hdecls)
 {
 	// Expecting the declaration list to be either a single
 	// variable, or a list of variable declarations
-	Type tdecls = hdecls->getType();
+	Type tdecls = hdecls->get_type();
 	if (VARIABLE_NODE == tdecls or GLOB_NODE == tdecls)
 	{
 		_varlist.varset.insert(hdecls);
@@ -427,7 +427,7 @@ std::string opencog::oc_to_string(const VariableListPtr& vlp)
 	if (vlp == nullptr)
 		return "nullvariablelist\n";
 	else
-		return oc_to_string(vlp->getHandle());
+		return oc_to_string(vlp->get_handle());
 }
 
 DEFINE_LINK_FACTORY(VariableList, VARIABLE_LIST)

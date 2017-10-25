@@ -106,7 +106,7 @@ public:
 
     //! Returns const string "[sti_val, lti_val, vlti_val]"
     //! @param none
-    virtual std::string toString(const std::string& = "") const;
+    virtual std::string to_string(const std::string& = "") const;
 
     static AttentionValuePtr createAV(sti_t s = DEFAULTATOMSTI,
                                       lti_t l = DEFAULTATOMLTI,

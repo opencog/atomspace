@@ -89,20 +89,20 @@ int main(int argc, char ** args)
 
 void AtomAddedCBHandler(const Handle& h)
 {
-    std::cout << "An atom added.\n" << h->toShortString() << std::endl;
+    std::cout << "An atom added.\n" << h->to_short_string() << std::endl;
 }
 
 void AVChangedCBHandler(const Handle& h, const AttentionValuePtr& av_old,
                         const AttentionValuePtr& av_new)
 {
-    std::cout << "An atom's attention value changed.\n" << h->toShortString()
+    std::cout << "An atom's attention value changed.\n" << h->to_short_string()
               << std::endl;
 }
 
 void TVChangedCBHandler(const Handle& h, const TruthValuePtr& av_old,
                         const TruthValuePtr& tv_new)
 {
-    std::cout << "An atom's truth value changed.\n" << h->toShortString()
+    std::cout << "An atom's truth value changed.\n" << h->to_short_string()
               << std::endl;
 }
 
@@ -115,7 +115,7 @@ void AtomAddedToAFCBHandler(const Handle& h, const AttentionValuePtr& av_old,
                             const AttentionValuePtr& av_new)
 {
     std::cout << "An atom was added to Attentional Focus.\n"
-              << h->toShortString() << std::endl;
+              << h->to_short_string() << std::endl;
 }
 
 void AtomRemovedFromAFCBHandler(const Handle& h,
@@ -123,5 +123,5 @@ void AtomRemovedFromAFCBHandler(const Handle& h,
                                 const AttentionValuePtr& av_new)
 {
     std::cout << "An atom was removed from Attentional Focus.\n"
-              << h->toShortString() << std::endl;
+              << h->to_short_string() << std::endl;
 }

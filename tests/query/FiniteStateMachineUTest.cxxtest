@@ -73,7 +73,7 @@ void FiniteStateMachineUTest::setUp(void)
 	as->clear();
 }
 
-#define getarity(hand) hand->getArity()
+#define getarity(hand) hand->get_arity()
 
 Handle FiniteStateMachineUTest::get_state(Handle set_link)
 {
@@ -109,7 +109,7 @@ void FiniteStateMachineUTest::test_basic(void)
 	// Take one step of the finite state machine.
 	printf("Going to take one step\n");
 	Handle first = eval->eval_h("(cog-bind take-one-step)");
-	printf("First state found:\n%s\n", first->toShortString().c_str());
+	printf("First state found:\n%s\n", first->to_short_string().c_str());
 	TS_ASSERT_EQUALS(1, getarity(first));
 
 	// After the first step, we expect a green light.

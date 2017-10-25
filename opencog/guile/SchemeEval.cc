@@ -990,7 +990,7 @@ SCM SchemeEval::do_apply_scm(const std::string& func, const Handle& varargs )
 		// If varargs is a ListLink, its elements are passed to the
 		// function, otherwise the single argument is passed.
 		HandleSeq single_arg{varargs};
-		const HandleSeq &oset = varargs->getType() == LIST_LINK ?
+		const HandleSeq &oset = varargs->get_type() == LIST_LINK ?
 			varargs->getOutgoingSet() : single_arg;
 
 		// Iterate in reverse, because cons chains in reverse.

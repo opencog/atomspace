@@ -83,7 +83,7 @@ void SudokuPuzzle::setUp(void)
 }
 
 #define getlink(hand,pos) hand->getOutgoingAtom(pos)
-#define getarity(hand) hand->getArity()
+#define getarity(hand) hand->get_arity()
 
 /* ========================================================================
  * Extremely simple 2x2 puzzle solver

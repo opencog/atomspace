@@ -51,7 +51,7 @@ ControlPolicy::ControlPolicy(const RuleSet& rs, const BIT& bit,
 	std::stringstream ss;
 	ss << "Default inference rule TVs:" << std::endl;
 	for (const auto& rtv : _default_tvs)
-		ss << rtv.second->toString() << " " << oc_to_string(rtv.first);
+		ss << rtv.second->to_string() << " " << oc_to_string(rtv.first);
 	ure_logger().debug() << ss.str();
 
 	// Fetches expansion control rules from _control_as
@@ -62,7 +62,7 @@ ControlPolicy::ControlPolicy(const RuleSet& rs, const BIT& bit,
 			_expansion_control_rules[rule_alias] = exp_ctrl_rules;
 
 			ure_logger().debug() << "Expansion control rules for "
-			                     << rule_alias->toString()
+			                     << rule_alias->to_string()
 			                     << oc_to_string(exp_ctrl_rules);
 		}
 	}
@@ -179,7 +179,7 @@ HandleTVMap ControlPolicy::expansion_success_tvs(
 	std::stringstream ss;
 	ss << "Rule TVs expanding a supposed preproof into another preproof:" << std::endl;
 	for (const auto& rtv : success_tvs)
-		ss << rtv.second->toString() << " " << oc_to_string(rtv.first);
+		ss << rtv.second->to_string() << " " << oc_to_string(rtv.first);
 	ure_logger().debug() << ss.str();
 
 	return success_tvs;
@@ -259,10 +259,10 @@ HandleSet ControlPolicy::active_expansion_control_rules(const Handle& inf_rule_a
 	if (not results.empty()) {
 		std::stringstream ss;
 		ss << "Active expansion control rules for "
-		   << inf_rule_alias->toString()
+		   << inf_rule_alias->to_string()
 		   << "size = " << results.size() << ":";
 		for (const Handle& acr : results)
-			ss << " " << acr->idToString();
+			ss << " " << acr->id_to_string();
 		ure_logger().debug() << ss.str();
 	}
 
@@ -281,17 +281,17 @@ bool ControlPolicy::control_rule_active(const Handle& ctrl_rule) const
 Handle ControlPolicy::get_expansion_control_rule_pattern(const Handle& ctrl_rule) const
 {
 	// Check that it is indeed an expansion control rule
-	OC_ASSERT(ctrl_rule->getType() == IMPLICATION_SCOPE_LINK);
-	OC_ASSERT(ctrl_rule->getArity() == 3);
+	OC_ASSERT(ctrl_rule->get_type() == IMPLICATION_SCOPE_LINK);
+	OC_ASSERT(ctrl_rule->get_arity() == 3);
 
 	// The pattern is in the implicant, if any
 	Handle implicant = ctrl_rule->getOutgoingAtom(1);
 
 	// If present it must be inside a conjunction of an ExecutionLink
 	// and a pattern
-	if (implicant->getType() == AND_LINK)
+	if (implicant->get_type() == AND_LINK)
 		for (const Handle& child : implicant->getOutgoingSet())
-			if (child->getType() != EXECUTION_LINK)
+			if (child->get_type() != EXECUTION_LINK)
 				return child;
 
 	return Handle::UNDEFINED;

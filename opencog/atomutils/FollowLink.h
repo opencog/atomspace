@@ -75,11 +75,11 @@ private:
 	inline bool find_link_type(const Handle& h)
 	{
 		// Make sure that the link is of the desired type.
-		if (link_type != h->getType()) return false;
+		if (link_type != h->get_type()) return false;
 
 		cnt = -1;
 		to_atom = Handle::UNDEFINED;
-		if (h->isLink()) LinkCast(h)->foreach_outgoing(&FollowLink::pursue_link, this);
+		if (h->is_link()) LinkCast(h)->foreach_outgoing(&FollowLink::pursue_link, this);
 		if (to_atom) return true;
 		return false;
 	}

@@ -211,24 +211,24 @@ static void atomCompare(AtomPtr a, AtomPtr b, const char* where)
         return;
     }
 
-    TSM_ASSERT_EQUALS("Type mismatch", a->getType(), b->getType());
+    TSM_ASSERT_EQUALS("Type mismatch", a->get_type(), b->get_type());
 
     NodePtr na(NodeCast(a));
     NodePtr nb(NodeCast(b));
     if (na and nb)
     {
-        TSM_ASSERT_EQUALS("Name mismatch", na->getName(), nb->getName());
+        TSM_ASSERT_EQUALS("Name mismatch", na->get_name(), nb->get_name());
     }
 
     LinkPtr la(LinkCast(a));
     LinkPtr lb(LinkCast(b));
     if (la and lb)
     {
-        TSM_ASSERT_EQUALS("Arity mismatch", la->getArity(), lb->getArity());
+        TSM_ASSERT_EQUALS("Arity mismatch", la->get_arity(), lb->get_arity());
         if (*la != *lb)
         {
-            printf("Mismatching la = %s\n", la->toString().c_str());
-            printf("Mismatching lb = %s\n", lb->toString().c_str());
+            printf("Mismatching la = %s\n", la->to_string().c_str());
+            printf("Mismatching lb = %s\n", lb->to_string().c_str());
             TSM_ASSERT_EQUALS("Link mis-match", la, lb);
         }
     }
@@ -247,7 +247,7 @@ static void atomCompare(AtomPtr a, AtomPtr b, const char* where)
             {
                 fprintf(stderr, "Error, truth value miscompare, "
                     "ma=%f mb=%f ca=%f cb=%f\n",
-                    ta->getMean(), tb->getMean(), ta->getCount(), tb->getCount());
+                    ta->get_mean(), tb->get_mean(), ta->get_count(), tb->get_count());
             }
         }
     }
@@ -299,16 +299,16 @@ void PersistUTest::add_to_space(int idx, AtomSpace *as, std::string id)
 
 void PersistUTest::check_space(int idx, AtomSpace *space)
 {
-    Handle hb1 = space->get_handle(n1[idx]->getType(), n1[idx]->getName());
+    Handle hb1 = space->get_handle(n1[idx]->get_type(), n1[idx]->get_name());
     atomCompare(h1[idx], hb1, "check_space hb1");
 
-    Handle hb2 = space->get_handle(n2[idx]->getType(), n2[idx]->getName());
+    Handle hb2 = space->get_handle(n2[idx]->get_type(), n2[idx]->get_name());
     atomCompare(h2[idx], hb2, "check_space hb2");
 
-    Handle hb3 = space->get_handle(n3[idx]->getType(), n3[idx]->getName());
+    Handle hb3 = space->get_handle(n3[idx]->get_type(), n3[idx]->get_name());
     atomCompare(h3[idx], hb3, "check_space hb3");
 
-    Handle hb4 = space->get_handle(n4[idx]->getType(), n4[idx]->getName());
+    Handle hb4 = space->get_handle(n4[idx]->get_type(), n4[idx]->get_name());
     atomCompare(h4[idx], hb4, "check_space hb4");
 
     HandleSeq hv1;
@@ -320,30 +320,30 @@ void PersistUTest::check_space(int idx, AtomSpace *space)
     //_pm->setPrintStatements();
     //_pm->setPrintStatementsOff();
 
-    Handle hlb1 = space->get_handle(hl1[idx]->getType(), hv1);
+    Handle hlb1 = space->get_handle(hl1[idx]->get_type(), hv1);
     atomCompare(hl1[idx], hlb1, "check_space hlb1");
 
     HandleSeq hv2({hlb1, hb2});
-    Handle hlb2 = space->get_handle(hl2[idx]->getType(), hv2);
+    Handle hlb2 = space->get_handle(hl2[idx]->get_type(), hv2);
     atomCompare(hl2[idx], hlb2, "check_space hlb2");
 
     HandleSeq hv3({hb1, hlb2, hb3});
-    Handle hlb3 = space->get_handle(hl3[idx]->getType(), hv3);
+    Handle hlb3 = space->get_handle(hl3[idx]->get_type(), hv3);
     atomCompare(hl3[idx], hlb3, "check_space hlb3");
 }
 
 void PersistUTest::check_empty(int idx, AtomSpace *space)
 {
-    Handle hb1 = space->get_handle(n1[idx]->getType(), n1[idx]->getName());
+    Handle hb1 = space->get_handle(n1[idx]->get_type(), n1[idx]->get_name());
     TSM_ASSERT("Should not find this atom", hb1 == Handle::UNDEFINED);
 
-    Handle hb2 = space->get_handle(n2[idx]->getType(), n2[idx]->getName());
+    Handle hb2 = space->get_handle(n2[idx]->get_type(), n2[idx]->get_name());
     TSM_ASSERT("Should not find this atom", hb2 == Handle::UNDEFINED);
 
-    Handle hb3 = space->get_handle(n3[idx]->getType(), n3[idx]->getName());
+    Handle hb3 = space->get_handle(n3[idx]->get_type(), n3[idx]->get_name());
     TSM_ASSERT("Should not find this atom", hb3 == Handle::UNDEFINED);
 
-    Handle hb4 = space->get_handle(n4[idx]->getType(), n4[idx]->getName());
+    Handle hb4 = space->get_handle(n4[idx]->get_type(), n4[idx]->get_name());
     TSM_ASSERT("Should not find this atom", hb4 == Handle::UNDEFINED);
 
     HandleSeq hvec;
@@ -352,7 +352,7 @@ void PersistUTest::check_empty(int idx, AtomSpace *space)
     hvec.push_back(h3[idx]);
     hvec.push_back(h4[idx]);
 
-    Handle hlb = space->get_handle(hl1[idx]->getType(), hvec);
+    Handle hlb = space->get_handle(hl1[idx]->get_type(), hvec);
     TSM_ASSERT("Should not find this atom", hlb == Handle::UNDEFINED);
 }
 

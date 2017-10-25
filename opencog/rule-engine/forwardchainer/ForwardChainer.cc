@@ -71,7 +71,7 @@ void ForwardChainer::init(const Handle& source,
 	HandleSeq init_sources;
 
 	// Accept set of initial sources wrapped in a SET_LINK.
-	if (source->getType() == SET_LINK) {
+	if (source->get_type() == SET_LINK) {
 		init_sources = source->getOutgoingSet();
 	} else {
 		init_sources.push_back(source);
@@ -141,7 +141,7 @@ void ForwardChainer::do_step()
 
 	// Select source
 	_cur_source = select_source();
-	LAZY_URE_LOG_DEBUG << "Source:" << std::endl << _cur_source->toString();
+	LAZY_URE_LOG_DEBUG << "Source:" << std::endl << _cur_source->to_string();
 
 	// Select rule
 	Rule rule = select_rule(_cur_source);
@@ -207,7 +207,7 @@ Handle ForwardChainer::select_source()
 		// remain a hack anyway.
 		if (biased_randbool(0.01)) {
 			for (const Handle& h : _selected_sources) {
-				if (h->isLink()) {
+				if (h->is_link()) {
 					const HandleSeq& outgoings = h->getOutgoingSet();
 					HandleSeq no_free_vars_outgoings;
 					// Only add children with no free variables in them
@@ -276,7 +276,7 @@ Rule ForwardChainer::select_rule(const Handle& source)
 	std::map<const Rule*, float> rule_weight;
 	for (const Rule& r : _rules)
 		if (not r.is_meta())
-			rule_weight[&r] = r.get_tv()->getMean();
+			rule_weight[&r] = r.get_tv()->get_mean();
 
 	ure_logger().debug("%d rules to be searched as matched against the source",
 	                   rule_weight.size());
@@ -348,7 +348,7 @@ UnorderedHandleSet ForwardChainer::apply_rule(const Rule& rule)
 	auto add_results = [&](AtomSpace& as) {
 		for (Handle& h : results)
 		{
-			Type t = h->getType();
+			Type t = h->get_type();
 			// If it's a List then add all the results. That kinda
 			// means you can't infer List itself, maybe something to
 			// look after.
@@ -368,7 +368,7 @@ UnorderedHandleSet ForwardChainer::apply_rule(const Rule& rule)
 	}
 
 	LAZY_URE_LOG_DEBUG << "Result is:" << std::endl
-	                   << _as.add_link(SET_LINK, results)->toShortString();
+	                   << _as.add_link(SET_LINK, results)->to_short_string();
 
 	return UnorderedHandleSet(results.begin(), results.end());
 }

@@ -57,7 +57,7 @@ void VarScraper::find_vars(HandleSeq& varseq, HandleSet& varset,
 {
 	for (const Handle& h : oset)
 	{
-		Type t = h->getType();
+		Type t = h->get_type();
 
 		if ((VARIABLE_NODE == t or GLOB_NODE == t) and
 		    _quotation.is_unquoted() and
@@ -68,7 +68,7 @@ void VarScraper::find_vars(HandleSeq& varseq, HandleSet& varset,
 			varset.insert(h);
 		}
 
-		if (not h->isLink()) continue;
+		if (not h->is_link()) continue;
 
 		bool issco = _quotation.is_unquoted()
 			and classserver().isA(t, SCOPE_LINK);
@@ -183,9 +183,9 @@ Handle FreeVariables::substitute_scoped(const Handle& term,
 
 	// If its a node, and its not a variable, then it is a constant,
 	// and just return that.
-	if (not term->isLink()) return term;
+	if (not term->is_link()) return term;
 
-	Type ty = term->getType();
+	Type ty = term->get_type();
 
 	// Update for subsequent recursive calls of substitute_scoped
 	quotation.update(ty);
@@ -241,7 +241,7 @@ Handle FreeVariables::substitute_scoped(const Handle& term,
 				oset.emplace_back(substitute_scoped(h, args, silent,
 				                                    hidden_map, quotation));
 			}
-			return createLink(oset, term->getType());
+			return createLink(oset, term->get_type());
 		}
 	}
 
@@ -252,10 +252,10 @@ Handle FreeVariables::substitute_scoped(const Handle& term,
 		// GlobNodes are matched with a list of one or more values.
 		// Those values need to be in-lined, stripping off the list
 		// that wraps them up.  See MapLinkUTest for examples.
-		if (GLOB_NODE == h->getType())
+		if (GLOB_NODE == h->get_type())
 		{
 			Handle glst(substitute_scoped(h, args, silent, index_map, quotation));
-			if (glst->isNode())
+			if (glst->is_node())
 				return glst;
 			for (const Handle& gl : glst->getOutgoingSet())
 				oset.emplace_back(gl);
@@ -265,7 +265,7 @@ Handle FreeVariables::substitute_scoped(const Handle& term,
 				substitute_scoped(h, args, silent, index_map, quotation));
 	}
 
-	return createLink(oset, term->getType());
+	return createLink(oset, term->get_type());
 }
 
 /* ================================================================= */
@@ -322,7 +322,7 @@ bool Variables::is_equal(const Variables& other, size_t index) const
 
 	// If one is a GlobNode, and the other a VariableNode,
 	// then its a mismatch.
-	if (vme->getType() != voth->getType()) return false;
+	if (vme->get_type() != voth->get_type()) return false;
 
 	// If typed, types must match.
 	auto sime = _simple_typemap.find(vme);
@@ -418,7 +418,7 @@ bool Variables::is_type(const Handle& var, const Handle& val) const
 	if (_simple_typemap.end() != tit)
 	{
 		const std::set<Type> &tchoice = tit->second;
-		Type htype = val->getType();
+		Type htype = val->get_type();
 		std::set<Type>::const_iterator allow = tchoice.find(htype);
 
 		// If the value has the simple type, then we are good to go;

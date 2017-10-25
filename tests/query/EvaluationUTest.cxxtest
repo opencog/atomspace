@@ -74,7 +74,7 @@ void EvaluationUTest::setUp(void)
 	eval->eval("(add-to-load-path \"../../..\")");
 }
 
-#define getarity(hand) hand->getArity()
+#define getarity(hand) hand->get_arity()
 
 /*
  * Evaluation most basic unit test.
@@ -86,27 +86,27 @@ void EvaluationUTest::test_eval(void)
 	eval->eval("(load-from-path \"tests/query/evaluation.scm\")");
 
 	Handle five = eval->eval_h("(cog-execute! (five-arcs))");
-	printf ("five: found:\n%s\n", five->toShortString().c_str());
+	printf ("five: found:\n%s\n", five->to_short_string().c_str());
 	TS_ASSERT_EQUALS(5, getarity(five));
 
 	Handle one = eval->eval_h("(cog-execute! (one-arc-one))");
-	printf ("one: found:\n%s\n", one->toShortString().c_str());
+	printf ("one: found:\n%s\n", one->to_short_string().c_str());
 	TS_ASSERT_EQUALS(1, getarity(one));
 
 	Handle onet = eval->eval_h("(cog-execute! (one-arc-three))");
-	printf ("onet: found:\n%s\n", onet->toShortString().c_str());
+	printf ("onet: found:\n%s\n", onet->to_short_string().c_str());
 	TS_ASSERT_EQUALS(1, getarity(onet));
 
 	Handle zero = eval->eval_h("(cog-execute! (zero-arcs))");
-	printf ("zero: found:\n%s\n", zero->toShortString().c_str());
+	printf ("zero: found:\n%s\n", zero->to_short_string().c_str());
 	TS_ASSERT_EQUALS(0, getarity(zero));
 
 	Handle four = eval->eval_h("(cog-execute! (four-arcs))");
-	printf ("four: found:\n%s\n", four->toShortString().c_str());
+	printf ("four: found:\n%s\n", four->to_short_string().c_str());
 	TS_ASSERT_EQUALS(4, getarity(four));
 
 	Handle two = eval->eval_h("(cog-execute! (two-arcs))");
-	printf ("two: found:\n%s\n", two->toShortString().c_str());
+	printf ("two: found:\n%s\n", two->to_short_string().c_str());
 	TS_ASSERT_EQUALS(2, getarity(two));
 
 	logger().debug("END TEST: %s", __FUNCTION__);
@@ -122,19 +122,19 @@ void EvaluationUTest::test_logic(void)
 	eval->eval("(load-from-path \"tests/query/evaluation.scm\")");
 
 	Handle four = eval->eval_h("(cog-execute! (four-not))");
-	printf ("four-not: found:\n%s\n", four->toShortString().c_str());
+	printf ("four-not: found:\n%s\n", four->to_short_string().c_str());
 	TS_ASSERT_EQUALS(4, getarity(four));
 
 	Handle two = eval->eval_h("(cog-execute! (two-or))");
-	printf ("two-or: found:\n%s\n", two->toShortString().c_str());
+	printf ("two-or: found:\n%s\n", two->to_short_string().c_str());
 	TS_ASSERT_EQUALS(2, getarity(two));
 
 	Handle three = eval->eval_h("(cog-execute! (three-nor))");
-	printf ("three-nor: found:\n%s\n", three->toShortString().c_str());
+	printf ("three-nor: found:\n%s\n", three->to_short_string().c_str());
 	TS_ASSERT_EQUALS(3, getarity(three));
 
 	Handle fancy = eval->eval_h("(cog-execute! (two-fancy))");
-	printf ("two-fancy: found:\n%s\n", fancy->toShortString().c_str());
+	printf ("two-fancy: found:\n%s\n", fancy->to_short_string().c_str());
 	TS_ASSERT_EQUALS(2, getarity(fancy));
 
 	// Both the searches should return the same two (the first two)
@@ -155,7 +155,7 @@ void EvaluationUTest::test_varval(void)
 
 	Handle do_things = eval->eval_h("(do-things)");
 	Handle do_things_results = bindlink(as, do_things);
-	printf ("do-things: \n%s\n", do_things_results->toShortString().c_str());
+	printf ("do-things: \n%s\n", do_things_results->to_short_string().c_str());
 
 	// Of the two possibilities, we only expect one to pass.
 	Handle expected = eval->eval_h(
@@ -167,7 +167,7 @@ void EvaluationUTest::test_varval(void)
 	TS_ASSERT_EQUALS(expected, do_things_results);
 
 	Handle ndostuff = eval->eval_h("(cog-execute! (do-nthings))");
-	printf ("do-nthings: \n%s\n", ndostuff->toShortString().c_str());
+	printf ("do-nthings: \n%s\n", ndostuff->to_short_string().c_str());
 
 	// Of the two possibilities, we only expect one to pass.
 	Handle rejected = eval->eval_h(
@@ -179,7 +179,7 @@ void EvaluationUTest::test_varval(void)
 	TS_ASSERT_EQUALS(rejected, ndostuff);
 
 	Handle nndostuff = eval->eval_h("(cog-execute! (do-nnthings))");
-	printf ("do-nnthings: \n%s\n", nndostuff->toShortString().c_str());
+	printf ("do-nnthings: \n%s\n", nndostuff->to_short_string().c_str());
 
 	// Of the two possibilities, we only expect one to pass.
 	TS_ASSERT_EQUALS(expected, nndostuff);

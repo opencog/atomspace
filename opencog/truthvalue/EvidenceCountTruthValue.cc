@@ -52,8 +52,8 @@ EvidenceCountTruthValue::EvidenceCountTruthValue(const TruthValue& source)
 	: TruthValue(EVIDENCE_COUNT_TRUTH_VALUE)
 {
 	_value.resize(2);
-	_value[POS_COUNT] = source.getMean() * source.getCount();
-	_value[TOTAL_COUNT] = source.getCount();
+	_value[POS_COUNT] = source.get_mean() * source.get_count();
+	_value[TOTAL_COUNT] = source.get_count();
 }
 
 EvidenceCountTruthValue::EvidenceCountTruthValue(EvidenceCountTruthValue const& source)
@@ -61,13 +61,13 @@ EvidenceCountTruthValue::EvidenceCountTruthValue(EvidenceCountTruthValue const& 
 {
 	_value.resize(2);
 	_value[POS_COUNT] = source.getPositiveCount();
-	_value[TOTAL_COUNT] = source.getCount();
+	_value[TOTAL_COUNT] = source.get_count();
 }
 
 EvidenceCountTruthValue::EvidenceCountTruthValue(const ProtoAtomPtr& source)
        : TruthValue(EVIDENCE_COUNT_TRUTH_VALUE)
 {
-    if (source->getType() != EVIDENCE_COUNT_TRUTH_VALUE)
+    if (source->get_type() != EVIDENCE_COUNT_TRUTH_VALUE)
         throw RuntimeException(TRACE_INFO,
             "Source must be a EvidenceCountTruthValue");
 
@@ -77,10 +77,10 @@ EvidenceCountTruthValue::EvidenceCountTruthValue(const ProtoAtomPtr& source)
     _value[TOTAL_COUNT] = fp->value()[TOTAL_COUNT];
 }
 
-strength_t EvidenceCountTruthValue::getMean() const
+strength_t EvidenceCountTruthValue::get_mean() const
 {
 	if (is_count_valid())
-		return getPositiveCount() / getCount();
+		return getPositiveCount() / get_count();
 	return NAN;
 }
 
@@ -89,12 +89,12 @@ count_t EvidenceCountTruthValue::getPositiveCount() const
 	return _value[POS_COUNT];
 }
 
-count_t EvidenceCountTruthValue::getCount() const
+count_t EvidenceCountTruthValue::get_count() const
 {
 	return _value[TOTAL_COUNT];
 }
 
-confidence_t EvidenceCountTruthValue::getConfidence() const
+confidence_t EvidenceCountTruthValue::get_confidence() const
 {
 	if (is_count_valid())
 		return _value[TOTAL_COUNT] / (DEFAULT_K + _value[TOTAL_COUNT]);
@@ -120,14 +120,14 @@ TruthValuePtr EvidenceCountTruthValue::merge(const TruthValuePtr& other,
 	{
 		// Based on Section 5.10.2 (A heuristic revision rule for STV)
 		// of the PLN book
-		if (other->getType() != EVIDENCE_COUNT_TRUTH_VALUE)
+		if (other->get_type() != EVIDENCE_COUNT_TRUTH_VALUE)
 			throw RuntimeException(TRACE_INFO,
 			                       "Don't know how to merge %s into a "
 			                       "EvidenceCountTruthValue using the default style",
 			                       typeid(*other).name());
 
-		auto count = getCount();
-		auto count2 = other->getCount();
+		auto count = get_count();
+		auto count2 = other->get_count();
 #define CVAL  0.2f
 		auto count_new = count + count2 - std::min(count, count2) * CVAL;
 #undef CVAL
@@ -144,7 +144,7 @@ TruthValuePtr EvidenceCountTruthValue::merge(const TruthValuePtr& other,
 	}
 }
 
-std::string EvidenceCountTruthValue::toString(const std::string& indent) const
+std::string EvidenceCountTruthValue::to_string(const std::string& indent) const
 {
 	char buf[1024];
 	sprintf(buf, "(ectv %f %f)",
@@ -168,5 +168,5 @@ bool EvidenceCountTruthValue::operator==(const ProtoAtom& rhs) const
 	return close_enough(getPositiveCount(), ectv->getPositiveCount())
 		and is_count_valid() == ectv->is_count_valid()
 		and (!is_count_valid() or
-		     close_enough(getCount(), ectv->getCount()));
+		     close_enough(get_count(), ectv->get_count()));
 }

@@ -52,7 +52,7 @@ Handle add_prefixed_node(AtomSpace& as, Type t, const std::string& prefix)
 bool do_hypergraph_removal(AtomSpace& as, const Handle& h, bool from_storage)
 {
     // Recursive case
-    if (h->isLink()) {
+    if (h->is_link()) {
         HandleSeq oset = h->getOutgoingSet();
         bool success = (from_storage)? as.remove_atom(h) : as.extract_atom(h);
         if (success) {

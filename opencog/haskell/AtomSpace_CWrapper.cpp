@@ -105,7 +105,7 @@ int AtomSpace_getAtomByHandle( AtomSpace* this_ptr
     if(!h) // Invalid UUID parameter.
         return -1;
 
-    const std::string &str = classserver().getTypeName(h->getType());
+    const std::string &str = classserver().getTypeName(h->get_type());
     *type = (char*) malloc(sizeof(char) * (str.length()+1));
     if(! *type)
         throw RuntimeException(TRACE_INFO,"Failed malloc.");
@@ -114,7 +114,7 @@ int AtomSpace_getAtomByHandle( AtomSpace* this_ptr
     NodePtr ptr = NodeCast(h);
     if(ptr){ // It is a node.
         *node_or_link = 1;
-        const std::string &str = ptr->getName();
+        const std::string &str = ptr->get_name();
         *name = (char*) malloc(sizeof(char) * (str.length()+1));
         if(! *name)
             throw RuntimeException(TRACE_INFO,"Failed malloc.");
@@ -125,7 +125,7 @@ int AtomSpace_getAtomByHandle( AtomSpace* this_ptr
         LinkPtr lnk = LinkCast(h);
         if(!lnk)
             throw RuntimeException(TRACE_INFO,"Error in cast Link.");
-        *out_len = lnk->getArity();
+        *out_len = lnk->get_arity();
 
         *out = (Handle*)malloc(sizeof(Handle*) * (*out_len));
 

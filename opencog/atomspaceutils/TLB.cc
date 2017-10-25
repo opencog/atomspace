@@ -55,7 +55,7 @@ void TLB::clear_resolver(const AtomTable* tab)
 Handle TLB::do_res(const Handle& h)
 {
     // No-op if it's already in an atomspace.
-    if (h->getAtomSpace()) return h->getHandle();
+    if (h->getAtomSpace()) return h->get_handle();
 
     for (const AtomTable* at : _resolver) {
         Handle hr(at->getHandle(h));
@@ -72,7 +72,7 @@ UUID TLB::addAtom(const Handle& h, UUID uuid)
     if (nullptr == hr) hr = h;
 
     // Force a resolution of the outgoing set!
-    if (hr != h and h->isLink())
+    if (hr != h and h->is_link())
     {
         for (const Handle& ho: h->getOutgoingSet())
             addAtom(ho, TLB::INVALID_UUID);

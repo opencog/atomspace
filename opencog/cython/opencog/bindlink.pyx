@@ -47,8 +47,8 @@ def satisfaction_link(AtomSpace atomspace, Atom atom):
     cdef tv_ptr result_tv_ptr = c_satisfaction_link(atomspace.atomspace,
                                                  deref(atom.handle))
     cdef cTruthValue* result_tv = result_tv_ptr.get()
-    cdef strength_t strength = deref(result_tv).getMean()
-    cdef strength_t confidence = deref(result_tv).getConfidence()
+    cdef strength_t strength = deref(result_tv).get_mean()
+    cdef strength_t confidence = deref(result_tv).get_confidence()
     return TruthValue(strength, confidence)
 
 def satisfying_set(AtomSpace atomspace, Atom atom):
@@ -85,6 +85,6 @@ def evaluate_atom(AtomSpace atomspace, Atom atom):
     cdef tv_ptr result_tv_ptr = c_evaluate_atom(atomspace.atomspace,
                                                 deref(atom.handle))
     cdef cTruthValue* result_tv = result_tv_ptr.get()
-    cdef strength_t strength = deref(result_tv).getMean()
-    cdef strength_t confidence = deref(result_tv).getConfidence()
+    cdef strength_t strength = deref(result_tv).get_mean()
+    cdef strength_t confidence = deref(result_tv).get_confidence()
     return TruthValue(strength, confidence)

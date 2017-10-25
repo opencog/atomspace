@@ -58,7 +58,7 @@ FunctionLink::FunctionLink(Type t, const Handle& a, const Handle& b)
 FunctionLink::FunctionLink(const Link& l)
     : FreeLink(l)
 {
-	Type tscope = l.getType();
+	Type tscope = l.get_type();
 	if (not classserver().isA(tscope, FUNCTION_LINK))
 		throw InvalidParamException(TRACE_INFO, "Expecting a FunctionLink");
 	init();
@@ -67,7 +67,7 @@ FunctionLink::FunctionLink(const Link& l)
 Handle FunctionLink::execute(AtomSpace* as) const
 {
 	throw RuntimeException(TRACE_INFO, "Not executable: %s\n",
-		classserver().getTypeName(getType()).c_str());
+		classserver().getTypeName(get_type()).c_str());
 }
 
 Handle FunctionLink::do_execute(AtomSpace* as, const Handle& h)
@@ -86,7 +86,7 @@ FunctionLinkPtr FunctionLink::castfactory(const Handle& h)
 	if (nullptr == h)
 		throw RuntimeException(TRACE_INFO, "Not executable!");
 
-	auto fact = classserver().getFactory(h->getType());
+	auto fact = classserver().getFactory(h->get_type());
 	return FunctionLinkCast((*fact)(h));
 }
 

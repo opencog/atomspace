@@ -27,7 +27,7 @@ using namespace opencog;
 
 bool Valuation::operator==(const ProtoAtom& other) const
 {
-	if (VALUATION != other.getType()) return false;
+	if (VALUATION != other.get_type()) return false;
 	Valuation* vp = (Valuation*) &other;
 	if (vp->_key != _key) return false;
 	if (vp->_atom != _atom) return false;
@@ -36,12 +36,12 @@ bool Valuation::operator==(const ProtoAtom& other) const
 
 // ==============================================================
 
-std::string Valuation::toString(const std::string& indent) const
+std::string Valuation::to_string(const std::string& indent) const
 {
 	std::string rv = indent + "(Valuation\n   " + indent;
-	rv += _key->toString("") + "\n   " + indent;
-	rv += _atom->toString("") + "\n   " + indent;
-	rv += _value->toString("") + ")\n";
+	rv += _key->to_string("") + "\n   " + indent;
+	rv += _atom->to_string("") + "\n   " + indent;
+	rv += _value->to_string("") + ")\n";
 	return rv;
 }
 

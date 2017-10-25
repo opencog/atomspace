@@ -54,7 +54,7 @@ AttentionValue::AttentionValue(const AttentionValue& source) :
 AttentionValue::AttentionValue(const ProtoAtomPtr& source) :
 	FloatValue(ATTENTION_VALUE)
 {
-	if (source->getType() != ATTENTION_VALUE)
+	if (source->get_type() != ATTENTION_VALUE)
 		throw RuntimeException(TRACE_INFO,
 			"Source must be an AttentionValue");
 
@@ -80,7 +80,7 @@ AttentionValue::vlti_t AttentionValue::getVLTI() const
 	return _value[VLTI];
 }
 
-std::string AttentionValue::toString(const std::string& indent) const
+std::string AttentionValue::to_string(const std::string& indent) const
 {
 	char buffer[256];
 	sprintf(buffer, "(av %f %f %f)", getSTI(), getLTI(), getVLTI());

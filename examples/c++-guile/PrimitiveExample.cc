@@ -30,11 +30,11 @@ class MyTestClass
 		Handle my_func(Handle h)
 		{
 			Handle hlist;
-			Type t = h->getType();
+			Type t = h->get_type();
 			if (classserver().isA(t, NODE))
 			{
 				NodePtr n = NodeCast(h);
-				std::string name = n->getName();
+				std::string name = n->get_name();
 				printf("Info: my_func instance %d received the node: %s\n",
 				       _id, name.c_str());
 				hlist = _as->add_link(LIST_LINK, h);

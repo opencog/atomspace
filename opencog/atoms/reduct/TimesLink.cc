@@ -53,7 +53,7 @@ TimesLink::TimesLink(const Link& l)
 
 void TimesLink::init(void)
 {
-	Type tscope = getType();
+	Type tscope = get_type();
 	if (not classserver().isA(tscope, TIMES_LINK))
 		throw InvalidParamException(TRACE_INFO, "Expecting a TimesLink");
 
@@ -80,8 +80,8 @@ static inline double get_double(const Handle& h)
 Handle TimesLink::kons(const Handle& fi, const Handle& fj)
 {
 	// Are they numbers?
-	if (NUMBER_NODE == fi->getType() and
-	    NUMBER_NODE == fj->getType())
+	if (NUMBER_NODE == fi->get_type() and
+	    NUMBER_NODE == fj->get_type())
 	{
 		double prod = get_double(fi) * get_double(fj);
 		return Handle(createNumberNode(prod));

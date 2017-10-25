@@ -72,7 +72,7 @@ void BuggyEqual::setUp(void)
 }
 
 #define getlink(hand,pos) hand->getOutgoingAtom(pos)
-#define getarity(hand) hand->getArity()
+#define getarity(hand) hand->get_arity()
 
 /*
  * NotLink causing weird trouble.
@@ -84,7 +84,7 @@ void BuggyEqual::test_bugeq(void)
 	eval->eval("(load-from-path \"tests/query/buggy-equal.scm\")");
 
 	Handle pln = eval->eval_h("(cog-bind pln-rule-deduction)");
-	printf("Deduction results:\n%s\n", pln->toShortString().c_str());
+	printf("Deduction results:\n%s\n", pln->to_short_string().c_str());
 	TSM_ASSERT_EQUALS("wrong number of solutions found", 4, getarity(pln));
 
 	logger().debug("END TEST: %s", __FUNCTION__);
@@ -99,7 +99,7 @@ void BuggyEqual::test_bugalt(void)
 	eval->eval("(load-from-path \"tests/query/buggy-equal.scm\")");
 
 	Handle alt = eval->eval_h("(cog-bind pln-alt)");
-	printf("Alt results:\n%s\n", alt->toShortString().c_str());
+	printf("Alt results:\n%s\n", alt->to_short_string().c_str());
 	TSM_ASSERT_EQUALS("wrong number of solutions found", 4, getarity(alt));
 
 	logger().debug("END TEST: %s", __FUNCTION__);

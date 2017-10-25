@@ -70,7 +70,7 @@ EvaluationLink::EvaluationLink(const HandleSeq& oset, Type t)
 	//
 /********
 	if (2 != oset.size())
-	   // or (LIST_LINK != oset[1]->getType()))
+	   // or (LIST_LINK != oset[1]->get_type()))
 	{
 		throw RuntimeException(TRACE_INFO,
 		    "EvaluationLink must have predicate and args!");
@@ -81,7 +81,7 @@ EvaluationLink::EvaluationLink(const HandleSeq& oset, Type t)
 EvaluationLink::EvaluationLink(const Handle& schema, const Handle& args)
     : FreeLink(EVALUATION_LINK, schema, args)
 {
-	if (LIST_LINK != args->getType()) {
+	if (LIST_LINK != args->get_type()) {
 		throw RuntimeException(TRACE_INFO,
 		    "EvaluationLink must have args in a ListLink!");
 	}
@@ -90,7 +90,7 @@ EvaluationLink::EvaluationLink(const Handle& schema, const Handle& args)
 EvaluationLink::EvaluationLink(const Link& l)
     : FreeLink(l)
 {
-	Type tscope = l.getType();
+	Type tscope = l.get_type();
 	if (EVALUATION_LINK != tscope)
 		throw RuntimeException(TRACE_INFO,
 		    "Expecting an EvaluationLink");
@@ -100,12 +100,12 @@ EvaluationLink::EvaluationLink(const Link& l)
 // if that set contains a single number, then unwrap it.
 static NumberNodePtr unwrap_set(Handle h)
 {
-	if (SET_LINK == h->getType())
+	if (SET_LINK == h->get_type())
 	{
-		if (1 != h->getArity())
+		if (1 != h->get_arity())
 			throw SyntaxException(TRACE_INFO,
 				"Don't know how to do arithmetic with this: %s",
-				h->toString().c_str());
+				h->to_string().c_str());
 		h = h->getOutgoingAtom(0);
 	}
 
@@ -119,7 +119,7 @@ static NumberNodePtr unwrap_set(Handle h)
 	if (nullptr == na)
 		throw SyntaxException(TRACE_INFO,
 			"Don't know how to compare this: %s",
-			h->toString().c_str());
+			h->to_string().c_str());
 	return na;
 }
 
@@ -178,7 +178,7 @@ static TruthValuePtr equal(AtomSpace* as, const Handle& h)
 
 static bool is_evaluatable_sat(const Handle& satl)
 {
-	if (1 != satl->getArity())
+	if (1 != satl->get_arity())
 		return false;
 
 	PatternLinkPtr plp(PatternLinkCast(satl));
@@ -188,14 +188,14 @@ static bool is_evaluatable_sat(const Handle& satl)
 
 static bool is_tail_rec(const Handle& thish, const Handle& tail)
 {
-	if (DEFINED_PREDICATE_NODE != tail->getType())
+	if (DEFINED_PREDICATE_NODE != tail->get_type())
 		return false;
 
 	Handle defn(DefineLink::get_definition(tail));
 	if (defn == thish)
 		return true;
 
-	if (SATISFACTION_LINK != defn->getType())
+	if (SATISFACTION_LINK != defn->get_type())
 		return false;
 
 	if (not is_evaluatable_sat(defn))
@@ -258,7 +258,7 @@ TruthValuePtr EvaluationLink::do_eval_scratch(AtomSpace* as,
                                               AtomSpace* scratch,
                                               bool silent)
 {
-	Type t = evelnk->getType();
+	Type t = evelnk->get_type();
 	if (EVALUATION_LINK == t)
 	{
 		const HandleSeq& sna(evelnk->getOutgoingSet());
@@ -269,7 +269,7 @@ TruthValuePtr EvaluationLink::do_eval_scratch(AtomSpace* as,
 				sna.size());
 
 		// An ungrounded predicate evaluates to itself
-		if (sna.at(0)->getType() == PREDICATE_NODE)
+		if (sna.at(0)->get_type() == PREDICATE_NODE)
 			return evelnk->getTruthValue();
 
 		// The arguments may need to be executed...
@@ -294,14 +294,14 @@ TruthValuePtr EvaluationLink::do_eval_scratch(AtomSpace* as,
 	{
 		TruthValuePtr tv(do_eval_scratch(as, evelnk->getOutgoingAtom(0), scratch));
 		return SimpleTruthValue::createTV(
-		              1.0 - tv->getMean(), tv->getConfidence());
+		              1.0 - tv->get_mean(), tv->get_confidence());
 	}
 	else if (AND_LINK == t)
 	{
 		for (const Handle& h : evelnk->getOutgoingSet())
 		{
 			TruthValuePtr tv(do_eval_scratch(as, h, scratch));
-			if (tv->getMean() < 0.5)
+			if (tv->get_mean() < 0.5)
 				return tv;
 		}
 		return TruthValue::TRUE_TV();
@@ -311,7 +311,7 @@ TruthValuePtr EvaluationLink::do_eval_scratch(AtomSpace* as,
 		for (const Handle& h : evelnk->getOutgoingSet())
 		{
 			TruthValuePtr tv(do_eval_scratch(as, h, scratch));
-			if (0.5 < tv->getMean())
+			if (0.5 < tv->get_mean())
 				return tv;
 		}
 		return TruthValue::FALSE_TV();
@@ -332,7 +332,7 @@ TruthValuePtr EvaluationLink::do_eval_scratch(AtomSpace* as,
 			for (size_t i=0; i<arity; i++)
 			{
 				TruthValuePtr tv(do_eval_scratch(as, oset[i], scratch));
-				if (tv->getMean() < 0.5)
+				if (tv->get_mean() < 0.5)
 					return tv;
 			}
 		} while (is_trec);
@@ -354,7 +354,7 @@ TruthValuePtr EvaluationLink::do_eval_scratch(AtomSpace* as,
 			for (size_t i=0; i<arity; i++)
 			{
 				TruthValuePtr tv(do_eval_scratch(as, oset[i], scratch));
-				if (0.5 < tv->getMean())
+				if (0.5 < tv->get_mean())
 					return tv;
 			}
 		} while (is_trec);
@@ -380,7 +380,7 @@ TruthValuePtr EvaluationLink::do_eval_scratch(AtomSpace* as,
 		// Return the logical-AND of the returned truth values
 		for (const TruthValuePtr& tv: tvp)
 		{
-			if (0.5 > tv->getMean())
+			if (0.5 > tv->get_mean())
 				return tv;
 		}
 		return TruthValue::TRUE_TV();
@@ -410,10 +410,10 @@ TruthValuePtr EvaluationLink::do_eval_scratch(AtomSpace* as,
 		// atoms into the atomspace, to signal some event or state.
 		// These cannot be discarded. This is explictly tested by
 		// SequenceUTest::test_or_put().
-		if (0 < evelnk->getArity())
+		if (0 < evelnk->get_arity())
 		{
 			const Handle& term = evelnk->getOutgoingAtom(0);
-			if (classserver().isA(term->getType(), EVALUATABLE_LINK))
+			if (classserver().isA(term->get_type(), EVALUATABLE_LINK))
 			{
 				EvaluationLink::do_eval_scratch(as, term, scratch, silent);
 			}
@@ -495,7 +495,7 @@ TruthValuePtr EvaluationLink::do_eval_scratch(AtomSpace* as,
 
 	throw SyntaxException(TRACE_INFO,
 		"Either incorrect or not implemented yet. Cannot evaluate %s",
-		evelnk->toString().c_str());
+		evelnk->to_string().c_str());
 }
 
 TruthValuePtr EvaluationLink::do_evaluate(AtomSpace* as,
@@ -535,29 +535,29 @@ TruthValuePtr EvaluationLink::do_evaluate(AtomSpace* as,
                                           const Handle& cargs,
                                           bool silent)
 {
-	Type pntype = pn->getType();
+	Type pntype = pn->get_type();
 	if (DEFINED_PREDICATE_NODE == pntype)
 	{
 		Handle defn = DefineLink::get_definition(pn);
-		Type dtype = defn->getType();
+		Type dtype = defn->get_type();
 
 		// Allow recursive definitions. This can be handy.
 		while (DEFINED_PREDICATE_NODE == dtype)
 		{
 			defn = DefineLink::get_definition(defn);
-			dtype = defn->getType();
+			dtype = defn->get_type();
 		}
 
 		// If its not a LambdaLink, then I don't know what to do...
 		if (LAMBDA_LINK != dtype)
 			throw RuntimeException(TRACE_INFO,
 				"Expecting definition to be a LambdaLink, got %s",
-				defn->toString().c_str());
+				defn->to_string().c_str());
 
 		// Treat it as if it were a PutLink -- perform the
 		// beta-reduction, and evaluate the result.
 		LambdaLinkPtr lam(LambdaLinkCast(defn));
-		Type atype = cargs->getType();
+		Type atype = cargs->get_type();
 		Handle reduct = lam->substitute(atype == LIST_LINK ?
 		                                cargs->getOutgoingSet()
 		                                : HandleSeq(1, cargs));
@@ -578,7 +578,7 @@ TruthValuePtr EvaluationLink::do_evaluate(AtomSpace* as,
 	Handle args = force_execute(as, cargs, silent);
 
 	// Get the schema name.
-	const std::string& schema = pn->getName();
+	const std::string& schema = pn->get_name();
 	// printf ("Grounded schema name: %s\n", schema.c_str());
 
 	// A very special-case C++ comparison.
@@ -594,7 +594,7 @@ TruthValuePtr EvaluationLink::do_evaluate(AtomSpace* as,
 	// Hard-coded in C++ for speed. (well, and for convenience ...)
 	if (0 == schema.compare("c++:exclusive"))
 	{
-		Arity sz = args->getArity();
+		Arity sz = args->get_arity();
 		for (Arity i=0; i<sz-1; i++) {
 			Handle h1(args->getOutgoingAtom(i));
 			for (Arity j=i+1; j<sz; j++) {

@@ -57,11 +57,11 @@ public:
 
     virtual bool operator==(const ProtoAtom& rhs) const;
 
-    std::string toString(const std::string&) const;
+    std::string to_string(const std::string&) const;
 
-    strength_t getMean() const;
-    count_t getCount() const;
-    confidence_t getConfidence() const;
+    strength_t get_mean() const;
+    count_t get_count() const;
+    confidence_t get_confidence() const;
 
     /**
      * Truth value merge formula, as specified by PLN.

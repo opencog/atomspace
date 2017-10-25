@@ -29,10 +29,10 @@ using namespace opencog;
 
 void DefineLink::init()
 {
-	if (not classserver().isA(getType(), DEFINE_LINK))
+	if (not classserver().isA(get_type(), DEFINE_LINK))
 		throw SyntaxException(TRACE_INFO,
 			"Expecting a DefineLink, got %s",
-				classserver().getTypeName(getType()).c_str());
+				classserver().getTypeName(get_type()).c_str());
 
 	// Must have name and body
 	if (2 != _outgoing.size())
@@ -45,7 +45,7 @@ void DefineLink::init()
 	// Type-check. The execution and FunctionLink's only expand
 	// definitions anchored with these types; other definitions won't
 	// work during execution.
-	Type dtype = _outgoing[0]->getType();
+	Type dtype = _outgoing[0]->get_type();
 	if (DEFINED_SCHEMA_NODE != dtype and
 	    DEFINED_PREDICATE_NODE != dtype and
 	    DEFINED_TYPE_NODE != dtype)

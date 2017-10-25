@@ -69,7 +69,7 @@ void BuggyLinkUTest::setUp(void)
     as->clear();
 }
 
-#define getarity(hand) hand->getArity()
+#define getarity(hand) hand->get_arity()
 
 /*
  * BuggyLink unit test.  Test binding to unquoted links.
@@ -88,7 +88,7 @@ void BuggyLinkUTest::test_link(void)
     TSM_ASSERT("Failed to load test data", Handle::UNDEFINED != bindy);
 
     Handle lily = bindlink(as, bindy);
-    logger().debug() << "Result is this:\n" << lily->toString();
+    logger().debug() << "Result is this:\n" << lily->to_string();
 
     TS_ASSERT_EQUALS(1, getarity(lily));
 }

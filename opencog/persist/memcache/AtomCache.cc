@@ -64,7 +64,7 @@ void AtomCache::storeAtom(Atom *atom)
 {
 	memcached_return rc;
 
-	Handle h = atom->getHandle();
+	Handle h = atom->get_handle();
 
 	// Set up the basic root of the key
 #define KBSIZE 50
@@ -77,7 +77,7 @@ void AtomCache::storeAtom(Atom *atom)
 	char valbuff[VBSIZE];
 
 	// Get the atom type.
-	Type t = atom->getType();
+	Type t = atom->get_type();
 	strcpy(p, "type");
 	int vlen = snprintf(valbuff, VBSIZE, "%d", t);
 
@@ -89,8 +89,8 @@ void AtomCache::storeAtom(Atom *atom)
 	if (n)
 	{
 		strcpy(p, "name");
-		const char *name = n->getName().c_str();
-		vlen = n->getName().size();
+		const char *name = n->get_name().c_str();
+		vlen = n->get_name().size();
 		rc = memcached_set (mc, keybuff, rootlen+4, name, vlen, 0, 0);
 		CHECK_RC(rc);
 	}
@@ -98,7 +98,7 @@ void AtomCache::storeAtom(Atom *atom)
 	{
 		// Store the outgoing set
 		Link *l = dynamic_cast<Link *>(atom);
-		int arity = l->getArity();
+		int arity = l->get_arity();
 		vlen = snprintf(valbuff, VBSIZE, "(%d", arity);
 
 		HandleSeq out = l->getOutgoingSet();
@@ -122,7 +122,7 @@ void AtomCache::storeAtom(Atom *atom)
 		return;
 	}
 
-	vlen = snprintf(valbuff, VBSIZE, "(%20.16g, %20.16g)", tv.getMean(), tv.getCount());
+	vlen = snprintf(valbuff, VBSIZE, "(%20.16g, %20.16g)", tv.get_mean(), tv.get_count());
 	strcpy(p, "stv");
 	rc = memcached_set (mc, keybuff, rootlen+3, valbuff, vlen, 0, 0);
 	CHECK_RC(rc);
@@ -263,7 +263,7 @@ int AtomCache::depth(Atom *atom)
 	if (NULL == l) return 0;
 
 	int maxd = 0;
-	int arity = l->getArity();
+	int arity = l->get_arity();
 
 	HandleSeq out = l->getOutgoingSet();
 	for (int i=0; i<arity; i++)
@@ -279,7 +279,7 @@ int AtomCache::depth(Atom *atom)
 
 bool AtomCache::store_cb(Atom *atom)
 {
-	Handle h = atom->getHandle();
+	Handle h = atom->get_handle();
 
 	// Build an index of atoms of a given depth
 	char hbuff[KBSIZE];

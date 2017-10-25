@@ -768,14 +768,14 @@ PyObject* PythonEval::call_user_function(const std::string& moduleFunction,
     }
 
     // Get the actual argument count, passed in the ListLink.
-    if (arguments->getType() != LIST_LINK) {
+    if (arguments->get_type() != LIST_LINK) {
         PyGILState_Release(gstate);
         throw RuntimeException(TRACE_INFO,
             "Expecting arguments to be a ListLink!");
     }
 
     // Now make sure the expected count matches the actual argument count.
-    int actualArgumentCount = arguments->getArity();
+    int actualArgumentCount = arguments->get_arity();
     if (expectedArgumentCount != actualArgumentCount) {
         PyGILState_Release(gstate);
         throw RuntimeException(TRACE_INFO,

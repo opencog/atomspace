@@ -120,7 +120,7 @@ public:
      * or any of the values or truth values.
      */
     Link(const Link &l)
-        : Atom(l.getType())
+        : Atom(l.get_type())
     {
         init(l.getOutgoingSet());
     }
@@ -130,10 +130,10 @@ public:
      */
     ~Link();
 
-    virtual bool isNode() const { return false; }
-    virtual bool isLink() const { return true; }
+    virtual bool is_node() const { return false; }
+    virtual bool is_link() const { return true; }
 
-    virtual Arity getArity() const {
+    virtual Arity get_arity() const {
         return _outgoing.size();
     }
 
@@ -189,7 +189,7 @@ public:
      *
      * @return A string representation of the link.
      */
-    std::string toString(const std::string& indent) const;
+    std::string to_string(const std::string& indent) const;
 
     /**
      * Returns a short string representation of the link.
@@ -199,14 +199,14 @@ public:
      *
      * @return A short string representation of the link.
      */
-    std::string toShortString(const std::string& indent) const;
+    std::string to_short_string(const std::string& indent) const;
 
 	// Work around gdb's incapability to build a string on the fly,
 	// see http://stackoverflow.com/questions/16734783 and
 	// http://stackoverflow.com/questions/2973976 for more
 	// explanation.
-	using Atom::toString;
-	using Atom::toShortString;
+	using Atom::to_string;
+	using Atom::to_short_string;
 	
     /**
      * Perform a content-based compare of another atom to this one.
@@ -237,7 +237,7 @@ Handle createLink( Args&&... args )
 {
 	// Do we need to say (std::forward<Args>(args)...) instead ???
 	LinkPtr tmp(std::make_shared<Link>(args ...));
-	return classserver().factory(tmp->getHandle());
+	return classserver().factory(tmp->get_handle());
 }
 
 /** @}*/

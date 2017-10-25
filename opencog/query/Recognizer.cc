@@ -106,7 +106,7 @@ using namespace opencog;
 
 bool Recognizer::do_search(PatternMatchEngine* pme, const Handle& top)
 {
-	if (top->isLink())
+	if (top->is_link())
 	{
 		// Recursively drill down and explore every possible node as
 		// a search starting point. This is needed, as the patterns we
@@ -127,8 +127,8 @@ bool Recognizer::do_search(PatternMatchEngine* pme, const Handle& top)
 		Handle h(iset[i]);
 		dbgprt("rrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrr\n");
 		dbgprt("Loop candidate (%lu - %s):\n%s\n", _cnt++,
-		       top->toShortString().c_str(),
-		       h->toShortString().c_str());
+		       top->to_short_string().c_str(),
+		       h->to_short_string().c_str());
 		bool found = pme->explore_neighborhood(_root, _starter_term, h);
 
 		// Terminate search if satisfied.
@@ -159,7 +159,7 @@ bool Recognizer::node_match(const Handle& npat_h, const Handle& nsoln_h)
 	if (match) return true;
 
 	if (npat_h == nsoln_h) return true;
-	if (VARIABLE_NODE == nsoln_h->getType()) return true;
+	if (VARIABLE_NODE == nsoln_h->get_type()) return true;
 	return false;
 }
 
@@ -172,7 +172,7 @@ bool Recognizer::link_match(const PatternTermPtr& ptm, const Handle& lsoln)
 	if (lpat == lsoln) return true;
 
 	// mis-matched types are a dead-end.
-	if (lpat->getType() != lsoln->getType()) return false;
+	if (lpat->get_type() != lsoln->get_type()) return false;
 
 	// TODO: Change to something better if possible...
 	// What is happening here is to manually call the
@@ -203,7 +203,7 @@ bool Recognizer::link_match(const PatternTermPtr& ptm, const Handle& lsoln)
 	// all the glob-matching logic is there, so it
 	// should be able to handle this better.
 	if (contains_atomtype(lsoln, GLOB_NODE) and
-	    lpat->getArity() == lsoln->getArity())
+	    lpat->get_arity() == lsoln->get_arity())
 	{
 		if (fuzzy_match(lpat, lsoln))
 		{
@@ -218,13 +218,13 @@ bool Recognizer::link_match(const PatternTermPtr& ptm, const Handle& lsoln)
 
 bool Recognizer::loose_match(const Handle& npat_h, const Handle& nsoln_h)
 {
-	Type gtype = nsoln_h->getType();
+	Type gtype = nsoln_h->get_type();
 	// Variable matches anything; move to next.
 	if (VARIABLE_NODE == gtype) return true;
 
 	// Strict match for link types.
-	if (npat_h->getType() != gtype) return false;
-	if (not npat_h->isNode()) return true;
+	if (npat_h->get_type() != gtype) return false;
+	if (not npat_h->is_node()) return true;
 
 	// If we are here, we know we have nodes. Ask for a strict match.
 	if (npat_h != nsoln_h) return false;
@@ -237,7 +237,7 @@ bool Recognizer::fuzzy_match(const Handle& npat_h, const Handle& nsoln_h)
 	// Try to match them, fairly rigorously. Exactly what constitutes
 	// an OK match is still a bit up in the air.
 
-	if (not npat_h->isLink() or not nsoln_h->isLink()) return false;
+	if (not npat_h->is_link() or not nsoln_h->is_link()) return false;
 
 	const HandleSeq &osg = nsoln_h->getOutgoingSet();
 	size_t osg_size = osg.size();
@@ -246,7 +246,7 @@ bool Recognizer::fuzzy_match(const Handle& npat_h, const Handle& nsoln_h)
 	bool have_glob = false;
 	for (size_t j=0; j<osg_size; j++)
 	{
-		if (osg[j]->getType() == GLOB_NODE)
+		if (osg[j]->get_type() == GLOB_NODE)
 		{
 			have_glob = true;
 			break;
@@ -266,7 +266,7 @@ bool Recognizer::fuzzy_match(const Handle& npat_h, const Handle& nsoln_h)
 		if (ip == osp_size) ip--;
 		if (jg == osg_size) jg--;
 
-		if (GLOB_NODE != osg[jg]->getType())
+		if (GLOB_NODE != osg[jg]->get_type())
 		{
 			if (loose_match(osp[ip], osg[jg])) continue;
 			return false;
@@ -280,7 +280,7 @@ bool Recognizer::fuzzy_match(const Handle& npat_h, const Handle& nsoln_h)
 		const Handle& post(osg[jg+1]);
 
 		// If the post is also a GlobNode, we are done for this one.
-		if (GLOB_NODE == post->getType()) return true;
+		if (GLOB_NODE == post->get_type()) return true;
 
 		// Match as many as possible.
 		while (ip < osp_size and not loose_match(osp[ip], post))

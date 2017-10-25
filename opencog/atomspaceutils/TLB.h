@@ -91,7 +91,7 @@ public:
      * @return UUID of the newly added atom.
      */
     UUID addAtom(const AtomPtr& a, UUID uuid) {
-        return addAtom(a->getHandle(), uuid);
+        return addAtom(a->get_handle(), uuid);
     }
     UUID addAtom(const Handle&, UUID);
 
@@ -103,7 +103,7 @@ public:
 
     /** Remove the atom. */
     void removeAtom(const AtomPtr& a) {
-        return removeAtom(a->getHandle());
+        return removeAtom(a->get_handle());
     }
     void removeAtom(const Handle&);
     void removeAtom(UUID);

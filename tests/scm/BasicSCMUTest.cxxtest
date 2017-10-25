@@ -178,8 +178,8 @@ void BasicSCMUTest::check_node(const char * tipo, const char * nodename, float t
 	if (n)
 	{
 		TruthValuePtr tv = n->getTruthValue();
-		float m = tv->getMean();
-		float c = tv->getConfidence();
+		float m = tv->get_mean();
+		float c = tv->get_confidence();
 
 		TS_ASSERT_LESS_THAN_EQUALS(fabs(m-truth), 1.0e-6);
 		TS_ASSERT_LESS_THAN_EQUALS(fabs(c-conf), 1.0e-6);
@@ -331,17 +331,17 @@ void BasicSCMUTest::check_truth_value(const TruthValuePtr& tv)
 	// set its truth value
 	stringstream ss;
 	ss << "(cog-set-tv! " << add_node_str << "(";
-	Type tvt = tv->getType();
+	Type tvt = tv->get_type();
 	if (tvt == SIMPLE_TRUTH_VALUE)
-		ss << "cog-new-stv " << tv->getMean() << " " << tv->getConfidence();
+		ss << "cog-new-stv " << tv->get_mean() << " " << tv->get_confidence();
 	else if (tvt == COUNT_TRUTH_VALUE)
-		ss << "cog-new-stv " << tv->getMean() << " " << tv->getConfidence()
-		   << " " << tv->getCount();
+		ss << "cog-new-stv " << tv->get_mean() << " " << tv->get_confidence()
+		   << " " << tv->get_count();
 	else if (tvt == INDEFINITE_TRUTH_VALUE) {
 		const IndefiniteTruthValuePtr& itv =
 			dynamic_pointer_cast<const IndefiniteTruthValue>(tv);
 		ss << "cog-new-itv " << itv->getL() << " " << itv->getU()
-		   << " " << itv->getConfidence();
+		   << " " << itv->get_confidence();
 	}
 	else {
 		ss << "Wrong Truth Value Type (" << tvt << ")";
@@ -359,7 +359,7 @@ void BasicSCMUTest::check_truth_value(const TruthValuePtr& tv)
 	Handle h = as->get_handle(NODE, node_str);
 	TSM_ASSERT("Failed to get the handle", h != Handle::UNDEFINED);
 	// hack to avoid floating error
-	bool tv_eq = tv->toString() == h->getTruthValue()->toString();
+	bool tv_eq = tv->to_string() == h->getTruthValue()->to_string();
 	TSM_ASSERT("TVs are different", tv_eq);
 
 	// remove Node so we can redo the test
@@ -527,8 +527,8 @@ void BasicSCMUTest::check_link(const char * tipo, Type type,
 	for (i = links.begin(); i != links.end(); ++i)
 	{
 		TruthValuePtr tv = (*i)->getTruthValue();
-		float m = tv->getMean();
-		float c = tv->getConfidence();
+		float m = tv->get_mean();
+		float c = tv->get_confidence();
 		TS_ASSERT_LESS_THAN_EQUALS(fabs(m - truth), 1.0e-6);
 		TS_ASSERT_LESS_THAN_EQUALS(fabs(c - conf), 1.0e-6);
 		//printf("Link TruthValue: %f -- %f\n", m, c);
@@ -623,8 +623,8 @@ void BasicSCMUTest::test_link_tv_setting(void)
 	TSM_ASSERT("Failed to create a link", !eval_err);
 
 	TruthValuePtr tv = inh->getTruthValue();
-	float m = tv->getMean();
-	float c = tv->getConfidence();
+	float m = tv->get_mean();
+	float c = tv->get_confidence();
 	TS_ASSERT_LESS_THAN_EQUALS(fabs(m - 0.75), 1.0e-6);
 	TS_ASSERT_LESS_THAN_EQUALS(fabs(c - 0.25), 1.0e-6);
 
@@ -636,8 +636,8 @@ void BasicSCMUTest::test_link_tv_setting(void)
 	TSM_ASSERT("Failed to update a link", !eval_err);
 
 	tv = inh->getTruthValue();
-	m = tv->getMean();
-	c = tv->getConfidence();
+	m = tv->get_mean();
+	c = tv->get_confidence();
 	TS_ASSERT_LESS_THAN_EQUALS(fabs(m - 0.6), 1.0e-6);
 	TS_ASSERT_LESS_THAN_EQUALS(fabs(c - 0.42), 1.0e-6);
 
@@ -668,8 +668,8 @@ void BasicSCMUTest::check_parse_link(const char * tipo, Type type,
 	for (i = links.begin(); i != links.end(); ++i)
 	{
 		TruthValuePtr tv = (*i)->getTruthValue();
-		float m = tv->getMean();
-		float c = tv->getConfidence();
+		float m = tv->get_mean();
+		float c = tv->get_confidence();
 		//the link has TV 0.0
 		TS_ASSERT_EQUALS(m, 1.0); // DEFAULT_TV is true with no confidence
 		TS_ASSERT_EQUALS(c, 0.0);
@@ -685,8 +685,8 @@ void BasicSCMUTest::check_parse_link(const char * tipo, Type type,
 	if (n1)
 	{
 		TruthValuePtr tv = n1->getTruthValue();
-		float m = tv->getMean();
-		float c = tv->getConfidence();
+		float m = tv->get_mean();
+		float c = tv->get_confidence();
 		TS_ASSERT_LESS_THAN_EQUALS(fabs(m - truth), 1.0e-6);
 		TS_ASSERT_LESS_THAN_EQUALS(fabs(c - conf), 1.0e-6);
 	}

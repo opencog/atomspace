@@ -52,7 +52,7 @@ void UniqueLink::init(bool allow_open)
 				{
 					throw InvalidParamException(TRACE_INFO,
 					      "Already defined: %s\n",
-					       alias->toString().c_str());
+					       alias->to_string().c_str());
 				}
 			}
 		}
@@ -84,7 +84,7 @@ UniqueLink::UniqueLink(const Link &l)
 	: FreeLink(l)
 {
 	// Type must be as expected
-	Type type = l.getType();
+	Type type = l.get_type();
 	if (not classserver().isA(type, UNIQUE_LINK))
 	{
 		const std::string& tname = classserver().getTypeName(type);
@@ -117,14 +117,14 @@ Handle UniqueLink::get_unique(const Handle& alias, Type type,
 				UniqueLinkPtr ulp(UniqueLinkCast(defl));
 				if (0 < ulp->get_vars().varseq.size()) continue;
 			}
-			return defl->getHandle();
+			return defl->get_handle();
 		}
 	}
 
 	// There is no definition for the alias.
 	throw InvalidParamException(TRACE_INFO,
 	                            "Cannot find defined hypergraph for atom %s",
-	                            alias->toString().c_str());
+	                            alias->to_string().c_str());
 }
 
 DEFINE_LINK_FACTORY(UniqueLink, UNIQUE_LINK)

@@ -47,7 +47,7 @@ RandomChoiceLink::RandomChoiceLink(const Link &l)
 	: FunctionLink(l)
 {
 	// Type must be as expected
-	Type tscope = l.getType();
+	Type tscope = l.get_type();
 	if (not classserver().isA(tscope, RANDOM_CHOICE_LINK))
 	{
 		const std::string& tname = classserver().getTypeName(tscope);
@@ -135,7 +135,7 @@ Handle RandomChoiceLink::execute(AtomSpace * as) const
 
 	// Special-case handling for SetLinks, so it works with
 	// dynamically-evaluated PutLinks ...
-	Type ot = ofirst->getType();
+	Type ot = ofirst->get_type();
 	if (1 == ary and (SET_LINK == ot or LIST_LINK == ot))
 	{
 		// Search for ListLink pairs, w/car of pair a number.
@@ -143,7 +143,7 @@ Handle RandomChoiceLink::execute(AtomSpace * as) const
 		std::vector<double> weights;
 		for (const Handle& h : ofirst->getOutgoingSet())
 		{
-			if (LIST_LINK != h->getType()) goto uniform;
+			if (LIST_LINK != h->get_type()) goto uniform;
 
 			const HandleSeq& oset = h->getOutgoingSet();
 			if (2 != oset.size()) goto uniform;
@@ -167,7 +167,7 @@ Handle RandomChoiceLink::execute(AtomSpace * as) const
 		return choices[randy.rand_discrete(weights)];
 
 uniform:
-		ary = ofirst->getArity();
+		ary = ofirst->get_arity();
 		if (0 == ary)
 			throw RuntimeException(TRACE_INFO,
 				"Asked to choose element from empty set!");
@@ -180,7 +180,7 @@ uniform:
 		const Handle& choices(_outgoing[1]);
 
 		// ofirst are the weights
-		if (ofirst->getArity() != choices->getArity())
+		if (ofirst->get_arity() != choices->get_arity())
 			throw SyntaxException(TRACE_INFO,
 				"Weights and choices must be the same size");
 

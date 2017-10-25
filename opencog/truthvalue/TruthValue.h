@@ -111,7 +111,7 @@ public:
     static TruthValuePtr factory(Type, const std::vector<double>&);
     static TruthValuePtr factory(const ProtoAtomPtr&);
 
-    virtual std::string toShortString(const std::string&) const;
+    virtual std::string to_short_string(const std::string&) const;
 
     // Special TVs
 
@@ -140,9 +140,9 @@ public:
      */
     static TruthValuePtr TRIVIAL_TV();
 
-    virtual strength_t getMean()  const = 0;
-    virtual confidence_t getConfidence()  const = 0;
-    virtual count_t getCount()  const = 0;
+    virtual strength_t get_mean()  const = 0;
+    virtual confidence_t get_confidence()  const = 0;
+    virtual count_t get_count()  const = 0;
 
     virtual TruthValuePtr clone() const  = 0;
     virtual TruthValue* rawclone() const  = 0;

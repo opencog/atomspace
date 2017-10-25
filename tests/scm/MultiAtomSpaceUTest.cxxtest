@@ -120,7 +120,7 @@ void MultiAtomSpace::test_two_scm(void)
 	CHKERR;
 
 	TSM_ASSERT("Failed to create atom", Handle::UNDEFINED != h1);
-	TSM_ASSERT_EQUALS("Wrong atom type", CONCEPT_NODE, h1->getType());
+	TSM_ASSERT_EQUALS("Wrong atom type", CONCEPT_NODE, h1->get_type());
 
 	// Create the 'same' ConceptNode in a different atomspace
 	Handle h2 = evaluator->eval_h(
@@ -128,7 +128,7 @@ void MultiAtomSpace::test_two_scm(void)
 	CHKERR;
 
 	TSM_ASSERT("Failed to create atom", Handle::UNDEFINED != h2);
-	TSM_ASSERT_EQUALS("Wrong atom type", CONCEPT_NODE, h2->getType());
+	TSM_ASSERT_EQUALS("Wrong atom type", CONCEPT_NODE, h2->get_type());
 
 	printf ("h1 = %lu %p\n", h1.value(), h1.operator->());
 	printf ("h2 = %lu %p\n", h2.value(), h2.operator->());
@@ -229,7 +229,7 @@ void MultiAtomSpace::test_load(void)
 	printf ("counter1 = %lu %p\n", counter1.value(), counter1.operator->());
 
 	TSM_ASSERT("Failed to find atom", Handle::UNDEFINED != counter1);
-	TSM_ASSERT_EQUALS("Wrong atom type", CONCEPT_NODE, counter1->getType());
+	TSM_ASSERT_EQUALS("Wrong atom type", CONCEPT_NODE, counter1->get_type());
 
 	ev1->eval("(test-incr-cnt)");
 	CHKEV(ev1);
@@ -241,8 +241,8 @@ void MultiAtomSpace::test_load(void)
 	CHKEV(ev1);
 	TruthValuePtr tv1 = counter1->getTruthValue();
 
-	TSM_ASSERT_EQUALS("Wrong truth value type", COUNT_TRUTH_VALUE, tv1->getType());
-	TSM_ASSERT_EQUALS("wrong count found", 4, (int)(tv1->getCount()));
+	TSM_ASSERT_EQUALS("Wrong truth value type", COUNT_TRUTH_VALUE, tv1->get_type());
+	TSM_ASSERT_EQUALS("wrong count found", 4, (int)(tv1->get_count()));
 
 	// Count tv in atomspace2 should be unscathed. ----------------------------
 	ev2->eval("(set! counter (ConceptNode \"asdf\"))");
@@ -251,7 +251,7 @@ void MultiAtomSpace::test_load(void)
 	printf ("counter2 = %lu %p\n", counter2.value(), counter2.operator->());
 
 	TSM_ASSERT("Failed to find atom", Handle::UNDEFINED != counter2);
-	TSM_ASSERT_EQUALS("Wrong atom type", CONCEPT_NODE, counter2->getType());
+	TSM_ASSERT_EQUALS("Wrong atom type", CONCEPT_NODE, counter2->get_type());
 
 	TSM_ASSERT("Atoms fail to differ", counter1 != counter2);
 
@@ -260,8 +260,8 @@ void MultiAtomSpace::test_load(void)
 
 	TruthValuePtr tv2 = counter2->getTruthValue();
 
-	TSM_ASSERT_EQUALS("Wrong truth value type", COUNT_TRUTH_VALUE, tv2->getType());
-	TSM_ASSERT_EQUALS("wrong count found", 1, (int)(tv2->getCount()));
+	TSM_ASSERT_EQUALS("Wrong truth value type", COUNT_TRUTH_VALUE, tv2->get_type());
+	TSM_ASSERT_EQUALS("wrong count found", 1, (int)(tv2->get_count()));
 
 	// Count tv in atomspace1 should be unscathed. ----------------------------
 	ev1->eval("(set! counter (ConceptNode \"asdf\"))");
@@ -270,14 +270,14 @@ void MultiAtomSpace::test_load(void)
 	printf ("counter3 = %lu %p\n", counter3.value(), counter3.operator->());
 
 	TSM_ASSERT("Failed to find atom", Handle::UNDEFINED != counter3);
-	TSM_ASSERT_EQUALS("Wrong atom type", CONCEPT_NODE, counter3->getType());
+	TSM_ASSERT_EQUALS("Wrong atom type", CONCEPT_NODE, counter3->get_type());
 
 	TSM_ASSERT("Atoms should be same", counter1 == counter3);
 
 	TruthValuePtr tv3 = counter3->getTruthValue();
 
-	TSM_ASSERT_EQUALS("Wrong truth value type", COUNT_TRUTH_VALUE, tv3->getType());
-	TSM_ASSERT_EQUALS("wrong count found", 4, (int)(tv3->getCount()));
+	TSM_ASSERT_EQUALS("Wrong truth value type", COUNT_TRUTH_VALUE, tv3->get_type());
+	TSM_ASSERT_EQUALS("wrong count found", 4, (int)(tv3->get_count()));
 
 	delete ev1;
 	delete ev2;
@@ -359,8 +359,8 @@ void MultiAtomSpace::test_nest_scm(void)
 
 	TSM_ASSERT("Failed to create atom", Handle::UNDEFINED != ha);
 	TSM_ASSERT("Failed to create atom", Handle::UNDEFINED != hb);
-	TSM_ASSERT_EQUALS("Wrong atom type", CONCEPT_NODE, ha->getType());
-	TSM_ASSERT_EQUALS("Wrong atom type", CONCEPT_NODE, hb->getType());
+	TSM_ASSERT_EQUALS("Wrong atom type", CONCEPT_NODE, ha->get_type());
+	TSM_ASSERT_EQUALS("Wrong atom type", CONCEPT_NODE, hb->get_type());
 
 	// Get these same atoms in the nested space
 	Handle hna = evaluator->eval_h(
@@ -452,8 +452,8 @@ void MultiAtomSpace::test_arg_scm(void)
 
 	TSM_ASSERT("Failed to create atom", Handle::UNDEFINED != ha);
 	TSM_ASSERT("Failed to create atom", Handle::UNDEFINED != hb);
-	TSM_ASSERT_EQUALS("Wrong atom type", CONCEPT_NODE, ha->getType());
-	TSM_ASSERT_EQUALS("Wrong atom type", CONCEPT_NODE, hb->getType());
+	TSM_ASSERT_EQUALS("Wrong atom type", CONCEPT_NODE, ha->get_type());
+	TSM_ASSERT_EQUALS("Wrong atom type", CONCEPT_NODE, hb->get_type());
 
 	// Create a link in the arg atomspace
 	Handle hl = evaluator->eval_h(

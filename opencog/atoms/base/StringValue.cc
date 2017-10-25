@@ -26,7 +26,7 @@ using namespace opencog;
 
 bool StringValue::operator==(const ProtoAtom& other) const
 {
-	if (STRING_VALUE != other.getType()) return false;
+	if (STRING_VALUE != other.get_type()) return false;
 
 	const StringValue* sov = (const StringValue*) &other;
 
@@ -39,7 +39,7 @@ bool StringValue::operator==(const ProtoAtom& other) const
 
 // ==============================================================
 
-std::string StringValue::toString(const std::string& indent) const
+std::string StringValue::to_string(const std::string& indent) const
 {
 	std::string rv = indent + "(StringValue";
 	for (std::string v :_value)

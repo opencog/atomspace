@@ -47,7 +47,7 @@ SleepLink::SleepLink(const HandleSeq& oset, Type t)
 		throw SyntaxException(TRACE_INFO,
 			"SleepLink expects only one argument");
 
-	Type tf = oset[0]->getType();
+	Type tf = oset[0]->get_type();
 	if (NUMBER_NODE != tf and classserver().isA(tf, FUNCTION_LINK))
 		throw SyntaxException(TRACE_INFO,
 			"Expecting a NumberNode or something that returns a NumberNode");
@@ -57,7 +57,7 @@ SleepLink::SleepLink(const Link &l)
 	: FunctionLink(l)
 {
 	// Type must be as expected
-	Type tscope = l.getType();
+	Type tscope = l.get_type();
 	if (not classserver().isA(tscope, SLEEP_LINK))
 	{
 		const std::string& tname = classserver().getTypeName(tscope);
@@ -80,7 +80,7 @@ Handle SleepLink::execute(AtomSpace * as) const
 		throw RuntimeException(TRACE_INFO,
 			"Expecting an NumberNode, got %s",
 				(nullptr == time) ? "<invalid handle>" :
-					classserver().getTypeName(time->getType()).c_str());
+					classserver().getTypeName(time->get_type()).c_str());
 
 	double length = nsle->get_value();
 	unsigned int secs = floor(length);

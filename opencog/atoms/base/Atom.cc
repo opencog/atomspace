@@ -66,7 +66,7 @@ hash<opencog::WinkPtr>::operator()(const opencog::WinkPtr& w) const noexcept
 {
     opencog::LinkPtr h(w.lock());
     if (nullptr == h) return 0;
-    return h->getType();
+    return h->get_type();
 }
 
 bool
@@ -127,7 +127,7 @@ void Atom::setTruthValue(const TruthValuePtr& newTV)
 
     if (_atom_space != nullptr) {
         TVCHSigl& tvch = _atom_space->_atom_table.TVChangedSignal();
-        tvch(getHandle(), oldTV, newTV);
+        tvch(get_handle(), oldTV, newTV);
     }
 }
 
@@ -204,8 +204,8 @@ std::string Atom::valuesToString() const
     for (const Handle& k: keys)
     {
         ProtoAtomPtr p = getValue(k);
-        rv += "; key = " + k->toString();
-        rv += "; val = " + p->toString() + "\n";
+        rv += "; key = " + k->to_string();
+        rv += "; val = " + p->to_string() + "\n";
     }
     return rv;
 }
@@ -299,7 +299,7 @@ void Atom::insert_atom(const LinkPtr& a)
     if (nullptr == _incoming_set) return;
     std::lock_guard<std::mutex> lck (_mtx);
 
-    Type at = a->getType();
+    Type at = a->get_type();
     auto bucket = _incoming_set->_iset.find(at);
     if (bucket == _incoming_set->_iset.end())
     {
@@ -322,7 +322,7 @@ void Atom::remove_atom(const LinkPtr& a)
 #ifdef INCOMING_SET_SIGNALS
     _incoming_set->_removeAtomSignal(shared_from_this(), a);
 #endif /* INCOMING_SET_SIGNALS */
-    Type at = a->getType();
+    Type at = a->get_type();
     auto bucket = _incoming_set->_iset.find(at);
     bucket->second.erase(a);
 }
@@ -338,11 +338,11 @@ void Atom::swap_atom(const LinkPtr& old, const LinkPtr& neu)
 #ifdef INCOMING_SET_SIGNALS
     _incoming_set->_removeAtomSignal(shared_from_this(), old);
 #endif /* INCOMING_SET_SIGNALS */
-    Type ot = old->getType();
+    Type ot = old->get_type();
     auto bucket = _incoming_set->_iset.find(ot);
     bucket->second.erase(old);
 
-    Type nt = neu->getType();
+    Type nt = neu->get_type();
     bucket = _incoming_set->_iset.find(nt);
     if (bucket == _incoming_set->_iset.end())
     {
@@ -430,7 +430,7 @@ IncomingSet Atom::getIncomingSetByType(Type type) const
     return result;
 }
 
-std::string Atom::idToString() const
+std::string Atom::id_to_string() const
 {
     return
         std::string("[") + std::to_string(get_hash()) + "]" +
@@ -442,7 +442,7 @@ std::string oc_to_string(const IncomingSet& iset)
 	std::stringstream ss;
 	ss << "size = " << iset.size() << std::endl;
 	for (unsigned i = 0; i < iset.size(); i++)
-		ss << "link[" << i << "]:" << std::endl << iset[i]->toString();
+		ss << "link[" << i << "]:" << std::endl << iset[i]->to_string();
 	return ss.str();
 }
 

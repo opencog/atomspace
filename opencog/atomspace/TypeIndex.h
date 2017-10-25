@@ -58,11 +58,11 @@ class TypeIndex : public FixedIntegerIndex
 		void resize(void);
 		void insertAtom(Atom* a)
 		{
-			insert(a->getType(), a);
+			insert(a->get_type(), a);
 		}
 		void removeAtom(Atom* a)
 		{
-			remove(a->getType(), a);
+			remove(a->get_type(), a);
 		}
 
 		class iterator

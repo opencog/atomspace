@@ -247,7 +247,7 @@ void AtomspaceHTabler::storeAtom(Handle h)
     {
         // Store the name
         key.column_family = "name";
-        m_handle_mutator->set(key, as->getName(h).c_str(), as->getName(h).length());
+        m_handle_mutator->set(key, as->get_name(h).c_str(), as->get_name(h).length());
 
         // Store the handle in Nametable
         KeySpec name_key;
@@ -256,7 +256,7 @@ void AtomspaceHTabler::storeAtom(Handle h)
         char r[BUFF_SIZE];
         int len = snprintf(r, BUFF_SIZE, "%hu", as->getType(h));
 
-        std::string name_index = as->getName(h) + ',' + std::string(r,len);
+        std::string name_index = as->get_name(h) + ',' + std::string(r,len);
         name_key.row = name_index.c_str();
         name_key.row_len = name_index.length();
         name_key.column_family = "handle";
@@ -342,7 +342,7 @@ void AtomspaceHTabler::storeAtom(Handle h)
         return;
     }
     val_len = snprintf(val, BUFF_SIZE, "(%f, %f)",
-                tv.getMean(), tv.getCount());
+                tv.get_mean(), tv.get_count());
     key.column_family = "stv";
     m_handle_mutator->set(key, val, val_len);
 

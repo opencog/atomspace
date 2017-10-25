@@ -107,14 +107,14 @@ void GetStateUTest::Getter(void)
 		Handle got = eval->eval_h("(cog-execute! getter)");
 
 		TSM_ASSERT("Expected a valid handle", nullptr != got);
-		TSM_ASSERT("Expected a StateLink", got->getType() == SET_LINK);
-		if (1 != got->getArity())
+		TSM_ASSERT("Expected a StateLink", got->get_type() == SET_LINK);
+		if (1 != got->get_arity())
 		{
 			fail_count++;
 			printf("Ohh nooo: failure %d got %s\n", fail_count,
-				got->toString().c_str());
+				got->to_string().c_str());
 		}
-		TSM_ASSERT("Expected arity of one", got->getArity() == 1);
+		TSM_ASSERT("Expected arity of one", got->get_arity() == 1);
 		// sched_yield();
 	}
 

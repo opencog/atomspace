@@ -463,8 +463,8 @@ void SCMExecutionOutputUTest::test_numeric(void)
 	Handle nexp = eval->eval_h("(cog-execute! expr)");
 	CHKEV(eval);
 	Handle twntyfour = eval->eval_h("(NumberNode 24)");
-	std::cout << "Expression is " << nexp->toString() << std::endl;
-	std::cout << "Expected " << twntyfour->toString() << std::endl;
+	std::cout << "Expression is " << nexp->to_string() << std::endl;
+	std::cout << "Expected " << twntyfour->to_string() << std::endl;
 	TS_ASSERT_EQUALS(nexp, twntyfour);
 
 	NumberNodePtr ne(NumberNodeCast(nexp));
@@ -489,7 +489,7 @@ void SCMExecutionOutputUTest::test_boolean(void)
 	// Evaluate the boolean expreson; it should be true.
 	TruthValuePtr tv = eval->eval_tv("(cog-evaluate! expr)");
 	CHKEV(eval);
-	TS_ASSERT_LESS_THAN_EQUALS(0.999, tv->getMean());
+	TS_ASSERT_LESS_THAN_EQUALS(0.999, tv->get_mean());
 
 	// Another boolean expression
 	Handle boolex = eval->eval_h(
@@ -501,7 +501,7 @@ void SCMExecutionOutputUTest::test_boolean(void)
 
 	// When evaluated, this one should be false.
 	tv = EvaluationLink::do_evaluate(as, boolex);
-	TS_ASSERT_LESS_THAN_EQUALS(tv->getMean(), 0.001);
+	TS_ASSERT_LESS_THAN_EQUALS(tv->get_mean(), 0.001);
 }
 
 void SCMExecutionOutputUTest::test_dsn(void)
@@ -534,8 +534,8 @@ void SCMExecutionOutputUTest::test_dsn(void)
 	CHKEV(eval);
 
 	Handle expect = eval->eval_h("(NumberNode 42)");
-	std::cout << "Expression is " << result->toString() << std::endl;
-	std::cout << "Expected " << expect->toString() << std::endl;
+	std::cout << "Expression is " << result->to_string() << std::endl;
+	std::cout << "Expected " << expect->to_string() << std::endl;
 	TS_ASSERT_EQUALS(result, expect);
 
 	// Same as above, but without the define.
@@ -557,8 +557,8 @@ void SCMExecutionOutputUTest::test_dsn(void)
 	);
 	CHKEV(eval);
 
-	std::cout << "Lambda is " << result->toString() << std::endl;
-	std::cout << "Expected " << expect->toString() << std::endl;
+	std::cout << "Lambda is " << result->to_string() << std::endl;
+	std::cout << "Expected " << expect->to_string() << std::endl;
 	TS_ASSERT_EQUALS(result, expect);
 }
 
@@ -584,8 +584,8 @@ void SCMExecutionOutputUTest::test_execute_single_arg(void)
 
 	Handle expect =
 		eval->eval_h("(And (Concept \"A\") (Concept \"B\"))");
-	std::cout << "Expression is " << result->toString() << std::endl;
-	std::cout << "Expected " << expect->toString() << std::endl;
+	std::cout << "Expression is " << result->to_string() << std::endl;
+	std::cout << "Expected " << expect->to_string() << std::endl;
 	TS_ASSERT_EQUALS(result, expect);
 
 	// Test scheme execution function taking a single argument that
@@ -604,8 +604,8 @@ void SCMExecutionOutputUTest::test_execute_single_arg(void)
 	expect =
 		eval->eval_h("(And (Concept \"A\")"
 		             "     (And (Concept \"A\") (Concept \"B\")))");
-	std::cout << "Expression is " << result->toString() << std::endl;
-	std::cout << "Expected " << expect->toString() << std::endl;
+	std::cout << "Expression is " << result->to_string() << std::endl;
+	std::cout << "Expected " << expect->to_string() << std::endl;
 	TS_ASSERT_EQUALS(result, expect);
 }
 

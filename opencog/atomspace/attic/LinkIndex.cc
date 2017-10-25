@@ -48,7 +48,7 @@ size_t LinkIndex::size() const
 
 void LinkIndex::insertAtom(const AtomPtr& a)
 {
-	Type t = a->getType();
+	Type t = a->get_type();
 	HandleSeqIndex &hsi = idx[t];
 
 	LinkPtr l(LinkCast(a));
@@ -59,7 +59,7 @@ void LinkIndex::insertAtom(const AtomPtr& a)
 
 void LinkIndex::removeAtom(const AtomPtr& a)
 {
-	Type t = a->getType();
+	Type t = a->get_type();
 	HandleSeqIndex &hsi = idx.at(t);
 
 	LinkPtr l(LinkCast(a));
@@ -72,7 +72,7 @@ Handle LinkIndex::getHandle(Type t, const HandleSeq &seq) const
 {
 	const HandleSeqIndex &hsi = idx.at(t);
 	Link* l = hsi.get(seq);
-	if (l) return l->getHandle();
+	if (l) return l->get_handle();
 	return Handle::UNDEFINED;
 }
 
@@ -97,7 +97,7 @@ UnorderedHandleSet LinkIndex::getHandleSet(Type type,
 				const HandleSeqIndex &hsi = idx.at(s);
 				Link* l = hsi.get(seq);
 				if (l)
-					hs.insert(l->getHandle());
+					hs.insert(l->get_handle());
 			}
 		}
 	}

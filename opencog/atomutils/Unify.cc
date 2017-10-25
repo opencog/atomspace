@@ -43,7 +43,7 @@ Unify::CHandle::CHandle(const Handle& h, const Context& c)
 
 bool Unify::CHandle::is_variable() const
 {
-	return handle->getType() == VARIABLE_NODE;
+	return handle->get_type() == VARIABLE_NODE;
 }
 
 bool Unify::CHandle::is_free_variable() const
@@ -70,7 +70,7 @@ Unify::CHandle::find_variables(const Handle& h) const
 
 bool Unify::CHandle::is_consumable() const
 {
-	return context.quotation.consumable(handle->getType());
+	return context.quotation.consumable(handle->get_type());
 }
 
 bool Unify::CHandle::is_quoted() const
@@ -270,7 +270,7 @@ Handle Unify::substitution_vardecl(const HandleCHandleMap& var2val) const
 
 bool Unify::is_pm_connector(const Handle& h)
 {
-	return is_pm_connector(h->getType());
+	return is_pm_connector(h->get_type());
 }
 
 bool Unify::is_pm_connector(Type t)
@@ -312,15 +312,15 @@ Handle Unify::consume_ill_quotations(const Variables& variables, Handle h,
                                      Quotation quotation, bool escape)
 {
 	// Base case
-	if (h->isNode())
+	if (h->is_node())
 		return h;
 
 	// Recursive cases
-	Type t = h->getType();
+	Type t = h->get_type();
 	if (quotation.consumable(t)) {
 		if (t == QUOTE_LINK) {
 			Handle scope = h->getOutgoingAtom(0);
-			OC_ASSERT(classserver().isA(scope->getType(), SCOPE_LINK),
+			OC_ASSERT(classserver().isA(scope->get_type(), SCOPE_LINK),
 			          "This defaults the assumption, see this function comment");
 			// Check whether the vardecl of scope is bound to the
 			// ancestor scope rather than itself, if so escape the
@@ -355,7 +355,7 @@ bool Unify::is_bound_to_ancestor(const Variables& variables,
                                  const Handle& local_scope)
 {
 	Handle unquote = local_scope->getOutgoingAtom(0);
-	if (unquote->getType() == UNQUOTE_LINK) {
+	if (unquote->get_type() == UNQUOTE_LINK) {
 		Handle var = unquote->getOutgoingAtom(0);
 		return variables.is_in_varset(var);
 	}
@@ -412,7 +412,7 @@ Handle Unify::substitute(BindLinkPtr bl, const HandleMap& var2val,
 		hs.insert(hs.begin(), vardecl);
 
 	// Create the substituted BindLink
-	return createLink(hs, bl->getType());
+	return createLink(hs, bl->get_type());
 }
 
 Handle Unify::substitute_vardecl(const Handle& vardecl,
@@ -421,14 +421,14 @@ Handle Unify::substitute_vardecl(const Handle& vardecl,
 	if (not vardecl)
 		return Handle::UNDEFINED;
 
-	Type t = vardecl->getType();
+	Type t = vardecl->get_type();
 
 	// Base cases
 
 	if (t == VARIABLE_NODE) {
 		auto it = var2val.find(vardecl);
 		// Only substitute if the variable is substituted by another variable
-		if (it != var2val.end() and it->second->getType() == VARIABLE_NODE)
+		if (it != var2val.end() and it->second->get_type() == VARIABLE_NODE)
 			return it->second;
 		return Handle::UNDEFINED;
 	}
@@ -472,7 +472,7 @@ Handle Unify::remove_constant_clauses(const Handle& vardecl,
 	HandleSet vars = vl->get_variables().varset;
 
 	// Remove constant clauses
-	Type t = clauses->getType();
+	Type t = clauses->get_type();
 	HandleSeq hs;
 	if (t == AND_LINK) {
 		for (const Handle& clause : clauses->getOutgoingSet()) {
@@ -504,8 +504,8 @@ Unify::SolutionSet Unify::unify(const CHandle& lhs, const CHandle& rhs) const
 Unify::SolutionSet Unify::unify(const Handle& lh, const Handle& rh,
                                 Context lc, Context rc) const
 {
-	Type lt(lh->getType());
-	Type rt(rh->getType());
+	Type lt(lh->get_type());
+	Type rt(rh->get_type());
 
 	///////////////////
 	// Base cases    //
@@ -519,7 +519,7 @@ Unify::SolutionSet Unify::unify(const Handle& lh, const Handle& rh,
 	CHandle rch(rh, rc);
 
 	// If one is a node
-	if (lh->isNode() or rh->isNode()) {
+	if (lh->is_node() or rh->is_node()) {
 		// If one is a free variable and they are different, then
 		// unifies.
 		if (lch.is_free_variable() or rch.is_free_variable()) {
@@ -571,8 +571,8 @@ Unify::SolutionSet Unify::unify(const Handle& lh, const Handle& rh,
 
 	// At this point they are both links of the same type, check that
 	// they have the same arity
-	Arity lh_arity(lh->getArity());
-	Arity rh_arity(rh->getArity());
+	Arity lh_arity(lh->get_arity());
+	Arity rh_arity(rh->get_arity());
 	if (lh_arity != rh_arity)
 		return SolutionSet();
 
@@ -671,7 +671,7 @@ Unify::SolutionSet Unify::comb_unify(const std::set<CHandle>& chs) const
 	
 bool Unify::is_unordered(const Handle& h) const
 {
-	return classserver().isA(h->getType(), UNORDERED_LINK);
+	return classserver().isA(h->get_type(), UNORDERED_LINK);
 }
 
 HandleSeq Unify::cp_erase(const HandleSeq& hs, Arity i) const
@@ -979,8 +979,8 @@ bool Unify::inherit(const CHandle& lch, const CHandle& rch) const
 bool Unify::inherit(const Handle& lh, const Handle& rh,
                     Context lc, Context rc) const
 {
-	Type lt = lh->getType();
-	Type rt = rh->getType();
+	Type lt = lh->get_type();
+	Type rt = rh->get_type();
 
 	// Recursive cases
 
@@ -996,9 +996,9 @@ bool Unify::inherit(const Handle& lh, const Handle& rh,
 
 	// If both are links then check that the outgoings of lhs inherit
 	// the outgoings of rhs.
-	if (lh->isLink() and rh->isLink() and (lt == rt)) {
-		if (lh->getArity() == rh->getArity()) {
-			for (size_t i = 0; i < lh->getArity(); i++) {
+	if (lh->is_link() and rh->is_link() and (lt == rt)) {
+		if (lh->get_arity() == rh->get_arity()) {
+			for (size_t i = 0; i < lh->get_arity(); i++) {
 				if (not inherit(lh->getOutgoingAtom(i),
 				                rh->getOutgoingAtom(i),
 				                lc, rc))

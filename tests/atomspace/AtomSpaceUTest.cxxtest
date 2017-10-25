@@ -77,17 +77,17 @@ Handle addRealAtom(AtomSpace& as, AtomPtr atom,
     Handle result;
     NodePtr node(NodeCast(atom));
     if (node) {
-        result = as.get_handle(node->getType(), node->getName());
+        result = as.get_handle(node->get_type(), node->get_name());
         if (result == Handle::UNDEFINED) {
-            result = as.add_node(node->getType(), node->getName());
+            result = as.add_node(node->get_type(), node->get_name());
             result->setTruthValue(newTV);
             return result;
         }
     } else {
         LinkPtr link(LinkCast(atom));
-        result = as.get_handle(link->getType(), link->getOutgoingSet());
+        result = as.get_handle(link->get_type(), link->getOutgoingSet());
         if (result == Handle::UNDEFINED) {
-            result = as.add_link(link->getType(), link->getOutgoingSet());
+            result = as.add_link(link->get_type(), link->getOutgoingSet());
             result->setTruthValue(newTV);
             return result;
         }
@@ -367,7 +367,7 @@ public:
 
     struct mean : public HandlePredicate {
         virtual bool test(const Handle& h) const {
-            return h->getTruthValue()->getMean() > 0.8;
+            return h->getTruthValue()->get_mean() > 0.8;
         }
     };
 
@@ -423,27 +423,27 @@ public:
         for (int i = 0; i < NUM_NODES; i++) {
             TruthValuePtr tv = h[i]->getTruthValue();
             logger().debug("h: tv mean = %f, atomSpace->getMean(h[i]) = %f",
-                 tv->getMean(), h[i]->getTruthValue()->getMean());
-            TS_ASSERT(fabs(tv->getMean() - 0.001) < FLOAT_ACCEPTABLE_ERROR);
-            logger().debug("h: confidence = %f, diff = %f, error = %f", tv->getConfidence(), fabs(tv->getConfidence() - 0.99), FLOAT_ACCEPTABLE_ERROR);
-            TS_ASSERT(fabs(tv->getConfidence() - 0.99) < FLOAT_ACCEPTABLE_ERROR);
+                 tv->get_mean(), h[i]->getTruthValue()->get_mean());
+            TS_ASSERT(fabs(tv->get_mean() - 0.001) < FLOAT_ACCEPTABLE_ERROR);
+            logger().debug("h: confidence = %f, diff = %f, error = %f", tv->get_confidence(), fabs(tv->get_confidence() - 0.99), FLOAT_ACCEPTABLE_ERROR);
+            TS_ASSERT(fabs(tv->get_confidence() - 0.99) < FLOAT_ACCEPTABLE_ERROR);
             if (i < NUM_FORCEUSER_LINKS) {
                 TruthValuePtr tv = FU[i]->getTruthValue();
                 logger().debug("h: tv mean = %f, atomSpace->getMean(h[i]) = %f",
-                  tv->getMean(), h[i]->getTruthValue()->getMean());
+                  tv->get_mean(), h[i]->getTruthValue()->get_mean());
                 logger().debug("FU: tv mean = %f, atomSpace->getMean(FU[i]) = %f\n",
-                 tv->getMean(), FU[i]->getTruthValue()->getMean());
-                TS_ASSERT(fabs(tv->getMean() - ForceUser[i]) < FLOAT_ACCEPTABLE_ERROR);
-                logger().debug("FU: confidence = %f, diff = %f, error = %f", tv->getConfidence(), fabs(tv->getConfidence() - 0.99), FLOAT_ACCEPTABLE_ERROR);
-                TS_ASSERT(fabs(tv->getConfidence() - 0.99) < FLOAT_ACCEPTABLE_ERROR);
+                 tv->get_mean(), FU[i]->getTruthValue()->get_mean());
+                TS_ASSERT(fabs(tv->get_mean() - ForceUser[i]) < FLOAT_ACCEPTABLE_ERROR);
+                logger().debug("FU: confidence = %f, diff = %f, error = %f", tv->get_confidence(), fabs(tv->get_confidence() - 0.99), FLOAT_ACCEPTABLE_ERROR);
+                TS_ASSERT(fabs(tv->get_confidence() - 0.99) < FLOAT_ACCEPTABLE_ERROR);
             }
             if (i < NUM_HUMAN_LINKS) {
                 TruthValuePtr tv = H[i]->getTruthValue();
                 logger().debug("h: tv mean = %f, atomSpace->getMean(h[i]) = %f",
-                     tv->getMean(), h[i]->getTruthValue()->getMean());
-                TS_ASSERT(fabs(tv->getMean() - Human[i]) < FLOAT_ACCEPTABLE_ERROR);
-                logger().debug("H: confidence = %f, diff = %f, error = %f", tv->getConfidence(), fabs(tv->getConfidence() - 0.99), FLOAT_ACCEPTABLE_ERROR);
-                TS_ASSERT(fabs(tv->getConfidence() - 0.99) < FLOAT_ACCEPTABLE_ERROR);
+                     tv->get_mean(), h[i]->getTruthValue()->get_mean());
+                TS_ASSERT(fabs(tv->get_mean() - Human[i]) < FLOAT_ACCEPTABLE_ERROR);
+                logger().debug("H: confidence = %f, diff = %f, error = %f", tv->get_confidence(), fabs(tv->get_confidence() - 0.99), FLOAT_ACCEPTABLE_ERROR);
+                TS_ASSERT(fabs(tv->get_confidence() - 0.99) < FLOAT_ACCEPTABLE_ERROR);
             }
         }
         logger().debug("TVS checked");
@@ -557,7 +557,7 @@ public:
             get_handles_by_name(atomSpace, back_inserter(allInhLinks), "", INHERITANCE_LINK, true);
             logger().debug("4) allInhLinks.size() = %d (vhIdx: %d)", allInhLinks.size(), vhIdx);
             //for (unsigned int x = 0; x < allInhLinks.size(); ++x) {
-            //    logger().info("allInhLinks[x]: %s\n", allInhLinks[x]->toString().c_str());
+            //    logger().info("allInhLinks[x]: %s\n", allInhLinks[x]->to_string().c_str());
             //}
             TS_ASSERT(allInhLinks.size() == 8);
             HandleSeq justInhLinks;
@@ -626,7 +626,7 @@ public:
         // In this case, the expected behavior is to perform a merge and return the
         // handle was inserted previously.
         TS_ASSERT(h1_ == h1);
-        TS_ASSERT(h1_->getTruthValue()->getMean() - 0.5f < FLOAT_ACCEPTABLE_ERROR);
+        TS_ASSERT(h1_->getTruthValue()->get_mean() - 0.5f < FLOAT_ACCEPTABLE_ERROR);
         delete tr;
 
         tr = mva(evalLink, nullptr);
@@ -635,7 +635,7 @@ public:
         // In this case, the expected behavior is to perform a merge and return the
         // handle was inserted previously.
         TS_ASSERT(evalLink_ == evalLink);
-        TS_ASSERT(evalLink_->getTruthValue()->getMean() - 0.5f < FLOAT_ACCEPTABLE_ERROR);
+        TS_ASSERT(evalLink_->getTruthValue()->get_mean() - 0.5f < FLOAT_ACCEPTABLE_ERROR);
         delete tr;
     }
 
@@ -676,16 +676,16 @@ public:
 
         TS_ASSERT(h1 == h1_);
         TruthValuePtr h1tv = h1->getTruthValue();
-        TS_ASSERT(h1tv->getMean() - tv1_->getMean() < FLOAT_ACCEPTABLE_ERROR);
-        TS_ASSERT(h1tv->getCount() - tv1_->getCount() < FLOAT_ACCEPTABLE_ERROR);
+        TS_ASSERT(h1tv->get_mean() - tv1_->get_mean() < FLOAT_ACCEPTABLE_ERROR);
+        TS_ASSERT(h1tv->get_count() - tv1_->get_count() < FLOAT_ACCEPTABLE_ERROR);
         TS_ASSERT(h2 == h2_);
         TruthValuePtr h2tv = h2->getTruthValue();
-        TS_ASSERT(h2tv->getMean() - tv2->getMean() < FLOAT_ACCEPTABLE_ERROR);
-        TS_ASSERT(h2tv->getCount() - tv2->getCount() < FLOAT_ACCEPTABLE_ERROR);
+        TS_ASSERT(h2tv->get_mean() - tv2->get_mean() < FLOAT_ACCEPTABLE_ERROR);
+        TS_ASSERT(h2tv->get_count() - tv2->get_count() < FLOAT_ACCEPTABLE_ERROR);
         TS_ASSERT(h3 == h3_);
         TruthValuePtr h3tv = h3->getTruthValue();
-        TS_ASSERT(h3tv->getMean() - tv3->getMean() < FLOAT_ACCEPTABLE_ERROR);
-        TS_ASSERT(h3tv->getCount() - tv3->getCount() < FLOAT_ACCEPTABLE_ERROR);
+        TS_ASSERT(h3tv->get_mean() - tv3->get_mean() < FLOAT_ACCEPTABLE_ERROR);
+        TS_ASSERT(h3tv->get_count() - tv3->get_count() < FLOAT_ACCEPTABLE_ERROR);
 
         // test adding a node with no truth value
         Handle h4 = atomSpace->add_node(CONCEPT_NODE, "wood");
@@ -765,12 +765,12 @@ public:
 
         TS_ASSERT(l1 == l1_);
         TruthValuePtr l1tv = l1->getTruthValue();
-        TS_ASSERT(l1tv->getMean() - tv1_->getMean() < FLOAT_ACCEPTABLE_ERROR);
-        TS_ASSERT(l1tv->getCount() - tv1_->getCount() < FLOAT_ACCEPTABLE_ERROR);
+        TS_ASSERT(l1tv->get_mean() - tv1_->get_mean() < FLOAT_ACCEPTABLE_ERROR);
+        TS_ASSERT(l1tv->get_count() - tv1_->get_count() < FLOAT_ACCEPTABLE_ERROR);
         TS_ASSERT(l2 ==  l2_);
         TruthValuePtr l2tv = l2->getTruthValue();
-        TS_ASSERT(l2tv->getMean() - tv2->getMean() < FLOAT_ACCEPTABLE_ERROR);
-        TS_ASSERT(l2tv->getCount() - tv2->getCount() < FLOAT_ACCEPTABLE_ERROR);
+        TS_ASSERT(l2tv->get_mean() - tv2->get_mean() < FLOAT_ACCEPTABLE_ERROR);
+        TS_ASSERT(l2tv->get_count() - tv2->get_count() < FLOAT_ACCEPTABLE_ERROR);
 
     }
 

@@ -26,7 +26,7 @@ using namespace opencog;
 
 bool LinkValue::operator==(const ProtoAtom& other) const
 {
-	if (LINK_VALUE != other.getType()) return false;
+	if (LINK_VALUE != other.get_type()) return false;
 
 	const LinkValue* lov = (const LinkValue*) &other;
 
@@ -41,11 +41,11 @@ bool LinkValue::operator==(const ProtoAtom& other) const
 
 // ==============================================================
 
-std::string LinkValue::toString(const std::string& indent) const
+std::string LinkValue::to_string(const std::string& indent) const
 {
 	std::string rv = indent + "(LinkValue\n";
 	for (ProtoAtomPtr v :_value)
-		rv += std::string(" ") + v->toString(indent + "   ") + "\n";
+		rv += std::string(" ") + v->to_string(indent + "   ") + "\n";
 	rv += ")";
 	return rv;
 }

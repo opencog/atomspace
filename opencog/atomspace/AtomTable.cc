@@ -97,7 +97,7 @@ AtomTable::~AtomTable()
         // This is a stinky design, but I see no other way,
         // because it seems that we can't do this in the Atom
         // destructor (which is where this should be happening).
-        if (atom_to_delete->isLink()) {
+        if (atom_to_delete->is_link()) {
             LinkPtr link_to_delete = LinkCast(atom_to_delete);
             for (AtomPtr atom_in_out_set : atom_to_delete->getOutgoingSet()) {
                 atom_in_out_set->remove_atom(link_to_delete);
@@ -159,7 +159,7 @@ void AtomTable::clear_all_atoms()
         // If this is a link we need to remove this atom from the incoming
         // sets for any atoms in this atom's outgoing set. See note in
         // the analogous loop in ~AtomTable above.
-        if (atom_to_clear->isLink()) {
+        if (atom_to_clear->is_link()) {
             LinkPtr link_to_clear = LinkCast(atom_to_clear);
             for (AtomPtr atom_in_out_set : atom_to_clear->getOutgoingSet()) {
                 atom_in_out_set->remove_atom(link_to_clear);
@@ -257,7 +257,7 @@ Handle AtomTable::getHandle(Type t, const HandleSeq& seq) const
 Handle AtomTable::getLinkHandle(const AtomPtr& orig) const
 {
     AtomPtr a(orig);
-    Type t = a->getType();
+    Type t = a->get_type();
     const HandleSeq &seq = a->getOutgoingSet();
 
     // Make sure all the atoms in the outgoing set are in the atomspace.
@@ -301,11 +301,11 @@ Handle AtomTable::getHandle(const AtomPtr& a) const
     if (nullptr == a) return Handle::UNDEFINED;
 
     if (in_environ(a))
-        return a->getHandle();
+        return a->get_handle();
 
-    if (a->isNode())
+    if (a->is_node())
         return getNodeHandle(a);
-    else if (a->isLink())
+    else if (a->is_link())
         return getLinkHandle(a);
 
     return Handle::UNDEFINED;
@@ -351,7 +351,7 @@ static void prt_diag(AtomPtr atom, size_t i, size_t arity, const HandleSeq& ogs)
     for (unsigned int fk=0; fk<arity; fk++)
         logger().error() << "outset i=" << fk;
 
-    logger().error() << "link is " << atom->toString();
+    logger().error() << "link is " << atom->to_string();
     logger().flush();
     logger().setBackTraceLevel(save);
 }
@@ -364,10 +364,10 @@ Handle AtomTable::add(AtomPtr atom, bool async)
 
     // Is the atom already in this table, or one of its environments?
     if (in_environ(atom))
-        return atom->getHandle();
+        return atom->get_handle();
 
     AtomPtr orig(atom);
-    Type atom_type = atom->getType();
+    Type atom_type = atom->get_type();
 
     // Certain DeleteLinks can never be added!
     atom = cast_factory(atom_type, atom);
@@ -377,7 +377,7 @@ Handle AtomTable::add(AtomPtr atom, bool async)
     // then we need to clone it. We cannot insert it into this atomtable
     // as-is.  (We already know that its not in this atomspace, or its
     // environ.)
-    if (atom->isLink()) {
+    if (atom->is_link()) {
         // Well, if the link was in some other atomspace, then
         // the outgoing set will probably be too. (It might not
         // be if the other atomspace is a child of this one).
@@ -412,7 +412,7 @@ Handle AtomTable::add(AtomPtr atom, bool async)
 
     atom->copyValues(Handle(orig));
 
-    if (atom->isLink()) {
+    if (atom->is_link()) {
         if (STATE_LINK == atom_type) {
             // If this is a closed StateLink, (i.e. has no variables)
             // then make sure that the old state gets removed from the
@@ -436,7 +436,7 @@ Handle AtomTable::add(AtomPtr atom, bool async)
         }
 
         // Build the incoming set of outgoing atom h.
-        size_t arity = atom->getArity();
+        size_t arity = atom->get_arity();
         LinkPtr llc(LinkCast(atom));
         for (size_t i = 0; i < arity; i++) {
             llc->_outgoing[i]->insert_atom(llc);
@@ -447,11 +447,11 @@ Handle AtomTable::add(AtomPtr atom, bool async)
     atom->setAtomSpace(_as);
 
     _size++;
-    if (atom->isNode()) _num_nodes++;
-    if (atom->isLink()) _num_links++;
+    if (atom->is_node()) _num_nodes++;
+    if (atom->is_link()) _num_links++;
     _size_by_type[atom->_type] ++;
 
-    Handle h(atom->getHandle());
+    Handle h(atom->get_handle());
     _atom_store.insert({atom->get_hash(), h});
 
     if (not _transient and not async)
@@ -464,7 +464,7 @@ Handle AtomTable::add(AtomPtr atom, bool async)
     if (not _transient and async)
         _index_queue.enqueue(atom);
 
-    DPRINTF("Atom added: %s\n", atom->toString().c_str());
+    DPRINTF("Atom added: %s\n", atom->to_string().c_str());
     return h;
 }
 
@@ -485,7 +485,7 @@ void AtomTable::put_atom_into_index(const AtomPtr& atom)
 
     // Now that we are completely done, emit the added signal.
     // Don't emit signal until after the indexes are updated!
-    _addAtomSignal(atom->getHandle());
+    _addAtomSignal(atom->get_handle());
 }
 
 void AtomTable::barrier()
@@ -609,7 +609,7 @@ AtomPtrSet AtomTable::extract(Handle& handle, bool recursive)
         {
             Handle his(*is_it);
             DPRINTF("[AtomTable::extract] incoming set: %s",
-                 (his) ? his->toString().c_str() : "INVALID HANDLE");
+                 (his) ? his->to_string().c_str() : "INVALID HANDLE");
 
             // Something is seriously screwed up if the incoming set
             // is not in this atomtable, and its not a child of this
@@ -681,9 +681,9 @@ AtomPtrSet AtomTable::extract(Handle& handle, bool recursive)
                     logger().warn() << "This atomtable=" << ((void*) this)
                                     << " other atomtale=" << ((void*) iset[i]->getAtomTable())
                                     << " in_environ=" << iset[i]->getAtomTable()->in_environ(handle);
-                    logger().warn() << "This atom: " << handle->toString();
+                    logger().warn() << "This atom: " << handle->to_string();
                     for (size_t j=0; j<ilen; j++) {
-                        logger().warn() << "Atom j=" << j << " " << iset[j]->toString();
+                        logger().warn() << "Atom j=" << j << " " << iset[j]->to_string();
                         logger().warn() << "Marked: " << iset[j]->isMarkedForRemoval()
                                         << " Table: " << ((void*) iset[j]->getAtomTable());
                     }
@@ -710,8 +710,8 @@ AtomPtrSet AtomTable::extract(Handle& handle, bool recursive)
 
     // Decrements the size of the table
     _size--;
-    if (atom->isNode()) _num_nodes--;
-    if (atom->isLink()) _num_links--;
+    if (atom->is_node()) _num_nodes--;
+    if (atom->is_link()) _num_links--;
     _size_by_type[atom->_type] --;
 
     auto range = _atom_store.equal_range(atom->get_hash());
@@ -727,7 +727,7 @@ AtomPtrSet AtomTable::extract(Handle& handle, bool recursive)
     Atom* pat = atom.operator->();
     typeIndex.removeAtom(pat);
 
-    if (atom->isLink()) {
+    if (atom->is_link()) {
         LinkPtr lll(LinkCast(atom));
         for (AtomPtr a : lll->_outgoing) {
             a->remove_atom(lll);

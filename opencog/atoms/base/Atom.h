@@ -223,7 +223,7 @@ private:
 public:
 
     virtual ~Atom();
-    virtual bool isAtom() const { return true; }
+    virtual bool is_atom() const { return true; }
 
     //! Returns the AtomSpace in which this Atom is inserted.
     AtomSpace* getAtomSpace() const { return _atom_space; }
@@ -236,11 +236,11 @@ public:
         return compute_hash();
     }
 
-    virtual const std::string& getName() const {
+    virtual const std::string& get_name() const {
         throw RuntimeException(TRACE_INFO, "Not a node!");
     }
 
-    virtual Arity getArity() const {
+    virtual Arity get_arity() const {
         throw RuntimeException(TRACE_INFO, "Not a link!");
     }
 
@@ -257,7 +257,7 @@ public:
     }
 
     /** Returns the handle of the atom. */
-    inline Handle getHandle() const {
+    inline Handle get_handle() const {
         return Handle(std::dynamic_pointer_cast<Atom>(
              const_cast<Atom*>(this)->shared_from_this()));
     }
@@ -364,15 +364,15 @@ public:
     IncomingSet getIncomingSetByType(Type type) const;
 
     /** Returns a string representation of the node. */
-    virtual std::string toString(const std::string& indent) const = 0;
-    virtual std::string toShortString(const std::string& indent) const = 0;
-    virtual std::string idToString() const;
+    virtual std::string to_string(const std::string& indent) const = 0;
+    virtual std::string to_short_string(const std::string& indent) const = 0;
+    virtual std::string id_to_string() const;
 
     // Work around gdb's inability to build a string on the fly,
     // see http://stackoverflow.com/questions/16734783 for more
     // explanation.
-    std::string toString() const { return toString(""); }
-    std::string toShortString() const { return toShortString(""); }
+    std::string to_string() const { return to_string(""); }
+    std::string to_short_string() const { return to_short_string(""); }
 
     /**
      * Perform a content-based comparison of two atoms.
@@ -394,7 +394,7 @@ public:
 
     virtual bool operator==(const ProtoAtom& other) const
     {
-        if (_type != other.getType()) return false;
+        if (_type != other.get_type()) return false;
         return operator==(dynamic_cast<const Atom&>(other));
     }
 

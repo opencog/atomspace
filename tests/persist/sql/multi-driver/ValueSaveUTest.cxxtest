@@ -389,14 +389,14 @@ void ValueSaveUTest::check_one(ProtoAtomPtr pap, bool fetchkey)
 
 	Handle key = as->fetch_atom(bkey);
 	Handle atom = as->fetch_atom(batom);
-	printf ("Setup atom %s\n", atom->toString().c_str());
+	printf ("Setup atom %s\n", atom->to_string().c_str());
 	printf ("Vals %s\n", atom->valuesToString().c_str());
 
 	atom->setValue(key, pap);
 	as->store_atom(atom);
 	as->barrier();
 
-	printf ("Stored atom %s\n", atom->toString().c_str());
+	printf ("Stored atom %s\n", atom->to_string().c_str());
 	printf ("Stored vals %s\n", atom->valuesToString().c_str());
 
 	delete as;
@@ -418,11 +418,11 @@ void ValueSaveUTest::check_one(ProtoAtomPtr pap, bool fetchkey)
 	if (fetchkey) key = as->fetch_atom(bkey);
 	atom = as->fetch_atom(batom);
 
-	printf("Got atom %s\n", atom->toString().c_str());
+	printf("Got atom %s\n", atom->to_string().c_str());
 	printf("Got vals %s\n", atom->valuesToString().c_str());
 	ProtoAtomPtr fap = atom->getValue(key);
 
-	printf("Expecting %s\n", pap->toString().c_str());
+	printf("Expecting %s\n", pap->to_string().c_str());
 	TS_ASSERT(*pap == *fap);
 
 	delete as;

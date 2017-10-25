@@ -35,7 +35,7 @@ void get_outgoing_nodes(const Handle& hinput,
                         Type type)
 {
     // Recursive case
-    if (hinput->isLink()) {
+    if (hinput->is_link()) {
         for (const Handle& h : hinput->getOutgoingSet())
             get_outgoing_nodes(h, node_set, type);
         return;
@@ -43,7 +43,7 @@ void get_outgoing_nodes(const Handle& hinput,
 
     // Base case
     if (NODE == type or // Empty means all kinds of nodes
-        hinput->getType() == type)
+        hinput->get_type() == type)
     {
         node_set.insert(hinput);
     }
@@ -68,11 +68,11 @@ bool are_similar(const Handle& h1, const Handle& h2, bool strict_type_match)
     if (h1 == h2)
         return true;
 
-    if (h1->isNode() and h2->isNode())
-        return !strict_type_match or h1->getType() == h2->getType();
+    if (h1->is_node() and h2->is_node())
+        return !strict_type_match or h1->get_type() == h2->get_type();
 
-    if (h1->isLink() and h2->isLink()) {
-        if (strict_type_match and (h1->getType() != h2->getType()))
+    if (h1->is_link() and h2->is_link()) {
+        if (strict_type_match and (h1->get_type() != h2->get_type()))
             return false;
 
         const HandleSeq& hseqh1 = h1->getOutgoingSet();
@@ -82,8 +82,8 @@ bool are_similar(const Handle& h1, const Handle& h2, bool strict_type_match)
             return false;
 
         // Unordered links should be treated in a special way
-        if (classserver().isA(h1->getType(), UNORDERED_LINK) or
-            classserver().isA(h2->getType(), UNORDERED_LINK))
+        if (classserver().isA(h1->get_type(), UNORDERED_LINK) or
+            classserver().isA(h2->get_type(), UNORDERED_LINK))
         {
             for (const Handle& h1 : hseqh1) {
                 for (auto it = hseqh2.begin(); it != hseqh2.end(); ++it) {

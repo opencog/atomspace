@@ -197,8 +197,8 @@ void BackwardChainerUTest::test_deduction()
 		AD = al(INHERITANCE_LINK, A, D),
 		expected = al(SET_LINK, CD, BD, AD);
 
-	logger().debug() << "results = " << results->toString();
-	logger().debug() << "expected = " << expected->toString();
+	logger().debug() << "results = " << results->to_string();
+	logger().debug() << "expected = " << expected->to_string();
 
 	TS_ASSERT_EQUALS(results, expected);
 
@@ -222,8 +222,8 @@ void BackwardChainerUTest::test_deduction_tv_query()
 	bc.get_config().set_maximum_iterations(10);
 	bc.do_chain();
 
-	TS_ASSERT_DELTA(target->getTruthValue()->getMean(), 1, 1e-10);
-	TS_ASSERT_DELTA(target->getTruthValue()->getConfidence(), 1, 1e-10);
+	TS_ASSERT_DELTA(target->getTruthValue()->get_mean(), 1, 1e-10);
+	TS_ASSERT_DELTA(target->getTruthValue()->get_confidence(), 1, 1e-10);
 
 	logger().debug("END TEST: %s", __FUNCTION__);
 }
@@ -243,8 +243,8 @@ void BackwardChainerUTest::test_modus_ponens_tv_query()
 	bc.get_config().set_maximum_iterations(40);
 	bc.do_chain();
 
-	TS_ASSERT_DELTA(target->getTruthValue()->getMean(), 1, 1e-10);
-	TS_ASSERT_DELTA(target->getTruthValue()->getConfidence(), 1, 1e-10);
+	TS_ASSERT_DELTA(target->getTruthValue()->get_mean(), 1, 1e-10);
+	TS_ASSERT_DELTA(target->getTruthValue()->get_confidence(), 1, 1e-10);
 
 	logger().debug("END TEST: %s", __FUNCTION__);
 }
@@ -272,8 +272,8 @@ void BackwardChainerUTest::test_conjunction_fuzzy_evaluation_tv_query()
 	bc.get_config().set_maximum_iterations(2);
 	bc.do_chain();
 
-	TS_ASSERT_DELTA(target->getTruthValue()->getMean(), 0.4, 1e-6);
-	TS_ASSERT_DELTA(target->getTruthValue()->getConfidence(), 0.2, 1e-6);
+	TS_ASSERT_DELTA(target->getTruthValue()->get_mean(), 0.4, 1e-6);
+	TS_ASSERT_DELTA(target->getTruthValue()->get_confidence(), 0.2, 1e-6);
 
 	logger().debug("END TEST: %s", __FUNCTION__);
 }
@@ -315,8 +315,8 @@ void BackwardChainerUTest::test_conditional_instantiation_1()
 		              friend_with_john(edward),
 		              friend_with_john(cyril));
 
-	logger().debug() << "results = " << results->toString();
-	logger().debug() << "expected = " << expected->toString();
+	logger().debug() << "results = " << results->to_string();
+	logger().debug() << "expected = " << expected->to_string();
 
 	TS_ASSERT_EQUALS(results, expected);
 
@@ -348,8 +348,8 @@ void BackwardChainerUTest::test_conditional_instantiation_2()
 	Handle results = bc.get_results(),
 		expected = al(SET_LINK, al(INHERITANCE_LINK, Fritz, green));
 
-	logger().debug() << "results = " << results->toString();
-	logger().debug() << "expected = " << expected->toString();
+	logger().debug() << "results = " << results->to_string();
+	logger().debug() << "expected = " << expected->to_string();
 
 	TS_ASSERT_EQUALS(results, expected);
 
@@ -375,8 +375,8 @@ void BackwardChainerUTest::test_conditional_instantiation_tv_query()
 	bc.get_config().set_maximum_iterations(20);
 	bc.do_chain();
 
-	TS_ASSERT_DELTA(target->getTruthValue()->getMean(), 1, .1);
-	TS_ASSERT_DELTA(target->getTruthValue()->getConfidence(), 1, .1);
+	TS_ASSERT_DELTA(target->getTruthValue()->get_mean(), 1, .1);
+	TS_ASSERT_DELTA(target->getTruthValue()->get_confidence(), 1, .1);
 
 	logger().debug("END TEST: %s", __FUNCTION__);
 }
@@ -465,8 +465,8 @@ void BackwardChainerUTest::test_conditional_partial_instantiation()
 	bc.get_config().set_maximum_iterations(5);
 	bc.do_chain();
 
-	TS_ASSERT_DELTA(target->getTruthValue()->getMean(), 1, 1e-10);
-	TS_ASSERT_DELTA(target->getTruthValue()->getConfidence(), 1, 1e-10);
+	TS_ASSERT_DELTA(target->getTruthValue()->get_mean(), 1, 1e-10);
+	TS_ASSERT_DELTA(target->getTruthValue()->get_confidence(), 1, 1e-10);
 
 	logger().debug("END TEST: %s", __FUNCTION__);
 }
@@ -500,8 +500,8 @@ void BackwardChainerUTest::test_impossible_criminal()
 	Handle results = bc.get_results(),
 		expected = al(SET_LINK, HandleSeq());
 
-	logger().debug() << "results = " << results->toString();
-	logger().debug() << "expected = " << expected->toString();
+	logger().debug() << "results = " << results->to_string();
+	logger().debug() << "expected = " << expected->to_string();
 
 	TS_ASSERT_EQUALS(results, expected);
 
@@ -546,8 +546,8 @@ void BackwardChainerUTest::test_criminal()
 	logger().debug() << "expected = " << oc_to_string(expected);
 
 	TS_ASSERT_EQUALS(results, expected);
-	TS_ASSERT_LESS_THAN(0.9, expected_target->getTruthValue()->getMean());
-	TS_ASSERT_LESS_THAN(0.9, expected_target->getTruthValue()->getConfidence());
+	TS_ASSERT_LESS_THAN(0.9, expected_target->getTruthValue()->get_mean());
+	TS_ASSERT_LESS_THAN(0.9, expected_target->getTruthValue()->get_confidence());
 
 	// Extract traces and return the backward chainer with these
 	// traces, which should greatly speed it up.
@@ -603,8 +603,8 @@ void BackwardChainerUTest::test_criminal()
 	logger().debug() << "expected = " << oc_to_string(expected);
 
 	TS_ASSERT_EQUALS(results, expected);
-	TS_ASSERT_LESS_THAN(0.9, expected_target->getTruthValue()->getMean());
-	TS_ASSERT_LESS_THAN(0.9, expected_target->getTruthValue()->getConfidence());
+	TS_ASSERT_LESS_THAN(0.9, expected_target->getTruthValue()->get_mean());
+	TS_ASSERT_LESS_THAN(0.9, expected_target->getTruthValue()->get_confidence());
 
 	logger().debug("END TEST: %s", __FUNCTION__);
 }
@@ -630,10 +630,10 @@ void BackwardChainerUTest::test_induction()
 	bc.do_chain();
 
 	// TODO: fixme, for that we need to support BIT expansion over meta rule
-	// TS_ASSERT_DELTA(target->getTruthValue()->getMean(), 1, 1e-10);
+	// TS_ASSERT_DELTA(target->getTruthValue()->get_mean(), 1, 1e-10);
 	// TODO: determine the expected confidence, which depends on the
 	// number of instances the induction is based on
-	// TS_ASSERT_DELTA(target->getTruthValue()->getConfidence(), 1, 1e-10);
+	// TS_ASSERT_DELTA(target->getTruthValue()->get_confidence(), 1, 1e-10);
 	TS_ASSERT(true);
 
 	logger().debug("END TEST: %s", __FUNCTION__);

@@ -88,22 +88,22 @@ void ZMQClient::reserve() {
  */
 void ZMQClient::storeAtom(const AtomPtr& atomPtr, bool synchronous)
 {
-	fprintf(stderr, "Storing atom %lu ...", atomPtr->getHandle().value());
+	fprintf(stderr, "Storing atom %lu ...", atomPtr->get_handle().value());
 
     ZMQRequestMessage req;
     ZMQReplyMessage rep;
 
     req.set_function(ZMQstoreAtoms);
     ZMQAtomMessage *atomMsg = req.add_atom();
-    atomMsg->set_handle(atomPtr->getHandle().value());
-    atomMsg->set_type(atomPtr->getType());
+    atomMsg->set_handle(atomPtr->get_handle().value());
+    atomMsg->set_type(atomPtr->get_type());
 
 //    ZMQTruthValueMessage *tvMsg = atomMsg->mutable_truthvalue();
 //    ZMQSingleTruthValueMessage *stvMsg = tvMsg->add_singletruthvalue();
 //    stvMsg->set_truthvaluetype(ZMQTruthValueTypeSimple);
-//    stvMsg->set_mean(atomPtr->getTruthValue()->getMean());
-//    stvMsg->set_confidence(atomPtr->getTruthValue()->getConfidence());
-//    stvMsg->set_count(atomPtr->getTruthValue()->getCount());
+//    stvMsg->set_mean(atomPtr->getTruthValue()->get_mean());
+//    stvMsg->set_confidence(atomPtr->getTruthValue()->get_confidence());
+//    stvMsg->set_count(atomPtr->getTruthValue()->get_count());
 //    atomMsg->set_allocated_truthvalue(tvMsg);
 
     LinkPtr linkPtr = dynamic_pointer_cast<Link>(atomPtr);
@@ -115,7 +115,7 @@ void ZMQClient::storeAtom(const AtomPtr& atomPtr, bool synchronous)
     } else {
     	NodePtr nodePtr = dynamic_pointer_cast<Node>(atomPtr);
     	atomMsg->set_atomtype(ZMQAtomTypeNode);
-    	atomMsg->set_name(nodePtr->getName());
+    	atomMsg->set_name(nodePtr->get_name());
     }
 
     sendMessage(req, rep);

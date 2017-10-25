@@ -92,8 +92,8 @@ void FreeLinkUTest::test_unquote(void)
 	fv.find_variables(unq);
 	HandleSeq vars = fv.varseq;
 
-	printf("expecting Variable $x: %s\n", vars[0]->toShortString().c_str());
-	printf("expecting Variable $z: %s\n", vars[1]->toShortString().c_str());
+	printf("expecting Variable $x: %s\n", vars[0]->to_short_string().c_str());
+	printf("expecting Variable $z: %s\n", vars[1]->to_short_string().c_str());
 
 	// Expecting only two variables $x and $z, because $y is quoted.
 	// Expecting the order to be preserved: i.e. $x before $z
@@ -130,9 +130,9 @@ void FreeLinkUTest::test_deunquote(void)
 	fv.find_variables(unq);
 	HandleSeq vars = fv.varseq;
 
-	printf("expect Var $x: %s\n", vars[0]->toShortString().c_str());
-	printf("expect Var $z: %s\n", vars[1]->toShortString().c_str());
-	printf("expect Var $u: %s\n", vars[2]->toShortString().c_str());
+	printf("expect Var $x: %s\n", vars[0]->to_short_string().c_str());
+	printf("expect Var $z: %s\n", vars[1]->to_short_string().c_str());
+	printf("expect Var $u: %s\n", vars[2]->to_short_string().c_str());
 
 	// Expecting only three variables $x, $z, $u because all the
 	// others are quoted.  Expecting the order to be preserved:
@@ -166,8 +166,8 @@ void FreeLinkUTest::test_binding(void)
 	fv.find_variables(unq);
 	HandleSeq vars = fv.varseq;
 
-	printf("expecting free $x: %s\n", vars[0]->toShortString().c_str());
-	printf("expecting free $z: %s\n", vars[1]->toShortString().c_str());
+	printf("expecting free $x: %s\n", vars[0]->to_short_string().c_str());
+	printf("expecting free $z: %s\n", vars[1]->to_short_string().c_str());
 
 	// Expecting only two variables $x and $z, because $y is quoted.
 	// Expecting the order to be preserved: i.e. $x before $z
@@ -206,8 +206,8 @@ void FreeLinkUTest::test_getlink(void)
 	fv.find_variables(unq);
 	HandleSeq vars = fv.varseq;
 
-	printf("expecting get $x: %s\n", vars[0]->toShortString().c_str());
-	printf("expecting get $z: %s\n", vars[1]->toShortString().c_str());
+	printf("expecting get $x: %s\n", vars[0]->to_short_string().c_str());
+	printf("expecting get $z: %s\n", vars[1]->to_short_string().c_str());
 
 	// Expecting only two variables $x and $z, because $y is quoted.
 	// Expecting the order to be preserved: i.e. $x before $z

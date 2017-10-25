@@ -129,8 +129,8 @@ public:
 	// Work around gdb's incapability to build a string on the fly,
 	// see http://stackoverflow.com/questions/16734783 for more
 	// explanation.
-	std::string toString() const;
-	std::string toString(std::string indent) const;
+	std::string to_string() const;
+	std::string to_string(std::string indent) const;
 };
 
 // For gdb, see

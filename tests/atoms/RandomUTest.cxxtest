@@ -85,18 +85,18 @@ void RandomUTest::test_weights(void)
 
     Handle countA = eval->eval_h(
         "(cog-execute! (Get (State (Anchor \"sum-A\") (Variable \"$x\"))))");
-    printf("A-count = %s\n", countA->toString().c_str());
+    printf("A-count = %s\n", countA->to_string().c_str());
 
     Handle countB = eval->eval_h(
         "(cog-execute! (Get (State (Anchor \"sum-B\") (Variable \"$x\"))))");
-    printf("B-count = %s\n", countB->toString().c_str());
+    printf("B-count = %s\n", countB->to_string().c_str());
 
     Handle ratio = eval->eval_h(
         "(cog-execute! (DefinedSchema \"ratio\"))");
-    printf("ratio = %s\n", ratio->toString().c_str());
+    printf("ratio = %s\n", ratio->to_string().c_str());
 
     TruthValuePtr tv = eval->eval_tv("(cog-evaluate! (DefinedPredicate \"test\"))");
-    TS_ASSERT_LESS_THAN(0.5, tv->getMean());
+    TS_ASSERT_LESS_THAN(0.5, tv->get_mean());
 
     logger().debug("END TEST: %s", __FUNCTION__);
 }

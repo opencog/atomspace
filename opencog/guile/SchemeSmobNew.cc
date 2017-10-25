@@ -44,7 +44,7 @@ std::string SchemeSmob::to_string(SCM node)
  * This is NOT optimized for performance, as printing should not
  * be in any performance-critical paths ...
  *
- * This does NOT use the Atom::toString() methods, because those
+ * This does NOT use the Atom::to_string() methods, because those
  * methods are not guaranteed to generate valid scheme.
  */
 std::string SchemeSmob::to_string(const Handle& h)
@@ -60,12 +60,12 @@ std::string SchemeSmob::handle_to_string(const Handle& h, int indent)
 	// to file, and then restored, as needed.
 	std::string ret = "";
 	for (int i=0; i< indent; i++) ret += "   ";
-	if (h->isNode())
+	if (h->is_node())
 	{
 		ret += "(";
-		ret += classserver().getTypeName(h->getType());
+		ret += classserver().getTypeName(h->get_type());
 		ret += " \"";
-		ret += h->getName();
+		ret += h->get_name();
 		ret += "\"";
 
 		// Print the truth value only after the node name
@@ -83,10 +83,10 @@ std::string SchemeSmob::handle_to_string(const Handle& h, int indent)
 		return ret;
 	}
 
-	if (h->isLink())
+	if (h->is_link())
 	{
 		ret += "(";
-		ret += classserver().getTypeName(h->getType());
+		ret += classserver().getTypeName(h->get_type());
 
 		// If there's a truth value, print it before the other atoms
 		TruthValuePtr tv(h->getTruthValue());
@@ -124,9 +124,9 @@ std::string SchemeSmob::protom_to_string(SCM node)
 	ProtoAtomPtr pa(scm_to_protom(node));
 	if (nullptr == pa) return "#<Invalid handle>";
 
-	// XXX FIXME; should not use pa->toString() as the print method.
-	if (not pa->isAtom())
-		return pa->toString();
+	// XXX FIXME; should not use pa->to_string() as the print method.
+	if (not pa->is_atom())
+		return pa->to_string();
 
 	// Avoid printing atoms that are not in any atomspace.
 	// Doing so, and more generally, keeping these around
@@ -193,7 +193,7 @@ Handle SchemeSmob::scm_to_handle (SCM sh)
 	if (nullptr == pa)
 		return Handle::UNDEFINED;
 
-	if (not pa->isAtom())
+	if (not pa->is_atom())
 		return Handle::UNDEFINED;
 
 	Handle h(HandleCast(pa));
@@ -260,7 +260,7 @@ SCM SchemeSmob::ss_node_p (SCM s)
 	if (nullptr == h)
 		return SCM_BOOL_F;
 
-	if (h->isNode()) return SCM_BOOL_T;
+	if (h->is_node()) return SCM_BOOL_T;
 
 	return SCM_BOOL_F;
 }
@@ -274,7 +274,7 @@ SCM SchemeSmob::ss_link_p (SCM s)
 	if (nullptr == h)
 		return SCM_BOOL_F;
 
-	if (h->isLink()) return SCM_BOOL_T;
+	if (h->is_link()) return SCM_BOOL_T;
 	return SCM_BOOL_F;
 }
 

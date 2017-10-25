@@ -72,7 +72,7 @@ std::string	BITNode::to_string() const
 	   << "rules: size = " << rules.size();
 	for (const auto& rule : rules)
 		ss << std::endl << rule.first.get_name()
-		   << " " << rule.first.get_rule()->idToString();
+		   << " " << rule.first.get_rule()->id_to_string();
 	return ss.str();
 }
 
@@ -169,18 +169,18 @@ bool AndBIT::has_cycle() const
 
 bool AndBIT::has_cycle(const Handle& h, HandleSet ancestors) const
 {
-	if (h->getType() == EXECUTION_OUTPUT_LINK) {
+	if (h->get_type() == EXECUTION_OUTPUT_LINK) {
 		Handle arg = h->getOutgoingAtom(1);
-		if (arg->getType() == LIST_LINK) {
+		if (arg->get_type() == LIST_LINK) {
 			Handle conclusion = arg->getOutgoingAtom(0);
 			if (is_in(conclusion, ancestors))
 				return true;
 
 			ancestors.insert(conclusion);
-			Arity arity = arg->getArity();
+			Arity arity = arg->get_arity();
 			if (1 < arity) {
 				bool unordered_premises =
-					arg->getOutgoingAtom(1)->getType() == SET_LINK;
+					arg->getOutgoingAtom(1)->get_type() == SET_LINK;
 				if (unordered_premises) {
 					OC_ASSERT(arity == 2,
 					          "Mixture of ordered and unordered"
@@ -234,20 +234,20 @@ std::string AndBIT::fcs_to_ascii_art(const Handle& nfcs) const
 
 std::string AndBIT::fcs_rewrite_to_ascii_art(const Handle& h) const
 {
-	if (h->getType() == EXECUTION_OUTPUT_LINK) {
+	if (h->get_type() == EXECUTION_OUTPUT_LINK) {
 		Handle gsn = h->getOutgoingAtom(0);
 		Handle arg = h->getOutgoingAtom(1);
-		if (arg->getType() == LIST_LINK) {
+		if (arg->get_type() == LIST_LINK) {
 			// Render the conclusion
 			Handle conclusion = arg->getOutgoingAtom(0);
 			std::string conclusion_aa = fcs_rewrite_to_ascii_art(conclusion);
 
 			// Render the premises
-			Arity arity = arg->getArity();
+			Arity arity = arg->get_arity();
 			if (1 < arity) {
 				std::vector<std::string> premises_aas;
 				bool unordered_premises =
-					arg->getOutgoingAtom(1)->getType() == SET_LINK;
+					arg->getOutgoingAtom(1)->get_type() == SET_LINK;
 				if (unordered_premises) {
 					OC_ASSERT(arity == 2,
 					          "Mixture of ordered and unordered"
@@ -287,7 +287,7 @@ std::string AndBIT::fcs_rewrite_to_ascii_art(const Handle& h) const
 			std::string line_str(line_separator("", conclusion_aa, gsn));
 			return line_str + "\n" + conclusion_aa;
 		}
-	} else return h->idToString();
+	} else return h->id_to_string();
 }
 
 double AndBIT::expand_complexity(const Handle& leaf, const Rule& rule,
@@ -333,7 +333,7 @@ Handle AndBIT::expand_fcs(const Handle& leaf,
 
 	// Log expansion
 	LAZY_URE_LOG_DEBUG << "Expanded forward chainer strategy:" << std::endl
-	                   << nfcs->toString();
+	                   << nfcs->to_string();
 	LAZY_URE_LOG_DEBUG << "With inference tree:" << std::endl << std::endl
 	                   << fcs_to_ascii_art(nfcs) << std::endl;
 
@@ -366,7 +366,7 @@ HandleSet AndBIT::get_leaves() const
 
 HandleSet AndBIT::get_leaves(const Handle& h) const
 {
-	Type t = h->getType();
+	Type t = h->get_type();
 	if (t == BIND_LINK) {
 		BindLinkPtr hsc = BindLinkCast(h);
 		Handle rewrite = hsc->get_implicand();
@@ -375,9 +375,9 @@ HandleSet AndBIT::get_leaves(const Handle& h) const
 		// All arguments except the first one are potential target leaves
 		Handle args = h->getOutgoingAtom(1);
 		HandleSet leaves;
-		if (args->getType() == LIST_LINK) {
-			OC_ASSERT(args->getArity() > 0);
-			for (Arity i = 1; i < args->getArity(); i++) {
+		if (args->get_type() == LIST_LINK) {
+			OC_ASSERT(args->get_arity() > 0);
+			for (Arity i = 1; i < args->get_arity(); i++) {
 				HandleSet aleaves = get_leaves(args->getOutgoingAtom(i));
 				leaves.insert(aleaves.begin(), aleaves.end());
 			}
@@ -425,7 +425,7 @@ Handle AndBIT::expand_fcs_pattern(const Handle& fcs_pattern,
 		                                               clauses.end()));
 
 	// The fcs contains a conjunction of clauses
-	OC_ASSERT(fcs_pattern->getType() == AND_LINK);
+	OC_ASSERT(fcs_pattern->get_type() == AND_LINK);
 
 	// Remove any fcs clause that:
 	//
@@ -467,14 +467,14 @@ Handle AndBIT::expand_fcs_rewrite(const Handle& fcs_rewrite,
 	// Recursive cases
 
 	AtomSpace& as = *fcs->getAtomSpace();
-	Type t = fcs_rewrite->getType();
+	Type t = fcs_rewrite->get_type();
 
 	if (t == EXECUTION_OUTPUT_LINK) {
 		// If it is an ExecutionOutput then skip the first input
 		// argument as it is a conclusion already.
 		Handle gsn = fcs_rewrite->getOutgoingAtom(0);
 		Handle arg = fcs_rewrite->getOutgoingAtom(1);
-		if (arg->getType() == LIST_LINK) {
+		if (arg->get_type() == LIST_LINK) {
 			HandleSeq args = arg->getOutgoingSet();
 			for (size_t i = 1; i < args.size(); i++)
 				args[i] = expand_fcs_rewrite(args[i], rule);
@@ -500,12 +500,12 @@ Handle AndBIT::expand_fcs_rewrite(const Handle& fcs_rewrite,
 
 bool AndBIT::is_argument_of(const Handle& eval, const Handle& atom) const
 {
-	if (eval->getType() == EVALUATION_LINK) {
+	if (eval->get_type() == EVALUATION_LINK) {
 		Handle args = eval->getOutgoingAtom(1);
 		if (content_eq(args, atom))
 			return true;
-		if (args->getType() == LIST_LINK)
-			for (Arity i = 0; i < args->getArity(); i++)
+		if (args->get_type() == LIST_LINK)
+			for (Arity i = 0; i < args->get_arity(); i++)
 				if (content_eq(args->getOutgoingAtom(i), atom))
 					return true;
 	}
@@ -516,8 +516,8 @@ bool AndBIT::is_locally_quoted_eq(const Handle& lhs, const Handle& rhs) const
 {
 	if (content_eq(lhs, rhs))
 		return true;
-	Type lhs_t = lhs->getType();
-	Type rhs_t = rhs->getType();
+	Type lhs_t = lhs->get_type();
+	Type rhs_t = rhs->get_type();
 	if (lhs_t == LOCAL_QUOTE_LINK and rhs_t != LOCAL_QUOTE_LINK)
 		return content_eq(lhs->getOutgoingAtom(0), rhs);
 	if (lhs_t != LOCAL_QUOTE_LINK and rhs_t == LOCAL_QUOTE_LINK)
@@ -635,7 +635,7 @@ std::string AndBIT::line_separator(const std::string& up_aa,
 
 	// Get formula string
 	std::string lang, lib, fun;
-	ExecutionOutputLink::lang_lib_fun(gsn->getName(), lang, lib, fun);
+	ExecutionOutputLink::lang_lib_fun(gsn->get_name(), lang, lib, fun);
 	std::string formula_str = fun.substr(0, line_sep_size - 2);
 	size_t formula_str_size = formula_str.size();
 
@@ -712,7 +712,7 @@ AndBIT* BIT::insert(AndBIT& andbit)
 	// Check that it isn't already in the BIT
 	if (boost::find(andbits, andbit) != andbits.end()) {
 		LAZY_URE_LOG_DEBUG << "The following and-BIT is already in the BIT: "
-		                   << andbit.fcs->idToString();
+		                   << andbit.fcs->id_to_string();
 		return nullptr;
 	}
 	// Insert while keeping the order

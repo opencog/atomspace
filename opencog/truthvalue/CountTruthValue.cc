@@ -47,24 +47,24 @@ CountTruthValue::CountTruthValue(const TruthValue& source)
 	: TruthValue(COUNT_TRUTH_VALUE)
 {
     _value.resize(3);
-    _value[MEAN] = source.getMean();
-    _value[CONFIDENCE] = source.getConfidence();
-    _value[COUNT] = source.getCount();
+    _value[MEAN] = source.get_mean();
+    _value[CONFIDENCE] = source.get_confidence();
+    _value[COUNT] = source.get_count();
 }
 
 CountTruthValue::CountTruthValue(CountTruthValue const& source)
 	: TruthValue(COUNT_TRUTH_VALUE)
 {
     _value.resize(3);
-    _value[MEAN] = source.getMean();
-    _value[CONFIDENCE] = source.getConfidence();
-    _value[COUNT] = source.getCount();
+    _value[MEAN] = source.get_mean();
+    _value[CONFIDENCE] = source.get_confidence();
+    _value[COUNT] = source.get_count();
 }
 
 CountTruthValue::CountTruthValue(const ProtoAtomPtr& source)
        : TruthValue(COUNT_TRUTH_VALUE)
 {
-    if (source->getType() != COUNT_TRUTH_VALUE)
+    if (source->get_type() != COUNT_TRUTH_VALUE)
         throw RuntimeException(TRACE_INFO,
             "Source must be a CountTruthValue");
 
@@ -75,28 +75,28 @@ CountTruthValue::CountTruthValue(const ProtoAtomPtr& source)
     _value[COUNT] = fp->value()[COUNT];
 }
 
-strength_t CountTruthValue::getMean() const
+strength_t CountTruthValue::get_mean() const
 {
     return _value[MEAN];
 }
 
-count_t CountTruthValue::getCount() const
+count_t CountTruthValue::get_count() const
 {
     return  _value[COUNT];
 }
 
-confidence_t CountTruthValue::getConfidence() const
+confidence_t CountTruthValue::get_confidence() const
 {
     return _value[CONFIDENCE];
 }
 
-std::string CountTruthValue::toString(const std::string& indent) const
+std::string CountTruthValue::to_string(const std::string& indent) const
 {
     char buf[1024];
     sprintf(buf, "(ctv %f %f %f)",
-            static_cast<float>(getMean()),
-            static_cast<double>(getConfidence()),
-            static_cast<float>(getCount()));
+            static_cast<float>(get_mean()),
+            static_cast<double>(get_confidence()),
+            static_cast<float>(get_count()));
     return buf;
 }
 
@@ -105,9 +105,9 @@ bool CountTruthValue::operator==(const ProtoAtom& rhs) const
     const CountTruthValue *ctv = dynamic_cast<const CountTruthValue *>(&rhs);
     if (NULL == ctv) return false;
 
-    if (not nearly_equal(getMean(), ctv->getMean())) return false;
-    if (not nearly_equal(getConfidence(), ctv->getConfidence())) return false;
-    if (not nearly_equal(ctv->getCount(), getCount())) return false;
+    if (not nearly_equal(get_mean(), ctv->get_mean())) return false;
+    if (not nearly_equal(get_confidence(), ctv->get_confidence())) return false;
+    if (not nearly_equal(ctv->get_count(), get_count())) return false;
 
     return true;
 }
@@ -131,9 +131,9 @@ TruthValuePtr CountTruthValue::merge(const TruthValuePtr& other,
     // If both this and other are counts, then accumulate to get the
     // total count, and average together the strengths, using the
     // count as the relative weight.
-    count_t cnt =  getCount() + oc->getCount();
-    strength_t meeny = (getMean() * getCount() +
-                   oc->getMean() * oc->getCount()) / cnt;
+    count_t cnt =  get_count() + oc->get_count();
+    strength_t meeny = (get_mean() * get_count() +
+                   oc->get_mean() * oc->get_count()) / cnt;
 
     // XXX This is not the correct way to handle confidence ...
     // The confidence will typically hold the log probability,
@@ -144,5 +144,5 @@ TruthValuePtr CountTruthValue::merge(const TruthValuePtr& other,
     // Argh .. what to do?
     //    confidence = oc->confidence;
 
-    return createTV(meeny, getConfidence(), cnt);
+    return createTV(meeny, get_confidence(), cnt);
 }

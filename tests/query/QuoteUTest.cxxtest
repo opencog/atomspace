@@ -82,9 +82,9 @@ void QuoteUTest::setUp(void)
     as->clear();
 }
 
-#define getarity(hand) hand->getArity()
+#define getarity(hand) hand->get_arity()
 #define getlink(hand,pos) hand->getOutgoingAtom(pos)
-#define getname(hand) hand->getName()
+#define getname(hand) hand->get_name()
 
 /*
  * QuoteLink unit test.  Test quoted variables.
@@ -101,7 +101,7 @@ void QuoteUTest::test_quoted_variable(void)
     TS_ASSERT_EQUALS(1, getarity(banana));
 
     banana = getlink(banana, 0);
-    TS_ASSERT_EQUALS(CONCEPT_NODE, banana->getType());
+    TS_ASSERT_EQUALS(CONCEPT_NODE, banana->get_type());
     TS_ASSERT_EQUALS(0, strcmp("banana", getname(banana).c_str()));
 
     // ----------------------------------------------
@@ -112,7 +112,7 @@ void QuoteUTest::test_quoted_variable(void)
     TS_ASSERT_EQUALS(1, getarity(banana));
 
     banana = getlink(banana, 0);
-    TS_ASSERT_EQUALS(CONCEPT_NODE, banana->getType());
+    TS_ASSERT_EQUALS(CONCEPT_NODE, banana->get_type());
     TS_ASSERT_EQUALS(0, strcmp("banana", getname(banana).c_str()));
 
     // ----------------------------------------------
@@ -123,7 +123,7 @@ void QuoteUTest::test_quoted_variable(void)
     TS_ASSERT_EQUALS(1, getarity(banana));
 
     banana = getlink(banana, 0);
-    TS_ASSERT_EQUALS(CONCEPT_NODE, banana->getType());
+    TS_ASSERT_EQUALS(CONCEPT_NODE, banana->get_type());
     TS_ASSERT_EQUALS(0, strcmp("banana", getname(banana).c_str()));
 
     logger().debug("END TEST: %s", __FUNCTION__);
@@ -144,7 +144,7 @@ void QuoteUTest::test_nest(void)
     TS_ASSERT_EQUALS(1, getarity(allstar));
 
     allstar = getlink(allstar, 0);
-    TS_ASSERT_EQUALS(PREDICATE_NODE, allstar->getType());
+    TS_ASSERT_EQUALS(PREDICATE_NODE, allstar->get_type());
     TS_ASSERT_EQUALS(std::string("all-var"), getname(allstar));
 
     logger().debug("END TEST: %s", __FUNCTION__);
@@ -195,7 +195,7 @@ void QuoteUTest::test_gpn(void)
     TS_ASSERT_EQUALS(1, getarity(allstar));
 
     allstar = getlink(allstar, 0);
-    TS_ASSERT_EQUALS(LIST_LINK, allstar->getType());
+    TS_ASSERT_EQUALS(LIST_LINK, allstar->get_type());
     TS_ASSERT_EQUALS(2, getarity(allstar));
 
     logger().debug("END TEST: %s", __FUNCTION__);
@@ -216,7 +216,7 @@ void QuoteUTest::test_double_quote(void)
     TS_ASSERT_EQUALS(1, getarity(banana));
 
     banana = getlink(banana, 0);
-    TS_ASSERT_EQUALS(CONCEPT_NODE, banana->getType());
+    TS_ASSERT_EQUALS(CONCEPT_NODE, banana->get_type());
     TS_ASSERT_EQUALS(0, strcmp("banana", getname(banana).c_str()));
 
     logger().debug("END TEST: %s", __FUNCTION__);
@@ -289,7 +289,7 @@ void QuoteUTest::test_crash(void)
     // ones, at considerable cost...)
     // Handle infloop = eval->eval_h("infloop");
     // Handle inf = bindlink(as, infloop);
-    // printf("infloop is %s\n", inf->toShortString().c_str());
+    // printf("infloop is %s\n", inf->to_short_string().c_str());
     // TS_ASSERT_EQUALS(4, getarity(inf));
 
     logger().debug("END TEST: %s", __FUNCTION__);

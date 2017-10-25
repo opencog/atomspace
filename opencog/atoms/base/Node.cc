@@ -43,7 +43,7 @@ void Node::init(const std::string& cname)
     _name = cname;
 }
 
-std::string Node::toShortString(const std::string& indent) const
+std::string Node::to_short_string(const std::string& indent) const
 {
     std::string answer = indent;
     answer += "(" + classserver().getTypeName(_type);
@@ -51,14 +51,14 @@ std::string Node::toShortString(const std::string& indent) const
 
     // Print the TV only if its not the default.
     if (not getTruthValue()->isDefaultTV())
-        answer += " " + getTruthValue()->toString();
+        answer += " " + getTruthValue()->to_string();
 
     answer += ")\n";
 
     return answer;
 }
 
-std::string Node::toString(const std::string& indent) const
+std::string Node::to_string(const std::string& indent) const
 {
     std::string answer = indent;
     answer += "(" + classserver().getTypeName(_type);
@@ -66,9 +66,9 @@ std::string Node::toString(const std::string& indent) const
 
     // Print the TV only if its not the default.
     if (not getTruthValue()->isDefaultTV())
-        answer += " " + getTruthValue()->toString();
+        answer += " " + getTruthValue()->to_string();
 
-    answer += ") ; " + idToString() + "\n";
+    answer += ") ; " + id_to_string() + "\n";
 
     return answer;
 }
@@ -81,8 +81,8 @@ bool Node::operator==(const Atom& other) const
     // Rule out obvious mis-matches, based on the hash.
     if (get_hash() != other.get_hash()) return false;
 
-    if (getType() != other.getType()) return false;
-    return getName() == other.getName();
+    if (get_type() != other.get_type()) return false;
+    return get_name() == other.get_name();
 }
 
 bool Node::operator<(const Atom& other) const
@@ -96,18 +96,18 @@ bool Node::operator<(const Atom& other) const
     // We get to here only if the hashes are equal.
     // Compare the contents directly, for this
     // (hopefully rare) case.
-    if (getType() == other.getType())
-        return getName() < other.getName();
+    if (get_type() == other.get_type())
+        return get_name() < other.get_name();
     else
-        return getType() < other.getType();
+        return get_type() < other.get_type();
 }
 
 ContentHash Node::compute_hash() const
 {
-	ContentHash hsh = std::hash<std::string>()(getName());
+	ContentHash hsh = std::hash<std::string>()(get_name());
 
 	// 1<<43 - 369 is a prime number.
-	hsh += (hsh<<5) + ((1UL<<43)-369) * getType();
+	hsh += (hsh<<5) + ((1UL<<43)-369) * get_type();
 
 	// Nodes will never have the MSB set.
 	ContentHash mask = ~(((ContentHash) 1UL) << (8*sizeof(ContentHash) - 1));

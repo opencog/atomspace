@@ -221,7 +221,7 @@ bool DefaultPatternMatchCB::variable_match(const Handle& npat_h,
 	// accept the match. This allows any kind of node types to be
 	// explicitly bound as variables.  However, the type VariableNode
 	// gets special handling, below.
-	Type pattype = npat_h->getType();
+	Type pattype = npat_h->get_type();
 	if (VARIABLE_NODE != pattype and GLOB_NODE != pattype) return true;
 
 	// If the ungrounded term is a variable, then see if there
@@ -268,15 +268,15 @@ bool DefaultPatternMatchCB::link_match(const PatternTermPtr& ptm,
 
 	// Accept all ChoiceLink's by default! We will get another shot
 	// at it when the contents of the ChoiceLink are examined.
-	Type pattype = lpat->getType();
+	Type pattype = lpat->get_type();
 	if (CHOICE_LINK == pattype) return true;
 
 	// If types differ, no match
-	Type soltype = lsoln->getType();
+	Type soltype = lsoln->get_type();
 	if (pattype != soltype) return false;
 
 	// Reject mis-sized compares, unless the pattern has a glob in it.
-	if (0 == _globs->count(lpat) and lpat->getArity() != lsoln->getArity())
+	if (0 == _globs->count(lpat) and lpat->get_arity() != lsoln->get_arity())
 		return false;
 
 	// If the link is a ScopeLink, we need to deal with the
@@ -317,7 +317,7 @@ bool DefaultPatternMatchCB::link_match(const PatternTermPtr& ptm,
 bool DefaultPatternMatchCB::post_link_match(const Handle& lpat,
                                             const Handle& lgnd)
 {
-	Type pattype = lpat->getType();
+	Type pattype = lpat->get_type();
 	if (_pat_bound_vars and _classserver.isA(pattype, SCOPE_LINK))
 	{
 		_pat_bound_vars = nullptr;
@@ -350,14 +350,14 @@ bool DefaultPatternMatchCB::post_link_match(const Handle& lpat,
 	// one how the evaluation turned out.  Its "crisp logic"
 	// because we use a greater-than-half for the TV.
 	// This is the same behavior as used in evaluate_term().
-	TruthValuePtr tv(EvaluationLink::do_evaluate(_as, lgnd->getHandle()));
-	return tv->getMean() >= 0.5;
+	TruthValuePtr tv(EvaluationLink::do_evaluate(_as, lgnd->get_handle()));
+	return tv->get_mean() >= 0.5;
 }
 
 void DefaultPatternMatchCB::post_link_mismatch(const Handle& lpat,
                                                const Handle& lgnd)
 {
-	Type pattype = lpat->getType();
+	Type pattype = lpat->get_type();
 	if (_pat_bound_vars and _classserver.isA(pattype, SCOPE_LINK))
 	{
 		_pat_bound_vars = nullptr;
@@ -380,7 +380,7 @@ bool DefaultPatternMatchCB::is_self_ground(const Handle& ptrn,
                                            const HandleSet& varset,
                                            Quotation quotation)
 {
-	Type ptype = ptrn->getType();
+	Type ptype = ptrn->get_type();
 
 	// Unwrap quotations, so that they can be compared properly.
 	if (Quotation::is_quotation_type(ptype))
@@ -415,7 +415,7 @@ bool DefaultPatternMatchCB::is_self_ground(const Handle& ptrn,
 		for (const Handle& ch: pset)
 		{
 			const auto pr = term_gnds.find(ch);
-			if (pr != term_gnds.end() or CHOICE_LINK == ch->getType())
+			if (pr != term_gnds.end() or CHOICE_LINK == ch->get_type())
 			{
 				if (is_self_ground(ch, grnd, term_gnds, varset, quotation))
 					return true;
@@ -426,8 +426,8 @@ bool DefaultPatternMatchCB::is_self_ground(const Handle& ptrn,
 
 	// Just assume matches were carried out correctly.
 	// Do not try to get fancy, here.
-	if (not ptrn->isLink()) return false;
-	if (not grnd->isLink()) return false;
+	if (not ptrn->is_link()) return false;
+	if (not grnd->is_link()) return false;
 
 	// Recursive call.
 	const HandleSeq& pset = ptrn->getOutgoingSet();
@@ -441,7 +441,7 @@ bool DefaultPatternMatchCB::is_self_ground(const Handle& ptrn,
 	// ScopeLink that happen to have exactly the same name as a bound
 	// variable in the pattern will hide/obscure the variable in the
 	// pattern. Or rather: here is where we hide it.  Tedious.
-	if (_classserver.isA(grnd->getType(), SCOPE_LINK))
+	if (_classserver.isA(grnd->get_type(), SCOPE_LINK))
 	{
 		// Step 1: Look to see if the scope link binds any of the
 		// variables that the pattern also binds.
@@ -506,14 +506,14 @@ bool DefaultPatternMatchCB::clause_match(const Handle& ptrn,
 
 	// This if-statement handles the case given in the callback description.
 	// It is tested by EvaluationUTest.
-	if (ptrn->getType() == VARIABLE_NODE and
-	    grnd->getType() == EVALUATION_LINK and
-	    0 < grnd->getArity() and
-	    (grnd->getOutgoingAtom(0)->getType() == GROUNDED_PREDICATE_NODE or
-	    grnd->getOutgoingAtom(0)->getType() == DEFINED_PREDICATE_NODE))
+	if (ptrn->get_type() == VARIABLE_NODE and
+	    grnd->get_type() == EVALUATION_LINK and
+	    0 < grnd->get_arity() and
+	    (grnd->getOutgoingAtom(0)->get_type() == GROUNDED_PREDICATE_NODE or
+	    grnd->getOutgoingAtom(0)->get_type() == DEFINED_PREDICATE_NODE))
 	{
 		DO_LOG({LAZY_LOG_FINE << "Evaluate the grounding clause=" << std::endl
-		              << grnd->toShortString() << std::endl;})
+		              << grnd->to_short_string() << std::endl;})
 
 		// We make two awkard asumptions here: the ground term itself
 		// does not contain any variables, and so does not need any
@@ -526,12 +526,12 @@ bool DefaultPatternMatchCB::clause_match(const Handle& ptrn,
 		TruthValuePtr tvp(EvaluationLink::do_eval_scratch(_as, grnd, _temp_aspace));
 
 		DO_LOG({LAZY_LOG_FINE << "Clause_match evaluation yeilded tv"
-		              << std::endl << tvp->toString() << std::endl;})
+		              << std::endl << tvp->to_string() << std::endl;})
 
 		// XXX FIXME: we are making a crisp-logic go/no-go decision
 		// based on the TV strength. Perhaps something more subtle might be
 		// wanted, here.
-		bool relation_holds = tvp->getMean() > 0.5;
+		bool relation_holds = tvp->get_mean() > 0.5;
 		return relation_holds;
 	}
 
@@ -579,9 +579,9 @@ bool DefaultPatternMatchCB::eval_term(const Handle& virt,
 	Handle gvirt(_instor->instantiate(virt, gnds));
 
 	DO_LOG({LAZY_LOG_FINE << "Enter eval_term CB with virt=" << std::endl
-	              << virt->toShortString() << std::endl;})
+	              << virt->to_short_string() << std::endl;})
 	DO_LOG({LAZY_LOG_FINE << "Grounded by gvirt=" << std::endl
-	              << gvirt->toShortString() << std::endl;})
+	              << gvirt->to_short_string() << std::endl;})
 
 	// At this time, we expect all virutal links to be in one of two
 	// forms: either EvaluationLink's or GreaterThanLink's.  The
@@ -619,7 +619,7 @@ bool DefaultPatternMatchCB::eval_term(const Handle& virt,
 	//
 	// However, we also want to have a side-effect: the result of
 	// executing one of these things should be placed into the atomspace.
-	Type vty = virt->getType();
+	Type vty = virt->get_type();
 	if (EXECUTION_OUTPUT_LINK == vty or
 	    DEFINED_SCHEMA_NODE == vty or
 	    _classserver.isA(vty, FUNCTION_LINK))
@@ -650,15 +650,15 @@ bool DefaultPatternMatchCB::eval_term(const Handle& virt,
 	if (NULL == tvp)
 		throw InvalidParamException(TRACE_INFO,
 	            "Expecting a TruthValue for an evaluatable link: %s\n",
-	            gvirt->toShortString().c_str());
+	            gvirt->to_short_string().c_str());
 
 	DO_LOG({LAZY_LOG_FINE << "Eval_term evaluation yeilded tv="
-	              << tvp->toString() << std::endl;})
+	              << tvp->to_string() << std::endl;})
 
 	// XXX FIXME: we are making a crsip-logic go/no-go decision
 	// based on the TV strength. Perhaps something more subtle might be
 	// wanted, here.
-	bool relation_holds = tvp->getMean() > 0.5;
+	bool relation_holds = tvp->get_mean() > 0.5;
 	return relation_holds;
 }
 
@@ -675,24 +675,24 @@ bool DefaultPatternMatchCB::eval_sentence(const Handle& top,
                                           const HandleMap& gnds)
 {
 	DO_LOG({LAZY_LOG_FINE << "Enter eval_sentence CB with top=" << std::endl
-	              << top->toShortString() << std::endl;})
+	              << top->to_short_string() << std::endl;})
 
-	if (top->getType() == VARIABLE_NODE)
+	if (top->get_type() == VARIABLE_NODE)
 	{
 		return eval_term(top, gnds);
 	}
 
-	if (not top->isLink())
+	if (not top->is_link())
 		throw InvalidParamException(TRACE_INFO,
 	            "Not expecting a Node, here %s\n",
-	            top->toShortString().c_str());
+	            top->to_short_string().c_str());
 
 	const HandleSeq& oset = top->getOutgoingSet();
 	if (0 == oset.size())
 		throw InvalidParamException(TRACE_INFO,
 		   "Expecting logical connective to have at least one child!");
 
-	Type term_type = top->getType();
+	Type term_type = top->get_type();
 	if (OR_LINK == term_type or SEQUENTIAL_OR_LINK == term_type)
 	{
 		for (const Handle& h : oset)
@@ -791,11 +791,11 @@ bool DefaultPatternMatchCB::eval_sentence(const Handle& top,
 	{
 		TruthValuePtr tvp(g->second->getTruthValue());
 		DO_LOG({LAZY_LOG_FINE << "Non-logical atom has tv="
-		              << tvp->toString() << std::endl;})
+		              << tvp->to_string() << std::endl;})
 		// XXX FIXME: we are making a crisp-logic go/no-go decision
 		// based on the TV strength. Perhaps something more subtle might be
 		// wanted, here.
-		bool relation_holds = tvp->getMean() > 0.5;
+		bool relation_holds = tvp->get_mean() > 0.5;
 		return relation_holds;
 	}
 

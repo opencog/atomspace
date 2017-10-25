@@ -39,7 +39,7 @@ void FuzzyMatch::explore(const Handle& h)
 {
 	for (const LinkPtr& lptr : h->getIncomingSet())
 	{
-		Handle soln(lptr->getHandle());
+		Handle soln(lptr->get_handle());
 		bool look_for_more = try_match(soln);
 
 		if (look_for_more) explore(soln);
@@ -62,14 +62,14 @@ void FuzzyMatch::find_starters(const Handle& hp)
 	// Check if there is a similar tree, explore it if there is one
 	// and is accepted as a starting point
 	for (const LinkPtr& lptr : hp->getIncomingSet())
-		if (lptr->getType() == SIMILARITY_LINK)
+		if (lptr->get_type() == SIMILARITY_LINK)
 			for (const Handle& h : lptr->getOutgoingSet())
 				if (h != hp and accept_starter(h))
 					explore(h);
 
 	// Proposed start was not accepted. Look farther down, at it's
 	// sub-trees.
-	if (hp->isLink())
+	if (hp->is_link())
 		for (const Handle& h : hp->getOutgoingSet())
 			find_starters(h);
 }

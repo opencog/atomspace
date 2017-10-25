@@ -133,7 +133,7 @@ public:
      */
     Handle add_atom(const Handle&, bool async=false);
     Handle add_atom(AtomPtr a, bool async=false)
-        { return add_atom(a->getHandle(), async); }
+        { return add_atom(a->get_handle(), async); }
 
     /**
      * Add a node to the Atom Table.  If the atom already exists

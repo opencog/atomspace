@@ -59,7 +59,7 @@ private:
 			return it->second;
 
 		// If not a link, and not mapped, just return it.
-		if (not expr->isLink()) return expr;
+		if (not expr->is_link()) return expr;
 
 		HandleSeq oset_results;
 		bool changed = false;
@@ -73,7 +73,7 @@ private:
 		if (not changed) return expr;
 
 		// Create a duplicate link with the substitution.
-		Handle hret(createLink(oset_results, expr->getType()));
+		Handle hret(createLink(oset_results, expr->get_type()));
 		hret->copyValues(expr);
 		return hret;
 	}

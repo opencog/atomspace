@@ -171,29 +171,29 @@ void FetchUTest::kill_data(void)
 
 void FetchUTest::atomCompare(AtomPtr a, AtomPtr b, std::string where)
 {
-	printf("Check %s expect %s\n", where.c_str(), a->toString().c_str());
+	printf("Check %s expect %s\n", where.c_str(), a->to_string().c_str());
 	TSM_ASSERT("No atom found", b != nullptr);
 
 	if (nullptr == b) return;
 
-	TSM_ASSERT_EQUALS("Type mismatch", a->getType(), b->getType());
+	TSM_ASSERT_EQUALS("Type mismatch", a->get_type(), b->get_type());
 
 	NodePtr na(NodeCast(a));
 	NodePtr nb(NodeCast(b));
 	if (na and nb)
 	{
-		TSM_ASSERT_EQUALS("Name mismatch", na->getName(), nb->getName());
+		TSM_ASSERT_EQUALS("Name mismatch", na->get_name(), nb->get_name());
 	}
 
 	LinkPtr la(LinkCast(a));
 	LinkPtr lb(LinkCast(b));
 	if (la and lb)
 	{
-		TSM_ASSERT_EQUALS("Arity mismatch", la->getArity(), lb->getArity());
+		TSM_ASSERT_EQUALS("Arity mismatch", la->get_arity(), lb->get_arity());
 		if (*la != *lb)
 		{
-			printf("Mismatching la = %s\n", la->toString().c_str());
-			printf("Mismatching lb = %s\n", lb->toString().c_str());
+			printf("Mismatching la = %s\n", la->to_string().c_str());
+			printf("Mismatching lb = %s\n", lb->to_string().c_str());
 			TSM_ASSERT_EQUALS("Link mis-match", la, lb);
 		}
 	}
@@ -212,7 +212,7 @@ void FetchUTest::atomCompare(AtomPtr a, AtomPtr b, std::string where)
 			{
 				fprintf(stderr, "Error, truth value miscompare, "
 					"ma=%f mb=%f ca=%f cb=%f\n",
-					ta->getMean(), tb->getMean(), ta->getCount(), tb->getCount());
+					ta->get_mean(), tb->get_mean(), ta->get_count(), tb->get_count());
 			}
 		}
 	}
@@ -240,7 +240,7 @@ void FetchUTest::test_stuff(void)
 
 	// The above should NOT update the TV of (Concept "AAA")
 	TruthValuePtr tv = eval->eval_tv(R"((cog-tv (Concept "AAA")))");
-	printf("Expecting default, got %s\n", tv->toString().c_str());
+	printf("Expecting default, got %s\n", tv->to_string().c_str());
 	TruthValuePtr dtv = TruthValue::DEFAULT_TV();
 	TS_ASSERT((*tv) == (*dtv));
 
@@ -274,8 +274,8 @@ void FetchUTest::test_stuff(void)
 	eval->eval(R"((fetch-atom (Concept "BBB")))");
 	tv = eval->eval_tv(R"((cog-tv (Concept "BBB")))");
 	TS_ASSERT((*tv) == (*dtv));
-	printf("Expecting %s\n", dtv->toString().c_str());
-	printf("Got %s\n", tv->toString().c_str());
+	printf("Expecting %s\n", dtv->to_string().c_str());
+	printf("Got %s\n", tv->to_string().c_str());
 
 	logger().debug("END TEST: %s", __FUNCTION__);
 }

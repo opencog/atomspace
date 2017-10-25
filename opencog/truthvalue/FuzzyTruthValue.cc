@@ -48,22 +48,22 @@ FuzzyTruthValue::FuzzyTruthValue(const TruthValue& source)
 	: TruthValue(FUZZY_TRUTH_VALUE)
 {
     _value.resize(2);
-    _value[MEAN] = source.getMean();
-    _value[COUNT] = source.getCount();
+    _value[MEAN] = source.get_mean();
+    _value[COUNT] = source.get_count();
 }
 
 FuzzyTruthValue::FuzzyTruthValue(FuzzyTruthValue const& source)
 	: TruthValue(FUZZY_TRUTH_VALUE)
 {
     _value.resize(2);
-    _value[MEAN] = source.getMean();
-    _value[COUNT] = source.getCount();
+    _value[MEAN] = source.get_mean();
+    _value[COUNT] = source.get_count();
 }
 
 FuzzyTruthValue::FuzzyTruthValue(const ProtoAtomPtr& source)
     : TruthValue(FUZZY_TRUTH_VALUE)
 {
-    if (source->getType() != FUZZY_TRUTH_VALUE)
+    if (source->get_type() != FUZZY_TRUTH_VALUE)
         throw RuntimeException(TRACE_INFO,
             "Source must be a FuzzyTruthValue");
 
@@ -73,43 +73,43 @@ FuzzyTruthValue::FuzzyTruthValue(const ProtoAtomPtr& source)
     _value[COUNT] = fp->value()[COUNT];
 }
 
-strength_t FuzzyTruthValue::getMean() const
+strength_t FuzzyTruthValue::get_mean() const
 {
     return _value[MEAN];
 }
 
-count_t FuzzyTruthValue::getCount() const
+count_t FuzzyTruthValue::get_count() const
 {
     return _value[COUNT];
 }
 
-confidence_t FuzzyTruthValue::getConfidence() const
+confidence_t FuzzyTruthValue::get_confidence() const
 {
-    return countToConfidence(getCount());
+    return countToConfidence(get_count());
 }
 
 // This is the merge formula appropriate for PLN.
 TruthValuePtr FuzzyTruthValue::merge(const TruthValuePtr& other,
                                      const MergeCtrl& mc) const
 {
-    if (other->getType() != SIMPLE_TRUTH_VALUE) {
+    if (other->get_type() != SIMPLE_TRUTH_VALUE) {
         throw RuntimeException(TRACE_INFO,
            "Don't know how to merge %s into a FuzzyTruthValue",
            typeid(*other).name());
     }
 
-    if (other->getConfidence() > getConfidence())
+    if (other->get_confidence() > get_confidence())
         return other;
 
     return std::static_pointer_cast<const TruthValue>(shared_from_this());
 }
 
-std::string FuzzyTruthValue::toString(const std::string& indent) const
+std::string FuzzyTruthValue::to_string(const std::string& indent) const
 {
     char buf[1024];
     sprintf(buf, "(ftv %f %f)",
-            static_cast<float>(getMean()),
-            static_cast<float>(getConfidence()));
+            static_cast<float>(get_mean()),
+            static_cast<float>(get_confidence()));
     return buf;
 }
 
@@ -118,7 +118,7 @@ bool FuzzyTruthValue::operator==(const ProtoAtom& rhs) const
     const FuzzyTruthValue *ftv = dynamic_cast<const FuzzyTruthValue *>(&rhs);
     if (NULL == ftv) return false;
 
-    if (not nearly_equal(getMean(), ftv->getMean())) return false;
+    if (not nearly_equal(get_mean(), ftv->get_mean())) return false;
 
 // Converting from confidence to count and back again using single-precision
 // float is a real accuracy killer.  In particular, 2/802 = 0.002494 but
@@ -127,7 +127,7 @@ bool FuzzyTruthValue::operator==(const ProtoAtom& rhs) const
 // thereabouts.
 #define FLOAT_ACCEPTABLE_COUNT_ERROR 0.0002
 
-    if (FLOAT_ACCEPTABLE_COUNT_ERROR < fabs(1.0 - (ftv->getCount()/getCount()))) return false;
+    if (FLOAT_ACCEPTABLE_COUNT_ERROR < fabs(1.0 - (ftv->get_count()/get_count()))) return false;
     return true;
 }
 

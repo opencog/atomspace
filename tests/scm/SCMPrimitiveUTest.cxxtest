@@ -76,7 +76,7 @@ class MyExampleClass
 			TSM_ASSERT("Failed to get a valid handle", as->is_valid_handle(h))
 
 			logger().debug("Info: my_func instance %d received the node: %s\n",
-			               id, NodeCast(h)->getName().c_str());
+			               id, NodeCast(h)->get_name().c_str());
 			Handle hlist = as->add_link(LIST_LINK, h);
 			return hlist;
 		}
@@ -94,7 +94,7 @@ class MyExampleClass
 			// if handle invalid, it just mean the same atom might have been deleted by another thread
 			if (not as->is_valid_handle(h))
 			{
-				logger().debug("Info: my_more_func_1 got invalid handle %s", h->toShortString().c_str());
+				logger().debug("Info: my_more_func_1 got invalid handle %s", h->to_short_string().c_str());
 				return Handle::UNDEFINED;
 			}
 
@@ -106,7 +106,7 @@ class MyExampleClass
 		{
 			if (not as->is_valid_handle(h))
 			{
-				logger().debug("Info: my_more_func_2 got invalid handle %s", h->toShortString().c_str());
+				logger().debug("Info: my_more_func_2 got invalid handle %s", h->to_short_string().c_str());
 				return;
 			}
 

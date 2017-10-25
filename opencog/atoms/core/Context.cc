@@ -42,7 +42,7 @@ Context::Context(bool s) : store_scope_variables(s) {}
 
 void Context::update(const Handle& h)
 {
-	Type t = h->getType();
+	Type t = h->get_type();
 
 	// Update shadow
 	if (quotation.is_unquoted() and classserver().isA(t, SCOPE_LINK)) {
@@ -77,7 +77,7 @@ bool Context::consumable(Type t) const
 
 bool Context::is_free_variable(const Handle& h) const
 {
-	return (h->getType() == VARIABLE_NODE)
+	return (h->get_type() == VARIABLE_NODE)
 		and quotation.is_unquoted()
 		and not is_in(h, shadow);
 }

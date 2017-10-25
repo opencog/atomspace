@@ -75,18 +75,18 @@ public:
 
 	TypeNode(Node &n)
 		: Node(n),
-		  value(classserver().getType(n.getName()))
+		  value(classserver().getType(n.get_name()))
 	{
-		OC_ASSERT(classserver().isA(n.getType(), TYPE_NODE),
+		OC_ASSERT(classserver().isA(n.get_type(), TYPE_NODE),
 			"Bad TypeNode constructor!");
 
 		if (DEFINED_TYPE_NODE != _type and NOTYPE == value)
 			throw InvalidParamException(TRACE_INFO,
-				"Not a valid typename: '%s'", n.getName().c_str());
+				"Not a valid typename: '%s'", n.get_name().c_str());
 
 		if (DEFINED_TYPE_NODE == _type and NOTYPE != value)
 			throw InvalidParamException(TRACE_INFO,
-				"Redefinition of a built-in typename: '%s'", n.getName().c_str());
+				"Redefinition of a built-in typename: '%s'", n.get_name().c_str());
 	}
 
 	static void validate(const std::string& str)
