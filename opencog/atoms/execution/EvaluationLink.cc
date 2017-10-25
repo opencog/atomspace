@@ -637,6 +637,23 @@ TruthValuePtr EvaluationLink::do_evaluate(AtomSpace* as,
 #endif /* HAVE_CYTHON */
 	}
 
+#ifdef BROKEN_CODE
+	// Used by the Haskel bindings
+	// See ExecutionOutputLink.cc lines 174-187 for more
+	// code that partly implements this.
+	if (lang == "lib")
+	{
+		void* sym = LibraryManager::getFunc(lib,fun);
+
+		// Convert the void* pointer to the correct function type.
+		Handle* (*func)(AtomSpace*, Handle*);
+		func = reinterpret_cast<Handle* (*)(AtomSpace *, Handle*)>(sym);
+
+		// Execute the function
+		result = *func(as, &args);
+	}
+#endif
+
 	// Unkown proceedure type.
 	throw RuntimeException(TRACE_INFO,
 	     "Cannot evaluate unknown GroundedPredicateNode: %s",
