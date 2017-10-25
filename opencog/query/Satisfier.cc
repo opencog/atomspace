@@ -140,15 +140,12 @@ bool SatisfyingSet::grounding(const HandleMap &var_soln,
 TruthValuePtr opencog::satisfaction_link(AtomSpace* as, const Handle& hlink)
 {
 	PatternLinkPtr plp(PatternLinkCast(hlink));
+
+	// OK, this seems weird to me. If its NOT a PatternLink of some
+	// kind, then WRAP it in a PatternLink.  Why is this the correct
+	// thing to do ???
 	if (NULL == plp)
-	{
-		// If it is a BindLink (for example), we want to use that ctor
-		// instead of the default ctor.
-		if (classserver().isA(hlink->getType(), SATISFACTION_LINK))
-			plp = createPatternLink(*LinkCast(hlink));
-		else
-			plp = createPatternLink(hlink);
-	}
+		plp = createPatternLink(hlink);
 
 	Satisfier sater(as);
 	plp->satisfy(sater);
