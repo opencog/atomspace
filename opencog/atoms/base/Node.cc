@@ -82,7 +82,7 @@ bool Node::operator==(const Atom& other) const
     if (get_hash() != other.get_hash()) return false;
 
     if (getType() != other.getType()) return false;
-    return getName() == other.getName();
+    return get_name() == other.get_name();
 }
 
 bool Node::operator<(const Atom& other) const
@@ -97,14 +97,14 @@ bool Node::operator<(const Atom& other) const
     // Compare the contents directly, for this
     // (hopefully rare) case.
     if (getType() == other.getType())
-        return getName() < other.getName();
+        return get_name() < other.get_name();
     else
         return getType() < other.getType();
 }
 
 ContentHash Node::compute_hash() const
 {
-	ContentHash hsh = std::hash<std::string>()(getName());
+	ContentHash hsh = std::hash<std::string>()(get_name());
 
 	// 1<<43 - 369 is a prime number.
 	hsh += (hsh<<5) + ((1UL<<43)-369) * getType();

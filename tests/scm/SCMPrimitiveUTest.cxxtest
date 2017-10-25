@@ -76,7 +76,7 @@ class MyExampleClass
 			TSM_ASSERT("Failed to get a valid handle", as->is_valid_handle(h))
 
 			logger().debug("Info: my_func instance %d received the node: %s\n",
-			               id, NodeCast(h)->getName().c_str());
+			               id, NodeCast(h)->get_name().c_str());
 			Handle hlist = as->add_link(LIST_LINK, h);
 			return hlist;
 		}

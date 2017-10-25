@@ -152,7 +152,7 @@ bool AtomSpace::compare_atomspaces(const AtomSpace& space_first,
         if (atom_first->isNode())
         {
             atom_second = table_second.getHandle(atom_first->getType(),
-                        atom_first->getName());
+                        atom_first->get_name());
         }
         else if (atom_first->isLink())
         {
@@ -347,7 +347,7 @@ Handle AtomSpace::fetch_atom(const Handle& h)
     Handle hv;
     if (h->isNode()) {
         hv = _backing_store->getNode(h->getType(),
-                                     h->getName().c_str());
+                                     h->get_name().c_str());
     }
     else if (h->isLink()) {
         hv = _backing_store->getLink(h->getType(),

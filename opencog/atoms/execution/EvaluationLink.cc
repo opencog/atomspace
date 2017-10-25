@@ -578,7 +578,7 @@ TruthValuePtr EvaluationLink::do_evaluate(AtomSpace* as,
 	Handle args = force_execute(as, cargs, silent);
 
 	// Get the schema name.
-	const std::string& schema = pn->getName();
+	const std::string& schema = pn->get_name();
 	// printf ("Grounded schema name: %s\n", schema.c_str());
 
 	// A very special-case C++ comparison.

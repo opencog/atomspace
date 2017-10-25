@@ -176,7 +176,7 @@ static void atomCompare(AtomPtr a, AtomPtr b, const char* where)
     NodePtr nb(NodeCast(b));
     if (na and nb)
     {
-        TSM_ASSERT_EQUALS("Name mismatch", na->getName(), nb->getName());
+        TSM_ASSERT_EQUALS("Name mismatch", na->get_name(), nb->get_name());
     }
 
     LinkPtr la(LinkCast(a));

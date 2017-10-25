@@ -276,7 +276,7 @@ static __attribute__ ((constructor)) void init(void)              \
 Handle CNAME::factory(const Handle& base)                         \
 {                                                                 \
    if (CNAME##Cast(base)) return base;                            \
-   Handle h(create##CNAME(base->getType(), base->getName()));     \
+   Handle h(create##CNAME(base->getType(), base->get_name()));     \
    return h;                                                      \
 }                                                                 \
                                                                   \

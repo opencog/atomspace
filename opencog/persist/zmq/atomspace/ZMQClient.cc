@@ -115,7 +115,7 @@ void ZMQClient::storeAtom(const AtomPtr& atomPtr, bool synchronous)
     } else {
     	NodePtr nodePtr = dynamic_pointer_cast<Node>(atomPtr);
     	atomMsg->set_atomtype(ZMQAtomTypeNode);
-    	atomMsg->set_name(nodePtr->getName());
+    	atomMsg->set_name(nodePtr->get_name());
     }
 
     sendMessage(req, rep);

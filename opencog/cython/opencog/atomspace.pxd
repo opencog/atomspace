@@ -116,7 +116,7 @@ cdef extern from "opencog/atoms/base/Atom.h" namespace "opencog":
         output_iterator getIncomingSetByType(output_iterator, Type type)
 
         # Conditionally-valid methods. Not defined for all atoms.
-        string getName()
+        string get_name()
         vector[cHandle] getOutgoingSet()
 
 

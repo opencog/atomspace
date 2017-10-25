@@ -142,9 +142,9 @@ Handle addRealAtom(AtomSpace& as, AtomPtr atom,
     Handle result;
     NodePtr node(NodeCast(atom));
     if (node) {
-        result = as.get_handle(node->getType(), node->getName());
+        result = as.get_handle(node->getType(), node->get_name());
         if (result == Handle::UNDEFINED) {
-            Handle h = as.add_node(node->getType(), node->getName());
+            Handle h = as.add_node(node->getType(), node->get_name());
             h->setTruthValue(newTV);
             return h;
         }

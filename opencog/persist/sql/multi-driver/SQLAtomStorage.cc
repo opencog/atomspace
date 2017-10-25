@@ -1035,7 +1035,7 @@ UUID SQLAtomStorage::check_uuid(const Handle& h)
 	Handle dbh;
 	if (h->isNode())
 	{
-		dbh = doGetNode(h->getType(), h->getName().c_str());
+		dbh = doGetNode(h->getType(), h->get_name().c_str());
 	}
 	else
 	{
@@ -1384,7 +1384,7 @@ void SQLAtomStorage::do_store_single_atom(const Handle& h, int aheight)
 		// Use postgres $-quoting to make unicode strings
 		// easier to deal with.
 		std::string qname = " $ocp$";
-		qname += h->getName();
+		qname += h->get_name();
 		qname += "$ocp$ ";
 
 		// The Atoms table has a UNIQUE constraint on the

@@ -108,7 +108,7 @@ void Rule::init(const Handle& rule_alias, const Handle& rule, const Handle& rbs)
 	_rule = BindLinkCast(rule);
 
 	_rule_alias = rule_alias;
-	_name = _rule_alias->getName();
+	_name = _rule_alias->get_name();
 	_rbs = rbs;
 	AtomSpace& as = *rule_alias->getAtomSpace();
 	Handle ml = as.get_link(MEMBER_LINK, rule_alias, rbs);
@@ -495,7 +495,7 @@ Handle Rule::standardize_helper(AtomSpace* as, const Handle& h,
 	if (dict.count(h) == 0)
 	{
 		// TODO: use opencog's random generator
-		std::string new_name = h->getName() + "-"
+		std::string new_name = h->get_name() + "-"
 			+ boost::uuids::to_string(boost::uuids::random_generator()());
 
 		Handle hcpy(as->add_atom(createNode(h->getType(), new_name)));
@@ -509,7 +509,7 @@ Handle Rule::standardize_helper(AtomSpace* as, const Handle& h,
 	if (dict.at(h) != Handle::UNDEFINED)
 		return dict[h];
 
-	std::string new_name = h->getName() + "-" + _name;
+	std::string new_name = h->get_name() + "-" + _name;
 	Handle hcpy(as->add_atom(createNode(h->getType(), new_name)));
 	hcpy->copyValues(h);
 

@@ -321,7 +321,7 @@ SCM SchemeSmob::ss_value_to_list (SCM svalue)
 
 	if (classserver().isA(t, NODE))
 	{
-		const std::string& name = AtomCast(pa)->getName();
+		const std::string& name = AtomCast(pa)->get_name();
 		return scm_cons(scm_from_utf8_string(name.c_str()), SCM_EOL);
 	}
 
@@ -360,7 +360,7 @@ SCM SchemeSmob::ss_value_ref (SCM svalue, SCM sindex)
 
 	if (classserver().isA(t, NODE))
 	{
-		const std::string& name = AtomCast(pa)->getName();
+		const std::string& name = AtomCast(pa)->get_name();
 		if (0 == index) return scm_from_string(name);
 	}
 

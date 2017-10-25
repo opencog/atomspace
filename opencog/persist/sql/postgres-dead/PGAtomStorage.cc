@@ -1053,7 +1053,7 @@ std::string PGAtomStorage::build_atom_insert(Database& database,
         // a redesign of the table format, in some way. Maybe
         // we could hash the long node names, store the hash,
         // and make sure that is unique.
-        database.add_column_quoted_string("name", atom->getName(), 
+        database.add_column_quoted_string("name", atom->get_name(), 
                 MAX_NODE_NAME_LENGTH);
 
         // Nodes have a height of zero by definition.

@@ -111,7 +111,7 @@ size_t AtomSpaceBenchmark::estimateOfAtomSize(Handle h)
     if (n)
     {
         total = sizeof(Node);
-        total += n->getName().capacity();
+        total += n->get_name().capacity();
     }
     else
     {

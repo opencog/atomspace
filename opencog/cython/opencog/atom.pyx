@@ -38,7 +38,7 @@ cdef class Atom(object):
                 if atom_ptr == NULL:   # avoid null-pointer deref
                     return None
                 if atom_ptr.isNode():
-                    self._name = atom_ptr.getName()
+                    self._name = atom_ptr.get_name()
                 else:
                     self._name = ""
             return self._name

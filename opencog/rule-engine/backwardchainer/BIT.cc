@@ -635,7 +635,7 @@ std::string AndBIT::line_separator(const std::string& up_aa,
 
 	// Get formula string
 	std::string lang, lib, fun;
-	ExecutionOutputLink::lang_lib_fun(gsn->getName(), lang, lib, fun);
+	ExecutionOutputLink::lang_lib_fun(gsn->get_name(), lang, lib, fun);
 	std::string formula_str = fun.substr(0, line_sep_size - 2);
 	size_t formula_str_size = formula_str.size();
 

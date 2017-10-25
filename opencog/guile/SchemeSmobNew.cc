@@ -65,7 +65,7 @@ std::string SchemeSmob::handle_to_string(const Handle& h, int indent)
 		ret += "(";
 		ret += classserver().getTypeName(h->getType());
 		ret += " \"";
-		ret += h->getName();
+		ret += h->get_name();
 		ret += "\"";
 
 		// Print the truth value only after the node name

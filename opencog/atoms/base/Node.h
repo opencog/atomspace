@@ -80,7 +80,7 @@ public:
      *
      * @return The name of the node.
      */
-    virtual const std::string& getName() const { return _name; }
+    virtual const std::string& get_name() const { return _name; }
 
     virtual size_t size() const { return 1; }
 

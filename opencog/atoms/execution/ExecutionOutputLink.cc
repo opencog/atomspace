@@ -131,7 +131,7 @@ Handle ExecutionOutputLink::do_execute(AtomSpace* as,
 	Handle args = force_execute(as, cargs, silent);
 
 	// Get the schema name.
-	const std::string& schema = gsn->getName();
+	const std::string& schema = gsn->get_name();
 
 	// Extract the language, library and function
 	std::string lang, lib, fun;

@@ -133,8 +133,8 @@ bool PMCB::node_match(Node *npat, Node *nsoln)
 	Handle ha = npat->getHandle();
 	Handle hb = nsoln->getHandle();
 	logger().debug("Compare (%zu) %s ==== (%zu) %s",
-		ha.value(), npat->getName().c_str(),
-		hb.value(), nsoln->getName().c_str());
+		ha.value(), npat->get_name().c_str(),
+		hb.value(), nsoln->get_name().c_str());
 
 	return npat == nsoln;
 }

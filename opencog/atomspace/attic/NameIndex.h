@@ -45,13 +45,13 @@ class NameIndex:
 		{
 			Node * n = dynamic_cast<Node*>(a);
 			if (NULL == n) return;
-			insert(n->getName(), a);
+			insert(n->get_name(), a);
 		}
 		void removeAtom(Atom* a)
 		{
 			Node * n = dynamic_cast<Node*>(a);
 			if (NULL == n) return;
-			remove(n->getName());
+			remove(n->get_name());
 		}
 };
 

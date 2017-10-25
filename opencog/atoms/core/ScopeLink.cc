@@ -361,7 +361,7 @@ inline HandleSeq append_rand_str(const HandleSeq& vars)
 {
 	HandleSeq new_vars;
 	for (const Handle& h : vars) {
-		std::string new_var_name = h->getName() + "-" + rand_hex_str();
+		std::string new_var_name = h->get_name() + "-" + rand_hex_str();
 		new_vars.emplace_back(createNode(VARIABLE_NODE, new_var_name));
 	}
 	return new_vars;

@@ -89,8 +89,8 @@ void AtomCache::storeAtom(Atom *atom)
 	if (n)
 	{
 		strcpy(p, "name");
-		const char *name = n->getName().c_str();
-		vlen = n->getName().size();
+		const char *name = n->get_name().c_str();
+		vlen = n->get_name().size();
 		rc = memcached_set (mc, keybuff, rootlen+4, name, vlen, 0, 0);
 		CHECK_RC(rc);
 	}

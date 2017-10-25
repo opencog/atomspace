@@ -236,7 +236,7 @@ public:
         return compute_hash();
     }
 
-    virtual const std::string& getName() const {
+    virtual const std::string& get_name() const {
         throw RuntimeException(TRACE_INFO, "Not a node!");
     }
 

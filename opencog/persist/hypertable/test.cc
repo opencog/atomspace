@@ -87,7 +87,7 @@ int main (int argc, char **argv){
         }
         
         // Get it back through get node
-        Atom *c = table.getNode(a->getType(), ((Node *)a)->getName().c_str());
+        Atom *c = table.getNode(a->getType(), ((Node *)a)->get_name().c_str());
         rc = atomCompare(a,c);
         if (!rc) {
             printf("node compare success\n");

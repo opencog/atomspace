@@ -114,7 +114,7 @@ int AtomSpace_getAtomByHandle( AtomSpace* this_ptr
     NodePtr ptr = NodeCast(h);
     if(ptr){ // It is a node.
         *node_or_link = 1;
-        const std::string &str = ptr->getName();
+        const std::string &str = ptr->get_name();
         *name = (char*) malloc(sizeof(char) * (str.length()+1));
         if(! *name)
             throw RuntimeException(TRACE_INFO,"Failed malloc.");
