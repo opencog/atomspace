@@ -45,7 +45,7 @@ std::string LinkValue::to_string(const std::string& indent) const
 {
 	std::string rv = indent + "(LinkValue\n";
 	for (ProtoAtomPtr v :_value)
-		rv += std::string(" ") + v->to_string(indent + "   ") + "\n";
-	rv += ")";
+		rv += std::string(" ") + v->to_string(indent + "   ");
+	rv += ")\n";
 	return rv;
 }

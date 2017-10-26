@@ -44,6 +44,6 @@ std::string StringValue::to_string(const std::string& indent) const
 	std::string rv = indent + "(StringValue";
 	for (std::string v :_value)
 		rv += std::string(" \"") + v + "\"";
-	rv += ")";
+	rv += ")\n";
 	return rv;
 }
