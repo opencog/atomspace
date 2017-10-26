@@ -22,7 +22,7 @@
 
 ; Values can be attached to atoms:
 (define a (Concept "some atom"))
-(define k1 (ConceptNode "first key"))
+(define k1 (PredicateNode "first key"))
 (cog-set-value! a k1 f)
 
 ; The attached value can be fetched.
@@ -35,7 +35,7 @@
 (cog-value a k1)
 
 ; Multipe values can be attached using different keys.
-(define k2 (ConceptNode "second key"))
+(define k2 (PredicateNode "second key"))
 (cog-set-value! a k2 s)
 (cog-value a k2)
 
