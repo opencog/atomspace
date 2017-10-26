@@ -11,35 +11,33 @@
 (use-modules (opencog))
 
 ; Values can store vectors of floats ...
-(FloatValue 0.1 0.2 3.3 4.5678)
+(define f (FloatValue 0.1 0.2 3.3 4.5678))
 
 ; or lists of strings:
-(StringValue "asdf" "gh" "jkl;")
+(define s (StringValue "asdf" "gh" "jkl;"))
 
 ; or lists of other values or atoms.  Thus, they can be heirarchical.
-(LinkValue
-	(Concept "foobar")
-	(StringValue "property")
-	(FloatValue 42)
-)
+(define l (LinkValue
+  (Concept "foobar") (StringValue "property") (FloatValue 42)))
 
 ; Values can be attached to atoms:
 (define a (Concept "some atom"))
-(define v (LinkValue (StringValue "property") (FloatValue 42)))
-(cog-set-value! a v)
+(define k1 (ConceptNode "first key"))
+(cog-set-value! a k1 f)
 
 ; The attached value can be fetched.
-(cog-value a)
-
-(define l (LinkValue
-	(Concept "foobar") (StringValue "property") (FloatValue 42)))
-
-; The following should throw errors.
-(cog-value v)
-(cog-value l)
+(cog-value a k1)
 
 ; The value can be changed ...
-(cog-set-value! a l)
+(cog-set-value! a k1 l)
 
 ; Verify that the value changed.
-(cog-value a)
+(cog-value a k1)
+
+; Multipe values can be attached using different keys.
+(define k2 (ConceptNode "second key"))
+(cog-set-value! a k2 s)
+(cog-value a k2)
+
+; Verify that the value for the first key is still there.
+(cog-value a k1)
