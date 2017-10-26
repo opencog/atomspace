@@ -76,6 +76,7 @@
 ; exactly the same thing as (cog-tv a)
 (cog-value a ktv)
 (cog-tv a)
+(equal? (cog-value a ktv) (cog-tv a))
 
 ; Truth Values are values, just like the rest. So are Attention Values:
 (define l2 (LinkValue
@@ -83,3 +84,13 @@
 
 (cog-set-value! a k2 l2)
 (cog-value a k2)
+
+; Attention values are stored under a special key as well:
+(cog-set-av! a (av 3 2 1))
+(cog-keys a)
+
+; and can be accessed as values:
+(define kav (PredicateNode "*-AttentionValueKey-*"))
+(cog-value a kav)
+(cog-av a)
+(equal? (cog-value a kav) (cog-av a))
