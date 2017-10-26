@@ -20,6 +20,22 @@
 (define l (LinkValue
   (Concept "foobar") (StringValue "property") (FloatValue 42)))
 
+; A list of values can be converted into an ordinary scheme list:
+(cog-value->list f)
+(cog-value->list s)
+(cog-value->list l)
+
+; Alternately, individual elements in the list can be accessed directly.
+; This behaves just like   (list-ref (cog-value->list VAL) NUM)
+; but is computationally faster.
+(cog-value-ref f 2)
+(cog-value-ref s 0)
+(cog-value-ref l 1)
+
+; Help for these functions can be viewed at the guile command line:
+,d cog-value->list
+,d cog-value-ref
+
 ; Values can be attached to atoms:
 (define a (Concept "some atom"))
 (define k1 (PredicateNode "first key"))
@@ -41,3 +57,29 @@
 
 ; Verify that the value for the first key is still there.
 (cog-value a k1)
+
+; List all of the keys on the atom.
+(cog-keys a)
+
+; Add a truth value to the atom
+(cog-set-tv! a (stv 0.9 0.8))
+
+; List all of the keys on the atom.
+; Note that the tv is stored with a key, so that truth values
+; behave like other values.
+(cog-keys a)
+
+; Lets play with truth values. First, define the truth value key:
+(define ktv (PredicateNode "*-TruthValueKey-*"))
+
+; Verify that it works as expected; that is, this should return
+; exactly the same thing as (cog-tv a)
+(cog-value a ktv)
+(cog-tv a)
+
+; Truth Values are values, just like the rest. So are Attention Values:
+(define l2 (LinkValue
+  (stv 0.1 0.2) (stv 0.3 0.4) (Concept "foobar") (av 3 2 1) (av 4 5 0)))
+
+(cog-set-value! a k2 l2)
+(cog-value a k2)
