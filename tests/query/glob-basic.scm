@@ -279,3 +279,53 @@
 			(List (Glob "$x"))
 			(List (Glob "$y"))
 			(List (Glob "$z")))))
+
+; -----------------------------------------------------------------
+; The same glob appears more than once in the pattern
+
+(ListLink
+	(ConceptNode "a")
+	(ConceptNode "b")
+	(ConceptNode "c")
+	(ConceptNode "d")
+	(ConceptNode "e")
+	(ConceptNode "f")
+	(ConceptNode "g")
+	(ConceptNode "h")
+	(ConceptNode "i")
+	(ConceptNode "j")
+	(ConceptNode "k"))
+
+(ListLink
+	(ConceptNode "a")
+	(ConceptNode "b")
+	(ConceptNode "FOO")
+	(ConceptNode "e")
+	(ConceptNode "f")
+	(ConceptNode "FOO")
+	(ConceptNode "j")
+	(ConceptNode "k"))
+
+(ListLink
+	(ConceptNode "a")
+	(ConceptNode "b")
+	(ConceptNode "FOO")
+	(ConceptNode "e")
+	(ConceptNode "f")
+	(ConceptNode "FOO")
+	(ConceptNode "BAR")
+	(ConceptNode "j")
+	(ConceptNode "k"))
+
+(define get-ma
+	(GetLink
+		(GlobNode "star")
+		(ListLink
+			(ConceptNode "a")
+			(ConceptNode "b")
+			(GlobNode "star")
+			(ConceptNode "e")
+			(ConceptNode "f")
+			(GlobNode "star")
+			(ConceptNode "j")
+			(ConceptNode "k"))))
