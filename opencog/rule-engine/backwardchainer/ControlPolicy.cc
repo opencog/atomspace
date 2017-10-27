@@ -299,8 +299,8 @@ Handle ControlPolicy::get_expansion_control_rule_pattern(const Handle& ctrl_rule
 
 HandleSet ControlPolicy::fetch_expansion_control_rules(const Handle& inf_rule)
 {
-	return set_union(fetch_expansion_control_rules(inf_rule, 1),
-	                 fetch_expansion_control_rules(inf_rule, 2));
+	return set_union(fetch_expansion_control_rules(inf_rule, 0),
+	                 fetch_expansion_control_rules(inf_rule, 1));
 }
 
 HandleSet ControlPolicy::fetch_expansion_control_rules(const Handle& inf_rule,
@@ -356,41 +356,44 @@ Handle ControlPolicy::mk_preproof_eval(const Handle& preproof_args_var)
 Handle ControlPolicy::mk_expansion_control_rules_query(const Handle& inf_rule,
                                                        int n)
 {
-	OC_ASSERT(0 < n, "Not supported yet");
-
 	Handle vardecl_var = an(VARIABLE_NODE, "$vardecl"),
 		vardecl_vardecl = mk_vardecl_vardecl(vardecl_var),
 
-		input_andbit_var = an(VARIABLE_NODE, "$input_andbit"),
-		input_leaf_var = an(VARIABLE_NODE, "$input_leaf"),
-		output_andbit_var = an(VARIABLE_NODE, "$output_andbit"),
-		expand_exec = mk_expand_exec(input_andbit_var, input_leaf_var, inf_rule,
-		                             output_andbit_var),
+		in_preproof_args_var = an(VARIABLE_NODE, "$in_preproof_args"),
+		in_preproof_args_vardecl = mk_list_of_args_vardecl(in_preproof_args_var),
+		in_preproof_eval = mk_preproof_eval(in_preproof_args_var),
 
-		preproof_args_var = an(VARIABLE_NODE, "$preproof_args"),
-		preproof_args_vardecl = mk_list_of_args_vardecl(preproof_args_var),
-		preproof_eval = mk_preproof_eval(preproof_args_var);
+		in_andbit_var = an(VARIABLE_NODE, "$in_andbit"),
+		in_leaf_var = an(VARIABLE_NODE, "$in_leaf"),
+		out_andbit_var = an(VARIABLE_NODE, "$out_andbit"),
+		expand_exec = mk_expand_exec(in_andbit_var, in_leaf_var, inf_rule,
+		                             out_andbit_var),
+
+		out_preproof_args_var = an(VARIABLE_NODE, "$out_preproof_args"),
+		out_preproof_args_vardecl = mk_list_of_args_vardecl(out_preproof_args_var),
+		out_preproof_eval = mk_preproof_eval(out_preproof_args_var);
 
 	HandleSeq pattern_vars = mk_pattern_vars(n);
 
 	// ImplicationScope with a pattern in its antecedent to
 	// retrieve
-	HandleSeq antecedents{expand_exec};
+	HandleSeq antecedents{in_preproof_eval, expand_exec};
 	for (const Handle pv : pattern_vars)
 		antecedents.push_back(al(UNQUOTE_LINK, pv));
 	Handle pat_expand_preproof_impl = al(QUOTE_LINK,
 	                                     al(IMPLICATION_SCOPE_LINK,
 	                                        al(UNQUOTE_LINK, vardecl_var),
 	                                        al(AND_LINK, antecedents),
-	                                        preproof_eval));
+	                                        out_preproof_eval));
 
 	// Bind of ImplicationScope with a pattern in its antecedent
 	// to retrieve
 	HandleSeq vardecls{vardecl_vardecl,
-	                   input_andbit_var,
-	                   input_leaf_var,
-	                   output_andbit_var,
-	                   preproof_args_vardecl};
+	                   in_preproof_args_vardecl,
+	                   in_andbit_var,
+	                   in_leaf_var,
+	                   out_andbit_var,
+	                   out_preproof_args_vardecl};
 	vardecls.insert(vardecls.end(), pattern_vars.begin(), pattern_vars.end());
 
 	Handle pat_expand_preproof_impl_bl = al(BIND_LINK,

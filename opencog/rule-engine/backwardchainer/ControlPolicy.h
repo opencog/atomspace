@@ -182,47 +182,43 @@ private:
 
 	/**
 	 * Given an inference rule, fetch both pattern and pattern free
-	 * expansion control rules. See comments of
-	 * fetch_pattern_free_expansion_control_rules and
-	 * fetch_pattern_expansion_control_rules
+	 * expansion control rules. See comments below.
 	 */
 	HandleSet fetch_expansion_control_rules(const Handle& inf_rule);
 
 	/**
 	 * Fetch control rules from _control_as involved in BIT
-	 * expansion. Informally that if and-BIT, A, expands into B from L
-	 * with the given rule, and follow some pattern, then B has a
-	 * probability TV of being a preproof of T. Formally
+	 * expansion. Informally that if and-BIT, A, is a preproof and
+	 * expands into B from L with the given rule, and follow some
+	 * pattern, then B has a probability TV of being a preproof of
+	 * T. Formally
 	 *
 	 * ImplicationScope <TV>
-	 *  VariableList
-	 *    Variable "$T"  ;; Theorem/target to prove
-	 *    TypedVariable  ;; and-BIT to expand
-	 *      Variable "$A"
-	 *      Type "BindLink"
-	 *    Variable "$L"  ;; Leaf from A to expand
-	 *    TypedVariable  ;; Resulting and-BIT from the expansion of L from A with rule R
-	 *      Variable "$B"
-	 *      Type "BindLink"
+	 *  <vardecl>
 	 *  And
+	 *    Evaluation
+	 *      Predicate "preproof-of"
+	 *      List
+	 *        <A>
+	 *        <T>
 	 *    Execution
 	 *      Schema "expand-and-BIT"
 	 *      List
-	 *        BontExec Variable "$A"
-	 *        Variable "$L"
-	 *        DontExec <inf_rule>
-	 *      DontExec Variable "$B"
+	 *        <A>
+	 *        <L>
+	 *        <inf_rule>
+	 *      <B>
 	 *    <pattern-1>
 	 *    ...
 	 *    <pattern-n>
 	 *  Evaluation
 	 *    Predicate "preproof"
 	 *    List
-	 *      DontExec Variable "$B"
-	 *      Variable "$T"
+	 *      <B>
+	 *      <T>
 	 *
-	 * n is the number of patterns in addition to the expansion itself
-	 * (the Execution link).
+	 * n >=0 is the number of patterns in addition to preproof and
+	 * expansion.
 	 */
 	HandleSet fetch_expansion_control_rules(const Handle& inf_rule, int n);
 
