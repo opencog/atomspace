@@ -26,6 +26,7 @@
 #include <opencog/util/random.h>
 #include <opencog/util/algorithm.h>
 #include <opencog/query/BindLinkAPI.h>
+#include <opencog/atomutils/Unify.h>
 
 #include "MixtureModel.h"
 #include "ActionSelection.h"
@@ -131,7 +132,7 @@ RuleSelection ControlPolicy::select_rule(const AndBIT& andbit,
                                          const BITNode& bitleaf,
                                          const RuleTypedSubstitutionMap& inf_rules)
 {
-	// Build a mapping from rule to their TVs of expansion success
+	// Build a mapping from rule to TV of expansion success
 	HandleTVMap success_tvs = expansion_success_tvs(andbit, bitleaf, inf_rules);
 	std::vector<double> weights = rule_weights(success_tvs, inf_rules);
 
@@ -160,7 +161,8 @@ HandleTVMap ControlPolicy::expansion_success_tvs(
 	HandleTVMap success_tvs;
 	for (const auto& rule : rule_aliases(inf_rules)) {
 		// Get all active expansion control rules
-		HandleSet active_ctrl_rules = active_expansion_control_rules(rule);
+		HandleSet active_ctrl_rules =
+			active_expansion_control_rules(andbit, bitleaf, rule);
 
 		if (active_ctrl_rules.empty()) {
 			// If there are no active control rules, use the default
@@ -244,7 +246,10 @@ HandleSet ControlPolicy::rule_aliases(const RuleTypedSubstitutionMap& rules) con
 	return aliases;
 }
 
-HandleSet ControlPolicy::active_expansion_control_rules(const Handle& inf_rule_alias)
+HandleSet ControlPolicy::active_expansion_control_rules(
+	const AndBIT& andbit,
+	const BITNode& bitleaf,
+	const Handle& inf_rule_alias)
 {
 	if (!_control_as)
 		return HandleSet();
@@ -252,7 +257,7 @@ HandleSet ControlPolicy::active_expansion_control_rules(const Handle& inf_rule_a
 	// Filter out inactive expansion control rules
 	HandleSet results;
 	for (const Handle& ctrl_rule : _expansion_control_rules[inf_rule_alias])
-		if (control_rule_active(ctrl_rule))
+		if (is_control_rule_active(andbit, bitleaf, ctrl_rule))
 			results.insert(ctrl_rule);
 
 	// Log active control rules, if any
@@ -269,13 +274,52 @@ HandleSet ControlPolicy::active_expansion_control_rules(const Handle& inf_rule_a
 	return results;
 }
 
-bool ControlPolicy::control_rule_active(const Handle& ctrl_rule) const
+bool ControlPolicy::is_control_rule_active(const AndBIT& andbit,
+                                           const BITNode& bitleaf,
+                                           const Handle& ctrl_rule) const
 {
-	// For now we assume that any control rules are active. Also in
-	// principle a control is neither active or inactive, it has
-	// instead a certain probability of being true, indeed we need
-	// never know for sure whether a context is satisfied.
-	return true;
+	Handle ctrl_vardecl = ScopeLinkCast(ctrl_rule)->get_vardecl(),
+		expansion = retrieve_expansion(ctrl_rule),
+		input = expansion->getOutgoingAtom(1),
+		ctrl_andbit = input->getOutgoingAtom(0),
+		ctrl_bitleaf = input->getOutgoingAtom(1),
+		actual_andbit = andbit.fcs,
+		actual_andbit_vardecl = ScopeLinkCast(ctrl_rule)->get_vardecl();
+
+	// Make sure that the variables in the control rule and the actual
+	// andbit are disjoint
+	//
+	// TODO: should be alpha-converted to have no variable in common.
+	Variables ctrl_vars = VariableList(ctrl_vardecl).get_variables(),
+		actual_andbit_vars = VariableList(actual_andbit_vardecl).get_variables();
+	OC_ASSERT(is_disjoint(ctrl_vars.varset, actual_andbit_vars.varset),
+	          "Not implemented yet");
+
+	// Check that the current andbit (resp. current bitleaf) and the
+	// andbit (resp. bitleaf) on the control rule are unifiable.
+	//
+	// TODO: support vardecls, once QuoteBindLink is introduced,
+	// otherwise some false positive might go through.
+	return unifiable(ctrl_andbit, andbit.fcs) and
+		unifiable(ctrl_bitleaf, bitleaf.body);
+}
+
+Handle ControlPolicy::retrieve_expansion(const Handle& ctrl_rule) const
+{
+	ScopeLinkPtr sc = ScopeLinkCast(ctrl_rule);
+	for (const Handle& h : sc->get_body()->getOutgoingSet())
+		if (is_expansion(h))
+			return h;
+	return Handle::UNDEFINED;
+}
+
+bool ControlPolicy::is_expansion(const Handle& h) const
+{
+	if (h->get_type() == EXECUTION_LINK) {
+		Handle schema = h->getOutgoingAtom(0);
+		return schema->get_name() == TraceRecorder::expand_andbit_schema_name;
+	}
+	return false;
 }
 
 Handle ControlPolicy::get_expansion_control_rule_pattern(const Handle& ctrl_rule) const
