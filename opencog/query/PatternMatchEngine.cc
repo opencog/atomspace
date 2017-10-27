@@ -752,13 +752,12 @@ bool PatternMatchEngine::glob_compare(const PatternTermSeq& osp,
 	// turns out the groundings do not satisfy some other terms
 	// in the same pattern, so we try again and see if the globs
 	// in osp can be grounded differently.
-	bool resuming = false;
 	auto r = glob_state.find(gp);
 	if (r != glob_state.end())
 	{
-		solution_pop();
+		backtracking = true;
 
-		resuming = true;
+		solution_pop();
 		glob_grd = r->second.first;
 		glob_pos_stack = r->second.second;
 		ip = glob_pos_stack.top().second.first;
@@ -782,13 +781,12 @@ bool PatternMatchEngine::glob_compare(const PatternTermSeq& osp,
 			HandleSeq glob_seq;
 			PatternTermPtr glob(osp[ip]);
 
-			// No need to push to stack if we are backtracking or resuming.
-			if (backtracking or resuming)
+			// No need to push to stack if we are backtracking.
+			if (backtracking)
 			{
-				// Reset the flags, so that the next glob will be
+				// Reset the flag, so that the next glob will be
 				// pushed to the stack.
 				backtracking = false;
-				resuming = false;
 			}
 			else
 			{
