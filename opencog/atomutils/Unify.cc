@@ -865,6 +865,13 @@ bool Unify::is_satisfiable(const TypedBlock& block) const
 	return (bool)block.second;
 }
 
+bool unifiable(const Handle& lhs, const Handle& rhs,
+               const Handle& lhs_vardecl, const Handle& rhs_vardecl)
+{
+	Unify unify(lhs, rhs, lhs_vardecl, rhs_vardecl);
+	return unify().is_satisfiable();
+}
+
 bool hm_content_eq(const HandleMap& lhs, const HandleMap& rhs)
 {
 	if (lhs.size() != rhs.size())
