@@ -781,6 +781,36 @@ bool PatternMatchEngine::glob_compare(const PatternTermSeq& osp,
 			HandleSeq glob_seq;
 			PatternTermPtr glob(osp[ip]);
 
+			// A glob can appear more than once in the pattern,
+			// so check if it's the case, and more importantly.
+			// if we have already grounded it previously, make
+			// sure the grounding satisfies what we are looking
+			// at here.
+			auto vg = var_grounding.find(ohp);
+			if (not backtracking and vg != var_grounding.end())
+			{
+				bool match = true;
+
+				// The grounding of a glob is wrapped in a ListLink,
+				// so compare the outgoing set of it.
+				for (const Handle& h : vg->second->getOutgoingSet())
+				{
+					if (h != osg[jg])
+					{
+						match = false;
+						break;
+					}
+					jg++;
+				}
+
+				// Backtrack if the previous grounding does not fit here.
+				if (not match) backtrack(true);
+				// Otherwise, move on.
+				else ip++;
+
+				continue;
+			}
+
 			// No need to push to stack if we are backtracking.
 			if (backtracking)
 			{
