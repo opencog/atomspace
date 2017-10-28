@@ -1,0 +1,1046 @@
+#LyX 2.2 created this file. For more info see http://www.lyx.org/
+\lyxformat 508
+\begin_document
+\begin_header
+\save_transient_properties true
+\origin unavailable
+\textclass amsart
+\begin_preamble
+\usepackage{url} 
+\end_preamble
+\use_default_options false
+\begin_modules
+theorems-ams
+eqs-within-sections
+figs-within-sections
+\end_modules
+\maintain_unincluded_children false
+\language english
+\language_package default
+\inputencoding utf8
+\fontencoding global
+\font_roman "times" "default"
+\font_sans "helvet" "default"
+\font_typewriter "courier" "default"
+\font_math "auto" "auto"
+\font_default_family default
+\use_non_tex_fonts false
+\font_sc false
+\font_osf false
+\font_sf_scale 100 100
+\font_tt_scale 100 100
+\graphics default
+\default_output_format default
+\output_sync 0
+\bibtex_command default
+\index_command default
+\paperfontsize default
+\spacing single
+\use_hyperref true
+\pdf_bookmarks true
+\pdf_bookmarksnumbered false
+\pdf_bookmarksopen false
+\pdf_bookmarksopenlevel 1
+\pdf_breaklinks true
+\pdf_pdfborder true
+\pdf_colorlinks true
+\pdf_backref false
+\pdf_pdfusetitle true
+\papersize default
+\use_geometry false
+\use_package amsmath 2
+\use_package amssymb 2
+\use_package cancel 1
+\use_package esint 0
+\use_package mathdots 1
+\use_package mathtools 1
+\use_package mhchem 0
+\use_package stackrel 1
+\use_package stmaryrd 1
+\use_package undertilde 1
+\cite_engine basic
+\cite_engine_type default
+\biblio_style plain
+\use_bibtopic false
+\use_indices false
+\paperorientation portrait
+\suppress_date false
+\justification true
+\use_refstyle 0
+\index Index
+\shortcut idx
+\color #008000
+\end_index
+\secnumdepth 3
+\tocdepth 3
+\paragraph_separation indent
+\paragraph_indentation default
+\quotes_language english
+\papercolumns 1
+\papersides 1
+\paperpagestyle default
+\tracking_changes false
+\output_changes false
+\html_math_output 0
+\html_css_as_file 0
+\html_be_strict false
+\end_header
+
+\begin_body
+
+\begin_layout Title
+Graphical Sheaves
+\end_layout
+
+\begin_layout Author
+Linas Vepstas
+\end_layout
+
+\begin_layout Date
+27 October 2017
+\end_layout
+
+\begin_layout Abstract
+An examination of a certain method for extracting structure from graphs,
+ in a fashion resembling sheaves.
+\end_layout
+
+\begin_layout Section*
+Intro
+\end_layout
+
+\begin_layout Standard
+This document attempts to give a precise definition to some concepts that
+ I have been throwing around rather loosely, and have been slapped and zapped
+ for doing so.
+ Thus, it attempts to spell things out in detail, although the result reads
+ a bit simplistically, and is a bit turgid.
+ The goal is to be precise enough that the proverbial 
+\begin_inset Quotes eld
+\end_inset
+
+anyone
+\begin_inset Quotes erd
+\end_inset
+
+ can follow through and understand.
+\end_layout
+
+\begin_layout Standard
+I had hoped that what I describe here had, in fact, been previously described
+ by others, written down and available, even in some textbook somewhere,
+ because its simply not that hard.
+ However, after several different confused and slightly acrimonious conversation
+s, it appears that this is not the case.
+ Thus, I have to wade in and do yet more work myself.
+ As if there's not enough.
+ 
+\end_layout
+
+\begin_layout Standard
+The thing being spelled out is a kind of 
+\begin_inset Quotes eld
+\end_inset
+
+sheaf theory for graphs
+\begin_inset Quotes erd
+\end_inset
+
+, except that the structures being explored are not exactly graphs in the
+ canonical sense of graph theory, nor are they quite sheaves in the customary
+ sense, even though they obey the axioms of sheaf theory.
+ At any rate, customary sheaf theory carries with it a huge amount of obstruse
+ and abstract baggage almost all of which is simply not required for the
+ envisioned application.
+\end_layout
+
+\begin_layout Standard
+The envisioned application is the use of machine learning to study natural
+ language.
+ Due to the nature of natural language, the topic inherently touches on
+ other interesting areas of mathematics, including parsing, type theory
+ and category theory.
+ But this all comes later on, after the basics are set up.
+\end_layout
+
+\begin_layout Standard
+We begin first by giving a provisional definition for a section, and some
+ motivation for that definition.
+ Next, a defintion of sheaves, not in generality, but limited to the current
+ context.
+ 
+\end_layout
+
+\begin_layout Section*
+Sections
+\end_layout
+
+\begin_layout Standard
+Begin with the standard definition of a graph.
+\end_layout
+
+\begin_layout Definition*
+A 
+\noun on
+graph
+\noun default
+ 
+\begin_inset Formula $G=\left(V,E\right)$
+\end_inset
+
+ is an ordered pair 
+\begin_inset Formula $\left(V,E\right)$
+\end_inset
+
+ of two sets, the first being the set 
+\begin_inset Formula $V$
+\end_inset
+
+ of vertices, and the second being the set 
+\begin_inset Formula $E$
+\end_inset
+
+ of edges.
+ An edge 
+\begin_inset Formula $e\in E$
+\end_inset
+
+ is a pair 
+\begin_inset Formula $\left(v_{1},v_{2}\right)$
+\end_inset
+
+ of vertices, where every 
+\begin_inset Formula $v_{k}$
+\end_inset
+
+ 
+\emph on
+must
+\emph default
+ be a member of 
+\begin_inset Formula $V$
+\end_inset
+
+.
+ That is, edges in 
+\begin_inset Formula $E$
+\end_inset
+
+ can only connect vertexes in 
+\begin_inset Formula $V$
+\end_inset
+
+, and not to something else.
+ 
+\begin_inset Formula $\diamond$
+\end_inset
+
+
+\end_layout
+
+\begin_layout Standard
+For directed graphs, the vertex ordering in the edge matters.
+ For undirected graphs, it does not.
+ The subsequent will assume both directed and undirected edges, as the occasion
+ and the need fits.
+ In most of what follows, it will usually be assumed that there are no edges
+ with 
+\begin_inset Formula $v_{1}=v_{2}$
+\end_inset
+
+ and that there is at most one edge connecting any given pair of vertexes.
+ This is primarily for general convenience and simplicity of discussion,
+ rather than a fundamental limitation.
+ It just makes things easier to talk about and less cluttered at the start.
+ The primary application does not require either construct, although the
+ extension to allow all this is straight-forward.
+ Similar remarks apply to graphs with labelled vertexes or edges.
+ A notion of types will be introduced later on.
+ The intended application of this machinery will be graphs whose edges and
+ vertexes carry numerical weights on them, but these do not need to be talked
+ about at this stage.
+ Just keep in mind that these will appear out of thin air, later on.
+\end_layout
+
+\begin_layout Standard
+Besides the above defintion, there are other ways of defining and specifying
+ graphs.
+ The one that will be of primary interest here will be one that defines
+ graphs as a collection of sections.
+ These, in turn, are composed of seeds.
+\end_layout
+
+\begin_layout Definition*
+A 
+\noun on
+seed
+\noun default
+ is a vertex and the set of edges that connect to it.
+ That is, it is the pair 
+\begin_inset Formula $\left(v,E_{v}\right)$
+\end_inset
+
+ where 
+\begin_inset Formula $v$
+\end_inset
+
+ is a single vertex, and 
+\begin_inset Formula $E_{v}$
+\end_inset
+
+ is a set of edges containing that vertex, i.e.
+ that set of edges having 
+\begin_inset Formula $v$
+\end_inset
+
+ as one or the other endpoint.
+ The vertex 
+\begin_inset Formula $v$
+\end_inset
+
+ may be called the 
+\noun on
+germ
+\noun default
+ of the seed.
+ 
+\begin_inset Formula $\diamond$
+\end_inset
+
+
+\end_layout
+
+\begin_layout Standard
+It should be clear that, given a graph 
+\begin_inset Formula $G$
+\end_inset
+
+, one can equivalently describe it as a set of seeds.
+ The converse is not 
+\begin_inset Quotes eld
+\end_inset
+
+naturally
+\begin_inset Quotes erd
+\end_inset
+
+ true.
+ Consider a single seed, consisting of one vertex 
+\begin_inset Formula $v_{1}$
+\end_inset
+
+, and a single edge 
+\begin_inset Formula $e=\left(v_{1},v_{2}\right)$
+\end_inset
+
+.
+ Then the pair 
+\begin_inset Formula $\left(V,E\right)$
+\end_inset
+
+ with 
+\begin_inset Formula $V=\left\{ v_{1}\right\} $
+\end_inset
+
+ and 
+\begin_inset Formula $E=\left\{ \left(v_{1},v_{2}\right)\right\} $
+\end_inset
+
+ is 
+\emph on
+not
+\emph default
+ a graph, because 
+\begin_inset Formula $v_{2}$
+\end_inset
+
+ is missing from the set 
+\begin_inset Formula $V$
+\end_inset
+
+.
+ Of course, we could implicitly include 
+\begin_inset Formula $v_{2}$
+\end_inset
+
+ in the collection of vertexes, but for reasons that will hopefully become
+ clear, this is not 
+\begin_inset Quotes eld
+\end_inset
+
+natural
+\begin_inset Quotes erd
+\end_inset
+
+, and not desired at this stage.
+\end_layout
+
+\begin_layout Standard
+Thus, given a seed, each edge in that seed has one 
+\begin_inset Quotes eld
+\end_inset
+
+connected
+\begin_inset Quotes erd
+\end_inset
+
+ endpoint, and one 
+\begin_inset Quotes eld
+\end_inset
+
+unconnected
+\begin_inset Quotes erd
+\end_inset
+
+ endpoint.
+ The 
+\begin_inset Quotes eld
+\end_inset
+
+connected
+\begin_inset Quotes erd
+\end_inset
+
+ endpoint is that endpoint that is 
+\begin_inset Formula $v$
+\end_inset
+
+.
+ The other endpoint will commonly be called the 
+\noun on
+connector
+\noun default
+; equivalently, the whole edge can be taken to be the connector.
+\end_layout
+
+\begin_layout Definition*
+A 
+\noun on
+section
+\noun default
+ is a set of seeds.
+ 
+\begin_inset Formula $\diamond$
+\end_inset
+
+
+\end_layout
+
+\begin_layout Standard
+It should be clear that a graph 
+\begin_inset Formula $G$
+\end_inset
+
+ can be expressed as section; that section has the nice property that all
+ of the germs appear once (and only once) in the set 
+\begin_inset Formula $V$
+\end_inset
+
+ of 
+\begin_inset Formula $G$
+\end_inset
+
+, and that all of the edges in 
+\begin_inset Formula $E$
+\end_inset
+
+ appear twice, once each in two distinct seeds.
+ This connectivity property motivates the following definition: 
+\end_layout
+
+\begin_layout Definition*
+Given a section 
+\begin_inset Formula $S$
+\end_inset
+
+, a 
+\noun on
+link
+\noun default
+ is any edge 
+\begin_inset Formula $\left(v_{1},v_{2}\right)$
+\end_inset
+
+ where both 
+\begin_inset Formula $v_{1}$
+\end_inset
+
+ and 
+\begin_inset Formula $v_{2}$
+\end_inset
+
+ appear as germs of seeds in 
+\begin_inset Formula $S$
+\end_inset
+
+.
+ Two seeds are 
+\noun on
+connected
+\noun default
+ when there is a link between them.
+\end_layout
+
+\begin_layout Standard
+The use of links allows the concepts of paths and connectivity, taken from
+ graph theory, to be imported into the current context.
+ Thus, one can obviously define:
+\end_layout
+
+\begin_layout Definition*
+A 
+\noun on
+connected section
+\noun default
+, or a 
+\noun on
+contiguous section
+\noun default
+ is a section where every germ is connected to every other germ via a path
+ through the edges.
+ 
+\begin_inset Formula $\diamond$
+\end_inset
+
+
+\end_layout
+
+\begin_layout Standard
+In graph theory, this would normally be called a 
+\begin_inset Quotes eld
+\end_inset
+
+connected graph
+\begin_inset Quotes erd
+\end_inset
+
+, but we cannot fairly call it that because the seeds and sections were
+ defined in such a way that they are not graphs in and of themselves; they
+ only become graphs when they are fully connected.
+ Never-the-less, it is fairly safe and straight-foreward to apply common
+ concepts from graph-theory.
+ Sections are almost like graphs, but not quite.
+\end_layout
+
+\begin_layout Standard
+Note that there are two types of edges in a section: those edges that connect
+ to nothing, and those edges that connect to other seeds in that section.
+ Henceforth, the unconnected edges will be called connectors (as defined
+ above), while the fully-connected edges will be called links (also defined
+ above).
+ Connectors can be thought of as a kind-of half-edge: incomplete, missing
+ the far end, while links are fully connected, whole.
+\end_layout
+
+\begin_layout Standard
+Seeds and sections can (and should!) be visualized as hedgehogs – the connectors
+ can be thought of as spiny bits sticking out, waiting to make a connection,
+ while the hedgehog body consists of the vertices and the links connecting
+ them.
+\end_layout
+
+\begin_layout Standard
+Implicit in the above definitions was that, during link formation, an edge
+ is only allowed to connect to another seed if and only if the connector
+ matches the germ.
+ That is, if 
+\begin_inset Formula $\left(v_{1},v_{2}\right)$
+\end_inset
+
+ is an edge rooted in the seed for 
+\begin_inset Formula $v_{1}$
+\end_inset
+
+ and if 
+\begin_inset Formula $\left(v_{3},v_{4}\right)$
+\end_inset
+
+ is an edge rooted in the seed for 
+\begin_inset Formula $v_{3}$
+\end_inset
+
+, then these two can form a link if and only if 
+\begin_inset Formula $v_{2}=v_{3}$
+\end_inset
+
+ and 
+\begin_inset Formula $v_{4}=v_{1}$
+\end_inset
+
+.
+ That is, the connectors are typed: they can only connect to seeds that
+ are of the same type as the unconnected end of the edge.
+\end_layout
+
+\begin_layout Standard
+This motivates a different way of looking at seeds: they can be visualized
+ as jigsaw puzzle pieces, where any given tab on one jigsaw piece can fit
+ into one and only one slot on another jigsaw piece.
+ This union of a tab+slot is the link.
+ The types of the connectors will later be seen to be the same thing as
+ the types of type theory; that is, they are bona-fide types.
+\end_layout
+
+\begin_layout Subsection*
+Why sections?
+\end_layout
+
+\begin_layout Standard
+Whats the point of introducing this seemingly non-standard approach to something
+ that looks a lot like graph theory? There are several reasons.
+\end_layout
+
+\begin_layout Itemize
+From a computational viewpoint, sections have nice properties that a list
+ of vertexes and edges do not.
+ Given a single seed, one 
+\begin_inset Quotes eld
+\end_inset
+
+instantly
+\begin_inset Quotes erd
+\end_inset
+
+ know 
+\emph on
+all
+\emph default
+ of the edges attached to its germ: they are listed right there.
+ By contrast, given only a graph description, one has to search the entire
+ list 
+\begin_inset Formula $E$
+\end_inset
+
+ for any edges that might contain the given vertex.
+ Computationally, searching large lists is inefficeint, espcially so for
+ very large graphs.
+\end_layout
+
+\begin_layout Itemize
+The subset of a section is always a section.
+ This is not the case for a graph: given 
+\begin_inset Formula $G=\left(V,E\right)$
+\end_inset
+
+, some arbitrary subset of 
+\begin_inset Formula $V$
+\end_inset
+
+ and some arbitrary subset of 
+\begin_inset Formula $E$
+\end_inset
+
+ do not generally form a graph; one has to apply consistency conditions
+ to get a subgraph.
+\end_layout
+
+\begin_layout Itemize
+Readers familiar with link-grammar should have by now instantly recognized
+ seeds as being more or less the same thing as 
+\begin_inset Quotes eld
+\end_inset
+
+disjuncts
+\begin_inset Quotes erd
+\end_inset
+
+ in link-grammar.
+ However, link-grammar disjuncts are a bit more complicated than seeds;
+ this is the topic of the next section.
+\end_layout
+
+\begin_layout Itemize
+In certain ways, the connectors on a seed look like the uncontracted indexes
+ on a tensor.
+ That is, a seed with 
+\begin_inset Formula $n$
+\end_inset
+
+ connectors on it looks like a tensor of order 
+\begin_inset Formula $n$
+\end_inset
+
+.
+ A link looks like a pair of indexes that have been contracted.
+ Tensors have additional properties that seeds do not have; however, the
+ notion of connecting together connectors to form links means that many
+ of the notions from a tensor algebra can be carried over into the current
+ context.
+ This includes, at least partly, the notion that a tensor category describes
+ the algebra of sections.
+\end_layout
+
+\begin_layout Standard
+If we stop here, not much is accomplished, other than to define a somewhat
+ idiosyncratic view of graph theory.
+ But that is not the case; the concept of seeds and sections are needed
+ to construct a concept of sheaves, which is being pursued so as to provide
+ a tool to study natural language and other systems.
+ 
+\end_layout
+
+\begin_layout Section*
+Sheaves
+\end_layout
+
+\begin_layout Standard
+To arrive at a sheaf, begin by definiting a kind of quotienting operation
+ on a graph.
+ To motivate this, consider the following scenario.
+ One has a large graph, some dense mesh, and one decides, for some external
+ reason, that two vertexes are similar.
+ One particularly good reason to think that they are similar is that they
+ share a lot of nearest neighbors.
+ In a social graph, one might say they have a lot of freinds in common.
+ In genomic or proteomic data, they may interact with the same kinds of
+ genes/proteins.
+ In natural language, they might be words that are synonyms, and thus get
+ used the same way across many different sentences; specifically, the syntactic
+ dependency parse links these words to the same set of heads an dependents.
+ At any rate, one has a large graph, and some sort of equivalence operation
+ that can decide if two vertexes are the 
+\begin_inset Quotes eld
+\end_inset
+
+same
+\begin_inset Quotes erd
+\end_inset
+
+, or are 
+\begin_inset Quotes eld
+\end_inset
+
+similar enough
+\begin_inset Quotes erd
+\end_inset
+
+.
+ Whenever one has an equivalence operation, one can apply it to obtain a
+ quotient, of grouping together into an identity all things that are the
+ same.
+\end_layout
+
+\begin_layout Standard
+In graph theory, there is a notion of quotienting, but it is not quite the
+ same as what will be defined shortly.
+ In graph theory, when working with quotients, one will typically consider
+ a graph 
+\begin_inset Formula $G$
+\end_inset
+
+ relative to some subgraph 
+\begin_inset Formula $A\subset G$
+\end_inset
+
+.
+ One effectively 
+\begin_inset Quotes eld
+\end_inset
+
+draws a dotted line
+\begin_inset Quotes erd
+\end_inset
+
+ or places a balloon around the vertexes in 
+\begin_inset Formula $A$
+\end_inset
+
+, but preserves all of the edges coming out of 
+\begin_inset Formula $A$
+\end_inset
+
+ and going into 
+\begin_inset Formula $G$
+\end_inset
+
+.
+ The internal structure of 
+\begin_inset Formula $A$
+\end_inset
+
+ is then typically ignored, discarded; not out of spite, but because that
+ is the nature of an equivalence relation: it states that all elements of
+ 
+\begin_inset Formula $A$
+\end_inset
+
+ are 
+\begin_inset Quotes eld
+\end_inset
+
+equal
+\begin_inset Quotes erd
+\end_inset
+
+, are 
+\begin_inset Quotes eld
+\end_inset
+
+equivalent
+\begin_inset Quotes erd
+\end_inset
+
+, are one and the same, and thus 
+\begin_inset Formula $A$
+\end_inset
+
+ behaves as if it were a single vertex, with assorted edges attached to
+ it, running from 
+\begin_inset Formula $A$
+\end_inset
+
+ to the rest of 
+\begin_inset Formula $G$
+\end_inset
+
+.
+\end_layout
+
+\begin_layout Standard
+By contrast, the goal here is not just to talk about a graph 
+\begin_inset Formula $G$
+\end_inset
+
+ relative to a single 
+\begin_inset Formula $A$
+\end_inset
+
+, but relative to a huge number of different 
+\begin_inset Formula $A$
+\end_inset
+
+'s.
+ What's more, the internal structure of these 
+\begin_inset Formula $A$
+\end_inset
+
+'s will continue to be interesting, and so is carried on.
+ Finally, the act of merging together multiple vertexes into one 
+\begin_inset Formula $A$
+\end_inset
+
+ may result in some of the existing edges being cut, or new edges being
+ created.
+ The clustering operation applied to the graph alters the graph structure.
+ These considerations are wha makes it convenient to abondon traditional
+ graph theory, and to replace it by the notion of sheaves and sections,
+ as defined below.
+\end_layout
+
+\begin_layout Standard
+Given two vertexes 
+\begin_inset Formula $v_{a}$
+\end_inset
+
+ and 
+\begin_inset Formula $v_{b}$
+\end_inset
+
+, let 
+\begin_inset Formula $s_{a}$
+\end_inset
+
+ and 
+\begin_inset Formula $s_{b}$
+\end_inset
+
+ be the corresponding seeds, as defined previously.
+ That is, 
+\begin_inset Formula $s=\left(v,E_{v}\right)$
+\end_inset
+
+ with 
+\begin_inset Formula $E_{v}$
+\end_inset
+
+ being the set of edges connecting 
+\begin_inset Formula $v$
+\end_inset
+
+ to all of its nearest neighbors.
+ Consider now creating the object 
+\begin_inset Formula $\left(\left\{ v_{a},v_{b}\right\} ,E_{ab}\right)$
+\end_inset
+
+.
+ This is no longer a seed, as the first item is no longer a single vertex,
+ but a set of vertexes.
+ The set 
+\begin_inset Formula $E_{ab}$
+\end_inset
+
+ is still a set of edges, depending on the two initial sets of edges 
+\begin_inset Formula $E_{a}$
+\end_inset
+
+ and 
+\begin_inset Formula $E_{b}$
+\end_inset
+
+.
+ The precise defition of 
+\begin_inset Formula $E_{ab}$
+\end_inset
+
+ is not given: it might be the union of 
+\begin_inset Formula $E_{a}$
+\end_inset
+
+ and 
+\begin_inset Formula $E_{b}$
+\end_inset
+
+, or the intersection, or some other function.
+ In general, one writes 
+\begin_inset Formula $E_{ab}=f\left(E_{a},E_{b}\right)$
+\end_inset
+
+ for some function 
+\begin_inset Formula $f$
+\end_inset
+
+.
+ The result of creating this object is no longer strictly a graph, at least,
+ not in the natural sense (one can force a graph structure onto the result,
+ but doing so gets awkward).
+ The mashing together of two vertexes creates a kind of a quotient, as described
+ above.
+ This quotient will be called a stalk in what follows.
+\end_layout
+
+\begin_layout Definition*
+A 
+\noun on
+stalk
+\noun default
+ is an ordered pair 
+\begin_inset Formula $S=\left(V,E\right)$
+\end_inset
+
+ of vertexes and edges such that every edge in 
+\begin_inset Formula $E$
+\end_inset
+
+ has one endpoint being a vertex in 
+\begin_inset Formula $V$
+\end_inset
+
+ and the other endpoint being a vertex not in 
+\begin_inset Formula $V$
+\end_inset
+
+.
+ That is, each edge in 
+\begin_inset Formula $E$
+\end_inset
+
+ is a connector, and no edge in 
+\begin_inset Formula $E$
+\end_inset
+
+ is a link (back into 
+\begin_inset Formula $V)$
+\end_inset
+
+.
+ 
+\begin_inset Formula $\diamond$
+\end_inset
+
+
+\end_layout
+
+\begin_layout Standard
+This definition of a stalk is meant to be a straight-forward generalization
+ of the previously defined seed, replacing the germ vertex by a germ that
+ is a set of vertexes.
+ Stalks can be linked together, much as seeds are:
+\end_layout
+
+\begin_layout Definition*
+A 
+\noun on
+link
+\noun default
+ is between two different stalks 
+\begin_inset Formula $S_{1}=\left(V_{1},E_{1}\right)$
+\end_inset
+
+ and 
+\begin_inset Formula $S_{2}=\left(V_{2},E_{2}\right)$
+\end_inset
+
+ is any edge 
+\begin_inset Formula $e=\left(v_{1},v_{2}\right)$
+\end_inset
+
+ running between them, 
+\emph on
+viz.
+
+\emph default
+ where 
+\begin_inset Formula $v_{1}\in V_{1}$
+\end_inset
+
+ and 
+\begin_inset Formula $v_{2}\in V_{2}$
+\end_inset
+
+ and 
+\begin_inset Formula $e\in E_{1}$
+\end_inset
+
+ and 
+\begin_inset Formula $e\in E_{2}$
+\end_inset
+
+.
+ Two stalks are 
+\noun on
+connected
+\noun default
+ when there are one or more links between them.
+ 
+\begin_inset Formula $\diamond$
+\end_inset
+
+
+\end_layout
+
+\begin_layout Standard
+It is convenient (it is suggested) that the vertexes in the stalk be visualized
+ as being stacked one on top another, forming a tower or a fiber, with the
+ edges sticking out as spines.
+ Perhaps one can visualize a kind-of melted stack of jigsaw-puzzle pieces.
+ This visualization is suggested only to enforce the idea that two different
+ stalks project down to two different base-points.
+ In particular, one now can have the notion of a meta-graph where each stalk
+ is a vertex, and each link is an edge.
+ That is, if one flattens the meta-graph down to two dimensions, then one
+ can imagine a stalk growing up as a pole above each meta-vertex, and each
+ meta-edge as being the projection of a link between two stalks.
+ To maintain consistency with standard mathematical terminology, this meta-graph
+ should really be called a 
+\begin_inset Quotes eld
+\end_inset
+
+base space
+\begin_inset Quotes erd
+\end_inset
+
+, and the stalks and links project down onto it in the usual sense.
+\end_layout
+
+\begin_layout Standard
+XXX
+\end_layout
+
+\begin_layout Standard
+Wait – there's more to be written.
+ This is just a save of an early draft.
+ So, not the end, not yet.
+\end_layout
+
+\end_body
+\end_document
