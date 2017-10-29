@@ -149,7 +149,7 @@ sheaf theory for graphs
 , except that the structures being explored are not exactly graphs in the
  canonical sense of graph theory, nor are they quite sheaves in the customary
  sense, even though they obey the axioms of sheaf theory.
- At any rate, customary sheaf theory carries with it a huge amount of obstruse
+ At any rate, customary sheaf theory carries with it a huge amount of abstruse
  and abstract baggage almost all of which is simply not required for the
  envisioned application.
 \end_layout
@@ -166,7 +166,7 @@ The envisioned application is the use of machine learning to study natural
 \begin_layout Standard
 We begin first by giving a provisional definition for a section, and some
  motivation for that definition.
- Next, a defintion of sheaves, not in generality, but limited to the current
+ Next, a definition of sheaves, not in generality, but limited to the current
  context.
  
 \end_layout
@@ -254,7 +254,7 @@ For directed graphs, the vertex ordering in the edge matters.
  It just makes things easier to talk about and less cluttered at the start.
  The primary application does not require either construct, although the
  extension to allow all this is straight-forward.
- Similar remarks apply to graphs with labelled vertexes or edges.
+ Similar remarks apply to graphs with labeled vertexes or edges.
  A notion of types will be introduced later on.
  The intended application of this machinery will be graphs whose edges and
  vertexes carry numerical weights on them, but these do not need to be talked
@@ -263,7 +263,7 @@ For directed graphs, the vertex ordering in the edge matters.
 \end_layout
 
 \begin_layout Standard
-Besides the above defintion, there are other ways of defining and specifying
+Besides the above definition, there are other ways of defining and specifying
  graphs.
  The one that will be of primary interest here will be one that defines
  graphs as a collection of sections.
@@ -363,8 +363,7 @@ not
 \begin_inset Formula $v_{2}$
 \end_inset
 
- in the collection of vertexes, but for reasons that will hopefully become
- clear, this is not 
+ in the collection of vertexes, but this is not 
 \begin_inset Quotes eld
 \end_inset
 
@@ -372,7 +371,8 @@ natural
 \begin_inset Quotes erd
 \end_inset
 
-, and not desired at this stage.
+, if one is taking the germs of the seeds to define the vertexes of the
+ graph.
 \end_layout
 
 \begin_layout Standard
@@ -410,7 +410,89 @@ connected
 \noun on
 connector
 \noun default
-; equivalently, the whole edge can be taken to be the connector.
+; equivalently, the edge can be taken to be the connector.
+ Perhaps it should be called a half-edge, as one end-point is specified,
+ but missing.
+\end_layout
+
+\begin_layout Standard
+The seed can be visualized as a ball, with a bunch of sticks sticking out
+ of it.
+ A burr one might collect on one's clothing.
+ One can envision a seed as an analog of an open set in topology: the center
+ (the germ) is part of the set, and then there's some more, but the boundary
+ is not part of the set.
+ The vertexes on the unconnected ends of the edges are not a part of the
+ seed.
+\begin_inset Float figure
+placement h
+wide false
+sideways false
+status open
+
+\begin_layout Plain Layout
+\begin_inset Caption Standard
+
+\begin_layout Plain Layout
+A seed
+\end_layout
+
+\end_inset
+
+
+\end_layout
+
+\begin_layout Plain Layout
+\begin_inset Graphics
+	filename seed.eps
+	width 30col%
+
+\end_inset
+
+
+\end_layout
+
+\begin_layout Plain Layout
+
+\end_layout
+
+\end_inset
+
+
+\end_layout
+
+\begin_layout Standard
+Just as one can cover a topological space with a collection of open sets,
+ so one can also cover a graph with seeds.
+ This analogy is firm: if one has open sets 
+\begin_inset Formula $U_{i}$
+\end_inset
+
+ and 
+\begin_inset Formula $U_{j}$
+\end_inset
+
+ and 
+\begin_inset Formula $U_{i}\cap U_{j}\ne\emptyset$
+\end_inset
+
+ then one can take 
+\begin_inset Formula $U_{i}$
+\end_inset
+
+ and 
+\begin_inset Formula $U_{j}$
+\end_inset
+
+ to be vertices, and 
+\begin_inset Formula $U_{i}\cap U_{j}$
+\end_inset
+
+ to be an edge running between them.
+\end_layout
+
+\begin_layout Standard
+More definitions are needed to advance the ideas of connecting and covering.
 \end_layout
 
 \begin_layout Definition*
@@ -479,9 +561,45 @@ link
 connected
 \noun default
  when there is a link between them.
+ 
+\begin_inset Formula $\diamond$
+\end_inset
+
+
 \end_layout
 
 \begin_layout Standard
+\begin_inset Float figure
+placement h
+wide false
+sideways false
+status open
+
+\begin_layout Plain Layout
+\begin_inset Caption Standard
+
+\begin_layout Plain Layout
+Two linked (connected) seeds
+\end_layout
+
+\end_inset
+
+
+\begin_inset Graphics
+	filename seeds-two.eps
+	width 45col%
+
+\end_inset
+
+
+\end_layout
+
+\begin_layout Plain Layout
+
+\end_layout
+
+\end_inset
+
 The use of links allows the concepts of paths and connectivity, taken from
  graph theory, to be imported into the current context.
  Thus, one can obviously define:
@@ -517,7 +635,7 @@ connected graph
 , but we cannot fairly call it that because the seeds and sections were
  defined in such a way that they are not graphs in and of themselves; they
  only become graphs when they are fully connected.
- Never-the-less, it is fairly safe and straight-foreward to apply common
+ Never-the-less, it is fairly safe and straight-forward to apply common
  concepts from graph-theory.
  Sections are almost like graphs, but not quite.
 \end_layout
@@ -533,10 +651,43 @@ Note that there are two types of edges in a section: those edges that connect
 \end_layout
 
 \begin_layout Standard
-Seeds and sections can (and should!) be visualized as hedgehogs – the connectors
- can be thought of as spiny bits sticking out, waiting to make a connection,
- while the hedgehog body consists of the vertices and the links connecting
+Seeds and sections can (and should!) be visualized as hedgehogs - a body
+ with spines sticking out of it - the connectors can be thought of as the
+ spiny bits sticking out, waiting to make a connection, while the hedgehog
+ body is that collection of vertices and the fully-connected links between
  them.
+\begin_inset Float figure
+placement h
+wide false
+sideways false
+status open
+
+\begin_layout Plain Layout
+\begin_inset Caption Standard
+
+\begin_layout Plain Layout
+A connected section
+\end_layout
+
+\end_inset
+
+
+\begin_inset Graphics
+	filename hedgehog.eps
+	width 30col%
+
+\end_inset
+
+
+\end_layout
+
+\begin_layout Plain Layout
+
+\end_layout
+
+\end_inset
+
+
 \end_layout
 
 \begin_layout Standard
@@ -612,7 +763,7 @@ all
 \end_inset
 
  for any edges that might contain the given vertex.
- Computationally, searching large lists is inefficeint, espcially so for
+ Computationally, searching large lists is inefficient, especially so for
  very large graphs.
 \end_layout
 
@@ -632,6 +783,24 @@ The subset of a section is always a section.
 
  do not generally form a graph; one has to apply consistency conditions
  to get a subgraph.
+\end_layout
+
+\begin_layout Itemize
+A connected section behaves very much like a seed: just as two seeds can
+ be linked together to form a connected section, so also two connected sections
+ can be linked together to form a larger connected section.
+ Both have a body, with spines sticking out.
+ The building blocks, and the things built from them have the same properties,
+ lie in the same class.
+ Thus, one has a system that is 
+\begin_inset Quotes eld
+\end_inset
+
+scalable
+\begin_inset Quotes erd
+\end_inset
+
+, and allows notions of similarity and scale invariance to be explored.
 \end_layout
 
 \begin_layout Itemize
@@ -670,6 +839,12 @@ In certain ways, the connectors on a seed look like the uncontracted indexes
  the algebra of sections.
 \end_layout
 
+\begin_layout Itemize
+The analogy between graphs and topology, specifically, between open sets
+ and seeds, the intersection of open sets and edges, allows concepts and
+ tools to be borrowed from algebraic topology.
+\end_layout
+
 \begin_layout Standard
 If we stop here, not much is accomplished, other than to define a somewhat
  idiosyncratic view of graph theory.
@@ -680,23 +855,30 @@ If we stop here, not much is accomplished, other than to define a somewhat
 \end_layout
 
 \begin_layout Section*
-Sheaves
+Clustering
 \end_layout
 
 \begin_layout Standard
-To arrive at a sheaf, begin by definiting a kind of quotienting operation
- on a graph.
- To motivate this, consider the following scenario.
- One has a large graph, some dense mesh, and one decides, for some external
- reason, that two vertexes are similar.
+The intended interpretation of the graph is that it represents a large amount
+ of collected raw data.
+ From this data, one wants to extract commonalities and recurring patterns.
+ Doing so, one arrives at the need to perform a kind of quotienting operation
+ on the graph.
+ 
+\end_layout
+
+\begin_layout Standard
+To motivate this, consider the following scenario.
+ One has a large graph, some dense mesh, and one decides, via some external
+ decision process, that two vertexes are similar.
  One particularly good reason to think that they are similar is that they
  share a lot of nearest neighbors.
- In a social graph, one might say they have a lot of freinds in common.
+ In a social graph, one might say they have a lot of friends in common.
  In genomic or proteomic data, they may interact with the same kinds of
  genes/proteins.
  In natural language, they might be words that are synonyms, and thus get
  used the same way across many different sentences; specifically, the syntactic
- dependency parse links these words to the same set of heads an dependents.
+ dependency parse links these words to the same set of heads and dependents.
  At any rate, one has a large graph, and some sort of equivalence operation
  that can decide if two vertexes are the 
 \begin_inset Quotes eld
@@ -715,7 +897,7 @@ similar enough
 \end_inset
 
 .
- Whenever one has an equivalence operation, one can apply it to obtain a
+ Whenever one has an equivalence relation, one can apply it to obtain a
  quotient, of grouping together into an identity all things that are the
  same.
 \end_layout
@@ -814,7 +996,7 @@ By contrast, the goal here is not just to talk about a graph
 \begin_inset Formula $A$
 \end_inset
 
-'s will continue to be interesting, and so is carried on.
+'s will continue to be interesting, and so is carried onwards.
  Finally, the act of merging together multiple vertexes into one 
 \begin_inset Formula $A$
 \end_inset
@@ -822,9 +1004,8 @@ By contrast, the goal here is not just to talk about a graph
  may result in some of the existing edges being cut, or new edges being
  created.
  The clustering operation applied to the graph alters the graph structure.
- These considerations are wha makes it convenient to abondon traditional
- graph theory, and to replace it by the notion of sheaves and sections,
- as defined below.
+ These considerations are what makes it convenient to abandon traditional
+ graph theory, and to replace it by the notion of sheaves and sections.
 \end_layout
 
 \begin_layout Standard
@@ -878,7 +1059,7 @@ Given two vertexes
 \end_inset
 
 .
- The precise defition of 
+ The precise definition of 
 \begin_inset Formula $E_{ab}$
 \end_inset
 
@@ -962,12 +1143,12 @@ A
 \noun on
 link
 \noun default
- is between two different stalks 
-\begin_inset Formula $S_{1}=\left(V_{1},E_{1}\right)$
+ between two different stalks 
+\begin_inset Formula $S_{a}=\left(V_{a},E_{a}\right)$
 \end_inset
 
  and 
-\begin_inset Formula $S_{2}=\left(V_{2},E_{2}\right)$
+\begin_inset Formula $S_{b}=\left(V_{b},E_{b}\right)$
 \end_inset
 
  is any edge 
@@ -980,19 +1161,19 @@ viz.
 
 \emph default
  where 
-\begin_inset Formula $v_{1}\in V_{1}$
+\begin_inset Formula $v_{1}\in V_{a}$
 \end_inset
 
  and 
-\begin_inset Formula $v_{2}\in V_{2}$
+\begin_inset Formula $v_{2}\in V_{b}$
 \end_inset
 
  and 
-\begin_inset Formula $e\in E_{1}$
+\begin_inset Formula $e\in E_{a}$
 \end_inset
 
  and 
-\begin_inset Formula $e\in E_{2}$
+\begin_inset Formula $e\in E_{b}$
 \end_inset
 
 .
@@ -1030,14 +1211,1409 @@ base space
 \end_inset
 
 , and the stalks and links project down onto it in the usual sense.
+\begin_inset Float figure
+placement h
+wide false
+sideways false
+status open
+
+\begin_layout Plain Layout
+\begin_inset Caption Standard
+
+\begin_layout Plain Layout
+A stalk and it's projection
+\end_layout
+
+\end_inset
+
+
+\begin_inset Graphics
+	filename stalk.eps
+	width 60col%
+
+\end_inset
+
+
+\end_layout
+
+\begin_layout Plain Layout
+
+\end_layout
+
+\end_inset
+
+
 \end_layout
 
 \begin_layout Standard
-XXX
+The projection down to a base space suggests that the equivalence relation
+ on vertexes can be extended to an equivalence relation on edges: two edges
+ are equivalent if they form the same link.
+ That is, one has an equivalence class of edges:
+\end_layout
+
+\begin_layout Definition*
+A 
+\noun on
+link
+\noun default
+ between two different stalks 
+\begin_inset Formula $S_{a}=\left(V_{a},E_{a}\right)$
+\end_inset
+
+ and 
+\begin_inset Formula $S_{b}=\left(V_{b},E_{b}\right)$
+\end_inset
+
+ is the set 
+\begin_inset Formula $l=\left\{ e_{k}\right\} $
+\end_inset
+
+ of all edges 
+\begin_inset Formula $e_{k}$
+\end_inset
+
+ that connect some pair of vertexes in 
+\begin_inset Formula $V_{a}$
+\end_inset
+
+ and 
+\begin_inset Formula $V_{b}$
+\end_inset
+
+.
+ That is, every 
+\begin_inset Formula $e_{k}=\left(v_{k1},v_{k2}\right)$
+\end_inset
+
+ in 
+\begin_inset Formula $L$
+\end_inset
+
+ has the property that 
+\begin_inset Formula $v_{k1}\in V_{a}$
+\end_inset
+
+ and 
+\begin_inset Formula $v_{k2}\in V_{b}$
+\end_inset
+
+ and 
+\begin_inset Formula $e_{k}\in E_{a}$
+\end_inset
+
+ and 
+\begin_inset Formula $e_{k}\in E_{b}$
+\end_inset
+
+.
+ 
+\begin_inset Formula $\diamond$
+\end_inset
+
+
 \end_layout
 
 \begin_layout Standard
-Wait – there's more to be written.
+This redefines the notion of a link.
+ Perhaps it should be given a different name, but it should be OK, because
+ the intended sense should be clear from the context.
+ This allows us to redefine the notion of a stalk as well:
+\end_layout
+
+\begin_layout Definition*
+A 
+\noun on
+stalk
+\noun default
+ is an ordered pair 
+\begin_inset Formula $S=\left(V,L\right)$
+\end_inset
+
+ of vertexes and links such that every link in 
+\begin_inset Formula $L$
+\end_inset
+
+ has one endpoint that is 
+\begin_inset Formula $V$
+\end_inset
+
+ and the other endpoint not being 
+\begin_inset Formula $V$
+\end_inset
+
+.
+ That is, each link in 
+\begin_inset Formula $L$
+\end_inset
+
+ is a connector or half-edge.
+ 
+\begin_inset Formula $\diamond$
+\end_inset
+
+
+\end_layout
+
+\begin_layout Standard
+The above definition renders the stalk as being essentially the same thing
+ as a seed, except that now, one is working with sets of vertices, and the
+ links between them.
+ One can think of this structure as a kind of hypergraph, but that view
+ does not seem to be particularly productive.
+\end_layout
+
+\begin_layout Subsection*
+Why clustering?
+\end_layout
+
+\begin_layout Standard
+The above establishes a vocabulary, a means for talking about the clustering
+ of similar things on graphs.
+ It does not suggest how to cluster.
+ Without this vocabulary, it can be very confusing to visualize and talk
+ about what is meant by clustering on a graph.
+ Its worth reviewing some examples.
+\end_layout
+
+\begin_layout Itemize
+In a social graph, a cluster might be a clique of friends.
+ By placing these friends into one group, the stalk allows you to examine
+ how different groups interact with one-another.
+\end_layout
+
+\begin_layout Itemize
+In proteomic or genomic data, if one can group together similar proteins
+ or genes into clusters, one can accomplish a form of dimensional reduction,
+ decreasing the overall size of the dataset.
+ It provides a methodical way of creating a simplified model of biology,
+ without the bad smell of ad-hoc simplifications.
+\end_layout
+
+\begin_layout Itemize
+In linguistic data, the natural clustering is that of words that behave
+ in a similar syntactic fashion; such clusters are commonly called 
+\begin_inset Quotes eld
+\end_inset
+
+grammatical classes
+\begin_inset Quotes erd
+\end_inset
+
+ or 
+\begin_inset Quotes eld
+\end_inset
+
+parts of speech
+\begin_inset Quotes erd
+\end_inset
+
+.
+ In particular, it allows one to visualize language as a graph.
+ So: consider, for example, the set of all dependency parses of all sentences
+ in some corpus, say Wikipedia.
+ Each dependency parse is a tree; the vertexes are words, and the edges
+ are the dependencies.
+ Taken as a graph, this is a huge graph, with words connecting to other
+ words, all over the place.
+ Its not terribly interesting in this raw state, because its overwhelmingly
+ large.
+ However, we might notice that all sentences containing the word 
+\begin_inset Quotes eld
+\end_inset
+
+dish
+\begin_inset Quotes erd
+\end_inset
+
+ resemble all sentences containing the word 
+\begin_inset Quotes eld
+\end_inset
+
+plate
+\begin_inset Quotes erd
+\end_inset
+
+; that these two words always get used in a similar or the same way.
+ Grouping these two words together into one reduces the size of the graph
+ by one vertex.
+ Aggressively merging similar words together can sharply shrink the size
+ of the graph to a manageable size.
+ One gets something more: the resulting graph can be understood as encapsulating
+ the structure of the English language.
+ 
+\end_layout
+
+\begin_layout Standard
+This last example is worth expanding on.
+ Two things happen when the compressed graph is created.
+ First, that graph encodes the syntactic structure of the language: the
+ links between grammatical classes indicate how words can be arranged into
+ grammatically correct sentences.
+ Second, the amount of compression applied can reveal different kinds of
+ structures.
+ With extremely heavy compression, one might discover only the crudest parts
+ of speech: determiners, adjectives, nouns, transitive and intransitive
+ verbs.
+ Each of these classes are distinct, because they link differently.
+ However, if instead, a lot less compression is applied, then one can discover
+ synonymous words: so, 
+\begin_inset Quotes eld
+\end_inset
+
+plate
+\begin_inset Quotes erd
+\end_inset
+
+ and 
+\begin_inset Quotes eld
+\end_inset
+
+dish
+\begin_inset Quotes erd
+\end_inset
+
+ might be grouped together, possibly with 
+\begin_inset Quotes eld
+\end_inset
+
+saucer
+\begin_inset Quotes erd
+\end_inset
+
+, but not with 
+\begin_inset Quotes eld
+\end_inset
+
+cup
+\begin_inset Quotes erd
+\end_inset
+
+.
+ Here, one is extracting a semantic grouping, rather than a syntactic grouping.
+ 
+\end_layout
+
+\begin_layout Standard
+So, the answer to 
+\begin_inset Quotes eld
+\end_inset
+
+why clustering?
+\begin_inset Quotes erd
+\end_inset
+
+ is that it allows information to be extracted from a graph, and encoded
+ in a useful, usable fashion.
+ No attempt is made here to suggest how to cluster; merely, that if an equivalen
+ce relation is available, and if it is employed wisely, then one can construct
+ quotient graphs that encode important relationships of the original, raw
+ graph.
+\end_layout
+
+\begin_layout Section*
+Types
+\end_layout
+
+\begin_layout Standard
+It is notationally awkward to have to write stalks in terms of the sets
+ of vertexes that they are composed of; it is convenient to instead replace
+ each set by a symbol.
+ The symbol will be called a 
+\noun on
+type
+\noun default
+.
+ As it happens, these types can be seen to be the same things occurring
+ in the study of type theory; the name is justified.
+\end_layout
+
+\begin_layout Standard
+The core idea can be illustrated with link-grammar as an example.
+ The link-grammar disjuncts 
+\emph on
+are
+\emph default
+ one and the same thing as stalks.
+ It is worth making this very explicit.
+ A subset of the link-grammar English dictionary looks like this:
+\begin_inset VSpace medskip
+\end_inset
+
+
+\end_layout
+
+\begin_layout Standard
+\begin_inset Box Frameless
+position "t"
+hor_pos "c"
+has_inner_box 1
+inner_pos "t"
+use_parbox 0
+use_makebox 0
+width "50col%"
+special "none"
+height "1in"
+height_special "totalheight"
+thickness "0.4pt"
+separation "3pt"
+shadowsize "4pt"
+framecolor "black"
+backgroundcolor "none"
+status open
+
+\begin_layout Plain Layout
+
+\family sans
+cat dog: D- & S+;
+\end_layout
+
+\begin_layout Plain Layout
+
+\family sans
+the a: D+;
+\end_layout
+
+\begin_layout Plain Layout
+
+\family sans
+ran: S-;
+\end_layout
+
+\end_inset
+
+
+\begin_inset VSpace medskip
+\end_inset
+
+
+\begin_inset Newline newline
+\end_inset
+
+This states that 
+\begin_inset Quotes eld
+\end_inset
+
+cat
+\begin_inset Quotes erd
+\end_inset
+
+ and 
+\begin_inset Quotes eld
+\end_inset
+
+dog
+\begin_inset Quotes erd
+\end_inset
+
+ are both vertexes, and they are in the same stalk.
+ That stalk has two connectors: 
+\family sans
+D-
+\family default
+ and 
+\family sans
+S+
+\family default
+, which encode the other stalks that can be connected to.
+ So, the 
+\family sans
+D+
+\family default
+ can be connected to the 
+\family sans
+D-
+\family default
+ to form a link.
+ The link has the form 
+\family sans
+({the, a}, {cat, dog})
+\family default
+ and the connector symbols 
+\family sans
+D+
+\family default
+ and 
+\family sans
+D-
+\family default
+ act as abbreviations for the vertex sets that the unconnected end can connect
+ to.
+ The + and - symbols indicate a directionality: to the right or to the left.
+ The capture the notion that, in English, the word-order matters.
+ To properly explain the + and -, we should have to go back to the definition
+ of a graph on the very first page, and introduce the notion of left-right
+ order among the vertices.
+ Doing so from the very beginning would do nothing but clutter up the presentati
+on, so that is not done.
+ The reader is now invited to treat the initial definition of the graph
+ as a monad: there are additional details 
+\begin_inset Quotes eld
+\end_inset
+
+under the covers
+\begin_inset Quotes erd
+\end_inset
+
+, but they are wrapped up and ignored, and only the relevant bits are exposed.
+ Perhaps the vertices had a color.
+ Perhaps they had a name, or a numerical weight; this is ignored.
+ Here, we unwrap the idea that the vertices must be organized in a left-right
+ order.
+ Its sufficient, for now, to leave it at that.
+\begin_inset Float figure
+placement h
+wide false
+sideways false
+status open
+
+\begin_layout Plain Layout
+\begin_inset Caption Standard
+
+\begin_layout Plain Layout
+Three stalks and two typed links
+\end_layout
+
+\end_inset
+
+
+\begin_inset Graphics
+	filename grammar.eps
+	width 45col%
+
+\end_inset
+
+
+\end_layout
+
+\begin_layout Plain Layout
+
+\end_layout
+
+\end_inset
+
+
+\end_layout
+
+\begin_layout Standard
+The three stalks here encode a set of grammatically valid English language
+ sentences.
+ Hooking together the S- and S+ connectors to form an S link, one obtains
+ the sequence 
+\family sans
+[{the, a} {cat, dog} {ran}]
+\family default
+.
+ This can be used to generate grammatically valid sentences: pick one word
+ from each set, and one gets a valid sentence.
+ Alternatively, this structure can be taken to encode the sum-total knowledge
+ about this toy language: it is a kind-of graphical representation of the
+ entire language, viewed as a whole.
+\end_layout
+
+\begin_layout Definition*
+Given a stalk 
+\begin_inset Formula $S=\left(V,L\right)$
+\end_inset
+
+, the 
+\noun on
+connector type
+\noun default
+ of 
+\begin_inset Formula $L$
+\end_inset
+
+ is a symbol that can be used as a synonym for the set 
+\begin_inset Formula $L$
+\end_inset
+
+.
+ It serves as a short-hand notation for 
+\begin_inset Formula $L$
+\end_inset
+
+ itself.
+ 
+\begin_inset Formula $\diamond$
+\end_inset
+
+
+\end_layout
+
+\begin_layout Standard
+Just as in type theory, a type can be viewed a set.
+ Yet, just as in type theory, this is the wrong viewpoint: a type is better
+ understood as expressing a property: it is an intensional, rather than
+ an extensional description.
+ Formally, in the case of finite sets, this may feel like splitting hairs.
+ For an intuitive understanding, however, its useful to think of a type
+ as a property carried by an object, not just the class that the object
+ can be assigned to.
+\end_layout
+
+\begin_layout Subsection*
+Why types? 
+\end_layout
+
+\begin_layout Standard
+Types are introduced here primarily as a convenience for working with stalks.
+ They are labels, but they can be useful.
+ Re-examining the examples:
+\end_layout
+
+\begin_layout Itemize
+In a social graph, one group of friends might be called 
+\begin_inset Quotes eld
+\end_inset
+
+students
+\begin_inset Quotes erd
+\end_inset
+
+ and another group of friends might be called 
+\begin_inset Quotes eld
+\end_inset
+
+teachers
+\begin_inset Quotes erd
+\end_inset
+
+.
+ The class labels are useful for noting the function and relationship of
+ the different social groups.
+\end_layout
+
+\begin_layout Itemize
+In genomic data, one type of gene sequence might be classified as an exon,
+ another as an intron.
+\end_layout
+
+\begin_layout Standard
+These examples suggest that the use of types is little more than a convenient
+ labeling system.
+ In fact, more hay can be made here, as types interact strongly with category
+ theory: types are used to describe the internal language of monoidal categories.
+ But this is a rather abstract viewpoint, of no immediate short-term use.
+ Suffice it to say that appearance of types in grammatical analysis of a
+ language is not accidental.
+ 
+\end_layout
+
+\begin_layout Section*
+Parsing
+\end_layout
+
+\begin_layout Standard
+The introduction remarked that not every collection of seeds can be assembled
+ in such a way as to create a valid graph.
+ This idea can be firmed up, and defined more carefully.
+ Generically, a valid assembly of seeds is called a parse, and the act of
+ assembling them is called parsing, which is done by parse algorithms.
+ To illustrate the process, consider the following two seeds:
+\begin_inset Newline newline
+\end_inset
+
+
+\end_layout
+
+\begin_layout Standard
+\begin_inset space \qquad{}
+\end_inset
+
+
+\begin_inset Box Frameless
+position "t"
+hor_pos "c"
+has_inner_box 1
+inner_pos "t"
+use_parbox 0
+use_makebox 0
+width "80col%"
+special "none"
+height "1in"
+height_special "totalheight"
+thickness "0.4pt"
+separation "3pt"
+shadowsize "4pt"
+framecolor "black"
+backgroundcolor "none"
+status open
+
+\begin_layout Plain Layout
+\begin_inset Formula $v_{2}:\left\{ \left(v_{2},v_{1}\right),\left(v_{2},v_{3}\right)\right\} $
+\end_inset
+
+
+\end_layout
+
+\begin_layout Plain Layout
+\begin_inset Formula $v_{3}:\left\{ \left(v_{3},v_{2}\right)\right\} $
+\end_inset
+
+
+\end_layout
+
+\end_inset
+
+
+\begin_inset Newline newline
+\end_inset
+
+
+\begin_inset Newline newline
+\end_inset
+
+Represented graphically, these seeds are
+\end_layout
+
+\begin_layout Standard
+\begin_inset Float figure
+placement H
+wide false
+sideways false
+status open
+
+\begin_layout Plain Layout
+\begin_inset Caption Standard
+
+\begin_layout Plain Layout
+Two unconnected seeds
+\end_layout
+
+\end_inset
+
+
+\begin_inset Graphics
+	filename bad-graph.eps
+	width 55col%
+
+\end_inset
+
+
+\end_layout
+
+\begin_layout Plain Layout
+
+\end_layout
+
+\end_inset
+
+The connector (half-edge) 
+\begin_inset Formula $\left(v_{2},v_{3}\right)$
+\end_inset
+
+ appears with both polarities, and can be linked together to form a link.
+ The connector 
+\begin_inset Formula $\left(v_{2},v_{1}\right)$
+\end_inset
+
+ has nothing to connect to.
+ Even after maximally linking these two seeds, one does not obtain a valid
+ graph: the vertex 
+\begin_inset Formula $v_{1}$
+\end_inset
+
+ is missing from the vertex-set of the graph, even though there is an edge
+ ready to attach to it.
+ This provides an example of a failed parse.
+ It is enough to add the seed 
+\begin_inset Formula $v_{1}:\left\{ \left(v_{1},v_{2}\right)\right\} $
+\end_inset
+
+ to convert this into a successful parse.
+ Adding this seed, and then attempting to maximally link it results in a
+ valid graph; the parse is successful.
+\end_layout
+
+\begin_layout Standard
+\begin_inset Float figure
+placement h
+wide false
+sideways false
+status open
+
+\begin_layout Plain Layout
+\begin_inset Caption Standard
+
+\begin_layout Plain Layout
+Parsing is the creation of links
+\end_layout
+
+\end_inset
+
+
+\begin_inset Graphics
+	filename parsing.eps
+	width 45col%
+
+\end_inset
+
+
+\end_layout
+
+\begin_layout Plain Layout
+
+\end_layout
+
+\end_inset
+
+
+\end_layout
+
+\begin_layout Standard
+Note the minor change in notation: the colon is used as a separator, with
+ the germ appearing on the left, and set of connectors on the right.
+ The relevance of this notational change becomes more apparent, if we label
+ the vertexes in a funny way: let 
+\begin_inset Formula $v_{1}$
+\end_inset
+
+ carry the lable 
+\begin_inset Quotes eld
+\end_inset
+
+the
+\begin_inset Quotes erd
+\end_inset
+
+, and 
+\begin_inset Formula $v_{2}$
+\end_inset
+
+ carry the label 
+\begin_inset Quotes eld
+\end_inset
+
+dog
+\begin_inset Quotes erd
+\end_inset
+
+ and 
+\begin_inset Formula $v_{3}$
+\end_inset
+
+ carry the label 
+\begin_inset Quotes eld
+\end_inset
+
+ran
+\begin_inset Quotes erd
+\end_inset
+
+.
+ The failed parse is meant to illustrate that 
+\begin_inset Quotes eld
+\end_inset
+
+dog ran
+\begin_inset Quotes erd
+\end_inset
+
+ is not a grammatically valid sentence, whereas 
+\begin_inset Quotes eld
+\end_inset
+
+the dog ran
+\begin_inset Quotes erd
+\end_inset
+
+ is.
+ 
+\end_layout
+
+\begin_layout Standard
+Converting these seeds to also enforce left-right word-order requires the
+ notation
+\begin_inset Newline newline
+\end_inset
+
+
+\end_layout
+
+\begin_layout Standard
+\begin_inset space \qquad{}
+\end_inset
+
+
+\begin_inset Box Frameless
+position "t"
+hor_pos "c"
+has_inner_box 1
+inner_pos "t"
+use_parbox 0
+use_makebox 0
+width "80col%"
+special "none"
+height "1in"
+height_special "totalheight"
+thickness "0.4pt"
+separation "3pt"
+shadowsize "4pt"
+framecolor "black"
+backgroundcolor "none"
+status open
+
+\begin_layout Plain Layout
+
+\family sans
+the: {(the, dog+)}
+\end_layout
+
+\begin_layout Plain Layout
+
+\family sans
+dog: {(dog, the-), (dog,ran+)}
+\end_layout
+
+\begin_layout Plain Layout
+
+\family sans
+ran: {(ran, dog-)}
+\end_layout
+
+\end_inset
+
+
+\begin_inset Newline newline
+\end_inset
+
+
+\begin_inset Newline newline
+\end_inset
+
+
+\end_layout
+
+\begin_layout Standard
+This notation is verbose, and slightly confusing.
+ Repeating the germ as the first vertex in every connector is entirely un-necces
+sary.
+ Write instead:
+\begin_inset Newline newline
+\end_inset
+
+
+\end_layout
+
+\begin_layout Standard
+\begin_inset space \qquad{}
+\end_inset
+
+
+\begin_inset Box Frameless
+position "t"
+hor_pos "c"
+has_inner_box 1
+inner_pos "t"
+use_parbox 0
+use_makebox 0
+width "80col%"
+special "none"
+height "1in"
+height_special "totalheight"
+thickness "0.4pt"
+separation "3pt"
+shadowsize "4pt"
+framecolor "black"
+backgroundcolor "none"
+status open
+
+\begin_layout Plain Layout
+
+\family sans
+the: { dog+ }
+\end_layout
+
+\begin_layout Plain Layout
+
+\family sans
+dog: { the-, ran+}
+\end_layout
+
+\begin_layout Plain Layout
+
+\family sans
+ran: { dog- }
+\end_layout
+
+\end_inset
+
+
+\begin_inset Newline newline
+\end_inset
+
+
+\begin_inset Newline newline
+\end_inset
+
+
+\end_layout
+
+\begin_layout Standard
+The set-builder notation is un-needed, and perhaps slightly confusing.
+ In particular, the word 
+\begin_inset Quotes eld
+\end_inset
+
+dog
+\begin_inset Quotes erd
+\end_inset
+
+ has two connectors on it; both must be connected to obtain a valid parse.
+ The ampersand can be used to indicate the requirement that both connectors
+ are required.
+ This notation will also be useful in the next section.
+\begin_inset Newline newline
+\end_inset
+
+
+\end_layout
+
+\begin_layout Standard
+\begin_inset space \qquad{}
+\end_inset
+
+
+\begin_inset Box Frameless
+position "t"
+hor_pos "c"
+has_inner_box 1
+inner_pos "t"
+use_parbox 0
+use_makebox 0
+width "80col%"
+special "none"
+height "1in"
+height_special "totalheight"
+thickness "0.4pt"
+separation "3pt"
+shadowsize "4pt"
+framecolor "black"
+backgroundcolor "none"
+status open
+
+\begin_layout Plain Layout
+
+\family sans
+the: dog+ ;
+\end_layout
+
+\begin_layout Plain Layout
+
+\family sans
+dog: the- & ran+ ;
+\end_layout
+
+\begin_layout Plain Layout
+
+\family sans
+ran: dog- ;
+\end_layout
+
+\end_inset
+
+
+\begin_inset Newline newline
+\end_inset
+
+
+\begin_inset Newline newline
+\end_inset
+
+
+\end_layout
+
+\begin_layout Standard
+This brings us almost back to the previous section, but not quite.
+ Here, we are working with seeds; previously we worked with stalks.
+ Here, the connector type labels were not employed.
+ In real-world use-cases, using stalks and type labels is much more convenient.
+\end_layout
+
+\begin_layout Standard
+This now brings us to a first draft of a parse algorithm.
+ Given an input set of vertices, it attempts to find a graph that is able
+ to connect all of them.
+\end_layout
+
+\begin_layout Enumerate
+Provide a dictionary 
+\begin_inset Formula $D$
+\end_inset
+
+ consisting of a set of un-connected stalks.
+ 
+\end_layout
+
+\begin_layout Enumerate
+Input a set of vertices 
+\begin_inset Formula $V=\left\{ v_{1},v_{2},\cdots,v_{k}\right\} $
+\end_inset
+
+.
+ 
+\end_layout
+
+\begin_layout Enumerate
+For each vertex in 
+\begin_inset Formula $V$
+\end_inset
+
+, locate a stalk which contains that vertex in it's germ.
+\end_layout
+
+\begin_layout Enumerate
+Attempt to connect all connectors in the selected stalks.
+\end_layout
+
+\begin_layout Enumerate
+If all connectors can be connected, the parse is successful; else the parse
+ fails.
+\end_layout
+
+\begin_layout Enumerate
+Print the resulting graph.
+ This graph can be described as a pair 
+\begin_inset Formula $\left(V,E\right)$
+\end_inset
+
+ with 
+\begin_inset Formula $V$
+\end_inset
+
+ the input set of vertexes, and 
+\begin_inset Formula $E$
+\end_inset
+
+ the set of links obtained from fully connecting the selected stalks.
+\end_layout
+
+\begin_layout Standard
+The above algorithm is 
+\begin_inset Quotes eld
+\end_inset
+
+generic
+\begin_inset Quotes erd
+\end_inset
+
+, and does not suggest any optimal strategy for the crucial steps 3 or 4.
+ It also omits discussion of any further constraints that might need to
+ be applied: perhaps the edges need to be directed; perhaps the resulting
+ graph must be a planar graph (no intersecting edges); perhaps the graph
+ must be a minimum spanning tree; perhaps the input vertexes must be arranged
+ in linear order.
+ These are additional constraints that will typically be required in some
+ specific application.
+\end_layout
+
+\begin_layout Subsection*
+Why parsing?
+\end_layout
+
+\begin_layout Standard
+The benefit of parsing for the analysis of the structure of natural language
+ is well established.
+ Thus, an example of parsing in a non-linguistic domain is useful.
+ Consider having used the above graph compression/vertex-edge clustering
+ techniques to obtain a collection of stalks that describe genomic interactions.
+ This collection provides the initial dictionary 
+\begin_inset Formula $D$
+\end_inset
+
+.
+ Now imagine a process where a certain specific set of genes are associated
+ with some particular trait or reaction.
+ Is this a complete set? Can it be said that thier interactions are fully
+ understood?
+\end_layout
+
+\begin_layout Standard
+One way to answer these last two questions would be to apply the parse algorithm
+, using the known dictionary, to see if a complete interaction network can
+ be obtained.
+ If so, then this new specific gene-set fits the general pattern.
+ If not, if a complete parse cannot be found, then one strongly suspects
+ that there remain one or more genes, yet undetermined, that also play a
+ role in the trait.
+ To find these, one might examine the stalks that might have been required
+ to complete the parse: these will give a specific type of gene, or style
+ of interaction to search for.
+\end_layout
+
+\begin_layout Standard
+Thus, parsing new gene expressions and pathways offers a way of discovering
+ whether they resemble existing, known systems, or whther they are truly
+ novel.
+ If they seem novel, parsig also gives strong hints as to where to look
+ for any missing pieces or interactions.
+\end_layout
+
+\begin_layout Subsection*
+Is this really parsing?
+\end_layout
+
+\begin_layout Standard
+The above description of parsing is sufficiently different from standard
+ textbook expositions of natural language parsing that some form of an apology
+ neds to be written.
+ 
+\end_layout
+
+\begin_layout Standard
+The first step is to observe that the presented algorithm is essentially
+ a simplified, generalized variation of the link-grammar parsing algorithm.
+ The generalization consists in the removal of word-order and link-crossing
+ constraints.
+\end_layout
+
+\begin_layout Standard
+The second step is to observe that the theory of link-grammar is more-or-less
+ isomorphic to the theory of pregroup grammars (see 
+\begin_inset CommandInset href
+LatexCommand href
+name "Wikipedia"
+target "https://en.wikipedia.org/wiki/Pregroup_grammar"
+
+\end_inset
+
+); the primary differences being notational.
+ The left-right directional link-grammar connectors correspond to the left
+ and right adjoints in a pregroup.
+ A link-grammar disjunct (that is, a seed) coresponds to a sequence of types
+ in a pregroup grammar.
+ The correspondance is more-or-less direct, except that link grammar is
+ notational simpler to work with.
+\end_layout
+
+\begin_layout Standard
+The third step is to observe that the link-grammar is a form of dependency
+ grammar.
+ Although the original link-grammar formulation uses undirected links, it
+ is straight-forward and unambiguous to mark up the links with head-dependent
+ directional arrows.
+\end_layout
+
+\begin_layout Standard
+The fourth step is to realize that dependency grammars (DG) and head-phrase-stru
+cture grammars (HPSG) are essentially isomorphic.
+ Given one, one can obtain the other in a purely mechanistic way.
+ 
+\end_layout
+
+\begin_layout Standard
+The final step is to realize that most introductory textbooks describe parsers
+ for a context-free grammar, and that, for general instructional purposes,
+ such parsers are sufficient to work with HPSG.
+ The priamry issue with HPSG and context-free language parsers is that they
+ obscure the notion of linking together pieces; this is one reason why dependenc
+y grammars are oftan favored: they make clear that it is the linkage between
+ various words that has a primary psychological role in the human understanding
+ of language.
+ It should be noted that many researchers in the psychology of linguistics
+ are particularly drawn to the categorial grammars; these are quite similar
+ to the pregroup grammars, and are more closely related to link-grammar
+ than to the phrase-structure grammars.
+\end_layout
+
+\begin_layout Section*
+Polymorphism
+\end_layout
+
+\begin_layout Standard
+Any given vertex may participate in two or more seeds, independently from
+ one-another.
+ It is this statement that really starts setting apart the system described
+ here from ordinary graph theory.
+ It is best illustrated by a practical example.
+\end_layout
+
+\begin_layout Standard
+Consider a large graph, constructed from a large corpus of English language
+ sentences.
+ As subgraphs, it might contain the two sentences 
+\begin_inset Quotes eld
+\end_inset
+
+there's a fly on your nose
+\begin_inset Quotes erd
+\end_inset
+
+ and 
+\begin_inset Quotes eld
+\end_inset
+
+did you see it fly?
+\begin_inset Quotes erd
+\end_inset
+
+.
+ The vertex 
+\begin_inset Quotes eld
+\end_inset
+
+fly
+\begin_inset Quotes erd
+\end_inset
+
+ occurs as a noun in one sentence, and a verb in the other.
+ Suppose that the equivalence relation, described in the clustering section,
+ also has the power to discern that this one word should really be split
+ into two namely 
+\begin_inset Formula $fly_{\mbox{noun}}$
+\end_inset
+
+ and 
+\begin_inset Formula $fly_{\mbox{verb}}$
+\end_inset
+
+, and placed into two different stalks, namely, in the 
+\begin_inset Quotes eld
+\end_inset
+
+noun
+\begin_inset Quotes erd
+\end_inset
+
+ stalk in the first case, and the 
+\begin_inset Quotes eld
+\end_inset
+
+verb
+\begin_inset Quotes erd
+\end_inset
+
+ stalk in the second.
+ Recall that these two stalks must be different, because the kinds of connectors
+ that are allowed on a noun must necessarily be quite different from those
+ on a verb.
+ One is then lead to the image shown in figure 
+\begin_inset CommandInset ref
+LatexCommand ref
+reference "fig:Polymorphism"
+
+\end_inset
+
+.
+ 
+\end_layout
+
+\begin_layout Standard
+\begin_inset Float figure
+wide false
+sideways false
+status open
+
+\begin_layout Plain Layout
+
+\end_layout
+
+\begin_layout Plain Layout
+\begin_inset Caption Standard
+
+\begin_layout Plain Layout
+Polymorphism
+\begin_inset CommandInset label
+LatexCommand label
+name "fig:Polymorphism"
+
+\end_inset
+
+
+\end_layout
+
+\end_inset
+
+
+\end_layout
+
+\begin_layout Plain Layout
+\begin_inset Graphics
+	filename polymorph.eps
+	width 75col%
+
+\end_inset
+
+
+\end_layout
+
+\begin_layout Plain Layout
+This figure illustrates a polymorphic assignment for the word 
+\begin_inset Quotes eld
+\end_inset
+
+fly
+\begin_inset Quotes erd
+\end_inset
+
+.
+ It is split into two parts, the first, a noun, classed with other nouns,
+ showing labeled connectors to determiners, adjectives, and a connector
+ showing that nouns can act as the subject of a verb.
+ The second class shows labelled connectors to subjects and objects, as
+ is appropriate for transitive verbs.
+ Underneath are the flattened raw seeds, showing the words 
+\begin_inset Quotes eld
+\end_inset
+
+fly
+\begin_inset Quotes erd
+\end_inset
+
+ and 
+\begin_inset Quotes eld
+\end_inset
+
+cat
+\begin_inset Quotes erd
+\end_inset
+
+ and the myriad of connectors on them.
+ The flattened seeds cannot lead to grammatical linkages, as they mash together
+ into noe the connectors for different parst of speech.
+\end_layout
+
+\begin_layout Plain Layout
+\begin_inset CommandInset line
+LatexCommand rule
+offset "0.5ex"
+width "100col%"
+height "1pt"
+
+\end_inset
+
+
+\end_layout
+
+\begin_layout Plain Layout
+
+\end_layout
+
+\end_inset
+
+
+\end_layout
+
+\begin_layout Section*
+Sheaves
+\end_layout
+
+\begin_layout Standard
+The polymorphism issue above is what really drives the system to resemble
+ a sheaf, as opposed to a simpler graphical theory.
+\end_layout
+
+\begin_layout Standard
+present the sheaf axioms
+\end_layout
+
+\begin_layout Section*
+Conclusion
+\end_layout
+
+\begin_layout Standard
+XXX Wait – there's more to be written.
  This is just a save of an early draft.
  So, not the end, not yet.
 \end_layout
