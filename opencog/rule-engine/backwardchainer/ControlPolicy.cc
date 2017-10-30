@@ -171,15 +171,20 @@ HandleTVMap ControlPolicy::expansion_success_tvs(
 		} else {
 			// Otherwise calculate the truth value of its mixture
 			// model.
-			// TODO: set cpx_penalty and compressiveness.
-			success_tvs[rule] = MixtureModel(active_ctrl_rules)();
+			//
+			// TODO add cpx_penalty and compressiveness as parameters.
+			double cpx_penalty = 0.1,
+				compressiveness = 0.1;
+			success_tvs[rule] = MixtureModel(active_ctrl_rules,
+			                                 cpx_penalty,
+			                                 compressiveness)();
 		}
 	}
 
 	// Log TVs of representing probability of success (expanding into
 	// a preproof) for each action
 	std::stringstream ss;
-	ss << "Rule TVs expanding a supposed preproof into another preproof:" << std::endl;
+	ss << "Rule TVs of expanding a preproof into another preproof:" << std::endl;
 	for (const auto& rtv : success_tvs)
 		ss << rtv.second->to_string() << " " << oc_to_string(rtv.first);
 	ure_logger().debug() << ss.str();

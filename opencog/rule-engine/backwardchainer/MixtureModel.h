@@ -71,9 +71,10 @@ public:
 	             double compressiveness=0.0);
 
 	/**
-	 * Calculate the TV of the mixture model. According to Universal
-	 * Operator Induction, assuming complete models, the equation
-	 * rewritten for TVs is
+	 * Calculate the TV of the mixture model.
+	 *
+	 * According to Universal Operator Induction, assuming complete
+	 * models, the equation rewritten for TVs is
 	 *
 	 * TV_MM(D') = Sum_i=0^n TV_Mi(D') * P(Mi) / Sum_i=0^n P(Mi)
 	 *

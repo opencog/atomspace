@@ -30,6 +30,8 @@
 #include <opencog/atomutils/FindUtils.h>
 #include <opencog/truthvalue/SimpleTruthValue.h>
 
+#include "../URELogger.h"
+
 using namespace opencog;
 
 using boost::math::binomial_coefficient;
@@ -45,6 +47,9 @@ TruthValuePtr MixtureModel::operator()()
 	std::vector<TruthValuePtr> tvs;
 	std::vector<double> weights;
 	for (const Handle model : models) {
+		ure_logger().fine() << "MixtureModel::operator() model = "
+		                    << oc_to_string(model);
+
 		// Get model's TV
 		TruthValuePtr tv = model->getTruthValue();
 		tvs.push_back(tv);
@@ -52,8 +57,18 @@ TruthValuePtr MixtureModel::operator()()
 		// Calculate model's weight
 		double count = tv->get_count(),
 			pos_count = tv->get_mean() * count, // TODO correct when mean is fixed
-			binom = binomial_coefficient<double>(count, pos_count);
-		weights.push_back(prior_estimate(model) * (count+1) * binom);
+			binom = binomial_coefficient<double>(count, pos_count),
+			prior = prior_estimate(model),
+			weight = prior * (count+1) * binom;
+
+		ure_logger().fine() << "MixtureModel::operator() count = " << count
+		                    << ", pos_count = " << pos_count
+		                    << ", binom = " << binom
+		                    << ", (count+1) * binom = " << (count+1) * binom
+		                    << ", prior_estimate = " << prior
+		                    << ", weight = " << weight;
+
+		weights.push_back(weight);
 	}
 	return weighted_average(tvs, weights);
 }
@@ -84,9 +99,16 @@ TruthValuePtr MixtureModel::weighted_average(const std::vector<TruthValuePtr>& t
 double MixtureModel::prior_estimate(const Handle& model)
 {
 	HandleSet all_atoms(get_all_uniq_atoms(model));
-	double partial_length = all_atoms.size();
-	double remain_data_size = data_set_size - model->getTruthValue()->get_count();
-	return prior(partial_length + kolmogorov_estimate(remain_data_size));
+	double partial_length = all_atoms.size(),
+		remain_data_size = data_set_size - model->getTruthValue()->get_count(),
+		kestimate = kolmogorov_estimate(remain_data_size);
+
+	ure_logger().fine() << "MixtureModel::prior_estimate "
+	                    << "partial_length = " << partial_length
+	                    << ", remain_data_size = " << remain_data_size
+	                    << ", kestimate = " << kestimate;
+
+	return prior(partial_length + kestimate);
 }
 
 double MixtureModel::kolmogorov_estimate(double remain_count)
@@ -96,6 +118,8 @@ double MixtureModel::kolmogorov_estimate(double remain_count)
 
 double MixtureModel::prior(double length)
 {
+	ure_logger().fine() << "MixtureModel::prior length = " << length
+	                    << ", prior = " << exp(-cpx_penalty*length);
 	return exp(-cpx_penalty*length);
 }
 
