@@ -279,12 +279,12 @@ bool ControlPolicy::is_control_rule_active(const AndBIT& andbit,
                                            const Handle& ctrl_rule) const
 {
 	Handle ctrl_vardecl = ScopeLinkCast(ctrl_rule)->get_vardecl(),
-		expansion = retrieve_expansion(ctrl_rule),
-		input = expansion->getOutgoingAtom(1),
-		ctrl_andbit = input->getOutgoingAtom(0),
-		ctrl_bitleaf = input->getOutgoingAtom(1),
+		ctrl_expansion = retrieve_expansion(ctrl_rule),
+		ctrl_input = ctrl_expansion->getOutgoingAtom(1),
+		ctrl_andbit = ctrl_input->getOutgoingAtom(0),
+		ctrl_bitleaf = ctrl_input->getOutgoingAtom(1),
 		actual_andbit = andbit.fcs,
-		actual_andbit_vardecl = ScopeLinkCast(ctrl_rule)->get_vardecl();
+		actual_andbit_vardecl = ScopeLinkCast(actual_andbit)->get_vardecl();
 
 	// Make sure that the variables in the control rule and the actual
 	// andbit are disjoint
@@ -292,8 +292,15 @@ bool ControlPolicy::is_control_rule_active(const AndBIT& andbit,
 	// TODO: should be alpha-converted to have no variable in common.
 	Variables ctrl_vars = VariableList(ctrl_vardecl).get_variables(),
 		actual_andbit_vars = VariableList(actual_andbit_vardecl).get_variables();
-	OC_ASSERT(is_disjoint(ctrl_vars.varset, actual_andbit_vars.varset),
-	          "Not implemented yet");
+	if (not is_disjoint(ctrl_vars.varset, actual_andbit_vars.varset)) {
+		std::stringstream ss;
+		ss << "Not implemented yet. "
+		   << "ctrl_vars and actual_andbit_vars ctrl_vars should be disjoint, "
+		   << "but ctrl_vars = " << oc_to_string(ctrl_vars) << std::endl
+		   << "actual_andbit_vars = "
+		   << oc_to_string(actual_andbit_vars) << std::endl;
+		OC_ASSERT(false, ss.str());
+	}
 
 	// Check that the current andbit (resp. current bitleaf) and the
 	// andbit (resp. bitleaf) on the control rule are unifiable.
