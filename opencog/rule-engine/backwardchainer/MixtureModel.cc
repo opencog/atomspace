@@ -27,9 +27,11 @@
 #include <boost/range/algorithm/transform.hpp>
 #include <boost/range/numeric.hpp>
 
+#include <opencog/util/numeric.h>
 #include <opencog/atomutils/FindUtils.h>
 #include <opencog/truthvalue/SimpleTruthValue.h>
 
+#include "BetaDistribution.h"
 #include "../URELogger.h"
 
 using namespace opencog;
@@ -76,24 +78,32 @@ TruthValuePtr MixtureModel::operator()()
 TruthValuePtr MixtureModel::weighted_average(const std::vector<TruthValuePtr>& tvs,
                                              const std::vector<double>& weights) const
 {
-	// Normalize the weights and get the TV means
+	// Normalize the weights
 	double total = boost::accumulate(weights, 0.0);
-	std::vector<double> norm_weights, means;
+	std::vector<double> norm_weights;
 	boost::transform(weights, std::back_inserter(norm_weights),
 	                 [total](double w) { return w / total; });
-	boost::transform(tvs, std::back_inserter(means),
-	                 [](const TruthValuePtr& tv) { return tv->get_mean(); });
 
-	// For now the formula is extremely approximative, instead we
-	// could fit the mixture by a beta distribution, either
-	// analytically (Extended Beta Distribution in R by Grun et al) or
-	// numerically (Fitting Beta Distribution Based on Sample Data by
-	// AbouRisk et al). Or, better, this should be moved in the truth
-	// value API because a TV might not necessarily be a beta
-	// distribution.
+	// Calculate the TV means and variances
+	std::vector<BetaDistribution> dists;
+	std::vector<double> means, variances;
+	boost::transform(tvs, std::back_inserter(dists), mk_beta_distribution);
+	boost::transform(dists, std::back_inserter(means),
+	                 [](const BetaDistribution& bd) { return bd.mean(); });
+	boost::transform(tvs, std::back_inserter(variances),
+	                 [](const BetaDistribution& bd) { return bd.variance(); });
+
+	// For now the mixed TV remains a SimpleTV, thus a
+	// beta-distribution. The mean and variance is calculated
+	// according to
+	// https://en.wikipedia.org/wiki/Mixture_distribution#Moments
 	double mean = boost::inner_product(norm_weights, means, 0.0);
-	double confidence = 0.2;    // TODO
-	return SimpleTruthValue::createSTV(mean, confidence);
+	std::vector<double> relative_variances(variances);
+	for (std::size_t i = 0; i < relative_variances.size(); i++)
+		relative_variances[i] += sq(means[i] - mean);
+	double variance = boost::inner_product(norm_weights, relative_variances, 0.0);
+
+	return mk_stv(mean, variance);
 }
 
 double MixtureModel::prior_estimate(const Handle& model)
