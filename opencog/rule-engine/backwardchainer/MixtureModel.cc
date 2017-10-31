@@ -97,10 +97,11 @@ double MixtureModel::prior_estimate(const Handle& model)
 		remain_data_size = data_set_size - model->getTruthValue()->get_count(),
 		kestimate = kolmogorov_estimate(remain_data_size);
 
-	ure_logger().fine() << "MixtureModel::prior_estimate "
-	                    << "partial_length = " << partial_length
-	                    << ", remain_data_size = " << remain_data_size
-	                    << ", kestimate = " << kestimate;
+	LAZY_URE_LOG_FINE << "MixtureModel::prior_estimate "
+	                  << "model = " << oc_to_string(model)
+	                  << "partial_length = " << partial_length
+	                  << ", remain_data_size = " << remain_data_size
+	                  << ", kestimate = " << kestimate;
 
 	return prior(partial_length + kestimate);
 }
@@ -112,8 +113,8 @@ double MixtureModel::kolmogorov_estimate(double remain_count)
 
 double MixtureModel::prior(double length)
 {
-	ure_logger().fine() << "MixtureModel::prior length = " << length
-	                    << ", prior = " << exp(-cpx_penalty*length);
+	LAZY_URE_LOG_FINE << "MixtureModel::prior length = " << length
+	                  << ", prior = " << exp(-cpx_penalty*length);
 	return exp(-cpx_penalty*length);
 }
 
