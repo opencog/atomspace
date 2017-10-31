@@ -150,11 +150,11 @@ folk knowledge
 \end_inset
 
  generally known to a number of practitioners.
- However, I am not currently aware of any kind of presentation of this knowledge
-, either in review/summary form, or as a fully articulated text.
+ However, I am not currently aware of any kind of presentation of this informati
+on, either in review/summary form, or as a fully articulated text.
  There are some texts that discuss these ideas, but they tend to occur primarily
- in highly abstract mathematical texts, outside of the mainstream computer-scien
-ce and data-analysis domain.
+ in highly abstract mathematical books an aritcles, outside of the mainstream
+ computer-science and data-analysis domain.
  Thus, this document tries to provide an introduction to these concepts
  in a plain-spoken language.
  The hope is to be precise enough that there will be few complaints from
@@ -186,7 +186,7 @@ The penultimate can serve as a general example.
  Yet many students struggle.
  Given raw data on a large sample of students, and the curricula they were
  subjected to, can one discern sequences and dependencies of cause-and-effect
- in this data? Cam one find the most effective curriculum to teach, that
+ in this data? Can one find the most effective curriculum to teach, that
  advances the greatest number of students? Can one discover different classes
  of students, some who respond better to one style than another? My beleif
  is that these questions can not only be answered, but that the framework
@@ -216,11 +216,12 @@ pick your own algorithm
 \begin_inset Quotes erd
 \end_inset
 
- – apply your favorite technique and style, neural nets, whatever, as you
- wish, to obtain results.
+ – apply your favorite technique and style, neural nets, Bayesian nets,
+ Markov nets, whatever, as you wish, to obtain results.
  The goal is to provide a way of talking about, thinking about and presenting
  data so that the important knowledge contained in it is captured and described,
- boiled down to a manageable, workable state from a large raw dump of data.
+ boiled down to a manageable, workable state from a large raw dump of pair-relat
+ionship data.
 \end_layout
 
 \begin_layout Standard
@@ -273,7 +274,8 @@ For the mathematically inclined, please be aware that the concepts described
 \end_layout
 
 \begin_layout Standard
-The first part provides a definition of a 
+This document is organized as follows.
+ The first part of provides a definition of a 
 \begin_inset Quotes eld
 \end_inset
 
@@ -1295,7 +1297,7 @@ similar enough
 placement h
 wide false
 sideways false
-status collapsed
+status open
 
 \begin_layout Plain Layout
 \begin_inset Caption Standard
@@ -3199,7 +3201,7 @@ separation "3pt"
 shadowsize "4pt"
 framecolor "black"
 backgroundcolor "none"
-status collapsed
+status open
 
 \begin_layout Plain Layout
 
@@ -3252,7 +3254,7 @@ separation "3pt"
 shadowsize "4pt"
 framecolor "black"
 backgroundcolor "none"
-status collapsed
+status open
 
 \begin_layout Plain Layout
 
