@@ -49,28 +49,8 @@ TruthValuePtr MixtureModel::operator()()
 	std::vector<TruthValuePtr> tvs;
 	std::vector<double> weights;
 	for (const Handle model : models) {
-		ure_logger().fine() << "MixtureModel::operator() model = "
-		                    << oc_to_string(model);
-
-		// Get model's TV
-		TruthValuePtr tv = model->getTruthValue();
-		tvs.push_back(tv);
-
-		// Calculate model's weight
-		double count = tv->get_count(),
-			pos_count = tv->get_mean() * count, // TODO correct when mean is fixed
-			binom = binomial_coefficient<double>(count, pos_count),
-			prior = prior_estimate(model),
-			weight = prior * (count+1) * binom;
-
-		ure_logger().fine() << "MixtureModel::operator() count = " << count
-		                    << ", pos_count = " << pos_count
-		                    << ", binom = " << binom
-		                    << ", (count+1) * binom = " << (count+1) * binom
-		                    << ", prior_estimate = " << prior
-		                    << ", weight = " << weight;
-
-		weights.push_back(weight);
+		tvs.push_back(model->getTruthValue());
+		weights.push_back(prior_estimate(model));
 	}
 	return weighted_average(tvs, weights);
 }

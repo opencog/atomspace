@@ -71,6 +71,8 @@ public:
 	             double compressiveness=0.0);
 
 	/**
+	 * TODO: correct comment. Remove the choose shenanigan.
+	 *
 	 * Calculate the TV of the mixture model.
 	 *
 	 * According to Universal Operator Induction, assuming complete
