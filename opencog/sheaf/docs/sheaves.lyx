@@ -89,7 +89,7 @@ figs-within-sections
 \begin_body
 
 \begin_layout Title
-Graphical Sheaves
+Graph Quotients: A Topological Approach to Graphs
 \end_layout
 
 \begin_layout Author
@@ -97,12 +97,12 @@ Linas Vepstas
 \end_layout
 
 \begin_layout Date
-27 October 2017
+30 October 2017
 \end_layout
 
 \begin_layout Abstract
-An examination of a certain method for extracting structure from graphs,
- in a fashion resembling sheaves.
+This document develops some general concepts useful for extracting knowledge
+ embedded in graphs and similar large cause-effect-type datasets.
 \end_layout
 
 \begin_layout Section*
@@ -110,12 +110,42 @@ Intro
 \end_layout
 
 \begin_layout Standard
-This document attempts to give a precise definition to some concepts that
- I have been throwing around rather loosely, and have been slapped and zapped
- for doing so.
- Thus, it attempts to spell things out in detail, although the result reads
- a bit simplistically, and is a bit turgid.
- The goal is to be precise enough that the proverbial 
+This document presents some definitions and vocabulary for working with
+ datasets that contain complex relationships, applicable to a large variety
+ of application domains.
+ The concepts borrow from graph theory, and several other areas of mathematics.
+ The goal is to define a way of thinking about complex graphs, and how they
+ can be simplified and condensed into simpler graphs that 
+\begin_inset Quotes eld
+\end_inset
+
+concentrate
+\begin_inset Quotes erd
+\end_inset
+
+ embeded knowlege into a more managable size.
+\end_layout
+
+\begin_layout Standard
+The ideas described here are not terribly complex; they represent a kind-of
+ 
+\begin_inset Quotes eld
+\end_inset
+
+folk knowledge
+\begin_inset Quotes erd
+\end_inset
+
+ generally known to a number of pratitioners.
+ However, I am not currently aware of any kind of presentation of this knowledge
+, either in review/summary form, or as a fully articulated text.
+ There are some texts that discuss these ideas, but they tend to occur primarily
+ in highly abstract mathematical texts, outside of the mainstream computer-scien
+ce and data-analysis domain.
+ Thus, this document tries to provide an introduction to these concepts
+ in a plain-spoken language.
+ The hope is to be precise enough that there will be few complaints from
+ the mathematically rigorous-minded, yet simple enough that 
 \begin_inset Quotes eld
 \end_inset
 
@@ -127,44 +157,111 @@ anyone
 \end_layout
 
 \begin_layout Standard
-I had hoped that what I describe here had, in fact, been previously described
- by others, written down and available, even in some textbook somewhere,
- because its simply not that hard.
- However, after several different confused and slightly acrimonious conversation
-s, it appears that this is not the case.
- Thus, I have to wade in and do yet more work myself.
- As if there's not enough.
- 
+Some examples will be provided, primarily drawn from linguistics.
+ However, the concepts are generally applicable, and should prove useful
+ for analyzing any kind of dataset with complex and hidden cause-and-effect
+ relationships.
+ This includes genomic and proteomic data, social-graph data, and even such
+ gneric domains as determining the effectiveness of educational curricula
+ or analyzing the narratives of books and movies.
 \end_layout
 
 \begin_layout Standard
-The thing being spelled out is a kind of 
+These pebnultimate serves as a general example.
+ When teaching students, one never teaches advanced topics until foundations
+ are laid.
+ Yet many students struggle.
+ Given raw data on a large sample of students, and the curricula they were
+ subjected to, can one discern sequences and dependencies of cause-and-effect
+ in this data? Cam one find the most effective curriculum to teach, that
+ advances the greatest number of students? Can one discover different classes
+ of students, some who respond better to one style than another? My beleif
+ is that these questions can not only be answered, but that the framework
+ described here can be used to uncover this structure.
+\end_layout
+
+\begin_layout Standard
+The approach is 
 \begin_inset Quotes eld
 \end_inset
 
-sheaf theory for graphs
+highly mathematical
 \begin_inset Quotes erd
 \end_inset
 
-, except that the structures being explored are not exactly graphs in the
- canonical sense of graph theory, nor are they quite sheaves in the customary
- sense, even though they obey the axioms of sheaf theory.
- At any rate, customary sheaf theory carries with it a huge amount of abstruse
- and abstract baggage almost all of which is simply not required for the
- envisioned application.
+, in that most of this document is devoted to defining certain mathematical
+ structures that can be applied to these problems.
+ The mathematics is inspired by and draws upon concepts from algebraic topology,
+ but, for the most part, tries to avoid the difficult abstractions.
+ The devices that are sketched are frameworks (for the most part) and not
+ algorithms.
+ The hope is that you can 
+\begin_inset Quotes eld
+\end_inset
+
+pick your own algorithm
+\begin_inset Quotes erd
+\end_inset
+
+ – apply your favorite technique and style, neural nets, whatever, as you
+ wish, to obtain results.
+ The goal is to provide a way of talking about, thinking about and presenting
+ data so that the important knowledge contained in it is captured and described,
+ boiled down to a managable, workable state from a large raw dump of data.
 \end_layout
 
 \begin_layout Standard
-The envisioned application is the use of machine learning to study natural
- language.
- Due to the nature of natural language, the topic inherently touches on
- other interesting areas of mathematics, including parsing, type theory
- and category theory.
- But this all comes later on, after the basics are set up.
+Currently, the ideas described here are employed in a machine-learning project
+ that attempts to extract the structure of natural language in an unsupervised
+ way.
+ Thus, the primary, detailed examples will come from the natural language
+ domain.
+ The theory should be far more general than that.
 \end_layout
 
 \begin_layout Standard
-We begin first by giving a provisional definition for a section, and some
+This document resides in, accompanies source code that implements the ideas
+ here.
+ Specifically, it is in 
+\begin_inset CommandInset href
+LatexCommand href
+name "https://github.com/opencog/atomspace/tree/master/opencog/sheaf"
+target "https://github.com/opencog/atomspace/tree/master/opencog/sheaf"
+
+\end_inset
+
+ and it spills over into other files, such as 
+\begin_inset CommandInset href
+LatexCommand href
+name "https://github.com/opencog/opencog/blob/master/ opencog/nlp/learn/scm/gram-class.scm"
+target "https://github.com/opencog/opencog/blob/master/opencog/nlp/learn/scm/gram-class.scm"
+
+\end_inset
+
+ This code is in active development, and is likely to have changed by a
+ lot since this was written.
+ This document is 
+\emph on
+not
+\emph default
+ intended to describe the code; rather, it is meant to describe the general
+ underlying concepts.
+\end_layout
+
+\begin_layout Standard
+For the mathematically inclined, please be aware that the concepts described
+ here touch on the tiniest tips of some very deep mathematical icebergs,
+ specifically in parsing, type theory and category theory.
+ I have no hope of providing the needed background, as these fields are
+ sophisticated and immense.
+ The reader is encouraged to study these on thier own, especially as they
+ are applied in computer science and linguistics.
+ Ther are many good texts on these topics.
+\end_layout
+
+\begin_layout Standard
+The first section describes ...
+ We begin first by giving a provisional definition for a section, and some
  motivation for that definition.
  Next, a definition of sheaves, not in generality, but limited to the current
  context.
@@ -241,25 +338,39 @@ must
 \begin_layout Standard
 For directed graphs, the vertex ordering in the edge matters.
  For undirected graphs, it does not.
- The subsequent will assume both directed and undirected edges, as the occasion
- and the need fits.
+ The subsequent will mostly leave this distinction unspecified, and allow
+ either (or both) directed and undirected edges, as the occasion and the
+ need fits.
+ Distinguishing between directed and undirected graphs is not important,
+ at this point.
  In most of what follows, it will usually be assumed that there are no edges
  with 
 \begin_inset Formula $v_{1}=v_{2}$
 \end_inset
 
- and that there is at most one edge connecting any given pair of vertexes.
- This is primarily for general convenience and simplicity of discussion,
- rather than a fundamental limitation.
+ (loops that copnnect back to themselves) and that there is at most one
+ edge connecting any given pair of vertexes.
+ These assumptions are being made to simplify the discussion; they are not
+ meant to be a fundamental limitation.
  It just makes things easier to talk about and less cluttered at the start.
- The primary application does not require either construct, although the
- extension to allow all this is straight-forward.
- Similar remarks apply to graphs with labeled vertexes or edges.
- A notion of types will be introduced later on.
- The intended application of this machinery will be graphs whose edges and
- vertexes carry numerical weights on them, but these do not need to be talked
- about at this stage.
- Just keep in mind that these will appear out of thin air, later on.
+ The primary application does not require either construct, and it is straight-f
+orward to add extensions to provide these features.
+ Similar remarks apply to graphs with labeled vertexes or edges (such as
+ 
+\begin_inset Quotes eld
+\end_inset
+
+colored
+\begin_inset Quotes erd
+\end_inset
+
+ edges, vertexes or edges with numerical weights on them, 
+\emph on
+etc
+\emph default
+).
+ Just keep in mind that such additional markup may appear out of thin air,
+ later on.
 \end_layout
 
 \begin_layout Standard
@@ -315,7 +426,8 @@ It should be clear that, given a graph
 \begin_inset Formula $G$
 \end_inset
 
-, one can equivalently describe it as a set of seeds.
+, one can equivalently describe it as a set of seeds (one simply lists all
+ of the vertexes, and all of the edges attached to each vertex).
  The converse is not 
 \begin_inset Quotes eld
 \end_inset
@@ -633,8 +745,8 @@ connected graph
 \end_inset
 
 , but we cannot fairly call it that because the seeds and sections were
- defined in such a way that they are not graphs in and of themselves; they
- only become graphs when they are fully connected.
+ defined in such a way that they are not graphs; they only become graphs
+ when they are fully connected.
  Never-the-less, it is fairly safe and straight-forward to apply common
  concepts from graph-theory.
  Sections are almost like graphs, but not quite.
@@ -732,6 +844,44 @@ This motivates a different way of looking at seeds: they can be visualized
  the types of type theory; that is, they are bona-fide types.
 \end_layout
 
+\begin_layout Standard
+\begin_inset Float figure
+placement h
+wide false
+sideways false
+status open
+
+\begin_layout Plain Layout
+\begin_inset Caption Standard
+
+\begin_layout Plain Layout
+Joining two connectors to form a link
+\end_layout
+
+\end_inset
+
+
+\end_layout
+
+\begin_layout Plain Layout
+\begin_inset Graphics
+	filename puzzle.eps
+	width 40col%
+
+\end_inset
+
+
+\end_layout
+
+\begin_layout Plain Layout
+
+\end_layout
+
+\end_inset
+
+
+\end_layout
+
 \begin_layout Subsection*
 Why sections?
 \end_layout
@@ -790,9 +940,9 @@ A connected section behaves very much like a seed: just as two seeds can
  be linked together to form a connected section, so also two connected sections
  can be linked together to form a larger connected section.
  Both have a body, with spines sticking out.
- The building blocks, and the things built from them have the same properties,
- lie in the same class.
- Thus, one has a system that is 
+ The building blocks (seeds), and the things built from them (sections)
+ have the same properties, lie in the same class.
+ Thus, one has a system that is naturally 
 \begin_inset Quotes eld
 \end_inset
 
@@ -801,6 +951,17 @@ scalable
 \end_inset
 
 , and allows notions of similarity and scale invariance to be explored.
+ There is no need to introduce additional concepts and constructions.
+\end_layout
+
+\begin_layout Itemize
+Given two seeds, one can always either join them (because they connect)
+ or it is impossible to connect them.
+ Either way, one knows immediately.
+ Graphs, in general, cannot be joined, unless one specifies a subgraph in
+ each that matches up.
+ Locating subgraphs in a graph is computationally expensive; verifying subgraph
+ isopmorphism is computationally expensive.
 \end_layout
 
 \begin_layout Itemize
@@ -849,22 +1010,203 @@ The analogy between graphs and topology, specifically, between open sets
 If we stop here, not much is accomplished, other than to define a somewhat
  idiosyncratic view of graph theory.
  But that is not the case; the concept of seeds and sections are needed
- to construct a concept of sheaves, which is being pursued so as to provide
- a tool to study natural language and other systems.
- 
+ to pursue more complex constructions.
+ They provide a tool to study natural language and other systems.
 \end_layout
 
-\begin_layout Section*
-Clustering
+\begin_layout Subsection*
+Similar concepts
 \end_layout
 
 \begin_layout Standard
-The intended interpretation of the graph is that it represents a large amount
- of collected raw data.
- From this data, one wants to extract commonalities and recurring patterns.
- Doing so, one arrives at the need to perform a kind of quotienting operation
- on the graph.
+Linguistics literature sometimes describes similar concepts using a lambda-calcu
+lus notation.
+ For example, one can sort-of envision the expression 
+\begin_inset Formula $\lambda M.xyz$
+\end_inset
+
+ as a seed with the germ 
+\begin_inset Formula $M$
+\end_inset
+
+ and with connectors 
+\begin_inset Formula $x$
+\end_inset
+
+, 
+\begin_inset Formula $y$
+\end_inset
+
+ and 
+\begin_inset Formula $z$
+\end_inset
+
+.
+ This notation has been used to express the concept of a seed, as described
+ above (see Poon & Domingos, for example).
+ The problem with this notation is that, properly speaking, lambda calculus
+ is a system for generating and working with strings, not with graphs, and
+ lambdas are designed to perform substitution (beta-reduction), and not
+ for connecting things.
  
+\end_layout
+
+\begin_layout Standard
+That is, lambda terms are alwyas strings of symbols, and the variables bound
+ by the lambda are used to perform substitutions.
+ To illustrate the issue, suppose that 
+\begin_inset Formula $M$
+\end_inset
+
+ above is 
+\begin_inset Formula $axbyczd$
+\end_inset
+
+ and suppose that 
+\begin_inset Formula $\lambda N.w=ewf$
+\end_inset
+
+.
+ Can these be 
+\begin_inset Quotes eld
+\end_inset
+
+connected
+\begin_inset Quotes erd
+\end_inset
+
+ together, linked together like seeds? No: if one tried to 
+\begin_inset Quotes eld
+\end_inset
+
+connect
+\begin_inset Quotes erd
+\end_inset
+
+ 
+\begin_inset Formula $N$
+\end_inset
+
+ to 
+\begin_inset Formula $z,$
+\end_inset
+
+ one has the beta-reduction 
+\begin_inset Formula $(\lambda M.xyz)\lambda N.w\rightarrow\lambda axbycewfd.xyw$
+\end_inset
+
+.
+ There is no way to express some symmetric verision of this, because 
+\begin_inset Formula $(\lambda N.w)\lambda M.xyz\rightarrow\lambda eaxbyczdf.xyz$
+\end_inset
+
+ which is hardly the same.
+ Now, of course, lambda calculus has great expressive power, and one could
+ invent a way encoding graph theory, and/or seeds, in lambda calculus; however,
+ doing so would result in verbose and complex system.
+ Its easier to work with graphs directly, and just sleep peacefully with
+ the knowledge that one could encode them with lambdas, if that is what
+ your life depended on.
+\end_layout
+
+\begin_layout Standard
+Note also that there have been extensions of the ideas of lambda calculus
+ to graphs; however, those extensions cling to the fundamental concept of
+ beta reduction.
+ Thus, one works with graphs that have variables in them.
+ Given a variable, one plugs in a graph in the place of that variable.
+ The OpenCog 
+\begin_inset CommandInset href
+LatexCommand href
+name "PutLink"
+target "http://wiki.opencog.org/w/PutLink"
+
+\end_inset
+
+ works in exactly this way.
+ The beta-reduction is fundamentall not symmetrical: putting A into B is
+ not the same as putting B into A.
+ The concept of 
+\begin_inset Quotes eld
+\end_inset
+
+connecting
+\begin_inset Quotes erd
+\end_inset
+
+ in a symmetric way doesn't arise.
+\end_layout
+
+\begin_layout Section*
+Clustering and Quotienting
+\end_layout
+
+\begin_layout Standard
+The intended interpretation for the graphs discussed in this document is
+ that they represent or are the result of capturing a large amount of collected
+ raw data.
+ From this data, one wants to extract commonalities and recurring patterns.
+ 
+\end_layout
+
+\begin_layout Standard
+The core assumption being made in this section is that, when two local neighborh
+oods of a graph are similar or identical, then this reflects some important
+ similarity in the raw data.
+ That is, similarity of subgraphs is the be-all and end-all of extracting
+ knowledge from the larger graph, and that the primary goal is to search
+ for, mine, such similar subgraphs.
+\end_layout
+
+\begin_layout Standard
+Exactly what it means to be 
+\begin_inset Quotes eld
+\end_inset
+
+similar
+\begin_inset Quotes erd
+\end_inset
+
+ is not defined here; this is up to the user.
+ Similarity could mean subgraph isomorphism, or subgraph homomorphism, or
+ something else: some sort of 
+\begin_inset Quotes eld
+\end_inset
+
+close-enough
+\begin_inset Quotes erd
+\end_inset
+
+ similarity property involving the shape of the graph, the connections made,
+ the colors, directions, labels and weights on the vertexes or edges.
+ The precise details do not matter.
+ However, it is assumed that the user can provide some algorithm for finding
+ such similarities, and that the similarities can be understood as a kind-of
+ 
+\begin_inset Quotes eld
+\end_inset
+
+equivalence relation
+\begin_inset Quotes erd
+\end_inset
+
+.
+\end_layout
+
+\begin_layout Standard
+If one has an equivalence relation, then the obvious desire, he obvious
+ urge is to attempt to perform quotienting on the graph.
+ That is, to create a new graph, where the 
+\begin_inset Quotes eld
+\end_inset
+
+equal
+\begin_inset Quotes erd
+\end_inset
+
+ parts are merged into one.
+ The rest of this document describes how this can be done, and what sort
+ of notation to use to do this.
 \end_layout
 
 \begin_layout Standard
@@ -900,6 +1242,105 @@ similar enough
  Whenever one has an equivalence relation, one can apply it to obtain a
  quotient, of grouping together into an identity all things that are the
  same.
+\end_layout
+
+\begin_layout Standard
+\begin_inset Float figure
+placement h
+wide false
+sideways false
+status collapsed
+
+\begin_layout Plain Layout
+\begin_inset Caption Standard
+
+\begin_layout Plain Layout
+Creating a quotient graph
+\end_layout
+
+\end_inset
+
+
+\begin_inset Graphics
+	filename similar.eps
+	width 60col%
+
+\end_inset
+
+
+\end_layout
+
+\begin_layout Plain Layout
+The vertexes 
+\begin_inset Quotes eld
+\end_inset
+
+walked
+\begin_inset Quotes erd
+\end_inset
+
+, 
+\begin_inset Quotes eld
+\end_inset
+
+ran
+\begin_inset Quotes erd
+\end_inset
+
+ and 
+\begin_inset Quotes eld
+\end_inset
+
+drove
+\begin_inset Quotes erd
+\end_inset
+
+ can be considered similar, because they have the same neighbors.
+ The upper graph can be simplified by computing a quotient, shown in the
+ lower diagram: the quotient merges these three similar vertexes into one.
+ The result is not only a simpler graph, but also some vague sense that
+ 
+\begin_inset Quotes eld
+\end_inset
+
+walked
+\begin_inset Quotes erd
+\end_inset
+
+, 
+\begin_inset Quotes eld
+\end_inset
+
+ran
+\begin_inset Quotes erd
+\end_inset
+
+ and 
+\begin_inset Quotes eld
+\end_inset
+
+drove
+\begin_inset Quotes erd
+\end_inset
+
+ are synonymous in some way.
+\end_layout
+
+\begin_layout Plain Layout
+\begin_inset CommandInset line
+LatexCommand rule
+offset "0.5ex"
+width "100col%"
+height "1pt"
+
+\end_inset
+
+
+\end_layout
+
+\end_inset
+
+
 \end_layout
 
 \begin_layout Standard
@@ -1359,8 +1800,7 @@ stalk
 The above definition renders the stalk as being essentially the same thing
  as a seed, except that now, one is working with sets of vertices, and the
  links between them.
- One can think of this structure as a kind of hypergraph, but that view
- does not seem to be particularly productive.
+ 
 \end_layout
 
 \begin_layout Subsection*
@@ -1509,6 +1949,15 @@ why clustering?
 ce relation is available, and if it is employed wisely, then one can construct
  quotient graphs that encode important relationships of the original, raw
  graph.
+\end_layout
+
+\begin_layout Subsection*
+Similar concepts
+\end_layout
+
+\begin_layout Standard
+One can think of a stalk as a kind of hypergraph, but this view does not
+ seem to be particularly productive.
 \end_layout
 
 \begin_layout Section*
@@ -1679,7 +2128,7 @@ Three stalks and two typed links
 
 \begin_inset Graphics
 	filename grammar.eps
-	width 45col%
+	width 40col%
 
 \end_inset
 
@@ -2338,13 +2787,13 @@ One way to answer these last two questions would be to apply the parse algorithm
  that there remain one or more genes, yet undetermined, that also play a
  role in the trait.
  To find these, one might examine the stalks that might have been required
- to complete the parse: these will give a specific type of gene, or style
- of interaction to search for.
+ to complete the parse: these will give hints as to the specific type of
+ gene, or style of interaction to search for.
 \end_layout
 
 \begin_layout Standard
 Thus, parsing new gene expressions and pathways offers a way of discovering
- whether they resemble existing, known systems, or whther they are truly
+ whether they resemble existing, known pathways, or whether they are truly
  novel.
  If they seem novel, parsig also gives strong hints as to where to look
  for any missing pieces or interactions.
@@ -2571,7 +3020,7 @@ cat
 
  and the myriad of connectors on them.
  The flattened seeds cannot lead to grammatical linkages, as they mash together
- into noe the connectors for different parst of speech.
+ into one the connectors for different parts of speech.
 \end_layout
 
 \begin_layout Plain Layout
