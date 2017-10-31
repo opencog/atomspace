@@ -78,6 +78,10 @@ TruthValuePtr MixtureModel::operator()()
 TruthValuePtr MixtureModel::weighted_average(const std::vector<TruthValuePtr>& tvs,
                                              const std::vector<double>& weights) const
 {
+	// Don't bother mixing if there's only one TV
+	if (tvs.size () == 1)
+		return tvs[0];
+
 	// Normalize the weights
 	double total = boost::accumulate(weights, 0.0);
 	std::vector<double> norm_weights;

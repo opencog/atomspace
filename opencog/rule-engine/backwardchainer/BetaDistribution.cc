@@ -29,6 +29,7 @@ namespace opencog {
 
 BetaDistribution::BetaDistribution(const TruthValuePtr& tv,
                                    double p_alpha, double p_beta)
+	// TODO should be replaced by tv->get_mode() once implemented
 	: BetaDistribution(tv->get_mean() * tv->get_count(),
 	                   tv->get_count(), p_alpha, p_beta) {}
 
@@ -77,9 +78,21 @@ TruthValuePtr mk_stv(double mean, double variance,
 	// alpha == prior_alpha + pos_count
 	// beta == prior_beta + count - pos_count
 	double count = alpha + beta - prior_alpha - prior_beta,
-		confidence = count / (count + SimpleTruthValue::DEFAULT_K);
+		confidence = count / (count + SimpleTruthValue::DEFAULT_K),
+		mode = 1;               // default strength if confidence is null
 
-	return SimpleTruthValue::createTV(mean, confidence);
+	if (1 < alpha and 1 < beta)
+		mode = boost::math::mode(beta_distribution<double>(alpha, beta));
+
+	if (alpha < 1 and 1 <= beta)
+		mode = 0;
+
+	if (beta < 1 and 1 <= alpha)
+		mode = 1;
+
+	// The strength is in fact the mode, this should be corrected once
+	// TruthValue is reworked
+	return SimpleTruthValue::createTV(mode, confidence);
 }
 
 } // ~namespace opencog
