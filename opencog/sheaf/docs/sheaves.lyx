@@ -97,12 +97,25 @@ Linas Vepstas
 \end_layout
 
 \begin_layout Date
-30 October 2017
+31 October 2017
 \end_layout
 
 \begin_layout Abstract
 This document develops some general concepts useful for extracting knowledge
- embedded in graphs and similar large cause-effect-type datasets.
+ embedded in large graphs and similar cause-effect-type datasets.
+ It attempts to make almost no underlying assumptions, other than that the
+ data can be presented in terms of pair-wise relationships between objects/event
+s.
+ The resulting extracted structures or 
+\begin_inset Quotes eld
+\end_inset
+
+patterns
+\begin_inset Quotes erd
+\end_inset
+
+ are manifestly symbolic in nature, as they capture and encode the graph
+ structure of the dataset in terms of a (generative) grammar.
 \end_layout
 
 \begin_layout Section*
@@ -123,7 +136,7 @@ concentrate
 \begin_inset Quotes erd
 \end_inset
 
- embeded knowlege into a more managable size.
+ embedded knowledge into a more manageable size.
 \end_layout
 
 \begin_layout Standard
@@ -136,7 +149,7 @@ folk knowledge
 \begin_inset Quotes erd
 \end_inset
 
- generally known to a number of pratitioners.
+ generally known to a number of practitioners.
  However, I am not currently aware of any kind of presentation of this knowledge
 , either in review/summary form, or as a fully articulated text.
  There are some texts that discuss these ideas, but they tend to occur primarily
@@ -162,12 +175,12 @@ Some examples will be provided, primarily drawn from linguistics.
  for analyzing any kind of dataset with complex and hidden cause-and-effect
  relationships.
  This includes genomic and proteomic data, social-graph data, and even such
- gneric domains as determining the effectiveness of educational curricula
+ generic domains as determining the effectiveness of educational curricula
  or analyzing the narratives of books and movies.
 \end_layout
 
 \begin_layout Standard
-These pebnultimate serves as a general example.
+The penultimate can serve as a general example.
  When teaching students, one never teaches advanced topics until foundations
  are laid.
  Yet many students struggle.
@@ -207,7 +220,7 @@ pick your own algorithm
  wish, to obtain results.
  The goal is to provide a way of talking about, thinking about and presenting
  data so that the important knowledge contained in it is captured and described,
- boiled down to a managable, workable state from a large raw dump of data.
+ boiled down to a manageable, workable state from a large raw dump of data.
 \end_layout
 
 \begin_layout Standard
@@ -254,18 +267,51 @@ For the mathematically inclined, please be aware that the concepts described
  specifically in parsing, type theory and category theory.
  I have no hope of providing the needed background, as these fields are
  sophisticated and immense.
- The reader is encouraged to study these on thier own, especially as they
+ The reader is encouraged to study these on their own, especially as they
  are applied in computer science and linguistics.
- Ther are many good texts on these topics.
+ There are many good texts on these topics.
 \end_layout
 
 \begin_layout Standard
-The first section describes ...
- We begin first by giving a provisional definition for a section, and some
- motivation for that definition.
- Next, a definition of sheaves, not in generality, but limited to the current
- context.
- 
+The first part provides a definition of a 
+\begin_inset Quotes eld
+\end_inset
+
+section
+\begin_inset Quotes erd
+\end_inset
+
+ of a graph.
+ A section is a lot like a subgraph, except that it explicitly indicates
+ which edges were cut to form the subgraph.
+ The next part makes use of this concept of 
+\begin_inset Quotes eld
+\end_inset
+
+sections
+\begin_inset Quotes erd
+\end_inset
+
+ to show how they can be used to talk about and understand pattern-mining,
+ clustering and quotienting.
+ The next part indicates how such clusters can be understood to be 
+\begin_inset Quotes eld
+\end_inset
+
+types
+\begin_inset Quotes erd
+\end_inset
+
+, in the formal sense of mathematical type theory.
+ Next follows a brief review of the concept of parsing, as it applies to
+ this context.
+ The ability to parse is what motivates the data discovery to begin with:
+ after extracting patterns from a dataset, parsing is how those patterns
+ can be re-assembled.
+ An important part of pattern mining is the ability to distinguish polymorphic
+ behavior.
+ The final part shows how the system as a whole can be understood to be
+ a kind of a sheaf, borrowing a concept from a different branch of mathematics.
 \end_layout
 
 \begin_layout Section*
@@ -348,8 +394,8 @@ For directed graphs, the vertex ordering in the edge matters.
 \begin_inset Formula $v_{1}=v_{2}$
 \end_inset
 
- (loops that copnnect back to themselves) and that there is at most one
- edge connecting any given pair of vertexes.
+ (loops that connect back to themselves) and that there is at most one edge
+ connecting any given pair of vertexes.
  These assumptions are being made to simplify the discussion; they are not
  meant to be a fundamental limitation.
  It just makes things easier to talk about and less cluttered at the start.
@@ -961,7 +1007,7 @@ Given two seeds, one can always either join them (because they connect)
  Graphs, in general, cannot be joined, unless one specifies a subgraph in
  each that matches up.
  Locating subgraphs in a graph is computationally expensive; verifying subgraph
- isopmorphism is computationally expensive.
+ isomorphism is computationally expensive.
 \end_layout
 
 \begin_layout Itemize
@@ -1052,7 +1098,7 @@ lus notation.
 \end_layout
 
 \begin_layout Standard
-That is, lambda terms are alwyas strings of symbols, and the variables bound
+That is, lambda terms are always strings of symbols, and the variables bound
  by the lambda are used to perform substitutions.
  To illustrate the issue, suppose that 
 \begin_inset Formula $M$
@@ -1096,7 +1142,7 @@ connect
 \end_inset
 
 .
- There is no way to express some symmetric verision of this, because 
+ There is no way to express some symmetric version of this, because 
 \begin_inset Formula $(\lambda N.w)\lambda M.xyz\rightarrow\lambda eaxbyczdf.xyz$
 \end_inset
 
@@ -1124,7 +1170,7 @@ target "http://wiki.opencog.org/w/PutLink"
 \end_inset
 
  works in exactly this way.
- The beta-reduction is fundamentall not symmetrical: putting A into B is
+ The beta-reduction is fundamentally not symmetrical: putting A into B is
  not the same as putting B into A.
  The concept of 
 \begin_inset Quotes eld
@@ -2249,6 +2295,63 @@ These examples suggest that the use of types is little more than a convenient
  
 \end_layout
 
+\begin_layout Subsection*
+What kind of information do types carry?
+\end_layout
+
+\begin_layout Standard
+The above example oversimplifies the notion of types, presenting them as
+ a purely syntactic device.
+ In practice, types also carry semantic information.
+ The amount of semantic information varies inversely to the broadness of
+ the type.
+ In language, coarse-grained types (noun, verb) carry almost no semantic
+ information.
+ Fine-grained types carry much more: a 
+\begin_inset Quotes eld
+\end_inset
+
+transitive verb taking a particle and an indirect object
+\begin_inset Quotes erd
+\end_inset
+
+ is quite specific: it must be some action that can be performed on some
+ object using some tool in some fashion.
+ An example would be 
+\begin_inset Quotes eld
+\end_inset
+
+John sang a song to Mary on his guitar
+\begin_inset Quotes erd
+\end_inset
+
+: there is a what, who and and how yoked together in the verb 
+\begin_inset Quotes eld
+\end_inset
+
+sang
+\begin_inset Quotes erd
+\end_inset
+
+.
+ The more fine-grained the classification, the more semantic content is
+ contained in it.
+\end_layout
+
+\begin_layout Standard
+This suggests that the proper approach is hierarchical: a fine-grained clusterin
+g, that captures semantic content, followed by a coarser clustering that
+ erases much of this, leaving behind only 
+\begin_inset Quotes eld
+\end_inset
+
+syntactic
+\begin_inset Quotes erd
+\end_inset
+
+ content.
+\end_layout
+
 \begin_layout Section*
 Parsing
 \end_layout
@@ -2418,7 +2521,7 @@ Note the minor change in notation: the colon is used as a separator, with
 \begin_inset Formula $v_{1}$
 \end_inset
 
- carry the lable 
+ carry the label 
 \begin_inset Quotes eld
 \end_inset
 
@@ -2536,8 +2639,8 @@ ran: {(ran, dog-)}
 
 \begin_layout Standard
 This notation is verbose, and slightly confusing.
- Repeating the germ as the first vertex in every connector is entirely un-necces
-sary.
+ Repeating the germ as the first vertex in every connector is entirely unnecessa
+ry.
  Write instead:
 \begin_inset Newline newline
 \end_inset
@@ -2600,7 +2703,7 @@ ran: { dog- }
 \end_layout
 
 \begin_layout Standard
-The set-builder notation is un-needed, and perhaps slightly confusing.
+The set-builder notation is unneeded, and perhaps slightly confusing.
  In particular, the word 
 \begin_inset Quotes eld
 \end_inset
@@ -2691,7 +2794,7 @@ Provide a dictionary
 \begin_inset Formula $D$
 \end_inset
 
- consisting of a set of un-connected stalks.
+ consisting of a set of unconnected stalks.
  
 \end_layout
 
@@ -2774,7 +2877,7 @@ The benefit of parsing for the analysis of the structure of natural language
 .
  Now imagine a process where a certain specific set of genes are associated
  with some particular trait or reaction.
- Is this a complete set? Can it be said that thier interactions are fully
+ Is this a complete set? Can it be said that their interactions are fully
  understood?
 \end_layout
 
@@ -2795,7 +2898,7 @@ One way to answer these last two questions would be to apply the parse algorithm
 Thus, parsing new gene expressions and pathways offers a way of discovering
  whether they resemble existing, known pathways, or whether they are truly
  novel.
- If they seem novel, parsig also gives strong hints as to where to look
+ If they seem novel, parsing also gives strong hints as to where to look
  for any missing pieces or interactions.
 \end_layout
 
@@ -2806,7 +2909,7 @@ Is this really parsing?
 \begin_layout Standard
 The above description of parsing is sufficiently different from standard
  textbook expositions of natural language parsing that some form of an apology
- neds to be written.
+ needs to be written.
  
 \end_layout
 
@@ -2830,9 +2933,9 @@ target "https://en.wikipedia.org/wiki/Pregroup_grammar"
 ); the primary differences being notational.
  The left-right directional link-grammar connectors correspond to the left
  and right adjoints in a pregroup.
- A link-grammar disjunct (that is, a seed) coresponds to a sequence of types
- in a pregroup grammar.
- The correspondance is more-or-less direct, except that link grammar is
+ A link-grammar disjunct (that is, a seed) corresponds to a sequence of
+ types in a pregroup grammar.
+ The correspondence is more-or-less direct, except that link grammar is
  notational simpler to work with.
 \end_layout
 
@@ -2857,7 +2960,7 @@ The final step is to realize that most introductory textbooks describe parsers
  such parsers are sufficient to work with HPSG.
  The priamry issue with HPSG and context-free language parsers is that they
  obscure the notion of linking together pieces; this is one reason why dependenc
-y grammars are oftan favored: they make clear that it is the linkage between
+y grammars are often favored: they make clear that it is the linkage between
  various words that has a primary psychological role in the human understanding
  of language.
  It should be noted that many researchers in the psychology of linguistics
@@ -2873,9 +2976,9 @@ Polymorphism
 \begin_layout Standard
 Any given vertex may participate in two or more seeds, independently from
  one-another.
- It is this statement that really starts setting apart the system described
- here from ordinary graph theory.
- It is best illustrated by a practical example.
+ It is this statement that further sharpens the departure from naive graph
+ theory.
+ This is best illustrated by a practical example.
 \end_layout
 
 \begin_layout Standard
@@ -2909,7 +3012,7 @@ fly
  occurs as a noun in one sentence, and a verb in the other.
  Suppose that the equivalence relation, described in the clustering section,
  also has the power to discern that this one word should really be split
- into two namely 
+ into two, namely 
 \begin_inset Formula $fly_{\mbox{noun}}$
 \end_inset
 
@@ -2955,10 +3058,6 @@ sideways false
 status open
 
 \begin_layout Plain Layout
-
-\end_layout
-
-\begin_layout Plain Layout
 \begin_inset Caption Standard
 
 \begin_layout Plain Layout
@@ -3000,8 +3099,8 @@ fly
  It is split into two parts, the first, a noun, classed with other nouns,
  showing labeled connectors to determiners, adjectives, and a connector
  showing that nouns can act as the subject of a verb.
- The second class shows labelled connectors to subjects and objects, as
- is appropriate for transitive verbs.
+ The second class shows labeled connectors to subjects and objects, as is
+ appropriate for transitive verbs.
  Underneath are the flattened raw seeds, showing the words 
 \begin_inset Quotes eld
 \end_inset
@@ -3044,17 +3143,716 @@ height "1pt"
 
 \end_layout
 
+\begin_layout Standard
+The point of the figure is to illustrate that, although the 
+\begin_inset Quotes eld
+\end_inset
+
+base graph
+\begin_inset Quotes erd
+\end_inset
+
+ may not distinguish one variant of a vertex from another, it is important
+ to discover, extract and represent this difference.
+ The concept of 
+\begin_inset Quotes eld
+\end_inset
+
+polymorphism
+\begin_inset Quotes erd
+\end_inset
+
+ applies, because the base vertex behaves as one of several distinct types
+ in practice.
+ There are several ways the above diagram can be represented textually.
+ As before, the link-grammar-style notation is used, as it is fairly clear
+ and direct.
+ One representation would be to expose the polymorphism only in the connectors,
+ and not in the base vertex label:
+\end_layout
+
+\begin_layout Standard
+\begin_inset VSpace defskip
+\end_inset
+
+
+\end_layout
+
+\begin_layout Standard
+\begin_inset space \qquad{}
+\end_inset
+
+
+\begin_inset Box Frameless
+position "t"
+hor_pos "c"
+has_inner_box 1
+inner_pos "t"
+use_parbox 0
+use_makebox 0
+width "100col%"
+special "none"
+height "1in"
+height_special "totalheight"
+thickness "0.4pt"
+separation "3pt"
+shadowsize "4pt"
+framecolor "black"
+backgroundcolor "none"
+status collapsed
+
+\begin_layout Plain Layout
+
+\family typewriter
+fly: (DET- & ADJ- & SUBJ+) or (SUBJ- & OBJ+);
+\end_layout
+
+\end_inset
+
+ 
+\end_layout
+
+\begin_layout Standard
+\begin_inset VSpace defskip
+\end_inset
+
+
+\end_layout
+
+\begin_layout Standard
+A different possibility is to promptly split the vertex label into two,
+ and ignore the subscript during the parsing stage:
+\end_layout
+
+\begin_layout Standard
+\begin_inset VSpace defskip
+\end_inset
+
+
+\end_layout
+
+\begin_layout Standard
+\begin_inset space \qquad{}
+\end_inset
+
+
+\begin_inset Box Frameless
+position "t"
+hor_pos "c"
+has_inner_box 1
+inner_pos "t"
+use_parbox 0
+use_makebox 0
+width "100col%"
+special "none"
+height "1in"
+height_special "totalheight"
+thickness "0.4pt"
+separation "3pt"
+shadowsize "4pt"
+framecolor "black"
+backgroundcolor "none"
+status collapsed
+
+\begin_layout Plain Layout
+
+\family typewriter
+fly.noun cat: (DET- & ADJ- & SUBJ+);
+\end_layout
+
+\begin_layout Plain Layout
+
+\family typewriter
+fly.verb walk: (SUBJ- & OBJ+);
+\end_layout
+
+\end_inset
+
+ 
+\end_layout
+
+\begin_layout Standard
+\begin_inset VSpace defskip
+\end_inset
+
+
+\end_layout
+
+\begin_layout Standard
+Either way, the non-subscripted version of 
+\begin_inset Formula $fly$
+\end_inset
+
+ behaves in a polymorphic fashion.
+\end_layout
+
+\begin_layout Standard
+Note that the use of the notation 
+\begin_inset Quotes eld
+\end_inset
+
+
+\family typewriter
+or
+\family default
+
+\begin_inset Quotes erd
+\end_inset
+
+ to disjoin the possibilities denotes a choice function, and not a boolean-or.
+ That is, one can choose either one form, or the other; one cannot choose
+ both.
+ During the parse, both possibilities need to be considered, but only one
+ selected in the end.
+ This implies that at least some fragment of linear logic is at play, and
+ not boolean logic.
+ (this should be expanded upon in future drafts).
+\end_layout
+
 \begin_layout Section*
 Sheaves
 \end_layout
 
 \begin_layout Standard
-The polymorphism issue above is what really drives the system to resemble
- a sheaf, as opposed to a simpler graphical theory.
+The classification and quotienting procedures cause the structure of the
+ entire network to behave much like the mathematical concept of a 
+\begin_inset Quotes eld
+\end_inset
+
+sheaf
+\begin_inset Quotes erd
+\end_inset
+
+ studied in 
+\begin_inset Quotes eld
+\end_inset
+
+sheaf theory
+\begin_inset Quotes erd
+\end_inset
+
+.
+ This is a rather abstract branch of mathematics, most of which offers relativel
+y little insight into the problems being tackled here.
+ Thus, the presentation here is informal, and lacks in rigor.
+ The primary example is again drawn from linguistics, although examples
+ in biochemistry and other fields can be found as well.
 \end_layout
 
 \begin_layout Standard
-present the sheaf axioms
+The canonical first step in corpus linguistics is to align text around a
+ shared word or phrase:
+\begin_inset VSpace defskip
+\end_inset
+
+
+\end_layout
+
+\begin_layout Standard
+\begin_inset space \qquad{}
+\end_inset
+
+
+\begin_inset Box Frameless
+position "t"
+hor_pos "c"
+has_inner_box 1
+inner_pos "t"
+use_parbox 0
+use_makebox 0
+width "100col%"
+special "none"
+height "1in"
+height_special "totalheight"
+thickness "0.4pt"
+separation "3pt"
+shadowsize "4pt"
+framecolor "black"
+backgroundcolor "none"
+status open
+
+\begin_layout Plain Layout
+\begin_inset Tabular
+<lyxtabular version="3" rows="8" columns="2">
+<features tabularvalignment="middle">
+<column alignment="right" valignment="top">
+<column alignment="left" valignment="top">
+<row>
+<cell alignment="right" valignment="top" usebox="none">
+\begin_inset Text
+
+\begin_layout Plain Layout
+
+\end_layout
+
+\end_inset
+</cell>
+<cell alignment="left" valignment="top" usebox="none">
+\begin_inset Text
+
+\begin_layout Plain Layout
+
+\family typewriter
+fly like a butterfly
+\end_layout
+
+\end_inset
+</cell>
+</row>
+<row>
+<cell alignment="right" valignment="top" usebox="none">
+\begin_inset Text
+
+\begin_layout Plain Layout
+
+\family typewriter
+airplanes that
+\end_layout
+
+\end_inset
+</cell>
+<cell alignment="left" valignment="top" usebox="none">
+\begin_inset Text
+
+\begin_layout Plain Layout
+
+\family typewriter
+fly
+\end_layout
+
+\end_inset
+</cell>
+</row>
+<row>
+<cell alignment="right" valignment="top" usebox="none">
+\begin_inset Text
+
+\begin_layout Plain Layout
+
+\end_layout
+
+\end_inset
+</cell>
+<cell alignment="left" valignment="top" usebox="none">
+\begin_inset Text
+
+\begin_layout Plain Layout
+
+\family typewriter
+fly fishing
+\end_layout
+
+\end_inset
+</cell>
+</row>
+<row>
+<cell alignment="right" valignment="top" usebox="none">
+\begin_inset Text
+
+\begin_layout Plain Layout
+
+\end_layout
+
+\end_inset
+</cell>
+<cell alignment="left" valignment="top" usebox="none">
+\begin_inset Text
+
+\begin_layout Plain Layout
+
+\family typewriter
+fly away home
+\end_layout
+
+\end_inset
+</cell>
+</row>
+<row>
+<cell alignment="right" valignment="top" usebox="none">
+\begin_inset Text
+
+\begin_layout Plain Layout
+
+\end_layout
+
+\end_inset
+</cell>
+<cell alignment="left" valignment="top" usebox="none">
+\begin_inset Text
+
+\begin_layout Plain Layout
+
+\family typewriter
+fly ash in concrete
+\end_layout
+
+\end_inset
+</cell>
+</row>
+<row>
+<cell alignment="right" valignment="top" usebox="none">
+\begin_inset Text
+
+\begin_layout Plain Layout
+
+\family typewriter
+when sparks
+\end_layout
+
+\end_inset
+</cell>
+<cell alignment="left" valignment="top" usebox="none">
+\begin_inset Text
+
+\begin_layout Plain Layout
+
+\family typewriter
+fly
+\end_layout
+
+\end_inset
+</cell>
+</row>
+<row>
+<cell alignment="right" valignment="top" usebox="none">
+\begin_inset Text
+
+\begin_layout Plain Layout
+
+\family typewriter
+let's
+\end_layout
+
+\end_inset
+</cell>
+<cell alignment="left" valignment="top" usebox="none">
+\begin_inset Text
+
+\begin_layout Plain Layout
+
+\family typewriter
+fly a kite
+\end_layout
+
+\end_inset
+</cell>
+</row>
+<row>
+<cell alignment="right" valignment="top" usebox="none">
+\begin_inset Text
+
+\begin_layout Plain Layout
+
+\family typewriter
+learn to
+\end_layout
+
+\end_inset
+</cell>
+<cell alignment="left" valignment="top" usebox="none">
+\begin_inset Text
+
+\begin_layout Plain Layout
+
+\family typewriter
+fly helicopters
+\end_layout
+
+\end_inset
+</cell>
+</row>
+</lyxtabular>
+
+\end_inset
+
+
+\end_layout
+
+\end_inset
+
+ 
+\end_layout
+
+\begin_layout Standard
+\begin_inset VSpace defskip
+\end_inset
+
+Each word is meant to be a vertex; edges are assumed to connect the vertexes
+ together in some way.
+ In standard corpus linguistics, the edges are always taken to join together
+ neighboring words: these then form the 
+\begin_inset Quotes eld
+\end_inset
+
+n-grams
+\begin_inset Quotes erd
+\end_inset
+
+ that are commonly studied.
+ Alternately, the phrases can be parsed with a dependency parser of one
+ style or another, in which case the words are joined with (directed) edges
+ that denote dependencies.
+ Parsing with a head-phrase parser introduces additional vertexes, typically
+ called NP, VP, S and so on.
+ The resulting graphical structure is shown in the two figures below.
+ The first figure shows alignment based on N-grams, where the phrases are
+ taken as linear sequences of words, without any structure.
+\end_layout
+
+\begin_layout Standard
+\begin_inset Float figure
+placement h
+wide false
+sideways false
+status open
+
+\begin_layout Plain Layout
+\begin_inset Caption Standard
+
+\begin_layout Plain Layout
+N-gram corpus text alignment
+\end_layout
+
+\end_inset
+
+
+\end_layout
+
+\begin_layout Plain Layout
+\begin_inset Graphics
+	filename corpus-ngram.eps
+	width 50col%
+
+\end_inset
+
+
+\end_layout
+
+\end_inset
+
+
+\end_layout
+
+\begin_layout Standard
+The next figure shows alignment that results from an (unlabeled, undirected)
+ dependency parse of the text.
+ Most noticeable is that the determiner 
+\begin_inset Quotes eld
+\end_inset
+
+a
+\begin_inset Quotes erd
+\end_inset
+
+ does not link to 
+\begin_inset Quotes eld
+\end_inset
+
+fly
+\begin_inset Quotes erd
+\end_inset
+
+ even though it stands next to it; instead, the determiner links to the
+ noun it determines.
+ This figure also shows 
+\begin_inset Quotes eld
+\end_inset
+
+ash
+\begin_inset Quotes erd
+\end_inset
+
+ as modifying 
+\begin_inset Quotes eld
+\end_inset
+
+fly
+\begin_inset Quotes erd
+\end_inset
+
+, which, as a dependency, is not exactly correct but does serve to illustrate
+ the difference between the N-gram and the dependency alignment.
+ 
+\end_layout
+
+\begin_layout Standard
+\begin_inset Float figure
+placement h
+wide false
+sideways false
+status open
+
+\begin_layout Plain Layout
+\begin_inset Caption Standard
+
+\begin_layout Plain Layout
+Dependency parse corpus text alignment
+\end_layout
+
+\end_inset
+
+
+\end_layout
+
+\begin_layout Plain Layout
+\begin_inset Graphics
+	filename corpus-dep.eps
+	width 75col%
+
+\end_inset
+
+
+\end_layout
+
+\end_inset
+
+
+\end_layout
+
+\begin_layout Standard
+Both of these figures represent a graph that results from a corpus alignment,
+ where all uses of a word have been collapsed (projected down) to a single
+ node.
+ The resulting graph is the graph of the language.
+ One way of visualizing this graph is as a stack of sheets of paper, with
+ one sentence written on each sheet.
+ The papers are stacked in such a way that words that are the same are always
+ vertically above one-another.
+ This 
+\begin_inset Quotes eld
+\end_inset
+
+stacking
+\begin_inset Quotes erd
+\end_inset
+
+ is where the term 
+\begin_inset Quotes eld
+\end_inset
+
+sheaf
+\begin_inset Quotes erd
+\end_inset
+
+ comes from.
+ Each single sheet of paper is a 
+\begin_inset Quotes eld
+\end_inset
+
+section
+\begin_inset Quotes erd
+\end_inset
+
+.
+ 
+\end_layout
+
+\begin_layout Standard
+Sections can be cut down, or they can be enlarged, yet each section must
+ consist of a grammatically-correct sentence, phrase (or paragraph, or larger!).
+ The base space consists simply of the individual words in the language,
+ each word being a vertex, connections between words being projections of
+ the connections discovered from the N-grams, or dependency graphs, as the
+ case may be.
+ One can examine how the structure of language changes as words are removed
+ from the base space: such changes correspond to the 
+\begin_inset Quotes eld
+\end_inset
+
+restriction morphisms
+\begin_inset Quotes erd
+\end_inset
+
+ of a sheaf.
+ These restriction morphisms obey all of the axioms of a sheaf; this observation
+ is what drives the peculiar naming convention given here.
+ The reason this 
+\begin_inset Quotes eld
+\end_inset
+
+works
+\begin_inset Quotes erd
+\end_inset
+
+, that the axioms apply, is in fact rather shallow: it is because the seeds,
+ as initially defined, behave very much like open sets, and when they are
+ projected to the base space, they serve to cover the base space, much as
+ a topological covering does.
+ 
+\end_layout
+
+\begin_layout Standard
+The restriction morphisms appear to continue to satisfy the sheaf axioms
+ even after projection (at least, at the informal level given here).
+\end_layout
+
+\begin_layout Subsection*
+Why sheaves?
+\end_layout
+
+\begin_layout Standard
+The primary reason for introducing this notion is to consolidate the otherwise
+ vague idea of the 
+\begin_inset Quotes eld
+\end_inset
+
+language graph
+\begin_inset Quotes erd
+\end_inset
+
+.
+ One has dueling notions: the graph of all sentences; the generative power
+ of grammars.
+ Surface realizations of language are studied in corpus linguistics, where
+ differences in regional dialects, differences according to socio-economic
+ status and politically motivated differences are found.
+ However, these surface realizations are almost never refined into a grammar,
+ and thus, one does not obtain a generative model of how different speakers
+ in different socio-economic classes speak: corpus linguistics examples
+ are just that: examples that are not further refined.
+ By applying a pattern mining approach, the underlying grammar can be discovered
+ computationally.
+ But what is it, really, that is being discovered, other than some collection
+ of grammatical classes and relations? By looking at the collection of all
+ words, sentences and paragraphs in a corpus as if it were a sheaf, one
+ gets a more 
+\begin_inset Quotes eld
+\end_inset
+
+holistic
+\begin_inset Quotes erd
+\end_inset
+
+ view of what language is: one can start seeing the 
+\begin_inset Quotes eld
+\end_inset
+
+big picture
+\begin_inset Quotes erd
+\end_inset
+
+, instead of just the trees.
+ This holistic view is the primary point of this exercise.
+\end_layout
+
+\begin_layout Subsection*
+Related ideas
+\end_layout
+
+\begin_layout Standard
+As before, the 
+\begin_inset Quotes eld
+\end_inset
+
+sections
+\begin_inset Quotes erd
+\end_inset
+
+ presented above (sentence fragments) are presented minimally.
+ In practice, sections will be adorned with additional information, such
+ as frequency counts and mutual information values.
+ Once clustering and quotienting has been performed, non trivial type tags
+ become available.
 \end_layout
 
 \begin_layout Section*
@@ -3062,9 +3860,47 @@ Conclusion
 \end_layout
 
 \begin_layout Standard
-XXX Wait – there's more to be written.
- This is just a save of an early draft.
- So, not the end, not yet.
+This document presents a way of thinking about graphs that allows them to
+ be decomposed into constituent parts fairly easily, and then brought together
+ and reassembled in a coherent, syntactically correct fashion.
+ It does so without having to play favorites among competing algorithmic
+ approaches and scoring functions.
+ It makes only one base assumption: that knowledge can be extracted at a
+ symbolic level from pair-wise relationships between events or objects.
+\end_layout
+
+\begin_layout Standard
+It touches briefly, all too briefly, on several closely-related topics,
+ such as the application of category theory and type theory to the analysis
+ of graph structure.
+ These topics could be greatly expanded upon, possibly clarifying much of
+ this content.
+ It is now known to category theorists that there is a close relationship
+ between categories, the internal languages that they encode, and that these
+ are reflections of one another, reflecting through a theory of types.
+ A reasonable but incomplete reference for some of this material is the
+ HoTT book.
+ It exposes types in greater detail, but does not cover the relationship
+ between internal languages, parsing, and the modal logic descriptions of
+ parsing.
+ It is possible that there are texts in proof theory that cover these topics,
+ but I am not aware of any.
+\end_layout
+
+\begin_layout Standard
+This is a bit unfortunate, since I feel that much or most of what is written
+ here is 
+\begin_inset Quotes eld
+\end_inset
+
+well known
+\begin_inset Quotes erd
+\end_inset
+
+ to computational proof theorists; unfortunately, that literature is not
+ aimed at the data-mining and machine-learning crowd that this document
+ tries to address.
+ Additions, corrections and revisions are welcomed.
 \end_layout
 
 \end_body
