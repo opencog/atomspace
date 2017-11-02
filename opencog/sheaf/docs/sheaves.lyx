@@ -2940,7 +2940,7 @@ target "https://en.wikipedia.org/wiki/Pregroup_grammar"
  A link-grammar disjunct (that is, a seed) corresponds to a sequence of
  types in a pregroup grammar.
  The correspondence is more-or-less direct, except that link grammar is
- notational simpler to work with.
+ notationally simpler to work with.
 \end_layout
 
 \begin_layout Standard
