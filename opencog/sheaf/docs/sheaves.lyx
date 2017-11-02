@@ -102,20 +102,17 @@ Linas Vepstas
 
 \begin_layout Abstract
 This document develops some general concepts useful for extracting knowledge
- embedded in large graphs and similar cause-effect-type datasets.
- It attempts to make almost no underlying assumptions, other than that the
- data can be presented in terms of pair-wise relationships between objects/event
-s.
- The resulting extracted structures or 
-\begin_inset Quotes eld
-\end_inset
-
-patterns
-\begin_inset Quotes erd
-\end_inset
-
- are manifestly symbolic in nature, as they capture and encode the graph
- structure of the dataset in terms of a (generative) grammar.
+ embedded in large graphs or datasets with pair-wise relationships, such
+ as cause-effect-type relations.
+ Almost no underlying assumptions are made, other than that the data can
+ be presented in terms of pair-wise relationships between objects/events,
+ and that there is some way for judging when objects/events are similar.
+ These two assumptions are used to mine for patterns in the dataset, defining
+ a reduced graph or dataset that boils-down or concentrates the data into
+ a more compact form.
+ The resulting extracted structure or set of patterns are manifestly symbolic
+ in nature, as they capture and encode the graph structure of the dataset
+ in terms of a (generative) grammar.
 \end_layout
 
 \begin_layout Section*
@@ -137,6 +134,8 @@ concentrate
 \end_inset
 
  embedded knowledge into a more manageable size.
+ The output of the process is a grammar that summarizes or captures the
+ significant or important relationships.
 \end_layout
 
 \begin_layout Standard
@@ -151,9 +150,9 @@ folk knowledge
 
  generally known to a number of practitioners.
  However, I am not currently aware of any kind of presentation of this informati
-on, either in review/summary form, or as a fully articulated text.
- There are some texts that discuss these ideas, but they tend to occur primarily
- in highly abstract mathematical books an aritcles, outside of the mainstream
+on, either in review/summary form, or as a fully articulated book or text.
+ The background knowledge appears to be scattered across wide domains, and
+ occur primarily in highly abstract settings, outside of the mainstream
  computer-science and data-analysis domain.
  Thus, this document tries to provide an introduction to these concepts
  in a plain-spoken language.
@@ -170,17 +169,16 @@ anyone
 \end_layout
 
 \begin_layout Standard
-Some examples will be provided, primarily drawn from linguistics.
+Some examples are provided, primarily drawn from linguistics.
  However, the concepts are generally applicable, and should prove useful
- for analyzing any kind of dataset with complex and hidden cause-and-effect
- relationships.
- This includes genomic and proteomic data, social-graph data, and even such
- generic domains as determining the effectiveness of educational curricula
- or analyzing the narratives of books and movies.
+ for analyzing any kind of dataset expressed with pair-wise relationships,
+ but containing hidden (non-obvious) complex cause-and-effect relationships.
+ Such datasets include genomic and proteomic data, social-graph data, and
+ even such social policy information.
 \end_layout
 
 \begin_layout Standard
-The penultimate can serve as a general example.
+Consider the example of determining the effectiveness of educational curricula.
  When teaching students, one never teaches advanced topics until foundations
  are laid.
  Yet many students struggle.
@@ -194,30 +192,33 @@ The penultimate can serve as a general example.
 \end_layout
 
 \begin_layout Standard
-The approach is 
-\begin_inset Quotes eld
-\end_inset
+Another example might be the analysis of motives and actions in humans.
+ This includes analysis from real life, as well as the narratives of books
+ and movies.
+ In a book setting, the author cannot easily put characters into action
+ until some basic sketch of personality and motives is developed.
+ Motives can't be understood until a setting is established.
+ If one can break down a large number of books/movies into pairs of related
+ facts/scenes/remarks/actions, one can then extract a grammar of relationships,
+ to see exactly what is involved in the movement of a narrative from here
+ to there.
+\end_layout
 
-highly mathematical
-\begin_inset Quotes erd
-\end_inset
+\begin_layout Standard
+Much of this document is devoted to stating definitions for a few key structures
+ used to talk about the general problem of discerning relationships and
+ structure.
+ The definitions are inspired by and draw upon concepts from algebraic topology,
+ but mostly avoid both the rigor and the difficulty of that topic.
+ 
+\end_layout
 
-, in that most of this document is devoted to defining certain mathematical
- structures that can be applied to these problems.
- The mathematics is inspired by and draws upon concepts from algebraic topology,
- but, for the most part, tries to avoid the difficult abstractions.
- The devices that are sketched are frameworks (for the most part) and not
- algorithms.
- The hope is that you can 
-\begin_inset Quotes eld
-\end_inset
-
-pick your own algorithm
-\begin_inset Quotes erd
-\end_inset
-
- – apply your favorite technique and style, neural nets, Bayesian nets,
- Markov nets, whatever, as you wish, to obtain results.
+\begin_layout Standard
+The definitions provide a framework, rather than an algorithm.
+ It is up to the user to provide some mechanism for judging similarity -
+ and this can be anything: some neural net, Bayesian net, Markov chain,
+ or some vector space or SVM-style technique; the overall framework is agnostic
+ as to these details.
  The goal is to provide a way of talking about, thinking about and presenting
  data so that the important knowledge contained in it is captured and described,
  boiled down to a manageable, workable state from a large raw dump of pair-relat
@@ -950,7 +951,7 @@ instantly
 \begin_inset Quotes erd
 \end_inset
 
- know 
+ knows 
 \emph on
 all
 \emph default
@@ -1013,8 +1014,8 @@ Given two seeds, one can always either join them (because they connect)
 \end_layout
 
 \begin_layout Itemize
-Readers familiar with link-grammar should have by now instantly recognized
- seeds as being more or less the same thing as 
+Readers familiar with link-grammar should have recognized seeds as being
+ more or less the same thing as 
 \begin_inset Quotes eld
 \end_inset
 
@@ -1049,9 +1050,9 @@ In certain ways, the connectors on a seed look like the uncontracted indexes
 \end_layout
 
 \begin_layout Itemize
-The analogy between graphs and topology, specifically, between open sets
- and seeds, the intersection of open sets and edges, allows concepts and
- tools to be borrowed from algebraic topology.
+The analogy between graphs and topology, specifically between open sets
+ and seeds and the intersection of open sets and edges, allows concepts
+ and tools to be borrowed from algebraic topology.
 \end_layout
 
 \begin_layout Standard
@@ -1242,7 +1243,7 @@ equivalence relation
 \end_layout
 
 \begin_layout Standard
-If one has an equivalence relation, then the obvious desire, he obvious
+If one has an equivalence relation, then the obvious desire, the obvious
  urge is to attempt to perform quotienting on the graph.
  That is, to create a new graph, where the 
 \begin_inset Quotes eld
@@ -1873,9 +1874,9 @@ In a social graph, a cluster might be a clique of friends.
 \begin_layout Itemize
 In proteomic or genomic data, if one can group together similar proteins
  or genes into clusters, one can accomplish a form of dimensional reduction,
- decreasing the overall size of the dataset.
- It provides a methodical way of creating a simplified model of biology,
- without the bad smell of ad-hoc simplifications.
+ simplifying the network model of the dataset.
+ It provides a way to formalize network construction, without the bad smell
+ of ad-hoc simplifications.
 \end_layout
 
 \begin_layout Itemize
@@ -2282,8 +2283,9 @@ teachers
 \end_layout
 
 \begin_layout Itemize
-In genomic data, one type of gene sequence might be classified as an exon,
- another as an intron.
+In a genetic regulatory network, sub-networks can be classified as "positive
+ regulatory pathways" or "negative regulatory pathways" with respect to
+ the activation of a particular gene.
 \end_layout
 
 \begin_layout Standard
@@ -3716,8 +3718,50 @@ Both of these figures represent a graph that results from a corpus alignment,
  where all uses of a word have been collapsed (projected down) to a single
  node.
  The resulting graph is the graph of the language.
- One way of visualizing this graph is as a stack of sheets of paper, with
- one sentence written on each sheet.
+ 
+\end_layout
+
+\begin_layout Standard
+A collapsed graph like that might appear strange; why would one want to
+ do that, if one has individual sentence data? The answer is that by collapsing
+ in this way, one can accumulate statistics for large collections of sentences:
+ one can find out which links are frequenctly seen, and which are rare.
+ One can capture the affinity for pairs of words, by computing the mutual
+ information between them.
+ Through this kind of averaging, a global overvioew emerges.
+ The local structure can be recaptured by extracting seeds from individual
+ sentences, and then re-assembling these seeds into stalks, in a polymorphic
+ fashion.
+\end_layout
+
+\begin_layout Standard
+In some domains, one might not have specific sentences as sequences of words,
+ but one might be able to observe specific activation networks.
+ For example, in biology, if one specific gene is up-regulated, one can
+ then try to view everything else that changed as a 
+\begin_inset Quotes eld
+\end_inset
+
+sentence
+\begin_inset Quotes erd
+\end_inset
+
+, a certain 
+\begin_inset Quotes eld
+\end_inset
+
+mode
+\begin_inset Quotes erd
+\end_inset
+
+ within the global graph.
+\end_layout
+
+\begin_layout Standard
+One way of visualizing this global graph is as a stack of sheets of paper,
+ with one sentence written on each sheet.
+ In biology, one might write down specific pathways or interaction networks
+ on the individual sheets.
  The papers are stacked in such a way that words that are the same are always
  vertically above one-another.
  This 
@@ -3751,7 +3795,9 @@ section
 
 \begin_layout Standard
 Sections can be cut down, or they can be enlarged, yet each section must
- consist of a grammatically-correct sentence, phrase (or paragraph, or larger!).
+ consist of a grammatically-correct sentence, phrase (or paragraph, or larger!
+ ...
+ or smaller, just a sentence fragment).
  The base space consists simply of the individual words in the language,
  each word being a vertex, connections between words being projections of
  the connections discovered from the N-grams, or dependency graphs, as the
