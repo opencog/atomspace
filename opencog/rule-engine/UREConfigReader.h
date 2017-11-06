@@ -63,6 +63,8 @@ public:
 	// BC
 	double get_complexity_penalty() const;
 	double get_max_bit_size() const;
+	double get_mm_complexity_penalty() const;
+	double get_mm_compressiveness() const;
 
 	///////////////////////////////////////////////////////////////////
 	// Modifiers. WARNING: Those changes are not reflected in the    //
@@ -74,6 +76,8 @@ public:
 	void set_maximum_iterations(int);
 	// BC
 	void set_complexity_penalty(double);
+	void set_mm_complexity_penalty(double);
+	void set_mm_compressiveness(double);
 
 	//////////////////
 	// Constants    //
@@ -98,16 +102,16 @@ public:
 
 	// Name of the maximum number of and-BITs in the BIT parameter
 	static const std::string bc_max_bit_size_name;
+
+	// Name of the parameter of the Mixture Model controlling how
+	// complexity affects model prior.
+	static const std::string bc_mm_complexity_penalty_name;
+
+	// Name of the parameter of the Mixture Model controlling how
+	// much unexplained data are compressed
+	static const std::string bc_mm_compressiveness_name;
+
 private:
-
-	// Fetch from the AtomSpace all rules of a given rube-based
-	// system. Specifically fetches patterns
-	//
-	// MemberLink <TV>
-	//    <rule name>
-	//    <rbs>
-	HandleSeq fetch_rule_names(const Handle& rbs);
-
 	AtomSpace& _as;
 
 	// Parameter common to the forward and backward chainer.
@@ -133,8 +137,38 @@ private:
 		// This put an upper boundary on the maximum number of
 		// and-BITs the BIT can hold. Negative means unlimited.
 		int max_bit_size;
+
+		// Parameter of the Mixture Model controlling how complexity
+		// affects model prior. The prior exponentially decreases
+		// w.r.t. to the complexity. Specifically
+		//
+		// prior = exp(-mm_complexity_penalty * complexity)
+		double mm_complexity_penalty;
+
+		// Parameter of the Mixture Model controlling how much
+		// unexplained data are compressed. The compressed unexplained
+		// data are added to the model complexity.
+		double mm_compressiveness;
 	};
 	BCParameters _bc_params;
+
+	// Fetch from the AtomSpace all rules of a given rube-based
+	// system. Specifically fetches patterns
+	//
+	// MemberLink <TV>
+	//    <rule name>
+	//    <rbs>
+	HandleSeq fetch_rule_names(const Handle& rbs);
+
+	// Fetch from the atomspace all parameters common to the forward
+	// and backward chainer
+	void fetch_common_parameters(const Handle& rbs);
+
+	// Fetch from the atomspace all forward chainer parameters
+	void fetch_fc_parameters(const Handle& rbs);
+
+	// Fetch from the atomspace all backward chainer parameters
+	void fetch_bc_parameters(const Handle& rbs);
 
 	// Given <schema>, an <input> and optionally an output <type> (or
 	// subtype), return the <output>s in

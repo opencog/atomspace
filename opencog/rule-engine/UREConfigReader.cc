@@ -37,40 +37,18 @@ const std::string UREConfigReader::attention_alloc_name = "URE:attention-allocat
 const std::string UREConfigReader::max_iter_name = "URE:maximum-iterations";
 const std::string UREConfigReader::bc_complexity_penalty_name = "URE:BC:complexity-penalty";
 const std::string UREConfigReader::bc_max_bit_size_name = "URE:BC:maximum-bit-size";
+const std::string UREConfigReader::bc_mm_complexity_penalty_name = "URE:BC:MM:complexity-penalty";
+const std::string UREConfigReader::bc_mm_compressiveness_name = "URE:BC:MM:compressiveness";
 
 UREConfigReader::UREConfigReader(AtomSpace& as, const Handle& rbs) : _as(as)
 {
-	//////////////////////////
-	// Common parameters    //
-	//////////////////////////
-
 	if (Handle::UNDEFINED == rbs)
 		throw RuntimeException(TRACE_INFO,
 			"UREConfigReader - invalid rulebase specified!");
 
-	// Retrieve the rules (MemberLinks) and instantiate them
-	for (const Handle& rule_name : fetch_rule_names(rbs))
-		_common_params.rules.emplace(rule_name, rbs);
-
-	// Fetch maximum number of iterations
-	_common_params.max_iter = fetch_num_param(max_iter_name, rbs);
-
-	// Fetch attention allocation parameter
-	_common_params.attention_alloc = fetch_bool_param(attention_alloc_name, rbs);
-
-	//////////////////////
-	// FC parameters    //
-	//////////////////////
-
-	//////////////////////
-	// BC parameters    //
-	//////////////////////
-
-	// Fetch BC complexity penalty parameter
-	_bc_params.complexity_penalty = fetch_num_param(bc_complexity_penalty_name, rbs);
-
-	// Fetch BC BIT maximum size parameter
-	_bc_params.max_bit_size = fetch_num_param(bc_max_bit_size_name, rbs, -1);
+	fetch_common_parameters(rbs);
+	fetch_fc_parameters(rbs);
+	fetch_bc_parameters(rbs);
 }
 
 const RuleSet& UREConfigReader::get_rules() const
@@ -103,6 +81,16 @@ double UREConfigReader::get_max_bit_size() const
 	return _bc_params.max_bit_size;
 }
 
+double UREConfigReader::get_mm_complexity_penalty() const
+{
+	return _bc_params.mm_complexity_penalty;
+}
+
+double UREConfigReader::get_mm_compressiveness() const
+{
+	return _bc_params.mm_compressiveness;
+}
+
 void UREConfigReader::set_attention_allocation(bool aa)
 {
 	_common_params.attention_alloc = aa;
@@ -116,6 +104,16 @@ void UREConfigReader::set_maximum_iterations(int mi)
 void UREConfigReader::set_complexity_penalty(double cp)
 {
 	_bc_params.complexity_penalty = cp;
+}
+
+void UREConfigReader::set_mm_complexity_penalty(double mm_cp)
+{
+	_bc_params.mm_complexity_penalty = mm_cp;
+}
+
+void UREConfigReader::set_mm_compressiveness(double mm_cpr)
+{
+	_bc_params.mm_complexity_penalty = mm_cpr;
 }
 
 HandleSeq UREConfigReader::fetch_rule_names(const Handle& rbs)
@@ -133,6 +131,42 @@ HandleSeq UREConfigReader::fetch_rule_names(const Handle& rbs)
 	_as.extract_atom(results);
 
 	return rule_names;
+}
+
+void UREConfigReader::fetch_common_parameters(const Handle& rbs)
+{
+	// Retrieve the rules (MemberLinks) and instantiate them
+	for (const Handle& rule_name : fetch_rule_names(rbs))
+		_common_params.rules.emplace(rule_name, rbs);
+
+	// Fetch maximum number of iterations
+	_common_params.max_iter = fetch_num_param(max_iter_name, rbs);
+
+	// Fetch attention allocation parameter
+	_common_params.attention_alloc = fetch_bool_param(attention_alloc_name, rbs);
+}
+
+void UREConfigReader::fetch_fc_parameters(const Handle& rbs)
+{
+	// None yet
+}
+
+void UREConfigReader::fetch_bc_parameters(const Handle& rbs)
+{
+	// Fetch BC complexity penalty parameter
+	_bc_params.complexity_penalty =
+		fetch_num_param(bc_complexity_penalty_name, rbs);
+
+	// Fetch BC BIT maximum size parameter
+	_bc_params.max_bit_size = fetch_num_param(bc_max_bit_size_name, rbs, -1);
+
+	// Fetch BC Mixture Model complexity penalty parameter
+	_bc_params.mm_complexity_penalty =
+		fetch_num_param(bc_mm_complexity_penalty_name, rbs);
+
+	// Fetch BC Mixture Model complexity penalty parameter
+	_bc_params.mm_compressiveness =
+		fetch_num_param(bc_mm_compressiveness_name, rbs);
 }
 
 HandleSeq UREConfigReader::fetch_execution_outputs(const Handle& schema,

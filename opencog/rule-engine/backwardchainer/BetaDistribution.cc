@@ -78,7 +78,7 @@ TruthValuePtr mk_stv(double mean, double variance,
 	// alpha == prior_alpha + pos_count
 	// beta == prior_beta + count - pos_count
 	double count = alpha + beta - prior_alpha - prior_beta;
-	count = std::max(0.1, count); // Hack to avoid having too non-sensical TV
+	count = std::max(0.1, count); // Hack to avoid non-sensical TV
 	double confidence = count / (count + SimpleTruthValue::DEFAULT_K),
 		mode = 1;               // default strength if confidence is null
 
