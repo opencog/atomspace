@@ -162,11 +162,11 @@ void UREConfigReader::fetch_bc_parameters(const Handle& rbs)
 
 	// Fetch BC Mixture Model complexity penalty parameter
 	_bc_params.mm_complexity_penalty =
-		fetch_num_param(bc_mm_complexity_penalty_name, rbs);
+		fetch_num_param(bc_mm_complexity_penalty_name, rbs, 0);
 
 	// Fetch BC Mixture Model complexity penalty parameter
 	_bc_params.mm_compressiveness =
-		fetch_num_param(bc_mm_compressiveness_name, rbs);
+		fetch_num_param(bc_mm_compressiveness_name, rbs, 1);
 }
 
 HandleSeq UREConfigReader::fetch_execution_outputs(const Handle& schema,
