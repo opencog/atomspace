@@ -173,8 +173,8 @@ HandleTVMap ControlPolicy::expansion_success_tvs(
 			// model.
 			//
 			// TODO add cpx_penalty and compressiveness as parameters.
-			double cpx_penalty = 0.1,
-				compressiveness = 0.1;
+			double cpx_penalty = 0.01,
+				compressiveness = 0.99;
 			success_tvs[rule] = MixtureModel(active_ctrl_rules,
 			                                 cpx_penalty,
 			                                 compressiveness)();
