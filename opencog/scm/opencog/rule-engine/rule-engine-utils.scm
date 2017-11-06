@@ -91,7 +91,7 @@
   tv (head): Optional TV representing the probability (uncertainty included) that the rule produces a desire outcome.
 "
     ; Didn't add type checking here b/c the ure-configuration format isn't
-    ; set in stone yet. And the best place to do that is in c++ UREConfigReader
+    ; set in stone yet. And the best place to do that is in c++ UREConfig
     (let ((alias (DefinedSchemaNode rule-name)))
         (DefineLink alias rule)
 

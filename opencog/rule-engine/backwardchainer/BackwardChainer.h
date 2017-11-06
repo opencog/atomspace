@@ -26,7 +26,7 @@
 #define OPENCOG_BACKWARDCHAINER_H_
 
 #include <opencog/rule-engine/Rule.h>
-#include <opencog/rule-engine/UREConfigReader.h>
+#include <opencog/rule-engine/UREConfig.h>
 
 #include "BIT.h"
 #include "TraceRecorder.h"
@@ -109,8 +109,8 @@ public:
 	/**
 	 * URE configuration accessors
 	 */
-	UREConfigReader& get_config();
-	const UREConfigReader& get_config() const;
+	UREConfig& get_config();
+	const UREConfig& get_config() const;
 
 	/**
 	 * Perform backward chaining inference till the termination
@@ -183,7 +183,7 @@ private:
 	AtomSpace& _as;
 
 	// Contain the configuration
-	UREConfigReader _configReader;
+	UREConfig _configReader;
 
 	// Structure holding the Back Inference Tree
 	BIT _bit;

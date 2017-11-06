@@ -66,12 +66,12 @@ BackwardChainer::BackwardChainer(AtomSpace& as, const Handle& rbs,
 	_trace_recorder.target(target);
 }
 
-UREConfigReader& BackwardChainer::get_config()
+UREConfig& BackwardChainer::get_config()
 {
 	return _configReader;
 }
 
-const UREConfigReader& BackwardChainer::get_config() const
+const UREConfig& BackwardChainer::get_config() const
 {
 	return _configReader;
 }

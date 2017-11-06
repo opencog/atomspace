@@ -1,5 +1,5 @@
 /*
- * UREConfigReader.h
+ * UREConfig.h
  *
  * Copyright (C) 2015 OpenCog Foundation
  *
@@ -21,8 +21,8 @@
  * 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
  */
 
-#ifndef _URE_CONFIG_READER_H
-#define _URE_CONFIG_READER_H
+#ifndef _URE_CONFIG_H
+#define _URE_CONFIG_H
 
 #include "Rule.h"
 
@@ -31,7 +31,7 @@
 namespace opencog {
 
 /**
- * Read the URE configuration in the AtomSpace as described in
+ * Read the URE configuration from the AtomSpace as described in
  * http://wiki.opencog.org/w/URE_Configuration_Format, and provide
  * parameter accessors for all rule-based systems.
  *
@@ -41,7 +41,7 @@ namespace opencog {
  * instead it assumes all parameters are duplicated for all systems
  * and subsystems, for now.
  */
-class UREConfigReader
+class UREConfig
 {
 public:
 	/////////////
@@ -49,7 +49,7 @@ public:
 	/////////////
 
 	// rbs is a Handle pointing to a rule-based system is as
-	UREConfigReader(AtomSpace& as, const Handle& rbs);
+	UREConfig(AtomSpace& as, const Handle& rbs);
 
 	///////////////
 	// Accessors //
@@ -68,7 +68,7 @@ public:
 
 	///////////////////////////////////////////////////////////////////
 	// Modifiers. WARNING: Those changes are not reflected in the    //
-	// AtomSpace, only in the UREConfigReader object.                //
+	// AtomSpace, only in the UREConfig object.                      //
 	///////////////////////////////////////////////////////////////////
 
 	// Common
@@ -218,4 +218,4 @@ private:
 } // ~namespace opencog
 
 
-#endif /* _URE_CONFIG_READER_H_ */
+#endif /* _URE_CONFIG_H_ */

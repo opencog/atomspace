@@ -2,7 +2,7 @@
 #include <opencog/rule-engine/backwardchainer/BackwardChainer.h>
 #include <opencog/rule-engine/forwardchainer/ForwardChainer.h>
 #include <opencog/guile/SchemeEval.h>
-#include <opencog/rule-engine/UREConfigReader.h>
+#include <opencog/rule-engine/UREConfig.h>
 
 using namespace opencog;
 

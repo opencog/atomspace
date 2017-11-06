@@ -1,17 +1,17 @@
 #include <opencog/atomspace/AtomSpace.h>
 #include <opencog/guile/SchemeEval.h>
 
-#include <opencog/rule-engine/UREConfigReader.h>
+#include <opencog/rule-engine/UREConfig.h>
 
 using namespace opencog;
 
-class UREConfigReaderUTest : public CxxTest::TestSuite {
+class UREConfigUTest : public CxxTest::TestSuite {
 private:
 	AtomSpace _as;
 	SchemeEval _eval;
 
 public:
-	UREConfigReaderUTest() : _eval(&_as)
+	UREConfigUTest() : _eval(&_as)
 	{
 		// Module loading is borked from the C++ environment, so
 		// add the following paths so that utilities.scm is found.
@@ -32,7 +32,7 @@ public:
 		std::cout << "AtomSpace = " << _as << std::endl;
 	}
 
-	~UREConfigReaderUTest()
+	~UREConfigUTest()
 	{
 		// Erase the log file if no assertions failed.
 		if (!CxxTest::TestTracker::tracker().suiteFailed())
@@ -47,7 +47,7 @@ _exit(rc); // XXX hack to avoid double-free in __run_exit_handlers
 		// to test
 		Handle rbs = _as.get_node(CONCEPT_NODE, "fc-rule-base");
 
-		UREConfigReader cr(_as, rbs);
+		UREConfig cr(_as, rbs);
 
 		TS_ASSERT_EQUALS(cr.get_rules().size(), 2);
 		TS_ASSERT_EQUALS(cr.get_attention_allocation(), false);

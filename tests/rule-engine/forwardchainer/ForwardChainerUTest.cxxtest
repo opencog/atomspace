@@ -115,7 +115,7 @@ void ForwardChainerUTest::test_do_chain_animals()
 	_eval.eval("(load-from-path \"animals.scm\")");
 	randGen().seed(0);
 
-	Handle top_rbs = _as.get_node(CONCEPT_NODE, UREConfigReader::top_rbs_name);
+	Handle top_rbs = _as.get_node(CONCEPT_NODE, UREConfig::top_rbs_name);
 
 	Handle Fritz = an(CONCEPT_NODE, "Fritz"),
 		croaks = an(PREDICATE_NODE, "croaks"),

@@ -25,7 +25,7 @@
 #define FORWARDCHAINERX_H_
 
 #include <opencog/rule-engine/URECommons.h>
-#include <opencog/rule-engine/UREConfigReader.h>
+#include <opencog/rule-engine/UREConfig.h>
 
 #include "FCStat.h"
 
@@ -57,7 +57,7 @@ private:
 
 	URECommons _rec;            // utility class
 	Handle _rbs;                // rule-based system
-	UREConfigReader _configReader;
+	UREConfig _configReader;
 
 	int _iteration;
 	source_selection_mode _ts_mode;
@@ -137,8 +137,8 @@ public:
 	/**
 	 * URE configuration accessors
 	 */
-	UREConfigReader& get_config();
-	const UREConfigReader& get_config() const;
+	UREConfig& get_config();
+	const UREConfig& get_config() const;
 
 	/**
 	 * Perform forward chaining inference till the termination
