@@ -26,6 +26,7 @@
 #include <opencog/atomspace/AtomSpace.h>
 
 #include "BIT.h"
+#include "../UREConfig.h"
 #include "../Rule.h"
 
 class ControlPolicyUTest;
@@ -45,7 +46,7 @@ class ControlPolicy
 {
     friend class ::ControlPolicyUTest;
 public:
-	ControlPolicy(const RuleSet& rules, const BIT& bit,
+	ControlPolicy(const UREConfig& ure_config, const BIT& bit,
 	              AtomSpace* control_as=nullptr);
 	~ControlPolicy();
 
@@ -73,6 +74,9 @@ public:
 	RuleSelection select_rule(AndBIT& andbit, BITNode& bitleaf);
 
 private:
+	// Reference to URE configuration
+	const UREConfig& _ure_config;
+
 	// Reference to the BackwardChainer BIT
 	const BIT& _bit;
 

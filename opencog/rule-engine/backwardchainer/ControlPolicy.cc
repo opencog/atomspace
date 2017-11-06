@@ -40,9 +40,10 @@ using namespace opencog;
 #define al _query_as->add_link
 #define an _query_as->add_node
 
-ControlPolicy::ControlPolicy(const RuleSet& rs, const BIT& bit,
+ControlPolicy::ControlPolicy(const UREConfig& ure_config, const BIT& bit,
                              AtomSpace* control_as) :
-	rules(rs), _bit(bit), _control_as(control_as), _query_as(nullptr)
+	rules(ure_config.get_rules()), _ure_config(ure_config),
+	_bit(bit), _control_as(control_as), _query_as(nullptr)
 {
 	// Fetch default TVs for each inference rule (the TV on the member
 	// link connecting the rule to the rule base
@@ -171,13 +172,10 @@ HandleTVMap ControlPolicy::expansion_success_tvs(
 		} else {
 			// Otherwise calculate the truth value of its mixture
 			// model.
-			//
-			// TODO add cpx_penalty and compressiveness as parameters.
-			double cpx_penalty = 0.01,
-				compressiveness = 0.99;
+			double cpx_penalty = _ure_config.get_mm_complexity_penalty(),
+				compressiveness = _ure_config.get_mm_compressiveness();
 			success_tvs[rule] = MixtureModel(active_ctrl_rules,
-			                                 cpx_penalty,
-			                                 compressiveness)();
+			                                 cpx_penalty, compressiveness)();
 		}
 	}
 

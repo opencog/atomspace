@@ -77,7 +77,9 @@ void ControlPolicyUTest::test_fetch_control_rules()
 	logger().debug("BEGIN TEST: %s", __FUNCTION__);
 
 	_eval.eval("(load-from-path \"control-rules.scm\")");
-	_cp = new ControlPolicy(RuleSet(), BIT(), &_control_as);
+	AtomSpace rbs_as;
+	Handle rbs = rbs_as.add_node(CONCEPT_NODE, "dummy");
+	_cp = new ControlPolicy(UREConfig(rbs_as, rbs), BIT(), &_control_as);
 
 	Handle rule_1_alias = _eval.eval_h("(DefinedSchemaNode \"rule-1\")");
 	HandleSet control_1_rules = _cp->fetch_expansion_control_rules(rule_1_alias);
