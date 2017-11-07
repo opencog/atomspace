@@ -22,6 +22,7 @@
  */
 
 #include "BetaDistribution.h"
+#include "../URELogger.h"
 
 #include <opencog/truthvalue/SimpleTruthValue.h>
 
@@ -90,6 +91,15 @@ TruthValuePtr mk_stv(double mean, double variance,
 
 	if (beta < 1 and 1 <= alpha)
 		mode = 1;
+
+	// This is mathematically wrong, but for now we don't try to have
+	// a bimodal TV, rather a unimodal one with very low confidence.
+	if (alpha < 1 and beta < 1)
+		mode = mean;
+
+	LAZY_URE_LOG_FINE << "mk_stv alpha alpha = " << alpha
+	                  << ", beta = " << beta << ", count = " << count
+	                  << ", confidence = " << confidence << ", mode = " << mode;
 
 	// The strength is in fact the mode, this should be corrected once
 	// TruthValue is reworked

@@ -87,6 +87,9 @@ TruthValuePtr MixtureModel::weighted_average(const std::vector<TruthValuePtr>& t
 		relative_variances[i] += sq(means[i] - mean);
 	double variance = boost::inner_product(norm_weights, relative_variances, 0.0);
 
+	LAZY_URE_LOG_FINE << "MixtureModel::weighted_average mean = " << mean
+	                  << ", variance = " << variance;
+
 	return mk_stv(mean, variance);
 }
 
@@ -98,7 +101,6 @@ double MixtureModel::prior_estimate(const Handle& model)
 		kestimate = kolmogorov_estimate(remain_data_size);
 
 	LAZY_URE_LOG_FINE << "MixtureModel::prior_estimate "
-	                  << "model = " << oc_to_string(model)
 	                  << "partial_length = " << partial_length
 	                  << ", remain_data_size = " << remain_data_size
 	                  << ", kestimate = " << kestimate;
