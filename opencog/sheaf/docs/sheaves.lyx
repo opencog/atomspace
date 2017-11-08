@@ -930,6 +930,18 @@ Joining two connectors to form a link
 
 \end_layout
 
+\begin_layout Standard
+The jigsaw puzzle-piece illustration is not uncommon in the literature;
+ such illustrations are explicitly depicted in a variety of settings.
+\begin_inset CommandInset citation
+LatexCommand cite
+key "Coecke2010,Sleator1991,Baez2009"
+
+\end_inset
+
+
+\end_layout
+
 \begin_layout Subsection*
 Why sections?
 \end_layout
@@ -1013,8 +1025,14 @@ Given two seeds, one can always either join them (because they connect)
 \end_layout
 
 \begin_layout Itemize
-Readers familiar with link-grammar should have recognized seeds as being
- more or less the same thing as 
+Readers familiar with Link Grammar
+\begin_inset CommandInset citation
+LatexCommand cite
+key "Sleator1991"
+
+\end_inset
+
+ should have recognized seeds as being more or less the same thing as 
 \begin_inset Quotes eld
 \end_inset
 
@@ -1022,8 +1040,8 @@ disjuncts
 \begin_inset Quotes erd
 \end_inset
 
- in link-grammar.
- However, link-grammar disjuncts are a bit more complicated than seeds;
+ in Link Grammar.
+ However, Link Grammar disjuncts are a bit more complicated than seeds;
  this is the topic of the next section.
 \end_layout
 
@@ -1098,7 +1116,7 @@ key "Poon2009"
 
 \end_inset
 
-  The problem with this notation is that, properly speaking, lambda calculus
+ The problem with this notation is that, properly speaking, lambda calculus
  is a system for generating and working with strings, not with graphs, and
  lambdas are designed to perform substitution (beta-reduction), and not
  for connecting things.
@@ -2158,14 +2176,14 @@ type
 \end_layout
 
 \begin_layout Standard
-The core idea can be illustrated with link-grammar as an example.
- The link-grammar disjuncts 
+The core idea can be illustrated with Link Grammar as an example.
+ The Link Grammar disjuncts 
 \emph on
 are
 \emph default
  one and the same thing as stalks.
  It is worth making this very explicit.
- A subset of the link-grammar English dictionary looks like this:
+ A subset of the Link Grammar English dictionary looks like this:
 \begin_inset VSpace medskip
 \end_inset
 
@@ -3050,13 +3068,19 @@ The above description of parsing is sufficiently different from standard
 
 \begin_layout Standard
 The first step is to observe that the presented algorithm is essentially
- a simplified, generalized variation of the link-grammar parsing algorithm.
+ a simplified, generalized variation of the Link Grammar parsing algorithm.
+\begin_inset CommandInset citation
+LatexCommand cite
+key "Sleator1993"
+
+\end_inset
+
  The generalization consists in the removal of word-order and link-crossing
  constraints.
 \end_layout
 
 \begin_layout Standard
-The second step is to observe that the theory of link-grammar is more-or-less
+The second step is to observe that the theory of Link Grammar is more-or-less
  isomorphic to the theory of pregroup grammars (see 
 \begin_inset CommandInset href
 LatexCommand href
@@ -3066,18 +3090,18 @@ target "https://en.wikipedia.org/wiki/Pregroup_grammar"
 \end_inset
 
 ); the primary differences being notational.
- The left-right directional link-grammar connectors correspond to the left
+ The left-right directional Link Grammar connectors correspond to the left
  and right adjoints in a pregroup.
- A link-grammar disjunct (that is, a seed) corresponds to a sequence of
+ A Link Grammar disjunct (that is, a seed) corresponds to a sequence of
  types in a pregroup grammar.
  The correspondence is more-or-less direct, except that link grammar is
  notationally simpler to work with.
 \end_layout
 
 \begin_layout Standard
-The third step is to observe that the link-grammar is a form of dependency
+The third step is to observe that the Link Grammar is a form of dependency
  grammar.
- Although the original link-grammar formulation uses undirected links, it
+ Although the original Link Grammar formulation uses undirected links, it
  is straight-forward and unambiguous to mark up the links with head-dependent
  directional arrows.
 \end_layout
@@ -3100,7 +3124,7 @@ y grammars are often favored: they make clear that it is the linkage between
  of language.
  It should be noted that many researchers in the psychology of linguistics
  are particularly drawn to the categorial grammars; these are quite similar
- to the pregroup grammars, and are more closely related to link-grammar
+ to the pregroup grammars, and are more closely related to Link Grammar
  than to the phrase-structure grammars.
 \end_layout
 
@@ -3301,7 +3325,7 @@ polymorphism
  applies, because the base vertex behaves as one of several distinct types
  in practice.
  There are several ways the above diagram can be represented textually.
- As before, the link-grammar-style notation is used, as it is fairly clear
+ As before, the Link Grammar-style notation is used, as it is fairly clear
  and direct.
  One representation would be to expose the polymorphism only in the connectors,
  and not in the base vertex label:
@@ -3446,11 +3470,97 @@ or
 \end_layout
 
 \begin_layout Subsection*
+Similar concept: part of speech
+\end_layout
+
+\begin_layout Standard
+It is tempting to identify the connectors DET, ADJ, SUBJ, OBJ in the diagrams
+ above with 
+\begin_inset Quotes eld
+\end_inset
+
+parts of speech
+\begin_inset Quotes erd
+\end_inset
+
+.
+ This would be a mistake.
+ In conventional grammatical analysis, there are half-a-dozen or a dozen
+ parts of speech that are recognized: noun, verb, adjective, and so on.
+ By contrast, these connector types indicate a grammatical role.
+ That is, the disjunct 
+\family typewriter
+SUBJ- & OBJ+
+\family default
+ indicates a word that takes both a subject and an object: a transitive
+ verb.
+ That is, the disjunct is in essence a fine-grained part of speech, indicating
+ not only verb-ness, but the specific type of verb-ness (transitive).
+\end_layout
+
+\begin_layout Standard
+The Link Grammar English dictionary documents more than 100 connector types,
+ these are subtyped, so that approximately 500 connectors might be seen.
+ These connectors, when arranged into disjuncts, result in tens of thousands
+ of disjuncts.
+ That is, Link Grammar defines tens of thousands of distinct 
+\begin_inset Quotes eld
+\end_inset
+
+parts of speech
+\begin_inset Quotes erd
+\end_inset
+
+.
+ The can be thought of as parts of speech, but they are quite fine-grained,
+ far more fine-grained than any text on grammar might ever care to list.
+\end_layout
+
+\begin_layout Standard
+If one uses a technique, such as MST parsing
+\begin_inset CommandInset citation
+LatexCommand cite
+key "Yuret1998"
+
+\end_inset
+
+, and then extracts disjuncts, one might observe more than 6 million disjuncts
+ and 9 million seeds on a vocabulary of 140K words.
+ These are, again, in the above technical sense, just 
+\begin_inset Quotes eld
+\end_inset
+
+parts of speech
+\begin_inset Quotes erd
+\end_inset
+
+, but they are hyperfine-grained.
+ The count is overwhelming.
+ So, although it is techinically correct to call them 
+\begin_inset Quotes eld
+\end_inset
+
+parts of speech
+\begin_inset Quotes erd
+\end_inset
+
+, it is a conceptual error to think of a class that has six million representati
+ves as if it were a class with a dozen members.
+\end_layout
+
+\begin_layout Subsection*
 Similar concept: skip-grams
 \end_layout
 
 \begin_layout Standard
-The N-gram and the more efficient skip-gram
+The N-gram
+\begin_inset CommandInset citation
+LatexCommand cite
+key "Rosen1996"
+
+\end_inset
+
+ and the more efficient skip-gram
 \begin_inset CommandInset citation
 LatexCommand cite
 key "Guthrie2006"
@@ -3569,6 +3679,106 @@ additional data
  and is explicit.
  By contrast, untagged N-grams or untagged skip-grams leave all such structure
  implicit and hidden.
+\end_layout
+
+\begin_layout Subsection*
+Polymorphism and semantics
+\end_layout
+
+\begin_layout Standard
+The concept of polymorphism introduced above lays a foundation for semantics,
+ for extracting meaning from graphs.
+ This is already hinted at by the fact that any English-language dictionary
+ will provide at least two different definitions for 
+\begin_inset Quotes eld
+\end_inset
+
+fly
+\begin_inset Quotes erd
+\end_inset
+
+: one tagged as a noun, the other as a verb.
+ The observation of hyperfine-grained parts of speech can push this agressively
+ farther.
+ 
+\end_layout
+
+\begin_layout Standard
+In a modern corpus of English, one might expect to observe the seeds 
+\begin_inset Quotes eld
+\end_inset
+
+apple: green-
+\begin_inset Quotes erd
+\end_inset
+
+ and 
+\begin_inset Quotes eld
+\end_inset
+
+apple: iphone+
+\begin_inset Quotes erd
+\end_inset
+
+.
+ The disjuncts 
+\begin_inset Quotes eld
+\end_inset
+
+green-
+\begin_inset Quotes erd
+\end_inset
+
+ and 
+\begin_inset Quotes eld
+\end_inset
+
+iphone+
+\begin_inset Quotes erd
+\end_inset
+
+ can be interpreted as a kind-of tag on the word 
+\begin_inset Quotes eld
+\end_inset
+
+apple
+\begin_inset Quotes erd
+\end_inset
+
+.
+ Since there are exactly two tags in this example, they can be viewed as
+ supplying exactly one bit of additional information to the word 
+\begin_inset Quotes eld
+\end_inset
+
+apple
+\begin_inset Quotes erd
+\end_inset
+
+.
+ Effectively, a single apple has been split into two distinct apples.
+ Are they really distinct, however? This can only be judged on the basis
+ of some clustering algorithm that can assign tagged words to classes.
+ Even very naive, unsophisticated algorithms might be expected to classify
+ these two different kinds of apple into different classes; the extra bit
+ of information carried by the disjunct is a bit of actual, usable information.
+\end_layout
+
+\begin_layout Standard
+To summarize: the arrangement of vertexes into polymorphic seeds and sections
+ enables the vertexes to be tagged with extra information.
+ The tags are the connectors themselves: thier presence or absence carries
+ information.
+ That extra information can be treated as 
+\begin_inset Quotes eld
+\end_inset
+
+semantic information
+\begin_inset Quotes erd
+\end_inset
+
+, identifying different types or kinds, rather than as purely syntactic
+ information about arrangments and relationships.
 \end_layout
 
 \begin_layout Section*
