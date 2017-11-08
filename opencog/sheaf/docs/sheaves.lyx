@@ -7,6 +7,8 @@
 \textclass amsart
 \begin_preamble
 \usepackage{url} 
+
+  \definecolor{docnotelinkcolor}{rgb}{0,0,0.4}
 \end_preamble
 \use_default_options false
 \begin_modules
@@ -935,7 +937,7 @@ The jigsaw puzzle-piece illustration is not uncommon in the literature;
  such illustrations are explicitly depicted in a variety of settings.
 \begin_inset CommandInset citation
 LatexCommand cite
-key "Coecke2010,Sleator1991,Baez2009"
+key "Sleator1991,Coecke2010,Kart2014,Baez2009"
 
 \end_inset
 
@@ -3081,7 +3083,14 @@ key "Sleator1993"
 
 \begin_layout Standard
 The second step is to observe that the theory of Link Grammar is more-or-less
- isomorphic to the theory of pregroup grammars (see 
+ isomorphic to the theory of pregroup grammars
+\begin_inset CommandInset citation
+LatexCommand cite
+key "Kart2014"
+
+\end_inset
+
+ (see 
 \begin_inset CommandInset href
 LatexCommand href
 name "Wikipedia"
