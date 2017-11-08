@@ -48,12 +48,22 @@ public:
 	                 double prior_alpha=1.0, double prior_beta=1.0);
 
 	/**
-	 * Return the mean of the beta distribution
+	 * Return the alpha parameter of the distribution
+	 */
+	double alpha() const;
+
+	/**
+	 * Return the beta of the beta parameter of the distribution
+	 */
+	double beta() const;
+
+	/**
+	 * Return the mean of the distribution
 	 */
 	double mean() const;
 
 	/**
-	 * Return the variance of the beta distribution
+	 * Return the variance of the distribution
 	 */
 	double variance() const;
 
@@ -74,8 +84,9 @@ private:
 
 // Helpers
 BetaDistribution mk_beta_distribution(const TruthValuePtr& tv);
-	TruthValuePtr mk_stv(double mean, double variance,
-	                     double prior_alpha=1.0, double prior_beta=1.0);
+
+TruthValuePtr mk_stv(double mean, double variance,
+                     double prior_alpha=1.0, double prior_beta=1.0);
 
 } // namespace opencog
 

@@ -274,8 +274,8 @@ private:
 	Handle mk_pattern_var(int i);
 
 	/**
-	 * Calculate the actual mean of a TV. which is to be constracted
-	 * by the mean in the TruthValue class which doesn't correspond to
+	 * Calculate the actual mean of a TV. which is to be contrasted by
+	 * the mean in the TruthValue class which doesn't correspond to
 	 * the actual mean of the second order distribution.
 	 *
 	 * TODO: replace this by the mean method of the TruthValue once

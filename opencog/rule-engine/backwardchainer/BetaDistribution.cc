@@ -38,6 +38,16 @@ BetaDistribution::BetaDistribution(double pos_count, double count,
                                    double p_alpha, double p_beta)
 	: _beta_distribution(p_alpha + pos_count, p_beta + count - pos_count) {}
 
+double BetaDistribution::alpha() const
+{
+	return _beta_distribution.alpha();
+}
+
+double BetaDistribution::beta() const
+{
+	return _beta_distribution.beta();
+}
+
 double BetaDistribution::mean() const
 {
 	return boost::math::mean(_beta_distribution);

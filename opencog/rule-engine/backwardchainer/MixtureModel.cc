@@ -23,7 +23,7 @@
 
 #include "MixtureModel.h"
 
-#include <boost/math/special_functions/binomial.hpp>
+#include <boost/math/special_functions/beta.hpp>
 #include <boost/range/algorithm/transform.hpp>
 #include <boost/range/numeric.hpp>
 
@@ -36,21 +36,26 @@
 
 using namespace opencog;
 
-using boost::math::binomial_coefficient;
-
 MixtureModel::MixtureModel(const HandleSet& mds, double cpx, double cmp) :
 	models(mds), cpx_penalty(cpx), compressiveness(cmp)
 {
 	data_set_size = infer_data_set_size();
 }
 
-TruthValuePtr MixtureModel::operator()()
+TruthValuePtr MixtureModel::operator()() const
 {
+	// Don't bother mixing if there's only one TV
+	if (models.size() == 1)
+		return (*models.begin())->getTruthValue();
+
 	std::vector<TruthValuePtr> tvs;
 	std::vector<double> weights;
 	for (const Handle model : models) {
+		double weight = prior_estimate(model) * beta_factor(model);
+		LAZY_URE_LOG_FINE << "MixtureModel::operator model = " << model->id_to_string()
+		                  << ", weight = " << weight;
 		tvs.push_back(model->getTruthValue());
-		weights.push_back(prior_estimate(model));
+		weights.push_back(weight);
 	}
 	return weighted_average(tvs, weights);
 }
@@ -58,10 +63,6 @@ TruthValuePtr MixtureModel::operator()()
 TruthValuePtr MixtureModel::weighted_average(const std::vector<TruthValuePtr>& tvs,
                                              const std::vector<double>& weights) const
 {
-	// Don't bother mixing if there's only one TV
-	if (tvs.size () == 1)
-		return tvs[0];
-
 	// Normalize the weights
 	double total = boost::accumulate(weights, 0.0);
 	std::vector<double> norm_weights;
@@ -93,8 +94,18 @@ TruthValuePtr MixtureModel::weighted_average(const std::vector<TruthValuePtr>& t
 	return mk_stv(mean, variance);
 }
 
-double MixtureModel::prior_estimate(const Handle& model)
+double MixtureModel::beta_factor(const Handle& model) const
 {
+	BetaDistribution beta_dist(model->getTruthValue());
+	double factor = boost::math::beta(beta_dist.alpha(), beta_dist.beta());
+	LAZY_URE_LOG_FINE << "MixtureModel::beta_factor factor = " << factor;
+	return factor;
+}
+
+double MixtureModel::prior_estimate(const Handle& model) const
+{
+	LAZY_URE_LOG_FINE << "MixtureModel::prior_estimate model = " << model->id_to_string();
+
 	HandleSet all_atoms(get_all_uniq_atoms(model));
 	double partial_length = all_atoms.size(),
 		remain_data_size = data_set_size - model->getTruthValue()->get_count(),
@@ -108,19 +119,20 @@ double MixtureModel::prior_estimate(const Handle& model)
 	return prior(partial_length + kestimate);
 }
 
-double MixtureModel::kolmogorov_estimate(double remain_count)
+double MixtureModel::kolmogorov_estimate(double remain_count) const
 {
 	return std::pow(remain_count, 1.0 - compressiveness);
 }
 
-double MixtureModel::prior(double length)
+double MixtureModel::prior(double length) const
 {
+	double pri = exp(-cpx_penalty*length);
 	LAZY_URE_LOG_FINE << "MixtureModel::prior length = " << length
-	                  << ", prior = " << exp(-cpx_penalty*length);
-	return exp(-cpx_penalty*length);
+	                  << ", pri = " << pri;
+	return pri;
 }
 
-double MixtureModel::infer_data_set_size()
+double MixtureModel::infer_data_set_size() const
 {
 	double max_count = 0.0;
 	for (const Handle& model : models)
