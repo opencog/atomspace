@@ -18,7 +18,7 @@ ADD_LIBRARY(ruleengine
 	InferenceSCM.cc
 	Rule.cc
 	URECommons.cc
-	UREConfigReader.cc
+	UREConfig.cc
 )
 
 ADD_DEPENDENCIES(ruleengine
@@ -40,11 +40,11 @@ ENDIF (HAVE_GUILE)
 INSTALL (TARGETS ruleengine DESTINATION "lib${LIB_DIR_SUFFIX}/opencog")
 
 INSTALL (FILES
-	UREConfigReader.h
+	UREConfig.h
 	URECommons.h
     URELogger.h
 	Rule.h
-	UREConfigReader.h
+	UREConfig.h
 	DESTINATION "include/opencog/rule-engine"
 )
 

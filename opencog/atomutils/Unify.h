@@ -154,11 +154,11 @@ public:
 	struct SolutionSet : Partitions
 	{
 		// Default ctor
-		SolutionSet(const Partitions& p);
+		explicit SolutionSet(const Partitions& p);
 		// Helper ctor. Initialize with the empty partition as
 		// singleton, i.e. a satisfiable solution, if s == true, or
 		// the empty partition set if unsatisfiable.
-		SolutionSet(bool s=false);
+		explicit SolutionSet(bool s=false);
 
 		// Return true iff the solution set is satisfiable which is
 		// indicated by whether it is empty or not.
@@ -694,6 +694,10 @@ private:
 	 */
 	bool inherit(const std::set<Type>& lhs, const std::set<Type>& rhs) const;
 };
+
+bool unifiable(const Handle& lhs, const Handle& rhs,
+               const Handle& lhs_vardecl=Handle::UNDEFINED,
+               const Handle& rhs_vardecl=Handle::UNDEFINED);
 
 /**
  * Till content equality between atoms become the default.

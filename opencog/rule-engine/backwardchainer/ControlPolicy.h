@@ -26,6 +26,7 @@
 #include <opencog/atomspace/AtomSpace.h>
 
 #include "BIT.h"
+#include "../UREConfig.h"
 #include "../Rule.h"
 
 class ControlPolicyUTest;
@@ -45,7 +46,7 @@ class ControlPolicy
 {
     friend class ::ControlPolicyUTest;
 public:
-	ControlPolicy(const RuleSet& rules, const BIT& bit,
+	ControlPolicy(const UREConfig& ure_config, const BIT& bit,
 	              AtomSpace* control_as=nullptr);
 	~ControlPolicy();
 
@@ -73,6 +74,9 @@ public:
 	RuleSelection select_rule(AndBIT& andbit, BITNode& bitleaf);
 
 private:
+	// Reference to URE configuration
+	const UREConfig& _ure_config;
+
 	// Reference to the BackwardChainer BIT
 	const BIT& _bit;
 
@@ -100,14 +104,15 @@ private:
 	std::map<Handle, HandleSet> _expansion_control_rules;
 
 	/**
-	 * Return all valid rules, in the sense that they may possibly be
-	 * used to infer the target.
+	 * Return all valid inference rules, in the sense that they may
+	 * possibly be used to infer the target.
 	 */
 	RuleTypedSubstitutionMap get_valid_rules(const AndBIT& andbit,
 	                                         const BITNode& bitleaf);
 
 	/**
-	 * Select a rule for expansion amongst a set of valid ones.
+	 * Select an inference rule for expansion amongst a set of valid
+	 * ones.
 	 */
 	RuleSelection select_rule(const AndBIT& andbit,
 	                          const BITNode& bitleaf,
@@ -160,19 +165,51 @@ private:
 	 * Get all active expansion control rules concerning the given
 	 * inference rule.
 	 */
-	HandleSet active_expansion_control_rules(const Handle& inf_rule_alias);
+	HandleSet active_expansion_control_rules(const AndBIT& andbit,
+	                                         const BITNode& bitleaf,
+	                                         const Handle& inf_rule_alias);
 
 	/**
-	 * Return true iff the given control is current active, that is
-	 * the case of an expansion control rule whether the pattern is
-	 * true.
+	 * Return true iff the given control is current active, that is,
+	 * in the case of an expansion control rule, whether the pattern
+	 * is true.
+	 *
+	 * For now it just tries to unify andbit with the input and-BIT of
+	 * the expansion, and bitleaf with the BIT-leaf of the expansion.
 	 *
 	 * Ultimately this should be replace by a TV because most patterns
 	 * will have a certain probability of being true, or some degree
 	 * of truth. To do well it should rely on a conditional
 	 * instantiation PLN rule.
 	 */
-	bool control_rule_active(const Handle& ctrl_rule) const;
+	bool is_control_rule_active(const AndBIT& andbit,
+	                            const BITNode& bitleaf,
+	                            const Handle& ctrl_rule) const;
+
+	/**
+	 * Given a control rule, retrieve the antecedent part concerning
+	 * the expansion. That is given
+	 *
+	 * ImplicationScope
+	 *   <variables>
+	 *   And
+	 *     <preproof-of-A>
+	 *     Execution
+	 *       Schema "URE:BC:expand"
+	 *       List <A> <L> <ctrl_rule>
+	 *       <B>
+	 *     <patterns>
+	 *   <preproof-of-B>
+	 *
+	 * return
+	 *
+	 *     Execution
+	 *       Schema "URE:BC:expand"
+	 *       List <A> <L> <ctrl_rule>
+	 *       <B>
+	 */
+	Handle retrieve_expansion(const Handle& ctrl_rule) const;
+	bool is_expansion(const Handle& h) const;
 
 	/**
 	 * Return the pattern in a given expansion control rule, if it has
@@ -182,47 +219,43 @@ private:
 
 	/**
 	 * Given an inference rule, fetch both pattern and pattern free
-	 * expansion control rules. See comments of
-	 * fetch_pattern_free_expansion_control_rules and
-	 * fetch_pattern_expansion_control_rules
+	 * expansion control rules. See comments below.
 	 */
 	HandleSet fetch_expansion_control_rules(const Handle& inf_rule);
 
 	/**
 	 * Fetch control rules from _control_as involved in BIT
-	 * expansion. Informally that if and-BIT, A, expands into B from L
-	 * with the given rule, and follow some pattern, then B has a
-	 * probability TV of being a preproof of T. Formally
+	 * expansion. Informally that if and-BIT, A, is a preproof and
+	 * expands into B from L with the given rule, and follow some
+	 * pattern, then B has a probability TV of being a preproof of
+	 * T. Formally
 	 *
 	 * ImplicationScope <TV>
-	 *  VariableList
-	 *    Variable "$T"  ;; Theorem/target to prove
-	 *    TypedVariable  ;; and-BIT to expand
-	 *      Variable "$A"
-	 *      Type "BindLink"
-	 *    Variable "$L"  ;; Leaf from A to expand
-	 *    TypedVariable  ;; Resulting and-BIT from the expansion of L from A with rule R
-	 *      Variable "$B"
-	 *      Type "BindLink"
+	 *  <vardecl>
 	 *  And
+	 *    Evaluation
+	 *      Predicate "preproof-of"
+	 *      List
+	 *        <A>
+	 *        <T>
 	 *    Execution
 	 *      Schema "expand-and-BIT"
 	 *      List
-	 *        BontExec Variable "$A"
-	 *        Variable "$L"
-	 *        DontExec <inf_rule>
-	 *      DontExec Variable "$B"
+	 *        <A>
+	 *        <L>
+	 *        <inf_rule>
+	 *      <B>
 	 *    <pattern-1>
 	 *    ...
 	 *    <pattern-n>
 	 *  Evaluation
 	 *    Predicate "preproof"
 	 *    List
-	 *      DontExec Variable "$B"
-	 *      Variable "$T"
+	 *      <B>
+	 *      <T>
 	 *
-	 * n is the number of patterns in addition to the expansion itself
-	 * (the Execution link).
+	 * n >= 0 is the number of patterns in addition to preproof and
+	 * expansion.
 	 */
 	HandleSet fetch_expansion_control_rules(const Handle& inf_rule, int n);
 
@@ -241,8 +274,8 @@ private:
 	Handle mk_pattern_var(int i);
 
 	/**
-	 * Calculate the actual mean of a TV. which is to be constracted
-	 * by the mean in the TruthValue class which doesn't correspond to
+	 * Calculate the actual mean of a TV. which is to be contrasted by
+	 * the mean in the TruthValue class which doesn't correspond to
 	 * the actual mean of the second order distribution.
 	 *
 	 * TODO: replace this by the mean method of the TruthValue once
@@ -250,7 +283,6 @@ private:
 	 */
 	double get_actual_mean(TruthValuePtr tv) const;
 };
-
 
 } // namespace opencog
 

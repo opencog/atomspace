@@ -1,5 +1,5 @@
 /*
- * UREConfigReader.cc
+ * UREConfig.cc
  *
  * Copyright (C) 2015 OpenCog Foundation
  *
@@ -21,7 +21,7 @@
  * 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
  */
 
-#include "UREConfigReader.h"
+#include "UREConfig.h"
 
 #include <opencog/atoms/core/NumberNode.h>
 #include <opencog/atomspaceutils/AtomSpaceUtils.h>
@@ -30,95 +30,93 @@
 using namespace std;
 using namespace opencog;
 
-const std::string UREConfigReader::top_rbs_name = "URE";
+const std::string UREConfig::top_rbs_name = "URE";
 
 // Parameters
-const std::string UREConfigReader::attention_alloc_name = "URE:attention-allocation";
-const std::string UREConfigReader::max_iter_name = "URE:maximum-iterations";
-const std::string UREConfigReader::bc_complexity_penalty_name = "URE:BC:complexity-penalty";
-const std::string UREConfigReader::bc_max_bit_size_name = "URE:BC:maximum-bit-size";
+const std::string UREConfig::attention_alloc_name = "URE:attention-allocation";
+const std::string UREConfig::max_iter_name = "URE:maximum-iterations";
+const std::string UREConfig::bc_complexity_penalty_name = "URE:BC:complexity-penalty";
+const std::string UREConfig::bc_max_bit_size_name = "URE:BC:maximum-bit-size";
+const std::string UREConfig::bc_mm_complexity_penalty_name = "URE:BC:MM:complexity-penalty";
+const std::string UREConfig::bc_mm_compressiveness_name = "URE:BC:MM:compressiveness";
 
-UREConfigReader::UREConfigReader(AtomSpace& as, const Handle& rbs) : _as(as)
+UREConfig::UREConfig(AtomSpace& as, const Handle& rbs) : _as(as)
 {
-	//////////////////////////
-	// Common parameters    //
-	//////////////////////////
-
 	if (Handle::UNDEFINED == rbs)
 		throw RuntimeException(TRACE_INFO,
-			"UREConfigReader - invalid rulebase specified!");
+			"UREConfig - invalid rulebase specified!");
 
-	// Retrieve the rules (MemberLinks) and instantiate them
-	for (const Handle& rule_name : fetch_rule_names(rbs))
-		_common_params.rules.emplace(rule_name, rbs);
-
-	// Fetch maximum number of iterations
-	_common_params.max_iter = fetch_num_param(max_iter_name, rbs);
-
-	// Fetch attention allocation parameter
-	_common_params.attention_alloc = fetch_bool_param(attention_alloc_name, rbs);
-
-	//////////////////////
-	// FC parameters    //
-	//////////////////////
-
-	//////////////////////
-	// BC parameters    //
-	//////////////////////
-
-	// Fetch BC complexity penalty parameter
-	_bc_params.complexity_penalty = fetch_num_param(bc_complexity_penalty_name, rbs);
-
-	// Fetch BC BIT maximum size parameter
-	_bc_params.max_bit_size = fetch_num_param(bc_max_bit_size_name, rbs, -1);
+	fetch_common_parameters(rbs);
+	fetch_fc_parameters(rbs);
+	fetch_bc_parameters(rbs);
 }
 
-const RuleSet& UREConfigReader::get_rules() const
+const RuleSet& UREConfig::get_rules() const
 {
 	return _common_params.rules;
 }
 
-RuleSet& UREConfigReader::get_rules()
+RuleSet& UREConfig::get_rules()
 {
 	return _common_params.rules;
 }
 
-bool UREConfigReader::get_attention_allocation() const
+bool UREConfig::get_attention_allocation() const
 {
 	return _common_params.attention_alloc;
 }
 
-int UREConfigReader::get_maximum_iterations() const
+int UREConfig::get_maximum_iterations() const
 {
 	return _common_params.max_iter;
 }
 
-double UREConfigReader::get_complexity_penalty() const
+double UREConfig::get_complexity_penalty() const
 {
 	return _bc_params.complexity_penalty;
 }
 
-double UREConfigReader::get_max_bit_size() const
+double UREConfig::get_max_bit_size() const
 {
 	return _bc_params.max_bit_size;
 }
 
-void UREConfigReader::set_attention_allocation(bool aa)
+double UREConfig::get_mm_complexity_penalty() const
+{
+	return _bc_params.mm_complexity_penalty;
+}
+
+double UREConfig::get_mm_compressiveness() const
+{
+	return _bc_params.mm_compressiveness;
+}
+
+void UREConfig::set_attention_allocation(bool aa)
 {
 	_common_params.attention_alloc = aa;
 }
 
-void UREConfigReader::set_maximum_iterations(int mi)
+void UREConfig::set_maximum_iterations(int mi)
 {
 	_common_params.max_iter = mi;
 }
 
-void UREConfigReader::set_complexity_penalty(double cp)
+void UREConfig::set_complexity_penalty(double cp)
 {
 	_bc_params.complexity_penalty = cp;
 }
 
-HandleSeq UREConfigReader::fetch_rule_names(const Handle& rbs)
+void UREConfig::set_mm_complexity_penalty(double mm_cp)
+{
+	_bc_params.mm_complexity_penalty = mm_cp;
+}
+
+void UREConfig::set_mm_compressiveness(double mm_cpr)
+{
+	_bc_params.mm_complexity_penalty = mm_cpr;
+}
+
+HandleSeq UREConfig::fetch_rule_names(const Handle& rbs)
 {
 	// Retrieve rules
 	Handle rule_var = _as.add_node(VARIABLE_NODE, "__URE_RULE__"),
@@ -135,9 +133,45 @@ HandleSeq UREConfigReader::fetch_rule_names(const Handle& rbs)
 	return rule_names;
 }
 
-HandleSeq UREConfigReader::fetch_execution_outputs(const Handle& schema,
-                                                   const Handle& input,
-                                                   Type type)
+void UREConfig::fetch_common_parameters(const Handle& rbs)
+{
+	// Retrieve the rules (MemberLinks) and instantiate them
+	for (const Handle& rule_name : fetch_rule_names(rbs))
+		_common_params.rules.emplace(rule_name, rbs);
+
+	// Fetch maximum number of iterations
+	_common_params.max_iter = fetch_num_param(max_iter_name, rbs);
+
+	// Fetch attention allocation parameter
+	_common_params.attention_alloc = fetch_bool_param(attention_alloc_name, rbs);
+}
+
+void UREConfig::fetch_fc_parameters(const Handle& rbs)
+{
+	// None yet
+}
+
+void UREConfig::fetch_bc_parameters(const Handle& rbs)
+{
+	// Fetch BC complexity penalty parameter
+	_bc_params.complexity_penalty =
+		fetch_num_param(bc_complexity_penalty_name, rbs);
+
+	// Fetch BC BIT maximum size parameter
+	_bc_params.max_bit_size = fetch_num_param(bc_max_bit_size_name, rbs, -1);
+
+	// Fetch BC Mixture Model complexity penalty parameter
+	_bc_params.mm_complexity_penalty =
+		fetch_num_param(bc_mm_complexity_penalty_name, rbs, 0);
+
+	// Fetch BC Mixture Model complexity penalty parameter
+	_bc_params.mm_compressiveness =
+		fetch_num_param(bc_mm_compressiveness_name, rbs, 1);
+}
+
+HandleSeq UREConfig::fetch_execution_outputs(const Handle& schema,
+                                             const Handle& input,
+                                             Type type)
 {
 	// Retrieve rules
 	Handle var_node = _as.add_node(VARIABLE_NODE, "__EXECUTION_OUTPUT_VAR__"),
@@ -167,9 +201,9 @@ HandleSeq UREConfigReader::fetch_execution_outputs(const Handle& schema,
 	return outputs;
 }
 
-double UREConfigReader::fetch_num_param(const string& schema_name,
-                                        const Handle& input,
-                                        double default_value)
+double UREConfig::fetch_num_param(const string& schema_name,
+                                  const Handle& input,
+                                  double default_value)
 {
 	Handle param_schema = _as.add_node(SCHEMA_NODE, schema_name);
 	HandleSeq outputs = fetch_execution_outputs(param_schema, input, NUMBER_NODE);
@@ -200,8 +234,8 @@ double UREConfigReader::fetch_num_param(const string& schema_name,
 	}
 }
 
-bool UREConfigReader::fetch_bool_param(const string& pred_name,
-                                       const Handle& input)
+bool UREConfig::fetch_bool_param(const string& pred_name,
+                                 const Handle& input)
 {
 	Handle pred = _as.add_node(PREDICATE_NODE, pred_name);
 	TruthValuePtr tv =

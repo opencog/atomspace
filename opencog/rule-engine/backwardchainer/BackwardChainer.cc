@@ -58,7 +58,7 @@ BackwardChainer::BackwardChainer(AtomSpace& as, const Handle& rbs,
 	  _bit(as, target, vardecl, bitnode_fitness),
 	  _andbit_fitness(andbit_fitness),
 	  _trace_recorder(trace_as),
-	  _control(_configReader.get_rules(), _bit, control_as),
+	  _control(_configReader, _bit, control_as),
 	  _rules(_control.rules),
 	  _iteration(0), _last_expansion_andbit(nullptr)
 {
@@ -66,12 +66,12 @@ BackwardChainer::BackwardChainer(AtomSpace& as, const Handle& rbs,
 	_trace_recorder.target(target);
 }
 
-UREConfigReader& BackwardChainer::get_config()
+UREConfig& BackwardChainer::get_config()
 {
 	return _configReader;
 }
 
-const UREConfigReader& BackwardChainer::get_config() const
+const UREConfig& BackwardChainer::get_config() const
 {
 	return _configReader;
 }

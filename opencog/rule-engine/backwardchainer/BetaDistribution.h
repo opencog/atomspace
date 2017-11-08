@@ -42,13 +42,30 @@ public:
 	 * Construct a BetaDistribution given a TV and a beta-distribution
 	 * prior with parameters (alpha, beta).
 	 */
-	BetaDistribution(const TruthValuePtr& tv, double alpha=1.0, double beta=1.0);
-	BetaDistribution(double pos_count, double count, double alpha=1.0, double beta=1.0);
+	BetaDistribution(const TruthValuePtr& tv,
+	                 double prior_alpha=1.0, double prior_beta=1.0);
+	BetaDistribution(double pos_count, double count,
+	                 double prior_alpha=1.0, double prior_beta=1.0);
 
 	/**
-	 * Return the mean of the beta distribution
+	 * Return the alpha parameter of the distribution
+	 */
+	double alpha() const;
+
+	/**
+	 * Return the beta of the beta parameter of the distribution
+	 */
+	double beta() const;
+
+	/**
+	 * Return the mean of the distribution
 	 */
 	double mean() const;
+
+	/**
+	 * Return the variance of the distribution
+	 */
+	double variance() const;
 
 	/**
 	 * Calculate the cdf of a beta distribution, given the number of
@@ -64,6 +81,12 @@ public:
 private:
 	boost::math::beta_distribution<double> _beta_distribution;
 };
+
+// Helpers
+BetaDistribution mk_beta_distribution(const TruthValuePtr& tv);
+
+TruthValuePtr mk_stv(double mean, double variance,
+                     double prior_alpha=1.0, double prior_beta=1.0);
 
 } // namespace opencog
 

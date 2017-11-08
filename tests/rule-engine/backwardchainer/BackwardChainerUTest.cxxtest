@@ -106,7 +106,7 @@ void BackwardChainerUTest::reset_bc()
 
 	// std::cout << "eval_result = " << eval_result << std::endl;
 
-	Handle top_rbs = _as.get_node(CONCEPT_NODE, UREConfigReader::top_rbs_name);
+	Handle top_rbs = _as.get_node(CONCEPT_NODE, UREConfig::top_rbs_name);
 
 	_bc = new BackwardChainer(_as, top_rbs, Handle::UNDEFINED);
 }
@@ -179,7 +179,7 @@ void BackwardChainerUTest::test_deduction()
 	load_from_path("bc-transitive-closure.scm");
 	randGen().seed(0);
 
-	Handle top_rbs = _as.get_node(CONCEPT_NODE, UREConfigReader::top_rbs_name);
+	Handle top_rbs = _as.get_node(CONCEPT_NODE, UREConfig::top_rbs_name);
 	Handle X = an(VARIABLE_NODE, "$X"),
 		D = an(CONCEPT_NODE, "D"),
 		target = al(INHERITANCE_LINK, X, D);
@@ -213,7 +213,7 @@ void BackwardChainerUTest::test_deduction_tv_query()
 	load_from_path("bc-transitive-closure.scm");
 	randGen().seed(0);
 
-	Handle top_rbs = _as.get_node(CONCEPT_NODE, UREConfigReader::top_rbs_name);
+	Handle top_rbs = _as.get_node(CONCEPT_NODE, UREConfig::top_rbs_name);
 	Handle target = _eval.eval_h("(Inheritance"
 	                             "   (Concept \"A\")"
 	                             "   (Concept \"D\"))");
@@ -236,7 +236,7 @@ void BackwardChainerUTest::test_modus_ponens_tv_query()
 	load_from_path("modus-ponens-example.scm");
 	randGen().seed(0);
 
-	Handle top_rbs = _as.get_node(CONCEPT_NODE, UREConfigReader::top_rbs_name);
+	Handle top_rbs = _as.get_node(CONCEPT_NODE, UREConfig::top_rbs_name);
 	Handle target = an(PREDICATE_NODE, "T");
 
 	BackwardChainer bc(_as, top_rbs, target);
@@ -258,7 +258,7 @@ void BackwardChainerUTest::test_conjunction_fuzzy_evaluation_tv_query()
 	result = load_from_path("simple-conjunction.scm");
 	randGen().seed(0);
 
-	Handle top_rbs = _as.get_node(CONCEPT_NODE, UREConfigReader::top_rbs_name);
+	Handle top_rbs = _as.get_node(CONCEPT_NODE, UREConfig::top_rbs_name);
 
 	Handle P = an(PREDICATE_NODE, "P"),
 		Q = an(PREDICATE_NODE, "Q"),
@@ -289,7 +289,7 @@ void BackwardChainerUTest::test_conditional_instantiation_1()
 	result = load_from_path("friends.scm");
 	randGen().seed(0);
 
-	Handle top_rbs = _as.get_node(CONCEPT_NODE, UREConfigReader::top_rbs_name);
+	Handle top_rbs = _as.get_node(CONCEPT_NODE, UREConfig::top_rbs_name);
 
 	Handle are_friends = an(PREDICATE_NODE, "are-friends"),
 		john = an(CONCEPT_NODE, "John"),
@@ -332,7 +332,7 @@ void BackwardChainerUTest::test_conditional_instantiation_2()
 	load_from_path("animals.scm");
 	randGen().seed(0);
 
-	Handle top_rbs = _as.get_node(CONCEPT_NODE, UREConfigReader::top_rbs_name);
+	Handle top_rbs = _as.get_node(CONCEPT_NODE, UREConfig::top_rbs_name);
 
 	Handle green = an(CONCEPT_NODE, "green"),
 		Fritz = an(CONCEPT_NODE, "Fritz"),
@@ -364,7 +364,7 @@ void BackwardChainerUTest::test_conditional_instantiation_tv_query()
 	load_from_path("animals.scm");
 	randGen().seed(500);
 
-	Handle top_rbs = _as.get_node(CONCEPT_NODE, UREConfigReader::top_rbs_name);
+	Handle top_rbs = _as.get_node(CONCEPT_NODE, UREConfig::top_rbs_name);
 
 	Handle target =
 	    _eval.eval_h("(InheritanceLink"
@@ -429,7 +429,7 @@ void BackwardChainerUTest::test_conditional_partial_instantiation()
 	result = load_from_path("friends.scm");
 	randGen().seed(0);
 
-	Handle top_rbs = _as.get_node(CONCEPT_NODE, UREConfigReader::top_rbs_name);
+	Handle top_rbs = _as.get_node(CONCEPT_NODE, UREConfig::top_rbs_name);
 
 	Handle target = _eval.eval_h("(ImplicationScope"
 	                             "   (TypedVariable"
@@ -479,7 +479,7 @@ void BackwardChainerUTest::test_impossible_criminal()
 	load_from_path("criminal.scm");
 	randGen().seed(0);
 
-	Handle top_rbs = _as.get_node(CONCEPT_NODE, UREConfigReader::top_rbs_name);
+	Handle top_rbs = _as.get_node(CONCEPT_NODE, UREConfig::top_rbs_name);
 
 	Handle target =
 	    _eval.eval_h("(InheritanceLink"
@@ -516,7 +516,7 @@ void BackwardChainerUTest::test_criminal()
 	load_from_path("criminal.scm");
 	randGen().seed(0);
 
-	Handle top_rbs = _as.get_node(CONCEPT_NODE, UREConfigReader::top_rbs_name);
+	Handle top_rbs = _as.get_node(CONCEPT_NODE, UREConfig::top_rbs_name);
 
 	Handle target_var = _eval.eval_h("(VariableNode \"$who\")");
 	Handle target =
@@ -621,7 +621,7 @@ void BackwardChainerUTest::test_induction()
 
 	randGen().seed(500);
 
-	Handle top_rbs = _as.get_node(CONCEPT_NODE, UREConfigReader::top_rbs_name);
+	Handle top_rbs = _as.get_node(CONCEPT_NODE, UREConfig::top_rbs_name);
 
 	Handle target = _eval.eval_h("bc-induction-target");
 
@@ -647,7 +647,7 @@ void BackwardChainerUTest::test_focus_set()
 	load_from_path("animals.scm");
 	randGen().seed(500);
 
-	Handle top_rbs = _as.get_node(CONCEPT_NODE, UREConfigReader::top_rbs_name);
+	Handle top_rbs = _as.get_node(CONCEPT_NODE, UREConfig::top_rbs_name);
 
 	Handle green = an(CONCEPT_NODE, "green"),
 		Fritz = an(CONCEPT_NODE, "Fritz"),

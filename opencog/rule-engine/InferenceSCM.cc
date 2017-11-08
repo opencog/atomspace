@@ -90,7 +90,7 @@ public:
 #include <opencog/rule-engine/forwardchainer/ForwardChainer.h>
 #include <opencog/rule-engine/backwardchainer/BackwardChainer.h>
 
-#include "UREConfigReader.h"
+#include "UREConfig.h"
 using namespace opencog;
 
 InferenceSCM::InferenceSCM() : ModuleWrap("opencog rule-engine") {}
@@ -171,7 +171,7 @@ Handle InferenceSCM::get_rulebase_rules(Handle rbs)
             "InferenceSCM::get_rulebase_rules - invalid rulebase!");
 
     AtomSpace *as = SchemeSmob::ss_get_env_as("cog-rbs-rules");
-    UREConfigReader ure_config(*as, rbs);
+    UREConfig ure_config(*as, rbs);
     auto rules = ure_config.get_rules();
     HandleSeq hs;
 

@@ -100,12 +100,12 @@ void ForwardChainer::init(const Handle& source,
 	_iteration = 0;
 }
 
-UREConfigReader& ForwardChainer::get_config()
+UREConfig& ForwardChainer::get_config()
 {
 	return _configReader;
 }
 
-const UREConfigReader& ForwardChainer::get_config() const
+const UREConfig& ForwardChainer::get_config() const
 {
 	return _configReader;
 }

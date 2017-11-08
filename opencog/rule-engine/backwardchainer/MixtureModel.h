@@ -71,66 +71,40 @@ public:
 	             double compressiveness=0.0);
 
 	/**
-	 * Calculate the TV of the mixture model. According to Universal
-	 * Operator Induction, assuming complete models, the equation
-	 * rewritten for TVs is
+	 * Calculate the TV of the mixture model. Assuming the ith model,
+	 * Mi, with prior Pi, has its TV represented by a probabilistic
+	 * density function pfd_i, a beta-distributions with parameters
+	 * alpha_i, beta_i, then, an optimal mixture, according to
+	 * Universal Operator Induction, may be approached with
 	 *
-	 * TV_MM(D') = Sum_i=0^n TV_Mi(D') * P(Mi) / Sum_i=0^n P(Mi)
+	 * Sum_i Pi * pdf_i * Beta(alpha_i, beta_i)
 	 *
-	 * where
-	 * - D' is the new data to explain
-	 * - TV_MM(D') is the TV of the mixture model explaining D'
-	 * - TV_Mi(D') is the TV of model Mi explaining D'
-	 * - P(Mi) is the prior probability of model Mi
+	 * up to a normalizing factor so that the resulting pdf integrates
+	 * to 1. The reason for that is lengthly explained in Subsection
+	 * Combining Inference Control Rules of
+	 * <OPENCOG_ROOT>/examples/pln/inference-control-learning/README.md
 	 *
-	 * TVs already captures the likelihood of the training data (the
-	 * binomial part of the beta-binomial distribution underlying a
-	 * TV, see Section 4.5.1 of the PLN book) which is why it doesn't
-	 * appear in the equation.
-	 *
-	 * However, most of the time the models are partial, they are only
-	 * active on a subset of observations. Ignoring the unexplained
-	 * data would give an unfair advantage to partial models. Indeed
-	 * the multiplicative factor to have the TV exactly equal to the
-	 * likelihood of explaining the historical data could be ignored
-	 * in the equation above because it is constant for all complete
-	 * models, but it can no longer be ignored for partial
-	 * models. Assuming Ni and Xi are respectively the number of total
-	 * and positive observations defined in model Mi, this factor is
-	 *
-	 * 1 / (Ni+1)*(choose Ni Xi)
-	 *
-	 * which grows quadratically to exponentially as N goes down.
-	 *
-	 * In principle a way to deal with that would be to complete these
-	 * partial models with as many models as possible. As it is
-	 * costly, if not impractical, we will attempt to avoid that
-	 * entirely and assume instead a fictive completion that perfectly
-	 * explains the remaining data, leading to a likelihood of 1. It
-	 * seems acceptable as such a fictive completion dominates all
-	 * others in terms of fitness (pior*likelihood). However to do
-	 * well we need to estimate its size, the Kolmogorov complexity of
-	 * the unexplained data. Which almost brings us back to square
-	 * one. For now we will use the following simplistic heuristic to
-	 * estimate its Kolmogorov complexity
+	 * Since Mi may be based on a subet of observations, Pi must
+	 * account for the complexity of the missing observations. We use
+	 * the simplistic heuristic to estimate the Kolmogorov complexity
+	 * of the missing observations D
 	 *
 	 * K(D) = |D|^(1-c)
 	 *
 	 * where c is a compressiveness parameter, that ranges from 0, no
 	 * compression, to 1, full compression.
 	 *
-	 * So for partial models the TV of the mixture model can be
+	 * So for partial models the pdf of the mixture model can be
 	 * defined as followed
 	 *
-	 * TV_MM(D') = Sum_i=0^n TV_Mi(D') * P(Li + K(Di)) * ((Ni+1)*(choose Ni Xi))
-	 *           / Sum_i=0^n P(Li + K(Di)) * ((Ni+1)*(choose Ni Xi))
+	 * Sum_i P(Li + K(Di)) * pdf_i * Beta(alpha_i, beta_i)
 	 *
 	 * where
 	 * - Li is the length of model Mi
-	 * - Di are the unexplained data by model Mi
+	 * - Di are the missing data of model Mi
 	 * - P(Li + K(Di)) is the prior of model Mi + perfect fictive completion
 	 */
-	TruthValuePtr operator()();
+	TruthValuePtr operator()() const;
 
 	/**
 	 * Given a list of TVs and a list of associated weights, that do
@@ -145,10 +119,16 @@ public:
 	                               const std::vector<double>& weights) const;
 
 	/**
+	 * Calculate the alpha and beta parameters of the model's TV, and
+	 * return Beta(alpha, beta), where Beta is the beta function.
+	 */
+	double beta_factor(const Handle& model) const;
+
+	/**
 	 * Given a model, calculate it's prior estimate. In the case of a
 	 * partial model, the length is estimated
 	 */
-	double prior_estimate(const Handle& model);
+	double prior_estimate(const Handle& model) const;
 
 	/**
 	 * Given the size of the data set that isn't explained by a model,
@@ -162,7 +142,7 @@ public:
 	 * it return 1, which is the maximum compression, all data can be
 	 * explained with just one bit.
 	 */
-	double kolmogorov_estimate(double remain_data_size);
+	double kolmogorov_estimate(double remain_data_size) const;
 
 	/**
 	 * Given the length of a model, calculate its prior
@@ -177,14 +157,14 @@ public:
 	 * The prior doesn't have to sum up to 1 because the probability
 	 * estimates are normalized.
 	 */
-	double prior(double length);
+	double prior(double length) const;
 
 private:
 	/**
 	 * Infer the data set size by taking the max count of all models
 	 * (it works assuming that one of them is complete).
 	 */
-	double infer_data_set_size();
+	double infer_data_set_size() const;
 
 };
 

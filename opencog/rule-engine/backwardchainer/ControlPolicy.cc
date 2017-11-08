@@ -26,6 +26,7 @@
 #include <opencog/util/random.h>
 #include <opencog/util/algorithm.h>
 #include <opencog/query/BindLinkAPI.h>
+#include <opencog/atomutils/Unify.h>
 
 #include "MixtureModel.h"
 #include "ActionSelection.h"
@@ -39,9 +40,10 @@ using namespace opencog;
 #define al _query_as->add_link
 #define an _query_as->add_node
 
-ControlPolicy::ControlPolicy(const RuleSet& rs, const BIT& bit,
+ControlPolicy::ControlPolicy(const UREConfig& ure_config, const BIT& bit,
                              AtomSpace* control_as) :
-	rules(rs), _bit(bit), _control_as(control_as), _query_as(nullptr)
+	rules(ure_config.get_rules()), _ure_config(ure_config),
+	_bit(bit), _control_as(control_as), _query_as(nullptr)
 {
 	// Fetch default TVs for each inference rule (the TV on the member
 	// link connecting the rule to the rule base
@@ -131,7 +133,7 @@ RuleSelection ControlPolicy::select_rule(const AndBIT& andbit,
                                          const BITNode& bitleaf,
                                          const RuleTypedSubstitutionMap& inf_rules)
 {
-	// Build a mapping from rule to their TVs of expansion success
+	// Build a mapping from rule to TV of expansion success
 	HandleTVMap success_tvs = expansion_success_tvs(andbit, bitleaf, inf_rules);
 	std::vector<double> weights = rule_weights(success_tvs, inf_rules);
 
@@ -160,7 +162,8 @@ HandleTVMap ControlPolicy::expansion_success_tvs(
 	HandleTVMap success_tvs;
 	for (const auto& rule : rule_aliases(inf_rules)) {
 		// Get all active expansion control rules
-		HandleSet active_ctrl_rules = active_expansion_control_rules(rule);
+		HandleSet active_ctrl_rules =
+			active_expansion_control_rules(andbit, bitleaf, rule);
 
 		if (active_ctrl_rules.empty()) {
 			// If there are no active control rules, use the default
@@ -169,15 +172,17 @@ HandleTVMap ControlPolicy::expansion_success_tvs(
 		} else {
 			// Otherwise calculate the truth value of its mixture
 			// model.
-			// TODO: set cpx_penalty and compressiveness.
-			success_tvs[rule] = MixtureModel(active_ctrl_rules)();
+			double cpx_penalty = _ure_config.get_mm_complexity_penalty(),
+				compressiveness = _ure_config.get_mm_compressiveness();
+			success_tvs[rule] = MixtureModel(active_ctrl_rules,
+			                                 cpx_penalty, compressiveness)();
 		}
 	}
 
 	// Log TVs of representing probability of success (expanding into
 	// a preproof) for each action
 	std::stringstream ss;
-	ss << "Rule TVs expanding a supposed preproof into another preproof:" << std::endl;
+	ss << "Rule TVs of expanding a preproof into another preproof:" << std::endl;
 	for (const auto& rtv : success_tvs)
 		ss << rtv.second->to_string() << " " << oc_to_string(rtv.first);
 	ure_logger().debug() << ss.str();
@@ -244,7 +249,10 @@ HandleSet ControlPolicy::rule_aliases(const RuleTypedSubstitutionMap& rules) con
 	return aliases;
 }
 
-HandleSet ControlPolicy::active_expansion_control_rules(const Handle& inf_rule_alias)
+HandleSet ControlPolicy::active_expansion_control_rules(
+	const AndBIT& andbit,
+	const BITNode& bitleaf,
+	const Handle& inf_rule_alias)
 {
 	if (!_control_as)
 		return HandleSet();
@@ -252,7 +260,7 @@ HandleSet ControlPolicy::active_expansion_control_rules(const Handle& inf_rule_a
 	// Filter out inactive expansion control rules
 	HandleSet results;
 	for (const Handle& ctrl_rule : _expansion_control_rules[inf_rule_alias])
-		if (control_rule_active(ctrl_rule))
+		if (is_control_rule_active(andbit, bitleaf, ctrl_rule))
 			results.insert(ctrl_rule);
 
 	// Log active control rules, if any
@@ -269,13 +277,59 @@ HandleSet ControlPolicy::active_expansion_control_rules(const Handle& inf_rule_a
 	return results;
 }
 
-bool ControlPolicy::control_rule_active(const Handle& ctrl_rule) const
+bool ControlPolicy::is_control_rule_active(const AndBIT& andbit,
+                                           const BITNode& bitleaf,
+                                           const Handle& ctrl_rule) const
 {
-	// For now we assume that any control rules are active. Also in
-	// principle a control is neither active or inactive, it has
-	// instead a certain probability of being true, indeed we need
-	// never know for sure whether a context is satisfied.
-	return true;
+	Handle ctrl_vardecl = ScopeLinkCast(ctrl_rule)->get_vardecl(),
+		ctrl_expansion = retrieve_expansion(ctrl_rule),
+		ctrl_input = ctrl_expansion->getOutgoingAtom(1),
+		ctrl_andbit = ctrl_input->getOutgoingAtom(0),
+		ctrl_bitleaf = ctrl_input->getOutgoingAtom(1),
+		actual_andbit = andbit.fcs,
+		actual_andbit_vardecl = ScopeLinkCast(actual_andbit)->get_vardecl();
+
+	// Make sure that the variables in the control rule and the actual
+	// andbit are disjoint
+	//
+	// TODO: should be alpha-converted to have no variable in common.
+	Variables ctrl_vars = VariableList(ctrl_vardecl).get_variables(),
+		actual_andbit_vars = VariableList(actual_andbit_vardecl).get_variables();
+	if (not is_disjoint(ctrl_vars.varset, actual_andbit_vars.varset)) {
+		std::stringstream ss;
+		ss << "Not implemented yet. "
+		   << "ctrl_vars and actual_andbit_vars ctrl_vars should be disjoint, "
+		   << "but ctrl_vars = " << oc_to_string(ctrl_vars) << std::endl
+		   << "actual_andbit_vars = "
+		   << oc_to_string(actual_andbit_vars) << std::endl;
+		OC_ASSERT(false, ss.str());
+	}
+
+	// Check that the current andbit (resp. current bitleaf) and the
+	// andbit (resp. bitleaf) on the control rule are unifiable.
+	//
+	// TODO: support vardecls, once QuoteBindLink is introduced,
+	// otherwise some false positive might go through.
+	return unifiable(ctrl_andbit, andbit.fcs) and
+		unifiable(ctrl_bitleaf, bitleaf.body);
+}
+
+Handle ControlPolicy::retrieve_expansion(const Handle& ctrl_rule) const
+{
+	ScopeLinkPtr sc = ScopeLinkCast(ctrl_rule);
+	for (const Handle& h : sc->get_body()->getOutgoingSet())
+		if (is_expansion(h))
+			return h;
+	return Handle::UNDEFINED;
+}
+
+bool ControlPolicy::is_expansion(const Handle& h) const
+{
+	if (h->get_type() == EXECUTION_LINK) {
+		Handle schema = h->getOutgoingAtom(0);
+		return schema->get_name() == TraceRecorder::expand_andbit_schema_name;
+	}
+	return false;
 }
 
 Handle ControlPolicy::get_expansion_control_rule_pattern(const Handle& ctrl_rule) const
@@ -299,8 +353,8 @@ Handle ControlPolicy::get_expansion_control_rule_pattern(const Handle& ctrl_rule
 
 HandleSet ControlPolicy::fetch_expansion_control_rules(const Handle& inf_rule)
 {
-	return set_union(fetch_expansion_control_rules(inf_rule, 1),
-	                 fetch_expansion_control_rules(inf_rule, 2));
+	return set_union(fetch_expansion_control_rules(inf_rule, 0),
+	                 fetch_expansion_control_rules(inf_rule, 1));
 }
 
 HandleSet ControlPolicy::fetch_expansion_control_rules(const Handle& inf_rule,
@@ -356,41 +410,44 @@ Handle ControlPolicy::mk_preproof_eval(const Handle& preproof_args_var)
 Handle ControlPolicy::mk_expansion_control_rules_query(const Handle& inf_rule,
                                                        int n)
 {
-	OC_ASSERT(0 < n, "Not supported yet");
-
 	Handle vardecl_var = an(VARIABLE_NODE, "$vardecl"),
 		vardecl_vardecl = mk_vardecl_vardecl(vardecl_var),
 
-		input_andbit_var = an(VARIABLE_NODE, "$input_andbit"),
-		input_leaf_var = an(VARIABLE_NODE, "$input_leaf"),
-		output_andbit_var = an(VARIABLE_NODE, "$output_andbit"),
-		expand_exec = mk_expand_exec(input_andbit_var, input_leaf_var, inf_rule,
-		                             output_andbit_var),
+		in_preproof_args_var = an(VARIABLE_NODE, "$in_preproof_args"),
+		in_preproof_args_vardecl = mk_list_of_args_vardecl(in_preproof_args_var),
+		in_preproof_eval = mk_preproof_eval(in_preproof_args_var),
 
-		preproof_args_var = an(VARIABLE_NODE, "$preproof_args"),
-		preproof_args_vardecl = mk_list_of_args_vardecl(preproof_args_var),
-		preproof_eval = mk_preproof_eval(preproof_args_var);
+		in_andbit_var = an(VARIABLE_NODE, "$in_andbit"),
+		in_leaf_var = an(VARIABLE_NODE, "$in_leaf"),
+		out_andbit_var = an(VARIABLE_NODE, "$out_andbit"),
+		expand_exec = mk_expand_exec(in_andbit_var, in_leaf_var, inf_rule,
+		                             out_andbit_var),
+
+		out_preproof_args_var = an(VARIABLE_NODE, "$out_preproof_args"),
+		out_preproof_args_vardecl = mk_list_of_args_vardecl(out_preproof_args_var),
+		out_preproof_eval = mk_preproof_eval(out_preproof_args_var);
 
 	HandleSeq pattern_vars = mk_pattern_vars(n);
 
 	// ImplicationScope with a pattern in its antecedent to
 	// retrieve
-	HandleSeq antecedents{expand_exec};
+	HandleSeq antecedents{in_preproof_eval, expand_exec};
 	for (const Handle pv : pattern_vars)
 		antecedents.push_back(al(UNQUOTE_LINK, pv));
 	Handle pat_expand_preproof_impl = al(QUOTE_LINK,
 	                                     al(IMPLICATION_SCOPE_LINK,
 	                                        al(UNQUOTE_LINK, vardecl_var),
 	                                        al(AND_LINK, antecedents),
-	                                        preproof_eval));
+	                                        out_preproof_eval));
 
 	// Bind of ImplicationScope with a pattern in its antecedent
 	// to retrieve
 	HandleSeq vardecls{vardecl_vardecl,
-	                   input_andbit_var,
-	                   input_leaf_var,
-	                   output_andbit_var,
-	                   preproof_args_vardecl};
+	                   in_preproof_args_vardecl,
+	                   in_andbit_var,
+	                   in_leaf_var,
+	                   out_andbit_var,
+	                   out_preproof_args_vardecl};
 	vardecls.insert(vardecls.end(), pattern_vars.begin(), pattern_vars.end());
 
 	Handle pat_expand_preproof_impl_bl = al(BIND_LINK,
