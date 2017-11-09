@@ -72,7 +72,18 @@ public:
 	 * distribution.
 	 */
 	Handle operator()();
+
+private:
+	/**
+	 * Helper for distribution(). Given a vector of cdf vector, one
+	 * cdf vector per action, calculate the unnormalized Pi (see the
+	 * comment of distribution()) for action i.
+	 */
+	double Pi(size_t i, const std::vector<std::vector<double>>& cdfs) const;
 };
+
+std::string	oc_to_string(const ActionSelection& asel);
+std::string	oc_to_string(const HandleTVMap& h2tv);
 
 } // namespace opencog
 
