@@ -99,7 +99,7 @@ Linas Vepštas
 \end_layout
 
 \begin_layout Date
-7 November 2017
+9 November 2017
 \end_layout
 
 \begin_layout Abstract
@@ -1027,10 +1027,28 @@ Given two seeds, one can always either join them (because they connect)
 \end_layout
 
 \begin_layout Itemize
+The analogy between graphs and topology, specifically between open sets
+ and seeds and the intersection of open sets and edges, allows concepts
+ and tools to be borrowed from algebraic topology.
+\end_layout
+
+\begin_layout Standard
+If we stop here, not much is accomplished, other than to define a somewhat
+ idiosyncratic view of graph theory.
+ But that is not the case; the concept of seeds and sections are needed
+ to pursue more complex constructions.
+ They provide a tool to study natural language and other systems.
+\end_layout
+
+\begin_layout Subsection*
+Similar concept: Link Grammar
+\end_layout
+
+\begin_layout Standard
 Readers familiar with Link Grammar
 \begin_inset CommandInset citation
 LatexCommand cite
-key "Sleator1991"
+key "Sleator1991,Sleator1993"
 
 \end_inset
 
@@ -1043,43 +1061,278 @@ disjuncts
 \end_inset
 
  in Link Grammar.
- However, Link Grammar disjuncts are a bit more complicated than seeds;
- this is the topic of the next section.
-\end_layout
-
-\begin_layout Itemize
-In certain ways, the connectors on a seed look like the uncontracted indexes
- on a tensor.
- That is, a seed with 
-\begin_inset Formula $n$
+ The formal defintion for Link Grammar disjuncts are a bit more complicated
+ than seeds, and is expanded on in later sections.
+ To lay that groundwork, however, consider an unlabelled dependency parse
+ for the sentence 
+\begin_inset Quotes eld
 \end_inset
 
- connectors on it looks like a tensor of order 
-\begin_inset Formula $n$
+this is an example
+\begin_inset Quotes erd
 \end_inset
 
-.
- A link looks like a pair of indexes that have been contracted.
- Tensors have additional properties that seeds do not have; however, the
- notion of connecting together connectors to form links means that many
- of the notions from a tensor algebra can be carried over into the current
- context.
- This includes, at least partly, the notion that a tensor category describes
- the algebra of sections.
-\end_layout
-
-\begin_layout Itemize
-The analogy between graphs and topology, specifically between open sets
- and seeds and the intersection of open sets and edges, allows concepts
- and tools to be borrowed from algebraic topology.
+, shown in the figure below.
 \end_layout
 
 \begin_layout Standard
-If we stop here, not much is accomplished, other than to define a somewhat
- idiosyncratic view of graph theory.
- But that is not the case; the concept of seeds and sections are needed
- to pursue more complex constructions.
- They provide a tool to study natural language and other systems.
+\begin_inset Float figure
+placement h
+wide false
+sideways false
+status open
+
+\begin_layout Plain Layout
+\begin_inset Caption Standard
+
+\begin_layout Plain Layout
+A dependency parse decomposed into four seeds
+\end_layout
+
+\end_inset
+
+
+\begin_inset Graphics
+	filename example.eps
+	width 85col%
+
+\end_inset
+
+
+\end_layout
+
+\begin_layout Plain Layout
+
+\end_layout
+
+\end_inset
+
+
+\end_layout
+
+\begin_layout Standard
+The depdency parse is shown as a graph, with four vertexes.
+ Below, the parse is decomposed into the component seeds; as always, the
+ open dots are connectors, the closed dots are the germs.
+ Using the notation 
+\begin_inset Formula $\left(v,E_{v}\right)$
+\end_inset
+
+ for a seed, where 
+\begin_inset Formula $E_{v}=\left\{ \left(v,v_{a}\right),\left(v,v_{b}\right),\cdots\right\} $
+\end_inset
+
+, these seeds can be textually written as
+\begin_inset Newline newline
+\end_inset
+
+
+\end_layout
+
+\begin_layout Standard
+\begin_inset space \qquad{}
+\end_inset
+
+
+\begin_inset Box Frameless
+position "t"
+hor_pos "c"
+has_inner_box 1
+inner_pos "t"
+use_parbox 0
+use_makebox 0
+width "80col%"
+special "none"
+height "1in"
+height_special "totalheight"
+thickness "0.4pt"
+separation "3pt"
+shadowsize "4pt"
+framecolor "black"
+backgroundcolor "none"
+status open
+
+\begin_layout Plain Layout
+
+\family sans
+this: {(this, is+)}
+\end_layout
+
+\begin_layout Plain Layout
+
+\family sans
+is: {(is, this-), (is, example+)}
+\end_layout
+
+\begin_layout Plain Layout
+
+\family sans
+an: {(an, example+)}
+\end_layout
+
+\begin_layout Plain Layout
+
+\family sans
+example: {(example, is-), (example, an-)}
+\end_layout
+
+\end_inset
+
+
+\begin_inset Newline newline
+\end_inset
+
+
+\begin_inset Newline newline
+\end_inset
+
+The above vertex: edge-list notation is a bit awkward and hard to read.
+ A simpler notation conveying the same idea is
+\begin_inset Newline newline
+\end_inset
+
+
+\end_layout
+
+\begin_layout Standard
+\begin_inset space \qquad{}
+\end_inset
+
+
+\begin_inset Box Frameless
+position "t"
+hor_pos "c"
+has_inner_box 1
+inner_pos "t"
+use_parbox 0
+use_makebox 0
+width "80col%"
+special "none"
+height "1in"
+height_special "totalheight"
+thickness "0.4pt"
+separation "3pt"
+shadowsize "4pt"
+framecolor "black"
+backgroundcolor "none"
+status open
+
+\begin_layout Plain Layout
+
+\family sans
+this: is+;
+\end_layout
+
+\begin_layout Plain Layout
+
+\family sans
+is: this- & example+;
+\end_layout
+
+\begin_layout Plain Layout
+
+\family sans
+an: example+;
+\end_layout
+
+\begin_layout Plain Layout
+
+\family sans
+example: an- & is-;
+\end_layout
+
+\end_inset
+
+
+\begin_inset Newline newline
+\end_inset
+
+
+\begin_inset Newline newline
+\end_inset
+
+In both textual representations, the pluses and minuses are used to indicate
+ word-order: minuses to the left, pluses to the right.
+ This is an additional decoration added to the connectors, needed to indicate
+ and preserve word-order, but not a part of the core definition of a seed.
+ The ampersand is not symmetric, but enforces order; this is not apparent
+ here, but is required for the proper definition.
+\end_layout
+
+\begin_layout Standard
+In Link Grammar, the objects to the right of the colon are called 
+\begin_inset Quotes eld
+\end_inset
+
+disjuncts
+\begin_inset Quotes erd
+\end_inset
+
+.
+ The name comes from the idea that they disjoin colocational extractions.
+ After observing a large corpus, one might find that
+\begin_inset Newline newline
+\end_inset
+
+
+\end_layout
+
+\begin_layout Standard
+\begin_inset space \qquad{}
+\end_inset
+
+
+\begin_inset Box Frameless
+position "t"
+hor_pos "c"
+has_inner_box 1
+inner_pos "t"
+use_parbox 0
+use_makebox 0
+width "80col%"
+special "none"
+height "1in"
+height_special "totalheight"
+thickness "0.4pt"
+separation "3pt"
+shadowsize "4pt"
+framecolor "black"
+backgroundcolor "none"
+status open
+
+\begin_layout Plain Layout
+
+\family sans
+is: (this- & example+) or (banana- & fruit+) or (apple- & green+);
+\end_layout
+
+\end_inset
+
+
+\begin_inset Newline newline
+\end_inset
+
+
+\begin_inset Newline newline
+\end_inset
+
+which indicates that sentences such as 
+\begin_inset Quotes eld
+\end_inset
+
+a banana is a kind of fruit
+\begin_inset Quotes erd
+\end_inset
+
+ or 
+\begin_inset Quotes eld
+\end_inset
+
+this apple is green
+\begin_inset Quotes erd
+\end_inset
+
+ were observed and parsed into (unlabelled) dependencies.
 \end_layout
 
 \begin_layout Subsection*
@@ -1112,13 +1365,132 @@ lus notation.
 .
  This notation has been used to express the concept of a seed, as described
  above.
+ For example, Poon and Domingos
 \begin_inset CommandInset citation
 LatexCommand cite
 key "Poon2009"
 
 \end_inset
 
- The problem with this notation is that, properly speaking, lambda calculus
+ write 
+\begin_inset Formula $\lambda y\lambda x.\mbox{borders}(x,y)$
+\end_inset
+
+ to represent the attachments of the word 
+\begin_inset Quotes eld
+\end_inset
+
+borders
+\begin_inset Quotes erd
+\end_inset
+
+ as a synonym for 
+\begin_inset Quotes eld
+\end_inset
+
+is next to
+\begin_inset Quotes erd
+\end_inset
+
+.
+ This is illustrated with the verb-phrase 
+\begin_inset Formula $\lambda y\lambda x.\mbox{borders}(x,y)(\mbox{Idaho})$
+\end_inset
+
+ which beta-reduces to the verb-phrase 
+\begin_inset Formula $\lambda x.\mbox{borders}(x,\mbox{Idaho})$
+\end_inset
+
+ to indicate that 
+\begin_inset Formula $x$
+\end_inset
+
+ is next to Idaho.
+ The utility of this device becomes apparant because one can use this same
+ notation to write 
+\begin_inset Formula $\lambda y\lambda x.\mbox{is\_next\_to}(x,y)$
+\end_inset
+
+ and 
+\begin_inset Formula $\lambda y\lambda x.\mbox{shares\_a\_border\_with}(x,y)$
+\end_inset
+
+ as synonymous phrases.
+ The lambda notation allows 
+\begin_inset Formula $x$
+\end_inset
+
+ and 
+\begin_inset Formula $y$
+\end_inset
+
+ to be exposed as connectors, while at the same time hiding the links that
+ were required to assemble seeds for 
+\begin_inset Quotes eld
+\end_inset
+
+next
+\begin_inset Quotes erd
+\end_inset
+
+, 
+\begin_inset Quotes eld
+\end_inset
+
+is
+\begin_inset Quotes erd
+\end_inset
+
+, and 
+\begin_inset Quotes eld
+\end_inset
+
+to
+\begin_inset Quotes erd
+\end_inset
+
+ into a phrase.
+ That is, 
+\begin_inset Formula $\lambda y\lambda x.\mbox{is\_next\_to}(x,y)$
+\end_inset
+
+ is an example of a connected section, having 
+\begin_inset Formula $x$
+\end_inset
+
+ and 
+\begin_inset Formula $y$
+\end_inset
+
+ as the externally exposed connectors and the internal links between 
+\begin_inset Quotes eld
+\end_inset
+
+next
+\begin_inset Quotes erd
+\end_inset
+
+, 
+\begin_inset Quotes eld
+\end_inset
+
+is
+\begin_inset Quotes erd
+\end_inset
+
+, and 
+\begin_inset Quotes eld
+\end_inset
+
+to
+\begin_inset Quotes erd
+\end_inset
+
+ hidden.
+\end_layout
+
+\begin_layout Standard
+The problem with this notation is that, properly speaking, lambda calculus
  is a system for generating and working with strings, not with graphs, and
  lambdas are designed to perform substitution (beta-reduction), and not
  for connecting things.
@@ -1212,6 +1584,500 @@ connecting
 \end_layout
 
 \begin_layout Subsection*
+Similar concept: tensor algebra
+\end_layout
+
+\begin_layout Standard
+The 
+\begin_inset CommandInset href
+LatexCommand href
+name "tensor algebra"
+target "https://en.wikipedia.org/w/Tensor_algebra"
+
+\end_inset
+
+ is an important mathematical construct underlying large parts of mathematical
+ analysis, including the theory of vector spaces, the theory of Hilbert
+ spaces, and, in physics, the theory of quantum mechanics.
+ 
+\end_layout
+
+\begin_layout Standard
+\begin_inset Float figure
+placement h
+wide false
+sideways false
+status open
+
+\begin_layout Plain Layout
+\begin_inset Caption Standard
+
+\begin_layout Plain Layout
+A tensor with three input wires and two output wires
+\end_layout
+
+\end_inset
+
+
+\end_layout
+
+\begin_layout Plain Layout
+\begin_inset Graphics
+	filename tensor.eps
+	width 30col%
+
+\end_inset
+
+
+\end_layout
+
+\begin_layout Plain Layout
+
+\end_layout
+
+\end_inset
+
+
+\end_layout
+
+\begin_layout Standard
+It has been widely noted that tensor algebras have the structure of monoidal
+ categories; perhaps the most insightful and carefully explained such developmen
+t is given by Baez and Stay
+\begin_inset CommandInset citation
+LatexCommand cite
+key "Baez2009"
+
+\end_inset
+
+.
+ The diagram of a tensor shown above is taken from that paper; it is a diagramma
+tic representation of a morphism 
+\begin_inset Formula $f:X_{1}\otimes X_{2}\otimes X_{3}\to Y_{1}\otimes Y_{2}$
+\end_inset
+
+.
+ There are several interesting operations one can do with tensors.
+ One of them is the contraction of indexes between two tensors.
+ For example, to multiply a matrix 
+\begin_inset Formula $M_{ik}$
+\end_inset
+
+ by a vector 
+\begin_inset Formula $v_{k}$
+\end_inset
+
+, one sums over the index 
+\begin_inset Formula $k$
+\end_inset
+
+ to obtain another vector: 
+\begin_inset Formula $w_{i}=\sum_{k}M_{ik}v_{k}$
+\end_inset
+
+.
+ The matrix 
+\begin_inset Formula $M_{ik}$
+\end_inset
+
+ should be understood as a 2-tensor, having two connectors, while vectors
+ are 1-tensors.
+ The intent here is that 
+\begin_inset Formula $M_{ik}$
+\end_inset
+
+ is to be literally taken as a seed, with 
+\begin_inset Formula $M$
+\end_inset
+
+ the germ, and 
+\begin_inset Formula $i$
+\end_inset
+
+ and 
+\begin_inset Formula $k$
+\end_inset
+
+ the connectors on the germ.
+ The vector 
+\begin_inset Formula $v_{k}$
+\end_inset
+
+ is another seed, with germ 
+\begin_inset Formula $v$
+\end_inset
+
+ and connector 
+\begin_inset Formula $k$
+\end_inset
+
+.
+ The inner product 
+\begin_inset Formula $\sum_{k}M_{ik}v_{k}$
+\end_inset
+
+ is a connected section.
+ The multiplication of vectors and matrices is the act of connecting together
+ connectors to form links: multiplication is linking.
+\end_layout
+
+\begin_layout Standard
+Tensors have additonal properties and operations on them, the most important
+ of which, for analysis, is thier linearity.
+ For the purposes here, the linearity is not important, whereas the ablity
+ to contract indexes is.
+ The contraction of indexes, that is, the joining together of connectors
+ to form links, gives tensor algebras the structure of a monoidal category.
+ This is a statement that seems simple, and yet carries a lot of depth.
+ As noted above, the beta-reduction of lambda calculus also looks like the
+ joining together of connectors.
+ This is not accidental; rather, it is the side effect of the fact that
+ the internal language of closed monoidal categories is simply typed lambda
+ calculus.
+ The words 
+\begin_inset Quotes eld
+\end_inset
+
+simply typed
+\begin_inset Quotes erd
+\end_inset
+
+ are mean to convey that there is only one type.
+ For the above example morphism, that would mean that 
+\begin_inset Formula $X_{1}$
+\end_inset
+
+ and 
+\begin_inset Formula $X_{2}$
+\end_inset
+
+ and so on all have the same type: 
+\begin_inset Formula $X_{1}=X_{2}=X_{3}=Y_{1}=Y_{2}$
+\end_inset
+
+.
+ The end-points on the seed are NOT labelled; equivalently, they all carry
+ the same label.
+ This is in sharp contrast to the earlier example
+\begin_inset Newline newline
+\end_inset
+
+
+\end_layout
+
+\begin_layout Standard
+\begin_inset space \qquad{}
+\end_inset
+
+
+\begin_inset Box Frameless
+position "t"
+hor_pos "c"
+has_inner_box 1
+inner_pos "t"
+use_parbox 0
+use_makebox 0
+width "80col%"
+special "none"
+height "1in"
+height_special "totalheight"
+thickness "0.4pt"
+separation "3pt"
+shadowsize "4pt"
+framecolor "black"
+backgroundcolor "none"
+status open
+
+\begin_layout Plain Layout
+
+\family sans
+is: this- & example+;
+\end_layout
+
+\end_inset
+
+
+\begin_inset Newline newline
+\end_inset
+
+
+\begin_inset Newline newline
+\end_inset
+
+where the two connectors are labelled, and have different types, which sharply
+ limit what the connect to.
+ The 
+\family sans
+this-
+\family default
+ connector has the type 
+\begin_inset Quotes eld
+\end_inset
+
+
+\family sans
+this-is
+\family default
+
+\begin_inset Quotes erd
+\end_inset
+
+, and can only attach to another connector having the same type, namely,
+ the 
+\family sans
+is+
+\family default
+ connector on 
+\begin_inset Quotes eld
+\end_inset
+
+this
+\begin_inset Quotes erd
+\end_inset
+
+
+\begin_inset Newline newline
+\end_inset
+
+
+\end_layout
+
+\begin_layout Standard
+\begin_inset space \qquad{}
+\end_inset
+
+
+\begin_inset Box Frameless
+position "t"
+hor_pos "c"
+has_inner_box 1
+inner_pos "t"
+use_parbox 0
+use_makebox 0
+width "80col%"
+special "none"
+height "1in"
+height_special "totalheight"
+thickness "0.4pt"
+separation "3pt"
+shadowsize "4pt"
+framecolor "black"
+backgroundcolor "none"
+status open
+
+\begin_layout Plain Layout
+
+\family sans
+this: is+;
+\end_layout
+
+\end_inset
+
+
+\begin_inset Newline newline
+\end_inset
+
+
+\begin_inset Newline newline
+\end_inset
+
+It may seem strange to conflate the concept of tensors and monoidal categories
+ with linguistic analysis, yet this has an rich and old history, breifly
+ touched on in the next section.
+ The core principle driving this is that the Lambek calculus, underpinning
+ the categorial grammars used in linguistic analysis, can be embedded into
+ a fragment of non-commutative linear logic.
+ The remaining step is to recall that linear logic is the logic of tensor
+ categories; the non-commutative aspect is a statement that the left and
+ right products must be handled distinctly.
+\end_layout
+
+\begin_layout Subsection*
+Similar concept: Lambek Calculus
+\end_layout
+
+\begin_layout Standard
+The foundations of categorial grammars date back to Lambek in 1961
+\begin_inset CommandInset citation
+LatexCommand cite
+key "Lambek61,Marcus1967"
+
+\end_inset
+
+ and the interpretation in terms of tensorial categories proliferates explosivel
+y in modern times.
+ One direct example can be found in works by Kartsaklis
+\begin_inset CommandInset citation
+LatexCommand cite
+key "Kart2013,Kart2014"
+
+\end_inset
+
+, where one can find not only a detailed development of the tensorial approach,
+ together with its type theory, but also explicit examples, such as the
+ tensor 
+\begin_inset Formula 
+\[
+\overrightarrow{men}\otimes\overline{built}\otimes\overrightarrow{houses}
+\]
+
+\end_inset
+
+together with explicit instructions on how to contract this with a different
+ tensor 
+\begin_inset Formula 
+\[
+\mathcal{F}\left(\alpha_{\mbox{subj verb obj}}\right)=\epsilon_{W}\otimes1_{W}\otimes\epsilon_{W}
+\]
+
+\end_inset
+
+to obtain the 
+\begin_inset Quotes eld
+\end_inset
+
+quantization
+\begin_inset Quotes erd
+\end_inset
+
+ of the sentence 
+\begin_inset Quotes eld
+\end_inset
+
+men built houses
+\begin_inset Quotes erd
+\end_inset
+
+.
+ This notation will not be explained here; the reader should consult 
+\begin_inset CommandInset citation
+LatexCommand cite
+key "Kart2013"
+
+\end_inset
+
+ directly for details.
+ The point to be made is that this kind of tensorial analysis can, and is
+ done, and often invokes words like 
+\begin_inset Quotes eld
+\end_inset
+
+quantum
+\begin_inset Quotes erd
+\end_inset
+
+ and 
+\begin_inset Quotes eld
+\end_inset
+
+entanglement
+\begin_inset Quotes erd
+\end_inset
+
+ to emphasize the connection to linear logic and to linear type theory.
+\end_layout
+
+\begin_layout Standard
+Unfortunately, it is usually not clearly stated that it is only a fragment
+ of linear logic and linear type theory that applies.
+ In linguistics, it is not the linearity that is important, but rather the
+ conception of frames (in the sense of Kripke frames in proof theory).
+ Frames have the important property of presenting choices or alternatives:
+ one can have either this, or can have that.
+ The property of having alternatives is described by intuitionistic logic,
+ where the axiom of double-negation is discarded.
+ This either-or choice appears as the concept of a 
+\begin_inset Quotes eld
+\end_inset
+
+multiverse
+\begin_inset Quotes erd
+\end_inset
+
+ in quantum mechanics, and far more mundanely as alternative parses in linguisti
+cs.
+\end_layout
+
+\begin_layout Standard
+Another worthwhile example of tensor algebr can be found in equation 13
+ of 
+\begin_inset CommandInset citation
+LatexCommand cite
+key "Kart2014"
+
+\end_inset
+
+, reproduced below: 
+\begin_inset Formula 
+\[
+\overline{verb}=\sum_{i}\left(\overrightarrow{subject}_{i}\otimes\overrightarrow{object}_{i}\right)
+\]
+
+\end_inset
+
+where 
+\begin_inset Formula $\overrightarrow{subject}_{i}$
+\end_inset
+
+ and 
+\begin_inset Formula $\overrightarrow{object}_{i}$
+\end_inset
+
+ are meant to be the 
+\begin_inset Formula $i$
+\end_inset
+
+th occurance of a subject/object pair in an observed corpus.
+ If the corpus consisted of two sentences, 
+\begin_inset Quotes eld
+\end_inset
+
+a banana is a kind of fruit
+\begin_inset Quotes erd
+\end_inset
+
+ or 
+\begin_inset Quotes eld
+\end_inset
+
+this apple is green
+\begin_inset Quotes erd
+\end_inset
+
+, then one would write
+\begin_inset Formula 
+\[
+\overline{verb}=\left(\overrightarrow{banana}\otimes\overrightarrow{fruit}\right)+\left(\overrightarrow{apple}\otimes\overrightarrow{green}\right)
+\]
+
+\end_inset
+
+where the verb, in this case, is 
+\begin_inset Quotes eld
+\end_inset
+
+is
+\begin_inset Quotes erd
+\end_inset
+
+.
+ The control over the word order, that is, the left-right placement of the
+ dependencies, is controlled by means of the pregroup grammar.
+ The pregroup grammar and its compositionality properties follow directly
+ from the properties of the left-division, right-division and multiplication
+ in the Lambek calculus.
+ A quick modern mathematical review of the axioms of the Lambek calculus
+ can be found in Pentus
+\begin_inset CommandInset citation
+LatexCommand cite
+key "Pentus98"
+
+\end_inset
+
+, which also provides a proof of equivalence to context-free grammars.
+\end_layout
+
+\begin_layout Subsection*
 Similar concept: history
 \end_layout
 
@@ -1270,6 +2136,41 @@ history
  is well-suited for such analysis.
  Several issues, however, make this approach impractical for many common
  problems.
+\end_layout
+
+\begin_layout Standard
+\begin_inset Float figure
+placement h
+wide false
+sideways false
+status open
+
+\begin_layout Plain Layout
+\begin_inset Caption Standard
+
+\begin_layout Plain Layout
+The history of a text as a sequence of words
+\end_layout
+
+\end_inset
+
+
+\begin_inset Graphics
+	filename history.eps
+	width 50col%
+
+\end_inset
+
+
+\end_layout
+
+\begin_layout Plain Layout
+
+\end_layout
+
+\end_inset
+
+
 \end_layout
 
 \begin_layout Standard
@@ -2759,7 +3660,7 @@ separation "3pt"
 shadowsize "4pt"
 framecolor "black"
 backgroundcolor "none"
-status open
+status collapsed
 
 \begin_layout Plain Layout
 
