@@ -4,6 +4,7 @@ LINK_LIBRARIES(
 	clearbox
 )
 
+ADD_CXXTEST(BetaDistributionUTest)
 ADD_CXXTEST(BackwardChainerUTest)
 ADD_CXXTEST(ActionSelectionUTest)
 ADD_CXXTEST(ControlPolicyUTest)

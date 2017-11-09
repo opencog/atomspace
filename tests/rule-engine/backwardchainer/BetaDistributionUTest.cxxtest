@@ -1,0 +1,106 @@
+/*
+ * BetaDistributionUTest.cxxtest
+ *
+ *  Created on: Nov 9, 2017
+ *      Authors: Nil Geisweiller
+ */
+
+#include <opencog/util/Logger.h>
+#include <opencog/rule-engine/backwardchainer/BetaDistribution.h>
+#include <opencog/truthvalue/SimpleTruthValue.h>
+
+#include <cxxtest/TestSuite.h>
+
+using namespace std;
+using namespace opencog;
+
+#define al _as.add_link
+#define an _as.add_node
+
+class BetaDistributionUTest: public CxxTest::TestSuite
+{
+private:
+
+public:
+	BetaDistributionUTest();
+
+	void setUp();
+	void tearDown();
+
+	void test_cdf();
+};
+
+BetaDistributionUTest::BetaDistributionUTest()
+{
+	logger().set_level(Logger::DEBUG);
+	logger().set_print_to_stdout_flag(true);
+}
+
+void BetaDistributionUTest::setUp()
+{
+}
+
+void BetaDistributionUTest::tearDown()
+{
+}
+
+void BetaDistributionUTest::test_cdf()
+{
+	logger().debug("BEGIN TEST: %s", __FUNCTION__);
+
+	vector<TruthValuePtr>
+		TVs{SimpleTruthValue::createSTV(0.0, 0.01),
+			SimpleTruthValue::createSTV(0.5, 0.01),
+			SimpleTruthValue::createSTV(1.0, 0.01),
+			SimpleTruthValue::createSTV(0.0, 1),
+			SimpleTruthValue::createSTV(0.5, 1),
+			SimpleTruthValue::createSTV(1.0, 1),};
+
+	vector<BetaDistribution> BDs;
+	for (const auto& TV : TVs)
+		BDs.emplace_back(TV);
+
+	const unsigned bins = 3;
+	vector<vector<double>> cdfs;
+	for (const auto& BD : BDs)
+		cdfs.push_back(BD.cdf(bins));
+
+	// Print the BDs and cdfs
+	size_t i = 0;
+	for (const vector<double>& cdf : cdfs) {
+		logger().debug() << "BDs[" << i << "]: " << oc_to_string(BDs[i]);
+		stringstream ss;
+		ss << "cdfs[" << i << "]:";
+		i++;
+		for (double p : cdf)
+			ss << " " << p;
+		logger().debug() << ss.str();
+	}
+
+	const double espilon = 1e-3;
+	TS_ASSERT_DELTA(cdfs[0][0], 0.974826, espilon);
+	TS_ASSERT_DELTA(cdfs[0][1], 0.999954, espilon);
+	TS_ASSERT_DELTA(cdfs[0][2], 1, espilon);
+
+	TS_ASSERT_DELTA(cdfs[1][0], 0.143828, espilon);
+	TS_ASSERT_DELTA(cdfs[1][1], 0.856172, espilon);
+	TS_ASSERT_DELTA(cdfs[1][2], 1, espilon);
+
+	TS_ASSERT_DELTA(cdfs[2][0], 4.64893e-05, espilon);
+	TS_ASSERT_DELTA(cdfs[2][1], 0.0251738, espilon);
+	TS_ASSERT_DELTA(cdfs[2][2], 1, espilon);
+
+	TS_ASSERT_DELTA(cdfs[3][0], 1, espilon);
+	TS_ASSERT_DELTA(cdfs[3][1], 1, espilon);
+	TS_ASSERT_DELTA(cdfs[3][2], 1, espilon);
+
+	TS_ASSERT_DELTA(cdfs[4][0], 0, espilon);
+	TS_ASSERT_DELTA(cdfs[4][1], 1, espilon);
+	TS_ASSERT_DELTA(cdfs[4][2], 1, espilon);
+
+	TS_ASSERT_DELTA(cdfs[5][0], 0, espilon);
+	TS_ASSERT_DELTA(cdfs[5][1], 0, espilon);
+	TS_ASSERT_DELTA(cdfs[5][2], 1, espilon);
+
+	logger().debug("END TEST: %s", __FUNCTION__);
+}
