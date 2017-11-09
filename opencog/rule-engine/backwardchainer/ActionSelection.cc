@@ -54,16 +54,18 @@ HandleCounter ActionSelection::distribution()
 	for (size_t i = 0; i < action2tv.size(); i++) {
 		const BetaDistribution& beta = betas[i];
 		double Pi = 0;
+		// Perform a midpoint Riemann sum of fi(x)
 		for (int x_idx = 0; x_idx < bins; x_idx++) {
-			double x = (x_idx + 1.0) / bins;
+			double x = (x_idx + 0.5) / bins;
 			double f_x = beta.pd(x) * step;
-			// Only bother calculating Prod_j!=i cdfj(x) is pdfi(x) is
+			// Only bother calculating Prod_j!=i cdfj(x) if pdfi(x) is
 			// greater than zero
 			if (f_x <= 0.0)
 				continue;
-			for (size_t j = 0; j < action2tv.size(); j++)
+			for (size_t j = 0; j < action2tv.size(); j++) {
 				if (j != i)
 					f_x *= cdfs[j][x_idx];
+			}
 			Pi += f_x;
 		}
 		action2prob[std::next(action2tv.begin(), i)->first] = Pi;
