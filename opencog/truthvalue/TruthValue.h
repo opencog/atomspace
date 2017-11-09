@@ -180,6 +180,10 @@ static inline ProtoAtomPtr ProtoAtomCast(const TruthValuePtr& tv)
     return std::shared_ptr<ProtoAtom>(tv, (ProtoAtom*) tv.get());
 }
 
+// Convenient for gdb debugging, see
+// https://wiki.opencog.org/w/Development_standards#Print_OpenCog_Objects
+std::string oc_to_string(TruthValuePtr tv);
+
 } // namespace opencog
 
 /** @}*/

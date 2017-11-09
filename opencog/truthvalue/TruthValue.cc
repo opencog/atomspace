@@ -34,7 +34,7 @@
 #include <opencog/truthvalue/SimpleTruthValue.h>
 #include <opencog/truthvalue/TruthValue.h>
 
-using namespace opencog;
+namespace opencog {
 
 const strength_t MAX_TRUTH  = 1.0;
 
@@ -181,3 +181,12 @@ TruthValuePtr TruthValue::factory(const ProtoAtomPtr& pap)
 		"Unknown TruthValue type %d", t);
 	return nullptr;
 }
+
+std::string oc_to_string(TruthValuePtr tv)
+{
+	if (tv)
+		return tv->to_string();
+	return "none";
+}
+
+} // ~namespace opencog
