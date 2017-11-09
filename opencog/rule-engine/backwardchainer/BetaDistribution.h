@@ -68,8 +68,16 @@ public:
 	double variance() const;
 
 	/**
-	 * Calculate the cdf of a beta distribution, given the number of
-	 * bins for discretization.
+	 * Generate a vector of the cdf of regularly spaced right-end
+	 * points, specifically
+	 *
+	 * [beta_distribution_cdf(1/bins),
+	 *  beta_distribution_cdf(2/bins),
+	 *  ...
+	 *  beta_distribution_cdf(1)]
+	 *
+	 * The cdf at the origin is ignored because it is always 0. The
+	 * last one is always 1 but is included for completeness.
 	 */
 	std::vector<double> cdf(int bins) const;
 
@@ -77,6 +85,8 @@ public:
 	 * Calculate the probability density at x
 	 */
 	double pd(double x) const;
+
+	std::string to_string() const;
 
 private:
 	boost::math::beta_distribution<double> _beta_distribution;
@@ -87,6 +97,8 @@ BetaDistribution mk_beta_distribution(const TruthValuePtr& tv);
 
 TruthValuePtr mk_stv(double mean, double variance,
                      double prior_alpha=1.0, double prior_beta=1.0);
+
+std::string oc_to_string(const BetaDistribution& bd);
 
 } // namespace opencog
 

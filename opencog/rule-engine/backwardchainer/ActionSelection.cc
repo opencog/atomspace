@@ -26,7 +26,7 @@
 #include <opencog/util/Logger.h>
 #include <opencog/util/oc_assert.h>
 
-using namespace opencog;
+namespace opencog {
 
 ActionSelection::ActionSelection(const HandleTVMap& a2tv)
 	: action2tv(a2tv) {}
@@ -35,41 +35,19 @@ HandleCounter ActionSelection::distribution()
 {
 	HandleCounter action2prob;
 	const int bins = 100;             // Number of bins used for discretization
-	const double step = 1.0 / bins;   // Step size
 
-	// Generate all beta distributions of all TVs
-	std::vector<BetaDistribution> betas;
-	for (const auto& atv : action2tv)
-		betas.emplace_back(atv.second);
-
-	// Calculate cdfs for all TV
+	// Calculate cdfs for all TVs
 	std::vector<std::vector<double>> cdfs;
-	for (const auto& beta : betas)
-		cdfs.push_back(beta.cdf(bins));
+	for (const auto& atv : action2tv)
+		cdfs.push_back(BetaDistribution(atv.second).cdf(bins));
 
 	// Calculate Pi for all actions
-	// Pi = I_0^1 fi(x)
-	// where fi(x) = pdfi(x) Prod_j!=i cdfj(x) dx
-	double nt = 0.0;
+	// where Pi = I_0^1 pdfi(x) Prod_j!=i cdfj(x) dx
+	double nt = 0.0;            // normalizing term
 	for (size_t i = 0; i < action2tv.size(); i++) {
-		const BetaDistribution& beta = betas[i];
-		double Pi = 0;
-		// Perform a midpoint Riemann sum of fi(x)
-		for (int x_idx = 0; x_idx < bins; x_idx++) {
-			double x = (x_idx + 0.5) / bins;
-			double f_x = beta.pd(x) * step;
-			// Only bother calculating Prod_j!=i cdfj(x) if pdfi(x) is
-			// greater than zero
-			if (f_x <= 0.0)
-				continue;
-			for (size_t j = 0; j < action2tv.size(); j++) {
-				if (j != i)
-					f_x *= cdfs[j][x_idx];
-			}
-			Pi += f_x;
-		}
-		action2prob[std::next(action2tv.begin(), i)->first] = Pi;
-		nt += Pi;
+		double p = Pi(i, cdfs);
+		action2prob[std::next(action2tv.begin(), i)->first] = p;
+		nt += p;
 	}
 
 	// Normalize so that it sums up to 1
@@ -79,3 +57,50 @@ HandleCounter ActionSelection::distribution()
 
 	return action2prob;
 }
+
+double ActionSelection::Pi(size_t i,
+                           const std::vector<std::vector<double>>& cdfs) const
+{
+	double result = 0.0;
+	size_t bins = cdfs[i].size();
+	// Perform right-end point Riemann sum of fi(x)
+	for (size_t x_idx = 0; x_idx < bins; x_idx++) {
+		// Calculate pdfi(x)*dx, that is the probability of the first
+		// order probability being within [(x_idx-1)/bins, x_idx/bins]
+		// using the derivative of the cdf
+		double f_x = cdfs[i][x_idx] - (x_idx == 0 ? 0.0 : cdfs[i][x_idx - 1]);
+
+		// Only bother calculating Prod_j!=i cdfj(x) if pdfi(x)*dx is
+		// greater than zero
+		if (f_x <= 0.0)
+			continue;
+
+		// Calculate Prod_j!=i cdfj(x)
+		for (size_t j = 0; j < action2tv.size(); j++)
+			if (j != i)
+				f_x *= cdfs[j][x_idx];
+		result += f_x;
+	}
+	return result;
+}
+
+std::string oc_to_string(const ActionSelection& asel)
+{
+	std::stringstream ss;
+	ss << "action2tv:" << std::endl << oc_to_string(asel.action2tv);
+	return ss.str();
+}
+
+std::string oc_to_string(const HandleTVMap& h2tv)
+{
+	std::stringstream ss;
+	ss << "size = " << h2tv.size() << std::endl;
+	int i = 0;
+	for (const auto& htv : h2tv) {
+		ss << "atom[" << i << "]:" << std::endl << oc_to_string(htv.first);
+		ss << "tv[" << i << "]:" << oc_to_string(htv.second) << std::endl;
+	}
+	return ss.str();
+}
+
+} // ~namespace opencog

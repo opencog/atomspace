@@ -74,6 +74,16 @@ double BetaDistribution::pd(double x) const
 	return boost::math::pdf(_beta_distribution, x);
 }
 
+std::string BetaDistribution::to_string() const
+{
+	std::stringstream ss;
+	ss << "alpha = " << alpha()
+	   << ", beta = " << beta()
+	   << ", mean = " << mean()
+	   << ", variance = " << variance() << std::endl;
+	return ss.str();
+}
+
 BetaDistribution mk_beta_distribution(const TruthValuePtr& tv) {
 	return BetaDistribution(tv);
 }
@@ -114,6 +124,11 @@ TruthValuePtr mk_stv(double mean, double variance,
 	// The strength is in fact the mode, this should be corrected once
 	// TruthValue is reworked
 	return SimpleTruthValue::createTV(mode, confidence);
+}
+
+std::string oc_to_string(const BetaDistribution& bd)
+{
+	return bd.to_string();
 }
 
 } // ~namespace opencog
