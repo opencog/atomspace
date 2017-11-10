@@ -36,6 +36,7 @@ public:
 	void tearDown();
 
 	void test_fetch_control_rules();
+	void test_is_control_rule_active();
 };
 
 ControlPolicyUTest::ControlPolicyUTest() : _eval(&_control_as)
@@ -90,6 +91,36 @@ void ControlPolicyUTest::test_fetch_control_rules()
 	HandleSet control_2_rules = _cp->fetch_expansion_control_rules(rule_2_alias);
 	logger().debug() << "control_2_rules = " << oc_to_string(control_2_rules);
 	TS_ASSERT_EQUALS(control_2_rules.size(), 1);
+
+	logger().debug("END TEST: %s", __FUNCTION__);
+}
+
+void ControlPolicyUTest::test_is_control_rule_active()
+{
+	logger().debug("BEGIN TEST: %s", __FUNCTION__);
+
+	// Fetch context sensitive rule
+	_eval.eval("(load-from-path \"control-rules.scm\")");
+	AtomSpace rbs_as;
+	Handle rbs = rbs_as.add_node(CONCEPT_NODE, "dummy");
+	_cp = new ControlPolicy(UREConfig(rbs_as, rbs), BIT(), &_control_as);
+	Handle rule_2_alias = _eval.eval_h("(DefinedSchemaNode \"rule-2\")");
+	HandleSet control_2_rules = _cp->fetch_expansion_control_rules(rule_2_alias);
+	Handle ctrl_rule = *control_2_rules.begin();
+
+	Handle inference_tree = _eval.eval_h("(BindLink"
+	                                     "  (AndLink)"
+	                                     "  (InheritanceLink"
+	                                     "    (ConceptNode \"a\")"
+	                                     "    (ConceptNode \"p\")))");
+	AndBIT andbit(inference_tree);
+
+	Handle leaf = _eval.eval_h("(InheritanceLink"
+	                           "  (ConceptNode \"a\")"
+	                           "  (ConceptNode \"p\"))");
+	BITNode bitnode(leaf);
+
+	TS_ASSERT(_cp->is_control_rule_active(andbit, bitnode, ctrl_rule));
 
 	logger().debug("END TEST: %s", __FUNCTION__);
 }

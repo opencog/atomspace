@@ -282,42 +282,56 @@ bool ControlPolicy::is_control_rule_active(const AndBIT& andbit,
                                            const BITNode& bitleaf,
                                            const Handle& ctrl_rule) const
 {
-	Handle ctrl_vardecl = ScopeLinkCast(ctrl_rule)->get_vardecl(),
+	Handle
+		// Control rule components
+		ctrl_vardecl = ScopeLinkCast(ctrl_rule)->get_vardecl(),
 		ctrl_expansion = retrieve_expansion(ctrl_rule),
 		ctrl_input = ctrl_expansion->getOutgoingAtom(1),
 		ctrl_andbit = ctrl_input->getOutgoingAtom(0),
 		ctrl_bitleaf = ctrl_input->getOutgoingAtom(1),
-		actual_andbit = andbit.fcs,
-		actual_andbit_vardecl = ScopeLinkCast(actual_andbit)->get_vardecl();
+		// Actual components
+		actl_andbit = andbit.fcs,
+		actl_andbit_vardecl = ScopeLinkCast(actl_andbit)->get_vardecl(),
+		actl_bitleaf = bitleaf.body,
+		// Wrap the actual andbit in a DontExecLink to match the
+		// control rule, and to guaranty that it doesn't get executed
+		// while evaluating whether it is active (i.e. whether it
+		// matches)
+		nexe_actl_andbit = createLink(DONT_EXEC_LINK, actl_andbit);
 
 	// Make sure that the variables in the control rule and the actual
 	// andbit are disjoint
 	//
 	// TODO: should be alpha-converted to have no variable in common.
 	Variables ctrl_vars = VariableList(ctrl_vardecl).get_variables(),
-		actual_andbit_vars = VariableList(actual_andbit_vardecl).get_variables();
-	if (not is_disjoint(ctrl_vars.varset, actual_andbit_vars.varset)) {
+		actl_andbit_vars = VariableList(actl_andbit_vardecl).get_variables();
+	if (not is_disjoint(ctrl_vars.varset, actl_andbit_vars.varset)) {
 		std::stringstream ss;
 		ss << "Not implemented yet. "
 		   << "ctrl_vars and actual_andbit_vars ctrl_vars should be disjoint, "
 		   << "but ctrl_vars = " << oc_to_string(ctrl_vars) << std::endl
 		   << "actual_andbit_vars = "
-		   << oc_to_string(actual_andbit_vars) << std::endl;
+		   << oc_to_string(actl_andbit_vars) << std::endl;
 		OC_ASSERT(false, ss.str());
 	}
 
-	// Check that the current andbit (resp. current bitleaf) and the
-	// andbit (resp. bitleaf) on the control rule are unifiable.
-	//
-	// TODO: support vardecls, once QuoteBindLink is introduced,
-	// otherwise some false positive might go through.
-	return match(ctrl_andbit, andbit.fcs) and match(ctrl_bitleaf, bitleaf.body);
+	// Check that the control andbit matches the actual andbit, and
+	// that the control bitleaf matches the actual bitleaf.
+	return match(ctrl_andbit, nexe_actl_andbit, ctrl_vardecl)
+		and match(ctrl_bitleaf, actl_bitleaf, ctrl_vardecl);
 }
 
 bool ControlPolicy::match(const Handle& pattern, const Handle& term,
                           const Handle& vardecl) const
 {
-	return (bool)MapLink(pattern, term).execute();
+	AtomSpace tmp_as;
+	Handle rewrite = tmp_as.add_node(CONCEPT_NODE, "dummy"),
+		impl = tmp_as.add_link(IMPLICATION_SCOPE_LINK,
+		                       vardecl, pattern, rewrite),
+		tmp_term = tmp_as.add_atom(term),
+		result = MapLink(impl, tmp_term).execute(&tmp_as);
+
+	return (bool)result;
 }
 
 Handle ControlPolicy::retrieve_expansion(const Handle& ctrl_rule) const
