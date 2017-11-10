@@ -607,7 +607,7 @@ A seed
 \begin_layout Plain Layout
 \begin_inset Graphics
 	filename seed.eps
-	width 30col%
+	width 25col%
 
 \end_inset
 
@@ -749,7 +749,7 @@ Two linked (connected) seeds
 
 \begin_inset Graphics
 	filename seeds-two.eps
-	width 45col%
+	width 35col%
 
 \end_inset
 
@@ -836,7 +836,7 @@ A connected section
 
 \begin_inset Graphics
 	filename hedgehog.eps
-	width 30col%
+	width 25col%
 
 \end_inset
 
@@ -890,8 +890,11 @@ This motivates a different way of looking at seeds: they can be visualized
  as jigsaw puzzle pieces, where any given tab on one jigsaw piece can fit
  into one and only one slot on another jigsaw piece.
  This union of a tab+slot is the link.
+ Connectors must be of the same type in order to be connectable.
  The types of the connectors will later be seen to be the same thing as
- the types of type theory; that is, they are bona-fide types.
+ the types of type theory; that is, they are bona-fide types, in the proper
+ sense of the word.
+ 
 \end_layout
 
 \begin_layout Standard
@@ -1041,6 +1044,68 @@ If we stop here, not much is accomplished, other than to define a somewhat
 \end_layout
 
 \begin_layout Subsection*
+Example: Biochemical reaction type
+\end_layout
+
+\begin_layout Standard
+An example of a seed applied to the biochemical domain would be the phosphorylat
+ion of ADP to ATP, shown in the figure below.
+\end_layout
+
+\begin_layout Standard
+\align center
+\begin_inset Graphics
+	filename phosphorylation.svg
+	lyxscale 50
+	width 35col%
+
+\end_inset
+
+
+\end_layout
+
+\begin_layout Standard
+The germ of the seed is the point where the semi-circle kisses the line:
+ not labelled here, the germ would be succinate-CoA ligase.
+ The connectors are labelled with thier types, and the arrows provide directiona
+lity.
+ The connector types clearly indicate what can be linked to what: this particula
+r seed, when linked, 
+\emph on
+must
+\emph default
+ link to a source of ADP, or a source of phosphate, or a sink if ATP or
+ a sink of hydroxyls, if it is to be validly linked into any part of a connected
+ section.
+\end_layout
+
+\begin_layout Standard
+An example of a connected section would be the Krebs cycle, taken as a whole:
+\end_layout
+
+\begin_layout Standard
+\align center
+\begin_inset Graphics
+	filename krebs.svg
+	lyxscale 30
+	width 55col%
+
+\end_inset
+
+
+\end_layout
+
+\begin_layout Standard
+Each distinct reaction constitutes a seed; the heavy lines forming the cycle
+ are the links internal to the section, and each tangent arrow is a pair
+ of connectors, with one end of the arrow being an unconnected reaction
+ input, and the other end of the arrow an unconnected reaction product.
+ Thus, for example, connector types include NAD, NADH, water and ATP, among
+ others.
+ These connectors are free to be attached to other seeds or sections.
+\end_layout
+
+\begin_layout Subsection*
 Similar concept: Link Grammar
 \end_layout
 
@@ -1186,6 +1251,10 @@ example: {(example, is-), (example, an-)}
 \begin_inset Newline newline
 \end_inset
 
+
+\begin_inset Newline newline
+\end_inset
+
 The above vertex: edge-list notation is a bit awkward and hard to read.
  A simpler notation conveying the same idea is
 \begin_inset Newline newline
@@ -1241,6 +1310,10 @@ an: example+;
 example: an- & is-;
 \end_layout
 
+\end_inset
+
+
+\begin_inset Newline newline
 \end_inset
 
 
@@ -2078,7 +2151,7 @@ key "Pentus98"
 \end_layout
 
 \begin_layout Subsection*
-Similar concept: history
+Similar concept: history and Bayesian inference
 \end_layout
 
 \begin_layout Standard
@@ -2135,7 +2208,7 @@ history
 
  is well-suited for such analysis.
  Several issues, however, make this approach impractical for many common
- problems.
+ problems, including natural language.
 \end_layout
 
 \begin_layout Standard
@@ -2157,7 +2230,7 @@ The history of a text as a sequence of words
 
 \begin_inset Graphics
 	filename history.eps
-	width 50col%
+	width 40col%
 
 \end_inset
 
@@ -2174,9 +2247,9 @@ The history of a text as a sequence of words
 \end_layout
 
 \begin_layout Standard
-One issue, already noted, is the linearity.
- One can try to hand-wave away this issue: given a graph of vertices, its
- sufficient to write the vertexes in some order, any order will do.
+One issue, already noted, is the sequential nature of the process.
+ One can try to hand-wave away this issue: given a graph of vertices, it
+ is sufficient to write the vertexes in some order, any order will do.
  This obsucres the fact that 
 \begin_inset Formula $n$
 \end_inset
@@ -2205,6 +2278,354 @@ edges
 \end_layout
 
 \begin_layout Standard
+To put it more bluntly: a sequential history model of genomic and proteomic
+ data is inappropriate.
+ Although base pairs and amino acids come in sequences, the interactions
+ between different genes and proteins are not in any way shap or form sequential.
+ The interactions are happening in parallel, in distinct, different physical
+ locations in a cell.
+ These interactions can be depicted as a graph.
+ Curiously, that graph can resemble the one depicted below, although the
+ depiction is meant to show something different: it is meant to show a history.
+\end_layout
+
+\begin_layout Standard
+\begin_inset Float figure
+placement h
+wide false
+sideways false
+status open
+
+\begin_layout Plain Layout
+\begin_inset Caption Standard
+
+\begin_layout Plain Layout
+A Viterbi parse lattice of Markov chain
+\end_layout
+
+\end_inset
+
+
+\end_layout
+
+\begin_layout Plain Layout
+\begin_inset Graphics
+	filename viterbi.eps
+	width 20page%
+
+\end_inset
+
+
+\end_layout
+
+\end_inset
+
+
+\end_layout
+
+\begin_layout Standard
+The above depicts the lattice of a Viterbi parse of a Markov chain.
+ The dashed red line depicts a maximum-liklihood path through the lattice,
+ that is, the most likely history.
+ Viterbi decoding, using an 
+\begin_inset Quotes eld
+\end_inset
+
+error correcting code
+\begin_inset Quotes erd
+\end_inset
+
+, is a process by which the validity of the dashed red path is checked,
+ and failing paths discarded.
+ For natural language, the dashed red path must be a grammatically correct
+ sequence of words.
+ For a radio receiver, the dashed red path must be a sequence of bits that
+ obey some error-correction polynomial; if it doesn't, the next-most-likely
+ path is selected.
+\end_layout
+
+\begin_layout Standard
+Each black line represents a probability 
+\begin_inset Formula $p_{ij}$
+\end_inset
+
+ of moving from state 
+\begin_inset Formula $i$
+\end_inset
+
+ to state 
+\begin_inset Formula $j$
+\end_inset
+
+ at the next time-step.
+ That is, 
+\begin_inset Formula $p_{ij}=P(w_{n}=j|w_{n-1}=i)$
+\end_inset
+
+ is the likelihood of word 
+\begin_inset Formula $j$
+\end_inset
+
+ given word 
+\begin_inset Formula $i$
+\end_inset
+
+ in the immediate past.
+ The probabilities are arranged such that 
+\begin_inset Formula $\sum_{i}p_{ij}=1$
+\end_inset
+
+.
+ This is called a Markov model, because only the most recent state transitions
+ are depicted: there are no edges connecting the nodes more than one time-step
+ apart; there are no edges connecting 
+\begin_inset Formula $w_{n}$
+\end_inset
+
+ to 
+\begin_inset Formula $w_{n-2},$
+\end_inset
+
+ etc.
+ Put differrently, 
+\begin_inset Formula $P(w_{n}|h)=P(w_{n}|w_{n-1})$
+\end_inset
+
+.
+ That is, this depicts the use of 2-grams to predict the current state.
+\end_layout
+
+\begin_layout Standard
+Non-Markov models would have edges connecting nodes furthre in the past.
+ A 
+\begin_inset Formula $n$
+\end_inset
+
+-gram approach to language digs 
+\begin_inset Formula $n$
+\end_inset
+
+ steps into the past.
+ If there are 
+\begin_inset Formula $k$
+\end_inset
+
+ states, and 
+\begin_inset Formula $n$
+\end_inset
+
+ steps into the past, then 
+\begin_inset Formula $k^{n}$
+\end_inset
+
+ edges are required: that is, a rank-
+\begin_inset Formula $n$
+\end_inset
+
+ tensor.
+ Here, 
+\begin_inset Formula $k=4$
+\end_inset
+
+ and 
+\begin_inset Formula $n=2$
+\end_inset
+
+ is depicted; in natural language 
+\begin_inset Formula $k$
+\end_inset
+
+ is the number of words (say, 
+\begin_inset Formula $k=10^{4}$
+\end_inset
+
+ for a common subset of the English language), while 
+\begin_inset Formula $n$
+\end_inset
+
+ is the length of a longer sentence, say 
+\begin_inset Formula $k=12$
+\end_inset
+
+.
+ In this case, the history tensor 
+\begin_inset Formula $P(w_{n}|h)$
+\end_inset
+
+ has 
+\begin_inset Formula $k^{n}=10^{48}=2^{160}$
+\end_inset
+
+ edges.
+ But of course, this is computationally absurd.
+ It is also theoretically absurd: almost all of those edges have zero probabilit
+y.
+ Almost none of the edges are needed; the actual tensor is very very sparse.
+\end_layout
+
+\begin_layout Standard
+The reason for this sparsity becomes apparant from the viewpoint of dependency
+ parsing.
+ So, for example, if 
+\begin_inset Formula $w_{n-3}=this$
+\end_inset
+
+ and 
+\begin_inset Formula $w_{n-2}=is$
+\end_inset
+
+ and 
+\begin_inset Formula $w_{n-1}=an$
+\end_inset
+
+, a dependency parse will tell you that 
+\begin_inset Formula $w_{n}$
+\end_inset
+
+ must be a noun starting with a vowel.
+ It also tells you that, for this particular history, this noun can depend
+ only on 
+\begin_inset Formula $w_{n-2}$
+\end_inset
+
+ and on 
+\begin_inset Formula $w_{n-1}$
+\end_inset
+
+ but not on 
+\begin_inset Formula $w_{n-3}$
+\end_inset
+
+.
+ A collection of depedency parses obtained from a corpus allows you to figure
+ out which edges matter, and which edges do not.
+ 
+\end_layout
+
+\begin_layout Standard
+Dependency parses also give a more holisitic perception of what might be
+ going on in natural language.
+ That is, the notation 
+\end_layout
+
+\begin_layout Standard
+\begin_inset Formula 
+\[
+\overline{is}=\left(\overrightarrow{banana}\otimes\overrightarrow{fruit}\right)+\left(\overrightarrow{apple}\otimes\overrightarrow{green}\right)
+\]
+
+\end_inset
+
+and
+\begin_inset Newline newline
+\end_inset
+
+
+\end_layout
+
+\begin_layout Standard
+\begin_inset space \qquad{}
+\end_inset
+
+
+\begin_inset Box Frameless
+position "t"
+hor_pos "c"
+has_inner_box 1
+inner_pos "t"
+use_parbox 0
+use_makebox 0
+width "80col%"
+special "none"
+height "1in"
+height_special "totalheight"
+thickness "0.4pt"
+separation "3pt"
+shadowsize "4pt"
+framecolor "black"
+backgroundcolor "none"
+status open
+
+\begin_layout Plain Layout
+
+\family sans
+is: (banana- & fruit+) or (apple- & green+);
+\end_layout
+
+\end_inset
+
+
+\begin_inset Newline newline
+\end_inset
+
+
+\begin_inset Newline newline
+\end_inset
+
+and 
+\begin_inset Formula 
+\[
+P\left(w_{n}=fruit|w_{n-1}=is,w_{n-2}=banana\right)+P\left(w_{n}=green|w_{n-1}=is,w_{n-2}=apple\right)
+\]
+
+\end_inset
+
+all represent the same knowledge, the dependency notation appears to be
+ less awkward than the viewing history as some Bayesian probability.
+ The dependency notion focuses attention on a different part of the problem.
+ 
+\end_layout
+
+\begin_layout Standard
+Another popular way to at least partly deal with the sparsity of the history
+ tensor 
+\begin_inset Formula $P(w_{n}|h)$
+\end_inset
+
+ is to use skip-grams.
+ The idea recognizes that many of the edges of an 
+\begin_inset Formula $n$
+\end_inset
+
+-gram will be zero, and so these edges can be skipped.
+ This is not a bad approach, except that it is 
+\begin_inset Quotes eld
+\end_inset
+
+simply typed
+\begin_inset Quotes erd
+\end_inset
+
+: it does not leverage the possibility that different words might have different
+ types (verb, noun, ...) and that this typing information delivers further
+ constraints on the structure of the skip-gram.
+ That is, the notion of subj-verb-obj not only tells you that your skip-gram
+ is effectively a 3-gram, but also that the first and third words belong
+ to a class called 
+\begin_inset Quotes eld
+\end_inset
+
+noun
+\begin_inset Quotes erd
+\end_inset
+
+, and the middle is a transitive verb.
+ This sharply prunes the number of possibilities *before* the learning algorithm
+ is launched, instead of during or after.
+ The fact that such pruning is even possible is obscured by the notation
+ and language of 
+\begin_inset Formula $n$
+\end_inset
+
+-grams and the history 
+\begin_inset Formula $P(w_{n}|h)$
+\end_inset
+
+.
+ 
+\end_layout
+
+\begin_layout Standard
 A different stumbling block of the 
 \begin_inset Quotes eld
 \end_inset
@@ -2221,25 +2642,32 @@ the future
 \begin_inset Quotes erd
 \end_inset
 
-: the fact that the words I might say next have already influenced the choice
- of the words I've already said.
+: the fact that the words might be said next have already influenced the
+ choice of the words already spoken.
  This can be hand-waved away by stating that the history is creating a model
  of (hidden) mental states, and that this model already incorporates those,
  and thus is anticipating future speech actions.
  Although this might be philosophically acceptable to some degree, it again
  forces complexity onto the problem, when the complexity is not needed.
- If you've already got the document, look at all of it; don't arbitrarily
- divide it into past and future, and discard the future.
+ If you've already got the document, look at all of it; go all the way to
+ the end of the sentence.
+ Don't arbitrarily divide it into past and future, and discard the future.
 \end_layout
 
 \begin_layout Standard
-To summarize: graphical structures appear naturally; flattening them into
- sequences places one at a computational disadvantage, even if the flattening
- is conceptually isomorphic to the original problem.
+To summarize: dependency structures appear naturally; flattening them into
+ sequences places one at a notional, computational and conceptual disadvantage,
+ even if the flattening is conceptually isomorphic to the original problem.
+ The tensor 
+\begin_inset Formula $P(w_{n}|h)$
+\end_inset
+
+ may indeed encode all possible knowledge about the text in a rigorously
+ Bayesian fashion; but its unweildy.
 \end_layout
 
 \begin_layout Section*
-Clustering and Quotienting
+Quotienting
 \end_layout
 
 \begin_layout Standard
@@ -2294,20 +2722,8 @@ equivalence relation
 .
 \end_layout
 
-\begin_layout Standard
-If one has an equivalence relation, then the obvious desire, the obvious
- urge is to attempt to perform quotienting on the graph.
- That is, to create a new graph, where the 
-\begin_inset Quotes eld
-\end_inset
-
-equal
-\begin_inset Quotes erd
-\end_inset
-
- parts are merged into one.
- The rest of this document describes how this can be done, and what sort
- of notation to use to do this.
+\begin_layout Subsection*
+Example of similarity
 \end_layout
 
 \begin_layout Standard
@@ -2346,6 +2762,183 @@ similar enough
 \end_layout
 
 \begin_layout Standard
+To make this even more concrete, consider this example from linguistics.
+ Suppose, given a corpus, one has observed three sentences: 
+\begin_inset Quotes eld
+\end_inset
+
+Mary walked home
+\begin_inset Quotes erd
+\end_inset
+
+, 
+\begin_inset Quotes eld
+\end_inset
+
+Mary ran home
+\begin_inset Quotes erd
+\end_inset
+
+ and 
+\begin_inset Quotes eld
+\end_inset
+
+Mary drove home
+\begin_inset Quotes erd
+\end_inset
+
+.
+ A dependency parse provides three seeds: 
+\begin_inset Newline newline
+\end_inset
+
+
+\end_layout
+
+\begin_layout Standard
+\begin_inset space \qquad{}
+\end_inset
+
+
+\begin_inset Box Frameless
+position "t"
+hor_pos "c"
+has_inner_box 1
+inner_pos "t"
+use_parbox 0
+use_makebox 0
+width "80col%"
+special "none"
+height "1in"
+height_special "totalheight"
+thickness "0.4pt"
+separation "3pt"
+shadowsize "4pt"
+framecolor "black"
+backgroundcolor "none"
+status open
+
+\begin_layout Plain Layout
+
+\family sans
+walked: Mary- & home+; 
+\end_layout
+
+\begin_layout Plain Layout
+
+\family sans
+ran: Mary- & home+;
+\end_layout
+
+\begin_layout Plain Layout
+
+\family sans
+drove: Mary- & home+;
+\end_layout
+
+\end_inset
+
+
+\begin_inset Newline newline
+\end_inset
+
+
+\begin_inset Newline newline
+\end_inset
+
+which seem to be begging for an equivalence relation that will reduce these
+ to 
+\begin_inset Newline newline
+\end_inset
+
+
+\end_layout
+
+\begin_layout Standard
+\begin_inset space \qquad{}
+\end_inset
+
+
+\begin_inset Box Frameless
+position "t"
+hor_pos "c"
+has_inner_box 1
+inner_pos "t"
+use_parbox 0
+use_makebox 0
+width "80col%"
+special "none"
+height "1in"
+height_special "totalheight"
+thickness "0.4pt"
+separation "3pt"
+shadowsize "4pt"
+framecolor "black"
+backgroundcolor "none"
+status open
+
+\begin_layout Plain Layout
+
+\family sans
+walked ran drove: Mary- & home+; 
+\end_layout
+
+\end_inset
+
+
+\begin_inset Newline newline
+\end_inset
+
+
+\begin_inset Newline newline
+\end_inset
+
+Using a tensorial notation, once starts with
+\begin_inset Formula 
+\[
+\overrightarrow{Mary}\otimes\overline{walked}\otimes\overrightarrow{home}+\overrightarrow{Mary}\otimes\overline{ran}\otimes\overrightarrow{home}+\overrightarrow{Mary}\otimes\overline{drove}\otimes\overrightarrow{home}
+\]
+
+\end_inset
+
+and applies the equivalence relation to obtain
+\end_layout
+
+\begin_layout Standard
+\begin_inset Formula 
+\[
+\overrightarrow{Mary}\otimes\left(\overline{walked}+\overline{ran}+\overline{drove}\right)\otimes\overrightarrow{home}
+\]
+
+\end_inset
+
+The structure here strongly resembles the application of the distributive
+ law of multiplication over addition.
+ This distributivity property is one of the appeals of the tensor notation.
+ One can obtain a similar sense of distributivity by using the operator
+ 
+\begin_inset Quotes eld
+\end_inset
+
+
+\family sans
+or
+\family default
+
+\begin_inset Quotes erd
+\end_inset
+
+ to separate the Link Grammar style stanzas, and note that the change also
+ appears to be an application of the distributive law of conjunction over
+ disjunction.
+ 
+\end_layout
+
+\begin_layout Standard
+This is illustrated pictorially, below.
+\end_layout
+
+\begin_layout Standard
 \begin_inset Float figure
 placement h
 wide false
@@ -2364,15 +2957,22 @@ Creating a quotient graph
 
 \begin_inset Graphics
 	filename similar.eps
-	width 60col%
+	width 55col%
 
 \end_inset
 
 
 \end_layout
 
-\begin_layout Plain Layout
-The vertexes 
+\end_inset
+
+
+\end_layout
+
+\begin_layout Standard
+It need not be the case that an equivalence relation is staring us in the
+ face, yet here, it is.
+ The vertexes 
 \begin_inset Quotes eld
 \end_inset
 
@@ -2396,9 +2996,9 @@ drove
 \begin_inset Quotes erd
 \end_inset
 
- can be considered similar, because they have the same neighbors.
+ can be considered similar, precisely because they have the same neighbors.
  The upper graph can be simplified by computing a quotient, shown in the
- lower diagram: the quotient merges these three similar vertexes into one.
+ lower part: the quotient merges these three similar vertexes into one.
  The result is not only a simpler graph, but also some vague sense that
  
 \begin_inset Quotes eld
@@ -2427,37 +3027,207 @@ drove
  are synonymous in some way.
 \end_layout
 
-\begin_layout Plain Layout
-\begin_inset CommandInset line
-LatexCommand rule
-offset "0.5ex"
-width "100col%"
-height "1pt"
-
-\end_inset
-
-
-\end_layout
-
-\end_inset
-
-
+\begin_layout Subsection*
+Quotienting
 \end_layout
 
 \begin_layout Standard
-In graph theory, there is a notion of quotienting, but it is not quite the
- same as what will be defined shortly.
- In graph theory, when working with quotients, one will typically consider
- a graph 
-\begin_inset Formula $G$
+If one has an equivalence relation that can be applied to a graph, then
+ the obvious urge is to attempt to perform quotienting on the graph.
+ That is, to create a new graph, where the 
+\begin_inset Quotes eld
 \end_inset
 
- relative to some subgraph 
-\begin_inset Formula $A\subset G$
+equal
+\begin_inset Quotes erd
+\end_inset
+
+ parts are merged into one.
+ 
+\end_layout
+
+\begin_layout Standard
+The first issue to be cleared out of the way is the use of the word 
+\begin_inset Quotes eld
+\end_inset
+
+
+\begin_inset CommandInset href
+LatexCommand href
+name "quotienting"
+target "https://en.wikipedia.org/wiki/Quotient"
+
+\end_inset
+
+
+\begin_inset Quotes erd
+\end_inset
+
+, which seems awkward, since the example above seemed to involve some sort
+ of factoring, or the application of a distributive law of some sort.
+ The terminology comes from modulo arithmetic, and is in wide use in all
+ branches of mathematics.
+ A simple example is the idea of dividing by three: given the set of integers
+ 
+\begin_inset Formula $\mathbb{Z}$
+\end_inset
+
+, one partitions it into three sets: the set 
+\begin_inset Formula $\left\{ 0,3,6,9,\cdots\right\} $
+\end_inset
+
+, the set 
+\begin_inset Formula $\left\{ 1,4,7,\cdots\right\} $
+\end_inset
+
+ and the set 
+\begin_inset Formula $\left\{ 2,5,8,\cdots\right\} $
 \end_inset
 
 .
- One effectively 
+ These three sets are termed the cosets of 0, 1 and 2, and all elements
+ in each set are considered to be equal, in the sense that, for any 
+\begin_inset Formula $m$
+\end_inset
+
+ and 
+\begin_inset Formula $n$
+\end_inset
+
+ in any one of these sets, it is always true that 
+\begin_inset Formula $m=n\mod3$
+\end_inset
+
+: they are equal, modulo 3.
+ In this way, one obtains the quotient set 
+\begin_inset Formula $\mathbb{Z}_{3}=\mathbb{Z}/3\mathbb{Z}=\mathbb{Z}/\mod3=\left\{ 0,1,2\right\} $
+\end_inset
+
+.
+ Modulo arithmetic resembles division, ergo the term 
+\begin_inset Quotes eld
+\end_inset
+
+quotient
+\begin_inset Quotes erd
+\end_inset
+
+.
+ 
+\end_layout
+
+\begin_layout Standard
+Given a set 
+\begin_inset Formula $S$
+\end_inset
+
+ and an equivalence relation 
+\begin_inset Formula $\sim$
+\end_inset
+
+, it is common to write the quotient set as 
+\begin_inset Formula $Q=S/\sim$
+\end_inset
+
+.
+ In the above, 
+\begin_inset Formula $S$
+\end_inset
+
+ was 
+\begin_inset Formula $\mathbb{Z}$
+\end_inset
+
+ and 
+\begin_inset Formula $\sim$
+\end_inset
+
+ was 
+\begin_inset Formula $\mod3$
+\end_inset
+
+.
+ In general, one looks for, and works with equivalence relations that preserve
+ desirable algebraic properties of the set, while removing undesirable or
+ pointless distinctions.
+ In the modulo arithmetic example, addition is preserved: it is well defined,
+ and works as expected.
+ In the linguistic example, the subj-verb-obj structure of the sentence
+ is preserved; the quotienting removes the 
+\begin_inset Quotes eld
+\end_inset
+
+pointless
+\begin_inset Quotes erd
+\end_inset
+
+ distinction between different verbs.
+\end_layout
+
+\begin_layout Standard
+Quotienting is often described in terms of homomorphisms, functions 
+\begin_inset Formula $f:S\to Q$
+\end_inset
+
+ that preserve the algebraic operations on 
+\begin_inset Formula $S$
+\end_inset
+
+.
+ For example, if 
+\begin_inset Formula $m:S\times S\times S\to S$
+\end_inset
+
+ is a three-argument endomorphism on 
+\begin_inset Formula $S$
+\end_inset
+
+, one expects that 
+\begin_inset Formula $f$
+\end_inset
+
+ preserves it: that 
+\begin_inset Formula $f\left(m\left(a,b,c\right)\right)=m\left(f\left(a\right),f\left(b\right),f\left(c\right)\right)$
+\end_inset
+
+.
+ For the previous example, if 
+\begin_inset Formula $m$
+\end_inset
+
+ was used to provide or identify a subj-verb-obj relationship, then, after
+ quotienting, one expects that 
+\begin_inset Formula $m$
+\end_inset
+
+ can still identify the verb-slot correctly.
+ 
+\end_layout
+
+\begin_layout Subsection*
+Graph quotients
+\end_layout
+
+\begin_layout Standard
+In graph theory, the notion of quotienting is often referred to as working
+ 
+\begin_inset Quotes eld
+\end_inset
+
+relative to a subgraph
+\begin_inset Quotes erd
+\end_inset
+
+.
+ Given a graph 
+\begin_inset Formula $G$
+\end_inset
+
+ and a subgraph 
+\begin_inset Formula $A\subset G$
+\end_inset
+
+, one 
 \begin_inset Quotes eld
 \end_inset
 
@@ -2465,7 +3235,7 @@ draws a dotted line
 \begin_inset Quotes erd
 \end_inset
 
- or places a balloon around the vertexes in 
+ or places a balloon around the vertexes and edges in 
 \begin_inset Formula $A$
 \end_inset
 
@@ -2482,29 +3252,12 @@ draws a dotted line
 \begin_inset Formula $A$
 \end_inset
 
- is then typically ignored, discarded; not out of spite, but because that
- is the nature of an equivalence relation: it states that all elements of
- 
+ is then ignored.
+ The equivalence relation makes all elements of 
 \begin_inset Formula $A$
 \end_inset
 
- are 
-\begin_inset Quotes eld
-\end_inset
-
-equal
-\begin_inset Quotes erd
-\end_inset
-
-, are 
-\begin_inset Quotes eld
-\end_inset
-
-equivalent
-\begin_inset Quotes erd
-\end_inset
-
-, are one and the same, and thus 
+ equivalent, so that 
 \begin_inset Formula $A$
 \end_inset
 
@@ -2520,34 +3273,13 @@ equivalent
 .
 \end_layout
 
+\begin_layout Subsection*
+Stalks
+\end_layout
+
 \begin_layout Standard
-By contrast, the goal here is not just to talk about a graph 
-\begin_inset Formula $G$
-\end_inset
-
- relative to a single 
-\begin_inset Formula $A$
-\end_inset
-
-, but relative to a huge number of different 
-\begin_inset Formula $A$
-\end_inset
-
-'s.
- What's more, the internal structure of these 
-\begin_inset Formula $A$
-\end_inset
-
-'s will continue to be interesting, and so is carried onwards.
- Finally, the act of merging together multiple vertexes into one 
-\begin_inset Formula $A$
-\end_inset
-
- may result in some of the existing edges being cut, or new edges being
- created.
- The clustering operation applied to the graph alters the graph structure.
- These considerations are what makes it convenient to abandon traditional
- graph theory, and to replace it by the notion of sheaves and sections.
+Given the above notion of a graph quotient, it can be brought over to the
+ language of seeds and sections, established earlier.
 \end_layout
 
 \begin_layout Standard
@@ -2623,12 +3355,31 @@ Given two vertexes
 \end_inset
 
 .
- The result of creating this object is no longer strictly a graph, at least,
- not in the natural sense (one can force a graph structure onto the result,
- but doing so gets awkward).
- The mashing together of two vertexes creates a kind of a quotient, as described
- above.
- This quotient will be called a stalk in what follows.
+ It is typically desirable for 
+\begin_inset Formula $f$
+\end_inset
+
+ to be both commutative and associative, so that 
+\begin_inset Formula $f\left(E_{a},E_{b}\right)=f\left(E_{b},E_{a}\right)$
+\end_inset
+
+ and 
+\begin_inset Formula $f\left(f\left(E_{a},E_{b}\right),E_{c}\right)=f\left(E_{a},f\left(E_{b},E_{c}\right)\right)=f\left(E_{a},E_{b},E_{c}\right)$
+\end_inset
+
+
+\end_layout
+
+\begin_layout Standard
+The mashing together of several vertexes creates a structure resembling
+ a graph quotient, as described above.
+ This will be called a stalk in what follows.
+ The stalk is defined in such a way that it is not actually a graph quotient;
+ it merely resembles one.
+ It is a partial step on the way to a graph quotient.
+ The definition asks that the internal structure of the stalk be preserved.
+ One obtains a true graph quotient only after projecting the stalk down
+ to a base space.
 \end_layout
 
 \begin_layout Definition*
@@ -2788,6 +3539,83 @@ A stalk and it's projection
 \end_layout
 
 \begin_layout Standard
+The notion of projection can be formalized.
+\end_layout
+
+\begin_layout Definition*
+A projection 
+\begin_inset Formula $\pi$
+\end_inset
+
+ is a function that accepts a stalk 
+\begin_inset Formula $S=\left(V,E\right)$
+\end_inset
+
+ and produces a seed 
+\begin_inset Formula $s=\left(b,E^{\prime}\right)$
+\end_inset
+
+ such that for each 
+\begin_inset Formula $v\in V$
+\end_inset
+
+, it produces 
+\begin_inset Formula $b$
+\end_inset
+
+, and for each edge 
+\begin_inset Formula $\left(v,w\right)\in E$
+\end_inset
+
+, it produces the edge 
+\begin_inset Formula $\left(b,w\right)\in E^{\prime}$
+\end_inset
+
+.That is 
+\begin_inset Formula $\pi\left(v,\left(v,w)\right)\right)=\left(b,\left(b,w\right)\right)$
+\end_inset
+
+.
+ By abose of notation, one may write 
+\begin_inset Formula $\pi\left(v\right)=b$
+\end_inset
+
+ so that 
+\begin_inset Formula $\pi\left(v,\left(v,w)\right)\right)=\left(\pi\left(v\right),\left(\pi\left(v\right),w\right)\right)$
+\end_inset
+
+.
+ 
+\begin_inset Formula $\diamond$
+\end_inset
+
+
+\end_layout
+
+\begin_layout Definition*
+The desirable properties of the projection can be summarized in a lemma:
+\end_layout
+
+\begin_layout Lemma*
+The projection function 
+\begin_inset Formula $\pi$
+\end_inset
+
+ is a morphism of graphs, taking a graph and mapping it to a quotient graph.
+ 
+\begin_inset Formula $\diamond$
+\end_inset
+
+
+\end_layout
+
+\begin_layout Standard
+The proof of the lemma is left to the reader, in the hopes that it is self-evide
+nt.
+ An actual proof requires a few additional definitions, as follows.
+\end_layout
+
+\begin_layout Standard
 The projection down to a base space suggests that the equivalence relation
  on vertexes can be extended to an equivalence relation on edges: two edges
  are equivalent if they form the same link.
@@ -2898,14 +3726,877 @@ stalk
 \end_layout
 
 \begin_layout Standard
-The above definition renders the stalk as being essentially the same thing
- as a seed, except that now, one is working with sets of vertices, and the
- links between them.
+One then has an obvious lemma about the projection.
+\end_layout
+
+\begin_layout Lemma*
+The projection function 
+\begin_inset Formula $\pi$
+\end_inset
+
+ can be extended consistently to the revised defintion of a stalk.
+ 
+\begin_inset Formula $\diamond$
+\end_inset
+
+
+\end_layout
+
+\begin_layout Standard
+As before, the proof is left as being obvious.
+\end_layout
+
+\begin_layout Section*
+Sheaves
+\end_layout
+
+\begin_layout Standard
+The above defintions, along with the projection function, indicate that
+ stalks can be thought of as seeds.
+ The stalk preserves the graph structure; the projection creates graph quotients.
+ The above finally allows the definition of a section to be understood in
+ a way that is in keeping with the usual notion of a section as commonly
+ defined in covering spaces and fiber bundles.
+\begin_inset Wrap figure
+lines 0
+placement r
+overhang 0in
+width "52text%"
+status open
+
+\begin_layout Plain Layout
+\align center
+\begin_inset Caption Standard
+
+\begin_layout Plain Layout
+Corn
+\end_layout
+
+\end_inset
+
+
+\end_layout
+
+\begin_layout Plain Layout
+\align center
+\begin_inset Graphics
+	filename cornstalk.jpg
+	width 35text%
+
+\end_inset
+
+
+\end_layout
+
+\end_inset
+
+
+\end_layout
+
+\begin_layout Definition*
+A sheaf is graph 
+\begin_inset Formula $G$
+\end_inset
+
+ represented as a collection of seeds, together with a projection function
+ 
+\begin_inset Formula $\pi$
+\end_inset
+
+ that can be taken to be an equivalence relation.
+ That is, 
+\begin_inset Formula $\pi$
+\end_inset
+
+ maps 
+\begin_inset Formula $G$
+\end_inset
+
+ to a quotient graph 
+\begin_inset Formula $G/\pi$
+\end_inset
+
+ such that, for each pair of vertexes 
+\begin_inset Formula $v,w\in G$
+\end_inset
+
+, one has 
+\begin_inset Formula $\pi(v)=\pi(w)$
+\end_inset
+
+ if and only if 
+\begin_inset Formula $v,w$
+\end_inset
+
+ are in germs in the same stalk, and, for any pair of edges 
+\begin_inset Formula $e,e^{\prime}\in G$
+\end_inset
+
+, one has that 
+\begin_inset Formula $\pi(e)=\pi\left(e^{\prime}\right)$
+\end_inset
+
+ if and only if the pair 
+\begin_inset Formula $e,e^{\prime}$
+\end_inset
+
+ are connectors in the same stalk.
+ 
+\begin_inset Formula $\diamond$
+\end_inset
+
+
+\end_layout
+
+\begin_layout Standard
+The formal definition of a sheaf also requires that it obey a set of axioms,
+ called the gluing axioms.
+ Before giving these, it is useful to look at an example.
+\end_layout
+
+\begin_layout Subsection*
+Example: colocations
+\end_layout
+
+\begin_layout Standard
+A canonical first step in corpus linguistics is to align text around a shared
+ word or phrase:
+\begin_inset VSpace defskip
+\end_inset
+
+
+\end_layout
+
+\begin_layout Standard
+\begin_inset space \qquad{}
+\end_inset
+
+
+\begin_inset Box Frameless
+position "t"
+hor_pos "c"
+has_inner_box 1
+inner_pos "t"
+use_parbox 0
+use_makebox 0
+width "100col%"
+special "none"
+height "1in"
+height_special "totalheight"
+thickness "0.4pt"
+separation "3pt"
+shadowsize "4pt"
+framecolor "black"
+backgroundcolor "none"
+status open
+
+\begin_layout Plain Layout
+\begin_inset Tabular
+<lyxtabular version="3" rows="8" columns="2">
+<features tabularvalignment="middle">
+<column alignment="right" valignment="top">
+<column alignment="left" valignment="top">
+<row>
+<cell alignment="right" valignment="top" usebox="none">
+\begin_inset Text
+
+\begin_layout Plain Layout
+
+\end_layout
+
+\end_inset
+</cell>
+<cell alignment="left" valignment="top" usebox="none">
+\begin_inset Text
+
+\begin_layout Plain Layout
+
+\family typewriter
+fly like a butterfly
+\end_layout
+
+\end_inset
+</cell>
+</row>
+<row>
+<cell alignment="right" valignment="top" usebox="none">
+\begin_inset Text
+
+\begin_layout Plain Layout
+
+\family typewriter
+airplanes that
+\end_layout
+
+\end_inset
+</cell>
+<cell alignment="left" valignment="top" usebox="none">
+\begin_inset Text
+
+\begin_layout Plain Layout
+
+\family typewriter
+fly
+\end_layout
+
+\end_inset
+</cell>
+</row>
+<row>
+<cell alignment="right" valignment="top" usebox="none">
+\begin_inset Text
+
+\begin_layout Plain Layout
+
+\end_layout
+
+\end_inset
+</cell>
+<cell alignment="left" valignment="top" usebox="none">
+\begin_inset Text
+
+\begin_layout Plain Layout
+
+\family typewriter
+fly fishing
+\end_layout
+
+\end_inset
+</cell>
+</row>
+<row>
+<cell alignment="right" valignment="top" usebox="none">
+\begin_inset Text
+
+\begin_layout Plain Layout
+
+\end_layout
+
+\end_inset
+</cell>
+<cell alignment="left" valignment="top" usebox="none">
+\begin_inset Text
+
+\begin_layout Plain Layout
+
+\family typewriter
+fly away home
+\end_layout
+
+\end_inset
+</cell>
+</row>
+<row>
+<cell alignment="right" valignment="top" usebox="none">
+\begin_inset Text
+
+\begin_layout Plain Layout
+
+\end_layout
+
+\end_inset
+</cell>
+<cell alignment="left" valignment="top" usebox="none">
+\begin_inset Text
+
+\begin_layout Plain Layout
+
+\family typewriter
+fly ash in concrete
+\end_layout
+
+\end_inset
+</cell>
+</row>
+<row>
+<cell alignment="right" valignment="top" usebox="none">
+\begin_inset Text
+
+\begin_layout Plain Layout
+
+\family typewriter
+when sparks
+\end_layout
+
+\end_inset
+</cell>
+<cell alignment="left" valignment="top" usebox="none">
+\begin_inset Text
+
+\begin_layout Plain Layout
+
+\family typewriter
+fly
+\end_layout
+
+\end_inset
+</cell>
+</row>
+<row>
+<cell alignment="right" valignment="top" usebox="none">
+\begin_inset Text
+
+\begin_layout Plain Layout
+
+\family typewriter
+let's
+\end_layout
+
+\end_inset
+</cell>
+<cell alignment="left" valignment="top" usebox="none">
+\begin_inset Text
+
+\begin_layout Plain Layout
+
+\family typewriter
+fly a kite
+\end_layout
+
+\end_inset
+</cell>
+</row>
+<row>
+<cell alignment="right" valignment="top" usebox="none">
+\begin_inset Text
+
+\begin_layout Plain Layout
+
+\family typewriter
+learn to
+\end_layout
+
+\end_inset
+</cell>
+<cell alignment="left" valignment="top" usebox="none">
+\begin_inset Text
+
+\begin_layout Plain Layout
+
+\family typewriter
+fly helicopters
+\end_layout
+
+\end_inset
+</cell>
+</row>
+</lyxtabular>
+
+\end_inset
+
+
+\end_layout
+
+\end_inset
+
+ 
+\end_layout
+
+\begin_layout Standard
+\begin_inset VSpace defskip
+\end_inset
+
+
+\end_layout
+
+\begin_layout Standard
+Each word is meant to be a vertex; edges are assumed to connect the vertexes
+ together in some way.
+ In standard corpus linguistics, the edges are always taken to join together
+ neighboring words, in sequential fashion.
+ Note that each phrase in the colocation obeys the formal definition of
+ a section, given above.
+ It does so trivially: its just a linear sequence of vertexes connected
+ with edges.
+ If the colocated phrases are chopped up so that they form a word-sequence
+ that is exactly 
+\begin_inset Formula $n$
+\end_inset
+
+ words long, then one calls that sequence an 
+\begin_inset Formula $n$
+\end_inset
+
+-gram.
+ 
+\end_layout
+
+\begin_layout Standard
+The projection function 
+\begin_inset Formula $\pi$
+\end_inset
+
+ is now also equally plain: it simply maps all of the distinct occurances
+ of the word 
+\begin_inset Quotes eld
+\end_inset
+
+fly
+\begin_inset Quotes erd
+\end_inset
+
+ down to a single, generic word 
+\begin_inset Quotes eld
+\end_inset
+
+fly
+\begin_inset Quotes erd
+\end_inset
+
+.
+ The stalk is just the vertical arrangement of the word 
+\begin_inset Quotes eld
+\end_inset
+
+fly
+\begin_inset Quotes erd
+\end_inset
+
+, one above another.
+ Each phrase or section can be visualized as a botanical branch or botanical
+ leaf branching off the central stalk.The projection of the stalk is shown
+ below.
+ The words in each phrase ar connected as a linear sequence.
+ Idential words are projected down to a common base point.
+\end_layout
+
+\begin_layout Standard
+\begin_inset Float figure
+placement h
+wide false
+sideways false
+status open
+
+\begin_layout Plain Layout
+\begin_inset Caption Standard
+
+\begin_layout Plain Layout
+N-gram corpus text alignment
+\end_layout
+
+\end_inset
+
+
+\end_layout
+
+\begin_layout Plain Layout
+\begin_inset Graphics
+	filename corpus-ngram.eps
+	width 50col%
+
+\end_inset
+
+
+\end_layout
+
+\end_inset
+
+
+\end_layout
+
+\begin_layout Standard
+The sections do not have to be linear sequences; the phrases can be parsed
+ with a dependency parser of one style or another, in which case the words
+ are joined with (directed) edges that denote dependencies.
+ Parsing with a head-phrase parser introduces additional vertexes, typically
+ called NP, VP, S and so on.
+ The next figure shows the projection that results from alignment on an
+ (unlabeled, undirected) dependency parse of the text.
+ Most noticeable is that the determiner 
+\begin_inset Quotes eld
+\end_inset
+
+a
+\begin_inset Quotes erd
+\end_inset
+
+ does not link to 
+\begin_inset Quotes eld
+\end_inset
+
+fly
+\begin_inset Quotes erd
+\end_inset
+
+ even though it stands next to it; instead, the determiner links to the
+ noun it determines.
+ This figure also shows 
+\begin_inset Quotes eld
+\end_inset
+
+ash
+\begin_inset Quotes erd
+\end_inset
+
+ as modifying 
+\begin_inset Quotes eld
+\end_inset
+
+fly
+\begin_inset Quotes erd
+\end_inset
+
+, which, as a dependency, is not exactly correct but does serve to illustrate
+ the difference between the N-gram and the dependency alignment.
+ 
+\end_layout
+
+\begin_layout Standard
+\begin_inset Float figure
+placement h
+wide false
+sideways false
+status open
+
+\begin_layout Plain Layout
+\begin_inset Caption Standard
+
+\begin_layout Plain Layout
+Dependency parse corpus text alignment
+\end_layout
+
+\end_inset
+
+
+\end_layout
+
+\begin_layout Plain Layout
+\begin_inset Graphics
+	filename corpus-dep.eps
+	width 75col%
+
+\end_inset
+
+
+\end_layout
+
+\end_inset
+
+
+\end_layout
+
+\begin_layout Standard
+Both of these figures represent a quotient graph that results from a corpus
+ alignment, where all uses of a word have been collapsed (projected down)
+ to a single node.
+ The resulting graph is the graph of the language.
  
 \end_layout
 
 \begin_layout Subsection*
+Why sheaves? Are projections useful?
+\end_layout
+
+\begin_layout Standard
+Yes.
+ A collapsed graph like that might appear strange; why would one want to
+ do that, if one has individual sentence data? 
+\end_layout
+
+\begin_layout Standard
+By collapsing in this way, one obtains a natural place to store 
+\begin_inset CommandInset href
+LatexCommand href
+name "marginal distributions"
+target "https://en.wikipedia.org/wiki/Marginal_distribution"
+
+\end_inset
+
+.
+ For example, when accumulating statistics for large collections of sentences,
+ the projected vertex becomes an ideal place to store the frequency count
+ of that word; the edge becomes an excellent place to store the joint probabilit
+y or the mutual information for a pair of words.
+ The projected graph - the quotient graph, is manageable in size.
+ For example, in a corpus consisting of ten million sentences, one might
+ see 130K distinct, unique words (130K vertexes) and perhaps 5 million distinct
+ word-pairs (5M edges).
+ Such a graph is managable, and can fit into the RAM of a contemporary computer.
+ 
+\end_layout
+
+\begin_layout Standard
+By contrast, storing the individual parses for 10 million sentences is mor
+ challenging.
+ Assuming 15 words per sentence, this requires storing 150M vertexes, and
+ approximately 20 links per sentence for 200M edges.
+ This graph is two orders of magnitude larger than the quotient graph.
+ It makes sense to collapse the stalks down to their projections as soon
+ as possible.
+ They can be envisioned to still be there, virtually, in principle, but
+ the actual storage can be avoided.
+\end_layout
+
+\begin_layout Standard
+\begin_inset Float figure
+wide false
+sideways false
+status collapsed
+
+\begin_layout Plain Layout
+\begin_inset Caption Standard
+
+\begin_layout Plain Layout
+A Sheaf of Stalks; a Sheaf of Paper
+\end_layout
+
+\end_inset
+
+
+\end_layout
+
+\begin_layout Plain Layout
+\begin_inset Graphics
+	filename sheaf-of-stalks.jpg
+	width 35col%
+
+\end_inset
+
+
+\begin_inset Graphics
+	filename sheaf-of-papers.jpg
+	width 51col%
+
+\end_inset
+
+
+\end_layout
+
+\end_inset
+
+
+\end_layout
+
+\begin_layout Standard
+Every graph can be represented as an adjacency matrix.
+ In this example, it would be a sparse matrix, with 5 million non-zero entries
+ out of 130K
+\begin_inset Formula $\times$
+\end_inset
+
+130K total.
+ The marginals stored with the graph can be accessed as marginals in the
+ normal sense of values written in the margin of the matrix.
+ Standard linear-algebra tools, such as the R programming language, can
+ access the matrix and the marginals.
+\end_layout
+
+\begin_layout Standard
+One way of visualizing the sheaf is as a stack of sheets of paper, with
+ one sentence written on each sheet.
+ The papers are stacked in such a way that words that are the same are always
+ vertically above one-another.
+ This stacking is where the term 
+\begin_inset Quotes eld
+\end_inset
+
+sheaf
+\begin_inset Quotes erd
+\end_inset
+
+ comes from.
+ Each single sheet of paper is a section.
+ Each colocation is a stalk.
+ 
+\end_layout
+
+\begin_layout Standard
+A different example can be taken from biochemistry.
+ There, one might want to write down specific pathways or interaction networks
+ on the individual sheets of paper, treating them as sections.
+ If one specific gene is up-regulated, one can then try to view everything
+ else that changed as belonging to the same section, as if it were an activation
+ mode within the global network graph of all possible interactions.
+ Thus, for example, the Krebs cycle can be taken to be a single section
+ through the network: it shows exactly which coenzymes are active in aerobic
+ metabolism.
+ The same subtstrates, products and enzymes may also participate in other
+ pathways; those other pathways should be considered as other sections through
+ the sheaf.
+ Each substrate, enzyme or product is itself a stalk.
+ Each reaction type is a seed.
+\end_layout
+
+\begin_layout Standard
+The sheaf, it's decomposition into sections, and it's projection down to
+ a single base unified network, provides a holistic view of a network of
+ interactions.
+ Activations or modes of the network correspond to grammatically valid sentences
+, when the network is a language network.
+ Sections correspond to activated biological pathways, when the network
+ is a map of biochemical interactions.
+\end_layout
+
+\begin_layout Subsection*
+Gluing Axioms
+\end_layout
+
+\begin_layout Standard
+Sections can be cut down, or they can be enlarged, yet each section must
+ consist of a grammatically-correct sentence, phrase (or paragraph, or larger!
+ ...
+ or smaller, just a sentence fragment).
+ The base space consists simply of the individual words in the language,
+ each word being a vertex, connections between words being projections of
+ the connections discovered from the N-grams, or dependency graphs, as the
+ case may be.
+ One can examine how the structure of language changes as words are removed
+ from the base space: such changes correspond to the 
+\begin_inset Quotes eld
+\end_inset
+
+restriction morphisms
+\begin_inset Quotes erd
+\end_inset
+
+ of a sheaf.
+ These restriction morphisms obey all of the axioms of a sheaf; this observation
+ is what drives the peculiar naming convention given here.
+ The reason this 
+\begin_inset Quotes eld
+\end_inset
+
+works
+\begin_inset Quotes erd
+\end_inset
+
+, that the axioms apply, is in fact rather shallow: it is because the seeds,
+ as initially defined, behave very much like open sets, and when they are
+ projected to the base space, they serve to cover the base space, much as
+ a topological covering does.
+ 
+\end_layout
+
+\begin_layout Standard
+The restriction morphisms appear to continue to satisfy the sheaf axioms
+ even after projection (at least, at the informal level given here).
+\end_layout
+
+\begin_layout Subsection*
+Why sheaves?
+\end_layout
+
+\begin_layout Standard
+The primary reason for introducing this notion is to consolidate the otherwise
+ vague idea of the 
+\begin_inset Quotes eld
+\end_inset
+
+language graph
+\begin_inset Quotes erd
+\end_inset
+
+.
+ One has dueling notions: the graph of all sentences; the generative power
+ of grammars.
+ Surface realizations of language are studied in corpus linguistics, where
+ differences in regional dialects, differences according to socio-economic
+ status and politically motivated differences are found.
+ However, these surface realizations are almost never refined into a grammar,
+ and thus, one does not obtain a generative model of how different speakers
+ in different socio-economic classes speak: corpus linguistics examples
+ are just that: examples that are not further refined.
+ By applying a pattern mining approach, the underlying grammar can be discovered
+ computationally.
+ But what is it, really, that is being discovered, other than some collection
+ of grammatical classes and relations? By looking at the collection of all
+ words, sentences and paragraphs in a corpus as if it were a sheaf, one
+ gets a more 
+\begin_inset Quotes eld
+\end_inset
+
+holistic
+\begin_inset Quotes erd
+\end_inset
+
+ view of what language is: one can start seeing the 
+\begin_inset Quotes eld
+\end_inset
+
+big picture
+\begin_inset Quotes erd
+\end_inset
+
+, instead of just the trees.
+ This holistic view is the primary point of this exercise.
+\end_layout
+
+\begin_layout Subsection*
+Related ideas
+\end_layout
+
+\begin_layout Standard
+As before, the 
+\begin_inset Quotes eld
+\end_inset
+
+sections
+\begin_inset Quotes erd
+\end_inset
+
+ presented above (sentence fragments) are presented minimally.
+ In practice, sections will be adorned with additional information, such
+ as frequency counts and mutual information values.
+ Once clustering and quotienting has been performed, non trivial type tags
+ become available.
+\end_layout
+
+\begin_layout Section*
+clustering
+\end_layout
+
+\begin_layout Standard
+typical bullshit
+\end_layout
+
+\begin_layout Subsection*
 Why clustering?
+\end_layout
+
+\begin_layout Standard
+foo
+\end_layout
+
+\begin_layout Standard
+x
+\end_layout
+
+\begin_layout Standard
+x
+\end_layout
+
+\begin_layout Standard
+By contrast, the goal here is not just to talk about a graph 
+\begin_inset Formula $G$
+\end_inset
+
+ relative to a single 
+\begin_inset Formula $A$
+\end_inset
+
+, but relative to a huge number of different 
+\begin_inset Formula $A$
+\end_inset
+
+'s.
+ What's more, the internal structure of these 
+\begin_inset Formula $A$
+\end_inset
+
+'s will continue to be interesting, and so is carried onwards.
+ Finally, the act of merging together multiple vertexes into one 
+\begin_inset Formula $A$
+\end_inset
+
+ may result in some of the existing edges being cut, or new edges being
+ created.
+ The clustering operation applied to the graph alters the graph structure.
+ These considerations are what makes it convenient to abandon traditional
+ graph theory, and to replace it by the notion of sheaves and sections.
+\end_layout
+
+\begin_layout Standard
+x
 \end_layout
 
 \begin_layout Standard
@@ -4689,596 +6380,6 @@ semantic information
 
 , identifying different types or kinds, rather than as purely syntactic
  information about arrangments and relationships.
-\end_layout
-
-\begin_layout Section*
-Sheaves
-\end_layout
-
-\begin_layout Standard
-The classification and quotienting procedures cause the structure of the
- entire network to behave much like the mathematical concept of a 
-\begin_inset Quotes eld
-\end_inset
-
-sheaf
-\begin_inset Quotes erd
-\end_inset
-
- studied in 
-\begin_inset Quotes eld
-\end_inset
-
-sheaf theory
-\begin_inset Quotes erd
-\end_inset
-
-.
- This is a rather abstract branch of mathematics, most of which offers relativel
-y little insight into the problems being tackled here.
- Thus, the presentation here is informal, and lacks in rigor.
- The primary example is again drawn from linguistics, although examples
- in biochemistry and other fields can be found as well.
-\end_layout
-
-\begin_layout Standard
-The canonical first step in corpus linguistics is to align text around a
- shared word or phrase:
-\begin_inset VSpace defskip
-\end_inset
-
-
-\end_layout
-
-\begin_layout Standard
-\begin_inset space \qquad{}
-\end_inset
-
-
-\begin_inset Box Frameless
-position "t"
-hor_pos "c"
-has_inner_box 1
-inner_pos "t"
-use_parbox 0
-use_makebox 0
-width "100col%"
-special "none"
-height "1in"
-height_special "totalheight"
-thickness "0.4pt"
-separation "3pt"
-shadowsize "4pt"
-framecolor "black"
-backgroundcolor "none"
-status open
-
-\begin_layout Plain Layout
-\begin_inset Tabular
-<lyxtabular version="3" rows="8" columns="2">
-<features tabularvalignment="middle">
-<column alignment="right" valignment="top">
-<column alignment="left" valignment="top">
-<row>
-<cell alignment="right" valignment="top" usebox="none">
-\begin_inset Text
-
-\begin_layout Plain Layout
-
-\end_layout
-
-\end_inset
-</cell>
-<cell alignment="left" valignment="top" usebox="none">
-\begin_inset Text
-
-\begin_layout Plain Layout
-
-\family typewriter
-fly like a butterfly
-\end_layout
-
-\end_inset
-</cell>
-</row>
-<row>
-<cell alignment="right" valignment="top" usebox="none">
-\begin_inset Text
-
-\begin_layout Plain Layout
-
-\family typewriter
-airplanes that
-\end_layout
-
-\end_inset
-</cell>
-<cell alignment="left" valignment="top" usebox="none">
-\begin_inset Text
-
-\begin_layout Plain Layout
-
-\family typewriter
-fly
-\end_layout
-
-\end_inset
-</cell>
-</row>
-<row>
-<cell alignment="right" valignment="top" usebox="none">
-\begin_inset Text
-
-\begin_layout Plain Layout
-
-\end_layout
-
-\end_inset
-</cell>
-<cell alignment="left" valignment="top" usebox="none">
-\begin_inset Text
-
-\begin_layout Plain Layout
-
-\family typewriter
-fly fishing
-\end_layout
-
-\end_inset
-</cell>
-</row>
-<row>
-<cell alignment="right" valignment="top" usebox="none">
-\begin_inset Text
-
-\begin_layout Plain Layout
-
-\end_layout
-
-\end_inset
-</cell>
-<cell alignment="left" valignment="top" usebox="none">
-\begin_inset Text
-
-\begin_layout Plain Layout
-
-\family typewriter
-fly away home
-\end_layout
-
-\end_inset
-</cell>
-</row>
-<row>
-<cell alignment="right" valignment="top" usebox="none">
-\begin_inset Text
-
-\begin_layout Plain Layout
-
-\end_layout
-
-\end_inset
-</cell>
-<cell alignment="left" valignment="top" usebox="none">
-\begin_inset Text
-
-\begin_layout Plain Layout
-
-\family typewriter
-fly ash in concrete
-\end_layout
-
-\end_inset
-</cell>
-</row>
-<row>
-<cell alignment="right" valignment="top" usebox="none">
-\begin_inset Text
-
-\begin_layout Plain Layout
-
-\family typewriter
-when sparks
-\end_layout
-
-\end_inset
-</cell>
-<cell alignment="left" valignment="top" usebox="none">
-\begin_inset Text
-
-\begin_layout Plain Layout
-
-\family typewriter
-fly
-\end_layout
-
-\end_inset
-</cell>
-</row>
-<row>
-<cell alignment="right" valignment="top" usebox="none">
-\begin_inset Text
-
-\begin_layout Plain Layout
-
-\family typewriter
-let's
-\end_layout
-
-\end_inset
-</cell>
-<cell alignment="left" valignment="top" usebox="none">
-\begin_inset Text
-
-\begin_layout Plain Layout
-
-\family typewriter
-fly a kite
-\end_layout
-
-\end_inset
-</cell>
-</row>
-<row>
-<cell alignment="right" valignment="top" usebox="none">
-\begin_inset Text
-
-\begin_layout Plain Layout
-
-\family typewriter
-learn to
-\end_layout
-
-\end_inset
-</cell>
-<cell alignment="left" valignment="top" usebox="none">
-\begin_inset Text
-
-\begin_layout Plain Layout
-
-\family typewriter
-fly helicopters
-\end_layout
-
-\end_inset
-</cell>
-</row>
-</lyxtabular>
-
-\end_inset
-
-
-\end_layout
-
-\end_inset
-
- 
-\end_layout
-
-\begin_layout Standard
-\begin_inset VSpace defskip
-\end_inset
-
-Each word is meant to be a vertex; edges are assumed to connect the vertexes
- together in some way.
- In standard corpus linguistics, the edges are always taken to join together
- neighboring words: these then form the 
-\begin_inset Quotes eld
-\end_inset
-
-n-grams
-\begin_inset Quotes erd
-\end_inset
-
- that are commonly studied.
- Alternately, the phrases can be parsed with a dependency parser of one
- style or another, in which case the words are joined with (directed) edges
- that denote dependencies.
- Parsing with a head-phrase parser introduces additional vertexes, typically
- called NP, VP, S and so on.
- The resulting graphical structure is shown in the two figures below.
- The first figure shows alignment based on N-grams, where the phrases are
- taken as linear sequences of words, without any structure.
-\end_layout
-
-\begin_layout Standard
-\begin_inset Float figure
-placement h
-wide false
-sideways false
-status open
-
-\begin_layout Plain Layout
-\begin_inset Caption Standard
-
-\begin_layout Plain Layout
-N-gram corpus text alignment
-\end_layout
-
-\end_inset
-
-
-\end_layout
-
-\begin_layout Plain Layout
-\begin_inset Graphics
-	filename corpus-ngram.eps
-	width 50col%
-
-\end_inset
-
-
-\end_layout
-
-\end_inset
-
-
-\end_layout
-
-\begin_layout Standard
-The next figure shows alignment that results from an (unlabeled, undirected)
- dependency parse of the text.
- Most noticeable is that the determiner 
-\begin_inset Quotes eld
-\end_inset
-
-a
-\begin_inset Quotes erd
-\end_inset
-
- does not link to 
-\begin_inset Quotes eld
-\end_inset
-
-fly
-\begin_inset Quotes erd
-\end_inset
-
- even though it stands next to it; instead, the determiner links to the
- noun it determines.
- This figure also shows 
-\begin_inset Quotes eld
-\end_inset
-
-ash
-\begin_inset Quotes erd
-\end_inset
-
- as modifying 
-\begin_inset Quotes eld
-\end_inset
-
-fly
-\begin_inset Quotes erd
-\end_inset
-
-, which, as a dependency, is not exactly correct but does serve to illustrate
- the difference between the N-gram and the dependency alignment.
- 
-\end_layout
-
-\begin_layout Standard
-\begin_inset Float figure
-placement h
-wide false
-sideways false
-status open
-
-\begin_layout Plain Layout
-\begin_inset Caption Standard
-
-\begin_layout Plain Layout
-Dependency parse corpus text alignment
-\end_layout
-
-\end_inset
-
-
-\end_layout
-
-\begin_layout Plain Layout
-\begin_inset Graphics
-	filename corpus-dep.eps
-	width 75col%
-
-\end_inset
-
-
-\end_layout
-
-\end_inset
-
-
-\end_layout
-
-\begin_layout Standard
-Both of these figures represent a graph that results from a corpus alignment,
- where all uses of a word have been collapsed (projected down) to a single
- node.
- The resulting graph is the graph of the language.
- 
-\end_layout
-
-\begin_layout Standard
-A collapsed graph like that might appear strange; why would one want to
- do that, if one has individual sentence data? The answer is that by collapsing
- in this way, one can accumulate statistics for large collections of sentences:
- one can find out which links are frequenctly seen, and which are rare.
- One can capture the affinity for pairs of words, by computing the mutual
- information between them.
- Through this kind of averaging, a global overvioew emerges.
- The local structure can be recaptured by extracting seeds from individual
- sentences, and then re-assembling these seeds into stalks, in a polymorphic
- fashion.
-\end_layout
-
-\begin_layout Standard
-In some domains, one might not have specific sentences as sequences of words,
- but one might be able to observe specific activation networks.
- For example, in biology, if one specific gene is up-regulated, one can
- then try to view everything else that changed as a 
-\begin_inset Quotes eld
-\end_inset
-
-sentence
-\begin_inset Quotes erd
-\end_inset
-
-, a certain 
-\begin_inset Quotes eld
-\end_inset
-
-mode
-\begin_inset Quotes erd
-\end_inset
-
- within the global graph.
-\end_layout
-
-\begin_layout Standard
-One way of visualizing this global graph is as a stack of sheets of paper,
- with one sentence written on each sheet.
- In biology, one might write down specific pathways or interaction networks
- on the individual sheets.
- The papers are stacked in such a way that words that are the same are always
- vertically above one-another.
- This 
-\begin_inset Quotes eld
-\end_inset
-
-stacking
-\begin_inset Quotes erd
-\end_inset
-
- is where the term 
-\begin_inset Quotes eld
-\end_inset
-
-sheaf
-\begin_inset Quotes erd
-\end_inset
-
- comes from.
- Each single sheet of paper is a 
-\begin_inset Quotes eld
-\end_inset
-
-section
-\begin_inset Quotes erd
-\end_inset
-
-.
- 
-\end_layout
-
-\begin_layout Standard
-Sections can be cut down, or they can be enlarged, yet each section must
- consist of a grammatically-correct sentence, phrase (or paragraph, or larger!
- ...
- or smaller, just a sentence fragment).
- The base space consists simply of the individual words in the language,
- each word being a vertex, connections between words being projections of
- the connections discovered from the N-grams, or dependency graphs, as the
- case may be.
- One can examine how the structure of language changes as words are removed
- from the base space: such changes correspond to the 
-\begin_inset Quotes eld
-\end_inset
-
-restriction morphisms
-\begin_inset Quotes erd
-\end_inset
-
- of a sheaf.
- These restriction morphisms obey all of the axioms of a sheaf; this observation
- is what drives the peculiar naming convention given here.
- The reason this 
-\begin_inset Quotes eld
-\end_inset
-
-works
-\begin_inset Quotes erd
-\end_inset
-
-, that the axioms apply, is in fact rather shallow: it is because the seeds,
- as initially defined, behave very much like open sets, and when they are
- projected to the base space, they serve to cover the base space, much as
- a topological covering does.
- 
-\end_layout
-
-\begin_layout Standard
-The restriction morphisms appear to continue to satisfy the sheaf axioms
- even after projection (at least, at the informal level given here).
-\end_layout
-
-\begin_layout Subsection*
-Why sheaves?
-\end_layout
-
-\begin_layout Standard
-The primary reason for introducing this notion is to consolidate the otherwise
- vague idea of the 
-\begin_inset Quotes eld
-\end_inset
-
-language graph
-\begin_inset Quotes erd
-\end_inset
-
-.
- One has dueling notions: the graph of all sentences; the generative power
- of grammars.
- Surface realizations of language are studied in corpus linguistics, where
- differences in regional dialects, differences according to socio-economic
- status and politically motivated differences are found.
- However, these surface realizations are almost never refined into a grammar,
- and thus, one does not obtain a generative model of how different speakers
- in different socio-economic classes speak: corpus linguistics examples
- are just that: examples that are not further refined.
- By applying a pattern mining approach, the underlying grammar can be discovered
- computationally.
- But what is it, really, that is being discovered, other than some collection
- of grammatical classes and relations? By looking at the collection of all
- words, sentences and paragraphs in a corpus as if it were a sheaf, one
- gets a more 
-\begin_inset Quotes eld
-\end_inset
-
-holistic
-\begin_inset Quotes erd
-\end_inset
-
- view of what language is: one can start seeing the 
-\begin_inset Quotes eld
-\end_inset
-
-big picture
-\begin_inset Quotes erd
-\end_inset
-
-, instead of just the trees.
- This holistic view is the primary point of this exercise.
-\end_layout
-
-\begin_layout Subsection*
-Related ideas
-\end_layout
-
-\begin_layout Standard
-As before, the 
-\begin_inset Quotes eld
-\end_inset
-
-sections
-\begin_inset Quotes erd
-\end_inset
-
- presented above (sentence fragments) are presented minimally.
- In practice, sections will be adorned with additional information, such
- as frequency counts and mutual information values.
- Once clustering and quotienting has been performed, non trivial type tags
- become available.
 \end_layout
 
 \begin_layout Section*
