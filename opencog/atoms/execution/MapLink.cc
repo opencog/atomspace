@@ -94,8 +94,8 @@ void MapLink::init(void)
 	// FunctionLink::init();
 }
 
-MapLink::MapLink(const Handle& vars, const Handle& body)
-	: FunctionLink(HandleSeq({vars, body}), MAP_LINK)
+MapLink::MapLink(const Handle& pattern, const Handle& term)
+	: FunctionLink(HandleSeq({pattern, term}), MAP_LINK)
 {
 	init();
 }
