@@ -56,9 +56,7 @@ protected:
 
 	MapLink(Type, const Handle&);
 
-	bool extract(const Handle&, const Handle&,
-	             HandleMap&,
-	             AtomSpace*) const;
+	bool extract(const Handle&, const Handle&, HandleMap&) const;
 
 	Handle rewrite_one(const Handle&, AtomSpace*) const;
 
