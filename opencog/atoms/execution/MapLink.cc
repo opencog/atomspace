@@ -160,8 +160,7 @@ MapLink::MapLink(const Link &l)
 ///
 bool MapLink::extract(const Handle& termpat,
                       const Handle& ground,
-                      HandleMap& valmap,
-                      AtomSpace* scratch) const
+                      HandleMap& valmap) const
 {
 	if (termpat == ground) return true;
 
@@ -200,7 +199,7 @@ bool MapLink::extract(const Handle& termpat,
 	{
 		for (const Handle& choice : termpat->getOutgoingSet())
 		{
-			if (extract(choice, ground, valmap, scratch))
+			if (extract(choice, ground, valmap))
 				return true;
 		}
 		return false;
@@ -225,7 +224,7 @@ bool MapLink::extract(const Handle& termpat,
 		if (gsz != tsz) return false;
 		for (size_t i=0; i<tsz; i++)
 		{
-			if (not extract(tlo[i], glo[i], valmap, scratch))
+			if (not extract(tlo[i], glo[i], valmap))
 				return false;
 		}
 
@@ -255,7 +254,7 @@ bool MapLink::extract(const Handle& termpat,
 			}
 
 			// Match at least one.
-			bool tc = extract(glob, glo[jg], valmap, scratch);
+			bool tc = extract(glob, glo[jg], valmap);
 			if (not tc) return false;
 
 			glob_seq.push_back(glo[jg]);
@@ -267,10 +266,10 @@ bool MapLink::extract(const Handle& termpat,
 				if (have_post)
 				{
 					// If the atom after the glob matches, then we are done.
-					tc = extract(post_glob, glo[jg], valmap, scratch);
+					tc = extract(post_glob, glo[jg], valmap);
 					if (tc) break;
 				}
-				tc = extract(glob, glo[jg], valmap, scratch);
+				tc = extract(glob, glo[jg], valmap);
 				if (tc) glob_seq.push_back(glo[jg]);
 				jg ++;
 			}
@@ -303,7 +302,7 @@ bool MapLink::extract(const Handle& termpat,
 		else
 		{
 			// If we are here, we are not comparing to a glob.
-			if (not extract(tlo[ip], glo[jg], valmap, scratch))
+			if (not extract(tlo[ip], glo[jg], valmap))
 				return false;
 		}
 	}
@@ -317,7 +316,7 @@ Handle MapLink::rewrite_one(const Handle& cterm, AtomSpace* scratch) const
 
 	// Extract values for variables.
 	HandleMap valmap;
-	if (not extract(_pattern->get_body(), term, valmap, scratch))
+	if (not extract(_pattern->get_body(), term, valmap))
 		return Handle::UNDEFINED;
 
 	// Make sure each variable is grounded. Place the groundings
