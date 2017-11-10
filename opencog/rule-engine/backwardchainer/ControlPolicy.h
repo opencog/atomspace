@@ -187,6 +187,15 @@ private:
 	                            const Handle& ctrl_rule) const;
 
 	/**
+	 * Given a pattern, with an optional variable declaration vardecl,
+	 * and a term, check whether the pattern matches the term. This is
+	 * different than unification in the sense that term is always
+	 * treated as grounded term.
+	 */
+	bool match(const Handle& pattern, const Handle& term,
+	           const Handle& vardecl=Handle::UNDEFINED) const;
+
+	/**
 	 * Given a control rule, retrieve the antecedent part concerning
 	 * the expansion. That is given
 	 *

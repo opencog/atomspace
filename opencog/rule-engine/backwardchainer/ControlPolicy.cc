@@ -27,6 +27,7 @@
 #include <opencog/util/algorithm.h>
 #include <opencog/query/BindLinkAPI.h>
 #include <opencog/atomutils/Unify.h>
+#include <opencog/atoms/core/MapLink.h>
 
 #include "MixtureModel.h"
 #include "ActionSelection.h"
@@ -310,8 +311,13 @@ bool ControlPolicy::is_control_rule_active(const AndBIT& andbit,
 	//
 	// TODO: support vardecls, once QuoteBindLink is introduced,
 	// otherwise some false positive might go through.
-	return unifiable(ctrl_andbit, andbit.fcs) and
-		unifiable(ctrl_bitleaf, bitleaf.body);
+	return match(ctrl_andbit, andbit.fcs) and match(ctrl_bitleaf, bitleaf.body);
+}
+
+bool ControlPolicy::match(const Handle& pattern, const Handle& term,
+                          const Handle& vardecl) const
+{
+	return (bool)MapLink(pattern, term).execute();
 }
 
 Handle ControlPolicy::retrieve_expansion(const Handle& ctrl_rule) const
