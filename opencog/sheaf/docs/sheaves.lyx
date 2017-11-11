@@ -464,7 +464,11 @@ seed
 germ
 \noun default
  of the seed.
- 
+ For each edge in the edge set, the other vertex is calld the 
+\noun on
+connector
+\noun default
+.
 \begin_inset Formula $\diamond$
 \end_inset
 
@@ -731,6 +735,34 @@ connected
 \end_layout
 
 \begin_layout Standard
+This definition of a link is imprecise.
+ A more proper, technical definition is that a link can be formed only when
+ the germ 
+\begin_inset Formula $v_{1}$
+\end_inset
+
+ has 
+\begin_inset Formula $v_{2}$
+\end_inset
+
+ as a connector, and also, at the same time, the germ 
+\begin_inset Formula $v_{2}$
+\end_inset
+
+ has 
+\begin_inset Formula $v_{1}$
+\end_inset
+
+ as a connector; only then can the two be joined together.
+ The joining is meant to be optional, not mandatory: just because a section
+ contains connectors that can be joined, it does not imply that they must
+ be.
+ The joining is also meant to consume the connectors as a resource: once
+ two connectors have been connected, neither one is free to make connections
+ elsewhere.
+\end_layout
+
+\begin_layout Standard
 \begin_inset Float figure
 placement h
 wide false
@@ -944,7 +976,230 @@ key "Sleator1991,Coecke2010,Kart2014,Baez2009"
 
 \end_inset
 
+ The point being illustrated here is that the connectors need not be specific
+ vertexes, they can be vertex types, where any connector of the appropriate
+ type is allowed to connect.
+ This can be formalized in an expanded definition of a seed.
+ A provisional definition of a type is needed, first.
+\end_layout
 
+\begin_layout Definition*
+A 
+\noun on
+type
+\noun default
+ is a set of vertexes.
+ Notationally, 
+\begin_inset Formula $t=\left\{ v_{a},v_{b},\cdots\right\} $
+\end_inset
+
+.
+ 
+\begin_inset Formula $\diamond$
+\end_inset
+
+
+\end_layout
+
+\begin_layout Standard
+This allows the jigsaw concept to be expressed more formally.
+ 
+\end_layout
+
+\begin_layout Definition*
+A 
+\noun on
+seed
+\noun default
+ is a vertex and the set of connector types that connect to it.
+ That is, it is the pair 
+\begin_inset Formula $\left(v,C_{v}\right)$
+\end_inset
+
+ where 
+\begin_inset Formula $v$
+\end_inset
+
+ is a vertex, and 
+\begin_inset Formula $C_{v}$
+\end_inset
+
+ is a set of connector types containing that vertex, i.e.
+ that set of edges having 
+\begin_inset Formula $v$
+\end_inset
+
+ as one endpoint and a type as the other endpoint.
+ That is, 
+\begin_inset Formula $C_{v}=\left\{ \left(v,t_{a}\right),\left(v,t_{b}\right),\cdots\right\} $
+\end_inset
+
+.
+ A single pair 
+\begin_inset Formula $\left(v,t\right)$
+\end_inset
+
+ can be called a 
+\noun on
+connector type
+\noun default
+.
+ 
+\begin_inset Formula $\diamond$
+\end_inset
+
+
+\end_layout
+
+\begin_layout Standard
+The capital letter 
+\begin_inset Formula $C$
+\end_inset
+
+ is used to remind one that members of the set are connectors.
+ The intent of specifying connector types is exactly what the jigsaw-puzzle
+ paradigm suggests: links can be created, as long as the types match up.
+ This is formalized by expanding the definition of a link.
+ 
+\end_layout
+
+\begin_layout Definition*
+Given a section 
+\begin_inset Formula $S$
+\end_inset
+
+, a 
+\noun on
+link
+\noun default
+ between seeds 
+\begin_inset Formula $s_{1}=\left(v_{1},C_{1}\right)$
+\end_inset
+
+ and 
+\begin_inset Formula $s_{2}=\left(v_{2},C_{2}\right)$
+\end_inset
+
+ is any edge 
+\begin_inset Formula $\left(v_{1},v_{2}\right)$
+\end_inset
+
+ where 
+\begin_inset Formula $v_{1}$
+\end_inset
+
+ is in one of the types in 
+\begin_inset Formula $C_{2}$
+\end_inset
+
+ and 
+\begin_inset Formula $v_{2}$
+\end_inset
+
+ is in one of the types in 
+\begin_inset Formula $C_{1}$
+\end_inset
+
+.
+ That is, there exists a pair 
+\begin_inset Formula $\left(v_{1},t_{a}\right)\in C_{1}$
+\end_inset
+
+ such that 
+\begin_inset Formula $v_{2}\in t_{a}$
+\end_inset
+
+ and, symmetrically, there exists a pair 
+\begin_inset Formula $\left(v_{2},t_{b}\right)\in C_{2}$
+\end_inset
+
+ such that 
+\begin_inset Formula $v_{1}\in t_{b}$
+\end_inset
+
+ .
+ Two seeds are 
+\noun on
+connected
+\noun default
+ when there is a link between them.
+ 
+\begin_inset Formula $\diamond$
+\end_inset
+
+
+\end_layout
+
+\begin_layout Standard
+As before, the creation of links is meant to be optional, not forced.
+ As before, the connectors are meant to be consumable: once connected, they
+ cannot be used again.
+ The figure below illustrates the idea.
+\end_layout
+
+\begin_layout Standard
+\begin_inset Float figure
+placement h
+wide false
+sideways false
+status open
+
+\begin_layout Plain Layout
+\begin_inset Caption Standard
+
+\begin_layout Plain Layout
+Seed connectors might be types, not vertexes
+\end_layout
+
+\end_inset
+
+
+\end_layout
+
+\begin_layout Plain Layout
+\begin_inset Graphics
+	filename seed-puzzle.eps
+	width 35col%
+
+\end_inset
+
+
+\end_layout
+
+\end_inset
+
+
+\end_layout
+
+\begin_layout Standard
+Its important to realize that the standard approach to graph theory has
+ been left behind.
+ Although it is possible to hook up seeds to form a graph, it is also possible
+ to have a collection of seeds that is not a graph: the category of sections
+ contain the category of graphs as a subset.
+ Extending the notion of a connector to be the notion of a connector-type
+ in particular plays considerable violence to the notion of graph theory.
+ As long as the narrower defintion of seed was used, one could imagine that
+ a collection of seeds could be assembled into a graph, and that assembly
+ is unique.
+ Once connector types are introduced, the possibility that there are multiple,
+ non-unique assemblages of seeds becomes possible.
+ A graph can be disassembled into seeds, and, if one is careful to label
+ veretexes and edges in a unique way, that collection can be viewed as isomorphi
+c to the original graph.
+ If one is not careful, slopply assigning labels or avoiding them entirely,
+ the collection can have multiple non-isomorphic re-assemblies.
+ The ability to be sloppy in this way is one of the appeals, one of the
+ benefits of working with seeds and sections.
+ They provide 
+\begin_inset Quotes eld
+\end_inset
+
+elbow room
+\begin_inset Quotes erd
+\end_inset
+
+ not available in (naive) graph theory.
 \end_layout
 
 \begin_layout Subsection*
@@ -1077,6 +1332,10 @@ must
  link to a source of ADP, or a source of phosphate, or a sink if ATP or
  a sink of hydroxyls, if it is to be validly linked into any part of a connected
  section.
+ In this example, ADP and ATP can both be treated as simple connectors,
+ while R-OH does name a type: R can be any moiety.
+ Implicit here, but not explicit in the seed, is that the R group on both
+ connectors must be the same.
 \end_layout
 
 \begin_layout Standard
@@ -1180,11 +1439,11 @@ The depdency parse is shown as a graph, with four vertexes.
  Below, the parse is decomposed into the component seeds; as always, the
  open dots are connectors, the closed dots are the germs.
  Using the notation 
-\begin_inset Formula $\left(v,E_{v}\right)$
+\begin_inset Formula $\left(v,C_{v}\right)$
 \end_inset
 
  for a seed, where 
-\begin_inset Formula $E_{v}=\left\{ \left(v,v_{a}\right),\left(v,v_{b}\right),\cdots\right\} $
+\begin_inset Formula $C_{v}=\left\{ \left(v,v_{a}\right),\left(v,v_{b}\right),\cdots\right\} $
 \end_inset
 
 , these seeds can be textually written as
@@ -1815,7 +2074,7 @@ simply typed
 \begin_inset Quotes erd
 \end_inset
 
- are mean to convey that there is only one type.
+ are meant to convey that there is only one type.
  For the above example morphism, that would mean that 
 \begin_inset Formula $X_{1}$
 \end_inset
@@ -1878,7 +2137,7 @@ is: this- & example+;
 \end_inset
 
 where the two connectors are labelled, and have different types, which sharply
- limit what the connect to.
+ limit what they connect to.
  The 
 \family sans
 this-
@@ -2056,7 +2315,7 @@ Unfortunately, it is usually not clearly stated that it is only a fragment
  In linguistics, it is not the linearity that is important, but rather the
  conception of frames (in the sense of Kripke frames in proof theory).
  Frames have the important property of presenting choices or alternatives:
- one can have either this, or can have that.
+ one can have either this, or one can have that.
  The property of having alternatives is described by intuitionistic logic,
  where the axiom of double-negation is discarded.
  This either-or choice appears as the concept of a 
@@ -2072,7 +2331,7 @@ cs.
 \end_layout
 
 \begin_layout Standard
-Another worthwhile example of tensor algebr can be found in equation 13
+Another worthwhile example of tensor algebra can be found in equation 13
  of 
 \begin_inset CommandInset citation
 LatexCommand cite
@@ -2109,7 +2368,7 @@ a banana is a kind of fruit
 \begin_inset Quotes erd
 \end_inset
 
- or 
+ and 
 \begin_inset Quotes eld
 \end_inset
 
@@ -2325,7 +2584,7 @@ A Viterbi parse lattice of Markov chain
 
 \begin_layout Standard
 The above depicts the lattice of a Viterbi parse of a Markov chain.
- The dashed red line depicts a maximum-liklihood path through the lattice,
+ The dashed green line depicts a maximum-liklihood path through the lattice,
  that is, the most likely history.
  Viterbi decoding, using an 
 \begin_inset Quotes eld
@@ -2444,7 +2703,7 @@ Non-Markov models would have edges connecting nodes furthre in the past.
 \end_inset
 
  is the length of a longer sentence, say 
-\begin_inset Formula $k=12$
+\begin_inset Formula $n=12$
 \end_inset
 
 .
@@ -2461,11 +2720,85 @@ Non-Markov models would have edges connecting nodes furthre in the past.
  It is also theoretically absurd: almost all of those edges have zero probabilit
 y.
  Almost none of the edges are needed; the actual tensor is very very sparse.
+ 
 \end_layout
 
 \begin_layout Standard
-The reason for this sparsity becomes apparant from the viewpoint of dependency
- parsing.
+The red path in the figure below indicates a very unlikely word-sequence:
+ 
+\begin_inset Quotes eld
+\end_inset
+
+example this an this
+\begin_inset Quotes erd
+\end_inset
+
+.
+ There are 
+\begin_inset Formula $4\times16=64$
+\end_inset
+
+ paths through it.
+ Of these, only 3 are plausible: the green edges, and the sequences 
+\begin_inset Quotes eld
+\end_inset
+
+this example is an
+\begin_inset Quotes erd
+\end_inset
+
+ and 
+\begin_inset Quotes eld
+\end_inset
+
+an example is this
+\begin_inset Quotes erd
+\end_inset
+
+.
+ The others can't be observed.
+\end_layout
+
+\begin_layout Standard
+\begin_inset Float figure
+placement h
+wide false
+sideways false
+status open
+
+\begin_layout Plain Layout
+\begin_inset Caption Standard
+
+\begin_layout Plain Layout
+Likely and unlikely word sequences
+\end_layout
+
+\end_inset
+
+
+\end_layout
+
+\begin_layout Plain Layout
+\begin_inset Graphics
+	filename chain.eps
+	width 35col%
+
+\end_inset
+
+
+\end_layout
+
+\begin_layout Plain Layout
+
+\end_layout
+
+\end_inset
+
+
+\end_layout
+
+\begin_layout Standard
+The sparsity is easily exposed with dependency parsing.
  So, for example, if 
 \begin_inset Formula $w_{n-3}=this$
 \end_inset
@@ -2482,7 +2815,8 @@ The reason for this sparsity becomes apparant from the viewpoint of dependency
 \begin_inset Formula $w_{n}$
 \end_inset
 
- must be a noun starting with a vowel.
+ must be a singular noun starting with a vowel, or an adjective starting
+ with a vowel.
  It also tells you that, for this particular history, this noun can depend
  only on 
 \begin_inset Formula $w_{n-2}$
@@ -2497,14 +2831,16 @@ The reason for this sparsity becomes apparant from the viewpoint of dependency
 \end_inset
 
 .
- A collection of depedency parses obtained from a corpus allows you to figure
- out which edges matter, and which edges do not.
+ A collection of depedency parses obtained from a corpus identifies which
+ edges matter, and which edges do not.
  
 \end_layout
 
 \begin_layout Standard
-Dependency parses also give a more holisitic perception of what might be
- going on in natural language.
+Dependency parses do even more: they unveil possible paths, and not just
+ pair-wise edges.
+ They provide a more holisitic view of what might be going on in natural
+ language.
  That is, the notation 
 \end_layout
 
@@ -2571,8 +2907,8 @@ P\left(w_{n}=fruit|w_{n-1}=is,w_{n-2}=banana\right)+P\left(w_{n}=green|w_{n-1}=i
 \end_inset
 
 all represent the same knowledge, the dependency notation appears to be
- less awkward than the viewing history as some Bayesian probability.
- The dependency notion focuses attention on a different part of the problem.
+ less awkward than thinking about history as some Bayesian probability.
+ The dependency notation focuses attention on a different part of the problem.
  
 \end_layout
 
@@ -2610,8 +2946,11 @@ noun
 \end_inset
 
 , and the middle is a transitive verb.
- This sharply prunes the number of possibilities *before* the learning algorithm
- is launched, instead of during or after.
+ This sharply prunes the number of possibilities 
+\emph on
+before
+\emph default
+ the learning algorithm is launched, instead of during or after.
  The fact that such pruning is even possible is obscured by the notation
  and language of 
 \begin_inset Formula $n$
@@ -2642,8 +2981,8 @@ the future
 \begin_inset Quotes erd
 \end_inset
 
-: the fact that the words might be said next have already influenced the
- choice of the words already spoken.
+: the fact that the words that might be said next have already influenced
+ the choice of the words already spoken.
  This can be hand-waved away by stating that the history is creating a model
  of (hidden) mental states, and that this model already incorporates those,
  and thus is anticipating future speech actions.
@@ -3166,7 +3505,7 @@ pointless
 
 \begin_layout Standard
 Quotienting is often described in terms of homomorphisms, functions 
-\begin_inset Formula $f:S\to Q$
+\begin_inset Formula $\pi:S\to Q$
 \end_inset
 
  that preserve the algebraic operations on 
@@ -3183,11 +3522,11 @@ Quotienting is often described in terms of homomorphisms, functions
 \end_inset
 
 , one expects that 
-\begin_inset Formula $f$
+\begin_inset Formula $\pi$
 \end_inset
 
  preserves it: that 
-\begin_inset Formula $f\left(m\left(a,b,c\right)\right)=m\left(f\left(a\right),f\left(b\right),f\left(c\right)\right)$
+\begin_inset Formula $\pi\left(m\left(a,b,c\right)\right)=m\left(\pi\left(a\right),\pi\left(b\right),\pi\left(c\right)\right)$
 \end_inset
 
 .
@@ -3280,10 +3619,11 @@ Stalks
 \begin_layout Standard
 Given the above notion of a graph quotient, it can be brought over to the
  language of seeds and sections, established earlier.
-\end_layout
+ Let 
+\begin_inset Formula $G$
+\end_inset
 
-\begin_layout Standard
-Given two vertexes 
+ be a graph, and let 
 \begin_inset Formula $v_{a}$
 \end_inset
 
@@ -3291,7 +3631,7 @@ Given two vertexes
 \begin_inset Formula $v_{b}$
 \end_inset
 
-, let 
+ be two vertexes in the graph, with corresponding seeds 
 \begin_inset Formula $s_{a}$
 \end_inset
 
@@ -3299,13 +3639,13 @@ Given two vertexes
 \begin_inset Formula $s_{b}$
 \end_inset
 
- be the corresponding seeds, as defined previously.
+ extracted from the graph.
  That is, 
-\begin_inset Formula $s=\left(v,E_{v}\right)$
+\begin_inset Formula $s=\left(v,C_{v}\right)$
 \end_inset
 
  with 
-\begin_inset Formula $E_{v}$
+\begin_inset Formula $C_{v}$
 \end_inset
 
  being the set of edges connecting 
@@ -3313,107 +3653,72 @@ Given two vertexes
 \end_inset
 
  to all of its nearest neighbors.
- Consider now creating the object 
-\begin_inset Formula $\left(\left\{ v_{a},v_{b}\right\} ,E_{ab}\right)$
+ Let 
+\begin_inset Formula $\pi$
+\end_inset
+
+ be a projection function, such that 
+\begin_inset Formula $\pi\left(v_{a}\right)=\pi\left(v_{b}\right)$
 \end_inset
 
 .
- This is no longer a seed, as the first item is no longer a single vertex,
- but a set of vertexes.
- The set 
-\begin_inset Formula $E_{ab}$
+ That is, 
+\begin_inset Formula $\pi:V\to B$
 \end_inset
 
- is still a set of edges, depending on the two initial sets of edges 
-\begin_inset Formula $E_{a}$
+ is a map from the vertices 
+\begin_inset Formula $V$
 \end_inset
 
- and 
-\begin_inset Formula $E_{b}$
+ of 
+\begin_inset Formula $G$
 \end_inset
 
-.
- The precise definition of 
-\begin_inset Formula $E_{ab}$
-\end_inset
-
- is not given: it might be the union of 
-\begin_inset Formula $E_{a}$
-\end_inset
-
- and 
-\begin_inset Formula $E_{b}$
-\end_inset
-
-, or the intersection, or some other function.
- In general, one writes 
-\begin_inset Formula $E_{ab}=f\left(E_{a},E_{b}\right)$
-\end_inset
-
- for some function 
-\begin_inset Formula $f$
+ to some other set 
+\begin_inset Formula $B$
 \end_inset
 
 .
- It is typically desirable for 
-\begin_inset Formula $f$
-\end_inset
-
- to be both commutative and associative, so that 
-\begin_inset Formula $f\left(E_{a},E_{b}\right)=f\left(E_{b},E_{a}\right)$
-\end_inset
-
- and 
-\begin_inset Formula $f\left(f\left(E_{a},E_{b}\right),E_{c}\right)=f\left(E_{a},f\left(E_{b},E_{c}\right)\right)=f\left(E_{a},E_{b},E_{c}\right)$
-\end_inset
-
-
+ 
 \end_layout
 
 \begin_layout Standard
-The mashing together of several vertexes creates a structure resembling
- a graph quotient, as described above.
- This will be called a stalk in what follows.
- The stalk is defined in such a way that it is not actually a graph quotient;
- it merely resembles one.
- It is a partial step on the way to a graph quotient.
- The definition asks that the internal structure of the stalk be preserved.
- One obtains a true graph quotient only after projecting the stalk down
- to a base space.
+It is not hard to see that 
+\begin_inset Formula $\pi$
+\end_inset
+
+ is a morphism of graphs; it not only maps vertexes, but it can be extended
+ to map edges as well.
+ The target of 
+\begin_inset Formula $\pi$
+\end_inset
+
+ is a graph quotient.
 \end_layout
 
 \begin_layout Definition*
-A 
+Given a map 
+\begin_inset Formula $\pi:V\to B$
+\end_inset
+
+, the 
 \noun on
 stalk
 \noun default
- is an ordered pair 
-\begin_inset Formula $S=\left(V,E\right)$
+ above 
+\begin_inset Formula $b\in B$
 \end_inset
 
- of vertexes and edges such that every edge in 
-\begin_inset Formula $E$
+ is the set 
+\begin_inset Formula $S$
 \end_inset
 
- has one endpoint being a vertex in 
-\begin_inset Formula $V$
+ of seeds such that for each 
+\begin_inset Formula $s=\left(v,C_{v}\right)\in S$
 \end_inset
 
- and the other endpoint being a vertex not in 
-\begin_inset Formula $V$
-\end_inset
-
-.
- That is, each edge in 
-\begin_inset Formula $E$
-\end_inset
-
- is a connector, and no edge in 
-\begin_inset Formula $E$
-\end_inset
-
- is a link (back into 
-\begin_inset Formula $V)$
+, one has that 
+\begin_inset Formula $\pi(v)=b$
 \end_inset
 
 .
@@ -3425,85 +3730,6 @@ stalk
 \end_layout
 
 \begin_layout Standard
-This definition of a stalk is meant to be a straight-forward generalization
- of the previously defined seed, replacing the germ vertex by a germ that
- is a set of vertexes.
- Stalks can be linked together, much as seeds are:
-\end_layout
-
-\begin_layout Definition*
-A 
-\noun on
-link
-\noun default
- between two different stalks 
-\begin_inset Formula $S_{a}=\left(V_{a},E_{a}\right)$
-\end_inset
-
- and 
-\begin_inset Formula $S_{b}=\left(V_{b},E_{b}\right)$
-\end_inset
-
- is any edge 
-\begin_inset Formula $e=\left(v_{1},v_{2}\right)$
-\end_inset
-
- running between them, 
-\emph on
-viz.
-
-\emph default
- where 
-\begin_inset Formula $v_{1}\in V_{a}$
-\end_inset
-
- and 
-\begin_inset Formula $v_{2}\in V_{b}$
-\end_inset
-
- and 
-\begin_inset Formula $e\in E_{a}$
-\end_inset
-
- and 
-\begin_inset Formula $e\in E_{b}$
-\end_inset
-
-.
- Two stalks are 
-\noun on
-connected
-\noun default
- when there are one or more links between them.
- 
-\begin_inset Formula $\diamond$
-\end_inset
-
-
-\end_layout
-
-\begin_layout Standard
-It is convenient (it is suggested) that the vertexes in the stalk be visualized
- as being stacked one on top another, forming a tower or a fiber, with the
- edges sticking out as spines.
- Perhaps one can visualize a kind-of melted stack of jigsaw-puzzle pieces.
- This visualization is suggested only to enforce the idea that two different
- stalks project down to two different base-points.
- In particular, one now can have the notion of a meta-graph where each stalk
- is a vertex, and each link is an edge.
- That is, if one flattens the meta-graph down to two dimensions, then one
- can imagine a stalk growing up as a pole above each meta-vertex, and each
- meta-edge as being the projection of a link between two stalks.
- To maintain consistency with standard mathematical terminology, this meta-graph
- should really be called a 
-\begin_inset Quotes eld
-\end_inset
-
-base space
-\begin_inset Quotes erd
-\end_inset
-
-, and the stalks and links project down onto it in the usual sense.
 \begin_inset Float figure
 placement h
 wide false
@@ -3529,6 +3755,74 @@ A stalk and it's projection
 
 \end_layout
 
+\end_inset
+
+
+\end_layout
+
+\begin_layout Standard
+In general, this defintion does not require that the map 
+\begin_inset Formula $\pi:V\to B$
+\end_inset
+
+ be a total map; that is, it does not need to be defined on all of 
+\begin_inset Formula $V$
+\end_inset
+
+.
+ Also, 
+\begin_inset Formula $V$
+\end_inset
+
+ does not need to be the vertexes of some specific graph; it is enough that
+ 
+\begin_inset Formula $V$
+\end_inset
+
+ is a set of germs of seeds.
+ That is, the seeds in the stalk can be generalized seeds, having typed
+ connectors, rather than connectors derviced from edges.
+ The vertexes in the stalk can be visualized as being stacked one on top
+ another, forming a tower or a fiber, with the edges sticking out as spines.
+ When the seeds carry typed connectors, the stalk can be visualized as a
+ tower of jigsaw-puzzle pieces.
+ 
+\end_layout
+
+\begin_layout Standard
+\begin_inset Float figure
+placement h
+wide false
+sideways false
+status open
+
+\begin_layout Plain Layout
+\begin_inset Caption Standard
+
+\begin_layout Plain Layout
+A corn stalk, a stack of puzzle pieces
+\end_layout
+
+\end_inset
+
+
+\begin_inset Graphics
+	filename cornstalk.jpg
+	lyxscale 50
+	width 25text%
+
+\end_inset
+
+
+\begin_inset Graphics
+	filename stack-jigsaw-puzzle-pieces.jpg
+	width 25col%
+
+\end_inset
+
+
+\end_layout
+
 \begin_layout Plain Layout
 
 \end_layout
@@ -3539,185 +3833,71 @@ A stalk and it's projection
 \end_layout
 
 \begin_layout Standard
-The notion of projection can be formalized.
-\end_layout
-
-\begin_layout Definition*
-A projection 
-\begin_inset Formula $\pi$
-\end_inset
-
- is a function that accepts a stalk 
-\begin_inset Formula $S=\left(V,E\right)$
-\end_inset
-
- and produces a seed 
-\begin_inset Formula $s=\left(b,E^{\prime}\right)$
-\end_inset
-
- such that for each 
-\begin_inset Formula $v\in V$
-\end_inset
-
-, it produces 
+Note that the projection of a stalk is a seed.
+ It's germ is 
 \begin_inset Formula $b$
 \end_inset
 
-, and for each edge 
-\begin_inset Formula $\left(v,w\right)\in E$
+, and if any connector appears in the stalk, then it also appears as a connector
+ on 
+\begin_inset Formula $b$
 \end_inset
 
-, it produces the edge 
-\begin_inset Formula $\left(b,w\right)\in E^{\prime}$
-\end_inset
-
-.That is 
-\begin_inset Formula $\pi\left(v,\left(v,w)\right)\right)=\left(b,\left(b,w\right)\right)$
-\end_inset
-
-.
- By abose of notation, one may write 
-\begin_inset Formula $\pi\left(v\right)=b$
-\end_inset
-
- so that 
-\begin_inset Formula $\pi\left(v,\left(v,w)\right)\right)=\left(\pi\left(v\right),\left(\pi\left(v\right),w\right)\right)$
-\end_inset
-
-.
- 
-\begin_inset Formula $\diamond$
-\end_inset
-
-
-\end_layout
-
-\begin_layout Definition*
-The desirable properties of the projection can be summarized in a lemma:
-\end_layout
-
-\begin_layout Lemma*
-The projection function 
+ in the base.
+ At least, this is the unassailable conclusion if one starts with a graph,
+ and assumes that 
 \begin_inset Formula $\pi$
 \end_inset
 
- is a morphism of graphs, taking a graph and mapping it to a quotient graph.
- 
-\begin_inset Formula $\diamond$
+ is a graph morphism.
+ It will prove to be very useful to loosen this restriction, that is, to
+ allow 
+\begin_inset Formula $\pi$
 \end_inset
 
-
-\end_layout
-
-\begin_layout Standard
-The proof of the lemma is left to the reader, in the hopes that it is self-evide
-nt.
- An actual proof requires a few additional definitions, as follows.
-\end_layout
-
-\begin_layout Standard
-The projection down to a base space suggests that the equivalence relation
- on vertexes can be extended to an equivalence relation on edges: two edges
- are equivalent if they form the same link.
- That is, one has an equivalence class of edges:
+ to add or remove connectors.
+ Thus, it is useful to immediately broaden the defnition of the stalk.
+ 
 \end_layout
 
 \begin_layout Definition*
-A 
-\noun on
-link
-\noun default
- between two different stalks 
-\begin_inset Formula $S_{a}=\left(V_{a},E_{a}\right)$
+Given a map 
+\begin_inset Formula $\pi:E\to B$
+\end_inset
+
+, where both 
+\begin_inset Formula $E$
 \end_inset
 
  and 
-\begin_inset Formula $S_{b}=\left(V_{b},E_{b}\right)$
+\begin_inset Formula $B$
 \end_inset
 
- is the set 
-\begin_inset Formula $l=\left\{ e_{k}\right\} $
-\end_inset
-
- of all edges 
-\begin_inset Formula $e_{k}$
-\end_inset
-
- that connect some pair of vertexes in 
-\begin_inset Formula $V_{a}$
-\end_inset
-
- and 
-\begin_inset Formula $V_{b}$
-\end_inset
-
-.
- That is, every 
-\begin_inset Formula $e_{k}=\left(v_{k1},v_{k2}\right)$
-\end_inset
-
- in 
-\begin_inset Formula $L$
-\end_inset
-
- has the property that 
-\begin_inset Formula $v_{k1}\in V_{a}$
-\end_inset
-
- and 
-\begin_inset Formula $v_{k2}\in V_{b}$
-\end_inset
-
- and 
-\begin_inset Formula $e_{k}\in E_{a}$
-\end_inset
-
- and 
-\begin_inset Formula $e_{k}\in E_{b}$
-\end_inset
-
-.
- 
-\begin_inset Formula $\diamond$
-\end_inset
-
-
-\end_layout
-
-\begin_layout Standard
-This redefines the notion of a link.
- Perhaps it should be given a different name, but it should be OK, because
- the intended sense should be clear from the context.
- This allows us to redefine the notion of a stalk as well:
-\end_layout
-
-\begin_layout Definition*
-A 
+ are collections seeds, the 
 \noun on
 stalk
 \noun default
- is an ordered pair 
-\begin_inset Formula $S=\left(V,L\right)$
+ above 
+\begin_inset Formula $b\in B$
 \end_inset
 
- of vertexes and links such that every link in 
-\begin_inset Formula $L$
+ is the set 
+\begin_inset Formula $S$
 \end_inset
 
- has one endpoint that is 
-\begin_inset Formula $V$
+ of seeds in 
+\begin_inset Formula $E$
 \end_inset
 
- and the other endpoint not being 
-\begin_inset Formula $V$
+ such that for each 
+\begin_inset Formula $s=\left(v,C_{v}\right)\in S$
+\end_inset
+
+, one has that 
+\begin_inset Formula $\pi(s)=b$
 \end_inset
 
 .
- That is, each link in 
-\begin_inset Formula $L$
-\end_inset
-
- is a connector or half-edge.
  
 \begin_inset Formula $\diamond$
 \end_inset
@@ -3726,15 +3906,140 @@ stalk
 \end_layout
 
 \begin_layout Standard
-One then has an obvious lemma about the projection.
-\end_layout
-
-\begin_layout Lemma*
-The projection function 
+In this revised definition, there is no hint of what 
 \begin_inset Formula $\pi$
 \end_inset
 
- can be extended consistently to the revised defintion of a stalk.
+ did with the connectors.
+ In particular, there is no way to ask about some specific connector on
+ some seed 
+\begin_inset Formula $s$
+\end_inset
+
+, and what happened to it after 
+\begin_inset Formula $\pi$
+\end_inset
+
+ mapped 
+\begin_inset Formula $s$
+\end_inset
+
+ to 
+\begin_inset Formula $b$
+\end_inset
+
+.
+ This definition is perhaps too general; in the most common case, it is
+ useful to project the connectors as well as the germs.
+ It is also very useful to be able to say that a particular connector on
+ 
+\begin_inset Formula $s$
+\end_inset
+
+ can be mapped to a particular connector on 
+\begin_inset Formula $b$
+\end_inset
+
+.
+ Yet it is also useful to sometimes discard some connectors because they
+ are infrequently used, to perform pruning, as it were.
+ These use-cases will be returned to later.
+ There is no particular reason to allow pruning during projection; it can
+ always be done before, or after.
+\end_layout
+
+\begin_layout Standard
+Thus, perhaps the most agreeable defintion for a stalk is this.
+\end_layout
+
+\begin_layout Definition*
+Given a map 
+\begin_inset Formula $\pi:E\to B$
+\end_inset
+
+, where both 
+\begin_inset Formula $E$
+\end_inset
+
+ and 
+\begin_inset Formula $B$
+\end_inset
+
+ are collections seeds, the 
+\noun on
+stalk
+\noun default
+ above 
+\begin_inset Formula $b\in B$
+\end_inset
+
+ is the set 
+\begin_inset Formula $S$
+\end_inset
+
+ of seeds in 
+\begin_inset Formula $E$
+\end_inset
+
+ such that for each 
+\begin_inset Formula $s=\left(v,C_{v}\right)\in S$
+\end_inset
+
+, one has that 
+\begin_inset Formula $\pi(s)=b$
+\end_inset
+
+.
+ The map 
+\begin_inset Formula $\pi$
+\end_inset
+
+ can be decomposed into a pair 
+\begin_inset Formula $\pi=\left(\pi_{g},\pi_{c}\right)$
+\end_inset
+
+ such that, for every 
+\begin_inset Formula $\gamma\in C_{v}$
+\end_inset
+
+ one has that 
+\begin_inset Formula $\pi\left(v,\gamma\right)=\left(\pi_{g}\left(v\right),\pi_{c}\left(\gamma\right)\right)$
+\end_inset
+
+ such that 
+\begin_inset Formula $\pi_{c}\left(\gamma\right)\in C_{b}$
+\end_inset
+
+.
+ That is, 
+\begin_inset Formula $\pi_{g}$
+\end_inset
+
+ maps the germs of 
+\begin_inset Formula $E$
+\end_inset
+
+ to the germs of 
+\begin_inset Formula $B$
+\end_inset
+
+ and 
+\begin_inset Formula $\pi_{c}$
+\end_inset
+
+ maps the connectors in 
+\begin_inset Formula $E$
+\end_inset
+
+ to specific connectors in 
+\series bold
+
+\begin_inset Formula $B$
+\end_inset
+
+.
+
+\series default
  
 \begin_inset Formula $\diamond$
 \end_inset
@@ -3743,7 +4048,160 @@ The projection function
 \end_layout
 
 \begin_layout Standard
-As before, the proof is left as being obvious.
+The next figure illustrates both the projection of germs, and of connectors.
+ It tries to capture the notion that the projection is entire and consistently
+ defined.
+\end_layout
+
+\begin_layout Standard
+\begin_inset Float figure
+placement h
+wide false
+sideways false
+status open
+
+\begin_layout Plain Layout
+
+\end_layout
+
+\begin_layout Plain Layout
+\begin_inset Caption Standard
+
+\begin_layout Plain Layout
+Germs and connectors project consistently
+\end_layout
+
+\end_inset
+
+
+\end_layout
+
+\begin_layout Plain Layout
+\begin_inset Graphics
+	filename project.eps
+	width 60col%
+
+\end_inset
+
+
+\end_layout
+
+\begin_layout Plain Layout
+
+\end_layout
+
+\end_inset
+
+
+\end_layout
+
+\begin_layout Standard
+The definition of a link needs to be generalized, and made consistent with
+ this final defintion of a stalk.
+ 
+\end_layout
+
+\begin_layout Definition*
+Two stalks 
+\begin_inset Formula $S_{1}$
+\end_inset
+
+ and 
+\begin_inset Formula $S_{2}$
+\end_inset
+
+ are 
+\noun on
+connected
+\noun default
+ if there exists a link between some seed 
+\begin_inset Formula $s_{1}\in S_{1}$
+\end_inset
+
+ and some seed 
+\begin_inset Formula $s_{2}\in S_{2}$
+\end_inset
+
+.
+ The stalks are 
+\noun on
+consistently linked
+\noun default
+ if the projections of the stalks are also linked in a fashion consistent
+ with the projection.
+ That is, if 
+\begin_inset Formula $\left(v_{1},t_{a}\right)$
+\end_inset
+
+ is the connector on 
+\begin_inset Formula $s_{1}$
+\end_inset
+
+ that is connected to the connector 
+\begin_inset Formula $\left(v_{2},t_{b}\right)$
+\end_inset
+
+ on 
+\begin_inset Formula $s_{2}$
+\end_inset
+
+, 
+\emph on
+viz.
+
+\emph default
+ 
+\begin_inset Formula $v_{2}\in t_{a}$
+\end_inset
+
+ and 
+\begin_inset Formula $v_{1}\in t_{b}$
+\end_inset
+
+, then 
+\begin_inset Formula $\left(\pi_{g}\left(v_{1}\right),\pi_{c}\left(t_{a}\right)\right)$
+\end_inset
+
+ is connected to 
+\begin_inset Formula $\left(\pi_{g}\left(v_{1}\right),\pi_{c}\left(t_{a}\right)\right)$
+\end_inset
+
+ .
+ That is, 
+\begin_inset Formula $\pi_{g}\left(v_{2}\right)\in\pi_{c}\left(t_{a}\right)$
+\end_inset
+
+ and 
+\begin_inset Formula $\pi_{g}\left(v_{1}\right)\in\pi_{c}\left(t_{b}\right)$
+\end_inset
+
+ .
+\begin_inset Formula $\diamond$
+\end_inset
+
+
+\end_layout
+
+\begin_layout Standard
+Recall that the original defintion of a connector was such that it could
+ be used once and only once.
+ This can become an issue, if it is strictly enforced on the base space.
+ It will become convenient to remove this restriction on the bse space,
+ and replace it by a use-count.
+ That is, if two different links between stalks project down to the same
+ link in the base space, then the link in the base-space should be counted
+ 
+\begin_inset Quotes eld
+\end_inset
+
+with multiplicity
+\begin_inset Quotes erd
+\end_inset
+
+.
+ This induces the notion that maybe the base space can be used for statistics-ga
+thering, and that is exactly the intent.
+ 
 \end_layout
 
 \begin_layout Section*
@@ -3751,25 +4209,48 @@ Sheaves
 \end_layout
 
 \begin_layout Standard
-The above defintions, along with the projection function, indicate that
- stalks can be thought of as seeds.
- The stalk preserves the graph structure; the projection creates graph quotients.
- The above finally allows the definition of a section to be understood in
- a way that is in keeping with the usual notion of a section as commonly
- defined in covering spaces and fiber bundles.
-\begin_inset Wrap figure
-lines 0
-placement r
-overhang 0in
-width "52text%"
+The stalk is meant to provide a framework with which to solve the computational
+ intractability problems associated with Bayesian networks, by explicitly
+ exposing the grammatical structure within them in such a fashion that they
+ can be explicitly manipulated.
+ The intent is to accomplish the hope expressed in the diagram below.
+ To actually arrive at a workable solution requires additional clarifications,
+ examples, and definitions.
+ This hopeful figure 
+\emph on
+must not be taken literally
+\emph default
+: one certainly does 
+\emph on
+not
+\emph default
+ want the base space to be some Markov network! That would be a disaster.
+ Rather, the hope is to accumulate a large number of graph fragments in
+ such a way that the fragments are apparent, but that the statistics of
+ thier collective behavior is also accessible.
+ The hope is that this can be done without overflowing available CPU and
+ RAM, while carefully maintaining fidelity to the graph framents.
+ This is an example from linguistics, but one might hope to do the same
+ with activation pathways in cell biochemistry.
+ The citric acid cycle should be amenable to such a treatment, as well.
+\end_layout
+
+\begin_layout Standard
+\begin_inset Float figure
+placement h
+wide false
+sideways false
 status open
 
 \begin_layout Plain Layout
-\align center
+
+\end_layout
+
+\begin_layout Plain Layout
 \begin_inset Caption Standard
 
 \begin_layout Plain Layout
-Corn
+The problem, and it's intended solution 
 \end_layout
 
 \end_inset
@@ -3778,28 +4259,37 @@ Corn
 \end_layout
 
 \begin_layout Plain Layout
-\align center
 \begin_inset Graphics
-	filename cornstalk.jpg
-	width 35text%
+	filename sheaf.eps
+	width 45col%
 
 \end_inset
 
 
 \end_layout
 
+\begin_layout Plain Layout
+
+\end_layout
+
 \end_inset
 
 
+\end_layout
+
+\begin_layout Standard
+From the previous development, it should be clear that stalks capture the
+ local structure of graphs, and that the projection, carefully done, can
+ preserve the essence of tht local structure.
+ Enough mechanism has been developed to allow the definition of a section
+ to be understood in a way that is in keeping with the usual notion of a
+ section as commonly defined in covering spaces and fiber bundles.
+ A preliminary, provisional definition of a sheaf can now be given.
 \end_layout
 
 \begin_layout Definition*
-A sheaf is graph 
-\begin_inset Formula $G$
-\end_inset
-
- represented as a collection of seeds, together with a projection function
- 
+A sheaf is a collection of connected sections, together with a projection
+ function 
 \begin_inset Formula $\pi$
 \end_inset
 
@@ -3808,19 +4298,15 @@ A sheaf is graph
 \begin_inset Formula $\pi$
 \end_inset
 
- maps 
-\begin_inset Formula $G$
+ maps sections to a base space 
+\begin_inset Formula $B$
 \end_inset
 
- to a quotient graph 
-\begin_inset Formula $G/\pi$
+, such that, for each pair of vertexes 
+\begin_inset Formula $v,w$
 \end_inset
 
- such that, for each pair of vertexes 
-\begin_inset Formula $v,w\in G$
-\end_inset
-
-, one has 
+ occuring in different sections, one has 
 \begin_inset Formula $\pi(v)=\pi(w)$
 \end_inset
 
@@ -3828,19 +4314,7 @@ A sheaf is graph
 \begin_inset Formula $v,w$
 \end_inset
 
- are in germs in the same stalk, and, for any pair of edges 
-\begin_inset Formula $e,e^{\prime}\in G$
-\end_inset
-
-, one has that 
-\begin_inset Formula $\pi(e)=\pi\left(e^{\prime}\right)$
-\end_inset
-
- if and only if the pair 
-\begin_inset Formula $e,e^{\prime}$
-\end_inset
-
- are connectors in the same stalk.
+ are in germs in the same stalk.
  
 \begin_inset Formula $\diamond$
 \end_inset
@@ -3849,7 +4323,8 @@ A sheaf is graph
 \end_layout
 
 \begin_layout Standard
-The formal definition of a sheaf also requires that it obey a set of axioms,
+This provisional definition can be tightened.
+ The formal definition of a sheaf also requires that it obey a set of axioms,
  called the gluing axioms.
  Before giving these, it is useful to look at an example.
 \end_layout
@@ -4316,15 +4791,51 @@ y or the mutual information for a pair of words.
 \end_layout
 
 \begin_layout Standard
-By contrast, storing the individual parses for 10 million sentences is mor
+By contrast, storing the individual parses for 10 million sentences is more
  challenging.
  Assuming 15 words per sentence, this requires storing 150M vertexes, and
  approximately 20 links per sentence for 200M edges.
  This graph is two orders of magnitude larger than the quotient graph.
- It makes sense to collapse the stalks down to their projections as soon
- as possible.
+ It makes sense to project sections down to the base space as soon as possible.
  They can be envisioned to still be there, virtually, in principle, but
  the actual storage can be avoided.
+\end_layout
+
+\begin_layout Standard
+Every graph can be represented as an adjacency matrix.
+ In this example, it would be a sparse matrix, with 5 million non-zero entries
+ out of 130K
+\begin_inset Formula $\times$
+\end_inset
+
+130K total.
+ The marginals stored with the graph can be accessed as marginals in the
+ normal sense of values written in the margin of the matrix.
+ Standard linear-algebra tools, such as the R programming language, can
+ access the matrix and the marginals.
+\end_layout
+
+\begin_layout Subsection*
+Visualizing Sheaves
+\end_layout
+
+\begin_layout Standard
+One way of visualizing the sheaf is as a stack of sheets of paper, with
+ one sentence written on each sheet.
+ The papers are stacked in such a way that words that are the same are always
+ vertically above one-another.
+ This stacking is where the term 
+\begin_inset Quotes eld
+\end_inset
+
+sheaf
+\begin_inset Quotes erd
+\end_inset
+
+ comes from.
+ Each single sheet of paper is a section.
+ Each colocation is a stalk.
+ 
 \end_layout
 
 \begin_layout Standard
@@ -4368,39 +4879,6 @@ A Sheaf of Stalks; a Sheaf of Paper
 \end_layout
 
 \begin_layout Standard
-Every graph can be represented as an adjacency matrix.
- In this example, it would be a sparse matrix, with 5 million non-zero entries
- out of 130K
-\begin_inset Formula $\times$
-\end_inset
-
-130K total.
- The marginals stored with the graph can be accessed as marginals in the
- normal sense of values written in the margin of the matrix.
- Standard linear-algebra tools, such as the R programming language, can
- access the matrix and the marginals.
-\end_layout
-
-\begin_layout Standard
-One way of visualizing the sheaf is as a stack of sheets of paper, with
- one sentence written on each sheet.
- The papers are stacked in such a way that words that are the same are always
- vertically above one-another.
- This stacking is where the term 
-\begin_inset Quotes eld
-\end_inset
-
-sheaf
-\begin_inset Quotes erd
-\end_inset
-
- comes from.
- Each single sheet of paper is a section.
- Each colocation is a stalk.
- 
-\end_layout
-
-\begin_layout Standard
 A different example can be taken from biochemistry.
  There, one might want to write down specific pathways or interaction networks
  on the individual sheets of paper, treating them as sections.
@@ -4428,7 +4906,748 @@ The sheaf, it's decomposition into sections, and it's projection down to
 \end_layout
 
 \begin_layout Subsection*
+Projections with Stalks
+\end_layout
+
+\begin_layout Standard
+The above makes the case that the projection of a sheaf down to its base
+ space use useful from the data management point of view.
+ The projection shrinks the size of the dataset.
+ However, it erases a lot of local connectivity data that is useful and
+ important.
+ Local data can be maintained by keeping the projection, and then keeping
+ individual stalks.
+ Visually, this can be envisioned as a corn-field.
+ The ground is the base space, the corn-stalks are the individual stalks.
+ The stalks correspond to 
+\begin_inset Quotes eld
+\end_inset
+
+feature vectors
+\begin_inset Quotes erd
+\end_inset
+
+ in traditional data mining approaches.
+\end_layout
+
+\begin_layout Standard
+This is best illustrated with an example.
+ Consider the corpus 
+\begin_inset Quotes eld
+\end_inset
+
+the dog chased the cat
+\begin_inset Quotes erd
+\end_inset
+
+, 
+\begin_inset Quotes eld
+\end_inset
+
+the cat chased the mouse
+\begin_inset Quotes erd
+\end_inset
+
+, 
+\begin_inset Quotes eld
+\end_inset
+
+the dog chased the squirrel
+\begin_inset Quotes erd
+\end_inset
+
+, 
+\begin_inset Quotes eld
+\end_inset
+
+the dog killed the chicken
+\begin_inset Quotes erd
+\end_inset
+
+, 
+\begin_inset Quotes eld
+\end_inset
+
+the cat killed the mouse
+\begin_inset Quotes erd
+\end_inset
+
+, 
+\begin_inset Quotes eld
+\end_inset
+
+the cat chased the cockroach
+\begin_inset Quotes erd
+\end_inset
+
+.
+ There are multiple stalks, here, but the ones of interest are the one for
+ the dog:
+\end_layout
+
+\begin_layout Standard
+\begin_inset VSpace defskip
+\end_inset
+
+
+\end_layout
+
+\begin_layout Standard
+\begin_inset space \qquad{}
+\end_inset
+
+
+\begin_inset Box Frameless
+position "t"
+hor_pos "c"
+has_inner_box 1
+inner_pos "t"
+use_parbox 0
+use_makebox 0
+width "100col%"
+special "none"
+height "1in"
+height_special "totalheight"
+thickness "0.4pt"
+separation "3pt"
+shadowsize "4pt"
+framecolor "black"
+backgroundcolor "none"
+status open
+
+\begin_layout Plain Layout
+\begin_inset Tabular
+<lyxtabular version="3" rows="3" columns="2">
+<features tabularvalignment="middle">
+<column alignment="right" valignment="top">
+<column alignment="left" valignment="top">
+<row>
+<cell alignment="right" valignment="top" usebox="none">
+\begin_inset Text
+
+\begin_layout Plain Layout
+
+\family typewriter
+the
+\end_layout
+
+\end_inset
+</cell>
+<cell alignment="left" valignment="top" usebox="none">
+\begin_inset Text
+
+\begin_layout Plain Layout
+
+\family typewriter
+dog chased the cat
+\end_layout
+
+\end_inset
+</cell>
+</row>
+<row>
+<cell alignment="center" valignment="top" usebox="none">
+\begin_inset Text
+
+\begin_layout Plain Layout
+
+\family typewriter
+the
+\end_layout
+
+\end_inset
+</cell>
+<cell alignment="center" valignment="top" usebox="none">
+\begin_inset Text
+
+\begin_layout Plain Layout
+
+\family typewriter
+dog chased the squirrel
+\end_layout
+
+\end_inset
+</cell>
+</row>
+<row>
+<cell alignment="right" valignment="top" usebox="none">
+\begin_inset Text
+
+\begin_layout Plain Layout
+
+\family typewriter
+the
+\end_layout
+
+\end_inset
+</cell>
+<cell alignment="left" valignment="top" usebox="none">
+\begin_inset Text
+
+\begin_layout Plain Layout
+
+\family typewriter
+dog killed the chicken
+\end_layout
+
+\end_inset
+</cell>
+</row>
+</lyxtabular>
+
+\end_inset
+
+
+\end_layout
+
+\end_inset
+
+ 
+\end_layout
+
+\begin_layout Standard
+\begin_inset VSpace defskip
+\end_inset
+
+
+\end_layout
+
+\begin_layout Standard
+The stalk for the cat is:
+\end_layout
+
+\begin_layout Standard
+\begin_inset VSpace defskip
+\end_inset
+
+
+\end_layout
+
+\begin_layout Standard
+\begin_inset space \qquad{}
+\end_inset
+
+
+\begin_inset Box Frameless
+position "t"
+hor_pos "c"
+has_inner_box 1
+inner_pos "t"
+use_parbox 0
+use_makebox 0
+width "100col%"
+special "none"
+height "1in"
+height_special "totalheight"
+thickness "0.4pt"
+separation "3pt"
+shadowsize "4pt"
+framecolor "black"
+backgroundcolor "none"
+status open
+
+\begin_layout Plain Layout
+\begin_inset Tabular
+<lyxtabular version="3" rows="4" columns="2">
+<features tabularvalignment="middle">
+<column alignment="right" valignment="top">
+<column alignment="left" valignment="top">
+<row>
+<cell alignment="right" valignment="top" usebox="none">
+\begin_inset Text
+
+\begin_layout Plain Layout
+
+\family typewriter
+the dog chased the
+\end_layout
+
+\end_inset
+</cell>
+<cell alignment="left" valignment="top" usebox="none">
+\begin_inset Text
+
+\begin_layout Plain Layout
+
+\family typewriter
+cat
+\end_layout
+
+\end_inset
+</cell>
+</row>
+<row>
+<cell alignment="center" valignment="top" usebox="none">
+\begin_inset Text
+
+\begin_layout Plain Layout
+
+\family typewriter
+the
+\end_layout
+
+\end_inset
+</cell>
+<cell alignment="center" valignment="top" usebox="none">
+\begin_inset Text
+
+\begin_layout Plain Layout
+
+\family typewriter
+cat chased the mouse
+\end_layout
+
+\end_inset
+</cell>
+</row>
+<row>
+<cell alignment="right" valignment="top" usebox="none">
+\begin_inset Text
+
+\begin_layout Plain Layout
+
+\family typewriter
+the
+\end_layout
+
+\end_inset
+</cell>
+<cell alignment="left" valignment="top" usebox="none">
+\begin_inset Text
+
+\begin_layout Plain Layout
+
+\family typewriter
+cat killed the mouse
+\end_layout
+
+\end_inset
+</cell>
+</row>
+<row>
+<cell alignment="center" valignment="top" usebox="none">
+\begin_inset Text
+
+\begin_layout Plain Layout
+
+\family typewriter
+the
+\end_layout
+
+\end_inset
+</cell>
+<cell alignment="center" valignment="top" usebox="none">
+\begin_inset Text
+
+\begin_layout Plain Layout
+
+\family typewriter
+cat chased the cockroach
+\end_layout
+
+\end_inset
+</cell>
+</row>
+</lyxtabular>
+
+\end_inset
+
+
+\end_layout
+
+\end_inset
+
+ 
+\end_layout
+
+\begin_layout Standard
+\begin_inset VSpace defskip
+\end_inset
+
+
+\end_layout
+
+\begin_layout Standard
+One old approach to data mining is to trim these down to 3-grams, and then
+ compare them as feature vectors.
+ These 3-gram feature vectors are:
+\end_layout
+
+\begin_layout Standard
+\begin_inset VSpace defskip
+\end_inset
+
+
+\end_layout
+
+\begin_layout Standard
+\begin_inset space \qquad{}
+\end_inset
+
+
+\begin_inset Box Frameless
+position "t"
+hor_pos "c"
+has_inner_box 1
+inner_pos "t"
+use_parbox 0
+use_makebox 0
+width "100col%"
+special "none"
+height "1in"
+height_special "totalheight"
+thickness "0.4pt"
+separation "3pt"
+shadowsize "4pt"
+framecolor "black"
+backgroundcolor "none"
+status open
+
+\begin_layout Plain Layout
+\begin_inset Tabular
+<lyxtabular version="3" rows="2" columns="3">
+<features tabularvalignment="middle">
+<column alignment="right" valignment="top">
+<column alignment="left" valignment="top">
+<column alignment="left" valignment="top">
+<row>
+<cell alignment="right" valignment="top" usebox="none">
+\begin_inset Text
+
+\begin_layout Plain Layout
+
+\family typewriter
+the
+\end_layout
+
+\end_inset
+</cell>
+<cell alignment="left" valignment="top" usebox="none">
+\begin_inset Text
+
+\begin_layout Plain Layout
+
+\family typewriter
+dog chased
+\end_layout
+
+\end_inset
+</cell>
+<cell alignment="center" valignment="top" usebox="none">
+\begin_inset Text
+
+\begin_layout Plain Layout
+; 2 observations
+\end_layout
+
+\end_inset
+</cell>
+</row>
+<row>
+<cell alignment="right" valignment="top" usebox="none">
+\begin_inset Text
+
+\begin_layout Plain Layout
+
+\family typewriter
+the
+\end_layout
+
+\end_inset
+</cell>
+<cell alignment="left" valignment="top" usebox="none">
+\begin_inset Text
+
+\begin_layout Plain Layout
+
+\family typewriter
+dog killed 
+\end_layout
+
+\end_inset
+</cell>
+<cell alignment="center" valignment="top" usebox="none">
+\begin_inset Text
+
+\begin_layout Plain Layout
+; 1 observation
+\end_layout
+
+\end_inset
+</cell>
+</row>
+</lyxtabular>
+
+\end_inset
+
+
+\end_layout
+
+\end_inset
+
+ 
+\end_layout
+
+\begin_layout Standard
+\begin_inset VSpace defskip
+\end_inset
+
+
+\end_layout
+
+\begin_layout Standard
+The stalk for the cat is:
+\end_layout
+
+\begin_layout Standard
+\begin_inset VSpace defskip
+\end_inset
+
+
+\end_layout
+
+\begin_layout Standard
+\begin_inset space \qquad{}
+\end_inset
+
+
+\begin_inset Box Frameless
+position "t"
+hor_pos "c"
+has_inner_box 1
+inner_pos "t"
+use_parbox 0
+use_makebox 0
+width "100col%"
+special "none"
+height "1in"
+height_special "totalheight"
+thickness "0.4pt"
+separation "3pt"
+shadowsize "4pt"
+framecolor "black"
+backgroundcolor "none"
+status open
+
+\begin_layout Plain Layout
+\begin_inset Tabular
+<lyxtabular version="3" rows="3" columns="3">
+<features tabularvalignment="middle">
+<column alignment="right" valignment="top">
+<column alignment="left" valignment="top">
+<column alignment="left" valignment="top">
+<row>
+<cell alignment="right" valignment="top" usebox="none">
+\begin_inset Text
+
+\begin_layout Plain Layout
+
+\family typewriter
+chased the
+\end_layout
+
+\end_inset
+</cell>
+<cell alignment="left" valignment="top" usebox="none">
+\begin_inset Text
+
+\begin_layout Plain Layout
+
+\family typewriter
+cat
+\end_layout
+
+\end_inset
+</cell>
+<cell alignment="center" valignment="top" usebox="none">
+\begin_inset Text
+
+\begin_layout Plain Layout
+1 observation
+\end_layout
+
+\end_inset
+</cell>
+</row>
+<row>
+<cell alignment="center" valignment="top" usebox="none">
+\begin_inset Text
+
+\begin_layout Plain Layout
+
+\family typewriter
+the
+\end_layout
+
+\end_inset
+</cell>
+<cell alignment="center" valignment="top" usebox="none">
+\begin_inset Text
+
+\begin_layout Plain Layout
+
+\family typewriter
+cat chased 
+\end_layout
+
+\end_inset
+</cell>
+<cell alignment="center" valignment="top" usebox="none">
+\begin_inset Text
+
+\begin_layout Plain Layout
+2 observations
+\end_layout
+
+\end_inset
+</cell>
+</row>
+<row>
+<cell alignment="right" valignment="top" usebox="none">
+\begin_inset Text
+
+\begin_layout Plain Layout
+
+\family typewriter
+the
+\end_layout
+
+\end_inset
+</cell>
+<cell alignment="left" valignment="top" usebox="none">
+\begin_inset Text
+
+\begin_layout Plain Layout
+
+\family typewriter
+cat killed 
+\end_layout
+
+\end_inset
+</cell>
+<cell alignment="center" valignment="top" usebox="none">
+\begin_inset Text
+
+\begin_layout Plain Layout
+1 observation
+\end_layout
+
+\end_inset
+</cell>
+</row>
+</lyxtabular>
+
+\end_inset
+
+
+\end_layout
+
+\end_inset
+
+ 
+\end_layout
+
+\begin_layout Standard
+\begin_inset VSpace defskip
+\end_inset
+
+
+\end_layout
+
+\begin_layout Standard
+These are now explicitly vectors, as the addition of the observation count
+ makes them so.
+ The vertical alignment reminds us that they are still stalks, and come
+ from colocations.
+ If one was working with a dependency parse, as opposed to 3-grams, one
+ might arrive at an expression of the form 
+\begin_inset Formula 
+\[
+\overline{dog}=2\left(\overleftarrow{the}\otimes\overrightarrow{chased}\right)+1\left(\overleftarrow{the}\otimes\overrightarrow{killed}\right)
+\]
+
+\end_inset
+
+and 
+\begin_inset Formula 
+\[
+\overline{cat}=\left(\overleftarrow{chased}\otimes\overleftarrow{the}\right)+2\left(\overleftarrow{the}\otimes\overrightarrow{chased}\right)+1\left(\overleftarrow{the}\otimes\overrightarrow{killed}\right)
+\]
+
+\end_inset
+
+Treated as vectors, the cosine distance can be taken between the two to
+ arrive at the conclusion that they are grammatically similar.
+ At any rate, one has that both 
+\begin_inset Quotes eld
+\end_inset
+
+cat
+\begin_inset Quotes erd
+\end_inset
+
+ and 
+\begin_inset Quotes eld
+\end_inset
+
+dog
+\begin_inset Quotes erd
+\end_inset
+
+ are points in the base space; each point in the base-space has a feature-vector
+ associated with it.
+ That feature vector, however, has connectivity properties: it is a collection
+ of seeds, forming a stalk.
+ This can be pictured as a corn-field, but the corn is funny: each corn-leaf
+ is a jigsaw-puzzle piece (a collection of connectors).
+ The connectors are, for the moment, unconnected to neighboring corn-stalks.
+ 
+\end_layout
+
+\begin_layout Subsection*
 Gluing Axioms
+\end_layout
+
+\begin_layout Standard
+The gluing axioms are used to ensure that sections and stalks can be assembled
+ in a fashion that is consistent with the description and examples given
+ above.
+ They are technical requirements imposed on the structure, to make sure
+ its assembled in a coherent fashion.
+ In practical applications, using 
+\begin_inset Quotes eld
+\end_inset
+
+common sense
+\begin_inset Quotes erd
+\end_inset
+
+, they are unlikely to be violated, but formally, it is important to state
+ them.
+\end_layout
+
+\begin_layout Standard
+x
+\end_layout
+
+\begin_layout Standard
+x
+\end_layout
+
+\begin_layout Standard
+x
+\end_layout
+
+\begin_layout Standard
+x
+\end_layout
+
+\begin_layout Standard
+a way that 
+\begin_inset Quotes eld
+\end_inset
+
+makes sen
 \end_layout
 
 \begin_layout Standard
