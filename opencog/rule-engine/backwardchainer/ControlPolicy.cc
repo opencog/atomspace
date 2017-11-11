@@ -27,7 +27,7 @@
 #include <opencog/util/algorithm.h>
 #include <opencog/query/BindLinkAPI.h>
 #include <opencog/atomutils/Unify.h>
-#include <opencog/atoms/core/MapLink.h>
+#include <opencog/atoms/execution/MapLink.h>
 
 #include "MixtureModel.h"
 #include "ActionSelection.h"
