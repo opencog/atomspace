@@ -99,7 +99,7 @@ Linas Vepštas
 \end_layout
 
 \begin_layout Date
-9 November 2017
+11 November 2017
 \end_layout
 
 \begin_layout Abstract
@@ -464,7 +464,7 @@ seed
 germ
 \noun default
  of the seed.
- For each edge in the edge set, the other vertex is calld the 
+ For each edge in the edge set, the other vertex is called the 
 \noun on
 connector
 \noun default
@@ -922,7 +922,7 @@ This motivates a different way of looking at seeds: they can be visualized
  as jigsaw puzzle pieces, where any given tab on one jigsaw piece can fit
  into one and only one slot on another jigsaw piece.
  This union of a tab+slot is the link.
- Connectors must be of the same type in order to be connectable.
+ Connectors must be of the same type in order to be connectible.
  The types of the connectors will later be seen to be the same thing as
  the types of type theory; that is, they are bona-fide types, in the proper
  sense of the word.
@@ -1179,15 +1179,15 @@ Its important to realize that the standard approach to graph theory has
  contain the category of graphs as a subset.
  Extending the notion of a connector to be the notion of a connector-type
  in particular plays considerable violence to the notion of graph theory.
- As long as the narrower defintion of seed was used, one could imagine that
- a collection of seeds could be assembled into a graph, and that assembly
+ As long as the narrower definition of seed was used, one could imagine
+ that a collection of seeds could be assembled into a graph, and that assembly
  is unique.
  Once connector types are introduced, the possibility that there are multiple,
  non-unique assemblages of seeds becomes possible.
  A graph can be disassembled into seeds, and, if one is careful to label
- veretexes and edges in a unique way, that collection can be viewed as isomorphi
-c to the original graph.
- If one is not careful, slopply assigning labels or avoiding them entirely,
+ vertexes and edges in a unique way, that collection can be viewed as isomorphic
+ to the original graph.
+ If one is not careful, sloppily assigning labels or avoiding them entirely,
  the collection can have multiple non-isomorphic re-assemblies.
  The ability to be sloppy in this way is one of the appeals, one of the
  benefits of working with seeds and sections.
@@ -1321,9 +1321,9 @@ ion of ADP to ATP, shown in the figure below.
 
 \begin_layout Standard
 The germ of the seed is the point where the semi-circle kisses the line:
- not labelled here, the germ would be succinate-CoA ligase.
- The connectors are labelled with thier types, and the arrows provide directiona
-lity.
+ not labeled here, the germ would be succinate-CoA ligase.
+ The connectors are labeled with their types, and the arrows provide directional
+ity.
  The connector types clearly indicate what can be linked to what: this particula
 r seed, when linked, 
 \emph on
@@ -1364,6 +1364,12 @@ Each distinct reaction constitutes a seed; the heavy lines forming the cycle
  These connectors are free to be attached to other seeds or sections.
 \end_layout
 
+\begin_layout Standard
+This example may seem dubious, at this point of the presentation.
+ That it is a valid example should become clear with further development
+ of the general principles in what follows.
+\end_layout
+
 \begin_layout Subsection*
 Similar concept: Link Grammar
 \end_layout
@@ -1385,9 +1391,9 @@ disjuncts
 \end_inset
 
  in Link Grammar.
- The formal defintion for Link Grammar disjuncts are a bit more complicated
+ The formal definition for Link Grammar disjuncts are a bit more complicated
  than seeds, and is expanded on in later sections.
- To lay that groundwork, however, consider an unlabelled dependency parse
+ To lay that groundwork, however, consider an unlabeled dependency parse
  for the sentence 
 \begin_inset Quotes eld
 \end_inset
@@ -1435,7 +1441,7 @@ A dependency parse decomposed into four seeds
 \end_layout
 
 \begin_layout Standard
-The depdency parse is shown as a graph, with four vertexes.
+The dependency parse is shown as a graph, with four vertexes.
  Below, the parse is decomposed into the component seeds; as always, the
  open dots are connectors, the closed dots are the germs.
  Using the notation 
@@ -1664,7 +1670,7 @@ this apple is green
 \begin_inset Quotes erd
 \end_inset
 
- were observed and parsed into (unlabelled) dependencies.
+ were observed and parsed into (unlabeled) dependencies.
 \end_layout
 
 \begin_layout Subsection*
@@ -1738,7 +1744,7 @@ is next to
 \end_inset
 
  is next to Idaho.
- The utility of this device becomes apparant because one can use this same
+ The utility of this device becomes apparent because one can use this same
  notation to write 
 \begin_inset Formula $\lambda y\lambda x.\mbox{is\_next\_to}(x,y)$
 \end_inset
@@ -2054,9 +2060,9 @@ tic representation of a morphism
 \end_layout
 
 \begin_layout Standard
-Tensors have additonal properties and operations on them, the most important
- of which, for analysis, is thier linearity.
- For the purposes here, the linearity is not important, whereas the ablity
+Tensors have additional properties and operations on them, the most important
+ of which, for analysis, is their linearity.
+ For the purposes here, the linearity is not important, whereas the ability
  to contract indexes is.
  The contraction of indexes, that is, the joining together of connectors
  to form links, gives tensor algebras the structure of a monoidal category.
@@ -2088,7 +2094,7 @@ simply typed
 \end_inset
 
 .
- The end-points on the seed are NOT labelled; equivalently, they all carry
+ The end-points on the seed are NOT labeled; equivalently, they all carry
  the same label.
  This is in sharp contrast to the earlier example
 \begin_inset Newline newline
@@ -2136,7 +2142,7 @@ is: this- & example+;
 \begin_inset Newline newline
 \end_inset
 
-where the two connectors are labelled, and have different types, which sharply
+where the two connectors are labeled, and have different types, which sharply
  limit what they connect to.
  The 
 \family sans
@@ -2214,7 +2220,7 @@ this: is+;
 \end_inset
 
 It may seem strange to conflate the concept of tensors and monoidal categories
- with linguistic analysis, yet this has an rich and old history, breifly
+ with linguistic analysis, yet this has an rich and old history, briefly
  touched on in the next section.
  The core principle driving this is that the Lambek calculus, underpinning
  the categorial grammars used in linguistic analysis, can be embedded into
@@ -2359,7 +2365,7 @@ where
 \begin_inset Formula $i$
 \end_inset
 
-th occurance of a subject/object pair in an observed corpus.
+th occurrence of a subject/object pair in an observed corpus.
  If the corpus consisted of two sentences, 
 \begin_inset Quotes eld
 \end_inset
@@ -2455,7 +2461,7 @@ key "Ash1965"
  In a finite-state process model, the future state is predicated only on
  the current state, and thus the Markov assumption holds.
  In deciphering such a process, one might not know how the current state
- is corellated to the output symbol, thus leading to the concept of a Hidden
+ is correlated to the output symbol, thus leading to the concept of a Hidden
  Markov Model (HMM).
  The concept of 
 \begin_inset Quotes eld
@@ -2509,7 +2515,7 @@ The history of a text as a sequence of words
 One issue, already noted, is the sequential nature of the process.
  One can try to hand-wave away this issue: given a graph of vertices, it
  is sufficient to write the vertexes in some order, any order will do.
- This obsucres the fact that 
+ This obscures the fact that 
 \begin_inset Formula $n$
 \end_inset
 
@@ -2540,7 +2546,8 @@ edges
 To put it more bluntly: a sequential history model of genomic and proteomic
  data is inappropriate.
  Although base pairs and amino acids come in sequences, the interactions
- between different genes and proteins are not in any way shap or form sequential.
+ between different genes and proteins are not in any way shape or form sequentia
+l.
  The interactions are happening in parallel, in distinct, different physical
  locations in a cell.
  These interactions can be depicted as a graph.
@@ -2584,7 +2591,7 @@ A Viterbi parse lattice of Markov chain
 
 \begin_layout Standard
 The above depicts the lattice of a Viterbi parse of a Markov chain.
- The dashed green line depicts a maximum-liklihood path through the lattice,
+ The dashed green line depicts a maximum-likelihood path through the lattice,
  that is, the most likely history.
  Viterbi decoding, using an 
 \begin_inset Quotes eld
@@ -2646,7 +2653,7 @@ Each black line represents a probability
 \end_inset
 
  etc.
- Put differrently, 
+ Put differently, 
 \begin_inset Formula $P(w_{n}|h)=P(w_{n}|w_{n-1})$
 \end_inset
 
@@ -2655,7 +2662,7 @@ Each black line represents a probability
 \end_layout
 
 \begin_layout Standard
-Non-Markov models would have edges connecting nodes furthre in the past.
+Non-Markov models would have edges connecting nodes further in the past.
  A 
 \begin_inset Formula $n$
 \end_inset
@@ -2831,7 +2838,7 @@ The sparsity is easily exposed with dependency parsing.
 \end_inset
 
 .
- A collection of depedency parses obtained from a corpus identifies which
+ A collection of dependency parses obtained from a corpus identifies which
  edges matter, and which edges do not.
  
 \end_layout
@@ -2839,7 +2846,7 @@ The sparsity is easily exposed with dependency parsing.
 \begin_layout Standard
 Dependency parses do even more: they unveil possible paths, and not just
  pair-wise edges.
- They provide a more holisitic view of what might be going on in natural
+ They provide a more holistic view of what might be going on in natural
  language.
  That is, the notation 
 \end_layout
@@ -3002,7 +3009,7 @@ To summarize: dependency structures appear naturally; flattening them into
 \end_inset
 
  may indeed encode all possible knowledge about the text in a rigorously
- Bayesian fashion; but its unweildy.
+ Bayesian fashion; but its unwieldy.
 \end_layout
 
 \begin_layout Section*
@@ -3761,7 +3768,7 @@ A stalk and it's projection
 \end_layout
 
 \begin_layout Standard
-In general, this defintion does not require that the map 
+In general, this definition does not require that the map 
 \begin_inset Formula $\pi:V\to B$
 \end_inset
 
@@ -3781,7 +3788,7 @@ In general, this defintion does not require that the map
 
  is a set of germs of seeds.
  That is, the seeds in the stalk can be generalized seeds, having typed
- connectors, rather than connectors derviced from edges.
+ connectors, rather than connectors derived from edges.
  The vertexes in the stalk can be visualized as being stacked one on top
  another, forming a tower or a fiber, with the edges sticking out as spines.
  When the seeds carry typed connectors, the stalk can be visualized as a
@@ -3856,7 +3863,7 @@ Note that the projection of a stalk is a seed.
 \end_inset
 
  to add or remove connectors.
- Thus, it is useful to immediately broaden the defnition of the stalk.
+ Thus, it is useful to immediately broaden the definition of the stalk.
  
 \end_layout
 
@@ -3949,7 +3956,7 @@ In this revised definition, there is no hint of what
 \end_layout
 
 \begin_layout Standard
-Thus, perhaps the most agreeable defintion for a stalk is this.
+Thus, perhaps the most agreeable definition for a stalk is this.
 \end_layout
 
 \begin_layout Definition*
@@ -4097,7 +4104,7 @@ Germs and connectors project consistently
 
 \begin_layout Standard
 The definition of a link needs to be generalized, and made consistent with
- this final defintion of a stalk.
+ this final definition of a stalk.
  
 \end_layout
 
@@ -4183,10 +4190,10 @@ viz.
 \end_layout
 
 \begin_layout Standard
-Recall that the original defintion of a connector was such that it could
+Recall that the original definition of a connector was such that it could
  be used once and only once.
  This can become an issue, if it is strictly enforced on the base space.
- It will become convenient to remove this restriction on the bse space,
+ It will become convenient to remove this restriction on the base space,
  and replace it by a use-count.
  That is, if two different links between stalks project down to the same
  link in the base space, then the link in the base-space should be counted
@@ -4227,9 +4234,9 @@ not
  want the base space to be some Markov network! That would be a disaster.
  Rather, the hope is to accumulate a large number of graph fragments in
  such a way that the fragments are apparent, but that the statistics of
- thier collective behavior is also accessible.
+ their collective behavior is also accessible.
  The hope is that this can be done without overflowing available CPU and
- RAM, while carefully maintaining fidelity to the graph framents.
+ RAM, while carefully maintaining fidelity to the graph fragments.
  This is an example from linguistics, but one might hope to do the same
  with activation pathways in cell biochemistry.
  The citric acid cycle should be amenable to such a treatment, as well.
@@ -4280,7 +4287,7 @@ The problem, and it's intended solution
 \begin_layout Standard
 From the previous development, it should be clear that stalks capture the
  local structure of graphs, and that the projection, carefully done, can
- preserve the essence of tht local structure.
+ preserve the essence of that local structure.
  Enough mechanism has been developed to allow the definition of a section
  to be understood in a way that is in keeping with the usual notion of a
  section as commonly defined in covering spaces and fiber bundles.
@@ -4306,7 +4313,7 @@ A sheaf is a collection of connected sections, together with a projection
 \begin_inset Formula $v,w$
 \end_inset
 
- occuring in different sections, one has 
+ occurring in different sections, one has 
 \begin_inset Formula $\pi(v)=\pi(w)$
 \end_inset
 
@@ -4629,10 +4636,28 @@ fly
 
 , one above another.
  Each phrase or section can be visualized as a botanical branch or botanical
- leaf branching off the central stalk.The projection of the stalk is shown
- below.
- The words in each phrase ar connected as a linear sequence.
- Idential words are projected down to a common base point.
+ leaf branching off the central stalk.The projection of all of the stalks
+ obtained from collocation is shown below, in figure 
+\begin_inset CommandInset ref
+LatexCommand ref
+reference "fig:N-gram-base"
+
+\end_inset
+
+.
+ Identical words are projected down to a common base point.
+ Links between words are projected down to links in the base space.
+ For ordinary 
+\begin_inset Formula $n$
+\end_inset
+
+-grams, the links are merely the direct sequential linking of neighboring
+ words.
+ The figure depicts the base-space of the sheaf obtained from 
+\begin_inset Formula $n$
+\end_inset
+
+-grams.
 \end_layout
 
 \begin_layout Standard
@@ -4647,6 +4672,13 @@ status open
 
 \begin_layout Plain Layout
 N-gram corpus text alignment
+\begin_inset CommandInset label
+LatexCommand label
+name "fig:N-gram-base"
+
+\end_inset
+
+
 \end_layout
 
 \end_inset
@@ -4672,12 +4704,23 @@ N-gram corpus text alignment
 \begin_layout Standard
 The sections do not have to be linear sequences; the phrases can be parsed
  with a dependency parser of one style or another, in which case the words
- are joined with (directed) edges that denote dependencies.
+ are joined with edges that denote dependencies.
+ The edges might be directed, and they might be labelled.
  Parsing with a head-phrase parser introduces additional vertexes, typically
  called NP, VP, S and so on.
- The next figure shows the projection that results from alignment on an
- (unlabeled, undirected) dependency parse of the text.
- Most noticeable is that the determiner 
+ The next figure (figure 
+\begin_inset CommandInset ref
+LatexCommand ref
+reference "fig:Dependency-base"
+
+\end_inset
+
+) shows the projection that results from alignment on an (unlabeled, undirected)
+ dependency parse of the text.
+ As before, each stalk is projected down to a single word, and the links
+ are projected down as well.
+ The most noticeable difference between this base space and the N-gram base
+ space is that the determiner 
 \begin_inset Quotes eld
 \end_inset
 
@@ -4712,8 +4755,9 @@ fly
 \end_inset
 
 , which, as a dependency, is not exactly correct but does serve to illustrate
- the difference between the N-gram and the dependency alignment.
- 
+ how the N-gram and the dependency alignments differ.
+ If the depedency parse produced directed edges with labels, it would be
+ prudent to project those labels as well.
 \end_layout
 
 \begin_layout Standard
@@ -4728,6 +4772,13 @@ status open
 
 \begin_layout Plain Layout
 Dependency parse corpus text alignment
+\begin_inset CommandInset label
+LatexCommand label
+name "fig:Dependency-base"
+
+\end_inset
+
+
 \end_layout
 
 \end_inset
@@ -4751,21 +4802,46 @@ Dependency parse corpus text alignment
 \end_layout
 
 \begin_layout Standard
-Both of these figures represent a quotient graph that results from a corpus
- alignment, where all uses of a word have been collapsed (projected down)
- to a single node.
- The resulting graph is the graph of the language.
+Both of the figures 
+\begin_inset CommandInset ref
+LatexCommand ref
+reference "fig:N-gram-base"
+
+\end_inset
+
+ and 
+\begin_inset CommandInset ref
+LatexCommand ref
+reference "fig:Dependency-base"
+
+\end_inset
+
+ depict a quotient graph that results from a corpus alignment, where all
+ uses of a word have been collapsed (projected down) to a single node, and
+ all links connecting the words are likewise projected.
+ The resulting graph can be understood to depict all possible connections
+ in a natural language.
+ In some sense, it captures important structural information in natural
+ language.
+\end_layout
+
+\begin_layout Standard
+Be careful, though: these base spaces are just the projections of the sheaf;
+ they are not the sheaf itself.
+ Its as if a flashlight were held above the stalks: the base space is the
+ shadow that is cast.
+ The sheaf is the full structure, the base space is just the shadow.
  
 \end_layout
 
 \begin_layout Subsection*
-Why sheaves? Are projections useful?
+Are projections useful?
 \end_layout
 
 \begin_layout Standard
 Yes.
- A collapsed graph like that might appear strange; why would one want to
- do that, if one has individual sentence data? 
+ A collapsed graph like those above might appear strange; why would one
+ want to do that, if one has individual sentence data? 
 \end_layout
 
 \begin_layout Standard
@@ -4780,8 +4856,8 @@ target "https://en.wikipedia.org/wiki/Marginal_distribution"
 .
  For example, when accumulating statistics for large collections of sentences,
  the projected vertex becomes an ideal place to store the frequency count
- of that word; the edge becomes an excellent place to store the joint probabilit
-y or the mutual information for a pair of words.
+ of that word; the projected edge becomes an excellent place to store the
+ joint probability or the mutual information for a pair of words.
  The projected graph - the quotient graph, is manageable in size.
  For example, in a corpus consisting of ten million sentences, one might
  see 130K distinct, unique words (130K vertexes) and perhaps 5 million distinct
@@ -4796,9 +4872,11 @@ By contrast, storing the individual parses for 10 million sentences is more
  Assuming 15 words per sentence, this requires storing 150M vertexes, and
  approximately 20 links per sentence for 200M edges.
  This graph is two orders of magnitude larger than the quotient graph.
- It makes sense to project sections down to the base space as soon as possible.
- They can be envisioned to still be there, virtually, in principle, but
- the actual storage can be avoided.
+ One could, of course, apply various programming and coding tricks to squeeze
+ and compress the data, but this misses the point: It makes sense to project
+ sections down to the base space as soon as possible.
+ The original sections can be envisioned to still be there, virtually, in
+ principle, but the actual storage can be avoided.
 \end_layout
 
 \begin_layout Standard
@@ -4809,10 +4887,21 @@ Every graph can be represented as an adjacency matrix.
 \end_inset
 
 130K total.
- The marginals stored with the graph can be accessed as marginals in the
- normal sense of values written in the margin of the matrix.
- Standard linear-algebra tools, such as the R programming language, can
- access the matrix and the marginals.
+ The sparsity is considerable: 
+\begin_inset Formula $\log_{2}\left(130\times130/5\right)=11.7$
+\end_inset
+
+.
+ Less than one in a thousand of all possible edges are actually observed.
+\end_layout
+
+\begin_layout Standard
+The marginals stored with the graph can be accessed as marginals on the
+ adjacency matrix.
+ That is, they are marginals in the ordinary sense of values written in
+ the margin of the matrix.
+ Standard linear-algebra and data-analysis tools, such as the R programming
+ language, can access the matrix and the marginals.
 \end_layout
 
 \begin_layout Subsection*
@@ -4888,7 +4977,7 @@ A different example can be taken from biochemistry.
  Thus, for example, the Krebs cycle can be taken to be a single section
  through the network: it shows exactly which coenzymes are active in aerobic
  metabolism.
- The same subtstrates, products and enzymes may also participate in other
+ The same substrates, products and enzymes may also participate in other
  pathways; those other pathways should be considered as other sections through
  the sheaf.
  Each substrate, enzyme or product is itself a stalk.
@@ -4897,29 +4986,23 @@ A different example can be taken from biochemistry.
 
 \begin_layout Standard
 The sheaf, it's decomposition into sections, and it's projection down to
- a single base unified network, provides a holistic view of a network of
+ a single unified base network, provides a holistic view of a network of
  interactions.
- Activations or modes of the network correspond to grammatically valid sentences
-, when the network is a language network.
- Sections correspond to activated biological pathways, when the network
- is a map of biochemical interactions.
+ For linguistic data, activations or modes of the network correspond to
+ grammatically valid sentences.
+ For biological data, an activated biological pathway is a section.
+ The base space provides a general map of biochemical interactions; it does
+ not capture individual activations.
+ The individual sections in the sheaf do capture that activation.
 \end_layout
 
 \begin_layout Subsection*
-Projections with Stalks
+Feature Vectors
 \end_layout
 
 \begin_layout Standard
-The above makes the case that the projection of a sheaf down to its base
- space use useful from the data management point of view.
- The projection shrinks the size of the dataset.
- However, it erases a lot of local connectivity data that is useful and
- important.
- Local data can be maintained by keeping the projection, and then keeping
- individual stalks.
- Visually, this can be envisioned as a corn-field.
- The ground is the base space, the corn-stalks are the individual stalks.
- The stalks correspond to 
+It is important to understand that, in many ways, stalks can be treated
+ as vectors, and, specifically as the 
 \begin_inset Quotes eld
 \end_inset
 
@@ -4927,12 +5010,12 @@ feature vectors
 \begin_inset Quotes erd
 \end_inset
 
- in traditional data mining approaches.
+ of data-mining.
+ This is best illustrated with an example.
 \end_layout
 
 \begin_layout Standard
-This is best illustrated with an example.
- Consider the corpus 
+Consider the corpus 
 \begin_inset Quotes eld
 \end_inset
 
@@ -5109,11 +5192,7 @@ dog killed the chicken
 \begin_inset VSpace defskip
 \end_inset
 
-
-\end_layout
-
-\begin_layout Standard
-The stalk for the cat is:
+and the stalk for the cat:
 \end_layout
 
 \begin_layout Standard
@@ -5270,7 +5349,7 @@ cat chased the cockroach
 \begin_layout Standard
 One old approach to data mining is to trim these down to 3-grams, and then
  compare them as feature vectors.
- These 3-gram feature vectors are:
+ These 3-gram feature vector for the dog is:
 \end_layout
 
 \begin_layout Standard
@@ -5392,11 +5471,7 @@ dog killed
 \begin_inset VSpace defskip
 \end_inset
 
-
-\end_layout
-
-\begin_layout Standard
-The stalk for the cat is:
+and the 3-gram stalk for the cat is:
 \end_layout
 
 \begin_layout Standard
@@ -5463,7 +5538,7 @@ cat
 \begin_inset Text
 
 \begin_layout Plain Layout
-1 observation
+; 1 observation
 \end_layout
 
 \end_inset
@@ -5496,7 +5571,7 @@ cat chased
 \begin_inset Text
 
 \begin_layout Plain Layout
-2 observations
+; 2 observations
 \end_layout
 
 \end_inset
@@ -5529,7 +5604,7 @@ cat killed
 \begin_inset Text
 
 \begin_layout Plain Layout
-1 observation
+; 1 observation
 \end_layout
 
 \end_inset
@@ -5557,10 +5632,201 @@ cat killed
 \begin_layout Standard
 These are now explicitly vectors, as the addition of the observation count
  makes them so.
- The vertical alignment reminds us that they are still stalks, and come
- from colocations.
- If one was working with a dependency parse, as opposed to 3-grams, one
- might arrive at an expression of the form 
+ The vertical alignment reminds us that they are also still stalks, and
+ that the vector comes from collocations.
+ 
+\end_layout
+
+\begin_layout Standard
+Recall how a vector is defined.
+ One writes a vector 
+\begin_inset Formula $\vec{v}$
+\end_inset
+
+ as a sum over basis elements 
+\begin_inset Formula $\hat{e}_{i}$
+\end_inset
+
+ with (usually real-number) coefficients 
+\begin_inset Formula $a_{i}$
+\end_inset
+
+:
+\begin_inset Formula 
+\[
+\vec{v}=\sum_{i}a_{i}\hat{e}_{i}
+\]
+
+\end_inset
+
+The basis elements 
+\begin_inset Formula $\hat{e}_{i}$
+\end_inset
+
+ are unit-length vectors.
+ Another common notation is the bra-ket notation, which says the same thing,
+ but in a different way:
+\begin_inset Formula 
+\[
+\vec{v}=\sum_{i}a_{i}\left|i\right\rangle 
+\]
+
+\end_inset
+
+The bra-ket notation is slightly easier to use for this example.
+ The above 3-gram collocations can be written as vectors.
+ The one for dog would be 
+\begin_inset Formula 
+\[
+\overrightarrow{dog}=2\left|the\;*\;chased\right\rangle +\left|the\;*\;killed\right\rangle 
+\]
+
+\end_inset
+
+while the one for cat would be
+\end_layout
+
+\begin_layout Standard
+\begin_inset Formula 
+\[
+\overrightarrow{cat}=\left|chased\;the\;*\right\rangle +2\left|the\;*\;chased\right\rangle +\left|the\;*\;killed\right\rangle 
+\]
+
+\end_inset
+
+The 
+\begin_inset Formula $*$
+\end_inset
+
+ here is the wild-card; it indicates where 
+\begin_inset Quotes eld
+\end_inset
+
+dog
+\begin_inset Quotes erd
+\end_inset
+
+ and 
+\begin_inset Quotes eld
+\end_inset
+
+cat
+\begin_inset Quotes erd
+\end_inset
+
+ should go, but it also indicates how the basis vectors should be treated:
+ the wild-card helps establish that dogs and cats are similar.
+ It allows the basis vectors to be explicitly compared to one-another.
+ The ability to compare these allows the dot product to be taken.
+\end_layout
+
+\begin_layout Standard
+Recall the defintion of a dot-product (the inner product).
+ For 
+\begin_inset Formula $\vec{v}$
+\end_inset
+
+ as above, and 
+\begin_inset Formula $\vec{w}=\sum_{i}b_{i}\hat{e}_{i}$
+\end_inset
+
+, one has that
+\begin_inset Formula 
+\[
+\vec{v}\cdot\vec{w}=\sum_{i}\sum_{j}a_{i}b_{j}\hat{e}_{i}\cdot\hat{e_{j}}=\sum_{i}\sum_{j}a_{i}b_{j}\delta_{ij}=\sum_{i}a_{i}b_{i}
+\]
+
+\end_inset
+
+where the Kronecker delta was used in the middle term:
+\begin_inset Formula 
+\[
+\hat{e}_{i}\cdot\hat{e_{j}}=\delta_{ij}=\begin{cases}
+1 & \mbox{if }i=j\\
+0 & \mbox{if }i\ne j
+\end{cases}
+\]
+
+\end_inset
+
+Thus, the inner prioduct of 
+\begin_inset Formula $\overrightarrow{cat}$
+\end_inset
+
+ and 
+\begin_inset Formula $\overrightarrow{dog}$
+\end_inset
+
+ can be computed:
+\begin_inset Formula 
+\[
+\overrightarrow{cat}\cdot\overrightarrow{dog}=0\cdot1+2\cdot2+1\cdot1=5
+\]
+
+\end_inset
+
+One common way to express the similarity of 
+\begin_inset Formula $\overrightarrow{cat}$
+\end_inset
+
+ and 
+\begin_inset Formula $\overrightarrow{dog}$
+\end_inset
+
+ is to compute the cosine similarity.
+ The angle 
+\begin_inset Formula $\theta$
+\end_inset
+
+ between two vectors is given by
+\begin_inset Formula 
+\[
+\cos\theta=\vec{v}\cdot\vec{w}/\left|\vec{v}\right|\left|\vec{w}\right|
+\]
+
+\end_inset
+
+where 
+\begin_inset Formula $\left|\vec{v}\right|=\sqrt{\sum_{i}a_{i}^{2}}$
+\end_inset
+
+ is the length of 
+\begin_inset Formula $\vec{v}$
+\end_inset
+
+.
+ Since 
+\begin_inset Formula $\left|\overrightarrow{cat}\right|=\sqrt{6}$
+\end_inset
+
+ and 
+\begin_inset Formula $\left|\overrightarrow{dog}\right|=\sqrt{5}$
+\end_inset
+
+ one finds that 
+\begin_inset Formula 
+\[
+\cos\theta=\frac{5}{\sqrt{30}}\approx0.913
+\]
+
+\end_inset
+
+That is, dogs and cats really are similar.
+ 
+\end_layout
+
+\begin_layout Standard
+If one was working with a dependency parse, as opposed to 3-grams, and if
+ one used the Frobenius algebra notation such as that used by Kartsaklis
+ in 
+\begin_inset CommandInset citation
+LatexCommand cite
+key "Kart2014"
+
+\end_inset
+
+, then one would write the basis elements as a peculiar kind of tensor,
+ and one might arrive at an expression roughly of the form 
 \begin_inset Formula 
 \[
 \overline{dog}=2\left(\overleftarrow{the}\otimes\overrightarrow{chased}\right)+1\left(\overleftarrow{the}\otimes\overrightarrow{killed}\right)
@@ -5576,32 +5842,247 @@ and
 
 \end_inset
 
-Treated as vectors, the cosine distance can be taken between the two to
- arrive at the conclusion that they are grammatically similar.
- At any rate, one has that both 
-\begin_inset Quotes eld
+Ignoring the differences in notation (ignoring that the quantities in parenthesi
+s are tensors), one clearly can see that these are still feature vectors.
+ Focusing on the vector aspect only, these represent the same information
+ as the 3-gram feature vectors.
+ They're the same thing.
+ The dot products are the same, the vectors are the same.
+ The difference between them is that the bra-ket notation was used for the
+ 3-grams, while the tensor notation was used for the dependency parse.
+ The feature vectors can also be written using the link-grammar-inspired
+ notation: 
+\begin_inset Newline newline
 \end_inset
 
-cat
-\begin_inset Quotes erd
+
+\end_layout
+
+\begin_layout Standard
+\begin_inset space \qquad{}
+\end_inset
+
+
+\begin_inset Box Frameless
+position "t"
+hor_pos "c"
+has_inner_box 1
+inner_pos "t"
+use_parbox 0
+use_makebox 0
+width "80col%"
+special "none"
+height "1in"
+height_special "totalheight"
+thickness "0.4pt"
+separation "3pt"
+shadowsize "4pt"
+framecolor "black"
+backgroundcolor "none"
+status open
+
+\begin_layout Plain Layout
+
+\family sans
+dog: [the- & chased+]2 or [the- & killed+]1;
+\end_layout
+
+\begin_layout Plain Layout
+
+\family sans
+cat: [chased- & the-]1 or [the- & chased+]2 or [the- & killed+]1;
+\end_layout
+
+\end_inset
+
+
+\begin_inset Newline newline
+\end_inset
+
+
+\begin_inset Newline newline
+\end_inset
+
+
+\begin_inset Newline newline
+\end_inset
+
+The notation is different, but the meaning is the same.
+ The above gives two feature vectors, one for dog, and one for cat.
+ They happen to look identical to the 3-gram feature vectors because this
+ eample was carefully arranged to allow this.
+ In general, dependency parses and 3-grams are going to be quite different;
+ for these short phrases, they happen to superficially look the same.
+ In any of these cases, and in any of these notations, the concept of feature
+ vectors remain the same.
+\end_layout
+
+\begin_layout Subsection*
+Stalk fields and vector fields
+\end_layout
+
+\begin_layout Standard
+The figures 
+\begin_inset CommandInset ref
+LatexCommand ref
+reference "fig:N-gram-base"
+
 \end_inset
 
  and 
-\begin_inset Quotes eld
+\begin_inset CommandInset ref
+LatexCommand ref
+reference "fig:Dependency-base"
+
 \end_inset
 
-dog
-\begin_inset Quotes erd
+ illustrate the base space.
+ Above each point in the base space, one can, if one wishes, plant a stalk.
+\end_layout
+
+\begin_layout Standard
+\begin_inset Float figure
+placement h
+wide false
+sideways false
+status open
+
+\begin_layout Plain Layout
+
+\end_layout
+
+\begin_layout Plain Layout
+\begin_inset Caption Standard
+
+\begin_layout Plain Layout
+Corn field; stalk field
+\end_layout
+
 \end_inset
 
- are points in the base space; each point in the base-space has a feature-vector
- associated with it.
- That feature vector, however, has connectivity properties: it is a collection
- of seeds, forming a stalk.
- This can be pictured as a corn-field, but the corn is funny: each corn-leaf
- is a jigsaw-puzzle piece (a collection of connectors).
- The connectors are, for the moment, unconnected to neighboring corn-stalks.
+
+\end_layout
+
+\begin_layout Plain Layout
+\begin_inset Graphics
+	filename corn-field.jpg
+	lyxscale 50
+	width 40col%
+
+\end_inset
+
  
+\begin_inset space \qquad{}
+\end_inset
+
+
+\begin_inset Graphics
+	filename stalk-field.eps
+	lyxscale 50
+	width 25col%
+
+\end_inset
+
+
+\end_layout
+
+\begin_layout Plain Layout
+
+\end_layout
+
+\end_inset
+
+
+\end_layout
+
+\begin_layout Standard
+Such a plantation is not a sheaf; or rather it could be, but it is not one
+ with large sections.
+ The stalk field only has individuals seeds up and down each stalk; the
+ stalks are not linked to one-another.
+ In the general case, illustrated in figure 
+\begin_inset CommandInset ref
+LatexCommand ref
+reference "fig:General-Sheaf"
+
+\end_inset
+
+, the stalks are linked to one-another; the sections really do start to
+ resemble sheets of paper stacked one on top another.
+\end_layout
+
+\begin_layout Standard
+\begin_inset Float figure
+placement h
+wide false
+sideways false
+status open
+
+\begin_layout Plain Layout
+\begin_inset Caption Standard
+
+\begin_layout Plain Layout
+Sheafs have big sections, in general
+\begin_inset CommandInset label
+LatexCommand label
+name "fig:General-Sheaf"
+
+\end_inset
+
+
+\end_layout
+
+\end_inset
+
+
+\end_layout
+
+\begin_layout Plain Layout
+\begin_inset Graphics
+	filename section-field.eps
+	lyxscale 60
+	width 45col%
+
+\end_inset
+
+
+\end_layout
+
+\begin_layout Plain Layout
+
+\end_layout
+
+\end_inset
+
+
+\end_layout
+
+\begin_layout Standard
+The general sheaf, as depicted here, holds much more data than just the
+ base space.
+ It holds the data showing where the base space came from: how the base
+ space was a projection of sections.
+ Holding such a large amount of data might be impractical: in the previous
+ example, holding the parse data for 10 million individual, distinct sentences
+ might be a challenge.
+ The stalk field is meant to be a half-way point: it can hold more information
+ than the base alone, but still be computationally manageable.
+\end_layout
+
+\begin_layout Standard
+A particular appeal of the stalk field is that each stalk can be re-interpreted
+ as a vector.
+ For each point of the base space, one just attaches a single vector.
+ There is no additional structure, and all this talk of stalks can be brushed
+ away as just a layer of theoretical complexity: in the end, its just per-base-p
+oint feature vectors.
+\end_layout
+
+\begin_layout Standard
+The power of the stalk representation is to keep in mind that the basis
+ elements are not just vacuous items, but are in fact jigsaw-puzzle pieces
+ that can be connected to one-another.
+ Again, each stalk can be viewed as a stack of jigsaw-puzzle pieces.
 \end_layout
 
 \begin_layout Subsection*
@@ -5609,12 +6090,18 @@ Gluing Axioms
 \end_layout
 
 \begin_layout Standard
-The gluing axioms are used to ensure that sections and stalks can be assembled
- in a fashion that is consistent with the description and examples given
- above.
- They are technical requirements imposed on the structure, to make sure
- its assembled in a coherent fashion.
- In practical applications, using 
+The formal defintion of a sheaf entails a presentation of the so-called
+ 
+\begin_inset Quotes eld
+\end_inset
+
+gluing axioms
+\begin_inset Quotes erd
+\end_inset
+
+.
+ These are technical requirements that ensure that the stalks can be linked,
+ and sections projected in a 
 \begin_inset Quotes eld
 \end_inset
 
@@ -5622,45 +6109,167 @@ common sense
 \begin_inset Quotes erd
 \end_inset
 
-, they are unlikely to be violated, but formally, it is important to state
- them.
+ kind of fashion.
+ For example, if a section contains a sentence, one expects that the sentence
+ is grammatical.
+ One also expects to be able to extract phrases out of it.
+ Gluing sentences together, one expects to arrive at coherent paragraphs.
+ In a biochemical setting, one expects that all of the individual reactions
+ in a pathway fit together.
+ One expects to be able to talk about subsets of the full pathway without
+ obtaining nonsense.
+ This is just common sense.
 \end_layout
 
 \begin_layout Standard
-x
-\end_layout
-
-\begin_layout Standard
-x
-\end_layout
-
-\begin_layout Standard
-x
-\end_layout
-
-\begin_layout Standard
-x
-\end_layout
-
-\begin_layout Standard
-a way that 
+Unfortunately, 
 \begin_inset Quotes eld
 \end_inset
 
-makes sen
+common sense
+\begin_inset Quotes erd
+\end_inset
+
+ being a commodity in short supply, the gluing axioms must be written in
+ detail.
+ There are three of them.
+ First, a functor is defined.
+\end_layout
+
+\begin_layout Claim*
+There exists a functor 
+\begin_inset Formula $F$
+\end_inset
+
+ such that, for each subgraph 
+\begin_inset Formula $U$
+\end_inset
+
+ of the base graph 
+\begin_inset Formula $B$
+\end_inset
+
+, there exists some collection 
+\begin_inset Formula $F(U)$
+\end_inset
+
+ of stalks and sections above 
+\begin_inset Formula $U$
+\end_inset
+
+.
+ 
+\begin_inset Formula $\diamond$
+\end_inset
+
+
 \end_layout
 
 \begin_layout Standard
-Sections can be cut down, or they can be enlarged, yet each section must
- consist of a grammatically-correct sentence, phrase (or paragraph, or larger!
- ...
- or smaller, just a sentence fragment).
- The base space consists simply of the individual words in the language,
- each word being a vertex, connections between words being projections of
- the connections discovered from the N-grams, or dependency graphs, as the
- case may be.
- One can examine how the structure of language changes as words are removed
- from the base space: such changes correspond to the 
+Next, the restriction morphism, which cuts down or restricts this collection.
+\end_layout
+
+\begin_layout Claim*
+For each subgraph 
+\begin_inset Formula $V\subseteq U$
+\end_inset
+
+ there is a morphism 
+\begin_inset Formula $\mbox{res}_{V,U}:F\left(U\right)\to F\left(V\right)$
+\end_inset
+
+.
+ 
+\begin_inset Formula $\diamond$
+\end_inset
+
+
+\end_layout
+
+\begin_layout Standard
+Since 
+\begin_inset Formula $V$
+\end_inset
+
+ is smaller, we expect 
+\begin_inset Formula $F\left(V\right)$
+\end_inset
+
+to be smaller, also.
+ The restriction morphism trims away the wnated parts.
+ The trimming needs to stay faithful, to preserve the structure.
+ Thus
+\end_layout
+
+\begin_layout Claim*
+For every subgraph 
+\begin_inset Formula $U$
+\end_inset
+
+ of the base graph 
+\begin_inset Formula $B$
+\end_inset
+
+, the restriction morphism 
+\begin_inset Formula $\mbox{res}_{U,U}:F\left(U\right)\to F\left(U\right)$
+\end_inset
+
+ is the identity on 
+\begin_inset Formula $F\left(U\right)$
+\end_inset
+
+.
+ 
+\begin_inset Formula $\diamond$
+\end_inset
+
+
+\end_layout
+
+\begin_layout Standard
+The restrictions must compose in a natural way, as well, so that if one
+ trims a bit, then trims a bit more, its the same as doing it all at once.
+\end_layout
+
+\begin_layout Claim*
+For a sequence of subgraphs 
+\begin_inset Formula $W\subseteq V\subseteq U$
+\end_inset
+
+, the restrictions compose so that 
+\begin_inset Formula $\mbox{res}_{W,V}\circ\mbox{res}_{V,U}=\mbox{res}_{W,U}$
+\end_inset
+
+.
+ 
+\begin_inset Formula $\diamond$
+\end_inset
+
+
+\end_layout
+
+\begin_layout Standard
+If a system obeys the above, it is techically called a 
+\noun on
+presheaf
+\noun default
+.
+ It is much like the general cconcept that this document has been illustrating,
+ but one can create some unusual structures that obey the axioms above,
+ but aren't quite what was intended for a sheaf.
+ 
+\end_layout
+
+\begin_layout Standard
+x
+\end_layout
+
+\begin_layout Standard
+x
+\end_layout
+
+\begin_layout Standard
+x
 \begin_inset Quotes eld
 \end_inset
 
@@ -5669,26 +6278,12 @@ restriction morphisms
 \end_inset
 
  of a sheaf.
- These restriction morphisms obey all of the axioms of a sheaf; this observation
- is what drives the peculiar naming convention given here.
- The reason this 
-\begin_inset Quotes eld
-\end_inset
-
-works
-\begin_inset Quotes erd
-\end_inset
-
-, that the axioms apply, is in fact rather shallow: it is because the seeds,
- as initially defined, behave very much like open sets, and when they are
- projected to the base space, they serve to cover the base space, much as
- a topological covering does.
  
 \end_layout
 
 \begin_layout Standard
-The restriction morphisms appear to continue to satisfy the sheaf axioms
- even after projection (at least, at the informal level given here).
+these are listed as claims since not totally self-evident left as exercise
+ for reader.
 \end_layout
 
 \begin_layout Subsection*
