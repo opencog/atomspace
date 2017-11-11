@@ -1,8 +1,9 @@
+#!/bin/bash
 BIN_DIR=$1
 
 ghcver="$(stack --allow-different-user ghc -- --version)"
 
-if [[ $ghcver == *8.0.2* ]]
+if [[ "$ghcver" == *8.0.2* ]]
 then
     echo "Correct GHC version installed"
 else
