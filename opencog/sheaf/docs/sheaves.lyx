@@ -91,7 +91,7 @@ figs-within-sections
 \begin_body
 
 \begin_layout Title
-Graph Quotients: A Topological Approach to Graphs
+Sheaves: A Topological Approach to Big Data
 \end_layout
 
 \begin_layout Author
@@ -114,6 +114,10 @@ This document develops general concepts useful for extracting knowledge
  The resulting extracted structure or set of patterns are manifestly symbolic
  in nature, as they capture and encode the graph structure of the dataset
  in terms of a (generative) grammar.
+ This structure is identified as having the formal mathematical structure
+ of a sheaf.
+ In essence, this paper introduces the basic concepts of sheaf theory into
+ the domain of graphical datasets.
 \end_layout
 
 \begin_layout Section*
@@ -273,6 +277,22 @@ For the mathematically inclined, please be aware that the concepts described
  The reader is encouraged to study these on their own, especially as they
  are applied in computer science and linguistics.
  There are many good texts on these topics.
+\end_layout
+
+\begin_layout Standard
+x
+\end_layout
+
+\begin_layout Standard
+x
+\end_layout
+
+\begin_layout Standard
+x TODO
+\end_layout
+
+\begin_layout Standard
+The paragraph below is incorrect, and needs revision.
 \end_layout
 
 \begin_layout Standard
@@ -4337,7 +4357,7 @@ This provisional definition can be tightened.
 \end_layout
 
 \begin_layout Subsection*
-Example: colocations
+Example: collocations
 \end_layout
 
 \begin_layout Standard
@@ -4586,11 +4606,11 @@ Each word is meant to be a vertex; edges are assumed to connect the vertexes
  together in some way.
  In standard corpus linguistics, the edges are always taken to join together
  neighboring words, in sequential fashion.
- Note that each phrase in the colocation obeys the formal definition of
+ Note that each phrase in the collocation obeys the formal definition of
  a section, given above.
  It does so trivially: its just a linear sequence of vertexes connected
  with edges.
- If the colocated phrases are chopped up so that they form a word-sequence
+ If the collocated phrases are chopped up so that they form a word-sequence
  that is exactly 
 \begin_inset Formula $n$
 \end_inset
@@ -4608,7 +4628,7 @@ The projection function
 \begin_inset Formula $\pi$
 \end_inset
 
- is now also equally plain: it simply maps all of the distinct occurances
+ is now also equally plain: it simply maps all of the distinct occurrences
  of the word 
 \begin_inset Quotes eld
 \end_inset
@@ -4705,7 +4725,7 @@ name "fig:N-gram-base"
 The sections do not have to be linear sequences; the phrases can be parsed
  with a dependency parser of one style or another, in which case the words
  are joined with edges that denote dependencies.
- The edges might be directed, and they might be labelled.
+ The edges might be directed, and they might be labeled.
  Parsing with a head-phrase parser introduces additional vertexes, typically
  called NP, VP, S and so on.
  The next figure (figure 
@@ -4756,7 +4776,7 @@ fly
 
 , which, as a dependency, is not exactly correct but does serve to illustrate
  how the N-gram and the dependency alignments differ.
- If the depedency parse produced directed edges with labels, it would be
+ If the dependency parse produced directed edges with labels, it would be
  prudent to project those labels as well.
 \end_layout
 
@@ -4862,7 +4882,8 @@ target "https://en.wikipedia.org/wiki/Marginal_distribution"
  For example, in a corpus consisting of ten million sentences, one might
  see 130K distinct, unique words (130K vertexes) and perhaps 5 million distinct
  word-pairs (5M edges).
- Such a graph is managable, and can fit into the RAM of a contemporary computer.
+ Such a graph is manageable, and can fit into the RAM of a contemporary
+ computer.
  
 \end_layout
 
@@ -4923,7 +4944,7 @@ sheaf
 
  comes from.
  Each single sheet of paper is a section.
- Each colocation is a stalk.
+ Each collocation is a stalk.
  
 \end_layout
 
@@ -5721,7 +5742,7 @@ cat
 \end_layout
 
 \begin_layout Standard
-Recall the defintion of a dot-product (the inner product).
+Recall the definition of a dot-product (the inner product).
  For 
 \begin_inset Formula $\vec{v}$
 \end_inset
@@ -5749,7 +5770,7 @@ where the Kronecker delta was used in the middle term:
 
 \end_inset
 
-Thus, the inner prioduct of 
+Thus, the inner product of 
 \begin_inset Formula $\overrightarrow{cat}$
 \end_inset
 
@@ -5910,7 +5931,7 @@ cat: [chased- & the-]1 or [the- & chased+]2 or [the- & killed+]1;
 The notation is different, but the meaning is the same.
  The above gives two feature vectors, one for dog, and one for cat.
  They happen to look identical to the 3-gram feature vectors because this
- eample was carefully arranged to allow this.
+ example was carefully arranged to allow this.
  In general, dependency parses and 3-grams are going to be quite different;
  for these short phrases, they happen to superficially look the same.
  In any of these cases, and in any of these notations, the concept of feature
@@ -6085,12 +6106,60 @@ The power of the stalk representation is to keep in mind that the basis
  Again, each stalk can be viewed as a stack of jigsaw-puzzle pieces.
 \end_layout
 
-\begin_layout Subsection*
-Gluing Axioms
+\begin_layout Standard
+If there is a vector at each point, can the sheaf, as described here, be
+ thought of as a fiber bundle? Maybe, but that is not the intent.
+ In a fiber bundle, each fiber is isomorphic to every other.
+ Thus, locally, a fiber bundle always looks like the produce space 
+\begin_inset Formula $U\times F$
+\end_inset
+
+ with 
+\begin_inset Formula $U\subseteq B$
+\end_inset
+
+ and 
+\begin_inset Formula $F$
+\end_inset
+
+ the fiber.
+ Fiber bundles are interesting when they are glued together in non-trivial
+ ways, globally.
+ Here, there's a different set of concerns: its the local structure that
+ is interesting, and not so much the global structure.
+ Also, there has been no attempt to make each stalk (or stalk-space) isomorphic
+ to every other.
+ If each stalk is a vector in a vector space, one could, in principle, force
+ that vector space to be the same, everywhere.
+ This does not buy much: in the practical case, the support for any given
+ vector is extremely sparse.
+ 
 \end_layout
 
 \begin_layout Standard
-The formal defintion of a sheaf entails a presentation of the so-called
+In some cases, it is natural to have different stalks be incomparable.
+ In biology, some stalks may correspond to enzymes, others to RNA, others
+ to DNA.
+ In some vague philosophical sense, it could be argued that these are 
+\begin_inset Quotes eld
+\end_inset
+
+all the same
+\begin_inset Quotes erd
+\end_inset
+
+: examples of molecules.
+ In practice, forcing such unification seems to be a loosing proposition.
+ The goal of the technology here is to detect, observe and model fine details
+ of structure, and not to mash everything into one bag.
+\end_layout
+
+\begin_layout Subsection*
+Presheaves
+\end_layout
+
+\begin_layout Standard
+The formal definition of a sheaf entails a presentation of the so-called
  
 \begin_inset Quotes eld
 \end_inset
@@ -6132,8 +6201,92 @@ common sense
 
  being a commodity in short supply, the gluing axioms must be written in
  detail.
- There are three of them.
- First, a functor is defined.
+ Before this can be done, the axioms for a presheaf must be reviewed.
+ There are several.
+ Rather than presenting these as axioms, they are presented below as 
+\begin_inset Quotes eld
+\end_inset
+
+claims
+\begin_inset Quotes erd
+\end_inset
+
+.
+ It is up to the reader to verify that the structures defined earlier satisfy
+ these claims.
+ This is done for several reasons.
+ First, such proofs are a bit tedious, and would be out of place in this
+ otherwise rather informal treatment of the topic.
+ Second, the overall informality of this document gives little support for
+ weighty proofs.
+ Third, most of these claims should be fairly self-evident, upon a bit of
+ exploration.
+ Finally, many choices were left to the reader: should edges be directed?
+ Are they labeled? Do vertexes carry additional markings or values? Each
+ choice of labeling and marking potentially affects the verification of
+ these claims.
+ Thus, the below are presented as 
+\begin_inset Quotes eld
+\end_inset
+
+claims
+\begin_inset Quotes erd
+\end_inset
+
+, living in limbo between axioms and theorems.
+\end_layout
+
+\begin_layout Standard
+First, a definition.
+\end_layout
+
+\begin_layout Definition*
+An 
+\noun on
+open subgraph
+\noun default
+ 
+\begin_inset Formula $U$
+\end_inset
+
+ of a graph 
+\begin_inset Formula $G$
+\end_inset
+
+ is defined to be a section of 
+\begin_inset Formula $G$
+\end_inset
+
+.
+ 
+\begin_inset Formula $\diamond$
+\end_inset
+
+
+\end_layout
+
+\begin_layout Standard
+This definition helps avoid what would otherwise be confusing terminology.
+ The open subgraphs below will always be subgraphs of the base space 
+\begin_inset Formula $B$
+\end_inset
+
+.
+ The open subgraphs are created by taking scissors and cutting edges in
+ the graph, but leaving the cut half-edges attached, as they were originally.
+ That is, the cut edges are converted into connectors.
+ By leaving these connectors in place, much of the information needed to
+ glue them back together remains intact.
+ It is up to the reader to convince themselves that these open subgraphs
+ behave essentially the same way as open sets in a topological space do:
+ one can take intersections and unions, and doing so still results in an
+ open subgraph.
+ One can even build a Borel algebra out of them, but his will not be needed.
+\end_layout
+
+\begin_layout Standard
+The presheaf is defined in terms of a functor and it's properties.
+ 
 \end_layout
 
 \begin_layout Claim*
@@ -6141,7 +6294,7 @@ There exists a functor
 \begin_inset Formula $F$
 \end_inset
 
- such that, for each subgraph 
+ such that, for each open subgraph 
 \begin_inset Formula $U$
 \end_inset
 
@@ -6153,7 +6306,7 @@ There exists a functor
 \begin_inset Formula $F(U)$
 \end_inset
 
- of stalks and sections above 
+ of sections above 
 \begin_inset Formula $U$
 \end_inset
 
@@ -6170,7 +6323,7 @@ Next, the restriction morphism, which cuts down or restricts this collection.
 \end_layout
 
 \begin_layout Claim*
-For each subgraph 
+For each open subgraph 
 \begin_inset Formula $V\subseteq U$
 \end_inset
 
@@ -6196,13 +6349,13 @@ Since
 \end_inset
 
 to be smaller, also.
- The restriction morphism trims away the wnated parts.
+ The restriction morphism trims away the unwanted parts.
  The trimming needs to stay faithful, to preserve the structure.
  Thus
 \end_layout
 
 \begin_layout Claim*
-For every subgraph 
+For every open subgraph 
 \begin_inset Formula $U$
 \end_inset
 
@@ -6232,7 +6385,7 @@ The restrictions must compose in a natural way, as well, so that if one
 \end_layout
 
 \begin_layout Claim*
-For a sequence of subgraphs 
+For a sequence of open subgraphs 
 \begin_inset Formula $W\subseteq V\subseteq U$
 \end_inset
 
@@ -6249,45 +6402,453 @@ For a sequence of subgraphs
 \end_layout
 
 \begin_layout Standard
-If a system obeys the above, it is techically called a 
+If a system obeys the above, it is technically called a 
 \noun on
 presheaf
 \noun default
 .
- It is much like the general cconcept that this document has been illustrating,
- but one can create some unusual structures that obey the axioms above,
- but aren't quite what was intended for a sheaf.
- 
+ A presheaf is much like the (informal) definition given for a sheaf, above.
+ However, it is possible to create structures that satisfy the above claims
+ (axioms), but don't quite match the intended definition of a sheaf.
+ In particular, the above are not enough to guarantee that the sections
+ in the presheaf can be organized properly into stalks.
+ To get well-behaved stalks, more is needed.
+ These are the gluing axioms.
+\end_layout
+
+\begin_layout Subsection*
+Gluing axioms
 \end_layout
 
 \begin_layout Standard
-x
-\end_layout
+The open subgraphs behave much like open sets.
+ Thus, the concept of an open covering can be imported in a straight-forward
+ way.
+ A collection 
+\begin_inset Formula $\left\{ U_{i}\right\} $
+\end_inset
 
-\begin_layout Standard
-x
-\end_layout
+ of open subgraphs is an open cover for an open subgraph 
+\begin_inset Formula $U$
+\end_inset
 
-\begin_layout Standard
-x
+ if the union of all the 
+\begin_inset Formula $U_{i}$
+\end_inset
+
+ contain 
+\begin_inset Formula $U$
+\end_inset
+
+.
+ That is, they are an open cover if 
+\begin_inset Formula $U\subseteq\bigcup_{i}U_{i}$
+\end_inset
+
+.
+ The union of open subgraphs is meant to be 
 \begin_inset Quotes eld
 \end_inset
 
-restriction morphisms
+obvious
 \begin_inset Quotes erd
 \end_inset
 
- of a sheaf.
- 
+: join together the connectors, where possible.
 \end_layout
 
 \begin_layout Standard
-these are listed as claims since not totally self-evident left as exercise
- for reader.
+A presheaf is a sheaf if it obeys the following two claims/axioms.
+\end_layout
+
+\begin_layout Claim*
+(Locality) If 
+\begin_inset Formula $\left\{ U_{i}\right\} $
+\end_inset
+
+ is an open cover for 
+\begin_inset Formula $U$
+\end_inset
+
+, and if 
+\begin_inset Formula $s,t\in F\left(U\right)$
+\end_inset
+
+ are sections such that 
+\begin_inset Formula $s\vert_{U_{i}}=t\vert_{U_{i}}$
+\end_inset
+
+ for each 
+\begin_inset Formula $U_{i}$
+\end_inset
+
+, then 
+\begin_inset Formula $s=t$
+\end_inset
+
+.
+ 
+\begin_inset Formula $\diamond$
+\end_inset
+
+
+\end_layout
+
+\begin_layout Standard
+In the above, the notation 
+\begin_inset Formula $s\vert_{V}$
+\end_inset
+
+ denotes the restriction of the section 
+\begin_inset Formula $s$
+\end_inset
+
+ to the open subgraph 
+\begin_inset Formula $V$
+\end_inset
+
+ of the base space
+\begin_inset Formula $B$
+\end_inset
+
+.
+ Pictorially, 
+\begin_inset Formula $s\vert_{V}$
+\end_inset
+
+ is that part of the section that sits on the stalks above 
+\begin_inset Formula $V$
+\end_inset
+
+.
+ It is a trimming-down of 
+\begin_inset Formula $s$
+\end_inset
+
+ so that it projects cleanly down to 
+\begin_inset Formula $V$
+\end_inset
+
+ and to nothing larger.
+ If each 
+\begin_inset Formula $U_{i}$
+\end_inset
+
+ is a seed in the base space, then 
+\begin_inset Formula $s\vert_{U_{i}}$
+\end_inset
+
+ is a seed in the stalk above 
+\begin_inset Formula $U_{i}$
+\end_inset
+
+.
+ Note that 
+\begin_inset Formula $s\vert_{U_{i}}$
+\end_inset
+
+ might be the empty set.
+ The locality axiom is basically saying 
+\begin_inset Quotes eld
+\end_inset
+
+stalks exist
+\begin_inset Quotes erd
+\end_inset
+
+.
+ Alternately, the locality axiom says that if you cut up a layer-cake, you
+ can still tell, after the cutting, which layer was which.
+\end_layout
+
+\begin_layout Standard
+The gluing axiom is needed to reassemble the pieces.
+\end_layout
+
+\begin_layout Claim*
+(Gluing) If 
+\begin_inset Formula $\left\{ U_{i}\right\} $
+\end_inset
+
+ is an open cover for 
+\begin_inset Formula $U$
+\end_inset
+
+, and if 
+\begin_inset Formula $s_{i}\in F\left(U_{i}\right)$
+\end_inset
+
+ are sections restricted to each 
+\begin_inset Formula $U_{i}$
+\end_inset
+
+, and if, for all pairs 
+\begin_inset Formula $i,j$
+\end_inset
+
+ the 
+\begin_inset Formula $s_{i}$
+\end_inset
+
+ and 
+\begin_inset Formula $s_{j}$
+\end_inset
+
+ agree on overlaps, then there exists a section 
+\begin_inset Formula $s\in F\left(U\right)$
+\end_inset
+
+ such that 
+\begin_inset Formula $s_{i}=s\vert_{U_{i}}$
+\end_inset
+
+.
+ 
+\begin_inset Formula $\diamond$
+\end_inset
+
+
+\end_layout
+
+\begin_layout Standard
+In the above, the phrase 
+\begin_inset Quotes eld
+\end_inset
+
+
+\begin_inset Formula $s_{i}$
+\end_inset
+
+ and 
+\begin_inset Formula $s_{j}$
+\end_inset
+
+ agree on overlaps
+\begin_inset Quotes erd
+\end_inset
+
+ means that 
+\begin_inset Formula $s_{i}\vert_{U_{i}\cap U_{j}}=s_{j}\vert_{U_{i}\cap U_{j}}$
+\end_inset
+
+.
+ Note that 
+\begin_inset Formula $U_{i}\cap U_{j}$
+\end_inset
+
+ might be the empty set, in which case no agreement is needed.
+ The gluing axioms states, more or less, that if the layer cake is cut into
+ pieces, and the pieces can be reassembled with the edges lining up correctly,
+ then the original layers can be re-discovered.
+\end_layout
+
+\begin_layout Standard
+Gluing is perhaps not as trivial as it sounds.
+ It will be seen later on that gluing is essentially the same thing as parsing.
+ Obtaining a successful parse is the same thing as obtained a valid section.
+ In the case of natural language, a parse succeeds if and only if a sentence
+ is grammatically valid.
+ But of course! the sections of a natural language sheaf are exactly the
+ grammatical sentences.
+\end_layout
+
+\begin_layout Standard
+Until this more detailed presentation of parsing is described, one can imagine
+ the following scenario.
+ If seeds correspond to jigsaw-puzzle pieces, then the sections 
+\begin_inset Formula $s_{i}$
+\end_inset
+
+ correspond to partially-assembled parts of the jigsaw.
+ Two such parts 
+\begin_inset Formula $s_{i}$
+\end_inset
+
+ and 
+\begin_inset Formula $s_{j}$
+\end_inset
+
+ agree on overlaps if 
+\begin_inset Formula $U_{i}\cap U_{j}$
+\end_inset
+
+ is non-empty, and these two parts can be joined together.
+ If the connectors are typed, then there may be multiple distinct connectors
+ that can be joined to one-another.
+ They just might fit.
+ That is, there might be more than one way to make 
+\begin_inset Formula $s_{i}$
+\end_inset
+
+ and 
+\begin_inset Formula $s_{j}$
+\end_inset
+
+ connect, possibly by shifting, turning, the pieces, etc.
+ If one then tried to connect 
+\begin_inset Formula $s_{k}$
+\end_inset
+
+, there might be multiple ways of doing this, leading to a combinatorial
+ explosion.
+ At some point in this process, one might discover that there is simply
+ no way at all to connect the next piece: it just won't fit.
+ One then has to back-track, and try a different arrangement.
+ Obtaining an efficient algorithm to perform this back-tracking is non-trivial:
+ such algorithms are called parsers, and gluing is parsing.
+\end_layout
+
+\begin_layout Subsection*
+Does this really work?
+\end_layout
+
+\begin_layout Standard
+The point of the above is to convince the reader that the structures being
+ described really are sheaves, in the formal sense of sheaf theory.
+ There's a big difference though: everything above was developed from the
+ point of view of graphs, and that really does change the nature of the
+ game.
+ That said, the reason that all of this mahinery 
+\begin_inset Quotes eld
+\end_inset
+
+works
+\begin_inset Quotes erd
+\end_inset
+
+ is because the open subgraphs really do behave very much like open sets.
+ Because of this, many concepts from topology extend naturally to the current
+ structures.
+\end_layout
+
+\begin_layout Standard
+It is worth noting at this point that the normal notion of a 
+\begin_inset Quotes eld
+\end_inset
+
+germ
+\begin_inset Quotes erd
+\end_inset
+
+ in sheaf theory corresponds to what is called a 
+\begin_inset Quotes eld
+\end_inset
+
+seed
+\begin_inset Quotes erd
+\end_inset
+
+, here.
+ I suppose that the vocabulary used here could be changed, but I do like
+ thinking of seeds as sticky burrs.
+ The biological germ of a seed is that thing left, when the outer casing
+ is removed.
+\end_layout
+
+\begin_layout Subsection*
+Cohomology
+\end_layout
+
+\begin_layout Standard
+In 
+\begin_inset Quotes eld
+\end_inset
+
+standard
+\begin_inset Quotes erd
+\end_inset
+
+ mathematics, the only reason that sheaves are introduced is to promptly
+ lead the reader to Čech cohomology in the next chapter.
+ That won't be done here, so what's the point of all this?
+\end_layout
+
+\begin_layout Standard
+Well, this won't be done here mostly because I'm running out of space, and
+ this is uncharted territory.
+ But some comments are in order.
+ First, if the point of this was merely to get at graph theory, there would
+ not be much to say.
+ For example, the homotopy theory of graphs is more-or-less boring: every
+ graph is homotopic to a bouquet of circles.
+ Homotopy and homology on graphs only becomes interesting if one can add
+ 2-cells and 
+\begin_inset Formula $n$
+\end_inset
+
+-cells for 
+\begin_inset Formula $n>1$
+\end_inset
+
+; then one gets cellular homology.
+ Can that ever happen here?
+\end_layout
+
+\begin_layout Standard
+If one considers the Krebs cycle (the citric acid cycle), then the answer
+ is yes.
+ This is a loop; it's essentially exothermic, or a kind of pump, in that
+ the loop always goes around in one direction.
+ The edges are directional.
+ Its a cycle not only in a biological sense, but also in th mathematical
+ sense: it can be considered to be the boundry of a 2-cell.
+ The krebs cycle is not the only cycle in biochemistry, and many of these
+ cycles share common edges.
+ In essence, there's a whole bunch of 2-cells in biochemistry, and they're
+ all tangent to one-another.
+ What's thier homology? Are there 3-cells in biochemistry? I suspect that
+ this question has not been asked before, or that its answer is unknown.
+ Perhaps this is not a suprise; we have not had the tools to 
+\begin_inset Quotes eld
+\end_inset
+
+solve biochemistry
+\begin_inset Quotes erd
+\end_inset
+
+ before.
+\end_layout
+
+\begin_layout Standard
+What about linguistics? Examples here seem to be more forced.
+ Yes, dependencies can be directional.
+ Dependency trees are trees.
+ One can allow loops into them, but these loops are always acyclic.
+ (
+\emph on
+viz.
+
+\emph default
+ a 
+\begin_inset Quotes eld
+\end_inset
+
+DAG
+\begin_inset Quotes erd
+\end_inset
+
+ - a directed acyclic graph).
+ There are no obviously cyclic phenomena in natural language.
 \end_layout
 
 \begin_layout Subsection*
 Why sheaves?
+\end_layout
+
+\begin_layout Standard
+x
+\end_layout
+
+\begin_layout Standard
+x
+\end_layout
+
+\begin_layout Standard
+x
+\end_layout
+
+\begin_layout Standard
+x
 \end_layout
 
 \begin_layout Standard
@@ -6333,26 +6894,6 @@ big picture
 
 , instead of just the trees.
  This holistic view is the primary point of this exercise.
-\end_layout
-
-\begin_layout Subsection*
-Related ideas
-\end_layout
-
-\begin_layout Standard
-As before, the 
-\begin_inset Quotes eld
-\end_inset
-
-sections
-\begin_inset Quotes erd
-\end_inset
-
- presented above (sentence fragments) are presented minimally.
- In practice, sections will be adorned with additional information, such
- as frequency counts and mutual information values.
- Once clustering and quotienting has been performed, non trivial type tags
- become available.
 \end_layout
 
 \begin_layout Section*
