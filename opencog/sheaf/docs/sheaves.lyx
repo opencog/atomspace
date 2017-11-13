@@ -99,7 +99,7 @@ Linas Vepštas
 \end_layout
 
 \begin_layout Date
-11 November 2017
+12 November 2017
 \end_layout
 
 \begin_layout Abstract
@@ -280,22 +280,6 @@ For the mathematically inclined, please be aware that the concepts described
 \end_layout
 
 \begin_layout Standard
-x
-\end_layout
-
-\begin_layout Standard
-x
-\end_layout
-
-\begin_layout Standard
-x TODO
-\end_layout
-
-\begin_layout Standard
-The paragraph below is incorrect, and needs revision.
-\end_layout
-
-\begin_layout Standard
 This document is organized as follows.
  The first part of provides a definition of a 
 \begin_inset Quotes eld
@@ -308,34 +292,33 @@ section
  of a graph.
  A section is a lot like a subgraph, except that it explicitly indicates
  which edges were cut to form the subgraph.
- The next part makes use of this concept of 
+ The next part defines and articulates the concept of projection, and shows
+ how it can be used to form quotients.
+ The quotients or projections are termed 
 \begin_inset Quotes eld
 \end_inset
 
-sections
+stalks
 \begin_inset Quotes erd
 \end_inset
 
- to show how they can be used to talk about and understand pattern-mining,
- clustering and quotienting.
- The next part indicates how such clusters can be understood to be 
-\begin_inset Quotes eld
-\end_inset
+, and, because each stalk comes festooned with connectors, they can be thought
+ to resemble corn-stalks.
+ The next part shows how stalks can be tied together to form sheaves, and
+ reviews the axioms of sheaf theory to show that this name is appropriate.
+\end_layout
 
-types
-\begin_inset Quotes erd
-\end_inset
-
-, in the formal sense of mathematical type theory.
- Next follows a brief review of the concept of parsing, as it applies to
- this context.
- The ability to parse is what motivates the data discovery to begin with:
- after extracting patterns from a dataset, parsing is how those patterns
- can be re-assembled.
- An important part of pattern mining is the ability to distinguish polymorphic
- behavior.
- The final part shows how the system as a whole can be understood to be
- a kind of a sheaf, borrowing a concept from a different branch of mathematics.
+\begin_layout Standard
+After this comes a lighting review of how data mining, pattern mining and
+ clustering can be viewed in the context of sheaves.
+ After this come two asides: a quick sketch of type theory, illustrating
+ the interplay between data-mined patterns and the concept of types.
+ Another aside reviews the nature of parsing, illustrating that parsing
+ algorithms implement the gluing axiom of sheaves, viz, that gluing and
+ parsing are the same thing.
+ The final part examines polymorphic behavior.
+ Polymoprhism is that point where syntax begins to touch semantics, where
+ deep structure becomes distinguished from surface structure.
 \end_layout
 
 \begin_layout Section*
@@ -6708,7 +6691,7 @@ The point of the above is to convince the reader that the structures being
  There's a big difference though: everything above was developed from the
  point of view of graphs, and that really does change the nature of the
  game.
- That said, the reason that all of this mahinery 
+ That said, the reason that all of this machinery 
 \begin_inset Quotes eld
 \end_inset
 
@@ -6719,6 +6702,44 @@ works
  is because the open subgraphs really do behave very much like open sets.
  Because of this, many concepts from topology extend naturally to the current
  structures.
+\end_layout
+
+\begin_layout Standard
+This is not exactly a new realization.
+ The 
+\begin_inset Quotes eld
+\end_inset
+
+open subgraphs
+\begin_inset Quotes erd
+\end_inset
+
+ defined here essentially form a 
+\begin_inset CommandInset href
+LatexCommand href
+name "Grothendieck topology,"
+target "https://en.wikipedia.org/wiki/Grothendieck_topology"
+
+\end_inset
+
+ and the thing that is being called a 
+\begin_inset Quotes eld
+\end_inset
+
+sheaf
+\begin_inset Quotes erd
+\end_inset
+
+ should probably be more accurately called a 
+\begin_inset Quotes eld
+\end_inset
+
+site
+\begin_inset Quotes erd
+\end_inset
+
+.
+ Developing and articulating this further is left for a rainy day.
 \end_layout
 
 \begin_layout Standard
@@ -6745,27 +6766,35 @@ seed
  is removed.
 \end_layout
 
+\begin_layout Standard
+The use of the jigsaw-puzzle piece analogy to define connectors is strongly
+ analogous to the cunstruction of the 
+\begin_inset CommandInset href
+LatexCommand href
+name "Čech nerve"
+target "https://en.wikipedia.org/wiki/Nerve_of_a_covering"
+
+\end_inset
+
+.
+ This can be thought of as a way of inducing overlaps from fiber products.
+ This point is returned to, later on.
+\end_layout
+
 \begin_layout Subsection*
 Cohomology
 \end_layout
 
 \begin_layout Standard
-In 
-\begin_inset Quotes eld
-\end_inset
-
-standard
-\begin_inset Quotes erd
-\end_inset
-
- mathematics, the only reason that sheaves are introduced is to promptly
- lead the reader to Čech cohomology in the next chapter.
+In orthodox mathematics, the only reason that sheaves are introduced is
+ to promptly usher the reader to Čech cohomology in the next chapter of
+ any book on algebraic topology.
  That won't be done here, so what's the point of all this?
 \end_layout
 
 \begin_layout Standard
-Well, this won't be done here mostly because I'm running out of space, and
- this is uncharted territory.
+Well, this won't be done here mostly because I'm running out of space, and,
+ in the context of biology and linguistics, this is uncharted territory.
  But some comments are in order.
  First, if the point of this was merely to get at graph theory, there would
  not be much to say.
@@ -6791,14 +6820,15 @@ If one considers the Krebs cycle (the citric acid cycle), then the answer
  the loop always goes around in one direction.
  The edges are directional.
  Its a cycle not only in a biological sense, but also in th mathematical
- sense: it can be considered to be the boundry of a 2-cell.
- The krebs cycle is not the only cycle in biochemistry, and many of these
+ sense: it can be considered to be the boundary of a 2-cell.
+ The Krebs cycle is not the only cycle in biochemistry, and many of these
  cycles share common edges.
  In essence, there's a whole bunch of 2-cells in biochemistry, and they're
  all tangent to one-another.
- What's thier homology? Are there 3-cells in biochemistry? I suspect that
+ That is, there are chain complexes in biochemistry.
+ What's their homology? Are there 3-cells in biochemistry? I suspect that
  this question has not been asked before, or that its answer is unknown.
- Perhaps this is not a suprise; we have not had the tools to 
+ Perhaps this is not a surprise; we have not had the tools to 
 \begin_inset Quotes eld
 \end_inset
 
@@ -6812,8 +6842,8 @@ solve biochemistry
 \begin_layout Standard
 What about linguistics? Examples here seem to be more forced.
  Yes, dependencies can be directional.
- Dependency trees are trees.
- One can allow loops into them, but these loops are always acyclic.
+ Dependency trees are trees, however.
+ One can allow loops in them, but these loops are always acyclic.
  (
 \emph on
 viz.
@@ -6836,24 +6866,14 @@ Why sheaves?
 \end_layout
 
 \begin_layout Standard
-x
+By pointing out that natural language and biology can be described with
+ sheaves, it is hoped that this will prove better insights into their structure,
+ and provide a clear framework to think about the structure of such data.
+ 
 \end_layout
 
 \begin_layout Standard
-x
-\end_layout
-
-\begin_layout Standard
-x
-\end_layout
-
-\begin_layout Standard
-x
-\end_layout
-
-\begin_layout Standard
-The primary reason for introducing this notion is to consolidate the otherwise
- vague idea of the 
+For example, consider the normally vague idea of the 
 \begin_inset Quotes eld
 \end_inset
 
@@ -6862,46 +6882,959 @@ language graph
 \end_inset
 
 .
- One has dueling notions: the graph of all sentences; the generative power
- of grammars.
- Surface realizations of language are studied in corpus linguistics, where
- differences in regional dialects, differences according to socio-economic
- status and politically motivated differences are found.
- However, these surface realizations are almost never refined into a grammar,
- and thus, one does not obtain a generative model of how different speakers
- in different socio-economic classes speak: corpus linguistics examples
- are just that: examples that are not further refined.
- By applying a pattern mining approach, the underlying grammar can be discovered
- computationally.
- But what is it, really, that is being discovered, other than some collection
- of grammatical classes and relations? By looking at the collection of all
- words, sentences and paragraphs in a corpus as if it were a sheaf, one
- gets a more 
-\begin_inset Quotes eld
-\end_inset
-
-holistic
-\begin_inset Quotes erd
-\end_inset
-
- view of what language is: one can start seeing the 
-\begin_inset Quotes eld
-\end_inset
-
-big picture
-\begin_inset Quotes erd
-\end_inset
-
-, instead of just the trees.
- This holistic view is the primary point of this exercise.
-\end_layout
-
-\begin_layout Section*
-clustering
+ What is this? One has dueling notions: the graph of all sentences; the
+ generative power of grammars.
+ Sheaves provide a clearer picture: the graph itself is the base space,
+ while surface and deep structure can be explored through sections.
 \end_layout
 
 \begin_layout Standard
-typical bullshit
+It can be argued that orthodox corpus linguistics studies the sheaf of surface
+ structure, with especially strong focus on the stalks.
+ Differences in the stalks reveal differences between regional dialects.
+ Much more interesting is that the corpus linguists have analyzed stalks
+ to discover not just differences in socio-economic status, but even to
+ discover politically-motivated speech, truth and lack-thereof in journalism
+ and news media.
+\begin_inset CommandInset citation
+LatexCommand cite
+key "Louw1993"
+
+\end_inset
+
+
+\end_layout
+
+\begin_layout Standard
+The orthodox corpus linguists are not interested in refining their collocations
+ into a generative grammar.
+ One does not obtain a generative model of how different speakers in different
+ socio-economic classes speak; corpus linguistics examples are just that:
+ examples that are not further refined.
+ By applying a pattern mining approach, the underlying grammar can be discovered
+ computationally.
+ By viewing structure holistically, as a sheaf, one can see ways in which
+ this might be done.
+ 
+\end_layout
+
+\begin_layout Standard
+Besides the sheaf of surface realizations studied by corpus linguists, there
+ are several different kinds of sheaves of grammatical structure.
+ Each section is a grammatically valid sentence, expressed as a tree or
+ as a DAG (directed acyclic graph) of some sort, annotated with additional
+ information, based on the formalities of that particular grammatical approach
+ (dependency grammar, head-phrase-structure grammar, etc).
+ The orthodox approach is to view the grammar as being the primary object
+ of study.
+ The sheaf approach helps emphasize how that grammar was arrived at: distinct
+ words were grouped into grammatical classes.
+ Put differently, distinct stalks are recognized as being very similar,
+ if not identical, and are merged together to form a grammatical category;
+ it is no longer individual words that link with one-another, but the grammatica
+l classes.
+\end_layout
+
+\begin_layout Standard
+Viewing language as a sheaf helps identify how one can automatically extract
+ grammatical classes: If one can judge two stalks as being sufficiently
+ similar in some way, then one can merge them into one, proceeding in this
+ way to create a reduced, concentrated model of language that captures it's
+ syntactic structure.
+\end_layout
+
+\begin_layout Standard
+One can do even more: one can play off the differences in regional dialects,
+ or differences due to social-economic classes, discovered by statistical
+ means from a corpus, and attach these to specific grammatical structures,
+ identified from syntactic analysis.
+ That is, by seeing both activities: surface realizations and deeper structure
+ as two slightly different forms of 
+\begin_inset Quotes eld
+\end_inset
+
+the same thing
+\begin_inset Quotes erd
+\end_inset
+
+, one can see-saw, lever ones way about, moving from one to the other and
+ back.
+ Tools can be developed that do both, instead of just one or just the other.
+ One can actually unify into one, what seem to be very theories and approaches,
+ and one can develop the techniques to move between these theories.
+ This seems to be a very big win.
+\end_layout
+
+\begin_layout Section*
+clustering morphisms
+\end_layout
+
+\begin_layout Standard
+The primary topic of this part is that the extraction of structure from
+ data is more-or-less a kind of morphism between sheaves.
+ A 
+\begin_inset Quotes eld
+\end_inset
+
+pseudo-morphism
+\begin_inset Quotes erd
+\end_inset
+
+ might be an more appropriate term, as the definition here will not be axiomatic
+ally precise.
+\end_layout
+
+\begin_layout Standard
+There are several types of morphisms that are of interest.
+ one kind keeps the base space intact, but attempts to map one kind of section
+ into another: for example, mapping sections of 
+\begin_inset Formula $n$
+\end_inset
+
+-grams into sections of dependency parses.
+ This resembles the orthodox concept of a morphism between sheaves.
+ The other kind of morphism is one that attempts to re-arrange the base
+ space, by grouping together multiple stalks into one.
+ This second kind of morphism is the one discussed in this part.
+ It is roughly termed a 
+\begin_inset Quotes eld
+\end_inset
+
+clustering morphism
+\begin_inset Quotes erd
+\end_inset
+
+.
+\end_layout
+
+\begin_layout Standard
+There are several kinds of clustering morphisms that are interesting.
+ One was previously illustrated.
+ Starting with
+\end_layout
+
+\begin_layout Standard
+\begin_inset Formula 
+\[
+\overrightarrow{Mary}\otimes\overline{walked}\otimes\overrightarrow{home}+\overrightarrow{Mary}\otimes\overline{ran}\otimes\overrightarrow{home}+\overrightarrow{Mary}\otimes\overline{drove}\otimes\overrightarrow{home}
+\]
+
+\end_inset
+
+one wishes to deduce 
+\end_layout
+
+\begin_layout Standard
+\begin_inset Formula 
+\[
+\overrightarrow{Mary}\otimes\left(\overline{walked}+\overline{ran}+\overline{drove}\right)\otimes\overrightarrow{home}
+\]
+
+\end_inset
+
+This seems to be relatively straight-forward to accomplish, as it looks
+ like a simple application of the distributive law of multiplication over
+ addition.
+ It is perhaps deceptive, as it presumes that the three words 
+\begin_inset Quotes eld
+\end_inset
+
+walked
+\begin_inset Quotes erd
+\end_inset
+
+, 
+\begin_inset Quotes eld
+\end_inset
+
+ran
+\begin_inset Quotes erd
+\end_inset
+
+, 
+\begin_inset Quotes eld
+\end_inset
+
+drove
+\begin_inset Quotes erd
+\end_inset
+
+ do not appear anywhere else in the sheaf.
+\end_layout
+
+\begin_layout Standard
+A different example is that of forcing diagonalization where there is none.
+ Given a structure such as
+\begin_inset Formula 
+\[
+\left|Mary\right\rangle \otimes\left|walked\right\rangle +\left|Adam\right\rangle \otimes\left|ran\right\rangle 
+\]
+
+\end_inset
+
+one wishes to induce
+\begin_inset Formula 
+\[
+\left(\left|Mary\right\rangle +\left|Adam\right\rangle \right)\otimes\left(\left|walked\right\rangle +\left|ran\right\rangle \right)
+\]
+
+\end_inset
+
+This resembles a grammar-school error: an inappropriate application of the
+ distributive law.
+ But is it really? Part of the problem here is that the notation itself
+ is biased: the symbols 
+\begin_inset Formula $\otimes$
+\end_inset
+
+ and 
+\begin_inset Formula $+$
+\end_inset
+
+ look like the symbols for multiplication and addition, and we are deeply
+ ingrained, from childhood - from grammar school, that multiplication distribute
+s over addition, but not the other way around.
+ By using these symbols, one introduces a prejudice into one's thinking;
+ the prejudice suggests that one operation is manifestly legal, while the
+ other is dubious and requires lots of justification.
+\end_layout
+
+\begin_layout Standard
+This prejudice can run very deeply: in data-mining software, if not in the
+ theories themselves, the first operation might be hard-coded into the software,
+ into the theory, and assumed to be 
+\emph on
+de facto
+\emph default
+ correct.
+ By contrast, the second relation seems to require data-mining, and maybe
+ lots of it: crunching immense, untold numbers of examples to arrive at
+ the conclusion that such a diagonalization is valid.
+ Perhaps reality is somewhere between these two extremes: the first factorizatio
+n should not be assumed, and, as a result, the second diagonalization might
+ not be so hard to discover.
+ Perhaps induction can be applied uniformly to both cases.
+\end_layout
+
+\begin_layout Subsection*
+Induction
+\end_layout
+
+\begin_layout Standard
+The goal of machine learning in data science is the induction of the factorizati
+on and diagonalization from a given dataset.
+ Both examples given above are misleading, because they ignore the fact
+ that they are embeded in a much larger corpus of language.
+ How might these two cases be induced from first principles, 
+\emph on
+ab initio
+\emph default
+, from nothing at all, except for a bunch of examples? 
+\end_layout
+
+\begin_layout Standard
+On possibility is to start by looking for pair-wise correlations.
+ This works: that is how 
+\begin_inset Formula $\left|Mary\right\rangle \otimes\left|walked\right\rangle $
+\end_inset
+
+ is discovered in the first place: these two words were collocated.
+ Likewise, for 
+\begin_inset Formula $\left|Adam\right\rangle \otimes\left|ran\right\rangle $
+\end_inset
+
+.
+ But what about inducing diagonalization? Here, one observes that Mary does
+ lots of things, and so does Adam.
+ Writing down the collocation stalk for Mary, and the one for Adam should
+ indicate that these two stalks are quite similar.
+ How can similarity be judged? The cosine distance, previously reviewed,
+ is a plausible way to start.
+ One can legitimately conclude that Adam and Mary belong in the same grammatical
+ category.
+ What about 
+\begin_inset Quotes eld
+\end_inset
+
+walked
+\begin_inset Quotes erd
+\end_inset
+
+ and 
+\begin_inset Quotes eld
+\end_inset
+
+ran
+\begin_inset Quotes erd
+\end_inset
+
+? One can create a stalk for these two as well, and it should not be hard
+ to conclude, using either cosine distance, or something else, that the
+ two are quite similar.
+\end_layout
+
+\begin_layout Standard
+Great.
+ Now what? Just because Adam and Mary are similar, and 
+\begin_inset Quotes eld
+\end_inset
+
+ran
+\begin_inset Quotes erd
+\end_inset
+
+ and 
+\begin_inset Quotes eld
+\end_inset
+
+walked
+\begin_inset Quotes erd
+\end_inset
+
+ are similar, this is still not quite enough to justify the diagonalization.
+ After all, 
+\begin_inset Quotes eld
+\end_inset
+
+Mary ran
+\begin_inset Quotes erd
+\end_inset
+
+ and 
+\begin_inset Quotes eld
+\end_inset
+
+Adam walked
+\begin_inset Quotes erd
+\end_inset
+
+ have not been observed; how can one justify that these will likely be observed,
+ which is the central claim that diagonalization is making?
+\end_layout
+
+\begin_layout Standard
+The answer would need to be that certain cross-correlations are only weakly
+ seen.
+ Define the set of named-things, and action-things, already discovered:
+ 
+\begin_inset Formula $names=\{Adam,Mary\}$
+\end_inset
+
+ while 
+\begin_inset Formula $actions=\{ran,walked\}$
+\end_inset
+
+.
+ Let the 
+\begin_inset Formula $\lnot$
+\end_inset
+
+ symbol denote 
+\begin_inset Quotes eld
+\end_inset
+
+not
+\begin_inset Quotes erd
+\end_inset
+
+, so that 
+\begin_inset Formula $\lnot names$
+\end_inset
+
+ is the set of all thigs are not 
+\begin_inset Formula $names$
+\end_inset
+
+, and 
+\begin_inset Formula $\lnot actions$
+\end_inset
+
+ denote all things that are not actions.
+ Consider then the correlation matrix
+\end_layout
+
+\begin_layout Standard
+\begin_inset VSpace defskip
+\end_inset
+
+
+\end_layout
+
+\begin_layout Standard
+\align center
+\begin_inset Tabular
+<lyxtabular version="3" rows="3" columns="3">
+<features tabularvalignment="middle">
+<column alignment="center" valignment="top">
+<column alignment="center" valignment="top">
+<column alignment="center" valignment="top">
+<row>
+<cell alignment="center" valignment="top" usebox="none">
+\begin_inset Text
+
+\begin_layout Plain Layout
+
+\end_layout
+
+\end_inset
+</cell>
+<cell alignment="center" valignment="top" usebox="none">
+\begin_inset Text
+
+\begin_layout Plain Layout
+\begin_inset Formula $actions$
+\end_inset
+
+
+\end_layout
+
+\end_inset
+</cell>
+<cell alignment="center" valignment="top" usebox="none">
+\begin_inset Text
+
+\begin_layout Plain Layout
+\begin_inset Formula $\lnot actions$
+\end_inset
+
+ 
+\end_layout
+
+\end_inset
+</cell>
+</row>
+<row>
+<cell alignment="center" valignment="top" usebox="none">
+\begin_inset Text
+
+\begin_layout Plain Layout
+\begin_inset Formula $names$
+\end_inset
+
+
+\end_layout
+
+\end_inset
+</cell>
+<cell alignment="center" valignment="top" topline="true" bottomline="true" leftline="true" usebox="none">
+\begin_inset Text
+
+\begin_layout Plain Layout
+High
+\end_layout
+
+\end_inset
+</cell>
+<cell alignment="center" valignment="top" topline="true" bottomline="true" leftline="true" rightline="true" usebox="none">
+\begin_inset Text
+
+\begin_layout Plain Layout
+Low
+\end_layout
+
+\end_inset
+</cell>
+</row>
+<row>
+<cell alignment="center" valignment="top" usebox="none">
+\begin_inset Text
+
+\begin_layout Plain Layout
+ 
+\begin_inset Formula $\lnot names$
+\end_inset
+
+
+\end_layout
+
+\end_inset
+</cell>
+<cell alignment="center" valignment="top" topline="true" bottomline="true" leftline="true" usebox="none">
+\begin_inset Text
+
+\begin_layout Plain Layout
+Low
+\end_layout
+
+\end_inset
+</cell>
+<cell alignment="center" valignment="top" topline="true" bottomline="true" leftline="true" rightline="true" usebox="none">
+\begin_inset Text
+
+\begin_layout Plain Layout
+n/a
+\end_layout
+
+\end_inset
+</cell>
+</row>
+</lyxtabular>
+
+\end_inset
+
+
+\end_layout
+
+\begin_layout Standard
+\begin_inset VSpace defskip
+\end_inset
+
+The entry 
+\begin_inset Quotes eld
+\end_inset
+
+High
+\begin_inset Quotes erd
+\end_inset
+
+ means that a large amount of correlation is observed, while 
+\begin_inset Quotes eld
+\end_inset
+
+Low
+\begin_inset Quotes erd
+\end_inset
+
+ means that little is observed.
+ Correlation can be measured in many ways; mutual information and Kullbeck-Liebl
+er divergence are popular.
+ 
+\end_layout
+
+\begin_layout Standard
+Why might this work? Well, this correlation matrix embodies the very meaning
+ of 
+\begin_inset Quotes eld
+\end_inset
+
+diagonalization
+\begin_inset Quotes erd
+\end_inset
+
+: a matrix is diagonal, when the entries along the diagonal are large, and
+ the entries not on the diagonal are zero.
+ Observing this structure then justifies writing 
+\begin_inset Formula $names\otimes actions$
+\end_inset
+
+, which is exactly what one wanted to induce.
+ Can one also validly claim that 
+\begin_inset Formula $\left(\lnot names\right)\otimes\left(\lnot actions\right)$
+\end_inset
+
+? Well, probably not.
+ The correlation there might be low or non-existant.
+ It might be hard to compute, and, in the current context, its not clear
+ that its even wanted.
+\end_layout
+
+\begin_layout Standard
+Can one induce factorization in the same way? Factorization, as given above,
+ seemed 
+\begin_inset Quotes eld
+\end_inset
+
+obvious
+\begin_inset Quotes erd
+\end_inset
+
+, but that was only due to the use of symbols that prejudiced one's thinking.
+ Factorization is, in fact, every bit as non-obvious as diagonalization.
+ The reason it seems so obvious in the example was that the corpus 
+\begin_inset Quotes eld
+\end_inset
+
+Mary walked home
+\begin_inset Quotes erd
+\end_inset
+
+, etc.
+ did not include any sentences about Adam, nor anything about 
+\begin_inset Quotes eld
+\end_inset
+
+to the store
+\begin_inset Quotes erd
+\end_inset
+
+, 
+\begin_inset Quotes eld
+\end_inset
+
+to work
+\begin_inset Quotes erd
+\end_inset
+
+, etc.
+ Once these are included, factorization starts to look a lot like diagonalizatio
+n, if not exactly the same thing.
+ Inducing a subject-verb-object relationship can be done by means of correlation
+, but is harder to depict, because the correlation is no longer a pair-wise
+ matrix, but is 3D, forming a cube, because three categories need to be
+ compared: 
+\begin_inset Formula $names$
+\end_inset
+
+, 
+\begin_inset Formula $actions$
+\end_inset
+
+, and 
+\begin_inset Formula $places$
+\end_inset
+
+, where 
+\begin_inset Formula $places=\{home,to\,the\,store,to\,work\}$
+\end_inset
+
+.
+ This is shown below.
+\end_layout
+
+\begin_layout Standard
+\begin_inset VSpace defskip
+\end_inset
+
+
+\end_layout
+
+\begin_layout Standard
+\align left
+\begin_inset space \qquad{}
+\end_inset
+
+
+\begin_inset Formula $places\;\begin{cases}
+\\
+\\
+\\
+\end{cases}$
+\end_inset
+
+  
+\begin_inset Tabular
+<lyxtabular version="3" rows="3" columns="3">
+<features tabularvalignment="middle">
+<column alignment="center" valignment="top">
+<column alignment="center" valignment="top">
+<column alignment="center" valignment="top">
+<row>
+<cell alignment="center" valignment="top" usebox="none">
+\begin_inset Text
+
+\begin_layout Plain Layout
+
+\end_layout
+
+\end_inset
+</cell>
+<cell alignment="center" valignment="top" usebox="none">
+\begin_inset Text
+
+\begin_layout Plain Layout
+\begin_inset Formula $actions$
+\end_inset
+
+
+\end_layout
+
+\end_inset
+</cell>
+<cell alignment="center" valignment="top" usebox="none">
+\begin_inset Text
+
+\begin_layout Plain Layout
+\begin_inset Formula $\lnot actions$
+\end_inset
+
+ 
+\end_layout
+
+\end_inset
+</cell>
+</row>
+<row>
+<cell alignment="center" valignment="top" usebox="none">
+\begin_inset Text
+
+\begin_layout Plain Layout
+\begin_inset Formula $names$
+\end_inset
+
+
+\end_layout
+
+\end_inset
+</cell>
+<cell alignment="center" valignment="top" topline="true" bottomline="true" leftline="true" usebox="none">
+\begin_inset Text
+
+\begin_layout Plain Layout
+High
+\end_layout
+
+\end_inset
+</cell>
+<cell alignment="center" valignment="top" topline="true" bottomline="true" leftline="true" rightline="true" usebox="none">
+\begin_inset Text
+
+\begin_layout Plain Layout
+Low
+\end_layout
+
+\end_inset
+</cell>
+</row>
+<row>
+<cell alignment="center" valignment="top" usebox="none">
+\begin_inset Text
+
+\begin_layout Plain Layout
+ 
+\begin_inset Formula $\lnot names$
+\end_inset
+
+
+\end_layout
+
+\end_inset
+</cell>
+<cell alignment="center" valignment="top" topline="true" bottomline="true" leftline="true" usebox="none">
+\begin_inset Text
+
+\begin_layout Plain Layout
+Low
+\end_layout
+
+\end_inset
+</cell>
+<cell alignment="center" valignment="top" topline="true" bottomline="true" leftline="true" rightline="true" usebox="none">
+\begin_inset Text
+
+\begin_layout Plain Layout
+n/a
+\end_layout
+
+\end_inset
+</cell>
+</row>
+</lyxtabular>
+
+\end_inset
+
+
+\end_layout
+
+\begin_layout Standard
+\begin_inset VSpace defskip
+\end_inset
+
+
+\end_layout
+
+\begin_layout Standard
+\begin_inset VSpace defskip
+\end_inset
+
+
+\end_layout
+
+\begin_layout Standard
+\align left
+\begin_inset space \qquad{}
+\end_inset
+
+
+\begin_inset space \qquad{}
+\end_inset
+
+
+\begin_inset space \qquad{}
+\end_inset
+
+
+\begin_inset space \qquad{}
+\end_inset
+
+
+\begin_inset space \qquad{}
+\end_inset
+
+
+\begin_inset Formula $\lnot places\;\begin{cases}
+\\
+\\
+\\
+\end{cases}$
+\end_inset
+
+ 
+\begin_inset Tabular
+<lyxtabular version="3" rows="3" columns="3">
+<features tabularvalignment="middle">
+<column alignment="center" valignment="top">
+<column alignment="center" valignment="top">
+<column alignment="center" valignment="top">
+<row>
+<cell alignment="center" valignment="top" usebox="none">
+\begin_inset Text
+
+\begin_layout Plain Layout
+
+\end_layout
+
+\end_inset
+</cell>
+<cell alignment="center" valignment="top" usebox="none">
+\begin_inset Text
+
+\begin_layout Plain Layout
+\begin_inset Formula $actions$
+\end_inset
+
+
+\end_layout
+
+\end_inset
+</cell>
+<cell alignment="center" valignment="top" usebox="none">
+\begin_inset Text
+
+\begin_layout Plain Layout
+\begin_inset Formula $\lnot actions$
+\end_inset
+
+ 
+\end_layout
+
+\end_inset
+</cell>
+</row>
+<row>
+<cell alignment="center" valignment="top" usebox="none">
+\begin_inset Text
+
+\begin_layout Plain Layout
+\begin_inset Formula $names$
+\end_inset
+
+
+\end_layout
+
+\end_inset
+</cell>
+<cell alignment="center" valignment="top" topline="true" bottomline="true" leftline="true" usebox="none">
+\begin_inset Text
+
+\begin_layout Plain Layout
+Low
+\end_layout
+
+\end_inset
+</cell>
+<cell alignment="center" valignment="top" topline="true" bottomline="true" leftline="true" rightline="true" usebox="none">
+\begin_inset Text
+
+\begin_layout Plain Layout
+n/a
+\end_layout
+
+\end_inset
+</cell>
+</row>
+<row>
+<cell alignment="center" valignment="top" usebox="none">
+\begin_inset Text
+
+\begin_layout Plain Layout
+ 
+\begin_inset Formula $\lnot names$
+\end_inset
+
+
+\end_layout
+
+\end_inset
+</cell>
+<cell alignment="center" valignment="top" topline="true" bottomline="true" leftline="true" usebox="none">
+\begin_inset Text
+
+\begin_layout Plain Layout
+n/a
+\end_layout
+
+\end_inset
+</cell>
+<cell alignment="center" valignment="top" topline="true" bottomline="true" leftline="true" rightline="true" usebox="none">
+\begin_inset Text
+
+\begin_layout Plain Layout
+n/a
+\end_layout
+
+\end_inset
+</cell>
+</row>
+</lyxtabular>
+
+\end_inset
+
+
+\end_layout
+
+\begin_layout Standard
+\begin_inset VSpace defskip
+\end_inset
+
+That is, one can induce a three-way relationship 
+\begin_inset Formula $(x,y,z)$
+\end_inset
+
+ whenever that relationship is frequently seen, and all three of the relations
+ 
+\begin_inset Formula $(\lnot x,y,z)$
+\end_inset
+
+, 
+\begin_inset Formula $(x,\lnot y,z)$
+\end_inset
+
+ and 
+\begin_inset Formula $(x,y,\lnot z)$
+\end_inset
+
+ are not seen.
+ This extends to 4-way relations, and so on.
+\end_layout
+
+\begin_layout Standard
+There is one notable pheonmenon that is not covered by the above: words
+ that have different meanings, but the same spelling, for example, 
+\begin_inset Quotes eld
+\end_inset
+
+saw
+\begin_inset Quotes erd
+\end_inset
+
+ or 
+\begin_inset Quotes eld
+\end_inset
+
+fly
+\begin_inset Quotes erd
+\end_inset
+
+ which are both nouns and verbs.
+ This complicates the approach above; this issue is returned to in a later
+ section, titled 
+\begin_inset CommandInset ref
+LatexCommand nameref
+reference "sec:Polymorphism"
+
+\end_inset
+
+.
 \end_layout
 
 \begin_layout Subsection*
@@ -6909,7 +7842,7 @@ Why clustering?
 \end_layout
 
 \begin_layout Standard
-foo
+foo-bar
 \end_layout
 
 \begin_layout Standard
@@ -7096,15 +8029,6 @@ why clustering?
 ce relation is available, and if it is employed wisely, then one can construct
  quotient graphs that encode important relationships of the original, raw
  graph.
-\end_layout
-
-\begin_layout Subsection*
-Similar concepts
-\end_layout
-
-\begin_layout Standard
-One can think of a stalk as a kind of hypergraph, but this view does not
- seem to be particularly productive.
 \end_layout
 
 \begin_layout Section*
@@ -8086,6 +9010,13 @@ y grammars are often favored: they make clear that it is the linkage between
 
 \begin_layout Section*
 Polymorphism
+\begin_inset CommandInset label
+LatexCommand label
+name "sec:Polymorphism"
+
+\end_inset
+
+
 \end_layout
 
 \begin_layout Standard
