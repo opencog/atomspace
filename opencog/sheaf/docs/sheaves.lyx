@@ -2298,8 +2298,8 @@ key "Kart2013"
 \end_inset
 
  directly for details.
- The point to be made is that this kind of tensorial analysis can, and is
- done, and often invokes words like 
+ The point to be made is that this kind of tensorial analysis can be, and
+ is done, and often invokes words like 
 \begin_inset Quotes eld
 \end_inset
 
@@ -2569,7 +2569,14 @@ status open
 \begin_inset Caption Standard
 
 \begin_layout Plain Layout
-A Viterbi parse lattice of Markov chain
+A Viterbi parse lattice of a Markov chain
+\begin_inset CommandInset label
+LatexCommand label
+name "fig:A-Viterbi-parse"
+
+\end_inset
+
+
 \end_layout
 
 \end_inset
@@ -2593,7 +2600,14 @@ A Viterbi parse lattice of Markov chain
 \end_layout
 
 \begin_layout Standard
-The above depicts the lattice of a Viterbi parse of a Markov chain.
+Figure 
+\begin_inset CommandInset ref
+LatexCommand ref
+reference "fig:A-Viterbi-parse"
+
+\end_inset
+
+ depicts the lattice of a Viterbi parse of a Markov chain.
  The dashed green line depicts a maximum-likelihood path through the lattice,
  that is, the most likely history.
  Viterbi decoding, using an 
@@ -3284,7 +3298,14 @@ or
 \end_layout
 
 \begin_layout Standard
-This is illustrated pictorially, below.
+This is illustrated pictorially, in figure 
+\begin_inset CommandInset ref
+LatexCommand ref
+reference "fig:Creating-a-quotient"
+
+\end_inset
+
+.
 \end_layout
 
 \begin_layout Standard
@@ -3299,6 +3320,13 @@ status open
 
 \begin_layout Plain Layout
 Creating a quotient graph
+\begin_inset CommandInset label
+LatexCommand label
+name "fig:Creating-a-quotient"
+
+\end_inset
+
+
 \end_layout
 
 \end_inset
@@ -4916,7 +4944,7 @@ Visualizing Sheaves
 One way of visualizing the sheaf is as a stack of sheets of paper, with
  one sentence written on each sheet.
  The papers are stacked in such a way that words that are the same are always
- vertically above one-another.
+ arranged vertically one above another.
  This stacking is where the term 
 \begin_inset Quotes eld
 \end_inset
@@ -6071,6 +6099,12 @@ The general sheaf, as depicted here, holds much more data than just the
  might be a challenge.
  The stalk field is meant to be a half-way point: it can hold more information
  than the base alone, but still be computationally manageable.
+ For example, the sme dataset discussed previously, containing 10 million
+ sentences composed of 130K words has been found to contain 6 million seeds;
+ these are observed on average of 2.5 times each, although the distribution
+ is roughly Zipfian: a few are observed hundreds of thousands of times,
+ and more than a third are observed only once.
+ 
 \end_layout
 
 \begin_layout Standard
@@ -6686,8 +6720,25 @@ Does this really work?
 \end_layout
 
 \begin_layout Standard
-The point of the above is to convince the reader that the structures being
- described really are sheaves, in the formal sense of sheaf theory.
+The sheaf axioms presented above are standardized and are presented in many
+ books.
+ See, for example, Eisenbud & Harris
+\begin_inset CommandInset citation
+LatexCommand cite
+key "Eisenbud2000"
+
+\end_inset
+
+ or Mac Lane & Moerdijk
+\begin_inset CommandInset citation
+LatexCommand cite
+key "MacLane1992"
+
+\end_inset
+
+.
+ The point of the above is to convince the reader that the structures being
+ described really are sheaves, in the formal sense of the word.
  There's a big difference though: everything above was developed from the
  point of view of graphs, and that really does change the nature of the
  game.
@@ -6814,8 +6865,8 @@ Well, this won't be done here mostly because I'm running out of space, and,
 \end_layout
 
 \begin_layout Standard
-If one considers the Krebs cycle (the citric acid cycle), then the answer
- is yes.
+If one considers biochemistry, and use the Krebs cycle (the citric acid
+ cycle) as an example, then the answer is yes.
  This is a loop; it's essentially exothermic, or a kind of pump, in that
  the loop always goes around in one direction.
  The edges are directional.
@@ -7124,7 +7175,7 @@ Induction
 The goal of machine learning in data science is the induction of the factorizati
 on and diagonalization from a given dataset.
  Both examples given above are misleading, because they ignore the fact
- that they are embeded in a much larger corpus of language.
+ that they are embedded in a much larger corpus of language.
  How might these two cases be induced from first principles, 
 \emph on
 ab initio
@@ -7241,7 +7292,7 @@ not
 \begin_inset Formula $\lnot names$
 \end_inset
 
- is the set of all thigs are not 
+ is the set of all things are not 
 \begin_inset Formula $names$
 \end_inset
 
@@ -7423,9 +7474,9 @@ diagonalization
 \end_inset
 
 ? Well, probably not.
- The correlation there might be low or non-existant.
- It might be hard to compute, and, in the current context, its not clear
- that its even wanted.
+ The correlation there might be low or non-existent.
+ It might be hard to compute, and, in the current context, its seems not
+ to be wanted.
 \end_layout
 
 \begin_layout Standard
@@ -7808,7 +7859,7 @@ That is, one can induce a three-way relationship
 \end_layout
 
 \begin_layout Standard
-There is one notable pheonmenon that is not covered by the above: words
+There is one notable phenomenon that is not covered by the above: words
  that have different meanings, but the same spelling, for example, 
 \begin_inset Quotes eld
 \end_inset
@@ -7870,12 +7921,12 @@ tion as some panacea for linguistics.
 
 \begin_layout Standard
 The above was also vague as to the form of correlation: how should it be
- done? Should it literally be correllation, in the sense of probability
- theory? Should it be mutual information? Something else? This is left intention
-ally vague: different measures of correlation are possible.
+ done? Should it literally be correlation, in the sense of probability theory?
+ Should it be mutual information? Something else? This is left intentionally
+ vague: different measures of correlation are possible.
  Some may produce better results than others.
  A general theoretical framework is being sketched here; the quality of
- different algorithms is not assesed or presented.
+ different algorithms is not assessed or presented.
  It is up to the reader to experiment with different forms of correlation
  and discrimination.
 \end_layout
@@ -7885,15 +7936,8 @@ Related concept: Clustering
 \end_layout
 
 \begin_layout Standard
-The induction, described above, resembles the machine-learning concept 
-\begin_inset Quotes eld
-\end_inset
-
-clustering
-\begin_inset Quotes erd
-\end_inset
-
- in several ways.
+The induction, described above, resembles the machine-learning concept of
+ clustering in several ways.
  There are also some strong differences, and so this is worth reviewing.
  Two old and time-honored approaches to clustering are support vector machines
  (SVM) and 
@@ -9874,7 +9918,7 @@ well known
 \begin_inset CommandInset bibtex
 LatexCommand bibtex
 bibfiles "lang"
-options "naturemagdoi"
+options "tufte"
 
 \end_inset
 
