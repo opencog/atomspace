@@ -6768,7 +6768,7 @@ seed
 
 \begin_layout Standard
 The use of the jigsaw-puzzle piece analogy to define connectors is strongly
- analogous to the cunstruction of the 
+ analogous to the construction of the 
 \begin_inset CommandInset href
 LatexCommand href
 name "Čech nerve"
@@ -6898,7 +6898,7 @@ It can be argued that orthodox corpus linguistics studies the sheaf of surface
  and news media.
 \begin_inset CommandInset citation
 LatexCommand cite
-key "Louw1993"
+key "Louw2007"
 
 \end_inset
 
@@ -7835,6 +7835,160 @@ reference "sec:Polymorphism"
 \end_inset
 
 .
+\end_layout
+
+\begin_layout Subsection*
+Related concept: Discrimination
+\end_layout
+
+\begin_layout Standard
+Several comments are in order.
+ The above presents grammatical induction as a form of discrimination -
+ 
+\begin_inset CommandInset href
+LatexCommand href
+name "binary discrimination"
+target "https://en.wikipedia.org/wiki/Binary_classification"
+
+\end_inset
+
+, even, which is considered to be a particularly simple form of learning.
+ There are many available techniques for this, and one can promptly fall
+ into the examination of 
+\begin_inset CommandInset href
+LatexCommand href
+name "ROC curves"
+target "https://en.wikipedia.org/wiki/Receiver_operating_characteristic"
+
+\end_inset
+
+, and the like.
+ It is important to note that what is being sketched here is the idea of
+ discrimination in the context of sheaves, and not the idea of binary discrimina
+tion as some panacea for linguistics.
+\end_layout
+
+\begin_layout Standard
+The above was also vague as to the form of correlation: how should it be
+ done? Should it literally be correllation, in the sense of probability
+ theory? Should it be mutual information? Something else? This is left intention
+ally vague: different measures of correlation are possible.
+ Some may produce better results than others.
+ A general theoretical framework is being sketched here; the quality of
+ different algorithms is not assesed or presented.
+ It is up to the reader to experiment with different forms of correlation
+ and discrimination.
+\end_layout
+
+\begin_layout Subsection*
+Related concept: Clustering
+\end_layout
+
+\begin_layout Standard
+The induction, described above, resembles the machine-learning concept 
+\begin_inset Quotes eld
+\end_inset
+
+clustering
+\begin_inset Quotes erd
+\end_inset
+
+ in several ways.
+ There are also some strong differences, and so this is worth reviewing.
+ Two old and time-honored approaches to clustering are support vector machines
+ (SVM) and 
+\begin_inset Formula $k$
+\end_inset
+
+-means clustering.
+ The first relies explicitly on some sort of vectorial representation for
+ the data, while the second expects some sort of metric for judging whether
+ two points are similar or not.
+ For the former, interpreting the stalks as the feature vectors is sufficient,
+ while for the latter, the cosine distance can fill the role of a metric.
+\end_layout
+
+\begin_layout Standard
+These two approaches are sufficient to extract classes of things, such as
+ 
+\begin_inset Formula $names$
+\end_inset
+
+, 
+\begin_inset Formula $places$
+\end_inset
+
+ and 
+\begin_inset Formula $actions$
+\end_inset
+
+ in the above example.
+ The accuracy of the extracted categories is rarely excellent, but is certainly
+ adequate enough to proceed to other stages.
+ Except ...
+ that's it.
+ These clustering techniques stop there; they say nothing at all about inducing
+ grammatical relations.
+ To induce grammatical relations, one 
+\emph on
+also
+\emph default
+ has to perform discrimination in some way.
+ One has to combine the results obtained from clustering, and then discriminate
+ to induce grammar.
+\end_layout
+
+\begin_layout Standard
+Note that the discrimination step provides information about how good the
+ clustering was.
+ Say, for example, that cosine distance was used, together with 
+\begin_inset Formula $k$
+\end_inset
+
+-means clustering, to obtain classes of words.
+ Was this clustering 
+\begin_inset Quotes eld
+\end_inset
+
+adequate
+\begin_inset Quotes erd
+\end_inset
+
+? That question can be answered by examining the ROC curves obtained from
+ a binary discrimination step.
+ Different kinds of clustering will present different ROC curves.
+ This can be used as feedback for the clustering step, so that one gets
+ a recursive learning step, alternating between discrimination and clustering.
+\end_layout
+
+\begin_layout Standard
+This observation of recursion, of course, raises the question: can clustering
+ and discrimination be combined into one effective algorithm? Yes, they
+ can.
+\end_layout
+
+\begin_layout Subsection*
+Related concepts: neurlal nets, adagram.
+\end_layout
+
+\begin_layout Standard
+Besides binary discrimination, there are other approaches.
+ Approaches that are more sophisticated include decision trees and decision
+ forests.
+ These two approaches treat the vectors as tables of input data, and then
+ pick and choose among the vector components deemed predictive.
+\end_layout
+
+\begin_layout Standard
+x
+\end_layout
+
+\begin_layout Standard
+x
+\end_layout
+
+\begin_layout Standard
+foo
 \end_layout
 
 \begin_layout Subsection*
