@@ -73,7 +73,14 @@ public:
         init(oset);
     }
 
-    Link(Type t, const Handle& h)
+    Link(Type t)
+        : Atom(t)
+    {
+        HandleSeq oset;
+        init(oset);
+    }
+
+	Link(Type t, const Handle& h)
         : Atom(t)
     {
         // reserve+assign is 2x faster than push_back()/emplace_back()
