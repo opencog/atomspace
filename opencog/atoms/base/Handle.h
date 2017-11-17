@@ -180,7 +180,7 @@ typedef std::set<Handle> HandleSet;
 typedef std::unordered_set<Handle> UnorderedHandleSet;
 
 //! an ordered map from Handle to Handle set
-typedef std::map<Handle, UnorderedHandleSet> HandleMultimap;
+typedef std::map<Handle, HandleSet> HandleMultimap;
 
 //! an ordered map from Handle to Handle
 typedef std::map<Handle, Handle> HandleMap;
