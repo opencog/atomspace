@@ -24,6 +24,7 @@
 #include <string>
 
 #include <opencog/util/mt19937ar.h>
+#include <opencog/util/random.h>
 #include <opencog/util/Logger.h>
 #include <opencog/atoms/base/ClassServer.h>
 #include <opencog/atoms/core/LambdaLink.h>
@@ -349,19 +350,11 @@ ContentHash ScopeLink::term_hash(const Handle& h,
 
 /* ================================================================= */
 
-inline std::string rand_hex_str()
-{
-	int rnd_id = randGen().randint();
-	std::stringstream ss;
-	ss << std::hex << rnd_id;
-	return ss.str();
-}
-
 inline HandleSeq append_rand_str(const HandleSeq& vars)
 {
 	HandleSeq new_vars;
 	for (const Handle& h : vars) {
-		std::string new_var_name = h->get_name() + "-" + rand_hex_str();
+		std::string new_var_name = randstr(h->get_name() + "-");
 		new_vars.emplace_back(createNode(VARIABLE_NODE, new_var_name));
 	}
 	return new_vars;
