@@ -2,8 +2,8 @@
 ;; Test dataset, in scheme ...
 
   (AtTimeLink
-     (TimeNode "630057840")
      (ConceptNode "07620189")
+     (TimeNode "630057840")
   )
 
   (AndLink
