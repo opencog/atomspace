@@ -188,9 +188,6 @@ public:
 	 * Generate typed substitution rules, given a satisfiable
 	 * SolutionSet and the term from which to select the variables as
 	 * values in case multiple choices are possible.
-	 *
-	 * Remarks: lhs_vardecl and rhs_vardecl are passed by copy because
-	 * they will be filled with free variables in case they are empty.
 	 */
 	TypedSubstitutions typed_substitutions(const SolutionSet& sol,
 	                                       const Handle& pre) const;
