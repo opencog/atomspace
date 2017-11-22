@@ -149,6 +149,9 @@ static inline bool operator!= (std::nullptr_t, const Handle& rhs) noexcept
 bool content_eq(const opencog::Handle& lh,
                 const opencog::Handle& rh) noexcept;
 
+bool content_eq(const opencog::HandleSet& lhs,
+                const opencog::HandleSet& rhs);
+
 //! Boost needs this function to be called by exactly this name.
 std::size_t hash_value(Handle const&);
 

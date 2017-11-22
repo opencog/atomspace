@@ -52,6 +52,18 @@ bool content_eq(const Handle& lh, const Handle& rh) noexcept
     return *((AtomPtr) lh) == *((AtomPtr) rh);
 }
 
+bool content_eq(const HandleSet& lhs, const HandleSet& rhs)
+{
+	if (lhs.size() != rhs.size())
+		return false;
+
+	auto lit = lhs.begin(), rit = rhs.begin();
+	for (; rit != rhs.end(); ++lit, ++rit)
+		if (not content_eq(*lit, *rit))
+			return false;
+	return true;
+}
+
 bool Handle::atoms_less(const Atom* a, const Atom* b)
 {
     if (a == b) return false;
