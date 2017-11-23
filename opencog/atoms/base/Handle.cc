@@ -100,6 +100,18 @@ bool Handle::operator<(const Handle& h) const noexcept
 	return get()->operator<(*h);
 }
 
+bool content_eq(const HandleSet& lhs, const HandleSet& rhs)
+{
+	if (lhs.size() != rhs.size())
+		return false;
+
+	auto lit = lhs.begin(), rit = rhs.begin();
+	for (; rit != rhs.end(); ++lit, ++rit)
+		if (not content_eq(*lit, *rit))
+			return false;
+	return true;
+}
+
 // The rest of this file is devoted to printing utilities used only
 // during GDB debugging.  Thus, you won't find these anywhere in the
 // code base. You may call that directly from gdb
