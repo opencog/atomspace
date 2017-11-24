@@ -381,7 +381,7 @@ Handle Unify::substitute(BindLinkPtr bl, const HandleMap& var2val,
 			: gen_vardecl(bl->get_body());
 		// Substitute the variables in the old vardecl to obtain the
 		// new one.
-		vardecl = substitute_vardecl(bl->get_vardecl(), var2val);
+		vardecl = substitute_vardecl(old_vardecl, var2val);
 	}
 
 	const Variables variables = bl->get_variables();
