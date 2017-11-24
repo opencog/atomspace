@@ -67,6 +67,7 @@ public:
 	void test_constant_evaluatable_2();
 	void test_constant_evaluatable_3();
 	void test_complex();
+	void test_constant_pattern();
 };
 
 void ConstantClausesUTest::tearDown()
@@ -373,6 +374,23 @@ void ConstantClausesUTest::test_complex()
 	Handle result = bindlink(&as, bl);
 	Handle expected = al(SET_LINK, B);
 
+	TS_ASSERT_EQUALS(result, expected);
+}
+
+/**
+ * Constant clauses in a child atomspace are expected not to be accessible
+ * from the parent atomspace (so the rewrite term should not be triggered).
+ */
+void ConstantClausesUTest::test_constant_pattern()
+{
+	AtomSpace derived_as(&as);
+	Handle DA = derived_as.add_node(CONCEPT_NODE, "DA"),
+		DB = derived_as.add_node(CONCEPT_NODE, "DB"),
+		bl = derived_as.add_link(BIND_LINK,
+		                         derived_as.add_link(INHERITANCE_LINK, DA, DB),
+		                         DB),
+		result = bindlink(&as, bl),
+		expected = al(SET_LINK);
 	TS_ASSERT_EQUALS(result, expected);
 }
 
