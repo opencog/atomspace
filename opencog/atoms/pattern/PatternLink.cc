@@ -452,23 +452,6 @@ void PatternLink::validate_clauses(HandleSet& vars,
                                    HandleSeq& constants)
 
 {
-	// Make sure that the user did not pass in bogus clauses.
-	// Make sure that every clause contains at least one variable.
-	// The presence of constant clauses will mess up the current
-	// pattern matcher.  Constant clauses are "trivial" to match,
-	// and so its pointless to even send them through the system.
-	bool bogus = remove_constants(vars, clauses, constants);
-	if (bogus)
-	{
-		logger().warn("%s: Constant clauses removed from pattern %s",
-		              __FUNCTION__, to_short_string().c_str());
-		for (const Handle& h: constants)
-		{
-			logger().warn("%s: Removed %s",
-		              __FUNCTION__, h->to_short_string().c_str());
-		}
-	}
-
 	// Make sure that each declared variable appears in some clause.
 	// We won't (can't) ground variables that don't show up in a
 	// clause.  They are presumably there due to programmer error.

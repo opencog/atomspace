@@ -28,6 +28,7 @@
 
 #include <opencog/atomspace/AtomSpace.h>
 #include <opencog/atoms/base/ClassServer.h>
+#include <opencog/atoms/pattern/PatternUtils.h>
 
 #include "PatternMatch.h"
 #include "PatternMatchEngine.h"
@@ -328,12 +329,32 @@ bool PatternMatch::recursive_virtual(PatternMatchCallback& cb,
  * to indicate the bindings of the variables, and (optionally) limit
  * the types of acceptable groundings for the variables.
  */
-bool BindLink::imply(PatternMatchCallback& pmc, bool check_conn)
+bool BindLink::imply(PatternMatchCallback& pmc, AtomSpace* as, bool check_conn)
 {
    if (check_conn and 0 == _virtual.size() and 1 < _components.size())
 		throw InvalidParamException(TRACE_INFO,
 			"BindLink consists of multiple disconnected components!");
 			// PatternLink::check_connectivity(_comps);
+
+	// Make sure that the user did not pass in bogus clauses
+	// in the queried atomspace.
+	// Make sure that every clause contains at least one variable.
+	// The presence of constant clauses will mess up the current
+	// pattern matcher.  Constant clauses are "trivial" to match,
+	// and so its pointless to even send them through the system.
+	bool bogus = remove_constants(_varlist.varset, _pat, _components, as);
+	if (bogus)
+	{
+		logger().warn("%s: Constant clauses removed from pattern %s",
+		              __FUNCTION__, to_short_string().c_str());
+		for (const Handle& h: _pat.constants)
+		{
+			logger().warn("%s: Removed %s",
+			              __FUNCTION__, h->to_short_string().c_str());
+		}
+
+		_num_comps = _components.size();
+	}
 
 	return PatternLink::satisfy(pmc);
 }

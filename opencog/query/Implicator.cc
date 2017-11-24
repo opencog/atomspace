@@ -96,7 +96,7 @@ static Handle do_imply(AtomSpace* as,
 
 	impl.implicand = bl->get_implicand();
 
-	bl->imply(impl, do_conn_check);
+	bl->imply(impl, as, do_conn_check);
 
 	// If we got a non-empty answer, just return it.
 	if (0 < impl.get_result_list().size())

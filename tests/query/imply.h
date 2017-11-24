@@ -30,7 +30,7 @@ static inline Handle imply(AtomSpace* as, Handle hclauses, Handle himplicand)
 	DefaultImplicator impl(as);
 	impl.implicand = himplicand;
 
-	bl->imply(impl);
+	bl->imply(impl, as);
 
 	// The result_list contains a list of the grounded expressions.
 	// Turn it into a true list, and return it.
