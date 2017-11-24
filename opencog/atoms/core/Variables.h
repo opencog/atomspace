@@ -93,7 +93,8 @@ struct FreeVariables
 	void find_variables(const HandleSeq&);
 
 	// Given a mapping from variables to values to create values
-	// sequence to be passed to substitute
+	// sequence to be passed to substitute. Missing variable keys
+	// consider themselves as values.
 	HandleSeq make_values(const HandleMap&) const;
 
 	// Erase the given variable, if exist
