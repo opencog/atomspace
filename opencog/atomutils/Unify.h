@@ -282,6 +282,10 @@ public:
 	 * removed from the BindLink. If no clause remains then the
 	 * pattern body is left with an empty AndLink.
 	 *
+	 * TODO: removing constant clauses might be a problem as the
+	 * clauses might not necessarily be in the queried atomspace, so
+	 * they might not be trivially true.
+	 *
 	 * Examples:
 	 *
 	 * Assume the instance is:
