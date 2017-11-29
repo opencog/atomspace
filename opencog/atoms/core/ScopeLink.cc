@@ -350,13 +350,17 @@ ContentHash ScopeLink::term_hash(const Handle& h,
 
 /* ================================================================= */
 
+inline Handle append_rand_str(const Handle& var)
+{
+	std::string new_var_name = randstr(var->get_name() + "-");
+	return createNode(VARIABLE_NODE, new_var_name);
+}
+
 inline HandleSeq append_rand_str(const HandleSeq& vars)
 {
 	HandleSeq new_vars;
-	for (const Handle& h : vars) {
-		std::string new_var_name = randstr(h->get_name() + "-");
-		new_vars.emplace_back(createNode(VARIABLE_NODE, new_var_name));
-	}
+	for (const Handle& h : vars)
+		new_vars.push_back(append_rand_str(h));
 	return new_vars;
 }
 
@@ -373,6 +377,16 @@ Handle ScopeLink::alpha_conversion(HandleSeq vars) const
 
 	// Create the alpha converted scope link
 	return createLink(hs, get_type());
+}
+
+Handle ScopeLink::alpha_conversion(const HandleMap& vsmap) const
+{
+	HandleSeq vars;
+	for (const Handle& var : _varlist.varseq) {
+		auto it = vsmap.find(var);
+		vars.push_back(it == vsmap.end() ? append_rand_str(var) : it->second);
+	}
+	return alpha_conversion(vars);
 }
 
 /* ================================================================= */
