@@ -22,6 +22,8 @@
 
 #include <opencog/guile/SchemeEval.h>
 #include <opencog/atoms/base/Atom.h>
+#include <opencog/atoms/base/Node.h>
+#include <opencog/atoms/base/Link.h>
 #include <opencog/atomspace/AtomSpace.h>
 #include <opencog/atoms/core/ScopeLink.h>
 
@@ -65,6 +67,7 @@ public:
 	void test_get_variables_3();
 	void test_compute_hash_1();
 	void test_compute_hash_2();
+	void test_content_less();
 };
 
 void ScopeLinkUTest::test_get_variables_1()
@@ -164,6 +167,25 @@ void ScopeLinkUTest::test_compute_hash_2()
 		gl2 = _eval.eval_h("gl-2");
 
 	TS_ASSERT_DIFFERS(gl1.value(), gl2.value());
+
+	logger().info("END TEST: %s", __FUNCTION__);
+}
+
+void ScopeLinkUTest::test_content_less()
+{
+	logger().info("BEGIN TEST: %s", __FUNCTION__);
+
+	Handle X = createNode(VARIABLE_NODE, "$X"),
+		Y = createNode(VARIABLE_NODE, "$Y"),
+		scX = createLink(SCOPE_LINK, X, X),
+		scY = createLink(SCOPE_LINK, Y, Y);
+
+	// scX and scY alpha-equivalent, they should be equal by content,
+	// thus neither scX < scY not scY < scX by content.
+	content_based_handle_less lt;
+	TS_ASSERT(content_eq(scX, scY));
+	TS_ASSERT(not lt(scX, scY));
+	TS_ASSERT(not lt(scY, scX));
 
 	logger().info("END TEST: %s", __FUNCTION__);
 }
