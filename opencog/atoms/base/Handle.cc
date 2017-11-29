@@ -215,6 +215,30 @@ std::string hps_to_string(const HandlePairSeq& hps)
 	}
 	return ss.str();
 }
+std::string hc_to_string(const HandleCounter& hc)
+{
+	std::stringstream ss;
+	ss << "size = " << hc.size() << std::endl;
+	size_t i = 0;
+	for (const auto el : hc) {
+		ss << "atom[" << i << "]:" << std::endl << oc_to_string(el.first)
+		   << "num[" << i << "]:" << el.second << std::endl;
+		i++;
+	}
+	return ss.str();
+}
+std::string huc_to_string(const HandleUCounter& huc)
+{
+	std::stringstream ss;
+	ss << "size = " << huc.size() << std::endl;
+	size_t i = 0;
+	for (const auto& el : huc) {
+		ss << "atom[" << i << "]:" << std::endl << oc_to_string(el.first)
+		   << "num[" << i << "]:" << el.second << std::endl;
+		i++;
+	}
+	return ss.str();
+}
 std::string atomtype_to_string(Type type)
 {
 	std::stringstream ss;
@@ -273,6 +297,14 @@ std::string oc_to_string(const HandleMapSet& hms)
 std::string oc_to_string(const HandlePairSeq& hps)
 {
 	return hps_to_string(hps);
+}
+std::string oc_to_string(const HandleCounter& hc)
+{
+	return hc_to_string(hc);
+}
+std::string oc_to_string(const HandleUCounter& huc)
+{
+	return huc_to_string(huc);
 }
 std::string oc_to_string(Type type)
 {
