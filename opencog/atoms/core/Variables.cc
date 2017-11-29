@@ -764,16 +764,4 @@ std::string oc_to_string(const Variables& var)
 	return var.to_string();
 }
 
-std::string oc_to_string(const FreeVariables::IndexMap& imap)
-{
-	std::stringstream ss;
-	ss << "size = " << imap.size() << std::endl;
-	for (const auto& vi : imap)
-	{
-		ss << "at[" << vi.second << "]:" << std::endl
-		   << h_to_string(vi.first);
-	}
-	return ss.str();
-}
-
 } // ~namespace opencog
