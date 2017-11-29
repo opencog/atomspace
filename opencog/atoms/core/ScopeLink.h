@@ -97,10 +97,17 @@ public:
 	 * can be optionally provided, otherwise there are randomly
 	 * generated.
 	 *
-	 * Warning: the alpha converted handle is not insert in the
+	 * Warning: the alpha converted handle is not inserted in the
 	 * atomspace, it is up to the user to do so.
 	 */
 	Handle alpha_conversion(HandleSeq vars=HandleSeq()) const;
+
+	/**
+	 * Like above but take a mapping from old variable name to new
+	 * variable names. If an old variable doesn't have a mapping then
+	 * its new random name is randomly generated.
+	 */
+	Handle alpha_conversion(const HandleMap& vsmap) const;
 
 	// Overload equality check!
 	virtual bool operator==(const Atom&) const;
