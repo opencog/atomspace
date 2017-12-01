@@ -140,8 +140,8 @@ SCM PrimitiveEnviron::do_call(SCM sfe, SCM arglist)
 	// an error message to the shell. Actually, we'll be nice
 	// about this, and convert the C++ exception into a scheme
 	// exception. If the exception is an OpenCog exception, then
-	// we can have a stack trace. If its some C++ exception, then
-	// there is no stack trace, and we would need to overload
+	// we can have a stack trace. If its some other C++ exception,
+	// then there is no stack trace, and we would need to overload
 	// __cxa_throw() to get it to work. Yuck, so we don't do that.
 	// Use gdb if you hit this situation.
 	try
