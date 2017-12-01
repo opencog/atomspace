@@ -143,6 +143,12 @@ bool Link::operator<(const Atom& other) const
     if (arity != other_arity)
         return arity < other_arity;
 
+    // Before comparing their outgoings, make sure that they are not
+    // equal. Indeed, in some cases, such as alpha-equivalence,
+    // comparing their outgoings won't work
+    if (operator==(other))
+	    return false;
+
     for (Arity i=0; i < arity; i++)
     {
         const Handle& ll(outgoing[i]);

@@ -175,7 +175,7 @@ bool ScopeLink::is_equal(const Handle& other, bool silent) const
 
 	// Some derived classes (such as BindLink) have multiple body parts,
 	// so it is not enough to compare this->_body to other->_body.
-	// They tricky bit, below, is skipping over variable decls correctly,
+	// The tricky bit, below, is skipping over variable decls correctly,
 	// to find the remaining body parts. Start by counting to make sure
 	// that this and other have the same number of body parts.
 	Arity vardecl_offset = _vardecl != Handle::UNDEFINED;
