@@ -350,7 +350,7 @@ bool DefaultPatternMatchCB::post_link_match(const Handle& lpat,
 	// one how the evaluation turned out.  Its "crisp logic"
 	// because we use a greater-than-half for the TV.
 	// This is the same behavior as used in evaluate_term().
-	TruthValuePtr tv(EvaluationLink::do_evaluate(_as, lgnd->get_handle()));
+	TruthValuePtr tv(EvaluationLink::do_evaluate(_as, lgnd));
 	return tv->get_mean() >= 0.5;
 }
 
