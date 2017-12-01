@@ -68,6 +68,8 @@ public:
 	void test_compute_hash_1();
 	void test_compute_hash_2();
 	void test_content_less();
+	void test_partial_substitute_1();
+	void test_partial_substitute_2();
 };
 
 void ScopeLinkUTest::test_get_variables_1()
@@ -186,6 +188,53 @@ void ScopeLinkUTest::test_content_less()
 	TS_ASSERT(content_eq(scX, scY));
 	TS_ASSERT(not lt(scX, scY));
 	TS_ASSERT(not lt(scY, scX));
+
+	logger().info("END TEST: %s", __FUNCTION__);
+}
+
+// Test ScopeLink::partial_substitute with duplicated variable names
+void ScopeLinkUTest::test_partial_substitute_1()
+{
+	logger().info("BEGIN TEST: %s", __FUNCTION__);
+
+	// Test simple ScopeLink
+	Handle X = createNode(VARIABLE_NODE, "$X"),
+		Y = createNode(VARIABLE_NODE, "$Y"),
+		Z = createNode(VARIABLE_NODE, "$Z"),
+		hsc = createLink(SCOPE_LINK,
+		                 createLink(VARIABLE_LIST, X, Y),
+		                 createLink(INHERITANCE_LINK, X, Y));
+
+	ScopeLinkPtr sc(ScopeLinkCast(hsc));
+	Handle result = sc->partial_substitute(HandleMap{{X, Z}, {Y, Z}}),
+		expected = createLink(SCOPE_LINK, Z, createLink(INHERITANCE_LINK, Z, Z));
+
+	std::cout << "result = " << oc_to_string(result);
+	std::cout << "expected = " << oc_to_string(expected);
+
+	TS_ASSERT(content_eq(result, expected));
+
+	logger().info("END TEST: %s", __FUNCTION__);
+}
+
+// Test ScopeLink::partial_substitute with no variable
+void ScopeLinkUTest::test_partial_substitute_2()
+{
+	logger().info("BEGIN TEST: %s", __FUNCTION__);
+
+	// Test simple ScopeLink
+	Handle hsc = createLink(SCOPE_LINK,
+	                        createLink(VARIABLE_LIST, X, Y),
+	                        createLink(INHERITANCE_LINK, X, Y));
+
+	ScopeLinkPtr sc(ScopeLinkCast(hsc));
+	Handle result = sc->partial_substitute(HandleMap{}),
+		expected = hsc;
+
+	std::cout << "result = " << oc_to_string(result);
+	std::cout << "expected = " << oc_to_string(expected);
+
+	TS_ASSERT(content_eq(result, expected));
 
 	logger().info("END TEST: %s", __FUNCTION__);
 }

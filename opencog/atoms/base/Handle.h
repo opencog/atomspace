@@ -203,6 +203,9 @@ typedef Counter<Handle, unsigned> HandleUCounter;
 //! a handle iterator
 typedef std::iterator<std::forward_iterator_tag, Handle> HandleIterator;
 
+bool content_eq(const opencog::HandleSeq& lhs,
+                const opencog::HandleSeq& rhs);
+
 bool content_eq(const opencog::HandleSet& lhs,
                 const opencog::HandleSet& rhs);
 
