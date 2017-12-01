@@ -311,10 +311,13 @@ Handle filter_vardecl(const Handle& vardecl, const HandleSeq& hs)
 	else if (VARIABLE_LIST == t)
 	{
 		HandleSeq subvardecls;
+		HandleSet subvars;      // avoid duplicating variables
 		for (const Handle& v : vardecl->getOutgoingSet())
 		{
-			if (filter_vardecl(v, hs))
+			if (filter_vardecl(v, hs) and subvars.find(v) == subvars.end()) {
 				subvardecls.push_back(v);
+				subvars.insert(v);
+			}
 		}
 		if (subvardecls.empty() and get_free_variables(hs).empty())
 			return Handle::UNDEFINED;
