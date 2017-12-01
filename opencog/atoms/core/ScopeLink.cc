@@ -29,6 +29,7 @@
 #include <opencog/atoms/base/ClassServer.h>
 #include <opencog/atoms/core/LambdaLink.h>
 #include <opencog/atoms/core/TypeNode.h>
+#include <opencog/atomutils/TypeUtils.h>
 
 #include "ScopeLink.h"
 
@@ -364,12 +365,14 @@ inline HandleSeq append_rand_str(const HandleSeq& vars)
 	return new_vars;
 }
 
-Handle ScopeLink::alpha_conversion(HandleSeq vars) const
+Handle ScopeLink::alpha_conversion() const
 {
-	// If hs is empty then generate new variable names
-	if (vars.empty())
-		vars = append_rand_str(_varlist.varseq);
+	HandleSeq vars = append_rand_str(_varlist.varseq);
+	return alpha_conversion(vars);
+}
 
+Handle ScopeLink::alpha_conversion(const HandleSeq& vars) const
+{
 	// Perform alpha conversion
 	HandleSeq hs;
 	for (size_t i = 0; i < get_arity(); ++i)
@@ -387,6 +390,147 @@ Handle ScopeLink::alpha_conversion(const HandleMap& vsmap) const
 		vars.push_back(it == vsmap.end() ? append_rand_str(var) : it->second);
 	}
 	return alpha_conversion(vars);
+}
+
+/* ================================================================= */
+
+Handle ScopeLink::partial_substitute(const HandleMap& vm) const
+{
+	// Perform substitution over the variable declaration
+	Handle vardecl = partial_substitute_vardecl(vm);
+
+	// Perform substitution over the bodies. Consuming ill quotations
+	// resulting from the substitution.
+	const Variables variables = get_variables();
+	HandleSeq values = variables.make_values(vm);
+	HandleSeq hs;
+	for (size_t i = (get_vardecl() ? 1 : 0); i < get_arity(); ++i) {
+		const Handle& h = getOutgoingAtom(i);
+		Handle nh = variables.substitute_nocheck(h, values);
+		nh = consume_ill_quotations(vardecl, nh);
+		hs.push_back(nh);
+	}
+
+	// Filter vardecl
+	vardecl = filter_vardecl(vardecl, hs);
+
+	// Insert vardecl in outs if defined
+	if (vardecl)
+		hs.insert(hs.begin(), vardecl);
+
+	// Create the substituted BindLink
+	return createLink(hs, get_type());
+}
+
+Handle ScopeLink::partial_substitute_vardecl(const HandleMap& vm) const
+{
+	if (not get_vardecl())
+		return Handle::UNDEFINED;
+
+	return substitute_vardecl(get_vardecl(), vm);
+}
+
+Handle ScopeLink::substitute_vardecl(const Handle& vardecl,
+                                     const HandleMap& vm)
+{
+	Type t = vardecl->get_type();
+
+	// Base cases
+
+	if (t == VARIABLE_NODE) {
+		auto it = vm.find(vardecl);
+		// Only substitute if the variable is substituted by another variable
+		if (it == vm.end())
+			return vardecl;
+		if (it->second->get_type() == VARIABLE_NODE)
+			return it->second;
+		return Handle::UNDEFINED;
+	}
+
+	// Recursive cases
+
+	HandleSeq oset;
+
+	if (t == VARIABLE_LIST) {
+		for (const Handle& h : vardecl->getOutgoingSet()) {
+			Handle nh = substitute_vardecl(h, vm);
+			if (nh)
+				oset.push_back(nh);
+		}
+		if (oset.empty())
+			return Handle::UNDEFINED;
+	}
+	else if (t == TYPED_VARIABLE_LINK) {
+		Handle new_var = substitute_vardecl(vardecl->getOutgoingAtom(0), vm);
+		if (new_var) {
+			oset.push_back(new_var);
+			oset.push_back(vardecl->getOutgoingAtom(1));
+		} else return Handle::UNDEFINED;
+	}
+	else {
+		OC_ASSERT(false, "Not implemented");
+	}
+	return createLink(oset, t);
+}
+
+Handle ScopeLink::consume_ill_quotations(const Handle& vardecl, const Handle& h)
+{
+	const Variables variables = createVariableList(vardecl)->get_variables();
+	return consume_ill_quotations(variables, h);
+}
+
+Handle ScopeLink::consume_ill_quotations(const Variables& variables, Handle h,
+                                         Quotation quotation, bool escape)
+{
+	// Base case
+	if (h->is_node())
+		return h;
+
+	// Recursive cases
+	Type t = h->get_type();
+	if (quotation.consumable(t)) {
+		if (t == QUOTE_LINK) {
+			Handle scope = h->getOutgoingAtom(0);
+			OC_ASSERT(classserver().isA(scope->get_type(), SCOPE_LINK),
+			          "This defaults the assumption, see this function comment");
+			// Check whether the vardecl of scope is bound to the
+			// ancestor scope rather than itself, if so escape the
+			// consumption.
+			if (not is_bound_to_ancestor(variables, scope)) {
+				quotation.update(t);
+				return consume_ill_quotations(variables, scope, quotation);
+			} else {
+				escape = true;
+			}
+		} else if (t == UNQUOTE_LINK) {
+			if (not escape) {
+				quotation.update(t);
+				return consume_ill_quotations(variables, h->getOutgoingAtom(0),
+				                              quotation);
+			}
+		}
+		// Ignore LocalQuotes as they supposedly used only to quote
+		// pattern matcher connectors.
+	}
+
+	quotation.update(t);
+	HandleSeq consumed;
+	for (const Handle outh : h->getOutgoingSet())
+		consumed.push_back(consume_ill_quotations(variables, outh, quotation,
+		                                          escape));
+
+	return createLink(consumed, t);
+}
+
+bool ScopeLink::is_bound_to_ancestor(const Variables& variables,
+                                     const Handle& local_scope)
+{
+	Handle unquote = local_scope->getOutgoingAtom(0);
+	if (unquote->get_type() == UNQUOTE_LINK) {
+		Handle var = unquote->getOutgoingAtom(0);
+		return variables.is_in_varset(var);
+	}
+	return false;
 }
 
 /* ================================================================= */

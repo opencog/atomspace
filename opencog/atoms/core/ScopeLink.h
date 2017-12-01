@@ -71,12 +71,6 @@ protected:
 	                      Quotation quotation = Quotation()) const;
 	virtual ContentHash compute_hash() const;
 
-private:
-	// Replace the variables names in vardecl by the given vars,
-	// ignoring values to not create a ill-formed vardecl.
-	Handle substitute_vardecl(const Handle& vardecl,
-	                          const HandleMap& var2val) const;
-
 public:
 	ScopeLink(const HandleSeq&, Type=SCOPE_LINK);
 	ScopeLink(const Handle& varcdecls, const Handle& body);
@@ -100,7 +94,8 @@ public:
 	 * Warning: the alpha converted handle is not inserted in the
 	 * atomspace, it is up to the user to do so.
 	 */
-	Handle alpha_conversion(HandleSeq vars=HandleSeq()) const;
+	Handle alpha_conversion() const;
+	Handle alpha_conversion(const HandleSeq& vars) const;
 
 	/**
 	 * Like above but take a mapping from old variable name to new
@@ -108,6 +103,60 @@ public:
 	 * its new random name is randomly generated.
 	 */
 	Handle alpha_conversion(const HandleMap& vsmap) const;
+
+	/**
+	 * Partially substitute a scope link. Given a partial mapping
+	 * between variables and values, generate the scope link resulting
+	 * from the replacement of the variables by the values. In no
+	 * variable is left (i.e. if the provided mapping is complete),
+	 * the resulting atom is still a scope link (or inherited) with an
+	 * empty variable declaration.
+	 */
+	Handle partial_substitute(const HandleMap& vm) const;
+
+	/**
+	 * Helper for partial_substitute. Given a partial mapping from
+	 * variables to values, which of them being variables themselves,
+	 * generate a new variable declaration with these new variables.
+	 */
+	Handle partial_substitute_vardecl(const HandleMap& vm) const;
+	static Handle substitute_vardecl(const Handle& vardecl,
+	                                 const HandleMap& vm);
+
+	/**
+	 * Used by partial_substitute.
+	 *
+	 * After substitution remaining quotations might be useless or
+	 * harmful, which might be the case if they deprive a nested
+	 * ScopeLink from hiding supposedly hidden variables, consume
+	 * them.
+	 *
+	 * Specifically this code makes 2 assumptions
+	 *
+	 * 1. LocalQuotes in front root level And, Or or Not links on the
+	 *    pattern body are not consumed because they are supposedly
+	 *    used to avoid interpreting them as pattern matcher
+	 *    connectors.
+	 *
+	 * 2. Quote/Unquote are used to wrap scope links so that their
+	 *    variable declaration can pattern match grounded or partially
+	 *    grounded scope links.
+	 *
+	 * No other use of quotation is assumed besides the 2 above.
+	 */
+	static Handle consume_ill_quotations(const Handle& vardecl, const Handle& h);
+	static Handle consume_ill_quotations(const Variables& variables, Handle h,
+	                                     Quotation quotation=Quotation(),
+	                                     bool escape=false /* ignore the next
+	                                                        * quotation
+	                                                        * consumption */);
+
+	/**
+	 * Return true iff the variable declaration of local_scope is a
+	 * variable of variables wrapped in a UnquoteLink.
+	 */
+	static bool is_bound_to_ancestor(const Variables& variables,
+	                                 const Handle& local_scope);
 
 	// Overload equality check!
 	virtual bool operator==(const Atom&) const;
