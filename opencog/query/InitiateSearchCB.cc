@@ -788,7 +788,7 @@ bool InitiateSearchCB::variable_search(PatternMatchEngine *pme)
 			return false;
 		}
 
-		// The pattrn body might be of the form
+		// The pattern body might be of the form
 		// (And (Present (Variable "$x")) (Evaluation ...))
 		// We should start the search on the PresentLink, and allow
 		// the EvaluationLinks to be evaluated later.
