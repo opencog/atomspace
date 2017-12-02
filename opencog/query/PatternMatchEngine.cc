@@ -741,6 +741,10 @@ bool PatternMatchEngine::glob_compare(const PatternTermSeq& osp,
 
 		Handle glp(createLink(glob_seq, LIST_LINK));
 		var_grounding[glob->getHandle()] = glp;
+
+		DO_LOG({LAZY_LOG_FINE << "Found grounding of glob:";})
+		logmsg("$$ variable:", glob->getHandle());
+		logmsg("$$ ground term:", glp);
 	};
 
 	// Common things needed to be done when it's not a match.
