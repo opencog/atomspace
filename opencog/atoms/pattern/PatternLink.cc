@@ -79,7 +79,15 @@ void PatternLink::common_init(void)
 	trace_connectives(connectives, _pat.clauses);
 
 	// Split the non-virtual clauses into connected components
-	get_connected_components(_varlist.varset, _fixed,
+	// Evaluatable clauses cannot connect anything, pass in only
+	// those clauses which can actually appear in the atomspace.
+	HandleSeq clauses;
+	for (const Handle& cl: _fixed)
+	{
+		if (0 <  _pat.evaluatable_holders.count(cl)) continue;
+		clauses.emplace_back(cl);
+	}
+	get_connected_components(_varlist.varset, clauses,
 	                         _components, _component_vars);
 	_num_comps = _components.size();
 
