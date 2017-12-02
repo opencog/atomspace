@@ -1202,7 +1202,6 @@ bool PatternMatchEngine::explore_up_branches(const PatternTermPtr& ptm,
 	              << " have " << sz << " branches";})
 
 	// Check if the pattern has globs in it.
-	// bool has_glob = contains_atomtype(ptm->getHandle(), GLOB_NODE);
 	bool has_glob = (0 < _pat->globby_terms.count(ptm->getHandle()));
 	size_t gstate_size = SIZE_MAX;
 
@@ -2061,9 +2060,8 @@ bool PatternMatchEngine::explore_clause(const Handle& term,
 	{
 		// Check if the pattern has globs in it, and record the glob_state.
 		// Do this *before* exploring the term.
-		// bool has_glob = contains_atomtype(term, GLOB_NODE);
 		bool has_glob = (0 < _pat->globby_terms.count(term));
-		size_t gstate_size = (has_glob)? _glob_state.size() : SIZE_MAX;
+		size_t gstate_size = _glob_state.size();
 
 		DO_LOG({logger().fine("Clause is matchable; start matching it");})
 		bool found = explore_term_branches(term, grnd, clause);
