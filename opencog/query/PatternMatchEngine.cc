@@ -128,10 +128,13 @@ bool PatternMatchEngine::variable_compare(const Handle& hp,
 
 	// Make a record of it. Cannot record GlobNodes here; they're
 	// variadic.
-	DO_LOG({LAZY_LOG_FINE << "Found grounding of variable:";})
-	logmsg("$$ variable:", hp);
-	logmsg("$$ ground term:", hg);
-	if (hp->get_type() != GLOB_NODE) var_grounding[hp] = hg;
+	if (hp->get_type() != GLOB_NODE)
+	{
+		DO_LOG({LAZY_LOG_FINE << "Found grounding of variable:";})
+		logmsg("$$ variable:", hp);
+		logmsg("$$ ground term:", hg);
+		var_grounding[hp] = hg;
+	}
 	return true;
 }
 
