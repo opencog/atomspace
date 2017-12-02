@@ -275,26 +275,30 @@ void GetLinkUTest::test_not_equal(void) {
 /*
  * Two disconnected components, one evaluatable is constant
  */
-void GetLinkUTest::test_disconnected_const_eval(void) {
+void GetLinkUTest::test_disconnected_const_eval(void)
+{
 	logger().debug("BEGIN TEST: %s", __FUNCTION__);
 
 	as->clear();
 
 	Handle inh_ground = al(INHERITANCE_LINK,
 	                       an(CONCEPT_NODE, "A"),
-	                       an(CONCEPT_NODE, "B")),
-		real_comp = al(INHERITANCE_LINK,
-		               an(VARIABLE_NODE, "$A"),
-		               an(VARIABLE_NODE, "$B")),
-		virt_comp_pos = al(EVALUATION_LINK,
-		                   an(GROUNDED_PREDICATE_NODE, "scm: cog-tv"),
-		                      al(LIST_LINK,
-		                         an(CONCEPT_NODE, "A"))),
-		virt_comp_neg = al(NOT_LINK, virt_comp_pos),
-		pattern_pos = al(AND_LINK, real_comp, virt_comp_pos),
-		pattern_neg = al(AND_LINK, real_comp, virt_comp_neg),
-		getlink_pos = al(GET_LINK, pattern_pos),
-		getlink_neg = al(GET_LINK, pattern_neg);
+	                       an(CONCEPT_NODE, "B"));
+
+	Handle real_comp = al(INHERITANCE_LINK,
+	                      an(VARIABLE_NODE, "$A"),
+	                      an(VARIABLE_NODE, "$B"));
+
+	Handle virt_comp_pos = al(EVALUATION_LINK,
+	                          an(GROUNDED_PREDICATE_NODE, "scm: cog-tv"),
+	                          al(LIST_LINK,
+	                             an(CONCEPT_NODE, "A")));
+
+	Handle virt_comp_neg = al(NOT_LINK, virt_comp_pos);
+	Handle pattern_pos = al(AND_LINK, real_comp, virt_comp_pos);
+	Handle pattern_neg = al(AND_LINK, real_comp, virt_comp_neg);
+	Handle getlink_pos = al(GET_LINK, pattern_pos);
+	Handle getlink_neg = al(GET_LINK, pattern_neg);
 
 	// Evaluatable constant clause is satisfied
 	Handle result = satisfying_set(as, getlink_pos);
