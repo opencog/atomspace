@@ -273,7 +273,7 @@ void AlphaConvertUTest::test_bindlink()
 	Handle hscox =
 	LA(BIND_LINK,
 		NA(VARIABLE_NODE, "$X"),
-		LA(OR_LINK, NA(VARIABLE_NODE, "$X")),
+		LA(PRESENT_LINK, NA(VARIABLE_NODE, "$X")),
 		LA(AND_LINK, NA(VARIABLE_NODE, "$X")));
 
 	ScopeLinkPtr scox(ScopeLinkCast(hscox));
@@ -283,7 +283,7 @@ void AlphaConvertUTest::test_bindlink()
 	Handle hscoy =
 	LB(BIND_LINK,
 		NB(VARIABLE_NODE, "$X"),
-		LB(OR_LINK, NB(VARIABLE_NODE, "$X")),
+		LB(PRESENT_LINK, NB(VARIABLE_NODE, "$X")),
 		LB(AND_LINK, NB(VARIABLE_NODE, "$X")));
 
 	// x and y should be equal
@@ -292,7 +292,7 @@ void AlphaConvertUTest::test_bindlink()
 	_asb.clear();
 	hscoy =
 	LB(BIND_LINK,
-		LB(OR_LINK, NB(VARIABLE_NODE, "$X")),
+		LB(PRESENT_LINK, NB(VARIABLE_NODE, "$X")),
 		LB(AND_LINK, NB(VARIABLE_NODE, "$X")));
 
 	// x and y should be equal
@@ -302,8 +302,8 @@ void AlphaConvertUTest::test_bindlink()
 	hscoy =
 	LB(BIND_LINK,
 		NB(VARIABLE_NODE, "$X"),
-		LB(OR_LINK, NA(VARIABLE_NODE, "$X")),
-		LB(OR_LINK, NB(VARIABLE_NODE, "$X")));
+		LB(PRESENT_LINK, NA(VARIABLE_NODE, "$X")),
+		LB(PRESENT_LINK, NB(VARIABLE_NODE, "$X")));
 
 	// x and y should be NOT equal because their implicants are not
 	// alpha-equivalent.
