@@ -237,29 +237,28 @@ void GetLinkUTest::test_disconnected_empty(void) {
 }
 
 /*
- * Two disconnected components, only one of them has a solution, so
- * the whole request has no solution. It should stop at the first
- * component with no solution, no need to explore the second
- * component.
+ * Test the not-equal predicate.  We want all solutions not equal
+ * to a particular atom.
  */
-void GetLinkUTest::test_not_equal(void) {
+void GetLinkUTest::test_not_equal(void)
+{
 	logger().debug("BEGIN TEST: %s", __FUNCTION__);
 
 	as->clear();
 
-	Handle P = an(PREDICATE_NODE, "P"),
-		Q = an(PREDICATE_NODE, "Q"),
-		Qvar = an(VARIABLE_NODE, "$Q"),
-		Qtype = an(TYPE_NODE, "PredicateNode"),
-		vardecl = al(VARIABLE_LIST,
-		             al(TYPED_VARIABLE_LINK, Qvar, Qtype)),
-		body = al(AND_LINK,
-		          al(NOT_LINK,
-		             al(EQUAL_LINK, P, Qvar)),
-		          Qvar),
-		gl = al(GET_LINK, vardecl, body);
-
+	Handle P = an(PREDICATE_NODE, "P");
+	Handle Q = an(PREDICATE_NODE, "Q");
 	Q->setTruthValue(SimpleTruthValue::TRUE_TV());
+
+	Handle Qvar = an(VARIABLE_NODE, "$Q");
+	Handle vardecl = al(VARIABLE_LIST,
+	                    al(TYPED_VARIABLE_LINK,
+	                       Qvar,
+                          an(TYPE_NODE, "PredicateNode")));
+	Handle body = al(AND_LINK,
+	                 al(NOT_LINK, al(EQUAL_LINK, P, Qvar)),
+	                 al(PRESENT_LINK, Qvar));
+	Handle gl = al(GET_LINK, vardecl, body);
 
 	Handle result = satisfying_set(as, gl);
 	Handle expect = al(SET_LINK, Q);
@@ -275,26 +274,32 @@ void GetLinkUTest::test_not_equal(void) {
 /*
  * Two disconnected components, one evaluatable is constant
  */
-void GetLinkUTest::test_disconnected_const_eval(void) {
+void GetLinkUTest::test_disconnected_const_eval(void)
+{
 	logger().debug("BEGIN TEST: %s", __FUNCTION__);
 
 	as->clear();
 
 	Handle inh_ground = al(INHERITANCE_LINK,
 	                       an(CONCEPT_NODE, "A"),
-	                       an(CONCEPT_NODE, "B")),
-		real_comp = al(INHERITANCE_LINK,
-		               an(VARIABLE_NODE, "$A"),
-		               an(VARIABLE_NODE, "$B")),
-		virt_comp_pos = al(EVALUATION_LINK,
-		                   an(GROUNDED_PREDICATE_NODE, "scm: cog-tv"),
-		                      al(LIST_LINK,
-		                         an(CONCEPT_NODE, "A"))),
-		virt_comp_neg = al(NOT_LINK, virt_comp_pos),
-		pattern_pos = al(AND_LINK, real_comp, virt_comp_pos),
-		pattern_neg = al(AND_LINK, real_comp, virt_comp_neg),
-		getlink_pos = al(GET_LINK, pattern_pos),
-		getlink_neg = al(GET_LINK, pattern_neg);
+	                       an(CONCEPT_NODE, "B"));
+
+	Handle real_comp = al(INHERITANCE_LINK,
+	                      an(VARIABLE_NODE, "$A"),
+	                      an(VARIABLE_NODE, "$B"));
+
+	Handle virt_comp_pos = al(EVALUATION_LINK,
+	                          an(GROUNDED_PREDICATE_NODE, "scm: cog-tv"),
+	                          al(LIST_LINK,
+	                             an(CONCEPT_NODE, "A")));
+
+	Handle virt_comp_neg = al(NOT_LINK, virt_comp_pos);
+
+	Handle pattern_pos = al(AND_LINK, real_comp, virt_comp_pos);
+	Handle getlink_pos = al(GET_LINK, pattern_pos);
+
+	Handle pattern_neg = al(AND_LINK, real_comp, virt_comp_neg);
+	Handle getlink_neg = al(GET_LINK, pattern_neg);
 
 	// Evaluatable constant clause is satisfied
 	Handle result = satisfying_set(as, getlink_pos);

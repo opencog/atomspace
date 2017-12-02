@@ -34,11 +34,13 @@
 
 (define query
 (Bind
+   (TypedVariable (Variable "$X") (TypeNode "ConceptNode"))
    (AndLink
       (Evaluation ;; <--- bug
          (GroundedPredicate "scm: my-precondition")
          (Variable "$X")
       )
+      (Present (Variable "$X"))
       (Concept "I")
    )
    (Concept "O")

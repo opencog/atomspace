@@ -773,7 +773,7 @@ bool InitiateSearchCB::variable_search(PatternMatchEngine *pme)
 			if (prev != _pattern) { prev = _pattern; count = 0; }
 			else {
 				count++;
-				if (1000 < count)
+				if (300 < count)
 					throw RuntimeException(TRACE_INFO,
 						"Infinite Loop detected! Recursed %u times!", count);
 			}
@@ -787,7 +787,23 @@ bool InitiateSearchCB::variable_search(PatternMatchEngine *pme)
 			_search_fail = true;
 			return false;
 		}
-		_root = _starter_term = clauses[0];
+
+		// The pattern body might be of the form
+		// (And (Present (Variable "$x")) (Evaluation ...))
+		// We should start the search on the PresentLink, and allow
+		// the EvaluationLinks to be evaluated later.
+		for (const Handle& m : _pattern->mandatory)
+		{
+			if (0 == _pattern->evaluatable_holders.count(m))
+			{
+				_root = _starter_term = m;
+				break;
+			}
+		}
+
+		// Fail-safe, in case they are all evaluatable.
+		if (nullptr == _root)
+			_root = _starter_term = clauses[0];
 	}
 
 	HandleSeq handle_set;
