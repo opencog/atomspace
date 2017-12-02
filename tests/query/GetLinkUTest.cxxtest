@@ -295,9 +295,11 @@ void GetLinkUTest::test_disconnected_const_eval(void)
 	                             an(CONCEPT_NODE, "A")));
 
 	Handle virt_comp_neg = al(NOT_LINK, virt_comp_pos);
+
 	Handle pattern_pos = al(AND_LINK, real_comp, virt_comp_pos);
-	Handle pattern_neg = al(AND_LINK, real_comp, virt_comp_neg);
 	Handle getlink_pos = al(GET_LINK, pattern_pos);
+
+	Handle pattern_neg = al(AND_LINK, real_comp, virt_comp_neg);
 	Handle getlink_neg = al(GET_LINK, pattern_neg);
 
 	// Evaluatable constant clause is satisfied
