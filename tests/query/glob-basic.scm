@@ -256,6 +256,12 @@
 		(stv 1 1)
 		(stv 0 1)))
 
+; Only returns true if ATOM is "DEF"
+(define-public (match-def ATOM)
+	(if (equal? (List (Concept "D") (Concept "E") (Concept "F")) ATOM)
+		(stv 1 1)
+		(stv 0 1)))
+
 ; The situation below is that there are many different ways
 ; to ground all these three globs, but the black-box link
 ; accepts only one of them, so make sure we can backtrack
@@ -275,6 +281,26 @@
 		(And
 			(List (Glob "$x") (Glob "$y") (Glob "$z"))
 			(Evaluation (GroundedPredicate "scm: match-c") (List (Glob "$y"))))
+		(List
+			(List (Glob "$x"))
+			(List (Glob "$y"))
+			(List (Glob "$z")))))
+
+(define backtoo
+	(Bind
+		(VariableList
+			(TypedVariable (Glob "$x")
+				(TypeSet (Type "ConceptNode")
+					(IntervalLink (Number 0) (Number -1))))
+			(TypedVariable (Glob "$y")
+				(TypeSet (Type "ConceptNode")
+					(IntervalLink (Number 1) (Number 1))))
+			(TypedVariable (Glob "$z")
+				(TypeSet (Type "ConceptNode")
+					(IntervalLink (Number 0) (Number -1)))))
+		(And
+			(List (Glob "$x") (Glob "$y") (Glob "$z"))
+			(Evaluation (GroundedPredicate "scm: match-def") (List (Glob "$y"))))
 		(List
 			(List (Glob "$x"))
 			(List (Glob "$y"))
