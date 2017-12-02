@@ -48,6 +48,7 @@ bool is_constant(const HandleSet& vars, const Handle& clause);
 // See C file for description
 void get_connected_components(const HandleSet& vars,
                               const HandleSeq& clauses,
+                              const HandleSet& evaluatables,
                               HandleSeqSeq& compset,
                               std::vector<HandleSet>& compvars);
 

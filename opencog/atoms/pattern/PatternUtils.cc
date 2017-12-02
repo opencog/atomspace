@@ -140,6 +140,7 @@ bool is_constant(const HandleSet& vars, const Handle& clause)
  */
 void get_connected_components(const HandleSet& vars,
                               const HandleSeq& clauses,
+                              const HandleSet& evaluatables,
                               HandleSeqSeq& components,
                               std::vector<HandleSet>& component_vars)
 {
@@ -169,9 +170,13 @@ void get_connected_components(const HandleSet& vars,
 					components[i].emplace_back(cl);
 
 					// Add to the varset cache for that component.
-					FindAtoms fv(vars);
-					fv.search_set(cl);
-					for (const Handle& v : fv.varset) cur_vars.insert(v);
+					// But only for real, non-virtual clauses.
+					if (0 == evaluatables.count(cl))
+					{
+						FindAtoms fv(vars);
+						fv.search_set(cl);
+						for (const Handle& v : fv.varset) cur_vars.insert(v);
+					}
 
 					extended = true;
 					did_at_least_one = true;
@@ -199,9 +204,12 @@ void get_connected_components(const HandleSet& vars,
 		// Start a new component
 		components.push_back({ncl});
 
-		FindAtoms fv(vars);
-		fv.search_set(ncl);
-		component_vars.emplace_back(fv.varset);
+		if (0 == evaluatables.count(ncl))
+		{
+			FindAtoms fv(vars);
+			fv.search_set(ncl);
+			component_vars.emplace_back(fv.varset);
+		}
 	}
 }
 
