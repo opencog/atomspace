@@ -237,29 +237,28 @@ void GetLinkUTest::test_disconnected_empty(void) {
 }
 
 /*
- * Two disconnected components, only one of them has a solution, so
- * the whole request has no solution. It should stop at the first
- * component with no solution, no need to explore the second
- * component.
+ * Test the not-equal predicate.  We want all solutions not equal
+ * to a particular atom.
  */
-void GetLinkUTest::test_not_equal(void) {
+void GetLinkUTest::test_not_equal(void)
+{
 	logger().debug("BEGIN TEST: %s", __FUNCTION__);
 
 	as->clear();
 
-	Handle P = an(PREDICATE_NODE, "P"),
-		Q = an(PREDICATE_NODE, "Q"),
-		Qvar = an(VARIABLE_NODE, "$Q"),
-		Qtype = an(TYPE_NODE, "PredicateNode"),
-		vardecl = al(VARIABLE_LIST,
-		             al(TYPED_VARIABLE_LINK, Qvar, Qtype)),
-		body = al(AND_LINK,
-		          al(NOT_LINK,
-		             al(EQUAL_LINK, P, Qvar)),
-		          Qvar),
-		gl = al(GET_LINK, vardecl, body);
-
+	Handle P = an(PREDICATE_NODE, "P");
+	Handle Q = an(PREDICATE_NODE, "Q");
 	Q->setTruthValue(SimpleTruthValue::TRUE_TV());
+
+	Handle Qvar = an(VARIABLE_NODE, "$Q");
+	Handle vardecl = al(VARIABLE_LIST,
+	                    al(TYPED_VARIABLE_LINK,
+	                       Qvar,
+                          an(TYPE_NODE, "PredicateNode")));
+	Handle body = al(AND_LINK,
+	                 al(NOT_LINK, al(EQUAL_LINK, P, Qvar)),
+	                 al(PRESENT_LINK, Qvar));
+	Handle gl = al(GET_LINK, vardecl, body);
 
 	Handle result = satisfying_set(as, gl);
 	Handle expect = al(SET_LINK, Q);
