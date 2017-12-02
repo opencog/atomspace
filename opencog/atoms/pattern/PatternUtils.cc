@@ -210,6 +210,10 @@ void get_connected_components(const HandleSet& vars,
 			fv.search_set(ncl);
 			component_vars.emplace_back(fv.varset);
 		}
+		else
+		{
+			component_vars.emplace_back(HandleSet());
+		}
 	}
 }
 
