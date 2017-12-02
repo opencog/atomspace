@@ -140,17 +140,10 @@ bool is_constant(const HandleSet& vars, const Handle& clause)
  */
 void get_connected_components(const HandleSet& vars,
                               const HandleSeq& clauses,
-                              const HandleSet& evaluatables,
                               HandleSeqSeq& components,
                               std::vector<HandleSet>& component_vars)
 {
-	HandleSeq todo;
-
-	// First, do the real clauses.
-	for (const Handle& cl: clauses)
-	{
-		if (0 == evaluatables.count(cl)) todo.emplace_back(cl);
-	}
+	HandleSeq todo(clauses);
 
 	while (0 < todo.size())
 	{
@@ -209,38 +202,6 @@ void get_connected_components(const HandleSet& vars,
 		FindAtoms fv(vars);
 		fv.search_set(ncl);
 		component_vars.emplace_back(fv.varset);
-	}
-
-	// Again, but the virtual clauses.  The virtual clauses cannot
-	// connect anything, so they never extend variables.
-	for (const Handle& cl: clauses)
-	{
-		if (0 == evaluatables.count(cl)) continue;
-
-		// Which component might this possibly belong to??? Try them all.
-		bool extended = false;
-		size_t nc = components.size();
-		for (size_t i = 0; i<nc; i++)
-		{
-			HandleSet& cur_vars(component_vars[i]);
-			// If clause cl is connected to this component, then add it
-			// to this component.
-			if (any_unquoted_in_tree(cl, cur_vars))
-			{
-				// Extend the component
-				components[i].emplace_back(cl);
-
-				extended = true;
-				break;
-			}
-		}
-
-		// Start a new component, if needed.
-		if (not extended)
-		{
-			components.push_back({cl});
-			component_vars.emplace_back(HandleSet());
-		}
 	}
 }
 

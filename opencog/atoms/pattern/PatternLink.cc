@@ -80,7 +80,6 @@ void PatternLink::common_init(void)
 
 	// Split the non-virtual clauses into connected components
 	get_connected_components(_varlist.varset, _fixed,
-	                         _pat.evaluatable_holders,
 	                         _components, _component_vars);
 	_num_comps = _components.size();
 
