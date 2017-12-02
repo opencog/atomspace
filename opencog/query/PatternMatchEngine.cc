@@ -2021,8 +2021,6 @@ bool PatternMatchEngine::explore_redex(const Handle& term,
                                        const Handle& grnd,
                                        const Handle& first_clause)
 {
-	if (nullptr == term) return false; // Really? Is this needed?
-
 	// Cleanup
 	clear_current_state();
 
