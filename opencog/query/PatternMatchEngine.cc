@@ -2021,7 +2021,7 @@ bool PatternMatchEngine::explore_redex(const Handle& term,
                                        const Handle& grnd,
                                        const Handle& first_clause)
 {
-	if (not term) return false;
+	if (nullptr == term) return false; // Really? Is this needed?
 
 	// Cleanup
 	clear_current_state();
@@ -2051,12 +2051,12 @@ bool PatternMatchEngine::explore_clause(const Handle& term,
 	// evaluate to true or false.
 	if (not is_evaluatable(clause))
 	{
+		DO_LOG({logger().fine("Clause is matchable; start matching it");})
+		bool found = explore_term_branches(term, grnd, clause);
+
 		// Check if the pattern has globs in it, and record the glob_state.
 		bool has_glob = (contains_atomtype(term, GLOB_NODE));
 		size_t gstate_size = (has_glob)? glob_state.size() : SIZE_MAX;
-
-		DO_LOG({logger().fine("Clause is matchable; start matching it");})
-		bool found = explore_term_branches(term, grnd, clause);
 
 		// If there may be another way to ground it differently to the same
 		// candidate, do it until exhausted.
