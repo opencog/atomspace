@@ -294,13 +294,14 @@
 					(IntervalLink (Number 0) (Number -1))))
 			(TypedVariable (Glob "$y")
 				(TypeSet (Type "ConceptNode")
-					(IntervalLink (Number 1) (Number 1))))
+					(IntervalLink (Number 1) (Number -1))))
 			(TypedVariable (Glob "$z")
 				(TypeSet (Type "ConceptNode")
 					(IntervalLink (Number 0) (Number -1)))))
 		(And
 			(List (Glob "$x") (Glob "$y") (Glob "$z"))
-			(Evaluation (GroundedPredicate "scm: match-def") (List (Glob "$y"))))
+			(Evaluation (GroundedPredicate "scm: match-def")
+				(List (List (Glob "$y")))))
 		(List
 			(List (Glob "$x"))
 			(List (Glob "$y"))
