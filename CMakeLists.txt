@@ -566,7 +566,7 @@ ADD_CUSTOM_TARGET(cscope
 )
 
 # packaging
-SET(CPACK_PACKAGE_DESCRIPTION_SUMMARY "The Open Cognition Framework")
+SET(CPACK_PACKAGE_DESCRIPTION_SUMMARY "The OpenCog AtomSpace")
 SET(CPACK_PACKAGE_NAME "atomspace")
 SET(CPACK_PACKAGE_VENDOR "opencog.org")
 SET(CPACK_PACKAGE_DESCRIPTION_FILE "${CMAKE_CURRENT_SOURCE_DIR}/README.md")
@@ -628,12 +628,11 @@ SET(CPACK_SOURCE_IGNORE_FILES
 	"^${PROJECT_SOURCE_DIR}/.bzr/"
 	"^${PROJECT_SOURCE_DIR}/.bzrignore$"
 	"^${PROJECT_SOURCE_DIR}/.git/"
-	"^${PROJECT_BINARY_DIR}/examples/hopfield/hopfield$"
 )
 
 SET(CPACK_PACKAGING_INSTALL_PREFIX "/usr/local")
 SET(CPACK_DEBIAN_PACKAGE_DEPENDS
-    "guile-2.0 (>= 2.0.9), python (>= 2.7.5), libzmq3 (>= 4.0.4), libboost-date-time1.54.0, libboost-filesystem1.54.0, libboost-program-options1.54.0, libboost-regex1.54.0, libboost-serialization1.54.0, libboost-system1.54.0, libboost-thread1.54.0, protobuf-compiler (>= 2.5.0), libssl1.0.0 (>= 1.0.1), libatlas-base-dev, unixodbc (>= 2.2.14p2), odbc-postgresql (>= 1:09.02.0100), cogutil (>= 2.0.2)"
+    "guile-2.0 (>= 2.0.9), python (>= 2.7.5), libzmq3 (>= 4.0.4), libboost-date-time1.54.0, libboost-filesystem1.54.0, libboost-program-options1.54.0, libboost-regex1.54.0, libboost-serialization1.54.0, libboost-system1.54.0, libboost-thread1.54.0, protobuf-compiler (>= 2.5.0), libssl1.0.0 (>= 1.0.1), libatlas-base-dev, libpq-dev, cogutil (>= 2.0.2)"
 )
 
 SET(CPACK_PACKAGE_INSTALL_DIRECTORY "CMake ${CMake_VERSION_MAJOR}.${CMake_VERSION_MINOR}")
