@@ -396,7 +396,7 @@ Handle Unify::substitute(BindLinkPtr bl, const HandleMap& var2val,
 	// constant clauses
 	Handle clauses = variables.substitute_nocheck(bl->get_body(), values);
 	clauses = consume_ill_quotations(vardecl, clauses);
-	clauses = remove_constant_clauses(vardecl, clauses);
+//	clauses = remove_constant_clauses(vardecl, clauses);
 	hs.push_back(clauses);
 
 	// Perform substitution over the rewrite term

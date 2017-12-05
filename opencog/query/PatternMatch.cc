@@ -24,15 +24,12 @@
 #include <opencog/util/Logger.h>
 
 #include <opencog/atoms/pattern/BindLink.h>
-#include <opencog/atoms/pattern/PatternLink.h>
 
 #include <opencog/atomspace/AtomSpace.h>
-#include <opencog/atoms/base/ClassServer.h>
 #include <opencog/atoms/pattern/PatternUtils.h>
 
 #include "PatternMatch.h"
 #include "PatternMatchEngine.h"
-#include "PatternMatchCallback.h"
 #include "DefaultPatternMatchCB.h"
 
 using namespace opencog;
@@ -354,6 +351,7 @@ bool BindLink::imply(PatternMatchCallback& pmc, AtomSpace* as, bool check_conn)
 		}
 
 		_num_comps = _components.size();
+		make_connectivity_map(_pat.cnf_clauses);
 	}
 
 	return PatternLink::satisfy(pmc);

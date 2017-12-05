@@ -26,6 +26,7 @@
 #include <opencog/query/BindLinkAPI.h>
 #include <opencog/util/Logger.h>
 
+using namespace std;
 using namespace opencog;
 
 #define al as.add_link
@@ -68,6 +69,7 @@ public:
 	void test_constant_evaluatable_3();
 	void test_complex();
 	void test_constant_pattern();
+	void test_mixed_clauses();
 };
 
 void ConstantClausesUTest::tearDown()
@@ -391,6 +393,21 @@ void ConstantClausesUTest::test_constant_pattern()
 		                         DB),
 		result = bindlink(&as, bl),
 		expected = al(SET_LINK);
+	TS_ASSERT_EQUALS(result, expected);
+}
+
+void ConstantClausesUTest::test_mixed_clauses()
+{
+	Handle mary = an(CONCEPT_NODE, "Mary"),
+		edward = an(CONCEPT_NODE, "Edward");
+
+	string dir = string(PROJECT_SOURCE_DIR) + "/tests/query";
+	eval.eval(string("(add-to-load-path \"") + dir + string("\")"));
+	eval.eval("(load-from-path \"friends.scm\")");
+
+	Handle result = eval.eval_h("(cog-execute! mixed-clauses)"),
+		expected = al(SET_LINK, edward, mary);
+
 	TS_ASSERT_EQUALS(result, expected);
 }
 
