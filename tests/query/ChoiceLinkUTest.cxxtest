@@ -77,7 +77,7 @@ void ChoiceLinkUTest::tearDown(void)
 void ChoiceLinkUTest::setUp(void)
 {
 	as->clear();
-	eval->eval("(use-modules (opencog query))");
+	eval->eval("(use-modules (opencog exec))");
 }
 
 #define getarity(hand) hand->get_arity()
@@ -91,7 +91,7 @@ void ChoiceLinkUTest::test_basic_or(void)
 
 	eval->eval("(load-from-path \"tests/query/choice-link.scm\")");
 
-	Handle items = eval->eval_h("(cog-bind (basic))");
+	Handle items = eval->eval_h("(cog-execute! (basic))");
 
 	TS_ASSERT_EQUALS(2, getarity(items));
 }
@@ -105,7 +105,7 @@ void ChoiceLinkUTest::test_embed_or(void)
 
 	eval->eval("(load-from-path \"tests/query/choice-embed.scm\")");
 
-	Handle items = eval->eval_h("(cog-bind (embed))");
+	Handle items = eval->eval_h("(cog-execute! (embed))");
 
 	TS_ASSERT_EQUALS(2, getarity(items));
 }
@@ -119,7 +119,7 @@ void ChoiceLinkUTest::test_nest_or(void)
 
 	eval->eval("(load-from-path \"tests/query/choice-nest.scm\")");
 
-	Handle items = eval->eval_h("(cog-bind (nest))");
+	Handle items = eval->eval_h("(cog-execute! (nest))");
 
 	printf ("Nest found:\n%s\n", items->to_short_string().c_str());
 	TS_ASSERT_EQUALS(5, getarity(items));
@@ -134,7 +134,7 @@ void ChoiceLinkUTest::test_top_nest_or(void)
 
 	eval->eval("(load-from-path \"tests/query/choice-top-nest.scm\")");
 
-	Handle items = eval->eval_h("(cog-bind (top-nest))");
+	Handle items = eval->eval_h("(cog-execute! (top-nest))");
 
 	printf ("Top-nest found:\n%s\n", items->to_short_string().c_str());
 	TS_ASSERT_EQUALS(5, getarity(items));
@@ -149,7 +149,7 @@ void ChoiceLinkUTest::test_nest_bad_or(void)
 
 	eval->eval("(load-from-path \"tests/query/choice-nest.scm\")");
 
-	Handle items = eval->eval_h("(cog-bind (nest-bad))");
+	Handle items = eval->eval_h("(cog-execute! (nest-bad))");
 
 	printf ("Nest-bad found:\n%s\n", items->to_short_string().c_str());
 	TS_ASSERT_EQUALS(4, getarity(items));
@@ -164,7 +164,7 @@ void ChoiceLinkUTest::test_top_nest_bad_or(void)
 
 	eval->eval("(load-from-path \"tests/query/choice-top-nest.scm\")");
 
-	Handle items = eval->eval_h("(cog-bind (top-nest-bad))");
+	Handle items = eval->eval_h("(cog-execute! (top-nest-bad))");
 
 	printf ("Top-nest-bad found:\n%s\n", items->to_short_string().c_str());
 	TS_ASSERT_EQUALS(4, getarity(items));
@@ -179,12 +179,12 @@ void ChoiceLinkUTest::test_top_disco(void)
 
 	eval->eval("(load-from-path \"tests/query/choice-disconnected.scm\")");
 
-	Handle items = eval->eval_h("(cog-bind (top-disco))");
+	Handle items = eval->eval_h("(cog-execute! (top-disco))");
 
 	printf ("Top-disco found:\n%s\n", items->to_short_string().c_str());
 	TS_ASSERT_EQUALS(2, getarity(items));
 
-	Handle wrap = eval->eval_h("(cog-bind (wrapped-disco))");
+	Handle wrap = eval->eval_h("(cog-execute! (wrapped-disco))");
 
 	printf ("Top-wrapped-disco found:\n%s\n", wrap->to_short_string().c_str());
 	TS_ASSERT_EQUALS(2, getarity(wrap));
@@ -200,7 +200,7 @@ void ChoiceLinkUTest::test_embed_disco(void)
 
 	eval->eval("(load-from-path \"tests/query/choice-embed-disco.scm\")");
 
-	Handle items = eval->eval_h("(cog-bind (embed-disco))");
+	Handle items = eval->eval_h("(cog-execute! (embed-disco))");
 
 	printf ("Embed pseudo-disco found:\n%s\n", items->to_short_string().c_str());
 	TS_ASSERT_EQUALS(2, getarity(items));
@@ -215,7 +215,7 @@ void ChoiceLinkUTest::test_double_or(void)
 
 	eval->eval("(load-from-path \"tests/query/choice-double.scm\")");
 
-	Handle items = eval->eval_h("(cog-bind (double))");
+	Handle items = eval->eval_h("(cog-execute! (double))");
 
 	TS_ASSERT_EQUALS(3, getarity(items));
 }

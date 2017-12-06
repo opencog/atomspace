@@ -3,7 +3,7 @@
 ; Much link choice-embed, except it ahs two choice links
 ;
 (use-modules (opencog))
-(use-modules (opencog query))
+(use-modules (opencog exec))
 
 ;;; Populate the atomspace with four small trees.
 (MemberLink
