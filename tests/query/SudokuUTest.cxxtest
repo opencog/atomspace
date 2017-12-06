@@ -47,7 +47,7 @@ class SudokuPuzzle :  public CxxTest::TestSuite
 			eval = new SchemeEval(as);
 			eval->eval("(add-to-load-path \"..\")");
 			eval->eval("(add-to-load-path \"../../..\")");
-			eval->eval("(use-modules (opencog query))");
+			eval->eval("(use-modules (opencog exec))");
 		}
 
 		~SudokuPuzzle()
@@ -103,7 +103,7 @@ void SudokuPuzzle::test_2x2_puzzle(void)
 
 	// Solve the puzzle
 	// Handle puzzle_solution = bindlink(as, puzzle);
-	Handle puzzle_solution = eval->eval_h("(cog-bind (x2-puzzle))");
+	Handle puzzle_solution = eval->eval_h("(cog-execute! (x2-puzzle))");
 	logger().debug("puzzle solution is %s\n", SchemeSmob::to_string(puzzle_solution).c_str());
 	TSM_ASSERT_EQUALS("wrong number of solutions found", 1, getarity(puzzle_solution));
 
@@ -155,7 +155,7 @@ void SudokuPuzzle::test_3x3_puzzle(void)
 
 	// Solve the puzzle
 	// Handle puzzle_solution = bindlink(as, puzzle);
-	Handle puzzle_solution = eval->eval_h("(cog-bind (x3-puzzle))");
+	Handle puzzle_solution = eval->eval_h("(cog-execute! (x3-puzzle))");
 	logger().debug("puzzle solution is %s\n", SchemeSmob::to_string(puzzle_solution).c_str());
 	TSM_ASSERT_EQUALS("wrong number of solutions found", 4, getarity(puzzle_solution));
 

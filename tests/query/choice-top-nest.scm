@@ -2,7 +2,7 @@
 ; Unit testing for nested ChoiceLinks in the pattern matcher.
 ;
 (use-modules (opencog))
-(use-modules (opencog query))
+(use-modules (opencog exec))
 
 
 ;;; Populate the atomspace with four small trees.

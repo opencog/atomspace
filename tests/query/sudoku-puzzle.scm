@@ -1,5 +1,5 @@
 (use-modules (opencog))
-(use-modules (opencog query))
+(use-modules (opencog exec))
 
 ;
 ; Definition for a specific puzzle

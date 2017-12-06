@@ -4,7 +4,6 @@
 ; Demonstrate the use of DefineLink to give names to things.
 ;
 (use-modules (opencog))
-(use-modules (opencog query))
 (use-modules (opencog exec))
 
 ;; Some data to populate the atomspace.

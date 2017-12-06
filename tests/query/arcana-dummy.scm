@@ -2,7 +2,7 @@
 ; Unit testing for addition of "dummy" clauses into pattern.
 ;
 (use-modules (opencog))
-(use-modules (opencog query) (opencog exec))
+(use-modules (opencog exec))
 
 ; Data
 (Number 42)

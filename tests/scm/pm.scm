@@ -51,7 +51,7 @@
 ;; history-as.
 (define (run-bug i)
   (cog-logger-debug "run-bug ~a" i)
-  (cog-bind query)
+  (cog-execute! query)
   (gc)) ;; <--- precipitate the bug
 
 (for-each run-bug (iota 100))

@@ -2,7 +2,7 @@
 ; Data and tests for GetLink
 ;
 
-(use-modules ((opencog query)))
+(use-modules ((opencog exec)))
 
 (InheritanceLink (ConceptNode "Ben") (ConceptNode "human"))
 (InheritanceLink (ConceptNode "Linas") (ConceptNode "human"))

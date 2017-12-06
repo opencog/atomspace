@@ -43,7 +43,7 @@ public:
 		eval = new SchemeEval(as);
 		eval->eval("(add-to-load-path \"..\")");
 		eval->eval("(add-to-load-path \"../../..\")");
-		eval->eval("(use-modules (opencog query))");
+		eval->eval("(use-modules (opencog exec))");
 		eval->eval("(load-from-path \"tests/query/test_types.scm\")");
 	}
 
@@ -90,11 +90,11 @@ void ArcanaUTest::test_repeats(void)
 
 	eval->eval("(load-from-path \"tests/query/arcana-repeat.scm\")");
 
-	Handle same = eval->eval_h("(cog-bind (repeat-same))");
+	Handle same = eval->eval_h("(cog-execute! (repeat-same))");
 	printf("same, num solutions=%lu\n", getarity(same));
 	TS_ASSERT_EQUALS(1, getarity(same));
 
-	Handle diff = eval->eval_h("(cog-bind (repeat-different))");
+	Handle diff = eval->eval_h("(cog-execute! (repeat-different))");
 
 	// Either one or two solutions are acceptable, as long as the
 	// two are identical. One solution is prefered, but seems
@@ -111,16 +111,16 @@ void ArcanaUTest::test_repeats(void)
 		printf("Solution 2:\n%s\n", oset[0]->to_short_string().c_str());
 	TS_ASSERT_EQUALS(true, pass);
 
-	Handle d3d = eval->eval_h("(cog-bind (repeat-diff-thrice))");
+	Handle d3d = eval->eval_h("(cog-execute! (repeat-diff-thrice))");
 	printf("d3d, num solutions=%lu\n", getarity(d3d));
 	TS_ASSERT(1 <= getarity(d3d));
 	TS_ASSERT(getarity(d3d) <= 3);
 
-	Handle thrice = eval->eval_h("(cog-bind (repeat-thrice))");
+	Handle thrice = eval->eval_h("(cog-execute! (repeat-thrice))");
 	printf("thrice, num solutions=%lu\n", getarity(thrice));
 	TS_ASSERT_EQUALS(1, getarity(thrice));
 
-	Handle once = eval->eval_h("(cog-bind (repeat-once))");
+	Handle once = eval->eval_h("(cog-execute! (repeat-once))");
 	printf("once, num solutions=%lu\n", getarity(once));
 	TS_ASSERT_EQUALS(1, getarity(once));
 
@@ -141,7 +141,7 @@ void ArcanaUTest::test_const(void)
 	// ----
 	Handle marconi = eval->eval_h("marconi");
 
-	Handle answer = eval->eval_h("(cog-bind who)");
+	Handle answer = eval->eval_h("(cog-execute! who)");
 	printf("radio=%s\n", answer->to_string().c_str());
 
 	TS_ASSERT_EQUALS(1, getarity(answer));
@@ -151,7 +151,7 @@ void ArcanaUTest::test_const(void)
 
 	// ----
 	// Test DefinedSchemaNode as an answer.
-	Handle defans = eval->eval_h("(cog-bind whodfn)");
+	Handle defans = eval->eval_h("(cog-execute! whodfn)");
 	printf("defined radio=%s\n", defans->to_string().c_str());
 
 	TS_ASSERT_EQUALS(1, getarity(defans));

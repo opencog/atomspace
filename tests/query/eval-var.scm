@@ -2,7 +2,7 @@
 ; Unit test for evaluation of variables
 ;
 (use-modules (opencog))
-(use-modules (opencog query))
+(use-modules (opencog exec))
 
 (define (truf x)
 	(cond

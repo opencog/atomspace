@@ -51,7 +51,7 @@ public:
 
 		as = new AtomSpace();
 		SchemeEval* eval = SchemeEval::get_evaluator(as);
-		eval->eval("(use-modules (opencog exec) (opencog query))");
+		eval->eval("(use-modules (opencog exec))");
 		eval->eval("(add-to-load-path \"..\")");
 		eval->eval("(add-to-load-path \"../../..\")");
 	}

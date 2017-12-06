@@ -25,7 +25,7 @@
 ;
 
 (use-modules (opencog))
-(use-modules (opencog query))
+(use-modules (opencog exec))
 (use-modules (srfi srfi-1))
 
 (define* (cog-fc rbs source #:key (vardecl (List)) (focus-set (Set)))
@@ -179,7 +179,7 @@
                           (DeleteLink
                              (param-hypergraph (VariableNode "__VALUE__"))))))
        ; Delete any previous value for that parameter
-       (cog-bind del-prev-val)
+       (cog-execute! del-prev-val)
        ; Delete pattern to not create to much junk in the atomspace
        (extract-hypergraph del-prev-val)
   )
@@ -238,8 +238,8 @@
   applying the generated rules to the atomspace. Convenient for testing
   meta-rules.
 "
-  (let* ((rules (cog-bind bl))
-         (result-sets (map cog-bind (cog-outgoing-set rules)))
+  (let* ((rules (cog-execute! bl))
+         (result-sets (map cog-execute! (cog-outgoing-set rules)))
          (result-lists (map cog-outgoing-set result-sets))
          (equal-lset-union (lambda (x y) (lset-union equal? x y)))
          (results (fold equal-lset-union '() result-lists)))

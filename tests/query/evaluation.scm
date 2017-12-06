@@ -2,7 +2,7 @@
 ; Basic unit testing for different ways of nesting evaluatable links.
 ;
 (use-modules (opencog))
-(use-modules (opencog query))
+(use-modules (opencog exec))
 
 ;;; Populate the atomspace with a cover of a directed bouquet of four circles
 ;;; All nodes are equivalent to one, and there are directed arrows
