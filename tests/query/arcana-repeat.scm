@@ -3,7 +3,7 @@
 ;
 ;;; Populate the atomspace with two things
 (use-modules (opencog))
-(use-modules (opencog query))
+(use-modules (opencog exec))
 
 ; Two parts, both identical
 (ListLink
