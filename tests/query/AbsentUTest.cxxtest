@@ -42,7 +42,7 @@ public:
 		eval = new SchemeEval(as);
 		eval->eval("(add-to-load-path \"..\")");
 		eval->eval("(add-to-load-path \"../../..\")");
-		eval->eval("(use-modules (opencog exec) (opencog query))");
+		eval->eval("(use-modules (opencog exec))");
 	}
 
 	~AbsentUTest()
@@ -100,9 +100,9 @@ void AbsentUTest::test_single(void)
 	TS_ASSERT_EQUALS(state, empty);
 
 	// Make the golem come alive
-	eval->eval_h("(cog-bind create)");
-	eval->eval_h("(cog-bind is-visible)");
-	eval->eval_h("(cog-bind is-invisible)");
+	eval->eval_h("(cog-execute! create)");
+	eval->eval_h("(cog-execute! is-visible)");
+	eval->eval_h("(cog-execute! is-invisible)");
 
 	state = eval->eval_h("(show-room-state)");
 	printf("Expecting: %s\n", full->to_string().c_str());
@@ -110,24 +110,24 @@ void AbsentUTest::test_single(void)
 	TS_ASSERT_EQUALS(state, full);
 
 	// Kill the golem
-	eval->eval_h("(cog-bind destroy)");
-	eval->eval_h("(cog-bind is-visible)");
-	eval->eval_h("(cog-bind is-invisible)");
+	eval->eval_h("(cog-execute! destroy)");
+	eval->eval_h("(cog-execute! is-visible)");
+	eval->eval_h("(cog-execute! is-invisible)");
 
 	state = eval->eval_h("(show-room-state)");
 	TS_ASSERT_EQUALS(state, empty);
 
 	// Once more, for good luck.
-	eval->eval_h("(cog-bind create)");
-	eval->eval_h("(cog-bind is-visible)");
-	eval->eval_h("(cog-bind is-invisible)");
+	eval->eval_h("(cog-execute! create)");
+	eval->eval_h("(cog-execute! is-visible)");
+	eval->eval_h("(cog-execute! is-invisible)");
 
 	state = eval->eval_h("(show-room-state)");
 	TS_ASSERT_EQUALS(state, full);
 
-	eval->eval_h("(cog-bind destroy)");
-	eval->eval_h("(cog-bind is-visible)");
-	eval->eval_h("(cog-bind is-invisible)");
+	eval->eval_h("(cog-execute! destroy)");
+	eval->eval_h("(cog-execute! is-visible)");
+	eval->eval_h("(cog-execute! is-invisible)");
 
 	state = eval->eval_h("(show-room-state)");
 	TS_ASSERT_EQUALS(state, empty);
@@ -150,45 +150,45 @@ void AbsentUTest::test_double(void)
 	TS_ASSERT_EQUALS(state, exists);
 
 	// Mulder and Scully not around; UFO should be.
-	eval->eval_h("(cog-bind is-visible)");
-	eval->eval_h("(cog-bind is-invisible)");
-	eval->eval_h("(cog-bind is-proven)");
+	eval->eval_h("(cog-execute! is-visible)");
+	eval->eval_h("(cog-execute! is-invisible)");
+	eval->eval_h("(cog-execute! is-proven)");
 
 	state = eval->eval_h("(show-ufo-state)");
 	TS_ASSERT_EQUALS(state, exists);
 
 	// Get Mulder on the scene
 	eval->eval_h("(cog-execute! call-mulder)");
-	eval->eval_h("(cog-bind is-visible)");
-	eval->eval_h("(cog-bind is-invisible)");
-	eval->eval_h("(cog-bind is-proven)");
+	eval->eval_h("(cog-execute! is-visible)");
+	eval->eval_h("(cog-execute! is-invisible)");
+	eval->eval_h("(cog-execute! is-proven)");
 
 	state = eval->eval_h("(show-ufo-state)");
 	TS_ASSERT_EQUALS(state, denied);
 
 	// Discredit Mulder
-	eval->eval_h("(cog-bind discredit-mulder)");
-	eval->eval_h("(cog-bind is-visible)");
-	eval->eval_h("(cog-bind is-invisible)");
-	eval->eval_h("(cog-bind is-proven)");
+	eval->eval_h("(cog-execute! discredit-mulder)");
+	eval->eval_h("(cog-execute! is-visible)");
+	eval->eval_h("(cog-execute! is-invisible)");
+	eval->eval_h("(cog-execute! is-proven)");
 
 	state = eval->eval_h("(show-ufo-state)");
 	TS_ASSERT_EQUALS(state, exists);
 
 	// Get Scully on the scene
 	eval->eval_h("(cog-execute! call-scully)");
-	eval->eval_h("(cog-bind is-visible)");
-	eval->eval_h("(cog-bind is-invisible)");
-	eval->eval_h("(cog-bind is-proven)");
+	eval->eval_h("(cog-execute! is-visible)");
+	eval->eval_h("(cog-execute! is-invisible)");
+	eval->eval_h("(cog-execute! is-proven)");
 
 	state = eval->eval_h("(show-ufo-state)");
 	TS_ASSERT_EQUALS(state, denied);
 
 	// Discredit Scully
-	eval->eval_h("(cog-bind discredit-scully)");
-	eval->eval_h("(cog-bind is-visible)");
-	eval->eval_h("(cog-bind is-invisible)");
-	eval->eval_h("(cog-bind is-proven)");
+	eval->eval_h("(cog-execute! discredit-scully)");
+	eval->eval_h("(cog-execute! is-visible)");
+	eval->eval_h("(cog-execute! is-invisible)");
+	eval->eval_h("(cog-execute! is-proven)");
 
 	state = eval->eval_h("(show-ufo-state)");
 	TS_ASSERT_EQUALS(state, exists);
@@ -196,27 +196,27 @@ void AbsentUTest::test_double(void)
 	// Get both Mulder and Scully on the job
 	eval->eval_h("(cog-execute! call-mulder)");
 	eval->eval_h("(cog-execute! call-scully)");
-	eval->eval_h("(cog-bind is-visible)");
-	eval->eval_h("(cog-bind is-invisible)");
-	eval->eval_h("(cog-bind is-proven)");
+	eval->eval_h("(cog-execute! is-visible)");
+	eval->eval_h("(cog-execute! is-invisible)");
+	eval->eval_h("(cog-execute! is-proven)");
 
 	state = eval->eval_h("(show-ufo-state)");
 	TS_ASSERT_EQUALS(state, proven);
 
 	// Discredit Scully
-	eval->eval_h("(cog-bind discredit-scully)");
-	eval->eval_h("(cog-bind is-visible)");
-	eval->eval_h("(cog-bind is-invisible)");
-	eval->eval_h("(cog-bind is-proven)");
+	eval->eval_h("(cog-execute! discredit-scully)");
+	eval->eval_h("(cog-execute! is-visible)");
+	eval->eval_h("(cog-execute! is-invisible)");
+	eval->eval_h("(cog-execute! is-proven)");
 
 	state = eval->eval_h("(show-ufo-state)");
 	TS_ASSERT_EQUALS(state, denied);
 
 	// Discredit Mulder too
-	eval->eval_h("(cog-bind discredit-mulder)");
-	eval->eval_h("(cog-bind is-visible)");
-	eval->eval_h("(cog-bind is-invisible)");
-	eval->eval_h("(cog-bind is-proven)");
+	eval->eval_h("(cog-execute! discredit-mulder)");
+	eval->eval_h("(cog-execute! is-visible)");
+	eval->eval_h("(cog-execute! is-invisible)");
+	eval->eval_h("(cog-execute! is-proven)");
 
 	state = eval->eval_h("(show-ufo-state)");
 	TS_ASSERT_EQUALS(state, exists);
@@ -230,7 +230,7 @@ void AbsentUTest::test_connect_exist(void)
 
 	eval->eval("(load-from-path \"tests/query/absent-conn1.scm\")");
 
-	Handle rtn = eval->eval_h("(cog-bind test)");
+	Handle rtn = eval->eval_h("(cog-execute! test)");
 
 	Handle soln = eval->eval_h("soln");
 
@@ -246,7 +246,7 @@ void AbsentUTest::test_connect_not_exist(void)
 
 	eval->eval("(load-from-path \"tests/query/absent-conn2.scm\")");
 
-	Handle rtn = eval->eval_h("(cog-bind test)");
+	Handle rtn = eval->eval_h("(cog-execute! test)");
 
 	Handle soln = eval->eval_h("soln");
 
@@ -262,7 +262,7 @@ void AbsentUTest::test_discon_exist(void)
 
 	eval->eval("(load-from-path \"tests/query/absent-disconn1.scm\")");
 
-	Handle rtn = eval->eval_h("(cog-bind test)");
+	Handle rtn = eval->eval_h("(cog-execute! test)");
 
 	Handle soln = eval->eval_h("soln");
 
@@ -278,7 +278,7 @@ void AbsentUTest::test_discon_not_exist(void)
 
 	eval->eval("(load-from-path \"tests/query/absent-disconn2.scm\")");
 
-	Handle rtn = eval->eval_h("(cog-bind test)");
+	Handle rtn = eval->eval_h("(cog-execute! test)");
 
 	Handle soln = eval->eval_h("soln");
 

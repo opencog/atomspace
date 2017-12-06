@@ -1,6 +1,6 @@
 ; https://github.com/opencog/atomspace/issues/211
 
-(use-modules ((opencog query)))
+(use-modules ((opencog exec)))
 
 (EvaluationLink
    (ConceptNode "arkle")

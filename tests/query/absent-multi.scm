@@ -7,7 +7,6 @@
 ; proof.
 ;
 (use-modules (opencog))
-(use-modules (opencog query))
 (use-modules (opencog exec))
 
 ; Clause to match during query - are Agents Mulder and Scully around?
