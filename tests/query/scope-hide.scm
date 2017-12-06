@@ -3,7 +3,7 @@
 ;
 
 (use-modules (opencog))
-(use-modules (opencog query))
+(use-modules (opencog exec))
 
 ;; The ForAll link is a ScopeLink, and so (VariableNode "$X")
 ;; is a bound var.
