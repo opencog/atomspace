@@ -12,12 +12,12 @@
       path))
 
 (use-modules (opencog))
+(use-modules (opencog exec))
 (use-modules (opencog logger))
-(use-modules (opencog query))
 (use-modules (opencog rule-engine))
 
 ; Hack to re-load the logger module, again.
-; Its been previously loaded, but the cog-logger-debug symbol
+; Its been previously loaded, but the `cog-logger-debug` symbol
 ; is missing because it was loaded in a different environment.
 ; guile environments are mis-handled in the unit tests...
 (load "../../opencog/scm/opencog/logger.scm")
