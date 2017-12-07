@@ -4,24 +4,25 @@
 ; Hack to get rule-engine to load in the unit-test environment.
 ; I don't understand why this is needed here, it doesn't seem to
 ; be needed in any of the other unit tests.
-(define path "/usr/local/lib/opencog:/usr/local/lib64/opencog")
-(define path
-"./opencog/rule-engine:./opencog/guile:../../opencog/rule-engine:../../opencog/guile:../../../opencog/guile")
+(define libpath "/usr/local/lib/opencog:/usr/local/lib64/opencog")
+(define libpath
+"./opencog/rule-engine:./opencog/guile:../../opencog/rule-engine:../../opencog/guile:../../../opencog/rule-engine:../../../opencog/guile")
 (setenv "LTDL_LIBRARY_PATH"
    (if (getenv "LTDL_LIBRARY_PATH")
-      (string-append (getenv "LTDL_LIBRARY_PATH") ":" path)
-      path))
+      (string-append (getenv "LTDL_LIBRARY_PATH") ":" libpath)
+      libpath))
 
 (use-modules (opencog))
 (use-modules (opencog exec))
 (use-modules (opencog logger))
 (use-modules (opencog rule-engine))
+(sleep 2)
 
 ; Hack to re-load the logger module, again.
 ; Its been previously loaded, but the `cog-logger-debug` symbol
 ; is missing because it was loaded in a different environment.
 ; guile environments are mis-handled in the unit tests...
-(load "../../opencog/scm/opencog/logger.scm")
+(load-from-path "../../opencog/scm/opencog/logger.scm")
 
 ;; Create a new atomspace to not by-pass the problem (due to
 ;; WORK_AROUND_GUILE_20_GC_BUG in SchemeSmobAS.cc)
