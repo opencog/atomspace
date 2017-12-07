@@ -511,6 +511,9 @@ void MultiAtomSpace::test_pm_scm(void)
 {
 	logger().debug("BEGIN TEST: %s", __FUNCTION__);
 
+	evaluator->eval("(use-modules (opencog))");
+	evaluator->eval("(use-modules (opencog exec))");
+
 	std::string rs = evaluator->eval("(load-from-path \"tests/scm/pm.scm\")");
 	boost::trim(rs);
 	std::cout << "rs = " << rs << std::endl;
