@@ -5,7 +5,8 @@
 ; I don't understand why this is needed here, it doesn't seem to
 ; be needed in any of the other unit tests.
 (define path "/usr/local/lib/opencog:/usr/local/lib64/opencog")
-(define path "./opencog/rule-engine:./opencog/guile")
+(define path
+"./opencog/rule-engine:./opencog/guile:../../opencog/rule-engine:../../opencog/guile:../../../opencog/guile")
 (setenv "LTDL_LIBRARY_PATH"
    (if (getenv "LTDL_LIBRARY_PATH")
       (string-append (getenv "LTDL_LIBRARY_PATH") ":" path)
