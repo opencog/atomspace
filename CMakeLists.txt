@@ -89,13 +89,10 @@ IF (CMAKE_COMPILER_IS_GNUCXX)
 		# -flto is good for performance, but wow is it slow to link...
 		# XXX disable for now ... its just to painful, in daily life.
 		# ... except that the buildbot needs this, to pass unit tests.
-		# Current failure is in libatomcore, which depends on atomspace.
-		# (ldd -r libatomcore shows unresolved symbols.)
-		# This will someday be fiaxable by moving the factories out
-		# of the atomtable, and into the class server. But for now,
-		# we use -flto as a work-around.
-		# SET(CMAKE_C_FLAGS_RELEASE "-O3 -g -fstack-protector")
-		SET(CMAKE_C_FLAGS_RELEASE "-O3 -g -fstack-protector -flto")
+		# Current failure is in libatomcore, which depends on atomutils
+		# (ldd -r libatomcore.so shows unresolved symbols.)
+		SET(CMAKE_C_FLAGS_RELEASE "-O3 -g -fstack-protector")
+		# SET(CMAKE_C_FLAGS_RELEASE "-O3 -g -fstack-protector -flto")
 		# SET(CMAKE_C_FLAGS_RELEASE "-O3 -g -fstack-protector -flto=8")
 
 		SET(NO_AS_NEEDED "-Wl,--no-as-needed")
