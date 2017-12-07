@@ -30,6 +30,7 @@
 #include <opencog/atoms/core/LambdaLink.h>
 #include <opencog/atoms/core/TypeNode.h>
 #include <opencog/atomutils/TypeUtils.h>
+#include <opencog/atomutils/FindUtils.h>
 
 #include "ScopeLink.h"
 
@@ -473,6 +474,28 @@ Handle ScopeLink::substitute_vardecl(const Handle& vardecl,
 	return createLink(oset, t);
 }
 
+Handle ScopeLink::consume_ill_quotations() const
+{
+	Handle vardecl = get_vardecl();
+	const Variables& variables = get_variables();
+	HandleSeq nouts;
+	for (size_t i = (get_vardecl() ? 1 : 0); i < get_arity(); ++i) {
+		Handle nbody = consume_ill_quotations(variables, getOutgoingAtom(i));
+		nouts.push_back(nbody);
+		// If the new body has terms with free variables but no
+		// vardecl it means that some quotations are missing. Rather
+		// than adding them we set vardecl to an empty VariableList.
+		if (not vardecl and not get_free_variables(nbody).empty())
+			vardecl = Handle(createVariableList(HandleSeq{}));
+	}
+
+	if (vardecl)
+		nouts.insert(nouts.begin(), vardecl);
+
+	// Recreate the scope
+	return createLink(nouts, get_type());
+}
+
 Handle ScopeLink::consume_ill_quotations(const Handle& vardecl, const Handle& h)
 {
 	const Variables variables = createVariableList(vardecl)->get_variables();
@@ -490,20 +513,26 @@ Handle ScopeLink::consume_ill_quotations(const Variables& variables, Handle h,
 	Type t = h->get_type();
 	if (quotation.consumable(t)) {
 		if (t == QUOTE_LINK) {
-			Handle scope = h->getOutgoingAtom(0);
-			OC_ASSERT(classserver().isA(scope->get_type(), SCOPE_LINK),
-			          "This defaults the assumption, see this function comment");
-			// Check whether the vardecl of scope is bound to the
-			// ancestor scope rather than itself, if so escape the
-			// consumption.
-			if (not is_bound_to_ancestor(variables, scope)) {
+			Handle qh = h->getOutgoingAtom(0);
+			// If it's a scope, check whether its vardecl is bound to
+			// itself rather than the ancestor scope, if so the Quote
+			// is harmful, consume it. Otherwise, for other quoted
+			// link types, do not consume the quote and the subsequent
+			// unquotes.
+			if (classserver().isA(qh->get_type(), SCOPE_LINK) and
+			    not is_bound_to_ancestor(variables, qh))
+			{
 				quotation.update(t);
-				return consume_ill_quotations(variables, scope, quotation);
+				return consume_ill_quotations(variables, qh, quotation);
 			} else {
 				escape = true;
 			}
 		} else if (t == UNQUOTE_LINK) {
-			if (not escape) {
+			Handle uh = h->getOutgoingAtom(0);
+			// Either remove subsequent unquote associated by a
+			// removed quote, or useless unquote because there are no
+			// free variables to unquote
+			if (not escape or get_free_variables(uh).empty()) {
 				quotation.update(t);
 				return consume_ill_quotations(variables, h->getOutgoingAtom(0),
 				                              quotation);
