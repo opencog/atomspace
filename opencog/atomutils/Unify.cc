@@ -185,8 +185,9 @@ Unify::TypedSubstitution Unify::typed_substitution(const Partition& partition,
 
 	// Remove ill quotations
 	for (auto& vcv : var2cval) {
-		Handle consumed = consume_ill_quotations(_variables, vcv.second.handle,
-		                                         vcv.second.context.quotation);
+		Handle consumed =
+			ScopeLink::consume_ill_quotations(_variables, vcv.second.handle,
+			                                  vcv.second.context.quotation);
 		vcv.second = CHandle(consumed, vcv.second.context);
 	}
 
@@ -278,90 +279,6 @@ bool Unify::is_pm_connector(Type t)
 	return t == AND_LINK or t == OR_LINK or t == NOT_LINK;
 }
 
-BindLinkPtr Unify::consume_ill_quotations(BindLinkPtr bl)
-{
-	Handle vardecl = bl->get_vardecl(),
-		pattern = bl->get_body(),
-		rewrite = bl->get_implicand();
-
-	// Consume the pattern's quotations
-	pattern = consume_ill_quotations(bl->get_variables(), pattern);
-
-	// Consume the rewrite's quotations
-	rewrite = consume_ill_quotations(bl->get_variables(), rewrite);
-
-	// If the pattern has clauses with free variables but no vardecl
-	// it means that some quotations are missing. Rather than adding
-	// them we merely set vardecl to an empty VariableList.
-	if (not vardecl and not get_free_variables(pattern).empty())
-		vardecl = Handle(createVariableList(HandleSeq{}));
-
-	// Recreate the BindLink
-	return vardecl ?
-		createBindLink(vardecl, pattern, rewrite)
-		: createBindLink(pattern, rewrite);
-}
-
-Handle Unify::consume_ill_quotations(const Handle& vardecl, const Handle& h)
-{
-	const Variables variables = createVariableList(vardecl)->get_variables();
-	return consume_ill_quotations(variables, h);
-}
-
-Handle Unify::consume_ill_quotations(const Variables& variables, Handle h,
-                                     Quotation quotation, bool escape)
-{
-	// Base case
-	if (h->is_node())
-		return h;
-
-	// Recursive cases
-	Type t = h->get_type();
-	if (quotation.consumable(t)) {
-		if (t == QUOTE_LINK) {
-			Handle scope = h->getOutgoingAtom(0);
-			OC_ASSERT(classserver().isA(scope->get_type(), SCOPE_LINK),
-			          "This defaults the assumption, see this function comment");
-			// Check whether the vardecl of scope is bound to the
-			// ancestor scope rather than itself, if so escape the
-			// consumption.
-			if (not is_bound_to_ancestor(variables, scope)) {
-				quotation.update(t);
-				return consume_ill_quotations(variables, scope, quotation);
-			} else {
-				escape = true;
-			}
-		} else if (t == UNQUOTE_LINK) {
-			if (not escape) {
-				quotation.update(t);
-				return consume_ill_quotations(variables, h->getOutgoingAtom(0),
-				                              quotation);
-			}
-		}
-		// Ignore LocalQuotes as they supposedly used only to quote
-		// pattern matcher connectors.
-	}
-
-	quotation.update(t);
-	HandleSeq consumed;
-	for (const Handle outh : h->getOutgoingSet())
-		consumed.push_back(consume_ill_quotations(variables, outh, quotation,
-		                                          escape));
-
-	return createLink(consumed, t);
-}
-
-bool Unify::is_bound_to_ancestor(const Variables& variables,
-                                 const Handle& local_scope)
-{
-	Handle unquote = local_scope->getOutgoingAtom(0);
-	if (unquote->get_type() == UNQUOTE_LINK) {
-		Handle var = unquote->getOutgoingAtom(0);
-		return variables.is_in_varset(var);
-	}
-	return false;
-}
-
 Handle Unify::substitute(BindLinkPtr bl, const TypedSubstitution& ts)
 {
 	// TODO: make sure that ts.second contains the declaration of all
@@ -395,13 +312,13 @@ Handle Unify::substitute(BindLinkPtr bl, const HandleMap& var2val,
 	// Perform substitution over the pattern term, then remove
 	// constant clauses
 	Handle clauses = variables.substitute_nocheck(bl->get_body(), values);
-	clauses = consume_ill_quotations(vardecl, clauses);
+	clauses = ScopeLink::consume_ill_quotations(vardecl, clauses);
 	clauses = remove_constant_clauses(vardecl, clauses);
 	hs.push_back(clauses);
 
 	// Perform substitution over the rewrite term
 	Handle rewrite = variables.substitute_nocheck(bl->get_implicand(), values);
-	rewrite = consume_ill_quotations(vardecl, rewrite);
+	rewrite = ScopeLink::consume_ill_quotations(vardecl, rewrite);
 	hs.push_back(rewrite);
 
 	// Filter vardecl

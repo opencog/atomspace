@@ -241,24 +241,10 @@ public:
 	 *
 	 * No other use of quotation is assumed besides the 2 above.
 	 *
-	 * TODO: replace by ScopeLink methods!
+	 * TODO: apparently not used. And if it is used it should be moved
+	 * to ScopeLink.
 	 */
 	static BindLinkPtr consume_ill_quotations(BindLinkPtr bl);
-	static Handle consume_ill_quotations(const Handle& vardecl, const Handle& h);
-	static Handle consume_ill_quotations(const Variables& variables, Handle h,
-	                                     Quotation quotation=Quotation(),
-	                                     bool escape=false /* ignore the next
-	                                                        * quotation
-	                                                        * consumption */);
-
-	/**
-	 * Return true iff the variable declaration of local_scope is a
-	 * variable of variables wrapped in a UnquoteLink.
-	 *
-	 * TODO: user ScopeLink method instead!
-	 */
-	static bool is_bound_to_ancestor(const Variables& variables,
-	                                 const Handle& local_scope);
 
 	/**
 	 * Return true iff the handle or type correspond to a pattern
