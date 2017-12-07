@@ -14,6 +14,7 @@
 ; Declare everything the C++ library provides; this avoid compile-time
 ; warnings when this file gets compiled.
 (export
+	cog-logger?
 	cog-default-logger
 	cog-ure-logger
 	cog-logger-get-filename-of-logger
@@ -30,6 +31,20 @@
 	cog-logger-info-of-logger
 	cog-logger-debug-of-logger
 	cog-logger-fine-of-logger
+	cog-logger-get-filename
+	cog-logger-get-level
+	cog-logger-get-component
+	cog-logger-set-filename!
+	cog-logger-set-level!
+	cog-logger-set-component!
+	cog-logger-set-stdout!
+	cog-logger-set-sync!
+	cog-logger-set-timestamp!
+	cog-logger-error
+	cog-logger-warn
+	cog-logger-info
+	cog-logger-debug
+	cog-logger-fine
 )
 
 ;; Documentation for the functions implemented as C++ code
@@ -294,18 +309,3 @@
     The MSG can be in any ice-9 printing format.
 "
   (cog-logger-fine-of-logger logger (apply format #f msg args)))
-
-(export cog-logger-get-filename
-        cog-logger-get-level
-        cog-logger-get-component
-        cog-logger-set-filename!
-        cog-logger-set-level!
-        cog-logger-set-component!
-        cog-logger-set-stdout!
-        cog-logger-set-sync!
-        cog-logger-set-timestamp!
-        cog-logger-error
-        cog-logger-warn
-        cog-logger-info
-        cog-logger-debug
-        cog-logger-fine)
