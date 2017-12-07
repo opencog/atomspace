@@ -142,8 +142,13 @@ public:
 	 *    variable declaration can pattern match grounded or partially
 	 *    grounded scope links.
 	 *
-	 * No other use of quotation is assumed besides the 2 above.
+	 * 3. Quote/Unquote are also used to wrap Evaluation containing
+	 *    GroundedPredicate and possibly other atom types with special
+	 *    handling by the pattern matcher.
+	 *
+	 * No other use of quotation is assumed besides the 3 above.
 	 */
+	Handle consume_ill_quotations() const;
 	static Handle consume_ill_quotations(const Handle& vardecl, const Handle& h);
 	static Handle consume_ill_quotations(const Variables& variables, Handle h,
 	                                     Quotation quotation=Quotation(),
