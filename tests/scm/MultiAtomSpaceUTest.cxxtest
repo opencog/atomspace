@@ -506,10 +506,6 @@ void MultiAtomSpace::test_arg_scm(void)
 /**
  * Create a new atomspace from scheme and work (use the pattern
  * matcher) inside this atomspace.
- *
- * This unit test always fails, for obscure, hard-to-understand
- * reasons that seem to have something to do with the loading and
- * symbol resolution of shared libraries in the test environment.
  */
 void MultiAtomSpace::test_pm_scm(void)
 {
