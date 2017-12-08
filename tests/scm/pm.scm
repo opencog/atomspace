@@ -5,19 +5,20 @@
 ; I don't understand why this is needed here, it doesn't seem to
 ; be needed in any of the other unit tests.
 (define libpath "/usr/local/lib/opencog:/usr/local/lib64/opencog")
-(define libpath "./opencog/rule-engine:./opencog/guile:../../opencog/rule-engine:../../opencog/guile:../../../opencog/rule-engine:../../../opencog/guile")
-; (define libpath "./opencog/rule-engine:./opencog/guile")
+(define libpath "./opencog/rule-engine:./opencog/guile:../../opencog/rule-engine:../../opencog/guile")
 (setenv "LTDL_LIBRARY_PATH"
    (if (getenv "LTDL_LIBRARY_PATH")
       (string-append (getenv "LTDL_LIBRARY_PATH") ":" libpath)
       libpath))
 
-(reload-module (resolve-module (list (string->symbol "opencog"))))
-(reload-module (resolve-module (list (string->symbol "opencog") (string->symbol "logger"))))
-(use-modules (opencog))
 (use-modules (opencog exec))
 (use-modules (opencog logger))
 (use-modules (opencog rule-engine))
+
+; Hack to reload the rule-engine and logger modules.
+; I don't understand why this is needed, but its needed.
+(reload-module (resolve-module (list (string->symbol "opencog"))))
+(reload-module (resolve-module (list (string->symbol "opencog") (string->symbol "logger"))))
 
 ;; Create a new atomspace to not by-pass the problem (due to
 ;; WORK_AROUND_GUILE_20_GC_BUG in SchemeSmobAS.cc)
