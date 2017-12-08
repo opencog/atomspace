@@ -1,26 +1,29 @@
 ;; File to reproduce a bug when operating on multiple atomspaces
 ;; created from scheme.
 
-; Hack to get rule-engine to load in the unit-test environment.
+; Hack to get logger to load in the unit-test environment.
 ; I don't understand why this is needed here, it doesn't seem to
 ; be needed in any of the other unit tests.
-(define path "/usr/local/lib/opencog:/usr/local/lib64/opencog")
-(define path "./opencog/rule-engine:./opencog/guile")
+; Its got some bizarro interaction with the rule-engine: if we
+; remove the rule-engine from the path, then liblogger.scm cannot
+; be found! That is very confusing to me ...
+(define libpath "/usr/local/lib/opencog:/usr/local/lib64/opencog")
+(define libpath "./opencog/rule-engine:./opencog/guile:../../opencog/rule-engine:../../opencog/guile")
 (setenv "LTDL_LIBRARY_PATH"
    (if (getenv "LTDL_LIBRARY_PATH")
-      (string-append (getenv "LTDL_LIBRARY_PATH") ":" path)
-      path))
+      (string-append (getenv "LTDL_LIBRARY_PATH") ":" libpath)
+      libpath))
 
-(use-modules (opencog))
-(use-modules (opencog exec))
 (use-modules (opencog logger))
-(use-modules (opencog rule-engine))
 
-; Hack to re-load the logger module, again.
-; Its been previously loaded, but the `cog-logger-debug` symbol
-; is missing because it was loaded in a different environment.
-; guile environments are mis-handled in the unit tests...
-(load "../../opencog/scm/opencog/logger.scm")
+; Hack to reload the logger module. I don't understand why this is
+; needed, but its needed. It might have something to do with unresolved
+; symbols in some of the libraries that liblgger.so depends on?
+; (reload-module (resolve-module (list (string->symbol "opencog"))))
+(reload-module (resolve-module (list (string->symbol "opencog") (string->symbol "logger"))))
+
+(use-modules (opencog exec))
+(use-modules (opencog rule-engine))
 
 ;; Create a new atomspace to not by-pass the problem (due to
 ;; WORK_AROUND_GUILE_20_GC_BUG in SchemeSmobAS.cc)

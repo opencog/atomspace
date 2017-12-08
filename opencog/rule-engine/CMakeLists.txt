@@ -42,7 +42,7 @@ INSTALL (TARGETS ruleengine DESTINATION "lib${LIB_DIR_SUFFIX}/opencog")
 INSTALL (FILES
 	UREConfig.h
 	URECommons.h
-    URELogger.h
+	URELogger.h
 	Rule.h
 	UREConfig.h
 	DESTINATION "include/opencog/rule-engine"
