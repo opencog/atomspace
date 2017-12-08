@@ -18,23 +18,6 @@
 (use-modules (opencog exec))
 (use-modules (opencog logger))
 (use-modules (opencog rule-engine))
-(sleep 2)
-; (format #t "duuude mod is ~A\n" (current-module))
-
-; (reload-module ((opencog logger)))
-; (reload-module (resolve-module ((opencog logger))))
-; (format #t "duuude now amod is ~A\n" (current-module))
-
-; Hack to re-load the logger module, again.
-; Its been previously loaded, but the `cog-logger-debug` symbol
-; is missing because it was loaded in a different environment.
-; guile environments are mis-handled in the unit tests...
-; (load "../../opencog/scm/opencog/logger.scm")
-; (display %load-path) (newline)
-(add-to-load-path "../opencog/scm/opencog/")
-(add-to-load-path "../../opencog/scm/opencog/")
-; (save-module-excursion (lambda () (load-from-path "exec.scm")))
-; (save-module-excursion (lambda () (load-from-path "logger.scm")))
 
 ;; Create a new atomspace to not by-pass the problem (due to
 ;; WORK_AROUND_GUILE_20_GC_BUG in SchemeSmobAS.cc)
