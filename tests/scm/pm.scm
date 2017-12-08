@@ -5,24 +5,36 @@
 ; I don't understand why this is needed here, it doesn't seem to
 ; be needed in any of the other unit tests.
 (define libpath "/usr/local/lib/opencog:/usr/local/lib64/opencog")
-(define libpath
-"./opencog/rule-engine:./opencog/guile:../../opencog/rule-engine:../../opencog/guile:../../../opencog/rule-engine:../../../opencog/guile")
+(define libpath "./opencog/rule-engine:./opencog/guile:../../opencog/rule-engine:../../opencog/guile:../../../opencog/rule-engine:../../../opencog/guile")
+; (define libpath "./opencog/rule-engine:./opencog/guile")
 (setenv "LTDL_LIBRARY_PATH"
    (if (getenv "LTDL_LIBRARY_PATH")
       (string-append (getenv "LTDL_LIBRARY_PATH") ":" libpath)
       libpath))
 
+(reload-module (resolve-module (list (string->symbol "opencog"))))
+(reload-module (resolve-module (list (string->symbol "opencog") (string->symbol "logger"))))
 (use-modules (opencog))
 (use-modules (opencog exec))
 (use-modules (opencog logger))
 (use-modules (opencog rule-engine))
 (sleep 2)
+; (format #t "duuude mod is ~A\n" (current-module))
+
+; (reload-module ((opencog logger)))
+; (reload-module (resolve-module ((opencog logger))))
+; (format #t "duuude now amod is ~A\n" (current-module))
 
 ; Hack to re-load the logger module, again.
 ; Its been previously loaded, but the `cog-logger-debug` symbol
 ; is missing because it was loaded in a different environment.
 ; guile environments are mis-handled in the unit tests...
-(load-from-path "../../opencog/scm/opencog/logger.scm")
+; (load "../../opencog/scm/opencog/logger.scm")
+; (display %load-path) (newline)
+(add-to-load-path "../opencog/scm/opencog/")
+(add-to-load-path "../../opencog/scm/opencog/")
+; (save-module-excursion (lambda () (load-from-path "exec.scm")))
+; (save-module-excursion (lambda () (load-from-path "logger.scm")))
 
 ;; Create a new atomspace to not by-pass the problem (due to
 ;; WORK_AROUND_GUILE_20_GC_BUG in SchemeSmobAS.cc)
