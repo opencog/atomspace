@@ -242,15 +242,17 @@
 (Evaluation
 	(Predicate "Some Seq")
 	(List
-		(Concept "A")
-		(Concept "B")
-		(Concept "C")
-		(Concept "D")
-		(Concept "E")
-		(Concept "F")
-		(Concept "G")
-		(Concept "H")
-		(Concept "I")))
+		(Concept "Some Node")
+		(List
+			(Concept "A")
+			(Concept "B")
+			(Concept "C")
+			(Concept "D")
+			(Concept "E")
+			(Concept "F")
+			(Concept "G")
+			(Concept "H")
+			(Concept "I"))))
 
 ; Only returns true if ATOM is "C"
 (define-public (match-c ATOM)
@@ -323,7 +325,8 @@
 					(IntervalLink (Number 0) (Number -1)))))
 		(And
 			(Evaluation (Predicate "Some Seq")
-				(List (Glob "$x") (Glob "$y") (Glob "$z")))
+				(List (Concept "Some Node")
+					(List (Glob "$x") (Glob "$y") (Glob "$z"))))
 			(Evaluation (GroundedPredicate "scm: match-def")
 				(List (List (Glob "$y")))))
 		(List
