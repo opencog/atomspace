@@ -501,7 +501,7 @@ bool PatternMatchEngine::unorder_compare(const PatternTermPtr& ptm,
 	const HandleSeq& osg = hg->getOutgoingSet();
 	PatternTermSeq osp = ptm->getOutgoingSet();
 	size_t arity = osp.size();
-	bool has_glob = (0 < _pat->globby_terms.count(ptm->getHandle()));
+	bool has_glob = (0 < _pat->globby_holders.count(ptm->getHandle()));
 
 	// They've got to be the same size, at the least!
 	// unless there are globs in the pattern
@@ -1202,7 +1202,7 @@ bool PatternMatchEngine::explore_up_branches(const PatternTermPtr& ptm,
 	              << " have " << sz << " branches";})
 
 	// Check if the pattern has globs in it.
-	bool has_glob = contains_atomtype(ptm->getHandle(), GLOB_NODE);
+	bool has_glob = (0 < _pat->globby_holders.count(ptm->getHandle()));
 	size_t gstate_size = SIZE_MAX;
 
 	bool found = false;
@@ -2060,7 +2060,7 @@ bool PatternMatchEngine::explore_clause(const Handle& term,
 	{
 		// Check if the pattern has globs in it, and record the glob_state.
 		// Do this *before* exploring the term.
-		bool has_glob = contains_atomtype(term, GLOB_NODE);
+		bool has_glob = (0 < _pat->globby_holders.count(term));
 		size_t gstate_size = _glob_state.size();
 
 		DO_LOG({logger().fine("Clause is matchable; start matching it");})
