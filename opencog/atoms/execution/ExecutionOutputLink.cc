@@ -83,6 +83,8 @@ ExecutionOutputLink::ExecutionOutputLink(const Link& l)
 	if (EXECUTION_OUTPUT_LINK != tscope)
 		throw SyntaxException(TRACE_INFO,
 			"Expection an ExecutionOutputLink!");
+
+	check_schema(l.getOutgoingAtom(0));
 }
 
 /// execute -- execute the function defined in an ExecutionOutputLink
