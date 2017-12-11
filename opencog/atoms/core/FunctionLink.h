@@ -42,7 +42,7 @@ class AtomSpace;
  * it derives from the FreeLink, and NOT the LambdaLink.  This may seem
  * counter-intuitive, and deserves an explanation, so here it is:
  * All link types inheriting from this class will always, by definition,
- * have thier outgoing set be the arguments to that function. Think of
+ * have their outgoing set be the arguments to that function. Think of
  * PlusLink, for example.  Having a lambda with variable declarations
  * in there would just be weird and create confusion.  If the arguments
  * to PlusLink happen to include a variable, that variable is necessarily
