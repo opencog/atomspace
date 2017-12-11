@@ -56,8 +56,8 @@ public:
 		// Erase the log file if no assertions failed.
 		if (!CxxTest::TestTracker::tracker().suiteFailed())
 			std::remove(logger().get_filename().c_str());
-int rc = CxxTest::TestTracker::tracker().suiteFailed();
-_exit(rc); // XXX hack to avoid double-free in __run_exit_handlers
+		int rc = CxxTest::TestTracker::tracker().suiteFailed();
+		_exit(rc); // XXX hack to avoid double-free in __run_exit_handlers
 	}
 
 	void setUp();
@@ -133,10 +133,10 @@ void ScopeUTest::test_search()
 	eval->eval("(load-from-path \"tests/query/scope-search.scm\")");
 
 	Handle c1 = eval->eval_h("(content-1)");
-	Handle r1 = eval->eval_h("(cog-bind (member-to-evaluation-2-1-rule))");
+	Handle r1 = eval->eval_h("(cog-execute! (member-to-evaluation-2-1-rule))");
 
 	Handle c2 = eval->eval_h("(content-2)");
-	Handle r2 = eval->eval_h("(cog-bind (member-to-evaluation-2-1-rule))");
+	Handle r2 = eval->eval_h("(cog-execute! (member-to-evaluation-2-1-rule))");
 
 	TS_ASSERT_EQUALS(c1, c2);
 	TS_ASSERT_EQUALS(r1, r2);
@@ -154,10 +154,10 @@ void ScopeUTest::test_search_reverse()
 	eval->eval("(load-from-path \"tests/query/scope-search.scm\")");
 
 	Handle c2 = eval->eval_h("(content-2)");
-	Handle r2 = eval->eval_h("(cog-bind (member-to-evaluation-2-1-rule))");
+	Handle r2 = eval->eval_h("(cog-execute! (member-to-evaluation-2-1-rule))");
 
 	Handle c1 = eval->eval_h("(content-1)");
-	Handle r1 = eval->eval_h("(cog-bind (member-to-evaluation-2-1-rule))");
+	Handle r1 = eval->eval_h("(cog-execute! (member-to-evaluation-2-1-rule))");
 
 	TS_ASSERT_EQUALS(c1, c2);
 	TS_ASSERT_EQUALS(r1, r2);
@@ -174,10 +174,10 @@ void ScopeUTest::test_search_alt()
 	eval->eval("(load-from-path \"tests/query/scope-search.scm\")");
 
 	Handle c1 = eval->eval_h("(content-1)");
-	Handle r1 = eval->eval_h("(cog-bind (member-to-evaluation-2-1-alt))");
+	Handle r1 = eval->eval_h("(cog-execute! (member-to-evaluation-2-1-alt))");
 
 	Handle c2 = eval->eval_h("(content-2)");
-	Handle r2 = eval->eval_h("(cog-bind (member-to-evaluation-2-1-rule))");
+	Handle r2 = eval->eval_h("(cog-execute! (member-to-evaluation-2-1-rule))");
 
 	TS_ASSERT_EQUALS(c1, c2);
 	TS_ASSERT_EQUALS(r1, r2);
@@ -199,9 +199,9 @@ void ScopeUTest::test_pushpop()
 	Handle c1 = eval->eval_h("(content-1)");
 	eval->eval_h("(evaluation-to-member-2-rule-loose)");
 	eval->eval_h("(evaluation-to-member-2-rule)");
-	eval->eval_h("(cog-bind (member-to-evaluation-2-1-rule))");
+	eval->eval_h("(cog-execute! (member-to-evaluation-2-1-rule))");
 
-	Handle em = eval->eval_h("(cog-bind (evaluation-to-member-2-rule))");
+	Handle em = eval->eval_h("(cog-execute! (evaluation-to-member-2-rule))");
 	TS_ASSERT_EQUALS(1, em->get_arity());
 	Handle c2 = em->getOutgoingAtom(0);
 
@@ -220,8 +220,8 @@ void ScopeUTest::test_quote()
 
 	eval->eval("(load-from-path \"tests/query/scope-quote.scm\")");
 
-	Handle list = eval->eval_h("(cog-bind blist)");
-	Handle andl = eval->eval_h("(cog-bind bland)");
+	Handle list = eval->eval_h("(cog-execute! blist)");
+	Handle andl = eval->eval_h("(cog-execute! bland)");
 
 	Handle elist = eval->eval_h("(SetLink (OrderedLink p-lamb q-lamb))");
 	Handle eandl = eval->eval_h("(SetLink (UnorderedLink p-lamb q-lamb))");

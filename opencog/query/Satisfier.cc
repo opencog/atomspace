@@ -118,7 +118,17 @@ bool SatisfyingSet::grounding(const HandleMap &var_soln,
 
 	if (1 == _varseq.size())
 	{
-		_satisfying_set.emplace(var_soln.at(_varseq[0]));
+		// std::map::at() can throw. Rethrow for easier deubugging.
+		try
+		{
+			_satisfying_set.emplace(var_soln.at(_varseq[0]));
+		}
+		catch (...)
+		{
+			throw AssertionException(TRACE_INFO,
+				"Internal error: ungrounded variable %s\n",
+				_varseq[0]->to_string().c_str());
+		}
 
 		// If we found as many as we want, then stop looking for more.
 		return (_satisfying_set.size() >= max_results);

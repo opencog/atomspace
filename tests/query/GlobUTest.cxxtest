@@ -42,7 +42,7 @@ public:
 		eval = new SchemeEval(as);
 		eval->eval("(add-to-load-path \"..\")");
 		eval->eval("(add-to-load-path \"../../..\")");
-		eval->eval("(use-modules (opencog query))");
+		eval->eval("(use-modules (opencog exec))");
 	}
 
 	~GlobUTest()
@@ -70,6 +70,8 @@ _exit(rc); // XXX hack to avoid double-free in __run_exit_handlers
 	void test_glob_greedy(void);
 	void test_glob_unorder(void);
 	void test_glob_backtrack(void);
+	void test_glob_backtoo(void);
+	void test_glob_backmore(void);
 	void test_glob_multiple(void);
 };
 
@@ -426,6 +428,70 @@ void GlobUTest::test_glob_backtrack(void)
 		"      (ConceptNode \"I\"))))"
 	);
 	TS_ASSERT_EQUALS(backtrack, response);
+
+	// ----
+	logger().debug("END TEST: %s", __FUNCTION__);
+}
+
+void GlobUTest::test_glob_backtoo(void)
+{
+	logger().debug("BEGIN TEST: %s", __FUNCTION__);
+
+	eval->eval("(load-from-path \"tests/query/glob-basic.scm\")");
+
+	Handle backtoo = eval->eval_h("(cog-execute! backtoo)");
+	printf("backtoo %s\n", backtoo->to_string().c_str());
+	TS_ASSERT_EQUALS(1, backtoo->get_arity());
+
+	Handle response = eval->eval_h(
+		"(SetLink"
+		"  (ListLink"
+		"    (ListLink"
+		"      (ConceptNode \"A\")"
+		"      (ConceptNode \"B\")"
+		"      (ConceptNode \"C\"))"
+		"    (ListLink"
+		"      (ConceptNode \"D\")"
+		"      (ConceptNode \"E\")"
+		"      (ConceptNode \"F\"))"
+		"    (ListLink"
+		"      (ConceptNode \"G\")"
+		"      (ConceptNode \"H\")"
+		"      (ConceptNode \"I\"))))"
+	);
+	TS_ASSERT_EQUALS(backtoo, response);
+
+	// ----
+	logger().debug("END TEST: %s", __FUNCTION__);
+}
+
+void GlobUTest::test_glob_backmore(void)
+{
+	logger().debug("BEGIN TEST: %s", __FUNCTION__);
+
+	eval->eval("(load-from-path \"tests/query/glob-basic.scm\")");
+
+	Handle backmore = eval->eval_h("(cog-execute! backmore)");
+	printf("backmore %s\n", backmore->to_string().c_str());
+	TS_ASSERT_EQUALS(1, backmore->get_arity());
+
+	Handle response = eval->eval_h(
+		"(SetLink"
+		"  (ListLink"
+		"    (ListLink"
+		"      (ConceptNode \"A\")"
+		"      (ConceptNode \"B\")"
+		"      (ConceptNode \"C\"))"
+		"    (ListLink"
+		"      (ConceptNode \"D\")"
+		"      (ConceptNode \"E\")"
+		"      (ConceptNode \"F\"))"
+		"    (ListLink"
+		"      (ConceptNode \"G\")"
+		"      (ConceptNode \"H\")"
+		"      (ConceptNode \"I\"))))"
+	);
+	TS_ASSERT_EQUALS(backmore, response);
 
 	// ----
 	logger().debug("END TEST: %s", __FUNCTION__);

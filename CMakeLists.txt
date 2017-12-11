@@ -89,13 +89,10 @@ IF (CMAKE_COMPILER_IS_GNUCXX)
 		# -flto is good for performance, but wow is it slow to link...
 		# XXX disable for now ... its just to painful, in daily life.
 		# ... except that the buildbot needs this, to pass unit tests.
-		# Current failure is in libatomcore, which depends on atomspace.
-		# (ldd -r libatomcore shows unresolved symbols.)
-		# This will someday be fiaxable by moving the factories out
-		# of the atomtable, and into the class server. But for now,
-		# we use -flto as a work-around.
-		# SET(CMAKE_C_FLAGS_RELEASE "-O3 -g -fstack-protector")
-		SET(CMAKE_C_FLAGS_RELEASE "-O3 -g -fstack-protector -flto")
+		# Current failure is in libatomcore, which depends on atomutils
+		# (ldd -r libatomcore.so shows unresolved symbols.)
+		SET(CMAKE_C_FLAGS_RELEASE "-O3 -g -fstack-protector")
+		# SET(CMAKE_C_FLAGS_RELEASE "-O3 -g -fstack-protector -flto")
 		# SET(CMAKE_C_FLAGS_RELEASE "-O3 -g -fstack-protector -flto=8")
 
 		SET(NO_AS_NEEDED "-Wl,--no-as-needed")
@@ -504,9 +501,6 @@ IF (CXXTEST_FOUND)
 			# combined across all tests (the latter is MUCH faster). Use a define?
 			# There is coverage specific stuff in AddCxxTest.cmake now...
 			# -
-			# Depends on cogserver because RESTFulTest needs it
-			# and cmake has no way to add non-test dependencies to tests
-			DEPENDS tests cogserver
 			WORKING_DIRECTORY tests
 			COMMAND ${CMAKE_CTEST_COMMAND} --force-new-ctest-process $(ARGS)
 			# This script combines the coverage analysis of each test,
@@ -520,7 +514,8 @@ IF (CXXTEST_FOUND)
 		ADD_CUSTOM_TARGET(test
 			DEPENDS tests
 			WORKING_DIRECTORY tests
-			COMMAND ${CMAKE_CTEST_COMMAND} --force-new-ctest-process $(ARGS)
+			# COMMAND ${CMAKE_CTEST_COMMAND} --force-new-ctest-process $(ARGS)
+			COMMAND ${CMAKE_CTEST_COMMAND} --force-new-ctest-process --output-on-failure $(ARGS)
 			COMMENT "Running tests..."
 		)
 	ENDIF (CMAKE_BUILD_TYPE STREQUAL "Coverage")
@@ -569,7 +564,7 @@ ADD_CUSTOM_TARGET(cscope
 )
 
 # packaging
-SET(CPACK_PACKAGE_DESCRIPTION_SUMMARY "The Open Cognition Framework")
+SET(CPACK_PACKAGE_DESCRIPTION_SUMMARY "The OpenCog AtomSpace")
 SET(CPACK_PACKAGE_NAME "atomspace")
 SET(CPACK_PACKAGE_VENDOR "opencog.org")
 SET(CPACK_PACKAGE_DESCRIPTION_FILE "${CMAKE_CURRENT_SOURCE_DIR}/README.md")
@@ -631,14 +626,11 @@ SET(CPACK_SOURCE_IGNORE_FILES
 	"^${PROJECT_SOURCE_DIR}/.bzr/"
 	"^${PROJECT_SOURCE_DIR}/.bzrignore$"
 	"^${PROJECT_SOURCE_DIR}/.git/"
-	"^${PROJECT_BINARY_DIR}/opencog/server/cogserver$"
-	"^${PROJECT_BINARY_DIR}/examples/server/derivedserver$"
-	"^${PROJECT_BINARY_DIR}/examples/hopfield/hopfield$"
 )
 
 SET(CPACK_PACKAGING_INSTALL_PREFIX "/usr/local")
 SET(CPACK_DEBIAN_PACKAGE_DEPENDS
-    "guile-2.0 (>= 2.0.9), python (>= 2.7.5), libzmq3 (>= 4.0.4), libboost-date-time1.54.0, libboost-filesystem1.54.0, libboost-program-options1.54.0, libboost-regex1.54.0, libboost-serialization1.54.0, libboost-system1.54.0, libboost-thread1.54.0, protobuf-compiler (>= 2.5.0), libssl1.0.0 (>= 1.0.1), libatlas-base-dev, unixodbc (>= 2.2.14p2), odbc-postgresql (>= 1:09.02.0100), cogutil (>= 2.0.2)"
+    "guile-2.0 (>= 2.0.9), python (>= 2.7.5), libzmq3 (>= 4.0.4), libboost-date-time1.54.0, libboost-filesystem1.54.0, libboost-program-options1.54.0, libboost-regex1.54.0, libboost-serialization1.54.0, libboost-system1.54.0, libboost-thread1.54.0, protobuf-compiler (>= 2.5.0), libssl1.0.0 (>= 1.0.1), libatlas-base-dev, libpq-dev, cogutil (>= 2.0.2)"
 )
 
 SET(CPACK_PACKAGE_INSTALL_DIRECTORY "CMake ${CMake_VERSION_MAJOR}.${CMake_VERSION_MINOR}")
@@ -649,19 +641,16 @@ IF (WIN32)
 		# properly. Make sure there is at least one set of four (4)
 		# backslashes.
 		SET(CPACK_PACKAGE_ICON "${CMake_SOURCE_DIR}\\\\lib\\\\opencog.ico")
-		SET(CPACK_NSIS_INSTALLED_ICON_NAME "bin\\\\cogserver.exe")
-		SET(CPACK_NSIS_DISPLAY_NAME "${CPACK_PACKAGE_INSTALL_DIRECTORY} The Open Cognition Framework")
+		SET(CPACK_NSIS_DISPLAY_NAME "${CPACK_PACKAGE_INSTALL_DIRECTORY} The OpenCog Atomspace")
 		SET(CPACK_NSIS_HELP_LINK "http:\\\\\\\\www.opencog.org")
 		SET(CPACK_NSIS_URL_INFO_ABOUT "http:\\\\\\\\www.opencog.org")
 		SET(CPACK_NSIS_CONTACT "opencog@googlegroups.com")
 		SET(CPACK_NSIS_MODIFY_PATH ON)
 	ELSE(NOT UNIX)
-		SET(CPACK_STRIP_FILES "bin/cogserver")
 		SET(CPACK_SOURCE_STRIP_FILES "")
 	ENDIF(NOT UNIX)
 ENDIF(WIN32)
 
-SET(CPACK_PACKAGE_EXECUTABLES "cogserver" "The Open Cognition Framework")
 INCLUDE(CPack)
 
 # documentation

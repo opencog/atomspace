@@ -273,7 +273,7 @@ void AlphaConvertUTest::test_bindlink()
 	Handle hscox =
 	LA(BIND_LINK,
 		NA(VARIABLE_NODE, "$X"),
-		LA(OR_LINK, NA(VARIABLE_NODE, "$X")),
+		LA(PRESENT_LINK, NA(VARIABLE_NODE, "$X")),
 		LA(AND_LINK, NA(VARIABLE_NODE, "$X")));
 
 	ScopeLinkPtr scox(ScopeLinkCast(hscox));
@@ -283,7 +283,7 @@ void AlphaConvertUTest::test_bindlink()
 	Handle hscoy =
 	LB(BIND_LINK,
 		NB(VARIABLE_NODE, "$X"),
-		LB(OR_LINK, NB(VARIABLE_NODE, "$X")),
+		LB(PRESENT_LINK, NB(VARIABLE_NODE, "$X")),
 		LB(AND_LINK, NB(VARIABLE_NODE, "$X")));
 
 	// x and y should be equal
@@ -292,7 +292,7 @@ void AlphaConvertUTest::test_bindlink()
 	_asb.clear();
 	hscoy =
 	LB(BIND_LINK,
-		LB(OR_LINK, NB(VARIABLE_NODE, "$X")),
+		LB(PRESENT_LINK, NB(VARIABLE_NODE, "$X")),
 		LB(AND_LINK, NB(VARIABLE_NODE, "$X")));
 
 	// x and y should be equal
@@ -302,8 +302,8 @@ void AlphaConvertUTest::test_bindlink()
 	hscoy =
 	LB(BIND_LINK,
 		NB(VARIABLE_NODE, "$X"),
-		LB(OR_LINK, NA(VARIABLE_NODE, "$X")),
-		LB(OR_LINK, NB(VARIABLE_NODE, "$X")));
+		LB(PRESENT_LINK, NA(VARIABLE_NODE, "$X")),
+		LB(PRESENT_LINK, NB(VARIABLE_NODE, "$X")));
 
 	// x and y should be NOT equal because their implicants are not
 	// alpha-equivalent.
@@ -326,7 +326,7 @@ void AlphaConvertUTest::test_rand_alpha_conversion()
 	ScopeLinkPtr sc(ScopeLinkCast(hsc));
 	Handle scac = sc->alpha_conversion();
 
-	std::cout << "sc = " << oc_to_string(sc);
+	std::cout << "sc = " << oc_to_string(Handle(sc));
 	std::cout << "scac = " << oc_to_string(scac);
 
 	TS_ASSERT(sc->is_equal(scac));
@@ -342,16 +342,16 @@ void AlphaConvertUTest::test_names_alpha_conversion()
 	// Test simple ScopeLink
 	Handle X = NA(VARIABLE_NODE, "$X"),
 		Y = NA(VARIABLE_NODE, "$Y"),
-		hsc = LA(SCOPE_LINK, X, LA(AND_LINK, X)),
-		expected = LA(SCOPE_LINK, Y, LA(AND_LINK, Y));
+		hsc = LA(SCOPE_LINK, X, LA(AND_LINK, X));
+	Handle expected = createLink(SCOPE_LINK, Y, LA(AND_LINK, Y));
 
 	ScopeLinkPtr sc(ScopeLinkCast(hsc));
-	Handle result = _asa.add_atom(sc->alpha_conversion({{X, Y}}));
+	Handle result = sc->alpha_conversion(HandleMap{{X, Y}});
 
 	std::cout << "result = " << oc_to_string(result);
 	std::cout << "expected = " << oc_to_string(expected);
 
-	TS_ASSERT_EQUALS(result, expected);
+	TS_ASSERT(content_eq(result, expected));
 
 	logger().info("END TEST: %s", __FUNCTION__);
 }

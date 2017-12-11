@@ -437,6 +437,11 @@ void PatternLink::locate_globs(HandleSeq& clauses)
 		{
 			_pat.globby_terms.insert(sh);
 		}
+
+		for (const Handle& h : fgn.holders)
+		{
+			_pat.globby_holders.insert(h);
+		}
 	}
 }
 

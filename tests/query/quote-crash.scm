@@ -1,6 +1,6 @@
 
 (use-modules (opencog))
-(use-modules (opencog query))
+(use-modules (opencog exec))
 
 ; This is an infinite loop, except that the QuoteLink is supposed
 ; to stop the recursion.

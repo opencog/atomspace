@@ -4,7 +4,7 @@
 ; can try to do a brute-force exploration.
 ;
 (use-modules (opencog))
-(use-modules (opencog query))
+(use-modules (opencog exec))
 
 
 ; Definition of a number.  Cells in the sudoku puzzle can only contain

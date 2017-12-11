@@ -4,7 +4,7 @@
 ; Unit test for github bug report opencog/opencog#1520
 ;
 (use-modules (opencog))
-(use-modules (opencog query))
+(use-modules (opencog exec))
 
 ; --------------------------------------------------------------------
 ; First, some data to populate the atomspace

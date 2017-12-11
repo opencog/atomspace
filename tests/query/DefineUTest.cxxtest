@@ -43,7 +43,7 @@ public:
 		eval = new SchemeEval(as);
 		eval->eval("(add-to-load-path \"..\")");
 		eval->eval("(add-to-load-path \"../../..\")");
-		eval->eval("(use-modules (opencog query))");
+		eval->eval("(use-modules (opencog exec))");
 	}
 
 	~DefineLinkUTest()

@@ -20,10 +20,11 @@
  * 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
  */
 
+#include <opencog/util/Logger.h>
 #include <opencog/atoms/base/Link.h>
 #include <opencog/atomspace/AtomSpace.h>
 #include <opencog/guile/SchemeEval.h>
-#include <opencog/util/Logger.h>
+#include <opencog/query/BindLinkAPI.h>
 
 #include "imply.h"
 
@@ -31,43 +32,47 @@ using namespace opencog;
 
 class ExecutionOutputUTest :  public CxxTest::TestSuite
 {
-	private:
-		AtomSpace *as;
+private:
+	AtomSpace as;
+	SchemeEval eval;
 
-	public:
+public:
 
-		ExecutionOutputUTest(void)
-		{
-			logger().set_level(Logger::DEBUG);
-			logger().set_print_to_stdout_flag(true);
-		}
+	ExecutionOutputUTest(void) : eval(&as)
+	{
+		logger().set_level(Logger::DEBUG);
+		logger().set_print_to_stdout_flag(true);
 
-		~ExecutionOutputUTest()
-		{
-			// erase the log file if no assertions failed
-			if (!CxxTest::TestTracker::tracker().suiteFailed())
-				std::remove(logger().get_filename().c_str());
-		}
+		eval.eval("(add-to-load-path \"..\")");
+		eval.eval("(add-to-load-path \"../../..\")");
+	}
 
-		void setUp(void);
-		void tearDown(void);
+	~ExecutionOutputUTest()
+	{
+		// erase the log file if no assertions failed
+		if (!CxxTest::TestTracker::tracker().suiteFailed())
+			std::remove(logger().get_filename().c_str());
+	}
 
-		void test_exec(void);
-		void test_varsub(void);
+	void setUp(void);
+	void tearDown(void);
+
+	void test_exec(void);
+	void test_varsub(void);
+	void test_query_exec(void);
 };
 
-#define an as->add_node
-#define al as->add_link
+#define an as.add_node
+#define al as.add_link
 #define getarity(hand) hand->get_arity()
 #define getlink(hand,pos) hand->getOutgoingAtom(pos)
 
 void ExecutionOutputUTest::tearDown(void)
 {
-	delete as;
+	as.clear();
 }
 void ExecutionOutputUTest::setUp(void)
 {
-	as = new AtomSpace();
 }
 
 /*
@@ -81,7 +86,6 @@ void ExecutionOutputUTest::setUp(void)
  *          WordNode "capital"
  *          DefinedLinguisticRelationshipNode "of"
  */
-
 void ExecutionOutputUTest::test_exec(void)
 {
 	logger().debug("BEGIN TEST: %s", __FUNCTION__);
@@ -150,12 +154,10 @@ void ExecutionOutputUTest::test_exec(void)
 	"		) \n"
 	"	) \n"
 	")";
-	SchemeEval* ev = new SchemeEval(as);
-	ev->eval(str);
-	delete ev;
+	eval.eval(str);
 
 	// Result should be a ListLink
-	Handle result = imply(as, clauses, implicand);
+	Handle result = imply(&as, clauses, implicand);
 
 	// There should be only one solution: the Berlin one.
 	// The Madrid graph should be rejected because of the
@@ -189,11 +191,8 @@ void ExecutionOutputUTest::test_varsub(void)
 {
 	logger().debug("BEGIN TEST: %s", __FUNCTION__);
 
-	const char * str =
-	"(define (retarg x) x)\n";
-	SchemeEval* ev = new SchemeEval(as);
-	ev->eval(str);
-	delete ev;
+	const char * str = "(define (retarg x) x)\n";
+	eval.eval(str);
 
 	Handle resolution;
 	// Raw data
@@ -218,7 +217,6 @@ void ExecutionOutputUTest::test_varsub(void)
 		)
 	);
 
-
 	Handle situ =
 	al(BIND_LINK,
 	   al(CONTEXT_LINK,
@@ -239,25 +237,41 @@ void ExecutionOutputUTest::test_varsub(void)
 	);
 	BindLinkPtr predicament(createBindLink(*LinkCast(pred)));
 
-   // Now perform the search.
-   DefaultImplicator simpl(as);
-   simpl.implicand = situation->get_implicand();
-   situation->imply(simpl, as);
+	// Now perform the search.
+	DefaultImplicator simpl(&as);
+	simpl.implicand = situation->get_implicand();
+	situation->imply(simpl, &as);
 
-   // The result_list contains a list of the grounded expressions.
-   Handle res = simpl.get_result_list()[0];
+	// The result_list contains a list of the grounded expressions.
+	Handle res = simpl.get_result_list()[0];
 	printf("res is %s\n", res->to_short_string().c_str());
 	TSM_ASSERT_EQUALS("incorrect resolution", res, resolution);
 
-   // Now perform the search.
-   DefaultImplicator pimpl(as);
-   pimpl.implicand = predicament->get_implicand();
-   predicament->imply(pimpl, as);
+	// Now perform the search.
+	DefaultImplicator pimpl(&as);
+	pimpl.implicand = predicament->get_implicand();
+	predicament->imply(pimpl, &as);
 
-   // The result_list contains a list of the grounded expressions.
-   Handle del = pimpl.get_result_list()[0];
+	// The result_list contains a list of the grounded expressions.
+	Handle del = pimpl.get_result_list()[0];
 	printf("del is %s\n", del->to_short_string().c_str());
 	TSM_ASSERT_EQUALS("incorrect delivarance", del, deliverance);
+
+	logger().debug("END TEST: %s", __FUNCTION__);
+}
+
+/*
+ * Query ExecutionOutputLink atoms, with varying schemas.
+ */
+void ExecutionOutputUTest::test_query_exec(void)
+{
+	logger().debug("BEGIN TEST: %s", __FUNCTION__);
+
+	eval.eval("(load-from-path \"tests/query/exec.scm\")");
+
+	Handle exec_query = eval.eval_h("exec-query");
+	Handle results = satisfying_set(&as, exec_query);
+	TS_ASSERT_EQUALS(results->get_arity(), 3);
 
 	logger().debug("END TEST: %s", __FUNCTION__);
 }

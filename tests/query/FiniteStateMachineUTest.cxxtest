@@ -40,7 +40,7 @@ public:
 
 		as = new AtomSpace();
 		eval = new SchemeEval(as);
-		eval->eval("(use-modules (opencog query))");
+		eval->eval("(use-modules (opencog exec))");
 		eval->eval("(add-to-load-path \"..\")");
 		eval->eval("(add-to-load-path \"../../..\")");
 	}
@@ -108,7 +108,7 @@ void FiniteStateMachineUTest::test_basic(void)
 
 	// Take one step of the finite state machine.
 	printf("Going to take one step\n");
-	Handle first = eval->eval_h("(cog-bind take-one-step)");
+	Handle first = eval->eval_h("(cog-execute! take-one-step)");
 	printf("First state found:\n%s\n", first->to_short_string().c_str());
 	TS_ASSERT_EQUALS(1, getarity(first));
 
@@ -123,7 +123,7 @@ void FiniteStateMachineUTest::test_basic(void)
 	for (int i=1; i<21; i++)
 	{
 		printf("Going to take one step; %d\n", i);
-		Handle next = eval->eval_h("(cog-bind take-one-step)");
+		Handle next = eval->eval_h("(cog-execute! take-one-step)");
 		TS_ASSERT_EQUALS(1, getarity(next));
 		TS_ASSERT_EQUALS(states[i%3], get_state(next));
 	}

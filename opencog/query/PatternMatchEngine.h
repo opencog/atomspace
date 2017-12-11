@@ -139,10 +139,9 @@ private:
 
 	// Record how many atoms have been grounded to the globs
 	typedef std::map<PatternTermPtr, size_t> GlobGrd;
-
 	typedef std::pair<GlobGrd, GlobPosStack> GlobState;
 
-	std::map<GlobPair, GlobState> glob_state;
+	std::map<GlobPair, GlobState> _glob_state;
 
 	// --------------------------------------------
 	// Methods and state that select the next clause to be grounded.

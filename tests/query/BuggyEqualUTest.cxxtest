@@ -42,7 +42,7 @@ class BuggyEqual :  public CxxTest::TestSuite
 
 			as = new AtomSpace();
 			eval = new SchemeEval(as);
-			eval->eval("(use-modules (opencog query))");
+			eval->eval("(use-modules (opencog exec))");
 			eval->eval("(add-to-load-path \"..\")");
 			eval->eval("(add-to-load-path \"../../..\")");
 		}
@@ -83,7 +83,7 @@ void BuggyEqual::test_bugeq(void)
 
 	eval->eval("(load-from-path \"tests/query/buggy-equal.scm\")");
 
-	Handle pln = eval->eval_h("(cog-bind pln-rule-deduction)");
+	Handle pln = eval->eval_h("(cog-execute! pln-rule-deduction)");
 	printf("Deduction results:\n%s\n", pln->to_short_string().c_str());
 	TSM_ASSERT_EQUALS("wrong number of solutions found", 4, getarity(pln));
 
@@ -98,7 +98,7 @@ void BuggyEqual::test_bugalt(void)
 
 	eval->eval("(load-from-path \"tests/query/buggy-equal.scm\")");
 
-	Handle alt = eval->eval_h("(cog-bind pln-alt)");
+	Handle alt = eval->eval_h("(cog-execute! pln-alt)");
 	printf("Alt results:\n%s\n", alt->to_short_string().c_str());
 	TSM_ASSERT_EQUALS("wrong number of solutions found", 4, getarity(alt));
 

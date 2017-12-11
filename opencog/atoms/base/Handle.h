@@ -203,6 +203,9 @@ typedef Counter<Handle, unsigned> HandleUCounter;
 //! a handle iterator
 typedef std::iterator<std::forward_iterator_tag, Handle> HandleIterator;
 
+bool content_eq(const opencog::HandleSeq& lhs,
+                const opencog::HandleSeq& rhs);
+
 bool content_eq(const opencog::HandleSet& lhs,
                 const opencog::HandleSet& rhs);
 
@@ -294,6 +297,8 @@ std::string oc_to_string(const HandleMultimap& hmm);
 std::string oc_to_string(const HandleMapSeq& hms);
 std::string oc_to_string(const HandleMapSet& hms);
 std::string oc_to_string(const HandlePairSeq& hps);
+std::string oc_to_string(const HandleCounter& hc);
+std::string oc_to_string(const HandleUCounter& huc);
 std::string oc_to_string(Type type);
 std::string oc_to_string(const AtomPtr& aptr);
 

@@ -240,21 +240,11 @@ public:
 	 *    grounded scope links.
 	 *
 	 * No other use of quotation is assumed besides the 2 above.
+	 *
+	 * TODO: apparently not used. And if it is used it should be moved
+	 * to ScopeLink.
 	 */
 	static BindLinkPtr consume_ill_quotations(BindLinkPtr bl);
-	static Handle consume_ill_quotations(const Handle& vardecl, const Handle& h);
-	static Handle consume_ill_quotations(const Variables& variables, Handle h,
-	                                     Quotation quotation=Quotation(),
-	                                     bool escape=false /* ignore the next
-	                                                        * quotation
-	                                                        * consumption */);
-
-	/**
-	 * Return true iff the variable declaration of local_scope is a
-	 * variable of variables wrapped in a UnquoteLink.
-	 */
-	static bool is_bound_to_ancestor(const Variables& variables,
-	                                 const Handle& local_scope);
 
 	/**
 	 * Return true iff the handle or type correspond to a pattern
@@ -332,6 +322,8 @@ public:
 	 *   (ExecutionOutputLink
 	 *     (GroundedSchemaNode "gsn")
 	 *     (Inheritance (Concept "$A") (Concept "B"))))
+	 *
+	 * TODO: replace by ScopeLink methods!
 	 */
 	static Handle substitute(BindLinkPtr bl, const HandleMap& var2val,
 	                         Handle vardecl=Handle::UNDEFINED);
@@ -340,6 +332,8 @@ public:
 	 * Substitute the variable declaration of a BindLink. Remove
 	 * variables that are substituted by values. If all variables are
 	 * removed it returns Handle::UNDEFINED.
+	 *
+	 * TODO: replace by ScopeLink methods!
 	 */
 	static Handle substitute_vardecl(const Handle& vardecl,
 	                                 const HandleMap& var2val);

@@ -128,10 +128,13 @@ bool PatternMatchEngine::variable_compare(const Handle& hp,
 
 	// Make a record of it. Cannot record GlobNodes here; they're
 	// variadic.
-	DO_LOG({LAZY_LOG_FINE << "Found grounding of variable:";})
-	logmsg("$$ variable:", hp);
-	logmsg("$$ ground term:", hg);
-	if (hp->get_type() != GLOB_NODE) var_grounding[hp] = hg;
+	if (hp->get_type() != GLOB_NODE)
+	{
+		DO_LOG({LAZY_LOG_FINE << "Found grounding of variable:";})
+		logmsg("$$ variable:", hp);
+		logmsg("$$ ground term:", hg);
+		var_grounding[hp] = hg;
+	}
 	return true;
 }
 
@@ -498,7 +501,7 @@ bool PatternMatchEngine::unorder_compare(const PatternTermPtr& ptm,
 	const HandleSeq& osg = hg->getOutgoingSet();
 	PatternTermSeq osp = ptm->getOutgoingSet();
 	size_t arity = osp.size();
-	bool has_glob = (0 < _pat->globby_terms.count(ptm->getHandle()));
+	bool has_glob = (0 < _pat->globby_holders.count(ptm->getHandle()));
 
 	// They've got to be the same size, at the least!
 	// unless there are globs in the pattern
@@ -710,7 +713,7 @@ bool PatternMatchEngine::glob_compare(const PatternTermSeq& osp,
 			glob_grd.erase(glob_pos_stack.top().first);
 
 			glob_pos_stack.pop();
-			glob_state[gp] = {glob_grd, glob_pos_stack};
+			_glob_state[gp] = {glob_grd, glob_pos_stack};
 		}
 
 		// See where the previous glob is and try again
@@ -734,17 +737,21 @@ bool PatternMatchEngine::glob_compare(const PatternTermSeq& osp,
 		solution_push();
 
 		glob_grd[glob] = glob_seq.size();
-		glob_state[gp] = {glob_grd, glob_pos_stack};
+		_glob_state[gp] = {glob_grd, glob_pos_stack};
 
 		Handle glp(createLink(glob_seq, LIST_LINK));
 		var_grounding[glob->getHandle()] = glp;
+
+		DO_LOG({LAZY_LOG_FINE << "Found grounding of glob:";})
+		logmsg("$$ glob:", glob->getHandle());
+		logmsg("$$ ground term:", glp);
 	};
 
 	// Common things needed to be done when it's not a match.
 	auto mismatch = [&]()
 	{
 		match = false;
-		glob_state.erase(gp);
+		_glob_state.erase(gp);
 	};
 
 	// Resume the matching from a previous state.
@@ -752,8 +759,8 @@ bool PatternMatchEngine::glob_compare(const PatternTermSeq& osp,
 	// turns out the groundings do not satisfy some other terms
 	// in the same pattern, so we try again and see if the globs
 	// in osp can be grounded differently.
-	auto r = glob_state.find(gp);
-	if (r != glob_state.end())
+	auto r = _glob_state.find(gp);
+	if (r != _glob_state.end())
 	{
 		backtracking = true;
 
@@ -820,7 +827,7 @@ bool PatternMatchEngine::glob_compare(const PatternTermSeq& osp,
 			else
 			{
 				glob_pos_stack.push({glob, {ip, jg}});
-				glob_state[gp] = {glob_grd, glob_pos_stack};
+				_glob_state[gp] = {glob_grd, glob_pos_stack};
 			}
 
 			// First of all, see if we have seen this glob in
@@ -1195,30 +1202,32 @@ bool PatternMatchEngine::explore_up_branches(const PatternTermPtr& ptm,
 	              << " have " << sz << " branches";})
 
 	// Check if the pattern has globs in it.
-	bool has_glob = (contains_atomtype(ptm->getHandle(), GLOB_NODE));
+	bool has_glob = (0 < _pat->globby_holders.count(ptm->getHandle()));
 	size_t gstate_size = SIZE_MAX;
 
 	bool found = false;
-	for (size_t i = 0; i < sz; i++) {
+	for (size_t i = 0; i < sz; i++)
+	{
 		DO_LOG({LAZY_LOG_FINE << "Try upward branch " << i+1 << " of " << sz
 		              << " for term=" << ptm->to_string()
 		              << " propose=" << Handle(iset[i]).value();})
 
-		// Before exploring the link branches, record the current glob_state size.
-		// The idea is, if the ptm & hg is a match, their state will be recorded
-		// in glob_state, so that one can, if needed, resume and try to ground
-		// those globs again in a different way (e.g. backtracking from another
-		// branchpoint). If there is no more possible ways to ground them, they
-		// will be removed from glob_state. So simply by comparing the glob_state
-		// size before and after seems to be an OK way to quickly check if we
-		// can move on to the next one or not.
-		if (has_glob) gstate_size = glob_state.size();
+		// Before exploring the link branches, record the current
+		// _glob_state size.  The idea is, if the ptm & hg is a match,
+		// their state will be recorded in _glob_state, so that one can,
+		// if needed, resume and try to ground those globs again in a
+		// different way (e.g. backtracking from another branchpoint).
+		// If there is no more possible ways to ground them, they
+		// will be removed from glob_state. So simply by comparing the
+		// _glob_state size before and after seems to be an OK way to
+		// quickly check if we can move on to the next one or not.
+		if (has_glob) gstate_size = _glob_state.size();
 
 		found = explore_link_branches(ptm, Handle(iset[i]), clause_root);
 
 		// If there may be another way to ground it differently to the same
 		// candidate, do it until exhausted.
-		while (not found and has_glob and glob_state.size() > gstate_size)
+		while (not found and has_glob and _glob_state.size() > gstate_size)
 		{
 			found = explore_link_branches(ptm, Handle(iset[i]), clause_root);
 		}
@@ -1591,11 +1600,11 @@ bool PatternMatchEngine::do_next_clause(void)
 		DO_LOG(log_solution(var_grounding, clause_grounding);)
 
 		// Since the PM may move on and try to search for more solutions,
-		// clear the glob_state here to prevent it from comparing the
+		// clear the _glob_state here to prevent it from comparing the
 		// exact same term to the exact same candidate again.
 		// Otherwise, all possible ways to ground the globs in the term
 		// will be explored before moving to the next candidate.
-		glob_state.clear();
+		_glob_state.clear();
 	}
 	else
 	{
@@ -2021,8 +2030,6 @@ bool PatternMatchEngine::explore_redex(const Handle& term,
                                        const Handle& grnd,
                                        const Handle& first_clause)
 {
-	if (not term) return false;
-
 	// Cleanup
 	clear_current_state();
 
@@ -2052,15 +2059,16 @@ bool PatternMatchEngine::explore_clause(const Handle& term,
 	if (not is_evaluatable(clause))
 	{
 		// Check if the pattern has globs in it, and record the glob_state.
-		bool has_glob = (contains_atomtype(term, GLOB_NODE));
-		size_t gstate_size = (has_glob)? glob_state.size() : SIZE_MAX;
+		// Do this *before* exploring the term.
+		bool has_glob = (0 < _pat->globby_holders.count(term));
+		size_t gstate_size = _glob_state.size();
 
 		DO_LOG({logger().fine("Clause is matchable; start matching it");})
 		bool found = explore_term_branches(term, grnd, clause);
 
 		// If there may be another way to ground it differently to the same
 		// candidate, do it until exhausted.
-		while (not found and has_glob and glob_state.size() > gstate_size)
+		while (not found and has_glob and _glob_state.size() > gstate_size)
 		{
 			found = explore_term_branches(term, grnd, clause);
 		}

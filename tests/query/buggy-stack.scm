@@ -142,5 +142,5 @@
 )
 
 ; Running the implication should return only one answer!
-; (cog-bind (impy))
+; (cog-execute! (impy))
 

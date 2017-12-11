@@ -87,7 +87,7 @@ void SingleUTest::test_single_bindlink(void)
 
     // First, get all the solutions. There should be 3 of them:
     // Socrates, Einstein and Peirce all inherit from man
-    Handle answersAll = eval->eval_h("(cog-bind find-man)");
+    Handle answersAll = eval->eval_h("(cog-execute! find-man)");
     TS_ASSERT_EQUALS(3, getarity(answersAll));
 
     // Test PatternMatch::single_bindlink, which should only return the

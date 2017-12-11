@@ -46,7 +46,9 @@ public:
 void ExecutionOutputLink::check_schema(const Handle& schema) const
 {
 	if (not classserver().isA(schema->get_type(), SCHEMA_NODE) and
-	    LAMBDA_LINK != schema->get_type())
+	    LAMBDA_LINK != schema->get_type() and
+	    // In case it is a pattern matcher query
+	    UNQUOTE_LINK != schema->get_type())
 	{
 		throw SyntaxException(TRACE_INFO,
 		                      "ExecutionOutputLink must have schema! Got %s",
@@ -83,6 +85,8 @@ ExecutionOutputLink::ExecutionOutputLink(const Link& l)
 	if (EXECUTION_OUTPUT_LINK != tscope)
 		throw SyntaxException(TRACE_INFO,
 			"Expection an ExecutionOutputLink!");
+
+	check_schema(l.getOutgoingAtom(0));
 }
 
 /// execute -- execute the function defined in an ExecutionOutputLink

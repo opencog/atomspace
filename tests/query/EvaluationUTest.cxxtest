@@ -69,7 +69,6 @@ void EvaluationUTest::setUp(void)
 {
 	as->clear();
 	eval->eval("(use-modules (opencog exec))");
-	eval->eval("(use-modules (opencog query))");
 	eval->eval("(add-to-load-path \"..\")");
 	eval->eval("(add-to-load-path \"../../..\")");
 }
