@@ -20,10 +20,11 @@
  * 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
  */
 
+#include <opencog/util/Logger.h>
 #include <opencog/atoms/base/Link.h>
 #include <opencog/atomspace/AtomSpace.h>
 #include <opencog/guile/SchemeEval.h>
-#include <opencog/util/Logger.h>
+#include <opencog/query/BindLinkAPI.h>
 
 #include "imply.h"
 
@@ -41,6 +42,9 @@ public:
 	{
 		logger().set_level(Logger::DEBUG);
 		logger().set_print_to_stdout_flag(true);
+
+		eval.eval("(add-to-load-path \"..\")");
+		eval.eval("(add-to-load-path \"../../..\")");
 	}
 
 	~ExecutionOutputUTest()
@@ -263,8 +267,11 @@ void ExecutionOutputUTest::test_query_exec(void)
 {
 	logger().debug("BEGIN TEST: %s", __FUNCTION__);
 
-	// TODO
-	TS_ASSERT(true);
-	
+	eval.eval("(load-from-path \"tests/query/exec.scm\")");
+
+	Handle exec_query = eval.eval_h("exec-query");
+	Handle results = satisfying_set(&as, exec_query);
+	TS_ASSERT_EQUALS(results->get_arity(), 3);
+
 	logger().debug("END TEST: %s", __FUNCTION__);
 }
