@@ -56,6 +56,7 @@ typedef std::shared_ptr<FunctionLink> FunctionLinkPtr;
 class FunctionLink : public FreeLink
 {
 protected:
+	static void check_type(Type t);
 	void init(void);
 	FunctionLink(Type, const Handle& a);
 	FunctionLink(Type, const Handle& a, const Handle& b);
@@ -67,7 +68,7 @@ public:
 	FunctionLink(const Link& l);
 	virtual ~FunctionLink() {}
 
-	virtual Handle execute(AtomSpace* = NULL) const;
+	virtual Handle execute(AtomSpace* = nullptr) const;
 	static Handle do_execute(AtomSpace*, const Handle&);
 
 	static Handle factory(const Handle&);
