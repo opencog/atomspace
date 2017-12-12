@@ -6,13 +6,11 @@ ADD_LIBRARY (atomutils
 	FuzzyMatchBasic
 	Neighbors
 	TypeUtils
-	Unify
 )
 
 ADD_DEPENDENCIES(atomutils opencog_atom_types)
 
 TARGET_LINK_LIBRARIES(atomutils
-	atomcore
 	atombase
 	${COGUTIL_LIBRARY}
 )
@@ -38,6 +36,5 @@ INSTALL (FILES
 	Neighbors.h
 	Substitutor.h
 	TypeUtils.h
-	Unify.h
 	DESTINATION "include/opencog/atomutils"
 )

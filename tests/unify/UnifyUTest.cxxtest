@@ -1,5 +1,5 @@
 /**
- * tests/atomspace/UnifyUTest.cxxtest
+ * tests/unify/UnifyUTest.cxxtest
  *
  * Copyright (C) 2016 OpenCog Foundation
  * All Rights Reserved
@@ -24,7 +24,7 @@
 #include <opencog/util/Logger.h>
 
 #include <opencog/atoms/core/Context.h>
-#include <opencog/atomutils/Unify.h>
+#include <opencog/unify/Unify.h>
 #include <opencog/atomspace/AtomSpace.h>
 #include <opencog/guile/SchemeEval.h>
 

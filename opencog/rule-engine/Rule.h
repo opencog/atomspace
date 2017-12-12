@@ -30,7 +30,7 @@
 #include <opencog/atoms/core/ScopeLink.h>
 #include <opencog/atoms/core/VariableList.h>
 #include <opencog/atoms/pattern/BindLink.h>
-#include <opencog/atomutils/Unify.h>
+#include <opencog/unify/Unify.h>
 
 namespace opencog {
 

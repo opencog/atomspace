@@ -35,7 +35,7 @@
 
 #include <opencog/atomspace/AtomSpace.h>
 #include <opencog/atomutils/TypeUtils.h>
-#include <opencog/atomutils/Unify.h>
+#include <opencog/unify/Unify.h>
 
 #include <opencog/query/BindLinkAPI.h>
 
