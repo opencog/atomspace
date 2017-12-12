@@ -64,7 +64,6 @@ static inline UnorderedLinkPtr UnorderedLinkCast(const Handle& h)
 static inline UnorderedLinkPtr UnorderedLinkCast(const AtomPtr& a)
 	{ return std::dynamic_pointer_cast<UnorderedLink>(a); }
 
-// XXX temporary hack ...
 #define createUnorderedLink std::make_shared<UnorderedLink>
 
 /** @}*/

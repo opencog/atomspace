@@ -77,7 +77,6 @@ static inline PutLinkPtr PutLinkCast(const Handle& h)
 static inline PutLinkPtr PutLinkCast(const AtomPtr& a)
    { return std::dynamic_pointer_cast<PutLink>(a); }
 
-// XXX temporary hack ...
 #define createPutLink std::make_shared<PutLink>
 
 /** @}*/

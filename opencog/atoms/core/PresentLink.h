@@ -72,7 +72,6 @@ static inline PresentLinkPtr PresentLinkCast(const Handle& h)
 static inline PresentLinkPtr PresentLinkCast(const AtomPtr& a)
 	{ return std::dynamic_pointer_cast<PresentLink>(a); }
 
-// XXX temporary hack ...
 #define createPresentLink std::make_shared<PresentLink>
 
 /** @}*/

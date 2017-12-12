@@ -109,7 +109,6 @@ static inline NumberNodePtr NumberNodeCast(const Handle& h)
 static inline NumberNodePtr NumberNodeCast(const AtomPtr& a)
 	{ return std::dynamic_pointer_cast<NumberNode>(a); }
 
-// XXX temporary hack ...
 #define createNumberNode std::make_shared<NumberNode>
 
 /** @}*/

@@ -62,7 +62,6 @@ static inline FoldLinkPtr FoldLinkCast(const Handle& h)
 static inline FoldLinkPtr FoldLinkCast(AtomPtr a)
    { return std::dynamic_pointer_cast<FoldLink>(a); }
 
-// XXX temporary hack ...
 #define createFoldLink std::make_shared<FoldLink>
 
 /** @}*/

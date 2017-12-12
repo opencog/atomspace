@@ -188,7 +188,6 @@ static inline PatternLinkPtr PatternLinkCast(const Handle& h)
 static inline PatternLinkPtr PatternLinkCast(AtomPtr a)
 	{ return std::dynamic_pointer_cast<PatternLink>(a); }
 
-// XXX temporary hack ...
 #define createPatternLink std::make_shared<PatternLink>
 
 /** @}*/

@@ -77,7 +77,6 @@ static inline RandomChoiceLinkPtr RandomChoiceLinkCast(const Handle& h)
 static inline RandomChoiceLinkPtr RandomChoiceLinkCast(const AtomPtr& a)
 	{ return std::dynamic_pointer_cast<RandomChoiceLink>(a); }
 
-// XXX temporary hack ...
 #define createRandomChoiceLink std::make_shared<RandomChoiceLink>
 
 /** @}*/

@@ -67,7 +67,6 @@ typedef std::shared_ptr<const FloatValue> FloatValuePtr;
 static inline FloatValuePtr FloatValueCast(const ProtoAtomPtr& a)
 	{ return std::dynamic_pointer_cast<const FloatValue>(a); }
 
-// XXX temporary hack ...
 #define createFloatValue std::make_shared<FloatValue>
 
 

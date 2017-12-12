@@ -70,7 +70,6 @@ typedef std::shared_ptr<Valuation> ValuationPtr;
 static inline ValuationPtr ValuationCast(const ProtoAtomPtr& a)
 	{ return std::dynamic_pointer_cast<Valuation>(a); }
 
-// XXX temporary hack ...
 #define createValuation std::make_shared<Valuation>
 
 

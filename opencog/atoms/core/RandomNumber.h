@@ -63,7 +63,6 @@ static inline RandomNumberLinkPtr RandomNumberLinkCast(const Handle& h)
 static inline RandomNumberLinkPtr RandomNumberLinkCast(AtomPtr a)
 	{ return std::dynamic_pointer_cast<RandomNumberLink>(a); }
 
-// XXX temporary hack ...
 #define createRandomNumberLink std::make_shared<RandomNumberLink>
 
 /** @}*/

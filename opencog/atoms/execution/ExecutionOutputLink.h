@@ -71,7 +71,6 @@ static inline ExecutionOutputLinkPtr ExecutionOutputLinkCast(const Handle& h)
 static inline ExecutionOutputLinkPtr ExecutionOutputLinkCast(AtomPtr a)
    { return std::dynamic_pointer_cast<ExecutionOutputLink>(a); }
 
-// XXX temporary hack ...
 #define createExecutionOutputLink std::make_shared<ExecutionOutputLink>
 
 /** @}*/

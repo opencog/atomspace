@@ -58,7 +58,6 @@ static inline TimesLinkPtr TimesLinkCast(const Handle& h)
 static inline TimesLinkPtr TimesLinkCast(AtomPtr a)
    { return std::dynamic_pointer_cast<TimesLink>(a); }
 
-// XXX temporary hack ...
 #define createTimesLink std::make_shared<TimesLink>
 
 /** @}*/

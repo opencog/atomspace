@@ -98,7 +98,6 @@ static inline VariableListPtr VariableListCast(const Handle& h)
 static inline VariableListPtr VariableListCast(const AtomPtr& a)
 	{ return std::dynamic_pointer_cast<VariableList>(a); }
 
-// XXX temporary hack ...
 #define createVariableList std::make_shared<VariableList>
 
 // For gdb, see

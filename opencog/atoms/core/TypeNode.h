@@ -112,7 +112,6 @@ static inline TypeNodePtr TypeNodeCast(const Handle& h)
 static inline TypeNodePtr TypeNodeCast(AtomPtr a)
 	{ return std::dynamic_pointer_cast<TypeNode>(a); }
 
-// XXX temporary hack ...
 #define createTypeNode std::make_shared<TypeNode>
 
 /** @}*/

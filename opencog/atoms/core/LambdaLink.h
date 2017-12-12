@@ -62,7 +62,6 @@ static inline LambdaLinkPtr LambdaLinkCast(const Handle& h)
 static inline LambdaLinkPtr LambdaLinkCast(const AtomPtr& a)
 	{ return std::dynamic_pointer_cast<LambdaLink>(a); }
 
-// XXX temporary hack ...
 #define createLambdaLink std::make_shared<LambdaLink>
 
 /** @}*/
