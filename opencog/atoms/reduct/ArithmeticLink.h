@@ -52,7 +52,7 @@ public:
 	ArithmeticLink(const Link& l);
 
 	virtual Handle reorder(void);
-   virtual Handle reduce(void);
+	virtual Handle reduce(void);
 	virtual Handle execute(AtomSpace* as) const;
 };
 
