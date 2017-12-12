@@ -46,7 +46,6 @@ static inline DualLinkPtr DualLinkCast(const Handle& h)
 static inline DualLinkPtr DualLinkCast(AtomPtr a)
 	{ return std::dynamic_pointer_cast<DualLink>(a); }
 
-// XXX temporary hack ...
 #define createDualLink std::make_shared<DualLink>
 
 /** @}*/

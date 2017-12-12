@@ -79,7 +79,6 @@ static inline MapLinkPtr MapLinkCast(const Handle& h)
 static inline MapLinkPtr MapLinkCast(AtomPtr a)
 	{ return std::dynamic_pointer_cast<MapLink>(a); }
 
-// XXX temporary hack ...
 #define createMapLink std::make_shared<MapLink>
 
 /** @}*/

@@ -57,7 +57,6 @@ static inline MinusLinkPtr MinusLinkCast(const Handle& h)
 static inline MinusLinkPtr MinusLinkCast(AtomPtr a)
    { return std::dynamic_pointer_cast<MinusLink>(a); }
 
-// XXX temporary hack ...
 #define createMinusLink std::make_shared<MinusLink>
 
 /** @}*/

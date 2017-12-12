@@ -90,7 +90,6 @@ static inline DefineLinkPtr DefineLinkCast(const Handle& h)
 static inline DefineLinkPtr DefineLinkCast(const AtomPtr& a)
 	{ return std::dynamic_pointer_cast<DefineLink>(a); }
 
-// XXX temporary hack ...
 #define createDefineLink std::make_shared<DefineLink>
 
 /** @}*/

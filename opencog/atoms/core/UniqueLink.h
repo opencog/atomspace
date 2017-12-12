@@ -66,7 +66,6 @@ static inline UniqueLinkPtr UniqueLinkCast(const Handle& h)
 static inline UniqueLinkPtr UniqueLinkCast(const AtomPtr& a)
 	{ return std::dynamic_pointer_cast<UniqueLink>(a); }
 
-// XXX temporary hack ...
 #define createUniqueLink std::make_shared<UniqueLink>
 
 /** @}*/

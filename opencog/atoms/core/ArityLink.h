@@ -62,7 +62,6 @@ static inline ArityLinkPtr ArityLinkCast(const Handle& h)
 static inline ArityLinkPtr ArityLinkCast(const AtomPtr& a)
 	{ return std::dynamic_pointer_cast<ArityLink>(a); }
 
-// XXX temporary hack ...
 #define createArityLink std::make_shared<ArityLink>
 
 /** @}*/

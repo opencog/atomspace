@@ -82,7 +82,6 @@ static inline StateLinkPtr StateLinkCast(const Handle& h)
 static inline StateLinkPtr StateLinkCast(const AtomPtr& a)
 	{ return std::dynamic_pointer_cast<StateLink>(a); }
 
-// XXX temporary hack ...
 #define createStateLink std::make_shared<StateLink>
 
 /** @}*/

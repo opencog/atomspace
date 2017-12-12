@@ -53,7 +53,6 @@ static inline SleepLinkPtr SleepLinkCast(const Handle& h)
 static inline SleepLinkPtr SleepLinkCast(AtomPtr a)
 	{ return std::dynamic_pointer_cast<SleepLink>(a); }
 
-// XXX temporary hack ...
 #define createSleepLink std::make_shared<SleepLink>
 
 /** @}*/

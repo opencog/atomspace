@@ -66,7 +66,6 @@ static inline EvaluationLinkPtr EvaluationLinkCast(const Handle& h)
 static inline EvaluationLinkPtr EvaluationLinkCast(AtomPtr a)
    { return std::dynamic_pointer_cast<EvaluationLink>(a); }
 
-// XXX temporary hack ...
 #define createEvaluationLink std::make_shared<EvaluationLink>
 
 /** @}*/

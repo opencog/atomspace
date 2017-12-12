@@ -68,7 +68,6 @@ static inline FreeLinkPtr FreeLinkCast(const Handle& h)
 static inline FreeLinkPtr FreeLinkCast(const AtomPtr& a)
    { return std::dynamic_pointer_cast<FreeLink>(a); }
 
-// XXX temporary hack ...
 #define createFreeLink std::make_shared<FreeLink>
 
 /** @}*/

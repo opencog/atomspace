@@ -77,7 +77,6 @@ static inline TypedAtomLinkPtr TypedAtomLinkCast(const Handle& h)
 static inline TypedAtomLinkPtr TypedAtomLinkCast(AtomPtr a)
 	{ return std::dynamic_pointer_cast<TypedAtomLink>(a); }
 
-// XXX temporary hack ...
 #define createTypedAtomLink std::make_shared<TypedAtomLink>
 
 /** @}*/

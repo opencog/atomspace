@@ -63,7 +63,6 @@ typedef std::shared_ptr<LinkValue> LinkValuePtr;
 static inline LinkValuePtr LinkValueCast(const ProtoAtomPtr& a)
 	{ return std::dynamic_pointer_cast<LinkValue>(a); }
 
-// XXX temporary hack ...
 #define createLinkValue std::make_shared<LinkValue>
 
 

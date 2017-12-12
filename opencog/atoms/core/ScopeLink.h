@@ -175,7 +175,6 @@ static inline ScopeLinkPtr ScopeLinkCast(const Handle& h)
 static inline ScopeLinkPtr ScopeLinkCast(const AtomPtr& a)
 	{ return std::dynamic_pointer_cast<ScopeLink>(a); }
 
-// XXX temporary hack ...
 #define createScopeLink std::make_shared<ScopeLink>
 
 /** @}*/

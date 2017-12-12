@@ -66,7 +66,6 @@ static inline ImplicationScopeLinkPtr ImplicationScopeLinkCast(const Handle& h)
 static inline ImplicationScopeLinkPtr ImplicationScopeLinkCast(AtomPtr a)
 	{ return std::dynamic_pointer_cast<ImplicationScopeLink>(a); }
 
-// XXX temporary hack ...
 #define createImplicationScopeLink std::make_shared<ImplicationScopeLink>
 
 /** @}*/

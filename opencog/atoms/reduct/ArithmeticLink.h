@@ -62,7 +62,6 @@ static inline ArithmeticLinkPtr ArithmeticLinkCast(const Handle& h)
 static inline ArithmeticLinkPtr ArithmeticLinkCast(AtomPtr a)
    { return std::dynamic_pointer_cast<ArithmeticLink>(a); }
 
-// XXX temporary hack ...
 #define createArithmeticLink std::make_shared<ArithmeticLink>
 
 /** @}*/

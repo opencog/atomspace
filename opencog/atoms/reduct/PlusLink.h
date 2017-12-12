@@ -58,7 +58,6 @@ static inline PlusLinkPtr PlusLinkCast(const Handle& h)
 static inline PlusLinkPtr PlusLinkCast(AtomPtr a)
    { return std::dynamic_pointer_cast<PlusLink>(a); }
 
-// XXX temporary hack ...
 #define createPlusLink std::make_shared<PlusLink>
 
 /** @}*/

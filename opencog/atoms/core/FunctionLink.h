@@ -79,7 +79,6 @@ static inline FunctionLinkPtr FunctionLinkCast(const Handle& h)
 static inline FunctionLinkPtr FunctionLinkCast(const AtomPtr& a)
    { return std::dynamic_pointer_cast<FunctionLink>(a); }
 
-// XXX temporary hack ...
 #define createFunctionLink std::make_shared<FunctionLink>
 
 /** @}*/

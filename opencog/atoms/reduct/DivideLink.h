@@ -57,7 +57,6 @@ static inline DivideLinkPtr DivideLinkCast(const Handle& h)
 static inline DivideLinkPtr DivideLinkCast(AtomPtr a)
    { return std::dynamic_pointer_cast<DivideLink>(a); }
 
-// XXX temporary hack ...
 #define createDivideLink std::make_shared<DivideLink>
 
 /** @}*/

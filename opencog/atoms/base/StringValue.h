@@ -65,7 +65,6 @@ typedef std::shared_ptr<const StringValue> StringValuePtr;
 static inline StringValuePtr StringValueCast(const ProtoAtomPtr& a)
 	{ return std::dynamic_pointer_cast<const StringValue>(a); }
 
-// XXX temporary hack ...
 #define createStringValue std::make_shared<StringValue>
 
 
