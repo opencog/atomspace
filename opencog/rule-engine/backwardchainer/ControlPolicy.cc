@@ -26,7 +26,7 @@
 #include <opencog/util/random.h>
 #include <opencog/util/algorithm.h>
 #include <opencog/query/BindLinkAPI.h>
-#include <opencog/atomutils/Unify.h>
+#include <opencog/unify/Unify.h>
 #include <opencog/atoms/execution/MapLink.h>
 
 #include "MixtureModel.h"

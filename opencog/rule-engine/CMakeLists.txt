@@ -32,6 +32,7 @@ TARGET_LINK_LIBRARIES(ruleengine
 	atomutils
 	atomspace
 	atomspaceutils
+    unify
 )
 IF (HAVE_GUILE)
 	TARGET_LINK_LIBRARIES(ruleengine smob)
