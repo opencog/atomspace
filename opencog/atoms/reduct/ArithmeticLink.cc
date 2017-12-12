@@ -178,9 +178,7 @@ Handle ArithmeticLink::execute(AtomSpace* as) const
 		{
 			return do_execute(as, arg->getOutgoingSet());
 		}
-		HandleSeq o;
-		o.emplace_back(arg);
-		return do_execute(as, o);
+		return do_execute(as, {arg});
 	}
 	return do_execute(as, _outgoing);
 }
