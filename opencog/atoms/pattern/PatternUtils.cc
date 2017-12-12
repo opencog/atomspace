@@ -22,6 +22,8 @@
  */
 
 #include <opencog/atomutils/FindUtils.h>
+#include <opencog/atomspace/AtomSpace.h>
+#include <boost/range/algorithm/find.hpp>
 #include "PatternUtils.h"
 
 using namespace opencog;
@@ -29,7 +31,8 @@ using namespace opencog;
 namespace opencog {
 
 /**
- * Remove constant clauses from the list of clauses.
+ * Remove constant clauses from the list of clauses if they are in
+ * the queried atomspace.
  *
  * Make sure that every clause contains at least one variable;
  * if not, remove the clause from the list of clauses.
@@ -59,20 +62,38 @@ namespace opencog {
  * Returns true if the list of clauses was modified, else returns false.
  */
 bool remove_constants(const HandleSet &vars,
-                      HandleSeq &clauses,
-                      HandleSeq &constants)
+                      Pattern &pat,
+                      HandleSeqSeq &components,
+                      const AtomSpace &queried_as)
 {
 	bool modified = false;
 
 	// Caution: this loop modifies the clauses list!
 	HandleSeq::iterator i;
-	for (i = clauses.begin(); i != clauses.end(); )
+	for (i = pat.clauses.begin(); i != pat.clauses.end();)
 	{
 		Handle clause(*i);
-		if (is_constant(vars, clause))
+
+		if (is_constant(vars, clause) && is_in_atomspace(clause, queried_as))
 		{
-			constants.emplace_back(clause);
-			i = clauses.erase(i);
+			pat.constants.emplace_back(clause);
+			i = pat.clauses.erase(i);
+
+			// remove the clause from _components.
+			auto j = boost::find(components, HandleSeq{clause});
+			if (j != components.end())
+				components.erase(j);
+
+			// remove the clause from _pattern_mandatory.
+			auto m = boost::find(pat.mandatory, clause);
+			if (m != pat.mandatory.end())
+				pat.mandatory.erase(m);
+
+			// remove the clause from _cnf_clauses.
+			auto c = boost::find(pat.cnf_clauses, clause);
+			if (c != pat.cnf_clauses.end())
+				pat.cnf_clauses.erase(c);
+
 			modified = true;
 		}
 		else
@@ -82,6 +103,11 @@ bool remove_constants(const HandleSet &vars,
 	}
 
 	return modified;
+}
+
+bool is_in_atomspace(const Handle& handle, const AtomSpace& atomspace)
+{
+	return (bool)atomspace.get_atom(handle);
 }
 
 bool is_constant(const HandleSet& vars, const Handle& clause)

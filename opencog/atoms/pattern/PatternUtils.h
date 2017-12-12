@@ -32,6 +32,7 @@
 
 #include <opencog/atoms/base/Handle.h>
 #include <opencog/atoms/base/types.h>
+#include "Pattern.h"
 
 namespace opencog {
 
@@ -39,8 +40,12 @@ namespace opencog {
 // Make sure that variables can be found in the clauses.
 // See C file for description
 bool remove_constants(const HandleSet& vars,
-                      HandleSeq& clauses,
-                      HandleSeq& constants);
+                      Pattern& pat,
+                      HandleSeqSeq &components,
+                      const AtomSpace &queried_as);
+
+// check whether an Atom exists in a given atomspace.
+bool is_in_atomspace(const Handle& clause, const AtomSpace& atomspace);
 
 // Return true if the clause is constant
 bool is_constant(const HandleSet& vars, const Handle& clause);
