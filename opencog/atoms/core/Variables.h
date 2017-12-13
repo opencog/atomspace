@@ -103,6 +103,12 @@ struct FreeVariables
 	// Comparison operators. Convenient to define containers of Variables
 	bool operator<(const FreeVariables& other) const;
 
+	// Return the number of variables
+	std::size_t size() const;
+
+	// Return true iff it has no variable
+	bool empty() const;
+
 	// Given the tree `tree` containing variables in it, create and
 	// return a new tree with the indicated values `vals` substituted
 	// for the variables.  "nocheck" == no type checking is done.

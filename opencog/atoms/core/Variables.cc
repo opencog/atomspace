@@ -701,6 +701,16 @@ bool Variables::operator<(const Variables& other) const
 		        and _fuzzy_typemap < other._fuzzy_typemap));
 }
 
+std::size_t FreeVariables::size() const
+{
+	return varseq.size();
+}
+
+bool FreeVariables::empty() const
+{
+	return varseq.empty();
+}
+
 Handle Variables::get_vardecl() const
 {
 	HandleSeq vars;
