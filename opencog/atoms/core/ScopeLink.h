@@ -115,6 +115,12 @@ public:
 	Handle partial_substitute(const HandleMap& vm) const;
 
 	/**
+	 * Like above but uses a sequence of values instead of variable to
+	 * value mapping.
+	 */
+	Handle partial_substitute(const HandleSeq& values) const;
+	
+	/**
 	 * Helper for partial_substitute. Given a partial mapping from
 	 * variables to values, which of them being variables themselves,
 	 * generate a new variable declaration with these new variables.
@@ -132,6 +138,22 @@ public:
 	HandleSeq partial_substitute_bodies(const Handle& nvardecl,
 	                                    const HandleMap& vm) const;
 
+	/**
+	 * Like above but take a sequence of values instead of variable to
+	 * value mapping.
+	 */
+	HandleSeq partial_substitute_bodies(const Handle& nvardecl,
+	                                    const HandleSeq& values) const;
+
+	/**
+	 * Given a new variable declaration, a body of that scope, and a
+	 * list of values. Perform the partial substitution over that body
+	 * with these values.
+	 */
+	Handle partial_substitute_body(const Handle& nvardecl,
+	                               const Handle& body,
+	                               const HandleSeq& values) const;
+	
 	/**
 	 * Used by partial_substitute.
 	 *

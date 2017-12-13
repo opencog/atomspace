@@ -418,15 +418,27 @@ HandleSeq ScopeLink::partial_substitute_bodies(const Handle& nvardecl,
                                                const HandleMap& vm) const
 {
 	const Variables& variables = get_variables();
-	HandleSeq values = variables.make_values(vm);
+	return partial_substitute_bodies(nvardecl, variables.make_values(vm));
+}
+
+HandleSeq ScopeLink::partial_substitute_bodies(const Handle& nvardecl,
+                                               const HandleSeq& values) const
+{
 	HandleSeq hs;
 	for (size_t i = (get_vardecl() ? 1 : 0); i < get_arity(); ++i) {
 		const Handle& h = getOutgoingAtom(i);
-		Handle nh = variables.substitute_nocheck(h, values);
-		nh = consume_ill_quotations(nvardecl, nh);
-		hs.push_back(nh);
+		hs.push_back(partial_substitute_body(nvardecl, h, values));
 	}
 	return hs;
+}
+
+Handle ScopeLink::partial_substitute_body(const Handle& nvardecl,
+                                          const Handle& body,
+                                          const HandleSeq& values) const
+{
+	Handle nbody = get_variables().substitute_nocheck(body, values);
+	nbody = consume_ill_quotations(nvardecl, nbody);
+	return nbody;
 }
 
 Handle ScopeLink::partial_substitute_vardecl(const HandleMap& vm) const
