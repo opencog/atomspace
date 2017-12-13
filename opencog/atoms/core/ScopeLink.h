@@ -107,7 +107,7 @@ public:
 	/**
 	 * Partially substitute a scope link. Given a partial mapping
 	 * between variables and values, generate the scope link resulting
-	 * from the replacement of the variables by the values. In no
+	 * from the replacement of the variables by the values. If no
 	 * variable is left (i.e. if the provided mapping is complete),
 	 * the resulting atom is still a scope link (or inherited) with an
 	 * empty variable declaration.
@@ -122,6 +122,15 @@ public:
 	Handle partial_substitute_vardecl(const HandleMap& vm) const;
 	static Handle substitute_vardecl(const Handle& vardecl,
 	                                 const HandleMap& vm);
+
+	/**
+	 * Helper for partial_substitute. Given the resulting variable
+	 * declaration and a partial mapping from variables to values,
+	 * perform partial substitution over all bodies, consuming ill
+	 * quotations if necessary.
+	 */
+	HandleSeq partial_substitute_bodies(const Handle& nvardecl,
+	                                    const HandleMap& vm) const;
 
 	/**
 	 * Used by partial_substitute.
