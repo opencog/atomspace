@@ -38,7 +38,23 @@ namespace opencog
  */
 class ComposeLink : public FunctionLink {
 protected:
-	static void check_type(Type t);
+	void check() const;
+
+	/**
+	 * Given a sequence of scopes return the intersection of their
+	 * variable declarations.
+	 *
+	 * TODO: for now is only deals with ProjectLinks and one of the
+	 * variable declaration. If more than one variable declaration
+	 * exists then just make sure they are equivalent, as opposed to
+	 * calculate their intersection.
+	 */
+	Variables variables_intersection(const HandleSeq& scopes) const;
+
+	/**
+	 * Return projection index of a given ProjectLink.
+	 */
+	static unsigned projection_index(const Handle& projection);
 
 public:
 	// XXX Need to make this public, so that the factory can call it!
@@ -47,7 +63,21 @@ public:
 	ComposeLink(const Link& l);
 	virtual ~ComposeLink() {}
 
+	/**
+	 * TODO: explain what it does
+	 *
+	 * TODO: do we really need to support the AtomSpace?
+	 */
 	virtual Handle execute(AtomSpace* = nullptr) const;
+
+	/**
+	 * Given a new variable declaration and a sequence of values to
+	 * substitute the variables of this scope link, create a new scope
+	 * that is the composition of this scope with the provided values.
+	 */
+	Handle compose(const Handle& nvardecl, const HandleSeq& values) const;
+	Handle compose(const Variables& nvars, const HandleSeq& values) const;
+
 	static Handle factory(const Handle&);
 };
 
