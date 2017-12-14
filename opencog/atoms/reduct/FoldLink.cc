@@ -124,18 +124,18 @@ Handle FoldLink::reduce(void) const
 			auto fact = classserver().getFactory(t);
 			FoldLinkPtr fff(FoldLinkCast((*fact)(h)));
 			Handle redh = fff->reduce();
-			if (h != redh)
+			if (not content_eq(h, redh))
 			{
 				did_reduce = true;
-				if (redh != knil)
+				if (not content_eq(redh, knil))
 					reduct.push_back(redh);
 			}
-			else if (h != knil)
+			else if (not content_eq(h, knil))
 				reduct.push_back(h);
 			else
 				did_reduce = true;
 		}
-		else if (h != knil)
+		else if (not content_eq(h, knil))
 			reduct.push_back(h);
 		else
 			did_reduce = true;
