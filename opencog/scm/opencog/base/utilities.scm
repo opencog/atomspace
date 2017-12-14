@@ -1021,6 +1021,8 @@
 	)
 )
 
+;; TODO: move this to rule-engine utils
+
 ; XXX The below should be removed from the geeneric opencog utilities,
 ; and should be copied directly into the code that actually needs this.
 (define-public (bool->tv b)
@@ -1039,9 +1041,7 @@
 "
   Convert TRUE_TV to #t, anything else to #f
 "
-    (if (equal? (stv 1 1) tv)
-        #t
-        #f))
+    (equal? (stv 1 1) tv))
 
 ; ---------------------------------------------------------------------
 
