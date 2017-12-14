@@ -102,9 +102,26 @@ Handle ArithmeticLink::reorder(void) const
 
 	for (const Handle& h : _outgoing)
 	{
-		if (h->get_type() == VARIABLE_NODE)
+		Type htype = h->get_type();
+
+		// Hack for pattern matcher, which returns SetLinks of stuff.
+		// Recurse exacly once.
+		if (SET_LINK == htype)
+		{
+			for (const Handle& he : h->getOutgoingSet())
+			{
+				Type het = he->get_type();
+				if (VARIABLE_NODE == het)
+					vars.push_back(he);
+				else if (NUMBER_NODE == het)
+					numbers.push_back(he);
+				else
+					exprs.push_back(he);
+			}
+		}
+		else if (VARIABLE_NODE == htype)
 			vars.push_back(h);
-		else if (h->get_type() == NUMBER_NODE)
+		else if (NUMBER_NODE == htype)
 			numbers.push_back(h);
 		else
 			exprs.push_back(h);
