@@ -84,6 +84,12 @@ Handle PlusLink::kons(const Handle& fi, const Handle& fj) const
 		return Handle(createNumberNode(sum));
 	}
 
+	// If either one is the unit, then just drop it.
+	if (content_eq(fi, knil))
+		return fj;
+	if (content_eq(fj, knil))
+		return fi;
+
 	// Is fi identical to fj? If so, then replace by 2*fi
 	if (fi == fj)
 	{

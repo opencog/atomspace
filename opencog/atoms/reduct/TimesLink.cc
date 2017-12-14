@@ -81,6 +81,12 @@ Handle TimesLink::kons(const Handle& fi, const Handle& fj) const
 		return Handle(createNumberNode(prod));
 	}
 
+	// If either one is the unit, then just drop it.
+	if (content_eq(fi, knil))
+		return fj;
+	if (content_eq(fj, knil))
+		return fi;
+
 	// If we are here, we've been asked to multiply two things of the
 	// same type, but they are not of a type that we know how to multiply.
 	return Handle(createTimesLink(fi, fj)->reorder());
