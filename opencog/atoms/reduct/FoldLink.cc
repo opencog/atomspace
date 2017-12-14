@@ -135,11 +135,11 @@ Handle FoldLink::reduce(void) const
 	// If it reduced down to one element, we are done.
 	size_t osz = reduct.size();
 	if (1 == osz)
-	{
-		if (not did_reduce)
-			return get_handle();
 		return reduct[0];
-	}
+
+	// If it reduced to zero elements, it must be knil.
+	if (0 == osz)
+		return knil;
 
 	// Next, search for two neighboring atoms of the same type.
 	// If two atoms of the same type are found, apply kons to them.
