@@ -4,6 +4,7 @@ INCLUDE_DIRECTORIES( ${CMAKE_CURRENT_BINARY_DIR})
 
 ADD_LIBRARY (atomcore
 	ArityLink.cc
+	CompositionLink.cc
 	Context.cc
 	DefineLink.cc
 	DeleteLink.cc
@@ -27,7 +28,6 @@ ADD_LIBRARY (atomcore
 	UnorderedLink.cc
 	Variables.cc
 	VariableList.cc
-    CompositionLink.cc
 )
 
 # Without this, parallel make will race and crap up the generated files.

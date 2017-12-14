@@ -144,6 +144,11 @@ void PutLink::static_typecheck_values(void)
 		return;
 	}
 
+	// Cannot typecheck naked FunctionLinks.  For example:
+	// (cog-execute! (Put (Plus) (List (Number 2) (Number 2))))
+	if (0 == sz and classserver().isA(btype, FUNCTION_LINK))
+		return;
+
 	// The standard, default case is to get a ListLink as an argument.
 	if (LIST_LINK == vtype)
 	{
