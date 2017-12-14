@@ -27,7 +27,7 @@ ADD_LIBRARY (atomcore
 	UnorderedLink.cc
 	Variables.cc
 	VariableList.cc
-    ComposeLink
+    CompositionLink.cc
 )
 
 # Without this, parallel make will race and crap up the generated files.
@@ -66,6 +66,6 @@ INSTALL (FILES
 	UnorderedLink.h
 	Variables.h
 	VariableList.h
-    ComposeLink.h
+    CompositionLink.h
 	DESTINATION "include/opencog/atoms/core"
 )

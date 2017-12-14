@@ -1,5 +1,5 @@
 /*
- * tests/atoms/ComposeLinkUTest.cxxtest
+ * tests/atoms/CompositionLinkUTest.cxxtest
  *
  * Copyright (C) 2017 OpenCog Foundation
  * All Rights Reserved
@@ -20,9 +20,8 @@
  * 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
  */
 
-#include <opencog/guile/SchemeEval.h>
 #include <opencog/atomspace/AtomSpace.h>
-#include <opencog/atoms/core/ComposeLink.h>
+#include <opencog/atoms/core/CompositionLink.h>
 
 #include <cxxtest/TestSuite.h>
 
@@ -33,20 +32,16 @@ using namespace opencog;
 
 // Test ScopeLink.
 //
-class ComposeLinkUTest :  public CxxTest::TestSuite
+class CompositionLinkUTest :  public CxxTest::TestSuite
 {
 private:
 	AtomSpace _as;
-	SchemeEval _eval;
 
 public:
-	ComposeLinkUTest() : _eval(&_as)
+	CompositionLinkUTest()
 	{
 		logger().set_print_to_stdout_flag(true);
 		logger().set_level(Logger::DEBUG);
-
-		_eval.eval("(add-to-load-path \"..\")");
-		_eval.eval("(add-to-load-path \"../../..\")");
 	}
 
 	void setUp() {}
@@ -55,9 +50,10 @@ public:
 
 	void test_execute_1();
 	void test_execute_2();
+	// TODO: add test with nested compositions
 };
 
-void ComposeLinkUTest::test_execute_1()
+void CompositionLinkUTest::test_execute_1()
 {
 	Handle
 		P = an(PREDICATE_NODE, "P"),
@@ -65,9 +61,9 @@ void ComposeLinkUTest::test_execute_1()
 		Y = an(VARIABLE_NODE, "$Y"),
 		g = al(LAMBDA_LINK, al(EVALUATION_LINK, P, X)),
 		f = al(LAMBDA_LINK, al(INHERITANCE_LINK, X, Y)),
-		comp = al(COMPOSE_LINK, g, f);
+		comp = al(COMPOSITION_LINK, g, f);
 
-	ComposeLinkPtr comp_cl = ComposeLinkCast(comp);
+	CompositionLinkPtr comp_cl = CompositionLinkCast(comp);
 	Handle executed_comp = comp_cl->execute(),
 		expected = al(LAMBDA_LINK,
 		              al(EVALUATION_LINK, P, al(INHERITANCE_LINK, X, Y)));
@@ -78,20 +74,20 @@ void ComposeLinkUTest::test_execute_1()
 	TS_ASSERT(content_eq(executed_comp, expected));
 }
 
-void ComposeLinkUTest::test_execute_2()
+void CompositionLinkUTest::test_execute_2()
 {
 	Handle
 		X = an(VARIABLE_NODE, "$X"),
 		Y = an(VARIABLE_NODE, "$Y"),
 		Z = an(VARIABLE_NODE, "$Z"),
 		g = al(LAMBDA_LINK, al(EVALUATION_LINK, X, Y)),
-		f1 = al(PROJECT_LINK, an(NUMBER_NODE, "0")),
+		f1 = al(PROJECTION_LINK, an(NUMBER_NODE, "0")),
 		f2 = al(LAMBDA_LINK,
 		        al(VARIABLE_LIST, X, Y, Z),
 		        al(INHERITANCE_LINK, Y, Z)),
-		comp = al(COMPOSE_LINK, g, al(LIST_LINK, f1, f2));
+		comp = al(COMPOSITION_LINK, g, al(LIST_LINK, f1, f2));
 
-	ComposeLinkPtr comp_cl = ComposeLinkCast(comp);
+	CompositionLinkPtr comp_cl = CompositionLinkCast(comp);
 	Handle executed_comp = comp_cl->execute(),
 		expected = al(LAMBDA_LINK,
 		              al(VARIABLE_LIST, X, Y, Z),

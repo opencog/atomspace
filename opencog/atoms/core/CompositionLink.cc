@@ -1,5 +1,5 @@
 /*
- * opencog/atoms/core/ComposeLink.cc
+ * opencog/atoms/core/CompositionLink.cc
  *
  * Copyright (C) 2017 Nil Geisweiller
  * All Rights Reserved
@@ -24,20 +24,20 @@
 #include <opencog/atoms/base/ClassServer.h>
 #include <opencog/atoms/core/ScopeLink.h>
 #include <opencog/atoms/core/NumberNode.h>
-#include "ComposeLink.h"
+#include "CompositionLink.h"
 
 using namespace opencog;
 
-void ComposeLink::check() const
+void CompositionLink::check() const
 {
-	if (not classserver().isA(get_type(), COMPOSE_LINK))
-		throw InvalidParamException(TRACE_INFO, "Expecting a ComposeLink");
+	if (not classserver().isA(get_type(), COMPOSITION_LINK))
+		throw InvalidParamException(TRACE_INFO, "Expecting a CompositionLink");
 
 	if (get_arity() != 2)
 		throw InvalidParamException(TRACE_INFO, "Expecting two outgoings");
 }
 
-Variables ComposeLink::variables_intersection(const HandleSeq& scopes) const
+Variables CompositionLink::variables_intersection(const HandleSeq& scopes) const
 {
 	Variables variables;
 	unsigned maxpro = 0; // maximum index of the projected argument
@@ -61,26 +61,26 @@ Variables ComposeLink::variables_intersection(const HandleSeq& scopes) const
 	return variables;
 }
 
-unsigned ComposeLink::projection_index(const Handle& projection)
+unsigned CompositionLink::projection_index(const Handle& projection)
 {
-	OC_ASSERT(projection->get_type() == PROJECT_LINK);
+	OC_ASSERT(projection->get_type() == PROJECTION_LINK);
 	NumberNodePtr num = NumberNodeCast(projection->getOutgoingAtom(0));
 	OC_ASSERT(num != nullptr);
 	OC_ASSERT(0 <= num->get_value());
 	return num->get_value();
 }
 
-ComposeLink::ComposeLink(const HandleSeq oset, Type t) : FunctionLink(oset, t)
+CompositionLink::CompositionLink(const HandleSeq oset, Type t) : FunctionLink(oset, t)
 {
 	check();
 }
 
-ComposeLink::ComposeLink(const Link& l) : FunctionLink(l)
+CompositionLink::CompositionLink(const Link& l) : FunctionLink(l)
 {
 	check();
 }
 
-Handle ComposeLink::execute(AtomSpace* as) const
+Handle CompositionLink::execute(AtomSpace* as) const
 {
 	Handle g = getOutgoingAtom(0);
 	Handle f = getOutgoingAtom(1);
@@ -109,7 +109,7 @@ Handle ComposeLink::execute(AtomSpace* as) const
 	// Build sequence of values (body functions) for substitution
 	HandleSeq values;
 	for (const Handle& fi : f->getOutgoingSet()) {
-		if (fi->get_type() == PROJECT_LINK) {
+		if (fi->get_type() == PROJECTION_LINK) {
 			values.push_back(n_vars.varseq[projection_index(fi)]);
 		} else {
 			ScopeLinkPtr fi_sc = ScopeLinkCast(fi);
@@ -124,7 +124,7 @@ Handle ComposeLink::execute(AtomSpace* as) const
 	return compose(n_vars, values);
 }
 
-Handle ComposeLink::compose(const Handle& nvardecl,
+Handle CompositionLink::compose(const Handle& nvardecl,
                             const HandleSeq& values) const
 {
 	Handle g = getOutgoingAtom(0);
@@ -141,10 +141,10 @@ Handle ComposeLink::compose(const Handle& nvardecl,
 	return createLink(comp_hs, g->get_type());
 }
 
-Handle ComposeLink::compose(const Variables& nvars,
+Handle CompositionLink::compose(const Variables& nvars,
                             const HandleSeq& values) const
 {
 	return compose(nvars.get_vardecl(), values);
 }
 
-DEFINE_LINK_FACTORY(ComposeLink, COMPOSE_LINK);
+DEFINE_LINK_FACTORY(CompositionLink, COMPOSITION_LINK);
