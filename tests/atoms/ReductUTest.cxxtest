@@ -57,6 +57,7 @@ public:
 	void tearDown(void);
 
 	void test_arithmetic(void);
+	void test_setlink(void);
 };
 
 void ReductUTest::tearDown(void)
@@ -206,6 +207,35 @@ void ReductUTest::test_arithmetic(void)
 	Handle esixex = eval->eval_h(
 		"(TimesLink (VariableNode \"$x\") (NumberNode 6))");
 	TS_ASSERT_EQUALS(sixex, esixex);
+
+	// ---------
+	logger().debug("END TEST: %s", __FUNCTION__);
+}
+
+// Test SetLink, which the pattern matcher gives to us.
+void ReductUTest::test_setlink(void)
+{
+	logger().debug("BEGIN TEST: %s", __FUNCTION__);
+
+	// ---------
+	Handle one = eval->eval_h(
+		"(cog-execute! (Plus (Set (NumberNode 0)) (NumberNode  1)))"
+	);
+	printf("expecting one: %s\n", one->to_short_string().c_str());
+
+	Handle eone = eval->eval_h("(NumberNode 1)");
+	TS_ASSERT_EQUALS(one, eone);
+
+	// ---------
+	Handle four = eval->eval_h(
+		"(cog-execute! (Plus "
+		"   (Set (NumberNode 1) (NumberNode 1) (NumberNode 1))"
+		"   (NumberNode  1)))"
+	);
+	printf("expecting four: %s\n", four->to_short_string().c_str());
+
+	Handle efour = eval->eval_h("(NumberNode 4)");
+	TS_ASSERT_EQUALS(four, efour);
 
 	// ---------
 	logger().debug("END TEST: %s", __FUNCTION__);
