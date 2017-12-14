@@ -39,19 +39,15 @@ namespace opencog
 class ArithmeticLink : public FoldLink
 {
 protected:
-	double knild;
-	virtual double konsd(double, double) const = 0;
-
 	void init(void);
 	ArithmeticLink(Type, const Handle& a, const Handle& b);
 
-	NumberNodePtr unwrap_set(Handle) const;
-	virtual Handle do_execute(AtomSpace*, const HandleSeq&) const;
+	virtual Handle reorder(void) const;
+
 public:
 	ArithmeticLink(const HandleSeq& oset, Type=ARITHMETIC_LINK);
 	ArithmeticLink(const Link& l);
 
-	virtual Handle reorder(void) const;
 	virtual Handle reduce(void) const;
 	virtual Handle execute(AtomSpace* as) const;
 };

@@ -38,7 +38,6 @@ namespace opencog
 class TimesLink : public ArithmeticLink
 {
 protected:
-	double konsd(double, double) const;
 	Handle kons(const Handle&, const Handle&) const;
 
 	void init(void);

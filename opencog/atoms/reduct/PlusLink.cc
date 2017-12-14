@@ -58,15 +58,12 @@ void PlusLink::init(void)
 	if (not classserver().isA(tscope, PLUS_LINK))
 		throw InvalidParamException(TRACE_INFO, "Expecting a PlusLink");
 
-	knild = 0.0;
 	knil = Handle(createNumberNode("0"));
 
 	distributive_type = TIMES_LINK;
 }
 
 // ============================================================
-
-double PlusLink::konsd(double a, double b) const { return a+b; }
 
 static inline double get_double(const Handle& h)
 {

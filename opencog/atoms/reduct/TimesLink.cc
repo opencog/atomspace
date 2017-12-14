@@ -57,13 +57,10 @@ void TimesLink::init(void)
 	if (not classserver().isA(tscope, TIMES_LINK))
 		throw InvalidParamException(TRACE_INFO, "Expecting a TimesLink");
 
-	knild = 1.0;
 	knil = Handle(createNumberNode("1"));
 }
 
 // ============================================================
-
-double TimesLink::konsd(double a, double b) const { return a*b; }
 
 static inline double get_double(const Handle& h)
 {

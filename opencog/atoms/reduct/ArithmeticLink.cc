@@ -51,9 +51,7 @@ void ArithmeticLink::init(void)
 {
 	Type tscope = get_type();
 	if (not classserver().isA(tscope, ARITHMETIC_LINK))
-		throw InvalidParamException(TRACE_INFO, "Expecting a ArithmeticLink");
-
-	knild = std::numeric_limits<double>::quiet_NaN();
+		throw InvalidParamException(TRACE_INFO, "Expecting an ArithmeticLink");
 }
 
 // ===========================================================
@@ -139,78 +137,10 @@ Handle ArithmeticLink::reorder(void) const
 }
 
 // ===========================================================
-
-static inline double get_double(const Handle& h)
-{
-	NumberNodePtr nnn(NumberNodeCast(h));
-	if (nnn == nullptr)
-		throw RuntimeException(TRACE_INFO,
-			  "Expecting a NumberNode, got %s",
-		     classserver().getTypeName(h->get_type()).c_str());
-
-	return nnn->get_value();
-}
-
-NumberNodePtr ArithmeticLink::unwrap_set(Handle h) const
-{
-	FunctionLinkPtr flp(FunctionLinkCast(h));
-	if (flp) h = flp->execute();
-
-	// Pattern matching hack. The pattern matcher returns sets of atoms;
-	// if that set contains numbers or something numeric, then unwrap it.
-	if (SET_LINK == h->get_type())
-	{
-		if (1 != h->get_arity())
-			throw SyntaxException(TRACE_INFO,
-				"Don't know how to do arithmetic with this: %s",
-				h->to_string().c_str());
-		h = h->getOutgoingAtom(0);
-	}
-
-	NumberNodePtr na(NumberNodeCast(h));
-	if (nullptr == na)
-		throw SyntaxException(TRACE_INFO,
-			"Don't know how to do arithmetic with this: %s",
-			h->to_string().c_str());
-	return na;
-}
-
-/// execute() -- Execute the expression, returning a number
-///
-/// Similar to reduce(), above, except that this can only work
-/// on fully grounded (closed) sentences: after execution,
-/// everything must be a number, and there can be no variables
-/// in sight.
+/// execute() -- Execute the expression
 Handle ArithmeticLink::execute(AtomSpace* as) const
 {
-	// Pattern matching hack. The pattern matcher returns SetLinks of atoms;
-	// if that set contains numbers or something numeric, then unwrap it.
-	if (1 == _outgoing.size())
-	{
-		Handle arg = _outgoing[0];
-		FunctionLinkPtr flp(FunctionLinkCast(arg));
-		if (flp) arg = flp->execute(as);
-
-		if (SET_LINK == arg->get_type())
-		{
-			return do_execute(as, arg->getOutgoingSet());
-		}
-		return do_execute(as, {arg});
-	}
-	return do_execute(as, _outgoing);
-}
-
-Handle ArithmeticLink::do_execute(AtomSpace* as, const HandleSeq& oset) const
-{
-	double sum = knild;
-	for (Handle h: oset)
-	{
-		h = unwrap_set(h);
-		sum = konsd(sum, get_double(h));
-	}
-
-	if (as) return as->add_atom(createNumberNode(sum));
-	return Handle(createNumberNode(sum));
+	return reduce();
 }
 
 // ===========================================================
