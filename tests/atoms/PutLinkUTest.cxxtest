@@ -136,6 +136,7 @@ void PutLinkUTest::test_filtering()
 void PutLinkUTest::test_function()
 {
 	logger().info("BEGIN TEST: %s", __FUNCTION__);
+	Instantiator inst(&_as);
 
 	// Test that 2+2 = 4
 	// (Put (Plus) (List (Number 2) (Number 2)))
@@ -144,14 +145,24 @@ void PutLinkUTest::test_function()
 			L(PLUS_LINK),
 				L(LIST_LINK, N(NUMBER_NODE, "2"), N(NUMBER_NODE, "2")));
 
-	Instantiator inst(&_as);
 	Handle four = inst.execute(want_four);
-
 	Handle expected_four = N(NUMBER_NODE, "4");
 
 	printf("Expecting %s\n", expected_four->to_string().c_str());
 	printf("Got %s\n", four->to_string().c_str());
 	TS_ASSERT_EQUALS(four, expected_four);
+
+	// Test that 2 = 2
+	// (Put (Plus) (Number 2))
+	Handle want_two =
+		L(PUT_LINK, L(PLUS_LINK), N(NUMBER_NODE, "2"));
+
+	Handle two = inst.execute(want_two);
+	Handle expected_two = N(NUMBER_NODE, "2");
+
+	printf("Expecting %s\n", expected_two->to_string().c_str());
+	printf("Got %s\n", two->to_string().c_str());
+	TS_ASSERT_EQUALS(two, expected_two);
 
 	logger().info("END TEST: %s", __FUNCTION__);
 }
