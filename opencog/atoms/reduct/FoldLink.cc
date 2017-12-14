@@ -56,15 +56,6 @@ void FoldLink::init(void)
 
 // ===============================================================
 
-// Place the result into the same atomspace we are in.
-// XXX this is bad, buggy, uncomfortable, icky: it pollutes
-// the atomspace with intermediate results. This needs to
-// be fixed somehow. Right now, I don't know how.
-#define DO_RETURN(result) { \
-	if (not _atom_space) return (result); \
-	return _atom_space->add_atom(result); \
-}
-
 /// reduce() -- reduce the expression by summing constants, etc.
 ///
 /// No actual black-box evaluation or execution is performed. Only
@@ -147,7 +138,7 @@ Handle FoldLink::reduce(void) const
 	{
 		if (not did_reduce)
 			return get_handle();
-		DO_RETURN(reduct[0]);
+		return reduct[0];
 	}
 
 	// Next, search for two neighboring atoms of the same type.
@@ -177,7 +168,7 @@ Handle FoldLink::reduce(void) const
 
 			// If there were only two things in total we are done.
 			if (2 == osz)
-				DO_RETURN(cons);
+				return cons;
 
 			HandleSeq rere;
 			for (size_t k=0; k < osz; k++)
@@ -191,16 +182,10 @@ Handle FoldLink::reduce(void) const
 			}
 
 			// Create the reduced atom, and recurse.
-			// We need to insert it into the atomspace,
-			// so that knil gets placed into the atomspace
-			// when reduce is called; else the knil
-			// compares up above fail.
 			Handle foo(createLink(rere, get_type()));
-			if (_atom_space)
-				foo = _atom_space->add_atom(foo);
 			FoldLinkPtr flp(FoldLinkCast(foo));
 
-			DO_RETURN(Handle(flp->reduce()));
+			return flp->reduce();
 		}
 	}
 
@@ -208,7 +193,7 @@ Handle FoldLink::reduce(void) const
 	if (not did_reduce)
 		return get_handle();
 
-	DO_RETURN(createLink(reduct, get_type()));
+	return createLink(reduct, get_type());
 }
 
 // ===========================================================
