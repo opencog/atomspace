@@ -116,7 +116,7 @@ void PutLinkUTest::test_filtering()
 					N(CONCEPT_NODE, "thingy")),
 				N(SCHEMA_NODE, "finagle"),
 				bar = N(CONCEPT_NODE, "bar")));
-				
+
 	// Test that execution filters as desired...
 	Instantiator inst(&_as);
 	Handle cncpts = inst.execute(filt);
@@ -163,6 +163,40 @@ void PutLinkUTest::test_function()
 	printf("Expecting %s\n", expected_two->to_string().c_str());
 	printf("Got %s\n", two->to_string().c_str());
 	TS_ASSERT_EQUALS(two, expected_two);
+
+	// Test a complex set.
+	// (Put (Times) (Set
+	//    (Number 1)
+	//    (List (Number 2) (Number 2))
+	//    (List (Number 3) (Number 3) (Number 3))
+	//    (List (Number 4) (Number 4) (Number 4) (Number 4))
+	// )))
+	//
+	Handle want_set =
+		L(PUT_LINK,
+			L(TIMES_LINK),
+				L(SET_LINK,
+					N(NUMBER_NODE, "1"),
+					L(LIST_LINK, N(NUMBER_NODE, "2"), N(NUMBER_NODE, "2")),
+					L(LIST_LINK, N(NUMBER_NODE, "3"),
+					             N(NUMBER_NODE, "3"),
+					             N(NUMBER_NODE, "3")),
+					L(LIST_LINK, N(NUMBER_NODE, "4"),
+					             N(NUMBER_NODE, "4"),
+					             N(NUMBER_NODE, "4"),
+					             N(NUMBER_NODE, "4"))));
+
+	Handle set = inst.execute(want_set);
+	Handle expected_set =
+		L(SET_LINK,
+			N(NUMBER_NODE, "1"),
+			N(NUMBER_NODE, "4"),
+			N(NUMBER_NODE, "27"),
+			N(NUMBER_NODE, "256"));
+
+	printf("Expecting %s\n", expected_set->to_string().c_str());
+	printf("Got %s\n", set->to_string().c_str());
+	TS_ASSERT_EQUALS(set, expected_set);
 
 	logger().info("END TEST: %s", __FUNCTION__);
 }
@@ -364,7 +398,7 @@ void PutLinkUTest::test_eval_implication_1()
 	printf("Expecting %s\n", expected->to_string().c_str());
 	printf("Got %s\n", putted->to_string().c_str());
 	TS_ASSERT_EQUALS(putted, expected);
-	
+
 	logger().info("END TEST: %s", __FUNCTION__);
 }
 
