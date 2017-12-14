@@ -31,7 +31,7 @@ using namespace opencog;
 
 // Test the PutLink.
 //
-class PutLinkUTest :  public CxxTest::TestSuite
+class PutLinkUTest: public CxxTest::TestSuite
 {
 private:
 	AtomSpace _as;
@@ -48,6 +48,7 @@ public:
 
 	void test_define();
 	void test_filtering();
+	void test_function();
 	void test_lambda();
 	void test_lambda_partial_substitution();
 	void test_eval_inheritance();
@@ -132,6 +133,29 @@ void PutLinkUTest::test_filtering()
 	logger().info("END TEST: %s", __FUNCTION__);
 }
 
+void PutLinkUTest::test_function()
+{
+	logger().info("BEGIN TEST: %s", __FUNCTION__);
+
+	// Test that 2+2 = 4
+	// (Put (Plus) (List (Number 2) (Number 2)))
+	Handle want_four =
+		L(PUT_LINK,
+			L(PLUS_LINK),
+				L(LIST_LINK, N(NUMBER_NODE, "2"), N(NUMBER_NODE, "2")));
+
+	Instantiator inst(&_as);
+	Handle four = inst.execute(want_four);
+
+	Handle expected_four = N(NUMBER_NODE, "4");
+
+	printf("Expecting %s\n", expected_four->to_string().c_str());
+	printf("Got %s\n", four->to_string().c_str());
+	TS_ASSERT_EQUALS(four, expected_four);
+
+	logger().info("END TEST: %s", __FUNCTION__);
+}
+
 void PutLinkUTest::test_lambda()
 {
 	logger().info("BEGIN TEST: %s", __FUNCTION__);
@@ -140,26 +164,26 @@ void PutLinkUTest::test_lambda()
 	// provided in the lambda rather than left-to-right in the body.
 	Handle lam =
 		L(LAMBDA_LINK,
-		  L(VARIABLE_LIST,
-		    N(VARIABLE_NODE, "$x"),
-		    N(VARIABLE_NODE, "$y")),
-		  L(INHERITANCE_LINK,
-		    N(VARIABLE_NODE, "$y"),
-		    N(VARIABLE_NODE, "$x")));
+			L(VARIABLE_LIST,
+				N(VARIABLE_NODE, "$x"),
+				N(VARIABLE_NODE, "$y")),
+			L(INHERITANCE_LINK,
+				N(VARIABLE_NODE, "$y"),
+				N(VARIABLE_NODE, "$x")));
 	Handle put =
 		L(PUT_LINK,
-		  lam,
-		  L(LIST_LINK,
-		    N(CONCEPT_NODE, "animal"),
-		    N(CONCEPT_NODE, "coyote")));
+			lam,
+			L(LIST_LINK,
+				N(CONCEPT_NODE, "animal"),
+				N(CONCEPT_NODE, "coyote")));
 
 	Instantiator inst(&_as);
 	Handle putted = inst.execute(put);
 
 	Handle expected_putted =
 		L(INHERITANCE_LINK,
-		  N(CONCEPT_NODE, "coyote"),
-		  N(CONCEPT_NODE, "animal"));
+			N(CONCEPT_NODE, "coyote"),
+			N(CONCEPT_NODE, "animal"));
 
 	printf("Expecting %s\n", expected_putted->to_string().c_str());
 	printf("Got %s\n", putted->to_string().c_str());
@@ -175,22 +199,22 @@ void PutLinkUTest::test_lambda_partial_substitution()
 	// Test partial substitution
 	Handle lam =
 		L(LAMBDA_LINK,
-		  N(VARIABLE_NODE, "$x"),
-		  L(INHERITANCE_LINK,
-		    N(VARIABLE_NODE, "$y"),
-		    N(VARIABLE_NODE, "$x")));
+			N(VARIABLE_NODE, "$x"),
+			L(INHERITANCE_LINK,
+				N(VARIABLE_NODE, "$y"),
+				N(VARIABLE_NODE, "$x")));
 	Handle put =
 		L(PUT_LINK,
-		  lam,
-		  N(CONCEPT_NODE, "animal"));
+			lam,
+			N(CONCEPT_NODE, "animal"));
 
 	Instantiator inst(&_as);
 	Handle putted = inst.execute(put);
 
 	Handle expected_putted =
 		L(INHERITANCE_LINK,
-		  N(VARIABLE_NODE, "$y"),
-		  N(CONCEPT_NODE, "animal"));
+			N(VARIABLE_NODE, "$y"),
+			N(CONCEPT_NODE, "animal"));
 
 	printf("Expecting %s\n", expected_putted->to_string().c_str());
 	printf("Got %s\n", putted->to_string().c_str());
