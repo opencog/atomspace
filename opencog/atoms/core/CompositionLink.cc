@@ -1,0 +1,150 @@
+/*
+ * opencog/atoms/core/CompositionLink.cc
+ *
+ * Copyright (C) 2017 Nil Geisweiller
+ * All Rights Reserved
+ *
+ * This program is free software; you can redistribute it and/or modify
+ * it under the terms of the GNU Affero General Public License v3 as
+ * published by the Free Software Foundation and including the exceptions
+ * at http://opencog.org/wiki/Licenses
+ *
+ * This program is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ * GNU General Public License for more details.
+ *
+ * You should have received a copy of the GNU Affero General Public License
+ * along with this program; if not, write to:
+ * Free Software Foundation, Inc.,
+ * 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
+ */
+
+#include <opencog/atoms/base/atom_types.h>
+#include <opencog/atoms/base/ClassServer.h>
+#include <opencog/atoms/core/ScopeLink.h>
+#include <opencog/atoms/core/NumberNode.h>
+#include "CompositionLink.h"
+
+using namespace opencog;
+
+void CompositionLink::check() const
+{
+	if (not classserver().isA(get_type(), COMPOSITION_LINK))
+		throw InvalidParamException(TRACE_INFO, "Expecting a CompositionLink");
+
+	if (get_arity() != 2)
+		throw InvalidParamException(TRACE_INFO, "Expecting two outgoings");
+}
+
+Variables CompositionLink::variables_intersection(const HandleSeq& scopes) const
+{
+	Variables variables;
+	unsigned maxpro = 0; // maximum index of the projected argument
+	for (const Handle& h :  scopes) {
+		ScopeLinkPtr sc = ScopeLinkCast(h);
+		if (sc) {
+			if (variables.empty()) {
+				variables = sc->get_variables();
+			} else {
+				// Make sure all variable declarations are
+				// alpha-equivalent
+				OC_ASSERT(variables == sc->get_variables());
+			}
+		} else {
+			maxpro = std::max(maxpro, projection_index(h));
+		}
+	}
+	// Make sure that no projection is going out of bound
+	OC_ASSERT(maxpro < variables.size(), "Projection out of bound");
+
+	return variables;
+}
+
+unsigned CompositionLink::projection_index(const Handle& projection)
+{
+	OC_ASSERT(projection->get_type() == PROJECTION_LINK);
+	NumberNodePtr num = NumberNodeCast(projection->getOutgoingAtom(0));
+	OC_ASSERT(num != nullptr);
+	OC_ASSERT(0 <= num->get_value());
+	return num->get_value();
+}
+
+CompositionLink::CompositionLink(const HandleSeq oset, Type t) : FunctionLink(oset, t)
+{
+	check();
+}
+
+CompositionLink::CompositionLink(const Link& l) : FunctionLink(l)
+{
+	check();
+}
+
+Handle CompositionLink::execute(AtomSpace* as) const
+{
+	Handle g = getOutgoingAtom(0);
+	Handle f = getOutgoingAtom(1);
+	ScopeLinkPtr g_sc = ScopeLinkCast(g);
+	OC_ASSERT(g_sc != nullptr, "First outgoing must be a scope");
+
+	const Variables& g_vars = g_sc->get_variables();
+	if (g_vars.size() == 1) {
+		// g has one variable only, thus we expect f to be a scope as
+		// opposed to a list of scopes
+		ScopeLinkPtr f_sc = ScopeLinkCast(f);
+		OC_ASSERT(f_sc != nullptr, "Second outgoing must be a scope");
+
+		return compose(f_sc->get_vardecl(), {f_sc->get_body()});
+	}
+
+	// f must be a list of scopes
+	OC_ASSERT(f->get_type() == LIST_LINK);
+	// With an equal number of variables from g vardecl
+	OC_ASSERT(f->get_arity() == g_vars.size());
+	const HandleSeq& scopes = f->getOutgoingSet();
+
+	// Extract the variable declaration intersection
+	Variables n_vars = variables_intersection(scopes);
+
+	// Build sequence of values (body functions) for substitution
+	HandleSeq values;
+	for (const Handle& fi : f->getOutgoingSet()) {
+		if (fi->get_type() == PROJECTION_LINK) {
+			values.push_back(n_vars.varseq[projection_index(fi)]);
+		} else {
+			ScopeLinkPtr fi_sc = ScopeLinkCast(fi);
+			OC_ASSERT(fi_sc != nullptr);
+			// Make sure its variables have the same named as the new
+			// variable declaration
+			Handle afi = fi_sc->alpha_conversion(n_vars.varseq);
+			ScopeLinkPtr afi_sc = ScopeLinkCast(afi);
+			values.push_back(afi_sc->get_body());
+		}
+	}
+	return compose(n_vars, values);
+}
+
+Handle CompositionLink::compose(const Handle& nvardecl,
+                            const HandleSeq& values) const
+{
+	Handle g = getOutgoingAtom(0);
+	ScopeLinkPtr g_sc = ScopeLinkCast(g);
+	OC_ASSERT(g_sc != nullptr, "First outgoing must be a scope");
+
+	HandleSeq comp_hs = g_sc->partial_substitute_bodies(nvardecl, values);
+
+	// Insert fvardecl if the outgoings if defined
+	if (nvardecl)
+		comp_hs.insert(comp_hs.begin(), nvardecl);
+
+	// Create composed scope
+	return createLink(comp_hs, g->get_type());
+}
+
+Handle CompositionLink::compose(const Variables& nvars,
+                            const HandleSeq& values) const
+{
+	return compose(nvars.get_vardecl(), values);
+}
+
+DEFINE_LINK_FACTORY(CompositionLink, COMPOSITION_LINK);

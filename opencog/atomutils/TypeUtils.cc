@@ -410,6 +410,11 @@ VariableListPtr gen_varlist(const Handle& h, const Handle& vardecl)
 	return createVariableList(vardecl);
 }
 
+Variables gen_variables(const Handle& h, const Handle& vardecl)
+{
+	return gen_varlist(h, vardecl)->get_variables();
+}
+
 Handle gen_vardecl(const Handle& h, const Handle& vardecl)
 {
 	if (not vardecl)

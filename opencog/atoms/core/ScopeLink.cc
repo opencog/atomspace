@@ -398,29 +398,47 @@ Handle ScopeLink::alpha_conversion(const HandleMap& vsmap) const
 Handle ScopeLink::partial_substitute(const HandleMap& vm) const
 {
 	// Perform substitution over the variable declaration
-	Handle vardecl = partial_substitute_vardecl(vm);
+	Handle nvardecl = partial_substitute_vardecl(vm);
 
-	// Perform substitution over the bodies. Consuming ill quotations
-	// resulting from the substitution.
-	const Variables variables = get_variables();
-	HandleSeq values = variables.make_values(vm);
+	// Perform substitution over the bodies
+	HandleSeq hs = partial_substitute_bodies(nvardecl, vm);
+
+	// Filter vardecl
+	nvardecl = filter_vardecl(nvardecl, hs);
+
+	// Insert vardecl in the outgoings if defined
+	if (nvardecl)
+		hs.insert(hs.begin(), nvardecl);
+
+	// Create the substituted scope
+	return createLink(hs, get_type());
+}
+
+HandleSeq ScopeLink::partial_substitute_bodies(const Handle& nvardecl,
+                                               const HandleMap& vm) const
+{
+	const Variables& variables = get_variables();
+	return partial_substitute_bodies(nvardecl, variables.make_values(vm));
+}
+
+HandleSeq ScopeLink::partial_substitute_bodies(const Handle& nvardecl,
+                                               const HandleSeq& values) const
+{
 	HandleSeq hs;
 	for (size_t i = (get_vardecl() ? 1 : 0); i < get_arity(); ++i) {
 		const Handle& h = getOutgoingAtom(i);
-		Handle nh = variables.substitute_nocheck(h, values);
-		nh = consume_ill_quotations(vardecl, nh);
-		hs.push_back(nh);
+		hs.push_back(partial_substitute_body(nvardecl, h, values));
 	}
+	return hs;
+}
 
-	// Filter vardecl
-	vardecl = filter_vardecl(vardecl, hs);
-
-	// Insert vardecl in outs if defined
-	if (vardecl)
-		hs.insert(hs.begin(), vardecl);
-
-	// Create the substituted BindLink
-	return createLink(hs, get_type());
+Handle ScopeLink::partial_substitute_body(const Handle& nvardecl,
+                                          const Handle& body,
+                                          const HandleSeq& values) const
+{
+	Handle nbody = get_variables().substitute_nocheck(body, values);
+	nbody = consume_ill_quotations(nvardecl, nbody);
+	return nbody;
 }
 
 Handle ScopeLink::partial_substitute_vardecl(const HandleMap& vm) const
@@ -498,8 +516,7 @@ Handle ScopeLink::consume_ill_quotations() const
 
 Handle ScopeLink::consume_ill_quotations(const Handle& vardecl, const Handle& h)
 {
-	const Variables variables = createVariableList(vardecl)->get_variables();
-	return consume_ill_quotations(variables, h);
+	return consume_ill_quotations(gen_variables(h, vardecl), h);
 }
 
 Handle ScopeLink::consume_ill_quotations(const Variables& variables, Handle h,

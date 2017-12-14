@@ -26,6 +26,12 @@
 
 using namespace opencog;
 
+void FunctionLink::check_type(Type t)
+{
+	if (not classserver().isA(t, FUNCTION_LINK))
+		throw InvalidParamException(TRACE_INFO, "Expecting a FunctionLink");
+}
+
 void FunctionLink::init(void)
 {
 	FreeLink::init();
@@ -34,33 +40,28 @@ void FunctionLink::init(void)
 FunctionLink::FunctionLink(const HandleSeq& oset, Type t)
     : FreeLink(oset, t)
 {
-	if (not classserver().isA(t, FUNCTION_LINK))
-		throw InvalidParamException(TRACE_INFO, "Expecting a FunctionLink");
+	check_type(t);
 	init();
 }
 
 FunctionLink::FunctionLink(Type t, const Handle& a)
     : FreeLink(t, a)
 {
-	if (not classserver().isA(t, FUNCTION_LINK))
-		throw InvalidParamException(TRACE_INFO, "Expecting a FunctionLink");
+	check_type(t);
 	init();
 }
 
 FunctionLink::FunctionLink(Type t, const Handle& a, const Handle& b)
     : FreeLink({a, b}, t)
 {
-	if (not classserver().isA(t, FUNCTION_LINK))
-		throw InvalidParamException(TRACE_INFO, "Expecting a FunctionLink");
+	check_type(t);
 	init();
 }
 
 FunctionLink::FunctionLink(const Link& l)
     : FreeLink(l)
 {
-	Type tscope = l.get_type();
-	if (not classserver().isA(tscope, FUNCTION_LINK))
-		throw InvalidParamException(TRACE_INFO, "Expecting a FunctionLink");
+	check_type(l.get_type());
 	init();
 }
 

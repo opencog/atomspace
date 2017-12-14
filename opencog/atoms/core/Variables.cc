@@ -157,6 +157,13 @@ Handle FreeVariables::substitute_nocheck(const Handle& term,
 	return substitute_scoped(term, args, silent, index, 0);
 }
 
+Handle FreeVariables::substitute_nocheck(const Handle& term,
+                                         const HandleMap& vm,
+                                         bool silent) const
+{
+	return substitute_scoped(term, make_values(vm), silent, index, 0);
+}
+
 /// Perform beta-reduction on the term.  This is more-or-less a purely
 /// syntactic beta-reduction, except for two "tiny" semantic parts:
 /// The semantics of QuoteLink, UnquoteLink is honoured, so that quoted
@@ -692,6 +699,16 @@ bool Variables::operator<(const Variables& other) const
 		     and _deep_typemap < other._deep_typemap)
 		    or (_deep_typemap == other._deep_typemap
 		        and _fuzzy_typemap < other._fuzzy_typemap));
+}
+
+std::size_t FreeVariables::size() const
+{
+	return varseq.size();
+}
+
+bool FreeVariables::empty() const
+{
+	return varseq.empty();
 }
 
 Handle Variables::get_vardecl() const
