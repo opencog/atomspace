@@ -78,7 +78,7 @@ void ReductUTest::test_arithmetic(void)
 
 	// ---------
 	Handle four = eval->eval_h(
-		"(cog-reduce! (PlusLink (NumberNode 2) (NumberNode 2)))"
+		"(cog-execute! (PlusLink (NumberNode 2) (NumberNode 2)))"
 	);
 	printf("expecting four: %s\n", four->to_short_string().c_str());
 
@@ -87,7 +87,7 @@ void ReductUTest::test_arithmetic(void)
 
 	// ---------
 	Handle zero = eval->eval_h(
-		"(cog-reduce! (PlusLink (NumberNode 2) (NumberNode -2)))"
+		"(cog-execute! (PlusLink (NumberNode 2) (NumberNode -2)))"
 	);
 	printf("expecting zero: %s\n", zero->to_short_string().c_str());
 
@@ -95,12 +95,8 @@ void ReductUTest::test_arithmetic(void)
 	TS_ASSERT_EQUALS(zero, ezero);
 
 	// ---------
-/******
-XXX FIXME -- this used to pass, but the circular dependency
-nightmare is killing me and I can't debug this any more.
-
 	Handle xplus5 = eval->eval_h(
-		"(cog-reduce! (PlusLink "
+		"(cog-execute! (PlusLink "
 		"	(NumberNode 2) (VariableNode \"$x\") (NumberNode 3)))"
 	);
 	printf("expecting x+5: %s\n", xplus5->to_short_string().c_str());
@@ -108,29 +104,20 @@ nightmare is killing me and I can't debug this any more.
 	Handle explus5 = eval->eval_h(
 		"(PlusLink (VariableNode \"$x\") (NumberNode 5))");
 	TS_ASSERT_EQUALS(xplus5, explus5);
-********/
 
 	// ---------
-/***********
-XXX FIXME -- like the above, this used to pass, could pass, if we
-were able to get the PlusLink (FoldLink) into the atomspace early
-enough; but we can't due to the circular shared library dependencies.
-Anyway, right now, no one actually needs this, and in the long-run
-it is probably bettter to get the URE to do reuction for us anyway.
-So I'm punting for now...
-
 	Handle x = eval->eval_h(
-		"(cog-reduce! (PlusLink "
+		"(cog-execute! (PlusLink "
 		"	(NumberNode 2) (VariableNode \"$x\") (NumberNode -2)))"
 	);
 	printf("expecting $x: %s\n", x->to_short_string().c_str());
 
 	Handle ex = eval->eval_h("(VariableNode \"$x\")");
 	TS_ASSERT_EQUALS(x, ex);
-**********/
+
 	// ---------
 	Handle twox = eval->eval_h(
-		"(cog-reduce! (PlusLink "
+		"(cog-execute! (PlusLink "
 		"	(VariableNode \"$x\") (VariableNode \"$x\")))"
 	);
 	printf("expecting 2x: %s\n", twox->to_short_string().c_str());
@@ -140,12 +127,20 @@ So I'm punting for now...
 	TS_ASSERT_EQUALS(twox, etwox);
 
 	// ---------
-/******
-XXX FIXME -- this used to pass, but the circular dependency
-nightmare is killing me and I can't debug this any more.
+	Handle threex = eval->eval_h(
+		"(cog-execute! (PlusLink (VariableNode \"$x\") "
+		"	(VariableNode \"$x\") (VariableNode \"$x\")))"
+	);
+	printf("expecting 3x: %s\n", threex->to_short_string().c_str());
+
+	Handle ethreex = eval->eval_h(
+		"(TimesLink (VariableNode \"$x\") (NumberNode 3))");
+	TS_ASSERT_EQUALS(twox, ethreex);
+
+	// ---------
 
 	Handle xtimes42 = eval->eval_h(
-		"(cog-reduce! (PlusLink "
+		"(cog-execute! (PlusLink "
 		"	(VariableNode \"$x\")"
 		"	(TimesLink (NumberNode 38) (VariableNode \"$x\"))"
 		"	(TimesLink (VariableNode \"$x\") (NumberNode 3))))"
@@ -155,11 +150,10 @@ nightmare is killing me and I can't debug this any more.
 	Handle extimes42 = eval->eval_h(
 		"(TimesLink (VariableNode \"$x\") (NumberNode 42))");
 	TS_ASSERT_EQUALS(xtimes42, extimes42);
-********/
 
 	// ---------
 	Handle six = eval->eval_h(
-		"(cog-reduce! (TimesLink (NumberNode 2) (NumberNode 3)))"
+		"(cog-execute! (TimesLink (NumberNode 2) (NumberNode 3)))"
 	);
 	printf("expecting six: %s\n", six->to_short_string().c_str());
 
@@ -167,12 +161,9 @@ nightmare is killing me and I can't debug this any more.
 	TS_ASSERT_EQUALS(six, esix);
 
 	// ---------
-/******
-XXX FIXME -- this used to pass, but the circular dependency
-nightmare is killing me and I can't debug this any more.
 
 	Handle sixex = eval->eval_h(
-		"(cog-reduce! (TimesLink "
+		"(cog-execute! (TimesLink "
 		"	(NumberNode 2) (VariableNode \"$x\") (NumberNode 3)))"
 	);
 	printf("expecting x * 6: %s\n", sixex->to_short_string().c_str());
@@ -180,7 +171,6 @@ nightmare is killing me and I can't debug this any more.
 	Handle esixex = eval->eval_h(
 		"(TimesLink (VariableNode \"$x\") (NumberNode 6))");
 	TS_ASSERT_EQUALS(sixex, esixex);
-********/
 
 	// ---------
 	logger().debug("END TEST: %s", __FUNCTION__);
