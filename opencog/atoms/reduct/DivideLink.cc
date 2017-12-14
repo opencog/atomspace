@@ -64,17 +64,25 @@ void DivideLink::init(void)
 			"Don't know how to divide that!");
 }
 
-Handle DivideLink::do_execute(AtomSpace* as, const HandleSeq& oset) const
+static inline double get_double(const Handle& h)
 {
-	if (1 == oset.size())
+	return NumberNodeCast(h)->get_value();
+}
+
+// No ExpLink or PowLink and so kons is very simple
+Handle DivideLink::kons(const Handle& fi, const Handle& fj) const
+{
+	// Are they numbers?
+	if (NUMBER_NODE == fi->get_type() and
+	    NUMBER_NODE == fj->get_type())
 	{
-		NumberNodePtr na(unwrap_set(oset[0]));
-		return createNumberNode(1.0 / na->get_value())->get_handle();
+		double prod = get_double(fi) / get_double(fj);
+		return Handle(createNumberNode(prod));
 	}
 
-	NumberNodePtr na(unwrap_set(oset[0]));
-	NumberNodePtr nb(unwrap_set(oset[1]));
-	return createNumberNode(na->get_value() / nb->get_value())->get_handle();
+	// If we are here, we've been asked to take a ratio of two things,
+	// but they are not of a type that we know how to multiply.
+	return Handle(createDivideLink(fi, fj));
 }
 
 DEFINE_LINK_FACTORY(DivideLink, DIVIDE_LINK)
