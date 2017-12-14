@@ -77,9 +77,11 @@ static inline double get_double(const Handle& h)
 
 Handle PlusLink::kons(const Handle& fi, const Handle& fj) const
 {
+	Type fitype = fi->get_type();
+	Type fjtype = fj->get_type();
+
 	// Are they numbers?
-	if (NUMBER_NODE == fi->get_type() and
-	    NUMBER_NODE == fj->get_type())
+	if (NUMBER_NODE == fitype and NUMBER_NODE == fjtype)
 	{
 		double sum = get_double(fi) + get_double(fj);
 		return Handle(createNumberNode(sum));
@@ -98,7 +100,7 @@ Handle PlusLink::kons(const Handle& fi, const Handle& fj) const
 	// If j is (TimesLink x a) and i is (TimesLink x b)
 	// then create (TimesLink x (a+b))
 	//
-	if (fj->get_type() == TIMES_LINK)
+	if (fjtype == TIMES_LINK)
 	{
 		bool do_add = false;
 		HandleSeq rest;
@@ -114,7 +116,7 @@ Handle PlusLink::kons(const Handle& fi, const Handle& fj) const
 		}
 
 		// Handle the (a+b) case described above.
-		else if (fi->get_type() == TIMES_LINK and
+		else if (fitype == TIMES_LINK and
 		         fi->getOutgoingAtom(0) == exx)
 		{
 			const HandleSeq& ilpo = fi->getOutgoingSet();
