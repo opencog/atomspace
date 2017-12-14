@@ -77,6 +77,24 @@ void ReductUTest::test_arithmetic(void)
 	logger().debug("BEGIN TEST: %s", __FUNCTION__);
 
 	// ---------
+	Handle zero = eval->eval_h(
+		"(cog-execute! (PlusLink (NumberNode 0)))"
+	);
+	printf("expecting zero: %s\n", zero->to_short_string().c_str());
+
+	Handle ezero = eval->eval_h("(NumberNode 0)");
+	TS_ASSERT_EQUALS(zero, ezero);
+
+	// ---------
+	Handle two = eval->eval_h(
+		"(cog-execute! (PlusLink (NumberNode 2)))"
+	);
+	printf("expecting two: %s\n", two->to_short_string().c_str());
+
+	Handle etwo = eval->eval_h("(NumberNode 2)");
+	TS_ASSERT_EQUALS(two, etwo);
+
+	// ---------
 	Handle four = eval->eval_h(
 		"(cog-execute! (PlusLink (NumberNode 2) (NumberNode 2)))"
 	);
@@ -86,13 +104,32 @@ void ReductUTest::test_arithmetic(void)
 	TS_ASSERT_EQUALS(four, efour);
 
 	// ---------
-	Handle zero = eval->eval_h(
+	zero = eval->eval_h(
 		"(cog-execute! (PlusLink (NumberNode 2) (NumberNode -2)))"
 	);
 	printf("expecting zero: %s\n", zero->to_short_string().c_str());
 
-	Handle ezero = eval->eval_h("(NumberNode 0)");
+	ezero = eval->eval_h("(NumberNode 0)");
 	TS_ASSERT_EQUALS(zero, ezero);
+
+	// ---------
+	Handle xplus0 = eval->eval_h(
+		"(cog-execute! (PlusLink "
+		"	(VariableNode \"$x\") (NumberNode 0)))"
+	);
+	printf("expecting x: %s\n", xplus0->to_short_string().c_str());
+
+	Handle ex = eval->eval_h(
+		"(VariableNode \"$x\"))");
+	TS_ASSERT_EQUALS(xplus0, ex);
+
+	// ---------
+	Handle Oplusx = eval->eval_h(
+		"(cog-execute! (PlusLink "
+		"	(NumberNode 0) (VariableNode \"$x\")))"
+	);
+	printf("expecting x: %s\n", Oplusx->to_short_string().c_str());
+	TS_ASSERT_EQUALS(Oplusx, ex);
 
 	// ---------
 	Handle xplus5 = eval->eval_h(
@@ -111,8 +148,6 @@ void ReductUTest::test_arithmetic(void)
 		"	(NumberNode 2) (VariableNode \"$x\") (NumberNode -2)))"
 	);
 	printf("expecting $x: %s\n", x->to_short_string().c_str());
-
-	Handle ex = eval->eval_h("(VariableNode \"$x\")");
 	TS_ASSERT_EQUALS(x, ex);
 
 	// ---------
