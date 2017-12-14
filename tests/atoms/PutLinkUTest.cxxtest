@@ -31,7 +31,7 @@ using namespace opencog;
 
 // Test the PutLink.
 //
-class PutLinkUTest :  public CxxTest::TestSuite
+class PutLinkUTest: public CxxTest::TestSuite
 {
 private:
 	AtomSpace _as;
@@ -48,6 +48,7 @@ public:
 
 	void test_define();
 	void test_filtering();
+	void test_function();
 	void test_lambda();
 	void test_lambda_partial_substitution();
 	void test_eval_inheritance();
@@ -115,7 +116,7 @@ void PutLinkUTest::test_filtering()
 					N(CONCEPT_NODE, "thingy")),
 				N(SCHEMA_NODE, "finagle"),
 				bar = N(CONCEPT_NODE, "bar")));
-				
+
 	// Test that execution filters as desired...
 	Instantiator inst(&_as);
 	Handle cncpts = inst.execute(filt);
@@ -132,6 +133,74 @@ void PutLinkUTest::test_filtering()
 	logger().info("END TEST: %s", __FUNCTION__);
 }
 
+void PutLinkUTest::test_function()
+{
+	logger().info("BEGIN TEST: %s", __FUNCTION__);
+	Instantiator inst(&_as);
+
+	// Test that 2+2 = 4
+	// (Put (Plus) (List (Number 2) (Number 2)))
+	Handle want_four =
+		L(PUT_LINK,
+			L(PLUS_LINK),
+				L(LIST_LINK, N(NUMBER_NODE, "2"), N(NUMBER_NODE, "2")));
+
+	Handle four = inst.execute(want_four);
+	Handle expected_four = N(NUMBER_NODE, "4");
+
+	printf("Expecting %s\n", expected_four->to_string().c_str());
+	printf("Got %s\n", four->to_string().c_str());
+	TS_ASSERT_EQUALS(four, expected_four);
+
+	// Test that 2 = 2
+	// (Put (Plus) (Number 2))
+	Handle want_two =
+		L(PUT_LINK, L(PLUS_LINK), N(NUMBER_NODE, "2"));
+
+	Handle two = inst.execute(want_two);
+	Handle expected_two = N(NUMBER_NODE, "2");
+
+	printf("Expecting %s\n", expected_two->to_string().c_str());
+	printf("Got %s\n", two->to_string().c_str());
+	TS_ASSERT_EQUALS(two, expected_two);
+
+	// Test a complex set.
+	// (Put (Times) (Set
+	//    (Number 1)
+	//    (List (Number 2) (Number 2))
+	//    (List (Number 3) (Number 3) (Number 3))
+	//    (List (Number 4) (Number 4) (Number 4) (Number 4))
+	// )))
+	//
+	Handle want_set =
+		L(PUT_LINK,
+			L(TIMES_LINK),
+				L(SET_LINK,
+					N(NUMBER_NODE, "1"),
+					L(LIST_LINK, N(NUMBER_NODE, "2"), N(NUMBER_NODE, "2")),
+					L(LIST_LINK, N(NUMBER_NODE, "3"),
+					             N(NUMBER_NODE, "3"),
+					             N(NUMBER_NODE, "3")),
+					L(LIST_LINK, N(NUMBER_NODE, "4"),
+					             N(NUMBER_NODE, "4"),
+					             N(NUMBER_NODE, "4"),
+					             N(NUMBER_NODE, "4"))));
+
+	Handle set = inst.execute(want_set);
+	Handle expected_set =
+		L(SET_LINK,
+			N(NUMBER_NODE, "1"),
+			N(NUMBER_NODE, "4"),
+			N(NUMBER_NODE, "27"),
+			N(NUMBER_NODE, "256"));
+
+	printf("Expecting %s\n", expected_set->to_string().c_str());
+	printf("Got %s\n", set->to_string().c_str());
+	TS_ASSERT_EQUALS(set, expected_set);
+
+	logger().info("END TEST: %s", __FUNCTION__);
+}
+
 void PutLinkUTest::test_lambda()
 {
 	logger().info("BEGIN TEST: %s", __FUNCTION__);
@@ -140,26 +209,26 @@ void PutLinkUTest::test_lambda()
 	// provided in the lambda rather than left-to-right in the body.
 	Handle lam =
 		L(LAMBDA_LINK,
-		  L(VARIABLE_LIST,
-		    N(VARIABLE_NODE, "$x"),
-		    N(VARIABLE_NODE, "$y")),
-		  L(INHERITANCE_LINK,
-		    N(VARIABLE_NODE, "$y"),
-		    N(VARIABLE_NODE, "$x")));
+			L(VARIABLE_LIST,
+				N(VARIABLE_NODE, "$x"),
+				N(VARIABLE_NODE, "$y")),
+			L(INHERITANCE_LINK,
+				N(VARIABLE_NODE, "$y"),
+				N(VARIABLE_NODE, "$x")));
 	Handle put =
 		L(PUT_LINK,
-		  lam,
-		  L(LIST_LINK,
-		    N(CONCEPT_NODE, "animal"),
-		    N(CONCEPT_NODE, "coyote")));
+			lam,
+			L(LIST_LINK,
+				N(CONCEPT_NODE, "animal"),
+				N(CONCEPT_NODE, "coyote")));
 
 	Instantiator inst(&_as);
 	Handle putted = inst.execute(put);
 
 	Handle expected_putted =
 		L(INHERITANCE_LINK,
-		  N(CONCEPT_NODE, "coyote"),
-		  N(CONCEPT_NODE, "animal"));
+			N(CONCEPT_NODE, "coyote"),
+			N(CONCEPT_NODE, "animal"));
 
 	printf("Expecting %s\n", expected_putted->to_string().c_str());
 	printf("Got %s\n", putted->to_string().c_str());
@@ -175,22 +244,22 @@ void PutLinkUTest::test_lambda_partial_substitution()
 	// Test partial substitution
 	Handle lam =
 		L(LAMBDA_LINK,
-		  N(VARIABLE_NODE, "$x"),
-		  L(INHERITANCE_LINK,
-		    N(VARIABLE_NODE, "$y"),
-		    N(VARIABLE_NODE, "$x")));
+			N(VARIABLE_NODE, "$x"),
+			L(INHERITANCE_LINK,
+				N(VARIABLE_NODE, "$y"),
+				N(VARIABLE_NODE, "$x")));
 	Handle put =
 		L(PUT_LINK,
-		  lam,
-		  N(CONCEPT_NODE, "animal"));
+			lam,
+			N(CONCEPT_NODE, "animal"));
 
 	Instantiator inst(&_as);
 	Handle putted = inst.execute(put);
 
 	Handle expected_putted =
 		L(INHERITANCE_LINK,
-		  N(VARIABLE_NODE, "$y"),
-		  N(CONCEPT_NODE, "animal"));
+			N(VARIABLE_NODE, "$y"),
+			N(CONCEPT_NODE, "animal"));
 
 	printf("Expecting %s\n", expected_putted->to_string().c_str());
 	printf("Got %s\n", putted->to_string().c_str());
@@ -329,7 +398,7 @@ void PutLinkUTest::test_eval_implication_1()
 	printf("Expecting %s\n", expected->to_string().c_str());
 	printf("Got %s\n", putted->to_string().c_str());
 	TS_ASSERT_EQUALS(putted, expected);
-	
+
 	logger().info("END TEST: %s", __FUNCTION__);
 }
 
