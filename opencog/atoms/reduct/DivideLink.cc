@@ -62,6 +62,9 @@ void DivideLink::init(void)
 	if (2 < sz or 0 == sz)
 		throw InvalidParamException(TRACE_INFO,
 			"Don't know how to divide that!");
+
+   knil = Handle(createNumberNode("1"));
+	_commutative = false;
 }
 
 static inline double get_double(const Handle& h)
@@ -79,6 +82,10 @@ Handle DivideLink::kons(const Handle& fi, const Handle& fj) const
 		double ratio = get_double(fi) / get_double(fj);
 		return Handle(createNumberNode(ratio));
 	}
+
+	// If fj is one, just drop it
+	if (content_eq(fj, knil))
+		return fi;
 
 	// If we are here, we've been asked to take a ratio of two things,
 	// but they are not of a type that we know how to divide.

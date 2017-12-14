@@ -62,6 +62,9 @@ void MinusLink::init(void)
 	if (2 < sz or 0 == sz)
 		throw InvalidParamException(TRACE_INFO,
 			"Don't know how to subract that!");
+
+	_commutative = false;
+	knil = Handle(createNumberNode("0"));
 }
 
 static inline double get_double(const Handle& h)
@@ -78,6 +81,10 @@ Handle MinusLink::kons(const Handle& fi, const Handle& fj) const
 		double diff = get_double(fi) - get_double(fj);
 		return Handle(createNumberNode(diff));
 	}
+
+	// If fj is zero, just drop it.
+	if (content_eq(fj, knil))
+		return fi;
 
 	// If we are here, we've been asked to subtracttwo things,
 	// but they are not of a type that we know how to subtract.

@@ -33,8 +33,8 @@ namespace opencog
  */
 
 /**
- * The ArithmeticLink implements the arithmetic operations of plus
- * and times. It uses FoldLink to perform reduction.
+ * The ArithmeticLink implements the simple arithmetic operations.
+ * It uses FoldLink to perform reduction.
  */
 class ArithmeticLink : public FoldLink
 {
@@ -43,6 +43,7 @@ protected:
 	ArithmeticLink(Type, const Handle& a, const Handle& b);
 
 	virtual Handle reorder(void) const;
+	bool _commutative;
 
 public:
 	ArithmeticLink(const HandleSeq& oset, Type=ARITHMETIC_LINK);

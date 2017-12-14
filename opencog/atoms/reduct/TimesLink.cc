@@ -58,6 +58,7 @@ void TimesLink::init(void)
 		throw InvalidParamException(TRACE_INFO, "Expecting a TimesLink");
 
 	knil = Handle(createNumberNode("1"));
+	_commutative = true;
 }
 
 // ============================================================

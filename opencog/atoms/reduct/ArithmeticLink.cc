@@ -52,6 +52,8 @@ void ArithmeticLink::init(void)
 	Type tscope = get_type();
 	if (not classserver().isA(tscope, ARITHMETIC_LINK))
 		throw InvalidParamException(TRACE_INFO, "Expecting an ArithmeticLink");
+
+	_commutative = false;
 }
 
 // ===========================================================
@@ -94,6 +96,8 @@ Handle ArithmeticLink::reduce(void) const
 /// almost in the correct order.
 Handle ArithmeticLink::reorder(void) const
 {
+	if (not _commutative) return get_handle();
+
 	HandleSeq vars;
 	HandleSeq exprs;
 	HandleSeq numbers;
@@ -130,10 +134,7 @@ Handle ArithmeticLink::reorder(void) const
 	for (const Handle& h : exprs) result.push_back(h);
 	for (const Handle& h : numbers) result.push_back(h);
 
-	Handle h(createLink(result, get_type()));
-	if (NULL == _atom_space) return h;
-
-	return _atom_space->add_atom(h);
+	return Handle(createLink(result, get_type()));
 }
 
 // ===========================================================
