@@ -70,16 +70,12 @@ double PlusLink::konsd(double a, double b) const { return a+b; }
 
 static inline double get_double(const Handle& h)
 {
-	NumberNodePtr nnn(NumberNodeCast(h));
-	if (NULL == nnn)
-		nnn = createNumberNode(*NodeCast(h));
-
-	return nnn->get_value();
+	return NumberNodeCast(h)->get_value();
 }
 
 // ============================================================
 
-Handle PlusLink::kons(const Handle& fi, const Handle& fj)
+Handle PlusLink::kons(const Handle& fi, const Handle& fj) const
 {
 	// Are they numbers?
 	if (NUMBER_NODE == fi->get_type() and

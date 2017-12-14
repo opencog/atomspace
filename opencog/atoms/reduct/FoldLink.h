@@ -44,7 +44,7 @@ class FoldLink : public FunctionLink
 {
 protected:
 	Handle knil;
-	virtual Handle kons(const Handle&, const Handle&) = 0;
+	virtual Handle kons(const Handle&, const Handle&) const = 0;
 	Type distributive_type = NOTYPE;
 
 	void init(void);
@@ -54,7 +54,7 @@ public:
 	FoldLink(const HandleSeq&, Type=FOLD_LINK);
 	FoldLink(const Link& l);
 
-   virtual Handle reduce(void);
+   virtual Handle reduce(void) const;
 };
 
 static inline FoldLinkPtr FoldLinkCast(const Handle& h)

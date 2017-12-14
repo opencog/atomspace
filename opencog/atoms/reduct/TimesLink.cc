@@ -67,17 +67,13 @@ double TimesLink::konsd(double a, double b) const { return a*b; }
 
 static inline double get_double(const Handle& h)
 {
-	NumberNodePtr nnn(NumberNodeCast(h));
-	if (NULL == nnn)
-		nnn = createNumberNode(*NodeCast(h));
-
-	return nnn->get_value();
+	return NumberNodeCast(h)->get_value();
 }
 
 /// Because there is no ExpLink or PowLink that can handle repeated
 /// products, or any distributive property, kons is very simple for
 /// the TimesLink.
-Handle TimesLink::kons(const Handle& fi, const Handle& fj)
+Handle TimesLink::kons(const Handle& fi, const Handle& fj) const
 {
 	// Are they numbers?
 	if (NUMBER_NODE == fi->get_type() and

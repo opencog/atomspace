@@ -107,13 +107,8 @@ void FoldLink::init(void)
 ///    it is both easy (easier) to use, and also is high-performance.
 ///
 /// Obviously, B) is much harder than A) but is probably more important.
-Handle FoldLink::reduce(void)
+Handle FoldLink::reduce(void) const
 {
-	// The atom table is typically not set when the ctor runs.
-	// So fix it up now.
-	if (_atom_space)
-		knil = _atom_space->add_atom(knil);
-
 	HandleSeq reduct;
 	bool did_reduce = false;
 
