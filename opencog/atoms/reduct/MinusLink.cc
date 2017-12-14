@@ -64,17 +64,24 @@ void MinusLink::init(void)
 			"Don't know how to subract that!");
 }
 
-Handle MinusLink::do_execute(AtomSpace* as, const HandleSeq& oset) const
+static inline double get_double(const Handle& h)
 {
-	if (1 == oset.size())
+	return NumberNodeCast(h)->get_value();
+}
+
+Handle MinusLink::kons(const Handle& fi, const Handle& fj) const
+{
+	// Are they numbers?
+	if (NUMBER_NODE == fi->get_type() and
+	    NUMBER_NODE == fj->get_type())
 	{
-		NumberNodePtr na(unwrap_set(oset[0]));
-		return createNumberNode(- na->get_value())->get_handle();
+		double diff = get_double(fi) - get_double(fj);
+		return Handle(createNumberNode(diff));
 	}
 
-	NumberNodePtr na(unwrap_set(oset[0]));
-	NumberNodePtr nb(unwrap_set(oset[1]));
-	return createNumberNode(na->get_value() - nb->get_value())->get_handle();
+	// If we are here, we've been asked to subtracttwo things,
+	// but they are not of a type that we know how to subtract.
+	return Handle(createMinusLink(fi, fj));
 }
 
 DEFINE_LINK_FACTORY(MinusLink, MINUS_LINK)

@@ -76,12 +76,12 @@ Handle DivideLink::kons(const Handle& fi, const Handle& fj) const
 	if (NUMBER_NODE == fi->get_type() and
 	    NUMBER_NODE == fj->get_type())
 	{
-		double prod = get_double(fi) / get_double(fj);
-		return Handle(createNumberNode(prod));
+		double ratio = get_double(fi) / get_double(fj);
+		return Handle(createNumberNode(ratio));
 	}
 
 	// If we are here, we've been asked to take a ratio of two things,
-	// but they are not of a type that we know how to multiply.
+	// but they are not of a type that we know how to divide.
 	return Handle(createDivideLink(fi, fj));
 }
 

@@ -42,7 +42,7 @@ protected:
 	void init(void);
 	MinusLink(Type, const Handle& a, const Handle& b);
 
-	virtual Handle do_execute(AtomSpace*, const HandleSeq&) const;
+	Handle kons(const Handle&, const Handle&) const;
 public:
 	MinusLink(const Handle& a, const Handle& b);
 	MinusLink(const HandleSeq&, Type=MINUS_LINK);
