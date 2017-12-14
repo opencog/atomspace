@@ -123,13 +123,7 @@ Handle ArithmeticLink::reorder(void)
 
 // ===========================================================
 
-/// execute() -- Execute the expression, returning a number
-///
-/// Similar to reduce(), above, except that this can only work
-/// on fully grounded (closed) sentences: after executation,
-/// everything must be a number, and there can be no variables
-/// in sight.
-static inline double get_double(AtomSpace *as, Handle h)
+static inline double get_double(const Handle& h)
 {
 	NumberNodePtr nnn(NumberNodeCast(h));
 	if (nnn == nullptr)
@@ -164,6 +158,12 @@ NumberNodePtr ArithmeticLink::unwrap_set(Handle h) const
 	return na;
 }
 
+/// execute() -- Execute the expression, returning a number
+///
+/// Similar to reduce(), above, except that this can only work
+/// on fully grounded (closed) sentences: after execution,
+/// everything must be a number, and there can be no variables
+/// in sight.
 Handle ArithmeticLink::execute(AtomSpace* as) const
 {
 	// Pattern matching hack. The pattern matcher returns sets of atoms;
@@ -189,7 +189,7 @@ Handle ArithmeticLink::do_execute(AtomSpace* as, const HandleSeq& oset) const
 	for (Handle h: oset)
 	{
 		h = unwrap_set(h);
-		sum = konsd(sum, get_double(as, h));
+		sum = konsd(sum, get_double(h));
 	}
 
 	if (as) return as->add_atom(createNumberNode(sum));
