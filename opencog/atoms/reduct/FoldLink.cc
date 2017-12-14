@@ -98,92 +98,26 @@ void FoldLink::init(void)
 /// Obviously, B) is much harder than A) but is probably more important.
 Handle FoldLink::reduce(void) const
 {
-	HandleSeq reduct;
-	bool did_reduce = false;
+	Handle expr = knil;
 
-	// First, reduce the outgoing set. Loop over the outgoing set,
-	// and call reduce on everything reducible.
-	for (const Handle& h: _outgoing)
+	// Loop over the outgoing set, kons'ing away.
+	// This is right to left.
+	size_t osz = _outgoing.size();
+	for (int i = osz-1; 0 <= i; i--)
 	{
-		Type t = h->get_type();
+		Handle h(_outgoing[i]);
 
+		Type t = h->get_type();
 		if (classserver().isA(t, FOLD_LINK))
 		{
 			auto fact = classserver().getFactory(t);
 			FoldLinkPtr fff(FoldLinkCast((*fact)(h)));
-			Handle redh = fff->reduce();
-			if (not content_eq(h, redh))
-			{
-				did_reduce = true;
-				reduct.push_back(redh);
-			}
-			reduct.push_back(h);
+			h = fff->reduce();
 		}
-		reduct.push_back(h);
+		expr = kons(h, expr);
 	}
 
-	// If it reduced down to one element, we are done.
-	size_t osz = reduct.size();
-	if (1 == osz)
-		return reduct[0];
-
-	// If it reduced to zero elements, it must be knil.
-	if (0 == osz)
-		return knil;
-
-	// Next, search for two neighboring atoms of the same type.
-	// If two atoms of the same type are found, apply kons to them.
-	// Also handle the distributive case.
-	for (size_t i = 0; i < osz-1; i++)
-	{
-		const Handle& hi = reduct[i];
-		Type it = hi->get_type();
-
-		size_t j = i+1;
-		const Handle& hj = reduct[j];
-		Type jt = hj->get_type();
-
-		// Explore two cases.
-		// i and j are the same type. Apply kons, and then recurse.
-		bool do_kons = (it == jt);
-
-		// If j is (DistType x a) and i is identical to x,
-		// then call kons, because kons is distributive.
-		do_kons |= (jt == distributive_type and
-		            hj->getOutgoingAtom(0) == hi);
-
-		if (do_kons)
-		{
-			Handle cons = kons(hi, hj);
-
-			// If there were only two things in total we are done.
-			if (2 == osz)
-				return cons;
-
-			HandleSeq rere;
-			for (size_t k=0; k < osz; k++)
-			{
-				if (k < i)
-					rere.push_back(reduct[k]);
-				else if (k == i)
-					rere.push_back(cons);
-				else if (j < k)
-					rere.push_back(reduct[k]);
-			}
-
-			// Create the reduced atom, and recurse.
-			Handle foo(createLink(rere, get_type()));
-			FoldLinkPtr flp(FoldLinkCast(foo));
-
-			return flp->reduce();
-		}
-	}
-
-	// If nothing reduced, nothing to do.
-	if (not did_reduce)
-		return get_handle();
-
-	return createLink(reduct, get_type());
+	return expr;
 }
 
 // ===========================================================
