@@ -286,7 +286,22 @@ Handle PutLink::do_reduce(void) const
 	// (cog-execute! (Put (Plus) (List (Number 2) (Number 2))))
 	if (0 == nvars and classserver().isA(btype, FUNCTION_LINK))
 	{
-		return createLink(_values->getOutgoingSet(), btype);
+		if (LIST_LINK == vtype)
+			return createLink(_values->getOutgoingSet(), btype);
+
+		if (SET_LINK != vtype)
+			return createLink(btype, _values);
+
+		// If the values are given in a set, then iterate over the set...
+		HandleSeq bset;
+		for (const Handle& h : _values->getOutgoingSet())
+		{
+			if (LIST_LINK == h->get_type())
+				bset.emplace_back(createLink(h->getOutgoingSet(), btype));
+			else
+				bset.emplace_back(createLink(btype, h));
+		}
+		return createLink(bset, SET_LINK);
 	}
 
 	// If there is only one variable in the PutLink body...
