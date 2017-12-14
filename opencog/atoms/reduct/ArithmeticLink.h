@@ -51,8 +51,8 @@ public:
 	ArithmeticLink(const HandleSeq& oset, Type=ARITHMETIC_LINK);
 	ArithmeticLink(const Link& l);
 
-	virtual Handle reorder(void);
-	virtual Handle reduce(void);
+	virtual Handle reorder(void) const;
+	virtual Handle reduce(void) const;
 	virtual Handle execute(AtomSpace* as) const;
 };
 

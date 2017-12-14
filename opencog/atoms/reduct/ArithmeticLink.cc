@@ -68,7 +68,7 @@ void ArithmeticLink::init(void)
 /// The reduct of (PlusLink (VariableNode "$x") (NumberNode 0)) is
 /// (VariableNode "$x"), because adding zero to anything yeilds the
 /// thing itself.
-Handle ArithmeticLink::reduce(void)
+Handle ArithmeticLink::reduce(void) const
 {
 	Handle road(reorder());
 	ArithmeticLinkPtr alp(ArithmeticLinkCast(road));
@@ -94,7 +94,7 @@ Handle ArithmeticLink::reduce(void)
 /// Sorting by variable names would hold consilidate them...
 /// The FoldLink::reduce() method already returns expressions that are
 /// almost in the correct order.
-Handle ArithmeticLink::reorder(void)
+Handle ArithmeticLink::reorder(void) const
 {
 	HandleSeq vars;
 	HandleSeq exprs;
@@ -166,7 +166,7 @@ NumberNodePtr ArithmeticLink::unwrap_set(Handle h) const
 /// in sight.
 Handle ArithmeticLink::execute(AtomSpace* as) const
 {
-	// Pattern matching hack. The pattern matcher returns sets of atoms;
+	// Pattern matching hack. The pattern matcher returns SetLinks of atoms;
 	// if that set contains numbers or something numeric, then unwrap it.
 	if (1 == _outgoing.size())
 	{
