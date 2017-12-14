@@ -271,13 +271,26 @@ Handle PutLink::do_reduce(void) const
 		LambdaLinkPtr lam(LambdaLinkCast(bods));
 		bods = lam->get_body();
 		vars = lam->get_variables();
+		btype = bods->get_type();
 	}
 
 	// Now get the values that we will plug into the body.
 	Type vtype = _values->get_type();
 
+	size_t nvars = vars.varseq.size();
+
+	// At this time, we don't know the number of arguments a FunctionLink
+	// might take.  Atomese does have the mechanisms to declare these,
+	// including arbitrary-arity functions, its just that its currently
+	// not declared anywhere.  So we just punt.  Example usage:
+	// (cog-execute! (Put (Plus) (List (Number 2) (Number 2))))
+	if (0 == nvars and classserver().isA(btype, FUNCTION_LINK))
+	{
+		return createLink(_values->getOutgoingSet(), btype);
+	}
+
 	// If there is only one variable in the PutLink body...
-	if (1 == vars.varseq.size())
+	if (1 == nvars)
 	{
 		if (SET_LINK != vtype)
 		{
