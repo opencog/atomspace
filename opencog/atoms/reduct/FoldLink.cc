@@ -72,15 +72,13 @@ void FoldLink::init(void)
 /// reducing numeric expressions.  It makes the following assumptions
 /// and performs the following actions:
 ///
-/// 1) It is always safe to remove knil from a list. That is, knil is
-///    always a unit.
-/// 2) Two neighboring elements of the same type can always be kons'ed
+/// 1) Two neighboring elements of the same type can always be kons'ed
 ///    together with each-other.  That is, kons is called on two
 ///    neighbors that have the same type. That is, this assumes that
 ///    the list has the associative property, so that neighboring
 ///    elements can always be cons'ed together.
-/// 3) It does not asssume the commutative property.
-/// 4) If distributive_type is set, then kons is called when it seems
+/// 2) It does not asssume the commutative property.
+/// 3) If distributive_type is set, then kons is called when it seems
 ///    that one neigboring element might distribute into the next.
 ///    This is vaguely hacky, and is used to implement distributivity
 ///    of multiplication over addition.
@@ -104,8 +102,7 @@ Handle FoldLink::reduce(void) const
 	bool did_reduce = false;
 
 	// First, reduce the outgoing set. Loop over the outgoing set,
-	// and call reduce on everything reducible.  Remove all occurances
-	// of knil, while we are at it.
+	// and call reduce on everything reducible.
 	for (const Handle& h: _outgoing)
 	{
 		Type t = h->get_type();
@@ -118,18 +115,11 @@ Handle FoldLink::reduce(void) const
 			if (not content_eq(h, redh))
 			{
 				did_reduce = true;
-				if (not content_eq(redh, knil))
-					reduct.push_back(redh);
+				reduct.push_back(redh);
 			}
-			else if (not content_eq(h, knil))
-				reduct.push_back(h);
-			else
-				did_reduce = true;
-		}
-		else if (not content_eq(h, knil))
 			reduct.push_back(h);
-		else
-			did_reduce = true;
+		}
+		reduct.push_back(h);
 	}
 
 	// If it reduced down to one element, we are done.
