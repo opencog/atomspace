@@ -73,9 +73,11 @@ static inline double get_double(const Handle& h)
 /// the TimesLink.
 Handle TimesLink::kons(const Handle& fi, const Handle& fj) const
 {
+	Type fitype = fi->get_type();
+	Type fjtype = fj->get_type();
+
 	// Are they numbers?
-	if (NUMBER_NODE == fi->get_type() and
-	    NUMBER_NODE == fj->get_type())
+	if (NUMBER_NODE == fitype and NUMBER_NODE == fjtype)
 	{
 		double prod = get_double(fi) * get_double(fj);
 		return Handle(createNumberNode(prod));
@@ -86,6 +88,36 @@ Handle TimesLink::kons(const Handle& fi, const Handle& fj) const
 		return fj;
 	if (content_eq(fj, knil))
 		return fi;
+
+	// Is either one a TimesLink? If so, then flatten.
+	if (TIMES_LINK == fitype or TIMES_LINK == fjtype)
+	{
+		HandleSeq seq;
+		// flatten the left
+		if (TIMES_LINK == fitype)
+		{
+			for (const Handle& lhs: fi->getOutgoingSet())
+				seq.push_back(lhs);
+		}
+		else
+		{
+			seq.push_back(fi);
+		}
+
+		// flatten the right
+		if (TIMES_LINK == fjtype)
+		{
+			for (const Handle& rhs: fj->getOutgoingSet())
+				seq.push_back(rhs);
+		}
+		else
+		{
+			seq.push_back(fj);
+		}
+		Handle foo(createLink(seq, TIMES_LINK));
+		TimesLinkPtr ap = TimesLinkCast(foo);
+		return ap->reduce();
+	}
 
 	// If we are here, we've been asked to multiply two things of the
 	// same type, but they are not of a type that we know how to multiply.
