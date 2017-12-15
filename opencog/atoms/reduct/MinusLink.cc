@@ -62,7 +62,7 @@ void MinusLink::init(void)
 
 	// Disallow unary Minus. This makes things easier, overall.
 	if (1 == _outgoing.size())
-		_outgoing.insert(_outgoing.cbegin(), knil);
+		_outgoing.insert(_outgoing.begin(), knil);
 }
 
 static inline double get_double(const Handle& h)
