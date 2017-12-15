@@ -62,7 +62,7 @@ void DivideLink::init(void)
 		throw InvalidParamException(TRACE_INFO,
 			"Don't know how to divide that!");
 
-   knil = Handle(createNumberNode("1"));
+   knil = Handle(createNumberNode(1));
 	_commutative = false;
 }
 

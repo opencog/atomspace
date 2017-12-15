@@ -58,7 +58,8 @@ void PlusLink::init(void)
 	if (not classserver().isA(tscope, PLUS_LINK))
 		throw InvalidParamException(TRACE_INFO, "Expecting a PlusLink");
 
-	knil = Handle(createNumberNode("0"));
+	knil = Handle(createNumberNode(0));
+	_commutative = true;
 }
 
 // ============================================================

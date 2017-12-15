@@ -120,8 +120,7 @@ void ReductUTest::test_arithmetic(void)
 	);
 	printf("expecting x: %s\n", xplus0->to_short_string().c_str());
 
-	Handle ex = eval->eval_h(
-		"(VariableNode \"$x\"))");
+	Handle ex = eval->eval_h("(VariableNode \"$x\")");
 	TS_ASSERT_EQUALS(xplus0, ex);
 
 	// ---------

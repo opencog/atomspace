@@ -57,7 +57,7 @@ void TimesLink::init(void)
 	if (not classserver().isA(tscope, TIMES_LINK))
 		throw InvalidParamException(TRACE_INFO, "Expecting a TimesLink");
 
-	knil = Handle(createNumberNode("1"));
+	knil = Handle(createNumberNode(1));
 	_commutative = true;
 }
 

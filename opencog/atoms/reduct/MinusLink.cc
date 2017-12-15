@@ -63,7 +63,7 @@ void MinusLink::init(void)
 			"Don't know how to subract that!");
 
 	_commutative = false;
-	knil = Handle(createNumberNode("0"));
+	knil = Handle(createNumberNode(0));
 }
 
 static inline double get_double(const Handle& h)
