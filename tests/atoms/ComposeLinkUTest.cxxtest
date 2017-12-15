@@ -81,7 +81,7 @@ void ComposeLinkUTest::test_execute_2()
 		Y = an(VARIABLE_NODE, "$Y"),
 		Z = an(VARIABLE_NODE, "$Z"),
 		g = al(LAMBDA_LINK, al(EVALUATION_LINK, X, Y)),
-		f1 = al(PROJECTION_LINK, an(NUMBER_NODE, "0")),
+		f1 = al(PROJECT_LINK, an(NUMBER_NODE, "0")),
 		f2 = al(LAMBDA_LINK,
 		        al(VARIABLE_LIST, X, Y, Z),
 		        al(INHERITANCE_LINK, Y, Z)),

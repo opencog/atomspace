@@ -63,7 +63,7 @@ Variables ComposeLink::variables_intersection(const HandleSeq& scopes) const
 
 unsigned ComposeLink::projection_index(const Handle& projection)
 {
-	OC_ASSERT(projection->get_type() == PROJECTION_LINK);
+	OC_ASSERT(projection->get_type() == PROJECT_LINK);
 	NumberNodePtr num = NumberNodeCast(projection->getOutgoingAtom(0));
 	OC_ASSERT(num != nullptr);
 	OC_ASSERT(0 <= num->get_value());
@@ -109,7 +109,7 @@ Handle ComposeLink::execute(AtomSpace* as) const
 	// Build sequence of values (body functions) for substitution
 	HandleSeq values;
 	for (const Handle& fi : f->getOutgoingSet()) {
-		if (fi->get_type() == PROJECTION_LINK) {
+		if (fi->get_type() == PROJECT_LINK) {
 			values.push_back(n_vars.varseq[projection_index(fi)]);
 		} else {
 			ScopeLinkPtr fi_sc = ScopeLinkCast(fi);

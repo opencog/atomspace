@@ -554,7 +554,7 @@ COMPOSE_LINK <- FUNCTION_LINK
 
 // Unary higher order function to build a projection function. Take a
 // number and build a function projecting its ith input argument.
-PROJECTION_LINK <- FUNCTION_LINK
+PROJECT_LINK <- FUNCTION_LINK
 
 // ====================================================================
 // Grammatical inference on time series
