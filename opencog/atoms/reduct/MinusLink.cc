@@ -64,6 +64,10 @@ void MinusLink::init(void)
 
 	_commutative = false;
 	knil = Handle(createNumberNode(0));
+
+	// Disallow unary Minus. This makes things easier, overall.
+	if (1 == sz)
+		_outgoing.insert(_outgoing.cbegin(), knil);
 }
 
 static inline double get_double(const Handle& h)
