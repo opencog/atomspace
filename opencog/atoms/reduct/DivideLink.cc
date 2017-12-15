@@ -61,7 +61,7 @@ void DivideLink::init(void)
    knil = Handle(createNumberNode(1));
 
 	// Disallow unary Divide. This makes things easier, overall.
-	if (1 == _outgoing.size()
+	if (1 == _outgoing.size())
 		_outgoing.insert(_outgoing.cbegin(), knil);
 }
 
