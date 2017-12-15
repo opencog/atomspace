@@ -396,6 +396,10 @@ void ConstantClausesUTest::test_constant_pattern()
 	TS_ASSERT_EQUALS(result, expected);
 }
 
+/**
+ * Clauses consisting of both ungrounded and grounded (constant)
+ * clauses should trigger the rewrite term properly.
+ */
 void ConstantClausesUTest::test_mixed_clauses()
 {
 	Handle mary = an(CONCEPT_NODE, "Mary"),
