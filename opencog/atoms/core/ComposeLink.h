@@ -1,5 +1,5 @@
 /*
- * opencog/atoms/core/CompositionLink.h
+ * opencog/atoms/core/ComposeLink.h
  *
  * Copyright (C) 2017 Nil Geisweiller
  * All Rights Reserved
@@ -20,8 +20,8 @@
  * 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
  */
 
-#ifndef _OPENCOG_COMPOSITION_LINK_H
-#define _OPENCOG_COMPOSITION_LINK_H
+#ifndef _OPENCOG_COMPOSE_LINK_H
+#define _OPENCOG_COMPOSE_LINK_H
 
 #include <opencog/atoms/core/FunctionLink.h>
 
@@ -34,9 +34,9 @@ namespace opencog
 /**
  * High level function for function composition, implements
  * https://en.wikipedia.org/wiki/Function_composition. For more info
- * see https://wiki.opencog.org/w/CompositionLink.
+ * see https://wiki.opencog.org/w/ComposeLink.
  */
-class CompositionLink : public FunctionLink {
+class ComposeLink : public FunctionLink {
 protected:
 	void check() const;
 
@@ -58,10 +58,10 @@ protected:
 
 public:
 	// XXX Need to make this public, so that the factory can call it!
-	CompositionLink(const HandleSeq oset, Type = COMPOSITION_LINK);
+	ComposeLink(const HandleSeq oset, Type = COMPOSE_LINK);
 
-	CompositionLink(const Link& l);
-	virtual ~CompositionLink() {}
+	ComposeLink(const Link& l);
+	virtual ~ComposeLink() {}
 
 	/**
 	 * TODO: explain what it does
@@ -81,20 +81,20 @@ public:
 	static Handle factory(const Handle&);
 };
 
-typedef std::shared_ptr<CompositionLink> CompositionLinkPtr;
-static inline CompositionLinkPtr CompositionLinkCast(const Handle& h)
+typedef std::shared_ptr<ComposeLink> ComposeLinkPtr;
+static inline ComposeLinkPtr ComposeLinkCast(const Handle& h)
 {
-	AtomPtr a(h); return std::dynamic_pointer_cast<CompositionLink>(a);
+	AtomPtr a(h); return std::dynamic_pointer_cast<ComposeLink>(a);
 }
-static inline CompositionLinkPtr CompositionLinkCast(AtomPtr a)
+static inline ComposeLinkPtr ComposeLinkCast(AtomPtr a)
 {
-	return std::dynamic_pointer_cast<CompositionLink>(a);
+	return std::dynamic_pointer_cast<ComposeLink>(a);
 }
 
-#define createCompositionLink std::make_shared<CompositionLink>
+#define createComposeLink std::make_shared<ComposeLink>
 
 /** @}*/
 
 }
 
-#endif // _OPENCOG_COMPOSITION_LINK_H
+#endif // _OPENCOG_COMPOSE_LINK_H
