@@ -170,7 +170,7 @@ void ReductUTest::test_arithmetic(void)
 
 	Handle ethreex = eval->eval_h(
 		"(TimesLink (VariableNode \"$x\") (NumberNode 3))");
-	TS_ASSERT_EQUALS(twox, ethreex);
+	TS_ASSERT_EQUALS(threex, ethreex);
 
 	// ---------
 
