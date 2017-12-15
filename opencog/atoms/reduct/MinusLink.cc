@@ -24,30 +24,29 @@
 #include <opencog/atoms/base/ClassServer.h>
 #include <opencog/atoms/core/NumberNode.h>
 #include "MinusLink.h"
-#include "PlusLink.h"
 
 using namespace opencog;
 
 MinusLink::MinusLink(const HandleSeq& oset, Type t)
-    : PlusLink(oset, t)
+    : ArithmeticLink(oset, t)
 {
 	init();
 }
 
 MinusLink::MinusLink(const Handle& a, const Handle& b)
-    : PlusLink(MINUS_LINK, a, b)
+    : ArithmeticLink(MINUS_LINK, a, b)
 {
 	init();
 }
 
 MinusLink::MinusLink(Type t, const Handle& a, const Handle& b)
-    : PlusLink(t, a, b)
+    : ArithmeticLink(t, a, b)
 {
 	init();
 }
 
 MinusLink::MinusLink(const Link& l)
-    : PlusLink(l)
+    : ArithmeticLink(l)
 {
 	init();
 }

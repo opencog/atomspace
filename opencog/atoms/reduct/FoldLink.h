@@ -45,7 +45,6 @@ class FoldLink : public FunctionLink
 protected:
 	Handle knil;
 	virtual Handle kons(const Handle&, const Handle&) const = 0;
-	Type distributive_type = NOTYPE;
 
 	void init(void);
 	FoldLink(Type, const Handle& a, const Handle& b);

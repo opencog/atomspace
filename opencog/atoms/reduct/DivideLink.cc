@@ -24,30 +24,29 @@
 #include <opencog/atoms/base/ClassServer.h>
 #include <opencog/atoms/core/NumberNode.h>
 #include "DivideLink.h"
-#include "TimesLink.h"
 
 using namespace opencog;
 
 DivideLink::DivideLink(const HandleSeq& oset, Type t)
-    : TimesLink(oset, t)
+    : ArithmeticLink(oset, t)
 {
 	init();
 }
 
 DivideLink::DivideLink(const Handle& a, const Handle& b)
-    : TimesLink(DIVIDE_LINK, a, b)
+    : ArithmeticLink(DIVIDE_LINK, a, b)
 {
 	init();
 }
 
 DivideLink::DivideLink(Type t, const Handle& a, const Handle& b)
-    : TimesLink(t, a, b)
+    : ArithmeticLink(t, a, b)
 {
 	init();
 }
 
 DivideLink::DivideLink(const Link& l)
-    : TimesLink(l)
+    : ArithmeticLink(l)
 {
 	init();
 }

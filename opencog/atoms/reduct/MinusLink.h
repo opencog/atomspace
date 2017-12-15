@@ -23,9 +23,7 @@
 #ifndef _OPENCOG_MINUS_LINK_H
 #define _OPENCOG_MINUS_LINK_H
 
-#include <opencog/atomspace/AtomSpace.h>
-#include <opencog/atoms/reduct/PlusLink.h>
-#include <opencog/atoms/core/NumberNode.h>
+#include <opencog/atoms/reduct/ArithmeticLink.h>
 
 namespace opencog
 {
@@ -36,7 +34,7 @@ namespace opencog
 /**
  * The MinusLink implements the mathematical operation of "minus"
  */
-class MinusLink : public PlusLink
+class MinusLink : public ArithmeticLink
 {
 protected:
 	void init(void);

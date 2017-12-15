@@ -59,8 +59,6 @@ void PlusLink::init(void)
 		throw InvalidParamException(TRACE_INFO, "Expecting a PlusLink");
 
 	knil = Handle(createNumberNode("0"));
-
-	distributive_type = TIMES_LINK;
 }
 
 // ============================================================
@@ -69,8 +67,6 @@ static inline double get_double(const Handle& h)
 {
 	return NumberNodeCast(h)->get_value();
 }
-
-// ============================================================
 
 Handle PlusLink::kons(const Handle& fi, const Handle& fj) const
 {
