@@ -57,6 +57,8 @@ public:
 	void tearDown(void);
 
 	void test_arithmetic(void);
+	void test_setlink(void);
+	void test_minus(void);
 };
 
 void ReductUTest::tearDown(void)
@@ -70,24 +72,15 @@ void ReductUTest::setUp(void)
 }
 
 /*
- * ReductLink unit test.  Test arithmetic.
+ * ReductLink unit test.  Test Plus, Times arithmetic.
  */
 void ReductUTest::test_arithmetic(void)
 {
 	logger().debug("BEGIN TEST: %s", __FUNCTION__);
 
 	// ---------
-	Handle four = eval->eval_h(
-		"(cog-reduce! (PlusLink (NumberNode 2) (NumberNode 2)))"
-	);
-	printf("expecting four: %s\n", four->to_short_string().c_str());
-
-	Handle efour = eval->eval_h("(NumberNode 4)");
-	TS_ASSERT_EQUALS(four, efour);
-
-	// ---------
 	Handle zero = eval->eval_h(
-		"(cog-reduce! (PlusLink (NumberNode 2) (NumberNode -2)))"
+		"(cog-execute! (PlusLink (NumberNode 0)))"
 	);
 	printf("expecting zero: %s\n", zero->to_short_string().c_str());
 
@@ -95,12 +88,53 @@ void ReductUTest::test_arithmetic(void)
 	TS_ASSERT_EQUALS(zero, ezero);
 
 	// ---------
-/******
-XXX FIXME -- this used to pass, but the circular dependency
-nightmare is killing me and I can't debug this any more.
+	Handle two = eval->eval_h(
+		"(cog-execute! (PlusLink (NumberNode 2)))"
+	);
+	printf("expecting two: %s\n", two->to_short_string().c_str());
 
+	Handle etwo = eval->eval_h("(NumberNode 2)");
+	TS_ASSERT_EQUALS(two, etwo);
+
+	// ---------
+	Handle four = eval->eval_h(
+		"(cog-execute! (PlusLink (NumberNode 2) (NumberNode 2)))"
+	);
+	printf("expecting four: %s\n", four->to_short_string().c_str());
+
+	Handle efour = eval->eval_h("(NumberNode 4)");
+	TS_ASSERT_EQUALS(four, efour);
+
+	// ---------
+	zero = eval->eval_h(
+		"(cog-execute! (PlusLink (NumberNode 2) (NumberNode -2)))"
+	);
+	printf("expecting zero: %s\n", zero->to_short_string().c_str());
+
+	ezero = eval->eval_h("(NumberNode 0)");
+	TS_ASSERT_EQUALS(zero, ezero);
+
+	// ---------
+	Handle xplus0 = eval->eval_h(
+		"(cog-execute! (PlusLink "
+		"	(VariableNode \"$x\") (NumberNode 0)))"
+	);
+	printf("expecting x: %s\n", xplus0->to_short_string().c_str());
+
+	Handle ex = eval->eval_h("(VariableNode \"$x\")");
+	TS_ASSERT_EQUALS(xplus0, ex);
+
+	// ---------
+	Handle Oplusx = eval->eval_h(
+		"(cog-execute! (PlusLink "
+		"	(NumberNode 0) (VariableNode \"$x\")))"
+	);
+	printf("expecting x: %s\n", Oplusx->to_short_string().c_str());
+	TS_ASSERT_EQUALS(Oplusx, ex);
+
+	// ---------
 	Handle xplus5 = eval->eval_h(
-		"(cog-reduce! (PlusLink "
+		"(cog-execute! (PlusLink "
 		"	(NumberNode 2) (VariableNode \"$x\") (NumberNode 3)))"
 	);
 	printf("expecting x+5: %s\n", xplus5->to_short_string().c_str());
@@ -108,29 +142,18 @@ nightmare is killing me and I can't debug this any more.
 	Handle explus5 = eval->eval_h(
 		"(PlusLink (VariableNode \"$x\") (NumberNode 5))");
 	TS_ASSERT_EQUALS(xplus5, explus5);
-********/
 
 	// ---------
-/***********
-XXX FIXME -- like the above, this used to pass, could pass, if we
-were able to get the PlusLink (FoldLink) into the atomspace early
-enough; but we can't due to the circular shared library dependencies.
-Anyway, right now, no one actually needs this, and in the long-run
-it is probably bettter to get the URE to do reuction for us anyway.
-So I'm punting for now...
-
 	Handle x = eval->eval_h(
-		"(cog-reduce! (PlusLink "
+		"(cog-execute! (PlusLink "
 		"	(NumberNode 2) (VariableNode \"$x\") (NumberNode -2)))"
 	);
 	printf("expecting $x: %s\n", x->to_short_string().c_str());
-
-	Handle ex = eval->eval_h("(VariableNode \"$x\")");
 	TS_ASSERT_EQUALS(x, ex);
-**********/
+
 	// ---------
 	Handle twox = eval->eval_h(
-		"(cog-reduce! (PlusLink "
+		"(cog-execute! (PlusLink "
 		"	(VariableNode \"$x\") (VariableNode \"$x\")))"
 	);
 	printf("expecting 2x: %s\n", twox->to_short_string().c_str());
@@ -140,12 +163,20 @@ So I'm punting for now...
 	TS_ASSERT_EQUALS(twox, etwox);
 
 	// ---------
-/******
-XXX FIXME -- this used to pass, but the circular dependency
-nightmare is killing me and I can't debug this any more.
+	Handle threex = eval->eval_h(
+		"(cog-execute! (PlusLink (VariableNode \"$x\") "
+		"	(VariableNode \"$x\") (VariableNode \"$x\")))"
+	);
+	printf("expecting 3x: %s\n", threex->to_short_string().c_str());
+
+	Handle ethreex = eval->eval_h(
+		"(TimesLink (VariableNode \"$x\") (NumberNode 3))");
+	TS_ASSERT_EQUALS(threex, ethreex);
+
+	// ---------
 
 	Handle xtimes42 = eval->eval_h(
-		"(cog-reduce! (PlusLink "
+		"(cog-execute! (PlusLink "
 		"	(VariableNode \"$x\")"
 		"	(TimesLink (NumberNode 38) (VariableNode \"$x\"))"
 		"	(TimesLink (VariableNode \"$x\") (NumberNode 3))))"
@@ -155,11 +186,10 @@ nightmare is killing me and I can't debug this any more.
 	Handle extimes42 = eval->eval_h(
 		"(TimesLink (VariableNode \"$x\") (NumberNode 42))");
 	TS_ASSERT_EQUALS(xtimes42, extimes42);
-********/
 
 	// ---------
 	Handle six = eval->eval_h(
-		"(cog-reduce! (TimesLink (NumberNode 2) (NumberNode 3)))"
+		"(cog-execute! (TimesLink (NumberNode 2) (NumberNode 3)))"
 	);
 	printf("expecting six: %s\n", six->to_short_string().c_str());
 
@@ -167,12 +197,9 @@ nightmare is killing me and I can't debug this any more.
 	TS_ASSERT_EQUALS(six, esix);
 
 	// ---------
-/******
-XXX FIXME -- this used to pass, but the circular dependency
-nightmare is killing me and I can't debug this any more.
 
 	Handle sixex = eval->eval_h(
-		"(cog-reduce! (TimesLink "
+		"(cog-execute! (TimesLink "
 		"	(NumberNode 2) (VariableNode \"$x\") (NumberNode 3)))"
 	);
 	printf("expecting x * 6: %s\n", sixex->to_short_string().c_str());
@@ -180,7 +207,109 @@ nightmare is killing me and I can't debug this any more.
 	Handle esixex = eval->eval_h(
 		"(TimesLink (VariableNode \"$x\") (NumberNode 6))");
 	TS_ASSERT_EQUALS(sixex, esixex);
-********/
+
+	// ---------
+	logger().debug("END TEST: %s", __FUNCTION__);
+}
+
+// Test SetLink, which the pattern matcher gives to us.
+void ReductUTest::test_setlink(void)
+{
+	logger().debug("BEGIN TEST: %s", __FUNCTION__);
+
+	// ---------
+	Handle one = eval->eval_h(
+		"(cog-execute! (Plus (Set (NumberNode 0)) (NumberNode  1)))"
+	);
+	printf("expecting one: %s\n", one->to_short_string().c_str());
+
+	Handle eone = eval->eval_h("(NumberNode 1)");
+	TS_ASSERT_EQUALS(one, eone);
+
+	// ---------
+	Handle four = eval->eval_h(
+		"(cog-execute! (Plus "
+		"   (Set (NumberNode 1) (NumberNode 1) (NumberNode 1))"
+		"   (NumberNode  1)))"
+	);
+	printf("expecting four: %s\n", four->to_short_string().c_str());
+
+	Handle efour = eval->eval_h("(NumberNode 4)");
+	TS_ASSERT_EQUALS(four, efour);
+
+	// ---------
+	logger().debug("END TEST: %s", __FUNCTION__);
+}
+
+/*
+ * ReductLink unit test.  Test Minus Divide.
+ */
+void ReductUTest::test_minus(void)
+{
+	logger().debug("BEGIN TEST: %s", __FUNCTION__);
+
+	// ---------
+	Handle zero = eval->eval_h(
+		"(cog-execute! (Minus (Number 0)))"
+	);
+	printf("expecting zero: %s\n", zero->to_short_string().c_str());
+
+	Handle ezero = eval->eval_h("(Number 0)");
+	TS_ASSERT_EQUALS(zero, ezero);
+
+	// ---------
+	Handle mone = eval->eval_h(
+		"(cog-execute! (Minus (Number 1)))"
+	);
+	printf("expecting minus one: %s\n", mone->to_short_string().c_str());
+
+	Handle emone = eval->eval_h("(Number -1)");
+	TS_ASSERT_EQUALS(mone, emone);
+
+	// ---------
+	mone = eval->eval_h(
+		"(cog-execute! (Minus (Number 0) (Number 1)))"
+	);
+	printf("expecting minus one: %s\n", mone->to_short_string().c_str());
+	TS_ASSERT_EQUALS(mone, emone);
+
+	// ---------
+	Handle x = eval->eval_h(
+		"(cog-execute! (Minus (Variable \"$x\") (Number 0)))"
+	);
+	printf("expecting x: %s\n", x->to_short_string().c_str());
+
+	Handle ex = eval->eval_h("(Variable \"$x\")");
+	TS_ASSERT_EQUALS(x, ex);
+
+	// ---------
+	Handle mx = eval->eval_h(
+		"(cog-execute! (Minus (Number 0) (Variable \"$x\")))"
+	);
+	printf("expecting minus x: %s\n", mx->to_string().c_str());
+
+	Handle emx = eval->eval_h(
+		"(Minus (Number 0) (Variable \"$x\"))"
+	);
+	TS_ASSERT_EQUALS(mx, emx);
+
+	// ---------
+	x = eval->eval_h(
+		"(cog-execute! (Divide (Variable \"$x\") (Number 1)))"
+	);
+	printf("expecting x: %s\n", x->to_short_string().c_str());
+	TS_ASSERT_EQUALS(x, ex);
+
+	// ---------
+	Handle dx = eval->eval_h(
+		"(cog-execute! (Divide (Number 1) (Variable \"$x\")))"
+	);
+	printf("expecting 1/x: %s\n", dx->to_short_string().c_str());
+
+	Handle edx = eval->eval_h(
+		"(Divide (Number 1) (Variable \"$x\"))"
+	);
+	TS_ASSERT_EQUALS(dx, edx);
 
 	// ---------
 	logger().debug("END TEST: %s", __FUNCTION__);

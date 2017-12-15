@@ -58,39 +58,67 @@ void PlusLink::init(void)
 	if (not classserver().isA(tscope, PLUS_LINK))
 		throw InvalidParamException(TRACE_INFO, "Expecting a PlusLink");
 
-	knild = 0.0;
-	knil = Handle(createNumberNode("0"));
-
-	distributive_type = TIMES_LINK;
+	knil = Handle(createNumberNode(0));
+	_commutative = true;
 }
 
 // ============================================================
-
-double PlusLink::konsd(double a, double b) const { return a+b; }
 
 static inline double get_double(const Handle& h)
 {
-	NumberNodePtr nnn(NumberNodeCast(h));
-	if (NULL == nnn)
-		nnn = createNumberNode(*NodeCast(h));
-
-	return nnn->get_value();
+	return NumberNodeCast(h)->get_value();
 }
 
-// ============================================================
-
-Handle PlusLink::kons(const Handle& fi, const Handle& fj)
+Handle PlusLink::kons(const Handle& fi, const Handle& fj) const
 {
+	Type fitype = fi->get_type();
+	Type fjtype = fj->get_type();
+
 	// Are they numbers?
-	if (NUMBER_NODE == fi->get_type() and
-	    NUMBER_NODE == fj->get_type())
+	if (NUMBER_NODE == fitype and NUMBER_NODE == fjtype)
 	{
 		double sum = get_double(fi) + get_double(fj);
 		return Handle(createNumberNode(sum));
 	}
 
+	// If either one is the unit, then just drop it.
+	if (content_eq(fi, knil))
+		return fj;
+	if (content_eq(fj, knil))
+		return fi;
+
+	// Is either one a PlusLink? If so, then flatten.
+	if (PLUS_LINK == fitype or PLUS_LINK == fjtype)
+	{
+		HandleSeq seq;
+		// flatten the left
+		if (PLUS_LINK == fitype)
+		{
+			for (const Handle& lhs: fi->getOutgoingSet())
+				seq.push_back(lhs);
+		}
+		else
+		{
+			seq.push_back(fi);
+		}
+
+		// flatten the right
+		if (PLUS_LINK == fjtype)
+		{
+			for (const Handle& rhs: fj->getOutgoingSet())
+				seq.push_back(rhs);
+		}
+		else
+		{
+			seq.push_back(fj);
+		}
+		Handle foo(createLink(seq, PLUS_LINK));
+		PlusLinkPtr ap = PlusLinkCast(foo);
+		return ap->reduce();
+	}
+
 	// Is fi identical to fj? If so, then replace by 2*fi
-	if (fi == fj)
+	if (content_eq(fi, fj))
 	{
 		Handle two(createNumberNode("2"));
 		return Handle(createTimesLink(fi, two));
@@ -102,7 +130,7 @@ Handle PlusLink::kons(const Handle& fi, const Handle& fj)
 	// If j is (TimesLink x a) and i is (TimesLink x b)
 	// then create (TimesLink x (a+b))
 	//
-	if (fj->get_type() == TIMES_LINK)
+	if (fjtype == TIMES_LINK)
 	{
 		bool do_add = false;
 		HandleSeq rest;
@@ -118,7 +146,7 @@ Handle PlusLink::kons(const Handle& fi, const Handle& fj)
 		}
 
 		// Handle the (a+b) case described above.
-		else if (fi->get_type() == TIMES_LINK and
+		else if (fitype == TIMES_LINK and
 		         fi->getOutgoingAtom(0) == exx)
 		{
 			const HandleSeq& ilpo = fi->getOutgoingSet();
@@ -139,13 +167,10 @@ Handle PlusLink::kons(const Handle& fi, const Handle& fj)
 			// We need to insert into the atomspace, else reduce() horks
 			// up the knil compares during reduction.
 			Handle foo(createLink(rest, PLUS_LINK));
-			if (_atom_space)
-				foo = _atom_space->add_atom(foo);
-
 			PlusLinkPtr ap = PlusLinkCast(foo);
 			Handle a_plus(ap->reduce());
 
-			return Handle(createTimesLink(a_plus, exx));
+			return Handle(createTimesLink(exx, a_plus));
 		}
 	}
 

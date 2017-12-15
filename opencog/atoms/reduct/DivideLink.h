@@ -23,9 +23,7 @@
 #ifndef _OPENCOG_DIVIDE_LINK_H
 #define _OPENCOG_DIVIDE_LINK_H
 
-#include <opencog/atomspace/AtomSpace.h>
-#include <opencog/atoms/reduct/TimesLink.h>
-#include <opencog/atoms/core/NumberNode.h>
+#include <opencog/atoms/reduct/ArithmeticLink.h>
 
 namespace opencog
 {
@@ -36,13 +34,13 @@ namespace opencog
 /**
  * The DivideLink implements the mathematical operation of "divide".
  */
-class DivideLink : public TimesLink
+class DivideLink : public ArithmeticLink
 {
 protected:
 	void init(void);
 	DivideLink(Type, const Handle& a, const Handle& b);
 
-	virtual Handle do_execute(AtomSpace*, const HandleSeq&) const;
+	Handle kons(const Handle&, const Handle&) const;
 public:
 	DivideLink(const Handle& a, const Handle& b);
 	DivideLink(const HandleSeq& oset, Type=DIVIDE_LINK);

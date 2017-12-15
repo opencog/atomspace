@@ -57,34 +57,66 @@ void TimesLink::init(void)
 	if (not classserver().isA(tscope, TIMES_LINK))
 		throw InvalidParamException(TRACE_INFO, "Expecting a TimesLink");
 
-	knild = 1.0;
-	knil = Handle(createNumberNode("1"));
+	knil = Handle(createNumberNode(1));
+	_commutative = true;
 }
 
 // ============================================================
 
-double TimesLink::konsd(double a, double b) const { return a*b; }
-
 static inline double get_double(const Handle& h)
 {
-	NumberNodePtr nnn(NumberNodeCast(h));
-	if (NULL == nnn)
-		nnn = createNumberNode(*NodeCast(h));
-
-	return nnn->get_value();
+	return NumberNodeCast(h)->get_value();
 }
 
 /// Because there is no ExpLink or PowLink that can handle repeated
 /// products, or any distributive property, kons is very simple for
 /// the TimesLink.
-Handle TimesLink::kons(const Handle& fi, const Handle& fj)
+Handle TimesLink::kons(const Handle& fi, const Handle& fj) const
 {
+	Type fitype = fi->get_type();
+	Type fjtype = fj->get_type();
+
 	// Are they numbers?
-	if (NUMBER_NODE == fi->get_type() and
-	    NUMBER_NODE == fj->get_type())
+	if (NUMBER_NODE == fitype and NUMBER_NODE == fjtype)
 	{
 		double prod = get_double(fi) * get_double(fj);
 		return Handle(createNumberNode(prod));
+	}
+
+	// If either one is the unit, then just drop it.
+	if (content_eq(fi, knil))
+		return fj;
+	if (content_eq(fj, knil))
+		return fi;
+
+	// Is either one a TimesLink? If so, then flatten.
+	if (TIMES_LINK == fitype or TIMES_LINK == fjtype)
+	{
+		HandleSeq seq;
+		// flatten the left
+		if (TIMES_LINK == fitype)
+		{
+			for (const Handle& lhs: fi->getOutgoingSet())
+				seq.push_back(lhs);
+		}
+		else
+		{
+			seq.push_back(fi);
+		}
+
+		// flatten the right
+		if (TIMES_LINK == fjtype)
+		{
+			for (const Handle& rhs: fj->getOutgoingSet())
+				seq.push_back(rhs);
+		}
+		else
+		{
+			seq.push_back(fj);
+		}
+		Handle foo(createLink(seq, TIMES_LINK));
+		TimesLinkPtr ap = TimesLinkCast(foo);
+		return ap->reduce();
 	}
 
 	// If we are here, we've been asked to multiply two things of the

@@ -24,30 +24,29 @@
 #include <opencog/atoms/base/ClassServer.h>
 #include <opencog/atoms/core/NumberNode.h>
 #include "MinusLink.h"
-#include "PlusLink.h"
 
 using namespace opencog;
 
 MinusLink::MinusLink(const HandleSeq& oset, Type t)
-    : PlusLink(oset, t)
+    : ArithmeticLink(oset, t)
 {
 	init();
 }
 
 MinusLink::MinusLink(const Handle& a, const Handle& b)
-    : PlusLink(MINUS_LINK, a, b)
+    : ArithmeticLink(MINUS_LINK, a, b)
 {
 	init();
 }
 
 MinusLink::MinusLink(Type t, const Handle& a, const Handle& b)
-    : PlusLink(t, a, b)
+    : ArithmeticLink(t, a, b)
 {
 	init();
 }
 
 MinusLink::MinusLink(const Link& l)
-    : PlusLink(l)
+    : ArithmeticLink(l)
 {
 	init();
 }
@@ -58,23 +57,36 @@ void MinusLink::init(void)
 	if (not classserver().isA(tscope, MINUS_LINK))
 		throw InvalidParamException(TRACE_INFO, "Expecting a MinusLink");
 
-	size_t sz = _outgoing.size();
-	if (2 < sz or 0 == sz)
-		throw InvalidParamException(TRACE_INFO,
-			"Don't know how to subract that!");
+	_commutative = false;
+	knil = Handle(createNumberNode(0));
+
+	// Disallow unary Minus. This makes things easier, overall.
+	if (1 == _outgoing.size())
+		_outgoing.insert(_outgoing.cbegin(), knil);
 }
 
-Handle MinusLink::do_execute(AtomSpace* as, const HandleSeq& oset) const
+static inline double get_double(const Handle& h)
 {
-	if (1 == oset.size())
+	return NumberNodeCast(h)->get_value();
+}
+
+Handle MinusLink::kons(const Handle& fi, const Handle& fj) const
+{
+	// Are they numbers?
+	if (NUMBER_NODE == fi->get_type() and
+	    NUMBER_NODE == fj->get_type())
 	{
-		NumberNodePtr na(unwrap_set(oset[0]));
-		return createNumberNode(- na->get_value())->get_handle();
+		double diff = get_double(fi) - get_double(fj);
+		return Handle(createNumberNode(diff));
 	}
 
-	NumberNodePtr na(unwrap_set(oset[0]));
-	NumberNodePtr nb(unwrap_set(oset[1]));
-	return createNumberNode(na->get_value() - nb->get_value())->get_handle();
+	// If fj is zero, just drop it.
+	if (content_eq(fj, knil))
+		return fi;
+
+	// If we are here, we've been asked to subtracttwo things,
+	// but they are not of a type that we know how to subtract.
+	return Handle(createMinusLink(fi, fj));
 }
 
 DEFINE_LINK_FACTORY(MinusLink, MINUS_LINK)
