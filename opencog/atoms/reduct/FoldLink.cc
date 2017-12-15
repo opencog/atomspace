@@ -56,46 +56,8 @@ void FoldLink::init(void)
 
 // ===============================================================
 
-/// reduce() -- reduce the expression by summing constants, etc.
+/// reduce() -- reduce a right-fold by recursively calling kons.
 ///
-/// No actual black-box evaluation or execution is performed. Only
-/// clearbox reductions are performed.
-///
-/// Examples: the reduct of (FoldLink (NumberNode 2) (NumberNode 2))
-/// is (NumberNode 4) -- its just a constant.
-///
-/// The reduct of (FoldLink (VariableNode "$x") (NumberNode 0)) is
-/// (VariableNode "$x"), because adding zero to anything yeilds the
-/// thing itself.
-///
-/// This routine is pretending to be more general, though, than simply
-/// reducing numeric expressions.  It makes the following assumptions
-/// and performs the following actions:
-///
-/// 1) Two neighboring elements of the same type can always be kons'ed
-///    together with each-other.  That is, kons is called on two
-///    neighbors that have the same type. That is, this assumes that
-///    the list has the associative property, so that neighboring
-///    elements can always be cons'ed together.
-/// 2) It does not asssume the commutative property.
-/// 3) If distributive_type is set, then kons is called when it seems
-///    that one neigboring element might distribute into the next.
-///    This is vaguely hacky, and is used to implement distributivity
-///    of multiplication over addition.
-///
-/// For something as simple as the above, the code below is
-/// annoyingly complicated.  This is certainly not an efficient,
-/// effective way to build a computer algebra system.  It works, its
-/// just barely good enough for single-variable arithmetic, but that's
-/// all.  For general reduction tasks, there are two choices:
-///
-/// A) Convert atoms to some other CAS format, reduce that, and then
-///    convert back to atoms.
-///
-/// B) Figure out why the atomspace is so ungainly, and fix it so that
-///    it is both easy (easier) to use, and also is high-performance.
-///
-/// Obviously, B) is much harder than A) but is probably more important.
 Handle FoldLink::reduce(void) const
 {
 	Handle expr = knil;

@@ -62,12 +62,29 @@ void ArithmeticLink::init(void)
 /// No actual black-box evaluation or execution is performed. Only
 /// clearbox reductions are performed.
 ///
-/// Examples: the reduct of (PlusLink (NumberNode 2) (NumberNode 2))
+/// Examples: the reduct of (FoldLink (NumberNode 2) (NumberNode 2))
 /// is (NumberNode 4) -- its just a constant.
 ///
-/// The reduct of (PlusLink (VariableNode "$x") (NumberNode 0)) is
+/// The reduct of (FoldLink (VariableNode "$x") (NumberNode 0)) is
 /// (VariableNode "$x"), because adding zero to anything yeilds the
 /// thing itself.
+///
+/// This is certainly not an efficient, effective way to build a
+/// computer algebra system.  It works, its just barely good enough
+/// for single-variable arithmetic, but that's all.  For general
+/// reduction tasks, there are two choices:
+///
+/// A) Convert atoms to some other CAS format, reduce that, and then
+///    convert back to atoms.
+///
+/// B) Implement reduction with the Rule Engine, together with a set
+///    of reduction rules for arithmetic.
+///
+/// In some sense B) is better, but is likely to have poorer performance
+/// than A).  It also threatens to spiral out of control: We can add
+/// ever-more rules to the rule engine to reduce ever-more interesting
+/// algebraic expressions.
+///
 Handle ArithmeticLink::reduce(void) const
 {
 	Handle road(reorder());
