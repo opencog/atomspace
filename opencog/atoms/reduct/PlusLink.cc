@@ -170,7 +170,7 @@ Handle PlusLink::kons(const Handle& fi, const Handle& fj) const
 			PlusLinkPtr ap = PlusLinkCast(foo);
 			Handle a_plus(ap->reduce());
 
-			return Handle(createTimesLink(a_plus, exx));
+			return Handle(createTimesLink(exx, a_plus));
 		}
 	}
 
