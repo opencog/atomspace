@@ -86,8 +86,38 @@ Handle PlusLink::kons(const Handle& fi, const Handle& fj) const
 	if (content_eq(fj, knil))
 		return fi;
 
+	// Is either one a PlusLink? If so, then flatten.
+	if (PLUS_LINK == fitype or PLUS_LINK == fjtype)
+	{
+		HandleSeq seq;
+		// flatten the left
+		if (PLUS_LINK == fitype)
+		{
+			for (const Handle& lhs: fi->getOutgoingSet())
+				seq.push_back(lhs);
+		}
+		else
+		{
+			seq.push_back(fi);
+		}
+
+		// flatten the right
+		if (PLUS_LINK == fjtype)
+		{
+			for (const Handle& rhs: fj->getOutgoingSet())
+				seq.push_back(rhs);
+		}
+		else
+		{
+			seq.push_back(fj);
+		}
+		Handle foo(createLink(seq, PLUS_LINK));
+		PlusLinkPtr ap = PlusLinkCast(foo);
+		return ap->reduce();
+	}
+
 	// Is fi identical to fj? If so, then replace by 2*fi
-	if (fi == fj)
+	if (content_eq(fi, fj))
 	{
 		Handle two(createNumberNode("2"));
 		return Handle(createTimesLink(fi, two));
@@ -136,9 +166,6 @@ Handle PlusLink::kons(const Handle& fi, const Handle& fj) const
 			// We need to insert into the atomspace, else reduce() horks
 			// up the knil compares during reduction.
 			Handle foo(createLink(rest, PLUS_LINK));
-			if (_atom_space)
-				foo = _atom_space->add_atom(foo);
-
 			PlusLinkPtr ap = PlusLinkCast(foo);
 			Handle a_plus(ap->reduce());
 
