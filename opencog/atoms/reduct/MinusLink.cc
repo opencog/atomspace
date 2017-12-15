@@ -57,16 +57,11 @@ void MinusLink::init(void)
 	if (not classserver().isA(tscope, MINUS_LINK))
 		throw InvalidParamException(TRACE_INFO, "Expecting a MinusLink");
 
-	size_t sz = _outgoing.size();
-	if (2 < sz or 0 == sz)
-		throw InvalidParamException(TRACE_INFO,
-			"Don't know how to subract that!");
-
 	_commutative = false;
 	knil = Handle(createNumberNode(0));
 
 	// Disallow unary Minus. This makes things easier, overall.
-	if (1 == sz)
+	if (1 == _outgoing.size())
 		_outgoing.insert(_outgoing.cbegin(), knil);
 }
 

@@ -57,13 +57,12 @@ void DivideLink::init(void)
 	if (not classserver().isA(tscope, DIVIDE_LINK))
 		throw InvalidParamException(TRACE_INFO, "Expecting a DivideLink");
 
-	size_t sz = _outgoing.size();
-	if (2 < sz or 0 == sz)
-		throw InvalidParamException(TRACE_INFO,
-			"Don't know how to divide that!");
-
-   knil = Handle(createNumberNode(1));
 	_commutative = false;
+   knil = Handle(createNumberNode(1));
+
+	// Disallow unary Divide. This makes things easier, overall.
+	if (1 == _outgoing.size()
+		_outgoing.insert(_outgoing.cbegin(), knil);
 }
 
 static inline double get_double(const Handle& h)
