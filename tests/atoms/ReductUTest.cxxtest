@@ -58,6 +58,7 @@ public:
 
 	void test_arithmetic(void);
 	void test_setlink(void);
+	void test_minus(void);
 };
 
 void ReductUTest::tearDown(void)
@@ -71,7 +72,7 @@ void ReductUTest::setUp(void)
 }
 
 /*
- * ReductLink unit test.  Test arithmetic.
+ * ReductLink unit test.  Test Plus, Times arithmetic.
  */
 void ReductUTest::test_arithmetic(void)
 {
@@ -235,6 +236,80 @@ void ReductUTest::test_setlink(void)
 
 	Handle efour = eval->eval_h("(NumberNode 4)");
 	TS_ASSERT_EQUALS(four, efour);
+
+	// ---------
+	logger().debug("END TEST: %s", __FUNCTION__);
+}
+
+/*
+ * ReductLink unit test.  Test Minus Divide.
+ */
+void ReductUTest::test_minus(void)
+{
+	logger().debug("BEGIN TEST: %s", __FUNCTION__);
+
+	// ---------
+	Handle zero = eval->eval_h(
+		"(cog-execute! (Minus (Number 0)))"
+	);
+	printf("expecting zero: %s\n", zero->to_short_string().c_str());
+
+	Handle ezero = eval->eval_h("(Number 0)");
+	TS_ASSERT_EQUALS(zero, ezero);
+
+	// ---------
+	Handle mone = eval->eval_h(
+		"(cog-execute! (Minus (Number 1)))"
+	);
+	printf("expecting minus one: %s\n", mone->to_short_string().c_str());
+
+	Handle emone = eval->eval_h("(Number -1)");
+	TS_ASSERT_EQUALS(mone, emone);
+
+	// ---------
+	mone = eval->eval_h(
+		"(cog-execute! (Minus (Number 0) (Number 1)))"
+	);
+	printf("expecting minus one: %s\n", mone->to_short_string().c_str());
+	TS_ASSERT_EQUALS(mone, emone);
+
+	// ---------
+	Handle x = eval->eval_h(
+		"(cog-execute! (Minus (Variable \"$x\") (Number 0)))"
+	);
+	printf("expecting x: %s\n", x->to_short_string().c_str());
+
+	Handle ex = eval->eval_h("(Variable \"$x\")");
+	TS_ASSERT_EQUALS(x, ex);
+
+	// ---------
+	Handle mx = eval->eval_h(
+		"(cog-execute! (Minus (Number 0) (Variable \"$x\")))"
+	);
+	printf("expecting minus x: %s\n", mx->to_short_string().c_str());
+
+	Handle emx = eval->eval_h(
+		"(Minus (Number 0) (Variable \"$x\")))"
+	);
+	TS_ASSERT_EQUALS(mx, emx);
+
+	// ---------
+	x = eval->eval_h(
+		"(cog-execute! (Divide (Variable \"$x\") (Number 1)))"
+	);
+	printf("expecting x: %s\n", x->to_short_string().c_str());
+	TS_ASSERT_EQUALS(x, ex);
+
+	// ---------
+	Handle dx = eval->eval_h(
+		"(cog-execute! (Divide (Number 1) (Variable \"$x\")))"
+	);
+	printf("expecting 1/x: %s\n", dx->to_short_string().c_str());
+
+	Handle edx = eval->eval_h(
+		"(Divide (Number 1) (Variable \"$x\")))"
+	);
+	TS_ASSERT_EQUALS(dx, edx);
 
 	// ---------
 	logger().debug("END TEST: %s", __FUNCTION__);
