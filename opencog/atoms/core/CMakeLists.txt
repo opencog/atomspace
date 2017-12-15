@@ -4,7 +4,7 @@ INCLUDE_DIRECTORIES( ${CMAKE_CURRENT_BINARY_DIR})
 
 ADD_LIBRARY (atomcore
 	ArityLink.cc
-	CompositionLink.cc
+	ComposeLink.cc
 	Context.cc
 	DefineLink.cc
 	DeleteLink.cc
@@ -66,6 +66,6 @@ INSTALL (FILES
 	UnorderedLink.h
 	Variables.h
 	VariableList.h
-    CompositionLink.h
+    ComposeLink.h
 	DESTINATION "include/opencog/atoms/core"
 )

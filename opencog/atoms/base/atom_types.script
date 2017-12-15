@@ -550,11 +550,11 @@ MAP_LINK <- FUNCTION_LINK
 // produce the m-ary function g(f1(x1,...,xm),...,fn(x1,...,xm)). If g
 // is unary, then the second outgoing can be function instead of a
 // ListLink.
-COMPOSITION_LINK <- FUNCTION_LINK
+COMPOSE_LINK <- FUNCTION_LINK
 
 // Unary higher order function to build a projection function. Take a
 // number and build a function projecting its ith input argument.
-PROJECTION_LINK <- FUNCTION_LINK
+PROJECT_LINK <- FUNCTION_LINK
 
 // ====================================================================
 // Grammatical inference on time series
