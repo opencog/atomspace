@@ -286,10 +286,10 @@ void ReductUTest::test_minus(void)
 	Handle mx = eval->eval_h(
 		"(cog-execute! (Minus (Number 0) (Variable \"$x\")))"
 	);
-	printf("expecting minus x: %s\n", mx->to_short_string().c_str());
+	printf("expecting minus x: %s\n", mx->to_string().c_str());
 
 	Handle emx = eval->eval_h(
-		"(Minus (Number 0) (Variable \"$x\")))"
+		"(Minus (Number 0) (Variable \"$x\"))"
 	);
 	TS_ASSERT_EQUALS(mx, emx);
 
@@ -307,7 +307,7 @@ void ReductUTest::test_minus(void)
 	printf("expecting 1/x: %s\n", dx->to_short_string().c_str());
 
 	Handle edx = eval->eval_h(
-		"(Divide (Number 1) (Variable \"$x\")))"
+		"(Divide (Number 1) (Variable \"$x\"))"
 	);
 	TS_ASSERT_EQUALS(dx, edx);
 
