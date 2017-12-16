@@ -29,7 +29,6 @@
 #include <opencog/atoms/pattern/BindLink.h>
 #include <opencog/atoms/pattern/PatternLink.h>
 #include <opencog/atomutils/FindUtils.h>
-#include <opencog/atomutils/Substitutor.h>
 #include <opencog/query/BindLinkAPI.h>
 #include <opencog/query/DefaultImplicator.h>
 #include <opencog/rule-engine/Rule.h>

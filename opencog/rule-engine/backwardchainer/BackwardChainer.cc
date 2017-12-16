@@ -30,7 +30,6 @@
 #include <opencog/util/random.h>
 
 #include <opencog/atomutils/FindUtils.h>
-#include <opencog/atomutils/Substitutor.h>
 #include <opencog/unify/Unify.h>
 #include <opencog/atomutils/TypeUtils.h>
 #include <opencog/atoms/pattern/PatternLink.h>

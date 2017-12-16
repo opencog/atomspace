@@ -874,7 +874,7 @@ void InitiateSearchCB::jit_analyze(PatternMatchEngine* pme)
 	// really we need to expand, one level at a time, during
 	// evaluation, and only expand if really, really needed. (Which
 	// then brings up ideas like tail recursion, etc.)  Anyway, most
-	// of this code should probably be moved to PatterLink::jit_expand()
+	// of this code should probably be moved to PatternLink::jit_expand()
 	while (0 < _pattern->defined_terms.size())
 	{
 		Variables vset;
@@ -903,9 +903,9 @@ void InitiateSearchCB::jit_analyze(PatternMatchEngine* pme)
 			defnmap.insert({name, defn});
 		}
 
-		// Rebuild the pattern, expanding all DefinedPredicateNodes to one level.
-		// Note that newbody is not being place in any atomspace; but I think
-		// that is OK...
+		// Rebuild the pattern, expanding all DefinedPredicateNodes
+		// to one level. Note that `newbody` is not being placed in
+		// any atomspace; but I think that is OK...
 		Handle newbody = Substitutor::substitute(_pattern->body, defnmap);
 
 		// We need to let both the PME know about the new clauses
