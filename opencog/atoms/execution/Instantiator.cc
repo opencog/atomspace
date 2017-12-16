@@ -172,9 +172,9 @@ Handle Instantiator::walk_tree(const Handle& expr, bool silent)
 	//    Eager: first, execute the arguments to the Put, then beta-
 	//    reduce, then execute again.
 	//
-	//    Lazy: beta-reduce first, then execute.  Lazy helps avoid
-	//    un-needed executions, and has better control over infinite
-	//    recursion.
+	//    Lazy: beta-reduce first, then execute.  Lazy can sometimes
+	//    avoid un-needed executions, although it can sometimes lead to
+	//    more of them. Lazy has better control over infinite recursion.
 	//
 	if (PUT_LINK == t)
 	{
@@ -241,8 +241,7 @@ Handle Instantiator::walk_tree(const Handle& expr, bool silent)
 		return rex;
 	}
 
-	// ExecutionOutputLinks are not handled by the FunctionLink factory
-	// below. This is due to a circular shared-libarary dependency.
+	// ExecutionOutputLinks get special treatment.
 	//
 	// Even for the case of lazy execution, we still have to do eager
 	// execution of the arguments passed to the ExOutLink.  This is
