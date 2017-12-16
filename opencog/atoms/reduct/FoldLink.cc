@@ -56,9 +56,13 @@ void FoldLink::init(void)
 
 // ===============================================================
 
-/// reduce() -- reduce a right-fold by recursively calling kons.
+/// delta_reduce() -- delta-reduce a right-fold by recursively
+/// calling kons.  Recall the defintion of delta-reduction: it is
+/// that operation by which a function with arguments is replaced
+/// by the value that function would have for these values.
+/// For example, the delta-reduction of 2+2 is 4.
 ///
-Handle FoldLink::reduce(void) const
+Handle FoldLink::delta_reduce(void) const
 {
 	Handle expr = knil;
 
@@ -84,7 +88,7 @@ Handle FoldLink::reduce(void) const
 		{
 			auto fact = classserver().getFactory(t);
 			FoldLinkPtr fff(FoldLinkCast((*fact)(h)));
-			h = fff->reduce();
+			h = fff->delta_reduce();
 		}
 		expr = kons(h, expr);
 	}

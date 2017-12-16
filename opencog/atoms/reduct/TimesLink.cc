@@ -116,7 +116,7 @@ Handle TimesLink::kons(const Handle& fi, const Handle& fj) const
 		}
 		Handle foo(createLink(seq, TIMES_LINK));
 		TimesLinkPtr ap = TimesLinkCast(foo);
-		return ap->reduce();
+		return ap->delta_reduce();
 	}
 
 	// If we are here, we've been asked to multiply two things of the
