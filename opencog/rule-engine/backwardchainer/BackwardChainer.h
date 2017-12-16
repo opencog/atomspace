@@ -27,10 +27,9 @@
 
 #include <opencog/rule-engine/Rule.h>
 #include <opencog/rule-engine/UREConfig.h>
-
-#include "BIT.h"
-#include "TraceRecorder.h"
-#include "ControlPolicy.h"
+#include <opencog/rule-engine/backwardchainer/BIT.h>
+#include <opencog/rule-engine/backwardchainer/TraceRecorder.h>
+#include <opencog/rule-engine/backwardchainer/ControlPolicy.h>
 
 class BackwardChainerUTest;
 

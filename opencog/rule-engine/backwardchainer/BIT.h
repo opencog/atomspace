@@ -23,7 +23,6 @@
 #ifndef _OPENCOG_BIT_H
 #define _OPENCOG_BIT_H
 
-#include <random>
 #include <boost/operators.hpp>
 #include <opencog/rule-engine/Rule.h>
 #include <opencog/atoms/base/Handle.h>

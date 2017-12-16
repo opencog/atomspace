@@ -21,17 +21,9 @@
  * 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
  */
 
-#include <boost/range/algorithm/find.hpp>
-#include <boost/range/algorithm/sort.hpp>
-#include <boost/range/algorithm/unique_copy.hpp>
-
-#include <opencog/atoms/execution/Instantiator.h>
 #include <opencog/atoms/pattern/BindLink.h>
-#include <opencog/atoms/pattern/PatternLink.h>
 #include <opencog/atomutils/FindUtils.h>
-#include <opencog/atomutils/Substitutor.h>
 #include <opencog/query/BindLinkAPI.h>
-#include <opencog/query/DefaultImplicator.h>
 #include <opencog/rule-engine/Rule.h>
 
 #include "ForwardChainer.h"

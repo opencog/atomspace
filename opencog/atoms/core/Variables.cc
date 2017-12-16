@@ -118,7 +118,8 @@ void FreeVariables::find_variables(const Handle& h)
 HandleSeq FreeVariables::make_values(const HandleMap& varmap) const
 {
 	HandleSeq values;
-	for (const Handle& var : varseq) {
+	for (const Handle& var : varseq)
+	{
 		HandleMap::const_iterator it = varmap.find(var);
 		values.push_back(it == varmap.end() ? var : it->second);
 	}

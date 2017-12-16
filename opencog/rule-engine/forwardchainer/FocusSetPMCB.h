@@ -32,9 +32,9 @@ namespace opencog
 /**
  * Used for pattern matching and instantiating on two
  * different atomspaces.
- *
  */
-class FocusSetPMCB: public virtual DefaultImplicator {
+class FocusSetPMCB: public virtual DefaultImplicator
+{
 private:
     Instantiator* _inst;
     AtomSpace * _inst_as;

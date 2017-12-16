@@ -23,6 +23,7 @@
 #include <opencog/guile/SchemeEval.h>
 #include <opencog/atomspace/AtomSpace.h>
 #include <opencog/atoms/execution/ExecSCM.h>
+#include <opencog/atoms/core/NumberNode.h>
 #include <opencog/util/Logger.h>
 
 using namespace opencog;
@@ -59,6 +60,7 @@ public:
 	void test_arithmetic(void);
 	void test_setlink(void);
 	void test_minus(void);
+	void test_execution(void);
 };
 
 void ReductUTest::tearDown(void)
@@ -310,6 +312,32 @@ void ReductUTest::test_minus(void)
 		"(Divide (Number 1) (Variable \"$x\"))"
 	);
 	TS_ASSERT_EQUALS(dx, edx);
+
+	// ---------
+	logger().debug("END TEST: %s", __FUNCTION__);
+}
+
+/*
+ * ReductLink unit test.  Test exuction of arguments.
+ */
+void ReductUTest::test_execution(void)
+{
+	logger().debug("BEGIN TEST: %s", __FUNCTION__);
+
+	// ---------
+	Handle fife = eval->eval_h(
+		"(cog-execute! (Plus (Number 10) "
+		"    (RandomNumber (Number 5) (Number 9))))"
+	);
+	printf("expecting 15 to 19: %s\n", fife->to_short_string().c_str());
+
+	Type tfife = fife->get_type();
+	TS_ASSERT_EQUALS(tfife, NUMBER_NODE);
+
+	NumberNodePtr nn(NumberNodeCast(fife));
+	double val = nn->get_value();
+	TS_ASSERT_LESS_THAN_EQUALS(15.0, val);
+	TS_ASSERT_LESS_THAN_EQUALS(val, 19.0);
 
 	// ---------
 	logger().debug("END TEST: %s", __FUNCTION__);
