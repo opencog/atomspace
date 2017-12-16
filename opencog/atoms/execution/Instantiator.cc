@@ -41,10 +41,9 @@ using namespace opencog;
 /// have to actually be VariableNode's; they can be any atom.)
 static Handle beta_reduce(const Handle& expr, const HandleMap vmap)
 {
-	// XXX crud.  Stupid inefficient format conversion. FIXME.
-	// FreeVariables::substitute_nocheck() performs beta-reduction
-	// correctly, so we just use that. But it takes a specific
-	// format, and a variable-value map is not one of them.
+	// Format conversion. FreeVariables::substitute_nocheck() performs
+	// beta-reduction correctly, so we just use that. But we have to
+	// jam the map into the format it expects.
 	HandleSeq vals;
 	FreeVariables crud;
 	unsigned int idx = 0;
