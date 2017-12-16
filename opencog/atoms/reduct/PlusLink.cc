@@ -114,7 +114,7 @@ Handle PlusLink::kons(const Handle& fi, const Handle& fj) const
 		}
 		Handle foo(createLink(seq, PLUS_LINK));
 		PlusLinkPtr ap = PlusLinkCast(foo);
-		return ap->reduce();
+		return ap->delta_reduce();
 	}
 
 	// Is fi identical to fj? If so, then replace by 2*fi
@@ -164,11 +164,9 @@ Handle PlusLink::kons(const Handle& fi, const Handle& fj) const
 				rest.push_back(jlpo[k]);
 
 			// a_plus is now (a+1) or (a+b) as described above.
-			// We need to insert into the atomspace, else reduce() horks
-			// up the knil compares during reduction.
 			Handle foo(createLink(rest, PLUS_LINK));
 			PlusLinkPtr ap = PlusLinkCast(foo);
-			Handle a_plus(ap->reduce());
+			Handle a_plus(ap->delta_reduce());
 
 			return Handle(createTimesLink(exx, a_plus));
 		}

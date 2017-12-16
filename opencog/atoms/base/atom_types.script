@@ -242,12 +242,6 @@ DEFINE_LINK <- UNIQUE_LINK
 // necessarily list ALL the (free) variables within it; the ScopeLink
 // need not bind all of them.  The FreeLink also has no type
 // restrictions on the variables.
-//
-// The ScopeLink differs from a LambdaLink in that it does NOT allow
-// beta-reduction; only LambdaLinks can be beta-reduced. Thus,
-// ScopeLink can be used as a base class for things like ForAllLink,
-// ExistsLink and AverageLink, which bind variables, but are not
-// beta-reducible.
 SCOPE_LINK <- ORDERED_LINK
 
 // A LambdaLink is a link whose bound variables may be substituted,
@@ -259,8 +253,15 @@ SCOPE_LINK <- ORDERED_LINK
 LAMBDA_LINK <- SCOPE_LINK
 
 // PutLinks perform a beta-reduction when executed; i.e. they get
-// beta-reduced when they are executed.
+// beta-reduced when they are executed. PutLinks are the same thing as
+// beta-redexes.
 PUT_LINK <- SCOPE_LINK
+
+// The PrenexLink is a ScopeLink that is in prenex normal form.  It
+// serves as a base class for the various pattern-matching links, since
+// pattern matching only makes sense when the patterns are written in
+// prenex normal form.
+PRENEX_LINK <- SCOPE_LINK
 
 // Pattern definition, pattern grounding/satisfaction.
 // The PatternLink implements the base class holding a pattern that
@@ -268,7 +269,7 @@ PUT_LINK <- SCOPE_LINK
 // enable a C++ class that unpacks all the arguments and types, etc.
 // into assorted C++ structures. It does not have any semantics in and
 // of itself, it just holds machinery.
-PATTERN_LINK <- SCOPE_LINK         // A pattern encapsulated in a Link.
+PATTERN_LINK <- PRENEX_LINK         // A pattern encapsulated in a Link.
 
 // We subdivide patterns into two types: one type returns a TV when it
 // is evaluated.  The other type returns a set of atoms when it is

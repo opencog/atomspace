@@ -24,14 +24,14 @@ fixed.
 
 Anyway... try this at the guile prompt:
 ```
-(cog-reduce! (PlusLink (NumberNode 2) (NumberNode 2)))
+(cog-execute! (PlusLink (NumberNode 2) (NumberNode 2)))
 ```
 
 you should see `(NumberNode 4)` as the output.
 
 A more challenging example:
 ```
-(cog-reduce! (PlusLink (NumberNode 0) (VariableNode "$x")))
+(cog-execute! (PlusLink (NumberNode 0) (VariableNode "$x")))
 ```
 
 should yeild `(VariableNode "$x")` -- that is, adding zero to something
@@ -39,13 +39,13 @@ has no effect!
 
 Some more interesting examples:
 ```
-(cog-reduce! (PlusLink (NumberNode 2) (VariableNode "$x") (NumberNode -2)))
+(cog-execute! (PlusLink (NumberNode 2) (VariableNode "$x") (NumberNode -2)))
 ```
 
 should yeild `(VariableNode "$x")` -- the +2 and -2 cancel.
 
 ```
-(cog-reduce! (PlusLink (NumberNode 2) (VariableNode "$x") (NumberNode 2)))
+(cog-execute! (PlusLink (NumberNode 2) (VariableNode "$x") (NumberNode 2)))
 ```
 
 should yeild `(PlusLink (VariableNode "$x") (NumberNode 4))` --
@@ -53,15 +53,15 @@ the +2 and +2 sum.
 
 Using the same ideas:
 ```
-(cog-reduce! (TimesLink (NumberNode 1) (VariableNode "$x")))
+(cog-execute! (TimesLink (NumberNode 1) (VariableNode "$x")))
 
-(cog-reduce!
+(cog-execute!
    (TimesLink
       (VariableNode "$y")
       (NumberNode 1)
       (VariableNode "$x")))
 
-(cog-reduce!
+(cog-execute!
    (TimesLink
       (VariableNode "$y")
          (NumberNode 0.5)

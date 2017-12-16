@@ -34,7 +34,7 @@ namespace opencog
 
 /**
  * The ArithmeticLink implements the simple arithmetic operations.
- * It uses FoldLink to perform reduction.
+ * It uses FoldLink to perform delta-reduction.
  */
 class ArithmeticLink : public FoldLink
 {
@@ -49,7 +49,7 @@ public:
 	ArithmeticLink(const HandleSeq& oset, Type=ARITHMETIC_LINK);
 	ArithmeticLink(const Link& l);
 
-	virtual Handle reduce(void) const;
+	virtual Handle delta_reduce(void) const;
 	virtual Handle execute(AtomSpace* as) const;
 };
 

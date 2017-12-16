@@ -57,16 +57,20 @@ void ArithmeticLink::init(void)
 }
 
 // ===========================================================
-/// reduce() -- reduce the expression by summing constants, etc.
+/// delta_reduce() -- delta-reduce the expression by summing constants, etc.
+///
+/// Recall the defintion of delta-reduction: it is the replacement of
+/// functions with values by the value that the function would have.
+/// For example, the delta-reduction of 2+2 is 4.
 ///
 /// No actual black-box evaluation or execution is performed. Only
 /// clearbox reductions are performed.
 ///
-/// Examples: the reduct of (FoldLink (NumberNode 2) (NumberNode 2))
-/// is (NumberNode 4) -- its just a constant.
+/// Examples: the delta-reduction of (FoldLink (Number 2) (Number 2))
+/// is (Number 4) -- its just a constant.
 ///
-/// The reduct of (FoldLink (VariableNode "$x") (NumberNode 0)) is
-/// (VariableNode "$x"), because adding zero to anything yeilds the
+/// The delta-reduct of (FoldLink (VariableNode "$x") (NumberNode 0))
+/// is (VariableNode "$x"), because adding zero to anything yeilds the
 /// thing itself.
 ///
 /// This is certainly not an efficient, effective way to build a
@@ -85,12 +89,12 @@ void ArithmeticLink::init(void)
 /// ever-more rules to the rule engine to reduce ever-more interesting
 /// algebraic expressions.
 ///
-Handle ArithmeticLink::reduce(void) const
+Handle ArithmeticLink::delta_reduce(void) const
 {
 	Handle road(reorder());
 	ArithmeticLinkPtr alp(ArithmeticLinkCast(road));
 
-	Handle red(alp->FoldLink::reduce());
+	Handle red(alp->FoldLink::delta_reduce());
 
 	alp = ArithmeticLinkCast(red);
 	if (NULL == alp) return red;
@@ -109,7 +113,7 @@ Handle ArithmeticLink::reduce(void) const
 /// last, all number nodes
 /// We do not currently sort the variables, but maybe we should...?
 /// Sorting by variable names would hold consilidate them...
-/// The FoldLink::reduce() method already returns expressions that are
+/// The FoldLink::delta_reduce() method already returns expressions that are
 /// almost in the correct order.
 Handle ArithmeticLink::reorder(void) const
 {
@@ -158,7 +162,7 @@ Handle ArithmeticLink::reorder(void) const
 /// execute() -- Execute the expression
 Handle ArithmeticLink::execute(AtomSpace* as) const
 {
-	return reduce();
+	return delta_reduce();
 }
 
 // ===========================================================
