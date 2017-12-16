@@ -250,6 +250,7 @@ Handle PutLink::do_reduce(void) const
 {
 	Handle bods(_body);
 	Variables vars(_varlist);
+
 	// Resolve the body, if needed. That is, if the body is
 	// given in a defintion, get that defintion.
 	Type btype = _body->get_type();
