@@ -24,10 +24,10 @@
 #ifndef _FCSTAT_H_
 #define _FCSTAT_H_
 
-#include <opencog/atoms/base/Handle.h>
 #include <map>
 
-#include "../Rule.h"
+#include <opencog/atoms/base/Handle.h>
+#include <opencog/rule-engine/Rule.h>
 
 namespace opencog {
 
