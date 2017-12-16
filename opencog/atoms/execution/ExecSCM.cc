@@ -41,36 +41,6 @@ static TruthValuePtr ss_evaluate(AtomSpace* atomspace, const Handle& h)
 	return EvaluationLink::do_evaluate(atomspace, h);
 }
 
-/**
- * cog-reduce! reduces a FoldLink with free variables in it.
- *
- * XXX this routine is strongly deprecated, and should be, will be
- * removed!  The correct way to do reduction is in the atomspace, and
- * not in C++ code!
- */
-static Handle ss_reduce(AtomSpace* atomspace, const Handle& h)
-{
-	Type t = h->get_type();
-	if (NUMBER_NODE == t) return h;
-
-	if (not classserver().isA(t, FOLD_LINK))
-		throw InvalidParamException(TRACE_INFO,
-			"Expecting a FoldLink (PlusLink, TimesLink, etc");
-
-	auto fact = classserver().getFactory(t);
-	FoldLinkPtr fff(FoldLinkCast((*fact)(h)));
-	Handle hr(fff->reduce());
-
-	if (DELETE_LINK == hr->get_type())
-	{
-		for (const Handle& ho : hr->getOutgoingSet())
-			atomspace->remove_atom(ho, true);
-		return Handle::UNDEFINED;
-	}
-
-	return atomspace->add_atom(hr);
-}
-
 // ========================================================
 
 // XXX HACK ALERT This needs to be static, in order for python to
@@ -93,9 +63,6 @@ void ExecSCM::init(void)
 
 	_binders.push_back(new FunctionWrap(ss_evaluate,
 	                   "cog-evaluate!", "exec"));
-
-	_binders.push_back(new FunctionWrap(ss_reduce,
-	                   "cog-reduce!", "exec"));
 }
 
 ExecSCM::~ExecSCM()
