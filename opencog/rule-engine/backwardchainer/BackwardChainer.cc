@@ -23,19 +23,10 @@
  * 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
  */
 
-#include <random>
-
-#include <boost/range/algorithm/lower_bound.hpp>
-
 #include <opencog/util/random.h>
 
-#include <opencog/atomutils/FindUtils.h>
-#include <opencog/unify/Unify.h>
-#include <opencog/atomutils/TypeUtils.h>
-#include <opencog/atoms/pattern/PatternLink.h>
-#include <opencog/atoms/pattern/BindLink.h>
-
 #include <opencog/query/BindLinkAPI.h>
+#include <opencog/unify/Unify.h>
 
 #include "BackwardChainer.h"
 #include "BackwardChainerPMCB.h"
