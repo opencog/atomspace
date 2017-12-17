@@ -244,6 +244,10 @@ DEFINE_LINK <- UNIQUE_LINK
 // restrictions on the variables.
 SCOPE_LINK <- ORDERED_LINK
 
+// The RewriteLink is a ScopeLink with a large number of methods
+// that perform various different kinds of re-writing on the ScopeLink.
+REWRITE_LINK <- SCOPE_LINK
+
 // A LambdaLink is a link whose bound variables may be substituted,
 // that is, may be beta-reduced. It can be thought of as not only a
 // variable declaration (which is what ScopeLink does) but also has

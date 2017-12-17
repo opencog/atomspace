@@ -18,6 +18,7 @@ ADD_LIBRARY (atomcore
 	Quotation.cc
 	RandomChoice.cc
 	RandomNumber.cc
+	RewriteLink.cc
 	ScopeLink.cc
 	SleepLink.cc
 	StateLink.cc
@@ -44,6 +45,7 @@ INSTALL (TARGETS atomcore
 
 INSTALL (FILES
 	ArityLink.h
+	ComposeLink.h
 	Context.h
 	DefineLink.h
 	DeleteLink.h
@@ -56,6 +58,7 @@ INSTALL (FILES
 	Quotation.h
 	RandomChoice.h
 	RandomNumber.h
+	RewriteLink.h
 	ScopeLink.h
 	SleepLink.h
 	StateLink.h
@@ -66,6 +69,5 @@ INSTALL (FILES
 	UnorderedLink.h
 	Variables.h
 	VariableList.h
-    ComposeLink.h
 	DESTINATION "include/opencog/atoms/core"
 )
