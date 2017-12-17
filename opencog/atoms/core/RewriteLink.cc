@@ -1,7 +1,7 @@
 /*
  * RewriteLink.cc
  *
- * Copyright (C) 2017 Nil Geiswiller
+ * Copyright (C) 2017 Nil Geisweiller
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU Affero General Public License v3 as
@@ -36,6 +36,7 @@ using namespace opencog;
 
 void RewriteLink::init(void)
 {
+	Type t = get_type();
 	if (not classserver().isA(t, REWRITE_LINK))
 	{
 		const std::string& tname = classserver().getTypeName(t);
@@ -65,7 +66,7 @@ RewriteLink::RewriteLink(const HandleSeq& oset, Type t)
 }
 
 RewriteLink::RewriteLink(const Link &l)
-	: Link(l)
+	: ScopeLink(l)
 {
 	if (skip_init(l.get_type())) return;
 	init();
