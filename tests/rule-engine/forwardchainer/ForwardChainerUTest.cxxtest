@@ -73,6 +73,7 @@ _exit(rc); // XXX hack to avoid double-free in __run_exit_handlers
 	void test_do_chain_deduction();
 	void test_do_chain_animals();
 	void test_select_rule();
+	void test_unsatisfied_premise();
 };
 
 void ForwardChainerUTest::test_do_chain_deduction()
@@ -149,6 +150,28 @@ void ForwardChainerUTest::test_select_rule(void)
     // Full unification
     Rule rule = fc.select_rule(h);
     TS_ASSERT(rule.is_valid());
+}
+
+/**
+ * ForwardChainer shouldn't return a result when there is
+ * unsatisfied premise.
+ */
+void ForwardChainerUTest::test_unsatisfied_premise(void)
+{
+	_eval.eval("(load-from-path \"fc-unsatisfied-premise.scm\")");
+
+	Handle table = an(CONCEPT_NODE, "table"),
+		furniture = an(CONCEPT_NODE, "furniture"),
+		source = al(INHERITANCE_LINK, table, furniture),
+		vardecl = Handle::UNDEFINED,
+		top_rbs = _as.get_node(CONCEPT_NODE, "rule-base");
+
+	ForwardChainer fc(_as, top_rbs, source, vardecl);
+	fc.get_config().set_maximum_iterations(20);
+	fc.do_chain();
+
+	UnorderedHandleSet results = fc.get_chaining_result();
+	TS_ASSERT_EQUALS(results.size(), 0);
 }
 
 #undef al
