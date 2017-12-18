@@ -31,19 +31,11 @@ namespace opencog
  *  @{
  */
 
-/// The RewriteLink consitsts of two parts: An optional variable
-/// declaration, followed by an expression body (of arbitrary form).
-/// If a variable declaration is present, then it must conform to current
-/// variable declaration standards: i.e. it must be either a single
-/// VariableNode, a single TypedVariableLink, or a VariableList.  If a
-/// variable declaration is missing, then the body is searched for all
-/// free variables, these are then bound.
-///
-/// This class does little other than to check for the above-described
-/// format, and unpacke the variable decalrations, if present; it will
-/// throw an error if the variables are somehow ill-formed. As usual,
-/// the point of unpacked variables is to act as a memo or cache,
-/// speeding up later calculations.
+/// The RewriteLink extends the ScopeLink class to add a large variety
+/// of methods to rewrite various parts of the ScopeLink in various
+/// ways.  These are used by the backward and foreward chainers to
+/// edit and create PatternLinks on the fly, thus allowing different
+/// kinds of queries to be generated and run as chaining proceeds.
 ///
 class RewriteLink;
 typedef std::shared_ptr<RewriteLink> RewriteLinkPtr;
@@ -162,7 +154,7 @@ public:
 	                                                        * consumption */);
 
 	/**
-	 * Return true iff the variable declaration of local_scope is a
+	 * Return true if the variable declaration of local_scope is a
 	 * variable of variables wrapped in a UnquoteLink.
 	 */
 	static bool is_bound_to_ancestor(const Variables& variables,
