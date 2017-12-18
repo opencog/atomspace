@@ -130,7 +130,7 @@ public:
 	 * Like the above, but accepting a sequence of values.
 	 */
 	HandleSeq substitute_bodies(const Handle& nvardecl,
-	                                    const HandleSeq& values) const;
+	                            const HandleSeq& values) const;
 
 	/**
 	 * Used by substitute.

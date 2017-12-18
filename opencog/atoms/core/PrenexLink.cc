@@ -74,6 +74,14 @@ PrenexLink::PrenexLink(const Link &l)
 
 /* ================================================================= */
 
+Handle PrenexLink::substitute(const HandleSeq& vals) const
+{
+	// XXX this is wrong.
+	return RewriteLink::substitute(vals);
+}
+
+/* ================================================================= */
+
 DEFINE_LINK_FACTORY(PrenexLink, PRENEX_LINK);
 
 /* ===================== END OF FILE ===================== */

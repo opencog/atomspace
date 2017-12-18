@@ -138,20 +138,19 @@ Handle RewriteLink::substitute(const HandleMap& vm) const
 
 Handle RewriteLink::substitute(const HandleSeq& vals) const
 {
-	// XXX this implementation is probably wrong.
-	// Its copied from Lambda.
+	// XXX this implementation is wrong. Its a hack for now.
 	return get_variables().substitute(_body, vals);
 }
 
 HandleSeq RewriteLink::substitute_bodies(const Handle& nvardecl,
-                                               const HandleMap& vm) const
+                                         const HandleMap& vm) const
 {
 	const Variables& variables = get_variables();
 	return substitute_bodies(nvardecl, variables.make_values(vm));
 }
 
 HandleSeq RewriteLink::substitute_bodies(const Handle& nvardecl,
-                                               const HandleSeq& values) const
+                                         const HandleSeq& values) const
 {
 	HandleSeq hs;
 	for (size_t i = (get_vardecl() ? 1 : 0); i < get_arity(); ++i)
@@ -180,7 +179,7 @@ Handle RewriteLink::substitute_vardecl(const HandleMap& vm) const
 }
 
 Handle RewriteLink::substitute_vardecl(const Handle& vardecl,
-                                     const HandleMap& vm)
+                                       const HandleMap& vm)
 {
 	Type t = vardecl->get_type();
 
@@ -254,13 +253,14 @@ Handle RewriteLink::consume_ill_quotations() const
 	return createLink(nouts, get_type());
 }
 
-Handle RewriteLink::consume_ill_quotations(const Handle& vardecl, const Handle& h)
+Handle RewriteLink::consume_ill_quotations(const Handle& vardecl,
+                                           const Handle& h)
 {
 	return consume_ill_quotations(gen_variables(h, vardecl), h);
 }
 
 Handle RewriteLink::consume_ill_quotations(const Variables& variables, Handle h,
-                                         Quotation quotation, bool escape)
+                                           Quotation quotation, bool escape)
 {
 	// Base case
 	if (h->is_node())
@@ -309,7 +309,7 @@ Handle RewriteLink::consume_ill_quotations(const Variables& variables, Handle h,
 }
 
 bool RewriteLink::is_bound_to_ancestor(const Variables& variables,
-                                     const Handle& local_scope)
+                                       const Handle& local_scope)
 {
 	Handle unquote = local_scope->getOutgoingAtom(0);
 	if (unquote->get_type() == UNQUOTE_LINK) {

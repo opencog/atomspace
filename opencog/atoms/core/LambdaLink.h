@@ -31,7 +31,7 @@ namespace opencog
  *  @{
  */
 
-/// The LambdaLink is a RewriteLink that ... seems not to do anything.
+/// The LambdaLink is a RewriteLink that ...
 ///
 class LambdaLink : public RewriteLink
 {
@@ -42,6 +42,8 @@ public:
 	LambdaLink(const HandleSeq&, Type=LAMBDA_LINK);
 	LambdaLink(const Handle& varcdecls, const Handle& body);
 	LambdaLink(const Link &l);
+
+	virtual Handle substitute(const HandleSeq& values) const;
 
 	static Handle factory(const Handle&);
 };
