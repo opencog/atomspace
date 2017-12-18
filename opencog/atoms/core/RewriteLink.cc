@@ -242,7 +242,7 @@ Handle RewriteLink::consume_ill_quotations(const Handle& vardecl, const Handle& 
 }
 
 Handle RewriteLink::consume_ill_quotations(const Variables& variables, Handle h,
-                                         Quotation quotation, bool escape)
+                                           Quotation quotation, bool escape)
 {
 	// Base case
 	if (h->is_node())
