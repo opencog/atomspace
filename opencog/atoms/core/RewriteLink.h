@@ -44,8 +44,46 @@ class RewriteLink : public ScopeLink
 protected:
 	RewriteLink(Type, const Handle&);
 
-protected:
 	void init(void);
+
+	/**
+	 * Helper for partial_substitute. Given a mapping from
+	 * variables to values, some of which might be variables
+	 * themselves, this generates a new variable declaration
+	 * with using the new, substituted variables.
+	 */
+	Handle partial_substitute_vardecl(const HandleMap& vm) const;
+	static Handle substitute_vardecl(const Handle& vardecl,
+	                                 const HandleMap& vm);
+
+	/**
+	 * Helper for partial_substitute. Given the variable
+	 * declaration and a mapping from variables to values,
+	 * this performs substitution over all bodies(??),
+	 * consuming ill quotations if necessary.
+	 *
+	 * XXX why does it say "all bodies"? How can there be more
+	 * one body?
+	 *
+	 * XXX what is an "ill quotation"?
+	 */
+	HandleSeq partial_substitute_bodies(const Handle& nvardecl,
+	                                    const HandleMap& vm) const;
+
+	/**
+	 * Given a variable declaration, a body, and a list of values,
+	 * perform substitution on the body, replacing variables with values.
+	 */
+	Handle partial_substitute_body(const Handle& nvardecl,
+	                               const Handle& body,
+	                               const HandleSeq& values) const;
+
+	/**
+	 * Return true if the variable declaration of local_scope is a
+	 * variable of variables wrapped in a UnquoteLink.
+	 */
+	static bool is_bound_to_ancestor(const Variables& variables,
+	                                 const Handle& local_scope);
 
 public:
 	RewriteLink(const HandleSeq&, Type=REWRITE_LINK);
@@ -74,59 +112,32 @@ public:
 	Handle alpha_conversion(const HandleMap& vsmap) const;
 
 	/**
-	 * Partially substitute a scope link. Given a partial mapping
-	 * between variables and values, generate the scope link resulting
-	 * from the replacement of the variables by the values. If no
-	 * variable is left (i.e. if the provided mapping is complete),
-	 * the resulting atom is still a scope link (or inherited) with an
-	 * empty variable declaration.
+	 * Perform a substitution of values for variables. Given a mapping
+	 * between variables and values, generate the RewriteLink that
+	 * would result from the replacement of the variables by the values.
+	 * If all variables are substituted, then the returned atom will
+	 * still be a RewriteLink, but with an empty variable declaration.
+	 *
+	 * XXX why is this called "partial"??
 	 */
 	Handle partial_substitute(const HandleMap& vm) const;
 
 	/**
-	 * Like above but uses a sequence of values instead of variable to
-	 * value mapping.
+	 * Like the above, but uses a sequence of values, presumed to be
+	 * in the same order as the variable declarations.
 	 */
 	Handle partial_substitute(const HandleSeq& values) const;
-	
-	/**
-	 * Helper for partial_substitute. Given a partial mapping from
-	 * variables to values, which of them being variables themselves,
-	 * generate a new variable declaration with these new variables.
-	 */
-	Handle partial_substitute_vardecl(const HandleMap& vm) const;
-	static Handle substitute_vardecl(const Handle& vardecl,
-	                                 const HandleMap& vm);
 
 	/**
-	 * Helper for partial_substitute. Given the resulting variable
-	 * declaration and a partial mapping from variables to values,
-	 * perform partial substitution over all bodies, consuming ill
-	 * quotations if necessary.
-	 */
-	HandleSeq partial_substitute_bodies(const Handle& nvardecl,
-	                                    const HandleMap& vm) const;
-
-	/**
-	 * Like above but take a sequence of values instead of variable to
-	 * value mapping.
+	 * Like the above, but accepting a sequence of values.
 	 */
 	HandleSeq partial_substitute_bodies(const Handle& nvardecl,
 	                                    const HandleSeq& values) const;
 
 	/**
-	 * Given a new variable declaration, a body of that scope, and a
-	 * list of values. Perform the partial substitution over that body
-	 * with these values.
-	 */
-	Handle partial_substitute_body(const Handle& nvardecl,
-	                               const Handle& body,
-	                               const HandleSeq& values) const;
-	
-	/**
 	 * Used by partial_substitute.
 	 *
-	 * After substitution remaining quotations might be useless or
+	 * After substitution, remaining quotations might be useless or
 	 * harmful, which might be the case if they deprive a nested
 	 * RewriteLink from hiding supposedly hidden variables, consume
 	 * them.
@@ -155,13 +166,6 @@ public:
 	                                     bool escape=false /* ignore the next
 	                                                        * quotation
 	                                                        * consumption */);
-
-	/**
-	 * Return true if the variable declaration of local_scope is a
-	 * variable of variables wrapped in a UnquoteLink.
-	 */
-	static bool is_bound_to_ancestor(const Variables& variables,
-	                                 const Handle& local_scope);
 
 	static Handle factory(const Handle&);
 };
