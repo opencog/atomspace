@@ -30,7 +30,7 @@ using namespace opencog;
 #define al _as.add_link
 #define an _as.add_node
 
-// Test ScopeLink.
+// Test LambdaLink.
 //
 class ComposeLinkUTest :  public CxxTest::TestSuite
 {

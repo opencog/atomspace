@@ -85,14 +85,14 @@ Handle ComposeLink::execute(AtomSpace* as) const
 	Handle g = getOutgoingAtom(0);
 	Handle f = getOutgoingAtom(1);
 	RewriteLinkPtr g_sc = RewriteLinkCast(g);
-	OC_ASSERT(g_sc != nullptr, "First outgoing must be a scope");
+	OC_ASSERT(g_sc != nullptr, "First atom must be a RewriteLink");
 
 	const Variables& g_vars = g_sc->get_variables();
 	if (g_vars.size() == 1) {
 		// g has one variable only, thus we expect f to be a scope as
 		// opposed to a list of scopes
 		RewriteLinkPtr f_sc = RewriteLinkCast(f);
-		OC_ASSERT(f_sc != nullptr, "Second outgoing must be a scope");
+		OC_ASSERT(f_sc != nullptr, "Second atom must be a RewriteLink");
 
 		return compose(f_sc->get_vardecl(), {f_sc->get_body()});
 	}

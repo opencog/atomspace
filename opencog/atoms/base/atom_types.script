@@ -254,7 +254,7 @@ REWRITE_LINK <- SCOPE_LINK
 // the ability to substitute values for those variables.  This is
 // exactly the standard definition from lambda calc/functional
 // programming: an anonymous function declaration.
-LAMBDA_LINK <- SCOPE_LINK
+LAMBDA_LINK <- REWRITE_LINK
 
 // PutLinks perform a beta-reduction when executed; i.e. they get
 // beta-reduced when they are executed. PutLinks are the same thing as
