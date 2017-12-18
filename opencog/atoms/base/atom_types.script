@@ -265,7 +265,7 @@ PUT_LINK <- SCOPE_LINK
 // serves as a base class for the various pattern-matching links, since
 // pattern matching only makes sense when the patterns are written in
 // prenex normal form.
-PRENEX_LINK <- SCOPE_LINK
+PRENEX_LINK <- REWRITE_LINK
 
 // Pattern definition, pattern grounding/satisfaction.
 // The PatternLink implements the base class holding a pattern that
