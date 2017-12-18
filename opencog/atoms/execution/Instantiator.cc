@@ -26,6 +26,7 @@
 #include <opencog/atoms/core/PutLink.h>
 #include <opencog/atoms/execution/ExecutionOutputLink.h>
 #include <opencog/atoms/execution/EvaluationLink.h>
+#include <opencog/atoms/execution/MapLink.h>
 #include <opencog/atoms/reduct/FoldLink.h>
 #include <opencog/query/BindLinkAPI.h>
 
@@ -326,6 +327,22 @@ Handle Instantiator::walk_tree(const Handle& expr, bool silent)
 				_as->remove_atom(h, true);
 		}
 		return Handle::UNDEFINED;
+	}
+
+	if (MAP_LINK == t)
+	{
+		if (_eager)
+		{
+			HandleSeq oset_results;
+			walk_sequence(oset_results, expr->getOutgoingSet(), silent);
+			MapLinkPtr mlp(MapLinkCast(createLink(oset_results, t)));
+			return mlp->execute(_as);
+		}
+		else
+		{
+			MapLinkPtr mlp(MapLinkCast(expr));
+			return mlp->execute(_as);
+		}
 	}
 
 	// Fire any other function links, not handled above.
