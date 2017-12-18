@@ -23,7 +23,7 @@
 #ifndef _OPENCOG_PUT_LINK_H
 #define _OPENCOG_PUT_LINK_H
 
-#include <opencog/atoms/core/ScopeLink.h>
+#include <opencog/atoms/core/RewriteLink.h>
 
 namespace opencog
 {
@@ -47,7 +47,7 @@ namespace opencog
  * reduction.  The reduce() method only performs the substitution; it
  * does not attempt to execute or evaluate the resulting expression.
  */
-class PutLink : public ScopeLink
+class PutLink : public RewriteLink
 {
 protected:
 	/// The values that are to be placed into the body.

@@ -259,7 +259,7 @@ LAMBDA_LINK <- REWRITE_LINK
 // PutLinks perform a beta-reduction when executed; i.e. they get
 // beta-reduced when they are executed. PutLinks are the same thing as
 // beta-redexes.
-PUT_LINK <- SCOPE_LINK
+PUT_LINK <- REWRITE_LINK
 
 // The PrenexLink is a ScopeLink that is in prenex normal form.  It
 // serves as a base class for the various pattern-matching links, since

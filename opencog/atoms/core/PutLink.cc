@@ -30,19 +30,19 @@
 using namespace opencog;
 
 PutLink::PutLink(const HandleSeq& oset, Type t)
-    : ScopeLink(oset, t)
+    : RewriteLink(oset, t)
 {
 	init();
 }
 
 PutLink::PutLink(const Handle& a)
-    : ScopeLink(PUT_LINK, a)
+    : RewriteLink(PUT_LINK, a)
 {
 	init();
 }
 
 PutLink::PutLink(const Link& l)
-    : ScopeLink(l)
+    : RewriteLink(l)
 {
 	init();
 }
@@ -250,6 +250,7 @@ Handle PutLink::do_reduce(void) const
 {
 	Handle bods(_body);
 	Variables vars(_varlist);
+	RewriteLinkPtr subs(RewriteLinkCast(get_handle()));
 
 	// Resolve the body, if needed. That is, if the body is
 	// given in a defintion, get that defintion.
@@ -273,6 +274,7 @@ Handle PutLink::do_reduce(void) const
 		bods = lam->get_body();
 		vars = lam->get_variables();
 		btype = bods->get_type();
+		subs = lam;
 	}
 
 	// Now get the values that we will plug into the body.
@@ -314,7 +316,8 @@ Handle PutLink::do_reduce(void) const
 			oset.emplace_back(_values);
 			try
 			{
-				return vars.substitute(bods, oset, /* silent */ true);
+				// return vars.substitute(bods, oset, /* silent */ true);
+				return subs->substitute(oset);
 			}
 			catch (const TypeCheckException& ex)
 			{
@@ -330,7 +333,8 @@ Handle PutLink::do_reduce(void) const
 			oset.emplace_back(h);
 			try
 			{
-				bset.emplace_back(vars.substitute(bods, oset, /* silent */ true));
+				// bset.emplace_back(vars.substitute(bods, oset, /* silent */ true));
+				bset.emplace_back(subs->substitute(oset));
 			}
 			catch (const TypeCheckException& ex) {}
 		}
@@ -345,7 +349,8 @@ Handle PutLink::do_reduce(void) const
 		const HandleSeq& oset = _values->getOutgoingSet();
 		try
 		{
-			return vars.substitute(bods, oset, /* silent */ true);
+			// return vars.substitute(bods, oset, /* silent */ true);
+			return subs->substitute(oset);
 		}
 		catch (const TypeCheckException& ex)
 		{
@@ -364,7 +369,8 @@ Handle PutLink::do_reduce(void) const
 		const HandleSeq& oset = h->getOutgoingSet();
 		try
 		{
-			bset.emplace_back(vars.substitute(bods, oset, /* silent */ true));
+			// bset.emplace_back(vars.substitute(bods, oset, /* silent */ true));
+			bset.emplace_back(subs->substitute(oset));
 		}
 		catch (const TypeCheckException& ex) {}
 	}
