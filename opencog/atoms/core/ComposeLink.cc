@@ -129,9 +129,9 @@ Handle ComposeLink::compose(const Handle& nvardecl,
 {
 	Handle g = getOutgoingAtom(0);
 	RewriteLinkPtr g_sc = RewriteLinkCast(g);
-	OC_ASSERT(g_sc != nullptr, "First outgoing must be a scope");
+	OC_ASSERT(g_sc != nullptr, "First atom must be a RewriteLink");
 
-	HandleSeq comp_hs = g_sc->partial_substitute_bodies(nvardecl, values);
+	HandleSeq comp_hs = g_sc->substitute_bodies(nvardecl, values);
 
 	// Insert fvardecl if the outgoings if defined
 	if (nvardecl)

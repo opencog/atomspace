@@ -117,13 +117,13 @@ Handle RewriteLink::alpha_conversion(const HandleMap& vsmap) const
 
 /* ================================================================= */
 
-Handle RewriteLink::partial_substitute(const HandleMap& vm) const
+Handle RewriteLink::substitute(const HandleMap& vm) const
 {
 	// Perform substitution over the variable declaration
-	Handle nvardecl = partial_substitute_vardecl(vm);
+	Handle nvardecl = substitute_vardecl(vm);
 
 	// Perform substitution over the bodies
-	HandleSeq hs = partial_substitute_bodies(nvardecl, vm);
+	HandleSeq hs = substitute_bodies(nvardecl, vm);
 
 	// Filter vardecl
 	nvardecl = filter_vardecl(nvardecl, hs);
@@ -136,26 +136,26 @@ Handle RewriteLink::partial_substitute(const HandleMap& vm) const
 	return createLink(hs, get_type());
 }
 
-HandleSeq RewriteLink::partial_substitute_bodies(const Handle& nvardecl,
+HandleSeq RewriteLink::substitute_bodies(const Handle& nvardecl,
                                                const HandleMap& vm) const
 {
 	const Variables& variables = get_variables();
-	return partial_substitute_bodies(nvardecl, variables.make_values(vm));
+	return substitute_bodies(nvardecl, variables.make_values(vm));
 }
 
-HandleSeq RewriteLink::partial_substitute_bodies(const Handle& nvardecl,
+HandleSeq RewriteLink::substitute_bodies(const Handle& nvardecl,
                                                const HandleSeq& values) const
 {
 	HandleSeq hs;
 	for (size_t i = (get_vardecl() ? 1 : 0); i < get_arity(); ++i)
 	{
 		const Handle& h = getOutgoingAtom(i);
-		hs.push_back(partial_substitute_body(nvardecl, h, values));
+		hs.push_back(substitute_body(nvardecl, h, values));
 	}
 	return hs;
 }
 
-Handle RewriteLink::partial_substitute_body(const Handle& nvardecl,
+Handle RewriteLink::substitute_body(const Handle& nvardecl,
                                           const Handle& body,
                                           const HandleSeq& values) const
 {
@@ -164,7 +164,7 @@ Handle RewriteLink::partial_substitute_body(const Handle& nvardecl,
 	return nbody;
 }
 
-Handle RewriteLink::partial_substitute_vardecl(const HandleMap& vm) const
+Handle RewriteLink::substitute_vardecl(const HandleMap& vm) const
 {
 	if (not get_vardecl())
 		return Handle::UNDEFINED;

@@ -47,17 +47,17 @@ protected:
 	void init(void);
 
 	/**
-	 * Helper for partial_substitute. Given a mapping from
+	 * Helper for substitute. Given a mapping from
 	 * variables to values, some of which might be variables
 	 * themselves, this generates a new variable declaration
 	 * with using the new, substituted variables.
 	 */
-	Handle partial_substitute_vardecl(const HandleMap& vm) const;
+	Handle substitute_vardecl(const HandleMap& vm) const;
 	static Handle substitute_vardecl(const Handle& vardecl,
 	                                 const HandleMap& vm);
 
 	/**
-	 * Helper for partial_substitute. Given the variable
+	 * Helper for substitute. Given the variable
 	 * declaration and a mapping from variables to values,
 	 * this performs substitution over all bodies(??),
 	 * consuming ill quotations if necessary.
@@ -67,14 +67,14 @@ protected:
 	 *
 	 * XXX what is an "ill quotation"?
 	 */
-	HandleSeq partial_substitute_bodies(const Handle& nvardecl,
+	HandleSeq substitute_bodies(const Handle& nvardecl,
 	                                    const HandleMap& vm) const;
 
 	/**
 	 * Given a variable declaration, a body, and a list of values,
 	 * perform substitution on the body, replacing variables with values.
 	 */
-	Handle partial_substitute_body(const Handle& nvardecl,
+	Handle substitute_body(const Handle& nvardecl,
 	                               const Handle& body,
 	                               const HandleSeq& values) const;
 
@@ -117,25 +117,23 @@ public:
 	 * would result from the replacement of the variables by the values.
 	 * If all variables are substituted, then the returned atom will
 	 * still be a RewriteLink, but with an empty variable declaration.
-	 *
-	 * XXX why is this called "partial"??
 	 */
-	Handle partial_substitute(const HandleMap& vm) const;
+	virtual Handle substitute(const HandleMap& vm) const;
 
 	/**
 	 * Like the above, but uses a sequence of values, presumed to be
 	 * in the same order as the variable declarations.
 	 */
-	Handle partial_substitute(const HandleSeq& values) const;
+	// virtual Handle substitute(const HandleSeq& values) const;
 
 	/**
 	 * Like the above, but accepting a sequence of values.
 	 */
-	HandleSeq partial_substitute_bodies(const Handle& nvardecl,
+	HandleSeq substitute_bodies(const Handle& nvardecl,
 	                                    const HandleSeq& values) const;
 
 	/**
-	 * Used by partial_substitute.
+	 * Used by substitute.
 	 *
 	 * After substitution, remaining quotations might be useless or
 	 * harmful, which might be the case if they deprive a nested
