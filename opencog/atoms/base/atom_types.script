@@ -339,6 +339,7 @@ EXTENSIONAL_EQUIVALENCE_LINK <- EQUIVALENCE_LINK
 ASSOCIATIVE_LINK <- ORDERED_LINK
 
 // Mystery link.  Lexical attraction???
+// Can we nuke this ??
 ATTRACTION_LINK <- ORDERED_LINK
 
 // To be used with PredicateNode
@@ -362,15 +363,8 @@ GROUNDED_SCHEMA_NODE <- SCHEMA_NODE,GROUNDED_PROCEDURE_NODE
 
 // PredicateNodes are TV-valued.  They must return a TV.
 PREDICATE_NODE <- PROCEDURE_NODE
-// Cannot be both a node and a link! Have to be one or the other!
-DEFINED_PREDICATE_NODE <- PREDICATE_NODE// ,EVALUATABLE_LINK
+DEFINED_PREDICATE_NODE <- PREDICATE_NODE
 GROUNDED_PREDICATE_NODE <- PREDICATE_NODE,GROUNDED_PROCEDURE_NODE
-
-// Huh?? XXX What are these? I don't understand them Do we use them
-// anywhere? I think the first is same as ExecutionOutputLink, right?
-// Not clear how a schema can be evaluated ...
-// SCHEMA_EXECUTION_LINK <- INHERITANCE_LINK
-// SCHEMA_EVALUATION_LINK <- SCHEMA_EXECUTION_LINK
 
 // ==============================================================
 // Types and type constructors.
