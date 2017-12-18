@@ -18,10 +18,6 @@ TARGET_LINK_LIBRARIES(atomspace
 	${NO_AS_NEEDED}
 	attentionbank
 	atomcore
-	lambda
-	clearbox
-	atomutils
-	atombase
 	truthvalue
 	${COGUTIL_LIBRARY}
 	${Boost_THREAD_LIBRARY}
