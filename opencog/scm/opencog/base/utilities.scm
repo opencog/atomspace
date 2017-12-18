@@ -45,7 +45,6 @@
 ; -- cartesian-prod-list-only -- Alternative version of cartesian-prod.
 ; -- bool->tv -- Convert #t to TRUE_TV and #f to FALSE_TV
 ; -- tv->bool -- Convert TRUE_TV to #t, anything else to #f
-; -- cog-equal? -- Test equality of 2 atoms and returns TRUE_TV/FALSE_TV
 ; -- max-element-by-key -- Get maximum element in a list
 ; -- min-element-by-key -- Get maximum element in a list
 ; -- cog-push-atomspace -- Create a temporary atomspace.
@@ -1029,18 +1028,6 @@
 
 ; ---------------------------------------------------------------------
 
-; XXX The below should be removed from the geeneric opencog utilities,
-; and should be copied directly into the code that actually needs this.
-(define-public (cog-equal? atom-1 atom-2)
-"
-  Checks whether two nodes are equal. If they are equal then it will return
-  TRUE_TV else it returns FALSE_TV.
-"
-    (bool->tv (equal? atom-1 atom-2))
-)
-
-; ---------------------------------------------------------------------
-
 (define-public (min-element-by-key lyst fun)
 "
  min-element-by-key LIST FUN
@@ -1298,10 +1285,8 @@
 'filter-hypergraph
 'cartesian-prod
 'cartesian-prod-list-only
-'approx-eq?
 'bool->tv
 'tv->bool
-'cog-equal?
 'min-element-by-key
 'max-element-by-key
 'cog-atomspace-stack
