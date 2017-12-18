@@ -147,7 +147,8 @@ HandleSeq RewriteLink::partial_substitute_bodies(const Handle& nvardecl,
                                                const HandleSeq& values) const
 {
 	HandleSeq hs;
-	for (size_t i = (get_vardecl() ? 1 : 0); i < get_arity(); ++i) {
+	for (size_t i = (get_vardecl() ? 1 : 0); i < get_arity(); ++i)
+	{
 		const Handle& h = getOutgoingAtom(i);
 		hs.push_back(partial_substitute_body(nvardecl, h, values));
 	}
@@ -178,8 +179,10 @@ Handle RewriteLink::substitute_vardecl(const Handle& vardecl,
 
 	// Base cases
 
-	if (t == VARIABLE_NODE) {
+	if (t == VARIABLE_NODE)
+	{
 		auto it = vm.find(vardecl);
+
 		// Only substitute if the variable is substituted by another variable
 		if (it == vm.end())
 			return vardecl;
@@ -192,8 +195,10 @@ Handle RewriteLink::substitute_vardecl(const Handle& vardecl,
 
 	HandleSeq oset;
 
-	if (t == VARIABLE_LIST) {
-		for (const Handle& h : vardecl->getOutgoingSet()) {
+	if (t == VARIABLE_LIST)
+	{
+		for (const Handle& h : vardecl->getOutgoingSet())
+		{
 			Handle nh = substitute_vardecl(h, vm);
 			if (nh)
 				oset.push_back(nh);
@@ -201,14 +206,19 @@ Handle RewriteLink::substitute_vardecl(const Handle& vardecl,
 		if (oset.empty())
 			return Handle::UNDEFINED;
 	}
-	else if (t == TYPED_VARIABLE_LINK) {
+	else if (t == TYPED_VARIABLE_LINK)
+	{
 		Handle new_var = substitute_vardecl(vardecl->getOutgoingAtom(0), vm);
-		if (new_var) {
+		if (new_var)
+		{
 			oset.push_back(new_var);
 			oset.push_back(vardecl->getOutgoingAtom(1));
-		} else return Handle::UNDEFINED;
+		}
+		else
+			return Handle::UNDEFINED;
 	}
-	else {
+	else
+	{
 		OC_ASSERT(false, "Not implemented");
 	}
 	return createLink(oset, t);
@@ -219,7 +229,8 @@ Handle RewriteLink::consume_ill_quotations() const
 	Handle vardecl = get_vardecl();
 	const Variables& variables = get_variables();
 	HandleSeq nouts;
-	for (size_t i = (get_vardecl() ? 1 : 0); i < get_arity(); ++i) {
+	for (size_t i = (get_vardecl() ? 1 : 0); i < get_arity(); ++i)
+	{
 		Handle nbody = consume_ill_quotations(variables, getOutgoingAtom(i));
 		nouts.push_back(nbody);
 		// If the new body has terms with free variables but no
