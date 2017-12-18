@@ -80,10 +80,8 @@ public:
 	virtual ~FunctionLink() {}
 
 	virtual Handle execute(AtomSpace* = nullptr) const;
-	static Handle do_execute(AtomSpace*, const Handle&);
 
 	static Handle factory(const Handle&);
-	static FunctionLinkPtr castfactory(const Handle&);
 };
 
 static inline FunctionLinkPtr FunctionLinkCast(const Handle& h)

@@ -71,26 +71,6 @@ Handle FunctionLink::execute(AtomSpace* as) const
 		classserver().getTypeName(get_type()).c_str());
 }
 
-Handle FunctionLink::do_execute(AtomSpace* as, const Handle& h)
-{
-	FunctionLinkPtr flp(castfactory(h));
-	return flp->execute(as);
-}
-
-FunctionLinkPtr FunctionLink::castfactory(const Handle& h)
-{
-	// If h is of the right form already, its just a matter of calling
-	// it.  Otherwise, we have to create
-	FunctionLinkPtr flp(FunctionLinkCast(h));
-	if (flp) return flp;
-
-	if (nullptr == h)
-		throw RuntimeException(TRACE_INFO, "Not executable!");
-
-	auto fact = classserver().getFactory(h->get_type());
-	return FunctionLinkCast((*fact)(h));
-}
-
 DEFINE_LINK_FACTORY(FunctionLink, FUNCTION_LINK);
 
 /* ===================== END OF FILE ===================== */
