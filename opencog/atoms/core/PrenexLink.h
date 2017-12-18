@@ -31,11 +31,14 @@ namespace opencog
  *  @{
  */
 
-/// The PrenexLink extends the ScopeLink class to add a large variety
-/// of methods to rewrite various parts of the ScopeLink in various
-/// ways.  These are used by the backward and foreward chainers to
-/// edit and create PatternLinks on the fly, thus allowing different
-/// kinds of queries to be generated and run as chaining proceeds.
+/// The PrenexLink extends the RewriteLink class in such a way that
+/// the only allowed rewrites result in a link in that is in prenex
+/// form, that is, with all variable declarations out in front,
+/// and never within the body.
+///
+/// This is used primarily to ensure that PatternLinks remain in
+/// prenex form, even when being rewritten. PatternLinks must have
+/// all avraible declarations out in front, in order to work.
 ///
 class PrenexLink;
 typedef std::shared_ptr<PrenexLink> PrenexLinkPtr;

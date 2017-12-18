@@ -26,7 +26,7 @@
 #include <unordered_map>
 
 #include <opencog/atoms/core/Quotation.h>
-#include <opencog/atoms/core/RewriteLink.h>
+#include <opencog/atoms/core/PrenexLink.h>
 #include <opencog/atoms/core/VariableList.h>
 #include <opencog/atoms/pattern/Pattern.h>
 #include <opencog/query/PatternMatchCallback.h>
@@ -76,7 +76,7 @@ namespace opencog
 /// link, and return a truth value.
 class PatternLink;
 typedef std::shared_ptr<PatternLink> PatternLinkPtr;
-class PatternLink : public RewriteLink
+class PatternLink : public PrenexLink
 {
 protected:
 	// The pattern that is specified by this link.

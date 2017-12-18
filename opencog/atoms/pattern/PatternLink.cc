@@ -161,7 +161,7 @@ void PatternLink::init(void)
 /// It assumes that the variables have already been correctly extracted
 /// from the body, as appropriate.
 PatternLink::PatternLink(const Variables& vars, const Handle& body)
-	: RewriteLink(HandleSeq(), PATTERN_LINK)
+	: PrenexLink(HandleSeq(), PATTERN_LINK)
 {
 	_pat.redex_name = "jit PatternLink";
 
@@ -182,7 +182,7 @@ PatternLink::PatternLink(const HandleSet& vars,
                          const GlobIntervalMap& intervalmap,
                          const HandleSeq& compo,
                          const HandleSet& opts)
-	: RewriteLink(HandleSeq(), PATTERN_LINK)
+	: PrenexLink(HandleSeq(), PATTERN_LINK)
 {
 	// First, lets deal with the vars. We have discarded the original
 	// order of the variables, and I think that's OK, because we will
@@ -249,7 +249,7 @@ PatternLink::PatternLink(const HandleSet& vars,
 /// either.  This is used only for backwards-compatibility API's.
 PatternLink::PatternLink(const HandleSet& vars,
                          const HandleSeq& clauses)
-	: RewriteLink(HandleSeq(), PATTERN_LINK)
+	: PrenexLink(HandleSeq(), PATTERN_LINK)
 {
 	_varlist.varset = vars;
 	_pat.clauses = clauses;
@@ -260,19 +260,19 @@ PatternLink::PatternLink(const HandleSet& vars,
 /* ================================================================= */
 
 PatternLink::PatternLink(const Handle& body)
-	: RewriteLink(HandleSeq({body}), PATTERN_LINK)
+	: PrenexLink(HandleSeq({body}), PATTERN_LINK)
 {
 	init();
 }
 
 PatternLink::PatternLink(const Handle& vars, const Handle& body)
-	: RewriteLink(HandleSeq({vars, body}), PATTERN_LINK)
+	: PrenexLink(HandleSeq({vars, body}), PATTERN_LINK)
 {
 	init();
 }
 
 PatternLink::PatternLink(const HandleSeq& hseq, Type t)
-	: RewriteLink(hseq, t)
+	: PrenexLink(hseq, t)
 {
 	// Type must be as expected
 	if (not classserver().isA(t, PATTERN_LINK))
@@ -289,7 +289,7 @@ PatternLink::PatternLink(const HandleSeq& hseq, Type t)
 }
 
 PatternLink::PatternLink(const Link& l)
-	: RewriteLink(l)
+	: PrenexLink(l)
 {
 	// Type must be as expected
 	Type tscope = l.get_type();
