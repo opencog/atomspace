@@ -346,7 +346,7 @@ Handle Instantiator::walk_tree(const Handle& expr, bool silent)
 			walk_sequence(oset_results, expr->getOutgoingSet(), silent);
 
 			FunctionLinkPtr flp(FunctionLinkCast(createLink(oset_results, t)));
-			return flp->execute(_as);
+			return _as->add_atom(flp->execute());
 		}
 		else
 		{
@@ -356,7 +356,7 @@ Handle Instantiator::walk_tree(const Handle& expr, bool silent)
 			// Perform substitution on all arguments before applying the
 			// function itself.
 			FunctionLinkPtr flp(FunctionLinkCast(expr));
-			return flp->execute(_as);
+			return _as->add_atom(flp->execute());
 		}
 	}
 

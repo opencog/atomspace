@@ -23,7 +23,6 @@
 
 #include <opencog/util/mt19937ar.h>
 
-#include <opencog/atomspace/AtomSpace.h>
 #include <opencog/atoms/core/NumberNode.h>
 
 #include "RandomNumber.h"
@@ -88,7 +87,7 @@ static NumberNodePtr unwrap_set(Handle h)
 }
 
 
-Handle RandomNumberLink::execute(AtomSpace * as) const
+Handle RandomNumberLink::execute() const
 {
 	NumberNodePtr nmin(unwrap_set(_outgoing[0]));
 	NumberNodePtr nmax(unwrap_set(_outgoing[1]));

@@ -23,7 +23,6 @@
 #include <sys/time.h>
 
 #include <opencog/atoms/core/NumberNode.h>
-#include <opencog/atomspace/AtomSpace.h>
 
 #include "TimeLink.h"
 
@@ -60,7 +59,7 @@ TimeLink::TimeLink(const Link &l)
 
 // ---------------------------------------------------------------
 
-Handle TimeLink::execute(AtomSpace * as) const
+Handle TimeLink::execute() const
 {
 	// time_t now = time(nullptr);
 	struct timeval tv;

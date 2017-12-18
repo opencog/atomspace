@@ -21,7 +21,6 @@
  * 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
  */
 
-#include <opencog/atomspace/AtomSpace.h>
 #include <opencog/atoms/core/NumberNode.h>
 
 #include "ArityLink.h"
@@ -54,7 +53,7 @@ ArityLink::ArityLink(const Link &l)
 
 // ---------------------------------------------------------------
 
-Handle ArityLink::execute(AtomSpace * as) const
+Handle ArityLink::execute() const
 {
 	size_t ary = 0;
 	for (Handle h : _outgoing)
@@ -62,7 +61,7 @@ Handle ArityLink::execute(AtomSpace * as) const
 		FunctionLinkPtr flp(FunctionLinkCast(h));
 		if (nullptr != flp)
 		{
-			h = flp->execute(as);
+			h = flp->execute();
 		}
 		if (h->is_link()) ary += h->get_arity();
 	}

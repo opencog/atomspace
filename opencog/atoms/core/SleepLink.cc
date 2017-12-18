@@ -26,7 +26,6 @@
 #include <sys/time.h>
 
 #include <opencog/atoms/core/NumberNode.h>
-#include <opencog/atomspace/AtomSpace.h>
 
 #include "SleepLink.h"
 
@@ -68,7 +67,7 @@ SleepLink::SleepLink(const Link &l)
 
 // ---------------------------------------------------------------
 
-Handle SleepLink::execute(AtomSpace * as) const
+Handle SleepLink::execute() const
 {
 	Handle time(_outgoing[0]);
 	FunctionLinkPtr flp(FunctionLinkCast(time));

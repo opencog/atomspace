@@ -65,7 +65,7 @@ FunctionLink::FunctionLink(const Link& l)
 	init();
 }
 
-Handle FunctionLink::execute(AtomSpace* as) const
+Handle FunctionLink::execute() const
 {
 	throw RuntimeException(TRACE_INFO, "Not executable: %s\n",
 		classserver().getTypeName(get_type()).c_str());

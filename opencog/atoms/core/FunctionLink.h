@@ -30,8 +30,6 @@ namespace opencog
 /** \addtogroup grp_atomspace
  *  @{
  */
-class AtomSpace;
-
 /**
  * The FunctionLink provides an important method: execute().
  * The execute() method performs delta-reduction on this atom, and
@@ -79,7 +77,7 @@ public:
 	FunctionLink(const Link& l);
 	virtual ~FunctionLink() {}
 
-	virtual Handle execute(AtomSpace* = nullptr) const;
+	virtual Handle execute() const;
 
 	static Handle factory(const Handle&);
 };

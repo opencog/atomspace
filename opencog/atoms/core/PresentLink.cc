@@ -22,7 +22,6 @@
  */
 
 #include <opencog/util/mt19937ar.h>
-#include <opencog/atomspace/AtomSpace.h>
 
 #include "PresentLink.h"
 

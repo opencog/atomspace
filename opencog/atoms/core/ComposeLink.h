@@ -66,10 +66,8 @@ public:
 
 	/**
 	 * TODO: explain what it does
-	 *
-	 * TODO: do we really need to support the AtomSpace? Probably not.
 	 */
-	virtual Handle execute(AtomSpace* = nullptr) const;
+	virtual Handle execute() const;
 
 	/**
 	 * Given a new variable declaration and a sequence of values to
