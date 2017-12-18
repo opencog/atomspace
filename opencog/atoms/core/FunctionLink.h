@@ -34,8 +34,18 @@ class AtomSpace;
 
 /**
  * The FunctionLink provides an important method: execute().
- * The execute() method executes the given expression, and returns
- * a Handle resulting from the execution.
+ * The execute() method performs delta-reduction on this atom, and
+ * returns a Handle resulting from the execution.
+ *
+ * Here, "delta-reduction" is the name for the idea that certain Links
+ * can be replaced by other Atoms that are operationally equivalent
+ * but simpler.  For example, the delta-reduction of (Plus 2 2) is 4.
+ * Delta-reduction can be understood in several ways. From the viewpoint
+ * of term-rewriting, or inference or theorem-proving, a delta-reduction
+ * is a (usually infinite) set of inference rules for reducing the
+ * intial expression to the final expression. From the viewpoint of
+ * proceedural computation, it just means "perform this computation
+ * on this input", viz. "execute this function".
  *
  * The FunctionLink is meant to be a base class for any link type
  * that behaves like a function; i.e. can be executed.  Observe that
@@ -43,10 +53,11 @@ class AtomSpace;
  * counter-intuitive, and deserves an explanation, so here it is:
  * All link types inheriting from this class will always, by definition,
  * have their outgoing set be the arguments to that function. Think of
- * PlusLink, for example.  Having a lambda with variable declarations
- * in there would just be weird and create confusion.  If the arguments
- * to PlusLink happen to include a variable, that variable is necessarily
- * free; thus, this class dervies from FreeLink.
+ * PlusLink, for example.  We don't want to insert a lambda with
+ * variable declarations in there; that would just be weird and create
+ * confusion.  If the arguments to PlusLink happen to include a
+ * variable, that variable is necessarily free; thus, this class
+ * dervies from FreeLink.
  *
  * Note that this class must NOT be used for user-defined functions;
  * users should use the LambdaLink for that.
@@ -62,7 +73,7 @@ protected:
 	FunctionLink(Type, const Handle& a, const Handle& b);
 
 public:
-	// XXX Need to make this public, so that the factory can call it!
+	// Sadly, need to make this public, else the factory code fails.
 	FunctionLink(const HandleSeq& oset, Type = FUNCTION_LINK);
 
 	FunctionLink(const Link& l);
