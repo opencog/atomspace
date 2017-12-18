@@ -124,7 +124,7 @@ public:
 	 * Like the above, but uses a sequence of values, presumed to be
 	 * in the same order as the variable declarations.
 	 */
-	// virtual Handle substitute(const HandleSeq& values) const;
+	virtual Handle substitute(const HandleSeq& values) const;
 
 	/**
 	 * Like the above, but accepting a sequence of values.

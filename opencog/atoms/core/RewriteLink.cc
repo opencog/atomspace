@@ -136,6 +136,13 @@ Handle RewriteLink::substitute(const HandleMap& vm) const
 	return createLink(hs, get_type());
 }
 
+Handle RewriteLink::substitute(const HandleSeq& vals) const
+{
+	// XXX this implementation is probably wrong.
+	// Its copied from Lambda.
+	return get_variables().substitute(_body, vals);
+}
+
 HandleSeq RewriteLink::substitute_bodies(const Handle& nvardecl,
                                                const HandleMap& vm) const
 {

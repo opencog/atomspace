@@ -31,9 +31,7 @@ namespace opencog
  *  @{
  */
 
-/// The LambdaLink is a RewriteLink that implements beta-reduction.
-/// It does little more than to provide a method that subsitutes values
-/// into the variables bound by RewriteLink.
+/// The LambdaLink is a RewriteLink that ... seems not to do anything.
 ///
 class LambdaLink : public RewriteLink
 {
@@ -44,14 +42,6 @@ public:
 	LambdaLink(const HandleSeq&, Type=LAMBDA_LINK);
 	LambdaLink(const Handle& varcdecls, const Handle& body);
 	LambdaLink(const Link &l);
-
-	// Take the list of values `vals`, and substitute them in for the
-	// variables in the body of this lambda. The values must satisfy all
-	// type restrictions, else an exception will be thrown.
-	Handle substitute(const HandleSeq& vals) const
-	{
-		return get_variables().substitute(_body, vals);
-	}
 
 	static Handle factory(const Handle&);
 };
