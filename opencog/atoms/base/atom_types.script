@@ -244,13 +244,17 @@ DEFINE_LINK <- UNIQUE_LINK
 // restrictions on the variables.
 SCOPE_LINK <- ORDERED_LINK
 
+// The RewriteLink is a ScopeLink with a large number of methods
+// that perform various different kinds of re-writing on the ScopeLink.
+REWRITE_LINK <- SCOPE_LINK
+
 // A LambdaLink is a link whose bound variables may be substituted,
 // that is, may be beta-reduced. It can be thought of as not only a
 // variable declaration (which is what ScopeLink does) but also has
 // the ability to substitute values for those variables.  This is
 // exactly the standard definition from lambda calc/functional
 // programming: an anonymous function declaration.
-LAMBDA_LINK <- SCOPE_LINK
+LAMBDA_LINK <- REWRITE_LINK
 
 // PutLinks perform a beta-reduction when executed; i.e. they get
 // beta-reduced when they are executed. PutLinks are the same thing as
@@ -261,7 +265,7 @@ PUT_LINK <- SCOPE_LINK
 // serves as a base class for the various pattern-matching links, since
 // pattern matching only makes sense when the patterns are written in
 // prenex normal form.
-PRENEX_LINK <- SCOPE_LINK
+PRENEX_LINK <- REWRITE_LINK
 
 // Pattern definition, pattern grounding/satisfaction.
 // The PatternLink implements the base class holding a pattern that

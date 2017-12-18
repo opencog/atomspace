@@ -1,0 +1,268 @@
+/*
+ * tests/atoms/RewriteLinkUTest.cxxtest
+ *
+ * Copyright (C) 2017 OpenCog Foundation
+ * All Rights Reserved
+ *
+ * This program is free software; you can redistribute it and/or modify
+ * it under the terms of the GNU Affero General Public License v3 as
+ * published by the Free Software Foundation and including the exceptions
+ * at http://opencog.org/wiki/Licenses
+ *
+ * This program is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ * GNU General Public License for more details.
+ *
+ * You should have received a copy of the GNU Affero General Public License
+ * along with this program; if not, write to:
+ * Free Software Foundation, Inc.,
+ * 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
+ */
+
+#include <opencog/guile/SchemeEval.h>
+#include <opencog/atoms/base/Atom.h>
+#include <opencog/atoms/base/Node.h>
+#include <opencog/atoms/base/Link.h>
+#include <opencog/atomspace/AtomSpace.h>
+#include <opencog/atoms/core/RewriteLink.h>
+#include <opencog/atoms/pattern/BindLink.h>
+
+
+#include <cxxtest/TestSuite.h>
+
+using namespace opencog;
+
+#define al _as.add_link
+#define an _as.add_node
+
+// Test RewriteLink.
+//
+class RewriteLinkUTest :  public CxxTest::TestSuite
+{
+private:
+	AtomSpace _as;
+	AtomSpace _asa;
+	AtomSpace _asb;
+	SchemeEval _eval;
+	Handle X, Y, P, Q, CT;
+
+public:
+	RewriteLinkUTest() : _eval(&_as)
+	{
+		logger().set_print_to_stdout_flag(true);
+
+		X = an(VARIABLE_NODE, "$X");
+		Y = an(VARIABLE_NODE, "$Y");
+		P = an(PREDICATE_NODE, "P");
+		Q = an(PREDICATE_NODE, "Q");
+		CT = an(TYPE_NODE, "ConceptNode");
+
+		_eval.eval("(add-to-load-path \"..\")");
+		_eval.eval("(add-to-load-path \"../../..\")");
+	}
+
+	void setUp() {}
+
+	void tearDown() {}
+
+	void test_rand_alpha_conversion();
+	void test_names_alpha_conversion();
+	void xtest_vardecl_bindlink_alpha_conversion();
+	void test_unordered();
+	void test_partial_substitute_1();
+	void test_partial_substitute_2();
+	void test_remove_ill_quotations_1();
+};
+
+#define NA _asa.add_node
+#define LA _asa.add_link
+
+#define NB _asb.add_node
+#define LB _asb.add_link
+
+// Test RewriteLink::alpha_conversion with no arguments
+void RewriteLinkUTest::test_rand_alpha_conversion()
+{
+	logger().info("BEGIN TEST: %s", __FUNCTION__);
+
+	// Test simple RewriteLink
+	Handle hsc =
+	LA(REWRITE_LINK,
+		NA(VARIABLE_NODE, "$X"),
+		LA(AND_LINK, NA(VARIABLE_NODE, "$X")));
+
+	RewriteLinkPtr sc(RewriteLinkCast(hsc));
+	Handle scac = sc->alpha_conversion();
+
+	std::cout << "sc = " << oc_to_string(Handle(sc));
+	std::cout << "scac = " << oc_to_string(scac);
+
+	TS_ASSERT(sc->is_equal(scac));
+
+	logger().info("END TEST: %s", __FUNCTION__);
+}
+
+// Test RewriteLink::alpha_conversion with provided variable names
+void RewriteLinkUTest::test_names_alpha_conversion()
+{
+	logger().info("BEGIN TEST: %s", __FUNCTION__);
+
+	// Test simple RewriteLink
+	Handle X = NA(VARIABLE_NODE, "$X"),
+		Y = NA(VARIABLE_NODE, "$Y"),
+		hsc = LA(REWRITE_LINK, X, LA(AND_LINK, X));
+	Handle expected = createLink(REWRITE_LINK, Y, LA(AND_LINK, Y));
+
+	RewriteLinkPtr sc(RewriteLinkCast(hsc));
+	Handle result = sc->alpha_conversion(HandleMap{{X, Y}});
+
+	std::cout << "result = " << oc_to_string(result);
+	std::cout << "expected = " << oc_to_string(expected);
+
+	TS_ASSERT(content_eq(result, expected));
+
+	logger().info("END TEST: %s", __FUNCTION__);
+}
+
+// Like test_vardecl_bindlink_alpha_conversion but using a BindLink
+// instead of a RewriteLink
+void RewriteLinkUTest::xtest_vardecl_bindlink_alpha_conversion()
+{
+	logger().info("BEGIN TEST: %s", __FUNCTION__);
+
+	// Test simple RewriteLink
+	Handle X = NA(VARIABLE_NODE, "$X"),
+		Y = NA(VARIABLE_NODE, "$Y"),
+		CT = NA(TYPE_NODE, "ConceptNode"),
+		Y_vardecl = LA(TYPED_VARIABLE_LINK, Y, CT),
+		hbl = LA(BIND_LINK, LA(AND_LINK, X), LA(OR_LINK, X)),
+		expected_wo_vardecl = LA(BIND_LINK,
+		                         LA(AND_LINK, Y), LA(OR_LINK, Y)),
+		expected = LA(BIND_LINK, Y_vardecl,
+		              LA(AND_LINK, Y), LA(OR_LINK, Y));
+
+	BindLinkPtr bl(BindLinkCast(hbl));
+	Handle result_wo_vardecl = _asa.add_atom(bl->alpha_conversion({Y}));
+
+	std::cout << "result_wo_vardecl = " << oc_to_string(result_wo_vardecl);
+	std::cout << "expected_wo_vardecl = " << oc_to_string(expected_wo_vardecl);
+
+	TS_ASSERT_EQUALS(result_wo_vardecl, expected_wo_vardecl);
+
+	logger().info("END TEST: %s", __FUNCTION__);
+}
+
+// Test RewriteLink::is_equal with undordered links
+void RewriteLinkUTest::test_unordered()
+{
+	logger().info("BEGIN TEST: %s", __FUNCTION__);
+
+	Handle
+		X = NA(VARIABLE_NODE, "$X-origin"),
+		Y = NA(VARIABLE_NODE, "$Y-origin"),
+		Z = NA(VARIABLE_NODE, "$Z-origin"),
+		and1 = LA(AND_LINK, X, Y),
+		and2 = LA(AND_LINK, Z, Y),
+		vardecl = LA(VARIABLE_LIST, X, Y, Z),
+		body = LA(OR_LINK, and1, and2),
+		sc = LA(REWRITE_LINK, vardecl, body);
+
+	RewriteLinkPtr sc_p(RewriteLinkCast(sc));
+	TS_ASSERT(sc_p != nullptr);
+
+	Handle
+		alpha_X = NA(VARIABLE_NODE, "$X-alpha"),
+		alpha_Y = NA(VARIABLE_NODE, "$Y-alpha"),
+		alpha_Z = NA(VARIABLE_NODE, "$Z-alpha"),
+		alpha_and2 = LA(AND_LINK, alpha_Z, alpha_Y),
+		alpha_and1 = LA(AND_LINK, alpha_X, alpha_Y),
+		alpha_vardecl = LA(VARIABLE_LIST, alpha_X, alpha_Y, alpha_Z),
+		alpha_body = LA(OR_LINK, alpha_and1, alpha_and2),
+		alpha_sc = LA(REWRITE_LINK, alpha_vardecl, alpha_body);
+
+	std::cout << "sc = " << oc_to_string(sc);
+	std::cout << "alpha_sc = " << oc_to_string(alpha_sc);
+	
+	TS_ASSERT(sc_p->is_equal(alpha_sc));
+
+	logger().info("END TEST: %s", __FUNCTION__);
+}
+// Test RewriteLink::partial_substitute with duplicated variable names
+void RewriteLinkUTest::test_partial_substitute_1()
+{
+	logger().info("BEGIN TEST: %s", __FUNCTION__);
+
+	// Test simple RewriteLink
+	Handle X = createNode(VARIABLE_NODE, "$X"),
+		Y = createNode(VARIABLE_NODE, "$Y"),
+		Z = createNode(VARIABLE_NODE, "$Z"),
+		hsc = createLink(REWRITE_LINK,
+		                 createLink(VARIABLE_LIST, X, Y),
+		                 createLink(INHERITANCE_LINK, X, Y));
+
+	RewriteLinkPtr sc(RewriteLinkCast(hsc));
+	Handle result = sc->partial_substitute(HandleMap{{X, Z}, {Y, Z}}),
+		expected = createLink(REWRITE_LINK, Z, createLink(INHERITANCE_LINK, Z, Z));
+
+	std::cout << "result = " << oc_to_string(result);
+	std::cout << "expected = " << oc_to_string(expected);
+
+	TS_ASSERT(content_eq(result, expected));
+
+	logger().info("END TEST: %s", __FUNCTION__);
+}
+
+// Test RewriteLink::partial_substitute with no variable
+void RewriteLinkUTest::test_partial_substitute_2()
+{
+	logger().info("BEGIN TEST: %s", __FUNCTION__);
+
+	// Test simple RewriteLink
+	Handle hsc = createLink(REWRITE_LINK,
+	                        createLink(VARIABLE_LIST, X, Y),
+	                        createLink(INHERITANCE_LINK, X, Y));
+
+	RewriteLinkPtr sc(RewriteLinkCast(hsc));
+	Handle result = sc->partial_substitute(HandleMap{}),
+		expected = hsc;
+
+	std::cout << "result = " << oc_to_string(result);
+	std::cout << "expected = " << oc_to_string(expected);
+
+	TS_ASSERT(content_eq(result, expected));
+
+	logger().info("END TEST: %s", __FUNCTION__);
+}
+
+void RewriteLinkUTest::test_remove_ill_quotations_1()
+{
+	logger().info("BEGIN TEST: %s", __FUNCTION__);
+
+	// Test simple RewriteLink
+	Handle
+		gpn = createNode(GROUNDED_PREDICATE_NODE, "scm: dummy"),
+		gl = createLink(GET_LINK, X,
+		                createLink(QUOTE_LINK,
+		                           createLink(EVALUATION_LINK,
+		                                      createLink(UNQUOTE_LINK, gpn),
+		                                      createLink(UNQUOTE_LINK, X))));
+
+	// Remove the UnquoteLink wrapping gpn as it is useless, and even
+	// harmful to the pattern matcher as it makes it believe that the
+	// gpn is evaluatable
+	RewriteLinkPtr sc(RewriteLinkCast(gl));
+	Handle result = sc->consume_ill_quotations(),
+		expected = createLink(GET_LINK, X,
+		                      createLink(QUOTE_LINK,
+		                                 createLink(EVALUATION_LINK, gpn,
+		                                            createLink(UNQUOTE_LINK, X))));
+
+	std::cout << "result = " << oc_to_string(result);
+	std::cout << "expected = " << oc_to_string(expected);
+
+	TS_ASSERT(content_eq(result, expected));
+}
+
+#undef al
+#undef an

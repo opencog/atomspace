@@ -23,7 +23,7 @@
 #ifndef _OPENCOG_LAMBDA_LINK_H
 #define _OPENCOG_LAMBDA_LINK_H
 
-#include <opencog/atoms/core/ScopeLink.h>
+#include <opencog/atoms/core/RewriteLink.h>
 
 namespace opencog
 {
@@ -31,11 +31,11 @@ namespace opencog
  *  @{
  */
 
-/// The LambdaLink is a ScopeLink that implements beta-reduction.
+/// The LambdaLink is a RewriteLink that implements beta-reduction.
 /// It does little more than to provide a method that subsitutes values
-/// into the variables bound by ScopeLink.
+/// into the variables bound by RewriteLink.
 ///
-class LambdaLink : public ScopeLink
+class LambdaLink : public RewriteLink
 {
 protected:
 	LambdaLink(Type, const Handle&);

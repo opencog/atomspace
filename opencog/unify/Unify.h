@@ -242,7 +242,7 @@ public:
 	 * No other use of quotation is assumed besides the 2 above.
 	 *
 	 * TODO: apparently not used. And if it is used it should be moved
-	 * to ScopeLink.
+	 * to RewriteLink.
 	 */
 	static BindLinkPtr consume_ill_quotations(BindLinkPtr bl);
 
@@ -323,7 +323,7 @@ public:
 	 *     (GroundedSchemaNode "gsn")
 	 *     (Inheritance (Concept "$A") (Concept "B"))))
 	 *
-	 * TODO: replace by ScopeLink methods!
+	 * TODO: replace by RewriteLink methods!
 	 */
 	static Handle substitute(BindLinkPtr bl, const HandleMap& var2val,
 	                         Handle vardecl=Handle::UNDEFINED);
@@ -333,7 +333,7 @@ public:
 	 * variables that are substituted by values. If all variables are
 	 * removed it returns Handle::UNDEFINED.
 	 *
-	 * TODO: replace by ScopeLink methods!
+	 * TODO: replace by RewriteLink methods!
 	 */
 	static Handle substitute_vardecl(const Handle& vardecl,
 	                                 const HandleMap& var2val);

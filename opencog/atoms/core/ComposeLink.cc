@@ -22,7 +22,7 @@
 
 #include <opencog/atoms/base/atom_types.h>
 #include <opencog/atoms/base/ClassServer.h>
-#include <opencog/atoms/core/ScopeLink.h>
+#include <opencog/atoms/core/RewriteLink.h>
 #include <opencog/atoms/core/NumberNode.h>
 #include "ComposeLink.h"
 
@@ -84,15 +84,15 @@ Handle ComposeLink::execute(AtomSpace* as) const
 {
 	Handle g = getOutgoingAtom(0);
 	Handle f = getOutgoingAtom(1);
-	ScopeLinkPtr g_sc = ScopeLinkCast(g);
-	OC_ASSERT(g_sc != nullptr, "First outgoing must be a scope");
+	RewriteLinkPtr g_sc = RewriteLinkCast(g);
+	OC_ASSERT(g_sc != nullptr, "First atom must be a RewriteLink");
 
 	const Variables& g_vars = g_sc->get_variables();
 	if (g_vars.size() == 1) {
 		// g has one variable only, thus we expect f to be a scope as
 		// opposed to a list of scopes
-		ScopeLinkPtr f_sc = ScopeLinkCast(f);
-		OC_ASSERT(f_sc != nullptr, "Second outgoing must be a scope");
+		RewriteLinkPtr f_sc = RewriteLinkCast(f);
+		OC_ASSERT(f_sc != nullptr, "Second atom must be a RewriteLink");
 
 		return compose(f_sc->get_vardecl(), {f_sc->get_body()});
 	}
@@ -112,12 +112,12 @@ Handle ComposeLink::execute(AtomSpace* as) const
 		if (fi->get_type() == PROJECT_LINK) {
 			values.push_back(n_vars.varseq[projection_index(fi)]);
 		} else {
-			ScopeLinkPtr fi_sc = ScopeLinkCast(fi);
+			RewriteLinkPtr fi_sc = RewriteLinkCast(fi);
 			OC_ASSERT(fi_sc != nullptr);
 			// Make sure its variables have the same named as the new
 			// variable declaration
 			Handle afi = fi_sc->alpha_conversion(n_vars.varseq);
-			ScopeLinkPtr afi_sc = ScopeLinkCast(afi);
+			RewriteLinkPtr afi_sc = RewriteLinkCast(afi);
 			values.push_back(afi_sc->get_body());
 		}
 	}
@@ -128,7 +128,7 @@ Handle ComposeLink::compose(const Handle& nvardecl,
                             const HandleSeq& values) const
 {
 	Handle g = getOutgoingAtom(0);
-	ScopeLinkPtr g_sc = ScopeLinkCast(g);
+	RewriteLinkPtr g_sc = RewriteLinkCast(g);
 	OC_ASSERT(g_sc != nullptr, "First outgoing must be a scope");
 
 	HandleSeq comp_hs = g_sc->partial_substitute_bodies(nvardecl, values);
