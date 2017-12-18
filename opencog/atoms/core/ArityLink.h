@@ -32,7 +32,7 @@ namespace opencog
  */
 
 /// The ArityLink returns a NumberNode holding the arity of the wrapped
-/// atom; its zero for Nodes, and empty Links.
+/// atom; its zero for Nodes and empty Links.
 ///
 /// For example,
 ///

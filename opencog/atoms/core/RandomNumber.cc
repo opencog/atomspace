@@ -98,14 +98,7 @@ Handle RandomNumberLink::execute(AtomSpace * as) const
 
 	double ary = slope * randy.randdouble() + cept;
 
-	// XXX This is probably wrong ... if the as is null, we should
-	// probably use the atomspace that this link is in, right?
-	// We need to make a decision here and in many other places...
-	// We should probably be doing "lazy-add-to-atomsapce" ...
-	if (NULL == as)
-		return Handle(createNumberNode(ary));
-
-	return as->add_atom(createNumberNode(ary));
+	return Handle(createNumberNode(ary));
 }
 
 DEFINE_LINK_FACTORY(RandomNumberLink, RANDOM_NUMBER_LINK);

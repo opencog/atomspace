@@ -67,13 +67,7 @@ Handle ArityLink::execute(AtomSpace * as) const
 		if (h->is_link()) ary += h->get_arity();
 	}
 
-	// XXX This is probably wrong ... if the as is null, we should
-	// probably use the atomspace that this link is in, right?
-	// We need to make a decision here and in many other places...
-	if (NULL == as)
-		return Handle(createNumberNode(ary));
-
-	return as->add_atom(createNumberNode(ary));
+	return Handle(createNumberNode(ary));
 }
 
 DEFINE_LINK_FACTORY(ArityLink, ARITY_LINK)

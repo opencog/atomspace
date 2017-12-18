@@ -36,7 +36,8 @@ namespace opencog
  * https://en.wikipedia.org/wiki/Function_composition. For more info
  * see https://wiki.opencog.org/w/ComposeLink.
  */
-class ComposeLink : public FunctionLink {
+class ComposeLink : public FunctionLink
+{
 protected:
 	void check() const;
 
@@ -57,7 +58,7 @@ protected:
 	static unsigned projection_index(const Handle& projection);
 
 public:
-	// XXX Need to make this public, so that the factory can call it!
+	// Sadly, need to make this public, else the factory code fails.
 	ComposeLink(const HandleSeq oset, Type = COMPOSE_LINK);
 
 	ComposeLink(const Link& l);
@@ -66,7 +67,7 @@ public:
 	/**
 	 * TODO: explain what it does
 	 *
-	 * TODO: do we really need to support the AtomSpace?
+	 * TODO: do we really need to support the AtomSpace? Probably not.
 	 */
 	virtual Handle execute(AtomSpace* = nullptr) const;
 
