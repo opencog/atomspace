@@ -23,7 +23,6 @@
 #ifndef _OPENCOG_FOLD_LINK_H
 #define _OPENCOG_FOLD_LINK_H
 
-#include <opencog/atomspace/AtomSpace.h>
 #include <opencog/atoms/core/FunctionLink.h>
 
 namespace opencog
