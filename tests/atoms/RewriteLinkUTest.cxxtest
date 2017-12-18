@@ -70,8 +70,8 @@ public:
 	void test_names_alpha_conversion();
 	void xtest_vardecl_bindlink_alpha_conversion();
 	void test_unordered();
-	void test_partial_substitute_1();
-	void test_partial_substitute_2();
+	void test_substitute_1();
+	void test_substitute_2();
 	void test_remove_ill_quotations_1();
 };
 
@@ -188,8 +188,8 @@ void RewriteLinkUTest::test_unordered()
 
 	logger().info("END TEST: %s", __FUNCTION__);
 }
-// Test RewriteLink::partial_substitute with duplicated variable names
-void RewriteLinkUTest::test_partial_substitute_1()
+// Test RewriteLink::substitute with duplicated variable names
+void RewriteLinkUTest::test_substitute_1()
 {
 	logger().info("BEGIN TEST: %s", __FUNCTION__);
 
@@ -202,7 +202,7 @@ void RewriteLinkUTest::test_partial_substitute_1()
 		                 createLink(INHERITANCE_LINK, X, Y));
 
 	RewriteLinkPtr sc(RewriteLinkCast(hsc));
-	Handle result = sc->partial_substitute(HandleMap{{X, Z}, {Y, Z}}),
+	Handle result = sc->substitute(HandleMap{{X, Z}, {Y, Z}}),
 		expected = createLink(REWRITE_LINK, Z, createLink(INHERITANCE_LINK, Z, Z));
 
 	std::cout << "result = " << oc_to_string(result);
@@ -213,8 +213,8 @@ void RewriteLinkUTest::test_partial_substitute_1()
 	logger().info("END TEST: %s", __FUNCTION__);
 }
 
-// Test RewriteLink::partial_substitute with no variable
-void RewriteLinkUTest::test_partial_substitute_2()
+// Test RewriteLink::substitute with no variable
+void RewriteLinkUTest::test_substitute_2()
 {
 	logger().info("BEGIN TEST: %s", __FUNCTION__);
 
@@ -224,7 +224,7 @@ void RewriteLinkUTest::test_partial_substitute_2()
 	                        createLink(INHERITANCE_LINK, X, Y));
 
 	RewriteLinkPtr sc(RewriteLinkCast(hsc));
-	Handle result = sc->partial_substitute(HandleMap{}),
+	Handle result = sc->substitute(HandleMap{}),
 		expected = hsc;
 
 	std::cout << "result = " << oc_to_string(result);
