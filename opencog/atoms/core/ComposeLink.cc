@@ -80,7 +80,7 @@ ComposeLink::ComposeLink(const Link& l) : FunctionLink(l)
 	check();
 }
 
-Handle ComposeLink::execute(AtomSpace* as) const
+Handle ComposeLink::execute() const
 {
 	Handle g = getOutgoingAtom(0);
 	Handle f = getOutgoingAtom(1);

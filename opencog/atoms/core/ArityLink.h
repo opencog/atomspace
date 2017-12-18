@@ -32,7 +32,7 @@ namespace opencog
  */
 
 /// The ArityLink returns a NumberNode holding the arity of the wrapped
-/// atom; its zero for Nodes, and empty Links.
+/// atom; its zero for Nodes and empty Links.
 ///
 /// For example,
 ///
@@ -51,7 +51,7 @@ public:
 	ArityLink(const Link &l);
 
 	// Return a pointer to the atom being specified.
-	virtual Handle execute(AtomSpace* = NULL) const;
+	virtual Handle execute() const;
 
 	static Handle factory(const Handle&);
 };

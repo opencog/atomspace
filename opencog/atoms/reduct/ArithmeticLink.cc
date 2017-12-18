@@ -160,7 +160,7 @@ Handle ArithmeticLink::reorder(void) const
 
 // ===========================================================
 /// execute() -- Execute the expression
-Handle ArithmeticLink::execute(AtomSpace* as) const
+Handle ArithmeticLink::execute() const
 {
 	return delta_reduce();
 }

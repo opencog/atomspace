@@ -23,7 +23,6 @@
 #include <sys/time.h>
 
 #include <opencog/atoms/core/NumberNode.h>
-#include <opencog/atomspace/AtomSpace.h>
 
 #include "TimeLink.h"
 
@@ -60,20 +59,14 @@ TimeLink::TimeLink(const Link &l)
 
 // ---------------------------------------------------------------
 
-Handle TimeLink::execute(AtomSpace * as) const
+Handle TimeLink::execute() const
 {
 	// time_t now = time(nullptr);
 	struct timeval tv;
 	gettimeofday(&tv, nullptr);
 	double now = tv.tv_sec + 1.0e-6 * tv.tv_usec;
 
-	// XXX This is probably wrong ... if the as is null, we should
-	// probably use the atomspace that this link is in, right?
-	// We need to make a decision here and in many other places...
-	if (NULL == as)
-		return Handle(createNumberNode(now));
-
-	return as->add_atom(createNumberNode(now));
+	return Handle(createNumberNode(now));
 }
 
 DEFINE_LINK_FACTORY(TimeLink, TIME_LINK)
