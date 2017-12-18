@@ -140,7 +140,7 @@ public:
 	 * RewriteLink from hiding supposedly hidden variables, consume
 	 * them.
 	 *
-	 * Specifically this code makes 2 assumptions
+	 * Specifically this code makes 3 assumptions
 	 *
 	 * 1. LocalQuotes in front root level And, Or or Not links on the
 	 *    pattern body are not consumed because they are supposedly
@@ -156,6 +156,27 @@ public:
 	 *    handling by the pattern matcher.
 	 *
 	 * No other use of quotation is assumed besides the 3 above.
+	 *
+	 * Examples:
+	 *
+	 * 1. Remove UnquoteLink wrapping around a closed term. Assuming
+	 * the current link is
+	 *
+	 * Get
+	 *   Variable "$X"
+	 *   Quote
+	 *     Evaluation
+	 *       Unquote GroundedSchema "scm: dummy"
+	 *       Unquote Variable "$X"
+	 *
+	 * then applying this function returns
+	 *
+	 * Get
+	 *   Variable "$X"
+	 *   Quote
+	 *     Evaluation
+	 *       GroundedSchema "scm: dummy"
+	 *       Unquote Variable "$X"
 	 */
 	Handle consume_ill_quotations() const;
 	static Handle consume_ill_quotations(const Handle& vardecl, const Handle& h);
