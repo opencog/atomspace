@@ -43,7 +43,6 @@
 ; -- filter-hypergraph -- recursively traverse outgoing links of graph.
 ; -- cartesian-prod -- create Cartesian product from tuple of sets.
 ; -- cartesian-prod-list-only -- Alternative version of cartesian-prod.
-; -- approx-eq? -- Test equality of 2 floats up to an epsilon
 ; -- bool->tv -- Convert #t to TRUE_TV and #f to FALSE_TV
 ; -- tv->bool -- Convert TRUE_TV to #t, anything else to #f
 ; -- cog-equal? -- Test equality of 2 atoms and returns TRUE_TV/FALSE_TV
@@ -1005,21 +1004,6 @@
 )
 
 ; ---------------------------------------------------------------------
-
-; XXX The below should be removed from the geeneric opencog utilities,
-; and should be copied directly into the code that actually needs this.
-(define-public (approx-eq? x y)
-"
- approx-eq? X Y
-    Returns true when the absolute value of the difference of
-    floating-point values X and Y is less than 0.000001.
-"
-	(let ((diff (- x y))
-			(minus-epsilon -0.000001)
-			(plus-epsilon 0.000001))
-		(and (< minus-epsilon diff) (> plus-epsilon diff))
-	)
-)
 
 ;; TODO: move this to rule-engine utils
 
