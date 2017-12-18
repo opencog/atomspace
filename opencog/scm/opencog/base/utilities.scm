@@ -43,8 +43,6 @@
 ; -- filter-hypergraph -- recursively traverse outgoing links of graph.
 ; -- cartesian-prod -- create Cartesian product from tuple of sets.
 ; -- cartesian-prod-list-only -- Alternative version of cartesian-prod.
-; -- bool->tv -- Convert #t to TRUE_TV and #f to FALSE_TV
-; -- tv->bool -- Convert TRUE_TV to #t, anything else to #f
 ; -- max-element-by-key -- Get maximum element in a list
 ; -- min-element-by-key -- Get maximum element in a list
 ; -- cog-push-atomspace -- Create a temporary atomspace.
@@ -1004,30 +1002,6 @@
 
 ; ---------------------------------------------------------------------
 
-;; TODO: move this to rule-engine utils
-
-; XXX The below should be removed from the geeneric opencog utilities,
-; and should be copied directly into the code that actually needs this.
-(define-public (bool->tv b)
-"
-  Convert #t to TRUE_TV and #f to FALSE_TV
-"
-    (if b
-        (stv 1 1)
-        (stv 0 1)
-    )
-)
-
-; XXX The below should be removed from the geeneric opencog utilities,
-; and should be copied directly into the code that actually needs this.
-(define-public (tv->bool tv)
-"
-  Convert TRUE_TV to #t, anything else to #f
-"
-    (equal? (stv 1 1) tv))
-
-; ---------------------------------------------------------------------
-
 (define-public (min-element-by-key lyst fun)
 "
  min-element-by-key LIST FUN
@@ -1285,8 +1259,6 @@
 'filter-hypergraph
 'cartesian-prod
 'cartesian-prod-list-only
-'bool->tv
-'tv->bool
 'min-element-by-key
 'max-element-by-key
 'cog-atomspace-stack

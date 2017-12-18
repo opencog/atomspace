@@ -14,6 +14,8 @@
 ; -- ure-define-rbs -- Create a rbs that runs for a particular number of
 ;                      iterations.
 ; -- ure-get-forward-rule -- Return the forward form of a rule
+; -- bool->tv -- Convert #t to TRUE_TV and #f to FALSE_TV
+; -- tv->bool -- Convert TRUE_TV to #t, anything else to #f
 ; -- gt-zero-confidence -- Return TrueTV iff A's confidence is greater than 0
 ; -- meta-bind -- Fully apply a meta rule. Convenient for testing meta-rules
 ;
@@ -225,6 +227,22 @@
     (if (eq? rule-type 'ListLink) (gar rule) rule))
 )
 
+(define-public (bool->tv b)
+"
+  Convert #t to TRUE_TV and #f to FALSE_TV
+"
+    (if b
+        (stv 1 1)
+        (stv 0 1)
+    )
+)
+
+(define-public (tv->bool tv)
+"
+  Convert TRUE_TV to #t, anything else to #f
+"
+    (equal? (stv 1 1) tv))
+
 ;; Very handy and frequent rule precondition.
 (define-public (gt-zero-confidence A)
 "
@@ -256,6 +274,8 @@
           ure-set-fuzzy-bool-parameter
           ure-define-rbs
           ure-get-forward-rule
+          bool->tv
+          tv->bool
           gt-zero-confidence
           meta-bind
           ; export-rule-engine-utils
