@@ -53,20 +53,23 @@ public:
 	RewriteLink(const Link &l);
 
 	/**
-	 * Return an alpha converted copy of itself. New variable names
-	 * can be optionally provided, otherwise there are randomly
-	 * generated.
+	 * Return an alpha-converted copy of this atom. Optionally,
+	 * new variable names can be provided. If none are provided,
+	 * then new randomly generated names are created.
 	 *
-	 * Warning: the alpha converted handle is not inserted in the
-	 * atomspace, it is up to the user to do so.
+	 * Warning: the atomspace treats all alpha-convertible atoms
+	 * as identical; if the new copy is inserted into the atomspace,
+	 * the original version will be returned.  Alpha-converted atoms
+	 * can only be used outside of the atomspace, for temporary
+	 * operations.
 	 */
 	Handle alpha_conversion() const;
 	Handle alpha_conversion(const HandleSeq& vars) const;
 
 	/**
-	 * Like above but take a mapping from old variable name to new
-	 * variable names. If an old variable doesn't have a mapping then
-	 * its new random name is randomly generated.
+	 * Like the above, but using a mapping from old variable names to
+	 * new variable names. If an existing variable doesn't have a
+	 * mapping specified, then a new random name is generated.
 	 */
 	Handle alpha_conversion(const HandleMap& vsmap) const;
 
