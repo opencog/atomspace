@@ -70,8 +70,8 @@ public:
 	void test_names_alpha_conversion();
 	void xtest_vardecl_bindlink_alpha_conversion();
 	void test_unordered();
-	void test_partial_substitute_1();
-	void test_partial_substitute_2();
+	void test_beta_reduce_1();
+	void test_beta_reduce_2();
 	void test_remove_ill_quotations_1();
 };
 
@@ -93,7 +93,7 @@ void RewriteLinkUTest::test_rand_alpha_conversion()
 		LA(AND_LINK, NA(VARIABLE_NODE, "$X")));
 
 	RewriteLinkPtr sc(RewriteLinkCast(hsc));
-	Handle scac = sc->alpha_conversion();
+	Handle scac = sc->alpha_convert();
 
 	std::cout << "sc = " << oc_to_string(Handle(sc));
 	std::cout << "scac = " << oc_to_string(scac);
@@ -115,7 +115,7 @@ void RewriteLinkUTest::test_names_alpha_conversion()
 	Handle expected = createLink(REWRITE_LINK, Y, LA(AND_LINK, Y));
 
 	RewriteLinkPtr sc(RewriteLinkCast(hsc));
-	Handle result = sc->alpha_conversion(HandleMap{{X, Y}});
+	Handle result = sc->alpha_convert(HandleMap{{X, Y}});
 
 	std::cout << "result = " << oc_to_string(result);
 	std::cout << "expected = " << oc_to_string(expected);
@@ -143,7 +143,7 @@ void RewriteLinkUTest::xtest_vardecl_bindlink_alpha_conversion()
 		              LA(AND_LINK, Y), LA(OR_LINK, Y));
 
 	BindLinkPtr bl(BindLinkCast(hbl));
-	Handle result_wo_vardecl = _asa.add_atom(bl->alpha_conversion({Y}));
+	Handle result_wo_vardecl = _asa.add_atom(bl->alpha_convert({Y}));
 
 	std::cout << "result_wo_vardecl = " << oc_to_string(result_wo_vardecl);
 	std::cout << "expected_wo_vardecl = " << oc_to_string(expected_wo_vardecl);
@@ -188,8 +188,8 @@ void RewriteLinkUTest::test_unordered()
 
 	logger().info("END TEST: %s", __FUNCTION__);
 }
-// Test RewriteLink::partial_substitute with duplicated variable names
-void RewriteLinkUTest::test_partial_substitute_1()
+// Test RewriteLink::beta_reduce with duplicated variable names
+void RewriteLinkUTest::test_beta_reduce_1()
 {
 	logger().info("BEGIN TEST: %s", __FUNCTION__);
 
@@ -202,7 +202,7 @@ void RewriteLinkUTest::test_partial_substitute_1()
 		                 createLink(INHERITANCE_LINK, X, Y));
 
 	RewriteLinkPtr sc(RewriteLinkCast(hsc));
-	Handle result = sc->partial_substitute(HandleMap{{X, Z}, {Y, Z}}),
+	Handle result = sc->beta_reduce(HandleMap{{X, Z}, {Y, Z}}),
 		expected = createLink(REWRITE_LINK, Z, createLink(INHERITANCE_LINK, Z, Z));
 
 	std::cout << "result = " << oc_to_string(result);
@@ -213,8 +213,8 @@ void RewriteLinkUTest::test_partial_substitute_1()
 	logger().info("END TEST: %s", __FUNCTION__);
 }
 
-// Test RewriteLink::partial_substitute with no variable
-void RewriteLinkUTest::test_partial_substitute_2()
+// Test RewriteLink::beta_reduce with no variable
+void RewriteLinkUTest::test_beta_reduce_2()
 {
 	logger().info("BEGIN TEST: %s", __FUNCTION__);
 
@@ -224,7 +224,7 @@ void RewriteLinkUTest::test_partial_substitute_2()
 	                        createLink(INHERITANCE_LINK, X, Y));
 
 	RewriteLinkPtr sc(RewriteLinkCast(hsc));
-	Handle result = sc->partial_substitute(HandleMap{}),
+	Handle result = sc->beta_reduce(HandleMap{}),
 		expected = hsc;
 
 	std::cout << "result = " << oc_to_string(result);

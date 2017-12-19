@@ -38,7 +38,6 @@ class DivideLink : public ArithmeticLink
 {
 protected:
 	void init(void);
-	DivideLink(Type, const Handle& a, const Handle& b);
 
 	Handle kons(const Handle&, const Handle&) const;
 public:

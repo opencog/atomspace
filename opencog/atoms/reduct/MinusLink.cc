@@ -34,13 +34,7 @@ MinusLink::MinusLink(const HandleSeq& oset, Type t)
 }
 
 MinusLink::MinusLink(const Handle& a, const Handle& b)
-    : ArithmeticLink(MINUS_LINK, a, b)
-{
-	init();
-}
-
-MinusLink::MinusLink(Type t, const Handle& a, const Handle& b)
-    : ArithmeticLink(t, a, b)
+    : ArithmeticLink({a, b}, MINUS_LINK)
 {
 	init();
 }

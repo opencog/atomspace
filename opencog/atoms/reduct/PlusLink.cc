@@ -35,13 +35,7 @@ PlusLink::PlusLink(const HandleSeq& oset, Type t)
 }
 
 PlusLink::PlusLink(const Handle& a, const Handle& b)
-    : ArithmeticLink(PLUS_LINK, a, b)
-{
-	init();
-}
-
-PlusLink::PlusLink(Type t, const Handle& a, const Handle& b)
-    : ArithmeticLink(t, a, b)
+    : ArithmeticLink({a, b}, PLUS_LINK)
 {
 	init();
 }

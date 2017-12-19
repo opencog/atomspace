@@ -31,27 +31,33 @@ namespace opencog
  *  @{
  */
 
-/// The LambdaLink is a RewriteLink that implements beta-reduction.
-/// It does little more than to provide a method that subsitutes values
-/// into the variables bound by RewriteLink.
+/// The LambdaLink is supposed to closely model the traditional concept
+/// of a lambda from lambda calculus (or functional programming). It
+/// is meant to behave just like a combinator, and supports the standard
+/// operations of beta-reduction and alpha-conversion (modulo that the
+/// atomspace enforces alpha-equivalence).
+///
+/// The actual implementation of the alpha and beta reduction sits on
+/// the RewriteLink, so this class is effectively a no-op, from the
+/// C++ point of view. However...
+///
+/// However, we want to have this to minimize confusion in other,
+/// distant parts of the code base.  The issue is that there are many
+/// other classes derived from RewriteLink, and they are NOT lambdas!
+/// The most prominent example are the various PatternLinks; a simpler
+/// example is the PutLink, which is a beta-redex and therefore cannot
+/// ever be an actual lambda, elthough it derives from RewriteLink
+/// to do it's beta-reduction.  And so that's why we have a no-op C++
+/// class, here.
 ///
 class LambdaLink : public RewriteLink
 {
-protected:
-	LambdaLink(Type, const Handle&);
-
 public:
 	LambdaLink(const HandleSeq&, Type=LAMBDA_LINK);
 	LambdaLink(const Handle& varcdecls, const Handle& body);
 	LambdaLink(const Link &l);
 
-	// Take the list of values `vals`, and substitute them in for the
-	// variables in the body of this lambda. The values must satisfy all
-	// type restrictions, else an exception will be thrown.
-	Handle substitute(const HandleSeq& vals) const
-	{
-		return get_variables().substitute(_body, vals);
-	}
+	virtual Handle beta_reduce(const HandleSeq& values) const;
 
 	static Handle factory(const Handle&);
 };

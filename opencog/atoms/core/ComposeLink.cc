@@ -116,7 +116,7 @@ Handle ComposeLink::execute() const
 			OC_ASSERT(fi_sc != nullptr);
 			// Make sure its variables have the same named as the new
 			// variable declaration
-			Handle afi = fi_sc->alpha_conversion(n_vars.varseq);
+			Handle afi = fi_sc->alpha_convert(n_vars.varseq);
 			RewriteLinkPtr afi_sc = RewriteLinkCast(afi);
 			values.push_back(afi_sc->get_body());
 		}
@@ -129,9 +129,9 @@ Handle ComposeLink::compose(const Handle& nvardecl,
 {
 	Handle g = getOutgoingAtom(0);
 	RewriteLinkPtr g_sc = RewriteLinkCast(g);
-	OC_ASSERT(g_sc != nullptr, "First outgoing must be a scope");
+	OC_ASSERT(g_sc != nullptr, "First atom must be a RewriteLink");
 
-	HandleSeq comp_hs = g_sc->partial_substitute_bodies(nvardecl, values);
+	HandleSeq comp_hs = g_sc->beta_reduce_bodies(nvardecl, values);
 
 	// Insert fvardecl if the outgoings if defined
 	if (nvardecl)

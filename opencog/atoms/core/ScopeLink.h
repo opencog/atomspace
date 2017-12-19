@@ -59,8 +59,6 @@ protected:
 	/// Variables bound in the body.
 	Variables _varlist;
 
-	ScopeLink(Type, const Handle&);
-
 protected:
 	void init(void);
 	void extract_variables(const HandleSeq& oset);

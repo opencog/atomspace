@@ -35,12 +35,6 @@ FoldLink::FoldLink(const HandleSeq& oset, Type t)
 	init();
 }
 
-FoldLink::FoldLink(Type t, const Handle& a, const Handle& b)
-    : FunctionLink(t, a, b)
-{
-	init();
-}
-
 FoldLink::FoldLink(const Link& l)
     : FunctionLink(l)
 {

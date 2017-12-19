@@ -32,11 +32,6 @@ LambdaLink::LambdaLink(const Handle& vars, const Handle& body)
 {
 }
 
-LambdaLink::LambdaLink(Type t, const Handle& body)
-	: RewriteLink(HandleSeq({body}), t)
-{
-}
-
 LambdaLink::LambdaLink(const HandleSeq& oset, Type t)
 	: RewriteLink(oset, t)
 {
@@ -59,6 +54,14 @@ LambdaLink::LambdaLink(const Link &l)
 		throw SyntaxException(TRACE_INFO,
 			"Expecting a LambdaLink, got %s", tname.c_str());
 	}
+}
+
+Handle LambdaLink::beta_reduce(const HandleSeq& vals) const
+{
+	// return get_variables().substitute(_body, vals);
+
+	// XXX this is wrong, but hack it for now.
+	return RewriteLink::beta_reduce(vals);
 }
 
 DEFINE_LINK_FACTORY(LambdaLink, LAMBDA_LINK)

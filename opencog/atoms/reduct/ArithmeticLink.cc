@@ -35,12 +35,6 @@ ArithmeticLink::ArithmeticLink(const HandleSeq& oset, Type t)
 	init();
 }
 
-ArithmeticLink::ArithmeticLink(Type t, const Handle& a, const Handle& b)
-    : FoldLink(t, a, b)
-{
-	init();
-}
-
 ArithmeticLink::ArithmeticLink(const Link& l)
     : FoldLink(l)
 {

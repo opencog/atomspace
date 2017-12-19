@@ -79,7 +79,7 @@ EvaluationLink::EvaluationLink(const HandleSeq& oset, Type t)
 }
 
 EvaluationLink::EvaluationLink(const Handle& schema, const Handle& args)
-    : FreeLink(EVALUATION_LINK, schema, args)
+    : FreeLink({schema, args}, EVALUATION_LINK)
 {
 	if (LIST_LINK != args->get_type()) {
 		throw RuntimeException(TRACE_INFO,
@@ -558,7 +558,7 @@ TruthValuePtr EvaluationLink::do_evaluate(AtomSpace* as,
 		// beta-reduction, and evaluate the result.
 		LambdaLinkPtr lam(LambdaLinkCast(defn));
 		Type atype = cargs->get_type();
-		Handle reduct = lam->substitute(atype == LIST_LINK ?
+		Handle reduct = lam->beta_reduce(atype == LIST_LINK ?
 		                                cargs->getOutgoingSet()
 		                                : HandleSeq(1, cargs));
 		return do_evaluate(as, reduct, silent);

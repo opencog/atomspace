@@ -33,14 +33,8 @@ TimesLink::TimesLink(const HandleSeq& oset, Type t)
 	init();
 }
 
-TimesLink::TimesLink(Type t, const Handle& a, const Handle& b)
-    : ArithmeticLink(t, a, b)
-{
-	init();
-}
-
 TimesLink::TimesLink(const Handle& a, const Handle& b)
-    : ArithmeticLink(TIMES_LINK, a, b)
+    : ArithmeticLink({a,b}, TIMES_LINK)
 {
 	init();
 }

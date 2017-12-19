@@ -25,7 +25,6 @@
 #include <opencog/util/random.h>
 #include <opencog/util/Logger.h>
 #include <opencog/atoms/base/ClassServer.h>
-#include <opencog/atoms/core/LambdaLink.h>
 #include <opencog/atoms/core/TypeNode.h>
 #include <opencog/atomutils/TypeUtils.h>
 #include <opencog/atomutils/FindUtils.h>
@@ -46,27 +45,20 @@ void RewriteLink::init(void)
 }
 
 RewriteLink::RewriteLink(const Handle& vars, const Handle& body)
-	: ScopeLink(HandleSeq({vars, body}), REWRITE_LINK)
+	: ScopeLink(HandleSeq({vars, body}), REWRITE_LINK), _silent(false)
 {
-	init();
-}
-
-RewriteLink::RewriteLink(Type t, const Handle& body)
-	: ScopeLink(HandleSeq({body}), t)
-{
-	if (skip_init(t)) return;
 	init();
 }
 
 RewriteLink::RewriteLink(const HandleSeq& oset, Type t)
-	: ScopeLink(oset, t)
+	: ScopeLink(oset, t), _silent(false)
 {
 	if (skip_init(t)) return;
 	init();
 }
 
 RewriteLink::RewriteLink(const Link &l)
-	: ScopeLink(l)
+	: ScopeLink(l), _silent(false)
 {
 	if (skip_init(l.get_type())) return;
 	init();
@@ -88,82 +80,109 @@ inline HandleSeq append_rand_str(const HandleSeq& vars)
 	return new_vars;
 }
 
-Handle RewriteLink::alpha_conversion() const
+Handle RewriteLink::alpha_convert() const
 {
 	HandleSeq vars = append_rand_str(_varlist.varseq);
-	return alpha_conversion(vars);
+	return alpha_convert(vars);
 }
 
-Handle RewriteLink::alpha_conversion(const HandleSeq& vars) const
+Handle RewriteLink::alpha_convert(const HandleSeq& vars) const
 {
 	// Perform alpha conversion
 	HandleSeq hs;
 	for (size_t i = 0; i < get_arity(); ++i)
-		hs.push_back(_varlist.substitute_nocheck(getOutgoingAtom(i), vars));
+		hs.push_back(_varlist.substitute_nocheck(getOutgoingAtom(i), vars, _silent));
 
 	// Create the alpha converted scope link
 	return createLink(hs, get_type());
 }
 
-Handle RewriteLink::alpha_conversion(const HandleMap& vsmap) const
+Handle RewriteLink::alpha_convert(const HandleMap& vsmap) const
 {
 	HandleSeq vars;
 	for (const Handle& var : _varlist.varseq) {
 		auto it = vsmap.find(var);
 		vars.push_back(it == vsmap.end() ? append_rand_str(var) : it->second);
 	}
-	return alpha_conversion(vars);
+	return alpha_convert(vars);
 }
 
 /* ================================================================= */
 
-Handle RewriteLink::partial_substitute(const HandleMap& vm) const
+Handle RewriteLink::beta_reduce(const HandleMap& vm) const
 {
 	// Perform substitution over the variable declaration
-	Handle nvardecl = partial_substitute_vardecl(vm);
+	Handle nvardecl = substitute_vardecl(vm);
 
 	// Perform substitution over the bodies
-	HandleSeq hs = partial_substitute_bodies(nvardecl, vm);
+	HandleSeq hs = substitute_bodies(nvardecl, vm);
 
 	// Filter vardecl
 	nvardecl = filter_vardecl(nvardecl, hs);
 
-	// Insert vardecl in the outgoings if defined
+	// Insert vardecl in the outgoing set, if defined
 	if (nvardecl)
+	{
 		hs.insert(hs.begin(), nvardecl);
+	}
+	else
+	{
+		// Its illegal to create a PutLink that is not in the
+		// form of a redex, i.e. doesn't have variable declarations
+		// in it. So we must not call createLink(), below.
+		Type t = get_type();
+		if (PUT_LINK == t or LAMBDA_LINK == t)
+			return hs[0];
+	}
 
-	// Create the substituted scope
+	// Create the substituted scope.  I suspect that this is a bad
+	// idea, when nvardecl==nullptr, I mean, its just gonna be weird,
+	// and cause issues thhrought the code ... but ... whatever.
 	return createLink(hs, get_type());
 }
 
-HandleSeq RewriteLink::partial_substitute_bodies(const Handle& nvardecl,
-                                               const HandleMap& vm) const
+Handle RewriteLink::beta_reduce(const HandleSeq& vals) const
 {
-	const Variables& variables = get_variables();
-	return partial_substitute_bodies(nvardecl, variables.make_values(vm));
+	// return get_variables().substitute(_body, vals, _silent);
+
+	HandleMap vm;
+	const Variables& vars = get_variables();
+	for (size_t i=0; i<vals.size(); i++)
+	{
+		vm.insert({vars.varseq[i], vals[i]});
+	}
+	return beta_reduce(vm);
 }
 
-HandleSeq RewriteLink::partial_substitute_bodies(const Handle& nvardecl,
-                                               const HandleSeq& values) const
+HandleSeq RewriteLink::substitute_bodies(const Handle& nvardecl,
+                                         const HandleMap& vm) const
+{
+	const Variables& variables = get_variables();
+	return beta_reduce_bodies(nvardecl, variables.make_sequence(vm));
+}
+
+HandleSeq RewriteLink::beta_reduce_bodies(const Handle& nvardecl,
+                                         const HandleSeq& values) const
 {
 	HandleSeq hs;
-	for (size_t i = (get_vardecl() ? 1 : 0); i < get_arity(); ++i) {
+	for (size_t i = (get_vardecl() ? 1 : 0); i < get_arity(); ++i)
+	{
 		const Handle& h = getOutgoingAtom(i);
-		hs.push_back(partial_substitute_body(nvardecl, h, values));
+		hs.push_back(substitute_body(nvardecl, h, values));
 	}
 	return hs;
 }
 
-Handle RewriteLink::partial_substitute_body(const Handle& nvardecl,
-                                          const Handle& body,
-                                          const HandleSeq& values) const
+Handle RewriteLink::substitute_body(const Handle& nvardecl,
+                                    const Handle& body,
+                                    const HandleSeq& values) const
 {
-	Handle nbody = get_variables().substitute_nocheck(body, values);
+	Handle nbody = get_variables().substitute(body, values, _silent);
 	nbody = consume_ill_quotations(nvardecl, nbody);
 	return nbody;
 }
 
-Handle RewriteLink::partial_substitute_vardecl(const HandleMap& vm) const
+Handle RewriteLink::substitute_vardecl(const HandleMap& vm) const
 {
 	if (not get_vardecl())
 		return Handle::UNDEFINED;
@@ -172,14 +191,16 @@ Handle RewriteLink::partial_substitute_vardecl(const HandleMap& vm) const
 }
 
 Handle RewriteLink::substitute_vardecl(const Handle& vardecl,
-                                     const HandleMap& vm)
+                                       const HandleMap& vm)
 {
 	Type t = vardecl->get_type();
 
 	// Base cases
 
-	if (t == VARIABLE_NODE) {
+	if (t == VARIABLE_NODE)
+	{
 		auto it = vm.find(vardecl);
+
 		// Only substitute if the variable is substituted by another variable
 		if (it == vm.end())
 			return vardecl;
@@ -192,8 +213,10 @@ Handle RewriteLink::substitute_vardecl(const Handle& vardecl,
 
 	HandleSeq oset;
 
-	if (t == VARIABLE_LIST) {
-		for (const Handle& h : vardecl->getOutgoingSet()) {
+	if (t == VARIABLE_LIST)
+	{
+		for (const Handle& h : vardecl->getOutgoingSet())
+		{
 			Handle nh = substitute_vardecl(h, vm);
 			if (nh)
 				oset.push_back(nh);
@@ -201,14 +224,19 @@ Handle RewriteLink::substitute_vardecl(const Handle& vardecl,
 		if (oset.empty())
 			return Handle::UNDEFINED;
 	}
-	else if (t == TYPED_VARIABLE_LINK) {
+	else if (t == TYPED_VARIABLE_LINK)
+	{
 		Handle new_var = substitute_vardecl(vardecl->getOutgoingAtom(0), vm);
-		if (new_var) {
+		if (new_var)
+		{
 			oset.push_back(new_var);
 			oset.push_back(vardecl->getOutgoingAtom(1));
-		} else return Handle::UNDEFINED;
+		}
+		else
+			return Handle::UNDEFINED;
 	}
-	else {
+	else
+	{
 		OC_ASSERT(false, "Not implemented");
 	}
 	return createLink(oset, t);
@@ -219,7 +247,8 @@ Handle RewriteLink::consume_ill_quotations() const
 	Handle vardecl = get_vardecl();
 	const Variables& variables = get_variables();
 	HandleSeq nouts;
-	for (size_t i = (get_vardecl() ? 1 : 0); i < get_arity(); ++i) {
+	for (size_t i = (get_vardecl() ? 1 : 0); i < get_arity(); ++i)
+	{
 		Handle nbody = consume_ill_quotations(variables, getOutgoingAtom(i));
 		nouts.push_back(nbody);
 		// If the new body has terms with free variables but no
@@ -236,7 +265,8 @@ Handle RewriteLink::consume_ill_quotations() const
 	return createLink(nouts, get_type());
 }
 
-Handle RewriteLink::consume_ill_quotations(const Handle& vardecl, const Handle& h)
+Handle RewriteLink::consume_ill_quotations(const Handle& vardecl,
+                                           const Handle& h)
 {
 	return consume_ill_quotations(gen_variables(h, vardecl), h);
 }
@@ -291,7 +321,7 @@ Handle RewriteLink::consume_ill_quotations(const Variables& variables, Handle h,
 }
 
 bool RewriteLink::is_bound_to_ancestor(const Variables& variables,
-                                     const Handle& local_scope)
+                                       const Handle& local_scope)
 {
 	Handle unquote = local_scope->getOutgoingAtom(0);
 	if (unquote->get_type() == UNQUOTE_LINK) {

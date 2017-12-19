@@ -244,22 +244,24 @@ DEFINE_LINK <- UNIQUE_LINK
 // restrictions on the variables.
 SCOPE_LINK <- ORDERED_LINK
 
-// The RewriteLink is a ScopeLink with a large number of methods
-// that perform various different kinds of re-writing on the ScopeLink.
+// The RewriteLink is a ScopeLink with extra methods that perform
+// alpha conversion and beta reduction on the ScopeLink. It is a base
+// class for many kinds of atom types, most on which CANNOT be treated
+// as if they were lambdas!  So user beware: although RewriteLink feels
+// like LambdaLink ... it isn't.  Not everything is a Lambda.
 REWRITE_LINK <- SCOPE_LINK
 
-// A LambdaLink is a link whose bound variables may be substituted,
-// that is, may be beta-reduced. It can be thought of as not only a
-// variable declaration (which is what ScopeLink does) but also has
-// the ability to substitute values for those variables.  This is
-// exactly the standard definition from lambda calc/functional
-// programming: an anonymous function declaration.
+// The LambdaLink is supposed to closely model the traditional concept
+// of a lambda from lambda calculus (or functional programming). It
+// is meant to behave just like a combinator, and supports the standard
+// operations of beta-reduction and alpha-conversion (modulo that the
+// atomspace enforces alpha-equivalence).
 LAMBDA_LINK <- REWRITE_LINK
 
 // PutLinks perform a beta-reduction when executed; i.e. they get
 // beta-reduced when they are executed. PutLinks are the same thing as
 // beta-redexes.
-PUT_LINK <- SCOPE_LINK
+PUT_LINK <- REWRITE_LINK
 
 // The PrenexLink is a ScopeLink that is in prenex normal form.  It
 // serves as a base class for the various pattern-matching links, since
@@ -339,6 +341,7 @@ EXTENSIONAL_EQUIVALENCE_LINK <- EQUIVALENCE_LINK
 ASSOCIATIVE_LINK <- ORDERED_LINK
 
 // Mystery link.  Lexical attraction???
+// Can we nuke this ??
 ATTRACTION_LINK <- ORDERED_LINK
 
 // To be used with PredicateNode
@@ -362,15 +365,8 @@ GROUNDED_SCHEMA_NODE <- SCHEMA_NODE,GROUNDED_PROCEDURE_NODE
 
 // PredicateNodes are TV-valued.  They must return a TV.
 PREDICATE_NODE <- PROCEDURE_NODE
-// Cannot be both a node and a link! Have to be one or the other!
-DEFINED_PREDICATE_NODE <- PREDICATE_NODE// ,EVALUATABLE_LINK
+DEFINED_PREDICATE_NODE <- PREDICATE_NODE
 GROUNDED_PREDICATE_NODE <- PREDICATE_NODE,GROUNDED_PROCEDURE_NODE
-
-// Huh?? XXX What are these? I don't understand them Do we use them
-// anywhere? I think the first is same as ExecutionOutputLink, right?
-// Not clear how a schema can be evaluated ...
-// SCHEMA_EXECUTION_LINK <- INHERITANCE_LINK
-// SCHEMA_EVALUATION_LINK <- SCHEMA_EXECUTION_LINK
 
 // ==============================================================
 // Types and type constructors.

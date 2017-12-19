@@ -42,45 +42,51 @@ typedef std::shared_ptr<RewriteLink> RewriteLinkPtr;
 class RewriteLink : public ScopeLink
 {
 protected:
-	RewriteLink(Type, const Handle&);
-
+	bool _silent;
 	void init(void);
 
 	/**
-	 * Helper for partial_substitute. Given a mapping from
-	 * variables to values, some of which might be variables
-	 * themselves, this generates a new variable declaration
-	 * with using the new, substituted variables.
+	 * Perform "substitution" on a variable declaration.  This
+	 * returns a new variable declaration, where one of two things
+	 * were done.  If the map held a constant value for a variable,
+	 * then that variable is removed.  If the map held a different
+	 * variable, then the alpha-conversion is performed. This might
+	 * return the invalid handle, if all variables were reduced by
+	 * constants.
 	 */
-	Handle partial_substitute_vardecl(const HandleMap& vm) const;
+	Handle substitute_vardecl(const HandleMap& vm) const;
 	static Handle substitute_vardecl(const Handle& vardecl,
 	                                 const HandleMap& vm);
 
 	/**
-	 * Helper for partial_substitute. Given the variable
-	 * declaration and a mapping from variables to values,
-	 * this performs substitution over all bodies(??),
-	 * consuming ill quotations if necessary.
+	 * Perform "substitution" on all of the "bodies" in the link.
+	 * (There may be more than two atoms in the outgoing set; this
+    * performs the substitution on all atoms that are not initial
+	 * variable declaration).
 	 *
-	 * XXX why does it say "all bodies"? How can there be more
-	 * one body?
+	 * The substitution performs either a beta-reduction, or an
+    * alpha-conversion, depending on the map. If the map specifies
+	 * variable->value, then a normal beta reduction is done. If
+	 * the maps specifies variable->variable, then an alpha renaming
+	 * is done.
 	 *
-	 * XXX what is an "ill quotation"?
+	 * If there are any poorly-formed (ill-formed) quotations,
+	 * these are removed.
 	 */
-	HandleSeq partial_substitute_bodies(const Handle& nvardecl,
-	                                    const HandleMap& vm) const;
+	HandleSeq substitute_bodies(const Handle& nvardecl,
+	                            const HandleMap& vm) const;
 
 	/**
-	 * Given a variable declaration, a body, and a list of values,
+	 * Given a variable declaration, a body, and a sequence of values,
 	 * perform substitution on the body, replacing variables with values.
 	 */
-	Handle partial_substitute_body(const Handle& nvardecl,
-	                               const Handle& body,
-	                               const HandleSeq& values) const;
+	Handle substitute_body(const Handle& nvardecl,
+	                       const Handle& body,
+	                       const HandleSeq& values) const;
 
 	/**
 	 * Return true if the variable declaration of local_scope is a
-	 * variable of variables wrapped in a UnquoteLink.
+	 * variable of variables wrapped in a UnquoteLink. (Huh?)
 	 */
 	static bool is_bound_to_ancestor(const Variables& variables,
 	                                 const Handle& local_scope);
@@ -89,6 +95,8 @@ public:
 	RewriteLink(const HandleSeq&, Type=REWRITE_LINK);
 	RewriteLink(const Handle& varcdecls, const Handle& body);
 	RewriteLink(const Link &l);
+
+	void make_silent(bool s) { _silent = s; }
 
 	/**
 	 * Return an alpha-converted copy of this atom. Optionally,
@@ -101,41 +109,50 @@ public:
 	 * can only be used outside of the atomspace, for temporary
 	 * operations.
 	 */
-	Handle alpha_conversion() const;
-	Handle alpha_conversion(const HandleSeq& vars) const;
+	Handle alpha_convert() const;
+	Handle alpha_convert(const HandleSeq& vars) const;
 
 	/**
-	 * Like the above, but using a mapping from old variable names to
-	 * new variable names. If an existing variable doesn't have a
-	 * mapping specified, then a new random name is generated.
+	 * Like the above, but using a mapping from old variable names
+	 * to new variable names. If an existing variable doesn't have
+	 * a mapping specified, then a new random name is generated.
 	 */
-	Handle alpha_conversion(const HandleMap& vsmap) const;
+	Handle alpha_convert(const HandleMap& vsmap) const;
 
 	/**
-	 * Perform a substitution of values for variables. Given a mapping
-	 * between variables and values, generate the RewriteLink that
-	 * would result from the replacement of the variables by the values.
-	 * If all variables are substituted, then the returned atom will
-	 * still be a RewriteLink, but with an empty variable declaration.
+	 * Perform a beta-reduction and optional alpha-conversion,
+	 * returning the reduced RewriteLink.
 	 *
-	 * XXX why is this called "partial"??
+	 * If the map specifies a variable->value, then a standard
+	 * beta-reduction is performed, and the variable is removed
+	 * from the returned RewriteLink.
+	 *
+	 * If the map specifies a variable->new-variable, then an
+	 * alpha-conversion is performed.
+	 *
+	 * If the original RewriteLink contains bound variables that
+	 * are not mentioned in the map, these are untouched.
+	 *
+	 * If the RewriteLink is fully reduced, i.e. all variables have
+	 * been beta-reduced, then the returned atom is still a
+	 * RewriteLink, but with an empty variable declaration.
 	 */
-	Handle partial_substitute(const HandleMap& vm) const;
+	virtual Handle beta_reduce(const HandleMap& vm) const;
 
 	/**
 	 * Like the above, but uses a sequence of values, presumed to be
 	 * in the same order as the variable declarations.
 	 */
-	Handle partial_substitute(const HandleSeq& values) const;
+	virtual Handle beta_reduce(const HandleSeq& values) const;
 
 	/**
 	 * Like the above, but accepting a sequence of values.
 	 */
-	HandleSeq partial_substitute_bodies(const Handle& nvardecl,
-	                                    const HandleSeq& values) const;
+	HandleSeq beta_reduce_bodies(const Handle& nvardecl,
+	                             const HandleSeq& values) const;
 
 	/**
-	 * Used by partial_substitute.
+	 * Helper function, used by beta_reduce and the unifier.
 	 *
 	 * After substitution, remaining quotations might be useless or
 	 * harmful, which might be the case if they deprive a nested

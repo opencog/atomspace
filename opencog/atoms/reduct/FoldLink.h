@@ -46,7 +46,6 @@ protected:
 	virtual Handle kons(const Handle&, const Handle&) const = 0;
 
 	void init(void);
-	FoldLink(Type, const Handle& a, const Handle& b);
 
 public:
 	FoldLink(const HandleSeq&, Type=FOLD_LINK);

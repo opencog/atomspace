@@ -40,7 +40,6 @@ protected:
 	Handle kons(const Handle&, const Handle&) const;
 
 	void init(void);
-	TimesLink(Type, const Handle& a, const Handle& b);
 
 public:
 	TimesLink(const HandleSeq&, Type=TIMES_LINK);

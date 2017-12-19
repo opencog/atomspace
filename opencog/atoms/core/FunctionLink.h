@@ -67,8 +67,6 @@ class FunctionLink : public FreeLink
 protected:
 	static void check_type(Type t);
 	void init(void);
-	FunctionLink(Type, const Handle& a);
-	FunctionLink(Type, const Handle& a, const Handle& b);
 
 public:
 	// Sadly, need to make this public, else the factory code fails.

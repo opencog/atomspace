@@ -143,7 +143,7 @@ void PutLinkUTest::test_function()
 	Handle want_four =
 		L(PUT_LINK,
 			L(PLUS_LINK),
-				L(LIST_LINK, N(NUMBER_NODE, "2"), N(NUMBER_NODE, "2")));
+			L(LIST_LINK, N(NUMBER_NODE, "2"), N(NUMBER_NODE, "2")));
 
 	Handle four = inst.execute(want_four);
 	Handle expected_four = N(NUMBER_NODE, "4");
@@ -163,6 +163,34 @@ void PutLinkUTest::test_function()
 	printf("Expecting %s\n", expected_two->to_string().c_str());
 	printf("Got %s\n", two->to_string().c_str());
 	TS_ASSERT_EQUALS(two, expected_two);
+
+	// Test the combinator (+9) (2+2) = 13
+	// (Put (Plus (Number 9)) (List (Number 2) (Number 2)))
+	Handle want_thirteen =
+		L(PUT_LINK,
+			L(PLUS_LINK, N(NUMBER_NODE, "9")),
+			L(LIST_LINK, N(NUMBER_NODE, "2"), N(NUMBER_NODE, "2")));
+
+	Handle thirteen = inst.execute(want_thirteen);
+	Handle expected_thirteen = N(NUMBER_NODE, "13");
+
+	printf("Expecting %s\n", expected_thirteen->to_string().c_str());
+	printf("Got %s\n", thirteen->to_string().c_str());
+	TS_ASSERT_EQUALS(thirteen, expected_thirteen);
+
+	// Test the combinator (+ 3 5) (2+2) = 12
+	// (Put (Plus (Number 3) (Number 5)) (List (Number 2) (Number 2)))
+	Handle want_twelve =
+		L(PUT_LINK,
+			L(PLUS_LINK, N(NUMBER_NODE, "3"), N(NUMBER_NODE, "5")),
+			L(LIST_LINK, N(NUMBER_NODE, "2"), N(NUMBER_NODE, "2")));
+
+	Handle twelve = inst.execute(want_twelve);
+	Handle expected_twelve = N(NUMBER_NODE, "12");
+
+	printf("Expecting %s\n", expected_twelve->to_string().c_str());
+	printf("Got %s\n", twelve->to_string().c_str());
+	TS_ASSERT_EQUALS(twelve, expected_twelve);
 
 	// Test a complex set.
 	// (Put (Times) (Set

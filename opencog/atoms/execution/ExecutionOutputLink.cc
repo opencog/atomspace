@@ -73,7 +73,7 @@ ExecutionOutputLink::ExecutionOutputLink(const HandleSeq& oset, Type t)
 
 ExecutionOutputLink::ExecutionOutputLink(const Handle& schema,
                                          const Handle& args)
-	: FunctionLink(EXECUTION_OUTPUT_LINK, schema, args)
+	: FunctionLink({schema, args}, EXECUTION_OUTPUT_LINK)
 {
 	check_schema(schema);
 }
