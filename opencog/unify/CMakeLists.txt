@@ -5,6 +5,7 @@ ADD_LIBRARY (unify
 ADD_DEPENDENCIES(unify opencog_atom_types)
 
 TARGET_LINK_LIBRARIES(unify
+	lambda
 	atomcore
 	atombase
 	${COGUTIL_LIBRARY}

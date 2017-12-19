@@ -26,7 +26,6 @@
 #include <sys/time.h>
 
 #include <opencog/atoms/core/NumberNode.h>
-#include <opencog/atomspace/AtomSpace.h>
 
 #include "SleepLink.h"
 
@@ -68,7 +67,7 @@ SleepLink::SleepLink(const Link &l)
 
 // ---------------------------------------------------------------
 
-Handle SleepLink::execute(AtomSpace * as) const
+Handle SleepLink::execute() const
 {
 	Handle time(_outgoing[0]);
 	FunctionLinkPtr flp(FunctionLinkCast(time));
@@ -90,13 +89,7 @@ Handle SleepLink::execute(AtomSpace * as) const
 	if (0 == secs)
 		usleep (usec);
 
-	// XXX This is probably wrong ... if the as is null, we should
-	// probably use the atomspace that this link is in, right?
-	// We need to make a decision here and in many other places...
-	if (NULL == as)
-		return Handle(createNumberNode(secs));
-
-	return as->add_atom(createNumberNode(secs));
+	return Handle(createNumberNode(secs));
 }
 
 DEFINE_LINK_FACTORY(SleepLink, SLEEP_LINK)

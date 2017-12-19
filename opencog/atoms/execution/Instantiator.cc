@@ -26,6 +26,7 @@
 #include <opencog/atoms/core/PutLink.h>
 #include <opencog/atoms/execution/ExecutionOutputLink.h>
 #include <opencog/atoms/execution/EvaluationLink.h>
+#include <opencog/atoms/execution/MapLink.h>
 #include <opencog/atoms/reduct/FoldLink.h>
 #include <opencog/query/BindLinkAPI.h>
 
@@ -328,6 +329,22 @@ Handle Instantiator::walk_tree(const Handle& expr, bool silent)
 		return Handle::UNDEFINED;
 	}
 
+	if (MAP_LINK == t)
+	{
+		if (_eager)
+		{
+			HandleSeq oset_results;
+			walk_sequence(oset_results, expr->getOutgoingSet(), silent);
+			MapLinkPtr mlp(MapLinkCast(createLink(oset_results, t)));
+			return mlp->execute(_as);
+		}
+		else
+		{
+			MapLinkPtr mlp(MapLinkCast(expr));
+			return mlp->execute(_as);
+		}
+	}
+
 	// Fire any other function links, not handled above.
 	if (classserver().isA(t, FUNCTION_LINK))
 	{
@@ -346,7 +363,7 @@ Handle Instantiator::walk_tree(const Handle& expr, bool silent)
 			walk_sequence(oset_results, expr->getOutgoingSet(), silent);
 
 			FunctionLinkPtr flp(FunctionLinkCast(createLink(oset_results, t)));
-			return flp->execute(_as);
+			return flp->execute();
 		}
 		else
 		{
@@ -356,7 +373,7 @@ Handle Instantiator::walk_tree(const Handle& expr, bool silent)
 			// Perform substitution on all arguments before applying the
 			// function itself.
 			FunctionLinkPtr flp(FunctionLinkCast(expr));
-			return flp->execute(_as);
+			return flp->execute();
 		}
 	}
 
@@ -408,7 +425,7 @@ mere_recursive_call:
 	{
 		Handle subl(createLink(oset_results, t));
 		subl->copyValues(expr);
-		return _as->add_atom(subl);
+		return subl;
 	}
 	return expr;
 }

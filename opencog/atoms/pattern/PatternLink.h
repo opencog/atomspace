@@ -27,7 +27,6 @@
 
 #include <opencog/atoms/core/Quotation.h>
 #include <opencog/atoms/core/PrenexLink.h>
-#include <opencog/atoms/core/VariableList.h>
 #include <opencog/atoms/pattern/Pattern.h>
 #include <opencog/query/PatternMatchCallback.h>
 

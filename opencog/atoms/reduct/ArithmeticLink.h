@@ -23,7 +23,6 @@
 #ifndef _OPENCOG_ARITHMETIC_LINK_H
 #define _OPENCOG_ARITHMETIC_LINK_H
 
-#include <opencog/atomspace/AtomSpace.h>
 #include <opencog/atoms/reduct/FoldLink.h>
 
 namespace opencog
@@ -49,7 +48,7 @@ public:
 	ArithmeticLink(const Link& l);
 
 	virtual Handle delta_reduce(void) const;
-	virtual Handle execute(AtomSpace* as) const;
+	virtual Handle execute() const;
 };
 
 typedef std::shared_ptr<ArithmeticLink> ArithmeticLinkPtr;

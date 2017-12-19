@@ -23,7 +23,6 @@
 #ifndef _OPENCOG_PLUS_LINK_H
 #define _OPENCOG_PLUS_LINK_H
 
-#include <opencog/atomspace/AtomSpace.h>
 #include <opencog/atoms/reduct/ArithmeticLink.h>
 
 namespace opencog

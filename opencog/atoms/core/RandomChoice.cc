@@ -22,7 +22,6 @@
  */
 
 #include <opencog/util/mt19937ar.h>
-#include <opencog/atomspace/AtomSpace.h>
 
 #include "FunctionLink.h"
 #include "NumberNode.h"
@@ -120,7 +119,7 @@ RandomChoiceLink::RandomChoiceLink(const Link &l)
 //           ...
 //           AtomZ
 //
-Handle RandomChoiceLink::execute(AtomSpace * as) const
+Handle RandomChoiceLink::execute() const
 {
 	size_t ary = _outgoing.size();
 	if (0 == ary) return Handle();
@@ -131,7 +130,7 @@ Handle RandomChoiceLink::execute(AtomSpace * as) const
 	// something of that sort.
 	FunctionLinkPtr flp(FunctionLinkCast(ofirst));
 	if (flp)
-		ofirst = flp->execute(as);
+		ofirst = flp->execute();
 
 	// Special-case handling for SetLinks, so it works with
 	// dynamically-evaluated PutLinks ...
@@ -151,7 +150,7 @@ Handle RandomChoiceLink::execute(AtomSpace * as) const
 			Handle hw = oset[0];
 			FunctionLinkPtr flp(FunctionLinkCast(hw));
 			if (nullptr != flp)
-				hw = flp->execute(as);
+				hw = flp->execute();
 
 			NumberNodePtr nn(NumberNodeCast(hw));
 			if (nullptr == nn) // goto uniform;
@@ -190,7 +189,7 @@ uniform:
 		{
 			FunctionLinkPtr flp(FunctionLinkCast(h));
 			if (nullptr != flp)
-				h = flp->execute(as);
+				h = flp->execute();
 
 			NumberNodePtr nn(NumberNodeCast(h));
 			if (nullptr == nn)
