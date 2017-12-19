@@ -15,7 +15,7 @@ ADD_LIBRARY (atomspace
 ADD_DEPENDENCIES(atomspace opencog_atom_types)
 
 TARGET_LINK_LIBRARIES(atomspace
-	${NO_AS_NEEDED}
+#	${NO_AS_NEEDED}
 	attentionbank
 	atomcore
 	truthvalue

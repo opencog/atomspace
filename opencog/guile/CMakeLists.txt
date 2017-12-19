@@ -27,6 +27,19 @@ ADD_LIBRARY (randgen
 )
 
 TARGET_LINK_LIBRARIES(smob
+
+	# We want to list every possible library that defines some
+	# atom type, so that the library ctors will run, and add those
+	# atom types to the classserver. If this is not done, then the
+	# classserver will fail to run atom factories, viz, will fail
+	# to run the ctors for C++-backed atom types, resulting in
+	# screwball failures.
+	clearbox
+	lambda
+	# execution
+	atomcore
+	atombase
+	truthvalue
 	attentionbank
 	atomspace
 	${GUILE_LIBRARIES}
