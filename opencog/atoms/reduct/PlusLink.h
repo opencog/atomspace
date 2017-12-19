@@ -41,7 +41,6 @@ protected:
 	virtual Handle kons(const Handle&, const Handle&) const;
 
 	void init(void);
-	PlusLink(Type, const Handle& a, const Handle& b);
 
 public:
 	PlusLink(const Handle& a, const Handle& b);

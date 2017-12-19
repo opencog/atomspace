@@ -51,13 +51,6 @@ RewriteLink::RewriteLink(const Handle& vars, const Handle& body)
 	init();
 }
 
-RewriteLink::RewriteLink(Type t, const Handle& body)
-	: ScopeLink(HandleSeq({body}), t)
-{
-	if (skip_init(t)) return;
-	init();
-}
-
 RewriteLink::RewriteLink(const HandleSeq& oset, Type t)
 	: ScopeLink(oset, t)
 {

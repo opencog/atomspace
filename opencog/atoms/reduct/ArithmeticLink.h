@@ -40,7 +40,6 @@ class ArithmeticLink : public FoldLink
 {
 protected:
 	void init(void);
-	ArithmeticLink(Type, const Handle& a, const Handle& b);
 
 	virtual Handle reorder(void) const;
 	bool _commutative;

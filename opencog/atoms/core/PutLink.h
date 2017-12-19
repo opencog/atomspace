@@ -60,7 +60,6 @@ protected:
 
 public:
 	PutLink(const HandleSeq& oset, Type=PUT_LINK);
-	PutLink(const Handle& a);
 	PutLink(const Link& l);
 	virtual ~PutLink() {}
 

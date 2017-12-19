@@ -51,13 +51,6 @@ PrenexLink::PrenexLink(const Handle& vars, const Handle& body)
 	init();
 }
 
-PrenexLink::PrenexLink(Type t, const Handle& body)
-	: RewriteLink(HandleSeq({body}), t)
-{
-	if (skip_init(t)) return;
-	init();
-}
-
 PrenexLink::PrenexLink(const HandleSeq& oset, Type t)
 	: RewriteLink(oset, t)
 {

@@ -79,7 +79,7 @@ EvaluationLink::EvaluationLink(const HandleSeq& oset, Type t)
 }
 
 EvaluationLink::EvaluationLink(const Handle& schema, const Handle& args)
-    : FreeLink(EVALUATION_LINK, schema, args)
+    : FreeLink({schema, args}, EVALUATION_LINK)
 {
 	if (LIST_LINK != args->get_type()) {
 		throw RuntimeException(TRACE_INFO,

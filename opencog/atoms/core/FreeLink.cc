@@ -26,36 +26,8 @@
 
 using namespace opencog;
 
-FreeLink::FreeLink(const Handle& a)
-    : Link(FREE_LINK, a)
-{
-	init();
-}
-
 FreeLink::FreeLink(const HandleSeq& oset, Type t)
     : Link(oset, t)
-{
-	if (not classserver().isA(t, FREE_LINK))
-		throw InvalidParamException(TRACE_INFO, "Expecting a FreeLink");
-
-	// Derived classes have thier own init routines.
-	if (FREE_LINK != t) return;
-	init();
-}
-
-FreeLink::FreeLink(Type t, const Handle& a)
-    : Link(t, a)
-{
-	if (not classserver().isA(t, FREE_LINK))
-		throw InvalidParamException(TRACE_INFO, "Expecting a FreeLink");
-
-	// Derived classes have thier own init routines.
-	if (FREE_LINK != t) return;
-	init();
-}
-
-FreeLink::FreeLink(Type t, const Handle& a, const Handle& b)
-    : Link(t, a, b)
 {
 	if (not classserver().isA(t, FREE_LINK))
 		throw InvalidParamException(TRACE_INFO, "Expecting a FreeLink");

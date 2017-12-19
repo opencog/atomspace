@@ -34,13 +34,7 @@ DivideLink::DivideLink(const HandleSeq& oset, Type t)
 }
 
 DivideLink::DivideLink(const Handle& a, const Handle& b)
-    : ArithmeticLink(DIVIDE_LINK, a, b)
-{
-	init();
-}
-
-DivideLink::DivideLink(Type t, const Handle& a, const Handle& b)
-    : ArithmeticLink(t, a, b)
+    : ArithmeticLink({a, b}, DIVIDE_LINK)
 {
 	init();
 }

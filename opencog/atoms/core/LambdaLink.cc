@@ -32,11 +32,6 @@ LambdaLink::LambdaLink(const Handle& vars, const Handle& body)
 {
 }
 
-LambdaLink::LambdaLink(Type t, const Handle& body)
-	: RewriteLink(HandleSeq({body}), t)
-{
-}
-
 LambdaLink::LambdaLink(const HandleSeq& oset, Type t)
 	: RewriteLink(oset, t)
 {

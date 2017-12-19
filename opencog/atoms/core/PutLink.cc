@@ -35,12 +35,6 @@ PutLink::PutLink(const HandleSeq& oset, Type t)
 	init();
 }
 
-PutLink::PutLink(const Handle& a)
-    : RewriteLink(PUT_LINK, a)
-{
-	init();
-}
-
 PutLink::PutLink(const Link& l)
     : RewriteLink(l)
 {

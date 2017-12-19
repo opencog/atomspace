@@ -47,13 +47,8 @@ protected:
 
 	void init(void);
 
-protected:
-	FreeLink(Type, const Handle& a);
-	FreeLink(Type, const Handle& a, const Handle& b);
-
 public:
 	FreeLink(const HandleSeq& oset, Type=FREE_LINK);
-	FreeLink(const Handle& a);
 	FreeLink(const Link& l);
 	virtual ~FreeLink() {}
 

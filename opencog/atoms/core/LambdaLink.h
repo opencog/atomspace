@@ -35,9 +35,6 @@ namespace opencog
 ///
 class LambdaLink : public RewriteLink
 {
-protected:
-	LambdaLink(Type, const Handle&);
-
 public:
 	LambdaLink(const HandleSeq&, Type=LAMBDA_LINK);
 	LambdaLink(const Handle& varcdecls, const Handle& body);

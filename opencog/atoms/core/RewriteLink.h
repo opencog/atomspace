@@ -42,8 +42,6 @@ typedef std::shared_ptr<RewriteLink> RewriteLinkPtr;
 class RewriteLink : public ScopeLink
 {
 protected:
-	RewriteLink(Type, const Handle&);
-
 	void init(void);
 
 	/**

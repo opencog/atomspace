@@ -45,9 +45,6 @@ typedef std::shared_ptr<PrenexLink> PrenexLinkPtr;
 class PrenexLink : public RewriteLink
 {
 protected:
-	PrenexLink(Type, const Handle&);
-
-protected:
 	void init(void);
 
 public:
