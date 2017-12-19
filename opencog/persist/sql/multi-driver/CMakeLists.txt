@@ -50,11 +50,6 @@ ADD_EXECUTABLE(sniff
 TARGET_LINK_LIBRARIES(sniff
 	sql-support
 	persist-sql
-	atomspace
-	execution
-	clearbox
-	atomcore
-	atomutils
 )
 IF (ODBC_FOUND)
 	TARGET_LINK_LIBRARIES(sniff persist-odbc)

@@ -23,15 +23,8 @@ IF (HAVE_CYTHON)
 ENDIF(HAVE_CYTHON)
 
 TARGET_LINK_LIBRARIES (atomspace_bm m
-	atomutils
-	attentionbank
-	atomspaceutils
 	atomspace
-	execution
-	clearbox
 	${COGUTIL_LIBRARY}
-	atomutils
-	atomcore
 )
 
 IF (HAVE_GUILE)
