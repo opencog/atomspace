@@ -178,7 +178,6 @@ Handle RewriteLink::substitute_body(const Handle& nvardecl,
                                     const Handle& body,
                                     const HandleSeq& values) const
 {
-	// Handle nbody = get_variables().substitute_nocheck(body, values, _silent);
 	Handle nbody = get_variables().substitute(body, values, _silent);
 	nbody = consume_ill_quotations(nvardecl, nbody);
 	return nbody;
