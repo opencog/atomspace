@@ -205,7 +205,7 @@ void PutLink::static_typecheck_values(void)
 static inline Handle reddy(RewriteLinkPtr subs, const HandleSeq& oset)
 {
 	subs->make_silent(true);
-	return subs->beta_reduce(oset)->getOutgoingAtom(0);
+	return subs->beta_reduce(oset);
 }
 
 /**

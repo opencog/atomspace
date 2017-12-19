@@ -126,6 +126,15 @@ Handle RewriteLink::beta_reduce(const HandleMap& vm) const
 	{
 		hs.insert(hs.begin(), nvardecl);
 	}
+	else
+	{
+		// Its illegal to create a PutLink that is not in the
+		// form of a redex, i.e. doesn't have variable declarations
+		// in it. So we must not call createLink(), below.
+		Type t = get_type();
+		if (PUT_LINK == t or LAMBDA_LINK == t)
+			return hs[0];
+	}
 
 	// Create the substituted scope.  I suspect that this is a bad
 	// idea, when nvardecl==nullptr, I mean, its just gonna be weird,
