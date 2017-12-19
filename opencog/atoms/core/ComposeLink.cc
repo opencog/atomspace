@@ -94,6 +94,11 @@ Handle ComposeLink::execute() const
 		RewriteLinkPtr f_sc = RewriteLinkCast(f);
 		OC_ASSERT(f_sc != nullptr, "Second atom must be a RewriteLink");
 
+		// Make sure it has a body, this may happen if the link has
+		// unquoted outgoing set.
+		OC_ASSERT(f_sc->get_body() != nullptr,
+		          "f doesn't have a body! f = %s", oc_to_string(f).c_str());
+
 		return compose(f_sc->get_vardecl(), {f_sc->get_body()});
 	}
 
@@ -131,14 +136,14 @@ Handle ComposeLink::compose(const Handle& nvardecl,
 	RewriteLinkPtr g_sc = RewriteLinkCast(g);
 	OC_ASSERT(g_sc != nullptr, "First atom must be a RewriteLink");
 
-	HandleSeq comp_hs = g_sc->beta_reduce_bodies(nvardecl, values);
+	HandleSeq cmp_hs = g_sc->beta_reduce_bodies(nvardecl, values);
 
 	// Insert fvardecl if the outgoings if defined
 	if (nvardecl)
-		comp_hs.insert(comp_hs.begin(), nvardecl);
+		cmp_hs.insert(cmp_hs.begin(), nvardecl);
 
 	// Create composed scope
-	return createLink(comp_hs, g->get_type());
+	return createLink(cmp_hs, g->get_type());
 }
 
 Handle ComposeLink::compose(const Variables& nvars,
