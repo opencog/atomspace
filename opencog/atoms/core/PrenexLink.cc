@@ -74,10 +74,10 @@ PrenexLink::PrenexLink(const Link &l)
 
 /* ================================================================= */
 
-Handle PrenexLink::substitute(const HandleSeq& vals) const
+Handle PrenexLink::beta_reduce(const HandleSeq& vals) const
 {
 	// XXX this is wrong.
-	return RewriteLink::substitute(vals);
+	return RewriteLink::beta_reduce(vals);
 }
 
 /* ================================================================= */

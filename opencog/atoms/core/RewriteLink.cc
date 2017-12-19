@@ -117,7 +117,7 @@ Handle RewriteLink::alpha_convert(const HandleMap& vsmap) const
 
 /* ================================================================= */
 
-Handle RewriteLink::substitute(const HandleMap& vm) const
+Handle RewriteLink::beta_reduce(const HandleMap& vm) const
 {
 	// Perform substitution over the variable declaration
 	Handle nvardecl = substitute_vardecl(vm);
@@ -136,7 +136,7 @@ Handle RewriteLink::substitute(const HandleMap& vm) const
 	return createLink(hs, get_type());
 }
 
-Handle RewriteLink::substitute(const HandleSeq& vals) const
+Handle RewriteLink::beta_reduce(const HandleSeq& vals) const
 {
 	// XXX this implementation is wrong. Its a hack for now.
 	return get_variables().substitute(_body, vals);
@@ -146,10 +146,10 @@ HandleSeq RewriteLink::substitute_bodies(const Handle& nvardecl,
                                          const HandleMap& vm) const
 {
 	const Variables& variables = get_variables();
-	return substitute_bodies(nvardecl, variables.make_sequence(vm));
+	return beta_reduce_bodies(nvardecl, variables.make_sequence(vm));
 }
 
-HandleSeq RewriteLink::substitute_bodies(const Handle& nvardecl,
+HandleSeq RewriteLink::beta_reduce_bodies(const Handle& nvardecl,
                                          const HandleSeq& values) const
 {
 	HandleSeq hs;

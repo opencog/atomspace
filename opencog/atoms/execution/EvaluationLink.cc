@@ -558,7 +558,7 @@ TruthValuePtr EvaluationLink::do_evaluate(AtomSpace* as,
 		// beta-reduction, and evaluate the result.
 		LambdaLinkPtr lam(LambdaLinkCast(defn));
 		Type atype = cargs->get_type();
-		Handle reduct = lam->substitute(atype == LIST_LINK ?
+		Handle reduct = lam->beta_reduce(atype == LIST_LINK ?
 		                                cargs->getOutgoingSet()
 		                                : HandleSeq(1, cargs));
 		return do_evaluate(as, reduct, silent);

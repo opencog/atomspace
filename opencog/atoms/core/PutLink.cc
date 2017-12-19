@@ -317,7 +317,7 @@ Handle PutLink::do_reduce(void) const
 			try
 			{
 				// return vars.substitute(bods, oset, /* silent */ true);
-				return subs->substitute(oset);
+				return subs->beta_reduce(oset);
 			}
 			catch (const TypeCheckException& ex)
 			{
@@ -334,7 +334,7 @@ Handle PutLink::do_reduce(void) const
 			try
 			{
 				// bset.emplace_back(vars.substitute(bods, oset, /* silent */ true));
-				bset.emplace_back(subs->substitute(oset));
+				bset.emplace_back(subs->beta_reduce(oset));
 			}
 			catch (const TypeCheckException& ex) {}
 		}
@@ -350,7 +350,7 @@ Handle PutLink::do_reduce(void) const
 		try
 		{
 			// return vars.substitute(bods, oset, /* silent */ true);
-			return subs->substitute(oset);
+			return subs->beta_reduce(oset);
 		}
 		catch (const TypeCheckException& ex)
 		{
@@ -370,7 +370,7 @@ Handle PutLink::do_reduce(void) const
 		try
 		{
 			// bset.emplace_back(vars.substitute(bods, oset, /* silent */ true));
-			bset.emplace_back(subs->substitute(oset));
+			bset.emplace_back(subs->beta_reduce(oset));
 		}
 		catch (const TypeCheckException& ex) {}
 	}

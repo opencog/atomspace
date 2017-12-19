@@ -131,7 +131,7 @@ Handle ComposeLink::compose(const Handle& nvardecl,
 	RewriteLinkPtr g_sc = RewriteLinkCast(g);
 	OC_ASSERT(g_sc != nullptr, "First atom must be a RewriteLink");
 
-	HandleSeq comp_hs = g_sc->substitute_bodies(nvardecl, values);
+	HandleSeq comp_hs = g_sc->beta_reduce_bodies(nvardecl, values);
 
 	// Insert fvardecl if the outgoings if defined
 	if (nvardecl)

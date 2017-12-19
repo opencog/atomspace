@@ -55,7 +55,7 @@ public:
 	PrenexLink(const Handle& varcdecls, const Handle& body);
 	PrenexLink(const Link &l);
 
-	virtual Handle substitute(const HandleSeq& values) const;
+	virtual Handle beta_reduce(const HandleSeq& values) const;
 
 	static Handle factory(const Handle&);
 };

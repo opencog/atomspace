@@ -61,12 +61,12 @@ LambdaLink::LambdaLink(const Link &l)
 	}
 }
 
-Handle LambdaLink::substitute(const HandleSeq& vals) const
+Handle LambdaLink::beta_reduce(const HandleSeq& vals) const
 {
 	// return get_variables().substitute(_body, vals);
 
 	// XXX this is wrong, but hack it for now.
-	return RewriteLink::substitute(vals);
+	return RewriteLink::beta_reduce(vals);
 }
 
 DEFINE_LINK_FACTORY(LambdaLink, LAMBDA_LINK)

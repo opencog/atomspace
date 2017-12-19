@@ -136,22 +136,22 @@ public:
 	 * been beta-reduced, then the returned atom is still a
 	 * RewriteLink, but with an empty variable declaration.
 	 */
-	virtual Handle substitute(const HandleMap& vm) const;
+	virtual Handle beta_reduce(const HandleMap& vm) const;
 
 	/**
 	 * Like the above, but uses a sequence of values, presumed to be
 	 * in the same order as the variable declarations.
 	 */
-	virtual Handle substitute(const HandleSeq& values) const;
+	virtual Handle beta_reduce(const HandleSeq& values) const;
 
 	/**
 	 * Like the above, but accepting a sequence of values.
 	 */
-	HandleSeq substitute_bodies(const Handle& nvardecl,
-	                            const HandleSeq& values) const;
+	HandleSeq beta_reduce_bodies(const Handle& nvardecl,
+	                             const HandleSeq& values) const;
 
 	/**
-	 * Helper function, used by substitute and the unifier.
+	 * Helper function, used by beta_reduce and the unifier.
 	 *
 	 * After substitution, remaining quotations might be useless or
 	 * harmful, which might be the case if they deprive a nested
