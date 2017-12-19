@@ -372,8 +372,10 @@ RuleTypedSubstitutionMap Rule::unify_source(const Handle& source,
 	if (not is_valid())
 		return {};
 
-	// To guaranty that the rule variable does not share any variable
-	// with the source.
+	// To guarantee that the rule variable does not have the same name
+	// as any variable in the source. XXX This is only a stochastic
+	// guarantee, there is a small chance that the new random name
+	// will still collide.
 	Rule alpha_rule = rand_alpha_converted();
 
 	RuleTypedSubstitutionMap unified_rules;
@@ -403,8 +405,10 @@ RuleTypedSubstitutionMap Rule::unify_target(const Handle& target,
 	if (not is_valid())
 		return {};
 
-	// To guaranty that the rule variable does not share any variable
-	// of the target.
+	// To guarantee that the rule variable does not have the same name
+	// as any variable in the source. XXX This is only a stochastic
+	// guarantee, there is a small chance that the new random name
+	// will still collide.
 	Rule alpha_rule = rand_alpha_converted();
 
 	RuleTypedSubstitutionMap unified_rules;
@@ -456,7 +460,7 @@ Rule Rule::rand_alpha_converted() const
 	Rule result = *this;
 
 	// Alpha convert the rule
-	result.set_rule(_rule->alpha_conversion());
+	result.set_rule(_rule->alpha_convert());
 
 	return result;
 }

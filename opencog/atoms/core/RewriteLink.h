@@ -78,7 +78,7 @@ protected:
 	                            const HandleMap& vm) const;
 
 	/**
-	 * Given a variable declaration, a body, and a list of values,
+	 * Given a variable declaration, a body, and a sequence of values,
 	 * perform substitution on the body, replacing variables with values.
 	 */
 	Handle substitute_body(const Handle& nvardecl,
@@ -87,7 +87,7 @@ protected:
 
 	/**
 	 * Return true if the variable declaration of local_scope is a
-	 * variable of variables wrapped in a UnquoteLink.
+	 * variable of variables wrapped in a UnquoteLink. (Huh?)
 	 */
 	static bool is_bound_to_ancestor(const Variables& variables,
 	                                 const Handle& local_scope);
@@ -108,15 +108,15 @@ public:
 	 * can only be used outside of the atomspace, for temporary
 	 * operations.
 	 */
-	Handle alpha_conversion() const;
-	Handle alpha_conversion(const HandleSeq& vars) const;
+	Handle alpha_convert() const;
+	Handle alpha_convert(const HandleSeq& vars) const;
 
 	/**
-	 * Like the above, but using a mapping from old variable names to
-	 * new variable names. If an existing variable doesn't have a
-	 * mapping specified, then a new random name is generated.
+	 * Like the above, but using a mapping from old variable names
+	 * to new variable names. If an existing variable doesn't have
+	 * a mapping specified, then a new random name is generated.
 	 */
-	Handle alpha_conversion(const HandleMap& vsmap) const;
+	Handle alpha_convert(const HandleMap& vsmap) const;
 
 	/**
 	 * Perform a substitution of values for variables. Given a mapping

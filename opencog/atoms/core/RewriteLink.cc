@@ -88,13 +88,13 @@ inline HandleSeq append_rand_str(const HandleSeq& vars)
 	return new_vars;
 }
 
-Handle RewriteLink::alpha_conversion() const
+Handle RewriteLink::alpha_convert() const
 {
 	HandleSeq vars = append_rand_str(_varlist.varseq);
-	return alpha_conversion(vars);
+	return alpha_convert(vars);
 }
 
-Handle RewriteLink::alpha_conversion(const HandleSeq& vars) const
+Handle RewriteLink::alpha_convert(const HandleSeq& vars) const
 {
 	// Perform alpha conversion
 	HandleSeq hs;
@@ -105,14 +105,14 @@ Handle RewriteLink::alpha_conversion(const HandleSeq& vars) const
 	return createLink(hs, get_type());
 }
 
-Handle RewriteLink::alpha_conversion(const HandleMap& vsmap) const
+Handle RewriteLink::alpha_convert(const HandleMap& vsmap) const
 {
 	HandleSeq vars;
 	for (const Handle& var : _varlist.varseq) {
 		auto it = vsmap.find(var);
 		vars.push_back(it == vsmap.end() ? append_rand_str(var) : it->second);
 	}
-	return alpha_conversion(vars);
+	return alpha_convert(vars);
 }
 
 /* ================================================================= */

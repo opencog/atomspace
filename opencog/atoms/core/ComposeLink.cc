@@ -116,7 +116,7 @@ Handle ComposeLink::execute(AtomSpace* as) const
 			OC_ASSERT(fi_sc != nullptr);
 			// Make sure its variables have the same named as the new
 			// variable declaration
-			Handle afi = fi_sc->alpha_conversion(n_vars.varseq);
+			Handle afi = fi_sc->alpha_convert(n_vars.varseq);
 			RewriteLinkPtr afi_sc = RewriteLinkCast(afi);
 			values.push_back(afi_sc->get_body());
 		}
