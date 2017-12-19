@@ -47,36 +47,43 @@ protected:
 	void init(void);
 
 	/**
-	 * Helper for substitute. Given a mapping from
-	 * variables to values, some of which might be variables
-	 * themselves, this generates a new variable declaration
-	 * with using the new, substituted variables.
+	 * Perform "substitution" on a variable declaration.  This
+	 * returns a new variable declaration, where one of two things
+	 * were done.  If the map held a constant value for a variable,
+	 * then that variable is removed.  If the map held a different
+	 * variable, then the alpha-conversion is performed. This might
+	 * return the invalid handle, if all variables were reduced by
+	 * constants.
 	 */
 	Handle substitute_vardecl(const HandleMap& vm) const;
 	static Handle substitute_vardecl(const Handle& vardecl,
 	                                 const HandleMap& vm);
 
 	/**
-	 * Helper for substitute. Given the variable
-	 * declaration and a mapping from variables to values,
-	 * this performs substitution over all bodies(??),
-	 * consuming ill quotations if necessary.
+	 * Perform "substitution" on all of the "bodies" in the link.
+	 * (There may be more than two atoms in the outgoing set; this
+    * performs the substitution on all atoms that are not initial
+	 * variable declaration).
 	 *
-	 * XXX why does it say "all bodies"? How can there be more
-	 * one body?
+	 * The substitution performs either a beta-reduction, or an
+    * alpha-conversion, depending on the map. If the map specifies
+	 * variable->value, then a normal beta reduction is done. If
+	 * the maps specifies variable->variable, then an alpha renaming
+	 * is done.
 	 *
-	 * XXX what is an "ill quotation"?
+	 * If there are any poorly-formed (ill-formed) quotations,
+	 * these are removed.
 	 */
 	HandleSeq substitute_bodies(const Handle& nvardecl,
-	                                    const HandleMap& vm) const;
+	                            const HandleMap& vm) const;
 
 	/**
 	 * Given a variable declaration, a body, and a list of values,
 	 * perform substitution on the body, replacing variables with values.
 	 */
 	Handle substitute_body(const Handle& nvardecl,
-	                               const Handle& body,
-	                               const HandleSeq& values) const;
+	                       const Handle& body,
+	                       const HandleSeq& values) const;
 
 	/**
 	 * Return true if the variable declaration of local_scope is a

@@ -162,8 +162,8 @@ HandleSeq RewriteLink::substitute_bodies(const Handle& nvardecl,
 }
 
 Handle RewriteLink::substitute_body(const Handle& nvardecl,
-                                          const Handle& body,
-                                          const HandleSeq& values) const
+                                    const Handle& body,
+                                    const HandleSeq& values) const
 {
 	Handle nbody = get_variables().substitute_nocheck(body, values);
 	nbody = consume_ill_quotations(nvardecl, nbody);
