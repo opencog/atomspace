@@ -123,11 +123,28 @@ void PutLink::static_typecheck_values(void)
 		return;
 
 	size_t sz = _varlist.varseq.size();
-	Type vtype = _values->get_type();
+
+	Handle valley = _values;
+	Type vtype = valley->get_type();
+
+	// If its a LambdaLink, try to see if its eta-reducible. If
+	// so, then eta-reduce it immediately. A LambdaLink is
+	// eta-reducible when it's body is a ListLink.
+	if (LAMBDA_LINK == vtype)
+	{
+		LambdaLinkPtr lam(LambdaLinkCast(_values));
+		Handle body = lam->get_body();
+		Type bt = body->get_type();
+		if (LIST_LINK == bt)
+		{
+			valley = body;
+			vtype = bt;
+		}
+	}
 
 	if (1 == sz)
 	{
-		if (not _varlist.is_type(_values)
+		if (not _varlist.is_type(valley)
 		    and SET_LINK != vtype
 		    and PUT_LINK != vtype
 		    and not (classserver().isA(vtype, SATISFYING_LINK)))
@@ -146,7 +163,7 @@ void PutLink::static_typecheck_values(void)
 	// The standard, default case is to get a ListLink as an argument.
 	if (LIST_LINK == vtype)
 	{
-		if (not _varlist.is_type(_values->getOutgoingSet()))
+		if (not _varlist.is_type(valley->getOutgoingSet()))
 		{
 			if (_vardecl)
 				throw SyntaxException(TRACE_INFO,
@@ -177,7 +194,7 @@ void PutLink::static_typecheck_values(void)
 
 	if (1 < sz)
 	{
-		for (const Handle& h : _values->getOutgoingSet())
+		for (const Handle& h : valley->getOutgoingSet())
 		{
 			// If the arity is greater than one, then the values must be in a list.
 		   if (h->get_type() != LIST_LINK)
@@ -192,7 +209,7 @@ void PutLink::static_typecheck_values(void)
 	}
 
 	// If the arity is one, the values must obey type constraint.
-	for (const Handle& h : _values->getOutgoingSet())
+	for (const Handle& h : valley->getOutgoingSet())
 	{
 		if (not _varlist.is_type(h))
 			throw InvalidParamException(TRACE_INFO,
@@ -278,7 +295,23 @@ Handle PutLink::do_reduce(void) const
 	}
 
 	// Now get the values that we will plug into the body.
-	Type vtype = _values->get_type();
+	Handle valley = _values;
+	Type vtype = valley->get_type();
+
+	// If the value is a LambdaLink, try to see if its eta-reducible.
+	// If so, then eta-reduce it immediately. A LambdaLink is
+	// eta-reducible when it's body is a ListLink.
+	if (LAMBDA_LINK == vtype)
+	{
+		LambdaLinkPtr lam(LambdaLinkCast(_values));
+		Handle eta = lam->get_body();
+		Type bt = eta->get_type();
+		if (LIST_LINK == bt)
+		{
+			valley = eta;
+			vtype = bt;
+		}
+	}
 
 	size_t nvars = vars.varseq.size();
 
@@ -297,7 +330,7 @@ Handle PutLink::do_reduce(void) const
 		if (LIST_LINK == vtype)
 		{
 			HandleSeq oset(bods->getOutgoingSet());
-			const HandleSeq& rest = _values->getOutgoingSet();
+			const HandleSeq& rest = valley->getOutgoingSet();
 			oset.insert(oset.end(), rest.begin(), rest.end());
 			return createLink(oset, btype);
 		}
@@ -305,13 +338,13 @@ Handle PutLink::do_reduce(void) const
 		if (SET_LINK != vtype)
 		{
 			HandleSeq oset(bods->getOutgoingSet());
-			oset.emplace_back(_values);
+			oset.emplace_back(valley);
 			return createLink(oset, btype);
 		}
 
 		// If the values are given in a set, then iterate over the set...
 		HandleSeq bset;
-		for (const Handle& h : _values->getOutgoingSet())
+		for (const Handle& h : valley->getOutgoingSet())
 		{
 			if (LIST_LINK == h->get_type())
 			{
@@ -336,7 +369,7 @@ Handle PutLink::do_reduce(void) const
 		if (SET_LINK != vtype)
 		{
 			HandleSeq oset;
-			oset.emplace_back(_values);
+			oset.emplace_back(valley);
 			try
 			{
 				// return vars.substitute(bods, oset, /* silent */ true);
@@ -350,7 +383,7 @@ Handle PutLink::do_reduce(void) const
 
 		// If the values are given in a set, then iterate over the set...
 		HandleSeq bset;
-		for (const Handle& h : _values->getOutgoingSet())
+		for (const Handle& h : valley->getOutgoingSet())
 		{
 			HandleSeq oset;
 			oset.emplace_back(h);
@@ -369,7 +402,7 @@ Handle PutLink::do_reduce(void) const
 	// then assume that there is only a single set of values to plug in.
 	if (LIST_LINK == vtype)
 	{
-		const HandleSeq& oset = _values->getOutgoingSet();
+		const HandleSeq& oset = valley->getOutgoingSet();
 		try
 		{
 			// return vars.substitute(bods, oset, /* silent */ true);
@@ -387,7 +420,7 @@ Handle PutLink::do_reduce(void) const
 		"Should have caught this earlier, in the ctor");
 
 	HandleSeq bset;
-	for (const Handle& h : _values->getOutgoingSet())
+	for (const Handle& h : valley->getOutgoingSet())
 	{
 		const HandleSeq& oset = h->getOutgoingSet();
 		try
