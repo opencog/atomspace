@@ -315,8 +315,8 @@ Handle PutLink::do_reduce(void) const
 
 	size_t nvars = vars.varseq.size();
 
-	// FunctionLinks behave like combinators; that is, one can create
-	// valid beta-redexes with them. We handle that here.
+	// FunctionLinks behave like pointless lambdas; that is, one can
+	// create valid beta-redexes with them. We handle that here.
 	//
 	// XXX At this time, we don't know the number of arguments any
 	// given FunctionLink might take.  Atomese does have the mechanisms
