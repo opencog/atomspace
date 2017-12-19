@@ -146,7 +146,7 @@ HandleSeq RewriteLink::substitute_bodies(const Handle& nvardecl,
                                          const HandleMap& vm) const
 {
 	const Variables& variables = get_variables();
-	return substitute_bodies(nvardecl, variables.make_values(vm));
+	return substitute_bodies(nvardecl, variables.make_sequence(vm));
 }
 
 HandleSeq RewriteLink::substitute_bodies(const Handle& nvardecl,

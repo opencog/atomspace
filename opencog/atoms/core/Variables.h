@@ -92,22 +92,15 @@ struct FreeVariables
 	void find_variables(const Handle&);
 	void find_variables(const HandleSeq&);
 
-	// Given a mapping from variables to values to create values
-	// sequence to be passed to substitute. Missing variable keys
-	// consider themselves as values.
-	HandleSeq make_values(const HandleMap&) const;
+	/// Convert a variable->value mapping into a sequence of "values"
+	/// that are in the same order as the free variables in this
+	/// class.  If the mapping does not mention a variable, then
+	/// that variable itself is used as the value.  This sequence
+	/// can be used with the substitute_nocheck() function below.
+	HandleSeq make_sequence(const HandleMap&) const;
 
-	// Erase the given variable, if exist
+	/// Erase the given variable, if it exists.
 	void erase(const Handle&);
-
-	// Comparison operators. Convenient to define containers of Variables
-	bool operator<(const FreeVariables& other) const;
-
-	// Return the number of variables
-	std::size_t size() const;
-
-	// Return true iff it has no variable
-	bool empty() const;
 
 	// Given the tree `tree` containing variables in it, create and
 	// return a new tree with the indicated values `vals` substituted
@@ -118,11 +111,21 @@ struct FreeVariables
 	                          const HandleSeq&,
 	                          bool silent=false) const;
 
-	// Like above but take a mapping from variables to values instead
-	// of a vector of values.
+	// Like the above, but takes a mapping from variables to values.
 	Handle substitute_nocheck(const Handle&,
 	                          const HandleMap&,
 	                          bool silent=false) const;
+
+	/// Comparison operator. Used to enable containers holding
+	/// this class.
+	bool operator<(const FreeVariables& other) const;
+
+	/// Return the number of free variables that this class is holding.
+	std::size_t size() const;
+
+	/// Return true, if there are no free variables.
+	bool empty() const;
+
 protected:
 	Handle substitute_scoped(const Handle&, const HandleSeq&, bool,
 	                         const IndexMap&,

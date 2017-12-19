@@ -115,7 +115,7 @@ void FreeVariables::find_variables(const Handle& h)
 	find_variables(HandleSeq{h});
 }
 
-HandleSeq FreeVariables::make_values(const HandleMap& varmap) const
+HandleSeq FreeVariables::make_sequence(const HandleMap& varmap) const
 {
 	HandleSeq values;
 	for (const Handle& var : varseq)
@@ -162,7 +162,7 @@ Handle FreeVariables::substitute_nocheck(const Handle& term,
                                          const HandleMap& vm,
                                          bool silent) const
 {
-	return substitute_scoped(term, make_values(vm), silent, index, 0);
+	return substitute_scoped(term, make_sequence(vm), silent, index, 0);
 }
 
 /// Perform beta-reduction on the term.  This is more-or-less a purely

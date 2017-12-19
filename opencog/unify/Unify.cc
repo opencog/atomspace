@@ -240,7 +240,7 @@ Unify::HandleCHandleMap Unify::substitution_closure(const HandleCHandleMap& var2
 	for (auto& el : result) {
 		VariableListPtr varlist = gen_varlist(el.second);
 		const Variables& variables = varlist->get_variables();
-		HandleSeq values = variables.make_values(var2val);
+		HandleSeq values = variables.make_sequence(var2val);
 		el.second.handle = variables.substitute_nocheck(el.second.handle, values);
 	}
 
@@ -304,7 +304,7 @@ Handle Unify::substitute(BindLinkPtr bl, const HandleMap& var2val,
 	const Variables variables = bl->get_variables();
 
 	// Turn the map into a vector of new variable names/values
-	HandleSeq values = variables.make_values(var2val);
+	HandleSeq values = variables.make_sequence(var2val);
 
 	// Substituted BindLink outgoings
 	HandleSeq hs;
