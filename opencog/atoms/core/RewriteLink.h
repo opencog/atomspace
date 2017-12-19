@@ -119,11 +119,22 @@ public:
 	Handle alpha_convert(const HandleMap& vsmap) const;
 
 	/**
-	 * Perform a substitution of values for variables. Given a mapping
-	 * between variables and values, generate the RewriteLink that
-	 * would result from the replacement of the variables by the values.
-	 * If all variables are substituted, then the returned atom will
-	 * still be a RewriteLink, but with an empty variable declaration.
+	 * Perform a beta-reduction and optional alpha-conversion,
+	 * returning the reduced RewriteLink.
+	 *
+	 * If the map specifies a variable->value, then a standard
+	 * beta-reduction is performed, and the variable is removed
+	 * from the returned RewriteLink.
+	 *
+	 * If the map specifies a variable->new-variable, then an
+	 * alpha-conversion is performed.
+	 *
+	 * If the original RewriteLink contains bound variables that
+	 * are not mentioned in the map, these are untouched.
+	 *
+	 * If the RewriteLink is fully reduced, i.e. all variables have
+	 * been beta-reduced, then the returned atom is still a
+	 * RewriteLink, but with an empty variable declaration.
 	 */
 	virtual Handle substitute(const HandleMap& vm) const;
 
@@ -140,7 +151,7 @@ public:
 	                            const HandleSeq& values) const;
 
 	/**
-	 * Used by substitute.
+	 * Helper function, used by substitute and the unifier.
 	 *
 	 * After substitution, remaining quotations might be useless or
 	 * harmful, which might be the case if they deprive a nested
