@@ -42,6 +42,7 @@ typedef std::shared_ptr<RewriteLink> RewriteLinkPtr;
 class RewriteLink : public ScopeLink
 {
 protected:
+	bool _silent;
 	void init(void);
 
 	/**
@@ -94,6 +95,8 @@ public:
 	RewriteLink(const HandleSeq&, Type=REWRITE_LINK);
 	RewriteLink(const Handle& varcdecls, const Handle& body);
 	RewriteLink(const Link &l);
+
+	void make_silent(bool s) { _silent = s; }
 
 	/**
 	 * Return an alpha-converted copy of this atom. Optionally,

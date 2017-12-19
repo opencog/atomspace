@@ -46,20 +46,20 @@ void RewriteLink::init(void)
 }
 
 RewriteLink::RewriteLink(const Handle& vars, const Handle& body)
-	: ScopeLink(HandleSeq({vars, body}), REWRITE_LINK)
+	: ScopeLink(HandleSeq({vars, body}), REWRITE_LINK), _silent(false)
 {
 	init();
 }
 
 RewriteLink::RewriteLink(const HandleSeq& oset, Type t)
-	: ScopeLink(oset, t)
+	: ScopeLink(oset, t), _silent(false)
 {
 	if (skip_init(t)) return;
 	init();
 }
 
 RewriteLink::RewriteLink(const Link &l)
-	: ScopeLink(l)
+	: ScopeLink(l), _silent(false)
 {
 	if (skip_init(l.get_type())) return;
 	init();
@@ -92,7 +92,7 @@ Handle RewriteLink::alpha_convert(const HandleSeq& vars) const
 	// Perform alpha conversion
 	HandleSeq hs;
 	for (size_t i = 0; i < get_arity(); ++i)
-		hs.push_back(_varlist.substitute_nocheck(getOutgoingAtom(i), vars));
+		hs.push_back(_varlist.substitute_nocheck(getOutgoingAtom(i), vars, _silent));
 
 	// Create the alpha converted scope link
 	return createLink(hs, get_type());
@@ -132,7 +132,7 @@ Handle RewriteLink::beta_reduce(const HandleMap& vm) const
 Handle RewriteLink::beta_reduce(const HandleSeq& vals) const
 {
 	// XXX this implementation is wrong. Its a hack for now.
-	return get_variables().substitute(_body, vals);
+	return get_variables().substitute(_body, vals, _silent);
 }
 
 HandleSeq RewriteLink::substitute_bodies(const Handle& nvardecl,
@@ -158,7 +158,7 @@ Handle RewriteLink::substitute_body(const Handle& nvardecl,
                                     const Handle& body,
                                     const HandleSeq& values) const
 {
-	Handle nbody = get_variables().substitute_nocheck(body, values);
+	Handle nbody = get_variables().substitute_nocheck(body, values, _silent);
 	nbody = consume_ill_quotations(nvardecl, nbody);
 	return nbody;
 }
