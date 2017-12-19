@@ -30,13 +30,13 @@
 using namespace opencog;
 
 PutLink::PutLink(const HandleSeq& oset, Type t)
-    : RewriteLink(oset, t)
+    : PrenexLink(oset, t)
 {
 	init();
 }
 
 PutLink::PutLink(const Link& l)
-    : RewriteLink(l)
+    : PrenexLink(l)
 {
 	init();
 }
@@ -219,7 +219,7 @@ void PutLink::static_typecheck_values(void)
 
 /* ================================================================= */
 
-static inline Handle reddy(RewriteLinkPtr subs, const HandleSeq& oset)
+static inline Handle reddy(PrenexLinkPtr subs, const HandleSeq& oset)
 {
 	subs->make_silent(true);
 	return subs->beta_reduce(oset);
@@ -267,7 +267,7 @@ Handle PutLink::do_reduce(void) const
 {
 	Handle bods(_body);
 	Variables vars(_varlist);
-	RewriteLinkPtr subs(RewriteLinkCast(get_handle()));
+	PrenexLinkPtr subs(PrenexLinkCast(get_handle()));
 
 	// Resolve the body, if needed. That is, if the body is
 	// given in a defintion, get that defintion.

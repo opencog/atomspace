@@ -28,12 +28,12 @@
 using namespace opencog;
 
 LambdaLink::LambdaLink(const Handle& vars, const Handle& body)
-	: RewriteLink(HandleSeq({vars, body}), LAMBDA_LINK)
+	: PrenexLink(HandleSeq({vars, body}), LAMBDA_LINK)
 {
 }
 
 LambdaLink::LambdaLink(const HandleSeq& oset, Type t)
-	: RewriteLink(oset, t)
+	: PrenexLink(oset, t)
 {
 	if (not classserver().isA(t, LAMBDA_LINK))
 	{
@@ -44,7 +44,7 @@ LambdaLink::LambdaLink(const HandleSeq& oset, Type t)
 }
 
 LambdaLink::LambdaLink(const Link &l)
-	: RewriteLink(l)
+	: PrenexLink(l)
 {
 	// Type must be as expected
 	Type tscope = l.get_type();
