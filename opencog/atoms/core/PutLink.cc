@@ -282,27 +282,50 @@ Handle PutLink::do_reduce(void) const
 
 	size_t nvars = vars.varseq.size();
 
-	// At this time, we don't know the number of arguments a FunctionLink
-	// might take.  Atomese does have the mechanisms to declare these,
-	// including arbitrary-arity functions, its just that its currently
-	// not declared anywhere.  So we just punt.  Example usage:
+	// FunctionLinks behave like combinators; that is, one can create
+	// valid beta-redexes with them. We handle that here.
+	//
+	// XXX At this time, we don't know the number of arguments any
+	// given FunctionLink might take.  Atomese does have the mechanisms
+	// to declare these, including arbitrary-arity functions, its
+	// just that its currently not declared anywhere for any of the
+	// FunctionLinks.  So we just punt.  Example usage:
 	// (cog-execute! (Put (Plus) (List (Number 2) (Number 2))))
+	// (cog-execute! (Put (Plus (Number 9)) (List (Number 2) (Number 2))))
 	if (0 == nvars and classserver().isA(btype, FUNCTION_LINK))
 	{
 		if (LIST_LINK == vtype)
-			return createLink(_values->getOutgoingSet(), btype);
+		{
+			HandleSeq oset(bods->getOutgoingSet());
+			const HandleSeq& rest = _values->getOutgoingSet();
+			oset.insert(oset.end(), rest.begin(), rest.end());
+			return createLink(oset, btype);
+		}
 
 		if (SET_LINK != vtype)
-			return createLink(btype, _values);
+		{
+			HandleSeq oset(bods->getOutgoingSet());
+			oset.emplace_back(_values);
+			return createLink(oset, btype);
+		}
 
 		// If the values are given in a set, then iterate over the set...
 		HandleSeq bset;
 		for (const Handle& h : _values->getOutgoingSet())
 		{
 			if (LIST_LINK == h->get_type())
-				bset.emplace_back(createLink(h->getOutgoingSet(), btype));
+			{
+				HandleSeq oset(bods->getOutgoingSet());
+				const HandleSeq& rest = h->getOutgoingSet();
+				oset.insert(oset.end(), rest.begin(), rest.end());
+				bset.emplace_back(createLink(oset, btype));
+			}
 			else
-				bset.emplace_back(createLink(btype, h));
+			{
+				HandleSeq oset(bods->getOutgoingSet());
+				oset.emplace_back(h);
+				bset.emplace_back(createLink(oset, btype));
+			}
 		}
 		return createLink(bset, SET_LINK);
 	}

@@ -25,7 +25,6 @@
 #include <opencog/util/random.h>
 #include <opencog/util/Logger.h>
 #include <opencog/atoms/base/ClassServer.h>
-#include <opencog/atoms/core/LambdaLink.h>
 #include <opencog/atoms/core/TypeNode.h>
 #include <opencog/atomutils/TypeUtils.h>
 #include <opencog/atomutils/FindUtils.h>
