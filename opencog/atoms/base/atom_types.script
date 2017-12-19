@@ -244,16 +244,18 @@ DEFINE_LINK <- UNIQUE_LINK
 // restrictions on the variables.
 SCOPE_LINK <- ORDERED_LINK
 
-// The RewriteLink is a ScopeLink with a large number of methods
-// that perform various different kinds of re-writing on the ScopeLink.
+// The RewriteLink is a ScopeLink with extra methods that perform
+// alpha conversion and beta reduction on the ScopeLink. It is a base
+// class for many kinds of atom types, most on which CANNOT be treated
+// as if they were lambdas!  So user beware: although RewriteLink feels
+// like LambdaLink ... it isn't.  Not everything is a Lambda.
 REWRITE_LINK <- SCOPE_LINK
 
-// A LambdaLink is a link whose bound variables may be substituted,
-// that is, may be beta-reduced. It can be thought of as not only a
-// variable declaration (which is what ScopeLink does) but also has
-// the ability to substitute values for those variables.  This is
-// exactly the standard definition from lambda calc/functional
-// programming: an anonymous function declaration.
+// The LambdaLink is supposed to closely model the traditional concept
+// of a lambda from lambda calculus (or functional programming). It
+// is meant to behave just like a combinator, and supports the standard
+// operations of beta-reduction and alpha-conversion (modulo that the
+// atomspace enforces alpha-equivalence).
 LAMBDA_LINK <- REWRITE_LINK
 
 // PutLinks perform a beta-reduction when executed; i.e. they get
