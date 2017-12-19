@@ -121,18 +121,29 @@ Handle RewriteLink::beta_reduce(const HandleMap& vm) const
 	// Filter vardecl
 	nvardecl = filter_vardecl(nvardecl, hs);
 
-	// Insert vardecl in the outgoings if defined
+	// Insert vardecl in the outgoing set, if defined
 	if (nvardecl)
+	{
 		hs.insert(hs.begin(), nvardecl);
+	}
 
-	// Create the substituted scope
+	// Create the substituted scope.  I suspect that this is a bad
+	// idea, when nvardecl==nullptr, I mean, its just gonna be weird,
+	// and cause issues thhrought the code ... but ... whatever.
 	return createLink(hs, get_type());
 }
 
 Handle RewriteLink::beta_reduce(const HandleSeq& vals) const
 {
-	// XXX this implementation is wrong. Its a hack for now.
-	return get_variables().substitute(_body, vals, _silent);
+	// return get_variables().substitute(_body, vals, _silent);
+
+	HandleMap vm;
+	const Variables& vars = get_variables();
+	for (size_t i=0; i<vals.size(); i++)
+	{
+		vm.insert({vars.varseq[i], vals[i]});
+	}
+	return beta_reduce(vm);
 }
 
 HandleSeq RewriteLink::substitute_bodies(const Handle& nvardecl,
@@ -158,7 +169,8 @@ Handle RewriteLink::substitute_body(const Handle& nvardecl,
                                     const Handle& body,
                                     const HandleSeq& values) const
 {
-	Handle nbody = get_variables().substitute_nocheck(body, values, _silent);
+	// Handle nbody = get_variables().substitute_nocheck(body, values, _silent);
+	Handle nbody = get_variables().substitute(body, values, _silent);
 	nbody = consume_ill_quotations(nvardecl, nbody);
 	return nbody;
 }
