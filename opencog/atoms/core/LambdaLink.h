@@ -57,8 +57,6 @@ public:
 	LambdaLink(const Handle& varcdecls, const Handle& body);
 	LambdaLink(const Link &l);
 
-	virtual Handle beta_reduce(const HandleSeq& values) const;
-
 	static Handle factory(const Handle&);
 };
 
