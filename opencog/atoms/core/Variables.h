@@ -222,6 +222,11 @@ struct Variables : public FreeVariables,
 	                  const HandleSeq& vals,
 	                  bool silent=false) const;
 
+	// Like the above, but using a partial map.
+	Handle substitute(const Handle& tree,
+	                  const HandleMap& map,
+	                  bool silent=false) const;
+
 	// Extend this variable set by adding in the given variable set.
 	void extend(const Variables&);
 

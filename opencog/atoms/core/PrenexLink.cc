@@ -134,8 +134,8 @@ Handle PrenexLink::beta_reduce(const HandleMap& vmap) const
 		}
 	}
 
-	// Now get the new body... XXX should check... not nocheck
-	Handle newbod = vars.substitute_nocheck(_body, vm);
+	// Now get the new body...
+	Handle newbod = vars.substitute(_body, vm);
 
 	if (0 < final_varlist.size())
 	{

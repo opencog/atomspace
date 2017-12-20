@@ -627,6 +627,13 @@ Handle Variables::substitute(const Handle& func,
 	return substitute_nocheck(func, args);
 }
 
+Handle Variables::substitute(const Handle& func,
+                             const HandleMap& map,
+                             bool silent) const
+{
+	return substitute(func, make_sequence(map), silent);
+}
+
 /* ================================================================= */
 /**
  * Extend a set of variables.
