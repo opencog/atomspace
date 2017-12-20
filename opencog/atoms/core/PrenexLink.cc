@@ -75,13 +75,21 @@ Handle PrenexLink::beta_reduce(const HandleSeq& seq) const
 
 static Handle collect(const Variables& vtool,
                       const Handle& origvar, const Handle& newvar,
-                      HandleSeq& final_varlist, HandleSet& used_vars)
+                      HandleSeq& final_varlist,
+                      HandleSet& used_vars,
+                      HandleMap& issued_vars)
 {
-	// Is there a collision?
+	// If we've already issued this variable, do not re-issue it.
+	const auto& pr = issued_vars.find(newvar);
+	if (pr != issued_vars.end())
+		return pr->second;
+
+	// Is there a naming collision?
 	if (used_vars.find(newvar) == used_vars.end())
 	{
 		final_varlist.emplace_back(vtool.get_type_decl(origvar, newvar));
-		used_vars.insert(origvar);
+		used_vars.insert(newvar);
+		issued_vars.insert({newvar, newvar});
 		return Handle::UNDEFINED;
 	}
 
@@ -94,7 +102,8 @@ static Handle collect(const Variables& vtool,
 	} while (used_vars.find(alt) != used_vars.end());
 
 	final_varlist.emplace_back(vtool.get_type_decl(origvar, alt));
-	used_vars.insert(origvar);
+	used_vars.insert(alt);
+	issued_vars.insert({newvar, alt});
 	return alt;
 }
 
@@ -117,7 +126,9 @@ Handle PrenexLink::beta_reduce(const HandleMap& vmap) const
 		const auto& pare = vm.find(var);
 		if (vm.find(var) == vm.end())
 		{
-			Handle alt = collect(vtool, var, var, final_varlist, used_vars);
+			HandleMap issued; // empty
+			Handle alt = collect(vtool, var, var,
+			                     final_varlist, used_vars, issued);
 			if (alt)
 				vm.insert({var, alt});
 			continue;
@@ -130,7 +141,9 @@ Handle PrenexLink::beta_reduce(const HandleMap& vmap) const
 		// instead.
 		if (VARIABLE_NODE == valuetype)
 		{
-			Handle alt = collect(vtool, var, pare->second, final_varlist, used_vars);
+			HandleMap issued; // empty
+			Handle alt = collect(vtool, var, pare->second,
+			                     final_varlist, used_vars, issued);
 			if (alt)
 				vm[var] = alt;
 			continue;
@@ -143,9 +156,11 @@ Handle PrenexLink::beta_reduce(const HandleMap& vmap) const
 			ScopeLinkPtr sc = ScopeLinkCast(pare->second);
 			Variables bound = sc->get_variables();
 			Handle body = sc->get_body();
+			HandleMap issued;
 			for (const Handle& bv : bound.varseq)
 			{
-				Handle alt = collect(bound, bv, bv, final_varlist, used_vars);
+				Handle alt = collect(bound, bv, bv,
+				                     final_varlist, used_vars, issued);
 				if (alt)
 				{
 					// In the body of the scope link, rename
