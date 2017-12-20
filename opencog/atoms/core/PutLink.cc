@@ -149,8 +149,19 @@ void PutLink::static_typecheck_values(void)
 		    and PUT_LINK != vtype
 		    and not (classserver().isA(vtype, SATISFYING_LINK)))
 		{
-				throw InvalidParamException(TRACE_INFO,
-					"PutLink mismatched type!");
+			// Well, one more possible case ...
+			// Function composition with lambda means that
+			// the body of the lambda must be the right type.
+			if (LAMBDA_LINK == vtype)
+			{
+				LambdaLinkPtr lam(LambdaLinkCast(valley));
+				const Handle& body = lam->get_body();
+				if (_varlist.is_type(body))
+					return; // everything is OK.
+			}
+
+			throw InvalidParamException(TRACE_INFO,
+				"PutLink mismatched type!");
 		}
 		return;
 	}
