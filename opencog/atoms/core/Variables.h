@@ -233,9 +233,15 @@ struct Variables : public FreeVariables,
 	// Erase the given variable, if exist
 	void erase(const Handle&);
 
-	/// This is the dual of VariableList::validate_vartype. convert a
-	/// Variables object into a Handle variable declaration usable by
-	/// by ScopeLink.
+	/// Return the TypedVariableLink for the indicated variable.
+	/// Return just the Variable itself, if its not typed.
+	Handle get_type_decl(const Handle&, const Handle&) const;
+
+	/// This is the dual of VariableList::validate_vartype.
+	/// (XXX Dual in what way?)
+	///
+	/// Convert everything in this object into a single VariableList,
+	/// suitable for direct use in a ScopeLink.
 	///
 	/// If empty then return the empty VariableList.
 	///

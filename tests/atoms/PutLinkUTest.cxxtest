@@ -21,6 +21,7 @@
  * 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
  */
 
+#include <opencog/util/exceptions.h>
 #include <opencog/atoms/base/Atom.h>
 #include <opencog/atomspace/AtomSpace.h>
 #include <opencog/atoms/core/PutLink.h>
@@ -55,6 +56,7 @@ public:
 	void test_eta();
 	void test_alpha();
 	void test_compose();
+	void test_typed_compose();
 	void test_ident_compose();
 	void test_recursive_compose();
 	void test_eval_inheritance();
@@ -462,6 +464,96 @@ void PutLinkUTest::test_compose()
 	printf("Expecting %s\n", expected_putted->to_string().c_str());
 	printf("Got %s\n", putted->to_string().c_str());
 	TS_ASSERT_EQUALS(putted, expected_putted);
+
+	logger().info("END TEST: %s", __FUNCTION__);
+}
+
+// Test function composition with types.
+void PutLinkUTest::test_typed_compose()
+{
+	logger().info("BEGIN TEST: %s", __FUNCTION__);
+
+	// Test typed function compostion
+	//
+	// (define g (Lambda
+	//    (TypedVariable (Variable "X") (TypeNode "InheritanceLink"))
+	//    (Evaluation (Predicate "P") (Variable "X"))))
+	// (define f (Lambda
+	//    (VariableList
+	//       (TypedVariable (Variable "X") (TypeNode "ConceptNode"))
+	//       (TypedVariable (Variable "Y") (TypeNode "ConceptNode")))
+	//    (Inheritance (Variable "X") (Variable "Y"))))
+	//
+	// (cog-execute! (Put g f))
+	//
+	// We expect the result to be in prenex form.
+	//
+	Handle gee =
+		L(LAMBDA_LINK,
+			L(TYPED_VARIABLE_LINK,
+				N(VARIABLE_NODE, "$x"),
+				N(TYPE_NODE, "InheritanceLink")),
+			L(EVALUATION_LINK,
+				N(PREDICATE_NODE, "P"),
+				N(VARIABLE_NODE, "$x")));
+	Handle eff =
+		L(LAMBDA_LINK,
+			L(VARIABLE_LIST,
+				L(TYPED_VARIABLE_LINK,
+					N(VARIABLE_NODE, "$x"),
+					N(TYPE_NODE, "ConceptNode")),
+				L(TYPED_VARIABLE_LINK,
+					N(VARIABLE_NODE, "$y"),
+					N(TYPE_NODE, "ConceptNode"))),
+			L(INHERITANCE_LINK,
+				N(VARIABLE_NODE, "$x"),
+				N(VARIABLE_NODE, "$y")));
+	Handle put =
+		L(PUT_LINK, gee, eff);
+
+	Instantiator inst(&_as);
+	Handle putted = inst.execute(put);
+
+	Handle expected_putted =
+		L(LAMBDA_LINK,
+			L(VARIABLE_LIST,
+				L(TYPED_VARIABLE_LINK,
+					N(VARIABLE_NODE, "$u"),
+					N(TYPE_NODE, "ConceptNode")),
+				L(TYPED_VARIABLE_LINK,
+					N(VARIABLE_NODE, "$v"),
+					N(TYPE_NODE, "ConceptNode"))),
+			L(EVALUATION_LINK,
+				N(PREDICATE_NODE, "P"),
+				L(INHERITANCE_LINK,
+					N(VARIABLE_NODE, "$u"),
+					N(VARIABLE_NODE, "$v"))));
+
+	printf("Expecting %s\n", expected_putted->to_string().c_str());
+	printf("Got %s\n", putted->to_string().c_str());
+	TS_ASSERT_EQUALS(putted, expected_putted);
+
+	Handle gahhh =
+		L(LAMBDA_LINK,
+			L(TYPED_VARIABLE_LINK,
+				N(VARIABLE_NODE, "$x"),
+				N(TYPE_NODE, "SimilarityLink")), // type mismatch here!
+			L(EVALUATION_LINK,
+				N(PREDICATE_NODE, "P"),
+				N(VARIABLE_NODE, "$x")));
+
+	bool caught = false;
+	try
+	{
+		put = L(PUT_LINK, gahhh, eff);
+		inst.execute(put);
+	}
+	catch(const StandardException& ex)
+	{
+		caught = true;
+	}
+	printf("Expecting throw, got %d\n", caught);
+	TSM_ASSERT("Failed to catch expected exception", caught);
 
 	logger().info("END TEST: %s", __FUNCTION__);
 }
