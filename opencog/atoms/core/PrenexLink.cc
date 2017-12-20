@@ -29,7 +29,6 @@
 #include <opencog/atomutils/TypeUtils.h>
 #include <opencog/atomutils/FindUtils.h>
 
-#include "LambdaLink.h"
 #include "PrenexLink.h"
 
 using namespace opencog;
@@ -164,7 +163,7 @@ Handle PrenexLink::beta_reduce(const HandleMap& vmap) const
 	if (0 < final_varlist.size())
 	{
 		Handle vdecl(createVariableList(final_varlist));
-		return Handle(createLambdaLink(vdecl, newbod));
+		return Handle(createLink(get_type(), vdecl, newbod));
 	}
 
 	return newbod;
