@@ -66,13 +66,6 @@ PrenexLink::PrenexLink(const Link &l)
 
 /* ================================================================= */
 
-Handle PrenexLink::beta_reduce(const HandleSeq& seq) const
-{
-	return RewriteLink::beta_reduce(seq);
-}
-
-/* ================================================================= */
-
 static Handle collect(const Variables& vtool,
                       const Handle& origvar, const Handle& newvar,
                       HandleSeq& final_varlist,
@@ -106,6 +99,63 @@ static Handle collect(const Variables& vtool,
 	issued_vars.insert({newvar, alt});
 	return alt;
 }
+
+/* ================================================================= */
+
+Handle PrenexLink::beta_reduce(const HandleSeq& seq) const
+{
+	const Variables& vtool = get_variables();
+	if (seq.size() != vtool.size() and
+	    1 == seq.size() and
+	    SCOPE_LINK == seq[0]->get_type())
+	{
+		ScopeLinkPtr lam(ScopeLinkCast(seq[0]));
+		const Handle& body = lam->get_body();
+		if (body->get_arity() != vtool.size() or
+		    body->get_type() != LIST_LINK)
+		{
+			if (_silent) return Handle::UNDEFINED;
+			throw SyntaxException(TRACE_INFO,
+			   "PrenexLink has mismatched eta, expecting %lu == %lu",
+			   vtool.size(), body->get_arity());
+		}
+
+		HandleMap vm;
+		HandleSeq final_varlist;
+		HandleSet used_vars;
+
+		Variables bound = lam->get_variables();
+		HandleMap issued;
+		for (const Handle& bv : bound.varseq)
+		{
+			Handle alt = collect(bound, bv, bv,
+			                     final_varlist, used_vars, issued);
+			if (alt)
+				vm.insert({bv,alt});
+		}
+
+		// Now get the new body...
+		Handle newbod = vtool.substitute(body, vm, _silent);
+
+		if (0 < final_varlist.size())
+		{
+			Handle vdecl;
+			if (1 == final_varlist.size())
+				vdecl = final_varlist[0];
+			else
+				vdecl = Handle(createVariableList(final_varlist));
+
+			return Handle(createLink(get_type(), vdecl, newbod));
+		}
+
+		return newbod;
+	}
+
+	// Else not an eta reduction. Do the normal thing.
+	return RewriteLink::beta_reduce(seq);
+}
+
+/* ================================================================= */
 
 Handle PrenexLink::beta_reduce(const HandleMap& vmap) const
 {
