@@ -29,6 +29,7 @@
 #include <opencog/atomutils/TypeUtils.h>
 #include <opencog/atomutils/FindUtils.h>
 
+#include "LambdaLink.h"
 #include "RewriteLink.h"
 
 using namespace opencog;
@@ -143,10 +144,48 @@ Handle RewriteLink::beta_reduce(const HandleMap& vm) const
 
 Handle RewriteLink::beta_reduce(const HandleSeq& vals) const
 {
-	// return get_variables().substitute(_body, vals, _silent);
+	const Variables& vars = get_variables();
+	if (vals.size() != vars.size())
+	{
+		if (1 != vals.size() or LAMBDA_LINK != vals[0]->get_type())
+		{
+			if (_silent) return Handle::UNDEFINED;
+
+			throw SyntaxException(TRACE_INFO,
+				"RewriteLink has mismatched arity, expecting %lu == %lu",
+				vars.size(), vals.size());
+		}
+
+		// Verify that eta reduction is possible...
+		LambdaLinkPtr lam(LambdaLinkCast(vals[0]));
+		const Handle& body = lam->get_body();
+		if (body->get_arity() != vars.size())
+		{
+			if (_silent) return Handle::UNDEFINED;
+
+			throw SyntaxException(TRACE_INFO,
+				"RewriteLink has mismatched eta, expecting %lu == %lu",
+				vars.size(), body->get_arity());
+		}
+
+	}
+
+	if (1 == vals.size() and LAMBDA_LINK == vals[0]->get_type())
+	{
+		// Attempt a cheesy form of eta reduction.
+		// XXX this is not really correct, because we are accidentally
+		// converting bound variables into free variables.
+		LambdaLinkPtr lam(LambdaLinkCast(vals[0]));
+		const Handle& body = lam->get_body();
+		const HandleSeq& eta = body->getOutgoingSet();
+		HandleMap vm;
+
+		for (size_t i=0; i<eta.size(); i++)
+			vm.insert({vars.varseq[i], eta[i]});
+		return beta_reduce(vm);
+	}
 
 	HandleMap vm;
-	const Variables& vars = get_variables();
 	for (size_t i=0; i<vals.size(); i++)
 	{
 		vm.insert({vars.varseq[i], vals[i]});

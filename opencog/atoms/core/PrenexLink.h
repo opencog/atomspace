@@ -52,10 +52,7 @@ public:
 	PrenexLink(const Handle& varcdecls, const Handle& body);
 	PrenexLink(const Link &l);
 
-	virtual Handle beta_reduce(const HandleSeq& seq) const {
-		// call the base class, trivially.
-		return RewriteLink::beta_reduce(seq);
-	}
+	virtual Handle beta_reduce(const HandleSeq& seq) const;
 	virtual Handle beta_reduce(const HandleMap& vm) const;
 
 	static Handle factory(const Handle&);

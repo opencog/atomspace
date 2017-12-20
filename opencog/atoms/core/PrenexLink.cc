@@ -67,6 +67,13 @@ PrenexLink::PrenexLink(const Link &l)
 
 /* ================================================================= */
 
+Handle PrenexLink::beta_reduce(const HandleSeq& seq) const
+{
+	return RewriteLink::beta_reduce(seq);
+}
+
+/* ================================================================= */
+
 static Handle collect(const Handle& var,
                       HandleSeq& final_varlist, HandleSet& used_vars)
 {
