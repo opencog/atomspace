@@ -29,6 +29,7 @@
 #include <opencog/atomutils/TypeUtils.h>
 #include <opencog/atomutils/FindUtils.h>
 
+#include "LambdaLink.h"
 #include "PrenexLink.h"
 
 using namespace opencog;
@@ -66,7 +67,27 @@ PrenexLink::PrenexLink(const Link &l)
 
 /* ================================================================= */
 
-// Handle s
+static Handle collect(const Handle& var,
+                      HandleSeq& final_varlist, HandleSet& used_vars)
+{
+	// Is there a collision?
+	if (used_vars.find(var) == used_vars.end())
+	{
+		final_varlist.push_back(var);
+		used_vars.insert(var);
+		return Handle::UNDEFINED;
+	}
+
+	// Aiiee, there is a collision, make a new name!
+	Handle alt;
+	do
+	{
+		std::string altname = randstr(var->get_name() + "-");
+		alt = createNode(VARIABLE_NODE, altname);
+	} while (used_vars.find(alt) != used_vars.end());
+	used_vars.insert(alt);
+	return alt;
+}
 
 Handle PrenexLink::beta_reduce(const HandleMap& vmap) const
 {
@@ -82,50 +103,47 @@ Handle PrenexLink::beta_reduce(const HandleMap& vmap) const
 	Variables vars = get_variables();
 	for (const Handle& var : vars.varseq)
 	{
-		// If we are not substituting for this, copy it over.
+		// If we are not substituting for this variable, copy it
+		// over to the final list.
 		const auto& pare = vm.find(var);
 		if (vm.find(var) == vm.end())
 		{
-			// Is there a collision?
-			if (used_vars.find(var) == used_vars.end())
-			{
-				final_varlist.push_back(var);
-				used_vars.insert(var);
-			}
-			else
-			{
-				// Aiiee, there is a collision, make a new name!
-				Handle alt;
-				do
-				{
-					std::string altname = randstr(var->get_name() + "-");
-					alt = createNode(VARIABLE_NODE, altname);
-				} while (used_vars.find(alt) != used_vars.end());
+			Handle alt = collect(var, final_varlist, used_vars);
+			if (alt)
 				vm.insert({var, alt});
-				used_vars.insert(alt);
-			}
 			continue;
 		}
 
 		// If we are here, then var is in to be beta-reduced.
-		// Is the value a ScopeLink?
+		// Is the value a ScopeLink? If so, handle it.
 		Type vtype = pare->second->get_type();
 		if (classserver().isA(vtype, SCOPE_LINK))
 		{
 			ScopeLinkPtr sc = ScopeLinkCast(pare->second);
 			Variables bound = sc->get_variables();
-printf("duuude ist scope\n");
+			Handle body = sc->get_body();
 			for (const Handle& bv : bound.varseq)
 			{
-				final_varlist.push_back(bv);
-				used_vars.insert(bv);
+				Handle alt = collect(bv, final_varlist, used_vars);
+				if (alt)
+				{
+					// body = substitute_nocheck(...); XXX TODO
+				}
 			}
-			vm[pare->first] = sc->get_body();
+			vm[pare->first] = body;
 		}
 	}
 
-	// XXX this is wrong.
-	return RewriteLink::beta_reduce(vm);
+	// Now get the new body... XXX should check... not nocheck
+	Handle newbod = vars.substitute_nocheck(_body, vm);
+
+	if (0 < final_varlist.size())
+	{
+		Handle vdecl(createVariableList(final_varlist));
+		return Handle(createLambdaLink(vdecl, newbod));
+	}
+
+	return newbod;
 }
 
 /* ================================================================= */
