@@ -92,6 +92,7 @@ static Handle collect(const Handle& var,
 		std::string altname = randstr(var->get_name() + "-");
 		alt = createNode(VARIABLE_NODE, altname);
 	} while (used_vars.find(alt) != used_vars.end());
+	final_varlist.push_back(alt);
 	used_vars.insert(alt);
 	return alt;
 }
