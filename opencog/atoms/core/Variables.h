@@ -235,7 +235,7 @@ struct Variables : public FreeVariables,
 
 	/// Return the TypedVariableLink for the indicated variable.
 	/// Return just the Variable itself, if its not typed.
-	Handle get_type_decl(const Handle&) const;
+	Handle get_type_decl(const Handle&, const Handle&) const;
 
 	/// This is the dual of VariableList::validate_vartype.
 	/// (XXX Dual in what way?)

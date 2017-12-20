@@ -719,10 +719,12 @@ bool FreeVariables::empty() const
 	return varseq.empty();
 }
 
-Handle Variables::get_type_decl(const Handle& var) const
+/// Look up the type declaration for `var`, but create the actual
+/// declaration for `alt`.  This is an alpha-renaming.
+Handle Variables::get_type_decl(const Handle& var, const Handle& alt) const
 {
 	// Simple type info
-	auto sit = _simple_typemap.find(var);
+	const auto& sit = _simple_typemap.find(var);
 	if (sit != _simple_typemap.end())
 	{
 		HandleSeq types;
@@ -730,7 +732,7 @@ Handle Variables::get_type_decl(const Handle& var) const
 			types.push_back(Handle(createTypeNode(t)));
 		Handle types_h = types.size() == 1 ? types[0]
 			: createLink(types, TYPE_CHOICE);
-		return Handle(createLink(TYPED_VARIABLE_LINK, var, types_h));
+		return Handle(createLink(TYPED_VARIABLE_LINK, alt, types_h));
 	}
 
 	auto dit = _deep_typemap.find(var);
@@ -748,7 +750,7 @@ Handle Variables::get_type_decl(const Handle& var) const
 	// TODO: _glob_intervalmap?
 
 	// No type info
-	return var;
+	return alt;
 }
 
 Handle Variables::get_vardecl() const
@@ -756,7 +758,7 @@ Handle Variables::get_vardecl() const
 	HandleSeq vars;
 	for (const Handle& var : varseq)
 	{
-		vars.emplace_back(get_type_decl(var));
+		vars.emplace_back(get_type_decl(var, var));
 	}
 	if (vars.size() == 1)
 		return vars[0];
