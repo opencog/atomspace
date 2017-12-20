@@ -56,6 +56,7 @@ public:
 	void test_alpha();
 	void test_compose();
 	void test_ident_compose();
+	void test_recursive_compose();
 	void test_eval_inheritance();
 	void test_eval_implication_1();
 	void test_eval_implication_2();
@@ -470,7 +471,7 @@ void PutLinkUTest::test_ident_compose()
 {
 	logger().info("BEGIN TEST: %s", __FUNCTION__);
 
-	// Test that simple function compostion can be performed.
+	// Test function compostion with a cartesian product
 	//
 	// (define g (Lambda (Evaluation (Variable "X") (Variable "Y"))))
 	// (define f2 (Lambda
@@ -518,6 +519,76 @@ void PutLinkUTest::test_ident_compose()
 				L(INHERITANCE_LINK,
 					N(VARIABLE_NODE, "$y"),
 					N(VARIABLE_NODE, "$z"))));
+
+	printf("Expecting %s\n", expected_putted->to_string().c_str());
+	printf("Got %s\n", putted->to_string().c_str());
+	TS_ASSERT_EQUALS(putted, expected_putted);
+
+	logger().info("END TEST: %s", __FUNCTION__);
+}
+
+// Test recursive function composition
+void PutLinkUTest::test_recursive_compose()
+{
+	logger().info("BEGIN TEST: %s", __FUNCTION__);
+
+	// Test recursive function compostion can be performed.
+	//
+	// (define g (Lambda (Evaluation (Variable "X") (Variable "Y"))))
+	// (define f2 (Lambda
+	//    (VariableList (Variable "X") (Variable "Y") (Variable "Z"))
+	//    (Inheritance (Variable "Y")(Variable "Z")) ))
+	//
+	// (define inject ;; knock out first argument
+	//    (List (Concept "junk") (Variable "S")(Variable "T")))
+	//
+	// (define ident (Lambda (Variable "W") (Variable "W")))
+	// (cog-execute! (Put g (List ident (Put f2 inject))))
+	//
+	// We expect the result to be in prenex form.
+	//
+	Handle gee =
+		L(LAMBDA_LINK,
+			L(EVALUATION_LINK,
+				N(VARIABLE_NODE, "$x"),
+				N(VARIABLE_NODE, "$y")));
+	Handle eff =
+		L(LAMBDA_LINK,
+			L(VARIABLE_LIST,
+				N(VARIABLE_NODE, "$x"),
+				N(VARIABLE_NODE, "$y"),
+				N(VARIABLE_NODE, "$z")),
+			L(INHERITANCE_LINK,
+				N(VARIABLE_NODE, "$y"),
+				N(VARIABLE_NODE, "$z")));
+	Handle inject =
+		L(LIST_LINK,
+			N(CONCEPT_NODE, "junk"),
+			N(VARIABLE_NODE, "$x"),
+			N(VARIABLE_NODE, "$y"));
+
+	Handle ident =
+		L(LAMBDA_LINK,
+			N(VARIABLE_NODE, "$x"), N(VARIABLE_NODE, "$x"));
+
+	Handle put =
+		L(PUT_LINK, gee,
+			L(LIST_LINK, ident, L(PUT_LINK, eff, inject)));
+
+	Instantiator inst(&_as);
+	Handle putted = inst.execute(put);
+
+	Handle expected_putted =
+		L(LAMBDA_LINK,
+			L(VARIABLE_LIST,
+				N(VARIABLE_NODE, "A"),
+				N(VARIABLE_NODE, "B"),
+				N(VARIABLE_NODE, "C")),
+			L(EVALUATION_LINK,
+				N(VARIABLE_NODE, "A"),
+				L(INHERITANCE_LINK,
+					N(VARIABLE_NODE, "B"),
+					N(VARIABLE_NODE, "C"))));
 
 	printf("Expecting %s\n", expected_putted->to_string().c_str());
 	printf("Got %s\n", putted->to_string().c_str());
