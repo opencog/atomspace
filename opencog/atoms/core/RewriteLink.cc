@@ -132,7 +132,7 @@ Handle RewriteLink::beta_reduce(const HandleMap& vm) const
 		// form of a redex, i.e. doesn't have variable declarations
 		// in it. So we must not call createLink(), below.
 		Type t = get_type();
-		if (PUT_LINK == t)
+		if (PUT_LINK == t or LAMBDA_LINK == t)
 			return hs[0];
 	}
 
