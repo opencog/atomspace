@@ -327,7 +327,7 @@ Handle filter_vardecl(const Handle& vardecl, const HandleSeq& hs)
 	}
 
 	// If we're here we have failed to recognize vardecl as a useful
-	// and well formed variable declaration, so Handle::UNDEFINED is
+	// and well-formed variable declaration, so Handle::UNDEFINED is
 	// returned.
 	return Handle::UNDEFINED;
 }

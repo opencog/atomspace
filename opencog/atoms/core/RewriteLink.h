@@ -31,9 +31,15 @@ namespace opencog
  *  @{
  */
 
-/// The RewriteLink extends the ScopeLink class to add a large variety
-/// of methods to rewrite various parts of the ScopeLink in various
-/// ways.  These are used by the backward and foreward chainers to
+/// The RewriteLink extends the ScopeLink class to add several
+/// methods to perform alpha-conversion and beta-reduction on the
+/// ScopeLink.  Note that the beta-reduction being performed is
+/// NOT compatible with classical Lambda Calculus: it mixes together,
+/// in one place, both alpha and beta conversions. That's OK -
+/// Atomese is not Lambda Calculus; its more natural to do it this
+/// way in Atomese.
+///
+/// The methods here are used by the backward and foreward chainers to
 /// edit and create PatternLinks on the fly, thus allowing different
 /// kinds of queries to be generated and run as chaining proceeds.
 ///
@@ -128,7 +134,10 @@ public:
 	 * from the returned RewriteLink.
 	 *
 	 * If the map specifies a variable->new-variable, then an
-	 * alpha-conversion is performed.
+	 * alpha-conversion is performed, replacing the old variable
+	 * with the new one.  The variable continues to be bound,
+	 * instead of becoming free. Note that this is NOT how
+	 * classical lambda calculus works!!
 	 *
 	 * If the original RewriteLink contains bound variables that
 	 * are not mentioned in the map, these are untouched.
@@ -141,7 +150,10 @@ public:
 
 	/**
 	 * Like the above, but uses a sequence of values, presumed to be
-	 * in the same order as the variable declarations.
+	 * in the same order as the variable declarations. The number of
+	 * values must match the number of variables, or there must be
+	 * a single value that is eta-convertible and gives the right
+	 * number of values.
 	 */
 	virtual Handle beta_reduce(const HandleSeq& values) const;
 

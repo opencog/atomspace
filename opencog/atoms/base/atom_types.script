@@ -251,23 +251,29 @@ SCOPE_LINK <- ORDERED_LINK
 // like LambdaLink ... it isn't.  Not everything is a Lambda.
 REWRITE_LINK <- SCOPE_LINK
 
-// The LambdaLink is supposed to closely model the traditional concept
+// The PrenexLink is a RewriteLink that maintains prenex normal form.
+// It serves as a base class for the various pattern-matching links,
+// since pattern matching only makes sense when the patterns are written
+// in prenex normal form.  It also serves as the base class for Lambda,
+// since function composition in atomese only seems to make sense if
+// the result is in prenex form. (I can't figure out the meaning,
+// semantics of the non-prenex forms).
+PRENEX_LINK <- REWRITE_LINK
+
+// The LambdaLink is supposed to roughly model the traditional concept
 // of a lambda from lambda calculus (or functional programming). It
-// is meant to behave just like a combinator, and supports the standard
-// operations of beta-reduction and alpha-conversion (modulo that the
-// atomspace enforces alpha-equivalence).
-LAMBDA_LINK <- REWRITE_LINK
+// is meant to behave just like a lambda-abstraction, and supports the
+// standard operations of beta-reduction and alpha-conversion (modulo
+// that the atomspace enforces alpha-equivalence).  Non-prenex lambdas
+// in atomese don't seem to "make any sense", at least to me, so
+// lambda's are forced to be prenex. This is a departure from classical
+// lambda calculus.
+LAMBDA_LINK <- PRENEX_LINK
 
 // PutLinks perform a beta-reduction when executed; i.e. they get
 // beta-reduced when they are executed. PutLinks are the same thing as
 // beta-redexes.
-PUT_LINK <- REWRITE_LINK
-
-// The PrenexLink is a ScopeLink that is in prenex normal form.  It
-// serves as a base class for the various pattern-matching links, since
-// pattern matching only makes sense when the patterns are written in
-// prenex normal form.
-PRENEX_LINK <- REWRITE_LINK
+PUT_LINK <- PRENEX_LINK
 
 // Pattern definition, pattern grounding/satisfaction.
 // The PatternLink implements the base class holding a pattern that

@@ -23,7 +23,7 @@
 #ifndef _OPENCOG_PUT_LINK_H
 #define _OPENCOG_PUT_LINK_H
 
-#include <opencog/atoms/core/RewriteLink.h>
+#include <opencog/atoms/core/PrenexLink.h>
 
 namespace opencog
 {
@@ -70,7 +70,7 @@ namespace opencog
  * values must be wrapped in a ListLink, to be consistent with other
  * parts of atomese. However, for N=1, the ListLink is optional.
  */
-class PutLink : public RewriteLink
+class PutLink : public PrenexLink
 {
 protected:
 	/// The values that are to be placed into the body.

@@ -1,7 +1,8 @@
 /*
  * tests/atoms/PutUTest.cxxtest
  *
- * Copyright (C) 2015 Linas Vepstas
+ * Copyright (C) 2015,2017 Linas Vepstas
+ * Copyright (C) 2016 Nil Geiswieller
  * All Rights Reserved
  *
  * This program is free software; you can redistribute it and/or modify
@@ -52,6 +53,10 @@ public:
 	void test_lambda();
 	void test_lambda_partial_substitution();
 	void test_eta();
+	void test_alpha();
+	void test_compose();
+	void test_ident_compose();
+	void test_recursive_compose();
 	void test_eval_inheritance();
 	void test_eval_implication_1();
 	void test_eval_implication_2();
@@ -308,6 +313,21 @@ void PutLinkUTest::test_eta()
 	logger().info("BEGIN TEST: %s", __FUNCTION__);
 
 	// Test that eta-reduction can be performed on the values.
+	// (define lam (Lambda
+	//      (VariableList (Variable "$x")(Variable "$y")(Variable "$z"))
+	//      (Inheritance (Variable "$z") (Variable "$x"))))
+	//
+	// (define put (Put lam
+	//      (Lambda (Variable "$w")
+	//          (List (Concept "animal") (Concept "foobar") (Variable "$w")))))
+	//
+	// We expect the below, with $w bound, because this is how beta
+	// reduction is defined in atomese. Note that it is NOT compatible
+	// with beta-reduction is classical lambda calculus! In lmbda calc,
+	// the result would leave $w free, not bound.
+	//
+	// (Lambda (Variable "$w") (Inheritance (Variable "$w") (Concept "animal")))
+	//
 	Handle lam =
 		L(LAMBDA_LINK,
 			L(VARIABLE_LIST,
@@ -344,6 +364,238 @@ void PutLinkUTest::test_eta()
 	logger().info("END TEST: %s", __FUNCTION__);
 }
 
+// Test alpha-renaming, where values are variables. Similar to
+// the test_eta, except the input is pointless (aka tacit).
+void PutLinkUTest::test_alpha()
+{
+	logger().info("BEGIN TEST: %s", __FUNCTION__);
+
+	// Test that alpha-renaming can be performed on the values.
+	// (define lam (Lambda
+	//      (VariableList (Variable "$x")(Variable "$y")(Variable "$z"))
+	//      (Inheritance (Variable "$z") (Variable "$x"))))
+	//
+	// (define put (Put lam
+	//      (List (Concept "animal") (Concept "foobar") (Variable "$w"))))
+	//
+	// We expect the below, with $w bound, because this is how beta
+	// reduction is defined in atomese. Note that it is NOT compatible
+	// with beta-reduction is classical lambda calculus! In lmbda calc,
+	// the result would leave $w free, not bound.
+	//
+	// (Lambda (Variable "$w") (Inheritance (Variable "$w") (Concept "animal")))
+	//
+	Handle lam =
+		L(LAMBDA_LINK,
+			L(VARIABLE_LIST,
+				N(VARIABLE_NODE, "$x"),
+				N(VARIABLE_NODE, "$y"),
+				N(VARIABLE_NODE, "$z")),
+			L(INHERITANCE_LINK,
+				N(VARIABLE_NODE, "$z"),
+				N(VARIABLE_NODE, "$x")));
+	Handle put =
+		L(PUT_LINK,
+			lam,
+			L(LIST_LINK,
+				N(CONCEPT_NODE, "animal"),
+				N(CONCEPT_NODE, "foobar"),
+				N(VARIABLE_NODE, "$w")));
+
+	Instantiator inst(&_as);
+	Handle putted = inst.execute(put);
+
+	Handle expected_putted =
+		L(LAMBDA_LINK,
+			N(VARIABLE_NODE, "$w"),
+			L(INHERITANCE_LINK,
+				N(VARIABLE_NODE, "$w"),
+				N(CONCEPT_NODE, "animal")));
+
+	printf("Expecting %s\n", expected_putted->to_string().c_str());
+	printf("Got %s\n", putted->to_string().c_str());
+	TS_ASSERT_EQUALS(putted, expected_putted);
+
+	logger().info("END TEST: %s", __FUNCTION__);
+}
+
+// Test simple function composition.
+void PutLinkUTest::test_compose()
+{
+	logger().info("BEGIN TEST: %s", __FUNCTION__);
+
+	// Test that simple function compostion can be performed.
+	//
+	// (define g (Lambda (Evaluation (Predicate "P") (Variable "X"))))
+	// (define f (Lambda (Inheritance (Variable "X") (Variable "Y"))))
+	// (cog-execute! (Put g f))
+	//
+	// We expect the result to be in prenex form.
+	//
+	Handle gee =
+		L(LAMBDA_LINK,
+			L(EVALUATION_LINK,
+				N(PREDICATE_NODE, "P"),
+				N(VARIABLE_NODE, "$x")));
+	Handle eff =
+		L(LAMBDA_LINK,
+			L(INHERITANCE_LINK,
+				N(VARIABLE_NODE, "$x"),
+				N(VARIABLE_NODE, "$y")));
+	Handle put =
+		L(PUT_LINK, gee, eff);
+
+	Instantiator inst(&_as);
+	Handle putted = inst.execute(put);
+
+	Handle expected_putted =
+		L(LAMBDA_LINK,
+			L(VARIABLE_LIST,
+				N(VARIABLE_NODE, "$x"),
+				N(VARIABLE_NODE, "$y")),
+			L(EVALUATION_LINK,
+				N(PREDICATE_NODE, "P"),
+				L(INHERITANCE_LINK,
+					N(VARIABLE_NODE, "$x"),
+					N(VARIABLE_NODE, "$y"))));
+
+	printf("Expecting %s\n", expected_putted->to_string().c_str());
+	printf("Got %s\n", putted->to_string().c_str());
+	TS_ASSERT_EQUALS(putted, expected_putted);
+
+	logger().info("END TEST: %s", __FUNCTION__);
+}
+
+// Test function composition with identity function
+void PutLinkUTest::test_ident_compose()
+{
+	logger().info("BEGIN TEST: %s", __FUNCTION__);
+
+	// Test function compostion with a cartesian product
+	//
+	// (define g (Lambda (Evaluation (Variable "X") (Variable "Y"))))
+	// (define f2 (Lambda
+	//    (VariableList (Variable "X") (Variable "Y") (Variable "Z"))
+	//    (Inheritance (Variable "Y")(Variable "Z")) ))
+	//
+	// (define ident (Lambda (Variable "W") (Variable "W")))
+	// (cog-execute! (Put g (List ident f2)))
+	//
+	// We expect the result to be in prenex form.
+	//
+	Handle gee =
+		L(LAMBDA_LINK,
+			L(EVALUATION_LINK,
+				N(VARIABLE_NODE, "$x"),
+				N(VARIABLE_NODE, "$y")));
+	Handle eff =
+		L(LAMBDA_LINK,
+			L(VARIABLE_LIST,
+				N(VARIABLE_NODE, "$x"),
+				N(VARIABLE_NODE, "$y"),
+				N(VARIABLE_NODE, "$z")),
+			L(INHERITANCE_LINK,
+				N(VARIABLE_NODE, "$y"),
+				N(VARIABLE_NODE, "$z")));
+	Handle ident =
+		L(LAMBDA_LINK,
+			N(VARIABLE_NODE, "$x"), N(VARIABLE_NODE, "$x"));
+
+	Handle put =
+		L(PUT_LINK, gee, L(LIST_LINK, ident, eff));
+
+	Instantiator inst(&_as);
+	Handle putted = inst.execute(put);
+
+	Handle expected_putted =
+		L(LAMBDA_LINK,
+			L(VARIABLE_LIST,
+				N(VARIABLE_NODE, "$w"),
+				N(VARIABLE_NODE, "$x"),
+				N(VARIABLE_NODE, "$y"),
+				N(VARIABLE_NODE, "$z")),
+			L(EVALUATION_LINK,
+				N(VARIABLE_NODE, "$w"),
+				L(INHERITANCE_LINK,
+					N(VARIABLE_NODE, "$y"),
+					N(VARIABLE_NODE, "$z"))));
+
+	printf("Expecting %s\n", expected_putted->to_string().c_str());
+	printf("Got %s\n", putted->to_string().c_str());
+	TS_ASSERT_EQUALS(putted, expected_putted);
+
+	logger().info("END TEST: %s", __FUNCTION__);
+}
+
+// Test recursive function composition
+void PutLinkUTest::test_recursive_compose()
+{
+	logger().info("BEGIN TEST: %s", __FUNCTION__);
+
+	// Test recursive function compostion can be performed.
+	//
+	// (define g (Lambda (Evaluation (Variable "X") (Variable "Y"))))
+	// (define f2 (Lambda
+	//    (VariableList (Variable "X") (Variable "Y") (Variable "Z"))
+	//    (Inheritance (Variable "Y")(Variable "Z")) ))
+	//
+	// (define inject ;; knock out first argument
+	//    (List (Concept "junk") (Variable "S")(Variable "T")))
+	//
+	// (define ident (Lambda (Variable "W") (Variable "W")))
+	// (cog-execute! (Put g (List ident (Put f2 inject))))
+	//
+	// We expect the result to be in prenex form.
+	//
+	Handle gee =
+		L(LAMBDA_LINK,
+			L(EVALUATION_LINK,
+				N(VARIABLE_NODE, "$x"),
+				N(VARIABLE_NODE, "$y")));
+	Handle eff =
+		L(LAMBDA_LINK,
+			L(VARIABLE_LIST,
+				N(VARIABLE_NODE, "$x"),
+				N(VARIABLE_NODE, "$y"),
+				N(VARIABLE_NODE, "$z")),
+			L(INHERITANCE_LINK,
+				N(VARIABLE_NODE, "$y"),
+				N(VARIABLE_NODE, "$z")));
+	Handle inject =
+		L(LIST_LINK,
+			N(CONCEPT_NODE, "junk"),
+			N(VARIABLE_NODE, "$x"),
+			N(VARIABLE_NODE, "$y"));
+
+	Handle ident =
+		L(LAMBDA_LINK,
+			N(VARIABLE_NODE, "$x"), N(VARIABLE_NODE, "$x"));
+
+	Handle put =
+		L(PUT_LINK, gee,
+			L(LIST_LINK, ident, L(PUT_LINK, eff, inject)));
+
+	Instantiator inst(&_as);
+	Handle putted = inst.execute(put);
+
+	Handle expected_putted =
+		L(LAMBDA_LINK,
+			L(VARIABLE_LIST,
+				N(VARIABLE_NODE, "A"),
+				N(VARIABLE_NODE, "B"),
+				N(VARIABLE_NODE, "C")),
+			L(EVALUATION_LINK,
+				N(VARIABLE_NODE, "A"),
+				L(INHERITANCE_LINK,
+					N(VARIABLE_NODE, "B"),
+					N(VARIABLE_NODE, "C"))));
+
+	printf("Expecting %s\n", expected_putted->to_string().c_str());
+	printf("Got %s\n", putted->to_string().c_str());
+	TS_ASSERT_EQUALS(putted, expected_putted);
+
+	logger().info("END TEST: %s", __FUNCTION__);
+}
 
 /**
  * This test is for the case where PutLink has to evaluate the beta
