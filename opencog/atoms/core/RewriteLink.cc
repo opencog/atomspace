@@ -170,7 +170,9 @@ Handle RewriteLink::beta_reduce(const HandleSeq& vals) const
 
 	}
 
-	if (1 == vals.size() and LAMBDA_LINK == vals[0]->get_type())
+	if (vals.size() != vars.size() and
+	    1 == vals.size() and
+       LAMBDA_LINK == vals[0]->get_type())
 	{
 		// Perform a very simple-minded eta reduction.
 		LambdaLinkPtr lam(LambdaLinkCast(vals[0]));
