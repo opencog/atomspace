@@ -146,8 +146,11 @@ Handle PrenexLink::beta_reduce(const HandleMap& vmap) const
 				Handle alt = collect(bv, final_varlist, used_vars);
 				if (alt)
 				{
-OC_ASSERT(false, "Not Implemented!");
-					// body = substitute_nocheck(...); XXX TODO
+					// In the body of the scope link, rename
+					// the bond variable to its new name.
+					HandleMap alpha;
+					alpha[bv] = alt;
+					body = bound.substitute_nocheck(body, alpha);
 				}
 			}
 			vm[pare->first] = body;
