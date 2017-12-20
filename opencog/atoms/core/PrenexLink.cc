@@ -81,7 +81,7 @@ static Handle collect(const Variables& vtool,
 	if (used_vars.find(newvar) == used_vars.end())
 	{
 		final_varlist.emplace_back(vtool.get_type_decl(origvar, newvar));
-		used_vars.insert(newvar);
+		used_vars.insert(origvar);
 		return Handle::UNDEFINED;
 	}
 
@@ -94,7 +94,7 @@ static Handle collect(const Variables& vtool,
 	} while (used_vars.find(alt) != used_vars.end());
 
 	final_varlist.emplace_back(vtool.get_type_decl(origvar, alt));
-	used_vars.insert(alt);
+	used_vars.insert(origvar);
 	return alt;
 }
 
