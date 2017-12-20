@@ -474,7 +474,9 @@ void PutLinkUTest::test_typed_compose()
 
 	// Test typed function compostion
 	//
-	// (define g (Lambda (Evaluation (Predicate "P") (Variable "X"))))
+	// (define g (Lambda
+	//    (TypedVariable (Variable "X") (TypeNode "InheritanceLink"))
+	//    (Evaluation (Predicate "P") (Variable "X"))))
 	// (define f (Lambda
 	//    (VariableList
 	//       (TypedVariable (Variable "X") (TypeNode "ConceptNode"))
@@ -487,6 +489,9 @@ void PutLinkUTest::test_typed_compose()
 	//
 	Handle gee =
 		L(LAMBDA_LINK,
+			L(TYPED_VARIABLE_LINK,
+				N(VARIABLE_NODE, "$x"),
+				N(TYPE_NODE, "InheritanceLink")),
 			L(EVALUATION_LINK,
 				N(PREDICATE_NODE, "P"),
 				N(VARIABLE_NODE, "$x")));
