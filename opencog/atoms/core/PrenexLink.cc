@@ -121,10 +121,22 @@ Handle PrenexLink::beta_reduce(const HandleMap& vmap) const
 			continue;
 		}
 
-		// If we are here, then var is in to be beta-reduced.
+		Type valuetype = pare->second->get_type();
+
+		// If we are here, then var will be beta-reduced.
+		// But if the value is another variable, then alpha-convert,
+		// instead.
+		if (VARIABLE_NODE == valuetype)
+		{
+			Handle alt = collect(pare->second, final_varlist, used_vars);
+			if (alt)
+				vm[var] = alt;
+			continue;
+		}
+
+		// If we are here, then var will be beta-reduced.
 		// Is the value a ScopeLink? If so, handle it.
-		Type vtype = pare->second->get_type();
-		if (classserver().isA(vtype, SCOPE_LINK))
+		if (classserver().isA(valuetype, SCOPE_LINK))
 		{
 			ScopeLinkPtr sc = ScopeLinkCast(pare->second);
 			Variables bound = sc->get_variables();
@@ -134,6 +146,7 @@ Handle PrenexLink::beta_reduce(const HandleMap& vmap) const
 				Handle alt = collect(bv, final_varlist, used_vars);
 				if (alt)
 				{
+OC_ASSERT(false, "Not Implemented!");
 					// body = substitute_nocheck(...); XXX TODO
 				}
 			}
