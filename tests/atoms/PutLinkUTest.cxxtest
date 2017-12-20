@@ -52,6 +52,7 @@ public:
 	void test_lambda();
 	void test_lambda_partial_substitution();
 	void test_eta();
+	void test_alpha();
 	void test_eval_inheritance();
 	void test_eval_implication_1();
 	void test_eval_implication_2();
@@ -355,6 +356,54 @@ void PutLinkUTest::test_eta()
 	logger().info("END TEST: %s", __FUNCTION__);
 }
 
+// Test alpha-renaming, where values are variables. Similar to
+// the test_eta, except the result has free variables, not bound.
+void PutLinkUTest::test_alpha()
+{
+	logger().info("BEGIN TEST: %s", __FUNCTION__);
+
+	// Test that alpha-renaming can be performed on the values.
+	// (define lam (Lambda
+	//      (VariableList (Variable "$x")(Variable "$y")(Variable "$z"))
+	//      (Inheritance (Variable "$z") (Variable "$x"))))
+	//
+	// (define put (Put lam
+	//      (List (Concept "animal") (Concept "foobar") (Variable "$w"))))
+	// expect
+	//
+	// (Inheritance (Variable "$w") (Concept "animal"))
+	//
+	Handle lam =
+		L(LAMBDA_LINK,
+			L(VARIABLE_LIST,
+				N(VARIABLE_NODE, "$x"),
+				N(VARIABLE_NODE, "$y"),
+				N(VARIABLE_NODE, "$z")),
+			L(INHERITANCE_LINK,
+				N(VARIABLE_NODE, "$z"),
+				N(VARIABLE_NODE, "$x")));
+	Handle put =
+		L(PUT_LINK,
+			lam,
+			L(LIST_LINK,
+				N(CONCEPT_NODE, "animal"),
+				N(CONCEPT_NODE, "foobar"),
+				N(VARIABLE_NODE, "$w")));
+
+	Instantiator inst(&_as);
+	Handle putted = inst.execute(put);
+
+	Handle expected_putted =
+			L(INHERITANCE_LINK,
+				N(VARIABLE_NODE, "$w"),
+				N(CONCEPT_NODE, "animal"));
+
+	printf("Expecting %s\n", expected_putted->to_string().c_str());
+	printf("Got %s\n", putted->to_string().c_str());
+	TS_ASSERT_EQUALS(putted, expected_putted);
+
+	logger().info("END TEST: %s", __FUNCTION__);
+}
 
 /**
  * This test is for the case where PutLink has to evaluate the beta
