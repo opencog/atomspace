@@ -308,6 +308,17 @@ void PutLinkUTest::test_eta()
 	logger().info("BEGIN TEST: %s", __FUNCTION__);
 
 	// Test that eta-reduction can be performed on the values.
+	// (define lam (Lambda
+	//      (VariableList (Variable "$x")(Variable "$y")(Variable "$z"))
+	//      (Inheritance (Variable "$z") (Variable "$x"))))
+	//
+	// (define put (Put lam
+	//      (Lambda (Variable "$w")
+	//          (List (Concept "animal") (Concept "foobar") (Variable "$w")))))
+	// expect
+	//
+	// (Lambda (Variable "$w") (Inheritance (Variable "$w") (Concept "animal")))
+	//
 	Handle lam =
 		L(LAMBDA_LINK,
 			L(VARIABLE_LIST,
