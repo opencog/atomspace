@@ -132,7 +132,7 @@ Handle RewriteLink::beta_reduce(const HandleMap& vm) const
 		// form of a redex, i.e. doesn't have variable declarations
 		// in it. So we must not call createLink(), below.
 		Type t = get_type();
-		if (PUT_LINK == t or LAMBDA_LINK == t)
+		if (PUT_LINK == t)
 			return hs[0];
 	}
 
@@ -172,9 +172,7 @@ Handle RewriteLink::beta_reduce(const HandleSeq& vals) const
 
 	if (1 == vals.size() and LAMBDA_LINK == vals[0]->get_type())
 	{
-		// Attempt a cheesy form of eta reduction.
-		// XXX this is not really correct, because we are accidentally
-		// converting bound variables into free variables.
+		// Perform a very simple-minded eta reduction.
 		LambdaLinkPtr lam(LambdaLinkCast(vals[0]));
 		const Handle& body = lam->get_body();
 		const HandleSeq& eta = body->getOutgoingSet();
