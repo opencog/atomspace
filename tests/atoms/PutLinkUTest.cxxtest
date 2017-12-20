@@ -60,6 +60,7 @@ public:
 	void test_inject_compose();
 	void test_typed_compose();
 	void test_ident_compose();
+	void test_again_compose_ident();
 	void test_recursive_compose();
 	void test_eval_inheritance();
 	void test_eval_implication_1();
@@ -679,6 +680,18 @@ void PutLinkUTest::test_ident_compose()
 	printf("Got %s\n", putted->to_string().c_str());
 	TS_ASSERT_EQUALS(putted, expected_putted);
 
+	logger().info("END TEST: %s", __FUNCTION__);
+}
+
+// Test function composition with identity function
+void PutLinkUTest::test_again_compose_ident()
+{
+	logger().info("BEGIN TEST: %s", __FUNCTION__);
+
+	// A non-empty atomspace throws off alpha-conversion collions bugs.
+	// retest with an empty atomspace.
+	_as.clear();
+	test_ident_compose();
 	logger().info("END TEST: %s", __FUNCTION__);
 }
 
