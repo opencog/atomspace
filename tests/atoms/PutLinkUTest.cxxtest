@@ -505,7 +505,7 @@ void PutLinkUTest::test_inject_compose()
 			L(VARIABLE_LIST, X, Y, Z, W),
 			L(AND_LINK,
 				L(INHERITANCE_LINK, X, Y),
-				L(INHERITANCE_LINK, W, Z)));
+				L(INHERITANCE_LINK, Z, W)));
 
 	Handle eff =
 		L(LAMBDA_LINK,
