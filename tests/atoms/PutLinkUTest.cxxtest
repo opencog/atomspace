@@ -58,6 +58,7 @@ public:
 	void test_alpha();
 	void test_compose();
 	void test_inject_compose();
+	void test_simple_replace();
 	void test_typed_compose();
 	void test_ident_compose();
 	void test_again_compose_ident();
@@ -512,8 +513,7 @@ void PutLinkUTest::test_inject_compose()
 			L(VARIABLE_LIST, X, Y, Z),
 			L(LIST_LINK, X, Y, Y, Z));
 
-	Handle put =
-		L(PUT_LINK, gee, eff);
+	Handle put = L(PUT_LINK, gee, eff);
 
 	Instantiator inst(&_as);
 	Handle putted = inst.execute(put);
@@ -524,6 +524,68 @@ void PutLinkUTest::test_inject_compose()
 			L(AND_LINK,
 				L(INHERITANCE_LINK, X, Y),
 				L(INHERITANCE_LINK, Y, Z)));
+
+	printf("Expecting %s\n", expected_putted->to_string().c_str());
+	printf("Got %s\n", putted->to_string().c_str());
+	TS_ASSERT_EQUALS(putted, expected_putted);
+
+	logger().info("END TEST: %s", __FUNCTION__);
+}
+
+// Test basic insertion.
+// A lot like test_inject_compose, but simpler.
+void PutLinkUTest::test_simple_replace()
+{
+	logger().info("BEGIN TEST: %s", __FUNCTION__);
+
+	// Test function compostion with injection
+	//
+	// (define X (Variable "X"))
+	// (define Y (Variable "Y"))
+	// (define Z (Variable "Z"))
+	// (define W (Variable "W"))
+	//
+	// (define g (Lambda
+	//    (VariableList X Y W Z)
+	//    (And
+	//       (Inheritance X Y)
+	//       (Inheritance W Z))))
+	//
+	// (define A (Concept "A"))
+	// (define B (Concept "B"))
+	// (define C (Concept "C"))
+	//
+	// (define f (List A B B C)))
+	//
+	// (cog-execute! (Put g f))
+	//
+	Handle X = N(VARIABLE_NODE, "X");
+	Handle Y = N(VARIABLE_NODE, "Y");
+	Handle Z = N(VARIABLE_NODE, "Z");
+	Handle W = N(VARIABLE_NODE, "W");
+
+	Handle gee =
+		L(LAMBDA_LINK,
+			L(VARIABLE_LIST, X, Y, Z, W),
+			L(AND_LINK,
+				L(INHERITANCE_LINK, X, Y),
+				L(INHERITANCE_LINK, Z, W)));
+
+	Handle A = N(CONCEPT_NODE, "A");
+	Handle B = N(CONCEPT_NODE, "B");
+	Handle C = N(CONCEPT_NODE, "C");
+
+	Handle eff = L(LIST_LINK, A, B, B, C);
+
+	Handle put = L(PUT_LINK, gee, eff);
+
+	Instantiator inst(&_as);
+	Handle putted = inst.execute(put);
+
+	Handle expected_putted =
+		L(AND_LINK,
+			L(INHERITANCE_LINK, A, B),
+			L(INHERITANCE_LINK, B, C));
 
 	printf("Expecting %s\n", expected_putted->to_string().c_str());
 	printf("Got %s\n", putted->to_string().c_str());

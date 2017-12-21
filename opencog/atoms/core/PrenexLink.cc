@@ -72,7 +72,6 @@ Handle PrenexLink::reassemble(const HandleMap& vm,
 	const Variables& vtool = get_variables();
 
 	// Now get the new body...
-// XXX handle mutiple bodyes...
 	Handle newbod = vtool.substitute(_body, vm, _silent);
 
 	if (0 < final_varlist.size())
