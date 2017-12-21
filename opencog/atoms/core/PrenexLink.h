@@ -46,6 +46,7 @@ class PrenexLink : public RewriteLink
 {
 protected:
 	void init(void);
+	Handle reassemble(const HandleMap&, const HandleSeq&) const;
 
 public:
 	PrenexLink(const HandleSeq&, Type=PRENEX_LINK);

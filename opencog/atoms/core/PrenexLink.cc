@@ -66,6 +66,31 @@ PrenexLink::PrenexLink(const Link &l)
 
 /* ================================================================= */
 
+Handle PrenexLink::reassemble(const HandleMap& vm,
+                              const HandleSeq& final_varlist) const
+{
+	const Variables& vtool = get_variables();
+
+	// Now get the new body...
+// XXX handle mutiple bodyes...
+	Handle newbod = vtool.substitute(_body, vm, _silent);
+
+	if (0 < final_varlist.size())
+	{
+		Handle vdecl;
+		if (1 == final_varlist.size())
+			vdecl = final_varlist[0];
+		else
+			vdecl = Handle(createVariableList(final_varlist));
+
+		return Handle(createLink(get_type(), vdecl, newbod));
+	}
+
+	return newbod;
+}
+
+/* ================================================================= */
+
 static Handle collect(const Variables& vtool,
                       const Handle& origvar, const Handle& newvar,
                       HandleSeq& final_varlist,
@@ -104,62 +129,63 @@ static Handle collect(const Variables& vtool,
 
 Handle PrenexLink::beta_reduce(const HandleSeq& seq) const
 {
+	// Test for a special case: eta reduction on the supplied
+	// function.  We can recognize this if we don't get fewer
+	// arguments than we expected.
 	const Variables& vtool = get_variables();
-	if (seq.size() != vtool.size() and
-	    1 == seq.size() and
-	    classserver().isA(seq[0]->get_type(), SCOPE_LINK))
+	size_t seqsize = seq.size();
+	if (seqsize == vtool.size())
 	{
-		ScopeLinkPtr lam(ScopeLinkCast(seq[0]));
-		const Handle& body = lam->get_body();
-		if (body->get_arity() != vtool.size() or
-		    body->get_type() != LIST_LINK)
-		{
-			if (_silent) return Handle::UNDEFINED;
-			throw SyntaxException(TRACE_INFO,
-			   "PrenexLink has mismatched eta, expecting %lu == %lu",
-			   vtool.size(), body->get_arity());
-		}
-
-		HandleMap vm;
-		HandleSeq final_varlist;
-		HandleSet used_vars;
-
-		// First, figure out what the new variables will be.
-		Variables bound = lam->get_variables();
-		HandleMap issued;
-		for (const Handle& bv: bound.varseq)
-		{
-			Handle alt = collect(bound, bv, bv,
-			                     final_varlist, used_vars, issued);
-		}
-
-		// Next, figure out what substitutions will be made.
-		const HandleSeq& oset = body->getOutgoingSet();
-		for (size_t i=0; i<vtool.size(); i++)
-		{
-			vm.insert({vtool.varseq[i], oset[i]});
-		}
-
-		// Now get the new body...
-// XXX handle mutiple bodyes...
-		Handle newbod = vtool.substitute(_body, vm, _silent);
-
-		if (0 < final_varlist.size())
-		{
-			Handle vdecl;
-			if (1 == final_varlist.size())
-				vdecl = final_varlist[0];
-			else
-				vdecl = Handle(createVariableList(final_varlist));
-
-			return Handle(createLink(get_type(), vdecl, newbod));
-		}
-
-		return newbod;
+		// Not an eta reduction. Do the normal thing.
+		return RewriteLink::beta_reduce(seq);
 	}
 
-	// Else not an eta reduction. Do the normal thing.
-	return RewriteLink::beta_reduce(seq);
+	// If its an eta, there must be just one argument, and it must
+	// must be a ScopeLink.
+	if (1 != seqsize or
+	    not classserver().isA(seq[0]->get_type(), SCOPE_LINK))
+	{
+		if (_silent) return Handle::UNDEFINED;
+		throw SyntaxException(TRACE_INFO,
+		   "PrenexLink is badly formed");
+	}
+
+	// If its an eta, it had better have the right size.
+	ScopeLinkPtr lam(ScopeLinkCast(seq[0]));
+	const Handle& body = lam->get_body();
+	if (body->get_arity() != vtool.size() or
+	    body->get_type() != LIST_LINK)
+	{
+		if (_silent) return Handle::UNDEFINED;
+		throw SyntaxException(TRACE_INFO,
+		   "PrenexLink has mismatched eta, expecting %lu == %lu",
+		   vtool.size(), body->get_arity());
+	}
+
+	// If we are here, we have a valid eta reduction to perform.
+	HandleSeq final_varlist;
+	HandleSet used_vars;
+	HandleMap issued;
+
+	// First, figure out what the new variables will be.
+	Variables bound = lam->get_variables();
+	for (const Handle& bv: bound.varseq)
+	{
+		collect(bound, bv, bv, final_varlist, used_vars, issued);
+	}
+
+	// Next, figure out what substitutions will be made.
+	HandleMap vm;
+	const HandleSeq& oset = body->getOutgoingSet();
+	for (size_t i=0; i<vtool.size(); i++)
+	{
+		vm.insert({vtool.varseq[i], oset[i]});
+	}
+
+	// Almost done. The final_varlist holds the variable declarations,
+	// and the vm holds what needs to be substituted in. Substitute,
+	// and create the reduced link.
+	return reassemble(vm, final_varlist);
 }
 
 /* ================================================================= */
@@ -231,21 +257,10 @@ Handle PrenexLink::beta_reduce(const HandleMap& vmap) const
 		}
 	}
 
-	// Now get the new body...
-	Handle newbod = vtool.substitute(_body, vm, _silent);
-
-	if (0 < final_varlist.size())
-	{
-		Handle vdecl;
-		if (1 == final_varlist.size())
-			vdecl = final_varlist[0];
-		else
-			vdecl = Handle(createVariableList(final_varlist));
-
-		return Handle(createLink(get_type(), vdecl, newbod));
-	}
-
-	return newbod;
+	// Almost done. The final_varlist holds the variable declarations,
+	// and the vm holds what needs to be substituted in. Substitute,
+	// and create the reduced link.
+	return reassemble(vm, final_varlist);
 }
 
 /* ================================================================= */
