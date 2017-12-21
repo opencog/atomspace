@@ -103,9 +103,12 @@ store-atom load-atoms-of-type barrier)
 		; The fetch-incoming-set function for this is defined to perform
 		; a recursive fetch.
 		; We do an extra recursion here, in case we were passed a list.
-		(if (pair? atom)
-			(for-each load-referers atom)
-			(fetch-incoming-set atom)
+		(begin
+			(if (pair? atom)
+				(for-each load-referers atom)
+				(fetch-incoming-set atom)
+			)
+			(for-each load-referers (cog-incoming-set atom))
 		)
 	)
 )
