@@ -122,6 +122,11 @@ void PutLink::static_typecheck_values(void)
 	if (classserver().isA(btype, TYPE_NODE) or TYPE_CHOICE == btype)
 		return;
 
+	// If it's an UnquoteLink then the PutLink is likely quoted and
+	// thus there is nothing to do
+	if (btype == UNQUOTE_LINK)
+		return;
+
 	size_t sz = _varlist.varseq.size();
 
 	Handle valley = _values;
