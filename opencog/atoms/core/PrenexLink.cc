@@ -107,7 +107,7 @@ Handle PrenexLink::beta_reduce(const HandleSeq& seq) const
 	const Variables& vtool = get_variables();
 	if (seq.size() != vtool.size() and
 	    1 == seq.size() and
-	    SCOPE_LINK == seq[0]->get_type())
+	    classserver().isA(seq[0]->get_type(), SCOPE_LINK))
 	{
 		ScopeLinkPtr lam(ScopeLinkCast(seq[0]));
 		const Handle& body = lam->get_body();
@@ -124,18 +124,25 @@ Handle PrenexLink::beta_reduce(const HandleSeq& seq) const
 		HandleSeq final_varlist;
 		HandleSet used_vars;
 
+		// First, figure out what the new variables will be.
 		Variables bound = lam->get_variables();
 		HandleMap issued;
-		for (const Handle& bv : bound.varseq)
+		for (const Handle& bv: bound.varseq)
 		{
 			Handle alt = collect(bound, bv, bv,
 			                     final_varlist, used_vars, issued);
-			if (alt)
-				vm.insert({bv,alt});
+		}
+
+		// Next, figure out what substitutions will be made.
+		const HandleSeq& oset = body->getOutgoingSet();
+		for (size_t i=0; i<vtool.size(); i++)
+		{
+			vm.insert({vtool.varseq[i], oset[i]});
 		}
 
 		// Now get the new body...
-		Handle newbod = vtool.substitute(body, vm, _silent);
+// XXX handle mutiple bodyes...
+		Handle newbod = vtool.substitute(_body, vm, _silent);
 
 		if (0 < final_varlist.size())
 		{
