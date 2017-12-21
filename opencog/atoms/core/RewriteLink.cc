@@ -159,7 +159,9 @@ Handle RewriteLink::beta_reduce(const HandleSeq& vals) const
 		// Verify that eta reduction is possible...
 		LambdaLinkPtr lam(LambdaLinkCast(vals[0]));
 		const Handle& body = lam->get_body();
-		if (body->get_arity() != vars.size())
+
+		if (body->get_arity() != vars.size() or
+		    body->get_type() != LIST_LINK)
 		{
 			if (_silent) return Handle::UNDEFINED;
 
@@ -168,15 +170,9 @@ Handle RewriteLink::beta_reduce(const HandleSeq& vals) const
 				vars.size(), body->get_arity());
 		}
 
-	}
-
-	if (vals.size() != vars.size() and
-	    1 == vals.size() and
-       LAMBDA_LINK == vals[0]->get_type())
-	{
 		// Perform a very simple-minded eta reduction.
-		LambdaLinkPtr lam(LambdaLinkCast(vals[0]));
-		const Handle& body = lam->get_body();
+		// This will be incorrect under a variety of corner cases,
+		// but gives approximately correct results for the simple case.
 		const HandleSeq& eta = body->getOutgoingSet();
 		HandleMap vm;
 
