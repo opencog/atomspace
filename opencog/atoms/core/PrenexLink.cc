@@ -199,6 +199,7 @@ Handle PrenexLink::beta_reduce(const HandleMap& vmap) const
 	// collisions.
 	HandleSeq final_varlist;
 	HandleSet used_vars;
+	HandleMap issued;
 
 	Variables vtool = get_variables();
 	for (const Handle& var : vtool.varseq)
@@ -208,7 +209,6 @@ Handle PrenexLink::beta_reduce(const HandleMap& vmap) const
 		const auto& pare = vm.find(var);
 		if (vm.find(var) == vm.end())
 		{
-			HandleMap issued; // empty
 			Handle alt = collect(vtool, var, var,
 			                     final_varlist, used_vars, issued);
 			if (alt)
@@ -223,7 +223,6 @@ Handle PrenexLink::beta_reduce(const HandleMap& vmap) const
 		// instead.
 		if (VARIABLE_NODE == valuetype)
 		{
-			HandleMap issued; // empty
 			Handle alt = collect(vtool, var, pare->second,
 			                     final_varlist, used_vars, issued);
 			if (alt)
@@ -238,11 +237,11 @@ Handle PrenexLink::beta_reduce(const HandleMap& vmap) const
 			ScopeLinkPtr sc = ScopeLinkCast(pare->second);
 			Variables bound = sc->get_variables();
 			Handle body = sc->get_body();
-			HandleMap issued;
+			HandleMap scopissued;
 			for (const Handle& bv : bound.varseq)
 			{
 				Handle alt = collect(bound, bv, bv,
-				                     final_varlist, used_vars, issued);
+				                     final_varlist, used_vars, scopissued);
 				if (alt)
 				{
 					// In the body of the scope link, rename
