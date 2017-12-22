@@ -182,7 +182,7 @@ RTN_TYPE* ClassServer::searchToDepth(const std::vector<RTN_TYPE*>& vect,
 	return nullptr;
 }
 
-ClassServer::AtomFactory* ClassServer::getFactory(Type t)
+ClassServer::AtomFactory* ClassServer::getFactory(Type t) const
 {
 	if (nTypes <= t) return nullptr;
 
@@ -206,7 +206,7 @@ ClassServer::AtomFactory* ClassServer::getFactory(Type t)
 	return nullptr;
 }
 
-Handle ClassServer::factory(const Handle& h)
+Handle ClassServer::factory(const Handle& h) const
 {
 	// If there is a factory, then use it.
 	AtomFactory* fact = getFactory(h->get_type());
@@ -216,35 +216,35 @@ Handle ClassServer::factory(const Handle& h)
 	return h;
 }
 
-Type ClassServer::getNumberOfClasses()
+Type ClassServer::getNumberOfClasses() const
 {
     return nTypes;
 }
 
-bool ClassServer::isA_non_recursive(Type type, Type parent)
+bool ClassServer::isA_non_recursive(Type type, Type parent) const
 {
     std::lock_guard<std::mutex> l(type_mutex);
     if ((type >= nTypes) || (parent >= nTypes)) return false;
     return inheritanceMap[parent][type];
 }
 
-bool ClassServer::isDefined(const std::string& typeName)
+bool ClassServer::isDefined(const std::string& typeName) const
 {
     std::lock_guard<std::mutex> l(type_mutex);
     return name2CodeMap.find(typeName) != name2CodeMap.end();
 }
 
-Type ClassServer::getType(const std::string& typeName)
+Type ClassServer::getType(const std::string& typeName) const
 {
     std::lock_guard<std::mutex> l(type_mutex);
-    std::unordered_map<std::string, Type>::iterator it = name2CodeMap.find(typeName);
+    std::unordered_map<std::string, Type>::const_iterator it = name2CodeMap.find(typeName);
     if (it == name2CodeMap.end()) {
         return NOTYPE;
     }
     return it->second;
 }
 
-const std::string& ClassServer::getTypeName(Type type)
+const std::string& ClassServer::getTypeName(Type type) const
 {
     static std::string nullString = "*** Unknown Type! ***";
 
