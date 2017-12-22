@@ -448,9 +448,9 @@ FUZZY_LINK <- SIGNATURE_LINK
 TYPED_VARIABLE_LINK <- ORDERED_LINK
 
 // A type binder for non-variable atoms. It binds a type to an atom
-// at a "global" level.  Always arity-2, the first position must be
-// a Variablenode, the second must be a type.  A given atom can only
-// ever have just one type, thus, this is unique.
+// at a "global" level.  Always arity-2, the first position cannot be
+// any atom except for a VariableNode, the second must be a type.
+//  A given atom can only ever have just one type, thus, this is unique.
 TYPED_ATOM_LINK <- UNIQUE_LINK
 
 // ====================================================================
