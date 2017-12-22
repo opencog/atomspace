@@ -150,10 +150,26 @@ void ClassServer::addFactory(Type t, AtomFactory* fact)
     _atomFactory[t] = fact;
 }
 
+Handle validating_factory(const Handle& atom_to_check)
+{
+	ClassServer::Validator* checker =
+		classserver().getValidator(atom_to_check->get_type());
+
+	/* Well, is it OK, or not? */
+	if (not checker(atom_to_check))
+		throw SyntaxException(TRACE_INFO,
+		     "Invalid Atom syntax: %s",
+		     atom_to_check->to_string().c_str());
+
+	return atom_to_check;
+}
+
 void ClassServer::addValidator(Type t, Validator* checker)
 {
-    std::unique_lock<std::mutex> l(type_mutex);
-    _validator[t] = checker;
+	std::unique_lock<std::mutex> l(type_mutex);
+	_validator[t] = checker;
+	if (not _atomFactory[t])
+		_atomFactory[t] = validating_factory;
 }
 
 // Perform a depth-first recursive search for a factory,
