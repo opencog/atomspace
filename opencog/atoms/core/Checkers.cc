@@ -25,6 +25,10 @@
 
 using namespace opencog;
 
+/// Provide static factory-time type checking.
+/// This only performs a very simple kind of type checking;
+/// it does not check deep types, nor does it check arity.
+
 /// Check to see if every input atom is of Evaluatable type.
 bool check_evaluatable(const Handle& bool_atom)
 {
@@ -34,11 +38,39 @@ bool check_evaluatable(const Handle& bool_atom)
 
 	for (const Handle& h: bool_atom->getOutgoingSet())
 	{
-		// PutLinks cannt be type-checked statically. So checking
-		// has to be defered until runtime.
-		if (PUT_LINK == h->get_type()) continue;
+		Type t = h->get_type();
+		// PutLinks and GetLinks cannot be type-checked statically.
+		// Checking has to be defered until runtime.
+		if (PUT_LINK == t) continue;
+		if (GET_LINK == t) continue;
+		if (VARIABLE_NODE == t) continue;
+
+		// Fucking quote links. I hate those with a passion.
+		if (QUOTE_LINK == t) continue;
+		if (UNQUOTE_LINK == t) continue;
 
 		if (not h->is_type(EVALUATABLE_LINK)) return false;
+	}
+	return true;
+}
+
+/// Check to see if every input atom is of Numeric type.
+bool check_numeric(const Handle& bool_atom)
+{
+	for (const Handle& h: bool_atom->getOutgoingSet())
+	{
+		Type t = h->get_type();
+		// PutLinks and GetLinks cannot be type-checked statically.
+		// Checking has to be defered until runtime.
+		if (PUT_LINK == t) continue;
+		if (GET_LINK == t) continue;
+		if (VARIABLE_NODE == t) continue;
+		if (NUMBER_NODE == t) continue;
+
+		// Oddly enough, sets of numbers are allowed.
+		if (SET_LINK == t and check_numeric(h)) continue;
+
+		if (not h->is_type(NUMERIC_OUTPUT_LINK)) return false;
 	}
 	return true;
 }
@@ -47,4 +79,5 @@ bool check_evaluatable(const Handle& bool_atom)
 static __attribute__ ((constructor)) void init(void)
 {
 	classserver().addValidator(BOOLEAN_LINK, check_evaluatable);
+	classserver().addValidator(NUMERIC_LINK, check_numeric);
 }
