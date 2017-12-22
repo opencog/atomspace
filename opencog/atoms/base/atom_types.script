@@ -45,6 +45,15 @@ NUMBER_NODE <- NODE
 ORDERED_LINK <- LINK
 UNORDERED_LINK <- LINK
 
+// ===========================================================
+// Type-safety links.  These are used to enforce type safety
+// at Atom creation time. The mechanism that employs these fails
+// to handle "deep types", so this is kind-of inadequate for
+// strong type checking. In fact, doing it this way is kind of
+// a cheesey hack - really, there should be some ArrowLink
+// associated to each atom type, and that should determine the
+// behavior of the atom. But, for now, we do it the hacky way.
+
 // Evaluatable link. Any link type which might be evaluated, resulting
 // in a truth-value, should inherit from this type.  This is a
 // mixin-type, it does nothing by itself, but is used to identify
@@ -57,12 +66,21 @@ EVALUATABLE_LINK <- LINK
 BOOLEAN_LINK <- LINK
 
 // Numeric-input link.  This link type forces type-checking on it's
-// "inputs" (it's outgoing set): they must be NumbeNodes
+// "inputs" (it's outgoing set): they must be NumberNodes, or things
+// that can evaluate to NumberNodes: viz NumericOutputLinks.
 NUMERIC_LINK <- LINK
 
 // Numeric-output link. Generates NumberNodes upon execution.
 NUMERIC_OUTPUT_LINK <- LINK
 
+// Type-input link.  This link type forces type-checking on it's
+// "inputs" (it's outgoing set): they must be types.
+TYPE_LINK <- LINK
+
+// Type-output link. Generates Types upon execution.
+TYPE_OUTPUT_LINK <- LINK
+
+// ===========================================================
 // Basic set-theory-inspired links
 SET_LINK <- UNORDERED_LINK
 LIST_LINK <- ORDERED_LINK
@@ -407,26 +425,26 @@ TYPE_CO_INH_NODE <- TYPE_NODE
 DEFINED_TYPE_NODE <- TYPE_NODE
 
 // Used for type polymorphism.
-TYPE_CHOICE <- CHOICE_LINK
+TYPE_CHOICE <- CHOICE_LINK,TYPE_OUTPUT_LINK,TYPE_LINK
 
 // Type constructor. Forces a boolean-and of all of the type defintions
 // (signatures) that it contains.  Mostly useful only when used with
 // the IntervalLink, so specify the length of a list or the size of a
 // set.  This, in turn, is mostly useful only for Regex matching using
 // the GlobNode.
-TYPE_SET_LINK <- SET_LINK
+TYPE_SET_LINK <- SET_LINK,TYPE_OUTPUT_LINK,TYPE_LINK
 
 // Type constructor.  Corresponds to right-arrow of functional
 // programming languages, viz. arity-2, first arg is input, 2nd
 // arg is output.
-ARROW_LINK <- ORDERED_LINK
+ARROW_LINK <- ORDERED_LINK,TYPE_OUTPUT_LINK
 
 // Type constructor.
 // The SignatureLink implements "deep types", a way for specifying
 // the type of an entire graph, and not just some node or link.
 // The type specification is "precise", in contrast to the fuzzy
 // type specification, below.
-SIGNATURE_LINK <- ORDERED_LINK
+SIGNATURE_LINK <- ORDERED_LINK,TYPE_OUTPUT_LINK
 
 // The FuzzyLink is a kind of type specification that can be imprecise.
 // It is used to specify a pattern that is then matched only

@@ -81,9 +81,26 @@ bool check_numeric(const Handle& bool_atom)
 	return true;
 }
 
+/// Check the type constructors that expect types as input.
+bool check_type_ctors(const Handle& bool_atom)
+{
+	for (const Handle& h: bool_atom->getOutgoingSet())
+	{
+		Type t = h->get_type();
+		if (h->is_type(TYPE_NODE)) continue;
+
+		// Intervals are commonly used with GlobNodes.
+		if (INTERVAL_LINK == t) continue;
+
+		if (not h->is_type(TYPE_OUTPUT_LINK)) return false;
+	}
+	return true;
+}
+
 /* This runs when the shared lib is loaded. */
 static __attribute__ ((constructor)) void init(void)
 {
 	classserver().addValidator(BOOLEAN_LINK, check_evaluatable);
 	classserver().addValidator(NUMERIC_LINK, check_numeric);
+	classserver().addValidator(TYPE_LINK, check_type_ctors);
 }
