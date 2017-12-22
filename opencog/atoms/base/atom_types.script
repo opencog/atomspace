@@ -77,6 +77,10 @@ INTENSIONAL_SIMILARITY_LINK <- SIMILARITY_LINK
 // properly.
 EVALUATABLE_LINK <- LINK
 
+// Boolean-input link.  This link type forces type-checking on it's
+// "inputs" (it's outgoing set): they must be EvaluatableLinks.
+BOOLEAN_LINK <- LINK
+
 // Boolean set operations, logical constants.
 // These are used by the pattern matcher to compute crisp-logic
 // boolean combinations of predicates.
@@ -85,13 +89,13 @@ EVALUATABLE_LINK <- LINK
 // behavior-tree Sequence and Fallback to be implemented: they guarantee
 // sequential execution until the first failure or the first success.
 //
-TRUE_LINK <- ORDERED_LINK,EVALUATABLE_LINK
-FALSE_LINK <- ORDERED_LINK,EVALUATABLE_LINK
-AND_LINK <- UNORDERED_LINK,EVALUATABLE_LINK
-OR_LINK <- UNORDERED_LINK,EVALUATABLE_LINK
-NOT_LINK <- UNORDERED_LINK,EVALUATABLE_LINK
-SEQUENTIAL_AND_LINK <- ORDERED_LINK,EVALUATABLE_LINK
-SEQUENTIAL_OR_LINK <- ORDERED_LINK,EVALUATABLE_LINK
+TRUE_LINK <- ORDERED_LINK,EVALUATABLE_LINK,BOOLEAN_LINK
+FALSE_LINK <- ORDERED_LINK,EVALUATABLE_LINK,BOOLEAN_LINK
+AND_LINK <- UNORDERED_LINK,EVALUATABLE_LINK,BOOLEAN_LINK
+OR_LINK <- UNORDERED_LINK,EVALUATABLE_LINK,BOOLEAN_LINK
+NOT_LINK <- UNORDERED_LINK,EVALUATABLE_LINK,BOOLEAN_LINK
+SEQUENTIAL_AND_LINK <- ORDERED_LINK,EVALUATABLE_LINK,BOOLEAN_LINK
+SEQUENTIAL_OR_LINK <- ORDERED_LINK,EVALUATABLE_LINK,BOOLEAN_LINK
 
 // The 'intuitionist logic' version of OR_LINK is 'multiple choice'
 // (the 'axiom of choice', by terrible abuse of terminology).  The
@@ -135,7 +139,7 @@ ABSENT_LINK <- PRESENT_LINK
 // them to return.  JoinLink launches multiple threads, and waits for
 // all of them to return, and then returns the And of thier truth
 // values.
-PARALLEL_LINK <- AND_LINK
+PARALLEL_LINK <- UNORDERED_LINK,EVALUATABLE_LINK
 JOIN_LINK <- PARALLEL_LINK
 
 // ====================================================================
@@ -288,7 +292,7 @@ PATTERN_LINK <- PRENEX_LINK         // A pattern encapsulated in a Link.
 // executed.  The distinction is made for the benefit of the C++ code,
 // so that it can dispatch appropriately, based on the base type.
 SATISFACTION_LINK <- PATTERN_LINK,EVALUATABLE_LINK  // Finds all groundings, return TV
-SATISFYING_LINK <- PATTERN_LINK           // Finds all groundings, return SetLink
+SATISFYING_LINK <- PATTERN_LINK    // Finds all groundings, return SetLink
 
 // The GetLink is almost exactly the same thing as a SatsifyingSetLink,
 // except that GetLink is imperative, while SatisfyingSetLink is
@@ -306,6 +310,7 @@ DUAL_LINK <- SATISFYING_LINK
 // Assorted PLN link types.
 
 // Logical quantifiers
+// Should these inherit from EvaluatableLink ??
 FORALL_LINK <- SCOPE_LINK "ForAllLink"
 EXISTS_LINK <- SCOPE_LINK
 
@@ -395,24 +400,18 @@ TYPE_CO_INH_NODE <- TYPE_NODE
 DEFINED_TYPE_NODE <- TYPE_NODE
 
 // Used for type polymorphism.
-// XXX this inheritance seems to be making RuleUTest fail???
-// TYPE_CHOICE <- OR_LINK,EVALUATABLE_LINK
-TYPE_CHOICE <- OR_LINK
+TYPE_CHOICE <- CHOICE_LINK
 
 // Type constructor. Forces a boolean-and of all of the type defintions
 // (signatures) that it contains.  Mostly useful only when used with
 // the IntervalLink, so specify the length of a list or the size of a
 // set.  This, in turn, is mostly useful only for Regex matching using
 // the GlobNode.
-// XXX this inheritance seems to be making RuleUTest fail???
-// TYPE_SET_LINK <- SET_LINK,EVALUATABLE_LINK
 TYPE_SET_LINK <- SET_LINK
 
 // Type constructor.  Corresponds to right-arrow of functional
 // programming languages, viz. arity-2, first arg is input, 2nd
 // arg is output.
-// XXX this inheritance seems to be making RuleUTest fail???
-// ARROW_LINK <- ORDERED_LINK,EVALUATABLE_LINK
 ARROW_LINK <- ORDERED_LINK
 
 // Type constructor.
@@ -420,8 +419,6 @@ ARROW_LINK <- ORDERED_LINK
 // the type of an entire graph, and not just some node or link.
 // The type specification is "precise", in contrast to the fuzzy
 // type specification, below.
-// XXX this inheritance seems to be making RuleUTest fail???
-// SIGNATURE_LINK <- ORDERED_LINK,EVALUATABLE_LINK
 SIGNATURE_LINK <- ORDERED_LINK
 
 // The FuzzyLink is a kind of type specification that can be imprecise.
@@ -441,9 +438,6 @@ FUZZY_LINK <- SIGNATURE_LINK
 // of "true", if the indicated variable is of the given type, else
 // it evaluates to "false".  The predicate specifying the concrete
 // test is the signature (SignatureLink, etc) that is tested.
-// XXX Perhaps this should inherit from EvaluationLink, instead ??
-// XXX this inheritance seems to be making RuleUTest fail???
-// TYPED_VARIABLE_LINK <- ORDERED_LINK,EVALUATABLE_LINK
 TYPED_VARIABLE_LINK <- ORDERED_LINK
 
 // A type binder for non-variable atoms. It binds a type to an atom
