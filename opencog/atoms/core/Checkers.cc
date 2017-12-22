@@ -44,6 +44,7 @@ bool check_evaluatable(const Handle& bool_atom)
 		if (PUT_LINK == t) continue;
 		if (GET_LINK == t) continue;
 		if (VARIABLE_NODE == t) continue;
+		if (DEFINED_PREDICATE_NODE == t) continue;
 
 		// Fucking quote links. I hate those with a passion.
 		if (QUOTE_LINK == t) continue;
