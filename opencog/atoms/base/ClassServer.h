@@ -54,6 +54,9 @@ public:
     // values. TruthValues could use a factory, but, for now,
     // we don't have a pressing reason to add that.
     typedef Handle (AtomFactory)(const Handle&);
+
+    // Perform checking of the outgoing set, during construction.
+    typedef bool (Validator)(const Handle&);
 private:
 
     /** Private default constructor for this class to make it a singleton. */
@@ -77,12 +80,14 @@ private:
     std::unordered_map<std::string, Type> name2CodeMap;
     std::vector<const std::string*> _code2NameMap;
     std::vector<AtomFactory*> _atomFactory;
+    std::vector<Validator*> _validator;
     std::vector<int> _mod;
     TypeSignal _addTypeSignal;
 
     void setParentRecursively(Type parent, Type type, Type& maxd);
 
-    AtomFactory* searchToDepth(Type, int);
+    template<typename RTN_TYPE>
+    RTN_TYPE* searchToDepth(const std::vector<RTN_TYPE*>&, Type, int) const;
 
 public:
     /** Gets the singleton instance (following meyer's design pattern) */
@@ -103,6 +108,12 @@ public:
     AtomFactory* getFactory(Type);
 
     /**
+     * Declare a validator for an atom type.
+     */
+    void addValidator(Type, Validator*);
+    Validator* getValidator(Type);
+
+    /**
      * Convert the indicated Atom into a C++ instance of the
      * same type.
      */
@@ -119,7 +130,7 @@ public:
      * Returns the number of children types.
      */
     template<typename OutputIterator>
-    unsigned long getChildren(Type type, OutputIterator result)
+    unsigned long getChildren(Type type, OutputIterator result) const
     {
         unsigned long n_children = 0;
         for (Type i = 0; i < nTypes; ++i) {
@@ -136,7 +147,7 @@ public:
      * Returns the number of parent types.
      */
     template<typename OutputIterator>
-    unsigned long getParents(Type type, OutputIterator result)
+    unsigned long getParents(Type type, OutputIterator result) const
     {
         unsigned long n_parents = 0;
         for (Type i = 0; i < nTypes; ++i) {

@@ -99,6 +99,7 @@ Type ClassServer::declType(const Type parent, const std::string& name)
     _code2NameMap.resize(nTypes);
     _mod.resize(nTypes);
     _atomFactory.resize(nTypes);
+    _validator.resize(nTypes);
 
     for (auto& bv: inheritanceMap) bv.resize(nTypes, false);
     for (auto& bv: recursiveMap) bv.resize(nTypes, false);
@@ -149,12 +150,20 @@ void ClassServer::addFactory(Type t, AtomFactory* fact)
     _atomFactory[t] = fact;
 }
 
+void ClassServer::addValidator(Type t, Validator* checker)
+{
+    std::unique_lock<std::mutex> l(type_mutex);
+    _validator[t] = checker;
+}
+
 // Perform a depth-first recursive search for a factory,
 // up to a maximum depth.
-ClassServer::AtomFactory* ClassServer::searchToDepth(Type t, int depth)
+template<typename RTN_TYPE>
+RTN_TYPE* ClassServer::searchToDepth(const std::vector<RTN_TYPE*>& vect,
+                                     Type t, int depth) const
 {
 	// If there is a factory, then return it.
-	AtomFactory* fpr = _atomFactory[t];
+	AtomFactory* fpr = vect[t];
 	if (fpr) return fpr;
 
 	// Perhaps one of the parent types has a factory.
@@ -166,7 +175,7 @@ ClassServer::AtomFactory* ClassServer::searchToDepth(Type t, int depth)
 	getParents(t, back_inserter(parents));
 	for (auto p: parents)
 	{
-		AtomFactory* fact = searchToDepth(p, depth);
+		RTN_TYPE* fact = searchToDepth<RTN_TYPE>(vect, p, depth);
 		if (fact) return fact;
 	}
 
@@ -190,7 +199,7 @@ ClassServer::AtomFactory* ClassServer::getFactory(Type t)
 	//
 	for (int search_depth = 1; search_depth <= _maxDepth; search_depth++)
 	{
-		AtomFactory* fact = searchToDepth(t, search_depth);
+		AtomFactory* fact = searchToDepth<AtomFactory>(_atomFactory, t, search_depth);
 		if (fact) return fact;
 	}
 
