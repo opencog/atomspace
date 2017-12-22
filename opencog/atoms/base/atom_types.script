@@ -425,7 +425,7 @@ TYPE_CO_INH_NODE <- TYPE_NODE
 DEFINED_TYPE_NODE <- TYPE_NODE
 
 // Used for type polymorphism.
-TYPE_CHOICE <- CHOICE_LINK,TYPE_OUTPUT_LINK,TYPE_LINK
+TYPE_CHOICE <- CHOICE_LINK,TYPE_OUTPUT_LINK
 
 // Type constructor. Forces a boolean-and of all of the type defintions
 // (signatures) that it contains.  Mostly useful only when used with
