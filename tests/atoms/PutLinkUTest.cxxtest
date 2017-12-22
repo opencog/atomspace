@@ -67,6 +67,7 @@ public:
 	void test_eval_inheritance();
 	void test_eval_implication_1();
 	void test_eval_implication_2();
+	void test_ill_unquote();
 };
 
 #define N _as.add_node
@@ -1096,6 +1097,49 @@ void PutLinkUTest::test_eval_implication_2()
 	printf("Expecting %s\n", expected->to_string().c_str());
 	printf("Got %s\n", putted->to_string().c_str());
 	TS_ASSERT_EQUALS(putted, expected);
+
+	logger().info("END TEST: %s", __FUNCTION__);
+}
+
+/**
+ * Test that the ill quotation use doesn't crash execution
+ *
+ * (PutLink
+ *   (LambdaLink
+ *     (VariableNode "$X")
+ *     (EvaluationLink
+ *       (PredicateNode "P")
+ *       (VariableNode "$X")
+ *     )
+ *   )
+ *   (LambdaLink
+ *     (UnquoteLink
+ *       (VariableNode "$x")
+ *     )
+ *     (UnquoteLink
+ *       (VariableNode "$g")
+ *     )
+ *   )
+ * )
+ */
+void PutLinkUTest::test_ill_unquote()
+{
+	logger().info("BEGIN TEST: %s", __FUNCTION__);
+
+	Handle X = N(VARIABLE_NODE, "$X"),
+		P = N(PREDICATE_NODE, "P"),
+		x = N(VARIABLE_NODE, "$x"),
+		g = N(VARIABLE_NODE, "$g"),
+		put = L(PUT_LINK,
+		        L(LAMBDA_LINK,
+		          X,
+		          L(EVALUATION_LINK, P, X)),
+		        L(LAMBDA_LINK,
+		          L(UNQUOTE_LINK, x),
+		          L(UNQUOTE_LINK, g)));
+
+	Instantiator inst(&_as);
+	TS_ASSERT_THROWS_ANYTHING(inst.execute(put));
 
 	logger().info("END TEST: %s", __FUNCTION__);
 }
