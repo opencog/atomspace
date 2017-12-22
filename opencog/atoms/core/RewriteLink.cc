@@ -149,7 +149,7 @@ Handle RewriteLink::beta_reduce(const HandleSeq& vals) const
 	{
 		if (1 != vals.size() or LAMBDA_LINK != vals[0]->get_type())
 		{
-			if (_silent) return Handle::UNDEFINED;
+			if (_silent) throw TypeCheckException();
 
 			throw SyntaxException(TRACE_INFO,
 				"RewriteLink has mismatched arity, expecting %lu == %lu",
@@ -163,7 +163,7 @@ Handle RewriteLink::beta_reduce(const HandleSeq& vals) const
 		if (body->get_arity() != vars.size() or
 		    body->get_type() != LIST_LINK)
 		{
-			if (_silent) return Handle::UNDEFINED;
+			if (_silent) throw TypeCheckException();
 
 			throw SyntaxException(TRACE_INFO,
 				"RewriteLink has mismatched eta, expecting %lu == %lu",
