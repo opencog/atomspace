@@ -274,7 +274,18 @@ ClassServer& classserver();
                                                                   \
 Handle CNAME::factory(const Handle& base)                         \
 {                                                                 \
+   /* If it's castable, nothing to do. */                         \
    if (CNAME##Cast(base)) return base;                            \
+                                                                  \
+   /* Look to see if we have static typechecking to do */         \
+   ClassServer::Validator* checker =                              \
+       classserver().getValidator(base->get_type());              \
+                                                                  \
+   /* Well, is it OK, or not? */                                  \
+   if (checker and not checker(base))                             \
+       throw SyntaxException(TRACE_INFO,                          \
+           "Invalid Atom syntax: %s", base->to_string().c_str()); \
+                                                                  \
    Handle h(create##CNAME(base->getOutgoingSet(), base->get_type())); \
    return h;                                                      \
 }                                                                 \
