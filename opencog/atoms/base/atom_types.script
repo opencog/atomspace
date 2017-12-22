@@ -544,7 +544,7 @@ RANDOM_CHOICE_LINK <- FUNCTION_LINK
 TIME_LINK <- FUNCTION_LINK,NUMERIC_OUTPUT_LINK
 
 // Sleep link pauses executation for the indicated number of seconds.
-SLEEP_LINK <- FUNCTION_LINK
+SLEEP_LINK <- FUNCTION_LINK,NUMERIC_OUTPUT_LINK
 
 // MapLink could be named UnPutLink ... it undoes a beta-reduction,
 // by extracting values for a given set of variables.  In many ways,
