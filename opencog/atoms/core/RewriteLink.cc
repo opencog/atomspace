@@ -21,7 +21,6 @@
 
 #include <string>
 
-#include <opencog/util/mt19937ar.h>
 #include <opencog/util/random.h>
 #include <opencog/util/Logger.h>
 #include <opencog/atoms/base/ClassServer.h>
