@@ -27,6 +27,7 @@
 #include <set>
 
 #include <opencog/query/DefaultPatternMatchCB.h>
+#include <opencog/atoms/core/UnorderedLink.h>
 #include <opencog/atoms/pattern/PatternLink.h>
 #include <opencog/atomutils/FindUtils.h>
 
@@ -317,8 +318,5 @@ Handle opencog::recognize(AtomSpace* as, const Handle& hlink)
 	Recognizer reco(as);
 	bl->satisfy(reco);
 
-	HandleSeq hs;
-	for (const Handle& h : reco._rules) hs.push_back(h);
-
-	return as->add_link(SET_LINK, hs);
+	return as->add_atom(createUnorderedLink(reco._rules, SET_LINK));
 }

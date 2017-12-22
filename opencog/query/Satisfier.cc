@@ -22,6 +22,7 @@
  */
 
 #include <opencog/atomspace/AtomSpace.h>
+#include <opencog/atoms/core/UnorderedLink.h>
 #include <opencog/atoms/pattern/PatternLink.h>
 
 #include "BindLinkAPI.h"
@@ -195,14 +196,8 @@ Handle opencog::satisfying_set(AtomSpace* as, const Handle& hlink, size_t max_re
 	sater.max_results = max_results;
 	bl->satisfy(sater);
 
-	// Ugh. We used an std::set to avoid duplicates. But now, we need a
-	// vector.  Which means copying. Got a better idea?
-	HandleSeq satvec;
-	for (const Handle& h : sater._satisfying_set)
-		satvec.push_back(h);
-
 	// Create the satisfying set, and cache it.
-	Handle satset(createLink(satvec, SET_LINK));
+	Handle satset(createUnorderedLink(sater._satisfying_set, SET_LINK));
 
 #define PLACE_RESULTS_IN_ATOMSPACE
 #ifdef PLACE_RESULTS_IN_ATOMSPACE
