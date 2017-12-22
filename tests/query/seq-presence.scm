@@ -48,6 +48,6 @@
 				(ListLink (VariableNode "$x")))
 		)))
 
-; (cog-satisfy empty-sequence)
+; (cog-evaluate! empty-sequence)
 
 ; ------------------------------------------------------

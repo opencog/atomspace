@@ -93,7 +93,7 @@ void GetLinkUTest::test_unary_get(void)
 	as->clear();
 	eval->eval("(load-from-path \"tests/query/get-link.scm\")");
 
-	Handle hgnd = eval->eval_h("(cog-satisfying-set is-human)");
+	Handle hgnd = eval->eval_h("(cog-execute! is-human)");
 	Handle hans = eval->eval_h(
 		"(SetLink (ConceptNode \"Ben\") (ConceptNode \"Linas\"))");
 
@@ -115,7 +115,7 @@ void GetLinkUTest::test_binary_get(void)
 	as->clear();
 	eval->eval("(load-from-path \"tests/query/get-link.scm\")");
 
-	Handle hgnd = eval->eval_h("(cog-satisfying-set is-something)");
+	Handle hgnd = eval->eval_h("(cog-execute! is-something)");
 	Handle hans = eval->eval_h(
 		"(SetLink "
 		"(ListLink (ConceptNode \"Ben\") (ConceptNode \"human\"))"
@@ -139,7 +139,7 @@ void GetLinkUTest::test_free_bound(void)
 
 	eval->eval("(load-from-path \"tests/query/get-link.scm\")");
 
-	Handle hgnd = eval->eval_h("(cog-satisfying-set is-query)");
+	Handle hgnd = eval->eval_h("(cog-execute! is-query)");
 
 	Handle hans = eval->eval_h("(SetLink (ConceptNode \"human\"))");
 
@@ -161,7 +161,7 @@ void GetLinkUTest::test_eval_clause(void)
 	as->clear();
 	eval->eval("(load-from-path \"tests/query/get-link-eval.scm\")");
 
-	Handle hgnd = eval->eval_h("(cog-satisfying-set get)");
+	Handle hgnd = eval->eval_h("(cog-execute! get)");
 
 	Handle hans = eval->eval_h("(SetLink"
 	                           "   (ListLink"
