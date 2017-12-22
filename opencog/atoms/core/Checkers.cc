@@ -68,6 +68,9 @@ bool check_numeric(const Handle& bool_atom)
 		if (VARIABLE_NODE == t) continue;
 		if (NUMBER_NODE == t) continue;
 
+		// TODO - look up the schema, and make sure its numeric, also.
+		if (DEFINED_SCHEMA_NODE == t) continue;
+
 		// Oddly enough, sets of numbers are allowed.
 		if (SET_LINK == t and check_numeric(h)) continue;
 
