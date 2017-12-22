@@ -99,6 +99,7 @@ Type ClassServer::declType(const Type parent, const std::string& name)
     _code2NameMap.resize(nTypes);
     _mod.resize(nTypes);
     _atomFactory.resize(nTypes);
+    _validator.resize(nTypes);
 
     for (auto& bv: inheritanceMap) bv.resize(nTypes, false);
     for (auto& bv: recursiveMap) bv.resize(nTypes, false);
@@ -149,12 +150,36 @@ void ClassServer::addFactory(Type t, AtomFactory* fact)
     _atomFactory[t] = fact;
 }
 
+Handle validating_factory(const Handle& atom_to_check)
+{
+	ClassServer::Validator* checker =
+		classserver().getValidator(atom_to_check->get_type());
+
+	/* Well, is it OK, or not? */
+	if (not checker(atom_to_check))
+		throw SyntaxException(TRACE_INFO,
+		     "Invalid Atom syntax: %s",
+		     atom_to_check->to_string().c_str());
+
+	return atom_to_check;
+}
+
+void ClassServer::addValidator(Type t, Validator* checker)
+{
+	std::unique_lock<std::mutex> l(type_mutex);
+	_validator[t] = checker;
+	if (not _atomFactory[t])
+		_atomFactory[t] = validating_factory;
+}
+
 // Perform a depth-first recursive search for a factory,
 // up to a maximum depth.
-ClassServer::AtomFactory* ClassServer::searchToDepth(Type t, int depth)
+template<typename RTN_TYPE>
+RTN_TYPE* ClassServer::searchToDepth(const std::vector<RTN_TYPE*>& vect,
+                                     Type t, int depth) const
 {
 	// If there is a factory, then return it.
-	AtomFactory* fpr = _atomFactory[t];
+	RTN_TYPE* fpr = vect[t];
 	if (fpr) return fpr;
 
 	// Perhaps one of the parent types has a factory.
@@ -166,19 +191,21 @@ ClassServer::AtomFactory* ClassServer::searchToDepth(Type t, int depth)
 	getParents(t, back_inserter(parents));
 	for (auto p: parents)
 	{
-		AtomFactory* fact = searchToDepth(p, depth);
+		RTN_TYPE* fact = searchToDepth<RTN_TYPE>(vect, p, depth);
 		if (fact) return fact;
 	}
 
 	return nullptr;
 }
 
-ClassServer::AtomFactory* ClassServer::getFactory(Type t)
+template<typename RTN_TYPE>
+RTN_TYPE* ClassServer::getOper(const std::vector<RTN_TYPE*>& vect,
+                               Type t) const
 {
 	if (nTypes <= t) return nullptr;
 
 	// If there is a factory, then return it.
-	AtomFactory* fpr = _atomFactory[t];
+	RTN_TYPE* fpr = vect[t];
 	if (fpr) return fpr;
 
 	// Perhaps one of the parent types has a factory.
@@ -190,14 +217,24 @@ ClassServer::AtomFactory* ClassServer::getFactory(Type t)
 	//
 	for (int search_depth = 1; search_depth <= _maxDepth; search_depth++)
 	{
-		AtomFactory* fact = searchToDepth(t, search_depth);
+		RTN_TYPE* fact = searchToDepth<RTN_TYPE>(vect, t, search_depth);
 		if (fact) return fact;
 	}
 
 	return nullptr;
 }
 
-Handle ClassServer::factory(const Handle& h)
+ClassServer::AtomFactory* ClassServer::getFactory(Type t) const
+{
+	return getOper<AtomFactory>(_atomFactory, t);
+}
+
+ClassServer::Validator* ClassServer::getValidator(Type t) const
+{
+	return getOper<Validator>(_validator, t);
+}
+
+Handle ClassServer::factory(const Handle& h) const
 {
 	// If there is a factory, then use it.
 	AtomFactory* fact = getFactory(h->get_type());
@@ -207,35 +244,35 @@ Handle ClassServer::factory(const Handle& h)
 	return h;
 }
 
-Type ClassServer::getNumberOfClasses()
+Type ClassServer::getNumberOfClasses() const
 {
     return nTypes;
 }
 
-bool ClassServer::isA_non_recursive(Type type, Type parent)
+bool ClassServer::isA_non_recursive(Type type, Type parent) const
 {
     std::lock_guard<std::mutex> l(type_mutex);
     if ((type >= nTypes) || (parent >= nTypes)) return false;
     return inheritanceMap[parent][type];
 }
 
-bool ClassServer::isDefined(const std::string& typeName)
+bool ClassServer::isDefined(const std::string& typeName) const
 {
     std::lock_guard<std::mutex> l(type_mutex);
     return name2CodeMap.find(typeName) != name2CodeMap.end();
 }
 
-Type ClassServer::getType(const std::string& typeName)
+Type ClassServer::getType(const std::string& typeName) const
 {
     std::lock_guard<std::mutex> l(type_mutex);
-    std::unordered_map<std::string, Type>::iterator it = name2CodeMap.find(typeName);
+    std::unordered_map<std::string, Type>::const_iterator it = name2CodeMap.find(typeName);
     if (it == name2CodeMap.end()) {
         return NOTYPE;
     }
     return it->second;
 }
 
-const std::string& ClassServer::getTypeName(Type type)
+const std::string& ClassServer::getTypeName(Type type) const
 {
     static std::string nullString = "*** Unknown Type! ***";
 

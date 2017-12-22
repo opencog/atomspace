@@ -1,6 +1,7 @@
 
 
 classserver().beginTypeDecls();
+ANTI_LINK = classserver().declType(LINK, "AntiLink");
 AT_TIME_LINK = classserver().declType(ORDERED_LINK, "AtTimeLink");
 DEFINED_LINGUISTIC_CONCEPT_NODE = classserver().declType(NODE, "DefinedLinguisticConceptNode");
 DEFINED_LINGUISTIC_RELATIONSHIP_NODE = classserver().declType(NODE, "DefinedLinguisticRelationshipNode");

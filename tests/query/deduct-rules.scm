@@ -39,7 +39,7 @@
 		(t1 v1)
 		(ListLink
 			(t2 v2)
-			(NotLink (t3 v3))
+			(AntiLink (t3 v3))
 		)
 	)
 )

@@ -56,7 +56,7 @@ public:
 	inline Type get_type() const { return _type; }
 
 	/** Basic predicate */
-	bool is_type(Type t, bool subclass) const
+	bool is_type(Type t, bool subclass = true) const
 	{
 		Type at(get_type());
 		if (not subclass) return t == at;

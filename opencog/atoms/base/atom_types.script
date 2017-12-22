@@ -45,10 +45,46 @@ NUMBER_NODE <- NODE
 ORDERED_LINK <- LINK
 UNORDERED_LINK <- LINK
 
-// Basic sets
+// ===========================================================
+// Type-safety links.  These are used to enforce type safety
+// at Atom creation time. The mechanism that employs these fails
+// to handle "deep types", so this is kind-of inadequate for
+// strong type checking. In fact, doing it this way is kind of
+// a cheesey hack - really, there should be some ArrowLink
+// associated to each atom type, and that should determine the
+// behavior of the atom. But, for now, we do it the hacky way.
+
+// Evaluatable link. Any link type which might be evaluated, resulting
+// in a truth-value, should inherit from this type.  This is a
+// mixin-type, it does nothing by itself, but is used to identify
+// link types that are evaluatable - that is, they return truth values
+// when they are evaluated.
+EVALUATABLE_LINK <- LINK
+
+// Boolean-input link.  This link type forces type-checking on it's
+// "inputs" (it's outgoing set): they must be EvaluatableLinks.
+BOOLEAN_LINK <- LINK
+
+// Numeric-input link.  This link type forces type-checking on it's
+// "inputs" (it's outgoing set): they must be NumberNodes, or things
+// that can evaluate to NumberNodes: viz NumericOutputLinks.
+NUMERIC_LINK <- LINK
+
+// Numeric-output link. Generates NumberNodes upon execution.
+NUMERIC_OUTPUT_LINK <- LINK
+
+// Type-input link.  This link type forces type-checking on it's
+// "inputs" (it's outgoing set): they must be types.
+TYPE_LINK <- LINK
+
+// Type-output link. Generates Types upon execution.
+TYPE_OUTPUT_LINK <- LINK
+
+// ===========================================================
+// Basic set-theory-inspired links
 SET_LINK <- UNORDERED_LINK
 LIST_LINK <- ORDERED_LINK
-MEMBER_LINK <- ORDERED_LINK
+MEMBER_LINK <- ORDERED_LINK,EVALUATABLE_LINK
 
 // ContextLink: Universe of discourse. This behaves like set subtraction
 // in that the set of things outside of the context have no bearing on
@@ -62,20 +98,13 @@ CONTEXT_LINK <- ORDERED_LINK
 
 // SUBSET_LINK is semantically equivalent to EXTENSIONAL_INHERITANCE_LINK.
 // Therefore the later has been removed.
-INHERITANCE_LINK <- ORDERED_LINK
+INHERITANCE_LINK <- ORDERED_LINK,EVALUATABLE_LINK
 SUBSET_LINK <- INHERITANCE_LINK
 INTENSIONAL_INHERITANCE_LINK <- INHERITANCE_LINK
 
-SIMILARITY_LINK <- UNORDERED_LINK
+SIMILARITY_LINK <- UNORDERED_LINK,EVALUATABLE_LINK
 EXTENSIONAL_SIMILARITY_LINK <- SIMILARITY_LINK
 INTENSIONAL_SIMILARITY_LINK <- SIMILARITY_LINK
-
-// Evaluatable link. Any link type which might be evaluated, resulting
-// in a truth-value, should inherit from this type.  This is a mixin-type,
-// it does nothing by itself, but is used to identify boolean-ish,
-// probabilisitic-TV-valued link types, so that they can be handled
-// properly.
-EVALUATABLE_LINK <- LINK
 
 // Boolean set operations, logical constants.
 // These are used by the pattern matcher to compute crisp-logic
@@ -87,11 +116,11 @@ EVALUATABLE_LINK <- LINK
 //
 TRUE_LINK <- ORDERED_LINK,EVALUATABLE_LINK
 FALSE_LINK <- ORDERED_LINK,EVALUATABLE_LINK
-AND_LINK <- UNORDERED_LINK,EVALUATABLE_LINK
-OR_LINK <- UNORDERED_LINK,EVALUATABLE_LINK
-NOT_LINK <- UNORDERED_LINK,EVALUATABLE_LINK
-SEQUENTIAL_AND_LINK <- ORDERED_LINK,EVALUATABLE_LINK
-SEQUENTIAL_OR_LINK <- ORDERED_LINK,EVALUATABLE_LINK
+AND_LINK <- UNORDERED_LINK,EVALUATABLE_LINK,BOOLEAN_LINK
+OR_LINK <- UNORDERED_LINK,EVALUATABLE_LINK,BOOLEAN_LINK
+NOT_LINK <- UNORDERED_LINK,EVALUATABLE_LINK,BOOLEAN_LINK
+SEQUENTIAL_AND_LINK <- ORDERED_LINK,EVALUATABLE_LINK,BOOLEAN_LINK
+SEQUENTIAL_OR_LINK <- ORDERED_LINK,EVALUATABLE_LINK,BOOLEAN_LINK
 
 // The 'intuitionist logic' version of OR_LINK is 'multiple choice'
 // (the 'axiom of choice', by terrible abuse of terminology).  The
@@ -135,7 +164,7 @@ ABSENT_LINK <- PRESENT_LINK
 // them to return.  JoinLink launches multiple threads, and waits for
 // all of them to return, and then returns the And of thier truth
 // values.
-PARALLEL_LINK <- AND_LINK
+PARALLEL_LINK <- UNORDERED_LINK,EVALUATABLE_LINK
 JOIN_LINK <- PARALLEL_LINK
 
 // ====================================================================
@@ -288,7 +317,7 @@ PATTERN_LINK <- PRENEX_LINK         // A pattern encapsulated in a Link.
 // executed.  The distinction is made for the benefit of the C++ code,
 // so that it can dispatch appropriately, based on the base type.
 SATISFACTION_LINK <- PATTERN_LINK,EVALUATABLE_LINK  // Finds all groundings, return TV
-SATISFYING_LINK <- PATTERN_LINK           // Finds all groundings, return SetLink
+SATISFYING_LINK <- PATTERN_LINK    // Finds all groundings, return SetLink
 
 // The GetLink is almost exactly the same thing as a SatsifyingSetLink,
 // except that GetLink is imperative, while SatisfyingSetLink is
@@ -306,6 +335,7 @@ DUAL_LINK <- SATISFYING_LINK
 // Assorted PLN link types.
 
 // Logical quantifiers
+// Should these inherit from EvaluatableLink ??
 FORALL_LINK <- SCOPE_LINK "ForAllLink"
 EXISTS_LINK <- SCOPE_LINK
 
@@ -335,7 +365,7 @@ INTENSIONAL_EQUIVALENCE_SCOPE_LINK <- EQUIVALENCE_SCOPE_LINK
 EXTENSIONAL_EQUIVALENCE_SCOPE_LINK <- EQUIVALENCE_SCOPE_LINK
 
 // Standard, non sugar form of implication and equivalence links.
-IMPLICATION_LINK <- ORDERED_LINK
+IMPLICATION_LINK <- ORDERED_LINK,EVALUATABLE_LINK
 INTENSIONAL_IMPLICATION_LINK <- IMPLICATION_LINK
 EXTENSIONAL_IMPLICATION_LINK <- IMPLICATION_LINK
 
@@ -395,34 +425,26 @@ TYPE_CO_INH_NODE <- TYPE_NODE
 DEFINED_TYPE_NODE <- TYPE_NODE
 
 // Used for type polymorphism.
-// XXX this inheritance seems to be making RuleUTest fail???
-// TYPE_CHOICE <- OR_LINK,EVALUATABLE_LINK
-TYPE_CHOICE <- OR_LINK
+TYPE_CHOICE <- CHOICE_LINK,TYPE_OUTPUT_LINK
 
 // Type constructor. Forces a boolean-and of all of the type defintions
 // (signatures) that it contains.  Mostly useful only when used with
 // the IntervalLink, so specify the length of a list or the size of a
 // set.  This, in turn, is mostly useful only for Regex matching using
 // the GlobNode.
-// XXX this inheritance seems to be making RuleUTest fail???
-// TYPE_SET_LINK <- SET_LINK,EVALUATABLE_LINK
-TYPE_SET_LINK <- SET_LINK
+TYPE_SET_LINK <- SET_LINK,TYPE_OUTPUT_LINK,TYPE_LINK
 
 // Type constructor.  Corresponds to right-arrow of functional
 // programming languages, viz. arity-2, first arg is input, 2nd
 // arg is output.
-// XXX this inheritance seems to be making RuleUTest fail???
-// ARROW_LINK <- ORDERED_LINK,EVALUATABLE_LINK
-ARROW_LINK <- ORDERED_LINK
+ARROW_LINK <- ORDERED_LINK,TYPE_OUTPUT_LINK
 
 // Type constructor.
 // The SignatureLink implements "deep types", a way for specifying
 // the type of an entire graph, and not just some node or link.
 // The type specification is "precise", in contrast to the fuzzy
 // type specification, below.
-// XXX this inheritance seems to be making RuleUTest fail???
-// SIGNATURE_LINK <- ORDERED_LINK,EVALUATABLE_LINK
-SIGNATURE_LINK <- ORDERED_LINK
+SIGNATURE_LINK <- ORDERED_LINK,TYPE_OUTPUT_LINK
 
 // The FuzzyLink is a kind of type specification that can be imprecise.
 // It is used to specify a pattern that is then matched only
@@ -441,15 +463,12 @@ FUZZY_LINK <- SIGNATURE_LINK
 // of "true", if the indicated variable is of the given type, else
 // it evaluates to "false".  The predicate specifying the concrete
 // test is the signature (SignatureLink, etc) that is tested.
-// XXX Perhaps this should inherit from EvaluationLink, instead ??
-// XXX this inheritance seems to be making RuleUTest fail???
-// TYPED_VARIABLE_LINK <- ORDERED_LINK,EVALUATABLE_LINK
 TYPED_VARIABLE_LINK <- ORDERED_LINK
 
 // A type binder for non-variable atoms. It binds a type to an atom
-// at a "global" level.  Always arity-2, the first position must be
-// a Variablenode, the second must be a type.  A given atom can only
-// ever have just one type, thus, this is unique.
+// at a "global" level.  Always arity-2, the first position cannot be
+// any atom except for a VariableNode, the second must be a type.
+//  A given atom can only ever have just one type, thus, this is unique.
 TYPED_ATOM_LINK <- UNIQUE_LINK
 
 // ====================================================================
@@ -488,7 +507,7 @@ QUANTITY_LINK <- ORDERED_LINK
 // matcher is concerned, which, right now, is the only user of this
 // link type.)
 VIRTUAL_LINK <- EVALUATION_LINK
-GREATER_THAN_LINK <- VIRTUAL_LINK
+GREATER_THAN_LINK <- VIRTUAL_LINK,NUMERIC_LINK
 
 // IdenticalLink tests for syntactic equality.  It does NOT execute its
 // arguments; it true only if both sides are the same atom.
@@ -525,25 +544,25 @@ EXECUTION_OUTPUT_LINK <- FUNCTION_LINK
 
 // Basic arithmetic operators
 FOLD_LINK <- FUNCTION_LINK
-ARITHMETIC_LINK <- FOLD_LINK
+ARITHMETIC_LINK <- FOLD_LINK,NUMERIC_LINK,NUMERIC_OUTPUT_LINK
 PLUS_LINK <- ARITHMETIC_LINK
 MINUS_LINK <- ARITHMETIC_LINK
 TIMES_LINK <- ARITHMETIC_LINK
 DIVIDE_LINK <- ARITHMETIC_LINK
 
-RANDOM_NUMBER_LINK <- FUNCTION_LINK
+RANDOM_NUMBER_LINK <- FUNCTION_LINK,NUMERIC_OUTPUT_LINK
 
 // Return arity of the wrapped link.
-ARITY_LINK <- FUNCTION_LINK
+ARITY_LINK <- FUNCTION_LINK,NUMERIC_OUTPUT_LINK
 
 // Return (with uniform distribution) one of the links it wraps.
 RANDOM_CHOICE_LINK <- FUNCTION_LINK
 
 // Return the current time.
-TIME_LINK <- FUNCTION_LINK
+TIME_LINK <- FUNCTION_LINK,NUMERIC_OUTPUT_LINK
 
 // Sleep link pauses executation for the indicated number of seconds.
-SLEEP_LINK <- FUNCTION_LINK
+SLEEP_LINK <- FUNCTION_LINK,NUMERIC_OUTPUT_LINK
 
 // MapLink could be named UnPutLink ... it undoes a beta-reduction,
 // by extracting values for a given set of variables.  In many ways,

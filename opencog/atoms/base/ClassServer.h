@@ -54,6 +54,9 @@ public:
     // values. TruthValues could use a factory, but, for now,
     // we don't have a pressing reason to add that.
     typedef Handle (AtomFactory)(const Handle&);
+
+    // Perform checking of the outgoing set, during construction.
+    typedef bool (Validator)(const Handle&);
 private:
 
     /** Private default constructor for this class to make it a singleton. */
@@ -77,12 +80,17 @@ private:
     std::unordered_map<std::string, Type> name2CodeMap;
     std::vector<const std::string*> _code2NameMap;
     std::vector<AtomFactory*> _atomFactory;
+    std::vector<Validator*> _validator;
     std::vector<int> _mod;
     TypeSignal _addTypeSignal;
 
     void setParentRecursively(Type parent, Type type, Type& maxd);
 
-    AtomFactory* searchToDepth(Type, int);
+    template<typename RTN_TYPE>
+    RTN_TYPE* searchToDepth(const std::vector<RTN_TYPE*>&, Type, int) const;
+
+    template<typename RTN_TYPE>
+    RTN_TYPE* getOper(const std::vector<RTN_TYPE*>&, Type) const;
 
 public:
     /** Gets the singleton instance (following meyer's design pattern) */
@@ -100,13 +108,19 @@ public:
      * Declare a factory for an atom type.
      */
     void addFactory(Type, AtomFactory*);
-    AtomFactory* getFactory(Type);
+    AtomFactory* getFactory(Type) const;
+
+    /**
+     * Declare a validator for an atom type.
+     */
+    void addValidator(Type, Validator*);
+    Validator* getValidator(Type) const;
 
     /**
      * Convert the indicated Atom into a C++ instance of the
      * same type.
      */
-    Handle factory(const Handle&);
+    Handle factory(const Handle&) const;
 
     /** Provides ability to get type-added signals.
      * @warning methods connected to this signal must not call
@@ -119,7 +133,7 @@ public:
      * Returns the number of children types.
      */
     template<typename OutputIterator>
-    unsigned long getChildren(Type type, OutputIterator result)
+    unsigned long getChildren(Type type, OutputIterator result) const
     {
         unsigned long n_children = 0;
         for (Type i = 0; i < nTypes; ++i) {
@@ -136,7 +150,7 @@ public:
      * Returns the number of parent types.
      */
     template<typename OutputIterator>
-    unsigned long getParents(Type type, OutputIterator result)
+    unsigned long getParents(Type type, OutputIterator result) const
     {
         unsigned long n_parents = 0;
         for (Type i = 0; i < nTypes; ++i) {
@@ -149,7 +163,7 @@ public:
     }
 
     template <typename OutputIterator>
-    unsigned long getChildrenRecursive(Type type, OutputIterator result)
+    unsigned long getChildrenRecursive(Type type, OutputIterator result) const
     {
         unsigned long n_children = 0;
         for (Type i = 0; i < nTypes; ++i) {
@@ -162,7 +176,7 @@ public:
     }
 
     template <typename Function>
-    void foreachRecursive(Function func, Type type)
+    void foreachRecursive(Function func, Type type) const
     {
         for (Type i = 0; i < nTypes; ++i) {
             if (recursiveMap[type][i]) (func)(i);
@@ -174,7 +188,7 @@ public:
      *
      * @return The total number of classes in the system.
      */
-    Type getNumberOfClasses();
+    Type getNumberOfClasses() const;
 
     /**
      * Returns whether a given class is assignable from another.
@@ -184,7 +198,7 @@ public:
      * @param sub Subclass.
      * @return Whether a given class is assignable from another.
      */
-    bool isA(Type sub, Type super)
+    bool isA(Type sub, Type super) const
     {
         /* Because this method is called extremely often, we want
          * the best-case fast-path for it.  Since updates are extremely
@@ -198,7 +212,7 @@ public:
         return recursiveMap[super][sub];
     }
 
-    bool isA_non_recursive(Type sub, Type super);
+    bool isA_non_recursive(Type sub, Type super) const;
 
     /**
      * Returns true if given class is a Value.
@@ -206,7 +220,7 @@ public:
      * @param t class.
      * @return Whether a given class is Value.
      */
-    bool isValue(Type t) { return isA(t, VALUE); }
+    bool isValue(Type t) const { return isA(t, VALUE); }
 
     /**
      * Returns true if given class is a valid atom type.
@@ -214,7 +228,7 @@ public:
      * @param t class.
      * @return Whether a given class is an atom.
      */
-    bool isAtom(Type t) { return isA(t, ATOM); }
+    bool isAtom(Type t) const { return isA(t, ATOM); }
 
     /**
      * Returns true if given class is a Node.
@@ -222,7 +236,7 @@ public:
      * @param t class.
      * @return Whether a given class is Node.
      */
-    bool isNode(Type t) { return isA(t, NODE); }
+    bool isNode(Type t) const { return isA(t, NODE); }
 
     /**
      * Returns true if given class is a Link.
@@ -230,12 +244,12 @@ public:
      * @param t class.
      * @return Whether a given class is Link.
      */
-    bool isLink(Type t) { return isA(t, LINK); }
+    bool isLink(Type t) const { return isA(t, LINK); }
 
     /**
      * Returns whether a class with name 'typeName' is defined.
      */
-    bool isDefined(const std::string& typeName);
+    bool isDefined(const std::string& typeName) const;
 
     /**
      * Returns the type of a given class.
@@ -243,7 +257,7 @@ public:
      * @param typeName Class type name.
      * @return The type of a givenn class.
      */
-    Type getType(const std::string& typeName);
+    Type getType(const std::string& typeName) const;
 
     /**
      * Returns the string representation of a given atom type.
@@ -251,7 +265,7 @@ public:
      * @param type Atom type code.
      * @return The string representation of a givenn class.
      */
-    const std::string& getTypeName(Type type);
+    const std::string& getTypeName(Type type) const;
 };
 
 ClassServer& classserver();
@@ -260,7 +274,18 @@ ClassServer& classserver();
                                                                   \
 Handle CNAME::factory(const Handle& base)                         \
 {                                                                 \
+   /* If it's castable, nothing to do. */                         \
    if (CNAME##Cast(base)) return base;                            \
+                                                                  \
+   /* Look to see if we have static typechecking to do */         \
+   ClassServer::Validator* checker =                              \
+       classserver().getValidator(base->get_type());              \
+                                                                  \
+   /* Well, is it OK, or not? */                                  \
+   if (checker and not checker(base))                             \
+       throw SyntaxException(TRACE_INFO,                          \
+           "Invalid Atom syntax: %s", base->to_string().c_str()); \
+                                                                  \
    Handle h(create##CNAME(base->getOutgoingSet(), base->get_type())); \
    return h;                                                      \
 }                                                                 \
