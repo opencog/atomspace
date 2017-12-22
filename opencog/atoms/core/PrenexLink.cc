@@ -144,7 +144,7 @@ Handle PrenexLink::beta_reduce(const HandleSeq& seq) const
 	if (1 != seqsize or
 	    not classserver().isA(seq[0]->get_type(), SCOPE_LINK))
 	{
-		if (_silent) return Handle::UNDEFINED;
+		if (_silent) throw TypeCheckException();
 		throw SyntaxException(TRACE_INFO,
 		   "PrenexLink is badly formed");
 	}
@@ -155,7 +155,7 @@ Handle PrenexLink::beta_reduce(const HandleSeq& seq) const
 	if (body->get_arity() != vtool.size() or
 	    body->get_type() != LIST_LINK)
 	{
-		if (_silent) return Handle::UNDEFINED;
+		if (_silent) throw TypeCheckException();
 		throw SyntaxException(TRACE_INFO,
 		   "PrenexLink has mismatched eta, expecting %lu == %lu",
 		   vtool.size(), body->get_arity());
