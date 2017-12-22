@@ -109,8 +109,8 @@ public:
     Handle factory(const Handle&);
 
     /** Provides ability to get type-added signals.
-     * @warning methods connected to this signal must not call ClassServer::addType or
-     * things will deadlock.
+     * @warning methods connected to this signal must not call
+     * ClassServer::addType or things will deadlock.
      */
     TypeSignal& addTypeSignal();
 
@@ -276,7 +276,7 @@ static __attribute__ ((constructor)) void init(void)              \
 Handle CNAME::factory(const Handle& base)                         \
 {                                                                 \
    if (CNAME##Cast(base)) return base;                            \
-   Handle h(create##CNAME(base->get_type(), base->get_name()));     \
+   Handle h(create##CNAME(base->get_type(), base->get_name()));   \
    return h;                                                      \
 }                                                                 \
                                                                   \
