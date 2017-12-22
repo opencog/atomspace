@@ -134,6 +134,17 @@ void PutLink::static_typecheck_values(void)
 	{
 		LambdaLinkPtr lam(LambdaLinkCast(_values));
 		Handle body = lam->get_body();
+
+		// The body might not exist, if there's an unmantched
+		// UnquoteLink in it.  I really dislike Quote/Unquote.
+		// There's something deeply evil about them.
+		if (nullptr == body)
+		{
+			throw SyntaxException(TRACE_INFO,
+				"PutLink given a malformed value=%s",
+				lam->to_string().c_str());
+		}
+
 		Type bt = body->get_type();
 		if (LIST_LINK == bt)
 		{
