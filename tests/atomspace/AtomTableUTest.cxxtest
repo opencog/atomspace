@@ -180,7 +180,7 @@ public:
         // type.   Unordered links get spcial handling.
         doRecursiveAdd(LIST_LINK);
         doRecursiveAdd(SET_LINK);
-        doRecursiveAdd(OR_LINK);
+        doRecursiveAdd(SIMILARITY_LINK);
         doRecursiveAdd(LIST_LINK);
     }
 
