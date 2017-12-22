@@ -25,8 +25,13 @@
 
 using namespace opencog;
 
+/// Check to see if every input atom is of Evaluatable type.
 bool check_evaluatable(const Handle& bool_atom)
 {
+	for (const Handle& h: bool_atom->getOutgoingSet())
+	{
+		if (not h->is_type(EVALUATABLE_LINK)) return false;
+	}
 	return true;
 }
 
