@@ -45,7 +45,18 @@ NUMBER_NODE <- NODE
 ORDERED_LINK <- LINK
 UNORDERED_LINK <- LINK
 
-// Basic sets
+// Evaluatable link. Any link type which might be evaluated, resulting
+// in a truth-value, should inherit from this type.  This is a
+// mixin-type, it does nothing by itself, but is used to identify
+// link types that are evaluatable - that is, they return truth values
+// when they are evaluated.
+EVALUATABLE_LINK <- LINK
+
+// Boolean-input link.  This link type forces type-checking on it's
+// "inputs" (it's outgoing set): they must be EvaluatableLinks.
+BOOLEAN_LINK <- LINK
+
+// Basic set-theory-inspired links
 SET_LINK <- UNORDERED_LINK
 LIST_LINK <- ORDERED_LINK
 MEMBER_LINK <- ORDERED_LINK
@@ -62,24 +73,13 @@ CONTEXT_LINK <- ORDERED_LINK
 
 // SUBSET_LINK is semantically equivalent to EXTENSIONAL_INHERITANCE_LINK.
 // Therefore the later has been removed.
-INHERITANCE_LINK <- ORDERED_LINK
+INHERITANCE_LINK <- ORDERED_LINK,EVALUATABLE_LINK
 SUBSET_LINK <- INHERITANCE_LINK
 INTENSIONAL_INHERITANCE_LINK <- INHERITANCE_LINK
 
-SIMILARITY_LINK <- UNORDERED_LINK
+SIMILARITY_LINK <- UNORDERED_LINK,EVALUATABLE_LINK
 EXTENSIONAL_SIMILARITY_LINK <- SIMILARITY_LINK
 INTENSIONAL_SIMILARITY_LINK <- SIMILARITY_LINK
-
-// Evaluatable link. Any link type which might be evaluated, resulting
-// in a truth-value, should inherit from this type.  This is a mixin-type,
-// it does nothing by itself, but is used to identify boolean-ish,
-// probabilisitic-TV-valued link types, so that they can be handled
-// properly.
-EVALUATABLE_LINK <- LINK
-
-// Boolean-input link.  This link type forces type-checking on it's
-// "inputs" (it's outgoing set): they must be EvaluatableLinks.
-BOOLEAN_LINK <- LINK
 
 // Boolean set operations, logical constants.
 // These are used by the pattern matcher to compute crisp-logic
