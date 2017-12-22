@@ -28,8 +28,16 @@ using namespace opencog;
 /// Check to see if every input atom is of Evaluatable type.
 bool check_evaluatable(const Handle& bool_atom)
 {
+	// Make an exception for AndLink, its used in pattern matcher
+	// in an unseemly way.
+	if (bool_atom->get_type() == AND_LINK) return true;
+
 	for (const Handle& h: bool_atom->getOutgoingSet())
 	{
+		// PutLinks cannt be type-checked statically. So checking
+		// has to be defered until runtime.
+		if (PUT_LINK == h->get_type()) continue;
+
 		if (not h->is_type(EVALUATABLE_LINK)) return false;
 	}
 	return true;
