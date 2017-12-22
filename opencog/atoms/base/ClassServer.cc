@@ -163,7 +163,7 @@ RTN_TYPE* ClassServer::searchToDepth(const std::vector<RTN_TYPE*>& vect,
                                      Type t, int depth) const
 {
 	// If there is a factory, then return it.
-	AtomFactory* fpr = vect[t];
+	RTN_TYPE* fpr = vect[t];
 	if (fpr) return fpr;
 
 	// Perhaps one of the parent types has a factory.
@@ -182,12 +182,14 @@ RTN_TYPE* ClassServer::searchToDepth(const std::vector<RTN_TYPE*>& vect,
 	return nullptr;
 }
 
-ClassServer::AtomFactory* ClassServer::getFactory(Type t) const
+template<typename RTN_TYPE>
+RTN_TYPE* ClassServer::getOper(const std::vector<RTN_TYPE*>& vect,
+                               Type t) const
 {
 	if (nTypes <= t) return nullptr;
 
 	// If there is a factory, then return it.
-	AtomFactory* fpr = _atomFactory[t];
+	RTN_TYPE* fpr = vect[t];
 	if (fpr) return fpr;
 
 	// Perhaps one of the parent types has a factory.
@@ -199,11 +201,21 @@ ClassServer::AtomFactory* ClassServer::getFactory(Type t) const
 	//
 	for (int search_depth = 1; search_depth <= _maxDepth; search_depth++)
 	{
-		AtomFactory* fact = searchToDepth<AtomFactory>(_atomFactory, t, search_depth);
+		RTN_TYPE* fact = searchToDepth<RTN_TYPE>(vect, t, search_depth);
 		if (fact) return fact;
 	}
 
 	return nullptr;
+}
+
+ClassServer::AtomFactory* ClassServer::getFactory(Type t) const
+{
+	return getOper<AtomFactory>(_atomFactory, t);
+}
+
+ClassServer::Validator* ClassServer::getValidator(Type t) const
+{
+	return getOper<Validator>(_validator, t);
 }
 
 Handle ClassServer::factory(const Handle& h) const
