@@ -56,10 +56,17 @@ EVALUATABLE_LINK <- LINK
 // "inputs" (it's outgoing set): they must be EvaluatableLinks.
 BOOLEAN_LINK <- LINK
 
+// Numeric-input link.  This link type forces type-checking on it's
+// "inputs" (it's outgoing set): they must be NumbeNodes
+NUMERIC_LINK <- LINK
+
+// Numeric-output link. Generates NumberNodes upon execution.
+NUMERIC_OUTPUT_LINK <- LINK
+
 // Basic set-theory-inspired links
 SET_LINK <- UNORDERED_LINK
 LIST_LINK <- ORDERED_LINK
-MEMBER_LINK <- ORDERED_LINK
+MEMBER_LINK <- ORDERED_LINK,EVALUATABLE_LINK
 
 // ContextLink: Universe of discourse. This behaves like set subtraction
 // in that the set of things outside of the context have no bearing on
@@ -340,7 +347,7 @@ INTENSIONAL_EQUIVALENCE_SCOPE_LINK <- EQUIVALENCE_SCOPE_LINK
 EXTENSIONAL_EQUIVALENCE_SCOPE_LINK <- EQUIVALENCE_SCOPE_LINK
 
 // Standard, non sugar form of implication and equivalence links.
-IMPLICATION_LINK <- ORDERED_LINK
+IMPLICATION_LINK <- ORDERED_LINK,EVALUATABLE_LINK
 INTENSIONAL_IMPLICATION_LINK <- IMPLICATION_LINK
 EXTENSIONAL_IMPLICATION_LINK <- IMPLICATION_LINK
 
@@ -482,7 +489,7 @@ QUANTITY_LINK <- ORDERED_LINK
 // matcher is concerned, which, right now, is the only user of this
 // link type.)
 VIRTUAL_LINK <- EVALUATION_LINK
-GREATER_THAN_LINK <- VIRTUAL_LINK
+GREATER_THAN_LINK <- VIRTUAL_LINK,NUMERIC_LINK
 
 // IdenticalLink tests for syntactic equality.  It does NOT execute its
 // arguments; it true only if both sides are the same atom.
@@ -519,16 +526,16 @@ EXECUTION_OUTPUT_LINK <- FUNCTION_LINK
 
 // Basic arithmetic operators
 FOLD_LINK <- FUNCTION_LINK
-ARITHMETIC_LINK <- FOLD_LINK
+ARITHMETIC_LINK <- FOLD_LINK,NUMERIC_LINK,NUMERIC_OUTPUT_LINK
 PLUS_LINK <- ARITHMETIC_LINK
 MINUS_LINK <- ARITHMETIC_LINK
 TIMES_LINK <- ARITHMETIC_LINK
 DIVIDE_LINK <- ARITHMETIC_LINK
 
-RANDOM_NUMBER_LINK <- FUNCTION_LINK
+RANDOM_NUMBER_LINK <- FUNCTION_LINK,NUMERIC_OUTPUT_LINK
 
 // Return arity of the wrapped link.
-ARITY_LINK <- FUNCTION_LINK
+ARITY_LINK <- FUNCTION_LINK,NUMERIC_OUTPUT_LINK
 
 // Return (with uniform distribution) one of the links it wraps.
 RANDOM_CHOICE_LINK <- FUNCTION_LINK
