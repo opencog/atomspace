@@ -3,7 +3,7 @@
 
 ; Some data to populate the atomspace
 (SetLink
-   (OrLink
+   (UnorderedLink
       (AssociativeLink (stv 1.0 1.0)
          (ConceptNode "want-this")
          (ConceptNode "valid")
@@ -25,7 +25,7 @@
       )
    )
 
-   (AndLink
+   (SimilarityLink
       (AssociativeLink (stv 1.0 1.0)
          (ConceptNode "wrong thing")
          (MemberLink
