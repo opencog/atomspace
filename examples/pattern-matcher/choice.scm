@@ -53,6 +53,6 @@
 					(ConceptNode "green"))))))
 
 ; Run the query:
-(cog-satisfying-set find-fruit)
+(cog-execute! find-fruit)
 
 ; The answer will be what you expect.

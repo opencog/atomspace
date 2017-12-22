@@ -39,7 +39,7 @@
          ;; Fetch all antecedent terms, or rather their values
          ;; associated to their variables
          (query (Get vardecl antecedent))
-         (antecedent-values (cog-satisfying-set query))
+         (antecedent-values (cog-execute! query))
          ;; Generate the antecedent and consequent terms, to get there
          ;; TVs
          (antecedent-terms (Put vardecl antecedent (List antecedent-values)))

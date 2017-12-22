@@ -11,7 +11,7 @@
 ; The expected result, after running the below, is that the following
 ; should be printed:
 ;
-; guile> (cog-bind x)
+; guile> (cog-execute! x)
 ; (ListLink (EvaluationLink (PredicateNode "make_from")
 ;     (ListLink (ConceptNode "pottery")
 ;            (ConceptNode "clay"))))
@@ -85,4 +85,4 @@
 		(ConceptNode "clay")))
 
 ; Run the pattern matcher.
-(cog-bind make-semantic-triple)
+(cog-execute! make-semantic-triple)

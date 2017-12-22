@@ -113,9 +113,9 @@
 
 ;;;; Run the Pattern-Mather by invoking any of the following.
 
-; (cog-satisfying-set human)
-; (cog-bind human-implies-animal)
-; (cog-bind human-implies-animal-stv)
+; (cog-execute! human)
+; (cog-execute! human-implies-animal)
+; (cog-execute! human-implies-animal-stv)
 
 ;;;; Expected output for each case above:
 

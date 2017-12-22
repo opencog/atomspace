@@ -49,11 +49,11 @@
 			(PredicateNode "some property")
 			(VariableNode "$x"))))
 
-; The cog-satisfying-set function will return the value(s) that
+; The cog-execute! function will return the value(s) that
 ; the GetLink finds.  If only one value satsifies the query, then
 ; that is returned. Else a SetLink is returned. Equivalently,
 ; the cog-execute! function will do the same thing.
-(cog-satisfying-set get-value)
+(cog-execute! get-value)
 (cog-execute! get-value)
 
 ; The PutLink below causes the put-link above to be un-done.

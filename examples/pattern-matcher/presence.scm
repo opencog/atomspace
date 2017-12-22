@@ -74,7 +74,7 @@
 				(ListLink (VariableNode "$x")))
 		)))
 
-(cog-satisfy empty-sequence)
+(cog-evaluate! empty-sequence)
 
 ; ------------------------------------------------------
 ;; This variant uses a GetLink to fetch the room-state from the
@@ -110,7 +110,7 @@
 				(ListLink))  ; zero arguments passed to function
 		)))
 
-(cog-satisfy get-empty-seq)
+(cog-evaluate! get-empty-seq)
 
 ; ------------------------------------------------------
 ;; This variant uses the traditional BindLink format to trigger
@@ -140,7 +140,7 @@
 				(ListLink (VariableNode "$x")))
 		))
 
-(cog-bind bind-empty)
+(cog-execute! bind-empty)
 
 ; ------------------------------------------------------
 ;; This variant uses a PutLink-GetLink combination. It is functionally

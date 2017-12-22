@@ -255,7 +255,7 @@ void ScopeUTest::test_hide_1()
 	// and the ground don't happen to have the same variable.
 	TS_ASSERT_EQUALS(varx, patvar);
 
-	Handle result = eval->eval_h("(cog-satisfying-set getx)");
+	Handle result = eval->eval_h("(cog-execute! getx)");
 	TS_ASSERT_EQUALS(1, result->get_arity());
 
 	Handle expected = eval->eval_h(

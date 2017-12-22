@@ -48,7 +48,7 @@ to solve the inference problem
 
 We apply the rules manually to understand what they do. The following
 ```scheme
-(cog-bind fuzzy-conjunction-introduction-2ary-rule)
+(cog-execute! fuzzy-conjunction-introduction-2ary-rule)
 ```
 produces conjunctions including the fact that Fritz croaks and eats flies
 ```scheme
@@ -69,17 +69,17 @@ produces conjunctions including the fact that Fritz croaks and eats flies
 ```
 
 We then apply the conditional full instantiation meta rule. Since it
-is a meta rule, that is it produces rules, we need to call `cog-bind`
+is a meta rule, that is it produces rules, we need to call `cog-execute!`
 twice, over the meta-rule, and then over the rules produced by the
 meta-rule, thus the use of the scheme function `map`
 ```scheme
-(map cog-bind (cog-outgoing-set (cog-bind conditional-full-instantiation-meta-rule)))
+(map cog-execute! (cog-outgoing-set (cog-execute! conditional-full-instantiation-meta-rule)))
 ```
 which gives us the fact that Fritz is a frog.
 
 Running again
 ```scheme
-(map cog-bind (cog-outgoing-set (cog-bind conditional-full-instantiation-meta-rule)))
+(map cog-execute! (cog-outgoing-set (cog-execute! conditional-full-instantiation-meta-rule)))
 ```
 finally gives us the result that Fritz is green.
 
@@ -106,8 +106,8 @@ The user is obviously invited to compare `knowledge-base.scm` and
 
 Then we apply the rules
 ```scheme
-(cog-bind if-croaks-and-eats-flies-then-frog-rule)
-(cog-bind if-frog-then-green-rule)
+(cog-execute! if-croaks-and-eats-flies-then-frog-rule)
+(cog-execute! if-frog-then-green-rule)
 ```
 to produce the answer.
 

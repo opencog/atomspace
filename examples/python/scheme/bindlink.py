@@ -24,7 +24,7 @@ for item in data:
 # Add to scheme's %load-path directory to serach for opencog guile modules
 scheme_eval(atomspace, "(add-to-load-path \"/usr/local/share/opencog/scm\")")
 
-# Import opencog modules required for using `cog-bind` in scheme_eval
+# Import opencog modules required for using `cog-execute!` in scheme_eval
 scheme_eval(atomspace, "(use-modules (opencog))")
 scheme_eval(atomspace, "(use-modules (opencog query))")
 
@@ -59,5 +59,5 @@ scheme_query = \
 scheme_eval_h(atomspace, scheme_query)
 
 # Run the above pattern and print the result
-result = scheme_eval_h(atomspace, '(cog-bind find-animals)')
+result = scheme_eval_h(atomspace, '(cog-execute! find-animals)')
 print "The result of pattern matching is:\n\n" + str(atomspace[result])
