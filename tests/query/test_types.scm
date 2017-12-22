@@ -1,6 +1,9 @@
 
 ; required atom types.
 
+(define (AntiLink . x)
+	(apply cog-new-link (append (list 'AntiLink) x)))
+
 (define (AtTimeLink . x)
 	(apply cog-new-link (append (list 'AtTimeLink) x)))
 
