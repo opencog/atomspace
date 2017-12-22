@@ -80,8 +80,7 @@ Handle FoldLink::delta_reduce(void) const
 
 		if (classserver().isA(t, FOLD_LINK))
 		{
-			auto fact = classserver().getFactory(t);
-			FoldLinkPtr fff(FoldLinkCast((*fact)(h)));
+			FoldLinkPtr fff(FoldLinkCast(classserver().factory(h)));
 			h = fff->delta_reduce();
 		}
 		expr = kons(h, expr);
