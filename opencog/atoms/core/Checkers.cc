@@ -65,6 +65,8 @@ bool check_numeric(const Handle& bool_atom)
 		// Checking has to be defered until runtime.
 		if (PUT_LINK == t) continue;
 		if (GET_LINK == t) continue;
+		if (EXECUTION_OUTPUT_LINK == t) continue;
+
 		if (VARIABLE_NODE == t) continue;
 		if (NUMBER_NODE == t) continue;
 
