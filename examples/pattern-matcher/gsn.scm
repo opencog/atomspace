@@ -107,4 +107,4 @@
 ;; The below should cause two hello messages to be printed, when
 ;; it is run.
 ;;
-(cog-bind find-humans)
+(cog-execute! find-humans)

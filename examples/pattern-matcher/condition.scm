@@ -82,4 +82,4 @@
 
 ;; Performing the below should cause only the (ConcpetNode "acceptance")
 ;; to be printed.
-; (cog-bind do-things)
+; (cog-execute! do-things)

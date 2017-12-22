@@ -140,7 +140,7 @@
 				(ListLink (VariableNode "$x")))
 		))
 
-(cog-bind bind-empty)
+(cog-execute! bind-empty)
 
 ; ------------------------------------------------------
 ;; This variant uses a PutLink-GetLink combination. It is functionally

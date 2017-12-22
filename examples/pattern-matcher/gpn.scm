@@ -115,6 +115,6 @@
 
 ; Running the below multiple times will return different sets of
 ; selected logicians each time.
-(cog-bind find-logicians)
-(cog-bind find-logicians)
-(cog-bind find-logicians)
+(cog-execute! find-logicians)
+(cog-execute! find-logicians)
+(cog-execute! find-logicians)

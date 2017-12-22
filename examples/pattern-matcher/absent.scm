@@ -106,29 +106,29 @@
 (show-room-state)
 
 ; Now, create the EvaluationLink.
-(cog-bind create)
+(cog-execute! create)
 
 ; Set the room state. We check for both visibility and invisibility,
 ; we don't want to assume either case in advance.
-(cog-bind is-visible)
-(cog-bind is-invisible)
+(cog-execute! is-visible)
+(cog-execute! is-invisible)
 
 ; Show the room state.  The room should be full.
 (show-room-state)
 
 ; Destroy the EvaluationLink, and set the room state.
-(cog-bind destroy)
-(cog-bind is-visible)
-(cog-bind is-invisible)
+(cog-execute! destroy)
+(cog-execute! is-visible)
+(cog-execute! is-invisible)
 (show-room-state)
 
 ; Do it again, for good luck.
-(cog-bind create)
-(cog-bind is-visible)
-(cog-bind is-invisible)
+(cog-execute! create)
+(cog-execute! is-visible)
+(cog-execute! is-invisible)
 (show-room-state)
 
-(cog-bind destroy)
-(cog-bind is-visible)
-(cog-bind is-invisible)
+(cog-execute! destroy)
+(cog-execute! is-visible)
+(cog-execute! is-invisible)
 (show-room-state)

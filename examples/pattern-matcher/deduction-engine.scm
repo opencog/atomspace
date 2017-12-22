@@ -235,5 +235,5 @@
 				(VariableNode "$V"))))))
 
 ;; TODO: x is undefined
-; (cog-bind (gar (cog-bind x)))
+; (cog-execute! (gar (cog-execute! x)))
 *unspecified*

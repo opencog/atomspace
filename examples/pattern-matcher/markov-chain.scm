@@ -382,10 +382,10 @@
 	(define my-stepper (create-chain-stepper my-trans my-nexts my-state))
 	(define my-delter (create-chain-deleter my-state))
 	(define my-mover (create-chain-move my-state my-nexts))
-	(cog-bind my-stepper)
+	(cog-execute! my-stepper)
 	; (show-state my-nexts)
-	(cog-bind my-delter)
-	(cog-bind my-mover)
+	(cog-execute! my-delter)
+	(cog-execute! my-mover)
 	(show-state my-state)
 )
 
