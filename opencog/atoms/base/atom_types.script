@@ -541,7 +541,7 @@ ARITY_LINK <- FUNCTION_LINK,NUMERIC_OUTPUT_LINK
 RANDOM_CHOICE_LINK <- FUNCTION_LINK
 
 // Return the current time.
-TIME_LINK <- FUNCTION_LINK
+TIME_LINK <- FUNCTION_LINK,NUMERIC_OUTPUT_LINK
 
 // Sleep link pauses executation for the indicated number of seconds.
 SLEEP_LINK <- FUNCTION_LINK
