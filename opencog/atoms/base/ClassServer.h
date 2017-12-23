@@ -79,8 +79,8 @@ private:
     std::vector< std::vector<bool> > recursiveMap;
     std::unordered_map<std::string, Type> name2CodeMap;
     std::vector<const std::string*> _code2NameMap;
-    std::vector<AtomFactory*> _atomFactory;
-    std::vector<Validator*> _validator;
+    mutable std::vector<AtomFactory*> _atomFactory;
+    mutable std::vector<Validator*> _validator;
     std::vector<int> _mod;
     TypeSignal _addTypeSignal;
 
@@ -91,6 +91,9 @@ private:
 
     template<typename RTN_TYPE>
     RTN_TYPE* getOper(const std::vector<RTN_TYPE*>&, Type) const;
+
+    mutable bool _is_init;
+    void init() const;
 
 public:
     /** Gets the singleton instance (following meyer's design pattern) */

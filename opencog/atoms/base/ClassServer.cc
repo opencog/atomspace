@@ -43,21 +43,23 @@ using namespace opencog;
 
 ClassServer::ClassServer(void)
 {
-    nTypes = 0;
-    _maxDepth = 0;
+	nTypes = 0;
+	_maxDepth = 0;
+	_is_init = false;
 }
 
 static int tmod = 0;
 
 void ClassServer::beginTypeDecls(void)
 {
-    tmod++;
+	tmod++;
+	_is_init = false;
 }
 
 void ClassServer::endTypeDecls(void)
 {
-    // Valid types are odd-numbered.
-    tmod++;
+	// Valid types are odd-numbered.
+	tmod++;
 }
 
 Type ClassServer::declType(const Type parent, const std::string& name)
@@ -146,8 +148,9 @@ boost::signals2::signal<void (Type)>& ClassServer::addTypeSignal()
 
 void ClassServer::addFactory(Type t, AtomFactory* fact)
 {
-    std::unique_lock<std::mutex> l(type_mutex);
-    _atomFactory[t] = fact;
+	std::unique_lock<std::mutex> l(type_mutex);
+	_atomFactory[t] = fact;
+	_is_init = false;
 }
 
 Handle validating_factory(const Handle& atom_to_check)
@@ -226,12 +229,33 @@ RTN_TYPE* ClassServer::getOper(const std::vector<RTN_TYPE*>& vect,
 
 ClassServer::AtomFactory* ClassServer::getFactory(Type t) const
 {
+	if (not _is_init) init();
+	return _atomFactory[t];
 	return getOper<AtomFactory>(_atomFactory, t);
 }
 
 ClassServer::Validator* ClassServer::getValidator(Type t) const
 {
 	return getOper<Validator>(_validator, t);
+}
+
+void ClassServer::init() const
+{
+	for (Type parent = 0; parent < nTypes; parent++)
+	{
+		if (_atomFactory[parent])
+		{
+			for (Type chi = parent+1; chi < nTypes; ++chi)
+			{
+				if (recursiveMap[parent][chi] and
+				    nullptr == _atomFactory[chi])
+				{
+					_atomFactory[chi] = getOper<AtomFactory>(_atomFactory, chi);
+				}
+			}
+		}
+	}
+	_is_init = true;
 }
 
 Handle ClassServer::factory(const Handle& h) const
