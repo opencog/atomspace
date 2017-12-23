@@ -548,8 +548,11 @@ Type AtomSpaceBenchmark::randomType(Type t)
     do {
         candidateType = ATOM + randomGenerator->randint(numberOfTypes - ATOM - 1);
     } while (!classserver().isA(candidateType, t) or
+        classserver().isA(candidateType, BOOLEAN_LINK) or
         classserver().isA(candidateType, FREE_LINK) or
+        classserver().isA(candidateType, NUMERIC_LINK) or
         classserver().isA(candidateType, SCOPE_LINK) or
+        classserver().isA(candidateType, TYPE_LINK) or
         classserver().isA(candidateType, UNIQUE_LINK) or
         candidateType == VARIABLE_LIST or
         candidateType == DEFINE_LINK or
