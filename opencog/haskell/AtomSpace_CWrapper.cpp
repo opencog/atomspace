@@ -1,3 +1,4 @@
+#include <cstring>
 
 #include "AtomSpace_CWrapper.h"
 #include <opencog/atoms/base/ClassServer.h>

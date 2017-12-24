@@ -1,3 +1,6 @@
+
+#include <cstring>
+
 #include "Value_CWrapper.h"
 
 int FloatValue_getFromAtom( Handle* atom
