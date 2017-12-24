@@ -95,7 +95,8 @@ be built and run.
   to `sudo make install` at the end.
 
 ###### guile
-* Embedded scheme REPL (version 2.0.9 or newer is required).
+* Embedded scheme REPL (version 2.0.9 or newer is required; version 2.2
+  is strongly recommended).
 * http://www.gnu.org/software/guile/guile.html | `apt-get install guile-2.0-dev`
 
 Optional Prerequisites
@@ -124,11 +125,6 @@ during the build, will be more precise as to which parts will not be built.
 * Distributed, multi-client networked storage.
 * Needed for "remembering" things between shutdowns.
 * http://postgres.org | `apt-get install postgresql postgresql-client`
-
-###### unixODBC
-* Generic SQL Database client access libraries.
-* Required for the distributed-processing atomspace.
-* http://www.unixodbc.org/ | `apt-get install unixodbc-dev`
 
 ###### ZeroMQ (version 3.2.4 or higher)
 * Asynchronous messaging library.
