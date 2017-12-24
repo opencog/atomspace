@@ -46,6 +46,9 @@ bool check_evaluatable(const Handle& bool_atom)
 		if (VARIABLE_NODE == t) continue;
 		if (DEFINED_PREDICATE_NODE == t) continue;
 
+		// XXX This is kind-of pushing it, but OK, allow PredicateNode
+		if (PREDICATE_NODE == t) continue;
+
 		// Fucking quote links. I hate those with a passion.
 		if (QUOTE_LINK == t) continue;
 		if (UNQUOTE_LINK == t) continue;
