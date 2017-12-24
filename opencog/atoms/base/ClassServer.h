@@ -209,8 +209,18 @@ public:
          * and don't care at all about writer starvation, since there
          * will almost never be writers. However, see comments above
          * about multi-reader-locks -- we are not using them just right
-         * now, because they don't seem to actually help. */
-        std::lock_guard<std::mutex> l(type_mutex);
+         * now, because they don't seem to actually help.
+         *
+         * Currently, this lock accounts for 2% or 3% performance
+         * impact on atom insertion into atomspace.  The unit tests
+         * don't need it to pass.  Most users probably dont need it
+         * at all, because most type creation/update happens in
+         * shared-lib ctors, which mistly should be done by the time
+         * that this gets called. How big a price do you want to pay
+         * for avoiding a possible crash on a shared-lib load while
+         * also running some multi-threaded app?
+         */
+        // std::lock_guard<std::mutex> l(type_mutex);
         if ((sub >= nTypes) || (super >= nTypes)) return false;
         return recursiveMap[super][sub];
     }
