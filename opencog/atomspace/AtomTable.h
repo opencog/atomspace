@@ -29,11 +29,10 @@
 #include <set>
 #include <vector>
 
-#include <boost/signals2.hpp>
-
 #include <opencog/util/async_method_caller.h>
 #include <opencog/util/oc_omp.h>
 #include <opencog/util/RandGen.h>
+#include <opencog/util/sigslot.h>
 
 #include <opencog/truthvalue/TruthValue.h>
 
@@ -52,18 +51,11 @@ namespace opencog
 
 typedef std::set<AtomPtr> AtomPtrSet;
 
-// XXX FIXME boost::signals2 is painfully bloated and slow. It accounts
-// for 5% or 10% of the total performance of the atomspace (try it -
-// comment out the emit-signal functions below, and measure.
-// Alternately, launch gdb, get into the signal, and look at the stack.
-// boost::signals2 uses eleven stack frames to do its thing. Eleven!
-// Really!) Should be enough to use SigSlot in cogutil.  Need to just
-// finish this work.
-typedef boost::signals2::signal<void (const Handle&)> AtomSignal;
-typedef boost::signals2::signal<void (const AtomPtr&)> AtomPtrSignal;
-typedef boost::signals2::signal<void (const Handle&,
-                                      const TruthValuePtr&,
-                                      const TruthValuePtr&)> TVCHSigl;
+typedef SigSlot<const Handle&> AtomSignal;
+typedef SigSlot<const AtomPtr&> AtomPtrSignal;
+typedef SigSlot<const Handle&,
+                const TruthValuePtr&,
+                const TruthValuePtr&> TVCHSigl;
 
 class AtomSpace;
 
@@ -110,7 +102,7 @@ private:
      * signal connection used to find out about atom type additions in the
      * ClassServer
      */
-    boost::signals2::connection addedTypeConnection;
+    int addedTypeConnection;
 
     /** Handler of the 'type added' signal from ClassServer */
     void typeAdded(Type);
@@ -349,8 +341,8 @@ public:
      */
     Handle getRandom(RandGen* rng) const;
 
-    AtomSignal& addAtomSignal() { return _addAtomSignal; }
-    AtomPtrSignal& removeAtomSignal() { return _removeAtomSignal; }
+    AtomSignal& atomAddedSignal() { return _addAtomSignal; }
+    AtomPtrSignal& atomRemovedSignal() { return _removeAtomSignal; }
 
     /** Provide ability for others to find out about TV changes */
     TVCHSigl& TVChangedSignal() { return _TVChangedSignal; }

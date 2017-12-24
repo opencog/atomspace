@@ -553,8 +553,9 @@ void SQLAtomStorage::registerWith(AtomSpace* as)
 	// The callback just deletes stuff not in the atomspace, as, chances
 	// are, they'll never be used again.
 	//
-	_extract_sig = as->removeAtomSignal(
-		boost::bind(&SQLAtomStorage::extract_callback, this, _1));
+	_extract_sig = as->atomRemovedAtomSignal().connect(
+		std::bind(&SQLAtomStorage::extract_callback, this,
+			std::placeholders::_1));
 #endif // NOT_NEEDED_RIGHT_NOW
 }
 

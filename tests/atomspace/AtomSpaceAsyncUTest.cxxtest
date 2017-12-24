@@ -24,12 +24,11 @@
 
 #include <algorithm>
 #include <atomic>
+#include <functional>
 #include <thread>
 
 #include <math.h>
 #include <string.h>
-
-#include <boost/bind.hpp>
 
 #include <opencog/atomspace/AtomSpace.h>
 #include <opencog/attentionbank/AttentionBank.h>
@@ -42,6 +41,7 @@
 
 using namespace opencog;
 using namespace std;
+using namespace std::placeholders;
 
 class AtomSpaceAsyncUTest :  public CxxTest::TestSuite
 {
@@ -147,18 +147,18 @@ public:
     void testSignals()
     {
         // Connect signals
-        boost::signals2::connection add1 =
-            atomSpace->addAtomSignal(boost::bind(&AtomSpaceAsyncUTest::atomAdded1, this, _1));
-        boost::signals2::connection add2 =
-            atomSpace->addAtomSignal(boost::bind(&AtomSpaceAsyncUTest::atomAdded2, this, _1));
-        boost::signals2::connection merge1 =
-            atomSpace->TVChangedSignal(boost::bind(&AtomSpaceAsyncUTest::atomMerged1, this, _1, _2, _3));
-        boost::signals2::connection merge2 =
-            atomSpace->TVChangedSignal(boost::bind(&AtomSpaceAsyncUTest::atomMerged2, this, _1, _2, _3));
-        boost::signals2::connection remove1 =
-            atomSpace->removeAtomSignal(boost::bind(&AtomSpaceAsyncUTest::atomRemoved1, this, _1));
-        boost::signals2::connection remove2 =
-            atomSpace->removeAtomSignal(boost::bind(&AtomSpaceAsyncUTest::atomRemoved2, this, _1));
+        int add1 =
+            atomSpace->atomAddedSignal().connect(std::bind(&AtomSpaceAsyncUTest::atomAdded1, this, _1));
+        int add2 =
+            atomSpace->atomAddedSignal().connect(std::bind(&AtomSpaceAsyncUTest::atomAdded2, this, _1));
+        int merge1 =
+            atomSpace->TVChangedSignal().connect(std::bind(&AtomSpaceAsyncUTest::atomMerged1, this, _1, _2, _3));
+        int merge2 =
+            atomSpace->TVChangedSignal().connect(std::bind(&AtomSpaceAsyncUTest::atomMerged2, this, _1, _2, _3));
+        int remove1 =
+            atomSpace->atomRemovedSignal().connect(std::bind(&AtomSpaceAsyncUTest::atomRemoved1, this, _1));
+        int remove2 =
+            atomSpace->atomRemovedSignal().connect(std::bind(&AtomSpaceAsyncUTest::atomRemoved2, this, _1));
 
         /* Add and remove a simple node */
         __testSignalsCounter = 0;
@@ -181,9 +181,9 @@ public:
 
         // test disconnections
         __testSignalsCounter = 0;
-        add1.disconnect();
-        merge1.disconnect();
-        remove1.disconnect();
+        atomSpace->atomAddedSignal().disconnect(add1);
+        atomSpace->TVChangedSignal().disconnect(merge1);
+        atomSpace->atomRemovedSignal().disconnect(remove1);
         wnHandle = atomSpace->add_node(NUMBER_NODE, "1.41421356");
         atomSpace->add_node(NUMBER_NODE, "1.41421356");
         TS_ASSERT(__testSignalsCounter == 10);
@@ -191,9 +191,9 @@ public:
         TS_ASSERT(__testSignalsCounter == 100010);
 
         __testSignalsCounter = 0;
-        add2.disconnect();
-        merge2.disconnect();
-        remove2.disconnect();
+        atomSpace->atomAddedSignal().disconnect(add2);
+        atomSpace->TVChangedSignal().disconnect(merge2);
+        atomSpace->atomRemovedSignal().disconnect(remove2);
         wnHandle = atomSpace->add_node(NUMBER_NODE, "1.41421356");
         atomSpace->add_node(NUMBER_NODE, "1.41421356");
         TS_ASSERT(__testSignalsCounter == 0);
@@ -336,11 +336,11 @@ public:
     void testThreadedSignals()
     {
         // connect signals
-        boost::signals2::connection add =
-            atomSpace->addAtomSignal(boost::bind(&AtomSpaceAsyncUTest::countAtomAdded, this, _1));
+        int add =
+            atomSpace->atomAddedSignal().connect(std::bind(&AtomSpaceAsyncUTest::countAtomAdded, this, _1));
 
-        boost::signals2::connection chg =
-            atomSpace->TVChangedSignal(boost::bind(&AtomSpaceAsyncUTest::countAtomChanged, this, _1, _2, _3));
+        int chg =
+            atomSpace->TVChangedSignal().connect(std::bind(&AtomSpaceAsyncUTest::countAtomChanged, this, _1, _2, _3));
 
         __totalAdded = 0;
         __totalChanged = 0;
@@ -350,6 +350,9 @@ public:
         // subtract 1, because first time through, there is no change signal,
         // only an add signal.
         TS_ASSERT_EQUALS((int) __totalChanged, num_atoms * n_threads);
+
+        atomSpace->atomAddedSignal().disconnect(add);
+        atomSpace->TVChangedSignal().disconnect(chg);
     }
 
     // =================================================================
@@ -500,13 +503,13 @@ public:
 
     void testAFSignals()
     {
-        boost::signals2::connection addAFConnection =
+        int addAFConnection =
             ab->AddAFSignal().connect(
-                    boost::bind(&AtomSpaceAsyncUTest::addAFSignal,
+                    std::bind(&AtomSpaceAsyncUTest::addAFSignal,
                                 this, _1, _2, _3));
-        boost::signals2::connection removeAFConnection =
+        int removeAFConnection =
             ab->RemoveAFSignal().connect(
-                    boost::bind(&AtomSpaceAsyncUTest::removeAFSignal,
+                    std::bind(&AtomSpaceAsyncUTest::removeAFSignal,
                                 this, _1, _2, _3));
 
         __testAFSignalsCounter = 0;
@@ -525,7 +528,8 @@ public:
         ab->set_sti(h2, af_sti + 300); // AFadded and AFRemoved signal emitted here.
         TS_ASSERT_EQUALS((int)__testAFSignalsCounter, 3);
 
-        addAFConnection.disconnect();
+        ab->AddAFSignal().disconnect(addAFConnection);
+        ab->RemoveAFSignal().disconnect(removeAFConnection);
     }
 
     // =================================================================
@@ -629,8 +633,8 @@ public:
 
         __totalPurged = 0;
 
-        boost::signals2::connection del =
-            atomSpace->removeAtomSignal(boost::bind(&AtomSpaceAsyncUTest::countAtomPurged, this, _1));
+        int del =
+            atomSpace->atomRemovedSignal().connect(std::bind(&AtomSpaceAsyncUTest::countAtomPurged, this, _1));
 
         spinwait = true;
         std::vector<std::thread> thread_pool;
@@ -649,6 +653,7 @@ public:
 
         std::cout << "Final size:" << size << std::endl;
         TS_ASSERT_EQUALS(size, n_threads);
+        atomSpace->atomRemovedSignal().disconnect(del);
     }
 
     // =================================================================
@@ -711,8 +716,8 @@ public:
         __totalPurged = 0;
         __altTotalPurged = 0;
 
-        atomSpace->removeAtomSignal(boost::bind(&AtomSpaceAsyncUTest::countAtomPurged, this, _1));
-        atomSpace->removeAtomSignal(boost::bind(&AtomSpaceAsyncUTest::simpleCountPurged, this, _1));
+        atomSpace->atomRemovedSignal().connect(std::bind(&AtomSpaceAsyncUTest::countAtomPurged, this, _1));
+        atomSpace->atomRemovedSignal().connect(std::bind(&AtomSpaceAsyncUTest::simpleCountPurged, this, _1));
 
         spinwait = true;
         std::vector<std::thread> thread_pool;

@@ -28,12 +28,12 @@
 #include "AtomTable.h"
 
 #include <atomic>
+#include <functional>
 #include <iterator>
 #include <mutex>
 #include <set>
 
 #include <stdlib.h>
-#include <boost/bind.hpp>
 
 #include <opencog/atoms/base/ClassServer.h>
 #include <opencog/atoms/base/Link.h>
@@ -76,15 +76,15 @@ AtomTable::AtomTable(AtomTable* parent, AtomSpace* holder, bool transient) :
 
     // Connect signal to find out about type additions
     addedTypeConnection =
-        _classserver.addTypeSignal().connect(
-            boost::bind(&AtomTable::typeAdded, this, _1));
+        _classserver.typeAddedSignal().connect(
+            std::bind(&AtomTable::typeAdded, this, std::placeholders::_1));
 }
 
 AtomTable::~AtomTable()
 {
     // Disconnect signals. Only then clear the resolver.
     std::lock_guard<std::recursive_mutex> lck(_mtx);
-    addedTypeConnection.disconnect();
+    _classserver.typeAddedSignal().disconnect(addedTypeConnection);
 
     // No one who shall look at these atoms shall ever again
     // find a reference to this atomtable.
@@ -485,7 +485,7 @@ void AtomTable::put_atom_into_index(const AtomPtr& atom)
 
     // Now that we are completely done, emit the added signal.
     // Don't emit signal until after the indexes are updated!
-    _addAtomSignal(atom->get_handle());
+    _addAtomSignal.emit(atom->get_handle());
 }
 
 void AtomTable::barrier()
@@ -705,7 +705,7 @@ AtomPtrSet AtomTable::extract(Handle& handle, bool recursive)
     // unlocking it once is not enough, because it can still be
     // recurisvely locked.
     // lck.unlock();
-    _removeAtomSignal(atom);
+    _removeAtomSignal.emit(atom);
     // lck.lock();
 
     // Decrements the size of the table

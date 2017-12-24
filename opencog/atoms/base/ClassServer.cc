@@ -121,7 +121,7 @@ Type ClassServer::declType(const Type parent, const std::string& name)
     l.unlock();
 
     // Emit add type signal.
-    _addTypeSignal(type);
+    _addTypeSignal.emit(type);
 
     return type;
 }
@@ -141,7 +141,7 @@ void ClassServer::setParentRecursively(Type parent, Type type, Type& maxd)
     if (incr) maxd++;
 }
 
-boost::signals2::signal<void (Type)>& ClassServer::addTypeSignal()
+TypeSignal& ClassServer::typeAddedSignal()
 {
     return _addTypeSignal;
 }
