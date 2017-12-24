@@ -28,8 +28,7 @@
 #include <unordered_map>
 #include <vector>
 
-#include <boost/signals2.hpp>
-
+#include <opencog/util/sigslot.h>
 #include <opencog/atoms/base/types.h>
 #include <opencog/atoms/base/atom_types.h>
 #include <opencog/atoms/base/Handle.h>
@@ -40,7 +39,7 @@ namespace opencog
  *  @{
  */
 
-typedef boost::signals2::signal<void (Type)> TypeSignal;
+typedef SigSlot<Type> TypeSignal;
 
 /**
  * This class keeps track of the complete protoatom (value and atom)
@@ -129,7 +128,7 @@ public:
      * @warning methods connected to this signal must not call
      * ClassServer::addType or things will deadlock.
      */
-    TypeSignal& addTypeSignal();
+    TypeSignal& typeAddedSignal();
 
     /**
      * Stores the children types on the OutputIterator 'result'.

@@ -550,17 +550,17 @@ public:
     /* ----------------------------------------------------------- */
     // ---- Signals
 
-    boost::signals2::connection addAtomSignal(const AtomSignal::slot_type& function)
+    AtomSignal& atomAddedSignal()
     {
-        return _atom_table.addAtomSignal().connect(function);
+        return _atom_table.atomAddedSignal();
     }
-    boost::signals2::connection removeAtomSignal(const AtomPtrSignal::slot_type& function)
+    AtomPtrSignal& atomRemovedSignal()
     {
-        return _atom_table.removeAtomSignal().connect(function);
+        return _atom_table.atomRemovedSignal();
     }
-    boost::signals2::connection TVChangedSignal(const TVCHSigl::slot_type& function)
+    TVCHSigl& TVChangedSignal()
     {
-        return _atom_table.TVChangedSignal().connect(function);
+        return _atom_table.TVChangedSignal();
     }
 };
 

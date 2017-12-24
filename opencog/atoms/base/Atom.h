@@ -33,8 +33,7 @@
 #include <string>
 #include <unordered_set>
 
-#include <boost/signals2.hpp>
-
+#include <opencog/util/sigslot.h>
 #include <opencog/atoms/base/Handle.h>
 #include <opencog/atoms/base/ProtoAtom.h>
 #include <opencog/truthvalue/TruthValue.h>
@@ -90,7 +89,7 @@ typedef std::size_t Arity;
 //! O(1) performance. Note that sometimes incoming sets can be huge,
 //! millions of atoms.
 typedef std::vector<LinkPtr> IncomingSet; // use vector; see below.
-typedef boost::signals2::signal<void (AtomPtr, LinkPtr)> AtomPairSignal;
+typedef SigSlot<AtomPtr, LinkPtr> AtomPairSignal;
 
 // typedef std::unordered_set<WinkPtr> WincomingSet;
 typedef std::set<WinkPtr, std::owner_less<WinkPtr> > WincomingSet;
