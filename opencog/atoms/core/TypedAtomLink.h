@@ -73,7 +73,7 @@ public:
 
 typedef std::shared_ptr<TypedAtomLink> TypedAtomLinkPtr;
 static inline TypedAtomLinkPtr TypedAtomLinkCast(const Handle& h)
-	{ AtomPtr a(h); return std::dynamic_pointer_cast<TypedAtomLink>(a); }
+	{ return std::dynamic_pointer_cast<TypedAtomLink>(h); }
 static inline TypedAtomLinkPtr TypedAtomLinkCast(AtomPtr a)
 	{ return std::dynamic_pointer_cast<TypedAtomLink>(a); }
 

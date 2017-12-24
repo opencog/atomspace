@@ -235,7 +235,7 @@ public:
 };
 
 static inline LinkPtr LinkCast(const Handle& h)
-    { return std::dynamic_pointer_cast<Link>(AtomCast(h)); }
+    { return std::dynamic_pointer_cast<Link>(h); }
 static inline LinkPtr LinkCast(const AtomPtr& a)
     { return std::dynamic_pointer_cast<Link>(a); }
 

@@ -73,7 +73,7 @@ public:
 
 typedef std::shared_ptr<RandomChoiceLink> RandomChoiceLinkPtr;
 static inline RandomChoiceLinkPtr RandomChoiceLinkCast(const Handle& h)
-	{ return std::dynamic_pointer_cast<RandomChoiceLink>(AtomCast(h)); }
+	{ return std::dynamic_pointer_cast<RandomChoiceLink>(h); }
 static inline RandomChoiceLinkPtr RandomChoiceLinkCast(const AtomPtr& a)
 	{ return std::dynamic_pointer_cast<RandomChoiceLink>(a); }
 

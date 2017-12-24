@@ -79,8 +79,8 @@ private:
     std::vector< std::vector<bool> > recursiveMap;
     std::unordered_map<std::string, Type> name2CodeMap;
     std::vector<const std::string*> _code2NameMap;
-    std::vector<AtomFactory*> _atomFactory;
-    std::vector<Validator*> _validator;
+    mutable std::vector<AtomFactory*> _atomFactory;
+    mutable std::vector<Validator*> _validator;
     std::vector<int> _mod;
     TypeSignal _addTypeSignal;
 
@@ -91,6 +91,9 @@ private:
 
     template<typename RTN_TYPE>
     RTN_TYPE* getOper(const std::vector<RTN_TYPE*>&, Type) const;
+
+    mutable bool _is_init;
+    void init() const;
 
 public:
     /** Gets the singleton instance (following meyer's design pattern) */
@@ -206,8 +209,18 @@ public:
          * and don't care at all about writer starvation, since there
          * will almost never be writers. However, see comments above
          * about multi-reader-locks -- we are not using them just right
-         * now, because they don't seem to actually help. */
-        std::lock_guard<std::mutex> l(type_mutex);
+         * now, because they don't seem to actually help.
+         *
+         * Currently, this lock accounts for 2% or 3% performance
+         * impact on atom insertion into atomspace.  The unit tests
+         * don't need it to pass.  Most users probably dont need it
+         * at all, because most type creation/update happens in
+         * shared-lib ctors, which mistly should be done by the time
+         * that this gets called. How big a price do you want to pay
+         * for avoiding a possible crash on a shared-lib load while
+         * also running some multi-threaded app?
+         */
+        // std::lock_guard<std::mutex> l(type_mutex);
         if ((sub >= nTypes) || (super >= nTypes)) return false;
         return recursiveMap[super][sub];
     }

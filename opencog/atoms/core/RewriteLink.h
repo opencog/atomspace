@@ -221,7 +221,7 @@ public:
 };
 
 static inline RewriteLinkPtr RewriteLinkCast(const Handle& h)
-	{ return std::dynamic_pointer_cast<RewriteLink>(AtomCast(h)); }
+	{ return std::dynamic_pointer_cast<RewriteLink>(h); }
 static inline RewriteLinkPtr RewriteLinkCast(const AtomPtr& a)
 	{ return std::dynamic_pointer_cast<RewriteLink>(a); }
 

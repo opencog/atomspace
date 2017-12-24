@@ -94,7 +94,7 @@ public:
 
 typedef std::shared_ptr<VariableList> VariableListPtr;
 static inline VariableListPtr VariableListCast(const Handle& h)
-	{ return std::dynamic_pointer_cast<VariableList>(AtomCast(h)); }
+	{ return std::dynamic_pointer_cast<VariableList>(h); }
 static inline VariableListPtr VariableListCast(const AtomPtr& a)
 	{ return std::dynamic_pointer_cast<VariableList>(a); }
 

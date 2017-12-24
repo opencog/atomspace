@@ -68,7 +68,7 @@ public:
 
 typedef std::shared_ptr<PresentLink> PresentLinkPtr;
 static inline PresentLinkPtr PresentLinkCast(const Handle& h)
-	{ return std::dynamic_pointer_cast<PresentLink>(AtomCast(h)); }
+	{ return std::dynamic_pointer_cast<PresentLink>(h); }
 static inline PresentLinkPtr PresentLinkCast(const AtomPtr& a)
 	{ return std::dynamic_pointer_cast<PresentLink>(a); }
 

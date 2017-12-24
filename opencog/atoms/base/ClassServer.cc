@@ -43,21 +43,23 @@ using namespace opencog;
 
 ClassServer::ClassServer(void)
 {
-    nTypes = 0;
-    _maxDepth = 0;
+	nTypes = 0;
+	_maxDepth = 0;
+	_is_init = false;
 }
 
 static int tmod = 0;
 
 void ClassServer::beginTypeDecls(void)
 {
-    tmod++;
+	tmod++;
+	_is_init = false;
 }
 
 void ClassServer::endTypeDecls(void)
 {
-    // Valid types are odd-numbered.
-    tmod++;
+	// Valid types are odd-numbered.
+	tmod++;
 }
 
 Type ClassServer::declType(const Type parent, const std::string& name)
@@ -146,8 +148,9 @@ boost::signals2::signal<void (Type)>& ClassServer::addTypeSignal()
 
 void ClassServer::addFactory(Type t, AtomFactory* fact)
 {
-    std::unique_lock<std::mutex> l(type_mutex);
-    _atomFactory[t] = fact;
+	std::unique_lock<std::mutex> l(type_mutex);
+	_atomFactory[t] = fact;
+	_is_init = false;
 }
 
 Handle validating_factory(const Handle& atom_to_check)
@@ -170,6 +173,7 @@ void ClassServer::addValidator(Type t, Validator* checker)
 	_validator[t] = checker;
 	if (not _atomFactory[t])
 		_atomFactory[t] = validating_factory;
+	_is_init = false;
 }
 
 // Perform a depth-first recursive search for a factory,
@@ -226,12 +230,54 @@ RTN_TYPE* ClassServer::getOper(const std::vector<RTN_TYPE*>& vect,
 
 ClassServer::AtomFactory* ClassServer::getFactory(Type t) const
 {
-	return getOper<AtomFactory>(_atomFactory, t);
+	if (not _is_init) init();
+	return _atomFactory[t];
 }
 
 ClassServer::Validator* ClassServer::getValidator(Type t) const
 {
-	return getOper<Validator>(_validator, t);
+	if (not _is_init) init();
+	return _validator[t];
+}
+
+void ClassServer::init() const
+{
+	// The goal here is to cache the various factories that child
+	// nodes might run. The getOper<AtomFactory>() is too expensive
+	// to run for every node creation. If damages performance by
+	// 10x per Node creation, and 5x for every link creation.
+	//
+	// Unfortunately, creating this cache is tricky, because the
+	// factories get added in random order, can can clobber
+	// one-another, so we have to wait to do this until after
+	// all factories have been declared.
+	for (Type parent = 0; parent < nTypes; parent++)
+	{
+		if (_atomFactory[parent])
+		{
+			for (Type chi = parent+1; chi < nTypes; ++chi)
+			{
+				if (recursiveMap[parent][chi] and
+				    nullptr == _atomFactory[chi])
+				{
+					_atomFactory[chi] = getOper<AtomFactory>(_atomFactory, chi);
+				}
+			}
+		}
+
+		if (_validator[parent])
+		{
+			for (Type chi = parent+1; chi < nTypes; ++chi)
+			{
+				if (recursiveMap[parent][chi] and
+				    nullptr == _validator[chi])
+				{
+					_validator[chi] = getOper<Validator>(_validator, chi);
+				}
+			}
+		}
+	}
+	_is_init = true;
 }
 
 Handle ClassServer::factory(const Handle& h) const

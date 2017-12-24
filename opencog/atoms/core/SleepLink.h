@@ -49,7 +49,7 @@ public:
 
 typedef std::shared_ptr<SleepLink> SleepLinkPtr;
 static inline SleepLinkPtr SleepLinkCast(const Handle& h)
-	{ AtomPtr a(h); return std::dynamic_pointer_cast<SleepLink>(a); }
+	{ return std::dynamic_pointer_cast<SleepLink>(h); }
 static inline SleepLinkPtr SleepLinkCast(AtomPtr a)
 	{ return std::dynamic_pointer_cast<SleepLink>(a); }
 

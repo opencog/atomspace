@@ -48,7 +48,7 @@ public:
 
 typedef std::shared_ptr<TimeLink> TimeLinkPtr;
 static inline TimeLinkPtr TimeLinkCast(const Handle& h)
-	{ AtomPtr a(h); return std::dynamic_pointer_cast<TimeLink>(a); }
+	{ return std::dynamic_pointer_cast<TimeLink>(h); }
 static inline TimeLinkPtr TimeLinkCast(AtomPtr a)
 	{ return std::dynamic_pointer_cast<TimeLink>(a); }
 
