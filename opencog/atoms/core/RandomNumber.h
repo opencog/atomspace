@@ -59,7 +59,7 @@ public:
 
 typedef std::shared_ptr<RandomNumberLink> RandomNumberLinkPtr;
 static inline RandomNumberLinkPtr RandomNumberLinkCast(const Handle& h)
-	{ AtomPtr a(h); return std::dynamic_pointer_cast<RandomNumberLink>(a); }
+	{ return std::dynamic_pointer_cast<RandomNumberLink>(h); }
 static inline RandomNumberLinkPtr RandomNumberLinkCast(AtomPtr a)
 	{ return std::dynamic_pointer_cast<RandomNumberLink>(a); }
 

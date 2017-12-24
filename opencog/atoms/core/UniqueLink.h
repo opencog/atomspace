@@ -62,7 +62,7 @@ public:
 
 typedef std::shared_ptr<UniqueLink> UniqueLinkPtr;
 static inline UniqueLinkPtr UniqueLinkCast(const Handle& h)
-	{ return std::dynamic_pointer_cast<UniqueLink>(AtomCast(h)); }
+	{ return std::dynamic_pointer_cast<UniqueLink>(h); }
 static inline UniqueLinkPtr UniqueLinkCast(const AtomPtr& a)
 	{ return std::dynamic_pointer_cast<UniqueLink>(a); }
 

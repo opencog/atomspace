@@ -60,7 +60,7 @@ public:
 };
 
 static inline PrenexLinkPtr PrenexLinkCast(const Handle& h)
-	{ return std::dynamic_pointer_cast<PrenexLink>(AtomCast(h)); }
+	{ return std::dynamic_pointer_cast<PrenexLink>(h); }
 static inline PrenexLinkPtr PrenexLinkCast(const AtomPtr& a)
 	{ return std::dynamic_pointer_cast<PrenexLink>(a); }
 

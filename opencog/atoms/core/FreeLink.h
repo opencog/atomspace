@@ -59,7 +59,7 @@ public:
 };
 
 static inline FreeLinkPtr FreeLinkCast(const Handle& h)
-   { return std::dynamic_pointer_cast<FreeLink>(AtomCast(h)); }
+   { return std::dynamic_pointer_cast<FreeLink>(h); }
 static inline FreeLinkPtr FreeLinkCast(const AtomPtr& a)
    { return std::dynamic_pointer_cast<FreeLink>(a); }
 

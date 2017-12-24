@@ -83,7 +83,7 @@ public:
 typedef std::shared_ptr<ComposeLink> ComposeLinkPtr;
 static inline ComposeLinkPtr ComposeLinkCast(const Handle& h)
 {
-	AtomPtr a(h); return std::dynamic_pointer_cast<ComposeLink>(a);
+	return std::dynamic_pointer_cast<ComposeLink>(h);
 }
 static inline ComposeLinkPtr ComposeLinkCast(AtomPtr a)
 {

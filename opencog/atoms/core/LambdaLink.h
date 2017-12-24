@@ -62,7 +62,7 @@ public:
 
 typedef std::shared_ptr<LambdaLink> LambdaLinkPtr;
 static inline LambdaLinkPtr LambdaLinkCast(const Handle& h)
-	{ return std::dynamic_pointer_cast<LambdaLink>(AtomCast(h)); }
+	{ return std::dynamic_pointer_cast<LambdaLink>(h); }
 static inline LambdaLinkPtr LambdaLinkCast(const AtomPtr& a)
 	{ return std::dynamic_pointer_cast<LambdaLink>(a); }
 

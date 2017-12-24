@@ -62,7 +62,7 @@ public:
 
 typedef std::shared_ptr<ImplicationScopeLink> ImplicationScopeLinkPtr;
 static inline ImplicationScopeLinkPtr ImplicationScopeLinkCast(const Handle& h)
-	{ AtomPtr a(h); return std::dynamic_pointer_cast<ImplicationScopeLink>(a); }
+	{ return std::dynamic_pointer_cast<ImplicationScopeLink>(h); }
 static inline ImplicationScopeLinkPtr ImplicationScopeLinkCast(AtomPtr a)
 	{ return std::dynamic_pointer_cast<ImplicationScopeLink>(a); }
 

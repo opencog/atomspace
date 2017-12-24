@@ -92,7 +92,7 @@ public:
 };
 
 static inline ScopeLinkPtr ScopeLinkCast(const Handle& h)
-	{ return std::dynamic_pointer_cast<ScopeLink>(AtomCast(h)); }
+	{ return std::dynamic_pointer_cast<ScopeLink>(h); }
 static inline ScopeLinkPtr ScopeLinkCast(const AtomPtr& a)
 	{ return std::dynamic_pointer_cast<ScopeLink>(a); }
 
