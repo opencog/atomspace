@@ -1434,3 +1434,40 @@ Remarks:
 * Improvement in getType and pointerCast also unexpected.
 * Improvement in addNode addLink removeAtom expected, because of
   refactoring of very inefficient AttentionBank.
+
+======================================================================
+
+23 Dec 2017
+-----------
+New core baseline. Fanny.  This baseline measures perf after misc.
+general updates, including the implementation of Values.
+
+compiler: gcc version 6.3.0
+
+                     -A          -A           -A
+   test            Nov 2016    Dec 2016       Today
+   name            K-ops/sec   K-ops/sec      2017         Comments
+   ----            ---------   ---------      ----      -----------------
+  noop              1.76e6      2.20e6       1.89e6
+  getType          79.1K       82.3K        79.9K
+  getTV             4099        4109         4117
+  setTV             1217        1243          796       Values!
+  pointerCast       7561        8236        10.6K       DoubleCast
+  getIncomingSet    2272        2270         2086
+  getOutgoingSet   43.6K       47.2K        45.6K
+  addNode            231         305          315
+  addLink             88.3       103          142       ! 40% faster!!
+  removeAtom         431         559          573
+
+Remarks:
+* setTV dropped due to new Values framework. Don't know how to regain
+  the lost perf.  Note that a big part of setTV performance is the
+  stupid signal.
+
+* The pointerCast result is mixed. At first, it measured a lot slower.
+  Looking at the code, there was a double cast.  Remove that, its a
+  lot faster. So: this suggests a compiler issue: the compiler knocked
+  us down by about 10%, which we got back by avoiding a double-cast.
+  So WTF.
+
+* No clue why addLink is so much faster.
