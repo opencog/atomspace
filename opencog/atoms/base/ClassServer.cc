@@ -173,6 +173,7 @@ void ClassServer::addValidator(Type t, Validator* checker)
 	_validator[t] = checker;
 	if (not _atomFactory[t])
 		_atomFactory[t] = validating_factory;
+	_is_init = false;
 }
 
 // Perform a depth-first recursive search for a factory,
@@ -231,16 +232,25 @@ ClassServer::AtomFactory* ClassServer::getFactory(Type t) const
 {
 	if (not _is_init) init();
 	return _atomFactory[t];
-	return getOper<AtomFactory>(_atomFactory, t);
 }
 
 ClassServer::Validator* ClassServer::getValidator(Type t) const
 {
-	return getOper<Validator>(_validator, t);
+	if (not _is_init) init();
+	return _validator[t];
 }
 
 void ClassServer::init() const
 {
+	// The goal here is to cache the various factories that child
+	// nodes might run. The getOper<AtomFactory>() is too expensive
+	// to run for every node creation. If damages performance by
+	// 10x per Node creation, and 5x for every link creation.
+	//
+	// Unfortunately, creating this cache is tricky, because the
+	// factories get added in random order, can can clobber
+	// one-another, so we have to wait to do this until after
+	// all factories have been declared.
 	for (Type parent = 0; parent < nTypes; parent++)
 	{
 		if (_atomFactory[parent])
@@ -251,6 +261,18 @@ void ClassServer::init() const
 				    nullptr == _atomFactory[chi])
 				{
 					_atomFactory[chi] = getOper<AtomFactory>(_atomFactory, chi);
+				}
+			}
+		}
+
+		if (_validator[parent])
+		{
+			for (Type chi = parent+1; chi < nTypes; ++chi)
+			{
+				if (recursiveMap[parent][chi] and
+				    nullptr == _validator[chi])
+				{
+					_validator[chi] = getOper<Validator>(_validator, chi);
 				}
 			}
 		}
