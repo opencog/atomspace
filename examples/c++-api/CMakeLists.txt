@@ -17,11 +17,9 @@ TARGET_LINK_LIBRARIES(ureexample
 	ruleengine
 	)
 
-IF(Boost_FOUND)
-	ADD_EXECUTABLE(aseventsexample
-		AtomSpaceEventSubscribeExample
-		)
-	TARGET_LINK_LIBRARIES(aseventsexample
-		atomspace
-		)
-ENDIF(Boost_FOUND)
+ADD_EXECUTABLE(aseventsexample
+    AtomSpaceEventSubscribeExample
+    )
+TARGET_LINK_LIBRARIES(aseventsexample
+    atomspace
+    )
