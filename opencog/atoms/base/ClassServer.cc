@@ -191,12 +191,15 @@ RTN_TYPE* ClassServer::searchToDepth(const std::vector<RTN_TYPE*>& vect,
 	depth--;
 	if (depth < 0) return nullptr;
 
-	std::vector<Type> parents;
-	getParents(t, back_inserter(parents));
-	for (auto p: parents)
+	// Do any of the immediate parents of this type
+	// have a factory?
+	for (Type p = 0; p < t; ++p)
 	{
-		RTN_TYPE* fact = searchToDepth<RTN_TYPE>(vect, p, depth);
-		if (fact) return fact;
+		if (inheritanceMap[p][t])
+		{
+			RTN_TYPE* fact = searchToDepth<RTN_TYPE>(vect, p, depth);
+			if (fact) return fact;
+		}
 	}
 
 	return nullptr;
@@ -244,20 +247,21 @@ void ClassServer::init() const
 {
 	// The goal here is to cache the various factories that child
 	// nodes might run. The getOper<AtomFactory>() is too expensive
-	// to run for every node creation. If damages performance by
+	// to run for every node creation. It damages performance by
 	// 10x per Node creation, and 5x for every link creation.
 	//
-	// Unfortunately, creating this cache is tricky, because the
-	// factories get added in random order, can can clobber
-	// one-another, so we have to wait to do this until after
-	// all factories have been declared.
+	// Unfortunately, creating this cache is tricky. It can't be
+	// done one at a time, because the factories get added in
+	// random order, can can clobber one-another. Instead, we have
+	// to wait to do this until after all factories have been
+	// declared.
 	for (Type parent = 0; parent < nTypes; parent++)
 	{
 		if (_atomFactory[parent])
 		{
 			for (Type chi = parent+1; chi < nTypes; ++chi)
 			{
-				if (recursiveMap[parent][chi] and
+				if (inheritanceMap[parent][chi] and
 				    nullptr == _atomFactory[chi])
 				{
 					_atomFactory[chi] = getOper<AtomFactory>(_atomFactory, chi);
@@ -269,7 +273,7 @@ void ClassServer::init() const
 		{
 			for (Type chi = parent+1; chi < nTypes; ++chi)
 			{
-				if (recursiveMap[parent][chi] and
+				if (inheritanceMap[parent][chi] and
 				    nullptr == _validator[chi])
 				{
 					_validator[chi] = getOper<Validator>(_validator, chi);
