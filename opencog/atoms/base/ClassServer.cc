@@ -198,12 +198,15 @@ RTN_TYPE* ClassServer::searchToDepth(const std::vector<RTN_TYPE*>& vect,
 	depth--;
 	if (depth < 0) return nullptr;
 
-	std::vector<Type> parents;
-	getParents(t, back_inserter(parents));
-	for (auto p: parents)
+	// Do any of the immediate parents of this type
+	// have a factory?
+	for (Type p = 0; p < t; ++p)
 	{
-		RTN_TYPE* fact = searchToDepth<RTN_TYPE>(vect, p, depth);
-		if (fact) return fact;
+		if (inheritanceMap[p][t])
+		{
+			RTN_TYPE* fact = searchToDepth<RTN_TYPE>(vect, p, depth);
+			if (fact) return fact;
+		}
 	}
 
 	return nullptr;
