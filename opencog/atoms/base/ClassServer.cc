@@ -151,6 +151,13 @@ void ClassServer::addFactory(Type t, AtomFactory* fact)
 	std::unique_lock<std::mutex> l(type_mutex);
 	_atomFactory[t] = fact;
 	_is_init = false;
+
+	// Children may have already inherited other factories.
+	// Reset this, so that the init() function can find this one.
+	for (Type chi = t+1; chi < nTypes; ++chi)
+	{
+		if (recursiveMap[t][chi]) _atomFactory[chi] = nullptr;
+	}
 }
 
 Handle validating_factory(const Handle& atom_to_check)
