@@ -146,6 +146,20 @@ TypeSignal& ClassServer::typeAddedSignal()
     return _addTypeSignal;
 }
 
+static Handle validating_factory(const Handle& atom_to_check)
+{
+	ClassServer::Validator* checker =
+		classserver().getValidator(atom_to_check->get_type());
+
+	/* Well, is it OK, or not? */
+	if (not checker(atom_to_check))
+		throw SyntaxException(TRACE_INFO,
+		     "Invalid Atom syntax: %s",
+		     atom_to_check->to_string().c_str());
+
+	return atom_to_check;
+}
+
 void ClassServer::addFactory(Type t, AtomFactory* fact)
 {
 	std::unique_lock<std::mutex> l(type_mutex);
@@ -153,6 +167,7 @@ void ClassServer::addFactory(Type t, AtomFactory* fact)
 
 	// Find all the factories that belong to parents of this type.
 	std::set<AtomFactory*> ok_to_clobber;
+	ok_to_clobber.insert(validating_factory);
 	for (Type parent=0; parent < t; parent++)
 	{
 		if (recursiveMap[parent][t] and _atomFactory[parent])
@@ -171,20 +186,6 @@ void ClassServer::addFactory(Type t, AtomFactory* fact)
 			_atomFactory[chi] = fact;
 		}
 	}
-}
-
-Handle validating_factory(const Handle& atom_to_check)
-{
-	ClassServer::Validator* checker =
-		classserver().getValidator(atom_to_check->get_type());
-
-	/* Well, is it OK, or not? */
-	if (not checker(atom_to_check))
-		throw SyntaxException(TRACE_INFO,
-		     "Invalid Atom syntax: %s",
-		     atom_to_check->to_string().c_str());
-
-	return atom_to_check;
 }
 
 void ClassServer::addValidator(Type t, Validator* checker)
@@ -253,7 +254,6 @@ RTN_TYPE* ClassServer::getOper(const std::vector<RTN_TYPE*>& vect,
 
 ClassServer::AtomFactory* ClassServer::getFactory(Type t) const
 {
-	if (not _is_init) init();
 	return _atomFactory[t];
 }
 
@@ -277,20 +277,6 @@ void ClassServer::init() const
 	// declared.
 	for (Type parent = 0; parent < nTypes; parent++)
 	{
-#if 0
-		if (_atomFactory[parent])
-		{
-			for (Type chi = parent+1; chi < nTypes; ++chi)
-			{
-				if (inheritanceMap[parent][chi] and
-				    nullptr == _atomFactory[chi])
-				{
-					_atomFactory[chi] = getOper<AtomFactory>(_atomFactory, chi);
-				}
-			}
-		}
-#endif
-
 		if (_validator[parent])
 		{
 			for (Type chi = parent+1; chi < nTypes; ++chi)
