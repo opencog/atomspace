@@ -131,6 +131,8 @@ public:
     TypeSignal& typeAddedSignal();
 
     /**
+     * Given the type `type`, get the immediate descendents.
+     * This is NOT recursive, only the first generation is returned.
      * Stores the children types on the OutputIterator 'result'.
      * Returns the number of children types.
      */
@@ -148,6 +150,8 @@ public:
     }
 
     /**
+     * Given the type `type`, get the immediate parents.
+     * This is NOT recursive, only the first generation is returned.
      * Stores the parent types on the OutputIterator 'result'.
      * Returns the number of parent types.
      */
@@ -164,6 +168,12 @@ public:
         return n_parents;
     }
 
+    /**
+     * Given the type `type`, get all of the descendents.  This is
+     * recursive, that is, children of the children are returned.
+     * Stores the children types on the OutputIterator 'result'.
+     * Returns the number of children types.
+     */
     template <typename OutputIterator>
     unsigned long getChildrenRecursive(Type type, OutputIterator result) const
     {
