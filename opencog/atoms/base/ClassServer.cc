@@ -150,7 +150,27 @@ void ClassServer::addFactory(Type t, AtomFactory* fact)
 {
 	std::unique_lock<std::mutex> l(type_mutex);
 	_atomFactory[t] = fact;
-	_is_init = false;
+
+	// Find all the factories that belong to parents of this type.
+	std::set<AtomFactory*> ok_to_clobber;
+	for (Type parent=0; parent < t; parent++)
+	{
+		if (recursiveMap[parent][t] and _atomFactory[parent])
+			ok_to_clobber.insert(_atomFactory[parent]);
+	}
+
+	// Set the factory for all children of this type.  Be careful
+	// not to clobber any factories that might have been previously
+	// declared.
+	for (Type chi=t+1; chi < nTypes; chi++)
+	{
+		if (recursiveMap[t][chi] and
+		    (nullptr == _atomFactory[chi] or
+		    ok_to_clobber.end() != ok_to_clobber.find(_atomFactory[chi])))
+		{
+			_atomFactory[chi] = fact;
+		}
+	}
 }
 
 Handle validating_factory(const Handle& atom_to_check)
@@ -257,6 +277,7 @@ void ClassServer::init() const
 	// declared.
 	for (Type parent = 0; parent < nTypes; parent++)
 	{
+#if 0
 		if (_atomFactory[parent])
 		{
 			for (Type chi = parent+1; chi < nTypes; ++chi)
@@ -268,6 +289,7 @@ void ClassServer::init() const
 				}
 			}
 		}
+#endif
 
 		if (_validator[parent])
 		{
