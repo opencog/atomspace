@@ -244,13 +244,14 @@ void ClassServer::init() const
 {
 	// The goal here is to cache the various factories that child
 	// nodes might run. The getOper<AtomFactory>() is too expensive
-	// to run for every node creation. If damages performance by
+	// to run for every node creation. It damages performance by
 	// 10x per Node creation, and 5x for every link creation.
 	//
-	// Unfortunately, creating this cache is tricky, because the
-	// factories get added in random order, can can clobber
-	// one-another, so we have to wait to do this until after
-	// all factories have been declared.
+	// Unfortunately, creating this cache is tricky. It can't be
+	// done one at a time, because the factories get added in
+	// random order, can can clobber one-another. Instead, we have
+	// to wait to do this until after all factories have been
+	// declared.
 	for (Type parent = 0; parent < nTypes; parent++)
 	{
 		if (_atomFactory[parent])
