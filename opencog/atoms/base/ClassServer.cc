@@ -258,7 +258,7 @@ void ClassServer::init() const
 		{
 			for (Type chi = parent+1; chi < nTypes; ++chi)
 			{
-				if (recursiveMap[parent][chi] and
+				if (inheritanceMap[parent][chi] and
 				    nullptr == _atomFactory[chi])
 				{
 					_atomFactory[chi] = getOper<AtomFactory>(_atomFactory, chi);
@@ -270,7 +270,7 @@ void ClassServer::init() const
 		{
 			for (Type chi = parent+1; chi < nTypes; ++chi)
 			{
-				if (recursiveMap[parent][chi] and
+				if (inheritanceMap[parent][chi] and
 				    nullptr == _validator[chi])
 				{
 					_validator[chi] = getOper<Validator>(_validator, chi);
