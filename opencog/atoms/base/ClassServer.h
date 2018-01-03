@@ -85,6 +85,8 @@ private:
 
     void setParentRecursively(Type parent, Type type, Type& maxd);
 
+    void spliceFactory(Type, AtomFactory*);
+
     template<typename RTN_TYPE>
     RTN_TYPE* searchToDepth(const std::vector<RTN_TYPE*>&, Type, int) const;
 

@@ -160,7 +160,7 @@ static Handle validating_factory(const Handle& atom_to_check)
 	return atom_to_check;
 }
 
-void ClassServer::addFactory(Type t, AtomFactory* fact)
+void ClassServer::spliceFactory(Type t, AtomFactory* fact)
 {
 	std::unique_lock<std::mutex> l(type_mutex);
 	_atomFactory[t] = fact;
@@ -188,12 +188,18 @@ void ClassServer::addFactory(Type t, AtomFactory* fact)
 	}
 }
 
+void ClassServer::addFactory(Type t, AtomFactory* fact)
+{
+	// std::unique_lock<std::mutex> l(type_mutex);
+	spliceFactory(t, fact);
+}
+
 void ClassServer::addValidator(Type t, Validator* checker)
 {
 	std::unique_lock<std::mutex> l(type_mutex);
 	_validator[t] = checker;
 	if (not _atomFactory[t])
-		_atomFactory[t] = validating_factory;
+		spliceFactory(t, validating_factory);
 	_is_init = false;
 }
 
