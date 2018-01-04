@@ -87,15 +87,6 @@ private:
 
     void spliceFactory(Type, AtomFactory*);
 
-    template<typename RTN_TYPE>
-    RTN_TYPE* searchToDepth(const std::vector<RTN_TYPE*>&, Type, int) const;
-
-    template<typename RTN_TYPE>
-    RTN_TYPE* getOper(const std::vector<RTN_TYPE*>&, Type) const;
-
-    mutable bool _is_init;
-    void init() const;
-
 public:
     /** Gets the singleton instance (following meyer's design pattern) */
     friend ClassServer& classserver();
