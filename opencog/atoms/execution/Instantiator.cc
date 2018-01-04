@@ -207,6 +207,9 @@ Handle Instantiator::walk_tree(const Handle& expr, bool silent)
 		// Step one: beta-reduce.
 		Handle red(ppp->reduce());
 
+		if (nullptr == red)
+			return red;
+
 		// Step two: execute the resulting body.
 		// (unless its not executable)
 		if (DONT_EXEC_LINK == red->get_type())

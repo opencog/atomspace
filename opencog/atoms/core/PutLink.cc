@@ -387,6 +387,10 @@ Handle PutLink::do_reduce(void) const
 			{
 				return Handle::UNDEFINED;
 			}
+			catch (const SyntaxException& ex)
+			{
+				return Handle::UNDEFINED;
+			}
 		}
 
 		// If the values are given in a set, then iterate over the set...
