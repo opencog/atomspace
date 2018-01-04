@@ -162,9 +162,6 @@ static Handle validating_factory(const Handle& atom_to_check)
 
 void ClassServer::spliceFactory(Type t, AtomFactory* fact)
 {
-	std::unique_lock<std::mutex> l(type_mutex);
-	_atomFactory[t] = fact;
-
 	// Find all the factories that belong to parents of this type.
 	std::set<AtomFactory*> ok_to_clobber;
 	ok_to_clobber.insert(validating_factory);
@@ -177,7 +174,7 @@ void ClassServer::spliceFactory(Type t, AtomFactory* fact)
 	// Set the factory for all children of this type.  Be careful
 	// not to clobber any factories that might have been previously
 	// declared.
-	for (Type chi=t+1; chi < nTypes; chi++)
+	for (Type chi=t; chi < nTypes; chi++)
 	{
 		if (recursiveMap[t][chi] and
 		    (nullptr == _atomFactory[chi] or
@@ -190,7 +187,7 @@ void ClassServer::spliceFactory(Type t, AtomFactory* fact)
 
 void ClassServer::addFactory(Type t, AtomFactory* fact)
 {
-	// std::unique_lock<std::mutex> l(type_mutex);
+	std::unique_lock<std::mutex> l(type_mutex);
 	spliceFactory(t, fact);
 }
 
@@ -198,8 +195,7 @@ void ClassServer::addValidator(Type t, Validator* checker)
 {
 	std::unique_lock<std::mutex> l(type_mutex);
 	_validator[t] = checker;
-	if (not _atomFactory[t])
-		spliceFactory(t, validating_factory);
+	spliceFactory(t, validating_factory);
 	_is_init = false;
 }
 
