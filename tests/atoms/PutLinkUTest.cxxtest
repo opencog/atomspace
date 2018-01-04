@@ -42,6 +42,7 @@ public:
 	PutLinkUTest()
 	{
 		logger().set_print_to_stdout_flag(true);
+		logger().set_level(Logger::DEBUG);
 		logger().set_sync_flag(true); // interleave with printf correctly
 	}
 
@@ -67,7 +68,7 @@ public:
 	void test_eval_inheritance();
 	void test_eval_implication_1();
 	void test_eval_implication_2();
-	void xtest_ill_unquote();
+	void test_ill_unquote();
 };
 
 #define N _as.add_node
@@ -1122,7 +1123,7 @@ void PutLinkUTest::test_eval_implication_2()
  *   )
  * )
  */
-void PutLinkUTest::xtest_ill_unquote()
+void PutLinkUTest::test_ill_unquote()
 {
 	logger().info("BEGIN TEST: %s", __FUNCTION__);
 
@@ -1139,7 +1140,7 @@ void PutLinkUTest::xtest_ill_unquote()
 		          L(UNQUOTE_LINK, g)));
 
 	Instantiator inst(&_as);
-	TS_ASSERT_THROWS_ANYTHING(inst.execute(put));
+	TS_ASSERT_EQUALS(inst.execute(put), nullptr);
 
 	logger().info("END TEST: %s", __FUNCTION__);
 }
