@@ -45,7 +45,6 @@ ClassServer::ClassServer(void)
 {
 	nTypes = 0;
 	_maxDepth = 0;
-	_is_init = false;
 }
 
 static int tmod = 0;
@@ -53,7 +52,6 @@ static int tmod = 0;
 void ClassServer::beginTypeDecls(void)
 {
 	tmod++;
-	_is_init = false;
 }
 
 void ClassServer::endTypeDecls(void)
@@ -146,14 +144,7 @@ TypeSignal& ClassServer::typeAddedSignal()
     return _addTypeSignal;
 }
 
-void ClassServer::addFactory(Type t, AtomFactory* fact)
-{
-	std::unique_lock<std::mutex> l(type_mutex);
-	_atomFactory[t] = fact;
-	_is_init = false;
-}
-
-Handle validating_factory(const Handle& atom_to_check)
+static Handle validating_factory(const Handle& atom_to_check)
 {
 	ClassServer::Validator* checker =
 		classserver().getValidator(atom_to_check->get_type());
@@ -167,121 +158,58 @@ Handle validating_factory(const Handle& atom_to_check)
 	return atom_to_check;
 }
 
+void ClassServer::spliceFactory(Type t, AtomFactory* fact)
+{
+	// Find all the factories that belong to parents of this type.
+	std::set<AtomFactory*> ok_to_clobber;
+	ok_to_clobber.insert(validating_factory);
+	for (Type parent=0; parent < t; parent++)
+	{
+		if (recursiveMap[parent][t] and _atomFactory[parent])
+			ok_to_clobber.insert(_atomFactory[parent]);
+	}
+
+	// Set the factory for all children of this type.  Be careful
+	// not to clobber any factories that might have been previously
+	// declared.
+	for (Type chi=t; chi < nTypes; chi++)
+	{
+		if (recursiveMap[t][chi] and
+		    (nullptr == _atomFactory[chi] or
+		    ok_to_clobber.end() != ok_to_clobber.find(_atomFactory[chi])))
+		{
+			_atomFactory[chi] = fact;
+		}
+	}
+}
+
+void ClassServer::addFactory(Type t, AtomFactory* fact)
+{
+	std::unique_lock<std::mutex> l(type_mutex);
+	spliceFactory(t, fact);
+}
+
 void ClassServer::addValidator(Type t, Validator* checker)
 {
 	std::unique_lock<std::mutex> l(type_mutex);
 	_validator[t] = checker;
-	if (not _atomFactory[t])
-		_atomFactory[t] = validating_factory;
-	_is_init = false;
-}
+	spliceFactory(t, validating_factory);
 
-// Perform a depth-first recursive search for a factory,
-// up to a maximum depth.
-template<typename RTN_TYPE>
-RTN_TYPE* ClassServer::searchToDepth(const std::vector<RTN_TYPE*>& vect,
-                                     Type t, int depth) const
-{
-	// If there is a factory, then return it.
-	RTN_TYPE* fpr = vect[t];
-	if (fpr) return fpr;
-
-	// Perhaps one of the parent types has a factory.
-	// Perform a depth-first recursion.
-	depth--;
-	if (depth < 0) return nullptr;
-
-	// Do any of the immediate parents of this type
-	// have a factory?
-	for (Type p = 0; p < t; ++p)
+	for (Type chi=t; chi < nTypes; chi++)
 	{
-		if (inheritanceMap[p][t])
-		{
-			RTN_TYPE* fact = searchToDepth<RTN_TYPE>(vect, p, depth);
-			if (fact) return fact;
-		}
+		if (recursiveMap[t][chi])
+			_validator[chi] = checker;
 	}
-
-	return nullptr;
-}
-
-template<typename RTN_TYPE>
-RTN_TYPE* ClassServer::getOper(const std::vector<RTN_TYPE*>& vect,
-                               Type t) const
-{
-	if (nTypes <= t) return nullptr;
-
-	// If there is a factory, then return it.
-	RTN_TYPE* fpr = vect[t];
-	if (fpr) return fpr;
-
-	// Perhaps one of the parent types has a factory.
-	//
-	// We want to use a breadth-first recursion, and not
-	// the simpler-to-code depth-first recursion.  That is,
-	// we do NOT want some deep parent factory, when there
-	// is some factory at a shallower level.
-	//
-	for (int search_depth = 1; search_depth <= _maxDepth; search_depth++)
-	{
-		RTN_TYPE* fact = searchToDepth<RTN_TYPE>(vect, t, search_depth);
-		if (fact) return fact;
-	}
-
-	return nullptr;
 }
 
 ClassServer::AtomFactory* ClassServer::getFactory(Type t) const
 {
-	if (not _is_init) init();
 	return _atomFactory[t];
 }
 
 ClassServer::Validator* ClassServer::getValidator(Type t) const
 {
-	if (not _is_init) init();
 	return _validator[t];
-}
-
-void ClassServer::init() const
-{
-	// The goal here is to cache the various factories that child
-	// nodes might run. The getOper<AtomFactory>() is too expensive
-	// to run for every node creation. It damages performance by
-	// 10x per Node creation, and 5x for every link creation.
-	//
-	// Unfortunately, creating this cache is tricky. It can't be
-	// done one at a time, because the factories get added in
-	// random order, can can clobber one-another. Instead, we have
-	// to wait to do this until after all factories have been
-	// declared.
-	for (Type parent = 0; parent < nTypes; parent++)
-	{
-		if (_atomFactory[parent])
-		{
-			for (Type chi = parent+1; chi < nTypes; ++chi)
-			{
-				if (inheritanceMap[parent][chi] and
-				    nullptr == _atomFactory[chi])
-				{
-					_atomFactory[chi] = getOper<AtomFactory>(_atomFactory, chi);
-				}
-			}
-		}
-
-		if (_validator[parent])
-		{
-			for (Type chi = parent+1; chi < nTypes; ++chi)
-			{
-				if (inheritanceMap[parent][chi] and
-				    nullptr == _validator[chi])
-				{
-					_validator[chi] = getOper<Validator>(_validator, chi);
-				}
-			}
-		}
-	}
-	_is_init = true;
 }
 
 Handle ClassServer::factory(const Handle& h) const

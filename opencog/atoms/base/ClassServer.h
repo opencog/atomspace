@@ -85,14 +85,7 @@ private:
 
     void setParentRecursively(Type parent, Type type, Type& maxd);
 
-    template<typename RTN_TYPE>
-    RTN_TYPE* searchToDepth(const std::vector<RTN_TYPE*>&, Type, int) const;
-
-    template<typename RTN_TYPE>
-    RTN_TYPE* getOper(const std::vector<RTN_TYPE*>&, Type) const;
-
-    mutable bool _is_init;
-    void init() const;
+    void spliceFactory(Type, AtomFactory*);
 
 public:
     /** Gets the singleton instance (following meyer's design pattern) */

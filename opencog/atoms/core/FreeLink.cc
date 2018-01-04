@@ -32,6 +32,8 @@ FreeLink::FreeLink(const HandleSeq& oset, Type t)
 	if (not classserver().isA(t, FREE_LINK))
 		throw InvalidParamException(TRACE_INFO, "Expecting a FreeLink");
 
+	unorder();
+
 	// Derived classes have thier own init routines.
 	if (FREE_LINK != t) return;
 	init();
@@ -44,12 +46,26 @@ FreeLink::FreeLink(const Link& l)
 	if (not classserver().isA(tscope, FREE_LINK))
 		throw InvalidParamException(TRACE_INFO, "Expecting a FreeLink");
 
+	unorder();
+
 	// Derived classes have thier own init routines.
 	if (FREE_LINK != tscope) return;
 	init();
 }
 
 /* ================================================================= */
+
+void FreeLink::unorder(void)
+{
+	if (not classserver().isA(get_type(), UNORDERED_LINK)) return;
+
+	// Place into arbitrary, but deterministic order.
+	// We have to do this here,  because some links,
+	// e.g. EqualLink and IdenticalLink are unordered,
+	// but don't inherit from the C++ UnorderedLink class.
+	// So we hack around and do it here.
+	std::sort(_outgoing.begin(), _outgoing.end(), handle_less());
+}
 
 void FreeLink::init(void)
 {

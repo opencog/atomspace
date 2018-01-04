@@ -498,7 +498,7 @@ QUANTITY_LINK <- ORDERED_LINK
 // evaluation links have better performance, since they don't need
 // to make a call to external scheme or python code to get evaluated.
 //
-// The VirtuaLink designation is needed by the pattern matcher,
+// The VirtualLink designation is needed by the pattern matcher,
 // in order to be able to find and treat these terms correctly.
 //
 // VirtualLinks only need to be used for those GPN's that take 2 or
