@@ -237,6 +237,17 @@ Handle PrenexLink::beta_reduce(const HandleMap& vmap) const
 			ScopeLinkPtr sc = ScopeLinkCast(pare->second);
 			Variables bound = sc->get_variables();
 			Handle body = sc->get_body();
+
+			// The body might not exist, if there's an unmantched
+			// UnquoteLink in it. In such a case the beta-reduction is
+			// aborted.
+			if (nullptr == body)
+			{
+				throw SyntaxException(TRACE_INFO,
+				                      "PrenexLink given a malformed value=%s",
+				                      sc->to_string().c_str());
+			}
+
 			HandleMap scopissued;
 			for (const Handle& bv : bound.varseq)
 			{
