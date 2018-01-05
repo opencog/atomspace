@@ -1,30 +1,35 @@
-;
-; rule-engine-utils.scm
-;
-;;; Commentary:
-;
-; Handy utilities for working with the rule-engine. In particular to
-; configure a rule-based system (rbs).
-;
-; Utilities include:
-; -- ure-add-rule -- Associate a rule to a rbs with a certain TV
-; -- ure-add-rules -- Associate  a list of rule-alias and TV pairs to a rbs
-; -- ure-set-num-parameter -- Set a numeric parameter of an rbs
-; -- ure-set-fuzzy-bool-parameter -- Set a fuzzy boolean parameter of an rbs
-; -- ure-define-rbs -- Create a rbs that runs for a particular number of
-;                      iterations.
-; -- ure-get-forward-rule -- Return the forward form of a rule
-; -- bool->tv -- Convert #t to TRUE_TV and #f to FALSE_TV
-; -- tv->bool -- Convert TRUE_TV to #t, anything else to #f
-; -- gt-zero-confidence -- Return TrueTV iff A's confidence is greater than 0
-; -- meta-bind -- Fully apply a meta rule. Convenient for testing meta-rules
-;
-; If you add more utilities don't forget to add them in the
-; export-rule-engine-utils function.
-;
-;;; Code:
-; Copyright (c) 2015, OpenCog Foundation
-;
+;;
+;; rule-engine-utils.scm
+;;
+;;;; Commentary:
+;;
+;; Handy utilities for working with the rule-engine. In particular to
+;; configure a rule-based system (rbs).
+;;
+;; Utilities include:
+;; -- ure-add-rule -- Associate a rule to a rbs with a certain TV
+;; -- ure-add-rules -- Associate  a list of rule-alias and TV pairs to a rbs
+;; -- ure-set-num-parameter -- Set a numeric parameter of an rbs
+;; -- ure-set-fuzzy-bool-parameter -- Set a fuzzy boolean parameter of an rbs
+;; -- ure-define-rbs -- Create a rbs that runs for a particular number of
+;;                      iterations.
+;; -- ure-get-forward-rule -- Return the forward form of a rule
+;; -- bool->tv -- Convert #t to TRUE_TV and #f to FALSE_TV
+;; -- tv->bool -- Convert TRUE_TV to #t, anything else to #f
+;; -- atom->number -- Convert NumberNode into its corresponding number
+;; -- gt-zero-confidence -- Return TrueTV iff A's confidence is greater than 0
+;; -- meta-bind -- Fully apply a meta rule. Convenient for testing meta-rules
+;; -- gen-variable -- Generate VariableNode with certain prefix and index
+;; -- gen-variables -- Generate VariableNodes with certain prefix and indexes
+;; -- gen-rand-variable -- Generate random VariableNode
+;; -- gen-rand-variables -- Generate random VariableNodes
+;;
+;; If you add more utilities don't forget to add them in the
+;; export-rule-engine-utils function.
+;;
+;;;; Code:
+;; Copyright (c) 2015, OpenCog Foundation
+;;
 
 (use-modules (opencog))
 (use-modules (opencog exec))
@@ -231,17 +236,19 @@
 "
   Convert #t to TRUE_TV and #f to FALSE_TV
 "
-    (if b
-        (stv 1 1)
-        (stv 0 1)
-    )
-)
+    (stv (if b 1 0) 1))
 
 (define-public (tv->bool tv)
 "
   Convert TRUE_TV to #t, anything else to #f
 "
     (equal? (stv 1 1) tv))
+
+(define (atom->number A)
+"
+  Convert (NumberNode <number>) to number.
+"
+  (string->number (cog-name A)))
 
 ;; Very handy and frequent rule precondition.
 (define-public (gt-zero-confidence A)
@@ -263,6 +270,42 @@
          (results (fold equal-lset-union '() result-lists)))
     (Set results)))
 
+(define (gen-variable prefix i)
+"
+  Generate variable (Variable prefix + \"-\" + (number->string i))
+"
+  (Variable (string-append prefix "-" (number->string i))))
+
+(define (gen-variables prefix n)
+"
+  Generate a list of variables calling gen-variable with i=0,...,n-1
+"
+  (if (= n 0)
+      ;; Base case
+      '()
+      ;; Recursive case
+      (append (gen-variables prefix (- n 1))
+              (list (gen-variable prefix (- n 1))))))
+
+(define (gen-rand-variable prefix base length)
+"
+  gen-rand-variable prefix base length
+
+  Generate a random variable (Variable prefix + \"-\" + RAND). where
+  RAND is a random sequence of 'length' digits in base 'base'.
+"
+  (let* ((rand-char (lambda (i) (number->string (random base) base)))
+         (rand-chars (map rand-char (iota length)))
+         (rand-str (apply string-append rand-chars))
+         (rand-name (string-append prefix "-" rand-str)))
+    (Variable rand-name)))
+
+(define (gen-rand-variables prefix base length n)
+"
+  Generate a list of random variables calling gen-rand-variable n times.
+"
+  (map (lambda (x) (gen-rand-variable prefix base length)) (iota n)))
+
 (define (export-rule-engine-utils)
   (export
           cog-fc
@@ -276,8 +319,12 @@
           ure-get-forward-rule
           bool->tv
           tv->bool
+          atom->number
           gt-zero-confidence
           meta-bind
-          ; export-rule-engine-utils
+          gen-variable
+          gen-variables
+          gen-rand-variable
+          gen-rand-variables
   )
 )
