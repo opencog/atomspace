@@ -397,10 +397,13 @@ Handle AtomTable::add(AtomPtr atom, bool async)
     else if (atom == orig)
     {
         // NumberNode, TypeNode and LgDictNode need a factory to construct.
-        if (_classserver.isA(atom_type, NODE))
+        if (atom->is_node())
             atom = createNode(*NodeCast(atom));
-        else
+        else if (atom->is_link())
             atom = createLink(*LinkCast(atom));
+        else
+            throw RuntimeException(TRACE_INFO,
+               "AtomTable - expecting an Atom!");
     }
 
     // Lock before checking to see if this kind of atom is already in
