@@ -140,6 +140,14 @@ void AttentionBank::stimulate(const Handle& h, double stimulus)
            sti + stiWage, lti + ltiWage, vlti);
     _importanceIndex.updateImportance(h, oldav, newav);
     AVChanged(h, oldav, newav);
+
+#ifdef ECAN_EXPERIMENT
+    if(stimulusRec.find(h) != stimulusRec.end()){
+        stimulusRec[h] += stimulus;
+    } else{
+        stimulusRec[h] = stimulus;
+    }
+#endif
 }
 
 AttentionValue::sti_t AttentionBank::calculateSTIWage()
