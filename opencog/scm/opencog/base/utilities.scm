@@ -54,6 +54,7 @@
 ; -- cog-new-flattened-link -- Create flattened link
 ; -- cog-cp -- Copy list of atoms from one atomspace to another
 ; -- cog-cp-all -- Copy all atoms from one atomspace to another
+; -- cog-get-all-subtypes -- Call recursively cog-get-subtypes
 ;
 ;;; Code:
 ; Copyright (c) 2008, 2013, 2014 Linas Vepstas <linasvepstas@gmail.com>
@@ -1205,6 +1206,11 @@
   (cog-cp (apply append (map cog-get-atoms (cog-get-types))) AS)
 )
 
+(define-public (cog-get-all-subtypes type)
+  (let* ((subtypes (cog-get-subtypes type))
+         (rec-subtypes (map cog-get-all-subtypes subtypes)))
+    (delete-duplicates (append subtypes (apply append rec-subtypes)))))
+
 ; -----------------------------------------------------------------------
 
 ; A list of all the public (exported) utilities in this file
@@ -1271,6 +1277,7 @@
 'cog-new-flattened-link
 'cog-cp
 'cog-cp-all
+'cog-get-all-subtypes
 ))
 
 ; Compile 'em all.  This should improve performance a bit.
