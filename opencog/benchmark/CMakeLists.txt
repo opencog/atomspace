@@ -24,6 +24,7 @@ ENDIF(HAVE_CYTHON)
 
 TARGET_LINK_LIBRARIES (atomspace_bm m
 	atomspace
+	atomspaceutils
 	${COGUTIL_LIBRARY}
 )
 

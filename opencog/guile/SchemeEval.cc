@@ -419,10 +419,12 @@ SCM SchemeEval::catch_handler (SCM tag, SCM throw_args)
 			                                       SCM_BOOL_F, SCM_BOOL_F,
 			                                       highlights);
 			scm_newline (port);
+
+			if (SCM_STACK_LENGTH(_captured_stack))
+				set_captured_stack(scm_stack_ref (_captured_stack, SCM_INUM0));
+
+			scm_display_error(_captured_stack, port, subr, message, parts, rest);
 		}
-		if (SCM_STACK_LENGTH(_captured_stack))
-			set_captured_stack(scm_stack_ref (_captured_stack, SCM_INUM0));
-		scm_display_error(_captured_stack, port, subr, message, parts, rest);
 	}
 	else
 	{
@@ -564,13 +566,25 @@ void SchemeEval::do_eval(const std::string &expr)
 	_pending_input = false;
 	_error_msg.clear();
 	set_captured_stack(SCM_BOOL_F);
-	SCM eval_str = scm_from_utf8_string(_input_line.c_str());
-	SCM rc = scm_c_catch (SCM_BOOL_T,
+
+	// When invoked from the cogserver shell, it can happen that
+	// telnet control characters sneak through. These will not be
+	// valid utf8 strings, and scm_from_utf8_string will throw.
+	// Avoid some bad behavior by catching and cleaning up.
+	SCM eval_str = scm_internal_catch(SCM_BOOL_T,
+	                      (scm_t_catch_body) scm_from_utf8_string,
+	                      (void *) _input_line.c_str(),
+	                      SchemeEval::catch_handler_wrapper, this);
+
+	if (not _caught_error)
+	{
+		SCM rc = scm_c_catch (SCM_BOOL_T,
 	                      (scm_t_catch_body) scm_eval_string,
 	                      (void *) eval_str,
 	                      SchemeEval::catch_handler_wrapper, this,
 	                      SchemeEval::preunwind_handler_wrapper, this);
-	save_rc(rc);
+		save_rc(rc);
+	}
 	restore_output();
 
 	if (saved_as)
