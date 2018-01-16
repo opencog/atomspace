@@ -306,7 +306,6 @@ PatternLink::PatternLink(const Link& l)
 	init();
 }
 
-
 /* ================================================================= */
 ///
 /// Unpack the clauses.
