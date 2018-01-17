@@ -230,12 +230,18 @@ static bool try_to_load_modules(const char ** config_paths)
         for (int i = 0; i < pathSize; i++)
         {
             PyObject* pySysPathLine = PyList_GetItem(pySysPath, i);
-            // PyObject* pyStr = PyUnicode_AsEncodedString(pySysPathLine, "UTF-8", "ignore");
-            const char* sysPathCString = PyBytes_AS_STRING(pySysPathLine);
+            PyObject* pyStr = nullptr;
+            if (not PyBytes_Check(pySysPathLine)) {
+                pyStr = PyUnicode_AsEncodedString(pySysPathLine,
+                                               "UTF-8", "strict");
+                pySysPathLine = pyStr;
+            }
+            const char* sysPathCString = PyBytes_AsString(pySysPathLine);
             logger().debug("    %2d > %s", i, sysPathCString);
-            // NOTE: PyList_GetItem returns borrowed reference so don't do this:
+            // PyList_GetItem returns borrowed reference,
+            // so don't do this:
             // Py_DECREF(pySysPathLine);
-            // Py_DECREF(pyStr);
+            if (pyStr) Py_DECREF(pyStr);
         }
     }
 
