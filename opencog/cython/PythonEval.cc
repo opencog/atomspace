@@ -230,7 +230,7 @@ static bool try_to_load_modules(const char ** config_paths)
         for (int i = 0; i < pathSize; i++)
         {
             PyObject* pySysPathLine = PyList_GetItem(pySysPath, i);
-            const char* sysPathCString = PyString_AsString(pySysPathLine);
+            const char* sysPathCString = PyBytes_AS_STRING(pySysPathLine);
             logger().debug("    %2d > %s", i, sysPathCString);
             // NOTE: PyList_GetItem returns borrowed reference so don't do this:
             // Py_DECREF(pySysPathLine);
@@ -590,7 +590,7 @@ void PythonEval::build_python_error_message(const char* function_name,
         errorStringStream << "in " << function_name;
     if (pyError) {
         pyErrorString = PyObject_Str(pyError);
-        char* pythonErrorString = PyString_AsString(pyErrorString);
+        char* pythonErrorString = PyBytes_AS_STRING(pyErrorString);
         if (pythonErrorString) {
             errorStringStream << ": " << pythonErrorString << ".";
         } else {
