@@ -230,10 +230,12 @@ static bool try_to_load_modules(const char ** config_paths)
         for (int i = 0; i < pathSize; i++)
         {
             PyObject* pySysPathLine = PyList_GetItem(pySysPath, i);
+            // PyObject* pyStr = PyUnicode_AsEncodedString(pySysPathLine, "UTF-8", "ignore");
             const char* sysPathCString = PyBytes_AS_STRING(pySysPathLine);
             logger().debug("    %2d > %s", i, sysPathCString);
             // NOTE: PyList_GetItem returns borrowed reference so don't do this:
             // Py_DECREF(pySysPathLine);
+            // Py_DECREF(pyStr);
         }
     }
 
@@ -270,7 +272,11 @@ void opencog::global_python_initialize()
     // is as old as the wind. The solution of using dlopen() is given
     // here:
     // https://mail.python.org/pipermail/new-bugs-announce/2008-November/003322.html
+#if PY_MAJOR_VERSION < 3
     dlopen("libpython2.7.so", RTLD_LAZY | RTLD_GLOBAL);
+#else
+    dlopen("libpython3.5.so", RTLD_LAZY | RTLD_GLOBAL);
+#endif
 
     // We don't really know the gstate yet but we'll set it here to avoid
     // compiler warnings below.
@@ -638,7 +644,9 @@ void PythonEval::execute_string(const char* command)
 
     if (pyResult)
         Py_DECREF(pyResult);
-    Py_FlushLine();
+
+    PyObject *f = PySys_GetObject((char *) "stdout");
+    if (f) PyFile_WriteString("\n", f);  // Force a flush
 }
 
 int PythonEval::argument_count(PyObject* pyFunction)

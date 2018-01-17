@@ -84,7 +84,7 @@ public:
 
         PyRun_SimpleString(
                     "import sys\n"
-                    "import StringIO\n"
+                    "import io\n"
                     );
         pySysPath = PySys_GetObject((char*)"path");
 
@@ -93,10 +93,12 @@ public:
             Py_ssize_t pathSize = PyList_Size(pySysPath);
             for (int pathIndex = 0; pathIndex < pathSize; pathIndex++) {
                 PyObject* pySysPathLine = PyList_GetItem(pySysPath, pathIndex);
-                const char* sysPathCString = PyString_AsString(pySysPathLine);
+                // PyObject* pyStr = PyUnicode_AsEncodedString(pySysPathLine, "UTF-8", "strict");
+                const char* sysPathCString = PyBytes_AS_STRING(pySysPathLine);
                 logger().debug("        %2d > %s", pathIndex, sysPathCString);
                 // NOTE: PyList_GetItem returns borrowed reference so don't do this:
                 // Py_DECREF(pySysPathLine);
+                // Py_DECREF(pyStr);
             }
         }
 
@@ -112,7 +114,7 @@ public:
 
         PyRun_SimpleString(
                     "import sys\n"
-                    "import StringIO\n"
+                    "import io\n"
                     );
         pySysPath = PySys_GetObject((char*)"path");
 
