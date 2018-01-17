@@ -224,7 +224,7 @@ public:
         evaluator->clear_pending();
         evaluator->eval_expr("from opencog.atomspace import *");
         evaluator->eval_expr("ATOMSPACE.add_node(types.ConceptNode,'test')");
-        evaluator->eval_expr("print 'Total atoms = ', ATOMSPACE.size(), '\\n'");
+        evaluator->eval_expr("print ('Total atoms = ', ATOMSPACE.size(), '\\n')");
 
         // Delete the singleton instance and atomspace.
         PythonEval::delete_singleton_instance();
@@ -251,11 +251,11 @@ public:
             "from opencog.atomspace import types, Atom, TruthValue\n"
             "def add_link(atom1, atom2):\n"
             "    link = ATOMSPACE.add_link(types.ListLink, [atom1, atom2])\n"
-            "    print 'add_link(',atom1,',',atom2,') = ', link\n"
+            "    print ('add_link(',atom1,',',atom2,') = ', link)\n"
             "    return link\n\n"
 
             "def return_truth(atom1, atom2):\n"
-            "    print 'return_truth TruthValue(0.75, 100.0)'\n"
+            "    print ('return_truth TruthValue(0.75, 100.0)')\n"
             "    return TruthValue(0.75, 100.0)\n\n"
             );
 

@@ -13,11 +13,11 @@ __author__ = 'Curtis Faith'
 
 def assert_equals(object_one, object_two):
     if (object_one != object_two):
-        print "assert_equals FAILED: one ", object_one, ", two ", object_two
+        print ("assert_equals FAILED: one ", object_one, ", two ", object_two)
 
 def assert_true(test):
     if (not test):
-        print "assert_true FAILED: test ", test
+        print ("assert_true FAILED: test ", test)
 
 def add_link(atom_one, atom_two):
     return ListLink(atom_one, atom_two)
