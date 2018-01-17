@@ -136,7 +136,7 @@ cdef class AtomSpace:
             return True
         return False
 
-    def remove(self, Atom atom, recursive=True):
+    def remove(self, Atom atom, recursive=False):
         """ Removes an atom from the atomspace
         atom --  The Atom of the atom to be removed.
         recursive -- Recursive-removal flag; if set, then all links
