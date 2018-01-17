@@ -748,6 +748,22 @@ PyObject* PythonEval::call_user_function(const std::string& moduleFunction,
 
     // Get a reference to the user function.
     PyObject* pyDict = PyModule_GetDict(pyModule);
+#define DEBUG
+#ifdef DEBUG
+    PyObject* lst = PyDict_Keys(pyDict);
+    Py_ssize_t sz = PyList_Size(lst);
+    for (int i = 0; i < sz; i++) {
+        PyObject* key = PyList_GetItem(lst, i);
+        PyObject* pyStr = nullptr;
+        if (not PyBytes_Check(key)) {
+            pyStr = PyUnicode_AsEncodedString(key, "UTF-8", "strict");
+            key = pyStr;
+        }
+        const char* foo = PyBytes_AsString(key);
+        printf("Dict item %d is %s\n", i, foo);
+    }
+#endif
+
     PyObject* pyUserFunc = PyDict_GetItemString(pyDict, functionName.c_str());
 
     // PyModule_GetDict returns a borrowed reference, so don't do this:
