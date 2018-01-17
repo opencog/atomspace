@@ -25,7 +25,7 @@ def add_link(atom_one, atom_two):
 atomspace = AtomSpace()
 
 # Initialize Python
-initialize_opencog(atomspace, "")
+initialize_opencog(atomspace)
 
 # Define several animals and something of a different type as well
 InheritanceLink( ConceptNode("Frog"),       ConceptNode("animal"))

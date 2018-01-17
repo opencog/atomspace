@@ -17,7 +17,7 @@ scheme_preload = [
 for scheme_file in scheme_preload:
     load_scm(atomspace, scheme_file)
 
-initialize_opencog(atomspace, "utilities_test.conf")
+initialize_opencog(atomspace)
 
 executed = False
 
