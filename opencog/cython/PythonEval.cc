@@ -213,7 +213,12 @@ static bool try_to_load_modules(const char ** config_paths)
 
         if (S_ISDIR(finfo.st_mode))
         {
+#if PY_MAJOR_VERSION < 3
             PyObject* pyModulePath = PyBytes_FromString(config_paths[i]);
+#else
+            PyObject* pyModulePath = PyUnicode_DecodeUTF8(
+                  config_paths[i], strlen(config_paths[i]), "strict");
+#endif
             PyList_Append(pySysPath, pyModulePath);
             Py_DECREF(pyModulePath);
         }
