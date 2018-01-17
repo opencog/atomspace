@@ -60,10 +60,12 @@ cdef class TruthValue:
         return PyLong_FromVoidPtr(<void*>self.cobj)
 
     def __str__(self):
-        return self._ptr().to_string().c_str()
+        cs = string(self._ptr().to_string().c_str())
+        return cs.decode('UTF-8')
 
     def __repr__(self):
-        return self._ptr().to_string().c_str()
+        cs = string(self._ptr().to_string().c_str())
+        return cs.decode('UTF-8')
 
 #    @staticmethod
 #    def confidence_to_count(float conf):

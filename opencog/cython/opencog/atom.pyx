@@ -38,7 +38,7 @@ cdef class Atom(object):
                 if atom_ptr == NULL:   # avoid null-pointer deref
                     return None
                 if atom_ptr.is_node():
-                    self._name = atom_ptr.get_name()
+                    self._name = atom_ptr.get_name().decode('UTF-8')
                 else:
                     self._name = ""
             return self._name
@@ -278,11 +278,13 @@ cdef class Atom(object):
     def __str__(self):
         cdef cAtom* atom_ptr = self.handle.atom_ptr()
         if atom_ptr != NULL:
-            return atom_ptr.to_short_string().decode()
+            cs = atom_ptr.to_short_string()
+            return cs.decode('UTF-8')
         return ""
 
     def __repr__(self):
-        return self.long_string()
+        cs = self.long_string()
+        return string(cs).decode('UTF-8')
 
     def __richcmp__(a1_, a2_, int op):
         if not isinstance(a1_, Atom) or not isinstance(a2_, Atom):
