@@ -307,8 +307,7 @@ void opencog::global_python_initialize()
         // Many python libraries (e.g. ROS) expect sys.argv to be set.
         // So, avoid the error print, and let them know who we are.
         // We must do this *before* the module pre-loading, done below.
-        static const char *argv0 = "cogserver";
-        PySys_SetArgv(1, (char **) &argv0);
+        PyRun_SimpleString("import sys; sys.argv='cogserver'\n");
     }
 
     logger().info("[global_python_initialize] Adding OpenCog sys.path "
