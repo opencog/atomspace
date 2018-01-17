@@ -315,10 +315,7 @@ void opencog::global_python_initialize()
             "directories");
 
     // Get starting "sys.path".
-    PyRun_SimpleString(
-                "import sys\n"
-                "import StringIO\n"
-                );
+    PyRun_SimpleString("import sys\n");
 
     // Add default OpenCog module directories to the Python interprator's path.
     try_to_load_modules(get_module_paths());
@@ -652,11 +649,11 @@ int PythonEval::argument_count(PyObject* pyFunction)
     int argumentCount;
 
     // Get the 'function.func_code.co_argcount' Python internal attribute.
-    pyFunctionCode = PyObject_GetAttrString(pyFunction, "func_code");
+    pyFunctionCode = PyObject_GetAttrString(pyFunction, "__code__");
     if (pyFunctionCode) {
         pyArgumentCount = PyObject_GetAttrString(pyFunctionCode, "co_argcount");
         if (pyArgumentCount) {
-            argumentCount = PyInt_AsLong(pyArgumentCount);
+            argumentCount = PyLong_AsLong(pyArgumentCount);
         }  else {
             Py_DECREF(pyFunctionCode);
             return MISSING_FUNC_CODE;
