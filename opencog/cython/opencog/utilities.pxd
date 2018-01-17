@@ -1,8 +1,8 @@
 from opencog.atomspace cimport cAtomSpace
 
 cdef extern from "opencog/cython/opencog/Utilities.h" namespace "opencog":
-    # C++: 
-    #   
+    # C++:
+    #
     #   initialize_opencog(AtomSpace* atomSpace, const char* configFile = NULL);
     #   void finalize_opencog();
     #   void configuration_load(const char* configFile);

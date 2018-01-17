@@ -28,7 +28,7 @@ def finalize_opencog():
     global is_initialized
     if is_initialized:
         c_finalize_opencog()
-        
+
     set_type_ctor_atomspace(None)
 
 def configuration_load(object config):

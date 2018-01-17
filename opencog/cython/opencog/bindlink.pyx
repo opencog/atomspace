@@ -37,7 +37,7 @@ def first_n_bindlink(AtomSpace atomspace, Atom atom, max_results):
 
 def af_bindlink(AtomSpace atomspace, Atom atom):
     if atom == None: raise ValueError("af_bindlink atom is: None")
-    cdef cHandle c_result = c_af_bindlink(atomspace.atomspace, 
+    cdef cHandle c_result = c_af_bindlink(atomspace.atomspace,
                                           deref(atom.handle))
     cdef Atom result = Atom(void_from_candle(c_result), atomspace)
     return result

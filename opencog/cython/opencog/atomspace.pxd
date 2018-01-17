@@ -125,7 +125,7 @@ cdef extern from "opencog/atoms/base/Handle.h" namespace "opencog":
     cdef cppclass cHandle "opencog::Handle":
         cHandle()
         cHandle(const cHandle&)
-        
+
         cAtom* atom_ptr()
         string to_string()
         string to_short_string()
