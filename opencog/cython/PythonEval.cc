@@ -750,6 +750,8 @@ PyObject* PythonEval::call_user_function(const std::string& moduleFunction,
     PyObject* pyDict = PyModule_GetDict(pyModule);
 #define DEBUG
 #ifdef DEBUG
+    printf("Looking for %s in module %s; here's what we hav:\n",
+        functionName.c_str(), moduleFunction.c_str());
     PyObject* lst = PyDict_Keys(pyDict);
     Py_ssize_t sz = PyList_Size(lst);
     for (int i = 0; i < sz; i++) {
