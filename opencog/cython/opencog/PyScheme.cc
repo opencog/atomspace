@@ -21,18 +21,36 @@
  */
 #include "PyScheme.h"
 
+#include <atomic>
 #include <opencog/util/oc_assert.h>
 #include <opencog/atomspace/AtomSpace.h>
 #include <opencog/guile/SchemeEval.h>
 
-using std::string;
-
 using namespace opencog;
+
+static void do_init()
+{
+	// It should be enough to do this only once, instead of once
+	// per thread; so this is a belt-and-suspenders strategy for
+	// making sure python initialization doesn't fall down.
+	static thread_local bool thread_is_inited = false;
+	if (thread_is_inited) return;
+	thread_is_inited = true;
+
+	SchemeEval* evaluator = SchemeEval::get_evaluator(nullptr);
+	evaluator->eval(
+		"(define cog-initial-as (cog-atomspace))"
+		"(if (eq? cog-initial-as #f)"
+		"	(begin "
+		"		(set! cog-initial-as (cog-new-atomspace))"
+		"		(cog-set-atomspace! cog-initial-as)))");
+}
 
 // Convenience wrapper, for stand-alone usage.
 std::string opencog::eval_scheme(AtomSpace* as, const std::string &s)
 {
 #ifdef HAVE_GUILE
+	do_init();
 	OC_ASSERT(nullptr != as, "Cython failed to specify an atomspace!");
 	SchemeEval* evaluator = SchemeEval::get_evaluator(as);
 	std::string scheme_return_value = evaluator->eval(s);
@@ -58,6 +76,7 @@ std::string opencog::eval_scheme(AtomSpace* as, const std::string &s)
 Handle opencog::eval_scheme_h(AtomSpace* as, const std::string &s)
 {
 #ifdef HAVE_GUILE
+	do_init();
 	OC_ASSERT(nullptr != as, "Cython failed to specify an atomspace!");
 
 	SchemeEval* evaluator = SchemeEval::get_evaluator(as);
@@ -77,6 +96,7 @@ Handle opencog::eval_scheme_h(AtomSpace* as, const std::string &s)
 AtomSpace* opencog::eval_scheme_as(const std::string &s)
 {
 #ifdef HAVE_GUILE
+	do_init();
 	SchemeEval* evaluator = SchemeEval::get_evaluator(nullptr);
 	AtomSpace* as = evaluator->eval_as(s);
 
