@@ -21,6 +21,7 @@
  */
 #include "PyScheme.h"
 
+#include <opencog/util/oc_assert.h>
 #include <opencog/atomspace/AtomSpace.h>
 #include <opencog/guile/SchemeEval.h>
 
@@ -32,6 +33,7 @@ using namespace opencog;
 std::string opencog::eval_scheme(AtomSpace& as, const std::string &s)
 {
 #ifdef HAVE_GUILE
+	OC_ASSERT(nullptr != (void *) &as, "Cython failed to specify an atomspace!");
 	SchemeEval* evaluator = SchemeEval::get_evaluator(&as);
 	std::string scheme_return_value = evaluator->eval(s);
 
@@ -39,12 +41,12 @@ std::string opencog::eval_scheme(AtomSpace& as, const std::string &s)
 	// a backtrace.  Be sure to display that to the user.
 	if (evaluator->eval_error())
 		throw RuntimeException(TRACE_INFO,
-		       "Scheme: Failed to execute '%s'\n%s",
+		       "Python-Scheme Wrapper: Failed to execute '%s'\n%s",
 		       s.c_str(), scheme_return_value.c_str());
 
 	if (evaluator->input_pending())
 		throw RuntimeException(TRACE_INFO,
-		      "Scheme: Syntax error in input: '%s'", s.c_str());
+		      "Python-Scheme Wrapper: Syntax error in input: '%s'", s.c_str());
 
 	return scheme_return_value;
 #else // HAVE_GUILE
@@ -56,12 +58,13 @@ std::string opencog::eval_scheme(AtomSpace& as, const std::string &s)
 Handle opencog::eval_scheme_h(AtomSpace& as, const std::string &s)
 {
 #ifdef HAVE_GUILE
+	OC_ASSERT(nullptr != (void *) &as, "Cython failed to specify an atomspace!");
 	SchemeEval* evaluator = SchemeEval::get_evaluator(&as);
 	Handle scheme_return_value = evaluator->eval_h(s);
 
 	if (evaluator->eval_error())
 		throw RuntimeException(TRACE_INFO,
-		       "Scheme: Failed to execute '%s'", s.c_str());
+		       "Python-Scheme Wrapper: Failed to execute '%s'", s.c_str());
 
 	return scheme_return_value;
 #else // HAVE_GUILE
@@ -74,13 +77,17 @@ AtomSpace* opencog::eval_scheme_as(const std::string &s)
 {
 #ifdef HAVE_GUILE
 	SchemeEval* evaluator = SchemeEval::get_evaluator(nullptr);
-	AtomSpace* scheme_return_value = evaluator->eval_as(s);
+	AtomSpace* as = evaluator->eval_as(s);
+
+	if (nullptr == as)
+		throw RuntimeException(TRACE_INFO,
+		       "Python-Scheme Wrapper: Null atomspace for '%s'", s.c_str());
 
 	if (evaluator->eval_error())
 		throw RuntimeException(TRACE_INFO,
-		       "Scheme: Failed to execute '%s'", s.c_str());
+		       "Python-Scheme Wrapper: Failed to execute '%s'", s.c_str());
 
-	return scheme_return_value;
+	return as;
 #else // HAVE_GUILE
 	return nullptr;
 #endif // HAVE_GUILE
