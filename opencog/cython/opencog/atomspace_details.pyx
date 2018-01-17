@@ -9,8 +9,7 @@ from atomspace cimport *
 
 cdef api string get_path_as_string() with gil:
     import sys
-    cdef bytes c_str = str(sys.path)
-    return string(c_str)
+    return str(sys.path).encode('UTF-8')
 
 cdef convert_handle_seq_to_python_list(vector[cHandle] handles, AtomSpace atomspace):
     cdef vector[cHandle].iterator handle_iter
