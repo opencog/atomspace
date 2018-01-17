@@ -185,7 +185,7 @@ INSTALL (TARGETS
 	logger_cython
 	type_constructors
 	utilities_cython
-	DESTINATION "lib${LIB_DIR_SUFFIX}/python2.7/dist-packages/opencog")
+	DESTINATION "lib${LIB_DIR_SUFFIX}/${PYTHON_VER}/dist-packages/opencog")
 
 IF (HAVE_GUILE)
 	############################## scheme wrapper #####################
@@ -214,10 +214,10 @@ IF (HAVE_GUILE)
 
 	INSTALL (TARGETS
 		scheme_wrapper
-		DESTINATION "lib${LIB_DIR_SUFFIX}/python2.7/dist-packages/opencog")
+		DESTINATION "lib${LIB_DIR_SUFFIX}/${PYTHON_VER}/dist-packages/opencog")
 ENDIF (HAVE_GUILE)
 
 
 INSTALL (FILES
 	__init__.py
-	DESTINATION "lib${LIB_DIR_SUFFIX}/python2.7/dist-packages/opencog")
+	DESTINATION "lib${LIB_DIR_SUFFIX}/${PYTHON_VER}/dist-packages/opencog")

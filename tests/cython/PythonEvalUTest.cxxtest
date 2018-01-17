@@ -93,12 +93,17 @@ public:
             Py_ssize_t pathSize = PyList_Size(pySysPath);
             for (int pathIndex = 0; pathIndex < pathSize; pathIndex++) {
                 PyObject* pySysPathLine = PyList_GetItem(pySysPath, pathIndex);
-                // PyObject* pyStr = PyUnicode_AsEncodedString(pySysPathLine, "UTF-8", "strict");
-                const char* sysPathCString = PyBytes_AS_STRING(pySysPathLine);
+                PyObject* pyStr = nullptr;
+                if (not PyBytes_Check(pySysPathLine)) {
+                    pyStr = PyUnicode_AsEncodedString(pySysPathLine,
+                                                    "UTF-8", "strict");
+                    pySysPathLine = pyStr;
+                }
+                const char* sysPathCString = PyBytes_AsString(pySysPathLine);
                 logger().debug("        %2d > %s", pathIndex, sysPathCString);
                 // NOTE: PyList_GetItem returns borrowed reference so don't do this:
                 // Py_DECREF(pySysPathLine);
-                // Py_DECREF(pyStr);
+                if (pyStr) Py_DECREF(pyStr);
             }
         }
 

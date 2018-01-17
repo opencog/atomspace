@@ -213,7 +213,12 @@ static bool try_to_load_modules(const char ** config_paths)
 
         if (S_ISDIR(finfo.st_mode))
         {
+#if PY_MAJOR_VERSION < 3
             PyObject* pyModulePath = PyBytes_FromString(config_paths[i]);
+#else
+            PyObject* pyModulePath = PyUnicode_DecodeUTF8(
+                  config_paths[i], strlen(config_paths[i]), "strict");
+#endif
             PyList_Append(pySysPath, pyModulePath);
             Py_DECREF(pyModulePath);
         }
@@ -230,12 +235,18 @@ static bool try_to_load_modules(const char ** config_paths)
         for (int i = 0; i < pathSize; i++)
         {
             PyObject* pySysPathLine = PyList_GetItem(pySysPath, i);
-            // PyObject* pyStr = PyUnicode_AsEncodedString(pySysPathLine, "UTF-8", "ignore");
-            const char* sysPathCString = PyBytes_AS_STRING(pySysPathLine);
+            PyObject* pyStr = nullptr;
+            if (not PyBytes_Check(pySysPathLine)) {
+                pyStr = PyUnicode_AsEncodedString(pySysPathLine,
+                                               "UTF-8", "strict");
+                pySysPathLine = pyStr;
+            }
+            const char* sysPathCString = PyBytes_AsString(pySysPathLine);
             logger().debug("    %2d > %s", i, sysPathCString);
-            // NOTE: PyList_GetItem returns borrowed reference so don't do this:
+            // PyList_GetItem returns borrowed reference,
+            // so don't do this:
             // Py_DECREF(pySysPathLine);
-            // Py_DECREF(pyStr);
+            if (pyStr) Py_DECREF(pyStr);
         }
     }
 
@@ -737,6 +748,25 @@ PyObject* PythonEval::call_user_function(const std::string& moduleFunction,
 
     // Get a reference to the user function.
     PyObject* pyDict = PyModule_GetDict(pyModule);
+
+// #define DEBUG
+#ifdef DEBUG
+    printf("Looking for %s in module %s; here's what we have:\n",
+        functionName.c_str(), moduleFunction.c_str());
+    PyObject* lst = PyDict_Keys(pyDict);
+    Py_ssize_t sz = PyList_Size(lst);
+    for (int i = 0; i < sz; i++) {
+        PyObject* key = PyList_GetItem(lst, i);
+        PyObject* pyStr = nullptr;
+        if (not PyBytes_Check(key)) {
+            pyStr = PyUnicode_AsEncodedString(key, "UTF-8", "strict");
+            key = pyStr;
+        }
+        const char* foo = PyBytes_AsString(key);
+        printf("Dict item %d is %s\n", i, foo);
+    }
+#endif
+
     PyObject* pyUserFunc = PyDict_GetItemString(pyDict, functionName.c_str());
 
     // PyModule_GetDict returns a borrowed reference, so don't do this:
@@ -1245,30 +1275,28 @@ void PythonEval::add_modules_from_path(std::string pathString)
 {
     std::vector<std::string> dirs;
     std::vector<std::string> files;
+    bool found = false;
 
-    auto loadmod_prep = [&dirs,&files](const std::string& abspath,
+    auto loadmod_prep = [&dirs, &files, &found](const std::string& abspath,
             const char** config_paths)
     {
         // If the resulting path is a directory or a regular file,
         // then push to loading list.
         struct stat finfo;
         stat(abspath.c_str(), &finfo);
-        if (S_ISDIR(finfo.st_mode))
+        if (S_ISDIR(finfo.st_mode)) {
+            found = true;
             dirs.push_back(abspath);
+            logger().info() << "Found python module in directory \'"
+                << abspath << "\'";
+        }
 
-        else if (S_ISREG(finfo.st_mode))
+        else if (S_ISREG(finfo.st_mode)) {
+            found = true;
             files.push_back(abspath);
-
-        else {
-            Logger::Level btl = logger().get_backtrace_level();
-            logger().set_backtrace_level(Logger::Level::NONE);
-            logger().warn() << "Failed to load python module \'"
-                << abspath << "\', searched directories:";
-            for (int i = 0; config_paths[i] != NULL; ++i) {
-                logger().warn() << "Directory: " << config_paths[i];
-            }
-            logger().set_backtrace_level(btl);
-       }
+            logger().info() << "Found python module in file \'"
+                << abspath << "\'";
+        }
     };
 
     const char** config_paths = get_module_paths();
@@ -1295,6 +1323,17 @@ void PythonEval::add_modules_from_path(std::string pathString)
                 loadmod_prep(abspath, config_paths);
             }
         }
+    }
+
+    if (not found) {
+        Logger::Level btl = logger().get_backtrace_level();
+        logger().set_backtrace_level(Logger::Level::NONE);
+        logger().warn() << "Failed to load python module \'"
+            << pathString << "\', searched directories:";
+        for (int i = 0; config_paths[i] != NULL; ++i) {
+            logger().warn() << "Directory: " << config_paths[i];
+        }
+        logger().set_backtrace_level(btl);
     }
 
     // First, load directories, and then load files, to properly
