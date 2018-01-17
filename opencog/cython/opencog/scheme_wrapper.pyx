@@ -23,7 +23,7 @@ cdef extern from "<string>" namespace "std":
         int size()
 
 cdef extern from "opencog/cython/opencog/PyScheme.h" namespace "opencog":
-    string eval_scheme(cAtomSpace& as, const string& s) except +
+    string eval_scheme(cAtomSpace* as, const string& s) except +
 
 def scheme_eval(AtomSpace a, char* s):
     """
@@ -32,11 +32,12 @@ def scheme_eval(AtomSpace a, char* s):
     cdef string ret
     cdef string expr
     expr = string(s)
-    ret = eval_scheme(deref(a.atomspace), expr)
+    # print "Debug: called scheme eval with atomspace {0:x}".format(<unsigned long int>a.atomspace)
+    ret = eval_scheme(a.atomspace, expr)
     return ret.c_str()
 
 cdef extern from "opencog/cython/opencog/PyScheme.h" namespace "opencog":
-    cHandle eval_scheme_h(cAtomSpace& as, const string& s) except +
+    cHandle eval_scheme_h(cAtomSpace* as, const string& s) except +
 
 def scheme_eval_h(AtomSpace a, char* s):
     """
@@ -45,7 +46,7 @@ def scheme_eval_h(AtomSpace a, char* s):
     cdef cHandle ret
     cdef string expr
     expr = string(s)
-    ret = eval_scheme_h(deref(a.atomspace), expr)
+    ret = eval_scheme_h(a.atomspace, expr)
     return Atom(void_from_candle(ret), a)
 
 cdef extern from "opencog/cython/opencog/PyScheme.h" namespace "opencog":

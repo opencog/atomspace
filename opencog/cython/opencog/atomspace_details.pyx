@@ -26,6 +26,7 @@ cdef convert_handle_seq_to_python_list(vector[cHandle] handles, AtomSpace atomsp
 cdef AtomSpace_factory(cAtomSpace *to_wrap):
     cdef AtomSpace instance = AtomSpace.__new__(AtomSpace)
     instance.atomspace = to_wrap
+    # print "Debug: atomspace factory={0:x}".format(<long unsigned int>to_wrap)
     instance.owns_atomspace = False
     return instance
 
