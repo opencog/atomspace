@@ -30,11 +30,11 @@ using std::string;
 using namespace opencog;
 
 // Convenience wrapper, for stand-alone usage.
-std::string opencog::eval_scheme(AtomSpace& as, const std::string &s)
+std::string opencog::eval_scheme(AtomSpace* as, const std::string &s)
 {
 #ifdef HAVE_GUILE
-	OC_ASSERT(nullptr != (void *) &as, "Cython failed to specify an atomspace!");
-	SchemeEval* evaluator = SchemeEval::get_evaluator(&as);
+	OC_ASSERT(nullptr != as, "Cython failed to specify an atomspace!");
+	SchemeEval* evaluator = SchemeEval::get_evaluator(as);
 	std::string scheme_return_value = evaluator->eval(s);
 
 	// If there's an error, the scheme_return_value will contain
@@ -55,11 +55,12 @@ std::string opencog::eval_scheme(AtomSpace& as, const std::string &s)
 }
 
 // Convenience wrapper, for stand-alone usage.
-Handle opencog::eval_scheme_h(AtomSpace& as, const std::string &s)
+Handle opencog::eval_scheme_h(AtomSpace* as, const std::string &s)
 {
 #ifdef HAVE_GUILE
-	OC_ASSERT(nullptr != (void *) &as, "Cython failed to specify an atomspace!");
-	SchemeEval* evaluator = SchemeEval::get_evaluator(&as);
+	OC_ASSERT(nullptr != as, "Cython failed to specify an atomspace!");
+
+	SchemeEval* evaluator = SchemeEval::get_evaluator(as);
 	Handle scheme_return_value = evaluator->eval_h(s);
 
 	if (evaluator->eval_error())
