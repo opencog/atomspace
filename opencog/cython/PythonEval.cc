@@ -507,16 +507,21 @@ void PythonEval::initialize_python_objects_and_imports(void)
     Py_INCREF(_pyRootModule);
     PyModule_AddStringConstant(_pyRootModule, "__file__", "");
 
+#define SET_ATOMSPACE_IN_MODULE
+#ifdef SET_ATOMSPACE_IN_MODULE
+    // This seems like a really bad idea ... why would we do this?
     // Add ATOMSPACE to __main__ module.
     PyObject* pyRootDictionary = PyModule_GetDict(_pyRootModule);
     PyObject* pyAtomSpaceObject = this->atomspace_py_object(_atomspace);
     PyDict_SetItemString(pyRootDictionary, "ATOMSPACE", pyAtomSpaceObject);
     Py_DECREF(pyAtomSpaceObject);
-    if (nullptr == _atomspace)
-        logger().warn("Python evaluator initialized with null atomspace!");
 
     // PyModule_GetDict returns a borrowed reference, so don't do this:
     // Py_DECREF(pyRootDictionary);
+#endif // SET_ATOMSPACE_IN_MODULE
+
+    if (nullptr == _atomspace)
+        logger().warn("Python evaluator initialized with null atomspace!");
 
     // These are needed for calling Python/C API functions, define
     // them once here so we can reuse them.
@@ -1174,7 +1179,8 @@ void PythonEval::import_module(const boost::filesystem::path &file,
         return;
     }
 
-    // If the import succeeded...
+#ifdef SET_ATOMSPACE_IN_MODULE
+    // This seems like a really bad idea ... why would we do this?
     PyObject* pyModuleDictionary = PyModule_GetDict(pyModule);
 
     // Add the ATOMSPACE object to this module
@@ -1187,7 +1193,7 @@ void PythonEval::import_module(const boost::filesystem::path &file,
     Py_DECREF(pyAtomSpaceObject);
     if (nullptr == _atomspace)
         logger().warn("Python module initialized with null atomspace!");
-
+#endif // SET_ATOMSPACE_IN_MODULE
 
     // We need to increment the pyModule reference because
     // PyModule_AddObject "steals" it and we're keeping a copy
