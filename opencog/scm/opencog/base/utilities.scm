@@ -1206,8 +1206,13 @@
   (cog-cp (apply append (map cog-get-atoms (cog-get-types))) AS)
 )
 
-(define-public (cog-get-all-subtypes type)
-  (let* ((subtypes (cog-get-subtypes type))
+(define-public (cog-get-all-subtypes atom-type)
+"
+ cog-get-all-subtypes TYPE
+    Given an atom type TYPE, return all its subtypes, direct
+    and indirect, via recursively calling cog-get-subtypes.
+"
+  (let* ((subtypes (cog-get-subtypes atom-type))
          (rec-subtypes (map cog-get-all-subtypes subtypes)))
     (delete-duplicates (append subtypes (apply append rec-subtypes)))))
 
