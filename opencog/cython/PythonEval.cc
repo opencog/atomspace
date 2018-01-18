@@ -562,21 +562,28 @@ PyObject* PythonEval::atomspace_py_object(AtomSpace* atomspace)
     return pyAtomSpace;
 }
 
-void PythonEval::print_dictionary(PyObject* obj)
+void PythonEval::print_dictionary(PyObject* pyDict)
 {
-    if (!PyDict_Check(obj))
+    if (!PyDict_Check(pyDict))
         return;
 
-    PyObject *pyKey, *pyKeys;
-
     // Get the keys from the dictionary and print them.
-    pyKeys = PyDict_Keys(obj);
-    for (int i = 0; i < PyList_Size(pyKeys); i++) {
-
+    PyObject* pyKeys = PyDict_Keys(pyDict);
+    Py_ssize_t sz = PyList_Size(pyKeys);
+    for (int i = 0; i < sz; i++)
+    {
         // Get and print one key.
-        pyKey = PyList_GetItem(pyKeys, i);
-        char* c_name = PyBytes_AsString(pyKey);
-        printf("%s\n", c_name);
+        PyObject* pyKey = PyList_GetItem(pyKeys, i);
+        PyObject* pyStr = nullptr;
+        if (not PyBytes_Check(pyKey))
+        {
+            pyStr = PyUnicode_AsEncodedString(pyKey, "UTF-8", "strict");
+            pyKey = pyStr;
+        }
+        if (pyStr) Py_DECREF(pyStr);
+
+        const char* c_name = PyBytes_AsString(pyKey);
+        printf("Dict item %d is %s\n", i, c_name);
 
         // PyList_GetItem returns a borrowed reference, so don't do this:
         // Py_DECREF(pyKey);
@@ -753,18 +760,7 @@ PyObject* PythonEval::call_user_function(const std::string& moduleFunction,
 #ifdef DEBUG
     printf("Looking for %s in module %s; here's what we have:\n",
         functionName.c_str(), moduleFunction.c_str());
-    PyObject* lst = PyDict_Keys(pyDict);
-    Py_ssize_t sz = PyList_Size(lst);
-    for (int i = 0; i < sz; i++) {
-        PyObject* key = PyList_GetItem(lst, i);
-        PyObject* pyStr = nullptr;
-        if (not PyBytes_Check(key)) {
-            pyStr = PyUnicode_AsEncodedString(key, "UTF-8", "strict");
-            key = pyStr;
-        }
-        const char* foo = PyBytes_AsString(key);
-        printf("Dict item %d is %s\n", i, foo);
-    }
+    print_dictionary(pyDict);
 #endif
 
     PyObject* pyUserFunc = PyDict_GetItemString(pyDict, functionName.c_str());

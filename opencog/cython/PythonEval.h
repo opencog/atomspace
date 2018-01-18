@@ -1,4 +1,4 @@
-/*
+/**
  * @file opencog/cython/PythonEval.h
  *
  * Simple python expression evaluator.
@@ -10,13 +10,13 @@
  * @date   2011-09-20
  *
  * @Note
- *   Zhenhua: Many code are copied directly from original /opencog/cython/PythonModule.h|cc
+ *   Zhenhua: Many code are copied directly from original
+ *            /opencog/cython/PythonModule.h|cc
  *            by Joel. I also borrowed some ideas from SchemeEval.h|cc
  *
- *   Ramin: This class is completely revised by me and Keyvan. The new code is inspired
- *          by Linas' SchemeEval and borrowed some ideas from Joel's PythonModule.
- *
- *  @todo
+ *   Ramin: This class is completely revised by me and Keyvan. The new
+ *          code is inspired by Linas' SchemeEval and borrowed some
+ *          ideas from Joel's PythonModule.
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU Affero General Public License v3 as
@@ -192,14 +192,16 @@ class PythonEval : public GenericEval
          *
          */
         void print_root_dictionary()
-            { this->print_dictionary(PyModule_GetDict(_pyRootModule)); }
-
+        {
+            printf("The root dictionary is:\n");
+            this->print_dictionary(PyModule_GetDict(_pyRootModule));
+        }
 };
 
 /**
  * Initialize Python. Must be called before any Python dependent modules
  * are loaded.
- */ 
+ */
 void global_python_initialize();
 
 /**
