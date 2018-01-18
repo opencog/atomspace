@@ -12,15 +12,8 @@ __author__ = 'Cosmo Harrigan'
 NUMBER_OF_ITERATIONS = 50000
 
 from opencog.atomspace import AtomSpace, TruthValue, types, get_type_name
-from opencog.scheme_wrapper import load_scm, scheme_eval
+from opencog.scheme_wrapper import scheme_eval
 atomspace = AtomSpace()
-
-data = ["opencog/atomspace/core_types.scm",
-        "opencog/scm/utilities.scm"]
-
-for item in data:
-    load_scm(atomspace, item)
-
 
 def test_operation():
     for i in range(NUMBER_OF_ITERATIONS):
