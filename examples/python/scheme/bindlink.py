@@ -11,21 +11,16 @@ http://wiki.opencog.org/w/Pattern_matching#The_Simplified_API
 __author__ = 'Cosmo Harrigan'
 
 from opencog.atomspace import AtomSpace
-from opencog.scheme_wrapper import load_scm, scheme_eval, scheme_eval_h
+from opencog.scheme_wrapper import scheme_eval, scheme_eval_h
 
 atomspace = AtomSpace()
-
-data = ["opencog/atomspace/core_types.scm",
-        "opencog/scm/utilities.scm"]
-
-for item in data:
-    load_scm(atomspace, item)
 
 # Add to scheme's %load-path directory to serach for opencog guile modules
 scheme_eval(atomspace, "(add-to-load-path \"/usr/local/share/opencog/scm\")")
 
 # Import opencog modules required for using `cog-execute!` in scheme_eval
 scheme_eval(atomspace, "(use-modules (opencog))")
+scheme_eval(atomspace, "(use-modules (opencog exec))")
 scheme_eval(atomspace, "(use-modules (opencog query))")
 
 # Define several animals and something of a different type as well
@@ -60,4 +55,4 @@ scheme_eval_h(atomspace, scheme_query)
 
 # Run the above pattern and print the result
 result = scheme_eval_h(atomspace, '(cog-execute! find-animals)')
-print "The result of pattern matching is:\n\n" + str(atomspace[result])
+print ("The result of pattern matching is:\n\n" + str(result))
