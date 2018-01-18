@@ -13,12 +13,6 @@ from opencog.scheme_wrapper import load_scm
 
 atomspace = AtomSpace()
 
-data = ["opencog/atomspace/core_types.scm",
-        "opencog/scm/utilities.scm"]
-
-for item in data:
-    load_scm(atomspace, item)
-
 atom = atomspace.add(types.ConceptNode, "Frog #1")
 
 # To get one type name
