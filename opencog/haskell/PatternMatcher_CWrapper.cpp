@@ -1,6 +1,6 @@
 
 #include "PatternMatcher_CWrapper.h"
-#include "TruthValue_CWrapper.h"
+#include "Value_CWrapper.h"
 #include <opencog/query/BindLinkAPI.h>
 
 Handle* PatternMatcher_BindLink(AtomSpace* this_ptr, Handle* handle)
@@ -16,6 +16,6 @@ int PatternMatcher_SatisfactionLink(AtomSpace* this_ptr
                             , double* parameters)
 {
     TruthValuePtr tv = satisfaction_link(this_ptr, *handle);
-    return TruthValue_toRawType(tv,tv_type,parameters);
+    return FloatValue_toRaw(tv,tv_type,parameters);
 }
 
