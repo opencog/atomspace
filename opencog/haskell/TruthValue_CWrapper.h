@@ -19,20 +19,6 @@ extern "C"
     using namespace opencog;
 
     /**
-     * TruthValue_toRawType Turns a TruthValuePtr ito
-     *                      something that haskell interface
-     *                      can work with
-     *
-     * @param     tv          TruthValuePtr to convert
-     * @param[out] ty_type    The Type of the TV as a String
-     * @param[out] parameters List of parameters of the TV (strenght,confidence,...)
-     *
-     * @return 0 if success
-     */
-    int TruthValue_toRawType(TruthValuePtr tv
-                            , char** tv_type
-                            , double* parameters);
-    /**
      * TruthValue_getFromAtom  Gets the truthvalue of an Atom
      *
      * @param      handle      Handle id of target atom.
