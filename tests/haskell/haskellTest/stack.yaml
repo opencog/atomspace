@@ -26,5 +26,8 @@ flags: {}
 # arch: x86_64
 
 # Extra directories used by stack for building
-# extra-include-dirs: [/path/to/dir]
-# extra-lib-dirs: ["/home/roman/OpenCog/atomspace/build/opencog/haskell"]
+# extra-include-dirs: [/usr/local/lib/opencog/]
+extra-lib-dirs: [../../../build/opencog/haskell]
+
+ghc-options:
+    haskell-test: -latomspace-cwrapper
