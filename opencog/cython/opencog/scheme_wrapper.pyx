@@ -66,5 +66,6 @@ cdef extern from "opencog/cython/load-file.h" namespace "opencog":
     int load_scm_file_relative (cAtomSpace& as, char* filename) except +
 
 def load_scm(AtomSpace a, str fname):
-    status = load_scm_file_relative(deref(a.atomspace), fname.encode('UTF-8'))
+    fname_tmp = fname.encode('UTF-8')
+    status = load_scm_file_relative(deref(a.atomspace), fname_tmp)
     return status == 0
