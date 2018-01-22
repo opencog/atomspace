@@ -187,7 +187,7 @@ Unify::TypedSubstitution Unify::typed_substitution(const Partition& partition,
 	for (auto& vcv : var2cval) {
 		Handle consumed =
 			RewriteLink::consume_ill_quotations(_variables, vcv.second.handle,
-			                                  vcv.second.context.quotation);
+			                                    vcv.second.context.quotation);
 		vcv.second = CHandle(consumed, vcv.second.context);
 	}
 
