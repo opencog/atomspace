@@ -63,6 +63,10 @@ struct FreeVariables
 	typedef std::map<Handle, unsigned int> IndexMap;
 	IndexMap index;
 
+	// CTor, convenient for  unit tests, so far
+	FreeVariables() {}
+	FreeVariables(const std::initializer_list<Handle>& variables);
+
 	/// Return true if the variables in this, and other, are the same
 	/// variables (have exactly the same variable names.)
 	bool is_identical(const FreeVariables& other) const;
@@ -148,6 +152,11 @@ typedef std::map<Handle, const std::pair<double, double>> GlobIntervalMap;
 struct Variables : public FreeVariables,
                    public boost::totally_ordered<Variables>
 {
+	// CTor, convenient for  unit tests, so far
+	Variables() {}
+	Variables(const std::initializer_list<Handle>& variables)
+		: FreeVariables(variables) {}
+
 	/// Unbundled variables and type restrictions for them.
 
 	/// _simple_typemap is the (possibly empty) list of restrictions

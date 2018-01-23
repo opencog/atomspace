@@ -132,6 +132,11 @@ bool Unify::CHandle::operator<(const CHandle& ch) const
 		(handle == ch.handle and context < ch.context);
 }
 
+Unify::CHandle::operator bool() const
+{
+	return (bool)handle;
+}
+
 Unify::SolutionSet::SolutionSet(bool s)
 	: Partitions(s ? empty_partition_singleton : empty_partitions) {}
 
@@ -214,9 +219,9 @@ Unify::CHandle Unify::find_least_abstract(const TypedBlock& block,
 	CHandle least_abstract(top);
 	for (const CHandle& ch : block.first) {
 		if (inherit(ch, least_abstract) and
-		    // If h is a variable, only consider it as value
-		    // if it is in pre (stands for precedence)
-		    (not ch.is_variable()
+		    // If h is a variable, consider it if it is in pre (stands
+		    // for precedence)
+		    (not ch.is_free_variable()
 		     or is_unquoted_unscoped_in_tree(pre, ch.handle))) {
 			least_abstract = ch;
 		}
@@ -435,6 +440,9 @@ Unify::SolutionSet Unify::unify(const Handle& lh, const Handle& rh,
 	CHandle lch(lh, lc);
 	CHandle rch(rh, rc);
 
+	bool lq = lc.quotation.consumable(lt);
+	bool rq = rc.quotation.consumable(rt);
+
 	// If one is a node
 	if (lh->is_node() or rh->is_node()) {
 		// If one is a free variable and they are different, then
@@ -452,7 +460,7 @@ Unify::SolutionSet Unify::unify(const Handle& lh, const Handle& rh,
 			} else {
 				return mkvarsol(lch, rch);
 			}
-		} else
+		} else if (!lq and !rq)
 			return SolutionSet(lch.is_node_satisfiable(rch));
 	}
 
@@ -461,8 +469,6 @@ Unify::SolutionSet Unify::unify(const Handle& lh, const Handle& rh,
 	////////////////////////
 
     // Consume quotations
-	bool lq = lc.quotation.consumable(lt);
-	bool rq = rc.quotation.consumable(rt);
 	if (lq and rq) {
 		lc.quotation.update(lt);
 		rc.quotation.update(rt);
@@ -607,7 +613,7 @@ Unify::SolutionSet Unify::mkvarsol(CHandle lch, CHandle rch) const
 	if (rch.is_free_variable() and lch.is_consumable() and lch.is_quoted())
 		lch.update();
 
-	Handle inter = type_intersection(lch, rch);
+	CHandle inter = type_intersection(lch, rch);
 	if (not inter)
 		return SolutionSet();
 	else {
@@ -715,7 +721,7 @@ Unify::SolutionSet Unify::join(const Partition& partition,
 Unify::TypedBlock Unify::join(const TypedBlockSeq& common_blocks,
                               const TypedBlock& block) const
 {
-	std::pair<Block, Handle> result{block};
+	std::pair<Block, CHandle> result{block};
 	for (const auto& c_block : common_blocks) {
 		result =  join(result, c_block);
         // Abort if unsatisfiable
@@ -864,18 +870,12 @@ VariableListPtr gen_varlist(const Unify::CHandle& ch)
 	return createVariableList(HandleSeq(free_vars.begin(), free_vars.end()));
 }
 
-Handle Unify::type_intersection(const CHandle& lch, const CHandle& rch) const
+Unify::CHandle Unify::type_intersection(const CHandle& lch, const CHandle& rch) const
 {
-	return type_intersection(lch.handle, rch.handle, lch.context, rch.context);
-}
-
-Handle Unify::type_intersection(const Handle& lh, const Handle& rh,
-                                Context lc, Context rc) const
-{
-	if (inherit(lh, rh, lc, rc))
-		return lh;
-	if (inherit(rh, lh, rc, lc))
-		return rh;
+	if (inherit(lch, rch))
+		return lch;
+	if (inherit(rch, lch))
+		return rch;
 	return Handle::UNDEFINED;
 }
 
@@ -938,17 +938,16 @@ bool Unify::inherit(const Handle& lh, const Handle& rh,
 	if (lh == rh)
 		return true;
 
-	// If both are unquoted variables then look at then types (only
+	// If both are free variables then look at their types (only
 	// simple types are considered for now).
-	if (lc.quotation.is_unquoted() and VARIABLE_NODE == lt
-	    and rc.quotation.is_unquoted() and VARIABLE_NODE == rt)
+	if (lc.is_free_variable(lh) and rc.is_free_variable(rh))
 		return inherit(get_union_type(lh), get_union_type(rh));
 
-	// If only rh is a variable, if its in _variable then check
+	// If only rh is a free variable, if its in _variable then check
 	// whether lh type inherits from it (using Variables::is_type),
 	// otherwise assume rh is the top type and thus anything inherits
 	// from it.
-	if (rc.quotation.is_unquoted() and VARIABLE_NODE == rt)
+	if (rc.is_free_variable(rh))
         return not _variables.is_in_varset(rh) or _variables.is_type(rh, lh);
 
 	return false;
