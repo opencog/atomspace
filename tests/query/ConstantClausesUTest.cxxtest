@@ -43,7 +43,11 @@ public:
 	ConstantClausesUTest() : eval(&as)
 	{
 		logger().set_level(Logger::DEBUG);
+		logger().set_timestamp_flag(false);
 		logger().set_print_to_stdout_flag(true);
+
+		string dir = string(PROJECT_SOURCE_DIR) + "/tests/query";
+		eval.eval(string("(add-to-load-path \"") + dir + string("\")"));
 	}
 
 	~ConstantClausesUTest()
@@ -69,7 +73,8 @@ public:
 	void test_constant_evaluatable_3();
 	void test_complex();
 	void test_constant_pattern();
-	void test_mixed_clauses();
+	void test_mixed_clauses_1();
+	void test_mixed_clauses_2();
 };
 
 void ConstantClausesUTest::tearDown()
@@ -400,17 +405,33 @@ void ConstantClausesUTest::test_constant_pattern()
  * Clauses consisting of both ungrounded and grounded (constant)
  * clauses should trigger the rewrite term properly.
  */
-void ConstantClausesUTest::test_mixed_clauses()
+void ConstantClausesUTest::test_mixed_clauses_1()
 {
 	Handle mary = an(CONCEPT_NODE, "Mary"),
 		edward = an(CONCEPT_NODE, "Edward");
 
-	string dir = string(PROJECT_SOURCE_DIR) + "/tests/query";
-	eval.eval(string("(add-to-load-path \"") + dir + string("\")"));
 	eval.eval("(load-from-path \"friends.scm\")");
 
 	Handle result = eval.eval_h("(cog-execute! mixed-clauses)"),
 		expected = al(SET_LINK, edward, mary);
+
+	TS_ASSERT_EQUALS(result, expected);
+}
+
+/**
+ * Clauses consisting of ungrounded, grounded (constant) and virtual
+ * clauses.
+ */
+void ConstantClausesUTest::test_mixed_clauses_2()
+{
+	eval.eval("(load-from-path \"blair-witch.scm\")");
+
+	Handle query = eval.eval_h("query"),
+		result = bindlink(&as, query),
+		expected = al(SET_LINK, A);
+
+	logger().debug() << "result = " << oc_to_string(result);
+	logger().debug() << "expected = " << oc_to_string(expected);
 
 	TS_ASSERT_EQUALS(result, expected);
 }
