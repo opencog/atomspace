@@ -1687,27 +1687,13 @@ void UnifyUTest::test_unify_complex_9()
                      ")");
 
 	Handle x_var = _eval.eval_h("(VariableNode \"$x\")");
-	Handle f_var = _eval.eval_h("(VariableNode \"$f\")");// TODO: need?
+	Handle f_var = _eval.eval_h("(VariableNode \"$f\")");
 	Handle g_var = _eval.eval_h("(VariableNode \"$g\")");
 	Handle texts_var = _eval.eval_h("(VariableNode \"$texts\")");
 	Handle ms_var = _eval.eval_h("(VariableNode \"$ms\")");
 	Handle X = _eval.eval_h("(VariableNode \"$X\")");
 	Handle texts = _eval.eval_h("(ConceptNode \"texts\")");
 	Handle ms = _eval.eval_h("(NumberNode \"2.0\")");
-
-	// Handle X_vardecl =
-	// 	_eval.eval_h("(TypedVariableLink"
-	// 	             "  (VariableNode \"$X\")"
-	// 	             "  (TypeNode \"ConceptNode\")"
-	// 	             ")");
-	// Handle body =
-	// 	_eval.eval_h("(EvaluationLink"
-	// 	             "  (PredicateNode \"contain\")"
-	// 	             "  (ListLink"
-	// 	             "    (ConceptNode \"treatment-1\")"
-	// 	             "    (ConceptNode \"compound-A\")"
-	// 	             "  )"
-	// 	             ")");
 
 	Context C(Quotation(), {X}, true, {Variables{X}});
 	Unify::CHandle CX(X, C);
@@ -1722,20 +1708,6 @@ void UnifyUTest::test_unify_complex_9()
 	std::cout << "expected = " << oc_to_string(expected) << std::endl;
 
 	TS_ASSERT_EQUALS(result, expected);
-
-	// Handle ts_vardecl = al(VARIABLE_LIST);
-
-	// Unify::TypedSubstitutions ts_result =
-	// 	unify.typed_substitutions(result, target);
-	// Unify::TypedSubstitutions ts_expected =
-	// 	Unify::TypedSubstitutions{{{{V, CX_vardecl},
-	// 	                            {B, Cbody}},
-	// 	                           ts_vardecl}};
-
-	// std::cout << "ts_result = " << oc_to_string(ts_result) << std::endl;
-	// std::cout << "ts_expected = " << oc_to_string(ts_expected) << std::endl;
-
-	// TS_ASSERT(tss_content_eq(ts_result, ts_expected));
 }
 
 #undef al
