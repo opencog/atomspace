@@ -317,13 +317,17 @@ Handle RewriteLink::consume_ill_quotations(const Variables& variables, Handle h,
 	if (quotation.consumable(t)) {
 		if (t == QUOTE_LINK) {
 			Handle qh = h->getOutgoingAtom(0);
+			Type qht = qh->get_type();
 			// If it's a scope, check whether its vardecl is bound to
 			// itself rather than the ancestor scope, if so the Quote
 			// is harmful, consume it. Otherwise, for other quoted
 			// link types, do not consume the quote and the subsequent
 			// unquotes.
-			if (classserver().isA(qh->get_type(), SCOPE_LINK) and
-			    not is_bound_to_ancestor(variables, qh))
+			if (classserver().isA(qht, SCOPE_LINK) and
+			    not is_bound_to_ancestor(variables, qh)
+			    // Do not consume if it has a special pattern matcher
+			    // function
+			    and qht != PUT_LINK)
 			{
 				quotation.update(t);
 				return consume_ill_quotations(variables, qh, quotation);

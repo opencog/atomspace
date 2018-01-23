@@ -120,6 +120,11 @@ public:
 		 */
 		bool operator==(const CHandle& other) const;
 		bool operator<(const CHandle& other) const;
+
+		/**
+		 * Cast operators
+		 */
+		explicit operator bool() const;
 	};
 
 	// Pair of CHandles
@@ -129,7 +134,7 @@ public:
 	typedef std::set<CHandle> Block;
 
 	// Mapping from partition blocks to type
-	typedef std::map<Block, Handle> Partition;
+	typedef std::map<Block, CHandle> Partition;
 
 	// This is in fact a typed block but is merely named Block due to
 	// being so frequently used.
@@ -634,11 +639,12 @@ private:
      *
      * In case the intersection is empty, then Handle::UNDEFINED is
      * returned.
+     *
+     * A contextual handle is returned to keep track of scoped
+     * variable, which are essentially considered as constant.
 	 */
-	Handle type_intersection(const CHandle& lch, const CHandle& rch) const;
 public:
-	Handle type_intersection(const Handle& lh, const Handle& rh,
-	                         Context lc=Context(), Context rc=Context()) const;
+	CHandle type_intersection(const CHandle& lch, const CHandle& rch) const;
 private:
 
 	/**

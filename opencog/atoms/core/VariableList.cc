@@ -418,7 +418,7 @@ void VariableList::build_index(void)
 	size_t sz = _varlist.varseq.size();
 	for (size_t i=0; i<sz; i++)
 	{
-		_varlist.index.insert(std::pair<Handle, unsigned int>(_varlist.varseq[i], i));
+		_varlist.index.insert({_varlist.varseq[i], i});
 	}
 }
 

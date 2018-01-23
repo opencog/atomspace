@@ -99,6 +99,16 @@ void VarScraper::find_vars(HandleSeq& varseq, HandleSet& varset,
 	}
 }
 
+/* ================================================================= */
+
+FreeVariables::FreeVariables(const std::initializer_list<Handle>& variables)
+	: varseq(variables), varset(variables)
+{
+	unsigned i = 0;
+	for (const Handle& var : variables)
+		index.insert({var, i++});
+}
+
 void FreeVariables::find_variables(const HandleSeq& oset)
 {
 	VarScraper vsc;
