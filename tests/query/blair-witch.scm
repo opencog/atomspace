@@ -4,23 +4,11 @@
 ;;
 ;; blair-witch is here to emphasize the weirdness of the bug.
 
-;; Data
-(LambdaLink
-  (VariableList
-    (VariableNode "$X")
-    (VariableNode "$Y")
-  )
-  (InheritanceLink
-    (VariableNode "$X")
-    (VariableNode "$Y")
-  )
-)
-
 ;; Query
 (define query
 (BindLink
   (AndLink
-    ;; (VariableNode "$f-lamb-e84bdd8")
+    (VariableNode "$f-lamb-e84bdd8")
     (NumberNode "2.000000")
     (EvaluationLink
       (GroundedPredicateNode "scm: dummy")
