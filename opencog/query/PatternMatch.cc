@@ -328,10 +328,10 @@ bool PatternMatch::recursive_virtual(PatternMatchCallback& cb,
  */
 bool BindLink::imply(PatternMatchCallback& pmc, AtomSpace* as, bool check_conn)
 {
-   if (check_conn and 0 == _virtual.size() and 1 < _components.size())
+	if (check_conn and 0 == _virtual.size() and 1 < _components.size())
 		throw InvalidParamException(TRACE_INFO,
-			"BindLink consists of multiple disconnected components!");
-			// PatternLink::check_connectivity(_comps);
+		                            "BindLink consists of multiple "
+		                            "disconnected components!");
 
 	// Make sure that the user did not pass in bogus clauses
 	// in the queried atomspace.
