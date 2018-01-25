@@ -91,8 +91,9 @@ protected:
 	                       const HandleSeq& values) const;
 
 	/**
-	 * Return true if the variable declaration of local_scope is a
-	 * variable of variables wrapped in a UnquoteLink. (Huh?)
+	 * Return true if the variable declaration of local_scope contains
+	 * variables in `variables`. If that is the case then we can infer
+	 * that its declaration should in fact remain unquoted.
 	 */
 	static bool is_bound_to_ancestor(const Variables& variables,
 	                                 const Handle& local_scope);

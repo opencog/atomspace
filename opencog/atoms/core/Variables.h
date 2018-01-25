@@ -76,6 +76,18 @@ struct FreeVariables
 		return varset.end() != varset.find(v);
 	}
 
+	/// Return true if all variables within the given range is in
+	/// varset.
+	template<typename It>
+	bool are_in_varset(It from, It to) const {
+		return std::all_of(from, to, [&](const Handle& v)
+		                   { return is_in_varset(v); });
+	}
+	template <typename C>
+	bool are_in_varset(const C& c) const {
+		return are_in_varset(c.begin(), c.end());
+	}
+
 	/// Create an ordered set of the free variables in the given oset.
 	///
 	/// By "ordered set" it is meant: a list of variables, in traversal
@@ -246,11 +258,10 @@ struct Variables : public FreeVariables,
 	/// Return just the Variable itself, if its not typed.
 	Handle get_type_decl(const Handle&, const Handle&) const;
 
-	/// This is the dual of VariableList::validate_vartype.
-	/// (XXX Dual in what way?)
+	/// This is the inverse function of VariableList(vardecls).get_variable().
 	///
-	/// Convert everything in this object into a single VariableList,
-	/// suitable for direct use in a ScopeLink.
+	/// That is, convert everything in this object into a single
+	/// VariableList, suitable for direct use in a ScopeLink.
 	///
 	/// If empty then return the empty VariableList.
 	///
