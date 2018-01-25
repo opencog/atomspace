@@ -363,8 +363,9 @@ bool RewriteLink::is_bound_to_ancestor(const Variables& variables,
 {
 	Handle unquote = local_scope->getOutgoingAtom(0);
 	if (unquote->get_type() == UNQUOTE_LINK) {
-		Handle var = unquote->getOutgoingAtom(0);
-		return variables.is_in_varset(var);
+		Handle vardecl = unquote->getOutgoingAtom(0);
+		Variables local_vars = VariableList(vardecl).get_variables();
+		return variables.are_in_varset(local_vars.varset);
 	}
 	return false;
 }

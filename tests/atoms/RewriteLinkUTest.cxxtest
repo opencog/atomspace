@@ -50,6 +50,7 @@ private:
 public:
 	RewriteLinkUTest() : _eval(&_as)
 	{
+		logger().set_level(Logger::INFO);
 		logger().set_print_to_stdout_flag(true);
 
 		X = an(VARIABLE_NODE, "$X");
@@ -73,6 +74,7 @@ public:
 	void test_beta_reduce_1();
 	void test_beta_reduce_2();
 	void test_remove_ill_quotations_1();
+	void test_remove_ill_quotations_2();
 };
 
 #define NA _asa.add_node
@@ -257,6 +259,29 @@ void RewriteLinkUTest::test_remove_ill_quotations_1()
 		                      createLink(QUOTE_LINK,
 		                                 createLink(EVALUATION_LINK, gpn,
 		                                            createLink(UNQUOTE_LINK, X))));
+
+	std::cout << "result = " << oc_to_string(result);
+	std::cout << "expected = " << oc_to_string(expected);
+
+	TS_ASSERT(content_eq(result, expected));
+}
+
+void RewriteLinkUTest::test_remove_ill_quotations_2()
+{
+	logger().info("BEGIN TEST: %s", __FUNCTION__);
+
+	std::string rs = _eval.eval("(load-from-path \"tests/atoms/quotations.scm\")");
+	logger().debug() << "rs = " << rs;
+
+	// Test simple RewriteLink
+	Handle vardecl = _eval.eval_h("vardecl"),
+		ill_quoted = _eval.eval_h("ill-quoted");
+
+	// Remove the UnquoteLink wrapping gpn as it is useless, and even
+	// harmful to the pattern matcher as it makes it believe that the
+	// gpn is evaluatable
+	Handle result = RewriteLink::consume_ill_quotations(vardecl, ill_quoted),
+		expected = _eval.eval_h("well-quoted");
 
 	std::cout << "result = " << oc_to_string(result);
 	std::cout << "expected = " << oc_to_string(expected);
