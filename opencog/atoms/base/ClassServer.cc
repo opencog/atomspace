@@ -214,6 +214,12 @@ ClassServer::Validator* ClassServer::getValidator(Type t) const
 
 Handle ClassServer::factory(const Handle& h) const
 {
+	// It is possible for the user to sneak in bad data up to here,
+	// avoid null-ptr deref.
+	if (nullptr == h)
+		throw InvalidParamException(TRACE_INFO,
+		            "Null handle passed to factory\n");
+
 	// If there is a factory, then use it.
 	AtomFactory* fact = getFactory(h->get_type());
 	if (fact)

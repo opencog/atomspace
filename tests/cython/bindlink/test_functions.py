@@ -1,5 +1,5 @@
 # 
-# Test Functions preloaded into the CogServer
+# Test Functions
 
 from opencog.atomspace import types, Atom, TruthValue
 from opencog.type_constructors import *
