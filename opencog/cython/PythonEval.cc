@@ -48,6 +48,10 @@ using namespace opencog;
 //#define DPRINTF printf
 #define DPRINTF(...)
 
+#ifdef __APPLE__
+  #define secure_getenv getenv
+#endif
+
 PythonEval* PythonEval::singletonInstance = NULL;
 
 const int NO_SIGNAL_HANDLERS = 0;
