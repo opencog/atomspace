@@ -1370,7 +1370,7 @@ timepair_t AtomSpaceBenchmark::bm_getHandlesByType()
         std::string ps = dss.str();
         clock_t t_begin = clock();
         pyev->eval(ps);
-        return Nclock*(clock() - t_begin);
+        return timepair_t(Nclock*clock(), Nclock*t_begin);
     }
 #endif /* HAVE_CYTHON */
 #if HAVE_GUILE
