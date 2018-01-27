@@ -27,6 +27,12 @@
 #include <opencog/atomspace/AtomSpace.h>
 #include <opencog/util/Logger.h>
 
+#ifndef __APPLE__
+  #define ATOM_SLEEP(x,y) clock_nanosleep(CLOCK_REALTIME, 0, x, y)
+#else
+  #define ATOM_SLEEP(x,y) nanosleep(x, y)
+#endif
+
 using namespace opencog;
 
 class ParallelUTest: public CxxTest::TestSuite
@@ -89,7 +95,7 @@ int ParallelUTest::robustSleep(int secs)
     gettimeofday(&tv, nullptr);
     double start = tv.tv_sec + 1.0e-6 * tv.tv_usec;
     
-    while ((e = clock_nanosleep(CLOCK_REALTIME, 0, &request, &remain)) != 0) {
+    while ((e = ATOM_SLEEP(&request, &remain)) != 0) {
         gettimeofday(&tv, nullptr);
         double now = tv.tv_sec + 1.0e-6 * tv.tv_usec;
         printf("Slept for %.4f secs so far\n", now - start);
