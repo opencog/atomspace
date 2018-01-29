@@ -118,7 +118,7 @@ void BasicSCMUTest::setUp(void)
 	// in the majority of European locales. Unfortunately, guile number
 	// parsing is not locale dependent...
 	// eval->eval("(setlocale LC_ALL \"\")");
-	eval->eval("(setlocale LC_CTYPE \"\")");
+	eval->eval("(setlocale LC_CTYPE \"en_US.utf8\")");
 	eval->clear_pending();
 }
 
