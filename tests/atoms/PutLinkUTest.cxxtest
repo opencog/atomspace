@@ -22,6 +22,7 @@
  */
 
 #include <opencog/util/exceptions.h>
+#include <opencog/guile/SchemeEval.h>
 #include <opencog/atoms/base/Atom.h>
 #include <opencog/atomspace/AtomSpace.h>
 #include <opencog/atoms/core/PutLink.h>
@@ -37,13 +38,17 @@ class PutLinkUTest: public CxxTest::TestSuite
 {
 private:
 	AtomSpace _as;
+	SchemeEval _eval;
 
 public:
-	PutLinkUTest()
+	PutLinkUTest() : _eval(&_as)
 	{
 		logger().set_print_to_stdout_flag(true);
 		logger().set_level(Logger::DEBUG);
 		logger().set_sync_flag(true); // interleave with printf correctly
+
+		_eval.eval("(add-to-load-path \"..\")");
+        _eval.eval("(add-to-load-path \"../../..\")");
 	}
 
 	void setUp() {}
@@ -69,6 +74,7 @@ public:
 	void test_eval_implication_1();
 	void test_eval_implication_2();
 	void test_ill_unquote();
+	void test_nested();
 };
 
 #define N _as.add_node
@@ -1141,6 +1147,55 @@ void PutLinkUTest::test_ill_unquote()
 
 	Instantiator inst(&_as);
 	TS_ASSERT_EQUALS(inst.execute(put), nullptr);
+
+	logger().info("END TEST: %s", __FUNCTION__);
+}
+
+/**
+ * Test that the nested PutLinks is supported, for instance that
+ * executing
+ *
+ * (Put
+ *   (Put
+ *     (Lambda
+ *       (Variable "$X")
+ *       (Variable "$X"))
+ *     (Lambda
+ *       (VariableList
+ *         (Variable "$Y")
+ *         (Variable "$Z"))
+ *       (Inheritance
+ *         (Variable "$Y")
+ *         (Variable "$Z"))))
+ *   (List
+ *     (Concept "A")
+ *     (Variable "$X")))
+ *
+ * outputs
+ *
+ * (Lambda
+ *   (Variable "X")
+ *   (Inheritance
+ *     (Concept "A")
+ *     (Variable "$X")))
+ *
+ */
+void PutLinkUTest::test_nested()
+{
+	logger().info("BEGIN TEST: %s", __FUNCTION__);
+
+	std::string rs = _eval.eval("(load-from-path \"tests/atoms/nested-put.scm\")");
+	logger().debug() << "rs = " << rs;
+
+	Instantiator inst(&_as);
+	Handle nested_put = _eval.eval_h("nested-put"),
+		result = inst.execute(nested_put),
+		expected = _eval.eval_h("expected");
+
+	logger().debug() << "result = " << oc_to_string(result);
+	logger().debug() << "expected = " << oc_to_string(expected);
+
+	TS_ASSERT_EQUALS(result, expected);
 
 	logger().info("END TEST: %s", __FUNCTION__);
 }

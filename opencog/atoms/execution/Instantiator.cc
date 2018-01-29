@@ -184,7 +184,7 @@ Handle Instantiator::walk_tree(const Handle& expr, bool silent)
 		{
 			ppp = PutLinkCast(expr);
 			// Execute the values in the PutLink before doing the
-			// beta-reduction. Execute the body only after the
+			// beta-reduction. Execute the PutLink only after the
 			// beta-reduction has been done.
 			Handle pvals = ppp->get_values();
 			Handle gargs = walk_tree(pvals, silent);
