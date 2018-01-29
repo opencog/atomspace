@@ -38,7 +38,7 @@ namespace opencog
 ///
 /// This is used primarily to ensure that PatternLinks remain in
 /// prenex form, even when being rewritten. PatternLinks must have
-/// all avraible declarations out in front, in order to work.
+/// all available declarations out in front, in order to work.
 ///
 class PrenexLink;
 typedef std::shared_ptr<PrenexLink> PrenexLinkPtr;

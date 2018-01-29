@@ -257,7 +257,7 @@ static inline Handle reddy(PrenexLinkPtr subs, const HandleSeq& oset)
  * This is a lot like applying the function fun to the argument list
  * args, except that no actual evaluation is performed; only
  * substitution.  The resulting tree is NOT placed into any atomspace,
- * either. If you want that, you must do it youself.  If you want
+ * either. If you want that, you must do it yourself.  If you want
  * evaluation or execution to happen during or after sustitution, use
  * either the EvaluationLink, the ExecutionOutputLink, or the Instantiator.
  *
