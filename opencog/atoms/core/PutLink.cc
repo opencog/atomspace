@@ -117,6 +117,8 @@ void PutLink::static_typecheck_values(void)
 		return;
 	if (DEFINED_PREDICATE_NODE == btype)
 		return;
+	if (PUT_LINK == btype)
+		return;
 
 	// If its part of a signature, there is nothing to do.
 	if (classserver().isA(btype, TYPE_NODE) or TYPE_CHOICE == btype)
@@ -222,7 +224,7 @@ void PutLink::static_typecheck_values(void)
 		for (const Handle& h : valley->getOutgoingSet())
 		{
 			// If the arity is greater than one, then the values must be in a list.
-		   if (h->get_type() != LIST_LINK)
+			if (h->get_type() != LIST_LINK)
 				throw InvalidParamException(TRACE_INFO,
 					"PutLink expected value list!");
 
@@ -307,6 +309,14 @@ Handle PutLink::do_reduce(void) const
 			throw InvalidParamException(TRACE_INFO,
 					"Expecting a LambdaLink, got %s",
 			      bods->to_string().c_str());
+	}
+
+	// If the body is itself a PutLink, then reduce it first
+	if (PUT_LINK == btype)
+	{
+		PutLinkPtr nested_put = PutLinkCast(bods);
+		bods = nested_put->reduce();
+		btype = bods->get_type();
 	}
 
 	// If the body is a lambda, work with that.
