@@ -14,6 +14,8 @@ IF(HAVE_GUILE)
 	TARGET_LINK_LIBRARIES(RewriteLinkUTest smob atomspace)
 	ADD_CXXTEST(ScopeLinkUTest)
 	TARGET_LINK_LIBRARIES(ScopeLinkUTest smob atomspace)
+	ADD_CXXTEST(PutLinkUTest)
+	TARGET_LINK_LIBRARIES(PutLinkUTest execution smob atomspace)
 ENDIF(HAVE_GUILE)
 
 ADD_CXXTEST(AlphaConvertUTest)
@@ -30,9 +32,6 @@ TARGET_LINK_LIBRARIES(DeleteLinkUTest execution atomspace)
 
 ADD_CXXTEST(EqualLinkUTest)
 TARGET_LINK_LIBRARIES(EqualLinkUTest execution atomspace)
-
-ADD_CXXTEST(PutLinkUTest)
-TARGET_LINK_LIBRARIES(PutLinkUTest execution atomspace)
 
 ADD_CXXTEST(StateLinkUTest)
 TARGET_LINK_LIBRARIES(StateLinkUTest execution atomspace)
