@@ -11,6 +11,7 @@
 ; This should result in a utf8 locale being used!
 ; See https://github.com/opencog/opencog/issues/937
 (setlocale LC_CTYPE "")
+(setlocale LC_NUMERIC, "C")
 
 ; libsmob won't be found unless we setenv where to find it!
 ; In theory, we should have installed it into one of these locations:
