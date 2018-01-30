@@ -48,7 +48,7 @@ static TruthValuePtr ss_evaluate(AtomSpace* atomspace, const Handle& h)
 // destroying this class, but it expects things to stick around.
 // Oh well. I guess that's OK, since the definition is meant to be
 // for the lifetime of the server, anyway.
-std::vector<FunctionWrap*> ExecSCM::_binders;
+std::vector<FunctionWrap*>* ExecSCM::_binders = nullptr;
 
 ExecSCM::ExecSCM(void) :
 	ModuleWrap("opencog exec")
@@ -58,18 +58,20 @@ ExecSCM::ExecSCM(void) :
 /// Thus, all the definitions below happen in that module.
 void ExecSCM::init(void)
 {
-	_binders.push_back(new FunctionWrap(ss_execute,
+	_binders = new std::vector<FunctionWrap*>();
+	_binders->push_back(new FunctionWrap(ss_execute,
 	                   "cog-execute!", "exec"));
 
-	_binders.push_back(new FunctionWrap(ss_evaluate,
+	_binders->push_back(new FunctionWrap(ss_evaluate,
 	                   "cog-evaluate!", "exec"));
 }
 
 ExecSCM::~ExecSCM()
 {
 #if PYTHON_BUG_IS_FIXED
-	for (FunctionWrap* pw : _binders)
+	for (FunctionWrap* pw : *_binders)
 		delete pw;
+	delete _binders;
 #endif
 }
 

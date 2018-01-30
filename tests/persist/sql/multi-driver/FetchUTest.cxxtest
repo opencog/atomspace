@@ -134,11 +134,6 @@ void FetchUTest::setUp(void)
 
 	// eval->eval(R"((add-to-load-path "/usr/local/share/opencog/scm"))");
 	// eval->eval("(use-modules (opencog))");
-
-	// WTF ... Module loading fails without this; but why is this
-	// even needed ???
-   eval->eval(R"((setenv "LTDL_LIBRARY_PATH" (if (getenv "LTDL_LIBRARY_PATH") (string-append (getenv "LTDL_LIBRARY_PATH") ":/usr/local/lib/opencog") "/usr/local/lib/opencog")))");
-
 }
 
 void FetchUTest::tearDown(void)
