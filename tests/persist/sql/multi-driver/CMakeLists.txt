@@ -70,10 +70,6 @@ IF (DB_IS_CONFIGURED)
     IF (HAVE_GUILE)
         ADD_CXXTEST(FetchUTest)
         TARGET_LINK_LIBRARIES(FetchUTest execution)
-
-        # This seems not to work ... why?
-        SET_TESTS_PROPERTIES(FetchUTest PROPERTIES
-            ENVIRONMENT "LTDL_LIBRARY_PATH=${PROJECT_BINARY_DIR}/opencog/persist/guile:${PROJECT_BINARY_DIR}/opencog/persist/sql/multi-driver")
     ENDIF (HAVE_GUILE)
 
 ELSE (DB_IS_CONFIGURED)
