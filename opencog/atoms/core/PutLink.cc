@@ -316,6 +316,8 @@ Handle PutLink::do_reduce(void) const
 	{
 		PutLinkPtr nested_put = PutLinkCast(bods);
 		bods = nested_put->reduce();
+		if (not bods)
+			return Handle::UNDEFINED;
 		btype = bods->get_type();
 	}
 

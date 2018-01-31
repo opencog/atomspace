@@ -201,7 +201,7 @@ Handle PrenexLink::beta_reduce(const HandleMap& vmap) const
 	HandleSet used_vars;
 	HandleMap issued;
 
-	Variables vtool = get_variables();
+	const Variables& vtool = get_variables();
 	for (const Handle& var : vtool.varseq)
 	{
 		// If we are not substituting for this variable, copy it
@@ -235,7 +235,7 @@ Handle PrenexLink::beta_reduce(const HandleMap& vmap) const
 		if (classserver().isA(valuetype, SCOPE_LINK))
 		{
 			ScopeLinkPtr sc = ScopeLinkCast(pare->second);
-			Variables bound = sc->get_variables();
+			const Variables& bound = sc->get_variables();
 			Handle body = sc->get_body();
 
 			// The body might not exist, if there's an unmantched
