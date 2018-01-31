@@ -205,6 +205,7 @@ Handle Instantiator::walk_tree(const Handle& expr, bool silent)
 		}
 
 		// Step one: beta-reduce.
+		ppp->make_silent(silent);
 		Handle red(ppp->reduce());
 
 		if (nullptr == red)

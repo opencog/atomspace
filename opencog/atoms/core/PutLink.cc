@@ -454,9 +454,15 @@ Handle PutLink::do_reduce(void) const
 	}
 
 	// If we are here, then there are multiple values.
-	// These  MUST be given to us as a SetLink.
-	OC_ASSERT(SET_LINK == vtype,
-		"Should have caught this earlier, in the ctor");
+	// These MUST be given to us as a SetLink.
+	if (SET_LINK != vtype)
+	{
+		if (_silent)
+			throw NotEvaluatableException();
+
+		throw RuntimeException(TRACE_INFO,
+		                       "Should have caught this earlier, in the ctor");
+	}
 
 	HandleSeq bset;
 	for (const Handle& h : _values->getOutgoingSet())
