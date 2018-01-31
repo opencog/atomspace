@@ -152,8 +152,8 @@ Handle PrenexLink::beta_reduce(const HandleSeq& seq) const
 	// If its an eta, it had better have the right size.
 	ScopeLinkPtr lam(ScopeLinkCast(seq[0]));
 	const Handle& body = lam->get_body();
-	if (body->get_arity() != vtool.size() or
-	    body->get_type() != LIST_LINK)
+	if (body->get_type() != LIST_LINK or
+	    body->get_arity() != vtool.size())
 	{
 		if (_silent) throw TypeCheckException();
 		throw SyntaxException(TRACE_INFO,
