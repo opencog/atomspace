@@ -97,6 +97,11 @@ public:
 		_vmap = nullptr;
 	}
 
+	void reset_halt()
+	{
+		_halt = false;
+	}
+
 	Handle instantiate(const Handle& expr, const HandleMap &vars,
 	                   bool silent=false);
 	Handle execute(const Handle& expr, bool silent=false)

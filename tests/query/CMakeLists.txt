@@ -72,6 +72,7 @@ IF (HAVE_GUILE)
 	ADD_CXXTEST(AbsentUTest)
 	ADD_CXXTEST(SingleUTest)
 	ADD_CXXTEST(ScopeUTest)
+    ADD_CXXTEST(PutUTest)
 
 	ADD_CXXTEST(FirstNUTest)
 	ADD_CXXTEST(AttentionalFocusCBUTest)
@@ -175,3 +176,5 @@ CONFIGURE_FILE(${CMAKE_SOURCE_DIR}/tests/query/no-exception.scm
     ${PROJECT_BINARY_DIR}/tests/query/no-exception.scm)
 CONFIGURE_FILE(${CMAKE_SOURCE_DIR}/tests/query/friends.scm
 		${PROJECT_BINARY_DIR}/tests/query/friends.scm)
+CONFIGURE_FILE(${CMAKE_SOURCE_DIR}/tests/query/ill-put.scm
+		${PROJECT_BINARY_DIR}/tests/query/ill-put.scm)
