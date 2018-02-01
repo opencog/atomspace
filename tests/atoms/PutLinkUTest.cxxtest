@@ -1,5 +1,5 @@
 /*
- * tests/atoms/PutUTest.cxxtest
+ * tests/atoms/PutLinkUTest.cxxtest
  *
  * Copyright (C) 2015,2017 Linas Vepstas
  * Copyright (C) 2016 Nil Geiswieller
@@ -74,7 +74,9 @@ public:
 	void test_eval_implication_1();
 	void test_eval_implication_2();
 	void test_ill_unquote();
-	void test_nested();
+	void test_nested_1();
+	void test_nested_2();
+	void test_nested_3();
 };
 
 #define N _as.add_node
@@ -1152,8 +1154,7 @@ void PutLinkUTest::test_ill_unquote()
 }
 
 /**
- * Test that the nested PutLinks is supported, for instance that
- * executing
+ * Test that nested PutLinks is supported, specifically that executing
  *
  * (Put
  *   (Put
@@ -1180,7 +1181,7 @@ void PutLinkUTest::test_ill_unquote()
  *     (Variable "$X")))
  *
  */
-void PutLinkUTest::test_nested()
+void PutLinkUTest::test_nested_1()
 {
 	logger().info("BEGIN TEST: %s", __FUNCTION__);
 
@@ -1188,12 +1189,97 @@ void PutLinkUTest::test_nested()
 	logger().debug() << "rs = " << rs;
 
 	Instantiator inst(&_as);
-	Handle nested_put = _eval.eval_h("nested-put"),
+	Handle nested_put = _eval.eval_h("nested-put-1"),
 		result = inst.execute(nested_put),
-		expected = _eval.eval_h("expected");
+		expected = _eval.eval_h("expected-1");
 
 	logger().debug() << "result = " << oc_to_string(result);
 	logger().debug() << "expected = " << oc_to_string(expected);
+
+	TS_ASSERT_EQUALS(result, expected);
+
+	logger().info("END TEST: %s", __FUNCTION__);
+}
+
+/**
+ * Test that nested PutLinks is supported, specifically that executing
+ *
+ * (PutLink
+ *   (PutLink
+ *     (LambdaLink
+ *       (VariableNode "$X")
+ *       (VariableNode "$X"))
+ *     (ListLink
+ *       (ConceptNode "texts")
+ *       (VariableNode "$W")))
+ *   (LambdaLink
+ *     (VariableList
+ *       (VariableNode "$Y")
+ *       (VariableNode "$Z"))
+ *     (InheritanceLink
+ *       (VariableNode "$Y")
+ *       (VariableNode "$Z"))))
+ *
+ * outputs
+ *
+ * (Lambda
+ *   (VariableList
+ *     (VariableNode "$Y")
+ *     (VariableNode "$Z"))
+ *   (ListLink
+ *     (ConceptNode "texts")
+ *     (Inheritance
+ *       (VariableNode "$Y")
+ *       (VariableNode "$Z"))))
+ *
+ */
+void PutLinkUTest::test_nested_2()
+{
+	logger().info("BEGIN TEST: %s", __FUNCTION__);
+
+	std::string rs = _eval.eval("(load-from-path \"tests/atoms/nested-put.scm\")");
+	logger().debug() << "rs = " << rs;
+
+	Instantiator inst(&_as);
+	Handle nested_put = _eval.eval_h("nested-put-2"),
+		result = inst.execute(nested_put),
+		expected = _eval.eval_h("expected-2");
+
+	logger().debug() << "result = " << oc_to_string(result);
+	logger().debug() << "expected = " << oc_to_string(expected);
+
+	TS_ASSERT_EQUALS(result, expected);
+
+	logger().info("END TEST: %s", __FUNCTION__);
+}
+
+/**
+ * Test that nested PutLinks is supported, specifically that executing
+ *
+ * (PutLink
+ *   (PutLink
+ *     (PutLink
+ *       (LambdaLink
+ *         (VariableNode "$X")
+ *         (VariableNode "$X"))
+ *       (ConceptNode "A"))
+ *     (Concept "B"))
+ *   (Concept "C"))
+ *
+ * outputs an undefined atom, assuming that silent is enabled.
+ */
+void PutLinkUTest::test_nested_3()
+{
+	logger().info("BEGIN TEST: %s", __FUNCTION__);
+
+	std::string rs = _eval.eval("(load-from-path \"tests/atoms/nested-put.scm\")");
+	logger().debug() << "rs = " << rs;
+
+	Instantiator inst(&_as);
+	Handle nested_put = _eval.eval_h("nested-put-3");
+
+	// TODO wrap that in NotEvaluatableException exception test assert
+	result = inst.execute(nested_put, true);
 
 	TS_ASSERT_EQUALS(result, expected);
 
