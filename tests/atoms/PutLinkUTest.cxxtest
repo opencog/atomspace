@@ -1266,7 +1266,7 @@ void PutLinkUTest::test_nested_2()
  *     (Concept "B"))
  *   (Concept "C"))
  *
- * outputs an undefined atom, assuming that silent is enabled.
+ * raise an exception
  */
 void PutLinkUTest::test_nested_3()
 {
@@ -1278,10 +1278,7 @@ void PutLinkUTest::test_nested_3()
 	Instantiator inst(&_as);
 	Handle nested_put = _eval.eval_h("nested-put-3");
 
-	// TODO wrap that in NotEvaluatableException exception test assert
-	result = inst.execute(nested_put, true);
-
-	TS_ASSERT_EQUALS(result, expected);
+	TS_ASSERT_THROWS(inst.execute(nested_put, true), NotEvaluatableException);
 
 	logger().info("END TEST: %s", __FUNCTION__);
 }
