@@ -581,7 +581,7 @@ bool DefaultPatternMatchCB::eval_term(const Handle& virt,
 	{
 		gvirt = _instor->instantiate(virt, gnds, true);
 	}
-	catch (const NotEvaluatableException& ex)
+	catch (...)
 	{
 		// The evaluation above can throw an exception if the
 		// instantiation turns out to be ill-formed. If so assume it
