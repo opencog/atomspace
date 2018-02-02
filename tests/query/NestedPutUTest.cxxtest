@@ -1,5 +1,5 @@
 /*
- * tests/query/PutUTest.cxxtest
+ * tests/query/NestedPutUTest.cxxtest
  *
  * Copyright (C) 2018 OpenCog Foundation
  * All Rights Reserved
@@ -30,14 +30,14 @@ using namespace opencog;
 #define an _as.add_node
 #define al _as.add_link
 
-class PutUTest: public CxxTest::TestSuite
+class NestedPutUTest: public CxxTest::TestSuite
 {
 private:
 	AtomSpace _as;
 	SchemeEval _eval;
 
 public:
-	PutUTest() : _eval(&_as)
+	NestedPutUTest() : _eval(&_as)
 	{
 		logger().set_level(Logger::DEBUG);
 		logger().set_print_to_stdout_flag(true);
@@ -47,7 +47,7 @@ public:
 		_eval.eval("(use-modules (opencog query))");
 	}
 
-	~PutUTest()
+	~NestedPutUTest()
 	{
 		// Erase the log file if no assertions failed.
 		if (!CxxTest::TestTracker::tracker().suiteFailed())
@@ -62,12 +62,12 @@ public:
 	void test_ill_put();
 };
 
-void PutUTest::tearDown()
+void NestedPutUTest::tearDown()
 {
 	_as.clear();
 }
 
-void PutUTest::setUp()
+void NestedPutUTest::setUp()
 {
 }
 
@@ -75,7 +75,7 @@ void PutUTest::setUp()
  * Run a query evaluating PutLinks, including some ill-formed ones
  * (only detectable at run-time).
  */
-void PutUTest::test_ill_put()
+void NestedPutUTest::test_ill_put()
 {
 	logger().debug("BEGIN TEST: %s", __FUNCTION__);
 
