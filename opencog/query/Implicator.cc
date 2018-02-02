@@ -55,9 +55,6 @@ bool Implicator::grounding(const HandleMap &var_soln,
 	// to prevent them from producing nothing.  In practice it is
 	// difficult to insure so meanwhile this try-catch is used. See
 	// issue #950 and pull req #962. XXX FIXME later.
-	//
-	// TODO: maybe instead it should be set to silent and only catch
-	// the exceptions dedicated to silent throwing.
 	try {
 		Handle h = inst.instantiate(implicand, var_soln, true);
 		insert_result(h);
