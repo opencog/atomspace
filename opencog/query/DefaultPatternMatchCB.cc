@@ -655,7 +655,7 @@ bool DefaultPatternMatchCB::eval_term(const Handle& virt,
 		{
 			tvp = EvaluationLink::do_eval_scratch(_as, gvirt, _temp_aspace, true);
 		}
-		catch (const NotEvaluatableException& ex)
+		catch (...)
 		{
 			// The do_evaluate() above can throw if its given ungrounded
 			// expressions. It can be given ungrounded expressions if
