@@ -20,6 +20,7 @@
  * 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
  */
 
+#include <opencog/util/Logger.h>
 #include <opencog/atoms/base/atom_types.h>
 #include <opencog/atoms/base/ClassServer.h>
 #include "DefineLink.h"
@@ -389,19 +390,7 @@ Handle PutLink::do_reduce(void) const
 		{
 			HandleSeq oset;
 			oset.emplace_back(_values);
-			try
-			{
-				// return vars.substitute(bods, oset, /* silent */ true);
-				return reddy(subs, oset);
-			}
-			catch (const TypeCheckException& ex)
-			{
-				return Handle::UNDEFINED;
-			}
-			catch (const SyntaxException& ex)
-			{
-				return Handle::UNDEFINED;
-			}
+			return reddy(subs, oset);
 		}
 
 		// If the values are given in a set, then iterate over the set...
@@ -412,7 +401,6 @@ Handle PutLink::do_reduce(void) const
 			oset.emplace_back(h);
 			try
 			{
-				// bset.emplace_back(vars.substitute(bods, oset, /* silent */ true));
 				bset.emplace_back(reddy(subs, oset));
 			}
 			catch (const TypeCheckException& ex) {}
@@ -426,15 +414,7 @@ Handle PutLink::do_reduce(void) const
 	if (LIST_LINK == vtype)
 	{
 		const HandleSeq& oset = _values->getOutgoingSet();
-		try
-		{
-			// return vars.substitute(bods, oset, /* silent */ true);
-			return reddy(subs, oset);
-		}
-		catch (const TypeCheckException& ex)
-		{
-			return Handle::UNDEFINED;
-		}
+		return reddy(subs, oset);
 	}
 
 	// If the value is a LambdaLink, it will eta-reducible.
@@ -444,14 +424,7 @@ Handle PutLink::do_reduce(void) const
 	{
 		HandleSeq oset;
 		oset.emplace_back(_values);
-		try
-		{
-			return reddy(subs, oset);
-		}
-		catch (const TypeCheckException& ex)
-		{
-			return Handle::UNDEFINED;
-		}
+		return reddy(subs, oset);
 	}
 
 	// If we are here, then there are multiple values.
@@ -459,7 +432,7 @@ Handle PutLink::do_reduce(void) const
 	if (SET_LINK != vtype)
 	{
 		if (_silent)
-			throw NotEvaluatableException();
+			throw TypeCheckException();
 
 		throw RuntimeException(TRACE_INFO,
 		                       "Should have caught this earlier, in the ctor");
@@ -471,7 +444,6 @@ Handle PutLink::do_reduce(void) const
 		const HandleSeq& oset = h->getOutgoingSet();
 		try
 		{
-			// bset.emplace_back(vars.substitute(bods, oset, /* silent */ true));
 			bset.emplace_back(reddy(subs, oset));
 		}
 		catch (const TypeCheckException& ex) {}

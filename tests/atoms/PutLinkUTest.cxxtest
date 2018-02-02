@@ -77,6 +77,7 @@ public:
 	void test_nested_1();
 	void test_nested_2();
 	void test_nested_3();
+	void test_nested_4();
 };
 
 #define N _as.add_node
@@ -1148,7 +1149,7 @@ void PutLinkUTest::test_ill_unquote()
 		          L(UNQUOTE_LINK, g)));
 
 	Instantiator inst(&_as);
-	TS_ASSERT_EQUALS(inst.execute(put), nullptr);
+	TS_ASSERT_THROWS_ANYTHING(inst.execute(put));
 
 	logger().info("END TEST: %s", __FUNCTION__);
 }
@@ -1202,7 +1203,7 @@ void PutLinkUTest::test_nested_1()
 }
 
 /**
- * Test that nested PutLinks is supported, specifically that executing
+ * Test that the following raise an exception
  *
  * (PutLink
  *   (PutLink
@@ -1241,14 +1242,8 @@ void PutLinkUTest::test_nested_2()
 	logger().debug() << "rs = " << rs;
 
 	Instantiator inst(&_as);
-	Handle nested_put = _eval.eval_h("nested-put-2"),
-		result = inst.execute(nested_put),
-		expected = _eval.eval_h("expected-2");
-
-	logger().debug() << "result = " << oc_to_string(result);
-	logger().debug() << "expected = " << oc_to_string(expected);
-
-	TS_ASSERT_EQUALS(result, expected);
+	Handle nested_put = _eval.eval_h("nested-put-2");
+	TS_ASSERT_THROWS_ANYTHING(inst.execute(nested_put));
 
 	logger().info("END TEST: %s", __FUNCTION__);
 }
@@ -1278,7 +1273,37 @@ void PutLinkUTest::test_nested_3()
 	Instantiator inst(&_as);
 	Handle nested_put = _eval.eval_h("nested-put-3");
 
-	TS_ASSERT_THROWS(inst.execute(nested_put, true), NotEvaluatableException);
+	TS_ASSERT_THROWS_ANYTHING(inst.execute(nested_put, true));
+
+	logger().info("END TEST: %s", __FUNCTION__);
+}
+
+/**
+ * Test that the following PutLinks raise an exception when executed
+ *
+ * (PutLink
+ *   (PutLink
+ *     (PutLink
+ *       (LambdaLink
+ *         (VariableNode "$X")
+ *         (VariableNode "$X"))
+ *       (ConceptNode "texts"))
+ *     (ListLink
+ *       (ConceptNode "texts")
+ *       (VariableNode "$x-1")))
+ *   (ConceptNode "texts"))
+ */
+void PutLinkUTest::test_nested_4()
+{
+	logger().info("BEGIN TEST: %s", __FUNCTION__);
+
+	std::string rs = _eval.eval("(load-from-path \"tests/atoms/nested-put.scm\")");
+	logger().debug() << "rs = " << rs;
+
+	Instantiator inst(&_as);
+	Handle nested_put = _eval.eval_h("nested-put-4");
+
+	TS_ASSERT_THROWS_ANYTHING(inst.execute(nested_put, true));
 
 	logger().info("END TEST: %s", __FUNCTION__);
 }

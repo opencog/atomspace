@@ -29,24 +29,17 @@
   (PutLink
     (LambdaLink
       (VariableNode "$X")
-      (VariableNode "$X")
-    )
+      (VariableNode "$X"))
     (ListLink
       (ConceptNode "texts")
-      (VariableNode "$W")
-    )
-  )
+      (VariableNode "$W")))
   (LambdaLink
     (VariableList
       (VariableNode "$Y")
-      (VariableNode "$Z")
-    )
+      (VariableNode "$Z"))
     (InheritanceLink
       (VariableNode "$Y")
-      (VariableNode "$Z")
-    )
-  )
-)
+      (VariableNode "$Z"))))
 )
 
 (define expected-2
@@ -68,12 +61,22 @@
     (PutLink
       (LambdaLink
         (VariableNode "$X")
-        (VariableNode "$X")
-      )
-      (ConceptNode "A")
-    )
-    (Concept "B")
-  )
-  (Concept "C")
+        (VariableNode "$X"))
+      (ConceptNode "A"))
+    (Concept "B"))
+  (Concept "C"))
 )
+
+(define nested-put-4
+(PutLink
+  (PutLink
+    (PutLink
+      (LambdaLink
+        (VariableNode "$X")
+        (VariableNode "$X"))
+      (ConceptNode "texts"))
+    (ListLink
+      (ConceptNode "texts")
+      (VariableNode "$x-1")))
+  (ConceptNode "texts"))
 )
