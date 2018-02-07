@@ -78,6 +78,8 @@ public:
 	void test_nested_2();
 	void test_nested_3();
 	void test_nested_4();
+	void test_and_compose_1();
+	void test_and_compose_2();
 };
 
 #define N _as.add_node
@@ -1304,6 +1306,132 @@ void PutLinkUTest::test_nested_4()
 	Handle nested_put = _eval.eval_h("nested-put-4");
 
 	TS_ASSERT_THROWS_ANYTHING(inst.execute(nested_put, true));
+
+	logger().info("END TEST: %s", __FUNCTION__);
+}
+
+/**
+ * Make sure that composing a top abstraction with aquoted AndLink
+ * doesn't remove the quotes, because otherwise the AndLink is
+ * interpreted as being a pattern matcher logic connector. So
+ * specifically check that
+ *
+ * (PutLink
+ *   (LambdaLink
+ *     (VariableNode "$top-arg")
+ *     (VariableNode "$top-arg"))
+ *   (LambdaLink
+ *     (VariableList
+ *       (VariableNode "$sha-arg-0")
+ *       (VariableNode "$sha-arg-1")))
+ *     (LocalQuoteLink
+ *       (AndLink
+ *         (VariableNode "$sha-arg-0")
+ *         (VariableNode "$sha-arg-1"))))
+ *
+ * upon execution outputs
+ *
+ * (LambdaLink
+ *   (VariableList
+ *     (VariableNode "$sha-arg-0")
+ *     (VariableNode "$sha-arg-1"))
+ *   (LocalQuoteLink
+ *     (AndLink
+ *       (VariableNode "$sha-arg-0")
+ *       (VariableNode "$sha-arg-1"))))
+ *
+ */
+void PutLinkUTest::test_and_compose_1()
+{
+	logger().info("BEGIN TEST: %s", __FUNCTION__);
+
+	std::string rs = _eval.eval("(load-from-path \"tests/atoms/put-and.scm\")");
+	logger().debug() << "rs = " << rs;
+
+	Instantiator inst(&_as);
+	Handle top = _eval.eval_h("top"),
+		and_sha_abs = _eval.eval_h("and-shallow-abstraction"),
+		put_top_and = L(PUT_LINK, top,
+		                and_sha_abs),
+		result = inst.execute(put_top_and),
+		expected = and_sha_abs;
+
+	logger().debug() << "result = " << oc_to_string(result);
+	logger().debug() << "expected = " << oc_to_string(expected);
+
+	TS_ASSERT_EQUALS(result, expected);
+
+	logger().info("END TEST: %s", __FUNCTION__);
+}
+
+/**
+ * Make sure that composing a non top abstraction with a quoted
+ * AndLink does remove the quotation as it is useless. Specifically
+ *
+ * (PutLink
+ *   (LambdaLink
+ *     (VariableList
+ *       (VariableNode "$sha-arg-0")
+ *       (VariableNode "$sha-arg-1"))
+ *     (InheritanceLink
+ *       (VariableNode "$sha-arg-0")
+ *       (VariableNode "$sha-arg-1")))
+ *   (ListLink
+ *     (VariableNode "spe-0")
+ *     (LambdaLink
+ *       (VariableList
+ *         (VariableNode "$sha-arg-0")
+ *         (VariableNode "$sha-arg-1"))
+ *       (LocalQuoteLink
+ *         (AndLink
+ *           (VariableNode "$sha-arg-0")
+ *           (VariableNode "$sha-arg-1"))))))
+ *
+ * upon execution outputs
+ *
+ * (LambdaLink
+ *   (VariableList
+ *     (VariableNode "spe-0")
+ *     (VariableNode "$sha-arg-0")
+ *     (VariableNode "$sha-arg-1"))
+ *   (InheritanceLink
+ *     (VariableNode "spe-0")
+ *     (AndLink
+ *       (VariableNode "$sha-arg-0")
+ *       (VariableNode "$sha-arg-1"))))
+ *
+ */
+void PutLinkUTest::test_and_compose_2()
+{
+	logger().info("BEGIN TEST: %s", __FUNCTION__);
+
+	std::string rs = _eval.eval("(load-from-path \"tests/atoms/put-and.scm\")");
+	logger().debug() << "rs = " << rs;
+
+	Instantiator inst(&_as);
+	Handle inh_sha_abs = _eval.eval_h("inheritance-shallow-abstraction"),
+		and_sha_abs = _eval.eval_h("and-shallow-abstraction"),
+		spe_var = N(VARIABLE_NODE, "$spe-0"),
+		sha_var_1 = N(VARIABLE_NODE, "$sha-arg-0"),
+		sha_var_2 = N(VARIABLE_NODE, "$sha-arg-1"),
+		put_inh_and = L(PUT_LINK, inh_sha_abs,
+		                L(LIST_LINK, spe_var, and_sha_abs)),
+		result = inst.execute(put_inh_and),
+		expected = L(LAMBDA_LINK,
+		             L(VARIABLE_LIST,
+		               spe_var,
+		               sha_var_1,
+		               sha_var_2),
+		              L(INHERITANCE_LINK,
+		                spe_var,
+		                L(AND_LINK,
+		                  sha_var_1,
+		                  sha_var_2)));
+
+	logger().debug() << "result = " << oc_to_string(result);
+	logger().debug() << "expected = " << oc_to_string(expected);
+
+	TS_ASSERT_EQUALS(result, expected);
 
 	logger().info("END TEST: %s", __FUNCTION__);
 }
