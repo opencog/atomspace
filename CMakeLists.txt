@@ -309,11 +309,14 @@ MESSAGE(STATUS "${PROTOBUF_DIR_MESSAGE}")
 # Python and Cython
 #
 # NOTE: Python interpreter is needed for runing python unit tests, and for
-# running the FindCython and FindCxxtest cmake modules.
+# running the FindCython module.
+#
+# Search for Python3 first, and use that, if found. Else use Python2.
 
 FIND_PACKAGE(Python3Interp)
 IF (3.4.0 VERSION_LESS ${PYTHON3_VERSION_STRING})
 	SET (HAVE_PY_INTERP 1)
+	SET (PYTHON_VER python3.5)
 	MESSAGE(STATUS "Python ${PYTHON3_VERSION_STRING} interpreter found.")
 ENDIF()
 
@@ -321,6 +324,7 @@ IF (NOT HAVE_PY_INTERP)
 	FIND_PACKAGE(PythonInterp)
 	IF (2.7.0 VERSION_LESS ${PYTHON_VERSION_STRING})
 		SET (HAVE_PY_INTERP 1)
+		SET (PYTHON_VER python2.7)
 		MESSAGE(STATUS "Python ${PYTHON_VERSION_STRING} interpreter found.")
 	ENDIF()
 ENDIF()
@@ -329,25 +333,10 @@ FIND_PACKAGE(PythonLibs)
 IF (PYTHONLIBS_FOUND AND
 	2.7.0 VERSION_LESS ${PYTHONLIBS_VERSION_STRING})
 	SET (HAVE_PY_LIBS 1)
-	# SET (PYTHON_VER python2.7)
 	MESSAGE(STATUS "Python ${PYTHONLIBS_VERSION_STRING} libraries found.")
 ELSE()
 	MESSAGE(STATUS "Python libraries NOT found.")
 ENDIF()
-
-# Apparently, cmake is unable to find and correctly configure python3
-# so if you want that, you have to manually fiddle with the below.
-IF(BOGUS_PYTHON_HACKERY)
-	SET (PYTHON_INCLUDE_PATH /usr/include/python3.5m)
-	SET (PYTHON_LIBRARIES /usr/lib/x86_64-linux-gnu/libpython3.5m.so)
-	SET (PYTHON_LIBRARY /usr/lib/x86_64-linux-gnu/libpython3.5m.so)
-	SET (PYTHON_EXECUTABLE /usr/bin/python3.5)
-	SET (PYTHON_INCLUDE_DIR  /usr/include/python3.5m)
-	SET (PYTHON_INCLUDE_DIRS  /usr/include/python3.5m)
-	SET (HAVE_PY_LIBS 1)
-	SET (HAVE_PY_INTERP 1)
-	SET (PYTHON_VER python3.5)
-ENDIF(BOGUS_PYTHON_HACKERY)
 
 
 # Cython is used to generate python bindings.
