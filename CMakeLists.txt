@@ -350,23 +350,11 @@ IF(HAVE_PY_INTERP)
 		# differ on each operating system.
 		ADD_DEFINITIONS(-DHAVE_CYTHON)
 		SET(HAVE_CYTHON 1)
-		EXECUTE_PROCESS(
-			COMMAND ${PYTHON_EXECUTABLE} -c "from distutils.sysconfig import *;print(get_python_lib())"
-			OUTPUT_VARIABLE PYTHON_DEST
-		)
 
-		# Replace new line at end.
-		STRING(REPLACE "\n" "" PYTHON_DEST "${PYTHON_DEST}")
-		IF ("${PYTHON_DEST}" STREQUAL "")
-			MESSAGE(FATAL_ERROR "Python destination dir not found")
-		ELSE ("${PYTHON_DEST}" STREQUAL "")
-			MESSAGE(STATUS "Python destination dir found: ${PYTHON_DEST}" )
+		# Hack together some reasonable install location.
+		SET(PYTHON_DEST "lib${LIB_DIR_SUFFIX}/${PYTHON_VER}/dist-packages/opencog")
+		MESSAGE(STATUS "Python install dir: ${CMAKE_INSTALL_PREFIX}/${PYTHON_DEST}" )
 
-			# Build the targetwhere python modules will get installed.
-			STRING(REPLACE "/usr" "${CMAKE_INSTALL_PREFIX}" PYTHON_INSTALL_DEST "${PYTHON_DEST}")
-			STRING(APPEND PYTHON_INSTALL_DEST "/opencog")
-			MESSAGE(STATUS "Python install destination: ${PYTHON_INSTALL_DEST}" )
-		ENDIF ("${PYTHON_DEST}" STREQUAL "")
 	ELSE (CYTHON_FOUND AND HAVE_PY_LIBS)
 		IF(NOT CYTHON_FOUND)
 			MESSAGE(STATUS "Cython executable not found.")
@@ -508,7 +496,7 @@ SET(CMAKE_SKIP_BUILD_RPATH	FALSE)
 SET(CMAKE_BUILD_WITH_INSTALL_RPATH FALSE)
 SET(CMAKE_INSTALL_RPATH
 	"${CMAKE_INSTALL_PREFIX}/lib/opencog"
-	"${PYTHON_INSTALL_DEST}")
+	"${PYTHON_DEST}")
 
 SET(CMAKE_INSTALL_RPATH_USE_LINK_PATH TRUE)
 
