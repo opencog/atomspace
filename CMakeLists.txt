@@ -369,9 +369,14 @@ IF(HAVE_PY_INTERP)
 	ENDIF (CYTHON_FOUND AND HAVE_PY_LIBS)
 
 	# Nosetests will find and automatically run python tests.
-	FIND_PROGRAM(NOSETESTS_EXECUTABLE nosetests)
+	IF (PYTHON3INTERP_FOUND)
+		FIND_PROGRAM(NOSETESTS_EXECUTABLE nosetests3)
+	ELSE ()
+		FIND_PROGRAM(NOSETESTS_EXECUTABLE nosetests)
+	ENDIF ()
 	IF (NOSETESTS_EXECUTABLE AND CYTHON_FOUND AND HAVE_PY_LIBS)
 		SET(HAVE_NOSETESTS 1)
+		MESSAGE(STATUS "Using nosetests executable " ${NOSETESTS_EXECUTABLE})
 	ENDIF (NOSETESTS_EXECUTABLE AND CYTHON_FOUND AND HAVE_PY_LIBS)
 ENDIF(HAVE_PY_INTERP)
 
@@ -498,6 +503,7 @@ SET(CMAKE_SKIP_BUILD_RPATH	FALSE)
 SET(CMAKE_BUILD_WITH_INSTALL_RPATH FALSE)
 SET(CMAKE_INSTALL_RPATH "${CMAKE_INSTALL_PREFIX}/lib/opencog"
 	"${CMAKE_INSTALL_PREFIX}/lib/python2.7/dist-packages/opencog")
+
 SET(CMAKE_INSTALL_RPATH_USE_LINK_PATH TRUE)
 
 ADD_SUBDIRECTORY(lib)
@@ -643,7 +649,7 @@ SET(CPACK_SOURCE_IGNORE_FILES
 
 SET(CPACK_PACKAGING_INSTALL_PREFIX "/usr/local")
 SET(CPACK_DEBIAN_PACKAGE_DEPENDS
-    "guile-2.0 (>= 2.0.9), python (>= 2.7.5), libzmq3 (>= 4.0.4), libboost-date-time1.54.0, libboost-filesystem1.54.0, libboost-program-options1.54.0, libboost-regex1.54.0, libboost-serialization1.54.0, libboost-system1.54.0, libboost-thread1.54.0, protobuf-compiler (>= 2.5.0), libssl1.0.0 (>= 1.0.1), libatlas-base-dev, libpq-dev, cogutil (>= 2.0.2)"
+    "guile-2.0 (>= 2.0.9), python (>= 2.7.5), libzmq3 (>= 4.0.4), libboost-date-time1.54.0, libboost-filesystem1.54.0, libboost-program-options1.54.0, libboost-regex1.54.0, libboost-serialization1.54.0, libboost-system1.54.0, libboost-thread1.54.0, libssl1.0.0 (>= 1.0.1), libatlas-base-dev, libpq-dev, cogutil (>= 2.0.2)"
 )
 
 SET(CPACK_PACKAGE_INSTALL_DIRECTORY "CMake ${CMake_VERSION_MAJOR}.${CMake_VERSION_MINOR}")
