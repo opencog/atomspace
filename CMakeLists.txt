@@ -352,8 +352,10 @@ IF(HAVE_PY_INTERP)
 		SET(HAVE_CYTHON 1)
 
 		# Hack together some reasonable install location.
-		SET(PYTHON_DEST "lib${LIB_DIR_SUFFIX}/${PYTHON_VER}/dist-packages/opencog")
-		MESSAGE(STATUS "Python install dir: ${CMAKE_INSTALL_PREFIX}/${PYTHON_DEST}" )
+		SET(PYTHON_DEST
+			"lib${LIB_DIR_SUFFIX}/${PYTHON_VER}/dist-packages/opencog")
+		MESSAGE(STATUS
+			"Python install dir: ${CMAKE_INSTALL_PREFIX}/${PYTHON_DEST}" )
 
 	ELSE (CYTHON_FOUND AND HAVE_PY_LIBS)
 		IF(NOT CYTHON_FOUND)
