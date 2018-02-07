@@ -21,3 +21,11 @@
       (AndLink
         (VariableNode "$sha-arg-0")
         (VariableNode "$sha-arg-1")))))
+
+(define quoted-lambda
+  (QuoteLink
+    (LambdaLink
+      (UnquoteLink
+      (VariableNode "$vardecl"))
+    (UnquoteLink
+      (VariableNode "$body")))))
