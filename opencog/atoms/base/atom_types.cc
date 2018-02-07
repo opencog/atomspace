@@ -35,29 +35,19 @@ win::BOOL APIENTRY DllMain(win::HINSTANCE hinstDLL,  // handle to DLL module
 }
 #elif __GNUC__
 
-
-#define paste(s) opencog_shared_library_ ## s
-#define boolname(s) paste(s)
-
-// This *must* be a publically-visible global variable!
-// The goal here is to use ODR (One Definition Rule) to avoid
-// accidentally initializing types twice. This can happen when
-// this shared library is linked to some other library, and also
-// is dynamically loaded by scheme/guile during module loading.
-// In particular, this currently afflicts nlp-types. I'm not
-// sure if there is some better way to avoid double-loads.
-// This works, so we're going with it.
-bool boolname(INITNAME) = false;
-
 static __attribute__ ((constructor)) void init(void)
 {
-    if (boolname(INITNAME)) return;
-    boolname(INITNAME) = true;
+#define str(x) #x
+#define xstr(x) str(x)
 
-    #include INHERITANCE_FILE
-    #ifdef INHERITANCE_FILE2
-    #include INHERITANCE_FILE2
-    #endif
+	bool is_init = opencog::classserver().beginTypeDecls(xstr(INITNAME));
+	if (is_init) return;
+
+	#include INHERITANCE_FILE
+	#ifdef INHERITANCE_FILE2
+	#include INHERITANCE_FILE2
+	#endif
+	opencog::classserver().endTypeDecls();
 }
 
 static __attribute__ ((destructor)) void fini(void)
