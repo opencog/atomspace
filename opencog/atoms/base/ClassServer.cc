@@ -30,7 +30,6 @@
 #include "ClassServer.h"
 
 #include <exception>
-#include <opencog/util/Logger.h>
 
 #include <opencog/atoms/base/types.h>
 #include <opencog/atoms/base/atom_types.h>
