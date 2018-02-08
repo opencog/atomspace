@@ -80,7 +80,6 @@ public:
 	void test_nested_4();
 	void test_and_compose_1();
 	void test_and_compose_2();
-	void test_over_quotation_consumption();
 };
 
 #define N _as.add_node
@@ -1428,43 +1427,6 @@ void PutLinkUTest::test_and_compose_2()
 		                L(AND_LINK,
 		                  sha_var_1,
 		                  sha_var_2)));
-
-	logger().debug() << "result = " << oc_to_string(result);
-	logger().debug() << "expected = " << oc_to_string(expected);
-
-	TS_ASSERT_EQUALS(result, expected);
-
-	logger().info("END TEST: %s", __FUNCTION__);
-}
-
-/**
- * Make sure that executing the following
- *
- * (QuoteLink
- *   (LambdaLink
- *     (UnquoteLink
- *     (VariableNode "$vardecl"))
- *   (UnquoteLink
- *     (VariableNode "$body"))))
- *
- * executes into
- *
- * (LambdaLink
- *    (VariableNode "$vardecl")
- *    (VariableNode "$body"))
- *
- */
-void PutLinkUTest::test_over_quotation_consumption()
-{
-	logger().info("BEGIN TEST: %s", __FUNCTION__);
-
-	std::string rs = _eval.eval("(load-from-path \"tests/atoms/put-and.scm\")");
-	logger().debug() << "rs = " << rs;
-
-	Instantiator inst(&_as);
-	Handle quoted_lambda = _eval.eval_h("quoted-lambda"),
-		result = inst.execute(quoted_lambda),
-		expected = quoted_lambda;
 
 	logger().debug() << "result = " << oc_to_string(result);
 	logger().debug() << "expected = " << oc_to_string(expected);

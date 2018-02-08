@@ -1,0 +1,124 @@
+/*
+ * tests/atoms/QuoteLinkUTest.cxxtest
+ *
+ * Copyright (C) 2018 OpenCog Foundation
+ * All Rights Reserved
+ *
+ * This program is free software; you can redistribute it and/or modify
+ * it under the terms of the GNU Affero General Public License v3 as
+ * published by the Free Software Foundation and including the exceptions
+ * at http://opencog.org/wiki/Licenses
+ *
+ * This program is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ * GNU General Public License for more details.
+ *
+ * You should have received a copy of the GNU Affero General Public License
+ * along with this program; if not, write to:
+ * Free Software Foundation, Inc.,
+ * 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
+ */
+
+#include <opencog/guile/SchemeEval.h>
+#include <opencog/atoms/base/Atom.h>
+#include <opencog/atomspace/AtomSpace.h>
+#include <opencog/atoms/execution/Instantiator.h>
+
+#include <cxxtest/TestSuite.h>
+
+using namespace opencog;
+
+#define al _as.add_link
+#define an _as.add_node
+
+// Test QuoteLink.
+//
+class QuoteLinkUTest :  public CxxTest::TestSuite
+{
+private:
+	AtomSpace _as;
+	SchemeEval _eval;
+
+public:
+	QuoteLinkUTest() : _eval(&_as)
+	{
+		logger().set_level(Logger::INFO);
+		logger().set_print_to_stdout_flag(true);
+
+		_eval.eval("(add-to-load-path \"..\")");
+		_eval.eval("(add-to-load-path \"../../..\")");
+	}
+
+	void setUp() {}
+
+	void tearDown() {}
+
+	void test_root_local_quote_over_consumption();
+	void test_lambda_quote_over_consumption();
+};
+
+/**
+ * LocalQuote at the root of an AndLink in a pattern is used to
+ * indicate that a litteral AndLink should be matched instead of
+ * interpreting as a logic connector.
+ */
+void QuoteLinkUTest::test_root_local_quote_over_consumption()
+{
+	logger().info("BEGIN TEST: %s", __FUNCTION__);
+
+	std::string rs = _eval.eval("(load-from-path \"tests/atoms/put-and.scm\")");
+	logger().debug() << "rs = " << rs;
+
+	Instantiator inst(&_as);
+	Handle and_sha_abs = _eval.eval_h("and-shallow-abstraction"),
+		result = inst.execute(and_sha_abs),
+		expected = and_sha_abs;
+
+	logger().debug() << "result = " << oc_to_string(result);
+	logger().debug() << "expected = " << oc_to_string(expected);
+
+	TS_ASSERT(content_eq(result, expected));
+}
+
+/**
+ * Make sure that executing the following
+ *
+ * (QuoteLink
+ *   (LambdaLink
+ *     (UnquoteLink
+ *     (VariableNode "$vardecl"))
+ *   (UnquoteLink
+ *     (VariableNode "$body"))))
+ *
+ * does not turn into
+ *
+ * (LambdaLink
+ *    (VariableNode "$vardecl")
+ *    (VariableNode "$body"))
+ *
+ * Instead the quotation should be left intact, as to not change the
+ * semantics of the Lambda.
+ */
+void QuoteLinkUTest::test_lambda_quote_over_consumption()
+{
+	logger().info("BEGIN TEST: %s", __FUNCTION__);
+
+	std::string rs = _eval.eval("(load-from-path \"tests/atoms/quotations.scm\")");
+	logger().debug() << "rs = " << rs;
+
+	Instantiator inst(&_as);
+	Handle quoted_lambda = _eval.eval_h("quoted-lambda"),
+		result = inst.execute(quoted_lambda),
+		expected = quoted_lambda;
+
+	logger().debug() << "result = " << oc_to_string(result);
+	logger().debug() << "expected = " << oc_to_string(expected);
+
+	TS_ASSERT_EQUALS(result, expected);
+
+	logger().info("END TEST: %s", __FUNCTION__);
+}
+
+#undef al
+#undef an
