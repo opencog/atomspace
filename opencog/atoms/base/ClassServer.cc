@@ -49,9 +49,38 @@ ClassServer::ClassServer(void)
 
 static int tmod = 0;
 
-void ClassServer::beginTypeDecls(void)
+/**
+ * Return true if this module has already been loaded.
+ *
+ * This is a strange kind of hack to allow the cogserver unit
+ * tests to be run from the build directory, while *also* having
+ * libraries that those unit tests require be installed in the
+ * system directories.
+ *
+ * Essentially, this is a manual implementation of the so-called
+ * ODR (One Definition Rule) that the linker-loader uses to avoid
+ * loading the same library twice, and extending it so that it works
+ * when the "same library" is available in the build directory and
+ * in some system directory. These are not actually the "same library"
+ * from the point of view of the linker-loader; but they need to be,
+ * to get the unit tests to pass.
+ *
+ * The primary issue is driven by mixed python+scheme unit tests.
+ * They will typically load libraries in the build dir, and then,
+ * because they use modules, try to load the same lirbries again,
+ * this time from the system dir.  This results in the same atom
+ * types getting defined twice, and then things go downhill.
+ */
+bool ClassServer::beginTypeDecls(const char * mod_name)
 {
+   std::lock_guard<std::mutex> l(type_mutex);
+	std::string mname(mod_name);
+	if (_loaded_modules.end() != _loaded_modules.find(mname))
+		return true;
+
+	_loaded_modules.insert(mname);
 	tmod++;
+	return false;
 }
 
 void ClassServer::endTypeDecls(void)

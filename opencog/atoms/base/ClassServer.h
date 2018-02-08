@@ -25,6 +25,7 @@
 #define _OPENCOG_CLASS_SERVER_H
 
 #include <mutex>
+#include <set>
 #include <unordered_map>
 #include <vector>
 
@@ -61,6 +62,8 @@ private:
     /** Private default constructor for this class to make it a singleton. */
     ClassServer();
 
+    std::set< std::string > _loaded_modules;
+
     /* It is very tempting to make the type_mutex into a reader-writer
      * mutex. However, it appears that this is a bad idea: reader-writer
      * mutexes cause cache-line ping-ponging when there is contention,
@@ -91,7 +94,7 @@ public:
     /** Gets the singleton instance (following meyer's design pattern) */
     friend ClassServer& classserver();
 
-    void beginTypeDecls(void);
+    bool beginTypeDecls(const char *);
     void endTypeDecls(void);
     /**
      * Adds a new atom type with the given name and parent type.
