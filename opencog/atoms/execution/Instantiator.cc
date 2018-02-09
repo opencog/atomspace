@@ -273,13 +273,21 @@ Handle Instantiator::walk_tree(const Handle& expr, bool silent)
 	{
 		LambdaLinkPtr ll = LambdaLinkCast(expr);
 		Handle vardecl = ll->get_vardecl();
+
 		// Recursively walk vardecl
 		if (vardecl)
-		{
 			vardecl = walk_tree(vardecl, silent);
-		}
+
 		// Recursively walk body, making sure quotation is preserved
 		Handle body = ll->get_body();
+		// If the lambda is ill-formed it might not have a body, throw
+		// an exception then
+		if (not body)
+		{
+			if (silent)
+				throw NotEvaluatableException();
+			throw SyntaxException(TRACE_INFO, "body is ill-formed");
+		}
 		Type bt = body->get_type();
 		if (Quotation::is_quotation_type(bt))
 		{
@@ -292,11 +300,15 @@ Handle Instantiator::walk_tree(const Handle& expr, bool silent)
 		{
 			body = walk_tree(body, silent);
 		}
-		// Reconstruct Lambda
-		HandleSeq oset{body};
-		if (vardecl)
-			oset.insert(oset.begin(), vardecl);
-		return createLink(oset, LAMBDA_LINK);
+		// Reconstruct Lambda, if it has changed
+		if (ll->get_vardecl() != vardecl or ll->get_body() != body)
+		{
+			HandleSeq oset{body};
+			if (vardecl)
+				oset.insert(oset.begin(), vardecl);
+			return createLink(oset, LAMBDA_LINK);
+		}
+		return expr;
 	}
 
 	// ExecutionOutputLinks get special treatment.
