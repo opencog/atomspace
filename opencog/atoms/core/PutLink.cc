@@ -388,9 +388,7 @@ Handle PutLink::do_reduce(void) const
 	{
 		if (SET_LINK != vtype)
 		{
-			HandleSeq oset;
-			oset.emplace_back(_values);
-			return reddy(subs, oset);
+			return reddy(subs, {_values});
 		}
 
 		// If the values are given in a set, then iterate over the set...

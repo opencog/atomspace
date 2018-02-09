@@ -39,7 +39,7 @@ namespace opencog
 /// Atomese is not Lambda Calculus; its more natural to do it this
 /// way in Atomese.
 ///
-/// The methods here are used by the backward and foreward chainers to
+/// The methods here are used by the backward and forward chainers to
 /// edit and create PatternLinks on the fly, thus allowing different
 /// kinds of queries to be generated and run as chaining proceeds.
 ///
