@@ -1,5 +1,5 @@
 /*
- * tests/atoms/QuoteLinkUTest.cxxtest
+ * tests/atoms/QuotationUTest.cxxtest
  *
  * Copyright (C) 2018 OpenCog Foundation
  * All Rights Reserved
@@ -32,18 +32,18 @@ using namespace opencog;
 #define al _as.add_link
 #define an _as.add_node
 
-// Test QuoteLink.
+// Test quotations.
 //
-class QuoteLinkUTest :  public CxxTest::TestSuite
+class QuotationUTest :  public CxxTest::TestSuite
 {
 private:
 	AtomSpace _as;
 	SchemeEval _eval;
 
 public:
-	QuoteLinkUTest() : _eval(&_as)
+	QuotationUTest() : _eval(&_as)
 	{
-		logger().set_level(Logger::INFO);
+		logger().set_level(Logger::DEBUG);
 		logger().set_print_to_stdout_flag(true);
 
 		_eval.eval("(add-to-load-path \"..\")");
@@ -63,7 +63,7 @@ public:
  * indicate that a litteral AndLink should be matched instead of
  * interpreting as a logic connector.
  */
-void QuoteLinkUTest::test_root_local_quote_over_consumption()
+void QuotationUTest::test_root_local_quote_over_consumption()
 {
 	logger().info("BEGIN TEST: %s", __FUNCTION__);
 
@@ -100,7 +100,7 @@ void QuoteLinkUTest::test_root_local_quote_over_consumption()
  * Instead the quotation should be left intact, as to not change the
  * semantics of the Lambda.
  */
-void QuoteLinkUTest::test_lambda_quote_over_consumption()
+void QuotationUTest::test_lambda_quote_over_consumption()
 {
 	logger().info("BEGIN TEST: %s", __FUNCTION__);
 
