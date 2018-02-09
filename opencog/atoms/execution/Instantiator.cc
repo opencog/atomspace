@@ -109,13 +109,27 @@ Handle Instantiator::walk_tree(const Handle& expr, bool silent)
 
 	// Discard the following QuoteLink, UnquoteLink or LocalQuoteLink
 	// as it is serving its quoting or unquoting function.
-	if (_avoid_discarding_quotes_level == 0 and context_cp.consumable(t))
+	if (_avoid_discarding_quotes_level == 0 and _needless_quotation and
+	    context_cp.consumable(t))
 	{
 		if (1 != expr->get_arity())
 			throw InvalidParamException(TRACE_INFO,
 			                            "QuoteLink/UnquoteLink has "
 			                            "unexpected arity!");
-		return walk_tree(expr->getOutgoingAtom(0), silent);
+		Handle child = expr->getOutgoingAtom(0);
+		Handle walked_child = walk_tree(child, silent);
+
+		// Only consume if the quotation is really needless (walking
+		// the children might have changed _needless_quotation).
+		if (_needless_quotation)
+			return walked_child;
+
+		// Otherwise keep the quotation, but set _needless_quotation
+		// back to true for the remaining tree
+		_needless_quotation = true;
+		Handle nexp(createLink(t, walked_child));
+		nexp->copyValues(expr);
+		return nexp;
 	}
 
 	if (expr->is_node())
@@ -164,7 +178,12 @@ Handle Instantiator::walk_tree(const Handle& expr, bool silent)
 	// never for bound ones.
 
 	if (context_cp.is_quoted())
+	{
+		// Make sure we don't consume a useful quotation
+		if (not_self_match(t))
+			_needless_quotation = false;
 		goto mere_recursive_call;
+	}
 
 	// Reduce PutLinks. There are two ways to do this: eager execution
 	// and lazy execution.  The algos are this:
@@ -243,6 +262,41 @@ Handle Instantiator::walk_tree(const Handle& expr, bool silent)
 		}
 		catch (const NotEvaluatableException& ex) {}
 		return rex;
+	}
+
+	// LambdaLink may get special treatment in case it is used for
+	// pattern matching. For instance if a connector is quoted, we
+	// don't want to consume that quote otherwise the connector will
+	// serve as a logic connector to the pattern matcher instead of
+	// serving as self-match.
+	if (LAMBDA_LINK == t)
+	{
+		LambdaLinkPtr ll = LambdaLinkCast(expr);
+		Handle vardecl = ll->get_vardecl();
+		// Recursively walk vardecl
+		if (vardecl)
+		{
+			vardecl = walk_tree(vardecl, silent);
+		}
+		// Recursively walk body, making sure quotation is preserved
+		Handle body = ll->get_body();
+		Type bt = body->get_type();
+		if (Quotation::is_quotation_type(bt))
+		{
+			_context.update(body);
+			_needless_quotation = false;
+			body = walk_tree(body->getOutgoingAtom(0), silent);
+			body = createLink(bt, body);
+			_needless_quotation = true;
+		} else
+		{
+			body = walk_tree(body, silent);
+		}
+		// Reconstruct Lambda
+		HandleSeq oset{body};
+		if (vardecl)
+			oset.insert(oset.begin(), vardecl);
+		return createLink(oset, LAMBDA_LINK);
 	}
 
 	// ExecutionOutputLinks get special treatment.
@@ -432,6 +486,15 @@ mere_recursive_call:
 		return subl;
 	}
 	return expr;
+}
+
+bool Instantiator::not_self_match(Type t)
+{
+	return classserver().isA(t, SCOPE_LINK) or
+		classserver().isA(t, FUNCTION_LINK) or
+		classserver().isA(t, DELETE_LINK) or
+		classserver().isA(t, VIRTUAL_LINK) or
+		classserver().isA(t, DONT_EXEC_LINK);
 }
 
 /**

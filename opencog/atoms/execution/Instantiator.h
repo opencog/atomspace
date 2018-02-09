@@ -59,6 +59,15 @@ private:
 	int _avoid_discarding_quotes_level = 0;
 
 	/**
+	 * Can be set temporarily to false when consuming the quotation
+	 * would change the semantics.
+	 *
+	 * TODO: maybe this can eliminate the need for
+	 * _avoid_discarding_quotes_level
+	 */
+	bool _needless_quotation = true;
+
+	/**
 	 * Recursively walk a tree starting with the root of the
 	 * hypergraph to instantiate (typically an ExecutionOutputLink).
 	 *
@@ -81,6 +90,19 @@ private:
 	bool _eager = true;
 	Handle walk_tree(const Handle& tree, bool silent=false);
 	bool walk_sequence(HandleSeq&, const HandleSeq&, bool silent=false);
+
+	/**
+	 * Return true iff the following atom type may not match to
+	 * itself, that is a scope, an evaluatable, used as logic
+	 * connector by the pattern matcher, etc.
+	 *
+	 * TODO: should be refined to make the difference between AndLink
+	 * as pattern matcher connector and AndLink as self-match.
+	 *
+	 * TODO: this should probably be moved to some pattern matcher
+	 * method.
+	 */
+	static bool not_self_match(Type t);
 
 public:
 	Instantiator(AtomSpace* as) : _as(as), _vmap(nullptr) {}
