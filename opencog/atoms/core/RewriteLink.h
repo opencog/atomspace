@@ -83,12 +83,12 @@ protected:
 	                            const HandleMap& vm) const;
 
 	/**
-	 * Given a variable declaration, a body, and a sequence of values,
-	 * perform substitution on the body, replacing variables with values.
+	 * Like above but uses a mapping from variables to values instead
+	 * of a sequence of values.
 	 */
 	Handle substitute_body(const Handle& nvardecl,
 	                       const Handle& body,
-	                       const HandleSeq& values) const;
+	                       const HandleMap& vm) const;
 
 	/**
 	 * Return true if the variable declaration of local_scope contains
@@ -162,7 +162,7 @@ public:
 	 * Like the above, but accepting a sequence of values.
 	 */
 	HandleSeq beta_reduce_bodies(const Handle& nvardecl,
-	                             const HandleSeq& values) const;
+	                             const HandleMap& vm) const;
 
 	/**
 	 * Helper function, used by beta_reduce and the unifier.
