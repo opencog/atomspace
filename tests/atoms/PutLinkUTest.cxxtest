@@ -45,6 +45,7 @@ public:
 	{
 		logger().set_print_to_stdout_flag(true);
 		logger().set_level(Logger::DEBUG);
+		logger().set_timestamp_flag(false);
 		logger().set_sync_flag(true); // interleave with printf correctly
 
 		_eval.eval("(add-to-load-path \"..\")");
