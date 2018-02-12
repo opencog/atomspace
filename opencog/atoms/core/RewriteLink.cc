@@ -335,17 +335,21 @@ Handle RewriteLink::consume_ill_quotations(const Variables& variables, Handle h,
 			}
 		} else if (t == UNQUOTE_LINK) {
 			Handle uh = h->getOutgoingAtom(0);
-			// Either remove subsequent unquote associated by a
+			// Either remove subsequent unquote associated to a
 			// removed quote, or useless unquote because there are no
 			// free variables to unquote
 			if (not escape or get_free_variables(uh).empty()) {
 				quotation.update(t);
-				return consume_ill_quotations(variables, h->getOutgoingAtom(0),
-				                              quotation);
+				return consume_ill_quotations(variables, uh, quotation);
+			}
+			// The other possibility is that a Quote follows an
+			// Unquote, in which case we can consume both of them
+			// without altering semantics.
+			if (escape and uh->get_type() == QUOTE_LINK) {
+				Handle uqh = uh->getOutgoingAtom(0); // (Unquote (Quote ...))
+				return consume_ill_quotations(variables, uqh, quotation);
 			}
 		}
-		// Ignore LocalQuotes as they supposedly used only to quote
-		// pattern matcher connectors.
 	}
 
 	quotation.update(t);
