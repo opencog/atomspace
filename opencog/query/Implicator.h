@@ -59,7 +59,7 @@ class Implicator :
 		HandleSeq _result_list;
 
 	public:
-		Implicator(AtomSpace* as) : inst(as), max_results(SIZE_MAX) {}
+		Implicator(AtomSpace* as) : inst(as, true), max_results(SIZE_MAX) {}
 		Instantiator inst;
 		Handle implicand;
 		size_t max_results;

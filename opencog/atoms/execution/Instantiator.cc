@@ -34,6 +34,12 @@
 
 using namespace opencog;
 
+Instantiator::Instantiator(AtomSpace* as, bool consume_quotations)
+	: _as(as), _vmap(nullptr), _halt(false),
+	  _avoid_discarding_quotes_level(0),
+	  _consume_quotations(consume_quotations),
+	  _needless_quotation(true),
+	  _eager(true) {}
 
 /// Perform beta-reduction on the expression `expr`, using the `vmap`
 /// to fish out values for variables.  The map holds pairs: the first
@@ -109,7 +115,8 @@ Handle Instantiator::walk_tree(const Handle& expr, bool silent)
 
 	// Discard the following QuoteLink, UnquoteLink or LocalQuoteLink
 	// as it is serving its quoting or unquoting function.
-	if (_avoid_discarding_quotes_level == 0 and _needless_quotation and
+	if (_avoid_discarding_quotes_level == 0 and
+	    (_consume_quotations or _needless_quotation) and
 	    context_cp.consumable(t))
 	{
 		if (1 != expr->get_arity())
@@ -121,7 +128,7 @@ Handle Instantiator::walk_tree(const Handle& expr, bool silent)
 
 		// Only consume if the quotation is really needless (walking
 		// the children might have changed _needless_quotation).
-		if (_needless_quotation)
+		if (_consume_quotations or _needless_quotation)
 			return walked_child;
 
 		// Otherwise keep the quotation, but set _needless_quotation
@@ -532,6 +539,7 @@ Handle Instantiator::instantiate(const Handle& expr,
 			"Asked to ground a null expression");
 
 	_context = Context(false);
+	_needless_quotation = true;
 	_avoid_discarding_quotes_level = 0;
 
 	_vmap = &vars;

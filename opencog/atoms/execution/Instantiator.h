@@ -56,16 +56,26 @@ private:
 	 * their own scope. We must avoid damaging quotes for these atoms.
 	 */
 	Context _context;
-	int _avoid_discarding_quotes_level = 0;
+	int _avoid_discarding_quotes_level;
 
 	/**
-	 * Can be set temporarily to false when consuming the quotation
-	 * would change the semantics.
+	 * Consuming quotation should only take place when this is called
+	 * by a pattern matcher function, such as BindLink, GetLink and
+	 * PutLink, etc, as part of the substitution mechanics. Otherwise,
+	 * consuming quotes systematically may changes the semantics of
+	 * the program. This flag is here properly control that.
+	 */
+	bool _consume_quotations;
+
+	/**
+	 * In case _consume_quotations is set to false, this can be set
+	 * temporarily to false when consuming the quotation would change
+	 * the semantics.
 	 *
 	 * TODO: maybe this can eliminate the need for
 	 * _avoid_discarding_quotes_level
 	 */
-	bool _needless_quotation = true;
+	bool _needless_quotation;
 
 	/**
 	 * Recursively walk a tree starting with the root of the
@@ -87,7 +97,7 @@ private:
 	 * is still buggy, and unit tests will fail. So do eager execution
 	 * by default.
 	 */
-	bool _eager = true;
+	bool _eager;
 	Handle walk_tree(const Handle& tree, bool silent=false);
 	bool walk_sequence(HandleSeq&, const HandleSeq&, bool silent=false);
 
@@ -105,7 +115,7 @@ private:
 	static bool not_self_match(Type t);
 
 public:
-	Instantiator(AtomSpace* as) : _as(as), _vmap(nullptr) {}
+	Instantiator(AtomSpace* as, bool consume_quotations=false);
 
 	void ready(AtomSpace* as)
 	{
