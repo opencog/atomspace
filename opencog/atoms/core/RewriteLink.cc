@@ -314,7 +314,7 @@ Handle RewriteLink::consume_ill_quotations(const Variables& variables, Handle h,
 	// Recursive cases
 	Type t = h->get_type();
 	if (quotation.consumable(t)) {
-		if (t == QUOTE_LINK) {
+		if (t == QUOTE_LINK or t == LOCAL_QUOTE_LINK) {
 			Handle qh = h->getOutgoingAtom(0);
 			Type qht = qh->get_type();
 			// If it's a scope, check whether its vardecl is bound to
