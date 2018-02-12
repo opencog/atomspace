@@ -191,27 +191,26 @@ Handle RewriteLink::beta_reduce(const HandleSeq& vals) const
 HandleSeq RewriteLink::substitute_bodies(const Handle& nvardecl,
                                          const HandleMap& vm) const
 {
-	const Variables& variables = get_variables();
-	return beta_reduce_bodies(nvardecl, variables.make_sequence(vm));
+	return beta_reduce_bodies(nvardecl, vm);
 }
 
 HandleSeq RewriteLink::beta_reduce_bodies(const Handle& nvardecl,
-                                         const HandleSeq& values) const
+                                          const HandleMap& vm) const
 {
 	HandleSeq hs;
 	for (size_t i = (get_vardecl() ? 1 : 0); i < get_arity(); ++i)
 	{
 		const Handle& h = getOutgoingAtom(i);
-		hs.push_back(substitute_body(nvardecl, h, values));
+		hs.push_back(substitute_body(nvardecl, h, vm));
 	}
 	return hs;
 }
 
 Handle RewriteLink::substitute_body(const Handle& nvardecl,
                                     const Handle& body,
-                                    const HandleSeq& values) const
+                                    const HandleMap& vm) const
 {
-	Handle nbody = get_variables().substitute(body, values, _silent);
+	Handle nbody = get_variables().substitute(body, vm, _silent);
 	nbody = consume_ill_quotations(nvardecl, nbody);
 	return nbody;
 }
@@ -315,7 +314,7 @@ Handle RewriteLink::consume_ill_quotations(const Variables& variables, Handle h,
 	// Recursive cases
 	Type t = h->get_type();
 	if (quotation.consumable(t)) {
-		if (t == QUOTE_LINK) {
+		if (t == QUOTE_LINK or t == LOCAL_QUOTE_LINK) {
 			Handle qh = h->getOutgoingAtom(0);
 			Type qht = qh->get_type();
 			// If it's a scope, check whether its vardecl is bound to

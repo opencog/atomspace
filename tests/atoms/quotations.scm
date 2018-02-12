@@ -43,3 +43,11 @@
     )
   )
 )
+
+(define quoted-lambda
+  (QuoteLink
+    (LambdaLink
+      (UnquoteLink
+      (VariableNode "$vardecl"))
+    (UnquoteLink
+      (VariableNode "$body")))))

@@ -69,21 +69,13 @@ PrenexLink::PrenexLink(const Link &l)
 Handle PrenexLink::reassemble(const HandleMap& vm,
                               const HandleSeq& final_varlist) const
 {
-	const Variables& vtool = get_variables();
+	// Now get the vardecl and body
+	Handle vdecl = gen_vardecl(final_varlist);
+	Handle newbod = RewriteLink::substitute_body(vdecl, _body, vm);
 
-	// Now get the new body...
-	Handle newbod = vtool.substitute(_body, vm, _silent);
-
-	if (0 < final_varlist.size())
-	{
-		Handle vdecl;
-		if (1 == final_varlist.size())
-			vdecl = final_varlist[0];
-		else
-			vdecl = Handle(createVariableList(final_varlist));
-
+	// Reassemble if necessary
+	if (not final_varlist.empty())
 		return Handle(createLink(get_type(), vdecl, newbod));
-	}
 
 	return newbod;
 }

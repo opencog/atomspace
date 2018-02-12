@@ -207,6 +207,12 @@ Variables gen_variables(const Handle& h, const Handle& vardecl);
  */
 Handle gen_vardecl(const Handle& h, const Handle& vardecl);
 
+/**
+ * Given a list variables or typed variables, return the
+ * corresponding variable declaration.
+ */
+Handle gen_vardecl(const HandleSeq& varlist);
+
 /** @}*/
 }
 
