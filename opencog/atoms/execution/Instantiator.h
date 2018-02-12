@@ -46,7 +46,7 @@ class Instantiator
 private:
 	AtomSpace *_as;
 	const HandleMap *_vmap;
-	bool _halt = false;
+	bool _halt;
 
 	/**
 	 * Instatiator removes first level QuoteLinks and in such cases
@@ -56,7 +56,6 @@ private:
 	 * their own scope. We must avoid damaging quotes for these atoms.
 	 */
 	Context _context;
-	int _avoid_discarding_quotes_level;
 
 	/**
 	 * Consuming quotation should only take place when this is called

@@ -36,7 +36,6 @@ using namespace opencog;
 
 Instantiator::Instantiator(AtomSpace* as, bool consume_quotations)
 	: _as(as), _vmap(nullptr), _halt(false),
-	  _avoid_discarding_quotes_level(0),
 	  _consume_quotations(consume_quotations),
 	  _needless_quotation(true),
 	  _eager(true) {}
@@ -115,8 +114,7 @@ Handle Instantiator::walk_tree(const Handle& expr, bool silent)
 
 	// Discard the following QuoteLink, UnquoteLink or LocalQuoteLink
 	// as it is serving its quoting or unquoting function.
-	if (_avoid_discarding_quotes_level == 0 and
-	    (_consume_quotations or _needless_quotation) and
+	if ((_consume_quotations or _needless_quotation) and
 	    context_cp.consumable(t))
 	{
 		if (1 != expr->get_arity())
@@ -356,9 +354,7 @@ Handle Instantiator::walk_tree(const Handle& expr, bool silent)
 			// Perform substitution on the args, only.
 			if (_eager)
 			{
-				_avoid_discarding_quotes_level++;
 				args = walk_tree(args, silent);
-				_avoid_discarding_quotes_level--;
 			}
 			else
 			{
@@ -378,9 +374,7 @@ Handle Instantiator::walk_tree(const Handle& expr, bool silent)
 			// execution of its arguments. So the step below should not
 			// be needed -- yet, it is ... Funny thing is, it only
 			// breaks the BackwardChainerUTest ... why?
-			_avoid_discarding_quotes_level++;
 			args = walk_tree(args, silent);
-			_avoid_discarding_quotes_level--;
 		}
 		else
 		{
@@ -540,7 +534,6 @@ Handle Instantiator::instantiate(const Handle& expr,
 
 	_context = Context(false);
 	_needless_quotation = true;
-	_avoid_discarding_quotes_level = 0;
 
 	_vmap = &vars;
 
