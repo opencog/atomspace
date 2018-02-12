@@ -581,7 +581,7 @@ bool DefaultPatternMatchCB::eval_term(const Handle& virt,
 	{
 		gvirt = _instor->instantiate(virt, gnds, true);
 	}
-	catch (...)
+	catch (const SilentException& ex)
 	{
 		// The evaluation above can throw an exception if the
 		// instantiation turns out to be ill-formed. If so assume it
@@ -655,7 +655,7 @@ bool DefaultPatternMatchCB::eval_term(const Handle& virt,
 		{
 			tvp = EvaluationLink::do_eval_scratch(_as, gvirt, _temp_aspace, true);
 		}
-		catch (...)
+		catch (const SilentException& ex)
 		{
 			// The do_evaluate() above can throw if its given ungrounded
 			// expressions. It can be given ungrounded expressions if

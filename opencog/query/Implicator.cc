@@ -58,7 +58,7 @@ bool Implicator::grounding(const HandleMap &var_soln,
 	try {
 		Handle h = inst.instantiate(implicand, var_soln, true);
 		insert_result(h);
-	} catch(...) {}
+	} catch (const SilentException& ex) {}
 
 	// If we found as many as we want, then stop looking for more.
 	return (_result_set.size() >= max_results);
