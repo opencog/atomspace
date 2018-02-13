@@ -125,16 +125,9 @@ SCM SchemeSmob::ss_av_get_value (SCM s)
 {
 	AttentionValuePtr av = verify_av(s, "cog-av->alist");
 
-	// Format AV values to two decimal pts.
-	auto format = [](double n){
-	char number_str[20];
-	sprintf(number_str, "%.2f", n);
-	return atof(number_str);
-	};
-
-	SCM sti =scm_from_double(format(av->getSTI()));
-	SCM lti = scm_from_double(format(av->getLTI()));
-	SCM vlti = scm_from_double(format(av->getVLTI()));
+	SCM sti =scm_from_double(av->getSTI());
+	SCM lti = scm_from_double(av->getLTI());
+	SCM vlti = scm_from_double(av->getVLTI());
 
 	SCM ssti = scm_from_utf8_symbol("sti");
 	SCM slti = scm_from_utf8_symbol("lti");
