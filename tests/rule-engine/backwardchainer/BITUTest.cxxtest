@@ -27,6 +27,7 @@ private:
 
 	Handle closed_lambda_introduction_rule_h;
 	Handle implication_and_lambda_factorization_rule_h;
+	Handle unary_specialization_rule_h;
 
 public:
 	BITUTest() : _eval(&_as)
@@ -65,6 +66,13 @@ public:
 			             "   implication-and-lambda-factorization-rule-name"
 			             "   (ConceptNode \"URE\"))");
 
+		// Load implication-and-lambda-factorization-rule
+		eval_result = _eval.eval("(load-from-path \"unary-specialization-rule.scm\")");
+		unary_specialization_rule_h =
+			_eval.eval_h("(MemberLink (stv 1 1)"
+			             "   unary-specialization-rule-name"
+			             "   (ConceptNode \"URE\"))");
+
 		// Load bit.scm
 		eval_result = _eval.eval("(load-from-path \"bit.scm\")");
 	}
@@ -80,6 +88,7 @@ public:
 	void test_get_leaves();
 	void test_expand_1();
 	void test_expand_2();
+	void test_expand_3();
 	void test_has_cycle();
 };
 
@@ -843,6 +852,176 @@ void BITUTest::test_expand_2()
 		             "          )"
 		             "        )"
 		             "      )"
+		             "    )"
+		             "  )"
+		             ")"));
+
+	logger().debug() << "result = " << oc_to_string(result);
+	logger().debug() << "expected = " << oc_to_string(expected);
+
+	TS_ASSERT_EQUALS(result, expected);
+}
+
+void BITUTest::test_expand_3()
+{
+	AndBIT andbit(_eval.eval_h("fcs-5"));
+
+	Handle leaf = _eval.eval_h("(EvaluationLink"
+	                           "  (PredicateNode \"minsup\")"
+	                           "  (ListLink"
+	                           "    (VariableNode \"$g-2101505b\")"
+	                           "    (ConceptNode \"texts\")"
+	                           "    (NumberNode \"2.000000\")))");
+	Handle vardecl =
+		_eval.eval_h("(VariableList"
+		             "  (TypedVariableLink"
+		             "    (VariableNode \"$g-2101505b\")"
+		             "    (TypeChoice"
+		             "      (TypeNode \"LambdaLink\")"
+		             "      (TypeNode \"PutLink\")))"
+		             "  (TypedVariableLink"
+		             "    (VariableNode \"$f-53364b8c\")"
+		             "    (TypeChoice"
+		             "      (TypeNode \"ConceptNode\")"
+		             "      (TypeNode \"LambdaLink\"))))");
+
+	Rule unary_specialization_rule(unary_specialization_rule_h);
+	RuleTypedSubstitutionMap rules =
+        unary_specialization_rule.unify_target(leaf, vardecl);
+	RuleTypedSubstitutionPair rule = *rules.begin();
+
+	AndBIT result = andbit.expand(leaf, rule);
+	AndBIT expected(
+		_eval.eval_h("(BindLink"
+		             "  (VariableList"
+		             "    (TypedVariableLink"
+		             "      (VariableNode \"$f-53364b8c\")"
+		             "      (TypeChoice"
+		             "        (TypeNode \"ConceptNode\")"
+		             "        (TypeNode \"LambdaLink\")"
+		             "      )"
+		             "    )"
+		             "    (TypedVariableLink"
+		             "      (VariableNode \"$g-6566b25f\")"
+		             "      (TypeChoice"
+		             "        (TypeNode \"LambdaLink\")"
+		             "        (TypeNode \"PutLink\")"
+		             "      )"
+		             "    )"
+		             "    (TypedVariableLink"
+		             "      (VariableNode \"$f-72fe9f60\")"
+		             "      (TypeChoice"
+		             "        (TypeNode \"ConceptNode\")"
+		             "        (TypeNode \"LambdaLink\")"
+		             "      )"
+		             "    )"
+		             "  )"
+		             "  (AndLink"
+		             "    (VariableNode \"$f-72fe9f60\")"
+		             "    (VariableNode \"$f-53364b8c\")"
+		             "    (EvaluationLink"
+		             "      (GroundedPredicateNode \"scm: has-arity\")"
+		             "      (ListLink"
+		             "        (VariableNode \"$g-6566b25f\")"
+		             "        (NumberNode \"1.000000\")"
+		             "      )"
+		             "    )"
+		             "    (EvaluationLink"
+		             "      (PredicateNode \"minsup\")"
+		             "      (ListLink"
+		             "        (VariableNode \"$g-6566b25f\")"
+		             "        (ConceptNode \"texts\")"
+		             "        (NumberNode \"2.000000\")"
+		             "      )"
+		             "    )"
+		             "    (EvaluationLink"
+		             "      (GroundedPredicateNode \"scm: absolutely-true\")"
+		             "      (EvaluationLink"
+		             "        (PredicateNode \"minsup\")"
+		             "        (ListLink"
+		             "          (VariableNode \"$g-6566b25f\")"
+		             "          (ConceptNode \"texts\")"
+		             "          (NumberNode \"2.000000\")"
+		             "        )"
+		             "      )"
+		             "    )"
+		             "    (EvaluationLink"
+		             "      (GroundedPredicateNode \"scm: has-arity\")"
+		             "      (ListLink"
+		             "        (QuoteLink"
+		             "          (PutLink"
+		             "            (UnquoteLink"
+		             "              (VariableNode \"$g-6566b25f\")"
+		             "            )"
+		             "            (UnquoteLink"
+		             "              (VariableNode \"$f-72fe9f60\")"
+		             "            )"
+		             "          )"
+		             "        )"
+		             "        (NumberNode \"2.000000\")"
+		             "      )"
+		             "    )"
+		             "  )"
+		             "  (ExecutionOutputLink"
+		             "    (GroundedSchemaNode \"scm: specialization-formula\")"
+		             "    (ListLink"
+		             "      (EvaluationLink"
+		             "        (PredicateNode \"minsup\")"
+		             "        (ListLink"
+		             "          (QuoteLink"
+		             "            (PutLink"
+		             "              (PutLink"
+		             "                (UnquoteLink"
+		             "                  (VariableNode \"$g-6566b25f\")"
+		             "                )"
+		             "                (UnquoteLink"
+		             "                  (VariableNode \"$f-72fe9f60\")"
+		             "                )"
+		             "              )"
+		             "              (UnquoteLink"
+		             "                (ListLink"
+		             "                  (VariableNode \"$f-53364b8c\")"
+		             "                  (VariableNode \"$spe-arg-1\")"
+		             "                )"
+		             "              )"
+		             "            )"
+		             "          )"
+		             "          (ConceptNode \"texts\")"
+		             "          (NumberNode \"2.000000\")"
+		             "        )"
+		             "      )"
+		             "      (ExecutionOutputLink"
+		             "        (GroundedSchemaNode \"scm: specialization-formula\")"
+		             "        (ListLink"
+		             "          (EvaluationLink"
+		             "            (PredicateNode \"minsup\")"
+		             "            (ListLink"
+		             "              (QuoteLink"
+		             "                (PutLink"
+		             "                  (UnquoteLink"
+		             "                    (VariableNode \"$g-6566b25f\")"
+		             "                  )"
+		             "                  (UnquoteLink"
+		             "                    (VariableNode \"$f-72fe9f60\")"
+		             "                  )"
+		             "                )"
+		             "              )"
+		             "              (ConceptNode \"texts\")"
+		             "              (NumberNode \"2.000000\")"
+		             "            )"
+		             "          )"
+		             "          (EvaluationLink"
+		             "            (PredicateNode \"minsup\")"
+		             "            (ListLink"
+		             "              (VariableNode \"$g-6566b25f\")"
+		             "              (ConceptNode \"texts\")"
+		             "              (NumberNode \"2.000000\")"
+		             "            )"
+		             "          )"
+		             "          (VariableNode \"$f-72fe9f60\")"
+		             "        )"
+		             "      )"
+		             "      (VariableNode \"$f-53364b8c\")"
 		             "    )"
 		             "  )"
 		             ")"));
