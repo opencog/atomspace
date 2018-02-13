@@ -97,6 +97,11 @@ protected:
 	 */
 	static bool is_bound_to_ancestor(const Variables& variables,
 	                                 const Handle& local_scope);
+	/**
+	 * Like is_bound_to_ancestor but doesn't assume that the handle is
+	 * a scope, and test for it as well, returning false if it isn't.
+	 */
+	static bool is_scope_bound_to_ancestor(const Variables& variables, const Handle& h);
 
 public:
 	RewriteLink(const HandleSeq&, Type=REWRITE_LINK);
@@ -212,11 +217,16 @@ public:
 	 */
 	Handle consume_ill_quotations() const;
 	static Handle consume_ill_quotations(const Handle& vardecl, const Handle& h);
-	static Handle consume_ill_quotations(const Variables& variables, Handle h,
-	                                     Quotation quotation=Quotation(),
-	                                     bool escape=false /* ignore the next
-	                                                        * quotation
-	                                                        * consumption */);
+	static Handle consume_ill_quotations(const Variables& variables, const Handle& h);
+	static Handle consume_ill_quotations(const Variables& variables, const Handle& h,
+	                                     Quotation quotation);
+	static Handle consume_ill_quotations(const Variables& variables, const Handle& h,
+	                                     Quotation quotation,
+	                                     bool& needless_quotation);
+	static HandleSeq consume_ill_quotations(const Variables& variables,
+	                                        const HandleSeq& hs,
+	                                        Quotation quotation,
+	                                        bool& needless_quotation);
 
 	static Handle factory(const Handle&);
 };
