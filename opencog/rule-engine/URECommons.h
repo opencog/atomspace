@@ -47,7 +47,7 @@ public:
 	/**
 	 * Randomly pick about half of the elements, and amongst those
 	 * return the fittest (higher is better). If tfitness_map is
-	 * empty, then return the default value (build with Type()).
+	 * empty, then exception is thrown.
 	 *
 	 * TODO: generalize and move this method to
 	 * opencog/util/selection.h
