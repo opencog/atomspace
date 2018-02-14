@@ -997,135 +997,145 @@ Handle merge_vardecl(const Handle& lhs_vardecl, const Handle& rhs_vardecl)
 	return new_vars.get_vardecl();
 }
 
-std::string oc_to_string(const Unify::CHandle& ch)
+std::string oc_to_string(const Unify::CHandle& ch, const std::string& indent)
 {
 	std::stringstream ss;
-	ss << "context:" << std::endl << oc_to_string(ch.context)
-	   << "atom:" << std::endl << oc_to_string(ch.handle);
+	ss << indent << "context:" << std::endl
+	   << oc_to_string(ch.context, indent + OC_TO_STRING_INDENT)
+	   << indent << "atom:" << std::endl
+	   << oc_to_string(ch.handle, indent + OC_TO_STRING_INDENT);
 	return ss.str();
 }
-std::string oc_to_string(const Unify::CHandle& ch, const std::string& indent)
+std::string oc_to_string(const Unify::CHandle& ch)
 {
 	return oc_to_string(ch, "");
 }
 
-std::string oc_to_string(const Unify::Block& pb)
+std::string oc_to_string(const Unify::Block& pb, const std::string& indent)
 {
 	std::stringstream ss;
-	ss << "size = " << pb.size() << std::endl;
+	ss << indent << "size = " << pb.size() << std::endl;
 	int i = 0;
 	for (const auto& el : pb)
-		ss << "catom[" << i++ << "]:" << std::endl << oc_to_string(el);
+		ss << indent << "catom[" << i++ << "]:" << std::endl
+		   << oc_to_string(el, indent + OC_TO_STRING_INDENT);
 	return ss.str();
 }
-std::string oc_to_string(const Unify::Block& pb, const std::string& indent)
+std::string oc_to_string(const Unify::Block& pb)
 {
 	return oc_to_string(pb, "");
 }
 
-std::string oc_to_string(const Unify::TypedBlock& tb)
+std::string oc_to_string(const Unify::TypedBlock& tb, const std::string& indent)
 {
 	std::stringstream ss;
-	ss << "block:" << std::endl << oc_to_string(tb.first)
-	   << "type:" << std::endl << oc_to_string(tb.second);
+	ss << indent << "block:" << std::endl
+	   << oc_to_string(tb.first, indent + OC_TO_STRING_INDENT)
+	   << indent << "type:" << std::endl
+	   << oc_to_string(tb.second, indent + OC_TO_STRING_INDENT);
 	return ss.str();
 }
-std::string oc_to_string(const Unify::TypedBlock& tb, const std::string& indent)
+std::string oc_to_string(const Unify::TypedBlock& tb)
 {
 	return oc_to_string(tb, "");
 }
 
-std::string oc_to_string(const Unify::TypedBlockSeq& tbs)
+std::string oc_to_string(const Unify::TypedBlockSeq& tbs, const std::string& indent)
 {
 	std::stringstream ss;
-	ss << "size = " << tbs.size() << std::endl;
+	ss << indent << "size = " << tbs.size() << std::endl;
 	for (size_t i = 0; i < tbs.size(); i++)
-		ss << "typed block[" << i << "]:" << std::endl
-		   << oc_to_string(tbs[i]);
+		ss << indent << "typed block[" << i << "]:" << std::endl
+		   << oc_to_string(tbs[i], indent + OC_TO_STRING_INDENT);
 	return ss.str();
 }
-std::string oc_to_string(const Unify::TypedBlockSeq& tbs, const std::string& indent)
+std::string oc_to_string(const Unify::TypedBlockSeq& tbs)
 {
 	return oc_to_string(tbs, "");
 }
 
-std::string oc_to_string(const Unify::Partition& up)
+std::string oc_to_string(const Unify::Partition& up, const std::string& indent)
 {
 	std::stringstream ss;
-	ss << "size = " << up.size() << std::endl;
+	ss << indent << "size = " << up.size() << std::endl;
 	int i = 0;
 	for (const auto& p : up) {
-		ss << "block[" << i << "]:" << std::endl << oc_to_string(p.first)
-		   << "type[" << i << "]:" << std::endl << oc_to_string(p.second);
+		ss << indent << "block[" << i << "]:" << std::endl
+		   << oc_to_string(p.first, indent + OC_TO_STRING_INDENT)
+		   << indent << "type[" << i << "]:" << std::endl
+		   << oc_to_string(p.second, indent + OC_TO_STRING_INDENT);
 		i++;
 	}
 	return ss.str();
 }
-std::string oc_to_string(const Unify::Partition& up, const std::string& indent)
+std::string oc_to_string(const Unify::Partition& up)
 {
 	return oc_to_string(up, "");
 }
 
-std::string oc_to_string(const Unify::Partitions& par)
+std::string oc_to_string(const Unify::Partitions& par, const std::string& indent)
 {
 	std::stringstream ss;
-	ss << "size = " << par.size() << std::endl;
+	ss << indent << "size = " << par.size() << std::endl;
 	int i = 0;
 	for (const auto& el : par) {
-		ss << "typed partition[" << i << "]:" << std::endl << oc_to_string(el);
+		ss << indent << "typed partition[" << i << "]:"
+		   << std::endl << oc_to_string(el, indent + OC_TO_STRING_INDENT);
 		i++;
 	}
 	return ss.str();
 }
-std::string oc_to_string(const Unify::Partitions& par, const std::string& indent)
+std::string oc_to_string(const Unify::Partitions& par)
 {
 	return oc_to_string(par, "");
 }
 
-std::string oc_to_string(const Unify::HandleCHandleMap& hchm)
+std::string oc_to_string(const Unify::HandleCHandleMap& hchm, const std::string& indent)
 {
 	std::stringstream ss;
-	ss << "size = " << hchm.size() << std::endl;
+	ss << indent << "size = " << hchm.size() << std::endl;
 	int i = 0;
 	for (const auto& hch : hchm) {
-		ss << "atom[" << i << "]:" << std::endl
-		   << oc_to_string(hch.first);
-		ss << "catom[" << i << "]:" << std::endl
-		   << oc_to_string(hch.second);
+		ss << indent << "atom[" << i << "]:" << std::endl
+		   << oc_to_string(hch.first, indent + OC_TO_STRING_INDENT);
+		ss << indent << "catom[" << i << "]:" << std::endl
+		   << oc_to_string(hch.second, indent + OC_TO_STRING_INDENT);
 		i++;
 	}
 	return ss.str();
 }
-std::string oc_to_string(const Unify::HandleCHandleMap& hchm, const std::string& indent)
+std::string oc_to_string(const Unify::HandleCHandleMap& hchm)
 {
 	return oc_to_string(hchm, "");
 }
 
-std::string oc_to_string(const Unify::TypedSubstitution& ts)
+std::string oc_to_string(const Unify::TypedSubstitution& ts, const std::string& indent)
 {
 	std::stringstream ss;
-	ss << "substitution:" << std::endl << oc_to_string(ts.first)
-	   << "vardecl:" << std::endl << oc_to_string(ts.second);
+	ss << indent << "substitution:" << std::endl
+	   << oc_to_string(ts.first, indent + OC_TO_STRING_INDENT)
+	   << indent << "vardecl:" << std::endl
+	   << oc_to_string(ts.second, indent + OC_TO_STRING_INDENT);
 	return ss.str();
 }
-std::string oc_to_string(const Unify::TypedSubstitution& ts, const std::string& indent)
+std::string oc_to_string(const Unify::TypedSubstitution& ts)
 {
 	return oc_to_string(ts, "");
 }
 
-std::string oc_to_string(const Unify::TypedSubstitutions& tss)
+std::string oc_to_string(const Unify::TypedSubstitutions& tss, const std::string& indent)
 {
 	std::stringstream ss;
-	ss << "size = " << tss.size() << std::endl;
+	ss << indent << "size = " << tss.size() << std::endl;
 	int i = 0;
 	for (const auto& ts : tss) {
-		ss << "typed substitution[" << i << "]:" << std::endl
-		   << oc_to_string(ts);
+		ss << indent << "typed substitution[" << i << "]:" << std::endl
+		   << oc_to_string(ts, indent + OC_TO_STRING_INDENT);
 		i++;
 	}
 	return ss.str();
 }
-std::string oc_to_string(const Unify::TypedSubstitutions& tss, const std::string& indent)
+std::string oc_to_string(const Unify::TypedSubstitutions& tss)
 {
 	return oc_to_string(tss, "");
 }
