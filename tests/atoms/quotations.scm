@@ -51,3 +51,81 @@
       (VariableNode "$vardecl"))
     (UnquoteLink
       (VariableNode "$body")))))
+
+(define quoted-clauses
+(LocalQuoteLink
+  (AndLink
+    (QuoteLink
+      (LambdaLink
+        (UnquoteLink
+          (TypedVariableLink
+            (VariableNode "$X")
+            (TypeNode "ConceptNode")
+          )
+        )
+        (UnquoteLink
+          (EvaluationLink
+            (PredicateNode "contain")
+            (ListLink
+              (ConceptNode "treatment-1")
+              (ConceptNode "compound-A")
+            )
+          )
+        )
+      )
+    )
+    (QuoteLink
+      (LambdaLink
+        (UnquoteLink
+          (TypedVariableLink
+            (VariableNode "$X")
+            (TypeNode "ConceptNode")
+          )
+        )
+        (UnquoteLink
+          (EvaluationLink
+            (PredicateNode "take")
+            (ListLink
+              (VariableNode "$X")
+              (ConceptNode "treatment-1")
+            )
+          )
+        )
+      )
+    )
+  )
+)
+)
+
+(define consumed-quoted-clauses
+(LocalQuoteLink
+  (AndLink
+    (LambdaLink
+      (TypedVariableLink
+        (VariableNode "$X")
+        (TypeNode "ConceptNode")
+      )
+      (EvaluationLink
+        (PredicateNode "contain")
+        (ListLink
+          (ConceptNode "treatment-1")
+          (ConceptNode "compound-A")
+        )
+      )
+    )
+    (LambdaLink
+      (TypedVariableLink
+        (VariableNode "$X")
+        (TypeNode "ConceptNode")
+      )
+      (EvaluationLink
+        (PredicateNode "take")
+        (ListLink
+          (VariableNode "$X")
+          (ConceptNode "treatment-1")
+        )
+      )
+    )
+  )
+)
+)

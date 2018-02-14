@@ -74,8 +74,9 @@ public:
 	void test_unordered();
 	void test_beta_reduce_1();
 	void test_beta_reduce_2();
-	void test_remove_ill_quotations_1();
-	void test_remove_ill_quotations_2();
+	void test_consume_quotations_1();
+	void test_consume_quotations_2();
+	void test_consume_quotations_3();
 };
 
 #define NA _asa.add_node
@@ -238,7 +239,7 @@ void RewriteLinkUTest::test_beta_reduce_2()
 	logger().info("END TEST: %s", __FUNCTION__);
 }
 
-void RewriteLinkUTest::test_remove_ill_quotations_1()
+void RewriteLinkUTest::test_consume_quotations_1()
 {
 	logger().info("BEGIN TEST: %s", __FUNCTION__);
 
@@ -267,7 +268,7 @@ void RewriteLinkUTest::test_remove_ill_quotations_1()
 	TS_ASSERT(content_eq(result, expected));
 }
 
-void RewriteLinkUTest::test_remove_ill_quotations_2()
+void RewriteLinkUTest::test_consume_quotations_2()
 {
 	logger().info("BEGIN TEST: %s", __FUNCTION__);
 
@@ -283,6 +284,29 @@ void RewriteLinkUTest::test_remove_ill_quotations_2()
 	// gpn is evaluatable
 	Handle result = RewriteLink::consume_quotations(vardecl, ill_quoted, false),
 		expected = _eval.eval_h("well-quoted");
+
+	std::cout << "result = " << oc_to_string(result);
+	std::cout << "expected = " << oc_to_string(expected);
+
+	TS_ASSERT(content_eq(result, expected));
+}
+
+void RewriteLinkUTest::test_consume_quotations_3()
+{
+	logger().info("BEGIN TEST: %s", __FUNCTION__);
+
+	std::string rs = _eval.eval("(load-from-path \"tests/atoms/quotations.scm\")");
+	logger().debug() << "rs = " << rs;
+
+	// Test simple RewriteLink
+	Handle vardecl = al(VARIABLE_LIST),
+		quoted_clauses = _eval.eval_h("quoted-clauses");
+
+	// Remove the UnquoteLink wrapping gpn as it is useless, and even
+	// harmful to the pattern matcher as it makes it believe that the
+	// gpn is evaluatable
+	Handle result = RewriteLink::consume_quotations(vardecl, quoted_clauses, true),
+		expected = _eval.eval_h("consumed-quoted-clauses");
 
 	std::cout << "result = " << oc_to_string(result);
 	std::cout << "expected = " << oc_to_string(expected);
