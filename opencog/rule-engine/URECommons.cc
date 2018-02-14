@@ -21,11 +21,9 @@
  * 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
  */
 
-#include <opencog/util/macros.h>
 #include <opencog/atoms/base/Link.h>
 
 #include "URECommons.h"
-#include "ChainerUtils.h"
 
 using namespace opencog;
 
@@ -36,5 +34,5 @@ double URECommons::tv_fitness(const Handle& h) const
 	TruthValuePtr ptv(h->getTruthValue());
 	confidence_t c = ptv->get_confidence();
 	strength_t s = ptv->get_mean();
-	return (pow((1 - s), FITNESS_PARAM) * (pow(c, (2 - FITNESS_PARAM))));
+	return (pow(s, FITNESS_PARAM) * (pow(c, (2 - FITNESS_PARAM))));
 }
