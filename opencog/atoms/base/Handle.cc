@@ -126,225 +126,237 @@ bool content_eq(const HandleSet& lhs, const HandleSet& rhs)
 }
 
 // The rest of this file is devoted to printing utilities used only
-// during GDB debugging.  Thus, you won't find these anywhere in the
-// code base. You may call that directly from gdb
-// (opencog::h_to_string, etc), but very likely your version of GDB
-// supports overloading and in this case you can simply configure GDB
-// as follows
+// during GDB debugging. You can configure GDB as follows
 // http://wiki.opencog.org/w/Development_standards#Print_OpenCog_Objects
-std::string h_to_string(const Handle& h)
+
+std::string oc_to_string(const Handle& h, const std::string& indent)
 {
 	if (h == nullptr)
-		return "nullatom\n";
+		return indent + "nullatom\n";
 	else
-		return h->to_string();
+		return h->to_string(indent);
 }
-std::string hp_to_string(const HandlePair& hp)
+std::string oc_to_string(const Handle& h)
+{
+	return oc_to_string(h, "");
+}
+std::string oc_to_string(const HandlePair& hp, const std::string& indent)
 {
 	std::stringstream ss;
-	ss << "first:" << std::endl << h_to_string(hp.first);
-	ss << "second:" << std::endl << h_to_string(hp.second);
+	ss << indent << "first:" << std::endl
+	   << oc_to_string(hp.first, indent + OC_TO_STRING_INDENT);
+	ss << indent << "second:" << std::endl
+	   << oc_to_string(hp.second, indent + OC_TO_STRING_INDENT);
 	return ss.str();
 }
-std::string hs_to_string(const HandleSeq& hs)
+std::string oc_to_string(const HandlePair& hp)
 {
-	std::stringstream ss; std::operator<<(ss, hs); return ss.str();
+	return oc_to_string(hp, "");
 }
-std::string hss_to_string(const HandleSeqSeq& hss)
+// Hack around the lack template use in Handle.h due to circular dependencies
+#define GEN_ATOM_CONTAINER_OC_TO_STRING(T) \
+std::string oc_to_string(const T& hs, const std::string& indent) { \
+	std::stringstream ss; \
+	ss << indent << "size = " << hs.size() << std::endl; \
+	size_t i = 0; \
+	for (const opencog::Handle& h : hs) { \
+		ss << indent << "atom[" << i << "]:" << std::endl \
+		   << oc_to_string(h, indent + OC_TO_STRING_INDENT); \
+		i++; \
+	} \
+	return ss.str(); \
+}
+GEN_ATOM_CONTAINER_OC_TO_STRING(opencog::HandleSeq)
+std::string oc_to_string(const HandleSeq& hs)
+{
+	return oc_to_string(hs, "");
+}
+std::string oc_to_string(const HandleSeqSeq& hss, const std::string& indent)
 {
 	std::stringstream ss;
-	ss << "size = " << hss.size() << std::endl;
+	ss << indent << "size = " << hss.size() << std::endl;
 	size_t i = 0;
 	for (const HandleSeq& hs : hss) {
-		ss << "atoms[" << i << "]:" << std::endl << hs_to_string(hs);
+		ss << indent << "atoms[" << i << "]:" << std::endl
+		   << oc_to_string(hs, indent + OC_TO_STRING_INDENT);
 		i++;
 	}
 	return ss.str();
 }
-std::string ohs_to_string(const HandleSet& ohs)
+std::string oc_to_string(const HandleSeqSeq& hss)
 {
-	std::stringstream ss; std::operator<<(ss, ohs); return ss.str();
+	return oc_to_string(hss, "");
 }
-std::string uhs_to_string(const UnorderedHandleSet& uhs)
+GEN_ATOM_CONTAINER_OC_TO_STRING(opencog::HandleSet)
+std::string oc_to_string(const HandleSet& ohs)
 {
-	std::stringstream ss; std::operator<<(ss, uhs); return ss.str();
+	return oc_to_string(ohs, "");
 }
-std::string hmap_to_string(const HandleMap& hmap)
+GEN_ATOM_CONTAINER_OC_TO_STRING(opencog::UnorderedHandleSet)
+std::string oc_to_string(const UnorderedHandleSet& uhs)
+{
+	return oc_to_string(uhs, "");
+}
+std::string oc_to_string(const HandleMap& hmap, const std::string& indent)
 {
 	std::stringstream ss;
-	ss << "size = " << hmap.size() << std::endl;
+	ss << indent << "size = " << hmap.size() << std::endl;
 	int i = 0;
 	for (const auto& p : hmap) {
-		ss << "key[" << i << "]:" << std::endl << h_to_string(p.first)
-		   << "value[" << i << "]:" << std::endl << h_to_string(p.second);
+		ss << indent << "key[" << i << "]:" << std::endl
+		   << oc_to_string(p.first, indent + OC_TO_STRING_INDENT)
+		   << indent << "value[" << i << "]:" << std::endl
+		   << oc_to_string(p.second, indent + OC_TO_STRING_INDENT);
 		i++;
 	}
 	return ss.str();
 }
-std::string hmultimap_to_string(const HandleMultimap& hmultimap)
+std::string oc_to_string(const HandleMap& hmap)
+{
+	return oc_to_string(hmap, "");
+}
+std::string oc_to_string(const HandleMultimap& hmultimap, const std::string& indent)
 {
 	std::stringstream ss;
-	ss << "size = " << hmultimap.size() << std::endl;
+	ss << indent << "size = " << hmultimap.size() << std::endl;
 	int i = 0;
 	for (const auto& p : hmultimap) {
-		ss << "key[" << i << "]:" << std::endl << h_to_string(p.first)
-		   << "value[" << i << "]:" << std::endl;
+		ss << indent << "key[" << i << "]:" << std::endl
+		   << oc_to_string(p.first, indent + OC_TO_STRING_INDENT)
+		   << indent << "value[" << i << "]:" << std::endl;
 		for (const auto s : p.second)
-			ss << h_to_string(s);
+			ss << oc_to_string(s, indent + OC_TO_STRING_INDENT);
 		i++;
 	}
 	return ss.str();
 }
-std::string hmaps_to_string(const HandleMapSeq& hms)
+std::string oc_to_string(const HandleMultimap& hmultimap)
+{
+	return oc_to_string(hmultimap, "");
+}
+std::string oc_to_string(const HandleMapSeq& hms, const std::string& indent)
 {
 	std::stringstream ss;
-	ss << "size = " << hms.size() << std::endl;
+	ss << indent << "size = " << hms.size() << std::endl;
 	for (unsigned i = 0; i < hms.size(); i++)
-		ss << "--- map[" << i << "] ---" << std::endl
-		   << hmap_to_string(hms[i]);
+		ss << indent << "--- map[" << i << "] ---" << std::endl
+		   << oc_to_string(hms[i], indent + OC_TO_STRING_INDENT);
 	return ss.str();
 }
-std::string hmapset_to_string(const HandleMapSet& hms)
+std::string oc_to_string(const HandleMapSeq& hms)
+{
+	return oc_to_string(hms, "");
+}
+std::string oc_to_string(const HandleMapSet& hms, const std::string& indent)
 {
 	std::stringstream ss;
-	ss << "size = " << hms.size() << std::endl;
+	ss << indent << "size = " << hms.size() << std::endl;
 	unsigned i = 0;
 	for (const HandleMap& hm : hms) {
-		ss << "--- map[" << i << "] ---" << std::endl
-		   << hmap_to_string(hm);
+		ss << indent << "--- map[" << i << "] ---" << std::endl
+		   << oc_to_string(hm, indent + OC_TO_STRING_INDENT);
 		++i;
 	}
 	return ss.str();
 }
-std::string hps_to_string(const HandlePairSeq& hps)
-{
-	std::stringstream ss;
-	ss << "size = " << hps.size() << std::endl;
-	size_t i = 0;
-	for (const HandlePair& hp : hps) {
-		ss << "atom.first[" << i << "]:" << std::endl << h_to_string(hp.first);
-		ss << "atom.second[" << i << "]:" << std::endl << h_to_string(hp.second);
-		i++;
-	}
-	return ss.str();
-}
-std::string hc_to_string(const HandleCounter& hc)
-{
-	std::stringstream ss;
-	ss << "size = " << hc.size() << std::endl;
-	size_t i = 0;
-	for (const auto el : hc) {
-		ss << "atom[" << i << "]:" << std::endl << oc_to_string(el.first)
-		   << "num[" << i << "]:" << el.second << std::endl;
-		i++;
-	}
-	return ss.str();
-}
-std::string huc_to_string(const HandleUCounter& huc)
-{
-	std::stringstream ss;
-	ss << "size = " << huc.size() << std::endl;
-	size_t i = 0;
-	for (const auto& el : huc) {
-		ss << "atom[" << i << "]:" << std::endl << oc_to_string(el.first)
-		   << "num[" << i << "]:" << el.second << std::endl;
-		i++;
-	}
-	return ss.str();
-}
-std::string atomtype_to_string(Type type)
-{
-	std::stringstream ss;
-	ss << classserver().getTypeName(type) << std::endl;
-	return ss.str();
-}
-std::string aptr_to_string(const AtomPtr& aptr)
-{
-	return h_to_string(aptr->get_handle());
-}
-std::string lptr_to_string(const LinkPtr& lptr)
-{
-	return h_to_string(lptr->get_handle());
-}
-
-std::string oc_to_string(const Handle& h)
-{
-	return h_to_string(h);
-}
-std::string oc_to_string(const HandlePair& hp)
-{
-	return hp_to_string(hp);
-}
-std::string oc_to_string(const HandleSeq& hs)
-{
-	return hs_to_string(hs);
-}
-std::string oc_to_string(const HandleSeqSeq& hss)
-{
-	return hss_to_string(hss);
-}
-std::string oc_to_string(const HandleSet& ohs)
-{
-	return ohs_to_string(ohs);
-}
-std::string oc_to_string(const UnorderedHandleSet& uhs)
-{
-	return uhs_to_string(uhs);
-}
-std::string oc_to_string(const HandleMap& hm)
-{
-	return hmap_to_string(hm);
-}
-std::string oc_to_string(const HandleMultimap& hmm)
-{
-	return hmultimap_to_string(hmm);
-}
-std::string oc_to_string(const HandleMapSeq& hms)
-{
-	return hmaps_to_string(hms);
-}
 std::string oc_to_string(const HandleMapSet& hms)
 {
-	return hmapset_to_string(hms);
+	return oc_to_string(hms, "");
+}
+std::string oc_to_string(const HandlePairSeq& hps, const std::string& indent)
+{
+	std::stringstream ss;
+	ss << indent << "size = " << hps.size() << std::endl;
+	size_t i = 0;
+	for (const HandlePair& hp : hps) {
+		ss << indent << "atom.first[" << i << "]:" << std::endl
+		   << oc_to_string(hp.first, indent + OC_TO_STRING_INDENT);
+		ss << indent << "atom.second[" << i << "]:" << std::endl
+		   << oc_to_string(hp.second, indent + OC_TO_STRING_INDENT);
+		i++;
+	}
+	return ss.str();
 }
 std::string oc_to_string(const HandlePairSeq& hps)
 {
-	return hps_to_string(hps);
+	return oc_to_string(hps, "");
+}
+std::string oc_to_string(const HandleCounter& hc, const std::string& indent)
+{
+	std::stringstream ss;
+	ss << indent << "size = " << hc.size() << std::endl;
+	size_t i = 0;
+	for (const auto el : hc) {
+		ss << indent << "atom[" << i << "]:" << std::endl
+		   << oc_to_string(el.first, indent + OC_TO_STRING_INDENT)
+		   << indent << "num[" << i << "]:" << el.second << std::endl;
+		i++;
+	}
+	return ss.str();
 }
 std::string oc_to_string(const HandleCounter& hc)
 {
-	return hc_to_string(hc);
+	return oc_to_string(hc, "");
+}
+std::string oc_to_string(const HandleUCounter& huc, const std::string& indent)
+{
+	std::stringstream ss;
+	ss << indent << "size = " << huc.size() << std::endl;
+	size_t i = 0;
+	for (const auto& el : huc) {
+		ss << indent << "atom[" << i << "]:" << std::endl
+		   << oc_to_string(el.first, indent + OC_TO_STRING_INDENT)
+		   << indent << "num[" << i << "]:" << el.second << std::endl;
+		i++;
+	}
+	return ss.str();
 }
 std::string oc_to_string(const HandleUCounter& huc)
 {
-	return huc_to_string(huc);
+	return oc_to_string(huc, "");
+}
+std::string oc_to_string(Type type, const std::string& indent)
+{
+	std::stringstream ss;
+	ss << indent << classserver().getTypeName(type) << std::endl;
+	return ss.str();
 }
 std::string oc_to_string(Type type)
 {
-	return atomtype_to_string(type);
+	return oc_to_string(type, "");
+}
+std::string oc_to_string(const AtomPtr& aptr, const std::string& indent)
+{
+	return oc_to_string(aptr->get_handle(), indent);
 }
 std::string oc_to_string(const AtomPtr& aptr)
 {
-	return aptr_to_string(aptr);
+	return oc_to_string(aptr, "");
+}
+std::string oc_to_string(const LinkPtr& lptr, const std::string& indent)
+{
+	return oc_to_string(lptr->get_handle(), indent);
+}
+std::string oc_to_string(const LinkPtr& lptr)
+{
+	return oc_to_string(lptr, "");
 }
 
 } // ~namespace opencog
 
 namespace std {
 
-// Hack around the lack template use in Handle.h due to circular dependencies
-#define GEN_HANDLE_CONTAINER_OSTREAM_OPERATOR(T) \
-ostream& operator<<(ostream& out, const T& hs) { \
-	out << "size = " << hs.size() << endl; \
-	size_t i = 0; \
-	for (const opencog::Handle& h : hs) { \
-		out << "atom[" << i << "]:" << endl << h_to_string(h); \
-		i++; \
-	} \
-	return out; \
+ostream& operator<<(ostream& out, const opencog::HandleSeq& hs)
+{
+	return out << oc_to_string(hs);
 }
-GEN_HANDLE_CONTAINER_OSTREAM_OPERATOR(opencog::HandleSeq)
-GEN_HANDLE_CONTAINER_OSTREAM_OPERATOR(opencog::HandleSet)
-GEN_HANDLE_CONTAINER_OSTREAM_OPERATOR(opencog::UnorderedHandleSet)
+ostream& operator<<(ostream& out, const opencog::HandleSet& ohs)
+{
+	return out << oc_to_string(ohs);
+}
+ostream& operator<<(ostream& out, const opencog::UnorderedHandleSet& uhs)
+{
+	return out << oc_to_string(uhs);
+}
 
 } // ~namespace std

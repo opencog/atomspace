@@ -266,40 +266,41 @@ static inline std::string operator+ (const std::string &lhs, Handle h)
     return lhs + buff;
 }
 
-// Debugging helpers, very convenient to print Handle sets in gdb
-std::string h_to_string(const Handle& h);
-std::string hp_to_string(const HandlePair& hp);
-std::string hs_to_string(const HandleSeq& hs);
-std::string hss_to_string(const HandleSeqSeq& hss);
-std::string ohs_to_string(const HandleSet& ohs);
-std::string uhs_to_string(const UnorderedHandleSet& uhs);
-std::string hmap_to_string(const HandleMap& hm);
-std::string hmultimap_to_string(const HandleMultimap& hmm);
-std::string hmaps_to_string(const HandleMapSeq& hms);
-std::string hmapset_to_string(const HandleMapSet& hms);
-std::string hps_to_string(const HandlePairSeq& hps);
-std::string atomtype_to_string(Type type);
-std::string aptr_to_string(const AtomPtr& aptr);
-class Link;
-typedef std::shared_ptr<Link> LinkPtr;
-std::string lptr_to_string(const LinkPtr& lptr);
-
-// In case your gdb supports overloading, see
+// Debugging helpers see
 // http://wiki.opencog.org/w/Development_standards#Print_OpenCog_Objects
+// The reason indent is not an optional argument with default is
+// because gdb doesn't support that, see
+// http://stackoverflow.com/questions/16734783 for more explanation.
+#define OC_TO_STRING_INDENT "  "
+std::string oc_to_string(const Handle& h, const std::string& indent);
 std::string oc_to_string(const Handle& h);
+std::string oc_to_string(const HandlePair& hp, const std::string& indent);
 std::string oc_to_string(const HandlePair& hp);
+std::string oc_to_string(const HandleSeq& hs, const std::string& indent);
 std::string oc_to_string(const HandleSeq& hs);
+std::string oc_to_string(const HandleSeqSeq& hss, const std::string& indent);
 std::string oc_to_string(const HandleSeqSeq& hss);
+std::string oc_to_string(const HandleSet& ohs, const std::string& indent);
 std::string oc_to_string(const HandleSet& ohs);
+std::string oc_to_string(const UnorderedHandleSet& uhs, const std::string& indent);
 std::string oc_to_string(const UnorderedHandleSet& uhs);
+std::string oc_to_string(const HandleMap& hm, const std::string& indent);
 std::string oc_to_string(const HandleMap& hm);
+std::string oc_to_string(const HandleMultimap& hmm, const std::string& indent);
 std::string oc_to_string(const HandleMultimap& hmm);
+std::string oc_to_string(const HandleMapSeq& hms, const std::string& indent);
 std::string oc_to_string(const HandleMapSeq& hms);
+std::string oc_to_string(const HandleMapSet& hms, const std::string& indent);
 std::string oc_to_string(const HandleMapSet& hms);
+std::string oc_to_string(const HandlePairSeq& hps, const std::string& indent);
 std::string oc_to_string(const HandlePairSeq& hps);
+std::string oc_to_string(const HandleCounter& hc, const std::string& indent);
 std::string oc_to_string(const HandleCounter& hc);
+std::string oc_to_string(const HandleUCounter& huc, const std::string& indent);
 std::string oc_to_string(const HandleUCounter& huc);
+std::string oc_to_string(Type type, const std::string& indent);
 std::string oc_to_string(Type type);
+std::string oc_to_string(const AtomPtr& aptr, const std::string& indent);
 std::string oc_to_string(const AtomPtr& aptr);
 
 } // namespace opencog

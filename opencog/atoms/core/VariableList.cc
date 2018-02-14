@@ -422,12 +422,17 @@ void VariableList::build_index(void)
 	}
 }
 
-std::string opencog::oc_to_string(const VariableListPtr& vlp)
+std::string opencog::oc_to_string(const VariableListPtr& vlp,
+                                  const std::string& indent)
 {
 	if (vlp == nullptr)
-		return "nullvariablelist\n";
+		return indent + "nullvariablelist\n";
 	else
-		return oc_to_string(vlp->get_handle());
+		return oc_to_string(vlp->get_handle(), indent);
+}
+std::string opencog::oc_to_string(const VariableListPtr& vlp)
+{
+	return oc_to_string(vlp, "");
 }
 
 DEFINE_LINK_FACTORY(VariableList, VARIABLE_LIST)

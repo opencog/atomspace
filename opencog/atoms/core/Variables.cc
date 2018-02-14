@@ -776,22 +776,23 @@ Handle Variables::get_vardecl() const
 	return Handle(createVariableList(vars));
 }
 
-std::string Variables::to_string() const
+std::string Variables::to_string(const std::string& indent) const
 {
 	std::stringstream ss;
 
 	// Varseq
-	ss << "varseq:" << std::endl << oc_to_string(varseq);
+	ss << indent << "varseq:" << std::endl
+	   << oc_to_string(varseq, indent + OC_TO_STRING_INDENT);
 
 	// Simple typemap
-	ss << "_simple_typemap:" << std::endl;
-	ss << "size = " << _simple_typemap.size() << std::endl;
+	ss << indent << "_simple_typemap:" << std::endl;
+	ss << indent << "size = " << _simple_typemap.size() << std::endl;
 	unsigned i = 0;
 	for (const auto& v : _simple_typemap)
 	{
-		ss << "variable[" << i << "]:" << std::endl
-			<< h_to_string(v.first)
-		   << "types[" << i << "]:";
+		ss << indent << "variable[" << i << "]:" << std::endl
+		   << oc_to_string(v.first, indent + OC_TO_STRING_INDENT)
+		   << indent << "types[" << i << "]:";
 		for (auto& t : v.second)
 			ss << " " << classserver().getTypeName(t);
 		ss << std::endl;
@@ -800,9 +801,13 @@ std::string Variables::to_string() const
 	return ss.str();
 }
 
+std::string oc_to_string(const Variables& var, const std::string& indent)
+{
+	return var.to_string(indent);
+}
 std::string oc_to_string(const Variables& var)
 {
-	return var.to_string();
+	return oc_to_string(var, "");
 }
 
 } // ~namespace opencog
