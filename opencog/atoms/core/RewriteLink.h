@@ -232,31 +232,31 @@ public:
 	 *   (TypedVariable (Variable "$X") (Type "ConceptNode"))
 	 *   (And (Concept "A") (Variable "$X")))
 	 */
-	Handle consume_ill_quotations() const;
-	static Handle consume_ill_quotations(const Handle& vardecl, const Handle& h,
-	                                     /* Remember if some atom
-	                                      * is the clause root of a
-	                                      * pattern */
-	                                     bool clause_root);
-	static Handle consume_ill_quotations(const Variables& variables, const Handle& h,
-	                                     bool clause_root);
-	static Handle consume_ill_quotations(const Variables& variables, const Handle& h,
-	                                     Quotation quotation,
-	                                     bool clause_root);
-	static Handle consume_ill_quotations(const Variables& variables, const Handle& h,
-	                                     // TODO: we probably want to
-	                                     // move quotation,
-	                                     // needless_quotation,
-	                                     // clause_root and more in
-	                                     // its own class
-	                                     Quotation quotation,
-	                                     bool& needless_quotation,
-	                                     bool clause_root);
-	static HandleSeq consume_ill_quotations(const Variables& variables,
-	                                        const HandleSeq& hs,
-	                                        Quotation quotation,
-	                                        bool& needless_quotation,
-	                                        bool clause_root);
+	Handle consume_quotations() const;
+	static Handle consume_quotations(const Handle& vardecl, const Handle& h,
+	                                 /* Remember if some atom
+	                                  * is the clause root of a
+	                                  * pattern */
+	                                 bool clause_root);
+	static Handle consume_quotations(const Variables& variables, const Handle& h,
+	                                 bool clause_root);
+	static Handle consume_quotations(const Variables& variables, const Handle& h,
+	                                 Quotation quotation,
+	                                 bool clause_root);
+	static Handle consume_quotations(const Variables& variables, const Handle& h,
+	                                 // TODO: we probably want to
+	                                 // move quotation,
+	                                 // needless_quotation,
+	                                 // clause_root and more in
+	                                 // its own class
+	                                 Quotation quotation,
+	                                 bool& needless_quotation,
+	                                 bool clause_root);
+	static HandleSeq consume_quotations(const Variables& variables,
+	                                    const HandleSeq& hs,
+	                                    Quotation quotation,
+	                                    bool& needless_quotation,
+	                                    bool clause_root);
 
 	static Handle factory(const Handle&);
 };

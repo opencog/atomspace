@@ -255,7 +255,7 @@ void RewriteLinkUTest::test_remove_ill_quotations_1()
 	// harmful to the pattern matcher as it makes it believe that the
 	// gpn is evaluatable
 	RewriteLinkPtr sc(RewriteLinkCast(gl));
-	Handle result = sc->consume_ill_quotations(),
+	Handle result = sc->consume_quotations(),
 		expected = createLink(GET_LINK, X,
 		                      createLink(QUOTE_LINK,
 		                                 createLink(EVALUATION_LINK, gpn,
@@ -281,7 +281,7 @@ void RewriteLinkUTest::test_remove_ill_quotations_2()
 	// Remove the UnquoteLink wrapping gpn as it is useless, and even
 	// harmful to the pattern matcher as it makes it believe that the
 	// gpn is evaluatable
-	Handle result = RewriteLink::consume_ill_quotations(vardecl, ill_quoted, false),
+	Handle result = RewriteLink::consume_quotations(vardecl, ill_quoted, false),
 		expected = _eval.eval_h("well-quoted");
 
 	std::cout << "result = " << oc_to_string(result);

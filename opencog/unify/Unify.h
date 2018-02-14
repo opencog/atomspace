@@ -231,25 +231,10 @@ public:
 	/**
 	 * If the quotations are useless or harmful, which might be the
 	 * case if they deprive a ScopeLink from hiding supposedly hidden
-	 * variables, consume them.
-	 *
-	 * Specifically this code makes 2 assumptions
-	 *
-	 * 1. LocalQuotes in front root level And, Or or Not links on the
-	 *    pattern body are not consumed because they are supposedly
-	 *    used to avoid interpreting them as pattern matcher
-	 *    connectors.
-	 *
-	 * 2. Quote/Unquote are used to wrap scope links so that their
-	 *    variable declaration can pattern match grounded or partially
-	 *    grounded scope links.
-	 *
-	 * No other use of quotation is assumed besides the 2 above.
-	 *
-	 * TODO: apparently not used. And if it is used it should be moved
-	 * to RewriteLink.
+	 * variables, consume them. See RewriteLink::consume_quotations
+	 * comment for more details.
 	 */
-	static BindLinkPtr consume_ill_quotations(BindLinkPtr bl);
+	static BindLinkPtr consume_quotations(BindLinkPtr bl);
 
 	/**
 	 * Return true iff the handle or type correspond to a pattern

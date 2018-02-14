@@ -211,7 +211,7 @@ Handle RewriteLink::substitute_body(const Handle& nvardecl,
                                     const HandleMap& vm) const
 {
 	Handle nbody = get_variables().substitute(body, vm, _silent);
-	nbody = consume_ill_quotations(nvardecl, nbody, true);
+	nbody = consume_quotations(nvardecl, nbody, true);
 	return nbody;
 }
 
@@ -275,7 +275,7 @@ Handle RewriteLink::substitute_vardecl(const Handle& vardecl,
 	return createLink(oset, t);
 }
 
-Handle RewriteLink::consume_ill_quotations() const
+Handle RewriteLink::consume_quotations() const
 {
 	Handle vardecl = get_vardecl();
 	const Variables& variables = get_variables();
@@ -283,7 +283,7 @@ Handle RewriteLink::consume_ill_quotations() const
 	for (size_t i = (get_vardecl() ? 1 : 0); i < get_arity(); ++i)
 	{
 		bool clause_root = (i == (get_vardecl() ? 1 : 0));
-		Handle nbody = consume_ill_quotations(variables, getOutgoingAtom(i), clause_root);
+		Handle nbody = consume_quotations(variables, getOutgoingAtom(i), clause_root);
 		nouts.push_back(nbody);
 		// If the new body has terms with free variables but no
 		// vardecl it means that some quotations are missing. Rather
@@ -299,34 +299,34 @@ Handle RewriteLink::consume_ill_quotations() const
 	return createLink(nouts, get_type());
 }
 
-Handle RewriteLink::consume_ill_quotations(const Handle& vardecl,
-                                           const Handle& h,
-                                           bool clause_root)
+Handle RewriteLink::consume_quotations(const Handle& vardecl,
+                                       const Handle& h,
+                                       bool clause_root)
 {
-	return consume_ill_quotations(gen_variables(h, vardecl), h, clause_root);
+	return consume_quotations(gen_variables(h, vardecl), h, clause_root);
 }
 
-Handle RewriteLink::consume_ill_quotations(const Variables& variables,
-                                           const Handle& h,
-                                           bool clause_root)
+Handle RewriteLink::consume_quotations(const Variables& variables,
+                                       const Handle& h,
+                                       bool clause_root)
 {
-	return consume_ill_quotations(variables, h, Quotation(), clause_root);
+	return consume_quotations(variables, h, Quotation(), clause_root);
 }
 
-Handle RewriteLink::consume_ill_quotations(const Variables& variables,
-                                           const Handle& h,
-                                           Quotation quotation,
-                                           bool clause_root)
+Handle RewriteLink::consume_quotations(const Variables& variables,
+                                       const Handle& h,
+                                       Quotation quotation,
+                                       bool clause_root)
 {
 	bool needless_quotation = true;
-	return consume_ill_quotations(variables, h, quotation, needless_quotation, clause_root);
+	return consume_quotations(variables, h, quotation, needless_quotation, clause_root);
 }
 
-Handle RewriteLink::consume_ill_quotations(const Variables& variables,
-                                           const Handle& h,
-                                           Quotation quotation,
-                                           bool& needless_quotation,
-                                           bool clause_root)
+Handle RewriteLink::consume_quotations(const Variables& variables,
+                                       const Handle& h,
+                                       Quotation quotation,
+                                       bool& needless_quotation,
+                                       bool clause_root)
 {
 	Type t = h->get_type();
 
@@ -357,9 +357,9 @@ Handle RewriteLink::consume_ill_quotations(const Variables& variables,
 		    not contains_atomtype(uqh, QUOTE_LINK) and
 		    not contains_atomtype(uqh, LOCAL_QUOTE_LINK))
 		{
-			return consume_ill_quotations(variables, uqh,
-			                              quotation, needless_quotation,
-			                              clause_root);
+			return consume_quotations(variables, uqh,
+			                          quotation, needless_quotation,
+			                          clause_root);
 		}
 
 		// A succession of (Unquote (Quote ..)) is an involution and
@@ -369,9 +369,9 @@ Handle RewriteLink::consume_ill_quotations(const Variables& variables,
 		if (uqh->get_type() == QUOTE_LINK)
 		{
 			quotation.update(uqh->get_type());
-			return consume_ill_quotations(variables, uqh->getOutgoingAtom(0),
-			                              quotation, needless_quotation,
-			                              clause_root);
+			return consume_quotations(variables, uqh->getOutgoingAtom(0),
+			                          quotation, needless_quotation,
+			                          clause_root);
 		}
 	}
 
@@ -379,9 +379,9 @@ Handle RewriteLink::consume_ill_quotations(const Variables& variables,
 	if (needless_quotation and quotation_cp.consumable(t))
 	{
 		Handle qh = h->getOutgoingAtom(0);
-		Handle con_qh = consume_ill_quotations(variables, qh,
-		                                       quotation, needless_quotation,
-		                                       clause_root);
+		Handle con_qh = consume_quotations(variables, qh,
+		                                   quotation, needless_quotation,
+		                                   clause_root);
 
 		// Only consume if the quotation is really needless
 		// (calling consume_ill_quotations on qh might have
@@ -408,24 +408,24 @@ Handle RewriteLink::consume_ill_quotations(const Variables& variables,
 	clause_root = classserver().isA(t, SCOPE_LINK);
 
 	// Mere recursive call
-	HandleSeq chs = consume_ill_quotations(variables, h->getOutgoingSet(),
-	                                       quotation, needless_quotation,
-	                                       clause_root);
+	HandleSeq chs = consume_quotations(variables, h->getOutgoingSet(),
+	                                   quotation, needless_quotation,
+	                                   clause_root);
 	Handle ch = createLink(chs, t);
 	ch->copyValues(h);
 	return ch;
 }
 
-HandleSeq RewriteLink::consume_ill_quotations(const Variables& vars,
-                                              const HandleSeq& hs,
-                                              Quotation quotation,
-                                              bool& needless_qtn,
-                                              bool clause_root)
+HandleSeq RewriteLink::consume_quotations(const Variables& vars,
+                                          const HandleSeq& hs,
+                                          Quotation quotation,
+                                          bool& needless_qtn,
+                                          bool clause_root)
 {
 	HandleSeq con_hs(hs.size());
 	std::transform(hs.begin(), hs.end(), con_hs.begin(), [&](const Handle& h) {
-			return consume_ill_quotations(vars, h, quotation,
-			                              needless_qtn, clause_root); });
+			return consume_quotations(vars, h, quotation,
+			                          needless_qtn, clause_root); });
 	return con_hs;
 }
 
