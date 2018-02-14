@@ -141,33 +141,34 @@ struct Pattern
 	{
 		std::stringstream ss;
 		if (not clauses.empty())
-			ss << "clauses:" << std::endl << hs_to_string(clauses);
+			ss << "clauses:" << std::endl << oc_to_string(clauses);
 		if (not constants.empty())
-			ss << "constants:" << std::endl << hs_to_string(constants);
+			ss << "constants:" << std::endl << oc_to_string(constants);
 		if (not mandatory.empty())
-			ss << "mandatory:" << std::endl << hs_to_string(mandatory);
+			ss << "mandatory:" << std::endl << oc_to_string(mandatory);
 		if (not optionals.empty())
-			ss << "optionals:" << std::endl << ohs_to_string(optionals);
+			ss << "optionals:" << std::endl << oc_to_string(optionals);
 		if (not black.empty())
-			ss << "black:" << std::endl << ohs_to_string(black);
+			ss << "black:" << std::endl << oc_to_string(black);
 		if (not evaluatable_terms.empty())
 			ss << "evaluatable_terms:" << std::endl
-			   << ohs_to_string(evaluatable_terms);
+			   << oc_to_string(evaluatable_terms);
 		if (not evaluatable_holders.empty())
 			ss << "evaluatable_holders:" << std::endl
-			   << ohs_to_string(evaluatable_holders);
+			   << oc_to_string(evaluatable_holders);
 		if (not executable_terms.empty())
 			ss << "executable_terms:" << std::endl
-			   << ohs_to_string(executable_terms);
+			   << oc_to_string(executable_terms);
 		if (not executable_holders.empty())
 			ss << "executable_holders:" << std::endl
-			   << ohs_to_string(executable_holders);
+			   << oc_to_string(executable_holders);
 		return ss.str();
 	}
 };
 
 // For gdb, see
 // http://wiki.opencog.org/w/Development_standards#Print_OpenCog_Objects
+std::string oc_to_string(const Pattern&, const std::string& indent);
 std::string oc_to_string(const Pattern&);
 
 /** @}*/

@@ -303,11 +303,18 @@ private:
 	Rule substituted(const Unify::TypedSubstitution& ts) const;
 };
 
-// For Gdb debugging, see
+// Debugging helpers see
 // http://wiki.opencog.org/w/Development_standards#Print_OpenCog_Objects
+// The reason indent is not an optional argument with default is
+// because gdb doesn't support that, see
+// http://stackoverflow.com/questions/16734783 for more explanation.
+std::string oc_to_string(const Rule& rule, const std::string& indent);
 std::string oc_to_string(const Rule& rule);
+std::string oc_to_string(const RuleSet& rules, const std::string& indent);
 std::string oc_to_string(const RuleSet& rules);
+std::string oc_to_string(const RuleTypedSubstitutionPair& rule_ts_pair, const std::string& indent);
 std::string oc_to_string(const RuleTypedSubstitutionPair& rule_ts_pair);
+std::string oc_to_string(const RuleTypedSubstitutionMap& rule_ts_map, const std::string& indent);
 std::string oc_to_string(const RuleTypedSubstitutionMap& rule_ts_map);
 
 } // ~namespace opencog

@@ -437,7 +437,7 @@ std::string Atom::id_to_string() const
         std::string("[") + (_atom_space? std::to_string(_atom_space->_atom_table.get_uuid()) : std::string("-1")) + "]";
 }
 
-std::string oc_to_string(const IncomingSet& iset)
+std::string oc_to_string(const IncomingSet& iset, const std::string& indent)
 {
 	std::stringstream ss;
 	ss << "size = " << iset.size() << std::endl;

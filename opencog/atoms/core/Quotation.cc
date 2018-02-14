@@ -96,9 +96,13 @@ std::string Quotation::to_string() const
 	return ss.str();
 }
 
-std::string oc_to_string(const Quotation& quotation)
+std::string oc_to_string(const Quotation& quotation, const std::string& indent)
 {
 	return quotation.to_string();
+}
+std::string oc_to_string(const Quotation& quotation)
+{
+	return oc_to_string(quotation, "");
 }
 	
 } // namespace opencog

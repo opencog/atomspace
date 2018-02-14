@@ -732,14 +732,28 @@ VariableListPtr gen_varlist(const Unify::CHandle& ch);
 Variables merge_variables(const Variables& lv, const Variables& rv);
 Handle merge_vardecl(const Handle& l_vardecl, const Handle& r_vardecl);
 
+// Debugging helpers see
+// http://wiki.opencog.org/w/Development_standards#Print_OpenCog_Objects
+// The reason indent is not an optional argument with default is
+// because gdb doesn't support that, see
+// http://stackoverflow.com/questions/16734783 for more explanation.
+std::string oc_to_string(const Unify::CHandle& ch, const std::string& indent);
 std::string oc_to_string(const Unify::CHandle& ch);
+std::string oc_to_string(const Unify::Block& pb, const std::string& indent);
 std::string oc_to_string(const Unify::Block& pb);
+std::string oc_to_string(const Unify::Partition& hshm, const std::string& indent);
 std::string oc_to_string(const Unify::Partition& hshm);
+std::string oc_to_string(const Unify::TypedBlock& tb, const std::string& indent);
 std::string oc_to_string(const Unify::TypedBlock& tb);
+std::string oc_to_string(const Unify::TypedBlockSeq& tbs, const std::string& indent);
 std::string oc_to_string(const Unify::TypedBlockSeq& tbs);
+std::string oc_to_string(const Unify::Partitions& par, const std::string& indent);
 std::string oc_to_string(const Unify::Partitions& par);
+std::string oc_to_string(const Unify::HandleCHandleMap& hchm, const std::string& indent);
 std::string oc_to_string(const Unify::HandleCHandleMap& hchm);
+std::string oc_to_string(const Unify::TypedSubstitution& ts, const std::string& indent);
 std::string oc_to_string(const Unify::TypedSubstitution& ts);
+std::string oc_to_string(const Unify::TypedSubstitutions& tss, const std::string& indent);
 std::string oc_to_string(const Unify::TypedSubstitutions& tss);
 	
 } // namespace opencog

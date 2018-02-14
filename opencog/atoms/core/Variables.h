@@ -272,8 +272,12 @@ struct Variables : public FreeVariables,
 	std::string to_string() const;
 };
 
-// For gdb, see
+// Debugging helpers see
 // http://wiki.opencog.org/w/Development_standards#Print_OpenCog_Objects
+// The reason indent is not an optional argument with default is
+// because gdb doesn't support that, see
+// http://stackoverflow.com/questions/16734783 for more explanation.
+std::string oc_to_string(const Variables& var, const std::string& indent);
 std::string oc_to_string(const Variables& var);
 
 /** @}*/

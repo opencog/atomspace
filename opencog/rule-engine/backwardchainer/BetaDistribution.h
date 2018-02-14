@@ -98,6 +98,12 @@ BetaDistribution mk_beta_distribution(const TruthValuePtr& tv);
 TruthValuePtr mk_stv(double mean, double variance,
                      double prior_alpha=1.0, double prior_beta=1.0);
 
+// Debugging helpers see
+// http://wiki.opencog.org/w/Development_standards#Print_OpenCog_Objects
+// The reason indent is not an optional argument with default is
+// because gdb doesn't support that, see
+// http://stackoverflow.com/questions/16734783 for more explanation.
+std::string oc_to_string(const BetaDistribution& bd, const std::string& indent);
 std::string oc_to_string(const BetaDistribution& bd);
 
 } // namespace opencog

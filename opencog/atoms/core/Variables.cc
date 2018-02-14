@@ -790,7 +790,7 @@ std::string Variables::to_string() const
 	for (const auto& v : _simple_typemap)
 	{
 		ss << "variable[" << i << "]:" << std::endl
-			<< h_to_string(v.first)
+			<< oc_to_string(v.first)
 		   << "types[" << i << "]:";
 		for (auto& t : v.second)
 			ss << " " << classserver().getTypeName(t);
@@ -800,9 +800,13 @@ std::string Variables::to_string() const
 	return ss.str();
 }
 
-std::string oc_to_string(const Variables& var)
+std::string oc_to_string(const Variables& var, const std::string& indent)
 {
 	return var.to_string();
+}
+std::string oc_to_string(const Variables& var)
+{
+	return oc_to_string(var, "");
 }
 
 } // ~namespace opencog

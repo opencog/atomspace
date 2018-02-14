@@ -126,9 +126,13 @@ TruthValuePtr mk_stv(double mean, double variance,
 	return SimpleTruthValue::createTV(mode, confidence);
 }
 
-std::string oc_to_string(const BetaDistribution& bd)
+std::string oc_to_string(const BetaDistribution& bd, const std::string& indent)
 {
 	return bd.to_string();
+}
+std::string oc_to_string(const BetaDistribution& bd)
+{
+	return oc_to_string(bd, "");
 }
 
 } // ~namespace opencog
