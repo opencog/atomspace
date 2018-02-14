@@ -211,7 +211,7 @@ Handle RewriteLink::substitute_body(const Handle& nvardecl,
                                     const HandleMap& vm) const
 {
 	Handle nbody = get_variables().substitute(body, vm, _silent);
-	nbody = consume_ill_quotations(nvardecl, nbody);
+	nbody = consume_ill_quotations(nvardecl, nbody, true);
 	return nbody;
 }
 
@@ -282,7 +282,8 @@ Handle RewriteLink::consume_ill_quotations() const
 	HandleSeq nouts;
 	for (size_t i = (get_vardecl() ? 1 : 0); i < get_arity(); ++i)
 	{
-		Handle nbody = consume_ill_quotations(variables, getOutgoingAtom(i));
+		bool clause_root = (i == (get_vardecl() ? 1 : 0));
+		Handle nbody = consume_ill_quotations(variables, getOutgoingAtom(i), clause_root);
 		nouts.push_back(nbody);
 		// If the new body has terms with free variables but no
 		// vardecl it means that some quotations are missing. Rather
@@ -299,47 +300,88 @@ Handle RewriteLink::consume_ill_quotations() const
 }
 
 Handle RewriteLink::consume_ill_quotations(const Handle& vardecl,
-                                           const Handle& h)
+                                           const Handle& h,
+                                           bool clause_root)
 {
-	return consume_ill_quotations(gen_variables(h, vardecl), h);
-}
-
-Handle RewriteLink::consume_ill_quotations(const Variables& variables,
-                                           const Handle& h)
-{
-	return consume_ill_quotations(variables, h, Quotation());
+	return consume_ill_quotations(gen_variables(h, vardecl), h, clause_root);
 }
 
 Handle RewriteLink::consume_ill_quotations(const Variables& variables,
                                            const Handle& h,
-                                           Quotation quotation)
+                                           bool clause_root)
 {
-	bool needless_quotation = true;
-	return consume_ill_quotations(variables, h, quotation, needless_quotation);
+	return consume_ill_quotations(variables, h, Quotation(), clause_root);
 }
 
 Handle RewriteLink::consume_ill_quotations(const Variables& variables,
                                            const Handle& h,
                                            Quotation quotation,
-                                           bool& needless_quotation)
+                                           bool clause_root)
 {
+	bool needless_quotation = true;
+	return consume_ill_quotations(variables, h, quotation, needless_quotation, clause_root);
+}
+
+Handle RewriteLink::consume_ill_quotations(const Variables& variables,
+                                           const Handle& h,
+                                           Quotation quotation,
+                                           bool& needless_quotation,
+                                           bool clause_root)
+{
+	Type t = h->get_type();
+
 	// Base case
 	if (h->is_node())
+	{
+		// Make sure quotation is removed around GroundedPredicateNode
+		// as it otherwise changes the pattern matcher semantics as it
+		// will consider those as virtual.
+		if (t == GROUNDED_PREDICATE_NODE)
+			needless_quotation = false;
 		return h;
+	}
 
 	// Recursive cases
-	Type t = h->get_type();
 
 	// Remember current quotation before updating it
 	Quotation quotation_cp(quotation);
 	quotation.update(t);
 
-	// Quotation
+	if (quotation_cp.consumable(t) and t == UNQUOTE_LINK)
+	{
+		Handle uqh = h->getOutgoingAtom(0);
+		// A consumable Unquote over a closed term not containing any
+		// quotes is clearly useless, regardless of whether it has
+		// been determined needless.
+		if (is_closed(uqh) and
+		    not contains_atomtype(uqh, QUOTE_LINK) and
+		    not contains_atomtype(uqh, LOCAL_QUOTE_LINK))
+		{
+			return consume_ill_quotations(variables, uqh,
+			                              quotation, needless_quotation,
+			                              clause_root);
+		}
+
+		// A succession of (Unquote (Quote ..)) is an involution and
+		// thus can be remove.
+		//
+		// TODO: generalize with when Unquote and Quote are apart
+		if (uqh->get_type() == QUOTE_LINK)
+		{
+			quotation.update(uqh->get_type());
+			return consume_ill_quotations(variables, uqh->getOutgoingAtom(0),
+			                              quotation, needless_quotation,
+			                              clause_root);
+		}
+	}
+
+	// Possibly consume potentially needless quotation
 	if (needless_quotation and quotation_cp.consumable(t))
 	{
 		Handle qh = h->getOutgoingAtom(0);
 		Handle con_qh = consume_ill_quotations(variables, qh,
-		                                       quotation, needless_quotation);
+		                                       quotation, needless_quotation,
+		                                       clause_root);
 
 		// Only consume if the quotation is really needless
 		// (calling consume_ill_quotations on qh might have
@@ -356,14 +398,19 @@ Handle RewriteLink::consume_ill_quotations(const Variables& variables,
 	}
 
 	// Scope or special links that may require not to consume
-	// quotations
+	// quotations as they may otherwise change the semantics
 	if (t == PUT_LINK or
+	    (t == AND_LINK and clause_root) or
 	    is_scope_bound_to_ancestor(variables, h))
 		needless_quotation = false;
 
+	// Remember that the children are potentially clause root
+	clause_root = classserver().isA(t, SCOPE_LINK);
+
 	// Mere recursive call
 	HandleSeq chs = consume_ill_quotations(variables, h->getOutgoingSet(),
-	                                       quotation, needless_quotation);
+	                                       quotation, needless_quotation,
+	                                       clause_root);
 	Handle ch = createLink(chs, t);
 	ch->copyValues(h);
 	return ch;
@@ -372,11 +419,13 @@ Handle RewriteLink::consume_ill_quotations(const Variables& variables,
 HandleSeq RewriteLink::consume_ill_quotations(const Variables& vars,
                                               const HandleSeq& hs,
                                               Quotation quotation,
-                                              bool& needless_qtn)
+                                              bool& needless_qtn,
+                                              bool clause_root)
 {
 	HandleSeq con_hs(hs.size());
 	std::transform(hs.begin(), hs.end(), con_hs.begin(), [&](const Handle& h) {
-			return consume_ill_quotations(vars, h, quotation, needless_qtn); });
+			return consume_ill_quotations(vars, h, quotation,
+			                              needless_qtn, clause_root); });
 	return con_hs;
 }
 

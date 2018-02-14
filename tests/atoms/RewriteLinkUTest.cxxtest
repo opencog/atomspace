@@ -52,6 +52,7 @@ public:
 	{
 		logger().set_level(Logger::INFO);
 		logger().set_print_to_stdout_flag(true);
+		logger().set_timestamp_flag(false);
 
 		X = an(VARIABLE_NODE, "$X");
 		Y = an(VARIABLE_NODE, "$Y");
@@ -280,7 +281,7 @@ void RewriteLinkUTest::test_remove_ill_quotations_2()
 	// Remove the UnquoteLink wrapping gpn as it is useless, and even
 	// harmful to the pattern matcher as it makes it believe that the
 	// gpn is evaluatable
-	Handle result = RewriteLink::consume_ill_quotations(vardecl, ill_quoted),
+	Handle result = RewriteLink::consume_ill_quotations(vardecl, ill_quoted, false),
 		expected = _eval.eval_h("well-quoted");
 
 	std::cout << "result = " << oc_to_string(result);
