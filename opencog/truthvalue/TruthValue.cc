@@ -182,11 +182,15 @@ TruthValuePtr TruthValue::factory(const ProtoAtomPtr& pap)
 	return nullptr;
 }
 
-std::string oc_to_string(TruthValuePtr tv)
+std::string oc_to_string(TruthValuePtr tv, const std::string& indent)
 {
 	if (tv)
 		return tv->to_string();
 	return "none";
+}
+std::string oc_to_string(TruthValuePtr tv)
+{
+	return oc_to_string(tv, "");
 }
 
 } // ~namespace opencog

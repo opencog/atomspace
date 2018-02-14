@@ -86,7 +86,7 @@ public:
 	 */
 	double pd(double x) const;
 
-	std::string to_string() const;
+	std::string to_string(const std::string& indent) const;
 
 private:
 	boost::math::beta_distribution<double> _beta_distribution;

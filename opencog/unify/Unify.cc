@@ -1004,6 +1004,10 @@ std::string oc_to_string(const Unify::CHandle& ch)
 	   << "atom:" << std::endl << oc_to_string(ch.handle);
 	return ss.str();
 }
+std::string oc_to_string(const Unify::CHandle& ch, const std::string& indent)
+{
+	return oc_to_string(ch, "");
+}
 
 std::string oc_to_string(const Unify::Block& pb)
 {
@@ -1014,6 +1018,10 @@ std::string oc_to_string(const Unify::Block& pb)
 		ss << "catom[" << i++ << "]:" << std::endl << oc_to_string(el);
 	return ss.str();
 }
+std::string oc_to_string(const Unify::Block& pb, const std::string& indent)
+{
+	return oc_to_string(pb, "");
+}
 
 std::string oc_to_string(const Unify::TypedBlock& tb)
 {
@@ -1021,6 +1029,10 @@ std::string oc_to_string(const Unify::TypedBlock& tb)
 	ss << "block:" << std::endl << oc_to_string(tb.first)
 	   << "type:" << std::endl << oc_to_string(tb.second);
 	return ss.str();
+}
+std::string oc_to_string(const Unify::TypedBlock& tb, const std::string& indent)
+{
+	return oc_to_string(tb, "");
 }
 
 std::string oc_to_string(const Unify::TypedBlockSeq& tbs)
@@ -1031,6 +1043,10 @@ std::string oc_to_string(const Unify::TypedBlockSeq& tbs)
 		ss << "typed block[" << i << "]:" << std::endl
 		   << oc_to_string(tbs[i]);
 	return ss.str();
+}
+std::string oc_to_string(const Unify::TypedBlockSeq& tbs, const std::string& indent)
+{
+	return oc_to_string(tbs, "");
 }
 
 std::string oc_to_string(const Unify::Partition& up)
@@ -1045,6 +1061,10 @@ std::string oc_to_string(const Unify::Partition& up)
 	}
 	return ss.str();
 }
+std::string oc_to_string(const Unify::Partition& up, const std::string& indent)
+{
+	return oc_to_string(up, "");
+}
 
 std::string oc_to_string(const Unify::Partitions& par)
 {
@@ -1056,6 +1076,10 @@ std::string oc_to_string(const Unify::Partitions& par)
 		i++;
 	}
 	return ss.str();
+}
+std::string oc_to_string(const Unify::Partitions& par, const std::string& indent)
+{
+	return oc_to_string(par, "");
 }
 
 std::string oc_to_string(const Unify::HandleCHandleMap& hchm)
@@ -1072,6 +1096,10 @@ std::string oc_to_string(const Unify::HandleCHandleMap& hchm)
 	}
 	return ss.str();
 }
+std::string oc_to_string(const Unify::HandleCHandleMap& hchm, const std::string& indent)
+{
+	return oc_to_string(hchm, "");
+}
 
 std::string oc_to_string(const Unify::TypedSubstitution& ts)
 {
@@ -1079,6 +1107,10 @@ std::string oc_to_string(const Unify::TypedSubstitution& ts)
 	ss << "substitution:" << std::endl << oc_to_string(ts.first)
 	   << "vardecl:" << std::endl << oc_to_string(ts.second);
 	return ss.str();
+}
+std::string oc_to_string(const Unify::TypedSubstitution& ts, const std::string& indent)
+{
+	return oc_to_string(ts, "");
 }
 
 std::string oc_to_string(const Unify::TypedSubstitutions& tss)
@@ -1092,6 +1124,10 @@ std::string oc_to_string(const Unify::TypedSubstitutions& tss)
 		i++;
 	}
 	return ss.str();
+}
+std::string oc_to_string(const Unify::TypedSubstitutions& tss, const std::string& indent)
+{
+	return oc_to_string(tss, "");
 }
 
 } // namespace opencog

@@ -116,33 +116,43 @@ bool ohs_content_eq(const HandleSet& lhs, const HandleSet& rhs)
 	return true;
 }
 
-std::string oc_to_string(const Context::VariablesStack& scope_variables)
+std::string oc_to_string(const Context::VariablesStack& scope_variables,
+                         const std::string& indent)
 {
 	std::stringstream ss;
-	ss << "size = " << scope_variables.size() << std::endl;
+	ss << indent << "size = " << scope_variables.size() << std::endl;
 	int i = 0;
 	for (const Variables& variables : scope_variables) {
-		ss << "variables[" << i++ << "]:" << std::endl
-		   << variables.to_string();
+		ss << indent << "variables[" << i++ << "]:" << std::endl
+		   << variables.to_string(indent + OC_TO_STRING_INDENT);
 	}
 	return ss.str();
 }
-
-std::string oc_to_string(const Context& c)
+std::string oc_to_string(const Context::VariablesStack& scope_variables)
+{
+	return oc_to_string(scope_variables, "");
+}
+std::string oc_to_string(const Context& c, const std::string& indent)
 {
 	std::stringstream ss;
 	if (c == Context()) {
-		ss << "none" << std::endl;
+		ss << indent << "none" << std::endl;
 	} else {
-		ss << "quotation: " << oc_to_string(c.quotation) << std::endl
-		   << "shadow:" << std::endl << oc_to_string(c.shadow);
-		ss << "scope_variables:" << std::endl;
+		ss << indent << "quotation: " << oc_to_string(c.quotation)
+		   << indent << "shadow:" << std::endl
+		   << oc_to_string(c.shadow, indent + OC_TO_STRING_INDENT);
+		ss << indent << "scope_variables:" << std::endl;
 		if (c.store_scope_variables)
-			ss << oc_to_string(c.scope_variables);
+			ss << oc_to_string(c.scope_variables,
+			                   indent + OC_TO_STRING_INDENT);
 		else
-			ss << "ignored" << std::endl;
+			ss << indent + OC_TO_STRING_INDENT << "ignored" << std::endl;
 	}
 	return ss.str();
+}
+std::string oc_to_string(const Context& c)
+{
+	return oc_to_string(c, "");
 }
 
 } // namespace opencog

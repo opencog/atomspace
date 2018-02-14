@@ -89,7 +89,7 @@ public:
 	bool operator<(const Quotation& quotation) const;
 	bool operator==(const Quotation& quotation) const;
 
-	std::string to_string() const;
+	std::string to_string(const std::string& indent) const;
 };
 
 // Debugging helpers see

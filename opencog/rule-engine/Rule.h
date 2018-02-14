@@ -252,7 +252,7 @@ public:
 	 */
 	Handle apply(AtomSpace& as) const;
 
-	std::string to_string() const;
+	std::string to_string(const std::string& indent="") const;
 
 	// This flag allows to only sonsider the Rule clauses as
 	// premises. This is for backward compatibility with some rule

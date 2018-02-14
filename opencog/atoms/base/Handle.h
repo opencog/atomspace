@@ -271,6 +271,7 @@ static inline std::string operator+ (const std::string &lhs, Handle h)
 // The reason indent is not an optional argument with default is
 // because gdb doesn't support that, see
 // http://stackoverflow.com/questions/16734783 for more explanation.
+#define OC_TO_STRING_INDENT "  "
 std::string oc_to_string(const Handle& h, const std::string& indent);
 std::string oc_to_string(const Handle& h);
 std::string oc_to_string(const HandlePair& hp, const std::string& indent);

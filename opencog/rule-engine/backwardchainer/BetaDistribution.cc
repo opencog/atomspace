@@ -74,10 +74,10 @@ double BetaDistribution::pd(double x) const
 	return boost::math::pdf(_beta_distribution, x);
 }
 
-std::string BetaDistribution::to_string() const
+std::string BetaDistribution::to_string(const std::string& indent) const
 {
 	std::stringstream ss;
-	ss << "alpha = " << alpha()
+	ss << indent << "alpha = " << alpha()
 	   << ", beta = " << beta()
 	   << ", mean = " << mean()
 	   << ", variance = " << variance() << std::endl;
@@ -128,7 +128,7 @@ TruthValuePtr mk_stv(double mean, double variance,
 
 std::string oc_to_string(const BetaDistribution& bd, const std::string& indent)
 {
-	return bd.to_string();
+	return bd.to_string(indent);
 }
 std::string oc_to_string(const BetaDistribution& bd)
 {

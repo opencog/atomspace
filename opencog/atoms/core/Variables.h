@@ -269,7 +269,7 @@ struct Variables : public FreeVariables,
 	Handle get_vardecl() const;
 
 	// Useful for debugging
-	std::string to_string() const;
+	std::string to_string(const std::string& indent="") const;
 };
 
 // Debugging helpers see
