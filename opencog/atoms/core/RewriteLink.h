@@ -177,43 +177,60 @@ public:
 	 * RewriteLink from hiding supposedly hidden variables, consume
 	 * them.
 	 *
-	 * Specifically this code makes 3 assumptions
+	 * Specifically this code does the following
 	 *
-	 * 1. LocalQuotes in front root level And, Or or Not links on the
-	 *    pattern body are not consumed because they are supposedly
-	 *    used to avoid interpreting them as pattern matcher
-	 *    connectors.
+	 * 1. Remove needless quotations in front closed term, for instance
 	 *
-	 * 2. Quote/Unquote are used to wrap scope links so that their
-	 *    variable declaration can pattern match grounded or partially
-	 *    grounded scope links.
+	 * (QuoteLink
+	 *   (EvaluationLink
+	 *     (Unquote (GroundedPredicate "gpn"))
+	 *     (Unquote (Variable "$X"))))
 	 *
-	 * 3. Quote/Unquote are also used to wrap Evaluation containing
-	 *    GroundedPredicate and possibly other atom types with special
-	 *    handling by the pattern matcher.
+	 * The Unquote in front of the "gpn" is useless so it removed,
+	 * resulting into
 	 *
-	 * No other use of quotation is assumed besides the 3 above.
+	 * (QuoteLink
+	 *   (EvaluationLink
+	 *     (GroundedPredicate "gpn")
+	 *     (Unquote (Variable "$X"))))
 	 *
-	 * Examples:
+	 * 2. Remove obvious involutions such as
 	 *
-	 * 1. Remove UnquoteLink wrapping around a closed term. Assuming
-	 * the current link is
+	 * (Quote
+	 *   (Put
+	 *     (Unquote (Quote (Lambda (Variable "$X") (Variable "$X"))))
+	 *     (Concept "A")))
 	 *
-	 * Get
-	 *   Variable "$X"
-	 *   Quote
-	 *     Evaluation
-	 *       Unquote GroundedSchema "scm: dummy"
-	 *       Unquote Variable "$X"
+	 * (Unquote (Quote ... is an involution so remove it, resulting into
 	 *
-	 * then applying this function returns
+	 * (Quote
+	 *   (Put
+	 *     (Lambda (Variable "$X") (Variable "$X"))
+	 *     (Concept "A")))
 	 *
-	 * Get
-	 *   Variable "$X"
-	 *   Quote
-	 *     Evaluation
-	 *       GroundedSchema "scm: dummy"
-	 *       Unquote Variable "$X"
+	 * Note that the root Quote cannot be removed otherwise it would
+	 * change the semantics of the hypergraph (as the quotation
+	 * prevents the PutLink from being executing).
+	 *
+	 * 3. Remove quotations around a fully substituted scope, for
+	 * instance
+	 *
+	 * (Quote
+	 *   (Lambda
+	 *     (Unquote (TypedVariable (Variable "$X") (Type "ConceptNode")))
+	 *     (Unquote (And (Concept "A") (Variable "$X")))))
+	 *
+	 * all quotations can be remove (in fact keeping them would be
+	 * harmful because the variable $X would be interpreted as not
+	 * being bound to this Lambda, to make sure it is should be bound
+	 * to the lambda as opposed to be bound to a parent scope, a
+	 * Variables object is passed in argument representing the
+	 * variable declaration of that parent scope. Thus, assuming $X
+	 * isn't in the variables object, the above would result into
+	 *
+	 * (Lambda
+	 *   (TypedVariable (Variable "$X") (Type "ConceptNode"))
+	 *   (And (Concept "A") (Variable "$X")))
 	 */
 	Handle consume_ill_quotations() const;
 	static Handle consume_ill_quotations(const Handle& vardecl, const Handle& h,
