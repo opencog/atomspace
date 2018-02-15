@@ -122,7 +122,7 @@ DefaultPatternMatchCB::DefaultPatternMatchCB(AtomSpace* as) :
 	_classserver(classserver())
 {
 	_temp_aspace = grab_transient_atomspace(as);
-	_instor = new Instantiator(_temp_aspace, true);
+	_instor = new Instantiator(_temp_aspace);
 
 	_connectives.insert(SEQUENTIAL_AND_LINK);
 	_connectives.insert(SEQUENTIAL_OR_LINK);

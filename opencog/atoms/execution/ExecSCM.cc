@@ -26,7 +26,7 @@ using namespace opencog;
  */
 static Handle ss_execute(AtomSpace* atomspace, const Handle& h)
 {
-	Instantiator inst(atomspace, false);
+	Instantiator inst(atomspace);
 	Handle rh(inst.execute(h));
 	if (NULL != rh)
 		rh = atomspace->add_atom(rh);

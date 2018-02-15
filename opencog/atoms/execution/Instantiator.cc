@@ -34,9 +34,9 @@
 
 using namespace opencog;
 
-Instantiator::Instantiator(AtomSpace* as, bool consume_quotations)
+Instantiator::Instantiator(AtomSpace* as)
 	: _as(as), _vmap(nullptr), _halt(false),
-	  _consume_quotations(consume_quotations),
+	  _consume_quotations(true),
 	  _needless_quotation(true),
 	  _eager(true) {}
 

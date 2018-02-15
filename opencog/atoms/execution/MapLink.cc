@@ -322,7 +322,7 @@ bool MapLink::extract(const Handle& termpat,
 
 Handle MapLink::rewrite_one(const Handle& cterm, AtomSpace* scratch) const
 {
-	Instantiator inst(scratch, true);
+	Instantiator inst(scratch);
 	Handle term(inst.execute(cterm));
 
 	// Extract values for variables.
