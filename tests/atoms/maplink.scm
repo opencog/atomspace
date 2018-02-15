@@ -456,3 +456,28 @@
 		(ListLink
 			(Concept "baz") (Concept "ni") (Concept "goh"))
 	))
+
+(define local-quote-map
+(MapLink
+  (LambdaLink
+    (VariableList
+      (VariableNode "$X")
+      (VariableNode "$Y")
+    )
+    (LocalQuoteLink
+      (AndLink
+        (VariableNode "$X")
+        (VariableNode "$Y")
+      )
+    )
+  )
+  (AndLink
+    (ConceptNode "A")
+    (ConceptNode "B")
+  )
+)
+)
+
+(define local-quote-map-result
+  (ListLink
+    (ConceptNode "A") (ConceptNode "B")))

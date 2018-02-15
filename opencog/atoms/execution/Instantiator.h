@@ -114,7 +114,7 @@ private:
 	static bool not_self_match(Type t);
 
 public:
-	Instantiator(AtomSpace* as, bool consume_quotations=false);
+	Instantiator(AtomSpace* as);
 
 	void ready(AtomSpace* as)
 	{
@@ -126,6 +126,7 @@ public:
 	{
 		_as = nullptr;
 		_vmap = nullptr;
+		_consume_quotations = true;
 	}
 
 	void reset_halt()
@@ -133,10 +134,15 @@ public:
 		_halt = false;
 	}
 
+	// TODO: set consume_quotations to false when executing, set it to
+	// true when instantiating
 	Handle instantiate(const Handle& expr, const HandleMap &vars,
 	                   bool silent=false);
 	Handle execute(const Handle& expr, bool silent=false)
 	{
+		// If no actual instantiation is involved then do not consume
+		// quotations as it might change the semantics.
+		_consume_quotations = false;
 		return instantiate(expr, HandleMap(), silent);
 	}
 };

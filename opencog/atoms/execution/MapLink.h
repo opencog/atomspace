@@ -25,6 +25,7 @@
 
 #include <opencog/atoms/core/FunctionLink.h>
 #include <opencog/atoms/core/ScopeLink.h>
+#include <opencog/atoms/core/Quotation.h>
 
 namespace opencog
 {
@@ -56,7 +57,8 @@ protected:
 
 	MapLink(Type, const Handle&);
 
-	bool extract(const Handle&, const Handle&, HandleMap&) const;
+	bool extract(const Handle&, const Handle&, HandleMap&,
+	             Quotation quotation=Quotation()) const;
 
 	Handle rewrite_one(const Handle&, AtomSpace*) const;
 

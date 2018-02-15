@@ -160,7 +160,8 @@ MapLink::MapLink(const Link &l)
 ///
 bool MapLink::extract(const Handle& termpat,
                       const Handle& ground,
-                      HandleMap& valmap) const
+                      HandleMap& valmap,
+                      Quotation quotation) const
 {
 	if (termpat == ground) return true;
 
@@ -184,6 +185,16 @@ bool MapLink::extract(const Handle& termpat,
 		return true;
 	}
 
+	// Save quotation state before updating it
+	Quotation quotation_cp;
+	quotation.update(t);
+
+	// Consume quotation
+	if (quotation_cp.consumable(t))
+	{
+		return extract(termpat->getOutgoingAtom(0), ground, valmap, quotation);
+	}
+
 	if (GLOB_NODE == t and 0 < _varset->count(termpat))
 	{
 		// Check the type of the value.
@@ -199,7 +210,7 @@ bool MapLink::extract(const Handle& termpat,
 	{
 		for (const Handle& choice : termpat->getOutgoingSet())
 		{
-			if (extract(choice, ground, valmap))
+			if (extract(choice, ground, valmap, quotation))
 				return true;
 		}
 		return false;
@@ -224,7 +235,7 @@ bool MapLink::extract(const Handle& termpat,
 		if (gsz != tsz) return false;
 		for (size_t i=0; i<tsz; i++)
 		{
-			if (not extract(tlo[i], glo[i], valmap))
+			if (not extract(tlo[i], glo[i], valmap, quotation))
 				return false;
 		}
 
@@ -254,7 +265,7 @@ bool MapLink::extract(const Handle& termpat,
 			}
 
 			// Match at least one.
-			bool tc = extract(glob, glo[jg], valmap);
+			bool tc = extract(glob, glo[jg], valmap, quotation);
 			if (not tc) return false;
 
 			glob_seq.push_back(glo[jg]);
@@ -266,10 +277,10 @@ bool MapLink::extract(const Handle& termpat,
 				if (have_post)
 				{
 					// If the atom after the glob matches, then we are done.
-					tc = extract(post_glob, glo[jg], valmap);
+					tc = extract(post_glob, glo[jg], valmap, quotation);
 					if (tc) break;
 				}
-				tc = extract(glob, glo[jg], valmap);
+				tc = extract(glob, glo[jg], valmap, quotation);
 				if (tc) glob_seq.push_back(glo[jg]);
 				jg ++;
 			}
@@ -302,7 +313,7 @@ bool MapLink::extract(const Handle& termpat,
 		else
 		{
 			// If we are here, we are not comparing to a glob.
-			if (not extract(tlo[ip], glo[jg], valmap))
+			if (not extract(tlo[ip], glo[jg], valmap, quotation))
 				return false;
 		}
 	}
@@ -311,7 +322,7 @@ bool MapLink::extract(const Handle& termpat,
 
 Handle MapLink::rewrite_one(const Handle& cterm, AtomSpace* scratch) const
 {
-	Instantiator inst(scratch, true);
+	Instantiator inst(scratch);
 	Handle term(inst.execute(cterm));
 
 	// Extract values for variables.

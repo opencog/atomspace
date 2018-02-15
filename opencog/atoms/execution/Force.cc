@@ -50,7 +50,7 @@ using namespace opencog;
 ///
 Handle opencog::force_execute(AtomSpace* as, const Handle& cargs, bool silent)
 {
-	Instantiator inst(as, false);
+	Instantiator inst(as);
 
 	if (LIST_LINK != cargs->get_type())
 	{
