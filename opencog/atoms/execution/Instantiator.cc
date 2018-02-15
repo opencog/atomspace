@@ -311,6 +311,7 @@ Handle Instantiator::walk_tree(const Handle& expr, bool silent)
 			HandleSeq oset{body};
 			if (vardecl)
 				oset.insert(oset.begin(), vardecl);
+			// TODO: copy values
 			return createLink(oset, LAMBDA_LINK);
 		}
 		return expr;

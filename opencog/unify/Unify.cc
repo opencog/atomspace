@@ -191,8 +191,8 @@ Unify::TypedSubstitution Unify::typed_substitution(const Partition& partition,
 	// Remove ill quotations
 	for (auto& vcv : var2cval) {
 		Handle consumed =
-			RewriteLink::consume_ill_quotations(_variables, vcv.second.handle,
-			                                    vcv.second.context.quotation);
+			RewriteLink::consume_quotations(_variables, vcv.second.handle,
+			                                vcv.second.context.quotation, false);
 		vcv.second = CHandle(consumed, vcv.second.context);
 	}
 
@@ -317,13 +317,13 @@ Handle Unify::substitute(BindLinkPtr bl, const HandleMap& var2val,
 	// Perform substitution over the pattern term, then remove
 	// constant clauses
 	Handle clauses = variables.substitute_nocheck(bl->get_body(), values);
-	clauses = RewriteLink::consume_ill_quotations(vardecl, clauses);
+	clauses = RewriteLink::consume_quotations(vardecl, clauses, true);
 //	clauses = remove_constant_clauses(vardecl, clauses);
 	hs.push_back(clauses);
 
 	// Perform substitution over the rewrite term
 	Handle rewrite = variables.substitute_nocheck(bl->get_implicand(), values);
-	rewrite = RewriteLink::consume_ill_quotations(vardecl, rewrite);
+	rewrite = RewriteLink::consume_quotations(vardecl, rewrite, false);
 	hs.push_back(rewrite);
 
 	// Filter vardecl

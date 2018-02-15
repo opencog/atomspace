@@ -97,6 +97,11 @@ protected:
 	 */
 	static bool is_bound_to_ancestor(const Variables& variables,
 	                                 const Handle& local_scope);
+	/**
+	 * Like is_bound_to_ancestor but doesn't assume that the handle is
+	 * a scope, and test for it as well, returning false if it isn't.
+	 */
+	static bool is_scope_bound_to_ancestor(const Variables& variables, const Handle& h);
 
 public:
 	RewriteLink(const HandleSeq&, Type=REWRITE_LINK);
@@ -172,51 +177,91 @@ public:
 	 * RewriteLink from hiding supposedly hidden variables, consume
 	 * them.
 	 *
-	 * Specifically this code makes 3 assumptions
+	 * Specifically this code does the following
 	 *
-	 * 1. LocalQuotes in front root level And, Or or Not links on the
-	 *    pattern body are not consumed because they are supposedly
-	 *    used to avoid interpreting them as pattern matcher
-	 *    connectors.
+	 * 1. Remove needless quotations in front closed term, for instance
 	 *
-	 * 2. Quote/Unquote are used to wrap scope links so that their
-	 *    variable declaration can pattern match grounded or partially
-	 *    grounded scope links.
+	 * (QuoteLink
+	 *   (EvaluationLink
+	 *     (Unquote (GroundedPredicate "gpn"))
+	 *     (Unquote (Variable "$X"))))
 	 *
-	 * 3. Quote/Unquote are also used to wrap Evaluation containing
-	 *    GroundedPredicate and possibly other atom types with special
-	 *    handling by the pattern matcher.
+	 * The Unquote in front of the "gpn" is useless so it removed,
+	 * resulting into
 	 *
-	 * No other use of quotation is assumed besides the 3 above.
+	 * (QuoteLink
+	 *   (EvaluationLink
+	 *     (GroundedPredicate "gpn")
+	 *     (Unquote (Variable "$X"))))
 	 *
-	 * Examples:
+	 * 2. Remove obvious involutions such as
 	 *
-	 * 1. Remove UnquoteLink wrapping around a closed term. Assuming
-	 * the current link is
+	 * (Quote
+	 *   (Put
+	 *     (Unquote (Quote (Lambda (Variable "$X") (Variable "$X"))))
+	 *     (Concept "A")))
 	 *
-	 * Get
-	 *   Variable "$X"
-	 *   Quote
-	 *     Evaluation
-	 *       Unquote GroundedSchema "scm: dummy"
-	 *       Unquote Variable "$X"
+	 * (Unquote (Quote ... is an involution so remove it, resulting into
 	 *
-	 * then applying this function returns
+	 * (Quote
+	 *   (Put
+	 *     (Lambda (Variable "$X") (Variable "$X"))
+	 *     (Concept "A")))
 	 *
-	 * Get
-	 *   Variable "$X"
-	 *   Quote
-	 *     Evaluation
-	 *       GroundedSchema "scm: dummy"
-	 *       Unquote Variable "$X"
+	 * Note that the root Quote cannot be removed otherwise it would
+	 * change the semantics of the hypergraph (as the quotation
+	 * prevents the PutLink from being executing).
+	 *
+	 * 3. Remove quotations around a fully substituted scope, for
+	 * instance
+	 *
+	 * (Quote
+	 *   (Lambda
+	 *     (Unquote (TypedVariable (Variable "$X") (Type "ConceptNode")))
+	 *     (Unquote (And (Concept "A") (Variable "$X")))))
+	 *
+	 * all quotations can be remove (in fact keeping them would be
+	 * harmful because the variable $X would be interpreted as not
+	 * being bound to this Lambda, to make sure it is should be bound
+	 * to the lambda as opposed to be bound to a parent scope, a
+	 * Variables object is passed in argument representing the
+	 * variable declaration of that parent scope. Thus, assuming $X
+	 * isn't in the variables object, the above would result into
+	 *
+	 * (Lambda
+	 *   (TypedVariable (Variable "$X") (Type "ConceptNode"))
+	 *   (And (Concept "A") (Variable "$X")))
 	 */
-	Handle consume_ill_quotations() const;
-	static Handle consume_ill_quotations(const Handle& vardecl, const Handle& h);
-	static Handle consume_ill_quotations(const Variables& variables, Handle h,
-	                                     Quotation quotation=Quotation(),
-	                                     bool escape=false /* ignore the next
-	                                                        * quotation
-	                                                        * consumption */);
+	Handle consume_quotations() const;
+	static Handle consume_quotations(const Handle& vardecl, const Handle& h,
+	                                 /* Remember if some atom
+	                                  * is the clause root of a
+	                                  * pattern */
+	                                 bool clause_root);
+	static Handle consume_quotations(const Variables& variables, const Handle& h,
+	                                 bool clause_root);
+	static Handle consume_quotations(const Variables& variables, const Handle& h,
+	                                 Quotation quotation,
+	                                 bool clause_root);
+	static Handle consume_quotations(const Variables& variables, const Handle& h,
+	                                 // TODO: we probably want to
+	                                 // move quotation,
+	                                 // needless_quotation,
+	                                 // clause_root and more in
+	                                 // its own class
+	                                 Quotation quotation,
+	                                 bool& needless_quotation,
+	                                 bool clause_root);
+	static HandleSeq consume_quotations(const Variables& variables,
+	                                    const HandleSeq& hs,
+	                                    Quotation quotation,
+	                                    bool& needless_quotation,
+	                                    bool clause_root);
+	static Handle consume_quotations_mere_rec(const Variables& variables,
+	                                          const Handle& h,
+	                                          Quotation quotation,
+	                                          bool& needless_quotation,
+	                                          bool clause_root);
 
 	static Handle factory(const Handle&);
 };
