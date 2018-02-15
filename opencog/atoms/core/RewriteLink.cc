@@ -347,72 +347,100 @@ Handle RewriteLink::consume_quotations(const Variables& variables,
 	Quotation quotation_cp(quotation);
 	quotation.update(t);
 
-	if (quotation_cp.consumable(t) and t == UNQUOTE_LINK)
+	if (quotation_cp.consumable(t))
 	{
-		Handle uqh = h->getOutgoingAtom(0);
-		// A consumable Unquote over a closed term not containing any
-		// quotes is clearly useless, regardless of whether it has
-		// been determined needless.
-		if (is_closed(uqh) and
-		    not contains_atomtype(uqh, QUOTE_LINK) and
-		    not contains_atomtype(uqh, LOCAL_QUOTE_LINK))
+		if (t == UNQUOTE_LINK)
 		{
-			return consume_quotations(variables, uqh,
-			                          quotation, needless_quotation,
-			                          clause_root);
+			Handle uqh = h->getOutgoingAtom(0);
+
+			// A consumable Unquote over a closed term not containing
+			// any quotes is clearly useless, regardless of whether it
+			// has been determined needless.
+			if (is_closed(uqh) and
+			    not contains_atomtype(uqh, QUOTE_LINK) and
+			    not contains_atomtype(uqh, LOCAL_QUOTE_LINK))
+			{
+				return consume_quotations(variables, uqh,
+				                          quotation, needless_quotation,
+				                          clause_root);
+			}
+
+			// A succession of (Unquote (Quote ..)) is an involution
+			// and thus can be remove.
+			//
+			// TODO: generalize with when Unquote and Quote are apart
+			if (uqh->get_type() == QUOTE_LINK)
+			{
+				quotation.update(uqh->get_type());
+				return consume_quotations(variables, uqh->getOutgoingAtom(0),
+				                          quotation, needless_quotation,
+				                          clause_root);
+			}
+
+			// If it's been labelled as needless somewhere above, then
+			// consume it. Otherwise don't consume it and reset
+			// needless_quotation to true before the recursion.
+			if (needless_quotation)
+			{
+				return consume_quotations(variables, uqh,
+				                          quotation, needless_quotation,
+				                          clause_root);
+			}
+			else
+			{
+				needless_quotation = true;
+				Handle ch = consume_quotations_mere_rec(variables, h,
+				                                        quotation, needless_quotation,
+				                                        clause_root);
+				needless_quotation = false;
+				return ch;
+			}
 		}
 
-		// A succession of (Unquote (Quote ..)) is an involution and
-		// thus can be remove.
-		//
-		// TODO: generalize with when Unquote and Quote are apart
-		if (uqh->get_type() == QUOTE_LINK)
+		if (t == QUOTE_LINK or t == LOCAL_QUOTE_LINK)
 		{
-			quotation.update(uqh->get_type());
-			return consume_quotations(variables, uqh->getOutgoingAtom(0),
-			                          quotation, needless_quotation,
-			                          clause_root);
+			Handle qh = h->getOutgoingAtom(0);
+			Handle con_qh = consume_quotations(variables, qh,
+			                                   quotation, needless_quotation,
+			                                   clause_root);
+
+			// Only consume if the quotation turned out to be needless
+			if (needless_quotation)
+				return con_qh;
+
+			// Otherwise keep the quotation, and reset
+			// needless_quotation to true for the remaining tree
+			needless_quotation = true;
+			Handle new_con_qh = createLink(t, con_qh);
+			new_con_qh->copyValues(con_qh);
+			return new_con_qh;
 		}
-	}
-
-	// Possibly consume potentially needless quotation
-	if (needless_quotation and quotation_cp.consumable(t))
-	{
-		Handle qh = h->getOutgoingAtom(0);
-		Handle con_qh = consume_quotations(variables, qh,
-		                                   quotation, needless_quotation,
-		                                   clause_root);
-
-		// Only consume if the quotation is really needless
-		// (calling consume_ill_quotations on qh might have
-		// changed that)
-		if (needless_quotation)
-			return con_qh;
-
-		// Otherwise keep the quotation, but set needless_quotation
-		// back to true for the remaining tree
-		needless_quotation = true;
-		Handle new_con_qh = createLink(t, con_qh);
-		new_con_qh->copyValues(con_qh);
-		return new_con_qh;
 	}
 
 	// Scope or special links that may require not to consume
 	// quotations as they may otherwise change the semantics
-	if (t == PUT_LINK or
-	    (t == AND_LINK and clause_root) or
-	    is_scope_bound_to_ancestor(variables, h))
+	bool need_quotation = (quotation_cp.is_quoted() and
+	                       (t == PUT_LINK or
+	                        (t == AND_LINK and clause_root) or
+	                        is_scope_bound_to_ancestor(variables, h)));
+
+	// Propagate the need for quotation down
+	if (need_quotation and not quotation_cp.is_locally_quoted())
 		needless_quotation = false;
 
 	// Remember that the children are potentially clause root
 	clause_root = classserver().isA(t, SCOPE_LINK);
 
 	// Mere recursive call
-	HandleSeq chs = consume_quotations(variables, h->getOutgoingSet(),
-	                                   quotation, needless_quotation,
-	                                   clause_root);
-	Handle ch = createLink(chs, t);
-	ch->copyValues(h);
+	Handle ch = consume_quotations_mere_rec(variables, h,
+	                                        quotation, needless_quotation,
+	                                        clause_root);
+
+	// Propagate the need for quotation up (because in case it is
+	// local, we did not propagate it down.
+	if (need_quotation and quotation_cp.is_locally_quoted())
+		needless_quotation = false;
+
 	return ch;
 }
 
@@ -427,6 +455,20 @@ HandleSeq RewriteLink::consume_quotations(const Variables& vars,
 			return consume_quotations(vars, h, quotation,
 			                          needless_qtn, clause_root); });
 	return con_hs;
+}
+
+Handle RewriteLink::consume_quotations_mere_rec(const Variables& variables,
+                                                const Handle& h,
+                                                Quotation quotation,
+                                                bool& needless_quotation,
+                                                bool clause_root)
+{
+	HandleSeq chs = consume_quotations(variables, h->getOutgoingSet(),
+	                                   quotation, needless_quotation,
+	                                   clause_root);
+	Handle ch = createLink(chs, h->get_type());
+	ch->copyValues(h);
+	return ch;
 }
 
 bool RewriteLink::is_scope_bound_to_ancestor(const Variables& variables,

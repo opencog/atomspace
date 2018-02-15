@@ -131,6 +131,7 @@ void RewriteLinkUTest::test_names_alpha_conversion()
 
 // Like test_vardecl_bindlink_alpha_conversion but using a BindLink
 // instead of a RewriteLink
+// TODO: re-enable?
 void RewriteLinkUTest::xtest_vardecl_bindlink_alpha_conversion()
 {
 	logger().info("BEGIN TEST: %s", __FUNCTION__);

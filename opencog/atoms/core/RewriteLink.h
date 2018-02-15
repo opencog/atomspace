@@ -257,6 +257,11 @@ public:
 	                                    Quotation quotation,
 	                                    bool& needless_quotation,
 	                                    bool clause_root);
+	static Handle consume_quotations_mere_rec(const Variables& variables,
+	                                          const Handle& h,
+	                                          Quotation quotation,
+	                                          bool& needless_quotation,
+	                                          bool clause_root);
 
 	static Handle factory(const Handle&);
 };
