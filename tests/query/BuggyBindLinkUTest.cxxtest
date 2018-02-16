@@ -1,0 +1,85 @@
+/*
+ * tests/query/BuggyBindLinkUTest.cxxtest
+ *
+ * Copyright (C) 2018 OpenCog Foundation
+ * All Rights Reserved
+ *
+ * This program is free software; you can redistribute it and/or modify
+ * it under the terms of the GNU Affero General Public License v3 as
+ * published by the Free Software Foundation and including the exceptions
+ * at http://opencog.org/wiki/Licenses
+ *
+ * This program is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ * GNU General Public License for more details.
+ *
+ * You should have received a copy of the GNU Affero General Public License
+ * along with this program; if not, write to:
+ * Free Software Foundation, Inc.,
+ * 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
+ */
+
+#include <opencog/atomspace/AtomSpace.h>
+#include <opencog/guile/SchemeEval.h>
+#include <opencog/query/BindLinkAPI.h>
+#include <opencog/util/Logger.h>
+
+using namespace opencog;
+
+class BuggyBindLinkUTest: public CxxTest::TestSuite
+{
+private:
+        AtomSpace as;
+        SchemeEval eval;
+
+public:
+	BuggyBindLinkUTest(void) : eval(&as)
+    {
+        logger().set_level(Logger::DEBUG);
+        logger().set_print_to_stdout_flag(true);
+
+        eval.eval("(add-to-load-path \"..\")");
+        eval.eval("(add-to-load-path \"../../..\")");
+    }
+
+    ~BuggyBindLinkUTest()
+    {
+        // Erase the log file if no assertions failed.
+        if (!CxxTest::TestTracker::tracker().suiteFailed())
+                std::remove(logger().get_filename().c_str());
+    }
+
+    void setUp(void);
+    void tearDown(void);
+
+    void test_implication_introduction(void);
+};
+
+void BuggyBindLinkUTest::tearDown(void)
+{
+    as.clear();
+}
+
+void BuggyBindLinkUTest::setUp(void)
+{
+}
+
+/*
+ * Test some unexplained body is ill-formed exception. It should
+ * return nothing as opposed to crashing.
+ */
+void BuggyBindLinkUTest::test_implication_introduction(void)
+{
+    logger().debug("BEGIN TEST: %s", __FUNCTION__);
+
+    eval.eval("(load-from-path \"tests/query/implication-introduction.scm\")");
+
+    Handle implication_introduction_rule =
+	    eval.eval_h("implication-introduction-rule");
+
+    Handle result = bindlink(&as, implication_introduction_rule);
+    logger().debug() << "Result is this:\n" << result->to_string();
+
+    TS_ASSERT_EQUALS(0, result->get_arity());
+}

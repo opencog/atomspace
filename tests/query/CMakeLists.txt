@@ -66,6 +66,7 @@ IF (HAVE_GUILE)
 	ADD_CXXTEST(BuggyQuoteUTest)
 	ADD_CXXTEST(BuggyEqualUTest)
 	ADD_CXXTEST(BuggySelfGroundUTest)
+    ADD_CXXTEST(BuggyBindLinkUTest)
 	ADD_CXXTEST(ChoiceLinkUTest)
 	ADD_CXXTEST(DefineUTest)
 	ADD_CXXTEST(FiniteStateMachineUTest)
@@ -178,3 +179,5 @@ CONFIGURE_FILE(${CMAKE_SOURCE_DIR}/tests/query/friends.scm
     ${PROJECT_BINARY_DIR}/tests/query/friends.scm)
 CONFIGURE_FILE(${CMAKE_SOURCE_DIR}/tests/query/ill-put.scm
     ${PROJECT_BINARY_DIR}/tests/query/ill-put.scm)
+CONFIGURE_FILE(${CMAKE_SOURCE_DIR}/tests/query/implication-introduction.scm
+    ${PROJECT_BINARY_DIR}/tests/query/implication-introduction.scm)
