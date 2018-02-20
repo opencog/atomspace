@@ -222,7 +222,7 @@ Handle ForwardChainer::select_source()
 	                     << selsrc_size << "/" << _potential_sources.size();
 
 	URECommons urec(_as);
-	map<Handle, float> tournament_elem;
+	map<Handle, double> tournament_elem;
 
 	const UnorderedHandleSet& to_select_sources =
 		_unselected_sources.empty() ? _potential_sources : _unselected_sources;
@@ -263,12 +263,11 @@ An attentionbank is needed in order to get the STI...
 
 Rule ForwardChainer::select_rule(const Handle& source)
 {
-	// TODO: fix rule selection to use the full rule TV (strength and
-	// confidence).
-	std::map<const Rule*, float> rule_weight;
+	URECommons urec(_as);
+	std::map<const Rule*, double> rule_weight;
 	for (const Rule& r : _rules)
 		if (not r.is_meta())
-			rule_weight[&r] = r.get_tv()->get_mean();
+			rule_weight[&r] = urec.tv_fitness(r.get_rule());
 
 	ure_logger().debug("%d rules to be searched as matched against the source",
 	                   rule_weight.size());
