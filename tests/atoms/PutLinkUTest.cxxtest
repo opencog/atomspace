@@ -81,6 +81,9 @@ public:
 	void test_nested_4();
 	void test_and_compose_1();
 	void test_and_compose_2();
+	void test_and_compose_3();
+	void test_and_compose_4();
+	void test_and_compose_5();
 };
 
 #define N _as.add_node
@@ -1206,7 +1209,7 @@ void PutLinkUTest::test_nested_1()
 }
 
 /**
- * Test that the following raise an exception
+ * Test that the following
  *
  * (PutLink
  *   (PutLink
@@ -1245,8 +1248,14 @@ void PutLinkUTest::test_nested_2()
 	logger().debug() << "rs = " << rs;
 
 	Instantiator inst(&_as);
-	Handle nested_put = _eval.eval_h("nested-put-2");
-	TS_ASSERT_THROWS_ANYTHING(inst.execute(nested_put));
+	Handle nested_put = _eval.eval_h("nested-put-2"),
+		result = inst.execute(nested_put),
+		expected = _eval.eval_h("expected-2");
+
+	logger().debug() << "result = " << oc_to_string(result);
+	logger().debug() << "expected = " << oc_to_string(expected);
+
+	TS_ASSERT_EQUALS(result, expected);
 
 	logger().info("END TEST: %s", __FUNCTION__);
 }
@@ -1433,6 +1442,147 @@ void PutLinkUTest::test_and_compose_2()
 	logger().debug() << "expected = " << oc_to_string(expected);
 
 	TS_ASSERT_EQUALS(result, expected);
+
+	logger().info("END TEST: %s", __FUNCTION__);
+}
+
+/**
+ * The following composition
+ *
+ * (Put
+ *  (Lambda (Inheritance (Variable "$X") (Variable "$Y")))
+ *  (List (Variable "$Z") (Variable "$Z")))
+ *
+ * should output upon execution
+ *
+ * (LambdaLink
+ *  (VariableNode "$Z")
+ *  (InheritanceLink
+ *    (VariableNode "$Z")
+ *    (VariableNode "$Z")))
+ *
+ * with or without Lambda in the Put body
+ */
+void PutLinkUTest::test_and_compose_3()
+{
+	logger().info("BEGIN TEST: %s", __FUNCTION__);
+
+	std::string rs = _eval.eval("(load-from-path \"tests/atoms/other-put.scm\")");
+	logger().debug() << "rs = " << rs;
+
+	Instantiator inst(&_as);
+	Handle put1 = _eval.eval_h("put-1"),
+		put2 = _eval.eval_h("put-2"),
+		result1 = inst.execute(put1),
+		result2 = inst.execute(put2),
+		expected = _eval.eval_h("expected-1-2");
+
+	logger().debug() << "result1 = " << oc_to_string(result1);
+	logger().debug() << "result2 = " << oc_to_string(result2);
+	logger().debug() << "expected = " << oc_to_string(expected);
+
+	TS_ASSERT_EQUALS(result1, expected);
+	TS_ASSERT_EQUALS(result2, expected);
+
+	logger().info("END TEST: %s", __FUNCTION__);
+}
+
+/**
+ * The following composition
+ *
+ * (Put
+ *  (Lambda
+ *   (Inheritance (Variable "$X") (Variable "$Y")))
+ *   (List (Variable "$Z") (Variable "$W")))
+ *
+ * should output upon execution
+ *
+ * (LambdaLink
+ *  (InheritanceLink
+ *    (VariableNode "$X")
+ *    (VariableNode "$Y")))
+ *
+ * with or without Lambda in the Put body
+ */
+void PutLinkUTest::test_and_compose_4()
+{
+	logger().info("BEGIN TEST: %s", __FUNCTION__);
+
+	std::string rs = _eval.eval("(load-from-path \"tests/atoms/other-put.scm\")");
+	logger().debug() << "rs = " << rs;
+
+	Instantiator inst(&_as);
+	Handle put3 = _eval.eval_h("put-3"),
+		put4 = _eval.eval_h("put-4"),
+		result3 = inst.execute(put3),
+		result4 = inst.execute(put4),
+		expected = _eval.eval_h("expected-3-4");
+
+	logger().debug() << "result3 = " << oc_to_string(result3);
+	logger().debug() << "result4 = " << oc_to_string(result4);
+	logger().debug() << "expected = " << oc_to_string(expected);
+
+	TS_ASSERT_EQUALS(result3, expected);
+	TS_ASSERT_EQUALS(result4, expected);
+
+	logger().info("END TEST: %s", __FUNCTION__);
+}
+
+/**
+ * The following composition
+ *
+ * (PutLink
+ *    (PutLink
+ *       (PutLink
+ *          (LambdaLink
+ *             (VariableNode "$top-arg")
+ *             (VariableNode "$top-arg"))
+ *          (LambdaLink
+ *             (VariableNode "$top-arg")
+ *             (VariableNode "$top-arg")))
+ *       (ListLink
+ *          (VariableNode "$spe-arg-0")
+ *          (ConceptNode "D")))
+ *    (LambdaLink
+ *       (VariableList
+ *          (VariableNode "$sha-arg-0")
+ *          (VariableNode "$sha-arg-1"))
+ *       (InheritanceLink
+ *          (VariableNode "$sha-arg-0")
+ *          (VariableNode "$sha-arg-1"))))
+ *
+ * should output upon execution
+ *
+ * (LambdaLink
+ *   (VariableList
+ *     (VariableNode "$sha-arg-0")
+ *     (VariableNode "$sha-arg-1"))
+ *   (List
+ *     (InheritanceLink
+ *       (VariableNode "$sha-arg-0")
+ *       (VariableNode "$sha-arg-1"))
+ *     (ConceptNode "D")))
+ */
+void PutLinkUTest::test_and_compose_5()
+{
+	logger().info("BEGIN TEST: %s", __FUNCTION__);
+
+	std::string rs = _eval.eval("(load-from-path \"tests/atoms/other-put.scm\")");
+	logger().debug() << "rs = " << rs;
+
+	Instantiator inst(&_as);
+	Handle put5 = _eval.eval_h("put-5"),
+		put6 = _eval.eval_h("put-6"),
+		result5 = inst.execute(put5),
+		result6 = inst.execute(put6),
+		expected = _eval.eval_h("expected-5-6");
+
+	logger().debug() << "result5 = " << oc_to_string(result5);
+	logger().debug() << "result6 = " << oc_to_string(result6);
+	logger().debug() << "expected = " << oc_to_string(expected);
+
+	TS_ASSERT_EQUALS(result5, expected);
+	TS_ASSERT_EQUALS(result6, expected);
 
 	logger().info("END TEST: %s", __FUNCTION__);
 }
