@@ -81,6 +81,7 @@ public:
 	void test_nested_4();
 	void test_and_compose_1();
 	void test_and_compose_2();
+	void test_quoted_put();
 };
 
 #define N _as.add_node
@@ -1433,6 +1434,38 @@ void PutLinkUTest::test_and_compose_2()
 	logger().debug() << "expected = " << oc_to_string(expected);
 
 	TS_ASSERT_EQUALS(result, expected);
+
+	logger().info("END TEST: %s", __FUNCTION__);
+}
+
+/**
+ * Make sure one can build quoted PutLink like
+ *
+ * Quote
+ *   Put
+ *     Lambda
+ *       Inheritance
+ *         Variable "$X"
+ *         Variable "$Y"
+ *     Unquote Variable "$patvar"
+ */
+void PutLinkUTest::test_quoted_put()
+{
+	logger().info("BEGIN TEST: %s", __FUNCTION__);
+
+	Instantiator inst(&_as);
+	Handle quoted_put = L(QUOTE_LINK,
+	                      L(PUT_LINK,
+	                        L(LAMBDA_LINK,
+	                          L(INHERITANCE_LINK,
+	                            N(VARIABLE_NODE, "$X"),
+	                            N(VARIABLE_NODE, "$Y"))),
+	                        L(UNQUOTE_LINK,
+	                          N(VARIABLE_NODE, "$patvar"))));
+
+	logger().debug() << "quoted_put = " << oc_to_string(quoted_put);
+
+	TS_ASSERT_DIFFERS(quoted_put, nullptr);
 
 	logger().info("END TEST: %s", __FUNCTION__);
 }
