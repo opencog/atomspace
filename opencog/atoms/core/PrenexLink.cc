@@ -75,26 +75,7 @@ Handle PrenexLink::reassemble(const HandleMap& vm,
 
 	// Reassemble if necessary
 	if (not final_varlist.empty())
-	{
-		Type ntype = get_type();
-		// Due to the fact that
-		//
-		// PutLink
-		//   <vardecl>
-		//   <body>
-		//   <values>
-		//
-		// is equivalent to
-		//
-		// PutLink
-		//   Lambda
-		//     <vardecl>
-		//     <body>
-		//   <values>
-		if (ntype == PUT_LINK)
-			ntype = LAMBDA_LINK;
-		return Handle(createLink(ntype, vdecl, newbod));
-	}
+		return Handle(createLink(get_type(), vdecl, newbod));
 
 	return newbod;
 }
