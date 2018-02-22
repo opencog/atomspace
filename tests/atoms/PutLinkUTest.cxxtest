@@ -1214,7 +1214,7 @@ void PutLinkUTest::test_nested_1()
 }
 
 /**
- * Test that the following raise an exception
+ * Test that the following
  *
  * (PutLink
  *   (PutLink
@@ -1253,8 +1253,11 @@ void PutLinkUTest::test_nested_2()
 	logger().debug() << "rs = " << rs;
 
 	Instantiator inst(&_as);
-	Handle nested_put = _eval.eval_h("nested-put-2");
-	TS_ASSERT_THROWS_ANYTHING(inst.execute(nested_put));
+	Handle nested_put = _eval.eval_h("nested-put-2"),
+		result = inst.execute(nested_put),
+		expected = _eval.eval_h("expected-2");
+
+	TS_ASSERT_EQUALS(result, expected);
 
 	logger().info("END TEST: %s", __FUNCTION__);
 }
@@ -1559,12 +1562,29 @@ void PutLinkUTest::test_ill_put()
 	                              "        (VariableNode \"$g\")"
 	                              "        (VariableNode \"$texts\")"
 	                              "        (VariableNode \"$ms\")))"
-	                              "    (VariableNode \"$f\")))");
-	Handle result = inst.execute(ill_put);
+	                              "    (VariableNode \"$f\")))"),
+		result = inst.execute(ill_put),
+		expected = _eval.eval_h("(ListLink"
+		                        "  (EvaluationLink"
+		                        "    (PredicateNode \"minsup\")"
+		                        "    (ListLink"
+		                        "      (LambdaLink"
+		                        "        (VariableNode \"$x\")"
+		                        "        (VariableNode \"$x\"))"
+		                        "      (VariableNode \"$texts\")"
+		                        "      (VariableNode \"$ms\")))"
+		                        "  (EvaluationLink"
+		                        "    (PredicateNode \"minsup\")"
+		                        "    (ListLink"
+		                        "      (VariableNode \"$g\")"
+		                        "      (VariableNode \"$texts\")"
+		                        "      (VariableNode \"$ms\")))"
+		                        "  (VariableNode \"$f\"))");
 
 	logger().debug() << "result = " << oc_to_string(result);
+	logger().debug() << "expected = " << oc_to_string(expected);
 
-	TS_ASSERT_EQUALS(result, nullptr);
+	TS_ASSERT_EQUALS(result, expected);
 
 	logger().info("END TEST: %s", __FUNCTION__);
 }
