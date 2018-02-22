@@ -1,0 +1,97 @@
+/*
+ * tests/query/NestedPutUTest.cxxtest
+ *
+ * Copyright (C) 2018 OpenCog Foundation
+ * All Rights Reserved
+ *
+ * This program is free software; you can redistribute it and/or modify
+ * it under the terms of the GNU Affero General Public License v3 as
+ * published by the Free Software Foundation and including the exceptions
+ * at http://opencog.org/wiki/Licenses
+ *
+ * This program is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the
+ * GNU General Public License for more details.
+ *
+ * You should have received a copy of the GNU Affero General Public License
+ * along with this program; if not, write to:
+ * Free Software Foundation, Inc.,
+ * 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
+ */
+
+#include <opencog/guile/SchemeEval.h>
+#include <opencog/atomspace/AtomSpace.h>
+#include <opencog/query/BindLinkAPI.h>
+#include <opencog/util/Logger.h>
+
+using namespace opencog;
+
+#define an _as.add_node
+#define al _as.add_link
+
+class NestedPutUTest: public CxxTest::TestSuite
+{
+private:
+	AtomSpace _as;
+	SchemeEval _eval;
+
+public:
+	NestedPutUTest() : _eval(&_as)
+	{
+		logger().set_level(Logger::DEBUG);
+		logger().set_print_to_stdout_flag(true);
+
+		_eval.eval("(add-to-load-path \"..\")");
+		_eval.eval("(add-to-load-path \"../../..\")");
+		_eval.eval("(use-modules (opencog query))");
+	}
+
+	~NestedPutUTest()
+	{
+		// Erase the log file if no assertions failed.
+		if (!CxxTest::TestTracker::tracker().suiteFailed())
+			std::remove(logger().get_filename().c_str());
+		int rc = CxxTest::TestTracker::tracker().suiteFailed();
+		_exit(rc); // XXX hack to avoid double-free in __run_exit_handlers
+	}
+
+	void setUp();
+	void tearDown();
+
+	void test_ill_put();
+};
+
+void NestedPutUTest::tearDown()
+{
+	_as.clear();
+}
+
+void NestedPutUTest::setUp()
+{
+}
+
+/**
+ * Run a query evaluating PutLinks, including some ill-formed ones
+ * (only detectable at run-time).
+ */
+void NestedPutUTest::test_ill_put()
+{
+	logger().debug("BEGIN TEST: %s", __FUNCTION__);
+
+	_eval.eval("(load-from-path \"tests/query/ill-put.scm\")");
+
+	Handle get_put = _eval.eval_h("get-put"),
+		results = satisfying_set(&_as, get_put),
+		expected = al(SET_LINK, _eval.eval_h("put-1"));
+
+	logger().debug() << "results = " << oc_to_string(results);
+	logger().debug() << "expected = " << oc_to_string(expected);
+
+	TS_ASSERT_EQUALS(results, expected);
+
+	logger().debug("END TEST: %s", __FUNCTION__);
+}
+
+#undef an
+#undef al

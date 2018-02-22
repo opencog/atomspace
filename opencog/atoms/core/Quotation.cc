@@ -89,16 +89,21 @@ bool Quotation::operator==(const Quotation& quotation) const
 		and (_local_quote == quotation._local_quote);
 }
 
-std::string Quotation::to_string() const
+std::string Quotation::to_string(const std::string& indent) const
 {
 	std::stringstream ss;
-	ss << "{level = " << _quotation_level << ", local = " << _local_quote << "}";
+	ss << indent << "{level = " << _quotation_level
+	   << ", local = " << _local_quote << "}" << std::endl;
 	return ss.str();
 }
 
+std::string oc_to_string(const Quotation& quotation, const std::string& indent)
+{
+	return quotation.to_string(indent);
+}
 std::string oc_to_string(const Quotation& quotation)
 {
-	return quotation.to_string();
+	return oc_to_string(quotation, "");
 }
 	
 } // namespace opencog

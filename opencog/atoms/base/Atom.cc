@@ -437,12 +437,13 @@ std::string Atom::id_to_string() const
         std::string("[") + (_atom_space? std::to_string(_atom_space->_atom_table.get_uuid()) : std::string("-1")) + "]";
 }
 
-std::string oc_to_string(const IncomingSet& iset)
+std::string oc_to_string(const IncomingSet& iset, const std::string& indent)
 {
 	std::stringstream ss;
-	ss << "size = " << iset.size() << std::endl;
+	ss << indent << "size = " << iset.size() << std::endl;
 	for (unsigned i = 0; i < iset.size(); i++)
-		ss << "link[" << i << "]:" << std::endl << iset[i]->to_string();
+		ss << indent << "link[" << i << "]:" << std::endl
+		   << iset[i]->to_string(indent + OC_TO_STRING_INDENT);
 	return ss.str();
 }
 

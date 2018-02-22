@@ -9,15 +9,8 @@ Example of how to obtain atom type names and atom type IDs in Python
 __author__ = 'Cosmo Harrigan'
 
 from opencog.atomspace import AtomSpace, types, get_type_name
-from opencog.scheme_wrapper import load_scm
 
 atomspace = AtomSpace()
-
-data = ["opencog/atomspace/core_types.scm",
-        "opencog/scm/utilities.scm"]
-
-for item in data:
-    load_scm(atomspace, item)
 
 atom = atomspace.add(types.ConceptNode, "Frog #1")
 

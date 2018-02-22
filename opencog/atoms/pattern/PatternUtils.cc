@@ -63,7 +63,8 @@ namespace opencog {
  */
 bool remove_constants(const HandleSet &vars,
                       Pattern &pat,
-                      HandleSeqSeq &components,
+                      HandleSeqSeq& components,
+                      HandleSeq& component_patterns,
                       const AtomSpace &queried_as)
 {
 	bool modified = false;
@@ -79,10 +80,18 @@ bool remove_constants(const HandleSet &vars,
 			pat.constants.emplace_back(clause);
 			i = pat.clauses.erase(i);
 
-			// remove the clause from _components.
+			// remove the clause from components and component_patterns
 			auto j = boost::find(components, HandleSeq{clause});
 			if (j != components.end())
+			{
 				components.erase(j);
+				if (not component_patterns.empty())
+				{
+					auto cpj = std::next(component_patterns.begin(),
+					                     std::distance(components.begin(), j));
+					component_patterns.erase(cpj);
+				}
+			}
 
 			// remove the clause from _pattern_mandatory.
 			auto m = boost::find(pat.mandatory, clause);

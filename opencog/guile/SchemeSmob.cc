@@ -229,6 +229,28 @@ void SchemeSmob::module_init(void*)
 	// This needs to stay in sync with /opencog/scm/opencog.scm
 	scm_c_eval_string("(add-to-load-path \"/usr/local/share/opencog/scm\")");
 
+	// Set the library load path, so that other modules can find
+	// thier libraries. Copied from `scm/opencog.scm` and should stay
+	// in sync with that file.  This is NOT needed for ordinary usage
+	// from the guile REPL, but is needed by the unit tests.  The problem
+	// is that the unit tests create SchemeEval class directly, which
+	// causes this code here to run, which defines the opencog scheme
+	// module. Thus, a later `(use-modules opencog)` is a no-op because
+	// guile thinks that it already has done this. But it really hasn't;
+	// the contents of `opencog.scm` were never actually run. So what
+	// we do is to manually run the contents of that file, below.
+	// Something more elegant would be nice.
+	//
+	// lib64 is used by various versions of CentOS
+	scm_c_eval_string(
+		"(define path \"/usr/local/lib/opencog:/usr/local/lib64/opencog\")");
+
+	scm_c_eval_string(
+		"(setenv \"LTDL_LIBRARY_PATH\""
+		"   (if (getenv \"LTDL_LIBRARY_PATH\")"
+		"      (string-append (getenv \"LTDL_LIBRARY_PATH\") \":\" path)"
+		"      path))");
+
 #define DO_THE_UBER_BAD_HACKERY_FOR_EFFING_UNIT_TESTS_GRRRR
 #ifdef DO_THE_UBER_BAD_HACKERY_FOR_EFFING_UNIT_TESTS_GRRRR
 	// Loading files from the project directory is broken by design.

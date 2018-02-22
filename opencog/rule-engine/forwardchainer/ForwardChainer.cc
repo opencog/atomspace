@@ -222,7 +222,7 @@ Handle ForwardChainer::select_source()
 	                     << selsrc_size << "/" << _potential_sources.size();
 
 	URECommons urec(_as);
-	map<Handle, float> tournament_elem;
+	map<Handle, double> tournament_elem;
 
 	const UnorderedHandleSet& to_select_sources =
 		_unselected_sources.empty() ? _potential_sources : _unselected_sources;
@@ -263,12 +263,11 @@ An attentionbank is needed in order to get the STI...
 
 Rule ForwardChainer::select_rule(const Handle& source)
 {
-	// TODO: fix rule selection to use the full rule TV (strength and
-	// confidence).
-	std::map<const Rule*, float> rule_weight;
+	URECommons urec(_as);
+	std::map<const Rule*, double> rule_weight;
 	for (const Rule& r : _rules)
 		if (not r.is_meta())
-			rule_weight[&r] = r.get_tv()->get_mean();
+			rule_weight[&r] = urec.tv_fitness(r.get_rule());
 
 	ure_logger().debug("%d rules to be searched as matched against the source",
 	                   rule_weight.size());
@@ -312,28 +311,33 @@ UnorderedHandleSet ForwardChainer::apply_rule(const Rule& rule)
 {
 	HandleSeq results;
 
-	if (_search_focus_set) {
-		// rule.get_rule() may introduce a new atom that satisfies
-		// condition for the output. In order to prevent this
-		// undesirable effect, lets store rule.get_rule() in a child
-		// atomspace of parent focus_set_as so that PM will never be
-		// able to find this new undesired atom created from partial
-		// grounding.
-		AtomSpace derived_rule_as(&_focus_set_as);
-		Handle rhcpy = derived_rule_as.add_atom(rule.get_rule());
-		BindLinkPtr bl = BindLinkCast(rhcpy);
-		FocusSetPMCB fs_pmcb(&derived_rule_as, &_as);
-		fs_pmcb.implicand = bl->get_implicand();
-		bl->imply(fs_pmcb, &_focus_set_as, false);
-		results = fs_pmcb.get_result_list();
+	// Wrap in try/catch in case the pattern matcher can't handle it
+	try
+	{
+		if (_search_focus_set) {
+			// rule.get_rule() may introduce a new atom that satisfies
+			// condition for the output. In order to prevent this
+			// undesirable effect, lets store rule.get_rule() in a
+			// child atomspace of parent focus_set_as so that PM will
+			// never be able to find this new undesired atom created
+			// from partial grounding.
+			AtomSpace derived_rule_as(&_focus_set_as);
+			Handle rhcpy = derived_rule_as.add_atom(rule.get_rule());
+			BindLinkPtr bl = BindLinkCast(rhcpy);
+			FocusSetPMCB fs_pmcb(&derived_rule_as, &_as);
+			fs_pmcb.implicand = bl->get_implicand();
+			bl->imply(fs_pmcb, &_focus_set_as, false);
+			results = fs_pmcb.get_result_list();
+		}
+		// Search the whole atomspace.
+		else {
+			AtomSpace derived_rule_as(&_as);
+			Handle rhcpy = derived_rule_as.add_atom(rule.get_rule());
+			Handle h = bindlink(&_as, rhcpy);
+			results = h->getOutgoingSet();
+		}
 	}
-	// Search the whole atomspace.
-	else {
-		AtomSpace derived_rule_as(&_as);
-		Handle rhcpy = derived_rule_as.add_atom(rule.get_rule());
-		Handle h = bindlink(&_as, rhcpy);
-		results = h->getOutgoingSet();
-	}
+	catch (...) {}
 
 	// Take the results from applying the rule and add them in the
 	// given AtomSpace

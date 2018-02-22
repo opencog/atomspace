@@ -446,11 +446,12 @@ Handle Rule::apply(AtomSpace& as) const
 	return bindlink(&as, Handle(_rule));
 }
 
-std::string Rule::to_string() const
+std::string Rule::to_string(const std::string& indent) const
 {
 	std::stringstream ss;
-	ss << "name: " << _name << std::endl
-	   << "rule:" << std::endl << _rule->to_string();
+	ss << indent << "name: " << _name << std::endl
+	   << indent << "rule:" << std::endl
+	   << _rule->to_string(indent + OC_TO_STRING_INDENT);
 	return ss.str();
 }
 
@@ -562,40 +563,59 @@ Rule Rule::substituted(const Unify::TypedSubstitution& ts) const
 	return new_rule;
 }
 
+std::string oc_to_string(const Rule& rule, const std::string& indent)
+{
+	return rule.to_string(indent);
+}
 std::string oc_to_string(const Rule& rule)
 {
-	return rule.to_string();
+	return oc_to_string(rule, "");
 }
-
-std::string oc_to_string(const RuleSet& rules)
+std::string oc_to_string(const RuleSet& rules, const std::string& indent)
 {
 	std::stringstream ss;
-	ss << "size = " << rules.size() << std::endl;
+	ss << indent << "size = " << rules.size() << std::endl;
 	size_t i = 0;
 	for (const Rule& rule : rules)
-		ss << "rule[" << i++ << "]:" << std::endl
-		   << oc_to_string(rule) << std::endl;
+		ss << indent << "rule[" << i++ << "]:" << std::endl
+		   << oc_to_string(rule, indent + OC_TO_STRING_INDENT) << std::endl;
 	return ss.str();
 }
-
+std::string oc_to_string(const RuleSet& rules)
+{
+	return oc_to_string(rules, "");
+}
+std::string oc_to_string(const RuleTypedSubstitutionPair& rule_ts,
+                         const std::string& indent)
+{
+	std::stringstream ss;
+	ss << indent << "rule:" << std::endl
+	   << oc_to_string(rule_ts.first, indent + OC_TO_STRING_INDENT)
+	   << std::endl;
+	ss << indent << "typed substitutions:" << std::endl
+	   << oc_to_string(rule_ts.second, indent + OC_TO_STRING_INDENT)
+	   << std::endl;
+	return ss.str();
+}
 std::string oc_to_string(const RuleTypedSubstitutionPair& rule_ts)
 {
-	std::stringstream ss;
-	ss << "rule:" << std::endl << oc_to_string(rule_ts.first) << std::endl;
-	ss << "typed substitutions:" << std::endl
-	   << oc_to_string(rule_ts.second) << std::endl;
-	return ss.str();
+	return oc_to_string(rule_ts, "");
 }
-
-std::string oc_to_string(const RuleTypedSubstitutionMap& rules)
+std::string oc_to_string(const RuleTypedSubstitutionMap& rules,
+                         const std::string& indent)
 {
 	std::stringstream ss;
-	ss << "size = " << rules.size() << std::endl;
+	ss << indent << "size = " << rules.size() << std::endl;
 	size_t i = 0;
 	for (const RuleTypedSubstitutionPair& rule : rules)
-		ss << "rule[" << i++ << "]:" << std::endl
-		   << oc_to_string(rule) << std::endl;
+		ss << indent << "rule[" << i++ << "]:" << std::endl
+		   << oc_to_string(rule, indent + OC_TO_STRING_INDENT)
+		   << std::endl;
 	return ss.str();
+}
+std::string oc_to_string(const RuleTypedSubstitutionMap& rules)
+{
+	return oc_to_string(rules, "");
 }
 
 } // ~namespace opencog

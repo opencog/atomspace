@@ -422,6 +422,18 @@ Handle gen_vardecl(const Handle& h, const Handle& vardecl)
 	return vardecl;
 }
 
+Handle gen_vardecl(const HandleSeq& varlist)
+{
+	if (varlist.empty())
+		return Handle::UNDEFINED;
+
+	Handle vardecl;
+	if (1 == varlist.size())
+		return varlist[0];
+	else
+		return Handle(createVariableList(varlist));
+}
+
 } // ~namespace opencog
 
 /* ===================== END OF FILE ===================== */

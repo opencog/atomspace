@@ -1,14 +1,14 @@
 # 
-# Test Functions preloaded into the CogServer
+# Test Functions
 
 from opencog.atomspace import types, Atom, TruthValue
 from opencog.type_constructors import *
 
 def print_arguments(argOne, argTwo):
-    print "argOne = ", argOne
-    print "argTwo = ", argTwo
+    print ("argOne = ", argOne)
+    print ("argTwo = ", argTwo)
     atom = ATOMSPACE.add_link(types.ListLink, [argOne, argTwo])
-    print "atom = ", atom
+    print ("atom = ", atom)
     return atom
 
 def add_link(atom_one, atom_two):
@@ -47,15 +47,15 @@ def stop_go(atom):
     compare_green = ConceptNode("green light")
     compare_red = ConceptNode("red light")
     if atom == compare_green:
-        print "got a green light!"
+        print ("got a green light!")
         increment_green()
         return TruthValue(1,1)
     elif atom == compare_red:
-        print "got a red light"
+        print ("got a red light")
         increment_red()
         return TruthValue(0,1)
     else:
-        print "got no match :-("
+        print ("got no match :-(")
         assert(false)
 
     return TruthValue(0,0)

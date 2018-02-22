@@ -673,7 +673,7 @@ Or copy lib/opencog.conf to your build directory, edit the copy, and
 start the opencog server from your build folder as:
 
 ```
-   $ ./opencog/server/cogserver -c my.conf
+   $ ./opencog/cogserver/server/cogserver -c my.conf
 ```
 
 Verify that everything works. Start the cogserver, and bulk-save.

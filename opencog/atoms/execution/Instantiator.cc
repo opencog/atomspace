@@ -34,6 +34,11 @@
 
 using namespace opencog;
 
+Instantiator::Instantiator(AtomSpace* as)
+	: _as(as), _vmap(nullptr), _halt(false),
+	  _consume_quotations(true),
+	  _needless_quotation(true),
+	  _eager(true) {}
 
 /// Perform beta-reduction on the expression `expr`, using the `vmap`
 /// to fish out values for variables.  The map holds pairs: the first
@@ -109,13 +114,27 @@ Handle Instantiator::walk_tree(const Handle& expr, bool silent)
 
 	// Discard the following QuoteLink, UnquoteLink or LocalQuoteLink
 	// as it is serving its quoting or unquoting function.
-	if (_avoid_discarding_quotes_level == 0 and context_cp.consumable(t))
+	if ((_consume_quotations or _needless_quotation) and
+	    context_cp.consumable(t))
 	{
 		if (1 != expr->get_arity())
 			throw InvalidParamException(TRACE_INFO,
 			                            "QuoteLink/UnquoteLink has "
 			                            "unexpected arity!");
-		return walk_tree(expr->getOutgoingAtom(0), silent);
+		Handle child = expr->getOutgoingAtom(0);
+		Handle walked_child = walk_tree(child, silent);
+
+		// Only consume if the quotation is really needless (walking
+		// the children might have changed _needless_quotation).
+		if (_consume_quotations or _needless_quotation)
+			return walked_child;
+
+		// Otherwise keep the quotation, but set _needless_quotation
+		// back to true for the remaining tree
+		_needless_quotation = true;
+		Handle nexp(createLink(t, walked_child));
+		nexp->copyValues(expr);
+		return nexp;
 	}
 
 	if (expr->is_node())
@@ -164,7 +183,12 @@ Handle Instantiator::walk_tree(const Handle& expr, bool silent)
 	// never for bound ones.
 
 	if (context_cp.is_quoted())
+	{
+		// Make sure we don't consume a useful quotation
+		if (not_self_match(t))
+			_needless_quotation = false;
 		goto mere_recursive_call;
+	}
 
 	// Reduce PutLinks. There are two ways to do this: eager execution
 	// and lazy execution.  The algos are this:
@@ -184,7 +208,7 @@ Handle Instantiator::walk_tree(const Handle& expr, bool silent)
 		{
 			ppp = PutLinkCast(expr);
 			// Execute the values in the PutLink before doing the
-			// beta-reduction. Execute the body only after the
+			// beta-reduction. Execute the PutLink only after the
 			// beta-reduction has been done.
 			Handle pvals = ppp->get_values();
 			Handle gargs = walk_tree(pvals, silent);
@@ -205,6 +229,7 @@ Handle Instantiator::walk_tree(const Handle& expr, bool silent)
 		}
 
 		// Step one: beta-reduce.
+		ppp->make_silent(silent);
 		Handle red(ppp->reduce());
 
 		if (nullptr == red)
@@ -242,6 +267,54 @@ Handle Instantiator::walk_tree(const Handle& expr, bool silent)
 		}
 		catch (const NotEvaluatableException& ex) {}
 		return rex;
+	}
+
+	// LambdaLink may get special treatment in case it is used for
+	// pattern matching. For instance if a connector is quoted, we
+	// don't want to consume that quote otherwise the connector will
+	// serve as a logic connector to the pattern matcher instead of
+	// serving as self-match.
+	if (LAMBDA_LINK == t)
+	{
+		LambdaLinkPtr ll = LambdaLinkCast(expr);
+		Handle vardecl = ll->get_vardecl();
+
+		// Recursively walk vardecl
+		if (vardecl)
+			vardecl = walk_tree(vardecl, silent);
+
+		// Recursively walk body, making sure quotation is preserved
+		Handle body = ll->get_body();
+		// If the lambda is ill-formed it might not have a body, throw
+		// an exception then
+		if (not body)
+		{
+			if (silent)
+				throw NotEvaluatableException();
+			throw SyntaxException(TRACE_INFO, "body is ill-formed");
+		}
+		Type bt = body->get_type();
+		if (Quotation::is_quotation_type(bt))
+		{
+			_context.update(body);
+			_needless_quotation = false;
+			body = walk_tree(body->getOutgoingAtom(0), silent);
+			body = createLink(bt, body);
+			_needless_quotation = true;
+		} else
+		{
+			body = walk_tree(body, silent);
+		}
+		// Reconstruct Lambda, if it has changed
+		if (ll->get_vardecl() != vardecl or ll->get_body() != body)
+		{
+			HandleSeq oset{body};
+			if (vardecl)
+				oset.insert(oset.begin(), vardecl);
+			// TODO: copy values
+			return createLink(oset, LAMBDA_LINK);
+		}
+		return expr;
 	}
 
 	// ExecutionOutputLinks get special treatment.
@@ -282,9 +355,7 @@ Handle Instantiator::walk_tree(const Handle& expr, bool silent)
 			// Perform substitution on the args, only.
 			if (_eager)
 			{
-				_avoid_discarding_quotes_level++;
 				args = walk_tree(args, silent);
-				_avoid_discarding_quotes_level--;
 			}
 			else
 			{
@@ -304,9 +375,7 @@ Handle Instantiator::walk_tree(const Handle& expr, bool silent)
 			// execution of its arguments. So the step below should not
 			// be needed -- yet, it is ... Funny thing is, it only
 			// breaks the BackwardChainerUTest ... why?
-			_avoid_discarding_quotes_level++;
 			args = walk_tree(args, silent);
-			_avoid_discarding_quotes_level--;
 		}
 		else
 		{
@@ -433,6 +502,15 @@ mere_recursive_call:
 	return expr;
 }
 
+bool Instantiator::not_self_match(Type t)
+{
+	return classserver().isA(t, SCOPE_LINK) or
+		classserver().isA(t, FUNCTION_LINK) or
+		classserver().isA(t, DELETE_LINK) or
+		classserver().isA(t, VIRTUAL_LINK) or
+		classserver().isA(t, DONT_EXEC_LINK);
+}
+
 /**
  * instantiate -- create a grounded expression from an ungrounded one.
  *
@@ -456,7 +534,7 @@ Handle Instantiator::instantiate(const Handle& expr,
 			"Asked to ground a null expression");
 
 	_context = Context(false);
-	_avoid_discarding_quotes_level = 0;
+	_needless_quotation = true;
 
 	_vmap = &vars;
 

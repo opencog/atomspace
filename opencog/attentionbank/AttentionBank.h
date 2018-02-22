@@ -26,7 +26,6 @@
 #ifndef _OPENCOG_ATTENTION_BANK_H
 #define _OPENCOG_ATTENTION_BANK_H
 
-#include <atomic>
 #include <mutex>
 #include <unordered_map>
 
@@ -54,8 +53,10 @@ typedef SigSlot<const Handle&,
 class AtomSpace;
 class AttentionBank
 {
-    std::mutex AFMutex;
-    unsigned int minAFSize;
+    std::mutex _mtx; // For synchronizing STI & LTI funds update
+    std::mutex AFMutex; // For AF fetching and update
+
+    unsigned int maxAFSize;
     struct compare_sti_less {
         bool operator()(const std::pair<Handle, AttentionValuePtr>& h1,
                         const std::pair<Handle, AttentionValuePtr>& h2)
@@ -65,7 +66,7 @@ class AttentionBank
     };
     std::multiset<std::pair<Handle, AttentionValuePtr>, compare_sti_less> attentionalFocus;
 
-    void updateAttentionalFocus(const Handle&, const AttentionValuePtr&, 
+    void updateAttentionalFocus(const Handle&, const AttentionValuePtr&,
                                 const AttentionValuePtr&);
     
     /** AV changes */
@@ -81,15 +82,11 @@ class AttentionBank
     AFCHSigl _AddAFSignal;
     AFCHSigl _RemoveAFSignal;
 
-    /**
-     * The amount importance funds available in the AttentionBank.
-     * Atomic, so that updates don't need a lock.
-     */
-    std::atomic_long fundsSTI;
-    std::atomic_long fundsLTI;
+    AttentionValue::sti_t fundsSTI;
+    AttentionValue::lti_t fundsLTI;
 
-    long startingFundsSTI;
-    long startingFundsLTI;
+    AttentionValue::sti_t startingFundsSTI;
+    AttentionValue::lti_t startingFundsLTI;
 
     AttentionValue::sti_t stiFundsBuffer;
     AttentionValue::lti_t ltiFundsBuffer;
@@ -136,11 +133,11 @@ public:
     }
 
     void set_af_size(int size) {
-        minAFSize = size;
+        maxAFSize = size;
     }
 
     int get_af_size(void) {
-        return minAFSize;
+        return maxAFSize;
     }
 
     /**
@@ -168,8 +165,8 @@ public:
      *
      * @return total STI in the AttentionBank
      */
-    long getTotalSTI() const {
-        return startingFundsSTI - fundsSTI;
+    AttentionValue::sti_t getTotalSTI() const {
+        return startingFundsSTI - (AttentionValue::sti_t)fundsSTI;
     }
 
     /**
@@ -178,8 +175,8 @@ public:
      *
      * @return total LTI in the AttentionBank
      */
-    long getTotalLTI() const {
-        return startingFundsLTI - fundsLTI;
+    AttentionValue::lti_t getTotalLTI() const {
+        return startingFundsLTI - (AttentionValue::lti_t)fundsLTI;
     }
 
     /**
@@ -187,22 +184,18 @@ public:
      *
      * @return STI funds available
      */
-    long getSTIFunds() const { return fundsSTI; }
+    AttentionValue::sti_t getSTIFunds() const { return fundsSTI; }
 
     /**
      * Get the LTI funds available in the AttentionBank pool.
      *
      * @return LTI funds available
      */
-    long getLTIFunds() const { return fundsLTI; }
+    AttentionValue::lti_t getLTIFunds() const { return fundsLTI; }
 
-    long updateSTIFunds(AttentionValue::sti_t diff) {
-        return fundsSTI += diff;
-    }
+    AttentionValue::sti_t getSTIFundsBuffer(){ return stiFundsBuffer;}
 
-    long updateLTIFunds(AttentionValue::lti_t diff) {
-        return fundsLTI += diff;
-    }
+    AttentionValue::lti_t getLTIFundsBuffer(){ return ltiFundsBuffer;}
 
     AttentionValue::sti_t calculateSTIWage(void);
 
@@ -273,11 +266,8 @@ public:
         return _importanceIndex;
     }
 
-    /// Return a random atom drawn from the importanceBin.
-    Handle getRandomAtom(void) const
-    {
-        return _importanceIndex.getRandomAtom();
-    }
+    /// Return a random atom drawn from outside the AF.
+    Handle getRandomAtomNotInAF(void);
 
     AttentionValue::sti_t getMinSTI(bool average=true) const
     {

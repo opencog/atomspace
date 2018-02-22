@@ -84,23 +84,33 @@ double ActionSelection::Pi(size_t i,
 	return result;
 }
 
-std::string oc_to_string(const ActionSelection& asel)
+std::string oc_to_string(const ActionSelection& asel, const std::string& indent)
 {
 	std::stringstream ss;
-	ss << "action2tv:" << std::endl << oc_to_string(asel.action2tv);
+	ss << indent << "action2tv:" << std::endl
+	   << oc_to_string(asel.action2tv, indent + OC_TO_STRING_INDENT);
 	return ss.str();
 }
-
-std::string oc_to_string(const HandleTVMap& h2tv)
+std::string oc_to_string(const ActionSelection& asel)
+{
+	return oc_to_string(asel, "");
+}
+std::string oc_to_string(const HandleTVMap& h2tv, const std::string& indent)
 {
 	std::stringstream ss;
-	ss << "size = " << h2tv.size() << std::endl;
+	ss << indent << "size = " << h2tv.size() << std::endl;
 	int i = 0;
 	for (const auto& htv : h2tv) {
-		ss << "atom[" << i << "]:" << std::endl << oc_to_string(htv.first);
-		ss << "tv[" << i << "]:" << oc_to_string(htv.second) << std::endl;
+		ss << indent << "atom[" << i << "]:" << std::endl
+		   << oc_to_string(htv.first, indent + OC_TO_STRING_INDENT);
+		ss << indent << "tv[" << i << "]:"
+		   << oc_to_string(htv.second) << std::endl;
 	}
 	return ss.str();
+}
+std::string oc_to_string(const HandleTVMap& h2tv)
+{
+	return oc_to_string(h2tv, "");
 }
 
 } // ~namespace opencog

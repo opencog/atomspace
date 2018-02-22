@@ -9,17 +9,8 @@
 
 using namespace opencog;
 
-
-void opencog::initialize_opencog(AtomSpace* atomSpace, const char* configFile)
+void opencog::initialize_opencog(AtomSpace* atomSpace)
 {
-    // Load the config file if one was passed in.
-    if (configFile)
-    {
-        // Load the config file.
-        config().load(configFile);
-        logger().debug("initialize_opencog - config file loaded");
-    }
-
     // Initialize Python.
     logger().debug("initialize_opencog - initializing Python");
     global_python_initialize();
@@ -37,10 +28,4 @@ void opencog::finalize_opencog()
 
     // Cleanup Python.
     global_python_finalize();
-}
-
-void opencog::configuration_load(const char* configFile)
-{
-    if (configFile)
-        Config().load(configFile);
 }

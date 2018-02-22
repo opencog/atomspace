@@ -12,7 +12,7 @@ extern "C"
     using namespace opencog;
 
     /**
-     * FloatValue_toRawType Turns a TruthValuePtr ito
+     * FloatValue_toRawType Turns a FloatValuePtr ito
      *                      something that haskell interface
      *                      can work with
      *

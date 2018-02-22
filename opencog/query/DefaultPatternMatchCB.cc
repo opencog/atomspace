@@ -576,7 +576,28 @@ bool DefaultPatternMatchCB::eval_term(const Handle& virt,
 	// grounding might be insane.  So we put it here. This is probably
 	// not very efficient, but will do for now...
 
-	Handle gvirt(_instor->instantiate(virt, gnds));
+	Handle gvirt;
+	try
+	{
+		gvirt = _instor->instantiate(virt, gnds, true);
+	}
+	catch (const SilentException& ex)
+	{
+		// The evaluation above can throw an exception if the
+		// instantiation turns out to be ill-formed. If so assume it
+		// has failed.
+		//
+		// TODO: it would probably be preferable to put this try/catch
+		// around the eval_sentence call in
+		// Satisfier::search_finished, because in case such virtual
+		// term is embdded in a NotLink returning false here is gonna
+		// validate the NotLink, which might not be desirable. The
+		// main reason it is here now is is order to easily access
+		// _instor to reset Instantiator::_halt and avoid falsely
+		// detecting infinite recursion.
+		_instor->reset_halt();
+		return false;
+	}
 
 	DO_LOG({LAZY_LOG_FINE << "Enter eval_term CB with virt=" << std::endl
 	              << virt->to_short_string() << std::endl;})
@@ -634,7 +655,7 @@ bool DefaultPatternMatchCB::eval_term(const Handle& virt,
 		{
 			tvp = EvaluationLink::do_eval_scratch(_as, gvirt, _temp_aspace, true);
 		}
-		catch (const NotEvaluatableException& ex)
+		catch (const SilentException& ex)
 		{
 			// The do_evaluate() above can throw if its given ungrounded
 			// expressions. It can be given ungrounded expressions if

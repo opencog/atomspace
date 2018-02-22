@@ -21,6 +21,9 @@
  * 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
  */
 
+#ifdef __APPLE__
+  #include <cmath>
+#endif
 #include <algorithm>
 #include <boost/range/adaptor/reversed.hpp>
 
@@ -51,7 +54,6 @@ using namespace opencog;
 ImportanceIndex::ImportanceIndex()
     : _index(IMPORTANCE_INDEX_SIZE+1)
 {
-    minAFSize = config().get_int("ECAN_MIN_AF_SIZE", 100);
 }
 
 size_t ImportanceIndex::importanceBin(AttentionValue::sti_t impo)
@@ -95,7 +97,6 @@ void ImportanceIndex::updateImportance(const Handle& h,
 
     _index.remove(oldbin, h);
     _index.insert(newbin, h);
-    updateTopStiValues(h);
 }
 
 // ==============================================================
@@ -109,53 +110,6 @@ void ImportanceIndex::removeAtom(const Handle& h)
 
     std::lock_guard<std::mutex> lock(_mtx);
     _index.remove(bin, h);
-
-    // Also remove from topKSTIValueHandles vector
-    auto it = std::find_if(
-            topKSTIValuedHandles.begin(),
-            topKSTIValuedHandles.end(),
-            [&h](const HandleSTIPair& p) {return p.first == h; });
-    if (it != topKSTIValuedHandles.end()) topKSTIValuedHandles.erase(it);
-    //TODO Find the next highest STI valued atom to replace the removed one.
-}
-
-// ==============================================================
-
-void ImportanceIndex::updateTopStiValues(const Handle& h)
-{
-    std::lock_guard<std::mutex> lock(_mtx);
-
-    auto insertHandle = [this](Handle h)
-    {
-        // delete if this handle is already in the vector. TODO find efficient
-        // way of doing this.
-        auto it = std::find_if(topKSTIValuedHandles.begin(),
-                               topKSTIValuedHandles.end(),
-                               [&h](HandleSTIPair p)
-                                    { return p.first == h; });
-
-        if (it != topKSTIValuedHandles.end()) topKSTIValuedHandles.erase(it);
-
-        HandleSTIPair p(h, get_sti(h));
-        it = std::lower_bound(topKSTIValuedHandles.begin(),
-                              topKSTIValuedHandles.end(), p,
-                [=](const HandleSTIPair& hsti1, const HandleSTIPair& hsti2)
-                {
-                      return hsti1.second < hsti2.second;
-                });
-        topKSTIValuedHandles.insert(it, HandleSTIPair(h, get_sti(h)));
-    };
-
-    AttentionValue::sti_t sti = get_sti(h);
-    if (static_cast<int>(topKSTIValuedHandles.size()) < minAFSize)
-    {
-        insertHandle(h);
-    }
-    else if (topKSTIValuedHandles.begin()->second < sti)
-    {
-        topKSTIValuedHandles.erase(topKSTIValuedHandles.begin());
-        insertHandle(h);
-    }
 }
 
 // ==============================================================
@@ -253,6 +207,11 @@ UnorderedHandleSet ImportanceIndex::getHandleSet(
     return ret;
 }
 
+Handle ImportanceIndex::getRandomAtom(void) const
+{
+   return  _index.getRandomAtom();
+}
+
 UnorderedHandleSet ImportanceIndex::getMaxBinContents()
 {
     UnorderedHandleSet ret;
@@ -281,15 +240,6 @@ UnorderedHandleSet ImportanceIndex::getMinBinContents()
         }
     }
     return ret;
-}
-
-HandleSeq ImportanceIndex::getTopSTIValuedHandles()
-{
-    std::lock_guard<std::mutex> lock(_mtx);
-    HandleSeq hseq;
-    for (const HandleSTIPair& p : topKSTIValuedHandles)
-        hseq.push_back(p.first);
-    return  hseq;
 }
 
 size_t ImportanceIndex::bin_size() const

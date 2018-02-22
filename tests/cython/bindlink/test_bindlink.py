@@ -24,7 +24,7 @@ class BindlinkTest(TestCase):
     starting_size = 0
 
     def setUp(self):
-        print "setUp - atomspace = ", self.atomspace
+        print ("setUp - atomspace = ", self.atomspace)
 
         # Clear atoms from previous test
         self.atomspace.clear()
@@ -70,7 +70,7 @@ class BindlinkTest(TestCase):
 
 
     def tearDown(self):
-        print "tearDown - atomspace = ", self.atomspace
+        print ("tearDown - atomspace = ", self.atomspace)
 
         # Can't do this; finalize can be called only once, ever, and
         # then never again.  The second call will never follow through.

@@ -69,21 +69,13 @@ PrenexLink::PrenexLink(const Link &l)
 Handle PrenexLink::reassemble(const HandleMap& vm,
                               const HandleSeq& final_varlist) const
 {
-	const Variables& vtool = get_variables();
+	// Now get the vardecl and body
+	Handle vdecl = gen_vardecl(final_varlist);
+	Handle newbod = RewriteLink::substitute_body(vdecl, _body, vm);
 
-	// Now get the new body...
-	Handle newbod = vtool.substitute(_body, vm, _silent);
-
-	if (0 < final_varlist.size())
-	{
-		Handle vdecl;
-		if (1 == final_varlist.size())
-			vdecl = final_varlist[0];
-		else
-			vdecl = Handle(createVariableList(final_varlist));
-
+	// Reassemble if necessary
+	if (not final_varlist.empty())
 		return Handle(createLink(get_type(), vdecl, newbod));
-	}
 
 	return newbod;
 }
@@ -152,8 +144,8 @@ Handle PrenexLink::beta_reduce(const HandleSeq& seq) const
 	// If its an eta, it had better have the right size.
 	ScopeLinkPtr lam(ScopeLinkCast(seq[0]));
 	const Handle& body = lam->get_body();
-	if (body->get_arity() != vtool.size() or
-	    body->get_type() != LIST_LINK)
+	if (body->get_type() != LIST_LINK or
+	    body->get_arity() != vtool.size())
 	{
 		if (_silent) throw TypeCheckException();
 		throw SyntaxException(TRACE_INFO,
@@ -201,7 +193,7 @@ Handle PrenexLink::beta_reduce(const HandleMap& vmap) const
 	HandleSet used_vars;
 	HandleMap issued;
 
-	Variables vtool = get_variables();
+	const Variables& vtool = get_variables();
 	for (const Handle& var : vtool.varseq)
 	{
 		// If we are not substituting for this variable, copy it
@@ -235,7 +227,7 @@ Handle PrenexLink::beta_reduce(const HandleMap& vmap) const
 		if (classserver().isA(valuetype, SCOPE_LINK))
 		{
 			ScopeLinkPtr sc = ScopeLinkCast(pare->second);
-			Variables bound = sc->get_variables();
+			const Variables& bound = sc->get_variables();
 			Handle body = sc->get_body();
 
 			// The body might not exist, if there's an unmantched

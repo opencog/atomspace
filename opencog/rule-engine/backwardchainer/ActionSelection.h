@@ -82,7 +82,14 @@ private:
 	double Pi(size_t i, const std::vector<std::vector<double>>& cdfs) const;
 };
 
+// Debugging helpers see
+// http://wiki.opencog.org/w/Development_standards#Print_OpenCog_Objects
+// The reason indent is not an optional argument with default is
+// because gdb doesn't support that, see
+// http://stackoverflow.com/questions/16734783 for more explanation.
+std::string	oc_to_string(const ActionSelection& asel, const std::string& indent);
 std::string	oc_to_string(const ActionSelection& asel);
+std::string	oc_to_string(const HandleTVMap& h2tv, const std::string& indent);
 std::string	oc_to_string(const HandleTVMap& h2tv);
 
 } // namespace opencog

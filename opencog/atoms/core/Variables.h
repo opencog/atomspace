@@ -63,6 +63,10 @@ struct FreeVariables
 	typedef std::map<Handle, unsigned int> IndexMap;
 	IndexMap index;
 
+	// CTor, convenient for  unit tests, so far
+	FreeVariables() {}
+	FreeVariables(const std::initializer_list<Handle>& variables);
+
 	/// Return true if the variables in this, and other, are the same
 	/// variables (have exactly the same variable names.)
 	bool is_identical(const FreeVariables& other) const;
@@ -70,6 +74,18 @@ struct FreeVariables
 	/// Return true if variable `var` is in this variableset.
 	bool is_in_varset(const Handle& v) const {
 		return varset.end() != varset.find(v);
+	}
+
+	/// Return true if all variables within the given range is in
+	/// varset.
+	template<typename It>
+	bool are_in_varset(It from, It to) const {
+		return std::all_of(from, to, [&](const Handle& v)
+		                   { return is_in_varset(v); });
+	}
+	template <typename C>
+	bool are_in_varset(const C& c) const {
+		return are_in_varset(c.begin(), c.end());
 	}
 
 	/// Create an ordered set of the free variables in the given oset.
@@ -148,6 +164,11 @@ typedef std::map<Handle, const std::pair<double, double>> GlobIntervalMap;
 struct Variables : public FreeVariables,
                    public boost::totally_ordered<Variables>
 {
+	// CTor, convenient for  unit tests, so far
+	Variables() {}
+	Variables(const std::initializer_list<Handle>& variables)
+		: FreeVariables(variables) {}
+
 	/// Unbundled variables and type restrictions for them.
 
 	/// _simple_typemap is the (possibly empty) list of restrictions
@@ -237,11 +258,10 @@ struct Variables : public FreeVariables,
 	/// Return just the Variable itself, if its not typed.
 	Handle get_type_decl(const Handle&, const Handle&) const;
 
-	/// This is the dual of VariableList::validate_vartype.
-	/// (XXX Dual in what way?)
+	/// This is the inverse function of VariableList(vardecls).get_variable().
 	///
-	/// Convert everything in this object into a single VariableList,
-	/// suitable for direct use in a ScopeLink.
+	/// That is, convert everything in this object into a single
+	/// VariableList, suitable for direct use in a ScopeLink.
 	///
 	/// If empty then return the empty VariableList.
 	///
@@ -249,11 +269,15 @@ struct Variables : public FreeVariables,
 	Handle get_vardecl() const;
 
 	// Useful for debugging
-	std::string to_string() const;
+	std::string to_string(const std::string& indent="") const;
 };
 
-// For gdb, see
+// Debugging helpers see
 // http://wiki.opencog.org/w/Development_standards#Print_OpenCog_Objects
+// The reason indent is not an optional argument with default is
+// because gdb doesn't support that, see
+// http://stackoverflow.com/questions/16734783 for more explanation.
+std::string oc_to_string(const Variables& var, const std::string& indent);
 std::string oc_to_string(const Variables& var);
 
 /** @}*/

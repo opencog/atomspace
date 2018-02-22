@@ -26,10 +26,8 @@
 
 namespace opencog {
 
-void initialize_opencog(AtomSpace* atomSpace, const char* configFile = NULL);
+void initialize_opencog(AtomSpace*);
 void finalize_opencog();
-
-void configuration_load(const char* configFile);
 
 } // namespace opencog
 

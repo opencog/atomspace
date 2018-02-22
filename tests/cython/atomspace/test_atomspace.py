@@ -168,7 +168,7 @@ class AtomSpaceTest(TestCase):
         sleep(1)
 
         result = self.space.get_atoms_by_av(4, 10)
-        print "The atoms-by-av result is ", result
+        print ("The atoms-by-av result is ", result)
         assert len(result) == 3
         assert set(result) == set([a1, a2, a3])
         assert a4 not in result

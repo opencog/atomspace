@@ -25,6 +25,15 @@
 
 using namespace opencog;
 
+// There is a way for the user to pull a fast one, and crash us here.
+// avoid null-ptr deref.
+static inline void check_null(const Handle& h)
+{
+	if (nullptr == h)
+		throw InvalidParamException(TRACE_INFO,
+		       "Outgoing set of Link contains null handle\n");
+}
+
 /// Provide static factory-time type checking.
 /// This only performs a very simple kind of type checking;
 /// it does not check deep types, nor does it check arity.
@@ -38,6 +47,7 @@ bool check_evaluatable(const Handle& bool_atom)
 
 	for (const Handle& h: bool_atom->getOutgoingSet())
 	{
+		check_null(h);
 		Type t = h->get_type();
 		// PutLinks and GetLinks cannot be type-checked statically.
 		// Checking has to be defered until runtime.
@@ -63,6 +73,7 @@ bool check_numeric(const Handle& bool_atom)
 {
 	for (const Handle& h: bool_atom->getOutgoingSet())
 	{
+		check_null(h);
 		Type t = h->get_type();
 		// PutLinks and GetLinks cannot be type-checked statically.
 		// Checking has to be defered until runtime.
@@ -89,6 +100,7 @@ bool check_type_ctors(const Handle& bool_atom)
 {
 	for (const Handle& h: bool_atom->getOutgoingSet())
 	{
+		check_null(h);
 		Type t = h->get_type();
 		if (h->is_type(TYPE_NODE)) continue;
 

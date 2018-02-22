@@ -76,7 +76,7 @@ public:
     {
         Type ntypes = classserver().getNumberOfClasses();
 
-        classserver().beginTypeDecls();
+        classserver().beginTypeDecls("classy test types");
         Type CS_UTEST_NODE   = classserver().declType(NODE, "CsUtestNode");
         TS_ASSERT(CS_UTEST_NODE   == ntypes);
         TS_ASSERT(classserver().getNumberOfClasses() == (unsigned int)(ntypes+1));
@@ -121,6 +121,9 @@ public:
         TS_ASSERT(!classserver().isA(CS_UTEST_LINK,   NUMBER_NODE));
 
         classserver().endTypeDecls();
+
+        bool is_init = classserver().beginTypeDecls("classy test types");
+        TS_ASSERT(is_init);
     }
 
     void testIteratorMethods()

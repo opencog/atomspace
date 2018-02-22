@@ -1,4 +1,4 @@
-
+#
 # Need to use -fno-strict-aliasing when compiling cython code, in order
 # to avoid nasty compiler warnings about aliasing.  Cython explicitly
 # performs aliasing, in order to emulate python object inheritance.
@@ -177,15 +177,13 @@ SET_TARGET_PROPERTIES(bindlink_cython PROPERTIES
 	PREFIX ""
 	OUTPUT_NAME bindlink)
 
-# XXX FIXME -- there must surely be a more elegant way
-# of specifying the correct python install path ...
 INSTALL (TARGETS
 	atomspace_cython
 	bindlink_cython
 	logger_cython
 	type_constructors
 	utilities_cython
-	DESTINATION "lib${LIB_DIR_SUFFIX}/python2.7/dist-packages/opencog")
+	DESTINATION "${PYTHON_DEST}")
 
 IF (HAVE_GUILE)
 	############################## scheme wrapper #####################
@@ -214,10 +212,10 @@ IF (HAVE_GUILE)
 
 	INSTALL (TARGETS
 		scheme_wrapper
-		DESTINATION "lib${LIB_DIR_SUFFIX}/python2.7/dist-packages/opencog")
+		DESTINATION "${PYTHON_DEST}")
 ENDIF (HAVE_GUILE)
 
 
 INSTALL (FILES
 	__init__.py
-	DESTINATION "lib${LIB_DIR_SUFFIX}/python2.7/dist-packages/opencog")
+	DESTINATION "${PYTHON_DEST}")

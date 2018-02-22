@@ -46,7 +46,7 @@ class Instantiator
 private:
 	AtomSpace *_as;
 	const HandleMap *_vmap;
-	bool _halt = false;
+	bool _halt;
 
 	/**
 	 * Instatiator removes first level QuoteLinks and in such cases
@@ -56,7 +56,25 @@ private:
 	 * their own scope. We must avoid damaging quotes for these atoms.
 	 */
 	Context _context;
-	int _avoid_discarding_quotes_level = 0;
+
+	/**
+	 * Consuming quotation should only take place when this is called
+	 * by a pattern matcher function, such as BindLink, GetLink and
+	 * PutLink, etc, as part of the substitution mechanics. Otherwise,
+	 * consuming quotes systematically may changes the semantics of
+	 * the program. This flag is here properly control that.
+	 */
+	bool _consume_quotations;
+
+	/**
+	 * In case _consume_quotations is set to false, this can be set
+	 * temporarily to false when consuming the quotation would change
+	 * the semantics.
+	 *
+	 * TODO: maybe this can eliminate the need for
+	 * _avoid_discarding_quotes_level
+	 */
+	bool _needless_quotation;
 
 	/**
 	 * Recursively walk a tree starting with the root of the
@@ -78,12 +96,25 @@ private:
 	 * is still buggy, and unit tests will fail. So do eager execution
 	 * by default.
 	 */
-	bool _eager = true;
+	bool _eager;
 	Handle walk_tree(const Handle& tree, bool silent=false);
 	bool walk_sequence(HandleSeq&, const HandleSeq&, bool silent=false);
 
+	/**
+	 * Return true iff the following atom type may not match to
+	 * itself, that is a scope, an evaluatable, used as logic
+	 * connector by the pattern matcher, etc.
+	 *
+	 * TODO: should be refined to make the difference between AndLink
+	 * as pattern matcher connector and AndLink as self-match.
+	 *
+	 * TODO: this should probably be moved to some pattern matcher
+	 * method.
+	 */
+	static bool not_self_match(Type t);
+
 public:
-	Instantiator(AtomSpace* as) : _as(as), _vmap(nullptr) {}
+	Instantiator(AtomSpace* as);
 
 	void ready(AtomSpace* as)
 	{
@@ -95,12 +126,23 @@ public:
 	{
 		_as = nullptr;
 		_vmap = nullptr;
+		_consume_quotations = true;
 	}
 
+	void reset_halt()
+	{
+		_halt = false;
+	}
+
+	// TODO: set consume_quotations to false when executing, set it to
+	// true when instantiating
 	Handle instantiate(const Handle& expr, const HandleMap &vars,
 	                   bool silent=false);
 	Handle execute(const Handle& expr, bool silent=false)
 	{
+		// If no actual instantiation is involved then do not consume
+		// quotations as it might change the semantics.
+		_consume_quotations = false;
 		return instantiate(expr, HandleMap(), silent);
 	}
 };

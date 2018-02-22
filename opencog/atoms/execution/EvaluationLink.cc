@@ -159,7 +159,7 @@ static TruthValuePtr identical(const Handle& h)
 }
 
 /// Check for semantic equality
-static TruthValuePtr equal(AtomSpace* as, const Handle& h)
+static TruthValuePtr equal(AtomSpace* as, const Handle& h, bool silent)
 {
 	const HandleSeq& oset = h->getOutgoingSet();
 	if (2 != oset.size())
@@ -167,8 +167,8 @@ static TruthValuePtr equal(AtomSpace* as, const Handle& h)
 		     "EqualLink expects two arguments");
 
 	Instantiator inst(as);
-	Handle h0(inst.execute(oset[0]));
-	Handle h1(inst.execute(oset[1]));
+	Handle h0(inst.execute(oset[0], silent));
+	Handle h1(inst.execute(oset[1], silent));
 
 	if (h0 == h1)
 		return TruthValue::TRUE_TV();
@@ -284,7 +284,7 @@ TruthValuePtr EvaluationLink::do_eval_scratch(AtomSpace* as,
 	}
 	else if (EQUAL_LINK == t)
 	{
-		return equal(scratch, evelnk);
+		return equal(scratch, evelnk, silent);
 	}
 	else if (GREATER_THAN_LINK == t)
 	{

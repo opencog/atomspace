@@ -64,14 +64,15 @@ double BITNode::operator()() const
 		(fitness.upper - fitness(*this)) / (fitness.upper - fitness.lower);
 }
 
-std::string	BITNode::to_string() const
+std::string	BITNode::to_string(const std::string& indent) const
 {
 	std::stringstream ss;
-	ss << "body:" << std::endl << oc_to_string(body)
-	   << "exhausted: " << exhausted << std::endl
-	   << "rules: size = " << rules.size();
+	ss << indent << "body:" << std::endl
+	   << oc_to_string(body, indent + OC_TO_STRING_INDENT)
+	   << indent << "exhausted: " << exhausted << std::endl
+	   << indent << "rules: size = " << rules.size();
 	for (const auto& rule : rules)
-		ss << std::endl << rule.first.get_name()
+		ss << std::endl << indent << rule.first.get_name()
 		   << " " << rule.first.get_rule()->id_to_string();
 	return ss.str();
 }
@@ -222,9 +223,9 @@ bool AndBIT::operator<(const AndBIT& andbit) const
 		    and content_based_handle_less()(fcs, andbit.fcs));
 }
 
-std::string AndBIT::to_string() const
+std::string AndBIT::to_string(const std::string& indent) const
 {
-	return oc_to_string(fcs);
+	return oc_to_string(fcs, indent);
 }
 
 std::string AndBIT::fcs_to_ascii_art(const Handle& nfcs) const
@@ -737,14 +738,22 @@ bool BIT::is_in(const RuleTypedSubstitutionPair& rule,
 	return false;
 }
 
+std::string oc_to_string(const BITNode& bitnode, const std::string& indent)
+{
+	return bitnode.to_string(indent);
+}
 std::string oc_to_string(const BITNode& bitnode)
 {
-	return bitnode.to_string();
+	return oc_to_string(bitnode, "");
 }
 
+std::string oc_to_string(const AndBIT& andbit, const std::string& indent)
+{
+	return andbit.to_string(indent);
+}
 std::string oc_to_string(const AndBIT& andbit)
 {
-	return andbit.to_string();
+	return oc_to_string(andbit, "");
 }
 
 // std::string oc_to_string(const BIT& bit)

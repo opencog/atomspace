@@ -241,7 +241,7 @@ public:
 
     void testSimpleWithCustomAtomTypes()
     {
-        classserver().beginTypeDecls();
+        classserver().beginTypeDecls("custom types");
         Type MY_NUMBER_NODE = classserver().declType(NUMBER_NODE, "MyNumberNode");
         Type MY_CONCEPT_NODE = classserver().declType(CONCEPT_NODE, "MyConceptNode");
         Type MY_INHERITANCE_LINK = classserver().declType(INHERITANCE_LINK, "MyInheritanceLink");

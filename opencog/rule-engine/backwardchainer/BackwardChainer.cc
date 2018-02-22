@@ -214,7 +214,12 @@ void BackwardChainer::fulfill_bit()
 	}
 	LAZY_URE_LOG_DEBUG << "Selected and-BIT for fulfillment (fcs value):"
 	                   << std::endl << andbit->fcs->id_to_string();
-	fulfill_fcs(andbit->fcs);
+
+	// Wrap in a try/catch in case the pattern matcher can't handle
+	// it.
+	try {
+		fulfill_fcs(andbit->fcs);
+	} catch (...) {}
 }
 
 void BackwardChainer::fulfill_fcs(const Handle& fcs)
@@ -234,16 +239,20 @@ void BackwardChainer::fulfill_fcs(const Handle& fcs)
 	// alternatively modify some HypotheticalLink wrapping the atoms
 	// of concerns instead of the atoms themselves, and only modify
 	// the atoms if there are existing results to copy back to _as.
-	Handle hresult = bindlink(&tmp_as, fcs);
-	HandleSeq results;
-	for (const Handle& result : hresult->getOutgoingSet())
-		results.push_back(_as.add_atom(result));
-	LAZY_URE_LOG_DEBUG << "Results:" << std::endl << results;
-	_results.insert(results.begin(), results.end());
+	try
+	{
+		Handle hresult = bindlink(&tmp_as, fcs);
+		HandleSeq results;
+		for (const Handle& result : hresult->getOutgoingSet())
+			results.push_back(_as.add_atom(result));
+		LAZY_URE_LOG_DEBUG << "Results:" << std::endl << results;
+		_results.insert(results.begin(), results.end());
 
-	// Record the results in _trace_as
-	for (const Handle& result : results)
-		_trace_recorder.proof(fcs, result);
+		// Record the results in _trace_as
+		for (const Handle& result : results)
+			_trace_recorder.proof(fcs, result);
+	}
+	catch (...) {}
 }
 
 std::vector<double> BackwardChainer::expansion_anbit_weights()

@@ -17,7 +17,7 @@ scheme_preload = [
 for scheme_file in scheme_preload:
     load_scm(atomspace, scheme_file)
 
-initialize_opencog(atomspace, "utilities_test.conf")
+initialize_opencog(atomspace)
 
 executed = False
 
@@ -47,11 +47,11 @@ execute_code = \
     '''
 scheme_eval(atomspace, execute_code)
 
-print "execute: cog-execute"
+print ("execute: cog-execute")
 if (executed):
-    print "add_link - executed successfully"
+    print ("add_link - executed successfully")
 else:
-    print "add_link - did NOT execute"
+    print ("add_link - did NOT execute")
 
 executed = False
 execute_atom( atomspace,
@@ -63,11 +63,11 @@ execute_atom( atomspace,
         )
     )
 )
-print "execute: execute_atom"
+print ("execute: execute_atom")
 if (executed):
-    print "add_link - executed successfully"
+    print ("add_link - executed successfully")
 else:
-    print "add_link - did NOT execute"
+    print ("add_link - did NOT execute")
 
 
 finalize_opencog()

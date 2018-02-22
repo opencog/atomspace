@@ -1,6 +1,6 @@
 
 #include "Exec_CWrapper.h"
-#include "TruthValue_CWrapper.h"
+#include "Value_CWrapper.h"
 #include <opencog/atoms/execution/EvaluationLink.h>
 #include <opencog/atoms/execution/Instantiator.h>
 
@@ -10,9 +10,9 @@
 int Exec_execute(AtomSpace* atomspace, Handle* handle,Handle* out)
 {
     Handle h = *handle;
-	Instantiator inst(atomspace);
+    Instantiator inst(atomspace);
 	Handle rh(inst.execute(h));
-	if (NULL != rh) {
+	if (nullptr != rh) {
 		rh = atomspace->add_atom(rh);
         *out = rh;
         return 0;
@@ -31,7 +31,7 @@ int Exec_evaluate(AtomSpace* atomspace
 {
     Handle h = *handle;
 	TruthValuePtr tv = EvaluationLink::do_evaluate(atomspace, h);
-    return TruthValue_toRawType(tv,tv_type,parameters);
+    return FloatValue_toRaw(tv,tv_type,parameters);
 }
 
 

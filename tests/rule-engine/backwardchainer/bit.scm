@@ -1091,3 +1091,87 @@
   )
 )
 )
+
+(define fcs-5
+(BindLink
+  (VariableList
+    (TypedVariableLink
+      (VariableNode "$g-2101505b")
+      (TypeChoice
+        (TypeNode "LambdaLink")
+        (TypeNode "PutLink")
+      )
+    )
+    (TypedVariableLink
+      (VariableNode "$f-53364b8c")
+      (TypeChoice
+        (TypeNode "ConceptNode")
+        (TypeNode "LambdaLink")
+      )
+    )
+  )
+  (AndLink
+    (VariableNode "$f-53364b8c")
+    (EvaluationLink
+      (PredicateNode "minsup")
+      (ListLink
+        (VariableNode "$g-2101505b")
+        (ConceptNode "texts")
+        (NumberNode "2.000000")
+      )
+    )
+    (EvaluationLink
+      (GroundedPredicateNode "scm: has-arity")
+      (ListLink
+        (VariableNode "$g-2101505b")
+        (NumberNode "2.000000")
+      )
+    )
+    (EvaluationLink
+      (GroundedPredicateNode "scm: absolutely-true")
+      (EvaluationLink
+        (PredicateNode "minsup")
+        (ListLink
+          (VariableNode "$g-2101505b")
+          (ConceptNode "texts")
+          (NumberNode "2.000000")
+        )
+      )
+    )
+  )
+  (ExecutionOutputLink
+    (GroundedSchemaNode "scm: specialization-formula")
+    (ListLink
+      (EvaluationLink
+        (PredicateNode "minsup")
+        (ListLink
+          (QuoteLink
+            (PutLink
+              (UnquoteLink
+                (VariableNode "$g-2101505b")
+              )
+              (UnquoteLink
+                (ListLink
+                  (VariableNode "$f-53364b8c")
+                  (VariableNode "$spe-arg-1")
+                )
+              )
+            )
+          )
+          (ConceptNode "texts")
+          (NumberNode "2.000000")
+        )
+      )
+      (EvaluationLink
+        (PredicateNode "minsup")
+        (ListLink
+          (VariableNode "$g-2101505b")
+          (ConceptNode "texts")
+          (NumberNode "2.000000")
+        )
+      )
+      (VariableNode "$f-53364b8c")
+    )
+  )
+)
+)

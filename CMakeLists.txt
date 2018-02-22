@@ -309,24 +309,37 @@ MESSAGE(STATUS "${PROTOBUF_DIR_MESSAGE}")
 # Python and Cython
 #
 # NOTE: Python interpreter is needed for runing python unit tests, and for
-# running the FindCython and FindCxxtest cmake modules.
+# running the FindCython module.
+#
+# Search for Python3 first, and use that, if found. Else use Python2.
 
-FIND_PACKAGE(PythonInterp 2.7)
-IF (2.7.0 VERSION_LESS ${PYTHON_VERSION_STRING} AND
-	3.0.0 VERSION_GREATER ${PYTHON_VERSION_STRING})
+FIND_PACKAGE(Python3Interp)
+IF (3.4.0 VERSION_LESS ${PYTHON3_VERSION_STRING})
 	SET (HAVE_PY_INTERP 1)
-	MESSAGE(STATUS "Python ${PYTHON_VERSION_STRING} interpreter found.")
+	SET (PYTHON_VER python3.5)
+	MESSAGE(STATUS "Python ${PYTHON3_VERSION_STRING} interpreter found.")
 ENDIF()
 
-FIND_PACKAGE(PythonLibs 2.7)
+IF (NOT HAVE_PY_INTERP)
+	FIND_PACKAGE(PythonInterp)
+	IF (2.7.0 VERSION_LESS ${PYTHON_VERSION_STRING})
+		SET (HAVE_PY_INTERP 1)
+		SET (PYTHON_VER python2.7)
+		MESSAGE(STATUS "Python ${PYTHON_VERSION_STRING} interpreter found.")
+	ENDIF()
+ENDIF()
+
+FIND_PACKAGE(PythonLibs)
 IF (PYTHONLIBS_FOUND AND
-	2.7.0 VERSION_LESS ${PYTHONLIBS_VERSION_STRING} AND
-	3.0.0 VERSION_GREATER ${PYTHONLIBS_VERSION_STRING})
+     ((PYTHON3INTERP_FOUND AND 3.4.0 VERSION_LESS ${PYTHONLIBS_VERSION_STRING})
+     OR
+     (2.7.0 VERSION_LESS ${PYTHONLIBS_VERSION_STRING})))
 	SET (HAVE_PY_LIBS 1)
 	MESSAGE(STATUS "Python ${PYTHONLIBS_VERSION_STRING} libraries found.")
 ELSE()
 	MESSAGE(STATUS "Python libraries NOT found.")
 ENDIF()
+
 
 # Cython is used to generate python bindings.
 IF(HAVE_PY_INTERP)
@@ -337,18 +350,13 @@ IF(HAVE_PY_INTERP)
 		# differ on each operating system.
 		ADD_DEFINITIONS(-DHAVE_CYTHON)
 		SET(HAVE_CYTHON 1)
-		EXECUTE_PROCESS(
-			COMMAND ${PYTHON_EXECUTABLE} -c "from distutils.sysconfig import *;print(get_python_lib())"
-			OUTPUT_VARIABLE PYTHON_DEST
-		)
 
-		# Replace new line at end.
-		STRING(REPLACE "\n" "" PYTHON_DEST "${PYTHON_DEST}")
-		IF ("${PYTHON_DEST}" STREQUAL "")
-			MESSAGE(FATAL_ERROR "Python destination dir not found")
-		ELSE ("${PYTHON_DEST}" STREQUAL "")
-			MESSAGE(STATUS "Python destination dir found: ${PYTHON_DEST}" )
-		ENDIF ("${PYTHON_DEST}" STREQUAL "")
+		# Hack together some reasonable install location.
+		SET(PYTHON_DEST
+			"lib${LIB_DIR_SUFFIX}/${PYTHON_VER}/dist-packages/opencog")
+		MESSAGE(STATUS
+			"Python install dir: ${CMAKE_INSTALL_PREFIX}/${PYTHON_DEST}" )
+
 	ELSE (CYTHON_FOUND AND HAVE_PY_LIBS)
 		IF(NOT CYTHON_FOUND)
 			MESSAGE(STATUS "Cython executable not found.")
@@ -356,9 +364,14 @@ IF(HAVE_PY_INTERP)
 	ENDIF (CYTHON_FOUND AND HAVE_PY_LIBS)
 
 	# Nosetests will find and automatically run python tests.
-	FIND_PROGRAM(NOSETESTS_EXECUTABLE nosetests)
+	IF (PYTHON3INTERP_FOUND)
+		FIND_PROGRAM(NOSETESTS_EXECUTABLE nosetests3)
+	ELSE ()
+		FIND_PROGRAM(NOSETESTS_EXECUTABLE nosetests)
+	ENDIF ()
 	IF (NOSETESTS_EXECUTABLE AND CYTHON_FOUND AND HAVE_PY_LIBS)
 		SET(HAVE_NOSETESTS 1)
+		MESSAGE(STATUS "Using nosetests executable " ${NOSETESTS_EXECUTABLE})
 	ENDIF (NOSETESTS_EXECUTABLE AND CYTHON_FOUND AND HAVE_PY_LIBS)
 ENDIF(HAVE_PY_INTERP)
 
@@ -483,8 +496,10 @@ INCLUDE_DIRECTORIES(${PROJECT_SOURCE_DIR} ${CMAKE_BINARY_DIR}
 # rpath handling
 SET(CMAKE_SKIP_BUILD_RPATH	FALSE)
 SET(CMAKE_BUILD_WITH_INSTALL_RPATH FALSE)
-SET(CMAKE_INSTALL_RPATH "${CMAKE_INSTALL_PREFIX}/lib/opencog"
-	"${CMAKE_INSTALL_PREFIX}/lib/python2.7/dist-packages/opencog")
+SET(CMAKE_INSTALL_RPATH
+	"${CMAKE_INSTALL_PREFIX}/lib/opencog"
+	"${PYTHON_DEST}")
+
 SET(CMAKE_INSTALL_RPATH_USE_LINK_PATH TRUE)
 
 ADD_SUBDIRECTORY(lib)
@@ -630,7 +645,7 @@ SET(CPACK_SOURCE_IGNORE_FILES
 
 SET(CPACK_PACKAGING_INSTALL_PREFIX "/usr/local")
 SET(CPACK_DEBIAN_PACKAGE_DEPENDS
-    "guile-2.0 (>= 2.0.9), python (>= 2.7.5), libzmq3 (>= 4.0.4), libboost-date-time1.54.0, libboost-filesystem1.54.0, libboost-program-options1.54.0, libboost-regex1.54.0, libboost-serialization1.54.0, libboost-system1.54.0, libboost-thread1.54.0, protobuf-compiler (>= 2.5.0), libssl1.0.0 (>= 1.0.1), libatlas-base-dev, libpq-dev, cogutil (>= 2.0.2)"
+    "guile-2.0 (>= 2.0.9), python (>= 2.7.5), libzmq3 (>= 4.0.4), libboost-date-time1.54.0, libboost-filesystem1.54.0, libboost-program-options1.54.0, libboost-regex1.54.0, libboost-serialization1.54.0, libboost-system1.54.0, libboost-thread1.54.0, libssl1.0.0 (>= 1.0.1), libatlas-base-dev, libpq-dev, cogutil (>= 2.0.2)"
 )
 
 SET(CPACK_PACKAGE_INSTALL_DIRECTORY "CMake ${CMake_VERSION_MAJOR}.${CMake_VERSION_MINOR}")

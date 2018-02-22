@@ -22,6 +22,7 @@
 
 #include <opencog/guile/SchemeEval.h>
 #include <opencog/atomspace/AtomSpace.h>
+#include <opencog/atoms/execution/Instantiator.h>
 #include <opencog/util/Logger.h>
 
 using namespace opencog;
@@ -63,6 +64,7 @@ public:
     void test_implication(void);
     void test_glob(void);
     void test_implication_nodecl(void);
+	void test_local_quote_map(void);
 };
 
 void MapLinkUTest::tearDown(void)
@@ -295,5 +297,24 @@ void MapLinkUTest::test_implication_nodecl(void)
     printf("expected %s\n", sete->to_string().c_str());
 
     TS_ASSERT(result == sete);
+    logger().debug("END TEST: %s", __FUNCTION__);
+}
+
+void MapLinkUTest::test_local_quote_map(void)
+{
+    logger().debug("BEGIN TEST: %s", __FUNCTION__);
+
+    eval->eval("(load-from-path \"tests/atoms/maplink.scm\")");
+
+    Instantiator inst(as);
+    Handle local_quote_map = eval->eval_h("local-quote-map"),
+	    result = inst.execute(local_quote_map),
+	    expected = eval->eval_h("local-quote-map-result");
+
+    printf("result %s", result->to_string().c_str());
+    printf("expected %s\n", expected->to_string().c_str());
+
+    TS_ASSERT(result == expected);
+
     logger().debug("END TEST: %s", __FUNCTION__);
 }

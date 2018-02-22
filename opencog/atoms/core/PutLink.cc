@@ -20,6 +20,7 @@
  * 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
  */
 
+#include <opencog/util/Logger.h>
 #include <opencog/atoms/base/atom_types.h>
 #include <opencog/atoms/base/ClassServer.h>
 #include "DefineLink.h"
@@ -117,20 +118,22 @@ void PutLink::static_typecheck_values(void)
 		return;
 	if (DEFINED_PREDICATE_NODE == btype)
 		return;
+	if (PUT_LINK == btype)
+		return;
 
 	// If its part of a signature, there is nothing to do.
 	if (classserver().isA(btype, TYPE_NODE) or TYPE_CHOICE == btype)
-		return;
-
-	// If it's an UnquoteLink then the PutLink is likely quoted and
-	// thus there is nothing to do
-	if (btype == UNQUOTE_LINK)
 		return;
 
 	size_t sz = _varlist.varseq.size();
 
 	Handle valley = _values;
 	Type vtype = valley->get_type();
+
+	// If it's body or value is an UnquoteLink then the PutLink is
+	// likely quoted and thus there is nothing to do
+	if (btype == UNQUOTE_LINK or vtype == UNQUOTE_LINK)
+		return;
 
 	// If its a LambdaLink, try to see if its eta-reducible. If
 	// so, then eta-reduce it immediately. A LambdaLink is
@@ -222,7 +225,7 @@ void PutLink::static_typecheck_values(void)
 		for (const Handle& h : valley->getOutgoingSet())
 		{
 			// If the arity is greater than one, then the values must be in a list.
-		   if (h->get_type() != LIST_LINK)
+			if (h->get_type() != LIST_LINK)
 				throw InvalidParamException(TRACE_INFO,
 					"PutLink expected value list!");
 
@@ -257,7 +260,7 @@ static inline Handle reddy(PrenexLinkPtr subs, const HandleSeq& oset)
  * This is a lot like applying the function fun to the argument list
  * args, except that no actual evaluation is performed; only
  * substitution.  The resulting tree is NOT placed into any atomspace,
- * either. If you want that, you must do it youself.  If you want
+ * either. If you want that, you must do it yourself.  If you want
  * evaluation or execution to happen during or after sustitution, use
  * either the EvaluationLink, the ExecutionOutputLink, or the Instantiator.
  *
@@ -307,6 +310,15 @@ Handle PutLink::do_reduce(void) const
 			throw InvalidParamException(TRACE_INFO,
 					"Expecting a LambdaLink, got %s",
 			      bods->to_string().c_str());
+	}
+
+	// If the body is itself a PutLink, then reduce it first
+	if (PUT_LINK == btype)
+	{
+		PutLinkPtr nested_put = PutLinkCast(bods);
+		nested_put->make_silent(_silent);
+		bods = nested_put->reduce();
+		btype = bods->get_type();
 	}
 
 	// If the body is a lambda, work with that.
@@ -376,21 +388,7 @@ Handle PutLink::do_reduce(void) const
 	{
 		if (SET_LINK != vtype)
 		{
-			HandleSeq oset;
-			oset.emplace_back(_values);
-			try
-			{
-				// return vars.substitute(bods, oset, /* silent */ true);
-				return reddy(subs, oset);
-			}
-			catch (const TypeCheckException& ex)
-			{
-				return Handle::UNDEFINED;
-			}
-			catch (const SyntaxException& ex)
-			{
-				return Handle::UNDEFINED;
-			}
+			return reddy(subs, {_values});
 		}
 
 		// If the values are given in a set, then iterate over the set...
@@ -401,7 +399,6 @@ Handle PutLink::do_reduce(void) const
 			oset.emplace_back(h);
 			try
 			{
-				// bset.emplace_back(vars.substitute(bods, oset, /* silent */ true));
 				bset.emplace_back(reddy(subs, oset));
 			}
 			catch (const TypeCheckException& ex) {}
@@ -415,15 +412,7 @@ Handle PutLink::do_reduce(void) const
 	if (LIST_LINK == vtype)
 	{
 		const HandleSeq& oset = _values->getOutgoingSet();
-		try
-		{
-			// return vars.substitute(bods, oset, /* silent */ true);
-			return reddy(subs, oset);
-		}
-		catch (const TypeCheckException& ex)
-		{
-			return Handle::UNDEFINED;
-		}
+		return reddy(subs, oset);
 	}
 
 	// If the value is a LambdaLink, it will eta-reducible.
@@ -433,20 +422,19 @@ Handle PutLink::do_reduce(void) const
 	{
 		HandleSeq oset;
 		oset.emplace_back(_values);
-		try
-		{
-			return reddy(subs, oset);
-		}
-		catch (const TypeCheckException& ex)
-		{
-			return Handle::UNDEFINED;
-		}
+		return reddy(subs, oset);
 	}
 
 	// If we are here, then there are multiple values.
-	// These  MUST be given to us as a SetLink.
-	OC_ASSERT(SET_LINK == vtype,
-		"Should have caught this earlier, in the ctor");
+	// These MUST be given to us as a SetLink.
+	if (SET_LINK != vtype)
+	{
+		if (_silent)
+			throw TypeCheckException();
+
+		throw RuntimeException(TRACE_INFO,
+		                       "Should have caught this earlier, in the ctor");
+	}
 
 	HandleSeq bset;
 	for (const Handle& h : _values->getOutgoingSet())
@@ -454,7 +442,6 @@ Handle PutLink::do_reduce(void) const
 		const HandleSeq& oset = h->getOutgoingSet();
 		try
 		{
-			// bset.emplace_back(vars.substitute(bods, oset, /* silent */ true));
 			bset.emplace_back(reddy(subs, oset));
 		}
 		catch (const TypeCheckException& ex) {}

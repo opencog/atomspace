@@ -328,10 +328,10 @@ bool PatternMatch::recursive_virtual(PatternMatchCallback& cb,
  */
 bool BindLink::imply(PatternMatchCallback& pmc, AtomSpace* as, bool check_conn)
 {
-   if (check_conn and 0 == _virtual.size() and 1 < _components.size())
+	if (check_conn and 0 == _virtual.size() and 1 < _components.size())
 		throw InvalidParamException(TRACE_INFO,
-			"BindLink consists of multiple disconnected components!");
-			// PatternLink::check_connectivity(_comps);
+		                            "BindLink consists of multiple "
+		                            "disconnected components!");
 
 	// Make sure that the user did not pass in bogus clauses
 	// in the queried atomspace.
@@ -339,7 +339,8 @@ bool BindLink::imply(PatternMatchCallback& pmc, AtomSpace* as, bool check_conn)
 	// The presence of constant clauses will mess up the current
 	// pattern matcher.  Constant clauses are "trivial" to match,
 	// and so its pointless to even send them through the system.
-	bool bogus = remove_constants(_varlist.varset, _pat, _components, as);
+	bool bogus = remove_constants(_varlist.varset, _pat, _components,
+	                              _component_patterns, as);
 	if (bogus)
 	{
 		logger().warn("%s: Constant clauses removed from pattern %s",
@@ -471,13 +472,6 @@ bool PatternLink::satisfy(PatternMatchCallback& pmcb) const
 	return PatternMatch::recursive_virtual(pmcb, _virtual, optionals,
 	                                       empty_vg, empty_pg,
 	                                       comp_var_gnds, comp_term_gnds);
-}
-
-// For gdb, see
-// http://wiki.opencog.org/w/Development_standards#Print_OpenCog_Objects
-std::string oc_to_string(const Pattern& pattern)
-{
-	return pattern.to_string();
 }
 
 /* ===================== END OF FILE ===================== */

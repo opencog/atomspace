@@ -85,8 +85,8 @@ void ScopeLinkUTest::test_get_variables_1()
 	auto got = sc->get_variables().varset;
 	auto exp = HandleSet{X};
 
-	printf("Got %s\n", ohs_to_string(got).c_str());
-	printf("Excepted %s\n", ohs_to_string(exp).c_str());
+	printf("Got %s\n", oc_to_string(got).c_str());
+	printf("Excepted %s\n", oc_to_string(exp).c_str());
 
 	TS_ASSERT_EQUALS(got, exp);
 
@@ -109,8 +109,8 @@ void ScopeLinkUTest::test_get_variables_2()
 	auto got = sc->get_variables().varset;
 	auto exp = HandleSet{X};
 
-	printf("Got %s\n", ohs_to_string(got).c_str());
-	printf("Excepted %s\n", ohs_to_string(exp).c_str());
+	printf("Got %s\n", oc_to_string(got).c_str());
+	printf("Excepted %s\n", oc_to_string(exp).c_str());
 
 	TS_ASSERT_EQUALS(got, exp);
 
@@ -133,8 +133,8 @@ void ScopeLinkUTest::test_get_variables_3()
 	auto got = sc->get_variables().varset;
 	auto exp = HandleSet{X};
 
-	printf("Got %s\n", ohs_to_string(got).c_str());
-	printf("Excepted %s\n", ohs_to_string(exp).c_str());
+	printf("Got %s\n", oc_to_string(got).c_str());
+	printf("Excepted %s\n", oc_to_string(exp).c_str());
 
 	TS_ASSERT_EQUALS(got, exp);
 

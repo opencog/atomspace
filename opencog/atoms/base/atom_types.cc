@@ -34,12 +34,20 @@ win::BOOL APIENTRY DllMain(win::HINSTANCE hinstDLL,  // handle to DLL module
     return TRUE;
 }
 #elif __GNUC__
+
 static __attribute__ ((constructor)) void init(void)
 {
-    #include INHERITANCE_FILE
-    #ifdef INHERITANCE_FILE2
-    #include INHERITANCE_FILE2
-    #endif
+#define str(x) #x
+#define xstr(x) str(x)
+
+	bool is_init = opencog::classserver().beginTypeDecls(xstr(INITNAME));
+	if (is_init) return;
+
+	#include INHERITANCE_FILE
+	#ifdef INHERITANCE_FILE2
+	#include INHERITANCE_FILE2
+	#endif
+	opencog::classserver().endTypeDecls();
 }
 
 static __attribute__ ((destructor)) void fini(void)

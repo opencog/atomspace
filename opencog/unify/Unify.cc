@@ -132,6 +132,11 @@ bool Unify::CHandle::operator<(const CHandle& ch) const
 		(handle == ch.handle and context < ch.context);
 }
 
+Unify::CHandle::operator bool() const
+{
+	return (bool)handle;
+}
+
 Unify::SolutionSet::SolutionSet(bool s)
 	: Partitions(s ? empty_partition_singleton : empty_partitions) {}
 
@@ -186,8 +191,8 @@ Unify::TypedSubstitution Unify::typed_substitution(const Partition& partition,
 	// Remove ill quotations
 	for (auto& vcv : var2cval) {
 		Handle consumed =
-			RewriteLink::consume_ill_quotations(_variables, vcv.second.handle,
-			                                  vcv.second.context.quotation);
+			RewriteLink::consume_quotations(_variables, vcv.second.handle,
+			                                vcv.second.context.quotation, false);
 		vcv.second = CHandle(consumed, vcv.second.context);
 	}
 
@@ -214,9 +219,9 @@ Unify::CHandle Unify::find_least_abstract(const TypedBlock& block,
 	CHandle least_abstract(top);
 	for (const CHandle& ch : block.first) {
 		if (inherit(ch, least_abstract) and
-		    // If h is a variable, only consider it as value
-		    // if it is in pre (stands for precedence)
-		    (not ch.is_variable()
+		    // If h is a variable, consider it if it is in pre (stands
+		    // for precedence)
+		    (not ch.is_free_variable()
 		     or is_unquoted_unscoped_in_tree(pre, ch.handle))) {
 			least_abstract = ch;
 		}
@@ -312,13 +317,13 @@ Handle Unify::substitute(BindLinkPtr bl, const HandleMap& var2val,
 	// Perform substitution over the pattern term, then remove
 	// constant clauses
 	Handle clauses = variables.substitute_nocheck(bl->get_body(), values);
-	clauses = RewriteLink::consume_ill_quotations(vardecl, clauses);
+	clauses = RewriteLink::consume_quotations(vardecl, clauses, true);
 //	clauses = remove_constant_clauses(vardecl, clauses);
 	hs.push_back(clauses);
 
 	// Perform substitution over the rewrite term
 	Handle rewrite = variables.substitute_nocheck(bl->get_implicand(), values);
-	rewrite = RewriteLink::consume_ill_quotations(vardecl, rewrite);
+	rewrite = RewriteLink::consume_quotations(vardecl, rewrite, false);
 	hs.push_back(rewrite);
 
 	// Filter vardecl
@@ -435,6 +440,9 @@ Unify::SolutionSet Unify::unify(const Handle& lh, const Handle& rh,
 	CHandle lch(lh, lc);
 	CHandle rch(rh, rc);
 
+	bool lq = lc.quotation.consumable(lt);
+	bool rq = rc.quotation.consumable(rt);
+
 	// If one is a node
 	if (lh->is_node() or rh->is_node()) {
 		// If one is a free variable and they are different, then
@@ -452,7 +460,7 @@ Unify::SolutionSet Unify::unify(const Handle& lh, const Handle& rh,
 			} else {
 				return mkvarsol(lch, rch);
 			}
-		} else
+		} else if (!lq and !rq)
 			return SolutionSet(lch.is_node_satisfiable(rch));
 	}
 
@@ -461,8 +469,6 @@ Unify::SolutionSet Unify::unify(const Handle& lh, const Handle& rh,
 	////////////////////////
 
     // Consume quotations
-	bool lq = lc.quotation.consumable(lt);
-	bool rq = rc.quotation.consumable(rt);
 	if (lq and rq) {
 		lc.quotation.update(lt);
 		rc.quotation.update(rt);
@@ -607,7 +613,7 @@ Unify::SolutionSet Unify::mkvarsol(CHandle lch, CHandle rch) const
 	if (rch.is_free_variable() and lch.is_consumable() and lch.is_quoted())
 		lch.update();
 
-	Handle inter = type_intersection(lch, rch);
+	CHandle inter = type_intersection(lch, rch);
 	if (not inter)
 		return SolutionSet();
 	else {
@@ -715,7 +721,7 @@ Unify::SolutionSet Unify::join(const Partition& partition,
 Unify::TypedBlock Unify::join(const TypedBlockSeq& common_blocks,
                               const TypedBlock& block) const
 {
-	std::pair<Block, Handle> result{block};
+	std::pair<Block, CHandle> result{block};
 	for (const auto& c_block : common_blocks) {
 		result =  join(result, c_block);
         // Abort if unsatisfiable
@@ -864,18 +870,12 @@ VariableListPtr gen_varlist(const Unify::CHandle& ch)
 	return createVariableList(HandleSeq(free_vars.begin(), free_vars.end()));
 }
 
-Handle Unify::type_intersection(const CHandle& lch, const CHandle& rch) const
+Unify::CHandle Unify::type_intersection(const CHandle& lch, const CHandle& rch) const
 {
-	return type_intersection(lch.handle, rch.handle, lch.context, rch.context);
-}
-
-Handle Unify::type_intersection(const Handle& lh, const Handle& rh,
-                                Context lc, Context rc) const
-{
-	if (inherit(lh, rh, lc, rc))
-		return lh;
-	if (inherit(rh, lh, rc, lc))
-		return rh;
+	if (inherit(lch, rch))
+		return lch;
+	if (inherit(rch, lch))
+		return rch;
 	return Handle::UNDEFINED;
 }
 
@@ -938,17 +938,16 @@ bool Unify::inherit(const Handle& lh, const Handle& rh,
 	if (lh == rh)
 		return true;
 
-	// If both are unquoted variables then look at then types (only
+	// If both are free variables then look at their types (only
 	// simple types are considered for now).
-	if (lc.quotation.is_unquoted() and VARIABLE_NODE == lt
-	    and rc.quotation.is_unquoted() and VARIABLE_NODE == rt)
+	if (lc.is_free_variable(lh) and rc.is_free_variable(rh))
 		return inherit(get_union_type(lh), get_union_type(rh));
 
-	// If only rh is a variable, if its in _variable then check
+	// If only rh is a free variable, if its in _variable then check
 	// whether lh type inherits from it (using Variables::is_type),
 	// otherwise assume rh is the top type and thus anything inherits
 	// from it.
-	if (rc.quotation.is_unquoted() and VARIABLE_NODE == rt)
+	if (rc.is_free_variable(rh))
         return not _variables.is_in_varset(rh) or _variables.is_type(rh, lh);
 
 	return false;
@@ -998,101 +997,147 @@ Handle merge_vardecl(const Handle& lhs_vardecl, const Handle& rhs_vardecl)
 	return new_vars.get_vardecl();
 }
 
+std::string oc_to_string(const Unify::CHandle& ch, const std::string& indent)
+{
+	std::stringstream ss;
+	ss << indent << "context:" << std::endl
+	   << oc_to_string(ch.context, indent + OC_TO_STRING_INDENT)
+	   << indent << "atom:" << std::endl
+	   << oc_to_string(ch.handle, indent + OC_TO_STRING_INDENT);
+	return ss.str();
+}
 std::string oc_to_string(const Unify::CHandle& ch)
 {
-	std::stringstream ss;
-	ss << "context:" << std::endl << oc_to_string(ch.context)
-	   << "atom:" << std::endl << oc_to_string(ch.handle);
-	return ss.str();
+	return oc_to_string(ch, "");
 }
 
-std::string oc_to_string(const Unify::Block& pb)
+std::string oc_to_string(const Unify::Block& pb, const std::string& indent)
 {
 	std::stringstream ss;
-	ss << "size = " << pb.size() << std::endl;
+	ss << indent << "size = " << pb.size() << std::endl;
 	int i = 0;
 	for (const auto& el : pb)
-		ss << "catom[" << i++ << "]:" << std::endl << oc_to_string(el);
+		ss << indent << "catom[" << i++ << "]:" << std::endl
+		   << oc_to_string(el, indent + OC_TO_STRING_INDENT);
 	return ss.str();
 }
+std::string oc_to_string(const Unify::Block& pb)
+{
+	return oc_to_string(pb, "");
+}
 
+std::string oc_to_string(const Unify::TypedBlock& tb, const std::string& indent)
+{
+	std::stringstream ss;
+	ss << indent << "block:" << std::endl
+	   << oc_to_string(tb.first, indent + OC_TO_STRING_INDENT)
+	   << indent << "type:" << std::endl
+	   << oc_to_string(tb.second, indent + OC_TO_STRING_INDENT);
+	return ss.str();
+}
 std::string oc_to_string(const Unify::TypedBlock& tb)
 {
-	std::stringstream ss;
-	ss << "block:" << std::endl << oc_to_string(tb.first)
-	   << "type:" << std::endl << oc_to_string(tb.second);
-	return ss.str();
+	return oc_to_string(tb, "");
 }
 
+std::string oc_to_string(const Unify::TypedBlockSeq& tbs, const std::string& indent)
+{
+	std::stringstream ss;
+	ss << indent << "size = " << tbs.size() << std::endl;
+	for (size_t i = 0; i < tbs.size(); i++)
+		ss << indent << "typed block[" << i << "]:" << std::endl
+		   << oc_to_string(tbs[i], indent + OC_TO_STRING_INDENT);
+	return ss.str();
+}
 std::string oc_to_string(const Unify::TypedBlockSeq& tbs)
 {
-	std::stringstream ss;
-	ss << "size = " << tbs.size() << std::endl;
-	for (size_t i = 0; i < tbs.size(); i++)
-		ss << "typed block[" << i << "]:" << std::endl
-		   << oc_to_string(tbs[i]);
-	return ss.str();
+	return oc_to_string(tbs, "");
 }
 
-std::string oc_to_string(const Unify::Partition& up)
+std::string oc_to_string(const Unify::Partition& up, const std::string& indent)
 {
 	std::stringstream ss;
-	ss << "size = " << up.size() << std::endl;
+	ss << indent << "size = " << up.size() << std::endl;
 	int i = 0;
 	for (const auto& p : up) {
-		ss << "block[" << i << "]:" << std::endl << oc_to_string(p.first)
-		   << "type[" << i << "]:" << std::endl << oc_to_string(p.second);
+		ss << indent << "block[" << i << "]:" << std::endl
+		   << oc_to_string(p.first, indent + OC_TO_STRING_INDENT)
+		   << indent << "type[" << i << "]:" << std::endl
+		   << oc_to_string(p.second, indent + OC_TO_STRING_INDENT);
 		i++;
 	}
 	return ss.str();
 }
+std::string oc_to_string(const Unify::Partition& up)
+{
+	return oc_to_string(up, "");
+}
 
-std::string oc_to_string(const Unify::Partitions& par)
+std::string oc_to_string(const Unify::Partitions& par, const std::string& indent)
 {
 	std::stringstream ss;
-	ss << "size = " << par.size() << std::endl;
+	ss << indent << "size = " << par.size() << std::endl;
 	int i = 0;
 	for (const auto& el : par) {
-		ss << "typed partition[" << i << "]:" << std::endl << oc_to_string(el);
+		ss << indent << "typed partition[" << i << "]:"
+		   << std::endl << oc_to_string(el, indent + OC_TO_STRING_INDENT);
 		i++;
 	}
 	return ss.str();
 }
+std::string oc_to_string(const Unify::Partitions& par)
+{
+	return oc_to_string(par, "");
+}
 
-std::string oc_to_string(const Unify::HandleCHandleMap& hchm)
+std::string oc_to_string(const Unify::HandleCHandleMap& hchm, const std::string& indent)
 {
 	std::stringstream ss;
-	ss << "size = " << hchm.size() << std::endl;
+	ss << indent << "size = " << hchm.size() << std::endl;
 	int i = 0;
 	for (const auto& hch : hchm) {
-		ss << "atom[" << i << "]:" << std::endl
-		   << oc_to_string(hch.first);
-		ss << "catom[" << i << "]:" << std::endl
-		   << oc_to_string(hch.second);
+		ss << indent << "atom[" << i << "]:" << std::endl
+		   << oc_to_string(hch.first, indent + OC_TO_STRING_INDENT);
+		ss << indent << "catom[" << i << "]:" << std::endl
+		   << oc_to_string(hch.second, indent + OC_TO_STRING_INDENT);
 		i++;
 	}
 	return ss.str();
 }
+std::string oc_to_string(const Unify::HandleCHandleMap& hchm)
+{
+	return oc_to_string(hchm, "");
+}
 
+std::string oc_to_string(const Unify::TypedSubstitution& ts, const std::string& indent)
+{
+	std::stringstream ss;
+	ss << indent << "substitution:" << std::endl
+	   << oc_to_string(ts.first, indent + OC_TO_STRING_INDENT)
+	   << indent << "vardecl:" << std::endl
+	   << oc_to_string(ts.second, indent + OC_TO_STRING_INDENT);
+	return ss.str();
+}
 std::string oc_to_string(const Unify::TypedSubstitution& ts)
 {
-	std::stringstream ss;
-	ss << "substitution:" << std::endl << oc_to_string(ts.first)
-	   << "vardecl:" << std::endl << oc_to_string(ts.second);
-	return ss.str();
+	return oc_to_string(ts, "");
 }
 
-std::string oc_to_string(const Unify::TypedSubstitutions& tss)
+std::string oc_to_string(const Unify::TypedSubstitutions& tss, const std::string& indent)
 {
 	std::stringstream ss;
-	ss << "size = " << tss.size() << std::endl;
+	ss << indent << "size = " << tss.size() << std::endl;
 	int i = 0;
 	for (const auto& ts : tss) {
-		ss << "typed substitution[" << i << "]:" << std::endl
-		   << oc_to_string(ts);
+		ss << indent << "typed substitution[" << i << "]:" << std::endl
+		   << oc_to_string(ts, indent + OC_TO_STRING_INDENT);
 		i++;
 	}
 	return ss.str();
+}
+std::string oc_to_string(const Unify::TypedSubstitutions& tss)
+{
+	return oc_to_string(tss, "");
 }
 
 } // namespace opencog

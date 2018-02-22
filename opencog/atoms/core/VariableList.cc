@@ -418,16 +418,21 @@ void VariableList::build_index(void)
 	size_t sz = _varlist.varseq.size();
 	for (size_t i=0; i<sz; i++)
 	{
-		_varlist.index.insert(std::pair<Handle, unsigned int>(_varlist.varseq[i], i));
+		_varlist.index.insert({_varlist.varseq[i], i});
 	}
 }
 
-std::string opencog::oc_to_string(const VariableListPtr& vlp)
+std::string opencog::oc_to_string(const VariableListPtr& vlp,
+                                  const std::string& indent)
 {
 	if (vlp == nullptr)
-		return "nullvariablelist\n";
+		return indent + "nullvariablelist\n";
 	else
-		return oc_to_string(vlp->get_handle());
+		return oc_to_string(vlp->get_handle(), indent);
+}
+std::string opencog::oc_to_string(const VariableListPtr& vlp)
+{
+	return oc_to_string(vlp, "");
 }
 
 DEFINE_LINK_FACTORY(VariableList, VARIABLE_LIST)

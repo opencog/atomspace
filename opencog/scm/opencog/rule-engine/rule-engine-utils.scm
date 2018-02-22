@@ -18,6 +18,7 @@
 ;; -- tv->bool -- Convert TRUE_TV to #t, anything else to #f
 ;; -- atom->number -- Convert NumberNode into its corresponding number
 ;; -- gt-zero-confidence -- Return TrueTV iff A's confidence is greater than 0
+;; -- absolutely-true -- Return TrueTV iff A's TV is TrueTV
 ;; -- meta-bind -- Fully apply a meta rule. Convenient for testing meta-rules
 ;; -- gen-variable -- Generate VariableNode with certain prefix and index
 ;; -- gen-variables -- Generate VariableNodes with certain prefix and indexes
@@ -257,6 +258,12 @@
 "
   (bool->tv (> (cog-stv-confidence A) 0)))
 
+(define-public (absolutely-true A)
+"
+  Return TrueTV iff A's TV is TrueTV
+"
+  (bool->tv (tv->bool (cog-tv A))))
+
 (define (meta-bind bl)
 "
   Fully apply a meta rule, once for generating rules, another for
@@ -321,6 +328,7 @@
           tv->bool
           atom->number
           gt-zero-confidence
+          absolutely-true
           meta-bind
           gen-variable
           gen-variables

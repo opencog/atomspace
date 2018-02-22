@@ -84,7 +84,7 @@ public:
 
         PyRun_SimpleString(
                     "import sys\n"
-                    "import StringIO\n"
+                    "import io\n"
                     );
         pySysPath = PySys_GetObject((char*)"path");
 
@@ -93,10 +93,17 @@ public:
             Py_ssize_t pathSize = PyList_Size(pySysPath);
             for (int pathIndex = 0; pathIndex < pathSize; pathIndex++) {
                 PyObject* pySysPathLine = PyList_GetItem(pySysPath, pathIndex);
-                const char* sysPathCString = PyString_AsString(pySysPathLine);
+                PyObject* pyStr = nullptr;
+                if (not PyBytes_Check(pySysPathLine)) {
+                    pyStr = PyUnicode_AsEncodedString(pySysPathLine,
+                                                    "UTF-8", "strict");
+                    pySysPathLine = pyStr;
+                }
+                const char* sysPathCString = PyBytes_AsString(pySysPathLine);
                 logger().debug("        %2d > %s", pathIndex, sysPathCString);
                 // NOTE: PyList_GetItem returns borrowed reference so don't do this:
                 // Py_DECREF(pySysPathLine);
+                if (pyStr) Py_DECREF(pyStr);
             }
         }
 
@@ -112,7 +119,7 @@ public:
 
         PyRun_SimpleString(
                     "import sys\n"
-                    "import StringIO\n"
+                    "import io\n"
                     );
         pySysPath = PySys_GetObject((char*)"path");
 
@@ -224,7 +231,7 @@ public:
         evaluator->clear_pending();
         evaluator->eval_expr("from opencog.atomspace import *");
         evaluator->eval_expr("ATOMSPACE.add_node(types.ConceptNode,'test')");
-        evaluator->eval_expr("print 'Total atoms = ', ATOMSPACE.size(), '\\n'");
+        evaluator->eval_expr("print ('Total atoms = ', ATOMSPACE.size(), '\\n')");
 
         // Delete the singleton instance and atomspace.
         PythonEval::delete_singleton_instance();
@@ -251,11 +258,11 @@ public:
             "from opencog.atomspace import types, Atom, TruthValue\n"
             "def add_link(atom1, atom2):\n"
             "    link = ATOMSPACE.add_link(types.ListLink, [atom1, atom2])\n"
-            "    print 'add_link(',atom1,',',atom2,') = ', link\n"
+            "    print ('add_link(',atom1,',',atom2,') = ', link)\n"
             "    return link\n\n"
 
             "def return_truth(atom1, atom2):\n"
-            "    print 'return_truth TruthValue(0.75, 100.0)'\n"
+            "    print ('return_truth TruthValue(0.75, 100.0)')\n"
             "    return TruthValue(0.75, 100.0)\n\n"
             );
 

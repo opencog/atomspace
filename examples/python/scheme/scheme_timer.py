@@ -9,27 +9,25 @@ total execution time
 
 __author__ = 'Cosmo Harrigan'
 
-NUMBER_OF_ITERATIONS = 50000
-
-from opencog.atomspace import AtomSpace, TruthValue, types, get_type_name
-from opencog.scheme_wrapper import load_scm, scheme_eval
+from opencog.atomspace import AtomSpace, TruthValue
+from opencog.scheme_wrapper import scheme_eval, scheme_eval_h
 atomspace = AtomSpace()
 
-data = ["opencog/atomspace/core_types.scm",
-        "opencog/scm/utilities.scm"]
-
-for item in data:
-    load_scm(atomspace, item)
-
+NUMBER_OF_ITERATIONS = 50000
 
 def test_operation():
     for i in range(NUMBER_OF_ITERATIONS):
-        scheme_eval(atomspace, '(+ 2 2)')
+        # scheme_eval(atomspace, '(+ 2 2)')
+        scheme_eval_h(atomspace, '(Concept "foo")')
+        # scheme_eval_h(atomspace, '(Number ' + str(i) + ')')
 
 import timeit
 elapsed = timeit.timeit("test_operation()",
                         setup="from __main__ import test_operation",
                         number=1)
 
-print "{0} seconds elapsed performing {1} repeated calls = {2} calls / sec".\
-    format(elapsed, NUMBER_OF_ITERATIONS, NUMBER_OF_ITERATIONS / elapsed)
+def report():
+    print ("{0} seconds elapsed performing {1} repeated calls = {2} calls / sec".\
+        format(elapsed, NUMBER_OF_ITERATIONS, NUMBER_OF_ITERATIONS / elapsed))
+
+report()

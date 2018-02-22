@@ -47,6 +47,8 @@ void SchemeEval::init(void)
 #ifdef WORK_AROUND_GUILE_UTF8_BUGS
 	// Arghhh!  Avoid ongoing utf8 fruitcake nutiness in guile-2.0
 	scm_c_eval_string ("(setlocale LC_ALL \"\")\n");
+	// Force iso standard numeric formatting
+	scm_c_eval_string ("(setlocale LC_NUMERIC \"C\")\n");
 #endif // WORK_AROUND_GUILE_UTF8_BUGS
 
 	SchemeSmob::init();
@@ -302,6 +304,8 @@ void SchemeEval::per_thread_init(void)
 #ifdef WORK_AROUND_GUILE_UTF8_BUGS
 	// Arghhh!  Avoid ongoing utf8 fruitcake nutiness in guile-2.0
 	scm_c_eval_string ("(setlocale LC_ALL \"\")\n");
+	// Force iso standard numeric formatting
+	scm_c_eval_string ("(setlocale LC_NUMERIC \"C\")\n");
 #endif // WORK_AROUND_GUILE_UTF8_BUGS
 }
 

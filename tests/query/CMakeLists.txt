@@ -66,12 +66,14 @@ IF (HAVE_GUILE)
 	ADD_CXXTEST(BuggyQuoteUTest)
 	ADD_CXXTEST(BuggyEqualUTest)
 	ADD_CXXTEST(BuggySelfGroundUTest)
+    ADD_CXXTEST(BuggyBindLinkUTest)
 	ADD_CXXTEST(ChoiceLinkUTest)
 	ADD_CXXTEST(DefineUTest)
 	ADD_CXXTEST(FiniteStateMachineUTest)
 	ADD_CXXTEST(AbsentUTest)
 	ADD_CXXTEST(SingleUTest)
 	ADD_CXXTEST(ScopeUTest)
+	ADD_CXXTEST(NestedPutUTest)
 
 	ADD_CXXTEST(FirstNUTest)
 	ADD_CXXTEST(AttentionalFocusCBUTest)
@@ -174,4 +176,8 @@ CONFIGURE_FILE(${CMAKE_SOURCE_DIR}/tests/query/var-type-not.scm
 CONFIGURE_FILE(${CMAKE_SOURCE_DIR}/tests/query/no-exception.scm
     ${PROJECT_BINARY_DIR}/tests/query/no-exception.scm)
 CONFIGURE_FILE(${CMAKE_SOURCE_DIR}/tests/query/friends.scm
-		${PROJECT_BINARY_DIR}/tests/query/friends.scm)
+    ${PROJECT_BINARY_DIR}/tests/query/friends.scm)
+CONFIGURE_FILE(${CMAKE_SOURCE_DIR}/tests/query/ill-put.scm
+    ${PROJECT_BINARY_DIR}/tests/query/ill-put.scm)
+CONFIGURE_FILE(${CMAKE_SOURCE_DIR}/tests/query/implication-introduction.scm
+    ${PROJECT_BINARY_DIR}/tests/query/implication-introduction.scm)

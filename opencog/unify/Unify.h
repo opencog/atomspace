@@ -120,6 +120,11 @@ public:
 		 */
 		bool operator==(const CHandle& other) const;
 		bool operator<(const CHandle& other) const;
+
+		/**
+		 * Cast operators
+		 */
+		explicit operator bool() const;
 	};
 
 	// Pair of CHandles
@@ -129,7 +134,7 @@ public:
 	typedef std::set<CHandle> Block;
 
 	// Mapping from partition blocks to type
-	typedef std::map<Block, Handle> Partition;
+	typedef std::map<Block, CHandle> Partition;
 
 	// This is in fact a typed block but is merely named Block due to
 	// being so frequently used.
@@ -226,25 +231,10 @@ public:
 	/**
 	 * If the quotations are useless or harmful, which might be the
 	 * case if they deprive a ScopeLink from hiding supposedly hidden
-	 * variables, consume them.
-	 *
-	 * Specifically this code makes 2 assumptions
-	 *
-	 * 1. LocalQuotes in front root level And, Or or Not links on the
-	 *    pattern body are not consumed because they are supposedly
-	 *    used to avoid interpreting them as pattern matcher
-	 *    connectors.
-	 *
-	 * 2. Quote/Unquote are used to wrap scope links so that their
-	 *    variable declaration can pattern match grounded or partially
-	 *    grounded scope links.
-	 *
-	 * No other use of quotation is assumed besides the 2 above.
-	 *
-	 * TODO: apparently not used. And if it is used it should be moved
-	 * to RewriteLink.
+	 * variables, consume them. See RewriteLink::consume_quotations
+	 * comment for more details.
 	 */
-	static BindLinkPtr consume_ill_quotations(BindLinkPtr bl);
+	static BindLinkPtr consume_quotations(BindLinkPtr bl);
 
 	/**
 	 * Return true iff the handle or type correspond to a pattern
@@ -634,11 +624,12 @@ private:
      *
      * In case the intersection is empty, then Handle::UNDEFINED is
      * returned.
+     *
+     * A contextual handle is returned to keep track of scoped
+     * variable, which are essentially considered as constant.
 	 */
-	Handle type_intersection(const CHandle& lch, const CHandle& rch) const;
 public:
-	Handle type_intersection(const Handle& lh, const Handle& rh,
-	                         Context lc=Context(), Context rc=Context()) const;
+	CHandle type_intersection(const CHandle& lch, const CHandle& rch) const;
 private:
 
 	/**
@@ -726,14 +717,28 @@ VariableListPtr gen_varlist(const Unify::CHandle& ch);
 Variables merge_variables(const Variables& lv, const Variables& rv);
 Handle merge_vardecl(const Handle& l_vardecl, const Handle& r_vardecl);
 
+// Debugging helpers see
+// http://wiki.opencog.org/w/Development_standards#Print_OpenCog_Objects
+// The reason indent is not an optional argument with default is
+// because gdb doesn't support that, see
+// http://stackoverflow.com/questions/16734783 for more explanation.
+std::string oc_to_string(const Unify::CHandle& ch, const std::string& indent);
 std::string oc_to_string(const Unify::CHandle& ch);
+std::string oc_to_string(const Unify::Block& pb, const std::string& indent);
 std::string oc_to_string(const Unify::Block& pb);
+std::string oc_to_string(const Unify::Partition& hshm, const std::string& indent);
 std::string oc_to_string(const Unify::Partition& hshm);
+std::string oc_to_string(const Unify::TypedBlock& tb, const std::string& indent);
 std::string oc_to_string(const Unify::TypedBlock& tb);
+std::string oc_to_string(const Unify::TypedBlockSeq& tbs, const std::string& indent);
 std::string oc_to_string(const Unify::TypedBlockSeq& tbs);
+std::string oc_to_string(const Unify::Partitions& par, const std::string& indent);
 std::string oc_to_string(const Unify::Partitions& par);
+std::string oc_to_string(const Unify::HandleCHandleMap& hchm, const std::string& indent);
 std::string oc_to_string(const Unify::HandleCHandleMap& hchm);
+std::string oc_to_string(const Unify::TypedSubstitution& ts, const std::string& indent);
 std::string oc_to_string(const Unify::TypedSubstitution& ts);
+std::string oc_to_string(const Unify::TypedSubstitutions& tss, const std::string& indent);
 std::string oc_to_string(const Unify::TypedSubstitutions& tss);
 	
 } // namespace opencog

@@ -69,7 +69,7 @@ public:
 	// TODO: Maybe this should be moved to BackwardChainer
 	double operator()() const;
 
-	std::string to_string() const;
+	std::string to_string(const std::string& indent="") const;
 };
 
 /**
@@ -166,7 +166,7 @@ public:
 	bool operator==(const AndBIT& andbit) const;
 	bool operator<(const AndBIT& andbit) const;
 
-	std::string to_string() const;
+	std::string to_string(const std::string& indent="") const;
 
 	/**
 	 * Print the inference tree of a given FCS in ascii art.
@@ -459,7 +459,9 @@ BIT::AndBITs::iterator BIT::erase(It pos)
 
 // Gdb debugging, see
 // http://wiki.opencog.org/w/Development_standards#Print_OpenCog_Objects
+std::string oc_to_string(const BITNode& bitnode, const std::string& indent);
 std::string oc_to_string(const BITNode& bitnode);
+std::string oc_to_string(const AndBIT& andbit, const std::string& indent);
 std::string oc_to_string(const AndBIT& andbit);
 // std::string oc_to_string(const BIT& bit);
 

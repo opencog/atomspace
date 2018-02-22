@@ -70,12 +70,10 @@ class SchemeTest(TestCase):
         scheme_eval(self.space, "(use-modules (opencog exec))")
         question = scheme_eval_h(self.space, "find-animals")
         self.assertTrue(question)
-        print "\nThe question is:"
-        print question
+        print ("\nThe question is:", question)
 
         answer = scheme_eval_h(self.space, "(cog-execute! find-animals)")
         self.assertTrue(answer)
-        print "\nThe answer is:"
-        print answer
+        print ("\nThe answer is:", answer)
         self.assertEqual(answer.type, types.SetLink)
         self.assertEqual(answer.arity, 3)

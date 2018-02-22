@@ -17,7 +17,7 @@ class ExecSCM : public ModuleWrap
 {
 	protected:
 		virtual void init(void);
-		static std::vector<FunctionWrap*> _binders;
+		static std::vector<FunctionWrap*>* _binders;
 	public:
 		ExecSCM(void);
 		~ExecSCM();

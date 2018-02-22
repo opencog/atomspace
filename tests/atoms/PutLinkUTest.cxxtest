@@ -1,5 +1,5 @@
 /*
- * tests/atoms/PutUTest.cxxtest
+ * tests/atoms/PutLinkUTest.cxxtest
  *
  * Copyright (C) 2015,2017 Linas Vepstas
  * Copyright (C) 2016 Nil Geiswieller
@@ -22,6 +22,7 @@
  */
 
 #include <opencog/util/exceptions.h>
+#include <opencog/guile/SchemeEval.h>
 #include <opencog/atoms/base/Atom.h>
 #include <opencog/atomspace/AtomSpace.h>
 #include <opencog/atoms/core/PutLink.h>
@@ -37,13 +38,18 @@ class PutLinkUTest: public CxxTest::TestSuite
 {
 private:
 	AtomSpace _as;
+	SchemeEval _eval;
 
 public:
-	PutLinkUTest()
+	PutLinkUTest() : _eval(&_as)
 	{
 		logger().set_print_to_stdout_flag(true);
 		logger().set_level(Logger::DEBUG);
+		logger().set_timestamp_flag(false);
 		logger().set_sync_flag(true); // interleave with printf correctly
+
+		_eval.eval("(add-to-load-path \"..\")");
+		_eval.eval("(add-to-load-path \"../../..\")");
 	}
 
 	void setUp() {}
@@ -69,6 +75,20 @@ public:
 	void test_eval_implication_1();
 	void test_eval_implication_2();
 	void test_ill_unquote();
+	void test_nested_1();
+	void test_nested_2();
+	void test_nested_3();
+	void test_nested_4();
+	void test_nested_5();
+	void test_and_compose_1();
+	void test_and_compose_2();
+	void test_quoted_put();
+	void test_ill_put();
+	void test_tricky_put_1();
+	void test_tricky_put_2();
+	void test_tricky_put_3();
+	void test_tricky_put_4();
+	void test_tricky_put_5();
 };
 
 #define N _as.add_node
@@ -1140,7 +1160,593 @@ void PutLinkUTest::test_ill_unquote()
 		          L(UNQUOTE_LINK, g)));
 
 	Instantiator inst(&_as);
-	TS_ASSERT_EQUALS(inst.execute(put), nullptr);
+	TS_ASSERT_THROWS_ANYTHING(inst.execute(put));
+
+	logger().info("END TEST: %s", __FUNCTION__);
+}
+
+/**
+ * Test that nested PutLinks is supported, specifically that executing
+ *
+ * (Put
+ *   (Put
+ *     (Lambda
+ *       (Variable "$X")
+ *       (Variable "$X"))
+ *     (Lambda
+ *       (VariableList
+ *         (Variable "$Y")
+ *         (Variable "$Z"))
+ *       (Inheritance
+ *         (Variable "$Y")
+ *         (Variable "$Z"))))
+ *   (List
+ *     (Concept "A")
+ *     (Variable "$X")))
+ *
+ * outputs
+ *
+ * (Lambda
+ *   (Variable "X")
+ *   (Inheritance
+ *     (Concept "A")
+ *     (Variable "$X")))
+ *
+ */
+void PutLinkUTest::test_nested_1()
+{
+	logger().info("BEGIN TEST: %s", __FUNCTION__);
+
+	std::string rs = _eval.eval("(load-from-path \"tests/atoms/nested-put.scm\")");
+	logger().debug() << "rs = " << rs;
+
+	Instantiator inst(&_as);
+	Handle nested_put = _eval.eval_h("nested-put-1"),
+		result = inst.execute(nested_put),
+		expected = _eval.eval_h("expected-1");
+
+	logger().debug() << "result = " << oc_to_string(result);
+	logger().debug() << "expected = " << oc_to_string(expected);
+
+	TS_ASSERT_EQUALS(result, expected);
+
+	logger().info("END TEST: %s", __FUNCTION__);
+}
+
+/**
+ * Test that the following raise an exception
+ *
+ * (PutLink
+ *   (PutLink
+ *     (LambdaLink
+ *       (VariableNode "$X")
+ *       (VariableNode "$X"))
+ *     (ListLink
+ *       (ConceptNode "texts")
+ *       (VariableNode "$W")))
+ *   (LambdaLink
+ *     (VariableList
+ *       (VariableNode "$Y")
+ *       (VariableNode "$Z"))
+ *     (InheritanceLink
+ *       (VariableNode "$Y")
+ *       (VariableNode "$Z"))))
+ *
+ * outputs
+ *
+ * (Lambda
+ *   (VariableList
+ *     (VariableNode "$Y")
+ *     (VariableNode "$Z"))
+ *   (ListLink
+ *     (ConceptNode "texts")
+ *     (Inheritance
+ *       (VariableNode "$Y")
+ *       (VariableNode "$Z"))))
+ *
+ */
+void PutLinkUTest::test_nested_2()
+{
+	logger().info("BEGIN TEST: %s", __FUNCTION__);
+
+	std::string rs = _eval.eval("(load-from-path \"tests/atoms/nested-put.scm\")");
+	logger().debug() << "rs = " << rs;
+
+	Instantiator inst(&_as);
+	Handle nested_put = _eval.eval_h("nested-put-2");
+	TS_ASSERT_THROWS_ANYTHING(inst.execute(nested_put));
+
+	logger().info("END TEST: %s", __FUNCTION__);
+}
+
+/**
+ * Test that nested PutLinks is supported, specifically that executing
+ *
+ * (PutLink
+ *   (PutLink
+ *     (PutLink
+ *       (LambdaLink
+ *         (VariableNode "$X")
+ *         (VariableNode "$X"))
+ *       (ConceptNode "A"))
+ *     (Concept "B"))
+ *   (Concept "C"))
+ *
+ * raise an exception
+ */
+void PutLinkUTest::test_nested_3()
+{
+	logger().info("BEGIN TEST: %s", __FUNCTION__);
+
+	std::string rs = _eval.eval("(load-from-path \"tests/atoms/nested-put.scm\")");
+	logger().debug() << "rs = " << rs;
+
+	Instantiator inst(&_as);
+	Handle nested_put = _eval.eval_h("nested-put-3");
+
+	TS_ASSERT_THROWS_ANYTHING(inst.execute(nested_put, true));
+
+	logger().info("END TEST: %s", __FUNCTION__);
+}
+
+/**
+ * Test that the following PutLinks raise an exception when executed
+ *
+ * (PutLink
+ *   (PutLink
+ *     (PutLink
+ *       (LambdaLink
+ *         (VariableNode "$X")
+ *         (VariableNode "$X"))
+ *       (ConceptNode "texts"))
+ *     (ListLink
+ *       (ConceptNode "texts")
+ *       (VariableNode "$x-1")))
+ *   (ConceptNode "texts"))
+ */
+void PutLinkUTest::test_nested_4()
+{
+	logger().info("BEGIN TEST: %s", __FUNCTION__);
+
+	std::string rs = _eval.eval("(load-from-path \"tests/atoms/nested-put.scm\")");
+	logger().debug() << "rs = " << rs;
+
+	Instantiator inst(&_as);
+	Handle nested_put = _eval.eval_h("nested-put-4");
+
+	TS_ASSERT_THROWS_ANYTHING(inst.execute(nested_put, true));
+
+	logger().info("END TEST: %s", __FUNCTION__);
+}
+
+/**
+ * Test that the following PutLinks
+ *
+ * (Put
+ *   (Put
+ *     (Put
+ *       (Lambda
+ *         (Variable "$top-arg")
+ *         (Variable "$top-arg"))
+ *       (Lambda
+ *         (Variable "$top-arg")
+ *         (Variable "$top-arg")))
+ *     (List
+ *       (Variable "$spe-arg-0")
+ *       (Concept "D")))
+ *   (Lambda
+ *     (VariableList
+ *       (Variable "$sha-arg-0")
+ *       (Variable "$sha-arg-1"))
+ *     (Inheritance
+ *       (Variable "$sha-arg-0")
+ *       (Variable "$sha-arg-1"))))
+ *
+ * executes into
+ *
+ * (Lambda
+ *   (VariableList
+ *     (Variable "$sha-arg-0")
+ *     (Variable "$sha-arg-1"))
+ *   (List
+ *     (Inheritance
+ *       (Variable "$sha-arg-0")
+ *       (Variable "$sha-arg-1"))
+ *     (Concept "D")))
+ */
+void PutLinkUTest::test_nested_5()
+{
+	logger().info("BEGIN TEST: %s", __FUNCTION__);
+
+	std::string rs = _eval.eval("(load-from-path \"tests/atoms/nested-put.scm\")");
+	logger().debug() << "rs = " << rs;
+
+	Instantiator inst(&_as);
+	Handle nested_put = _eval.eval_h("nested-put-5"),
+		result = inst.execute(nested_put),
+		expected = _eval.eval_h("expected-5");
+
+	logger().debug() << "result = " << oc_to_string(result);
+	logger().debug() << "expected = " << oc_to_string(expected);
+
+	TS_ASSERT_EQUALS(result, expected);
+
+	logger().info("END TEST: %s", __FUNCTION__);
+}
+
+/**
+ * Make sure that composing a top abstraction with aquoted AndLink
+ * doesn't remove the quotes, because otherwise the AndLink is
+ * interpreted as being a pattern matcher logic connector. So
+ * specifically check that
+ *
+ * (PutLink
+ *   (LambdaLink
+ *     (VariableNode "$top-arg")
+ *     (VariableNode "$top-arg"))
+ *   (LambdaLink
+ *     (VariableList
+ *       (VariableNode "$sha-arg-0")
+ *       (VariableNode "$sha-arg-1")))
+ *     (LocalQuoteLink
+ *       (AndLink
+ *         (VariableNode "$sha-arg-0")
+ *         (VariableNode "$sha-arg-1"))))
+ *
+ * upon execution outputs
+ *
+ * (LambdaLink
+ *   (VariableList
+ *     (VariableNode "$sha-arg-0")
+ *     (VariableNode "$sha-arg-1"))
+ *   (LocalQuoteLink
+ *     (AndLink
+ *       (VariableNode "$sha-arg-0")
+ *       (VariableNode "$sha-arg-1"))))
+ *
+ */
+void PutLinkUTest::test_and_compose_1()
+{
+	logger().info("BEGIN TEST: %s", __FUNCTION__);
+
+	std::string rs = _eval.eval("(load-from-path \"tests/atoms/put-and.scm\")");
+	logger().debug() << "rs = " << rs;
+
+	Instantiator inst(&_as);
+	Handle top = _eval.eval_h("top"),
+		and_sha_abs = _eval.eval_h("and-shallow-abstraction"),
+		put_top_and = L(PUT_LINK, top,
+		                and_sha_abs),
+		result = inst.execute(put_top_and),
+		expected = and_sha_abs;
+
+	logger().debug() << "result = " << oc_to_string(result);
+	logger().debug() << "expected = " << oc_to_string(expected);
+
+	TS_ASSERT_EQUALS(result, expected);
+
+	logger().info("END TEST: %s", __FUNCTION__);
+}
+
+/**
+ * Make sure that composing a non top abstraction with a quoted
+ * AndLink does remove the quotation as it is useless. Specifically
+ *
+ * (PutLink
+ *   (LambdaLink
+ *     (VariableList
+ *       (VariableNode "$sha-arg-0")
+ *       (VariableNode "$sha-arg-1"))
+ *     (InheritanceLink
+ *       (VariableNode "$sha-arg-0")
+ *       (VariableNode "$sha-arg-1")))
+ *   (ListLink
+ *     (VariableNode "spe-0")
+ *     (LambdaLink
+ *       (VariableList
+ *         (VariableNode "$sha-arg-0")
+ *         (VariableNode "$sha-arg-1"))
+ *       (LocalQuoteLink
+ *         (AndLink
+ *           (VariableNode "$sha-arg-0")
+ *           (VariableNode "$sha-arg-1"))))))
+ *
+ * upon execution outputs
+ *
+ * (LambdaLink
+ *   (VariableList
+ *     (VariableNode "spe-0")
+ *     (VariableNode "$sha-arg-0")
+ *     (VariableNode "$sha-arg-1"))
+ *   (InheritanceLink
+ *     (VariableNode "spe-0")
+ *     (AndLink
+ *       (VariableNode "$sha-arg-0")
+ *       (VariableNode "$sha-arg-1"))))
+ *
+ */
+void PutLinkUTest::test_and_compose_2()
+{
+	logger().info("BEGIN TEST: %s", __FUNCTION__);
+
+	std::string rs = _eval.eval("(load-from-path \"tests/atoms/put-and.scm\")");
+	logger().debug() << "rs = " << rs;
+
+	Instantiator inst(&_as);
+	Handle inh_sha_abs = _eval.eval_h("inheritance-shallow-abstraction"),
+		and_sha_abs = _eval.eval_h("and-shallow-abstraction"),
+		spe_var = N(VARIABLE_NODE, "$spe-0"),
+		sha_var_1 = N(VARIABLE_NODE, "$sha-arg-0"),
+		sha_var_2 = N(VARIABLE_NODE, "$sha-arg-1"),
+		put_inh_and = L(PUT_LINK, inh_sha_abs,
+		                L(LIST_LINK, spe_var, and_sha_abs)),
+		result = inst.execute(put_inh_and),
+		expected = L(LAMBDA_LINK,
+		             L(VARIABLE_LIST,
+		               spe_var,
+		               sha_var_1,
+		               sha_var_2),
+		              L(INHERITANCE_LINK,
+		                spe_var,
+		                L(AND_LINK,
+		                  sha_var_1,
+		                  sha_var_2)));
+
+	logger().debug() << "result = " << oc_to_string(result);
+	logger().debug() << "expected = " << oc_to_string(expected);
+
+	TS_ASSERT_EQUALS(result, expected);
+
+	logger().info("END TEST: %s", __FUNCTION__);
+}
+
+/**
+ * Make sure one can build quoted PutLink like
+ *
+ * Quote
+ *   Put
+ *     Lambda
+ *       Inheritance
+ *         Variable "$X"
+ *         Variable "$Y"
+ *     Unquote Variable "$patvar"
+ */
+void PutLinkUTest::test_quoted_put()
+{
+	logger().info("BEGIN TEST: %s", __FUNCTION__);
+
+	Instantiator inst(&_as);
+	Handle quoted_put = L(QUOTE_LINK,
+	                      L(PUT_LINK,
+	                        L(LAMBDA_LINK,
+	                          L(INHERITANCE_LINK,
+	                            N(VARIABLE_NODE, "$X"),
+	                            N(VARIABLE_NODE, "$Y"))),
+	                        L(UNQUOTE_LINK,
+	                          N(VARIABLE_NODE, "$patvar"))));
+
+	logger().debug() << "quoted_put = " << oc_to_string(quoted_put);
+
+	TS_ASSERT_DIFFERS(quoted_put, nullptr);
+
+	logger().info("END TEST: %s", __FUNCTION__);
+}
+
+/**
+ * Make sure running some ill formed PutLink doesn't crash
+ */
+void PutLinkUTest::test_ill_put()
+{
+	logger().info("BEGIN TEST: %s", __FUNCTION__);
+
+	Instantiator inst(&_as);
+	Handle ill_put = _eval.eval_h("(PutLink"
+	                              "  (LambdaLink"
+	                              "    (VariableNode \"$top-arg\")"
+	                              "    (VariableNode \"$top-arg\"))"
+	                              "  (ListLink"
+	                              "    (EvaluationLink"
+	                              "      (PredicateNode \"minsup\")"
+	                              "      (ListLink"
+	                              "        (PutLink"
+	                              "          (VariableNode \"$g\")"
+	                              "          (VariableNode \"$f\"))"
+	                              "        (VariableNode \"$texts\")"
+	                              "        (VariableNode \"$ms\")))"
+	                              "    (EvaluationLink"
+	                              "      (PredicateNode \"minsup\")"
+	                              "      (ListLink"
+	                              "        (VariableNode \"$g\")"
+	                              "        (VariableNode \"$texts\")"
+	                              "        (VariableNode \"$ms\")))"
+	                              "    (VariableNode \"$f\")))");
+	Handle result = inst.execute(ill_put);
+
+	logger().debug() << "result = " << oc_to_string(result);
+
+	TS_ASSERT_EQUALS(result, nullptr);
+
+	logger().info("END TEST: %s", __FUNCTION__);
+}
+
+/**
+ * The following
+ *
+ * (Put
+ *   (Lambda (Inheritance (Variable "$X") (Variable "$Y")))
+ *   (List (Variable "$Z") (Variable "$Z")))
+ *
+ * should output upon execution
+ *
+ * (LambdaLink
+ *   (VariableNode "$Z")
+ *   (InheritanceLink
+ *     (VariableNode "$Z")
+ *     (VariableNode "$Z")))
+ */
+void PutLinkUTest::test_tricky_put_1()
+{
+	logger().info("BEGIN TEST: %s", __FUNCTION__);
+
+	std::string rs = _eval.eval("(load-from-path \"tests/atoms/tricky-put.scm\")");
+	logger().debug() << "rs = " << rs;
+
+	Instantiator inst(&_as);
+	Handle put = _eval.eval_h("put-1"),
+		result = inst.execute(put),
+		expected = _eval.eval_h("expected-1");
+
+	logger().debug() << "result = " << oc_to_string(result);
+	logger().debug() << "expected = " << oc_to_string(expected);
+
+	TS_ASSERT_EQUALS(result, expected);
+
+	logger().info("END TEST: %s", __FUNCTION__);
+}
+
+/**
+ * The following
+ *
+ * (Put
+ *   (Inheritance (Variable "$X") (Variable "$Y"))
+ *   (List (Variable "$Z") (Variable "$Z")))
+ *
+ * should output upon execution
+ *
+ * (InheritanceLink
+ *   (VariableNode "$Z")
+ *   (VariableNode "$Z"))
+ */
+void PutLinkUTest::test_tricky_put_2()
+{
+	logger().info("BEGIN TEST: %s", __FUNCTION__);
+
+	std::string rs = _eval.eval("(load-from-path \"tests/atoms/tricky-put.scm\")");
+	logger().debug() << "rs = " << rs;
+
+	Instantiator inst(&_as);
+	Handle put = _eval.eval_h("put-2"),
+		result = inst.execute(put),
+		expected = _eval.eval_h("expected-2");
+
+	logger().debug() << "result = " << oc_to_string(result);
+	logger().debug() << "expected = " << oc_to_string(expected);
+
+	TS_ASSERT_EQUALS(result, expected);
+
+	logger().info("END TEST: %s", __FUNCTION__);
+}
+
+/**
+ * The following
+ *
+ * (Put
+ *   (Lambda (Inheritance (Variable "$X") (Variable "$Y")))
+ *   (List (Variable "$Z") (Variable "$W")))
+ *
+ * should output upon execution
+ *
+ * (LambdaLink
+ *   (InheritanceLink
+ *     (VariableNode "$X")
+ *     (VariableNode "$Y")))
+ */
+void PutLinkUTest::test_tricky_put_3()
+{
+	logger().info("BEGIN TEST: %s", __FUNCTION__);
+
+	std::string rs = _eval.eval("(load-from-path \"tests/atoms/tricky-put.scm\")");
+	logger().debug() << "rs = " << rs;
+
+	Instantiator inst(&_as);
+	Handle put = _eval.eval_h("put-3"),
+		result = inst.execute(put),
+		expected = _eval.eval_h("expected-3");
+
+	logger().debug() << "result = " << oc_to_string(result);
+	logger().debug() << "expected = " << oc_to_string(expected);
+
+	TS_ASSERT_EQUALS(result, expected);
+
+	logger().info("END TEST: %s", __FUNCTION__);
+}
+
+/**
+ * The following
+ *
+ * (Put
+ *   (Inheritance (Variable "$X") (Variable "$Y"))
+ *   (List (Variable "$Z") (Variable "$W")))
+ *
+ * should output upon execution
+ *
+ * (InheritanceLink
+ *   (VariableNode "$X")
+ *   (VariableNode "$Y"))
+ */
+void PutLinkUTest::test_tricky_put_4()
+{
+	logger().info("BEGIN TEST: %s", __FUNCTION__);
+
+	std::string rs = _eval.eval("(load-from-path \"tests/atoms/tricky-put.scm\")");
+	logger().debug() << "rs = " << rs;
+
+	Instantiator inst(&_as);
+	Handle put = _eval.eval_h("put-4"),
+		result = inst.execute(put),
+		expected = _eval.eval_h("expected-4");
+
+	logger().debug() << "result = " << oc_to_string(result);
+	logger().debug() << "expected = " << oc_to_string(expected);
+
+	TS_ASSERT_EQUALS(result, expected);
+
+	logger().info("END TEST: %s", __FUNCTION__);
+}
+
+/**
+ * The following
+ *
+ * (Put
+ *   (List
+ *     (Variable "$spe-arg-0")
+ *     (Concept "D"))
+ *   (Lambda
+ *     (VariableList
+ *       (Variable "$sha-arg-0")
+ *       (Variable "$sha-arg-1"))
+ *     (Inheritance
+ *       (Variable "$sha-arg-0")
+ *       (Variable "$sha-arg-1"))))
+ *
+ * should output upon execution
+ *
+ * (Lambda
+ *   (VariableList
+ *     (Variable "$sha-arg-0")
+ *     (Variable "$sha-arg-1"))
+ *   (List
+ *     (Inheritance
+ *       (Variable "$sha-arg-0")
+ *       (Variable "$sha-arg-1"))
+ *     (Concept "D")))
+ */
+void PutLinkUTest::test_tricky_put_5()
+{
+	logger().info("BEGIN TEST: %s", __FUNCTION__);
+
+	std::string rs = _eval.eval("(load-from-path \"tests/atoms/tricky-put.scm\")");
+	logger().debug() << "rs = " << rs;
+
+	Instantiator inst(&_as);
+	Handle put = _eval.eval_h("put-5"),
+		result = inst.execute(put),
+		expected = _eval.eval_h("expected-5");
+
+	logger().debug() << "result = " << oc_to_string(result);
+	logger().debug() << "expected = " << oc_to_string(expected);
+
+	TS_ASSERT_EQUALS(result, expected);
 
 	logger().info("END TEST: %s", __FUNCTION__);
 }

@@ -55,8 +55,8 @@ std::string SchemeSmob::av_to_string(const AttentionValuePtr& av)
 	char buff[BUFLEN];
 
 	// We pretend that they are actually short integers.
-	snprintf(buff, BUFLEN, "(av %d %d %d)",
-	         (int) av->getSTI(), (int) av->getLTI(), (int) av->getVLTI());
+	snprintf(buff, BUFLEN, "(av %f %f %f)",
+	         av->getSTI(), av->getLTI(), av->getVLTI());
 
 	return buff;
 }
@@ -73,18 +73,18 @@ SCM SchemeSmob::av_to_scm (const AttentionValuePtr& av)
  */
 SCM SchemeSmob::ss_new_av (SCM ssti, SCM slti, SCM svlti)
 {
-	if (!scm_is_integer(ssti)) {
-		scm_wrong_type_arg_msg("cog-new-av", 1, ssti, "signed short");
+	if (!scm_is_real(ssti)) {
+		scm_wrong_type_arg_msg("cog-new-av", 1, ssti, "double");
 	}
-	if (!scm_is_integer(slti)) {
-		scm_wrong_type_arg_msg("cog-new-av", 2, slti, "signed short");
+	if (!scm_is_real(slti)) {
+		scm_wrong_type_arg_msg("cog-new-av", 2, slti, "double");
 	}
-	if (!scm_is_integer(svlti)) {
-		scm_wrong_type_arg_msg("cog-new-av", 3, svlti, "unsigned short");
+	if (!scm_is_real(svlti)) {
+		scm_wrong_type_arg_msg("cog-new-av", 3, svlti, "double");
 	}
-	AttentionValue::sti_t sti = scm_to_short(ssti);
-	AttentionValue::lti_t lti = scm_to_short(slti);
-	AttentionValue::vlti_t vlti = scm_to_ushort(svlti);
+	AttentionValue::sti_t sti = scm_to_double(ssti);
+	AttentionValue::lti_t lti = scm_to_double(slti);
+	AttentionValue::vlti_t vlti = scm_to_double(svlti);
 	AttentionValuePtr av = AttentionValue::createAV(sti, lti, vlti);
 	return av_to_scm(av);
 }
@@ -125,9 +125,9 @@ SCM SchemeSmob::ss_av_get_value (SCM s)
 {
 	AttentionValuePtr av = verify_av(s, "cog-av->alist");
 
-	SCM sti = scm_from_short(av->getSTI());
-	SCM lti = scm_from_short(av->getLTI());
-	SCM vlti = scm_from_ushort(av->getVLTI());
+	SCM sti =scm_from_double(av->getSTI());
+	SCM lti = scm_from_double(av->getLTI());
+	SCM vlti = scm_from_double(av->getVLTI());
 
 	SCM ssti = scm_from_utf8_symbol("sti");
 	SCM slti = scm_from_utf8_symbol("lti");

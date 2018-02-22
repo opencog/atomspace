@@ -34,15 +34,15 @@ using namespace opencog;
 
 AttentionBank::AttentionBank(AtomSpace* asp)
 {
-    startingFundsSTI = fundsSTI = config().get_int("STARTING_STI_FUNDS", 100000);
-    startingFundsLTI = fundsLTI = config().get_int("STARTING_LTI_FUNDS", 100000);
-    stiFundsBuffer = config().get_int("STI_FUNDS_BUFFER", 10000);
-    ltiFundsBuffer = config().get_int("LTI_FUNDS_BUFFER", 10000);
-    targetLTI = config().get_int("TARGET_LTI_FUNDS", 10000);
-    targetSTI = config().get_int("TARGET_STI_FUNDS", 10000);
-    STIAtomWage = config().get_int("ECAN_STARTING_ATOM_STI_WAGE", 10);
-    LTIAtomWage = config().get_int("ECAN_STARTING_ATOM_LTI_WAGE", 10);
-    minAFSize = config().get_int("ECAN_MIN_AF_SIZE", 100);
+    startingFundsSTI = fundsSTI = config().get_double("STARTING_STI_FUNDS", 100000);
+    startingFundsLTI = fundsLTI = config().get_double("STARTING_LTI_FUNDS", 100000);
+    stiFundsBuffer = config().get_double("STI_FUNDS_BUFFER", 10000);
+    ltiFundsBuffer = config().get_double("LTI_FUNDS_BUFFER", 10000);
+    targetLTI = config().get_double("TARGET_LTI_FUNDS", 10000);
+    targetSTI = config().get_double("TARGET_STI_FUNDS", 10000);
+    STIAtomWage = config().get_double("ECAN_STARTING_ATOM_STI_WAGE", 10);
+    LTIAtomWage = config().get_double("ECAN_STARTING_ATOM_LTI_WAGE", 10);
+    maxAFSize = config().get_int("ECAN_MAX_AF_SIZE", 100);
 
     _remove_signal = &asp->atomRemovedSignal();
     _remove_connection = _remove_signal->connect(
@@ -101,6 +101,7 @@ void AttentionBank::AVChanged(const Handle& h,
                               const AttentionValuePtr& old_av,
                               const AttentionValuePtr& new_av)
 {
+    _mtx.lock();
     // First, update the atom's actual AV.
     set_av(h, new_av);
 
@@ -109,13 +110,15 @@ void AttentionBank::AVChanged(const Handle& h,
 
     // Add the old attention values to the AttentionBank funds and
     // subtract the new attention values from the AttentionBank funds
-    updateSTIFunds(oldSti - newSti);
-    updateLTIFunds(old_av->getLTI() - new_av->getLTI());
+    fundsSTI += (oldSti - newSti);
+    fundsLTI += (old_av->getLTI() - new_av->getLTI());
 
     _importanceIndex.update();
 
+    _mtx.unlock();
+
     logger().fine("AVChanged: fundsSTI = %d, old_av: %d, new_av: %d",
-                   fundsSTI.load(), oldSti, newSti);
+                   fundsSTI, oldSti, newSti);
 
     // Notify any interested parties that the AV changed.
     _AVChangedSignal.emit(h, old_av, new_av);
@@ -152,9 +155,9 @@ void AttentionBank::stimulate(const Handle& h, double stimulus)
 
 AttentionValue::sti_t AttentionBank::calculateSTIWage()
 {
-    long funds = getSTIFunds();
-    double diff  = funds - targetSTI;
-    double ndiff = diff / stiFundsBuffer;
+    AttentionValue::sti_t funds = getSTIFunds();
+    AttentionValue::sti_t diff  = funds - targetSTI;
+    AttentionValue::sti_t ndiff = diff / stiFundsBuffer;
     ndiff = std::min(ndiff, 1.0);
     ndiff = std::max(ndiff, -1.0);
 
@@ -163,9 +166,9 @@ AttentionValue::sti_t AttentionBank::calculateSTIWage()
 
 AttentionValue::lti_t AttentionBank::calculateLTIWage()
 {
-    long funds = getLTIFunds();
-    double diff  = funds - targetLTI;
-    double ndiff = diff / ltiFundsBuffer;
+    AttentionValue::lti_t funds = getLTIFunds();
+    AttentionValue::lti_t diff  = funds - targetLTI;
+    AttentionValue::lti_t ndiff = diff / ltiFundsBuffer;
     ndiff = std::min(ndiff, 1.0);
     ndiff = std::max(ndiff, -1.0);
 
@@ -186,6 +189,7 @@ double AttentionBank::getNormalisedSTI(AttentionValuePtr av,
         int normaliser = -((int) getMinSTI(average) + get_af_max_sti());
         if (normaliser == 0) return 0.0;
         val = (s + get_af_max_sti()) / (double) normaliser;
+
     }
 
     if (clip) return std::max(-1.0, std::min(val, 1.0));
@@ -265,7 +269,7 @@ void AttentionBank::updateAttentionalFocus(const Handle& h,
     bool insertable = false;
     auto it = std::find_if(attentionalFocus.begin(), attentionalFocus.end(),
             [h](std::pair<Handle, AttentionValuePtr> p)
-            { if (p.first == h) return true; return false;});
+            { return p.first == h;});
 
     // Update the STI value if atoms was already in AF
     if (it != attentionalFocus.end())
@@ -276,13 +280,13 @@ void AttentionBank::updateAttentionalFocus(const Handle& h,
     }
 
     // Simply insert the new Atom if AF is not full yet.
-    else if (attentionalFocus.size() < minAFSize)
+    else if (attentionalFocus.size() < maxAFSize)
     {
         insertable = true;
     }
 
-    // Remove the least sti valued atom in the AF and repace
-    // it with the new atom holding higher STI value.
+    // Remove the least sti valued atom in the AF and replace
+    // it with the new atom holding a higher STI value.
     else if (sti > (least->second)->getSTI())
     {
         Handle hrm = least->first;
@@ -303,4 +307,25 @@ void AttentionBank::updateAttentionalFocus(const Handle& h,
         AFCHSigl& afch = AddAFSignal();
         afch.emit(h, old_av, new_av);
     }
+}
+
+Handle AttentionBank::getRandomAtomNotInAF(void)
+{
+    std::lock_guard<std::mutex> lock(AFMutex);
+    auto find_in_af = [this](const Handle& h){
+       auto it = std::find_if(attentionalFocus.begin(), attentionalFocus.end(),
+                [h](std::pair<Handle, AttentionValuePtr> hsp) { return hsp.first == h; });
+       return it;
+    };
+
+    int count = 50; // We might get stuck in the while loop if there are no atoms outside the AF
+    Handle h = Handle::UNDEFINED;
+    while(find_in_af(h) != attentionalFocus.end() and --count > 0){
+        h = _importanceIndex.getRandomAtom();
+    }
+    // Make sure the last selection did not select from the AF.
+    if(find_in_af(h) != attentionalFocus.end())
+        return Handle::UNDEFINED;
+
+    return h;
 }
