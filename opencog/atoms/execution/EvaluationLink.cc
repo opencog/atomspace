@@ -292,7 +292,8 @@ TruthValuePtr EvaluationLink::do_eval_scratch(AtomSpace* as,
 	}
 	else if (NOT_LINK == t)
 	{
-		TruthValuePtr tv(do_eval_scratch(as, evelnk->getOutgoingAtom(0), scratch));
+		TruthValuePtr tv(do_eval_scratch(as, evelnk->getOutgoingAtom(0),
+		                                 scratch, silent));
 		return SimpleTruthValue::createTV(
 		              1.0 - tv->get_mean(), tv->get_confidence());
 	}
@@ -300,7 +301,7 @@ TruthValuePtr EvaluationLink::do_eval_scratch(AtomSpace* as,
 	{
 		for (const Handle& h : evelnk->getOutgoingSet())
 		{
-			TruthValuePtr tv(do_eval_scratch(as, h, scratch));
+			TruthValuePtr tv(do_eval_scratch(as, h, scratch, silent));
 			if (tv->get_mean() < 0.5)
 				return tv;
 		}
@@ -310,7 +311,7 @@ TruthValuePtr EvaluationLink::do_eval_scratch(AtomSpace* as,
 	{
 		for (const Handle& h : evelnk->getOutgoingSet())
 		{
-			TruthValuePtr tv(do_eval_scratch(as, h, scratch));
+			TruthValuePtr tv(do_eval_scratch(as, h, scratch, silent));
 			if (0.5 < tv->get_mean())
 				return tv;
 		}
@@ -331,7 +332,7 @@ TruthValuePtr EvaluationLink::do_eval_scratch(AtomSpace* as,
 		{
 			for (size_t i=0; i<arity; i++)
 			{
-				TruthValuePtr tv(do_eval_scratch(as, oset[i], scratch));
+				TruthValuePtr tv(do_eval_scratch(as, oset[i], scratch, silent));
 				if (tv->get_mean() < 0.5)
 					return tv;
 			}
@@ -353,7 +354,7 @@ TruthValuePtr EvaluationLink::do_eval_scratch(AtomSpace* as,
 		{
 			for (size_t i=0; i<arity; i++)
 			{
-				TruthValuePtr tv(do_eval_scratch(as, oset[i], scratch));
+				TruthValuePtr tv(do_eval_scratch(as, oset[i], scratch, silent));
 				if (0.5 < tv->get_mean())
 					return tv;
 			}
@@ -437,7 +438,7 @@ TruthValuePtr EvaluationLink::do_eval_scratch(AtomSpace* as,
 		// directly, instead of going through the pattern matcher.
 		// The only reason we want to do even this much is to do
 		// tail-recursion optimization, if possible.
-		return do_eval_scratch(as, evelnk->getOutgoingAtom(0), scratch);
+		return do_eval_scratch(as, evelnk->getOutgoingAtom(0), scratch, silent);
 	}
 	else if (PUT_LINK == t)
 	{
@@ -465,11 +466,12 @@ TruthValuePtr EvaluationLink::do_eval_scratch(AtomSpace* as,
 		Handle red = pl->reduce();
 
 		// Step (3)
-		return do_eval_scratch(as, red, scratch);
+		return do_eval_scratch(as, red, scratch, silent);
 	}
 	else if (DEFINED_PREDICATE_NODE == t)
 	{
-		return do_eval_scratch(as, DefineLink::get_definition(evelnk), scratch);
+		return do_eval_scratch(as, DefineLink::get_definition(evelnk),
+		                       scratch, silent);
 	}
 	else if (// Links that evaluate to themselves
 		INHERITANCE_LINK == t or
