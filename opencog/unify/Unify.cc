@@ -215,17 +215,21 @@ void Unify::set_variables(const Handle& lhs, const Handle& rhs,
 Unify::CHandle Unify::find_least_abstract(const TypedBlock& block,
                                           const Handle& pre) const
 {
+	// Get the least abstract element of the block
 	static Handle top(Handle(createNode(VARIABLE_NODE, "__dummy_top__")));
 	CHandle least_abstract(top);
-	for (const CHandle& ch : block.first) {
-		if (inherit(ch, least_abstract) and
-		    // If h is a variable, consider it if it is in pre (stands
-		    // for precedence)
-		    (not ch.is_free_variable()
-		     or is_unquoted_unscoped_in_tree(pre, ch.handle))) {
+	for (const CHandle& ch : block.first)
+		if (inherit(ch, least_abstract))
 			least_abstract = ch;
-		}
-	}
+
+	// In case of ties pick up the one in pre (pre stands for
+	// precedence)
+	for (const CHandle& ch : block.first)
+		if (inherit(ch, least_abstract)
+		    and
+		    (not ch.is_free_variable()
+		     or is_unquoted_unscoped_in_tree(pre, ch.handle)))
+			least_abstract = ch;
 
 	OC_ASSERT(least_abstract.handle != top,
 	          "Finding the least abstract atom in the block has failed. "
