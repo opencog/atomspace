@@ -1806,10 +1806,10 @@ void UnifyUTest::test_unify_complex_10()
 	TS_ASSERT_EQUALS(result, expected);
 
 	Handle ts_vardecl = _eval.eval_h("(TypedVariableLink"
-	                                 "  (VariableNode \"$patvar\")"
+	                                 "  (VariableNode \"$f\")"
 	                                 "  (TypeChoice"
+	                                 "    (TypeNode \"ConceptNode\")"
 	                                 "    (TypeNode \"LambdaLink\")"
-	                                 "    (TypeNode \"PutLink\")"
 	                                 "  )"
 	                                 ")");
 
@@ -1818,9 +1818,9 @@ void UnifyUTest::test_unify_complex_10()
 	Unify::TypedSubstitutions ts_expected =
 		Unify::TypedSubstitutions{{{{texts_var, texts},
 		                            {g_var, Ctop},
-		                            {f_var, pat_var},
+		                            {f_var, f_var},
 		                            {ms_var, ms},
-		                            {pat_var, pat_var}},
+		                            {pat_var, f_var}},
 		                           ts_vardecl}};
 
 	std::cout << "ts_result = " << oc_to_string(ts_result) << std::endl;
