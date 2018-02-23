@@ -164,6 +164,7 @@ public:
 	void test_unify_complex_8();
 	void test_unify_complex_9();
 	void test_unify_complex_10();
+	void test_unify_complex_11();
 };
 
 void UnifyUTest::setUp(void)
@@ -1827,6 +1828,339 @@ void UnifyUTest::test_unify_complex_10()
 	std::cout << "ts_expected = " << oc_to_string(ts_expected) << std::endl;
 
 	TS_ASSERT(tss_content_eq(ts_result, ts_expected));
+}
+
+/**
+ * Test unification and substitution on a complex hypergraph
+ */
+void UnifyUTest::test_unify_complex_11()
+{
+	// Hypergraph to substitute after unification
+	Handle bl =
+		_eval.eval_h("(BindLink"
+		             "  (VariableList"
+		             "    (TypedVariableLink"
+		             "      (VariableNode \"$g\")"
+		             "      (TypeChoice"
+		             "        (TypeNode \"LambdaLink\")"
+		             "        (TypeNode \"PutLink\")"
+		             "      )"
+		             "    )"
+		             "    (TypedVariableLink"
+		             "      (VariableNode \"$texts\")"
+		             "      (TypeNode \"ConceptNode\")"
+		             "    )"
+		             "    (TypedVariableLink"
+		             "      (VariableNode \"$ms\")"
+		             "      (TypeNode \"NumberNode\")"
+		             "    )"
+		             "    (TypedVariableLink"
+		             "      (VariableNode \"$f\")"
+		             "      (TypeChoice"
+		             "        (TypeNode \"LambdaLink\")"
+		             "        (TypeNode \"PutLink\")"
+		             "        (TypeNode \"ConceptNode\")"
+		             "      )"
+		             "    )"
+		             "  )"
+		             "  (AndLink"
+		             "    (VariableNode \"$f\")"
+		             "    (EvaluationLink"
+		             "      (PredicateNode \"minsup\")"
+		             "      (ListLink"
+		             "        (VariableNode \"$g\")"
+		             "        (VariableNode \"$texts\")"
+		             "        (VariableNode \"$ms\")"
+		             "      )"
+		             "    )"
+		             "    (EvaluationLink"
+		             "      (GroundedPredicateNode \"scm: absolutely-true\")"
+		             "      (EvaluationLink"
+		             "        (PredicateNode \"minsup\")"
+		             "        (ListLink"
+		             "          (VariableNode \"$g\")"
+		             "          (VariableNode \"$texts\")"
+		             "          (VariableNode \"$ms\")"
+		             "        )"
+		             "      )"
+		             "    )"
+		             "    (EvaluationLink"
+		             "      (GroundedPredicateNode \"scm: has-arity\")"
+		             "      (ListLink"
+		             "        (VariableNode \"$g\")"
+		             "        (NumberNode \"2.000000\")"
+		             "      )"
+		             "    )"
+		             "  )"
+		             "  (ExecutionOutputLink"
+		             "    (GroundedSchemaNode \"scm: specialization-formula\")"
+		             "    (ListLink"
+		             "      (EvaluationLink"
+		             "        (PredicateNode \"minsup\")"
+		             "        (ListLink"
+		             "          (QuoteLink"
+		             "            (PutLink"
+		             "              (UnquoteLink"
+		             "                (VariableNode \"$g\")"
+		             "              )"
+		             "              (UnquoteLink"
+		             "                (ListLink"
+		             "                  (VariableNode \"$spe-arg-0\")"
+		             "                  (VariableNode \"$f\")"
+		             "                )"
+		             "              )"
+		             "            )"
+		             "          )"
+		             "          (VariableNode \"$texts\")"
+		             "          (VariableNode \"$ms\")"
+		             "        )"
+		             "      )"
+		             "      (EvaluationLink"
+		             "        (PredicateNode \"minsup\")"
+		             "        (ListLink"
+		             "          (VariableNode \"$g\")"
+		             "          (VariableNode \"$texts\")"
+		             "          (VariableNode \"$ms\")"
+		             "        )"
+		             "      )"
+		             "      (VariableNode \"$f\")"
+		             "    )"
+		             "  )"
+		             ")");
+
+	// Sub-element of bl to unify with
+	Handle target =
+		_eval.eval_h("(EvaluationLink"
+		             "  (PredicateNode \"minsup\")"
+		             "  (ListLink"
+		             "    (QuoteLink"
+		             "      (PutLink"
+		             "        (PutLink"
+		             "          (LambdaLink"
+		             "            (VariableNode \"$top-arg\")"
+		             "            (VariableNode \"$top-arg\")"
+		             "          )"
+		             "          (UnquoteLink"
+		             "            (VariableNode \"$shapat-0\")"
+		             "          )"
+		             "        )"
+		             "        (UnquoteLink"
+		             "          (VariableNode \"$shapat-1\")"
+		             "        )"
+		             "      )"
+		             "    )"
+		             "    (ConceptNode \"texts\")"
+		             "    (NumberNode \"2.000000\")"
+		             "  )"
+		             ")");
+
+	Handle alpha_pat =
+        _eval.eval_h("(EvaluationLink"
+                     "  (PredicateNode \"minsup\")"
+                     "  (ListLink"
+                     "    (QuoteLink"
+                     "      (PutLink"
+                     "        (UnquoteLink"
+                     "          (VariableNode \"$g\")"
+                     "        )"
+                     "        (UnquoteLink"
+                     "          (ListLink"
+                     "            (VariableNode \"$spe-arg-0\")"
+                     "            (VariableNode \"$f\")"
+                     "          )"
+                     "        )"
+                     "      )"
+                     "    )"
+                     "    (VariableNode \"$texts\")"
+                     "    (VariableNode \"$ms\")"
+                     "  )"
+                     ")");
+
+	Handle vardecl =
+        _eval.eval_h("(VariableList"
+                     "  (VariableNode \"$shapat-1\")"
+                     "  (VariableNode \"$shapat-0\")"
+                     ")");
+
+	Handle alpha_vardecl =
+        _eval.eval_h("(VariableList"
+                     "  (TypedVariableLink"
+                     "    (VariableNode \"$g\")"
+                     "    (TypeChoice"
+                     "      (TypeNode \"LambdaLink\")"
+                     "      (TypeNode \"PutLink\")"
+                     "    )"
+                     "  )"
+                     "  (TypedVariableLink"
+                     "    (VariableNode \"$texts\")"
+                     "    (TypeNode \"ConceptNode\")"
+                     "  )"
+                     "  (TypedVariableLink"
+                     "    (VariableNode \"$ms\")"
+                     "    (TypeNode \"NumberNode\")"
+                     "  )"
+                     "  (TypedVariableLink"
+                     "    (VariableNode \"$f\")"
+                     "    (TypeChoice"
+                     "      (TypeNode \"LambdaLink\")"
+                     "      (TypeNode \"PutLink\")"
+                     "      (TypeNode \"ConceptNode\")"
+                     "    )"
+                     "  )"
+                     ")");
+
+	Handle shapat1_var = _eval.eval_h("(VariableNode \"$shapat-1\")");
+	Handle spef_list = _eval.eval_h("(ListLink"
+	                                "  (VariableNode \"$spe-arg-0\")"
+	                                "  (VariableNode \"$f\"))");
+	Handle ms_var = _eval.eval_h("(VariableNode \"$ms\")");
+	Handle ms = _eval.eval_h("(NumberNode \"2.0\")");
+	Handle texts_var = _eval.eval_h("(VariableNode \"$texts\")");
+	Handle texts = _eval.eval_h("(ConceptNode \"texts\")");
+	Handle g_var = _eval.eval_h("(VariableNode \"$g\")");
+	Handle put_top = _eval.eval_h("(PutLink"
+	                              "  (LambdaLink"
+	                              "    (VariableNode \"$top-arg\")"
+	                              "    (VariableNode \"$top-arg\"))"
+	                              "  (UnquoteLink"
+	                              "    (VariableNode \"$shapat-0\")))");
+	Unify::CHandle Cput_top(put_top, Quotation(1));
+
+	// Test unification
+	Unify unify(target, alpha_pat, vardecl, alpha_vardecl);
+	Unify::SolutionSet result = unify(),
+		expected = Unify::SolutionSet({{{{shapat1_var, spef_list}, spef_list},
+					                    {{ms_var, ms}, ms},
+					                    {{texts_var, texts}, texts},
+					                    {{g_var, Cput_top}, Cput_top}}});
+
+	std::cout << "result = " << oc_to_string(result) << std::endl;
+	std::cout << "expected = " << oc_to_string(expected) << std::endl;
+
+	TS_ASSERT_EQUALS(result, expected);
+
+	// Test substitution structure construction
+	Handle ts_vardecl = _eval.eval_h("(VariableList"
+	                                 "  (VariableNode \"$shapat-0\")"
+	                                 "  (TypedVariableLink"
+	                                 "    (VariableNode \"$f\")"
+	                                 "    (TypeChoice"
+	                                 "      (TypeNode \"ConceptNode\")"
+	                                 "      (TypeNode \"LambdaLink\")"
+	                                 "      (TypeNode \"PutLink\"))))");
+
+	Unify::TypedSubstitutions ts_result =
+		unify.typed_substitutions(result, target);
+	Unify::TypedSubstitutions ts_expected =
+		Unify::TypedSubstitutions{{{{shapat1_var, spef_list},
+		                            {ms_var, ms},
+		                            {g_var, Cput_top},
+		                            {texts_var, texts}},
+		                           ts_vardecl}};
+
+	std::cout << "ts_result = " << oc_to_string(ts_result) << std::endl;
+	std::cout << "ts_expected = " << oc_to_string(ts_expected) << std::endl;
+
+	TS_ASSERT(tss_content_eq(ts_result, ts_expected));
+
+	// Test substitution itself
+	BindLinkPtr blptr = BindLinkCast(bl);
+	Handle sub_result = Unify::substitute(blptr, *ts_result.begin());
+	Handle sub_expected =
+		// TODO: fix that
+		_eval.eval_h("(BindLink"
+		             "  (VariableList"
+		             "    (TypedVariableLink"
+		             "      (VariableNode \"$g\")"
+		             "      (TypeChoice"
+		             "        (TypeNode \"LambdaLink\")"
+		             "        (TypeNode \"PutLink\")"
+		             "      )"
+		             "    )"
+		             "    (TypedVariableLink"
+		             "      (VariableNode \"$texts\")"
+		             "      (TypeNode \"ConceptNode\")"
+		             "    )"
+		             "    (TypedVariableLink"
+		             "      (VariableNode \"$ms\")"
+		             "      (TypeNode \"NumberNode\")"
+		             "    )"
+		             "    (TypedVariableLink"
+		             "      (VariableNode \"$f\")"
+		             "      (TypeChoice"
+		             "        (TypeNode \"LambdaLink\")"
+		             "        (TypeNode \"PutLink\")"
+		             "        (TypeNode \"ConceptNode\")"
+		             "      )"
+		             "    )"
+		             "  )"
+		             "  (AndLink"
+		             "    (VariableNode \"$f\")"
+		             "    (EvaluationLink"
+		             "      (PredicateNode \"minsup\")"
+		             "      (ListLink"
+		             "        (VariableNode \"$g\")"
+		             "        (VariableNode \"$texts\")"
+		             "        (VariableNode \"$ms\")"
+		             "      )"
+		             "    )"
+		             "    (EvaluationLink"
+		             "      (GroundedPredicateNode \"scm: absolutely-true\")"
+		             "      (EvaluationLink"
+		             "        (PredicateNode \"minsup\")"
+		             "        (ListLink"
+		             "          (VariableNode \"$g\")"
+		             "          (VariableNode \"$texts\")"
+		             "          (VariableNode \"$ms\")"
+		             "        )"
+		             "      )"
+		             "    )"
+		             "    (EvaluationLink"
+		             "      (GroundedPredicateNode \"scm: has-arity\")"
+		             "      (ListLink"
+		             "        (VariableNode \"$g\")"
+		             "        (NumberNode \"2.000000\")"
+		             "      )"
+		             "    )"
+		             "  )"
+		             "  (ExecutionOutputLink"
+		             "    (GroundedSchemaNode \"scm: specialization-formula\")"
+		             "    (ListLink"
+		             "      (EvaluationLink"
+		             "        (PredicateNode \"minsup\")"
+		             "        (ListLink"
+		             "          (QuoteLink"
+		             "            (PutLink"
+		             "              (UnquoteLink"
+		             "                (VariableNode \"$g\")"
+		             "              )"
+		             "              (UnquoteLink"
+		             "                (ListLink"
+		             "                  (VariableNode \"$spe-arg-0\")"
+		             "                  (VariableNode \"$f\")"
+		             "                )"
+		             "              )"
+		             "            )"
+		             "          )"
+		             "          (VariableNode \"$texts\")"
+		             "          (VariableNode \"$ms\")"
+		             "        )"
+		             "      )"
+		             "      (EvaluationLink"
+		             "        (PredicateNode \"minsup\")"
+		             "        (ListLink"
+		             "          (VariableNode \"$g\")"
+		             "          (VariableNode \"$texts\")"
+		             "          (VariableNode \"$ms\")"
+		             "        )"
+		             "      )"
+		             "      (VariableNode \"$f\")"
+		             "    )"
+		             "  )"
+		             ")");
+
+
+	TS_ASSERT(content_eq(sub_result, sub_expected));
 }
 
 #undef al
