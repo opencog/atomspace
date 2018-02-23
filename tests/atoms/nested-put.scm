@@ -80,3 +80,35 @@
       (VariableNode "$x-1")))
   (ConceptNode "texts"))
 )
+
+(define nested-put-5
+(Put
+  (Put
+    (Put
+      (Lambda
+        (Variable "$top-arg")
+        (Variable "$top-arg"))
+      (Lambda
+        (Variable "$top-arg")
+        (Variable "$top-arg")))
+    (List
+      (Variable "$spe-arg-0")
+      (Concept "D")))
+  (Lambda
+    (VariableList
+      (Variable "$sha-arg-0")
+      (Variable "$sha-arg-1"))
+    (Inheritance
+      (Variable "$sha-arg-0")
+      (Variable "$sha-arg-1")))))
+
+(define expected-5
+(Lambda
+  (VariableList
+    (Variable "$sha-arg-0")
+    (Variable "$sha-arg-1"))
+  (List
+    (Inheritance
+      (Variable "$sha-arg-0")
+      (Variable "$sha-arg-1"))
+    (Concept "D"))))
