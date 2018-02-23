@@ -30,6 +30,8 @@
 #ifndef _OPENCOG_TYPES_H
 #define _OPENCOG_TYPES_H
 
+#include <set>
+
 namespace opencog
 {
 /** \addtogroup grp_atomspace
@@ -38,6 +40,9 @@ namespace opencog
 
 //! type of Atoms, represented as short integer (16 bits)
 typedef unsigned short Type;
+
+//! Set of atom types
+typedef std::set<Type> TypeSet;
 
 /** @}*/
 } // namespace opencog

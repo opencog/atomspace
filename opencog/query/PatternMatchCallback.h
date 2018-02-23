@@ -300,8 +300,8 @@ class PatternMatchCallback
 		 */
 		virtual void pop(void) {}
 
-		virtual const std::set<Type>& get_connectives(void)
-		{ static const std::set<Type> _empty; return _empty; }
+		virtual const TypeSet& get_connectives(void)
+		{ static const TypeSet _empty; return _empty; }
 
 		/**
 		 * Called to initiate the search. This callback is responsible

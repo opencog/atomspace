@@ -672,7 +672,7 @@ bool InitiateSearchCB::variable_search(PatternMatchEngine *pme)
 
 	// Find the rarest variable type;
 	size_t count = SIZE_MAX;
-	std::set<Type> ptypes;
+	TypeSet ptypes;
 
 	DO_LOG({LAZY_LOG_FINE << "_variables = " <<  _variables->to_string();})
 	_root = Handle::UNDEFINED;
@@ -693,7 +693,7 @@ bool InitiateSearchCB::variable_search(PatternMatchEngine *pme)
 
 		auto tit = _variables->_simple_typemap.find(var);
 		if (_variables->_simple_typemap.end() == tit) continue;
-		const std::set<Type>& typeset = tit->second;
+		const TypeSet& typeset = tit->second;
 		DO_LOG({LAZY_LOG_FINE << "Type-restriction set size = "
 		              << typeset.size();})
 

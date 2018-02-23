@@ -337,7 +337,7 @@ bool is_well_typed(Type t)
 	return t != NOTYPE;
 }
 
-bool is_well_typed(const std::set<Type>& ts)
+bool is_well_typed(const TypeSet& ts)
 {
 	for (Type t : ts)
 		if (not is_well_typed(t))
@@ -355,9 +355,9 @@ Type type_intersection(Type lhs, Type rhs)
 	return NOTYPE;              // represent the bottom type
 }
 
-std::set<Type> type_intersection(Type lhs, const std::set<Type>& rhs)
+TypeSet type_intersection(Type lhs, const TypeSet& rhs)
 {
-	std::set<Type> res;
+	TypeSet res;
 	// Distribute the intersection over the union type rhs
 	for (Type rhst : rhs) {
 		Type ty = type_intersection(lhs, rhst);
@@ -367,8 +367,8 @@ std::set<Type> type_intersection(Type lhs, const std::set<Type>& rhs)
 	return res;
 }
 
-std::set<Type> type_intersection(const std::set<Type>& lhs,
-                                 const std::set<Type>& rhs)
+TypeSet type_intersection(const TypeSet& lhs,
+                          const TypeSet& rhs)
 {
 	// Base cases
 	if (lhs.empty())
@@ -377,9 +377,9 @@ std::set<Type> type_intersection(const std::set<Type>& lhs,
 		return lhs;
 
 	// Recursive cases
-	std::set<Type> res;
+	TypeSet res;
 	for (Type ty : lhs) {
-		std::set<Type> itr = type_intersection(ty, rhs);
+		TypeSet itr = type_intersection(ty, rhs);
 		res.insert(itr.begin(), itr.end());
 	}
 	return res;

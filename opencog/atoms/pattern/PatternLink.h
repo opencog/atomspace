@@ -96,7 +96,7 @@ protected:
 	HandleSeq _component_patterns;
 
 	void unbundle_clauses(const Handle& body);
-	void unbundle_clauses_rec(const std::set<Type>&,
+	void unbundle_clauses_rec(const TypeSet&,
 	                          const HandleSeq&);
 
 	void locate_defines(HandleSeq& clauses);
@@ -116,7 +116,7 @@ protected:
 
 	bool add_dummies();
 
-	void trace_connectives(const std::set<Type>&,
+	void trace_connectives(const TypeSet&,
 	                       const HandleSeq& clauses,
 	                       Quotation quotation=Quotation());
 

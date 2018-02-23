@@ -118,7 +118,7 @@ void RuleUTest::setUp()
 		             "   (ConceptNode \"URE\"))");
 
 	X = an(VARIABLE_NODE, "$X");
-	A = an(CONCEPT_NODE, "$A");
+	A = an(CONCEPT_NODE, "A");
 	V = an(VARIABLE_NODE, "$V");
 	CT = an(TYPE_NODE, "ConceptNode");
 	Typed_X = al(TYPED_VARIABLE_LINK, X, CT);
@@ -145,11 +145,7 @@ void RuleUTest::test_unify_target_deduction_1()
 	Handle rule = rules.begin()->first.get_rule(),
 		// Expected up to an alpha conversion
 		vardecl = al(VARIABLE_LIST,
-		             // TODO: unify needs to be upgraded so it can
-		             // infer that X is in fact a ConceptNode
-		             //
-		             // al(TYPED_VARIABLE_LINK, X, CT),
-		             X,
+		             al(TYPED_VARIABLE_LINK, X, CT),
 		             al(TYPED_VARIABLE_LINK, V, CT)),
 		XV = al(INHERITANCE_LINK, X, V),
 		VA = al(INHERITANCE_LINK, V, A),

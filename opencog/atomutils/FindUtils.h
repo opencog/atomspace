@@ -89,7 +89,7 @@ namespace opencog {
 class FindAtoms
 {
 public:
-	std::set<Type> stopset;
+	TypeSet stopset;
 	HandleSet varset;
 	HandleSet holders;
 	HandleSet least_holders;
@@ -117,7 +117,7 @@ private:
 	Loco find_rec(const Handle& h, Quotation quotation=Quotation());
 
 private:
-	std::set<Type> _target_types;
+	TypeSet _target_types;
 	HandleSet _target_atoms;
 };
 

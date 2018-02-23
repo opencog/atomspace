@@ -215,17 +215,21 @@ void Unify::set_variables(const Handle& lhs, const Handle& rhs,
 Unify::CHandle Unify::find_least_abstract(const TypedBlock& block,
                                           const Handle& pre) const
 {
+	// Get the least abstract element of the block
 	static Handle top(Handle(createNode(VARIABLE_NODE, "__dummy_top__")));
 	CHandle least_abstract(top);
-	for (const CHandle& ch : block.first) {
-		if (inherit(ch, least_abstract) and
-		    // If h is a variable, consider it if it is in pre (stands
-		    // for precedence)
-		    (not ch.is_free_variable()
-		     or is_unquoted_unscoped_in_tree(pre, ch.handle))) {
+	for (const CHandle& ch : block.first)
+		if (inherit(ch, least_abstract))
 			least_abstract = ch;
-		}
-	}
+
+	// In case of ties pick up the one in pre (pre stands for
+	// precedence)
+	for (const CHandle& ch : block.first)
+		if (inherit(ch, least_abstract)
+		    and
+		    (not ch.is_free_variable()
+		     or is_unquoted_unscoped_in_tree(pre, ch.handle)))
+			least_abstract = ch;
 
 	OC_ASSERT(least_abstract.handle != top,
 	          "Finding the least abstract atom in the block has failed. "
@@ -879,12 +883,12 @@ Unify::CHandle Unify::type_intersection(const CHandle& lch, const CHandle& rch) 
 	return Handle::UNDEFINED;
 }
 
-std::set<Type> Unify::simplify_type_union(std::set<Type>& type) const
+TypeSet Unify::simplify_type_union(TypeSet& type) const
 {
 	return {}; // TODO: do we really need that?
 }
 
-std::set<Type> Unify::get_union_type(const Handle& h) const
+TypeSet Unify::get_union_type(const Handle& h) const
 {
 	const VariableTypeMap& vtm = _variables._simple_typemap;
 	auto it = vtm.find(h);
@@ -958,7 +962,7 @@ bool Unify::inherit(Type lhs, Type rhs) const
 	return classserver().isA(lhs, rhs);
 }
 
-bool Unify::inherit(Type lhs, const std::set<Type>& rhs) const
+bool Unify::inherit(Type lhs, const TypeSet& rhs) const
 {
 	for (Type ty : rhs)
 		if (inherit(lhs, ty))
@@ -966,7 +970,7 @@ bool Unify::inherit(Type lhs, const std::set<Type>& rhs) const
 	return false;
 }
 
-bool Unify::inherit(const std::set<Type>& lhs, const std::set<Type>& rhs) const
+bool Unify::inherit(const TypeSet& lhs, const TypeSet& rhs) const
 {
 	for (Type ty : lhs)
 		if (not inherit(ty, rhs))

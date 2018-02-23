@@ -300,6 +300,8 @@ std::string oc_to_string(const HandleUCounter& huc, const std::string& indent);
 std::string oc_to_string(const HandleUCounter& huc);
 std::string oc_to_string(Type type, const std::string& indent);
 std::string oc_to_string(Type type);
+std::string oc_to_string(const TypeSet& types, const std::string& indent);
+std::string oc_to_string(const TypeSet& types);
 std::string oc_to_string(const AtomPtr& aptr, const std::string& indent);
 std::string oc_to_string(const AtomPtr& aptr);
 

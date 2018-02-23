@@ -134,7 +134,7 @@ class BackingStore
 		/**
 		 * The set of ignored atom types.
 		 */
-		std::set<Type> _ignored_types;
+		TypeSet _ignored_types;
 
 		/**
 		 * Register this backing store with the atomspace.

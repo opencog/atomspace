@@ -325,6 +325,23 @@ std::string oc_to_string(Type type)
 {
 	return oc_to_string(type, "");
 }
+std::string oc_to_string(const TypeSet& types, const std::string& indent)
+{
+	std::stringstream ss;
+	ss << indent << "size = " << types.size();
+	if (not types.empty()) {
+		ss << ", types =";
+		for (Type t : types) {
+			ss << " " << oc_to_string(t);
+		}
+	}
+	ss << std::endl;
+	return ss.str();
+}
+std::string oc_to_string(const TypeSet& types)
+{
+	return oc_to_string(types, "");
+}
 std::string oc_to_string(const AtomPtr& aptr, const std::string& indent)
 {
 	return oc_to_string(aptr->get_handle(), indent);
