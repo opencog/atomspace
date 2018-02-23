@@ -74,7 +74,7 @@ void PatternLink::common_init(void)
 	// we are being run with the DefaultPatternMatchCB, and so we assume
 	// that the logical connectives are AndLink, OrLink and NotLink.
 	// Tweak the evaluatable_holders to reflect this.
-	std::set<Type> connectives({AND_LINK, SEQUENTIAL_AND_LINK,
+	TypeSet connectives({AND_LINK, SEQUENTIAL_AND_LINK,
 	                            OR_LINK, SEQUENTIAL_OR_LINK, NOT_LINK});
 	trace_connectives(connectives, _pat.clauses);
 
@@ -361,7 +361,7 @@ void PatternLink::unbundle_clauses(const Handle& hbody)
 	{
 		// XXX FIXME, Just like in trace_connectives, assume we are
 		// working with the DefaultPatternMatchCB, which uses these.
-		std::set<Type> connectives({AND_LINK, SEQUENTIAL_AND_LINK,
+		TypeSet connectives({AND_LINK, SEQUENTIAL_AND_LINK,
 		                            OR_LINK, SEQUENTIAL_OR_LINK, NOT_LINK});
 		const HandleSeq& oset = hbody->getOutgoingSet();
 		unbundle_clauses_rec(connectives, oset);
@@ -378,7 +378,7 @@ void PatternLink::unbundle_clauses(const Handle& hbody)
 /// Search for any PRESENT_LINK or ABSENT_LINK's that are
 /// recusively embedded inside some evaluatable clause.  Expose these
 /// as first-class, groundable clauses.
-void PatternLink::unbundle_clauses_rec(const std::set<Type>& connectives,
+void PatternLink::unbundle_clauses_rec(const TypeSet& connectives,
                                        const HandleSeq& nest)
 {
 	for (const Handle& ho : nest)
@@ -756,7 +756,7 @@ bool PatternLink::add_dummies()
 /// having the form (AndLink stuff (OrLink more-stuff (NotLink not-stuff)))
 /// we have to assume that stuff, more-stuff and not-stuff are all
 /// evaluatable.
-void PatternLink::trace_connectives(const std::set<Type>& connectives,
+void PatternLink::trace_connectives(const TypeSet& connectives,
                                     const HandleSeq& oset,
                                     Quotation quotation)
 {

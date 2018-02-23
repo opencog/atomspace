@@ -169,16 +169,16 @@ bool is_well_typed(Type t);
  * amount to the valid type. We may want to relax that definition in
  * the future.
  */
-bool is_well_typed(const std::set<Type>& ts);
+bool is_well_typed(const TypeSet& ts);
 
 /**
  * Return shallow type intersection between lhs and rhs. Take into
  * account type inheritance as well.
  */
 Type type_intersection(Type lhs, Type rhs);
-std::set<Type> type_intersection(Type lhs, const std::set<Type>& rhs);
-std::set<Type> type_intersection(const std::set<Type>& lhs,
-                                 const std::set<Type>& rhs);
+TypeSet type_intersection(Type lhs, const TypeSet& rhs);
+TypeSet type_intersection(const TypeSet& lhs,
+                          const TypeSet& rhs);
 
 /**
  * Generate a VariableList of the free variables of a given atom h.

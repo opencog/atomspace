@@ -85,7 +85,7 @@ class DefaultPatternMatchCB : public virtual PatternMatchCallback
 		virtual bool evaluate_sentence(const Handle& pat, const HandleMap& gnds)
 		{ return eval_sentence(pat, gnds); }
 
-		virtual const std::set<Type>& get_connectives(void)
+		virtual const TypeSet& get_connectives(void)
 		{
 			return _connectives;
 		}
@@ -131,7 +131,7 @@ class DefaultPatternMatchCB : public virtual PatternMatchCallback
 		virtual void clear();
 #endif
 		// Crisp-logic evaluation of evaluatable terms
-		std::set<Type> _connectives;
+		TypeSet _connectives;
 		bool eval_term(const Handle& pat, const HandleMap& gnds);
 		bool eval_sentence(const Handle& pat, const HandleMap& gnds);
 

@@ -644,7 +644,7 @@ private:
 	 *
 	 * As ConceptNode inherits Node.
 	 */
-	std::set<Type> simplify_type_union(std::set<Type>& type) const;
+	TypeSet simplify_type_union(TypeSet& type) const;
 
 	/**
 	 * Return the union type of a variable. If the variable
@@ -653,7 +653,7 @@ private:
 	 * union type would instead mean the bottom type (that nothing can
 	 * inherit).
 	 */
-	std::set<Type> get_union_type(const Handle& h) const;
+	TypeSet get_union_type(const Handle& h) const;
 
 	/**
 	 * Return true if lhs inherit rhs. If lhs is not a variable then it
@@ -672,13 +672,13 @@ private:
 	/**
 	 * Return true if a type inherits a type union.
 	 */
-	bool inherit(Type lhs, const std::set<Type>& rhs) const;
+	bool inherit(Type lhs, const TypeSet& rhs) const;
 
 	/**
 	 * Return true if lhs inherits rhs. That is if all elements of lhs
 	 * inherits rhs.
 	 */
-	bool inherit(const std::set<Type>& lhs, const std::set<Type>& rhs) const;
+	bool inherit(const TypeSet& lhs, const TypeSet& rhs) const;
 };
 
 bool unifiable(const Handle& lhs, const Handle& rhs,

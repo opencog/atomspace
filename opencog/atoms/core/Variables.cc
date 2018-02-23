@@ -435,9 +435,9 @@ bool Variables::is_type(const Handle& var, const Handle& val) const
 	VariableTypeMap::const_iterator tit = _simple_typemap.find(var);
 	if (_simple_typemap.end() != tit)
 	{
-		const std::set<Type> &tchoice = tit->second;
+		const TypeSet &tchoice = tit->second;
 		Type htype = val->get_type();
-		std::set<Type>::const_iterator allow = tchoice.find(htype);
+		TypeSet::const_iterator allow = tchoice.find(htype);
 
 		// If the value has the simple type, then we are good to go;
 		// we are done.  Else, fall through, and see if one of the
@@ -664,8 +664,8 @@ void Variables::extend(const Variables& vset)
 			// Merge the two typemaps, if needed.
 			try
 			{
-				const std::set<Type>& tms = vset._simple_typemap.at(h);
-				std::set<Type> mytypes =
+				const TypeSet& tms = vset._simple_typemap.at(h);
+				TypeSet mytypes =
 					type_intersection(_simple_typemap[h], tms);
 				_simple_typemap.erase(h);	 // is it safe to erase if
                                              // h not in already?

@@ -148,7 +148,7 @@ protected:
 	                         Quotation quotation=Quotation()) const;
 };
 
-typedef std::map<Handle, const std::set<Type>> VariableTypeMap;
+typedef std::map<Handle, const TypeSet> VariableTypeMap;
 typedef std::map<Handle, const HandleSet> VariableDeepTypeMap;
 typedef std::map<Handle, const std::pair<double, double>> GlobIntervalMap;
 
