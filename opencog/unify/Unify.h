@@ -697,7 +697,7 @@ bool tss_content_eq(const Unify::TypedSubstitutions& lhs,
                     const Unify::TypedSubstitutions& rhs);
 
 /**
- * Strip the context from hchm.
+ * Strip the context from hchm. Add quotation links when necessary.
  */
 HandleMap strip_context(const Unify::HandleCHandleMap& hchm);
 
