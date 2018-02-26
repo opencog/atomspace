@@ -1730,7 +1730,7 @@ void UnifyUTest::test_unify_complex_10()
 		             "      )"
 		             "    )"
 		             "    (ConceptNode \"texts\")"
-		             "    (NumberNode \"2.000000\")"
+		             "    (NumberNode \"2\")"
 		             "  )"
 		             ")");
 
@@ -1792,7 +1792,7 @@ void UnifyUTest::test_unify_complex_10()
 	Handle texts_var = _eval.eval_h("(VariableNode \"$texts\")");
 	Handle texts = _eval.eval_h("(ConceptNode \"texts\")");
 	Handle ms_var = _eval.eval_h("(VariableNode \"$ms\")");
-	Handle ms = _eval.eval_h("(NumberNode \"2.0\")");
+	Handle ms = _eval.eval_h("(NumberNode \"2\")");
 
 	Unify unify(target, alpha_pat, vardecl, alpha_vardecl);
 	Unify::SolutionSet result = unify(),
@@ -1888,7 +1888,7 @@ void UnifyUTest::test_unify_complex_11()
 		             "      (GroundedPredicateNode \"scm: has-arity\")"
 		             "      (ListLink"
 		             "        (VariableNode \"$g\")"
-		             "        (NumberNode \"2.000000\")"
+		             "        (NumberNode \"2\")"
 		             "      )"
 		             "    )"
 		             "  )"
@@ -1950,7 +1950,7 @@ void UnifyUTest::test_unify_complex_11()
 		             "      )"
 		             "    )"
 		             "    (ConceptNode \"texts\")"
-		             "    (NumberNode \"2.000000\")"
+		             "    (NumberNode \"2\")"
 		             "  )"
 		             ")");
 
@@ -2014,7 +2014,7 @@ void UnifyUTest::test_unify_complex_11()
 	                                "  (VariableNode \"$spe-arg-0\")"
 	                                "  (VariableNode \"$f\"))");
 	Handle ms_var = _eval.eval_h("(VariableNode \"$ms\")");
-	Handle ms = _eval.eval_h("(NumberNode \"2.0\")");
+	Handle ms = _eval.eval_h("(NumberNode \"2\")");
 	Handle texts_var = _eval.eval_h("(VariableNode \"$texts\")");
 	Handle texts = _eval.eval_h("(ConceptNode \"texts\")");
 	Handle g_var = _eval.eval_h("(VariableNode \"$g\")");
@@ -2067,24 +2067,9 @@ void UnifyUTest::test_unify_complex_11()
 	BindLinkPtr blptr = BindLinkCast(bl);
 	Handle sub_result = Unify::substitute(blptr, *ts_result.begin());
 	Handle sub_expected =
-		// TODO: fix that
 		_eval.eval_h("(BindLink"
 		             "  (VariableList"
-		             "    (TypedVariableLink"
-		             "      (VariableNode \"$g\")"
-		             "      (TypeChoice"
-		             "        (TypeNode \"LambdaLink\")"
-		             "        (TypeNode \"PutLink\")"
-		             "      )"
-		             "    )"
-		             "    (TypedVariableLink"
-		             "      (VariableNode \"$texts\")"
-		             "      (TypeNode \"ConceptNode\")"
-		             "    )"
-		             "    (TypedVariableLink"
-		             "      (VariableNode \"$ms\")"
-		             "      (TypeNode \"NumberNode\")"
-		             "    )"
+		             "    (VariableNode \"$shapat-0\")"
 		             "    (TypedVariableLink"
 		             "      (VariableNode \"$f\")"
 		             "      (TypeChoice"
@@ -2099,9 +2084,19 @@ void UnifyUTest::test_unify_complex_11()
 		             "    (EvaluationLink"
 		             "      (PredicateNode \"minsup\")"
 		             "      (ListLink"
-		             "        (VariableNode \"$g\")"
-		             "        (VariableNode \"$texts\")"
-		             "        (VariableNode \"$ms\")"
+		             "        (QuoteLink"
+		             "          (PutLink"
+		             "            (LambdaLink"
+		             "              (VariableNode \"$top-arg\")"
+		             "              (VariableNode \"$top-arg\")"
+		             "            )"
+		             "            (UnquoteLink"
+		             "              (VariableNode \"$shapat-0\")"
+		             "            )"
+		             "          )"
+		             "        )"
+		             "        (ConceptNode \"texts\")"
+		             "        (NumberNode \"2\")"
 		             "      )"
 		             "    )"
 		             "    (EvaluationLink"
@@ -2109,17 +2104,37 @@ void UnifyUTest::test_unify_complex_11()
 		             "      (EvaluationLink"
 		             "        (PredicateNode \"minsup\")"
 		             "        (ListLink"
-		             "          (VariableNode \"$g\")"
-		             "          (VariableNode \"$texts\")"
-		             "          (VariableNode \"$ms\")"
+		             "          (QuoteLink"
+		             "            (PutLink"
+		             "              (LambdaLink"
+		             "                (VariableNode \"$top-arg\")"
+		             "                (VariableNode \"$top-arg\")"
+		             "              )"
+		             "              (UnquoteLink"
+		             "                (VariableNode \"$shapat-0\")"
+		             "              )"
+		             "            )"
+		             "          )"
+		             "          (ConceptNode \"texts\")"
+		             "          (NumberNode \"2\")"
 		             "        )"
 		             "      )"
 		             "    )"
 		             "    (EvaluationLink"
 		             "      (GroundedPredicateNode \"scm: has-arity\")"
 		             "      (ListLink"
-		             "        (VariableNode \"$g\")"
-		             "        (NumberNode \"2.000000\")"
+		             "        (QuoteLink"
+		             "          (PutLink"
+		             "            (LambdaLink"
+		             "              (VariableNode \"$top-arg\")"
+		             "              (VariableNode \"$top-arg\")"
+		             "            )"
+		             "            (UnquoteLink"
+		             "              (VariableNode \"$shapat-0\")"
+		             "            )"
+		             "          )"
+		             "        )"
+		             "        (NumberNode \"2\")"
 		             "      )"
 		             "    )"
 		             "  )"
@@ -2131,8 +2146,14 @@ void UnifyUTest::test_unify_complex_11()
 		             "        (ListLink"
 		             "          (QuoteLink"
 		             "            (PutLink"
-		             "              (UnquoteLink"
-		             "                (VariableNode \"$g\")"
+		             "              (PutLink"
+		             "                (LambdaLink"
+		             "                  (VariableNode \"$top-arg\")"
+		             "                  (VariableNode \"$top-arg\")"
+		             "                )"
+		             "                (UnquoteLink"
+		             "                  (VariableNode \"$shapat-0\")"
+		             "                )"
 		             "              )"
 		             "              (UnquoteLink"
 		             "                (ListLink"
@@ -2142,16 +2163,26 @@ void UnifyUTest::test_unify_complex_11()
 		             "              )"
 		             "            )"
 		             "          )"
-		             "          (VariableNode \"$texts\")"
-		             "          (VariableNode \"$ms\")"
+		             "          (ConceptNode \"texts\")"
+		             "          (NumberNode \"2\")"
 		             "        )"
 		             "      )"
 		             "      (EvaluationLink"
 		             "        (PredicateNode \"minsup\")"
 		             "        (ListLink"
-		             "          (VariableNode \"$g\")"
-		             "          (VariableNode \"$texts\")"
-		             "          (VariableNode \"$ms\")"
+		             "          (QuoteLink"
+		             "            (PutLink"
+		             "              (LambdaLink"
+		             "                (VariableNode \"$top-arg\")"
+		             "                (VariableNode \"$top-arg\")"
+		             "              )"
+		             "              (UnquoteLink"
+		             "                (VariableNode \"$shapat-0\")"
+		             "              )"
+		             "            )"
+		             "          )"
+		             "          (ConceptNode \"texts\")"
+		             "          (NumberNode \"2\")"
 		             "        )"
 		             "      )"
 		             "      (VariableNode \"$f\")"
@@ -2159,6 +2190,8 @@ void UnifyUTest::test_unify_complex_11()
 		             "  )"
 		             ")");
 
+	std::cout << "sub_result = " << oc_to_string(sub_result) << std::endl;
+	std::cout << "sub_expected = " << oc_to_string(sub_expected) << std::endl;
 
 	TS_ASSERT(content_eq(sub_result, sub_expected));
 }
