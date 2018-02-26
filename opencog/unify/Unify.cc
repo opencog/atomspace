@@ -859,8 +859,21 @@ bool tss_content_eq(const Unify::TypedSubstitutions& lhs,
 HandleMap strip_context(const Unify::HandleCHandleMap& hchm)
 {
 	HandleMap result;
-	for (auto& el : hchm)
-		result.insert({el.first, el.second.handle});
+	for (auto& el : hchm) {
+		const Context& ctx = el.second.context;
+		Handle val = el.second.handle;
+
+		// Insert quotation links if necessary
+		for (int i = 0; i < ctx.quotation.level(); i++) {
+			if (i == 0 and ctx.quotation.is_locally_quoted())
+				val = Handle(createLink(LOCAL_QUOTE_LINK, val));
+			else
+				val = Handle(createLink(QUOTE_LINK, val));
+		}
+
+		// Recreate variable to value mapping without context
+		result.insert({el.first, val});
+	}
 	return result;
 }
 
