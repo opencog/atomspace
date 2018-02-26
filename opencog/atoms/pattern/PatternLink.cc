@@ -76,7 +76,19 @@ void PatternLink::common_init(void)
 	// Tweak the evaluatable_holders to reflect this.
 	TypeSet connectives({AND_LINK, SEQUENTIAL_AND_LINK,
 	                     OR_LINK, SEQUENTIAL_OR_LINK, NOT_LINK});
-	trace_connectives(connectives, _pat.body);
+
+	// Icky. Yuck. Some pre-historic API's do not set the pattern body.
+	// These appear only in the unit tests, never in real code. For now,
+	// just work around this, but eventually XXX FIXME.
+	if (nullptr == _pat.body)
+	{
+		for (const Handle& term : _pat.clauses)
+			trace_connectives(connectives, term);
+	}
+	else
+	{
+		trace_connectives(connectives, _pat.body);
+	}
 
 	// Split the non-virtual clauses into connected components
 	get_connected_components(_varlist.varset, _fixed,
@@ -92,7 +104,7 @@ void PatternLink::common_init(void)
 	if (1 == _num_comps)
 	{
 		// Each component is in connection-order. By re-assigning to
-		// _pat.cnf_clauses, they get placed in that order, this giving
+		// _pat.cnf_clauses, they get placed in that order, thus giving
 		// a minor performance boost during clause traversal.
 		// Gurk. This does not work currently; the evaluatables have been
 		// stripped out of the component. I think this is a bug ...
@@ -136,7 +148,7 @@ void PatternLink::init(void)
 	// If the _body has not been initialized by ScopeLink, that's
 	// because the PatternLink itself was quoted, and thus not
 	// actually initializable. This seems ... weird... to me.
-	// I'm not convinced its a vaalid use of Quoting. It seems
+	// I'm not convinced its a valid use of Quoting. It seems
 	// like a bug. But whatever. System crashes if the body is
 	// not set.
 	if (nullptr == _body) return;
