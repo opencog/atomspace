@@ -308,6 +308,7 @@ std::string oc_to_string(const AtomPtr& aptr);
 } // namespace opencog
 
 namespace std {
+ostream& operator<<(ostream&, const opencog::HandleMap&);
 ostream& operator<<(ostream&, const opencog::HandleSeq&);
 ostream& operator<<(ostream&, const opencog::HandleSet&);
 ostream& operator<<(ostream&, const opencog::UnorderedHandleSet&);
