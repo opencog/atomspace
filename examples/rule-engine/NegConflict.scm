@@ -196,8 +196,15 @@
   (TypedVariable (VariableNode "$who") (TypeNode "ConceptNode"))
 )
 
+(define source
+  (Inheritance (stv 1.0 1.0)
+   (Concept "American")
+   (Concept "person"))
+)
+
 ;; Forward chainer:
-;; (cog-fc Einstein-rbs (Variable "$x"))
+;; (cog-fc Einstein-rbs (Variable "$x")) 
+;; (cog-fc Einstein-rbs source)
 ;; The expected result is:
 ;(SetLink
 ;   (EvaluationLink (stv 1 1)
