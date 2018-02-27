@@ -2080,6 +2080,14 @@ bool PatternMatchEngine::explore_clause(const Handle& term,
 
 	// If we are here, we have an evaluatable clause on our hands.
 	DO_LOG({logger().fine("Clause is evaluatable; start evaluating it");})
+
+	// Some people like to have a clause that is just one big
+	// giant variable, matching almost anything. Keep these folks
+	// happy, and record the suggested grounding. There's nowhere
+	// else to do this, so we do it here.
+	if (term->get_type() == VARIABLE_NODE)
+		var_grounding[term] = grnd;
+
 	bool found = _pmc.evaluate_sentence(clause, var_grounding);
 	DO_LOG({logger().fine("Post evaluating clause, found = %d", found);})
 	if (found)
