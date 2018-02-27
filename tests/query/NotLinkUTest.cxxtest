@@ -65,7 +65,8 @@ _exit(rc); // XXX hack to avoid double-free in __run_exit_handlers
 	void setUp(void);
 	void tearDown(void);
 
-	void test_strict(void);
+	void test_sheltered_strict_type(void);
+	void test_bare_strict_type(void);
 };
 
 void NotLinkUTest::tearDown(void)
@@ -77,8 +78,11 @@ void NotLinkUTest::setUp(void)
 }
 
 /*
+ * Test a sheltered strict type version.
+ * The variable is strictly typed, and it is sheltered by
+ * a PresentLink, to prevent it from being evaluated.
  */
-void NotLinkUTest::test_strict(void)
+void NotLinkUTest::test_sheltered_strict_type(void)
 {
 	logger().debug("BEGIN TEST: %s", __FUNCTION__);
 
@@ -86,9 +90,9 @@ void NotLinkUTest::test_strict(void)
 		"(define evel (Evaluation "
 		"	(Predicate \"keep-pet\")"
 		"	(List (Concept \"German\") (Concept \"dog\"))))");
-	          
+
 	eval->eval("(Not evel)");
-	          
+
 	eval->eval(
 		"(define n4 (BindLink"
 		"	(TypedVariable (Variable \"$A\") (TypeNode \"EvaluationLink\"))"
@@ -98,6 +102,52 @@ void NotLinkUTest::test_strict(void)
 	Handle hgnd = eval->eval_h("(cog-execute! n4)");
 
 	Handle hans = eval->eval_h("(SetLink evel)");
+
+	printf("Expected this: %s\n", hans->to_string().c_str());
+	printf("Found this answer: %s\n", hgnd->to_string().c_str());
+
+	TSM_ASSERT("Didn't get the expected grounding", hans == hgnd);
+
+	logger().debug("END TEST: %s", __FUNCTION__);
+}
+
+/*
+ * Test a bare strict type version.
+ * The variable is strictly typed, and it is bare, and
+ * thus subject to evaluation.
+ */
+void NotLinkUTest::test_bare_strict_type(void)
+{
+	logger().debug("BEGIN TEST: %s", __FUNCTION__);
+
+	eval->eval(
+		"(define evel (Evaluation (stv 1 1)"
+		"	(Predicate \"keep-pet\")"
+		"	(List (Concept \"German\") (Concept \"dog\"))))");
+
+	eval->eval("(Not evel)");
+
+	eval->eval(
+		"(define n3 (BindLink"
+		"	(TypedVariable (Variable \"$A\") (TypeNode \"EvaluationLink\"))"
+		"	(Not (Variable \"$A\"))"
+		"	(Variable \"$A\")))");
+
+	Handle hgnd = eval->eval_h("(cog-execute! n3)");
+
+	Handle hans = eval->eval_h("(SetLink)");
+
+	printf("Expected this: %s\n", hans->to_string().c_str());
+	printf("Found this answer: %s\n", hgnd->to_string().c_str());
+
+	TSM_ASSERT("Didn't get the expected grounding", hans == hgnd);
+
+	// ----------------------------------------------------
+	// Set the evaluation link to false, so the Not version of it
+	// will be true.
+	eval->eval("(cog-set-tv! evel (stv 0 1))");
+	hgnd = eval->eval_h("(cog-execute! n3)");
+	hans = eval->eval_h("(SetLink evel)");
 
 	printf("Expected this: %s\n", hans->to_string().c_str());
 	printf("Found this answer: %s\n", hgnd->to_string().c_str());
