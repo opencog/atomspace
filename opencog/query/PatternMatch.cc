@@ -339,6 +339,11 @@ bool BindLink::imply(PatternMatchCallback& pmc, AtomSpace* as, bool check_conn)
 	// The presence of constant clauses will mess up the current
 	// pattern matcher.  Constant clauses are "trivial" to match,
 	// and so its pointless to even send them through the system.
+	//
+	// XXX This removal *should* be happening at pattern compile time.
+	// It was moved here, to pattern execution time, by pull req #1444
+	// but it remains unclear why this check needed to be deferred
+	// like this. This is causing other issues, so Um ??? wtf?
 	bool bogus = remove_constants(_varlist.varset, _pat, _components,
 	                              _component_patterns, as);
 	if (bogus)

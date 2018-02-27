@@ -696,7 +696,8 @@ bool DefaultPatternMatchCB::eval_sentence(const Handle& top,
                                           const HandleMap& gnds)
 {
 	DO_LOG({LAZY_LOG_FINE << "Enter eval_sentence CB with top=" << std::endl
-	              << top->to_short_string() << std::endl;})
+	              << top->to_short_string() << std::endl
+	              << "grounds=" << gnds << std::endl;})
 
 	if (top->get_type() == VARIABLE_NODE)
 	{

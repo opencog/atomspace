@@ -117,7 +117,7 @@ protected:
 	bool add_dummies();
 
 	void trace_connectives(const TypeSet&,
-	                       const HandleSeq& clauses,
+	                       const Handle& body,
 	                       Quotation quotation=Quotation());
 
 	void make_connectivity_map(const HandleSeq&);

@@ -75,10 +75,10 @@ struct Pattern
 	/// The original body containing the link (if any).
 	Handle           body;
 
-	/// The actual clauses. Set by validate_clauses().
+	/// The actual clauses. Set by unbundle_clauses().
 	HandleSeq        clauses;
 
-	/// The removed constant clauses. Set by validate_clauses().
+	/// The removed constant clauses. Set by unbundle_clauses().
 	HandleSeq        constants;
 
 	// The cnf_clauses are the clauses, but with the AbsentLink removed.
