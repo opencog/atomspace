@@ -67,6 +67,7 @@ _exit(rc); // XXX hack to avoid double-free in __run_exit_handlers
 
 	void test_sheltered_strict_type(void);
 	void test_bare_strict_type(void);
+	void test_get_strict_type(void);
 };
 
 void NotLinkUTest::tearDown(void)
@@ -108,6 +109,21 @@ void NotLinkUTest::test_sheltered_strict_type(void)
 
 	TSM_ASSERT("Didn't get the expected grounding", hans == hgnd);
 
+	// ---------------------------------------------------
+	// Getting wrapped up in AndLink is a common style
+	eval->eval(
+		"(define n5 (BindLink"
+		"	(TypedVariable (Variable \"$A\") (TypeNode \"EvaluationLink\"))"
+		"	(AndLink (Present (Not (Variable \"$A\"))))"
+		"	(Variable \"$A\")))");
+
+	hgnd = eval->eval_h("(cog-execute! n5)");
+
+	printf("Expected this: %s\n", hans->to_string().c_str());
+	printf("Found this answer: %s\n", hgnd->to_string().c_str());
+
+	TSM_ASSERT("Didn't get the expected grounding", hans == hgnd);
+
 	logger().debug("END TEST: %s", __FUNCTION__);
 }
 
@@ -142,12 +158,77 @@ void NotLinkUTest::test_bare_strict_type(void)
 
 	TSM_ASSERT("Didn't get the expected grounding", hans == hgnd);
 
+	// ---------------------------------------------------
+	// Getting wrapped up in AndLink is a common style
+	eval->eval(
+		"(define n3a (BindLink"
+		"	(TypedVariable (Variable \"$A\") (TypeNode \"EvaluationLink\"))"
+		"	(AndLink (Not (Variable \"$A\")))"
+		"	(Variable \"$A\")))");
+
+	hgnd = eval->eval_h("(cog-execute! n3a)");
+	printf("Expected this: %s\n", hans->to_string().c_str());
+	printf("Found this answer: %s\n", hgnd->to_string().c_str());
+
+	TSM_ASSERT("Didn't get the expected grounding", hans == hgnd);
+
 	// ----------------------------------------------------
 	// Set the evaluation link to false, so the Not version of it
 	// will be true.
 	eval->eval("(cog-set-tv! evel (stv 0 1))");
 	hgnd = eval->eval_h("(cog-execute! n3)");
 	hans = eval->eval_h("(SetLink evel)");
+
+	printf("Expected this: %s\n", hans->to_string().c_str());
+	printf("Found this answer: %s\n", hgnd->to_string().c_str());
+
+	TSM_ASSERT("Didn't get the expected grounding", hans == hgnd);
+
+	// ----------------------------------------------------
+	// Just like the above, but with the AndLink.
+	hgnd = eval->eval_h("(cog-execute! n3a)");
+
+	printf("Expected this: %s\n", hans->to_string().c_str());
+	printf("Found this answer: %s\n", hgnd->to_string().c_str());
+
+	TSM_ASSERT("Didn't get the expected grounding", hans == hgnd);
+
+	logger().debug("END TEST: %s", __FUNCTION__);
+}
+
+void NotLinkUTest::test_get_strict_type(void)
+{
+	logger().debug("BEGIN TEST: %s", __FUNCTION__);
+
+	eval->eval(
+		"(define evel (Evaluation "
+		"	(Predicate \"keep-pet\")"
+		"	(List (Concept \"German\") (Concept \"dog\"))))");
+
+	eval->eval("(Not evel)");
+
+	eval->eval(
+		"(define g4 (GetLink"
+		"	(TypedVariable (Variable \"$A\") (TypeNode \"EvaluationLink\"))"
+		"	(Present (Not (Variable \"$A\")))))");
+
+	Handle hgnd = eval->eval_h("(cog-execute! g4)");
+
+	Handle hans = eval->eval_h("(SetLink evel)");
+
+	printf("Expected this: %s\n", hans->to_string().c_str());
+	printf("Found this answer: %s\n", hgnd->to_string().c_str());
+
+	TSM_ASSERT("Didn't get the expected grounding", hans == hgnd);
+
+	// ---------------------------------------------------
+	// Getting wrapped up in AndLink is a common style
+	eval->eval(
+		"(define g5 (GetLink"
+		"	(TypedVariable (Variable \"$A\") (TypeNode \"EvaluationLink\"))"
+		"	(AndLink (Present (Not (Variable \"$A\"))))))");
+
+	hgnd = eval->eval_h("(cog-execute! g5)");
 
 	printf("Expected this: %s\n", hans->to_string().c_str());
 	printf("Found this answer: %s\n", hgnd->to_string().c_str());
