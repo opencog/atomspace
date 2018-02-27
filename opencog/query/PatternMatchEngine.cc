@@ -2080,7 +2080,6 @@ bool PatternMatchEngine::explore_clause(const Handle& term,
 
 	// If we are here, we have an evaluatable clause on our hands.
 	DO_LOG({logger().fine("Clause is evaluatable; start evaluating it");})
-	var_grounding[term] = grnd;
 	bool found = _pmc.evaluate_sentence(clause, var_grounding);
 	DO_LOG({logger().fine("Post evaluating clause, found = %d", found);})
 	if (found)
