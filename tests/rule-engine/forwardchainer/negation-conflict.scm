@@ -176,26 +176,6 @@
    Einstein-rbs
 )
 
-
-
-;;We can run the backward chainer to find out "Who keeps the cat?" by
-;;defining a target
-
-(define target
-   (Evaluation
-      (Predicate "keep-pet")
-      (List
-	 (Variable "$who")
-	 (Concept "cat")))
-)
-
-
-;;with the following variable declaration
-
-(define vd
-  (TypedVariable (VariableNode "$who") (TypeNode "ConceptNode"))
-)
-
 (define source
   (Inheritance (stv 1.0 1.0)
    (Concept "American")
@@ -203,7 +183,6 @@
 )
 
 ;; Forward chainer:
-;; (cog-fc Einstein-rbs (Variable "$x")) 
 ;; (cog-fc Einstein-rbs source)
 ;; The expected result is:
 ;(SetLink
@@ -223,10 +202,5 @@
 ;   )
 ;)
 
-
-;;But the backward chainer won't work:
-;;(cog-bc Einstein-rbs target #:vardecl vd)
-;; It will output empty result, because it lack of rules.
-;; Please check out FactToRule.scm for the reason.
 
 

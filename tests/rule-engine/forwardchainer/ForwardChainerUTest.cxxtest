@@ -74,6 +74,7 @@ _exit(rc); // XXX hack to avoid double-free in __run_exit_handlers
 	void test_do_chain_animals();
 	void test_select_rule();
 	void test_unsatisfied_premise();
+    void test_negation_conflict();
 };
 
 void ForwardChainerUTest::test_do_chain_deduction()
@@ -158,15 +159,15 @@ void ForwardChainerUTest::test_select_rule(void)
  */
 void ForwardChainerUTest::test_unsatisfied_premise(void)
 {
-	_eval.eval("(load-from-path \"fc-unsatisfied-premise.scm\")");
+    _eval.eval("(load-from-path \"fc-unsatisfied-premise.scm\")");
 
-	Handle table = an(CONCEPT_NODE, "table"),
-		furniture = an(CONCEPT_NODE, "furniture"),
-		source = al(INHERITANCE_LINK, table, furniture),
-		vardecl = Handle::UNDEFINED,
-		top_rbs = _as.get_node(CONCEPT_NODE, "rule-base");
+    Handle table = an(CONCEPT_NODE, "table"),
+        furniture = an(CONCEPT_NODE, "furniture"),
+        source = al(INHERITANCE_LINK, table, furniture),
+        vardecl = Handle::UNDEFINED,
+        top_rbs = _as.get_node(CONCEPT_NODE, "rule-base");
 
-	ForwardChainer fc(_as, top_rbs, source, vardecl);
+    ForwardChainer fc(_as, top_rbs, source, vardecl);
 	fc.get_config().set_maximum_iterations(20);
 	fc.do_chain();
 
@@ -174,5 +175,39 @@ void ForwardChainerUTest::test_unsatisfied_premise(void)
 	TS_ASSERT_EQUALS(results.size(), 0);
 }
 
+/**
+ * Do not imply the result that conflicts with existing negation facts.
+ */
+void ForwardChainerUTest::test_negation_conflict()
+{
+    _eval.eval("(load-from-path \"negation-conflict.scm\")");
+
+    Handle vardecl = Handle::UNDEFINED;
+    Handle rbs = _as.get_node(CONCEPT_NODE, "Einstein-rbs");
+    Handle source = _eval.eval_h("source");
+
+    ForwardChainer fc(_as, rbs, source, vardecl);
+    fc.get_config().set_maximum_iterations(20);
+    fc.do_chain();
+
+    UnorderedHandleSet resultSet = fc.get_chaining_result();
+    HandleSeq resultHandleSeq(resultSet.begin(), resultSet.end());
+    Handle results = al(SET_LINK, resultHandleSeq);
+
+    Handle American = an(CONCEPT_NODE, "American"),
+           German = an(CONCEPT_NODE, "German"),
+           cat = an(CONCEPT_NODE, "cat"),
+           dog = an(CONCEPT_NODE, "dog"),
+           keep = an(PREDICATE_NODE, "keep-pet"),
+           Gkeepcat = al(EVALUATION_LINK, keep, al(LIST_LINK, German, cat)),
+           Akeepdog = al(EVALUATION_LINK, keep, al(LIST_LINK, American, dog));
+
+    Handle expected = al(SET_LINK, Gkeepcat,Akeepdog);
+
+    logger().debug() << "results = " << results->to_string();
+    logger().debug() << "expected = " << expected->to_string();
+
+    TS_ASSERT_EQUALS(results, expected);
+}
 #undef al
 #undef an
