@@ -75,6 +75,7 @@ public:
 	void test_constant_pattern();
 	void test_mixed_clauses_1();
 	void test_mixed_clauses_2();
+	void test_mixed_clauses_3();
 };
 
 void ConstantClausesUTest::tearDown()
@@ -429,6 +430,23 @@ void ConstantClausesUTest::test_mixed_clauses_2()
 	Handle query = eval.eval_h("query"),
 		result = bindlink(&as, query),
 		expected = al(SET_LINK, A);
+
+	logger().debug() << "result = " << oc_to_string(result);
+	logger().debug() << "expected = " << oc_to_string(expected);
+
+	TS_ASSERT_EQUALS(result, expected);
+}
+
+/**
+ * Clauses consisting of ungrounded, grounded (constant).
+ */
+void ConstantClausesUTest::test_mixed_clauses_3()
+{
+	eval.eval("(load-from-path \"constant-scope.scm\")");
+
+	Handle query = eval.eval_h("query"),
+		result = satisfying_set(&as, query),
+		expected = eval.eval_h("expected");
 
 	logger().debug() << "result = " << oc_to_string(result);
 	logger().debug() << "expected = " << oc_to_string(expected);
