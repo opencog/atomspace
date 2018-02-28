@@ -135,7 +135,7 @@ bool is_constant(const HandleSet& vars, const Handle& clause)
 	            // constant, unless it is a closed EvaluationLink over
 	            // a PredicateNode.
 	            or (classserver().isA(clause->get_type(), EVALUATABLE_LINK)
-	                and (0 != clause->get_arity()
+	                and (0 == clause->get_arity()
 	                     or
 	                     clause->getOutgoingAtom(0)->get_type() != PREDICATE_NODE)));
 }
