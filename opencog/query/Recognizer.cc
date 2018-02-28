@@ -316,7 +316,7 @@ Handle opencog::recognize(AtomSpace* as, const Handle& hlink)
 	PatternLinkPtr bl(PatternLinkCast(hlink));
 
 	Recognizer reco(as);
-	bl->satisfy(reco, as);
+	bl->satisfy(reco);
 
 	return as->add_atom(createUnorderedLink(reco._rules, SET_LINK));
 }

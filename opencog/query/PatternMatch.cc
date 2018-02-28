@@ -333,13 +333,6 @@ bool BindLink::imply(PatternMatchCallback& pmc, AtomSpace* as, bool check_conn)
 		                            "BindLink consists of multiple "
 		                            "disconnected components!");
 
-	return PatternLink::satisfy(pmc, as);
-}
-
-/* ================================================================= */
-
-bool PatternLink::satisfy(PatternMatchCallback& pmcb, AtomSpace* as)
-{
 	// Make sure that the user did not pass in bogus clauses
 	// in the queried atomspace.
 	// Make sure that every clause contains at least one variable.
@@ -367,6 +360,13 @@ bool PatternLink::satisfy(PatternMatchCallback& pmcb, AtomSpace* as)
 		make_connectivity_map(_pat.cnf_clauses);
 	}
 
+	return PatternLink::satisfy(pmc);
+}
+
+/* ================================================================= */
+
+bool PatternLink::satisfy(PatternMatchCallback& pmcb) const
+{
 	// If there is just one connected component, we don't have to
 	// do anything special to find a grounding for it.  Proceed
 	// in a direct fashion.
@@ -436,7 +436,7 @@ bool PatternLink::satisfy(PatternMatchCallback& pmcb, AtomSpace* as)
 
 		// Pass through the callbacks, collect up answers.
 		PMCGroundings gcb(pmcb);
-		clp->satisfy(gcb, as);
+		clp->satisfy(gcb);
 
 		// Special handling for disconnected pure optionals -- Returns false to
 		// end the search if this disconnected pure optional is found
