@@ -1,0 +1,242 @@
+/*
+ * tests/query/NotLinkUTest.cxxtest
+ *
+ * Copyright (C) 2018 Linas Vepstas
+ * All Rights Reserved
+ *
+ * This program is free software; you can redistribute it and/or modify
+ * it under the terms of the GNU Affero General Public License v3 as
+ * published by the Free Software Foundation and including the exceptions
+ * at http://opencog.org/wiki/Licenses
+ *
+ * This program is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ * GNU General Public License for more details.
+ *
+ * You should have received a copy of the GNU Affero General Public License
+ * along with this program; if not, write to:
+ * Free Software Foundation, Inc.,
+ * 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
+ */
+
+#include <opencog/guile/SchemeEval.h>
+#include <opencog/truthvalue/SimpleTruthValue.h>
+#include <opencog/atomspace/AtomSpace.h>
+#include <opencog/query/BindLinkAPI.h>
+#include <opencog/util/Logger.h>
+#include <cxxtest/TestSuite.h>
+
+using namespace opencog;
+
+#define al as->add_link
+#define an as->add_node
+
+class NotLinkUTest: public CxxTest::TestSuite
+{
+private:
+	AtomSpace *as;
+	SchemeEval* eval;
+
+public:
+	NotLinkUTest(void)
+	{
+		// logger().set_level(Logger::FINE);
+		logger().set_print_to_stdout_flag(true);
+		logger().set_timestamp_flag(false);
+
+		as = new AtomSpace();
+		eval = new SchemeEval(as);
+		eval->eval("(use-modules (opencog exec) (opencog query))");
+		eval->eval("(add-to-load-path \"..\")");
+		eval->eval("(add-to-load-path \"../../..\")");
+	}
+
+	~NotLinkUTest()
+	{
+		delete as;
+		// Erase the log file if no assertions failed.
+		if (!CxxTest::TestTracker::tracker().suiteFailed())
+				std::remove(logger().get_filename().c_str());
+int rc = CxxTest::TestTracker::tracker().suiteFailed();
+_exit(rc); // XXX hack to avoid double-free in __run_exit_handlers
+	}
+
+	void setUp(void);
+	void tearDown(void);
+
+	void test_sheltered_strict_type(void);
+	void test_bare_strict_type(void);
+	void test_get_strict_type(void);
+};
+
+void NotLinkUTest::tearDown(void)
+{
+}
+
+void NotLinkUTest::setUp(void)
+{
+}
+
+/*
+ * Test a sheltered strict type version.
+ * The variable is strictly typed, and it is sheltered by
+ * a PresentLink, to prevent it from being evaluated.
+ */
+void NotLinkUTest::test_sheltered_strict_type(void)
+{
+	logger().debug("BEGIN TEST: %s", __FUNCTION__);
+
+	eval->eval(
+		"(define evel (Evaluation "
+		"	(Predicate \"keep-pet\")"
+		"	(List (Concept \"German\") (Concept \"dog\"))))");
+
+	eval->eval("(Not evel)");
+
+	eval->eval(
+		"(define n4 (BindLink"
+		"	(TypedVariable (Variable \"$A\") (TypeNode \"EvaluationLink\"))"
+		"	(Present (Not (Variable \"$A\")))"
+		"	(Variable \"$A\")))");
+
+	Handle hgnd = eval->eval_h("(cog-execute! n4)");
+
+	Handle hans = eval->eval_h("(SetLink evel)");
+
+	printf("Expected this: %s\n", hans->to_string().c_str());
+	printf("Found this answer: %s\n", hgnd->to_string().c_str());
+
+	TSM_ASSERT("Didn't get the expected grounding", hans == hgnd);
+
+	// ---------------------------------------------------
+	// Getting wrapped up in AndLink is a common style
+	eval->eval(
+		"(define n5 (BindLink"
+		"	(TypedVariable (Variable \"$A\") (TypeNode \"EvaluationLink\"))"
+		"	(AndLink (Present (Not (Variable \"$A\"))))"
+		"	(Variable \"$A\")))");
+
+	hgnd = eval->eval_h("(cog-execute! n5)");
+
+	printf("Expected this: %s\n", hans->to_string().c_str());
+	printf("Found this answer: %s\n", hgnd->to_string().c_str());
+
+	TSM_ASSERT("Didn't get the expected grounding", hans == hgnd);
+
+	logger().debug("END TEST: %s", __FUNCTION__);
+}
+
+/*
+ * Test a bare strict type version.
+ * The variable is strictly typed, and it is bare, and
+ * thus subject to evaluation.
+ */
+void NotLinkUTest::test_bare_strict_type(void)
+{
+	logger().debug("BEGIN TEST: %s", __FUNCTION__);
+
+	eval->eval(
+		"(define evel (Evaluation (stv 1 1)"
+		"	(Predicate \"keep-pet\")"
+		"	(List (Concept \"German\") (Concept \"dog\"))))");
+
+	eval->eval("(Not evel)");
+
+	eval->eval(
+		"(define n3 (BindLink"
+		"	(TypedVariable (Variable \"$A\") (TypeNode \"EvaluationLink\"))"
+		"	(Not (Variable \"$A\"))"
+		"	(Variable \"$A\")))");
+
+	Handle hgnd = eval->eval_h("(cog-execute! n3)");
+
+	Handle hans = eval->eval_h("(SetLink)");
+
+	printf("Expected this: %s\n", hans->to_string().c_str());
+	printf("Found this answer: %s\n", hgnd->to_string().c_str());
+
+	TSM_ASSERT("Didn't get the expected grounding", hans == hgnd);
+
+	// ---------------------------------------------------
+	// Getting wrapped up in AndLink is a common style
+	eval->eval(
+		"(define n3a (BindLink"
+		"	(TypedVariable (Variable \"$A\") (TypeNode \"EvaluationLink\"))"
+		"	(AndLink (Not (Variable \"$A\")))"
+		"	(Variable \"$A\")))");
+
+	hgnd = eval->eval_h("(cog-execute! n3a)");
+	printf("Expected this: %s\n", hans->to_string().c_str());
+	printf("Found this answer: %s\n", hgnd->to_string().c_str());
+
+	TSM_ASSERT("Didn't get the expected grounding", hans == hgnd);
+
+	// ----------------------------------------------------
+	// Set the evaluation link to false, so the Not version of it
+	// will be true.
+	eval->eval("(cog-set-tv! evel (stv 0 1))");
+	hgnd = eval->eval_h("(cog-execute! n3)");
+	hans = eval->eval_h("(SetLink evel)");
+
+	printf("Expected this: %s\n", hans->to_string().c_str());
+	printf("Found this answer: %s\n", hgnd->to_string().c_str());
+
+	TSM_ASSERT("Didn't get the expected grounding", hans == hgnd);
+
+	// ----------------------------------------------------
+	// Just like the above, but with the AndLink.
+	hgnd = eval->eval_h("(cog-execute! n3a)");
+
+	printf("Expected this: %s\n", hans->to_string().c_str());
+	printf("Found this answer: %s\n", hgnd->to_string().c_str());
+
+	TSM_ASSERT("Didn't get the expected grounding", hans == hgnd);
+
+	logger().debug("END TEST: %s", __FUNCTION__);
+}
+
+void NotLinkUTest::test_get_strict_type(void)
+{
+	logger().debug("BEGIN TEST: %s", __FUNCTION__);
+
+	eval->eval(
+		"(define evel (Evaluation "
+		"	(Predicate \"keep-pet\")"
+		"	(List (Concept \"German\") (Concept \"dog\"))))");
+
+	eval->eval("(Not evel)");
+
+	eval->eval(
+		"(define g4 (GetLink"
+		"	(TypedVariable (Variable \"$A\") (TypeNode \"EvaluationLink\"))"
+		"	(Present (Not (Variable \"$A\")))))");
+
+	Handle hgnd = eval->eval_h("(cog-execute! g4)");
+
+	Handle hans = eval->eval_h("(SetLink evel)");
+
+	printf("Expected this: %s\n", hans->to_string().c_str());
+	printf("Found this answer: %s\n", hgnd->to_string().c_str());
+
+	TSM_ASSERT("Didn't get the expected grounding", hans == hgnd);
+
+	// ---------------------------------------------------
+	// Getting wrapped up in AndLink is a common style
+	eval->eval(
+		"(define g5 (GetLink"
+		"	(TypedVariable (Variable \"$A\") (TypeNode \"EvaluationLink\"))"
+		"	(AndLink (Present (Not (Variable \"$A\"))))))");
+
+	hgnd = eval->eval_h("(cog-execute! g5)");
+
+	printf("Expected this: %s\n", hans->to_string().c_str());
+	printf("Found this answer: %s\n", hgnd->to_string().c_str());
+
+	TSM_ASSERT("Didn't get the expected grounding", hans == hgnd);
+
+	logger().debug("END TEST: %s", __FUNCTION__);
+}
+
+#undef al
+#undef an

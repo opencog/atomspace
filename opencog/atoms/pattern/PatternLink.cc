@@ -54,7 +54,7 @@ void PatternLink::common_init(void)
 	validate_clauses(_varlist.varset, _pat.clauses, _pat.constants);
 	extract_optionals(_varlist.varset, _pat.clauses);
 
-	// Locate as well as black-box and clear-box clauses.
+	// Locate the black-box and clear-box clauses.
 	unbundle_virtual(_varlist.varset, _pat.cnf_clauses,
 	                 _fixed, _virtual, _pat.black);
 
@@ -76,7 +76,19 @@ void PatternLink::common_init(void)
 	// Tweak the evaluatable_holders to reflect this.
 	TypeSet connectives({AND_LINK, SEQUENTIAL_AND_LINK,
 	                     OR_LINK, SEQUENTIAL_OR_LINK, NOT_LINK});
-	trace_connectives(connectives, _pat.clauses);
+
+	// Icky. Yuck. Some pre-historic API's do not set the pattern body.
+	// These appear only in the unit tests, never in real code. For now,
+	// just work around this, but eventually XXX FIXME.
+	if (nullptr == _pat.body)
+	{
+		for (const Handle& term : _pat.clauses)
+			trace_connectives(connectives, term);
+	}
+	else
+	{
+		trace_connectives(connectives, _pat.body);
+	}
 
 	// Split the non-virtual clauses into connected components
 	get_connected_components(_varlist.varset, _fixed,
@@ -92,7 +104,7 @@ void PatternLink::common_init(void)
 	if (1 == _num_comps)
 	{
 		// Each component is in connection-order. By re-assigning to
-		// _pat.cnf_clauses, they get placed in that order, this giving
+		// _pat.cnf_clauses, they get placed in that order, thus giving
 		// a minor performance boost during clause traversal.
 		// Gurk. This does not work currently; the evaluatables have been
 		// stripped out of the component. I think this is a bug ...
@@ -136,7 +148,7 @@ void PatternLink::init(void)
 	// If the _body has not been initialized by ScopeLink, that's
 	// because the PatternLink itself was quoted, and thus not
 	// actually initializable. This seems ... weird... to me.
-	// I'm not convinced its a vaalid use of Quoting. It seems
+	// I'm not convinced its a valid use of Quoting. It seems
 	// like a bug. But whatever. System crashes if the body is
 	// not set.
 	if (nullptr == _body) return;
@@ -321,13 +333,8 @@ PatternLink::PatternLink(const Link& l)
 void PatternLink::unbundle_clauses(const Handle& hbody)
 {
 	Type t = hbody->get_type();
-	// For just right now, unpack PresentLink, although that is not
-	// technically correct in the long-run. XXX FIXME In the long run,
-	// nothing should be unpacked, since everything should be run-time
-	// evaluatable. i.e. everything should be a predicate, and that's
-	// that. ??? But how can this be done? We have to pattern-match
-	// disjoint clauses, connected via variables only; how else can this
-	// be done, except by unpacking?  I'm confused.
+	// For just right now, unpack PresentLink, although this might not
+	// be correct in the long-run. (???)
 	//
 	// For SequentialAndLinks, which are expected to be evaluated
 	// in-order, we need to fish out any PresentLinks, and add them
@@ -748,30 +755,32 @@ bool PatternLink::add_dummies()
 
 /* ================================================================= */
 
-/// Starting from the top of a clause, trace down through the tree
-/// of connectives.  If a term appears under a connective, and there
+/// Starting from the main body, trace down through the tree of (logical)
+/// connectives.  If a term appears under a (logic) connective, and there
 /// is a path of connectives all the way to the top, then we have to
 /// assume the term is evaluatable, as the whole point of connectives
 /// to to connect evaluatable terms.  Thus, for example, for a clause
 /// having the form (AndLink stuff (OrLink more-stuff (NotLink not-stuff)))
 /// we have to assume that stuff, more-stuff and not-stuff are all
-/// evaluatable.
+/// evaluatable. Tracning halts as soon as something that isn't a
+/// connective is encountered.
 void PatternLink::trace_connectives(const TypeSet& connectives,
-                                    const HandleSeq& oset,
+                                    const Handle& term,
                                     Quotation quotation)
 {
-	for (const Handle& term: oset)
+	Type t = term->get_type();
+
+	quotation.update(t);
+
+	if (quotation.is_quoted() or connectives.find(t) == connectives.end())
+		return;
+
+	_pat.evaluatable_holders.insert(term);
+	add_to_map(_pat.in_evaluatable, term, term);
+	for (const Handle& pred: term->getOutgoingSet())
 	{
-		Type t = term->get_type();
-
-		quotation.update(t);
-
-		if (quotation.is_quoted() or connectives.find(t) == connectives.end())
-			continue;
-		_pat.evaluatable_holders.insert(term);
-		add_to_map(_pat.in_evaluatable, term, term);
-		if (term->is_link())
-			trace_connectives(connectives, term->getOutgoingSet(), quotation);
+		if (pred->is_link())
+			trace_connectives(connectives, pred, quotation);
 	}
 }
 

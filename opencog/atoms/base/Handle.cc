@@ -363,6 +363,10 @@ std::string oc_to_string(const LinkPtr& lptr)
 
 namespace std {
 
+ostream& operator<<(ostream& out, const opencog::HandleMap& hm)
+{
+	return out << oc_to_string(hm);
+}
 ostream& operator<<(ostream& out, const opencog::HandleSeq& hs)
 {
 	return out << oc_to_string(hs);

@@ -75,10 +75,12 @@ public:
 	void test_constant_pattern();
 	void test_mixed_clauses_1();
 	void test_mixed_clauses_2();
+	void test_mixed_clauses_3();
 };
 
 void ConstantClausesUTest::tearDown()
 {
+	as.clear();
 }
 
 void ConstantClausesUTest::setUp()
@@ -434,6 +436,31 @@ void ConstantClausesUTest::test_mixed_clauses_2()
 	logger().debug() << "expected = " << oc_to_string(expected);
 
 	TS_ASSERT_EQUALS(result, expected);
+}
+
+/**
+ * Clauses consisting of ungrounded, grounded (constant).
+ */
+void ConstantClausesUTest::test_mixed_clauses_3()
+{
+	eval.eval("(load-from-path \"constant-scope.scm\")");
+
+	Handle query = eval.eval_h("query"),
+		result = satisfying_set(&as, query),
+		expected = eval.eval_h("expected");
+	HandleSet results(result->getOutgoingSet().begin(),
+	                  result->getOutgoingSet().end()),
+		more_expected(expected->getOutgoingSet().begin(),
+		              expected->getOutgoingSet().end());
+
+	// Add the other LambdaLinks
+	more_expected.insert(LP);
+	more_expected.insert(LQ);
+
+	logger().debug() << "results = " << oc_to_string(results);
+	logger().debug() << "more_expected = " << oc_to_string(more_expected);
+
+	TS_ASSERT_EQUALS(results, more_expected);
 }
 
 #undef al
