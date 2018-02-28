@@ -22,8 +22,6 @@
    (Concept "dog")
    (Concept "pet"))
 
-
-
 ;; The German doesn't keep the dog.
 ;; This truth is represented by the TV (stv 0.0 1.0)
 ;; Note that it won't work if you just wrap the EvaluationLink with a NotLink,
@@ -35,12 +33,9 @@
    	(Concept "German")
         (Concept "dog")))
 
-
-
 (define (evaluation-absent predicate A B )
     (bool->tv (null? (cog-link "EvaluationLink" predicate (List A B))) )
 )
-
 
 ;; If A keeps a pet x, B is different FROM A, 
 ;; and there exists some other pet, Y, 
@@ -55,7 +50,6 @@
           (akx (Evaluation kp (List vA vX)))
           (bky (Evaluation kp (List vB vY)))
        )
-
   (BindLink
    (VariableList
      (TypedVariable
@@ -94,7 +88,6 @@
            vX
            vY
         ))
-
      ;; test if the conclusion will conflict with the known truth:
      ;; it's fine if the conclusion doesn't exist in the knowledge base;
      ;; but if it already exist and the truth value is not true, 
@@ -125,7 +118,6 @@
      )
  
    )      
-   
    (ExecutionOutputLink
      (GroundedSchemaNode "scm: keep-different-pet-formula")
      (ListLink akx bky)
@@ -139,7 +131,6 @@
 
     (cog-set-tv! akx (stv 1 1))
     (cog-set-tv! bky (stv 1 1))
-
 )
 
 (define keep-different-pet-rule-name
@@ -147,14 +138,10 @@
 (Define keep-different-pet-rule-name
         keep-different-pet-rule)
 
-
-
-
 ;; below is the ure config for this example:
 
 (define Einstein-rbs (ConceptNode "Einstein-rbs"))
 (Inheritance Einstein-rbs (ConceptNode "URE"))
-
 
 ;; Associate the rules to the rule base 
 (MemberLink (stv 1 1)
