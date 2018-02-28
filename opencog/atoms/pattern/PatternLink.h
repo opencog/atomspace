@@ -174,7 +174,7 @@ public:
 	const HandleSeq& get_fixed(void) const { return _fixed; }
 	const HandleSeq& get_virtual(void) const { return _virtual; }
 
-	bool satisfy(PatternMatchCallback&, AtomSpace* as);
+	bool satisfy(PatternMatchCallback&) const;
 
 	// Return the cached variable groundings.
 	Handle get_groundings() const;
