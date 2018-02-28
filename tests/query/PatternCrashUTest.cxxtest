@@ -274,7 +274,7 @@ void PatternCrashUTest::test_one_thing(void)
 
 	logger().debug("Before Pattern Matching");
 
-	sl->satisfy(pmcb);
+	sl->satisfy(pmcb, _as);
 
 	logger().debug("END TEST: %s", __FUNCTION__);
 }
@@ -294,7 +294,7 @@ void PatternCrashUTest::test_empty_vars(void)
 	PatternLinkPtr sl = PatternLinkCast(hpattern);
 	PMCB pmcb(_as);
 
-	sl->satisfy(pmcb);
+	sl->satisfy(pmcb, _as);
 
 	logger().debug("END TEST: %s", __FUNCTION__);
 }
