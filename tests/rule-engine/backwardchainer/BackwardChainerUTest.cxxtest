@@ -3,8 +3,7 @@
  *
  *  Created on: Oct 20, 2014
  *      Authors: misgana
- *             : Nil Geisweiller (2015-2016)
- *             : Shujing Ke (2018)
+ ^             : Nil Geisweiller (2015-2016)
  */
 #include <opencog/rule-engine/backwardchainer/BackwardChainer.h>
 #include <opencog/rule-engine/backwardchainer/BackwardChainerPMCB.h>
@@ -32,8 +31,7 @@ private:
 	BackwardChainer* _bc;
 
 	string load_from_path(const string& filename);
-	void reset_bc();
-    void bc_fact_to_rule();
+    void reset_bc();
 
 public:
 	BackwardChainerUTest();
@@ -53,17 +51,10 @@ public:
 	void test_conditional_instantiation_tv_query();
 	void test_conditional_partial_instantiation();
 	void test_impossible_criminal();
-	void test_criminal();
-
+    void test_criminal();
 	// TODO: re-enable the following tests
 	void test_induction();
-	void test_focus_set();   
-    void test_fact_to_rule_lackofrule();
-
-    // This works. Do not do this test before test_fact_to_rule_lackofrule().
-    void test_fact_to_rule();
-
-
+    void test_focus_set();
 };
 
 BackwardChainerUTest::BackwardChainerUTest() : _eval(&_as)
@@ -705,60 +696,6 @@ void BackwardChainerUTest::test_focus_set()
 
 	logger().debug("END TEST: %s", __FUNCTION__);
 }
-
-void BackwardChainerUTest::bc_fact_to_rule()
-{
-    randGen().seed(0);
-
-    Handle rbs = _as.get_node(CONCEPT_NODE, "Einstein-rbs");
-
-    Handle target = _eval.eval_h("target");
-
-    BackwardChainer bc(_as, rbs, target);
-    bc.get_config().set_maximum_iterations(10);
-    bc.do_chain();
-
-    Handle results = bc.get_results(),
-        American = an(CONCEPT_NODE, "American"),
-        cat = an(CONCEPT_NODE, "cat"),
-        keep = an(PREDICATE_NODE, "keep-pet"),
-        Akeepcat = al(EVALUATION_LINK, keep, al(LIST_LINK, American, cat)),
-        expected = al(SET_LINK, Akeepcat);
-
-    logger().debug() << "results = " << results->to_string();
-    logger().debug() << "expected = " << expected->to_string();
-
-    TS_ASSERT_EQUALS(results, expected);
-
-}
-
-void BackwardChainerUTest::test_fact_to_rule_lackofrule()
-{
-
-    logger().debug("BEGIN TEST: %s", __FUNCTION__);
-
-    // load the kb that lack of the rule that converted from a fact
-    load_from_path("fact-to-rule-lackofrule.scm");
-
-    bc_fact_to_rule();
-
-    logger().debug("END TEST: %s", __FUNCTION__);
-}
-
-// Do not do this test before test_fact_to_rule_lackofrule(),
-// because the rule lacked in test_fact_to_rule_lackofrule will be loaded by this test.
-void BackwardChainerUTest::test_fact_to_rule()
-{
-    logger().debug("BEGIN TEST: %s", __FUNCTION__);
-
-    // load the kb that contain the rule that converted from a fact
-    load_from_path("fact-to-rule.scm");
-
-    bc_fact_to_rule();
-
-    logger().debug("END TEST: %s", __FUNCTION__);
-}
-
 
 #undef al
 #undef an
