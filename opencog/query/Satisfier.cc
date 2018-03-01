@@ -153,6 +153,7 @@ TruthValuePtr opencog::satisfaction_link(AtomSpace* as, const Handle& hlink)
 	PatternLinkPtr plp(PatternLinkCast(hlink));
 
 	Satisfier sater(as);
+	plp->remove_constant_clauses(as);
 	plp->satisfy(sater);
 
 #define PLACE_RESULTS_IN_ATOMSPACE
@@ -194,6 +195,7 @@ Handle opencog::satisfying_set(AtomSpace* as, const Handle& hlink, size_t max_re
 
 	SatisfyingSet sater(as);
 	sater.max_results = max_results;
+	bl->remove_constant_clauses(as);
 	bl->satisfy(sater);
 
 	// Create the satisfying set, and cache it.
