@@ -333,32 +333,7 @@ bool BindLink::imply(PatternMatchCallback& pmc, AtomSpace* as, bool check_conn)
 		                            "BindLink consists of multiple "
 		                            "disconnected components!");
 
-	// Make sure that the user did not pass in bogus clauses
-	// in the queried atomspace.
-	// Make sure that every clause contains at least one variable.
-	// The presence of constant clauses will mess up the current
-	// pattern matcher.  Constant clauses are "trivial" to match,
-	// and so its pointless to even send them through the system.
-	//
-	// XXX This removal *should* be happening at pattern compile time.
-	// It was moved here, to pattern execution time, by pull req #1444
-	// but it remains unclear why this check needed to be deferred
-	// like this. This is causing other issues, so Um ??? wtf?
-	bool bogus = remove_constants(_varlist.varset, _pat, _components,
-	                              _component_patterns, as);
-	if (bogus)
-	{
-		logger().warn("%s: Constant clauses removed from pattern %s",
-		              __FUNCTION__, to_short_string().c_str());
-		for (const Handle& h: _pat.constants)
-		{
-			logger().warn("%s: Removed %s",
-			              __FUNCTION__, h->to_short_string().c_str());
-		}
-
-		_num_comps = _components.size();
-		make_connectivity_map(_pat.cnf_clauses);
-	}
+	remove_constant_clauses(as);
 
 	return PatternLink::satisfy(pmc);
 }
