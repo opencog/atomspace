@@ -124,6 +124,10 @@ public:
 
 	/**
 	 * @return true if the termination criteria have been met.
+	 *
+	 * More specifically, either
+	 * 1. reached the maximum number of iterations,
+	 * 2. or all andbits are exhausted.
 	 */
 	bool termination();
 
@@ -159,7 +163,7 @@ private:
 
 	// Calculate distribution based on a (poor) estimate of the
 	// probablity of a and-BIT being within the path of the solution.
-	std::vector<double> expansion_anbit_weights();
+	std::vector<double> expansion_andbit_weights();
 
 	// Select an and-BIT for expansion
 	AndBIT* select_expansion_andbit();

@@ -729,6 +729,13 @@ void BIT::reset_exhausted_flags()
 		andbit.reset_exhausted();
 }
 
+bool BIT::andbits_exhausted() const
+{
+	return std::all_of(andbits.begin(), andbits.end(),
+	                   [](const AndBIT& andbit) {
+		                   return andbit.exhausted; });
+}
+
 bool BIT::is_in(const RuleTypedSubstitutionPair& rule,
                 const BITNode& bitnode) const
 {
