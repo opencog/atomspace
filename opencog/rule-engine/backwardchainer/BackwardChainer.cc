@@ -255,7 +255,7 @@ void BackwardChainer::fulfill_fcs(const Handle& fcs)
 	catch (...) {}
 }
 
-std::vector<double> BackwardChainer::expansion_anbit_weights()
+std::vector<double> BackwardChainer::expansion_andbit_weights()
 {
 	std::vector<double> weights;
 	for (const AndBIT& andbit : _bit.andbits)
@@ -265,7 +265,7 @@ std::vector<double> BackwardChainer::expansion_anbit_weights()
 
 AndBIT* BackwardChainer::select_expansion_andbit()
 {
-	std::vector<double> weights = expansion_anbit_weights();
+	std::vector<double> weights = expansion_andbit_weights();
 
 	// Debug log
 	if (ure_logger().is_debug_enabled()) {
@@ -306,7 +306,7 @@ void BackwardChainer::reduce_bit()
 
 void BackwardChainer::remove_unlikely_expandable_andbit()
 {
-	std::vector<double> weights = expansion_anbit_weights();
+	std::vector<double> weights = expansion_andbit_weights();
 	std::discrete_distribution<size_t> dist(weights.begin(), weights.end());
 	std::vector<double> never_expand_probs;
 
