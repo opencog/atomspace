@@ -124,6 +124,10 @@ public:
 
 	/**
 	 * @return true if the termination criteria have been met.
+	 *
+	 * More specifically, either
+	 * 1. reached the maximum number of iterations,
+	 * 2. or all andbits are exhausted.
 	 */
 	bool termination();
 

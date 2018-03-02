@@ -94,7 +94,8 @@ void BackwardChainer::do_step()
 
 bool BackwardChainer::termination()
 {
-	return _configReader.get_maximum_iterations() <= _iteration;
+	return _configReader.get_maximum_iterations() <= _iteration
+		or (not _bit.empty() and _bit.andbits_exhausted());
 }
 
 Handle BackwardChainer::get_results() const
@@ -352,7 +353,7 @@ double BackwardChainer::complexity_factor(const AndBIT& andbit) const
 
 double BackwardChainer::operator()(const AndBIT& andbit) const
 {
-	return (andbit.exhausted ? 0.0 : 1.0)
-		* _andbit_fitness(andbit)
-		* complexity_factor(andbit);
+	if (andbit.exhausted)
+		return 0.0;
+	return _andbit_fitness(andbit) * complexity_factor(andbit);
 }
