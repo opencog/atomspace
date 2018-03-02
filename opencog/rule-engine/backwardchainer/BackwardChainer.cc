@@ -94,8 +94,15 @@ void BackwardChainer::do_step()
 
 bool BackwardChainer::termination()
 {
-	return _configReader.get_maximum_iterations() <= _iteration
-		or (not _bit.empty() and _bit.andbits_exhausted());
+	if (_configReader.get_maximum_iterations() <= _iteration) {
+		ure_logger().debug() << "Terminate: reached the maximum number of iterations";
+		return true;
+	}
+	if (not _bit.empty() and _bit.andbits_exhausted()) {
+		ure_logger().debug() << "Terminate: all AndBITS are exhausted";
+		return true;
+	}
+	return false;
 }
 
 Handle BackwardChainer::get_results() const
