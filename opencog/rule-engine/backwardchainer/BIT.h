@@ -438,6 +438,11 @@ public:
 	void reset_exhausted_flags();
 
 	/**
+	 * Return true if all andbits are exhausted.
+	 */
+	bool andbits_exhausted() const;
+
+	/**
 	 * Return true if the rule is already an or-children of bitnode up
 	 * to an alpha conversion.
 	 */
