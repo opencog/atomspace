@@ -53,7 +53,7 @@ public:
 	 * Return the action distribution, a probability for each action
 	 * to be used as sampling distribution for picking the next
 	 * action. The distribution attempts to reflect the optimal
-	 * balance between exploration and exploitation (Thomson
+	 * balance between exploration and exploitation (Thompson
 	 * sampling).
 	 *
 	 * Pi = I_0^1 pdfi(x) Prod_j!=i cdfj(x) dx / nt
