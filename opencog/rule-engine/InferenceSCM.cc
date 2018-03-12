@@ -78,6 +78,15 @@ protected:
 
 	Handle get_rulebase_rules(Handle rbs);
 
+    std::string get_ure_logger_level();
+    std::string set_ure_logger_level(const std::string& level);
+    std::string get_ure_logger_filename();
+    std::string set_ure_logger_filename(const std::string& filename);
+    bool ure_logger_set_stdout(bool enable);
+    bool ure_logger_set_sync(bool enable);
+    bool ure_logger_set_timestamp(bool enable);
+
+
 public:
 	InferenceSCM();
 };
@@ -89,7 +98,7 @@ public:
 
 #include <opencog/rule-engine/forwardchainer/ForwardChainer.h>
 #include <opencog/rule-engine/backwardchainer/BackwardChainer.h>
-
+#include <opencog/rule-engine/URELogger.h>
 #include "UREConfig.h"
 using namespace opencog;
 
@@ -107,6 +116,28 @@ void InferenceSCM::init(void)
 
 	define_scheme_primitive("cog-rbs-rules",
 		&InferenceSCM::get_rulebase_rules, this, "rule-engine");
+
+    define_scheme_primitive("cog-ure-logger-set-level!",
+                            &InferenceSCM::set_ure_logger_level, this, "rule-engine");
+
+    define_scheme_primitive("cog-ure-logger-get-level",
+                            &InferenceSCM::get_ure_logger_level, this, "rule-engine");
+
+    define_scheme_primitive("cog-ure-logger-get-filename",
+                            &InferenceSCM::get_ure_logger_filename, this, "rule-engine");
+
+    define_scheme_primitive("cog-ure-logger-set-filename!",
+                            &InferenceSCM::set_ure_logger_filename, this, "rule-engine");
+
+    define_scheme_primitive("cog-ure-logger-set-stdout!",
+                            &InferenceSCM::ure_logger_set_stdout, this, "rule-engine");
+
+    define_scheme_primitive("cog-ure-logger-set-sync!",
+                            &InferenceSCM::ure_logger_set_sync, this, "rule-engine");
+
+    define_scheme_primitive("cog-ure-logger-set-timestamp!",
+                            &InferenceSCM::ure_logger_set_timestamp, this, "rule-engine");
+
 }
 
 Handle InferenceSCM::do_forward_chaining(Handle rbs,
@@ -183,6 +214,51 @@ Handle InferenceSCM::get_rulebase_rules(Handle rbs)
     return createLink(hs, SET_LINK);
 }
 
+// Get the current ure logger level
+std::string InferenceSCM::get_ure_logger_level()
+{
+    return Logger::get_level_string(ure_logger().get_level());
+}
+
+// Set ure logger level, return previous ure logger level.
+std::string InferenceSCM::set_ure_logger_level(const std::string& level)
+{
+    std::string prev_level;
+    prev_level = Logger::get_level_string(ure_logger().get_level());
+    ure_logger().set_level(Logger::get_level_from_string(level));
+    return prev_level;
+}
+
+std::string InferenceSCM::get_ure_logger_filename()
+{
+    return ure_logger().get_filename();
+}
+
+// Set ure logger filename, return the previous filename
+std::string InferenceSCM::set_ure_logger_filename(const std::string& filename)
+{
+    std::string prev_filename = ure_logger().get_filename();
+    ure_logger().set_filename(filename);
+    return prev_filename;
+}
+
+bool InferenceSCM::ure_logger_set_stdout(bool enable)
+{
+    ure_logger().set_print_to_stdout_flag(enable);
+    return enable;
+}
+
+bool InferenceSCM::ure_logger_set_sync(bool enable)
+{
+    ure_logger().set_sync_flag(enable);
+    return enable;
+}
+
+bool InferenceSCM::ure_logger_set_timestamp(bool enable)
+{
+    ure_logger().set_timestamp_flag(enable);
+    return enable;
+}
 
 extern "C" {
 void opencog_ruleengine_init(void);
