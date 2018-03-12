@@ -78,6 +78,16 @@ protected:
 
 	Handle get_rulebase_rules(Handle rbs);
 
+    /**
+     *
+     * Set ure logger level
+     *
+     * @param level        The string of the new ure logger level want to set to.
+     *
+     * @return             A string of previous ure logger level.
+     */
+    std::string set_ure_logger_level(const std::string& level);
+
 public:
 	InferenceSCM();
 };
@@ -89,7 +99,7 @@ public:
 
 #include <opencog/rule-engine/forwardchainer/ForwardChainer.h>
 #include <opencog/rule-engine/backwardchainer/BackwardChainer.h>
-
+#include <opencog/rule-engine/URELogger.h>
 #include "UREConfig.h"
 using namespace opencog;
 
@@ -107,6 +117,9 @@ void InferenceSCM::init(void)
 
 	define_scheme_primitive("cog-rbs-rules",
 		&InferenceSCM::get_rulebase_rules, this, "rule-engine");
+
+    define_scheme_primitive("cog-ure-logger-set-level",
+                            &InferenceSCM::set_ure_logger_level, this, "rule-engine");
 }
 
 Handle InferenceSCM::do_forward_chaining(Handle rbs,
@@ -182,6 +195,17 @@ Handle InferenceSCM::get_rulebase_rules(Handle rbs)
 
     return createLink(hs, SET_LINK);
 }
+
+
+// Set ure logger level, return previous ure logger level.
+std::string InferenceSCM::set_ure_logger_level(const std::string& level)
+{
+    std::string prev_level;
+    prev_level = Logger::get_level_string(ure_logger().get_level());
+    ure_logger().set_level(Logger::get_level_from_string(level));
+    return prev_level;
+}
+
 
 
 extern "C" {
