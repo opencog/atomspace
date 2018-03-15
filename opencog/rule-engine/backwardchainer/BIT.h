@@ -61,7 +61,6 @@ public:
 	double complexity;
 
 	// True iff all valid rules have already expanded this BIT-node.
-	// TODO (don't forget to reset if the rule set changes)
 	bool exhausted;
 
 	// Estimate the probability of usefulness of expanding this
@@ -92,7 +91,6 @@ public:
 	double complexity;
 
 	// True iff all leaves are exhausted (see BITNode::exhausted)
-	// TODO (don't forget to reset if the rule set changes)
 	bool exhausted;
 
 	/**
