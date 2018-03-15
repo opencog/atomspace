@@ -73,7 +73,7 @@ public:
 	};
 
 	// TODO: we may want to move the arguments in its own class if it
-	// groses bigger.
+	// grows bigger.
 	AndBITFitness(FitnessType ft=Uniform,
 	              const std::set<ContentHash>& tr=std::set<ContentHash>());
 
