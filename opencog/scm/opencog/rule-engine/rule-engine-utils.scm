@@ -314,31 +314,31 @@
 "
   (map (lambda (x) (gen-rand-variable prefix base length)) (iota n)))
 
-(define (set-ure-logger-level! level)
+(define (ure-logger-set-level! level)
   (cog-logger-set-level! (cog-ure-logger) level)
 )
 
-(define (get-ure-logger-level)
+(define (ure-logger-get-level)
   (cog-logger-get-level (cog-ure-logger))
 )
 
-(define (set-ure-logger-filename! filename)
+(define (ure-logger-set-filename! filename)
   (cog-logger-set-filename! (cog-ure-logger) filename)
 )
 
-(define (get-ure-logger-filename)
+(define (ure-logger-get-filename)
   (cog-logger-get-filename (cog-ure-logger))
 )
 
-(define (set-ure-logger-stdout! enable)
+(define (ure-logger-set-stdout! enable)
   (cog-logger-set-stdout! (cog-ure-logger) enable)
 )
 
-(define (set-ure-logger-sync! enable)
+(define (ure-logger-set-sync! enable)
   (cog-logger-set-sync! (cog-ure-logger) enable)
 )
 
-(define (set-ure-logger-timestamp! enable)
+(define (ure-logger-set-timestamp! enable)
   (cog-logger-set-timestamp! (cog-ure-logger) enable)
 )
 
@@ -362,12 +362,13 @@
           gen-variable
           gen-variables
           gen-rand-variable
-          set-ure-logger-level!
-          get-ure-logger-level
-          set-ure-logger-filename!
-          get-ure-logger-filename
-          set-ure-logger-stdout!
-          set-ure-logger-sync!
-          set-ure-logger-timestamp!
+          ure-logger-set-level!
+          ure-logger-get-level
+          ure-logger-set-filename!
+          ure-logger-get-filename
+          ure-logger-set-stdout!
+          ure-logger-set-sync!
+          ure-logger-set-timestamp!
+
   )
 )
