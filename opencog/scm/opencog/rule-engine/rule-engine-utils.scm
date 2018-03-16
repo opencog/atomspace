@@ -34,6 +34,7 @@
 
 (use-modules (opencog))
 (use-modules (opencog exec))
+(use-modules (opencog logger))
 (use-modules (srfi srfi-1))
 
 (define* (cog-fc rbs source #:key (vardecl (List)) (focus-set (Set)))
@@ -313,6 +314,34 @@
 "
   (map (lambda (x) (gen-rand-variable prefix base length)) (iota n)))
 
+(define (ure-logger-set-level! level)
+  (cog-logger-set-level! (cog-ure-logger) level)
+)
+
+(define (ure-logger-get-level)
+  (cog-logger-get-level (cog-ure-logger))
+)
+
+(define (ure-logger-set-filename! filename)
+  (cog-logger-set-filename! (cog-ure-logger) filename)
+)
+
+(define (ure-logger-get-filename)
+  (cog-logger-get-filename (cog-ure-logger))
+)
+
+(define (ure-logger-set-stdout! enable)
+  (cog-logger-set-stdout! (cog-ure-logger) enable)
+)
+
+(define (ure-logger-set-sync! enable)
+  (cog-logger-set-sync! (cog-ure-logger) enable)
+)
+
+(define (ure-logger-set-timestamp! enable)
+  (cog-logger-set-timestamp! (cog-ure-logger) enable)
+)
+
 (define (export-rule-engine-utils)
   (export
           cog-fc
@@ -333,6 +362,13 @@
           gen-variable
           gen-variables
           gen-rand-variable
-          gen-rand-variables
+          ure-logger-set-level!
+          ure-logger-get-level
+          ure-logger-set-filename!
+          ure-logger-get-filename
+          ure-logger-set-stdout!
+          ure-logger-set-sync!
+          ure-logger-set-timestamp!
+
   )
 )
