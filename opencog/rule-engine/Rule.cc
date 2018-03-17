@@ -5,6 +5,7 @@
  *
  * Authors: Misgana Bayetta <misgana.bayetta@gmail.com> 2015
  *          Nil Geisweiller 2015-2016
+ *          Shujing Ke 2018
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU Affero General Public License v3 as
@@ -113,6 +114,32 @@ void Rule::init(const Handle& rule_alias, const Handle& rule, const Handle& rbs)
 	AtomSpace& as = *rule_alias->getAtomSpace();
 	Handle ml = as.get_link(MEMBER_LINK, rule_alias, rbs);
 	_tv = ml->getTruthValue();
+
+    verify_rule();
+}
+
+bool Rule::verify_rule()
+{
+    // currently do not verify meta rules
+    if (is_meta())
+        return true;
+
+    Handle rewrite = _rule->get_implicand();
+    Type rewrite_type = rewrite->get_type();
+
+    // check 1: If there are multiple conclusions
+    if ((rewrite_type == AND_LINK) || (rewrite_type == LIST_LINK))
+    {
+        logger().warn() << "\nRule::verify_rule: " << _rule_alias->get_name()
+                        << " contains multiple conclusions.\n"
+                        << "This rule will not work in backwardchainer.\n"
+                        << "All the conclusions should be wrapped with an ExecutionOutPutLink.\n"
+                        << "Please check /atomspace/examples/rule-engine/DummyExecutionOutput.scm for example."
+                        << std::endl;
+        return false;
+    }
+
+    return true;
 }
 
 bool Rule::operator==(const Rule& r) const
