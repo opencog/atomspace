@@ -179,7 +179,7 @@ bool is_constant(const HandleSet& vars, const Handle& clause)
 void get_connected_components(const HandleSet& vars,
                               const HandleSeq& clauses,
                               HandleSeqSeq& components,
-                              std::vector<HandleSet>& component_vars)
+                              HandleSetSeq& component_vars)
 {
 	HandleSeq todo(clauses);
 

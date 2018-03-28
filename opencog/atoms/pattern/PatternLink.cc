@@ -833,7 +833,7 @@ void PatternLink::make_map_recursive(const Handle& root, const Handle& h)
 /// leading to an undefined condition.  So, explicitly check and throw
 /// an error if a pattern is ill-formed.
 void PatternLink::check_satisfiability(const HandleSet& vars,
-                                       const std::vector<HandleSet>& compvars)
+                                       const HandleSetSeq& compvars)
 {
 	// Compute the set-union of all component vars.
 	HandleSet vunion;

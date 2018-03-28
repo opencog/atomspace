@@ -192,6 +192,22 @@ std::string oc_to_string(const HandleSet& ohs)
 {
 	return oc_to_string(ohs, "");
 }
+std::string oc_to_string(const HandleSetSeq& hss, const std::string& indent)
+{
+	std::stringstream ss;
+	ss << indent << "size = " << hss.size() << std::endl;
+	size_t i = 0;
+	for (const HandleSet& hs : hss) {
+		ss << indent << "atoms[" << i << "]:" << std::endl
+		   << oc_to_string(hs, indent + OC_TO_STRING_INDENT);
+		i++;
+	}
+	return ss.str();
+}
+std::string oc_to_string(const HandleSetSeq& hss)
+{
+	return oc_to_string(hss, "");
+}
 GEN_ATOM_CONTAINER_OC_TO_STRING(opencog::UnorderedHandleSet)
 std::string oc_to_string(const UnorderedHandleSet& uhs)
 {
