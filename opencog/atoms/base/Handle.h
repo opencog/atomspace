@@ -176,6 +176,9 @@ typedef std::vector<HandleSeq> HandleSeqSeq;
 //! RAM and has faster iteration.
 typedef std::set<Handle> HandleSet;
 
+//! a sequence of sets of handles.
+typedef std::vector<HandleSet> HandleSetSeq;
+
 //! a hash table. Usually has faster insertion.
 typedef std::unordered_set<Handle> UnorderedHandleSet;
 
@@ -282,6 +285,8 @@ std::string oc_to_string(const HandleSeqSeq& hss, const std::string& indent);
 std::string oc_to_string(const HandleSeqSeq& hss);
 std::string oc_to_string(const HandleSet& ohs, const std::string& indent);
 std::string oc_to_string(const HandleSet& ohs);
+std::string oc_to_string(const HandleSetSeq& ohss, const std::string& indent);
+std::string oc_to_string(const HandleSetSeq& ohss);
 std::string oc_to_string(const UnorderedHandleSet& uhs, const std::string& indent);
 std::string oc_to_string(const UnorderedHandleSet& uhs);
 std::string oc_to_string(const HandleMap& hm, const std::string& indent);

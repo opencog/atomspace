@@ -55,7 +55,7 @@ bool is_constant(const HandleSet& vars, const Handle& clause);
 void get_connected_components(const HandleSet& vars,
                               const HandleSeq& clauses,
                               HandleSeqSeq& compset,
-                              std::vector<HandleSet>& compvars);
+                              HandleSetSeq& compvars);
 
 } // namespace opencog
 

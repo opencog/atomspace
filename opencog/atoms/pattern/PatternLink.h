@@ -92,7 +92,7 @@ protected:
 
 	size_t _num_comps;
 	HandleSeqSeq _components;
-	std::vector<HandleSet> _component_vars;
+	HandleSetSeq _component_vars;
 	HandleSeq _component_patterns;
 
 	void unbundle_clauses(const Handle& body);
@@ -124,7 +124,7 @@ protected:
 	void make_map_recursive(const Handle&, const Handle&);
 	void check_connectivity(const HandleSeqSeq&);
 	void check_satisfiability(const HandleSet&,
-	                          const std::vector<HandleSet>&);
+	                          const HandleSetSeq&);
 
 	void make_term_trees();
 	void make_term_tree_recursive(const Handle&, Handle,
