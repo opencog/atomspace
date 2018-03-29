@@ -92,9 +92,10 @@
 ; the object.  The value for N(*,*) can be gotten with the
 ; 'wild-wild-count method.
 ;
-; The fractional mutual information for the pair (x,y) is defined as
+; The fractional mutual information for the pair (x,y) is defined with
+; a plus sign, as in Deniz Yuret's thesis (1998, page 40):
 ;
-;     MI(x,y) = - log_2 [ p(x,y) /  p(x,*) p(*,y) ]
+;     MI(x,y) = + log_2 [ p(x,y) /  p(x,*) p(*,y) ]
 ;
 ; This is computed by the script batch-all-pair-mi below. The value is
 ; attached at the location provided by the 'set-pair-mi method on the
@@ -456,6 +457,9 @@
 						; Note the sign: it is PLUS log p(x,y)/p(*,y)p(x,*) !!
 						; This sign convention agrees with both Yuret and with
 						; wikipedia!
+						; logli are defined as -log_2 in object-api.scm, 
+						; so that's why it looks like the MINUS sign is being
+						; used, but it is not.
 						; Return the atom that is holding the MI value.
 						(define (do-one-pair lipr)
 							(define pr-freq (frqobj 'pair-freq lipr))
