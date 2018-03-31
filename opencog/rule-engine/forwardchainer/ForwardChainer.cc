@@ -133,7 +133,7 @@ void ForwardChainer::do_step()
 
 	// Select source
 	_cur_source = select_source();
-	LAZY_URE_LOG_DEBUG << "Source:" << std::endl << _cur_source->to_string();
+	LAZY_URE_LOG_DEBUG << "Selected source:" << std::endl << _cur_source->to_string();
 
 	// Select rule
 	Rule rule = select_rule(_cur_source);
@@ -203,9 +203,9 @@ Handle ForwardChainer::select_source()
 					const HandleSeq& outgoings = h->getOutgoingSet();
 					HandleSeq no_free_vars_outgoings;
 					// Only add children with no free variables in them
-					for (const Handle& h : outgoings)
-						if (is_closed(h))
-							no_free_vars_outgoings.push_back(h);
+					for (const Handle& ch : outgoings)
+						if (is_closed(ch))
+							no_free_vars_outgoings.push_back(ch);
 					update_potential_sources(no_free_vars_outgoings);
 				}
 			}
@@ -226,6 +226,15 @@ Handle ForwardChainer::select_source()
 
 	const UnorderedHandleSet& to_select_sources =
 		_unselected_sources.empty() ? _potential_sources : _unselected_sources;
+
+	// Log selectable sources
+	if (ure_logger().is_debug_enabled()) {
+		std::stringstream ss;
+		ss << "Available sources:";
+		for (const Handle& source : to_select_sources)
+			ss << std::endl << source->id_to_string();
+		ure_logger().debug() << ss.str();
+	}
 
 	Handle hchosen;
 	switch (_ts_mode) {
@@ -293,8 +302,8 @@ Rule ForwardChainer::select_rule(const Handle& source)
 			rule = *std::next(unified_rules.begin(),
 			                  randGen().randint(unified_rules.size()));
 
-			ure_logger().debug("Rule %s matched the source",
-			                   rule.get_name().c_str());
+			LAZY_URE_LOG_DEBUG << "The following rule unifies with the source:"
+			                   << std::endl << oc_to_string(rule);
 			break;
 		} else {
 			ure_logger().debug("Rule %s is not a match. Looking for another rule",

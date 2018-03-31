@@ -82,16 +82,16 @@ private:
 
 	template<typename HandleContainer>
 	void update_potential_sources(const HandleContainer& input)
-		{
-			UnorderedHandleSet input_minus_selected;
-			for (const Handle& h : input)
-				if (_selected_sources.find(h) == _selected_sources.end())
-					input_minus_selected.insert(h);
-			_potential_sources.insert(input_minus_selected.begin(),
-			                          input_minus_selected.end());
-			_unselected_sources.insert(input_minus_selected.begin(),
-			                           input_minus_selected.end());
-		}
+	{
+		UnorderedHandleSet input_minus_selected;
+		for (const Handle& h : input)
+			if (_selected_sources.find(h) == _selected_sources.end())
+				input_minus_selected.insert(h);
+		_potential_sources.insert(input_minus_selected.begin(),
+		                          input_minus_selected.end());
+		_unselected_sources.insert(input_minus_selected.begin(),
+		                           input_minus_selected.end());
+	}
 
 	void validate(const Handle& source);
 
