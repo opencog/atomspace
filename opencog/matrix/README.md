@@ -243,7 +243,7 @@ exactly where the `add-pair-freq-api` class, above, can find them.
 The `make-batch-mi` class provides methods to compute the fractional
 mutual information of all pairs, namely the value
 ```
-    MI(x,y) = -log_2 P(x,y) / P(x,*) P(*,y)
+    MI(x,y) = +log_2 P(x,y) / P(x,*) P(*,y)
 ```
 
 The `batch-all-pair-mi` class is a convenience class that wraps up all
@@ -268,7 +268,7 @@ entropy (or `left-entropy`) `h_left(y) = -sum_x P(x,y) log_2 P(x,y)`
 It also returns the far more interesting 'fractional entropy', given
 by `H_left(y) = h_left(y) / P(*,y)`.  Along similar lines, there is
 also the mutual information `mi_left(y) = sum_x P(x,y) log_2 MI(x,y)`
-where `MI(x,y) = -log_2 P(x,y) / P(x,*) P(*,y)` is the fractional pair
+where `MI(x,y) = +log_2 P(x,y) / P(x,*) P(*,y)` is the fractional pair
 MI.
 
 The `add-total-entropy-compute` class provides methods to compute the
