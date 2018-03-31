@@ -22,6 +22,7 @@
  */
 
 #include <opencog/atoms/pattern/BindLink.h>
+#include <opencog/atoms/core/VariableList.h>
 #include <opencog/atomutils/FindUtils.h>
 #include <opencog/query/BindLinkAPI.h>
 #include <opencog/rule-engine/Rule.h>
@@ -321,7 +322,24 @@ Rule ForwardChainer::select_rule(const Handle& source)
 
 UnorderedHandleSet ForwardChainer::apply_rule(const Rule& rule)
 {
-	HandleSeq results;
+	UnorderedHandleSet results;
+
+	// Take the results from applying the rule, add them in the given
+	// AtomSpace and insert them in results
+	auto add_results = [&](AtomSpace& as, const HandleSeq& hs) {
+		for (const Handle& h : hs)
+		{
+			Type t = h->get_type();
+			// If it's a List or Set then add all the results. That
+			// kinda means that to infer List or Set themselves you
+			// need to Quote them.
+			if (t == LIST_LINK or t == SET_LINK)
+				for (const Handle& hc : h->getOutgoingSet())
+					results.insert(as.add_atom(hc));
+			else
+				results.insert(as.add_atom(h));
+		}
+	};
 
 	// Wrap in try/catch in case the pattern matcher can't handle it
 	try
@@ -339,44 +357,19 @@ UnorderedHandleSet ForwardChainer::apply_rule(const Rule& rule)
 			FocusSetPMCB fs_pmcb(&derived_rule_as, &_as);
 			fs_pmcb.implicand = bl->get_implicand();
 			bl->imply(fs_pmcb, &_focus_set_as, false);
-			results = fs_pmcb.get_result_list();
+			add_results(_focus_set_as, fs_pmcb.get_result_list());
 		}
 		// Search the whole atomspace.
 		else {
 			AtomSpace derived_rule_as(&_as);
 			Handle rhcpy = derived_rule_as.add_atom(rule.get_rule());
 			Handle h = bindlink(&_as, rhcpy);
-			results = h->getOutgoingSet();
+			add_results(_as, h->getOutgoingSet());
 		}
 	}
 	catch (...) {}
 
-	// Take the results from applying the rule and add them in the
-	// given AtomSpace
-	auto add_results = [&](AtomSpace& as) {
-		for (Handle& h : results)
-		{
-			Type t = h->get_type();
-			// If it's a List then add all the results. That kinda
-			// means you can't infer List itself, maybe something to
-			// look after.
-			if (t == LIST_LINK)
-				for (const Handle& hc : h->getOutgoingSet())
-					as.add_atom(hc);
-			else
-				h = as.add_atom(h);
-		}
-	};
-
-	// Add result back to atomspace.
-	if (_search_focus_set) {
-		add_results(_focus_set_as);
-	} else {
-		add_results(_as);
-	}
-
-	LAZY_URE_LOG_DEBUG << "Result is:" << std::endl
-	                   << _as.add_link(SET_LINK, results)->to_short_string();
+	LAZY_URE_LOG_DEBUG << "Results:" << std::endl << oc_to_string(results);
 
 	return UnorderedHandleSet(results.begin(), results.end());
 }
