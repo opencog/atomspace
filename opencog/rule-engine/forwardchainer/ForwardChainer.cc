@@ -287,12 +287,15 @@ Rule ForwardChainer::select_rule(const Handle& source)
 
 	while (not rule_weight.empty()) {
 		const Rule *temp = _rec.tournament_select(rule_weight);
-		ure_logger().fine("Selected rule %s to match against the source",
+		ure_logger().fine("Selected rule %s to unify with the source",
 		                  temp->get_name().c_str());
 
 		// If the source is the initial source then we may use its
-		// variable declaration during rule unification
-		Handle vardecl = source == _init_source ? _init_vardecl : Handle::UNDEFINED;
+		// variable declaration during rule unification. Otherwise
+		// let's for now assume that any variable in a source must be
+		// treated as a constant, thus creating an empty VariableList.
+		Handle vardecl = source == _init_source ?
+			_init_vardecl : Handle(createVariableList(HandleSeq()));
 
 		RuleSet unified_rules =
 			Rule::strip_typed_substitution(temp->unify_source(source, vardecl));
