@@ -88,7 +88,7 @@ public:
 	// AtomSpace.
 	static const std::string top_rbs_name;
 
-	// Name of the PredicateNode outputing whether attention
+	// Name of the PredicateNode outputting whether attention
 	// allocation is enabled or not
 	static const std::string attention_alloc_name;
 

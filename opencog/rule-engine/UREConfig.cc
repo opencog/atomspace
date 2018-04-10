@@ -174,6 +174,7 @@ HandleSeq UREConfig::fetch_execution_outputs(const Handle& schema,
                                              Type type)
 {
 	// Retrieve rules
+	// TODO: do not pollute the AtomSpace when you can avoid it!!!
 	Handle var_node = _as.add_node(VARIABLE_NODE, "__EXECUTION_OUTPUT_VAR__"),
 		type_node = _as.add_node(TYPE_NODE, classserver().getTypeName(type)),
 		typed_var = _as.add_link(TYPED_VARIABLE_LINK, var_node, type_node),
@@ -207,19 +208,19 @@ double UREConfig::fetch_num_param(const string& schema_name,
 {
 	Handle param_schema = _as.add_node(SCHEMA_NODE, schema_name);
 	HandleSeq outputs = fetch_execution_outputs(param_schema, input, NUMBER_NODE);
-	{
-		string input_name = input->get_name();
-		Type input_type = input->get_type();
-		string input_str =
-			classserver().getTypeName(input_type) + " \"" + input_name + "\"";
-		if (outputs.size() == 0) {
-			logger().warn() << "Could not retrieve parameter " << schema_name
-			                << " for rule-based system " << input_name
-			                << ". Use default value " << default_value
-			                << " instead.";
-			return default_value;
-		} else {
-			OC_ASSERT(outputs.size() == 1,
+	string input_name = input->get_name();
+	Type input_type = input->get_type();
+	string input_str =
+		classserver().getTypeName(input_type) + " \"" + input_name + "\"";
+
+	if (outputs.size() == 0) {
+		logger().warn() << "Could not retrieve parameter " << schema_name
+		                << " for rule-based system " << input_name
+		                << ". Use default value " << default_value
+		                << " instead.";
+		return default_value;
+	} else {
+		OC_ASSERT(outputs.size() == 1,
 		          "Could not retrieve parameter %s for rule-based system %s. "
 		          "There should be only one output for\n"
 		          "ExecutionLink\n"
