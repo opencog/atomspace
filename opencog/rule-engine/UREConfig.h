@@ -212,7 +212,7 @@ private:
 	//
 	// Return TV.mean > 0.5 or default_value in case no such
 	// EvaluationLink exists.
-	bool fetch_bool_param(const std::string& pred_name, const Handle& input);
+	bool fetch_bool_param(const std::string& pred_name, const Handle& input, bool default_value = false);
 };
 
 } // ~namespace opencog

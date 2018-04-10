@@ -229,16 +229,25 @@ double UREConfig::fetch_num_param(const string& schema_name,
 		          "instead there are %u",
 		          schema_name.c_str(), input_name.c_str(),
 		          schema_name.c_str(), input_str.c_str(), outputs.size());
-			return NumberNodeCast(outputs.front())->get_value();
-		}
+		return NumberNodeCast(outputs.front())->get_value();
 	}
 }
 
 bool UREConfig::fetch_bool_param(const string& pred_name,
-                                 const Handle& input)
+                                 const Handle& input,
+                                 bool default_value)
 {
-	Handle pred = _as.add_node(PREDICATE_NODE, pred_name);
-	TruthValuePtr tv =
-		_as.add_link(EVALUATION_LINK, pred, input)->getTruthValue();
-	return tv->get_mean() > 0.5;
+	Handle pred = _as.get_node(PREDICATE_NODE, pred_name);
+	if (pred) {
+		Handle eval = _as.get_link(EVALUATION_LINK, pred, input);
+		if (eval) {
+			return eval->getTruthValue()->get_mean() > 0.5;
+		}
+	}
+
+	logger().warn() << "Could not retrieve parameter " << pred_name
+	                << " for rule-based system " << input->get_name()
+	                << ". Use default value " << default_value
+	                << " instead.";
+	return default_value;
 }
