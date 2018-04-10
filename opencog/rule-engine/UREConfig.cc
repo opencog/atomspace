@@ -187,7 +187,6 @@ HandleSeq UREConfig::fetch_execution_outputs(const Handle& schema,
                                              Type type)
 {
 	// Retrieve rules
-	// TODO: do not pollute the AtomSpace when you can avoid it!!!
 	Handle var_node = _as.add_node(VARIABLE_NODE, "__EXECUTION_OUTPUT_VAR__"),
 		type_node = _as.add_node(TYPE_NODE, classserver().getTypeName(type)),
 		typed_var = _as.add_link(TYPED_VARIABLE_LINK, var_node, type_node),
