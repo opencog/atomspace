@@ -156,7 +156,16 @@ void ForwardChainer::do_step()
 
 bool ForwardChainer::termination()
 {
-	return _configReader.get_maximum_iterations() <= _iteration;
+	bool terminate = false;
+
+	// Temporary termination if all sources have been tried
+	if (not _configReader.get_retry_sources())
+		terminate = 0 < _iteration and _unselected_sources.empty();
+
+	// Terminate if max iterations has been reached
+	terminate |= _configReader.get_maximum_iterations() <= _iteration;
+
+	return terminate;
 }
 
 /**
