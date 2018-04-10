@@ -60,6 +60,8 @@ public:
 	RuleSet& get_rules();
 	bool get_attention_allocation() const;
 	int get_maximum_iterations() const;
+	// FC
+	bool get_retry_sources() const;
 	// BC
 	double get_complexity_penalty() const;
 	double get_max_bit_size() const;
@@ -74,6 +76,8 @@ public:
 	// Common
 	void set_attention_allocation(bool);
 	void set_maximum_iterations(int);
+	// FC
+	void set_retry_sources(bool);
 	// BC
 	void set_complexity_penalty(double);
 	void set_mm_complexity_penalty(double);
@@ -95,6 +99,10 @@ public:
 	// Name of the SchemaNode outputing the maximum iterations
 	// parameter
 	static const std::string max_iter_name;
+
+	// Name of the PredicateNode outputting whether sources should be
+	// retried after exhaustion
+	static const std::string fc_retry_sources_name;
 
 	// Name of the complexity penalty parameter for the Backward
 	// Chainer
@@ -123,7 +131,10 @@ private:
 	CommonParameters _common_params;
 
 	// Parameter specific to the forward chainer.
-	struct FCParameters {};
+	struct FCParameters {
+		// Retry all sources even if they have all been tried
+		bool retry_sources;
+	};
 	FCParameters _fc_params;
 
 	// Parameter specific to the backward chainer.

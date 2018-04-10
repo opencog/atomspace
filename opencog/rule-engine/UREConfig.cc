@@ -35,6 +35,7 @@ const std::string UREConfig::top_rbs_name = "URE";
 // Parameters
 const std::string UREConfig::attention_alloc_name = "URE:attention-allocation";
 const std::string UREConfig::max_iter_name = "URE:maximum-iterations";
+const std::string UREConfig::fc_retry_sources_name = "URE:FC:retry-sources";
 const std::string UREConfig::bc_complexity_penalty_name = "URE:BC:complexity-penalty";
 const std::string UREConfig::bc_max_bit_size_name = "URE:BC:maximum-bit-size";
 const std::string UREConfig::bc_mm_complexity_penalty_name = "URE:BC:MM:complexity-penalty";
@@ -71,6 +72,11 @@ int UREConfig::get_maximum_iterations() const
 	return _common_params.max_iter;
 }
 
+bool UREConfig::get_retry_sources() const
+{
+	return _fc_params.retry_sources;
+}
+
 double UREConfig::get_complexity_penalty() const
 {
 	return _bc_params.complexity_penalty;
@@ -99,6 +105,11 @@ void UREConfig::set_attention_allocation(bool aa)
 void UREConfig::set_maximum_iterations(int mi)
 {
 	_common_params.max_iter = mi;
+}
+
+void UREConfig::set_retry_sources(bool rs)
+{
+	_fc_params.retry_sources = rs;
 }
 
 void UREConfig::set_complexity_penalty(double cp)
@@ -148,7 +159,9 @@ void UREConfig::fetch_common_parameters(const Handle& rbs)
 
 void UREConfig::fetch_fc_parameters(const Handle& rbs)
 {
-	// None yet
+	// Fetch retry sources parameter
+	_fc_params.retry_sources =
+		fetch_bool_param(fc_retry_sources_name, rbs, true);
 }
 
 void UREConfig::fetch_bc_parameters(const Handle& rbs)
