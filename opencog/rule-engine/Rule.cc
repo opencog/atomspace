@@ -366,7 +366,8 @@ Rule Rule::gen_standardize_apart(AtomSpace* as)
 }
 
 RuleTypedSubstitutionMap Rule::unify_source(const Handle& source,
-                                            const Handle& vardecl) const
+                                            const Handle& vardecl,
+                                            const AtomSpace* queried_as) const
 {
 	// If the rule's handle has not been set yet
 	if (not is_valid())
@@ -391,7 +392,7 @@ RuleTypedSubstitutionMap Rule::unify_source(const Handle& source,
 			// substituting all variables by their associated
 			// values.
 			for (const auto& ts : tss)
-				unified_rules.insert({alpha_rule.substituted(ts), ts});
+				unified_rules.insert({alpha_rule.substituted(ts, queried_as), ts});
 		}
 	}
 
@@ -399,7 +400,8 @@ RuleTypedSubstitutionMap Rule::unify_source(const Handle& source,
 }
 
 RuleTypedSubstitutionMap Rule::unify_target(const Handle& target,
-                                            const Handle& vardecl) const
+                                            const Handle& vardecl,
+                                            const AtomSpace* queried_as) const
 {
 	// If the rule's handle has not been set yet
 	if (not is_valid())
@@ -424,7 +426,7 @@ RuleTypedSubstitutionMap Rule::unify_target(const Handle& target,
 			// substituting all variables by their associated
 			// values.
 			for (const auto& ts : tss) {
-				unified_rules.insert({alpha_rule.substituted(ts), ts});
+				unified_rules.insert({alpha_rule.substituted(ts, queried_as), ts});
 			}
 		}
 	}
@@ -556,10 +558,11 @@ Handle Rule::get_execution_output_first_argument(const Handle& h) const
 		return args;
 }
 
-Rule Rule::substituted(const Unify::TypedSubstitution& ts) const
+Rule Rule::substituted(const Unify::TypedSubstitution& ts,
+                       const AtomSpace* queried_as) const
 {
 	Rule new_rule(*this);
-	new_rule.set_rule(Unify::substitute(_rule, ts));
+	new_rule.set_rule(Unify::substitute(_rule, ts, queried_as));
 	return new_rule;
 }
 

@@ -948,11 +948,11 @@ void PatternLink::remove_constant_clauses(const AtomSpace& queried_as)
 	if (bogus)
 	{
 		logger().warn("%s: Constant clauses removed from pattern %s",
-		              __FUNCTION__, to_short_string().c_str());
+		              __FUNCTION__, to_string().c_str());
 		for (const Handle& h: _pat.constants)
 		{
 			logger().warn("%s: Removed %s",
-			              __FUNCTION__, h->to_short_string().c_str());
+			              __FUNCTION__, h->to_string().c_str());
 		}
 
 		_num_comps = _components.size();

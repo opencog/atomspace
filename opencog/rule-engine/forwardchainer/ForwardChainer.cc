@@ -307,8 +307,9 @@ Rule ForwardChainer::select_rule(const Handle& source)
 		Handle vardecl = source == _init_source ?
 			_init_vardecl : Handle(createVariableList(HandleSeq()));
 
-		RuleSet unified_rules =
-			Rule::strip_typed_substitution(temp->unify_source(source, vardecl));
+		const AtomSpace& ref_as(_search_focus_set ? _focus_set_as : _as);
+		RuleTypedSubstitutionMap urm = temp->unify_source(source, vardecl, &ref_as);
+		RuleSet unified_rules = Rule::strip_typed_substitution(urm);
 
 		if (not unified_rules.empty()) {
 			// Randomly select a rule amongst the unified ones
@@ -353,6 +354,10 @@ UnorderedHandleSet ForwardChainer::apply_rule(const Rule& rule)
 	// Wrap in try/catch in case the pattern matcher can't handle it
 	try
 	{
+		AtomSpace& ref_as(_search_focus_set ? _focus_set_as : _as);
+		AtomSpace derived_rule_as(&ref_as);
+		Handle rhcpy = derived_rule_as.add_atom(rule.get_rule());
+
 		if (_search_focus_set) {
 			// rule.get_rule() may introduce a new atom that satisfies
 			// condition for the output. In order to prevent this
@@ -360,8 +365,6 @@ UnorderedHandleSet ForwardChainer::apply_rule(const Rule& rule)
 			// child atomspace of parent focus_set_as so that PM will
 			// never be able to find this new undesired atom created
 			// from partial grounding.
-			AtomSpace derived_rule_as(&_focus_set_as);
-			Handle rhcpy = derived_rule_as.add_atom(rule.get_rule());
 			BindLinkPtr bl = BindLinkCast(rhcpy);
 			FocusSetPMCB fs_pmcb(&derived_rule_as, &_as);
 			fs_pmcb.implicand = bl->get_implicand();
@@ -370,8 +373,6 @@ UnorderedHandleSet ForwardChainer::apply_rule(const Rule& rule)
 		}
 		// Search the whole atomspace.
 		else {
-			AtomSpace derived_rule_as(&_as);
-			Handle rhcpy = derived_rule_as.add_atom(rule.get_rule());
 			Handle h = bindlink(&_as, rhcpy);
 			add_results(_as, h->getOutgoingSet());
 		}

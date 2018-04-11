@@ -226,7 +226,8 @@ public:
 	 * now we return both.
 	 */
 	RuleTypedSubstitutionMap unify_source(const Handle& source,
-	                                      const Handle& vardecl=Handle::UNDEFINED) const;
+	                                      const Handle& vardecl=Handle::UNDEFINED,
+	                                      const AtomSpace* queried_as=nullptr) const;
 
 	/**
 	 * Used by the backward chainer. Given a target, generate all rule
@@ -240,7 +241,8 @@ public:
 	 * typed substitutions.
 	 */
 	 RuleTypedSubstitutionMap unify_target(const Handle& target,
-	                                       const Handle& vardecl=Handle::UNDEFINED) const;
+	                                       const Handle& vardecl=Handle::UNDEFINED,
+	                                       const AtomSpace* queried_as=nullptr) const;
 
 	/**
 	 * Remove the typed substitutions from the rule typed substitution map.
@@ -300,7 +302,8 @@ private:
 
 	// Given a typed substitution obtained from typed_substitutions
 	// unify function, generate a new partially substituted rule.
-	Rule substituted(const Unify::TypedSubstitution& ts) const;
+	Rule substituted(const Unify::TypedSubstitution& ts,
+	                 const AtomSpace* queried_as=nullptr) const;
 };
 
 // Debugging helpers see

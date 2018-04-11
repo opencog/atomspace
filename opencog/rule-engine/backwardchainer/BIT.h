@@ -93,17 +93,25 @@ public:
 	// True iff all leaves are exhausted (see BITNode::exhausted)
 	bool exhausted;
 
+	// Queried atomspace
+	const AtomSpace* queried_as;
+
 	/**
 	 * @brief Initialize an and-BIT with a certain target, vardecl and
-	 * fitness and add it in as.
+	 * fitness and add it in bit_as. If an extra atomspace queried_as
+	 * is provided, then subsequent and-BITs produced from it will
+	 * have their constants removed if present in the queried
+	 * atomspace.
 	 */
 	AndBIT();
-	AndBIT(AtomSpace& as, const Handle& target, Handle vardecl,
-	       const BITNodeFitness& fitness=BITNodeFitness());
+	AndBIT(AtomSpace& bit_as, const Handle& target, Handle vardecl,
+	       const BITNodeFitness& fitness=BITNodeFitness(),
+	       const AtomSpace* queried_as=nullptr);
 	/**
 	 * @brief construct a and-BIT given its FCS and complexity.
 	 */
-	AndBIT(const Handle& fcs, double complexity=0.0);
+	AndBIT(const Handle& fcs, double complexity=0.0,
+	       const AtomSpace* queried_as=nullptr);
 	~AndBIT();
 
 	/**
@@ -371,7 +379,7 @@ private:
 class BIT
 {
 public:
-	// Atomspace for storing the BIT
+	// Child atomspace of the queried atomspace for storing the BIT
 	AtomSpace bit_as;
 
 	// Collection of and-BITs. We use a sorted vector instead of a set
@@ -448,6 +456,9 @@ public:
 	           const BITNode& bitnode) const;
 
 private:
+    // Queried atomspace
+	AtomSpace* _as;
+
 	Handle _init_target;
 	Handle _init_vardecl;
 	BITNodeFitness _init_fitness;

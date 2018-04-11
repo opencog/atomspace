@@ -48,8 +48,10 @@ bool remove_constants(const HandleSet& vars,
 // check whether an Atom exists in a given atomspace.
 bool is_in_atomspace(const Handle& clause, const AtomSpace& atomspace);
 
-// Return true if the clause is constant
-bool is_constant(const HandleSet& vars, const Handle& clause);
+// Return true iff the clause is constant. If an atomspace is provided
+// it also check that it is present in it.
+bool is_constant(const HandleSet& vars, const Handle& clause,
+                 const AtomSpace* queried_as=nullptr);
 
 // See C file for description
 void get_connected_components(const HandleSet& vars,

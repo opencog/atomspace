@@ -83,25 +83,27 @@ std::string	BITNode::to_string(const std::string& indent) const
 
 AndBIT::AndBIT() : exhausted(false) {}
 
-AndBIT::AndBIT(AtomSpace& as, const Handle& target, Handle vardecl,
-               const BITNodeFitness& fitness) : exhausted(false)
+AndBIT::AndBIT(AtomSpace& bit_as, const Handle& target, Handle vardecl,
+               const BITNodeFitness& fitness, const AtomSpace* qas)
+	: exhausted(false), queried_as(qas)
 {
 	// Create initial FCS
 	vardecl = gen_vardecl(target, vardecl); // in case it is undefined
-	Handle body = Unify::remove_constant_clauses(vardecl, target);
+	Handle body =
+		Unify::remove_constant_clauses(vardecl, target, queried_as);
 	HandleSeq bl{body, target};
 	vardecl = filter_vardecl(vardecl, body); // remove useless vardecl
 	if (vardecl)
 		bl.insert(bl.begin(), vardecl);
-	fcs = as.add_link(BIND_LINK, bl);
+	fcs = bit_as.add_link(BIND_LINK, bl);
 
 	// Insert the initial BITNode and initialize the AndBIT complexity
 	auto it = insert_bitnode(target, fitness);
 	complexity = it->second.complexity;
 }
 
-AndBIT::AndBIT(const Handle& f, double cpx)	:
-	fcs(f), complexity(cpx), exhausted(false)
+AndBIT::AndBIT(const Handle& f, double cpx, const AtomSpace* qas)
+	: fcs(f), complexity(cpx), exhausted(false), queried_as(qas)
 {
 	set_leaf2bitnode();         // TODO: might differ till needed to optimize
 }
@@ -131,7 +133,7 @@ AndBIT AndBIT::expand(const Handle& leaf,
 		return AndBIT();
 	}
 
-	return AndBIT(new_fcs, new_cpx);
+	return AndBIT(new_fcs, new_cpx, queried_as);
 }
 
 BITNode* AndBIT::select_leaf()
@@ -408,7 +410,7 @@ Handle AndBIT::substitute_unified_variables(const Handle& leaf,
                                             const Unify::TypedSubstitution& ts) const
 {
 	BindLinkPtr fcs_bl(BindLinkCast(fcs));
-	return Handle(Unify::substitute(fcs_bl, ts));
+	return Handle(Unify::substitute(fcs_bl, ts, queried_as));
 }
 
 Handle AndBIT::expand_fcs_pattern(const Handle& fcs_pattern,
@@ -657,15 +659,15 @@ std::string AndBIT::line_separator(const std::string& up_aa,
 // BIT //
 /////////
 
-BIT::BIT() {}
+BIT::BIT() : _as(nullptr) {}
 
 BIT::BIT(AtomSpace& as,
          const Handle& target,
          const Handle& vardecl,
          const BITNodeFitness& fitness)
-	: bit_as(&as),
-	  _init_target(target), _init_vardecl(vardecl), _init_fitness(fitness)
-{}
+	: bit_as(&as), // child atomspace of as
+	  _as(&as), _init_target(target), _init_vardecl(vardecl),
+	  _init_fitness(fitness) {}
 
 BIT::~BIT() {}
 
@@ -681,7 +683,8 @@ size_t BIT::size() const
 
 AndBIT* BIT::init()
 {
-	andbits.emplace_back(bit_as, _init_target, _init_vardecl, _init_fitness);
+	andbits.emplace_back(bit_as, _init_target,
+	                     _init_vardecl, _init_fitness, _as);
 
 	LAZY_URE_LOG_DEBUG << "Initialize BIT with:" << std::endl
 	                   << andbits.begin()->to_string();

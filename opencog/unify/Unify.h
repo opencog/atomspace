@@ -246,8 +246,13 @@ public:
 	/**
 	 * Given a typed substitution, perform the substitution over a scope
 	 * link (for now only BindLinks are supported).
+	 *
+	 * If an atomspace is provided then remove constant clauses
+	 * present in the atomspace.
 	 */
-	static Handle substitute(BindLinkPtr bl, const TypedSubstitution& ts);
+	static Handle substitute(BindLinkPtr bl,
+	                         const TypedSubstitution& ts,
+	                         const AtomSpace* queried_as=nullptr);
 
 	/**
 	 * Given a mapping from variables to values, return a copy of
@@ -259,9 +264,8 @@ public:
 	 * removed from the BindLink. If no clause remains then the
 	 * pattern body is left with an empty AndLink.
 	 *
-	 * TODO: removing constant clauses might be a problem as the
-	 * clauses might not necessarily be in the queried atomspace, so
-	 * they might not be trivially true.
+	 * If an atomspace is provided then remove constant clauses
+	 * present in the atomspace.
 	 *
 	 * Examples:
 	 *
@@ -316,7 +320,8 @@ public:
 	 * TODO: replace by RewriteLink methods!
 	 */
 	static Handle substitute(BindLinkPtr bl, const HandleMap& var2val,
-	                         Handle vardecl=Handle::UNDEFINED);
+	                         Handle vardecl=Handle::UNDEFINED,
+	                         const AtomSpace* queried_as=nullptr);
 
 	/**
 	 * Substitute the variable declaration of a BindLink. Remove
@@ -333,6 +338,9 @@ public:
 	 * declaration, remove the constant clauses. If all clauses are
 	 * constants then return an empty AndLink.
 	 *
+	 * If an atomspace is provided then check that the constant is in
+	 * the atomspace as well, otherwise do not remove it.
+	 *
 	 * The variable declaration is assumed defined. That is if there
 	 * are no variable, rather than Handle::UNDEFINED the vardecl will
 	 * have to be a empty VariableList. That is because an undefined
@@ -340,7 +348,8 @@ public:
 	 * it means empty or containing all free variables.
 	 */
 	static Handle remove_constant_clauses(const Handle& vardecl,
-	                                      const Handle& clauses);
+	                                      const Handle& clauses,
+	                                      const AtomSpace* queried_as=nullptr);
 
 	/**
 	 * Perform unification by recursively
