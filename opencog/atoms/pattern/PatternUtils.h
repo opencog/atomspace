@@ -51,7 +51,7 @@ bool is_in_atomspace(const Handle& clause, const AtomSpace& atomspace);
 // Return true iff the clause is constant. If an atomspace is provided
 // it also check that it is present in it.
 bool is_constant(const HandleSet& vars, const Handle& clause,
-                 const AtomSpace* as=nullptr);
+                 const AtomSpace* queried_as=nullptr);
 
 // See C file for description
 void get_connected_components(const HandleSet& vars,

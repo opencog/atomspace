@@ -120,7 +120,7 @@ bool is_in_atomspace(const Handle& handle, const AtomSpace& atomspace)
 }
 
 bool is_constant(const HandleSet& vars, const Handle& clause,
-                 const AtomSpace* as)
+                 const AtomSpace* queried_as)
 {
 	Type ct = clause->get_type();
 	bool constant =
@@ -142,8 +142,8 @@ bool is_constant(const HandleSet& vars, const Handle& clause,
 		              or
 		              clause->getOutgoingAtom(0)->get_type() != PREDICATE_NODE)));
 
-	if (as)
-		return constant and is_in_atomspace(clause, *as);
+	if (queried_as)
+		return constant and is_in_atomspace(clause, *queried_as);
 	return constant;
 }
 
