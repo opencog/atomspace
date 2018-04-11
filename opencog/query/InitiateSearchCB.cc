@@ -750,7 +750,7 @@ bool InitiateSearchCB::variable_search(PatternMatchEngine *pme)
 
 		if (not _variables->_deep_typemap.empty())
 		{
-			logger().warn("Warning: Full deep-type support not implemented!");
+			logger().warn("Full deep-type support not implemented!");
 		}
 		else
 		{
@@ -759,7 +759,7 @@ bool InitiateSearchCB::variable_search(PatternMatchEngine *pme)
 			throw SyntaxException(TRACE_INFO,
 				"Error: There were no type restrictions! That's infinite-recursive!");
 #else
-			logger().warn("Warning: No type restrictions! Your code has a bug in it!");
+			logger().warn("No type restrictions! Your code has a bug in it!");
 			for (const Handle& var: _variables->varset)
 				logger().warn("Offending variable=%s\n", var->to_string().c_str());
 			for (const Handle& cl : clauses)
