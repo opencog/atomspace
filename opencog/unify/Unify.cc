@@ -405,12 +405,7 @@ Handle Unify::remove_constant_clauses(const Handle& vardecl,
 	HandleSeq hs;
 	if (t == AND_LINK) {
 		for (const Handle& clause : clauses->getOutgoingSet()) {
-			if (clause->get_hash() == 241327676611018844UL)
-				logger().debug() << "Unify::remove_constant_clauses clause = " << oc_to_string(clause);
-			bool constant = is_constant(vars, clause, as);
-			if (clause->get_hash() == 241327676611018844UL)
-				logger().debug() << "Unify::remove_constant_clauses constant = " << constant;
-			if (not constant) {
+			if (not is_constant(vars, clause, as)) {
 				hs.push_back(clause);
 			}
 		}
