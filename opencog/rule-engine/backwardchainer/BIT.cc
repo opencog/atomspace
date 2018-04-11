@@ -102,8 +102,8 @@ AndBIT::AndBIT(AtomSpace& bit_as, const Handle& target, Handle vardecl,
 	complexity = it->second.complexity;
 }
 
-	AndBIT::AndBIT(const Handle& f, double cpx, const AtomSpace* qas)
-		: fcs(f), complexity(cpx), exhausted(false), queried_as(qas)
+AndBIT::AndBIT(const Handle& f, double cpx, const AtomSpace* qas)
+	: fcs(f), complexity(cpx), exhausted(false), queried_as(qas)
 {
 	set_leaf2bitnode();         // TODO: might differ till needed to optimize
 }
