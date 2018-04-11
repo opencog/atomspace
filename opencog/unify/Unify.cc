@@ -288,15 +288,16 @@ bool Unify::is_pm_connector(Type t)
 	return t == AND_LINK or t == OR_LINK or t == NOT_LINK;
 }
 
-Handle Unify::substitute(BindLinkPtr bl, const TypedSubstitution& ts)
+Handle Unify::substitute(BindLinkPtr bl, const TypedSubstitution& ts,
+                         const AtomSpace* queried_as)
 {
 	// TODO: make sure that ts.second contains the declaration of all
 	// variables
-	return substitute(bl, strip_context(ts.first), ts.second);
+	return substitute(bl, strip_context(ts.first), ts.second, queried_as);
 }
 
 Handle Unify::substitute(BindLinkPtr bl, const HandleMap& var2val,
-                         Handle vardecl)
+                         Handle vardecl, const AtomSpace* queried_as)
 {
 	// Perform substitution over the existing variable declaration, if
 	// no new alternative is provided.
@@ -322,7 +323,8 @@ Handle Unify::substitute(BindLinkPtr bl, const HandleMap& var2val,
 	// constant clauses
 	Handle clauses = variables.substitute_nocheck(bl->get_body(), values);
 	clauses = RewriteLink::consume_quotations(vardecl, clauses, true);
-//	clauses = remove_constant_clauses(vardecl, clauses);
+	if (queried_as)
+		clauses = remove_constant_clauses(vardecl, clauses, queried_as);
 	hs.push_back(clauses);
 
 	// Perform substitution over the rewrite term
@@ -392,7 +394,8 @@ Handle Unify::substitute_vardecl(const Handle& vardecl,
 //
 // TODO: maybe replace Handle vardecl by Variables variables.
 Handle Unify::remove_constant_clauses(const Handle& vardecl,
-                                      const Handle& clauses)
+                                      const Handle& clauses,
+                                      const AtomSpace* as)
 {
 	VariableListPtr vl = createVariableList(vardecl);
 	HandleSet vars = vl->get_variables().varset;
@@ -402,11 +405,16 @@ Handle Unify::remove_constant_clauses(const Handle& vardecl,
 	HandleSeq hs;
 	if (t == AND_LINK) {
 		for (const Handle& clause : clauses->getOutgoingSet()) {
-			if (not is_constant(vars, clause)) {
+			if (clause->get_hash() == 241327676611018844UL)
+				logger().debug() << "Unify::remove_constant_clauses clause = " << oc_to_string(clause);
+			bool constant = is_constant(vars, clause, as);
+			if (clause->get_hash() == 241327676611018844UL)
+				logger().debug() << "Unify::remove_constant_clauses constant = " << constant;
+			if (not constant) {
 				hs.push_back(clause);
 			}
 		}
-	} else if (not is_constant(vars, clauses)) {
+	} else if (not is_constant(vars, clauses, as)) {
 		return clauses;
 	}
 	return createLink(hs, AND_LINK);
