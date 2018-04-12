@@ -72,8 +72,8 @@ void BuggyStackUTest::setUp(void)
 {
 	as = new AtomSpace();
 	SchemeEval* eval = new SchemeEval(as);
-	eval->eval("(add-to-load-path \"..\")");
-	eval->eval("(add-to-load-path \"../../..\")");
+	eval->eval("(add-to-load-path \"" PROJECT_SOURCE_DIR "\")");
+
 	eval->eval("(load-from-path \"tests/query/test_types.scm\")");
 	eval->eval("(load-from-path \"tests/query/buggy-stack.scm\")");
 

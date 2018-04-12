@@ -48,8 +48,8 @@ public:
 		as = new AtomSpace();
 		eval = new SchemeEval(as);
 		eval->eval("(use-modules (opencog exec) (opencog query))");
-		eval->eval("(add-to-load-path \"..\")");
-		eval->eval("(add-to-load-path \"../../..\")");
+		eval->eval("(add-to-load-path \"" PROJECT_SOURCE_DIR "\")");
+
 	}
 
 	~GetLinkUTest()

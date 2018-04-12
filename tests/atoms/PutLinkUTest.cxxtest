@@ -48,8 +48,8 @@ public:
 		logger().set_timestamp_flag(false);
 		logger().set_sync_flag(true); // interleave with printf correctly
 
-		_eval.eval("(add-to-load-path \"..\")");
-		_eval.eval("(add-to-load-path \"../../..\")");
+		_eval.eval("(add-to-load-path \"" PROJECT_SOURCE_DIR "\")");
+
 	}
 
 	void setUp() {}

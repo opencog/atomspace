@@ -45,8 +45,8 @@ public:
 
         as = new AtomSpace();
         eval = new SchemeEval(as);
-        eval->eval("(add-to-load-path \"..\")");
-        eval->eval("(add-to-load-path \"../../..\")");
+        eval->eval("(add-to-load-path \"" PROJECT_SOURCE_DIR "\")");
+
     }
 
     ~QuoteUTest()

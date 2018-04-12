@@ -19,8 +19,8 @@ public:
 		_eval.eval("(add-to-load-path \"" PROJECT_SOURCE_DIR "/opencog/scm/opencog\")");
 		_eval.eval("(add-to-load-path \"" PROJECT_SOURCE_DIR "/opencog/scm/opencog/rule-engine\")");
 
-		_eval.eval("(add-to-load-path \"..\")");
-		_eval.eval("(add-to-load-path \"../../..\")");
+		_eval.eval("(add-to-load-path \"" PROJECT_SOURCE_DIR "\")");
+
 		_eval.eval("(use-modules (opencog) (opencog query))");
 
 		// Load the simple crisp system example to test it
