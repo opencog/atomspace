@@ -68,7 +68,7 @@ void SCMUtilsUTest::setUp(void)
 {
 	as = new AtomSpace();
 	evaluator = new SchemeEval(as);
-	evaluator->eval("(add-to-load-path \"..\")");
+	evaluator->eval("(add-to-load-path \"" PROJECT_SOURCE_DIR "\")");
 	evaluator->eval("(add-to-load-path \"../../..\")");
 	evaluator->eval("(load-from-path \"tests/query/test_types.scm\")");
 	evaluator->eval("(load-from-path \"tests/scm/utils-test.scm\")");

@@ -69,8 +69,8 @@ void EvaluationUTest::setUp(void)
 {
 	as->clear();
 	eval->eval("(use-modules (opencog exec))");
-	eval->eval("(add-to-load-path \"..\")");
-	eval->eval("(add-to-load-path \"../../..\")");
+	eval->eval("(add-to-load-path \"" PROJECT_SOURCE_DIR "\")");
+
 }
 
 #define getarity(hand) hand->get_arity()

@@ -71,8 +71,8 @@ void DisconnectedUTest::setUp(void)
 	as = new AtomSpace();
 	eval = new SchemeEval(as);
 
-	eval->eval("(add-to-load-path \"..\")");
-	eval->eval("(add-to-load-path \"../../..\")");
+	eval->eval("(add-to-load-path \"" PROJECT_SOURCE_DIR "\")");
+
 	eval->eval("(load-from-path \"tests/query/test_types.scm\")");
 }
 

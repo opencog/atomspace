@@ -212,9 +212,9 @@ void BasicSCMUTest::test_single_atom(void)
 	TSM_ASSERT("Failed to find handle for first atom", h != nullptr);
 
 	// Load the utility definitions
-	eval->eval("(add-to-load-path \"..\")");
+	eval->eval("(add-to-load-path \"" PROJECT_SOURCE_DIR "\")");
 	eval->eval("(add-to-load-path \"../..\")");
-	eval->eval("(add-to-load-path \"../../..\")");
+
 	std::string rs = eval->eval("(load-from-path \"tests/scm/typedefs.scm\")");
 	eval_err = eval->eval_error();
 	if (eval_err)
