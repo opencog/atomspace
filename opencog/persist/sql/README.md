@@ -92,8 +92,8 @@ The goal of this implementation is to:
    usability and performance implications. The choices are discussed
    in a separate section, below.
 
-5) Discover the most minimal, simplest backingstore API. This API is
-   the API between the AtomSpace, and the persistance backend.  The
+5) Discover the most minimal, simplest backing-store API. This API is
+   the API between the AtomSpace, and the persistence backend.  The
    reason for keeping it as simple as possible is to minimize the work
    needed to create other backends, as well as all the standard software
    development reasons: lower complexity means fewer bugs and better
@@ -192,7 +192,7 @@ easy: the user can do it in their own thread :-)
 Semantics
 =========
 Exactly what to save, when saving and restoring atoms, is not entirely
-obvious.  The alternatives, and thier implications, are discussed below.
+obvious.  The alternatives, and their implications, are discussed below.
 
 * Saving a single node. Should all associated values be saved? Should
 the user get to pick which values get saved?  Its possible that the user
@@ -200,14 +200,14 @@ only wants to save one particular value, only, so as not to clobber
 other values already in the database.  The current default is to save
 all associated values, when storing a single node.  This is only weakly
 unit-tested; the tests are not thorough, and do not check all possible
-permuations.
+permutations.
 
 * Saving a single link. When a link is saved, the outgoing set of the
 link must also be saved. Thus, the above considerations for node-values
 also apply to the outgoing set of the link, and so on, recursively, for
 the nested links.  The current default is to save all associated values,
 but only on the link itself, and NOT on the entire outgoing set, when
-storing a single link.  This allows granular conrol on the part of the
+storing a single link.  This allows granular control on the part of the
 user. This is only weakly unit-tested.
 
 * Restoring a single node or link. The above considerations for saving
@@ -228,9 +228,9 @@ given atom.  There are four possibilities here: (a) fetch only the
 atoms, but not any of the associated values. (b) fetch the atoms
 and the associated values, but not the values in the recursive outgoing
 sets. (c) fetch the atoms and values, and all atoms and values,
-recursively, in thier outgoing set. (d) fetch the atoms, but update
+recursively, in their outgoing set. (d) fetch the atoms, but update
 the values only if they are atoms are new to the atomspace; i.e. do
-not clobber existing values in the atomsapce.
+not clobber existing values in the atomspace.
 
 Currently, option (b) is implemented, and is weakly unit-tested.
 It is plausible that some users may want options (a), (c) or (d).
@@ -245,7 +245,7 @@ one can imagine a situation where a pattern-matcher-like interface
 is provided for the backend, so that only certain values, on certain
 atoms, in certain locations in a given pattern, are fetched.
 
-This is not done because the pattern matcher is really quite commplex,
+This is not done because the pattern matcher is really quite complex,
 and it seems kind-of crazy to try to put this in the backend.  There
 currently aren't any plausible scenarios, and plausible algorithms,
 that would need this capability.
@@ -303,11 +303,12 @@ Be sure to install the Postgres server and the Postgres client.
     sudo apt-get install postgresql-9.3
 ```
 
-Optional: ODBC Device Driver Setup
-----------------------------------
+Deprecated; Optional: ODBC Device Driver Setup
+----------------------------------------------
 If you want to use ODBC, then you need to configure the ODBC driver.
 Again: the use of ODBC is optional and discouraged; its slower clunkier
-and more complex. Skip this section if you are not using ODBC.
+and more complex. Skip this section unless you absolutely need to use
+ODBC.
 
 After install, verify that `/etc/odbcinst.ini` contains the stanza
 below (or something similar).  If it is missing, then edit this file
@@ -350,7 +351,7 @@ mess with it, then add the below:
 Performance tweaks
 ------------------
 The Postgres default configuration can be (and should be) tweaked for
-performance.  The performance will be disasterously slow if the database
+performance.  The performance will be disastrously slow if the database
 is not tuned.  The primary performance bottleneck is the default of
 synchronous commits during writing. On spinning disk drives, this can
 lead to delays of tens of milliseconds to write handfuls of atoms, as
@@ -420,7 +421,7 @@ effective_io_concurrency = 5
 Unsafe performance tweaks
 -------------------------
 There is one very unsafe performance optimization: disabling fsync.
-It's not clear how much this helps; youd' have to measure. Disabbling
+It's not clear how much this helps; you'd have to measure. Disabling
 it is very dangerous: in case of a power loss, or a spontaneous reboot,
 before all data has been written to disk, this can result in database
 corruption.  Yes, this happens. THE BELOW IS NOT RECOMMENDED!
@@ -501,7 +502,7 @@ the database (only), not the OS. In general, you will want to pick a
 password that is DIFFERENT than your unix-password. This is because some
 of the database login methods require a clear-text password to be
 supplied. The full set of postgres login styles are supported, as long
-as you use the postgres URI format.  The ODBC logins require cleartext
+as you use the postgres URI format.  The ODBC logins require clear-text
 passwords to be used.
 
 See the [postgres
@@ -657,58 +658,6 @@ IMPORTANT: MAKE SURE THERE ARE NO SPACES AT THE START OF EVERY LINE!
    ConnSettings      =
 ```
 
-Opencog Setup
--------------
-Edit `~/opencog/build/lib/opencog.conf` and set the `STORAGE`,
-`STORAGE_USERNAME` and `STORAGE_PASSWD` there to the same values as
-in `~/.odbc.ini`.
-
-```
-STORAGE               = "mycogdata"
-STORAGE_USERNAME      = "opencog_user"
-STORAGE_PASSWD        = "cheese"
-```
-
-Or copy lib/opencog.conf to your build directory, edit the copy, and
-start the opencog server from your build folder as:
-
-```
-   $ ./opencog/cogserver/server/cogserver -c my.conf
-```
-
-Verify that everything works. Start the cogserver, and bulk-save.
-(Actually this didn't work for me, I had to do sql-open before sql-store
-worked, as shown below, even though my opencog.conf was correct and when
-using a custom my.conf file.)
-
-```
-   $ telnet localhost 17001
-   opencog> sql-store
-```
-
-Some output should be printed in the COGSERVER window:
-
-```
-   Max UUID is 57
-   Finished storing 55 atoms total.
-```
-
-The typical number of atoms stored will differ from this.
-
-You don't have to put the database credentials into the `opencog.conf`
-file.  In this case, the database would need to be opened manually,
-using the `sql-open` command:
-
-```
-   $ telnet localhost 17001
-   `opencog> sql-open mycogdata opencog_user cheese
-```
-
-Notice that the user-name and the password are the same as that given
-in the `~/.odbc.ini` file.  These are NOT (and should not be) your unix
-username and password!
-
-
 How To Pass the Unit Tests
 ==========================
 There are four unit tests for this API, `BasicSaveUTest`, `PersistUTest`,
@@ -798,37 +747,35 @@ Bulk load and restore: `sql-load` `sql-store` `sql-close`
 
 Bulk Save and Restore
 ---------------------
-Bulk save and restore of atoms can also be done from the cogserver
-command line -- `rlwrap telnet -8 localhost 17001` and issuing the
-commands:
+Bulk save and restore of atoms can be done from the guile REPL prompt
+by issuing the command:
 ```
-    opencog> ?
-    Available commands:
-      exit help list scm shutdown sql-open sql-close sql-store sql-load
-    opencog> sql-open
-    sql-open: invalid command syntax
-    Usage: sql-open <dbname> <username> <auth>
-
-    opencog> sql-open mycogdata opencog_user cheese
-    Opened "mycogdata" as user "opencog_user"
-
-    opencog> sql-store
-    SQL data store thread started
+scheme@(guile-user)> (sql-open "postgres://...")
+scheme@(guile-user)> (sql-store)
 ```
-At this point, a progress indicator will be printed by the opencog
-server, on the OpenCog server's stdout. It  will say something like:
-Stored 236000 atoms. When finished, its nice to say:
+At this point, a progress indicator will begin printing on `stdout`;
+It  will say something like this:
 ```
-    opencog> sql-close
+Stored 236000 atoms.
 ```
-At this point, the cogserver can be stopped and restarted.  After a
-restart, load the data with:
+When finished, you will typically want to say either:
 ```
-    opencog> sql-open mycogdata opencog_user cheese
-    opencog> sql-load
-    SQL loader thread started
+scheme@(guile-user)> (barrier)
 ```
-The completion message will be on the server output, for example:
+or
+```
+scheme@(guile-user)> (sql-close)
+```
+Either of the above will stall until all atoms have been written to disk.
+The `barrier` fence does not close the connection to the database, whereas
+the `sql-close` does.  After a close, it is safe to stop the atomspace,
+if desired; or one can continue working.  After a restart, load the data
+with:
+```
+scheme@(guile-user)> (sql-open "postgres://...")
+scheme@(guile-user)> (sql-close)
+```
+The completion message will be printed on `stdout`.  For example:
 ```
     Finished loading 973300 atoms in total
 ```
@@ -836,8 +783,6 @@ The completion message will be on the server output, for example:
 Individual-atom save and restore
 --------------------------------
 Individual atoms can be saved and fetched, using the guile interface.
-Either the guile shell, or the cogserver shell can be used.  If the
-guile shell is used, then you do NOT! need to start the cogserver!
 
 ```
     guile> (define x (ConceptNode "asdfasdf" (stv 0.123 0.789)))
@@ -909,30 +854,20 @@ The recursive forms, `cog-extract-recursive` and `cog-delete-recursive`
 extract/delete the atom and every link that contains that atom, and so
 on.
 
+Statistics
+----------
+Assorted technical statistics regarding the operation of the SQL backend
+can be printed with the `(sql-stats)` command.  The accumulated
+statistics can be zeroed with the `(sql-clear-stats)` command.
 
-Using SQL Persistence from Scheme
----------------------------------
-SQL fetch from store is not automatic!  That is because this layer
-cannot guess the user's intentions. There is no way for this layer
-to guess which atoms might be deleted in a few milliseconds from now,
-or to guess which atoms need to loaded into RAM (do you really want ALL
-of them to be loaded ??)  Some higher level management and policy will
-need to make the fetch and store decisions. This layer only implements
-the raw capability: it does not implement the policy.
+TLB Caching
+-----------
+Atoms in the database are identified with universally unique identifiers
+(UUID's). The database driver contains a cache that maps UUID's to the
+atoms in atomspace.  Under certain extreme circumstances, it can be
+useful to clear this cache. This can be done with the
+`(sql-clear-cache)` command.
 
-Incoming sets of an atom can be fetched by using either C++:
-```
-   AtomSpace::fetchIncomingSet(h, true);
-```
-or the scheme call
-```
-  (fetch-incoming-set atom)
-```
-
-To force an atom to be saved, call:
-```
-   (store-atom atom)
-```
 
 Copying Databases
 -----------------
@@ -1047,14 +982,6 @@ use analyze;
 use prepare;
 ```
 
-XML loading performance
------------------------
-Loading the dataset from XML files takes:
-```
-   cogserver 2:34 mm:ss when compiled without optimization
-   cogserver 1:19 mm:ss when compiled with -O3 optimization
-```
-
 Loading performance
 -------------------
 Loading performance. Database contains 1564K Atoms, and 2413K edges.
@@ -1083,7 +1010,7 @@ After a cold start, have
 ```
 Appears that there is no performance degradation for cold-starts.
 
-Note also: cogServer CPU usage is *identical* to its CPU usage when
+Note also: cogserver CPU usage is *identical* to its CPU usage when
 loading XML! Hurrah! Also, see below: RAM usage is significantly
 reduced; apparently, the reading of XML results in very bad memory
 fragmentation.
@@ -1196,7 +1123,7 @@ TODO
    storage: For details, see
    http://coussej.github.io/2016/01/14/Replacing-EAV-with-JSONB-in-PostgreSQL/
 
- * Extend the typecodes table to recording the type-inherintance
+ * Extend the typecodes table to recording the type-inheritance
    hierarchy, so that types can be fully saved and restored from the
    database. Not clear how to resolve conflicts, if they occur, between
    the type inheritance hierarchy defined in C++, and the hierarchy
