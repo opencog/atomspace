@@ -93,9 +93,9 @@ The goal of this implementation is to:
    in a separate section, below.
 
 5) Discover the most minimal, simplest backing-store API. This API is
-   the API between the AtomSpace, and the persistence back-end.  The
+   the API between the AtomSpace, and the persistence backend.  The
    reason for keeping it as simple as possible is to minimize the work
-   needed to create other back-ends, as well as all the standard software
+   needed to create other backends, as well as all the standard software
    development reasons: lower complexity means fewer bugs and better
    performance.  Lower complexity means the code is easier to understand
    and use correctly.
@@ -128,7 +128,7 @@ The goal of this implementation is to:
    and values, and not generic C++ objects. The design of the AtomSpace
    has been carefully crafted to provide two classes of objects: the
    immutable, globally unique atoms, and the mutable valuations
-   associated to atoms.  This back-end mirrors this functional split.
+   associated to atoms.  This backend mirrors this functional split.
 
 
 Current Design
@@ -236,17 +236,17 @@ Currently, option (b) is implemented, and is weakly unit-tested.
 It is plausible that some users may want options (a), (c) or (d).
 Note that option (d) has several variations.
 
-In the SQL back-end, option (b) mostly minimizes the network and database
-traffic.  For other kinds of back-ends, it might be more efficient to
+In the SQL backend, option (b) mostly minimizes the network and database
+traffic.  For other kinds of backends, it might be more efficient to
 implement option (c), and just get all the data in one big gulp.
 
 * Restoring by pattern. This is not implemented, not done.  However,
 one can imagine a situation where a pattern-matcher-like interface
-is provided for the back-end, so that only certain values, on certain
+is provided for the backend, so that only certain values, on certain
 atoms, in certain locations in a given pattern, are fetched.
 
 This is not done because the pattern matcher is really quite complex,
-and it seems kind-of crazy to try to put this in the back-end.  There
+and it seems kind-of crazy to try to put this in the backend.  There
 currently aren't any plausible scenarios, and plausible algorithms,
 that would need this capability.
 
@@ -856,7 +856,7 @@ on.
 
 Statistics
 ----------
-Assorted technical statistics regarding the operation of the SQL back-end
+Assorted technical statistics regarding the operation of the SQL backend
 can be printed with the `(sql-stats)` command.  The accumulated
 statistics can be zeroed with the `(sql-clear-stats)` command.
 
@@ -1123,7 +1123,7 @@ TODO
    storage: For details, see
    http://coussej.github.io/2016/01/14/Replacing-EAV-with-JSONB-in-PostgreSQL/
 
- * Extend the typecodes table to recording the type-inherintance
+ * Extend the typecodes table to recording the type-inheritance
    hierarchy, so that types can be fully saved and restored from the
    database. Not clear how to resolve conflicts, if they occur, between
    the type inheritance hierarchy defined in C++, and the hierarchy
