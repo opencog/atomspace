@@ -67,6 +67,7 @@ public:
 	void test_get_variables_3();
 	void test_compute_hash_1();
 	void test_compute_hash_2();
+	void test_compute_hash_3();
 	void test_content_less();
 };
 
@@ -169,6 +170,20 @@ void ScopeLinkUTest::test_compute_hash_2()
 	TS_ASSERT_DIFFERS(gl1.value(), gl2.value());
 
 	logger().info("END TEST: %s", __FUNCTION__);
+}
+
+void ScopeLinkUTest::test_compute_hash_3(){
+    logger().info("BEGIN TEST: %s", __FUNCTION__);
+
+    std::string result =
+        _eval.eval("(load-from-path \"tests/atoms/scopelinks.scm\")");
+
+    Handle hash1 = _eval.eval_h("hash-test1");
+    Handle hash2 = _eval.eval_h("hash-test2");
+
+    TS_ASSERT_DIFFERS(hash1.value(), hash2.value());
+
+    logger().info("END TEST: %s", __FUNCTION__);
 }
 
 void ScopeLinkUTest::test_content_less()

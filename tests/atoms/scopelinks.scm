@@ -732,3 +732,40 @@
 )
 )
 
+(define hash-test1
+    (LambdaLink
+         (VariableList
+           (VariableNode "$PM-565f9848")
+           (VariableNode "$PM-164e1b09")
+         )
+         (ImplicationLink
+           (InheritanceLink
+             (VariableNode "$PM-565f9848")
+             (VariableNode "$PM-164e1b09")
+           )
+           (InheritanceLink
+             (VariableNode "$PM-565f9848")
+             (VariableNode "$PM-164e1b09")
+           )
+         )
+    )
+)
+
+(define hash-test2
+(LambdaLink
+        (VariableList
+          (VariableNode "$PM-164e1b09")
+          (VariableNode "$PM-164e1b09-47189056")
+        )
+        (ImplicationLink
+          (InheritanceLink
+            (VariableNode "$PM-164e1b09")
+            (VariableNode "$PM-164e1b09")
+          )
+          (InheritanceLink
+            (VariableNode "$PM-164e1b09-47189056")
+            (VariableNode "$PM-164e1b09-47189056")
+          )
+        )
+      )
+)
