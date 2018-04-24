@@ -180,7 +180,14 @@ void ScopeLinkUTest::test_compute_hash_3(){
 
     Handle hash1 = _eval.eval_h("hash-test1");
     Handle hash2 = _eval.eval_h("hash-test2");
+    TS_ASSERT_DIFFERS(hash1.value(), hash2.value());
 
+    hash1 = _eval.eval_h("hash-test3");
+    hash2 = _eval.eval_h("hash-test4");
+    TS_ASSERT_DIFFERS(hash1.value(), hash2.value());
+
+    hash1 = _eval.eval_h("hash-test5");
+    hash2 = _eval.eval_h("hash-test6");
     TS_ASSERT_DIFFERS(hash1.value(), hash2.value());
 
     logger().info("END TEST: %s", __FUNCTION__);

@@ -242,29 +242,49 @@ bool ScopeLink::is_equal(const Handle& other, bool silent) const
 // Fowler–Noll–Vo hash function
 // Parameters are taken from author's page
 // http://www.isthe.com/chongo/tech/comp/fnv/index.html#FNV-1a
-const unsigned FNV_32_PRIME = 0x01000193;
-const unsigned FNV_32_OFFSET = 0x811c9dc5;
+const size_t FNV_32_PRIME = 0x01000193;
+const size_t FNV_32_OFFSET = 0x811c9dc5;
+const size_t FNV_64_PRIME = 0x100000001b3;
+const size_t FNV_64_OFFSET = 0xcbf29ce484222325;
 
+template <unsigned n>
+constexpr size_t get_fvna_prime(){
+	return FNV_32_PRIME;
+}
+
+template <>
+constexpr size_t get_fvna_prime<8>(){
+	return FNV_64_PRIME;
+}
+
+template <unsigned n>
+constexpr size_t get_fvna_offset(){
+	return FNV_32_OFFSET;
+}
+
+template <>
+constexpr size_t get_fvna_offset<8>(){
+	return FNV_64_OFFSET;
+}
 
 template<typename T>
-size_t fnv1a_hash (ContentHash & hval, T buf_t)
+ContentHash fnv1a_hash (ContentHash & hval, T buf_t)
 {
-    uint size = sizeof(buf_t);
-    const char * buf = (const char *)&buf_t;
-    size_t count = 0;
-    while (count < size)
-    {
-        hval ^= (unsigned int)*(buf+count);
-        hval *= FNV_32_PRIME;
-        count ++;
-    }
-
-    return hval;
+	uint size = sizeof(buf_t);
+	const char * buf = (const char *)&buf_t;
+	size_t count = 0;
+	while (count < size)
+	{
+		hval ^= (unsigned int)*(buf+count);
+		hval *= (ContentHash)get_fvna_prime<sizeof(ContentHash)>();
+		count ++;
+	}
+	return hval;
 }
 
 ContentHash ScopeLink::compute_hash() const
 {
-	ContentHash hsh = FNV_32_OFFSET;
+	ContentHash hsh = get_fvna_offset<sizeof(ContentHash)>();
 	fnv1a_hash(hsh, get_type());
 	fnv1a_hash(hsh, _varlist.varseq.size());
 
@@ -349,7 +369,10 @@ ContentHash ScopeLink::term_hash(const Handle& h,
 	{
 		hash_vec.push_back(term_hash(ho, bound_vars, quotation));
 	}
-	std::sort(hash_vec.begin(), hash_vec.end());
+	// hash_vec should be sorted only for unordered links
+	if (classserver().isA(t, UNORDERED_LINK)) {
+		std::sort(hash_vec.begin(), hash_vec.end());
+	}
 	for(ContentHash & t_hash: hash_vec){
 		fnv1a_hash(hsh, t_hash);
 	}
