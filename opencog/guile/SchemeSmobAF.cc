@@ -75,23 +75,7 @@ SCM SchemeSmob::ss_af (void)
 	return head;
 }
 
-/**
- * Return the top N atoms from the AF based on their STI value.
- * Setting N to a value larger than the AF size will be equivalent
- * to calling ss_af or cog-af from scheme.
- */
-SCM SchemeSmob::ss_af_topn (SCM n)
-{
-	AtomSpace* atomspace = ss_get_env_as("cog-af-topn");
-	HandleSeq attentionalFocus;
-	attentionbank(atomspace).get_handle_set_in_attentional_focus(back_inserter(attentionalFocus));
-	size_t isz = attentionalFocus.size();
-	if (0 == isz) return SCM_EOL;
-
-	SCM head = SCM_EOL;
-	int N = scm_to_int(n);
 	if( N > isz)  N = isz;
-	for (size_t i = isz - N; i < isz ; i++) {
 		Handle hi = attentionalFocus[i];
 		SCM smob = handle_to_scm(hi);
 		head = scm_cons(smob, head);
