@@ -881,6 +881,17 @@
     any atomspace, null is returned.
 ")
 
+(set-procedure-property! cog-af-topn 'documentation
+"
+ cog-af-topn N
+    Return the list of top N atoms from the AF based on their STI value.
+    if the specified N is larger than or equal to the AF size, all atoms in the
+    AF will be returned.
+
+    Example:
+    guile> (cog-af-topn 1)
+    (ConceptNode \"ArtificialIntelligence\" (av 15752 0 0))
+")
 
 
 (set-procedure-property! cog-af 'documentation
