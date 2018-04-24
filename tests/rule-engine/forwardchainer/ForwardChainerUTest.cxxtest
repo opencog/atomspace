@@ -54,15 +54,6 @@ public:
 		_eval.eval("(use-modules (opencog rule-engine))");
 		_eval.eval("(use-modules (opencog logger))");
 		CHKERR;
-
-		// Load the simple deduction rbs to test it
-		string result; // to be able to read load errors
-		result = _eval.eval("(load-from-path \"fc-deduction-config.scm\")");
-		CHKERR;
-
-		// Load the simple deduction + modus ponens rbs to test it
-		result = _eval.eval("(load-from-path \"fc-config.scm\")");
-		CHKERR;
 	}
 	~ForwardChainerUTest()
 	{
@@ -70,12 +61,33 @@ int rc = CxxTest::TestTracker::tracker().suiteFailed();
 _exit(rc); // XXX hack to avoid double-free in __run_exit_handlers
 	}
 
-	void test_do_chain_deduction();
+    void setUp();
+    void tearDown();
+
+    void test_do_chain_deduction();
 	void test_do_chain_animals();
 	void test_select_rule();
 	void test_unsatisfied_premise();
     void test_negation_conflict();
 };
+
+void ForwardChainerUTest::setUp()
+{
+    _as.clear();
+
+    // Load the simple deduction rbs to test it
+    string result; // to be able to read load errors
+    result = _eval.eval("(load-from-path \"fc-deduction-config.scm\")");
+    CHKERR;
+
+    // Load the simple deduction + modus ponens rbs to test it
+    result = _eval.eval("(load-from-path \"fc-config.scm\")");
+    CHKERR;
+}
+
+void ForwardChainerUTest::tearDown()
+{
+}
 
 void ForwardChainerUTest::test_do_chain_deduction()
 {
