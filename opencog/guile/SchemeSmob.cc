@@ -367,8 +367,7 @@ void SchemeSmob::register_procs()
 	register_proc("cog-av->alist",         1, 0, 0, C(ss_av_get_value));
 
 	// AttentionalFocus
-	register_proc("cog-af",                0, 0, 0, C(ss_af));
-	register_proc("cog-af-topn",           1, 0, 0, C(ss_af_topn));
+	register_proc("cog-af",                0, 1, 0, C(ss_af));
 	register_proc("cog-af-size",           0, 0, 0, C(ss_af_size));
 	register_proc("cog-set-af-size!",      1, 0, 0, C(ss_set_af_size));
 
