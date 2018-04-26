@@ -358,11 +358,10 @@ ContentHash ScopeLink::term_hash(const Handle& h,
 		const Variables& vees = sco->get_variables();
 		for (const Handle& v : vees.varseq) bound_vars.insert(v);
 	}
-	// XXX As discussed in issue #1176,
-	// compute the individual term_hashes first, then sort them,
-	// and then mix them!  This provides the desired qualities:
-	// different unordered links can be directly compared, and also
-	// have good mixing/avalanching properties.
+	// As discussed in issue #1176, compute the individual term_hashes
+	// first, then sort them, and then mix them!  This provides the
+	// desired qualities: different unordered links can be directly
+	// compared, and also have good mixing/avalanching properties.
 	ContentHash hsh = ((1UL<<8) - 59) * t;
 	std::vector<ContentHash> hash_vec;
 	for (const Handle& ho: h->getOutgoingSet())
