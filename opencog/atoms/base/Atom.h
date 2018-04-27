@@ -307,7 +307,7 @@ public:
     {
         if (nullptr == _incoming_set) return result;
         std::lock_guard<std::mutex> lck(_mtx);
-        for (const auto bucket : _incoming_set->_iset)
+        for (const auto& bucket : _incoming_set->_iset)
         {
             for (const WinkPtr& w : bucket.second)
             {

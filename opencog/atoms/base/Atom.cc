@@ -363,7 +363,7 @@ size_t Atom::getIncomingSetSize() const
     std::lock_guard<std::mutex> lck (_mtx);
 
     size_t cnt = 0;
-    for (const auto pr : _incoming_set->_iset)
+    for (const auto& pr : _incoming_set->_iset)
         cnt += pr.second.size();
     return cnt;
 }
@@ -382,7 +382,7 @@ IncomingSet Atom::getIncomingSet(AtomSpace* as) const
         // Prevent update of set while a copy is being made.
         std::lock_guard<std::mutex> lck (_mtx);
         IncomingSet iset;
-        for (const auto bucket : _incoming_set->_iset)
+        for (const auto& bucket : _incoming_set->_iset)
         {
             for (const WinkPtr& w : bucket.second)
             {
@@ -397,7 +397,7 @@ IncomingSet Atom::getIncomingSet(AtomSpace* as) const
     // Prevent update of set while a copy is being made.
     std::lock_guard<std::mutex> lck (_mtx);
     IncomingSet iset;
-    for (const auto bucket : _incoming_set->_iset)
+    for (const auto& bucket : _incoming_set->_iset)
     {
         for (const WinkPtr& w : bucket.second)
         {
