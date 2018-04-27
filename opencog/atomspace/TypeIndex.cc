@@ -61,7 +61,7 @@ TypeIndex::iterator TypeIndex::begin(Type t, bool sub) const
 	}
 
 	// Find the first type which is a subtype, and is not empty.
-	it.s++;
+	++it.s;
 	it.currtype++;
 	while (it.s != it.send)
 	{

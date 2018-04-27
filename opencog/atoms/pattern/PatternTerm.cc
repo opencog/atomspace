@@ -132,7 +132,7 @@ void PatternTerm::addBoundVariable()
 
 std::string PatternTerm::to_string() const { return to_string(":"); }
 
-std::string PatternTerm::to_string(std::string indent) const
+std::string PatternTerm::to_string(const std::string& indent) const
 {
 	if (not _handle) return "-";
 	std::string str = _parent->to_string();
