@@ -119,3 +119,6 @@ Makefile
 ### Linux ###
 *~
 *.autosave
+
+# Vim #
+*.swp
