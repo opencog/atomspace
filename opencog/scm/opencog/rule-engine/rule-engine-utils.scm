@@ -158,24 +158,26 @@
   (for-each add-rule rules)
 )
 
-; Set numerical parameters. Given an rbs, a parameter name and its
-; value, create
-;
-; ExecutionLink
-;    SchemaNode name
-;    rbs
-;    (NumberNode "value")
-;
-; It will also delete the any
-;
-; ExecutionLink
-;    SchemaNode name
-;    rbs
-;    *
-;
-; to be sure there is ever only one value associated to that
-; parameter. The value is automatically converted into string.
 (define (ure-set-num-parameter rbs name value)
+"
+  Set numerical parameters. Given an rbs, a parameter name and its
+  value, create
+
+  ExecutionLink
+     SchemaNode name
+     rbs
+     (NumberNode \"value\")
+
+  It will also delete the any
+
+  ExecutionLink
+     SchemaNode name
+     rbs
+     *
+
+  to be sure there is ever only one value associated to that
+  parameter. The value is automatically converted into string.
+"
   (define (param-hypergraph value)
     (ExecutionLink
        (SchemaNode name)
@@ -196,13 +198,15 @@
   (param-hypergraph (NumberNode (number->string value)))
 )
 
-; Set (fuzzy) bool parameters. Given an RBS, a parameter name and its
-; value, create (or overwrite)
-;
-; EvaluationLink (stv value 1)
-;    PredicateNode name
-;    rbs
 (define (ure-set-fuzzy-bool-parameter rbs name value)
+"
+  Set (fuzzy) bool parameters. Given an RBS, a parameter name and its
+  value, create (or overwrite)
+
+  EvaluationLink (stv value 1)
+     PredicateNode name
+     rbs
+"
   (EvaluationLink (stv value 1)
      (PredicateNode name)
      rbs)
