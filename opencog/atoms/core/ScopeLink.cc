@@ -237,10 +237,56 @@ bool ScopeLink::is_equal(const Handle& other, bool silent) const
 // order independence; addition is abelian; while "mixing" as
 // defined above, is non-abelian).
 //
+
+
+// Fowler–Noll–Vo hash function
+// Parameters are taken from author's page
+// http://www.isthe.com/chongo/tech/comp/fnv/index.html#FNV-1a
+const size_t FNV_32_PRIME = 0x01000193;
+const size_t FNV_32_OFFSET = 0x811c9dc5;
+const size_t FNV_64_PRIME = 0x100000001b3;
+const size_t FNV_64_OFFSET = 0xcbf29ce484222325;
+
+template <unsigned n>
+constexpr size_t get_fvna_prime(){
+	return FNV_32_PRIME;
+}
+
+template <>
+constexpr size_t get_fvna_prime<8>(){
+	return FNV_64_PRIME;
+}
+
+template <unsigned n>
+constexpr size_t get_fvna_offset(){
+	return FNV_32_OFFSET;
+}
+
+template <>
+constexpr size_t get_fvna_offset<8>(){
+	return FNV_64_OFFSET;
+}
+
+template<typename T>
+ContentHash fnv1a_hash (ContentHash & hval, T buf_t)
+{
+	uint size = sizeof(buf_t);
+	const char * buf = (const char *)&buf_t;
+	size_t count = 0;
+	while (count < size)
+	{
+		hval ^= (unsigned int)*(buf+count);
+		hval *= (ContentHash)get_fvna_prime<sizeof(ContentHash)>();
+		count ++;
+	}
+	return hval;
+}
+
 ContentHash ScopeLink::compute_hash() const
 {
-	ContentHash hsh = ((1UL<<35) - 325) * get_type();
-	hsh += (hsh <<5) + ((1UL<<47) - 649) * _varlist.varseq.size();
+	ContentHash hsh = get_fvna_offset<sizeof(ContentHash)>();
+	fnv1a_hash(hsh, get_type());
+	fnv1a_hash(hsh, _varlist.varseq.size());
 
 	// It is not safe to mix here, since the sort order of the
 	// typemaps will depend on the variable names. So must be
@@ -255,7 +301,7 @@ ContentHash ScopeLink::compute_hash() const
 	{
 		for (const Handle& th : pr.second) vth += th->get_hash();
 	}
-	hsh += (hsh <<5) + (vth % ((1UL<<27) - 235));
+	fnv1a_hash(hsh, vth);
 
 	Arity vardecl_offset = _vardecl != Handle::UNDEFINED;
 	Arity n_scoped_terms = get_arity() - vardecl_offset;
@@ -264,9 +310,8 @@ ContentHash ScopeLink::compute_hash() const
 	for (Arity i = 0; i < n_scoped_terms; ++i)
 	{
 		const Handle& h(_outgoing[i + vardecl_offset]);
-		hsh += (hsh<<5) + term_hash(h, hidden);
+		fnv1a_hash(hsh, term_hash(h, hidden));
 	}
-	hsh %= (1UL << 63) - 409;
 
 	// Links will always have the MSB set.
 	ContentHash mask = ((ContentHash) 1UL) << (8*sizeof(ContentHash) - 1);
@@ -313,29 +358,23 @@ ContentHash ScopeLink::term_hash(const Handle& h,
 		const Variables& vees = sco->get_variables();
 		for (const Handle& v : vees.varseq) bound_vars.insert(v);
 	}
-
-	// Prevent mixing for UnorderedLinks. The `mixer` var will be zero
-	// for UnorderedLinks. The problem is that two UnorderdLinks might
-	// be alpha-equivalent, but have their atoms presented in a
-	// different order. Thus, the hash must be computed in a purely
-	// commutative fashion: using only addition, so as to never create
-	// any entropy, until the end.
-	//
-	// XXX As discussed in issue #1176, a better fix would be to
-	// compute the individual term_hashes first, then sort them,
-	// and then mix them!  This provides the desired qualities:
-	// different unordered links can be directly compared, and also
-	// have good mixing/avalanching properties. The code below
-	// only allows for compare; it fails to mix.
-	//
-	bool is_ordered = not classserver().isA(t, UNORDERED_LINK);
-	ContentHash mixer = (ContentHash) is_ordered;
+	// As discussed in issue #1176, compute the individual term_hashes
+	// first, then sort them, and then mix them!  This provides the
+	// desired qualities: different unordered links can be directly
+	// compared, and also have good mixing/avalanching properties.
 	ContentHash hsh = ((1UL<<8) - 59) * t;
+	std::vector<ContentHash> hash_vec;
 	for (const Handle& ho: h->getOutgoingSet())
 	{
-		hsh += mixer * (hsh<<5) + term_hash(ho, bound_vars, quotation);
+		hash_vec.push_back(term_hash(ho, bound_vars, quotation));
 	}
-	hsh %= (1UL<<63) - 471;
+	// hash_vec should be sorted only for unordered links
+	if (classserver().isA(t, UNORDERED_LINK)) {
+		std::sort(hash_vec.begin(), hash_vec.end());
+	}
+	for(ContentHash & t_hash: hash_vec){
+		fnv1a_hash(hsh, t_hash);
+	}
 
 	// Restore saved vars from stack.
 	if (issco) bound_vars = bsave;
