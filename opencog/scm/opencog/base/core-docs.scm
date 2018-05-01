@@ -885,13 +885,18 @@
 
 (set-procedure-property! cog-af 'documentation
 "
- cog-af
-    Return the list of atoms in the AttentionalFocus.
+ cog-af n
+    Return the top n atoms in the AttentionalFocus or
+    return all atoms in the AF if n is unspecified or is larger
+    than the AF size.
 
     Example:
     guile> (cog-af)
     (ConceptNode \"ArtificialIntelligence\" (av 15752 0 0))
     (ConceptNode \"Databases\" (av 15752 0 0))
+   
+    guile> (cog-af 1)
+    (ConceptNode \"ArtificialIntelligence\" (av 15752 0 0))
 ")
 
 (set-procedure-property! cog-af-size 'documentation

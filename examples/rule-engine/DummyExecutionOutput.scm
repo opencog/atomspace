@@ -1,5 +1,5 @@
-;; This example shows that one dummy ExecutionOutputLink,
-;; and only one, is required in the conclusion
+;; This example shows that if there are multiple conclusions
+;; in a rule, they need to be wrapped in one dummy ExecutionOutputLink,
 ;; in order to enable backward chainer.
 ;; by Shujing Ke, Feb 2018
 
@@ -17,9 +17,11 @@
 (define keep-pet-rule
  (let* (
           (kp (Predicate "keep-pet"))
+          (like (Predicate "like"))
           (vA (Variable "$A"))
           (vX (Variable "$X"))
           (akx (Evaluation kp (List vA vX)))
+          (alx (Evaluation like (List vA vX)))
        )
   (BindLink
    (VariableList
@@ -39,7 +41,10 @@
         (Concept "pet"))
  
    )
-   akx
+   (And
+     akx
+     alx
+   )
   )
  )
 )
@@ -91,55 +96,64 @@
 ;;We can now call the backward chainer as follows
 ;;(cog-bc Einstein-rbs target #:vardecl vd)
 
-;; You may expect the backward chainer to output the result that:
-;; "American keep cat",
-;; but the it actually output empty result.
-;; The reason is the format of rule requires an dummy ExecutionOutputLink
-;; to make backward chainer work.
-;; Now we add a dummy ExecutionOutputLink as below:
-;
-;(define (dommyoutput k)
-;
-;    (cog-set-tv! k (stv 1 1))
-;
+;;; run bc with above rule, it will output empty result set.
+;;; To make it work, you need to define a dummy ExecutionOutputLink
+;;; to wrap the two conclusions, like below:
+
+(define (dommyoutput-formula k m)
+    (cog-set-tv! k (stv 1 1))
+    (cog-set-tv! m (stv 1 1))
+)
+
+;;; Then change the conclusion in the rule above into:
+(define keep-pet-rule-with-dummyoutput
+ (let* (
+          (kp (Predicate "keep-pet"))
+          (like (Predicate "like"))
+          (vA (Variable "$A"))
+          (vX (Variable "$X"))
+          (akx (Evaluation kp (List vA vX)))
+          (alx (Evaluation like (List vA vX)))
+       )
+  (BindLink
+   (VariableList
+     (TypedVariable
+        vA
+        (Type "ConceptNode"))
+     (TypedVariable
+        vX
+        (Type "ConceptNode"))
+   )
+   (And
+     (Inheritance
+        vA
+        (Concept "person"))
+     (Inheritance
+        vX
+        (Concept "pet"))
+   )
+   (ExecutionOutputLink
+     (GroundedSchemaNode "scm: dommyoutput-formula")
+     (ListLink akx alx)
+   )
+  )
+ )
+)
+
+(define keep-pet-rule-with-dummyoutput-name
+  (DefinedSchemaNode "keep-pet-rule-with-dummyoutput"))
+(Define keep-pet-rule-with-dummyoutput-name
+        keep-pet-rule-with-dummyoutput)
+
+;; Now uncomment below MemberLink to add this rule into rbs
+;(MemberLink (stv 1 1)
+;   keep-pet-rule-with-dummyoutput-name
+;   Einstein-rbs
 ;)
 
-;(define keep-pet-rule
-; (let* (
-;          (kp (Predicate "keep-pet"))
-;          (vA (Variable "$A"))
-;          (vX (Variable "$X"))
-;          (akx (Evaluation kp (List vA vX)))
-;       )
-;  (BindLink
-;   (VariableList
-;     (TypedVariable
-;        vA
-;        (Type "ConceptNode"))
-;     (TypedVariable
-;        vX
-;        (Type "ConceptNode"))
-;   )
-;   (And
-;     (Inheritance
-;        vA
-;        (Concept "person"))
-;     (Inheritance
-;        vX
-;        (Concept "pet"))
-; 
-;   )
-;   (ExecutionOutputLink
-;       (GroundedSchemaNode "scm: dommyoutput")
-;       akx
-;     )
-;  )
-; )
-;)
-
-;;; Now run the backward chainer again:
+;; Then run backward chainer again:
 ;;(cog-bc Einstein-rbs target #:vardecl vd)
-;
+
 ;;; It should ouput:
 ;;;(SetLink
 ;;;   (EvaluationLink (stv 1 1)
@@ -151,60 +165,3 @@
 ;;;   )
 ;;;)
 
-;;; Further more, only one conclusion is allowed in one rule.
-;;; If you have multiple ExecutionOutputLinks in the conclusion,
-;;; and link them with a AndLink, it won't work either.
-;;; Like below example won't work.
-;(define keep-pet-rule
-; (let* (
-;          (kp (Predicate "keep-pet"))
-;          (like (Predicate "like"))
-;          (vA (Variable "$A"))
-;          (vX (Variable "$X"))
-;          (akx (Evaluation kp (List vA vX)))
-;          (alx (Evaluation like (List vA vX)))
-;       )
-;  (BindLink
-;   (VariableList
-;     (TypedVariable
-;        vA
-;        (Type "ConceptNode"))
-;     (TypedVariable
-;        vX
-;        (Type "ConceptNode"))
-;   )
-;   (And
-;     (Inheritance
-;        vA
-;        (Concept "person"))
-;     (Inheritance
-;        vX
-;        (Concept "pet"))
-; 
-;   )
-;   (And
-;      (ExecutionOutputLink
-;          (GroundedSchemaNode "scm: dommyoutput")
-;          akx
-;      )
-;      (ExecutionOutputLink
-;          (GroundedSchemaNode "scm: dommyoutput")
-;          alx
-;      )
-;   )
-;  )
-; )
-;)
-
-;;; To make it work, you need to define a dummy function
-;;; that takes two args, like below:
-;(define (dommyoutput2 k m)
-;    (cog-set-tv! k (stv 1 1))
-;    (cog-set-tv! m (stv 1 1))
-;)
-
-;;; Then change the conclusion in the rule above into:
-;(ExecutionOutputLink
-;   (GroundedSchemaNode "scm: dommyoutput2")
-;   akx alx
-;)

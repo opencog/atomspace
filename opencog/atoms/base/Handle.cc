@@ -240,7 +240,7 @@ std::string oc_to_string(const HandleMultimap& hmultimap, const std::string& ind
 		ss << indent << "key[" << i << "]:" << std::endl
 		   << oc_to_string(p.first, indent + OC_TO_STRING_INDENT)
 		   << indent << "value[" << i << "]:" << std::endl;
-		for (const auto s : p.second)
+		for (const auto& s : p.second)
 			ss << oc_to_string(s, indent + OC_TO_STRING_INDENT);
 		i++;
 	}
@@ -302,7 +302,7 @@ std::string oc_to_string(const HandleCounter& hc, const std::string& indent)
 	std::stringstream ss;
 	ss << indent << "size = " << hc.size() << std::endl;
 	size_t i = 0;
-	for (const auto el : hc) {
+	for (const auto& el : hc) {
 		ss << indent << "atom[" << i << "]:" << std::endl
 		   << oc_to_string(el.first, indent + OC_TO_STRING_INDENT)
 		   << indent << "num[" << i << "]:" << el.second << std::endl;

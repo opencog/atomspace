@@ -52,12 +52,21 @@ AttentionBank::AttentionBank(AtomSpace* asp)
 
 AttentionBank::~AttentionBank()
 {
-    //_remove_signal->disconnect(_remove_connection);
+    _remove_signal->disconnect(_remove_connection);
 }
 
 void AttentionBank::remove_atom_from_bank(const AtomPtr& atom)
 {
-    _importanceIndex.removeAtom(Handle(atom));
+    AFMutex.lock();
+    auto it = std::find_if(attentionalFocus.begin(), attentionalFocus.end(),
+                [atom](std::pair<Handle, AttentionValuePtr> p)
+                { return p.first == Handle(atom);});
+
+    if (it != attentionalFocus.end())
+        attentionalFocus.erase(it);
+    AFMutex.unlock();
+
+   _importanceIndex.removeAtom(Handle(atom));
 }
 
 void AttentionBank::set_sti(const Handle& h, AttentionValue::sti_t stiValue)
@@ -314,15 +323,15 @@ Handle AttentionBank::getRandomAtomNotInAF(void)
     std::lock_guard<std::mutex> lock(AFMutex);
     auto find_in_af = [this](const Handle& h){
        auto it = std::find_if(attentionalFocus.begin(), attentionalFocus.end(),
-                [h](std::pair<Handle, AttentionValuePtr> hsp) { return hsp.first == h; });
+                [h](const std::pair<Handle, AttentionValuePtr>& hsp) { return hsp.first == h; });
        return it;
     };
 
     int count = 50; // We might get stuck in the while loop if there are no atoms outside the AF
     Handle h = Handle::UNDEFINED;
-    while(find_in_af(h) != attentionalFocus.end() and --count > 0){
+    do {
         h = _importanceIndex.getRandomAtom();
-    }
+    } while(find_in_af(h) != attentionalFocus.end() and --count > 0);
     // Make sure the last selection did not select from the AF.
     if(find_in_af(h) != attentionalFocus.end())
         return Handle::UNDEFINED;

@@ -38,14 +38,13 @@ public:
 		logger().set_print_to_stdout_flag(true);
 
 		string source_dir = string(PROJECT_SOURCE_DIR),
-			test_dir = source_dir + "/tests",
-			test_ure_dir = test_dir + "/rule-engine",
-			test_forwardchainer_dir = test_ure_dir + "/forwardchainer",
-			ure_dir = source_dir + "/opencog/scm/opencog/rule-engine";
-		vector<string> load_paths = {source_dir, test_dir, test_ure_dir,
-		                             test_forwardchainer_dir, ure_dir};
-		for (string& p : load_paths)
-		{
+		       test_dir = source_dir + "/tests",
+		       test_ure_dir = test_dir + "/rule-engine",
+		       test_forwardchainer_dir = test_ure_dir + "/forwardchainer",
+		       ure_dir = source_dir + "/opencog/scm/opencog/rule-engine";
+		vector<string> load_paths = { source_dir, test_dir, test_ure_dir,
+		                              test_forwardchainer_dir, ure_dir };
+		for (string& p : load_paths) {
 			string eval_str = string("(add-to-load-path \"") + p + string("\")");
 			_eval.eval(eval_str);
 		}
@@ -54,28 +53,40 @@ public:
 		_eval.eval("(use-modules (opencog rule-engine))");
 		_eval.eval("(use-modules (opencog logger))");
 		CHKERR;
-
-		// Load the simple deduction rbs to test it
-		string result; // to be able to read load errors
-		result = _eval.eval("(load-from-path \"fc-deduction-config.scm\")");
-		CHKERR;
-
-		// Load the simple deduction + modus ponens rbs to test it
-		result = _eval.eval("(load-from-path \"fc-config.scm\")");
-		CHKERR;
 	}
 	~ForwardChainerUTest()
 	{
-int rc = CxxTest::TestTracker::tracker().suiteFailed();
-_exit(rc); // XXX hack to avoid double-free in __run_exit_handlers
+		int rc = CxxTest::TestTracker::tracker().suiteFailed();
+		_exit(rc); // XXX hack to avoid double-free in __run_exit_handlers
 	}
+
+	void setUp();
+	void tearDown();
 
 	void test_do_chain_deduction();
 	void test_do_chain_animals();
 	void test_select_rule();
 	void test_unsatisfied_premise();
-    void test_negation_conflict();
+	void test_negation_conflict();
 };
+
+void ForwardChainerUTest::setUp()
+{
+	_as.clear();
+
+	// Load the simple deduction rbs to test it
+	string result; // to be able to read load errors
+	result = _eval.eval("(load-from-path \"fc-deduction-config.scm\")");
+	CHKERR;
+
+	// Load the simple deduction + modus ponens rbs to test it
+	result = _eval.eval("(load-from-path \"fc-config.scm\")");
+	CHKERR;
+}
+
+void ForwardChainerUTest::tearDown()
+{
+}
 
 void ForwardChainerUTest::test_do_chain_deduction()
 {
@@ -87,18 +98,18 @@ void ForwardChainerUTest::test_do_chain_deduction()
 	//   InheritanceLink A C
 	//
 	Handle A = _eval.eval_h("(ConceptNode \"A\" (stv 1 1))"),
-		B = _eval.eval_h("(ConceptNode \"B\")"),
-		C = _eval.eval_h("(ConceptNode \"C\")"),
-		AB = _eval.eval_h("(InheritanceLink (stv 1 1)"
-		                  "   (ConceptNode \"A\")"
-		                  "   (ConceptNode \"B\"))"),
-		BC = _eval.eval_h("(InheritanceLink (stv 1 1)"
-		                  "   (ConceptNode \"B\")"
-		                  "   (ConceptNode \"C\"))");
+	       B = _eval.eval_h("(ConceptNode \"B\")"),
+	       C = _eval.eval_h("(ConceptNode \"C\")"),
+	       AB = _eval.eval_h("(InheritanceLink (stv 1 1)"
+	                         "   (ConceptNode \"A\")"
+	                         "   (ConceptNode \"B\"))"),
+	       BC = _eval.eval_h("(InheritanceLink (stv 1 1)"
+	                         "   (ConceptNode \"B\")"
+	                         "   (ConceptNode \"C\"))");
 
-    // Get the ConceptNode corresponding to the rule-based system to test
+	// Get the ConceptNode corresponding to the rule-based system to test
 	Handle rbs = an(CONCEPT_NODE, "fc-deduction-rule-base");
-    ForwardChainer fc(_as, rbs, AB);
+	ForwardChainer fc(_as, rbs, AB);
 	// Run forward chainer
 	fc.do_chain();
 
@@ -140,17 +151,17 @@ void ForwardChainerUTest::test_do_chain_animals()
 
 void ForwardChainerUTest::test_select_rule(void)
 {
-    Handle h = _eval.eval_h("(InheritanceLink"
-                            "   (ConceptNode \"Cat\")"
-                            "   (ConceptNode \"Animal\"))");
-    TS_ASSERT_DIFFERS(h, Handle::UNDEFINED);
+	Handle h = _eval.eval_h("(InheritanceLink"
+	                        "   (ConceptNode \"Cat\")"
+	                        "   (ConceptNode \"Animal\"))");
+	TS_ASSERT_DIFFERS(h, Handle::UNDEFINED);
 
-    Handle rbs = _eval.eval_h("(ConceptNode \"fc-rule-base\")");
-    ForwardChainer fc(_as, rbs, h);
+	Handle rbs = _eval.eval_h("(ConceptNode \"fc-rule-base\")");
+	ForwardChainer fc(_as, rbs, h);
 
-    // Full unification
-    Rule rule = fc.select_rule(h);
-    TS_ASSERT(rule.is_valid());
+	// Full unification
+	Rule rule = fc.select_rule(h);
+	TS_ASSERT(rule.is_valid());
 }
 
 /**
@@ -159,15 +170,15 @@ void ForwardChainerUTest::test_select_rule(void)
  */
 void ForwardChainerUTest::test_unsatisfied_premise(void)
 {
-    _eval.eval("(load-from-path \"fc-unsatisfied-premise.scm\")");
+	_eval.eval("(load-from-path \"fc-unsatisfied-premise.scm\")");
 
-    Handle table = an(CONCEPT_NODE, "table"),
-        furniture = an(CONCEPT_NODE, "furniture"),
-        source = al(INHERITANCE_LINK, table, furniture),
-        vardecl = Handle::UNDEFINED,
-        top_rbs = _as.get_node(CONCEPT_NODE, "rule-base");
+	Handle table = an(CONCEPT_NODE, "table"),
+	       furniture = an(CONCEPT_NODE, "furniture"),
+	       source = al(INHERITANCE_LINK, table, furniture),
+	       vardecl = Handle::UNDEFINED,
+	       top_rbs = _as.get_node(CONCEPT_NODE, "rule-base");
 
-    ForwardChainer fc(_as, top_rbs, source, vardecl);
+	ForwardChainer fc(_as, top_rbs, source, vardecl);
 	fc.get_config().set_maximum_iterations(20);
 	fc.do_chain();
 
@@ -180,34 +191,34 @@ void ForwardChainerUTest::test_unsatisfied_premise(void)
  */
 void ForwardChainerUTest::test_negation_conflict()
 {
-    _eval.eval("(load-from-path \"negation-conflict.scm\")");
+	_eval.eval("(load-from-path \"negation-conflict.scm\")");
 
-    Handle vardecl = Handle::UNDEFINED;
-    Handle rbs = _as.get_node(CONCEPT_NODE, "Einstein-rbs");
-    Handle source = _eval.eval_h("source");
+	Handle vardecl = Handle::UNDEFINED;
+	Handle rbs = _as.get_node(CONCEPT_NODE, "Einstein-rbs");
+	Handle source = _eval.eval_h("source");
 
-    ForwardChainer fc(_as, rbs, source, vardecl);
-    fc.get_config().set_maximum_iterations(20);
-    fc.do_chain();
+	ForwardChainer fc(_as, rbs, source, vardecl);
+	fc.get_config().set_maximum_iterations(20);
+	fc.do_chain();
 
-    UnorderedHandleSet resultSet = fc.get_chaining_result();
-    HandleSeq resultHandleSeq(resultSet.begin(), resultSet.end());
-    Handle results = al(SET_LINK, resultHandleSeq);
+	UnorderedHandleSet resultSet = fc.get_chaining_result();
+	HandleSeq resultHandleSeq(resultSet.begin(), resultSet.end());
+	Handle results = al(SET_LINK, resultHandleSeq);
 
-    Handle American = an(CONCEPT_NODE, "American"),
-           German = an(CONCEPT_NODE, "German"),
-           cat = an(CONCEPT_NODE, "cat"),
-           dog = an(CONCEPT_NODE, "dog"),
-           keep = an(PREDICATE_NODE, "keep-pet"),
-           Gkeepcat = al(EVALUATION_LINK, keep, al(LIST_LINK, German, cat)),
-           Akeepdog = al(EVALUATION_LINK, keep, al(LIST_LINK, American, dog));
+	Handle American = an(CONCEPT_NODE, "American"),
+	       German = an(CONCEPT_NODE, "German"),
+	       cat = an(CONCEPT_NODE, "cat"),
+	       dog = an(CONCEPT_NODE, "dog"),
+	       keep = an(PREDICATE_NODE, "keep-pet"),
+	       Gkeepcat = al(EVALUATION_LINK, keep, al(LIST_LINK, German, cat)),
+	       Akeepdog = al(EVALUATION_LINK, keep, al(LIST_LINK, American, dog));
 
-    Handle expected = al(SET_LINK, Gkeepcat,Akeepdog);
+	Handle expected = al(SET_LINK, Gkeepcat, Akeepdog);
 
-    logger().debug() << "results = " << results->to_string();
-    logger().debug() << "expected = " << expected->to_string();
+	logger().debug() << "results = " << results->to_string();
+	logger().debug() << "expected = " << expected->to_string();
 
-    TS_ASSERT_EQUALS(results, expected);
+	TS_ASSERT_EQUALS(results, expected);
 }
 #undef al
 #undef an

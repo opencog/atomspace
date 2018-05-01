@@ -73,7 +73,7 @@ public:
 	/**
 	 * Calculate the TV of the mixture model. Assuming the ith model,
 	 * Mi, with prior Pi, has its TV represented by a probabilistic
-	 * density function pfd_i, a beta-distributions with parameters
+	 * density function pdf_i, a beta-distributions with parameters
 	 * alpha_i, beta_i, then, an optimal mixture, according to
 	 * Universal Operator Induction, may be approached with
 	 *
