@@ -63,6 +63,7 @@ public:
 	void tearDown() {}
 
 	void test_content_less();
+	void test_content_less_ev();
 	void test_get_variables_1();
 	void test_get_variables_2();
 	void test_get_variables_3();
@@ -76,6 +77,25 @@ void ScopeLinkUTest::test_content_less()
 
 	Handle scX(createLink(SCOPE_LINK, X, X));
 	Handle scY(createLink(SCOPE_LINK, Y, Y));
+
+	// scX and scY alpha-equivalent, they should be equal by content,
+	// thus neither scX < scY not scY < scX by content.
+	content_based_handle_less lt;
+	TS_ASSERT(content_eq(scX, scY));
+	TS_ASSERT(not lt(scX, scY));
+	TS_ASSERT(not lt(scY, scX));
+
+	logger().info("END TEST: %s", __FUNCTION__);
+}
+
+void ScopeLinkUTest::test_content_less_ev()
+{
+	logger().info("BEGIN TEST: %s", __FUNCTION__);
+
+	Handle scX(createLink(SCOPE_LINK, X,
+	                   al(EVALUATION_LINK, P, X)));
+	Handle scY(createLink(SCOPE_LINK, Y,
+	                   al(EVALUATION_LINK, P, Y)));
 
 	// scX and scY alpha-equivalent, they should be equal by content,
 	// thus neither scX < scY not scY < scX by content.
