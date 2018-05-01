@@ -41,7 +41,7 @@ class ScopeLinkUTest :  public CxxTest::TestSuite
 private:
 	AtomSpace _as;
 	SchemeEval _eval;
-	Handle X, Y, P, Q, CT;
+	Handle X, Y, S, T, P, Q, CT;
 
 public:
 	ScopeLinkUTest() : _eval(&_as)
@@ -50,6 +50,8 @@ public:
 
 		X = an(VARIABLE_NODE, "$X");
 		Y = an(VARIABLE_NODE, "$Y");
+		S = an(VARIABLE_NODE, "$S");
+		T = an(VARIABLE_NODE, "$T");
 		P = an(PREDICATE_NODE, "P");
 		Q = an(PREDICATE_NODE, "Q");
 		CT = an(TYPE_NODE, "ConceptNode");
@@ -64,6 +66,8 @@ public:
 
 	void test_content_less();
 	void test_content_less_ev();
+	void test_content_less_un();
+	void test_content_less_st();
 	void test_get_variables_1();
 	void test_get_variables_2();
 	void test_get_variables_3();
@@ -96,6 +100,56 @@ void ScopeLinkUTest::test_content_less_ev()
 	                   al(EVALUATION_LINK, P, X)));
 	Handle scY(createLink(SCOPE_LINK, Y,
 	                   al(EVALUATION_LINK, P, Y)));
+
+	// scX and scY alpha-equivalent, they should be equal by content,
+	// thus neither scX < scY not scY < scX by content.
+	content_based_handle_less lt;
+	TS_ASSERT(content_eq(scX, scY));
+	TS_ASSERT(not lt(scX, scY));
+	TS_ASSERT(not lt(scY, scX));
+
+	logger().info("END TEST: %s", __FUNCTION__);
+}
+
+void ScopeLinkUTest::test_content_less_un()
+{
+	logger().info("BEGIN TEST: %s", __FUNCTION__);
+
+	Handle scX(createLink(SCOPE_LINK,
+	                   al(VARIABLE_LIST, X, Y),
+	                   al(AND_LINK,
+	                      al(EVALUATION_LINK, P, X),
+	                      al(EVALUATION_LINK, Q, Y))));
+	Handle scY(createLink(SCOPE_LINK,
+	                   al(VARIABLE_LIST, Y, X),
+	                   al(AND_LINK,
+	                      al(EVALUATION_LINK, P, Y),
+	                      al(EVALUATION_LINK, Q, X))));
+
+	// scX and scY alpha-equivalent, they should be equal by content,
+	// thus neither scX < scY not scY < scX by content.
+	content_based_handle_less lt;
+	TS_ASSERT(content_eq(scX, scY));
+	TS_ASSERT(not lt(scX, scY));
+	TS_ASSERT(not lt(scY, scX));
+
+	logger().info("END TEST: %s", __FUNCTION__);
+}
+
+void ScopeLinkUTest::test_content_less_st()
+{
+	logger().info("BEGIN TEST: %s", __FUNCTION__);
+
+	Handle scX(createLink(SCOPE_LINK,
+	                   al(VARIABLE_LIST, X, Y),
+	                   al(AND_LINK,
+	                      al(EVALUATION_LINK, P, X),
+	                      al(EVALUATION_LINK, Q, Y))));
+	Handle scY(createLink(SCOPE_LINK,
+	                   al(VARIABLE_LIST, S, T),
+	                   al(AND_LINK,
+	                      al(EVALUATION_LINK, P, S),
+	                      al(EVALUATION_LINK, Q, T))));
 
 	// scX and scY alpha-equivalent, they should be equal by content,
 	// thus neither scX < scY not scY < scX by content.
