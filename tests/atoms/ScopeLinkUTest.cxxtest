@@ -175,10 +175,8 @@ void ScopeLinkUTest::test_content_less()
 {
 	logger().info("BEGIN TEST: %s", __FUNCTION__);
 
-	Handle X = createNode(VARIABLE_NODE, "$X"),
-		Y = createNode(VARIABLE_NODE, "$Y"),
-		scX = createLink(SCOPE_LINK, X, X),
-		scY = createLink(SCOPE_LINK, Y, Y);
+	Handle scX(createLink(SCOPE_LINK, X, X));
+	Handle scY(createLink(SCOPE_LINK, Y, Y));
 
 	// scX and scY alpha-equivalent, they should be equal by content,
 	// thus neither scX < scY not scY < scX by content.
