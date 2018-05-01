@@ -67,6 +67,7 @@ public:
 	void test_content_less();
 	void test_content_less_ev();
 	void test_content_less_un();
+	void test_content_less_uno();
 	void test_content_less_st();
 	void test_content_less_cpt();
 	void test_get_variables_1();
@@ -126,6 +127,35 @@ void ScopeLinkUTest::test_content_less_un()
 	                   al(AND_LINK,
 	                      al(EVALUATION_LINK, P, Y),
 	                      al(EVALUATION_LINK, Q, X))));
+
+	// scX and scY alpha-equivalent, they should be equal by content,
+	// thus neither scX < scY not scY < scX by content.
+	content_based_handle_less lt;
+	TS_ASSERT(content_eq(scX, scY));
+	TS_ASSERT(not lt(scX, scY));
+	TS_ASSERT(not lt(scY, scX));
+
+	logger().info("END TEST: %s", __FUNCTION__);
+}
+
+void ScopeLinkUTest::test_content_less_uno()
+{
+	logger().info("BEGIN TEST: %s", __FUNCTION__);
+
+	Handle scX(createLink(SCOPE_LINK,
+	                   al(VARIABLE_LIST, X, Y, S, T),
+	                   al(AND_LINK,
+	                      al(EVALUATION_LINK, P, X),
+	                      al(EVALUATION_LINK, P, Y),
+	                      al(EVALUATION_LINK, P, S),
+	                      al(EVALUATION_LINK, P, T))));
+	Handle scY(createLink(SCOPE_LINK,
+	                   al(VARIABLE_LIST, S, T, Y, X),
+	                   al(AND_LINK,
+	                      al(EVALUATION_LINK, P, X),
+	                      al(EVALUATION_LINK, P, Y),
+	                      al(EVALUATION_LINK, P, S),
+	                      al(EVALUATION_LINK, P, T))));
 
 	// scX and scY alpha-equivalent, they should be equal by content,
 	// thus neither scX < scY not scY < scX by content.
