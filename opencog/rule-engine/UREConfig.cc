@@ -148,7 +148,15 @@ void UREConfig::fetch_common_parameters(const Handle& rbs)
 {
 	// Retrieve the rules (MemberLinks) and instantiate them
 	for (const Handle& rule_name : fetch_rule_names(rbs))
+    {
+        OC_ASSERT((rule_name->get_type() == DEFINED_SCHEMA_NODE),
+              "The rule: \n%s \n is not a DefinedSchemaNode."
+              "A rule needs an alias and to be defined a DefinedSchemaNode.\n"
+              "Please check rules in /atomspace/examples/rule-engine for example.\n\n",
+              rule_name->to_short_string().c_str());
+
 		_common_params.rules.emplace(rule_name, rbs);
+    }
 
 	// Fetch maximum number of iterations
 	_common_params.max_iter = fetch_num_param(max_iter_name, rbs);
