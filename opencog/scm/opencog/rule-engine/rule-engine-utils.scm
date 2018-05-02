@@ -11,9 +11,12 @@
 ;; -- ure-add-rules -- Associate  a list of rule-alias and TV pairs to a rbs
 ;; -- ure-set-num-parameter -- Set a numeric parameter of an rbs
 ;; -- ure-set-fuzzy-bool-parameter -- Set a fuzzy boolean parameter of an rbs
+;; -- ure-set-maximum-iterations -- Set the URE:maximum-iterations parameter
+;; -- ure-set-fc-retry-sources -- Set the URE:FC:retry-sources parameter
 ;; -- ure-define-rbs -- Create a rbs that runs for a particular number of
 ;;                      iterations.
 ;; -- ure-get-forward-rule -- Return the forward form of a rule
+;; -- ure-
 ;; -- bool->tv -- Convert #t to TRUE_TV and #f to FALSE_TV
 ;; -- tv->bool -- Convert TRUE_TV to #t, anything else to #f
 ;; -- atom->number -- Convert NumberNode into its corresponding number
@@ -47,11 +50,11 @@
   source: Source from where to start forward chaining. If a SetLink
           then multiple sources are considered.
 
-  vardecl: optional variable declaration of the source (in case it has
-           variables)
+  vd: optional variable declaration of the source (in case it has
+      variables)
 
-  focus-set: optional focus-set, a SetLink with all atoms to consider
-             for forward chaining
+  fs: optional focus-set, a SetLink with all atoms to consider for
+      forward chaining
 "
   (cog-mandatory-args-fc rbs source vardecl focus-set))
 
@@ -67,15 +70,15 @@
 
   target: Target to proof.
 
-  vardecl: optional variable declaration of the target (in case it has
-           variables)
+  vardecl: [optional] Variable declaration of the target (in case it
+           has variables)
 
-  trace-as: optional AtomSpace to record the back-inference traces.
+  trace-as: [optional] AtomSpace to record the back-inference traces.
 
-  control-as: optional AtomSpace storing inference control rules.
+  control-as: [optional] AtomSpace storing inference control rules.
 
-  focus-set: optional focus-set, a SetLink with all atoms to consider
-             for forward chaining (NOT IMPLEMENTED).
+  focus-set: [optional] focus-set, a SetLink with all atoms to
+             consider for forward chaining (NOT IMPLEMENTED).
 "
   (let* ((trace-enabled (cog-atomspace? trace-as))
          (control-enabled (cog-atomspace? control-as))
@@ -166,7 +169,7 @@
   ExecutionLink
      SchemaNode name
      rbs
-     (NumberNode \"value\")
+     NumberNode value
 
   It will also delete the any
 
@@ -178,11 +181,11 @@
   to be sure there is ever only one value associated to that
   parameter. The value is automatically converted into string.
 "
-  (define (param-hypergraph value)
+  (define (param-hypergraph atom)
     (ExecutionLink
        (SchemaNode name)
        rbs
-       value)
+       atom)
   )
   (let ((del-prev-val (BindLink
                           (param-hypergraph (VariableNode "__VALUE__"))
@@ -195,7 +198,7 @@
   )
 
   ; Set new value for that parameter
-  (param-hypergraph (NumberNode (number->string value)))
+  (param-hypergraph (NumberNode value))
 )
 
 (define (ure-set-fuzzy-bool-parameter rbs name value)
@@ -211,6 +214,19 @@
      (PredicateNode name)
      rbs)
 )
+
+(define (ure-set-maximum-iterations rbs value)
+"
+  Set the URE:maximum-iterations parameter of a given RBS
+
+  ExecutionLink
+    SchemaNode \"URE:maximum-iterations\"
+    rbs
+    (NumberNode
+
+  delete any previous one if exists.
+"
+  (ure-set-num-parameter rbs "URE:maximum-iterations" value))
 
 (define-public (ure-define-rbs rbs iteration)
 "
@@ -298,6 +314,7 @@
       (append (gen-variables prefix (- n 1))
               (list (gen-variable prefix (- n 1))))))
 
+;; TODO: use random-variable instead
 (define (gen-rand-variable prefix base length)
 "
   gen-rand-variable prefix base length
