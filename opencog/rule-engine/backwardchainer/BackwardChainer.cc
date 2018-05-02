@@ -85,7 +85,7 @@ void BackwardChainer::do_step()
 	_iteration++;
 
 	ure_logger().debug() << "Iteration " << _iteration
-	                     << "/" << _configReader.get_maximum_iterations();
+	                     << "/" << _configReader.get_maximum_iterations_str();
 
 	expand_bit();
 	fulfill_bit();
@@ -94,15 +94,22 @@ void BackwardChainer::do_step()
 
 bool BackwardChainer::termination()
 {
-	if (_configReader.get_maximum_iterations() <= _iteration) {
-		ure_logger().debug() << "Terminate: reached the maximum number of iterations";
-		return true;
+	bool terminate = false;
+	std::string msg;            // Cause of the termination
+
+	if (_configReader.get_maximum_iterations() == _iteration) {
+		msg = "reached the maximum number of iterations";
+		terminate = true;
 	}
-	if (not _bit.empty() and _bit.andbits_exhausted()) {
-		ure_logger().debug() << "Terminate: all AndBITS are exhausted";
-		return true;
+	else if (not _bit.empty() and _bit.andbits_exhausted()) {
+		msg = "all AndBITS are exhausted";
+		terminate = true;
 	}
-	return false;
+
+	if (terminate)
+		ure_logger().debug() << "Terminate: " << msg;
+
+	return terminate;
 }
 
 Handle BackwardChainer::get_results() const

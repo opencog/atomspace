@@ -97,6 +97,13 @@ double UREConfig::get_mm_compressiveness() const
 	return _bc_params.mm_compressiveness;
 }
 
+std::string UREConfig::get_maximum_iterations_str() const
+{
+	if (_common_params.max_iter < 0)
+		return "+inf";
+	return std::to_string(_common_params.max_iter);
+}
+
 void UREConfig::set_attention_allocation(bool aa)
 {
 	_common_params.attention_alloc = aa;
@@ -159,7 +166,7 @@ void UREConfig::fetch_common_parameters(const Handle& rbs)
     }
 
 	// Fetch maximum number of iterations
-	_common_params.max_iter = fetch_num_param(max_iter_name, rbs);
+	_common_params.max_iter = fetch_num_param(max_iter_name, rbs, -1);
 
 	// Fetch attention allocation parameter
 	_common_params.attention_alloc = fetch_bool_param(attention_alloc_name, rbs);

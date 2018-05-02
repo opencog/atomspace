@@ -68,6 +68,9 @@ public:
 	double get_mm_complexity_penalty() const;
 	double get_mm_compressiveness() const;
 
+	// Display
+	std::string get_maximum_iterations_str() const; // "+inf" if negative
+
 	///////////////////////////////////////////////////////////////////
 	// Modifiers. WARNING: Those changes are not reflected in the    //
 	// AtomSpace, only in the UREConfig object.                      //
@@ -126,7 +129,7 @@ private:
 	struct CommonParameters {
 		RuleSet rules;
 		bool attention_alloc;
-		int max_iter;
+		int max_iter;           // If negative then disabled
 	};
 	CommonParameters _common_params;
 
