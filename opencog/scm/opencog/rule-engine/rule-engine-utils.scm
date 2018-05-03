@@ -11,8 +11,13 @@
 ;; -- ure-add-rules -- Associate  a list of rule-alias and TV pairs to a rbs
 ;; -- ure-set-num-parameter -- Set a numeric parameter of an rbs
 ;; -- ure-set-fuzzy-bool-parameter -- Set a fuzzy boolean parameter of an rbs
+;; -- ure-set-attention-allocation -- Set the URE:attention-allocation parameter
 ;; -- ure-set-maximum-iterations -- Set the URE:maximum-iterations parameter
 ;; -- ure-set-fc-retry-sources -- Set the URE:FC:retry-sources parameter
+;; -- ure-set-bc-complexity-penalty -- Set the URE:BC:complexity-penalty parameter
+;; -- ure-set-bc-maximum-bit-size -- Set the URE:BC:maximum-bit-size
+;; -- ure-set-bc-mm-complexity-penalty -- Set the URE:BC:MM:complexity-penalty
+;; -- ure-set-bc-mm-compressiveness -- Set the URE:BC:MM:compressiveness
 ;; -- ure-define-rbs -- Create a rbs that runs for a particular number of
 ;;                      iterations.
 ;; -- ure-get-forward-rule -- Return the forward form of a rule
@@ -215,6 +220,21 @@
      rbs)
 )
 
+(define (ure-set-attention-allocation rbs value)
+"
+  Set the URE:attention-allocation parameter of a given RBS
+
+  EvaluationLink (stv (if value 1 0) 1)
+    SchemaNode \"URE:attention-allocation\"
+    rbs
+    NumberNode value
+
+  where value is either #t or #f.
+
+  Delete any previous one if exists.
+"
+  (ure-set-num-parameter rbs "URE:attention-allocation" value))
+
 (define (ure-set-maximum-iterations rbs value)
 "
   Set the URE:maximum-iterations parameter of a given RBS
@@ -222,11 +242,76 @@
   ExecutionLink
     SchemaNode \"URE:maximum-iterations\"
     rbs
-    (NumberNode
+    NumberNode value
 
-  delete any previous one if exists.
+  Delete any previous one if exists.
 "
   (ure-set-num-parameter rbs "URE:maximum-iterations" value))
+
+(define (ure-set-fc-retry-sources rbs value)
+"
+  Set the URE:FC:retry-sources parameter of a given RBS
+
+  ExecutionLink
+    SchemaNode \"URE:FC:retry-sources\"
+    rbs
+    NumberNode value
+
+  Delete any previous one if exists.
+"
+  (ure-set-num-parameter rbs "URE:FC:retry-sources" value))
+
+(define (ure-set-bc-complexity-penalty rbs value)
+"
+  Set the URE:BC:complexity-penalty parameter of a given RBS
+
+  ExecutionLink
+    SchemaNode \"URE:BC:complexity-penalty\"
+    rbs
+    NumberNode value
+
+  Delete any previous one if exists.
+"
+  (ure-set-num-parameter rbs "URE:BC:complexity-penalty" value))
+
+(define (ure-set-bc-maximum-bit-size rbs value)
+"
+  Set the URE:BC:maximum-bit-size parameter of a given RBS
+
+  ExecutionLink
+    SchemaNode \"URE:BC:maximum-bit-size\"
+    rbs
+    NumberNode value
+
+  Delete any previous one if exists.
+"
+  (ure-set-num-parameter rbs "URE:BC:maximum-bit-size" value))
+
+(define (ure-set-bc-mm-complexity-penalty rbs value)
+"
+  Set the URE:BC:MM:complexity-penalty parameter of a given RBS
+
+  ExecutionLink
+    SchemaNode \"URE:BC:MM:complexity-penalty\"
+    rbs
+    NumberNode value
+
+  Delete any previous one if exists.
+"
+  (ure-set-num-parameter rbs "URE:BC:MM:complexity-penalty" value))
+
+(define (ure-set-bc-mm-compressiveness rbs value)
+"
+  Set the URE:BC:MM:compressiveness parameter of a given RBS
+
+  ExecutionLink
+    SchemaNode \"URE:BC:MM:compressiveness\"
+    rbs
+    NumberNode value
+
+  Delete any previous one if exists.
+"
+  (ure-set-num-parameter rbs "URE:BC:MM:compressiveness" value))
 
 (define-public (ure-define-rbs rbs iteration)
 "
@@ -278,11 +363,35 @@
 "
   (bool->tv (> (cog-stv-confidence A) 0)))
 
+(define-public (gt-zero-confidence-eval A)
+"
+  Add the following evaluation in the current atomspace
+
+  Evaluation
+    GroundedPredicate \"scm: gt-zero-confidence-eval\"
+    A
+"
+  (Evaluation
+    (GroundedPredicate "scm: gt-zero-confidence-eval")
+    A))
+
 (define-public (absolutely-true A)
 "
   Return TrueTV iff A's TV is TrueTV
 "
   (bool->tv (tv->bool (cog-tv A))))
+
+(define-public (absolutely-true-eval A)
+"
+  Add the following evaluation in the current atomspace
+
+  Evaluation
+    GroundedPredicate \"scm: absolutely-true\"
+    A
+"
+  (Evaluation
+    (GroundedPredicate "scm: absolutely-true")
+    A))
 
 (define (meta-bind bl)
 "
@@ -343,13 +452,21 @@
           ure-add-rules
           ure-set-num-parameter
           ure-set-fuzzy-bool-parameter
+          ure-set-attention-allocation
+          ure-set-maximum-iterations
+          ure-set-fc-retry-sources
+          ure-set-bc-maximum-bit-size
+          ure-set-bc-mm-complexity-penalty
+          ure-set-bc-mm-compressiveness
           ure-define-rbs
           ure-get-forward-rule
           bool->tv
           tv->bool
           atom->number
           gt-zero-confidence
+          gt-zero-confidence-eval
           absolutely-true
+          absolutely-true-eval
           meta-bind
           gen-variable
           gen-variables
