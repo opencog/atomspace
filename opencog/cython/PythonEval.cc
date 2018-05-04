@@ -24,6 +24,7 @@
  */
 
 #include <dlfcn.h>
+#include <unistd.h>
 
 #include <boost/filesystem/operations.hpp>
 
