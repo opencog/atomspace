@@ -644,18 +644,11 @@ IMPORTANT: MAKE SURE THERE ARE NO SPACES AT THE START OF EVERY LINE!
    [mycogdata]
    Description       = My Favorite Database
    Driver            = PostgreSQL Unicode
-   CommLog           = No
    Database          = mycogdata
    Servername        = localhost
    Port              = 5432
    Username          = opencog_user
    Password          = cheese
-   ReadOnly          = No
-   RowVersioning     = No
-   ShowSystemTables  = Yes
-   ShowOidColumn     = Yes
-   FakeOidIndex      = Yes
-   ConnSettings      =
 ```
 
 How To Pass the Unit Tests
@@ -684,8 +677,18 @@ So here's a super-short recap:
  * Create a new database: e.g.  `$ createdb opencog_test`
  * Create the tables: `$ cat atom.sql | psql `
  * (Optional) Create an entry in `~/.odbc.ini`, as explained above.
-   The entry should be called `opencog_test`, and use `opencog_tester`
-   as the user. Password is `cheese`.
+   The entry should look like this:
+```
+[opencog_test]
+Description = Unit-Test DB for Opencog unit tests.
+Driver      = PostgreSQL
+Database    = opencog_test
+Servername  = localhost
+Port        = 5432
+Username    = opencog_tester
+Password    = cheese
+```
+
  * The file `lib/opencog-test.conf` already has the above as the default
    username and database names.  Stick to these.
 
