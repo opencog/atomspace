@@ -24,6 +24,7 @@
  */
 
 #include <dlfcn.h>
+#include <unistd.h>
 
 #include <boost/filesystem/operations.hpp>
 
@@ -675,7 +676,7 @@ void PythonEval::execute_string(const char* command)
         Py_DECREF(pyResult);
 
     PyObject *f = PySys_GetObject((char *) "stdout");
-    if (f) PyFile_WriteString("\n", f);  // Force a flush
+    if (f) fsync(PyObject_AsFileDescriptor(f));  // Force a flush
 }
 
 int PythonEval::argument_count(PyObject* pyFunction)
