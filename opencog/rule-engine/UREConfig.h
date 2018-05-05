@@ -28,6 +28,8 @@
 
 #include <opencog/atomspace/AtomSpace.h>
 
+#include "URELogger.h"
+
 namespace opencog {
 
 /**
@@ -227,6 +229,17 @@ private:
 	// Return TV.mean > 0.5 or default_value in case no such
 	// EvaluationLink exists.
 	bool fetch_bool_param(const std::string& pred_name, const Handle& input, bool default_value = false);
+
+	// Log debug message about the value of parameter, fetched or default
+	template<typename T>
+	void log_param_value(const Handle& rbs_input,
+	                     const std::string& param_name,
+	                     const T& value, bool is_default=false) const
+	{
+		ure_logger().debug() << "Rule-base " << rbs_input->get_name()
+		                     << ", set parameter " << param_name
+		                     << " to " << (is_default ? "(default) " : "") << value;
+	}
 };
 
 } // ~namespace opencog
