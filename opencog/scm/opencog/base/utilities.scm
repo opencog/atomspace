@@ -284,23 +284,35 @@
 )
 
 ; -----------------------------------------------------------------------
-(define-public (cog-get-atoms atom-type)
+(define-public (cog-get-atoms atom-type . subtypes)
 "
-  cog-get-atoms -- Return a list of all atoms of type 'atom-type'
 
-  cog-get-atoms atom-type
-  Return a list of all atoms in the atomspace that are of type 'atom-type'
+  cog-get-atoms -- Return a list of all atoms of type 'atom-type', optionally
+                   if its subtypes as well.
 
-  Example usage:
+  Usage: (cog-get-atoms atom-type [subtypes])
+
+  Return a list of all atoms in the atomspace that are of type
+  'atom-type'. If the optional argument 'subtypes' is provided and set
+  to #t, then all atoms of subtypes of `atom-type` are returned as
+  well, otherwise only atoms of type `atom-type` are returned.
+
+  Examples:
+
   (display (cog-get-atoms 'ConceptNode))
   will return and display all atoms of type 'ConceptNode
+
+  (display (cog-get-atoms 'Atom #t))
+  will return and display all atoms, including outgoing duplicates.
 "
 	(let ((lst '()))
 		(define (mklist atom)
 			(set! lst (cons atom lst))
 			#f
 		)
-		(cog-map-type mklist atom-type)
+		(if (and (not (null? subtypes)) (eq? (car subtypes) #t))
+			(for-each (lambda (x) (cog-map-type mklist x)) (cog-get-all-subtypes atom-type))
+			(cog-map-type mklist atom-type))
 		lst
 	)
 )
