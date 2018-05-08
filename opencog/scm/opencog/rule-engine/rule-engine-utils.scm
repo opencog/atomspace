@@ -21,7 +21,6 @@
 ;; -- ure-define-rbs -- Create a rbs that runs for a particular number of
 ;;                      iterations.
 ;; -- ure-get-forward-rule -- Return the forward form of a rule
-;; -- ure-
 ;; -- bool->tv -- Convert #t to TRUE_TV and #f to FALSE_TV
 ;; -- tv->bool -- Convert TRUE_TV to #t, anything else to #f
 ;; -- atom->number -- Convert NumberNode into its corresponding number
@@ -214,11 +213,14 @@
   EvaluationLink (stv value 1)
      PredicateNode name
      rbs
+
+  If the provided value is a boolean, then it is automatically
+  converted into tv.
 "
-  (EvaluationLink (stv value 1)
-     (PredicateNode name)
-     rbs)
-)
+  (let* ((tv (if (number? value) (stv value 1) (bool->tv value))))
+    (EvaluationLink tv
+      (PredicateNode name)
+      rbs)))
 
 (define (ure-set-attention-allocation rbs value)
 "
@@ -252,14 +254,14 @@
 "
   Set the URE:FC:retry-sources parameter of a given RBS
 
-  ExecutionLink
-    SchemaNode \"URE:FC:retry-sources\"
+  EvaluationLink (stv value 1)
+    PredicateNode \"URE:FC:retry-sources\"
     rbs
-    NumberNode value
 
-  Delete any previous one if exists.
+  If the provided value is a boolean, then it is automatically
+  converted into tv.
 "
-  (ure-set-num-parameter rbs "URE:FC:retry-sources" value))
+  (ure-set-fuzzy-bool-parameter rbs "URE:FC:retry-sources" value))
 
 (define (ure-set-bc-complexity-penalty rbs value)
 "
