@@ -11,6 +11,13 @@
 ;; -- ure-add-rules -- Associate  a list of rule-alias and TV pairs to a rbs
 ;; -- ure-set-num-parameter -- Set a numeric parameter of an rbs
 ;; -- ure-set-fuzzy-bool-parameter -- Set a fuzzy boolean parameter of an rbs
+;; -- ure-set-attention-allocation -- Set the URE:attention-allocation parameter
+;; -- ure-set-maximum-iterations -- Set the URE:maximum-iterations parameter
+;; -- ure-set-fc-retry-sources -- Set the URE:FC:retry-sources parameter
+;; -- ure-set-bc-complexity-penalty -- Set the URE:BC:complexity-penalty parameter
+;; -- ure-set-bc-maximum-bit-size -- Set the URE:BC:maximum-bit-size
+;; -- ure-set-bc-mm-complexity-penalty -- Set the URE:BC:MM:complexity-penalty
+;; -- ure-set-bc-mm-compressiveness -- Set the URE:BC:MM:compressiveness
 ;; -- ure-define-rbs -- Create a rbs that runs for a particular number of
 ;;                      iterations.
 ;; -- ure-get-forward-rule -- Return the forward form of a rule
@@ -47,11 +54,11 @@
   source: Source from where to start forward chaining. If a SetLink
           then multiple sources are considered.
 
-  vardecl: optional variable declaration of the source (in case it has
-           variables)
+  vd: optional variable declaration of the source (in case it has
+      variables)
 
-  focus-set: optional focus-set, a SetLink with all atoms to consider
-             for forward chaining
+  fs: optional focus-set, a SetLink with all atoms to consider for
+      forward chaining
 "
   (cog-mandatory-args-fc rbs source vardecl focus-set))
 
@@ -67,15 +74,15 @@
 
   target: Target to proof.
 
-  vardecl: optional variable declaration of the target (in case it has
-           variables)
+  vardecl: [optional] Variable declaration of the target (in case it
+           has variables)
 
-  trace-as: optional AtomSpace to record the back-inference traces.
+  trace-as: [optional] AtomSpace to record the back-inference traces.
 
-  control-as: optional AtomSpace storing inference control rules.
+  control-as: [optional] AtomSpace storing inference control rules.
 
-  focus-set: optional focus-set, a SetLink with all atoms to consider
-             for forward chaining (NOT IMPLEMENTED).
+  focus-set: [optional] focus-set, a SetLink with all atoms to
+             consider for forward chaining (NOT IMPLEMENTED).
 "
   (let* ((trace-enabled (cog-atomspace? trace-as))
          (control-enabled (cog-atomspace? control-as))
@@ -158,29 +165,31 @@
   (for-each add-rule rules)
 )
 
-; Set numerical parameters. Given an rbs, a parameter name and its
-; value, create
-;
-; ExecutionLink
-;    SchemaNode name
-;    rbs
-;    (NumberNode "value")
-;
-; It will also delete the any
-;
-; ExecutionLink
-;    SchemaNode name
-;    rbs
-;    *
-;
-; to be sure there is ever only one value associated to that
-; parameter. The value is automatically converted into string.
 (define (ure-set-num-parameter rbs name value)
-  (define (param-hypergraph value)
+"
+  Set numerical parameters. Given an rbs, a parameter name and its
+  value, create
+
+  ExecutionLink
+     SchemaNode name
+     rbs
+     NumberNode value
+
+  It will also delete the any
+
+  ExecutionLink
+     SchemaNode name
+     rbs
+     *
+
+  to be sure there is ever only one value associated to that
+  parameter. The value is automatically converted into string.
+"
+  (define (param-hypergraph atom)
     (ExecutionLink
        (SchemaNode name)
        rbs
-       value)
+       atom)
   )
   (let ((del-prev-val (BindLink
                           (param-hypergraph (VariableNode "__VALUE__"))
@@ -193,20 +202,118 @@
   )
 
   ; Set new value for that parameter
-  (param-hypergraph (NumberNode (number->string value)))
+  (param-hypergraph (NumberNode value))
 )
 
-; Set (fuzzy) bool parameters. Given an RBS, a parameter name and its
-; value, create (or overwrite)
-;
-; EvaluationLink (stv value 1)
-;    PredicateNode name
-;    rbs
 (define (ure-set-fuzzy-bool-parameter rbs name value)
-  (EvaluationLink (stv value 1)
-     (PredicateNode name)
-     rbs)
-)
+"
+  Set (fuzzy) bool parameters. Given an RBS, a parameter name and its
+  value, create (or overwrite)
+
+  EvaluationLink (stv value 1)
+     PredicateNode name
+     rbs
+
+  If the provided value is a boolean, then it is automatically
+  converted into tv.
+"
+  (let* ((tv (if (number? value) (stv value 1) (bool->tv value))))
+    (EvaluationLink tv
+      (PredicateNode name)
+      rbs)))
+
+(define (ure-set-attention-allocation rbs value)
+"
+  Set the URE:attention-allocation parameter of a given RBS
+
+  EvaluationLink (stv (if value 1 0) 1)
+    SchemaNode \"URE:attention-allocation\"
+    rbs
+    NumberNode value
+
+  where value is either #t or #f.
+
+  Delete any previous one if exists.
+"
+  (ure-set-num-parameter rbs "URE:attention-allocation" value))
+
+(define (ure-set-maximum-iterations rbs value)
+"
+  Set the URE:maximum-iterations parameter of a given RBS
+
+  ExecutionLink
+    SchemaNode \"URE:maximum-iterations\"
+    rbs
+    NumberNode value
+
+  Delete any previous one if exists.
+"
+  (ure-set-num-parameter rbs "URE:maximum-iterations" value))
+
+(define (ure-set-fc-retry-sources rbs value)
+"
+  Set the URE:FC:retry-sources parameter of a given RBS
+
+  EvaluationLink (stv value 1)
+    PredicateNode \"URE:FC:retry-sources\"
+    rbs
+
+  If the provided value is a boolean, then it is automatically
+  converted into tv.
+"
+  (ure-set-fuzzy-bool-parameter rbs "URE:FC:retry-sources" value))
+
+(define (ure-set-bc-complexity-penalty rbs value)
+"
+  Set the URE:BC:complexity-penalty parameter of a given RBS
+
+  ExecutionLink
+    SchemaNode \"URE:BC:complexity-penalty\"
+    rbs
+    NumberNode value
+
+  Delete any previous one if exists.
+"
+  (ure-set-num-parameter rbs "URE:BC:complexity-penalty" value))
+
+(define (ure-set-bc-maximum-bit-size rbs value)
+"
+  Set the URE:BC:maximum-bit-size parameter of a given RBS
+
+  ExecutionLink
+    SchemaNode \"URE:BC:maximum-bit-size\"
+    rbs
+    NumberNode value
+
+  Delete any previous one if exists.
+"
+  (ure-set-num-parameter rbs "URE:BC:maximum-bit-size" value))
+
+(define (ure-set-bc-mm-complexity-penalty rbs value)
+"
+  Set the URE:BC:MM:complexity-penalty parameter of a given RBS
+
+  ExecutionLink
+    SchemaNode \"URE:BC:MM:complexity-penalty\"
+    rbs
+    NumberNode value
+
+  Delete any previous one if exists.
+"
+  (ure-set-num-parameter rbs "URE:BC:MM:complexity-penalty" value))
+
+(define (ure-set-bc-mm-compressiveness rbs value)
+"
+  Set the URE:BC:MM:compressiveness parameter of a given RBS
+
+  ExecutionLink
+    SchemaNode \"URE:BC:MM:compressiveness\"
+    rbs
+    NumberNode value
+
+  Delete any previous one if exists.
+"
+  (ure-set-num-parameter rbs "URE:BC:MM:compressiveness" value))
 
 (define-public (ure-define-rbs rbs iteration)
 "
@@ -258,11 +365,35 @@
 "
   (bool->tv (> (cog-stv-confidence A) 0)))
 
+(define-public (gt-zero-confidence-eval A)
+"
+  Add the following evaluation in the current atomspace
+
+  Evaluation
+    GroundedPredicate \"scm: gt-zero-confidence-eval\"
+    A
+"
+  (Evaluation
+    (GroundedPredicate "scm: gt-zero-confidence-eval")
+    A))
+
 (define-public (absolutely-true A)
 "
   Return TrueTV iff A's TV is TrueTV
 "
   (bool->tv (tv->bool (cog-tv A))))
+
+(define-public (absolutely-true-eval A)
+"
+  Add the following evaluation in the current atomspace
+
+  Evaluation
+    GroundedPredicate \"scm: absolutely-true\"
+    A
+"
+  (Evaluation
+    (GroundedPredicate "scm: absolutely-true")
+    A))
 
 (define (meta-bind bl)
 "
@@ -294,6 +425,7 @@
       (append (gen-variables prefix (- n 1))
               (list (gen-variable prefix (- n 1))))))
 
+;; TODO: use random-variable instead
 (define (gen-rand-variable prefix base length)
 "
   gen-rand-variable prefix base length
@@ -322,13 +454,21 @@
           ure-add-rules
           ure-set-num-parameter
           ure-set-fuzzy-bool-parameter
+          ure-set-attention-allocation
+          ure-set-maximum-iterations
+          ure-set-fc-retry-sources
+          ure-set-bc-maximum-bit-size
+          ure-set-bc-mm-complexity-penalty
+          ure-set-bc-mm-compressiveness
           ure-define-rbs
           ure-get-forward-rule
           bool->tv
           tv->bool
           atom->number
           gt-zero-confidence
+          gt-zero-confidence-eval
           absolutely-true
+          absolutely-true-eval
           meta-bind
           gen-variable
           gen-variables

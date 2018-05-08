@@ -125,8 +125,9 @@ void ForwardChainer::do_chain()
 
 void ForwardChainer::do_step()
 {
-	ure_logger().debug("Iteration %d", _iteration);
 	_iteration++;
+	ure_logger().debug() << "Iteration " << _iteration
+	                     << "/" << _configReader.get_maximum_iterations_str();
 
 	// Expand meta rules. This should probably be done on-the-fly in
 	// the select_rule method, but for now it's here
@@ -158,12 +159,13 @@ bool ForwardChainer::termination()
 {
 	bool terminate = false;
 
-	// Temporary termination if all sources have been tried
+	// Terminate if all sources have been tried (if sources are to be
+	// tried only once)
 	if (not _configReader.get_retry_sources())
 		terminate = 0 < _iteration and _unselected_sources.empty();
 
 	// Terminate if max iterations has been reached
-	terminate |= _configReader.get_maximum_iterations() <= _iteration;
+	terminate |= _configReader.get_maximum_iterations() == _iteration;
 
 	return terminate;
 }

@@ -28,6 +28,8 @@
 
 #include <opencog/atomspace/AtomSpace.h>
 
+#include "URELogger.h"
+
 namespace opencog {
 
 /**
@@ -67,6 +69,9 @@ public:
 	double get_max_bit_size() const;
 	double get_mm_complexity_penalty() const;
 	double get_mm_compressiveness() const;
+
+	// Display
+	std::string get_maximum_iterations_str() const; // "+inf" if negative
 
 	///////////////////////////////////////////////////////////////////
 	// Modifiers. WARNING: Those changes are not reflected in the    //
@@ -126,7 +131,7 @@ private:
 	struct CommonParameters {
 		RuleSet rules;
 		bool attention_alloc;
-		int max_iter;
+		int max_iter;           // If negative then disabled
 	};
 	CommonParameters _common_params;
 
@@ -224,6 +229,17 @@ private:
 	// Return TV.mean > 0.5 or default_value in case no such
 	// EvaluationLink exists.
 	bool fetch_bool_param(const std::string& pred_name, const Handle& input, bool default_value = false);
+
+	// Log debug message about the value of parameter, fetched or default
+	template<typename T>
+	void log_param_value(const Handle& rbs_input,
+	                     const std::string& param_name,
+	                     const T& value, bool is_default=false) const
+	{
+		ure_logger().debug() << "Rule-base " << rbs_input->get_name()
+		                     << ", set parameter " << param_name
+		                     << " to " << (is_default ? "(default) " : "") << value;
+	}
 };
 
 } // ~namespace opencog
