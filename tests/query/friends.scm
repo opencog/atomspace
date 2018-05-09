@@ -1,4 +1,6 @@
-(use-modules (opencog) (opencog exec) (opencog query))
+(use-modules (opencog))
+(use-modules (opencog query))
+(use-modules (opencog exec))
 
 ;; Facts
 (Evaluation (stv 1 1)

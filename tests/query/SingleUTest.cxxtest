@@ -41,9 +41,9 @@ public:
 
         as = new AtomSpace();
         eval = new SchemeEval(as);
-        eval->eval("(use-modules (opencog exec) (opencog query))");
+        eval->eval("(use-modules (opencog query))");
+        eval->eval("(use-modules (opencog exec))");
         eval->eval("(add-to-load-path \"" PROJECT_SOURCE_DIR "\")");
-
     }
 
     ~SingleUTest()
