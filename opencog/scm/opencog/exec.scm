@@ -8,3 +8,5 @@
 (use-modules (opencog))
 
 (load-extension "libexecution" "opencog_exec_init")
+
+(export cog-evaluate! cog-execute!)
