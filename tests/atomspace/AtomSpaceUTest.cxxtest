@@ -256,13 +256,7 @@ struct compareAtom
  * @return The set of atoms of a given type (subclasses optionally).
  *
  * @note The matched entries are appended to a container whose
- * OutputIterator is passed as the first argument.  Example of call to this
- * method, which would return all entries in AtomSpace, sorted by STI:
- * @code
- *         std::list<Handle> ret;
- *         AttentionValue::STISort stiSort;
- *         atomSpace.getHandleSet(back_inserter(ret), ATOM, true, stiSort);
- * @endcode
+ * OutputIterator is passed as the first argument.
  */
 template <typename OutputIterator, typename Compare> OutputIterator
 getSortedHandleSet(AtomSpace* as,
