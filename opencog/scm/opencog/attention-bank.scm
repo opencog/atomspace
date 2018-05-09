@@ -198,5 +198,13 @@
     200
 ")
 
+; --------------------------------------------------------------------
+
+(set-procedure-property! cog-bind-af 'documentation
+"
+ cog-bind-af HANDLE
+    Run pattern matcher on HANDLE.  HANDLE must be a BindLink.
+    A special-purpose pattern matcher used by the URE.
+")
 
 ; --------------------------------------------------------------------
