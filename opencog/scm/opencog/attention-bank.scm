@@ -13,6 +13,76 @@
 (use-modules (opencog))
 
 ;; -----------------------------------------------------
+
+(set-procedure-property! cog-av 'documentation
+"
+ cog-av ATOM
+    Return the attention value of ATOM.
+
+    Example:
+       ; Define a node
+       guile> (define x
+                 (cog-new-node 'ConceptNode \"abc\"
+                    (cog-new-av 11 21 0)))
+       guile> (cog-av x)
+       (av 11 21 0)
+       guile> (cog-av? (cog-av x))
+       #t
+")
+
+(set-procedure-property! cog-set-av! 'documentation
+"
+ cog-set-av! ATOM AV
+    Set the attention value of ATOM to AV.
+
+    Example:
+       ; Define a node
+       guile> (define x (cog-new-node 'ConceptNode \"def\"))
+       guile> (cog-av x)
+       (av 0 0 0)
+       guile> (cog-set-av! x (cog-new-av 44 55 1))
+       (ConceptNode \"def\" (av 44 55 1))
+       guile> (cog-av x)
+       (av 44 55 1)
+")
+
+(set-procedure-property! cog-inc-vlti! 'documentation
+"
+ cog-inc-vlti! ATOM
+    Increase the vlti of ATOM by 1.
+
+    Example:
+       ; Define a node
+       guile> (define x
+                 (cog-new-node 'ConceptNode \"abc\"
+                    (cog-new-av 11 21 0)))
+       guile> (cog-inc-vlti! x)
+       (ConceptNode \"abc\" (av 11 21 1))
+       guile> (cog-av x)
+       (av 11 21 1)
+       guile> (cog-inc-vlti! x)
+       (ConceptNode \"abc\" (av 11 21 2))
+       guile> (cog-av x)
+       (av 11 21 2)
+")
+
+(set-procedure-property! cog-dec-vlti! 'documentation
+"
+ cog-dec-vlti! ATOM
+    Decrease the vlti of ATOM by 1.
+
+    Example:
+       ; Define a node
+       guile> (define x
+                 (cog-new-node 'ConceptNode \"abc\"
+                    (cog-new-av 11 21 1)))
+       guile> (cog-dec-vlti! x)
+       (ConceptNode \"abc\" (av 11 21 0))
+       guile> (cog-av x)
+       (av 11 21 0)
+")
+
+;; -----------------------------------------------------
 ;;
 
 (define* (cog-af #:optional (n -1))
