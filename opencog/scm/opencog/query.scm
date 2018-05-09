@@ -20,7 +20,6 @@
 (export
 	cog-bind-first-n
 	cog-satisfying-set-first-n
-	cog-bind-af
 	cog-satisfy
 )
 

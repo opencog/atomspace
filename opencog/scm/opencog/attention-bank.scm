@@ -10,7 +10,9 @@
 ; This avoids complaints, when the docs are set, below.
 (export
 	cog-av cog-set-av! cog-inc-vlti! cog-dec-vlti!
-	cog-update-af cog-af-size cog-set-af-size! cog-stimulate)
+	cog-update-af cog-af-size cog-set-af-size! cog-stimulate
+	cog-bind-af
+)
 
 (use-modules (opencog))
 
