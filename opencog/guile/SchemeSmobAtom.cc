@@ -18,7 +18,6 @@
 #include <opencog/truthvalue/TruthValue.h>
 #include <opencog/atomutils/FindUtils.h>
 #include <opencog/guile/SchemeSmob.h>
-#include <opencog/attentionbank/AttentionBank.h>
 
 using namespace opencog;
 
@@ -133,38 +132,6 @@ SCM SchemeSmob::ss_inc_count (SCM satom, SCM scnt)
 		tv->get_mean(), tv->get_confidence(), cnt);
 
 	h->setTruthValue(tv);
-	return satom;
-}
-
-/* ============================================================== */
-/* Attention-Value stuff */
-// XXX FIXME all this should move to attentionbank/AttentionBankSCM.cc
-
-SCM SchemeSmob::ss_set_av (SCM satom, SCM sav)
-{
-	Handle h = verify_handle(satom, "cog-set-av!");
-	AttentionValuePtr av = verify_av(sav, "cog-set-av!", 2);
-	AtomSpace* atomspace = ss_get_env_as("cog-set-av!");
-
-	attentionbank(atomspace).change_av(h, av);
-	return satom;
-}
-
-SCM SchemeSmob::ss_inc_vlti (SCM satom)
-{
-	Handle h = verify_handle(satom, "cog-inc-vlti!");
-	AtomSpace* atomspace = ss_get_env_as("cog-inc-vlti!");
-
-	attentionbank(atomspace).inc_vlti(h);
-	return satom;
-}
-
-SCM SchemeSmob::ss_dec_vlti (SCM satom)
-{
-	Handle h = verify_handle(satom, "cog-dec-vlti!");
-	AtomSpace* atomspace = ss_get_env_as("cog-dec-vlti!");
-
-	attentionbank(atomspace).dec_vlti(h);
 	return satom;
 }
 

@@ -310,11 +310,6 @@ void SchemeSmob::register_procs()
 	register_proc("cog-set-tv!",           2, 0, 0, C(ss_set_tv));
 	register_proc("cog-inc-count!",        2, 0, 0, C(ss_inc_count));
 
-	// Attention values on atoms
-	register_proc("cog-set-av!",           2, 0, 0, C(ss_set_av));
-	register_proc("cog-inc-vlti!",         1, 0, 0, C(ss_inc_vlti));
-	register_proc("cog-dec-vlti!",         1, 0, 0, C(ss_dec_vlti));
-
 	// property getters on atoms
 	register_proc("cog-name",              1, 0, 0, C(ss_name));
 	register_proc("cog-type",              1, 0, 0, C(ss_type));

@@ -111,13 +111,10 @@ private:
 	static SCM ss_value_to_list(SCM);
 	static SCM ss_value_ref(SCM, SCM);
 
-	// Set properties of atoms
-	static SCM ss_set_av(SCM, SCM);
+	// Property setters on atoms
 	static SCM ss_set_tv(SCM, SCM);
 	static SCM ss_set_value(SCM, SCM, SCM);
 	static SCM ss_inc_count(SCM, SCM);
-	static SCM ss_inc_vlti(SCM);
-	static SCM ss_dec_vlti(SCM);
 
 	// Atom properties
 	static SCM ss_name(SCM);
