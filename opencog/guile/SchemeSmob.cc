@@ -362,14 +362,8 @@ void SchemeSmob::register_procs()
 
 	// Attention values
 	register_proc("cog-new-av",            3, 0, 0, C(ss_new_av));
-	register_proc("cog-stimulate",         2, 0, 0, C(ss_stimulate));
 	register_proc("cog-av?",               1, 0, 0, C(ss_av_p));
 	register_proc("cog-av->alist",         1, 0, 0, C(ss_av_get_value));
-
-	// AttentionalFocus
-	register_proc("cog-af",                0, 1, 0, C(ss_af));
-	register_proc("cog-af-size",           0, 0, 0, C(ss_af_size));
-	register_proc("cog-set-af-size!",      1, 0, 0, C(ss_set_af_size));
 
 	// Atom types
 	register_proc("cog-get-types",         0, 0, 0, C(ss_get_types));

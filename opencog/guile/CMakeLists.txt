@@ -8,7 +8,6 @@ ADD_LIBRARY (smob
 	SchemePrimitive.cc
 	SchemeSmob.cc
 	SchemeSmobAtom.cc
-	SchemeSmobAF.cc
 	SchemeSmobAS.cc
 	SchemeSmobAV.cc
 	SchemeSmobGC.cc
