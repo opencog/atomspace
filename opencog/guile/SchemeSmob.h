@@ -124,7 +124,6 @@ private:
 	static SCM ss_type(SCM);
 	static SCM ss_arity(SCM);
 	static SCM ss_as(SCM);
-	static SCM ss_av(SCM);
 	static SCM ss_tv(SCM);
 	static SCM ss_keys(SCM);
 	static SCM ss_value(SCM, SCM);

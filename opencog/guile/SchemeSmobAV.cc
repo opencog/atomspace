@@ -9,7 +9,6 @@
 #include <cstddef>
 #include <libguile.h>
 
-#include <opencog/attentionbank/AttentionBank.h>
 #include <opencog/truthvalue/AttentionValue.h>
 #include <opencog/guile/SchemeSmob.h>
 

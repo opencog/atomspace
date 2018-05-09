@@ -327,7 +327,6 @@ void SchemeSmob::register_procs()
 	register_proc("cog-keys",              1, 0, 0, C(ss_keys));
 	register_proc("cog-value",             2, 0, 0, C(ss_value));
 	register_proc("cog-tv",                1, 0, 0, C(ss_tv));
-	register_proc("cog-av",                1, 0, 0, C(ss_av));
 	register_proc("cog-as",                1, 0, 0, C(ss_as));
 
 	// Truth-values

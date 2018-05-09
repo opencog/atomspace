@@ -140,12 +140,6 @@ SCM SchemeSmob::ss_inc_count (SCM satom, SCM scnt)
 /* Attention-Value stuff */
 // XXX FIXME all this should move to attentionbank/AttentionBankSCM.cc
 
-SCM SchemeSmob::ss_av (SCM satom)
-{
-	Handle h = verify_handle(satom, "cog-av");
-	return av_to_scm(get_av(h));
-}
-
 SCM SchemeSmob::ss_set_av (SCM satom, SCM sav)
 {
 	Handle h = verify_handle(satom, "cog-set-av!");
