@@ -1,16 +1,11 @@
 ;
-; av-tv.scm
+; tv.scm
 ;
-; Useful utilities for working with attention values, truth values
-; and the attentional allocation system
+; Useful utilities for working with truth values.
 ;
 ; Utilities provided:
 ; -- cog-merge-tv! -- merge truth values on atom
 ; -- cog-merge-hi-conf-tv! -- different merge style
-; -- cog-af-length -- Length of list of atoms in the attentional focus
-; -- cog-av-sti -- Return the STI of an atom
-; -- cog-sti-above -- Filter atoms with STI above a threshold
-; -- cog-sti-below -- Filter atoms with STI below a threshold
 ; -- cog-stv-strength -- SimpleTruthValue strength of an atom
 ; -- cog-stv-strength-above -- Filter atoms with TV strength above a threshold
 ; -- cog-stv-strength-below -- Filter atoms with TV strength below a threshold
@@ -37,34 +32,6 @@
 " cog-merge-hi-conf-tv! -- merge truth values on atom"
 	(cog-set-tv! ATOM (cog-tv-merge-hi-conf (cog-tv ATOM) TV))
 )
-
-; -----------------------------------------------------------------------
-(define-public (cog-af-length)
-" cog-af-length -- Length of the list of atoms in the attentional focus."
-	(length (cog-af)))
-
-; -----------------------------------------------------------------------
-(define-public (cog-av-sti x)
-" cog-av-sti -- Return the STI of an atom."
-	(cdr (assoc 'sti (cog-av->alist (cog-av x)))))
-
-; -----------------------------------------------------------------------
-(define-public (cog-sti-above y z)
-"
-  cog-sti-above
-  Given a threshold 'y' and a list of atoms 'z', returns a list of atoms
-  with STI above the threshold
-"
-	(filter (lambda (x) (> (cog-av-sti x) y)) z))
-
-; -----------------------------------------------------------------------
-(define-public (cog-sti-below y z)
-"
-  cog-sti-below
-  Given a threshold 'y' and a list of atoms 'z', returns a list of atoms
-  with STI below the threshold
-"
-	(filter (lambda (x) (< (cog-av-sti x) y)) z))
 
 ; -----------------------------------------------------------------------
 (define-public (cog-stv-strength x)

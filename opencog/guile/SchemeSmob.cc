@@ -310,11 +310,6 @@ void SchemeSmob::register_procs()
 	register_proc("cog-set-tv!",           2, 0, 0, C(ss_set_tv));
 	register_proc("cog-inc-count!",        2, 0, 0, C(ss_inc_count));
 
-	// Attention values on atoms
-	register_proc("cog-set-av!",           2, 0, 0, C(ss_set_av));
-	register_proc("cog-inc-vlti!",         1, 0, 0, C(ss_inc_vlti));
-	register_proc("cog-dec-vlti!",         1, 0, 0, C(ss_dec_vlti));
-
 	// property getters on atoms
 	register_proc("cog-name",              1, 0, 0, C(ss_name));
 	register_proc("cog-type",              1, 0, 0, C(ss_type));
@@ -327,7 +322,6 @@ void SchemeSmob::register_procs()
 	register_proc("cog-keys",              1, 0, 0, C(ss_keys));
 	register_proc("cog-value",             2, 0, 0, C(ss_value));
 	register_proc("cog-tv",                1, 0, 0, C(ss_tv));
-	register_proc("cog-av",                1, 0, 0, C(ss_av));
 	register_proc("cog-as",                1, 0, 0, C(ss_as));
 
 	// Truth-values
@@ -362,14 +356,8 @@ void SchemeSmob::register_procs()
 
 	// Attention values
 	register_proc("cog-new-av",            3, 0, 0, C(ss_new_av));
-	register_proc("cog-stimulate",         2, 0, 0, C(ss_stimulate));
 	register_proc("cog-av?",               1, 0, 0, C(ss_av_p));
 	register_proc("cog-av->alist",         1, 0, 0, C(ss_av_get_value));
-
-	// AttentionalFocus
-	register_proc("cog-af",                0, 1, 0, C(ss_af));
-	register_proc("cog-af-size",           0, 0, 0, C(ss_af_size));
-	register_proc("cog-set-af-size!",      1, 0, 0, C(ss_set_af_size));
 
 	// Atom types
 	register_proc("cog-get-types",         0, 0, 0, C(ss_get_types));

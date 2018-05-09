@@ -115,36 +115,6 @@
 )
 
 ; -----------------------------------------------------------------------
-(define-public (cog-set-sti! atom sti)
-"
-  Returns the atom after setting its sti to the given value.
-"
-    (let ((av-alist (cog-av->alist (cog-av atom))))
-        (cog-set-av! atom
-            (av sti (assoc-ref av-alist 'lti) (assoc-ref av-alist 'vlti)))
-    )
-)
-
-(define-public (cog-set-lti! atom lti)
-"
-  Returns the atom after setting its lti to the given value.
-"
-    (let ((av-alist (cog-av->alist (cog-av atom))))
-        (cog-set-av! atom
-            (av (assoc-ref av-alist 'sti) lti (assoc-ref av-alist 'vlti)))
-    )
-)
-
-(define-public (cog-set-vlti! atom vlti)
-"
-  Returns the atom after setting its vlti to the given value.
-"
-    (let ((av-alist (cog-av->alist (cog-av atom))))
-        (cog-set-av! atom
-            (av (assoc-ref av-alist 'sti) (assoc-ref av-alist 'lti) vlti))
-    )
-)
-; -----------------------------------------------------------------------
 ; Analogs of car, cdr, etc. but for atoms.
 ; (define (gar x) (if (cog-atom? x) (car (cog-outgoing-set x)) (car x)))
 ; (define (gdr x) (if (cog-atom? x) (cadr (cog-outgoing-set x)) (cdr x)))
@@ -1254,9 +1224,6 @@
 'tv-conf
 'tv-non-null-conf?
 'tv-count
-'cog-set-sti!
-'cog-set-lti!
-'cog-set-vlti!
 'gar
 'gdr
 'gadr

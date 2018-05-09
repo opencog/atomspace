@@ -8,7 +8,6 @@ ADD_LIBRARY (smob
 	SchemePrimitive.cc
 	SchemeSmob.cc
 	SchemeSmobAtom.cc
-	SchemeSmobAF.cc
 	SchemeSmobAS.cc
 	SchemeSmobAV.cc
 	SchemeSmobGC.cc
@@ -40,17 +39,16 @@ TARGET_LINK_LIBRARIES(smob
 	atomcore
 	atombase
 	truthvalue
-	attentionbank
 	atomspace
 	${GUILE_LIBRARIES}
 	${COGUTIL_LIBRARY}
 )
 
 TARGET_LINK_LIBRARIES(logger
+	ruleengine # for cog-ure-logger XXX FIXME this is insane. WTF!??
 	smob
 	${GUILE_LIBRARIES}
 	${COGUTIL_LIBRARY}
-    ruleengine # for cog-ure-logger
 )
 
 TARGET_LINK_LIBRARIES(randgen

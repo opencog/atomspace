@@ -18,6 +18,7 @@ ADD_DEPENDENCIES(query
 )
 
 TARGET_LINK_LIBRARIES(query
+	attentionbank
 	atomutils
 	lambda
 	atomspace

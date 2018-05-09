@@ -21,6 +21,8 @@
  * 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
  */
 
+// XXX FIXME -- move this over to the opencog/attentionbank diectory
+
 #include "AttentionalFocusCB.h"
 #include <opencog/attentionbank/AttentionBank.h>
 
@@ -33,29 +35,29 @@ AttentionalFocusCB::AttentionalFocusCB(AtomSpace* as) :
 
 bool AttentionalFocusCB::node_match(const Handle& node1, const Handle& node2)
 {
-	return attentionbank(_as).atom_is_in_AF(node2) and node1 == node2;
+	return node1 == node2 and attentionbank(_as).atom_is_in_AF(node2);
 }
 
 bool AttentionalFocusCB::link_match(const PatternTermPtr& ptm, const Handle& lsoln)
 {
-	return attentionbank(_as).atom_is_in_AF(lsoln) and 
-           DefaultPatternMatchCB::link_match(ptm, lsoln);
+	return DefaultPatternMatchCB::link_match(ptm, lsoln) and
+		attentionbank(_as).atom_is_in_AF(lsoln);
 }
 
 
 IncomingSet AttentionalFocusCB::get_incoming_set(const Handle& h)
 {
-	const IncomingSet &incoming_set = h->getIncomingSet();
+	IncomingSet incoming_set = h->getIncomingSet();
 
 	// Discard the part of the incoming set that is below the
 	// AF boundary.  The PM will look only at those links that
 	// this callback returns; thus we avoid searching the low-AF
 	// parts of the hypergraph.
-    IncomingSet filtered_set;
-    for (const auto& l : incoming_set){
-        if(attentionbank(_as).atom_is_in_AF(Handle(l)))
-            filtered_set.push_back(l);
-    }
+	IncomingSet filtered_set;
+	for (const auto& l : incoming_set) {
+		if (attentionbank(_as).atom_is_in_AF(Handle(l)))
+			filtered_set.push_back(l);
+	}
 
 	// If nothing is in AF
 	if (filtered_set.empty())
