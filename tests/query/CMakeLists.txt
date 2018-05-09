@@ -77,7 +77,6 @@ IF (HAVE_GUILE)
 	ADD_CXXTEST(NestedPutUTest)
 
 	ADD_CXXTEST(FirstNUTest)
-	ADD_CXXTEST(AttentionalFocusCBUTest)
 	ADD_CXXTEST(SudokuUTest)
 	ADD_CXXTEST(EinsteinUTest)
 	ADD_CXXTEST(TypeChoiceUTest)

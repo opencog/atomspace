@@ -4,8 +4,7 @@ LINK_LIBRARIES(
 	atomutils
 	atomspaceutils
 	atomspace
-	attentionbank
-	clearbox
+#	clearbox
 )
 
 IF(HAVE_GUILE)
@@ -19,7 +18,6 @@ ADD_CXXTEST(NodeUTest)
 ADD_CXXTEST(LinkUTest)
 ADD_CXXTEST(TLBUTest)
 ADD_CXXTEST(AtomSpaceUTest)
-ADD_CXXTEST(AtomSpaceImplUTest)
 ADD_CXXTEST(AtomSpaceAsyncUTest)
 ADD_CXXTEST(UseCountUTest)
 ADD_CXXTEST(MultiSpaceUTest)

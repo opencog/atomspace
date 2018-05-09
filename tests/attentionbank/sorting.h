@@ -23,23 +23,23 @@ public:
     virtual bool test(const AtomPtr&, const AtomPtr&) const = 0;
 };
 
-    //! functor for comparing atom's attention value
-    struct STISort : public AtomComparator  {
-        STISort() {};
-        virtual bool test(const AtomPtr&, const AtomPtr&) const;
-    };
+//! functor for comparing atom's attention value
+struct STISort : public AtomComparator  {
+    STISort() {};
+    virtual bool test(const AtomPtr&, const AtomPtr&) const;
+};
 
-    //! functor for comparing atom's attention value
-    struct LTIAndTVAscendingSort : public AtomComparator  {
-        LTIAndTVAscendingSort() {};
-        virtual bool test(const AtomPtr&, const AtomPtr&) const;
-    };
+//! functor for comparing atom's attention value
+struct LTIAndTVAscendingSort : public AtomComparator  {
+    LTIAndTVAscendingSort() {};
+    virtual bool test(const AtomPtr&, const AtomPtr&) const;
+};
 
-    //! functor for comparing atom's attention value
-    struct LTIThenTVAscendingSort : public AtomComparator {
-        LTIThenTVAscendingSort() {};
-        virtual bool test(const AtomPtr&, const AtomPtr&) const;
-    };
+//! functor for comparing atom's attention value
+struct LTIThenTVAscendingSort : public AtomComparator {
+    LTIThenTVAscendingSort() {};
+    virtual bool test(const AtomPtr&, const AtomPtr&) const;
+};
 
 bool STISort::test(const AtomPtr& h1, const AtomPtr& h2) const
 {

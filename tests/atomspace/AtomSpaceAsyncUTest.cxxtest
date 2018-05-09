@@ -31,7 +31,6 @@
 #include <string.h>
 
 #include <opencog/atomspace/AtomSpace.h>
-#include <opencog/attentionbank/AttentionBank.h>
 #include <opencog/atoms/base/Node.h>
 #include <opencog/truthvalue/SimpleTruthValue.h>
 #include <opencog/util/Logger.h>
@@ -63,17 +62,6 @@ private:
     int num_atoms;
     bool spinwait;
 
-    void setSTI(Handle h, AttentionValue::sti_t stiValue) const
-    {
-        /* Make a copy */
-        AttentionValuePtr old_av = get_av(h);
-        AttentionValuePtr new_av = AttentionValue::createAV(
-            stiValue,
-            old_av->getLTI(),
-            old_av->getVLTI());
-        ab->change_av(h, new_av);
-    }
-
 public:
     AtomSpaceAsyncUTest()
     {
@@ -88,13 +76,11 @@ public:
     void setUp()
     {
         atomSpace = new AtomSpace();
-        ab = &attentionbank(atomSpace);
         rng = new opencog::MT19937RandGen((unsigned long) time(NULL));
     }
 
     void tearDown()
     {
-        attentionbank(nullptr);
         delete atomSpace;
         delete rng;
     }
