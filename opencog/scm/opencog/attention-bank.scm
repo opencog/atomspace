@@ -8,7 +8,9 @@
 (load-extension "libattentionbank" "opencog_attention_init")
 
 ; This avoids complaints, when the docs are set, below.
-(export cog-update-af cog-af-size cog-set-af-size! cog-stimulate)
+(export
+	cog-av cog-set-av! cog-inc-vlti! cog-dec-vlti!
+	cog-update-af cog-af-size cog-set-af-size! cog-stimulate)
 
 (use-modules (opencog))
 
