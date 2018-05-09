@@ -12,9 +12,10 @@
     (ConceptNode "Socrates")
     (ConceptNode "man") )
 
+(cog-set-av!
 (InheritanceLink (stv 1.0 1.0) 
     (ConceptNode "Einstein")
-    (ConceptNode "man") (cog-new-av 35 10 0))
+    (ConceptNode "man")) (cog-new-av 35 10 0))
 
 (InheritanceLink (stv 1.0 1.0)
     (ConceptNode "Peirce")
