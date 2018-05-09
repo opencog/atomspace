@@ -44,6 +44,7 @@ public:
 
 		_eval.eval("(add-to-load-path \"" PROJECT_SOURCE_DIR "\")");
 
+		_eval.eval("(use-modules (opencog logger))");
 		_eval.eval("(use-modules (opencog query))");
 	}
 
