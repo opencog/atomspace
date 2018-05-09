@@ -113,6 +113,29 @@
     )
 )
 
+; -----------------------------------------------------------------------
+(define-public (cog-av-sti x)
+" cog-av-sti -- Return the STI of an atom."
+	(cdr (assoc 'sti (cog-av->alist (cog-av x)))))
+
+; -----------------------------------------------------------------------
+(define-public (cog-sti-above y z)
+"
+  cog-sti-above
+  Given a threshold 'y' and a list of atoms 'z', returns a list of atoms
+  with STI above the threshold
+"
+	(filter (lambda (x) (> (cog-av-sti x) y)) z))
+
+; -----------------------------------------------------------------------
+(define-public (cog-sti-below y z)
+"
+  cog-sti-below
+  Given a threshold 'y' and a list of atoms 'z', returns a list of atoms
+  with STI below the threshold
+"
+	(filter (lambda (x) (< (cog-av-sti x) y)) z))
+
 ;; -----------------------------------------------------
 ;;
 
