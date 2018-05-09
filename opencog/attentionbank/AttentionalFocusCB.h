@@ -23,7 +23,7 @@
 #ifndef _ATTENTIONAL_FOCUS_CB_H
 #define _ATTENTIONAL_FOCUS_CB_H
 
-#include "DefaultPatternMatchCB.h"
+#include <opencog/query/DefaultPatternMatchCB.h>
 
 namespace opencog {
 

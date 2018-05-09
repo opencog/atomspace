@@ -1,7 +1,5 @@
 /*
- * BindLinkAPI.h
- *
- * Copyright (C) 2014 Linas Vepstas <linasvepstas@gmail.com>
+ * AFImplicator.cc
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU Affero General Public License v3 as
@@ -19,21 +17,30 @@
  * 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
  */
 
-#ifndef _OPENCOG_BINDLINK_API_H
-#define _OPENCOG_BINDLINK_API_H
+#include "AFImplicator.h"
+#include <opencog/query/DefaultImplicator.h>
 
-#include <opencog/atoms/base/Handle.h>
-#include <opencog/truthvalue/TruthValue.h>
+using namespace opencog;
 
-namespace opencog {
+// XXX FIXME -- do we need this function, at all?  Why isn't it
+// sufficient to just do a normal pattern search, and weed out
+// the atttention focus after the fact? I find it very hard to
+// beleive that this provides any significant performance kick
+// over a simpler, more modular design.
 
-class AtomSpace;
+namespace opencog
+{
 
-Handle bindlink(AtomSpace*, const Handle&, size_t max_results=SIZE_MAX);
-TruthValuePtr satisfaction_link(AtomSpace*, const Handle&);
-Handle satisfying_set(AtomSpace*, const Handle&, size_t max_results=SIZE_MAX);
-Handle recognize(AtomSpace*, const Handle&);
+/**
+ * Attentional Focus specific PatternMatchCallback implementation
+ */
+Handle af_bindlink(AtomSpace* as, const Handle& hbindlink)
+{
+	// Now perform the search.
+	AFImplicator impl(as);
+	return do_imply(as, hbindlink, impl, false);
+}
 
-} // namespace opencog
+}
 
-#endif // _OPENCOG_BINDLINK_API_H
+/* ===================== END OF FILE ===================== */

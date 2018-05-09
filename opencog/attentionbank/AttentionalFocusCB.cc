@@ -21,12 +21,16 @@
  * 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
  */
 
-// XXX FIXME -- move this over to the opencog/attentionbank diectory
-
-#include "AttentionalFocusCB.h"
+#include <opencog/attentionbank/AttentionalFocusCB.h>
 #include <opencog/attentionbank/AttentionBank.h>
 
 using namespace opencog;
+
+// XXX FIXME -- do we need this function, at all?  Why isn't it
+// sufficient to just do a normal pattern search, and weed out
+// the atttention focus after the fact? I find it very hard to
+// beleive that this provides any significant performance kick
+// over a simpler, more modular design.
 
 AttentionalFocusCB::AttentionalFocusCB(AtomSpace* as) :
 	DefaultPatternMatchCB(as)
@@ -43,7 +47,6 @@ bool AttentionalFocusCB::link_match(const PatternTermPtr& ptm, const Handle& lso
 	return DefaultPatternMatchCB::link_match(ptm, lsoln) and
 		attentionbank(_as).atom_is_in_AF(lsoln);
 }
-
 
 IncomingSet AttentionalFocusCB::get_incoming_set(const Handle& h)
 {

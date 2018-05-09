@@ -20,7 +20,6 @@
 (export
 	cog-bind-first-n
 	cog-satisfying-set-first-n
-	cog-bind-af
 	cog-satisfy
 )
 
@@ -62,13 +61,6 @@
  cog-bind-single HANDLE
     Run pattern matcher on HANDLE.  HANDLE must be a BindLink.
     The search is terminated after the first match is found.
-")
-
-(set-procedure-property! cog-bind-af 'documentation
-"
- cog-bind-af HANDLE
-    Run pattern matcher on HANDLE.  HANDLE must be a BindLink.
-    A special-purpose pattern matcher used by the URE.
 ")
 
 (set-procedure-property! cog-satisfy 'documentation

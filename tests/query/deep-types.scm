@@ -5,7 +5,9 @@
 ; a pattrn match: by default, types are checked during a search, and
 ; variable groundings must respect the variable type.
 ;
-(use-modules (opencog) (opencog exec))
+(use-modules (opencog))
+(use-modules (opencog exec))
+(use-modules (opencog query))
 
 ; Populate the atomspace with some nonsense atoms.
 (Inheritance (Concept "foo") (Concept "bingo"))

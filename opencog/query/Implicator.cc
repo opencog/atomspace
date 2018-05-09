@@ -87,10 +87,10 @@ namespace opencog
  * get naive users into trouble, but there are legit uses, not just
  * in the URE, for doing disconnected searches.
  */
-static Handle do_imply(AtomSpace* as,
-                       const Handle& hbindlink,
-                       Implicator& impl,
-                       bool do_conn_check=false)
+Handle do_imply(AtomSpace* as,
+                const Handle& hbindlink,
+                Implicator& impl,
+                bool do_conn_check=false)
 {
 	BindLinkPtr bl(BindLinkCast(hbindlink));
 
@@ -176,16 +176,6 @@ Handle bindlink(AtomSpace* as, const Handle& hbindlink, size_t max_results)
 	impl.max_results = max_results;
 	// Now perform the search.
 	return do_imply(as, hbindlink, impl);
-}
-
-/**
- * Attentional Focus specific PatternMatchCallback implementation
- */
-Handle af_bindlink(AtomSpace* as, const Handle& hbindlink)
-{
-	// Now perform the search.
-	AFImplicator impl(as);
-	return do_imply(as, hbindlink, impl, false);
 }
 
 }
