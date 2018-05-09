@@ -245,6 +245,8 @@ void FetchUTest::test_stuff(void)
 	tv = eval->eval_tv(R"((cog-tv (Concept "AAA")))");
 	TruthValuePtr etv = SimpleTruthValue::createTV(0.1, 0.11);
 	TS_ASSERT((*tv) == (*etv));
+	printf("Expecting %s\n", etv->to_string().c_str());
+	printf("Got %s\n", tv->to_string().c_str());
 
 	// Update A.
 	eval->eval(R"((cog-set-tv! (Concept "AAA") (stv 0.3 0.33)))");
@@ -264,6 +266,8 @@ void FetchUTest::test_stuff(void)
 	tv = eval->eval_tv(R"((cog-tv (Concept "AAA")))");
 	etv = SimpleTruthValue::createTV(0.3, 0.33);
 	TS_ASSERT((*tv) == (*etv));
+	printf("Expecting %s\n", etv->to_string().c_str());
+	printf("Got %s\n", tv->to_string().c_str());
 
 	// BBB should have been clobbered.
 	eval->eval(R"((fetch-atom (Concept "BBB")))");
