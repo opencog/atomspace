@@ -1224,9 +1224,6 @@
 'tv-conf
 'tv-non-null-conf?
 'tv-count
-'cog-set-sti!
-'cog-set-lti!
-'cog-set-vlti!
 'gar
 'gdr
 'gadr
