@@ -21,9 +21,7 @@
  * 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
  */
 
-// XXX FIXME -- move this over to the opencog/attentionbank diectory
-
-#include "AttentionalFocusCB.h"
+#include <opencog/attentionbank/AttentionalFocusCB.h>
 #include <opencog/attentionbank/AttentionBank.h>
 
 using namespace opencog;
@@ -43,7 +41,6 @@ bool AttentionalFocusCB::link_match(const PatternTermPtr& ptm, const Handle& lso
 	return DefaultPatternMatchCB::link_match(ptm, lsoln) and
 		attentionbank(_as).atom_is_in_AF(lsoln);
 }
-
 
 IncomingSet AttentionalFocusCB::get_incoming_set(const Handle& h)
 {

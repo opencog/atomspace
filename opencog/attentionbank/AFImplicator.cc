@@ -1,9 +1,9 @@
 /*
- * AttentionalFocusCB.h
+ * AFImplicator.cc
  *
- * Copyright (C) 2014 Misgana Bayetta
+ * Copyright (C) 2009, 2014 Linas Vepstas
  *
- * Author: Misgana Bayetta <misgana.bayetta@gmail.com>  July 2014
+ * Author: Linas Vepstas <linasvepstas@gmail.com>  January 2009
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU Affero General Public License v3 as
@@ -20,27 +20,25 @@
  * Free Software Foundation, Inc.,
  * 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
  */
-#ifndef _ATTENTIONAL_FOCUS_CB_H
-#define _ATTENTIONAL_FOCUS_CB_H
 
-#include "DefaultPatternMatchCB.h"
+#include "AFImplicator.h"
+#include <opencog/query/DefaultImplicator.h>
 
-namespace opencog {
+using namespace opencog;
 
-class AttentionalFocusCB: public virtual DefaultPatternMatchCB
+namespace opencog
 {
-public:
-	AttentionalFocusCB(AtomSpace*);
 
-	// Only match nodes if they are in the attentional focus
-	bool node_match(const Handle&, const Handle&);
+/**
+ * Attentional Focus specific PatternMatchCallback implementation
+ */
+Handle af_bindlink(AtomSpace* as, const Handle& hbindlink)
+{
+	// Now perform the search.
+	AFImplicator impl(as);
+	return do_imply(as, hbindlink, impl, false);
+}
 
-	// Only match links if they are in the attentional focus
-	bool link_match(const PatternTermPtr&, const Handle&);
+}
 
-	// Only get incoming sets that are in the attentional focus
-	IncomingSet get_incoming_set(const Handle&);
-};
-
-} //namespace opencog
-#endif /* _ATTENTIONALFOCUSCB_H */
+/* ===================== END OF FILE ===================== */

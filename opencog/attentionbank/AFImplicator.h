@@ -1,5 +1,5 @@
 /*
- * DefaultImplicator.h
+ * AFImplicator.h
  *
  * Copyright (C) 2009, 2014 Linas Vepstas
  *
@@ -21,43 +21,33 @@
  * 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
  */
 
-#ifndef _OPENCOG_DEFAULT_IMPLICATOR_H
-#define _OPENCOG_DEFAULT_IMPLICATOR_H
+#ifndef _OPENCOG_AF_IMPLICATOR_H
+#define _OPENCOG_AF_IMPLICATOR_H
 
-#include "DefaultPatternMatchCB.h"
-#include "Implicator.h"
-#include "InitiateSearchCB.h"
-#include "PatternMatchCallback.h"
+#include <opencog/attentionbank/AttentionalFocusCB.h>
+#include <opencog/query/DefaultPatternMatchCB.h>
+#include <opencog/query/Implicator.h>
+#include <opencog/query/InitiateSearchCB.h>
+#include <opencog/query/PatternMatchCallback.h>
 
 
 namespace opencog {
 
-class DefaultImplicator:
+/**
+ * Attentional Focus specific PatternMatchCallback implementation
+ */
+class AFImplicator:
 	public virtual Implicator,
 	public virtual InitiateSearchCB,
-	public virtual DefaultPatternMatchCB
+	public virtual AttentionalFocusCB
 {
 	public:
-		DefaultImplicator(AtomSpace* asp) :
+		AFImplicator(AtomSpace* asp) :
 			Implicator(asp),
 			InitiateSearchCB(asp),
-			DefaultPatternMatchCB(asp) {}
-
-#ifdef CACHED_IMPLICATOR
-	virtual void ready(AtomSpace* asp)
-	{
-		Implicator::ready(asp);
-		InitiateSearchCB::ready(asp);
-		DefaultPatternMatchCB::ready(asp);
-	}
-
-	virtual void clear()
-	{
-		Implicator::clear();
-		InitiateSearchCB::clear();
-		DefaultPatternMatchCB::clear();
-	}
-#endif
+			DefaultPatternMatchCB(asp),
+			AttentionalFocusCB(asp)
+		{}
 
 	virtual void set_pattern(const Variables& vars,
 	                         const Pattern& pat)
@@ -67,18 +57,8 @@ class DefaultImplicator:
 	}
 };
 
-#ifdef CACHED_IMPLICATOR
-class CachedDefaultImplicator {
-	static DefaultImplicator* _cached_implicator;
-	public:
-		CachedDefaultImplicator(AtomSpace*asp);
-		~CachedDefaultImplicator();
-		operator Implicator&() { return *_cached_implicator; }
-};
-#endif
-
-Handle do_imply(AtomSpace*, const Handle&, Implicator&, bool);
+Handle af_bindlink(AtomSpace*, const Handle&);
 
 }; // namespace opencog
 
-#endif // _OPENCOG_DEFAULT_IMPLICATOR_H
+#endif // _OPENCOG_AF_IMPLICATOR_H

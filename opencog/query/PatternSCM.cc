@@ -101,10 +101,6 @@ void PatternSCM::init(void)
 	_binders.push_back(new FunctionWrap(bindlink,
 	                   "cog-bind-first-n", "query"));
 
-	// Attentional Focus function
-	_binders.push_back(new FunctionWrap(af_bindlink,
-	                   "cog-bind-af", "query"));
-
 	// A bindlink that returns a TV
 	_binders.push_back(new FunctionWrap(do_satlink,
 	                   "cog-satisfy", "query"));
