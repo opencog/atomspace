@@ -5,13 +5,13 @@
 
 (define-module (opencog persist))
 
+(use-modules (opencog))
+
 (load-extension "libpersist" "opencog_persist_init")
 
 ; This avoids complaints, when the docs are set, below.
 (export fetch-atom fetch-incoming-set fetch-incoming-by-type
 store-atom load-atoms-of-type barrier)
-
-(use-modules (opencog))
 
 ;; -----------------------------------------------------
 ;;
