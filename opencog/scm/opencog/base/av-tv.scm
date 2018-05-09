@@ -7,7 +7,6 @@
 ; Utilities provided:
 ; -- cog-merge-tv! -- merge truth values on atom
 ; -- cog-merge-hi-conf-tv! -- different merge style
-; -- cog-af-length -- Length of list of atoms in the attentional focus
 ; -- cog-av-sti -- Return the STI of an atom
 ; -- cog-sti-above -- Filter atoms with STI above a threshold
 ; -- cog-sti-below -- Filter atoms with STI below a threshold
@@ -37,11 +36,6 @@
 " cog-merge-hi-conf-tv! -- merge truth values on atom"
 	(cog-set-tv! ATOM (cog-tv-merge-hi-conf (cog-tv ATOM) TV))
 )
-
-; -----------------------------------------------------------------------
-(define-public (cog-af-length)
-" cog-af-length -- Length of the list of atoms in the attentional focus."
-	(length (cog-af)))
 
 ; -----------------------------------------------------------------------
 (define-public (cog-av-sti x)
