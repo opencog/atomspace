@@ -33,6 +33,7 @@ INSTALL (FILES
 )
 
 INSTALL (FILES
+	opencog/attention-bank.scm
 	opencog/exec.scm
 	opencog/extension.scm
 	opencog/logger.scm

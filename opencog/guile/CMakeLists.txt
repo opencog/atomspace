@@ -40,7 +40,7 @@ TARGET_LINK_LIBRARIES(smob
 	atomcore
 	atombase
 	truthvalue
-	attentionbank
+	# attentionbank
 	atomspace
 	${GUILE_LIBRARIES}
 	${COGUTIL_LIBRARY}
