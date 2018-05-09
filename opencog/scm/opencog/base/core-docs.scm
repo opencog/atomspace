@@ -15,8 +15,7 @@
  cog-new-node NODE-TYPE NODE-NAME
     Create a new node of type NODE-TYPE and name NODE-NAME.
 
-    Optionally, a truth value and/or an attention value can follow
-    the node name.
+    Optionally, a truth value can follow the node name.
 
     Throws errors if node-type is not a valid atom type for a node,
     and if node-name is not a string.
@@ -38,9 +37,8 @@
     Returns the node of type NODE-TYPE and name NODE-NAME, if it exists,
     else returns null.
 
-    Optionally, a truth value and/or attention value can follow the
-    node name. If the node exists, then the truth value and/or
-    attention value is modified.
+    Optionally, a truth value can follow the node name. If the node
+    exists, then the truth value is modified.
 
     Throws errors if node-type is not a valid atom type for a node,
     and if node-name is not a string.
@@ -70,12 +68,11 @@
  cog-new-link LINK-TYPE ATOM-1 ... ATOM-N
     Create a new link, of type LINK-TYPE, with the given atoms in the link.
 
-    Optionally, a truth value or an attention value can be included
-    in the list of atoms.
+    Optionally, a truth value can be included in the list of atoms.
 
     Throws errors if the link type is not a valid opencog link type,
-    or if any of the arguments after the link type are not atoms,
-    truth values, attention values, or null.
+    or if any of the arguments after the link type are not atoms or
+    truth values.
 
     Example:
         ; Creates two nodes, and a new link:
@@ -101,13 +98,12 @@
     Returns the link of the given type LINK-TYPE and list of atoms,
     if it exists, else returns null.
 
-    Optionally, a truth value or attention value can be included
-    in the list of atoms. If the link exists, then the truth value
-    and/or attention value is modified.
+    Optionally, a truth value can be included in the list of atoms.
+    If the link exists, then the truth value is modified.
 
     Throws errors if the link type is not a valid opencog link type,
-    or if any of the arguments after the link type are not atoms,
-    truth values, attention values, or null.
+    or if any of the arguments after the link type are not atoms or
+    truth values.
 
     Example:
         ; Create two nodes:
