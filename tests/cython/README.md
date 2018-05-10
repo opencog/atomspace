@@ -5,7 +5,7 @@ HOWTO run these tests by hand:
 You need to set up the PYTHON path:
 export PYTHONPATH=${PROJECT_BINARY_DIR}/opencog/cython
 or, if installed:
-export PYTHONPATH=/usr/local/share/opencog/python:${PYTHON}
+export PYTHONPATH=/usr/local/python3.5/dist-packages/opencog:${PYTHON}
 
 For example:
 export PYTHONPATH=build/opencog/cython
