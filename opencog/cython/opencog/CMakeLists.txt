@@ -77,6 +77,12 @@ ADD_LIBRARY(atomspace_cython
 	atomspace.cpp
 )
 
+# The atomspace_api.h must be generated before PythonEval is compiled, thus
+# this phony-target is created. Why not add_dependencies between PythonEval
+# and atomspace_cython? -> Because that results in a cyclic dependency.
+ADD_CUSTOM_TARGET(py_atomspace_header
+	DEPENDS ${CMAKE_CURRENT_BINARY_DIR}/atomspace.cpp)
+
 # XXX FIXME Cython should not static link the atom-types, but
 # but should instead dynamic-load them, as needed.
 ADD_DEPENDENCIES(atomspace_cython opencog_atom_types)
@@ -210,7 +216,7 @@ IF (HAVE_GUILE)
 		smob
 		${PYTHON_LIBRARIES}
 	)
-	
+
 	SET_TARGET_PROPERTIES(scheme_wrapper PROPERTIES
 		PREFIX ""
 		OUTPUT_NAME scheme_wrapper)
