@@ -6,6 +6,7 @@ ADD_EXECUTABLE(crudexample
 	)
 TARGET_LINK_LIBRARIES(crudexample
 	atomspace
+	attentionbank
 	)
 
 ADD_EXECUTABLE(ureexample
@@ -22,4 +23,5 @@ ADD_EXECUTABLE(aseventsexample
     )
 TARGET_LINK_LIBRARIES(aseventsexample
     atomspace
+    attentionbank
     )
