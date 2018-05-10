@@ -261,7 +261,7 @@ Handle AtomTable::getLinkHandle(const AtomPtr& orig) const
     const HandleSeq &seq = a->getOutgoingSet();
 
     // Make sure all the atoms in the outgoing set are in the atomspace.
-    // If any are not are not, then reject the whhole mess.
+    // If any are not, then reject the whole mess.
     HandleSeq resolved_seq;
     bool changed = false;
     for (const Handle& ho : seq) {
