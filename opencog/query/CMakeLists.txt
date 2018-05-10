@@ -20,7 +20,7 @@ TARGET_LINK_LIBRARIES(query
 	atomutils
 	lambda
 	atomspace
-#	execution
+#	execution # disabled to avoid cyclic dependency
 )
 
 IF (HAVE_GUILE)
