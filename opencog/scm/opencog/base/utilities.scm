@@ -288,22 +288,44 @@
 )
 
 ; -----------------------------------------------------------------------
+(define (traverse-roots func)
+"
+  traverse-roots -- Applies func to every root atom in the atomspace.
+
+  The root atoms are those, which have no incoming atoms,
+  located in the atomspace or its ancestors (i.e. visible from the atomspace).
+"
+	(define (is-visible? atom)
+		(member
+			(cog-as atom)
+			(get-atomspace-and-parents
+				(cog-atomspace)
+				`())))
+	(define (get-atomspace-and-parents atomspace res)
+		(if (null? atomspace)
+			res
+			(get-atomspace-and-parents
+				(cog-atomspace-env atomspace)
+				(cons atomspace res))))
+
+	(define (apply-if-root h)
+		(if (null? (filter is-visible? (cog-incoming-set h)))
+			(func h))
+		#f)
+
+	(for-each (lambda (ty) (cog-map-type apply-if-root ty)) (cog-get-types))
+)
+; -----------------------------------------------------------------------
 (define-public (cog-prt-atomspace)
 "
   cog-prt-atomspace -- Prints all atoms in the atomspace
 
   This will print all of the atoms in the atomspace: specifically, only
-  those atoms that have no incoming set, and thus are at the top of a
-  tree.  All other atoms (those which do have an incoming set) will
-  appear somewhere underneath these top-most atoms.
+  those atoms that have no incoming set in the atomspace or its ancestors,
+  and thus are at the top of a tree.  All other atoms (those which do
+  have an incoming set) will appear somewhere underneath these top-most atoms.
 "
-	(define (prt-atom h)
-		; Print only the top-level atoms.
-		(if (null? (cog-incoming-set h))
-			(display h))
-		#f)
-
-	(for-each (lambda (ty) (cog-map-type prt-atom ty)) (cog-get-types))
+	(traverse-roots display)
 )
 
 ; -----------------------------------------------------------------------
