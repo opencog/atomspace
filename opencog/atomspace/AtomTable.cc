@@ -5,7 +5,8 @@
  * Copyright (C) 2013-2015 Linas Vepstas <linasvepstas@gmail.com>
  * All Rights Reserved
  *
- * Written by Thiago Maia <thiago@vettatech.com>
+ * Previous versions were written by
+ *            Thiago Maia <thiago@vettatech.com>
  *            Andre Senna <senna@vettalabs.com>
  *            Welter Silva <welter@vettalabs.com>
  *
