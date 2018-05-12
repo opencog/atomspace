@@ -33,6 +33,7 @@ TARGET_LINK_LIBRARIES(smob
 	# classserver will fail to run atom factories, viz, will fail
 	# to run the ctors for C++-backed atom types, resulting in
 	# screwball failures.
+	${NO_AS_NEEDED}
 	clearbox
 	lambda
 	# execution
