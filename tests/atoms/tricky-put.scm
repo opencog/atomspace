@@ -40,9 +40,10 @@
   (List (Variable "$Z") (Variable "$W"))))
 
 (define expected-4
-(InheritanceLink
-  (VariableNode "$X")
-  (VariableNode "$Y")))
+(LambdaLink
+  (InheritanceLink
+    (VariableNode "$X")
+    (VariableNode "$Y"))))
 
 (define put-5
 (Put
