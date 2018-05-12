@@ -396,7 +396,6 @@ Handle AtomTable::add(AtomPtr atom, bool async)
     // private copy of the atom, else crazy things go wrong.
     else if (atom == orig)
     {
-        // NumberNode, TypeNode and LgDictNode need a factory to construct.
         if (atom->is_node())
             atom = createNode(*NodeCast(atom));
         else if (atom->is_link())
