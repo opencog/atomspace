@@ -324,10 +324,6 @@
   those atoms that have no incoming set in the atomspace or its ancestors,
   and thus are at the top of a tree.  All other atoms (those which do
   have an incoming set) will appear somewhere underneath these top-most atoms.
-
-  N.B. That means, if the atomspace contains a link, refering an atom in a
-  child or independent atomspace, the printed result will include this
-  alien atom too.
 "
 	(traverse-roots display)
 )
