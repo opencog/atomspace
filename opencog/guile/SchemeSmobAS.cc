@@ -232,7 +232,7 @@ SCM SchemeSmob::ss_as_uuid(SCM sas)
 
 /* ============================================================== */
 /**
- * Return parent of the atomspace
+ * Return parent of the atomspace, or an empty list if there is no parent
  */
 SCM SchemeSmob::ss_as_env(SCM sas)
 {
@@ -247,7 +247,7 @@ SCM SchemeSmob::ss_as_env(SCM sas)
 
 	AtomSpace* env = as->get_environ();
 	scm_remember_upto_here_1(sas);
-	return make_as(env);
+	return env ? make_as(env) : SCM_EOL;
 }
 
 /* ============================================================== */
