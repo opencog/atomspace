@@ -19,11 +19,11 @@ using namespace opencog;
 
 /* ============================================================== */
 /**
- * Return a string holding the scheme representation of an atom/truthvalue.
+ * Return a string holding the scheme representation of an opencog object.
+ * This could be a ProtoAtom (an atom or a value), or an AtomSpace, or a
+ * guile module created with the PrimitiveEnviron C++ module wrapper.
  *
- * The input is assumed to be pointing at a Handle, a TruthValue,
- * an AttentionValue or a UUID. Returned is a valid scheme
- * expression that represents that Handle, etc.
+ * Returned is a valid scheme expression that represents that object.
  */
 std::string SchemeSmob::to_string(SCM node)
 {
