@@ -74,7 +74,7 @@ Handle PrenexLink::reassemble(const HandleMap& vm,
 	Handle newbod = RewriteLink::substitute_body(vdecl, _body, vm);
 
 	// Reassemble if necessary
-	if (not final_varlist.empty())
+	if (_vardecl and not final_varlist.empty())
 		return Handle(createLink(get_type(), vdecl, newbod));
 
 	return newbod;
@@ -82,6 +82,7 @@ Handle PrenexLink::reassemble(const HandleMap& vm,
 
 /* ================================================================= */
 
+// Collect up variables.
 static Handle collect(const Variables& vtool,
                       const Handle& origvar, const Handle& newvar,
                       HandleSeq& final_varlist,
