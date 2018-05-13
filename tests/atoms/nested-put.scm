@@ -1,9 +1,11 @@
 ;
 ; We expect the inner put to get evaluated first. The inner
-; Put should generate
-; (Lambda
-;   (VariableList (Variable "$Y") (Variable "$Z"))
-;   (Inheritance (Variable "$Y") (Variable "$Z")))
+; Put is a function composition; it composes the identity
+; function with another function, it should return just that.
+; That is, it should return
+;   (Lambda
+;     (VariableList (Variable "$Y") (Variable "$Z"))
+;     (Inheritance (Variable "$Y") (Variable "$Z")))
 ;
 (define nested-put-1
 (Put
