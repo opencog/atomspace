@@ -74,7 +74,7 @@ PrenexLink::PrenexLink(const Link &l)
 /// the analysis of the term has alrady happened; here, we just
 /// need to assemble the final prenex form.
 //
-Handle PrenexLink::reassemble(Type scope,
+Handle PrenexLink::reassemble(Type prenex,
                               const HandleMap& vm,
                               const HandleSeq& final_varlist) const
 {
@@ -84,8 +84,8 @@ Handle PrenexLink::reassemble(Type scope,
 
 	// Reassemble if necessary. That is, if there are variables to
 	// declare, place them outermost, in prenex form.
-	if (PUT_LINK != scope and not final_varlist.empty())
-		return Handle(createLink(scope, vdecl, newbod));
+	if (PUT_LINK != prenex and not final_varlist.empty())
+		return Handle(createLink(prenex, vdecl, newbod));
 
 	// Otherwise, we are done with the beta-reduction.
 	return newbod;
@@ -236,7 +236,7 @@ Handle PrenexLink::beta_reduce(const HandleMap& vmap) const
 	HandleSeq final_varlist;
 	HandleSet used_vars;
 	HandleMap issued;
-	Type scope = get_type();
+	Type prenex = get_type();
 
 	const Variables& vtool = get_variables();
 	for (const Handle& var : vtool.varseq)
@@ -305,14 +305,14 @@ Handle PrenexLink::beta_reduce(const HandleMap& vmap) const
 			// were multiple variables, and they weren's all LambdaLinks,
 			// for example. In that case, things are borked, and there's
 			// a bug here.  For now, we punt.
-			scope = valuetype;
+			prenex = valuetype;
 		}
 	}
 
 	// Almost done. The final_varlist holds the variable declarations,
 	// and the vm holds what needs to be substituted in. Substitute,
 	// and create the reduced link.
-	return reassemble(scope, vm, final_varlist);
+	return reassemble(prenex, vm, final_varlist);
 }
 
 /* ================================================================= */
