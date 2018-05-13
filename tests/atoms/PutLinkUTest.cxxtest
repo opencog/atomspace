@@ -341,21 +341,35 @@ void PutLinkUTest::test_eta()
 {
 	logger().info("BEGIN TEST: %s", __FUNCTION__);
 
-	// Test that eta-reduction can be performed on the values.
-	// (define lam (Lambda
+	// Test that eta-reduction can be performed on the values. (This is
+	// actually a test of function composition)
+	//
+	// (define func-with-three-args (Lambda
 	//      (VariableList (Variable "$x")(Variable "$y")(Variable "$z"))
 	//      (Inheritance (Variable "$z") (Variable "$x"))))
 	//
-	// (define put (Put lam
-	//      (Lambda (Variable "$w")
-	//          (List (Concept "animal") (Concept "foobar") (Variable "$w")))))
 	//
-	// We expect the below, with $w bound, because this is how beta
-	// reduction is defined in atomese. Note that it is NOT compatible
-	// with beta-reduction is classical lambda calculus! In lmbda calc,
-	// the result would leave $w free, not bound.
+	// The above is a function that expects three arguments: x,y,z.
+	// Lets compose it with a function that takes one argument, but
+	// returns three values (function coposition):
+	//
+	// (define func-returns-three-values
+	//    (Lambda (Variable "$w")
+	//      (List (Concept "animal") (Concept "foobar") (Variable"$w"))))
+	//
+	// Composing these two should return a function that takes one
+	// argument, namely $w.
+	//
+	//    (Put func-with-three-args func-returns-three-values)
+	//
+	// We expect as a result:
 	//
 	// (Lambda (Variable "$w") (Inheritance (Variable "$w") (Concept "animal")))
+	//
+	// Note that this is NOT compatible with beta-reduction in classical
+	// lambda calculus, which would leave $w free. We really want to
+	// eta-convert this, and keep $w bound, so that it looks like
+	// ordinary function composition. Atomese is not lambda calculus.
 	//
 	Handle lam =
 		L(LAMBDA_LINK,

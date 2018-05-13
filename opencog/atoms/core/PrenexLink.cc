@@ -123,9 +123,9 @@ static Handle collect(const Variables& vtool,
 
 Handle PrenexLink::beta_reduce(const HandleSeq& seq) const
 {
-	// Test for a special case: eta reduction on the supplied
-	// function.  We can recognize this if we don't get fewer
-	// arguments than we expected.
+	// Test for a special case: function composition followed by
+	// eta conversion on the supplied function.  We can recognize
+	// this if we get fewer arguments than expected.
 	const Variables& vtool = get_variables();
 	size_t seqsize = seq.size();
 	if (seqsize == vtool.size())
@@ -134,9 +134,40 @@ Handle PrenexLink::beta_reduce(const HandleSeq& seq) const
 		return RewriteLink::beta_reduce(seq);
 	}
 
-	// If we are here, we are expecting an eta conversion. For a
-	// valid eta conversion, there must be just one argument, and
-	// it must must be a ScopeLink.
+	// If we are here, we are expecting an eta conversion.
+	// Here is what an eta conversion looks like (see test_eta in
+	// PutLinkUTest):
+	//
+	// (define func-with-three-args
+	//    (Lambda
+	//      (VariableList (Variable "$x")(Variable "$y")(Variable "$z"))
+	//      (Inheritance (Variable "$z") (Variable "$x"))))
+	//
+	// The above is a function that expects three arguments: x,y,z.
+	// Lets compose it with a function that takes one argument, but
+	// returns three values (function coposition):
+	//
+	// (define func-returns-three-values
+	//    (Lambda (Variable "$w")
+	//      (List (Concept "animal") (Concept "foobar") (Variable"$w"))))
+	//
+	// Composing these two should return a function that takes one
+	// argument, namely $w.
+	//
+	//    (Put func-with-three-args func-returns-three-values)
+	//
+	// We expect as a result:
+	//
+	// (Lambda (Variable "$w") (Inheritance (Variable "$w") (Concept "animal")))
+	//
+	// Note that this is NOT compatible with beta-reduction in classical
+	// lambda calculus, which would leave $w free. We really want to
+	// eta-convert this, and keep $w bound, so that it looks like
+	// ordinary function composition. Atomese is not lambda calculus.
+
+	// ------- Lets begin.
+	// For a valid eta conversion, there must be just one argument,
+	// and it must must be a ScopeLink.
 	if (1 != seqsize or
 	    not classserver().isA(seq[0]->get_type(), SCOPE_LINK))
 	{
