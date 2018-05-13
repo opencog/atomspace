@@ -58,6 +58,7 @@ public:
 
 	void test_define();
 	void test_filtering();
+	void test_free_var_renaming();
 	void test_function();
 	void test_lambda();
 	void test_lambda_partial_substitution();
@@ -83,7 +84,7 @@ public:
 	void test_and_compose_1();
 	void test_and_compose_2();
 	void test_quoted_put();
-	void test_ill_put();
+	void test_nested_6();
 	void test_tricky_put_1();
 	void test_tricky_put_2();
 	void test_tricky_put_3();
@@ -264,6 +265,37 @@ void PutLinkUTest::test_function()
 	logger().info("END TEST: %s", __FUNCTION__);
 }
 
+void PutLinkUTest::test_free_var_renaming()
+{
+	logger().info("BEGIN TEST: %s", __FUNCTION__);
+
+	// Test simple substitution of free variable names.
+	Handle inh =
+		L(INHERITANCE_LINK,
+			N(VARIABLE_NODE, "$x"),
+			N(VARIABLE_NODE, "$y"));
+	Handle put =
+		L(PUT_LINK,
+			inh,
+			L(LIST_LINK,
+				N(VARIABLE_NODE, "$a"),
+				N(VARIABLE_NODE, "$b")));
+
+	Instantiator inst(&_as);
+	Handle putted = inst.execute(put);
+
+	Handle expected_putted =
+		L(INHERITANCE_LINK,
+			N(VARIABLE_NODE, "$a"),
+			N(VARIABLE_NODE, "$b"));
+
+	printf("Expecting %s\n", expected_putted->to_string().c_str());
+	printf("Got %s\n", putted->to_string().c_str());
+	TS_ASSERT_EQUALS(putted, expected_putted);
+
+	logger().info("END TEST: %s", __FUNCTION__);
+}
+
 void PutLinkUTest::test_lambda()
 {
 	logger().info("BEGIN TEST: %s", __FUNCTION__);
@@ -341,21 +373,35 @@ void PutLinkUTest::test_eta()
 {
 	logger().info("BEGIN TEST: %s", __FUNCTION__);
 
-	// Test that eta-reduction can be performed on the values.
-	// (define lam (Lambda
+	// Test that eta-reduction can be performed on the values. (This is
+	// actually a test of function composition)
+	//
+	// (define func-with-three-args (Lambda
 	//      (VariableList (Variable "$x")(Variable "$y")(Variable "$z"))
 	//      (Inheritance (Variable "$z") (Variable "$x"))))
 	//
-	// (define put (Put lam
-	//      (Lambda (Variable "$w")
-	//          (List (Concept "animal") (Concept "foobar") (Variable "$w")))))
 	//
-	// We expect the below, with $w bound, because this is how beta
-	// reduction is defined in atomese. Note that it is NOT compatible
-	// with beta-reduction is classical lambda calculus! In lmbda calc,
-	// the result would leave $w free, not bound.
+	// The above is a function that expects three arguments: x,y,z.
+	// Lets compose it with a function that takes one argument, but
+	// returns three values (function coposition):
+	//
+	// (define func-returns-three-values
+	//    (Lambda (Variable "$w")
+	//      (List (Concept "animal") (Concept "foobar") (Variable"$w"))))
+	//
+	// Composing these two should return a function that takes one
+	// argument, namely $w.
+	//
+	//    (Put func-with-three-args func-returns-three-values)
+	//
+	// We expect as a result:
 	//
 	// (Lambda (Variable "$w") (Inheritance (Variable "$w") (Concept "animal")))
+	//
+	// Note that this is NOT compatible with beta-reduction in classical
+	// lambda calculus, which would leave $w free. We really want to
+	// eta-convert this, and keep $w bound, so that it looks like
+	// ordinary function composition. Atomese is not lambda calculus.
 	//
 	Handle lam =
 		L(LAMBDA_LINK,
@@ -409,10 +455,13 @@ void PutLinkUTest::test_alpha()
 	//
 	// We expect the below, with $w bound, because this is how beta
 	// reduction is defined in atomese. Note that it is NOT compatible
-	// with beta-reduction is classical lambda calculus! In lmbda calc,
+	// with beta-reduction is classical lambda calculus! In lambda calc,
 	// the result would leave $w free, not bound.
 	//
 	// (Lambda (Variable "$w") (Inheritance (Variable "$w") (Concept "animal")))
+	//
+	// Note that this is very similar to the test-eta, immediately above.
+	// It differs because the arguments are not a function.
 	//
 	Handle lam =
 		L(LAMBDA_LINK,
@@ -1214,7 +1263,7 @@ void PutLinkUTest::test_nested_1()
 }
 
 /**
- * Test that the following raise an exception
+ * Test that the following
  *
  * (PutLink
  *   (PutLink
@@ -1244,6 +1293,11 @@ void PutLinkUTest::test_nested_1()
  *       (VariableNode "$Y")
  *       (VariableNode "$Z"))))
  *
+ * We expect the inner put to be evaluated first, resulting in
+ *   (ListLink (Concept "texts") (Variable "$W"))
+ * and then the outer put will just paste the lambda.yz where the $W goes.
+ * Finally, the whole expression is re-written in prenex form, so that the
+ * variable bindings are moved to outer-most.
  */
 void PutLinkUTest::test_nested_2()
 {
@@ -1252,15 +1306,22 @@ void PutLinkUTest::test_nested_2()
 	std::string rs = _eval.eval("(load-from-path \"tests/atoms/nested-put.scm\")");
 	logger().debug() << "rs = " << rs;
 
+	Handle nested = _eval.eval_h("nested-put-2");
+	Handle expected = _eval.eval_h("expected-2");
+
 	Instantiator inst(&_as);
-	Handle nested_put = _eval.eval_h("nested-put-2");
-	TS_ASSERT_THROWS_ANYTHING(inst.execute(nested_put));
+	Handle result = inst.execute(nested);
+
+	logger().debug() << "result = " << oc_to_string(result);
+	logger().debug() << "expected = " << oc_to_string(expected);
+
+	TS_ASSERT_EQUALS(result, expected);
 
 	logger().info("END TEST: %s", __FUNCTION__);
 }
 
 /**
- * Test that nested PutLinks is supported, specifically that executing
+ * Test that that executing the below raises an exception
  *
  * (PutLink
  *   (PutLink
@@ -1272,7 +1333,10 @@ void PutLinkUTest::test_nested_2()
  *     (Concept "B"))
  *   (Concept "C"))
  *
- * raise an exception
+ * The reason for this is that the innermost Put should evaluate
+ * to just (ConceptNode "A"), and so the middle one would be
+ *    (Put (Concept "A") (Concept "B"))
+ * which is ill-defined, and throws.
  */
 void PutLinkUTest::test_nested_3()
 {
@@ -1291,6 +1355,8 @@ void PutLinkUTest::test_nested_3()
 
 /**
  * Test that the following PutLinks raise an exception when executed
+ * This is essentially the same test as that above, and throws for the
+ * same reason (viz. its "texts" instead of "A", but same idea).
  *
  * (PutLink
  *   (PutLink
@@ -1320,7 +1386,7 @@ void PutLinkUTest::test_nested_4()
 }
 
 /**
- * Test that the following PutLinks
+ * Test that the following nested sequence of PutLinks
  *
  * (Put
  *   (Put
@@ -1342,7 +1408,7 @@ void PutLinkUTest::test_nested_4()
  *       (Variable "$sha-arg-0")
  *       (Variable "$sha-arg-1"))))
  *
- * executes into
+ * reduces to
  *
  * (Lambda
  *   (VariableList
@@ -1353,6 +1419,14 @@ void PutLinkUTest::test_nested_4()
  *       (Variable "$sha-arg-0")
  *       (Variable "$sha-arg-1"))
  *     (Concept "D")))
+ *
+ * The reason for this is that the outermost Put should be of the form
+ * (Put
+ *   (ListLink (Variable "$spe-arg-0") (Concept "D"))
+ *   (Lambda stuff)
+ * and so the (Lambda stuff) should get pasted verbatim into where the
+ * (Variable "$spe-arg-0") is. Finally, its reassembled in prenex form,
+ * so that the variable declarations are outermost.
  */
 void PutLinkUTest::test_nested_5()
 {
@@ -1362,9 +1436,17 @@ void PutLinkUTest::test_nested_5()
 	logger().debug() << "rs = " << rs;
 
 	Instantiator inst(&_as);
-	Handle nested_put = _eval.eval_h("nested-put-5"),
-		result = inst.execute(nested_put),
-		expected = _eval.eval_h("expected-5");
+	Handle simple_put = _eval.eval_h("simple-put-5");
+	Handle result = inst.execute(simple_put);
+	Handle expected = _eval.eval_h("expected-5");
+
+	logger().debug() << "result = " << oc_to_string(result);
+	logger().debug() << "expected = " << oc_to_string(expected);
+
+	TS_ASSERT_EQUALS(result, expected);
+
+	Handle nested_put = _eval.eval_h("nested-put-5");
+	result = inst.execute(nested_put);
 
 	logger().debug() << "result = " << oc_to_string(result);
 	logger().debug() << "expected = " << oc_to_string(expected);
@@ -1533,14 +1615,14 @@ void PutLinkUTest::test_quoted_put()
 }
 
 /**
- * Make sure running some ill formed PutLink doesn't crash
+ * Earlier variant of this crashed (!?) Make sure it doesn't
  */
-void PutLinkUTest::test_ill_put()
+void PutLinkUTest::test_nested_6()
 {
 	logger().info("BEGIN TEST: %s", __FUNCTION__);
 
 	Instantiator inst(&_as);
-	Handle ill_put = _eval.eval_h("(PutLink"
+	Handle nest_put = _eval.eval_h("(PutLink"
 	                              "  (LambdaLink"
 	                              "    (VariableNode \"$top-arg\")"
 	                              "    (VariableNode \"$top-arg\"))"
@@ -1560,11 +1642,28 @@ void PutLinkUTest::test_ill_put()
 	                              "        (VariableNode \"$texts\")"
 	                              "        (VariableNode \"$ms\")))"
 	                              "    (VariableNode \"$f\")))");
-	Handle result = inst.execute(ill_put);
+	Handle result = inst.execute(nest_put);
+
+	Handle expected = _eval.eval_h(
+	                              "  (ListLink"
+	                              "    (EvaluationLink"
+	                              "      (PredicateNode \"minsup\")"
+	                              "      (ListLink"
+	                              "        (VariableNode \"$f\")"
+	                              "        (VariableNode \"$texts\")"
+	                              "        (VariableNode \"$ms\")))"
+	                              "    (EvaluationLink"
+	                              "      (PredicateNode \"minsup\")"
+	                              "      (ListLink"
+	                              "        (VariableNode \"$g\")"
+	                              "        (VariableNode \"$texts\")"
+	                              "        (VariableNode \"$ms\")))"
+	                              "    (VariableNode \"$f\"))");
 
 	logger().debug() << "result = " << oc_to_string(result);
+	logger().debug() << "expected = " << oc_to_string(expected);
 
-	TS_ASSERT_EQUALS(result, nullptr);
+	TS_ASSERT_EQUALS(result, expected);
 
 	logger().info("END TEST: %s", __FUNCTION__);
 }
@@ -1659,13 +1758,21 @@ void PutLinkUTest::test_tricky_put_3()
 	logger().debug() << "rs = " << rs;
 
 	Instantiator inst(&_as);
-	Handle put = _eval.eval_h("put-3"),
-		result = inst.execute(put),
-		expected = _eval.eval_h("expected-3");
+	Handle put = _eval.eval_h("put-3");
+	Handle result = inst.execute(put);
+	Handle expected = _eval.eval_h("expected-3");
 
 	logger().debug() << "result = " << oc_to_string(result);
 	logger().debug() << "expected = " << oc_to_string(expected);
 
+	TS_ASSERT_EQUALS(result, expected);
+
+	expected = _eval.eval_h("expected-3-alt");
+	logger().debug() << "alternative expected = " << oc_to_string(expected);
+	TS_ASSERT_EQUALS(result, expected);
+
+	expected = _eval.eval_h("expected-3-alt-b");
+	logger().debug() << "alt-b expected = " << oc_to_string(expected);
 	TS_ASSERT_EQUALS(result, expected);
 
 	logger().info("END TEST: %s", __FUNCTION__);
@@ -1681,8 +1788,8 @@ void PutLinkUTest::test_tricky_put_3()
  * should output upon execution
  *
  * (InheritanceLink
- *   (VariableNode "$X")
- *   (VariableNode "$Y"))
+ *   (VariableNode "$Z")
+ *   (VariableNode "$W"))
  */
 void PutLinkUTest::test_tricky_put_4()
 {
@@ -1692,14 +1799,16 @@ void PutLinkUTest::test_tricky_put_4()
 	logger().debug() << "rs = " << rs;
 
 	Instantiator inst(&_as);
-	Handle put = _eval.eval_h("put-4"),
-		result = inst.execute(put),
-		expected = _eval.eval_h("expected-4");
+	Handle put = _eval.eval_h("put-4");
+	Handle result = inst.execute(put);
+	Handle expected = _eval.eval_h("expected-4");
+	Handle unexpected = _eval.eval_h("unexpected-4");
 
 	logger().debug() << "result = " << oc_to_string(result);
 	logger().debug() << "expected = " << oc_to_string(expected);
 
 	TS_ASSERT_EQUALS(result, expected);
+	TS_ASSERT_DIFFERS(result, unexpected);
 
 	logger().info("END TEST: %s", __FUNCTION__);
 }

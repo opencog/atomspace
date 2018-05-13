@@ -185,6 +185,8 @@ Handle RewriteLink::beta_reduce(const HandleSeq& vals) const
 	{
 		vm.insert({vars.varseq[i], vals[i]});
 	}
+
+	// Call the possibly-overloaded map-based reduction function.
 	return beta_reduce(vm);
 }
 

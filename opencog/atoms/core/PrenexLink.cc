@@ -66,22 +66,34 @@ PrenexLink::PrenexLink(const Link &l)
 
 /* ================================================================= */
 
-Handle PrenexLink::reassemble(const HandleMap& vm,
+/// Re-assemble into prenex form.
+///
+/// If the result of beta reduction is an expression with bound
+/// variables in it, then those bound variables should be moved
+/// to the outermost link, viz, be put into prenex form. All of
+/// the analysis of the term has alrady happened; here, we just
+/// need to assemble the final prenex form.
+//
+Handle PrenexLink::reassemble(Type scope,
+                              const HandleMap& vm,
                               const HandleSeq& final_varlist) const
 {
 	// Now get the vardecl and body
 	Handle vdecl = gen_vardecl(final_varlist);
 	Handle newbod = RewriteLink::substitute_body(vdecl, _body, vm);
 
-	// Reassemble if necessary
-	if (not final_varlist.empty())
-		return Handle(createLink(get_type(), vdecl, newbod));
+	// Reassemble if necessary. That is, if there are variables to
+	// declare, place them outermost, in prenex form.
+	if (PUT_LINK != scope and not final_varlist.empty())
+		return Handle(createLink(scope, vdecl, newbod));
 
+	// Otherwise, we are done with the beta-reduction.
 	return newbod;
 }
 
 /* ================================================================= */
 
+// Collect up variables.
 static Handle collect(const Variables& vtool,
                       const Handle& origvar, const Handle& newvar,
                       HandleSeq& final_varlist,
@@ -120,9 +132,9 @@ static Handle collect(const Variables& vtool,
 
 Handle PrenexLink::beta_reduce(const HandleSeq& seq) const
 {
-	// Test for a special case: eta reduction on the supplied
-	// function.  We can recognize this if we don't get fewer
-	// arguments than we expected.
+	// Test for a special case: function composition followed by
+	// eta conversion on the supplied function.  We can recognize
+	// this if we get fewer arguments than expected.
 	const Variables& vtool = get_variables();
 	size_t seqsize = seq.size();
 	if (seqsize == vtool.size())
@@ -131,8 +143,40 @@ Handle PrenexLink::beta_reduce(const HandleSeq& seq) const
 		return RewriteLink::beta_reduce(seq);
 	}
 
-	// If its an eta, there must be just one argument, and it must
-	// must be a ScopeLink.
+	// If we are here, we are expecting an eta conversion.
+	// Here is what an eta conversion looks like (see test_eta in
+	// PutLinkUTest):
+	//
+	// (define func-with-three-args
+	//    (Lambda
+	//      (VariableList (Variable "$x")(Variable "$y")(Variable "$z"))
+	//      (Inheritance (Variable "$z") (Variable "$x"))))
+	//
+	// The above is a function that expects three arguments: x,y,z.
+	// Lets compose it with a function that takes one argument, but
+	// returns three values (function coposition):
+	//
+	// (define func-returns-three-values
+	//    (Lambda (Variable "$w")
+	//      (List (Concept "animal") (Concept "foobar") (Variable"$w"))))
+	//
+	// Composing these two should return a function that takes one
+	// argument, namely $w.
+	//
+	//    (Put func-with-three-args func-returns-three-values)
+	//
+	// We expect as a result:
+	//
+	// (Lambda (Variable "$w") (Inheritance (Variable "$w") (Concept "animal")))
+	//
+	// Note that this is NOT compatible with beta-reduction in classical
+	// lambda calculus, which would leave $w free. We really want to
+	// eta-convert this, and keep $w bound, so that it looks like
+	// ordinary function composition. Atomese is not lambda calculus.
+
+	// ------- Lets begin.
+	// For a valid eta conversion, there must be just one argument,
+	// and it must must be a ScopeLink.
 	if (1 != seqsize or
 	    not classserver().isA(seq[0]->get_type(), SCOPE_LINK))
 	{
@@ -176,7 +220,7 @@ Handle PrenexLink::beta_reduce(const HandleSeq& seq) const
 	// Almost done. The final_varlist holds the variable declarations,
 	// and the vm holds what needs to be substituted in. Substitute,
 	// and create the reduced link.
-	return reassemble(vm, final_varlist);
+	return reassemble(get_type(), vm, final_varlist);
 }
 
 /* ================================================================= */
@@ -192,6 +236,7 @@ Handle PrenexLink::beta_reduce(const HandleMap& vmap) const
 	HandleSeq final_varlist;
 	HandleSet used_vars;
 	HandleMap issued;
+	Type scope = get_type();
 
 	const Variables& vtool = get_variables();
 	for (const Handle& var : vtool.varseq)
@@ -255,13 +300,19 @@ Handle PrenexLink::beta_reduce(const HandleMap& vmap) const
 				}
 			}
 			vm[pare->first] = body;
+
+			// Last one wins.  XXX This is actually ambiguous, if there
+			// were multiple variables, and they weren's all LambdaLinks,
+			// for example. In that case, things are borked, and there's
+			// a bug here.  For now, we punt.
+			scope = valuetype;
 		}
 	}
 
 	// Almost done. The final_varlist holds the variable declarations,
 	// and the vm holds what needs to be substituted in. Substitute,
 	// and create the reduced link.
-	return reassemble(vm, final_varlist);
+	return reassemble(scope, vm, final_varlist);
 }
 
 /* ================================================================= */
