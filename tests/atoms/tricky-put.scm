@@ -110,3 +110,36 @@
       (Variable "$sha-arg-0")
       (Variable "$sha-arg-1"))
     (Concept "D"))))
+
+; -----------------------------------------------------
+; Test conversion of putlink into prenex form.
+; Naively, one might think that one should get
+;    (List (Pattern stuff) (Concept "D"))
+; as the result of the evaluation; in fact, the pattern gets
+; pulled out, so that the final result is in prenex form.
+; This is nearly identical to put-5 above, but with
+; a non-lambda version of the PrenexLink
+;
+(define put-6
+(Put
+  (List
+    (Variable "$spe-arg-0")
+    (Concept "D"))
+  (Pattern
+    (VariableList
+      (Variable "$sha-arg-0")
+      (Variable "$sha-arg-1"))
+    (Inheritance
+      (Variable "$sha-arg-0")
+      (Variable "$sha-arg-1")))))
+
+(define expected-6
+(Pattern
+  (VariableList
+    (Variable "$sha-arg-0")
+    (Variable "$sha-arg-1"))
+  (List
+    (Inheritance
+      (Variable "$sha-arg-0")
+      (Variable "$sha-arg-1"))
+    (Concept "D"))))
