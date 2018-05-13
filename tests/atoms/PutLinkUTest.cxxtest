@@ -86,7 +86,7 @@ public:
 	void test_quoted_put();
 	void xtest_ill_put();
 	void test_tricky_put_1();
-	void xtest_tricky_put_2();
+	void test_tricky_put_2();
 	void test_tricky_put_3();
 	void xtest_tricky_put_4();
 	void xtest_tricky_put_5();
@@ -1699,7 +1699,7 @@ void PutLinkUTest::test_tricky_put_1()
  *   (VariableNode "$Z")
  *   (VariableNode "$Z"))
  */
-void PutLinkUTest::xtest_tricky_put_2()
+void PutLinkUTest::test_tricky_put_2()
 {
 	logger().info("BEGIN TEST: %s", __FUNCTION__);
 

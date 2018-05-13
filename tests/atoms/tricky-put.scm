@@ -1,3 +1,9 @@
+;
+; Test composition of function with diagonal operator (coproduct)
+; This triggers the alpha-conversion code path; its almost just
+; a variable renaming, together with an eta conversion at the end,
+; so that the vaialbe $Z becomes bound, instead of being free.
+;
 (define put-1
 (Put
   (Lambda (Inheritance (Variable "$X") (Variable "$Y")))
@@ -10,17 +16,22 @@
     (VariableNode "$Z")
     (VariableNode "$Z"))))
 
+; -----------------------------------------------------
+; Similar to above, but with free variables, instead of bound vars.
+; That is, both variables $X and $Y are free. The beta-substitution
+; keeps them free, and does not bind them (no eta-conversion).
+;
 (define put-2
 (Put
   (Inheritance (Variable "$X") (Variable "$Y"))
   (List (Variable "$Z") (Variable "$Z"))))
 
 (define expected-2
-(LambdaLink
-  (VariableNode "$Z")
   (InheritanceLink
     (VariableNode "$Z")
-    (VariableNode "$Z"))))
+    (VariableNode "$Z")))
+
+; -----------------------------------------------------
 
 (define put-3
 (Put
