@@ -75,8 +75,9 @@ Handle PrenexLink::reassemble(const HandleMap& vm,
 
 	// Reassemble if necessary. That is, if there are variables to
 	// declare, place them outermost, in prenex form.
-	if (not final_varlist.empty())
-		return Handle(createLink(get_type(), vdecl, newbod));
+	Type my_type = get_type();
+	if (PUT_LINK != my_type and not final_varlist.empty())
+		return Handle(createLink(my_type, vdecl, newbod));
 
 	// Otherwise, we are done with the beta-reduction.
 	return newbod;
