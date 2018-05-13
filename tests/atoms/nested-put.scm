@@ -71,6 +71,11 @@
 
 ; ----------------------------------------------
 ;
+; We expect the inner put to get evaluated first. The innermost
+; Put should generate (ConceptNode "A") and, as a result, the
+; next put is ill-defined, as there are no free variables, and
+; so no way to substitute.
+;
 (define nested-put-3
 (PutLink
   (PutLink
@@ -83,6 +88,8 @@
   (Concept "C"))
 )
 
+; ----------------------------------------------
+;
 (define nested-put-4
 (PutLink
   (PutLink

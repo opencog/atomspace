@@ -1268,7 +1268,7 @@ void PutLinkUTest::test_nested_2()
 }
 
 /**
- * Test that nested PutLinks is supported, specifically that executing
+ * Test that that executing the below raises an exception
  *
  * (PutLink
  *   (PutLink
@@ -1280,7 +1280,10 @@ void PutLinkUTest::test_nested_2()
  *     (Concept "B"))
  *   (Concept "C"))
  *
- * raise an exception
+ * The reason for this is that the innermost Put should evaluate
+ * to just (ConceptNode "A"), and so the middle one would be
+ *    (Put (Concept "A") (Concept "B"))
+ * which is ill-defined, and throws.
  */
 void PutLinkUTest::test_nested_3()
 {
