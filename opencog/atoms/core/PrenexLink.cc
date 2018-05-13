@@ -83,8 +83,12 @@ Handle PrenexLink::reassemble(Type prenex,
 	Handle newbod = RewriteLink::substitute_body(vdecl, _body, vm);
 
 	// Reassemble if necessary. That is, if there are variables to
-	// declare, place them outermost, in prenex form.
-	if (PUT_LINK != prenex and not final_varlist.empty())
+	// declare, place them outermost, in prenex form. We only
+	// re-assemble into prenex form if the desired link type actually
+	// is a prenex link type. If it's not, then it should not get
+	// prenexed.  Check for PutLink to avoid infinite recursion.
+	if (PUT_LINK != prenex and not final_varlist.empty() and
+	    classserver().isA(prenex, PRENEX_LINK))
 		return Handle(createLink(prenex, vdecl, newbod));
 
 	// Otherwise, we are done with the beta-reduction.
