@@ -1741,13 +1741,21 @@ void PutLinkUTest::test_tricky_put_3()
 	logger().debug() << "rs = " << rs;
 
 	Instantiator inst(&_as);
-	Handle put = _eval.eval_h("put-3"),
-		result = inst.execute(put),
-		expected = _eval.eval_h("expected-3");
+	Handle put = _eval.eval_h("put-3");
+	Handle result = inst.execute(put);
+	Handle expected = _eval.eval_h("expected-3");
 
 	logger().debug() << "result = " << oc_to_string(result);
 	logger().debug() << "expected = " << oc_to_string(expected);
 
+	TS_ASSERT_EQUALS(result, expected);
+
+	expected = _eval.eval_h("expected-3-alt");
+	logger().debug() << "alternative expected = " << oc_to_string(expected);
+	TS_ASSERT_EQUALS(result, expected);
+
+	expected = _eval.eval_h("expected-3-alt-b");
+	logger().debug() << "alt-b expected = " << oc_to_string(expected);
 	TS_ASSERT_EQUALS(result, expected);
 
 	logger().info("END TEST: %s", __FUNCTION__);

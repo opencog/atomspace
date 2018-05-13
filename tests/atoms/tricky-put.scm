@@ -32,6 +32,9 @@
     (VariableNode "$Z")))
 
 ; -----------------------------------------------------
+; Simple alpha conversion.
+; All three expected results are alpha-equivalent; any one will do.
+; All three should equal the result of evaluating the put.
 
 (define put-3
 (Put
@@ -45,6 +48,19 @@
     (VariableNode "$X")
     (VariableNode "$Y"))))
 
+(define expected-3-alt
+(LambdaLink
+  (InheritanceLink
+    (VariableNode "$Z")
+    (VariableNode "$W"))))
+
+(define expected-3-alt-b
+(LambdaLink
+  (InheritanceLink
+    (VariableNode "$foo")
+    (VariableNode "$bar"))))
+
+; -----------------------------------------------------
 (define put-4
 (Put
   (Inheritance (Variable "$X") (Variable "$Y"))
