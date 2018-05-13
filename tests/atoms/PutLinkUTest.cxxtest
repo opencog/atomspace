@@ -80,7 +80,7 @@ public:
 	void xtest_nested_2();
 	void test_nested_3();
 	void test_nested_4();
-	void xtest_nested_5();
+	void test_nested_5();
 	void test_and_compose_1();
 	void test_and_compose_2();
 	void test_quoted_put();
@@ -1384,7 +1384,7 @@ void PutLinkUTest::test_nested_4()
 }
 
 /**
- * Test that the following PutLinks
+ * Test that the following nested sequence of PutLinks
  *
  * (Put
  *   (Put
@@ -1406,7 +1406,7 @@ void PutLinkUTest::test_nested_4()
  *       (Variable "$sha-arg-0")
  *       (Variable "$sha-arg-1"))))
  *
- * executes into
+ * reduces to
  *
  * (Lambda
  *   (VariableList
@@ -1422,11 +1422,11 @@ void PutLinkUTest::test_nested_4()
  * (Put
  *   (ListLink (Variable "$spe-arg-0") (Concept "D"))
  *   (Lambda stuff)
- * and so the (LambdaStuff should get pasted verbatim into where the
+ * and so the (Lambda stuff) should get pasted verbatim into where the
  * (Variable "$spe-arg-0") is. Finally, its reassembled in prenex form,
  * so that the variable declarations are outermost.
  */
-void PutLinkUTest::xtest_nested_5()
+void PutLinkUTest::test_nested_5()
 {
 	logger().info("BEGIN TEST: %s", __FUNCTION__);
 
@@ -1434,9 +1434,17 @@ void PutLinkUTest::xtest_nested_5()
 	logger().debug() << "rs = " << rs;
 
 	Instantiator inst(&_as);
-	Handle nested_put = _eval.eval_h("nested-put-5"),
-		result = inst.execute(nested_put),
-		expected = _eval.eval_h("expected-5");
+	Handle simple_put = _eval.eval_h("simple-put-5");
+	Handle result = inst.execute(simple_put);
+	Handle expected = _eval.eval_h("expected-5");
+
+	logger().debug() << "result = " << oc_to_string(result);
+	logger().debug() << "expected = " << oc_to_string(expected);
+
+	TS_ASSERT_EQUALS(result, expected);
+
+	Handle nested_put = _eval.eval_h("nested-put-5");
+	result = inst.execute(nested_put);
 
 	logger().debug() << "result = " << oc_to_string(result);
 	logger().debug() << "expected = " << oc_to_string(expected);

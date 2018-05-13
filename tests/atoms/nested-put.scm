@@ -167,6 +167,21 @@
       (Variable "$sha-arg-0")
       (Variable "$sha-arg-1")))))
 
+; Same as above, what the outermost Put should look like,
+; after reducing the inner puts.
+(define simple-put-5
+  (Put
+    (List
+      (Variable "$spe-arg-0")
+      (Concept "D"))
+    (Lambda
+      (VariableList
+        (Variable "$sha-arg-0")
+        (Variable "$sha-arg-1"))
+      (Inheritance
+        (Variable "$sha-arg-0")
+        (Variable "$sha-arg-1")))))
+
 (define expected-5
 (Lambda
   (VariableList
