@@ -110,6 +110,25 @@
 
 ; ----------------------------------------------
 ;
+; We expect the inner put to get evaluated first. The innermost
+; Put should generate
+;   (LambdaLink (Variable "$X") (Variable "$X"))
+; which is the identity function.
+;
+; The middle Put should then reproduce its argument, since above
+; is the identity; viz, the middle Put should result in
+;
+;    (List (Variable "$spe-arg-0") (Concept "D"))
+;
+; The outermost put should just glue in the outer lambda into where
+; the variable $spe is, resulting in
+;
+;   (List
+;     (Lambda
+;       (VariableList (Variable "$sha-arg-0") (Variable "$sha-arg-1"))
+;       (Inheritance (Variable "$sha-arg-0") (Variable "$sha-arg-1")))
+;     (Concept "D"))
+;
 (define nested-put-5
 (Put
   (Put
@@ -132,12 +151,12 @@
       (Variable "$sha-arg-1")))))
 
 (define expected-5
-(Lambda
-  (VariableList
-    (Variable "$sha-arg-0")
-    (Variable "$sha-arg-1"))
-  (List
-    (Inheritance
+(List
+  (Lambda
+    (VariableList
       (Variable "$sha-arg-0")
       (Variable "$sha-arg-1"))
-    (Concept "D"))))
+    (Inheritance
+      (Variable "$sha-arg-0")
+      (Variable "$sha-arg-1")))
+  (Concept "D")))

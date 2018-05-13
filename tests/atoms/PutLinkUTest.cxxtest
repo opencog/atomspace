@@ -79,7 +79,7 @@ public:
 	void test_nested_2();
 	void test_nested_3();
 	void test_nested_4();
-	void xtest_nested_5();
+	void test_nested_5();
 	void test_and_compose_1();
 	void test_and_compose_2();
 	void test_quoted_put();
@@ -1357,17 +1357,24 @@ void PutLinkUTest::test_nested_4()
  *
  * executes into
  *
- * (Lambda
- *   (VariableList
- *     (Variable "$sha-arg-0")
- *     (Variable "$sha-arg-1"))
- *   (List
- *     (Inheritance
+ * (List
+ *   (Lambda
+ *     (VariableList
  *       (Variable "$sha-arg-0")
  *       (Variable "$sha-arg-1"))
- *     (Concept "D")))
+ *     (Inheritance
+ *       (Variable "$sha-arg-0")
+ *       (Variable "$sha-arg-1")))
+ *   (Concept "D"))
+ *
+ * The reason for this is that the outermost Put should be of the form
+ * (Put
+ *   (ListLink (Variable "$spe-arg-0") (Concept "D"))
+ *   (Lambda stuff)
+ * and so the (LambdaStuff should get pasted verbatim into where the
+ * (Variable "$spe-arg-0") is.
  */
-void PutLinkUTest::xtest_nested_5()
+void PutLinkUTest::test_nested_5()
 {
 	logger().info("BEGIN TEST: %s", __FUNCTION__);
 
