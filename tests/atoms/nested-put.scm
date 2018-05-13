@@ -1,3 +1,10 @@
+;
+; We expect the inner put to get evaluated first. The inner
+; Put should generate
+; (Lambda
+;   (VariableList (Variable "$Y") (Variable "$Z"))
+;   (Inheritance (Variable "$Y") (Variable "$Z")))
+;
 (define nested-put-1
 (Put
   (Put
@@ -24,6 +31,15 @@
     (Variable "$X")))
 )
 
+; ----------------------------------------------
+;
+; We expect the inner put to get evaluated first. The inner
+; Put should generate
+;   (List (Concept "texts") (Variable "$W"))
+; Why? Because the inner lambda had one variable, was proided two args,
+; and so it repeats the args. Then, evaluating the outer Put should
+; simply paste the lambda.yz into the $W location.
+;
 (define nested-put-2
 (PutLink
   (PutLink
@@ -43,18 +59,18 @@
 )
 
 (define expected-2
-(Lambda
-  (VariableList
-    (VariableNode "$Y")
-    (VariableNode "$Z")
-  )
-  (ListLink
-    (ConceptNode "texts")
-    (Inheritance
+(ListLink
+  (ConceptNode "texts")
+  (LambdaLink
+    (VariableList
       (VariableNode "$Y")
-      (VariableNode "$Z"))))
-)
+      (VariableNode "$Z"))
+    (InheritanceLink
+      (VariableNode "$Y")
+      (VariableNode "$Z")))))
 
+; ----------------------------------------------
+;
 (define nested-put-3
 (PutLink
   (PutLink
