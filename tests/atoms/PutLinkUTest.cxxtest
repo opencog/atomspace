@@ -76,7 +76,7 @@ public:
 	void test_eval_implication_2();
 	void test_ill_unquote();
 	void test_nested_1();
-	void test_nested_2();
+	void xtest_nested_2();
 	void test_nested_3();
 	void test_nested_4();
 	void xtest_nested_5();
@@ -1250,7 +1250,7 @@ void PutLinkUTest::test_nested_1()
  * Finally, the whole expression is re-written in prenex form, so that the
  * variable bindings are moved to outer-most.
  */
-void PutLinkUTest::test_nested_2()
+void PutLinkUTest::xtest_nested_2()
 {
 	logger().info("BEGIN TEST: %s", __FUNCTION__);
 

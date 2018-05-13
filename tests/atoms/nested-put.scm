@@ -38,8 +38,9 @@
 ; We expect the inner put to get evaluated first. The inner
 ; Put should generate
 ;   (List (Concept "texts") (Variable "$W"))
-; Why? Because the inner lambda had one variable, was provided two args,
-; and so it repeats the args. Then, evaluating the outer Put should
+; Why? Because the inner lambda had one variable, (its in fact the
+; identity function) and it was provided two args; thus it should just
+; repeat the args that it got. Then, evaluating the outer Put should
 ; simply paste the lambda.yz into the $W location. Finally, the
 ; PutLink is designed to always return variables in prenex form, so the
 ; variables are migrated out.

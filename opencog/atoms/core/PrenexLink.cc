@@ -73,10 +73,12 @@ Handle PrenexLink::reassemble(const HandleMap& vm,
 	Handle vdecl = gen_vardecl(final_varlist);
 	Handle newbod = RewriteLink::substitute_body(vdecl, _body, vm);
 
-	// Reassemble if necessary
-	if (_vardecl and not final_varlist.empty())
+	// Reassemble if necessary. That is, if there are variables to
+	// declare, place them outermost, in prenex form.
+	if (not final_varlist.empty())
 		return Handle(createLink(get_type(), vdecl, newbod));
 
+	// Otherwise, we are done with the beta-reduction.
 	return newbod;
 }
 
@@ -132,8 +134,9 @@ Handle PrenexLink::beta_reduce(const HandleSeq& seq) const
 		return RewriteLink::beta_reduce(seq);
 	}
 
-	// If its an eta, there must be just one argument, and it must
-	// must be a ScopeLink.
+	// If we are here, we are expecting an eta conversion. For a
+	// valid eta conversion, there must be just one argument, and
+	// it must must be a ScopeLink.
 	if (1 != seqsize or
 	    not classserver().isA(seq[0]->get_type(), SCOPE_LINK))
 	{
