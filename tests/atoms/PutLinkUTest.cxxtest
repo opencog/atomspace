@@ -79,14 +79,14 @@ public:
 	void test_nested_2();
 	void test_nested_3();
 	void test_nested_4();
-	void test_nested_5();
+	void xtest_nested_5();
 	void test_and_compose_1();
 	void test_and_compose_2();
 	void test_quoted_put();
 	void xtest_ill_put();
-	void xtest_tricky_put_1();
+	void test_tricky_put_1();
 	void xtest_tricky_put_2();
-	void xtest_tricky_put_3();
+	void test_tricky_put_3();
 	void xtest_tricky_put_4();
 	void xtest_tricky_put_5();
 };
@@ -1234,12 +1234,12 @@ void PutLinkUTest::test_nested_1()
  *
  * outputs
  *
- * (ListLink
- *   (ConceptNode "texts")
- *   (Lambda
- *     (VariableList
- *       (VariableNode "$Y")
- *       (VariableNode "$Z"))
+ * (Lambda
+ *   (VariableList
+ *     (VariableNode "$Y")
+ *     (VariableNode "$Z"))
+ *   (ListLink
+ *     (ConceptNode "texts")
  *     (Inheritance
  *       (VariableNode "$Y")
  *       (VariableNode "$Z"))))
@@ -1247,6 +1247,8 @@ void PutLinkUTest::test_nested_1()
  * We expect the inner put to be evaluated first, resulting in
  *   (ListLink (Concept "texts") (Variable "$W"))
  * and then the outer put will just paste the lambda.yz where the $W goes.
+ * Finally, the whole expression is re-written in prenex form, so that the
+ * variable bindings are moved to outer-most.
  */
 void PutLinkUTest::test_nested_2()
 {
@@ -1357,24 +1359,25 @@ void PutLinkUTest::test_nested_4()
  *
  * executes into
  *
- * (List
- *   (Lambda
- *     (VariableList
- *       (Variable "$sha-arg-0")
- *       (Variable "$sha-arg-1"))
+ * (Lambda
+ *   (VariableList
+ *     (Variable "$sha-arg-0")
+ *     (Variable "$sha-arg-1"))
+ *   (List
  *     (Inheritance
  *       (Variable "$sha-arg-0")
- *       (Variable "$sha-arg-1")))
- *   (Concept "D"))
+ *       (Variable "$sha-arg-1"))
+ *     (Concept "D")))
  *
  * The reason for this is that the outermost Put should be of the form
  * (Put
  *   (ListLink (Variable "$spe-arg-0") (Concept "D"))
  *   (Lambda stuff)
  * and so the (LambdaStuff should get pasted verbatim into where the
- * (Variable "$spe-arg-0") is.
+ * (Variable "$spe-arg-0") is. Finally, its reassembled in prenex form,
+ * so that the variable declarations are outermost.
  */
-void PutLinkUTest::test_nested_5()
+void PutLinkUTest::xtest_nested_5()
 {
 	logger().info("BEGIN TEST: %s", __FUNCTION__);
 
@@ -1604,7 +1607,7 @@ void PutLinkUTest::xtest_ill_put()
  *     (VariableNode "$Z")
  *     (VariableNode "$Z")))
  */
-void PutLinkUTest::xtest_tricky_put_1()
+void PutLinkUTest::test_tricky_put_1()
 {
 	logger().info("BEGIN TEST: %s", __FUNCTION__);
 
@@ -1671,7 +1674,7 @@ void PutLinkUTest::xtest_tricky_put_2()
  *     (VariableNode "$X")
  *     (VariableNode "$Y")))
  */
-void PutLinkUTest::xtest_tricky_put_3()
+void PutLinkUTest::test_tricky_put_3()
 {
 	logger().info("BEGIN TEST: %s", __FUNCTION__);
 

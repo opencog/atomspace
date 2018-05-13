@@ -38,9 +38,11 @@
 ; We expect the inner put to get evaluated first. The inner
 ; Put should generate
 ;   (List (Concept "texts") (Variable "$W"))
-; Why? Because the inner lambda had one variable, was proided two args,
+; Why? Because the inner lambda had one variable, was provided two args,
 ; and so it repeats the args. Then, evaluating the outer Put should
-; simply paste the lambda.yz into the $W location.
+; simply paste the lambda.yz into the $W location. Finally, the
+; PutLink is designed to always return variables in prenex form, so the
+; variables are migrated out.
 ;
 (define nested-put-2
 (PutLink
@@ -61,15 +63,17 @@
 )
 
 (define expected-2
-(ListLink
-  (ConceptNode "texts")
-  (LambdaLink
-    (VariableList
+(Lambda
+  (VariableList
+    (VariableNode "$Y")
+    (VariableNode "$Z")
+  )
+  (ListLink
+    (ConceptNode "texts")
+    (Inheritance
       (VariableNode "$Y")
-      (VariableNode "$Z"))
-    (InheritanceLink
-      (VariableNode "$Y")
-      (VariableNode "$Z")))))
+      (VariableNode "$Z"))))
+)
 
 ; ----------------------------------------------
 ;
@@ -131,6 +135,16 @@
 ;       (Inheritance (Variable "$sha-arg-0") (Variable "$sha-arg-1")))
 ;     (Concept "D"))
 ;
+; Finally, PutLink always places the result in prenex order, so the
+; above is rearranged to instead read
+;
+;   (Lambda
+;     (VariableList (Variable "$sha-arg-0") (Variable "$sha-arg-1"))
+;     (List
+;       (Inheritance (Variable "$sha-arg-0") (Variable "$sha-arg-1"))
+;       (Concept "D")))
+;
+;
 (define nested-put-5
 (Put
   (Put
@@ -153,12 +167,12 @@
       (Variable "$sha-arg-1")))))
 
 (define expected-5
-(List
-  (Lambda
-    (VariableList
-      (Variable "$sha-arg-0")
-      (Variable "$sha-arg-1"))
+(Lambda
+  (VariableList
+    (Variable "$sha-arg-0")
+    (Variable "$sha-arg-1"))
+  (List
     (Inheritance
       (Variable "$sha-arg-0")
-      (Variable "$sha-arg-1")))
-  (Concept "D")))
+      (Variable "$sha-arg-1"))
+    (Concept "D"))))
