@@ -91,6 +91,7 @@ public:
 	void test_tricky_put_4();
 	void test_tricky_put_5();
 	void test_tricky_put_6();
+	void test_tricky_put_7();
 };
 
 #define N _as.add_node
@@ -1876,6 +1877,30 @@ void PutLinkUTest::test_tricky_put_6()
 	Handle put = _eval.eval_h("put-6"),
 		result = inst.execute(put),
 		expected = _eval.eval_h("expected-6");
+
+	logger().debug() << "result = " << oc_to_string(result);
+	logger().debug() << "expected = " << oc_to_string(expected);
+
+	TS_ASSERT_EQUALS(result, expected);
+
+	logger().info("END TEST: %s", __FUNCTION__);
+}
+
+/**
+ * Just like tricky_put_5, but with a non-prenex link.
+ * Unlike trick_put_5, this should NOT be rewritten into prenex form!
+ */
+void PutLinkUTest::test_tricky_put_7()
+{
+	logger().info("BEGIN TEST: %s", __FUNCTION__);
+
+	std::string rs = _eval.eval("(load-from-path \"tests/atoms/tricky-put.scm\")");
+	logger().debug() << "rs = " << rs;
+
+	Instantiator inst(&_as);
+	Handle put = _eval.eval_h("put-7"),
+		result = inst.execute(put),
+		expected = _eval.eval_h("expected-7");
 
 	logger().debug() << "result = " << oc_to_string(result);
 	logger().debug() << "expected = " << oc_to_string(expected);

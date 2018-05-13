@@ -272,10 +272,13 @@ Handle PrenexLink::beta_reduce(const HandleMap& vmap) const
 		}
 
 		// If we are here, then var will be beta-reduced.
-		// Is the value a ScopeLink? If so, handle it.
-		if (classserver().isA(valuetype, SCOPE_LINK))
+		// Is the value a PrenexLink? If so, we need to disassmeble
+		// it, yank out the variables, and then reassemble it
+		// again, so that the variables are declared in the
+		// outer-most scope.
+		if (classserver().isA(valuetype, PRENEX_LINK))
 		{
-			ScopeLinkPtr sc = ScopeLinkCast(pare->second);
+			PrenexLinkPtr sc = PrenexLinkCast(pare->second);
 			const Variables& bound = sc->get_variables();
 			Handle body = sc->get_body();
 

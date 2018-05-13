@@ -143,3 +143,36 @@
       (Variable "$sha-arg-0")
       (Variable "$sha-arg-1"))
     (Concept "D"))))
+
+; -----------------------------------------------------
+; Test non-conversion to prenex form.
+; One should get only
+;    (List (Scope stuff) (Concept "D"))
+; as the result of the evaluation; since the ScopeLink is NOT
+; a prenex link, it should not get pulled out. Very nearly
+; identical to put-5 and put-6, but not a prenex.
+;
+;
+(define put-7
+(Put
+  (List
+    (Variable "$spe-arg-0")
+    (Concept "D"))
+  (Scope
+    (VariableList
+      (Variable "$sha-arg-0")
+      (Variable "$sha-arg-1"))
+    (Inheritance
+      (Variable "$sha-arg-0")
+      (Variable "$sha-arg-1")))))
+
+(define expected-7
+(List
+  (Scope
+    (VariableList
+      (Variable "$sha-arg-0")
+      (Variable "$sha-arg-1"))
+      (Inheritance
+        (Variable "$sha-arg-0")
+        (Variable "$sha-arg-1")))
+   (Concept "D")))
