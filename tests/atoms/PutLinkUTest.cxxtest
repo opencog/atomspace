@@ -88,7 +88,7 @@ public:
 	void test_tricky_put_1();
 	void test_tricky_put_2();
 	void test_tricky_put_3();
-	void xtest_tricky_put_4();
+	void test_tricky_put_4();
 	void xtest_tricky_put_5();
 };
 
@@ -1771,10 +1771,10 @@ void PutLinkUTest::test_tricky_put_3()
  * should output upon execution
  *
  * (InheritanceLink
- *   (VariableNode "$X")
- *   (VariableNode "$Y"))
+ *   (VariableNode "$Z")
+ *   (VariableNode "$W"))
  */
-void PutLinkUTest::xtest_tricky_put_4()
+void PutLinkUTest::test_tricky_put_4()
 {
 	logger().info("BEGIN TEST: %s", __FUNCTION__);
 
@@ -1782,14 +1782,16 @@ void PutLinkUTest::xtest_tricky_put_4()
 	logger().debug() << "rs = " << rs;
 
 	Instantiator inst(&_as);
-	Handle put = _eval.eval_h("put-4"),
-		result = inst.execute(put),
-		expected = _eval.eval_h("expected-4");
+	Handle put = _eval.eval_h("put-4");
+	Handle result = inst.execute(put);
+	Handle expected = _eval.eval_h("expected-4");
+	Handle unexpected = _eval.eval_h("unexpected-4");
 
 	logger().debug() << "result = " << oc_to_string(result);
 	logger().debug() << "expected = " << oc_to_string(expected);
 
 	TS_ASSERT_EQUALS(result, expected);
+	TS_ASSERT_DIFFERS(result, unexpected);
 
 	logger().info("END TEST: %s", __FUNCTION__);
 }

@@ -61,6 +61,10 @@
     (VariableNode "$bar"))))
 
 ; -----------------------------------------------------
+; Simple variable renaming of free variables.
+; Free variables are never alpha-converted.
+; Thus, the result should never be "unexpected-4"
+
 (define put-4
 (Put
   (Inheritance (Variable "$X") (Variable "$Y"))
@@ -68,9 +72,15 @@
 
 (define expected-4
 (InheritanceLink
+  (VariableNode "$Z")
+  (VariableNode "$W")))
+
+(define unexpected-4
+(InheritanceLink
   (VariableNode "$X")
   (VariableNode "$Y")))
 
+; -----------------------------------------------------
 (define put-5
 (Put
   (List
