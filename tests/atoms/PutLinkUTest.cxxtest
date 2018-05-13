@@ -1302,6 +1302,8 @@ void PutLinkUTest::test_nested_3()
 
 /**
  * Test that the following PutLinks raise an exception when executed
+ * This is essentially the same test as that above, and throws for the
+ * same reason (viz. its "texts" instead of "A", but same idea).
  *
  * (PutLink
  *   (PutLink

@@ -90,6 +90,10 @@
 
 ; ----------------------------------------------
 ;
+; Pretty much same as above; the innermost Put gets evaluated first,
+; resulting in (ConceptNode "texts"), which causes the next Put to
+; be ill-defined, and thus throwing an error.
+;
 (define nested-put-4
 (PutLink
   (PutLink
@@ -104,6 +108,8 @@
   (ConceptNode "texts"))
 )
 
+; ----------------------------------------------
+;
 (define nested-put-5
 (Put
   (Put
