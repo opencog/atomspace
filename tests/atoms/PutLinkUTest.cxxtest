@@ -84,7 +84,7 @@ public:
 	void test_and_compose_1();
 	void test_and_compose_2();
 	void test_quoted_put();
-	void xtest_ill_put();
+	void test_nested_6();
 	void test_tricky_put_1();
 	void test_tricky_put_2();
 	void test_tricky_put_3();
@@ -1615,14 +1615,14 @@ void PutLinkUTest::test_quoted_put()
 }
 
 /**
- * Make sure running some ill formed PutLink doesn't crash
+ * Earlier variant of this crashed (!?) Make sure it doesn't
  */
-void PutLinkUTest::xtest_ill_put()
+void PutLinkUTest::test_nested_6()
 {
 	logger().info("BEGIN TEST: %s", __FUNCTION__);
 
 	Instantiator inst(&_as);
-	Handle ill_put = _eval.eval_h("(PutLink"
+	Handle nest_put = _eval.eval_h("(PutLink"
 	                              "  (LambdaLink"
 	                              "    (VariableNode \"$top-arg\")"
 	                              "    (VariableNode \"$top-arg\"))"
@@ -1642,11 +1642,28 @@ void PutLinkUTest::xtest_ill_put()
 	                              "        (VariableNode \"$texts\")"
 	                              "        (VariableNode \"$ms\")))"
 	                              "    (VariableNode \"$f\")))");
-	Handle result = inst.execute(ill_put);
+	Handle result = inst.execute(nest_put);
+
+	Handle expected = _eval.eval_h(
+	                              "  (ListLink"
+	                              "    (EvaluationLink"
+	                              "      (PredicateNode \"minsup\")"
+	                              "      (ListLink"
+	                              "        (VariableNode \"$f\")"
+	                              "        (VariableNode \"$texts\")"
+	                              "        (VariableNode \"$ms\")))"
+	                              "    (EvaluationLink"
+	                              "      (PredicateNode \"minsup\")"
+	                              "      (ListLink"
+	                              "        (VariableNode \"$g\")"
+	                              "        (VariableNode \"$texts\")"
+	                              "        (VariableNode \"$ms\")))"
+	                              "    (VariableNode \"$f\"))");
 
 	logger().debug() << "result = " << oc_to_string(result);
+	logger().debug() << "expected = " << oc_to_string(expected);
 
-	TS_ASSERT_EQUALS(result, nullptr);
+	TS_ASSERT_EQUALS(result, expected);
 
 	logger().info("END TEST: %s", __FUNCTION__);
 }
