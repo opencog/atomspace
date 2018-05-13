@@ -77,7 +77,7 @@ public:
 	void test_eval_implication_2();
 	void test_ill_unquote();
 	void test_nested_1();
-	void xtest_nested_2();
+	void test_nested_2();
 	void test_nested_3();
 	void test_nested_4();
 	void test_nested_5();
@@ -1299,16 +1299,18 @@ void PutLinkUTest::test_nested_1()
  * Finally, the whole expression is re-written in prenex form, so that the
  * variable bindings are moved to outer-most.
  */
-void PutLinkUTest::xtest_nested_2()
+void PutLinkUTest::test_nested_2()
 {
 	logger().info("BEGIN TEST: %s", __FUNCTION__);
 
 	std::string rs = _eval.eval("(load-from-path \"tests/atoms/nested-put.scm\")");
 	logger().debug() << "rs = " << rs;
 
-	Instantiator inst(&_as);
-	Handle result = _eval.eval_h("nested-put-2");
+	Handle nested = _eval.eval_h("nested-put-2");
 	Handle expected = _eval.eval_h("expected-2");
+
+	Instantiator inst(&_as);
+	Handle result = inst.execute(nested);
 
 	logger().debug() << "result = " << oc_to_string(result);
 	logger().debug() << "expected = " << oc_to_string(expected);
