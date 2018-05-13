@@ -66,7 +66,16 @@ PrenexLink::PrenexLink(const Link &l)
 
 /* ================================================================= */
 
-Handle PrenexLink::reassemble(const HandleMap& vm,
+/// Re-assemble into prenex form.
+///
+/// If the result of beta reduction is an expression with bound
+/// variables in it, then those bound variables should be moved
+/// to the outermost link, viz, be put into prenex form. All of
+/// the analysis of the term has alrady happened; here, we just
+/// need to assemble the final prenex form.
+//
+Handle PrenexLink::reassemble(Type scope,
+                              const HandleMap& vm,
                               const HandleSeq& final_varlist) const
 {
 	// Now get the vardecl and body
@@ -75,9 +84,8 @@ Handle PrenexLink::reassemble(const HandleMap& vm,
 
 	// Reassemble if necessary. That is, if there are variables to
 	// declare, place them outermost, in prenex form.
-	Type my_type = get_type();
-	if (PUT_LINK != my_type and not final_varlist.empty())
-		return Handle(createLink(my_type, vdecl, newbod));
+	if (PUT_LINK != scope and not final_varlist.empty())
+		return Handle(createLink(scope, vdecl, newbod));
 
 	// Otherwise, we are done with the beta-reduction.
 	return newbod;
@@ -212,7 +220,7 @@ Handle PrenexLink::beta_reduce(const HandleSeq& seq) const
 	// Almost done. The final_varlist holds the variable declarations,
 	// and the vm holds what needs to be substituted in. Substitute,
 	// and create the reduced link.
-	return reassemble(vm, final_varlist);
+	return reassemble(get_type(), vm, final_varlist);
 }
 
 /* ================================================================= */
@@ -228,6 +236,7 @@ Handle PrenexLink::beta_reduce(const HandleMap& vmap) const
 	HandleSeq final_varlist;
 	HandleSet used_vars;
 	HandleMap issued;
+	Type scope = get_type();
 
 	const Variables& vtool = get_variables();
 	for (const Handle& var : vtool.varseq)
@@ -291,13 +300,19 @@ Handle PrenexLink::beta_reduce(const HandleMap& vmap) const
 				}
 			}
 			vm[pare->first] = body;
+
+			// Last one wins.  XXX This is actually ambiguous, if there
+			// were multiple variables, and they weren's all LambdaLinks,
+			// for example. In that case, things are borked, and there's
+			// a bug here.  For now, we punt.
+			scope = valuetype;
 		}
 	}
 
 	// Almost done. The final_varlist holds the variable declarations,
 	// and the vm holds what needs to be substituted in. Substitute,
 	// and create the reduced link.
-	return reassemble(vm, final_varlist);
+	return reassemble(scope, vm, final_varlist);
 }
 
 /* ================================================================= */
