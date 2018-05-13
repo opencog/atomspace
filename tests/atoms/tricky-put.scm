@@ -81,6 +81,12 @@
   (VariableNode "$Y")))
 
 ; -----------------------------------------------------
+; Test conversion of putlink into prenex form.
+; Naively, one might think that one should get
+;    (List (Lambda stuff) (Concept "D"))
+; as the result of the evaluation; in fact, the lambda gets
+; pulled out, so that the final result is in prenex form.
+;
 (define put-5
 (Put
   (List

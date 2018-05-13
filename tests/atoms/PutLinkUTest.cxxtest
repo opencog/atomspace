@@ -89,7 +89,7 @@ public:
 	void test_tricky_put_2();
 	void test_tricky_put_3();
 	void test_tricky_put_4();
-	void xtest_tricky_put_5();
+	void test_tricky_put_5();
 };
 
 #define N _as.add_node
@@ -1823,7 +1823,7 @@ void PutLinkUTest::test_tricky_put_4()
  *       (Variable "$sha-arg-1"))
  *     (Concept "D")))
  */
-void PutLinkUTest::xtest_tricky_put_5()
+void PutLinkUTest::test_tricky_put_5()
 {
 	logger().info("BEGIN TEST: %s", __FUNCTION__);
 
