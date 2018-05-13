@@ -20,11 +20,9 @@
  * 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
  */
 
-#include <opencog/util/Logger.h>
 #include <opencog/atoms/base/atom_types.h>
 #include <opencog/atoms/base/ClassServer.h>
 #include "DefineLink.h"
-#include "FreeLink.h"
 #include "LambdaLink.h"
 #include "PutLink.h"
 
@@ -125,8 +123,6 @@ void PutLink::static_typecheck_values(void)
 	if (classserver().isA(btype, TYPE_NODE) or TYPE_CHOICE == btype)
 		return;
 
-	size_t sz = _varlist.varseq.size();
-
 	Handle valley = _values;
 	Type vtype = valley->get_type();
 
@@ -157,6 +153,7 @@ void PutLink::static_typecheck_values(void)
 		}
 	}
 
+	size_t sz = _varlist.varseq.size();
 	if (1 == sz)
 	{
 		if (not _varlist.is_type(valley)
@@ -247,7 +244,7 @@ void PutLink::static_typecheck_values(void)
 
 /* ================================================================= */
 
-static inline Handle reddy(PrenexLinkPtr subs, const HandleSeq& oset)
+static inline Handle reddy(PrenexLinkPtr& subs, const HandleSeq& oset)
 {
 	subs->make_silent(true);
 	return subs->beta_reduce(oset);
