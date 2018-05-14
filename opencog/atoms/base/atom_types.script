@@ -488,8 +488,8 @@ ANCHOR_NODE <- NODE
 // as time intervals, or the lower and upper bounds of some range.
 INTERVAL_LINK <- ORDERED_LINK
 
-// Link for mathematics. (???) Huh? What is this? What does it do?
-// Is this actually used anywhere? Is this documented anywhere?
+// Link to represent the magnitude or the multitude of something, such
+// as 10kg, 10s, $10, etc.
 QUANTITY_LINK <- ORDERED_LINK
 
 // ====================================================================
