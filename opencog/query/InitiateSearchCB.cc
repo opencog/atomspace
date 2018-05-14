@@ -149,94 +149,97 @@ void InitiateSearchCB::set_pattern(const Variables& vars,
 //
 
 Handle
-InitiateSearchCB::find_starter(const Handle& h, size_t& depth,
-                                     Handle& startrm, size_t& width)
+InitiateSearchCB::find_starter(const Handle& root, size_t& depth,
+                                     Handle& parent, size_t& width)
 {
 	// If its a node, then we are done.
-	Type t = h->get_type();
-	if (_nameserver.isNode(t))
+	Type root_node_type = root->get_type();
+	if (_nameserver.isNode(root_node_type))
 	{
-		if (VARIABLE_NODE != t and GLOB_NODE != t)
+		if (VARIABLE_NODE != root_node_type and GLOB_NODE != root_node_type)
 		{
-			width = h->getIncomingSetSize();
-			startrm = h; // XXX wtf ???
-			return h;
+			width = root->getIncomingSetSize();
+			parent = root; // XXX wtf ???
+			return root;
 		}
 		return Handle::UNDEFINED;
 	}
 
 	// If its a link, then find recursively
-	return find_starter_recursive(h, depth, startrm, width);
+	return find_starter_recursive(root, depth, parent, width);
 }
 
 Handle
-InitiateSearchCB::find_starter_recursive(const Handle& h, size_t& depth,
-                                         Handle& startrm, size_t& width)
+InitiateSearchCB::find_starter_recursive(const Handle& root, size_t& depth,
+                                         Handle& starter_link, size_t& width)
 {
 	// If its a node, then we are done. Don't modify either depth or
 	// start.
-	Type t = h->get_type();
-	if (_nameserver.isNode(t))
+	Type root_node_type = root->get_type();
+	if (_nameserver.isNode(root_node_type))
 	{
-		if (VARIABLE_NODE != t and GLOB_NODE != t)
+		if (VARIABLE_NODE != root_node_type and GLOB_NODE != root_node_type)
 		{
-			width = h->getIncomingSetSize();
-			return h;
+			width = root->getIncomingSetSize();
+			return root;
 		}
 		return Handle::UNDEFINED;
 	}
 
 	// Ignore all dynamically-evaluatable links up front.
-	if (_dynamic->find(h) != _dynamic->end())
+	if (_dynamic->find(root) != _dynamic->end())
 		return Handle::UNDEFINED;
 
 	// Iterate over all the handles in the outgoing set.
 	// Find the deepest one that contains a constant, and start
 	// the search there.  If there are two at the same depth,
 	// then start with the skinnier one.
-	size_t deepest = depth;
-	startrm = Handle::UNDEFINED;
-	Handle hdeepest(Handle::UNDEFINED);
-	size_t thinnest = SIZE_MAX;
+	size_t starter_depth = depth;
+	starter_link = Handle::UNDEFINED;
+	Handle starter_node(Handle::UNDEFINED);
+	size_t starter_width = SIZE_MAX;
 
-	for (Handle hunt : h->getOutgoingSet())
+	for (Handle branch : root->getOutgoingSet())
 	{
-		size_t brdepth = depth + 1;
-		size_t brwid = SIZE_MAX;
-		Handle sbr(h);
+		size_t branch_depth = depth + 1;
+		size_t branch_width = SIZE_MAX;
+		Handle branch_link(root);
 
 		// Blow past the QuoteLinks, since they just screw up the search start.
-		if (Quotation::is_quotation_type(hunt->get_type()))
-			hunt = hunt->getOutgoingAtom(0);
+		if (Quotation::is_quotation_type(branch->get_type()))
+			branch = branch->getOutgoingAtom(0);
 
-		Handle s(find_starter_recursive(hunt, brdepth, sbr, brwid));
+		Handle branch_starter(
+		        find_starter_recursive(branch, branch_depth, branch_link,
+		                branch_width));
 
-		if (s)
+		if (branch_starter)
 		{
 			// Each ChoiceLink is potentially disconnected from the rest
 			// of the graph. Assume the worst case, explore them all.
-			if (CHOICE_LINK == t)
+			if (CHOICE_LINK == root_node_type)
 			{
 				Choice ch;
 				ch.clause = _curr_clause;
-				ch.best_start = s;
-				ch.start_term = sbr;
+				ch.best_start = branch_starter;
+				ch.start_term = branch_link;
 				_choices.push_back(ch);
 			}
 			else
-			if (brwid < thinnest
-			    or (brwid == thinnest and deepest < brdepth))
+			if (branch_width < starter_width
+			        or (branch_width == starter_width
+			                and starter_depth < branch_depth))
 			{
-				deepest = brdepth;
-				hdeepest = s;
-				startrm = sbr;
-				thinnest = brwid;
+				starter_depth = branch_depth;
+				starter_node = branch_starter;
+				starter_link = branch_link;
+				starter_width = branch_width;
 			}
 		}
 	}
-	depth = deepest;
-	width = thinnest;
-	return hdeepest;
+	depth = starter_depth;
+	width = starter_width;
+	return starter_node;
 }
 
 /* ======================================================== */
