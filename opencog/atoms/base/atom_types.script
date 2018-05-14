@@ -336,6 +336,8 @@ DUAL_LINK <- SATISFYING_LINK
 
 // Logical quantifiers
 // Should these inherit from EvaluatableLink ??
+// Actually, these probably should inherit from PrenexLink, because
+// we typically want to maintain these in prenex normal form.
 FORALL_LINK <- SCOPE_LINK "ForAllLink"
 EXISTS_LINK <- SCOPE_LINK
 
