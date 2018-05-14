@@ -140,7 +140,7 @@ void InitiateSearchCB::set_pattern(const Variables& vars,
 // start.
 //
 // size_t& depth will be set to the depth of the thinnest constant found.
-// Handle& start will be set to the link containing that constant.
+// Handle& link will be set to the link containing that constant.
 // size_t& width will be set to the incoming-set size of the thinnest
 //               constant found.
 // The returned value will be the constant at which to start the search.
@@ -150,7 +150,7 @@ void InitiateSearchCB::set_pattern(const Variables& vars,
 
 Handle
 InitiateSearchCB::find_starter(const Handle& root, size_t& depth,
-                                     Handle& parent, size_t& width)
+                                     Handle& link, size_t& width)
 {
 	// If its a node, then we are done.
 	Type root_node_type = root->get_type();
@@ -158,20 +158,20 @@ InitiateSearchCB::find_starter(const Handle& root, size_t& depth,
 	{
 		if (VARIABLE_NODE != root_node_type and GLOB_NODE != root_node_type)
 		{
+			depth = 0;
 			width = root->getIncomingSetSize();
-			parent = root; // XXX wtf ???
+			link = root; // XXX wtf ???
 			return root;
 		}
 		return Handle::UNDEFINED;
 	}
 
 	// If its a link, then find recursively
-	return find_starter_recursive(root, depth, parent, width);
+	return find_starter_recursive(root, depth, link, width);
 }
 
-Handle
-InitiateSearchCB::find_starter_recursive(const Handle& root, size_t& depth,
-                                         Handle& starter_link, size_t& width)
+Handle InitiateSearchCB::find_starter_recursive(const Handle& root, size_t& depth,
+                                                Handle& link, size_t& width)
 {
 	// If its a node, then we are done. Don't modify either depth or
 	// start.
@@ -180,6 +180,7 @@ InitiateSearchCB::find_starter_recursive(const Handle& root, size_t& depth,
 	{
 		if (VARIABLE_NODE != root_node_type and GLOB_NODE != root_node_type)
 		{
+			depth = 0;
 			width = root->getIncomingSetSize();
 			return root;
 		}
@@ -194,15 +195,15 @@ InitiateSearchCB::find_starter_recursive(const Handle& root, size_t& depth,
 	// Find the deepest one that contains a constant, and start
 	// the search there.  If there are two at the same depth,
 	// then start with the skinnier one.
-	size_t starter_depth = depth;
-	starter_link = Handle::UNDEFINED;
-	Handle starter_node(Handle::UNDEFINED);
-	size_t starter_width = SIZE_MAX;
+	depth = 0;
+	link = Handle::UNDEFINED;
+	Handle starter;
+	width = SIZE_MAX;
 
 	for (Handle branch : root->getOutgoingSet())
 	{
-		size_t branch_depth = depth + 1;
-		size_t branch_width = SIZE_MAX;
+		size_t branch_depth;
+		size_t branch_width;
 		Handle branch_link(root);
 
 		// Blow past the QuoteLinks, since they just screw up the search start.
@@ -226,20 +227,18 @@ InitiateSearchCB::find_starter_recursive(const Handle& root, size_t& depth,
 				_choices.push_back(ch);
 			}
 			else
-			if (branch_width < starter_width
-			        or (branch_width == starter_width
-			                and starter_depth < branch_depth))
+			if (branch_width < width
+			        or (branch_width == width
+			                and depth < branch_depth))
 			{
-				starter_depth = branch_depth;
-				starter_node = branch_starter;
-				starter_link = branch_link;
-				starter_width = branch_width;
+				depth = branch_depth + 1;
+				starter = branch_starter;
+				link = branch_link;
+				width = branch_width;
 			}
 		}
 	}
-	depth = starter_depth;
-	width = starter_width;
-	return starter_node;
+	return starter;
 }
 
 /* ======================================================== */
