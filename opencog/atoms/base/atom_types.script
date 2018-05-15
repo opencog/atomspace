@@ -338,8 +338,8 @@ DUAL_LINK <- SATISFYING_LINK
 // Should these inherit from EvaluatableLink ??
 // Actually, these probably should inherit from PrenexLink, because
 // we typically want to maintain these in prenex normal form.
-FORALL_LINK <- SCOPE_LINK "ForAllLink"
-EXISTS_LINK <- SCOPE_LINK
+FORALL_LINK <- SCOPE_LINK,EVALUATABLE_LINK "ForAllLink"
+EXISTS_LINK <- SCOPE_LINK,EVALUATABLE_LINK
 
 // Average links are not really useful since they are equivalent to a
 // predicate (which could be a PredicateNode or derived, or built with
