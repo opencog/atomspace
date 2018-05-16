@@ -14,12 +14,13 @@ ADD_LIBRARY (atomspace
 # Without this, parallel make will race and crap up the generated files.
 ADD_DEPENDENCIES(atomspace opencog_atom_types)
 
+# Explicitly link every library that defines atom types.
 TARGET_LINK_LIBRARIES(atomspace
 	${NO_AS_NEEDED}
+	truthvalue_
 	atombase
 	atomcore
 	lambda_
-	truthvalue_
 	${AS_NEEDED}
 	${COGUTIL_LIBRARY}
 	${Boost_THREAD_LIBRARY}
