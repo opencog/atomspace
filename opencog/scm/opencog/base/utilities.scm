@@ -298,18 +298,12 @@
 	(define (is-visible? atom)
 		(member
 			(cog-as atom)
-			(get-atomspace-and-parents
-				(cog-atomspace)
-				`())))
-	(define (get-atomspace-and-parents atomspace res)
-		(if (null? atomspace)
-			res
-			(get-atomspace-and-parents
-				(cog-atomspace-env atomspace)
-				(cons atomspace res))))
+			(get-atomspace-and-parents)))
+	(define (get-atomspace-and-parents)
+		(unfold null? identity cog-atomspace-env (cog-atomspace)))
 
 	(define (apply-if-root h)
-		(if (null? (filter is-visible? (cog-incoming-set h)))
+		(if (not (any is-visible? (cog-incoming-set h)))
 			(func h))
 		#f)
 
