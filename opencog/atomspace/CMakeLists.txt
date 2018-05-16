@@ -19,7 +19,7 @@ TARGET_LINK_LIBRARIES(atomspace
 	atombase
 	atomcore
 	lambda_
-	truthvalue
+	truthvalue_
 	${AS_NEEDED}
 	${COGUTIL_LIBRARY}
 	${Boost_THREAD_LIBRARY}
