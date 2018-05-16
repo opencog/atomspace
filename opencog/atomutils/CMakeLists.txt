@@ -1,5 +1,5 @@
 
-ADD_LIBRARY (atomutils
+ADD_LIBRARY (atomutils_
 	AtomUtils
 	FindUtils
 	FuzzyMatch
@@ -8,11 +8,17 @@ ADD_LIBRARY (atomutils
 	TypeUtils
 )
 
-ADD_DEPENDENCIES(atomutils opencog_atom_types)
+ADD_DEPENDENCIES(atomutils_ opencog_atom_types)
 
-TARGET_LINK_LIBRARIES(atomutils
+TARGET_LINK_LIBRARIES(atomutils_
 	atombase
 	${COGUTIL_LIBRARY}
+)
+
+ADD_LIBRARY (atomutils dummy)
+TARGET_LINK_LIBRARIES(atomutils
+	atomutils_
+	lambda_
 )
 
 IF (CYGWIN)

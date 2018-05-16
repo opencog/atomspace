@@ -15,7 +15,6 @@ ADD_LIBRARY (lambda_
 ADD_DEPENDENCIES(lambda_ opencog_atom_types)
 
 TARGET_LINK_LIBRARIES(lambda_
-	atomutils
 	atomcore
 	atombase
 	${COGUTIL_LIBRARY}
@@ -24,8 +23,15 @@ TARGET_LINK_LIBRARIES(lambda_
 ADD_LIBRARY (lambda dummy)
 TARGET_LINK_LIBRARIES(lambda
 	lambda_
+	query_
+	smob_
 	atomspace
 )
+
+IF (HAVE_CYTHON)
+	TARGET_LINK_LIBRARIES(lambda PythonEval)
+ENDIF (HAVE_CYTHON)
+
 
 INSTALL (TARGETS lambda
 	DESTINATION "lib${LIB_DIR_SUFFIX}/opencog"

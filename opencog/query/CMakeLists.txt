@@ -17,15 +17,14 @@ ADD_DEPENDENCIES(query_
 )
 
 TARGET_LINK_LIBRARIES(query_
-	atomutils
-	lambda
+	lambda_
 )
 
 ADD_LIBRARY(query dummy)
 TARGET_LINK_LIBRARIES(query
 	query_
 	lambda
-	execution
+	execution_
 	smob
 	atomspace
 )
