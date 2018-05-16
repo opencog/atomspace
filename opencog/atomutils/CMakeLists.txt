@@ -22,15 +22,8 @@ TARGET_LINK_LIBRARIES(atomutils
 	atomspace
 )
 
-IF (CYGWIN)
-	INSTALL (TARGETS atomutils
-		DESTINATION "lib${LIB_DIR_SUFFIX}/opencog"
-	)
-ELSE (CYGWIN)
-	INSTALL (TARGETS atomutils
-		DESTINATION "lib${LIB_DIR_SUFFIX}/opencog"
-	)
-ENDIF (CYGWIN)
+INSTALL (TARGETS atomutils_ DESTINATION "lib${LIB_DIR_SUFFIX}/opencog")
+INSTALL (TARGETS atomutils DESTINATION "lib${LIB_DIR_SUFFIX}/opencog")
 
 INSTALL (FILES
 	AtomUtils.h

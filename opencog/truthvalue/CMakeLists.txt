@@ -22,13 +22,8 @@ TARGET_LINK_LIBRARIES(truthvalue
 	atomspace
 )
 
-INSTALL (TARGETS truthvalue_
-	DESTINATION "lib${LIB_DIR_SUFFIX}/opencog"
-)
-
-INSTALL (TARGETS truthvalue
-	DESTINATION "lib${LIB_DIR_SUFFIX}/opencog"
-)
+INSTALL (TARGETS truthvalue_ DESTINATION "lib${LIB_DIR_SUFFIX}/opencog")
+INSTALL (TARGETS truthvalue DESTINATION "lib${LIB_DIR_SUFFIX}/opencog")
 
 INSTALL (FILES
 	AttentionValue.h

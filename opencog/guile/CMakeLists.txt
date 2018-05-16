@@ -77,6 +77,7 @@ TARGET_LINK_LIBRARIES(randgen
 #    /usr/lib64/guile/2.2/extensions
 #    /usr/local/lib64/guile/2.2/extensions
 # ... but which one?  what a pain.
+INSTALL (TARGETS smob_ DESTINATION "lib${LIB_DIR_SUFFIX}/opencog")
 INSTALL (TARGETS smob DESTINATION "lib${LIB_DIR_SUFFIX}/opencog")
 INSTALL (TARGETS logger DESTINATION "lib${LIB_DIR_SUFFIX}/opencog")
 INSTALL (TARGETS randgen DESTINATION "lib${LIB_DIR_SUFFIX}/opencog")
