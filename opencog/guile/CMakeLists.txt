@@ -28,7 +28,6 @@ ADD_LIBRARY (randgen
 TARGET_LINK_LIBRARIES(smob_
 	atomcore
 	atombase
-	truthvalue
 	${GUILE_LIBRARIES}
 	${COGUTIL_LIBRARY}
 )

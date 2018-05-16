@@ -19,6 +19,7 @@ ADD_LIBRARY (atomutils dummy)
 TARGET_LINK_LIBRARIES(atomutils
 	atomutils_
 	lambda_
+	atomspace
 )
 
 IF (CYGWIN)

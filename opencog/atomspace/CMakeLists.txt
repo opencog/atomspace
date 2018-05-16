@@ -30,6 +30,9 @@ TARGET_LINK_LIBRARIES(atomspace
 	execution_
 	lambda_
 	${AS_NEEDED}
+	smob_
+	query_
+	PythonEval_
 	${COGUTIL_LIBRARY}
 	${Boost_THREAD_LIBRARY}
 )
