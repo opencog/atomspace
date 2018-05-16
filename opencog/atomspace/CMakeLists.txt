@@ -27,6 +27,7 @@ TARGET_LINK_LIBRARIES(atomspace
 	truthvalue_
 	atombase
 	atomcore
+	clearbox
 	execution_
 	lambda_
 	${AS_NEEDED}
