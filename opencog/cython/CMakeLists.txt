@@ -33,15 +33,13 @@ ADD_LIBRARY(PythonEval
 ADD_DEPENDENCIES(PythonEval py_atomspace_header)
 
 TARGET_LINK_LIBRARIES(PythonEval
+	query_
+	smob_
 	atombase
 	atomspace
 	${PYTHON_LIBRARIES}
 	${Boost_FILESYSTEM_LIBRARY}
 )
-
-IF(HAVE_GUILE)
-	TARGET_LINK_LIBRARIES(PythonEval smob)
-ENDIF(HAVE_GUILE)
 
 INSTALL (TARGETS PythonEval DESTINATION "lib${LIB_DIR_SUFFIX}/opencog")
 

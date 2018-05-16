@@ -6,7 +6,7 @@ IF (HAVE_CYTHON)
 	INCLUDE_DIRECTORIES(${PYTHON_INCLUDE_PATH})
 ENDIF (HAVE_CYTHON)
 
-ADD_LIBRARY (execution
+ADD_LIBRARY (execution_
 	Force.cc
 	EvaluationLink.cc
 	ExecutionOutputLink.cc
@@ -16,13 +16,20 @@ ADD_LIBRARY (execution
 )
 
 # Without this, parallel make will race and crap up the generated files.
-ADD_DEPENDENCIES(execution opencog_atom_types)
+ADD_DEPENDENCIES(execution_ opencog_atom_types)
 
-TARGET_LINK_LIBRARIES(execution
+TARGET_LINK_LIBRARIES(execution_
 	clearbox
 	atombase
-	smob
 	${Boost_SYSTEM_LIBRARY}
+)
+
+ADD_LIBRARY (execution dummy)
+TARGET_LINK_LIBRARIES(execution
+	execution_
+	query_
+	atomspace
+	smob
 )
 
 IF (HAVE_CYTHON)
@@ -30,6 +37,7 @@ IF (HAVE_CYTHON)
 	TARGET_LINK_LIBRARIES(execution ${PYTHON_LIBRARIES})
 ENDIF (HAVE_CYTHON)
 
+INSTALL (TARGETS execution_ DESTINATION "lib${LIB_DIR_SUFFIX}/opencog")
 INSTALL (TARGETS execution DESTINATION "lib${LIB_DIR_SUFFIX}/opencog")
 
 INSTALL (FILES

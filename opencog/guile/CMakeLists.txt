@@ -2,7 +2,7 @@ INCLUDE_DIRECTORIES(
 	${GUILE_INCLUDE_DIR}
 )
 
-ADD_LIBRARY (smob
+ADD_LIBRARY (smob_
 	SchemeEval.cc
 	SchemeModule.cc
 	SchemePrimitive.cc
@@ -25,18 +25,22 @@ ADD_LIBRARY (randgen
 	RandGenSCM.cc
 )
 
-TARGET_LINK_LIBRARIES(smob
+TARGET_LINK_LIBRARIES(smob_
+	atomcore
+	atombase
+	truthvalue
+	${GUILE_LIBRARIES}
+	${COGUTIL_LIBRARY}
+)
 
-	# We want to list every possible library that defines some
-	# atom type, so that the library ctors will run, and add those
-	# atom types to the classserver. If this is not done, then the
-	# classserver will fail to run atom factories, viz, will fail
-	# to run the ctors for C++-backed atom types, resulting in
-	# screwball failures.
-	${NO_AS_NEEDED}
+
+ADD_LIBRARY (smob dummy)
+TARGET_LINK_LIBRARIES(smob
+	smob_
+	query_
 	clearbox
 	lambda
-	# execution
+	execution_
 	atomcore
 	atombase
 	truthvalue
@@ -44,6 +48,11 @@ TARGET_LINK_LIBRARIES(smob
 	${GUILE_LIBRARIES}
 	${COGUTIL_LIBRARY}
 )
+
+IF (HAVE_CYTHON)
+   TARGET_LINK_LIBRARIES(smob PythonEval)
+ENDIF (HAVE_CYTHON)
+
 
 TARGET_LINK_LIBRARIES(logger
 	ruleengine # for cog-ure-logger XXX FIXME this is insane. WTF!??
