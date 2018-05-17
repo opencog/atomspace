@@ -400,7 +400,7 @@ TruthValuePtr EvaluationLink::do_eval_scratch(AtomSpace* as,
 	{
 		// Assume that the link is wrapping something executable (or
 		// evaluatable), which we execute (or evaluate), but then
-		// ignore the result.  The executale ones, we need to put the
+		// ignore the result.  The executable ones, we need to put the
 		// result in the (scratch) atomspace ... but in either case,
 		// we ignore the TV on it. We are doing this for the side-effects,
 		// of course -- the True/FalseLinks are pure side-effect atoms.
