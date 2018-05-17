@@ -14,4 +14,4 @@ def set_type_ctor_atomspace(new_atomspace):
     global atomspace
     atomspace = new_atomspace
 
-include "opencog/atoms/base/core_types.pyx"
+include "opencog/atoms/proto/core_types.pyx"

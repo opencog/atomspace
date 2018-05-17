@@ -42,12 +42,12 @@
 #include <opencog/util/oc_omp.h>
 
 #include <opencog/atoms/base/Atom.h>
-#include <opencog/atoms/base/ClassServer.h>
+#include <opencog/atoms/proto/NameServer.h>
 #include <opencog/atoms/base/Link.h>
 #include <opencog/atoms/base/Node.h>
-#include <opencog/atoms/base/FloatValue.h>
-#include <opencog/atoms/base/LinkValue.h>
-#include <opencog/atoms/base/StringValue.h>
+#include <opencog/atoms/proto/FloatValue.h>
+#include <opencog/atoms/proto/LinkValue.h>
+#include <opencog/atoms/proto/StringValue.h>
 #include <opencog/atoms/base/Valuation.h>
 #include <opencog/truthvalue/TruthValue.h>
 #include <opencog/atomspace/AtomSpace.h>
@@ -723,21 +723,21 @@ void SQLAtomStorage::storeValuation(const Handle& key,
 	Type vtype = pap->get_type();
 	STMTI("type", storing_typemap[vtype]);
 
-	if (classserver().isA(vtype, FLOAT_VALUE))
+	if (nameserver().isA(vtype, FLOAT_VALUE))
 	{
 		FloatValuePtr fvp = FloatValueCast(pap);
 		std::string fstr = float_to_string(fvp);
 		STMT("floatvalue", fstr);
 	}
 	else
-	if (classserver().isA(vtype, STRING_VALUE))
+	if (nameserver().isA(vtype, STRING_VALUE))
 	{
 		StringValuePtr fvp = StringValueCast(pap);
 		std::string sstr = string_to_string(fvp);
 		STMT("stringvalue", sstr);
 	}
 	else
-	if (classserver().isA(vtype, LINK_VALUE))
+	if (nameserver().isA(vtype, LINK_VALUE))
 	{
 		LinkValuePtr fvp = LinkValueCast(pap);
 		std::string lstr = link_to_string(fvp);
@@ -782,21 +782,21 @@ SQLAtomStorage::VUID SQLAtomStorage::storeValue(const ProtoAtomPtr& pap)
 	Type vtype = pap->get_type();
 	STMTI("type", storing_typemap[vtype]);
 
-	if (classserver().isA(vtype, FLOAT_VALUE))
+	if (nameserver().isA(vtype, FLOAT_VALUE))
 	{
 		FloatValuePtr fvp = FloatValueCast(pap);
 		std::string fstr = float_to_string(fvp);
 		STMT("floatvalue", fstr);
 	}
 	else
-	if (classserver().isA(vtype, STRING_VALUE))
+	if (nameserver().isA(vtype, STRING_VALUE))
 	{
 		StringValuePtr fvp = StringValueCast(pap);
 		std::string sstr = string_to_string(fvp);
 		STMT("stringvalue", sstr);
 	}
 	else
-	if (classserver().isA(vtype, LINK_VALUE))
+	if (nameserver().isA(vtype, LINK_VALUE))
 	{
 		LinkValuePtr fvp = LinkValueCast(pap);
 		std::string lstr = link_to_string(fvp);
@@ -888,7 +888,7 @@ ProtoAtomPtr SQLAtomStorage::doUnpackValue(Response& rp)
 	// We expect rp.fltval to be of the form
 	// {1.1,2.2,3.3}
 	if ((vtype == FLOAT_VALUE)
-	    or classserver().isA(vtype, TRUTH_VALUE))
+	    or nameserver().isA(vtype, TRUTH_VALUE))
 	{
 		std::vector<double> fltarr;
 		char *p = (char *) rp.fltval;
@@ -1524,14 +1524,14 @@ void SQLAtomStorage::setup_typemap(void)
 		rp.rs->foreach_row(&Response::type_cb, &rp);
 	}
 
-	unsigned int numberOfTypes = classserver().getNumberOfClasses();
+	unsigned int numberOfTypes = nameserver().getNumberOfClasses();
 	for (Type t=0; t<numberOfTypes; t++)
 	{
 		int sqid = storing_typemap[t];
 		/* If this typename is not yet known, record it */
 		if (-1 == sqid)
 		{
-			const char * tname = classserver().getTypeName(t).c_str();
+			const char * tname = nameserver().getTypeName(t).c_str();
 
 			// Let the sql id be the same as the current type number,
 			// unless this sql number is already in use, in which case
@@ -1573,7 +1573,7 @@ void SQLAtomStorage::setup_typemap(void)
 
 void SQLAtomStorage::set_typemap(int dbval, const char * tname)
 {
-	Type realtype = classserver().getType(tname);
+	Type realtype = nameserver().getType(tname);
 	loading_typemap[dbval] = realtype;
 	storing_typemap[realtype] = dbval;
 	if (db_typename[dbval] != NULL) free (db_typename[dbval]);
@@ -1620,7 +1620,7 @@ SQLAtomStorage::PseudoPtr SQLAtomStorage::petAtom(UUID uuid)
 /// Note that this does NOT fetch any values!
 Handle SQLAtomStorage::get_recursive_if_not_exists(PseudoPtr p)
 {
-	if (classserver().isA(p->type, NODE))
+	if (nameserver().isA(p->type, NODE))
 	{
 		Handle h(_tlbuf.getAtom(p->uuid));
 		if (h) return h;
@@ -1891,7 +1891,7 @@ SQLAtomStorage::PseudoPtr SQLAtomStorage::makeAtom(Response &rp, UUID uuid)
 	// All positive height atoms are links.
 	// A negative height is "unknown" and must be checked.
 	if ((0 == rp.height) or
-		((-1 == rp.height) and classserver().isA(realtype, NODE)))
+		((-1 == rp.height) and nameserver().isA(realtype, NODE)))
 	{
 		atom->name = rp.name;
 	}
@@ -1994,7 +1994,7 @@ void SQLAtomStorage::loadType(AtomTable &table, Type atom_type)
 
 	// For links, assume a worst-case height.
 	// For nodes, its easy ... max_height is zero.
-	if (classserver().isNode(atom_type))
+	if (nameserver().isNode(atom_type))
 		max_height = 0;
 	else
 		max_height = getMaxObservedHeight();

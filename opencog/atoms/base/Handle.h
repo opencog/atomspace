@@ -39,7 +39,7 @@
 #include <vector>
 
 #include <opencog/util/Counter.h>
-#include <opencog/atoms/base/types.h>
+#include <opencog/atoms/proto/types.h>
 
 // Comment this out if you want to enforce more determinism in the
 // AtomSpace. For instance atoms are indexed according to content

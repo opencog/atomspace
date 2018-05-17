@@ -36,7 +36,7 @@
 
 #include <stdlib.h>
 
-#include <opencog/atoms/base/ClassServer.h>
+#include <opencog/atoms/proto/NameServer.h>
 #include <opencog/atoms/base/Link.h>
 #include <opencog/atoms/base/Node.h>
 #include <opencog/atoms/core/DeleteLink.h>
@@ -56,7 +56,7 @@ using namespace opencog;
 static std::atomic<UUID> _id_pool(1);
 
 AtomTable::AtomTable(AtomTable* parent, AtomSpace* holder, bool transient) :
-    _classserver(classserver()),
+    _nameserver(nameserver()),
     // Hmm. Right now async doesn't work anyway, so lets not create
     // threads for it. It just makes using gdb that much harder.
     // FIXME later. Actually, the async idea is not going to work as
@@ -71,13 +71,13 @@ AtomTable::AtomTable(AtomTable* parent, AtomSpace* holder, bool transient) :
     _size = 0;
     _num_nodes = 0;
     _num_links = 0;
-    size_t ntypes = _classserver.getNumberOfClasses();
+    size_t ntypes = _nameserver.getNumberOfClasses();
     _size_by_type.resize(ntypes);
     _transient = transient;
 
     // Connect signal to find out about type additions
     addedTypeConnection =
-        _classserver.typeAddedSignal().connect(
+        _nameserver.typeAddedSignal().connect(
             std::bind(&AtomTable::typeAdded, this, std::placeholders::_1));
 }
 
@@ -85,7 +85,7 @@ AtomTable::~AtomTable()
 {
     // Disconnect signals. Only then clear the resolver.
     std::lock_guard<std::recursive_mutex> lck(_mtx);
-    _classserver.typeAddedSignal().disconnect(addedTypeConnection);
+    _nameserver.typeAddedSignal().disconnect(addedTypeConnection);
 
     // No one who shall look at these atoms shall ever again
     // find a reference to this atomtable.
@@ -215,7 +215,7 @@ AtomTable& AtomTable::operator=(const AtomTable& other)
 }
 
 AtomTable::AtomTable(const AtomTable& other) :
-    _classserver(classserver()),
+    _nameserver(nameserver()),
     _index_queue(this, &AtomTable::put_atom_into_index)
 {
     throw opencog::RuntimeException(TRACE_INFO,
@@ -536,7 +536,7 @@ size_t AtomTable::getNumAtomsOfType(Type type, bool subclass) const
         Type ntypes = _size_by_type.size();
         for (Type t = ATOM; t<ntypes; t++)
         {
-            if (t != type and _classserver.isA(type, t))
+            if (t != type and _nameserver.isA(type, t))
                 result += _size_by_type[t];
         }
     }
@@ -752,7 +752,7 @@ void AtomTable::typeAdded(Type t)
 {
     std::lock_guard<std::recursive_mutex> lck(_mtx);
     //resize all Type-based indexes
-    size_t new_size = _classserver.getNumberOfClasses();
+    size_t new_size = _nameserver.getNumberOfClasses();
     _size_by_type.resize(new_size);
     typeIndex.resize();
 }

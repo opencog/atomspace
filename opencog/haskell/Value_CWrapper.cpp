@@ -24,7 +24,7 @@ int FloatValue_toRaw(FloatValuePtr ptr
                     , char** valuetype
                     , double* parameters)
 {
-    const std::string & type = classserver().getTypeName(ptr->get_type());
+    const std::string & type = nameserver().getTypeName(ptr->get_type());
 
     *valuetype = (char*) malloc(sizeof(char) * (type.length()+1));
     if(! *valuetype)
@@ -49,7 +49,7 @@ int FloatValue_setOnAtom( Handle* atom
     if(a == Handle::UNDEFINED || k == Handle::UNDEFINED)
         return -1;
 
-    Type type = classserver().getType(std::string(valuetype));
+    Type type = nameserver().getType(std::string(valuetype));
 
     std::vector<double> vec(parameters,parameters+length);
 

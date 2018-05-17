@@ -23,7 +23,7 @@
 #include <dlfcn.h>
 #include <stdlib.h>
 
-#include <opencog/atoms/base/atom_types.h>
+#include <opencog/atoms/proto/atom_types.h>
 #include <opencog/atomspace/AtomSpace.h>
 #include <opencog/atoms/core/DefineLink.h>
 #include <opencog/cython/PythonEval.h>
@@ -45,7 +45,7 @@ public:
 
 void ExecutionOutputLink::check_schema(const Handle& schema) const
 {
-	if (not classserver().isA(schema->get_type(), SCHEMA_NODE) and
+	if (not nameserver().isA(schema->get_type(), SCHEMA_NODE) and
 	    LAMBDA_LINK != schema->get_type() and
 	    // In case it is a pattern matcher query
 	    UNQUOTE_LINK != schema->get_type())

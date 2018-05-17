@@ -20,7 +20,7 @@
  * 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
  */
 
-#include <opencog/atoms/base/StringValue.h>
+#include <opencog/atoms/proto/StringValue.h>
 
 using namespace opencog;
 

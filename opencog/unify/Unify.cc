@@ -601,7 +601,7 @@ Unify::SolutionSet Unify::comb_unify(const std::set<CHandle>& chs) const
 	
 bool Unify::is_unordered(const Handle& h) const
 {
-	return classserver().isA(h->get_type(), UNORDERED_LINK);
+	return nameserver().isA(h->get_type(), UNORDERED_LINK);
 }
 
 HandleSeq Unify::cp_erase(const HandleSeq& hs, Arity i) const
@@ -975,7 +975,7 @@ bool Unify::inherit(const Handle& lh, const Handle& rh,
 
 bool Unify::inherit(Type lhs, Type rhs) const
 {
-	return classserver().isA(lhs, rhs);
+	return nameserver().isA(lhs, rhs);
 }
 
 bool Unify::inherit(Type lhs, const TypeSet& rhs) const

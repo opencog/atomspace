@@ -21,8 +21,8 @@
 
 #include <opencog/atomspace/NodeIndex.h>
 #include <opencog/atoms/base/Atom.h>
-#include <opencog/atoms/base/ClassServer.h>
-#include <opencog/atoms/base/atom_types.h>
+#include <opencog/atoms/proto/NameServer.h>
+#include <opencog/atoms/proto/atom_types.h>
 
 using namespace opencog;
 
@@ -33,7 +33,7 @@ NodeIndex::NodeIndex()
 
 void NodeIndex::resize()
 {
-	idx.resize(classserver().getNumberOfClasses());
+	idx.resize(nameserver().getNumberOfClasses());
 }
 
 size_t NodeIndex::size() const
@@ -51,7 +51,7 @@ UnorderedHandleSet NodeIndex::getHandleSet(Type type, const std::string& name,
 
 		Type max = idx.size();
 		for (Type s = 0; s < max; s++) {
-			if (classserver().isA(s, type)) {
+			if (nameserver().isA(s, type)) {
 				Atom* atom = getAtom(s, name);
 				if (atom)
 					hs.insert(atom->get_handle());

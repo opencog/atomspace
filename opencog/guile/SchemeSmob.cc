@@ -263,7 +263,7 @@ void SchemeSmob::module_init(void*)
 	scm_c_eval_string("(add-to-load-path \"" PROJECT_BINARY_DIR "\")");
 #endif
 
-	scm_primitive_load_path(scm_from_utf8_string("opencog/base/core_types.scm"));
+	scm_primitive_load_path(scm_from_utf8_string("opencog/atoms/proto/core_types.scm"));
 	scm_primitive_load_path(scm_from_utf8_string("opencog/base/core-docs.scm"));
 	scm_primitive_load_path(scm_from_utf8_string("opencog/base/utilities.scm"));
 	scm_primitive_load_path(scm_from_utf8_string("opencog/base/apply.scm"));

@@ -30,7 +30,7 @@
 #include <unordered_map>
 #include <vector>
 
-#include <opencog/atoms/base/ClassServer.h>
+#include <opencog/atoms/proto/NameServer.h>
 #include <opencog/atoms/pattern/Pattern.h>
 #include <opencog/query/PatternMatchCallback.h>
 
@@ -41,7 +41,7 @@ class PatternMatchEngine
 	// -------------------------------------------
 	// Callback to whom the results are reported.
 	PatternMatchCallback &_pmc;
-	ClassServer& _classserver;
+	NameServer& _nameserver;
 
 	// Private, locally scoped typedefs, not used outside of this class.
 

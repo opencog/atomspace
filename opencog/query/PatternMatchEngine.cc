@@ -1097,7 +1097,7 @@ bool PatternMatchEngine::tree_compare(const PatternTermPtr& ptm,
 
 	// If the two links are both ordered, its enough to compare
 	// them "side-by-side".
-	if (2 > hp->get_arity() or _classserver.isA(tp, ORDERED_LINK))
+	if (2 > hp->get_arity() or _nameserver.isA(tp, ORDERED_LINK))
 		return ordered_compare(ptm, hg);
 
 	// If we are here, we are dealing with an unordered link.
@@ -1280,7 +1280,7 @@ bool PatternMatchEngine::explore_link_branches(const PatternTermPtr& ptm,
 	// If its not an unordered link, then don't try to iterate over
 	// all permutations.
 	Type tp = hp->get_type();
-	if (not _classserver.isA(tp, UNORDERED_LINK))
+	if (not _nameserver.isA(tp, UNORDERED_LINK))
 		return explore_choice_branches(ptm, hg, clause_root);
 
 	do {
@@ -2139,7 +2139,7 @@ bool PatternMatchEngine::explore_constant_evaluatables(const HandleSeq& clauses)
 
 PatternMatchEngine::PatternMatchEngine(PatternMatchCallback& pmcb)
 	: _pmc(pmcb),
-	_classserver(classserver()),
+	_nameserver(nameserver()),
 	_varlist(NULL),
 	_pat(NULL)
 {

@@ -36,9 +36,9 @@ using namespace opencog;
 void RewriteLink::init(void)
 {
 	Type t = get_type();
-	if (not classserver().isA(t, REWRITE_LINK))
+	if (not nameserver().isA(t, REWRITE_LINK))
 	{
-		const std::string& tname = classserver().getTypeName(t);
+		const std::string& tname = nameserver().getTypeName(t);
 		throw InvalidParamException(TRACE_INFO,
 			"Expecting a RewriteLink, got %s", tname.c_str());
 	}
@@ -435,7 +435,7 @@ Handle RewriteLink::consume_quotations(const Variables& variables,
 		needless_quotation = false;
 
 	// Remember that the children are potentially clause root
-	clause_root = classserver().isA(t, SCOPE_LINK);
+	clause_root = nameserver().isA(t, SCOPE_LINK);
 
 	// Mere recursive call
 	Handle ch = consume_quotations_mere_rec(variables, h,
@@ -480,7 +480,7 @@ Handle RewriteLink::consume_quotations_mere_rec(const Variables& variables,
 bool RewriteLink::is_scope_bound_to_ancestor(const Variables& variables,
                                              const Handle& h)
 {
-	return classserver().isA(h->get_type(), SCOPE_LINK) and
+	return nameserver().isA(h->get_type(), SCOPE_LINK) and
 		is_bound_to_ancestor(variables, h);
 }
 

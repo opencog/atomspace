@@ -29,7 +29,7 @@
 #include <opencog/util/platform.h>
 #include <opencog/util/exceptions.h>
 
-#include <opencog/atoms/base/atom_types.h>
+#include <opencog/atoms/proto/atom_types.h>
 #include "ProbabilisticTruthValue.h"
 
 using namespace opencog;

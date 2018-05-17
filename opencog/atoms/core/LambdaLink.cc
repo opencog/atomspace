@@ -35,9 +35,9 @@ LambdaLink::LambdaLink(const Handle& vars, const Handle& body)
 LambdaLink::LambdaLink(const HandleSeq& oset, Type t)
 	: PrenexLink(oset, t)
 {
-	if (not classserver().isA(t, LAMBDA_LINK))
+	if (not nameserver().isA(t, LAMBDA_LINK))
 	{
-		const std::string& tname = classserver().getTypeName(t);
+		const std::string& tname = nameserver().getTypeName(t);
 		throw SyntaxException(TRACE_INFO,
 			"Expecting a LambdaLink, got %s", tname.c_str());
 	}
@@ -48,9 +48,9 @@ LambdaLink::LambdaLink(const Link &l)
 {
 	// Type must be as expected
 	Type tscope = l.get_type();
-	if (not classserver().isA(tscope, LAMBDA_LINK))
+	if (not nameserver().isA(tscope, LAMBDA_LINK))
 	{
-		const std::string& tname = classserver().getTypeName(tscope);
+		const std::string& tname = nameserver().getTypeName(tscope);
 		throw SyntaxException(TRACE_INFO,
 			"Expecting a LambdaLink, got %s", tname.c_str());
 	}

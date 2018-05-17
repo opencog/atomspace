@@ -24,8 +24,8 @@
 #define _OPENCOG_FLOAT_VALUE_H
 
 #include <vector>
-#include <opencog/atoms/base/ProtoAtom.h>
-#include <opencog/atoms/base/atom_types.h>
+#include <opencog/atoms/proto/ProtoAtom.h>
+#include <opencog/atoms/proto/atom_types.h>
 
 namespace opencog
 {

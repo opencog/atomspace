@@ -36,7 +36,7 @@
 
 #include <opencog/truthvalue/TruthValue.h>
 
-#include <opencog/atoms/base/ClassServer.h>
+#include <opencog/atoms/proto/NameServer.h>
 
 #include <opencog/atomspace/TypeIndex.h>
 
@@ -71,7 +71,7 @@ class AtomTable
     friend class ::AtomSpaceUTest;
 
 private:
-    ClassServer& _classserver;
+    NameServer& _nameserver;
 
     // Single, global mutex for locking the indexes.
     // Its recursive because we need to lock twice during atom insertion
@@ -100,11 +100,11 @@ private:
 
     /**
      * signal connection used to find out about atom type additions in the
-     * ClassServer
+     * NameServer
      */
     int addedTypeConnection;
 
-    /** Handler of the 'type added' signal from ClassServer */
+    /** Handler of the 'type added' signal from NameServer */
     void typeAdded(Type);
 
     /** Provided signals */

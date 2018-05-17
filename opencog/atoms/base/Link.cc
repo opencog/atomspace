@@ -26,7 +26,7 @@
 #include <opencog/util/exceptions.h>
 #include <opencog/util/Logger.h>
 
-#include <opencog/atoms/base/ClassServer.h>
+#include <opencog/atoms/proto/NameServer.h>
 #include <opencog/atoms/base/Node.h>
 #include <opencog/atomspace/AtomTable.h>
 
@@ -41,10 +41,10 @@ using namespace opencog;
 
 void Link::init(const HandleSeq& outgoingVector)
 {
-    if (not classserver().isA(_type, LINK)) {
+    if (not nameserver().isA(_type, LINK)) {
         throw InvalidParamException(TRACE_INFO,
             "Link ctor: Atom type is not a Link: '%d' %s.",
-            _type, classserver().getTypeName(_type).c_str());
+            _type, nameserver().getTypeName(_type).c_str());
     }
 
     _outgoing = outgoingVector;
@@ -60,7 +60,7 @@ std::string Link::to_short_string(const std::string& indent) const
     std::stringstream answer;
     std::string more_indent = indent + "  ";
 
-    answer << indent << "(" << classserver().getTypeName(_type);
+    answer << indent << "(" << nameserver().getTypeName(_type);
 
     if (not getTruthValue()->isDefaultTV())
         answer << " " << getTruthValue()->to_string();
@@ -81,7 +81,7 @@ std::string Link::to_string(const std::string& indent) const
     std::string answer = indent;
     std::string more_indent = indent + "  ";
 
-    answer += "(" + classserver().getTypeName(_type);
+    answer += "(" + nameserver().getTypeName(_type);
 
     // Print the TV only if its not the default.
     if (not getTruthValue()->isDefaultTV())

@@ -24,8 +24,8 @@
 
 #include <iostream>
 
-#include <opencog/atoms/base/atom_types.h>
-#include <opencog/atoms/base/ClassServer.h>
+#include <opencog/atoms/proto/atom_types.h>
+#include <opencog/atoms/proto/NameServer.h>
 
 using namespace opencog;
 using namespace std;
@@ -43,86 +43,86 @@ public:
 
     void testIsAssignableFrom()
     {
-        Type numClasses = classserver().getNumberOfClasses();
+        Type numClasses = nameserver().getNumberOfClasses();
         for (Type t = 0; t < numClasses; t++) {
-            TS_ASSERT(classserver().isA(t, t));
-            if (t > ATOM) TS_ASSERT(classserver().isA(t, NODE)
-                              or classserver().isA(t, LINK));
+            TS_ASSERT(nameserver().isA(t, t));
+            if (t > ATOM) TS_ASSERT(nameserver().isA(t, NODE)
+                              or nameserver().isA(t, LINK));
         }
 
-        TS_ASSERT( classserver().isA(NODE, ATOM));
-        TS_ASSERT( classserver().isA(LINK, ATOM));
-        TS_ASSERT( classserver().isA(NUMBER_NODE, NODE));
-        TS_ASSERT(!classserver().isA(NODE, NUMBER_NODE));
-        TS_ASSERT( classserver().isA(ORDERED_LINK, LINK));
-        TS_ASSERT( classserver().isA(LIST_LINK, ORDERED_LINK));
-        TS_ASSERT( classserver().isA(LIST_LINK, LINK));
-        TS_ASSERT( classserver().isA(LIST_LINK, ATOM));
-        TS_ASSERT(!classserver().isA(LIST_LINK, NODE));
-        TS_ASSERT(!classserver().isA(NUMBER_NODE, LINK));
-        TS_ASSERT(!classserver().isA(ATOM, LIST_LINK));
+        TS_ASSERT( nameserver().isA(NODE, ATOM));
+        TS_ASSERT( nameserver().isA(LINK, ATOM));
+        TS_ASSERT( nameserver().isA(NUMBER_NODE, NODE));
+        TS_ASSERT(!nameserver().isA(NODE, NUMBER_NODE));
+        TS_ASSERT( nameserver().isA(ORDERED_LINK, LINK));
+        TS_ASSERT( nameserver().isA(LIST_LINK, ORDERED_LINK));
+        TS_ASSERT( nameserver().isA(LIST_LINK, LINK));
+        TS_ASSERT( nameserver().isA(LIST_LINK, ATOM));
+        TS_ASSERT(!nameserver().isA(LIST_LINK, NODE));
+        TS_ASSERT(!nameserver().isA(NUMBER_NODE, LINK));
+        TS_ASSERT(!nameserver().isA(ATOM, LIST_LINK));
     }
 
     void testNames()
     {
-        TS_ASSERT(classserver().getTypeName(ATOM)      == "Atom");
-        TS_ASSERT(classserver().getTypeName(LINK)      == "Link");
-        TS_ASSERT(classserver().getTypeName(NODE)      == "Node");
-        TS_ASSERT(classserver().getTypeName(NUMBER_NODE) == "NumberNode");
-        TS_ASSERT(classserver().getTypeName(LIST_LINK) == "ListLink");
+        TS_ASSERT(nameserver().getTypeName(ATOM)      == "Atom");
+        TS_ASSERT(nameserver().getTypeName(LINK)      == "Link");
+        TS_ASSERT(nameserver().getTypeName(NODE)      == "Node");
+        TS_ASSERT(nameserver().getTypeName(NUMBER_NODE) == "NumberNode");
+        TS_ASSERT(nameserver().getTypeName(LIST_LINK) == "ListLink");
     }
 
     void testCustomTypes()
     {
-        Type ntypes = classserver().getNumberOfClasses();
+        Type ntypes = nameserver().getNumberOfClasses();
 
-        classserver().beginTypeDecls("classy test types");
-        Type CS_UTEST_NODE   = classserver().declType(NODE, "CsUtestNode");
+        nameserver().beginTypeDecls("classy test types");
+        Type CS_UTEST_NODE   = nameserver().declType(NODE, "CsUtestNode");
         TS_ASSERT(CS_UTEST_NODE   == ntypes);
-        TS_ASSERT(classserver().getNumberOfClasses() == (unsigned int)(ntypes+1));
-        TS_ASSERT( classserver().isA(CS_UTEST_NODE, NODE));
-        TS_ASSERT(!classserver().isA(CS_UTEST_NODE, NUMBER_NODE));
-        TS_ASSERT(!classserver().isA(CS_UTEST_NODE, LINK));
+        TS_ASSERT(nameserver().getNumberOfClasses() == (unsigned int)(ntypes+1));
+        TS_ASSERT( nameserver().isA(CS_UTEST_NODE, NODE));
+        TS_ASSERT(!nameserver().isA(CS_UTEST_NODE, NUMBER_NODE));
+        TS_ASSERT(!nameserver().isA(CS_UTEST_NODE, LINK));
 
-        Type CS_UTEST_LINK   = classserver().declType(LIST_LINK, "CsUtestLink");
+        Type CS_UTEST_LINK   = nameserver().declType(LIST_LINK, "CsUtestLink");
         TS_ASSERT(CS_UTEST_LINK   == (ntypes + 1));
-        TS_ASSERT(classserver().getNumberOfClasses() == (unsigned int)(ntypes+2));
-        TS_ASSERT( classserver().isA(CS_UTEST_LINK, LINK));
-        TS_ASSERT( classserver().isA(CS_UTEST_LINK, ORDERED_LINK));
-        TS_ASSERT( classserver().isA(CS_UTEST_LINK, LIST_LINK));
-        TS_ASSERT(!classserver().isA(CS_UTEST_LINK, UNORDERED_LINK));
-        TS_ASSERT(!classserver().isA(CS_UTEST_LINK, NODE));
-        TS_ASSERT(!classserver().isA(CS_UTEST_LINK, NUMBER_NODE));
+        TS_ASSERT(nameserver().getNumberOfClasses() == (unsigned int)(ntypes+2));
+        TS_ASSERT( nameserver().isA(CS_UTEST_LINK, LINK));
+        TS_ASSERT( nameserver().isA(CS_UTEST_LINK, ORDERED_LINK));
+        TS_ASSERT( nameserver().isA(CS_UTEST_LINK, LIST_LINK));
+        TS_ASSERT(!nameserver().isA(CS_UTEST_LINK, UNORDERED_LINK));
+        TS_ASSERT(!nameserver().isA(CS_UTEST_LINK, NODE));
+        TS_ASSERT(!nameserver().isA(CS_UTEST_LINK, NUMBER_NODE));
 
-        Type CS_UTEST_NODE_2 = classserver().declType(NODE, "CsUtestNode");
+        Type CS_UTEST_NODE_2 = nameserver().declType(NODE, "CsUtestNode");
         TS_ASSERT(CS_UTEST_NODE_2 == ntypes);
-        TS_ASSERT(classserver().getNumberOfClasses() == (unsigned int)(ntypes+2));
-        TS_ASSERT( classserver().isA(CS_UTEST_NODE_2, NODE));
-        TS_ASSERT(!classserver().isA(CS_UTEST_NODE_2, NUMBER_NODE));
-        TS_ASSERT(!classserver().isA(CS_UTEST_NODE_2, LINK));
-        TS_ASSERT( classserver().isA(CS_UTEST_NODE, NODE));
-        TS_ASSERT(!classserver().isA(CS_UTEST_NODE, NUMBER_NODE));
-        TS_ASSERT(!classserver().isA(CS_UTEST_NODE, LINK));
+        TS_ASSERT(nameserver().getNumberOfClasses() == (unsigned int)(ntypes+2));
+        TS_ASSERT( nameserver().isA(CS_UTEST_NODE_2, NODE));
+        TS_ASSERT(!nameserver().isA(CS_UTEST_NODE_2, NUMBER_NODE));
+        TS_ASSERT(!nameserver().isA(CS_UTEST_NODE_2, LINK));
+        TS_ASSERT( nameserver().isA(CS_UTEST_NODE, NODE));
+        TS_ASSERT(!nameserver().isA(CS_UTEST_NODE, NUMBER_NODE));
+        TS_ASSERT(!nameserver().isA(CS_UTEST_NODE, LINK));
 
-        Type CS_UTEST_LINK_2 = classserver().declType(UNORDERED_LINK, "CsUtestLink");
+        Type CS_UTEST_LINK_2 = nameserver().declType(UNORDERED_LINK, "CsUtestLink");
         TS_ASSERT(CS_UTEST_LINK_2 == (ntypes + 1));
-        TS_ASSERT(classserver().getNumberOfClasses() == (unsigned int)(ntypes+2));
-        TS_ASSERT( classserver().isA(CS_UTEST_LINK_2, LINK));
-        TS_ASSERT( classserver().isA(CS_UTEST_LINK_2, ORDERED_LINK));
-        TS_ASSERT( classserver().isA(CS_UTEST_LINK_2, LIST_LINK));
-        TS_ASSERT( classserver().isA(CS_UTEST_LINK_2, UNORDERED_LINK));
-        TS_ASSERT(!classserver().isA(CS_UTEST_LINK_2, NODE));
-        TS_ASSERT(!classserver().isA(CS_UTEST_LINK_2, NUMBER_NODE));
-        TS_ASSERT( classserver().isA(CS_UTEST_LINK,   LINK));
-        TS_ASSERT( classserver().isA(CS_UTEST_LINK,   ORDERED_LINK));
-        TS_ASSERT( classserver().isA(CS_UTEST_LINK,   LIST_LINK));
-        TS_ASSERT( classserver().isA(CS_UTEST_LINK,   UNORDERED_LINK));
-        TS_ASSERT(!classserver().isA(CS_UTEST_LINK,   NODE));
-        TS_ASSERT(!classserver().isA(CS_UTEST_LINK,   NUMBER_NODE));
+        TS_ASSERT(nameserver().getNumberOfClasses() == (unsigned int)(ntypes+2));
+        TS_ASSERT( nameserver().isA(CS_UTEST_LINK_2, LINK));
+        TS_ASSERT( nameserver().isA(CS_UTEST_LINK_2, ORDERED_LINK));
+        TS_ASSERT( nameserver().isA(CS_UTEST_LINK_2, LIST_LINK));
+        TS_ASSERT( nameserver().isA(CS_UTEST_LINK_2, UNORDERED_LINK));
+        TS_ASSERT(!nameserver().isA(CS_UTEST_LINK_2, NODE));
+        TS_ASSERT(!nameserver().isA(CS_UTEST_LINK_2, NUMBER_NODE));
+        TS_ASSERT( nameserver().isA(CS_UTEST_LINK,   LINK));
+        TS_ASSERT( nameserver().isA(CS_UTEST_LINK,   ORDERED_LINK));
+        TS_ASSERT( nameserver().isA(CS_UTEST_LINK,   LIST_LINK));
+        TS_ASSERT( nameserver().isA(CS_UTEST_LINK,   UNORDERED_LINK));
+        TS_ASSERT(!nameserver().isA(CS_UTEST_LINK,   NODE));
+        TS_ASSERT(!nameserver().isA(CS_UTEST_LINK,   NUMBER_NODE));
 
-        classserver().endTypeDecls();
+        nameserver().endTypeDecls();
 
-        bool is_init = classserver().beginTypeDecls("classy test types");
+        bool is_init = nameserver().beginTypeDecls("classy test types");
         TS_ASSERT(is_init);
     }
 
@@ -130,17 +130,17 @@ public:
     {
         vector<Type> types;
         back_insert_iterator< vector<Type> > back_it (types);
-        classserver().getChildren(NODE, back_it);
+        nameserver().getChildren(NODE, back_it);
         for (vector<Type>::iterator it = types.begin();
                 it != types.end(); ++it) {
-            TS_ASSERT(classserver().isNode(*it));
+            TS_ASSERT(nameserver().isNode(*it));
         }
         vector<Type> types2;
         back_insert_iterator< vector<Type> > back_it2 (types2);
-        classserver().getChildrenRecursive(NODE, back_it2);
+        nameserver().getChildrenRecursive(NODE, back_it2);
         for (vector<Type>::iterator it = types2.begin();
                 it != types2.end(); ++it) {
-            TS_ASSERT(classserver().isNode(*it));
+            TS_ASSERT(nameserver().isNode(*it));
         }
         TS_ASSERT(types2.size() >= types.size());
     }

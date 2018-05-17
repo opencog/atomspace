@@ -35,9 +35,9 @@ void RandomNumberLink::init()
 {
 	// Type must be as expected
 	Type tscope = get_type();
-	if (not classserver().isA(tscope, RANDOM_NUMBER_LINK))
+	if (not nameserver().isA(tscope, RANDOM_NUMBER_LINK))
 	{
-		const std::string& tname = classserver().getTypeName(tscope);
+		const std::string& tname = nameserver().getTypeName(tscope);
 		throw InvalidParamException(TRACE_INFO,
 			"Expecting an RandomNumberLink, got %s", tname.c_str());
 	}

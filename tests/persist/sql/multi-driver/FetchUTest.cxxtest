@@ -30,7 +30,7 @@
 
 #include <cstdio>
 
-#include <opencog/atoms/base/atom_types.h>
+#include <opencog/atoms/proto/atom_types.h>
 #include <opencog/atoms/base/Atom.h>
 #include <opencog/guile/SchemeEval.h>
 #include <opencog/persist/sql/multi-driver/SQLAtomStorage.h>

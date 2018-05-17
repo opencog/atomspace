@@ -20,7 +20,7 @@
  * 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
  */
 
-#include <opencog/atoms/base/atom_types.h>
+#include <opencog/atoms/proto/atom_types.h>
 #include <opencog/atoms/base/ClassServer.h>
 #include <opencog/atoms/core/NumberNode.h>
 #include "MinusLink.h"
@@ -48,7 +48,7 @@ MinusLink::MinusLink(const Link& l)
 void MinusLink::init(void)
 {
 	Type tscope = get_type();
-	if (not classserver().isA(tscope, MINUS_LINK))
+	if (not nameserver().isA(tscope, MINUS_LINK))
 		throw InvalidParamException(TRACE_INFO, "Expecting a MinusLink");
 
 	_commutative = false;

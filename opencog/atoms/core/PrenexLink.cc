@@ -36,9 +36,9 @@ using namespace opencog;
 void PrenexLink::init(void)
 {
 	Type t = get_type();
-	if (not classserver().isA(t, PRENEX_LINK))
+	if (not nameserver().isA(t, PRENEX_LINK))
 	{
-		const std::string& tname = classserver().getTypeName(t);
+		const std::string& tname = nameserver().getTypeName(t);
 		throw InvalidParamException(TRACE_INFO,
 			"Expecting a PrenexLink, got %s", tname.c_str());
 	}
@@ -88,7 +88,7 @@ Handle PrenexLink::reassemble(Type prenex,
 	// is a prenex link type. If it's not, then it should not get
 	// prenexed.  Check for PutLink to avoid infinite recursion.
 	if (PUT_LINK != prenex and not final_varlist.empty() and
-	    classserver().isA(prenex, PRENEX_LINK))
+	    nameserver().isA(prenex, PRENEX_LINK))
 		return Handle(createLink(prenex, vdecl, newbod));
 
 	// Otherwise, we are done with the beta-reduction.
@@ -182,7 +182,7 @@ Handle PrenexLink::beta_reduce(const HandleSeq& seq) const
 	// For a valid eta conversion, there must be just one argument,
 	// and it must must be a ScopeLink.
 	if (1 != seqsize or
-	    not classserver().isA(seq[0]->get_type(), SCOPE_LINK))
+	    not nameserver().isA(seq[0]->get_type(), SCOPE_LINK))
 	{
 		if (_silent) throw TypeCheckException();
 		throw SyntaxException(TRACE_INFO,
@@ -276,7 +276,7 @@ Handle PrenexLink::beta_reduce(const HandleMap& vmap) const
 		// it, yank out the variables, and then reassemble it
 		// again, so that the variables are declared in the
 		// outer-most scope.
-		if (classserver().isA(valuetype, PRENEX_LINK))
+		if (nameserver().isA(valuetype, PRENEX_LINK))
 		{
 			PrenexLinkPtr sc = PrenexLinkCast(pare->second);
 			const Variables& bound = sc->get_variables();

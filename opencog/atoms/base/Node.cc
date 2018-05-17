@@ -24,7 +24,7 @@
 #include <stdio.h>
 
 #include <opencog/util/Logger.h>
-#include <opencog/atoms/base/ClassServer.h>
+#include <opencog/atoms/proto/NameServer.h>
 #include <opencog/atoms/base/Link.h>
 #include <opencog/atomspace/AtomTable.h>
 
@@ -34,11 +34,11 @@ using namespace opencog;
 
 void Node::init(const std::string& cname)
 {
-    if (not classserver().isA(_type, NODE))
+    if (not nameserver().isA(_type, NODE))
     {
         throw InvalidParamException(TRACE_INFO,
             "Node - Invalid node type '%d' %s.",
-            _type, classserver().getTypeName(_type).c_str());
+            _type, nameserver().getTypeName(_type).c_str());
     }
     _name = cname;
 }
@@ -46,7 +46,7 @@ void Node::init(const std::string& cname)
 std::string Node::to_short_string(const std::string& indent) const
 {
     std::string answer = indent;
-    answer += "(" + classserver().getTypeName(_type);
+    answer += "(" + nameserver().getTypeName(_type);
     answer += " \"" + _name + "\"";
 
     // Print the TV only if its not the default.
@@ -61,7 +61,7 @@ std::string Node::to_short_string(const std::string& indent) const
 std::string Node::to_string(const std::string& indent) const
 {
     std::string answer = indent;
-    answer += "(" + classserver().getTypeName(_type);
+    answer += "(" + nameserver().getTypeName(_type);
     answer += " \"" + _name + "\"";
 
     // Print the TV only if its not the default.

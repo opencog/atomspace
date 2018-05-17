@@ -24,9 +24,9 @@
 #ifndef _OPENCOG_ATOM_UTILS_H
 #define _OPENCOG_ATOM_UTILS_H
 
-#include <opencog/atoms/base/atom_types.h>
+#include <opencog/atoms/proto/atom_types.h>
 #include <opencog/atoms/base/Handle.h>
-#include <opencog/atoms/base/types.h>
+#include <opencog/atoms/proto/types.h>
 
 namespace opencog
 {

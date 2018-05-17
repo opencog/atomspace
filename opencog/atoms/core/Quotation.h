@@ -28,7 +28,7 @@
 #include <string>
 #include <boost/operators.hpp>
 
-#include <opencog/atoms/base/atom_types.h>
+#include <opencog/atoms/proto/atom_types.h>
 
 namespace opencog
 {

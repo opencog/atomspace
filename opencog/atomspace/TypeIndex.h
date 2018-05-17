@@ -27,7 +27,7 @@
 
 #include <opencog/atoms/base/Atom.h>
 #include <opencog/atoms/base/Handle.h>
-#include <opencog/atoms/base/types.h>
+#include <opencog/atoms/proto/types.h>
 #include <opencog/atomspace/FixedIntegerIndex.h>
 
 namespace opencog

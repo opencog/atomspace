@@ -3,7 +3,7 @@
 
 #include <opencog/util/random.h>
 
-#include <opencog/atoms/base/types.h>
+#include <opencog/atoms/proto/types.h>
 #include <opencog/truthvalue/SimpleTruthValue.h>
 #include <opencog/truthvalue/TruthValue.h>
 
@@ -28,7 +28,7 @@ RandomAtomGenerator::RandomAtomGenerator(AtomSpace* atomspace,
     _chance_of_non_default_link = chance_of_non_default_link;
     _link_size_mean = link_size_mean;
 
-    _total_types = classserver().getNumberOfClasses();
+    _total_types = nameserver().getNumberOfClasses();
 
     _counter = 0;
     _chance_of_default_tv = chance_of_default_tv;
@@ -62,13 +62,13 @@ Type RandomAtomGenerator::random_type(Type parent_type)
     // validated types since the validation will fail.
     do {
         candidate_type = ATOM + _random_generator->randint(_total_types - ATOM - 1);
-    } while (!classserver().isA(candidate_type, parent_type) or
-        classserver().isA(candidate_type, FREE_LINK) or
-        classserver().isA(candidate_type, SCOPE_LINK) or
+    } while (!nameserver().isA(candidate_type, parent_type) or
+        nameserver().isA(candidate_type, FREE_LINK) or
+        nameserver().isA(candidate_type, SCOPE_LINK) or
         candidate_type == VARIABLE_LIST or
         candidate_type == DEFINE_LINK or
         candidate_type == NUMBER_NODE or
-        classserver().isA(candidate_type,TYPE_NODE));
+        nameserver().isA(candidate_type,TYPE_NODE));
 
     return candidate_type;
 }

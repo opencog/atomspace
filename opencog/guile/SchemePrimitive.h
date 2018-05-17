@@ -23,7 +23,6 @@
 #include <opencog/atoms/base/Handle.h>
 #include <opencog/truthvalue/TruthValue.h>
 #include <opencog/guile/SchemeSmob.h>
-#include <opencog/atoms/base/ClassServer.h>
 
 // Copied/pasted from gcc 4.9 utility. Remove as soon as C++14 is
 // enabled and gcc 4.9 is a minimum requirement.

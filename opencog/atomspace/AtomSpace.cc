@@ -31,10 +31,9 @@
 #include <opencog/util/Logger.h>
 #include <opencog/util/oc_assert.h>
 
-#include <opencog/atoms/base/ClassServer.h>
 #include <opencog/atoms/base/Link.h>
 #include <opencog/atoms/base/Node.h>
-#include <opencog/atoms/base/types.h>
+#include <opencog/atoms/proto/types.h>
 
 #include "AtomSpace.h"
 

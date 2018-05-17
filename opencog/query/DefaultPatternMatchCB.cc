@@ -119,7 +119,7 @@ void DefaultPatternMatchCB::release_transient_atomspace(AtomSpace* atomspace)
 /* ======================================================== */
 
 DefaultPatternMatchCB::DefaultPatternMatchCB(AtomSpace* as) :
-	_classserver(classserver())
+	_nameserver(nameserver())
 {
 	_temp_aspace = grab_transient_atomspace(as);
 	_instor = new Instantiator(_temp_aspace);
@@ -281,7 +281,7 @@ bool DefaultPatternMatchCB::link_match(const PatternTermPtr& ptm,
 
 	// If the link is a ScopeLink, we need to deal with the
 	// alpha-conversion of the bound variables in the scope link.
-	if (_classserver.isA(pattype, SCOPE_LINK))
+	if (_nameserver.isA(pattype, SCOPE_LINK))
 	{
 		// Unless it is quoted.
 		if (ptm->isQuoted()) return true;
@@ -318,7 +318,7 @@ bool DefaultPatternMatchCB::post_link_match(const Handle& lpat,
                                             const Handle& lgnd)
 {
 	Type pattype = lpat->get_type();
-	if (_pat_bound_vars and _classserver.isA(pattype, SCOPE_LINK))
+	if (_pat_bound_vars and _nameserver.isA(pattype, SCOPE_LINK))
 	{
 		_pat_bound_vars = nullptr;
 		_gnd_bound_vars = nullptr;
@@ -358,7 +358,7 @@ void DefaultPatternMatchCB::post_link_mismatch(const Handle& lpat,
                                                const Handle& lgnd)
 {
 	Type pattype = lpat->get_type();
-	if (_pat_bound_vars and _classserver.isA(pattype, SCOPE_LINK))
+	if (_pat_bound_vars and _nameserver.isA(pattype, SCOPE_LINK))
 	{
 		_pat_bound_vars = nullptr;
 		_gnd_bound_vars = nullptr;
@@ -441,7 +441,7 @@ bool DefaultPatternMatchCB::is_self_ground(const Handle& ptrn,
 	// ScopeLink that happen to have exactly the same name as a bound
 	// variable in the pattern will hide/obscure the variable in the
 	// pattern. Or rather: here is where we hide it.  Tedious.
-	if (_classserver.isA(grnd->get_type(), SCOPE_LINK))
+	if (_nameserver.isA(grnd->get_type(), SCOPE_LINK))
 	{
 		// Step 1: Look to see if the scope link binds any of the
 		// variables that the pattern also binds.
@@ -643,7 +643,7 @@ bool DefaultPatternMatchCB::eval_term(const Handle& virt,
 	Type vty = virt->get_type();
 	if (EXECUTION_OUTPUT_LINK == vty or
 	    DEFINED_SCHEMA_NODE == vty or
-	    _classserver.isA(vty, FUNCTION_LINK))
+	    _nameserver.isA(vty, FUNCTION_LINK))
 	{
 		gvirt = _as->add_atom(gvirt);
 		tvp = gvirt->getTruthValue();
@@ -738,7 +738,7 @@ bool DefaultPatternMatchCB::eval_sentence(const Handle& top,
 		return not eval_sentence(oset[0], gnds);
 	}
 	else if (EVALUATION_LINK == term_type or
-	         _classserver.isA(term_type, VIRTUAL_LINK))
+	         _nameserver.isA(term_type, VIRTUAL_LINK))
 	{
 		return eval_term(top, gnds);
 	}

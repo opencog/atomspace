@@ -30,9 +30,9 @@ using namespace opencog;
 UnorderedLink::UnorderedLink(const HandleSeq& oset, Type t)
 	: Link(oset, t)
 {
-	if (not classserver().isA(t, UNORDERED_LINK))
+	if (not nameserver().isA(t, UNORDERED_LINK))
 	{
-		const std::string& tname = classserver().getTypeName(t);
+		const std::string& tname = nameserver().getTypeName(t);
 		throw InvalidParamException(TRACE_INFO,
 			"Expecting an UnorderedLink, got %s", tname.c_str());
 	}
@@ -44,9 +44,9 @@ UnorderedLink::UnorderedLink(const HandleSeq& oset, Type t)
 UnorderedLink::UnorderedLink(const HandleSet& oset, Type t)
 	: Link(HandleSeq(), t)
 {
-	if (not classserver().isA(t, UNORDERED_LINK))
+	if (not nameserver().isA(t, UNORDERED_LINK))
 	{
-		const std::string& tname = classserver().getTypeName(t);
+		const std::string& tname = nameserver().getTypeName(t);
 		throw InvalidParamException(TRACE_INFO,
 			"Expecting an UnorderedLink, got %s", tname.c_str());
 	}
@@ -67,9 +67,9 @@ UnorderedLink::UnorderedLink(const Link& l)
 {
 	// Type must be as expected
 	Type tscope = l.get_type();
-	if (not classserver().isA(tscope, UNORDERED_LINK))
+	if (not nameserver().isA(tscope, UNORDERED_LINK))
 	{
-		const std::string& tname = classserver().getTypeName(tscope);
+		const std::string& tname = nameserver().getTypeName(tscope);
 		throw InvalidParamException(TRACE_INFO,
 			"Expecting an UnorderedLink, got %s", tname.c_str());
 	}

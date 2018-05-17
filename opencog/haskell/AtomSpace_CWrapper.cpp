@@ -1,7 +1,7 @@
 #include <cstring>
 
 #include "AtomSpace_CWrapper.h"
-#include <opencog/atoms/base/ClassServer.h>
+#include <opencog/atoms/proto/NameServer.h>
 #include <opencog/atoms/base/Link.h>
 #include <opencog/atoms/base/Node.h>
 #include <opencog/util/exceptions.h>
@@ -21,7 +21,7 @@ int AtomSpace_addNode( AtomSpace* this_ptr
                      , const char* name
                      , Handle* atom_out)
 {
-    Type t = classserver().getType(std::string(type));
+    Type t = nameserver().getType(std::string(type));
     if(t == NOTYPE)
         throw InvalidParamException(TRACE_INFO,
             "Invalid AtomType parameter '%s'.",type);
@@ -35,7 +35,7 @@ int AtomSpace_addLink( AtomSpace* this_ptr
                      , int size
                      , Handle* atom_out)
 {
-    Type t = classserver().getType(std::string(type));
+    Type t = nameserver().getType(std::string(type));
     if(t == NOTYPE)
         throw InvalidParamException(TRACE_INFO,
             "Invalid AtomType parameter '%s'.",type);
@@ -57,7 +57,7 @@ int AtomSpace_getNode( AtomSpace* this_ptr
                      , const char* name
                      , Handle* atom_out)
 {
-    Type t = classserver().getType(std::string(type));
+    Type t = nameserver().getType(std::string(type));
     if(t == NOTYPE)
         throw InvalidParamException(TRACE_INFO,
             "Invalid AtomType parameter '%s'.",type);
@@ -73,7 +73,7 @@ int AtomSpace_getLink( AtomSpace* this_ptr
                      , int size
                      , Handle* atom_out)
 {
-    Type t = classserver().getType(std::string(type));
+    Type t = nameserver().getType(std::string(type));
     if(t == NOTYPE)
         throw InvalidParamException(TRACE_INFO,
             "Invalid AtomType parameter '%s'.",type);
@@ -106,7 +106,7 @@ int AtomSpace_getAtomByHandle( AtomSpace* this_ptr
     if(!h) // Invalid UUID parameter.
         return -1;
 
-    const std::string &str = classserver().getTypeName(h->get_type());
+    const std::string &str = nameserver().getTypeName(h->get_type());
     *type = (char*) malloc(sizeof(char) * (str.length()+1));
     if(! *type)
         throw RuntimeException(TRACE_INFO,"Failed malloc.");

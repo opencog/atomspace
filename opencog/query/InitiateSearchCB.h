@@ -25,7 +25,7 @@
 #ifndef _OPENCOG_INITIATE_SEARCH_H
 #define _OPENCOG_INITIATE_SEARCH_H
 
-#include <opencog/atoms/base/types.h>
+#include <opencog/atoms/proto/types.h>
 #include <opencog/atoms/core/Quotation.h>
 #include <opencog/atoms/pattern/PatternLink.h>
 #include <opencog/query/PatternMatchCallback.h>
@@ -57,7 +57,7 @@ public:
 
 protected:
 
-	ClassServer& _classserver;
+	NameServer& _nameserver;
 
 	const Variables* _variables;
 	const Pattern* _pattern;

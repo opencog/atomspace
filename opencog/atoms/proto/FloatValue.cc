@@ -20,7 +20,7 @@
  * 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
  */
 
-#include <opencog/atoms/base/FloatValue.h>
+#include <opencog/atoms/proto/FloatValue.h>
 
 using namespace opencog;
 

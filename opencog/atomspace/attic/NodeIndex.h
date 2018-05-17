@@ -25,7 +25,7 @@
 #include <set>
 #include <vector>
 
-#include <opencog/atoms/base/types.h>
+#include <opencog/atoms/proto/types.h>
 #include <opencog/atomspace/NameIndex.h>
 
 namespace opencog
@@ -81,7 +81,7 @@ class NodeIndex
 			{
 				Type max = idx.size();
 				for (Type s = 0; s < max; s++) {
-					if (classserver().isA(s, type)) {
+					if (nameserver().isA(s, type)) {
 						Atom* atom = getAtom(s, name);
 						if (atom) *result++ = atom->get_handle();
 					}
