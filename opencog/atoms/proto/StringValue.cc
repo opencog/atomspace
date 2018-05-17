@@ -1,7 +1,7 @@
 /*
- * opencog/atoms/base/LinkValue.cc
+ * opencog/atoms/proto/StringValue.cc
  *
- * Copyright (C) 2015 Linas Vepstas
+ * Copyright (C) 2015, 2016 Linas Vepstas
  * All Rights Reserved
  *
  * This program is free software; you can redistribute it and/or modify
@@ -20,32 +20,30 @@
  * 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
  */
 
-#include <opencog/atoms/base/LinkValue.h>
+#include <opencog/atoms/base/StringValue.h>
 
 using namespace opencog;
 
-bool LinkValue::operator==(const ProtoAtom& other) const
+bool StringValue::operator==(const ProtoAtom& other) const
 {
-	if (LINK_VALUE != other.get_type()) return false;
+	if (STRING_VALUE != other.get_type()) return false;
 
-	const LinkValue* lov = (const LinkValue*) &other;
+	const StringValue* sov = (const StringValue*) &other;
 
-	if (_value.size() != lov->_value.size()) return false;
-
-	// Content-compare, NOT pointer-compare!
+	if (_value.size() != sov->_value.size()) return false;
 	size_t len = _value.size();
 	for (size_t i=0; i<len; i++)
-		if (*(_value[i]) != *(lov->_value[i])) return false;
+		if (_value[i] != sov->_value[i]) return false;
 	return true;
 }
 
 // ==============================================================
 
-std::string LinkValue::to_string(const std::string& indent) const
+std::string StringValue::to_string(const std::string& indent) const
 {
-	std::string rv = indent + "(LinkValue\n";
-	for (ProtoAtomPtr v :_value)
-		rv += std::string(" ") + v->to_string(indent + "   ");
+	std::string rv = indent + "(StringValue";
+	for (std::string v :_value)
+		rv += std::string(" \"") + v + "\"";
 	rv += ")\n";
 	return rv;
 }

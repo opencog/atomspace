@@ -1,7 +1,7 @@
 /*
- * opencog/atoms/base/FloatValue.h
+ * opencog/atoms/proto/StringValue.h
  *
- * Copyright (C) 2015 Linas Vepstas
+ * Copyright (C) 2015, 2016 Linas Vepstas
  * All Rights Reserved
  *
  * This program is free software; you can redistribute it and/or modify
@@ -20,9 +20,10 @@
  * 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
  */
 
-#ifndef _OPENCOG_FLOAT_VALUE_H
-#define _OPENCOG_FLOAT_VALUE_H
+#ifndef _OPENCOG_STRING_VALUE_H
+#define _OPENCOG_STRING_VALUE_H
 
+#include <string>
 #include <vector>
 #include <opencog/atoms/base/ProtoAtom.h>
 #include <opencog/atoms/base/atom_types.h>
@@ -35,42 +36,39 @@ namespace opencog
  */
 
 /**
- * FloatValues hold an ordered vector of doubles.
+ * StringValues hold an ordered vector of std::strings.
  */
-class FloatValue
+class StringValue
 	: public ProtoAtom
 {
 protected:
-	std::vector<double> _value;
-
-	FloatValue(Type t) : ProtoAtom(t) {}
-public: // XXX should be protected...
-	FloatValue(Type t, const std::vector<double>& v) : ProtoAtom(t), _value(v) {}
+	std::vector<std::string> _value;
 
 public:
-	FloatValue(double v) : ProtoAtom(FLOAT_VALUE) { _value.push_back(v); }
-	FloatValue(const std::vector<double>& v)
-		: ProtoAtom(FLOAT_VALUE), _value(v) {}
+	StringValue(const std::string& v)
+		: ProtoAtom(STRING_VALUE) { _value.push_back(v); }
+	StringValue(const std::vector<std::string>& v)
+		: ProtoAtom(STRING_VALUE), _value(v) {}
 
-	virtual ~FloatValue() {}
+	virtual ~StringValue() {}
 
-	const std::vector<double>& value() const { return _value; }
+	const std::vector<std::string>& value() const { return _value; }
 
 	/** Returns a string representation of the value.  */
-	virtual std::string to_string(const std::string& indent = "") const;
+	virtual std::string to_string(const std::string& indent) const;
 
-	/** Returns true if two atoms are equal.  */
+	/** Returns true if the two atoms are equal.  */
 	virtual bool operator==(const ProtoAtom&) const;
 };
 
-typedef std::shared_ptr<const FloatValue> FloatValuePtr;
-static inline FloatValuePtr FloatValueCast(const ProtoAtomPtr& a)
-	{ return std::dynamic_pointer_cast<const FloatValue>(a); }
+typedef std::shared_ptr<const StringValue> StringValuePtr;
+static inline StringValuePtr StringValueCast(const ProtoAtomPtr& a)
+	{ return std::dynamic_pointer_cast<const StringValue>(a); }
 
-#define createFloatValue std::make_shared<FloatValue>
+#define createStringValue std::make_shared<StringValue>
 
 
 /** @}*/
 } // namespace opencog
 
-#endif // _OPENCOG_FLOAT_VALUE_H
+#endif // _OPENCOG_STRING_VALUE_H

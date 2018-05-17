@@ -1,7 +1,7 @@
 /*
- * opencog/atoms/base/StringValue.h
+ * opencog/atoms/proto/LinkValue.h
  *
- * Copyright (C) 2015, 2016 Linas Vepstas
+ * Copyright (C) 2015 Linas Vepstas
  * All Rights Reserved
  *
  * This program is free software; you can redistribute it and/or modify
@@ -20,10 +20,9 @@
  * 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
  */
 
-#ifndef _OPENCOG_STRING_VALUE_H
-#define _OPENCOG_STRING_VALUE_H
+#ifndef _OPENCOG_LINK_VALUE_H
+#define _OPENCOG_LINK_VALUE_H
 
-#include <string>
 #include <vector>
 #include <opencog/atoms/base/ProtoAtom.h>
 #include <opencog/atoms/base/atom_types.h>
@@ -36,39 +35,38 @@ namespace opencog
  */
 
 /**
- * StringValues hold an ordered vector of std::strings.
+ * LinkValue holds an ordered vector of protoatoms.
+ * (i.e. its a link, but for values)
  */
-class StringValue
+class LinkValue
 	: public ProtoAtom
 {
 protected:
-	std::vector<std::string> _value;
+	std::vector<ProtoAtomPtr> _value;
 
 public:
-	StringValue(const std::string& v)
-		: ProtoAtom(STRING_VALUE) { _value.push_back(v); }
-	StringValue(const std::vector<std::string>& v)
-		: ProtoAtom(STRING_VALUE), _value(v) {}
+	LinkValue(const std::vector<ProtoAtomPtr>& v)
+		: ProtoAtom(LINK_VALUE), _value(v) {}
 
-	virtual ~StringValue() {}
+	virtual ~LinkValue() {}
 
-	const std::vector<std::string>& value() const { return _value; }
+	const std::vector<ProtoAtomPtr>& value() const { return _value; }
 
 	/** Returns a string representation of the value.  */
 	virtual std::string to_string(const std::string& indent) const;
 
-	/** Returns true if the two atoms are equal.  */
+	/** Returns true if the two atoms are equal, else false.  */
 	virtual bool operator==(const ProtoAtom&) const;
 };
 
-typedef std::shared_ptr<const StringValue> StringValuePtr;
-static inline StringValuePtr StringValueCast(const ProtoAtomPtr& a)
-	{ return std::dynamic_pointer_cast<const StringValue>(a); }
+typedef std::shared_ptr<LinkValue> LinkValuePtr;
+static inline LinkValuePtr LinkValueCast(const ProtoAtomPtr& a)
+	{ return std::dynamic_pointer_cast<LinkValue>(a); }
 
-#define createStringValue std::make_shared<StringValue>
+#define createLinkValue std::make_shared<LinkValue>
 
 
 /** @}*/
 } // namespace opencog
 
-#endif // _OPENCOG_STRING_VALUE_H
+#endif // _OPENCOG_LINK_VALUE_H

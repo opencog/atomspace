@@ -1,5 +1,5 @@
 /*
- * opencog/atoms/base/LinkValue.h
+ * opencog/atoms/proto/FloatValue.h
  *
  * Copyright (C) 2015 Linas Vepstas
  * All Rights Reserved
@@ -20,8 +20,8 @@
  * 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
  */
 
-#ifndef _OPENCOG_LINK_VALUE_H
-#define _OPENCOG_LINK_VALUE_H
+#ifndef _OPENCOG_FLOAT_VALUE_H
+#define _OPENCOG_FLOAT_VALUE_H
 
 #include <vector>
 #include <opencog/atoms/base/ProtoAtom.h>
@@ -35,38 +35,42 @@ namespace opencog
  */
 
 /**
- * LinkValue holds an ordered vector of protoatoms.
- * (i.e. its a link, but for values)
+ * FloatValues hold an ordered vector of doubles.
  */
-class LinkValue
+class FloatValue
 	: public ProtoAtom
 {
 protected:
-	std::vector<ProtoAtomPtr> _value;
+	std::vector<double> _value;
+
+	FloatValue(Type t) : ProtoAtom(t) {}
+public: // XXX should be protected...
+	FloatValue(Type t, const std::vector<double>& v) : ProtoAtom(t), _value(v) {}
 
 public:
-	LinkValue(const std::vector<ProtoAtomPtr>& v)
-		: ProtoAtom(LINK_VALUE), _value(v) {}
+	FloatValue(double v) : ProtoAtom(FLOAT_VALUE) { _value.push_back(v); }
+	FloatValue(const std::vector<double>& v)
+		: ProtoAtom(FLOAT_VALUE), _value(v) {}
 
-	virtual ~LinkValue() {}
+	virtual ~FloatValue() {}
 
-	const std::vector<ProtoAtomPtr>& value() const { return _value; }
+	const std::vector<double>& value() const { return _value; }
 
 	/** Returns a string representation of the value.  */
-	virtual std::string to_string(const std::string& indent) const;
+	virtual std::string to_string(const std::string& indent = "") const;
 
-	/** Returns true if the two atoms are equal, else false.  */
+	/** Returns true if two atoms are equal.  */
 	virtual bool operator==(const ProtoAtom&) const;
 };
 
-typedef std::shared_ptr<LinkValue> LinkValuePtr;
-static inline LinkValuePtr LinkValueCast(const ProtoAtomPtr& a)
-	{ return std::dynamic_pointer_cast<LinkValue>(a); }
+typedef std::shared_ptr<const FloatValue> FloatValuePtr;
+static inline FloatValuePtr FloatValueCast(const ProtoAtomPtr& a)
+	{ return std::dynamic_pointer_cast<const FloatValue>(a); }
 
-#define createLinkValue std::make_shared<LinkValue>
+#define createFloatValue std::make_shared<FloatValue>
 
 
 /** @}*/
 } // namespace opencog
 
-#endif // _OPENCOG_LINK_VALUE_H
+#endif // _OPENCOG_FLOAT_VALUE_H
