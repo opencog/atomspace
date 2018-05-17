@@ -1,5 +1,5 @@
 /*
- * tests/atoms/OrLinkUTest.cxxtest
+ * tests/atoms/ExistsLinkUTest.cxxtest
  *
  * Copyright (C) 2015 Linas Vepstas
  * All Rights Reserved
@@ -25,15 +25,15 @@
 
 using namespace opencog;
 
-// Test some OrLink constructs.
+// Test some constructs involving ExistsLink.
 //
-class OrLinkUTest :  public CxxTest::TestSuite
+class ExistsLinkUTest :  public CxxTest::TestSuite
 {
 private:
 	AtomSpace _as;
 
 public:
-	OrLinkUTest()
+	ExistsLinkUTest()
 	{
 		logger().set_print_to_stdout_flag(true);
 		logger().set_timestamp_flag(false);
@@ -51,7 +51,7 @@ public:
 
 // Test that the following construct (Or (Exists ...) (Exists ...)) is
 // valid.
-void OrLinkUTest::test_exists()
+void ExistsLinkUTest::test_exists()
 {
 	logger().info("BEGIN TEST: %s", __FUNCTION__);
 
