@@ -50,6 +50,11 @@ protected:
 	bool do_logger_set_stdout(Logger*, bool);
 	bool do_logger_set_sync(Logger*, bool);
 	bool do_logger_set_timestamp(Logger*, bool);
+	bool do_logger_is_error_enabled(Logger*);
+	bool do_logger_is_warn_enabled(Logger*);
+	bool do_logger_is_info_enabled(Logger*);
+	bool do_logger_is_debug_enabled(Logger*);
+	bool do_logger_is_fine_enabled(Logger*);
 	void do_logger_error(Logger*, const std::string& msg);
 	void do_logger_warn(Logger*, const std::string& msg);
 	void do_logger_info(Logger*, const std::string& msg);
@@ -145,6 +150,31 @@ bool LoggerSCM::do_logger_set_timestamp(Logger* lg, bool enable)
 	return previous_setting;
 }
 
+bool LoggerSCM::do_logger_is_error_enabled(Logger* lg)
+{
+	return lg->is_error_enabled();
+}
+
+bool LoggerSCM::do_logger_is_warn_enabled(Logger* lg)
+{
+	return lg->is_warn_enabled();
+}
+
+bool LoggerSCM::do_logger_is_info_enabled(Logger* lg)
+{
+	return lg->is_info_enabled();
+}
+
+bool LoggerSCM::do_logger_is_debug_enabled(Logger* lg)
+{
+	return lg->is_debug_enabled();
+}
+
+bool LoggerSCM::do_logger_is_fine_enabled(Logger* lg)
+{
+	return lg->is_fine_enabled();
+}
+
 void LoggerSCM::do_logger_error(Logger* lg, const std::string& msg)
 {
 	lg->error(msg);
@@ -212,6 +242,17 @@ void LoggerSCM::init(void)
 		&LoggerSCM::do_logger_set_sync, this, "logger");
 	define_scheme_primitive("cog-logger-set-timestamp-of-logger!",
 		&LoggerSCM::do_logger_set_timestamp, this, "logger");
+
+	define_scheme_primitive("cog-logger-error-enabled-of-logger?",
+		&LoggerSCM::do_logger_is_error_enabled, this, "logger");
+	define_scheme_primitive("cog-logger-warn-enabled-of-logger?",
+		&LoggerSCM::do_logger_is_warn_enabled, this, "logger");
+	define_scheme_primitive("cog-logger-info-enabled-of-logger?",
+		&LoggerSCM::do_logger_is_info_enabled, this, "logger");
+	define_scheme_primitive("cog-logger-debug-enabled-of-logger?",
+		&LoggerSCM::do_logger_is_debug_enabled, this, "logger");
+	define_scheme_primitive("cog-logger-fine-enabled-of-logger?",
+		&LoggerSCM::do_logger_is_fine_enabled, this, "logger");
 
 	define_scheme_primitive("cog-logger-error-of-logger",
 		&LoggerSCM::do_logger_error, this, "logger");
