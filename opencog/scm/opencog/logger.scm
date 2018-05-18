@@ -26,6 +26,11 @@
 	cog-logger-set-stdout-of-logger!
 	cog-logger-set-sync-of-logger!
 	cog-logger-set-timestamp-of-logger!
+	cog-logger-error-enabled-of-logger?
+	cog-logger-warn-enabled-of-logger?
+	cog-logger-info-enabled-of-logger?
+	cog-logger-debug-enabled-of-logger?
+	cog-logger-fine-enabled-of-logger?
 	cog-logger-error-of-logger
 	cog-logger-warn-of-logger
 	cog-logger-info-of-logger
@@ -40,6 +45,11 @@
 	cog-logger-set-stdout!
 	cog-logger-set-sync!
 	cog-logger-set-timestamp!
+	cog-logger-error-enabled?
+	cog-logger-warn-enabled?
+	cog-logger-info-enabled?
+	cog-logger-debug-enabled?
+	cog-logger-fine-enabled?
 	cog-logger-error
 	cog-logger-warn
 	cog-logger-info
@@ -224,6 +234,46 @@
     Returns the previous setting.
 "
   (apply cog-logger-set-timestamp-of-logger! (apply add-default-logger args)))
+
+(define (cog-logger-error-enabled? . args)
+"
+ cog-logger-error-enabled? [LOGGER]
+    Return #t iff the level of LOGGER is \"error\" or lower.
+    If LOGGER is not provided then use the default logger.
+"
+  (apply cog-logger-error-enabled-of-logger? (apply add-default-logger args)))
+
+(define (cog-logger-warn-enabled? . args)
+"
+ cog-logger-warn-enabled? [LOGGER]
+    Return #t iff the level of LOGGER is \"warn\" or lower.
+    If LOGGER is not provided then use the default logger.
+"
+  (apply cog-logger-warn-enabled-of-logger? (apply add-default-logger args)))
+
+(define (cog-logger-info-enabled? . args)
+"
+ cog-logger-info-enabled? [LOGGER]
+    Return #t iff the level of LOGGER is \"info\" or lower.
+    If LOGGER is not provided then use the default logger.
+"
+  (apply cog-logger-info-enabled-of-logger? (apply add-default-logger args)))
+
+(define (cog-logger-debug-enabled? . args)
+"
+ cog-logger-debug-enabled? [LOGGER]
+    Return #t iff the level of LOGGER is \"debug\" or lower.
+    If LOGGER is not provided then use the default logger.
+"
+  (apply cog-logger-debug-enabled-of-logger? (apply add-default-logger args)))
+
+(define (cog-logger-fine-enabled? . args)
+"
+ cog-logger-fine-enabled? [LOGGER]
+    Return #t iff the level of LOGGER is \"fine\" or lower.
+    If LOGGER is not provided then use the default logger.
+"
+  (apply cog-logger-fine-enabled-of-logger? (apply add-default-logger args)))
 
 (define (cog-logger-error . args)
 "
