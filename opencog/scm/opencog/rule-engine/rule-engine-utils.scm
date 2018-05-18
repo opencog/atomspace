@@ -21,6 +21,23 @@
 ;; -- ure-define-rbs -- Create a rbs that runs for a particular number of
 ;;                      iterations.
 ;; -- ure-get-forward-rule -- Return the forward form of a rule
+;; -- ure-logger-set-level! -- Set level of the URE logger
+;; -- ure-logger-get-level -- get level of the URE logger
+;; -- ure-logger-set-filename! -- set filename of the URE logger
+;; -- ure-logger-get-filename -- get filename of the URE logger
+;; -- ure-logger-set-stdout! -- set stdout flag of the URE logger
+;; -- ure-logger-set-sync! -- set sync flag of the URE logger
+;; -- ure-logger-set-timestamp! -- set timestamp falg of the URE logger
+;; -- ure-logger-error-enabled? -- check that the log level of the URE logger is error enabled
+;; -- ure-logger-warn-enabled? -- check that the log level of the URE logger is warn enabled
+;; -- ure-logger-info-enabled? -- check that the log level of the URE logger is info enabled
+;; -- ure-logger-debug-enabled? -- check that the log level of the URE logger is debug enabled
+;; -- ure-logger-fine-enabled? -- check that the log level of the URE logger is fine enabled
+;; -- ure-logger-error -- logger at error level of the URE logger
+;; -- ure-logger-warn -- logger at warn level of the URE logger
+;; -- ure-logger-info -- logger at info level of the URE logger
+;; -- ure-logger-debug -- logger at debug level of the URE logger
+;; -- ure-logger-fine -- logger at fine level of the URE logger
 ;; -- bool->tv -- Convert #t to TRUE_TV and #f to FALSE_TV
 ;; -- tv->bool -- Convert TRUE_TV to #t, anything else to #f
 ;; -- atom->number -- Convert NumberNode into its corresponding number
@@ -41,6 +58,7 @@
 
 (use-modules (opencog))
 (use-modules (opencog exec))
+(use-modules (opencog logger))
 (use-modules (srfi srfi-1))
 
 (define* (cog-fc rbs source #:key (vardecl (List)) (focus-set (Set)))
@@ -90,6 +108,10 @@
          (cas (if control-enabled control-as (cog-atomspace))))
   (cog-mandatory-args-bc rbs target vardecl
                          trace-enabled tas control-enabled cas focus-set)))
+
+;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+;; URE Configuration Helpers ;;
+;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 
 (define-public (ure-define-add-rule rbs rule-name rule . tv)
 "
@@ -340,6 +362,32 @@
     (if (eq? rule-type 'ListLink) (gar rule) rule))
 )
 
+;;;;;;;;;;;;;;;;
+;; URE Logger ;;
+;;;;;;;;;;;;;;;;
+
+(define (ure-logger-set-level! l) (cog-logger-set-level! (cog-ure-logger) l))
+(define (ure-logger-get-level) (cog-logger-get-level (cog-ure-logger)))
+(define (ure-logger-set-filename! filename) (cog-logger-set-filename! (cog-ure-logger) filename))
+(define (ure-logger-get-filename) (cog-logger-get-filename (cog-ure-logger)))
+(define (ure-logger-set-stdout! enable) (cog-logger-set-stdout! (cog-ure-logger) enable))
+(define (ure-logger-set-sync! enable) (cog-logger-set-sync! (cog-ure-logger) enable))
+(define (ure-logger-set-timestamp! enable) (cog-logger-set-timestamp! (cog-ure-logger) enable))
+(define (ure-logger-error-enabled?) (cog-logger-error-enabled? (cog-ure-logger)))
+(define (ure-logger-warn-enabled?) (cog-logger-warn-enabled? (cog-ure-logger)))
+(define (ure-logger-info-enabled?) (cog-logger-info-enabled? (cog-ure-logger)))
+(define (ure-logger-debug-enabled?) (cog-logger-debug-enabled? (cog-ure-logger)))
+(define (ure-logger-fine-enabled?) (cog-logger-fine-enabled? (cog-ure-logger)))
+(define (ure-logger-error . args) (apply cog-logger-error (cons (cog-ure-logger) args)))
+(define (ure-logger-warn . args) (apply cog-logger-warn (cons (cog-ure-logger) args)))
+(define (ure-logger-info . args) (apply cog-logger-info (cons (cog-ure-logger) args)))
+(define (ure-logger-debug . args) (apply cog-logger-debug (cons (cog-ure-logger) args)))
+(define (ure-logger-fine . args) (apply cog-logger-fine (cons (cog-ure-logger) args)))
+
+;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+;; Helpers for Implementing URE Rules ;;
+;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+
 (define-public (bool->tv b)
 "
   Convert #t to TRUE_TV and #f to FALSE_TV
@@ -462,6 +510,23 @@
           ure-set-bc-mm-compressiveness
           ure-define-rbs
           ure-get-forward-rule
+          ure-logger-set-level!
+          ure-logger-get-level
+          ure-logger-set-filename!
+          ure-logger-get-filename
+          ure-logger-set-stdout!
+          ure-logger-set-sync!
+          ure-logger-set-timestamp!
+          ure-logger-error-enabled?
+          ure-logger-warn-enabled?
+          ure-logger-info-enabled?
+          ure-logger-debug-enabled?
+          ure-logger-fine-enabled?
+          ure-logger-error
+          ure-logger-warn
+          ure-logger-info
+          ure-logger-debug
+          ure-logger-fine
           bool->tv
           tv->bool
           atom->number
