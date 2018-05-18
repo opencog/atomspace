@@ -15,6 +15,7 @@ ADD_LIBRARY (atomproto
 	FloatValue.cc
 	LinkValue.cc
 	StringValue.cc
+	NameServer.cc
 )
 
 # Without this, parallel make will race and crap up the generated files.
