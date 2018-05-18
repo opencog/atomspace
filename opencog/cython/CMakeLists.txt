@@ -25,24 +25,32 @@ file(MAKE_DIRECTORY opencog)
 file(COPY opencog/__init__.py DESTINATION opencog)
 ##
 
-ADD_LIBRARY(PythonEval
+ADD_LIBRARY(PythonEval_
 	PythonEval.cc
 	load-file.cc
 )
 
-ADD_DEPENDENCIES(PythonEval py_atomspace_header)
+ADD_DEPENDENCIES(PythonEval_ py_atomspace_header)
+TARGET_LINK_LIBRARIES(PythonEval_
+	query_
+	smob_
+	atombase
+	${PYTHON_LIBRARIES}
+	${Boost_FILESYSTEM_LIBRARY}
+)
 
+ADD_LIBRARY(PythonEval dummy)
 TARGET_LINK_LIBRARIES(PythonEval
+	PythonEval_
+	query_
+	smob_
 	atombase
 	atomspace
 	${PYTHON_LIBRARIES}
 	${Boost_FILESYSTEM_LIBRARY}
 )
 
-IF(HAVE_GUILE)
-	TARGET_LINK_LIBRARIES(PythonEval smob)
-ENDIF(HAVE_GUILE)
-
+INSTALL (TARGETS PythonEval_ DESTINATION "lib${LIB_DIR_SUFFIX}/opencog")
 INSTALL (TARGETS PythonEval DESTINATION "lib${LIB_DIR_SUFFIX}/opencog")
 
 INSTALL (FILES

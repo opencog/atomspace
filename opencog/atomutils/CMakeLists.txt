@@ -1,5 +1,5 @@
 
-ADD_LIBRARY (atomutils
+ADD_LIBRARY (atomutils_
 	AtomUtils
 	FindUtils
 	FuzzyMatch
@@ -8,22 +8,22 @@ ADD_LIBRARY (atomutils
 	TypeUtils
 )
 
-ADD_DEPENDENCIES(atomutils opencog_atom_types)
+ADD_DEPENDENCIES(atomutils_ opencog_atom_types)
 
-TARGET_LINK_LIBRARIES(atomutils
+TARGET_LINK_LIBRARIES(atomutils_
 	atombase
 	${COGUTIL_LIBRARY}
 )
 
-IF (CYGWIN)
-	INSTALL (TARGETS atomutils
-		DESTINATION "lib${LIB_DIR_SUFFIX}/opencog"
-	)
-ELSE (CYGWIN)
-	INSTALL (TARGETS atomutils
-		DESTINATION "lib${LIB_DIR_SUFFIX}/opencog"
-	)
-ENDIF (CYGWIN)
+ADD_LIBRARY (atomutils dummy)
+TARGET_LINK_LIBRARIES(atomutils
+	atomutils_
+	lambda_
+	atomspace
+)
+
+INSTALL (TARGETS atomutils_ DESTINATION "lib${LIB_DIR_SUFFIX}/opencog")
+INSTALL (TARGETS atomutils DESTINATION "lib${LIB_DIR_SUFFIX}/opencog")
 
 INSTALL (FILES
 	AtomUtils.h

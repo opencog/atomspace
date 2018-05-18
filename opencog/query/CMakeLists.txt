@@ -1,6 +1,6 @@
 
 # Build the query shlib
-ADD_LIBRARY(query
+ADD_LIBRARY(query_
 	DefaultPatternMatchCB.cc
 	Implicator.cc
 	DefaultImplicator.cc
@@ -12,21 +12,24 @@ ADD_LIBRARY(query
 	Satisfier.cc
 )
 
-ADD_DEPENDENCIES(query
+ADD_DEPENDENCIES(query_
 	opencog_atom_types
 )
 
-TARGET_LINK_LIBRARIES(query
-	atomutils
-	lambda
-	atomspace
-#	execution # disabled to avoid cyclic dependency
+TARGET_LINK_LIBRARIES(query_
+	lambda_
 )
 
-IF (HAVE_GUILE)
-	TARGET_LINK_LIBRARIES(query smob)
-ENDIF (HAVE_GUILE)
+ADD_LIBRARY(query dummy)
+TARGET_LINK_LIBRARIES(query
+	query_
+	lambda
+	execution_
+	smob
+	atomspace
+)
 
+INSTALL (TARGETS query_ DESTINATION "lib${LIB_DIR_SUFFIX}/opencog")
 INSTALL (TARGETS query DESTINATION "lib${LIB_DIR_SUFFIX}/opencog")
 
 INSTALL (FILES

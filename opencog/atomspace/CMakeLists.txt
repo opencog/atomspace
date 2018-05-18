@@ -14,10 +14,26 @@ ADD_LIBRARY (atomspace
 # Without this, parallel make will race and crap up the generated files.
 ADD_DEPENDENCIES(atomspace opencog_atom_types)
 
+# Explicitly link every library that defines atom types.
+# We want to list every possible library that defines some
+# atom type, so that the library ctors will run, and add those
+# atom types to the classserver. If this is not done, then the
+# classserver will fail to run atom factories, viz, will fail
+# to run the ctors for C++-backed atom types, resulting in
+# screwball failures.
+
 TARGET_LINK_LIBRARIES(atomspace
-#	${NO_AS_NEEDED}
+	${NO_AS_NEEDED}
+	truthvalue_
+	atombase
 	atomcore
-	truthvalue
+	clearbox
+	execution_
+	lambda_
+	${AS_NEEDED}
+	smob_
+	query_
+	PythonEval_
 	${COGUTIL_LIBRARY}
 	${Boost_THREAD_LIBRARY}
 )

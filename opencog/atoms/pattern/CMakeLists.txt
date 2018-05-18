@@ -2,7 +2,7 @@
 # The atom_types.h file is written to the build directory
 INCLUDE_DIRECTORIES( ${CMAKE_CURRENT_BINARY_DIR})
 
-ADD_LIBRARY (lambda
+ADD_LIBRARY (lambda_
 	BindLink.cc
 	DualLink.cc
 	PatternLink.cc
@@ -12,25 +12,29 @@ ADD_LIBRARY (lambda
 )
 
 # Without this, parallel make will race and crap up the generated files.
-ADD_DEPENDENCIES(lambda opencog_atom_types)
+ADD_DEPENDENCIES(lambda_ opencog_atom_types)
 
-TARGET_LINK_LIBRARIES(lambda
-	atomspace
-	atomutils
+TARGET_LINK_LIBRARIES(lambda_
 	atomcore
 	atombase
 	${COGUTIL_LIBRARY}
 )
 
-IF (CYGWIN)
-	INSTALL (TARGETS lambda
-		DESTINATION "lib${LIB_DIR_SUFFIX}/opencog"
-	)
-ELSE (CYGWIN)
-	INSTALL (TARGETS lambda
-		DESTINATION "lib${LIB_DIR_SUFFIX}/opencog"
-	)
-ENDIF (CYGWIN)
+ADD_LIBRARY (lambda dummy)
+TARGET_LINK_LIBRARIES(lambda
+	lambda_
+	query_
+	smob_
+	atomspace
+)
+
+IF (HAVE_CYTHON)
+	TARGET_LINK_LIBRARIES(lambda PythonEval)
+ENDIF (HAVE_CYTHON)
+
+
+INSTALL (TARGETS lambda DESTINATION "lib${LIB_DIR_SUFFIX}/opencog")
+INSTALL (TARGETS lambda_ DESTINATION "lib${LIB_DIR_SUFFIX}/opencog")
 
 INSTALL (FILES
 	BindLink.h

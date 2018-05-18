@@ -36,14 +36,12 @@ ADD_LIBRARY (atomcore
 ADD_DEPENDENCIES(atomcore opencog_atom_types)
 
 TARGET_LINK_LIBRARIES(atomcore
-	atomutils
+	atomutils_
 	atombase
 	${COGUTIL_LIBRARY}
 )
 
-INSTALL (TARGETS atomcore
-	DESTINATION "lib${LIB_DIR_SUFFIX}/opencog"
-)
+INSTALL (TARGETS atomcore DESTINATION "lib${LIB_DIR_SUFFIX}/opencog")
 
 INSTALL (FILES
 	ArityLink.h

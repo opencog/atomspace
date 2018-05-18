@@ -1,4 +1,4 @@
-ADD_LIBRARY (truthvalue
+ADD_LIBRARY (truthvalue_
 	AttentionValue.cc
 	CountTruthValue.cc
 	EvidenceCountTruthValue.cc
@@ -10,15 +10,20 @@ ADD_LIBRARY (truthvalue
 )
 
 # Without this, parallel make will race and crap up the generated files.
-ADD_DEPENDENCIES(truthvalue opencog_atom_types)
+ADD_DEPENDENCIES(truthvalue_ opencog_atom_types)
 
-TARGET_LINK_LIBRARIES(truthvalue
+TARGET_LINK_LIBRARIES(truthvalue_
 	${COGUTIL_LIBRARY}
 )
 
-INSTALL (TARGETS truthvalue
-	DESTINATION "lib${LIB_DIR_SUFFIX}/opencog"
+ADD_LIBRARY(truthvalue dummy)
+TARGET_LINK_LIBRARIES(truthvalue
+	truthvalue_
+	atomspace
 )
+
+INSTALL (TARGETS truthvalue_ DESTINATION "lib${LIB_DIR_SUFFIX}/opencog")
+INSTALL (TARGETS truthvalue DESTINATION "lib${LIB_DIR_SUFFIX}/opencog")
 
 INSTALL (FILES
 	AttentionValue.h
