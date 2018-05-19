@@ -752,9 +752,9 @@
 
     Example:
        guile> (cog-set-value!
-                 (Concept \"abc\") (Concept \"key\")
+                 (Concept \"abc\") (Predicate \"key\")
                  (FloatValue 1 2 3))
-       guile> (cog-value (Concept \"abc\") (Concept \"key\"))
+       guile> (cog-value (Concept \"abc\") (Predicate \"key\"))
        (FloatValue 1.000000 2.000000 3.00000)
 ")
 
