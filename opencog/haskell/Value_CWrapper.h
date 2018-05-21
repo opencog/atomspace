@@ -1,5 +1,4 @@
 #include <opencog/atomspace/AtomSpace.h>
-#include <opencog/atoms/base/ClassServer.h>
 
 /**
  * C wrapper fro truth values.

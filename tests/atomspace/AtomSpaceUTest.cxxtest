@@ -29,7 +29,7 @@
 #include <math.h>
 #include <string.h>
 
-#include <opencog/atoms/base/types.h>
+#include <opencog/atoms/proto/types.h>
 #include <opencog/atomspace/AtomSpace.h>
 #include <opencog/atoms/base/Handle.h>
 #include <opencog/atoms/base/Node.h>
@@ -288,11 +288,11 @@ get_handles_by_name(AtomSpace* as,
         if (h) *(result++) = h;
         return result;
     }
-    classserver().foreachRecursive(
+    nameserver().foreachRecursive(
         [&](Type t)->void {
             // Avoid illegal gets.
-            if (classserver().isA(t, NUMBER_NODE)) return;
-            if (classserver().isA(t, TYPE_NODE)) return;
+            if (nameserver().isA(t, NUMBER_NODE)) return;
+            if (nameserver().isA(t, TYPE_NODE)) return;
             Handle h(as->get_handle(t, name));
             if (h) *(result++) = h; }, type);
 
@@ -490,7 +490,7 @@ public:
             }
 
             logger().debug("Subset %d checked", vhIdx);
-            TS_ASSERT(classserver().isA(SUBSET_LINK, INHERITANCE_LINK));
+            TS_ASSERT(nameserver().isA(SUBSET_LINK, INHERITANCE_LINK));
 
             // Note: SUBSET_LINK is a subType of INHERITANCE_LINK
             HandleSeq links;

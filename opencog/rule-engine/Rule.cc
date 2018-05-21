@@ -87,7 +87,7 @@ Rule::Rule(const Handle& rule_alias, const Handle& rule, const Handle& rbs)
 void Rule::init(const Handle& rule_member)
 {
 	OC_ASSERT(rule_member != Handle::UNDEFINED);
-	if (not classserver().isA(rule_member->get_type(), MEMBER_LINK))
+	if (not nameserver().isA(rule_member->get_type(), MEMBER_LINK))
 		throw InvalidParamException(TRACE_INFO,
 		                            "Rule '%s' is expected to be a MemberLink",
 		                            rule_member->to_string().c_str());

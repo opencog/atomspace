@@ -137,7 +137,7 @@ bool is_constant(const HandleSet& vars, const Handle& clause,
 		     // If it is an EvaluatableLink then is is not a
 		     // constant, unless it is a closed EvaluationLink over
 		     // a PredicateNode.
-		     or (classserver().isA(ct, EVALUATABLE_LINK)
+		     or (nameserver().isA(ct, EVALUATABLE_LINK)
 		         and (0 == clause->get_arity()
 		              or
 		              clause->getOutgoingAtom(0)->get_type() != PREDICATE_NODE)));

@@ -40,14 +40,14 @@ static __attribute__ ((constructor)) void init(void)
 #define str(x) #x
 #define xstr(x) str(x)
 
-	bool is_init = opencog::classserver().beginTypeDecls(xstr(INITNAME));
+	bool is_init = opencog::nameserver().beginTypeDecls(xstr(INITNAME));
 	if (is_init) return;
 
 	#include INHERITANCE_FILE
 	#ifdef INHERITANCE_FILE2
 	#include INHERITANCE_FILE2
 	#endif
-	opencog::classserver().endTypeDecls();
+	opencog::nameserver().endTypeDecls();
 }
 
 static __attribute__ ((destructor)) void fini(void)

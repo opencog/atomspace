@@ -23,7 +23,7 @@
 #ifndef _OPENCOG_TYPE_NODE_H
 #define _OPENCOG_TYPE_NODE_H
 
-#include <opencog/atoms/base/ClassServer.h>
+#include <opencog/atoms/proto/NameServer.h>
 #include <opencog/atoms/base/Node.h>
 
 namespace opencog
@@ -46,7 +46,7 @@ public:
 	TypeNode(Type t, const std::string& s)
 		// Convert to number and back to string to avoid miscompares.
 		: Node(t, s),
-		  value(classserver().getType(s))
+		  value(nameserver().getType(s))
 	{
 		// Perform strict checking only for TypeNode.  The
 		// DefinedTypeNode, which inherits from this class,
@@ -61,7 +61,7 @@ public:
 	TypeNode(const std::string& s)
 		// Convert to number and back to string to avoid miscompares.
 		: Node(TYPE_NODE, s),
-		  value(classserver().getType(s))
+		  value(nameserver().getType(s))
 	{
 		if (NOTYPE == value)
 			throw InvalidParamException(TRACE_INFO,
@@ -69,15 +69,15 @@ public:
 	}
 
 	TypeNode(Type t)
-		: Node(TYPE_NODE, classserver().getTypeName(t)),
+		: Node(TYPE_NODE, nameserver().getTypeName(t)),
 		  value(t)
 	{}
 
 	TypeNode(Node &n)
 		: Node(n),
-		  value(classserver().getType(n.get_name()))
+		  value(nameserver().getType(n.get_name()))
 	{
-		OC_ASSERT(classserver().isA(n.get_type(), TYPE_NODE),
+		OC_ASSERT(nameserver().isA(n.get_type(), TYPE_NODE),
 			"Bad TypeNode constructor!");
 
 		if (DEFINED_TYPE_NODE != _type and NOTYPE == value)
@@ -91,7 +91,7 @@ public:
 
 	static void validate(const std::string& str)
 	{
-		Type t = classserver().getType(str);
+		Type t = nameserver().getType(str);
 		// XXX TODO ... Some types are defined. In this case,
 		// verify that the string occurs as a name inside
 		// some DefineLink... if it does, then it's valid.

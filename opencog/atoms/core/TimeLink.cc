@@ -32,9 +32,9 @@ TimeLink::TimeLink(const HandleSeq& oset, Type t)
 	: FunctionLink(oset, t)
 {
 	// Type must be as expected
-	if (not classserver().isA(t, TIME_LINK))
+	if (not nameserver().isA(t, TIME_LINK))
 	{
-		const std::string& tname = classserver().getTypeName(t);
+		const std::string& tname = nameserver().getTypeName(t);
 		throw InvalidParamException(TRACE_INFO,
 			"Expecting an TimeLink, got %s", tname.c_str());
 	}
@@ -49,9 +49,9 @@ TimeLink::TimeLink(const Link &l)
 {
 	// Type must be as expected
 	Type tscope = l.get_type();
-	if (not classserver().isA(tscope, TIME_LINK))
+	if (not nameserver().isA(tscope, TIME_LINK))
 	{
-		const std::string& tname = classserver().getTypeName(tscope);
+		const std::string& tname = nameserver().getTypeName(tscope);
 		throw InvalidParamException(TRACE_INFO,
 			"Expecting an TimeLink, got %s", tname.c_str());
 	}

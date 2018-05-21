@@ -29,7 +29,7 @@
 #include <boost/operators.hpp>
 
 #include <opencog/atoms/base/Handle.h>
-#include <opencog/atoms/base/atom_types.h>
+#include <opencog/atoms/proto/atom_types.h>
 #include <opencog/atoms/core/Quotation.h>
 #include <opencog/atoms/core/Context.h>
 #include <opencog/atoms/core/Variables.h>

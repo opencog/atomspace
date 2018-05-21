@@ -22,7 +22,7 @@
  */
 
 #include <opencog/atoms/base/Link.h>
-#include <opencog/atoms/base/ClassServer.h>
+#include <opencog/atoms/proto/NameServer.h>
 
 #include <opencog/atoms/core/TypeNode.h>
 #include <opencog/atoms/core/DefineLink.h>
@@ -68,14 +68,14 @@ bool value_is_type(const Handle& spec, const Handle& val)
 	{
 		// Just like above, but allows derived types.
 		Type deeptype = TypeNodeCast(deep)->get_value();
-		return classserver().isA(valtype, deeptype);
+		return nameserver().isA(valtype, deeptype);
 	}
 	else if (TYPE_CO_INH_NODE == dpt)
 	{
 		// Just like above, but in the other direction.
 		// That is, it allows base tyes.
 		Type deeptype = TypeNodeCast(deep)->get_value();
-		return classserver().isA(deeptype, valtype);
+		return nameserver().isA(deeptype, valtype);
 	}
 	else if (TYPE_CHOICE == dpt)
 	{
@@ -107,7 +107,7 @@ bool value_is_type(const Handle& spec, const Handle& val)
 	if (vlo.size() != sz) return false;
 
 	// Unordered links are harder to handle...
-	if (classserver().isA(dpt, UNORDERED_LINK))
+	if (nameserver().isA(dpt, UNORDERED_LINK))
 		throw RuntimeException(TRACE_INFO,
 			"Not implemented! TODO XXX FIXME");
 
@@ -211,13 +211,13 @@ static bool type_match_rec(const Handle& left_, const Handle& right_, bool tople
 	// Like above but allows derived tyes.
 	if (TYPE_INH_NODE == ltype)
 	{
-		return classserver().isA(rtype, TypeNodeCast(left)->get_value());
+		return nameserver().isA(rtype, TypeNodeCast(left)->get_value());
 	}
 
 	// Like above, but in the opposite direction: allows base types.
 	if (TYPE_CO_INH_NODE == ltype)
 	{
-		return classserver().isA(TypeNodeCast(left)->get_value(), rtype);
+		return nameserver().isA(TypeNodeCast(left)->get_value(), rtype);
 	}
 
 	// If left is a type choice, right must match a choice.
@@ -250,7 +250,7 @@ static bool type_match_rec(const Handle& left_, const Handle& right_, bool tople
 	if (not left->is_link() or not right->is_link()) return false;
 
 	// Unordered links are a pain in the butt.
-	if (classserver().isA(ltype, UNORDERED_LINK))
+	if (nameserver().isA(ltype, UNORDERED_LINK))
 		throw RuntimeException(TRACE_INFO,
 			"Not implemented! TODO XXX FIXME");
 
@@ -347,10 +347,10 @@ bool is_well_typed(const TypeSet& ts)
 
 Type type_intersection(Type lhs, Type rhs)
 {
-	ClassServer& cs = classserver();
-	if (cs.isA(lhs, rhs))
+	NameServer& ns = nameserver();
+	if (ns.isA(lhs, rhs))
 		return lhs;
-	if (cs.isA(rhs, lhs))
+	if (ns.isA(rhs, lhs))
 		return rhs;
 	return NOTYPE;              // represent the bottom type
 }

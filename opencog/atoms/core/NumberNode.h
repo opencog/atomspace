@@ -89,7 +89,7 @@ public:
 		: Node(n.get_type(), double_to_string(std::stod(n.get_name()))),
 		  value(std::stod(n.get_name()))
 	{
-		OC_ASSERT(classserver().isA(_type, NUMBER_NODE),
+		OC_ASSERT(nameserver().isA(_type, NUMBER_NODE),
 			"Bad NumberNode constructor!");
 	}
 

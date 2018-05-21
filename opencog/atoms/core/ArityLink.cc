@@ -30,9 +30,9 @@ using namespace opencog;
 ArityLink::ArityLink(const HandleSeq& oset, Type t)
 	: FunctionLink(oset, t)
 {
-	if (not classserver().isA(t, ARITY_LINK))
+	if (not nameserver().isA(t, ARITY_LINK))
 	{
-		const std::string& tname = classserver().getTypeName(t);
+		const std::string& tname = nameserver().getTypeName(t);
 		throw InvalidParamException(TRACE_INFO,
 			"Expecting an ArityLink, got %s", tname.c_str());
 	}
@@ -43,9 +43,9 @@ ArityLink::ArityLink(const Link &l)
 {
 	// Type must be as expected
 	Type tscope = l.get_type();
-	if (not classserver().isA(tscope, ARITY_LINK))
+	if (not nameserver().isA(tscope, ARITY_LINK))
 	{
-		const std::string& tname = classserver().getTypeName(tscope);
+		const std::string& tname = nameserver().getTypeName(tscope);
 		throw InvalidParamException(TRACE_INFO,
 			"Expecting an ArityLink, got %s", tname.c_str());
 	}

@@ -20,7 +20,7 @@
  * 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
  */
 
-#include <opencog/atoms/base/atom_types.h>
+#include <opencog/atoms/proto/atom_types.h>
 #include <opencog/atoms/base/ClassServer.h>
 #include "FreeLink.h"
 
@@ -29,7 +29,7 @@ using namespace opencog;
 FreeLink::FreeLink(const HandleSeq& oset, Type t)
     : Link(oset, t)
 {
-	if (not classserver().isA(t, FREE_LINK))
+	if (not nameserver().isA(t, FREE_LINK))
 		throw InvalidParamException(TRACE_INFO, "Expecting a FreeLink");
 
 	unorder();
@@ -43,7 +43,7 @@ FreeLink::FreeLink(const Link& l)
     : Link(l)
 {
 	Type tscope = l.get_type();
-	if (not classserver().isA(tscope, FREE_LINK))
+	if (not nameserver().isA(tscope, FREE_LINK))
 		throw InvalidParamException(TRACE_INFO, "Expecting a FreeLink");
 
 	unorder();
@@ -57,7 +57,7 @@ FreeLink::FreeLink(const Link& l)
 
 void FreeLink::unorder(void)
 {
-	if (not classserver().isA(get_type(), UNORDERED_LINK)) return;
+	if (not nameserver().isA(get_type(), UNORDERED_LINK)) return;
 
 	// Place into arbitrary, but deterministic order.
 	// We have to do this here,  because some links,

@@ -45,7 +45,7 @@ using namespace opencog;
 /* ======================================================== */
 
 InitiateSearchCB::InitiateSearchCB(AtomSpace* as) :
-	_classserver(classserver())
+	_nameserver(nameserver())
 {
 #ifdef CACHED_IMPLICATOR
 	InitiateSearchCB::clear();
@@ -154,7 +154,7 @@ InitiateSearchCB::find_starter(const Handle& h, size_t& depth,
 {
 	// If its a node, then we are done.
 	Type t = h->get_type();
-	if (_classserver.isNode(t))
+	if (_nameserver.isNode(t))
 	{
 		if (VARIABLE_NODE != t and GLOB_NODE != t)
 		{
@@ -176,7 +176,7 @@ InitiateSearchCB::find_starter_recursive(const Handle& h, size_t& depth,
 	// If its a node, then we are done. Don't modify either depth or
 	// start.
 	Type t = h->get_type();
-	if (_classserver.isNode(t))
+	if (_nameserver.isNode(t))
 	{
 		if (VARIABLE_NODE != t and GLOB_NODE != t)
 		{
@@ -887,7 +887,7 @@ void InitiateSearchCB::jit_analyze(PatternMatchEngine* pme)
 			// Extract the variables in the definition.
 			// Either they are given in a LambdaLink, or, if absent,
 			// we just hunt down and bind all of them.
-			if (_classserver.isA(LAMBDA_LINK, defn->get_type()))
+			if (_nameserver.isA(LAMBDA_LINK, defn->get_type()))
 			{
 				LambdaLinkPtr lam = LambdaLinkCast(defn);
 				vset.extend(lam->get_variables());

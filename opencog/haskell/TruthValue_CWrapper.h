@@ -1,5 +1,4 @@
 #include <opencog/atomspace/AtomSpace.h>
-#include <opencog/atoms/base/ClassServer.h>
 #include <opencog/truthvalue/TruthValue.h>
 #include <opencog/truthvalue/SimpleTruthValue.h>
 #include <opencog/truthvalue/CountTruthValue.h>

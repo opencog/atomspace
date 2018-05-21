@@ -50,9 +50,9 @@ ScopeLink::ScopeLink(const Handle& vars, const Handle& body)
 bool ScopeLink::skip_init(Type t)
 {
 	// Type must be as expected.
-	if (not classserver().isA(t, SCOPE_LINK))
+	if (not nameserver().isA(t, SCOPE_LINK))
 	{
-		const std::string& tname = classserver().getTypeName(t);
+		const std::string& tname = nameserver().getTypeName(t);
 		throw InvalidParamException(TRACE_INFO,
 			"Expecting a ScopeLink, got %s", tname.c_str());
 	}
@@ -62,7 +62,7 @@ bool ScopeLink::skip_init(Type t)
 	// do an if-statement here.
 	if (IMPLICATION_SCOPE_LINK == t) return true;
 	if (PUT_LINK == t) return true;
-	if (classserver().isA(t, PATTERN_LINK)) return true;
+	if (nameserver().isA(t, PATTERN_LINK)) return true;
 	return false;
 }
 
@@ -113,7 +113,7 @@ void ScopeLink::extract_variables(const HandleSeq& oset)
 	{
 		_body = oset[0];
 
-		if (classserver().isA(_body->get_type(), LAMBDA_LINK))
+		if (nameserver().isA(_body->get_type(), LAMBDA_LINK))
 		{
 			LambdaLinkPtr lam(LambdaLinkCast(_body));
 			_varlist = lam->get_variables();
@@ -347,7 +347,7 @@ ContentHash ScopeLink::term_hash(const Handle& h,
 	quotation.update(t);
 
 	// Other embedded ScopeLinks might be hiding some of our variables...
-	bool issco = classserver().isA(t, SCOPE_LINK);
+	bool issco = nameserver().isA(t, SCOPE_LINK);
 	UnorderedHandleSet bsave;
 	if (issco)
 	{
@@ -369,7 +369,7 @@ ContentHash ScopeLink::term_hash(const Handle& h,
 		hash_vec.push_back(term_hash(ho, bound_vars, quotation));
 	}
 	// hash_vec should be sorted only for unordered links
-	if (classserver().isA(t, UNORDERED_LINK)) {
+	if (nameserver().isA(t, UNORDERED_LINK)) {
 		std::sort(hash_vec.begin(), hash_vec.end());
 	}
 	for(ContentHash & t_hash: hash_vec){

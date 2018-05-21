@@ -82,8 +82,8 @@ bool are_similar(const Handle& h1, const Handle& h2, bool strict_type_match)
             return false;
 
         // Unordered links should be treated in a special way
-        if (classserver().isA(h1->get_type(), UNORDERED_LINK) or
-            classserver().isA(h2->get_type(), UNORDERED_LINK))
+        if (nameserver().isA(h1->get_type(), UNORDERED_LINK) or
+            nameserver().isA(h2->get_type(), UNORDERED_LINK))
         {
             for (const Handle& h1 : hseqh1) {
                 for (auto it = hseqh2.begin(); it != hseqh2.end(); ++it) {

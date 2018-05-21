@@ -287,9 +287,9 @@ PatternLink::PatternLink(const HandleSeq& hseq, Type t)
 	: PrenexLink(hseq, t)
 {
 	// Type must be as expected
-	if (not classserver().isA(t, PATTERN_LINK))
+	if (not nameserver().isA(t, PATTERN_LINK))
 	{
-		const std::string& tname = classserver().getTypeName(t);
+		const std::string& tname = nameserver().getTypeName(t);
 		throw InvalidParamException(TRACE_INFO,
 			"Expecting a PatternLink, got %s", tname.c_str());
 	}
@@ -305,9 +305,9 @@ PatternLink::PatternLink(const Link& l)
 {
 	// Type must be as expected
 	Type tscope = l.get_type();
-	if (not classserver().isA(tscope, PATTERN_LINK))
+	if (not nameserver().isA(tscope, PATTERN_LINK))
 	{
-		const std::string& tname = classserver().getTypeName(tscope);
+		const std::string& tname = nameserver().getTypeName(tscope);
 		throw InvalidParamException(TRACE_INFO,
 			"Expecting a PatternLink, got %s", tname.c_str());
 	}

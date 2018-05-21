@@ -59,9 +59,9 @@ void PresentLink::init(void)
 PresentLink::PresentLink(const HandleSeq& oset, Type t)
 	: UnorderedLink(oset, t)
 {
-	if (not classserver().isA(t, PRESENT_LINK))
+	if (not nameserver().isA(t, PRESENT_LINK))
 	{
-		const std::string& tname = classserver().getTypeName(t);
+		const std::string& tname = nameserver().getTypeName(t);
 		throw InvalidParamException(TRACE_INFO,
 			"Expecting an PresentLink, got %s", tname.c_str());
 	}
@@ -74,9 +74,9 @@ PresentLink::PresentLink(const Link& l)
 {
 	// Type must be as expected
 	Type tscope = l.get_type();
-	if (not classserver().isA(tscope, PRESENT_LINK))
+	if (not nameserver().isA(tscope, PRESENT_LINK))
 	{
-		const std::string& tname = classserver().getTypeName(tscope);
+		const std::string& tname = nameserver().getTypeName(tscope);
 		throw InvalidParamException(TRACE_INFO,
 			"Expecting an PresentLink, got %s", tname.c_str());
 	}

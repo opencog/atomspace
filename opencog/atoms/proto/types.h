@@ -1,8 +1,11 @@
 /*
- * opencog/atoms/base/StringValue.cc
+ * opencog/atoms/proto/types.h
  *
- * Copyright (C) 2015, 2016 Linas Vepstas
+ * Copyright (C) 2002-2007 Novamente LLC
  * All Rights Reserved
+ *
+ * Written by Thiago Maia <thiago@vettatech.com>
+ *            Andre Senna <senna@vettalabs.com>
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU Affero General Public License v3 as
@@ -20,30 +23,28 @@
  * 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
  */
 
-#include <opencog/atoms/base/StringValue.h>
+/**
+ * basic type definitions.
+ */
 
-using namespace opencog;
+#ifndef _OPENCOG_TYPES_H
+#define _OPENCOG_TYPES_H
 
-bool StringValue::operator==(const ProtoAtom& other) const
+#include <set>
+
+namespace opencog
 {
-	if (STRING_VALUE != other.get_type()) return false;
+/** \addtogroup grp_atomspace
+ *  @{
+ */
 
-	const StringValue* sov = (const StringValue*) &other;
+//! type of Atoms, represented as short integer (16 bits)
+typedef unsigned short Type;
 
-	if (_value.size() != sov->_value.size()) return false;
-	size_t len = _value.size();
-	for (size_t i=0; i<len; i++)
-		if (_value[i] != sov->_value[i]) return false;
-	return true;
-}
+//! Set of atom types
+typedef std::set<Type> TypeSet;
 
-// ==============================================================
+/** @}*/
+} // namespace opencog
 
-std::string StringValue::to_string(const std::string& indent) const
-{
-	std::string rv = indent + "(StringValue";
-	for (std::string v :_value)
-		rv += std::string(" \"") + v + "\"";
-	rv += ")\n";
-	return rv;
-}
+#endif // _OPENCOG_TYPES_H

@@ -1,5 +1,5 @@
 /*
- * opencog/atomspace/ProtoAtom.h
+ * opencog/atomspace/proto/ProtoAtom.h
  *
  * Copyright (C) 2015 Linas Vepstas
  * All Rights Reserved
@@ -26,9 +26,8 @@
 #include <memory>
 #include <string>
 
-#include <opencog/atoms/base/ClassServer.h>
-#include <opencog/atoms/base/Handle.h>
-#include <opencog/atoms/base/types.h>
+#include <opencog/atoms/proto/types.h>
+#include <opencog/atoms/proto/NameServer.h>
 
 namespace opencog
 {
@@ -55,17 +54,17 @@ public:
 
 	inline Type get_type() const { return _type; }
 
+	virtual bool is_atom() const { return false; }
+	virtual bool is_node() const { return false; }
+	virtual bool is_link() const { return false; }
+
 	/** Basic predicate */
 	bool is_type(Type t, bool subclass = true) const
 	{
 		Type at(get_type());
 		if (not subclass) return t == at;
-		return classserver().isA(at, t);
+		return nameserver().isA(at, t);
 	}
-
-	virtual bool is_atom() const { return false; }
-	virtual bool is_node() const { return false; }
-	virtual bool is_link() const { return false; }
 
 	/**
 	 * Returns a string representation of the proto-atom.
@@ -97,23 +96,6 @@ public:
 };
 
 typedef std::shared_ptr<ProtoAtom> ProtoAtomPtr;
-#if NOT_RIGHT_NOW
-struct ProtoAtomPtr : public std::shared_ptr<ProtoAtom>
-{
-	ProtoAtomPtr(std::shared_ptr<ProtoAtom> pa) :
-		std::shared_ptr<ProtoAtom>(pa) {}
-	ProtoAtomPtr(AtomPtr a) :
-		std::shared_ptr<ProtoAtom>(
-			std::dynamic_pointer_cast<ProtoAtom>(a)) {}
-	ProtoAtomPtr(Handle h) :
-		std::shared_ptr<ProtoAtom>(
-			std::dynamic_pointer_cast<ProtoAtom>(AtomPtr(h))) {}
-	operator AtomPtr() const
-		{ return AtomPtr(std::dynamic_pointer_cast<Atom>(*this)); }
-	operator Handle() const
-		{ return Handle(AtomPtr(*this)); }
-};
-#endif
 
 typedef std::vector<ProtoAtomPtr> ProtomSeq;
 

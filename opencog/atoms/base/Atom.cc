@@ -35,7 +35,7 @@
 #include <opencog/util/platform.h>
 
 #include <opencog/atoms/base/Atom.h>
-#include <opencog/atoms/base/ClassServer.h>
+#include <opencog/atoms/proto/NameServer.h>
 #include <opencog/atoms/base/Link.h>
 #include <opencog/atoms/base/Node.h>
 
@@ -92,7 +92,7 @@ Atom::~Atom()
         // destructor! Which they shouldn't do.)
         OC_ASSERT(0 == getIncomingSet().size(),
              "Atom deletion failure; incoming set not empty for %s h=%x",
-             classserver().getTypeName(_type).c_str(), get_hash());
+             nameserver().getTypeName(_type).c_str(), get_hash());
     }
     drop_incoming_set();
 }

@@ -334,7 +334,7 @@ std::string oc_to_string(const HandleUCounter& huc)
 std::string oc_to_string(Type type, const std::string& indent)
 {
 	std::stringstream ss;
-	ss << indent << classserver().getTypeName(type) << std::endl;
+	ss << indent << nameserver().getTypeName(type) << std::endl;
 	return ss.str();
 }
 std::string oc_to_string(Type type)

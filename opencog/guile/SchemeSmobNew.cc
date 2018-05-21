@@ -12,7 +12,7 @@
 #include <libguile.h>
 
 #include <opencog/atomspace/AtomSpace.h>
-#include <opencog/atoms/base/ClassServer.h>
+#include <opencog/atoms/proto/NameServer.h>
 #include <opencog/guile/SchemeSmob.h>
 
 using namespace opencog;
@@ -62,7 +62,7 @@ std::string SchemeSmob::handle_to_string(const Handle& h, int indent)
 	if (h->is_node())
 	{
 		ret += "(";
-		ret += classserver().getTypeName(h->get_type());
+		ret += nameserver().getTypeName(h->get_type());
 		ret += " \"";
 		ret += h->get_name();
 		ret += "\"";
@@ -80,7 +80,7 @@ std::string SchemeSmob::handle_to_string(const Handle& h, int indent)
 	if (h->is_link())
 	{
 		ret += "(";
-		ret += classserver().getTypeName(h->get_type());
+		ret += nameserver().getTypeName(h->get_type());
 
 		// If there's a truth value, print it before the other atoms
 		TruthValuePtr tv(h->getTruthValue());
@@ -285,7 +285,7 @@ Type SchemeSmob::verify_atom_type (SCM stype, const char *subrname, int pos)
 		scm_wrong_type_arg_msg(subrname, pos, stype, "name of opencog atom type");
 
 	const char * ct = scm_i_string_chars(stype);
-	Type t = classserver().getType(ct);
+	Type t = nameserver().getType(ct);
 
 	// Make sure that the type is good
 	if (NOTYPE == t)
@@ -359,7 +359,7 @@ SCM SchemeSmob::ss_new_node (SCM stype, SCM sname, SCM kv_pairs)
 	Type t = verify_atom_type(stype, "cog-new-node", 1);
 
 	// Special case handling for NumberNode (and TimeNode, etc.)
-	if (classserver().isA(t, NUMBER_NODE) and scm_is_number(sname)) {
+	if (nameserver().isA(t, NUMBER_NODE) and scm_is_number(sname)) {
 		sname = scm_number_to_string(sname, _radix_ten);
 	}
 	std::string name(verify_string (sname, "cog-new-node", 2,

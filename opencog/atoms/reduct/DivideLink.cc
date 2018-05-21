@@ -20,7 +20,7 @@
  * 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
  */
 
-#include <opencog/atoms/base/atom_types.h>
+#include <opencog/atoms/proto/atom_types.h>
 #include <opencog/atoms/base/ClassServer.h>
 #include <opencog/atoms/core/NumberNode.h>
 #include "DivideLink.h"
@@ -48,7 +48,7 @@ DivideLink::DivideLink(const Link& l)
 void DivideLink::init(void)
 {
 	Type tscope = get_type();
-	if (not classserver().isA(tscope, DIVIDE_LINK))
+	if (not nameserver().isA(tscope, DIVIDE_LINK))
 		throw InvalidParamException(TRACE_INFO, "Expecting a DivideLink");
 
 	_commutative = false;

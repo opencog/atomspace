@@ -31,7 +31,7 @@ class MyTestClass
 		{
 			Handle hlist;
 			Type t = h->get_type();
-			if (classserver().isA(t, NODE))
+			if (nameserver().isA(t, NODE))
 			{
 				NodePtr n = NodeCast(h);
 				std::string name = n->get_name();

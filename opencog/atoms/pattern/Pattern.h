@@ -31,7 +31,7 @@
 #include <vector>
 
 #include <opencog/atoms/base/Handle.h>
-#include <opencog/atoms/base/types.h>  // for typedef Type
+#include <opencog/atoms/proto/types.h>  // for typedef Type
 #include <opencog/atoms/pattern/PatternTerm.h>
 
 namespace opencog {

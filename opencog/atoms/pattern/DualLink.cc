@@ -31,9 +31,9 @@ using namespace opencog;
 void DualLink::init(void)
 {
 	Type t = get_type();
-	if (not classserver().isA(t, DUAL_LINK))
+	if (not nameserver().isA(t, DUAL_LINK))
 	{
-		const std::string& tname = classserver().getTypeName(t);
+		const std::string& tname = nameserver().getTypeName(t);
 		throw InvalidParamException(TRACE_INFO,
 			"Expecting a DualLink, got %s", tname.c_str());
 	}

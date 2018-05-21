@@ -25,7 +25,7 @@
 #define _OPENCOG_TYPE_UTILS_H
 
 #include <opencog/atoms/base/Handle.h>
-#include <opencog/atoms/base/types.h>
+#include <opencog/atoms/proto/types.h>
 #include <opencog/atoms/core/VariableList.h>
 
 namespace opencog

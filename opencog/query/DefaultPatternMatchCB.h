@@ -25,7 +25,7 @@
 #ifndef _OPENCOG_DEFAULT_PATTERN_MATCH_H
 #define _OPENCOG_DEFAULT_PATTERN_MATCH_H
 
-#include <opencog/atoms/base/types.h>
+#include <opencog/atoms/proto/types.h>
 #include <opencog/atoms/core/Quotation.h>
 #include <opencog/atoms/execution/Instantiator.h>
 #include <opencog/atomspace/AtomSpace.h>
@@ -93,7 +93,7 @@ class DefaultPatternMatchCB : public virtual PatternMatchCallback
 		bool optionals_present(void) { return _optionals_present; }
 	protected:
 
-		ClassServer& _classserver;
+		NameServer& _nameserver;
 
 		const Variables* _vars = NULL;
 		const HandleSet* _dynamic = NULL;

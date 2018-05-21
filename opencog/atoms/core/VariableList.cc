@@ -65,7 +65,7 @@ void VariableList::validate_vardecl(const HandleSeq& oset)
 			throw InvalidParamException(TRACE_INFO,
 				"Expected a VariableNode or a TypedVariableLink, got: %s"
 				"\nVariableList is %s",
-					classserver().getTypeName(t).c_str(),
+					nameserver().getTypeName(t).c_str(),
 					to_string().c_str());
 		}
 	}
@@ -90,9 +90,9 @@ VariableList::VariableList(const Handle& vardecl)
 VariableList::VariableList(const HandleSeq& oset, Type t)
 	: Link(oset, t)
 {
-	if (not classserver().isA(t, VARIABLE_LIST))
+	if (not nameserver().isA(t, VARIABLE_LIST))
 	{
-		const std::string& tname = classserver().getTypeName(t);
+		const std::string& tname = nameserver().getTypeName(t);
 		throw InvalidParamException(TRACE_INFO,
 			"Expecting a VariableList, got %s", tname.c_str());
 	}
@@ -106,9 +106,9 @@ VariableList::VariableList(const Link &l)
 {
 	// Type must be as expected
 	Type tscope = l.get_type();
-	if (not classserver().isA(tscope, VARIABLE_LIST))
+	if (not nameserver().isA(tscope, VARIABLE_LIST))
 	{
-		const std::string& tname = classserver().getTypeName(tscope);
+		const std::string& tname = nameserver().getTypeName(tscope);
 		throw InvalidParamException(TRACE_INFO,
 			"Expecting a VariableList, got %s", tname.c_str());
 	}
@@ -237,7 +237,7 @@ void VariableList::get_vartype(const Handle& htypelink)
 		Type vt = TypeNodeCast(vartype)->get_value();
 		TypeSet ts;
 		TypeSet::iterator it = ts.begin();
-		classserver().getChildren(vt, std::inserter(ts, it));
+		nameserver().getChildren(vt, std::inserter(ts, it));
 		_varlist._simple_typemap.insert({varname, ts});
 	}
 	else if (TYPE_CO_INH_NODE == t)
@@ -245,7 +245,7 @@ void VariableList::get_vartype(const Handle& htypelink)
 		Type vt = TypeNodeCast(vartype)->get_value();
 		TypeSet ts;
 		TypeSet::iterator it = ts.begin();
-		classserver().getChildren(vt, std::inserter(ts, it));
+		nameserver().getChildren(vt, std::inserter(ts, it));
 		_varlist._simple_typemap.insert({varname, ts});
 	}
 	else if (TYPE_CHOICE == t)
@@ -290,7 +290,7 @@ void VariableList::get_vartype(const Handle& htypelink)
 				throw InvalidParamException(TRACE_INFO,
 					"VariableChoice has unexpected content:\n"
 					"Expected TypeNode, got %s",
-					    classserver().getTypeName(ht->get_type()).c_str());
+					    nameserver().getTypeName(ht->get_type()).c_str());
 			}
 		}
 
@@ -340,7 +340,7 @@ void VariableList::get_vartype(const Handle& htypelink)
 		throw SyntaxException(TRACE_INFO,
 			"Unexpected contents in TypedVariableLink\n"
 			"Expected type specifier (e.g. TypeNode, TypeChoice, etc.), got %s",
-			classserver().getTypeName(t).c_str());
+			nameserver().getTypeName(t).c_str());
 	}
 
 	if (0 < intervals.size())

@@ -22,7 +22,7 @@
 
 #include <thread>
 
-#include <opencog/atoms/base/atom_types.h>
+#include <opencog/atoms/proto/atom_types.h>
 #include <opencog/truthvalue/SimpleTruthValue.h>
 #include <opencog/atoms/core/DefineLink.h>
 #include <opencog/atoms/core/LambdaLink.h>
@@ -414,7 +414,7 @@ TruthValuePtr EvaluationLink::do_eval_scratch(AtomSpace* as,
 		if (0 < evelnk->get_arity())
 		{
 			const Handle& term = evelnk->getOutgoingAtom(0);
-			if (classserver().isA(term->get_type(), EVALUATABLE_LINK))
+			if (nameserver().isA(term->get_type(), EVALUATABLE_LINK))
 			{
 				EvaluationLink::do_eval_scratch(as, term, scratch, silent);
 			}

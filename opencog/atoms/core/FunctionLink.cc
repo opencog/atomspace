@@ -20,7 +20,7 @@
  * 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
  */
 
-#include <opencog/atoms/base/atom_types.h>
+#include <opencog/atoms/proto/atom_types.h>
 #include <opencog/atoms/base/ClassServer.h>
 #include "FunctionLink.h"
 
@@ -28,7 +28,7 @@ using namespace opencog;
 
 void FunctionLink::check_type(Type t)
 {
-	if (not classserver().isA(t, FUNCTION_LINK))
+	if (not nameserver().isA(t, FUNCTION_LINK))
 		throw InvalidParamException(TRACE_INFO, "Expecting a FunctionLink");
 }
 
@@ -54,7 +54,7 @@ FunctionLink::FunctionLink(const Link& l)
 Handle FunctionLink::execute() const
 {
 	throw RuntimeException(TRACE_INFO, "Not executable: %s\n",
-		classserver().getTypeName(get_type()).c_str());
+		nameserver().getTypeName(get_type()).c_str());
 }
 
 DEFINE_LINK_FACTORY(FunctionLink, FUNCTION_LINK);

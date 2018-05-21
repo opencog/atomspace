@@ -31,7 +31,7 @@
 #include <vector>
 
 #include <opencog/util/exceptions.h>
-#include <opencog/atoms/base/FloatValue.h>
+#include <opencog/atoms/proto/FloatValue.h>
 
 /** \addtogroup grp_atomspace
  *  @{

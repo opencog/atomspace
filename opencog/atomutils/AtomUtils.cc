@@ -38,7 +38,7 @@ HandleSeq get_predicates(const Handle& target,
         throw InvalidParamException(TRACE_INFO,
             "get_predicates: Target handle %d doesn't refer to an Atom", target.value());
     }
-    ClassServer& classServer = classserver();
+    NameServer& nameServer = nameserver();
     HandleSeq answer;
 
     // First find any ListLinks that point to the target
@@ -46,7 +46,7 @@ HandleSeq get_predicates(const Handle& target,
     {
         // Skip any links that aren't subclasses of ListLink.
         Type linkType = link->get_type();
-        if (!classServer.isA(linkType, LIST_LINK))
+        if (!nameServer.isA(linkType, LIST_LINK))
            continue;
  
         // Look for EvaluationLink's that contain this ListLink.
@@ -54,7 +54,7 @@ HandleSeq get_predicates(const Handle& target,
         {
             // Skip any links that aren't subclasses of EvaluationLink.
             linkType = evaluationLink->get_type();
-            if (!classServer.isA(linkType, EVALUATION_LINK))
+            if (!nameServer.isA(linkType, EVALUATION_LINK))
                 continue;
 
             // Check the first outgoing atom for this EvaluationLink against
@@ -63,7 +63,7 @@ HandleSeq get_predicates(const Handle& target,
             Type candidateType = candidatePredicate->get_type();
             if ((candidateType == predicateType)
                 or (subClasses &&
-                    classServer.isA(candidateType, predicateType)))
+                    nameServer.isA(candidateType, predicateType)))
             {
                 answer.emplace_back(evaluationLink->get_handle());
             }
@@ -84,7 +84,7 @@ HandleSeq get_predicates_for(const Handle& target,
         throw InvalidParamException(TRACE_INFO,
             "get_predicates_for: Predicate handle %d doesn't refer to an Atom", predicate.value());
     }
-    ClassServer& classServer = classserver();
+    NameServer& nameServer = nameserver();
     HandleSeq answer;
 
     // First find any ListLinks that point to the target
@@ -92,7 +92,7 @@ HandleSeq get_predicates_for(const Handle& target,
     {
         // Skip any links that aren't subclasses of ListLink.
         Type linkType = link->get_type();
-        if (!classServer.isA(linkType, LIST_LINK))
+        if (!nameServer.isA(linkType, LIST_LINK))
            continue;
  
         // Look for EvaluationLink's that contain this ListLink.
@@ -100,7 +100,7 @@ HandleSeq get_predicates_for(const Handle& target,
         {
             // Skip any links that aren't subclasses of EvaluationLink.
             linkType = evaluationLink->get_type();
-            if (!classServer.isA(linkType, EVALUATION_LINK))
+            if (!nameServer.isA(linkType, EVALUATION_LINK))
                 continue;
 
             // Check if the first outgoing atom for this EvaluationLink is

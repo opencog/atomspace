@@ -25,7 +25,7 @@
 
 #include <opencog/atoms/base/Atom.h>
 #include <opencog/atoms/base/Link.h>
-#include <opencog/atoms/base/ClassServer.h>
+#include <opencog/atoms/proto/NameServer.h>
 #include <opencog/atoms/core/Quotation.h>
 #include <opencog/atomutils/TypeUtils.h>
 #include <opencog/atoms/core/TypeNode.h>
@@ -71,7 +71,7 @@ void VarScraper::find_vars(HandleSeq& varseq, HandleSet& varset,
 		if (not h->is_link()) continue;
 
 		bool issco = _quotation.is_unquoted()
-			and classserver().isA(t, SCOPE_LINK);
+			and nameserver().isA(t, SCOPE_LINK);
 		HandleSet bsave;
 		if (issco)
 		{
@@ -208,7 +208,7 @@ Handle FreeVariables::substitute_scoped(const Handle& term,
 	// Update for subsequent recursive calls of substitute_scoped
 	quotation.update(ty);
 
-	if (unquoted and classserver().isA(ty, SCOPE_LINK))
+	if (unquoted and nameserver().isA(ty, SCOPE_LINK))
 	{
 		// Perform alpha-conversion duck-n-cover.  We don't actually need
 		// to alpha-convert anything, if we happen to encounter a bound
@@ -794,7 +794,7 @@ std::string Variables::to_string(const std::string& indent) const
 		   << oc_to_string(v.first, indent + OC_TO_STRING_INDENT)
 		   << indent << "types[" << i << "]:";
 		for (auto& t : v.second)
-			ss << " " << classserver().getTypeName(t);
+			ss << " " << nameserver().getTypeName(t);
 		ss << std::endl;
 		i++;
 	}

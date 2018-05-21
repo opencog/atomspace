@@ -20,7 +20,7 @@
  * 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
  */
 
-#include <opencog/atoms/base/atom_types.h>
+#include <opencog/atoms/proto/atom_types.h>
 #include <opencog/atoms/base/ClassServer.h>
 #include "DefineLink.h"
 #include "LambdaLink.h"
@@ -77,7 +77,7 @@ PutLink::PutLink(const Link& l)
 ///
 void PutLink::init(void)
 {
-	if (not classserver().isA(get_type(), PUT_LINK))
+	if (not nameserver().isA(get_type(), PUT_LINK))
 		throw InvalidParamException(TRACE_INFO, "Expecting a PutLink");
 
 	size_t sz = _outgoing.size();
@@ -120,7 +120,7 @@ void PutLink::static_typecheck_values(void)
 		return;
 
 	// If its part of a signature, there is nothing to do.
-	if (classserver().isA(btype, TYPE_NODE) or TYPE_CHOICE == btype)
+	if (nameserver().isA(btype, TYPE_NODE) or TYPE_CHOICE == btype)
 		return;
 
 	Handle valley = _values;
@@ -159,7 +159,7 @@ void PutLink::static_typecheck_values(void)
 		if (not _varlist.is_type(valley)
 		    and SET_LINK != vtype
 		    and PUT_LINK != vtype
-		    and not (classserver().isA(vtype, SATISFYING_LINK)))
+		    and not (nameserver().isA(vtype, SATISFYING_LINK)))
 		{
 			// Well, one more possible case ...
 			// Function composition with lambda means that
@@ -180,7 +180,7 @@ void PutLink::static_typecheck_values(void)
 
 	// Cannot typecheck naked FunctionLinks.  For example:
 	// (cog-execute! (Put (Plus) (List (Number 2) (Number 2))))
-	if (0 == sz and classserver().isA(btype, FUNCTION_LINK))
+	if (0 == sz and nameserver().isA(btype, FUNCTION_LINK))
 		return;
 
 	// The standard, default case is to get a ListLink as an argument.
@@ -205,7 +205,7 @@ void PutLink::static_typecheck_values(void)
 	}
 
 	// GetLinks (and the like) are evaluated dynamically, later.
-	if (classserver().isA(vtype, SATISFYING_LINK))
+	if (nameserver().isA(vtype, SATISFYING_LINK))
 		return;
 
 	// If its part of a signature, there is nothing to do.
@@ -303,7 +303,7 @@ Handle PutLink::do_reduce(void) const
 		bods = DefineLink::get_definition(bods);
 		btype = bods->get_type();
 		// XXX TODO we should perform a type-check on the function.
-		if (not classserver().isA(btype, LAMBDA_LINK))
+		if (not nameserver().isA(btype, LAMBDA_LINK))
 			throw InvalidParamException(TRACE_INFO,
 					"Expecting a LambdaLink, got %s",
 			      bods->to_string().c_str());
@@ -319,7 +319,7 @@ Handle PutLink::do_reduce(void) const
 	}
 
 	// If the body is a lambda, work with that.
-	if (classserver().isA(btype, LAMBDA_LINK))
+	if (nameserver().isA(btype, LAMBDA_LINK))
 	{
 		LambdaLinkPtr lam(LambdaLinkCast(bods));
 		bods = lam->get_body();
@@ -342,7 +342,7 @@ Handle PutLink::do_reduce(void) const
 	// FunctionLinks.  So we just punt.  Example usage:
 	// (cog-execute! (Put (Plus) (List (Number 2) (Number 2))))
 	// (cog-execute! (Put (Plus (Number 9)) (List (Number 2) (Number 2))))
-	if (0 == nvars and classserver().isA(btype, FUNCTION_LINK))
+	if (0 == nvars and nameserver().isA(btype, FUNCTION_LINK))
 	{
 		if (LIST_LINK == vtype)
 		{

@@ -72,11 +72,11 @@ cdef extern from "opencog/truthvalue/SimpleTruthValue.h" namespace "opencog":
 
 
 # Basic OpenCog types
-# ClassServer
+# NameServer
 ctypedef short Type
 
-cdef extern from "opencog/atoms/base/ClassServer.h" namespace "opencog":
-    cdef cppclass cClassServer "opencog::ClassServer":
+cdef extern from "opencog/atoms/proto/NameServer.h" namespace "opencog":
+    cdef cppclass cNameServer "opencog::NameServer":
         bint isNode(Type t)
         bint isLink(Type t)
         bint isA(Type t, Type t)
@@ -85,9 +85,9 @@ cdef extern from "opencog/atoms/base/ClassServer.h" namespace "opencog":
         Type getType(string typename)
         string getTypeName(Type t)
         Type getNumberOfClasses()
-    cdef cClassServer classserver()
+    cdef cNameServer nameserver()
 
-cdef extern from "opencog/atoms/base/atom_types.h" namespace "opencog":
+cdef extern from "opencog/atoms/proto/atom_types.h" namespace "opencog":
     cdef Type NOTYPE
 
 

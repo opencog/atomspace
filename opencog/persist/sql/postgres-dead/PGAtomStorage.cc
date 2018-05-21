@@ -38,7 +38,7 @@
 #include <opencog/util/oc_assert.h>
 #include <opencog/atoms/base/Atom.h>
 #include <opencog/atoms/base/Handle.h>
-#include <opencog/atoms/base/ClassServer.h>
+#include <opencog/atoms/proto/NameServer.h>
 #include <opencog/atoms/base/Link.h>
 #include <opencog/atoms/base/Node.h>
 #include <opencog/truthvalue/CountTruthValue.h>
@@ -498,7 +498,7 @@ public:
     // that case, we have to load the outgoing set first.
     AtomPtr get_recursive_if_not_exists(PseudoPtr p)
     {
-        if (classserver().isA(p->type, NODE))
+        if (nameserver().isA(p->type, NODE))
         {
             NodePtr node(createNode(p->type, p->name, p->tv));
             TLB::addAtom(node, p->uuid);
@@ -1273,16 +1273,16 @@ void PGAtomStorage::setup_type_map(void)
     database.execute("SELECT * FROM TypeCodes;");
     database.for_each_row(&Database::type_cb);
 
-    // Now loop over each type that the classserver knows about and
+    // Now loop over each type that the nameserver knows about and
     // map it to the database types.
-    unsigned int numberOfTypes = classserver().getNumberOfClasses();
+    unsigned int numberOfTypes = nameserver().getNumberOfClasses();
     for (Type t=0; t<numberOfTypes; t++)
     {
         int type_codes_type = _storing_type_map[t];
         /* If this typename is not yet known, record it */
         if (-1 == type_codes_type)
         {
-            const char * type_name = classserver().getTypeName(t).c_str();
+            const char * type_name = nameserver().getTypeName(t).c_str();
 
             // Let the sql id be the same as the current type number,
             // unless this sql number is already in use, in which case
@@ -1323,7 +1323,7 @@ void PGAtomStorage::setup_type_map(void)
 
 void PGAtomStorage::map_database_type(int dbval, const char * type_name)
 {
-    Type realtype = classserver().getType(type_name);
+    Type realtype = nameserver().getType(type_name);
     _loading_type_map[dbval] = realtype;
     _storing_type_map[realtype] = dbval;
     if (_database_type_names[dbval] != NULL) free (_database_type_names[dbval]);
@@ -1764,7 +1764,7 @@ PGAtomStorage::PseudoPtr PGAtomStorage::make_pseudo_atom(Database &database,
     // All positive height atoms are links.
     // A negative height is "unknown" and must be checked.
     if ((0 == database.height) or
-        ((-1 == database.height) and classserver().isA(realtype, NODE)))
+        ((-1 == database.height) and nameserver().isA(realtype, NODE)))
     {
         // Handle the Node case
         pseudo_atom->name = database.name;
@@ -1772,7 +1772,7 @@ PGAtomStorage::PseudoPtr PGAtomStorage::make_pseudo_atom(Database &database,
         if (_verbose)
         {
             fprintf(stdout, "  %6lu %s, %s\n", uuid,
-                    classserver().getTypeName(realtype).c_str(), database.name);
+                    nameserver().getTypeName(realtype).c_str(), database.name);
         }
     }
     else
@@ -1804,7 +1804,7 @@ PGAtomStorage::PseudoPtr PGAtomStorage::make_pseudo_atom(Database &database,
         if (_verbose)
         {
             fprintf(stdout, "  %6lu %s, arity %lu, { ", uuid,
-                    classserver().getTypeName(realtype).c_str(),
+                    nameserver().getTypeName(realtype).c_str(),
                     pseudo_atom->oset.size());
             for (auto uuid : pseudo_atom->oset)
                 fprintf(stdout,"%lu ", uuid);
@@ -2023,7 +2023,7 @@ void PGAtomStorage::loadType(AtomTable &atom_table, Type atom_type)
 
     // For links, assume a worst-case height.
     // For nodes, its easy ... max_height is zero.
-    if (classserver().isNode(atom_type))
+    if (nameserver().isNode(atom_type))
         max_height = 0;
     else
         max_height = load_max_atoms_height();

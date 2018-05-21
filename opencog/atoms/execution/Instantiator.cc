@@ -418,7 +418,7 @@ Handle Instantiator::walk_tree(const Handle& expr, bool silent)
 	}
 
 	// Fire any other function links, not handled above.
-	if (classserver().isA(t, FUNCTION_LINK))
+	if (nameserver().isA(t, FUNCTION_LINK))
 	{
 		if (_eager)
 		{
@@ -451,7 +451,7 @@ Handle Instantiator::walk_tree(const Handle& expr, bool silent)
 
 	// If there is a SatisfyingLink, we have to perform it
 	// and return the saisfying set.
-	if (classserver().isA(t, SATISFYING_LINK))
+	if (nameserver().isA(t, SATISFYING_LINK))
 	{
 		return satisfying_set(_as, expr);
 	}
@@ -465,8 +465,8 @@ Handle Instantiator::walk_tree(const Handle& expr, bool silent)
 	// it will be triggered by something else.
 	// Non-virtual evaluatables fall through and are handled
 	// below.
-	// if (classserver().isA(t, EVALUATABLE_LINK))
-	if (classserver().isA(t, VIRTUAL_LINK))
+	// if (nameserver().isA(t, EVALUATABLE_LINK))
+	if (nameserver().isA(t, VIRTUAL_LINK))
 	{
 		if (_vmap->empty()) return expr;
 		return beta_reduce(expr, *_vmap);
@@ -504,11 +504,11 @@ mere_recursive_call:
 
 bool Instantiator::not_self_match(Type t)
 {
-	return classserver().isA(t, SCOPE_LINK) or
-		classserver().isA(t, FUNCTION_LINK) or
-		classserver().isA(t, DELETE_LINK) or
-		classserver().isA(t, VIRTUAL_LINK) or
-		classserver().isA(t, DONT_EXEC_LINK);
+	return nameserver().isA(t, SCOPE_LINK) or
+		nameserver().isA(t, FUNCTION_LINK) or
+		nameserver().isA(t, DELETE_LINK) or
+		nameserver().isA(t, VIRTUAL_LINK) or
+		nameserver().isA(t, DONT_EXEC_LINK);
 }
 
 /**

@@ -203,7 +203,7 @@ HandleSeq UREConfig::fetch_execution_outputs(const Handle& schema,
 {
 	// Retrieve rules
 	Handle var_node = _as.add_node(VARIABLE_NODE, "__EXECUTION_OUTPUT_VAR__"),
-		type_node = _as.add_node(TYPE_NODE, classserver().getTypeName(type)),
+		type_node = _as.add_node(TYPE_NODE, nameserver().getTypeName(type)),
 		typed_var = _as.add_link(TYPED_VARIABLE_LINK, var_node, type_node),
 		gl = _as.add_link(GET_LINK,
 		                  // TypedVariableLink
@@ -242,7 +242,7 @@ double UREConfig::fetch_num_param(const string& schema_name,
 	}
 
 	string input_name = input->get_name(),
-		input_type_str = classserver().getTypeName(input->get_type()),
+		input_type_str = nameserver().getTypeName(input->get_type()),
 		input_str = input_type_str + " \"" + input_name + "\"";
 	OC_ASSERT(outputs.size() == 1,
 	          "Could not retrieve parameter %s for rule-based system %s. "

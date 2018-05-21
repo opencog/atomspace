@@ -33,7 +33,7 @@ namespace opencog
 HandleSeq get_target_neighbors(const Handle& h, Type desiredLinkType,
                                bool match_subtype/* = false*/)
 {
-    if (classserver().isA(desiredLinkType, UNORDERED_LINK))
+    if (nameserver().isA(desiredLinkType, UNORDERED_LINK))
         return HandleSeq();
 
     HandleSeq answer;
@@ -41,7 +41,7 @@ HandleSeq get_target_neighbors(const Handle& h, Type desiredLinkType,
     {
         Type t = link->get_type();
         if (not(t == desiredLinkType or
-               (match_subtype and classserver().isA(t, desiredLinkType))))
+               (match_subtype and nameserver().isA(t, desiredLinkType))))
 	    continue;
         if (link->getOutgoingAtom(0) != h) continue;
 
@@ -57,7 +57,7 @@ HandleSeq get_target_neighbors(const Handle& h, Type desiredLinkType,
 HandleSeq get_source_neighbors(const Handle& h, Type desiredLinkType,
                                bool match_subtype/* = false*/)
 {
-    if (classserver().isA(desiredLinkType, UNORDERED_LINK))
+    if (nameserver().isA(desiredLinkType, UNORDERED_LINK))
         return HandleSeq();
 
     HandleSeq answer;
@@ -66,7 +66,7 @@ HandleSeq get_source_neighbors(const Handle& h, Type desiredLinkType,
     {
         Type t = link->get_type();
         if (not(t == desiredLinkType or
-               (match_subtype and classserver().isA(t, desiredLinkType))))
+               (match_subtype and nameserver().isA(t, desiredLinkType))))
 	    continue;
         if (link->getOutgoingAtom(0) == h) continue;
 

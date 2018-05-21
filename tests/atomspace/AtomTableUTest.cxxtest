@@ -35,8 +35,8 @@
 
 #include <opencog/atomspace/AtomSpace.h>
 #include <opencog/atomspace/AtomTable.h>
-#include <opencog/atoms/base/ClassServer.h>
-#include <opencog/atoms/base/FloatValue.h>
+#include <opencog/atoms/proto/NameServer.h>
+#include <opencog/atoms/proto/FloatValue.h>
 #include <opencog/atoms/base/Link.h>
 #include <opencog/atoms/base/Node.h>
 #include <opencog/truthvalue/SimpleTruthValue.h>
@@ -81,7 +81,7 @@ public:
         /* load scm files with all necessary nodes and links  */
         SchemeEval* eval = SchemeEval::get_evaluator(atomSpace);
         eval->eval("(add-to-load-path \"../..\")");
-        eval->eval("(load-from-path \"opencog/atoms/base/core_types.scm\")");
+        eval->eval("(load-from-path \"opencog/atoms/proto/core_types.scm\")");
         eval->eval("(load-from-path \"tests/query/test_types.scm\")");
     }
 
@@ -158,7 +158,7 @@ public:
         // The remainder of the test assumes an ordered link,
         // so that atoms get stored in known locations. Can't
         // run this part if its unordered.
-        if (not classserver().isA(list_type, ORDERED_LINK))
+        if (not nameserver().isA(list_type, ORDERED_LINK))
             return;
 
         Handle hn1_resolved(table->getHandle(hn1));
@@ -241,11 +241,11 @@ public:
 
     void testSimpleWithCustomAtomTypes()
     {
-        classserver().beginTypeDecls("custom types");
-        Type MY_NUMBER_NODE = classserver().declType(NUMBER_NODE, "MyNumberNode");
-        Type MY_CONCEPT_NODE = classserver().declType(CONCEPT_NODE, "MyConceptNode");
-        Type MY_INHERITANCE_LINK = classserver().declType(INHERITANCE_LINK, "MyInheritanceLink");
-        classserver().endTypeDecls();
+        nameserver().beginTypeDecls("custom types");
+        Type MY_NUMBER_NODE = nameserver().declType(NUMBER_NODE, "MyNumberNode");
+        Type MY_CONCEPT_NODE = nameserver().declType(CONCEPT_NODE, "MyConceptNode");
+        Type MY_INHERITANCE_LINK = nameserver().declType(INHERITANCE_LINK, "MyInheritanceLink");
+        nameserver().endTypeDecls();
         logger().debug("MY_NUMBER_NODE = %u, MY_CONCEPT_NODE = %u, MY_INHERITANCE_LINK = %u\n", MY_NUMBER_NODE, MY_CONCEPT_NODE, MY_INHERITANCE_LINK);
         Handle wp = createNode(MY_NUMBER_NODE, "1");
         Handle word = table->add(wp, false);

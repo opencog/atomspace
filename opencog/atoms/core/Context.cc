@@ -46,7 +46,7 @@ void Context::update(const Handle& h)
 	Type t = h->get_type();
 
 	// Update shadow
-	if (quotation.is_unquoted() and classserver().isA(t, SCOPE_LINK)) {
+	if (quotation.is_unquoted() and nameserver().isA(t, SCOPE_LINK)) {
 		const Variables& variables = ScopeLinkCast(h)->get_variables();
 
 		// Insert the new shadowing variables from the scope link

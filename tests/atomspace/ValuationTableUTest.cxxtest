@@ -25,7 +25,7 @@
 
 #include <opencog/atomspace/AtomSpace.h>
 #include <opencog/atomspace/ValuationTable.h>
-#include <opencog/atoms/base/FloatValue.h>
+#include <opencog/atoms/proto/FloatValue.h>
 #include <opencog/atoms/base/Link.h>
 #include <opencog/atoms/base/Node.h>
 #include <opencog/util/Logger.h>

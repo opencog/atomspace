@@ -34,9 +34,9 @@ static MT19937RandGen randy(43);
 RandomChoiceLink::RandomChoiceLink(const HandleSeq& oset, Type t)
 	: FunctionLink(oset, t)
 {
-	if (not classserver().isA(t, RANDOM_CHOICE_LINK))
+	if (not nameserver().isA(t, RANDOM_CHOICE_LINK))
 	{
-		const std::string& tname = classserver().getTypeName(t);
+		const std::string& tname = nameserver().getTypeName(t);
 		throw InvalidParamException(TRACE_INFO,
 			"Expecting an RandomChoiceLink, got %s", tname.c_str());
 	}
@@ -47,9 +47,9 @@ RandomChoiceLink::RandomChoiceLink(const Link &l)
 {
 	// Type must be as expected
 	Type tscope = l.get_type();
-	if (not classserver().isA(tscope, RANDOM_CHOICE_LINK))
+	if (not nameserver().isA(tscope, RANDOM_CHOICE_LINK))
 	{
-		const std::string& tname = classserver().getTypeName(tscope);
+		const std::string& tname = nameserver().getTypeName(tscope);
 		throw InvalidParamException(TRACE_INFO,
 			"Expecting an RandomChoiceLink, got %s", tname.c_str());
 	}

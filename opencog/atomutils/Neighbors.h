@@ -25,7 +25,7 @@
 #define _OPENCOG_NEIGHBORS_H
 
 #include <opencog/atoms/base/Handle.h>
-#include <opencog/atoms/base/types.h>
+#include <opencog/atoms/proto/types.h>
 
 namespace opencog
 {

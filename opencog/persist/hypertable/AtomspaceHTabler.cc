@@ -514,7 +514,7 @@ Atom * AtomspaceHTabler::getAtom(Handle h) const
 
     if (!found) return NULL;
 
-    if (classserver().isNode(type))
+    if (nameserver().isNode(type))
     {
         atom_ptr = new Node(type, name);
         std::cout << "getAtom(): Node created" <<std::endl;

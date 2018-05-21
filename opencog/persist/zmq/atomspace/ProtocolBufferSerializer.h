@@ -39,7 +39,7 @@
 #include <opencog/atoms/base/Node.h>
 #include <opencog/truthvalue/SimpleTruthValue.h>
 #include <opencog/truthvalue/TruthValue.h>
-#include <opencog/atoms/base/types.h>
+#include <opencog/atoms/proto/types.h>
 #include "opencog/persist/zmq/atomspace/ZMQMessages.pb.h"
 
 using namespace std;

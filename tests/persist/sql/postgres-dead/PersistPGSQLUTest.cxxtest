@@ -35,7 +35,7 @@
 #include <opencog/atoms/base/Node.h>
 #include <opencog/truthvalue/SimpleTruthValue.h>
 #include <opencog/atomspaceutils/TLB.h>
-#include <opencog/atoms/base/atom_types.h>
+#include <opencog/atoms/proto/atom_types.h>
 #include <opencog/persist/sql/postgres/PGAtomStorage.h>
 #include <opencog/persist/sql/postgres/PGSQLPersistSCM.h>
 

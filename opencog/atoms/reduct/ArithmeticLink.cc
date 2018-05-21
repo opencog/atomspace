@@ -22,8 +22,8 @@
 
 #include <limits>
 
-#include <opencog/atoms/base/atom_types.h>
-#include <opencog/atoms/base/ClassServer.h>
+#include <opencog/atoms/proto/atom_types.h>
+#include <opencog/atoms/proto/NameServer.h>
 #include <opencog/atoms/core/NumberNode.h>
 #include "ArithmeticLink.h"
 
@@ -44,7 +44,7 @@ ArithmeticLink::ArithmeticLink(const Link& l)
 void ArithmeticLink::init(void)
 {
 	Type tscope = get_type();
-	if (not classserver().isA(tscope, ARITHMETIC_LINK))
+	if (not nameserver().isA(tscope, ARITHMETIC_LINK))
 		throw InvalidParamException(TRACE_INFO, "Expecting an ArithmeticLink");
 
 	_commutative = false;

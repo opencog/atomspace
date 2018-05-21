@@ -9,11 +9,11 @@
 #include <cstddef>
 #include <libguile.h>
 
-#include <opencog/atoms/base/FloatValue.h>
-#include <opencog/atoms/base/LinkValue.h>
-#include <opencog/atoms/base/StringValue.h>
+#include <opencog/atoms/proto/FloatValue.h>
+#include <opencog/atoms/proto/LinkValue.h>
+#include <opencog/atoms/proto/StringValue.h>
 #include <opencog/atoms/base/Atom.h>
-#include <opencog/atoms/base/ClassServer.h>
+#include <opencog/atoms/proto/NameServer.h>
 
 #include <opencog/guile/SchemeSmob.h>
 
@@ -313,13 +313,13 @@ SCM SchemeSmob::ss_value_to_list (SCM svalue)
 		CPPL_TO_SCML(v, protom_to_scm)
 	}
 
-	if (classserver().isA(t, LINK))
+	if (nameserver().isA(t, LINK))
 	{
 		const HandleSeq& v = AtomCast(pa)->getOutgoingSet();
 		CPPL_TO_SCML(v, handle_to_scm)
 	}
 
-	if (classserver().isA(t, NODE))
+	if (nameserver().isA(t, NODE))
 	{
 		const std::string& name = AtomCast(pa)->get_name();
 		return scm_cons(scm_from_utf8_string(name.c_str()), SCM_EOL);
@@ -352,13 +352,13 @@ SCM SchemeSmob::ss_value_ref (SCM svalue, SCM sindex)
 		if (index < v.size()) return protom_to_scm(v[index]);
 	}
 
-	if (classserver().isA(t, LINK))
+	if (nameserver().isA(t, LINK))
 	{
 		const HandleSeq& v = AtomCast(pa)->getOutgoingSet();
 		if (index < v.size()) return handle_to_scm(v[index]);
 	}
 
-	if (classserver().isA(t, NODE))
+	if (nameserver().isA(t, NODE))
 	{
 		const std::string& name = AtomCast(pa)->get_name();
 		if (0 == index) return scm_from_string(name);

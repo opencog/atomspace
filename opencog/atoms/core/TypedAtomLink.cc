@@ -46,14 +46,14 @@ void TypedAtomLink::init()
 			"You are not allowed to globally type a variable");
 
 	Type dtype = _outgoing[1]->get_type();
-	if (not classserver().isA(dtype, TYPE_NODE) and
+	if (not nameserver().isA(dtype, TYPE_NODE) and
 	    DEFINED_TYPE_NODE != dtype and
 	    TYPE_CHOICE != dtype and
 	    SIGNATURE_LINK != dtype and
 	    ARROW_LINK != dtype)
 		throw SyntaxException(TRACE_INFO,
 			"Expecting type defintion, got %s",
-				classserver().getTypeName(dtype).c_str());
+				nameserver().getTypeName(dtype).c_str());
 
 }
 
