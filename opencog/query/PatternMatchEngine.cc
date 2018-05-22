@@ -2039,6 +2039,21 @@ bool PatternMatchEngine::explore_redex(const Handle& term,
 }
 
 /**
+ * Clean up the search context and start searching from given term moving up
+ * by term tree.
+ *
+ * @param term start term to move up from
+ * @return true if one (or more) matches are found
+ */
+bool PatternMatchEngine::explore_term(const PatternTermPtr& term)
+{
+	clause_stacks_clear();
+	clear_current_state();
+	issued.insert(term->getClause());
+	return do_term_up(term, term->getHandle(), term->getClause());
+}
+
+/**
  * Every clause in a pattern is one of two types:  it either
  * specifies a pattern to be matched, or it specifies an evaluatable
  * atom that must be evaluated to determine if it is to be accepted.

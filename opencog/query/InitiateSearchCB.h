@@ -74,6 +74,7 @@ protected:
 		size_t clause;
 		Handle best_start;
 		Handle start_term;
+		PatternTermPtr thinnest_term;
 	};
 	size_t _curr_clause;
 	std::vector<Choice> _choices;
@@ -81,6 +82,9 @@ protected:
 	virtual Handle find_starter(const Handle&, size_t&, Handle&, size_t&);
 	virtual Handle find_starter_recursive(const Handle&, size_t&, Handle&,
 	                                      size_t&);
+	PatternTermPtr find_thinnest_term(const HandleSeq&);
+	PatternTermPtr find_thinnest_term_recursive(const PatternTermPtr& root,
+	        size_t& width, size_t& depth);
 	virtual Handle find_thinnest(const HandleSeq&,
 	                             const HandleSet&,
 	                             Handle&, size_t&);

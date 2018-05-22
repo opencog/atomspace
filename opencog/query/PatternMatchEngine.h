@@ -235,7 +235,8 @@ public:
 	// Examine the locally connected neighborhood for possible
 	// matches.
 	bool explore_neighborhood(const Handle&, const Handle&, const Handle&);
-
+	// Explore pattern for possible matches starting from given term
+	bool explore_term(const PatternTermPtr&);
 	// Evaluate constant evaluatable and ground it via the
 	// PatternMatchCallback. It is assumed that all clauses are
 	// connected by an AndLink.
