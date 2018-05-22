@@ -124,7 +124,7 @@ during the build, will be more precise as to which parts will not be built.
 ###### Postgres
 * Distributed, multi-client networked storage.
 * Needed for "remembering" things between shutdowns.
-* http://postgres.org | `apt-get install postgresql postgresql-client`
+* http://postgres.org | `apt-get install postgresql postgresql-client`libpq-dev
 
 ###### ZeroMQ (version 3.2.4 or higher)
 * Asynchronous messaging library.
