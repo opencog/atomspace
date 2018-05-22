@@ -28,11 +28,13 @@ namespace opencog {
 
 PatternTerm::PatternTerm()
 	: _handle(Handle::UNDEFINED), _parent(PatternTerm::UNDEFINED),
-	  _has_any_bound_var(false)
+	  _clause(Handle::UNDEFINED), _has_any_bound_var(false)
 {}
 
-PatternTerm::PatternTerm(const PatternTermPtr& parent, const Handle& h)
+PatternTerm::PatternTerm(const PatternTermPtr& parent, const Handle& h,
+        const Handle& clause)
 	: _handle(h), _parent(parent),
+	  _clause(clause),
 	  _quotation(parent->_quotation.level(),
 	             false /* necessarily false since it is local */),
 	  _has_any_bound_var(false)
@@ -66,6 +68,11 @@ Handle PatternTerm::getHandle()
 PatternTermPtr PatternTerm::getParent()
 {
 	return _parent;
+}
+
+Handle PatternTerm::getClause()
+{
+	return _clause;
 }
 
 PatternTermSeq PatternTerm::getOutgoingSet() const
