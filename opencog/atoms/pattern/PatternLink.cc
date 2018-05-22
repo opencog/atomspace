@@ -863,6 +863,7 @@ void PatternLink::make_term_trees()
 	{
 		PatternTermPtr root_term(std::make_shared<PatternTerm>());
 		make_term_tree_recursive(clause, clause, root_term);
+		_pat.pattern_tree_by_clause[clause] = root_term->getOutgoingSet()[0];
 	}
 }
 
