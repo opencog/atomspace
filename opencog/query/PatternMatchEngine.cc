@@ -2003,12 +2003,12 @@ void PatternMatchEngine::solution_drop(void)
  * Inputs:
  * do_clause: must be one of the clauses previously specified in the
  *            clause list of the match() method.
- * starter:   must be a sub-clause of do_clause; that is, must be a link
- *            that appears in do_clause.
- * ah:        must be a (non-variable) node in the "starter" clause.
+ * term:      must be a sub-clause of do_clause; that is, must be a link
+ *            that appears in do_clause. Must contain `grnd` below.
+ * grnd:      must be a (non-variable) node in the `term` term.
  *            That is, this must be one of the outgoing atoms of the
- *            "starter" link, it must be a node, and it must not be
- *            a variable node.
+ *            `term` link; it must be a node, and it must not be
+ *            a variable node or glob node.
  *
  * Returns true if one (or more) matches are found
  *
