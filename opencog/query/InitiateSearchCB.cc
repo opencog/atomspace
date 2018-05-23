@@ -312,6 +312,10 @@ PatternTermPtr InitiateSearchCB::find_thinnest_term_recursive(
 		return root;
 	}
 
+	// Ignore all dynamically-evaluatable links up front.
+	if (_dynamic->find(root->getHandle()) != _dynamic->end())
+		return PatternTerm::UNDEFINED;
+
 	size_t max_depth = 0;
 	size_t min_width = SIZE_MAX;
 	PatternTermPtr thinnest_term = PatternTerm::UNDEFINED;
@@ -455,6 +459,7 @@ bool InitiateSearchCB::neighbor_search(PatternMatchEngine *pme)
 	// no constants in them at all.  In this case, the search is
 	// performed by looping over all links of the given types.
 #if USE_PATTERN_TERM
+	_choices.clear();
 	PatternTermPtr start_term = find_thinnest_term(clauses);
 
 	// Cannot find a starting point! This can happen if:
@@ -462,7 +467,7 @@ bool InitiateSearchCB::neighbor_search(PatternMatchEngine *pme)
 	// 2) all of the clauses are evaluatable(!),
 	// Somewhat unusual, but it can happen.  For this, we need
 	// some other, alternative search strategy.
-	if (start_term == PatternTerm::UNDEFINED) {
+	if (start_term == PatternTerm::UNDEFINED  and 0 == _choices.size()) {
 		_search_fail = true;
 		return false;
 	}
