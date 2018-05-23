@@ -195,7 +195,6 @@ InitiateSearchCB::find_starter_recursive(const Handle& h, size_t& depth,
 	// the search there.  If there are two at the same depth,
 	// then start with the skinnier one.
 	size_t deepest = depth;
-	startrm = Handle::UNDEFINED;
 	Handle hdeepest(Handle::UNDEFINED);
 	size_t thinnest = SIZE_MAX;
 
@@ -203,7 +202,12 @@ InitiateSearchCB::find_starter_recursive(const Handle& h, size_t& depth,
 	{
 		size_t brdepth = depth + 1;
 		size_t brwid = SIZE_MAX;
-		Handle sbr(h);
+
+		// The start-term is a term that contains the starting atom...
+		// but it cannot be a ChoiceLink; it must be above or below
+		// any choice link.
+		Handle sbr(startrm);
+		if (CHOICE_LINK != t) sbr = h;
 
 		// Blow past the QuoteLinks, since they just screw up the search start.
 		if (Quotation::is_quotation_type(hunt->get_type()))

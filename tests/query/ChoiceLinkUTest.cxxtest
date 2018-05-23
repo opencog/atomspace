@@ -67,6 +67,7 @@ public:
 	void test_double_or(void);
 	void test_unary(void);
 	void test_typed(void);
+	void test_nodes(void);
 };
 
 void ChoiceLinkUTest::tearDown(void)
@@ -259,4 +260,22 @@ void ChoiceLinkUTest::test_typed(void)
 
 	printf("typed get-nodes found:\n%s\n", rules->to_string().c_str());
 	TS_ASSERT_EQUALS(2, getarity(rules));
+}
+
+/*
+ * ChoiceLink with nodes in it
+ */
+void ChoiceLinkUTest::test_nodes(void)
+{
+	logger().debug("BEGIN TEST: %s", __FUNCTION__);
+
+	eval->eval("(load-from-path \"tests/query/choice-nodes.scm\")");
+
+	// Needed to define cog-execute!
+	eval->eval("(use-modules (opencog exec))");
+
+	Handle result = eval->eval_h("(cog-execute! query)");
+
+	printf("typed get-nodes found:\n%s\n", result->to_string().c_str());
+	TS_ASSERT_EQUALS(1, getarity(result));
 }
