@@ -1077,6 +1077,13 @@ bool PatternMatchEngine::tree_compare(const PatternTermPtr& ptm,
 	if (hp->is_node() and hg->is_node())
 		return node_compare(hp, hg);
 
+	// CHOICE_LINK's are multiple-choice links. As long as we can
+	// can match one of the sub-expressions of the ChoiceLink, then
+	// the ChoiceLink as a whole can be considered to be grounded.
+	//
+	if (CHOICE_LINK == tp)
+		return choice_compare(ptm, hg);
+
 	// If they're not both links, then it is clearly a mismatch.
 	if (not (hp->is_link() and hg->is_link())) return _pmc.fuzzy_match(hp, hg);
 
@@ -1087,13 +1094,6 @@ bool PatternMatchEngine::tree_compare(const PatternTermPtr& ptm,
 	DO_LOG({LAZY_LOG_FINE << "depth=" << depth;})
 	logmsg("tree_compare:", hp);
 	logmsg("to:", hg);
-
-	// CHOICE_LINK's are multiple-choice links. As long as we can
-	// can match one of the sub-expressions of the ChoiceLink, then
-	// the ChoiceLink as a whole can be considered to be grounded.
-	//
-	if (CHOICE_LINK == tp)
-		return choice_compare(ptm, hg);
 
 	// If the two links are both ordered, its enough to compare
 	// them "side-by-side".
@@ -2036,6 +2036,21 @@ bool PatternMatchEngine::explore_redex(const Handle& term,
 	// Match the required clauses.
 	issued.insert(first_clause);
 	return explore_clause(term, grnd, first_clause);
+}
+
+/**
+ * Clean up the search context and start searching from given term moving up
+ * by term tree.
+ *
+ * @param term start term to move up from
+ * @return true if one (or more) matches are found
+ */
+bool PatternMatchEngine::explore_term(const PatternTermPtr& term)
+{
+	clause_stacks_clear();
+	clear_current_state();
+	issued.insert(term->getClause());
+	return do_term_up(term, term->getHandle(), term->getClause());
 }
 
 /**

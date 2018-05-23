@@ -89,6 +89,7 @@ class PatternTerm
 protected:
 	Handle _handle;
 	PatternTermPtr _parent;
+	Handle _clause;
 	PatternTermWSeq _outgoing;
 
 	// Quotation level and local quotation
@@ -104,13 +105,16 @@ public:
 
 	PatternTerm();
 
-	PatternTerm(const PatternTermPtr& parent, const Handle& h);
+	PatternTerm(const PatternTermPtr& parent, const Handle& h,
+	        const Handle& clause);
 
 	void addOutgoingTerm(const PatternTermPtr& ptm);
 
 	Handle getHandle();
 
 	PatternTermPtr getParent();
+
+	Handle getClause();
 
 	PatternTermSeq getOutgoingSet() const;
 

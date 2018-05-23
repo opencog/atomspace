@@ -863,6 +863,7 @@ void PatternLink::make_term_trees()
 	{
 		PatternTermPtr root_term(std::make_shared<PatternTerm>());
 		make_term_tree_recursive(clause, clause, root_term);
+		_pat.pattern_tree_by_clause[clause] = root_term->getOutgoingSet()[0];
 	}
 }
 
@@ -870,7 +871,7 @@ void PatternLink::make_term_tree_recursive(const Handle& root,
                                            Handle h,
                                            PatternTermPtr& parent)
 {
-	PatternTermPtr ptm(std::make_shared<PatternTerm>(parent, h));
+	PatternTermPtr ptm(std::make_shared<PatternTerm>(parent, h, root));
 	h = ptm->getHandle();
 	parent->addOutgoingTerm(ptm);
 	_pat.connected_terms_map[{h, root}].emplace_back(ptm);

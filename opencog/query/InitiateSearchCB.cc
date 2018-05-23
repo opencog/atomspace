@@ -140,7 +140,7 @@ void InitiateSearchCB::set_pattern(const Variables& vars,
 // start.
 //
 // size_t& depth will be set to the depth of the thinnest constant found.
-// Handle& start will be set to the link containing that constant.
+// Handle& link will be set to the link containing that constant.
 // size_t& width will be set to the incoming-set size of the thinnest
 //               constant found.
 // The returned value will be the constant at which to start the search.
@@ -149,94 +149,208 @@ void InitiateSearchCB::set_pattern(const Variables& vars,
 //
 
 Handle
-InitiateSearchCB::find_starter(const Handle& h, size_t& depth,
-                                     Handle& startrm, size_t& width)
+InitiateSearchCB::find_starter(const Handle& root, size_t& depth,
+                                     Handle& link, size_t& width)
 {
 	// If its a node, then we are done.
-	Type t = h->get_type();
-	if (_nameserver.isNode(t))
+	Type root_node_type = root->get_type();
+	if (_nameserver.isNode(root_node_type))
 	{
-		if (VARIABLE_NODE != t and GLOB_NODE != t)
+		if (VARIABLE_NODE != root_node_type and GLOB_NODE != root_node_type)
 		{
-			width = h->getIncomingSetSize();
-			startrm = h; // XXX wtf ???
-			return h;
+			depth = 0;
+			width = root->getIncomingSetSize();
+			link = root; // XXX wtf ???
+			return root;
 		}
 		return Handle::UNDEFINED;
 	}
 
 	// If its a link, then find recursively
-	return find_starter_recursive(h, depth, startrm, width);
+	return find_starter_recursive(root, depth, link, width);
 }
 
-Handle
-InitiateSearchCB::find_starter_recursive(const Handle& h, size_t& depth,
-                                         Handle& startrm, size_t& width)
+Handle InitiateSearchCB::find_starter_recursive(const Handle& root, size_t& depth,
+                                                Handle& link, size_t& width)
 {
 	// If its a node, then we are done. Don't modify either depth or
 	// start.
-	Type t = h->get_type();
-	if (_nameserver.isNode(t))
+	Type root_node_type = root->get_type();
+	if (_nameserver.isNode(root_node_type))
 	{
-		if (VARIABLE_NODE != t and GLOB_NODE != t)
+		if (VARIABLE_NODE != root_node_type and GLOB_NODE != root_node_type)
 		{
-			width = h->getIncomingSetSize();
-			return h;
+			depth = 0;
+			width = root->getIncomingSetSize();
+			return root;
 		}
 		return Handle::UNDEFINED;
 	}
 
 	// Ignore all dynamically-evaluatable links up front.
-	if (_dynamic->find(h) != _dynamic->end())
+	if (_dynamic->find(root) != _dynamic->end())
 		return Handle::UNDEFINED;
 
 	// Iterate over all the handles in the outgoing set.
 	// Find the deepest one that contains a constant, and start
 	// the search there.  If there are two at the same depth,
 	// then start with the skinnier one.
-	size_t deepest = depth;
-	startrm = Handle::UNDEFINED;
-	Handle hdeepest(Handle::UNDEFINED);
-	size_t thinnest = SIZE_MAX;
+	depth = 0;
+	link = Handle::UNDEFINED;
+	Handle starter;
+	width = SIZE_MAX;
 
-	for (Handle hunt : h->getOutgoingSet())
+	for (Handle branch : root->getOutgoingSet())
 	{
-		size_t brdepth = depth + 1;
-		size_t brwid = SIZE_MAX;
-		Handle sbr(h);
+		size_t branch_depth;
+		size_t branch_width;
+		Handle branch_link(root);
 
 		// Blow past the QuoteLinks, since they just screw up the search start.
-		if (Quotation::is_quotation_type(hunt->get_type()))
-			hunt = hunt->getOutgoingAtom(0);
+		if (Quotation::is_quotation_type(branch->get_type()))
+			branch = branch->getOutgoingAtom(0);
 
-		Handle s(find_starter_recursive(hunt, brdepth, sbr, brwid));
+		Handle branch_starter(
+		        find_starter_recursive(branch, branch_depth, branch_link,
+		                branch_width));
 
-		if (s)
+		if (branch_starter)
 		{
 			// Each ChoiceLink is potentially disconnected from the rest
 			// of the graph. Assume the worst case, explore them all.
-			if (CHOICE_LINK == t)
+			if (CHOICE_LINK == root_node_type)
 			{
 				Choice ch;
 				ch.clause = _curr_clause;
-				ch.best_start = s;
-				ch.start_term = sbr;
+				ch.best_start = branch_starter;
+				ch.start_term = branch_link;
 				_choices.push_back(ch);
 			}
 			else
-			if (brwid < thinnest
-			    or (brwid == thinnest and deepest < brdepth))
+			if (branch_width < width
+			        or (branch_width == width
+			                and depth < branch_depth))
 			{
-				deepest = brdepth;
-				hdeepest = s;
-				startrm = sbr;
-				thinnest = brwid;
+				depth = branch_depth + 1;
+				starter = branch_starter;
+				link = branch_link;
+				width = branch_width;
 			}
 		}
 	}
-	depth = deepest;
-	width = thinnest;
-	return hdeepest;
+	return starter;
+}
+
+/**
+ * Find thinnest term for the set of clauses.
+ *
+ * Go through the set of clauses and for each clause find thinnest
+ * term using find_thinnest_term_recursive() method. Return the result with
+ * minimal width. If there are few results with equal width then return result
+ * with maximal depth.
+ *
+ * @param clauses list of clauses to get thinnest term
+ * @return thinnest term across all clauses
+ */
+PatternTermPtr InitiateSearchCB::find_thinnest_term(const HandleSeq& clauses)
+{
+	size_t max_depth = 0;
+	size_t min_width = SIZE_MAX;
+	PatternTermPtr thinnest_term = PatternTerm::UNDEFINED;
+
+	for (const auto& clause : clauses)
+	{
+		PatternTermPtr root_term = _pattern->pattern_tree_by_clause.at(clause);
+		size_t depth;
+		size_t width;
+
+		PatternTermPtr candidate = find_thinnest_term_recursive(root_term,
+		        depth, width);
+
+		if (width < min_width or (width == min_width and depth > max_depth))
+		{
+			max_depth = depth;
+			min_width = width;
+			thinnest_term = candidate;
+		}
+	}
+
+	return thinnest_term;
+}
+
+/**
+ * Find thinnest term in the tree of terms. It returns constant node with
+ * minimal incoming set size to minimize number of iterations in outer matching
+ * loop.
+ *
+ * For single node return this node. For the VARIABLE_NODE or GLOB_NODE return
+ * PatternTerm::UNDEFINED because it is too expensive to start search from such
+ * type of node. For the link go through outgoing set, find thinnest
+ * term recursively and return result with minimal width. If there are few such
+ * results return result with maximal depth. For CHOICE_LINK put each thinnest
+ * term into _choices collection to visit all possible choices in
+ * InitiateSearchCB::neighbor_search() method.
+ *
+ * @param[in] root root term of the tree
+ * @param[out] width incoming set size of the result
+ * @param[out] depth tree level of the result
+ * @return thinnest term or PatternTerm::UNDEFINED if not found
+ */
+PatternTermPtr InitiateSearchCB::find_thinnest_term_recursive(
+        const PatternTermPtr& root, size_t& width, size_t& depth)
+{
+	opencog::Handle root_node = root->getHandle();
+	opencog::Type root_node_type = root_node->get_type();
+
+	if (_nameserver.isNode(root_node_type)) {
+		if (VARIABLE_NODE == root_node_type or GLOB_NODE == root_node_type) {
+			return PatternTerm::UNDEFINED;
+		}
+
+		depth = 0;
+		width = root_node->getIncomingSetSize();
+		return root;
+	}
+
+	// Ignore all dynamically-evaluatable links up front.
+	if (_dynamic->find(root->getHandle()) != _dynamic->end())
+		return PatternTerm::UNDEFINED;
+
+	size_t max_depth = 0;
+	size_t min_width = SIZE_MAX;
+	PatternTermPtr thinnest_term = PatternTerm::UNDEFINED;
+
+	for (const auto& outgoing_term : root->getOutgoingSet()) {
+		size_t depth;
+		size_t width;
+		PatternTermPtr candidate = find_thinnest_term_recursive(outgoing_term,
+				width, depth);
+
+		if (!candidate || candidate == PatternTerm::UNDEFINED)
+			continue;
+
+		if (CHOICE_LINK == root_node_type)
+		{
+			Choice ch;
+			ch.thinnest_term = candidate;
+			_choices.push_back(ch);
+		}
+		else if (width < min_width
+		        or (width == min_width and (depth + 1) > max_depth))
+		{
+			max_depth = depth + 1;
+			min_width = width;
+			thinnest_term = candidate;
+		}
+	}
+
+	if (thinnest_term)
+	{
+		width = min_width;
+		depth = max_depth;
+	}
+
+	return thinnest_term;
 }
 
 /* ======================================================== */
@@ -304,6 +418,7 @@ Handle InitiateSearchCB::find_thinnest(const HandleSeq& clauses,
  * if the search was not performed, due to a failure to find a sutiable
  * starting point.
  */
+#define USE_PATTERN_TERM 0
 bool InitiateSearchCB::neighbor_search(PatternMatchEngine *pme)
 {
 	// If there are no non constant clauses, abort, will use
@@ -343,10 +458,40 @@ bool InitiateSearchCB::neighbor_search(PatternMatchEngine *pme)
 	// Note also: the user is allowed to specify patterns that have
 	// no constants in them at all.  In this case, the search is
 	// performed by looping over all links of the given types.
+#if USE_PATTERN_TERM
+	_choices.clear();
+	PatternTermPtr start_term = find_thinnest_term(clauses);
+
+	// Cannot find a starting point! This can happen if:
+	// 1) all of the clauses contain nothing but variables,
+	// 2) all of the clauses are evaluatable(!),
+	// Somewhat unusual, but it can happen.  For this, we need
+	// some other, alternative search strategy.
+	if (start_term == PatternTerm::UNDEFINED  and 0 == _choices.size()) {
+		_search_fail = true;
+		return false;
+	}
+	// If only a single choice, fake it for the loop below.
+	if (0 == _choices.size())
+	{
+		Choice ch;
+		ch.thinnest_term = start_term;
+		_choices.push_back(ch);
+	}
+#else
 	size_t bestclause;
 	Handle best_start = find_thinnest(clauses, _pattern->evaluatable_holders,
 	                                  _starter_term, bestclause);
+#endif
+#if USE_PATTERN_TERM
 
+	for (const Choice& choice : _choices)
+	{
+		bool found = pme->explore_term(choice.thinnest_term);
+		if (found)
+			return true;
+	}
+#else
 	// Cannot find a starting point! This can happen if:
 	// 1) all of the clauses contain nothing but variables,
 	// 2) all of the clauses are evaluatable(!),
@@ -357,7 +502,6 @@ bool InitiateSearchCB::neighbor_search(PatternMatchEngine *pme)
 		_search_fail = true;
 		return false;
 	}
-
 	// If only a single choice, fake it for the loop below.
 	if (0 == _choices.size())
 	{
@@ -402,7 +546,7 @@ bool InitiateSearchCB::neighbor_search(PatternMatchEngine *pme)
 			if (found) return true;
 		}
 	}
-
+#endif
 	// If we are here, we have searched the entire neighborhood, and
 	// no satisfiable groundings were found.
 	return false;

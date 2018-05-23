@@ -137,6 +137,8 @@ struct Pattern
 
 	ConnectTermMap   connected_terms_map;  // setup by make_term_trees()
 
+	std::unordered_map<Handle, PatternTermPtr> pattern_tree_by_clause;
+
 	std::string to_string(const std::string& indent) const;
 };
 
