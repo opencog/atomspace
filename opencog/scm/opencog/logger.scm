@@ -186,6 +186,8 @@
     Change the logging level of LOGGER to LEVEL.
     If LOGGER is not provided then use the default logger.
 
+    Valid levels are "fine", "debug", "info", "warn" and "error".
+
     Returns the previous logging level.
 "
   (apply cog-logger-set-level-of-logger! (apply add-default-logger args)))
