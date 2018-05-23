@@ -80,6 +80,7 @@ IF (CMAKE_COMPILER_IS_GNUCXX)
 
 		# The Apple linker does not support the --no-as-needed flag.
 		SET(NO_AS_NEEDED "")
+		SET(DUMMY_CC "${PROJECT_SOURCE_DIR}/lib/dummy.cc")
 
 	ELSE (APPLE)
 		SET(CMAKE_C_FLAGS "-Wall -fPIC")
@@ -96,6 +97,7 @@ IF (CMAKE_COMPILER_IS_GNUCXX)
 		# SET(CMAKE_C_FLAGS_RELEASE "-O3 -g -fstack-protector -flto=8")
 
 		SET(NO_AS_NEEDED "-Wl,--no-as-needed")
+		SET(DUMMY_CC "${PROJECT_SOURCE_DIR}/lib/dummy.cc")
 		LINK_LIBRARIES(pthread)
 
 		# Workaround for circular dependencies problem. This causes
