@@ -7,9 +7,11 @@ simplify general handling in various different subsystems.
 
 Atoms and Values can be contrasted in several ways; in breif, they
 offer two very different modes/styles of storing information, with
-very differrent performance profiles, API's and use-cases. Atoms
-are bigger, slower, bulkier but a lot more powerful; Values are
-fleeting and fast, but representationally weak.
+very different performance profiles, API's and use-cases. Atoms
+are bigger, slower, bulkier but a lot more powerful; the are best
+used for representing graphs that need to be repeatedly traversed.
+Values are fleeting and fast, but ill-suited for graphs. Values are
+ideal for holding data streams (e.g. video, audio).
 
 Hierarchy:
 * Atoms are a special case of Values; wherever you can use an Value,
@@ -17,16 +19,18 @@ Hierarchy:
 
 Atoms:
 * Atoms are heavy-weight, slow to create, hard/impossible to destroy.
-* Atoms are immuatable; they cannot be changed after being created.
+* Atoms are immutable; they cannot be changed after being created.
 * Atoms are globally unique (guaranteed by the Atomspace).
 * Atoms are indexed, and are thus searchable by name or type, and by
   the pattern-matching subsystem.
+* Atoms are meant to represent graphs (that are frequently traversed).
 
 Values:
 * Values are light-weight, fast and easy to create/destroy.
-* Values are highly mutable.
 * Values are not (globally or locally) unique.
 * Values are not indexed, and can be found only by knowing thier key.
+* Values are meant to hold transient and streaming data (e.g. video)
+  (See RandomValue for an example.)
 
 Databases:
 * Atoms can be stored in the Atomspace; Values cannot.
