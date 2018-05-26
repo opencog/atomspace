@@ -30,7 +30,11 @@ Values:
 * Values are not (globally or locally) unique.
 * Values are not indexed, and can be found only by knowing their key.
 * Values are meant to hold transient and streaming data (e.g. video)
-  (See RandomValue for an example.)
+
+Streams:
+* Streams are time-varying values. Experimental.
+* RandomValue for an example of a stream
+  - every time its called, it returns a different value.
 
 Databases:
 * Atoms can be stored in the Atomspace; Values cannot.
@@ -53,6 +57,13 @@ AtomSpace has a powerful query mechanism (the pattern matcher), whereas
 Values can only be found by knowing which Atom they are in, and which
 Key they are filed under. This two-level structure hopefully provides
 the kind of richness and flexibility suitable for complex problems.
+
+Streams
+-------
+The API for time-varying value streams is still experimental. What is
+currently implemented in StreamValue and RandomStream is an experiment.
+Known deficiencies:
+* We need a way of streaming something other than vectors of floats.
 
 Names
 -----
