@@ -101,12 +101,36 @@ void ValueOfUTest::test_times()
 
 	atom->setValue(key, value);
 
-	Handle times =
-		al(TIMES_LINK, an(NUMBER_NODE, "3"), al(VALUE_OF_LINK, atom, key));
+	Handle valof = al(VALUE_OF_LINK, atom, key);
+
+	// vector times scalar --------------------------------------------
+	Handle times = al(TIMES_LINK, an(NUMBER_NODE, "3"), valof);
 
 	ProtoAtomPtr result = FunctionLinkCast(times)->execute();
 
 	FloatValuePtr expect = createFloatValue(std::vector<double>{0.0, 3.0, 6.0});
+	printf("expect: %s\n", expect->to_string().c_str());
+	printf("result: %s\n", result->to_string().c_str());
+
+	TS_ASSERT(*expect == *FloatValueCast(result));
+
+	// vector times scalar --------------------------------------------
+	times = al(TIMES_LINK, valof, an(NUMBER_NODE, "7"));
+
+	result = FunctionLinkCast(times)->execute();
+
+	expect = createFloatValue(std::vector<double>{0.0, 7.0, 14.0});
+	printf("expect: %s\n", expect->to_string().c_str());
+	printf("result: %s\n", result->to_string().c_str());
+
+	TS_ASSERT(*expect == *FloatValueCast(result));
+
+	// vetor times vector ----------------------------------------------
+	times = al(TIMES_LINK, valof, valof);
+
+	result = FunctionLinkCast(times)->execute();
+
+	expect = createFloatValue(std::vector<double>{0.0, 1.0, 4.0});
 	printf("expect: %s\n", expect->to_string().c_str());
 	printf("result: %s\n", result->to_string().c_str());
 
