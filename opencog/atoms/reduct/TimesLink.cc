@@ -129,7 +129,7 @@ ProtoAtomPtr TimesLink::kons(const Handle& fi, const ProtoAtomPtr& fj) const
 	Type vjtype = vj->get_type();
 
 	// Swap order, make things easier below.
-	if (FLOAT_VALUE == fitype)
+	if (FLOAT_VALUE == vitype)
 	{
 		std::swap(vi, vj);
 		std::swap(vitype, vjtype);

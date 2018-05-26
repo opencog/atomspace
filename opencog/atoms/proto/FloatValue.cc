@@ -38,9 +38,6 @@ bool FloatValue::operator==(const ProtoAtom& other) const
 		// ordered. For technical explanation, see
 		// http://www.cygnus-software.com/papers/comparingfloats/Comparing%20floating%20point%20numbers.htm
 		// if (1.0e-15 < fabs(1.0 - fov->_value[i]/_value[i])) return false;
-		//
-		// Beats me why, but the ValueSaveUTest requires ULPS of 11 to
-		// pass, which works out to about 2.3e-15 in practice.
 #define MAX_ULPS 24
 		if (MAX_ULPS < abs(*(int64_t*) &(_value[i]) - *(int64_t*)&(fov->_value[i])))
 			return false;
@@ -69,7 +66,7 @@ ProtoAtomPtr opencog::times(double scalar, const FloatValuePtr& fvp)
 {
 	const std::vector<double>& fv = fvp->value();
 	size_t len = fv.size();
-	std::vector<double> prod;
+	std::vector<double> prod(len);
 	for (size_t i=0; i<len; i++)
 		prod[i] = scalar * fv[i];
 
@@ -81,7 +78,7 @@ ProtoAtomPtr opencog::plus(double scalar, const FloatValuePtr& fvp)
 {
 	const std::vector<double>& fv = fvp->value();
 	size_t len = fv.size();
-	std::vector<double> sum;
+	std::vector<double> sum(len);
 	for (size_t i=0; i<len; i++)
 		sum[i] = scalar + fv[i];
 
@@ -97,7 +94,7 @@ ProtoAtomPtr opencog::times(const FloatValuePtr& fvpa, const FloatValuePtr& fvpb
 	if (len != fvb.size())
 		throw RuntimeException(TRACE_INFO, "Mismatched vector sizes!");
 
-	std::vector<double> prod;
+	std::vector<double> prod(len);
 	for (size_t i=0; i<len; i++)
 		prod[i] = fva[i] * fvb[i];
 
@@ -113,7 +110,7 @@ ProtoAtomPtr opencog::plus(const FloatValuePtr& fvpa, const FloatValuePtr& fvpb)
 	if (len != fvb.size())
 		throw RuntimeException(TRACE_INFO, "Mismatched vector sizes!");
 
-	std::vector<double> sum;
+	std::vector<double> sum(len);
 	for (size_t i=0; i<len; i++)
 		sum[i] = fva[i] + fvb[i];
 
