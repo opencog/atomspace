@@ -69,6 +69,14 @@ static inline FloatValuePtr FloatValueCast(const ProtoAtomPtr& a)
 
 #define createFloatValue std::make_shared<FloatValue>
 
+// Scalar multiplication and addition
+FloatValuePtr times(double, const FloatValuePtr&);
+FloatValuePtr plus(double, const FloatValuePtr&);
+
+// Vector multiplication and addition
+FloatValuePtr times(const FloatValuePtr&, const FloatValuePtr&);
+FloatValuePtr plus(const FloatValuePtr&, const FloatValuePtr&);
+
 
 /** @}*/
 } // namespace opencog

@@ -20,6 +20,7 @@
  * 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
  */
 
+#include <opencog/util/exceptions.h>
 #include <opencog/atoms/proto/FloatValue.h>
 
 using namespace opencog;
@@ -59,4 +60,62 @@ std::string FloatValue::to_string(const std::string& indent) const
 	}
 	rv += ")\n";
 	return rv;
+}
+
+// ==============================================================
+
+/// Scalar multiplication
+FloatValuePtr times(double scalar, const FloatValuePtr& fvp)
+{
+	const std::vector<double>& fv = fvp->value();
+	size_t len = fv.size();
+	std::vector<double> prod;
+	for (size_t i=0; i<len; i++)
+		prod[i] = scalar * fv[i];
+
+	return createFloatValue(prod);
+}
+
+/// Scalar addition
+FloatValuePtr plus(double scalar, const FloatValuePtr& fvp)
+{
+	const std::vector<double>& fv = fvp->value();
+	size_t len = fv.size();
+	std::vector<double> sum;
+	for (size_t i=0; i<len; i++)
+		sum[i] = scalar + fv[i];
+
+	return createFloatValue(sum);
+}
+
+/// Vector (point-wise) multiplication
+FloatValuePtr times(const FloatValuePtr& fvpa, const FloatValuePtr& fvpb)
+{
+	const std::vector<double>& fva = fvpa->value();
+	const std::vector<double>& fvb = fvpb->value();
+	size_t len = fva.size();
+	if (len != fvb.size())
+		throw RuntimeException(TRACE_INFO, "Mismatched vector sizes!");
+
+	std::vector<double> prod;
+	for (size_t i=0; i<len; i++)
+		prod[i] = fva[i] * fvb[i];
+
+	return createFloatValue(prod);
+}
+
+/// Vector (point-wise) addition
+FloatValuePtr plus(const FloatValuePtr& fvpa, const FloatValuePtr& fvpb)
+{
+	const std::vector<double>& fva = fvpa->value();
+	const std::vector<double>& fvb = fvpb->value();
+	size_t len = fva.size();
+	if (len != fvb.size())
+		throw RuntimeException(TRACE_INFO, "Mismatched vector sizes!");
+
+	std::vector<double> sum;
+	for (size_t i=0; i<len; i++)
+		sum[i] = fva[i] + fvb[i];
+
+	return createFloatValue(sum);
 }
