@@ -45,4 +45,4 @@ ADD_CXXTEST(ExistsLinkUTest)
 TARGET_LINK_LIBRARIES(ExistsLinkUTest execution atomspace)
 
 ADD_CXXTEST(ValueOfUTest)
-TARGET_LINK_LIBRARIES(ValueOfUTest execution atomspace)
+TARGET_LINK_LIBRARIES(ValueOfUTest clearbox execution atomspace)

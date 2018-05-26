@@ -22,6 +22,7 @@
 
 #include <opencog/atoms/core/ValueOfLink.h>
 #include <opencog/atoms/execution/Instantiator.h>
+#include <opencog/atoms/proto/FloatValue.h>
 #include <opencog/atomspace/AtomSpace.h>
 
 #include <cxxtest/TestSuite.h>
@@ -39,8 +40,11 @@ private:
 public:
 
 	void test_basic();
+	void test_basic_value();
+	void test_times();
 };
 
+// Make sure ValueOf actually fetches the value.
 void ValueOfUTest::test_basic()
 {
 	logger().debug("BEGIN TEST: %s", __FUNCTION__);
@@ -56,10 +60,57 @@ void ValueOfUTest::test_basic()
 	Instantiator inst(&_as);
    Handle result = inst.execute(valof);
 
-	printf("expected: %s\n", value->to_string().c_str());
-	printf("     got: %s\n", result->to_string().c_str());
+	printf("expect: %s\n", value->to_string().c_str());
+	printf("result: %s\n", result->to_string().c_str());
 
 	TS_ASSERT_EQUALS(value, result);
+
+	logger().debug("END TEST: %s", __FUNCTION__);
+}
+
+// Make sure FloatValues work.
+void ValueOfUTest::test_basic_value()
+{
+	logger().debug("BEGIN TEST: %s", __FUNCTION__);
+
+	ProtoAtomPtr value = createFloatValue(std::vector<double>{0.0, 1.0, 2.0});
+	Handle key = an(PREDICATE_NODE, "my key");
+	Handle atom = an(CONCEPT_NODE, "some atom");
+
+	atom->setValue(key, value);
+
+	Handle valof = al(VALUE_OF_LINK, atom, key);
+	ProtoAtomPtr result = FunctionLinkCast(valof)->execute();
+
+	printf("expect: %s\n", value->to_string().c_str());
+	printf("result: %s\n", result->to_string().c_str());
+
+	TS_ASSERT_EQUALS(value, result);
+
+	logger().debug("END TEST: %s", __FUNCTION__);
+}
+
+// Make sure TimesLink works
+void ValueOfUTest::test_times()
+{
+	logger().debug("BEGIN TEST: %s", __FUNCTION__);
+
+	ProtoAtomPtr value = createFloatValue(std::vector<double>{0.0, 1.0, 2.0});
+	Handle key = an(PREDICATE_NODE, "my key");
+	Handle atom = an(CONCEPT_NODE, "some atom");
+
+	atom->setValue(key, value);
+
+	Handle times =
+		al(TIMES_LINK, an(NUMBER_NODE, "3"), al(VALUE_OF_LINK, atom, key));
+
+	ProtoAtomPtr result = FunctionLinkCast(times)->execute();
+
+	ProtoAtomPtr expect = createFloatValue(std::vector<double>{0.0, 3.0, 6.0});
+	printf("expect: %s\n", expect->to_string().c_str());
+	printf("result: %s\n", result->to_string().c_str());
+
+	TS_ASSERT_EQUALS(expect, result);
 
 	logger().debug("END TEST: %s", __FUNCTION__);
 }
