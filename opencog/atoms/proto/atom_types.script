@@ -32,6 +32,13 @@ EVIDENCE_COUNT_TRUTH_VALUE <- TRUTH_VALUE
 // The AttentionValue
 ATTENTION_VALUE <- FLOAT_VALUE
 
+// A base class for time-varying (floating-point) values.
+// XXX TODO we need some other base class for other kinds of varying values.
+STREAM_VALUE <- FLOAT_VALUE
+
+// An example of a time-varying value stream
+RANDOM_STREAM <- STREAM_VALUE
+
 // Base of hierarchy - NOTE: ATOM will not have a corresponding Python
 // construction function to avoid identifier conflict with the Atom object.
 ATOM <- VALUE

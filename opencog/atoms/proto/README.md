@@ -5,7 +5,7 @@ ProtoAtoms provide a common base class for both Atoms and Values.
 The aim of having a common base class for both kinds of objects is to
 simplify general handling in various different subsystems.
 
-Atoms and Values can be contrasted in several ways; in breif, they
+Atoms and Values can be contrasted in several ways; in brief, they
 offer two very different modes/styles of storing information, with
 very different performance profiles, API's and use-cases. Atoms
 are bigger, slower, bulkier but a lot more powerful; the are best
@@ -28,7 +28,7 @@ Atoms:
 Values:
 * Values are light-weight, fast and easy to create/destroy.
 * Values are not (globally or locally) unique.
-* Values are not indexed, and can be found only by knowing thier key.
+* Values are not indexed, and can be found only by knowing their key.
 * Values are meant to hold transient and streaming data (e.g. video)
   (See RandomValue for an example.)
 
@@ -48,7 +48,7 @@ vertexes). There are also many other domain-specific ways of viewing
 Atoms as forming a graph; in all cases, these graphs are held in the
 AtomSpace.
 
-Thus the AtomSpace can be viewed as a "database of databsases". The
+Thus the AtomSpace can be viewed as a "database of databases". The
 AtomSpace has a powerful query mechanism (the pattern matcher), whereas
 Values can only be found by knowing which Atom they are in, and which
 Key they are filed under. This two-level structure hopefully provides

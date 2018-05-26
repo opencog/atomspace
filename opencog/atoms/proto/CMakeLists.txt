@@ -14,8 +14,10 @@ ADD_LIBRARY (atomproto
 	atom_types_init.cc
 	FloatValue.cc
 	LinkValue.cc
-	StringValue.cc
 	NameServer.cc
+	RandomStream.cc
+	StreamValue.cc
+	StringValue.cc
 )
 
 # Without this, parallel make will race and crap up the generated files.
@@ -34,10 +36,12 @@ INSTALL (FILES
 	atom_types.cc
 	FloatValue.h
 	LinkValue.h
+	NameServer.h
 	ProtoAtom.h
+	RandomStream.h
+	StreamValue.h
 	StringValue.h
 	types.h
-	NameServer.h
 	DESTINATION "include/opencog/atoms/proto"
 )
 
