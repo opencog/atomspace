@@ -67,6 +67,8 @@ SleepLink::SleepLink(const Link &l)
 
 // ---------------------------------------------------------------
 
+/// Return number of seconds left to sleep.
+/// Normally, this is zero, unless the sleep was interrupted.
 ProtoAtomPtr SleepLink::execute() const
 {
 	Handle time(_outgoing[0]);

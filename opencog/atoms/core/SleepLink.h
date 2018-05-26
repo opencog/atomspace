@@ -41,7 +41,7 @@ public:
 	SleepLink(const HandleSeq&, Type=SLEEP_LINK);
 	SleepLink(const Link &l);
 
-	// Return a pointer to the atom being specified.
+	// Return number of seconds left to sleep.
 	virtual ProtoAtomPtr execute() const;
 
 	static Handle factory(const Handle&);
