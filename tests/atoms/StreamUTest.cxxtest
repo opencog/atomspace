@@ -67,7 +67,6 @@ double StreamUTest::loop(const Handle& stream)
 
 		for (int j=0; j<LEN; j++)
 		{
-printf("duuude %d %g\n", j, rv[j]);
 			sum += rv[j];
 		}
 	}

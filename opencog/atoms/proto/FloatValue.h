@@ -41,7 +41,9 @@ class FloatValue
 	: public ProtoAtom
 {
 protected:
-	std::vector<double> _value;
+	mutable std::vector<double> _value;
+
+	virtual void update() const {}
 
 	FloatValue(Type t) : ProtoAtom(t) {}
 public: // XXX should be protected...
@@ -54,7 +56,7 @@ public:
 
 	virtual ~FloatValue() {}
 
-	const std::vector<double>& value() const { return _value; }
+	const std::vector<double>& value() const { update(); return _value; }
 
 	/** Returns a string representation of the value.  */
 	virtual std::string to_string(const std::string& indent = "") const;

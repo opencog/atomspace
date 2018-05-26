@@ -35,14 +35,13 @@ RandomStream::RandomStream(int len) :
 
 // ==============================================================
 
-std::vector<double> RandomStream::value()
+void RandomStream::update() const
 {
 	static thread_local unsigned short xsubi[3];
 	for (int i=0; i< _len; i++)
 	{
 		_value[i] = erand48(xsubi);
 	}
-	return _value;
 }
 
 // ==============================================================

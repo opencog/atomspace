@@ -44,13 +44,12 @@ protected:
 	RandomStream(Type t) : StreamValue(t) {}
 	int _len;
 
-public:
+	virtual void update() const;
 
+public:
 	// int is the desired size of the vector.
 	RandomStream(int);
 	virtual ~RandomStream() {}
-
-	virtual std::vector<double> value();
 
 	/** Returns a string representation of the value.  */
 	virtual std::string to_string(const std::string& indent = "") const;

@@ -46,8 +46,6 @@ protected:
 public:
 	virtual ~StreamValue() {}
 
-	virtual std::vector<double> value() = 0;
-
 	/** Returns true if two atoms are equal.  */
 	virtual bool operator==(const ProtoAtom&) const;
 };
