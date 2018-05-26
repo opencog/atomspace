@@ -48,7 +48,7 @@ public:
 	ArithmeticLink(const Link& l);
 
 	virtual Handle delta_reduce(void) const;
-	virtual Handle execute() const;
+	virtual ProtoAtomPtr execute() const;
 };
 
 typedef std::shared_ptr<ArithmeticLink> ArithmeticLinkPtr;

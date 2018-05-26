@@ -75,7 +75,7 @@ public:
 	FunctionLink(const Link& l);
 	virtual ~FunctionLink() {}
 
-	virtual Handle execute() const;
+	virtual ProtoAtomPtr execute() const;
 
 	static Handle factory(const Handle&);
 };

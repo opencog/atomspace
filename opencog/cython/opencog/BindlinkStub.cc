@@ -33,6 +33,6 @@ Handle opencog::do_execute(AtomSpace* atomspace, Handle handle)
     }
 
     FunctionLinkPtr flp(FunctionLinkCast(handle));
-    if (flp) return flp->execute();
+    if (flp) return HandleCast(flp->execute());
     return Handle();
 }

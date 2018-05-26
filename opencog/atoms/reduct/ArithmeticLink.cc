@@ -154,7 +154,7 @@ Handle ArithmeticLink::reorder(void) const
 
 // ===========================================================
 /// execute() -- Execute the expression
-Handle ArithmeticLink::execute() const
+ProtoAtomPtr ArithmeticLink::execute() const
 {
 	return delta_reduce();
 }

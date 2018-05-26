@@ -87,8 +87,9 @@ static NumberNodePtr unwrap_set(Handle h)
 }
 
 
-Handle RandomNumberLink::execute() const
+ProtoAtomPtr RandomNumberLink::execute() const
 {
+	// XXX FIXME so that this also works with values.
 	NumberNodePtr nmin(unwrap_set(_outgoing[0]));
 	NumberNodePtr nmax(unwrap_set(_outgoing[1]));
 
@@ -97,7 +98,7 @@ Handle RandomNumberLink::execute() const
 
 	double ary = slope * randy.randdouble() + cept;
 
-	return Handle(createNumberNode(ary));
+	return ProtoAtomPtr(createNumberNode(ary));
 }
 
 DEFINE_LINK_FACTORY(RandomNumberLink, RANDOM_NUMBER_LINK);
