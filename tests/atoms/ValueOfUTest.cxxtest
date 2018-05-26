@@ -42,6 +42,7 @@ public:
 	void test_basic();
 	void test_basic_value();
 	void test_times();
+	void test_plus();
 };
 
 // Make sure ValueOf actually fetches the value.
@@ -60,7 +61,7 @@ void ValueOfUTest::test_basic()
 	Instantiator inst(&_as);
    Handle result = inst.execute(valof);
 
-	printf("expect: %s\n", value->to_string().c_str());
+	printf("expect: %s", value->to_string().c_str());
 	printf("result: %s\n", result->to_string().c_str());
 
 	TS_ASSERT_EQUALS(value, result);
@@ -82,7 +83,7 @@ void ValueOfUTest::test_basic_value()
 	Handle valof = al(VALUE_OF_LINK, atom, key);
 	ProtoAtomPtr result = FunctionLinkCast(valof)->execute();
 
-	printf("expect: %s\n", value->to_string().c_str());
+	printf("expect: %s", value->to_string().c_str());
 	printf("result: %s\n", result->to_string().c_str());
 
 	TS_ASSERT_EQUALS(value, result);
@@ -103,13 +104,13 @@ void ValueOfUTest::test_times()
 
 	Handle valof = al(VALUE_OF_LINK, atom, key);
 
-	// vector times scalar --------------------------------------------
+	// scalar times vector --------------------------------------------
 	Handle times = al(TIMES_LINK, an(NUMBER_NODE, "3"), valof);
 
 	ProtoAtomPtr result = FunctionLinkCast(times)->execute();
 
 	FloatValuePtr expect = createFloatValue(std::vector<double>{0.0, 3.0, 6.0});
-	printf("expect: %s\n", expect->to_string().c_str());
+	printf("expect: %s", expect->to_string().c_str());
 	printf("result: %s\n", result->to_string().c_str());
 
 	TS_ASSERT(*expect == *FloatValueCast(result));
@@ -125,7 +126,7 @@ void ValueOfUTest::test_times()
 	result = FunctionLinkCast(times)->execute();
 
 	expect = createFloatValue(std::vector<double>{0.0, 7.0, 14.0});
-	printf("expect: %s\n", expect->to_string().c_str());
+	printf("expect: %s", expect->to_string().c_str());
 	printf("result: %s\n", result->to_string().c_str());
 
 	TS_ASSERT(*expect == *FloatValueCast(result));
@@ -134,13 +135,75 @@ void ValueOfUTest::test_times()
 	check_value = atom->getValue(key);
 	TS_ASSERT(*orig_value == *FloatValueCast(check_value));
 
-	// vetor times vector ----------------------------------------------
+	// vector times vector ----------------------------------------------
 	times = al(TIMES_LINK, valof, valof);
 
 	result = FunctionLinkCast(times)->execute();
 
 	expect = createFloatValue(std::vector<double>{0.0, 1.0, 4.0});
-	printf("expect: %s\n", expect->to_string().c_str());
+	printf("expect: %s", expect->to_string().c_str());
+	printf("result: %s\n", result->to_string().c_str());
+
+	TS_ASSERT(*expect == *FloatValueCast(result));
+
+	// value must not get corrupted.
+	check_value = atom->getValue(key);
+	TS_ASSERT(*orig_value == *FloatValueCast(check_value));
+
+	logger().debug("END TEST: %s", __FUNCTION__);
+}
+
+// Make sure PlusLink works
+void ValueOfUTest::test_plus()
+{
+	logger().debug("BEGIN TEST: %s", __FUNCTION__);
+
+	ProtoAtomPtr value = createFloatValue(std::vector<double>{0.0, 1.0, 2.0});
+	Handle key = an(PREDICATE_NODE, "my key");
+	Handle atom = an(CONCEPT_NODE, "some atom");
+
+	atom->setValue(key, value);
+
+	Handle valof = al(VALUE_OF_LINK, atom, key);
+
+	// scalar plus vector --------------------------------------------
+	Handle times = al(PLUS_LINK, an(NUMBER_NODE, "3"), valof);
+
+	ProtoAtomPtr result = FunctionLinkCast(times)->execute();
+
+	FloatValuePtr expect = createFloatValue(std::vector<double>{3.0, 4.0, 5.0});
+	printf("expect: %s", expect->to_string().c_str());
+	printf("result: %s\n", result->to_string().c_str());
+
+	TS_ASSERT(*expect == *FloatValueCast(result));
+
+	// value must not get corrupted.
+	FloatValuePtr orig_value = createFloatValue(std::vector<double>{0.0, 1.0, 2.0});
+	ProtoAtomPtr check_value = atom->getValue(key);
+	TS_ASSERT(*orig_value == *FloatValueCast(check_value));
+
+	// vector plus scalar --------------------------------------------
+	times = al(PLUS_LINK, valof, an(NUMBER_NODE, "7"));
+
+	result = FunctionLinkCast(times)->execute();
+
+	expect = createFloatValue(std::vector<double>{7.0, 8.0, 9.0});
+	printf("expect: %s", expect->to_string().c_str());
+	printf("result: %s\n", result->to_string().c_str());
+
+	TS_ASSERT(*expect == *FloatValueCast(result));
+
+	// value must not get corrupted.
+	check_value = atom->getValue(key);
+	TS_ASSERT(*orig_value == *FloatValueCast(check_value));
+
+	// vector plus vector ----------------------------------------------
+	times = al(PLUS_LINK, valof, valof);
+
+	result = FunctionLinkCast(times)->execute();
+
+	expect = createFloatValue(std::vector<double>{0.0, 2.0, 4.0});
+	printf("expect: %s", expect->to_string().c_str());
 	printf("result: %s\n", result->to_string().c_str());
 
 	TS_ASSERT(*expect == *FloatValueCast(result));

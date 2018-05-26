@@ -58,9 +58,9 @@ void PlusLink::init(void)
 
 // ============================================================
 
-static inline double get_double(const Handle& h)
+static inline double get_double(const ProtoAtomPtr& pap)
 {
-	return NumberNodeCast(h)->get_value();
+	return NumberNodeCast(pap)->get_value();
 }
 
 ProtoAtomPtr PlusLink::kons(const Handle& fi, const ProtoAtomPtr& fj) const
@@ -71,7 +71,7 @@ ProtoAtomPtr PlusLink::kons(const Handle& fi, const ProtoAtomPtr& fj) const
 	// Are they numbers?
 	if (NUMBER_NODE == fitype and NUMBER_NODE == fjtype)
 	{
-		double sum = get_double(fi) + get_double(HandleCast(fj));
+		double sum = get_double(fi) + get_double(fj);
 		return createNumberNode(sum);
 	}
 
@@ -164,6 +164,40 @@ ProtoAtomPtr PlusLink::kons(const Handle& fi, const ProtoAtomPtr& fj) const
 
 			return createTimesLink(exx, HandleCast(a_plus));
 		}
+	}
+
+	// Try to yank out values, if possible.
+	ProtoAtomPtr vi(fi);
+	if (VALUE_OF_LINK == fitype)
+	{
+		vi = FunctionLinkCast(fi)->execute();
+	}
+	Type vitype = vi->get_type();
+
+	ProtoAtomPtr vj(fj);
+	if (VALUE_OF_LINK == fjtype)
+	{
+		vj = FunctionLinkCast(fj)->execute();
+	}
+	Type vjtype = vj->get_type();
+
+	// Swap order, make things easier below.
+	if (FLOAT_VALUE == vitype)
+	{
+		std::swap(vi, vj);
+		std::swap(vitype, vjtype);
+	}
+
+	// Scalar times vector
+	if (NUMBER_NODE == vitype and FLOAT_VALUE == vjtype)
+	{
+		return plus(get_double(vi), FloatValueCast(vj));
+	}
+
+	// Vector times vector
+	if (FLOAT_VALUE == vitype and FLOAT_VALUE == vjtype)
+	{
+		return plus(FloatValueCast(vi), FloatValueCast(vj));
 	}
 
 	// If we are here, we've been asked to add two things of the same

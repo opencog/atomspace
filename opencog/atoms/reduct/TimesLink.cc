@@ -73,7 +73,7 @@ ProtoAtomPtr TimesLink::kons(const Handle& fi, const ProtoAtomPtr& fj) const
 	// Are they both numbers?
 	if (NUMBER_NODE == fitype and NUMBER_NODE == fjtype)
 	{
-		double prod = get_double(fi) * get_double(HandleCast(fj));
+		double prod = get_double(fi) * get_double(fj);
 		return createNumberNode(prod);
 	}
 
