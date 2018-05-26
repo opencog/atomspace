@@ -72,10 +72,12 @@ static inline FloatValuePtr FloatValueCast(const ProtoAtomPtr& a)
 // Scalar multiplication and addition
 ProtoAtomPtr times(double, const FloatValuePtr&);
 ProtoAtomPtr plus(double, const FloatValuePtr&);
+ProtoAtomPtr divide(double, const FloatValuePtr&);
 
 // Vector multiplication and addition
 ProtoAtomPtr times(const FloatValuePtr&, const FloatValuePtr&);
 ProtoAtomPtr plus(const FloatValuePtr&, const FloatValuePtr&);
+ProtoAtomPtr divide(const FloatValuePtr&, const FloatValuePtr&);
 
 
 /** @}*/

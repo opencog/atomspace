@@ -45,8 +45,10 @@ public:
 	void test_plus();
 	void test_times_plus();
 	void test_minus();
+	void test_divide();
 };
 
+// ====================================================================
 // Make sure ValueOf actually fetches the value.
 void ValueOfUTest::test_basic()
 {
@@ -71,6 +73,7 @@ void ValueOfUTest::test_basic()
 	logger().debug("END TEST: %s", __FUNCTION__);
 }
 
+// ====================================================================
 // Make sure FloatValues work.
 void ValueOfUTest::test_basic_value()
 {
@@ -93,6 +96,7 @@ void ValueOfUTest::test_basic_value()
 	logger().debug("END TEST: %s", __FUNCTION__);
 }
 
+// ====================================================================
 // Make sure TimesLink works
 void ValueOfUTest::test_times()
 {
@@ -155,6 +159,7 @@ void ValueOfUTest::test_times()
 	logger().debug("END TEST: %s", __FUNCTION__);
 }
 
+// ====================================================================
 // Make sure PlusLink works
 void ValueOfUTest::test_plus()
 {
@@ -217,6 +222,7 @@ void ValueOfUTest::test_plus()
 	logger().debug("END TEST: %s", __FUNCTION__);
 }
 
+// ====================================================================
 // Make sure complex expressions work.
 void ValueOfUTest::test_times_plus()
 {
@@ -283,6 +289,7 @@ void ValueOfUTest::test_times_plus()
 	logger().debug("END TEST: %s", __FUNCTION__);
 }
 
+// ====================================================================
 // Make sure MinusLink works
 void ValueOfUTest::test_minus()
 {
@@ -297,9 +304,9 @@ void ValueOfUTest::test_minus()
 	Handle valof = al(VALUE_OF_LINK, atom, key);
 
 	// 3-x --------------------------------------------
-	Handle times = al(MINUS_LINK, an(NUMBER_NODE, "3"), valof);
+	Handle minus = al(MINUS_LINK, an(NUMBER_NODE, "3"), valof);
 
-	ProtoAtomPtr result = FunctionLinkCast(times)->execute();
+	ProtoAtomPtr result = FunctionLinkCast(minus)->execute();
 
 	FloatValuePtr expect = createFloatValue(std::vector<double>{3.0, 2.0, 1.0});
 	printf("expect: %s", expect->to_string().c_str());
@@ -313,9 +320,9 @@ void ValueOfUTest::test_minus()
 	TS_ASSERT(*orig_value == *FloatValueCast(check_value));
 
 	// x-7 --------------------------------------------
-	times = al(MINUS_LINK, valof, an(NUMBER_NODE, "7"));
+	minus = al(MINUS_LINK, valof, an(NUMBER_NODE, "7"));
 
-	result = FunctionLinkCast(times)->execute();
+	result = FunctionLinkCast(minus)->execute();
 
 	expect = createFloatValue(std::vector<double>{-7.0, -6.0, -5.0});
 	printf("expect: %s", expect->to_string().c_str());
@@ -327,12 +334,79 @@ void ValueOfUTest::test_minus()
 	check_value = atom->getValue(key);
 	TS_ASSERT(*orig_value == *FloatValueCast(check_value));
 
-	// vector times vector ----------------------------------------------
-	times = al(MINUS_LINK, valof, valof);
+	// vector minus vector ----------------------------------------------
+	minus = al(MINUS_LINK, valof, valof);
 
-	result = FunctionLinkCast(times)->execute();
+	result = FunctionLinkCast(minus)->execute();
 
 	expect = createFloatValue(std::vector<double>{0.0, 0.0, 0.0});
+	printf("expect: %s", expect->to_string().c_str());
+	printf("result: %s\n", result->to_string().c_str());
+
+	TS_ASSERT(*expect == *FloatValueCast(result));
+
+	// value must not get corrupted.
+	check_value = atom->getValue(key);
+	TS_ASSERT(*orig_value == *FloatValueCast(check_value));
+
+	logger().debug("END TEST: %s", __FUNCTION__);
+}
+
+// ====================================================================
+// Make sure DivideLink works
+void ValueOfUTest::test_divide()
+{
+	logger().debug("BEGIN TEST: %s", __FUNCTION__);
+
+	ProtoAtomPtr value = createFloatValue(std::vector<double>{0.0, 1.0, 2.0});
+	Handle key = an(PREDICATE_NODE, "my key");
+	Handle atom = an(CONCEPT_NODE, "some atom");
+
+	atom->setValue(key, value);
+
+	Handle valof = al(VALUE_OF_LINK, atom, key);
+
+	// x/2 --------------------------------------------
+	Handle divide = al(DIVIDE_LINK, valof, an(NUMBER_NODE, "4"));
+
+	ProtoAtomPtr result = FunctionLinkCast(divide)->execute();
+
+	FloatValuePtr expect = createFloatValue(std::vector<double>{0.0, 0.25, 0.5});
+	printf("expect: %s", expect->to_string().c_str());
+	printf("result: %s\n", result->to_string().c_str());
+
+	TS_ASSERT(*expect == *FloatValueCast(result));
+
+	// value must not get corrupted.
+	FloatValuePtr orig_value = createFloatValue(std::vector<double>{0.0, 1.0, 2.0});
+	ProtoAtomPtr check_value = atom->getValue(key);
+	TS_ASSERT(*orig_value == *FloatValueCast(check_value));
+
+	// 3/(x+1) --------------------------------------------
+
+	divide = al(DIVIDE_LINK, an(NUMBER_NODE, "3"),
+		al(PLUS_LINK, valof, an(NUMBER_NODE, "1")));
+
+	result = FunctionLinkCast(divide)->execute();
+
+	expect = createFloatValue(std::vector<double>{3.0, 3.0/2.0, 1.0});
+	printf("expect: %s", expect->to_string().c_str());
+	printf("result: %s\n", result->to_string().c_str());
+
+	TS_ASSERT(*expect == *FloatValueCast(result));
+
+	// value must not get corrupted.
+	check_value = atom->getValue(key);
+	TS_ASSERT(*orig_value == *FloatValueCast(check_value));
+
+	// vector divide vector ----------------------------------------------
+	divide = al(DIVIDE_LINK,
+		al(PLUS_LINK, valof, an(NUMBER_NODE, "7")),
+		al(PLUS_LINK, valof, an(NUMBER_NODE, "7")));
+
+	result = FunctionLinkCast(divide)->execute();
+
+	expect = createFloatValue(std::vector<double>{1.0, 1.0, 1.0});
 	printf("expect: %s", expect->to_string().c_str());
 	printf("result: %s\n", result->to_string().c_str());
 

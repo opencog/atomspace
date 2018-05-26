@@ -28,19 +28,19 @@
 using namespace opencog;
 
 DivideLink::DivideLink(const HandleSeq& oset, Type t)
-    : ArithmeticLink(oset, t)
+    : TimesLink(oset, t)
 {
 	init();
 }
 
 DivideLink::DivideLink(const Handle& a, const Handle& b)
-    : ArithmeticLink({a, b}, DIVIDE_LINK)
+    : TimesLink({a, b}, DIVIDE_LINK)
 {
 	init();
 }
 
 DivideLink::DivideLink(const Link& l)
-    : ArithmeticLink(l)
+    : TimesLink(l)
 {
 	init();
 }
@@ -52,11 +52,10 @@ void DivideLink::init(void)
 		throw InvalidParamException(TRACE_INFO, "Expecting a DivideLink");
 
 	_commutative = false;
-   knil = createNumberNode(1);
 
 	// Disallow unary Divide. This makes things easier, overall.
 	if (1 == _outgoing.size())
-		_outgoing.insert(_outgoing.begin(), HandleCast(knil));
+		_outgoing.insert(_outgoing.begin(), one);
 }
 
 static inline double get_double(const ProtoAtomPtr& pap)
@@ -67,17 +66,52 @@ static inline double get_double(const ProtoAtomPtr& pap)
 // No ExpLink or PowLink and so kons is very simple
 ProtoAtomPtr DivideLink::kons(const ProtoAtomPtr& fi, const ProtoAtomPtr& fj) const
 {
+	Type fitype = fi->get_type();
+	Type fjtype = fj->get_type();
+
 	// Are they numbers?
-	if (NUMBER_NODE == fi->get_type() and
-	    NUMBER_NODE == fj->get_type())
+	if (NUMBER_NODE == fitype and NUMBER_NODE == fjtype)
 	{
 		double ratio = get_double(fi) / get_double(fj);
 		return Handle(createNumberNode(ratio));
 	}
 
 	// If fj is one, just drop it
-	if (content_eq(HandleCast(fj), HandleCast(knil)))
+	if (content_eq(HandleCast(fj), one))
 		return fi;
+
+	// Try to yank out values, if possible.
+	ProtoAtomPtr vi(fi);
+	if (VALUE_OF_LINK == fitype)
+	{
+		vi = FunctionLinkCast(fi)->execute();
+	}
+	Type vitype = vi->get_type();
+
+	ProtoAtomPtr vj(fj);
+	if (VALUE_OF_LINK == fjtype)
+	{
+		vj = FunctionLinkCast(fj)->execute();
+	}
+	Type vjtype = vj->get_type();
+
+	// Scalar divided by vector
+	if (NUMBER_NODE == vitype and FLOAT_VALUE == vjtype)
+	{
+		return divide(get_double(vi), FloatValueCast(vj));
+	}
+
+	// Vector divided by scalar
+	if (FLOAT_VALUE == vitype and NUMBER_NODE == vjtype)
+	{
+		return times(1.0/get_double(vj), FloatValueCast(vi));
+	}
+
+	// Vector divided by vector
+	if (FLOAT_VALUE == vitype and FLOAT_VALUE == vjtype)
+	{
+		return divide(FloatValueCast(vi), FloatValueCast(vj));
+	}
 
 	// If we are here, we've been asked to take a ratio of two things,
 	// but they are not of a type that we know how to divide.

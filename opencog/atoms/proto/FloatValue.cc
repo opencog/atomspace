@@ -85,6 +85,18 @@ ProtoAtomPtr opencog::plus(double scalar, const FloatValuePtr& fvp)
 	return createFloatValue(sum);
 }
 
+/// Scalar division
+ProtoAtomPtr opencog::divide(double scalar, const FloatValuePtr& fvp)
+{
+	const std::vector<double>& fv = fvp->value();
+	size_t len = fv.size();
+	std::vector<double> ratio(len);
+	for (size_t i=0; i<len; i++)
+		ratio[i] = scalar / fv[i];
+
+	return createFloatValue(ratio);
+}
+
 /// Vector (point-wise) multiplication
 ProtoAtomPtr opencog::times(const FloatValuePtr& fvpa, const FloatValuePtr& fvpb)
 {
@@ -115,4 +127,20 @@ ProtoAtomPtr opencog::plus(const FloatValuePtr& fvpa, const FloatValuePtr& fvpb)
 		sum[i] = fva[i] + fvb[i];
 
 	return createFloatValue(sum);
+}
+
+/// Vector (point-wise) division
+ProtoAtomPtr opencog::divide(const FloatValuePtr& fvpa, const FloatValuePtr& fvpb)
+{
+	const std::vector<double>& fva = fvpa->value();
+	const std::vector<double>& fvb = fvpb->value();
+	size_t len = fva.size();
+	if (len != fvb.size())
+		throw RuntimeException(TRACE_INFO, "Mismatched vector sizes!");
+
+	std::vector<double> ratio(len);
+	for (size_t i=0; i<len; i++)
+		ratio[i] = fva[i] / fvb[i];
+
+	return createFloatValue(ratio);
 }
