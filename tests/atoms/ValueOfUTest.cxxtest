@@ -114,6 +114,11 @@ void ValueOfUTest::test_times()
 
 	TS_ASSERT(*expect == *FloatValueCast(result));
 
+	// value must not get corrupted.
+	FloatValuePtr orig_value = createFloatValue(std::vector<double>{0.0, 1.0, 2.0});
+	ProtoAtomPtr check_value = atom->getValue(key);
+	TS_ASSERT(*orig_value == *FloatValueCast(check_value));
+
 	// vector times scalar --------------------------------------------
 	times = al(TIMES_LINK, valof, an(NUMBER_NODE, "7"));
 
@@ -125,6 +130,10 @@ void ValueOfUTest::test_times()
 
 	TS_ASSERT(*expect == *FloatValueCast(result));
 
+	// value must not get corrupted.
+	check_value = atom->getValue(key);
+	TS_ASSERT(*orig_value == *FloatValueCast(check_value));
+
 	// vetor times vector ----------------------------------------------
 	times = al(TIMES_LINK, valof, valof);
 
@@ -135,6 +144,10 @@ void ValueOfUTest::test_times()
 	printf("result: %s\n", result->to_string().c_str());
 
 	TS_ASSERT(*expect == *FloatValueCast(result));
+
+	// value must not get corrupted.
+	check_value = atom->getValue(key);
+	TS_ASSERT(*orig_value == *FloatValueCast(check_value));
 
 	logger().debug("END TEST: %s", __FUNCTION__);
 }
