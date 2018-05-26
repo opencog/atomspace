@@ -92,7 +92,7 @@ public:
 	 * @return true if the proto-atoms are different, false otherwise.
 	 */
 	bool operator!=(const ProtoAtom& other) const
-	{ return not operator==(other); }
+		{ return not operator==(other); }
 };
 
 typedef std::shared_ptr<ProtoAtom> ProtoAtomPtr;

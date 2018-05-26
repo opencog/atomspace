@@ -84,6 +84,8 @@ static inline FunctionLinkPtr FunctionLinkCast(const Handle& h)
    { return std::dynamic_pointer_cast<FunctionLink>(h); }
 static inline FunctionLinkPtr FunctionLinkCast(const AtomPtr& a)
    { return std::dynamic_pointer_cast<FunctionLink>(a); }
+static inline FunctionLinkPtr FunctionLinkCast(const ProtoAtomPtr& a)
+   { return std::dynamic_pointer_cast<FunctionLink>(a); }
 
 #define createFunctionLink std::make_shared<FunctionLink>
 

@@ -65,7 +65,7 @@ std::string FloatValue::to_string(const std::string& indent) const
 // ==============================================================
 
 /// Scalar multiplication
-FloatValuePtr times(double scalar, const FloatValuePtr& fvp)
+ProtoAtomPtr opencog::times(double scalar, const FloatValuePtr& fvp)
 {
 	const std::vector<double>& fv = fvp->value();
 	size_t len = fv.size();
@@ -77,7 +77,7 @@ FloatValuePtr times(double scalar, const FloatValuePtr& fvp)
 }
 
 /// Scalar addition
-FloatValuePtr plus(double scalar, const FloatValuePtr& fvp)
+ProtoAtomPtr opencog::plus(double scalar, const FloatValuePtr& fvp)
 {
 	const std::vector<double>& fv = fvp->value();
 	size_t len = fv.size();
@@ -89,7 +89,7 @@ FloatValuePtr plus(double scalar, const FloatValuePtr& fvp)
 }
 
 /// Vector (point-wise) multiplication
-FloatValuePtr times(const FloatValuePtr& fvpa, const FloatValuePtr& fvpb)
+ProtoAtomPtr opencog::times(const FloatValuePtr& fvpa, const FloatValuePtr& fvpb)
 {
 	const std::vector<double>& fva = fvpa->value();
 	const std::vector<double>& fvb = fvpb->value();
@@ -105,7 +105,7 @@ FloatValuePtr times(const FloatValuePtr& fvpa, const FloatValuePtr& fvpb)
 }
 
 /// Vector (point-wise) addition
-FloatValuePtr plus(const FloatValuePtr& fvpa, const FloatValuePtr& fvpb)
+ProtoAtomPtr opencog::plus(const FloatValuePtr& fvpa, const FloatValuePtr& fvpb)
 {
 	const std::vector<double>& fva = fvpa->value();
 	const std::vector<double>& fvb = fvpb->value();

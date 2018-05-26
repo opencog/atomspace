@@ -108,6 +108,8 @@ static inline NumberNodePtr NumberNodeCast(const Handle& h)
 	{ return std::dynamic_pointer_cast<NumberNode>(h); }
 static inline NumberNodePtr NumberNodeCast(const AtomPtr& a)
 	{ return std::dynamic_pointer_cast<NumberNode>(a); }
+static inline NumberNodePtr NumberNodeCast(const ProtoAtomPtr& a)
+	{ return std::dynamic_pointer_cast<NumberNode>(a); }
 
 #define createNumberNode std::make_shared<NumberNode>
 

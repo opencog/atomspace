@@ -70,12 +70,12 @@ static inline FloatValuePtr FloatValueCast(const ProtoAtomPtr& a)
 #define createFloatValue std::make_shared<FloatValue>
 
 // Scalar multiplication and addition
-FloatValuePtr times(double, const FloatValuePtr&);
-FloatValuePtr plus(double, const FloatValuePtr&);
+ProtoAtomPtr times(double, const FloatValuePtr&);
+ProtoAtomPtr plus(double, const FloatValuePtr&);
 
 // Vector multiplication and addition
-FloatValuePtr times(const FloatValuePtr&, const FloatValuePtr&);
-FloatValuePtr plus(const FloatValuePtr&, const FloatValuePtr&);
+ProtoAtomPtr times(const FloatValuePtr&, const FloatValuePtr&);
+ProtoAtomPtr plus(const FloatValuePtr&, const FloatValuePtr&);
 
 
 /** @}*/

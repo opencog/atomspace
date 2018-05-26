@@ -57,9 +57,9 @@ void TimesLink::init(void)
 
 // ============================================================
 
-static inline double get_double(const Handle& h)
+static inline double get_double(const ProtoAtomPtr& pap)
 {
-	return NumberNodeCast(h)->get_value();
+	return NumberNodeCast(pap)->get_value();
 }
 
 /// Because there is no ExpLink or PowLink that can handle repeated
@@ -70,7 +70,7 @@ ProtoAtomPtr TimesLink::kons(const Handle& fi, const ProtoAtomPtr& fj) const
 	Type fitype = fi->get_type();
 	Type fjtype = fj->get_type();
 
-	// Are they numbers?
+	// Are they both numbers?
 	if (NUMBER_NODE == fitype and NUMBER_NODE == fjtype)
 	{
 		double prod = get_double(fi) * get_double(HandleCast(fj));
@@ -111,6 +111,40 @@ ProtoAtomPtr TimesLink::kons(const Handle& fi, const ProtoAtomPtr& fj) const
 		Handle foo(createLink(seq, TIMES_LINK));
 		TimesLinkPtr ap = TimesLinkCast(foo);
 		return ap->delta_reduce();
+	}
+
+	// Try to yank out values, if possible.
+	ProtoAtomPtr vi(fi);
+	if (VALUE_OF_LINK == fitype)
+	{
+		vi = FunctionLinkCast(fi)->execute();
+	}
+	Type vitype = vi->get_type();
+
+	ProtoAtomPtr vj(fj);
+	if (VALUE_OF_LINK == fjtype)
+	{
+		vj = FunctionLinkCast(fj)->execute();
+	}
+	Type vjtype = vj->get_type();
+
+	// Swap order, make things easier below.
+	if (FLOAT_VALUE == fitype)
+	{
+		std::swap(vi, vj);
+		std::swap(vitype, vjtype);
+	}
+
+	// Scalar times vector
+	if (NUMBER_NODE == vitype and FLOAT_VALUE == vjtype)
+	{
+		return times(get_double(vi), FloatValueCast(vj));
+	}
+
+	// Vector times vector
+	if (FLOAT_VALUE == vitype and FLOAT_VALUE == vjtype)
+	{
+		return times(FloatValueCast(vi), FloatValueCast(vj));
 	}
 
 	// If we are here, we've been asked to multiply two things of the
