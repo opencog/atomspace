@@ -1,0 +1,65 @@
+/*
+ * tests/atoms/ValueOfUTest.cxxtest
+ *
+ * Copyright (C) 2018 Linas Vepstas
+ * All Rights Reserved
+ *
+ * This program is free software; you can redistribute it and/or modify
+ * it under the terms of the GNU Affero General Public License v3 as
+ * published by the Free Software Foundation and including the exceptions
+ * at http://opencog.org/wiki/Licenses
+ *
+ * This program is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ * GNU General Public License for more details.
+ *
+ * You should have received a copy of the GNU Affero General Public License
+ * along with this program; if not, write to:
+ * Free Software Foundation, Inc.,
+ * 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
+ */
+
+#include <opencog/atoms/core/ValueOfLink.h>
+#include <opencog/atoms/execution/Instantiator.h>
+#include <opencog/atomspace/AtomSpace.h>
+
+#include <cxxtest/TestSuite.h>
+
+using namespace opencog;
+
+#define al _as.add_link
+#define an _as.add_node
+
+class ValueOfUTest : public CxxTest::TestSuite
+{
+private:
+	AtomSpace _as;
+	
+public:
+
+	void test_basic();
+};
+
+void ValueOfUTest::test_basic()
+{
+	logger().debug("BEGIN TEST: %s", __FUNCTION__);
+
+	Handle value = an(CONCEPT_NODE, "my value");
+	Handle key = an(PREDICATE_NODE, "my key");
+	Handle atom = an(CONCEPT_NODE, "some atom");
+
+	atom->setValue(key, value);
+
+	Handle valof = al(VALUE_OF_LINK, atom, key);
+
+	Instantiator inst(&_as);
+   Handle result = inst.execute(valof);
+
+	printf("expected: %s\n", value->to_string().c_str());
+	printf("     got: %s\n", result->to_string().c_str());
+
+	TS_ASSERT_EQUALS(value, result);
+
+	logger().debug("END TEST: %s", __FUNCTION__);
+}
