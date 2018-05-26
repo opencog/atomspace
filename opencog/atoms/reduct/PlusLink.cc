@@ -115,7 +115,7 @@ ProtoAtomPtr PlusLink::kons(const Handle& fi, const ProtoAtomPtr& fj) const
 	if (content_eq(fi, HandleCast(fj)))
 	{
 		Handle two(createNumberNode("2"));
-		return createTimesLink(fi, two);
+		return createTimesLink(fi, two) -> execute();
 	}
 
 	// If j is (TimesLink x a) and i is identical to x,
