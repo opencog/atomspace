@@ -1,7 +1,7 @@
 /*
  * opencog/atoms/reduct/MinusLink.h
  *
- * Copyright (C) 2015 Linas Vepstas
+ * Copyright (C) 2015, 2018 Linas Vepstas
  * All Rights Reserved
  *
  * This program is free software; you can redistribute it and/or modify
@@ -39,7 +39,7 @@ class MinusLink : public ArithmeticLink
 protected:
 	void init(void);
 
-	Handle kons(const Handle&, const Handle&) const;
+	ProtoAtomPtr kons(const Handle&, const ProtoAtomPtr&) const;
 public:
 	MinusLink(const Handle& a, const Handle& b);
 	MinusLink(const HandleSeq&, Type=MINUS_LINK);

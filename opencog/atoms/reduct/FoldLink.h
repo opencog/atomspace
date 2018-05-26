@@ -1,7 +1,7 @@
 /*
  * opencog/atoms/reduct/FoldLink.h
  *
- * Copyright (C) 2015 Linas Vepstas
+ * Copyright (C) 2015, 2018 Linas Vepstas
  * All Rights Reserved
  *
  * This program is free software; you can redistribute it and/or modify
@@ -42,8 +42,8 @@ typedef std::shared_ptr<FoldLink> FoldLinkPtr;
 class FoldLink : public FunctionLink
 {
 protected:
-	Handle knil;
-	virtual Handle kons(const Handle&, const Handle&) const = 0;
+	ProtoAtomPtr knil;
+	virtual ProtoAtomPtr kons(const Handle&, const ProtoAtomPtr&) const = 0;
 
 	void init(void);
 
@@ -51,7 +51,7 @@ public:
 	FoldLink(const HandleSeq&, Type=FOLD_LINK);
 	FoldLink(const Link& l);
 
-   virtual Handle delta_reduce(void) const;
+   virtual ProtoAtomPtr delta_reduce(void) const;
 };
 
 static inline FoldLinkPtr FoldLinkCast(const Handle& h)

@@ -1,7 +1,7 @@
 /*
  * opencog/atoms/reduct/DivideLink.cc
  *
- * Copyright (C) 2015 Linas Vepstas
+ * Copyright (C) 2015, 2018 Linas Vepstas
  * All Rights Reserved
  *
  * This program is free software; you can redistribute it and/or modify
@@ -52,11 +52,11 @@ void DivideLink::init(void)
 		throw InvalidParamException(TRACE_INFO, "Expecting a DivideLink");
 
 	_commutative = false;
-   knil = Handle(createNumberNode(1));
+   knil = createNumberNode(1);
 
 	// Disallow unary Divide. This makes things easier, overall.
 	if (1 == _outgoing.size())
-		_outgoing.insert(_outgoing.begin(), knil);
+		_outgoing.insert(_outgoing.begin(), HandleCast(knil));
 }
 
 static inline double get_double(const Handle& h)
@@ -65,23 +65,23 @@ static inline double get_double(const Handle& h)
 }
 
 // No ExpLink or PowLink and so kons is very simple
-Handle DivideLink::kons(const Handle& fi, const Handle& fj) const
+ProtoAtomPtr DivideLink::kons(const Handle& fi, const ProtoAtomPtr& fj) const
 {
 	// Are they numbers?
 	if (NUMBER_NODE == fi->get_type() and
 	    NUMBER_NODE == fj->get_type())
 	{
-		double ratio = get_double(fi) / get_double(fj);
+		double ratio = get_double(fi) / get_double(HandleCast(fj));
 		return Handle(createNumberNode(ratio));
 	}
 
 	// If fj is one, just drop it
-	if (content_eq(fj, knil))
+	if (content_eq(HandleCast(fj), HandleCast(knil)))
 		return fi;
 
 	// If we are here, we've been asked to take a ratio of two things,
 	// but they are not of a type that we know how to divide.
-	return Handle(createDivideLink(fi, fj));
+	return createDivideLink(fi, HandleCast(fj));
 }
 
 DEFINE_LINK_FACTORY(DivideLink, DIVIDE_LINK)

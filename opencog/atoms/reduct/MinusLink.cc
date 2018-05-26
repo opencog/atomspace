@@ -1,7 +1,7 @@
 /*
  * opencog/atoms/reduct/MinusLink.cc
  *
- * Copyright (C) 2015 Linas Vepstas
+ * Copyright (C) 2015, 2018 Linas Vepstas
  * All Rights Reserved
  *
  * This program is free software; you can redistribute it and/or modify
@@ -52,11 +52,11 @@ void MinusLink::init(void)
 		throw InvalidParamException(TRACE_INFO, "Expecting a MinusLink");
 
 	_commutative = false;
-	knil = Handle(createNumberNode(0));
+	knil = createNumberNode(0);
 
 	// Disallow unary Minus. This makes things easier, overall.
 	if (1 == _outgoing.size())
-		_outgoing.insert(_outgoing.begin(), knil);
+		_outgoing.insert(_outgoing.begin(), HandleCast(knil));
 }
 
 static inline double get_double(const Handle& h)
@@ -64,23 +64,26 @@ static inline double get_double(const Handle& h)
 	return NumberNodeCast(h)->get_value();
 }
 
-Handle MinusLink::kons(const Handle& fi, const Handle& fj) const
+ProtoAtomPtr MinusLink::kons(const Handle& fi, const ProtoAtomPtr& fj) const
 {
 	// Are they numbers?
 	if (NUMBER_NODE == fi->get_type() and
 	    NUMBER_NODE == fj->get_type())
 	{
-		double diff = get_double(fi) - get_double(fj);
-		return Handle(createNumberNode(diff));
+		double diff = get_double(fi) - get_double(HandleCast(fj));
+		return createNumberNode(diff);
 	}
 
 	// If fj is zero, just drop it.
-	if (content_eq(fj, knil))
+	if (content_eq(HandleCast(fj), HandleCast(knil)))
 		return fi;
 
-	// If we are here, we've been asked to subtracttwo things,
+	// If we are here, we've been asked to subtract two things,
 	// but they are not of a type that we know how to subtract.
-	return Handle(createMinusLink(fi, fj));
+	Handle sand(HandleCast(fj));
+	if (nullptr == sand)
+		throw SyntaxException(TRACE_INFO, "Not aan Atom!");
+	return Handle(createMinusLink(fi, sand));
 }
 
 DEFINE_LINK_FACTORY(MinusLink, MINUS_LINK)

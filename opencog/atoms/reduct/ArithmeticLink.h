@@ -1,7 +1,7 @@
 /*
  * opencog/atoms/reduct/ArithmeticLink.h
  *
- * Copyright (C) 2015 Linas Vepstas
+ * Copyright (C) 2015, 2018 Linas Vepstas
  * All Rights Reserved
  *
  * This program is free software; you can redistribute it and/or modify
@@ -47,7 +47,7 @@ public:
 	ArithmeticLink(const HandleSeq& oset, Type=ARITHMETIC_LINK);
 	ArithmeticLink(const Link& l);
 
-	virtual Handle delta_reduce(void) const;
+	virtual ProtoAtomPtr delta_reduce(void) const;
 	virtual ProtoAtomPtr execute() const;
 };
 

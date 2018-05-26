@@ -1,7 +1,7 @@
 /*
  * opencog/atoms/reduct/ArithmeticLink.cc
  *
- * Copyright (C) 2015 Linas Vepstas
+ * Copyright (C) 2015, 2018 Linas Vepstas
  * All Rights Reserved
  *
  * This program is free software; you can redistribute it and/or modify
@@ -83,15 +83,18 @@ void ArithmeticLink::init(void)
 /// ever-more rules to the rule engine to reduce ever-more interesting
 /// algebraic expressions.
 ///
-Handle ArithmeticLink::delta_reduce(void) const
+ProtoAtomPtr ArithmeticLink::delta_reduce(void) const
 {
 	Handle road(reorder());
 	ArithmeticLinkPtr alp(ArithmeticLinkCast(road));
 
-	Handle red(alp->FoldLink::delta_reduce());
+	ProtoAtomPtr red(alp->FoldLink::delta_reduce());
 
-	alp = ArithmeticLinkCast(red);
-	if (NULL == alp) return red;
+	Handle h(HandleCast(red));
+	if (nullptr == h) return red;
+
+	alp = ArithmeticLinkCast(h);
+	if (nullptr == alp) return red;
 	return alp->reorder();
 }
 

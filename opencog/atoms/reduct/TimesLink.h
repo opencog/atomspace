@@ -1,7 +1,7 @@
 /*
  * opencog/atoms/reduct/TimesLink.h
  *
- * Copyright (C) 2015 Linas Vepstas
+ * Copyright (C) 2015, 2018 Linas Vepstas
  * All Rights Reserved
  *
  * This program is free software; you can redistribute it and/or modify
@@ -37,7 +37,7 @@ namespace opencog
 class TimesLink : public ArithmeticLink
 {
 protected:
-	Handle kons(const Handle&, const Handle&) const;
+	ProtoAtomPtr kons(const Handle&, const ProtoAtomPtr&) const;
 
 	void init(void);
 

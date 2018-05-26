@@ -1,7 +1,7 @@
 /*
  * opencog/atoms/reduct/PlusLink.cc
  *
- * Copyright (C) 2015 Linas Vepstas
+ * Copyright (C) 2015, 2018 Linas Vepstas
  * All Rights Reserved
  *
  * This program is free software; you can redistribute it and/or modify
@@ -52,7 +52,7 @@ void PlusLink::init(void)
 	if (not nameserver().isA(tscope, PLUS_LINK))
 		throw InvalidParamException(TRACE_INFO, "Expecting a PlusLink");
 
-	knil = Handle(createNumberNode(0));
+	knil = createNumberNode(0);
 	_commutative = true;
 }
 
@@ -63,7 +63,7 @@ static inline double get_double(const Handle& h)
 	return NumberNodeCast(h)->get_value();
 }
 
-Handle PlusLink::kons(const Handle& fi, const Handle& fj) const
+ProtoAtomPtr PlusLink::kons(const Handle& fi, const ProtoAtomPtr& fj) const
 {
 	Type fitype = fi->get_type();
 	Type fjtype = fj->get_type();
@@ -71,14 +71,14 @@ Handle PlusLink::kons(const Handle& fi, const Handle& fj) const
 	// Are they numbers?
 	if (NUMBER_NODE == fitype and NUMBER_NODE == fjtype)
 	{
-		double sum = get_double(fi) + get_double(fj);
-		return Handle(createNumberNode(sum));
+		double sum = get_double(fi) + get_double(HandleCast(fj));
+		return createNumberNode(sum);
 	}
 
 	// If either one is the unit, then just drop it.
-	if (content_eq(fi, knil))
+	if (content_eq(fi, HandleCast(knil)))
 		return fj;
-	if (content_eq(fj, knil))
+	if (content_eq(HandleCast(fj), HandleCast(knil)))
 		return fi;
 
 	// Is either one a PlusLink? If so, then flatten.
@@ -99,12 +99,12 @@ Handle PlusLink::kons(const Handle& fi, const Handle& fj) const
 		// flatten the right
 		if (PLUS_LINK == fjtype)
 		{
-			for (const Handle& rhs: fj->getOutgoingSet())
+			for (const Handle& rhs: HandleCast(fj)->getOutgoingSet())
 				seq.push_back(rhs);
 		}
 		else
 		{
-			seq.push_back(fj);
+			seq.push_back(HandleCast(fj));
 		}
 		Handle foo(createLink(seq, PLUS_LINK));
 		PlusLinkPtr ap = PlusLinkCast(foo);
@@ -112,10 +112,10 @@ Handle PlusLink::kons(const Handle& fi, const Handle& fj) const
 	}
 
 	// Is fi identical to fj? If so, then replace by 2*fi
-	if (content_eq(fi, fj))
+	if (content_eq(fi, HandleCast(fj)))
 	{
 		Handle two(createNumberNode("2"));
-		return Handle(createTimesLink(fi, two));
+		return createTimesLink(fi, two);
 	}
 
 	// If j is (TimesLink x a) and i is identical to x,
@@ -129,7 +129,7 @@ Handle PlusLink::kons(const Handle& fi, const Handle& fj) const
 		bool do_add = false;
 		HandleSeq rest;
 
-		Handle exx = fj->getOutgoingAtom(0);
+		Handle exx = HandleCast(fj)->getOutgoingAtom(0);
 
 		// Handle the (a+1) case described above.
 		if (fi == exx)
@@ -152,7 +152,7 @@ Handle PlusLink::kons(const Handle& fi, const Handle& fj) const
 
 		if (do_add)
 		{
-			const HandleSeq& jlpo = fj->getOutgoingSet();
+			const HandleSeq& jlpo = HandleCast(fj)->getOutgoingSet();
 			size_t jlpsz = jlpo.size();
 			for (size_t k=1; k<jlpsz; k++)
 				rest.push_back(jlpo[k]);
@@ -160,16 +160,16 @@ Handle PlusLink::kons(const Handle& fi, const Handle& fj) const
 			// a_plus is now (a+1) or (a+b) as described above.
 			Handle foo(createLink(rest, PLUS_LINK));
 			PlusLinkPtr ap = PlusLinkCast(foo);
-			Handle a_plus(ap->delta_reduce());
+			ProtoAtomPtr a_plus(ap->delta_reduce());
 
-			return Handle(createTimesLink(exx, a_plus));
+			return createTimesLink(exx, HandleCast(a_plus));
 		}
 	}
 
 	// If we are here, we've been asked to add two things of the same
 	// type, but they are not of a type that we know how to add.
 	// For example, fi and fj might be two different VariableNodes.
-	return Handle(createPlusLink(fi, fj)->reorder());
+	return createPlusLink(fi, HandleCast(fj))->reorder();
 }
 
 DEFINE_LINK_FACTORY(PlusLink, PLUS_LINK);

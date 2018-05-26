@@ -1,7 +1,7 @@
 /*
  * opencog/atoms/reduct/FoldLink.cc
  *
- * Copyright (C) 2015 Linas Vepstas
+ * Copyright (C) 2015, 2018 Linas Vepstas
  * All Rights Reserved
  *
  * This program is free software; you can redistribute it and/or modify
@@ -56,9 +56,9 @@ void FoldLink::init(void)
 /// by the value that function would have for these values.
 /// For example, the delta-reduction of 2+2 is 4.
 ///
-Handle FoldLink::delta_reduce(void) const
+ProtoAtomPtr FoldLink::delta_reduce(void) const
 {
-	Handle expr = knil;
+	ProtoAtomPtr expr = knil;
 
 	// Loop over the outgoing set, kons'ing away.
 	// This is right to left.
@@ -81,7 +81,7 @@ Handle FoldLink::delta_reduce(void) const
 		if (nameserver().isA(t, FOLD_LINK))
 		{
 			FoldLinkPtr fff(FoldLinkCast(classserver().factory(h)));
-			h = fff->delta_reduce();
+			h = HandleCast(fff->delta_reduce());
 		}
 		expr = kons(h, expr);
 	}

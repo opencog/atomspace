@@ -1,7 +1,7 @@
 /*
  * opencog/atoms/reduct/DivideLink.h
  *
- * Copyright (C) 2015 Linas Vepstas
+ * Copyright (C) 2015,2018 Linas Vepstas
  * All Rights Reserved
  *
  * This program is free software; you can redistribute it and/or modify
@@ -39,7 +39,7 @@ class DivideLink : public ArithmeticLink
 protected:
 	void init(void);
 
-	Handle kons(const Handle&, const Handle&) const;
+	ProtoAtomPtr kons(const Handle&, const ProtoAtomPtr&) const;
 public:
 	DivideLink(const Handle& a, const Handle& b);
 	DivideLink(const HandleSeq& oset, Type=DIVIDE_LINK);
