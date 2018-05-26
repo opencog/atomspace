@@ -48,11 +48,11 @@ bool FloatValue::operator==(const ProtoAtom& other) const
 
 std::string FloatValue::to_string(const std::string& indent) const
 {
-	std::string rv = indent + "(FloatValue";
+	std::string rv = indent + "(" + nameserver().getTypeName(_type);
 	for (double v :_value)
 	{
 		char buf[40];
-		snprintf(buf, 40, "%20.17g", v);
+		snprintf(buf, 40, "%.17g", v);
 		rv += std::string(" ") + buf;
 	}
 	rv += ")\n";

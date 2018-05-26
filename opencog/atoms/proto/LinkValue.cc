@@ -43,7 +43,7 @@ bool LinkValue::operator==(const ProtoAtom& other) const
 
 std::string LinkValue::to_string(const std::string& indent) const
 {
-	std::string rv = indent + "(LinkValue\n";
+	std::string rv = indent + "(" + nameserver().getTypeName(_type) + "\n";
 	for (ProtoAtomPtr v :_value)
 		rv += std::string(" ") + v->to_string(indent + "   ");
 	rv += ")\n";
