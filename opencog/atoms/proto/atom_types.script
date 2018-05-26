@@ -543,6 +543,9 @@ FUNCTION_LINK <- FREE_LINK
 // function they perform is implicit in the link type.
 EXECUTION_OUTPUT_LINK <- FUNCTION_LINK
 
+// Return the indicated value on the indicated atom.
+VALUE_OF_LINK <- FUNCTION_LINK
+
 // Basic arithmetic operators
 FOLD_LINK <- FUNCTION_LINK
 ARITHMETIC_LINK <- FOLD_LINK,NUMERIC_LINK,NUMERIC_OUTPUT_LINK
@@ -571,17 +574,6 @@ SLEEP_LINK <- FUNCTION_LINK,NUMERIC_OUTPUT_LINK
 // list, instead of the entire AtomSpace.  It is more-or-less analogous
 // to the standard functional-programming concept of "map".
 MAP_LINK <- FUNCTION_LINK
-
-// Higher order function. Take an n-ary function g as first outgoing,
-// a ListLink of n m-ary functions f1 to fn, as second outgoing, and
-// produce the m-ary function g(f1(x1,...,xm),...,fn(x1,...,xm)). If g
-// is unary, then the second outgoing can be function instead of a
-// ListLink.
-COMPOSE_LINK <- FUNCTION_LINK
-
-// Unary higher order function to build a projection function. Take a
-// number and build a function projecting its ith input argument.
-PROJECT_LINK <- FUNCTION_LINK
 
 // ====================================================================
 // Grammatical inference on time series

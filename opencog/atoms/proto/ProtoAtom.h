@@ -1,5 +1,5 @@
 /*
- * opencog/atomspace/proto/ProtoAtom.h
+ * opencog/atoms/proto/ProtoAtom.h
  *
  * Copyright (C) 2015 Linas Vepstas
  * All Rights Reserved
