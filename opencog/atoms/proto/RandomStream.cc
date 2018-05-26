@@ -30,7 +30,7 @@ using namespace opencog;
 RandomStream::RandomStream(int len) :
 	StreamValue(RANDOM_STREAM), _len(len)
 {
-	_value.reserve(len);
+	_value.resize(len, 0.0);
 }
 
 // ==============================================================
