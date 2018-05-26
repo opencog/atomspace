@@ -59,19 +59,19 @@ void DivideLink::init(void)
 		_outgoing.insert(_outgoing.begin(), HandleCast(knil));
 }
 
-static inline double get_double(const Handle& h)
+static inline double get_double(const ProtoAtomPtr& pap)
 {
-	return NumberNodeCast(h)->get_value();
+	return NumberNodeCast(pap)->get_value();
 }
 
 // No ExpLink or PowLink and so kons is very simple
-ProtoAtomPtr DivideLink::kons(const Handle& fi, const ProtoAtomPtr& fj) const
+ProtoAtomPtr DivideLink::kons(const ProtoAtomPtr& fi, const ProtoAtomPtr& fj) const
 {
 	// Are they numbers?
 	if (NUMBER_NODE == fi->get_type() and
 	    NUMBER_NODE == fj->get_type())
 	{
-		double ratio = get_double(fi) / get_double(HandleCast(fj));
+		double ratio = get_double(fi) / get_double(fj);
 		return Handle(createNumberNode(ratio));
 	}
 
@@ -81,7 +81,7 @@ ProtoAtomPtr DivideLink::kons(const Handle& fi, const ProtoAtomPtr& fj) const
 
 	// If we are here, we've been asked to take a ratio of two things,
 	// but they are not of a type that we know how to divide.
-	return createDivideLink(fi, HandleCast(fj));
+	return createDivideLink(HandleCast(fi), HandleCast(fj));
 }
 
 DEFINE_LINK_FACTORY(DivideLink, DIVIDE_LINK)

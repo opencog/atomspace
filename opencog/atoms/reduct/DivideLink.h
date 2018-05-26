@@ -39,7 +39,7 @@ class DivideLink : public ArithmeticLink
 protected:
 	void init(void);
 
-	ProtoAtomPtr kons(const Handle&, const ProtoAtomPtr&) const;
+	ProtoAtomPtr kons(const ProtoAtomPtr&, const ProtoAtomPtr&) const;
 public:
 	DivideLink(const Handle& a, const Handle& b);
 	DivideLink(const HandleSeq& oset, Type=DIVIDE_LINK);

@@ -59,18 +59,18 @@ void MinusLink::init(void)
 		_outgoing.insert(_outgoing.begin(), HandleCast(knil));
 }
 
-static inline double get_double(const Handle& h)
+static inline double get_double(const ProtoAtomPtr& pap)
 {
-	return NumberNodeCast(h)->get_value();
+	return NumberNodeCast(pap)->get_value();
 }
 
-ProtoAtomPtr MinusLink::kons(const Handle& fi, const ProtoAtomPtr& fj) const
+ProtoAtomPtr MinusLink::kons(const ProtoAtomPtr& fi, const ProtoAtomPtr& fj) const
 {
 	// Are they numbers?
 	if (NUMBER_NODE == fi->get_type() and
 	    NUMBER_NODE == fj->get_type())
 	{
-		double diff = get_double(fi) - get_double(HandleCast(fj));
+		double diff = get_double(fi) - get_double(fj);
 		return createNumberNode(diff);
 	}
 
@@ -82,8 +82,8 @@ ProtoAtomPtr MinusLink::kons(const Handle& fi, const ProtoAtomPtr& fj) const
 	// but they are not of a type that we know how to subtract.
 	Handle sand(HandleCast(fj));
 	if (nullptr == sand)
-		throw SyntaxException(TRACE_INFO, "Not aan Atom!");
-	return Handle(createMinusLink(fi, sand));
+		throw SyntaxException(TRACE_INFO, "Not an Atom!");
+	return Handle(createMinusLink(HandleCast(fi), sand));
 }
 
 DEFINE_LINK_FACTORY(MinusLink, MINUS_LINK)

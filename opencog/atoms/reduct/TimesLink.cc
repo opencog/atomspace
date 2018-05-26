@@ -27,6 +27,8 @@
 
 using namespace opencog;
 
+Handle TimesLink::one;
+
 TimesLink::TimesLink(const HandleSeq& oset, Type t)
     : ArithmeticLink(oset, t)
 {
@@ -47,11 +49,12 @@ TimesLink::TimesLink(const Link& l)
 
 void TimesLink::init(void)
 {
+	if (nullptr == one) one = createNumberNode(1);
 	Type tscope = get_type();
 	if (not nameserver().isA(tscope, TIMES_LINK))
 		throw InvalidParamException(TRACE_INFO, "Expecting a TimesLink");
 
-	knil = Handle(createNumberNode(1));
+	knil = one;
 	_commutative = true;
 }
 
@@ -65,7 +68,7 @@ static inline double get_double(const ProtoAtomPtr& pap)
 /// Because there is no ExpLink or PowLink that can handle repeated
 /// products, or any distributive property, kons is very simple for
 /// the TimesLink.
-ProtoAtomPtr TimesLink::kons(const Handle& fi, const ProtoAtomPtr& fj) const
+ProtoAtomPtr TimesLink::kons(const ProtoAtomPtr& fi, const ProtoAtomPtr& fj) const
 {
 	Type fitype = fi->get_type();
 	Type fjtype = fj->get_type();
@@ -78,24 +81,25 @@ ProtoAtomPtr TimesLink::kons(const Handle& fi, const ProtoAtomPtr& fj) const
 	}
 
 	// If either one is the unit, then just drop it.
-	if (content_eq(fi, HandleCast(knil)))
+	if (content_eq(HandleCast(fi), one))
 		return fj;
-	if (content_eq(HandleCast(fj), HandleCast(knil)))
+	if (content_eq(HandleCast(fj), one))
 		return fi;
 
 	// Is either one a TimesLink? If so, then flatten.
 	if (TIMES_LINK == fitype or TIMES_LINK == fjtype)
 	{
+		Handle hi(HandleCast(fi));
 		HandleSeq seq;
 		// flatten the left
 		if (TIMES_LINK == fitype)
 		{
-			for (const Handle& lhs: fi->getOutgoingSet())
+			for (const Handle& lhs: hi->getOutgoingSet())
 				seq.push_back(lhs);
 		}
 		else
 		{
-			seq.push_back(fi);
+			seq.push_back(hi);
 		}
 
 		// flatten the right
@@ -149,7 +153,7 @@ ProtoAtomPtr TimesLink::kons(const Handle& fi, const ProtoAtomPtr& fj) const
 
 	// If we are here, we've been asked to multiply two things of the
 	// same type, but they are not of a type that we know how to multiply.
-	return createTimesLink(fi, HandleCast(fj))->reorder();
+	return createTimesLink(HandleCast(fi), HandleCast(fj))->reorder();
 }
 
 DEFINE_LINK_FACTORY(TimesLink, TIMES_LINK)

@@ -37,7 +37,8 @@ namespace opencog
 class PlusLink : public ArithmeticLink
 {
 protected:
-	virtual ProtoAtomPtr kons(const Handle&, const ProtoAtomPtr&) const;
+	static Handle zero;
+	virtual ProtoAtomPtr kons(const ProtoAtomPtr&, const ProtoAtomPtr&) const;
 
 	void init(void);
 

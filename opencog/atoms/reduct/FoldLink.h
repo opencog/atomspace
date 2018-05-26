@@ -43,7 +43,7 @@ class FoldLink : public FunctionLink
 {
 protected:
 	ProtoAtomPtr knil;
-	virtual ProtoAtomPtr kons(const Handle&, const ProtoAtomPtr&) const = 0;
+	virtual ProtoAtomPtr kons(const ProtoAtomPtr&, const ProtoAtomPtr&) const = 0;
 
 	void init(void);
 

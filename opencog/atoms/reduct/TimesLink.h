@@ -37,7 +37,8 @@ namespace opencog
 class TimesLink : public ArithmeticLink
 {
 protected:
-	ProtoAtomPtr kons(const Handle&, const ProtoAtomPtr&) const;
+	static Handle one;
+	ProtoAtomPtr kons(const ProtoAtomPtr&, const ProtoAtomPtr&) const;
 
 	void init(void);
 
