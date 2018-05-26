@@ -133,20 +133,20 @@ ProtoAtomPtr TimesLink::kons(const ProtoAtomPtr& fi, const ProtoAtomPtr& fj) con
 	Type vjtype = vj->get_type();
 
 	// Swap order, make things easier below.
-	if (FLOAT_VALUE == vitype)
+	if (nameserver().isA(vitype, FLOAT_VALUE))
 	{
 		std::swap(vi, vj);
 		std::swap(vitype, vjtype);
 	}
 
 	// Scalar times vector
-	if (NUMBER_NODE == vitype and FLOAT_VALUE == vjtype)
+	if (NUMBER_NODE == vitype and nameserver().isA(vjtype, FLOAT_VALUE))
 	{
 		return times(get_double(vi), FloatValueCast(vj));
 	}
 
 	// Vector times vector
-	if (FLOAT_VALUE == vitype and FLOAT_VALUE == vjtype)
+	if (nameserver().isA(vitype, FLOAT_VALUE) and nameserver().isA(vjtype, FLOAT_VALUE))
 	{
 		return times(FloatValueCast(vi), FloatValueCast(vj));
 	}
