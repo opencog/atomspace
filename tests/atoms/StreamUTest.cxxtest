@@ -39,6 +39,8 @@ private:
 	
 public:
 
+	double loop(const Handle&);
+
 	void test_basic();
 	void test_times();
 	void test_plus();
@@ -46,6 +48,33 @@ public:
 	void test_minus();
 	void test_divide();
 };
+
+// ====================================================================
+// Run the value, repeatedly.
+double StreamUTest::loop(const Handle& stream)
+{
+
+#define LEN 10
+	FunctionLinkPtr flp = FunctionLinkCast(stream);
+
+	double sum = 0.0;
+#define LOOPCNT 100
+	for (int i=0; i<LOOPCNT; i++)
+	{
+		ProtoAtomPtr pap = flp->execute();
+		const std::vector<double>& rv = StreamValueCast(pap)->value();
+		TS_ASSERT_EQUALS(rv.size(), LEN);
+
+		for (int j=0; j<LEN; j++)
+		{
+printf("duuude %d %g\n", j, rv[j]);
+			sum += rv[j];
+		}
+	}
+
+	sum /= LOOPCNT * LEN;
+	return sum;
+}
 
 // ====================================================================
 // Make sure that streaming works.
@@ -61,23 +90,8 @@ void StreamUTest::test_basic()
 	atom->setValue(key, value);
 
 	Handle valof = al(VALUE_OF_LINK, atom, key);
-	FunctionLinkPtr flp = FunctionLinkCast(valof);
+	double sum = loop(valof);
 
-	double sum = 0.0;
-#define LOOPCNT 100
-	for (int i=0; i<LOOPCNT; i++)
-	{
-		ProtoAtomPtr pap = flp->execute();
-		std::vector<double> rv = StreamValueCast(pap)->value();
-		TS_ASSERT_EQUALS(rv.size(), LEN);
-
-		for (int j=0; j<LEN; j++)
-		{
-			sum += rv[j];
-		}
-	}
-
-	sum /= LOOPCNT * LEN;
 	printf("Expect 0.49 < %g < 0.51\n", sum);
 	TS_ASSERT_LESS_THAN(0.49, sum);
 	TS_ASSERT_LESS_THAN(sum, 0.51);
