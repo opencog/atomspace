@@ -22,7 +22,7 @@
 using namespace opencog;
 
 /**
- * cog-execute! executes an ExecutionOutputLink
+ * cog-execute! executes any/all FunctionLinks
  */
 static Handle ss_execute(AtomSpace* atomspace, const Handle& h)
 {
