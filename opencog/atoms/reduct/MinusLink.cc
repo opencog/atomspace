@@ -28,19 +28,19 @@
 using namespace opencog;
 
 MinusLink::MinusLink(const HandleSeq& oset, Type t)
-    : ArithmeticLink(oset, t)
+    : PlusLink(oset, t)
 {
 	init();
 }
 
 MinusLink::MinusLink(const Handle& a, const Handle& b)
-    : ArithmeticLink({a, b}, MINUS_LINK)
+    : PlusLink({a, b}, MINUS_LINK)
 {
 	init();
 }
 
 MinusLink::MinusLink(const Link& l)
-    : ArithmeticLink(l)
+    : PlusLink(l)
 {
 	init();
 }
@@ -66,17 +66,54 @@ static inline double get_double(const ProtoAtomPtr& pap)
 
 ProtoAtomPtr MinusLink::kons(const ProtoAtomPtr& fi, const ProtoAtomPtr& fj) const
 {
+	Type fitype = fi->get_type();
+	Type fjtype = fj->get_type();
+
 	// Are they numbers?
-	if (NUMBER_NODE == fi->get_type() and
-	    NUMBER_NODE == fj->get_type())
+	if (NUMBER_NODE == fitype and NUMBER_NODE == fjtype)
 	{
 		double diff = get_double(fi) - get_double(fj);
 		return createNumberNode(diff);
 	}
 
 	// If fj is zero, just drop it.
-	if (content_eq(HandleCast(fj), HandleCast(knil)))
+	if (content_eq(HandleCast(fj), zero))
 		return fi;
+
+	// Try to yank out values, if possible.
+	ProtoAtomPtr vi(fi);
+	if (VALUE_OF_LINK == fitype)
+	{
+		vi = FunctionLinkCast(fi)->execute();
+	}
+	Type vitype = vi->get_type();
+
+	ProtoAtomPtr vj(fj);
+	if (VALUE_OF_LINK == fjtype)
+	{
+		vj = FunctionLinkCast(fj)->execute();
+	}
+	Type vjtype = vj->get_type();
+
+	// Scalar minus vector
+	if (NUMBER_NODE == vitype and FLOAT_VALUE == vjtype)
+	{
+		FloatValuePtr mj = FloatValueCast(times(-1.0, FloatValueCast(vj)));
+		return plus(get_double(vi), mj);
+	}
+
+	// Vector minus scalar
+	if (FLOAT_VALUE == vitype and NUMBER_NODE == vjtype)
+	{
+		return plus(-get_double(vj), FloatValueCast(vi));
+	}
+
+	// Vector times vector
+	if (FLOAT_VALUE == vitype and FLOAT_VALUE == vjtype)
+	{
+		FloatValuePtr mj = FloatValueCast(times(-1.0, FloatValueCast(vj)));
+		return plus(FloatValueCast(vi), mj);
+	}
 
 	// If we are here, we've been asked to subtract two things,
 	// but they are not of a type that we know how to subtract.
