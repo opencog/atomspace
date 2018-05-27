@@ -317,7 +317,7 @@ SCM SchemeSmob::ss_value_to_list (SCM svalue)
 	ProtoAtomPtr pa(verify_protom(svalue, "cog-value->list"));
 	Type t = pa->get_type();
 
-	if (FLOAT_VALUE == t)
+	if (nameserver().isA(t, FLOAT_VALUE))
 	{
 		const std::vector<double>& v = FloatValueCast(pa)->value();
 		CPPL_TO_SCML(v, scm_from_double)
@@ -356,7 +356,7 @@ SCM SchemeSmob::ss_value_ref (SCM svalue, SCM sindex)
    size_t index = verify_size(sindex, "cog-value-ref", 2);
 	Type t = pa->get_type();
 
-	if (FLOAT_VALUE == t)
+	if (nameserver().isA(t, FLOAT_VALUE))
 	{
 		const std::vector<double>& v = FloatValueCast(pa)->value();
 		if (index < v.size()) return scm_from_double(v[index]);
