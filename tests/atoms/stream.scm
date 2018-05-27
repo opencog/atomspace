@@ -8,6 +8,6 @@
 (define tym (Times (Plus vo (Number 6)) (Number 2)))
 
 (define b (Concept "other atom"))
-(cog-set-value! b k (RandomStream 4))
+(cog-set-value! b k (RandomStream 24))
 
-(define tymb (Number 2) (Times (Plus (ValueOf b k) (Number 6)) ))
+(define tymb (Times (Number 2) (Plus (ValueOf b k) (Number 6)) ))
