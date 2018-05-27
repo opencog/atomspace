@@ -37,7 +37,7 @@ RandomStream::RandomStream(int len) :
 
 void RandomStream::update() const
 {
-	static thread_local unsigned short xsubi[3];
+	static thread_local unsigned short xsubi[3] = {0, 0, 0};
 	for (int i=0; i< _len; i++)
 	{
 		_value[i] = erand48(xsubi);

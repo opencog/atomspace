@@ -332,7 +332,7 @@ void ValueOfUTest::test_divide()
 
 	Handle valof = al(VALUE_OF_LINK, atom, key);
 
-	// x/2 --------------------------------------------
+	// x/4 --------------------------------------------
 	Handle divide = al(DIVIDE_LINK, valof, an(NUMBER_NODE, "4"));
 
 	ProtoAtomPtr result = FunctionLinkCast(divide)->execute();
