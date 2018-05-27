@@ -92,12 +92,9 @@ bool Instantiator::walk_sequence(HandleSeq& oset_results,
 		}
 		else
 		{
-			// It could be a NULL handle if it's deleted... Just skip
-			// over it. We test the pointer here, not the uuid, since
-			// the uuid's are all Handle::UNDEFINED until we put them
-			// into the atomspace.
-			if (NULL != hg)
-				oset_results.emplace_back(hg);
+			// It could be a NULL handle if it's deleted...
+			// Just skip over it.
+			if (hg) oset_results.emplace_back(hg);
 		}
 	}
 	return changed;
@@ -538,27 +535,34 @@ ProtoAtomPtr Instantiator::instantiate(const Handle& expr,
 
 	_vmap = &vars;
 
-	// Most of tthe work happens in walk_tree (which returns a Handle
+	// Most of the work happens in walk_tree (which returns a Handle
 	// to the instantiaged tree). However, special-case the handling
 	// of expr being a FunctionLink - this can return a Value, which
 	// walk_tree cannot grok.
 	Type t = expr->get_type();
-	if (MAP_LINK != t and
-	    EXECUTION_OUTPUT_LINK != t and
-	    nameserver().isA(t, FUNCTION_LINK))
+	if (VALUE_OF_LINK == t or
+	   nameserver().isA(t, ARITHMETIC_LINK))
 	{
-		// Perform substitution on all arguments before applying the
-		// function itself. XXX FIXME -- We can almost but not quite
-		// avoid eager execution here ... however, many links, e.g.
-		// the RandomChoiceLink will typically take a GetLink as an
-		// argument, and, due to the stupid, fucked-up CMake
-		// shared-library dependency problem, we cannot get
-		// FunctionLinks to perform thier own evaluation of arguments.
-		// So we have to do eager evaluation, here.  This stinks, and
-		// needs fixing.
+		// Perform substitution on non-numeric arguments before
+		// applying the function itself.  We should not do any
+		// eager evaluation here, for the numeric functions, as
+		// these might be working with values, not atoms.
+		//
 		HandleSeq oset_results;
-		walk_sequence(oset_results, expr->getOutgoingSet(), silent);
-
+		for (const Handle& h: expr->getOutgoingSet())
+		{
+			Type th = h->get_type();
+			if (VALUE_OF_LINK == th or
+			   nameserver().isA(th, ARITHMETIC_LINK))
+			{
+			   oset_results.push_back(h);
+			}
+			else
+			{
+				Handle hg(walk_tree(h, silent));
+				if (hg) oset_results.push_back(hg);
+			}
+		}
 		FunctionLinkPtr flp(FunctionLinkCast(createLink(oset_results, t)));
 		ProtoAtomPtr pap(flp->execute());
 		if (pap->is_atom())
