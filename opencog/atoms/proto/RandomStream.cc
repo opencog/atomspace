@@ -49,7 +49,7 @@ void RandomStream::update() const
 std::string RandomStream::to_string(const std::string& indent) const
 {
 	std::string rv = indent + "(" + nameserver().getTypeName(_type);
-	// rv += to_string(_len);
+	rv += " " + std::to_string(_len);
 	rv += ")\n";
 	return rv;
 }
