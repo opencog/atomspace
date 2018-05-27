@@ -22,6 +22,7 @@
 
 #include <opencog/atoms/core/ValueOfLink.h>
 #include <opencog/atoms/execution/Instantiator.h>
+#include <opencog/guile/SchemeEval.h>
 #include <opencog/atoms/proto/RandomStream.h>
 #include <opencog/atomspace/AtomSpace.h>
 
@@ -52,6 +53,8 @@ public:
 	void test_times_plus();
 	void test_minus();
 	void test_divide();
+
+	void test_guile();
 };
 
 // This unit test is a stand-in test for the concept of a streaming API
@@ -289,6 +292,36 @@ void StreamUTest::test_divide()
 	printf("Expect 0.99 < %g < 1.01\n", sum);
 	TS_ASSERT_LESS_THAN(0.99, sum);
 	TS_ASSERT_LESS_THAN(sum, 1.01);
+
+	logger().debug("END TEST: %s", __FUNCTION__);
+}
+
+// ====================================================================
+// Make sure the scheme bindings work.
+void StreamUTest::test_guile()
+{
+	logger().debug("BEGIN TEST: %s", __FUNCTION__);
+
+	SchemeEval eval(&_as);
+	eval.eval("(add-to-load-path \"" PROJECT_SOURCE_DIR "\")");
+
+	FloatValuePtr voex = createFloatValue(std::vector<double>{1.0, 2.0, 3.0});
+	ProtoAtomPtr vo = eval.eval_v("vo");
+	TS_ASSERT(*voex == *FloatValueCast(vo));
+
+	FloatValuePtr tymex = createFloatValue(std::vector<double>{14.0, 16.0, 18.0});
+	ProtoAtomPtr tym = eval.eval_v("tym");
+	TS_ASSERT(*tymex == *FloatValueCast(tym));
+
+	ProtoAtomPtr tymb = eval.eval_v("tymb");
+	FloatValuePtr ftymb = FloatValueCast(tymb);
+	const std::vector<double>& vals = ftymb->value();
+
+	for (int i=0; i< 4; i++)
+	{
+		TS_ASSERT_LESS_THAN(11.99999, vals[i]);
+		TS_ASSERT_LESS_THAN(vals[i], 14.000001);
+	}
 
 	logger().debug("END TEST: %s", __FUNCTION__);
 }

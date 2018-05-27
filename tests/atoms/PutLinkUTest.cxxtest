@@ -1248,11 +1248,11 @@ void PutLinkUTest::test_nested_1()
 {
 	logger().info("BEGIN TEST: %s", __FUNCTION__);
 
-	std::string rs = _eval.eval("(load-from-path \"tests/atoms/nested-put.scm\")");
+	std::string rs = _eval.eval("(load-from-path \"tests/atoms/put-nested.scm\")");
 	logger().debug() << "rs = " << rs;
 
 	Instantiator inst(&_as);
-	Handle nested_put = _eval.eval_h("nested-put-1"),
+	Handle nested_put = _eval.eval_h("put-nested-1"),
 		result = HandleCast(inst.execute(nested_put)),
 		expected = _eval.eval_h("expected-1");
 
@@ -1305,10 +1305,10 @@ void PutLinkUTest::test_nested_2()
 {
 	logger().info("BEGIN TEST: %s", __FUNCTION__);
 
-	std::string rs = _eval.eval("(load-from-path \"tests/atoms/nested-put.scm\")");
+	std::string rs = _eval.eval("(load-from-path \"tests/atoms/put-nested.scm\")");
 	logger().debug() << "rs = " << rs;
 
-	Handle nested = _eval.eval_h("nested-put-2");
+	Handle nested = _eval.eval_h("put-nested-2");
 	Handle expected = _eval.eval_h("expected-2");
 
 	Instantiator inst(&_as);
@@ -1344,11 +1344,11 @@ void PutLinkUTest::test_nested_3()
 {
 	logger().info("BEGIN TEST: %s", __FUNCTION__);
 
-	std::string rs = _eval.eval("(load-from-path \"tests/atoms/nested-put.scm\")");
+	std::string rs = _eval.eval("(load-from-path \"tests/atoms/put-nested.scm\")");
 	logger().debug() << "rs = " << rs;
 
 	Instantiator inst(&_as);
-	Handle nested_put = _eval.eval_h("nested-put-3");
+	Handle nested_put = _eval.eval_h("put-nested-3");
 
 	TS_ASSERT_THROWS_ANYTHING(HandleCast(inst.execute(nested_put, true)));
 
@@ -1376,11 +1376,11 @@ void PutLinkUTest::test_nested_4()
 {
 	logger().info("BEGIN TEST: %s", __FUNCTION__);
 
-	std::string rs = _eval.eval("(load-from-path \"tests/atoms/nested-put.scm\")");
+	std::string rs = _eval.eval("(load-from-path \"tests/atoms/put-nested.scm\")");
 	logger().debug() << "rs = " << rs;
 
 	Instantiator inst(&_as);
-	Handle nested_put = _eval.eval_h("nested-put-4");
+	Handle nested_put = _eval.eval_h("put-nested-4");
 
 	TS_ASSERT_THROWS_ANYTHING(HandleCast(inst.execute(nested_put, true)));
 
@@ -1434,7 +1434,7 @@ void PutLinkUTest::test_nested_5()
 {
 	logger().info("BEGIN TEST: %s", __FUNCTION__);
 
-	std::string rs = _eval.eval("(load-from-path \"tests/atoms/nested-put.scm\")");
+	std::string rs = _eval.eval("(load-from-path \"tests/atoms/put-nested.scm\")");
 	logger().debug() << "rs = " << rs;
 
 	Instantiator inst(&_as);
@@ -1447,7 +1447,7 @@ void PutLinkUTest::test_nested_5()
 
 	TS_ASSERT_EQUALS(result, expected);
 
-	Handle nested_put = _eval.eval_h("nested-put-5");
+	Handle nested_put = _eval.eval_h("put-nested-5");
 	result = HandleCast(inst.execute(nested_put));
 
 	logger().debug() << "result = " << oc_to_string(result);

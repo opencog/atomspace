@@ -538,7 +538,16 @@ ProtoAtomPtr Instantiator::instantiate(const Handle& expr,
 	// Most of the work happens in walk_tree (which returns a Handle
 	// to the instantiaged tree). However, special-case the handling
 	// of expr being a FunctionLink - this can return a Value, which
-	// walk_tree cannot grok.
+	// walk_tree cannot grok.  XXX This is all very kind-of hacky.
+	// A proper solution would convert walk_tree to return ProtoAtomPtr's
+	// instead of Handles. However, it seems this would require lots
+	// of upcasting, which is horribly slow. So it seems better to
+	// hold off on a "good fix", until the instantiate-to-values
+	// experiment progresses further.  More generally, there are
+	// several blockers:
+	// * Circular shared-lib dependencies prevent lazy evaluation
+	// * The need to instantiate in an atomspace (viz GetLink)
+	//   impedes lazy evaluations.
 	Type t = expr->get_type();
 	if (VALUE_OF_LINK == t or
 	   nameserver().isA(t, ARITHMETIC_LINK))
