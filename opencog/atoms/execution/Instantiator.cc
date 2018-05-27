@@ -538,6 +538,34 @@ ProtoAtomPtr Instantiator::instantiate(const Handle& expr,
 
 	_vmap = &vars;
 
+	// Most of tthe work happens in walk_tree (which returns a Handle
+	// to the instantiaged tree). However, special-case the handling
+	// of expr being a FunctionLink - this can return a Value, which
+	// walk_tree cannot grok.
+	Type t = expr->get_type();
+	if (MAP_LINK != t and
+	    EXECUTION_OUTPUT_LINK != t and
+	    nameserver().isA(t, FUNCTION_LINK))
+	{
+		// Perform substitution on all arguments before applying the
+		// function itself. XXX FIXME -- We can almost but not quite
+		// avoid eager execution here ... however, many links, e.g.
+		// the RandomChoiceLink will typically take a GetLink as an
+		// argument, and, due to the stupid, fucked-up CMake
+		// shared-library dependency problem, we cannot get
+		// FunctionLinks to perform thier own evaluation of arguments.
+		// So we have to do eager evaluation, here.  This stinks, and
+		// needs fixing.
+		HandleSeq oset_results;
+		walk_sequence(oset_results, expr->getOutgoingSet(), silent);
+
+		FunctionLinkPtr flp(FunctionLinkCast(createLink(oset_results, t)));
+		ProtoAtomPtr pap(flp->execute());
+		if (pap->is_atom())
+			return _as->add_atom(HandleCast(pap));
+		return pap;
+	}
+
 	// The returned handle is not yet in the atomspace. Add it now.
 	// We do this here, instead of in walk_tree(), because adding
 	// atoms to the atomspace is an expensive process.  We can save
