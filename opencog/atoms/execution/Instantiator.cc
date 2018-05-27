@@ -524,7 +524,7 @@ bool Instantiator::not_self_match(Type t)
  * with their values, creating a new expression. The new expression is
  * added to the atomspace, and its handle is returned.
  */
-Handle Instantiator::instantiate(const Handle& expr,
+ProtoAtomPtr Instantiator::instantiate(const Handle& expr,
                                  const HandleMap &vars,
                                  bool silent)
 {
