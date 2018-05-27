@@ -323,7 +323,7 @@ bool MapLink::extract(const Handle& termpat,
 Handle MapLink::rewrite_one(const Handle& cterm, AtomSpace* scratch) const
 {
 	Instantiator inst(scratch);
-	Handle term(inst.execute(cterm));
+	Handle term(HandleCast(inst.execute(cterm)));
 
 	// Extract values for variables.
 	HandleMap valmap;
@@ -354,7 +354,7 @@ Handle MapLink::rewrite_one(const Handle& cterm, AtomSpace* scratch) const
 		// Beta reduce, and execute. No type-checking during
 		// beta-reduction; we've already done that.
 		Handle red(_mvars->substitute_nocheck(_rewrite, valseq));
-		return inst.execute(red);
+		return HandleCast(inst.execute(red));
 	}
 
 	// Make sure each variable is grounded. (for real, this time)

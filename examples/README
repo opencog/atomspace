@@ -3,14 +3,19 @@ AtomSpace Examples
 
 This directory contains various examples that use the AtomSpace
 
-guile           - Guile (scheme) usage examples
+atomspace       - Demos of all of the basic AtomSpace features and
+                  functions. All demos are in scheme.
 
-python          - Python usage examples
+haskell         - Haskell usage examples.
+python          - Python usage examples.
 
 pattern-matcher - Example code demonstrating the graph query system.
-                  It shows how to search for data fitting a pattern,
-                  how to search for patterns fitting data, and how
-                  to trigger actions when these are found.
+                  It shows how to search for data that fits a pattern,
+                  how to search for patterns that fit the data, and
+                  how to trigger actions when these are found.
+
+persist         - How to save and restore the contents of the AtomSpace,
+                  and how to access the database in piecemeal fashion.
 
 rule-engine     - Provide example of a simple crisp inference system
                   using the unified rule engine.

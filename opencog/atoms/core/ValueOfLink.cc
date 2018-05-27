@@ -22,7 +22,6 @@
  */
 
 #include "FunctionLink.h"
-#include "NumberNode.h"
 #include "ValueOfLink.h"
 
 using namespace opencog;
@@ -58,8 +57,7 @@ ProtoAtomPtr ValueOfLink::execute() const
 {
 	size_t ary = _outgoing.size();
 	if (2 != ary)
-		throw SyntaxException(TRACE_INFO,
-			"Expecting two atoms!\n");
+		throw SyntaxException(TRACE_INFO, "Expecting two atoms!");
 
 	return _outgoing[0]->getValue(_outgoing[1]);
 }

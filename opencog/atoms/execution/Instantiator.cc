@@ -92,12 +92,9 @@ bool Instantiator::walk_sequence(HandleSeq& oset_results,
 		}
 		else
 		{
-			// It could be a NULL handle if it's deleted... Just skip
-			// over it. We test the pointer here, not the uuid, since
-			// the uuid's are all Handle::UNDEFINED until we put them
-			// into the atomspace.
-			if (NULL != hg)
-				oset_results.emplace_back(hg);
+			// It could be a NULL handle if it's deleted...
+			// Just skip over it.
+			if (hg) oset_results.emplace_back(hg);
 		}
 	}
 	return changed;
@@ -524,7 +521,7 @@ bool Instantiator::not_self_match(Type t)
  * with their values, creating a new expression. The new expression is
  * added to the atomspace, and its handle is returned.
  */
-Handle Instantiator::instantiate(const Handle& expr,
+ProtoAtomPtr Instantiator::instantiate(const Handle& expr,
                                  const HandleMap &vars,
                                  bool silent)
 {
@@ -537,6 +534,50 @@ Handle Instantiator::instantiate(const Handle& expr,
 	_needless_quotation = true;
 
 	_vmap = &vars;
+
+	// Most of the work happens in walk_tree (which returns a Handle
+	// to the instantiaged tree). However, special-case the handling
+	// of expr being a FunctionLink - this can return a Value, which
+	// walk_tree cannot grok.  XXX This is all very kind-of hacky.
+	// A proper solution would convert walk_tree to return ProtoAtomPtr's
+	// instead of Handles. However, it seems this would require lots
+	// of upcasting, which is horribly slow. So it seems better to
+	// hold off on a "good fix", until the instantiate-to-values
+	// experiment progresses further.  More generally, there are
+	// several blockers:
+	// * Circular shared-lib dependencies prevent lazy evaluation
+	// * The need to instantiate in an atomspace (viz GetLink)
+	//   impedes lazy evaluations.
+	Type t = expr->get_type();
+	if (VALUE_OF_LINK == t or
+	   nameserver().isA(t, ARITHMETIC_LINK))
+	{
+		// Perform substitution on non-numeric arguments before
+		// applying the function itself.  We should not do any
+		// eager evaluation here, for the numeric functions, as
+		// these might be working with values, not atoms.
+		//
+		HandleSeq oset_results;
+		for (const Handle& h: expr->getOutgoingSet())
+		{
+			Type th = h->get_type();
+			if (VALUE_OF_LINK == th or
+			   nameserver().isA(th, ARITHMETIC_LINK))
+			{
+			   oset_results.push_back(h);
+			}
+			else
+			{
+				Handle hg(walk_tree(h, silent));
+				if (hg) oset_results.push_back(hg);
+			}
+		}
+		FunctionLinkPtr flp(FunctionLinkCast(createLink(oset_results, t)));
+		ProtoAtomPtr pap(flp->execute());
+		if (pap->is_atom())
+			return _as->add_atom(HandleCast(pap));
+		return pap;
+	}
 
 	// The returned handle is not yet in the atomspace. Add it now.
 	// We do this here, instead of in walk_tree(), because adding

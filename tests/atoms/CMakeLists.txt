@@ -48,4 +48,4 @@ ADD_CXXTEST(ValueOfUTest)
 TARGET_LINK_LIBRARIES(ValueOfUTest clearbox execution atomspace)
 
 ADD_CXXTEST(StreamUTest)
-TARGET_LINK_LIBRARIES(StreamUTest clearbox execution atomspace)
+TARGET_LINK_LIBRARIES(StreamUTest clearbox execution smob atomspace)

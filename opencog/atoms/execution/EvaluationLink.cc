@@ -132,8 +132,8 @@ static TruthValuePtr greater(AtomSpace* as, const Handle& h)
 		     "GreaterThankLink expects two arguments");
 
 	Instantiator inst(as);
-	Handle h1(inst.execute(oset[0]));
-	Handle h2(inst.execute(oset[1]));
+	Handle h1(HandleCast(inst.execute(oset[0])));
+	Handle h2(HandleCast(inst.execute(oset[1])));
 
 	NumberNodePtr n1(unwrap_set(h1));
 	NumberNodePtr n2(unwrap_set(h2));
@@ -167,8 +167,8 @@ static TruthValuePtr equal(AtomSpace* as, const Handle& h, bool silent)
 		     "EqualLink expects two arguments");
 
 	Instantiator inst(as);
-	Handle h0(inst.execute(oset[0], silent));
-	Handle h1(inst.execute(oset[1], silent));
+	Handle h0(HandleCast(inst.execute(oset[0], silent)));
+	Handle h1(HandleCast(inst.execute(oset[1], silent)));
 
 	if (h0 == h1)
 		return TruthValue::TRUE_TV();
@@ -274,7 +274,7 @@ TruthValuePtr EvaluationLink::do_eval_scratch(AtomSpace* as,
 
 		// The arguments may need to be executed...
 		Instantiator inst(scratch);
-		Handle args(inst.execute(sna.at(1), silent));
+		Handle args(HandleCast(inst.execute(sna.at(1), silent)));
 
 		return do_evaluate(scratch, sna.at(0), args, silent);
 	}
@@ -421,7 +421,7 @@ TruthValuePtr EvaluationLink::do_eval_scratch(AtomSpace* as,
 			else
 			{
 				Instantiator inst(as);
-				Handle result(inst.execute(term, silent));
+				Handle result(HandleCast(inst.execute(term, silent)));
 				scratch->add_atom(result);
 			}
 		}
@@ -451,7 +451,7 @@ TruthValuePtr EvaluationLink::do_eval_scratch(AtomSpace* as,
 		Handle pvals = pl->get_values();
 		Instantiator inst(as);
 		// Step (1)
-		Handle gvals = inst.execute(pvals, silent);
+		Handle gvals(HandleCast(inst.execute(pvals, silent)));
 		if (gvals != pvals)
 		{
 			as->add_atom(gvals);

@@ -11,8 +11,8 @@ int Exec_execute(AtomSpace* atomspace, Handle* handle,Handle* out)
 {
     Handle h = *handle;
     Instantiator inst(atomspace);
-	Handle rh(inst.execute(h));
-	if (nullptr != rh) {
+    Handle rh(HandleCast(inst.execute(h)));
+    if (nullptr != rh) {
 		rh = atomspace->add_atom(rh);
         *out = rh;
         return 0;

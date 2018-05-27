@@ -115,7 +115,7 @@ void PutLinkUTest::test_define()
 		N(CONCEPT_NODE, "bbb"));
 
 	Instantiator inst(&_as);
-	Handle putted = inst.execute(put);
+	Handle putted = HandleCast(inst.execute(put));
 
 	Handle pat =
 	L(INHERITANCE_LINK,
@@ -157,7 +157,7 @@ void PutLinkUTest::test_filtering()
 
 	// Test that execution filters as desired...
 	Instantiator inst(&_as);
-	Handle cncpts = inst.execute(filt);
+	Handle cncpts = HandleCast(inst.execute(filt));
 
 	printf("Filtered %s\n", cncpts->to_string().c_str());
 	TS_ASSERT_EQUALS(SET_LINK, cncpts->get_type());
@@ -183,7 +183,7 @@ void PutLinkUTest::test_function()
 			L(PLUS_LINK),
 			L(LIST_LINK, N(NUMBER_NODE, "2"), N(NUMBER_NODE, "2")));
 
-	Handle four = inst.execute(want_four);
+	Handle four = HandleCast(inst.execute(want_four));
 	Handle expected_four = N(NUMBER_NODE, "4");
 
 	printf("Expecting %s\n", expected_four->to_string().c_str());
@@ -195,7 +195,7 @@ void PutLinkUTest::test_function()
 	Handle want_two =
 		L(PUT_LINK, L(PLUS_LINK), N(NUMBER_NODE, "2"));
 
-	Handle two = inst.execute(want_two);
+	Handle two = HandleCast(inst.execute(want_two));
 	Handle expected_two = N(NUMBER_NODE, "2");
 
 	printf("Expecting %s\n", expected_two->to_string().c_str());
@@ -209,7 +209,7 @@ void PutLinkUTest::test_function()
 			L(PLUS_LINK, N(NUMBER_NODE, "9")),
 			L(LIST_LINK, N(NUMBER_NODE, "2"), N(NUMBER_NODE, "2")));
 
-	Handle thirteen = inst.execute(want_thirteen);
+	Handle thirteen = HandleCast(inst.execute(want_thirteen));
 	Handle expected_thirteen = N(NUMBER_NODE, "13");
 
 	printf("Expecting %s\n", expected_thirteen->to_string().c_str());
@@ -223,7 +223,7 @@ void PutLinkUTest::test_function()
 			L(PLUS_LINK, N(NUMBER_NODE, "3"), N(NUMBER_NODE, "5")),
 			L(LIST_LINK, N(NUMBER_NODE, "2"), N(NUMBER_NODE, "2")));
 
-	Handle twelve = inst.execute(want_twelve);
+	Handle twelve = HandleCast(inst.execute(want_twelve));
 	Handle expected_twelve = N(NUMBER_NODE, "12");
 
 	printf("Expecting %s\n", expected_twelve->to_string().c_str());
@@ -252,7 +252,7 @@ void PutLinkUTest::test_function()
 					             N(NUMBER_NODE, "4"),
 					             N(NUMBER_NODE, "4"))));
 
-	Handle set = inst.execute(want_set);
+	Handle set = HandleCast(inst.execute(want_set));
 	Handle expected_set =
 		L(SET_LINK,
 			N(NUMBER_NODE, "1"),
@@ -284,7 +284,7 @@ void PutLinkUTest::test_free_var_renaming()
 				N(VARIABLE_NODE, "$b")));
 
 	Instantiator inst(&_as);
-	Handle putted = inst.execute(put);
+	Handle putted = HandleCast(inst.execute(put));
 
 	Handle expected_putted =
 		L(INHERITANCE_LINK,
@@ -320,7 +320,7 @@ void PutLinkUTest::test_lambda()
 				N(CONCEPT_NODE, "coyote")));
 
 	Instantiator inst(&_as);
-	Handle putted = inst.execute(put);
+	Handle putted = HandleCast(inst.execute(put));
 
 	Handle expected_putted =
 		L(INHERITANCE_LINK,
@@ -355,7 +355,7 @@ void PutLinkUTest::test_lambda_partial_substitution()
 			N(CONCEPT_NODE, "animal"));
 
 	Instantiator inst(&_as);
-	Handle putted = inst.execute(put);
+	Handle putted = HandleCast(inst.execute(put));
 
 	// (Inheritance (Concept "animal") (Variable "$y"))
 	Handle expected_putted =
@@ -425,7 +425,7 @@ void PutLinkUTest::test_eta()
 					N(VARIABLE_NODE, "$w"))));
 
 	Instantiator inst(&_as);
-	Handle putted = inst.execute(put);
+	Handle putted = HandleCast(inst.execute(put));
 
 	Handle expected_putted =
 		L(LAMBDA_LINK,
@@ -483,7 +483,7 @@ void PutLinkUTest::test_alpha()
 				N(VARIABLE_NODE, "$w")));
 
 	Instantiator inst(&_as);
-	Handle putted = inst.execute(put);
+	Handle putted = HandleCast(inst.execute(put));
 
 	Handle expected_putted =
 		L(LAMBDA_LINK,
@@ -526,7 +526,7 @@ void PutLinkUTest::test_compose()
 		L(PUT_LINK, gee, eff);
 
 	Instantiator inst(&_as);
-	Handle putted = inst.execute(put);
+	Handle putted = HandleCast(inst.execute(put));
 
 	Handle expected_putted =
 		L(LAMBDA_LINK,
@@ -590,7 +590,7 @@ void PutLinkUTest::test_inject_compose()
 	Handle put = L(PUT_LINK, gee, eff);
 
 	Instantiator inst(&_as);
-	Handle putted = inst.execute(put);
+	Handle putted = HandleCast(inst.execute(put));
 
 	Handle expected_putted =
 		L(LAMBDA_LINK,
@@ -647,7 +647,7 @@ void PutLinkUTest::test_simple_alpha()
 	Handle put = L(PUT_LINK, gee, eff);
 
 	Instantiator inst(&_as);
-	Handle putted = inst.execute(put);
+	Handle putted = HandleCast(inst.execute(put));
 
 	Handle expected_putted =
 		L(LAMBDA_LINK,
@@ -711,7 +711,7 @@ void PutLinkUTest::test_simple_replace()
 	Handle put = L(PUT_LINK, gee, eff);
 
 	Instantiator inst(&_as);
-	Handle putted = inst.execute(put);
+	Handle putted = HandleCast(inst.execute(put));
 
 	Handle expected_putted =
 		L(AND_LINK,
@@ -769,7 +769,7 @@ void PutLinkUTest::test_typed_compose()
 		L(PUT_LINK, gee, eff);
 
 	Instantiator inst(&_as);
-	Handle putted = inst.execute(put);
+	Handle putted = HandleCast(inst.execute(put));
 
 	Handle expected_putted =
 		L(LAMBDA_LINK,
@@ -803,7 +803,7 @@ void PutLinkUTest::test_typed_compose()
 	try
 	{
 		put = L(PUT_LINK, gahhh, eff);
-		inst.execute(put);
+		HandleCast(inst.execute(put));
 	}
 	catch(const StandardException& ex)
 	{
@@ -854,7 +854,7 @@ void PutLinkUTest::test_ident_compose()
 		L(PUT_LINK, gee, L(LIST_LINK, ident, eff));
 
 	Instantiator inst(&_as);
-	Handle putted = inst.execute(put);
+	Handle putted = HandleCast(inst.execute(put));
 
 	Handle expected_putted =
 		L(LAMBDA_LINK,
@@ -937,7 +937,7 @@ void PutLinkUTest::test_recursive_compose()
 			L(LIST_LINK, ident, L(PUT_LINK, eff, inject)));
 
 	Instantiator inst(&_as);
-	Handle putted = inst.execute(put);
+	Handle putted = HandleCast(inst.execute(put));
 
 	Handle expected_putted =
 		L(LAMBDA_LINK,
@@ -1028,7 +1028,7 @@ void PutLinkUTest::test_eval_inheritance()
 		put = L(PUT_LINK, L(LAMBDA_LINK, vardecl, body), args);
 
 	Instantiator inst(&_as);
-	Handle putted = inst.execute(put);
+	Handle putted = HandleCast(inst.execute(put));
 	Handle expected = L(AND_LINK, Self_human, Bob_human, Self_Bob_acquainted);
 
 	printf("Expecting %s\n", expected->to_string().c_str());
@@ -1081,7 +1081,7 @@ void PutLinkUTest::test_eval_implication_1()
 		put = L(PUT_LINK, L(LAMBDA_LINK, vardecl, body), A);
 
 	Instantiator inst(&_as);
-	Handle putted = inst.execute(put);
+	Handle putted = HandleCast(inst.execute(put));
 	Handle expected = L(IMPLICATION_SCOPE_LINK, P_A, P_A);
 
 	printf("Executing %s\n", put->to_string().c_str());
@@ -1162,7 +1162,7 @@ void PutLinkUTest::test_eval_implication_2()
 		put = L(PUT_LINK, L(LAMBDA_LINK, vardecl, body), args);
 
 	Instantiator inst(&_as);
-	Handle putted = inst.execute(put);
+	Handle putted = HandleCast(inst.execute(put));
 	Handle expected = L(AND_LINK, Self_human, Bob_human, Self_Bob_acquainted);
 
 	printf("Executing %s\n", put->to_string().c_str());
@@ -1211,7 +1211,7 @@ void PutLinkUTest::test_ill_unquote()
 		          L(UNQUOTE_LINK, g)));
 
 	Instantiator inst(&_as);
-	TS_ASSERT_THROWS_ANYTHING(inst.execute(put));
+	TS_ASSERT_THROWS_ANYTHING(HandleCast(inst.execute(put)));
 
 	logger().info("END TEST: %s", __FUNCTION__);
 }
@@ -1248,12 +1248,12 @@ void PutLinkUTest::test_nested_1()
 {
 	logger().info("BEGIN TEST: %s", __FUNCTION__);
 
-	std::string rs = _eval.eval("(load-from-path \"tests/atoms/nested-put.scm\")");
+	std::string rs = _eval.eval("(load-from-path \"tests/atoms/put-nested.scm\")");
 	logger().debug() << "rs = " << rs;
 
 	Instantiator inst(&_as);
 	Handle nested_put = _eval.eval_h("nested-put-1"),
-		result = inst.execute(nested_put),
+		result = HandleCast(inst.execute(nested_put)),
 		expected = _eval.eval_h("expected-1");
 
 	logger().debug() << "result = " << oc_to_string(result);
@@ -1305,14 +1305,14 @@ void PutLinkUTest::test_nested_2()
 {
 	logger().info("BEGIN TEST: %s", __FUNCTION__);
 
-	std::string rs = _eval.eval("(load-from-path \"tests/atoms/nested-put.scm\")");
+	std::string rs = _eval.eval("(load-from-path \"tests/atoms/put-nested.scm\")");
 	logger().debug() << "rs = " << rs;
 
 	Handle nested = _eval.eval_h("nested-put-2");
 	Handle expected = _eval.eval_h("expected-2");
 
 	Instantiator inst(&_as);
-	Handle result = inst.execute(nested);
+	Handle result = HandleCast(inst.execute(nested));
 
 	logger().debug() << "result = " << oc_to_string(result);
 	logger().debug() << "expected = " << oc_to_string(expected);
@@ -1344,13 +1344,13 @@ void PutLinkUTest::test_nested_3()
 {
 	logger().info("BEGIN TEST: %s", __FUNCTION__);
 
-	std::string rs = _eval.eval("(load-from-path \"tests/atoms/nested-put.scm\")");
+	std::string rs = _eval.eval("(load-from-path \"tests/atoms/put-nested.scm\")");
 	logger().debug() << "rs = " << rs;
 
 	Instantiator inst(&_as);
 	Handle nested_put = _eval.eval_h("nested-put-3");
 
-	TS_ASSERT_THROWS_ANYTHING(inst.execute(nested_put, true));
+	TS_ASSERT_THROWS_ANYTHING(HandleCast(inst.execute(nested_put, true)));
 
 	logger().info("END TEST: %s", __FUNCTION__);
 }
@@ -1376,13 +1376,13 @@ void PutLinkUTest::test_nested_4()
 {
 	logger().info("BEGIN TEST: %s", __FUNCTION__);
 
-	std::string rs = _eval.eval("(load-from-path \"tests/atoms/nested-put.scm\")");
+	std::string rs = _eval.eval("(load-from-path \"tests/atoms/put-nested.scm\")");
 	logger().debug() << "rs = " << rs;
 
 	Instantiator inst(&_as);
 	Handle nested_put = _eval.eval_h("nested-put-4");
 
-	TS_ASSERT_THROWS_ANYTHING(inst.execute(nested_put, true));
+	TS_ASSERT_THROWS_ANYTHING(HandleCast(inst.execute(nested_put, true)));
 
 	logger().info("END TEST: %s", __FUNCTION__);
 }
@@ -1434,12 +1434,12 @@ void PutLinkUTest::test_nested_5()
 {
 	logger().info("BEGIN TEST: %s", __FUNCTION__);
 
-	std::string rs = _eval.eval("(load-from-path \"tests/atoms/nested-put.scm\")");
+	std::string rs = _eval.eval("(load-from-path \"tests/atoms/put-nested.scm\")");
 	logger().debug() << "rs = " << rs;
 
 	Instantiator inst(&_as);
 	Handle simple_put = _eval.eval_h("simple-put-5");
-	Handle result = inst.execute(simple_put);
+	Handle result = HandleCast(inst.execute(simple_put));
 	Handle expected = _eval.eval_h("expected-5");
 
 	logger().debug() << "result = " << oc_to_string(result);
@@ -1448,7 +1448,7 @@ void PutLinkUTest::test_nested_5()
 	TS_ASSERT_EQUALS(result, expected);
 
 	Handle nested_put = _eval.eval_h("nested-put-5");
-	result = inst.execute(nested_put);
+	result = HandleCast(inst.execute(nested_put));
 
 	logger().debug() << "result = " << oc_to_string(result);
 	logger().debug() << "expected = " << oc_to_string(expected);
@@ -1501,7 +1501,7 @@ void PutLinkUTest::test_and_compose_1()
 		and_sha_abs = _eval.eval_h("and-shallow-abstraction"),
 		put_top_and = L(PUT_LINK, top,
 		                and_sha_abs),
-		result = inst.execute(put_top_and),
+		result = HandleCast(inst.execute(put_top_and)),
 		expected = and_sha_abs;
 
 	logger().debug() << "result = " << oc_to_string(result);
@@ -1564,7 +1564,7 @@ void PutLinkUTest::test_and_compose_2()
 		sha_var_2 = N(VARIABLE_NODE, "$sha-arg-1"),
 		put_inh_and = L(PUT_LINK, inh_sha_abs,
 		                L(LIST_LINK, spe_var, and_sha_abs)),
-		result = inst.execute(put_inh_and),
+		result = HandleCast(inst.execute(put_inh_and)),
 		expected = L(LAMBDA_LINK,
 		             L(VARIABLE_LIST,
 		               spe_var,
@@ -1644,7 +1644,7 @@ void PutLinkUTest::test_nested_6()
 	                              "        (VariableNode \"$texts\")"
 	                              "        (VariableNode \"$ms\")))"
 	                              "    (VariableNode \"$f\")))");
-	Handle result = inst.execute(nest_put);
+	Handle result = HandleCast(inst.execute(nest_put));
 
 	Handle expected = _eval.eval_h(
 	                              "  (ListLink"
@@ -1689,12 +1689,12 @@ void PutLinkUTest::test_tricky_put_1()
 {
 	logger().info("BEGIN TEST: %s", __FUNCTION__);
 
-	std::string rs = _eval.eval("(load-from-path \"tests/atoms/tricky-put.scm\")");
+	std::string rs = _eval.eval("(load-from-path \"tests/atoms/put-tricky.scm\")");
 	logger().debug() << "rs = " << rs;
 
 	Instantiator inst(&_as);
 	Handle put = _eval.eval_h("put-1"),
-		result = inst.execute(put),
+		result = HandleCast(inst.execute(put)),
 		expected = _eval.eval_h("expected-1");
 
 	logger().debug() << "result = " << oc_to_string(result);
@@ -1722,12 +1722,12 @@ void PutLinkUTest::test_tricky_put_2()
 {
 	logger().info("BEGIN TEST: %s", __FUNCTION__);
 
-	std::string rs = _eval.eval("(load-from-path \"tests/atoms/tricky-put.scm\")");
+	std::string rs = _eval.eval("(load-from-path \"tests/atoms/put-tricky.scm\")");
 	logger().debug() << "rs = " << rs;
 
 	Instantiator inst(&_as);
 	Handle put = _eval.eval_h("put-2"),
-		result = inst.execute(put),
+		result = HandleCast(inst.execute(put)),
 		expected = _eval.eval_h("expected-2");
 
 	logger().debug() << "result = " << oc_to_string(result);
@@ -1756,12 +1756,12 @@ void PutLinkUTest::test_tricky_put_3()
 {
 	logger().info("BEGIN TEST: %s", __FUNCTION__);
 
-	std::string rs = _eval.eval("(load-from-path \"tests/atoms/tricky-put.scm\")");
+	std::string rs = _eval.eval("(load-from-path \"tests/atoms/put-tricky.scm\")");
 	logger().debug() << "rs = " << rs;
 
 	Instantiator inst(&_as);
 	Handle put = _eval.eval_h("put-3");
-	Handle result = inst.execute(put);
+	Handle result = HandleCast(inst.execute(put));
 	Handle expected = _eval.eval_h("expected-3");
 
 	logger().debug() << "result = " << oc_to_string(result);
@@ -1797,12 +1797,12 @@ void PutLinkUTest::test_tricky_put_4()
 {
 	logger().info("BEGIN TEST: %s", __FUNCTION__);
 
-	std::string rs = _eval.eval("(load-from-path \"tests/atoms/tricky-put.scm\")");
+	std::string rs = _eval.eval("(load-from-path \"tests/atoms/put-tricky.scm\")");
 	logger().debug() << "rs = " << rs;
 
 	Instantiator inst(&_as);
 	Handle put = _eval.eval_h("put-4");
-	Handle result = inst.execute(put);
+	Handle result = HandleCast(inst.execute(put));
 	Handle expected = _eval.eval_h("expected-4");
 	Handle unexpected = _eval.eval_h("unexpected-4");
 
@@ -1846,12 +1846,12 @@ void PutLinkUTest::test_tricky_put_5()
 {
 	logger().info("BEGIN TEST: %s", __FUNCTION__);
 
-	std::string rs = _eval.eval("(load-from-path \"tests/atoms/tricky-put.scm\")");
+	std::string rs = _eval.eval("(load-from-path \"tests/atoms/put-tricky.scm\")");
 	logger().debug() << "rs = " << rs;
 
 	Instantiator inst(&_as);
 	Handle put = _eval.eval_h("put-5"),
-		result = inst.execute(put),
+		result = HandleCast(inst.execute(put)),
 		expected = _eval.eval_h("expected-5");
 
 	logger().debug() << "result = " << oc_to_string(result);
@@ -1870,12 +1870,12 @@ void PutLinkUTest::test_tricky_put_6()
 {
 	logger().info("BEGIN TEST: %s", __FUNCTION__);
 
-	std::string rs = _eval.eval("(load-from-path \"tests/atoms/tricky-put.scm\")");
+	std::string rs = _eval.eval("(load-from-path \"tests/atoms/put-tricky.scm\")");
 	logger().debug() << "rs = " << rs;
 
 	Instantiator inst(&_as);
 	Handle put = _eval.eval_h("put-6"),
-		result = inst.execute(put),
+		result = HandleCast(inst.execute(put)),
 		expected = _eval.eval_h("expected-6");
 
 	logger().debug() << "result = " << oc_to_string(result);
@@ -1894,12 +1894,12 @@ void PutLinkUTest::test_tricky_put_7()
 {
 	logger().info("BEGIN TEST: %s", __FUNCTION__);
 
-	std::string rs = _eval.eval("(load-from-path \"tests/atoms/tricky-put.scm\")");
+	std::string rs = _eval.eval("(load-from-path \"tests/atoms/put-tricky.scm\")");
 	logger().debug() << "rs = " << rs;
 
 	Instantiator inst(&_as);
 	Handle put = _eval.eval_h("put-7"),
-		result = inst.execute(put),
+		result = HandleCast(inst.execute(put)),
 		expected = _eval.eval_h("expected-7");
 
 	logger().debug() << "result = " << oc_to_string(result);

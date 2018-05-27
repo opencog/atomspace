@@ -579,7 +579,7 @@ bool DefaultPatternMatchCB::eval_term(const Handle& virt,
 	Handle gvirt;
 	try
 	{
-		gvirt = _instor->instantiate(virt, gnds, true);
+		gvirt = HandleCast(_instor->instantiate(virt, gnds, true));
 	}
 	catch (const SilentException& ex)
 	{

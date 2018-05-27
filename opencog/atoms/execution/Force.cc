@@ -54,7 +54,7 @@ Handle opencog::force_execute(AtomSpace* as, const Handle& cargs, bool silent)
 
 	if (LIST_LINK != cargs->get_type())
 	{
-		Handle args(inst.execute(cargs, silent));
+		Handle args(HandleCast(inst.execute(cargs, silent)));
 		if (args != cargs)
 			args = as->add_atom(args);
 		return args;
@@ -65,7 +65,7 @@ Handle opencog::force_execute(AtomSpace* as, const Handle& cargs, bool silent)
 	bool changed = false;
 	for (const Handle& ho : cargs->getOutgoingSet())
 	{
-		Handle nh(inst.execute(ho, silent));
+		Handle nh(HandleCast(inst.execute(ho, silent)));
 		// nh might be NULL if ho was a DeleteLink
 		if (nullptr == nh)
 		{

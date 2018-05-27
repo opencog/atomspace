@@ -116,7 +116,7 @@ void LocalQuoteUTest::test_put()
 		put = al(PUT_LINK, al(LAMBDA_LINK, vardecl, body), A);
 
 	Instantiator inst(&_as);
-	Handle putted = inst.execute(put);
+	Handle putted = HandleCast(inst.execute(put));
 	Handle expected = al(IMPLICATION_SCOPE_LINK, P_A, P_A);
 
 	printf("Executing %s\n", put->to_string().c_str());

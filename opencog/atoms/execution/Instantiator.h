@@ -136,12 +136,12 @@ public:
 
 	// TODO: set consume_quotations to false when executing, set it to
 	// true when instantiating
-	Handle instantiate(const Handle& expr, const HandleMap &vars,
+	ProtoAtomPtr instantiate(const Handle& expr, const HandleMap &vars,
 	                   bool silent=false);
-	Handle execute(const Handle& expr, bool silent=false)
+	ProtoAtomPtr execute(const Handle& expr, bool silent=false)
 	{
-		// If no actual instantiation is involved then do not consume
-		// quotations as it might change the semantics.
+		// If no actual instantiation is involved, then do not consume
+		// quotations, as it might change the semantics. (??)
 		_consume_quotations = false;
 		return instantiate(expr, HandleMap(), silent);
 	}

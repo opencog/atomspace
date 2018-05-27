@@ -56,7 +56,7 @@ bool Implicator::grounding(const HandleMap &var_soln,
 	// difficult to insure so meanwhile this try-catch is used. See
 	// issue #950 and pull req #962. XXX FIXME later.
 	try {
-		Handle h = inst.instantiate(implicand, var_soln, true);
+		Handle h(HandleCast(inst.instantiate(implicand, var_soln, true)));
 		insert_result(h);
 	} catch (const SilentException& ex) {}
 
@@ -137,7 +137,7 @@ Handle do_imply(AtomSpace* as,
 	if (0 == pat.mandatory.size() and 0 < pat.optionals.size()
 	    and not intu->optionals_present())
 	{
-		Handle h = impl.inst.execute(impl.implicand, true);
+		Handle h(HandleCast(impl.inst.execute(impl.implicand, true)));
 		impl.insert_result(h);
 	}
 
