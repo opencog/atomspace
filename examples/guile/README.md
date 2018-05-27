@@ -86,8 +86,8 @@ The current list of modules that wrap C++ code includes:
                    callbacks written in python or scheme.
 * `get-put.scm` -- An example of asserting facts in the AtomSpace.
 * `state.scm`   -- Maintaining unique state.
-* `property.scm`-- Setting properies on atoms.
-* `values.scm`  -- Using ProtoAtoms aka Values.
+* `property.scm`-- Setting properies on Atoms.
+* `values.scm`  -- Using Values and attaching them to Atoms.
 * `filter.scm`  -- Filtering sets of atoms.
 * `map.scm`     -- Applying a map function to a set or list.
 * `random-choice.scm`  -- Numerical programming, including loops.
@@ -95,4 +95,5 @@ The current list of modules that wrap C++ code includes:
 * `except.scm`  -- An example of exceptions being thrown and passed.
 * `persist-example.scm` -- An example of saving atomspace data in an SQL
                    database.
+* `stream.scm`  -- Using a stream of time-varying Values.
 * `gperf.scm`   -- Some very crude performance measurements.

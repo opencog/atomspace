@@ -14,11 +14,11 @@
 
 ; Fetch the value, using the ValueOfLink
 (define vo (ValueOf a k))
-; (cog-execute! vo)
+(cog-execute! vo)
 
 ; Numeric computations can be performed on that value...
 (define tym (Times (Plus vo (Number 6)) (Number 2)))
-; (cog-execute! tym)
+(cog-execute! tym)
 
 ; Now, do it again, with the RandomStream
 ; The argument to RandomStream is how many random floats it
@@ -30,4 +30,8 @@
 ; Add 6 to get a number between 6 and 7.
 ; Then multiply by 2, to get a number between 12 and 14.
 (define tymb (Times (Number 2) (Plus (ValueOf b k) (Number 6)) ))
-; (cog-execute! tymb)
+(cog-execute! tymb)
+(cog-execute! tymb)
+(cog-execute! tymb)
+(cog-execute! tymb)
+(cog-execute! tymb)
