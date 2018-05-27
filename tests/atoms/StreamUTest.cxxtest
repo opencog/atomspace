@@ -55,7 +55,7 @@ public:
 };
 
 #define LEN 10
-#define LOOPCNT 100
+#define LOOPCNT 400
 
 void StreamUTest::setUp(void)
 {
@@ -98,9 +98,9 @@ void StreamUTest::test_basic()
 	Handle valof = al(VALUE_OF_LINK, atom, key);
 	double sum = loop(valof);
 
-	printf("Expect 0.49 < %g < 0.51\n", sum);
-	TS_ASSERT_LESS_THAN(0.49, sum);
-	TS_ASSERT_LESS_THAN(sum, 0.51);
+	printf("Expect 0.485 < %g < 0.515\n", sum);
+	TS_ASSERT_LESS_THAN(0.485, sum);
+	TS_ASSERT_LESS_THAN(sum, 0.515);
 
 	logger().debug("END TEST: %s", __FUNCTION__);
 }
@@ -117,24 +117,24 @@ void StreamUTest::test_times()
 	Handle times = al(TIMES_LINK, an(NUMBER_NODE, "3"), valof);
 
 	double sum = loop(times);
-	printf("Expect 1.47 < %g < 1.53\n", sum);
-	TS_ASSERT_LESS_THAN(1.47, sum);
-	TS_ASSERT_LESS_THAN(sum, 1.53);
+	printf("Expect 1.45 < %g < 1.55\n", sum);
+	TS_ASSERT_LESS_THAN(1.455, sum);
+	TS_ASSERT_LESS_THAN(sum, 1.55);
 
 	// vector times scalar --------------------------------------------
 	times = al(TIMES_LINK, valof, an(NUMBER_NODE, "7"));
 
 	sum = loop(times);
-	printf("Expect 3.43 < %g < 3.57\n", sum);
-	TS_ASSERT_LESS_THAN(3.43, sum);
-	TS_ASSERT_LESS_THAN(sum, 3.57);
+	printf("Expect 3.40 < %g < 3.6\n", sum);
+	TS_ASSERT_LESS_THAN(3.4, sum);
+	TS_ASSERT_LESS_THAN(sum, 3.6);
 
 	// vector times vector ----------------------------------------------
 	times = al(TIMES_LINK, valof, valof);
 
 	sum = loop(times);
 	// Integral of x^2 dx from 0 to 1 = 1/3
-	printf("Expect 0.32 < %g < 0.34\n", sum);
+	printf("Expect 0.32 < %g < 0.345\n", sum);
 	TS_ASSERT_LESS_THAN(0.32, sum);
 	TS_ASSERT_LESS_THAN(sum, 0.34);
 
@@ -169,9 +169,9 @@ void StreamUTest::test_plus()
 	plus = al(PLUS_LINK, valof, valof);
 
 	sum = loop(plus);
-	printf("Expect 0.97 < %g < 1.03\n", sum);
-	TS_ASSERT_LESS_THAN(0.97, sum);
-	TS_ASSERT_LESS_THAN(sum, 1.03);
+	printf("Expect 0.96 < %g < 1.04\n", sum);
+	TS_ASSERT_LESS_THAN(0.96, sum);
+	TS_ASSERT_LESS_THAN(sum, 1.04);
 
 	logger().debug("END TEST: %s", __FUNCTION__);
 }
@@ -182,50 +182,35 @@ void StreamUTest::test_times_plus()
 {
 	logger().debug("BEGIN TEST: %s", __FUNCTION__);
 
-	ProtoAtomPtr value = createFloatValue(std::vector<double>{0.0, 1.0, 2.0});
-	Handle key = an(PREDICATE_NODE, "my key");
-	Handle atom = an(CONCEPT_NODE, "some atom");
-
-	atom->setValue(key, value);
-
 	Handle valof = al(VALUE_OF_LINK, atom, key);
 
 	// 5+3x --------------------------------------------
 	Handle times = al(PLUS_LINK, an(NUMBER_NODE, "5"),
 		al(TIMES_LINK, an(NUMBER_NODE, "3"), valof));
 
-	ProtoAtomPtr result = FunctionLinkCast(times)->execute();
-
-	FloatValuePtr expect = createFloatValue(std::vector<double>{5.0, 8.0, 11.0});
-	printf("expect: %s", expect->to_string().c_str());
-	printf("result: %s\n", result->to_string().c_str());
-
-	TS_ASSERT(*expect == *FloatValueCast(result));
+	double sum = loop(times);
+	printf("Expect 6.45 < %g < 6.55\n", sum);
+	TS_ASSERT_LESS_THAN(6.45, sum);
+	TS_ASSERT_LESS_THAN(sum, 6.55);
 
 	// 5(3+x) --------------------------------------------
 	times = al(TIMES_LINK, an(NUMBER_NODE, "5"),
 		al(PLUS_LINK, an(NUMBER_NODE, "3"), valof));
 
-	result = FunctionLinkCast(times)->execute();
-
-	expect = createFloatValue(std::vector<double>{15.0, 20.0, 25.0});
-	printf("expect: %s", expect->to_string().c_str());
-	printf("result: %s\n", result->to_string().c_str());
-
-	TS_ASSERT(*expect == *FloatValueCast(result));
+	sum = loop(times);
+	printf("Expect 17.4 < %g < 17.5\n", sum);
+	TS_ASSERT_LESS_THAN(17.4, sum);
+	TS_ASSERT_LESS_THAN(sum, 17.5);
 
 	// (x+3)5 --------------------------------------------
 	times = al(TIMES_LINK,
 		al(PLUS_LINK, valof, an(NUMBER_NODE, "3")),
 		an(NUMBER_NODE, "5"));
 
-	result = FunctionLinkCast(times)->execute();
-
-	expect = createFloatValue(std::vector<double>{15.0, 20.0, 25.0});
-	printf("expect: %s", expect->to_string().c_str());
-	printf("result: %s\n", result->to_string().c_str());
-
-	TS_ASSERT(*expect == *FloatValueCast(result));
+	sum = loop(times);
+	printf("Expect 17.4 < %g < 17.5\n", sum);
+	TS_ASSERT_LESS_THAN(17.4, sum);
+	TS_ASSERT_LESS_THAN(sum, 17.5);
 
 	logger().debug("END TEST: %s", __FUNCTION__);
 }
