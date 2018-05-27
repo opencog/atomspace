@@ -81,7 +81,7 @@ void ValueOfUTest::test_basic()
 	Handle valof = al(VALUE_OF_LINK, atom, key);
 
 	Instantiator inst(&_as);
-   Handle result = inst.execute(valof);
+   Handle result = HandleCast(inst.execute(valof));
 
 	printf("expect: %s", value->to_string().c_str());
 	printf("result: %s\n", result->to_string().c_str());

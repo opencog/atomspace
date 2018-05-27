@@ -182,7 +182,7 @@ void StateLinkUTest::test_getting()
 			L(STATE_LINK, N(ANCHOR_NODE, "fruit"), N(VARIABLE_NODE, "$x")));
 
 	Instantiator inst(&_as);
-	Handle gotten = inst.execute(empty_get);
+	Handle gotten = HandleCast(inst.execute(empty_get));
 	printf("Got %s\n", gotten->to_string().c_str());
 
 	Handle empty_set = L(SET_LINK, HandleSeq());
@@ -202,7 +202,7 @@ void StateLinkUTest::test_getting()
 		L(GET_LINK,
 			L(STATE_LINK, N(ANCHOR_NODE, "fruit"), N(VARIABLE_NODE, "$x")));
 
-	gotten = inst.execute(get);
+	gotten = HandleCast(inst.execute(get));
 	printf("Got %s\n", gotten->to_string().c_str());
 
 	Handle apple_set = L(SET_LINK, N(CONCEPT_NODE, "apple"));
@@ -232,7 +232,7 @@ void StateLinkUTest::test_putting()
 			N(CONCEPT_NODE, "strawberry"));
 
 	Instantiator inst(&_as);
-	Handle putten = inst.execute(put);
+	Handle putten = HandleCast(inst.execute(put));
 	printf("Put %s\n", putten->to_string().c_str());
 
 	Handle strawberry = N(CONCEPT_NODE, "strawberry");

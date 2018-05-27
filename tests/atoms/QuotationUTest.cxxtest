@@ -72,7 +72,7 @@ void QuotationUTest::test_root_local_quote_over_consumption()
 
 	Instantiator inst(&_as);
 	Handle and_sha_abs = _eval.eval_h("and-shallow-abstraction"),
-		result = inst.execute(and_sha_abs),
+		result = HandleCast(inst.execute(and_sha_abs)),
 		expected = and_sha_abs;
 
 	logger().debug() << "result = " << oc_to_string(result);
@@ -109,7 +109,7 @@ void QuotationUTest::test_lambda_quote_over_consumption()
 
 	Instantiator inst(&_as);
 	Handle quoted_lambda = _eval.eval_h("quoted-lambda"),
-		result = inst.execute(quoted_lambda),
+		result = HandleCast(inst.execute(quoted_lambda)),
 		expected = quoted_lambda;
 
 	logger().debug() << "result = " << oc_to_string(result);

@@ -307,7 +307,7 @@ void MapLinkUTest::test_local_quote_map(void)
 
     Instantiator inst(as);
     Handle local_quote_map = eval->eval_h("local-quote-map"),
-	    result = inst.execute(local_quote_map),
+	    result = HandleCast(inst.execute(local_quote_map)),
 	    expected = eval->eval_h("local-quote-map-result");
 
     printf("result %s", result->to_string().c_str());

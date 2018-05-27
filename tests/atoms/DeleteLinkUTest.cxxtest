@@ -89,7 +89,7 @@ void DeleteLinkUTest::test_free_delete()
 
 	// Test that execution creates the desired link...
 	Instantiator inst(&_as);
-	Handle prop = inst.execute(add);
+	Handle prop = HandleCast(inst.execute(add));
 
 	printf("Created link %s\n", prop->to_string().c_str());
 	TS_ASSERT_EQUALS(EVALUATION_LINK, prop->get_type());
@@ -116,7 +116,7 @@ void DeleteLinkUTest::test_free_delete()
 	TS_ASSERT_EQUALS(2, pred->getIncomingSetSize());
 	TS_ASSERT_EQUALS(3, list->getIncomingSetSize());
 
-	Handle undef = inst.execute(del);
+	Handle undef = HandleCast(inst.execute(del));
 	TS_ASSERT_EQUALS(undef, Handle::UNDEFINED);
 
 	// The incoming set of both should decrease by one.
