@@ -24,13 +24,14 @@ using namespace opencog;
 /**
  * cog-execute! executes any/all FunctionLinks
  */
-static Handle ss_execute(AtomSpace* atomspace, const Handle& h)
+static ProtoAtomPtr ss_execute(AtomSpace* atomspace, const Handle& h)
 {
 	Instantiator inst(atomspace);
-	Handle rh(inst.execute(h));
+	ProtoAtomPtr pap(inst.execute(h));
+	Handle rh(HandleCast(pap));
 	if (NULL != rh)
-		rh = atomspace->add_atom(rh);
-	return rh;
+		pap = atomspace->add_atom(rh);
+	return pap;
 }
 
 /**
