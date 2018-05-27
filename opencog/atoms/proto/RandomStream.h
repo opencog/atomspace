@@ -48,7 +48,7 @@ protected:
 
 public:
 	// int is the desired size of the vector.
-	RandomStream(int);
+	RandomStream(int=1);
 	virtual ~RandomStream() {}
 
 	/** Returns a string representation of the value.  */

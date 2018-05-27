@@ -136,14 +136,19 @@ FOREACH (LINE ${TYPE_SCRIPT_CONTENTS})
 
         # Try to guess if the thing is a node or link based on its name
         STRING(REGEX MATCH "VALUE$" ISVALUE ${TYPE})
+        STRING(REGEX MATCH "STREAM$" ISSTREAM ${TYPE})
         STRING(REGEX MATCH "NODE$" ISNODE ${TYPE})
         STRING(REGEX MATCH "LINK$" ISLINK ${TYPE})
 
         # If not explicitly named, assume its a link. This is kind of
         # hacky, but is needed for e.g. "VariableList" ...
-        IF (NOT ISNODE STREQUAL "NODE" AND NOT ISVALUE STREQUAL "VALUE")
+        IF (NOT ISNODE STREQUAL "NODE"
+            AND NOT ISVALUE STREQUAL "VALUE"
+            AND NOT ISSTREAM STREQUAL "STREAM")
             SET(ISLINK "LINK")
-        ENDIF (NOT ISNODE STREQUAL "NODE" AND NOT ISVALUE STREQUAL "VALUE")
+        ENDIF (NOT ISNODE STREQUAL "NODE"
+            AND NOT ISVALUE STREQUAL "VALUE"
+            AND NOT ISSTREAM STREQUAL "STREAM")
 
         IF (${TYPE} STREQUAL "VALUATION")
             SET(ISLINK "")
@@ -151,10 +156,10 @@ FOREACH (LINE ${TYPE_SCRIPT_CONTENTS})
 
         # Print out the scheme definitions
         FILE(APPEND "${SCM_FILE}" "(define-public ${TYPE_NAME}Type (cog-type->int '${TYPE_NAME}))\n")
-        IF (ISVALUE STREQUAL "VALUE")
+        IF (ISVALUE STREQUAL "VALUE" OR ISSTREAM STREQUAL "STREAM")
             FILE(APPEND "${SCM_FILE}" "(define-public (${TYPE_NAME} . x)\n")
             FILE(APPEND "${SCM_FILE}" "\t(apply cog-new-value (append (list ${TYPE_NAME}Type) x)))\n")
-        ENDIF (ISVALUE STREQUAL "VALUE")
+        ENDIF (ISVALUE STREQUAL "VALUE" OR ISSTREAM STREQUAL "STREAM")
         IF (ISNODE STREQUAL "NODE")
             FILE(APPEND "${SCM_FILE}" "(define-public (${TYPE_NAME} . x)\n")
             FILE(APPEND "${SCM_FILE}" "\t(apply cog-new-node (append (list ${TYPE_NAME}Type) x)))\n")
@@ -176,11 +181,11 @@ FOREACH (LINE ${TYPE_SCRIPT_CONTENTS})
         # since we don't want to create a function with the same
         # identifier as the Python Atom object.
         IF (NOT TYPE_NAME STREQUAL "Atom")
-            IF (ISVALUE STREQUAL "VALUE")
+            IF (ISVALUE STREQUAL "VALUE" OR ISSTREAM STREQUAL "STREAM")
                 # XXX FIXME -- invent something for python
                 # FILE(APPEND "${PYTHON_FILE}" "def ${TYPE_NAME}(node_name, tv=None):\n")
                 # FILE(APPEND "${PYTHON_FILE}" "    return atomspace.add_node(types.${TYPE_NAME}, node_name, tv)\n")
-            ENDIF (ISVALUE STREQUAL "VALUE")
+            ENDIF (ISVALUE STREQUAL "VALUE" OR ISSTREAM STREQUAL "STREAM")
             IF (ISNODE STREQUAL "NODE")
                 FILE(APPEND "${PYTHON_FILE}" "def ${TYPE_NAME}(node_name, tv=None):\n")
                 FILE(APPEND "${PYTHON_FILE}" "    return atomspace.add_node(types.${TYPE_NAME}, node_name, tv)\n")
@@ -195,12 +200,14 @@ FOREACH (LINE ${TYPE_SCRIPT_CONTENTS})
         # This is kind of hacky, but I don't know what else to do ... 
         IF (NOT ISNODE STREQUAL "NODE" AND
             NOT ISLINK STREQUAL "LINK" AND
-            NOT ISVALUE STREQUAL "VALUE")
+            NOT ISVALUE STREQUAL "VALUE" AND
+            NOT ISSTREAM STREQUAL "STREAM")
             FILE(APPEND "${PYTHON_FILE}" "def ${TYPE_NAME}(*args):\n")
             FILE(APPEND "${PYTHON_FILE}" "    return atomspace.add_link(types.${TYPE_NAME}, args)\n")
         ENDIF (NOT ISNODE STREQUAL "NODE" AND
             NOT ISLINK STREQUAL "LINK" AND
-            NOT ISVALUE STREQUAL "VALUE")
+            NOT ISVALUE STREQUAL "VALUE" AND
+            NOT ISSTREAM STREQUAL "STREAM")
 
         IF (PARENT_TYPES)
             STRING(REGEX REPLACE "[ 	]*,[ 	]*" ";" PARENT_TYPES "${PARENT_TYPES}")
