@@ -96,19 +96,19 @@ ProtoAtomPtr DivideLink::kons(const ProtoAtomPtr& fi, const ProtoAtomPtr& fj) co
 	Type vjtype = vj->get_type();
 
 	// Scalar divided by vector
-	if (NUMBER_NODE == vitype and FLOAT_VALUE == vjtype)
+	if (NUMBER_NODE == vitype and nameserver().isA(vjtype, FLOAT_VALUE))
 	{
 		return divide(get_double(vi), FloatValueCast(vj));
 	}
 
 	// Vector divided by scalar
-	if (FLOAT_VALUE == vitype and NUMBER_NODE == vjtype)
+	if (nameserver().isA(vitype, FLOAT_VALUE) and NUMBER_NODE == vjtype)
 	{
 		return times(1.0/get_double(vj), FloatValueCast(vi));
 	}
 
 	// Vector divided by vector
-	if (FLOAT_VALUE == vitype and FLOAT_VALUE == vjtype)
+	if (nameserver().isA(vitype, FLOAT_VALUE) and nameserver().isA(vjtype, FLOAT_VALUE))
 	{
 		return divide(FloatValueCast(vi), FloatValueCast(vj));
 	}

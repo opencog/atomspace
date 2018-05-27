@@ -69,7 +69,6 @@ void StreamUTest::setUp(void)
 // Run the value, repeatedly.
 double StreamUTest::loop(const Handle& stream)
 {
-
 	FunctionLinkPtr flp = FunctionLinkCast(stream);
 
 	double sum = 0.0;
@@ -118,19 +117,26 @@ void StreamUTest::test_times()
 	Handle times = al(TIMES_LINK, an(NUMBER_NODE, "3"), valof);
 
 	double sum = loop(times);
-	printf("Expect 0.49 < %g < 0.51\n", sum);
+	printf("Expect 1.47 < %g < 1.53\n", sum);
+	TS_ASSERT_LESS_THAN(1.47, sum);
+	TS_ASSERT_LESS_THAN(sum, 1.53);
 
 	// vector times scalar --------------------------------------------
 	times = al(TIMES_LINK, valof, an(NUMBER_NODE, "7"));
 
 	sum = loop(times);
-	printf("Expect 0.49 < %g < 0.51\n", sum);
+	printf("Expect 3.43 < %g < 3.57\n", sum);
+	TS_ASSERT_LESS_THAN(3.43, sum);
+	TS_ASSERT_LESS_THAN(sum, 3.57);
 
 	// vector times vector ----------------------------------------------
 	times = al(TIMES_LINK, valof, valof);
 
 	sum = loop(times);
-	printf("Expect 0.49 < %g < 0.51\n", sum);
+	// Integral of x^2 dx from 0 to 1 = 1/3
+	printf("Expect 0.32 < %g < 0.34\n", sum);
+	TS_ASSERT_LESS_THAN(0.32, sum);
+	TS_ASSERT_LESS_THAN(sum, 0.34);
 
 	logger().debug("END TEST: %s", __FUNCTION__);
 }
@@ -141,46 +147,31 @@ void StreamUTest::test_plus()
 {
 	logger().debug("BEGIN TEST: %s", __FUNCTION__);
 
-	ProtoAtomPtr value = createFloatValue(std::vector<double>{0.0, 1.0, 2.0});
-	Handle key = an(PREDICATE_NODE, "my key");
-	Handle atom = an(CONCEPT_NODE, "some atom");
-
-	atom->setValue(key, value);
-
 	Handle valof = al(VALUE_OF_LINK, atom, key);
 
 	// scalar plus vector --------------------------------------------
-	Handle times = al(PLUS_LINK, an(NUMBER_NODE, "3"), valof);
+	Handle plus = al(PLUS_LINK, an(NUMBER_NODE, "3"), valof);
 
-	ProtoAtomPtr result = FunctionLinkCast(times)->execute();
-
-	FloatValuePtr expect = createFloatValue(std::vector<double>{3.0, 4.0, 5.0});
-	printf("expect: %s", expect->to_string().c_str());
-	printf("result: %s\n", result->to_string().c_str());
-
-	TS_ASSERT(*expect == *FloatValueCast(result));
+	double sum = loop(plus);
+	printf("Expect 3.49 < %g < 3.51\n", sum);
+	TS_ASSERT_LESS_THAN(3.49, sum);
+	TS_ASSERT_LESS_THAN(sum, 3.51);
 
 	// vector plus scalar --------------------------------------------
-	times = al(PLUS_LINK, valof, an(NUMBER_NODE, "7"));
+	plus = al(PLUS_LINK, valof, an(NUMBER_NODE, "7"));
 
-	result = FunctionLinkCast(times)->execute();
-
-	expect = createFloatValue(std::vector<double>{7.0, 8.0, 9.0});
-	printf("expect: %s", expect->to_string().c_str());
-	printf("result: %s\n", result->to_string().c_str());
-
-	TS_ASSERT(*expect == *FloatValueCast(result));
+	sum = loop(plus);
+	printf("Expect 7.49 < %g < 7.51\n", sum);
+	TS_ASSERT_LESS_THAN(7.49, sum);
+	TS_ASSERT_LESS_THAN(sum, 7.51);
 
 	// vector plus vector ----------------------------------------------
-	times = al(PLUS_LINK, valof, valof);
+	plus = al(PLUS_LINK, valof, valof);
 
-	result = FunctionLinkCast(times)->execute();
-
-	expect = createFloatValue(std::vector<double>{0.0, 2.0, 4.0});
-	printf("expect: %s", expect->to_string().c_str());
-	printf("result: %s\n", result->to_string().c_str());
-
-	TS_ASSERT(*expect == *FloatValueCast(result));
+	sum = loop(plus);
+	printf("Expect 0.97 < %g < 1.03\n", sum);
+	TS_ASSERT_LESS_THAN(0.97, sum);
+	TS_ASSERT_LESS_THAN(sum, 1.03);
 
 	logger().debug("END TEST: %s", __FUNCTION__);
 }

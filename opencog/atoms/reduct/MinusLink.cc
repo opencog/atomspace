@@ -96,20 +96,20 @@ ProtoAtomPtr MinusLink::kons(const ProtoAtomPtr& fi, const ProtoAtomPtr& fj) con
 	Type vjtype = vj->get_type();
 
 	// Scalar minus vector
-	if (NUMBER_NODE == vitype and FLOAT_VALUE == vjtype)
+	if (NUMBER_NODE == vitype and nameserver().isA(vjtype, FLOAT_VALUE))
 	{
 		FloatValuePtr mj = FloatValueCast(times(-1.0, FloatValueCast(vj)));
 		return plus(get_double(vi), mj);
 	}
 
 	// Vector minus scalar
-	if (FLOAT_VALUE == vitype and NUMBER_NODE == vjtype)
+	if (nameserver().isA(vitype, FLOAT_VALUE) and NUMBER_NODE == vjtype)
 	{
 		return plus(-get_double(vj), FloatValueCast(vi));
 	}
 
 	// Vector times vector
-	if (FLOAT_VALUE == vitype and FLOAT_VALUE == vjtype)
+	if (nameserver().isA(vitype, FLOAT_VALUE) and nameserver().isA(vjtype, FLOAT_VALUE))
 	{
 		FloatValuePtr mj = FloatValueCast(times(-1.0, FloatValueCast(vj)));
 		return plus(FloatValueCast(vi), mj);
