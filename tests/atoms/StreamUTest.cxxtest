@@ -54,6 +54,10 @@ public:
 	void test_divide();
 };
 
+// This unit test is a stand-in test for the concept of a streaming API
+// on Values. For lack of anything better to test, the RandomStream is
+// tested -- it just generated random numbers, and we just make sure
+// these average out to expected values. Its good enough, for now.
 #define LEN 10
 #define LOOPCNT 400
 
