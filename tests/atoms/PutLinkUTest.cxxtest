@@ -1689,7 +1689,7 @@ void PutLinkUTest::test_tricky_put_1()
 {
 	logger().info("BEGIN TEST: %s", __FUNCTION__);
 
-	std::string rs = _eval.eval("(load-from-path \"tests/atoms/tricky-put.scm\")");
+	std::string rs = _eval.eval("(load-from-path \"tests/atoms/put-tricky.scm\")");
 	logger().debug() << "rs = " << rs;
 
 	Instantiator inst(&_as);
@@ -1722,7 +1722,7 @@ void PutLinkUTest::test_tricky_put_2()
 {
 	logger().info("BEGIN TEST: %s", __FUNCTION__);
 
-	std::string rs = _eval.eval("(load-from-path \"tests/atoms/tricky-put.scm\")");
+	std::string rs = _eval.eval("(load-from-path \"tests/atoms/put-tricky.scm\")");
 	logger().debug() << "rs = " << rs;
 
 	Instantiator inst(&_as);
@@ -1756,7 +1756,7 @@ void PutLinkUTest::test_tricky_put_3()
 {
 	logger().info("BEGIN TEST: %s", __FUNCTION__);
 
-	std::string rs = _eval.eval("(load-from-path \"tests/atoms/tricky-put.scm\")");
+	std::string rs = _eval.eval("(load-from-path \"tests/atoms/put-tricky.scm\")");
 	logger().debug() << "rs = " << rs;
 
 	Instantiator inst(&_as);
@@ -1797,7 +1797,7 @@ void PutLinkUTest::test_tricky_put_4()
 {
 	logger().info("BEGIN TEST: %s", __FUNCTION__);
 
-	std::string rs = _eval.eval("(load-from-path \"tests/atoms/tricky-put.scm\")");
+	std::string rs = _eval.eval("(load-from-path \"tests/atoms/put-tricky.scm\")");
 	logger().debug() << "rs = " << rs;
 
 	Instantiator inst(&_as);
@@ -1846,7 +1846,7 @@ void PutLinkUTest::test_tricky_put_5()
 {
 	logger().info("BEGIN TEST: %s", __FUNCTION__);
 
-	std::string rs = _eval.eval("(load-from-path \"tests/atoms/tricky-put.scm\")");
+	std::string rs = _eval.eval("(load-from-path \"tests/atoms/put-tricky.scm\")");
 	logger().debug() << "rs = " << rs;
 
 	Instantiator inst(&_as);
@@ -1870,7 +1870,7 @@ void PutLinkUTest::test_tricky_put_6()
 {
 	logger().info("BEGIN TEST: %s", __FUNCTION__);
 
-	std::string rs = _eval.eval("(load-from-path \"tests/atoms/tricky-put.scm\")");
+	std::string rs = _eval.eval("(load-from-path \"tests/atoms/put-tricky.scm\")");
 	logger().debug() << "rs = " << rs;
 
 	Instantiator inst(&_as);
@@ -1894,7 +1894,7 @@ void PutLinkUTest::test_tricky_put_7()
 {
 	logger().info("BEGIN TEST: %s", __FUNCTION__);
 
-	std::string rs = _eval.eval("(load-from-path \"tests/atoms/tricky-put.scm\")");
+	std::string rs = _eval.eval("(load-from-path \"tests/atoms/put-tricky.scm\")");
 	logger().debug() << "rs = " << rs;
 
 	Instantiator inst(&_as);
