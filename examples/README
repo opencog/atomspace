@@ -14,6 +14,9 @@ pattern-matcher - Example code demonstrating the graph query system.
                   how to search for patterns that fit the data, and
                   how to trigger actions when these are found.
 
+persist         - How to save and restore the contents of the AtomSpace,
+                  and how to access the database in piecemeal fashion.
+
 rule-engine     - Provide example of a simple crisp inference system
                   using the unified rule engine.
 
