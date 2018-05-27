@@ -1,5 +1,5 @@
 /*
- * opencog/atomspace/proto/ProtoAtom.h
+ * opencog/atoms/proto/ProtoAtom.h
  *
  * Copyright (C) 2015 Linas Vepstas
  * All Rights Reserved
@@ -92,7 +92,7 @@ public:
 	 * @return true if the proto-atoms are different, false otherwise.
 	 */
 	bool operator!=(const ProtoAtom& other) const
-	{ return not operator==(other); }
+		{ return not operator==(other); }
 };
 
 typedef std::shared_ptr<ProtoAtom> ProtoAtomPtr;

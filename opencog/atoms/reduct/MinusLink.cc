@@ -1,7 +1,7 @@
 /*
  * opencog/atoms/reduct/MinusLink.cc
  *
- * Copyright (C) 2015 Linas Vepstas
+ * Copyright (C) 2015, 2018 Linas Vepstas
  * All Rights Reserved
  *
  * This program is free software; you can redistribute it and/or modify
@@ -28,19 +28,19 @@
 using namespace opencog;
 
 MinusLink::MinusLink(const HandleSeq& oset, Type t)
-    : ArithmeticLink(oset, t)
+    : PlusLink(oset, t)
 {
 	init();
 }
 
 MinusLink::MinusLink(const Handle& a, const Handle& b)
-    : ArithmeticLink({a, b}, MINUS_LINK)
+    : PlusLink({a, b}, MINUS_LINK)
 {
 	init();
 }
 
 MinusLink::MinusLink(const Link& l)
-    : ArithmeticLink(l)
+    : PlusLink(l)
 {
 	init();
 }
@@ -52,35 +52,75 @@ void MinusLink::init(void)
 		throw InvalidParamException(TRACE_INFO, "Expecting a MinusLink");
 
 	_commutative = false;
-	knil = Handle(createNumberNode(0));
+	knil = createNumberNode(0);
 
 	// Disallow unary Minus. This makes things easier, overall.
 	if (1 == _outgoing.size())
-		_outgoing.insert(_outgoing.begin(), knil);
+		_outgoing.insert(_outgoing.begin(), HandleCast(knil));
 }
 
-static inline double get_double(const Handle& h)
+static inline double get_double(const ProtoAtomPtr& pap)
 {
-	return NumberNodeCast(h)->get_value();
+	return NumberNodeCast(pap)->get_value();
 }
 
-Handle MinusLink::kons(const Handle& fi, const Handle& fj) const
+ProtoAtomPtr MinusLink::kons(const ProtoAtomPtr& fi, const ProtoAtomPtr& fj) const
 {
+	Type fitype = fi->get_type();
+	Type fjtype = fj->get_type();
+
 	// Are they numbers?
-	if (NUMBER_NODE == fi->get_type() and
-	    NUMBER_NODE == fj->get_type())
+	if (NUMBER_NODE == fitype and NUMBER_NODE == fjtype)
 	{
 		double diff = get_double(fi) - get_double(fj);
-		return Handle(createNumberNode(diff));
+		return createNumberNode(diff);
 	}
 
 	// If fj is zero, just drop it.
-	if (content_eq(fj, knil))
+	if (content_eq(HandleCast(fj), zero))
 		return fi;
 
-	// If we are here, we've been asked to subtracttwo things,
+	// Try to yank out values, if possible.
+	ProtoAtomPtr vi(fi);
+	if (VALUE_OF_LINK == fitype)
+	{
+		vi = FunctionLinkCast(fi)->execute();
+	}
+	Type vitype = vi->get_type();
+
+	ProtoAtomPtr vj(fj);
+	if (VALUE_OF_LINK == fjtype)
+	{
+		vj = FunctionLinkCast(fj)->execute();
+	}
+	Type vjtype = vj->get_type();
+
+	// Scalar minus vector
+	if (NUMBER_NODE == vitype and nameserver().isA(vjtype, FLOAT_VALUE))
+	{
+		FloatValuePtr mj = FloatValueCast(times(-1.0, FloatValueCast(vj)));
+		return plus(get_double(vi), mj);
+	}
+
+	// Vector minus scalar
+	if (nameserver().isA(vitype, FLOAT_VALUE) and NUMBER_NODE == vjtype)
+	{
+		return plus(-get_double(vj), FloatValueCast(vi));
+	}
+
+	// Vector times vector
+	if (nameserver().isA(vitype, FLOAT_VALUE) and nameserver().isA(vjtype, FLOAT_VALUE))
+	{
+		FloatValuePtr mj = FloatValueCast(times(-1.0, FloatValueCast(vj)));
+		return plus(FloatValueCast(vi), mj);
+	}
+
+	// If we are here, we've been asked to subtract two things,
 	// but they are not of a type that we know how to subtract.
-	return Handle(createMinusLink(fi, fj));
+	Handle sand(HandleCast(fj));
+	if (nullptr == sand)
+		throw SyntaxException(TRACE_INFO, "Not an Atom!");
+	return Handle(createMinusLink(HandleCast(fi), sand));
 }
 
 DEFINE_LINK_FACTORY(MinusLink, MINUS_LINK)

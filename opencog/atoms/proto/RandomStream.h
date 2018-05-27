@@ -1,5 +1,5 @@
 /*
- * opencog/atoms/reduct/TimesLink.h
+ * opencog/atoms/proto/RandomStream.h
  *
  * Copyright (C) 2015, 2018 Linas Vepstas
  * All Rights Reserved
@@ -20,45 +20,49 @@
  * 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
  */
 
-#ifndef _OPENCOG_TIMES_LINK_H
-#define _OPENCOG_TIMES_LINK_H
+#ifndef _OPENCOG_RANDOM_STREAM_H
+#define _OPENCOG_RANDOM_STREAM_H
 
-#include <opencog/atoms/reduct/ArithmeticLink.h>
+#include <vector>
+#include <opencog/atoms/proto/StreamValue.h>
+#include <opencog/atoms/proto/atom_types.h>
 
 namespace opencog
 {
+
 /** \addtogroup grp_atomspace
  *  @{
  */
 
 /**
- * The TimesLink implements the mathematical operation of "times".
+ * RandomStreams provide an example of streaming data.
  */
-class TimesLink : public ArithmeticLink
+class RandomStream
+	: public StreamValue
 {
 protected:
-	static Handle one;
-	ProtoAtomPtr kons(const ProtoAtomPtr&, const ProtoAtomPtr&) const;
+	RandomStream(Type t) : StreamValue(t) {}
+	int _len;
 
-	void init(void);
+	virtual void update() const;
 
 public:
-	TimesLink(const HandleSeq&, Type=TIMES_LINK);
-	TimesLink(const Handle& a, const Handle& b);
-	TimesLink(const Link&);
+	// int is the desired size of the vector.
+	RandomStream(int);
+	virtual ~RandomStream() {}
 
-	static Handle factory(const Handle&);
+	/** Returns a string representation of the value.  */
+	virtual std::string to_string(const std::string& indent = "") const;
 };
 
-typedef std::shared_ptr<TimesLink> TimesLinkPtr;
-static inline TimesLinkPtr TimesLinkCast(const Handle& h)
-   { AtomPtr a(h); return std::dynamic_pointer_cast<TimesLink>(a); }
-static inline TimesLinkPtr TimesLinkCast(AtomPtr a)
-   { return std::dynamic_pointer_cast<TimesLink>(a); }
+typedef std::shared_ptr<RandomStream> RandomStreamPtr;
+static inline RandomStreamPtr RandomStreamCast(ProtoAtomPtr& a)
+	{ return std::dynamic_pointer_cast<RandomStream>(a); }
 
-#define createTimesLink std::make_shared<TimesLink>
+#define createRandomStream std::make_shared<RandomStream>
+
 
 /** @}*/
-}
+} // namespace opencog
 
-#endif // _OPENCOG_TIMES_LINK_H
+#endif // _OPENCOG_RANDOM_STREAM_H

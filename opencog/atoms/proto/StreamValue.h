@@ -1,5 +1,5 @@
 /*
- * opencog/atoms/reduct/TimesLink.h
+ * opencog/atoms/proto/StreamValue.h
  *
  * Copyright (C) 2015, 2018 Linas Vepstas
  * All Rights Reserved
@@ -20,45 +20,44 @@
  * 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
  */
 
-#ifndef _OPENCOG_TIMES_LINK_H
-#define _OPENCOG_TIMES_LINK_H
+#ifndef _OPENCOG_STREAM_VALUE_H
+#define _OPENCOG_STREAM_VALUE_H
 
-#include <opencog/atoms/reduct/ArithmeticLink.h>
+#include <vector>
+#include <opencog/atoms/proto/FloatValue.h>
+#include <opencog/atoms/proto/atom_types.h>
 
 namespace opencog
 {
+
 /** \addtogroup grp_atomspace
  *  @{
  */
 
 /**
- * The TimesLink implements the mathematical operation of "times".
+ * StreamValues provide an example of streaming data.
  */
-class TimesLink : public ArithmeticLink
+class StreamValue
+	: public FloatValue
 {
 protected:
-	static Handle one;
-	ProtoAtomPtr kons(const ProtoAtomPtr&, const ProtoAtomPtr&) const;
-
-	void init(void);
+	StreamValue(Type t) : FloatValue(t) {}
 
 public:
-	TimesLink(const HandleSeq&, Type=TIMES_LINK);
-	TimesLink(const Handle& a, const Handle& b);
-	TimesLink(const Link&);
+	virtual ~StreamValue() {}
 
-	static Handle factory(const Handle&);
+	/** Returns true if two atoms are equal.  */
+	virtual bool operator==(const ProtoAtom&) const;
 };
 
-typedef std::shared_ptr<TimesLink> TimesLinkPtr;
-static inline TimesLinkPtr TimesLinkCast(const Handle& h)
-   { AtomPtr a(h); return std::dynamic_pointer_cast<TimesLink>(a); }
-static inline TimesLinkPtr TimesLinkCast(AtomPtr a)
-   { return std::dynamic_pointer_cast<TimesLink>(a); }
+typedef std::shared_ptr<StreamValue> StreamValuePtr;
+static inline StreamValuePtr StreamValueCast(ProtoAtomPtr& a)
+	{ return std::dynamic_pointer_cast<StreamValue>(a); }
 
-#define createTimesLink std::make_shared<TimesLink>
+#define createStreamValue std::make_shared<StreamValue>
+
 
 /** @}*/
-}
+} // namespace opencog
 
-#endif // _OPENCOG_TIMES_LINK_H
+#endif // _OPENCOG_STREAM_VALUE_H

@@ -1,7 +1,7 @@
 /*
- * opencog/atoms/core/ArityLink.h
+ * opencog/atoms/core/ValueOfLink.h
  *
- * Copyright (C) 2015 Linas Vepstas
+ * Copyright (C) 2018 Linas Vepstas
  * All Rights Reserved
  *
  * This program is free software; you can redistribute it and/or modify
@@ -20,8 +20,8 @@
  * 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
  */
 
-#ifndef _OPENCOG_ARITY_LINK_H
-#define _OPENCOG_ARITY_LINK_H
+#ifndef _OPENCOG_VALUE_OF_LINK_H
+#define _OPENCOG_VALUE_OF_LINK_H
 
 #include <opencog/atoms/core/FunctionLink.h>
 
@@ -31,24 +31,14 @@ namespace opencog
  *  @{
  */
 
-/// The ArityLink returns a NumberNode holding the arity of the wrapped
-/// atom; its zero for Nodes and empty Links.
+/// The ValueOfLink returns the value on the indicated atom (first
+/// argument) at the indicated key (second argument).
 ///
-/// For example,
-///
-///     ArityLink
-///         SomeAtom
-///         OtherAtom
-///
-/// will return
-///
-///     NumberNode 2
-///
-class ArityLink : public FunctionLink
+class ValueOfLink : public FunctionLink
 {
 public:
-	ArityLink(const HandleSeq&, Type = ARITY_LINK);
-	ArityLink(const Link &l);
+	ValueOfLink(const HandleSeq&, Type=VALUE_OF_LINK);
+	ValueOfLink(const Link &l);
 
 	// Return a pointer to the atom being specified.
 	virtual ProtoAtomPtr execute() const;
@@ -56,15 +46,15 @@ public:
 	static Handle factory(const Handle&);
 };
 
-typedef std::shared_ptr<ArityLink> ArityLinkPtr;
-static inline ArityLinkPtr ArityLinkCast(const Handle& h)
-	{ return std::dynamic_pointer_cast<ArityLink>(h); }
-static inline ArityLinkPtr ArityLinkCast(const AtomPtr& a)
-	{ return std::dynamic_pointer_cast<ArityLink>(a); }
+typedef std::shared_ptr<ValueOfLink> ValueOfLinkPtr;
+static inline ValueOfLinkPtr ValueOfLinkCast(const Handle& h)
+	{ return std::dynamic_pointer_cast<ValueOfLink>(h); }
+static inline ValueOfLinkPtr ValueOfLinkCast(AtomPtr a)
+	{ return std::dynamic_pointer_cast<ValueOfLink>(a); }
 
-#define createArityLink std::make_shared<ArityLink>
+#define createValueOfLink std::make_shared<ValueOfLink>
 
 /** @}*/
 }
 
-#endif // _OPENCOG_ARITY_LINK_H
+#endif // _OPENCOG_VALUE_OF_LINK_H

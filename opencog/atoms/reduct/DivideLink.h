@@ -1,7 +1,7 @@
 /*
  * opencog/atoms/reduct/DivideLink.h
  *
- * Copyright (C) 2015 Linas Vepstas
+ * Copyright (C) 2015,2018 Linas Vepstas
  * All Rights Reserved
  *
  * This program is free software; you can redistribute it and/or modify
@@ -23,7 +23,7 @@
 #ifndef _OPENCOG_DIVIDE_LINK_H
 #define _OPENCOG_DIVIDE_LINK_H
 
-#include <opencog/atoms/reduct/ArithmeticLink.h>
+#include <opencog/atoms/reduct/TimesLink.h>
 
 namespace opencog
 {
@@ -34,12 +34,12 @@ namespace opencog
 /**
  * The DivideLink implements the mathematical operation of "divide".
  */
-class DivideLink : public ArithmeticLink
+class DivideLink : public TimesLink
 {
 protected:
 	void init(void);
 
-	Handle kons(const Handle&, const Handle&) const;
+	ProtoAtomPtr kons(const ProtoAtomPtr&, const ProtoAtomPtr&) const;
 public:
 	DivideLink(const Handle& a, const Handle& b);
 	DivideLink(const HandleSeq& oset, Type=DIVIDE_LINK);

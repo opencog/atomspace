@@ -1,7 +1,7 @@
 /*
- * opencog/atoms/proto/LinkValue.cc
+ * opencog/atoms/proto/StreamValue.cc
  *
- * Copyright (C) 2015 Linas Vepstas
+ * Copyright (C) 2015, 2018 Linas Vepstas
  * All Rights Reserved
  *
  * This program is free software; you can redistribute it and/or modify
@@ -20,32 +20,16 @@
  * 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
  */
 
-#include <opencog/atoms/proto/LinkValue.h>
+#include <stdlib.h>
+#include <opencog/atoms/proto/StreamValue.h>
 
 using namespace opencog;
 
-bool LinkValue::operator==(const ProtoAtom& other) const
+// ==============================================================
+
+bool StreamValue::operator==(const ProtoAtom& other) const
 {
-	if (LINK_VALUE != other.get_type()) return false;
-
-	const LinkValue* lov = (const LinkValue*) &other;
-
-	if (_value.size() != lov->_value.size()) return false;
-
-	// Content-compare, NOT pointer-compare!
-	size_t len = _value.size();
-	for (size_t i=0; i<len; i++)
-		if (*(_value[i]) != *(lov->_value[i])) return false;
-	return true;
+	return &other == this;
 }
 
 // ==============================================================
-
-std::string LinkValue::to_string(const std::string& indent) const
-{
-	std::string rv = indent + "(" + nameserver().getTypeName(_type) + "\n";
-	for (ProtoAtomPtr v :_value)
-		rv += std::string(" ") + v->to_string(indent + "   ");
-	rv += ")\n";
-	return rv;
-}

@@ -1,7 +1,7 @@
 /*
  * opencog/atoms/reduct/PlusLink.cc
  *
- * Copyright (C) 2015 Linas Vepstas
+ * Copyright (C) 2015, 2018 Linas Vepstas
  * All Rights Reserved
  *
  * This program is free software; you can redistribute it and/or modify
@@ -28,6 +28,8 @@
 
 using namespace opencog;
 
+Handle PlusLink::zero;
+
 PlusLink::PlusLink(const HandleSeq& oset, Type t)
     : ArithmeticLink(oset, t)
 {
@@ -48,22 +50,24 @@ PlusLink::PlusLink(const Link& l)
 
 void PlusLink::init(void)
 {
+	if (nullptr == zero) zero = createNumberNode(0);
+
 	Type tscope = get_type();
 	if (not nameserver().isA(tscope, PLUS_LINK))
 		throw InvalidParamException(TRACE_INFO, "Expecting a PlusLink");
 
-	knil = Handle(createNumberNode(0));
+	knil = zero;
 	_commutative = true;
 }
 
 // ============================================================
 
-static inline double get_double(const Handle& h)
+static inline double get_double(const ProtoAtomPtr& pap)
 {
-	return NumberNodeCast(h)->get_value();
+	return NumberNodeCast(pap)->get_value();
 }
 
-Handle PlusLink::kons(const Handle& fi, const Handle& fj) const
+ProtoAtomPtr PlusLink::kons(const ProtoAtomPtr& fi, const ProtoAtomPtr& fj) const
 {
 	Type fitype = fi->get_type();
 	Type fjtype = fj->get_type();
@@ -72,13 +76,13 @@ Handle PlusLink::kons(const Handle& fi, const Handle& fj) const
 	if (NUMBER_NODE == fitype and NUMBER_NODE == fjtype)
 	{
 		double sum = get_double(fi) + get_double(fj);
-		return Handle(createNumberNode(sum));
+		return createNumberNode(sum);
 	}
 
 	// If either one is the unit, then just drop it.
-	if (content_eq(fi, knil))
+	if (content_eq(HandleCast(fi), zero))
 		return fj;
-	if (content_eq(fj, knil))
+	if (content_eq(HandleCast(fj), zero))
 		return fi;
 
 	// Is either one a PlusLink? If so, then flatten.
@@ -88,23 +92,23 @@ Handle PlusLink::kons(const Handle& fi, const Handle& fj) const
 		// flatten the left
 		if (PLUS_LINK == fitype)
 		{
-			for (const Handle& lhs: fi->getOutgoingSet())
+			for (const Handle& lhs: HandleCast(fi)->getOutgoingSet())
 				seq.push_back(lhs);
 		}
 		else
 		{
-			seq.push_back(fi);
+			seq.push_back(HandleCast(fi));
 		}
 
 		// flatten the right
 		if (PLUS_LINK == fjtype)
 		{
-			for (const Handle& rhs: fj->getOutgoingSet())
+			for (const Handle& rhs: HandleCast(fj)->getOutgoingSet())
 				seq.push_back(rhs);
 		}
 		else
 		{
-			seq.push_back(fj);
+			seq.push_back(HandleCast(fj));
 		}
 		Handle foo(createLink(seq, PLUS_LINK));
 		PlusLinkPtr ap = PlusLinkCast(foo);
@@ -112,10 +116,11 @@ Handle PlusLink::kons(const Handle& fi, const Handle& fj) const
 	}
 
 	// Is fi identical to fj? If so, then replace by 2*fi
-	if (content_eq(fi, fj))
+	Handle hi(HandleCast(fi));
+	if (hi and content_eq(hi, HandleCast(fj)))
 	{
 		Handle two(createNumberNode("2"));
-		return Handle(createTimesLink(fi, two));
+		return createTimesLink(hi, two) -> execute();
 	}
 
 	// If j is (TimesLink x a) and i is identical to x,
@@ -129,7 +134,7 @@ Handle PlusLink::kons(const Handle& fi, const Handle& fj) const
 		bool do_add = false;
 		HandleSeq rest;
 
-		Handle exx = fj->getOutgoingAtom(0);
+		Handle exx = HandleCast(fj)->getOutgoingAtom(0);
 
 		// Handle the (a+1) case described above.
 		if (fi == exx)
@@ -141,9 +146,9 @@ Handle PlusLink::kons(const Handle& fi, const Handle& fj) const
 
 		// Handle the (a+b) case described above.
 		else if (fitype == TIMES_LINK and
-		         fi->getOutgoingAtom(0) == exx)
+		         hi->getOutgoingAtom(0) == exx)
 		{
-			const HandleSeq& ilpo = fi->getOutgoingSet();
+			const HandleSeq& ilpo = hi->getOutgoingSet();
 			size_t ilpsz = ilpo.size();
 			for (size_t k=1; k<ilpsz; k++)
 				rest.push_back(ilpo[k]);
@@ -152,7 +157,7 @@ Handle PlusLink::kons(const Handle& fi, const Handle& fj) const
 
 		if (do_add)
 		{
-			const HandleSeq& jlpo = fj->getOutgoingSet();
+			const HandleSeq& jlpo = HandleCast(fj)->getOutgoingSet();
 			size_t jlpsz = jlpo.size();
 			for (size_t k=1; k<jlpsz; k++)
 				rest.push_back(jlpo[k]);
@@ -160,16 +165,50 @@ Handle PlusLink::kons(const Handle& fi, const Handle& fj) const
 			// a_plus is now (a+1) or (a+b) as described above.
 			Handle foo(createLink(rest, PLUS_LINK));
 			PlusLinkPtr ap = PlusLinkCast(foo);
-			Handle a_plus(ap->delta_reduce());
+			ProtoAtomPtr a_plus(ap->delta_reduce());
 
-			return Handle(createTimesLink(exx, a_plus));
+			return createTimesLink(exx, HandleCast(a_plus));
 		}
+	}
+
+	// Try to yank out values, if possible.
+	ProtoAtomPtr vi(fi);
+	if (VALUE_OF_LINK == fitype)
+	{
+		vi = FunctionLinkCast(fi)->execute();
+	}
+	Type vitype = vi->get_type();
+
+	ProtoAtomPtr vj(fj);
+	if (VALUE_OF_LINK == fjtype)
+	{
+		vj = FunctionLinkCast(fj)->execute();
+	}
+	Type vjtype = vj->get_type();
+
+	// Swap order, make things easier below.
+	if (nameserver().isA(vitype, FLOAT_VALUE))
+	{
+		std::swap(vi, vj);
+		std::swap(vitype, vjtype);
+	}
+
+	// Scalar times vector
+	if (NUMBER_NODE == vitype and nameserver().isA(vjtype, FLOAT_VALUE))
+	{
+		return plus(get_double(vi), FloatValueCast(vj));
+	}
+
+	// Vector times vector
+	if (nameserver().isA(vitype, FLOAT_VALUE) and nameserver().isA(vjtype, FLOAT_VALUE))
+	{
+		return plus(FloatValueCast(vi), FloatValueCast(vj));
 	}
 
 	// If we are here, we've been asked to add two things of the same
 	// type, but they are not of a type that we know how to add.
 	// For example, fi and fj might be two different VariableNodes.
-	return Handle(createPlusLink(fi, fj)->reorder());
+	return createPlusLink(HandleCast(fi), HandleCast(fj))->reorder();
 }
 
 DEFINE_LINK_FACTORY(PlusLink, PLUS_LINK);

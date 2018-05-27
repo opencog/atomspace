@@ -1,0 +1,294 @@
+/*
+ * tests/atoms/StreamUTest.cxxtest
+ *
+ * Copyright (C) 2018 Linas Vepstas
+ * All Rights Reserved
+ *
+ * This program is free software; you can redistribute it and/or modify
+ * it under the terms of the GNU Affero General Public License v3 as
+ * published by the Free Software Foundation and including the exceptions
+ * at http://opencog.org/wiki/Licenses
+ *
+ * This program is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ * GNU General Public License for more details.
+ *
+ * You should have received a copy of the GNU Affero General Public License
+ * along with this program; if not, write to:
+ * Free Software Foundation, Inc.,
+ * 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
+ */
+
+#include <opencog/atoms/core/ValueOfLink.h>
+#include <opencog/atoms/execution/Instantiator.h>
+#include <opencog/atoms/proto/RandomStream.h>
+#include <opencog/atomspace/AtomSpace.h>
+
+#include <cxxtest/TestSuite.h>
+
+using namespace opencog;
+
+#define al _as.add_link
+#define an _as.add_node
+
+class StreamUTest : public CxxTest::TestSuite
+{
+private:
+	AtomSpace _as;
+	ProtoAtomPtr value;
+	Handle key;
+	Handle atom;
+	
+public:
+	void setUp(void);
+
+	void check(void);
+	double loop(const Handle&);
+
+	void test_basic();
+	void test_times();
+	void test_plus();
+	void test_times_plus();
+	void test_minus();
+	void test_divide();
+};
+
+// This unit test is a stand-in test for the concept of a streaming API
+// on Values. For lack of anything better to test, the RandomStream is
+// tested -- it just generated random numbers, and we just make sure
+// these average out to expected values. Its good enough, for now.
+#define LEN 10
+#define LOOPCNT 400
+
+void StreamUTest::setUp(void)
+{
+	value = createRandomStream(LEN);
+	key = an(PREDICATE_NODE, "my key");
+	atom = an(CONCEPT_NODE, "some atom");
+	atom->setValue(key, value);
+}
+
+// ====================================================================
+// Run the value, repeatedly.
+double StreamUTest::loop(const Handle& stream)
+{
+	FunctionLinkPtr flp = FunctionLinkCast(stream);
+
+	double sum = 0.0;
+	for (int i=0; i<LOOPCNT; i++)
+	{
+		ProtoAtomPtr pap = flp->execute();
+		const std::vector<double>& rv = FloatValueCast(pap)->value();
+		TS_ASSERT_EQUALS(rv.size(), LEN);
+
+		for (int j=0; j<LEN; j++)
+		{
+			sum += rv[j];
+		}
+	}
+
+	sum /= LOOPCNT * LEN;
+	return sum;
+}
+
+// ====================================================================
+// Make sure that streaming works.
+void StreamUTest::test_basic()
+{
+	logger().debug("BEGIN TEST: %s", __FUNCTION__);
+
+#define LEN 10
+	Handle valof = al(VALUE_OF_LINK, atom, key);
+	double sum = loop(valof);
+
+	printf("Expect 0.485 < %g < 0.515\n", sum);
+	TS_ASSERT_LESS_THAN(0.485, sum);
+	TS_ASSERT_LESS_THAN(sum, 0.515);
+
+	logger().debug("END TEST: %s", __FUNCTION__);
+}
+
+// ====================================================================
+// Make sure TimesLink works
+void StreamUTest::test_times()
+{
+	logger().debug("BEGIN TEST: %s", __FUNCTION__);
+
+	Handle valof = al(VALUE_OF_LINK, atom, key);
+
+	// scalar times vector --------------------------------------------
+	Handle times = al(TIMES_LINK, an(NUMBER_NODE, "3"), valof);
+
+	double sum = loop(times);
+	printf("Expect 1.45 < %g < 1.55\n", sum);
+	TS_ASSERT_LESS_THAN(1.455, sum);
+	TS_ASSERT_LESS_THAN(sum, 1.55);
+
+	// vector times scalar --------------------------------------------
+	times = al(TIMES_LINK, valof, an(NUMBER_NODE, "7"));
+
+	sum = loop(times);
+	printf("Expect 3.40 < %g < 3.6\n", sum);
+	TS_ASSERT_LESS_THAN(3.4, sum);
+	TS_ASSERT_LESS_THAN(sum, 3.6);
+
+	// vector times vector ----------------------------------------------
+	times = al(TIMES_LINK, valof, valof);
+
+	sum = loop(times);
+	// Integral of x^2 dx from 0 to 1 = 1/3
+	printf("Expect 0.32 < %g < 0.345\n", sum);
+	TS_ASSERT_LESS_THAN(0.32, sum);
+	TS_ASSERT_LESS_THAN(sum, 0.345);
+
+	logger().debug("END TEST: %s", __FUNCTION__);
+}
+
+// ====================================================================
+// Make sure PlusLink works
+void StreamUTest::test_plus()
+{
+	logger().debug("BEGIN TEST: %s", __FUNCTION__);
+
+	Handle valof = al(VALUE_OF_LINK, atom, key);
+
+	// scalar plus vector --------------------------------------------
+	Handle plus = al(PLUS_LINK, an(NUMBER_NODE, "3"), valof);
+
+	double sum = loop(plus);
+	printf("Expect 3.49 < %g < 3.51\n", sum);
+	TS_ASSERT_LESS_THAN(3.49, sum);
+	TS_ASSERT_LESS_THAN(sum, 3.51);
+
+	// vector plus scalar --------------------------------------------
+	plus = al(PLUS_LINK, valof, an(NUMBER_NODE, "7"));
+
+	sum = loop(plus);
+	printf("Expect 7.48 < %g < 7.52\n", sum);
+	TS_ASSERT_LESS_THAN(7.48, sum);
+	TS_ASSERT_LESS_THAN(sum, 7.52);
+
+	// vector plus vector ----------------------------------------------
+	plus = al(PLUS_LINK, valof, valof);
+
+	sum = loop(plus);
+	printf("Expect 0.96 < %g < 1.04\n", sum);
+	TS_ASSERT_LESS_THAN(0.96, sum);
+	TS_ASSERT_LESS_THAN(sum, 1.04);
+
+	logger().debug("END TEST: %s", __FUNCTION__);
+}
+
+// ====================================================================
+// Make sure complex expressions work.
+void StreamUTest::test_times_plus()
+{
+	logger().debug("BEGIN TEST: %s", __FUNCTION__);
+
+	Handle valof = al(VALUE_OF_LINK, atom, key);
+
+	// 5+3x --------------------------------------------
+	Handle times = al(PLUS_LINK, an(NUMBER_NODE, "5"),
+		al(TIMES_LINK, an(NUMBER_NODE, "3"), valof));
+
+	double sum = loop(times);
+	printf("Expect 6.45 < %g < 6.55\n", sum);
+	TS_ASSERT_LESS_THAN(6.45, sum);
+	TS_ASSERT_LESS_THAN(sum, 6.55);
+
+	// 5(3+x) --------------------------------------------
+	times = al(TIMES_LINK, an(NUMBER_NODE, "5"),
+		al(PLUS_LINK, an(NUMBER_NODE, "3"), valof));
+
+	sum = loop(times);
+	printf("Expect 17.4 < %g < 17.6\n", sum);
+	TS_ASSERT_LESS_THAN(17.4, sum);
+	TS_ASSERT_LESS_THAN(sum, 17.6);
+
+	// (x+3)5 --------------------------------------------
+	times = al(TIMES_LINK,
+		al(PLUS_LINK, valof, an(NUMBER_NODE, "3")),
+		an(NUMBER_NODE, "5"));
+
+	sum = loop(times);
+	printf("Expect 17.4 < %g < 17.6\n", sum);
+	TS_ASSERT_LESS_THAN(17.4, sum);
+	TS_ASSERT_LESS_THAN(sum, 17.6);
+
+	logger().debug("END TEST: %s", __FUNCTION__);
+}
+
+// ====================================================================
+// Make sure MinusLink works
+void StreamUTest::test_minus()
+{
+	logger().debug("BEGIN TEST: %s", __FUNCTION__);
+
+	Handle valof = al(VALUE_OF_LINK, atom, key);
+
+	// 3-x --------------------------------------------
+	Handle minus = al(MINUS_LINK, an(NUMBER_NODE, "3"), valof);
+
+	double sum = loop(minus);
+	printf("Expect 2.45 < %g < 2.55\n", sum);
+	TS_ASSERT_LESS_THAN(2.45, sum);
+	TS_ASSERT_LESS_THAN(sum, 2.55);
+
+	// x-7 --------------------------------------------
+	minus = al(MINUS_LINK, valof, an(NUMBER_NODE, "7"));
+
+	sum = loop(minus);
+	printf("Expect -6.7 < %g < -6.3\n", sum);
+	TS_ASSERT_LESS_THAN(-6.7, sum);
+	TS_ASSERT_LESS_THAN(sum, -6.3);
+
+	// vector minus vector ----------------------------------------------
+	minus = al(MINUS_LINK, valof, valof);
+
+	sum = loop(minus);
+	printf("Expect -0.2 < %g < 0.2\n", sum);
+	TS_ASSERT_LESS_THAN(-0.2, sum);
+	TS_ASSERT_LESS_THAN(sum, 0.2);
+
+	logger().debug("END TEST: %s", __FUNCTION__);
+}
+
+// ====================================================================
+// Make sure DivideLink works
+void StreamUTest::test_divide()
+{
+	logger().debug("BEGIN TEST: %s", __FUNCTION__);
+
+	Handle valof = al(VALUE_OF_LINK, atom, key);
+
+	// x/4 --------------------------------------------
+	Handle divide = al(DIVIDE_LINK, valof, an(NUMBER_NODE, "4"));
+
+	double sum = loop(divide);
+	printf("Expect 0.122 < %g < 0.128\n", sum);
+	TS_ASSERT_LESS_THAN(0.122, sum);
+	TS_ASSERT_LESS_THAN(sum, 0.128);
+
+	// 3/(x+1) --------------------------------------------
+
+	divide = al(DIVIDE_LINK, an(NUMBER_NODE, "3"),
+		al(PLUS_LINK, valof, an(NUMBER_NODE, "1")));
+
+	sum = loop(divide);
+	printf("Expect 1.85 < %g < 2.15\n", sum);
+	TS_ASSERT_LESS_THAN(1.85, sum);
+	TS_ASSERT_LESS_THAN(sum, 2.15);
+
+	// vector divide vector ----------------------------------------------
+	divide = al(DIVIDE_LINK,
+		al(PLUS_LINK, valof, an(NUMBER_NODE, "7")),
+		al(PLUS_LINK, valof, an(NUMBER_NODE, "7")));
+
+	sum = loop(divide);
+	printf("Expect 0.99 < %g < 1.01\n", sum);
+	TS_ASSERT_LESS_THAN(0.99, sum);
+	TS_ASSERT_LESS_THAN(sum, 1.01);
+
+	logger().debug("END TEST: %s", __FUNCTION__);
+}

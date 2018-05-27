@@ -20,6 +20,7 @@ STRING_VALUE <- VALUE
 LINK_VALUE <- VALUE     // vector of values ("link" holding values)
 VALUATION <- VALUE
 
+// ===========================================================
 // All of the different flavors of truth values
 TRUTH_VALUE <- FLOAT_VALUE
 SIMPLE_TRUTH_VALUE <- TRUTH_VALUE
@@ -32,7 +33,16 @@ EVIDENCE_COUNT_TRUTH_VALUE <- TRUTH_VALUE
 // The AttentionValue
 ATTENTION_VALUE <- FLOAT_VALUE
 
-// Base of hierarchy - NOTE: ATOM will not have a corresponding Python
+// ===========================================================
+// A base class for time-varying (floating-point) values.
+// XXX TODO we need some other base class for other kinds of varying values.
+STREAM_VALUE <- FLOAT_VALUE
+
+// An example of a time-varying value stream
+RANDOM_STREAM <- STREAM_VALUE
+
+// ===========================================================
+// Base of Atom hierarchy - NOTE: ATOM will not have a corresponding Python
 // construction function to avoid identifier conflict with the Atom object.
 ATOM <- VALUE
 NODE <- ATOM
@@ -53,6 +63,14 @@ UNORDERED_LINK <- LINK
 // a cheesey hack - really, there should be some ArrowLink
 // associated to each atom type, and that should determine the
 // behavior of the atom. But, for now, we do it the hacky way.
+//
+// By doing type-checking at atom-creation time, this is a kind-of
+// static type-checking, and thus suffers from the typical issues
+// of static type-checking.
+//
+// Also -- polymorphic outputs are broken.  For example, ValueOfLink
+// can return both numbers, and not-numbers...
+
 
 // Evaluatable link. Any link type which might be evaluated, resulting
 // in a truth-value, should inherit from this type.  This is a
@@ -543,13 +561,17 @@ FUNCTION_LINK <- FREE_LINK
 // function they perform is implicit in the link type.
 EXECUTION_OUTPUT_LINK <- FUNCTION_LINK
 
+// Return the indicated value on the indicated atom.
+// XXX It doesn't *always* return numbers ...
+VALUE_OF_LINK <- FUNCTION_LINK,NUMERIC_OUTPUT_LINK
+
 // Basic arithmetic operators
 FOLD_LINK <- FUNCTION_LINK
 ARITHMETIC_LINK <- FOLD_LINK,NUMERIC_LINK,NUMERIC_OUTPUT_LINK
 PLUS_LINK <- ARITHMETIC_LINK
-MINUS_LINK <- ARITHMETIC_LINK
+MINUS_LINK <- PLUS_LINK
 TIMES_LINK <- ARITHMETIC_LINK
-DIVIDE_LINK <- ARITHMETIC_LINK
+DIVIDE_LINK <- TIMES_LINK
 
 RANDOM_NUMBER_LINK <- FUNCTION_LINK,NUMERIC_OUTPUT_LINK
 
@@ -571,17 +593,6 @@ SLEEP_LINK <- FUNCTION_LINK,NUMERIC_OUTPUT_LINK
 // list, instead of the entire AtomSpace.  It is more-or-less analogous
 // to the standard functional-programming concept of "map".
 MAP_LINK <- FUNCTION_LINK
-
-// Higher order function. Take an n-ary function g as first outgoing,
-// a ListLink of n m-ary functions f1 to fn, as second outgoing, and
-// produce the m-ary function g(f1(x1,...,xm),...,fn(x1,...,xm)). If g
-// is unary, then the second outgoing can be function instead of a
-// ListLink.
-COMPOSE_LINK <- FUNCTION_LINK
-
-// Unary higher order function to build a projection function. Take a
-// number and build a function projecting its ith input argument.
-PROJECT_LINK <- FUNCTION_LINK
 
 // ====================================================================
 // Grammatical inference on time series
