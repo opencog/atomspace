@@ -486,23 +486,13 @@ std::string Rule::to_string(const std::string& indent) const
 
 bool Rule::has_name_capture() const
 {
-	HandleSeq vardecls = VariableListCast((this->get_vardecl()))
-			->get_variables().varseq;
 	HandleSeq boundvars = BindLinkCast(this->get_rule())->get_variables()
 			.varseq;
-	size_t sb = boundvars.size();
-	size_t sd = vardecls.size();
+	FreeVariables fv = VariableListCast((this->get_vardecl()))->get_variables();
 
-	for (size_t i = 0; i < sb; i++)
+	for (const auto& v : boundvars)
 	{
-		for (size_t j = i+1; j < sb; j++)
-		{
-			if(content_eq(boundvars[i], boundvars[j])) return true;
-		}
-		for (size_t k = 0; k < sd; k++)
-		{
-			if(content_eq(boundvars[i], vardecls[k])) return true;
-		}
+		if(fv.is_in_varset(v)) return true;
 	}
 	return false;
 }
