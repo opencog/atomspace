@@ -1,7 +1,7 @@
 /*
  * opencog/truthvalue/GDTV.cc
  *
- * Copyright (C) 2002-2007 Novamente LLC
+ * Copyright (C) 2018 SingularityNet
  * All Rights Reserved
  *
  * Written by Roman Treutlein
