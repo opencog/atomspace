@@ -295,11 +295,11 @@ private:
 	// URE will always choose the one with the highest confidence.
 	TruthValuePtr _tv;
 
-	bool has_name_collision(const Handle& vardecls) const;
+	bool has_name_collision(const Handle& vardecl) const;
 
 	// Return a copy of the rule with the variables alpha-converted
 	// into random variable names.
-	Rule rand_alpha_converted(const Handle& vardecls) const;
+	Rule rand_alpha_converted(const Handle& vardecl) const;
 
 	Handle standardize_helper(AtomSpace*, const Handle&, HandleMap&);
 

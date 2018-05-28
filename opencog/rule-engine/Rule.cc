@@ -484,8 +484,7 @@ std::string Rule::to_string(const std::string& indent) const
 
 bool Rule::has_name_collision(const Handle& vardecl) const
 {
-	HandleSet boundvars = BindLinkCast(this->get_rule())->get_variables()
-			.varset;
+	const HandleSet& boundvars = _rule->get_variables().varset;
 	Variables fv = (VariableListCast(vardecl))->get_variables();
 
 	for (const auto& v : boundvars)
