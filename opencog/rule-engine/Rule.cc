@@ -404,7 +404,7 @@ RuleTypedSubstitutionMap Rule::unify_source(const Handle& source,
 	// as any variable in the source. XXX This is only a stochastic
 	// guarantee, there is a small chance that the new random name
 	// will still collide.
-	Rule alpha_rule = rand_alpha_converted();
+	Rule alpha_rule = rand_alpha_converted(vardecl);
 
 	RuleTypedSubstitutionMap unified_rules;
 	Handle rule_vardecl = alpha_rule.get_vardecl();
@@ -435,10 +435,8 @@ RuleTypedSubstitutionMap Rule::unify_target(const Handle& target,
 		return {};
 
 	// To guarantee that the rule variable does not have the same name
-	// as any variable in the target. XXX This is only a stochastic
-	// guarantee, there is a small chance that the new random name
-	// will still collide.
-	Rule alpha_rule = rand_alpha_converted();
+	// as any variable in the target.
+	Rule alpha_rule = rand_alpha_converted(vardecl);
 
 	RuleTypedSubstitutionMap unified_rules;
 	Handle alpha_vardecl = alpha_rule.get_vardecl();
@@ -484,13 +482,32 @@ std::string Rule::to_string(const std::string& indent) const
 	return ss.str();
 }
 
-Rule Rule::rand_alpha_converted() const
+bool Rule::has_name_collision(const Handle& vardecl) const
+{
+	HandleSet boundvars = BindLinkCast(this->get_rule())->get_variables()
+			.varset;
+	Variables fv = (VariableListCast(vardecl))->get_variables();
+
+	for (const auto& v : boundvars)
+	{
+		if (fv.is_in_varset(v)) return true;
+	}
+	return false;
+}
+
+Rule Rule::rand_alpha_converted(const Handle& vardecl) const
 {
 	// Clone the rule
 	Rule result = *this;
 
 	// Alpha convert the rule
 	result.set_rule(_rule->alpha_convert());
+
+	// Check for the small chance of still having name collisions
+	while(result.has_name_collision(vardecl))
+	{
+		result.set_rule(_rule->alpha_convert());
+	}
 
 	return result;
 }
@@ -511,7 +528,7 @@ Handle Rule::standardize_helper(AtomSpace* as, const Handle& h,
 		HandleSeq old_outgoing = h->getOutgoingSet();
 		HandleSeq new_outgoing;
 
-		for (auto ho : old_outgoing)
+		for (const auto ho : old_outgoing)
 			new_outgoing.push_back(standardize_helper(as, ho, dict));
 
 		Handle hcpy(as->add_atom(createLink(new_outgoing, h->get_type())));
