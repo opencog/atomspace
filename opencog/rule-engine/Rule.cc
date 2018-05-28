@@ -484,6 +484,30 @@ std::string Rule::to_string(const std::string& indent) const
 	return ss.str();
 }
 
+bool Rule::has_name_capture() const
+{
+    HandleSeq vardecls = VariableListCast((this->get_vardecl()))
+            ->get_variables().varseq;
+    HandleSeq boundvars = BindLinkCast(this->get_rule())->get_variables()
+            .varseq;
+    size_t sb = boundvars.size();
+    size_t sd = boundvars.size();
+
+    for (size_t i = 0; i < sb; i++)
+    {
+        for (size_t j = i+1; j < sb; j++)
+        {
+            if(content_eq(boundvars[i], boundvars[j])) return true;
+        }
+        for (size_t k = 0; k < sd; k++)
+        {
+            if(content_eq(boundvars[i], vardecls[k])) return true;
+        }
+
+    }
+    return false;
+}
+
 Rule Rule::rand_alpha_converted() const
 {
 	// Clone the rule

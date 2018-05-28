@@ -295,6 +295,8 @@ private:
 	// URE will always choose the one with the highest confidence.
 	TruthValuePtr _tv;
 
+	bool has_name_capture() const;
+
 	// Return a copy of the rule with the variables alpha-converted
 	// into random variable names.
 	Rule rand_alpha_converted() const;
