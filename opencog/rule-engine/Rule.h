@@ -299,7 +299,7 @@ private:
 
 	// Return a copy of the rule with the variables alpha-converted
 	// into random variable names.
-	Rule rand_alpha_converted() const;
+	Rule rand_alpha_converted(const Handle& vardecls) const;
 
 	Handle standardize_helper(AtomSpace*, const Handle&, HandleMap&);
 
