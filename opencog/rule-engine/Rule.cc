@@ -39,6 +39,7 @@
 #include <opencog/unify/Unify.h>
 
 #include <opencog/query/BindLinkAPI.h>
+#include <opencog/util/algorithm.h>
 
 #include "URELogger.h"
 
@@ -482,18 +483,6 @@ std::string Rule::to_string(const std::string& indent) const
 	return ss.str();
 }
 
-bool Rule::has_name_collision(const Handle& vardecl) const
-{
-	const HandleSet& boundvars = _rule->get_variables().varset;
-	Variables fv = (VariableListCast(vardecl))->get_variables();
-
-	for (const auto& v : boundvars)
-	{
-		if (fv.is_in_varset(v)) return true;
-	}
-	return false;
-}
-
 Rule Rule::rand_alpha_converted(const Handle& vardecl) const
 {
 	// Clone the rule
@@ -503,7 +492,11 @@ Rule Rule::rand_alpha_converted(const Handle& vardecl) const
 	result.set_rule(_rule->alpha_convert());
 
 	// Check for the small chance of still having name collisions
-	while(result.has_name_collision(vardecl))
+	const HandleSet& boundvars = _rule->get_variables().varset;
+	const HandleSet& vardecls = (VariableListCast(vardecl))->get_variables()
+			.varset;
+
+	while(is_disjoint(boundvars, vardecls))
 	{
 		result.set_rule(_rule->alpha_convert());
 	}
