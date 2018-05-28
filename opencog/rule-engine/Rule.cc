@@ -435,10 +435,10 @@ RuleTypedSubstitutionMap Rule::unify_target(const Handle& target,
 		return {};
 
 	// To guarantee that the rule variable does not have the same name
-	// as any variable in the target. XXX This is only a stochastic
-	// guarantee, there is a small chance that the new random name
-	// will still collide.
+	// as any variable in the target.
 	Rule alpha_rule = rand_alpha_converted();
+	// Check for the small chance of still having name collisions
+	alpha_rule.has_name_collision(vardecl);
 
 	RuleTypedSubstitutionMap unified_rules;
 	Handle alpha_vardecl = alpha_rule.get_vardecl();
@@ -484,12 +484,11 @@ std::string Rule::to_string(const std::string& indent) const
 	return ss.str();
 }
 
-bool Rule::has_name_capture() const
+bool Rule::has_name_collision(const Handle& vardecl) const
 {
 	HandleSeq boundvars = (BindLinkCast(this->get_rule())->get_variables())
 			.varseq;
-	FreeVariables fv = (VariableListCast(this->get_vardecl()))
-			->get_variables();
+	Variables fv = (VariableListCast(vardecl))->get_variables();
 
 	for (const auto& v : boundvars)
 	{
@@ -505,7 +504,6 @@ Rule Rule::rand_alpha_converted() const
 
 	// Alpha convert the rule
 	result.set_rule(_rule->alpha_convert());
-	if(result.has_name_capture()) result.rand_alpha_converted();
 
 	return result;
 }
