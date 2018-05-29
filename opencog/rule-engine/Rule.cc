@@ -39,7 +39,6 @@
 #include <opencog/unify/Unify.h>
 
 #include <opencog/query/BindLinkAPI.h>
-#include <opencog/util/algorithm.h>
 
 #include "URELogger.h"
 
@@ -402,8 +401,10 @@ RuleTypedSubstitutionMap Rule::unify_source(const Handle& source,
 		return {};
 
 	// To guarantee that the rule variable does not have the same name
-	// as any variable in the source.
-	Rule alpha_rule = rand_alpha_converted(source, vardecl);
+	// as any variable in the source. XXX This is only a stochastic
+	// guarantee, there is a small chance that the new random name
+	// will still collide.
+	Rule alpha_rule = rand_alpha_converted();
 
 	RuleTypedSubstitutionMap unified_rules;
 	Handle rule_vardecl = alpha_rule.get_vardecl();
@@ -434,8 +435,10 @@ RuleTypedSubstitutionMap Rule::unify_target(const Handle& target,
 		return {};
 
 	// To guarantee that the rule variable does not have the same name
-	// as any variable in the target.
-	Rule alpha_rule = rand_alpha_converted(target, vardecl);
+	// as any variable in the target. XXX This is only a stochastic
+	// guarantee, there is a small chance that the new random name
+	// will still collide.
+	Rule alpha_rule = rand_alpha_converted();
 
 	RuleTypedSubstitutionMap unified_rules;
 	Handle alpha_vardecl = alpha_rule.get_vardecl();
@@ -481,19 +484,13 @@ std::string Rule::to_string(const std::string& indent) const
 	return ss.str();
 }
 
-Rule Rule::rand_alpha_converted(const Handle& term, const Handle& vardecl)
-const
+Rule Rule::rand_alpha_converted() const
 {
 	// Clone the rule
 	Rule result = *this;
-	const HandleSet& term_vars = gen_variables(term, vardecl).varset;
-	const HandleSet& result_vars = result._rule->get_variables().varset;
 
-	do {
-		// Alpha convert the rule
-		result.set_rule(_rule->alpha_convert());
-	}
-	while(!is_disjoint(target_vars, result_vars));
+	// Alpha convert the rule
+	result.set_rule(_rule->alpha_convert());
 
 	return result;
 }
