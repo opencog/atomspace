@@ -525,6 +525,8 @@ QUANTITY_LINK <- ORDERED_LINK
 // for them to be declared as virtual (at least, as far as the pattern
 // matcher is concerned, which, right now, is the only user of this
 // link type.)
+//
+// XXX Or would it be better to merely have it derive from EvaluatableLink ???
 VIRTUAL_LINK <- EVALUATION_LINK
 GREATER_THAN_LINK <- VIRTUAL_LINK,NUMERIC_LINK
 
