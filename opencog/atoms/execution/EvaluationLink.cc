@@ -127,7 +127,7 @@ static NumberNodePtr unwrap_set(Handle h)
 static double get_numeric_value(const ProtoAtomPtr& pap)
 {
 	Type t = pap->get_type();
-	if (NUMBER_NODE == t)
+	if (NUMBER_NODE == t or SET_LINK == t)
 	{
 		NumberNodePtr n(unwrap_set(HandleCast(pap)));
 		return n->get_value();
