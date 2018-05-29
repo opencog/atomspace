@@ -582,7 +582,10 @@ RANDOM_NUMBER_LINK <- FUNCTION_LINK,NUMERIC_OUTPUT_LINK
 ARITY_LINK <- FUNCTION_LINK,NUMERIC_OUTPUT_LINK
 
 // Return (with uniform distribution) one of the links it wraps.
-RANDOM_CHOICE_LINK <- FUNCTION_LINK
+// XXX Broken polymorphism: the choice link can sometimes generate
+// numbers, and sometimes not. It depends ... so static type checking
+// is fairly broken, here, as currently implemented.
+RANDOM_CHOICE_LINK <- FUNCTION_LINK,NUMERIC_OUTPUT_LINK
 
 // Return the current time.
 TIME_LINK <- FUNCTION_LINK,NUMERIC_OUTPUT_LINK
