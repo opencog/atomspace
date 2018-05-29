@@ -108,6 +108,8 @@ protected:
 public:
     virtual ~TruthValue() {}
 
+    virtual bool operator==(const ProtoAtom&) const = 0;
+
     static TruthValuePtr factory(Type, const std::vector<double>&);
     static TruthValuePtr factory(const ProtoAtomPtr&);
 
