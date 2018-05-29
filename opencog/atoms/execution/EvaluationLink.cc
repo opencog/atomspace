@@ -124,6 +124,28 @@ static NumberNodePtr unwrap_set(Handle h)
 	return na;
 }
 
+static double get_numeric_value(const ProtoAtomPtr& pap)
+{
+	Type t = pap->get_type();
+	if (NUMBER_NODE == t)
+	{
+		NumberNodePtr n(unwrap_set(HandleCast(pap)));
+		return n->get_value();
+	}
+
+	if (FLOAT_VALUE == t)
+	{
+		FloatValuePtr fv(FloatValueCast(pap));
+		if (fv->value().empty())
+			throw RuntimeException(TRACE_INFO, "FloatValue is empty!");
+		return fv->value()[0];
+	}
+
+	throw RuntimeException(TRACE_INFO,
+		"Don't know how to do arithmetic with this: %s",
+		pap->to_string().c_str());
+}
+
 // Perform a GreaterThan check
 static TruthValuePtr greater(AtomSpace* as, const Handle& h)
 {
@@ -133,13 +155,13 @@ static TruthValuePtr greater(AtomSpace* as, const Handle& h)
 		     "GreaterThankLink expects two arguments");
 
 	Instantiator inst(as);
-	Handle h1(HandleCast(inst.execute(oset[0])));
-	Handle h2(HandleCast(inst.execute(oset[1])));
+	ProtoAtomPtr pap0(inst.execute(oset[0]));
+	ProtoAtomPtr pap1(inst.execute(oset[1]));
 
-	NumberNodePtr n1(unwrap_set(h1));
-	NumberNodePtr n2(unwrap_set(h2));
+	double v0 = get_numeric_value(pap0);
+	double v1 = get_numeric_value(pap1);
 
-	if (n1->get_value() > n2->get_value())
+	if (v0 > v1)
 		return TruthValue::TRUE_TV();
 	else
 		return TruthValue::FALSE_TV();
