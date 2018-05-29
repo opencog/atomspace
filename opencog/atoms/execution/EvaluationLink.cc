@@ -133,7 +133,7 @@ static double get_numeric_value(const ProtoAtomPtr& pap)
 		return n->get_value();
 	}
 
-	if (FLOAT_VALUE == t)
+	if (nameserver().isA(t, FLOAT_VALUE))
 	{
 		FloatValuePtr fv(FloatValueCast(pap));
 		if (fv->value().empty())
