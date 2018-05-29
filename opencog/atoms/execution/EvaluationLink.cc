@@ -504,9 +504,9 @@ TruthValuePtr EvaluationLink::do_eval_scratch(AtomSpace* as,
 	{
 		return evelnk->getTruthValue();
 	}
-	else if (TRUTH_VALUE_OF_LINK == t)
+	else if (nameserver().isA(t, VALUE_OF_LINK))
 	{
-		return TruthValueCast(TruthValueOfLinkCast(evelnk)->execute());
+		return TruthValueCast(ValueOfLinkCast(evelnk)->execute());
 	}
 
 	// We get exceptions here in two differet ways: (a) due to user
