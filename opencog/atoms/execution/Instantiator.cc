@@ -536,7 +536,7 @@ ProtoAtomPtr Instantiator::instantiate(const Handle& expr,
 	_vmap = &vars;
 
 	// Most of the work happens in walk_tree (which returns a Handle
-	// to the instantiaged tree). However, special-case the handling
+	// to the instantiated tree). However, special-case the handling
 	// of expr being a FunctionLink - this can return a Value, which
 	// walk_tree cannot grok.  XXX This is all very kind-of hacky.
 	// A proper solution would convert walk_tree to return ProtoAtomPtr's
@@ -579,11 +579,36 @@ ProtoAtomPtr Instantiator::instantiate(const Handle& expr,
 		return pap;
 	}
 
+	// Instantiate.
+	Handle grounded(walk_tree(expr, silent));
+
+#if NICE_IDEA_BUT_FAILS
+	// As above: if the result of execution is an evaluatable link,
+	// viz, something that could return a truth value when evaluated,
+	// then do the evaluation now, on the spot, and return the truth
+	// value.  XXX Again, just like above, this is kind-of-ish hacky
+	// to do it here. More correctly, this would need to be done
+	// in-line, in the walk_tree() code. Right now, we cannot actually
+	// do this, as (1) it would be inefficient, as it requires lots
+	// of casts to and from Handle, and (2) at least ten unit tests fail.
+	// The unit tests would need to be reviewed on a case-by-case basis,
+	// and design/architecture changes would need to be made.
+	t = grounded->get_type();
+	if (VALUE_OF_LINK == t or
+	    EQUAL_LINK == t or
+	    GREATER_THAN_LINK == t)
+	{
+		TruthValuePtr tvp(EvaluationLink::do_evaluate(_as, grounded));
+		ProtoAtomPtr pap(ProtoAtomCast(tvp));
+		return pap;
+	}
+#endif
+
 	// The returned handle is not yet in the atomspace. Add it now.
 	// We do this here, instead of in walk_tree(), because adding
 	// atoms to the atomspace is an expensive process.  We can save
 	// some time by doing it just once, right here, in one big batch.
-	return _as->add_atom(walk_tree(expr, silent));
+	return _as->add_atom(grounded);
 }
 
 /* ===================== END OF FILE ===================== */
