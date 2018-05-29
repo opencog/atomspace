@@ -153,11 +153,6 @@ public:
         return std::make_shared<IndefiniteTruthValue>(*this);
     }
 
-    TruthValue* rawclone() const
-    {
-        return new IndefiniteTruthValue(*this);
-    }
-
     static confidence_t DEFAULT_CONFIDENCE_LEVEL;
     static strength_t diffError;
     static strength_t s; //Nil : not that sure s should be strength_t

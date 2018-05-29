@@ -81,10 +81,6 @@ public:
     {
         return std::make_shared<CountTruthValue>(*this);
     }
-    TruthValue* rawclone() const
-    {
-        return new CountTruthValue(*this);
-    }
 };
 
 static inline CountTruthValuePtr CountTruthValueCast(const TruthValuePtr& tv)

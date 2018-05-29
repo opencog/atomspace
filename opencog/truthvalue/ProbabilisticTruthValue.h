@@ -81,10 +81,6 @@ public:
     {
         return std::make_shared<const ProbabilisticTruthValue>(*this);
     }
-    TruthValue* rawclone() const
-    {
-        return new ProbabilisticTruthValue(*this);
-    }
 };
 
 /** @}*/

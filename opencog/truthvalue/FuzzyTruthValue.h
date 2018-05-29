@@ -106,10 +106,6 @@ public:
     {
         return std::make_shared<FuzzyTruthValue>(*this);
     }
-    TruthValue* rawclone() const
-    {
-        return new FuzzyTruthValue(*this);
-    }
 };
 
 /** @}*/

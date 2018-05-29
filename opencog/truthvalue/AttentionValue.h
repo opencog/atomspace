@@ -121,10 +121,6 @@ public:
     {
         return std::make_shared<AttentionValue>(*this);
     }
-    AttentionValue* rawclone() const
-    {
-        return new AttentionValue(*this);
-    }
 
     //! Compares two AttentionValues and returns true if the
     //! elements are equal false otherwise
