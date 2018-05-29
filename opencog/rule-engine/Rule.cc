@@ -486,9 +486,8 @@ const
 {
 	// Clone the rule
 	Rule result = *this;
-	HandleSet target_vars = gen_variables(term, vardecl).varset;
-	HandleSet result_vars = BindLinkCast(result._rule)->get_variables()
-			.varset;
+	const HandleSet target_vars = gen_variables(term, vardecl).varset;
+	const HandleSet result_vars = result._rule->get_variables().varset;
 
 	do {
 		// Alpha convert the rule
