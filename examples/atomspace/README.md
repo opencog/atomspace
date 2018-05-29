@@ -28,6 +28,7 @@ It is recommended that you go through the examples in the order given.
 * `values.scm`  -- Using Values and attaching them to Atoms.
 * `filter.scm`  -- Filtering sets of atoms.
 * `map.scm`     -- Applying a map function to a set or list.
+* `recursive-loop.scm` -- An example of a tail-recursive loop.
 * `random-choice.scm`  -- Numerical programming, including loops.
 * `logger-example.scm` -- Using the built-in logger.
 * `except.scm`  -- An example of exceptions being thrown and passed.
