@@ -24,6 +24,7 @@ ADD_LIBRARY (atomcore
 	SleepLink.cc
 	StateLink.cc
 	TimeLink.cc
+	TruthValueOfLink.cc
 	TypedAtomLink.cc
 	TypeNode.cc
 	UniqueLink.cc
@@ -66,6 +67,7 @@ INSTALL (FILES
 	SleepLink.h
 	StateLink.h
 	TimeLink.h
+	TruthValueOfLink.h
 	TypedAtomLink.h
 	TypeNode.h
 	UniqueLink.h

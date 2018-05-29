@@ -594,7 +594,7 @@ ProtoAtomPtr Instantiator::instantiate(const Handle& expr,
 	// The unit tests would need to be reviewed on a case-by-case basis,
 	// and design/architecture changes would need to be made.
 	t = grounded->get_type();
-	if (VALUE_OF_LINK == t or
+	if (TRUTH_VALUE_OF_LINK == t or
 	    EQUAL_LINK == t or
 	    GREATER_THAN_LINK == t)
 	{
