@@ -506,7 +506,13 @@ TruthValuePtr EvaluationLink::do_eval_scratch(AtomSpace* as,
 	}
 	else if (nameserver().isA(t, VALUE_OF_LINK))
 	{
-		return TruthValueCast(ValueOfLinkCast(evelnk)->execute());
+		ProtoAtomPtr pap(ValueOfLinkCast(evelnk)->execute());
+		// If it's an atom, recursively evaluate.
+		if (pap->is_atom())
+			return EvaluationLink::do_eval_scratch(as,
+			                    HandleCast(pap), scratch, silent);
+
+		return TruthValueCast(pap);
 	}
 
 	// We get exceptions here in two differet ways: (a) due to user
