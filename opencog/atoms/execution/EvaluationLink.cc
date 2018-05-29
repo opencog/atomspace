@@ -504,6 +504,20 @@ TruthValuePtr EvaluationLink::do_eval_scratch(AtomSpace* as,
 	{
 		return evelnk->getTruthValue();
 	}
+	else if (TRUTH_VALUE_OF_LINK == t)
+	{
+		// If the truth value of the link is being requested,
+		// then ... compute the truth value, on the fly!
+		Handle ofatom = evelnk->getOutgoingAtom(0);
+		TruthValuePtr tvp(EvaluationLink::do_eval_scratch(as,
+		                    ofatom, scratch, silent));
+
+		// Cache the computed truth value...
+		// XXX FIXME: is this a good idea, or not?
+		evelnk->setTruthValue(tvp);
+		return tvp;
+	}
+
 	else if (nameserver().isA(t, VALUE_OF_LINK))
 	{
 		ProtoAtomPtr pap(ValueOfLinkCast(evelnk)->execute());
