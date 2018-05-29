@@ -173,14 +173,14 @@ ProtoAtomPtr PlusLink::kons(const ProtoAtomPtr& fi, const ProtoAtomPtr& fj) cons
 
 	// Try to yank out values, if possible.
 	ProtoAtomPtr vi(fi);
-	if (VALUE_OF_LINK == fitype)
+	if (nameserver().isA(fitype, VALUE_OF_LINK))
 	{
 		vi = FunctionLinkCast(fi)->execute();
 	}
 	Type vitype = vi->get_type();
 
 	ProtoAtomPtr vj(fj);
-	if (VALUE_OF_LINK == fjtype)
+	if (nameserver().isA(fjtype, VALUE_OF_LINK))
 	{
 		vj = FunctionLinkCast(fj)->execute();
 	}

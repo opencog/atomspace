@@ -506,7 +506,27 @@ TruthValuePtr EvaluationLink::do_eval_scratch(AtomSpace* as,
 	}
 	else if (TRUTH_VALUE_OF_LINK == t)
 	{
-		return TruthValueCast(TruthValueOfLinkCast(evelnk)->execute());
+		// If the truth value of the link is being requested,
+		// then ... compute the truth value, on the fly!
+		Handle ofatom = evelnk->getOutgoingAtom(0);
+		TruthValuePtr tvp(EvaluationLink::do_eval_scratch(as,
+		                    ofatom, scratch, silent));
+
+		// Cache the computed truth value...
+		// XXX FIXME: is this a good idea, or not?
+		evelnk->setTruthValue(tvp);
+		return tvp;
+	}
+
+	else if (nameserver().isA(t, VALUE_OF_LINK))
+	{
+		ProtoAtomPtr pap(ValueOfLinkCast(evelnk)->execute());
+		// If it's an atom, recursively evaluate.
+		if (pap->is_atom())
+			return EvaluationLink::do_eval_scratch(as,
+			                    HandleCast(pap), scratch, silent);
+
+		return TruthValueCast(pap);
 	}
 
 	// We get exceptions here in two differet ways: (a) due to user
