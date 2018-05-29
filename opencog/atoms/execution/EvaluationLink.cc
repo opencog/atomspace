@@ -28,6 +28,7 @@
 #include <opencog/atoms/core/LambdaLink.h>
 #include <opencog/atoms/core/NumberNode.h>
 #include <opencog/atoms/core/PutLink.h>
+#include <opencog/atoms/core/TruthValueOfLink.h>
 #include <opencog/atoms/execution/Instantiator.h>
 #include <opencog/atoms/pattern/PatternLink.h>
 #include <opencog/atoms/reduct/FoldLink.h>
@@ -480,6 +481,10 @@ TruthValuePtr EvaluationLink::do_eval_scratch(AtomSpace* as,
 		)
 	{
 		return evelnk->getTruthValue();
+	}
+	else if (TRUTH_VALUE_OF_LINK == t)
+	{
+		return TruthValueCast(TruthValueOfLinkCast(evelnk)->execute());
 	}
 
 	// We get exceptions here in two differet ways: (a) due to user
