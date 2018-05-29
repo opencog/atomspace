@@ -549,8 +549,8 @@ ProtoAtomPtr Instantiator::instantiate(const Handle& expr,
 	// * The need to instantiate in an atomspace (viz GetLink)
 	//   impedes lazy evaluations.
 	Type t = expr->get_type();
-	if (VALUE_OF_LINK == t or
-	   nameserver().isA(t, ARITHMETIC_LINK))
+	if (nameserver().isA(t, VALUE_OF_LINK) or
+	    nameserver().isA(t, ARITHMETIC_LINK))
 	{
 		// Perform substitution on non-numeric arguments before
 		// applying the function itself.  We should not do any
@@ -561,8 +561,8 @@ ProtoAtomPtr Instantiator::instantiate(const Handle& expr,
 		for (const Handle& h: expr->getOutgoingSet())
 		{
 			Type th = h->get_type();
-			if (VALUE_OF_LINK == th or
-			   nameserver().isA(th, ARITHMETIC_LINK))
+			if (nameserver().isA(th, VALUE_OF_LINK) or
+			    nameserver().isA(th, ARITHMETIC_LINK))
 			{
 			   oset_results.push_back(h);
 			}
