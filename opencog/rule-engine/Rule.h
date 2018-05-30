@@ -295,9 +295,15 @@ private:
 	// URE will always choose the one with the highest confidence.
 	TruthValuePtr _tv;
 
-	// Return a copy of the rule with the variables alpha-converted
-	// into random variable names.
-	Rule rand_alpha_converted() const;
+	/**
+	*
+	* @param vardecl: declarations of variables
+	* @param target: source term used by the foward chainer or target term used
+	* by the backward chainer; only used to get the variables out of the term in case
+	* there are no variable declarations
+	* @return alpha converted rule that has no collisions with the given term
+	*/
+	Rule rand_alpha_converted(const Handle& term, const Handle& vardecl) const;
 
 	Handle standardize_helper(AtomSpace*, const Handle&, HandleMap&);
 
