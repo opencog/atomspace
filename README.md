@@ -180,6 +180,55 @@ you'll be lost, and find it hard to contribute.  If you do know something
 about any of these topics, then please dive into the open bug list. Fixing
 bugs is the #1 best way of learning the internals of a system.
 
+Key Development Goals
+=====================
+Looking ahead, some key major projects.
+
+### Distributed Processing
+One of the major development goals for the 2019-2021 time frame
+is to gain experience with distributed data processing. Currently,
+the AtomSpace uses Postgres to provide distributed, scalable
+storage. We're also talking about porting to Apache Ignite, or
+possibly some other graph database, such as Redis, Riak or Grakn,
+all of which also support scalable, distributed storage.
+
+However, despite the fact that Postgres is already distributed,
+and fairly scalable, none of the actual users of the AtomSpace
+use it in it's distributed mode. Exactly why this is the case
+remains unclear: is it the difficulty of managing a distributed
+Postgres database? (I guess you have to be a good DB Admin to
+know how to do this?) Is it the programming API offered by the
+AtomSpace?  Maybe it's not yet urgent for them?  Would rebasing
+on a non-SQL database (such as Ignite, Riak, Redis or Grakn) make
+this easier and simpler?  This is quite unclear, and quite unknown
+at this stage.
+
+If a port to one of the distributed graph databases is undertaken,
+there are several implementation issues that need to be cleared
+up.  One is to eliminate many usages of SetLink (Iussues #1502 and
+#1507). Another is to change the AtomTable API to look like a bunch
+of MemberLink's.  (Currently, the AtomTable conceptually looks and
+behaves like a large set, which makes scaling and distribution
+harder than it could be). How to transform the AtomTable into a bunch
+of MemberLinks without blowing up RAM usage or hurting performance
+is unclear.
+
+
+### Exploring Values
+
+The new Value system seems to provide a very nice way of working
+with fast-moving high-frequency data.  It seems suitable for holding
+on to live-video feeds and audio streams and pipeing them through
+various data-processing configurations. It looks to be a decent
+API for declaring the structure and topology of neural nets (e.g.
+TensorFlow).  However, it is more-or-less unused for these tasks.
+Apparently, there is still some missing infrastructure, as well as
+some important design decisions to be made. Developers have not begun
+to explore the depth and breadth of this subsystem, to exert pressure
+on it.  Ratcheting up the tension by exploring new and better ways of
+using and working with Values will be an important goal for the
+2018-2022 timeframe.
+
 
 Building and Installing
 =======================
