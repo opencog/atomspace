@@ -92,8 +92,47 @@ repos, including:
 * [Opencog on a Raspberry Pi](https://github.com/opencog/tinycog)
 * [Port of the MOSES machine learning to Atomese](https://github.com/opencog/as-moses)
 
+
 New Developers; Pre-requisite skills
 ====================================
+The AtomSpace is a relatively mature system, and thus fairly complex.
+Because other users depend on it, it is not very "hackable"; it needs
+to stay relatively stable.  Despite this, it is simultaneously a
+research platform for discovering the proper way of adequately
+representing knowledge in a way that is useful for general intelligence.
+It turns out that knowledge representation is not easy.  This project
+is a good place to explore it, if you're interested in that sort of thing.
+
+Most developers should think of the AtomSpace as being kind-of-like an
+operating system kernel, or the guts of a database: its complex, and
+you don't need to know how the innards work to use the system. These
+innards are best left to commited systems programmers and research
+scientists; there is no easy way for junior programmers to participate,
+at least, not without a lot of hard work and study.
+
+Experience in any of the following areas will make things easier for
+you; in fact, if you are good at any of these, please seriously consider
+joining the project.
+
+* Database internals; query optimization.
+* Logic programming; Prolog.
+* SAT-solving; Answer Set programming; Satisfiability Modulo Theories.
+* Programming Language design &amp; implementation.
+* Rule engines; reasoning; inference; parsing.
+* Theorem-proving systems; Type theory.
+* Compiler internals; code generation; code optimization; bytecode; VM's.
+* Operating systems; distributed database internals.
+
+Basically, Atomese is a mashup of ideas taken from all of the above fields.
+It's kind-of trying to do and be all of these, all at once, and to find the
+right balance between all of them. Again: the goal is knowledge representation
+for general intelligence. Building something that the AGI developers can use.
+
+If you don't have at least some fair grounding in one of the above,
+you'll be lost, and find it hard to contribute.  If you do know something
+about any of these topics, then please dive into the open bug list. Fixing
+bugs is the #1 best way of learning the internals of a system.
+
 
 Building and Installing
 =======================
@@ -221,4 +260,3 @@ Thus it is significantly less-used than scheme in the OpenCog project.
 None-the-less, it remains vital for various applications. See the
 [`/examples/python`](/examples/python) directory for how to use python
 with the AtomSpace.
-
