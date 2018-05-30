@@ -256,9 +256,9 @@ stumble on natural language processing is because natural language
 only kind-of-ish, partly looks like a tensor algebra. But natural
 language looks a whole lot more like a sheaf (because things like
 pre-group grammars and categorial grammars "naturally" look like
-sheaves.)  Thus, it seems promising to steal all the basic concepts
-from deep learning, info-GAN, and all that, rip out the explicit
-tensor-algebra in those systems, and replace them by sheaves. A
+sheaves.)  Thus, it seems promising to take the theory and all the
+basic concepts of deep learning and neural nets, rip out the explicit
+tensor-algebra in those theories, and replace them by sheaves. A
 [crude sketch is here](/opencog/sheaf/docs/sheaves.pdf).
 
 Some primitive, basic infrastructure has been built. Huge remaining
