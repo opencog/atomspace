@@ -244,7 +244,7 @@ using and working with Values will be an important goal for the
 
 Building and Installing
 =======================
-The Atomspace runs on more-or-less any flavor of Linux. It does not
+The Atomspace runs on more-or-less any flavor of GNU/Linux. It does not
 run on any non-Linux operating systems (except maybe some of the BSD's).
 Sorry!
 
