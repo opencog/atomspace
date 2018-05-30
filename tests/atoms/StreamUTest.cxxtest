@@ -21,6 +21,7 @@
  */
 
 #include <opencog/atoms/core/ValueOfLink.h>
+#include <opencog/atoms/execution/EvaluationLink.h>
 #include <opencog/atoms/execution/Instantiator.h>
 #include <opencog/guile/SchemeEval.h>
 #include <opencog/atoms/proto/RandomStream.h>
@@ -40,7 +41,7 @@ private:
 	ProtoAtomPtr value;
 	Handle key;
 	Handle atom;
-	
+
 public:
 	void setUp(void);
 
@@ -53,6 +54,8 @@ public:
 	void test_times_plus();
 	void test_minus();
 	void test_divide();
+
+	void test_chaining();
 
 	void test_guile();
 };
@@ -292,6 +295,39 @@ void StreamUTest::test_divide()
 	printf("Expect 0.99 < %g < 1.01\n", sum);
 	TS_ASSERT_LESS_THAN(0.99, sum);
 	TS_ASSERT_LESS_THAN(sum, 1.01);
+
+	logger().debug("END TEST: %s", __FUNCTION__);
+}
+
+// ====================================================================
+// ====================================================================
+// ====================================================================
+// And now for something completely different....
+// Chain together streams.
+void StreamUTest::test_chaining()
+{
+	logger().debug("BEGIN TEST: %s", __FUNCTION__);
+
+	Handle valof = al(VALUE_OF_LINK, atom, key);
+
+	Handle coinflip = al(GREATER_THAN_LINK, an(NUMBER_NODE, "0.5"), valof);
+	Handle flipkey = an(PREDICATE_NODE, "*-binary-flip-*");
+	atom->setValue(flipkey, coinflip);
+
+	Handle chainof = al(VALUE_OF_LINK, atom, flipkey);
+
+	double sum = 0.0;
+	for (int i=0; i<LOOPCNT*LEN; i++)
+	{
+		TruthValuePtr tvp(EvaluationLink::do_evaluate(&_as, chainof));
+		if (*tvp == *TruthValue::TRUE_TV()) sum += 1.0;
+	}
+
+	sum /= LOOPCNT * LEN;
+
+	printf("Expect 0.49 < %g < 0.51\n", sum);
+	TS_ASSERT_LESS_THAN(0.49, sum);
+	TS_ASSERT_LESS_THAN(sum, 0.51);
 
 	logger().debug("END TEST: %s", __FUNCTION__);
 }
