@@ -147,7 +147,6 @@ public:
     virtual count_t get_count()  const = 0;
 
     virtual TruthValuePtr clone() const  = 0;
-    virtual TruthValue* rawclone() const  = 0;
 
     /**
      * Merge this TV object with the given TV object argument.

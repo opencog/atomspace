@@ -100,10 +100,6 @@ public:
 	{
 		return std::make_shared<EvidenceCountTruthValue>(*this);
 	}
-	TruthValue* rawclone() const
-	{
-		return new EvidenceCountTruthValue(*this);
-	}
 };
 
 /** @}*/
