@@ -19,19 +19,47 @@ are executable programs as well as data structures.
 The AtomSpace is a platform for building Artificial General Intelligence
 (AGI) systems. It provides the central knowledge representation component
 for OpenCog. As such, it is a fairly mature component, on which a lot of
-other systems are built, and which depend on it for correct operation.
+other systems are built, and which depend on it for stable, correct
+operation in a day-to-day production environment.
 
 However, it turns out that knowledge represention is hard, and so the
 AtomSpace is also a platform for active scientific research on knowledge
 represention, knowledge discovery and knowledge manipulation.
 
-### A  Theoretical Overview
+
+Using Atomese and the AtomSpace
+===============================
+The AtomSpace is not intended for end-users. Rather, it is a knowledge-base
+platform. It is probably easiest to think of it as kind-of-like an operating
+system kernel: you don't need to know how it works to use it.  You probably
+don't need to tinker with it. It just works, and its there when you need it.
+
+End-users and application developers will want to use one of the existing
+"app" subsystems, or write their own.  Most of the existing AtomSpace "apps"
+are focused on various aspects of "Artificial General Intelligence". This
+includes (unsupervised) natural-language learning, machine-learning,
+reasoning and induction, chatbots, robot control, perceptual subsystems
+(vision processing, sound input), genomic and proteomic data analysis,
+deep-learning neural-net interfaces. These can be found in other github
+repos, including:
+
+* [Natural language, chat, robot control](https://github.com/opencog/opencog)
+* [ROS bridge to robots, vision subsystem, chat](https://github.com/opencog/ghost_bridge)
+* [Unsupervised natural language learning](https://github.com/opencog/language-learning)
+* [Genomic, proteomic data analysis](https://github.com/opencog/agi-bio)
+* [Opencog on a Raspberry Pi](https://github.com/opencog/tinycog)
+* [Port of the MOSES machine learning to Atomese](https://github.com/opencog/as-moses)
+
+
+A  Theoretical Overview
+=======================
 The AtomSpace is a mashup of a large variety of concepts from
-mathematical logic, theorem proving, graph theory, type theory and
-knowledge representation. Its hard to provide a coherent overview
-without throwing around a lot of "big words" and "big concepts".
-Sorry if this sounds like rocket science. Its probably harder than
-rocket science. Sorry if this sounds like bragging. Its the way it is.
+mathematical logic, theorem proving, graph theory, database theory,
+type theory and knowledge representation. Its hard to provide a
+coherent overview without throwing around a lot of "big words" and
+"big concepts".  Sorry if this sounds like rocket science. Its probably
+harder than rocket science. Sorry if this sounds like bragging. Its
+the way it is.
 
 There are pre-defined Atoms for many basic knowledge-representation and
 computer-science concepts. These include Atoms for relations, such as
@@ -112,28 +140,6 @@ The primary documentation for the atomspace and Atomese is here:
 The main project site is at https://opencog.org
 
 
-Using Atomese and the AtomSpace
-===============================
-The AtomSpace is not intended for end-users. Rather, it is a knowledge-base
-platform.
-
-End-users and application developers will want to use one of the existing
-"app" subsystems, or write their own.  Most of the existing AtomSpace "apps"
-are focused on various aspects of "Artificial General Intelligence". This
-includes (unsupervised) natural-language learning, machine-learning,
-reasoning and induction, chatbots, robot control, perceptual subsystems
-(vision processing, sound input), genomic and proteomic data analysis,
-deep-learning neural-net interfaces. These can be found in other github
-repos, including:
-
-* [Natural language, chat, robot control](https://github.com/opencog/opencog)
-* [ROS bridge to robots, vision subsystem, chat](https://github.com/opencog/ghost_bridge)
-* [Unsupervised natural language learning](https://github.com/opencog/language-learning)
-* [Genomic, proteomic data analysis](https://github.com/opencog/agi-bio)
-* [Opencog on a Raspberry Pi](https://github.com/opencog/tinycog)
-* [Port of the MOSES machine learning to Atomese](https://github.com/opencog/as-moses)
-
-
 New Developers; Pre-requisite skills
 ====================================
 The AtomSpace is a relatively mature system, and thus fairly complex.
@@ -189,8 +195,8 @@ Some users may find some success with one of the [opencog Docker containers]
 the AtomSpace must be able to build it manually. If you can't do that,
 all hope is lost.
 
-Prerequisites
--------------
+### Prerequisites
+
 To build the OpenCog AtomSpace, the packages listed below are required.
 Essentially all Linux distributions will provide these packages.
 
@@ -213,8 +219,8 @@ Essentially all Linux distributions will provide these packages.
   is strongly recommended).
 * https://www.gnu.org/software/guile/guile.html | `apt-get install guile-2.0-dev`
 
-Optional Prerequisites
-----------------------
+### Optional Prerequisites
+
 The following packages are optional. If they are not installed, some
 optional parts of the AtomSpace will not be built.  The CMake command,
 during the build, will be more precise as to which parts will not be built.
@@ -251,8 +257,8 @@ during the build, will be more precise as to which parts will not be built.
 * https://developers.google.com/protocol-buffers | `apt-get install libprotobuf-dev`
 
 
-Building AtomSpace
-------------------
+### Building AtomSpace
+
 Be sure to install the pre-requisites first!
 Perform the following steps at the shell prompt:
 ```
@@ -266,16 +272,16 @@ Libraries will be built into subdirectories within build, mirroring
 the structure of the source directory root.
 
 
-Unit tests
-----------
+### Unit tests
+
 To build and run the unit tests, from the `./build` directory enter
 (after building opencog as above):
 ```
     make test
 ```
 
-Install
--------
+### Install
+
 After building, you MUST install the atomspace.
 ```
     sudo make install
