@@ -44,11 +44,17 @@ deep-learning neural-net interfaces. These can be found in other github
 repos, including:
 
 * [Natural language, chat, robot control](https://github.com/opencog/opencog)
+  (the opencog repo)
 * [ROS bridge to robots, vision subsystem, chat](https://github.com/opencog/ghost_bridge)
+  (ghost-bridge repo)
 * [Unsupervised natural language learning](https://github.com/opencog/language-learning)
+  (language-learning repo)
 * [Genomic, proteomic data analysis](https://github.com/opencog/agi-bio)
+  (agi-bio repo)
 * [Opencog on a Raspberry Pi](https://github.com/opencog/tinycog)
+  (tinycog repo)
 * [Port of the MOSES machine learning to Atomese](https://github.com/opencog/as-moses)
+  (as-moses repo)
 
 
 A  Theoretical Overview
@@ -57,9 +63,9 @@ The AtomSpace is a mashup of a large variety of concepts from
 mathematical logic, theorem proving, graph theory, database theory,
 type theory and knowledge representation. Its hard to provide a
 coherent overview without throwing around a lot of "big words" and
-"big concepts".  Sorry if this sounds like rocket science. Its probably
-harder than rocket science. Sorry if this sounds like bragging. Its
-the way it is.
+"big concepts".  We're trying to get a lot of things done, here,
+and there's no particularly simple or effective way of doing it
+without a lot of foundational theory.
 
 There are pre-defined Atoms for many basic knowledge-representation and
 computer-science concepts. These include Atoms for relations, such as
