@@ -67,6 +67,7 @@ coherent overview without throwing around a lot of "big words" and
 and there's no particularly simple or effective way of doing it
 without a lot of foundational theory.
 
+### Atom Types
 There are pre-defined Atoms for many basic knowledge-representation and
 computer-science concepts. These include Atoms for relations, such as
 similarity, inheritance and subsets; for logic, such as Boolean and, or,
@@ -79,6 +80,7 @@ searching and satisfiability and graph re-writing; for the specification
 of types and type signatures, including type polymorphism and type
 construction.
 
+### Atomese
 Because of these many and varied Atom types, constructing graphs to
 represent knowledge looks kind-of-like "programming"; the programming
 language is informally referred to as "Atomese".  It vaguely resembles
@@ -114,6 +116,7 @@ all these various needs in an integrated way.  It is likely to
 change, as the various current short-comings, design flaws,
 performance and scalability issues are corrected.
 
+### Atoms and Values
 Currently, one of the primary conceptual and performance splits
 are beween "Atoms" and "Values". Atoms are:
 
@@ -136,6 +139,7 @@ stored as an Atom.  As new evidence accumulates, the truth value of the
 proposition is adjusted. Other fleeting changes, or general free-form
 annotations can be stroed as Values.
 
+### More info
 The primary documentation for the atomspace and Atomese is here:
 
 * https://wiki.opencog.org/w/AtomSpace
@@ -211,8 +215,10 @@ at this stage.
 
 If a port to one of the distributed graph databases is undertaken,
 there are several implementation issues that need to be cleared
-up.  One is to eliminate many usages of SetLink (Iussues #1502 and
-#1507). Another is to change the AtomTable API to look like a bunch
+up.  One is to eliminate many usages of SetLink ([Issues #1502]
+(https://github.com/opencog/atomspace/issues/1502) and [#1507]
+(https://github.com/opencog/atomspace/issues/1507) ).
+Another is to change the AtomTable API to look like a bunch
 of MemberLink's.  (Currently, the AtomTable conceptually looks and
 behaves like a large set, which makes scaling and distribution
 harder than it could be). How to transform the AtomTable into a bunch
