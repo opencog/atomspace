@@ -72,17 +72,22 @@ and their use for solving various different tasks.
 
 Building and Installing
 =======================
-The Atomspace has a small number of pre-requisites that must be installed
-before it can be built.
+The Atomspace runs on more-or-less any flavor of Linux. It does not
+run on any non-Linux operating systems (except maybe some of the BSD's).
+Sorry!
+
+There are a small number of pre-requisites that must be installed
+before it can be built.  Many users will find it easiest to use the
+install scripts provided in the [ocpkg repo](https://github.com/opencog/ocpkg).
+Some users may find some success with one of the [opencog Docker containers]
+(https://github.com/opencog/docker). Developers interested in working on
+the AtomSpace must be able to build it manually. If you can't do that,
+all hope is lost.
 
 Prerequisites
 -------------
 To build the OpenCog AtomSpace, the packages listed below are required.
-With a few exceptions, most Linux distributions will provide these
-packages. Users of Ubuntu 14.04 "Trusty Tahr" may use the dependency
-installer at `/scripts/octool`.  Users of any version of Linux may
-use the Dockerfile to quickly build a container in which OpenCog will
-be built and run.
+Essentially all Linux distributions will provide these packages.
 
 ###### boost
 * C++ utilities package.
@@ -189,7 +194,8 @@ another way of interfacing to the atomspace. Unfortunately, it is not
 as easy and simple to use as scheme; it also has various technical issues.
 Thus it is significantly less-used than scheme in the OpenCog project.
 None-the-less, it remains vital for various applications. See the
-`/examples/python` directory for how to use python with the AtomSpace.
+[`/examples/python`](/examples/python) directory for how to use python
+with the AtomSpace.
 
 The proper way to use Atoms and Atomese is to write an "app" -- most
 users will not want to (should not want to??) use the AtomSpace directly,
@@ -200,7 +206,7 @@ deep-learning neural-net interfaces. These can be found in other github
 repos, including:
 
 * [Natural language, chat, robot control](https://github.com/opencog/opencog)
-* [ROS bridge to robots, vision subsystem, chat](https://github.com/opencog/ghost-bridge)
+* [ROS bridge to robots, vision subsystem, chat](https://github.com/opencog/ghost_bridge)
 * [Unsupervised natural language learning](https://github.com/opencog/language-learning)
 * [Genomic, proteomic data analysis](https://github.com/opencog/agi-bio)
 * [Opencog on a Raspberry Pi](https://github.com/opencog/tinycog)
