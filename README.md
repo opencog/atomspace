@@ -22,9 +22,9 @@ for OpenCog. As such, it is a fairly mature component, on which a lot of
 other systems are built, and which depend on it for stable, correct
 operation in a day-to-day production environment.
 
-However, it turns out that knowledge represention is hard, and so the
+However, it turns out that knowledge representation is hard, and so the
 AtomSpace is also a platform for active scientific research on knowledge
-represention, knowledge discovery and knowledge manipulation.
+representation, knowledge discovery and knowledge manipulation.
 
 
 Using Atomese and the AtomSpace
@@ -118,7 +118,7 @@ performance and scalability issues are corrected.
 
 ### Atoms and Values
 Currently, one of the primary conceptual and performance splits
-are beween "Atoms" and "Values". Atoms are:
+are between "Atoms" and "Values". Atoms are:
 
 * Used to represent graphs, networks, and long-term stable graphical relations.
 * Indexed (by the AtomSpace) and enable the rapid search and traversal of graphs.
@@ -127,7 +127,7 @@ are beween "Atoms" and "Values". Atoms are:
 * Large, bulky, heavy-weight.
 
 By contrast, Values, and valuations in general, are:
-* A way of holding on to rapidly-changing data, includng streaming data.
+* A way of holding on to rapidly-changing data, including streaming data.
 * Hold "truth values" and "probabilities", which change over time as new
   evidence is accumulated.
 * Provide a per-Atom key-value store (noSQL database).
@@ -137,7 +137,9 @@ By contrast, Values, and valuations in general, are:
 Thus, for example, a piece of knowledge, or some proposition would be
 stored as an Atom.  As new evidence accumulates, the truth value of the
 proposition is adjusted. Other fleeting changes, or general free-form
-annotations can be stroed as Values.
+annotations can be stored as Values.  Essentially, the AtomSpace looks
+like a database-of-databases; each atom is a key-value database; the
+atoms are related to one-another as a graph.
 
 ### More info
 The primary documentation for the atomspace and Atomese is here:
@@ -174,7 +176,7 @@ joining the project.
 * Database internals; query optimization.
 * Logic programming; Prolog.
 * SAT-solving; Answer Set programming; Satisfiability Modulo Theories.
-* Programming Language design &amp; implementation.
+* Programming language design &amp; implementation.
 * Rule engines; reasoning; inference; parsing.
 * Theorem-proving systems; Type theory.
 * Compiler internals; code generation; code optimization; bytecode; VM's.
@@ -230,7 +232,7 @@ is unclear.
 
 The new Value system seems to provide a very nice way of working
 with fast-moving high-frequency data.  It seems suitable for holding
-on to live-video feeds and audio streams and pipeing them through
+on to live-video feeds and audio streams and piping them through
 various data-processing configurations. It looks to be a decent
 API for declaring the structure and topology of neural nets (e.g.
 TensorFlow).  However, it is more-or-less unused for these tasks.
@@ -240,6 +242,29 @@ to explore the depth and breadth of this subsystem, to exert pressure
 on it.  Ratcheting up the tension by exploring new and better ways of
 using and working with Values will be an important goal for the
 2018-2022 timeframe.
+
+
+### Sheaf theory
+
+Many important types of real-world data, include parses of natural
+language and biochemical processes resemble the abstract mathematical
+concept of "sheaves", in the sense of sheaf theory.  One reason that
+things like deep learning and neural nets work well is because some
+kinds of sheaves look like tensor algebras; thus one has things like
+Word2Vec and SkipGram models.  One reason why neural nets still
+stumble on natural language processing is because natural language
+only kind-of-ish, partly looks like a tensor algebra. But natural
+language looks a whole lot more like a sheaf (because things like
+pre-group grammars and categorial grammars "naturally" look like
+sheaves.)  Thus, it seems promising to steal all the basic concepts
+from deep learning, info-GAN, and all that, rip out the explicit
+tensor-algebra in those systems, and replace them by sheaves. A
+[crude sketch is here](/opencog/sheaf/docs/sheaves.pdf).
+
+Some primitive, basic infrastructure has been built. Huge remaining
+work items are using neural nets to perform the tensor-like factorization
+of sheaves, and to redesign the rule-engine to use sheaf-type theorem
+proving techniques.
 
 
 Building and Installing
