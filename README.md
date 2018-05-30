@@ -70,6 +70,31 @@ AtomSpace, including the python and scheme bindings, the pattern
 matcher, the rule engine, and many of the various different atom types
 and their use for solving various different tasks.
 
+
+Using Atomese and the AtomSpace
+===============================
+The AtomSpace is not intended for end-users. Rather, it is a knowledge-base
+platform.
+
+End-users and application developers will want to use one of the existing
+"app" subsystems, or write thier own.  Most of the existing AtomSpace "apps"
+are focused on various aspects of "Artificial General Intelligence". This
+includes (unsupervised) natural-language learning, machine-learning,
+reasoning and induction, chatbots, robot control, perceptual subsystems
+(vision processing, sound input), genomic and proteomic data analysis,
+deep-learning neural-net interfaces. These can be found in other github
+repos, including:
+
+* [Natural language, chat, robot control](https://github.com/opencog/opencog)
+* [ROS bridge to robots, vision subsystem, chat](https://github.com/opencog/ghost_bridge)
+* [Unsupervised natural language learning](https://github.com/opencog/language-learning)
+* [Genomic, proteomic data analysis](https://github.com/opencog/agi-bio)
+* [Opencog on a Raspberry Pi](https://github.com/opencog/tinycog)
+* [Port of the MOSES machine learning to Atomese](https://github.com/opencog/as-moses)
+
+New Developers; Pre-requisite skills
+====================================
+
 Building and Installing
 =======================
 The Atomspace runs on more-or-less any flavor of Linux. It does not
@@ -197,17 +222,3 @@ None-the-less, it remains vital for various applications. See the
 [`/examples/python`](/examples/python) directory for how to use python
 with the AtomSpace.
 
-The proper way to use Atoms and Atomese is to write an "app" -- most
-users will not want to (should not want to??) use the AtomSpace directly,
-but instead use one of the existing "apps" (or develop a new one).
-Some notworthy "apps" include natural-language learning, machine-learning,
-reasoning, chatbots, robot control, genomic and proteomic data analysis,
-deep-learning neural-net interfaces. These can be found in other github
-repos, including:
-
-* [Natural language, chat, robot control](https://github.com/opencog/opencog)
-* [ROS bridge to robots, vision subsystem, chat](https://github.com/opencog/ghost_bridge)
-* [Unsupervised natural language learning](https://github.com/opencog/language-learning)
-* [Genomic, proteomic data analysis](https://github.com/opencog/agi-bio)
-* [Opencog on a Raspberry Pi](https://github.com/opencog/tinycog)
-* [Port of the MOSES machine learning to Atomese](https://github.com/opencog/as-moses)
