@@ -252,7 +252,7 @@ There are a small number of pre-requisites that must be installed
 before it can be built.  Many users will find it easiest to use the
 install scripts provided in the [ocpkg repo](https://github.com/opencog/ocpkg).
 Some users may find some success with one of the
-[opencog Docker containers] (https://github.com/opencog/docker).
+[opencog Docker containers](https://github.com/opencog/docker).
 Developers interested in working on the AtomSpace must be able to build
 it manually. If you can't do that, all hope is lost.
 
