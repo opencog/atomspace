@@ -26,14 +26,14 @@ variables and for lambda expressions and for beta-reduction and mapping;
 for uniqueness constraints, state and a messaging "blackboard"; for
 searching and satisfiability and graph re-writing; for the specification
 of types and type signatures, including type polymorphism and type
-construction (dependent types and type variables TBD).
+construction.
 
 Because of these many and varied Atom types, constructing graphs to
 represent knowledge looks kind-of-like "programming"; the programming
 language is informally referred to as "Atomese".  It vaguely resembles
-a strange mashup of SQL (due to queriability), prolog/datalog (due to
+a strange mash-up of SQL (due to queriability), prolog/datalog (due to
 the logic and reasoning components), lisp/scheme (due to lambda
-expressions), haskell/caml (due to the type system) and rule engines
+expressions), Haskell/CaML (due to the type system) and rule engines
 (due to the graph rewriting and forward/backward chaining inference
 systems).  This "programming language" is NOT designed for use by
 human programmers (it is too verbose and awkward for that); it is
@@ -62,13 +62,13 @@ needs in an integrated way.  It is likely to change, as the various
 current short-comings, design flaws, performance and scalability
 issues are corrected.
 
-The main project site is at https://opencog.org
+The primary documentation for the atomspace and Atomese is here:
 
-The [`examples`](https://github.com/opencog/atomspace/blob/master/examples)
-directory contains demonstrations of the various components of the
-AtomSpace, including the python and scheme bindings, the pattern
-matcher, the rule engine, and many of the various different atom types
-and their use for solving various different tasks.
+* https://wiki.opencog.org/w/AtomSpace
+* https://wiki.opencog.org/w/Atomese
+* https://wiki.opencog.org/w/Atom
+
+The main project site is at https://opencog.org
 
 
 Using Atomese and the AtomSpace
@@ -77,7 +77,7 @@ The AtomSpace is not intended for end-users. Rather, it is a knowledge-base
 platform.
 
 End-users and application developers will want to use one of the existing
-"app" subsystems, or write thier own.  Most of the existing AtomSpace "apps"
+"app" subsystems, or write their own.  Most of the existing AtomSpace "apps"
 are focused on various aspects of "Artificial General Intelligence". This
 includes (unsupervised) natural-language learning, machine-learning,
 reasoning and induction, chatbots, robot control, perceptual subsystems
@@ -106,7 +106,7 @@ is a good place to explore it, if you're interested in that sort of thing.
 Most developers should think of the AtomSpace as being kind-of-like an
 operating system kernel, or the guts of a database: its complex, and
 you don't need to know how the innards work to use the system. These
-innards are best left to commited systems programmers and research
+innards are best left to committed systems programmers and research
 scientists; there is no easy way for junior programmers to participate,
 at least, not without a lot of hard work and study.
 
@@ -123,7 +123,7 @@ joining the project.
 * Compiler internals; code generation; code optimization; bytecode; VM's.
 * Operating systems; distributed database internals.
 
-Basically, Atomese is a mashup of ideas taken from all of the above fields.
+Basically, Atomese is a mash-up of ideas taken from all of the above fields.
 It's kind-of trying to do and be all of these, all at once, and to find the
 right balance between all of them. Again: the goal is knowledge representation
 for general intelligence. Building something that the AGI developers can use.
@@ -191,7 +191,7 @@ during the build, will be more precise as to which parts will not be built.
 
 ###### Haskell
 * Haskell bindings (experimental).
-* Optional; almost no existing code makes use of haskell.
+* Optional; almost no existing code makes use of Haskell.
 * https://www.haskell.org/
 
 ###### Postgres
