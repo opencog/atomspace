@@ -16,6 +16,23 @@ The vertices and edges of a graph, known as "Atoms", are used to
 represent not only "data", but also "procedures"; thus, many graphs
 are executable programs as well as data structures.
 
+The AtomSpace is a platform for building Artificial General Intelligence
+(AGI) systems. It provides the central knowledge representation component
+for OpenCog. As such, it is a fairly mature component, on which a lot of
+other systems are built, and which depend on it for correct operation.
+
+However, it turns out that knowledge represention is hard, and so the
+AtomSpace is also a platform for active scientific research on knowledge
+represention, knowledge discovery and knowledge manipulation.
+
+### A  Theoretical Overview
+The AtomSpace is a mashup of a large variety of concepts from
+mathematical logic, theorem proving, graph theory, type theory and
+knowledge representation. Its hard to provide a coherent overview
+without throwing around a lot of "big words" and "big concepts".
+Sorry if this sounds like rocket science. Its probably harder than
+rocket science. Sorry if this sounds like bragging. Its the way it is.
+
 There are pre-defined Atoms for many basic knowledge-representation and
 computer-science concepts. These include Atoms for relations, such as
 similarity, inheritance and subsets; for logic, such as Boolean and, or,
@@ -50,23 +67,47 @@ systems.  It extends the idea of probabilistic logic networks to a
 generalized system for automatically manipulating and managing data.
 
 The use of the AtomSpace, and the operation and utility of Atomese,
-remains a topic of ongoing research and change, as various dependent
-subsystems are brought online. These include machine learning,
-natural language processing, motion control and animation, planning
-and constraint solving, pattern mining and data mining, question
-answering and common-sense systems, and emotional and behavioral
-psychological systems.  Each of these impose sharply conflicting
-requirements on the system architecture; the AtomSpace and "Atomese"
-is the current best-effort KR system for satisfying all these various
-needs in an integrated way.  It is likely to change, as the various
-current short-comings, design flaws, performance and scalability
-issues are corrected.
+remains a topic of ongoing research and design experimentation, as
+various AI and knowledge-processing subsystems are developed. These
+include machine learning, natural language processing, motion control
+and animation, deep-learning networks and vision processing,
+constraint solving and planning, pattern mining and data mining,
+question answering and common-sense systems, and emotional and
+behavioral psychological systems.  Each of these impose sharply
+conflicting requirements on the AtomSpace architecture; the AtomSpace
+and "Atomese" is the current best-effort KR system for satisfying
+all these various needs in an integrated way.  It is likely to
+change, as the various current short-comings, design flaws,
+performance and scalability issues are corrected.
+
+Currently, one of the primary conceptual and performance splits
+are beween "Atoms" and "Values". Atoms are:
+
+* Used to represent graphs, networks, and long-term stable graphical relations.
+* Indexed (by the AtomSpace) and enable the rapid search and traversal of graphs.
+* Globally unique, and thus unambiguous anchor points for data.
+* Immutable: can only be created and destroyed, and are effectively static and unchanging.
+* Large, bulky, heavy-weight.
+
+By contrast, Values, and valuations in general, are:
+* A way of holding on to rapidly-changing data, includng streaming data.
+* Hold "truth values" and "probabilities", which change over time as new
+  evidence is accumulated.
+* Provide a per-Atom key-value store (noSQL database).
+* Are not indexed, and are accessible only by direct reference.
+* Small, fast, fleeting.
+
+Thus, for example, a piece of knowledge, or some proposition would be
+stored as an Atom.  As new evidence accumulates, the truth value of the
+proposition is adjusted. Other fleeting changes, or general free-form
+annotations can be stroed as Values.
 
 The primary documentation for the atomspace and Atomese is here:
 
 * https://wiki.opencog.org/w/AtomSpace
 * https://wiki.opencog.org/w/Atomese
 * https://wiki.opencog.org/w/Atom
+* https://wiki.opencog.org/w/Value
 
 The main project site is at https://opencog.org
 
