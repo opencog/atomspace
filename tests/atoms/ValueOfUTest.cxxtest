@@ -20,6 +20,7 @@
  * 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
  */
 
+#include <opencog/atoms/core/NumberNode.h>
 #include <opencog/atoms/core/ValueOfLink.h>
 #include <opencog/atoms/execution/EvaluationLink.h>
 #include <opencog/atoms/execution/Instantiator.h>
@@ -53,6 +54,7 @@ public:
 	void test_times_plus();
 	void test_minus();
 	void test_divide();
+	void test_number();
 };
 
 void ValueOfUTest::setUp(void)
@@ -406,6 +408,32 @@ void ValueOfUTest::test_divide()
 
 	// value must not get corrupted.
 	check();
+
+	logger().debug("END TEST: %s", __FUNCTION__);
+}
+
+// ====================================================================
+// Make sure that NumberNodes can be used as values.
+//
+void ValueOfUTest::test_number()
+{
+	logger().debug("BEGIN TEST: %s", __FUNCTION__);
+
+	value = an(NUMBER_NODE, "3");
+	atom->setValue(key, value);
+
+	Handle valof = al(VALUE_OF_LINK, atom, key);
+
+	// 3/4 --------------------------------------------
+	Handle divide = al(DIVIDE_LINK, valof, an(NUMBER_NODE, "4"));
+
+	ProtoAtomPtr result = FunctionLinkCast(divide)->execute();
+
+	NumberNodePtr expect = NumberNodeCast(an(NUMBER_NODE, "0.75"));
+	printf("expect: %s", expect->to_string().c_str());
+	printf("result: %s\n", result->to_string().c_str());
+
+	TS_ASSERT(*expect == *NumberNodeCast(result));
 
 	logger().debug("END TEST: %s", __FUNCTION__);
 }
