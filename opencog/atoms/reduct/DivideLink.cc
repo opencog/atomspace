@@ -63,15 +63,6 @@ static inline double get_double(const ProtoAtomPtr& pap)
 	return NumberNodeCast(pap)->get_value();
 }
 
-static inline ProtoAtomPtr get_value(const ProtoAtomPtr& pap)
-{
-	ProtoAtomPtr vptr(pap);
-	while (nameserver().isA(vptr->get_type(), FUNCTION_LINK))
-	{
-		vptr = FunctionLinkCast(vptr)->execute();
-	}
-	return vptr;
-}
 // No ExpLink or PowLink and so kons is very simple
 ProtoAtomPtr DivideLink::kons(const ProtoAtomPtr& fi, const ProtoAtomPtr& fj) const
 {

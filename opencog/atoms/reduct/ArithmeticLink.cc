@@ -156,6 +156,19 @@ Handle ArithmeticLink::reorder(void) const
 }
 
 // ===========================================================
+
+ProtoAtomPtr ArithmeticLink::get_value(ProtoAtomPtr vptr) const
+{
+	while (nameserver().isA(vptr->get_type(), FUNCTION_LINK))
+	{
+		ProtoAtomPtr red(FunctionLinkCast(vptr)->execute());
+		if (*red == *vptr) return vptr;
+		vptr = red;
+	}
+	return vptr;
+}
+
+// ===========================================================
 /// execute() -- Execute the expression
 ProtoAtomPtr ArithmeticLink::execute() const
 {
