@@ -104,12 +104,15 @@ ProtoAtomPtr MinusLink::kons(const ProtoAtomPtr& fi, const ProtoAtomPtr& fj) con
 		return plus(FloatValueCast(vi), mj);
 	}
 
+	Handle hi(HandleCast(vi));
+	if (nullptr == hi) hi= HandleCast(fi);
+
+	Handle hj(HandleCast(vj));
+	if (nullptr == hj) hj= HandleCast(fj);
+
 	// If we are here, we've been asked to subtract two things,
 	// but they are not of a type that we know how to subtract.
-	Handle sand(HandleCast(fj));
-	if (nullptr == sand)
-		throw SyntaxException(TRACE_INFO, "Not an Atom!");
-	return Handle(createMinusLink(HandleCast(fi), sand));
+	return createMinusLink(hi, hj);
 }
 
 DEFINE_LINK_FACTORY(MinusLink, MINUS_LINK)

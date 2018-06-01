@@ -65,16 +65,6 @@ static inline double get_double(const ProtoAtomPtr& pap)
 	return NumberNodeCast(pap)->get_value();
 }
 
-static inline ProtoAtomPtr get_value(const ProtoAtomPtr& pap)
-{
-	ProtoAtomPtr vptr(pap);
-	while (nameserver().isA(vptr->get_type(), FUNCTION_LINK))
-	{
-		vptr = FunctionLinkCast(vptr)->execute();
-	}
-	return vptr;
-}
-
 /// Because there is no ExpLink or PowLink that can handle repeated
 /// products, or any distributive property, kons is very simple for
 /// the TimesLink.
@@ -150,9 +140,15 @@ ProtoAtomPtr TimesLink::kons(const ProtoAtomPtr& fi, const ProtoAtomPtr& fj) con
 		return times(FloatValueCast(vi), FloatValueCast(vj));
 	}
 
+	Handle hi(HandleCast(vi));
+	if (nullptr == hi) hi= HandleCast(fi);
+
+	Handle hj(HandleCast(vj));
+	if (nullptr == hj) hj= HandleCast(fj);
+
 	// If we are here, we've been asked to multiply two things of the
 	// same type, but they are not of a type that we know how to multiply.
-	return createTimesLink(HandleCast(fi), HandleCast(fj))->reorder();
+	return createTimesLink(hi, hj);
 }
 
 DEFINE_LINK_FACTORY(TimesLink, TIMES_LINK)

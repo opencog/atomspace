@@ -120,11 +120,11 @@ ProtoAtomPtr PlusLink::kons(const ProtoAtomPtr& fi, const ProtoAtomPtr& fj) cons
 	}
 
 	// Is fi identical to fj? If so, then replace by 2*fi
-	Handle hi(HandleCast(vi));
-	if (hi and content_eq(hi, HandleCast(vj)))
+	Handle hvi(HandleCast(vi));
+	if (hvi and content_eq(hvi, HandleCast(vj)))
 	{
 		Handle two(createNumberNode("2"));
-		return createTimesLink(hi, two) -> execute();
+		return createTimesLink(hvi, two) -> execute();
 	}
 
 	// If j is (TimesLink x a) and i is identical to x,
@@ -150,9 +150,9 @@ ProtoAtomPtr PlusLink::kons(const ProtoAtomPtr& fi, const ProtoAtomPtr& fj) cons
 
 		// Handle the (a+b) case described above.
 		else if (vitype == TIMES_LINK and
-		         hi->getOutgoingAtom(0) == exx)
+		         hvi->getOutgoingAtom(0) == exx)
 		{
-			const HandleSeq& ilpo = hi->getOutgoingSet();
+			const HandleSeq& ilpo = hvi->getOutgoingSet();
 			size_t ilpsz = ilpo.size();
 			for (size_t k=1; k<ilpsz; k++)
 				rest.push_back(ilpo[k]);
@@ -194,10 +194,16 @@ ProtoAtomPtr PlusLink::kons(const ProtoAtomPtr& fi, const ProtoAtomPtr& fj) cons
 		return plus(FloatValueCast(vi), FloatValueCast(vj));
 	}
 
+	Handle hi(HandleCast(vi));
+	if (nullptr == hi) hi= HandleCast(fi);
+
+	Handle hj(HandleCast(vj));
+	if (nullptr == hj) hj= HandleCast(fj);
+
 	// If we are here, we've been asked to add two things of the same
 	// type, but they are not of a type that we know how to add.
 	// For example, fi and fj might be two different VariableNodes.
-	return createPlusLink(HandleCast(fi), HandleCast(fj))->reorder();
+	return createPlusLink(hi, hj);
 }
 
 DEFINE_LINK_FACTORY(PlusLink, PLUS_LINK);

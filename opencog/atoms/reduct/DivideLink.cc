@@ -102,9 +102,15 @@ ProtoAtomPtr DivideLink::kons(const ProtoAtomPtr& fi, const ProtoAtomPtr& fj) co
 		return divide(FloatValueCast(vi), FloatValueCast(vj));
 	}
 
+	Handle hi(HandleCast(vi));
+	if (nullptr == hi) hi= HandleCast(fi);
+
+	Handle hj(HandleCast(vj));
+	if (nullptr == hj) hj= HandleCast(fj);
+
 	// If we are here, we've been asked to take a ratio of two things,
 	// but they are not of a type that we know how to divide.
-	return createDivideLink(HandleCast(fi), HandleCast(fj));
+	return createDivideLink(hi, hj);
 }
 
 DEFINE_LINK_FACTORY(DivideLink, DIVIDE_LINK)
