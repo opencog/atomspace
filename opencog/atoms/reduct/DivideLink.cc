@@ -63,37 +63,35 @@ static inline double get_double(const ProtoAtomPtr& pap)
 	return NumberNodeCast(pap)->get_value();
 }
 
+static inline ProtoAtomPtr get_value(const ProtoAtomPtr& pap)
+{
+	ProtoAtomPtr vptr(pap);
+	while (nameserver().isA(vptr->get_type(), FUNCTION_LINK))
+	{
+		vptr = FunctionLinkCast(vptr)->execute();
+	}
+	return vptr;
+}
 // No ExpLink or PowLink and so kons is very simple
 ProtoAtomPtr DivideLink::kons(const ProtoAtomPtr& fi, const ProtoAtomPtr& fj) const
 {
-	Type fitype = fi->get_type();
-	Type fjtype = fj->get_type();
+	// Try to yank out values, if possible.
+	ProtoAtomPtr vi(get_value(fi));
+	Type vitype = vi->get_type();
+
+	ProtoAtomPtr vj(get_value(fj));
+	Type vjtype = vj->get_type();
 
 	// Are they numbers?
-	if (NUMBER_NODE == fitype and NUMBER_NODE == fjtype)
+	if (NUMBER_NODE == vitype and NUMBER_NODE == vjtype)
 	{
-		double ratio = get_double(fi) / get_double(fj);
+		double ratio = get_double(vi) / get_double(vj);
 		return Handle(createNumberNode(ratio));
 	}
 
-	// If fj is one, just drop it
-	if (content_eq(HandleCast(fj), one))
-		return fi;
-
-	// Try to yank out values, if possible.
-	ProtoAtomPtr vi(fi);
-	if (nameserver().isA(fitype, VALUE_OF_LINK))
-	{
-		vi = FunctionLinkCast(fi)->execute();
-	}
-	Type vitype = vi->get_type();
-
-	ProtoAtomPtr vj(fj);
-	if (nameserver().isA(fjtype, VALUE_OF_LINK))
-	{
-		vj = FunctionLinkCast(fj)->execute();
-	}
-	Type vjtype = vj->get_type();
+	// If vj is one, just drop it
+	if (NUMBER_NODE == vjtype and content_eq(HandleCast(vj), one))
+		return vi;
 
 	// Scalar divided by vector
 	if (NUMBER_NODE == vitype and nameserver().isA(vjtype, FLOAT_VALUE))
