@@ -66,34 +66,23 @@ static inline double get_double(const ProtoAtomPtr& pap)
 
 ProtoAtomPtr MinusLink::kons(const ProtoAtomPtr& fi, const ProtoAtomPtr& fj) const
 {
-	Type fitype = fi->get_type();
-	Type fjtype = fj->get_type();
+	// Try to yank out values, if possible.
+	ProtoAtomPtr vi(get_value(fi));
+	Type vitype = vi->get_type();
+
+	ProtoAtomPtr vj(get_value(fj));
+	Type vjtype = vj->get_type();
 
 	// Are they numbers?
-	if (NUMBER_NODE == fitype and NUMBER_NODE == fjtype)
+	if (NUMBER_NODE == vitype and NUMBER_NODE == vjtype)
 	{
-		double diff = get_double(fi) - get_double(fj);
+		double diff = get_double(vi) - get_double(vj);
 		return createNumberNode(diff);
 	}
 
-	// If fj is zero, just drop it.
-	if (content_eq(HandleCast(fj), zero))
-		return fi;
-
-	// Try to yank out values, if possible.
-	ProtoAtomPtr vi(fi);
-	if (nameserver().isA(fitype, VALUE_OF_LINK))
-	{
-		vi = FunctionLinkCast(fi)->execute();
-	}
-	Type vitype = vi->get_type();
-
-	ProtoAtomPtr vj(fj);
-	if (nameserver().isA(fjtype, VALUE_OF_LINK))
-	{
-		vj = FunctionLinkCast(fj)->execute();
-	}
-	Type vjtype = vj->get_type();
+	// If vj is zero, just drop it.
+	if (NUMBER_NODE == vjtype and content_eq(HandleCast(vj), zero))
+		return vi;
 
 	// Scalar minus vector
 	if (NUMBER_NODE == vitype and nameserver().isA(vjtype, FLOAT_VALUE))
@@ -115,12 +104,15 @@ ProtoAtomPtr MinusLink::kons(const ProtoAtomPtr& fi, const ProtoAtomPtr& fj) con
 		return plus(FloatValueCast(vi), mj);
 	}
 
+	Handle hi(HandleCast(vi));
+	if (nullptr == hi) hi= HandleCast(fi);
+
+	Handle hj(HandleCast(vj));
+	if (nullptr == hj) hj= HandleCast(fj);
+
 	// If we are here, we've been asked to subtract two things,
 	// but they are not of a type that we know how to subtract.
-	Handle sand(HandleCast(fj));
-	if (nullptr == sand)
-		throw SyntaxException(TRACE_INFO, "Not an Atom!");
-	return Handle(createMinusLink(HandleCast(fi), sand));
+	return createMinusLink(hi, hj);
 }
 
 DEFINE_LINK_FACTORY(MinusLink, MINUS_LINK)

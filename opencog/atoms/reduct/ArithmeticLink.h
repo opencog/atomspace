@@ -43,6 +43,8 @@ protected:
 	virtual Handle reorder(void) const;
 	bool _commutative;
 
+	ProtoAtomPtr get_value(ProtoAtomPtr) const;
+
 public:
 	ArithmeticLink(const HandleSeq& oset, Type=ARITHMETIC_LINK);
 	ArithmeticLink(const Link& l);

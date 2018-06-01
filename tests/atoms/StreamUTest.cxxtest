@@ -20,6 +20,7 @@
  * 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
  */
 
+#include <opencog/atoms/core/NumberNode.h>
 #include <opencog/atoms/core/ValueOfLink.h>
 #include <opencog/atoms/execution/EvaluationLink.h>
 #include <opencog/atoms/execution/Instantiator.h>
@@ -54,6 +55,7 @@ public:
 	void test_times_plus();
 	void test_minus();
 	void test_divide();
+	void test_number();
 
 	void test_chaining();
 
@@ -295,6 +297,38 @@ void StreamUTest::test_divide()
 	printf("Expect 0.99 < %g < 1.01\n", sum);
 	TS_ASSERT_LESS_THAN(0.99, sum);
 	TS_ASSERT_LESS_THAN(sum, 1.01);
+
+	logger().debug("END TEST: %s", __FUNCTION__);
+}
+
+// ====================================================================
+// Make sure RandomNumberLink works
+void StreamUTest::test_number()
+{
+	logger().debug("BEGIN TEST: %s", __FUNCTION__);
+
+	value = al(RANDOM_NUMBER_LINK, an(NUMBER_NODE, "0"), an(NUMBER_NODE, "1"));
+	atom->setValue(key, value);
+
+	Handle valof = al(VALUE_OF_LINK, atom, key);
+
+	// x/4 --------------------------------------------
+	Handle divide = al(DIVIDE_LINK, valof, an(NUMBER_NODE, "4"));
+
+	FunctionLinkPtr flp = FunctionLinkCast(divide);
+
+	double sum = 0.0;
+	for (int i=0; i<LOOPCNT; i++)
+	{
+		ProtoAtomPtr pap = flp->execute();
+		NumberNodePtr nn = NumberNodeCast(pap);
+		sum += nn->get_value();
+	}
+
+	sum /= LOOPCNT;
+	printf("Expect 0 < %g < 0.25\n", sum);
+	TS_ASSERT_LESS_THAN(0, sum);
+	TS_ASSERT_LESS_THAN(sum, 0.25);
 
 	logger().debug("END TEST: %s", __FUNCTION__);
 }

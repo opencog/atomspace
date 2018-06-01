@@ -26,6 +26,7 @@ using namespace opencog;
 
 bool StringValue::operator==(const ProtoAtom& other) const
 {
+	if (nullptr == &other) return false;
 	if (STRING_VALUE != other.get_type()) return false;
 
 	const StringValue* sov = (const StringValue*) &other;
