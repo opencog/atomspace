@@ -77,17 +77,7 @@ ProtoAtomPtr FoldLink::delta_reduce(void) const
 			h = h->getOutgoingAtom(0);
 			t = h->get_type();
 		}
-
-		if (nameserver().isA(t, FOLD_LINK))
-		{
-			FoldLinkPtr fff(FoldLinkCast(classserver().factory(h)));
-			ProtoAtomPtr pap = fff->delta_reduce();
-			expr = kons(pap, expr);
-		}
-		else
-		{
-			expr = kons(h, expr);
-		}
+		expr = kons(h, expr);
 	}
 
 	return expr;
