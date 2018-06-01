@@ -67,48 +67,62 @@ static inline double get_double(const ProtoAtomPtr& pap)
 	return NumberNodeCast(pap)->get_value();
 }
 
+static inline ProtoAtomPtr get_value(const ProtoAtomPtr& pap)
+{
+	ProtoAtomPtr vptr(pap);
+	while (nameserver().isA(vptr->get_type(), FUNCTION_LINK))
+	{
+		vptr = FunctionLinkCast(vptr)->execute();
+	}
+	return vptr;
+}
+
 ProtoAtomPtr PlusLink::kons(const ProtoAtomPtr& fi, const ProtoAtomPtr& fj) const
 {
-	Type fitype = fi->get_type();
-	Type fjtype = fj->get_type();
+	// Try to yank out values, if possible.
+	ProtoAtomPtr vi(get_value(fi));
+	Type vitype = vi->get_type();
+
+	ProtoAtomPtr vj(get_value(fj));
+	Type vjtype = vj->get_type();
 
 	// Are they numbers?
-	if (NUMBER_NODE == fitype and NUMBER_NODE == fjtype)
+	if (NUMBER_NODE == vitype and NUMBER_NODE == vjtype)
 	{
-		double sum = get_double(fi) + get_double(fj);
+		double sum = get_double(vi) + get_double(vj);
 		return createNumberNode(sum);
 	}
 
 	// If either one is the unit, then just drop it.
-	if (content_eq(HandleCast(fi), zero))
-		return fj;
-	if (content_eq(HandleCast(fj), zero))
-		return fi;
+	if (NUMBER_NODE == vitype and content_eq(HandleCast(vi), zero))
+		return vj;
+	if (NUMBER_NODE == vjtype and content_eq(HandleCast(vj), zero))
+		return vi;
 
 	// Is either one a PlusLink? If so, then flatten.
-	if (PLUS_LINK == fitype or PLUS_LINK == fjtype)
+	if (PLUS_LINK == vitype or PLUS_LINK == vjtype)
 	{
 		HandleSeq seq;
 		// flatten the left
-		if (PLUS_LINK == fitype)
+		if (PLUS_LINK == vitype)
 		{
-			for (const Handle& lhs: HandleCast(fi)->getOutgoingSet())
+			for (const Handle& lhs: HandleCast(vi)->getOutgoingSet())
 				seq.push_back(lhs);
 		}
 		else
 		{
-			seq.push_back(HandleCast(fi));
+			seq.push_back(HandleCast(vi));
 		}
 
 		// flatten the right
-		if (PLUS_LINK == fjtype)
+		if (PLUS_LINK == vjtype)
 		{
-			for (const Handle& rhs: HandleCast(fj)->getOutgoingSet())
+			for (const Handle& rhs: HandleCast(vj)->getOutgoingSet())
 				seq.push_back(rhs);
 		}
 		else
 		{
-			seq.push_back(HandleCast(fj));
+			seq.push_back(HandleCast(vj));
 		}
 		Handle foo(createLink(seq, PLUS_LINK));
 		PlusLinkPtr ap = PlusLinkCast(foo);
@@ -116,8 +130,8 @@ ProtoAtomPtr PlusLink::kons(const ProtoAtomPtr& fi, const ProtoAtomPtr& fj) cons
 	}
 
 	// Is fi identical to fj? If so, then replace by 2*fi
-	Handle hi(HandleCast(fi));
-	if (hi and content_eq(hi, HandleCast(fj)))
+	Handle hi(HandleCast(vi));
+	if (hi and content_eq(hi, HandleCast(vj)))
 	{
 		Handle two(createNumberNode("2"));
 		return createTimesLink(hi, two) -> execute();
@@ -129,15 +143,15 @@ ProtoAtomPtr PlusLink::kons(const ProtoAtomPtr& fi, const ProtoAtomPtr& fj) cons
 	// If j is (TimesLink x a) and i is (TimesLink x b)
 	// then create (TimesLink x (a+b))
 	//
-	if (fjtype == TIMES_LINK)
+	if (vjtype == TIMES_LINK)
 	{
 		bool do_add = false;
 		HandleSeq rest;
 
-		Handle exx = HandleCast(fj)->getOutgoingAtom(0);
+		Handle exx = HandleCast(vj)->getOutgoingAtom(0);
 
 		// Handle the (a+1) case described above.
-		if (fi == exx)
+		if (vi == exx)
 		{
 			Handle one(createNumberNode("1"));
 			rest.push_back(one);
@@ -145,7 +159,7 @@ ProtoAtomPtr PlusLink::kons(const ProtoAtomPtr& fi, const ProtoAtomPtr& fj) cons
 		}
 
 		// Handle the (a+b) case described above.
-		else if (fitype == TIMES_LINK and
+		else if (vitype == TIMES_LINK and
 		         hi->getOutgoingAtom(0) == exx)
 		{
 			const HandleSeq& ilpo = hi->getOutgoingSet();
@@ -157,7 +171,7 @@ ProtoAtomPtr PlusLink::kons(const ProtoAtomPtr& fi, const ProtoAtomPtr& fj) cons
 
 		if (do_add)
 		{
-			const HandleSeq& jlpo = HandleCast(fj)->getOutgoingSet();
+			const HandleSeq& jlpo = HandleCast(vj)->getOutgoingSet();
 			size_t jlpsz = jlpo.size();
 			for (size_t k=1; k<jlpsz; k++)
 				rest.push_back(jlpo[k]);
@@ -170,21 +184,6 @@ ProtoAtomPtr PlusLink::kons(const ProtoAtomPtr& fi, const ProtoAtomPtr& fj) cons
 			return createTimesLink(exx, HandleCast(a_plus));
 		}
 	}
-
-	// Try to yank out values, if possible.
-	ProtoAtomPtr vi(fi);
-	if (nameserver().isA(fitype, VALUE_OF_LINK))
-	{
-		vi = FunctionLinkCast(fi)->execute();
-	}
-	Type vitype = vi->get_type();
-
-	ProtoAtomPtr vj(fj);
-	if (nameserver().isA(fjtype, VALUE_OF_LINK))
-	{
-		vj = FunctionLinkCast(fj)->execute();
-	}
-	Type vjtype = vj->get_type();
 
 	// Swap order, make things easier below.
 	if (nameserver().isA(vitype, FLOAT_VALUE))

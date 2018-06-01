@@ -126,9 +126,9 @@ ProtoAtomPtr TimesLink::kons(const ProtoAtomPtr& fi, const ProtoAtomPtr& fj) con
 	}
 
 	// If either one is the unit, then just drop it.
-	if (content_eq(HandleCast(vi), one))
+	if (NUMBER_NODE == vitype and content_eq(HandleCast(vi), one))
 		return vj;
-	if (content_eq(HandleCast(vj), one))
+	if (NUMBER_NODE == vjtype and content_eq(HandleCast(vj), one))
 		return vi;
 
 	// Swap order, make things easier below.
