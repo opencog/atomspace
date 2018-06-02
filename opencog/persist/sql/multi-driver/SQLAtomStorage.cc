@@ -2260,7 +2260,8 @@ void SQLAtomStorage::print_stats(void)
 {
 	printf("sql-stats: Currently open URI: %s\n", _uri.c_str());
 	time_t now = time(0);
-	printf("sql-stats: Time since stats reset=%lu secs (at %s)\n",
+	// ctime returns string with newline at end of it.
+	printf("sql-stats: Time since stats reset=%lu secs, at %s",
 		now - _stats_time, ctime(&_stats_time));
 
 
