@@ -38,14 +38,23 @@
 	(define (set-norms ATOM L0 L1 L2)
 		(cog-set-value! ATOM norm-key (FloatValue L0 L1 L2)))
 
+	; User might ask for something not in the matrix. In that
+	; case, cog-value-ref will throw 'wrong-type-arg. If this
+	; happens, just return zero.
 	(define (get-support ATOM)
-		(cog-value-ref (cog-value ATOM norm-key) 0))
+		(catch 'wrong-type-arg
+			(lambda () (cog-value-ref (cog-value ATOM norm-key) 0))
+			(lambda (key . args) 0)))
 
 	(define (get-count ATOM)
-		(cog-value-ref (cog-value ATOM norm-key) 1))
+		(catch 'wrong-type-arg
+			(lambda () (cog-value-ref (cog-value ATOM norm-key) 1))
+			(lambda (key . args) 0)))
 
 	(define (get-length ATOM)
-		(cog-value-ref (cog-value ATOM norm-key) 2))
+		(catch 'wrong-type-arg
+			(lambda () (cog-value-ref (cog-value ATOM norm-key) 2))
+			(lambda (key . args) 0)))
 
 	;--------
 	(define (get-left-support ITEM)
