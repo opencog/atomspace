@@ -449,6 +449,9 @@
   print-matrix-summary-report LLOBJ #:optional PORT
   Print a summary report about the pair dataset LLOBJ to the
   optionally-provided output PORT (e.g. a string or file port).
+
+  See documentation for `add-report-api` for an explanation of
+  what is being printed.
 "
 	(define (log2 x) (/ (log x) (log 2)))
 
