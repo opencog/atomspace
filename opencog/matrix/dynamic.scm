@@ -3,7 +3,7 @@
 ;
 ; Matrix algorithms that do not require that the entire dataset
 ; be loaded into RAM all at the same time.  Instead, portions are
-; "dynamically" loaded, as needed.
+; "dynamically" loaded, as needed, from the database.
 ;
 ; ---------------------------------------------------------------------
 
@@ -16,7 +16,7 @@
 "
   add-dynamic-stars LLOBJ - Extend LLOBJ with row and column access
   methods (aka wildcard methods), specifically, to get all non-zero
-  elements in a given row or column.
+  elements in a given row or column from the database backend.
 
   Similar to the (add-pair-stars LLOBJ) class, except that this
   attempts to work without having to load all pairs into RAM at the
