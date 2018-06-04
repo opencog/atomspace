@@ -32,6 +32,7 @@
 
 #include <opencog/util/exceptions.h>
 #include <opencog/atoms/base/ProtoAtom.h>
+#include <opencog/atomspace/AtomSpace.h>
 
 #include <opencog/truthvalue/FuzzyTruthValue.h>
 #include <opencog/truthvalue/ProbabilisticTruthValue.h>
@@ -47,17 +48,13 @@ namespace opencog
 class GDTV;
 typedef std::shared_ptr<const GDTV> GDTVPtr;
 
-typedef std::tuple<double,double> Interval;
-typedef std::tuple<Interval,int> IntervalCount;
-typedef std::vector<IntervalCount> IntervalCounts;
-typedef std::tuple<Interval,IntervalCounts> GDTVpart;
+typedef std::tuple<Handle,HandleCounter> GDTVpart;
 typedef std::vector<GDTVpart> GDTVrep;
 
 class GDTV
     : public ProtoAtom
 {
-
-    IntervalCounts gdtv;
+    HandleCounter value;
     int k;
 
     // Disallow assignment -- truth values are immutable!
@@ -67,39 +64,31 @@ class GDTV
 
 public:
     GDTV();
-    GDTV(IntervalCounts);
-    GDTV(SimpleTruthValue);
-    GDTV(FuzzyTruthValue);
+    GDTV(HandleCounter);
+    GDTV(SimpleTruthValue,AtomSpace);
+    GDTV(FuzzyTruthValue,AtomSpace);
 
-    static GDTVPtr UniformGDTV(int,int);
-    static GDTVPtr UniformGDTV(std::vector<Interval>,int);
-    static GDTVPtr UniformGDTV(IntervalCounts,int);
-
-    Interval InfInterval() {
-        double inf = std::numeric_limits<double>::infinity();
-        return std::make_tuple(-inf,inf);
-    }
+    static GDTVPtr UniformGDTV(std::vector<Handle>,int);
 
     std::vector<double> get_mode();
     std::vector<double> get_mean();
     std::vector<double> get_var();
 
-    double get_mode_for(IntervalCount);
-    double get_mean_for(IntervalCount);
-    double get_var_for(IntervalCount);
+    double get_mode_for(double);
+    double get_mean_for(double);
+    double get_var_for(double);
 
-    void AddEvidence(double);
+    void AddEvidence(Handle);
     void AddEvidence(GDTVPtr);
 
-    int get_count();
+    double total_count();
     double get_confidence(int);
 
-    IntervalCount getIntervalCount(double);
-    Interval getInterval(double);
-    int getCount(double);
-    double getMean(double);
-    double getMode(double);
-    double getVar(double);
+    Handle getKey(Handle);
+    double getCount(Handle);
+    double getMean(Handle);
+    double getMode(Handle);
+    double getVar(Handle);
 
     virtual bool operator==(const ProtoAtom& rhs) const;
 

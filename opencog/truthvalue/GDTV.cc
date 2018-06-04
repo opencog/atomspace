@@ -34,195 +34,162 @@ GDTV::GDTV()
     : ProtoAtom(GENERALIZED_DISTRIBUTIONAL_TRUTH_VALUE)
 {}
 
-GDTV::GDTV(IntervalCounts ics)
+GDTV::GDTV(HandleCounter hctr)
     : ProtoAtom(GENERALIZED_DISTRIBUTIONAL_TRUTH_VALUE)
 {
-    gdtv = ics;
+    value = hctr;
 }
 
-GDTV::GDTV(SimpleTruthValue stv)
+GDTV::GDTV(SimpleTruthValue stv,AtomSpace as)
     : ProtoAtom(GENERALIZED_DISTRIBUTIONAL_TRUTH_VALUE)
 {
     int count = std::round(stv.get_mean() * stv.get_count());
-    Interval interval = std::make_tuple(1.0,1.0);
-    IntervalCount intervalWithCount = std::make_tuple(interval,count);
-    gdtv.push_back(intervalWithCount);
+    Handle h = as.add_node(NUMBER_NODE,"1");
+    value[h] = count;
 }
 
-GDTV::GDTV(FuzzyTruthValue ftv)
+GDTV::GDTV(FuzzyTruthValue ftv,AtomSpace as)
     : ProtoAtom(GENERALIZED_DISTRIBUTIONAL_TRUTH_VALUE)
 {
-    Interval interval = std::make_tuple(ftv.get_mean(),ftv.get_mean());
-    IntervalCount intervalWithCount = std::make_tuple(interval,ftv.get_count());
-    gdtv.push_back(intervalWithCount);
+    Handle h = as.add_node(NUMBER_NODE,std::to_string(ftv.get_mean()));
+    value[h] = ftv.get_count();
 }
 
-GDTVPtr UniformGDTV(int k,int c)
+GDTVPtr GDTV::UniformGDTV(std::vector<Handle> hs,int c)
 {
-    IntervalCounts ics;
-    for (int i = 0; i < k; i++)
+    HandleCounter hctr;
+    for (Handle h : hs)
     {
-        Interval interval = std::make_tuple(i,i);
-        IntervalCount intervalWithCount = std::make_tuple(interval,c);
-        ics.push_back(intervalWithCount);
+        hctr[h] = c;
     }
-    return std::make_shared<const GDTV>(ics);
+    return std::make_shared<const GDTV>(hctr);
 }
 
-GDTVPtr GDTV::UniformGDTV(std::vector<Interval> k,int c)
+void GDTV::AddEvidence(Handle h)
 {
-    IntervalCounts ics;
-    for (size_t i = 0; i < k.size(); i++)
+    auto it = value.find(h);
+    if (it != value.end())
     {
-        IntervalCount intervalWithCount = std::make_tuple(k[i],c);
-        ics.push_back(intervalWithCount);
-    }
-    return std::make_shared<const GDTV>(ics);
-}
-
-GDTVPtr GDTV::UniformGDTV(IntervalCounts ics,int c)
-{
-    IntervalCounts res;
-    for (auto intervalWithCount : ics)
-    {
-        Interval interval = std::get<0>(intervalWithCount);
-        IntervalCount tuple = std::make_tuple(interval,c);
-        res.push_back(tuple);
-    }
-    return std::make_shared<const GDTV>(res);
-}
-
-void GDTV::AddEvidence(double val)
-{
-    for (auto &intervalWithCount : gdtv)
-    {
-        Interval interval = std::get<0>(intervalWithCount);
-
-        if (std::get<0>(interval) <= val &&  val <= std::get<1>(interval))
-        {
-            int count = std::get<1>(intervalWithCount);
-            intervalWithCount = std::make_tuple(interval,count+1);
-            break;
-        }
+        it->second = it->second + 1;
     }
     throw RuntimeException(TRACE_INFO, "No Interval for this value.");
 }
 
 void GDTV::AddEvidence(GDTVPtr newgdtv)
 {
-    for (int i = 0; i < k;i++)
+    if (k == newgdtv->k)
     {
-        if (std::get<0>(gdtv[i]) != std::get<0>(newgdtv->gdtv[i]))
+        auto it1 = value.begin();
+        auto it2 = newgdtv->value.begin();
+        for (int i = 0; i < k;i++)
         {
-            throw RuntimeException(TRACE_INFO,"Intervals of GDTVS don't match.");
+            if (it1->first != it2->first)
+            {
+                throw RuntimeException(TRACE_INFO
+                                      ,"Intervals of GDTVS don't match.");
+            }
+            std::next(it1);
+            std::next(it2);
         }
-    }
-    for (int i = 0; i < k;i++)
-    {
-        std::get<1>(gdtv[i]) = std::get<1>(gdtv[i]) + std::get<1>(newgdtv->gdtv[i]);
+        it1 = value.begin();
+        it2 = newgdtv->value.begin();
+        for (int i = 0; i < k;i++)
+        {
+            it1->second = it1->second + it2->second;
+            std::next(it1);
+            std::next(it2);
+        }
     }
 }
 
 std::vector<double> GDTV::get_mode()
 {
     std::vector<double> probs;
-    for (auto intervalWithCount : gdtv)
+    for (auto elem : value)
     {
-        probs.push_back(get_mode_for(intervalWithCount));
+        probs.push_back(get_mode_for(elem.second));
     }
     return probs;
 }
 
-double GDTV::get_mode_for(IntervalCount ic)
+double GDTV::get_mode_for(double ai)
 {
-    double ai = std::get<1>(ic);
-    double a0 = get_count();
-    return (ai - 1) / (a0 - k);
+    return (ai - 1) / (total_count() - k);
 }
 
 std::vector<double> GDTV::get_mean()
 {
     std::vector<double> probs;
-    for (auto intervalWithCount : gdtv)
+    for (auto elem : value)
     {
-        probs.push_back(get_mean_for(intervalWithCount));
+        probs.push_back(get_mean_for(elem.second));
     }
     return probs;
 }
 
-double GDTV::get_mean_for(IntervalCount ic)
+double GDTV::get_mean_for(double ai)
 {
-        double ai = std::get<1>(ic);
-        double a0 = get_count();
-        return ai / a0;
+        return ai / total_count();
 }
 
 std::vector<double> GDTV::get_var()
 {
     std::vector<double> probs;
-    for (auto intervalWithCount : gdtv)
+    for (auto elem : value)
     {
-        probs.push_back(get_var_for(intervalWithCount));
+        probs.push_back(get_var_for(elem.second));
     }
     return probs;
 }
 
-double GDTV::get_var_for(IntervalCount ic)
+double GDTV::get_var_for(double ai)
 {
-        double ai = std::get<1>(ic);
-        double a0 = get_count();
+        double a0 = total_count();
         return ai*(a0-ai) / a0*a0*(a0+1);
 }
 
-int GDTV::get_count()
+double GDTV::total_count()
 {
-    int sum = 0;
-    for (auto intervalWithCount : gdtv)
-    {
-        sum = sum + std::get<1>(intervalWithCount);
-    }
-    return sum;
+    return value.total_count();
 }
 
 double GDTV::get_confidence(int lookahead)
 {
-    int c = get_count();
+    int c = total_count();
     return c / (c + lookahead);
 }
 
-IntervalCount GDTV::getIntervalCount(double val)
+Handle GDTV::getKey(Handle h)
 {
-    for (auto intervalWithCount : gdtv)
+    auto it = value.find(h);
+    if (it != value.end())
     {
-        Interval interval = std::get<0>(intervalWithCount);
-
-        if (std::get<0>(interval)<= val &&  val <= std::get<1>(interval))
-        {
-            return intervalWithCount;
-        }
+        return it->first;
     }
-    throw RuntimeException(TRACE_INFO, "No Interval for this value.");
+    throw RuntimeException(TRACE_INFO, "No Key for this value.");
 }
 
-Interval GDTV::getInterval(double val)
+double GDTV::getCount(Handle h)
 {
-    return std::get<0>(getIntervalCount(val));
+    auto it = value.find(h);
+    if (it != value.end())
+    {
+        return it->second;
+    }
+    throw RuntimeException(TRACE_INFO, "No Key for this value.");
 }
-int GDTV::getCount(double val)
+
+double GDTV::getMode(Handle val)
 {
-    return std::get<1>(getIntervalCount(val));
+    return get_mode_for(getCount(val));
 }
-double GDTV::getMode(double val)
+double GDTV::getMean(Handle val)
 {
-    return get_mode_for(getIntervalCount(val));
+    return get_mean_for(getCount(val));
 }
-double GDTV::getMean(double val)
+double GDTV::getVar(Handle val)
 {
-    return get_mean_for(getIntervalCount(val));
-}
-double GDTV::getVar(double val)
-{
-    return get_var_for(getIntervalCount(val));
+    return get_var_for(getCount(val));
 }
 
 std::string GDTV::to_string(const std::string& indent) const
