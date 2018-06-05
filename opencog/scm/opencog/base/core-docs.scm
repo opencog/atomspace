@@ -654,6 +654,29 @@
        ((mean . 0.7) (confidence . 0.9))
 ")
 
+(set-procedure-property! cog-tv-mean 'documentation
+"
+ cog-tv-mean TV
+    Return the `mean` of the TruthValue. This is a single
+    floating point-number.
+")
+
+(set-procedure-property! cog-tv-confidence 'documentation
+"
+ cog-tv-confidence TV
+    Return the `confidence` of the TruthValue. This is a single
+    floating point-number.
+")
+
+(set-procedure-property! cog-tv-count 'documentation
+"
+ cog-tv-count TV
+    Return the `count` of the TruthValue. This is a single
+    floating point-number.
+")
+
+; ===================================================================
+;
 (set-procedure-property! cog-new-av 'documentation
 "
  cog-new-av STI LTI VLTI
