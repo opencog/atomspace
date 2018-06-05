@@ -479,6 +479,28 @@
      (cog-inc-count! (ConceptNode \"Answer\") 42.0)
 ")
 
+(set-procedure-property! cog-mean 'documentation
+"
+ cog-mean ATOM
+    Return the `mean` of the TruthValue on ATOM. This is a single
+    floating point-number.
+")
+
+(set-procedure-property! cog-confidence 'documentation
+"
+ cog-confidence ATOM
+    Return the `confidence` of the TruthValue on ATOM. This is a single
+    floating point-number.
+")
+
+(set-procedure-property! cog-count 'documentation
+"
+ cog-count ATOM
+    Return the `count` of the TruthValue on ATOM. This is a single
+    floating point-number.
+")
+
+; ===================================================================
 (set-procedure-property! cog-new-stv 'documentation
 "
  cog-new-stv MEAN CONFIDENCE
