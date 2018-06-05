@@ -8,6 +8,7 @@ ADD_LIBRARY (truthvalue
 	SimpleTruthValue.cc
 	TruthValue.cc
     GDTV.cc
+    ConditionalGDTV.cc
 )
 
 # Without this, parallel make will race and crap up the generated files.
@@ -31,5 +32,6 @@ INSTALL (FILES
 	EvidenceCountTruthValue.h
 	TruthValue.h
     GDTV.h
+    ConditionalGDTV.h
 	DESTINATION "include/opencog/truthvalue"
 )

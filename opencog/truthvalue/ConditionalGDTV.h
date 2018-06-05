@@ -48,11 +48,12 @@ namespace opencog
 class ConditionalGDTV;
 typedef std::shared_ptr<const ConditionalGDTV> ConditionalGDTVPtr;
 
+typedef std::map<Handle,HandleCounter> GDTVrep;
+
 class ConditionalGDTV
     : public ProtoAtom
 {
-
-    GDTVrep gdtv;
+    GDTVrep value;
 
     // Disallow assignment -- truth values are immutable!
     ConditionalGDTV& operator=(const ConditionalGDTV& rhs) {
@@ -60,11 +61,11 @@ class ConditionalGDTV
     }
 
 public:
-    GDTV(GDTVrep);
+    ConditionalGDTV();
+    ConditionalGDTV(GDTVrep);
 
-    GDTV getUnconditonal(double);
-    //GDTV getUnconditonal(Interval);
-    //GDTV getUnconditonal(GDTV);
+    GDTVPtr getUnconditional(Handle);
+    GDTVPtr getUnconditional(GDTVPtr);
 
 };
 

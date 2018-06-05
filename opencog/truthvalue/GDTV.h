@@ -48,12 +48,12 @@ namespace opencog
 class GDTV;
 typedef std::shared_ptr<const GDTV> GDTVPtr;
 
-typedef std::tuple<Handle,HandleCounter> GDTVpart;
-typedef std::vector<GDTVpart> GDTVrep;
-
 class GDTV
     : public ProtoAtom
 {
+
+    friend class ConditionalGDTV;
+
     HandleCounter value;
     int k;
 

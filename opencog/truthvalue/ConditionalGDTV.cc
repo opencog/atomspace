@@ -30,38 +30,28 @@
 
 using namespace opencog;
 
-GDTV::GDTV(GDTVrep rep)
+ConditionalGDTV::ConditionalGDTV()
 : ProtoAtom(CONDITIONAL_GENERALIZED_DISTRIBUTIONAL_TRUTH_VALUE)
 {
-    gdtv = rep;
 }
 
-GDTV ConditionalGDTV::getUnconditonal(double val)
+ConditionalGDTV::ConditionalGDTV(GDTVrep rep)
+: ProtoAtom(CONDITIONAL_GENERALIZED_DISTRIBUTIONAL_TRUTH_VALUE)
 {
-    for (auto gdtvpart : gdtv)
-    {
-        Interval interval = std::get<0>(gdtvpart);
-
-        if (std::get<0>(interval)<= val &&  val <= std::get<1>(interval))
-        {
-            return std::get<1>(gdtvpart);
-        }
-
-    }
+    value = rep;
 }
 
-/*
-GDTV ConditionalGDTV::getUnconditonal(Interval);
-
-GDTV ConditionalGDTV::getUnconditonal(GDTV condDist)
+GDTVPtr ConditionalGDTV::getUnconditional(Handle h)
 {
-    IntervalCounts res = UniformGDTV(sdt:get<1>(gdtv[0]));
-    for (auto gdtvpart : gdtv)
-    {
-        Interval interval = std::get<0>(gdtvpart);
-        double intervalMiddle = (std::get<0>(interval) + std::get<1>(interval))/2;
-        double weight = condDist.getMode(intervalMiddle);
-        res.AddEvidence(std::get<1>gdtvpart * weigth);
-    }
+    return std::make_shared<const GDTV>(value.find(h)->second);
 }
-*/
+
+GDTVPtr ConditionalGDTV::getUnconditional(GDTVPtr condDist)
+{
+    HandleCounter res;
+    for (auto gdtvpart : value)
+    {
+        res += gdtvpart.second * condDist->value.get(gdtvpart.first,0);
+    }
+    return std::make_shared<const GDTV>(res);
+}
