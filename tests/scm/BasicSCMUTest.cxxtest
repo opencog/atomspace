@@ -76,12 +76,14 @@ class BasicSCMUTest :  public CxxTest::TestSuite
 	void test_clear(void);
 	void test_extract_hypergraph(void);
 
+	void check_tv(const Handle&, double, double);
+
 	// Nodes
-	void check_node(const char *, const char *, float, float);
+	void check_node(const char *, const char *, double, double);
 
 	// Links
 	void check_link(const char *, Type, const char *, const char *,
-	                const char *, const char *, float, float);
+	                const char *, const char *, double, double);
 	void test_link_tv_setting(void);
 	void test_reference_link(void);
 	void test_word_instance_link(void);
@@ -98,7 +100,7 @@ class BasicSCMUTest :  public CxxTest::TestSuite
 	void test_truth_value(void);
 
 	// Relex links
-	void check_parse_link(const char *, Type, const char *, const char *, const char *, const char *, float, float);
+	void check_parse_link(const char *, Type, const char *, const char *, const char *, const char *, double, double);
 	void test_parse_link(void);
 	void test_lemma_link(void);
 	void test_part_of_speech_link(void);
@@ -157,7 +159,17 @@ void BasicSCMUTest::test_utf8(void)
 
 // ============================================================
 
-void BasicSCMUTest::check_node(const char * tipo, const char * nodename, float truth, float conf)
+void BasicSCMUTest::check_tv(const Handle& h, double mean, double conf)
+{
+	TruthValuePtr tv = h->getTruthValue();
+	double m = tv->get_mean();
+	double c = tv->get_confidence();
+
+	TS_ASSERT_LESS_THAN_EQUALS(fabs(m-mean), 1.0e-6);
+	TS_ASSERT_LESS_THAN_EQUALS(fabs(c-conf), 1.0e-6);
+}
+
+void BasicSCMUTest::check_node(const char * tipo, const char * nodename, double truth, double conf)
 {
 	printf("check_node(%s,%s,%f,%f)\n", tipo, nodename, truth, conf);
 	char buff[500];
@@ -175,26 +187,7 @@ void BasicSCMUTest::check_node(const char * tipo, const char * nodename, float t
 	NodePtr n = NodeCast(h);
 	TSM_ASSERT("Failed to find node", n != nullptr);
 
-	if (n)
-	{
-		TruthValuePtr tv = n->getTruthValue();
-		float m = tv->get_mean();
-		float c = tv->get_confidence();
-
-		TS_ASSERT_LESS_THAN_EQUALS(fabs(m-truth), 1.0e-6);
-		TS_ASSERT_LESS_THAN_EQUALS(fabs(c-conf), 1.0e-6);
-	}
-
-#if OBSOLETE_API
-	// Test the eval_h function also -- it returns a handle.
-	snprintf(buff, 500, "(cog-atom %lu)", h.value());
-	Handle h2 = eval->eval_h(buff);
-
-	eval_err = eval->eval_error();
-	eval->clear_pending();
-	TSM_ASSERT("Failed to eval_h", !eval_err);
-	TSM_ASSERT("Failed to get the correct handle", h == h2);
-#endif
+	if (n) check_tv(h, truth, conf);
 }
 
 void BasicSCMUTest::test_single_atom(void)
@@ -323,7 +316,7 @@ void BasicSCMUTest::check_truth_value(const TruthValuePtr& tv)
 	string node_str = "check_truth_value_node";
 	string add_node_str = string("(cog-new-node 'Node \"") + node_str + "\") ";
 
-	eval->eval(add_node_str);
+	Handle hadd = eval->eval_h(add_node_str);
 	bool eval_err = eval->eval_error();
 	eval->clear_pending();
 	TSM_ASSERT("Failed to create atom!", !eval_err);
@@ -355,12 +348,27 @@ void BasicSCMUTest::check_truth_value(const TruthValuePtr& tv)
 	eval->clear_pending();
 	TSM_ASSERT("Failed to eval", !eval_err);
 
-	// check that the atom has the right TV
+	// Check that the atom has the right TV
 	Handle h = as->get_handle(NODE, node_str);
 	TSM_ASSERT("Failed to get the handle", h != Handle::UNDEFINED);
+	TSM_ASSERT("Failed to get the correct handle", h == hadd);
 	// hack to avoid floating error
 	bool tv_eq = tv->to_string() == h->getTruthValue()->to_string();
 	TSM_ASSERT("TVs are different", tv_eq);
+
+	// Check the fast-path API, too
+	string strmfast = "(cog-mean " + add_node_str + ")";
+	double mfast = atof(eval->eval(strmfast.c_str()).c_str());
+	string strcfast = "(cog-confidence " + add_node_str + ")";
+	double cfast = atof(eval->eval(strcfast.c_str()).c_str());
+	check_tv(h, mfast, cfast);
+
+	// Check the slow-path API, too
+	string strmslow = "(cog-tv-mean (cog-tv " + add_node_str + "))";
+	double mslow = atof(eval->eval(strmslow.c_str()).c_str());
+	string strcslow = "(cog-tv-confidence (cog-tv " + add_node_str + "))";
+	double cslow = atof(eval->eval(strcslow.c_str()).c_str());
+	check_tv(h, mslow, cslow);
 
 	// remove Node so we can redo the test
 	as->remove_atom(h);
@@ -507,7 +515,7 @@ void BasicSCMUTest::test_value_list(void)
 void BasicSCMUTest::check_link(const char * tipo, Type type,
                                const char * nodename1, const char * nodename2,
                                const char * value1, const char * value2,
-                               float truth, float conf)
+                               double truth, double conf)
 {
 	printf("check_link(%s,%s,%s,%f,%f)\n",
 	        tipo, nodename1, nodename2, truth, conf);
@@ -523,16 +531,8 @@ void BasicSCMUTest::check_link(const char * tipo, Type type,
 	HandleSeq links;
 	as->get_handles_by_type(back_inserter(links), type, true);
 	//printf("Number of links found: %d\n",links.size());
-	HandleSeq::const_iterator i;
-	for (i = links.begin(); i != links.end(); ++i)
-	{
-		TruthValuePtr tv = (*i)->getTruthValue();
-		float m = tv->get_mean();
-		float c = tv->get_confidence();
-		TS_ASSERT_LESS_THAN_EQUALS(fabs(m - truth), 1.0e-6);
-		TS_ASSERT_LESS_THAN_EQUALS(fabs(c - conf), 1.0e-6);
-		//printf("Link TruthValue: %f -- %f\n", m, c);
-	}
+	for (const Handle& h: links)
+		check_tv(h, truth, conf);
 
 	Type t1 = nameserver().getType(nodename1);
 	Handle h1 = as->get_handle(t1, value1);
@@ -622,11 +622,7 @@ void BasicSCMUTest::test_link_tv_setting(void)
 	eval->clear_pending();
 	TSM_ASSERT("Failed to create a link", !eval_err);
 
-	TruthValuePtr tv = inh->getTruthValue();
-	float m = tv->get_mean();
-	float c = tv->get_confidence();
-	TS_ASSERT_LESS_THAN_EQUALS(fabs(m - 0.75), 1.0e-6);
-	TS_ASSERT_LESS_THAN_EQUALS(fabs(c - 0.25), 1.0e-6);
+	check_tv(inh, 0.75, 0.25);
 
 	// Add it again, but with stronger confidence.
 	// Make sure the new values grab hold
@@ -635,11 +631,7 @@ void BasicSCMUTest::test_link_tv_setting(void)
 	eval->clear_pending();
 	TSM_ASSERT("Failed to update a link", !eval_err);
 
-	tv = inh->getTruthValue();
-	m = tv->get_mean();
-	c = tv->get_confidence();
-	TS_ASSERT_LESS_THAN_EQUALS(fabs(m - 0.6), 1.0e-6);
-	TS_ASSERT_LESS_THAN_EQUALS(fabs(c - 0.42), 1.0e-6);
+	check_tv(inh, 0.6, 0.42);
 
 	logger().debug("END TEST: %s", __FUNCTION__);
 }
@@ -649,7 +641,7 @@ void BasicSCMUTest::test_link_tv_setting(void)
 void BasicSCMUTest::check_parse_link(const char * tipo, Type type,
                                const char * nodename1, const char * nodename2,
                                const char * value1, const char * value2,
-                               float truth, float conf)
+                               double truth, double conf)
 {
 	printf("check_parse_link(%s,%s,%s,%f,%f)\n",
 	       tipo, nodename1, nodename2, truth, conf);
@@ -664,16 +656,8 @@ void BasicSCMUTest::check_parse_link(const char * tipo, Type type,
 	HandleSeq links;
 	as->get_handles_by_type(back_inserter(links), type, true);
 	//printf("Number of links found: %d\n",links.size());
-	HandleSeq::const_iterator i;
-	for (i = links.begin(); i != links.end(); ++i)
-	{
-		TruthValuePtr tv = (*i)->getTruthValue();
-		float m = tv->get_mean();
-		float c = tv->get_confidence();
-		//the link has TV 0.0
-		TS_ASSERT_EQUALS(m, 1.0); // DEFAULT_TV is true with no confidence
-		TS_ASSERT_EQUALS(c, 0.0);
-	}
+	for (const Handle& h: links)
+		check_tv(h, 1.0, 0.0); // DEFAULT_TV is true with no confidence
 
 	Type t1 = nameserver().getType(nodename1);
 	Handle h1 = as->get_handle(t1, value1);
@@ -683,13 +667,7 @@ void BasicSCMUTest::check_parse_link(const char * tipo, Type type,
 	TSM_ASSERT("Failed to find node", n1 != nullptr);
 
 	if (n1)
-	{
-		TruthValuePtr tv = n1->getTruthValue();
-		float m = tv->get_mean();
-		float c = tv->get_confidence();
-		TS_ASSERT_LESS_THAN_EQUALS(fabs(m - truth), 1.0e-6);
-		TS_ASSERT_LESS_THAN_EQUALS(fabs(c - conf), 1.0e-6);
-	}
+		check_tv(h1, truth, conf);
 
 	Type t2 = nameserver().getType(nodename2);
 	Handle h2 = as->get_handle(t2, value2 );
