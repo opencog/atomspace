@@ -79,11 +79,11 @@ class BasicSCMUTest :  public CxxTest::TestSuite
 	void check_tv(const Handle&, double, double);
 
 	// Nodes
-	void check_node(const char *, const char *, float, float);
+	void check_node(const char *, const char *, double, double);
 
 	// Links
 	void check_link(const char *, Type, const char *, const char *,
-	                const char *, const char *, float, float);
+	                const char *, const char *, double, double);
 	void test_link_tv_setting(void);
 	void test_reference_link(void);
 	void test_word_instance_link(void);
@@ -100,7 +100,7 @@ class BasicSCMUTest :  public CxxTest::TestSuite
 	void test_truth_value(void);
 
 	// Relex links
-	void check_parse_link(const char *, Type, const char *, const char *, const char *, const char *, float, float);
+	void check_parse_link(const char *, Type, const char *, const char *, const char *, const char *, double, double);
 	void test_parse_link(void);
 	void test_lemma_link(void);
 	void test_part_of_speech_link(void);
@@ -162,14 +162,14 @@ void BasicSCMUTest::test_utf8(void)
 void BasicSCMUTest::check_tv(const Handle& h, double mean, double conf)
 {
 	TruthValuePtr tv = h->getTruthValue();
-	float m = tv->get_mean();
-	float c = tv->get_confidence();
+	double m = tv->get_mean();
+	double c = tv->get_confidence();
 
 	TS_ASSERT_LESS_THAN_EQUALS(fabs(m-mean), 1.0e-6);
 	TS_ASSERT_LESS_THAN_EQUALS(fabs(c-conf), 1.0e-6);
 }
 
-void BasicSCMUTest::check_node(const char * tipo, const char * nodename, float truth, float conf)
+void BasicSCMUTest::check_node(const char * tipo, const char * nodename, double truth, double conf)
 {
 	printf("check_node(%s,%s,%f,%f)\n", tipo, nodename, truth, conf);
 	char buff[500];
@@ -500,7 +500,7 @@ void BasicSCMUTest::test_value_list(void)
 void BasicSCMUTest::check_link(const char * tipo, Type type,
                                const char * nodename1, const char * nodename2,
                                const char * value1, const char * value2,
-                               float truth, float conf)
+                               double truth, double conf)
 {
 	printf("check_link(%s,%s,%s,%f,%f)\n",
 	        tipo, nodename1, nodename2, truth, conf);
@@ -626,7 +626,7 @@ void BasicSCMUTest::test_link_tv_setting(void)
 void BasicSCMUTest::check_parse_link(const char * tipo, Type type,
                                const char * nodename1, const char * nodename2,
                                const char * value1, const char * value2,
-                               float truth, float conf)
+                               double truth, double conf)
 {
 	printf("check_parse_link(%s,%s,%s,%f,%f)\n",
 	       tipo, nodename1, nodename2, truth, conf);
