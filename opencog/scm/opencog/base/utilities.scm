@@ -77,23 +77,26 @@
 (define-public (etv pos-count total-count) (cog-new-etv pos-count total-count))
 
 ; Fetch the mean, confidence and count of a TV.
-(define-public (tv-mean tv)
+(define-public (tv-mean TV)
 "
   Return the floating-point mean (strength) of a TruthValue.
+  Deprecated; use cog-tv-mean instead.
 "
-	(assoc-ref (cog-tv->alist tv) 'mean))
+	(cog-tv-mean TV))
 
-(define-public (tv-conf tv)
+(define-public (tv-conf TV)
 "
   Return the floating-point confidence of a TruthValue.
+  Deprecated; use cog-tv-confidence instead.
 "
-	(assoc-ref (cog-tv->alist tv) 'confidence))
+	(cog-tv-confidence TV))
 
-(define-public (tv-non-null-conf? tv)
+(define-public (tv-non-null-conf? TV)
 "
-  Return #t if the confidence of tv is non null positive, #f otherwise.
+  Return #t if the confidence of tv is positive, #f otherwise.
+  Deprecated. Just say (< 0 (cog-tv-confidence TV)) instead.
 "
-	(< 0 (tv-conf tv)))
+	(< 0 (cog-tv-confidence TV)))
 
 ;
 ; Simple truth values won't have a count. Its faster to just check
@@ -101,10 +104,9 @@
 (define-public (tv-count tv)
 "
   Return the floating-point count of a CountTruthValue.
+  Deprecated; use cog-tv-count instead.
 "
-	(define cnt (assoc-ref (cog-tv->alist tv) 'count))
-	(if (eq? cnt #f) 0 cnt)
-)
+	(cog-tv-count TV))
 
 (define-public (tv-positive-count tv)
 "
