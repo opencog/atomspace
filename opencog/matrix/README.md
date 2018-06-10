@@ -156,7 +156,7 @@ A: Yes. As currently structured, all of these classes assume that your
    your dataset is too big to fit into RAM.  At the time of this
    writing, a single atom takes about 1.5KBytes or so, so a dataset
    consisting of 100M atoms will require about 150GBytes of RAM, plus
-   a bit more for other processes (e.g. postgres). Since most computers
+   a bit more for other processes (e.g. Postgres). Since most computers
    max out at about 256 GBytes RAM, this limits datasets to 100M atoms.
    Some language datasets can be considerably larger than this.
    The largest Amazon EC2 instances are 256 GBytes.
@@ -369,3 +369,9 @@ To-do list items.
    the atomspace, which can only work if no filtering is applied. But
    if there are pre-filters, then the returned values are necessarily
    garbage. Yucko.  Can we fail-safe this for now?
+
+ * Need to support columns/rows that can be one of several types
+   (e.g. can be WordNodes, or be WordClassNodes)
+
+ * Need to provide better support for complex structures (viz. cases
+   where left and right are not immediately underneath a common link).
