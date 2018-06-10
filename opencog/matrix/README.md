@@ -10,6 +10,22 @@ and effects, or pair-wise relationships of any sort. A recurring
 problem is to obtain statistics for these pairs, and to manipulate
 them in various ways.
 
+A common theme in machine learning are "vectors of data": a vector
+of numbers can be associated to some object, and one is interested in
+classifying these vectors in some way; e.g. by using Principal Component
+Analysis (PCA), Singular Value Decomposition (SVD), K-means clustering,
+and so on. Vectors are buried in essentially all neural-net type
+algorithms.  But - this is key: a collection of vectors can be viewed
+as a matrix. Entries in the matrix are (row, column) pairs.
+
+The code in this directory exposes portions of the atomspace as pairs,
+or as a matrix, or as a collection of vectors, depending on how you want
+to think about it.  It implements the low-level code for this access,
+so that high-level algorithms can be implemented on top of it: so that
+they can grab that data, do things with it, and write it back.  It
+provides a "window" onto a portion of the atomspace, and everything
+seen through that "window" looks like vectors, like one big matrix.
+
 That is, the structure of interest are ordered pairs `(x,y)` of atoms
 (that is, where `x` and `y` are atoms), along with any values attached
 to such pairs. The primary value of interest is an observation count
@@ -43,9 +59,10 @@ that. Once you realize that your data can be seen as a kind of matrix,
 you can then apply a variety of generic matrix analysis tools to it.
 
 Another way to arrive at this idea is to view your data as a graph,
-and then realize that any graph can be described in terms of it's
-adjacency matrix. This directory provides tools to work with a graph
-from the point of view of its being an adjacency matrix.
+(of vertexes connected with edges) and then realize that any graph can
+be described in terms of it's adjacency matrix. This directory provides
+tools to work with a graph from the point of view of its being an
+adjacency matrix.
 
 The tools implemented here include:
 

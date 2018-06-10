@@ -76,7 +76,8 @@
 			r-basis)
 
 		; Fetch the incoming set for ITEM, but only if we haven't
-		; already done so.
+		; already done so. XXX FIXME: this only works if ITEM is
+		; immediately under 'pair-type. If its deeper, its broken.
 		(define (get-incoming ITEM)
 			(if (not (member ITEM cache-incoming))
 				(begin
