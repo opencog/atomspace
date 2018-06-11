@@ -104,7 +104,7 @@ void BasicAPIUTest::tearDown(void)
 	CHKERR; \
 	TSM_ASSERT_EQUALS(MSG, atoi(X.c_str()), VAL);
 
-#define EPS 1.0e-6
+#define EPS 1.0e-9
 
 #define CHKFLT(MSG,X,VAL) \
 	printf("Got %s=%s", MSG, X.c_str()); \
@@ -292,12 +292,21 @@ void BasicAPIUTest::test_marginals(void)
 	printf("---------------------------------------------------------\n");
 	// Verify that the central-compute object computes stuff correctly
 
+	// 3 3 1 are the chicken,dog,table supports while 11 7 4 are the counts.
 	num = eval->eval("(cent 'left-support)");
 	CHKFLT("total left support", num, (3.0*(11.0/22) + 3.0*(7.0/22.0) + (4.0/22.0)));
 
+	// 3 2 1 1 are the legs,eyes,wings,snouts supports while 11 4 6 1 are the counts
 	num = eval->eval("(cent 'right-support)");
 	CHKFLT("total right support", num,
 		(3.0*(11.0/22.0) + 2.0*(4.0/22.0) + (6.0/22.0) + (1.0/22.0)));
+
+	num = eval->eval("(cent 'left-count)");
+	CHKFLT("total left count", num, (11.0*(11.0/22) + 7.0*(7.0/22.0) + 4.0*(4.0/22.0)));
+
+	num = eval->eval("(cent 'right-count)");
+	CHKFLT("total right count", num,
+		(11.0*(11.0/22.0) + 4.0*(4.0/22.0) + 6.0*(6.0/22.0) + (1.0/22.0)));
 
 	printf("---------------------------------------------------------\n");
 	// Verify that the report objects reports the marginals correctly
@@ -316,6 +325,7 @@ void BasicAPIUTest::test_marginals(void)
 	num = eval->eval("(rapi 'total-mi)");
 	printf ("Got >>>%s", num.c_str());
 
+	// See above for explanation of magic formula
 	num = eval->eval("(rapi 'left-support)");
 	CHKFLT("report left support", num, (3.0*(11.0/22) + 3.0*(7.0/22.0) + (4.0/22.0)));
 
@@ -324,10 +334,11 @@ void BasicAPIUTest::test_marginals(void)
 		(3.0*(11.0/22.0) + 2.0*(4.0/22.0) + (6.0/22.0) + (1.0/22.0)));
 
 	num = eval->eval("(rapi 'left-count)");
-	printf ("Got >>>%s", num.c_str());
+	CHKFLT("report left count", num, (11.0*(11.0/22) + 7.0*(7.0/22.0) + 4.0*(4.0/22.0)));
 
 	num = eval->eval("(rapi 'right-count)");
-	printf ("Got >>>%s", num.c_str());
+	CHKFLT("report right count", num,
+		(11.0*(11.0/22.0) + 4.0*(4.0/22.0) + 6.0*(6.0/22.0) + (1.0/22.0)));
 
 	logger().debug("END TEST: %s", __FUNCTION__);
 }
