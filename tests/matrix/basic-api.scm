@@ -117,4 +117,6 @@
 (define capi (add-pair-count-api sapi))
 (define fapi (add-pair-freq-api capi))
 
+(define rapi (add-report-api bapi))
+
 *unspecified*

@@ -144,12 +144,30 @@ void BasicAPIUTest::test_marginals(void)
 	rc = eval->eval("(sql-open \"postgres:///opencog_test?user=opencog_tester&password=cheese\")");
 	CHKERR;
 
+	// Compute and store all marginals
 	rc = eval->eval("(batch-all-pair-mi bapi)");
 	printf("Batch >>>%s", rc.c_str());
 	CHKERR;
 
 	rc = eval->eval("(sql-close)");
 	CHKERR;
+
+	// Verify that the marginals were correctly computed
+	std::string tru = eval->eval("(equal? 3 (fapi 'left-basis-size))");
+	CHKERR; TSM_ASSERT_EQUALS("Expecting #t", tru, "#t\n");
+
+	tru = eval->eval("(equal? 4 (fapi 'right-basis-size))");
+	CHKERR; TSM_ASSERT_EQUALS("Expecting #t", tru, "#t\n");
+
+	tru = eval->eval("(equal? 22.0 (fapi 'wild-wild-count))");
+	CHKERR; TSM_ASSERT_EQUALS("Expecting #t", tru, "#t\n");
+
+	// Verify that the report objects reports the marginals correctly
+	tru = eval->eval("(equal? 3 (rapi 'left-dim))");
+	CHKERR; TSM_ASSERT_EQUALS("Expecting #t", tru, "#t\n");
+
+	tru = eval->eval("(equal? 4 (rapi 'right-dim))");
+	CHKERR; TSM_ASSERT_EQUALS("Expecting #t", tru, "#t\n");
 
 	logger().debug("END TEST: %s", __FUNCTION__);
 }

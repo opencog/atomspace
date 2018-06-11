@@ -19,4 +19,8 @@
 (setcnt (mkfoob "dog" "eyes") 2)
 (setcnt (mkfoob "table" "legs") 4)
 
+; left-basis-size = 3 = chicken, dog, table
+; right-basis-size = 4 = legs, wings, eyes, snouts
+; total count = (+ 3 6 2 4 1 2 4) = 22
+
 *unspecified*
