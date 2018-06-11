@@ -33,4 +33,7 @@
 ; table-count = 4
 ; average left count = (/ (+ 11 7 4) 3)
 
+; right supports: legs=3 eyes=2 wings=1 snouts=1
+; right counts: legs=(+ 3 4 4)=11 eyes=(+ 2 2)=4 wings=6 snouts=1
+
 *unspecified*
