@@ -125,4 +125,7 @@
 
 (define cosi (add-pair-cosine-compute bapi))
 
+(define dapi (add-dynamic-stars bapi))
+(define dosi (add-pair-cosine-compute dapi))
+
 *unspecified*
