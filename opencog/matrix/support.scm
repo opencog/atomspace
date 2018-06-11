@@ -107,7 +107,10 @@
   the count (lp-norm for p=1), the Eucliden length (lp-norm for p=2)
   and the general lp-norm.  These all work with the counts for the
   pairs, and NOT the frequencies!  None of these use cached values,
-  instead, they compute these values on the fly.
+  instead, they compute these values on the fly. The computed values
+  are NOT stored/saved, unless the 'cache-all method is invoked.
+  The 'cache-all method computes supports for the ENTIRE matrix,
+  and then stores the results. This can take a lot of CPU-time.
 
   Some terminology: Let N(x,y) be the observed count for the pair (x,y).
   The left-support-set consists of all pairs (x,y), for fixed y, for

@@ -160,7 +160,7 @@ void BasicAPIUTest::test_marginals(void)
 	rc = eval->eval("(sql-close)");
 	CHKERR;
 
-	// -------------------------------------------------------------
+	printf("---------------------------------------------------------\n");
 	// Verify that the marginals were correctly computed
 	std::string num = eval->eval("(fapi 'left-basis-size)");
 	CHKNUM("Left size", num, 3);
@@ -192,29 +192,56 @@ void BasicAPIUTest::test_marginals(void)
 	num = eval->eval("(length (fapi 'left-stars (Word \"snouts\")))");
 	CHKNUM("snouts stars", num, 1);
 
-	// -------------------------------------------------------------
+	printf("---------------------------------------------------------\n");
 	// Verify that the support API is not insane
-	num = eval->eval("cpapi 'left-support (Word \"chicken\"))");
+	num = eval->eval("(length (cpapi 'right-support-set (Word \"chicken\")))");
+	CHKNUM("chicken support set size", num, 3);
+
+	num = eval->eval("(cpapi 'right-support (Word \"chicken\"))");
 	CHKNUM("chicken support", num, 3);
 
-	num = eval->eval("cpapi 'left-support (Word \"dog\"))");
+	num = eval->eval("(cpapi 'right-support (Word \"dog\"))");
 	CHKNUM("dog support", num, 3);
 
-	num = eval->eval("cpapi 'left-support (Word \"table\"))");
+	num = eval->eval("(cpapi 'right-support (Word \"table\"))");
 	CHKNUM("table support", num, 1);
 
-	// -------------------------------------------------------------
+	num = eval->eval("(cpapi 'left-support (Word \"legs\"))");
+	CHKNUM("legs stars", num, 3);
+
+	num = eval->eval("(cpapi 'left-support (Word \"wings\"))");
+	CHKNUM("wings stars", num, 1);
+
+	num = eval->eval("(cpapi 'left-support (Word \"eyes\"))");
+	CHKNUM("eyes stars", num, 2);
+
+	num = eval->eval("(cpapi 'left-support (Word \"snouts\"))");
+	CHKNUM("snouts stars", num, 1);
+
+	printf("---------------------------------------------------------\n");
 	// Verify that the support API is not insane
-	num = eval->eval("papi 'left-support (Word \"chicken\"))");
+	num = eval->eval("(papi 'right-support (Word \"chicken\"))");
 	CHKNUM("chicken support", num, 3);
 
-	num = eval->eval("papi 'left-support (Word \"dog\"))");
+	num = eval->eval("(papi 'right-support (Word \"dog\"))");
 	CHKNUM("dog support", num, 3);
 
-	num = eval->eval("papi 'left-support (Word \"table\"))");
+	num = eval->eval("(papi 'right-support (Word \"table\"))");
 	CHKNUM("table support", num, 1);
 
-	// -------------------------------------------------------------
+	num = eval->eval("(papi 'left-support (Word \"legs\"))");
+	CHKNUM("legs stars", num, 3);
+
+	num = eval->eval("(papi 'left-support (Word \"wings\"))");
+	CHKNUM("wings stars", num, 1);
+
+	num = eval->eval("(papi 'left-support (Word \"eyes\"))");
+	CHKNUM("eyes stars", num, 2);
+
+	num = eval->eval("(papi 'left-support (Word \"snouts\"))");
+	CHKNUM("snouts stars", num, 1);
+
+	printf("---------------------------------------------------------\n");
 	// Verify that the report objects reports the marginals correctly
 	num = eval->eval("(rapi 'left-dim)");
 	CHKNUM("left dimension", num, 3);
