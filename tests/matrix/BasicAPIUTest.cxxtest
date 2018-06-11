@@ -137,8 +137,18 @@ void BasicAPIUTest::test_marginals(void)
 	printf("Load of data >>>%s", rc.c_str());
 	CHKERR;
 
+	// Where the data will go
+	rc = eval->eval("(use-modules (opencog persist-sql))");
+	CHKERR;
+
+	rc = eval->eval("(sql-open \"postgres:///opencog_test?user=opencog_tester&password=cheese\")");
+	CHKERR;
+
 	rc = eval->eval("(batch-all-pair-mi bapi)");
 	printf("Batch >>>%s", rc.c_str());
+	CHKERR;
+
+	rc = eval->eval("(sql-close)");
 	CHKERR;
 
 	logger().debug("END TEST: %s", __FUNCTION__);

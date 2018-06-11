@@ -19,9 +19,4 @@
 (setcnt (mkfoob "dog" "eyes") 2)
 (setcnt (mkfoob "table" "legs") 4)
 
-; Where it will go
-(use-modules (opencog persist-sql))
-(sql-open "postgres:///opencog_test?user=opencog_tester&password=cheese")
-
-
 *unspecified*
