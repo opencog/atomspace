@@ -344,6 +344,7 @@ void BasicAPIUTest::test_marginals(void)
 	chmi += (6.0/22.0) * log((6.0 * 22.0)/(11.0 *  6.0));  // chicken-wings=6  chicken-*=11 *-wings=6
 	chmi += (2.0/22.0) * log((2.0 * 22.0)/(11.0 *  4.0));  // chicken-eyes=2   chicken-*=11 *-eyes=4
 	// chmi += (0.0/22.0) * log((0.0 * 22.0)/(11.0 *  1.0));  // chicken-snouts=0 chicken-*=11 *-snouts=1
+	chmi /= log(2.0);
 	num = eval->eval("(fapi 'right-wild-mi (Word \"chicken\"))");
 	CHKFLT("chicken wild-mi", num, chmi);
 
@@ -352,6 +353,7 @@ void BasicAPIUTest::test_marginals(void)
 	// mi += (0.0/22.0) * log((0.0 * 22.0)/(7.0 *  6.0));  // dog-wings=0  dog-*=7 *-wings=6
 	domi += (2.0/22.0) * log((2.0 * 22.0)/(7.0 *  4.0));  // dog-eyes=2   dog-*=7 *-eyes=4
 	domi += (1.0/22.0) * log((1.0 * 22.0)/(7.0 *  1.0));  // dog-snouts=1 dog-*=7 *-snouts=1
+	domi /= log(2.0);
 
 	num = eval->eval("(fapi 'right-wild-mi (Word \"dog\"))");
 	CHKFLT("dog wild-mi", num, domi);
@@ -361,6 +363,7 @@ void BasicAPIUTest::test_marginals(void)
 	// tami += (0.0/22.0) * log((0.0 * 22.0)/(4.0 *  6.0));  // table-wings=0  table-*=4 *-wings=6
 	// tami += (0.0/22.0) * log((0.0 * 22.0)/(4.0 *  4.0));  // table-eyes=0   table-*=4 *-eyes=4
 	// tami += (0.0/22.0) * log((0.0 * 22.0)/(4.0 *  1.0));  // table-snouts=0 table-*=4 *-snouts=1
+	tami /= log(2.0);
 
 	num = eval->eval("(fapi 'right-wild-mi (Word \"table\"))");
 	CHKFLT("table wild-mi", num, tami);
