@@ -58,9 +58,9 @@ class BasicAPIUTest :  public CxxTest::TestSuite
 
 	void tearDown(void);
 
-	// First, check the basics, before doing more advanced stuff!
 	void test_basic(void);
 	void test_marginals(void);
+	void test_cosines(void);
 };
 
 /*
@@ -112,7 +112,7 @@ void BasicAPIUTest::tearDown(void)
 	TSM_ASSERT_LESS_THAN(MSG, atof(X.c_str()), VAL+EPS); \
 	TSM_ASSERT_LESS_THAN(MSG, VAL-EPS, atof(X.c_str()));
 
-// ============================================================
+// ====================================================================
 
 void BasicAPIUTest::test_basic(void)
 {
@@ -142,7 +142,7 @@ void BasicAPIUTest::test_basic(void)
 	logger().debug("END TEST: %s", __FUNCTION__);
 }
 
-// ============================================================
+// ====================================================================
 
 void BasicAPIUTest::test_marginals(void)
 {
@@ -370,6 +370,43 @@ void BasicAPIUTest::test_marginals(void)
 
 	num = eval->eval("(rapi 'total-mi)");
 	CHKFLT("report total mi", num, chmi+domi+tami);
+
+	logger().debug("END TEST: %s", __FUNCTION__);
+}
+
+// ====================================================================
+
+void BasicAPIUTest::test_cosines(void)
+{
+	logger().debug("BEGIN TEST: %s", __FUNCTION__);
+
+	std::string rc = eval->eval("(load-from-path \"tests/matrix/basic-data.scm\")");
+	printf("Load of data >>>%s", rc.c_str());
+	CHKERR;
+
+	std::string num = eval->eval("(cosi 'right-product (Word \"table\") (Word \"dog\"))");
+	double ptado = 4.0*4.0;
+	CHKFLT("product (table,dog)", num, ptado);
+
+	num = eval->eval("(cosi 'right-cosine (Word \"table\") (Word \"dog\"))");
+	double ctado = (4.0*4.0) / (sqrt(4.0*4.0) * sqrt(4.0*4.0 + 2.0*2.0 + 1.0*1.0));
+	CHKFLT("cosine (table,dog)", num, ctado);
+
+	num = eval->eval("(cosi 'right-product (Word \"chicken\") (Word \"table\"))");
+	double pchta = 3.0*4.0;
+	CHKFLT("product (chicken,table)", num, pchta);
+
+	num = eval->eval("(cosi 'right-cosine (Word \"chicken\") (Word \"table\"))");
+	double cchta = (3.0*4.0) / (sqrt(3.0*3.0 + 6.0*6.0 + 2.0*2.0) * sqrt(4.0*4.0));
+	CHKFLT("cosine (chicken,table)", num, cchta);
+
+	num = eval->eval("(cosi 'right-product (Word \"chicken\") (Word \"dog\"))");
+	double pchdo = 3.0*4.0 + 2.0*2.0;
+	CHKFLT("product (chicken,dog)", num, pchdo);
+
+	num = eval->eval("(cosi 'right-cosine (Word \"chicken\") (Word \"dog\"))");
+	double cchdo = (3.0*4.0 + 2.0*2.0) / (sqrt(3.0*3.0 + 6.0*6.0 + 2.0*2.0) * sqrt(4.0*4.0 + 2.0*2.0 + 1.0*1.0));
+	CHKFLT("cosine (chicken,dog)", num, cchdo);
 
 	logger().debug("END TEST: %s", __FUNCTION__);
 }

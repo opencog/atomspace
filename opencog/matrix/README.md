@@ -365,10 +365,6 @@ tools in the (opencog network) module.
 TODO
 ----
 To-do list items.
- * Complete lack of unit tests -- making this code potentially fragile.
-   At this point there's a whole lotta stuff here that needs unit
-   testing.
-
  * The "star" objects need to be redesigned. They fetch wild-card counts
    etc. straight out of the atomspace, which can only work if no filtering
    is applied. But if there are pre-filters, then the returned values are

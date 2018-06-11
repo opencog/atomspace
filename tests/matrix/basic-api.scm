@@ -121,7 +121,8 @@
 (define pcmp (add-support-compute bapi))
 
 (define cent (make-central-compute bapi))
-
 (define rapi (add-report-api bapi))
+
+(define cosi (add-pair-cosine-compute bapi))
 
 *unspecified*
