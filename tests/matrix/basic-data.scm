@@ -23,4 +23,14 @@
 ; right-basis-size = 4 = legs, wings, eyes, snouts
 ; total count = (+ 3 6 2 4 1 2 4) = 22
 
+; chicken-support = 3
+; dog-support = 3
+; table=suport = 1
+; average left support = (/ (+ 3 3 1) 3)
+
+; chicken-count = (+ 3 6 2) = 11
+; dog-count = (+ 4 1 2) = 7
+; table-count = 4
+; average left count = (/ (+ 11 7 4) 3)
+
 *unspecified*

@@ -97,6 +97,13 @@ void BasicAPIUTest::tearDown(void)
 	TSM_ASSERT("Caught scm error during eval", \
 		(false == eval->eval_error()));
 
+#define CHKPRT(X) printf("Got >>%s<<\n", X.c_str()); CHKERR;
+
+#define CHKNUM(MSG,X,VAL) \
+	printf("Got %s=%s", MSG, X.c_str()); \
+	CHKERR; \
+	TSM_ASSERT_EQUALS(MSG, atoi(X.c_str()), VAL);
+
 // ============================================================
 
 void BasicAPIUTest::test_basic(void)
@@ -137,6 +144,7 @@ void BasicAPIUTest::test_marginals(void)
 	printf("Load of data >>>%s", rc.c_str());
 	CHKERR;
 
+	// -------------------------------------------------------------
 	// Where the data will go
 	rc = eval->eval("(use-modules (opencog persist-sql))");
 	CHKERR;
@@ -152,22 +160,54 @@ void BasicAPIUTest::test_marginals(void)
 	rc = eval->eval("(sql-close)");
 	CHKERR;
 
+	// -------------------------------------------------------------
 	// Verify that the marginals were correctly computed
-	std::string tru = eval->eval("(equal? 3 (fapi 'left-basis-size))");
-	CHKERR; TSM_ASSERT_EQUALS("Expecting #t", tru, "#t\n");
+	std::string num = eval->eval("(fapi 'left-basis-size)");
+	CHKNUM("Left size", num, 3);
 
-	tru = eval->eval("(equal? 4 (fapi 'right-basis-size))");
-	CHKERR; TSM_ASSERT_EQUALS("Expecting #t", tru, "#t\n");
+	num = eval->eval("(fapi 'right-basis-size)");
+	CHKNUM("Right size", num, 4);
 
-	tru = eval->eval("(equal? 22.0 (fapi 'wild-wild-count))");
-	CHKERR; TSM_ASSERT_EQUALS("Expecting #t", tru, "#t\n");
+	num = eval->eval("(fapi 'wild-wild-count)");
+	CHKNUM("Wild-wild count", num, 22);
 
+	num = eval->eval("(length (fapi 'right-stars (Word \"chicken\")))");
+	CHKNUM("chicken stars", num, 3);
+
+	num = eval->eval("(length (fapi 'right-stars (Word \"dog\")))");
+	CHKNUM("dog stars", num, 3);
+
+	num = eval->eval("(length (fapi 'right-stars (Word \"table\")))");
+	CHKNUM("table stars", num, 1);
+
+	// -------------------------------------------------------------
 	// Verify that the report objects reports the marginals correctly
-	tru = eval->eval("(equal? 3 (rapi 'left-dim))");
-	CHKERR; TSM_ASSERT_EQUALS("Expecting #t", tru, "#t\n");
+	num = eval->eval("(rapi 'left-dim)");
+	CHKNUM("left dimension", num, 3);
 
-	tru = eval->eval("(equal? 4 (rapi 'right-dim))");
-	CHKERR; TSM_ASSERT_EQUALS("Expecting #t", tru, "#t\n");
+	num = eval->eval("(rapi 'right-dim)");
+	CHKNUM("right dimension", num, 4);
+
+	num = eval->eval("(rapi 'num-pairs)");
+	CHKNUM("num-pairs", num, 7);
+
+	num = eval->eval("(rapi 'total-count)");
+	CHKNUM("total-count", num, 22);
+
+	num = eval->eval("(rapi 'total-mi)");
+	printf ("Got >>>%s", num.c_str());
+
+	num = eval->eval("(rapi 'left-support)");
+	printf ("Got >>>%s", num.c_str());
+
+	num = eval->eval("(rapi 'right-support)");
+	printf ("Got >>>%s", num.c_str());
+
+	num = eval->eval("(rapi 'left-count)");
+	printf ("Got >>>%s", num.c_str());
+
+	num = eval->eval("(rapi 'right-count)");
+	printf ("Got >>>%s", num.c_str());
 
 	logger().debug("END TEST: %s", __FUNCTION__);
 }
