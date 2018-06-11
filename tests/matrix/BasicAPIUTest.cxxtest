@@ -27,6 +27,8 @@
 #include <opencog/guile/SchemeEval.h>
 #include <opencog/util/Logger.h>
 
+#include "../query/test-types.h"
+
 using namespace opencog;
 using namespace std;
 
@@ -42,6 +44,7 @@ class BasicAPIUTest :  public CxxTest::TestSuite
 	{
 		logger().set_level(Logger::DEBUG);
 		logger().set_print_to_stdout_flag(true);
+#include "../query/test-types.cc"
 	}
 
 	~BasicAPIUTest()
@@ -75,6 +78,12 @@ void BasicAPIUTest::setUp(void)
 	// eval->eval("(setlocale LC_ALL \"\")");
 	eval->eval("(setlocale LC_CTYPE \"\")");
 	eval->clear_pending();
+
+	eval->eval("(add-to-load-path \"" PROJECT_SOURCE_DIR "\")");
+	eval->eval("(add-to-load-path \"../../..\")");
+
+	eval->eval("(load-from-path \"tests/matrix/basic-api.scm\")");
+	eval->eval("(load-from-path \"tests/query/test_types.scm\")");
 }
 
 void BasicAPIUTest::tearDown(void)
@@ -83,16 +92,26 @@ void BasicAPIUTest::tearDown(void)
 	eval = NULL;
 }
 
+#define CHKERR \
+	TSM_ASSERT("Caught scm error during eval", \
+		(false == eval->eval_error()));
+
 // ============================================================
 
 void BasicAPIUTest::test_basic(void)
 {
 	logger().debug("BEGIN TEST: %s", __FUNCTION__);
 
-	eval->eval("(+ 2 2)");
-	bool eval_err = eval->eval_error();
-	eval->clear_pending();
-	TSM_ASSERT("Failed to find functional scheme iterpreter", !eval_err);
+	std::string rc = eval->eval("(load-from-path \"tests/matrix/basic-data.scm\")");
+	printf("Load of data >%s<\n", rc.c_str());
+	CHKERR;
+
+	eval->eval("(define bapi (make-basic-api))");
+	CHKERR;
+
+	std::string tru = eval->eval("(eq? 'WordNode (bapi 'left-type))");
+	CHKERR;
+	printf ("Its >%s<\n", tru.c_str());
 
 	logger().debug("END TEST: %s", __FUNCTION__);
 }

@@ -6,7 +6,7 @@
 ; Copyright (c) 2017, 2018 Linas Vepstas
 ;
 (use-modules (srfi srfi-1))
-(use-modules (opencog))
+(use-modules (opencog) (opencog persist))
 
 ; This is cut-n-pasted from `opencog/matrix/object-api.scm`
 ; where it's used as the example.
