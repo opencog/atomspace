@@ -270,7 +270,7 @@ constexpr size_t get_fvna_offset<8>(){
 template<typename T>
 ContentHash fnv1a_hash (ContentHash & hval, T buf_t)
 {
-	uint size = sizeof(buf_t);
+	uint64_t size = sizeof(buf_t);
 	const char * buf = (const char *)&buf_t;
 	size_t count = 0;
 	while (count < size)
