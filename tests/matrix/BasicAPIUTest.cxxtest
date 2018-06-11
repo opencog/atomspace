@@ -104,6 +104,14 @@ void BasicAPIUTest::tearDown(void)
 	CHKERR; \
 	TSM_ASSERT_EQUALS(MSG, atoi(X.c_str()), VAL);
 
+#define EPS 1.0e-6
+
+#define CHKFLT(MSG,X,VAL) \
+	printf("Got %s=%s", MSG, X.c_str()); \
+	CHKERR; \
+	TSM_ASSERT_LESS_THAN(MSG, atof(X.c_str()), VAL+EPS); \
+	TSM_ASSERT_LESS_THAN(MSG, VAL-EPS, atof(X.c_str()));
+
 // ============================================================
 
 void BasicAPIUTest::test_basic(void)
@@ -183,11 +191,11 @@ void BasicAPIUTest::test_marginals(void)
 	num = eval->eval("(length (fapi 'left-stars (Word \"legs\")))");
 	CHKNUM("legs stars", num, 3);
 
-	num = eval->eval("(length (fapi 'left-stars (Word \"wings\")))");
-	CHKNUM("wings stars", num, 1);
-
 	num = eval->eval("(length (fapi 'left-stars (Word \"eyes\")))");
 	CHKNUM("eyes stars", num, 2);
+
+	num = eval->eval("(length (fapi 'left-stars (Word \"wings\")))");
+	CHKNUM("wings stars", num, 1);
 
 	num = eval->eval("(length (fapi 'left-stars (Word \"snouts\")))");
 	CHKNUM("snouts stars", num, 1);
@@ -204,48 +212,92 @@ void BasicAPIUTest::test_marginals(void)
 	CHKNUM("table support", num, 1);
 
 	num = eval->eval("(papi 'left-support (Word \"legs\"))");
-	CHKNUM("legs stars", num, 3);
-
-	num = eval->eval("(papi 'left-support (Word \"wings\"))");
-	CHKNUM("wings stars", num, 1);
+	CHKNUM("legs support", num, 3);
 
 	num = eval->eval("(papi 'left-support (Word \"eyes\"))");
-	CHKNUM("eyes stars", num, 2);
+	CHKNUM("eyes support", num, 2);
+
+	num = eval->eval("(papi 'left-support (Word \"wings\"))");
+	CHKNUM("wings support", num, 1);
 
 	num = eval->eval("(papi 'left-support (Word \"snouts\"))");
-	CHKNUM("snouts stars", num, 1);
+	CHKNUM("snouts support", num, 1);
+
+	printf("---------------------------------------------------------\n");
+	// Verify that the count API is not insane
+	num = eval->eval("(papi 'right-count (Word \"chicken\"))");
+	CHKNUM("chicken count", num, 11);
+
+	num = eval->eval("(papi 'right-count (Word \"dog\"))");
+	CHKNUM("dog count", num, 7);
+
+	num = eval->eval("(papi 'right-count (Word \"table\"))");
+	CHKNUM("table count", num, 4);
+
+	num = eval->eval("(papi 'left-count (Word \"legs\"))");
+	CHKNUM("legs count", num, 11);
+
+	num = eval->eval("(papi 'left-count (Word \"eyes\"))");
+	CHKNUM("eyes count", num, 4);
+
+	num = eval->eval("(papi 'left-count (Word \"wings\"))");
+	CHKNUM("wings count", num, 6);
+
+	num = eval->eval("(papi 'left-count (Word \"snouts\"))");
+	CHKNUM("snouts count", num, 1);
 
 	printf("---------------------------------------------------------\n");
 	// Verify that the compute-support object functions correctly
-	num = eval->eval("(length (cpapi 'right-support-set (Word \"chicken\")))");
+	num = eval->eval("(length (pcmp 'right-support-set (Word \"chicken\")))");
 	CHKNUM("chicken support set size", num, 3);
 
-	num = eval->eval("(cpapi 'right-support (Word \"chicken\"))");
+	num = eval->eval("(pcmp 'right-support (Word \"chicken\"))");
 	CHKNUM("chicken support", num, 3);
 
-	num = eval->eval("(cpapi 'right-support (Word \"dog\"))");
+	num = eval->eval("(pcmp 'right-support (Word \"dog\"))");
 	CHKNUM("dog support", num, 3);
 
-	num = eval->eval("(cpapi 'right-support (Word \"table\"))");
+	num = eval->eval("(pcmp 'right-support (Word \"table\"))");
 	CHKNUM("table support", num, 1);
 
-	num = eval->eval("(cpapi 'left-support (Word \"legs\"))");
+	num = eval->eval("(pcmp 'left-support (Word \"legs\"))");
 	CHKNUM("legs stars", num, 3);
 
-	num = eval->eval("(cpapi 'left-support (Word \"wings\"))");
+	num = eval->eval("(pcmp 'left-support (Word \"wings\"))");
 	CHKNUM("wings stars", num, 1);
 
-	num = eval->eval("(cpapi 'left-support (Word \"eyes\"))");
+	num = eval->eval("(pcmp 'left-support (Word \"eyes\"))");
 	CHKNUM("eyes stars", num, 2);
 
-	num = eval->eval("(cpapi 'left-support (Word \"snouts\"))");
+	num = eval->eval("(pcmp 'left-support (Word \"snouts\"))");
 	CHKNUM("snouts stars", num, 1);
 
-	num = eval->eval("(cpapi 'total-support)");
+	num = eval->eval("(pcmp 'total-support)");
 	CHKNUM("total support", num, 7);
 
-	num = eval->eval("(cpapi 'total-count)");
+	num = eval->eval("(pcmp 'total-count)");
 	CHKNUM("total count", num, 22);
+
+	printf("---------------------------------------------------------\n");
+	// Verify marginal frequencies
+	num = eval->eval("(fapi 'right-wild-freq (Word \"chicken\"))");
+	CHKFLT("chicken wild-freq", num, 11.0/22.0);
+
+	num = eval->eval("(fapi 'right-wild-freq (Word \"dog\"))");
+	CHKFLT("dog wild-freq", num, 7.0/22.0);
+
+	num = eval->eval("(fapi 'right-wild-freq (Word \"table\"))");
+	CHKFLT("table wild-freq", num, 4.0/22.0);
+
+	printf("---------------------------------------------------------\n");
+	// Verify that the central-compute object computes stuff correctly
+
+	num = eval->eval("(cent 'left-support)");
+	CHKFLT("total left support", num, (3.0*(11.0/22) + 3.0*(7.0/22.0) + (4.0/22.0)));
+
+	num = eval->eval("(cent 'right-support)");
+	CHKFLT("total right support", num,
+		(3.0*(11.0/22.0) + 2.0*(4.0/22.0) + (6.0/22.0) + (1.0/22.0)));
 
 	printf("---------------------------------------------------------\n");
 	// Verify that the report objects reports the marginals correctly
@@ -265,10 +317,11 @@ void BasicAPIUTest::test_marginals(void)
 	printf ("Got >>>%s", num.c_str());
 
 	num = eval->eval("(rapi 'left-support)");
-	printf ("Got >>>%s", num.c_str());
+	CHKFLT("report left support", num, (3.0*(11.0/22) + 3.0*(7.0/22.0) + (4.0/22.0)));
 
 	num = eval->eval("(rapi 'right-support)");
-	printf ("Got >>>%s", num.c_str());
+	CHKFLT("report right support", num,
+		(3.0*(11.0/22.0) + 2.0*(4.0/22.0) + (6.0/22.0) + (1.0/22.0)));
 
 	num = eval->eval("(rapi 'left-count)");
 	printf ("Got >>>%s", num.c_str());

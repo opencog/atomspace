@@ -118,7 +118,9 @@
 (define fapi (add-pair-freq-api capi))
 
 (define papi (add-support-api bapi))
-(define cpapi (add-support-compute bapi))
+(define pcmp (add-support-compute bapi))
+
+(define cent (make-central-compute bapi))
 
 (define rapi (add-report-api bapi))
 
