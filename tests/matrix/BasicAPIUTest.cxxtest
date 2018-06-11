@@ -60,6 +60,7 @@ class BasicAPIUTest :  public CxxTest::TestSuite
 
 	// First, check the basics, before doing more advanced stuff!
 	void test_basic(void);
+	void test_marginals(void);
 };
 
 /*
@@ -106,14 +107,14 @@ void BasicAPIUTest::test_basic(void)
 	printf("Load of data >>>%s", rc.c_str());
 	CHKERR;
 
-	eval->eval("(define bapi (make-basic-api))");
-	CHKERR;
-
 	std::string tru = eval->eval("(eq? 'WordNode (bapi 'left-type))");
 	printf ("Got >>>%s", tru.c_str());
 	CHKERR; TSM_ASSERT_EQUALS("Expecting #t", tru, "#t\n");
 
 	tru = eval->eval("(eq? 'WordNode (bapi 'right-type))");
+	CHKERR; TSM_ASSERT_EQUALS("Expecting #t", tru, "#t\n");
+
+	tru = eval->eval("(equal? \"unit-test-demo\" (bapi 'id))");
 	CHKERR; TSM_ASSERT_EQUALS("Expecting #t", tru, "#t\n");
 
 	tru = eval->eval("(equal? chicken-legs (bapi 'item-pair chicken-legs-pair))");
@@ -122,6 +123,23 @@ void BasicAPIUTest::test_basic(void)
 	tru = eval->eval("(equal? 3.0 (bapi 'pair-count chicken-legs-pair))");
 	printf ("Got >>>%s", tru.c_str());
 	CHKERR; TSM_ASSERT_EQUALS("Expecting #t", tru, "#t\n");
+
+	logger().debug("END TEST: %s", __FUNCTION__);
+}
+
+// ============================================================
+
+void BasicAPIUTest::test_marginals(void)
+{
+	logger().debug("BEGIN TEST: %s", __FUNCTION__);
+
+	std::string rc = eval->eval("(load-from-path \"tests/matrix/basic-data.scm\")");
+	printf("Load of data >>>%s", rc.c_str());
+	CHKERR;
+
+	rc = eval->eval("(batch-all-pair-mi bapi)");
+	printf("Batch >>>%s", rc.c_str());
+	CHKERR;
 
 	logger().debug("END TEST: %s", __FUNCTION__);
 }

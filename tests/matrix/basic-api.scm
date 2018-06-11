@@ -6,7 +6,7 @@
 ; Copyright (c) 2017, 2018 Linas Vepstas
 ;
 (use-modules (srfi srfi-1))
-(use-modules (opencog) (opencog persist))
+(use-modules (opencog) (opencog persist) (opencog matrix))
 
 ; This is cut-n-pasted from `opencog/matrix/object-api.scm`
 ; where it's used as the example.
@@ -93,8 +93,8 @@
 	; The id is a short string used to create unique filter ids and names.
 	(lambda (message . args)
 		(apply (case message
-				((name) "A Kind of Demonstration Object")
-				((id)	"demo")
+				((name) (lambda () "The Unit Test Demo Object"))
+				((id)	(lambda () "unit-test-demo"))
 				((left-type) get-left-type)
 				((right-type) get-right-type)
 				((pair-type) get-pair-type)
@@ -112,3 +112,9 @@
 
 ; ---------------------------------------------------------------------
 
+(define bapi (make-basic-api))
+(define sapi (add-pair-stars bapi))
+(define capi (add-pair-count-api sapi))
+(define fapi (add-pair-freq-api capi))
+
+*unspecified*
