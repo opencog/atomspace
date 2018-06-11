@@ -194,6 +194,29 @@ void BasicAPIUTest::test_marginals(void)
 
 	printf("---------------------------------------------------------\n");
 	// Verify that the support API is not insane
+	num = eval->eval("(papi 'right-support (Word \"chicken\"))");
+	CHKNUM("chicken support", num, 3);
+
+	num = eval->eval("(papi 'right-support (Word \"dog\"))");
+	CHKNUM("dog support", num, 3);
+
+	num = eval->eval("(papi 'right-support (Word \"table\"))");
+	CHKNUM("table support", num, 1);
+
+	num = eval->eval("(papi 'left-support (Word \"legs\"))");
+	CHKNUM("legs stars", num, 3);
+
+	num = eval->eval("(papi 'left-support (Word \"wings\"))");
+	CHKNUM("wings stars", num, 1);
+
+	num = eval->eval("(papi 'left-support (Word \"eyes\"))");
+	CHKNUM("eyes stars", num, 2);
+
+	num = eval->eval("(papi 'left-support (Word \"snouts\"))");
+	CHKNUM("snouts stars", num, 1);
+
+	printf("---------------------------------------------------------\n");
+	// Verify that the compute-support object functions correctly
 	num = eval->eval("(length (cpapi 'right-support-set (Word \"chicken\")))");
 	CHKNUM("chicken support set size", num, 3);
 
@@ -218,28 +241,11 @@ void BasicAPIUTest::test_marginals(void)
 	num = eval->eval("(cpapi 'left-support (Word \"snouts\"))");
 	CHKNUM("snouts stars", num, 1);
 
-	printf("---------------------------------------------------------\n");
-	// Verify that the support API is not insane
-	num = eval->eval("(papi 'right-support (Word \"chicken\"))");
-	CHKNUM("chicken support", num, 3);
+	num = eval->eval("(cpapi 'total-support)");
+	CHKNUM("total support", num, 7);
 
-	num = eval->eval("(papi 'right-support (Word \"dog\"))");
-	CHKNUM("dog support", num, 3);
-
-	num = eval->eval("(papi 'right-support (Word \"table\"))");
-	CHKNUM("table support", num, 1);
-
-	num = eval->eval("(papi 'left-support (Word \"legs\"))");
-	CHKNUM("legs stars", num, 3);
-
-	num = eval->eval("(papi 'left-support (Word \"wings\"))");
-	CHKNUM("wings stars", num, 1);
-
-	num = eval->eval("(papi 'left-support (Word \"eyes\"))");
-	CHKNUM("eyes stars", num, 2);
-
-	num = eval->eval("(papi 'left-support (Word \"snouts\"))");
-	CHKNUM("snouts stars", num, 1);
+	num = eval->eval("(cpapi 'total-count)");
+	CHKNUM("total count", num, 22);
 
 	printf("---------------------------------------------------------\n");
 	// Verify that the report objects reports the marginals correctly

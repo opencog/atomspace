@@ -36,4 +36,7 @@
 ; right supports: legs=3 eyes=2 wings=1 snouts=1
 ; right counts: legs=(+ 3 4 4)=11 eyes=(+ 2 2)=4 wings=6 snouts=1
 
+; total support = (+ 3 3 1) = (+ 3 2 1 1) = 7
+; total count = (+ 11 7 4) = (+ 11 4 6 1) = 22
+
 *unspecified*
