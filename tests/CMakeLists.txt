@@ -29,18 +29,15 @@ IF (CXXTEST_FOUND)
 	ADD_SUBDIRECTORY (persist)
 
 	# guile provides scheme bindings for the atomspace.
-	IF (HAVE_GUILE)
-		ADD_SUBDIRECTORY (scm)
-	ENDIF (HAVE_GUILE)
+	ADD_SUBDIRECTORY (scm)
+	ADD_SUBDIRECTORY (matrix)
 
 	# Many of the query tests require a working guile, so run
 	# these only after guile has been tested.
 	ADD_SUBDIRECTORY (query)
 
-	# Currently, reasoning depends on query, above.
-	IF (HAVE_GUILE)
-		ADD_SUBDIRECTORY (rule-engine)
-	ENDIF (HAVE_GUILE)
+	# Reasoning depends on query, above.
+	ADD_SUBDIRECTORY (rule-engine)
 
 	IF (HAVE_CYTHON AND PYTHONINTERP_FOUND)
 		ADD_SUBDIRECTORY (cython)
