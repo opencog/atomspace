@@ -128,4 +128,7 @@
 (define dapi (add-dynamic-stars bapi))
 (define dosi (add-pair-cosine-compute dapi))
 
+(define suby (add-tuple-math bapi -))
+(define norm (add-support-compute suby))
+
 *unspecified*
