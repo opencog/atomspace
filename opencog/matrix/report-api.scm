@@ -118,7 +118,6 @@
     I recall correctly).
 "
 	(let* ((cntobj (add-pair-count-api LLOBJ))
-			(totcnt (cntobj 'wild-wild-count))
 			(wild-atom (LLOBJ 'wild-wild))
 			(is-filtered? (and ID (LLOBJ 'filters?)))
 		)
@@ -222,7 +221,7 @@
 			(cog-value-ref (cog-value wild-atom r-norm-key) 3))
 
 		; ----------------------------------------------------
-		(define (get-total-count) totcnt)
+		(define (get-total-count) (cntobj 'wild-wild-count))
 
 		; ----------------------------------------------------
 		; Methods on this class.
