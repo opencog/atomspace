@@ -163,8 +163,8 @@
 ;     ; The id is a short string used to create unique filter ids and names.
 ;     (lambda (message . args)
 ;        (apply (case message
-;              ((name) "A Kind of Demonstration Object")
-;              ((id)   "demo")
+;              ((name) (lambda () "A Kind of Demonstration Object"))
+;              ((id)   (lambda () "demo"))
 ;              ((left-type) get-left-type)
 ;              ((right-type) get-right-type)
 ;              ((pair-type) get-pair-type)
