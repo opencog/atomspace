@@ -322,9 +322,6 @@ void BasicAPIUTest::test_marginals(void)
 	num = eval->eval("(rapi 'total-count)");
 	CHKNUM("total-count", num, 22);
 
-	num = eval->eval("(rapi 'total-mi)");
-	printf ("Got >>>%s", num.c_str());
-
 	// See above for explanation of magic formula
 	num = eval->eval("(rapi 'left-support)");
 	CHKFLT("report left support", num, (3.0*(11.0/22) + 3.0*(7.0/22.0) + (4.0/22.0)));
@@ -339,6 +336,37 @@ void BasicAPIUTest::test_marginals(void)
 	num = eval->eval("(rapi 'right-count)");
 	CHKFLT("report right count", num,
 		(11.0*(11.0/22.0) + 4.0*(4.0/22.0) + 6.0*(6.0/22.0) + (1.0/22.0)));
+
+	printf("---------------------------------------------------------\n");
+	// Verify marginal mutual information
+	double chmi = 0.0;
+	chmi += (3.0/22.0) * log((3.0 * 22.0)/(11.0 * 11.0));  // chicken-legs=3   chicken-*=11 *-legs=11
+	chmi += (6.0/22.0) * log((6.0 * 22.0)/(11.0 *  6.0));  // chicken-wings=6  chicken-*=11 *-wings=6
+	chmi += (2.0/22.0) * log((2.0 * 22.0)/(11.0 *  4.0));  // chicken-eyes=2   chicken-*=11 *-eyes=4
+	// chmi += (0.0/22.0) * log((0.0 * 22.0)/(11.0 *  1.0));  // chicken-snouts=0 chicken-*=11 *-snouts=1
+	num = eval->eval("(fapi 'right-wild-mi (Word \"chicken\"))");
+	CHKFLT("chicken wild-mi", num, chmi);
+
+	double domi = 0.0;
+	domi += (4.0/22.0) * log((4.0 * 22.0)/(7.0 * 11.0));  // dog-legs=4   dog-*=7 *-legs=11
+	// mi += (0.0/22.0) * log((0.0 * 22.0)/(7.0 *  6.0));  // dog-wings=0  dog-*=7 *-wings=6
+	domi += (2.0/22.0) * log((2.0 * 22.0)/(7.0 *  4.0));  // dog-eyes=2   dog-*=7 *-eyes=4
+	domi += (1.0/22.0) * log((1.0 * 22.0)/(7.0 *  1.0));  // dog-snouts=1 dog-*=7 *-snouts=1
+
+	num = eval->eval("(fapi 'right-wild-mi (Word \"dog\"))");
+	CHKFLT("dog wild-mi", num, domi);
+
+	double tami = 0.0;
+	tami += (4.0/22.0) * log((4.0 * 22.0)/(4.0 * 11.0));  // table-legs=4   table-*=4 *-legs=11
+	// tami += (0.0/22.0) * log((0.0 * 22.0)/(4.0 *  6.0));  // table-wings=0  table-*=4 *-wings=6
+	// tami += (0.0/22.0) * log((0.0 * 22.0)/(4.0 *  4.0));  // table-eyes=0   table-*=4 *-eyes=4
+	// tami += (0.0/22.0) * log((0.0 * 22.0)/(4.0 *  1.0));  // table-snouts=0 table-*=4 *-snouts=1
+
+	num = eval->eval("(fapi 'right-wild-mi (Word \"table\"))");
+	CHKFLT("table wild-mi", num, tami);
+
+	num = eval->eval("(rapi 'total-mi)");
+	CHKFLT("report total mi", num, chmi+domi+tami);
 
 	logger().debug("END TEST: %s", __FUNCTION__);
 }
