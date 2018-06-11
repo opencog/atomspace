@@ -46,7 +46,7 @@
 		(define stats-atom (get-pair PAIR))
 		(if (null? stats-atom) 0
 			(cog-value-ref
-				 (cog-value stats-atom (Predicate "counter")) 42)))
+				 (cog-value stats-atom (Predicate "counter")) 2)))
 
 	; Return the atom holding the count, creating it if it does
 	; not yet exist.  Returns the same structure as the 'item-pair
