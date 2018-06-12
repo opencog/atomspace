@@ -336,10 +336,40 @@
 			(cog-extract-recursive uniqvar)
 			stars)
 
+		; Cache the most recent two values.  This should offer a
+		; significant performance enhancement for computing cosines
+		; of vectors, as usually, one of the cosine-pair is constant
+		; (and will be a cache-hit) while the other always misses.
+		(define (do-get-stars A-HIT A-MISS GETTER ITEM)
+			(define hit (atomic-box-ref A-HIT))
+			(if (null? hit)
+				; If hit is empty, then set it, and return the value
+				(let ((stars (GETTER ITEM)))
+					(atomic-box-set! A-HIT (list ITEM stars))
+					stars)
+				; If hit is not empty, and has the right key, then
+				; return the value. If hit has the wrong value, try
+				; again with miss.
+				(if (equal? ITEM (car hit))
+					(cadr hit)
+					(let ((miss (atomic-box-ref A-MISS)))
+						; If we can match miss, then promote miss to a hit.
+						; Else compute a value and cache it.
+						(if (and (not (null? miss)) (equal? ITEM (car miss)))
+							(begin
+								(atomic-box-set! A-HIT (list ITEM miss))
+								(atomic-box-set! A-MISS '())
+								miss)
+							(let ((stars (GETTER ITEM)))
+								(atomic-box-set! A-MISS (list ITEM stars))
+								stars))))))
+
 		(define (get-left-stars ITEM)
-			(do-get-left-stars ITEM))
+			(do-get-stars l-hit l-miss do-get-left-stars ITEM))
+
 		(define (get-right-stars ITEM)
-			(do-get-right-stars ITEM))
+			(do-get-stars r-hit r-miss do-get-right-stars ITEM))
+
 		;-------------------------------------------
 		; Return default, only if LLOBJ does not provide symbol
 		(define (overload symbol default)
