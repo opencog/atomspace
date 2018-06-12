@@ -1,7 +1,7 @@
 ;
 ; object-api.scm
 ;
-; Define object-oriented class API's for correlation matricies of atoms.
+; Define object-oriented class API's for correlation matrices of atoms.
 ;
 ; Copyright (c) 2017 Linas Vepstas
 ;
@@ -18,18 +18,18 @@
 ; N(x,y) of how often that particular pair was observed.  We typically
 ; are then interested in various statistical measures: usually starting
 ; with the normalized frequency (probability, likelihood) of how often
-; the pair (x,y) occured,
+; the pair (x,y) occurred,
 ;
 ; For all of these pairs (x,y), we typically need to get the count
 ; N(x,y), the partial sums N(x,*) = sum_y N(x,y), and likewise N(*,y)
 ; and N(*,*).   We need to compute frequencies of observations, such
 ; as p(x,y) = N(x,y)/N(*,*).  We also need to compute entropies and
-; mutual information, which can be infered from these frequencies.
-; We also can compute cosine-similairy and other metrics of similarity,
-; dervied solely from the observed frequency counts.
+; mutual information, which can be inferred from these frequencies.
+; We also can compute cosine-similarity and other metrics of similarity,
+; derived solely from the observed frequency counts.
 ;
 ; All of these formulas are independent of the actual objects in the
-; pairs.  Thus, it is useful to separae the various algorithms from
+; pairs.  Thus, it is useful to separate the various algorithms from
 ; the data that they operate on. Towards this end, this file defines
 ; some object-oriented OO API's for pairs, which the algos can assume,
 ; and the different types of pairs can implement.
@@ -59,8 +59,8 @@
 ;
 ; There are several API's here. The lowest-level ones are listed first.
 ;
-; XXX FIXME ... the calling seuqence is exactly backeards. In order
-; for overloading to work correct, attempts must be made to call
+; XXX FIXME ... the calling sequence is exactly backwards. In order
+; for overloading to work correctly, attempts must be made to call
 ; methods on the base object first, and only later on the wrapper.
 ; For now, we blow this off, but in the long run, this needs to be
 ; fixed.
@@ -68,12 +68,12 @@
 ; ---------------------------------------------------------------------
 ;
 ; Example low-level API class. It has only six methods; these
-; return pair-atoms on which counts are stored as values.
-; Higher-evel objects use this object to fetch counts, store them
+; return atoms on which observation counts are stored as values.
+; Higher-level objects use this object to fetch counts, store them
 ; into the database, or to return various statistics.
 ;
-; The `make-pair-count-get-set` class, below, is a typical user
-; of this class; it provides getters and setters for the counts.
+; The `add-pair-count-api` class, below, is a typical user of this
+; class; it provides getters and setters for the counts.
 ;
 ; See `make-any-link-api` for a working example.
 ;
@@ -99,7 +99,7 @@
 ;     ; EvaluationLink holding the ListLink. This atom is where all
 ;     ; values associated with this matrix are held.  This includes not
 ;     ; only the count (the number of observations of the pair) but also
-;     ; any dervides values, such as frequency, mutual information, and
+;     ; any derived values, such as frequency, mutual information, and
 ;     ; so on. Users are free to (are encouraged to) use this atom to
 ;     ; attach additional information and statistics.
 ;     ;
@@ -310,7 +310,7 @@
 		; the the behavior is undefined.
 		;
 		; Currently, this implementation always goes back to the
-		; atomspace, and re-filters the results eaach time.  Some
+		; atomspace, and re-filters the results each time.  Some
 		; performance could be gained, at the expense of greater
 		; memory usage, by using the atom cache to save these results.
 		;
@@ -360,7 +360,7 @@
 			; Explain what it is that I provide. The point here is that
 			; computing the left and right basis can be very expensive,
 			; and so if it has already been computed, that should be used,
-			; by defering to the object that holds those caches. We do
+			; by deferring to the object that holds those caches. We do
 			; by advertising that .. we hold caches.
 			(define (provides meth)
 				(case meth
@@ -405,7 +405,7 @@
   the key under which the values are stored.
 
   If the dataset is not filtered, the counts are stored in the
-  CountTruthValue assocaited with the atom; else they are stored
+  CountTruthValue associated with the atom; else they are stored
   in a value specific to the filter-id.
 
   These methods do NOT compute the counts! They merely provide fast
@@ -486,7 +486,7 @@
   add-pair-freq-api LLOBJ ID - Extend LLOBJ with frequency getters.
 
   Extend the LLOBJ with additional methods to get and set
-  the observation frequencies, entropies and mutual infomation.
+  the observation frequencies, entropies and mutual information.
   Basically, this decorates the class with additional methods
   that get and set these frequencies and entropies in \"standardized\"
   places. Other classes can overload these methods; these just
@@ -620,7 +620,7 @@
 	; ----------------------------------------------------
 	; ----------------------------------------------------
 	; Return the observational frequency on PAIR.
-	; If the PAIR does not exist (was not oberved) return 0.
+	; If the PAIR does not exist (was not observed) return 0.
 	(define (get-pair-freq PAIR)
 		(get-freq (LLOBJ 'item-pair PAIR)))
 
@@ -643,7 +643,7 @@
 	(define (get-pair-mi PAIR)
 		(get-total-mi (LLOBJ 'item-pair PAIR)))
 
-	; Return the fractional MI (lexical atraction) on the pair.
+	; Return the fractional MI (lexical attraction) on the pair.
 	; + log_2 P(x,y) / P(x,*) P(*,y)
 	; It differs from the MI above only by the leading probability.
 	(define (get-pair-fmi PAIR)
