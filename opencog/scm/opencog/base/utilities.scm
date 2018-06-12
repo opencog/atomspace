@@ -1073,14 +1073,32 @@
 
 ; ---------------------------------------------------------------------
 
+(define rand-state-fluid (make-fluid))
 (define-public (random-string str-length)
 "
- random-string -- Returns a random string of length 'str-length'.
+  random-string -- Returns a random string of length 'str-length'.
+
+  This is now thread-safe.  I think. Its missing a unit test,
+  and tends to not actually be random when hit hard from multiple
+  threads. Ick.  This and everything that touches this needs
+  review/redesign.
 "
 	(define alphanumeric "abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789")
-	(define str "")
+	(define alphlen (string-length alphanumeric))
+	(define str (format #f "~A-" (get-internal-real-time)))
+
+	; Attempt to make this thread-safe by giving each thread it's own
+	; random state.
+	(if (not (fluid-ref rand-state-fluid))
+		(fluid-set! rand-state-fluid
+			(seed->random-state (get-internal-real-time))))
+
+	; XXX FIXME -- this is a stunningly slow and sloppy random-string
+	; generator. But whatever.  I don't have the hours in the day to fix
+	; everything.
 	(while (> str-length 0)
-		(set! str (string-append str (string (string-ref alphanumeric (random (string-length alphanumeric))))))
+		(set! str (string-append str (string (string-ref alphanumeric
+			(random alphlen (fluid-ref rand-state-fluid))))))
 		(set! str-length (- str-length 1))
 	)
 	str
