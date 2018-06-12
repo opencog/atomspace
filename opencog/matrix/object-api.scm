@@ -238,51 +238,33 @@
 			(right-type (LLOBJ 'right-type))
 		)
 
-		; Return a list of all atoms of TYPE which appear in a Link
-		; of type 'pair-type
-		(define (get-basis TYPE PAIR-FILT)
-			(remove!
-				(lambda (item)
-					(null? (PAIR-FILT item (cog-incoming-by-type item pair-type))))
-				(cog-get-atoms TYPE)))
-
-		; Given a left-item, and a list of pairs, return only those
-		; pairs in which the left-item really is on the left, and
-		; the correct type is on the right.
-		(define (good-right-pairs left-item pair-list)
-			(filter!
-				(lambda (pr)
-					(and
-						(eq? 2 (cog-arity pr))
-						(equal? left-item (gar pr))
-						(eq? right-type (cog-type (gdr pr)))))
-				pair-list))
-
-		(define (good-left-pairs right-item pair-list)
-			(filter!
-				(lambda (pr)
-					(and
-						(eq? 2 (cog-arity pr))
-						(eq? left-type (cog-type (gar pr)))
-						(equal? right-item (gdr pr))))
-				pair-list))
+		; Perform a query to find all atoms that might appear on
+		; the left, or the right of a pair.  Return a list of them.
+		(define (do-get-basis LEF)
+			(define uleft (uniquely-named-variable))
+			(define uright (uniquely-named-variable))
+			(define term (LLOBJ 'make-pair uleft uright))
+			(define setlnk (cog-execute! (Bind
+				(VariableList
+					(TypedVariable uleft (Type (symbol->string left-type)))
+					(TypedVariable uright (Type (symbol->string right-type))))
+				term (if LEF uleft uright))))
+			(define basis (cog-outgoing-set setlnk))
+			(cog-extract setlnk)
+			(cog-extract-recursive uleft)
+			(cog-extract-recursive uright)
+			basis)
 
 		; Return a list of all of the atoms that might ever appear on
 		; the left-hand-side of a pair.  This is the set of all possible
 		; items x from the pair (x,y) for any y.
 		;
-		; XXX FIXME ... the good-right-pairs check is extremely
-		; CPU-expensive! Its currently taking 3 minutes to get the
-		; list of words!
-		;
 		(define (get-left-basis)
-			(if (null? l-basis)
-				(set! l-basis (get-basis left-type good-right-pairs)))
+			(if (null? l-basis) (set! l-basis (do-get-basis #t)))
 			l-basis)
 
 		(define (get-right-basis)
-			(if (null? r-basis)
-				(set! r-basis (get-basis right-type good-left-pairs)))
+			(if (null? r-basis) (set! r-basis (do-get-basis #f)))
 			r-basis)
 
 		(define (get-left-size)
