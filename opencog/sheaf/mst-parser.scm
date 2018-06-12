@@ -43,7 +43,7 @@
   make-score-fn LLOBJ METHOD -- Create a function that returns a
   score for a pair of atoms, the score being given by invoking
   METHOD on LLOBJ.  The LLOBJ must provide the METHOD, of course,
-  and also the 'pair-type method, so that pairs can be assembled.
+  and also the 'get-pair method, so that pairs can be assembled.
 
   If either atom is nil, or if the atom-pair cannot be found, then a
   default value of -1e40 is returned.
@@ -54,11 +54,11 @@
 	(lambda (left-atom right-atom distance)
 
 		; We take care here to not actually create the atoms,
-		; if they aren't already in the atomspace. cog-link returns
+		; if they aren't already in the atomspace. 'get-pair returns
 		; nil if the atoms can't be found.
 		(define wpr
 			(if (and (not (null? left-atom)) (not (null? right-atom)))
-				(cog-link (LLOBJ 'pair-type) left-atom right-atom)
+				(LLOBJ 'get-pair left-atom right-atom)
 				'()))
 		(if (null? wpr) bad-mi (LLOBJ METHOD wpr))
 	)
