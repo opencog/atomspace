@@ -169,10 +169,7 @@
 		(define (get-support-size LIST)
 			(fold
 				(lambda (lopr sum)
-					; 'get-pair returns the atom holding the count
-					(+ sum
-						(if (< 0 (get-cnt lopr))
-							1 0)))
+					(if (< 0 (get-cnt lopr)) (+ sum 1) sum))
 				0
 				LIST))
 
