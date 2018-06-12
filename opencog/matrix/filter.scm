@@ -11,7 +11,7 @@
 ; --------
 ; Large datasets are inherently likely to contain "noise" and spurious
 ; data that might be unwanted during data analysis. For example, the
-; dataset might contian a large number of atoms that were observed only
+; dataset might contain a large number of atoms that were observed only
 ; once or twice; these are likely to be junk and should be removed
 ; before data analysis begins.
 ;
@@ -166,7 +166,7 @@
 				((pair-type)        (apply LLOBJ (cons message args)))
 				; Block anything that might have to be filtered.
 				; For example: 'pair-freq which we don't, can't filter.
-				; Or any of the variious subtotals and marginals.
+				; Or any of the various subtotals and marginals.
 				(else               (throw 'bad-use 'add-generic-filter
 					(format #f "Sorry, method ~A not available on filter!" message))))
 		)))

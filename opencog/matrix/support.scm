@@ -104,7 +104,7 @@
 "
   add-support-compute LLOBJ - Extend LLOBJ with methods to
   compute wild-card sums, including the support (lp-norm for p=0),
-  the count (lp-norm for p=1), the Eucliden length (lp-norm for p=2)
+  the count (lp-norm for p=1), the Euclidean length (lp-norm for p=2)
   and the general lp-norm.  These all work with the counts for the
   pairs, and NOT the frequencies!  None of these use cached values,
   instead, they compute these values on the fly. The computed values
@@ -219,7 +219,7 @@
 					LIST))
 			(sqrt tot))
 
-		; Returns the Eucliden length aka the l_2 norm (l_p norm for p=2)
+		; Returns the Euclidean length aka the l_2 norm (l_p norm for p=2)
 		(define (sum-left-length ITEM)
 			(sum-length (star-obj 'left-stars ITEM)))
 

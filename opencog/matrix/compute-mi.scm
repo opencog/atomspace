@@ -41,7 +41,7 @@
 ; LinkGrammarRelationshipNode "ANY", so the correct notation would be
 ; N(rel, wl, wr) with `rel` the relationship.  In what follows, the
 ; relationship is always assumed to be the same, and is thus dropped.
-; (the relationship is provided through the GET-PAIR functiion).
+; (the relationship is provided through the GET-PAIR function).
 ;
 ; The mutual information for a pair is defined as follows:  Given
 ; two items, wl and wr, define three probabilities:
@@ -59,8 +59,8 @@
 ;
 ; These sums are computed, for a given item, by the `make-compute-count`
 ; object defined below.  It attached these counts at the locations
-; provided by the underlying object. By default, thse are given by
-; `add-pair-count-api` object, althought these are designed to be
+; provided by the underlying object. By default, these are given by
+; `add-pair-count-api` object, although these are designed to be
 ; overloaded, if needed.
 
 ; For example, for word-pair counts, the wild-card sums are stored
@@ -103,7 +103,7 @@
 ; method.
 ;
 ; The main utility wrapper not only computes all of these, but also
-; stores them in the database, from which they can be retreived at some
+; stores them in the database, from which they can be retrieved at some
 ; future date.  This helps avoid repeating the calculation, which can
 ; take many hours for large datasets (tens of millions of pairs).
 ;
@@ -177,7 +177,7 @@
 
 		; Compute and cache the left-side wild-card counts N(*,y).
 		; This returns the atom holding the cached count, thus
-		; making it convient to persist (store) this cache in
+		; making it convenient to persist (store) this cache in
 		; the database. It returns nil if the count was zero.
 		(define (cache-left-count ITEM)
 			(define cnt (compute-left-count ITEM))
@@ -320,7 +320,7 @@
 
 		; Compute and cache the pair frequency.
 		; This returns the atom holding the cached count, thus
-		; making it convient to persist (store) this cache in
+		; making it convenient to persist (store) this cache in
 		; the database. It returns nil if the count was zero.
 		(define (cache-pair-freq PAIR)
 			(define freq (compute-pair-freq PAIR))
@@ -456,7 +456,7 @@
 						; Compute the MI for exactly one pair.
 						; Note the sign: it is PLUS log p(x,y)/p(*,y)p(x,*) !!
 						; This sign convention agrees with both Yuret and with
-						; wikipedia!
+						; Wikipedia!
 						; logli are defined as -log_2 in object-api.scm, 
 						; so that's why it looks like the MINUS sign is being
 						; used, but it is not.
@@ -569,7 +569,7 @@
 		)
 
 		; Store all the pairs. These must be provided as a list to us,
-		; because, at this time, we don't hve an effective way of working
+		; because, at this time, we don't have an effective way of working
 		; with the non-zero elements.  Maybe a better solution will become
 		; clear over time...
 		(define (store-pairs all-pairs)
