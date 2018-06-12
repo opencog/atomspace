@@ -59,13 +59,13 @@
 ; ---------------------------------------------------------------------
 
 (define*-public (make-power-iter-pca LLOBJ #:optional
-	; Default is to use the pair-count method
-	(get-value 'pair-count))
+	; Default is to use the get-count method
+	(get-value 'get-count))
 "
   make-power-iter-pca LLOBJ - Implement a power-iteration form of PCA.
 
   Optionally, the name of a method can be supplied, from which the matrix
-  values will be fetched.  If not supplied, it defaults to 'pair-count.
+  values will be fetched.  If not supplied, it defaults to 'get-count.
   You can get fancier if you wish.  Using the MI could be interesting,
   for example: this would result in a MaxEnt style computation, instead
   of a PCA-style computation.
@@ -257,12 +257,12 @@
 ; ---------------------------------------------------------------------
 
 (define*-public (make-cosine-matrix LLOBJ #:optional
-	; Default is to use the pair-count method
-	(GET-CNT 'pair-count))
+	; Default is to use the get-count method
+	(GET-CNT 'get-count))
 "
   make-cosine-matrix LLOBJ - Provide a cosine-matrix form of LLOBJ.
 
-  Given an LLOBJ whose 'pair-count returns values N(x,y), one can define
+  Given an LLOBJ whose 'get-count returns values N(x,y), one can define
   another matrix such that the rows or columns are normalized to be unit
   vectors.  That is, one can define the left-unit
 
@@ -278,7 +278,7 @@
   We call it the 'left similarity' to emphasize that the summation is
   taking place over the left index.
 
-  The LLOBJ object needs to provide the 'pair-count method.
+  The LLOBJ object needs to provide the 'get-count method.
 "
 	(let* ((star-obj (add-pair-stars LLOBJ))
 			(supp-obj (add-support-compute star-obj GET-CNT))

@@ -55,7 +55,7 @@
   be kept.
 
   The PAIR-PRED should be a function to that accepts individual matrix
-  entries. It is applied whenever the 'get-pair or 'pair-count methods
+  entries. It is applied whenever the 'get-pair or 'get-count methods
   are invoked.  Like the others, it should return #t to keep the pair.
 
   The ID-STR should be a string; it is appended to the dataset name and
@@ -120,11 +120,12 @@
 
 		; ---------------
 		; Apply the pair-cut to each pair.
-		(define (get-item-pair PAIR)
-			(if (PAIR-PRED PAIR) (LLOBJ 'get-pair PAIR) '()))
+;xxx this is broken.
+		(define (get-item-pair L-ATOM R-ATOM)
+			(if (PAIR-PRED PAIR) (LLOBJ 'get-pair L-ATOM R-ATOM) '()))
 
 		(define (get-pair-count PAIR)
-			(if (PAIR-PRED PAIR) (LLOBJ 'pair-count PAIR) 0))
+			(if (PAIR-PRED PAIR) (LLOBJ 'get-count PAIR) 0))
 
 		; ---------------
 		(define (get-name)
@@ -157,7 +158,7 @@
 				((left-basis-size)  (get-left-size))
 				((right-basis-size) (get-right-size))
 				((get-pair)         (apply get-item-pair args))
-				((pair-count)       (apply get-pair-count args))
+				((get-count)        (apply get-pair-count args))
 				((provides)         (apply provides args))
 				((filters?)         RENAME)
 				; Pass through some selected methods
@@ -244,7 +245,7 @@
 			(< RIGHT-CUT (cnt-obj 'left-wild-count (gdr PAIR))))
 
 		(define (pair-pred PAIR)
-			(< PAIR-CUT (LLOBJ 'pair-count PAIR)))
+			(< PAIR-CUT (LLOBJ 'get-count PAIR)))
 
 		(define id-str
 			(format #f "cut-~D-~D-~D"

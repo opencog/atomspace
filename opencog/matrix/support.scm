@@ -100,7 +100,7 @@
 ; ---------------------------------------------------------------------
 
 (define*-public (add-support-compute LLOBJ
-	 #:optional (GET-CNT 'pair-count))
+	 #:optional (GET-CNT 'get-count))
 "
   add-support-compute LLOBJ - Extend LLOBJ with methods to
   compute wild-card sums, including the support (lp-norm for p=0),

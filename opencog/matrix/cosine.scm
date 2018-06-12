@@ -19,7 +19,7 @@
 ; ---------------------------------------------------------------------
 
 (define*-public (add-pair-cosine-compute LLOBJ
-	#:optional (GET-CNT 'pair-count))
+	#:optional (GET-CNT 'get-count))
 "
   add-pair-cosine-compute LLOBJ - Extend LLOBJ with methods to compute
   vector dot-products, cosine angles and jaccard distances between two
