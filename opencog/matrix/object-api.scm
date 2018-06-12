@@ -197,6 +197,8 @@
 
 (use-modules (srfi srfi-1))
 (use-modules (ice-9 optargs)) ; for define*-public
+(use-modules (ice-9 atomic))  ; for atomic-box
+(use-modules (ice-9 threads)) ; for mutex locks
 (use-modules (opencog) (opencog exec))
 
 ; ---------------------------------------------------------------------
@@ -246,6 +248,25 @@
 			(r-basis '())
 			(l-size 0)
 			(r-size 0)
+
+			; Caches for the left and right stars
+			(l-hit (make-atomic-box '()))
+			(l-miss (make-atomic-box '()))
+			(r-hit (make-atomic-box '()))
+			(r-miss (make-atomic-box '()))
+
+#! ============ Alternate variant, not currently used.
+			; Temporary atomspaces
+			(l-asp (make-fluid))
+			(r-asp (make-fluid))
+=============== !#
+
+			; Temporary atomspaces, non-fluid style.
+			(l-mtx (make-mutex))
+			(r-mtx (make-mutex))
+			(l-ase (cog-new-atomspace (cog-atomspace)))
+			(r-ase (cog-new-atomspace (cog-atomspace)))
+
 			(pair-type (LLOBJ 'pair-type))
 			(left-type (LLOBJ 'left-type))
 			(right-type (LLOBJ 'right-type))
@@ -301,35 +322,115 @@
 		; ITEM should be an atom of (LLOBJ 'right-type); if it isn't,
 		; the the behavior is undefined.
 		;
-		; Currently, this implementation always goes back to the
-		; atomspace, and performs a query each time.  Some performance
-		; could be gained, at the expense of greater memory usage, by
-		; using the atom cache to save these results. Also, it turns
-		; out that the current query API is inadequate; this does some
-		; forced atom deletion to make up for the ineffiency.
-		;
-		(define (get-left-stars ITEM)
-			(define uniqvar (uniquely-named-variable))
-			(define term (LLOBJ 'make-pair uniqvar ITEM))
-			(define setlnk (cog-execute! (Bind (TypedVariable
-					uniqvar (Type (symbol->string left-type)))
-				term term)))
-			(define stars (cog-outgoing-set setlnk))
-			(cog-extract setlnk)
-			(cog-extract-recursive uniqvar)
-			stars)
+		(define (do-get-left-stars ITEM)
+			(let* ((lock (lock-mutex l-mtx))
+					(old-as (cog-set-atomspace! l-ase))
+					(uniqvar (VariableNode "$obj-api-left-star"))
+					(term (LLOBJ 'make-pair uniqvar ITEM))
+					(setlnk (cog-execute! (Bind (TypedVariable
+						uniqvar (Type (symbol->string left-type)))
+						term term)))
+					(stars (cog-outgoing-set setlnk)))
+				(cog-atomspace-clear l-ase)
+				(cog-set-atomspace! old-as)
+				(unlock-mutex l-mtx)
+				stars))
 
 		; Same as above, but on the right.
+		(define (do-get-right-stars ITEM)
+			(let* ((lock (lock-mutex r-mtx))
+					(old-as (cog-set-atomspace! r-ase))
+					(uniqvar (VariableNode "$obj-api-right-star"))
+					(term (LLOBJ 'make-pair ITEM uniqvar))
+					(setlnk (cog-execute! (Bind (TypedVariable
+						uniqvar (Type (symbol->string right-type)))
+						term term)))
+					(stars (cog-outgoing-set setlnk)))
+				(cog-atomspace-clear r-ase)
+				(cog-set-atomspace! old-as)
+				(unlock-mutex r-mtx)
+				stars))
+
+#! ============ Alternate variant, not currently used.
+Yes, this actually works -- its just not being used.
+		; Use a temporary atomspace for performing the query.
+		; This is thread-safe, but quite slow when threads are
+		; being constantly created/destroyed, as it results in
+		; the temp atomspace being created/destroyed, which is
+		; just inefficient and slow, in the end.
+		(define (tmp-as-do-get-left-stars ITEM)
+			(let* ((tmp-asp
+						(let ((asp (fluid-ref l-asp)))
+							(if asp asp
+								(let ((nasp (cog-new-atomspace (cog-atomspace))))
+									(fluid-set! l-asp nasp)
+									nasp))))
+					(oldas (cog-set-atomspace! tmp-asp))
+					(uniqvar (VariableNode "$obj-api-left-star"))
+					(term (LLOBJ 'make-pair uniqvar ITEM))
+					(setlnk (cog-execute! (Bind (TypedVariable
+						uniqvar (Type (symbol->string left-type)))
+						term term)))
+					(stars (cog-outgoing-set setlnk))
+				)
+				(cog-atomspace-clear tmp-asp)
+				(cog-set-atomspace! oldas)
+				stars))
+
+		; Same as above, but on the right.
+		(define (tmp-as-do-get-right-stars ITEM)
+			(let* ((tmp-asp
+						(let ((asp (fluid-ref r-asp)))
+							(if asp asp
+								(let ((nasp (cog-new-atomspace (cog-atomspace))))
+									(fluid-set! r-asp nasp)
+									nasp))))
+					(oldas (cog-set-atomspace! tmp-asp))
+					(uniqvar (VariableNode "$obj-api-right-star"))
+					(term (LLOBJ 'make-pair ITEM uniqvar))
+					(setlnk (cog-execute! (Bind (TypedVariable
+						uniqvar (Type (symbol->string right-type)))
+						term term)))
+					(stars (cog-outgoing-set setlnk))
+				)
+				(cog-atomspace-clear tmp-asp)
+				(cog-set-atomspace! oldas)
+				stars))
+============= !#
+
+		; Cache the most recent two values.  This should offer a
+		; significant performance enhancement for computing cosines
+		; of vectors, as usually, one of the cosine-pair is constant
+		; (and will be a cache-hit) while the other always misses.
+		(define (do-get-stars A-HIT A-MISS GETTER ITEM)
+			(define hit (atomic-box-ref A-HIT))
+			(if (null? hit)
+				; If hit is empty, then set it, and return the value
+				(let ((stars (GETTER ITEM)))
+					(atomic-box-set! A-HIT (list ITEM stars))
+					stars)
+				; If hit is not empty, and has the right key, then
+				; return the value. If hit has the wrong value, try
+				; again with miss.
+				(if (equal? ITEM (car hit))
+					(cadr hit)
+					(let ((miss (atomic-box-ref A-MISS)))
+						; If we can match miss, then promote miss to a hit.
+						; Else compute a value and cache it.
+						(if (and (not (null? miss)) (equal? ITEM (car miss)))
+							(begin
+								(atomic-box-set! A-HIT miss)
+								(atomic-box-set! A-MISS '())
+								(cadr miss))
+							(let ((stars (GETTER ITEM)))
+								(atomic-box-set! A-MISS (list ITEM stars))
+								stars))))))
+
+		(define (get-left-stars ITEM)
+			(do-get-stars l-hit l-miss do-get-left-stars ITEM))
+
 		(define (get-right-stars ITEM)
-			(define uniqvar (uniquely-named-variable))
-			(define term (LLOBJ 'make-pair ITEM uniqvar))
-			(define setlnk (cog-execute! (Bind (TypedVariable
-					uniqvar (Type (symbol->string right-type)))
-				term term)))
-			(define stars (cog-outgoing-set setlnk))
-			(cog-extract setlnk)
-			(cog-extract-recursive uniqvar)
-			stars)
+			(do-get-stars r-hit r-miss do-get-right-stars ITEM))
 
 		;-------------------------------------------
 		; Return default, only if LLOBJ does not provide symbol

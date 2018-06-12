@@ -801,6 +801,14 @@ TODO
    then there is no point in instantiating `term` a second time - just
    repeat what is there.
 
+ * API enhancement: A not-uncommon search is to create a temporary
+   BindLink, perform the search, get the results, and then trash the
+   BindLink and the SetLink that the results came in. This is ...
+   annoyingly inefficient. Also not inherently thread-safe.  It can
+   be worked around by placing the BindLink, and the search results
+   in a temporary atomspace, but this is ... kind-of-ish icky?
+   Can we do something nicer, here?
+
  * Atomspaces are done wrong. Grounding whould always be performed
    in the same atomspace that the bindlink is in.  Thus should be fetched
    directly from the bind-link, and not passed as a third-party parameter.
