@@ -134,10 +134,12 @@ void BasicAPIUTest::test_basic(void)
 	tru = eval->eval("(equal? \"unit-test-demo\" (bapi 'id))");
 	CHKERR; TSM_ASSERT_EQUALS("Expecting #t", tru, "#t\n");
 
-	tru = eval->eval("(equal? chicken-legs (bapi 'item-pair (Word \"chicken\") (Word \"legs\")))");
+	tru = eval->eval(
+		"(equal? chicken-legs (bapi 'get-pair (Word \"chicken\") (Word \"legs\")))");
 	CHKERR; TSM_ASSERT_EQUALS("Expecting #t", tru, "#t\n");
 
-	tru = eval->eval("(equal? 3.0 (bapi 'pair-count (Word \"chicken\") (Word \"legs\")))");
+	tru = eval->eval(
+		"(equal? 3.0 (bapi 'pair-count (Word \"chicken\") (Word \"legs\")))");
 	printf ("Got >>>%s", tru.c_str());
 	CHKERR; TSM_ASSERT_EQUALS("Expecting #t", tru, "#t\n");
 

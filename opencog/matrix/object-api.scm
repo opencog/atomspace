@@ -109,13 +109,15 @@
 ;        (if (null? maybe-list) '()
 ;           (cog-link 'EvaluationLink (Predicate "foo") maybe-list)))
 ;
+;     ; Return the observed count for the pair PAIR.
+;     (define (get-count PAIR)
+;        (cog-value-ref (cog-value PAIR (Predicate "counter")) 42))
+;
 ;     ; Return the observed count for the pair (L-ATOM, R-ATOM), if it
 ;     ; exists, else return zero.
-;     (define (get-pair-count L-ATOM R-ATOM))
+;     (define (get-pair-count L-ATOM R-ATOM)
 ;        (define stats-atom (get-pair L-ATOM R-ATOM))
-;        (if (null? stats-atom) 0
-;           (cog-value-ref
-;               (cog-value stats-atom (Predicate "counter")) 42)))
+;        (if (null? stats-atom) 0 (get-count stats-atom)))
 ;
 ;     ; Return the atom holding the count, creating it if it does
 ;     ; not yet exist.  Returns the same structure as the 'item-pair
@@ -168,7 +170,8 @@
 ;              ((right-type) get-right-type)
 ;              ((pair-type) get-pair-type)
 ;              ((pair-count) get-pair-count)
-;              ((item-pair) get-pair)
+;              ((get-pair) get-pair)
+;              ((get-count) get-count)
 ;              ((make-pair) make-pair)
 ;              ((left-wildcard) get-left-wildcard)
 ;              ((right-wildcard) get-right-wildcard)
