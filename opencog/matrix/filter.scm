@@ -120,7 +120,7 @@
 
 		; ---------------
 		; Apply the pair-cut to each pair.
-;xxx this is broken.
+;xxxxxx this is broken.
 		(define (get-item-pair L-ATOM R-ATOM)
 			(if (PAIR-PRED PAIR) (LLOBJ 'get-pair L-ATOM R-ATOM) '()))
 
@@ -239,10 +239,10 @@
 		;
 		; See comments above: LEFT-CUT < right-wild-count is correct.
 		(define (left-stars-pred PAIR)
-			(< LEFT-CUT (cnt-obj 'right-wild-count (gar PAIR))))
+			(< LEFT-CUT (cnt-obj 'right-wild-count (LLOBJ 'left-element PAIR))))
 
 		(define (right-stars-pred PAIR)
-			(< RIGHT-CUT (cnt-obj 'left-wild-count (gdr PAIR))))
+			(< RIGHT-CUT (cnt-obj 'left-wild-count (LLOBJ 'right-element PAIR))))
 
 		(define (pair-pred PAIR)
 			(< PAIR-CUT (LLOBJ 'get-count PAIR)))
@@ -286,10 +286,10 @@
 	; ---------------
 	; Return only those stars that pass the cutoff.
 	(define (left-stars-pred PAIR)
-		(left-basis-pred (gar PAIR)))
+		(left-basis-pred (LLOBJ 'left-element PAIR)))
 
 	(define (right-stars-pred PAIR)
-		(right-basis-pred (gdr PAIR)))
+		(right-basis-pred (LLOBJ 'right-element PAIR)))
 
 	(define (pair-pred PAIR)
 		(and (left-stars-pred PAIR) (right-stars-pred PAIR)))

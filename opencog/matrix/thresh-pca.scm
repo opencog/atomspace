@@ -114,7 +114,7 @@
 			(lambda (ITEM)
 				(fold
 					(lambda (PAIR sum)
-						(define vecval (fvec (gar PAIR)))
+						(define vecval (fvec (LLOBJ 'left-element PAIR)))
 						; Avoid fetching the pair value if its
 						; multiply-by-zero
 						(if (eqv? 0 vecval)
@@ -130,7 +130,7 @@
 			(lambda (ITEM)
 				(fold
 					(lambda (PAIR sum)
-						(define vecval (fvec (gdr PAIR)))
+						(define vecval (fvec (LLOBJ 'right-element PAIR)))
 						(if (eqv? 0 vecval)
 							sum
 							(+ sum (* (llobj get-value PAIR) vecval))))
@@ -293,13 +293,13 @@
 		; --------------------
 		(define (do-left-unit PAIR)
 			(define cnt (LLOBJ GET-CNT PAIR))
-			(define len (get-left-length (gdr PAIR)))
+			(define len (get-left-length (LLOBJ 'right-element PAIR)))
 			(/ cnt len)
 		)
 
 		(define (do-right-unit PAIR)
 			(define cnt (LLOBJ GET-CNT PAIR))
-			(define len (get-right-length (gar PAIR)))
+			(define len (get-right-length (LLOBJ 'left-element PAIR)))
 			(/ cnt len)
 		)
 
