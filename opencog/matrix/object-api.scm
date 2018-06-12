@@ -357,9 +357,9 @@
 						; Else compute a value and cache it.
 						(if (and (not (null? miss)) (equal? ITEM (car miss)))
 							(begin
-								(atomic-box-set! A-HIT (list ITEM miss))
+								(atomic-box-set! A-HIT miss)
 								(atomic-box-set! A-MISS '())
-								miss)
+								(cadr miss))
 							(let ((stars (GETTER ITEM)))
 								(atomic-box-set! A-MISS (list ITEM stars))
 								stars))))))
