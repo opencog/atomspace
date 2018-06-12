@@ -314,7 +314,7 @@
 		; forced atom deletion to make up for the ineffiency.
 		;
 		(define (get-left-stars ITEM)
-			(define uniqvar (Variable "$X"))
+			(define uniqvar (uniquely-named-variable))
 			(define term (LLOBJ 'make-pair uniqvar ITEM))
 			(define setlnk (cog-execute! (Bind (TypedVariable
 					uniqvar (Type (symbol->string left-type)))
@@ -326,7 +326,7 @@
 
 		; Same as above, but on the right.
 		(define (get-right-stars ITEM)
-			(define uniqvar (Variable "$X"))
+			(define uniqvar (uniquely-named-variable))
 			(define term (LLOBJ 'make-pair ITEM uniqvar))
 			(define setlnk (cog-execute! (Bind (TypedVariable
 					uniqvar (Type (symbol->string right-type)))
