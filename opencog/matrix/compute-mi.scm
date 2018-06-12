@@ -30,7 +30,7 @@
 ; on the "low-level API". These include:
 ;   'left-type and 'right-type, both of which should return 'WordNode
 ;         for the above.
-;   'item-pair, which should return the EvaluationLink, given the
+;   'get-pair, which should return the EvaluationLink, given the
 ;        ListLink
 ;   'left-wildcard and 'right-wildcard, indicating where the partial
 ;        sums, such as N(x,*) and N(*,y) should be stored.
@@ -171,7 +171,7 @@
 		; This returns the count, or zero, if the pair was never observed.
 		(define (compute-left-count ITEM)
 			(fold
-				(lambda (pr sum) (+ sum (llobj 'pair-count pr)))
+				(lambda (pr sum) (+ sum (llobj 'get-count pr)))
 				0
 				(star-obj 'left-stars ITEM)))
 
@@ -188,7 +188,7 @@
 		; Compute the right-side wild-card count N(x,*).
 		(define (compute-right-count ITEM)
 			(fold
-				(lambda (pr sum) (+ sum (llobj 'pair-count pr)))
+				(lambda (pr sum) (+ sum (llobj 'get-count pr)))
 				0
 				(star-obj 'right-stars ITEM)))
 
@@ -309,7 +309,7 @@
 		; the frequency with which the pair (x,y) is observed. Return
 		; the frequency, or zero, if the pair was never observed.
 		(define (compute-pair-freq PAIR)
-			(/ (cntobj 'pair-count PAIR) tot-cnt))
+			(/ (cntobj 'get-count PAIR) tot-cnt))
 
 		; Compute the left-side wild-card frequency. This is the ratio
 		; P(*,y) = N(*,y) / N(*,*) = sum_x P(x,y)
@@ -465,7 +465,7 @@
 							(define pr-freq (frqobj 'pair-freq lipr))
 							(define pr-logli (frqobj 'pair-logli lipr))
 
-							(define right-item (gdr lipr))
+							(define right-item (llobj 'right-element lipr))
 							(if (< 0 (cntobj 'left-wild-count right-item))
 								(let* ((l-logli (frqobj 'left-wild-logli right-item))
 										(fmi (- (+ r-logli l-logli) pr-logli))

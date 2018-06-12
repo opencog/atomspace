@@ -55,7 +55,7 @@
   be kept.
 
   The PAIR-PRED should be a function to that accepts individual matrix
-  entries. It is applied whenever the 'item-pair or 'pair-count methods
+  entries. It is applied whenever the 'get-pair or 'get-count methods
   are invoked.  Like the others, it should return #t to keep the pair.
 
   The ID-STR should be a string; it is appended to the dataset name and
@@ -120,11 +120,12 @@
 
 		; ---------------
 		; Apply the pair-cut to each pair.
-		(define (get-item-pair PAIR)
-			(if (PAIR-PRED PAIR) (LLOBJ 'item-pair PAIR) '()))
+;xxxxxx this is broken.
+		(define (get-item-pair L-ATOM R-ATOM)
+			(if (PAIR-PRED PAIR) (LLOBJ 'get-pair L-ATOM R-ATOM) '()))
 
 		(define (get-pair-count PAIR)
-			(if (PAIR-PRED PAIR) (LLOBJ 'pair-count PAIR) 0))
+			(if (PAIR-PRED PAIR) (LLOBJ 'get-count PAIR) 0))
 
 		; ---------------
 		(define (get-name)
@@ -156,8 +157,8 @@
 				((right-basis)      (get-right-basis))
 				((left-basis-size)  (get-left-size))
 				((right-basis-size) (get-right-size))
-				((item-pair)        (apply get-item-pair args))
-				((pair-count)       (apply get-pair-count args))
+				((get-pair)         (apply get-item-pair args))
+				((get-count)        (apply get-pair-count args))
 				((provides)         (apply provides args))
 				((filters?)         RENAME)
 				; Pass through some selected methods
@@ -238,13 +239,13 @@
 		;
 		; See comments above: LEFT-CUT < right-wild-count is correct.
 		(define (left-stars-pred PAIR)
-			(< LEFT-CUT (cnt-obj 'right-wild-count (gar PAIR))))
+			(< LEFT-CUT (cnt-obj 'right-wild-count (LLOBJ 'left-element PAIR))))
 
 		(define (right-stars-pred PAIR)
-			(< RIGHT-CUT (cnt-obj 'left-wild-count (gdr PAIR))))
+			(< RIGHT-CUT (cnt-obj 'left-wild-count (LLOBJ 'right-element PAIR))))
 
 		(define (pair-pred PAIR)
-			(< PAIR-CUT (LLOBJ 'pair-count PAIR)))
+			(< PAIR-CUT (LLOBJ 'get-count PAIR)))
 
 		(define id-str
 			(format #f "cut-~D-~D-~D"
@@ -285,10 +286,10 @@
 	; ---------------
 	; Return only those stars that pass the cutoff.
 	(define (left-stars-pred PAIR)
-		(left-basis-pred (gar PAIR)))
+		(left-basis-pred (LLOBJ 'left-element PAIR)))
 
 	(define (right-stars-pred PAIR)
-		(right-basis-pred (gdr PAIR)))
+		(right-basis-pred (LLOBJ 'right-element PAIR)))
 
 	(define (pair-pred PAIR)
 		(and (left-stars-pred PAIR) (right-stars-pred PAIR)))

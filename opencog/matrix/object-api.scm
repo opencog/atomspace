@@ -90,9 +90,10 @@
 ;     ; the right side of the (row, column) pairs.
 ;     (define (get-right-type) 'WordNode)
 ;
-;     ; Return the type of the pair itself.  In this example, each pair
-;     ; will be of the form (ListLink (Word "row") (Word "col"))
-;     (define (get-pair-type) 'ListLink)
+;     ; Return the type of the link that holds the pair.  In this
+;     ; example, each pair will be held in the form
+;     ;  (Evaluation (Predicate "foo") (List (Word "row") (Word "col")))
+;     (define (get-pair-type) 'EvaluationLink)
 ;
 ;     ; Return the atom for a matrix (row,column) pair, if it exists,
 ;     ; else return nil. In this example, the matrix is defined by an
@@ -103,26 +104,34 @@
 ;     ; so on. Users are free to (are encouraged to) use this atom to
 ;     ; attach additional information and statistics.
 ;     ;
-;     ; The PAIR atom must be of 'pair-type, that is, a ListLink in this
-;     ; example.  Note: the cog-link function does NOT create the atom,
-;     ; if it does not already exist!
-;     (define (get-pair PAIR)
-;        (cog-link 'EvaluationLink (Predicate "foo") PAIR))
+;     (define (get-pair L-ATOM R-ATOM)
+;        (define maybe-list (cog-link 'ListLink L-ATOM R-ATOM))
+;        (if (null? maybe-list) '()
+;           (cog-link 'EvaluationLink (Predicate "foo") maybe-list)))
 ;
-;     ; Return the observed count for PAIR, if it exists, else
-;     ; return zero. The PAIR atom must be of type 'pair-type;
-;     ; that is, a ListLink in this example.
-;     (define (get-pair-count PAIR)
-;        (define stats-atom (get-pair PAIR))
-;        (if (null? stats-atom) 0
-;           (cog-value-ref
-;               (cog-value stats-atom (Predicate "counter")) 42)))
+;     ; Return the observed count for the pair PAIR.
+;     (define (get-count PAIR)
+;        (cog-value-ref (cog-value PAIR (Predicate "counter")) 42))
+;
+;     ; Return the observed count for the pair (L-ATOM, R-ATOM), if it
+;     ; exists, else return zero.
+;     (define (get-pair-count L-ATOM R-ATOM)
+;        (define stats-atom (get-pair L-ATOM R-ATOM))
+;        (if (null? stats-atom) 0 (get-count stats-atom)))
 ;
 ;     ; Return the atom holding the count, creating it if it does
-;     ; not yet exist.  Returns the same structure as the 'item-pair
+;     ; not yet exist.  Returns the same structure as the 'get-pair
 ;     ; method (the get-pair function, above).
-;     (define (make-pair PAIR)
-;        (EvaluationLink (Predicate "foo") PAIR))
+;     (define (make-pair L-ATOM R-ATOM)
+;        (Evaluation (Predicate "foo") (List L-ATOM R-ATOM)))
+;
+;     ; Return the left member of the pair. Given the pair-atom,
+;     ; locate the left-side atom.
+;     (define (get-left-element PAIR)
+;        (gadr PAIR))
+;
+;     (define (get-right-element PAIR)
+;        (gddr PAIR))
 ;
 ;     ; Return an atom to which column subtotals can be attached,
 ;     ; such as, for example, the subtotal `N(*,y)`. Thus, `y`
@@ -169,8 +178,11 @@
 ;              ((right-type) get-right-type)
 ;              ((pair-type) get-pair-type)
 ;              ((pair-count) get-pair-count)
-;              ((item-pair) get-pair)
+;              ((get-pair) get-pair)
+;              ((get-count) get-count)
 ;              ((make-pair) make-pair)
+;              ((left-element) get-left-element)
+;              ((right-element) get-right-element)
 ;              ((left-wildcard) get-left-wildcard)
 ;              ((right-wildcard) get-right-wildcard)
 ;              ((wild-wild) get-wild-wild)
@@ -185,7 +197,7 @@
 
 (use-modules (srfi srfi-1))
 (use-modules (ice-9 optargs)) ; for define*-public
-(use-modules (opencog))
+(use-modules (opencog) (opencog exec))
 
 ; ---------------------------------------------------------------------
 
@@ -239,51 +251,33 @@
 			(right-type (LLOBJ 'right-type))
 		)
 
-		; Return a list of all atoms of TYPE which appear in a Link
-		; of type 'pair-type
-		(define (get-basis TYPE PAIR-FILT)
-			(remove!
-				(lambda (item)
-					(null? (PAIR-FILT item (cog-incoming-by-type item pair-type))))
-				(cog-get-atoms TYPE)))
-
-		; Given a left-item, and a list of pairs, return only those
-		; pairs in which the left-item really is on the left, and
-		; the correct type is on the right.
-		(define (good-right-pairs left-item pair-list)
-			(filter!
-				(lambda (pr)
-					(and
-						(eq? 2 (cog-arity pr))
-						(equal? left-item (gar pr))
-						(eq? right-type (cog-type (gdr pr)))))
-				pair-list))
-
-		(define (good-left-pairs right-item pair-list)
-			(filter!
-				(lambda (pr)
-					(and
-						(eq? 2 (cog-arity pr))
-						(eq? left-type (cog-type (gar pr)))
-						(equal? right-item (gdr pr))))
-				pair-list))
+		; Perform a query to find all atoms that might appear on
+		; the left, or the right of a pair.  Return a list of them.
+		(define (do-get-basis LEF)
+			(define uleft (uniquely-named-variable))
+			(define uright (uniquely-named-variable))
+			(define term (LLOBJ 'make-pair uleft uright))
+			(define setlnk (cog-execute! (Bind
+				(VariableList
+					(TypedVariable uleft (Type (symbol->string left-type)))
+					(TypedVariable uright (Type (symbol->string right-type))))
+				term (if LEF uleft uright))))
+			(define basis (cog-outgoing-set setlnk))
+			(cog-extract setlnk)
+			(cog-extract-recursive uleft)
+			(cog-extract-recursive uright)
+			basis)
 
 		; Return a list of all of the atoms that might ever appear on
 		; the left-hand-side of a pair.  This is the set of all possible
 		; items x from the pair (x,y) for any y.
 		;
-		; XXX FIXME ... the good-right-pairs check is extremely
-		; CPU-expensive! Its currently taking 3 minutes to get the
-		; list of words!
-		;
 		(define (get-left-basis)
-			(if (null? l-basis)
-				(set! l-basis (get-basis left-type good-right-pairs)))
+			(if (null? l-basis) (set! l-basis (do-get-basis #t)))
 			l-basis)
 
 		(define (get-right-basis)
-			(if (null? r-basis)
-				(set! r-basis (get-basis right-type good-left-pairs)))
+			(if (null? r-basis) (set! r-basis (do-get-basis #f)))
 			r-basis)
 
 		(define (get-left-size)
@@ -299,43 +293,43 @@
 		; and an object of type (LLOBJ 'left-type) on the left.
 		; The point of this function is to find and return the complete
 		; wild-card set (*,y) = {(x,y) | there-exists pair (x,y) for some x}
-		; The pairs are Links of type 'pair-type, of arity two. That is,
-		; this returns a list of atoms of the form
+		; The pairs are Links of type 'pair-type, as would be returned by
+		; 'get-pair. That is, this returns a list of atoms of the form
 		;
-		;    (cog-link (LLOBJ 'pair-type)
-		;         (cog-atom (LLOBJ 'left-type) ...)
-		;         ITEM)
+		;    (LLOBJ 'make-pair $variable ITEM)
 		;
 		; ITEM should be an atom of (LLOBJ 'right-type); if it isn't,
 		; the the behavior is undefined.
 		;
 		; Currently, this implementation always goes back to the
-		; atomspace, and re-filters the results each time.  Some
-		; performance could be gained, at the expense of greater
-		; memory usage, by using the atom cache to save these results.
+		; atomspace, and performs a query each time.  Some performance
+		; could be gained, at the expense of greater memory usage, by
+		; using the atom cache to save these results. Also, it turns
+		; out that the current query API is inadequate; this does some
+		; forced atom deletion to make up for the ineffiency.
 		;
 		(define (get-left-stars ITEM)
-			(filter
-				(lambda (lnk)
-					(define oset (cog-outgoing-set lnk))
-					(and
-						(equal? 2 (cog-arity lnk))
-						(equal? left-type (cog-type (first oset)))
-						(equal? ITEM (second oset))
-					))
-				(cog-incoming-by-type ITEM pair-type)))
+			(define uniqvar (uniquely-named-variable))
+			(define term (LLOBJ 'make-pair uniqvar ITEM))
+			(define setlnk (cog-execute! (Bind (TypedVariable
+					uniqvar (Type (symbol->string left-type)))
+				term term)))
+			(define stars (cog-outgoing-set setlnk))
+			(cog-extract setlnk)
+			(cog-extract-recursive uniqvar)
+			stars)
 
 		; Same as above, but on the right.
 		(define (get-right-stars ITEM)
-			(filter
-				(lambda (lnk)
-					(define oset (cog-outgoing-set lnk))
-					(and
-						(equal? 2 (cog-arity lnk))
-						(equal? ITEM (first oset))
-						(equal? right-type (cog-type (second oset)))
-					))
-				(cog-incoming-by-type ITEM pair-type)))
+			(define uniqvar (uniquely-named-variable))
+			(define term (LLOBJ 'make-pair ITEM uniqvar))
+			(define setlnk (cog-execute! (Bind (TypedVariable
+					uniqvar (Type (symbol->string right-type)))
+				term term)))
+			(define stars (cog-outgoing-set setlnk))
+			(cog-extract setlnk)
+			(cog-extract-recursive uniqvar)
+			stars)
 
 		;-------------------------------------------
 		; Return default, only if LLOBJ does not provide symbol
@@ -413,7 +407,7 @@
   atomspace.  A method is provided to set the value, as well.
 
   Here, the LLOBJ is expected to be an object, with methods for
-  'item-pair 'make-pair 'left-wildcard 'right-wildcard and 'wild-wild
+  'get-pair 'make-pair 'left-wildcard 'right-wildcard and 'wild-wild
   on it, in the form documented above for the \"low-level API class\".
 "
 	; ----------------------------------------------------
@@ -493,7 +487,7 @@
   provide a reasonable default.
 
   Here, the LLOBJ is expected to be an object, with methods for
-  'item-pair 'make-pair 'left-wildcard and 'right-wildcard on it,
+  'get-pair 'make-pair 'left-wildcard and 'right-wildcard on it,
   in the form documented above for the \"low-level API class\".
 
   The optional ID argument should be #f or a string, used to construct
@@ -622,18 +616,18 @@
 	; Return the observational frequency on PAIR.
 	; If the PAIR does not exist (was not observed) return 0.
 	(define (get-pair-freq PAIR)
-		(get-freq (LLOBJ 'item-pair PAIR)))
+		(get-freq PAIR))
 
 	(define (get-pair-logli PAIR)
-		(get-logli (LLOBJ 'item-pair PAIR)))
+		(get-logli PAIR))
 
 	(define (get-pair-entropy PAIR)
-		(get-entropy (LLOBJ 'item-pair PAIR)))
+		(get-entropy PAIR))
 
 	; Set the frequency and log-frequency on PAIR
 	; Return the atom that holds this count.
 	(define (set-pair-freq PAIR FREQ)
-		(set-freq (LLOBJ 'make-pair PAIR) FREQ))
+		(set-freq PAIR FREQ))
 
 	; ----------------------------------------------------
 
@@ -641,16 +635,16 @@
 	; The MI is defined as
 	; + P(x,y) log_2 P(x,y) / P(x,*) P(*,y)
 	(define (get-pair-mi PAIR)
-		(get-total-mi (LLOBJ 'item-pair PAIR)))
+		(get-total-mi PAIR))
 
 	; Return the fractional MI (lexical attraction) on the pair.
 	; + log_2 P(x,y) / P(x,*) P(*,y)
 	; It differs from the MI above only by the leading probability.
 	(define (get-pair-fmi PAIR)
-		(get-fractional-mi (LLOBJ 'item-pair PAIR)))
+		(get-fractional-mi PAIR))
 
 	(define (set-pair-mi PAIR MI FMI)
-		(set-mi (LLOBJ 'item-pair PAIR) MI FMI))
+		(set-mi PAIR MI FMI))
 
 	; ----------------------------------------------------
 	; Get the left wildcard frequency

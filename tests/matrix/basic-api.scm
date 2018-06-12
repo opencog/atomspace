@@ -20,39 +20,48 @@
 	; the right side of the (row, column) pairs.
 	(define (get-right-type) 'WordNode)
 
-	; Return the type of the pair itself.  In this example, each pair
-	; will be of the form (ListLink (Word "row") (Word "col"))
-	(define (get-pair-type) 'ListLink)
+	; Return the type of the link that holds the pair.  In this
+	; example, each pair will be held in the form
+	;  (Evaluation (Predicate "foo") (List (Word "row") (Word "col")))
+	(define (get-pair-type) 'EvaluationLink)
 
 	; Return the atom for a matrix (row,column) pair, if it exists,
 	; else return nil. In this example, the matrix is defined by an
 	; EvaluationLink holding the ListLink. This atom is where all
 	; values associated with this matrix are held.  This includes not
 	; only the count (the number of observations of the pair) but also
-	; any dervides values, such as frequency, mutual information, and
+	; any derived values, such as frequency, mutual information, and
 	; so on. Users are free to (are encouraged to) use this atom to
 	; attach additional information and statistics.
 	;
-	; The PAIR atom must be of 'pair-type, that is, a ListLink in this
-	; example.  Note: the cog-link function does NOT create the atom,
-	; if it does not already exist!
-	(define (get-pair PAIR)
-		(cog-link 'EvaluationLink (Predicate "foo") PAIR))
+	(define (get-pair L-ATOM R-ATOM)
+		(define maybe-list (cog-link 'ListLink L-ATOM R-ATOM))
+		(if (null? maybe-list) '()
+			(cog-link 'EvaluationLink (Predicate "foo") maybe-list)))
 
-	; Return the observed count for PAIR, if it exists, else
-	; return zero. The PAIR atom must be of type 'pair-type;
-	; that is, a ListLink in this example.
-	(define (get-pair-count PAIR)
-		(define stats-atom (get-pair PAIR))
-		(if (null? stats-atom) 0
-			(cog-value-ref
-				 (cog-value stats-atom (Predicate "counter")) 2)))
+	; Return the observed count for the pair PAIR.
+	(define (get-count PAIR)
+		(cog-value-ref (cog-value PAIR (Predicate "counter")) 2))
+
+	; Return the observed count for the pair (L-ATOM, R-ATOM), if it
+	; exists, else return zero.
+	(define (get-pair-count L-ATOM R-ATOM)
+		(define stats-atom (get-pair L-ATOM R-ATOM))
+		(if (null? stats-atom) 0 (get-count stats-atom)))
 
 	; Return the atom holding the count, creating it if it does
 	; not yet exist.  Returns the same structure as the 'item-pair
 	; method (the get-pair function, above).
-	(define (make-pair PAIR)
-		(EvaluationLink (Predicate "foo") PAIR))
+	(define (make-pair L-ATOM R-ATOM)
+		(EvaluationLink (Predicate "foo") (List L-ATOM R-ATOM)))
+
+	; Return the left member of the pair. Given the pair-atom,
+	; locate the left-side atom.
+	(define (get-left-element PAIR)
+		(gadr PAIR))
+
+	(define (get-right-element PAIR)
+		(gddr PAIR))
 
 	; Return an atom to which column subtotals can be attached,
 	; such as, for example, the subtotal `N(*,y)`. Thus, `y`
@@ -99,8 +108,11 @@
 				((right-type) get-right-type)
 				((pair-type) get-pair-type)
 				((pair-count) get-pair-count)
-				((item-pair) get-pair)
+				((get-pair) get-pair)
+				((get-count) get-count)
 				((make-pair) make-pair)
+				((left-element) get-left-element)
+				((right-element) get-right-element)
 				((left-wildcard) get-left-wildcard)
 				((right-wildcard) get-right-wildcard)
 				((wild-wild) get-wild-wild)

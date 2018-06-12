@@ -100,7 +100,7 @@
 ; ---------------------------------------------------------------------
 
 (define*-public (add-support-compute LLOBJ
-	 #:optional (GET-CNT 'pair-count))
+	 #:optional (GET-CNT 'get-count))
 "
   add-support-compute LLOBJ - Extend LLOBJ with methods to
   compute wild-card sums, including the support (lp-norm for p=0),
@@ -149,16 +149,10 @@
 		)
 
 		; -------------
-		; Given a list of low-level pairs, return list of high-level
-		; pairs for which the count is non-zero. Internal use only.
+		; Filter and return only pairs with non-zero count.
+		; Internal use only.
 		(define (non-zero-filter LIST)
-			(filter-map
-				(lambda (lopr)
-					; 'item-pair returns the atom holding the count
-					(define hipr (LLOBJ 'item-pair lopr))
-					(define cnt (get-cnt lopr))
-					(if (< 0 cnt) hipr #f))
-				LIST))
+			(filter (lambda (lopr) (< 0 (get-cnt lopr))) LIST))
 
 		; Return a list of all pairs (x, y) for y == ITEM for which
 		; N(x,y) > 0.  Specifically, this returns the pairs which
@@ -175,10 +169,7 @@
 		(define (get-support-size LIST)
 			(fold
 				(lambda (lopr sum)
-					; 'item-pair returns the atom holding the count
-					(+ sum
-						(if (< 0 (get-cnt lopr))
-							1 0)))
+					(if (< 0 (get-cnt lopr)) (+ sum 1) sum))
 				0
 				LIST))
 

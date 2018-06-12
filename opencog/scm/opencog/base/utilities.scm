@@ -82,37 +82,41 @@
   Return the floating-point mean (strength) of a TruthValue.
   Deprecated; use cog-tv-mean instead.
 "
-	(cog-tv-mean TV))
+	(cog-tv-mean TV)
+)
 
 (define-public (tv-conf TV)
 "
   Return the floating-point confidence of a TruthValue.
   Deprecated; use cog-tv-confidence instead.
 "
-	(cog-tv-confidence TV))
+	(cog-tv-confidence TV)
+)
 
 (define-public (tv-non-null-conf? TV)
 "
   Return #t if the confidence of tv is positive, #f otherwise.
   Deprecated. Just say (< 0 (cog-tv-confidence TV)) instead.
 "
-	(< 0 (cog-tv-confidence TV)))
+	(< 0 (cog-tv-confidence TV))
+)
 
 ;
 ; Simple truth values won't have a count. Its faster to just check
 ; for #f than to call (cog-ctv? tv)
-(define-public (tv-count tv)
+(define-public (tv-count TV)
 "
   Return the floating-point count of a CountTruthValue.
   Deprecated; use cog-tv-count instead.
 "
-	(cog-tv-count TV))
+	(cog-tv-count TV)
+)
 
-(define-public (tv-positive-count tv)
+(define-public (tv-positive-count TV)
 "
   Return the floating-point positive count of a EvidenceCountTruthValue.
 "
-	(define pos-cnt (assoc-ref (cog-tv->alist tv) 'positive-count))
+	(define pos-cnt (assoc-ref (cog-tv->alist TV) 'positive-count))
 	(if (eq? pos-cnt #f) 0 pos-cnt)
 )
 
@@ -1086,9 +1090,13 @@
 
 (define-public (random-node-name node-type random-length prefix)
 "
-  Creates a random node name of type `node-type`, with name `prefix` followed by
-  a random string of length `random-length`. It Makes sure the resulting node
-  did not previously exist in the current atomspace.
+  random-node-name TYPE LENGTH PREFIX - create a unique node.
+
+  Create a random string, consisting of `PREFIX` followed by
+  a random string of length `LENGTH`.  The string is checked, so
+  that no node of type `TYPE` exists in the atomspace at the time
+  of this call. Thus, the name is almost unique -- there still is
+  a tiny window in which a race can occur.
 "
 	(define (check-name? node-name node-type)
 	"
@@ -1111,13 +1119,21 @@
 	node-name
 )
 
-;; TODO rename to random-variable-name
 (define-public (choose-var-name)
 "
- Creates a new random VariableNode.
+ DEPRECATED - use uniquely-named-variable instead.
 "
-    (random-node-name 'VariableNode 36 "$")
+    (random-node-name 'VariableNode 24 "$")
 )
+
+(define-public (uniquely-named-variable)
+"
+ uniquely-named-variable -- Creates a new uniquely-named VariableNode.
+"
+    (Variable (random-node-name 'VariableNode 24 "$"))
+)
+
+
 
 ; -----------------------------------------------------------------------
 
