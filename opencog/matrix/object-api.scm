@@ -247,10 +247,17 @@
 			(r-basis '())
 			(l-size 0)
 			(r-size 0)
+
+			; Caches for the left and right stars
 			(l-hit (make-atomic-box '()))
 			(l-miss (make-atomic-box '()))
 			(r-hit (make-atomic-box '()))
 			(r-miss (make-atomic-box '()))
+
+			; Temporary atomspaces
+			(l-asp (make-fluid))
+			(r-asp (make-fluid))
+
 			(pair-type (LLOBJ 'pair-type))
 			(left-type (LLOBJ 'left-type))
 			(right-type (LLOBJ 'right-type))
@@ -335,6 +342,51 @@
 			(cog-extract setlnk)
 			(cog-extract-recursive uniqvar)
 			stars)
+
+		; Use a temporary atomspace for performing the query.
+		; This is thread-safe, but quite slow when threads are
+		; being constantly created/destroyed, as it results in
+		; the temp atomspace being created/destroyed, which is
+		; just inefficient and slow, in the end.
+		(define (tmp-as-do-get-left-stars ITEM)
+			(let* ((tmp-asp
+						(let ((asp (fluid-ref l-asp)))
+							(if asp asp
+								(let ((nasp (cog-new-atomspace (cog-atomspace))))
+									(fluid-set! l-asp nasp)
+									nasp))))
+					(oldas (cog-set-atomspace! tmp-asp))
+					(uniqvar (uniquely-named-variable))
+					(term (LLOBJ 'make-pair uniqvar ITEM))
+					(setlnk (cog-execute! (Bind (TypedVariable
+							uniqvar (Type (symbol->string left-type)))
+						term term)))
+					(stars (cog-outgoing-set setlnk))
+				)
+				(cog-atomspace-clear tmp-asp)
+				(cog-set-atomspace! oldas)
+				stars))
+
+		; Same as above, but on the right.
+		(define (tmp-as-do-get-right-stars ITEM)
+			(let* ((tmp-asp
+						(let ((asp (fluid-ref r-asp)))
+							(if asp asp
+								(let ((nasp (cog-new-atomspace (cog-atomspace))))
+									(fluid-set! r-asp nasp)
+									nasp))))
+					(oldas (cog-set-atomspace! tmp-asp))
+					(uniqvar (uniquely-named-variable))
+					(term (LLOBJ 'make-pair ITEM uniqvar))
+					(setlnk (cog-execute! (Bind (TypedVariable
+							uniqvar (Type (symbol->string right-type)))
+						term term)))
+					(stars (cog-outgoing-set setlnk))
+				)
+				(cog-atomspace-clear tmp-asp)
+				(cog-set-atomspace! oldas)
+				stars))
+
 
 		; Cache the most recent two values.  This should offer a
 		; significant performance enhancement for computing cosines
