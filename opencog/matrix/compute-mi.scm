@@ -30,7 +30,7 @@
 ; on the "low-level API". These include:
 ;   'left-type and 'right-type, both of which should return 'WordNode
 ;         for the above.
-;   'item-pair, which should return the EvaluationLink, given the
+;   'get-pair, which should return the EvaluationLink, given the
 ;        ListLink
 ;   'left-wildcard and 'right-wildcard, indicating where the partial
 ;        sums, such as N(x,*) and N(*,y) should be stored.

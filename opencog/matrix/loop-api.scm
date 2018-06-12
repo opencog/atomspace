@@ -15,7 +15,7 @@
 ;
 ; The matrix is accessed using the wild-card stars object, and
 ; specifically uses these methods:
-;   'item-pair, which should return high-level pair, given the
+;   'get-pair, which should return high-level pair, given the
 ;        low-level pair.
 ;   'left-basis and 'right-basis, providing a list of all rows and columns
 ;   'left-stars and 'right-stars, providing a list of all non-zero

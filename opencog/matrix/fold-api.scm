@@ -119,9 +119,9 @@
   then the returned triple would be [(), (x,z), (x,w)].  At least one
   of the entries in the tuple is non-nil.
 
-  The 'item-pair method just distributes over the tuples. In the
-  above example, 'item-pair [(x,y), (x,z), (x,w)] will return the
-  triple ['item-pair (x,y), 'item-pair (x,z), 'item-pair (x,w)]
+  The 'get-pair method just distributes over the tuples. In the
+  above example, 'get-pair [(x,y), (x,z), (x,w)] will return the
+  triple ['get-pair (x,y), 'get-pair (x,z), 'get-pair (x,w)]
 
   The 'pair-count method will apply FUNC to the tuple. In the above
   example, the 'pair-count method will return a number, specifically,
@@ -237,7 +237,7 @@
 		; Given a TUPLE of low-level pairs, return a tuple of high-level
 		; pairs.
 		(define (get-pair TUPLE)
-			(map (lambda (lopr) (LLOBJ 'item-pair lopr)) TUPLE))
+			(map (lambda (lopr) (LLOBJ 'get-pair lopr)) TUPLE))
 
 		; Given a TUPLE of high-level pairs, return a single number.
 		; The FUNC is applied to reduce the counts on each pair
@@ -254,7 +254,7 @@
 			(case meth
 				((left-stars)  left-star-union)
 				((right-stars) right-star-union)
-				((item-pair)   get-pair)
+				((get-pair)    get-pair)
 				((pair-count)  get-func-count)
 				(else          (LLOBJ 'provides meth))))
 
@@ -265,7 +265,7 @@
 			(case message
 				((left-stars)      (apply left-star-union args))
 				((right-stars)     (apply right-star-union args))
-				((item-pair)       (apply get-pair args))
+				((get-pair)        (apply get-pair args))
 				((pair-count)      (apply get-func-count args))
 				((provides)        (apply provides args))
 				(else              (apply LLOBJ (cons message args))))

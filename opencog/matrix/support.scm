@@ -154,8 +154,8 @@
 		(define (non-zero-filter LIST)
 			(filter-map
 				(lambda (lopr)
-					; 'item-pair returns the atom holding the count
-					(define hipr (LLOBJ 'item-pair lopr))
+					; 'get-pair returns the atom holding the count
+					(define hipr (LLOBJ 'get-pair lopr))
 					(define cnt (get-cnt lopr))
 					(if (< 0 cnt) hipr #f))
 				LIST))
@@ -175,7 +175,7 @@
 		(define (get-support-size LIST)
 			(fold
 				(lambda (lopr sum)
-					; 'item-pair returns the atom holding the count
+					; 'get-pair returns the atom holding the count
 					(+ sum
 						(if (< 0 (get-cnt lopr))
 							1 0)))
