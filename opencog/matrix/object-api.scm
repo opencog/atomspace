@@ -605,14 +605,14 @@
 	; ----------------------------------------------------
 	; Return the observational frequency on PAIR.
 	; If the PAIR does not exist (was not observed) return 0.
-	(define (get-pair-freq L-ATOM R-ATOM)
-		(get-freq (LLOBJ 'get-pair L-ATOM R-ATOM)))
+	(define (get-pair-freq PAIR)
+		(get-freq PAIR))
 
-	(define (get-pair-logli L-ATOM R-ATOM)
-		(get-logli (LLOBJ 'get-pair L-ATOM R-ATOM)))
+	(define (get-pair-logli PAIR)
+		(get-logli PAIR))
 
-	(define (get-pair-entropy L-ATOM R-ATOM)
-		(get-entropy (LLOBJ 'get-pair L-ATOM R-ATOM)))
+	(define (get-pair-entropy PAIR)
+		(get-entropy PAIR))
 
 	; Set the frequency and log-frequency on PAIR
 	; Return the atom that holds this count.
