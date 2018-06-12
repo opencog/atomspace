@@ -789,10 +789,21 @@ it is supported.
 
 TODO
 ----
+ * API change: Instead of returning results wrapped in a huge SetLink,
+   the results should be returned, linked to some anchor. Huge SetLinks
+   suck. There's an open github issue for this.
+
+ * Performance: If a bind-link is of the form `(Bind $X $Y body term)`
+   and variabile $Y does not appear anywhere in term, then repeated
+   groundings for $Y can be avoided, and should be avoided.
+
+ * Performance: If a bind-link is of the form `(Bind variables term term)`
+   then there is no point in instantiating `term` a second time - just
+   repeat what is there.
 
  * Atomspaces are done wrong. Grounding whould always be performed
-   in the atomspace of the bindlink.  Thus should be fetched directly
-   from the bind-link, and not passed as a third-party parameter.
+   in the same atomspace that the bindlink is in.  Thus should be fetched
+   directly from the bind-link, and not passed as a third-party parameter.
 
  * Enhancement: Add support for VariableLink, so that, for example,
    (VariableLink $R (VariableNode $A) (VariableNode $B)) matches
