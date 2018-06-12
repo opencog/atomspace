@@ -184,7 +184,7 @@
 
 (use-modules (srfi srfi-1))
 (use-modules (ice-9 optargs)) ; for define*-public
-(use-modules (opencog))
+(use-modules (opencog) (opencog exec))
 
 ; ---------------------------------------------------------------------
 
@@ -298,43 +298,43 @@
 		; and an object of type (LLOBJ 'left-type) on the left.
 		; The point of this function is to find and return the complete
 		; wild-card set (*,y) = {(x,y) | there-exists pair (x,y) for some x}
-		; The pairs are Links of type 'pair-type, of arity two. That is,
-		; this returns a list of atoms of the form
+		; The pairs are Links of type 'pair-type, as would be returned by
+		; 'item-pair. That is, this returns a list of atoms of the form
 		;
-		;    (cog-link (LLOBJ 'pair-type)
-		;         (cog-atom (LLOBJ 'left-type) ...)
-		;         ITEM)
+		;    (LLOBJ 'make-pair $variable ITEM)
 		;
 		; ITEM should be an atom of (LLOBJ 'right-type); if it isn't,
 		; the the behavior is undefined.
 		;
 		; Currently, this implementation always goes back to the
-		; atomspace, and re-filters the results each time.  Some
-		; performance could be gained, at the expense of greater
-		; memory usage, by using the atom cache to save these results.
+		; atomspace, and performs a query each time.  Some performance
+		; could be gained, at the expense of greater memory usage, by
+		; using the atom cache to save these results. Also, it turns
+		; out that the current query API is inadequate; this does some
+		; forced atom deletion to make up for the ineffiency.
 		;
 		(define (get-left-stars ITEM)
-			(filter
-				(lambda (lnk)
-					(define oset (cog-outgoing-set lnk))
-					(and
-						(equal? 2 (cog-arity lnk))
-						(equal? left-type (cog-type (first oset)))
-						(equal? ITEM (second oset))
-					))
-				(cog-incoming-by-type ITEM pair-type)))
+			(define uniqvar (Variable "$X"))
+			(define term (LLOBJ 'make-pair uniqvar ITEM))
+			(define setlnk (cog-execute! (Bind (TypedVariable
+					uniqvar (Type (symbol->string left-type)))
+				term term)))
+			(define stars (cog-outgoing-set setlnk))
+			(cog-extract setlnk)
+			(cog-extract-recursive uniqvar)
+			stars)
 
 		; Same as above, but on the right.
 		(define (get-right-stars ITEM)
-			(filter
-				(lambda (lnk)
-					(define oset (cog-outgoing-set lnk))
-					(and
-						(equal? 2 (cog-arity lnk))
-						(equal? ITEM (first oset))
-						(equal? right-type (cog-type (second oset)))
-					))
-				(cog-incoming-by-type ITEM pair-type)))
+			(define uniqvar (Variable "$X"))
+			(define term (LLOBJ 'make-pair ITEM uniqvar))
+			(define setlnk (cog-execute! (Bind (TypedVariable
+					uniqvar (Type (symbol->string right-type)))
+				term term)))
+			(define stars (cog-outgoing-set setlnk))
+			(cog-extract setlnk)
+			(cog-extract-recursive uniqvar)
+			stars)
 
 		;-------------------------------------------
 		; Return default, only if LLOBJ does not provide symbol
