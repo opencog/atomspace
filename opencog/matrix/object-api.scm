@@ -634,17 +634,17 @@
 	; Return the MI value on the pair.
 	; The MI is defined as
 	; + P(x,y) log_2 P(x,y) / P(x,*) P(*,y)
-	(define (get-pair-mi L-ATOM R-ATOM)
-		(get-total-mi (LLOBJ 'get-pair L-ATOM R-ATOM)))
+	(define (get-pair-mi PAIR)
+		(get-total-mi PAIR))
 
 	; Return the fractional MI (lexical attraction) on the pair.
 	; + log_2 P(x,y) / P(x,*) P(*,y)
 	; It differs from the MI above only by the leading probability.
-	(define (get-pair-fmi L-ATOM R-ATOM)
-		(get-fractional-mi (LLOBJ 'get-pair L-ATOM R-ATOM)))
+	(define (get-pair-fmi PAIR)
+		(get-fractional-mi PAIR))
 
-	(define (set-pair-mi L-ATOM R-ATOM MI FMI)
-		(set-mi (LLOBJ 'get-pair L-ATOM R-ATOM) MI FMI))
+	(define (set-pair-mi PAIR MI FMI)
+		(set-mi PAIR MI FMI))
 
 	; ----------------------------------------------------
 	; Get the left wildcard frequency
