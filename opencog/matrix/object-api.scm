@@ -197,6 +197,7 @@
 
 (use-modules (srfi srfi-1))
 (use-modules (ice-9 optargs)) ; for define*-public
+(use-modules (ice-9 atomic))  ; for atomic-box
 (use-modules (opencog) (opencog exec))
 
 ; ---------------------------------------------------------------------
@@ -246,6 +247,10 @@
 			(r-basis '())
 			(l-size 0)
 			(r-size 0)
+			(l-hit (make-atomic-box '()))
+			(l-miss (make-atomic-box '()))
+			(r-hit (make-atomic-box '()))
+			(r-miss (make-atomic-box '()))
 			(pair-type (LLOBJ 'pair-type))
 			(left-type (LLOBJ 'left-type))
 			(right-type (LLOBJ 'right-type))
@@ -301,14 +306,14 @@
 		; ITEM should be an atom of (LLOBJ 'right-type); if it isn't,
 		; the the behavior is undefined.
 		;
-		; Currently, this implementation always goes back to the
-		; atomspace, and performs a query each time.  Some performance
-		; could be gained, at the expense of greater memory usage, by
-		; using the atom cache to save these results. Also, it turns
-		; out that the current query API is inadequate; this does some
-		; forced atom deletion to make up for the ineffiency.
+		; XXX FIXME! The current implementation is not thread-safe!
+		; The problem here is that the result of the search is returned
+		; in a SetLink, then that SetLink is destroyed.  If the the same
+		; search is done in a different thread, the same SetLink gets
+		; returned, and can get destroyed tehre, before it's looked-at
+		; here.  This is a very unsatisfactory state of affairs!
 		;
-		(define (get-left-stars ITEM)
+		(define (do-get-left-stars ITEM)
 			(define uniqvar (uniquely-named-variable))
 			(define term (LLOBJ 'make-pair uniqvar ITEM))
 			(define setlnk (cog-execute! (Bind (TypedVariable
@@ -320,7 +325,7 @@
 			stars)
 
 		; Same as above, but on the right.
-		(define (get-right-stars ITEM)
+		(define (do-get-right-stars ITEM)
 			(define uniqvar (uniquely-named-variable))
 			(define term (LLOBJ 'make-pair ITEM uniqvar))
 			(define setlnk (cog-execute! (Bind (TypedVariable
@@ -331,6 +336,10 @@
 			(cog-extract-recursive uniqvar)
 			stars)
 
+		(define (get-left-stars ITEM)
+			(do-get-left-stars ITEM))
+		(define (get-right-stars ITEM)
+			(do-get-right-stars ITEM))
 		;-------------------------------------------
 		; Return default, only if LLOBJ does not provide symbol
 		(define (overload symbol default)
