@@ -85,7 +85,7 @@
 ; ---------------------------------------------------------------------
 ;
 (define*-public (add-tuple-math LLOBJ FUNC #:optional
-	(GET-CNT 'pair-count))
+	(GET-CNT 'get-count))
 "
   add-tuple-math LLOBJ FUNC - Extend LLOBJ with ability to take tuples
   of rows or columns, and then call FUNC on that tuple, in the place of
@@ -178,19 +178,18 @@
 
 		; ---------------
 		; Given a TUPLE of items of 'right-type, this returns
-		; a tuple of low-level pairs of LEFTY and each righty
-		; in the TUPLE.  If such a pair does not exist, the
-		; returned tuple will contain an empty list at that locus.
-		(define (get-left-lopr-tuple LEFTY TUPLE)
-			(define prty (LLOBJ 'pair-type))
+		; a tuple of pairs of LEFTY and each righty in the TUPLE.
+		; If such a pair does not exist, the returned tuple will
+		; contain an empty list at that locus.
+		(define (get-left-tuple LEFTY TUPLE)
 			(map
-				(lambda (rght) (cog-link prty LEFTY rght))
+				(lambda (rght) (LLOBJ 'get-pair LEFTY rght))
 				TUPLE))
 
-		(define (get-right-lopr-tuple RIGHTY TUPLE)
+		(define (get-right-tuple RIGHTY TUPLE)
 			(define prty (LLOBJ 'pair-type))
 			(map
-				(lambda (left) (cog-link prty left RIGHTY))
+				(lambda (left) (LLOBJ 'get-pair left RIGHTY))
 				TUPLE))
 
 		; ---------------
@@ -224,22 +223,17 @@
 
 		(define (left-star-union TUPLE)
 			(map
-				(lambda (lefty) (get-left-lopr-tuple lefty TUPLE))
+				(lambda (lefty) (get-left-tuple lefty TUPLE))
 				(get-left-union TUPLE)))
 
 		; Same as above, but for the right
 		(define (right-star-union TUPLE)
 			(map
-				(lambda (righty) (get-right-lopr-tuple righty TUPLE))
+				(lambda (righty) (get-right-tuple righty TUPLE))
 				(get-right-union TUPLE)))
 
 		; ---------------
-		; Given a TUPLE of low-level pairs, return a tuple of high-level
-		; pairs.
-		(define (get-pair TUPLE)
-			(map (lambda (lopr) (LLOBJ 'get-pair lopr)) TUPLE))
-
-		; Given a TUPLE of high-level pairs, return a single number.
+		; Given a TUPLE of pairs, return a single number.
 		; The FUNC is applied to reduce the counts on each pair
 		; in the tuple down to just one number.
 		(define (get-func-count TUPLE)
@@ -254,7 +248,6 @@
 			(case meth
 				((left-stars)  left-star-union)
 				((right-stars) right-star-union)
-				((get-pair)    get-pair)
 				((pair-count)  get-func-count)
 				(else          (LLOBJ 'provides meth))))
 
