@@ -154,7 +154,7 @@
 			; Add the left-side of the pair to the set.
 			(define (add-left-to-set LIST)
 				(for-each
-					(lambda (star-pair) (atom-set (gar star-pair)))
+					(lambda (star-pair) (atom-set (LLOBJ 'left-element star-pair)))
 					LIST))
 
 			; loop over everything in the tuple.
@@ -169,7 +169,7 @@
 			(define atom-set (make-atom-set))
 			(define (add-right-to-set LIST)
 				(for-each
-					(lambda (star-pair) (atom-set (gdr star-pair)))
+					(lambda (star-pair) (atom-set (LLOBJ 'right-element star-pair)))
 					LIST))
 			(for-each
 				(lambda (item) (add-right-to-set (star-obj 'right-stars item)))
@@ -187,7 +187,6 @@
 				TUPLE))
 
 		(define (get-right-tuple RIGHTY TUPLE)
-			(define prty (LLOBJ 'pair-type))
 			(map
 				(lambda (left) (LLOBJ 'get-pair left RIGHTY))
 				TUPLE))
