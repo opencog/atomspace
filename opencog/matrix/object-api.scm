@@ -258,6 +258,12 @@
 			(l-asp (make-fluid))
 			(r-asp (make-fluid))
 
+			; Temporary atomspaces, non-fluid style.
+			(l-mtx (make-mutex))
+			(r-mtx (make-mutex))
+			(l-ase (cog-new-atomspace (cog-atomspace)))
+			(r-ase (cog-new-atomspace (cog-atomspace)))
+
 			(pair-type (LLOBJ 'pair-type))
 			(left-type (LLOBJ 'left-type))
 			(right-type (LLOBJ 'right-type))
@@ -313,35 +319,34 @@
 		; ITEM should be an atom of (LLOBJ 'right-type); if it isn't,
 		; the the behavior is undefined.
 		;
-		; XXX FIXME! The current implementation is not thread-safe!
-		; The problem here is that the result of the search is returned
-		; in a SetLink, then that SetLink is destroyed.  If the the same
-		; search is done in a different thread, the same SetLink gets
-		; returned, and can get destroyed tehre, before it's looked-at
-		; here.  This is a very unsatisfactory state of affairs!
-		;
 		(define (do-get-left-stars ITEM)
-			(define uniqvar (uniquely-named-variable))
-			(define term (LLOBJ 'make-pair uniqvar ITEM))
-			(define setlnk (cog-execute! (Bind (TypedVariable
-					uniqvar (Type (symbol->string left-type)))
-				term term)))
-			(define stars (cog-outgoing-set setlnk))
-			(cog-extract setlnk)
-			(cog-extract-recursive uniqvar)
-			stars)
+			(let* ((lock (lock-mutex l-mtx))
+					(old-as (cog-set-atomspace! l-ase))
+					(uniqvar (VariableNode "$obj-api-left-star"))
+					(term (LLOBJ 'make-pair uniqvar ITEM))
+					(setlnk (cog-execute! (Bind (TypedVariable
+						uniqvar (Type (symbol->string left-type)))
+						term term)))
+					(stars (cog-outgoing-set setlnk)))
+				(cog-atomspace-clear l-ase)
+				(cog-set-atomspace! old-as)
+				(unlock-mutex l-mtx)
+				stars))
 
 		; Same as above, but on the right.
 		(define (do-get-right-stars ITEM)
-			(define uniqvar (uniquely-named-variable))
-			(define term (LLOBJ 'make-pair ITEM uniqvar))
-			(define setlnk (cog-execute! (Bind (TypedVariable
-					uniqvar (Type (symbol->string right-type)))
-				term term)))
-			(define stars (cog-outgoing-set setlnk))
-			(cog-extract setlnk)
-			(cog-extract-recursive uniqvar)
-			stars)
+			(let* ((lock (lock-mutex r-mtx))
+					(old-as (cog-set-atomspace! r-ase))
+					(uniqvar (VariableNode "$obj-api-right-star"))
+					(term (LLOBJ 'make-pair ITEM uniqvar))
+					(setlnk (cog-execute! (Bind (TypedVariable
+						uniqvar (Type (symbol->string right-type)))
+						term term)))
+					(stars (cog-outgoing-set setlnk)))
+				(cog-atomspace-clear r-ase)
+				(cog-set-atomspace! old-as)
+				(unlock-mutex r-mtx)
+				stars))
 
 		; Use a temporary atomspace for performing the query.
 		; This is thread-safe, but quite slow when threads are
@@ -356,10 +361,10 @@
 									(fluid-set! l-asp nasp)
 									nasp))))
 					(oldas (cog-set-atomspace! tmp-asp))
-					(uniqvar (uniquely-named-variable))
+					(uniqvar (VariableNode "$obj-api-left-star"))
 					(term (LLOBJ 'make-pair uniqvar ITEM))
 					(setlnk (cog-execute! (Bind (TypedVariable
-							uniqvar (Type (symbol->string left-type)))
+						uniqvar (Type (symbol->string left-type)))
 						term term)))
 					(stars (cog-outgoing-set setlnk))
 				)
@@ -376,10 +381,10 @@
 									(fluid-set! r-asp nasp)
 									nasp))))
 					(oldas (cog-set-atomspace! tmp-asp))
-					(uniqvar (uniquely-named-variable))
+					(uniqvar (VariableNode "$obj-api-right-star"))
 					(term (LLOBJ 'make-pair ITEM uniqvar))
 					(setlnk (cog-execute! (Bind (TypedVariable
-							uniqvar (Type (symbol->string right-type)))
+						uniqvar (Type (symbol->string right-type)))
 						term term)))
 					(stars (cog-outgoing-set setlnk))
 				)
