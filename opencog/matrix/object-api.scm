@@ -602,36 +602,36 @@
 	; ----------------------------------------------------
 	; Return the observational frequency on PAIR.
 	; If the PAIR does not exist (was not observed) return 0.
-	(define (get-pair-freq PAIR)
-		(get-freq (LLOBJ 'item-pair PAIR)))
+	(define (get-pair-freq L-ATOM R-ATOM)
+		(get-freq (LLOBJ 'item-pair L-ATOM R-ATOM)))
 
-	(define (get-pair-logli PAIR)
-		(get-logli (LLOBJ 'item-pair PAIR)))
+	(define (get-pair-logli L-ATOM R-ATOM)
+		(get-logli (LLOBJ 'item-pair L-ATOM R-ATOM)))
 
-	(define (get-pair-entropy PAIR)
-		(get-entropy (LLOBJ 'item-pair PAIR)))
+	(define (get-pair-entropy L-ATOM R-ATOM)
+		(get-entropy (LLOBJ 'item-pair L-ATOM R-ATOM)))
 
 	; Set the frequency and log-frequency on PAIR
 	; Return the atom that holds this count.
-	(define (set-pair-freq PAIR FREQ)
-		(set-freq (LLOBJ 'make-pair PAIR) FREQ))
+	(define (set-pair-freq L-ATOM R-ATOM FREQ)
+		(set-freq (LLOBJ 'make-pair L-ATOM R-ATOM) FREQ))
 
 	; ----------------------------------------------------
 
 	; Return the MI value on the pair.
 	; The MI is defined as
 	; + P(x,y) log_2 P(x,y) / P(x,*) P(*,y)
-	(define (get-pair-mi PAIR)
-		(get-total-mi (LLOBJ 'item-pair PAIR)))
+	(define (get-pair-mi L-ATOM R-ATOM)
+		(get-total-mi (LLOBJ 'item-pair L-ATOM R-ATOM)))
 
 	; Return the fractional MI (lexical attraction) on the pair.
 	; + log_2 P(x,y) / P(x,*) P(*,y)
 	; It differs from the MI above only by the leading probability.
-	(define (get-pair-fmi PAIR)
-		(get-fractional-mi (LLOBJ 'item-pair PAIR)))
+	(define (get-pair-fmi L-ATOM R-ATOM)
+		(get-fractional-mi (LLOBJ 'item-pair L-ATOM R-ATOM)))
 
-	(define (set-pair-mi PAIR MI FMI)
-		(set-mi (LLOBJ 'item-pair PAIR) MI FMI))
+	(define (set-pair-mi L-ATOM R-ATOM MI FMI)
+		(set-mi (LLOBJ 'item-pair L-ATOM R-ATOM) MI FMI))
 
 	; ----------------------------------------------------
 	; Get the left wildcard frequency
