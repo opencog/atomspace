@@ -198,6 +198,7 @@
 (use-modules (srfi srfi-1))
 (use-modules (ice-9 optargs)) ; for define*-public
 (use-modules (ice-9 atomic))  ; for atomic-box
+(use-modules (ice-9 threads)) ; for mutex locks
 (use-modules (opencog) (opencog exec))
 
 ; ---------------------------------------------------------------------
@@ -254,9 +255,11 @@
 			(r-hit (make-atomic-box '()))
 			(r-miss (make-atomic-box '()))
 
+#! ============ Alternate variant, not currently used.
 			; Temporary atomspaces
 			(l-asp (make-fluid))
 			(r-asp (make-fluid))
+=============== !#
 
 			; Temporary atomspaces, non-fluid style.
 			(l-mtx (make-mutex))
@@ -348,6 +351,8 @@
 				(unlock-mutex r-mtx)
 				stars))
 
+#! ============ Alternate variant, not currently used.
+Yes, this actually works -- its just not being used.
 		; Use a temporary atomspace for performing the query.
 		; This is thread-safe, but quite slow when threads are
 		; being constantly created/destroyed, as it results in
@@ -391,7 +396,7 @@
 				(cog-atomspace-clear tmp-asp)
 				(cog-set-atomspace! oldas)
 				stars))
-
+============= !#
 
 		; Cache the most recent two values.  This should offer a
 		; significant performance enhancement for computing cosines
