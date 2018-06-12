@@ -248,7 +248,7 @@
 			(case meth
 				((left-stars)  left-star-union)
 				((right-stars) right-star-union)
-				((pair-count)  get-func-count)
+				((get-count)   get-func-count)
 				(else          (LLOBJ 'provides meth))))
 
 		; ---------------
@@ -258,8 +258,7 @@
 			(case message
 				((left-stars)      (apply left-star-union args))
 				((right-stars)     (apply right-star-union args))
-				((get-pair)        (apply get-pair args))
-				((pair-count)      (apply get-func-count args))
+				((get-count)       (apply get-func-count args))
 				((provides)        (apply provides args))
 				(else              (apply LLOBJ (cons message args))))
 			)))

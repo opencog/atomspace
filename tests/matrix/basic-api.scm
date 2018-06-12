@@ -30,7 +30,7 @@
 	; EvaluationLink holding the ListLink. This atom is where all
 	; values associated with this matrix are held.  This includes not
 	; only the count (the number of observations of the pair) but also
-	; any dervides values, such as frequency, mutual information, and
+	; any derived values, such as frequency, mutual information, and
 	; so on. Users are free to (are encouraged to) use this atom to
 	; attach additional information and statistics.
 	;
