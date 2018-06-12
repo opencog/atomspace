@@ -56,7 +56,7 @@
 		(EvaluationLink (Predicate "foo") (List L-ATOM R-ATOM)))
 
 	; Return the left member of the pair. Given the pair-atom,
-	; extract the left-side atom.
+	; locate the left-side atom.
 	(define (get-left-element PAIR)
 		(gadr PAIR))
 
