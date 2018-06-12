@@ -8,7 +8,7 @@
 ; ---------------------------------------------------------------------
 ; OVERVIEW
 ; --------
-; Each correlation matix has a size - the left and right dimensions, aka
+; Each correlation matrix has a size - the left and right dimensions, aka
 ; the number of rows and columns.  These are returned by 'left-dim and
 ; 'right-dim.
 ;
@@ -109,7 +109,7 @@
     rms, the 'mean' must be taken, by dividing by the support. But
     after this is done, support is multiplied back in.  The point
     here is that count is not the average-count, and the length
-    is not divided by teh support either.  So the rms-count should
+    is not divided by the support either.  So the rms-count should
     avoid an accidental divide by the support; thus the slightly
     odd-looking formula above.
 

@@ -10,7 +10,7 @@
 ; The object here assumes that a pair-counting batch job has completed.
 ; That is, it assumes that there are cached values available for the
 ; individual pair frequencies, the wild-card frequencies, and the
-; inddividual pair MI values.
+; individual pair MI values.
 ;
 ; It uses these cached stats for frequencies and MI to compute left
 ; and right subtotals (row and column subtotals), which are then cached.
@@ -48,7 +48,7 @@
   'cache-left-mi        -- compute and cache the column mi
   'cache-right-mi       -- compute and cache the row mi
 
-  The cahced values are accessible via the standard frequency API.
+  The cached values are accessible via the standard frequency API.
 "
 	; Need the 'left-stars method, provided by add-pair-stars
 	; Need the 'left-wild-freq method, provided by add-pair-freq-api
@@ -179,7 +179,7 @@
 
   The object must have valid partial sums for the entropy and MI on it,
   viz, the ones computed by add-subtotal-mi-compute, above. These are
-  acessed via the standard frequency-object API. These must have been
+  accessed via the standard frequency-object API. These must have been
   pre-computed, before this object can be used.
 
   These methods loop over all rows and columns to compute the total sums.

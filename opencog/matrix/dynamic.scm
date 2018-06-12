@@ -46,7 +46,7 @@
   'left-release COL - Remove pairs (*, COL) from the atomspace. This
   intended to be used to minimize RAM usage when working with a large
   database.  The atoms are NOT removed from the database; only from
-  the atospace. If the atoms are in use (have a non-empty incoming
+  the atomspace. If the atoms are in use (have a non-empty incoming
   set) they are not removed.
 
   'right-release ROW - same but for pairs in ROW.
@@ -58,7 +58,7 @@
 			(pair-type (LLOBJ 'pair-type))
 		)
 
-		; Retreive all atoms of TYPE from the database
+		; Retrieve all atoms of TYPE from the database
 		(define (get-atoms TYPE)
 			(load-atoms-of-type TYPE)
 			(cog-get-atoms  TYPE))
@@ -97,9 +97,9 @@
 			(stars-obj 'right-stars ITEM))
 
 		;-------------------------------------------
-		; Release (extract) row or column. No spcific check is made
+		; Release (extract) row or column. No specific check is made
 		; to really be sure that this is a part of the matrix; it's
-		; assumed that the pair-type is enough to acheive this.
+		; assumed that the pair-type is enough to achieve this.
 		(define (release-extract ITEM)
 			(for-each cog-extract (cog-incoming-by-type ITEM pair-type)))
 

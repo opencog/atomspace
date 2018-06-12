@@ -38,7 +38,7 @@
 ;      (normy 'right-length (list (Word "the") (Word "a")))
 ;
 ; which will take the disjunct-vectors for the two words "the" and "a",
-; treating each disjunct as a basis element, take thier difference, and
+; treating each disjunct as a basis element, take their difference, and
 ; return the length (the root-mean-square of the difference of the
 ; counts).
 ;
@@ -195,7 +195,7 @@
 
 		; ---------------
 		; Expects TUPLE to be a scheme list of items of 'right-type.
-		; Returns a list of tuples of the left-stars appropriae for
+		; Returns a list of tuples of the left-stars appropriate for
 		; that TUPLE.  The left-star tuples are "aligned", so that
 		; that within one tuple, all pairs have exactly the same
 		; left side.  If such a pair does not exist, the empty list

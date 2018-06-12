@@ -20,11 +20,11 @@
 ; recomputation, but also allows them to be persisted in the database.
 ;
 ; The second tool provided is a batch-compute function, that will
-; compute all NxN similarity values. This is extremely CPU-itensive,
+; compute all NxN similarity values. This is extremely CPU-intensive,
 ; and even moderate-sized matrixes can take days or weeks to compute.
 ;
 ; By default, the similarity measure is assumed to be the cosine
-; similarity; the ctor for the API allows other similairty measures
+; similarity; the ctor for the API allows other similarity measures
 ; to be specified.
 ;
 ; It is assumed that similarity scores are symmetric, so that exchanging
@@ -43,10 +43,10 @@
 ;
 ; are both exactly the same atom. The actual similarity values are
 ; stored as Values on these atoms.  The specific key used to store
-; the value depennds on the arguments the API is given; by default,
+; the value depends on the arguments the API is given; by default,
 ; the (Predicate "*-Cosine Sim Key-*") is used; if the underlying
 ; matrix is filtered, then a filter-name-dependent key is used.
-; Thus, the same API can be sed with both fitlered and non-filtered
+; Thus, the same API can be used with both filtered and non-filtered
 ; versions of the dataset.
 ;
 ; ---------------------------------------------------------------------
@@ -73,7 +73,7 @@
   stored in a database.
 
   The 'set-pair-similarity method is used to set a value.
-  The 'pair-simiarity method is used to fetch it.
+  The 'pair-similarity method is used to fetch it.
   
   This creates a new NON-sparse matrix that can be understood as a
   kind-of matrix product of LLOBJ with it's transpose.
@@ -336,7 +336,7 @@
 
 				((compute-similarity)  (apply compute-sim args))
 				((batch-compute)       (batch))
-				((paralel-batch)       (apply para-batch args))
+				((parallel-batch)       (apply para-batch args))
 
 				(else                  (apply LLOBJ (cons message args)))
 		)))

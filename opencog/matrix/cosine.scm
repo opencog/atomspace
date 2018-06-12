@@ -94,7 +94,7 @@
 
 		; -------------
 		; Return the vector product of column A and column B
-		; The prod-obj takes the product of pairs of atrix entries,
+		; The prod-obj takes the product of pairs of matrix entries,
 		; and the 'left-count method just adds them up.  Equivalently,
 		; we could just sum over the left-stars ourselves, but this
 		; would take three lines of code instead of one.
