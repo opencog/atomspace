@@ -120,7 +120,7 @@
 ;        (if (null? stats-atom) 0 (get-count stats-atom)))
 ;
 ;     ; Return the atom holding the count, creating it if it does
-;     ; not yet exist.  Returns the same structure as the 'item-pair
+;     ; not yet exist.  Returns the same structure as the 'get-pair
 ;     ; method (the get-pair function, above).
 ;     (define (make-pair L-ATOM R-ATOM)
 ;        (Evaluation (Predicate "foo") (List L-ATOM R-ATOM)))
@@ -284,7 +284,7 @@
 		; The point of this function is to find and return the complete
 		; wild-card set (*,y) = {(x,y) | there-exists pair (x,y) for some x}
 		; The pairs are Links of type 'pair-type, as would be returned by
-		; 'item-pair. That is, this returns a list of atoms of the form
+		; 'get-pair. That is, this returns a list of atoms of the form
 		;
 		;    (LLOBJ 'make-pair $variable ITEM)
 		;
@@ -397,7 +397,7 @@
   atomspace.  A method is provided to set the value, as well.
 
   Here, the LLOBJ is expected to be an object, with methods for
-  'item-pair 'make-pair 'left-wildcard 'right-wildcard and 'wild-wild
+  'get-pair 'make-pair 'left-wildcard 'right-wildcard and 'wild-wild
   on it, in the form documented above for the \"low-level API class\".
 "
 	; ----------------------------------------------------
@@ -477,7 +477,7 @@
   provide a reasonable default.
 
   Here, the LLOBJ is expected to be an object, with methods for
-  'item-pair 'make-pair 'left-wildcard and 'right-wildcard on it,
+  'get-pair 'make-pair 'left-wildcard and 'right-wildcard on it,
   in the form documented above for the \"low-level API class\".
 
   The optional ID argument should be #f or a string, used to construct
@@ -606,18 +606,18 @@
 	; Return the observational frequency on PAIR.
 	; If the PAIR does not exist (was not observed) return 0.
 	(define (get-pair-freq L-ATOM R-ATOM)
-		(get-freq (LLOBJ 'item-pair L-ATOM R-ATOM)))
+		(get-freq (LLOBJ 'get-pair L-ATOM R-ATOM)))
 
 	(define (get-pair-logli L-ATOM R-ATOM)
-		(get-logli (LLOBJ 'item-pair L-ATOM R-ATOM)))
+		(get-logli (LLOBJ 'get-pair L-ATOM R-ATOM)))
 
 	(define (get-pair-entropy L-ATOM R-ATOM)
-		(get-entropy (LLOBJ 'item-pair L-ATOM R-ATOM)))
+		(get-entropy (LLOBJ 'get-pair L-ATOM R-ATOM)))
 
 	; Set the frequency and log-frequency on PAIR
 	; Return the atom that holds this count.
-	(define (set-pair-freq L-ATOM R-ATOM FREQ)
-		(set-freq (LLOBJ 'make-pair L-ATOM R-ATOM) FREQ))
+	(define (set-pair-freq PAIR FREQ)
+		(set-freq PAIR FREQ))
 
 	; ----------------------------------------------------
 
@@ -625,16 +625,16 @@
 	; The MI is defined as
 	; + P(x,y) log_2 P(x,y) / P(x,*) P(*,y)
 	(define (get-pair-mi L-ATOM R-ATOM)
-		(get-total-mi (LLOBJ 'item-pair L-ATOM R-ATOM)))
+		(get-total-mi (LLOBJ 'get-pair L-ATOM R-ATOM)))
 
 	; Return the fractional MI (lexical attraction) on the pair.
 	; + log_2 P(x,y) / P(x,*) P(*,y)
 	; It differs from the MI above only by the leading probability.
 	(define (get-pair-fmi L-ATOM R-ATOM)
-		(get-fractional-mi (LLOBJ 'item-pair L-ATOM R-ATOM)))
+		(get-fractional-mi (LLOBJ 'get-pair L-ATOM R-ATOM)))
 
 	(define (set-pair-mi L-ATOM R-ATOM MI FMI)
-		(set-mi (LLOBJ 'item-pair L-ATOM R-ATOM) MI FMI))
+		(set-mi (LLOBJ 'get-pair L-ATOM R-ATOM) MI FMI))
 
 	; ----------------------------------------------------
 	; Get the left wildcard frequency
