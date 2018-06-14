@@ -322,42 +322,43 @@
 		; ITEM should be an atom of (LLOBJ 'right-type); if it isn't,
 		; the the behavior is undefined.
 		;
-		(define (raii-get-stars VAR TYPE TERM ASPACE)
+		(define (raii-get-stars VARNAME TYPE flip ITEM ASPACE)
 			(define old-as (cog-set-atomspace! ASPACE))
 			; If the user hits ctrl-C while we are in this other
 			; be sure to set it back to the main atomspace.
 			; XXX there is a small race here, but I don't care.
 			(with-throw-handler #t
 				(lambda ()
-					(define stars
-						(cog-outgoing-set
-							(cog-execute! (Bind (TypedVariable
-									VAR (Type (symbol->string TYPE)))
-									TERM TERM))))
+					(let* ((uniqvar (VariableNode VARNAME))
+							(term
+								(if flip
+									(LLOBJ 'make-pair ITEM uniqvar)
+									(LLOBJ 'make-pair uniqvar ITEM)))
+							(stars
+								(cog-outgoing-set
+									(cog-execute! (Bind (TypedVariable
+											uniqvar (Type (symbol->string TYPE)))
+											term term)))))
 					(cog-atomspace-clear ASPACE)
 					(cog-set-atomspace! old-as)
-					stars)
+					stars))
 				(lambda (key . args)
 					(cog-atomspace-clear ASPACE)
 					(cog-set-atomspace! old-as)
 				'())))
 
-		(define (lock-get-stars LOCK VAR TYPE TERM ASPACE)
+		(define (lock-get-stars LOCK VARNAME TYPE flip ITEM ASPACE)
 			(let* ((lock (lock-mutex LOCK))
-					(stars (raii-get-stars VAR TYPE TERM ASPACE)))
+					(stars (raii-get-stars VARNAME TYPE flip ITEM ASPACE)))
 				(unlock-mutex LOCK)
 				stars))
 
 		(define (do-get-left-stars ITEM)
-			(let* ((uniqvar (VariableNode "$obj-api-left-star"))
-					(term (LLOBJ 'make-pair uniqvar ITEM)))
-				(lock-get-stars l-mtx uniqvar left-type term l-ase)))
+			(lock-get-stars l-mtx "$api-left-star" left-type #f ITEM l-ase))
 
 		; Same as above, but on the right.
 		(define (do-get-right-stars ITEM)
-			(let* ((uniqvar (VariableNode "$obj-api-right-star"))
-					(term (LLOBJ 'make-pair ITEM uniqvar)))
-				(lock-get-stars r-mtx uniqvar right-type term r-ase)))
+			(lock-get-stars r-mtx "$api-right-star" right-type #t ITEM r-ase))
 
 #! ============ Alternate variant, not currently used.
 Yes, this actually works -- its just not being used.
