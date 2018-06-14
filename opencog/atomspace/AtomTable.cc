@@ -48,6 +48,7 @@
 
 //#define DPRINTF printf
 #define DPRINTF(...)
+#define DEBUG 1
 
 using namespace opencog;
 
@@ -460,6 +461,17 @@ Handle AtomTable::add(AtomPtr atom, bool async)
 
     Handle h(atom->get_handle());
     _atom_store.insert({atom->get_hash(), h});
+
+#ifdef DEBUG
+    auto its = _atom_store.equal_range(atom->get_hash());
+    for (auto it = its.first; it != its.second; ++it) {
+        AtomPtr a = it->second;
+        if (atom != a) {
+            LAZY_LOG_FINE << "hash collision between different atoms: " << std::endl
+                          << atom->to_string() << a->to_string();
+        }
+    }
+#endif
 
     if (not _transient and not async)
         put_atom_into_index(atom);
