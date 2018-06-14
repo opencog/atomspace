@@ -342,22 +342,22 @@
 					(cog-set-atomspace! old-as)
 				'())))
 
-		(define (do-get-left-stars ITEM)
-			(let* ((lock (lock-mutex l-mtx))
-					(uniqvar (VariableNode "$obj-api-left-star"))
-					(term (LLOBJ 'make-pair uniqvar ITEM))
-					(stars (raii-get-stars uniqvar left-type term l-ase)))
-				(unlock-mutex l-mtx)
+		(define (lock-get-stars LOCK VAR TYPE TERM ASPACE)
+			(let* ((lock (lock-mutex LOCK))
+					(stars (raii-get-stars VAR TYPE TERM ASPACE)))
+				(unlock-mutex LOCK)
 				stars))
+
+		(define (do-get-left-stars ITEM)
+			(let* ((uniqvar (VariableNode "$obj-api-left-star"))
+					(term (LLOBJ 'make-pair uniqvar ITEM)))
+				(lock-get-stars l-mtx uniqvar left-type term l-ase)))
 
 		; Same as above, but on the right.
 		(define (do-get-right-stars ITEM)
-			(let* ((lock (lock-mutex r-mtx))
-					(uniqvar (VariableNode "$obj-api-right-star"))
-					(term (LLOBJ 'make-pair ITEM uniqvar))
-					(stars (raii-get-stars uniqvar right-type term r-ase)))
-				(unlock-mutex r-mtx)
-				stars))
+			(let* ((uniqvar (VariableNode "$obj-api-right-star"))
+					(term (LLOBJ 'make-pair ITEM uniqvar)))
+				(lock-get-stars r-mtx uniqvar right-type term r-ase)))
 
 #! ============ Alternate variant, not currently used.
 Yes, this actually works -- its just not being used.
