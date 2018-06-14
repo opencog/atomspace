@@ -230,12 +230,6 @@ std::string DistSCM::dist_eval(const std::string& scm_string,
 			"Gearman: Memory allocation failure on client creation");
 	}
 
-	int timeout=-1;
-	if (timeout >= 0)
-	{
-		gearman_client_set_timeout(&client, timeout);
-	}
-
 	gearman_return_t rc = gearman_client_add_server(&client,
                               "localhost", GEARMAN_DEFAULT_TCP_PORT);
 	if (rc != GEARMAN_SUCCESS)
