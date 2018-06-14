@@ -322,21 +322,31 @@
 		; ITEM should be an atom of (LLOBJ 'right-type); if it isn't,
 		; the the behavior is undefined.
 		;
-		(define (do-get-stars VAR TYPE TERM ASPACE)
-			(let* ((old-as (cog-set-atomspace! ASPACE))
-					(setlnk (cog-execute! (Bind (TypedVariable
-						VAR (Type (symbol->string TYPE)))
-						TERM TERM)))
-					(stars (cog-outgoing-set setlnk)))
-				(cog-atomspace-clear ASPACE)
-				(cog-set-atomspace! old-as)
-				stars))
+		(define (raii-get-stars VAR TYPE TERM ASPACE)
+			(define old-as (cog-set-atomspace! ASPACE))
+			; If the user hits ctrl-C while we are in this other
+			; be sure to set it back to the main atomspace.
+			; XXX there is a small race here, but I don't care.
+			(with-throw-handler #t
+				(lambda ()
+					(define stars
+						(cog-outgoing-set
+							(cog-execute! (Bind (TypedVariable
+									VAR (Type (symbol->string TYPE)))
+									TERM TERM))))
+					(cog-atomspace-clear ASPACE)
+					(cog-set-atomspace! old-as)
+					stars)
+				(lambda (key . args)
+					(cog-atomspace-clear ASPACE)
+					(cog-set-atomspace! old-as)
+				'())))
 
 		(define (do-get-left-stars ITEM)
 			(let* ((lock (lock-mutex l-mtx))
 					(uniqvar (VariableNode "$obj-api-left-star"))
 					(term (LLOBJ 'make-pair uniqvar ITEM))
-					(stars (do-get-stars uniqvar left-type term l-ase)))
+					(stars (raii-get-stars uniqvar left-type term l-ase)))
 				(unlock-mutex l-mtx)
 				stars))
 
@@ -345,7 +355,7 @@
 			(let* ((lock (lock-mutex r-mtx))
 					(uniqvar (VariableNode "$obj-api-right-star"))
 					(term (LLOBJ 'make-pair ITEM uniqvar))
-					(stars (do-get-stars uniqvar right-type term r-ase)))
+					(stars (raii-get-stars uniqvar right-type term r-ase)))
 				(unlock-mutex r-mtx)
 				stars))
 
