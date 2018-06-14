@@ -324,9 +324,16 @@
 		;
 		(define (raii-get-stars VARNAME TYPE flip ITEM ASPACE)
 			(define old-as (cog-set-atomspace! ASPACE))
-			; If the user hits ctrl-C while we are in this other
-			; be sure to set it back to the main atomspace.
-			; XXX there is a small race here, but I don't care.
+			; Use RAII-style code, so that if the user hits ctrl-C
+			; while we are in this, we will catch that and set the
+			; atomspace back to normal.
+			; XXX there is a small race here, between the setting
+			; of the atomspace, and the invocation of the
+			; throw-handler, but I don't care.
+			;
+			; Note also: the VariableNode and the BindLink need
+			; to be created in the temp atomspace, else hell
+			; breaks loose.
 			(with-throw-handler #t
 				(lambda ()
 					(let* ((uniqvar (VariableNode VARNAME))
@@ -347,11 +354,22 @@
 					(cog-set-atomspace! old-as)
 				'())))
 
+		; Use an RAII style throw handler so that the lock is unlocked,
+		; if the user hits ctrl-C in the middle of things. This might
+		; be overkill, because usually this class will nto be reused ...
+		; at least not usually, when running in automatic.
+		; Note that there is a small race, between the getting of the
+		; lock, and the invocation of the throw handler. I don't care.
 		(define (lock-get-stars LOCK VARNAME TYPE flip ITEM ASPACE)
-			(let* ((lock (lock-mutex LOCK))
-					(stars (raii-get-stars VARNAME TYPE flip ITEM ASPACE)))
-				(unlock-mutex LOCK)
-				stars))
+			(lock-mutex LOCK)
+			(with-throw-handler #t
+				(lambda ()
+					(define stars (raii-get-stars VARNAME TYPE flip ITEM ASPACE))
+					(unlock-mutex LOCK)
+					stars)
+				(lambda (key . args)
+					(unlock-mutex LOCK)
+					'())))
 
 		(define (do-get-left-stars ITEM)
 			(lock-get-stars l-mtx "$api-left-star" left-type #f ITEM l-ase))
