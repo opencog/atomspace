@@ -576,7 +576,9 @@ Yes, this actually works -- its just not being used.
 ; ---------------------------------------------------------------------
 
 (define*-public (add-pair-freq-api LLOBJ
-    #:optional (ID (LLOBJ 'id)))
+    #:optional (ID (LLOBJ 'id))
+    #:key (nothrow #f)
+)
 "
   add-pair-freq-api LLOBJ ID - Extend LLOBJ with frequency getters.
 
@@ -593,6 +595,10 @@ Yes, this actually works -- its just not being used.
 
   The optional ID argument should be #f or a string, used to construct
   the key under which the values are stored.
+
+  The optional #:nothrow argument should be set to #t to avoid throwing
+  errors for missing values. If this is not set, then any missing value
+  will cause an error to be thrown.
 
   The methods are as below.  PAIR is the pair (x,y)
 
@@ -646,23 +652,36 @@ Yes, this actually works -- its just not being used.
 
 	(define freq-key (PredicateNode freq-name))
 
-	; Return the observed frequency on ATOM
+	(define (zero ATOM) (if nothrow 0
+		 (error "No such value! Did you forget to compute frequencies?\n" ATOM)))
+
+	(define (plus-inf ATOM) (if nothrow +inf.0
+		 (error "No such value! Did you forget to compute frequencies?\n" ATOM)))
+
+	(define (minus-inf ATOM) (if nothrow -inf.0
+		 (error "No such value! Did you forget to compute frequencies?\n" ATOM)))
+
+	; Return the observational frequency on ATOM.
+	; If the ATOM does not exist (was not observed) return 0.
 	(define (get-freq ATOM)
-		(if (null? ATOM) 0
-			(cog-value-ref (cog-value ATOM freq-key) 0)))
+		(if (null? ATOM) (zero ATOM)
+			(let ((val (cog-value ATOM freq-key)))
+				(if (null? val) (zero ATOM) (cog-value-ref val 0)))))
 
 	; Return the observed -log_2(frequency) on ATOM
 	(define (get-logli ATOM)
-		(if (null? ATOM) +inf.0
-			(cog-value-ref (cog-value ATOM freq-key) 1)))
+		(if (null? ATOM) (plus-inf ATOM)
+			(let ((val (cog-value ATOM freq-key)))
+				(if (null? val) (plus-inf ATOM) (cog-value-ref val 1)))))
 
 	; Return the observed -frequency * log_2(frequency) on ATOM
 	(define (get-entropy ATOM)
-		(if (null? ATOM) 0
-			(cog-value-ref (cog-value ATOM freq-key) 2)))
+		(if (null? ATOM) (zero ATOM)
+			(let ((val (cog-value ATOM freq-key)))
+				(if (null? val) (zero ATOM) (cog-value-ref val 2)))))
 
-	; Set both a frequency count, and a -log_2(frequency) on
-	; the ATOM.
+	; Set the frequency and -log_2(frequency) on the ATOM.
+	; Return the atom that holds this count.
 	(define (set-freq ATOM FREQ)
 		; 1.4426950408889634 is 1/0.6931471805599453 is 1/log 2
 		(define ln2 (* -1.4426950408889634 (log FREQ)))
@@ -680,7 +699,9 @@ Yes, this actually works -- its just not being used.
 
 	; Return the total entropy on ATOM
 	(define (get-total-entropy ATOM)
-		(cog-value-ref (cog-value ATOM entropy-key) 0))
+		(if (null? ATOM) (zero ATOM)
+			(let ((val (cog-value ATOM entropy-key)))
+				(if (null? val) (zero ATOM) (cog-value-ref val 0)))))
 
 	; Return the fractional entropy on ATOM
 	(define (get-fractional-entropy ATOM)
@@ -699,53 +720,26 @@ Yes, this actually works -- its just not being used.
 
 	(define mi-key (PredicateNode mi-name))
 
-	; Get the (floating-point) mutual information on ATOM.
+	; Return the MI value on ATOM.
+	; The MI is defined as
+	; + P(x,y) log_2 P(x,y) / P(x,*) P(*,y)
 	(define (get-total-mi ATOM)
-		(cog-value-ref (cog-value ATOM mi-key) 0))
+		(if (null? ATOM) (minus-inf ATOM)
+			(let ((val (cog-value ATOM mi-key)))
+				(if (null? val) (minus-inf ATOM) (cog-value-ref val 0)))))
 
-	; Get the (floating-point) fractional mutual information on ATOM.
+	; Return the fractional MI (lexical attraction) on ATOM.
+	; + log_2 P(x,y) / P(x,*) P(*,y)
+	; It differs from the MI above only by the leading probability.
 	; This is the Yuret "lexical attraction" value.
 	(define (get-fractional-mi ATOM)
-		(cog-value-ref (cog-value ATOM mi-key) 1))
+		(if (null? ATOM) (minus-inf ATOM)
+			(let ((val (cog-value ATOM mi-key)))
+				(if (null? val) (minus-inf ATOM) (cog-value-ref val 1)))))
 
 	; Set the MI value for ATOM.
 	(define (set-mi ATOM MI FMI)
 		(cog-set-value! ATOM mi-key (FloatValue MI FMI)))
-
-	; ----------------------------------------------------
-	; ----------------------------------------------------
-	; Return the observational frequency on PAIR.
-	; If the PAIR does not exist (was not observed) return 0.
-	(define (get-pair-freq PAIR)
-		(get-freq PAIR))
-
-	(define (get-pair-logli PAIR)
-		(get-logli PAIR))
-
-	(define (get-pair-entropy PAIR)
-		(get-entropy PAIR))
-
-	; Set the frequency and log-frequency on PAIR
-	; Return the atom that holds this count.
-	(define (set-pair-freq PAIR FREQ)
-		(set-freq PAIR FREQ))
-
-	; ----------------------------------------------------
-
-	; Return the MI value on the pair.
-	; The MI is defined as
-	; + P(x,y) log_2 P(x,y) / P(x,*) P(*,y)
-	(define (get-pair-mi PAIR)
-		(get-total-mi PAIR))
-
-	; Return the fractional MI (lexical attraction) on the pair.
-	; + log_2 P(x,y) / P(x,*) P(*,y)
-	; It differs from the MI above only by the leading probability.
-	(define (get-pair-fmi PAIR)
-		(get-fractional-mi PAIR))
-
-	(define (set-pair-mi PAIR MI FMI)
-		(set-mi PAIR MI FMI))
 
 	; ----------------------------------------------------
 	; Get the left wildcard frequency
@@ -834,13 +828,13 @@ Yes, this actually works -- its just not being used.
 	; Methods on this class.
 	(lambda (message . args)
 		(case message
-			((pair-freq)           (apply get-pair-freq args))
-			((pair-logli)          (apply get-pair-logli args))
-			((pair-entropy)        (apply get-pair-entropy args))
-			((pair-mi)             (apply get-pair-mi args))
-			((pair-fmi)            (apply get-pair-fmi args))
-			((set-pair-freq)       (apply set-pair-freq args))
-			((set-pair-mi)         (apply set-pair-mi args))
+			((pair-freq)           (apply get-freq args))
+			((pair-logli)          (apply get-logli args))
+			((pair-entropy)        (apply get-entropy args))
+			((pair-mi)             (apply get-total-mi args))
+			((pair-fmi)            (apply get-fractional-mi args))
+			((set-pair-freq)       (apply set-freq args))
+			((set-pair-mi)         (apply set-mi args))
 
 			((left-wild-freq)      (apply get-left-wild-freq args))
 			((left-wild-logli)     (apply get-left-wild-logli args))
