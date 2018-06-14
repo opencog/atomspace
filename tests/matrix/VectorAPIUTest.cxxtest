@@ -1,5 +1,5 @@
 /*
- * tests/matrix/BasicAPIUTest.cxxtest
+ * tests/matrix/VectorAPIUTest.cxxtest
  *
  * Most basic, simplest API test, verifies that core matrix functions work.
  * Copyright (C) 2018 Linas Vepstas <linasvepstas@gmail.com>
@@ -32,7 +32,7 @@
 using namespace opencog;
 using namespace std;
 
-class BasicAPIUTest :  public CxxTest::TestSuite
+class VectorAPIUTest :  public CxxTest::TestSuite
 {
 	private:
 		AtomSpace *as;
@@ -40,14 +40,14 @@ class BasicAPIUTest :  public CxxTest::TestSuite
 
 	public:
 
-	BasicAPIUTest(void)
+	VectorAPIUTest(void)
 	{
 		logger().set_level(Logger::DEBUG);
 		logger().set_print_to_stdout_flag(true);
 #include "../query/test-types.cc"
 	}
 
-	~BasicAPIUTest()
+	~VectorAPIUTest()
 	{
 		// erase the log file if no assertions failed
 		if (!CxxTest::TestTracker::tracker().suiteFailed())
@@ -68,7 +68,7 @@ class BasicAPIUTest :  public CxxTest::TestSuite
 /*
  * This is called once before each test, for each test (!!)
  */
-void BasicAPIUTest::setUp(void)
+void VectorAPIUTest::setUp(void)
 {
 	as = new AtomSpace();
 	eval = new SchemeEval(as);
@@ -89,7 +89,7 @@ void BasicAPIUTest::setUp(void)
 	eval->eval("(load-from-path \"tests/query/test_types.scm\")");
 }
 
-void BasicAPIUTest::tearDown(void)
+void VectorAPIUTest::tearDown(void)
 {
 	delete eval;
 	eval = NULL;
@@ -116,7 +116,7 @@ void BasicAPIUTest::tearDown(void)
 
 // ====================================================================
 
-void BasicAPIUTest::test_basic(void)
+void VectorAPIUTest::test_basic(void)
 {
 	logger().debug("BEGIN TEST: %s", __FUNCTION__);
 
@@ -148,7 +148,7 @@ void BasicAPIUTest::test_basic(void)
 
 // ====================================================================
 
-void BasicAPIUTest::test_marginals(void)
+void VectorAPIUTest::test_marginals(void)
 {
 	logger().debug("BEGIN TEST: %s", __FUNCTION__);
 
@@ -380,7 +380,7 @@ void BasicAPIUTest::test_marginals(void)
 
 // ====================================================================
 
-void BasicAPIUTest::test_cosines(void)
+void VectorAPIUTest::test_cosines(void)
 {
 	logger().debug("BEGIN TEST: %s", __FUNCTION__);
 
@@ -418,7 +418,7 @@ void BasicAPIUTest::test_cosines(void)
 // ====================================================================
 
 // Make sure data can be fetched from SQL
-void BasicAPIUTest::xtest_dynamic(void)
+void VectorAPIUTest::xtest_dynamic(void)
 {
 	logger().debug("BEGIN TEST: %s", __FUNCTION__);
 
@@ -450,7 +450,7 @@ void BasicAPIUTest::xtest_dynamic(void)
 // ====================================================================
 
 // Make sure the fold API works
-void BasicAPIUTest::test_fold(void)
+void VectorAPIUTest::test_fold(void)
 {
 	logger().debug("BEGIN TEST: %s", __FUNCTION__);
 
