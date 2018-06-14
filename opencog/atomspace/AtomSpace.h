@@ -62,11 +62,11 @@ class AtomSpace
     friend class ::AtomSpaceUTest;
 
     /**
-     * Override and declare copy constructor and equals operator, to
-     * prevent the accidental copying of large objects.
+     * Drop copy constructor and equals operator to
+     * prevent accidental copying of large objects.
      */
-    AtomSpace& operator=(const AtomSpace&);
-    AtomSpace(const AtomSpace&);
+    AtomSpace& operator=(const AtomSpace&) = delete;
+    AtomSpace(const AtomSpace&) = delete;
 
     AtomTable _atom_table;
     /**

@@ -128,11 +128,11 @@ private:
     bool _transient;
 
     /**
-     * Override and declare copy constructor and equals operator as
-     * private.  This is to prevent large object copying by mistake.
+     * Drop copy constructor and equals operator to
+     * prevent large object copying by mistake.
      */
-    AtomTable& operator=(const AtomTable&);
-    AtomTable(const AtomTable&);
+    AtomTable& operator=(const AtomTable&) = delete;
+    AtomTable(const AtomTable&) = delete;
 
     AtomPtr cast_factory(Type atom_type, AtomPtr atom);
 
