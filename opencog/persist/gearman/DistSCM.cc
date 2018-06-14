@@ -62,7 +62,9 @@ using namespace opencog;
 
 bool DistSCM::keep_working = true;
 
-DistSCM::DistSCM(void) : ModuleWrap("opencog dist-gearman")
+DistSCM::DistSCM(void) :
+    ModuleWrap("opencog dist-gearman"),
+    worker(nullptr)
 {}
 
 void DistSCM::init(void)
