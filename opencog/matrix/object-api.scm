@@ -576,7 +576,9 @@ Yes, this actually works -- its just not being used.
 ; ---------------------------------------------------------------------
 
 (define*-public (add-pair-freq-api LLOBJ
-    #:optional (ID (LLOBJ 'id)))
+    #:optional (ID (LLOBJ 'id))
+    #:key (nothrow #f)
+)
 "
   add-pair-freq-api LLOBJ ID - Extend LLOBJ with frequency getters.
 
@@ -593,6 +595,10 @@ Yes, this actually works -- its just not being used.
 
   The optional ID argument should be #f or a string, used to construct
   the key under which the values are stored.
+
+  The optional #:nothrow argument should be set to #t to avoid throwing
+  errors for missing values. If this is not set, then any missing value
+  will cause an error to be thrown.
 
   The methods are as below.  PAIR is the pair (x,y)
 
@@ -646,24 +652,33 @@ Yes, this actually works -- its just not being used.
 
 	(define freq-key (PredicateNode freq-name))
 
+	(define (zero ATOM) (if nothrow 0
+		 (error "No such value! Did you forget to compute frequencies?\n" ATOM)))
+
+	(define (plus-inf ATOM) (if nothrow +inf.0
+		 (error "No such value! Did you forget to compute frequencies?\n" ATOM)))
+
+	(define (minus-inf ATOM) (if nothrow -inf.0
+		 (error "No such value! Did you forget to compute frequencies?\n" ATOM)))
+
 	; Return the observational frequency on ATOM.
 	; If the ATOM does not exist (was not observed) return 0.
 	(define (get-freq ATOM)
-		(if (null? ATOM) 0
+		(if (null? ATOM) (zero ATOM)
 			(let ((val (cog-value ATOM freq-key)))
-				(if (null? val) 0 (cog-value-ref val 0)))))
+				(if (null? val) (zero ATOM) (cog-value-ref val 0)))))
 
 	; Return the observed -log_2(frequency) on ATOM
 	(define (get-logli ATOM)
-		(if (null? ATOM) +inf.0
+		(if (null? ATOM) (plus-inf ATOM)
 			(let ((val (cog-value ATOM freq-key)))
-				(if (null? val) +inf.0 (cog-value-ref val 1)))))
+				(if (null? val) (plus-inf ATOM) (cog-value-ref val 1)))))
 
 	; Return the observed -frequency * log_2(frequency) on ATOM
 	(define (get-entropy ATOM)
-		(if (null? ATOM) 0
+		(if (null? ATOM) (zero ATOM)
 			(let ((val (cog-value ATOM freq-key)))
-				(if (null? val) 0 (cog-value-ref val 2)))))
+				(if (null? val) (zero ATOM) (cog-value-ref val 2)))))
 
 	; Set the frequency and -log_2(frequency) on the ATOM.
 	; Return the atom that holds this count.
@@ -684,7 +699,9 @@ Yes, this actually works -- its just not being used.
 
 	; Return the total entropy on ATOM
 	(define (get-total-entropy ATOM)
-		(cog-value-ref (cog-value ATOM entropy-key) 0))
+		(if (null? ATOM) (zero ATOM)
+			(let ((val (cog-value ATOM entropy-key)))
+				(if (null? val) (zero ATOM) (cog-value-ref val 0)))))
 
 	; Return the fractional entropy on ATOM
 	(define (get-fractional-entropy ATOM)
@@ -707,18 +724,18 @@ Yes, this actually works -- its just not being used.
 	; The MI is defined as
 	; + P(x,y) log_2 P(x,y) / P(x,*) P(*,y)
 	(define (get-total-mi ATOM)
-		(if (null? ATOM) -inf.0
+		(if (null? ATOM) (minus-inf ATOM)
 			(let ((val (cog-value ATOM mi-key)))
-				(if (null? val) -inf.0 (cog-value-ref val 0)))))
+				(if (null? val) (minus-inf ATOM) (cog-value-ref val 0)))))
 
 	; Return the fractional MI (lexical attraction) on ATOM.
 	; + log_2 P(x,y) / P(x,*) P(*,y)
 	; It differs from the MI above only by the leading probability.
 	; This is the Yuret "lexical attraction" value.
 	(define (get-fractional-mi ATOM)
-		(if (null? ATOM) -inf.0
+		(if (null? ATOM) (minus-inf ATOM)
 			(let ((val (cog-value ATOM mi-key)))
-				(if (null? val) -inf.0 (cog-value-ref val 1)))))
+				(if (null? val) (minus-inf ATOM) (cog-value-ref val 1)))))
 
 	; Set the MI value for ATOM.
 	(define (set-mi ATOM MI FMI)
