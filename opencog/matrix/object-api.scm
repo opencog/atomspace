@@ -646,7 +646,8 @@ Yes, this actually works -- its just not being used.
 
 	(define freq-key (PredicateNode freq-name))
 
-	; Return the observed frequency on ATOM
+	; Return the observational frequency on ATOM.
+	; If the ATOM does not exist (was not observed) return 0.
 	(define (get-freq ATOM)
 		(if (null? ATOM) 0
 			(cog-value-ref (cog-value ATOM freq-key) 0)))
@@ -661,8 +662,8 @@ Yes, this actually works -- its just not being used.
 		(if (null? ATOM) 0
 			(cog-value-ref (cog-value ATOM freq-key) 2)))
 
-	; Set both a frequency count, and a -log_2(frequency) on
-	; the ATOM.
+	; Set the frequency and -log_2(frequency) on the ATOM.
+	; Return the atom that holds this count.
 	(define (set-freq ATOM FREQ)
 		; 1.4426950408889634 is 1/0.6931471805599453 is 1/log 2
 		(define ln2 (* -1.4426950408889634 (log FREQ)))
@@ -699,11 +700,15 @@ Yes, this actually works -- its just not being used.
 
 	(define mi-key (PredicateNode mi-name))
 
-	; Get the (floating-point) mutual information on ATOM.
+	; Return the MI value on ATOM.
+	; The MI is defined as
+	; + P(x,y) log_2 P(x,y) / P(x,*) P(*,y)
 	(define (get-total-mi ATOM)
 		(cog-value-ref (cog-value ATOM mi-key) 0))
 
-	; Get the (floating-point) fractional mutual information on ATOM.
+	; Return the fractional MI (lexical attraction) on ATOM.
+	; + log_2 P(x,y) / P(x,*) P(*,y)
+	; It differs from the MI above only by the leading probability.
 	; This is the Yuret "lexical attraction" value.
 	(define (get-fractional-mi ATOM)
 		(cog-value-ref (cog-value ATOM mi-key) 1))
@@ -711,41 +716,6 @@ Yes, this actually works -- its just not being used.
 	; Set the MI value for ATOM.
 	(define (set-mi ATOM MI FMI)
 		(cog-set-value! ATOM mi-key (FloatValue MI FMI)))
-
-	; ----------------------------------------------------
-	; ----------------------------------------------------
-	; Return the observational frequency on PAIR.
-	; If the PAIR does not exist (was not observed) return 0.
-	(define (get-pair-freq PAIR)
-		(get-freq PAIR))
-
-	(define (get-pair-logli PAIR)
-		(get-logli PAIR))
-
-	(define (get-pair-entropy PAIR)
-		(get-entropy PAIR))
-
-	; Set the frequency and log-frequency on PAIR
-	; Return the atom that holds this count.
-	(define (set-pair-freq PAIR FREQ)
-		(set-freq PAIR FREQ))
-
-	; ----------------------------------------------------
-
-	; Return the MI value on the pair.
-	; The MI is defined as
-	; + P(x,y) log_2 P(x,y) / P(x,*) P(*,y)
-	(define (get-pair-mi PAIR)
-		(get-total-mi PAIR))
-
-	; Return the fractional MI (lexical attraction) on the pair.
-	; + log_2 P(x,y) / P(x,*) P(*,y)
-	; It differs from the MI above only by the leading probability.
-	(define (get-pair-fmi PAIR)
-		(get-fractional-mi PAIR))
-
-	(define (set-pair-mi PAIR MI FMI)
-		(set-mi PAIR MI FMI))
 
 	; ----------------------------------------------------
 	; Get the left wildcard frequency
@@ -834,13 +804,13 @@ Yes, this actually works -- its just not being used.
 	; Methods on this class.
 	(lambda (message . args)
 		(case message
-			((pair-freq)           (apply get-pair-freq args))
-			((pair-logli)          (apply get-pair-logli args))
-			((pair-entropy)        (apply get-pair-entropy args))
-			((pair-mi)             (apply get-pair-mi args))
-			((pair-fmi)            (apply get-pair-fmi args))
-			((set-pair-freq)       (apply set-pair-freq args))
-			((set-pair-mi)         (apply set-pair-mi args))
+			((pair-freq)           (apply get-freq args))
+			((pair-logli)          (apply get-logli args))
+			((pair-entropy)        (apply get-entropy args))
+			((pair-mi)             (apply get-total-mi args))
+			((pair-fmi)            (apply get-fractional-mi args))
+			((set-pair-freq)       (apply set-freq args))
+			((set-pair-mi)         (apply set-mi args))
 
 			((left-wild-freq)      (apply get-left-wild-freq args))
 			((left-wild-logli)     (apply get-left-wild-logli args))
