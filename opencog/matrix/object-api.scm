@@ -322,32 +322,30 @@
 		; ITEM should be an atom of (LLOBJ 'right-type); if it isn't,
 		; the the behavior is undefined.
 		;
+		(define (do-get-stars VAR TYPE TERM ASPACE)
+			(let* ((old-as (cog-set-atomspace! ASPACE))
+					(setlnk (cog-execute! (Bind (TypedVariable
+						VAR (Type (symbol->string TYPE)))
+						TERM TERM)))
+					(stars (cog-outgoing-set setlnk)))
+				(cog-atomspace-clear ASPACE)
+				(cog-set-atomspace! old-as)
+				stars))
+
 		(define (do-get-left-stars ITEM)
 			(let* ((lock (lock-mutex l-mtx))
-					(old-as (cog-set-atomspace! l-ase))
 					(uniqvar (VariableNode "$obj-api-left-star"))
 					(term (LLOBJ 'make-pair uniqvar ITEM))
-					(setlnk (cog-execute! (Bind (TypedVariable
-						uniqvar (Type (symbol->string left-type)))
-						term term)))
-					(stars (cog-outgoing-set setlnk)))
-				(cog-atomspace-clear l-ase)
-				(cog-set-atomspace! old-as)
+					(stars (do-get-stars uniqvar left-type term l-ase)))
 				(unlock-mutex l-mtx)
 				stars))
 
 		; Same as above, but on the right.
 		(define (do-get-right-stars ITEM)
 			(let* ((lock (lock-mutex r-mtx))
-					(old-as (cog-set-atomspace! r-ase))
 					(uniqvar (VariableNode "$obj-api-right-star"))
 					(term (LLOBJ 'make-pair ITEM uniqvar))
-					(setlnk (cog-execute! (Bind (TypedVariable
-						uniqvar (Type (symbol->string right-type)))
-						term term)))
-					(stars (cog-outgoing-set setlnk)))
-				(cog-atomspace-clear r-ase)
-				(cog-set-atomspace! old-as)
+					(stars (do-get-stars uniqvar right-type term r-ase)))
 				(unlock-mutex r-mtx)
 				stars))
 
