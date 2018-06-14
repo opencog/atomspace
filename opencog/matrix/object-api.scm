@@ -322,34 +322,61 @@
 		; ITEM should be an atom of (LLOBJ 'right-type); if it isn't,
 		; the the behavior is undefined.
 		;
+		(define (raii-get-stars VARNAME TYPE flip ITEM ASPACE)
+			(define old-as (cog-set-atomspace! ASPACE))
+			; Use RAII-style code, so that if the user hits ctrl-C
+			; while we are in this, we will catch that and set the
+			; atomspace back to normal.
+			; XXX there is a small race here, between the setting
+			; of the atomspace, and the invocation of the
+			; throw-handler, but I don't care.
+			;
+			; Note also: the VariableNode and the BindLink need
+			; to be created in the temp atomspace, else hell
+			; breaks loose.
+			(with-throw-handler #t
+				(lambda ()
+					(let* ((uniqvar (VariableNode VARNAME))
+							(term
+								(if flip
+									(LLOBJ 'make-pair ITEM uniqvar)
+									(LLOBJ 'make-pair uniqvar ITEM)))
+							(stars
+								(cog-outgoing-set
+									(cog-execute! (Bind (TypedVariable
+											uniqvar (Type (symbol->string TYPE)))
+											term term)))))
+					(cog-atomspace-clear ASPACE)
+					(cog-set-atomspace! old-as)
+					stars))
+				(lambda (key . args)
+					(cog-atomspace-clear ASPACE)
+					(cog-set-atomspace! old-as)
+				'())))
+
+		; Use an RAII style throw handler so that the lock is unlocked,
+		; if the user hits ctrl-C in the middle of things. This might
+		; be overkill, because usually this class will nto be reused ...
+		; at least not usually, when running in automatic.
+		; Note that there is a small race, between the getting of the
+		; lock, and the invocation of the throw handler. I don't care.
+		(define (lock-get-stars LOCK VARNAME TYPE flip ITEM ASPACE)
+			(lock-mutex LOCK)
+			(with-throw-handler #t
+				(lambda ()
+					(define stars (raii-get-stars VARNAME TYPE flip ITEM ASPACE))
+					(unlock-mutex LOCK)
+					stars)
+				(lambda (key . args)
+					(unlock-mutex LOCK)
+					'())))
+
 		(define (do-get-left-stars ITEM)
-			(let* ((lock (lock-mutex l-mtx))
-					(old-as (cog-set-atomspace! l-ase))
-					(uniqvar (VariableNode "$obj-api-left-star"))
-					(term (LLOBJ 'make-pair uniqvar ITEM))
-					(setlnk (cog-execute! (Bind (TypedVariable
-						uniqvar (Type (symbol->string left-type)))
-						term term)))
-					(stars (cog-outgoing-set setlnk)))
-				(cog-atomspace-clear l-ase)
-				(cog-set-atomspace! old-as)
-				(unlock-mutex l-mtx)
-				stars))
+			(lock-get-stars l-mtx "$api-left-star" left-type #f ITEM l-ase))
 
 		; Same as above, but on the right.
 		(define (do-get-right-stars ITEM)
-			(let* ((lock (lock-mutex r-mtx))
-					(old-as (cog-set-atomspace! r-ase))
-					(uniqvar (VariableNode "$obj-api-right-star"))
-					(term (LLOBJ 'make-pair ITEM uniqvar))
-					(setlnk (cog-execute! (Bind (TypedVariable
-						uniqvar (Type (symbol->string right-type)))
-						term term)))
-					(stars (cog-outgoing-set setlnk)))
-				(cog-atomspace-clear r-ase)
-				(cog-set-atomspace! old-as)
-				(unlock-mutex r-mtx)
-				stars))
+			(lock-get-stars r-mtx "$api-right-star" right-type #t ITEM r-ase))
 
 #! ============ Alternate variant, not currently used.
 Yes, this actually works -- its just not being used.
