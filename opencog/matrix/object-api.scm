@@ -650,17 +650,20 @@ Yes, this actually works -- its just not being used.
 	; If the ATOM does not exist (was not observed) return 0.
 	(define (get-freq ATOM)
 		(if (null? ATOM) 0
-			(cog-value-ref (cog-value ATOM freq-key) 0)))
+			(let ((val (cog-value ATOM freq-key)))
+				(if (null? val) 0 (cog-value-ref val 0)))))
 
 	; Return the observed -log_2(frequency) on ATOM
 	(define (get-logli ATOM)
 		(if (null? ATOM) +inf.0
-			(cog-value-ref (cog-value ATOM freq-key) 1)))
+			(let ((val (cog-value ATOM freq-key)))
+				(if (null? val) +inf.0 (cog-value-ref val 1)))))
 
 	; Return the observed -frequency * log_2(frequency) on ATOM
 	(define (get-entropy ATOM)
 		(if (null? ATOM) 0
-			(cog-value-ref (cog-value ATOM freq-key) 2)))
+			(let ((val (cog-value ATOM freq-key)))
+				(if (null? val) 0 (cog-value-ref val 2)))))
 
 	; Set the frequency and -log_2(frequency) on the ATOM.
 	; Return the atom that holds this count.
@@ -704,14 +707,18 @@ Yes, this actually works -- its just not being used.
 	; The MI is defined as
 	; + P(x,y) log_2 P(x,y) / P(x,*) P(*,y)
 	(define (get-total-mi ATOM)
-		(cog-value-ref (cog-value ATOM mi-key) 0))
+		(if (null? ATOM) -inf.0
+			(let ((val (cog-value ATOM mi-key)))
+				(if (null? val) -inf.0 (cog-value-ref val 0)))))
 
 	; Return the fractional MI (lexical attraction) on ATOM.
 	; + log_2 P(x,y) / P(x,*) P(*,y)
 	; It differs from the MI above only by the leading probability.
 	; This is the Yuret "lexical attraction" value.
 	(define (get-fractional-mi ATOM)
-		(cog-value-ref (cog-value ATOM mi-key) 1))
+		(if (null? ATOM) -inf.0
+			(let ((val (cog-value ATOM mi-key)))
+				(if (null? val) -inf.0 (cog-value-ref val 1)))))
 
 	; Set the MI value for ATOM.
 	(define (set-mi ATOM MI FMI)
