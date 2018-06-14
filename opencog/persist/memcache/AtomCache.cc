@@ -30,7 +30,9 @@
 
 using namespace opencog;
 
-AtomCache::AtomCache(const std::string server, int portno)
+AtomCache::AtomCache(const std::string server, int portno) :
+    maxdepth(0),
+    load_count(0)
 {
 	memcached_return rc;
 	mc = memcached_create(NULL);
