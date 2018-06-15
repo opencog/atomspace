@@ -284,12 +284,13 @@ ContentHash ScopeLink::compute_hash() const
 
 	// It is not safe to mix here, since the sort order of the
 	// typemaps will depend on the variable names. So must be
-	// abelian.
+	// abelian. That is, we must use addition.
 	ContentHash vth = 0;
 	for (const auto& pr : _varlist._simple_typemap)
 	{
-		for (Type t : pr.second) vth += ((1UL<<19) - 87) * t;
+		for (Type t : pr.second) vth += t;
 	}
+	vth *= ((1UL<<19) - 87);
 
 	for (const auto& pr : _varlist._deep_typemap)
 	{
