@@ -167,7 +167,7 @@ ContentHash Link::compute_hash() const
 	ContentHash hsh = ((1UL<<44) - 377) * get_type();
 	for (const Handle& h: _outgoing)
 	{
-		hsh += (hsh <<5) + h->get_hash(); // recursive!
+		hsh += (hsh <<5) ^ (353 * h->get_hash()); // recursive!
 	}
 
 	// Links will always have the MSB set.
