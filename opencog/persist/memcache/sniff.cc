@@ -46,7 +46,7 @@ int main (int argc, char *argv[])
 	{
 		printf("reading -- oops its %s\n", memcached_strerror(mc, rc));
 	}
-	printf ("read val=%s len=%d\n", val, vlen);
+	printf ("read val=%s len=%zu\n", val, vlen);
 	
 
 	memcached_free(mc);
