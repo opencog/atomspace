@@ -332,7 +332,9 @@ ContentHash ScopeLink::term_hash(const Handle& h,
 	{
 		// Alpha-convert the variable "name" to its unique position
 		// in the sequence of bound vars.  Thus, the name is unique.
-		return ((1UL<<24)-77) * (1 + _varlist.index.find(h)->second);
+		ContentHash hsh = get_fvna_offset<sizeof(ContentHash)>();
+		fnv1a_hash(hsh, (1 + _varlist.index.find(h)->second));
+		return hsh;
 	}
 
 	// Just the plain old hash for all other nodes.
