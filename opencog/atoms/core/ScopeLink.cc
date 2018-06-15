@@ -221,22 +221,16 @@ bool ScopeLink::is_equal(const Handle& other, bool silent) const
 /// the actual variable names have to be excluded from the hash,
 /// and a standardized set used instead.
 //
-// There's a lot of prime-numbers in the code below, but the
-// actual mixing and avalanching is extremely poor. I'm hoping
-// its good enough for hash buckets, but have not verified.
+// "Mixing" refers to the idea of combining together two values, such
+// that thier bits are mixed together (in the formal, mathematical
+// definition, which includes ideas about increasing entropy).  Hash
+// functions are designed to be very good at mixing.
 //
-// (In the code below, the numbers of the form `((1UL<<35) - 325)`
-// etc. are all prime numbers. "Mixing" refers to code having the
-// form `hash += (hash<<5) + other_stuff;` -- the shift and add
-// mixes the bits. "Avalanching" refers to single-bit differences
-// rapidly turning into multi-bit differences.)
-//
-// There's also an issue that there are multiple places where the
-// hash must not mix, and must stay abelian, in order to deal with
-// unordered links and alpha-conversion. (Here, "abelian" refers to
-// order independence; addition is abelian; while "mixing" as
-// defined above, is non-abelian).
-//
+// There are multiple places where the combination of two hash values
+// must not mix, and must stay order-independent (i.e. abelian). This
+// is needed to deal with unordered links and alpha-conversion.
+// Addition is "abelian": A+B = B+A while most functions that mix are
+// non-abalian -- the result depends on the order of the operations.
 
 
 // Fowler–Noll–Vo hash function
@@ -270,13 +264,13 @@ constexpr size_t get_fvna_offset<8>(){
 template<typename T>
 ContentHash fnv1a_hash (ContentHash & hval, T buf_t)
 {
-	uint64_t size = sizeof(buf_t);
+	size_t size = sizeof(buf_t);
 	const char * buf = (const char *)&buf_t;
 	size_t count = 0;
 	while (count < size)
 	{
-		hval ^= (unsigned int)*(buf+count);
-		hval *= (ContentHash)get_fvna_prime<sizeof(ContentHash)>();
+		hval ^= (ContentHash) (*(buf+count));
+		hval *= (ContentHash) get_fvna_prime<sizeof(ContentHash)>();
 		count ++;
 	}
 	return hval;
@@ -290,12 +284,13 @@ ContentHash ScopeLink::compute_hash() const
 
 	// It is not safe to mix here, since the sort order of the
 	// typemaps will depend on the variable names. So must be
-	// abelian.
+	// abelian. That is, we must use addition.
 	ContentHash vth = 0;
 	for (const auto& pr : _varlist._simple_typemap)
 	{
-		for (Type t : pr.second) vth += ((1UL<<19) - 87) * t;
+		for (Type t : pr.second) vth += t;
 	}
+	fnv1a_hash(hsh, vth);
 
 	for (const auto& pr : _varlist._deep_typemap)
 	{
@@ -337,7 +332,9 @@ ContentHash ScopeLink::term_hash(const Handle& h,
 	{
 		// Alpha-convert the variable "name" to its unique position
 		// in the sequence of bound vars.  Thus, the name is unique.
-		return ((1UL<<24)-77) * (1 + _varlist.index.find(h)->second);
+		ContentHash hsh = get_fvna_offset<sizeof(ContentHash)>();
+		fnv1a_hash(hsh, (1 + _varlist.index.find(h)->second));
+		return hsh;
 	}
 
 	// Just the plain old hash for all other nodes.
@@ -358,21 +355,25 @@ ContentHash ScopeLink::term_hash(const Handle& h,
 		const Variables& vees = sco->get_variables();
 		for (const Handle& v : vees.varseq) bound_vars.insert(v);
 	}
+
 	// As discussed in issue #1176, compute the individual term_hashes
 	// first, then sort them, and then mix them!  This provides the
 	// desired qualities: different unordered links can be directly
 	// compared, and also have good mixing/avalanching properties.
-	ContentHash hsh = ((1UL<<8) - 59) * t;
 	std::vector<ContentHash> hash_vec;
 	for (const Handle& ho: h->getOutgoingSet())
 	{
 		hash_vec.push_back(term_hash(ho, bound_vars, quotation));
 	}
+
 	// hash_vec should be sorted only for unordered links
 	if (nameserver().isA(t, UNORDERED_LINK)) {
 		std::sort(hash_vec.begin(), hash_vec.end());
 	}
-	for(ContentHash & t_hash: hash_vec){
+
+	ContentHash hsh = get_fvna_offset<sizeof(ContentHash)>();
+	fnv1a_hash(hsh, t);
+	for (ContentHash & t_hash: hash_vec) {
 		fnv1a_hash(hsh, t_hash);
 	}
 
