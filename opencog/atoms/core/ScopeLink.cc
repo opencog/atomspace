@@ -221,22 +221,16 @@ bool ScopeLink::is_equal(const Handle& other, bool silent) const
 /// the actual variable names have to be excluded from the hash,
 /// and a standardized set used instead.
 //
-// There's a lot of prime-numbers in the code below, but the
-// actual mixing and avalanching is extremely poor. I'm hoping
-// its good enough for hash buckets, but have not verified.
+// In the code below, the numbers of the form `((1UL<<35) - 325)`
+// etc. are all prime numbers. "Mixing" refers to code that can
+// combine together two values, such that thier bits are mixed
+// together.  Hash functions are deisgned to be very good at mixing.
 //
-// (In the code below, the numbers of the form `((1UL<<35) - 325)`
-// etc. are all prime numbers. "Mixing" refers to code having the
-// form `hash += (hash<<5) + other_stuff;` -- the shift and add
-// mixes the bits. "Avalanching" refers to single-bit differences
-// rapidly turning into multi-bit differences.)
-//
-// There's also an issue that there are multiple places where the
-// hash must not mix, and must stay abelian, in order to deal with
-// unordered links and alpha-conversion. (Here, "abelian" refers to
-// order independence; addition is abelian; while "mixing" as
-// defined above, is non-abelian).
-//
+// There are multiple places where the combination of two hash values
+// must not mix, and must stay order-independent (i.e. abelian). This
+// is needed to deal with unordered links and alpha-conversion.
+// Addition is "abelian": A+B = B+A while most functions that mix are
+// non-abalian -- the result depends on the order of the operations.
 
 
 // Fowler–Noll–Vo hash function
@@ -270,13 +264,13 @@ constexpr size_t get_fvna_offset<8>(){
 template<typename T>
 ContentHash fnv1a_hash (ContentHash & hval, T buf_t)
 {
-	uint64_t size = sizeof(buf_t);
+	size_t size = sizeof(buf_t);
 	const char * buf = (const char *)&buf_t;
 	size_t count = 0;
 	while (count < size)
 	{
-		hval ^= (unsigned int)*(buf+count);
-		hval *= (ContentHash)get_fvna_prime<sizeof(ContentHash)>();
+		hval ^= (ContentHash) (*(buf+count));
+		hval *= (ContentHash) get_fvna_prime<sizeof(ContentHash)>();
 		count ++;
 	}
 	return hval;
