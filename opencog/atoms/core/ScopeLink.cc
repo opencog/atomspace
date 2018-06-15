@@ -221,10 +221,10 @@ bool ScopeLink::is_equal(const Handle& other, bool silent) const
 /// the actual variable names have to be excluded from the hash,
 /// and a standardized set used instead.
 //
-// In the code below, the numbers of the form `((1UL<<35) - 325)`
-// etc. are all prime numbers. "Mixing" refers to code that can
-// combine together two values, such that thier bits are mixed
-// together.  Hash functions are deisgned to be very good at mixing.
+// "Mixing" refers to the idea of combining together two values, such
+// that thier bits are mixed together (in the formal, mathematical
+// definition, which includes ideas about increasing entropy).  Hash
+// functions are designed to be very good at mixing.
 //
 // There are multiple places where the combination of two hash values
 // must not mix, and must stay order-independent (i.e. abelian). This
@@ -290,7 +290,7 @@ ContentHash ScopeLink::compute_hash() const
 	{
 		for (Type t : pr.second) vth += t;
 	}
-	vth *= ((1UL<<19) - 87);
+	fnv1a_hash(hsh, vth);
 
 	for (const auto& pr : _varlist._deep_typemap)
 	{
