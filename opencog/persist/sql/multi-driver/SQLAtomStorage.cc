@@ -93,14 +93,28 @@ class SQLAtomStorage::Response
 		LLConnection* _conn;
 
 	public:
-		Response(concurrent_stack<LLConnection*>& pool) : _pool(pool)
-		{
-			tname = "";
-			itype = 0;
-			intval = 0;
-			_conn = nullptr;
-			rs = nullptr;
-		}
+		Response(concurrent_stack<LLConnection*>& pool) :
+		    rs(nullptr),
+		    itype(0),
+		    name(nullptr),
+		    outlist(nullptr),
+		    height(0),
+		    floatval(0),
+		    stringval(nullptr),
+		    linkval(nullptr),
+		    _pool(pool),
+		    _conn(nullptr),
+		    table(nullptr),
+		    store(nullptr),
+		    pvec(nullptr),
+		    uvec(nullptr),
+		    tname(""),
+		    fltval(0),
+		    strval(nullptr),
+		    lnkval(nullptr),
+		    get_all_values(false),
+		    intval(0)
+		{}
 
 		~Response()
 		{
