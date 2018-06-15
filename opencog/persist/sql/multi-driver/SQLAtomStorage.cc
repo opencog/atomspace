@@ -614,7 +614,7 @@ void SQLAtomStorage::store_atomtable_id(const AtomTable& at)
 
 #define STMTI(colname,ival) { \
 	char buff[BUFSZ]; \
-	snprintf(buff, BUFSZ, "%u", ival); \
+	snprintf(buff, BUFSZ, "%d", ival); \
 	STMT(colname, buff); \
 }
 
@@ -1782,7 +1782,7 @@ Handle SQLAtomStorage::doGetNode(Type t, const char * str)
 
 	// Use postgres $-quoting to make unicode strings easier to deal with.
 	int nc = snprintf(buff, 4*BUFSZ, "SELECT * FROM Atoms WHERE "
-		"type = %hu AND name = $ocp$%s$ocp$ ;", storing_typemap[t], str);
+		"type = %d AND name = $ocp$%s$ocp$ ;", storing_typemap[t], str);
 
 	if (4*BUFSZ-1 <= nc)
 	{
@@ -1842,7 +1842,7 @@ Handle SQLAtomStorage::doGetLink(Type t, const HandleSeq& hseq)
 
 	char buff[BUFSZ];
 	snprintf(buff, BUFSZ,
-		"SELECT * FROM Atoms WHERE type = %hu AND outgoing = ",
+		"SELECT * FROM Atoms WHERE type = %d AND outgoing = ",
 		storing_typemap[t]);
 
 	std::string qstr = buff;
@@ -1948,7 +1948,7 @@ void SQLAtomStorage::load(AtomTable &table)
 		steps.push_back(rec);
 
 	printf("Loading all atoms: "
-		"Max Height is %d stepsize=%lu chunks=%lu\n",
+		"Max Height is %d stepsize=%lu chunks=%zu\n",
 		 max_height, stepsize, steps.size());
 
 	// Parallelize always.
@@ -2268,17 +2268,17 @@ void SQLAtomStorage::print_stats(void)
 	size_t load_count = _load_count;
 	size_t store_count = _store_count;
 	double frac = store_count / ((double) load_count);
-	printf("sql-stats: total loads = %lu total stores = %lu ratio=%f\n",
+	printf("sql-stats: total loads = %zu total stores = %zu ratio=%f\n",
 	       load_count, store_count, frac);
 
 	size_t valuation_stores = _valuation_stores;
 	size_t value_stores = _value_stores;
-	printf("sql-stats: valuation updates = %lu value updates = %lu\n",
+	printf("sql-stats: valuation updates = %zu value updates = %zu\n",
 	       valuation_stores, value_stores);
 
 	size_t num_atom_removes = _num_atom_removes;
 	size_t num_atom_deletes = _num_atom_deletes;
-	printf("sql-stats: atom remove requests = %lu total atom deletes = %lu\n",
+	printf("sql-stats: atom remove requests = %zu total atom deletes = %zu\n",
 	       num_atom_removes, num_atom_deletes);
 	printf("\n");
 
@@ -2295,15 +2295,15 @@ void SQLAtomStorage::print_stats(void)
 	size_t num_link_inserts = _num_link_inserts;
 
 	frac = 100.0 * num_got_nodes / ((double) num_get_nodes);
-	printf("num_get_nodes=%lu num_got_nodes=%lu (%f pct) recursive=%lu\n",
+	printf("num_get_nodes=%zu num_got_nodes=%zu (%f pct) recursive=%zu\n",
 	       num_get_nodes, num_got_nodes, frac, num_rec_nodes);
 
 	frac = 100.0 * num_got_links / ((double) num_get_links);
-	printf("num_get_links=%lu num_got_links=%lu (%f pct) recursive=%lu\n",
+	printf("num_get_links=%zu num_got_links=%zu (%f pct) recursive=%zu\n",
 	       num_get_links, num_got_links, frac, num_rec_links);
 
 	frac = num_get_inlinks / ((double) num_get_insets);
-	printf("num_get_incoming_sets=%lu set total=%lu avg set size=%f\n",
+	printf("num_get_incoming_sets=%zu set total=%zu avg set size=%f\n",
 	       num_get_insets, num_get_inlinks, frac);
 
 	unsigned long tot_node = num_node_inserts;
@@ -2388,7 +2388,7 @@ void SQLAtomStorage::print_stats(void)
 	mad -= 1;
 	size_t used = _tlbuf.size();
 	frac = 100.0 * used / ((double) mad);
-	printf("sql-stats: %lu of %lu reserved uuids used (%f pct)\n",
+	printf("sql-stats: %zu of %lu reserved uuids used (%f pct)\n",
 	       used, mad, frac);
 }
 
