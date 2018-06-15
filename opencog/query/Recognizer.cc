@@ -72,7 +72,10 @@ class Recognizer :
 		HandleSet _rules;
 
 		Recognizer(AtomSpace* as) :
-			DefaultPatternMatchCB(as) {}
+		    DefaultPatternMatchCB(as),
+		    _pattern(nullptr),
+		    _cnt(0)
+		{}
 
 		virtual void set_pattern(const Variables& vars,
 		                         const Pattern& pat)
