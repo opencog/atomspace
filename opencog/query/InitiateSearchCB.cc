@@ -600,11 +600,10 @@ bool InitiateSearchCB::link_type_search(PatternMatchEngine *pme)
 		// Evaluatables don't exist in the atomspace, in general.
 		// Cannot start a search with them.
 		if (0 < _pattern->evaluatable_holders.count(cl)) continue;
-		size_t prev = count;
+		const size_t prev = count;
 		find_rarest(cl, _starter_term, count);
 		if (count < prev)
 		{
-			prev = count;
 			_root = cl;
 		}
 	}
