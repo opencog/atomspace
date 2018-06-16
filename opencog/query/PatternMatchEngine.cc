@@ -2143,7 +2143,8 @@ PatternMatchEngine::PatternMatchEngine(PatternMatchCallback& pmcb)
 	: _pmc(pmcb),
 	_nameserver(nameserver()),
 	_varlist(NULL),
-	_pat(NULL)
+	_pat(NULL),
+	clause_accepted(false)
 {
 	// current state
 	depth = 0;
