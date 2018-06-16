@@ -21,7 +21,15 @@
 	 #:optional (ID (LLOBJ 'id)))
 "
   add-support-api LLOBJ ID - Extend LLOBJ with methods to retreive
-  cached support, size and length subtotals on rows and columns.
+  support, size and length subtotals on rows and columns. The values
+  are retreived from the "margins", attached to the matrix wild-cards.
+  This class assumes the marginals were previously computed and
+  attached to the wildcards.
+
+  The margins (the pre-computed values) can be populated by saying
+  `((add-support-compute LLOBJ) 'cache-all)`
+  The `add-support-api` and `add-support-compute` API's are designed
+  to work together and complement one-another.
 
   Optional argument ID is #f to use the default value key;
   otherwise a filtered key is used.
@@ -106,11 +114,16 @@
   compute wild-card sums, including the support (lp-norm for p=0),
   the count (lp-norm for p=1), the Euclidean length (lp-norm for p=2)
   and the general lp-norm.  These all work with the counts for the
-  pairs, and NOT the frequencies!  None of these use cached values,
-  instead, they compute these values on the fly. The computed values
-  are NOT stored/saved, unless the 'cache-all method is invoked.
-  The 'cache-all method computes supports for the ENTIRE matrix,
-  and then stores the results. This can take a lot of CPU-time.
+  pairs, and NOT the frequencies!  None of these use any pre-computed
+  (marginal, or "cached") values; instead, they compute the norms from
+  the raw matrix data.  The computed norms are not places in the
+  margins or cached or saved (unless the 'cache-all method is invoked.)
+
+  The 'cache-all method computes norms for the ENTIRE matrix, and
+  places them in the margins, i.e. as values on the wild-cards of the
+  matrix.  This can take a lot of CPU-time. After the 'cache-all
+  method has been invoked, the `(add-support-api)` object can be
+  used to return these values.
 
   Some terminology: Let N(x,y) be the observed count for the pair (x,y).
   The left-support-set consists of all pairs (x,y), for fixed y, for
