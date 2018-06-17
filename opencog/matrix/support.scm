@@ -22,7 +22,7 @@
 "
   add-support-api LLOBJ ID - Extend LLOBJ with methods to retreive
   support, size and length subtotals on rows and columns. The values
-  are retreived from the "margins", attached to the matrix wild-cards.
+  are retreived from the \"margins\", attached to the matrix wild-cards.
   This class assumes the marginals were previously computed and
   attached to the wildcards.
 
@@ -115,7 +115,7 @@
   the count (lp-norm for p=1), the Euclidean length (lp-norm for p=2)
   and the general lp-norm.  These all work with the counts for the
   pairs, and NOT the frequencies!  None of these use any pre-computed
-  (marginal, or "cached") values; instead, they compute the norms from
+  (marginal, or \"cached\") values; instead, they compute the norms from
   the raw matrix data.  The computed norms are not places in the
   margins or cached or saved (unless the 'cache-all method is invoked.)
 
