@@ -459,6 +459,13 @@ Yes, this actually works -- its just not being used.
 		(define (get-right-stars ITEM)
 			(do-get-stars r-hit r-miss do-get-right-stars ITEM))
 
+		; Invalidate the caches. This is needed, when atoms get deleted.
+		(define (clobber)
+			(atomic-box-set! l-hit '())
+			(atomic-box-set! l-miss '())
+			(atomic-box-set! r-hit '())
+			(atomic-box-set! r-miss '()))
+
 		;-------------------------------------------
 		; Return default, only if LLOBJ does not provide symbol
 		(define (overload symbol default)
@@ -476,7 +483,8 @@ Yes, this actually works -- its just not being used.
 				(f-left-basis-size (overload 'left-basis-size get-left-size))
 				(f-right-basis-size (overload 'right-basis-size get-right-size))
 				(f-left-stars (overload 'left-stars get-left-stars))
-				(f-right-stars (overload 'right-stars get-right-stars)))
+				(f-right-stars (overload 'right-stars get-right-stars))
+				(f-clobber (overload 'clobber clobber)))
 
 			;-------------------------------------------
 			; Explain what it is that I provide. The point here is that
@@ -492,6 +500,7 @@ Yes, this actually works -- its just not being used.
 					((right-basis)      f-right-basis)
 					((left-basis-size)  f-left-basis-size)
 					((right-basis-size) f-right-basis-size)
+					((clobber)          f-clobber)
 					(else               (LLOBJ 'provides meth))))
 
 			;-------------------------------------------
@@ -504,6 +513,7 @@ Yes, this actually works -- its just not being used.
 					((right-basis-size) (f-right-basis-size))
 					((left-stars)       (apply f-left-stars args))
 					((right-stars)      (apply f-right-stars args))
+					((clobber)          (f-clobber))
 					((provides)         (apply provides args))
 					(else               (apply LLOBJ (cons message args))))
 			))))
