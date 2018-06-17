@@ -274,17 +274,19 @@
 				(star-obj 'left-basis)))
 
 		; -------------
-		; Compute and cache all l_0, l_1 and l_2 norms, for later
-		; fast access.
+		; Compute all l_0, l_1 and l_2 norms, attach them to the
+		; wildcards, where the support-api can find them.
 
-		(define (cache-all)
+		(define start-time 0)
+		(define (elapsed-secs)
+			(define diff (- (current-time) start-time))
+			(set! start-time (current-time))
+			diff)
 
-			(define start-time (current-time))
-			(define (elapsed-secs)
-				(define diff (- (current-time) start-time))
-				(set! start-time (current-time))
-				diff)
-
+		; XXX FIXME can make this 3x faster by performing all three loops
+		; at the same time.
+		(define (left-marginals)
+			(elapsed-secs)
 			(for-each
 				(lambda (ITEM)
 					(define l0 (get-left-support-size ITEM))
@@ -293,9 +295,11 @@
 					(api-obj 'set-left-norms ITEM l0 l1 l2))
 				(star-obj 'right-basis))
 
-			(format #t "Finished left support subtotals in ~A secs\n"
-				(elapsed-secs))
+			(format #t "Finished left norm marginals in ~A secs\n"
+				(elapsed-secs)))
 
+		(define (right-marginals)
+			(elapsed-secs)
 			(for-each
 				(lambda (ITEM)
 					(define l0 (get-right-support-size ITEM))
@@ -303,11 +307,13 @@
 					(define l2 (sum-right-length ITEM))
 					(api-obj 'set-right-norms ITEM l0 l1 l2))
 				(star-obj 'left-basis))
+			(format #t "Finished right norm marginals in ~A secs\n"
+				(elapsed-secs)))
 
-			(format #t "Finished right support subtotals in ~A secs\n"
-				(elapsed-secs))
-		)
-
+		; Do both at once
+		(define (cache-all)
+			(left-marginals)
+			(right-marginals))
 
 		; -------------
 		; Methods on this class.
@@ -327,6 +333,8 @@
 				((total-support)      (compute-total-support))
 				((total-count)        (compute-total-count))
 
+				((left-marginals)     (left-marginals))
+				((right-marginals)    (right-marginals))
 				((cache-all)          (cache-all))
 				(else                 (apply LLOBJ (cons message args))))
 			)))
