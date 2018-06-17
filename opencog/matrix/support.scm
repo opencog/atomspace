@@ -125,6 +125,11 @@
   method has been invoked, the `(add-support-api)` object can be
   used to return these values.
 
+  In order for 'cache-all to work, the full matrix must avaialble
+  in RAM.  It can be fetched by calling `(LLOBJ 'fetch-pairs)`.
+  After computing the marginals, it is wise to store them back to
+  disk. This can be done with `((make-store LLOBJ) 'sotre-wildcards)`
+
   Some terminology: Let N(x,y) be the observed count for the pair (x,y).
   The left-support-set consists of all pairs (x,y), for fixed y, for
   which N(x,y) > 0. The right-support-set is the same, for fixed x.
