@@ -30,7 +30,6 @@ Missing features/ToDo items
  * Provide optimized table layout for EvaluationLinks.
  * Provide optimized layout for sheaf sections.
  * Add support for multiple atom spaces.
- * Add support for Space/TimeServer data.
  * See also TODO list at very bottom.
 
 Performance status
@@ -55,6 +54,24 @@ the Postgres server for better results.  The above was also done through
 the scheme interface; since then, garbage collection has been tuned a
 little bit, and so RAM usage should drop a bit.
 
+In June 2018, it took 3500 seconds wall-clock time to load 25924129
+atoms, for a rate of 7407 atoms/sec. Of these atoms, approximately half
+had non-trivial values associated with them. The cogserver process used
+38GB of RAM, for about 1.46KBytes/atom.
+
+Storing portions of this dataset proceeds at about 1K atoms/sec. This
+is for updating the values on the atoms, only; no actual atoms are
+stored (i.e. the atoms are already in the database; as are the values;
+the values are being updated).
+
+Store is performed by multiple parallel threads in the backend, each
+taking to a distinct instance of postgres; thus, it appears that
+postgres is the primary bottleneck. Certainly, postgres seems to be the
+primary consumer of CPU time, using a combined 2x more CPU than the
+atomspace. i.e. for every cpu-sec burned by the atomspace, the six
+different postgres instance burn up two cpu-secs.
+
+It is not at all obvious how to improve either load or store performance.
 
 Design Goals
 ============
@@ -1036,19 +1053,6 @@ Much much better!
 ```
 
 
-ProtoAtoms
-==========
-ProtoAtoms were invented to solve the representational issues associated
-with TV's. Narrowly, there is a need to store TV's of different kinds,
-including TV's with counts, relative entropies, value ranges, etc.
-Broadly, there is a need to store generic entity-attribute-value
-information with each atom (where the atom is the entity).  ProtoAtoms
-are the intended EAV solution for the atomspace.
-
-The ProtoAtom implementation, in the main atomspace, is incomplete.
-Much of the work has been done, but open design issues remain.
-
-
 JSONB
 =====
 The storage problem for the atomspace is essentially the problem of
@@ -1059,8 +1063,7 @@ https://en.wikipedia.org/wiki/Entity%E2%80%93attribute%E2%80%93value_model
 A workable design point, using postgres 9.4 or newer, is JSONB. See
 http://coussej.github.io/2016/01/14/Replacing-EAV-with-JSONB-in-PostgreSQL/
 
-The goal here is to deal with protoatom storage (i.e. as a replacement
-for the current TV representation problem.)
+The goal here is to deal with how to store Values (ProtoAtoms).
 
 The representation of the atomspace would then look vaguely like this
 (this is a rough sketch):
@@ -1095,13 +1098,13 @@ UPDATE atomspace
 SET atom = jsonb_set(properties, '{"stv"}', '[0.2, 0.54]')
 WHERE id = 42;
 
+
 Critically important observations:
 ----------------------------------
 Performance depends crucially on the use of the containment (@>)
 operator in the WHERE clause. This causes the GIN index to be used,
 and thus can run thousands (!) of times faster than an ordinary
 EAV table structure.
-
 
 
 TODO
@@ -1120,7 +1123,10 @@ TODO
  * Implement the large-outgoing-set extension. A version of this can be
    found in the `postgres-dead` directory, but the code there is badly
    broken. Its probably simplest to just ignore the code in
-   `postgres-dead`, and design something from scratch.
+   `postgres-dead`, and design something from scratch.  This might be
+   a *bad idea*; atoms with large outgoing sets are fundamentally bad.
+   Improving support for them just encourages bad knowledge-representation
+   design.  So maybe don't do this.
 
  * Consider an alternate implementation, using JSONB to do an EAV-like
    storage: For details, see
@@ -1130,7 +1136,7 @@ TODO
    hierarchy, so that types can be fully saved and restored from the
    database. Not clear how to resolve conflicts, if they occur, between
    the type inheritance hierarchy defined in C++, and the hierarchy
-   defined in the database.
+   defined in the database.  So maybe this is a *bad idea*.
 
  * Extend the standard table to hold count truth-values. Since almost
    all atoms have count TV's on them, this can lead to a more compact
