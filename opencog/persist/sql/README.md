@@ -62,7 +62,8 @@ had non-trivial values associated with them. The cogserver process used
 Storing portions of this dataset proceeds at about 1K atoms/sec. This
 is for updating the values on the atoms, only; no actual atoms are
 stored (i.e. the atoms are already in the database; as are the values;
-the values are being updated).
+the values are being updated).  Precisely, there were 6239904 stores
+in 6561 seconds, wall-clock time, for a rate of 951 Atoms/second.
 
 Store is performed by multiple parallel threads in the backend, each
 taking to a distinct instance of postgres; thus, it appears that
