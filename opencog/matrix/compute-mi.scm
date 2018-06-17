@@ -552,21 +552,24 @@
 
 		; Store all the wild-card atoms; these are exactly the ones
 		; obtained from the object, via the left and right basis.
+		(define (store-left-wildcards)
+			(store-list
+				(lambda (x) (llobj 'left-wildcard x))
+				(star-obj 'right-basis)
+				40000 "left-wilds"))
+
+		(define (store-right-wildcards)
+			(store-list
+				(lambda (x) (llobj 'right-wildcard x))
+				(star-obj 'left-basis)
+				40000 "right-wilds"))
+
 		(define (store-all-wildcards)
 			; Store the wild-wild-card atom, first.
 			; This holds the totals for the matrix.
 			(store-atom (llobj 'wild-wild))
-
-			(store-list
-				(lambda (x) (llobj 'left-wildcard x))
-				(star-obj 'right-basis)
-				40000 "left-wilds")
-
-			(store-list
-				(lambda (x) (llobj 'right-wildcard x))
-				(star-obj 'left-basis)
-				40000 "right-wilds")
-		)
+			(store-left-wildcards)
+			(store-right-wildcards))
 
 		; Store all the pairs. These must be provided as a list to us,
 		; because, at this time, we don't have an effective way of working
@@ -579,6 +582,8 @@
 		; Methods on this class.
 		(lambda (message . args)
 			(case message
+				((store-left-marginals) (store-left-wildcards))
+				((store-right-marginals)(store-right-wildcards))
 				((store-wildcards)      (store-all-wildcards))
 				((store-pairs)          (apply store-pairs args))
 				(else                   (apply llobj (cons message args))))
