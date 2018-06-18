@@ -296,7 +296,7 @@ void opencog::global_python_initialize()
 
     logger().info("[global_python_initialize] Start");
 
-    // Throw an exception if this is called more than once.
+    // Don't initialize twice
     if (already_initialized) {
         return;
     }
