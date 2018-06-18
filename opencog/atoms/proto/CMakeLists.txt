@@ -48,5 +48,5 @@ INSTALL (FILES
 # Install the auto-generated atom types as well
 INSTALL (FILES
 	${CMAKE_CURRENT_BINARY_DIR}/core_types.scm
-	DESTINATION "${DATADIR}/scm/opencog/proto"
+	DESTINATION "${DATADIR}/scm/opencog/base"
 )
