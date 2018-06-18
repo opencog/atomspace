@@ -124,6 +124,7 @@
 				((right-stars)    (apply get-right-stars args))
 				((left-release)   (apply release-extract args))
 				((right-release)  (apply release-extract args))
+				((clobber)        (stars-obj 'clobber))
 				((provides)       (apply provides args))
 				(else             (apply LLOBJ (cons message args))))
 		)))
