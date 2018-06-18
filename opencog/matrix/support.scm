@@ -336,6 +336,11 @@
 				((left-marginals)     (left-marginals))
 				((right-marginals)    (right-marginals))
 				((cache-all)          (cache-all))
+
+; XXX hack alert. We need something more elegant!?
+; the language-learning clustering code uses this
+; to invalidate the star objects in use.
+				((clobber)            (star-obj 'clobber))
 				(else                 (apply LLOBJ (cons message args))))
 			)))
 
