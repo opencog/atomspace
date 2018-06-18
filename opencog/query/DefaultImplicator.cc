@@ -27,7 +27,7 @@ using namespace opencog;
 
 #ifdef CACHED_IMPLICATOR
 
-DefaultImplicator* CachedDefaultImplicator::_cached_implicator = NULL;
+DefaultImplicator* CachedDefaultImplicator::_cached_implicator = nullptr;
 
 CachedDefaultImplicator::CachedDefaultImplicator(AtomSpace*asp)
 {
