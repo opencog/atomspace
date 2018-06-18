@@ -270,9 +270,6 @@ ELSE (HYPERTABLE_FOUND)
 
 ENDIF (HYPERTABLE_FOUND)
 
-# At this time, there is no reason to build with memcached for
-# FIND_PACKAGE(LibMemCached)
-
 # Google Protobuf library
 # The protocol buffer compiler is needed for ZMQ-based persistence.
 FIND_PACKAGE(Protobuf)
@@ -449,12 +446,6 @@ ENDIF(HAVE_COGUTIL)
 IF(HAVE_PROTOBUF AND HAVE_ZMQLIB)
 	SET(HAVE_ZMQ 1)
 ENDIF(HAVE_PROTOBUF AND HAVE_ZMQLIB)
-
-# At this time, there is no reason to build with memcached for
-# any "normal" use, so just stub it out.
-# IF (LIBMEMCACHED_FOUND)
-#	ADD_DEFINITIONS(-DHAVE_LIBMEMCACHED)
-# ENDIF (LIBMEMCACHED_FOUND)
 
 # ===================================================================
 # global includes

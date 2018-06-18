@@ -16,18 +16,13 @@ gearman    -- Experimental support for distributed operation, using
 hypertable -- Experimental HyperTable support. Unmaintained.
               (Won't compile at this time.) Should be revived!
 
-memcache   -- Experimental/broken, uses memcached for persistence.
-              (Won't compile at this time.) Not worth it, very poor
-              performance; memcache does not work well for small
-              objects, e.g. atoms, which are about 50 bytes in size.
-
 sql        -- Works well for most uses -- with caveats.
 
 zmq        -- ZeroMQ-based atomspace serialization and deserialization.
               Unmaintained.  (Won't compile at this time.)
 
 
-The gearman, hypertable, memcache and sql systems all support networked,
+The gearman, hypertable and sql systems all support networked,
 peer-to-peer communications between cogservers.  (In principle ...
 currently, needs test cases, and general work to enable/support).
 
