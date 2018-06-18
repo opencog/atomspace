@@ -93,8 +93,7 @@
 		(cog-set-atomspace! cog-initial-as)))
 
 ; Load core atom types.
-; The remaining atom types from the cogserver are in (opencog atom-types)
-(load-from-path "opencog/atoms/proto/core_types.scm")
+(load-from-path "opencog/base/core_types.scm")
 
 ; Load other grunge too.
 ; Some of these things could possibly be modules ...?
