@@ -27,6 +27,7 @@
 #include <opencog/guile/SchemeEval.h>
 #include <opencog/atoms/proto/RandomStream.h>
 #include <opencog/atomspace/AtomSpace.h>
+#include <opencog/util/Logger.h>
 
 #include <cxxtest/TestSuite.h>
 
@@ -44,6 +45,8 @@ private:
 	Handle atom;
 
 public:
+	StreamUTest(void);
+
 	void setUp(void);
 
 	void check(void);
@@ -61,6 +64,12 @@ public:
 
 	void test_guile();
 };
+
+StreamUTest::StreamUTest(void)
+{
+	logger().set_level(Logger::INFO);
+	logger().set_print_to_stdout_flag(true);
+}
 
 // This unit test is a stand-in test for the concept of a streaming API
 // on Values. For lack of anything better to test, the RandomStream is

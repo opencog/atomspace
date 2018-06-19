@@ -26,6 +26,7 @@
 #include <opencog/atoms/execution/Instantiator.h>
 #include <opencog/atoms/proto/FloatValue.h>
 #include <opencog/atomspace/AtomSpace.h>
+#include <opencog/util/Logger.h>
 
 #include <cxxtest/TestSuite.h>
 
@@ -43,6 +44,8 @@ private:
 	Handle atom;
 	
 public:
+	ValueOfUTest(void);
+
 	void setUp(void);
 	void check(void);
 
@@ -56,6 +59,12 @@ public:
 	void test_divide();
 	void test_number();
 };
+
+ValueOfUTest::ValueOfUTest(void)
+{
+	logger().set_level(Logger::INFO);
+	logger().set_print_to_stdout_flag(true);
+}
 
 void ValueOfUTest::setUp(void)
 {
