@@ -59,7 +59,7 @@ std::vector<AtomSpace*> DefaultPatternMatchCB::s_transient_cache;
 
 AtomSpace* DefaultPatternMatchCB::grab_transient_atomspace(AtomSpace* parent)
 {
-	AtomSpace* transient_atomspace = NULL;
+	AtomSpace* transient_atomspace = nullptr;
 
 	// See if the cache has one...
 	if (s_transient_cache.size() > 0)
@@ -141,7 +141,7 @@ DefaultPatternMatchCB::~DefaultPatternMatchCB()
 	if (_temp_aspace)
 	{
 		release_transient_atomspace(_temp_aspace);
-		_temp_aspace = NULL;
+		_temp_aspace = nullptr;
 	}
 
 	// Delete the instantiator.
@@ -159,20 +159,20 @@ void DefaultPatternMatchCB::ready(AtomSpace* as)
 
 void DefaultPatternMatchCB::clear()
 {
-	_vars = NULL;
-	_dynamic = NULL;
+	_vars = nullptr;
+	_dynamic = nullptr;
 	_have_evaluatables = false;
-	_globs = NULL;
+	_globs = nullptr;
 
 	_have_variables = false;
 	_pattern_body = Handle::UNDEFINED;
 
 	release_transient_atomspace(_temp_aspace);
-	_temp_aspace = NULL;
+	_temp_aspace = nullptr;
 	_instor->clear();
 
 	_optionals_present = false;
-	_as = NULL;
+	_as = nullptr;
 }
 #endif
 
@@ -668,7 +668,7 @@ bool DefaultPatternMatchCB::eval_term(const Handle& virt,
 
 	// Avoid null-pointer dereference if user specified a bogus evaluation.
 	// i.e. an evaluation that failed to return a TV.
-	if (NULL == tvp)
+	if (nullptr == tvp)
 		throw InvalidParamException(TRACE_INFO,
 	            "Expecting a TruthValue for an evaluatable link: %s\n",
 	            gvirt->to_short_string().c_str());

@@ -128,7 +128,7 @@ int AtomSpace_getAtomByHandle( AtomSpace* this_ptr
             throw RuntimeException(TRACE_INFO,"Error in cast Link.");
         *out_len = lnk->get_arity();
 
-        *out = (Handle*)malloc(sizeof(Handle*) * (*out_len));
+        *out = (Handle*)malloc(sizeof(Handle) * (*out_len));
 
         if(! *out)
             throw RuntimeException(TRACE_INFO,"Failed malloc.");

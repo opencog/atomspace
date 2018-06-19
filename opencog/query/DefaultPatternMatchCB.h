@@ -95,10 +95,10 @@ class DefaultPatternMatchCB : public virtual PatternMatchCallback
 
 		NameServer& _nameserver;
 
-		const Variables* _vars = NULL;
-		const HandleSet* _dynamic = NULL;
+		const Variables* _vars = nullptr;
+		const HandleSet* _dynamic = nullptr;
 		bool _have_evaluatables = false;
-		const HandleSet* _globs = NULL;
+		const HandleSet* _globs = nullptr;
 
 		bool _have_variables;
 		Handle _pattern_body;

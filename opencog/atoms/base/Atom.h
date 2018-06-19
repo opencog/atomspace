@@ -311,7 +311,7 @@ public:
         {
             for (const WinkPtr& w : bucket.second)
             {
-                Handle h(w.lock());
+                Handle h(std::static_pointer_cast<Atom>(w.lock()));
                 if (h) { *result = h; result ++; }
             }
         }
@@ -330,7 +330,7 @@ public:
         IncomingSet vh(getIncomingSet());
 
         for (const LinkPtr& lp : vh)
-            if ((data->*cb)(Handle(lp))) return true;
+            if ((data->*cb)(Handle(std::static_pointer_cast<Atom>(lp)))) return true;
         return false;
     }
 
@@ -353,7 +353,7 @@ public:
 
         for (const WinkPtr& w : bucket->second)
         {
-            Handle h(w.lock());
+            Handle h(std::static_pointer_cast<Atom>(w.lock()));
             if (h) { *result = h; result ++; }
         }
         return result;

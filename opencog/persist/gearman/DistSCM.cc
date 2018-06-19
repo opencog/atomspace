@@ -62,7 +62,9 @@ using namespace opencog;
 
 bool DistSCM::keep_working = true;
 
-DistSCM::DistSCM(void) : ModuleWrap("opencog dist-gearman")
+DistSCM::DistSCM(void) :
+    ModuleWrap("opencog dist-gearman"),
+    worker(nullptr)
 {}
 
 void DistSCM::init(void)
@@ -226,12 +228,6 @@ std::string DistSCM::dist_eval(const std::string& scm_string,
 		std::cerr << "Memory allocation failure on client creation" << std::endl;
 		throw RuntimeException(TRACE_INFO,
 			"Gearman: Memory allocation failure on client creation");
-	}
-
-	int timeout=-1;
-	if (timeout >= 0)
-	{
-		gearman_client_set_timeout(&client, timeout);
 	}
 
 	gearman_return_t rc = gearman_client_add_server(&client,

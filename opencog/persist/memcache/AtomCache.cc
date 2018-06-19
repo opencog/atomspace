@@ -30,7 +30,9 @@
 
 using namespace opencog;
 
-AtomCache::AtomCache(const std::string server, int portno)
+AtomCache::AtomCache(const std::string server, int portno) :
+    maxdepth(0),
+    load_count(0)
 {
 	memcached_return rc;
 	mc = memcached_create(NULL);
@@ -226,7 +228,7 @@ void AtomCache::load_list(AtomTable &table, int depth)
 	size_t klen = snprintf(keybuff, KBSIZE, "depth-list-%d", depth);
 	val = memcached_get(mc, keybuff, klen, &vlen, &flags, &rc);
 
-printf("duude depth=%d nodelist len=%d\n", depth, vlen);
+printf("duude depth=%d nodelist len=%zu\n", depth, vlen);
 	if ((vlen == 0) || (NULL == val)) return;
 
 	unsigned long ilc = load_count;

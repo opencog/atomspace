@@ -51,10 +51,10 @@ InitiateSearchCB::InitiateSearchCB(AtomSpace* as) :
 	InitiateSearchCB::clear();
 	InitiateSearchCB::ready(as);
 #else
-	_variables = NULL;
-	_pattern = NULL;
-	_dynamic = NULL;
-	_pl = NULL;
+	_variables = nullptr;
+	_pattern = nullptr;
+	_dynamic = nullptr;
+	_pl = nullptr;
 
 	_root = Handle::UNDEFINED;
 	_starter_term = Handle::UNDEFINED;
@@ -74,10 +74,10 @@ void InitiateSearchCB::ready(AtomSpace* as)
 
 void InitiateSearchCB::clear()
 {
-	_variables = NULL;
-	_pattern = NULL;
-	_dynamic = NULL;
-	_pl = NULL;
+	_variables = nullptr;
+	_pattern = nullptr;
+	_dynamic = nullptr;
+	_pl = nullptr;
 
 	_root = Handle::UNDEFINED;
 	_starter_term = Handle::UNDEFINED;
@@ -85,7 +85,7 @@ void InitiateSearchCB::clear()
 	_curr_clause = 0;
 	_choices.clear();
  	_search_fail = false;
-	_as = NULL;
+	_as = nullptr;
 }
 #endif
 
@@ -600,11 +600,10 @@ bool InitiateSearchCB::link_type_search(PatternMatchEngine *pme)
 		// Evaluatables don't exist in the atomspace, in general.
 		// Cannot start a search with them.
 		if (0 < _pattern->evaluatable_holders.count(cl)) continue;
-		size_t prev = count;
+		const size_t prev = count;
 		find_rarest(cl, _starter_term, count);
 		if (count < prev)
 		{
-			prev = count;
 			_root = cl;
 		}
 	}

@@ -224,20 +224,6 @@ void AtomTable::clear()
     }
 }
 
-AtomTable& AtomTable::operator=(const AtomTable& other)
-{
-    throw opencog::RuntimeException(TRACE_INFO,
-            "AtomTable - Cannot copy an object of this class");
-}
-
-AtomTable::AtomTable(const AtomTable& other) :
-    _nameserver(nameserver()),
-    _index_queue(this, &AtomTable::put_atom_into_index)
-{
-    throw opencog::RuntimeException(TRACE_INFO,
-            "AtomTable - Cannot copy an object of this class");
-}
-
 Handle AtomTable::getHandle(Type t, const std::string& n) const
 {
     AtomPtr a(createNode(t,n));

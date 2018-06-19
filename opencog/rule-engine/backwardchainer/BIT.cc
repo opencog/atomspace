@@ -81,7 +81,7 @@ std::string	BITNode::to_string(const std::string& indent) const
 // AndBIT //
 ////////////
 
-AndBIT::AndBIT() : exhausted(false) {}
+AndBIT::AndBIT() : complexity(0), exhausted(false), queried_as(nullptr) {}
 
 AndBIT::AndBIT(AtomSpace& bit_as, const Handle& target, Handle vardecl,
                const BITNodeFitness& fitness, const AtomSpace* qas)

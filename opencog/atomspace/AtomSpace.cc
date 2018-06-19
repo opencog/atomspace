@@ -69,14 +69,6 @@ AtomSpace::~AtomSpace()
 {
 }
 
-AtomSpace::AtomSpace(const AtomSpace&) :
-    _atom_table(nullptr),
-    _backing_store(nullptr)
-{
-     throw opencog::RuntimeException(TRACE_INFO,
-         "AtomSpace - Cannot copy an object of this class");
-}
-
 void AtomSpace::ready_transient(AtomSpace* parent)
 {
     _atom_table.ready_transient(parent? &parent->_atom_table : nullptr, this);
@@ -85,12 +77,6 @@ void AtomSpace::ready_transient(AtomSpace* parent)
 void AtomSpace::clear_transient()
 {
     _atom_table.clear_transient();
-}
-
-AtomSpace& AtomSpace::operator=(const AtomSpace&)
-{
-     throw opencog::RuntimeException(TRACE_INFO,
-         "AtomSpace - Cannot copy an object of this class");
 }
 
 bool AtomSpace::compare_atomspaces(const AtomSpace& space_first,

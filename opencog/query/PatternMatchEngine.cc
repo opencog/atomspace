@@ -2142,8 +2142,9 @@ bool PatternMatchEngine::explore_constant_evaluatables(const HandleSeq& clauses)
 PatternMatchEngine::PatternMatchEngine(PatternMatchCallback& pmcb)
 	: _pmc(pmcb),
 	_nameserver(nameserver()),
-	_varlist(NULL),
-	_pat(NULL)
+	_varlist(nullptr),
+	_pat(nullptr),
+	clause_accepted(false)
 {
 	// current state
 	depth = 0;

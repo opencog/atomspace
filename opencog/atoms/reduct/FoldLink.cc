@@ -67,15 +67,12 @@ ProtoAtomPtr FoldLink::delta_reduce(void) const
 	{
 		Handle h(_outgoing[i]);
 
-		Type t = h->get_type();
-
 		// Special-case hack for atoms returned by the pattern matcher.
 		// ... The pattern matcher returns things wrapped in a SetLink.
 		// Unwrap them and use them.
-		if (SET_LINK == t and h->get_arity() == 1)
+		if (SET_LINK == h->get_type() and h->get_arity() == 1)
 		{
 			h = h->getOutgoingAtom(0);
-			t = h->get_type();
 		}
 		expr = kons(h, expr);
 	}
