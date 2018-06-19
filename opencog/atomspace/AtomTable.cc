@@ -48,7 +48,22 @@
 
 //#define DPRINTF printf
 #define DPRINTF(...)
-#define DEBUG 1
+
+// Uncomment the following to check at run-time atom hash collisions,
+// that is whether 2 different atoms a1 and a2 have the same hash,
+// formally
+//
+// a1 != a2 and a1->get_hash() == a1->get_hash()
+//
+// Atom hash collision is unavoidable in principle but should be rare,
+// this code may be useful for discovering pathological hash
+// collisions. If enable, any hash collision should be warn logged.
+// #define CHECK_ATOM_HASH_COLLISION
+
+// If CHECK_ATOM_HASH_COLLISION is enabled, uncomment the following to
+// that to abort if a collision is detected. This is an extreme yet
+// convenient way to check whether a collision has occured.
+// #define HALT_ON_COLLISON
 
 using namespace opencog;
 
@@ -462,13 +477,20 @@ Handle AtomTable::add(AtomPtr atom, bool async)
     Handle h(atom->get_handle());
     _atom_store.insert({atom->get_hash(), h});
 
-#ifdef DEBUG
+#ifdef CHECK_ATOM_HASH_COLLISION
     auto its = _atom_store.equal_range(atom->get_hash());
     for (auto it = its.first; it != its.second; ++it) {
         AtomPtr a = it->second;
         if (atom != a) {
-            LAZY_LOG_FINE << "hash collision between different atoms: " << std::endl
-                          << atom->to_string() << a->to_string();
+            LAZY_LOG_WARN << "Hash collision between:" << std::endl
+                          << atom->to_string() << "and:" << std::endl
+                          << a->to_string();
+#ifdef HALT_ON_COLLISON
+            // This is an extreme yet convenient way to check whether
+            // a collision has occured.
+            logger().flush();
+            abort();
+#endif
         }
     }
 #endif
