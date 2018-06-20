@@ -599,38 +599,38 @@
 ; ---------------------------------------------------------------------
 ; ---------------------------------------------------------------------
 ;
-; Compute the mutual information between all pairs. Counts, frequencies
-; and left, right partial sums are also performed; this is an all-in-one
-; routine, which computes all of the needed pre-requisites, and stores
-; them, as well as the MI, in the database.
-;
-; The mutual information between pairs is described in the overview,
-; up top of this file. The access to the pairs is governed by the
-; the methods on the passed object.
-;
-; Among the things that are computed and stored are the partial sums
-; of counts, i.e. the N(x,*) and N(*,y) explained up top, the total
-; count N(*,*), the frequencies p(x,y) = N(x,y) / N(*,*), the
-; corresponding partial sums.  All of these quantities are written
-; back to the database, at the time of computation.
-;
-; In order to work correctly, this function assumes that the object
-; has at least the minimal low-level API to identify where to find
-; the counts on pairs.  This script is designed to work with any kinds
-; of pairs.
-;
-; Running this script can take hours or longer, depending on the size
-; of the dataset. Progress reports are printed to stdout, including
-; timing and summary statistics. This script wasn't really designed to
-; be efficient; instead, the goal to to allow general, generic knowledge
-; representation.  You can compute MI between any kinds of things
-; If you just need to count one thing, writing custom scripts that do
-; NOT use the atomspace would almost surely be faster.  We put up with
-; the performance overhead here in order to get the flexibility that
-; the atomspace provides.
-;
 (define-public (batch-all-pair-mi OBJ)
+"
+  Compute the mutual information between all pairs. Counts, frequencies
+  and left, right partial sums are also performed; this is an all-in-one
+  routine, which computes all of the needed pre-requisites, and stores
+  them, as well as the MI, in the database.
 
+  The mutual information between pairs is described in the overview,
+  up top of this file. The access to the pairs is governed by the
+  the methods on the passed object.
+
+  Among the things that are computed and stored are the partial sums
+  of counts, i.e. the N(x,*) and N(*,y) explained up top, the total
+  count N(*,*), the frequencies p(x,y) = N(x,y) / N(*,*), the
+  corresponding partial sums.  All of these quantities are written
+  back to the database, at the time of computation.
+
+  In order to work correctly, this function assumes that the object
+  has at least the minimal low-level API to identify where to find
+  the counts on pairs.  This script is designed to work with any kinds
+  of pairs.
+
+  Running this script can take hours or longer, depending on the size
+  of the dataset. Progress reports are printed to stdout, including
+  timing and summary statistics. This script wasn't really designed to
+  be efficient; instead, the goal to to allow general, generic knowledge
+  representation.  You can compute MI between any kinds of things
+  If you just need to count one thing, writing custom scripts that do
+  NOT use the atomspace would almost surely be faster.  We put up with
+  the performance overhead here in order to get the flexibility that
+  the atomspace provides.
+"
 	(define overall-start-time (current-time))
 	(define start-time (current-time))
 	(define (elapsed-secs)
