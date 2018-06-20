@@ -150,6 +150,7 @@ void VectorAPIUTest::test_basic(void)
 
 void VectorAPIUTest::test_marginals(void)
 {
+#ifdef HAVE_SQL_STORAGE
 	logger().debug("BEGIN TEST: %s", __FUNCTION__);
 
 	std::string rc = eval->eval("(load-from-path \"tests/matrix/basic-data.scm\")");
@@ -376,6 +377,7 @@ void VectorAPIUTest::test_marginals(void)
 	CHKFLT("report total mi", num, chmi+domi+tami);
 
 	logger().debug("END TEST: %s", __FUNCTION__);
+#endif // HAVE_SQL_STORAGE
 }
 
 // ====================================================================
@@ -420,6 +422,7 @@ void VectorAPIUTest::test_cosines(void)
 // Make sure data can be fetched from SQL
 void VectorAPIUTest::xtest_dynamic(void)
 {
+#ifdef HAVE_SQL_STORAGE
 	logger().debug("BEGIN TEST: %s", __FUNCTION__);
 
 	// Where the data comes from.
@@ -445,6 +448,7 @@ void VectorAPIUTest::xtest_dynamic(void)
 	CHKERR;
 
 	logger().debug("END TEST: %s", __FUNCTION__);
+#endif // HAVE_SQL_STORAGE
 }
 
 // ====================================================================
