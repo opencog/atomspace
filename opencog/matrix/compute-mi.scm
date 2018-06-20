@@ -150,15 +150,17 @@
 ; ---------------------------------------------------------------------
 ; ---------------------------------------------------------------------
 ;
-; Extend the LLOBJ with additional methods to compute wildcard counts
-; for pairs, and store the results using the count-object API.
-; That is, compute the summations N(x,*) = sum_y N(x,y) where (x,y)
-; is a pair, and N(x,y) is the count of how often that pair has been
-; observed, and * denotes the wild-card, ranging over all items
-; supported in that slot.
-;
-(define (make-compute-count LLOBJ)
+(define-public (make-compute-count LLOBJ)
+"
+  make-compute-count LLOBJ
 
+  Extend the LLOBJ with additional methods to compute wildcard counts
+  for pairs, and store the results using the count-object API.
+  That is, compute the summations N(x,*) = sum_y N(x,y) where (x,y)
+  is a pair, and N(x,y) is the count of how often that pair has been
+  observed, and * denotes the wild-card, ranging over all items
+  supported in that slot.
+"
 	; We need 'left-basis, provided by add-pair-stars
 	; We need 'set-left-wild-count, provided by add-pair-count-api
 	(let ((llobj LLOBJ)
@@ -276,21 +278,23 @@
 
 ; ---------------------------------------------------------------------
 ;
-; Extend the LLOBJ with additional methods to compute observation
-; frequencies and entropies for pairs, including partial-sum entropies
-; (mutual information) for the left and right side of each pair.
-; This will also cache the results of these computations in a
-; standardized location.
-;
-; The LLOBJ must have valid left and right wild-card counts on it.
-; These need to have been previously computed, before methods on
-; this class are called.
-;
-; Before using this class, the 'init-freq method must be called,
-; and it must be called *after* a valid wild-wild count is available.
+(define-public (make-compute-freq LLOBJ)
+"
+  make-compute-freq LLOBJ
 
-(define (make-compute-freq LLOBJ)
+  Extend the LLOBJ with additional methods to compute observation
+  frequencies and entropies for pairs, including partial-sum entropies
+  (mutual information) for the left and right side of each pair.
+  This will also cache the results of these computations in a
+  standardized location.
 
+  The LLOBJ must have valid left and right wild-card counts on it.
+  These need to have been previously computed, before methods on
+  this class are called.
+
+  Before using this class, the 'init-freq method must be called,
+  and it must be called *after* a valid wild-wild count is available.
+"
 	; We need 'left-basis, provided by add-pair-stars
 	; We need 'wild-wild-count, provided by add-pair-count-api
 	; We need 'set-left-wild-freq, provided by add-pair-freq-api
@@ -457,7 +461,7 @@
 						; Note the sign: it is PLUS log p(x,y)/p(*,y)p(x,*) !!
 						; This sign convention agrees with both Yuret and with
 						; Wikipedia!
-						; logli are defined as -log_2 in object-api.scm, 
+						; logli are defined as -log_2 in object-api.scm,
 						; so that's why it looks like the MINUS sign is being
 						; used, but it is not.
 						; Return the atom that is holding the MI value.
