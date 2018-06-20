@@ -359,8 +359,14 @@ SCM SchemeSmob::ss_new_node (SCM stype, SCM sname, SCM kv_pairs)
 	Type t = verify_atom_type(stype, "cog-new-node", 1);
 
 	// Special case handling for NumberNode (and TimeNode, etc.)
-	if (nameserver().isA(t, NUMBER_NODE) and scm_is_number(sname)) {
-		sname = scm_number_to_string(sname, _radix_ten);
+	if (nameserver().isA(t, NUMBER_NODE)) {
+		if (scm_is_number(sname))
+			sname = scm_number_to_string(sname, _radix_ten);
+	}
+	else
+	// Allow symbols as well as strings for atom types.
+	if (nameserver().isA(t, TYPE_NODE) and scm_is_symbol(sname)) {
+		sname = scm_symbol_to_string(sname);
 	}
 	std::string name(verify_string (sname, "cog-new-node", 2,
 		"string name for the node"));
