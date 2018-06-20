@@ -85,8 +85,8 @@ void VectorAPIUTest::setUp(void)
 	eval->eval("(add-to-load-path \"" PROJECT_SOURCE_DIR "\")");
 	eval->eval("(add-to-load-path \"../../..\")");
 
-	eval->eval("(load-from-path \"tests/matrix/basic-api.scm\")");
 	eval->eval("(load-from-path \"tests/query/test_types.scm\")");
+	eval->eval("(load-from-path \"tests/matrix/basic-api.scm\")");
 }
 
 void VectorAPIUTest::tearDown(void)
