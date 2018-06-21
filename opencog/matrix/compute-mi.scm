@@ -150,15 +150,17 @@
 ; ---------------------------------------------------------------------
 ; ---------------------------------------------------------------------
 ;
-; Extend the LLOBJ with additional methods to compute wildcard counts
-; for pairs, and store the results using the count-object API.
-; That is, compute the summations N(x,*) = sum_y N(x,y) where (x,y)
-; is a pair, and N(x,y) is the count of how often that pair has been
-; observed, and * denotes the wild-card, ranging over all items
-; supported in that slot.
-;
-(define (make-compute-count LLOBJ)
+(define-public (make-compute-count LLOBJ)
+"
+  make-compute-count LLOBJ
 
+  Extend the LLOBJ with additional methods to compute wildcard counts
+  for pairs, and store the results using the count-object API.
+  That is, compute the summations N(x,*) = sum_y N(x,y) where (x,y)
+  is a pair, and N(x,y) is the count of how often that pair has been
+  observed, and * denotes the wild-card, ranging over all items
+  supported in that slot.
+"
 	; We need 'left-basis, provided by add-pair-stars
 	; We need 'set-left-wild-count, provided by add-pair-count-api
 	(let ((llobj LLOBJ)
@@ -276,21 +278,23 @@
 
 ; ---------------------------------------------------------------------
 ;
-; Extend the LLOBJ with additional methods to compute observation
-; frequencies and entropies for pairs, including partial-sum entropies
-; (mutual information) for the left and right side of each pair.
-; This will also cache the results of these computations in a
-; standardized location.
-;
-; The LLOBJ must have valid left and right wild-card counts on it.
-; These need to have been previously computed, before methods on
-; this class are called.
-;
-; Before using this class, the 'init-freq method must be called,
-; and it must be called *after* a valid wild-wild count is available.
+(define-public (make-compute-freq LLOBJ)
+"
+  make-compute-freq LLOBJ
 
-(define (make-compute-freq LLOBJ)
+  Extend the LLOBJ with additional methods to compute observation
+  frequencies and entropies for pairs, including partial-sum entropies
+  (mutual information) for the left and right side of each pair.
+  This will also cache the results of these computations in a
+  standardized location.
 
+  The LLOBJ must have valid left and right wild-card counts on it.
+  These need to have been previously computed, before methods on
+  this class are called.
+
+  Before using this class, the 'init-freq method must be called,
+  and it must be called *after* a valid wild-wild count is available.
+"
 	; We need 'left-basis, provided by add-pair-stars
 	; We need 'wild-wild-count, provided by add-pair-count-api
 	; We need 'set-left-wild-freq, provided by add-pair-freq-api
@@ -457,7 +461,7 @@
 						; Note the sign: it is PLUS log p(x,y)/p(*,y)p(x,*) !!
 						; This sign convention agrees with both Yuret and with
 						; Wikipedia!
-						; logli are defined as -log_2 in object-api.scm, 
+						; logli are defined as -log_2 in object-api.scm,
 						; so that's why it looks like the MINUS sign is being
 						; used, but it is not.
 						; Return the atom that is holding the MI value.
@@ -595,38 +599,40 @@
 ; ---------------------------------------------------------------------
 ; ---------------------------------------------------------------------
 ;
-; Compute the mutual information between all pairs. Counts, frequencies
-; and left, right partial sums are also performed; this is an all-in-one
-; routine, which computes all of the needed pre-requisites, and stores
-; them, as well as the MI, in the database.
-;
-; The mutual information between pairs is described in the overview,
-; up top of this file. The access to the pairs is governed by the
-; the methods on the passed object.
-;
-; Among the things that are computed and stored are the partial sums
-; of counts, i.e. the N(x,*) and N(*,y) explained up top, the total
-; count N(*,*), the frequencies p(x,y) = N(x,y) / N(*,*), the
-; corresponding partial sums.  All of these quantities are written
-; back to the database, at the time of computation.
-;
-; In order to work correctly, this function assumes that the object
-; has at least the minimal low-level API to identify where to find
-; the counts on pairs.  This script is designed to work with any kinds
-; of pairs.
-;
-; Running this script can take hours or longer, depending on the size
-; of the dataset. Progress reports are printed to stdout, including
-; timing and summary statistics. This script wasn't really designed to
-; be efficient; instead, the goal to to allow general, generic knowledge
-; representation.  You can compute MI between any kinds of things
-; If you just need to count one thing, writing custom scripts that do
-; NOT use the atomspace would almost surely be faster.  We put up with
-; the performance overhead here in order to get the flexibility that
-; the atomspace provides.
-;
 (define-public (batch-all-pair-mi OBJ)
+"
+  batch-all-pair-mi LLOBJ
 
+  Compute the mutual information between all pairs. Counts, frequencies
+  and left, right partial sums are also performed; this is an all-in-one
+  routine, which computes all of the needed pre-requisites, and stores
+  them, as well as the MI, in the database.
+
+  The mutual information between pairs is described in the overview,
+  up top of this file. The access to the pairs is governed by the
+  the methods on the passed object.
+
+  Among the things that are computed and stored are the partial sums
+  of counts, i.e. the N(x,*) and N(*,y) explained up top, the total
+  count N(*,*), the frequencies p(x,y) = N(x,y) / N(*,*), the
+  corresponding partial sums.  All of these quantities are written
+  back to the database, at the time of computation.
+
+  In order to work correctly, this function assumes that the object
+  has at least the minimal low-level API to identify where to find
+  the counts on pairs.  This script is designed to work with any kinds
+  of pairs.
+
+  Running this script can take hours or longer, depending on the size
+  of the dataset. Progress reports are printed to stdout, including
+  timing and summary statistics. This script wasn't really designed to
+  be efficient; instead, the goal to to allow general, generic knowledge
+  representation.  You can compute MI between any kinds of things
+  If you just need to count one thing, writing custom scripts that do
+  NOT use the atomspace would almost surely be faster.  We put up with
+  the performance overhead here in order to get the flexibility that
+  the atomspace provides.
+"
 	(define overall-start-time (current-time))
 	(define start-time (current-time))
 	(define (elapsed-secs)
