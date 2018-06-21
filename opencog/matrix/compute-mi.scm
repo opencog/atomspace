@@ -601,6 +601,8 @@
 ;
 (define-public (batch-all-pair-mi OBJ)
 "
+  batch-all-pair-mi LLOBJ
+
   Compute the mutual information between all pairs. Counts, frequencies
   and left, right partial sums are also performed; this is an all-in-one
   routine, which computes all of the needed pre-requisites, and stores
