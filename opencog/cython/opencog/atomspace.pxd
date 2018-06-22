@@ -1,6 +1,6 @@
 from libcpp.vector cimport vector
 from libcpp.list cimport list as cpplist
-
+from libcpp.memory cimport shared_ptr
 
 cdef extern from "Python.h":
     # Tacky hack to pass atomspace pointer to AtomSpace ctor.
@@ -222,3 +222,19 @@ cdef extern from "opencog/atomutils/AtomUtils.h" namespace "opencog":
     #
     cdef vector[cHandle] c_get_predicates "get_predicates" (cHandle& target, Type t, bint subclass)
     cdef vector[cHandle] c_get_predicates_for "get_predicates_for" (cHandle& target, cHandle& predicate)
+
+cdef extern from "opencog/atoms/proto/ProtoAtom.h" namespace "opencog":
+    cdef cppclass cProtoAtom "opencog::ProtoAtom":
+        Type get_type()
+        string to_string()
+        string to_short_string()
+        bint operator==(const cProtoAtom&)
+        bint operator!=(const cProtoAtom&)
+    
+    ctypedef shared_ptr[cProtoAtom] cProtoAtomPtr "opencog::ProtoAtomPtr"
+
+cdef class ProtoAtom:
+    cdef cProtoAtomPtr shared_ptr
+    @staticmethod
+    cdef ProtoAtom from_shared_ptr(cProtoAtomPtr shared_ptr)
+    cdef cProtoAtom* get_ptr(self)
