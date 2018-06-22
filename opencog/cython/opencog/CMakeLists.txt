@@ -62,7 +62,7 @@ SET_TARGET_PROPERTIES(logger_cython PROPERTIES
 ###################### atomspace ####################################
 CYTHON_ADD_MODULE_PYX(atomspace
 	"atom.pyx" "nameserver.pyx" "truth_value.pyx"
-	"atomspace_details.pyx" opencog_atom_types
+	"atomspace_details.pyx" "protoatom.pyx" opencog_atom_types
 	"../../truthvalue/TruthValue.h" "../../truthvalue/SimpleTruthValue.h"
 	"../../atoms/proto/NameServer.h" "../../atoms/base/Handle.h"
 	"../../atomspace/AtomSpace.h"
