@@ -54,7 +54,6 @@ typedef std::shared_ptr<StreamValue> StreamValuePtr;
 static inline StreamValuePtr StreamValueCast(ProtoAtomPtr& a)
 	{ return std::dynamic_pointer_cast<StreamValue>(a); }
 
-#define createStreamValue std::make_shared<StreamValue>
 
 
 /** @}*/
