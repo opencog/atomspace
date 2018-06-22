@@ -90,6 +90,21 @@ cdef extern from "opencog/atoms/proto/NameServer.h" namespace "opencog":
 cdef extern from "opencog/atoms/proto/atom_types.h" namespace "opencog":
     cdef Type NOTYPE
 
+cdef extern from "opencog/atoms/proto/ProtoAtom.h" namespace "opencog":
+    cdef cppclass cProtoAtom "opencog::ProtoAtom":
+        Type get_type()
+        string to_string()
+        string to_short_string()
+        bint operator==(const cProtoAtom&)
+        bint operator!=(const cProtoAtom&)
+    
+    ctypedef shared_ptr[cProtoAtom] cProtoAtomPtr "opencog::ProtoAtomPtr"
+
+cdef class ProtoAtom:
+    cdef cProtoAtomPtr shared_ptr
+    @staticmethod
+    cdef ProtoAtom from_shared_ptr(cProtoAtomPtr shared_ptr)
+    cdef cProtoAtom* get_ptr(ProtoAtom self)
 
 # Atom
 ctypedef public short av_type
@@ -222,22 +237,6 @@ cdef extern from "opencog/atomutils/AtomUtils.h" namespace "opencog":
     #
     cdef vector[cHandle] c_get_predicates "get_predicates" (cHandle& target, Type t, bint subclass)
     cdef vector[cHandle] c_get_predicates_for "get_predicates_for" (cHandle& target, cHandle& predicate)
-
-cdef extern from "opencog/atoms/proto/ProtoAtom.h" namespace "opencog":
-    cdef cppclass cProtoAtom "opencog::ProtoAtom":
-        Type get_type()
-        string to_string()
-        string to_short_string()
-        bint operator==(const cProtoAtom&)
-        bint operator!=(const cProtoAtom&)
-    
-    ctypedef shared_ptr[cProtoAtom] cProtoAtomPtr "opencog::ProtoAtomPtr"
-
-cdef class ProtoAtom:
-    cdef cProtoAtomPtr shared_ptr
-    @staticmethod
-    cdef ProtoAtom from_shared_ptr(cProtoAtomPtr shared_ptr)
-    cdef cProtoAtom* get_ptr(self)
 
 cdef extern from "opencog/atoms/proto/FloatValue.h" namespace "opencog":
     cdef cProtoAtomPtr createFloatValue(...)
