@@ -182,9 +182,12 @@ FOREACH (LINE ${TYPE_SCRIPT_CONTENTS})
         # identifier as the Python Atom object.
         IF (NOT TYPE_NAME STREQUAL "Atom")
             IF (ISVALUE STREQUAL "VALUE" OR ISSTREAM STREQUAL "STREAM")
-                # XXX FIXME -- invent something for python
-                # FILE(APPEND "${PYTHON_FILE}" "def ${TYPE_NAME}(node_name, tv=None):\n")
-                # FILE(APPEND "${PYTHON_FILE}" "    return atomspace.add_node(types.${TYPE_NAME}, node_name, tv)\n")
+                IF (TYPE_NAME STREQUAL "FloatValue")
+                # Single arg will work as all of value constructors has 
+                # single argument: either value or vector.
+                FILE(APPEND "${PYTHON_FILE}" "def ${TYPE_NAME}(arg):\n")
+                FILE(APPEND "${PYTHON_FILE}" "    return createValue(types.${TYPE_NAME}, arg)\n")
+                ENDIF (TYPE_NAME STREQUAL "FloatValue")
             ENDIF (ISVALUE STREQUAL "VALUE" OR ISSTREAM STREQUAL "STREAM")
             IF (ISNODE STREQUAL "NODE")
                 FILE(APPEND "${PYTHON_FILE}" "def ${TYPE_NAME}(node_name, tv=None):\n")

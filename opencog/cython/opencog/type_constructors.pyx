@@ -8,10 +8,30 @@
 #
 
 from opencog.atomspace import AtomSpace, TruthValue, types
+from atomspace cimport cProtoAtomPtr, createFloatValue, ProtoAtom
+from libcpp.vector cimport vector
 
 atomspace = None
 def set_type_ctor_atomspace(new_atomspace):
     global atomspace
     atomspace = new_atomspace
+
+cdef createValue(type, arg):
+    """Method to costruct atomspace value from given type and constructor 
+    argument. It is similar to SchemeSmob::ss_new_value()"""
+    cdef vector[double] cValues
+    cdef double value
+    cdef cProtoAtomPtr result
+    
+    if (type == types.FloatValue):
+        if (isinstance(arg, list)):
+            for value in arg:
+                cValues.push_back(value)
+            result = createFloatValue(cValues)
+        else:
+            result = createFloatValue(<double>arg)
+    else:
+        raise TypeError('Unexpected value type {}'.format(type))
+    return ProtoAtom.from_shared_ptr(result)
 
 include "opencog/atoms/proto/core_types.pyx"

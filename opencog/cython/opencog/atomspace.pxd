@@ -238,3 +238,6 @@ cdef class ProtoAtom:
     @staticmethod
     cdef ProtoAtom from_shared_ptr(cProtoAtomPtr shared_ptr)
     cdef cProtoAtom* get_ptr(self)
+
+cdef extern from "opencog/atoms/proto/FloatValue.h" namespace "opencog":
+    cdef cProtoAtomPtr createFloatValue(...)
