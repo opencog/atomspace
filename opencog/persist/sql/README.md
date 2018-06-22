@@ -1121,13 +1121,19 @@ TODO
    or not.  Technically, this caching can be done in the atomspace, I
    guess... See https://github.com/opencog/atomspace/issues/1373
 
- * Implement the large-outgoing-set extension. A version of this can be
-   found in the `postgres-dead` directory, but the code there is badly
-   broken. Its probably simplest to just ignore the code in
-   `postgres-dead`, and design something from scratch.  This might be
-   a *bad idea*; atoms with large outgoing sets are fundamentally bad.
-   Improving support for them just encourages bad knowledge-representation
-   design.  So maybe don't do this.
+ * Implement the large-outgoing-set extension. One way of doing this
+   is touched in in https://github.com/opencog/atomspace/issues/1763
+   The idea is this: Create a new link-type `ConsLink` or `ExtendLink`.
+   A link with more than 330 atoms in the outgoing set would be split
+   into several parts: the original link, with less than 330 atoms,
+   the last atom of which would be the `ExtendLink`, which holds the
+   next 330, etc. until they are all specified. This can be done with
+   ZERO changes to the SQL table format.  Its really pretty easy to
+   implement: just look at the length during save and restore, and
+   trigger disassemble/reassembly code when the lenght limits are hit.
+   Note also: the new link-type should be used in the SQL backend only,
+   and thus, it would not be a real link-type, but a pseudo-type, a
+   marker used only in the SQL tables.
 
  * Consider an alternate implementation, using JSONB to do an EAV-like
    storage: For details, see
