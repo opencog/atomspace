@@ -547,6 +547,13 @@ Yes, this actually works -- its just not being used.
   Here, the LLOBJ is expected to be an object, with methods for
   'get-pair 'make-pair 'left-wildcard 'right-wildcard and 'wild-wild
   on it, in the form documented above for the \"low-level API class\".
+
+  The mthods return the following. ATOM is either the atom x or the
+  atom y.
+
+  'left-wild-count ATOM   -- return N(*,y) == sum_x N(x,y)
+  'right-wild-count ATOM  -- return N(x,*) == sum_y N(x,y)
+  'wild-wild-count        -- return N(*,*) == sum_x,y N(x,y)
 "
 	; ----------------------------------------------------
 	; Key under which the count values are stored.
