@@ -127,6 +127,8 @@ cdef extern from "opencog/atoms/base/Atom.h" namespace "opencog":
 
         tv_ptr getTruthValue()
         void setTruthValue(tv_ptr tvp)
+        void setValue(const cHandle& key, const cProtoAtomPtr& value)
+        cProtoAtomPtr getValue(const cHandle& key) const
 
         output_iterator getIncomingSetByType(output_iterator, Type type)
 
@@ -170,6 +172,7 @@ cdef class Atom:
     cdef object _atom_type
     cdef object _name
     cdef object _outgoing
+    cdef cAtom* get_ptr(Atom self)
 
 
 
