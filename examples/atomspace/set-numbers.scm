@@ -1,29 +1,40 @@
 ;; Construct Zermelo and Von Neumann numbers
 
+;; Set constructor. We use List instead of Set because this link
+;; should be discouraged or used with caution, and doesn't change the
+;; underlying constructions.
+(define SC List)
+
+(define (dec n)
+  (- n 1))
+
 (define (zermelo n)
 "
   Construct the first n+1 Zermelo numbers
 
-  (zermelo 0) -> (Set)
-  (zermelo n) -> (Set (zermelo n-1))
+  (zermelo 0) -> (SC)
+  (zermelo n) -> (SC (zermelo n-1))
 "
   (if (= n 0)
-      (Set)
-      (Set (zermelo (+ n -1)))))
+      (SC)
+      (SC (zermelo (dec n)))))
+
+(define (out-n-self x)
+"
+  Given an atom x, create a set with its outgoing set and itself
+"
+  (SC (cog-outgoing-set x) x))
 
 (define (von-neumann n)
 "
   Construct the first n+1 Von Neumann numbers
 
-  (von-neumann 0) -> (Set)
-  (von-neumann n) -> (Set (von-neumann n-1)) union (von-neumann n-1)
+  (von-neumann 0) -> (SC)
+  (von-neumann n) -> (SC (von-neumann n-1)) union (von-neumann n-1)
 "
   (if (= n 0)
-      (Set)
-      (let* ((dec-n (+ n -1))
-             (dec-vn (von-neumann dec-n))
-             (dec-vn-mbrs (cog-outgoing-set dec-vn)))
-        (Set dec-vn dec-vn-mbrs))))
+      (SC)
+      (out-n-self (von-neumann (dec n)))))
 
 ;; Examples
 
@@ -33,10 +44,10 @@
 ;;
 ;; is expected to return
 ;;
-;; (SetLink
-;;    (SetLink
-;;       (SetLink
-;;          (SetLink
+;; (ListLink
+;;    (ListLink
+;;       (ListLink
+;;          (ListLink
 ;;          )
 ;;       )
 ;;    )
@@ -48,18 +59,18 @@
 ;;
 ;; is expected to return
 ;;
-;; (SetLink
-;;    (SetLink
+;; (ListLink
+;;    (ListLink
 ;;    )
-;;    (SetLink
-;;       (SetLink
+;;    (ListLink
+;;       (ListLink
 ;;       )
 ;;    )
-;;    (SetLink
-;;       (SetLink
+;;    (ListLink
+;;       (ListLink
 ;;       )
-;;       (SetLink
-;;          (SetLink
+;;       (ListLink
+;;          (ListLink
 ;;          )
 ;;       )
 ;;    )
