@@ -26,25 +26,26 @@
 
 ; ---------------------------------------------------------------------
 
-#! xxxxxxxxxxxxxxxxxxxxxxx
 (define*-public (add-transpose-api LLOBJ
 	 #:optional (ID (LLOBJ 'id)))
 "
-  add-support-api LLOBJ ID - Extend LLOBJ with methods to retrieve
-  marginals (wild-card sums) for
-xxxxxxxxxx
-  support, size and length subtotals on rows and columns. The values
-  are retrieved from the \"margins\", attached to the matrix wild-cards.
-  This class assumes the marginals were previously computed and
-  attached to the wildcards.
+  add-transpose-api LLOBJ ID - Extend LLOBJ with methods to retrieve
+  marginals (wild-card sums) for the support and count for the
+  matrix-products M^TM and MM^T of the matrix M==LLOBJ times itself.
+
+  The values are retrieved from the \"margins\", attached to the matrix
+  wild-cards.  This class assumes the marginals were previously computed
+  and attached to the wildcards.
 
   The margins (the pre-computed values) can be populated by saying
-  `((add-support-compute LLOBJ) 'cache-all)`
-  The `add-support-api` and `add-support-compute` API's are designed
+  `((add-transpose-compute LLOBJ) 'cache-all)`
+  The `add-transpose-api` and `add-transpose-compute` API's are designed
   to work together and complement one-another.
 
-  Optional argument ID is #f to use the default value key;
-  otherwise a filtered key is used.
+  Optional argument ID is #f to use the default value key; otherwise
+  a filtered key is used. That is, the marginals are fetched from a
+  default location; however, that location can be changed by specifying
+  it with the optional ID argument.
 "
 	; ----------------------------------------------------
 	; Key under which the matrix l_p norms are stored.
@@ -55,9 +56,10 @@ xxxxxxxxxx
 
 	(define norm-key (PredicateNode key-name))
 
-	(define (set-norms ATOM L0 L1 L2)
-		(cog-set-value! ATOM norm-key (FloatValue L0 L1 L2)))
+	(define (set-norms ATOM L0 L1)
+		(cog-set-value! ATOM norm-key (FloatValue L0 L1)))
 
+#! xxxxxxxxxxxxxxxxxxxxxxx
 	; User might ask for something not in the matrix. In that
 	; case, cog-value-ref will throw 'wrong-type-arg. If this
 	; happens, just return zero.
@@ -102,22 +104,20 @@ xxxxxxxxxx
 	(define (set-right-norms ITEM L0 L1 L2)
 		(set-norms (LLOBJ 'right-wildcard ITEM) L0 L1 L2))
 
+xxxxxxxxxxxxxxxxxxxx !#
 	;--------
 	; Methods on this class.
 	(lambda (message . args)
 		(case message
-			((left-support)       (apply get-left-support args))
-			((right-support)      (apply get-right-support args))
-			((left-count)         (apply get-left-count args))
-			((right-count)        (apply get-right-count args))
-			((left-length)        (apply get-left-length args))
-			((right-length)       (apply get-right-length args))
-			((set-left-norms)     (apply set-left-norms args))
-			((set-right-norms)    (apply set-right-norms args))
+			((mtm-support)        (apply get-mtm-support args))
+			((mmt-support)        (apply get-mmt-support args))
+			((mtm-count)          (apply get-mtm-count args))
+			((mmt-count)          (apply get-mmt-count args))
+			((set-mtm-norms)      (apply set-mtm-norms args))
+			((set-mmt-norms)      (apply set-mmt-norms args))
 			(else                 (apply LLOBJ (cons message args)))))
 )
 
-xxxxxxxxxxxxxxxxxxxx !#
 ; ---------------------------------------------------------------------
 
 (define*-public (add-transpose-compute LLOBJ #:key
@@ -295,37 +295,35 @@ xxxxxxxxxxxxxxxxxxxx !#
 			(set! start-time (current-time))
 			diff)
 
-		; XXX FIXME can make this 3x faster by performing all three loops
+		; XXX FIXME can make this 2x faster by performing all both loops
 		; at the same time.
-		(define (left-marginals)
+		(define (mtm-marginals)
 			(elapsed-secs)
 			(for-each
 				(lambda (ITEM)
-					(define l0 (get-left-support-size ITEM))
-					(define l1 (sum-left-count ITEM))
-					(define l2 (sum-left-length ITEM))
-					(api-obj 'set-left-norms ITEM l0 l1 l2))
-				(star-obj 'right-basis))
+					(define l0 (sum-mtm-support ITEM))
+					(define l1 (sum-mtm-count ITEM))
+					(api-obj 'set-mtm-norms ITEM l0 l1))
+				(star-obj 'left-basis))
 
-			(format #t "Finished left norm marginals in ~A secs\n"
+			(format #t "Finished mtm norm marginals in ~A secs\n"
 				(elapsed-secs)))
 
-		(define (right-marginals)
+		(define (mmt-marginals)
 			(elapsed-secs)
 			(for-each
 				(lambda (ITEM)
-					(define l0 (get-right-support-size ITEM))
-					(define l1 (sum-right-count ITEM))
-					(define l2 (sum-right-length ITEM))
-					(api-obj 'set-right-norms ITEM l0 l1 l2))
-				(star-obj 'left-basis))
-			(format #t "Finished right norm marginals in ~A secs\n"
+					(define l0 (get-mmt-support-size ITEM))
+					(define l1 (sum-mmt-count ITEM))
+					(api-obj 'set-mmt-norms ITEM l0 l1))
+				(star-obj 'right-basis))
+			(format #t "Finished mmt norm marginals in ~A secs\n"
 				(elapsed-secs)))
 
 		; Do both at once
 		(define (cache-all)
-			(left-marginals)
-			(right-marginals))
+			(mmt-marginals)
+			(mtm-marginals))
 
 		; -------------
 		; Methods on this class.
@@ -343,8 +341,8 @@ xxxxxxxxxxxxxxxxxxxx !#
 				((total-mmt-support)  (compute-total-mmt-support))
 				((total-mmt-count)    (compute-total-mmt-count))
 
-				((left-marginals)     (left-marginals))
-				((right-marginals)    (right-marginals))
+				((mtm-marginals)      (mtm-marginals))
+				((mmt-marginals)      (mmt-marginals))
 				((cache-all)          (cache-all))
 
 				((clobber)            (star-obj 'clobber))
