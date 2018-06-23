@@ -182,8 +182,10 @@ FOREACH (LINE ${TYPE_SCRIPT_CONTENTS})
         # identifier as the Python Atom object.
         IF (NOT TYPE_NAME STREQUAL "Atom")
             IF (ISVALUE STREQUAL "VALUE" OR ISSTREAM STREQUAL "STREAM")
+                # Implementing only FloatValue for now, other types of values
+                # will be added after design is agreed
                 IF (TYPE_NAME STREQUAL "FloatValue")
-                # Single arg will work as all of value constructors has 
+                # Single arg will work as all of value constructors has
                 # single argument: either value or vector.
                 FILE(APPEND "${PYTHON_FILE}" "def ${TYPE_NAME}(arg):\n")
                 FILE(APPEND "${PYTHON_FILE}" "    return createValue(types.${TYPE_NAME}, arg)\n")
@@ -200,7 +202,7 @@ FOREACH (LINE ${TYPE_SCRIPT_CONTENTS})
         ENDIF (NOT TYPE_NAME STREQUAL "Atom")
 
         # If not named as a node or a link, assume its a link
-        # This is kind of hacky, but I don't know what else to do ... 
+        # This is kind of hacky, but I don't know what else to do ...
         IF (NOT ISNODE STREQUAL "NODE" AND
             NOT ISLINK STREQUAL "LINK" AND
             NOT ISVALUE STREQUAL "VALUE" AND
