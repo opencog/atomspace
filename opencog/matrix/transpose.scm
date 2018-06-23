@@ -210,41 +210,35 @@ xxxxxxxxxxxxxxxxxxxx !#
 		)
 
 		; -------------
-		; Filter and return only pairs with non-zero count.
-		; Internal use only.
-		(define (non-zero-filter LIST)
-			(filter (lambda (lopr) (< 0 (get-cnt lopr))) LIST))
-
-		; Return a list of all pairs (x, y) for y == ITEM for which
-		; N(x,y) > 0.  Specifically, this returns the pairs which
-		; are holding the counts (and not the low-level pairs).
-		(define (get-left-support-set ITEM)
-			(non-zero-filter (star-obj 'left-stars ITEM)))
+		; Return a list of all pairs (x,y) for y == ITEM for which
+		; sum_x N(x,*) N(x,y) > 0.
+		(define (get-mtm-support-set ITEM)
+			(filter (lambda (star)
+				(< 0 (* (right-count (LLOBJ 'left-element star)) (get-cnt star))))
+			(star-obj 'left-stars)))
 
 		; Same as above, but on the right.
-		(define (get-right-support-set ITEM)
-			(non-zero-filter (star-obj 'right-stars ITEM)))
+		(define (get-mmt-support-set ITEM)
+			(filter (lambda (star)
+				(< 0 (* (left-count (LLOBJ 'right-element star)) (get-cnt star))))
+			(star-obj 'right-stars)))
 
 		; -------------
 		; Return how many non-zero items are in the list.
-		(define (get-support-size LIST)
-			(fold
-				(lambda (lopr sum)
-					(if (< 0 (get-cnt lopr)) (+ sum 1) sum))
-				0
-				LIST))
+		; Identical to (length (get-mmt-support-set ITEM))
+		(define (sum-mmt-support ITEM)
+			(fold (lambda (star sum)
+				(if (< 0 (* (left-count (LLOBJ 'right-element star))
+						(get-cnt star))) (+ sum 1) sum)) 0
+				(star-obj 'right-stars)))
 
-		; Should return a value exactly equal to
-		; (length (get-left-support ITEM))
-		; Equivalently to the l_0 norm (l_p norm for p=0)
-		(define (get-left-support-size ITEM)
-			(get-support-size (star-obj 'left-stars ITEM)))
-
-		(define (get-right-support-size ITEM)
-			(get-support-size (star-obj 'right-stars ITEM)))
+		(define (sum-mtm-support ITEM)
+			(fold (lambda (star sum)
+				(if (< 0 (* (right-count (LLOBJ 'left-element star))
+						(get-cnt star))) (+ sum 1) sum)) 0
+				(star-obj 'left-stars)))
 
 		; -------------
-xxxxxxxxx
 		; Both sum-mmt-count and sum-mmt-count-slow compute the same
 		; thing. The first is much faster, because it loops only over
 		; the stars, of which there are few. However, it depends on a
@@ -333,10 +327,10 @@ xxxxxxxxx
 		; Methods on this class.
 		(lambda (message . args)
 			(case message
-				((left-support-set)   (apply get-left-support-set args))
-				((right-support-set)  (apply get-right-support-set args))
-				((left-support)       (apply get-left-support-size args))
-				((right-support)      (apply get-right-support-size args))
+				((mtm-support-set)    (apply get-mtm-support-set args))
+				((mmt-support-set)    (apply get-mmt-support-set args))
+				((mtm-support)        (apply sum-mtm-support args))
+				((mmt-support)        (apply sum-mmt-support args))
 				((mtm-count)          (apply sum-mtm-count args))
 				((mmt-count)          (apply sum-mmt-count args))
 
