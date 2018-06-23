@@ -245,14 +245,29 @@ xxxxxxxxxxxxxxxxxxxx !#
 
 		; -------------
 xxxxxxxxx
-		(define (sum-mmt-count ITEM)
+		; Both sum-mmt-count and sum-mmt-count-slow compute the same
+		; thing. The first is much faster, because it loops only over
+		; the stars, of which there are few. However, it depends on a
+		; non-broken, funcional 'right-element method. The second is
+		; much much slower, because it loops over the entire basis,
+		; which is going to have non-zero counts very sparsly.
+		(define (sum-mmt-count-slow ITEM)
 			(fold (lambda (wild sum)
 				(+ sum (* (left-count wild)
 						(get-cnt (LLOBJ 'get-pair ITEM wild))))) 0
 				(star-obj 'right-basis)))
 
-		(define (sum-right-count ITEM)
-			(sum-count (star-obj 'right-stars ITEM)))
+		(define (sum-mmt-count ITEM)
+			(fold (lambda (star sum)
+				(+ sum (* (left-count (LLOBJ 'right-element star))
+						(get-cnt star)))) 0
+				(star-obj 'right-stars)))
+
+		(define (sum-mtm-count ITEM)
+			(fold (lambda (star sum)
+				(+ sum (* (right-count (LLOBJ 'left-element star))
+						(get-cnt star)))) 0
+				(star-obj 'left-stars)))
 
 		; -------------
 		; Compute grand-totals for the whole matrix.
@@ -322,8 +337,8 @@ xxxxxxxxx
 				((right-support-set)  (apply get-right-support-set args))
 				((left-support)       (apply get-left-support-size args))
 				((right-support)      (apply get-right-support-size args))
-				((left-count)         (apply sum-left-count args))
-				((right-count)        (apply sum-right-count args))
+				((mtm-count)          (apply sum-mtm-count args))
+				((mmt-count)          (apply sum-mmt-count args))
 
 				((total-support)      (compute-total-support))
 				((total-count)        (compute-total-count))
@@ -332,9 +347,6 @@ xxxxxxxxx
 				((right-marginals)    (right-marginals))
 				((cache-all)          (cache-all))
 
-; XXX hack alert. We need something more elegant!?
-; the language-learning clustering code uses this
-; to invalidate the star objects in use.
 				((clobber)            (star-obj 'clobber))
 				(else                 (apply LLOBJ (cons message args))))
 			)))
