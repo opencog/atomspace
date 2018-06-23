@@ -1,15 +1,24 @@
 ;
-; support.scm
+; transpose.scm
 ;
-; Define object-oriented class API's for computing the supporting set
-; the the lp-norms for the left and right side of pairs.
+; Define object-oriented class API's for computing the counts,
+; frequencies and entropies of of a matrix times it's transpose.
 ;
-; Copyright (c) 2017 Linas Vepstas
+; Copyright (c) 2017, 2018 Linas Vepstas
 ;
 ; ---------------------------------------------------------------------
 ; OVERVIEW
 ; --------
-; See object-api.scm for the overview.  Or the README.md file.
+; A matrix times it's transpose is again a matrix. Actually, there are
+; two: M^TM and MM^T. One may be interested in a number of different
+; properties of these two, includings support, frequencies, entropies,
+; mutual information, etc. It is more computationally efficient to
+; re-order the order in which the marginals for these two matrices are
+; computed: that is what is done below.
+;
+; If it were not for these efficiencies, one could instead just write
+; an api object that took the product of two matricies.  Conceptually,
+; that would be simpler. And a lot slower.  Thus, this object.
 ; ---------------------------------------------------------------------
 
 (use-modules (srfi srfi-1))
@@ -17,10 +26,13 @@
 
 ; ---------------------------------------------------------------------
 
-(define*-public (add-support-api LLOBJ
+#! xxxxxxxxxxxxxxxxxxxxxxx
+(define*-public (add-transpose-api LLOBJ
 	 #:optional (ID (LLOBJ 'id)))
 "
   add-support-api LLOBJ ID - Extend LLOBJ with methods to retreive
+  marginals (wild-card sums) for
+xxxxxxxxxx
   support, size and length subtotals on rows and columns. The values
   are retreived from the \"margins\", attached to the matrix wild-cards.
   This class assumes the marginals were previously computed and
@@ -105,15 +117,28 @@
 			(else                 (apply LLOBJ (cons message args)))))
 )
 
+xxxxxxxxxxxxxxxxxxxx !#
 ; ---------------------------------------------------------------------
 
-(define*-public (add-support-compute LLOBJ
+(define*-public (add-transpose-compute LLOBJ
 	 #:optional (GET-CNT 'get-count))
 "
-  add-support-compute LLOBJ - Extend LLOBJ with methods to
-  compute wild-card sums, including the support (lp-norm for p=0),
-  the count (lp-norm for p=1), the Euclidean length (lp-norm for p=2)
-  and the general lp-norm.  These all work with the counts for the
+  add-transpose-compute LLOBJ - Extend LLOBJ with methods to compute
+  marginals (wild-card sums) for a matrix times it's transpose. These
+  include the support (lp-norm for p=0), the count (lp-norm for p=1),
+  the Euclidean length (lp-norm for p=2) and the general lp-norm.
+
+  This is very much like what the support-api does, except that these
+  compute the marginals for the matrixes MM^T and M^TM. It is more
+  efficient to compute support here, than it is to compute the product
+  first, and only then slap the support API on top.
+
+  By default, the counts and cached marginals are used to perform the
+  computation. This can be over-ridden by specifying optional methods
+  to access the desired numbers and marginals.  Note that the marginals
+  MUST have been pre-computed, else the calculations here will fail.
+xxxxxxxxxx
+  These all work with the counts for the
   pairs, and NOT the frequencies!  None of these use any pre-computed
   (marginal, or \"cached\") values; instead, they compute the norms from
   the raw matrix data.  The computed norms are not places in the
