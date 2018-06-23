@@ -10,6 +10,7 @@
 (load "matrix/object-api.scm")
 (load "matrix/dynamic.scm")
 (load "matrix/support.scm")
+(load "matrix/transpose.scm")
 (load "matrix/report-api.scm")
 (load "matrix/fold-api.scm")
 (load "matrix/loop-api.scm")
