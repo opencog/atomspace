@@ -264,22 +264,26 @@ xxxxxxxxxxxxxxxxxxxx !#
 				(star-obj 'left-stars ITEM)))
 
 		; -------------
-		; Compute grand-totals for the whole matrix.
-		; These are computed from the left; there is an equivalent
-		; computation from the right that should give exactly the same
-		; results. We could/should be not lazy and double-check these
-		; results in this way.
-		(define (compute-total-support)
+		; Compute grand-totals for the two matrix products.
+		(define (compute-total-mtm-support)
 			(fold
-				(lambda (item sum) (+ sum (get-right-support-size item)))
-				0
+				(lambda (item sum) (+ sum (sum-mtm-support item))) 0
 				(star-obj 'left-basis)))
 
-		(define (compute-total-count)
+		(define (compute-total-mtm-count)
 			(fold
-				(lambda (item sum) (+ sum (sum-right-count item)))
-				0
+				(lambda (item sum) (+ sum (sum-mtm-count item))) 0
 				(star-obj 'left-basis)))
+
+		(define (compute-total-mmt-support)
+			(fold
+				(lambda (item sum) (+ sum (sum-mmt-support item))) 0
+				(star-obj 'right-basis)))
+
+		(define (compute-total-mmt-count)
+			(fold
+				(lambda (item sum) (+ sum (sum-mmt-count item))) 0
+				(star-obj 'right-basis)))
 
 		; -------------
 		; Compute all l_0, l_1 and l_2 norms, attach them to the
@@ -334,8 +338,10 @@ xxxxxxxxxxxxxxxxxxxx !#
 				((mtm-count)          (apply sum-mtm-count args))
 				((mmt-count)          (apply sum-mmt-count args))
 
-				((total-support)      (compute-total-support))
-				((total-count)        (compute-total-count))
+				((total-mtm-support)  (compute-total-mtm-support))
+				((total-mtm-count)    (compute-total-mtm-count))
+				((total-mmt-support)  (compute-total-mmt-support))
+				((total-mmt-count)    (compute-total-mmt-count))
 
 				((left-marginals)     (left-marginals))
 				((right-marginals)    (right-marginals))
