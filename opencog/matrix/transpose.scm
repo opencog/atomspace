@@ -190,13 +190,14 @@
   N(*,y) == 'left-count      override with #:LEFT-COUNT
   N(x,*) == 'right-count     override with #:RIGHT-COUNT
 "
-	(let* ((star-obj (add-pair-stars LLOBJ))
-			(api-obj (add-support-api LLOBJ))
-			(get-cnt (lambda (x) (LLOBJ GET-COUNT x)))
-			(left-support  (lambda (x) (api-obj LEFT-SUPPORT x)))
-			(right-support (lambda (x) (api-obj RIGHT-SUPPORT x)))
-			(left-count    (lambda (x) (api-obj LEFT-COUNT x)))
-			(right-count   (lambda (x) (api-obj RIGHT-COUNT x)))
+	(let* ((star-obj     (add-pair-stars LLOBJ))
+			(support-obj   (add-support-api LLOBJ))
+			(api-obj       (add-transpose-api LLOBJ))
+			(get-cnt       (lambda (x) (LLOBJ GET-COUNT x)))
+			(left-support  (lambda (x) (support-obj LEFT-SUPPORT x)))
+			(right-support (lambda (x) (support-obj RIGHT-SUPPORT x)))
+			(left-count    (lambda (x) (support-obj LEFT-COUNT x)))
+			(right-count   (lambda (x) (support-obj RIGHT-COUNT x)))
 		)
 
 		; -------------
@@ -257,27 +258,27 @@
 		; Compute grand-totals for the two matrix products.
 		(define (compute-total-mtm-support)
 			(fold
-				(lambda (item sum) (+ sum (sum-mtm-support item))) 0
+				(lambda (item sum) (+ sum (api-obj 'mtm-support item))) 0
 				(star-obj 'left-basis)))
 
 		(define (compute-total-mtm-count)
 			(fold
-				(lambda (item sum) (+ sum (sum-mtm-count item))) 0
+				(lambda (item sum) (+ sum (api-obj 'mtm-count item))) 0
 				(star-obj 'left-basis)))
 
 		(define (compute-total-mmt-support)
 			(fold
-				(lambda (item sum) (+ sum (sum-mmt-support item))) 0
+				(lambda (item sum) (+ sum (api-obj 'mmt-support item))) 0
 				(star-obj 'right-basis)))
 
 		(define (compute-total-mmt-count)
 			(fold
-				(lambda (item sum) (+ sum (sum-mmt-count item))) 0
+				(lambda (item sum) (+ sum (api-obj 'mmt-count item))) 0
 				(star-obj 'right-basis)))
 
 		; -------------
-		; Compute all l_0, l_1 and l_2 norms, attach them to the
-		; wildcards, where the support-api can find them.
+		; Compute all l_0 and l_1 norms, attach them to the
+		; wildcards, where the transpose-api can find them.
 
 		(define start-time 0)
 		(define (elapsed-secs)
@@ -313,7 +314,11 @@
 		; Do both at once
 		(define (cache-all)
 			(mmt-marginals)
-			(mtm-marginals))
+			(compute-total-mmt-support)
+			(compute-total-mmt-count)
+			(mtm-marginals)
+			(compute-total-mtm-support)
+			(compute-total-mtm-count))
 
 		; -------------
 		; Methods on this class.
