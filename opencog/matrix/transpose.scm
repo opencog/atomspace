@@ -120,12 +120,12 @@ xxxxxxxxxx
 xxxxxxxxxxxxxxxxxxxx !#
 ; ---------------------------------------------------------------------
 
-(define*-public (add-transpose-compute LLOBJ
-	 #:key (GET-COUNT 'get-count)
-	 #:key (LEFT-SUPPORT 'left-support)
-	 #:key (RIGHT-SUPPORT 'right-support)
-	 #:key (LEFT-COUNT 'left-count)
-	 #:key (RIGHT-COUNT 'right-count))
+(define*-public (add-transpose-compute LLOBJ #:key
+	 (GET-COUNT 'get-count)
+	 (LEFT-SUPPORT 'left-support)
+	 (RIGHT-SUPPORT 'right-support)
+	 (LEFT-COUNT 'left-count)
+	 (RIGHT-COUNT 'right-count))
 "
   add-transpose-compute LLOBJ - Extend LLOBJ with methods to compute
   marginals (wild-card sums) for a matrix times it's transpose. These
@@ -200,7 +200,7 @@ xxxxxxxxxxxxxxxxxxxx !#
   N(*,y) == 'left-count      override with #:LEFT-COUNT
   N(x,*) == 'right-count     override with #:RIGHT-COUNT
 "
-	(let ((star-obj (add-pair-stars LLOBJ))
+	(let* ((star-obj (add-pair-stars LLOBJ))
 			(api-obj (add-support-api LLOBJ))
 			(get-cnt (lambda (x) (LLOBJ GET-COUNT x)))
 			(left-support  (lambda (x) (api-obj LEFT-SUPPORT x)))
@@ -215,13 +215,13 @@ xxxxxxxxxxxxxxxxxxxx !#
 		(define (get-mtm-support-set ITEM)
 			(filter (lambda (star)
 				(< 0 (* (right-count (LLOBJ 'left-element star)) (get-cnt star))))
-			(star-obj 'left-stars)))
+			(star-obj 'left-stars ITEM)))
 
 		; Same as above, but on the right.
 		(define (get-mmt-support-set ITEM)
 			(filter (lambda (star)
 				(< 0 (* (left-count (LLOBJ 'right-element star)) (get-cnt star))))
-			(star-obj 'right-stars)))
+			(star-obj 'right-stars ITEM)))
 
 		; -------------
 		; Return how many non-zero items are in the list.
@@ -230,13 +230,13 @@ xxxxxxxxxxxxxxxxxxxx !#
 			(fold (lambda (star sum)
 				(if (< 0 (* (left-count (LLOBJ 'right-element star))
 						(get-cnt star))) (+ sum 1) sum)) 0
-				(star-obj 'right-stars)))
+				(star-obj 'right-stars ITEM)))
 
 		(define (sum-mtm-support ITEM)
 			(fold (lambda (star sum)
 				(if (< 0 (* (right-count (LLOBJ 'left-element star))
 						(get-cnt star))) (+ sum 1) sum)) 0
-				(star-obj 'left-stars)))
+				(star-obj 'left-stars ITEM)))
 
 		; -------------
 		; Both sum-mmt-count and sum-mmt-count-slow compute the same
@@ -255,13 +255,13 @@ xxxxxxxxxxxxxxxxxxxx !#
 			(fold (lambda (star sum)
 				(+ sum (* (left-count (LLOBJ 'right-element star))
 						(get-cnt star)))) 0
-				(star-obj 'right-stars)))
+				(star-obj 'right-stars ITEM)))
 
 		(define (sum-mtm-count ITEM)
 			(fold (lambda (star sum)
 				(+ sum (* (right-count (LLOBJ 'left-element star))
 						(get-cnt star)))) 0
-				(star-obj 'left-stars)))
+				(star-obj 'left-stars ITEM)))
 
 		; -------------
 		; Compute grand-totals for the whole matrix.
