@@ -340,3 +340,29 @@
 			)))
 
 ; ---------------------------------------------------------------------
+; Example usage
+; This works great, for the pseudo-csets obtained from disjunct
+; counting.  The exposed indexes are then word-nodes, and the internal
+; sums run over the disjuncts. Viz: this matrix is N(word,disjunct)
+; so that N(*,d) == 'left-count and
+; 'mmt-count (WordNode "w") is sum_d N(w,d) N(*,d)
+;
+; (define psa (pseudo-cset-api))
+; (define tcc (add-transpose-compute psa))
+; (tcc 'mmt-count (Word "eyes"))
+;
+; Results for the "en_mtwo" dataset:
+; (tcc 'mmt-count (Word "eyes"))   ; 29484348.0
+; (tcc 'mmt-count (Word "want"))   ; 23512273.0
+; (tcc 'mmt-count (Word "nice"))   ; 2653722.0
+;
+; And again, for frequencies:
+; (define pfa (add-pair-freq-api psa #:nothrow #t))
+; (define tcf (add-transpose-compute pfa
+;                 #:GET-COUNT 'pair-freq #:LEFT-COUNT 'left-wild-freq))
+;
+; (tcf 'mmt-count (Word "eyes"))   ; 8.6245e-8
+; (tcf 'mmt-count (Word "want"))   ; 6.8776e-8
+; (tcf 'mmt-count (Word "nice"))   ; 7.7624e-9
+;
+; (tcf 'total-mmt-count)           ;
