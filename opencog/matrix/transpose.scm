@@ -197,12 +197,16 @@ xxxxxxxxxxxxxxxxxxxx !#
   The other marginals default as follows, and are over-ridden as:
   D(*,y) == 'left-support    override with #:LEFT-SUPPORT
   D(x,*) == 'right-support   override with #:RIGHT-SUPPORT
-  n(*,y) == 'left-count      override with #:LEFT-COUNT
+  N(*,y) == 'left-count      override with #:LEFT-COUNT
   N(x,*) == 'right-count     override with #:RIGHT-COUNT
 "
 	(let ((star-obj (add-pair-stars LLOBJ))
 			(api-obj (add-support-api LLOBJ))
 			(get-cnt (lambda (x) (LLOBJ GET-COUNT x)))
+			(left-support  (lambda (x) (api-obj LEFT-SUPPORT x)))
+			(right-support (lambda (x) (api-obj RIGHT-SUPPORT x)))
+			(left-count    (lambda (x) (api-obj LEFT-COUNT x)))
+			(right-count   (lambda (x) (api-obj RIGHT-COUNT x)))
 		)
 
 		; -------------
@@ -240,59 +244,15 @@ xxxxxxxxxxxxxxxxxxxx !#
 			(get-support-size (star-obj 'right-stars ITEM)))
 
 		; -------------
-		; Return the sum of the counts on the list
-		(define (sum-count LIST)
-			(fold
-				(lambda (lopr sum) (+ sum (get-cnt lopr)))
-				0
-				LIST))
-
-		; Should return a value exactly equal to 'left-count
-		; Equivalently to the l_1 norm (l_p norm for p=1)
-		(define (sum-left-count ITEM)
-			(sum-count (star-obj 'left-stars ITEM)))
+xxxxxxxxx
+		(define (sum-mmt-count ITEM)
+			(fold (lambda (wild sum)
+				(+ sum (* (left-count wild)
+						(get-cnt (LLOBJ 'get-pair ITEM wild))))) 0
+				(star-obj 'right-basis)))
 
 		(define (sum-right-count ITEM)
 			(sum-count (star-obj 'right-stars ITEM)))
-
-		; -------------
-		; Return the Euclidean length of the list
-		(define (sum-length LIST)
-			(define tot
-				(fold
-					(lambda (lopr sum)
-						(define cnt (get-cnt lopr))
-						(+ sum (* cnt cnt)))
-					0
-					LIST))
-			(sqrt tot))
-
-		; Returns the Euclidean length aka the l_2 norm (l_p norm for p=2)
-		(define (sum-left-length ITEM)
-			(sum-length (star-obj 'left-stars ITEM)))
-
-		(define (sum-right-length ITEM)
-			(sum-length (star-obj 'right-stars ITEM)))
-
-		; -------------
-		; Return the lp-norm (Banach-space norm) of the counts
-		; on LIST.  Viz sum_k N^p(k) for counted-pairs k in the
-		; list
-		(define (sum-lp-norm P LIST)
-			(define tot
-				(fold
-					(lambda (lopr sum)
-						(define cnt (get-cnt lopr))
-						(+ sum (expt cnt P)))
-					0
-					LIST))
-			(expt tot (/ 1.0 P)))
-
-		(define (sum-left-lp-norm P ITEM)
-			(sum-lp-norm P (star-obj 'left-stars ITEM)))
-
-		(define (sum-right-lp-norm P ITEM)
-			(sum-lp-norm P (star-obj 'right-stars ITEM)))
 
 		; -------------
 		; Compute grand-totals for the whole matrix.
@@ -364,10 +324,6 @@ xxxxxxxxxxxxxxxxxxxx !#
 				((right-support)      (apply get-right-support-size args))
 				((left-count)         (apply sum-left-count args))
 				((right-count)        (apply sum-right-count args))
-				((left-length)        (apply sum-left-length args))
-				((right-length)       (apply sum-right-length args))
-				((left-lp-norm)       (apply sum-left-lp-norm args))
-				((right-lp-norm)      (apply sum-right-lp-norm args))
 
 				((total-support)      (compute-total-support))
 				((total-count)        (compute-total-count))
