@@ -59,7 +59,10 @@ typedef std::shared_ptr<RandomStream> RandomStreamPtr;
 static inline RandomStreamPtr RandomStreamCast(ProtoAtomPtr& a)
 	{ return std::dynamic_pointer_cast<RandomStream>(a); }
 
-#define createRandomStream std::make_shared<RandomStream>
+template<typename ... Type>
+static inline std::shared_ptr<RandomStream> createRandomStream(Type&&... args) {
+	return std::make_shared<RandomStream>(std::forward<Type>(args)...);
+}
 
 
 /** @}*/

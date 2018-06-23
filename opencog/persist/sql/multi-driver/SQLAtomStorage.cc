@@ -1290,9 +1290,22 @@ void SQLAtomStorage::removeAtom(Response& rp, UUID uuid, bool recursive)
 	// This uses the GIN index and so it should be fast.
 	// CREATE INDEX incoming_idx on Atoms USING GIN(outgoing);
 	char buff[BUFSZ];
-	snprintf(buff, BUFSZ,
-		"SELECT uuid FROM Atoms WHERE outgoing @> ARRAY[CAST(%lu AS BIGINT)];",
-		uuid);
+	if (recursive)
+	{
+		snprintf(buff, BUFSZ,
+			"SELECT uuid FROM Atoms WHERE outgoing @> ARRAY[CAST(%lu AS BIGINT)];",
+			uuid);
+	}
+	else
+	{
+		// For non-recursive removes, we just want to check if there
+		// any atoms at all, in the incoming set. So just check for
+		// anything greater than zero. This check is much much faster
+		// than getting all of them (above).
+		snprintf(buff, BUFSZ,
+			"SELECT uuid FROM Atoms WHERE outgoing @> ARRAY[CAST(%lu AS BIGINT)] LIMIT 1;",
+			uuid);
+	}
 
 	std::vector<UUID> uset;
 	rp.uvec = &uset;

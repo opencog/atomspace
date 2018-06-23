@@ -1,5 +1,3 @@
-# Uncomment this if SQL is installed.
-# ADD_DEFINITIONS(-DHAVE_SQL_STORAGE)
 
 ADD_LIBRARY (sql-support
 	AtomStorage
@@ -25,7 +23,3 @@ INSTALL (TARGETS sql-support
 IF (PGSQL_FOUND OR ODBC_FOUND)
 	ADD_SUBDIRECTORY(multi-driver)
 ENDIF (PGSQL_FOUND OR ODBC_FOUND)
-
-#IF (PGSQL_FOUND)
-#	ADD_SUBDIRECTORY(postgres)
-#ENDIF (PGSQL_FOUND)

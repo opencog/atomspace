@@ -69,7 +69,10 @@ typedef std::shared_ptr<const FloatValue> FloatValuePtr;
 static inline FloatValuePtr FloatValueCast(const ProtoAtomPtr& a)
 	{ return std::dynamic_pointer_cast<const FloatValue>(a); }
 
-#define createFloatValue std::make_shared<FloatValue>
+template<typename ... Type>
+static inline std::shared_ptr<FloatValue> createFloatValue(Type&&... args) {
+	return std::make_shared<FloatValue>(std::forward<Type>(args)...);
+}
 
 // Scalar multiplication and addition
 ProtoAtomPtr times(double, const FloatValuePtr&);
