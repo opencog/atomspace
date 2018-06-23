@@ -11,13 +11,13 @@
 ; --------
 ; A matrix times it's transpose is again a matrix. Actually, there are
 ; two: M^TM and MM^T. One may be interested in a number of different
-; properties of these two, includings support, frequencies, entropies,
+; properties of these two, including support, frequencies, entropies,
 ; mutual information, etc. It is more computationally efficient to
 ; re-order the order in which the marginals for these two matrices are
 ; computed: that is what is done below.
 ;
 ; If it were not for these efficiencies, one could instead just write
-; an api object that took the product of two matricies.  Conceptually,
+; an api object that took the product of two matrices.  Conceptually,
 ; that would be simpler. And a lot slower.  Thus, this object.
 ; ---------------------------------------------------------------------
 
@@ -30,11 +30,11 @@
 (define*-public (add-transpose-api LLOBJ
 	 #:optional (ID (LLOBJ 'id)))
 "
-  add-support-api LLOBJ ID - Extend LLOBJ with methods to retreive
+  add-support-api LLOBJ ID - Extend LLOBJ with methods to retrieve
   marginals (wild-card sums) for
 xxxxxxxxxx
   support, size and length subtotals on rows and columns. The values
-  are retreived from the \"margins\", attached to the matrix wild-cards.
+  are retrieved from the \"margins\", attached to the matrix wild-cards.
   This class assumes the marginals were previously computed and
   attached to the wildcards.
 
@@ -121,7 +121,11 @@ xxxxxxxxxxxxxxxxxxxx !#
 ; ---------------------------------------------------------------------
 
 (define*-public (add-transpose-compute LLOBJ
-	 #:optional (GET-CNT 'get-count))
+	 #:key (GET-COUNT 'get-count)
+	 #:key (LEFT-SUPPORT 'left-support)
+	 #:key (RIGHT-SUPPORT 'right-support)
+	 #:key (LEFT-COUNT 'left-count)
+	 #:key (RIGHT-COUNT 'right-count))
 "
   add-transpose-compute LLOBJ - Extend LLOBJ with methods to compute
   marginals (wild-card sums) for a matrix times it's transpose. These
@@ -137,58 +141,68 @@ xxxxxxxxxxxxxxxxxxxx !#
   computation. This can be over-ridden by specifying optional methods
   to access the desired numbers and marginals.  Note that the marginals
   MUST have been pre-computed, else the calculations here will fail.
-xxxxxxxxxx
-  These all work with the counts for the
-  pairs, and NOT the frequencies!  None of these use any pre-computed
-  (marginal, or \"cached\") values; instead, they compute the norms from
-  the raw matrix data.  The computed norms are not places in the
-  margins or cached or saved (unless the 'cache-all method is invoked.)
+  The computed norms are not placed back into the atomspace after being
+  computed (unless the 'cache-all method is invoked.)
 
-  The 'cache-all method computes norms for the ENTIRE matrix, and
-  places them in the margins, i.e. as values on the wild-cards of the
+  The 'cache-all method computes all of the various norms, and then
+  places them in the margins, i.e. as values on the wild-cards on the
   matrix.  This can take a lot of CPU-time. After the 'cache-all
-  method has been invoked, the `(add-support-api)` object can be
+  method has been invoked, the `(add-transpose-api)` object can be
   used to return these values.
 
-  In order for 'cache-all to work, the full matrix must avaialble
-  in RAM.  It can be fetched by calling `(LLOBJ 'fetch-pairs)`.
-  After computing the marginals, it is wise to store them back to
-  disk. This can be done with `((make-store LLOBJ) 'sotre-wildcards)`
+  In order for 'cache-all to work, the full matrix must available
+  in RAM (and the marginals on it must have been pre-computed).  The
+  matrix can be fetched by calling `(LLOBJ 'fetch-pairs)`. After
+  'cache-all has done it's batch computation, it is wise to store the
+  results to disk. Do this with `((make-store LLOBJ) 'store-wildcards)`
 
   Some terminology: Let N(x,y) be the observed count for the pair (x,y).
-  The left-support-set consists of all pairs (x,y), for fixed y, for
-  which N(x,y) > 0. The right-support-set is the same, for fixed x.
+  Let D(x,y) == 1 if N(x,y) > 0; otherwise D(x,y) == 0.
+  Wild-cards are as usual:  e.g. D(x,*) = sum_y D(x,y), etc.
 
-  The support is the size of the support-set.  AKA the l_0 norm.
-  The left-support is the number of non-zero entries in a column.
+  Note that M^TM is symmetric, that is, (M^TM)^T = M^TM and so the
+  rows are the same as the columns in this matrix. Thus, the left and
+  right sums are identical, and cannot be distinguished.  Likewise,
+  the left and right marginals are identical.
 
-  The left-count is the wild-card sum_x N(x,y) for fixed y.
-  That is, for a given column y, this sums all counts in that column.
+  Of course, MM^T is also symmetric. Thus, this computes two sets of
+  norms: those for M^TM and those for MM^T. All methods are likewise
+  labelled.
 
-  The left-length is sqrt(sum_x N^2(x,y)) for fixed y.
+  The mtm-support is equal to sum_x D(x,y) D(x,*)
+  The mtm-support is the number of non-zero entries in a column or row
+  of the matrix M^TM. It is the l_0 norm of columns or rows in M^TM.
 
-  The left-lp-norm is |sum_x N^p(x,y)|^1/p for fixed y.
+  The mmt-support is equal to sum_y D(x,y) D(*,y)
 
-  The total-support is sum_x sum_y 1
-  That is, the total number of non-zero entries in the matrix.
+  The mtm-count is the wild-card sum_x N(x,y) N(x,*) for fixed y.
+  The mmt-count is the wild-card sum_y N(x,y) N(*,y) for fixed x.
 
-  The total-count is N(*,*) = sum_x sum_y N(x,y)
-  That is, the total of all count entries in the matrix.
+  The total-mtm-support is sum_x D(x,*) D(x,*)
+  The total-mmt-support is sum_y D(*,y) D(*,y)
+
+  The total-mtm-count is sum_x N(x,*) N(x,*)
+  The total-mmt-count is sum_y N(*,y) N(*,y)
 
   Here, the LLOBJ is expected to be an object, with valid counts
-  associated with each pair. LLOBJ is expected to have working,
-  functional methods for 'left-type and 'right-type on it.
+  and count-marginals.
 
   By default, the N(x,y) is taken to be the 'get-count method on LLOBJ,
-  i.e. it is literally the count. The optional argument GET-CNT allows
-  this to be over-ridden with any other method that returns a number.
-  For example, to compute the lengths and norms for frequencies, simply
-  pass 'pair-freq as the second argument: Any method that takes a pair
-  and returns a number is allowed.
+  i.e. it is literally the count. It can be over-ridden with the
+  #:GET-COUNT key argument. For example, to use frequencies instead of
+  counts, say `(add-transpose-compute LLOBJ #:GET-COUNT 'get-freq)`,
+  where LLOBJ is assumed to have a 'get-freq method that returns a
+  number that is used instead of the count.
+
+  The other marginals default as follows, and are over-ridden as:
+  D(*,y) == 'left-support    override with #:LEFT-SUPPORT
+  D(x,*) == 'right-support   override with #:RIGHT-SUPPORT
+  n(*,y) == 'left-count      override with #:LEFT-COUNT
+  N(x,*) == 'right-count     override with #:RIGHT-COUNT
 "
 	(let ((star-obj (add-pair-stars LLOBJ))
 			(api-obj (add-support-api LLOBJ))
-			(get-cnt (lambda (x) (LLOBJ GET-CNT x)))
+			(get-cnt (lambda (x) (LLOBJ GET-COUNT x)))
 		)
 
 		; -------------

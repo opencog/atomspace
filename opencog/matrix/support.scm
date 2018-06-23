@@ -20,9 +20,9 @@
 (define*-public (add-support-api LLOBJ
 	 #:optional (ID (LLOBJ 'id)))
 "
-  add-support-api LLOBJ ID - Extend LLOBJ with methods to retreive
+  add-support-api LLOBJ ID - Extend LLOBJ with methods to retrieve
   support, size and length subtotals on rows and columns. The values
-  are retreived from the \"margins\", attached to the matrix wild-cards.
+  are retrieved from the \"margins\", attached to the matrix wild-cards.
   This class assumes the marginals were previously computed and
   attached to the wildcards; this only grabs the precomputed values
   from the atomspace.
@@ -133,26 +133,29 @@
   method has been invoked, the `(add-support-api)` object can be
   used to access these values.
 
-  In order for 'cache-all to work, the full matrix must avaialble
+  In order for 'cache-all to work, the full matrix must available
   in RAM.  It can be fetched by calling `(LLOBJ 'fetch-pairs)`.
   After computing the marginals, it is wise to store them back to
   disk. This can be done with `((make-store LLOBJ) 'store-wildcards)`
 
   Some terminology: Let N(x,y) be the observed count for the pair (x,y).
+  Let D(x,y) == 1 if N(x,y) > 0; otherwise D(x,y) == 0.
+
   The left-support-set consists of all pairs (x,y), for fixed y, for
   which N(x,y) > 0. The right-support-set is the same, for fixed x.
 
   The support is the size of the support-set.  AKA the l_0 norm.
   The left-support is the number of non-zero entries in a column.
+  That is, the left-support is D(*,y) = sum_x D(x,y)
 
-  The left-count is the wild-card sum_x N(x,y) for fixed y.
+  The left-count is the wild-card N(*,y) = sum_x N(x,y) for fixed y.
   That is, for a given column y, this sums all counts in that column.
 
   The left-length is sqrt(sum_x N^2(x,y)) for fixed y.
 
   The left-lp-norm is |sum_x N^p(x,y)|^1/p for fixed y.
 
-  The total-support is sum_x sum_y 1
+  The total-support is sum_x sum_y D(x,y)
   That is, the total number of non-zero entries in the matrix.
 
   The total-count is N(*,*) = sum_x sum_y N(x,y)
