@@ -48,63 +48,53 @@
   it with the optional ID argument.
 "
 	; ----------------------------------------------------
-	; Key under which the matrix l_p norms are stored.
+	; Key under which the transpose-products norms are stored.
 	(define key-name
 		(if (and ID (LLOBJ 'filters?))
-			(string-append "*-Norm Key " ID)
-			"*-Norm Key-*"))
+			(string-append "*-TransProduct Key " ID "-*")
+			"*-TransProduct Key-*"))
 
-	(define norm-key (PredicateNode key-name))
+	(define trans-key (PredicateNode key-name))
 
 	(define (set-norms ATOM L0 L1)
-		(cog-set-value! ATOM norm-key (FloatValue L0 L1)))
+		(cog-set-value! ATOM trans-key (FloatValue L0 L1)))
 
-#! xxxxxxxxxxxxxxxxxxxxxxx
 	; User might ask for something not in the matrix. In that
 	; case, cog-value-ref will throw 'wrong-type-arg. If this
 	; happens, just return zero.
 	(define (get-support ATOM)
 		(catch 'wrong-type-arg
-			(lambda () (cog-value-ref (cog-value ATOM norm-key) 0))
+			(lambda () (cog-value-ref (cog-value ATOM trans-key) 0))
 			(lambda (key . args) 0)))
 
 	(define (get-count ATOM)
 		(catch 'wrong-type-arg
-			(lambda () (cog-value-ref (cog-value ATOM norm-key) 1))
-			(lambda (key . args) 0)))
-
-	(define (get-length ATOM)
-		(catch 'wrong-type-arg
-			(lambda () (cog-value-ref (cog-value ATOM norm-key) 2))
+			(lambda () (cog-value-ref (cog-value ATOM trans-key) 1))
 			(lambda (key . args) 0)))
 
 	;--------
-	(define (get-left-support ITEM)
+	; The internal sum is over the left items, so hang on the left.
+	; This is an arbitrary choice, but seems less confusing than the
+	; other one.
+	(define (get-mtm-support ITEM)
 		(get-support (LLOBJ 'left-wildcard ITEM)))
 
-	(define (get-left-count ITEM)
+	(define (get-mtm-count ITEM)
 		(get-count (LLOBJ 'left-wildcard ITEM)))
 
-	(define (get-left-length ITEM)
-		(get-length (LLOBJ 'left-wildcard ITEM)))
-
-	(define (set-left-norms ITEM L0 L1 L2)
-		(set-norms (LLOBJ 'left-wildcard ITEM) L0 L1 L2))
+	(define (set-mtm-norms ITEM L0 L1)
+		(set-norms (LLOBJ 'left-wildcard ITEM) L0 L1))
 
 	;--------
-	(define (get-right-support ITEM)
+	(define (get-mmt-support ITEM)
 		(get-support (LLOBJ 'right-wildcard ITEM)))
 
-	(define (get-right-count ITEM)
+	(define (get-mmt-count ITEM)
 		(get-count (LLOBJ 'right-wildcard ITEM)))
 
-	(define (get-right-length ITEM)
-		(get-length (LLOBJ 'right-wildcard ITEM)))
+	(define (set-mmt-norms ITEM L0 L1)
+		(set-norms (LLOBJ 'right-wildcard ITEM) L0 L1))
 
-	(define (set-right-norms ITEM L0 L1 L2)
-		(set-norms (LLOBJ 'right-wildcard ITEM) L0 L1 L2))
-
-xxxxxxxxxxxxxxxxxxxx !#
 	;--------
 	; Methods on this class.
 	(lambda (message . args)
