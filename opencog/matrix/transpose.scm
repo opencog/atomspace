@@ -96,6 +96,26 @@
 		(set-norms (LLOBJ 'right-wildcard ITEM) L0 L1))
 
 	;--------
+	(define (tot-mmt-support)
+		(get-support (LLOBJ 'wild-wild)))
+
+	(define (tot-mmt-count)
+		(get-count (LLOBJ 'wild-wild)))
+
+	(define (set-mmt-totals L0 L1)
+		(set-norms (LLOBJ 'wild-wild) L0 L1))
+
+	;--------
+	(define (tot-mtm-support)
+		(get-support (LLOBJ 'wild-wild)))
+
+	(define (tot-mtm-count)
+		(get-count (LLOBJ 'wild-wild)))
+
+	(define (set-mtm-totals L0 L1)
+		(set-norms (LLOBJ 'wild-wild) L0 L1))
+
+	;--------
 	; Methods on this class.
 	(lambda (message . args)
 		(case message
@@ -105,6 +125,13 @@
 			((mmt-count)          (apply get-mmt-count args))
 			((set-mtm-norms)      (apply set-mtm-norms args))
 			((set-mmt-norms)      (apply set-mmt-norms args))
+
+			((total-mtm-support)  (tot-mtm-support))
+			((total-mmt-support)  (tot-mmt-support))
+			((total-mtm-count)    (tot-mtm-count))
+			((total-mmt-count)    (tot-mmt-count))
+			((set-mtm-totals)     (apply set-mtm-totals args))
+			((set-mmt-totals)     (apply set-mmt-totals args))
 			(else                 (apply LLOBJ (cons message args)))))
 )
 
@@ -298,7 +325,14 @@
 				(star-obj 'right-basis))
 
 			(format #t "Finished mtm norm marginals in ~A secs\n"
+				(elapsed-secs))
+
+			(let ((mtm-sup (compute-total-mtm-support))
+					(mtm-cnt (compute-total-mtm-count)))
+				(api-obj 'set-mtm-totals mtm-sup mtm-cnt))
+			(format #t "Finished mtm totals in ~A secs\n"
 				(elapsed-secs)))
+
 
 		(define (mmt-marginals)
 			(elapsed-secs)
@@ -309,16 +343,18 @@
 					(api-obj 'set-mmt-norms ITEM l0 l1))
 				(star-obj 'left-basis))
 			(format #t "Finished mmt norm marginals in ~A secs\n"
+				(elapsed-secs))
+
+			(let ((mmt-sup (compute-total-mmt-support))
+					(mmt-cnt (compute-total-mmt-count)))
+				(api-obj 'set-mmt-totals mmt-sup mmt-cnt))
+			(format #t "Finished mmt totals in ~A secs\n"
 				(elapsed-secs)))
 
 		; Do both at once
 		(define (cache-all)
 			(mmt-marginals)
-			(compute-total-mmt-support)
-			(compute-total-mmt-count)
-			(mtm-marginals)
-			(compute-total-mtm-support)
-			(compute-total-mtm-count))
+			(mtm-marginals))
 
 		; -------------
 		; Methods on this class.
