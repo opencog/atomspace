@@ -559,13 +559,6 @@ void VectorAPIUTest::test_transpose(void)
 	num = eval->eval("(tapi 'total-mtm-count)");
 	CHKFLT("total-mtm ", num, totmtm);
 
-
-#if 0
-	num = eval->eval("(tapi 'mtm-count (list (Word \"chicken\") (Word \"dog\")))");
-	ch_do = sqrt(1.0*1.0 + 6.0*6.0 + 1.0*1.0);
-	CHKFLT("mtm (chicken - dog)", num, ch_do);
-#endif
-
 	logger().debug("END TEST: %s", __FUNCTION__);
 }
 
