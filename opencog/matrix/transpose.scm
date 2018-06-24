@@ -259,22 +259,22 @@
 		(define (compute-total-mtm-support)
 			(fold
 				(lambda (item sum) (+ sum (api-obj 'mtm-support item))) 0
-				(star-obj 'left-basis)))
+				(star-obj 'right-basis)))
 
 		(define (compute-total-mtm-count)
 			(fold
 				(lambda (item sum) (+ sum (api-obj 'mtm-count item))) 0
-				(star-obj 'left-basis)))
+				(star-obj 'right-basis)))
 
 		(define (compute-total-mmt-support)
 			(fold
 				(lambda (item sum) (+ sum (api-obj 'mmt-support item))) 0
-				(star-obj 'right-basis)))
+				(star-obj 'left-basis)))
 
 		(define (compute-total-mmt-count)
 			(fold
 				(lambda (item sum) (+ sum (api-obj 'mmt-count item))) 0
-				(star-obj 'right-basis)))
+				(star-obj 'left-basis)))
 
 		; -------------
 		; Compute all l_0 and l_1 norms, attach them to the
@@ -295,7 +295,7 @@
 					(define l0 (sum-mtm-support ITEM))
 					(define l1 (sum-mtm-count ITEM))
 					(api-obj 'set-mtm-norms ITEM l0 l1))
-				(star-obj 'left-basis))
+				(star-obj 'right-basis))
 
 			(format #t "Finished mtm norm marginals in ~A secs\n"
 				(elapsed-secs)))
@@ -307,7 +307,7 @@
 					(define l0 (sum-mmt-support ITEM))
 					(define l1 (sum-mmt-count ITEM))
 					(api-obj 'set-mmt-norms ITEM l0 l1))
-				(star-obj 'right-basis))
+				(star-obj 'left-basis))
 			(format #t "Finished mmt norm marginals in ~A secs\n"
 				(elapsed-secs)))
 

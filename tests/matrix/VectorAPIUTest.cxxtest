@@ -523,25 +523,35 @@ void VectorAPIUTest::test_transpose(void)
 	// And again, with tapi.
 
 	num = eval->eval("(tapi 'mmt-count (Word \"chicken\"))");
-	CHKFLT("mmt chicken ", num, chick);
+	CHKFLT("api mmt chicken ", num, chick);
 
 	num = eval->eval("(tapi 'mmt-count (Word \"dog\"))");
-	CHKFLT("mmt dog ", num, dog);
+	CHKFLT("api mmt dog ", num, dog);
 
 	num = eval->eval("(tapi 'mmt-count (Word \"table\"))");
-	CHKFLT("mmt table ", num, table);
+	CHKFLT("api mmt table ", num, table);
 
 	num = eval->eval("(tapi 'mtm-count (Word \"legs\"))");
-	CHKFLT("mtm legs ", num, legs);
+	CHKFLT("api mtm legs ", num, legs);
 
 	num = eval->eval("(tapi 'mtm-count (Word \"eyes\"))");
-	CHKFLT("mtm eyes ", num, eyes);
+	CHKFLT("api mtm eyes ", num, eyes);
 
 	num = eval->eval("(tapi 'mtm-count (Word \"wings\"))");
-	CHKFLT("mtm wings ", num, wings);
+	CHKFLT("api mtm wings ", num, wings);
 
 	num = eval->eval("(tapi 'mtm-count (Word \"snouts\"))");
-	CHKFLT("mtm snouts ", num, snouts);
+	CHKFLT("api mtm snouts ", num, snouts);
+
+	// ------------------------------------------------
+	// totals
+	num = eval->eval("(tcom 'total-mmt-count");
+	double totmmt = 4*11 + 2*4 + 1*1;
+	CHKFLT("total-mmt ", num, totmmt);
+
+	num = eval->eval("(tcom 'total-mtm-count");
+	double totmtm = 4*11 + 2*4 + 1*1;
+	CHKFLT("total-mtm ", num, totmtm);
 
 
 #if 0
