@@ -503,6 +503,47 @@ void VectorAPIUTest::test_transpose(void)
 	double table = 4*11;
 	CHKFLT("mmt table ", num, table);
 
+	num = eval->eval("(tcom 'mtm-count (Word \"legs\"))");
+	double legs = 3*11 + 4*7 + 4*4;
+	CHKFLT("mtm legs ", num, legs);
+
+	num = eval->eval("(tcom 'mtm-count (Word \"eyes\"))");
+	double eyes = 2*11 + 2*7 + 0*4;
+	CHKFLT("mtm eyes ", num, eyes);
+
+	num = eval->eval("(tcom 'mtm-count (Word \"wings\"))");
+	double wings = 6*11 + 0*7 + 0*4;
+	CHKFLT("mtm wings ", num, wings);
+
+	num = eval->eval("(tcom 'mtm-count (Word \"snouts\"))");
+	double snouts = 0*11 + 1*7 + 0*4;
+	CHKFLT("mtm snouts ", num, snouts);
+
+	// ------------------------------------------------
+	// And again, with tapi.
+
+	num = eval->eval("(tapi 'mmt-count (Word \"chicken\"))");
+	CHKFLT("mmt chicken ", num, chick);
+
+	num = eval->eval("(tapi 'mmt-count (Word \"dog\"))");
+	CHKFLT("mmt dog ", num, dog);
+
+	num = eval->eval("(tapi 'mmt-count (Word \"table\"))");
+	CHKFLT("mmt table ", num, table);
+
+	num = eval->eval("(tapi 'mtm-count (Word \"legs\"))");
+	CHKFLT("mtm legs ", num, legs);
+
+	num = eval->eval("(tapi 'mtm-count (Word \"eyes\"))");
+	CHKFLT("mtm eyes ", num, eyes);
+
+	num = eval->eval("(tapi 'mtm-count (Word \"wings\"))");
+	CHKFLT("mtm wings ", num, wings);
+
+	num = eval->eval("(tapi 'mtm-count (Word \"snouts\"))");
+	CHKFLT("mtm snouts ", num, snouts);
+
+
 #if 0
 	num = eval->eval("(tapi 'mtm-count (list (Word \"chicken\") (Word \"dog\")))");
 	ch_do = sqrt(1.0*1.0 + 6.0*6.0 + 1.0*1.0);
