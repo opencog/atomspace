@@ -13,5 +13,6 @@ ADD_GUILE_MODULE (FILES
 	support.scm
 	report-api.scm
 	thresh-pca.scm
+	transpose.scm
 	MODULE_DESTINATION "${DATADIR}/scm/opencog/matrix"
 )

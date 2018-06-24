@@ -143,4 +143,7 @@
 (define suby (add-tuple-math bapi -))
 (define norm (add-support-compute suby))
 
+(define tcom (add-transpose-compute bapi))
+(define tapi (add-transpose-api bapi))
+
 *unspecified*

@@ -2,7 +2,7 @@
 ; support.scm
 ;
 ; Define object-oriented class API's for computing the supporting set
-; the the lp-norms for the left and right side of pairs.
+; and the lp-norms of the rows and columns (vectors) in a matrix.
 ;
 ; Copyright (c) 2017 Linas Vepstas
 ;
@@ -20,19 +20,25 @@
 (define*-public (add-support-api LLOBJ
 	 #:optional (ID (LLOBJ 'id)))
 "
-  add-support-api LLOBJ ID - Extend LLOBJ with methods to retreive
+  add-support-api LLOBJ ID - Extend LLOBJ with methods to retrieve
   support, size and length subtotals on rows and columns. The values
-  are retreived from the \"margins\", attached to the matrix wild-cards.
+  are retrieved from the \"margins\", attached to the matrix wild-cards.
   This class assumes the marginals were previously computed and
-  attached to the wildcards.
+  attached to the wildcards; this only grabs the precomputed values
+  from the atomspace.
 
   The margins (the pre-computed values) can be populated by saying
   `((add-support-compute LLOBJ) 'cache-all)`
   The `add-support-api` and `add-support-compute` API's are designed
   to work together and complement one-another.
 
-  Optional argument ID is #f to use the default value key;
-  otherwise a filtered key is used.
+  See the documentation on `add-support-compute` for an explanation
+  of what these marginals are.
+
+  Optional argument ID is #f to use the default value key; otherwise
+  a filtered key is used. That is, the marginals are fetched from a
+  default location; however, that location can be changed by specifying
+  it with the optional ID argument.
 "
 	; ----------------------------------------------------
 	; Key under which the matrix l_p norms are stored.
@@ -113,38 +119,43 @@
   add-support-compute LLOBJ - Extend LLOBJ with methods to
   compute wild-card sums, including the support (lp-norm for p=0),
   the count (lp-norm for p=1), the Euclidean length (lp-norm for p=2)
-  and the general lp-norm.  These all work with the counts for the
-  pairs, and NOT the frequencies!  None of these use any pre-computed
-  (marginal, or \"cached\") values; instead, they compute the norms from
-  the raw matrix data.  The computed norms are not places in the
-  margins or cached or saved (unless the 'cache-all method is invoked.)
+  and the general lp-norm.  By default, these are computed from the
+  counts on the matrix; optionally, a different source of numbers can
+  be used.  This object does not make use of any pre-computed (marginal
+  or \"cached\") values; instead, all computations are done on the raw
+  matrix data.  The computed norms are not placed back into the
+  atomspace after being computed (unless the 'cache-all method is
+  invoked, in which case a bulk computation is done.)
 
   The 'cache-all method computes norms for the ENTIRE matrix, and
   places them in the margins, i.e. as values on the wild-cards of the
   matrix.  This can take a lot of CPU-time. After the 'cache-all
   method has been invoked, the `(add-support-api)` object can be
-  used to return these values.
+  used to access these values.
 
-  In order for 'cache-all to work, the full matrix must avaialble
+  In order for 'cache-all to work, the full matrix must available
   in RAM.  It can be fetched by calling `(LLOBJ 'fetch-pairs)`.
   After computing the marginals, it is wise to store them back to
-  disk. This can be done with `((make-store LLOBJ) 'sotre-wildcards)`
+  disk. This can be done with `((make-store LLOBJ) 'store-wildcards)`
 
   Some terminology: Let N(x,y) be the observed count for the pair (x,y).
+  Let D(x,y) == 1 if N(x,y) > 0; otherwise D(x,y) == 0.
+
   The left-support-set consists of all pairs (x,y), for fixed y, for
   which N(x,y) > 0. The right-support-set is the same, for fixed x.
 
   The support is the size of the support-set.  AKA the l_0 norm.
   The left-support is the number of non-zero entries in a column.
+  That is, the left-support is D(*,y) = sum_x D(x,y)
 
-  The left-count is the wild-card sum_x N(x,y) for fixed y.
+  The left-count is the wild-card N(*,y) = sum_x N(x,y) for fixed y.
   That is, for a given column y, this sums all counts in that column.
 
   The left-length is sqrt(sum_x N^2(x,y)) for fixed y.
 
   The left-lp-norm is |sum_x N^p(x,y)|^1/p for fixed y.
 
-  The total-support is sum_x sum_y 1
+  The total-support is sum_x sum_y D(x,y)
   That is, the total number of non-zero entries in the matrix.
 
   The total-count is N(*,*) = sum_x sum_y N(x,y)

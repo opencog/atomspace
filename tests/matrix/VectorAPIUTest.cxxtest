@@ -63,6 +63,7 @@ class VectorAPIUTest :  public CxxTest::TestSuite
 	void test_cosines(void);
 	void xtest_dynamic(void);
 	void test_fold(void);
+	void test_transpose(void);
 };
 
 /*
@@ -469,6 +470,101 @@ void VectorAPIUTest::test_fold(void)
 	num = eval->eval("(norm 'right-length (list (Word \"chicken\") (Word \"dog\")))");
 	double ch_do = sqrt(1.0*1.0 + 6.0*6.0 + 1.0*1.0);
 	CHKFLT("length (chicken - dog)", num, ch_do);
+
+	logger().debug("END TEST: %s", __FUNCTION__);
+}
+
+// Make sure the transpose API works
+void VectorAPIUTest::test_transpose(void)
+{
+	logger().debug("BEGIN TEST: %s", __FUNCTION__);
+
+	std::string rc = eval->eval("(load-from-path \"tests/matrix/basic-data.scm\")");
+	printf("Load of data >>>%s", rc.c_str());
+	CHKERR;
+
+	rc = eval->eval("(pcmp 'cache-all)");
+	printf("Support compute >>>%s", rc.c_str());
+	CHKERR;
+
+	rc = eval->eval("(tcom 'cache-all)");
+	printf("Transpose compute >>>%s", rc.c_str());
+	CHKERR;
+
+	std::string num = eval->eval("(tcom 'mmt-count (Word \"chicken\"))");
+	double chick = 3*11 + 6*6 + 2*4;
+	CHKFLT("mmt chicken ", num, chick);
+
+	num = eval->eval("(tcom 'mmt-count (Word \"dog\"))");
+	double dog = 4*11 + 2*4 + 1*1;
+	CHKFLT("mmt dog ", num, dog);
+
+	num = eval->eval("(tcom 'mmt-count (Word \"table\"))");
+	double table = 4*11;
+	CHKFLT("mmt table ", num, table);
+
+	num = eval->eval("(tcom 'mtm-count (Word \"legs\"))");
+	double legs = 3*11 + 4*7 + 4*4;
+	CHKFLT("mtm legs ", num, legs);
+
+	num = eval->eval("(tcom 'mtm-count (Word \"eyes\"))");
+	double eyes = 2*11 + 2*7 + 0*4;
+	CHKFLT("mtm eyes ", num, eyes);
+
+	num = eval->eval("(tcom 'mtm-count (Word \"wings\"))");
+	double wings = 6*11 + 0*7 + 0*4;
+	CHKFLT("mtm wings ", num, wings);
+
+	num = eval->eval("(tcom 'mtm-count (Word \"snouts\"))");
+	double snouts = 0*11 + 1*7 + 0*4;
+	CHKFLT("mtm snouts ", num, snouts);
+
+	// ------------------------------------------------
+	// And again, with tapi.
+
+	num = eval->eval("(tapi 'mmt-count (Word \"chicken\"))");
+	CHKFLT("api mmt chicken ", num, chick);
+
+	num = eval->eval("(tapi 'mmt-count (Word \"dog\"))");
+	CHKFLT("api mmt dog ", num, dog);
+
+	num = eval->eval("(tapi 'mmt-count (Word \"table\"))");
+	CHKFLT("api mmt table ", num, table);
+
+	num = eval->eval("(tapi 'mtm-count (Word \"legs\"))");
+	CHKFLT("api mtm legs ", num, legs);
+
+	num = eval->eval("(tapi 'mtm-count (Word \"eyes\"))");
+	CHKFLT("api mtm eyes ", num, eyes);
+
+	num = eval->eval("(tapi 'mtm-count (Word \"wings\"))");
+	CHKFLT("api mtm wings ", num, wings);
+
+	num = eval->eval("(tapi 'mtm-count (Word \"snouts\"))");
+	CHKFLT("api mtm snouts ", num, snouts);
+
+	// ------------------------------------------------
+	// totals
+	num = eval->eval("(tcom 'total-mmt-count)");
+	double totmmt = chick + dog + table;
+	CHKFLT("total-mmt ", num, totmmt);
+
+	num = eval->eval("(tcom 'total-mtm-count)");
+	double totmtm = legs + eyes + wings + snouts;
+	CHKFLT("total-mtm ", num, totmtm);
+
+	num = eval->eval("(tapi 'total-mmt-count)");
+	CHKFLT("total-mmt ", num, totmmt);
+
+	num = eval->eval("(tapi 'total-mtm-count)");
+	CHKFLT("total-mtm ", num, totmtm);
+
+
+#if 0
+	num = eval->eval("(tapi 'mtm-count (list (Word \"chicken\") (Word \"dog\")))");
+	ch_do = sqrt(1.0*1.0 + 6.0*6.0 + 1.0*1.0);
+	CHKFLT("mtm (chicken - dog)", num, ch_do);
+#endif
 
 	logger().debug("END TEST: %s", __FUNCTION__);
 }
