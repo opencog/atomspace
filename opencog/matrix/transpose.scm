@@ -49,27 +49,33 @@
 "
 	; ----------------------------------------------------
 	; Key under which the transpose-products norms are stored.
-	(define key-name
+	(define mmt-name
 		(if (and ID (LLOBJ 'filters?))
-			(string-append "*-TransProduct Key " ID "-*")
-			"*-TransProduct Key-*"))
+			(string-append "*-MM^T Product Key " ID "-*")
+			"*-MM^T Product Key-*"))
 
-	(define trans-key (PredicateNode key-name))
+	(define mtm-name
+		(if (and ID (LLOBJ 'filters?))
+			(string-append "*-M^TM Product Key " ID "-*")
+			"*-M^TM Product Key-*"))
 
-	(define (set-norms ATOM L0 L1)
-		(cog-set-value! ATOM trans-key (FloatValue L0 L1)))
+	(define mmt-key (PredicateNode mmt-name))
+	(define mtm-key (PredicateNode mtm-name))
+
+	(define (set-norms KEY ATOM L0 L1)
+		(cog-set-value! ATOM KEY (FloatValue L0 L1)))
 
 	; User might ask for something not in the matrix. In that
 	; case, cog-value-ref will throw 'wrong-type-arg. If this
 	; happens, just return zero.
-	(define (get-support ATOM)
+	(define (get-support KEY ATOM)
 		(catch 'wrong-type-arg
-			(lambda () (cog-value-ref (cog-value ATOM trans-key) 0))
+			(lambda () (cog-value-ref (cog-value ATOM KEY) 0))
 			(lambda (key . args) 0)))
 
-	(define (get-count ATOM)
+	(define (get-count KEY ATOM)
 		(catch 'wrong-type-arg
-			(lambda () (cog-value-ref (cog-value ATOM trans-key) 1))
+			(lambda () (cog-value-ref (cog-value ATOM KEY) 1))
 			(lambda (key . args) 0)))
 
 	;--------
@@ -77,43 +83,43 @@
 	; This is an arbitrary choice, but seems less confusing than the
 	; other one.
 	(define (get-mtm-support ITEM)
-		(get-support (LLOBJ 'left-wildcard ITEM)))
+		(get-support mtm-key (LLOBJ 'left-wildcard ITEM)))
 
 	(define (get-mtm-count ITEM)
-		(get-count (LLOBJ 'left-wildcard ITEM)))
+		(get-count mtm-key (LLOBJ 'left-wildcard ITEM)))
 
 	(define (set-mtm-norms ITEM L0 L1)
-		(set-norms (LLOBJ 'left-wildcard ITEM) L0 L1))
+		(set-norms mtm-key (LLOBJ 'left-wildcard ITEM) L0 L1))
 
 	;--------
 	(define (get-mmt-support ITEM)
-		(get-support (LLOBJ 'right-wildcard ITEM)))
+		(get-support mmt-key (LLOBJ 'right-wildcard ITEM)))
 
 	(define (get-mmt-count ITEM)
-		(get-count (LLOBJ 'right-wildcard ITEM)))
+		(get-count mmt-key (LLOBJ 'right-wildcard ITEM)))
 
 	(define (set-mmt-norms ITEM L0 L1)
-		(set-norms (LLOBJ 'right-wildcard ITEM) L0 L1))
+		(set-norms mmt-key (LLOBJ 'right-wildcard ITEM) L0 L1))
 
 	;--------
 	(define (tot-mmt-support)
-		(get-support (LLOBJ 'wild-wild)))
+		(get-support mmt-key (LLOBJ 'wild-wild)))
 
 	(define (tot-mmt-count)
-		(get-count (LLOBJ 'wild-wild)))
+		(get-count mmt-key (LLOBJ 'wild-wild)))
 
 	(define (set-mmt-totals L0 L1)
-		(set-norms (LLOBJ 'wild-wild) L0 L1))
+		(set-norms mmt-key (LLOBJ 'wild-wild) L0 L1))
 
 	;--------
 	(define (tot-mtm-support)
-		(get-support (LLOBJ 'wild-wild)))
+		(get-support mtm-key (LLOBJ 'wild-wild)))
 
 	(define (tot-mtm-count)
-		(get-count (LLOBJ 'wild-wild)))
+		(get-count mtm-key (LLOBJ 'wild-wild)))
 
 	(define (set-mtm-totals L0 L1)
-		(set-norms (LLOBJ 'wild-wild) L0 L1))
+		(set-norms mtm-key (LLOBJ 'wild-wild) L0 L1))
 
 	;--------
 	; Methods on this class.
