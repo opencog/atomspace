@@ -545,12 +545,18 @@ void VectorAPIUTest::test_transpose(void)
 
 	// ------------------------------------------------
 	// totals
-	num = eval->eval("(tcom 'total-mmt-count");
-	double totmmt = 4*11 + 2*4 + 1*1;
+	num = eval->eval("(tcom 'total-mmt-count)");
+	double totmmt = chick + dog + table;
 	CHKFLT("total-mmt ", num, totmmt);
 
-	num = eval->eval("(tcom 'total-mtm-count");
-	double totmtm = 4*11 + 2*4 + 1*1;
+	num = eval->eval("(tcom 'total-mtm-count)");
+	double totmtm = legs + eyes + wings + snouts;
+	CHKFLT("total-mtm ", num, totmtm);
+
+	num = eval->eval("(tapi 'total-mmt-count)");
+	CHKFLT("total-mmt ", num, totmmt);
+
+	num = eval->eval("(tapi 'total-mtm-count)");
 	CHKFLT("total-mtm ", num, totmtm);
 
 

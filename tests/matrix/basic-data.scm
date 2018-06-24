@@ -45,11 +45,12 @@
 ; sum_y N(chicken,y) N(*,y) = 3*11 + 6*6 + 2*4 = 77
 ; sum_y N(dog,y) N(*,y) = 4*11 + 2*4 + 1*1 = 53
 ; sum_y N(table,y) N(*,y) = 4*11 = 44
+; sum sum mmt = 77 + 53 + 44 = 174
 ;
 ; sum_x N(x,legs) N(x,*) = 3*11 + 4*7 + 4*4
 ; sum_x N(x,eyes) N(x,*) = 2*11 + 2*7 + 0*4
 ; sum_x N(x,wings) N(x,*) = 6*11 + 0*7 + 0*4
 ; sum_x N(x,snouts) N(x,*) = 0*11 + 1*7 + 0*4
-
+; sum sum = mtm = 77 + 36 + 66 + 7 = 186
 
 *unspecified*
