@@ -5,8 +5,6 @@
 
 namespace opencog {
 
-/* ================================================================= */
-
 // Fowler–Noll–Vo hash function
 // Parameters are taken from author's page
 // http://www.isthe.com/chongo/tech/comp/fnv/index.html#FNV-1a
@@ -36,12 +34,25 @@ constexpr size_t get_fvna_offset<8>(){
 }
 
 template<typename T>
-ContentHash fnv1a_hash (ContentHash & hval, T buf_t)
+typename std::enable_if<sizeof(T) <= sizeof(ContentHash), ContentHash>::type fnv1a_hash (ContentHash & hval, T buf_t)
 {
-	size_t size = sizeof(buf_t);
-	const char * buf = (const char *)&buf_t;
-	size_t count = 0;
-	while (count < size)
+	hval ^= (ContentHash) (buf_t);
+	hval *= (ContentHash) get_fvna_prime<sizeof(ContentHash)>();
+	return hval;
+}
+
+template<typename T, typename ChunkType=uint32_t>
+typename std::enable_if<sizeof(ContentHash) < sizeof(T), ContentHash>::type fnv1a_hash (ContentHash & hval, T buf_t)
+{
+	constexpr const size_t size = sizeof(buf_t);
+	static_assert(sizeof(ChunkType) <= sizeof(T), "sizeof(ChunkType) <= sizeof(T)");
+	static_assert(sizeof(T) % sizeof(ChunkType) == 0, "sizeof(T) is not divisible by "
+							  "sizeof(ChunkType)");
+	static_assert(sizeof(T) <= 65535, "the implementation can't handle more than 65535 bytes");
+	const ChunkType * buf = (const ChunkType *)&buf_t;
+	ushort count = 0;
+	constexpr const ushort num_iter = (size / sizeof(ChunkType));
+	while (count < num_iter)
 	{
 		hval ^= (ContentHash) (*(buf+count));
 		hval *= (ContentHash) get_fvna_prime<sizeof(ContentHash)>();
