@@ -63,6 +63,7 @@ class VectorAPIUTest :  public CxxTest::TestSuite
 	void test_cosines(void);
 	void xtest_dynamic(void);
 	void test_fold(void);
+	void test_transpose(void);
 };
 
 /*
@@ -469,6 +470,44 @@ void VectorAPIUTest::test_fold(void)
 	num = eval->eval("(norm 'right-length (list (Word \"chicken\") (Word \"dog\")))");
 	double ch_do = sqrt(1.0*1.0 + 6.0*6.0 + 1.0*1.0);
 	CHKFLT("length (chicken - dog)", num, ch_do);
+
+	logger().debug("END TEST: %s", __FUNCTION__);
+}
+
+// Make sure the transpose API works
+void VectorAPIUTest::test_transpose(void)
+{
+	logger().debug("BEGIN TEST: %s", __FUNCTION__);
+
+	std::string rc = eval->eval("(load-from-path \"tests/matrix/basic-data.scm\")");
+	printf("Load of data >>>%s", rc.c_str());
+	CHKERR;
+
+	rc = eval->eval("(pcmp 'cache-all)");
+	printf("Support compute >>>%s", rc.c_str());
+	CHKERR;
+
+	rc = eval->eval("(tcom 'cache-all)");
+	printf("Transpose compute >>>%s", rc.c_str());
+	CHKERR;
+
+	std::string num = eval->eval("(tcom 'mmt-count (Word \"chicken\"))");
+	double chick = 3*11 + 6*6 + 2*4;
+	CHKFLT("mmt chicken ", num, chick);
+
+	num = eval->eval("(tcom 'mmt-count (Word \"dog\"))");
+	double dog = 4*11 + 2*4 + 1*1;
+	CHKFLT("mmt dog ", num, dog);
+
+	num = eval->eval("(tcom 'mmt-count (Word \"table\"))");
+	double table = 4*11;
+	CHKFLT("mmt table ", num, table);
+
+#if 0
+	num = eval->eval("(tapi 'mtm-count (list (Word \"chicken\") (Word \"dog\")))");
+	ch_do = sqrt(1.0*1.0 + 6.0*6.0 + 1.0*1.0);
+	CHKFLT("mtm (chicken - dog)", num, ch_do);
+#endif
 
 	logger().debug("END TEST: %s", __FUNCTION__);
 }

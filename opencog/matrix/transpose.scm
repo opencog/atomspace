@@ -304,7 +304,7 @@
 			(elapsed-secs)
 			(for-each
 				(lambda (ITEM)
-					(define l0 (get-mmt-support-size ITEM))
+					(define l0 (sum-mmt-support ITEM))
 					(define l1 (sum-mmt-count ITEM))
 					(api-obj 'set-mmt-norms ITEM l0 l1))
 				(star-obj 'right-basis))

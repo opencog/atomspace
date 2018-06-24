@@ -26,9 +26,9 @@
 ; table=suport = 1
 ; average left support = (/ (+ 3 3 1) 3)
 
-; chicken-count = (+ 3 6 2) = 11
-; dog-count = (+ 4 1 2) = 7
-; table-count = 4
+; N(chicken,*) = chicken-count = (+ 3 6 2) = 11
+; N(dog,*) = dog-count = (+ 4 1 2) = 7
+; N(table,*) = table-count = 4
 ; average left count = (/ (+ 11 7 4) 3)
 
 ; right supports: legs=3 eyes=2 wings=1 snouts=1
@@ -36,5 +36,14 @@
 
 ; total support = (+ 3 3 1) = (+ 3 2 1 1) = 7
 ; total count = (+ 11 7 4) = (+ 11 4 6 1) = 22
+
+; ---------------------------------------------
+; N(*, legs) = 11
+; N(*, eyes) = 4
+; N(*, wings) = 6
+; N(*, snouts) = 1
+; sum_y N(chicken,y) N(*,y) = 3*11 + 6*6 + 2*4 = 77
+; sum_y N(dog,y) N(*,y) = 4*11 + 2*4 + 1*1 = 53
+; sum_y N(table,y) N(*,y) = 4*11 = 44
 
 *unspecified*
