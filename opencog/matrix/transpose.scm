@@ -12,13 +12,19 @@
 ; A matrix times it's transpose is again a matrix. Actually, there are
 ; two: M^TM and MM^T. One may be interested in a number of different
 ; properties of these two, including support, frequencies, entropies,
-; mutual information, etc. It is more computationally efficient to
-; re-order the order in which the marginals for these two matrices are
-; computed: that is what is done below.
+; mutual information, etc.
 ;
-; If it were not for these efficiencies, one could instead just write
-; an api object that took the product of two matrices.  Conceptually,
-; that would be simpler. And a lot slower.  Thus, this object.
+; One could, of course, define a generic matrix product, apply it to
+; the matrix, and then use the generic support, frequency, entropy
+; API's on this product matrix. Unfortunately, that would be
+; computationally very slow and inefficient.  Thus the objects here,
+; which are reasonably fast, by leveraging previously computed
+; marginals.
+;
+; Note, by the way, that both of the above are symmetric matrices:
+; that is, (M^TM)^T = M^TM and likewise for the other.  Thus, there
+; are no left-right differences between the two.
+;
 ; ---------------------------------------------------------------------
 
 (use-modules (srfi srfi-1))
