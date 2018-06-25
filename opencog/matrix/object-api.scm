@@ -125,14 +125,6 @@
 ;     (define (make-pair L-ATOM R-ATOM)
 ;        (Evaluation (Predicate "foo") (List L-ATOM R-ATOM)))
 ;
-;     ; Return the left member of the pair. Given the pair-atom,
-;     ; locate the left-side atom.
-;     (define (get-left-element PAIR)
-;        (gadr PAIR))
-;
-;     (define (get-right-element PAIR)
-;        (gddr PAIR))
-;
 ;     ; Return an atom to which column subtotals can be attached,
 ;     ; such as, for example, the subtotal `N(*,y)`. Thus, `y`
 ;     ; denotes a column, and the star is on the left (the star
@@ -181,8 +173,6 @@
 ;              ((get-pair) get-pair)
 ;              ((get-count) get-count)
 ;              ((make-pair) make-pair)
-;              ((left-element) get-left-element)
-;              ((right-element) get-right-element)
 ;              ((left-wildcard) get-left-wildcard)
 ;              ((right-wildcard) get-right-wildcard)
 ;              ((wild-wild) get-wild-wild)
