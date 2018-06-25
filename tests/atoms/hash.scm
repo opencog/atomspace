@@ -1,3 +1,5 @@
+;; Atoms for testing hash collisions
+
 ;; These 2 bind links are not alpha-equivalent and should ideally have
 ;; different hash values.
 
@@ -471,6 +473,47 @@
         )
       )
     )
+  )
+)
+)
+
+(define bl-3
+(BindLink
+  (TypedVariableLink
+    (GlobNode "$star")
+    (IntervalLink
+      (NumberNode "0.000000")
+      (NumberNode "1.000000")
+    )
+  )
+  (ListLink
+    (ConceptNode "I")
+    (ConceptNode "love")
+    (GlobNode "$star")
+  )
+  (ListLink
+    (ConceptNode "Hey!")
+    (ConceptNode "I")
+    (ConceptNode "like")
+    (GlobNode "$star")
+    (ConceptNode "also")
+  )
+)
+)
+
+(define bl-4
+(BindLink
+  (ListLink
+    (ConceptNode "I")
+    (ConceptNode "love")
+    (GlobNode "$star")
+  )
+  (ListLink
+    (ConceptNode "Hey!")
+    (ConceptNode "I")
+    (ConceptNode "like")
+    (GlobNode "$star")
+    (ConceptNode "also")
   )
 )
 )
