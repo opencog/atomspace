@@ -1,0 +1,108 @@
+/*
+ * tests/atoms/HashUTest.cxxtest
+ *
+ * Copyright (C) 2018 OpenCog Foundation
+ * All Rights Reserved
+ *
+ * This program is free software; you can redistribute it and/or modify
+ * it under the terms of the GNU Affero General Public License v3 as
+ * published by the Free Software Foundation and including the exceptions
+ * at http://opencog.org/wiki/Licenses
+ *
+ * This program is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ * GNU General Public License for more details.
+ *
+ * You should have received a copy of the GNU Affero General Public License
+ * along with this program; if not, write to:
+ * Free Software Foundation, Inc.,
+ * 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
+ */
+
+#include <opencog/guile/SchemeEval.h>
+#include <opencog/atoms/base/Atom.h>
+#include <opencog/atoms/base/Node.h>
+#include <opencog/atoms/base/Link.h>
+#include <opencog/atomspace/AtomSpace.h>
+#include <opencog/atoms/core/ScopeLink.h>
+
+#include <cxxtest/TestSuite.h>
+
+using namespace opencog;
+
+// Test Atom::compute_hash()
+//
+class HashUTest :  public CxxTest::TestSuite
+{
+private:
+	AtomSpace _as;
+	SchemeEval _eval;
+
+public:
+	HashUTest() : _eval(&_as)
+	{
+		logger().set_print_to_stdout_flag(true);
+
+		_eval.eval("(add-to-load-path \"" PROJECT_SOURCE_DIR "\")");
+	}
+
+	void setUp() {}
+
+	void tearDown() {}
+
+	void test_scope_compute_hash_1();
+	void test_scope_compute_hash_2();
+	void test_scope_compute_hash_3();
+};
+
+void HashUTest::test_scope_compute_hash_1()
+{
+	logger().info("BEGIN TEST: %s", __FUNCTION__);
+
+	std::string result =
+		_eval.eval("(load-from-path \"tests/atoms/hash.scm\")");
+
+	Handle bl1 = _eval.eval_h("bl-1"),
+		bl2 = _eval.eval_h("bl-2");
+
+	TS_ASSERT_DIFFERS(bl1.value(), bl2.value());
+
+	logger().info("END TEST: %s", __FUNCTION__);
+}
+
+void HashUTest::test_scope_compute_hash_2()
+{
+	logger().info("BEGIN TEST: %s", __FUNCTION__);
+
+	std::string result =
+		_eval.eval("(load-from-path \"tests/atoms/hash.scm\")");
+
+	Handle gl1 = _eval.eval_h("gl-1"),
+		gl2 = _eval.eval_h("gl-2");
+
+	TS_ASSERT_DIFFERS(gl1.value(), gl2.value());
+
+	logger().info("END TEST: %s", __FUNCTION__);
+}
+
+void HashUTest::test_scope_compute_hash_3(){
+	logger().info("BEGIN TEST: %s", __FUNCTION__);
+
+	std::string result =
+		_eval.eval("(load-from-path \"tests/atoms/hash.scm\")");
+
+	Handle h1 = _eval.eval_h("ll-1");
+	Handle h2 = _eval.eval_h("ll-2");
+	TS_ASSERT_DIFFERS(h1.value(), h2.value());
+
+	h1 = _eval.eval_h("ll-3");
+	h2 = _eval.eval_h("ll-4");
+	TS_ASSERT_DIFFERS(h1.value(), h2.value());
+
+	h1 = _eval.eval_h("ll-5");
+	h2 = _eval.eval_h("ll-6");
+	TS_ASSERT_DIFFERS(h1.value(), h2.value());
+
+	logger().info("END TEST: %s", __FUNCTION__);
+}

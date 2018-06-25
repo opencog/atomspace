@@ -732,7 +732,7 @@
 )
 )
 
-(define hash-test1
+(define ll-1
 (LambdaLink
     (VariableList
         (VariableNode "$PM-565f9848")
@@ -751,7 +751,7 @@
 )
 )
 
-(define hash-test2
+(define ll-2
 (LambdaLink
     (VariableList
         (VariableNode "$PM-164e1b09")
@@ -770,7 +770,7 @@
 )
 )
 
-(define hash-test3
+(define ll-3
 (LambdaLink
     (VariableList
         (VariableNode "$PM-41da0db7-3475e0e1")
@@ -790,7 +790,7 @@
 )
 )
 
-(define hash-test4
+(define ll-4
 (LambdaLink
     (VariableList
         (VariableNode "$PM-61bb02a1-5779870f")
@@ -810,7 +810,7 @@
 )
 )
 
-(define hash-test5
+(define ll-5
 (LambdaLink
     (VariableList
         (VariableNode "$PM-61bb02a1-5779870f")
@@ -829,7 +829,7 @@
 )
 )
 
-(define hash-test6
+(define ll-6
 (LambdaLink
     (VariableList
         (VariableNode "$PM-61bb02a1")
