@@ -37,6 +37,10 @@
 (use-modules (ice-9 optargs)) ; for define*-public
 
 ; ---------------------------------------------------------------------
+; XXX TODO -- redesign this to use left-duals and right-duals instead
+; of left-stars and right-stars. The real goal here is to get rid of
+; the 'left-element and 'right-element methods, which some of the
+; objects are not able to support.
 
 (define-public (add-generic-filter LLOBJ
 	LEFT-BASIS-PRED RIGHT-BASIS-PRED
