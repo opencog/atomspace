@@ -264,10 +264,9 @@
 			(r-hit (make-atomic-box '()))
 			(r-miss (make-atomic-box '()))
 
-#! ============ Alternate variant, not currently used.
+#! ============ Alternate variant, not currently used. See below.
 			; Temporary atomspaces
-			(l-asp (make-fluid))
-			(r-asp (make-fluid))
+			(fluasp (make-fluid))
 =============== !#
 
 			; Temporary atomspaces, non-fluid style.
@@ -316,121 +315,79 @@
 			(if (eq? 0 r-size) (set! r-size (length (get-right-basis))))
 			r-size)
 
-		;-------------------------------------------
-		; Return a list of all pairs with the ITEM on the right side,
-		; and an object of type (LLOBJ 'left-type) on the left.
-		; The point of this function is to find and return the complete
-		; wild-card set (*,y) = {(x,y) | there-exists pair (x,y) for some x}
-		; The pairs are Links of type 'pair-type, as would be returned by
-		; 'get-pair. That is, this returns a list of atoms of the form
+		; -------------------------------------------------------
 		;
-		;    (LLOBJ 'make-pair $variable ITEM)
+		; Use RAII-style code, so that if the user hits ctrl-C
+		; while we are in this, we will catch that and set the
+		; atomspace back to normal.
 		;
-		; ITEM should be an atom of (LLOBJ 'right-type); if it isn't,
-		; the the behavior is undefined.
+		; XXX there is a small race here, between the setting
+		; of the atomspace, and the invocation of the
+		; throw-handler, but I don't care.
 		;
-		(define (raii-get-stars VARNAME TYPE flip ITEM)
+		; To make this multi-threaded, we would use an atomspace
+		; per fluid. Unfortunately, this is quite slow when threads
+		; are being constantly created/destroyed, as it results in
+		; the temp atomspace being created/destroyed, which is
+		; just inefficient and slow, in the end.
+		;
+		; (let* ((tmp-asp
+		;			(let ((asp (fluid-ref fluasp)))
+		;				(if asp asp
+		;					(let ((nasp (cog-new-atomspace (cog-atomspace))))
+		;						(fluid-set! fluasp nasp)
+		;						nasp))))
+		;
+		(define (raii-get-pattern FUNC ITEM)
 			(define old-as (cog-set-atomspace! aspace))
-			; Use RAII-style code, so that if the user hits ctrl-C
-			; while we are in this, we will catch that and set the
-			; atomspace back to normal.
-			; XXX there is a small race here, between the setting
-			; of the atomspace, and the invocation of the
-			; throw-handler, but I don't care.
-			;
-			; Note also: the VariableNode and the BindLink need
-			; to be created in the temp atomspace, else hell
-			; breaks loose.
 			(with-throw-handler #t
 				(lambda ()
-					(let* ((uniqvar (VariableNode VARNAME))
-							(term
-								(if flip
-									(LLOBJ 'make-pair ITEM uniqvar)
-									(LLOBJ 'make-pair uniqvar ITEM)))
-							(stars
-								(cog-outgoing-set
-									(cog-execute! (Bind (TypedVariable
-											uniqvar (Type (symbol->string TYPE)))
-											term term)))))
-					(cog-atomspace-clear aspace)
-					(cog-set-atomspace! old-as)
-					stars))
+					; execute returns a SetLink. We don't want that.
+					(let* ((setlnk (cog-execute! (FUNC ITEM)))
+							(stars (cog-outgoing-set setlnk)))
+						(cog-atomspace-clear aspace)
+						(cog-set-atomspace! old-as)
+						stars))
 				(lambda (key . args)
 					(cog-atomspace-clear aspace)
 					(cog-set-atomspace! old-as)
-				'())))
+					'())))
 
-		; Use an RAII style throw handler so that the lock is unlocked,
-		; if the user hits ctrl-C in the middle of things. This might
-		; be overkill, because usually this class will nto be reused ...
-		; at least not usually, when running in automatic.
-		; Note that there is a small race, between the getting of the
-		; lock, and the invocation of the throw handler. I don't care.
-		(define (lock-get-stars VARNAME TYPE flip ITEM)
+		; This is a wrapper to serialize access to a temp atomspace,
+		; where the query is actually performed.
+		(define (get-stars FUNC ITEM)
 			(lock-mutex mtx)
 			(with-throw-handler #t
 				(lambda ()
-					(define stars (raii-get-stars VARNAME TYPE flip ITEM aspace))
+					(define stars (raii-get-pattern FUNC ITEM))
 					(unlock-mutex mtx)
 					stars)
 				(lambda (key . args)
 					(unlock-mutex mtx)
 					'())))
 
+		; -------------------------------------------------------
+		;
+		; Define patterns, that, when executed, return the stars.
+		(define (left-star-pat ITEM)
+			(let* ((var (Variable "$api-left-star"))
+					(term (LLOBJ 'make-pair var ITEM))
+				(Bind (TypedVariable var (Type left-type))
+					term term))))
+
+		(define (right-star-pat ITEM)
+			(let* ((var (Variable "$api-right-star"))
+					(term (LLOBJ 'make-pair ITEM var))
+				(Bind (TypedVariable var (Type right-type))
+					term term))))
+
+		; Actually get the patterns
 		(define (do-get-left-stars ITEM)
-			(lock-get-stars "$api-left-star" left-type #f ITEM))
+			(get-stars left-star-pat ITEM))
 
 		; Same as above, but on the right.
 		(define (do-get-right-stars ITEM)
-			(lock-get-stars "$api-right-star" right-type #t ITEM))
-
-#! ============ Alternate variant, not currently used.
-Yes, this actually works -- its just not being used.
-		; Use a temporary atomspace for performing the query.
-		; This is thread-safe, but quite slow when threads are
-		; being constantly created/destroyed, as it results in
-		; the temp atomspace being created/destroyed, which is
-		; just inefficient and slow, in the end.
-		(define (tmp-as-do-get-left-stars ITEM)
-			(let* ((tmp-asp
-						(let ((asp (fluid-ref l-asp)))
-							(if asp asp
-								(let ((nasp (cog-new-atomspace (cog-atomspace))))
-									(fluid-set! l-asp nasp)
-									nasp))))
-					(oldas (cog-set-atomspace! tmp-asp))
-					(uniqvar (VariableNode "$obj-api-left-star"))
-					(term (LLOBJ 'make-pair uniqvar ITEM))
-					(setlnk (cog-execute! (Bind (TypedVariable
-						uniqvar (Type (symbol->string left-type)))
-						term term)))
-					(stars (cog-outgoing-set setlnk))
-				)
-				(cog-atomspace-clear tmp-asp)
-				(cog-set-atomspace! oldas)
-				stars))
-
-		; Same as above, but on the right.
-		(define (tmp-as-do-get-right-stars ITEM)
-			(let* ((tmp-asp
-						(let ((asp (fluid-ref r-asp)))
-							(if asp asp
-								(let ((nasp (cog-new-atomspace (cog-atomspace))))
-									(fluid-set! r-asp nasp)
-									nasp))))
-					(oldas (cog-set-atomspace! tmp-asp))
-					(uniqvar (VariableNode "$obj-api-right-star"))
-					(term (LLOBJ 'make-pair ITEM uniqvar))
-					(setlnk (cog-execute! (Bind (TypedVariable
-						uniqvar (Type (symbol->string right-type)))
-						term term)))
-					(stars (cog-outgoing-set setlnk))
-				)
-				(cog-atomspace-clear tmp-asp)
-				(cog-set-atomspace! oldas)
-				stars))
-============= !#
+			(get-stars right-star-pat ITEM))
 
 		; Cache the most recent two values.  This should offer a
 		; significant performance enhancement for computing cosines
