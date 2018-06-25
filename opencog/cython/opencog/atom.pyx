@@ -169,8 +169,12 @@ cdef class Atom(object):
                                 (<ProtoAtom>value).shared_ptr)
         
     def get_value(self, key):
-        return ProtoAtom.from_cProtoAtomPtr(
-            self.get_ptr().getValue(deref((<Atom>key).handle)))
+        cdef cProtoAtomPtr value = self.get_ptr().getValue(
+            deref((<Atom>key).handle))
+        if (value != NULL):
+            return ProtoAtom.from_cProtoAtomPtr(value)
+        else:
+            return None
 
     def get_out(self):
         cdef cAtom* atom_ptr = self.handle.atom_ptr()
