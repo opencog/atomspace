@@ -35,6 +35,11 @@
       right-prod(x,u) = sum_y N(x,y) N(u,y)
   with x and u being two different row indexes.
 
+  The left-product is the same thing as an entry in the symmetric
+  matrix M^TM (with M==LLOBJ and ^T the transpose). That is,
+       left-product(y,z) = [M^TM](y,z)
+  Likewise, the right-product is an entry in the matrix MM^T.
+
   Cosines:
   --------
   Similarly, we can define the left and right cosine angles as
