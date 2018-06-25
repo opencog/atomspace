@@ -158,6 +158,24 @@ cdef class Atom(object):
             return
         attentionbank(self.atomspace.atomspace).dec_vlti(self.handle[0])
 
+    cdef cAtom* get_ptr(Atom self):
+        cdef cAtom* atom_ptr = self.handle.atom_ptr()
+        if atom_ptr == NULL:
+            raise AttributeError('Atom contains NULL reference')
+        return atom_ptr
+
+    def set_value(self, key, value):
+        self.get_ptr().setValue(deref((<Atom>key).handle),
+                                (<ProtoAtom>value).shared_ptr)
+        
+    def get_value(self, key):
+        cdef cProtoAtomPtr value = self.get_ptr().getValue(
+            deref((<Atom>key).handle))
+        if (value != NULL):
+            return ProtoAtom.from_cProtoAtomPtr(value)
+        else:
+            return None
+
     def get_out(self):
         cdef cAtom* atom_ptr = self.handle.atom_ptr()
         if atom_ptr == NULL:   # avoid null-pointer deref
