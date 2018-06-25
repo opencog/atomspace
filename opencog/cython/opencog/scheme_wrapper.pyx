@@ -11,7 +11,7 @@ Also refer to the list of .scm type definition files in opencog.conf
 """
 
 from cython.operator cimport dereference as deref
-from opencog.atomspace cimport cAtomSpace, Atom, AtomSpace, cAtom, cHandle, AtomSpace_factory, void_from_candle
+from opencog.atomspace cimport cProtoAtomPtr, ProtoAtom, cAtomSpace, Atom, AtomSpace, cAtom, cHandle, AtomSpace_factory, void_from_candle
 
 
 # basic wrapping for std::string conversion
@@ -35,6 +35,19 @@ def scheme_eval(AtomSpace a, str pys):
     # print "Debug: called scheme eval with atomspace {0:x}".format(<unsigned long int>a.atomspace)
     ret = eval_scheme(a.atomspace, expr)
     return ret.c_str()
+
+cdef extern from "opencog/cython/opencog/PyScheme.h" namespace "opencog":
+    cProtoAtomPtr eval_scheme_v(cAtomSpace* as, const string& s) except +
+
+def scheme_eval_v(AtomSpace a, str pys):
+    """
+    Returns a ProtoAtom
+    """
+    cdef cProtoAtomPtr ret
+    cdef string expr
+    expr = pys.encode('UTF-8')
+    ret = eval_scheme_v(a.atomspace, expr)
+    return ProtoAtom.from_cProtoAtomPtr(ret)
 
 cdef extern from "opencog/cython/opencog/PyScheme.h" namespace "opencog":
     cHandle eval_scheme_h(cAtomSpace* as, const string& s) except +
