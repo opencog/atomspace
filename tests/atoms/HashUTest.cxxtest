@@ -44,6 +44,7 @@ private:
 public:
 	HashUTest() : _eval(&_as)
 	{
+		logger().set_timestamp_flag(false);
 		logger().set_print_to_stdout_flag(true);
 
 		_eval.eval("(add-to-load-path \"" PROJECT_SOURCE_DIR "\")");
@@ -58,6 +59,10 @@ public:
 	void test_scope_compute_hash_2();
 	void test_scope_compute_hash_3();
 	void test_scope_compute_hash_4();
+
+	// Test hash collisions of non-scope links
+	void test_sequential_compute_hash();
+	void test_times_plus_compute_hash();
 };
 
 void HashUTest::test_scope_compute_hash_1()
@@ -122,6 +127,36 @@ void HashUTest::test_scope_compute_hash_4()
 		bl4 = _eval.eval_h("bl-4");
 
 	TS_ASSERT_DIFFERS(bl3.value(), bl4.value());
+
+	logger().info("END TEST: %s", __FUNCTION__);
+}
+
+void HashUTest::test_sequential_compute_hash()
+{
+	logger().info("BEGIN TEST: %s", __FUNCTION__);
+
+	std::string result =
+		_eval.eval("(load-from-path \"tests/atoms/hash.scm\")");
+
+	Handle sal = _eval.eval_h("sal"),
+		sol = _eval.eval_h("sol");
+
+	TS_ASSERT_DIFFERS(sal.value(), sol.value());
+
+	logger().info("END TEST: %s", __FUNCTION__);
+}
+
+void HashUTest::test_times_plus_compute_hash()
+{
+	logger().info("BEGIN TEST: %s", __FUNCTION__);
+
+	std::string result =
+		_eval.eval("(load-from-path \"tests/atoms/hash.scm\")");
+
+	Handle tl = _eval.eval_h("tl"),
+		pl = _eval.eval_h("pl");
+
+	TS_ASSERT_DIFFERS(tl.value(), pl.value());
 
 	logger().info("END TEST: %s", __FUNCTION__);
 }

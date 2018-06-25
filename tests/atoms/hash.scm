@@ -1,5 +1,7 @@
 ;; Atoms for testing hash collisions
 
+;; Scope links
+
 ;; These 2 bind links are not alpha-equivalent and should ideally have
 ;; different hash values.
 
@@ -888,5 +890,69 @@
             (VariableNode "$PM-61bb02a1-5779870f")
         )
     )
+)
+)
+
+;; Non scope links
+
+(define sal
+(SequentialAndLink
+  (AbsentLink
+    (EvaluationLink
+      (PredicateNode "visible")
+      (ListLink
+        (VariableNode "$x")
+      )
+    )
+  )
+  (EvaluationLink
+    (GroundedPredicateNode "scm: incr-trig")
+    (ListLink
+    )
+  )
+)
+)
+
+(define sol
+(SequentialOrLink
+  (PresentLink
+    (EvaluationLink
+      (PredicateNode "visible")
+      (ListLink
+        (VariableNode "$x")
+      )
+    )
+  )
+  (EvaluationLink
+    (GroundedPredicateNode "scm: incr-trig")
+    (ListLink
+    )
+  )
+)
+)
+
+(define tl
+(TimesLink
+  (NumberNode "5.000000")
+  (PlusLink
+    (NumberNode "3.000000")
+    (ValueOfLink
+      (ConceptNode "some atom")
+      (PredicateNode "my key")
+    )
+  )
+)
+)
+
+(define pl
+(PlusLink
+  (NumberNode "5.000000")
+  (TimesLink
+    (NumberNode "3.000000")
+    (ValueOfLink
+      (ConceptNode "some atom")
+      (PredicateNode "my key")
+    )
+  )
 )
 )
