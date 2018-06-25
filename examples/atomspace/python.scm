@@ -10,8 +10,8 @@
 ; The below should print "hello! 4"
 (python-eval "print ('hello! ' + str(2+2))")
 
-; Use execfile to load python files:
-(python-eval "execfile('my_py_func.py')")
+; Use exec(open()) to load python files:
+(python-eval "exec(open('my_py_func.py'))")
 
 ; -------------------------------------------------------------------
 ; It is possible to communicate an AtomSpace from guile to python.
