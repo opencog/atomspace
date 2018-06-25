@@ -105,14 +105,14 @@ void VectorAPIUTest::tearDown(void)
 #define CHKPRT(X) printf("Got >>%s<<\n", X.c_str()); CHKERR;
 
 #define CHKNUM(MSG,X,VAL) \
-	printf("Got %s=%s", MSG, X.c_str()); \
+	printf("Got %s=%s expect=%d", MSG, X.c_str(), VAL); \
 	CHKERR; \
 	TSM_ASSERT_EQUALS(MSG, atoi(X.c_str()), VAL);
 
 #define EPS 1.0e-9
 
 #define CHKFLT(MSG,X,VAL) \
-	printf("Got %s=%s", MSG, X.c_str()); \
+	printf("Got %s=%s expect=%f", MSG, X.c_str(), VAL); \
 	CHKERR; \
 	TSM_ASSERT_LESS_THAN(MSG, atof(X.c_str()), VAL+EPS); \
 	TSM_ASSERT_LESS_THAN(MSG, VAL-EPS, atof(X.c_str()));
