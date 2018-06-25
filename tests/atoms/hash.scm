@@ -1,3 +1,7 @@
+;; Atoms for testing hash collisions
+
+;; Scope links
+
 ;; These 2 bind links are not alpha-equivalent and should ideally have
 ;; different hash values.
 
@@ -475,6 +479,47 @@
 )
 )
 
+(define bl-3
+(BindLink
+  (TypedVariableLink
+    (GlobNode "$star")
+    (IntervalLink
+      (NumberNode "0.000000")
+      (NumberNode "1.000000")
+    )
+  )
+  (ListLink
+    (ConceptNode "I")
+    (ConceptNode "love")
+    (GlobNode "$star")
+  )
+  (ListLink
+    (ConceptNode "Hey!")
+    (ConceptNode "I")
+    (ConceptNode "like")
+    (GlobNode "$star")
+    (ConceptNode "also")
+  )
+)
+)
+
+(define bl-4
+(BindLink
+  (ListLink
+    (ConceptNode "I")
+    (ConceptNode "love")
+    (GlobNode "$star")
+  )
+  (ListLink
+    (ConceptNode "Hey!")
+    (ConceptNode "I")
+    (ConceptNode "like")
+    (GlobNode "$star")
+    (ConceptNode "also")
+  )
+)
+)
+
 ;; These 2 get links are not alpha-equivalent and should ideally have
 ;; different hash values.
 
@@ -732,7 +777,7 @@
 )
 )
 
-(define hash-test1
+(define ll-1
 (LambdaLink
     (VariableList
         (VariableNode "$PM-565f9848")
@@ -751,7 +796,7 @@
 )
 )
 
-(define hash-test2
+(define ll-2
 (LambdaLink
     (VariableList
         (VariableNode "$PM-164e1b09")
@@ -770,7 +815,7 @@
 )
 )
 
-(define hash-test3
+(define ll-3
 (LambdaLink
     (VariableList
         (VariableNode "$PM-41da0db7-3475e0e1")
@@ -790,7 +835,7 @@
 )
 )
 
-(define hash-test4
+(define ll-4
 (LambdaLink
     (VariableList
         (VariableNode "$PM-61bb02a1-5779870f")
@@ -810,7 +855,7 @@
 )
 )
 
-(define hash-test5
+(define ll-5
 (LambdaLink
     (VariableList
         (VariableNode "$PM-61bb02a1-5779870f")
@@ -829,7 +874,7 @@
 )
 )
 
-(define hash-test6
+(define ll-6
 (LambdaLink
     (VariableList
         (VariableNode "$PM-61bb02a1")
@@ -845,5 +890,69 @@
             (VariableNode "$PM-61bb02a1-5779870f")
         )
     )
+)
+)
+
+;; Non scope links
+
+(define sal
+(SequentialAndLink
+  (AbsentLink
+    (EvaluationLink
+      (PredicateNode "visible")
+      (ListLink
+        (VariableNode "$x")
+      )
+    )
+  )
+  (EvaluationLink
+    (GroundedPredicateNode "scm: incr-trig")
+    (ListLink
+    )
+  )
+)
+)
+
+(define sol
+(SequentialOrLink
+  (PresentLink
+    (EvaluationLink
+      (PredicateNode "visible")
+      (ListLink
+        (VariableNode "$x")
+      )
+    )
+  )
+  (EvaluationLink
+    (GroundedPredicateNode "scm: incr-trig")
+    (ListLink
+    )
+  )
+)
+)
+
+(define tl
+(TimesLink
+  (NumberNode "5.000000")
+  (PlusLink
+    (NumberNode "3.000000")
+    (ValueOfLink
+      (ConceptNode "some atom")
+      (PredicateNode "my key")
+    )
+  )
+)
+)
+
+(define pl
+(PlusLink
+  (NumberNode "5.000000")
+  (TimesLink
+    (NumberNode "3.000000")
+    (ValueOfLink
+      (ConceptNode "some atom")
+      (PredicateNode "my key")
+    )
+  )
 )
 )
