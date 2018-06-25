@@ -14,7 +14,7 @@
 
 ; The below demonstrates the use of python code in an execution link.
 ; Begin by loading the python code. (See `python.scm` for more details).
-(python-eval "execfile('my_py_func.py')")
+(python-eval "exec(open('my_py_func.py'))")
 
 ; Execute the python function `my_py_func`. The python function shhould
 ; return an atom, which is then printed.
