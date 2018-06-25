@@ -371,15 +371,15 @@
 		; Define patterns, that, when executed, return the stars.
 		(define (left-star-pat ITEM)
 			(let* ((var (Variable "$api-left-star"))
-					(term (LLOBJ 'make-pair var ITEM))
+					(term (LLOBJ 'make-pair var ITEM)))
 				(Bind (TypedVariable var (Type left-type))
-					term term))))
+					term term)))
 
 		(define (right-star-pat ITEM)
 			(let* ((var (Variable "$api-right-star"))
-					(term (LLOBJ 'make-pair ITEM var))
+					(term (LLOBJ 'make-pair ITEM var)))
 				(Bind (TypedVariable var (Type right-type))
-					term term))))
+					term term)))
 
 		; Actually get the patterns
 		(define (do-get-left-stars ITEM)
