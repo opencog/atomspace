@@ -259,10 +259,16 @@
 			(r-size 0)
 
 			; Caches for the left and right stars
-			(l-hit (make-atomic-box '()))
-			(l-miss (make-atomic-box '()))
-			(r-hit (make-atomic-box '()))
-			(r-miss (make-atomic-box '()))
+			(star-l-hit (make-atomic-box '()))
+			(star-l-miss (make-atomic-box '()))
+			(star-r-hit (make-atomic-box '()))
+			(star-r-miss (make-atomic-box '()))
+
+			; Caches for the left and right duals
+			(dual-l-hit (make-atomic-box '()))
+			(dual-l-miss (make-atomic-box '()))
+			(dual-r-hit (make-atomic-box '()))
+			(dual-r-miss (make-atomic-box '()))
 
 #! ============ Alternate variant, not currently used. See below.
 			; Temporary atomspaces
@@ -339,6 +345,28 @@
 			(overload 'left-star-pattern default-left-star-pat))
 		(define f-right-star-pat
 			(overload 'right-star-pattern default-right-star-pat))
+
+		; -------------------------------------------------------
+		; Same as above, but for the duals, not the stars.
+		; The pattern is almost the same, except that this time,
+		; we return basis elements.
+		;
+		; Define default patterns, that, when executed, return the duals.
+		; The LLOBJ can provide custom versions of this.
+		(define (default-left-dual-pat ITEM)
+			(let* ((var (Variable "$api-left-dual"))
+					(term (LLOBJ 'make-pair var ITEM)))
+				(Get (TypedVariable var (Type left-type)) term)))
+
+		(define (default-right-dual-pat ITEM)
+			(let* ((var (Variable "$api-right-dual"))
+					(term (LLOBJ 'make-pair ITEM var)))
+				(Get (TypedVariable var (Type right-type)) term)))
+
+		(define f-left-dual-pat
+			(overload 'left-dual-pattern default-left-dual-pat))
+		(define f-right-dual-pat
+			(overload 'right-dual-pattern default-right-dual-pat))
 
 		; -------------------------------------------------------
 		;
@@ -423,12 +451,12 @@
 
 		; Apply caching to the stars
 		(define (get-left-stars ITEM)
-			(do-get-stars l-hit l-miss
+			(do-get-stars star-l-hit star-l-miss
 				(lambda (itm) (get-stars f-left-star-pat itm)) ITEM))
 
 		; Same as above, but on the right.
 		(define (get-right-stars ITEM)
-			(do-get-stars r-hit r-miss
+			(do-get-stars star-r-hit star-r-miss
 				(lambda (itm) (get-stars f-right-star-pat itm)) ITEM))
 
 		; Invalidate the caches. This is needed, when atoms get deleted.
