@@ -408,7 +408,7 @@
 
 		; This is a wrapper to serialize access to a temp atomspace,
 		; where the query is actually performed.
-		(define (get-stars FUNC ITEM)
+		(define (run-query FUNC ITEM)
 			(lock-mutex mtx)
 			(with-throw-handler #t
 				(lambda ()
@@ -425,7 +425,7 @@
 		; significant performance enhancement for computing cosines
 		; of vectors, as usually, one of the cosine-pair is constant
 		; (and will be a cache-hit) while the other always misses.
-		(define (do-get-stars A-HIT A-MISS GETTER ITEM)
+		(define (do-run-query A-HIT A-MISS GETTER ITEM)
 			(define hit (atomic-box-ref A-HIT))
 			(if (null? hit)
 				; If hit is empty, then set it, and return the value
@@ -451,20 +451,35 @@
 
 		; Apply caching to the stars
 		(define (get-left-stars ITEM)
-			(do-get-stars star-l-hit star-l-miss
-				(lambda (itm) (get-stars f-left-star-pat itm)) ITEM))
+			(do-run-query star-l-hit star-l-miss
+				(lambda (itm) (run-query f-left-star-pat itm)) ITEM))
 
 		; Same as above, but on the right.
 		(define (get-right-stars ITEM)
-			(do-get-stars star-r-hit star-r-miss
-				(lambda (itm) (get-stars f-right-star-pat itm)) ITEM))
+			(do-run-query star-r-hit star-r-miss
+				(lambda (itm) (run-query f-right-star-pat itm)) ITEM))
+
+		; Apply caching to the duals
+		(define (get-left-duals ITEM)
+			(do-run-query dual-l-hit dual-l-miss
+				(lambda (itm) (run-query f-left-dual-pat itm)) ITEM))
+
+		; Same as above, but on the right.
+		(define (get-right-duals ITEM)
+			(do-run-query dual-r-hit dual-r-miss
+				(lambda (itm) (run-query f-right-dual-pat itm)) ITEM))
 
 		; Invalidate the caches. This is needed, when atoms get deleted.
 		(define (clobber)
-			(atomic-box-set! l-hit '())
-			(atomic-box-set! l-miss '())
-			(atomic-box-set! r-hit '())
-			(atomic-box-set! r-miss '()))
+			(atomic-box-set! star-l-hit '())
+			(atomic-box-set! star-l-miss '())
+			(atomic-box-set! star-r-hit '())
+			(atomic-box-set! star-r-miss '())
+
+			(atomic-box-set! dual-l-hit '())
+			(atomic-box-set! dual-l-miss '())
+			(atomic-box-set! dual-r-hit '())
+			(atomic-box-set! dual-r-miss '()))
 
 		;-------------------------------------------
 
@@ -480,6 +495,8 @@
 				(f-right-basis-size (overload 'right-basis-size get-right-size))
 				(f-left-stars (overload 'left-stars get-left-stars))
 				(f-right-stars (overload 'right-stars get-right-stars))
+				(f-left-duals (overload 'left-duals get-left-duals))
+				(f-right-duals (overload 'right-duals get-right-duals))
 				(f-clobber (overload 'clobber clobber)))
 
 			;-------------------------------------------
@@ -490,12 +507,14 @@
 			; by advertising that .. we hold caches.
 			(define (provides meth)
 				(case meth
-					((left-stars)       f-left-stars)
-					((right-stars)      f-right-stars)
 					((left-basis)       f-left-basis)
 					((right-basis)      f-right-basis)
 					((left-basis-size)  f-left-basis-size)
 					((right-basis-size) f-right-basis-size)
+					((left-stars)       f-left-stars)
+					((right-stars)      f-right-stars)
+					((left-duals)       f-left-duals)
+					((right-duals)      f-right-duals)
 					((clobber)          f-clobber)
 					(else               (LLOBJ 'provides meth))))
 
@@ -509,6 +528,8 @@
 					((right-basis-size) (f-right-basis-size))
 					((left-stars)       (apply f-left-stars args))
 					((right-stars)      (apply f-right-stars args))
+					((left-duals)       (apply f-left-duals args))
+					((right-duals)      (apply f-right-duals args))
 					((clobber)          (f-clobber))
 					((provides)         (apply provides args))
 					(else               (apply LLOBJ (cons message args))))
