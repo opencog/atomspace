@@ -11,6 +11,7 @@
 (load "matrix/dynamic.scm")
 (load "matrix/support.scm")
 (load "matrix/transpose.scm")
+(load "matrix/symmetric-mi.scm")
 (load "matrix/report-api.scm")
 (load "matrix/fold-api.scm")
 (load "matrix/loop-api.scm")
