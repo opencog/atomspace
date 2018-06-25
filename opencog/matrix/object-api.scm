@@ -227,6 +227,15 @@
 
   'right-basis-size - Likewise.
 
+  'left-duals COL - Return the set of rows for which the pair
+      (row, COL) exists in the atomspace.  That is, return the set
+          { x | (x,COL) exists in the atomspace }
+      The returned rows will all be of type (LLOBJ 'left-type).
+      The input COL atom must be of type (LLOBJ 'right-type).
+      This does NOT verify that these pairs have a non-zero count.
+
+  'right-duals ROW - Likewise, but returns the columns for (ROW, *).
+
   'left-stars COL - Return the set of pairs (row, column) for
       which the column is COL, and the pair exists in the atomspace.
       That is, return the set
