@@ -40,6 +40,20 @@ cdef class ProtoAtom:
     def is_a(self, type):
         return is_a(self.type, type)
 
+    def to_list(self):
+        cdef vector[double] doubleValues;
+        cdef vector[double].iterator it;
+        if (self.is_a(types.FloatValue)):
+            doubleValues = (<cFloatValue*>self.get_ptr()).value()
+            it = doubleValues.begin()
+            list = []
+            while it != doubleValues.end():
+                list.append(deref(it))
+                inc(it)
+            return list
+        else:
+            raise TypeError('Type {} is not supported'.format(self.type()))
+
     def long_string(self):
         return self.get_ptr().to_string().decode('UTF-8')
 
