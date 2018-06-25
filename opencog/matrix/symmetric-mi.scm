@@ -46,27 +46,33 @@
   That is, if f(y,z) is a symmetric matrix, then
        p(y,z) = f(y,z) / f(*,*)
   can be interpreted as a (frequentist) probability. From this, one can
-  construct the mutual information:
-       MI(y,z) = log_2 p(y,z) / p(y) p(z)
-  where p(y) = p(y,*) = p(*,y) is the marginal probability.
+  construct the (fractional) mutual information:
+       FMI(y,z) = log_2 p(y,z) / p(y) p(z)
+  where p(y) = p(y,*) = p(*,y) is the marginal probability. The full MI
+  is just of course
+       MI(y,z) = p(y,z) FMI(y,z)
 
   Arguments:
   ----------
   Here, the LLOBJ is expected to be an object defining a sparse matrix,
   with valid counts associated with each pair. LLOBJ is expected to have
   working, functional methods for 'left-type, 'right-type and 'pair-type
-  on it.
+  on it. It is assumed that teh transpose-marginals on it have been
+  previously computed, and are available in the atomspace.
 
   By default, the N(x,y) is taken to be the 'get-count method on LLOBJ,
   i.e. it is literally the count. The optional argument GET-CNT allows
   this to be over-ridden with any other method that returns a number.
 "
 
-	(let* ((star-obj (add-pair-stars LLOBJ))
-			(supp-obj  (add-support-compute star-obj GET-CNT))
+	(let* ((ol2 (/ 1.0 (log 2.0)))
+			(star-obj (add-pair-stars LLOBJ))
+			(trans-obj (add-transpose-api star-obj))
 			(prod-obj  (add-support-compute
 				(add-tuple-math star-obj * GET-CNT)))
 		)
+
+		(define (log2 x) (* (log x) ol2))
 
 		; -------------
 		; Return the vector product of column A and column B
@@ -81,9 +87,33 @@
 		(define (compute-right-product ROW-A ROW-B)
 			(prod-obj 'right-count (list ROW-A ROW-B)))
 
-		; -------------
-		(define (get-left-length COL) (supp-obj 'left-length COL))
-		(define (get-right-length ROW) (supp-obj 'right-length ROW))
+		(define (compute-mtm-fmi COL-A COL-B)
+			(define marga (trans-obj 'mtm-count COL-A))
+			(define margb (trans-obj 'mtm-count COL-B))
+			(define total (trans-obj 'total-mtm-count))
+			(define prod (compute-left-product COL-A COL-B))
+			(log2 (/ (* prod total) (* marga margb))))
+
+		(define (compute-mtm-mi COL-A COL-B)
+			(define marga (trans-obj 'mtm-count COL-A))
+			(define margb (trans-obj 'mtm-count COL-B))
+			(define total (trans-obj 'total-mtm-count))
+			(define prod (compute-left-product COL-A COL-B))
+			(* prod (log2 (/ (* prod total) (* marga margb)))))
+
+		(define (compute-mmt-fmi ROW-A ROW-B)
+			(define marga (trans-obj 'mmt-count ROW-A))
+			(define margb (trans-obj 'mmt-count ROW-B))
+			(define total (trans-obj 'total-mmt-count))
+			(define prod (compute-left-product ROW-A ROW-B))
+			(log2 (/ (* prod total) (* marga margb))))
+
+		(define (compute-mmt-mi ROW-A ROW-B)
+			(define marga (trans-obj 'mmt-count ROW-A))
+			(define margb (trans-obj 'mmt-count ROW-B))
+			(define total (trans-obj 'total-mmt-count))
+			(define prod (compute-left-product ROW-A ROW-B))
+			(* prod (log2 (/ (* prod total) (* marga margb)))))
 
 		; -------------
 		; Methods on this class.
