@@ -601,7 +601,7 @@ void VectorAPIUTest::test_symmetric_mi(void)
 	CHKERR;
 
 	std::string num;
-	num = eval->eval("(symc 'mmt-fmi (Word \"chicken\") (Word \"dog"))");
+	num = eval->eval("(symc 'mmt-fmi (Word \"chicken\") (Word \"dog\"))");
 	double chidog = mmt_trop("chicken", "dog");
 	CHKFLT("mmt chicken ", num, chidog);
 
