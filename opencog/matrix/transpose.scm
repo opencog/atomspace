@@ -233,6 +233,7 @@
 			(support-obj   (add-support-api LLOBJ))
 			(api-obj       (add-transpose-api LLOBJ))
 			(get-cnt       (lambda (x) (LLOBJ GET-COUNT x)))
+			(get-pr-cnt    (lambda (l r) (get-cnt (LLOBJ 'get-pair l r))))
 			(left-support  (lambda (x) (support-obj LEFT-SUPPORT x)))
 			(right-support (lambda (x) (support-obj RIGHT-SUPPORT x)))
 			(left-count    (lambda (x) (support-obj LEFT-COUNT x)))
@@ -243,55 +244,42 @@
 		; Return a list of all pairs (x,y) for y == ITEM for which
 		; sum_x N(x,*) N(x,y) > 0.
 		(define (get-mtm-support-set ITEM)
-			(filter (lambda (star)
-				(< 0 (* (right-count (LLOBJ 'left-element star)) (get-cnt star))))
-			(star-obj 'left-stars ITEM)))
+			(filter (lambda (ldual)
+				(< 0 (* (right-count ldual) (get-pr-cnt ldual ITEM))))
+			(star-obj 'left-duals ITEM)))
 
 		; Same as above, but on the right.
 		(define (get-mmt-support-set ITEM)
-			(filter (lambda (star)
-				(< 0 (* (left-count (LLOBJ 'right-element star)) (get-cnt star))))
-			(star-obj 'right-stars ITEM)))
+			(filter (lambda (rdual)
+				(< 0 (* (left-count rdual) (get-pr-cnt ITEM rdual))))
+			(star-obj 'right-duals ITEM)))
 
 		; -------------
 		; Return how many non-zero items are in the list.
 		; Identical to (length (get-mmt-support-set ITEM))
 		(define (sum-mmt-support ITEM)
-			(fold (lambda (star sum)
-				(if (< 0 (* (left-count (LLOBJ 'right-element star))
-						(get-cnt star))) (+ sum 1) sum)) 0
-				(star-obj 'right-stars ITEM)))
+			(fold (lambda (rdual sum)
+				(if (< 0 (* (left-count rdual)
+						(get-pr-cnt ITEM rdual))) (+ sum 1) sum)) 0
+				(star-obj 'right-duals ITEM)))
 
 		(define (sum-mtm-support ITEM)
-			(fold (lambda (star sum)
-				(if (< 0 (* (right-count (LLOBJ 'left-element star))
-						(get-cnt star))) (+ sum 1) sum)) 0
-				(star-obj 'left-stars ITEM)))
+			(fold (lambda (ldual sum)
+				(if (< 0 (* (right-count ldual)
+						(get-pr-cnt ldual ITEM))) (+ sum 1) sum)) 0
+				(star-obj 'left-duals ITEM)))
 
 		; -------------
-		; Both sum-mmt-count and sum-mmt-count-slow compute the same
-		; thing. The first is much faster, because it loops only over
-		; the stars, of which there are few. However, it depends on a
-		; non-broken, funcional 'right-element method. The second is
-		; much much slower, because it loops over the entire basis,
-		; which is going to have non-zero counts very sparsly.
-		(define (sum-mmt-count-slow ITEM)
-			(fold (lambda (wild sum)
-				(+ sum (* (left-count wild)
-						(get-cnt (LLOBJ 'get-pair ITEM wild))))) 0
-				(star-obj 'right-basis)))
-
+		; Sum counts
 		(define (sum-mmt-count ITEM)
-			(fold (lambda (star sum)
-				(+ sum (* (left-count (LLOBJ 'right-element star))
-						(get-cnt star)))) 0
-				(star-obj 'right-stars ITEM)))
+			(fold (lambda (rdual sum)
+				(+ sum (* (left-count rdual) (get-pr-cnt ITEM rdual)))) 0
+				(star-obj 'right-duals ITEM)))
 
 		(define (sum-mtm-count ITEM)
-			(fold (lambda (star sum)
-				(+ sum (* (right-count (LLOBJ 'left-element star))
-						(get-cnt star)))) 0
-				(star-obj 'left-stars ITEM)))
+			(fold (lambda (ldual sum)
+				(+ sum (* (right-count ldual) (get-pr-cnt ldual ITEM)))) 0
+				(star-obj 'left-duals ITEM)))
 
 		; -------------
 		; Compute grand-totals for the two matrix products.

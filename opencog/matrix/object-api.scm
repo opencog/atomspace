@@ -125,14 +125,6 @@
 ;     (define (make-pair L-ATOM R-ATOM)
 ;        (Evaluation (Predicate "foo") (List L-ATOM R-ATOM)))
 ;
-;     ; Return the left member of the pair. Given the pair-atom,
-;     ; locate the left-side atom.
-;     (define (get-left-element PAIR)
-;        (gadr PAIR))
-;
-;     (define (get-right-element PAIR)
-;        (gddr PAIR))
-;
 ;     ; Return an atom to which column subtotals can be attached,
 ;     ; such as, for example, the subtotal `N(*,y)`. Thus, `y`
 ;     ; denotes a column, and the star is on the left (the star
@@ -181,8 +173,6 @@
 ;              ((get-pair) get-pair)
 ;              ((get-count) get-count)
 ;              ((make-pair) make-pair)
-;              ((left-element) get-left-element)
-;              ((right-element) get-right-element)
 ;              ((left-wildcard) get-left-wildcard)
 ;              ((right-wildcard) get-right-wildcard)
 ;              ((wild-wild) get-wild-wild)
@@ -227,6 +217,15 @@
 
   'right-basis-size - Likewise.
 
+  'left-duals COL - Return the set of rows for which the pair
+      (row, COL) exists in the atomspace.  That is, return the set
+          { x | (x,COL) exists in the atomspace }
+      The returned rows will all be of type (LLOBJ 'left-type).
+      The input COL atom must be of type (LLOBJ 'right-type).
+      This does NOT verify that these pairs have a non-zero count.
+
+  'right-duals ROW - Likewise, but returns the columns for (ROW, *).
+
   'left-stars COL - Return the set of pairs (row, column) for
       which the column is COL, and the pair exists in the atomspace.
       That is, return the set
@@ -250,22 +249,25 @@
 			(r-size 0)
 
 			; Caches for the left and right stars
-			(l-hit (make-atomic-box '()))
-			(l-miss (make-atomic-box '()))
-			(r-hit (make-atomic-box '()))
-			(r-miss (make-atomic-box '()))
+			(star-l-hit (make-atomic-box '()))
+			(star-l-miss (make-atomic-box '()))
+			(star-r-hit (make-atomic-box '()))
+			(star-r-miss (make-atomic-box '()))
 
-#! ============ Alternate variant, not currently used.
+			; Caches for the left and right duals
+			(dual-l-hit (make-atomic-box '()))
+			(dual-l-miss (make-atomic-box '()))
+			(dual-r-hit (make-atomic-box '()))
+			(dual-r-miss (make-atomic-box '()))
+
+#! ============ Alternate variant, not currently used. See below.
 			; Temporary atomspaces
-			(l-asp (make-fluid))
-			(r-asp (make-fluid))
+			(fluasp (make-fluid))
 =============== !#
 
 			; Temporary atomspaces, non-fluid style.
-			(l-mtx (make-mutex))
-			(r-mtx (make-mutex))
-			(l-ase (cog-new-atomspace (cog-atomspace)))
-			(r-ase (cog-new-atomspace (cog-atomspace)))
+			(mtx (make-mutex))
+			(aspace (cog-new-atomspace (cog-atomspace)))
 
 			(pair-type (LLOBJ 'pair-type))
 			(left-type (LLOBJ 'left-type))
@@ -309,127 +311,111 @@
 			(if (eq? 0 r-size) (set! r-size (length (get-right-basis))))
 			r-size)
 
-		;-------------------------------------------
-		; Return a list of all pairs with the ITEM on the right side,
-		; and an object of type (LLOBJ 'left-type) on the left.
-		; The point of this function is to find and return the complete
-		; wild-card set (*,y) = {(x,y) | there-exists pair (x,y) for some x}
-		; The pairs are Links of type 'pair-type, as would be returned by
-		; 'get-pair. That is, this returns a list of atoms of the form
+		; -------------------------------------------------------
+		; Return default, only if LLOBJ does not provide symbol
+		(define (overload symbol default)
+			(define fp (LLOBJ 'provides symbol))
+			(if fp fp default))
+
+		; Define default patterns, that, when executed, return the stars.
+		; The LLOBJ can provide custom versions of this.
+		(define (default-left-star-pat ITEM)
+			(let* ((var (Variable "$api-left-star"))
+					(term (LLOBJ 'make-pair var ITEM)))
+				(Bind (TypedVariable var (Type left-type))
+					term term)))
+
+		(define (default-right-star-pat ITEM)
+			(let* ((var (Variable "$api-right-star"))
+					(term (LLOBJ 'make-pair ITEM var)))
+				(Bind (TypedVariable var (Type right-type))
+					term term)))
+
+		(define f-left-star-pat
+			(overload 'left-star-pattern default-left-star-pat))
+		(define f-right-star-pat
+			(overload 'right-star-pattern default-right-star-pat))
+
+		; -------------------------------------------------------
+		; Same as above, but for the duals, not the stars.
+		; The pattern is almost the same, except that this time,
+		; we return basis elements.
 		;
-		;    (LLOBJ 'make-pair $variable ITEM)
+		; Define default patterns, that, when executed, return the duals.
+		; The LLOBJ can provide custom versions of this.
+		(define (default-left-dual-pat ITEM)
+			(let* ((var (Variable "$api-left-dual"))
+					(term (LLOBJ 'make-pair var ITEM)))
+				(Get (TypedVariable var (Type left-type)) term)))
+
+		(define (default-right-dual-pat ITEM)
+			(let* ((var (Variable "$api-right-dual"))
+					(term (LLOBJ 'make-pair ITEM var)))
+				(Get (TypedVariable var (Type right-type)) term)))
+
+		(define f-left-dual-pat
+			(overload 'left-dual-pattern default-left-dual-pat))
+		(define f-right-dual-pat
+			(overload 'right-dual-pattern default-right-dual-pat))
+
+		; -------------------------------------------------------
 		;
-		; ITEM should be an atom of (LLOBJ 'right-type); if it isn't,
-		; the the behavior is undefined.
+		; Use RAII-style code, so that if the user hits ctrl-C
+		; while we are in this, we will catch that and set the
+		; atomspace back to normal.
 		;
-		(define (raii-get-stars VARNAME TYPE flip ITEM ASPACE)
-			(define old-as (cog-set-atomspace! ASPACE))
-			; Use RAII-style code, so that if the user hits ctrl-C
-			; while we are in this, we will catch that and set the
-			; atomspace back to normal.
-			; XXX there is a small race here, between the setting
-			; of the atomspace, and the invocation of the
-			; throw-handler, but I don't care.
-			;
-			; Note also: the VariableNode and the BindLink need
-			; to be created in the temp atomspace, else hell
-			; breaks loose.
-			(with-throw-handler #t
-				(lambda ()
-					(let* ((uniqvar (VariableNode VARNAME))
-							(term
-								(if flip
-									(LLOBJ 'make-pair ITEM uniqvar)
-									(LLOBJ 'make-pair uniqvar ITEM)))
-							(stars
-								(cog-outgoing-set
-									(cog-execute! (Bind (TypedVariable
-											uniqvar (Type (symbol->string TYPE)))
-											term term)))))
-					(cog-atomspace-clear ASPACE)
-					(cog-set-atomspace! old-as)
-					stars))
-				(lambda (key . args)
-					(cog-atomspace-clear ASPACE)
-					(cog-set-atomspace! old-as)
-				'())))
-
-		; Use an RAII style throw handler so that the lock is unlocked,
-		; if the user hits ctrl-C in the middle of things. This might
-		; be overkill, because usually this class will nto be reused ...
-		; at least not usually, when running in automatic.
-		; Note that there is a small race, between the getting of the
-		; lock, and the invocation of the throw handler. I don't care.
-		(define (lock-get-stars LOCK VARNAME TYPE flip ITEM ASPACE)
-			(lock-mutex LOCK)
-			(with-throw-handler #t
-				(lambda ()
-					(define stars (raii-get-stars VARNAME TYPE flip ITEM ASPACE))
-					(unlock-mutex LOCK)
-					stars)
-				(lambda (key . args)
-					(unlock-mutex LOCK)
-					'())))
-
-		(define (do-get-left-stars ITEM)
-			(lock-get-stars l-mtx "$api-left-star" left-type #f ITEM l-ase))
-
-		; Same as above, but on the right.
-		(define (do-get-right-stars ITEM)
-			(lock-get-stars r-mtx "$api-right-star" right-type #t ITEM r-ase))
-
-#! ============ Alternate variant, not currently used.
-Yes, this actually works -- its just not being used.
-		; Use a temporary atomspace for performing the query.
-		; This is thread-safe, but quite slow when threads are
-		; being constantly created/destroyed, as it results in
+		; XXX there is a small race here, between the setting
+		; of the atomspace, and the invocation of the
+		; throw-handler, but I don't care.
+		;
+		; To make this multi-threaded, we would use an atomspace
+		; per fluid. Unfortunately, this is quite slow when threads
+		; are being constantly created/destroyed, as it results in
 		; the temp atomspace being created/destroyed, which is
 		; just inefficient and slow, in the end.
-		(define (tmp-as-do-get-left-stars ITEM)
-			(let* ((tmp-asp
-						(let ((asp (fluid-ref l-asp)))
-							(if asp asp
-								(let ((nasp (cog-new-atomspace (cog-atomspace))))
-									(fluid-set! l-asp nasp)
-									nasp))))
-					(oldas (cog-set-atomspace! tmp-asp))
-					(uniqvar (VariableNode "$obj-api-left-star"))
-					(term (LLOBJ 'make-pair uniqvar ITEM))
-					(setlnk (cog-execute! (Bind (TypedVariable
-						uniqvar (Type (symbol->string left-type)))
-						term term)))
-					(stars (cog-outgoing-set setlnk))
-				)
-				(cog-atomspace-clear tmp-asp)
-				(cog-set-atomspace! oldas)
-				stars))
+		;
+		; (let* ((tmp-asp
+		;			(let ((asp (fluid-ref fluasp)))
+		;				(if asp asp
+		;					(let ((nasp (cog-new-atomspace (cog-atomspace))))
+		;						(fluid-set! fluasp nasp)
+		;						nasp))))
+		;
+		(define (raii-get-pattern FUNC ITEM)
+			(define old-as (cog-set-atomspace! aspace))
+			(with-throw-handler #t
+				(lambda ()
+					; execute returns a SetLink. We don't want that.
+					(let* ((setlnk (cog-execute! (FUNC ITEM)))
+							(stars (cog-outgoing-set setlnk)))
+						(cog-atomspace-clear aspace)
+						(cog-set-atomspace! old-as)
+						stars))
+				(lambda (key . args)
+					(cog-atomspace-clear aspace)
+					(cog-set-atomspace! old-as)
+					'())))
 
-		; Same as above, but on the right.
-		(define (tmp-as-do-get-right-stars ITEM)
-			(let* ((tmp-asp
-						(let ((asp (fluid-ref r-asp)))
-							(if asp asp
-								(let ((nasp (cog-new-atomspace (cog-atomspace))))
-									(fluid-set! r-asp nasp)
-									nasp))))
-					(oldas (cog-set-atomspace! tmp-asp))
-					(uniqvar (VariableNode "$obj-api-right-star"))
-					(term (LLOBJ 'make-pair ITEM uniqvar))
-					(setlnk (cog-execute! (Bind (TypedVariable
-						uniqvar (Type (symbol->string right-type)))
-						term term)))
-					(stars (cog-outgoing-set setlnk))
-				)
-				(cog-atomspace-clear tmp-asp)
-				(cog-set-atomspace! oldas)
-				stars))
-============= !#
+		; This is a wrapper to serialize access to a temp atomspace,
+		; where the query is actually performed.
+		(define (run-query FUNC ITEM)
+			(lock-mutex mtx)
+			(with-throw-handler #t
+				(lambda ()
+					(define stars (raii-get-pattern FUNC ITEM))
+					(unlock-mutex mtx)
+					stars)
+				(lambda (key . args)
+					(unlock-mutex mtx)
+					'())))
 
+		; -------------------------------------------------------
+		;
 		; Cache the most recent two values.  This should offer a
 		; significant performance enhancement for computing cosines
 		; of vectors, as usually, one of the cosine-pair is constant
 		; (and will be a cache-hit) while the other always misses.
-		(define (do-get-stars A-HIT A-MISS GETTER ITEM)
+		(define (do-run-query A-HIT A-MISS GETTER ITEM)
 			(define hit (atomic-box-ref A-HIT))
 			(if (null? hit)
 				; If hit is empty, then set it, and return the value
@@ -453,24 +439,39 @@ Yes, this actually works -- its just not being used.
 								(atomic-box-set! A-MISS (list ITEM stars))
 								stars))))))
 
+		; Apply caching to the stars
 		(define (get-left-stars ITEM)
-			(do-get-stars l-hit l-miss do-get-left-stars ITEM))
+			(do-run-query star-l-hit star-l-miss
+				(lambda (itm) (run-query f-left-star-pat itm)) ITEM))
 
+		; Same as above, but on the right.
 		(define (get-right-stars ITEM)
-			(do-get-stars r-hit r-miss do-get-right-stars ITEM))
+			(do-run-query star-r-hit star-r-miss
+				(lambda (itm) (run-query f-right-star-pat itm)) ITEM))
+
+		; Apply caching to the duals
+		(define (get-left-duals ITEM)
+			(do-run-query dual-l-hit dual-l-miss
+				(lambda (itm) (run-query f-left-dual-pat itm)) ITEM))
+
+		; Same as above, but on the right.
+		(define (get-right-duals ITEM)
+			(do-run-query dual-r-hit dual-r-miss
+				(lambda (itm) (run-query f-right-dual-pat itm)) ITEM))
 
 		; Invalidate the caches. This is needed, when atoms get deleted.
 		(define (clobber)
-			(atomic-box-set! l-hit '())
-			(atomic-box-set! l-miss '())
-			(atomic-box-set! r-hit '())
-			(atomic-box-set! r-miss '()))
+			(atomic-box-set! star-l-hit '())
+			(atomic-box-set! star-l-miss '())
+			(atomic-box-set! star-r-hit '())
+			(atomic-box-set! star-r-miss '())
+
+			(atomic-box-set! dual-l-hit '())
+			(atomic-box-set! dual-l-miss '())
+			(atomic-box-set! dual-r-hit '())
+			(atomic-box-set! dual-r-miss '()))
 
 		;-------------------------------------------
-		; Return default, only if LLOBJ does not provide symbol
-		(define (overload symbol default)
-			(define fp (LLOBJ 'provides symbol))
-			(if fp fp default))
 
 		; Provide default methods, but only if the low-level object
 		; does not already provide them. In practice, this is used in
@@ -484,6 +485,8 @@ Yes, this actually works -- its just not being used.
 				(f-right-basis-size (overload 'right-basis-size get-right-size))
 				(f-left-stars (overload 'left-stars get-left-stars))
 				(f-right-stars (overload 'right-stars get-right-stars))
+				(f-left-duals (overload 'left-duals get-left-duals))
+				(f-right-duals (overload 'right-duals get-right-duals))
 				(f-clobber (overload 'clobber clobber)))
 
 			;-------------------------------------------
@@ -494,12 +497,14 @@ Yes, this actually works -- its just not being used.
 			; by advertising that .. we hold caches.
 			(define (provides meth)
 				(case meth
-					((left-stars)       f-left-stars)
-					((right-stars)      f-right-stars)
 					((left-basis)       f-left-basis)
 					((right-basis)      f-right-basis)
 					((left-basis-size)  f-left-basis-size)
 					((right-basis-size) f-right-basis-size)
+					((left-stars)       f-left-stars)
+					((right-stars)      f-right-stars)
+					((left-duals)       f-left-duals)
+					((right-duals)      f-right-duals)
 					((clobber)          f-clobber)
 					(else               (LLOBJ 'provides meth))))
 
@@ -513,6 +518,8 @@ Yes, this actually works -- its just not being used.
 					((right-basis-size) (f-right-basis-size))
 					((left-stars)       (apply f-left-stars args))
 					((right-stars)      (apply f-right-stars args))
+					((left-duals)       (apply f-left-duals args))
+					((right-duals)      (apply f-right-duals args))
 					((clobber)          (f-clobber))
 					((provides)         (apply provides args))
 					(else               (apply LLOBJ (cons message args))))

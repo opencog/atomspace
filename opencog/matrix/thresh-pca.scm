@@ -101,6 +101,10 @@
 			(make-afunc-cache (unit-fvec ELT-LIST)))
 
 		; --------------------
+		(define (get-pair-count LEFT RIGHT)
+			(define pare (llobj 'get-pair LEFT RIGHT))
+			(if (null? pare) 0 (llobj get-value pare)))
+
 		; Multiply matrix on the left by FVEC.  That is, return the
 		; function
 		;     result(y) = sum_x p(x,y) FVEC(x)
@@ -108,34 +112,22 @@
 		; function with an arguement to force the computation to
 		; happen.  Note that this is effectively the transpose of P.
 		(define (left-mult LEFT-FVEC)
-
-			; We are going to cache it, because we know we will hit it hard.
-			(define fvec (make-afunc-cache LEFT-FVEC))
 			(lambda (ITEM)
 				(fold
-					(lambda (PAIR sum)
-						(define vecval (fvec (LLOBJ 'left-element PAIR)))
-						; Avoid fetching the pair value if its
-						; multiply-by-zero
-						(if (eqv? 0 vecval)
-							sum
-							(+ sum (* (llobj get-value PAIR) vecval))))
+					(lambda (dual sum)
+						(+ sum (* (get-pair-count dual ITEM) (LEFT-FVEC dual))))
 					0
-					(star-obj 'left-stars ITEM))))
+					(star-obj 'left-duals ITEM))))
 
 		; Just like above, but returns the function
 		;     result(x) = sum_y p(x,y) FVEC(y)
 		(define (right-mult RIGHT-FVEC)
-			(define fvec (make-afunc-cache RIGHT-FVEC))
 			(lambda (ITEM)
 				(fold
-					(lambda (PAIR sum)
-						(define vecval (fvec (LLOBJ 'right-element PAIR)))
-						(if (eqv? 0 vecval)
-							sum
-							(+ sum (* (llobj get-value PAIR) vecval))))
+					(lambda (dual sum)
+						(+ sum (* (get-pair-count ITEM dual) (RIGHT-FVEC dual))))
 					0
-					(star-obj 'right-stars ITEM))))
+					(star-obj 'right-duals ITEM))))
 
 		; --------------------
 		; Compute the normalization of the vector; that is, compute
@@ -291,6 +283,9 @@
 		(define get-right-length (make-afunc-cache do-get-right-length))
 
 		; --------------------
+		; XXX FIXME rewrite this to eliminate the use of 'right-element
+		; The problem is that not all objects can support 'right-element
+		; This is remedeied by using 'right-duals instead of 'right-stars
 		(define (do-left-unit PAIR)
 			(define cnt (LLOBJ GET-CNT PAIR))
 			(define len (get-left-length (LLOBJ 'right-element PAIR)))
