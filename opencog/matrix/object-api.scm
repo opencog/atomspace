@@ -316,6 +316,31 @@
 			r-size)
 
 		; -------------------------------------------------------
+		; Return default, only if LLOBJ does not provide symbol
+		(define (overload symbol default)
+			(define fp (LLOBJ 'provides symbol))
+			(if fp fp default))
+
+		; Define default patterns, that, when executed, return the stars.
+		; The LLOBJ can provide custom versions of this.
+		(define (default-left-star-pat ITEM)
+			(let* ((var (Variable "$api-left-star"))
+					(term (LLOBJ 'make-pair var ITEM)))
+				(Bind (TypedVariable var (Type left-type))
+					term term)))
+
+		(define (default-right-star-pat ITEM)
+			(let* ((var (Variable "$api-right-star"))
+					(term (LLOBJ 'make-pair ITEM var)))
+				(Bind (TypedVariable var (Type right-type))
+					term term)))
+
+		(define f-left-star-pat
+			(overload 'left-star-pattern default-left-star-pat))
+		(define f-right-star-pat
+			(overload 'right-star-pattern default-right-star-pat))
+
+		; -------------------------------------------------------
 		;
 		; Use RAII-style code, so that if the user hits ctrl-C
 		; while we are in this, we will catch that and set the
@@ -368,27 +393,6 @@
 
 		; -------------------------------------------------------
 		;
-		; Define patterns, that, when executed, return the stars.
-		(define (left-star-pat ITEM)
-			(let* ((var (Variable "$api-left-star"))
-					(term (LLOBJ 'make-pair var ITEM)))
-				(Bind (TypedVariable var (Type left-type))
-					term term)))
-
-		(define (right-star-pat ITEM)
-			(let* ((var (Variable "$api-right-star"))
-					(term (LLOBJ 'make-pair ITEM var)))
-				(Bind (TypedVariable var (Type right-type))
-					term term)))
-
-		; Actually get the patterns
-		(define (do-get-left-stars ITEM)
-			(get-stars left-star-pat ITEM))
-
-		; Same as above, but on the right.
-		(define (do-get-right-stars ITEM)
-			(get-stars right-star-pat ITEM))
-
 		; Cache the most recent two values.  This should offer a
 		; significant performance enhancement for computing cosines
 		; of vectors, as usually, one of the cosine-pair is constant
@@ -417,11 +421,15 @@
 								(atomic-box-set! A-MISS (list ITEM stars))
 								stars))))))
 
+		; Apply caching to the stars
 		(define (get-left-stars ITEM)
-			(do-get-stars l-hit l-miss do-get-left-stars ITEM))
+			(do-get-stars l-hit l-miss
+				(lambda (itm) (get-stars f-left-star-pat itm)) ITEM))
 
+		; Same as above, but on the right.
 		(define (get-right-stars ITEM)
-			(do-get-stars r-hit r-miss do-get-right-stars ITEM))
+			(do-get-stars r-hit r-miss
+				(lambda (itm) (get-stars f-right-star-pat itm)) ITEM))
 
 		; Invalidate the caches. This is needed, when atoms get deleted.
 		(define (clobber)
@@ -431,10 +439,6 @@
 			(atomic-box-set! r-miss '()))
 
 		;-------------------------------------------
-		; Return default, only if LLOBJ does not provide symbol
-		(define (overload symbol default)
-			(define fp (LLOBJ 'provides symbol))
-			(if fp fp default))
 
 		; Provide default methods, but only if the low-level object
 		; does not already provide them. In practice, this is used in
