@@ -1,7 +1,7 @@
 /*
  * tests/matrix/VectorAPIUTest.cxxtest
  *
- * Most basic, simplest API test, verifies that core matrix functions work.
+ * Verifies that assorted matrix functions work as claimed.
  * Copyright (C) 2018 Linas Vepstas <linasvepstas@gmail.com>
  * All Rights Reserved
  *
@@ -55,8 +55,9 @@ class VectorAPIUTest :  public CxxTest::TestSuite
 	}
 
 	void setUp(void);
-
 	void tearDown(void);
+
+	double mmt_trop(std::string, std::string);
 
 	void test_basic(void);
 	void test_marginals(void);
@@ -64,6 +65,7 @@ class VectorAPIUTest :  public CxxTest::TestSuite
 	void xtest_dynamic(void);
 	void test_fold(void);
 	void test_transpose(void);
+	void test_symmetric_mi(void);
 };
 
 /*
@@ -558,6 +560,50 @@ void VectorAPIUTest::test_transpose(void)
 
 	num = eval->eval("(tapi 'total-mtm-count)");
 	CHKFLT("total-mtm ", num, totmtm);
+
+	logger().debug("END TEST: %s", __FUNCTION__);
+}
+
+double VectorAPIUTest::mmt_trop(std::string lef, std::string rig)
+{
+	std::string num;
+	num = eval->eval("(cosi 'right-product (Word \""
+		+ lef + "\") (Word \"" + rig + "\"))");
+	double prod = atof(num.c_str());
+
+	num = eval->eval("(tcom 'mmt-count (Word \"" + lef + "\"))");
+	double margl = atof(num.c_str());
+
+	num = eval->eval("(tcom 'mmt-count (Word \"" + rig + "\"))");
+	double margr = atof(num.c_str());
+
+	num = eval->eval("(tcom 'total-mmt-count)");
+	double tot = atof(num.c_str());
+
+	return log(prod * tot / (margl * margr));
+}
+
+// Make sure the symmetric-MI API works
+void VectorAPIUTest::test_symmetric_mi(void)
+{
+	logger().debug("BEGIN TEST: %s", __FUNCTION__);
+
+	std::string rc = eval->eval("(load-from-path \"tests/matrix/basic-data.scm\")");
+	printf("Load of data >>>%s", rc.c_str());
+	CHKERR;
+
+	rc = eval->eval("(pcmp 'cache-all)");
+	printf("Support compute >>>%s", rc.c_str());
+	CHKERR;
+
+	rc = eval->eval("(tcom 'cache-all)");
+	printf("Transpose compute >>>%s", rc.c_str());
+	CHKERR;
+
+	std::string num;
+	num = eval->eval("(symc 'mmt-fmi (Word \"chicken\") (Word \"dog"))");
+	double chidog = mmt_trop("chicken", "dog");
+	CHKFLT("mmt chicken ", num, chidog);
 
 	logger().debug("END TEST: %s", __FUNCTION__);
 }
