@@ -4,7 +4,7 @@ cdef class ProtoAtom:
     """C++ ProtoAtom object wrapper for Python clients"""
 
     @staticmethod
-    cdef ProtoAtom from_shared_ptr(cProtoAtomPtr shared_ptr):
+    cdef ProtoAtom from_cProtoAtomPtr(cProtoAtomPtr shared_ptr):
         """Factory method to construct ProtoAtom from C++ ProtoAtomPtr (see
         http://docs.cython.org/en/latest/src/userguide/extension_types.html#instantiation-from-existing-c-c-pointers
         for example)"""

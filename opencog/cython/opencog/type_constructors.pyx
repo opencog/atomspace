@@ -32,6 +32,6 @@ cdef createValue(type, arg):
             result = createFloatValue(<double>arg)
     else:
         raise TypeError('Unexpected value type {}'.format(type))
-    return ProtoAtom.from_shared_ptr(result)
+    return ProtoAtom.from_cProtoAtomPtr(result)
 
 include "opencog/atoms/proto/core_types.pyx"
