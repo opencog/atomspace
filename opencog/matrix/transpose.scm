@@ -233,7 +233,7 @@
 			(support-obj   (add-support-api LLOBJ))
 			(api-obj       (add-transpose-api LLOBJ))
 			(get-cnt       (lambda (x) (LLOBJ GET-COUNT x)))
-			(get-pr-cnt    (lambda (l r) (get-cnt (LLOBJ get-pair l r))))
+			(get-pr-cnt    (lambda (l r) (get-cnt (LLOBJ 'get-pair l r))))
 			(left-support  (lambda (x) (support-obj LEFT-SUPPORT x)))
 			(right-support (lambda (x) (support-obj RIGHT-SUPPORT x)))
 			(left-count    (lambda (x) (support-obj LEFT-COUNT x)))
