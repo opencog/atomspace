@@ -580,7 +580,7 @@ double VectorAPIUTest::mmt_trop(std::string lef, std::string rig)
 	num = eval->eval("(tcom 'total-mmt-count)");
 	double tot = atof(num.c_str());
 
-	return log(prod * tot / (margl * margr));
+	return log(prod * tot / (margl * margr)) / log(2.0);
 }
 
 // Make sure the symmetric-MI API works
@@ -603,6 +603,7 @@ void VectorAPIUTest::test_symmetric_mi(void)
 	std::string num;
 	num = eval->eval("(symc 'mmt-fmi (Word \"chicken\") (Word \"dog\"))");
 	double chidog = mmt_trop("chicken", "dog");
+	chidog = log( 174 * 16 / (53.0 * 77.0)) / log(2.0);
 	CHKFLT("mmt chicken ", num, chidog);
 
 	logger().debug("END TEST: %s", __FUNCTION__);
