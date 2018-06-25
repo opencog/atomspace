@@ -271,10 +271,8 @@
 =============== !#
 
 			; Temporary atomspaces, non-fluid style.
-			(l-mtx (make-mutex))
-			(r-mtx (make-mutex))
-			(l-ase (cog-new-atomspace (cog-atomspace)))
-			(r-ase (cog-new-atomspace (cog-atomspace)))
+			(mtx (make-mutex))
+			(aspace (cog-new-atomspace (cog-atomspace)))
 
 			(pair-type (LLOBJ 'pair-type))
 			(left-type (LLOBJ 'left-type))
@@ -331,8 +329,8 @@
 		; ITEM should be an atom of (LLOBJ 'right-type); if it isn't,
 		; the the behavior is undefined.
 		;
-		(define (raii-get-stars VARNAME TYPE flip ITEM ASPACE)
-			(define old-as (cog-set-atomspace! ASPACE))
+		(define (raii-get-stars VARNAME TYPE flip ITEM)
+			(define old-as (cog-set-atomspace! aspace))
 			; Use RAII-style code, so that if the user hits ctrl-C
 			; while we are in this, we will catch that and set the
 			; atomspace back to normal.
@@ -355,11 +353,11 @@
 									(cog-execute! (Bind (TypedVariable
 											uniqvar (Type (symbol->string TYPE)))
 											term term)))))
-					(cog-atomspace-clear ASPACE)
+					(cog-atomspace-clear aspace)
 					(cog-set-atomspace! old-as)
 					stars))
 				(lambda (key . args)
-					(cog-atomspace-clear ASPACE)
+					(cog-atomspace-clear aspace)
 					(cog-set-atomspace! old-as)
 				'())))
 
@@ -369,23 +367,23 @@
 		; at least not usually, when running in automatic.
 		; Note that there is a small race, between the getting of the
 		; lock, and the invocation of the throw handler. I don't care.
-		(define (lock-get-stars LOCK VARNAME TYPE flip ITEM ASPACE)
-			(lock-mutex LOCK)
+		(define (lock-get-stars VARNAME TYPE flip ITEM)
+			(lock-mutex mtx)
 			(with-throw-handler #t
 				(lambda ()
-					(define stars (raii-get-stars VARNAME TYPE flip ITEM ASPACE))
-					(unlock-mutex LOCK)
+					(define stars (raii-get-stars VARNAME TYPE flip ITEM aspace))
+					(unlock-mutex mtx)
 					stars)
 				(lambda (key . args)
-					(unlock-mutex LOCK)
+					(unlock-mutex mtx)
 					'())))
 
 		(define (do-get-left-stars ITEM)
-			(lock-get-stars l-mtx "$api-left-star" left-type #f ITEM l-ase))
+			(lock-get-stars "$api-left-star" left-type #f ITEM))
 
 		; Same as above, but on the right.
 		(define (do-get-right-stars ITEM)
-			(lock-get-stars r-mtx "$api-right-star" right-type #t ITEM r-ase))
+			(lock-get-stars "$api-right-star" right-type #t ITEM))
 
 #! ============ Alternate variant, not currently used.
 Yes, this actually works -- its just not being used.
