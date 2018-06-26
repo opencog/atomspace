@@ -132,3 +132,22 @@
 )
 
 ; ---------------------------------------------------------------------
+
+(define-public (atoms-subtract LIST-A LIST-B)
+"
+  atom-subtract - 
+"
+	(define cache (make-hash-table))
+	(define (atom-hash ATOM SZ) (modulo (cog-handle ATOM) SZ))
+	(define (atom-assoc ATOM ALIST)
+		(find (lambda (pr) (equal? ATOM (car pr))) ALIST))
+
+	(for-each (lambda (ITEM)
+		(hashx-set! atom-hash atom-assoc cache ITEM #f))
+		LIST-B)
+	(remove (lambda (ATOM)
+		(hashx-ref atom-hash atom-assoc cache ATOM))
+		LIST-A)
+)
+
+; ---------------------------------------------------------------------
