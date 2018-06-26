@@ -75,7 +75,7 @@ CREATE INDEX incoming_idx on Atoms USING GIN(outgoing);
 -- However, neither MySQL nor SQLite3 support arrays, and so maybe
 -- this could be useful for a port to those DB's.
 --
--- Table of the edges of the Levi craph corresponding
+-- Table of the edges of the Levi graph corresponding
 -- to the hypergraph. An edge is a (src,dst) pair. The
 -- pair, understood as going src->dst, for a fixed src,
 -- is the set of outgoing edges of the atom. Understood
