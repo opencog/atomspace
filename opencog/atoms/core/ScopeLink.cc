@@ -255,9 +255,14 @@ ContentHash ScopeLink::compute_hash() const
 	}
 	fnv1a_hash(hsh, vth);
 
+	const Variables & vars = this->get_variables();
+	for(const auto& pr: vars._glob_intervalmap){
+		vth += pr.first->get_hash();
+	}
+	fnv1a_hash(hsh, vth);
+
 	Arity vardecl_offset = _vardecl != Handle::UNDEFINED;
 	Arity n_scoped_terms = get_arity() - vardecl_offset;
-	hsh += get_arity();
 	UnorderedHandleSet hidden;
 	for (Arity i = 0; i < n_scoped_terms; ++i)
 	{
