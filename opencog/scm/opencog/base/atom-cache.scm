@@ -98,9 +98,11 @@
 
 (define-public (delete-dup-atoms ATOM-LIST)
 "
-  delete-dup-atoms - Return ATOM-LIST, with duplicate atoms deleted.
+  delete-dup-atoms ATOM-LIST - Remove duplicate atoms from list.
 
-  This will usually be faster than calling delete-duplicates! whenever
+  This does the same thing as `delete-duplicates`, but is faster.
+
+  This will usually be faster than calling `delete-duplicates` whenever
   the ATOM-LIST is large (probably when its longer than 10 atoms long??)
 "
 
@@ -113,11 +115,11 @@
 
 (define-public (remove-duplicate-atoms ATOM-LIST)
 "
-  remove-duplicate-atoms - Return ATOM-LIST, with duplicate atoms deleted.
+  remove-duplicate-atoms ATOM-LIST - Remove duplicate atoms from list.
 
   This does the same thing as `delete-dup-atoms` but might be faster(?)
 
-  This will usually be faster than calling delete-duplicates! whenever
+  This will usually be faster than calling `delete-duplicates` whenever
   the ATOM-LIST is large (probably when its longer than 10 atoms long??)
 "
 
@@ -135,7 +137,12 @@
 
 (define-public (atoms-subtract LIST-A LIST-B)
 "
-  atom-subtract - 
+  atoms-subtract LIST-A LIST-B
+
+  Return a list of all atoms in LIST-A that are not in LIST-B.
+
+  This does the same thing as `lset-difference` but will usually be
+  much much faster, if either list is more than ten atoms long.
 "
 	(define cache (make-hash-table))
 	(define (atom-hash ATOM SZ) (modulo (cog-handle ATOM) SZ))
@@ -146,7 +153,7 @@
 		(hashx-set! atom-hash atom-assoc cache ITEM #f))
 		LIST-B)
 	(remove (lambda (ATOM)
-		(hashx-ref atom-hash atom-assoc cache ATOM))
+		(hashx-get-handle atom-hash atom-assoc cache ATOM))
 		LIST-A)
 )
 
