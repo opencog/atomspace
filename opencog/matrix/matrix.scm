@@ -15,6 +15,7 @@
 (load "matrix/fold-api.scm")
 (load "matrix/loop-api.scm")
 (load "matrix/bin-count.scm")
+(load "matrix/symmetric-mi.scm")
 (load "matrix/cosine.scm")
 (load "matrix/entropy.scm")
 (load "matrix/compute-mi.scm")

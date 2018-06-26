@@ -1,7 +1,7 @@
 /*
  * tests/matrix/VectorAPIUTest.cxxtest
  *
- * Most basic, simplest API test, verifies that core matrix functions work.
+ * Verifies that assorted matrix functions work as claimed.
  * Copyright (C) 2018 Linas Vepstas <linasvepstas@gmail.com>
  * All Rights Reserved
  *
@@ -55,8 +55,10 @@ class VectorAPIUTest :  public CxxTest::TestSuite
 	}
 
 	void setUp(void);
-
 	void tearDown(void);
+
+	double mmt_trop(std::string, std::string);
+	double mtm_trop(std::string, std::string);
 
 	void test_basic(void);
 	void test_marginals(void);
@@ -64,6 +66,7 @@ class VectorAPIUTest :  public CxxTest::TestSuite
 	void xtest_dynamic(void);
 	void test_fold(void);
 	void test_transpose(void);
+	void test_symmetric_mi(void);
 };
 
 /*
@@ -103,14 +106,14 @@ void VectorAPIUTest::tearDown(void)
 #define CHKPRT(X) printf("Got >>%s<<\n", X.c_str()); CHKERR;
 
 #define CHKNUM(MSG,X,VAL) \
-	printf("Got %s=%s", MSG, X.c_str()); \
+	printf("Expect %s=%d got=%s", MSG, VAL, X.c_str()); \
 	CHKERR; \
 	TSM_ASSERT_EQUALS(MSG, atoi(X.c_str()), VAL);
 
 #define EPS 1.0e-9
 
 #define CHKFLT(MSG,X,VAL) \
-	printf("Got %s=%s", MSG, X.c_str()); \
+	printf("Expect %s=%f got=%s", MSG, VAL, X.c_str()); \
 	CHKERR; \
 	TSM_ASSERT_LESS_THAN(MSG, atof(X.c_str()), VAL+EPS); \
 	TSM_ASSERT_LESS_THAN(MSG, VAL-EPS, atof(X.c_str()));
@@ -558,6 +561,128 @@ void VectorAPIUTest::test_transpose(void)
 
 	num = eval->eval("(tapi 'total-mtm-count)");
 	CHKFLT("total-mtm ", num, totmtm);
+
+	logger().debug("END TEST: %s", __FUNCTION__);
+}
+
+double VectorAPIUTest::mmt_trop(std::string lef, std::string rig)
+{
+	std::string num;
+	num = eval->eval("(cosi 'right-product (Word \""
+		+ lef + "\") (Word \"" + rig + "\"))");
+	double prod = atof(num.c_str());
+
+	num = eval->eval("(tcom 'mmt-count (Word \"" + lef + "\"))");
+	double margl = atof(num.c_str());
+
+	num = eval->eval("(tcom 'mmt-count (Word \"" + rig + "\"))");
+	double margr = atof(num.c_str());
+
+	num = eval->eval("(tcom 'total-mmt-count)");
+	double tot = atof(num.c_str());
+
+	return log(prod * tot / (margl * margr)) / log(2.0);
+}
+
+double VectorAPIUTest::mtm_trop(std::string lef, std::string rig)
+{
+	std::string num;
+	num = eval->eval("(cosi 'left-product (Word \""
+		+ lef + "\") (Word \"" + rig + "\"))");
+	double prod = atof(num.c_str());
+
+	num = eval->eval("(tcom 'mtm-count (Word \"" + lef + "\"))");
+	double margl = atof(num.c_str());
+
+	num = eval->eval("(tcom 'mtm-count (Word \"" + rig + "\"))");
+	double margr = atof(num.c_str());
+
+	num = eval->eval("(tcom 'total-mtm-count)");
+	double tot = atof(num.c_str());
+
+	return log(prod * tot / (margl * margr)) / log(2.0);
+}
+
+// Make sure the symmetric-MI API works
+void VectorAPIUTest::test_symmetric_mi(void)
+{
+	logger().debug("BEGIN TEST: %s", __FUNCTION__);
+
+	std::string rc = eval->eval("(load-from-path \"tests/matrix/basic-data.scm\")");
+	printf("Load of data >>>%s", rc.c_str());
+	CHKERR;
+
+	rc = eval->eval("(pcmp 'cache-all)");
+	printf("Support compute >>>%s", rc.c_str());
+	CHKERR;
+
+	rc = eval->eval("(tcom 'cache-all)");
+	printf("Transpose compute >>>%s", rc.c_str());
+	CHKERR;
+
+	std::string num;
+	num = eval->eval("(symc 'mmt-fmi (Word \"chicken\") (Word \"dog\"))");
+	double chidog = mmt_trop("chicken", "dog");
+	chidog = log( 174 * 16 / (53.0 * 77.0)) / log(2.0);
+	CHKFLT("chicken-dog ", num, chidog);
+
+	num = eval->eval("(symc 'mmt-fmi (Word \"chicken\") (Word \"table\"))");
+	double chitable = mmt_trop("chicken", "table");
+	CHKFLT("chicken-table ", num, chitable);
+
+	num = eval->eval("(symc 'mmt-fmi (Word \"table\") (Word \"dog\"))");
+	double dogtab = mmt_trop("table", "dog");
+	CHKFLT("dog-table", num, dogtab);
+
+	num = eval->eval("(symc 'mmt-fmi (Word \"chicken\") (Word \"chicken\"))");
+	double chichi = mmt_trop("chicken", "chicken");
+	CHKFLT("chicken-chicken ", num, chichi);
+
+	num = eval->eval("(symc 'mmt-fmi (Word \"dog\") (Word \"dog\"))");
+	double dogdog = mmt_trop("dog", "dog");
+	CHKFLT("dog-dog ", num, dogdog);
+
+	num = eval->eval("(symc 'mmt-fmi (Word \"table\") (Word \"table\"))");
+	double tabtab = mmt_trop("table", "table");
+	CHKFLT("table-table ", num, tabtab);
+
+   // --------
+	num = eval->eval("(symc 'mtm-fmi (Word \"wings\") (Word \"eyes\"))");
+	double weyes = mtm_trop("wings", "eyes");
+	CHKFLT("wings-eyes", num, weyes);
+
+	num = eval->eval("(symc 'mtm-fmi (Word \"eyes\") (Word \"wings\"))");
+	double ew = mtm_trop("eyes", "wings");
+	CHKFLT("eyes-wings", num, ew);
+	CHKFLT("wings-eyes", num, weyes);
+
+	num = eval->eval("(symc 'mtm-fmi (Word \"eyes\") (Word \"legs\"))");
+	double elegs = mtm_trop("eyes", "legs");
+	CHKFLT("eyes-legs", num, elegs);
+
+	num = eval->eval("(symc 'mtm-fmi (Word \"eyes\") (Word \"snouts\"))");
+	double esnouts = mtm_trop("eyes", "snouts");
+	CHKFLT("eyes-snouts", num, esnouts);
+
+	num = eval->eval("(symc 'mtm-fmi (Word \"wings\") (Word \"wings\"))");
+	double ww = mtm_trop("wings", "wings");
+	CHKFLT("wings-wings", num, ww);
+
+	num = eval->eval("(symc 'mtm-fmi (Word \"wings\") (Word \"legs\"))");
+	double wlegs = mtm_trop("wings", "legs");
+	CHKFLT("wings-legs", num, wlegs);
+
+	num = eval->eval("(symc 'mtm-fmi (Word \"legs\") (Word \"legs\"))");
+	double leglegs = mtm_trop("legs", "legs");
+	CHKFLT("legs-legs", num, leglegs);
+
+	num = eval->eval("(symc 'mtm-fmi (Word \"legs\") (Word \"snouts\"))");
+	double lesnouts = mtm_trop("legs", "snouts");
+	CHKFLT("legs-snouts", num, lesnouts);
+
+	num = eval->eval("(symc 'mtm-fmi (Word \"snouts\") (Word \"snouts\"))");
+	double sno = mtm_trop("snouts", "snouts");
+	CHKFLT("snouts-snouts", num, sno);
 
 	logger().debug("END TEST: %s", __FUNCTION__);
 }

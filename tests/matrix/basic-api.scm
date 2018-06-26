@@ -146,4 +146,6 @@
 (define tcom (add-transpose-compute bapi))
 (define tapi (add-transpose-api bapi))
 
+(define symc (add-symmetric-mi-compute bapi))
+
 *unspecified*
