@@ -672,12 +672,12 @@ void VectorAPIUTest::test_symmetric_mi(void)
 	CHKFLT("wings-snouts", num, wsnouts);
 
 	num = eval->eval("(symc 'mtm-fmi (Word \"legs\") (Word \"legs\"))");
-	double wlegs = mtm_trop("legs", "legs");
-	CHKFLT("legs-legs", num, wlegs);
+	double leglegs = mtm_trop("legs", "legs");
+	CHKFLT("legs-legs", num, leglegs);
 
 	num = eval->eval("(symc 'mtm-fmi (Word \"legs\") (Word \"snouts\"))");
-	double wsnouts = mtm_trop("legs", "snouts");
-	CHKFLT("legs-snouts", num, wsnouts);
+	double lesnouts = mtm_trop("legs", "snouts");
+	CHKFLT("legs-snouts", num, lesnouts);
 
 	num = eval->eval("(symc 'mtm-fmi (Word \"snouts\") (Word \"snouts\"))");
 	double sno = mtm_trop("snouts", "snouts");
