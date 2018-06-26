@@ -8,7 +8,8 @@
 #
 
 from opencog.atomspace import AtomSpace, TruthValue, types
-from atomspace cimport cProtoAtomPtr, createFloatValue, ProtoAtom
+from atomspace cimport (cProtoAtomPtr, createFloatValue, 
+                        ProtoAtom, createProtoAtom)
 from libcpp.vector cimport vector
 
 atomspace = None
@@ -32,6 +33,6 @@ cdef createValue(type, arg):
             result = createFloatValue(<double>arg)
     else:
         raise TypeError('Unexpected value type {}'.format(type))
-    return ProtoAtom.from_cProtoAtomPtr(result)
+    return createProtoAtom(result)
 
 include "opencog/atoms/proto/core_types.pyx"

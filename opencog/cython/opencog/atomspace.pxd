@@ -102,9 +102,9 @@ cdef extern from "opencog/atoms/proto/ProtoAtom.h" namespace "opencog":
 
 cdef class ProtoAtom:
     cdef cProtoAtomPtr shared_ptr
-    @staticmethod
-    cdef ProtoAtom from_cProtoAtomPtr(cProtoAtomPtr shared_ptr)
     cdef cProtoAtom* get_ptr(ProtoAtom self)
+
+cdef ProtoAtom createProtoAtom(cProtoAtomPtr shared_ptr)
 
 # Atom
 ctypedef public short av_type
