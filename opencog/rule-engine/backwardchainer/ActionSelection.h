@@ -20,8 +20,8 @@
  * Free Software Foundation, Inc.,
  * 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
  */
-#ifndef OPENCOG_ACTIONSELECTION_H_
-#define OPENCOG_ACTIONSELECTION_H_
+#ifndef _OPENCOG_ACTIONSELECTION_H_
+#define _OPENCOG_ACTIONSELECTION_H_
 
 #include <opencog/atoms/base/Handle.h>
 #include <opencog/truthvalue/TruthValue.h>
@@ -94,4 +94,4 @@ std::string	oc_to_string(const HandleTVMap& h2tv);
 
 } // namespace opencog
 
-#endif /* OPENCOG_ACTIONSELECTION_H_ */
+#endif /* _OPENCOG_ACTIONSELECTION_H_ */

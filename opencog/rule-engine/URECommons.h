@@ -1,5 +1,5 @@
 /*
- * RECommons.h
+ * URECommons.h
  *
  * Copyright (C) 2015 OpenCog Foundation
  *
@@ -20,8 +20,8 @@
  * Free Software Foundation, Inc.,
  * 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
  */
-#ifndef PLNCOMMONS_H_
-#define PLNCOMMONS_H_
+#ifndef _OPENCOG_URECOMMONS_H_
+#define _OPENCOG_URECOMMONS_H_
 
 #include <opencog/util/dorepeat.h>
 #include <opencog/util/random.h>
@@ -90,4 +90,4 @@ public:
 
 } // ~namespace opencog
 
-#endif /* PLNCOMMONS_H_ */
+#endif /* _OPENCOG_URECOMMONS_H_ */

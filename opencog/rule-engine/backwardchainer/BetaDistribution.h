@@ -20,8 +20,8 @@
  * Free Software Foundation, Inc.,
  * 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
  */
-#ifndef OPENCOG_BETADISTRIBUTION_H_
-#define OPENCOG_BETADISTRIBUTION_H_
+#ifndef _OPENCOG_BETADISTRIBUTION_H_
+#define _OPENCOG_BETADISTRIBUTION_H_
 
 #include <boost/math/distributions/beta.hpp>
 
@@ -108,4 +108,4 @@ std::string oc_to_string(const BetaDistribution& bd);
 
 } // namespace opencog
 
-#endif /* OPENCOG_ACTIONSELECTION_H_ */
+#endif /* _OPENCOG_BETADISTRIBUTION_H_ */

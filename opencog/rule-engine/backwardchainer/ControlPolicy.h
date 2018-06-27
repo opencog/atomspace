@@ -20,8 +20,8 @@
  * Free Software Foundation, Inc.,
  * 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
  */
-#ifndef OPENCOG_CONTROLPOLICY_H_
-#define OPENCOG_CONTROLPOLICY_H_
+#ifndef _OPENCOG_CONTROLPOLICY_H_
+#define _OPENCOG_CONTROLPOLICY_H_
 
 #include <opencog/atomspace/AtomSpace.h>
 
@@ -295,4 +295,4 @@ private:
 
 } // namespace opencog
 
-#endif /* OPENCOG_CONTROLPOLICY_H_ */
+#endif /* _OPENCOG_CONTROLPOLICY_H_ */

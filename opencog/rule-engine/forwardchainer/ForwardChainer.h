@@ -21,8 +21,8 @@
  * 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
  */
 
-#ifndef FORWARDCHAINERX_H_
-#define FORWARDCHAINERX_H_
+#ifndef _OPENCOG_FORWARDCHAINERX_H_
+#define _OPENCOG_FORWARDCHAINERX_H_
 
 #include <opencog/rule-engine/URECommons.h>
 #include <opencog/rule-engine/UREConfig.h>
@@ -164,4 +164,4 @@ public:
 
 } // ~namespace opencog
 
-#endif /* FORWARDCHAINERX_H_ */
+#endif /* _OPENCOG_FORWARDCHAINERX_H_ */
