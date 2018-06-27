@@ -40,8 +40,14 @@ cdef extern from "opencog/cython/opencog/PyScheme.h" namespace "opencog":
     cProtoAtomPtr eval_scheme_v(cAtomSpace* as, const string& s) except +
 
 def scheme_eval_v(AtomSpace a, str pys):
-    """
-    Returns a ProtoAtom
+    """Evaluate Scheme program when expected result is Value.
+    Args:
+        a (AtomSpace): atomspace to work on
+        pys (str): Scheme program to evaluate
+    Returns:
+        ProtoAtom: result of a evaluation
+    Raises:
+        RuntimeError: in case of evaluation error
     """
     cdef cProtoAtomPtr ret
     cdef string expr
