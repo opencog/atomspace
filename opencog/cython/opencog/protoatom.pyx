@@ -41,13 +41,12 @@ cdef class ProtoAtom:
         return is_a(self.type, type)
 
     def to_list(self):
-        cdef vector[double] doubleValues;
-        cdef vector[double].iterator it;
+        cdef const vector[double]* doubleValues;
         if (self.is_a(types.FloatValue)):
-            doubleValues = (<cFloatValue*>self.get_ptr()).value()
-            it = doubleValues.begin()
             list = []
-            while it != doubleValues.end():
+            doubleValues = &((<cFloatValue*>self.get_ptr()).value())
+            it = doubleValues.const_begin()
+            while it != doubleValues.const_end():
                 list.append(deref(it))
                 inc(it)
             return list
