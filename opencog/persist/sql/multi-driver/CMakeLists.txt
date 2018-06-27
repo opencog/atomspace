@@ -64,10 +64,3 @@ ENDIF (HAVE_GUILE)
 INSTALL (TARGETS persist-sql
 	DESTINATION "lib${LIB_DIR_SUFFIX}/opencog"
 )
-
-INSTALL (FILES
-	llapi.h
-	SQLAtomStorage.h
-	SQLPersistSCM.h
-	DESTINATION "include/opencog/persist/sql/multi-driver"
-)
