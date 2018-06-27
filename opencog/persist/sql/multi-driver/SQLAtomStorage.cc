@@ -63,9 +63,9 @@ using namespace opencog;
 /* ================================================================ */
 
 /**
- * Utility class, hangs on to a single response to an SQL query,
- * and provides routines to parse it, i.e. walk the rows and columns,
- * converting each row into an Atom, or Edge.
+ * Utility class, hangs on to a single response to an SQL query, and
+ * provides routines to parse it, i.e. walk the rows and columns,
+ * converting each row into an Atom.
  *
  * Intended to be allocated on stack, to avoid malloc overhead.
  * Methods are intended to be inlined, so as to avoid subroutine
