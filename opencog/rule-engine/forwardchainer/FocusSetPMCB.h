@@ -21,8 +21,8 @@
  * 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
  */
 
-#ifndef _FOCUSSETPMCB_H_
-#define _FOCUSSETPMCB_H_
+#ifndef _OPENCOG_FOCUSSETPMCB_H_
+#define _OPENCOG_FOCUSSETPMCB_H_
 
 #include <opencog/query/DefaultImplicator.h>
 
@@ -66,4 +66,4 @@ public:
 
 } /* namespace opencog */
 
-#endif /* _FOCUSSETPMCB_H_ */
+#endif /* _OPENCOG_FOCUSSETPMCB_H_ */

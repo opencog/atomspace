@@ -23,8 +23,8 @@
  * 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
  */
 
-#ifndef RULE_H_
-#define RULE_H_
+#ifndef _OPENCOG_RULE_H_
+#define _OPENCOG_RULE_H_
 
 #include <boost/operators.hpp>
 #include <opencog/atomspace/AtomSpace.h>
@@ -333,4 +333,4 @@ std::string oc_to_string(const RuleTypedSubstitutionMap& rule_ts_map);
 
 } // ~namespace opencog
 
-#endif /* RULE_H_ */
+#endif /* _OPENCOG_RULE_H_ */

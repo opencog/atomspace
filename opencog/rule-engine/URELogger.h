@@ -21,8 +21,8 @@
  * 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
  */
 
-#ifndef URELOGGER_H_
-#define URELOGGER_H_
+#ifndef _OPENCOG_URELOGGER_H_
+#define _OPENCOG_URELOGGER_H_
 
 #include <opencog/util/Logger.h>
 
@@ -41,4 +41,4 @@ Logger& ure_logger();
 
 } // ~namespace opencog
 
-#endif /* URELOGGER_H_ */
+#endif /* _OPENCOG_URELOGGER_H_ */

@@ -22,8 +22,8 @@
  * Free Software Foundation, Inc.,
  * 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
  */
-#ifndef OPENCOG_BACKWARDCHAINER_H_
-#define OPENCOG_BACKWARDCHAINER_H_
+#ifndef _OPENCOG_BACKWARDCHAINER_H_
+#define _OPENCOG_BACKWARDCHAINER_H_
 
 #include <opencog/rule-engine/Rule.h>
 #include <opencog/rule-engine/UREConfig.h>
@@ -215,4 +215,4 @@ private:
 
 } // namespace opencog
 
-#endif /* OPENCOG_BACKWARDCHAINER_H_ */
+#endif /* _OPENCOG_BACKWARDCHAINER_H_ */

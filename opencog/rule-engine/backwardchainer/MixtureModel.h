@@ -20,8 +20,8 @@
  * Free Software Foundation, Inc.,
  * 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
  */
-#ifndef OPENCOG_MIXTUREMODEL_H_
-#define OPENCOG_MIXTUREMODEL_H_
+#ifndef _OPENCOG_MIXTUREMODEL_H_
+#define _OPENCOG_MIXTUREMODEL_H_
 
 #include <opencog/atoms/base/Handle.h>
 #include <opencog/truthvalue/TruthValue.h>
@@ -170,4 +170,4 @@ private:
 
 } // namespace opencog
 
-#endif /* OPENCOG_MIXTUREMODEL_H_ */
+#endif /* _OPENCOG_MIXTUREMODEL_H_ */

@@ -21,8 +21,8 @@
  * 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
  */
 
-#ifndef _URE_CONFIG_H
-#define _URE_CONFIG_H
+#ifndef _OPENCOG_URE_CONFIG_H
+#define _OPENCOG_URE_CONFIG_H
 
 #include "Rule.h"
 
@@ -245,4 +245,4 @@ private:
 } // ~namespace opencog
 
 
-#endif /* _URE_CONFIG_H_ */
+#endif /* _OPENCOG_URE_CONFIG_H_ */

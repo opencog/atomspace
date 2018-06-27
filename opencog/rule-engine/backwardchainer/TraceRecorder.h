@@ -20,8 +20,8 @@
  * Free Software Foundation, Inc.,
  * 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
  */
-#ifndef OPENCOG_TRACERECORDER_H_
-#define OPENCOG_TRACERECORDER_H_
+#ifndef _OPENCOG_TRACERECORDER_H_
+#define _OPENCOG_TRACERECORDER_H_
 
 #include <opencog/atomspace/AtomSpace.h>
 
@@ -164,4 +164,4 @@ private:
 
 } // namespace opencog
 
-#endif /* OPENCOG_TRACERECORDER_H_ */
+#endif /* _OPENCOG_TRACERECORDER_H_ */
