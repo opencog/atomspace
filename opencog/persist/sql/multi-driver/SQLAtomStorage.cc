@@ -56,6 +56,10 @@
 #include "SQLAtomStorage.h"
 #include "SQLResponse.h"
 
+#include "ll-pg-cxx.h"
+#include "odbcxx.h"
+
+
 using namespace opencog;
 
 /* ================================================================ */

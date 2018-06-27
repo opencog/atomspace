@@ -4,10 +4,8 @@
  *
  * The SQL queries return rows and columns; these need to be
  * re-assembled into Atoms and Values. This is a utility class that
- * aids in this re-assembly. This explicitly interfaces to one of the
- * available database drivers. Currently, the postgres native libpq-dev
- * API and the ODBC API are supported. Note that libpq-dev is about
- * three times faster than ODBC.
+ * aids in this re-assembly. This interfaces to one of the "LLAPI"
+ * database drivers that returns rows and columns.
  *
  * Copyright (c) 2008,2009,2013,2017 Linas Vepstas <linas@linas.org>
  *
@@ -35,8 +33,6 @@
 #include <opencog/atomspaceutils/TLB.h>
 
 #include "llapi.h"
-// #include "ll-pg-cxx.h"
-// #include "odbcxx.h"
 #include "SQLAtomStorage.h"
 
 using namespace opencog;
