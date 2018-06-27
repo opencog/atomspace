@@ -49,8 +49,8 @@ class AtomTable;
  * uniquely identified as well.
  *
  * Reserving UUID's is kind of like mallocing them, except that
- * (currently) there is no way to free them.  Use reserve_range()
- * and reserve_extent() to malloc them.
+ * (currently) there is no way to free them.  Use reserve_extent()
+ * and reserve_upto() to malloc them.
  *
  * Everything in this class is private, mostly because we don't want
  * anyone to mess with it, except our closest friends.
@@ -111,23 +111,6 @@ public:
     /// Get the next UN-issued uuid.  The max issued UUID
     /// is one less than this.
     UUID getMaxUUID(void) { return _brk_uuid; }
-
-    /// Reserve a range of UUID's.  The range is inclusive; both `lo`
-    /// and `hi` are reserved.  The range must NOT intersect with the
-    /// currently issued UUID's.
-    inline void reserve_range(UUID lo, UUID hi)
-    {
-        if (hi <= lo)
-            throw InvalidParamException(TRACE_INFO,
-                "Bad argument order.");
-        UUID extent = hi - lo + 1;
-
-        UUID oldlo = _brk_uuid.fetch_add(extent, std::memory_order_relaxed);
-
-        if (lo < oldlo)
-            throw InvalidParamException(TRACE_INFO,
-                "Bad range reserve.");
-    }
 
     /// Reserve an extent of UUID's. The lowest reserved ID is returned.
     /// That is, after this call, no one else will be issued UUID's in
