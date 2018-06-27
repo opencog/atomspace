@@ -242,4 +242,7 @@ cdef extern from "opencog/atomutils/AtomUtils.h" namespace "opencog":
     cdef vector[cHandle] c_get_predicates_for "get_predicates_for" (cHandle& target, cHandle& predicate)
 
 cdef extern from "opencog/atoms/proto/FloatValue.h" namespace "opencog":
+    cdef cppclass cFloatValue "opencog::FloatValue":
+        const vector[double]& value() const;
+    
     cdef cProtoAtomPtr createFloatValue(...)

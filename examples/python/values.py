@@ -28,7 +28,11 @@ featureKey = PredicateNode('features')
 boundingBox.set_value(featureKey, featureValue)
 print('set value to atom: {}'.format(boundingBox))
 
-print('get value from atom: {}'.format(boundingBox.get_value(featureKey)))
+value = boundingBox.get_value(featureKey)
+print('get value from atom: {}'.format(value))
+
+list = value.to_list()
+print('get python list from value: {}'.format(list))
 
 value = scheme_eval_v(atomspace, '(ValueOf (ConceptNode "boundingBox") '
                       '(PredicateNode "features"))')
