@@ -2119,15 +2119,18 @@ void PatternMatchEngine::clear_current_state(void)
 
 	depth = 0;
 
-	// choice link state
+	// ChoiceLink state
 	_choice_state.clear();
 	_need_choice_push = false;
 	choose_next = true;
 
-	// unordered link state
+	// UnorderedLink state
 	have_more = false;
 	take_step = true;
 	_perm_state.clear();
+
+	// GlobNode state
+	_glob_state.clear();
 
 	issued.clear();
 }
