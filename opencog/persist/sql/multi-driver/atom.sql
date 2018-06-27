@@ -70,29 +70,6 @@ CREATE TABLE Atoms (
 CREATE INDEX incoming_idx on Atoms USING GIN(outgoing);
 
 -- -----------------------------------------------------------
--- Edge table is not used by the postgres driver.  That is because
--- the array of outgoing edges, above is enough to describe a Link.
--- However, neither MySQL nor SQLite3 support arrays, and so maybe
--- this could be useful for a port to those DB's.
---
--- Table of the edges of the Levi graph corresponding
--- to the hypergraph. An edge is a (src,dst) pair. The
--- pair, understood as going src->dst, for a fixed src,
--- is the set of outgoing edges of the atom. Understood
--- as dst<-src, with fixed dst, are the incoming edges.
---
--- Outgoing edges are understood to be ordered. "pos" is
--- is the order, starting with 0.
---
--- CREATE TABLE Edges (
---  src_uuid  BIGINT,
---  dst_uuid  BIGINT,
---  pos INT
--- );
--- CREATE INDEX inidx ON Edges(src_uuid);
--- CREATE INDEX outidx ON Edges(dst_uuid);
-
--- -----------------------------------------------------------
 -- An SQL table representation for opencog Valuations
 --
 CREATE TABLE Valuations (
@@ -123,7 +100,7 @@ CREATE TABLE Valuations (
 CREATE INDEX ON Valuations (atom);
 
 -- Index for the fast lookup of all valuations with a given key.
--- Why ???
+-- This does not seem to be needed, right now...
 -- CREATE INDEX ON Valuations (key);
 
 -- A recursive overflow table, if recursive values did not directly
