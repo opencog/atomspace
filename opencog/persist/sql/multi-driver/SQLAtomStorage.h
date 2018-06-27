@@ -66,7 +66,6 @@ class SQLAtomStorage : public AtomStorage
 
 		// Utility for handling responses (on stack).
 		class Response;
-		class Outgoing;
 
 		void init(const char *);
 		std::string _uri;
