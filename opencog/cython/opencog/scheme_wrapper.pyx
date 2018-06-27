@@ -26,8 +26,14 @@ cdef extern from "opencog/cython/opencog/PyScheme.h" namespace "opencog":
     string eval_scheme(cAtomSpace* as, const string& s) except +
 
 def scheme_eval(AtomSpace a, str pys):
-    """
-    Returns a string value
+    """Evaluate Scheme program and return string.
+    Args:
+        a (AtomSpace): atomspace to work on
+        pys (str): Scheme program to evaluate
+    Returns:
+        str: result of a evaluation
+    Raises:
+        RuntimeError: in case of evaluation error
     """
     cdef string ret
     cdef string expr
@@ -40,8 +46,14 @@ cdef extern from "opencog/cython/opencog/PyScheme.h" namespace "opencog":
     cHandle eval_scheme_h(cAtomSpace* as, const string& s) except +
 
 def scheme_eval_h(AtomSpace a, str pys):
-    """
-    Returns a Handle
+    """Evaluate Scheme program when expected result is Handle.
+    Args:
+        a (AtomSpace): atomspace to work on
+        pys (str): Scheme program to evaluate
+    Returns:
+        Handle: result of a evaluation
+    Raises:
+        RuntimeError: in case of evaluation error
     """
     cdef cHandle ret
     cdef string expr
@@ -53,8 +65,14 @@ cdef extern from "opencog/cython/opencog/PyScheme.h" namespace "opencog":
     cAtomSpace* eval_scheme_as(const string& s) except +
 
 def scheme_eval_as(str pys):
-    """
-    Returns an AtomSpace
+    """Evaluate Scheme program when expected result is AtomSpace.
+    Args:
+        pys (str): Scheme program to evaluate
+    Returns:
+        AtomSpace: atomspace result
+    Raises:
+        RuntimeError: if result of Scheme program is not AtomSpace or
+            in case of evaluation error
     """
     cdef cAtomSpace* ret
     cdef string expr
