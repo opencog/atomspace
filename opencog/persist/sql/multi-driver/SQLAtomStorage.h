@@ -243,7 +243,7 @@ class SQLAtomStorage : public AtomStorage
 		// Large-scale loads and saves
 		void load(AtomTable &); // Load entire contents of DB
 		void store(const AtomTable &); // Store entire contents of AtomTable
-		void reserve(void);     // reserve range of UUID's
+		UUID reserve(void);     // reserve range of UUID's
 
 		// Debugging and performance monitoring
 		void print_stats(void);
