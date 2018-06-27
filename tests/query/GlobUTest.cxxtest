@@ -74,6 +74,7 @@ _exit(rc); // XXX hack to avoid double-free in __run_exit_handlers
 	void test_glob_backmore(void);
 	void test_glob_multiple(void);
 	void test_nest(void);
+	void test_gnest(void);
 };
 
 void GlobUTest::tearDown(void)
@@ -536,6 +537,29 @@ void GlobUTest::test_nest(void)
 		"(SetLink one two three four five)"
 	);
 	TS_ASSERT_EQUALS(five, response);
+
+	// ----
+	logger().debug("END TEST: %s", __FUNCTION__);
+}
+
+/*
+ * Test nested expressions.
+ */
+void GlobUTest::test_gnest(void)
+{
+	logger().debug("BEGIN TEST: %s", __FUNCTION__);
+
+	eval->eval("(load-from-path \"tests/query/glob-nest.scm\")");
+
+	Handle four = eval->eval_h("(cog-execute! get-four)");
+	printf("nested %s\n", four->to_string().c_str());
+	TS_ASSERT_EQUALS(4, four->get_arity());
+
+	// "two" should not be found.
+	Handle response = eval->eval_h(
+		"(SetLink one three four five)"
+	);
+	TS_ASSERT_EQUALS(four, response);
 
 	// ----
 	logger().debug("END TEST: %s", __FUNCTION__);
