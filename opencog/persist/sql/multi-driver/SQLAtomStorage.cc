@@ -1956,12 +1956,11 @@ SQLAtomStorage::PseudoPtr SQLAtomStorage::makeAtom(Response &rp, UUID uuid)
 
 void SQLAtomStorage::load(AtomTable &table)
 {
-	unsigned long max_nrec = getMaxObservedUUID();
-	_tlbuf.reserve_upto(max_nrec);
-	printf("Max observed UUID is %lu\n", max_nrec);
+	UUID max_nrec = reserve();
 	_load_count = 0;
 	max_height = getMaxObservedHeight();
-	printf("Max Height is %d\n", max_height);
+	printf("Loading all atoms; maxuuid=%lu max height=%d\n",
+		max_nrec, max_height);
 	bulk_load = true;
 	bulk_start = time(0);
 
@@ -2014,9 +2013,7 @@ void SQLAtomStorage::load(AtomTable &table)
 
 void SQLAtomStorage::loadType(AtomTable &table, Type atom_type)
 {
-	unsigned long max_nrec = getMaxObservedUUID();
-	_tlbuf.reserve_upto(max_nrec);
-	logger().debug("SQLAtomStorage::loadType: Max observed UUID is %lu\n", max_nrec);
+	UUID max_nrec = reserve();
 	_load_count = 0;
 
 	// For links, assume a worst-case height.
@@ -2232,11 +2229,13 @@ int SQLAtomStorage::getMaxObservedHeight(void)
 	return rp.intval;
 }
 
-void SQLAtomStorage::reserve(void)
+UUID SQLAtomStorage::reserve(void)
 {
 	UUID max_observed_id = getMaxObservedUUID();
-	printf("Reserving UUID up to %lu\n", max_observed_id);
+	logger().debug("SQLAtomStorage::reserve(): Max observed UUID is %lu\n",
+		 max_observed_id);
 	_tlbuf.reserve_upto(max_observed_id);
+	return max_observed_id;
 }
 
 void SQLAtomStorage::clear_cache(void)
