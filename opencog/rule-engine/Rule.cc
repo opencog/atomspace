@@ -597,10 +597,6 @@ std::string oc_to_string(const Rule& rule, const std::string& indent)
 {
 	return rule.to_string(indent);
 }
-std::string oc_to_string(const Rule& rule)
-{
-	return oc_to_string(rule, "");
-}
 std::string oc_to_string(const RuleSet& rules, const std::string& indent)
 {
 	std::stringstream ss;
@@ -610,10 +606,6 @@ std::string oc_to_string(const RuleSet& rules, const std::string& indent)
 		ss << indent << "rule[" << i++ << "]:" << std::endl
 		   << oc_to_string(rule, indent + OC_TO_STRING_INDENT) << std::endl;
 	return ss.str();
-}
-std::string oc_to_string(const RuleSet& rules)
-{
-	return oc_to_string(rules, "");
 }
 std::string oc_to_string(const RuleTypedSubstitutionPair& rule_ts,
                          const std::string& indent)
@@ -627,10 +619,6 @@ std::string oc_to_string(const RuleTypedSubstitutionPair& rule_ts,
 	   << std::endl;
 	return ss.str();
 }
-std::string oc_to_string(const RuleTypedSubstitutionPair& rule_ts)
-{
-	return oc_to_string(rule_ts, "");
-}
 std::string oc_to_string(const RuleTypedSubstitutionMap& rules,
                          const std::string& indent)
 {
@@ -642,10 +630,6 @@ std::string oc_to_string(const RuleTypedSubstitutionMap& rules,
 		   << oc_to_string(rule, indent + OC_TO_STRING_INDENT)
 		   << std::endl;
 	return ss.str();
-}
-std::string oc_to_string(const RuleTypedSubstitutionMap& rules)
-{
-	return oc_to_string(rules, "");
 }
 
 } // ~namespace opencog
