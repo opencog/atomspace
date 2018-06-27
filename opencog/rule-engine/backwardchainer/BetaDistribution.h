@@ -25,6 +25,7 @@
 
 #include <boost/math/distributions/beta.hpp>
 
+#include <opencog/util/empty_string.h>
 #include <opencog/truthvalue/TruthValue.h>
 
 namespace opencog
@@ -103,8 +104,8 @@ TruthValuePtr mk_stv(double mean, double variance,
 // The reason indent is not an optional argument with default is
 // because gdb doesn't support that, see
 // http://stackoverflow.com/questions/16734783 for more explanation.
-std::string oc_to_string(const BetaDistribution& bd, const std::string& indent);
-std::string oc_to_string(const BetaDistribution& bd);
+std::string oc_to_string(const BetaDistribution& bd,
+                         const std::string& indent=empty_string);
 
 } // namespace opencog
 

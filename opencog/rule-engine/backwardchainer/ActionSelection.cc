@@ -91,10 +91,7 @@ std::string oc_to_string(const ActionSelection& asel, const std::string& indent)
 	   << oc_to_string(asel.action2tv, indent + OC_TO_STRING_INDENT);
 	return ss.str();
 }
-std::string oc_to_string(const ActionSelection& asel)
-{
-	return oc_to_string(asel, "");
-}
+
 std::string oc_to_string(const HandleTVMap& h2tv, const std::string& indent)
 {
 	std::stringstream ss;
@@ -107,10 +104,6 @@ std::string oc_to_string(const HandleTVMap& h2tv, const std::string& indent)
 		   << oc_to_string(htv.second) << std::endl;
 	}
 	return ss.str();
-}
-std::string oc_to_string(const HandleTVMap& h2tv)
-{
-	return oc_to_string(h2tv, "");
 }
 
 } // ~namespace opencog

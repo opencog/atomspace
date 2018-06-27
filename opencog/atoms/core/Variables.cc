@@ -805,9 +805,5 @@ std::string oc_to_string(const Variables& var, const std::string& indent)
 {
 	return var.to_string(indent);
 }
-std::string oc_to_string(const Variables& var)
-{
-	return oc_to_string(var, "");
-}
 
 } // ~namespace opencog

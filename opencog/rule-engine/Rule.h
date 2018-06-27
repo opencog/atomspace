@@ -32,6 +32,7 @@
 #include <opencog/atoms/core/VariableList.h>
 #include <opencog/atoms/pattern/BindLink.h>
 #include <opencog/unify/Unify.h>
+#include <opencog/util/empty_string.h>
 
 namespace opencog {
 
@@ -322,14 +323,14 @@ private:
 // The reason indent is not an optional argument with default is
 // because gdb doesn't support that, see
 // http://stackoverflow.com/questions/16734783 for more explanation.
-std::string oc_to_string(const Rule& rule, const std::string& indent);
-std::string oc_to_string(const Rule& rule);
-std::string oc_to_string(const RuleSet& rules, const std::string& indent);
-std::string oc_to_string(const RuleSet& rules);
-std::string oc_to_string(const RuleTypedSubstitutionPair& rule_ts_pair, const std::string& indent);
-std::string oc_to_string(const RuleTypedSubstitutionPair& rule_ts_pair);
-std::string oc_to_string(const RuleTypedSubstitutionMap& rule_ts_map, const std::string& indent);
-std::string oc_to_string(const RuleTypedSubstitutionMap& rule_ts_map);
+std::string oc_to_string(const Rule& rule,
+                         const std::string& indent=empty_string);
+std::string oc_to_string(const RuleSet& rules,
+                         const std::string& indent=empty_string);
+std::string oc_to_string(const RuleTypedSubstitutionPair& rule_ts_pair,
+                         const std::string& indent=empty_string);
+std::string oc_to_string(const RuleTypedSubstitutionMap& rule_ts_map,
+                         const std::string& indent=empty_string);
 
 } // ~namespace opencog
 

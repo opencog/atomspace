@@ -752,18 +752,10 @@ std::string oc_to_string(const BITNode& bitnode, const std::string& indent)
 {
 	return bitnode.to_string(indent);
 }
-std::string oc_to_string(const BITNode& bitnode)
-{
-	return oc_to_string(bitnode, "");
-}
 
 std::string oc_to_string(const AndBIT& andbit, const std::string& indent)
 {
 	return andbit.to_string(indent);
-}
-std::string oc_to_string(const AndBIT& andbit)
-{
-	return oc_to_string(andbit, "");
 }
 
 // std::string oc_to_string(const BIT& bit)

@@ -30,6 +30,7 @@
 #include <string>
 #include <vector>
 
+#include <opencog/util/empty_string.h>
 #include <opencog/util/exceptions.h>
 #include <opencog/atoms/proto/FloatValue.h>
 
@@ -186,8 +187,8 @@ static inline ProtoAtomPtr ProtoAtomCast(const TruthValuePtr& tv)
 // The reason indent is not an optional argument with default is
 // because gdb doesn't support that, see
 // http://stackoverflow.com/questions/16734783 for more explanation.
-std::string oc_to_string(TruthValuePtr tv, const std::string& indent);
-std::string oc_to_string(TruthValuePtr tv);
+std::string oc_to_string(TruthValuePtr tv,
+                         const std::string& indent=empty_string);
 
 } // namespace opencog
 

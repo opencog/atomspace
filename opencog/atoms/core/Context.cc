@@ -128,10 +128,7 @@ std::string oc_to_string(const Context::VariablesStack& scope_variables,
 	}
 	return ss.str();
 }
-std::string oc_to_string(const Context::VariablesStack& scope_variables)
-{
-	return oc_to_string(scope_variables, "");
-}
+
 std::string oc_to_string(const Context& c, const std::string& indent)
 {
 	std::stringstream ss;
@@ -149,10 +146,6 @@ std::string oc_to_string(const Context& c, const std::string& indent)
 			ss << indent + OC_TO_STRING_INDENT << "ignored" << std::endl;
 	}
 	return ss.str();
-}
-std::string oc_to_string(const Context& c)
-{
-	return oc_to_string(c, "");
 }
 
 } // namespace opencog

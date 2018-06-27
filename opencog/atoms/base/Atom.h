@@ -33,6 +33,7 @@
 #include <string>
 #include <unordered_set>
 
+#include <opencog/util/empty_string.h>
 #include <opencog/util/sigslot.h>
 #include <opencog/atoms/base/Handle.h>
 #include <opencog/atoms/proto/ProtoAtom.h>
@@ -415,8 +416,8 @@ static inline Handle HandleCast(const ProtoAtomPtr& pa)
 // The reason indent is not an optional argument with default is
 // because gdb doesn't support that, see
 // http://stackoverflow.com/questions/16734783 for more explanation.
-std::string oc_to_string(const IncomingSet& iset, const std::string& indent);
-std::string oc_to_string(const IncomingSet& iset);
+std::string oc_to_string(const IncomingSet& iset,
+                         const std::string& indent=empty_string);
 
 /** @}*/
 } // namespace opencog

@@ -23,6 +23,7 @@
 #ifndef _OPENCOG_VARIABLE_LIST_H
 #define _OPENCOG_VARIABLE_LIST_H
 
+#include <opencog/util/empty_string.h>
 #include <opencog/atoms/base/Handle.h>
 #include <opencog/atoms/base/Link.h>
 #include <opencog/atoms/core/Variables.h>
@@ -105,8 +106,8 @@ static inline VariableListPtr VariableListCast(const AtomPtr& a)
 // The reason indent is not an optional argument with default is
 // because gdb doesn't support that, see
 // http://stackoverflow.com/questions/16734783 for more explanation.
-std::string oc_to_string(const VariableListPtr& vlp, const std::string& indent);
-std::string oc_to_string(const VariableListPtr& vlp);
+std::string oc_to_string(const VariableListPtr& vlp,
+                         const std::string& indent=empty_string);
 
 /** @}*/
 }

@@ -28,6 +28,7 @@
 #include <string>
 #include <boost/operators.hpp>
 
+#include <opencog/util/empty_string.h>
 #include <opencog/atoms/proto/atom_types.h>
 
 namespace opencog
@@ -97,8 +98,8 @@ public:
 // The reason indent is not an optional argument with default is
 // because gdb doesn't support that, see
 // http://stackoverflow.com/questions/16734783 for more explanation.
-std::string oc_to_string(const Quotation& quotation, const std::string& indent);
-std::string oc_to_string(const Quotation& quotation);
+std::string oc_to_string(const Quotation& quotation,
+                         const std::string& indent=empty_string);
 	
 /** @}*/
 } // namespace opencog

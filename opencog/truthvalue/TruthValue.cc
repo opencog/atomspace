@@ -188,9 +188,5 @@ std::string oc_to_string(TruthValuePtr tv, const std::string& indent)
 		return tv->to_string();
 	return "none";
 }
-std::string oc_to_string(TruthValuePtr tv)
-{
-	return oc_to_string(tv, "");
-}
 
 } // ~namespace opencog

@@ -23,6 +23,7 @@
 #ifndef _OPENCOG_ACTIONSELECTION_H_
 #define _OPENCOG_ACTIONSELECTION_H_
 
+#include <opencog/util/empty_string.h>
 #include <opencog/atoms/base/Handle.h>
 #include <opencog/truthvalue/TruthValue.h>
 
@@ -87,10 +88,10 @@ private:
 // The reason indent is not an optional argument with default is
 // because gdb doesn't support that, see
 // http://stackoverflow.com/questions/16734783 for more explanation.
-std::string	oc_to_string(const ActionSelection& asel, const std::string& indent);
-std::string	oc_to_string(const ActionSelection& asel);
-std::string	oc_to_string(const HandleTVMap& h2tv, const std::string& indent);
-std::string	oc_to_string(const HandleTVMap& h2tv);
+std::string	oc_to_string(const ActionSelection& asel,
+                         const std::string& indent=empty_string);
+std::string	oc_to_string(const HandleTVMap& h2tv,
+                         const std::string& indent=empty_string);
 
 } // namespace opencog
 
