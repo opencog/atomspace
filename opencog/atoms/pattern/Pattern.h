@@ -30,6 +30,7 @@
 #include <unordered_map>
 #include <vector>
 
+#include <opencog/util/empty_string.h>
 #include <opencog/atoms/base/Handle.h>
 #include <opencog/atoms/proto/types.h>  // for typedef Type
 #include <opencog/atoms/pattern/PatternTerm.h>
@@ -142,8 +143,8 @@ struct Pattern
 
 // For gdb, see
 // http://wiki.opencog.org/w/Development_standards#Print_OpenCog_Objects
-std::string oc_to_string(const Pattern& pattern, const std::string& indent);
-std::string oc_to_string(const Pattern& pattern);
+std::string oc_to_string(const Pattern& pattern,
+                         const std::string& indent=empty_string);
 
 /** @}*/
 } // namespace opencog

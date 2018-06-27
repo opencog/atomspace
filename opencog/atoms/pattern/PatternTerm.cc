@@ -144,17 +144,10 @@ std::string oc_to_string(const PatternTerm& pt, const std::string& indent)
 {
 	return pt.to_string(indent);
 }
-std::string oc_to_string(const PatternTerm& pt)
-{
-	return oc_to_string(pt, "");
-}
+
 std::string oc_to_string(const PatternTermPtr& pt_ptr, const std::string& indent)
 {
 	return pt_ptr->to_string();
-}
-std::string oc_to_string(const PatternTermPtr& pt_ptr)
-{
-	return oc_to_string(pt_ptr, "");
 }
 
 } // ~namespace opencog

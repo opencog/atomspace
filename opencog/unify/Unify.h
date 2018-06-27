@@ -28,6 +28,7 @@
 
 #include <boost/operators.hpp>
 
+#include <opencog/util/empty_string.h>
 #include <opencog/atoms/base/Handle.h>
 #include <opencog/atoms/proto/atom_types.h>
 #include <opencog/atoms/core/Quotation.h>
@@ -731,24 +732,24 @@ Handle merge_vardecl(const Handle& l_vardecl, const Handle& r_vardecl);
 // The reason indent is not an optional argument with default is
 // because gdb doesn't support that, see
 // http://stackoverflow.com/questions/16734783 for more explanation.
-std::string oc_to_string(const Unify::CHandle& ch, const std::string& indent);
-std::string oc_to_string(const Unify::CHandle& ch);
-std::string oc_to_string(const Unify::Block& pb, const std::string& indent);
-std::string oc_to_string(const Unify::Block& pb);
-std::string oc_to_string(const Unify::Partition& hshm, const std::string& indent);
-std::string oc_to_string(const Unify::Partition& hshm);
-std::string oc_to_string(const Unify::TypedBlock& tb, const std::string& indent);
-std::string oc_to_string(const Unify::TypedBlock& tb);
-std::string oc_to_string(const Unify::TypedBlockSeq& tbs, const std::string& indent);
-std::string oc_to_string(const Unify::TypedBlockSeq& tbs);
-std::string oc_to_string(const Unify::Partitions& par, const std::string& indent);
-std::string oc_to_string(const Unify::Partitions& par);
-std::string oc_to_string(const Unify::HandleCHandleMap& hchm, const std::string& indent);
-std::string oc_to_string(const Unify::HandleCHandleMap& hchm);
-std::string oc_to_string(const Unify::TypedSubstitution& ts, const std::string& indent);
-std::string oc_to_string(const Unify::TypedSubstitution& ts);
-std::string oc_to_string(const Unify::TypedSubstitutions& tss, const std::string& indent);
-std::string oc_to_string(const Unify::TypedSubstitutions& tss);
+std::string oc_to_string(const Unify::CHandle& ch,
+                         const std::string& indent=empty_string);
+std::string oc_to_string(const Unify::Block& pb,
+                         const std::string& indent=empty_string);
+std::string oc_to_string(const Unify::Partition& hshm,
+                         const std::string& indent=empty_string);
+std::string oc_to_string(const Unify::TypedBlock& tb,
+                         const std::string& indent=empty_string);
+std::string oc_to_string(const Unify::TypedBlockSeq& tbs,
+                         const std::string& indent=empty_string);
+std::string oc_to_string(const Unify::Partitions& par,
+                         const std::string& indent=empty_string);
+std::string oc_to_string(const Unify::HandleCHandleMap& hchm,
+                         const std::string& indent=empty_string);
+std::string oc_to_string(const Unify::TypedSubstitution& ts,
+                         const std::string& indent=empty_string);
+std::string oc_to_string(const Unify::TypedSubstitutions& tss,
+                         const std::string& indent=empty_string);
 	
 } // namespace opencog
 

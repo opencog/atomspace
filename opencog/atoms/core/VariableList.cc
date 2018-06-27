@@ -430,10 +430,6 @@ std::string opencog::oc_to_string(const VariableListPtr& vlp,
 	else
 		return oc_to_string(vlp->get_handle(), indent);
 }
-std::string opencog::oc_to_string(const VariableListPtr& vlp)
-{
-	return oc_to_string(vlp, "");
-}
 
 DEFINE_LINK_FACTORY(VariableList, VARIABLE_LIST)
 

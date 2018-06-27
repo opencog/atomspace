@@ -66,9 +66,5 @@ std::string oc_to_string(const Pattern& pattern, const std::string& indent)
 {
 	return pattern.to_string(indent);
 }
-std::string oc_to_string(const Pattern& pattern)
-{
-	return oc_to_string(pattern, "");
-}
 
 } // ~namespace opencog

@@ -29,6 +29,7 @@
 
 #include <opencog/util/Logger.h>
 
+#include <opencog/util/empty_string.h>
 #include <opencog/atoms/base/Handle.h>
 #include <opencog/atoms/base/Link.h>
 #include <opencog/atoms/core/Quotation.h>
@@ -135,10 +136,10 @@ public:
 
 // For gdb, see
 // http://wiki.opencog.org/w/Development_standards#Print_OpenCog_Objects
-std::string oc_to_string(const PatternTerm& pt, const std::string& indent);
-std::string oc_to_string(const PatternTerm& pt);
-std::string oc_to_string(const PatternTermPtr& pt, const std::string& indent);
-std::string oc_to_string(const PatternTermPtr& pt_ptr);
+std::string oc_to_string(const PatternTerm& pt,
+                         const std::string& indent=empty_string);
+std::string oc_to_string(const PatternTermPtr& pt,
+                         const std::string& indent=empty_string);
 
 } // namespace opencog
 

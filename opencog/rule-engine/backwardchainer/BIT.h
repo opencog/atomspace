@@ -24,6 +24,8 @@
 #define _OPENCOG_BIT_H
 
 #include <boost/operators.hpp>
+
+#include <opencog/util/empty_string.h>
 #include <opencog/rule-engine/Rule.h>
 #include <opencog/atoms/base/Handle.h>
 #include <opencog/atomspaceutils/AtomSpaceUtils.h>
@@ -473,11 +475,10 @@ BIT::AndBITs::iterator BIT::erase(It pos)
 
 // Gdb debugging, see
 // http://wiki.opencog.org/w/Development_standards#Print_OpenCog_Objects
-std::string oc_to_string(const BITNode& bitnode, const std::string& indent);
-std::string oc_to_string(const BITNode& bitnode);
-std::string oc_to_string(const AndBIT& andbit, const std::string& indent);
-std::string oc_to_string(const AndBIT& andbit);
-// std::string oc_to_string(const BIT& bit);
+std::string oc_to_string(const BITNode& bitnode,
+                         const std::string& indent=empty_string);
+std::string oc_to_string(const AndBIT& andbit,
+                         const std::string& indent=empty_string);
 
 } // ~namespace opencog
 
