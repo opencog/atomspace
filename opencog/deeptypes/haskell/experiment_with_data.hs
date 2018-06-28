@@ -24,7 +24,7 @@ data Concept = Concept String
              | ConceptAnd Concept Concept
              | ConceptOr Concept Concept
 
-data Member = Member Atom Concept
+data Member = Member Concept Atom
 
 data Predicate = Predicate (Atom -> TV)
                | PredicateAnd Predicate Predicate

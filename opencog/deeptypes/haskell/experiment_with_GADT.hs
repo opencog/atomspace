@@ -30,7 +30,7 @@ data Atom a where
     ConceptOr :: Atom ConceptName -> Atom ConceptName -> Atom ConceptName
     Inheritance :: Atom ConceptName -> Atom ConceptName -> Atom TV
     Similarity :: Atom ConceptName -> Atom ConceptName -> Atom TV
-    Member :: Atom a -> Atom ConceptName -> Atom TV
+    Member :: Atom ConceptName -> Atom a -> Atom TV
     SatisfyingSet :: Atom (Atom a -> TV) -> Atom ConceptName
 
     -- Variable
