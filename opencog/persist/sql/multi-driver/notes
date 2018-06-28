@@ -595,3 +595,22 @@ atoms/execution/Instantiator.cc DONE
 
 convert createNode too DONE 
 remote _class from AtomT DONE
+=======================================
+SQL parallel ... is currently broken.  How to fix this?
+
+   TLB::reserve_extent
+   TLB::reserve_upto
+   SQLAtomStorage::getMaxObservedUUID()
+   SQLAtomStorage::reserve
+SQLAtomStorage::check_uuid
+SQLAtomStorage::not_yet_stored
+
+_tlbuf.addAtom(h, TLB::INVALID_UUID);
+uuid = _brk_uuid.fetch_add(1, std::memory_order_relaxed);
+
+SELECT * FROM pg_stat_activity WHERE datname='en_dj_cfive';
+
+IF (SELECT count(*) FROM pg_stat_activity WHERE datname='en_dj_cfive') = 8 THEN
+    DROP SEQUENCE uuid_pool;
+    CREATE SEQUENCE uuid_pool START maxuuid INCREMENT BY 40000;
+END IF;
