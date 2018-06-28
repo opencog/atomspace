@@ -6,8 +6,9 @@ ADD_LIBRARY (persist-sql
 	SQLAtomStorage
 	SQLAtoms
 	SQLBulk
-	SQLValues
+	SQLSpaces
 	SQLTypeMap
+	SQLValues
 	SQLUUID
 	SQLPersistSCM
 )
