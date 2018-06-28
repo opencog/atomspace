@@ -158,7 +158,7 @@
     guile> (cog-af 1)
     (ConceptNode \"ArtificialIntelligence\" (av 15752 0 0))
 "
-	(map gar
+	(map gdr
 		(cog-incoming-by-type (cog-update-af n) 'MemberLink))
 )
 

@@ -156,7 +156,7 @@ Handle AttentionSCM::update_af(int n)
 	HandleSet prev_af;
 	for (const LinkPtr& lp: paf)
 	{
-		Handle h(lp->getOutgoingAtom(0));
+		Handle h(lp->getOutgoingAtom(1));
 		if (h != af_anchor)
 			prev_af.insert(h);
 	}
@@ -178,7 +178,7 @@ Handle AttentionSCM::update_af(int n)
 		auto gone = prev_af.find(hi);
 		if (prev_af.end() == gone)
 		{
-			atomspace->add_link(MEMBER_LINK, hi, af_anchor);
+			atomspace->add_link(MEMBER_LINK, af_anchor, hi);
 		}
 		else
 		{
