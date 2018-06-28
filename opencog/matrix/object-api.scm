@@ -315,7 +315,7 @@
 		; Return default, only if LLOBJ does not provide symbol
 		(define (overload symbol default)
 			(define fp (LLOBJ 'provides symbol))
-			(if (or (unspecified? fp) (null? fp)) default fp))
+			(if fp fp default))
 
 		; Define default patterns, that, when executed, return the stars.
 		; The LLOBJ can provide custom versions of this.
