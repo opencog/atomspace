@@ -255,8 +255,7 @@ ContentHash ScopeLink::compute_hash() const
 	}
 	fnv1a_hash(hsh, vth);
 
-	const Variables & vars = this->get_variables();
-	for(const auto& pr: vars._glob_intervalmap){
+	for(const auto& pr: _varlist._glob_intervalmap){
 		vth += pr.first->get_hash();
 	}
 	fnv1a_hash(hsh, vth);
