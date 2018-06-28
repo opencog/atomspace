@@ -99,6 +99,7 @@ std::string SQLAtomStorage::link_to_string(const LinkValuePtr& lvle)
 }
 
 /* ================================================================ */
+#define BUFSZ 250
 
 #define STMT(colname,val) { \
 	if (notfirst) { cols += ", "; vals += ", "; } else notfirst = true; \
