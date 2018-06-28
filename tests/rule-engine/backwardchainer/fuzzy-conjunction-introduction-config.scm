@@ -11,24 +11,24 @@
 ;; is currently undefined, we might settled with probabilities but it's
 ;; not sure)
 (MemberLink (stv 1 1)
+   (ConceptNode "URE")
    fuzzy-conjunction-introduction-1ary-rule-name
-   (ConceptNode "URE")
 )
 (MemberLink (stv 1 1)
+   (ConceptNode "URE")
    fuzzy-conjunction-introduction-2ary-rule-name
-   (ConceptNode "URE")
 )
 (MemberLink (stv 1 1)
+   (ConceptNode "URE")
    fuzzy-conjunction-introduction-3ary-rule-name
-   (ConceptNode "URE")
 )
 (MemberLink (stv 1 1)
+   (ConceptNode "URE")
    fuzzy-conjunction-introduction-4ary-rule-name
-   (ConceptNode "URE")
 )
 (MemberLink (stv 1 1)
-   fuzzy-conjunction-introduction-5ary-rule-name
    (ConceptNode "URE")
+   fuzzy-conjunction-introduction-5ary-rule-name
 )
 
 ;; termination criteria parameters

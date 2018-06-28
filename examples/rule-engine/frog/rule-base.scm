@@ -16,12 +16,12 @@
 ;; is currently undefined, we might settled with probabilities but it's
 ;; not sure)
 (MemberLink (stv 1 1)
-   conditional-full-instantiation-meta-rule-name
    ci-rbs
+   conditional-full-instantiation-meta-rule-name
 )
 (MemberLink (stv 1 1)
-   fuzzy-conjunction-introduction-2ary-rule-name
    ci-rbs
+   fuzzy-conjunction-introduction-2ary-rule-name
 )
 
 ;; termination criteria parameters

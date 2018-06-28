@@ -92,8 +92,8 @@ void Rule::init(const Handle& rule_member)
 		                            "Rule '%s' is expected to be a MemberLink",
 		                            rule_member->to_string().c_str());
 
-	Handle rule_alias = rule_member->getOutgoingAtom(0);
-	Handle rbs = rule_member->getOutgoingAtom(1);
+	Handle rbs = rule_member->getOutgoingAtom(0);
+	Handle rule_alias = rule_member->getOutgoingAtom(1);
 	init(rule_alias, rbs);
 }
 
@@ -112,7 +112,7 @@ void Rule::init(const Handle& rule_alias, const Handle& rule, const Handle& rbs)
 	_name = _rule_alias->get_name();
 	_rbs = rbs;
 	AtomSpace& as = *rule_alias->getAtomSpace();
-	Handle ml = as.get_link(MEMBER_LINK, rule_alias, rbs);
+	Handle ml = as.get_link(MEMBER_LINK, rbs, rule_alias);
 	_tv = ml->getTruthValue();
 
     verify_rule();

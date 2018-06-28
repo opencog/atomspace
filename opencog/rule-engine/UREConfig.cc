@@ -138,7 +138,7 @@ HandleSeq UREConfig::fetch_rule_names(const Handle& rbs)
 {
 	// Retrieve rules
 	Handle rule_var = _as.add_node(VARIABLE_NODE, "__URE_RULE__"),
-		rule_pat = _as.add_link(MEMBER_LINK, rule_var, rbs),
+		rule_pat = _as.add_link(MEMBER_LINK, rbs, rule_var),
 		gl = _as.add_link(GET_LINK, rule_pat),
 		results = satisfying_set(&_as, gl);
 	HandleSeq rule_names = results->getOutgoingSet();

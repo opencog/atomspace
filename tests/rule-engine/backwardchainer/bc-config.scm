@@ -12,12 +12,12 @@
 ;; is currently undefined, we might settled with probabilities but it's
 ;; not sure)
 (MemberLink (stv 1 1)
-   crisp-modus-ponens-rule-name
    (ConceptNode "URE")
+   crisp-modus-ponens-rule-name
 )
 (MemberLink (stv 1 1)
-   bc-deduction-rule-name
    (ConceptNode "URE")
+   bc-deduction-rule-name
 )
 
 ;; termination criteria parameters

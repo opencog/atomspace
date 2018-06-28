@@ -5,8 +5,8 @@
 ; is currently undefined, we might settled with probabilities but it's
 ; not sure)
 (MemberLink (stv 1 1)
-   pln-rule-deduction-name
    (ConceptNode "FC_DEMO_RB")
+   pln-rule-deduction-name
 )
 
 ; termination criteria parameters

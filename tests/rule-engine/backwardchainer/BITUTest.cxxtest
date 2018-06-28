@@ -56,22 +56,22 @@ public:
 		std::string eval_result = _eval.eval("(load-from-path \"closed-lambda-introduction-rule.scm\")");
 		closed_lambda_introduction_rule_h =
 			_eval.eval_h("(MemberLink (stv 1 1)"
-			             "   closed-lambda-introduction-rule-name"
-			             "   (ConceptNode \"URE\"))");
+			             "   (ConceptNode \"URE\")"
+			             "   closed-lambda-introduction-rule-name)");
 
 		// Load implication-and-lambda-factorization-rule
 		eval_result = _eval.eval("(load-from-path \"implication-and-lambda-factorization-rule.scm\")");
 		implication_and_lambda_factorization_rule_h =
 			_eval.eval_h("(MemberLink (stv 1 1)"
-			             "   implication-and-lambda-factorization-rule-name"
-			             "   (ConceptNode \"URE\"))");
+			             "   (ConceptNode \"URE\")"
+			             "   implication-and-lambda-factorization-rule-name)");
 
 		// Load implication-and-lambda-factorization-rule
 		eval_result = _eval.eval("(load-from-path \"unary-specialization-rule.scm\")");
 		unary_specialization_rule_h =
 			_eval.eval_h("(MemberLink (stv 1 1)"
-			             "   unary-specialization-rule-name"
-			             "   (ConceptNode \"URE\"))");
+			             "   (ConceptNode \"URE\")"
+			             "   unary-specialization-rule-name)");
 
 		// Load bit.scm
 		eval_result = _eval.eval("(load-from-path \"bit.scm\")");

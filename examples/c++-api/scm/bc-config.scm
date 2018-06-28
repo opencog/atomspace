@@ -6,12 +6,12 @@
 ; is currently undefined, we might settled with probabilities but it's
 ; not sure)
 (MemberLink
-   pln-rule-modus-ponens-name
    (ConceptNode "BC_DEMO_RB")
+   pln-rule-modus-ponens-name
 )
 (MemberLink (stv 1 1)
-   pln-rule-deduction-name
    (ConceptNode "BC_DEMO_RB")
+   pln-rule-deduction-name
 )
 
 ; termination criteria parameters

@@ -12,8 +12,8 @@
     (Variable "$a")
     (Variable "$b"))
    (Member
-    (Variable "$a")
-    (Variable "$b")))
+    (Variable "$b")
+    (Variable "$a")))
 
   (ExecutionOutput
    (GroundedSchemaNode "scm: return-value")

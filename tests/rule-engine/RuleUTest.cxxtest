@@ -94,28 +94,28 @@ void RuleUTest::setUp()
 
 	deduction_rule_h =
 		_eval.eval_h("(MemberLink (stv 1 1)"
-		             "   bc-deduction-rule-name"
-		             "   (ConceptNode \"URE\"))");
+		             "   (ConceptNode \"URE\")"
+		             "   bc-deduction-rule-name)");
 	deduction_implication_rule_h =
 		_eval.eval_h("(MemberLink (stv 1 1)"
-		             "   crisp-deduction-implication-rule-name"
-		             "   (ConceptNode \"URE\"))");
+		             "   (ConceptNode \"URE\")"
+		             "   crisp-deduction-implication-rule-name)");
 	implication_scope_to_implication_rule_h =
 		_eval.eval_h("(MemberLink (stv 1 1)"
-		             "   implication-scope-to-implication-rule-name"
-		             "   (ConceptNode \"URE\"))");
+		             "   (ConceptNode \"URE\")"
+		             "   implication-scope-to-implication-rule-name)");
 	implication_and_lambda_factorization_rule_h =
 		_eval.eval_h("(MemberLink (stv 1 1)"
-		             "   implication-and-lambda-factorization-rule-name"
-		             "   (ConceptNode \"URE\"))");
+		             "   (ConceptNode \"URE\")"
+		             "   implication-and-lambda-factorization-rule-name)");
 	closed_lambda_introduction_rule_h =
 		_eval.eval_h("(MemberLink (stv 1 1)"
-		             "   closed-lambda-introduction-rule-name"
-		             "   (ConceptNode \"URE\"))");
+		             "   (ConceptNode \"URE\")"
+		             "   closed-lambda-introduction-rule-name)");
 	conditional_direct_evaluation_implication_scope_rule_h =
 		_eval.eval_h("(MemberLink (stv 1 1)"
-		             "   conditional-direct-evaluation-implication-scope-rule-name"
-		             "   (ConceptNode \"URE\"))");
+		             "   (ConceptNode \"URE\")"
+		             "   conditional-direct-evaluation-implication-scope-rule-name)");
 
 	X = an(VARIABLE_NODE, "$X");
 	A = an(CONCEPT_NODE, "A");

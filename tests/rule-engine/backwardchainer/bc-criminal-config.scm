@@ -14,32 +14,32 @@
 ;; not sure)
 (define rule-confidence 0.5)
 (MemberLink (stv 1 rule-confidence)
-   conditional-full-instantiation-meta-rule-name
    (ConceptNode "URE")
+   conditional-full-instantiation-meta-rule-name
 )
 (MemberLink (stv 0.6 rule-confidence)
+   (ConceptNode "URE")
    bc-deduction-rule-name
-   (ConceptNode "URE")
 )
 (MemberLink (stv 1 rule-confidence)
+   (ConceptNode "URE")
    fuzzy-conjunction-introduction-1ary-rule-name
-   (ConceptNode "URE")
 )
 (MemberLink (stv 1 rule-confidence)
+   (ConceptNode "URE")
    fuzzy-conjunction-introduction-2ary-rule-name
-   (ConceptNode "URE")
 )
 (MemberLink (stv 1 rule-confidence)
+   (ConceptNode "URE")
    fuzzy-conjunction-introduction-3ary-rule-name
-   (ConceptNode "URE")
 )
 (MemberLink (stv 1 rule-confidence)
+   (ConceptNode "URE")
    fuzzy-conjunction-introduction-4ary-rule-name
-   (ConceptNode "URE")
 )
 (MemberLink (stv 1 rule-confidence)
-   fuzzy-conjunction-introduction-5ary-rule-name
    (ConceptNode "URE")
+   fuzzy-conjunction-introduction-5ary-rule-name
 )
 
 ;; termination criteria parameters

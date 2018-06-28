@@ -59,8 +59,8 @@
 
 ;; Associate the rules to the rule base 
 (MemberLink (stv 1 1)
-   keep-pet-rule-name
    Einstein-rbs
+   keep-pet-rule-name
 )
 
 ;; termination criteria parameters
@@ -147,8 +147,8 @@
 
 ;; Now uncomment below MemberLink to add this rule into rbs
 ;(MemberLink (stv 1 1)
-;   keep-pet-rule-with-dummyoutput-name
 ;   Einstein-rbs
+;   keep-pet-rule-with-dummyoutput-name
 ;)
 
 ;; Then run backward chainer again:

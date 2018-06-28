@@ -11,8 +11,8 @@
 ;; is currently undefined, we might settled with probabilities but it's
 ;; not sure)
 (MemberLink (stv 1 1)
-   conditional-partial-instantiation-meta-rule-name
    (ConceptNode "URE")
+   conditional-partial-instantiation-meta-rule-name
 )
 
 ;; termination criteria parameters

@@ -12,12 +12,12 @@
 ;; is currently undefined, we might settled with probabilities but it's
 ;; not sure)
 (MemberLink (stv 1 1)
-   implication-scope-direct-evaluation-rule-name
    (ConceptNode "URE")
+   implication-scope-direct-evaluation-rule-name
 )
 (MemberLink (stv 1 1)
-   conditional-full-instantiation-meta-rule-name
    (ConceptNode "URE")
+   conditional-full-instantiation-meta-rule-name
 )
 
 ;; Termination criteria parameters

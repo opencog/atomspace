@@ -12,12 +12,12 @@
 ;; is currently undefined, we might settled with probabilities but it's
 ;; not sure)
 (MemberLink (stv 1 1)
-   conditional-full-instantiation-meta-rule-name
    (ConceptNode "URE")
+   conditional-full-instantiation-meta-rule-name
 )
 (MemberLink (stv 1 1)
-   fuzzy-conjunction-introduction-2ary-rule-name
    (ConceptNode "URE")
+   fuzzy-conjunction-introduction-2ary-rule-name
 )
 
 ;; termination criteria parameters

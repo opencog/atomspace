@@ -94,8 +94,8 @@ public:
 	 * The rule argument has the format
 	 *
 	 * MemberLink <TV>
-	 *    <rule alias>
 	 *    <rbs>
+	 *    <rule alias>
 	 *
 	 * where `<rule alias>` is a `DefinedSchemaNode`, defined elsewhere,
 	 * with a `DefineLink`.

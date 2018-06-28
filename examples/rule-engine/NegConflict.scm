@@ -158,8 +158,8 @@
 
 ;; Associate the rules to the rule base 
 (MemberLink (stv 1 1)
-   keep-different-pet-rule-name
    Einstein-rbs
+   keep-different-pet-rule-name
 )
 
 ;; termination criteria parameters

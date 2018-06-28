@@ -134,11 +134,11 @@
 
         (if (null? tv)
             (MemberLink
-               alias
-               rbs)
+               rbs
+               alias)
             (MemberLink (car tv)
-               alias
-               rbs))
+               rbs
+               alias))
 
         alias
     )
@@ -156,11 +156,11 @@
 "
   (if (null? tv)
       (MemberLink
-        rule-alias
-        rbs)
+        rbs
+        rule-alias)
       (MemberLink (car tv)
-        rule-alias
-        rbs))
+        rbs
+        rule-alias))
 )
 
 (define-public (ure-add-rules rbs rules)
@@ -168,8 +168,8 @@
   Given a rbs and a list of pairs (rule-alias tv) create for each rule
 
   MemberLink tv
-    rule-alias
     rbs
+    rule-alias
 
   rbs: The ConceptNode that represents a rulebase
 

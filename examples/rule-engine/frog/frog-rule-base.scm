@@ -90,11 +90,11 @@
 )
 
 (Member (stv 0.9 1)
-  if-croaks-and-eats-flies-then-frog-rule-name
   frog-rb
+  if-croaks-and-eats-flies-then-frog-rule-name
 )
 
 (Member (stv 0.5 1)
-  if-frog-then-green-rule-name
   frog-rb
+  if-frog-then-green-rule-name
 )

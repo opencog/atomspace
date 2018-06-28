@@ -172,8 +172,8 @@ private:
 	// system. Specifically fetches patterns
 	//
 	// MemberLink <TV>
-	//    <rule name>
 	//    <rbs>
+	//    <rule name>
 	HandleSeq fetch_rule_names(const Handle& rbs);
 
 	// Fetch from the atomspace all parameters common to the forward
