@@ -158,8 +158,8 @@
     guile> (cog-af 1)
     (ConceptNode \"ArtificialIntelligence\" (av 15752 0 0))
 "
-	(map gar
-		(cog-incoming-by-type (cog-update-af n) 'MemberLink))
+	(cog-value->list
+		(cog-value (cog-update-af n) (Predicate "AttentionalFocus")))
 )
 
 (export cog-af)
