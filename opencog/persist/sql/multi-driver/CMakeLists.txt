@@ -5,6 +5,7 @@ ADD_LIBRARY (persist-sql
 	llapi
 	SQLAtomStorage
 	SQLAtoms
+	SQLBulk
 	SQLValues
 	SQLTypeMap
 	SQLPersistSCM

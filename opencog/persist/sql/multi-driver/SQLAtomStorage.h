@@ -97,7 +97,6 @@ class SQLAtomStorage : public AtomStorage
 		Handle doGetNode(Type, const char *);
 		Handle doGetLink(Type, const HandleSeq&);
 
-		int get_height(const Handle&);
 		int max_height;
 
 		void getIncoming(AtomTable&, const char *);
