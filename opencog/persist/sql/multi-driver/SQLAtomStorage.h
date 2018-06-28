@@ -49,6 +49,10 @@
 
 #include "llapi.h"
 
+// See SQLAtomStorage.cc for extensive explantion of what this
+// is and why it has this particular value.
+#define NUM_OMP_THREADS 8
+
 namespace opencog
 {
 /** \addtogroup grp_persist

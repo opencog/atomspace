@@ -103,7 +103,7 @@ void SQLAtomStorage::init(const char * uri)
 	// _initial_conn_pool_size = std::thread::hardware_concurrency();
 	// if (0 == _initial_conn_pool_size) _initial_conn_pool_size = 8;
 	// _initial_conn_pool_size += NUM_WB_QUEUES;
-#define NUM_OMP_THREADS 8
+// #define NUM_OMP_THREADS 8
 
 	// A large number of write-back queues do not seem to help
 	// performance, because once the queues get above the high-water
