@@ -77,10 +77,9 @@ void SQLAtomStorage::getIncoming(AtomTable& table, const char *buff)
 		iset.emplace_back(hi);
 	});
 
-#ifdef STORAGE_DEBUG
+	// Performance stats
 	_num_get_insets++;
 	_num_get_inlinks += iset.size();
-#endif // STORAGE_DEBUG
 }
 
 /**

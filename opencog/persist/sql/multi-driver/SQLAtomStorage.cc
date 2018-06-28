@@ -1,5 +1,5 @@
 /*
- * FUNCTION:
+ * SQLAtomStorage.cc
  * Persistent Atom storage, SQL-backed.
  *
  * Atoms and Values are saved to, and restored from, an SQL DB using
@@ -29,15 +29,7 @@
  * 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
  */
 #include <stdlib.h>
-#include <time.h>
 #include <unistd.h>
-
-#include <chrono>
-#include <memory>
-#include <thread>
-
-#include <opencog/util/oc_assert.h>
-#include <opencog/util/oc_omp.h>
 
 #include <opencog/atoms/base/Atom.h>
 #include <opencog/atoms/proto/NameServer.h>
@@ -52,13 +44,10 @@
 #include "ll-pg-cxx.h"
 #include "odbcxx.h"
 
-
 using namespace opencog;
 
 /* ================================================================ */
 // Constructors
-
-#define STORAGE_DEBUG 1
 
 void SQLAtomStorage::init(const char * uri)
 {
@@ -487,7 +476,6 @@ void SQLAtomStorage::clear_stats(void)
 
 	_write_queue.clear_stats();
 
-#ifdef STORAGE_DEBUG
 	_num_get_nodes = 0;
 	_num_got_nodes = 0;
 	_num_rec_nodes = 0;
@@ -500,7 +488,6 @@ void SQLAtomStorage::clear_stats(void)
 	_num_link_inserts = 0;
 	_num_atom_removes = 0;
 	_num_atom_deletes = 0;
-#endif // STORAGE_DEBUG
 }
 
 void SQLAtomStorage::print_stats(void)
@@ -529,7 +516,6 @@ void SQLAtomStorage::print_stats(void)
 	       num_atom_removes, num_atom_deletes);
 	printf("\n");
 
-#ifdef STORAGE_DEBUG
 	size_t num_get_nodes = _num_get_nodes;
 	size_t num_got_nodes = _num_got_nodes;
 	size_t num_rec_nodes = _num_rec_nodes;
@@ -558,7 +544,6 @@ void SQLAtomStorage::print_stats(void)
 	frac = tot_link / ((double) tot_node);
 	printf("total stores for node=%lu link=%lu ratio=%f\n",
 	       tot_node, tot_link, frac);
-#endif // STORAGE_DEBUG
 
 	// Store queue performance
 	unsigned long item_count = _write_queue._item_count;

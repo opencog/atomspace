@@ -278,13 +278,12 @@ void SQLAtomStorage::do_store_single_atom(const Handle& h, int aheight)
 
 	STMT("uuid", uuidbuff);
 
-#ifdef STORAGE_DEBUG
+	// Keep performance stats
 	if (0 == aheight) {
 		_num_node_inserts++;
 	} else {
 		_num_link_inserts++;
 	}
-#endif // STORAGE_DEBUG
 
 	// Store the atomspace UUID
 	AtomTable * at = getAtomTable(h);
@@ -495,16 +494,14 @@ Handle SQLAtomStorage::doGetNode(Type t, const char * str)
 			"\tnc=%d buffer=>>%s<<\n", nc, buff);
 		return Handle();
 	}
-#ifdef STORAGE_DEBUG
+
+	// Performance stats
 	_num_get_nodes++;
-#endif // STORAGE_DEBUG
 
 	PseudoPtr p(getAtom(buff, 0));
 	if (NULL == p) return Handle();
 
-#ifdef STORAGE_DEBUG
 	_num_got_nodes++;
-#endif // STORAGE_DEBUG
 	_tlbuf.addAtom(node, p->uuid);
 	return _tlbuf.getAtom(p->uuid);
 }
@@ -552,15 +549,12 @@ Handle SQLAtomStorage::doGetLink(Type t, const HandleSeq& hseq)
 	qstr += ostr;
 	qstr += ";";
 
-#ifdef STORAGE_DEBUG
+	// Performance stats
 	_num_get_links++;
-#endif // STORAGE_DEBUG
 	PseudoPtr p = getAtom(qstr.c_str(), 1);
 	if (nullptr == p) return Handle();
 
-#ifdef STORAGE_DEBUG
 	_num_got_links++;
-#endif // STORAGE_DEBUG
 	_tlbuf.addAtom(link, p->uuid);
 	return _tlbuf.getAtom(p->uuid);
 }
