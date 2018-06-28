@@ -25,6 +25,7 @@
 #include <opencog/atomspace/AtomSpace.h>
 #include <opencog/guile/SchemeEval.h>
 #include <opencog/query/BindLinkAPI.h>
+#include <opencog/atoms/execution/Instantiator.h>
 
 #include "imply.h"
 
@@ -60,6 +61,7 @@ public:
 	void test_exec(void);
 	void test_varsub(void);
 	void test_query_exec(void);
+	void test_clear_box_single_argument(void);
 };
 
 #define an as.add_node
@@ -272,6 +274,30 @@ void ExecutionOutputUTest::test_query_exec(void)
 	Handle exec_query = eval.eval_h("exec-query");
 	Handle results = satisfying_set(&as, exec_query);
 	TS_ASSERT_EQUALS(results->get_arity(), 3);
+
+	logger().debug("END TEST: %s", __FUNCTION__);
+}
+
+/**
+ * Execute clear box with single argument
+ */
+void ExecutionOutputUTest::test_clear_box_single_argument(void)
+{
+	logger().debug("BEGIN TEST: %s", __FUNCTION__);
+
+	Handle X = an(VARIABLE_NODE, "$X"),
+		PXX = al(PLUS_LINK, X, X),
+		twice = al(LAMBDA_LINK, PXX),
+		// TODO: to crash this test remove the List around 21
+		// N21 = an(NUMBER_NODE, "21"),
+		N21 = al(LIST_LINK, an(NUMBER_NODE, "21")),
+		twice21 = al(EXECUTION_OUTPUT_LINK, twice, N21);
+
+	Instantiator inst(&as);
+	Handle expected = an(NUMBER_NODE, "42"),
+		result = HandleCast(inst.execute(twice21));
+
+	TS_ASSERT_EQUALS(expected, result);
 
 	logger().debug("END TEST: %s", __FUNCTION__);
 }
