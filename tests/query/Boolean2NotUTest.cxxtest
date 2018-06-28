@@ -97,16 +97,16 @@ void Boolean2NotUTest::setUp(void)
 			),
 			// used to gaurentee that both are in the same "sentence"
 			al(MEMBER_LINK,
-				an(VARIABLE_NODE, "$var1"),
-				an(VARIABLE_NODE, "$sent")
+			   an(VARIABLE_NODE, "$sent"),
+				an(VARIABLE_NODE, "$var1")
 			),
 			al(MEMBER_LINK,
-				an(VARIABLE_NODE, "$var2"),
-				an(VARIABLE_NODE, "$sent")
+			   an(VARIABLE_NODE, "$sent"),
+				an(VARIABLE_NODE, "$var2")
 			),
 			al(MEMBER_LINK,
-				an(VARIABLE_NODE, "$winst"),
-				an(VARIABLE_NODE, "$sent")
+			   an(VARIABLE_NODE, "$sent"),
+				an(VARIABLE_NODE, "$winst")
 			),
 			al(CONTEXT_LINK,
 				an(VARIABLE_NODE, "$winst"),
@@ -155,16 +155,16 @@ void Boolean2NotUTest::setUp(void)
 		)
 	);
 	al(MEMBER_LINK,
-		an(CONCEPT_NODE, "Berlin"),
-		an(CONCEPT_NODE, "sentence-AAA")
+	   an(CONCEPT_NODE, "sentence-AAA"),
+		an(CONCEPT_NODE, "Berlin")
 	);
 	al(MEMBER_LINK,
-		an(CONCEPT_NODE, "city"),
-		an(CONCEPT_NODE, "sentence-AAA")
+	   an(CONCEPT_NODE, "sentence-AAA"),
+		an(CONCEPT_NODE, "city")
 	);
 	al(MEMBER_LINK,
-		an(CONCEPT_NODE, "be@1111"),
-		an(CONCEPT_NODE, "sentence-AAA")
+	   an(CONCEPT_NODE, "sentence-AAA"),
+		an(CONCEPT_NODE, "be@1111")
 	);
 	al(CONTEXT_LINK,
 		an(CONCEPT_NODE, "be@1111"),
@@ -202,16 +202,16 @@ void Boolean2NotUTest::setUp(void)
 		)
 	);
 	al(MEMBER_LINK,
-		an(CONCEPT_NODE, "Madrid"),
-		an(CONCEPT_NODE, "sentence-BBB")
+	   an(CONCEPT_NODE, "sentence-BBB"),
+		an(CONCEPT_NODE, "Madrid")
 	);
 	al(MEMBER_LINK,
-		an(CONCEPT_NODE, "city"),
-		an(CONCEPT_NODE, "sentence-BBB")
+	   an(CONCEPT_NODE, "sentence-BBB"),
+		an(CONCEPT_NODE, "city")
 	);
 	al(MEMBER_LINK,
-		an(CONCEPT_NODE, "be@2222"),
-		an(CONCEPT_NODE, "sentence-BBB")
+	   an(CONCEPT_NODE, "sentence-BBB"),
+		an(CONCEPT_NODE, "be@2222")
 	);
 	al(CONTEXT_LINK,
 		an(CONCEPT_NODE, "be@2222"),

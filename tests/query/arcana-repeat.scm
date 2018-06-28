@@ -97,7 +97,7 @@
 			)
 		)
 	)
-	(MemberLink
+	(MemberLink                     ; TODO this MemberLink is ill-formed
 		(EvaluationLink
 			(PredicateNode "this way")
 			(ListLink
@@ -120,7 +120,7 @@
 			)
 		)
 	)
-	(MemberLink
+	(MemberLink                     ; TODO this MemberLink is ill-formed
 		(EvaluationLink
 			(PredicateNode "this way")
 			(ListLink
@@ -184,7 +184,7 @@
 					)
 				)
 			)
-			(MemberLink
+			(MemberLink     ; TODO this MemberLink is ill-formed
 				(EvaluationLink
 					(PredicateNode "this way")
 					(ListLink
@@ -213,7 +213,7 @@
 					)
 				)
 			)
-			(MemberLink
+			(MemberLink     ; TODO this MemberLink is ill-formed
 				(EvaluationLink
 					(PredicateNode "this way")
 					(ListLink

@@ -11,7 +11,7 @@
 		(Variable "$point")
 		(OrderedLink
 			(Glob "$begin")
-			(Member WORD (Variable "$set"))
+			(Member (Variable "$set") WORD)
 			(Glob "$end"))))
 
 (define (locate WORD)
@@ -30,7 +30,7 @@
 		(Variable "$point")
 		(OrderedLink
 			(Glob "$begin")
-			(Member (Glob "$set") WORD)
+			(Member WORD (Glob "$set"))
 			(Glob "$end"))))
 
 (define (glocate WORD)
@@ -49,7 +49,7 @@
 (List
 	(Concept "first")
 	(OrderedLink
-		(Member (Concept "special") (Concept "stuff"))
+		(Member (Concept "stuff") (Concept "special"))
 		(Concept "A")
 		(Concept "B")
 		(Concept "C")
@@ -60,7 +60,7 @@
 	(Concept "second")
 	(OrderedLink
 		(Concept "A")
-		(Member (Concept "special") (Concept "things"))
+		(Member (Concept "things") (Concept "special"))
 		(Concept "B")
 		(Concept "C")
 		(Concept "D"))))
@@ -71,7 +71,7 @@
 	(OrderedLink
 		(Concept "A")
 		(Concept "B")
-		(Member (Concept "special") (Concept "stuff"))
+		(Member (Concept "stuff") (Concept "special"))
 		(Concept "C")
 		(Concept "D"))))
 
@@ -82,7 +82,7 @@
 		(Concept "A")
 		(Concept "B")
 		(Concept "C")
-		(Member (Concept "special") (Concept "stuff"))
+		(Member (Concept "stuff") (Concept "special"))
 		(Concept "D"))))
 
 (define five
@@ -93,6 +93,6 @@
 		(Concept "B")
 		(Concept "C")
 		(Concept "D")
-		(Member (Concept "special") (Concept "stuff")))))
+		(Member (Concept "stuff") (Concept "special")))))
 
 *unspecified*

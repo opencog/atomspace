@@ -7,74 +7,74 @@
 
 ;;; Populate the atomspace with four small trees.
 (MemberLink
+	(ConceptNode "ways and means")
 	(ConceptNode "Tom")
-	(ConceptNode "ways and means")
 )
 
 (MemberLink
+	(ConceptNode "ways and means")
 	(ConceptNode "Joe")
-	(ConceptNode "ways and means")
 )
 
 (MemberLink
+	(ConceptNode "ways and means")
 	(ConceptNode "Hank")
-	(ConceptNode "ways and means")
 )
 
 (MemberLink
+	(ConceptNode "ways and means")
 	(ConceptNode "Mary")
-	(ConceptNode "ways and means")
 )
 
 (MemberLink
+	(ConceptNode "ways and means")
 	(ConceptNode "Phillip")
-	(ConceptNode "ways and means")
 )
 
 (MemberLink
+	(ConceptNode "ways and means")
 	(ConceptNode "Milton")
-	(ConceptNode "ways and means")
 )
 
 (MemberLink
+	(ConceptNode "ways and means")
 	(ConceptNode "Charlie")
-	(ConceptNode "ways and means")
 )
 
 (MemberLink
+	(ConceptNode "ways and means")
 	(ConceptNode "Chayim")
-	(ConceptNode "ways and means")
 )
 
 (MemberLink
+	(ConceptNode "ways and means")
 	(ConceptNode "Stuart")
-	(ConceptNode "ways and means")
 )
 
 (MemberLink
-	(ConceptNode "Tom")
 	(ConceptNode "Senator")
+	(ConceptNode "Tom")
 )
 
 (MemberLink
-	(ConceptNode "Joe")
 	(ConceptNode "Representative")
+	(ConceptNode "Joe")
 )
 
 ;; We should NOT find Hank!
 (MemberLink
-	(ConceptNode "Hank")
 	(ConceptNode "CEO")
+	(ConceptNode "Hank")
 )
 
 (MemberLink
-	(ConceptNode "Mary")
 	(ConceptNode "Page")
+	(ConceptNode "Mary")
 )
 
 (MemberLink
-	(ConceptNode "Phillip")
 	(ConceptNode "Secretary")
+	(ConceptNode "Phillip")
 )
 
 (EvaluationLink
@@ -115,17 +115,17 @@
 	(BindLink
 		(AndLink
 			(MemberLink
-				(VariableNode "$x")
 				(ConceptNode "ways and means")
+				(VariableNode "$x")
 			)
 			(ChoiceLink
 				(MemberLink
-					(VariableNode "$x")
 					(ConceptNode "Senator")
+					(VariableNode "$x")
 				)
 				(MemberLink
-					(VariableNode "$x")
 					(ConceptNode "Representative")
+					(VariableNode "$x")
 				)
 				(EvaluationLink
 					(PredicateNode "involved")
@@ -155,27 +155,27 @@
 	(BindLink
 		(AndLink
 			(MemberLink
-				(VariableNode "$x")
 				(ConceptNode "ways and means")
+				(VariableNode "$x")
 			)
 			(ChoiceLink
 				(MemberLink
-					(VariableNode "$x")
 					(ConceptNode "Senator")
+					(VariableNode "$x")
 				)
 				(MemberLink
-					(VariableNode "$x")
 					(ConceptNode "Representative")
+					(VariableNode "$x")
 				)
 				;;  Note this Choice within a Choice
 				(ChoiceLink
 					(MemberLink
-						(VariableNode "$x")
 						(ConceptNode "Page")
+						(VariableNode "$x")
 					)
 					(MemberLink
-						(VariableNode "$x")
 						(ConceptNode "Secretary")
+						(VariableNode "$x")
 					)
 				)
 			)

@@ -21,7 +21,7 @@
 )
 
 ;; this should not match.
-(MemberLink
+(MemberLink                             ; TODO this MemberLink is ill-formed
 	(SchemaNode "ActivationModulatorUpdater")
 	(NumberNode "0.24")
 	(SetLink
@@ -32,7 +32,7 @@
 )
 
 ;; this should not match.
-(MemberLink
+(MemberLink                             ; TODO this MemberLink is ill-formed
 	(SchemaNode "ActivationModulatorUpdater")
 	(NumberNode "0.24")
 	(AtTimeLink
@@ -44,7 +44,7 @@
 )
 
 ;; this should not match.
-(MemberLink
+(MemberLink                             ; TODO this MemberLink is ill-formed
 	(SchemaNode "ActivationModulatorUpdater")
 	(NumberNode "0.24")
 	(SetLink
@@ -56,7 +56,7 @@
 )
 
 ;; this should not match.
-(MemberLink
+(MemberLink                             ; TODO this MemberLink is ill-formed
 	(SchemaNode "ActivationModulatorUpdater")
 	(FeatureNode "here kitty kitty")
 	(EvaluationLink
@@ -68,7 +68,7 @@
 )
 
 ;; this should not match.
-(MemberLink
+(MemberLink                             ; TODO this MemberLink is ill-formed
 	(SchemaNode "ActivationModulatorUpdater")
 	(ConceptNode "big idea")
 	(SetLink
@@ -84,7 +84,7 @@
 ;; randomized in the atomspace -- i.e. not at the begining (lowest
 ;; handle uuid's) nor at the end (highest handle numbers) of the
 ;; atomspace
-(MemberLink
+(MemberLink                             ; TODO this MemberLink is ill-formed
 	(SchemaNode "ActivationModulatorUpdater")
 	(NumberNode "0.24")
 	(SetLink
@@ -96,7 +96,7 @@
 )
 
 ;; this should not match.
-(MemberLink
+(MemberLink                             ; TODO this MemberLink is ill-formed
 	(SchemaNode "ActivationModulatorUpdater")
 	(NumberNode "0.24")
 	(SetLink
@@ -119,7 +119,7 @@
 )
 
 ;; this should not match.
-(MemberLink
+(MemberLink                             ; TODO this MemberLink is ill-formed
 	(SchemaNode "ActivationModulatorUpdater")
 	(NumberNode "0.24")
 	(SetLink
@@ -131,7 +131,7 @@
 )
 
 ;; this should not match.
-(MemberLink
+(MemberLink                             ; TODO this MemberLink is ill-formed
 	(SemeNode "ActivationModulatorUpdater")
 	(ConceptNode "big idea")
 	(SetLink
@@ -143,7 +143,7 @@
 )
 
 ;; this should not match.
-(MemberLink
+(MemberLink                             ; TODO this MemberLink is ill-formed
 	(SchemaNode "ActivationModulatorUpdater")
 	(NumberNode "0.24")
 	(HebbianLink
@@ -162,7 +162,7 @@
 			(VariableNode "$var_schema")
 		)
 		;; body
-		(MemberLink
+		(MemberLink             ; TODO this MemberLink is ill-formed
 			(VariableNode "$var_schema")
 			(VariableNode "$var_number")
 			(SetLink
@@ -193,7 +193,7 @@
 )
 
 ;; this should not match.
-(MemberLink
+(MemberLink                             ; TODO this MemberLink is ill-formed
 	(WordNode "bird is the word")
 	(NumberNode "0.24")
 	(SetLink
@@ -205,7 +205,7 @@
 )
 
 ;; this should not match.
-(MemberLink
+(MemberLink                             ; TODO this MemberLink is ill-formed
 	(SchemaNode "ActivationModulatorUpdater")
 	(NumberNode "0.24")
 	(ParseLink
@@ -217,7 +217,7 @@
 )
 
 ;; this should not match.
-(MemberLink
+(MemberLink                             ; TODO this MemberLink is ill-formed
 	(SchemaNode "ActivationModulatorUpdater")
 	(NumberNode "0.24")
 	(SetLink
@@ -229,7 +229,7 @@
 )
 
 ;; this should not match.
-(MemberLink
+(MemberLink                             ; TODO this MemberLink is ill-formed
 	(PrepositionalRelationshipNode "Big Red Button")
 	(NumberNode "0.24")
 	(SetLink

@@ -126,8 +126,8 @@
 
 ;;; A satisfiability question: Does Bill like X where X is baseball?
 (MemberLink
-	(ConceptNode "baseball")
 	(DefinedPredicateNode "Does Bill like X?")
+	(ConceptNode "baseball")
 )
 
 ;; solution:

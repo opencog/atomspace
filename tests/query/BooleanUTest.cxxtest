@@ -95,12 +95,12 @@ void BooleanUTest::setUp(void)
 			),
 			// Used to gaurantee that both are in the same "sentence"
 			al(MEMBER_LINK,
-				an(VARIABLE_NODE, "$var1"),
-				an(VARIABLE_NODE, "$sent")
+			   an(VARIABLE_NODE, "$sent"),
+				an(VARIABLE_NODE, "$var1")
 			),
 			al(MEMBER_LINK,
-				an(VARIABLE_NODE, "$var2"),
-				an(VARIABLE_NODE, "$sent")
+			   an(VARIABLE_NODE, "$sent"),
+				an(VARIABLE_NODE, "$var2")
 			),
 			al(ABSENT_LINK,
 				al(INHERITANCE_LINK,
@@ -138,12 +138,12 @@ void BooleanUTest::setUp(void)
 		)
 	);
 	al(MEMBER_LINK,
-		an(CONCEPT_NODE, "Berlin"),
-		an(CONCEPT_NODE, "sentence-AAA")
+	   an(CONCEPT_NODE, "sentence-AAA"),
+		an(CONCEPT_NODE, "Berlin")
 	);
 	al(MEMBER_LINK,
-		an(CONCEPT_NODE, "city"),
-		an(CONCEPT_NODE, "sentence-AAA")
+	   an(CONCEPT_NODE, "sentence-AAA"),
+		an(CONCEPT_NODE, "city")
 	);
 
 	// Create data on which the above pattern should fail
@@ -181,12 +181,12 @@ void BooleanUTest::setUp(void)
 		)
 	);
 	al(MEMBER_LINK,
-		an(CONCEPT_NODE, "Madrid"),
-		an(CONCEPT_NODE, "sentence-BBB")
+	   an(CONCEPT_NODE, "sentence-BBB"),
+		an(CONCEPT_NODE, "Madrid")
 	);
 	al(MEMBER_LINK,
-		an(CONCEPT_NODE, "capital"),
-		an(CONCEPT_NODE, "sentence-BBB")
+	   an(CONCEPT_NODE, "sentence-BBB"),
+		an(CONCEPT_NODE, "capital")
 	);
 }
 

@@ -6,34 +6,34 @@
 
 ;;; Populate the atomspace with four small trees.
 (MemberLink
+	(ConceptNode "ways and means")
 	(ConceptNode "Tom")
-	(ConceptNode "ways and means")
 )
 
 (MemberLink
+	(ConceptNode "ways and means")
 	(ConceptNode "Joe")
-	(ConceptNode "ways and means")
 )
 
 (MemberLink
+	(ConceptNode "ways and means")
 	(ConceptNode "Hank")
-	(ConceptNode "ways and means")
 )
 
 (MemberLink
-	(ConceptNode "Tom")
 	(ConceptNode "Senator")
+	(ConceptNode "Tom")
 )
 
 (MemberLink
-	(ConceptNode "Joe")
 	(ConceptNode "Representative")
+	(ConceptNode "Joe")
 )
 
 ;; We should NOT find Hank among the solutions
 (MemberLink
-	(ConceptNode "Hank")
 	(ConceptNode "CEO")
+	(ConceptNode "Hank")
 )
 
 ;;; Two clauses; they both connected with a common variable.
@@ -41,17 +41,17 @@
 	(BindLink
 		(AndLink
 			(MemberLink
-				(VariableNode "$x")
 				(ConceptNode "ways and means")
+				(VariableNode "$x")
 			)
 			(ChoiceLink
 				(MemberLink
-					(VariableNode "$x")
 					(ConceptNode "Senator")
+					(VariableNode "$x")
 				)
 				(MemberLink
-					(VariableNode "$x")
 					(ConceptNode "Representative")
+					(VariableNode "$x")
 				)
 			)
 		)

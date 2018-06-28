@@ -15,7 +15,6 @@
 
 (define (content-1)
    (MemberLink
-      (ConceptNode "Socrates@81011e61-27a7-4001-a63b-3b569478bced")
       (SatisfyingSetScopeLink
          (VariableNode "$X")
          (EvaluationLink
@@ -26,6 +25,7 @@
             )
          )
       )
+      (ConceptNode "Socrates@81011e61-27a7-4001-a63b-3b569478bced")
    )
 )
 
@@ -33,7 +33,6 @@
 (define (content-2)
 ; MemberLink having the same Variable name as rule
    (MemberLink
-      (ConceptNode "Socrates@81011e61-27a7-4001-a63b-3b569478bced")
       (SatisfyingSetScopeLink
          (VariableNode "$X-M2E")
          (EvaluationLink
@@ -44,6 +43,7 @@
             )
          )
       )
+      (ConceptNode "Socrates@81011e61-27a7-4001-a63b-3b569478bced")
    )
 )
 
@@ -59,7 +59,6 @@
          )
       )
       (MemberLink
-         (VariableNode "$B")
          (SatisfyingSetScopeLink
             (VariableNode "$X-M2E")
             (EvaluationLink
@@ -70,6 +69,7 @@
                )
             )
          )
+         (VariableNode "$B")
       )
       (ExecutionOutputLink
          (GroundedSchemaNode "scm: member-to-evaluation-formula")
@@ -82,7 +82,6 @@
                )
             )
             (MemberLink
-               (VariableNode "$B")
                (SatisfyingSetScopeLink
                   (VariableNode "$X-M2E")
                   (EvaluationLink
@@ -93,6 +92,7 @@
                      )
                   )
                )
+               (VariableNode "$B")
             )
          )
       )
@@ -112,7 +112,6 @@
          )
       )
       (MemberLink
-         (VariableNode "$B")
          (SatisfyingSetScopeLink
             (VariableNode "$X-M2E")
             (EvaluationLink
@@ -123,6 +122,7 @@
                )
             )
          )
+         (VariableNode "$B")
       )
       (ExecutionOutputLink
          (GroundedSchemaNode "scm: member-to-evaluation-formula")
@@ -135,7 +135,6 @@
                )
             )
             (MemberLink
-               (VariableNode "$B")
                (SatisfyingSetScopeLink
                   (VariableNode "$some-bound-var")
                   (EvaluationLink
@@ -146,6 +145,7 @@
                      )
                   )
                )
+               (VariableNode "$B")
             )
          )
       )

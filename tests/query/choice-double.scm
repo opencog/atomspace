@@ -7,52 +7,52 @@
 
 ;;; Populate the atomspace with four small trees.
 (MemberLink
+	(ConceptNode "ways and means")
 	(ConceptNode "Tom")
-	(ConceptNode "ways and means")
 )
 
 (MemberLink
+	(ConceptNode "ways and means")
 	(ConceptNode "Joe")
-	(ConceptNode "ways and means")
 )
 
 (MemberLink
+	(ConceptNode "ways and means")
 	(ConceptNode "Hank")
-	(ConceptNode "ways and means")
 )
 
 (MemberLink
-	(ConceptNode "Dick")
 	(ConceptNode "agriculture")
+	(ConceptNode "Dick")
 )
 
 ;;; the list link serves no purpose other than to "embed"
 (ListLink
 	(MemberLink
+		(ConceptNode "Senator")
 		(ConceptNode "Tom")
-		(ConceptNode "Senator")
 	)
 )
 
 (ListLink
 	(MemberLink
+		(ConceptNode "Senator")
 		(ConceptNode "Dick")
-		(ConceptNode "Senator")
 	)
 )
 
 (ListLink
 	(MemberLink
-		(ConceptNode "Joe")
 		(ConceptNode "Representative")
+		(ConceptNode "Joe")
 	)
 )
 
 ;; We should NOT find Hank!
 (ListLink
 	(MemberLink
-		(ConceptNode "Hank")
 		(ConceptNode "CEO")
+		(ConceptNode "Hank")
 	)
 )
 
@@ -62,23 +62,23 @@
 		(AndLink
 			(ChoiceLink
 				(MemberLink
-					(VariableNode "$x")
 					(ConceptNode "ways and means")
+					(VariableNode "$x")
 				)
 				(MemberLink
-					(VariableNode "$x")
 					(ConceptNode "agriculture")
+					(VariableNode "$x")
 				)
 			)
 			(ListLink
 				(ChoiceLink
 					(MemberLink
-						(VariableNode "$x")
 						(ConceptNode "Senator")
+						(VariableNode "$x")
 					)
 					(MemberLink
-						(VariableNode "$x")
 						(ConceptNode "Representative")
+						(VariableNode "$x")
 					)
 				)
 			)

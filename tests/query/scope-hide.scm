@@ -36,8 +36,8 @@
 ;;     )
 ;;   )
 ;;   (MemberLink
-;;     (ConceptNode "ChurchOfEngland")
 ;;     (ConceptNode "AnglicanChurch")
+;;     (ConceptNode "ChurchOfEngland")
 ;;   )
 ;;   (EvaluationLink
 ;;     (PredicateNode "subOrganization")
@@ -49,8 +49,8 @@
 ;; )
 
 (MemberLink
-  (ConceptNode "ChurchOfEngland")
   (ConceptNode "AnglicanChurch")
+  (ConceptNode "ChurchOfEngland")
 )
 
 (define rule
@@ -64,8 +64,8 @@
          )
       )
       (MemberLink
-         (VariableNode "?C")
          (ConceptNode "AnglicanChurch")
+         (VariableNode "?C")
       )
       (ImplicationScopeLink
          (TypedVariableLink
@@ -77,8 +77,8 @@
             )
          )
          (MemberLink
-            (VariableNode "?C")
             (ConceptNode "AnglicanChurch")
+            (VariableNode "?C")
          )
          (EvaluationLink
             (PredicateNode "subOrganization")

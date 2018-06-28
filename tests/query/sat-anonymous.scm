@@ -36,7 +36,6 @@
 
 ;;; A satisfiability question: Does Tom like X where X is baseball?
 (MemberLink
-	(ConceptNode "baseball")
 	(SatisfactionLink
 		(VariableNode "$X")
 		(EvaluationLink
@@ -47,4 +46,5 @@
 			)
 		)
 	)
+	(ConceptNode "baseball")
 )

@@ -51,7 +51,7 @@
 )
 
 ;;; A satisfiability question: Does Tom like X where X is baseball?
-(MemberLink
-	(ConceptNode "baseball")
+(MemberLink                             ; TODO this MemberLink is ill-formed
 	(ConceptNode "Does Tom like X?")
+	(ConceptNode "baseball")
 )

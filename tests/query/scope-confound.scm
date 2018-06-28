@@ -29,24 +29,24 @@
             (GroundedSchemaNode "scm: evaluation-to-member-2-formula")
                 (ListLink
                     (MemberLink
-                        (VariableNode "$A")
                         (SatisfyingSetScopeLink
                             (VariableNode "$X")
                             (EvaluationLink
                                 (VariableNode "$D")
                                 (ListLink
                                     (VariableNode "$X")
-                                    (VariableNode "$B")))))
+                                    (VariableNode "$B"))))
+                        (VariableNode "$A"))
 
                     (MemberLink
-                        (VariableNode "$B")
                         (SatisfyingSetScopeLink
                             (VariableNode "$Y")
                             (EvaluationLink
                                 (VariableNode "$D")
                                 (ListLink
                                     (VariableNode "$A")
-                                    (VariableNode "$Y")))))
+                                    (VariableNode "$Y"))))
+                        (VariableNode "$B"))
                     (EvaluationLink
                         (VariableNode "$D")
                         (ListLink
@@ -80,24 +80,24 @@
             (GroundedSchemaNode "scm: evaluation-to-member-2-formula")
                 (ListLink
                     (MemberLink
-                        (VariableNode "$A")
                         (SatisfyingSetScopeLink
                             (VariableNode "$X")
                             (EvaluationLink
                                 (VariableNode "$D")
                                 (ListLink
                                     (VariableNode "$X")
-                                    (VariableNode "$B")))))
+                                    (VariableNode "$B"))))
+                        (VariableNode "$A"))
 
                     (MemberLink
-                        (VariableNode "$B")
                         (SatisfyingSetScopeLink
                             (VariableNode "$Y")
                             (EvaluationLink
                                 (VariableNode "$D")
                                 (ListLink
                                     (VariableNode "$A")
-                                    (VariableNode "$Y")))))
+                                    (VariableNode "$Y"))))
+                        (VariableNode "$B"))
                     (EvaluationLink
                         (VariableNode "$D")
                         (ListLink
