@@ -20,8 +20,6 @@
  * Free Software Foundation, Inc.,
  * 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
  */
-#ifdef HAVE_SQL_STORAGE
-
 #include <stdlib.h>
 #include <time.h>
 #include <unistd.h>
