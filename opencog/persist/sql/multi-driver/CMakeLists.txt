@@ -7,7 +7,6 @@ ADD_LIBRARY (persist-sql
 	SQLAtomLoad
 	SQLAtomStore
 	SQLAtomStorage
-	SQLAtoms
 	SQLBulk
 	SQLSpaces
 	SQLTypeMap
