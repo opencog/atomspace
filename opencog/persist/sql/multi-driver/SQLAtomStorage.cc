@@ -990,28 +990,6 @@ void SQLAtomStorage::getIncomingByType(AtomTable& table, const Handle& h, Type t
 	getIncoming(table, buff);
 }
 
-void SQLAtomStorage::getValuations(AtomTable& table,
-                                   const Handle& key, bool get_all_values)
-{
-	// If the uuid of the key is not known, the key does not exist
-	// in the database; therefore, there are no values. Just return.
-	UUID kuid = check_uuid(key);
-	if (TLB::INVALID_UUID == kuid) return;
-
-	char buff[BUFSZ];
-	snprintf(buff, BUFSZ,
-		"SELECT * FROM Valuations WHERE key=%lu;", kuid);
-
-	Response rp(conn_pool);
-	rp.store = this;
-	rp.table = &table;
-	rp.katom = key;
-	rp.get_all_values = get_all_values;
-	rp.exec(buff);
-	rp.rs->foreach_row(&Response::get_valuations_cb, &rp);
-	rp.katom = nullptr;
-}
-
 /**
  * Fetch the Node with the indicated type and name.
  * If there is no such node, NULL is returned.
