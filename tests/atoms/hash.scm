@@ -520,6 +520,44 @@
 )
 )
 
+(define bl-5
+(BindLink
+  (TypedVariableLink
+    (VariableNode "$x")
+    (TypeNode "ConceptNode")
+  )
+  (ListLink
+    (ConceptNode "I")
+    (ConceptNode "love")
+    (VariableNode "$x")
+  )
+  (ListLink
+    (ConceptNode "Hey!")
+    (ConceptNode "I")
+    (ConceptNode "like")
+    (VariableNode "$x")
+    (ConceptNode "also")
+  )
+)
+)
+
+(define bl-6
+(BindLink
+  (ListLink
+    (ConceptNode "I")
+    (ConceptNode "love")
+    (VariableNode "$x")
+  )
+  (ListLink
+    (ConceptNode "Hey!")
+    (ConceptNode "I")
+    (ConceptNode "like")
+    (VariableNode "$x")
+    (ConceptNode "also")
+  )
+)
+)
+
 ;; These 2 get links are not alpha-equivalent and should ideally have
 ;; different hash values.
 
