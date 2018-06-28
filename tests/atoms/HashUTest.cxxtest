@@ -59,6 +59,7 @@ public:
 	void test_scope_compute_hash_2();
 	void test_scope_compute_hash_3();
 	void test_scope_compute_hash_4();
+	void test_scope_compute_hash_5();
 
 	// Test hash collisions of non-scope links
 	void test_sequential_compute_hash();
@@ -131,12 +132,27 @@ void HashUTest::test_scope_compute_hash_4()
 	logger().info("END TEST: %s", __FUNCTION__);
 }
 
-void HashUTest::test_sequential_compute_hash()
+void HashUTest::test_scope_compute_hash_5()
 {
 	logger().info("BEGIN TEST: %s", __FUNCTION__);
 
 	std::string result =
 		_eval.eval("(load-from-path \"tests/atoms/hash.scm\")");
+
+	Handle bl5 = _eval.eval_h("bl-5"),
+		bl6 = _eval.eval_h("bl-6");
+
+	logger().info() << "bl5 = " << oc_to_string(bl5)
+	                << "bl6 = " << oc_to_string(bl6);
+
+	TS_ASSERT_DIFFERS(bl5.value(), bl6.value());
+
+	logger().info("END TEST: %s", __FUNCTION__);
+}
+
+void HashUTest::test_sequential_compute_hash()
+{
+	logger().info("BEGIN TEST: %s", __FUNCTION__);
 
 	Handle sal = _eval.eval_h("sal"),
 		sol = _eval.eval_h("sol");
