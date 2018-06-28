@@ -8,6 +8,7 @@ ADD_LIBRARY (persist-sql
 	SQLBulk
 	SQLValues
 	SQLTypeMap
+	SQLUUID
 	SQLPersistSCM
 )
 
