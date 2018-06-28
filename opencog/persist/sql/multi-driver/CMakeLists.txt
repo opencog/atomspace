@@ -3,6 +3,9 @@
 
 ADD_LIBRARY (persist-sql
 	llapi
+	SQLAtomDelete
+	SQLAtomLoad
+	SQLAtomStore
 	SQLAtomStorage
 	SQLAtoms
 	SQLBulk
