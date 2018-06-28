@@ -1,0 +1,293 @@
+/*
+ * SQLBulk.cc
+ * Bulk save & restore of Atoms.
+ *
+ * Copyright (c) 2008,2009,2013,2017 Linas Vepstas <linas@linas.org>
+ *
+ * LICENSE:
+ * This program is free software; you can redistribute it and/or modify
+ * it under the terms of the GNU Affero General Public License v3 as
+ * published by the Free Software Foundation and including the exceptions
+ * at http://opencog.org/wiki/Licenses
+ *
+ * This program is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ * GNU General Public License for more details.
+ *
+ * You should have received a copy of the GNU Affero General Public License
+ * along with this program; if not, write to:
+ * Free Software Foundation, Inc.,
+ * 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
+ */
+#include <stdlib.h>
+#include <time.h>
+#include <unistd.h>
+
+#include <chrono>
+#include <memory>
+#include <thread>
+
+#include <opencog/util/oc_assert.h>
+#include <opencog/util/oc_omp.h>
+
+#include <opencog/atoms/base/Atom.h>
+#include <opencog/atoms/proto/NameServer.h>
+#include <opencog/atoms/base/Link.h>
+#include <opencog/atoms/base/Node.h>
+#include <opencog/atomspace/AtomSpace.h>
+#include <opencog/atomspaceutils/TLB.h>
+
+#include "SQLAtomStorage.h"
+#include "SQLResponse.h"
+
+using namespace opencog;
+
+#define BUFSZ 120
+/* ================================================================ */
+/**
+ * Retreive the incoming set of the indicated atom.
+ */
+void SQLAtomStorage::getIncoming(AtomTable& table, const char *buff)
+{
+	std::vector<PseudoPtr> pset;
+	Response rp(conn_pool);
+	rp.store = this;
+	rp.height = -1;
+	rp.pvec = &pset;
+	rp.exec(buff);
+	rp.rs->foreach_row(&Response::fetch_incoming_set_cb, &rp);
+
+	HandleSeq iset;
+	std::mutex iset_mutex;
+
+	// Parallelize always.
+	opencog::setting_omp(NUM_OMP_THREADS, NUM_OMP_THREADS);
+
+	// A parallel fetch is much much faster, esp for big osets.
+	// std::for_each(std::execution::par_unseq, ... requires C++17
+	OMP_ALGO::for_each(pset.begin(), pset.end(),
+		[&] (const PseudoPtr& p)
+	{
+		Handle hi(get_recursive_if_not_exists(p));
+		hi = table.add(hi, false);
+		_tlbuf.addAtom(hi, p->uuid);
+		get_atom_values(hi);
+		std::lock_guard<std::mutex> lck(iset_mutex);
+		iset.emplace_back(hi);
+	});
+
+	// Performance stats
+	_num_get_insets++;
+	_num_get_inlinks += iset.size();
+}
+
+/**
+ * Retreive the entire incoming set of the indicated atom.
+ */
+void SQLAtomStorage::getIncomingSet(AtomTable& table, const Handle& h)
+{
+	// If the uuid is not known, then the atom is not in storage,
+	// and therefore, cannot have an incoming set.  Just return.
+	UUID uuid = check_uuid(h);
+	if (TLB::INVALID_UUID == uuid) return;
+
+	char buff[BUFSZ];
+	snprintf(buff, BUFSZ,
+		"SELECT * FROM Atoms WHERE outgoing @> ARRAY[CAST(%lu AS BIGINT)];",
+		uuid);
+
+	// Note: "select * from atoms where outgoing@>array[556];" will
+	// return all links with atom 556 in the outgoing set -- i.e. the
+	// incoming set of 556.  We could also use && here instead of @>
+	// but I don't know if this one is faster.
+	// The cast to BIGINT is needed, as otherwise one gets
+	// ERROR:  operator does not exist: bigint[] @> integer[]
+
+	getIncoming(table, buff);
+}
+
+/**
+ * Retreive the incoming set of the indicated atom, but only those atoms
+ * of type t.
+ */
+void SQLAtomStorage::getIncomingByType(AtomTable& table, const Handle& h, Type t)
+{
+	// If the uuid is not known, then the atom is not in storage,
+	// and therefore, cannot have an incoming set.  Just return.
+	UUID uuid = check_uuid(h);
+	if (TLB::INVALID_UUID == uuid) return;
+
+	int dbtype = storing_typemap[t];
+
+	char buff[BUFSZ];
+	snprintf(buff, BUFSZ,
+		"SELECT * FROM Atoms WHERE type = %d AND outgoing @> ARRAY[CAST(%lu AS BIGINT)];",
+		dbtype, uuid);
+
+	getIncoming(table, buff);
+}
+
+/* ================================================================ */
+
+void SQLAtomStorage::load(AtomTable &table)
+{
+	UUID max_nrec = reserve();
+	_load_count = 0;
+	max_height = getMaxObservedHeight();
+	printf("Loading all atoms; maxuuid=%lu max height=%d\n",
+		max_nrec, max_height);
+	bulk_load = true;
+	bulk_start = time(0);
+
+	setup_typemap();
+
+#define NCHUNKS 300
+#define MINSTEP 10123
+	std::vector<unsigned long> steps;
+	unsigned long stepsize = MINSTEP + max_nrec/NCHUNKS;
+	for (unsigned long rec = 0; rec <= max_nrec; rec += stepsize)
+		steps.push_back(rec);
+
+	printf("Loading all atoms: "
+		"Max Height is %d stepsize=%lu chunks=%zu\n",
+		 max_height, stepsize, steps.size());
+
+	// Parallelize always.
+	opencog::setting_omp(NUM_OMP_THREADS, NUM_OMP_THREADS);
+
+	for (int hei=0; hei<=max_height; hei++)
+	{
+		unsigned long cur = _load_count;
+
+		OMP_ALGO::for_each(steps.begin(), steps.end(),
+			[&](unsigned long rec)
+		{
+			Response rp(conn_pool);
+			rp.table = &table;
+			rp.store = this;
+			char buff[BUFSZ];
+			snprintf(buff, BUFSZ, "SELECT * FROM Atoms WHERE "
+			         "height = %d AND uuid > %lu AND uuid <= %lu;",
+			         hei, rec, rec+stepsize);
+			rp.height = hei;
+			rp.exec(buff);
+			rp.rs->foreach_row(&Response::load_all_atoms_cb, &rp);
+		});
+		printf("Loaded %lu atoms at height %d\n", _load_count - cur, hei);
+	}
+
+	time_t secs = time(0) - bulk_start;
+	double rate = ((double) _load_count) / secs;
+	printf("Finished loading %lu atoms in total in %d seconds (%d per second)\n",
+		(unsigned long) _load_count, (int) secs, (int) rate);
+	bulk_load = false;
+
+	// synchrnonize!
+	table.barrier();
+}
+
+void SQLAtomStorage::loadType(AtomTable &table, Type atom_type)
+{
+	UUID max_nrec = reserve();
+	_load_count = 0;
+
+	// For links, assume a worst-case height.
+	// For nodes, its easy ... max_height is zero.
+	if (nameserver().isNode(atom_type))
+		max_height = 0;
+	else
+		max_height = getMaxObservedHeight();
+
+	setup_typemap();
+	int db_atom_type = storing_typemap[atom_type];
+
+#define NCHUNKS 300
+#define MINSTEP 10123
+	std::vector<unsigned long> steps;
+	unsigned long stepsize = MINSTEP + max_nrec/NCHUNKS;
+	for (unsigned long rec = 0; rec <= max_nrec; rec += stepsize)
+		steps.push_back(rec);
+
+	logger().debug("SQLAtomStorage::loadType: "
+		"Max Height is %d stepsize=%lu chunks=%lu\n",
+		 max_height, stepsize, steps.size());
+
+	// Parallelize always.
+	opencog::setting_omp(NUM_OMP_THREADS, NUM_OMP_THREADS);
+
+	for (int hei=0; hei<=max_height; hei++)
+	{
+		unsigned long cur = _load_count;
+
+		OMP_ALGO::for_each(steps.begin(), steps.end(),
+			[&](unsigned long rec)
+		{
+			Response rp(conn_pool);
+			rp.table = &table;
+			rp.store = this;
+			char buff[BUFSZ];
+			snprintf(buff, BUFSZ, "SELECT * FROM Atoms WHERE type = %d "
+			         "AND height = %d AND uuid > %lu AND uuid <= %lu;",
+			         db_atom_type, hei, rec, rec+stepsize);
+			rp.height = hei;
+			rp.exec(buff);
+			rp.rs->foreach_row(&Response::load_if_not_exists_cb, &rp);
+		});
+		logger().debug("SQLAtomStorage::loadType: "
+		               "Loaded %lu atoms of type %d at height %d\n",
+			_load_count - cur, db_atom_type, hei);
+	}
+	logger().debug("SQLAtomStorage::loadType: Finished loading %lu atoms in total\n",
+		(unsigned long) _load_count);
+
+	// Synchronize!
+	table.barrier();
+}
+
+/// Store all of the atoms in the atom table.
+void SQLAtomStorage::store(const AtomTable &table)
+{
+	max_height = 0;
+	_store_count = 0;
+
+#ifdef ALTER
+	rename_tables();
+	create_tables();
+#endif
+
+	UUID max_uuid = _tlbuf.getMaxUUID();
+	printf("Max UUID is %lu\n", max_uuid);
+
+	// If we are storing to an absolutely empty database, then
+	// skip all UUID lookups completely!  This is not a safe
+	// operation for non-empty databases, but has a big performance
+	// impact for clean stores.
+	// uuid==1 is PredicateNode TruthValueKey
+	// uuid==2 is unissued.
+	if (2 >= max_uuid) bulk_store = true;
+
+	setup_typemap();
+	store_atomtable_id(table);
+
+	bulk_start = time(0);
+
+	// Try to knock out the nodes first, then the links.
+	table.foreachHandleByType(
+		[&](const Handle& h)->void { storeAtom(h); },
+		NODE, true);
+
+	table.foreachHandleByType(
+		[&](const Handle& h)->void { storeAtom(h); },
+		LINK, true);
+
+	flushStoreQueue();
+	bulk_store = false;
+
+	time_t secs = time(0) - bulk_start;
+	double rate = ((double) _store_count) / secs;
+	printf("\tFinished storing %lu atoms total, in %d seconds (%d per second)\n",
+		(unsigned long) _store_count, (int) secs, (int) rate);
+}
+
+/* ============================= END OF FILE ================= */

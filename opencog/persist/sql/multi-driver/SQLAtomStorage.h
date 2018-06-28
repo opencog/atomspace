@@ -49,6 +49,10 @@
 
 #include "llapi.h"
 
+// See SQLAtomStorage.cc for extensive explantion of what this
+// is and why it has this particular value.
+#define NUM_OMP_THREADS 8
+
 namespace opencog
 {
 /** \addtogroup grp_persist
@@ -66,7 +70,6 @@ class SQLAtomStorage : public AtomStorage
 
 		// Utility for handling responses (on stack).
 		class Response;
-		class Outgoing;
 
 		void init(const char *);
 		std::string _uri;
@@ -98,7 +101,6 @@ class SQLAtomStorage : public AtomStorage
 		Handle doGetNode(Type, const char *);
 		Handle doGetLink(Type, const HandleSeq&);
 
-		int get_height(const Handle&);
 		int max_height;
 
 		void getIncoming(AtomTable&, const char *);

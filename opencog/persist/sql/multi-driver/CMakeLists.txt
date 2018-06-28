@@ -3,7 +3,15 @@
 
 ADD_LIBRARY (persist-sql
 	llapi
+	SQLAtomDelete
+	SQLAtomLoad
+	SQLAtomStore
 	SQLAtomStorage
+	SQLBulk
+	SQLSpaces
+	SQLTypeMap
+	SQLValues
+	SQLUUID
 	SQLPersistSCM
 )
 
@@ -63,11 +71,4 @@ ENDIF (HAVE_GUILE)
 
 INSTALL (TARGETS persist-sql
 	DESTINATION "lib${LIB_DIR_SUFFIX}/opencog"
-)
-
-INSTALL (FILES
-	llapi.h
-	SQLAtomStorage.h
-	SQLPersistSCM.h
-	DESTINATION "include/opencog/persist/sql/multi-driver"
 )
