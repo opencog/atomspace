@@ -1,17 +1,12 @@
 
 SQL Backend Tests
 -----------------
-There are two subdirectories, here:
+There is one subdirectory, here:
 
 * `multi-driver`
-* `multi-user`
 
 The tests in `multi-driver` test both the `odbc` and the `postgres`
-driver backends.  The `postgres` driver seems to be faster.
-
-The `multi-user` tests emulate multiple users adding atoms to the
-database at the same time. This should be possible, without scrambling
-the state of teh database.
+driver backends.  The `postgres` driver is about 3x faster.
 
 
 HOWTO Run the SQL Tests
