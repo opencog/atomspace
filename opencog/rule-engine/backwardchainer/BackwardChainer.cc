@@ -254,20 +254,16 @@ void BackwardChainer::fulfill_fcs(const Handle& fcs)
 	// alternatively modify some HypotheticalLink wrapping the atoms
 	// of concerns instead of the atoms themselves, and only modify
 	// the atoms if there are existing results to copy back to _as.
-	try
-	{
-		Handle hresult = bindlink(&tmp_as, fcs);
-		HandleSeq results;
-		for (const Handle& result : hresult->getOutgoingSet())
-			results.push_back(_as.add_atom(result));
-		LAZY_URE_LOG_DEBUG << "Results:" << std::endl << results;
-		_results.insert(results.begin(), results.end());
+	Handle hresult = bindlink(&tmp_as, fcs);
+	HandleSeq results;
+	for (const Handle& result : hresult->getOutgoingSet())
+		results.push_back(_as.add_atom(result));
+	LAZY_URE_LOG_DEBUG << "Results:" << std::endl << results;
+	_results.insert(results.begin(), results.end());
 
-		// Record the results in _trace_as
-		for (const Handle& result : results)
-			_trace_recorder.proof(fcs, result);
-	}
-	catch (...) {}
+	// Record the results in _trace_as
+	for (const Handle& result : results)
+		_trace_recorder.proof(fcs, result);
 }
 
 std::vector<double> BackwardChainer::expansion_andbit_weights()
