@@ -118,6 +118,19 @@ UUID SQLAtomStorage::get_uuid(const Handle& h)
 	return TLB::INVALID_UUID;
 }
 
+/// Add an atom to the TLB.
+void SQLAtomStorage::add_atom(const Handle& h, UUID uuid)
+{
+	OC_ASSERT(TLB::INVALID_UUID != uuid);
+	_tlbuf.addAtom(h, uuid);
+}
+
+/// Issue a new UUID and the atom to the TLB.
+UUID SQLAtomStorage::issue_atom(const Handle& h)
+{
+	return _tlbuf.addAtom(h, TLB::INVALID_UUID);
+}
+
 /* ================================================================ */
 
 UUID SQLAtomStorage::getMaxObservedUUID(void)

@@ -145,7 +145,7 @@ void SQLAtomStorage::do_store_single_atom(const Handle& h, int aheight)
 	if (TLB::INVALID_UUID != uuid) return;
 
 	// If it was not found, then issue a brand-spankin new UUID.
-	uuid = _tlbuf.addAtom(h, TLB::INVALID_UUID);
+	uuid = issue_atom(h);
 
 	std::string uuidbuff = std::to_string(uuid);
 

@@ -170,7 +170,7 @@ class SQLAtomStorage::Response
 				Handle h(table->add(atom, false));
 
 				// Force resolution in TLB, so that later removes work.
-				store->_tlbuf.addAtom(h, uuid);
+				store->add_atom(h, uuid);
 
 				// Get the values only after TLB insertion!!
 				store->get_atom_values(h);
@@ -196,7 +196,7 @@ class SQLAtomStorage::Response
 				if (nullptr == h)
 				{
 					h = table->add(atom, false);
-					store->_tlbuf.addAtom(h, uuid);
+					store->add_atom(h, uuid);
 				}
 			}
 
@@ -346,7 +346,7 @@ class SQLAtomStorage::Response
 				PseudoPtr pu(store->petAtom(uuid));
 				h = store->get_recursive_if_not_exists(pu);
 				h = table->add(h, false);
-				store->_tlbuf.addAtom(h, uuid);
+				store->add_atom(h, uuid);
 			}
 
 			// If user wanted all the values, then go get them.
