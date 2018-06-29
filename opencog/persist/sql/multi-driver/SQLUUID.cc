@@ -162,10 +162,37 @@ void SQLAtomStorage::clear_cache(void)
 	reserve();
 }
 
+/// Reset the uuid_pool sequence, if and only if we are the only
+/// ones who are connected.  Otherwise, no reset can take place,
+/// because we are not the only user, and we must respect the currently
+/// issued UUID bundle.
 void SQLAtomStorage::reset_uuid_pool(void)
 {
+	std::string reset =
+		"DO $$"
+		"DECLARE "
+		"   maxuuid BIGINT;"
+		"   under BIGINT;"
+		"   maxvu BIGINT := 0;"
+		"   vnder BIGINT;"
+		"BEGIN"
+		"   IF (SELECT count(*) FROM pg_stat_activity WHERE"
+		"           datname=(SELECT current_database())) = "
+		+ std::to_string(_initial_conn_pool_size) +
+		" THEN"
+		"      maxuuid := (SELECT uuid FROM Atoms ORDER BY uuid DESC LIMIT 1);"
+		"      maxvu := (SELECT vuid FROM Values ORDER BY vuid DESC LIMIT 1);"
+		"      under := maxuuid - (SELECT increment_by FROM uuid_pool) + 1;"
+		"      vnder := maxvu - (SELECT increment_by FROM vuid_pool) + 1;"
+		"      RAISE NOTICE 'Max UUID=% under=%', maxuuid, under;"
+		"      RAISE NOTICE 'Max VUID=% vnder=%', maxvu, vnder;"
+		"      PERFORM (SELECT setval('uuid_pool',under));"
+		"      PERFORM (SELECT setval('vuid_pool',vnder));"
+		"   END IF;"
+		"END $$;";
+
 	Response rp(conn_pool);
-	rp.exec("SELECT vuid FROM Values ORDER BY vuid DESC LIMIT 1;");
+	rp.exec(reset.c_str());
 }
 
 /* ============================= END OF FILE ================= */

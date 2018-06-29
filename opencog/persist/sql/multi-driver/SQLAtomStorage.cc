@@ -127,6 +127,7 @@ void SQLAtomStorage::init(const char * uri)
 
 	if (!connected()) return;
 
+	reset_uuid_pool();
 	reserve();
 	_next_valid = getMaxObservedVUID() + 1;
 

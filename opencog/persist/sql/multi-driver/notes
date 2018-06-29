@@ -639,7 +639,7 @@ DECLARE
 	maxvu BIGINT := 0;
 	vnder BIGINT;
 BEGIN
-	IF (SELECT count(*) FROM pg_stat_activity WHERE datname=(SELECT current_database())) = 14 THEN
+	IF (SELECT count(*) FROM pg_stat_activity WHERE datname=(SELECT current_database())) = 1 THEN
 		maxuuid := (SELECT uuid FROM Atoms ORDER BY uuid DESC LIMIT 1);
 		maxvu := (SELECT vuid FROM Values ORDER BY vuid DESC LIMIT 1);
 		under := maxuuid - (SELECT increment_by FROM uuid_pool) + 1;
