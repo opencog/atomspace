@@ -282,6 +282,10 @@ void SQLAtomStorage::kill_data(void)
 	rp.exec("DELETE from Valuations;");
 	rp.exec("DELETE from Values;");
 	rp.exec("DELETE from Atoms;");
+	rp.exec("DROP SEQUENCE uuid_pool;");
+	rp.exec("DROP SEQUENCE vuid_pool;");
+	rp.exec("CREATE SEQUENCE uuid_pool START WITH 1 INCREMENT BY 400;");
+	rp.exec("CREATE SEQUENCE vuid_pool START WITH 1 INCREMENT BY 400;");
 
 	// Delete the atomspaces as well!
 	rp.exec("DELETE from Spaces;");
