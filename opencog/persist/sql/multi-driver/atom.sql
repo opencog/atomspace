@@ -1,6 +1,9 @@
 --
 -- atom.sql
--- Version 3.0 of the Postgres database schema for the AtomSpace.
+-- Version 3.1 of the Postgres database schema for the AtomSpace.
+--
+-- Changes since version 3.0:
+--   * Add SEQUENCE's for multi-user uuid and vuid alloc's.
 --
 -- Changes since version 2.0:
 --   * Added support for generic values.
@@ -133,5 +136,17 @@ CREATE TABLE TypeCodes (
     type SMALLINT UNIQUE,
     typename TEXT UNIQUE
 );
+
+-- -----------------------------------------------------------
+-- Number sequence generators, so that multiple users can share the
+-- Atoms table and the Values table, and issue uuid's, vuid's uniquely,
+-- without colliding with one-another.
+--
+-- IMPORTANT: the number '400' is hard-coded in the C++ code in several
+-- places, and it MUST NOT BE CHANGED, without also changing ALL of the
+-- right places in the C++ code!
+
+CREATE SEQUENCE uuid_pool START WITH 1 INCREMENT BY 400;
+CREATE SEQUENCE vuid_pool START WITH 1 INCREMENT BY 400;
 
 -- -----------------------------------------------------------
