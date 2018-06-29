@@ -193,6 +193,16 @@ void SQLAtomStorage::reset_uuid_pool(void)
 
 	Response rp(conn_pool);
 	rp.exec(reset.c_str());
+
+	rp.intval = 0;
+	rp.exec("SELECT increment_by FROM uuid_pool;");
+	rp.rs->foreach_row(&Response::intval_cb, &rp);
+	_uuid_pool_increment = rp.intval;
+
+	rp.intval = 0;
+	rp.exec("SELECT increment_by FROM vuid_pool;");
+	rp.rs->foreach_row(&Response::intval_cb, &rp);
+	_vuid_pool_increment = rp.intval;
 }
 
 /* ============================= END OF FILE ================= */
