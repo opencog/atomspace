@@ -125,10 +125,16 @@ void SQLAtomStorage::add_atom(const Handle& h, UUID uuid)
 	_tlbuf.addAtom(h, uuid);
 }
 
-/// Issue a new UUID and the atom to the TLB.
+/// Issue a new UUID and put the atom to the TLB (under that UUID)
 UUID SQLAtomStorage::issue_atom(const Handle& h)
 {
-	return _tlbuf.addAtom(h, TLB::INVALID_UUID);
+	UUID uuid = _next_unused_uuid.fetch_add(1);
+	while (_uuid_pool_top < uuid)
+	{
+		refill_uuid_pool();
+		uuid = _next_unused_uuid.fetch_add(1);
+	}
+	return _tlbuf.addAtom(h, uuid);
 }
 
 /* ================================================================ */
@@ -175,6 +181,9 @@ void SQLAtomStorage::clear_cache(void)
 	reserve();
 }
 
+/* ================================================================ */
+/* Pool management */
+
 /// Reset the uuid_pool sequence, if and only if we are the only
 /// ones who are connected.  Otherwise, no reset can take place,
 /// because we are not the only user, and we must respect the currently
@@ -216,6 +225,23 @@ void SQLAtomStorage::reset_uuid_pool(void)
 	rp.exec("SELECT increment_by FROM vuid_pool;");
 	rp.rs->foreach_row(&Response::intval_cb, &rp);
 	_vuid_pool_increment = rp.intval;
+
+	// Prepare to issue UUID's
+	_uuid_pool_top = getMaxObservedUUID();
+	_tlbuf.reserve_upto(_uuid_pool_top);
+	_next_unused_uuid = _uuid_pool_top + 1;
+}
+
+/// Obtain a block of unused UUID's from the SQL Sequence
+void SQLAtomStorage::refill_uuid_pool(void)
+{
+	Response rp(conn_pool);
+	rp.intval = 0;
+	rp.exec("SELECT nextval('uuid_pool');");
+	rp.rs->foreach_row(&Response::intval_cb, &rp);
+	// top is the last one that can be issued without requiring a refill.
+	_next_unused_uuid = rp.intval;
+	_uuid_pool_top = rp.intval + _uuid_pool_increment - 1;
 }
 
 /* ============================= END OF FILE ================= */

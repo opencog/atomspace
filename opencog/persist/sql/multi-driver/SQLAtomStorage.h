@@ -173,6 +173,7 @@ class SQLAtomStorage : public AtomStorage
 		UUID reserve(void);     // reserve range of UUID's
 		TLB _tlbuf;
 		void reset_uuid_pool(void);
+		void refill_uuid_pool(void);
 		int _uuid_pool_increment;
 		int _vuid_pool_increment;
 		std::atomic<UUID> _uuid_pool_top;
