@@ -654,3 +654,17 @@ END $$;
 SELECT nextval('uuid_pool');
 
 SELECT uuid into bar FROM Atoms ORDER BY uuid DESC LIMIT 1;
+
+=======================================================================
+Max UUID is 402
+[2018-06-29 19:23:24:428] [WARN] ODBC Driver: (7) ERROR: insert or
+update on table "valuations" violates foreign key constraint
+"valuations_key_fkey";
+Error while executing the query
+
+[2018-06-29 19:23:24:428] [WARN] ODCB Driver: Query was: INSERT INTO
+Valuations (key, atom, type, floatvalue) VALUES (401, 802, 6, '{
+0.44,                  406}');
+
+
+

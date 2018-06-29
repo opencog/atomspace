@@ -128,6 +128,7 @@ class MultiUserUTest :  public CxxTest::TestSuite
             exit(1);
         }
 
+        void connect_to_db(int);
         void add_to_space(int, AtomSpace *, std::string id);
         void fetch_space(int, AtomSpace *);
         void check_space(int, AtomSpace *, std::string dbgmsg);
@@ -136,7 +137,7 @@ class MultiUserUTest :  public CxxTest::TestSuite
 
         void threaded_add(int);
 
-        void test_atomspace(void);
+        void test_multiuser(void);
 };
 
 MultiUserUTest:: MultiUserUTest(void)
@@ -195,11 +196,16 @@ MultiUserUTest:: MultiUserUTest(void)
  */
 void MultiUserUTest::setUp(void)
 {
-    _as = new AtomSpace();
-    _pm = new SQLPersistSCM(_as);
+    kill_data();
+}
+
+void MultiUserUTest::connect_to_db(int i)
+{
+    _as[i] = new AtomSpace();
+    _pm[i] = new SQLPersistSCM(_as[i]);
 
     try {
-        _pm->do_open(uri);
+        _pm[i]->do_open(uri);
     }
     catch (RuntimeException &e)
     {
@@ -207,18 +213,17 @@ void MultiUserUTest::setUp(void)
         friendlyFailMessage();
         exit(1);
     };
-
-    kill_data();
 }
 
 void MultiUserUTest::tearDown(void)
 {
     /* Orderly shutdown avoids warning in Postgres log file. */
-    _pm->do_close();
-
-    delete _pm;
-    delete _as;
-
+    for (int i=0 i < n_threads; i++)
+    {
+        _pm[i]->do_close();
+        delete _pm[i];
+        delete _as[i];
+    }
     kill_data();
 }
 
@@ -477,13 +482,13 @@ void MultiUserUTest::threaded_add(int thread_id)
 // ============================================================
 // Perform one repetition of the unit test.
 
-void MultiUserUTest::test_atomspace(void)
+void MultiUserUTest::test_multiuser(void)
 {
     logger().debug("BEGIN TEST: %s", __FUNCTION__);
 
     TSM_ASSERT("Persist Module not loaded", _pm);
 
-    printf("Start creating %d theads\n", n_threads);
+    printf("Start creating %d user sessions\n", n_threads);
 
     std::vector<std::thread> thread_pool;
     for (int i=0; i < n_threads; i++) {
