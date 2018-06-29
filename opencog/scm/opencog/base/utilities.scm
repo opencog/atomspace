@@ -79,30 +79,30 @@
 ; Fetch the mean, confidence and count of a TV.
 (define-public (tv-mean TV)
 "
-  Warning: this function is obsolete, use cog-mean instead
+  Warning: this function is obsolete, use cog-tv-mean instead
 
   Return the floating-point mean (strength) of a TruthValue.
-  Deprecated; use cog-mean instead.
+  Deprecated; use cog-tv-mean instead.
 "
-	(cog-mean TV)
+	(cog-tv-mean TV)
 )
 
 (define-public (tv-conf TV)
 "
-  Warning: this function is obsolete, use cog-confidence instead
+  Warning: this function is obsolete, use cog-tv-confidence instead
 
   Return the floating-point confidence of a TruthValue.
-  Deprecated; use cog-confidence instead.
+  Deprecated; use cog-tv-confidence instead.
 "
-	(cog-confidence TV)
+	(cog-tv-confidence TV)
 )
 
 (define-public (tv-non-null-conf? TV)
 "
   Return #t if the confidence of tv is positive, #f otherwise.
-  Deprecated. Just say (< 0 (cog-confidence TV)) instead.
+  Deprecated. Just say (< 0 (cog-tv-confidence TV)) instead.
 "
-	(< 0 (cog-confidence TV))
+	(< 0 (cog-tv-confidence TV))
 )
 
 ;
@@ -110,12 +110,12 @@
 ; for #f than to call (cog-ctv? tv)
 (define-public (tv-count TV)
 "
-  Warning: this function is obsolete, use cog-count instead
+  Warning: this function is obsolete, use cog-tv-count instead
 
   Return the floating-point count of a CountTruthValue.
-  Deprecated; use cog-count instead.
+  Deprecated; use cog-tv-count instead.
 "
-	(cog-count TV)
+	(cog-tv-count TV)
 )
 
 (define-public (tv-positive-count TV)

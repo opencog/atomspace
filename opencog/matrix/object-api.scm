@@ -576,7 +576,7 @@
 		(if (null? ATOM) 0
 			(if is-filtered?
 				(cog-value-ref (cog-value ATOM cnt-key) 0)
-				(cog-count (cog-tv ATOM)))))
+				(cog-tv-count (cog-tv ATOM)))))
 
 	; Set a count on the ATOM.
 	(define (set-count ATOM CNT)

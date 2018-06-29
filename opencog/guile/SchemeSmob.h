@@ -122,9 +122,9 @@ private:
 	static SCM ss_arity(SCM);
 	static SCM ss_as(SCM);
 	static SCM ss_tv(SCM);
-	static SCM ss_get_tv_mean(SCM);
-	static SCM ss_get_tv_confidence(SCM);
-	static SCM ss_get_tv_count(SCM);
+	static SCM ss_get_mean(SCM);
+	static SCM ss_get_confidence(SCM);
+	static SCM ss_get_count(SCM);
 	static SCM ss_keys(SCM);
 	static SCM ss_value(SCM, SCM);
 	static SCM ss_incoming_set(SCM);

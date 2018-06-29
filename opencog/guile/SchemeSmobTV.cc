@@ -470,7 +470,7 @@ SCM SchemeSmob::ss_tv_get_value (SCM s)
  */
 SCM SchemeSmob::ss_tv_get_mean(SCM s)
 {
-	TruthValuePtr tv = verify_tv(s, "cog-mean");
+	TruthValuePtr tv = verify_tv(s, "cog-tv-mean");
 	return scm_from_double(tv->get_mean());
 }
 
@@ -479,7 +479,7 @@ SCM SchemeSmob::ss_tv_get_mean(SCM s)
  */
 SCM SchemeSmob::ss_tv_get_confidence(SCM s)
 {
-	TruthValuePtr tv = verify_tv(s, "cog-confidence");
+	TruthValuePtr tv = verify_tv(s, "cog-tv-confidence");
 	return scm_from_double(tv->get_confidence());
 }
 
@@ -488,7 +488,7 @@ SCM SchemeSmob::ss_tv_get_confidence(SCM s)
  */
 SCM SchemeSmob::ss_tv_get_count(SCM s)
 {
-	TruthValuePtr tv = verify_tv(s, "cog-count");
+	TruthValuePtr tv = verify_tv(s, "cog-tv-count");
 	return scm_from_double(tv->get_count());
 }
 

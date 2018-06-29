@@ -324,9 +324,9 @@ void SchemeSmob::register_procs()
 	register_proc("cog-value",             2, 0, 0, C(ss_value));
 	register_proc("cog-tv",                1, 0, 0, C(ss_tv));
 	register_proc("cog-as",                1, 0, 0, C(ss_as));
-	register_proc("cog-tv-mean",           1, 0, 0, C(ss_get_tv_mean));
-	register_proc("cog-tv-confidence",     1, 0, 0, C(ss_get_tv_confidence));
-	register_proc("cog-tv-count",          1, 0, 0, C(ss_get_tv_count));
+	register_proc("cog-mean",              1, 0, 0, C(ss_get_mean));
+	register_proc("cog-confidence",        1, 0, 0, C(ss_get_confidence));
+	register_proc("cog-count",             1, 0, 0, C(ss_get_count));
 
 	// Truth-values
 	register_proc("cog-new-stv",           2, 0, 0, C(ss_new_stv));
@@ -343,9 +343,9 @@ void SchemeSmob::register_procs()
 	register_proc("cog-ftv?",              1, 0, 0, C(ss_ftv_p));
 	register_proc("cog-etv?",              1, 0, 0, C(ss_etv_p));
 	register_proc("cog-tv->alist",         1, 0, 0, C(ss_tv_get_value));
-	register_proc("cog-mean",              1, 0, 0, C(ss_tv_get_mean));
-	register_proc("cog-confidence",        1, 0, 0, C(ss_tv_get_confidence));
-	register_proc("cog-count",             1, 0, 0, C(ss_tv_get_count));
+	register_proc("cog-tv-mean",           1, 0, 0, C(ss_tv_get_mean));
+	register_proc("cog-tv-confidence",     1, 0, 0, C(ss_tv_get_confidence));
+	register_proc("cog-tv-count",          1, 0, 0, C(ss_tv_get_count));
 	register_proc("cog-tv-merge",          2, 0, 0, C(ss_tv_merge));
 	register_proc("cog-tv-merge-hi-conf",  2, 0, 0, C(ss_tv_merge_hi_conf));
 
