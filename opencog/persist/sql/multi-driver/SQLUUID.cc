@@ -224,12 +224,7 @@ void SQLAtomStorage::reset_uuid_pool(void)
 		"   END IF;"
 		"END $$;";
 
-	// ODBC cannot run the above query, so we punt.  Mostly this
-	// won't matter, except that ODBC databases will have ranges
-	// unused UUID's in them.
-	std::string::size_type odbc = _uri.find("odbc://");
-	if (0 != odbc)
-		rp.exec(reset.c_str());
+	rp.exec(reset.c_str());
 
 	rp.intval = 0;
 	rp.exec("SELECT increment_by FROM uuid_pool;");
