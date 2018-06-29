@@ -59,6 +59,7 @@ public:
 	void test_minus();
 	void test_divide();
 	void test_number();
+	void test_equals();
 
 	void test_chaining();
 
@@ -343,6 +344,19 @@ void StreamUTest::test_number()
 }
 
 // ====================================================================
+// Test FloatValue::operator==()
+void StreamUTest::test_equals()
+{
+	logger().debug("BEGIN TEST: %s", __FUNCTION__);
+	FloatValuePtr a = createFloatValue(1.0);
+	FloatValuePtr b = createFloatValue(2.0);
+	
+	TS_ASSERT(*a != *b);
+	
+	logger().debug("END TEST: %s", __FUNCTION__);
+}
+
+// ====================================================================
 // ====================================================================
 // ====================================================================
 // And now for something completely different....
@@ -410,3 +424,4 @@ void StreamUTest::test_guile()
 
 	logger().debug("END TEST: %s", __FUNCTION__);
 }
+
