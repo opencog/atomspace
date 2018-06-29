@@ -388,6 +388,8 @@ void PersistUTest::do_test_atomspace(void)
 {
     logger().debug("BEGIN TEST: %s", __FUNCTION__);
 
+    kill_data();
+
     SQLPersistSCM* _pm = new SQLPersistSCM(_as);
     TSM_ASSERT("Persist Module not loaded", _pm);
 
@@ -400,8 +402,6 @@ void PersistUTest::do_test_atomspace(void)
         friendlyFailMessage();
         exit(1);
     };
-
-    kill_data();
 
     int idx = 0;
     add_to_space(idx++, _as, "AA-aa-wow ");
