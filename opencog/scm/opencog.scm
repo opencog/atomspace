@@ -63,7 +63,7 @@
 	cog-set-tv!
 	cog-set-value!
 	cog-tv
-	cog-tv-count
+	cog-count
 	cog-type
 	cog-value
 	cog-value-ref
