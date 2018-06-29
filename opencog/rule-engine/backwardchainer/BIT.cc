@@ -324,9 +324,12 @@ Handle AndBIT::expand_fcs(const Handle& leaf,
 	Handle nrewrite = expand_fcs_rewrite(nfcs_rewrite, rule.first);
 
 	// Generate new vardecl
-    // TODO: is this merging necessary?
+	// TODO: is this merging necessary?
 	Handle merged_vardecl = merge_vardecl(nfcs_vardecl, rule_vardecl);
 	Handle nvardecl = filter_vardecl(merged_vardecl, {npattern, nrewrite});
+
+	// Remove constant clauses from npattern
+	npattern = Unify::remove_constant_clauses(nvardecl, npattern, queried_as);
 
 	// Generate new atomese forward chaining s trategy
 	HandleSeq noutgoings({npattern, nrewrite});
