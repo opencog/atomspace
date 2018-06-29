@@ -213,10 +213,14 @@ void SQLAtomStorage::reset_uuid_pool(void)
 		"      maxvu := (SELECT vuid FROM Values ORDER BY vuid DESC LIMIT 1);"
 		"      under := maxuuid - (SELECT increment_by FROM uuid_pool) + 1;"
 		"      vnder := maxvu - (SELECT increment_by FROM vuid_pool) + 1;"
-		"      RAISE NOTICE 'Max UUID=% under=%', maxuuid, under;"
-		"      RAISE NOTICE 'Max VUID=% vnder=%', maxvu, vnder;"
-		"      PERFORM (SELECT setval('uuid_pool',under));"
-		"      PERFORM (SELECT setval('vuid_pool',vnder));"
+		"      IF (1 < under) THEN "
+		"         RAISE NOTICE 'Max UUID=% under=%', maxuuid, under;"
+		"         PERFORM (SELECT setval('uuid_pool',under));"
+		"      END IF;"
+		"      IF (1 < vnder) THEN "
+		"         RAISE NOTICE 'Max VUID=% vnder=%', maxvu, vnder;"
+		"         PERFORM (SELECT setval('vuid_pool',vnder));"
+		"      END IF;"
 		"   END IF;"
 		"END $$;";
 
