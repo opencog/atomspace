@@ -479,23 +479,23 @@
      (cog-inc-count! (ConceptNode \"Answer\") 42.0)
 ")
 
-(set-procedure-property! cog-mean 'documentation
+(set-procedure-property! cog-tv-mean 'documentation
 "
- cog-mean ATOM
+ cog-tv-mean ATOM
     Return the `mean` of the TruthValue on ATOM. This is a single
     floating point-number.
 ")
 
-(set-procedure-property! cog-confidence 'documentation
+(set-procedure-property! cog-tv-confidence 'documentation
 "
- cog-confidence ATOM
+ cog-tv-confidence ATOM
     Return the `confidence` of the TruthValue on ATOM. This is a single
     floating point-number.
 ")
 
-(set-procedure-property! cog-count 'documentation
+(set-procedure-property! cog-tv-count 'documentation
 "
- cog-count ATOM
+ cog-tv-count ATOM
     Return the `count` of the TruthValue on ATOM. This is a single
     floating point-number.
 ")
@@ -676,23 +676,23 @@
        ((mean . 0.7) (confidence . 0.9))
 ")
 
-(set-procedure-property! cog-tv-mean 'documentation
+(set-procedure-property! cog-mean 'documentation
 "
- cog-tv-mean TV
+ cog-mean TV
     Return the `mean` of the TruthValue TV. This is a single
     floating point-number.
 ")
 
-(set-procedure-property! cog-tv-confidence 'documentation
+(set-procedure-property! cog-confidence 'documentation
 "
- cog-tv-confidence TV
+ cog-confidence TV
     Return the `confidence` of the TruthValue TV. This is a single
     floating point-number.
 ")
 
-(set-procedure-property! cog-tv-count 'documentation
+(set-procedure-property! cog-count 'documentation
 "
- cog-tv-count TV
+ cog-count TV
     Return the `count` of the TruthValue TV. This is a single
     floating point-number.
 ")

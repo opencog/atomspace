@@ -109,27 +109,27 @@ SCM SchemeSmob::ss_tv (SCM satom)
 /**
  * Return the truth value mean on the atom.
  */
-SCM SchemeSmob::ss_get_mean(SCM satom)
+SCM SchemeSmob::ss_get_tv_mean(SCM satom)
 {
-	Handle h = verify_handle(satom, "cog-mean");
+	Handle h = verify_handle(satom, "cog-tv-mean");
 	return scm_from_double(h->getTruthValue()->get_mean());
 }
 
 /**
  * Return the truth value confidence on the atom.
  */
-SCM SchemeSmob::ss_get_confidence(SCM satom)
+SCM SchemeSmob::ss_get_tv_confidence(SCM satom)
 {
-	Handle h = verify_handle(satom, "cog-confidence");
+	Handle h = verify_handle(satom, "cog-tv-confidence");
 	return scm_from_double(h->getTruthValue()->get_confidence());
 }
 
 /**
  * Return the truth value count on the atom.
  */
-SCM SchemeSmob::ss_get_count(SCM satom)
+SCM SchemeSmob::ss_get_tv_count(SCM satom)
 {
-	Handle h = verify_handle(satom, "cog-count");
+	Handle h = verify_handle(satom, "cog-tv-count");
 	return scm_from_double(h->getTruthValue()->get_count());
 }
 
