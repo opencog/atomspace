@@ -629,22 +629,26 @@ END $$;
 
 CREATE SEQUENCE uuid_pool START WITH 1 INCREMENT BY 400;
 CREATE SEQUENCE vuid_pool START WITH 1 INCREMENT BY 400;
+
+_initial_conn_pool_size
+
 DO $$
-DECLARE maxuuid BIGINT;
+DECLARE
+	maxuuid BIGINT;
 	under BIGINT;
 	maxvu BIGINT := 0;
 	vnder BIGINT;
 BEGIN
-IF (SELECT count(*) FROM pg_stat_activity WHERE datname='en_dj_etwo') = 14 THEN
-	maxuuid := (SELECT uuid FROM Atoms ORDER BY uuid DESC LIMIT 1);
-	maxvu := (SELECT vuid FROM Values ORDER BY vuid DESC LIMIT 1);
-	under := maxuuid - 400 + 1;
-	vnder := maxvu - 400 + 1;
-	RAISE NOTICE 'Max UUID=% under=%', maxuuid, under; 
-	RAISE NOTICE 'Max VUID=% vnder=%', maxvu, vnder; 
-	PERFORM (SELECT setval('uuid_pool',under));
-	PERFORM (SELECT setval('vuid_pool',vnder));
-END IF;
+	IF (SELECT count(*) FROM pg_stat_activity WHERE datname=(SELECT current_database())) = 14 THEN
+		maxuuid := (SELECT uuid FROM Atoms ORDER BY uuid DESC LIMIT 1);
+		maxvu := (SELECT vuid FROM Values ORDER BY vuid DESC LIMIT 1);
+		under := maxuuid - (SELECT increment_by FROM uuid_pool) + 1;
+		vnder := maxvu - (SELECT increment_by FROM vuid_pool) + 1;
+		RAISE NOTICE 'Max UUID=% under=%', maxuuid, under; 
+		RAISE NOTICE 'Max VUID=% vnder=%', maxvu, vnder; 
+		PERFORM (SELECT setval('uuid_pool',under));
+		PERFORM (SELECT setval('vuid_pool',vnder));
+	END IF;
 END $$;
 
 SELECT nextval('uuid_pool');

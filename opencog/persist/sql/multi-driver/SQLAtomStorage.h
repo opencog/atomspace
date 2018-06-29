@@ -113,8 +113,6 @@ class SQLAtomStorage : public AtomStorage
 		void do_store_single_atom(const Handle&, int);
 
 		bool not_yet_stored(const Handle&);
-		UUID check_uuid(const Handle&);
-		UUID get_uuid(const Handle&);
 		std::string oset_to_string(const HandleSeq&);
 
 		bool bulk_load;
@@ -132,12 +130,6 @@ class SQLAtomStorage : public AtomStorage
 		void create_tables(void);
 
 		// --------------------------
-		// UUID management
-		UUID getMaxObservedUUID(void);
-		int getMaxObservedHeight(void);
-		TLB _tlbuf;
-
-		// --------------------------
 		// Values
 #define NUMVMUT 16
 		std::mutex _value_mutex[NUMVMUT];
@@ -152,9 +144,6 @@ class SQLAtomStorage : public AtomStorage
 		VUID storeValue(const ProtoAtomPtr&);
 		ProtoAtomPtr getValue(VUID);
 		void deleteValue(VUID);
-
-		VUID getMaxObservedVUID(void);
-		std::atomic<VUID> _next_valid;
 
 		// --------------------------
 		// Valuations
@@ -171,6 +160,21 @@ class SQLAtomStorage : public AtomStorage
 		std::string link_to_string(const LinkValuePtr&);
 
 		Handle tvpred; // the key to a very special valuation.
+
+		// --------------------------
+		// UUID management
+		UUID check_uuid(const Handle&);
+		UUID get_uuid(const Handle&);
+
+		UUID getMaxObservedUUID(void);
+		int getMaxObservedHeight(void);
+		UUID reserve(void);     // reserve range of UUID's
+		TLB _tlbuf;
+		void reset_uuid_pool(void);
+
+		VUID getMaxObservedVUID(void);
+		std::atomic<VUID> _next_valid;
+
 		// --------------------------
 		// Performance statistics
 		std::atomic<size_t> _num_get_nodes;
@@ -245,7 +249,6 @@ class SQLAtomStorage : public AtomStorage
 		// Large-scale loads and saves
 		void load(AtomTable &); // Load entire contents of DB
 		void store(const AtomTable &); // Store entire contents of AtomTable
-		UUID reserve(void);     // reserve range of UUID's
 
 		// Debugging and performance monitoring
 		void print_stats(void);

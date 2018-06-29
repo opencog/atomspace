@@ -162,4 +162,10 @@ void SQLAtomStorage::clear_cache(void)
 	reserve();
 }
 
+void SQLAtomStorage::reset_uuid_pool(void)
+{
+	Response rp(conn_pool);
+	rp.exec("SELECT vuid FROM Values ORDER BY vuid DESC LIMIT 1;");
+}
+
 /* ============================= END OF FILE ================= */
