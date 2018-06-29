@@ -190,6 +190,22 @@ void SQLAtomStorage::clear_cache(void)
 /// issued UUID bundle.
 void SQLAtomStorage::reset_uuid_pool(void)
 {
+	// Create the missing sequences, if they do not exist. This is
+	// for backwards compatibility with older databases that do not
+	// have these sequences in them.
+	UUID maxuuid = getMaxObservedUUID();
+	UUID maxvuid = getMaxObservedVUID();
+	std::string create =
+		"CREATE SEQUENCE IF NOT EXISTS uuid_pool START WITH "
+		+ std::to_string(maxuuid+1) +
+		" INCREMENT BY 400;"
+		"CREATE SEQUENCE IF NOT EXISTS vuid_pool START WITH "
+		+ std::to_string(maxvuid+1) +
+		" INCREMENT BY 400;";
+
+	Response rp(conn_pool);
+	rp.exec(create.c_str());
+
 	std::string reset =
 		"DO $$"
 		"DECLARE "
@@ -213,7 +229,6 @@ void SQLAtomStorage::reset_uuid_pool(void)
 		"   END IF;"
 		"END $$;";
 
-	Response rp(conn_pool);
 	rp.exec(reset.c_str());
 
 	rp.intval = 0;
