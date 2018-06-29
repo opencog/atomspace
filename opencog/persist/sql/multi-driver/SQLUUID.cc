@@ -157,15 +157,6 @@ SQLAtomStorage::VUID SQLAtomStorage::getMaxObservedVUID(void)
 	return rp.intval;
 }
 
-int SQLAtomStorage::getMaxObservedHeight(void)
-{
-	Response rp(conn_pool);
-	rp.intval = 0;
-	rp.exec("SELECT height FROM Atoms ORDER BY height DESC LIMIT 1;");
-	rp.rs->foreach_row(&Response::intval_cb, &rp);
-	return rp.intval;
-}
-
 UUID SQLAtomStorage::reserve(void)
 {
 	UUID max_observed_id = getMaxObservedUUID();

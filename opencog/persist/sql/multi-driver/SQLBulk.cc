@@ -130,6 +130,15 @@ void SQLAtomStorage::getIncomingByType(AtomTable& table, const Handle& h, Type t
 
 /* ================================================================ */
 
+int SQLAtomStorage::getMaxObservedHeight(void)
+{
+	Response rp(conn_pool);
+	rp.intval = 0;
+	rp.exec("SELECT height FROM Atoms ORDER BY height DESC LIMIT 1;");
+	rp.rs->foreach_row(&Response::intval_cb, &rp);
+	return rp.intval;
+}
+
 void SQLAtomStorage::load(AtomTable &table)
 {
 	UUID max_nrec = reserve();
