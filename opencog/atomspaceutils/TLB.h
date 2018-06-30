@@ -35,38 +35,19 @@
 namespace opencog
 {
 
+/// Default local (non-shared) uuid_pool.
 struct local_uuid_pool
 {
 private:
     // Thread-safe atomic
     std::atomic<UUID> _brk_uuid;
 public:
+    local_uuid_pool(void) : _brk_uuid(1);
+
     UUID operator()(void)
     {
         return _brk_uuid.fetch_add(1, std::memory_order_relaxed);
     };
-
-    /// Get the next UN-issued uuid.  The max issued UUID
-    /// is one less than this.
-    UUID getMaxUUID(void) { return _brk_uuid; }
-
-    /// Reserve an extent of UUID's. The lowest reserved ID is returned.
-    /// That is, after this call, no one else will be issued UUID's in
-    /// the range of [retval, retval+extent-1].
-    inline UUID reserve_extent(UUID extent)
-    {
-        return _brk_uuid.fetch_add(extent, std::memory_order_relaxed);
-    }
-
-    /// Make sure that all UUID's up to at least 'hi' have been
-    /// reserved.  No error checks are made; its OK if 'hi' has
-    /// already been issued.
-    inline void reserve_upto(UUID hi)
-    {
-        if (hi < _brk_uuid) return;
-        UUID extent = hi - _brk_uuid + 1;
-        _brk_uuid.fetch_add(extent, std::memory_order_relaxed);
-    }
 };
 
 class AtomTable;
@@ -81,13 +62,6 @@ class AtomTable;
  *
  * Atomspaces are also issued UUID's. This allows atomspaces to be
  * uniquely identified as well.
- *
- * Reserving UUID's is kind of like mallocing them, except that
- * (currently) there is no way to free them.  Use reserve_extent()
- * and reserve_upto() to malloc them.
- *
- * Everything in this class is private, mostly because we don't want
- * anyone to mess with it, except our closest friends.
  */
 class TLB
 {
