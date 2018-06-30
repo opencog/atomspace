@@ -127,7 +127,7 @@ void SQLAtomStorage::init(const char * uri)
 
 	if (!connected()) return;
 
-	reset_uuid_pool();
+	_uuid_manager.reset_uuid_pool();
 	_next_valid = getMaxObservedVUID() + 1;
 
 	// Special-case for TruthValues
@@ -432,7 +432,7 @@ void SQLAtomStorage::print_stats(void)
 	// size_t noh = 0;
 	// size_t remap = 0;
 
-	UUID mad = uuid_manager.getMaxUUID();
+	UUID mad = _uuid_manager.getMaxUUID();
 #if DONT_COUNT
 	This loop can lead to an apparent hang, when max UUID gets
 	// above a quarter-billion or so.  So don't do this.

@@ -32,8 +32,6 @@
 
 using namespace opencog;
 
-SQL_UUID_manager uuid_manager;
-
 /* ================================================================== */
 
 void SQLAtomStorage::registerWith(AtomSpace* as)
