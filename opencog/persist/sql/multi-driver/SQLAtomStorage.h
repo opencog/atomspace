@@ -166,8 +166,6 @@ class SQLAtomStorage : public AtomStorage
 		// UUID management
 		UUID check_uuid(const Handle&);
 		UUID get_uuid(const Handle&);
-		void add_atom(const Handle&, UUID);
-		UUID issue_atom(const Handle&);
 
 		UUID getMaxObservedUUID(void);
 		TLB _tlbuf;

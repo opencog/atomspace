@@ -83,7 +83,7 @@ Handle SQLAtomStorage::get_recursive_if_not_exists(PseudoPtr p)
 		if (h) return h;
 
 		Handle node(createNode(p->type, p->name));
-		add_atom(node, p->uuid);
+		_tlbuf.addAtom(node, p->uuid);
 		_num_rec_nodes ++;
 		return node;
 	}
@@ -110,7 +110,7 @@ Handle SQLAtomStorage::get_recursive_if_not_exists(PseudoPtr p)
 		resolved_oset.emplace_back(ha);
 	}
 	Handle link(createLink(resolved_oset, p->type));
-	add_atom(link, p->uuid);
+	_tlbuf.addAtom(link, p->uuid);
 	_num_rec_links++;
 	return link;
 }
@@ -151,7 +151,7 @@ Handle SQLAtomStorage::doGetNode(Type t, const char * str)
 	if (NULL == p) return Handle();
 
 	_num_got_nodes++;
-	add_atom(node, p->uuid);
+	_tlbuf.addAtom(node, p->uuid);
 	return _tlbuf.getAtom(p->uuid);
 }
 
@@ -204,7 +204,7 @@ Handle SQLAtomStorage::doGetLink(Type t, const HandleSeq& hseq)
 	if (nullptr == p) return Handle();
 
 	_num_got_links++;
-	add_atom(link, p->uuid);
+	_tlbuf.addAtom(link, p->uuid);
 	return _tlbuf.getAtom(p->uuid);
 }
 
