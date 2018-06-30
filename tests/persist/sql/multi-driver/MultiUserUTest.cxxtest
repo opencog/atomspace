@@ -80,7 +80,7 @@ class MultiUserUTest :  public CxxTest::TestSuite
         const char * username;
         const char * passwd;
 
-#define NHACK 10
+#define NHACK 1000
 #define NATOMS (NUSERS * NHACK)
         NodePtr *n1;
         NodePtr *n2;
@@ -492,8 +492,13 @@ void MultiUserUTest::test_multiuser(void)
     printf("Done joining threads\n");
 
     AtomSpace aspace;
-    fetch_space(0, &aspace);
-    check_space(0, &aspace, "verify-again");
+#define NATS 8
+    for (off=0; off<n_threads; off++)
+        for (i=0; i<NATS; i++) {
+            fetch_space(NHACK*off+i, &aspace);
+            check_space(NHACK*off+i, &aspace, "verify-again");
+        }
+
 
     logger().debug("END TEST: %s", __FUNCTION__);
 }
