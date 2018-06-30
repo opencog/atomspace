@@ -43,6 +43,7 @@ private:
     std::atomic<UUID> _brk_uuid;
 public:
     local_uuid_pool(void) : _brk_uuid(1) {}
+    local_uuid_pool(const local_uuid_pool& cpy) : _brk_uuid(1) {}
 
     UUID operator()(void)
     {
@@ -66,8 +67,7 @@ class AtomTable;
 class TLB
 {
 private:
-    local_uuid_pool _local_pool;
-    UUID (*get_unused_uuid)(void);
+    std::function<UUID(void)> get_unused_uuid;
 
     std::mutex _mtx;
     std::unordered_map<UUID, Handle> _uuid_map;
