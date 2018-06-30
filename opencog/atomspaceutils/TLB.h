@@ -92,6 +92,7 @@ class AtomTable;
 class TLB
 {
 private:
+    local_uuid_pool _local_pool;
     UUID (*get_unused_uuid)(void);
 
     std::mutex _mtx;
@@ -108,7 +109,7 @@ public:
 
     static const UUID INVALID_UUID = ULONG_MAX;
 
-    TLB(UUID(*)(void) = local_uuid_pool);
+    TLB(UUID(*)(void) = nullptr);
     void set_resolver(const AtomTable*);
     void clear_resolver(const AtomTable*);
 

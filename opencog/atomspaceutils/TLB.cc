@@ -25,9 +25,15 @@
 
 using namespace opencog;
 
-local_uuid_pool::_brk_uuid = 1;
+TLB::TLB(UUID (*allocator)(void))
+{
+	if (nullptr == allocator)
+		get_unused_uuid = &_local_pool::operator();
+	else
+		get_unused_uuid = allocator;
 
-TLB::TLB(UUID (*allocator)(void)) : get_unused_uuid(allocator) {}
+	_local_pool::_brk_uuid = 1;
+}
 
 void TLB::clear()
 {
