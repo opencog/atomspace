@@ -35,6 +35,40 @@
 namespace opencog
 {
 
+struct local_uuid_pool
+{
+private:
+    // Thread-safe atomic
+    std::atomic<UUID> _brk_uuid;
+public:
+    UUID operator()(void)
+    {
+        return _brk_uuid.fetch_add(1, std::memory_order_relaxed);
+    };
+
+    /// Get the next UN-issued uuid.  The max issued UUID
+    /// is one less than this.
+    UUID getMaxUUID(void) { return _brk_uuid; }
+
+    /// Reserve an extent of UUID's. The lowest reserved ID is returned.
+    /// That is, after this call, no one else will be issued UUID's in
+    /// the range of [retval, retval+extent-1].
+    inline UUID reserve_extent(UUID extent)
+    {
+        return _brk_uuid.fetch_add(extent, std::memory_order_relaxed);
+    }
+
+    /// Make sure that all UUID's up to at least 'hi' have been
+    /// reserved.  No error checks are made; its OK if 'hi' has
+    /// already been issued.
+    inline void reserve_upto(UUID hi)
+    {
+        if (hi < _brk_uuid) return;
+        UUID extent = hi - _brk_uuid + 1;
+        _brk_uuid.fetch_add(extent, std::memory_order_relaxed);
+    }
+};
+
 class AtomTable;
 
 /**
@@ -58,9 +92,7 @@ class AtomTable;
 class TLB
 {
 private:
-
-    // Thread-safe atomic
-    std::atomic<UUID> _brk_uuid;
+    UUID (*get_unused_uuid)(void);
 
     std::mutex _mtx;
     std::unordered_map<UUID, Handle> _uuid_map;
@@ -68,7 +100,7 @@ private:
                       std::hash<opencog::Handle>,
                       std::equal_to<opencog::Handle> > _handle_map;
 
-    // Its a vector, not a set, because its priority ranked.
+    // Its a vector, not a set, because it's priority ranked.
     std::vector<const AtomTable*> _resolver;
     Handle do_res(const Handle&);
 
@@ -76,7 +108,7 @@ public:
 
     static const UUID INVALID_UUID = ULONG_MAX;
 
-    TLB();
+    TLB(UUID(*)(void) = local_uuid_pool);
     void set_resolver(const AtomTable*);
     void clear_resolver(const AtomTable*);
 
@@ -107,28 +139,6 @@ public:
     }
     void removeAtom(const Handle&);
     void removeAtom(UUID);
-
-    /// Get the next UN-issued uuid.  The max issued UUID
-    /// is one less than this.
-    UUID getMaxUUID(void) { return _brk_uuid; }
-
-    /// Reserve an extent of UUID's. The lowest reserved ID is returned.
-    /// That is, after this call, no one else will be issued UUID's in
-    /// the range of [retval, retval+extent-1].
-    inline UUID reserve_extent(UUID extent)
-    {
-        return _brk_uuid.fetch_add(extent, std::memory_order_relaxed);
-    }
-
-    /// Make sure that all UUID's up to at least 'hi' have been
-    /// reserved.  No error checks are made; its OK if 'hi' has
-    /// already been issued.
-    inline void reserve_upto(UUID hi)
-    {
-        if (hi < _brk_uuid) return;
-        UUID extent = hi - _brk_uuid + 1;
-        _brk_uuid.fetch_add(extent, std::memory_order_relaxed);
-    }
 };
 
 } // namespace opencog

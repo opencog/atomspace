@@ -25,14 +25,15 @@
 
 using namespace opencog;
 
-TLB::TLB() : _brk_uuid(1) {}
+local_uuid_pool::_brk_uuid = 1;
+
+TLB::TLB(UUID (*allocator)(void)) : get_unused_uuid(allocator) {}
 
 void TLB::clear()
 {
     std::lock_guard<std::mutex> lck(_mtx);
     _handle_map.clear();
     _uuid_map.clear();
-    _brk_uuid = 1;
 }
 
 // ===================================================
@@ -107,7 +108,7 @@ UUID TLB::addAtom(const Handle& h, UUID uuid)
         if (_handle_map.end() != pr) return pr->second;
 
         // Not found; we need a new uuid.
-        uuid = _brk_uuid.fetch_add(1, std::memory_order_relaxed);
+        uuid = get_unused_uuid();
     }
     else
     {
