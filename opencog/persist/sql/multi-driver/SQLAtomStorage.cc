@@ -144,7 +144,7 @@ void SQLAtomStorage::init(const char * uri)
 }
 
 SQLAtomStorage::SQLAtomStorage(std::string uri) :
-	_tlbuf(&_uuid_manager),
+	_tlbuf((std::function<UUID(void)>) _uuid_manager),
 	_write_queue(this, &SQLAtomStorage::vdo_store_atom, NUM_WB_QUEUES)
 {
 	init(uri.c_str());

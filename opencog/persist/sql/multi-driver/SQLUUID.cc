@@ -178,7 +178,7 @@ void SQLAtomStorage::UUID_manager::reset_uuid_pool(void)
 		"BEGIN"
 		"   IF (SELECT count(*) FROM pg_stat_activity WHERE"
 		"           datname=(SELECT current_database())) = "
-		+ std::to_string(_initial_conn_pool_size) +
+		+ std::to_string(that->_initial_conn_pool_size) +
 		" THEN"
 		"      maxuuid := (SELECT uuid FROM Atoms ORDER BY uuid DESC LIMIT 1);"
 		"      maxvu := (SELECT vuid FROM Values ORDER BY vuid DESC LIMIT 1);"
@@ -205,7 +205,7 @@ void SQLAtomStorage::UUID_manager::reset_uuid_pool(void)
 	rp.intval = 0;
 	rp.exec("SELECT increment_by FROM vuid_pool;");
 	rp.rs->foreach_row(&Response::intval_cb, &rp);
-	_vuid_pool_increment = rp.intval;
+	that->_vuid_pool_increment = rp.intval;
 
 	// Prepare to issue UUID's
 	_uuid_pool_top = that->getMaxObservedUUID();

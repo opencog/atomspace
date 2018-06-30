@@ -265,7 +265,7 @@ void SQLAtomStorage::store(const AtomTable &table)
 	create_tables();
 #endif
 
-	UUID max_uuid = getMaxObservedUUID()
+	UUID max_uuid = getMaxObservedUUID();
 	logger().info("Bulk store to database with max UUID=%lu\n",
 		 max_uuid);
 
