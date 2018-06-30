@@ -128,14 +128,15 @@ class MultiUserUTest :  public CxxTest::TestSuite
             exit(1);
         }
 
-        void connect_to_db(int);
         void add_to_space(int, AtomSpace *, std::string id);
         void fetch_space(int, AtomSpace *);
         void check_space(int, AtomSpace *, std::string dbgmsg);
         void check_empty(int, AtomSpace *);
         void atomCompare(AtomPtr, AtomPtr, std::string);
 
-        void threaded_add(int);
+        void run_user_test(int);
+        void connect_to_db(int);
+        void add_atoms(int);
 
         void test_multiuser(void);
 };
@@ -458,25 +459,34 @@ void MultiUserUTest::check_empty(int idx, AtomSpace *space)
 
 // ============================================================
 
-void MultiUserUTest::threaded_add(int thread_id)
+void MultiUserUTest::add_atoms(int thread_id)
 {
     int idx = 0;
     int off = NHACK*thread_id;
+    AtomSpace* as = _as[thread_id];
 
-    add_to_space(off + idx++, _as, "AA-aa-wow ");
-    add_to_space(off + idx++, _as, "BB-bb-wow ");
-    add_to_space(off + idx++, _as, "CC-cc-wow ");
-    add_to_space(off + idx++, _as, "DD-dd-wow ");
-    add_to_space(off + idx++, _as, "EE-ee-wow ");
+    add_to_space(off + idx++, as, "AA-aa-wow ");
+    add_to_space(off + idx++, as, "BB-bb-wow ");
+    add_to_space(off + idx++, as, "CC-cc-wow ");
+    add_to_space(off + idx++, as, "DD-dd-wow ");
+    add_to_space(off + idx++, as, "EE-ee-wow ");
 
     /* Make sure UTF-8 works fine. */
-    add_to_space(off + idx++, _as, "Попытка выбраться вызвала слабый стон ");
-    add_to_space(off + idx++, _as, "はにがうりだそうであってるのかはち ");
-    add_to_space(off + idx++, _as, "係拉丁字母");
+    add_to_space(off + idx++, as, "Попытка выбраться вызвала слабый стон ");
+    add_to_space(off + idx++, as, "はにがうりだそうであってるのかはち ");
+    add_to_space(off + idx++, as, "係拉丁字母");
 
     /* Verify that the atoms were added */
     for (int i=0; i<idx; i++)
-        check_space(off+i, _as, "verify-add");
+        check_space(off+i, as, "verify-add");
+}
+
+// ============================================================
+
+void MultiUserUTest::run_user_test(int thread_id)
+{
+	if (0 < thread_id) sleep(1);
+	connect_to_db(thread_id);
 }
 
 // ============================================================
@@ -493,7 +503,7 @@ void MultiUserUTest::test_multiuser(void)
     std::vector<std::thread> thread_pool;
     for (int i=0; i < n_threads; i++) {
         thread_pool.push_back(
-            std::thread(&MultiUserUTest::threaded_add, this, i));
+            std::thread(&MultiUserUTest::run_user_test, this, i));
     }
 
     for (std::thread& t : thread_pool) t.join();
