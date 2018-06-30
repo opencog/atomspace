@@ -83,7 +83,7 @@ public:
 
     static const UUID INVALID_UUID = ULONG_MAX;
 
-    TLB(UUID(*)(void) = nullptr);
+    TLB(std::function<UUID(void)> = nullptr);
     void set_resolver(const AtomTable*);
     void clear_resolver(const AtomTable*);
 

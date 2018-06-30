@@ -25,7 +25,7 @@
 
 using namespace opencog;
 
-TLB::TLB(UUID (*allocator)(void))
+TLB::TLB(std::function<UUID(void)> allocator)
 {
 	if (nullptr == allocator)
 		get_unused_uuid = local_uuid_pool();
