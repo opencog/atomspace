@@ -295,6 +295,7 @@ void SQLAtomStorage::kill_data(void)
 	rp.exec("INSERT INTO Spaces VALUES (1,1);");
 
 	// Special case for TruthValues - must always have this atom.
+	_uuid_manager.reset_uuid_pool();
 	_tlbuf.clear();
 	do_store_single_atom(tvpred, 0);
 }
