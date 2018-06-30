@@ -81,7 +81,7 @@ class MultiUserUTest :  public CxxTest::TestSuite
         const char * passwd;
 
 #define NHACK 1000
-#define NATOMS (NUSERS * NHACK)
+#define NATOMS (NUSERS * NHACK + 20)
         NodePtr *n1;
         NodePtr *n2;
         NodePtr *n3;
@@ -221,7 +221,7 @@ void MultiUserUTest::tearDown(void)
     /* Orderly shutdown avoids warning in Postgres log file. */
     for (int i=0; i < n_threads; i++)
     {
-        _pm[i]->do_close();
+        // _pm[i]->do_close();
         delete _pm[i];
         delete _as[i];
     }
@@ -470,7 +470,9 @@ void MultiUserUTest::run_user_test(int thread_id)
 
 	// Spin, until they are all started.
 	while (n_threads != nstarted.fetch_add(0)) std::this_thread::yield();
+
 	add_atoms(thread_id);
+	_pm[thread_id]->do_close(); // this will force a flush.
 }
 
 // ============================================================
