@@ -213,7 +213,7 @@ void SQLAtomStorage::UUID_manager::reset_uuid_pool(void)
 }
 
 /// Issue a previously unallocated UUID.
-UUID SQLAtomStorage::UUID_manager::operator()(void)
+UUID SQLAtomStorage::UUID_manager::get_uuid(void)
 {
 	UUID uuid = _next_unused_uuid.fetch_add(1);
 	while (_uuid_pool_top < uuid)
