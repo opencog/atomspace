@@ -25,10 +25,10 @@
 
 using namespace opencog;
 
-TLB::TLB(std::function<UUID(void)> allocator)
+TLB::TLB(std::function<UUID(void)>* allocator)
 {
 	if (nullptr == allocator)
-		get_unused_uuid = local_uuid_pool();
+		get_unused_uuid = &(std::function<UUID(void)>) _local_pool;
 	else
 		get_unused_uuid = allocator;
 }
@@ -112,7 +112,7 @@ UUID TLB::addAtom(const Handle& h, UUID uuid)
         if (_handle_map.end() != pr) return pr->second;
 
         // Not found; we need a new uuid.
-        uuid = get_unused_uuid();
+        uuid = (*get_unused_uuid)();
     }
     else
     {

@@ -178,7 +178,6 @@ class SQLAtomStorage : public AtomStorage
 		struct UUID_manager : std::function<UUID(void)>
 		{
 			UUID_manager(void) {}
-			UUID_manager(const UUID_manager& cpy) {}
 			SQLAtomStorage* that;
 			void reset_uuid_pool(void);
 			void refill_uuid_pool(void);
