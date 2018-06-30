@@ -175,7 +175,7 @@ class SQLAtomStorage : public AtomStorage
 
 		/// Manage a collection of UUID's
 		/// (shared by multiple atomspaces.)
-		struct UUID_manager : std::functiion<UUID(void)>
+		struct UUID_manager : std::function<UUID(void)>
 		{
 			SQLAtomStorage* that;
 			void reset_uuid_pool(void);

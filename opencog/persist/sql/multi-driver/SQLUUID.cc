@@ -155,8 +155,8 @@ void SQLAtomStorage::UUID_manager::reset_uuid_pool(void)
 	// Create the missing sequences, if they do not exist. This is
 	// for backwards compatibility with older databases that do not
 	// have these sequences in them.
-	UUID maxuuid = getMaxObservedUUID();
-	UUID maxvuid = getMaxObservedVUID();
+	UUID maxuuid = that->getMaxObservedUUID();
+	UUID maxvuid = that->getMaxObservedVUID();
 	std::string create =
 		"CREATE SEQUENCE IF NOT EXISTS uuid_pool START WITH "
 		+ std::to_string(maxuuid+1) +
@@ -165,7 +165,7 @@ void SQLAtomStorage::UUID_manager::reset_uuid_pool(void)
 		+ std::to_string(maxvuid+1) +
 		" INCREMENT BY 400;";
 
-	Response rp(conn_pool);
+	Response rp(that->conn_pool);
 	rp.exec(create.c_str());
 
 	std::string reset =
@@ -208,7 +208,7 @@ void SQLAtomStorage::UUID_manager::reset_uuid_pool(void)
 	_vuid_pool_increment = rp.intval;
 
 	// Prepare to issue UUID's
-	_uuid_pool_top = getMaxObservedUUID();
+	_uuid_pool_top = that->getMaxObservedUUID();
 	_next_unused_uuid = _uuid_pool_top + 1;
 }
 
@@ -227,7 +227,7 @@ UUID SQLAtomStorage::UUID_manager::operator()(void)
 /// Obtain a block of unused UUID's from the SQL Sequence
 void SQLAtomStorage::UUID_manager::refill_uuid_pool(void)
 {
-	Response rp(conn_pool);
+	Response rp(that->conn_pool);
 	rp.intval = 0;
 	rp.exec("SELECT nextval('uuid_pool');");
 	rp.rs->foreach_row(&Response::intval_cb, &rp);

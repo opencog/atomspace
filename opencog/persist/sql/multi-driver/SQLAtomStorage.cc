@@ -127,6 +127,7 @@ void SQLAtomStorage::init(const char * uri)
 
 	if (!connected()) return;
 
+	_uuid_manager.that = this;
 	_uuid_manager.reset_uuid_pool();
 	_next_valid = getMaxObservedVUID() + 1;
 
@@ -143,7 +144,7 @@ void SQLAtomStorage::init(const char * uri)
 }
 
 SQLAtomStorage::SQLAtomStorage(std::string uri) :
-	_tlbuf(_uuid_manager),
+	_tlbuf(&_uuid_manager),
 	_write_queue(this, &SQLAtomStorage::vdo_store_atom, NUM_WB_QUEUES)
 {
 	init(uri.c_str());
