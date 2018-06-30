@@ -141,7 +141,7 @@ int SQLAtomStorage::getMaxObservedHeight(void)
 
 void SQLAtomStorage::load(AtomTable &table)
 {
-	UUID max_nrec = reserve();
+	UUID max_nrec = getMaxObservedUUID();
 	_load_count = 0;
 	max_height = getMaxObservedHeight();
 	printf("Loading all atoms; maxuuid=%lu max height=%d\n",
@@ -198,7 +198,7 @@ void SQLAtomStorage::load(AtomTable &table)
 
 void SQLAtomStorage::loadType(AtomTable &table, Type atom_type)
 {
-	UUID max_nrec = reserve();
+	UUID max_nrec = getMaxObservedUUID();
 	_load_count = 0;
 
 	// For links, assume a worst-case height.

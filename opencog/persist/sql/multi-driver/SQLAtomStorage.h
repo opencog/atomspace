@@ -101,6 +101,7 @@ class SQLAtomStorage : public AtomStorage
 		Handle doGetNode(Type, const char *);
 		Handle doGetLink(Type, const HandleSeq&);
 
+		int getMaxObservedHeight(void);
 		int max_height;
 
 		void getIncoming(AtomTable&, const char *);
@@ -169,18 +170,25 @@ class SQLAtomStorage : public AtomStorage
 		UUID issue_atom(const Handle&);
 
 		UUID getMaxObservedUUID(void);
-		int getMaxObservedHeight(void);
-		UUID reserve(void);     // reserve range of UUID's
 		TLB _tlbuf;
-		void reset_uuid_pool(void);
-		void refill_uuid_pool(void);
-		int _uuid_pool_increment;
 		int _vuid_pool_increment;
-		std::atomic<UUID> _uuid_pool_top;
-		std::atomic<UUID> _next_unused_uuid;
-
 		VUID getMaxObservedVUID(void);
 		std::atomic<VUID> _next_valid;
+
+		/// Manage a collection of UUID's
+		/// (shared by multiple atomspaces.)
+		struct UUID_manager
+		{
+			void reset_uuid_pool(void);
+			void refill_uuid_pool(void);
+			int _uuid_pool_increment;
+			std::atomic<UUID> _uuid_pool_top;
+			std::atomic<UUID> _next_unused_uuid;
+
+			// Issue an unused UUID
+			UUID operator()(void);
+		};
+		UUID_manager _uuid_manager;
 
 		// --------------------------
 		// Performance statistics

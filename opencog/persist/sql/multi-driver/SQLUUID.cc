@@ -32,6 +32,8 @@
 
 using namespace opencog;
 
+SQL_UUID_manager uuid_manager;
+
 /* ================================================================== */
 
 void SQLAtomStorage::registerWith(AtomSpace* as)
@@ -125,16 +127,10 @@ void SQLAtomStorage::add_atom(const Handle& h, UUID uuid)
 	_tlbuf.addAtom(h, uuid);
 }
 
-/// Issue a new UUID and put the atom to the TLB (under that UUID)
+/// Issue a new UUID and put the atom to the TLB.
 UUID SQLAtomStorage::issue_atom(const Handle& h)
 {
-	UUID uuid = _next_unused_uuid.fetch_add(1);
-	while (_uuid_pool_top < uuid)
-	{
-		refill_uuid_pool();
-		uuid = _next_unused_uuid.fetch_add(1);
-	}
-	return _tlbuf.addAtom(h, uuid);
+	return _tlbuf.addAtom(h, TLB::INVALID_UUID);
 }
 
 /* ================================================================ */
@@ -157,19 +153,9 @@ SQLAtomStorage::VUID SQLAtomStorage::getMaxObservedVUID(void)
 	return rp.intval;
 }
 
-UUID SQLAtomStorage::reserve(void)
-{
-	UUID max_observed_id = getMaxObservedUUID();
-	logger().debug("SQLAtomStorage::reserve(): Max observed UUID is %lu\n",
-		 max_observed_id);
-	_tlbuf.reserve_upto(max_observed_id);
-	return max_observed_id;
-}
-
 void SQLAtomStorage::clear_cache(void)
 {
 	_tlbuf.clear();
-	reserve();
 }
 
 /* ================================================================ */
@@ -179,7 +165,7 @@ void SQLAtomStorage::clear_cache(void)
 /// ones who are connected.  Otherwise, no reset can take place,
 /// because we are not the only user, and we must respect the currently
 /// issued UUID bundle.
-void SQLAtomStorage::reset_uuid_pool(void)
+void SQLAtomStorage::UUID_manager::reset_uuid_pool(void)
 {
 	// Create the missing sequences, if they do not exist. This is
 	// for backwards compatibility with older databases that do not
@@ -238,12 +224,23 @@ void SQLAtomStorage::reset_uuid_pool(void)
 
 	// Prepare to issue UUID's
 	_uuid_pool_top = getMaxObservedUUID();
-	_tlbuf.reserve_upto(_uuid_pool_top);
 	_next_unused_uuid = _uuid_pool_top + 1;
 }
 
+/// Issue a previously unallocated UUID.
+UUID SQLAtomStorage::UUID_manager::operator()(void)
+{
+	UUID uuid = _next_unused_uuid.fetch_add(1);
+	while (_uuid_pool_top < uuid)
+	{
+		refill_uuid_pool();
+		uuid = _next_unused_uuid.fetch_add(1);
+	}
+	return uuid;
+}
+
 /// Obtain a block of unused UUID's from the SQL Sequence
-void SQLAtomStorage::refill_uuid_pool(void)
+void SQLAtomStorage::UUID_manager::refill_uuid_pool(void)
 {
 	Response rp(conn_pool);
 	rp.intval = 0;
