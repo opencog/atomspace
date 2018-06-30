@@ -433,7 +433,7 @@ void SQLAtomStorage::print_stats(void)
 	// size_t noh = 0;
 	// size_t remap = 0;
 
-	UUID mad = _uuid_manager.getMaxUUID();
+	UUID mad = getMaxObservedUUID();
 #if DONT_COUNT
 	This loop can lead to an apparent hang, when max UUID gets
 	// above a quarter-billion or so.  So don't do this.
@@ -462,7 +462,6 @@ void SQLAtomStorage::print_stats(void)
 	       remap, frac);
 #endif
 
-	mad -= 1;
 	size_t used = _tlbuf.size();
 	frac = 100.0 * used / ((double) mad);
 	printf("sql-stats: %zu of %lu reserved uuids used (%f pct)\n",
