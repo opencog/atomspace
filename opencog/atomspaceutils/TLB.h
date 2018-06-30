@@ -42,7 +42,7 @@ private:
     // Thread-safe atomic
     std::atomic<UUID> _brk_uuid;
 public:
-    local_uuid_pool(void) : _brk_uuid(1);
+    local_uuid_pool(void) : _brk_uuid(1) {}
 
     UUID operator()(void)
     {
