@@ -36,7 +36,7 @@ namespace opencog
 {
 
 /// Default local (non-shared) uuid_pool.
-struct local_uuid_pool
+struct local_uuid_pool : std::function<UUID(void)>
 {
 private:
     // Thread-safe atomic
