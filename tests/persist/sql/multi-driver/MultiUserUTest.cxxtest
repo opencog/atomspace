@@ -73,6 +73,7 @@ class MultiUserUTest :  public CxxTest::TestSuite
 #define NUSERS 6
         AtomSpace _as[NUSERS];
         SQLPersistSCM _pm[NUSERS];
+        std::atomic<int> nstarted;
 
         std::string uri;
         const char * dbname;
@@ -131,7 +132,6 @@ class MultiUserUTest :  public CxxTest::TestSuite
         void add_to_space(int, AtomSpace *, std::string id);
         void fetch_space(int, AtomSpace *);
         void check_space(int, AtomSpace *, std::string dbgmsg);
-        void check_empty(int, AtomSpace *);
         void atomCompare(AtomPtr, AtomPtr, std::string);
 
         void run_user_test(int);
@@ -433,30 +433,6 @@ void MultiUserUTest::check_space(int idx, AtomSpace *space, std::string dbgmsg)
     atomCompare(hl3[idx], hlb3, dbgmsg + "-hlinkb3");
 }
 
-void MultiUserUTest::check_empty(int idx, AtomSpace *space)
-{
-    Handle hb1 = space->get_handle(n1[idx]->get_type(), n1[idx]->get_name());
-    TSM_ASSERT("Should not find this atom", hb1 == Handle::UNDEFINED);
-
-    Handle hb2 = space->get_handle(n2[idx]->get_type(), n2[idx]->get_name());
-    TSM_ASSERT("Should not find this atom", hb2 == Handle::UNDEFINED);
-
-    Handle hb3 = space->get_handle(n3[idx]->get_type(), n3[idx]->get_name());
-    TSM_ASSERT("Should not find this atom", hb3 == Handle::UNDEFINED);
-
-    Handle hb4 = space->get_handle(n4[idx]->get_type(), n4[idx]->get_name());
-    TSM_ASSERT("Should not find this atom", hb4 == Handle::UNDEFINED);
-
-    HandleSeq hvec;
-    hvec.push_back(h1[idx]);
-    hvec.push_back(h2[idx]);
-    hvec.push_back(h3[idx]);
-    hvec.push_back(h4[idx]);
-
-    Handle hlb = space->get_handle(hl[idx]->get_type(), hvec);
-    TSM_ASSERT("Should not find this atom", hlb == Handle::UNDEFINED);
-}
-
 // ============================================================
 
 void MultiUserUTest::add_atoms(int thread_id)
@@ -487,6 +463,12 @@ void MultiUserUTest::run_user_test(int thread_id)
 {
 	if (0 < thread_id) sleep(1);
 	connect_to_db(thread_id);
+
+	nstarted.fetch_add(1);
+
+	// Spin, until they are all started.
+	while (n_threads != nstarted.fetch_add(0)) yeild();
+	add_atoms(thread_id);
 }
 
 // ============================================================
@@ -509,43 +491,9 @@ void MultiUserUTest::test_multiuser(void)
     for (std::thread& t : thread_pool) t.join();
     printf("Done joining threads\n");
 
-    /* Extract atoms from the AtomSpace. This does not delete them from
-     * the SQL storage, though; to do that, they must be deleted, not
-     * extracted.
-     */
-    _as->barrier();
-    _as->clear();
-    TSM_ASSERT("Non-empty atomspace", 0 == _as->get_size());
-
-    int i, off;
-#define NATS 8
-    /* Verify that the atoms can still be fetched from storage. */
-   for (off=0; off<n_threads; off++)
-        for (i=0; i<NATS; i++) {
-            fetch_space(NHACK*off+i, _as);
-            check_space(NHACK*off+i, _as, "verify-fetch");
-        }
-
-    /* Do it again, for good luck.  */
-    _as->clear();
-    TSM_ASSERT("Non-empty atomspace", 0 == _as->get_size());
-
-    /* Verify that the atoms can still be fetched from storage. */
-    for (off=0; off<n_threads; off++)
-        for (i=0; i<NATS; i++) {
-            fetch_space(NHACK*off+i, _as);
-            check_space(NHACK*off+i, _as, "verify-again");
-        }
-
-    /* Kill data for good */
-    _as->clear();
-    TSM_ASSERT("Non-empty atomspace", 0 == _as->get_size());
-    kill_data();
-
-    /* Verify that the atoms are no longer being found. */
-    for (off=0; off<n_threads; off++)
-        for (i=0; i<NATS; i++)
-            check_empty(NHACK*off+i, _as);
+    AtomSpace aspace;
+    fetch_space(0, &aspace);
+    check_space(0, &aspace, "verify-again");
 
     logger().debug("END TEST: %s", __FUNCTION__);
 }
