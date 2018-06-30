@@ -307,6 +307,8 @@ void MultiUserUTest::atomCompare(AtomPtr a, AtomPtr b, std::string where)
 
 void MultiUserUTest::add_to_space(int idx, AtomSpace *as, std::string id)
 {
+    id += std::to_string(idx);
+
     // Create an atom ...
     TruthValuePtr stv(SimpleTruthValue::createTV(0.11, 100+idx));
     h1[idx] = as->add_node(CONCEPT_NODE, id + "fromNode");
@@ -491,14 +493,20 @@ void MultiUserUTest::test_multiuser(void)
     for (std::thread& t : thread_pool) t.join();
     printf("Done joining threads\n");
 
-    AtomSpace aspace;
+    AtomSpace* aspace = new AtomSpace();
+    SQLPersistSCM* pm = new SQLPersistSCM(aspace);
+
+    pm->do_open(uri);
 #define NATS 8
     for (int off=0; off<n_threads; off++)
         for (int i=0; i<NATS; i++) {
-            fetch_space(NHACK*off+i, &aspace);
-            check_space(NHACK*off+i, &aspace, "verify-again");
+            fetch_space(NHACK*off+i, aspace);
+            check_space(NHACK*off+i, aspace, "verify-again");
         }
 
+    pm->do_close();
+    delete pm;
+    delete aspace;
 
     logger().debug("END TEST: %s", __FUNCTION__);
 }
