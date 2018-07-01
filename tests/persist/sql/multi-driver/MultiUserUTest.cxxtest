@@ -98,7 +98,7 @@ class MultiUserUTest :  public CxxTest::TestSuite
         Handle *hl3;
 
         int n_threads;
-        bool spinwait;
+        bool clobber;
 
     public:
 
@@ -138,7 +138,9 @@ class MultiUserUTest :  public CxxTest::TestSuite
         void connect_to_db(int);
         void add_atoms(int);
 
+        void do_test_multiuser(void);
         void test_multiuser(void);
+        void xtest_clobber(void);
 };
 
 MultiUserUTest:: MultiUserUTest(void)
@@ -307,7 +309,7 @@ void MultiUserUTest::atomCompare(AtomPtr a, AtomPtr b, std::string where)
 
 void MultiUserUTest::add_to_space(int idx, AtomSpace *as, std::string id)
 {
-    id += std::to_string(idx);
+    if (not clobber) id += std::to_string(idx);
 
     // Create an atom ...
     TruthValuePtr stv(CountTruthValue::createTV(0.11, 0.0, 100+idx));
@@ -484,14 +486,13 @@ void MultiUserUTest::run_user_test(int thread_id)
 // ============================================================
 // Perform one repetition of the unit test.
 
-void MultiUserUTest::test_multiuser(void)
+void MultiUserUTest::do_test_multiuser(void)
 {
-    logger().debug("BEGIN TEST: %s", __FUNCTION__);
-
     TSM_ASSERT("Persist Module not loaded", _pm);
 
     printf("Start creating %d user sessions\n", n_threads);
 
+    nstarted = 0;
     std::vector<std::thread> thread_pool;
     for (int i=0; i < n_threads; i++) {
         thread_pool.push_back(
@@ -514,7 +515,29 @@ void MultiUserUTest::test_multiuser(void)
     pm->do_close();
     delete pm;
     delete aspace;
+}
 
+void MultiUserUTest::test_multiuser(void)
+{
+    logger().debug("BEGIN TEST: %s", __FUNCTION__);
+    clobber = false;
+    do_test_multiuser();
+    logger().debug("END TEST: %s", __FUNCTION__);
+}
+
+// Currently, this test fails, because there are two (or more) threads
+// trying to INSERT the same atom at the same time. One thread wins,
+// the others throw an error. This is not "hard" to fix; I don't think:
+// one need only to catch the error (and also not log it in error log),
+// then the losers perform an atom-get to find out what the UUID was
+// for the winning INSERT.  The winning UUID is then used for the truth
+// value stores that follow.  It's too late at night for me to fix this
+// right now, but surely it cannot be hard ....
+void MultiUserUTest::xtest_clobber(void)
+{
+    logger().debug("BEGIN TEST: %s", __FUNCTION__);
+    clobber = true;
+    do_test_multiuser();
     logger().debug("END TEST: %s", __FUNCTION__);
 }
 
