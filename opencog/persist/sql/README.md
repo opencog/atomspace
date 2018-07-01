@@ -8,15 +8,26 @@ SQL Persist
 
 An implementation of atom persistence in SQL.  This allows not only
 saving and restoring of the atomspace, but it also allows multiple
-cogservers to share a common set of data.  That is, it implements a
-basic form of a distributed atomspace.
+atomspaces to connect to the same SQL database at the same time, and
+so share a common set of data.  That is, it implements a basic form of
+a distributed atomspace.
 
 Status
 ======
-It works and has been used with databases containing millions of atoms,
-accessed by cogservers that ran for months to perform computations. It
-has scaled, trouble-free, without any slowdown, up to four cogservers.
-No one has tried anything larger than that, yet.
+It works and has been used with databases containing up to 100 million
+atoms (at about 1.5KByte/atom, this requires 150GBytes RAM). It has been
+accessed by atomspace processes (cogservers) that ran for months to
+perform computations, modifying more than 100's of millions of atoms,
+without crashes or other overt trouble.  It has scaled, trouble-free,
+without any slowdown, up to four cogservers.  No one has tried anything
+larger than that, yet.
+
+Unfortunately, its slow: typical save and restore speeds are in the
+general ballpark of 1K Atoms/sec. This can be speeded up almost ten-fold,
+by disabling various safety checks (such as sync-to-disk) in Postgres.
+This works great, unless you loose power, in which case your database
+will be permanently corrupted. Power loss happens more often than you
+might imagine.
 
 Features
 --------
@@ -166,18 +177,17 @@ tested in several unit tests.
  * Fully automated mapping of in-RAM atoms to in-storage universal
 unique identifiers (UUID's), using the TLB mechanism.
 
- * Multi-user issuance and management of UUID's is un-tested and is
-probably broken at this time.  That is, if multiple cogservers connect
-to the atomspace at the same time, it probably won't work.  It used to
-work, but there have been some major changes that probably broke this.
-There is existing infrastructure that enables this, e.g. one can
-"malloc" ranges of UUID's.  The code has bit-rotted, for lack of use.
+ * Multi-user issuance and management of UUID's is weakly tested and
+seems to work. This allows a form of a "distributed atomspace" --
+multiple atomsapces can connect to the same database at the same time,
+and save and restore atoms, getting back the correct Values (such as
+TruthValues) on each atom, as expected.
 
  * This implementation automatically handles clashing atom types.  That
 is, if the data is written with one set of atom types, and then the
-cogserver is stopped, the atomtypes are all changed (with some added,
-some deleted), then during the load of the old data, the types will
-be automatically translated to use the new atom types. (The deleted
+atomspace process is stopped, the atomtypes are all changed (with some
+added, some deleted), then during the load of the old data, the types
+will be automatically translated to use the new atom types. (The deleted
 atom types will not be removed from the database.  Restoring atoms with
 deleted atomtypes will cause an exception to be thrown.)
 
