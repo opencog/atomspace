@@ -643,7 +643,7 @@
 		(set! start-time (current-time))
 		diff)
 
-	; Decorate the object with methods that report support.
+	; Decorate the object with methods that provide wild-cards.
 	; All the others get to work off of the basis cached by this one.
 	(define wild-obj (add-pair-stars OBJ))
 

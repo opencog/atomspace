@@ -15,6 +15,18 @@
 ; It uses these cached stats for frequencies and MI to compute left
 ; and right subtotals (row and column subtotals), which are then cached.
 ; The cached values become available via the standard frequency API.
+;
+; XXX FIXME: This should be re-written to avoid the frequency API, and
+; make use only of the counts during computation. There are two reasons
+; for this:
+; 1) It takes time to compute the frequencies, and it takes storage to
+;    store them. This is a waste for large datasets; and poses problems
+;    when the datasets are extremely large.
+; 2) The count api can be filtered in a straight-forward way, with the
+;    filtering API. But these filtered counts are not used below, and
+;    there's no way to use that, without recomputing the frequencies.
+;    So .. see point 1) above: frequencies are screwy when filtering.
+;
 ; ---------------------------------------------------------------------
 ;
 (use-modules (srfi srfi-1))
