@@ -557,21 +557,24 @@
 		; Store all the wild-card atoms; these are exactly the ones
 		; obtained from the object, via the left and right basis.
 		(define (store-left-wildcards)
+			; Store the wild-wild-card atom, first.
+			; This holds the totals for the matrix.
+			(store-atom (llobj 'wild-wild))
 			(store-list
 				(lambda (x) (llobj 'left-wildcard x))
 				(star-obj 'right-basis)
 				40000 "left-wilds"))
 
 		(define (store-right-wildcards)
+			; Store the wild-wild-card atom, first.
+			; This holds the totals for the matrix.
+			(store-atom (llobj 'wild-wild))
 			(store-list
 				(lambda (x) (llobj 'right-wildcard x))
 				(star-obj 'left-basis)
 				40000 "right-wilds"))
 
 		(define (store-all-wildcards)
-			; Store the wild-wild-card atom, first.
-			; This holds the totals for the matrix.
-			(store-atom (llobj 'wild-wild))
 			(store-left-wildcards)
 			(store-right-wildcards))
 
