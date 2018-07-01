@@ -128,8 +128,9 @@ void SQLAtomStorage::init(const char * uri)
 	if (!connected()) return;
 
 	_uuid_manager.that = this;
-	_uuid_manager.reset_uuid_pool();
-	_next_valid = getMaxObservedVUID() + 1;
+	_uuid_manager.reset_uuid_pool(getMaxObservedUUID());
+	_vuid_manager.that = this;
+	_vuid_manager.reset_uuid_pool(getMaxObservedVUID());
 
 	// Special-case for TruthValues
 	tvpred = doGetNode(PREDICATE_NODE, "*-TruthValueKey-*");
@@ -145,6 +146,8 @@ void SQLAtomStorage::init(const char * uri)
 
 SQLAtomStorage::SQLAtomStorage(std::string uri) :
 	_tlbuf(&_uuid_manager),
+	_uuid_manager("uuid_pool"),
+	_vuid_manager("vuid_pool"),
 	_write_queue(this, &SQLAtomStorage::vdo_store_atom, NUM_WB_QUEUES)
 {
 	init(uri.c_str());
@@ -295,7 +298,8 @@ void SQLAtomStorage::kill_data(void)
 	rp.exec("INSERT INTO Spaces VALUES (1,1);");
 
 	// Special case for TruthValues - must always have this atom.
-	_uuid_manager.reset_uuid_pool();
+	_uuid_manager.reset_uuid_pool(0);
+	_vuid_manager.reset_uuid_pool(0);
 	_tlbuf.clear();
 	do_store_single_atom(tvpred, 0);
 }
