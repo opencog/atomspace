@@ -595,3 +595,76 @@ atoms/execution/Instantiator.cc DONE
 
 convert createNode too DONE 
 remote _class from AtomT DONE
+=======================================
+SQL parallel ... is currently broken.  How to fix this?
+
+   TLB::reserve_extent
+   TLB::reserve_upto
+   SQLAtomStorage::getMaxObservedUUID()
+   SQLAtomStorage::reserve
+SQLAtomStorage::check_uuid
+SQLAtomStorage::not_yet_stored
+
+_tlbuf.addAtom(h, TLB::INVALID_UUID);
+uuid = _brk_uuid.fetch_add(1, std::memory_order_relaxed);
+
+SELECT count(*) FROM pg_stat_activity WHERE datname='en_dj_cfive';
+14
+
+IF (SELECT count(*) FROM pg_stat_activity WHERE datname='en_dj_etwo') = 14 THEN
+    DROP SEQUENCE uuid_pool;
+    CREATE SEQUENCE uuid_pool START maxuuid INCREMENT BY 40000;
+END IF;
+
+
+DO $$
+DECLARE re BIGINT;
+BEGIN
+IF (SELECT count(*) FROM pg_stat_activity WHERE datname='en_dj_etwo') = 14 THEN
+	re := (SELECT uuid FROM Atoms ORDER BY uuid DESC LIMIT 1);
+	RAISE NOTICE 'Max UUID is %', re; 
+   EXECUTE format ('CREATE SEQUENCE uuid_pool START WITH %I INCREMENT BY 400', re);
+END IF;
+END $$;
+
+CREATE SEQUENCE uuid_pool START WITH 1 INCREMENT BY 400;
+CREATE SEQUENCE vuid_pool START WITH 1 INCREMENT BY 400;
+
+_initial_conn_pool_size
+
+DO $$
+DECLARE
+	maxuuid BIGINT;
+	under BIGINT;
+	maxvu BIGINT := 0;
+	vnder BIGINT;
+BEGIN
+	IF (SELECT count(*) FROM pg_stat_activity WHERE datname=(SELECT current_database())) = 1 THEN
+		maxuuid := (SELECT uuid FROM Atoms ORDER BY uuid DESC LIMIT 1);
+		maxvu := (SELECT vuid FROM Values ORDER BY vuid DESC LIMIT 1);
+		under := maxuuid - (SELECT increment_by FROM uuid_pool) + 1;
+		vnder := maxvu - (SELECT increment_by FROM vuid_pool) + 1;
+		RAISE NOTICE 'Max UUID=% under=%', maxuuid, under; 
+		RAISE NOTICE 'Max VUID=% vnder=%', maxvu, vnder; 
+		PERFORM (SELECT setval('uuid_pool',under));
+		PERFORM (SELECT setval('vuid_pool',vnder));
+	END IF;
+END $$;
+
+SELECT nextval('uuid_pool');
+
+SELECT uuid into bar FROM Atoms ORDER BY uuid DESC LIMIT 1;
+
+=======================================================================
+Max UUID is 402
+[2018-06-29 19:23:24:428] [WARN] ODBC Driver: (7) ERROR: insert or
+update on table "valuations" violates foreign key constraint
+"valuations_key_fkey";
+Error while executing the query
+
+[2018-06-29 19:23:24:428] [WARN] ODCB Driver: Query was: INSERT INTO
+Valuations (key, atom, type, floatvalue) VALUES (401, 802, 6, '{
+0.44,                  406}');
+
+
+

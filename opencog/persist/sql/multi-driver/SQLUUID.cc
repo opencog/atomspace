@@ -138,28 +138,102 @@ SQLAtomStorage::VUID SQLAtomStorage::getMaxObservedVUID(void)
 	return rp.intval;
 }
 
-int SQLAtomStorage::getMaxObservedHeight(void)
-{
-	Response rp(conn_pool);
-	rp.intval = 0;
-	rp.exec("SELECT height FROM Atoms ORDER BY height DESC LIMIT 1;");
-	rp.rs->foreach_row(&Response::intval_cb, &rp);
-	return rp.intval;
-}
-
-UUID SQLAtomStorage::reserve(void)
-{
-	UUID max_observed_id = getMaxObservedUUID();
-	logger().debug("SQLAtomStorage::reserve(): Max observed UUID is %lu\n",
-		 max_observed_id);
-	_tlbuf.reserve_upto(max_observed_id);
-	return max_observed_id;
-}
-
 void SQLAtomStorage::clear_cache(void)
 {
 	_tlbuf.clear();
-	reserve();
+}
+
+/* ================================================================ */
+/* Pool management */
+
+/// Reset the uuid_pool sequence, if and only if we are the only
+/// ones who are connected.  Otherwise, no reset can take place,
+/// because we are not the only user, and we must respect the currently
+/// issued UUID bundle.
+void SQLAtomStorage::UUID_manager::reset_uuid_pool(void)
+{
+	// Create the missing sequences, if they do not exist. This is
+	// for backwards compatibility with older databases that do not
+	// have these sequences in them.
+	UUID maxuuid = that->getMaxObservedUUID();
+	UUID maxvuid = that->getMaxObservedVUID();
+	std::string create =
+		"CREATE SEQUENCE IF NOT EXISTS uuid_pool START WITH "
+		+ std::to_string(maxuuid+1) +
+		" INCREMENT BY 400;"
+		"CREATE SEQUENCE IF NOT EXISTS vuid_pool START WITH "
+		+ std::to_string(maxvuid+1) +
+		" INCREMENT BY 400;";
+
+	Response rp(that->conn_pool);
+	rp.exec(create.c_str());
+
+	std::string reset =
+		"DO $$"
+		"DECLARE "
+		"   maxuuid BIGINT;"
+		"   under BIGINT;"
+		"   maxvu BIGINT := 0;"
+		"   vnder BIGINT;"
+		"BEGIN"
+		"   IF (SELECT count(*) FROM pg_stat_activity WHERE"
+		"           datname=(SELECT current_database())) = "
+		+ std::to_string(that->_initial_conn_pool_size) +
+		" THEN"
+		"      maxuuid := (SELECT uuid FROM Atoms ORDER BY uuid DESC LIMIT 1);"
+		"      maxvu := (SELECT vuid FROM Values ORDER BY vuid DESC LIMIT 1);"
+		"      under := maxuuid - (SELECT increment_by FROM uuid_pool) + 1;"
+		"      vnder := maxvu - (SELECT increment_by FROM vuid_pool) + 1;"
+		"      IF (1 < under) THEN "
+		"         RAISE NOTICE 'Max UUID=% under=%', maxuuid, under;"
+		"         PERFORM (SELECT setval('uuid_pool',under));"
+		"      END IF;"
+		"      IF (1 < vnder) THEN "
+		"         RAISE NOTICE 'Max VUID=% vnder=%', maxvu, vnder;"
+		"         PERFORM (SELECT setval('vuid_pool',vnder));"
+		"      END IF;"
+		"   END IF;"
+		"END $$;";
+
+	rp.exec(reset.c_str());
+
+	rp.intval = 0;
+	rp.exec("SELECT increment_by FROM uuid_pool;");
+	rp.rs->foreach_row(&Response::intval_cb, &rp);
+	_uuid_pool_increment = rp.intval;
+
+	rp.intval = 0;
+	rp.exec("SELECT increment_by FROM vuid_pool;");
+	rp.rs->foreach_row(&Response::intval_cb, &rp);
+	that->_vuid_pool_increment = rp.intval;
+
+	// Prepare to issue UUID's
+	_uuid_pool_top = that->getMaxObservedUUID();
+	_next_unused_uuid = _uuid_pool_top + 1;
+}
+
+/// Issue a previously unallocated UUID.
+UUID SQLAtomStorage::UUID_manager::get_uuid(void)
+{
+	UUID uuid = _next_unused_uuid.fetch_add(1);
+	while (_uuid_pool_top < uuid)
+	{
+		refill_uuid_pool();
+		uuid = _next_unused_uuid.fetch_add(1);
+	}
+	return uuid;
+}
+
+/// Obtain a block of unused UUID's from the SQL Sequence
+void SQLAtomStorage::UUID_manager::refill_uuid_pool(void)
+{
+	Response rp(that->conn_pool);
+	rp.intval = 0;
+	rp.exec("SELECT nextval('uuid_pool');");
+	rp.rs->foreach_row(&Response::intval_cb, &rp);
+	// top is the last one that can be issued without requiring a refill.
+	_next_unused_uuid = rp.intval;
+	_uuid_pool_top = rp.intval + _uuid_pool_increment - 1;
 }
 
 /* ============================= END OF FILE ================= */

@@ -130,9 +130,18 @@ void SQLAtomStorage::getIncomingByType(AtomTable& table, const Handle& h, Type t
 
 /* ================================================================ */
 
+int SQLAtomStorage::getMaxObservedHeight(void)
+{
+	Response rp(conn_pool);
+	rp.intval = 0;
+	rp.exec("SELECT height FROM Atoms ORDER BY height DESC LIMIT 1;");
+	rp.rs->foreach_row(&Response::intval_cb, &rp);
+	return rp.intval;
+}
+
 void SQLAtomStorage::load(AtomTable &table)
 {
-	UUID max_nrec = reserve();
+	UUID max_nrec = getMaxObservedUUID();
 	_load_count = 0;
 	max_height = getMaxObservedHeight();
 	printf("Loading all atoms; maxuuid=%lu max height=%d\n",
@@ -189,7 +198,7 @@ void SQLAtomStorage::load(AtomTable &table)
 
 void SQLAtomStorage::loadType(AtomTable &table, Type atom_type)
 {
-	UUID max_nrec = reserve();
+	UUID max_nrec = getMaxObservedUUID();
 	_load_count = 0;
 
 	// For links, assume a worst-case height.
@@ -256,8 +265,9 @@ void SQLAtomStorage::store(const AtomTable &table)
 	create_tables();
 #endif
 
-	UUID max_uuid = _tlbuf.getMaxUUID();
-	printf("Max UUID is %lu\n", max_uuid);
+	UUID max_uuid = getMaxObservedUUID();
+	logger().info("Bulk store to database with max UUID=%lu\n",
+		 max_uuid);
 
 	// If we are storing to an absolutely empty database, then
 	// skip all UUID lookups completely!  This is not a safe

@@ -127,7 +127,8 @@ void SQLAtomStorage::init(const char * uri)
 
 	if (!connected()) return;
 
-	reserve();
+	_uuid_manager.that = this;
+	_uuid_manager.reset_uuid_pool();
 	_next_valid = getMaxObservedVUID() + 1;
 
 	// Special-case for TruthValues
@@ -142,8 +143,9 @@ void SQLAtomStorage::init(const char * uri)
 	table_id_cache.insert(1);
 }
 
-SQLAtomStorage::SQLAtomStorage(std::string uri)
-	: _write_queue(this, &SQLAtomStorage::vdo_store_atom, NUM_WB_QUEUES)
+SQLAtomStorage::SQLAtomStorage(std::string uri) :
+	_tlbuf(&_uuid_manager),
+	_write_queue(this, &SQLAtomStorage::vdo_store_atom, NUM_WB_QUEUES)
 {
 	init(uri.c_str());
 
@@ -281,6 +283,10 @@ void SQLAtomStorage::kill_data(void)
 	rp.exec("DELETE from Valuations;");
 	rp.exec("DELETE from Values;");
 	rp.exec("DELETE from Atoms;");
+	rp.exec("DROP SEQUENCE uuid_pool;");
+	rp.exec("DROP SEQUENCE vuid_pool;");
+	rp.exec("CREATE SEQUENCE uuid_pool START WITH 1 INCREMENT BY 400;");
+	rp.exec("CREATE SEQUENCE vuid_pool START WITH 1 INCREMENT BY 400;");
 
 	// Delete the atomspaces as well!
 	rp.exec("DELETE from Spaces;");
@@ -289,6 +295,7 @@ void SQLAtomStorage::kill_data(void)
 	rp.exec("INSERT INTO Spaces VALUES (1,1);");
 
 	// Special case for TruthValues - must always have this atom.
+	_uuid_manager.reset_uuid_pool();
 	_tlbuf.clear();
 	do_store_single_atom(tvpred, 0);
 }
@@ -427,7 +434,7 @@ void SQLAtomStorage::print_stats(void)
 	// size_t noh = 0;
 	// size_t remap = 0;
 
-	UUID mad = _tlbuf.getMaxUUID();
+	UUID mad = getMaxObservedUUID();
 #if DONT_COUNT
 	This loop can lead to an apparent hang, when max UUID gets
 	// above a quarter-billion or so.  So don't do this.
@@ -456,7 +463,6 @@ void SQLAtomStorage::print_stats(void)
 	       remap, frac);
 #endif
 
-	mad -= 1;
 	size_t used = _tlbuf.size();
 	frac = 100.0 * used / ((double) mad);
 	printf("sql-stats: %zu of %lu reserved uuids used (%f pct)\n",

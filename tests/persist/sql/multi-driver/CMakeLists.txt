@@ -66,6 +66,7 @@ IF (DB_IS_CONFIGURED)
     ADD_CXXTEST(PersistUTest)
     ADD_CXXTEST(DeleteUTest)
     ADD_CXXTEST(MultiPersistUTest)
+    ADD_CXXTEST(MultiUserUTest)
 
     IF (HAVE_GUILE)
         ADD_CXXTEST(FetchUTest)
