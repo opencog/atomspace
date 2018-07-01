@@ -128,8 +128,9 @@ void SQLAtomStorage::init(const char * uri)
 	if (!connected()) return;
 
 	_uuid_manager.that = this;
-	_uuid_manager.reset_uuid_pool();
-	_next_valid = getMaxObservedVUID() + 1;
+	_uuid_manager.reset_uuid_pool(getMaxObservedUUID());
+	_vuid_manager.that = this;
+	_vuid_manager.reset_uuid_pool(getMaxObservedVUID());
 
 	// Special-case for TruthValues
 	tvpred = doGetNode(PREDICATE_NODE, "*-TruthValueKey-*");

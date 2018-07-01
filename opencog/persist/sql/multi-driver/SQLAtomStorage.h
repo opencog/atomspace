@@ -168,18 +168,17 @@ class SQLAtomStorage : public AtomStorage
 		UUID get_uuid(const Handle&);
 
 		UUID getMaxObservedUUID(void);
-		TLB _tlbuf;
-		int _vuid_pool_increment;
 		VUID getMaxObservedVUID(void);
-		std::atomic<VUID> _next_valid;
+		TLB _tlbuf;
 
 		/// Manage a collection of UUID's
 		/// (shared by multiple atomspaces.)
 		struct UUID_manager : public uuid_pool
 		{
-			UUID_manager(void) {}
+			const std::string poolname;
+			UUID_manager(const std::string& n) : poolname(n) {}
 			SQLAtomStorage* that;
-			void reset_uuid_pool(void);
+			void reset_uuid_pool(UUID);
 			void refill_uuid_pool(void);
 			int _uuid_pool_increment;
 			std::atomic<UUID> _uuid_pool_top;
@@ -188,7 +187,8 @@ class SQLAtomStorage : public AtomStorage
 			// Issue an unused UUID
 			UUID get_uuid(void);
 		};
-		UUID_manager _uuid_manager;
+		UUID_manager _uuid_manager("uuid_pool");
+		UUID_manager _vuid_manager("vuid_pool");
 
 		// --------------------------
 		// Performance statistics
