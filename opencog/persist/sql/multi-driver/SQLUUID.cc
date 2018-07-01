@@ -156,7 +156,7 @@ void SQLAtomStorage::UUID_manager::reset_uuid_pool(UUID maxuuid)
 	// for backwards compatibility with older databases that do not
 	// have these sequences in them.
 	std::string create =
-		"CREATE SEQUENCE IF NOT EXISTS " + poolnme + " START WITH "
+		"CREATE SEQUENCE IF NOT EXISTS " + poolname + " START WITH "
 		+ std::to_string(maxuuid+1) +
 		" INCREMENT BY 400;";
 

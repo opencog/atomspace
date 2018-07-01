@@ -112,6 +112,10 @@ class SQLAtomStorage::Response
 			if (nullptr == _conn) _conn = _pool.pop();
 			rs = _conn->exec(buff);
 		}
+		void exec(const std::string& str)
+		{
+			exec(str.c_str());
+		}
 
 		// Fetching of atoms -----------------------------------------
 		bool create_atom_column_cb(const char *colname, const char * colvalue)

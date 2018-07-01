@@ -262,7 +262,7 @@ void SQLAtomStorage::storeValuation(const Handle& key,
 // Almost a cut-n-passte of the above, but different.
 SQLAtomStorage::VUID SQLAtomStorage::storeValue(const ProtoAtomPtr& pap)
 {
-	VUID vuid = _vuid_pool.get_uuid();
+	VUID vuid = _vuid_manager.get_uuid();
 
 	bool notfirst = false;
 	std::string cols;

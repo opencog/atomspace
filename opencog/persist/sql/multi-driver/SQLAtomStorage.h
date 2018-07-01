@@ -187,8 +187,8 @@ class SQLAtomStorage : public AtomStorage
 			// Issue an unused UUID
 			UUID get_uuid(void);
 		};
-		UUID_manager _uuid_manager("uuid_pool");
-		UUID_manager _vuid_manager("vuid_pool");
+		UUID_manager _uuid_manager;
+		UUID_manager _vuid_manager;
 
 		// --------------------------
 		// Performance statistics
