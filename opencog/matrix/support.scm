@@ -306,11 +306,11 @@
 		; observed. In formulas, return
 		;     N(*,*) = sum_x N(x,*) = sum_x sum_y N(x,y)
 		;
-		; This method assumes that the partial wild-card counts have
-		; been previously computed and cached.  That is, it assumes that
-		; the 'right-wild-count returns a valid value, which really
-		; should be the same value as 'compute-right-count on this object.
-		(define (compute-total-count-from-left)
+		; This method assumes that the right-partial wild-card counts
+		; have been previously computed and cached.  That is, it assumes
+		; that the 'right-wild-count returns a valid value. This value
+		; should be the same as what 'compute-right-count would return.
+		(define (compute-total-count-from-right)
 			(fold
 				;;; Use the cached value, equiavalent to this:
 				;;; (lambda (item sum) (+ sum (sum-right-count item)))
@@ -324,7 +324,7 @@
 		; the order in which the sums are performed is distinct, and
 		; thus large differences indicate a bug; small differences are
 		; due to rounding errors.
-		(define (compute-total-count-from-right)
+		(define (compute-total-count-from-left)
 			(fold
 				;;; (lambda (item sum) (+ sum (sum-left-count item)))
 				(lambda (item sum) (+ sum (api-obj 'left-count item)))
@@ -332,14 +332,14 @@
 				(star-obj 'right-basis)))
 
 		; Same as above, but for the support
-		(define (compute-total-support-from-left)
+		(define (compute-total-support-from-right)
 			(fold
 				; (lambda (item sum) (+ sum (get-right-support-size item)))
 				(lambda (item sum) (+ sum (api-obj 'right-support item)))
 				0
 				(star-obj 'left-basis)))
 
-		(define (compute-total-support-from-right)
+		(define (compute-total-support-from-left)
 			(fold
 				; (lambda (item sum) (+ sum (get-left-support-size item)))
 				(lambda (item sum) (+ sum (api-obj 'left-support item)))
@@ -375,7 +375,15 @@
 				(star-obj 'right-basis))
 
 			(format #t "Finished left norm marginals in ~A secs\n"
-				(elapsed-secs)))
+				(elapsed-secs))
+
+			(api-obj 'set-left-totals
+				(compute-total-support-from-left)
+				(compute-total-count-from-left))
+
+			(format #t "Finished left totals in ~A secs\n"
+				(elapsed-secs))
+		)
 
 		(define (right-marginals)
 			(elapsed-secs)
@@ -386,8 +394,17 @@
 					(define l2 (sum-right-length ITEM))
 					(api-obj 'set-right-norms ITEM l0 l1 l2))
 				(star-obj 'left-basis))
+
 			(format #t "Finished right norm marginals in ~A secs\n"
-				(elapsed-secs)))
+				(elapsed-secs))
+
+			(api-obj 'set-right-totals
+				(compute-total-support-from-right)
+				(compute-total-count-from-right))
+
+			(format #t "Finished right totals in ~A secs\n"
+				(elapsed-secs))
+		)
 
 		; Do both at once
 		(define (cache-all)
