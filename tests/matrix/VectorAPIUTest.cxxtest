@@ -179,34 +179,34 @@ void VectorAPIUTest::test_marginals(void)
 
 	printf("---------------------------------------------------------\n");
 	// Verify that the marginals were correctly computed
-	std::string num = eval->eval("(fapi 'left-basis-size)");
+	std::string num = eval->eval("(papi 'left-basis-size)");
 	CHKNUM("Left size", num, 3);
 
-	num = eval->eval("(fapi 'right-basis-size)");
+	num = eval->eval("(papi 'right-basis-size)");
 	CHKNUM("Right size", num, 4);
 
-	num = eval->eval("(fapi 'wild-wild-count)");
+	num = eval->eval("(papi 'wild-wild-count)");
 	CHKNUM("Wild-wild count", num, 22);
 
-	num = eval->eval("(length (fapi 'right-stars (Word \"chicken\")))");
+	num = eval->eval("(length (papi 'right-stars (Word \"chicken\")))");
 	CHKNUM("chicken stars", num, 3);
 
-	num = eval->eval("(length (fapi 'right-stars (Word \"dog\")))");
+	num = eval->eval("(length (papi 'right-stars (Word \"dog\")))");
 	CHKNUM("dog stars", num, 3);
 
-	num = eval->eval("(length (fapi 'right-stars (Word \"table\")))");
+	num = eval->eval("(length (papi 'right-stars (Word \"table\")))");
 	CHKNUM("table stars", num, 1);
 
-	num = eval->eval("(length (fapi 'left-stars (Word \"legs\")))");
+	num = eval->eval("(length (papi 'left-stars (Word \"legs\")))");
 	CHKNUM("legs stars", num, 3);
 
-	num = eval->eval("(length (fapi 'left-stars (Word \"eyes\")))");
+	num = eval->eval("(length (papi 'left-stars (Word \"eyes\")))");
 	CHKNUM("eyes stars", num, 2);
 
-	num = eval->eval("(length (fapi 'left-stars (Word \"wings\")))");
+	num = eval->eval("(length (papi 'left-stars (Word \"wings\")))");
 	CHKNUM("wings stars", num, 1);
 
-	num = eval->eval("(length (fapi 'left-stars (Word \"snouts\")))");
+	num = eval->eval("(length (papi 'left-stars (Word \"snouts\")))");
 	CHKNUM("snouts stars", num, 1);
 
 	printf("---------------------------------------------------------\n");
