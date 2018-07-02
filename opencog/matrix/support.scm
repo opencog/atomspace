@@ -158,8 +158,17 @@
   The total-support is sum_x sum_y D(x,y)
   That is, the total number of non-zero entries in the matrix.
 
-  The total-count is N(*,*) = sum_x sum_y N(x,y)
-  That is, the total of all count entries in the matrix.
+  The total-count-left is N(*,*) = sum_x N(x,*)
+  That is, the total of all count entries in the matrix, with the
+  left-sum being done last. It uses the cached, previously-computed
+  right-marginal sums N(x,*) to perform the computation, and so this
+  computation will fail, if the marginals have not been stored.
+
+  The total-count-right is N(*,*) = sum_y N(*,y)
+  Same as above, but does the right-sum last. Should yeild the same
+  answer, as above, except for rounding errors. Using this method can
+  be more convenient, if the right-marginal sums are not available
+  (and v.v. if the other marginals are not available.)
 
   Here, the LLOBJ is expected to be an object, with valid counts
   associated with each pair. LLOBJ is expected to have working,
@@ -278,11 +287,40 @@
 				0
 				(star-obj 'left-basis)))
 
-		(define (compute-total-count)
+		; Compute the total number of times that all pairs have been
+		; observed. In formulas, return
+		;     N(*,*) = sum_x N(x,*) = sum_x sum_y N(x,y)
+		;
+		; This method assumes that the partial wild-card counts have
+		; been previously computed and cached.  That is, it assumes that
+		; the 'right-wild-count returns a valid value, which really
+		; should be the same value as 'compute-right-count on this object.
+		(define (compute-total-count-from-left)
 			(fold
-				(lambda (item sum) (+ sum (sum-right-count item)))
+				;;; Use the cached value, equiavalent to this:
+				;;; (lambda (item sum) (+ sum (sum-right-count item)))
+				(lambda (item sum) (+ sum (api-obj 'right-count item)))
 				0
 				(star-obj 'left-basis)))
+
+		; Compute the total number of times that all pairs have been
+		; observed. That is, return N(*,*) = sum_y N(*,y). Note that
+		; this should give exactly the same result as the above; however,
+		; the order in which the sums are performed is distinct, and
+		; thus large differences indicate a bug; small differences are
+		; due to rounding errors.
+		(define (compute-total-count-from-right)
+			(fold
+				;;; (lambda (item sum) (+ sum (sum-left-count item)))
+				(lambda (item sum) (+ sum (api-obj 'left-count item)))
+				0
+				(star-obj 'right-basis)))
+
+		; Compute and cache the total observation count for all pairs.
+		; This returns the atom holding the cached count.
+		; (define (cache-total-count)
+		;	(define cnt (compute-total-count))
+		;	(cntobj 'set-wild-wild-count cnt))
 
 		; -------------
 		; Compute all l_0, l_1 and l_2 norms, attach them to the
@@ -342,7 +380,8 @@
 				((right-lp-norm)      (apply sum-right-lp-norm args))
 
 				((total-support)      (compute-total-support))
-				((total-count)        (compute-total-count))
+				((total-count-left)   (compute-total-count-from-left))
+				((total-count-right)  (compute-total-count-from-right))
 
 				((left-marginals)     (left-marginals))
 				((right-marginals)    (right-marginals))
