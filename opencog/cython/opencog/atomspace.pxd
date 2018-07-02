@@ -238,3 +238,9 @@ cdef extern from "opencog/atoms/proto/FloatValue.h" namespace "opencog":
         const vector[double]& value() const;
     
     cdef cProtoAtomPtr createFloatValue(...)
+
+cdef extern from "opencog/atoms/proto/StringValue.h" namespace "opencog":
+    cdef cppclass cStringValue "opencog::StringValue":
+        const vector[string]& value() const;
+    
+    cdef cProtoAtomPtr createStringValue(...)
