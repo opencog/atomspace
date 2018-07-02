@@ -1,6 +1,7 @@
 from libcpp.vector cimport vector
 from libcpp.list cimport list as cpplist
 from libcpp.memory cimport shared_ptr
+from libcpp.string cimport string
 
 cdef extern from "Python.h":
     # Tacky hack to pass atomspace pointer to AtomSpace ctor.
@@ -18,15 +19,6 @@ cdef extern from "opencog/cython/opencog/Cast.h":
     # Tacky hack to convert C objects into Python objects.
     cdef PANDLE   void_from_candle(const cHandle& h)
     cdef PANDLE   void_from_cptr(cHandle* hp)
-
-
-# Basic wrapping for std::string conversion.
-cdef extern from "<string>" namespace "std":
-    cdef cppclass string:
-        string()
-        string(char *)
-        char * c_str()
-        int size()
 
 
 # Basic wrapping for back_insert_iterator conversion.
