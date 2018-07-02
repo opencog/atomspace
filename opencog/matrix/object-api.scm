@@ -554,12 +554,6 @@ XXX OBSOLETE! DO NOT USE IN NEW CODE! Use `add-support-api` instead!
 				(cog-value-ref (cog-value ATOM cnt-key) 0)
 				(cog-tv-count (cog-tv ATOM)))))
 
-	; Set a count on the ATOM.
-	(define (set-count ATOM CNT)
-		(if is-filtered?
-			(cog-set-value! ATOM cnt-key (FloatValue CNT))
-			(cog-set-tv! ATOM (cog-new-ctv 0 0 CNT))))
-
 	; Get the left wildcard count
 	(define (get-left-wild-count ITEM)
 		(get-count (LLOBJ 'left-wildcard ITEM)))
@@ -568,34 +562,16 @@ XXX OBSOLETE! DO NOT USE IN NEW CODE! Use `add-support-api` instead!
 	(define (get-right-wild-count ITEM)
 		(get-count (LLOBJ 'right-wildcard ITEM)))
 
-	; Set the left wildcard count
-	; Return the atom that holds this count.
-	(define (set-left-wild-count ITEM CNT)
-		(set-count (LLOBJ 'left-wildcard ITEM) CNT))
-
-	; Set the right wildcard count
-	; Return the atom that holds this count.
-	(define (set-right-wild-count ITEM CNT)
-		(set-count (LLOBJ 'right-wildcard ITEM) CNT))
-
 	; Get the wildcard-wildcard count
 	(define (get-wild-wild-count)
 		(get-count (LLOBJ 'wild-wild)))
-
-	; Set the wildcard-wildcard count
-	; Return the atom that holds this count.
-	(define (set-wild-wild-count CNT)
-		(set-count (LLOBJ 'wild-wild) CNT))
 
 	; Methods on this class.
 	(lambda (message . args)
 		(case message
 			((left-wild-count)      (apply get-left-wild-count args))
-			((set-left-wild-count)  (apply set-left-wild-count args))
 			((right-wild-count)     (apply get-right-wild-count args))
-			((set-right-wild-count) (apply set-right-wild-count args))
 			((wild-wild-count)      (get-wild-wild-count))
-			((set-wild-wild-count)  (apply set-wild-wild-count args))
 			(else                   (apply LLOBJ (cons message args))))
 	)
 )
