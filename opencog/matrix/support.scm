@@ -4,7 +4,7 @@
 ; Define object-oriented class API's for computing the supporting set
 ; and the lp-norms of the rows and columns (vectors) in a matrix.
 ;
-; Copyright (c) 2017 Linas Vepstas
+; Copyright (c) 2017, 2018 Linas Vepstas
 ;
 ; ---------------------------------------------------------------------
 ; OVERVIEW

@@ -3,7 +3,7 @@
 ;
 ; Compute the mutual information of pairs of items.
 ;
-; Copyright (c) 2013, 2014, 2017 Linas Vepstas
+; Copyright (c) 2013, 2014, 2017, 2018 Linas Vepstas
 ;
 ; ---------------------------------------------------------------------
 ; OVERVIEW
@@ -660,8 +660,8 @@ not a big deal.
 	; All the others get to work off of the basis cached by this one.
 	(define wild-obj (add-pair-stars OBJ))
 
-	; Decorate the object with methods that can compute counts.
-	(define count-obj (make-compute-count wild-obj))
+	; Define the object which computes left and right row-lengths
+	(define supp-obj (add-support-compute wild-obj))
 
 	; Decorate the object with methods that can compute frequencies.
 	(define freq-obj (make-compute-freq wild-obj))
@@ -674,9 +674,6 @@ not a big deal.
 
 	; Define the object which will compute total entropy and MI.
 	(define total-obj (add-total-entropy-compute wild-obj))
-
-	; Define the object which computes left and right row-lengths
-	(define supp-obj (add-support-compute wild-obj))
 
 	; Define the object which will roll up a summary of the supports.
 	(define central-obj (make-central-compute wild-obj))
@@ -692,17 +689,15 @@ not a big deal.
 
 	; First, compute the summations for the left and right wildcard counts.
 	; That is, compute N(x,*) and N(*,y) for the supports on x and y.
-
-	(count-obj 'cache-all-left-counts)
-	(count-obj 'cache-all-right-counts)
+	(supp-obj 'left-marginals)
+	(supp-obj 'right-marginals)
 
 	(format #t "Done with wild-card count N(x,*) and N(*,y) in ~A secs\n"
 		(elapsed-secs))
 
-	; Now, compute the grand-total.
-	(count-obj 'cache-total-count)
-	(format #t "Done computing N(*,*) total-count= ~A in ~A secs\n"
-		((add-pair-count-api OBJ) 'wild-wild-count)
+	(format #t "Total count N(*,*) = ~A = ~A\n"
+		((add-support-api OBJ) 'total-count-left)
+		((add-support-api OBJ) 'total-count-right)
 		(elapsed-secs))
 
 	; Compute the pair-frequencies, and the left and right
@@ -740,7 +735,6 @@ not a big deal.
 
 	(display "Going to do column and row subtotals\n")
 	(subtotal-obj 'cache-all-subtotals)
-	(supp-obj 'cache-all)
 
 	(display "Going to compute the left, right and total entropy\n")
 	(total-obj 'cache-entropy)
