@@ -160,6 +160,16 @@
   is a pair, and N(x,y) is the count of how often that pair has been
   observed, and * denotes the wild-card, ranging over all items
   supported in that slot.
+
+  XXX FIXME -- this is not really needed, as the support-obj will also
+  compute counts ... so this stores the same info, twice.
+  Viz, this object is obsolete.... it should be removed.
+
+Well, some work is needed; the totals need to be ported over to the
+support object. They need to be split into distinct column-totals
+and row-totals, just in case both sides do not get computed.
+The only users of count-api want 'wild-wild-count, anyway, so its
+not a big deal.
 "
 	; We need 'left-basis, provided by add-pair-stars
 	; We need 'set-left-wild-count, provided by add-pair-count-api
