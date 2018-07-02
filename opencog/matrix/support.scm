@@ -277,15 +277,6 @@
 
 		; -------------
 		; Compute grand-totals for the whole matrix.
-		; These are computed from the left; there is an equivalent
-		; computation from the right that should give exactly the same
-		; results. We could/should be not lazy and double-check these
-		; results in this way.
-		(define (compute-total-support)
-			(fold
-				(lambda (item sum) (+ sum (get-right-support-size item)))
-				0
-				(star-obj 'left-basis)))
 
 		; Compute the total number of times that all pairs have been
 		; observed. In formulas, return
@@ -313,6 +304,21 @@
 			(fold
 				;;; (lambda (item sum) (+ sum (sum-left-count item)))
 				(lambda (item sum) (+ sum (api-obj 'left-count item)))
+				0
+				(star-obj 'right-basis)))
+
+		; Same as above, but for the support
+		(define (compute-total-support-from-left)
+			(fold
+				; (lambda (item sum) (+ sum (get-right-support-size item)))
+				(lambda (item sum) (+ sum (api-obj 'right-support item)))
+				0
+				(star-obj 'left-basis)))
+
+		(define (compute-total-support-from-right)
+			(fold
+				; (lambda (item sum) (+ sum (get-left-support-size item)))
+				(lambda (item sum) (+ sum (api-obj 'left-support item)))
 				0
 				(star-obj 'right-basis)))
 
@@ -379,7 +385,8 @@
 				((left-lp-norm)       (apply sum-left-lp-norm args))
 				((right-lp-norm)      (apply sum-right-lp-norm args))
 
-				((total-support)      (compute-total-support))
+				((total-support-left) (compute-total-support-from-left))
+				((total-support-right) (compute-total-support-from-right))
 				((total-count-left)   (compute-total-count-from-left))
 				((total-count-right)  (compute-total-count-from-right))
 
