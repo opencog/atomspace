@@ -170,31 +170,31 @@
   and it must be called *after* a valid wild-wild count is available.
 "
 	; We need 'left-basis, provided by add-pair-stars
-	; We need 'wild-wild-count, provided by add-pair-count-api
+	; We need 'wild-wild-count, provided by add-support-api
 	; We need 'set-left-wild-freq, provided by add-pair-freq-api
 	; We need 'set-size, provided by add-report-api
 	(let ((llobj LLOBJ)
-			(cntobj (add-pair-count-api LLOBJ))
+			(supobj (add-support-api LLOBJ))
 			(frqobj (add-pair-freq-api LLOBJ))
 			(wldobj (add-pair-stars LLOBJ))
 			(rptobj (add-report-api LLOBJ))
 			(tot-cnt 0))
 
 		(define (init)
-			(set! tot-cnt (cntobj `wild-wild-count)))
+			(set! tot-cnt (supobj `wild-wild-count)))
 
 		; Compute the pair frequency P(x,y) = N(x,y) / N(*,*)  This is
 		; the frequency with which the pair (x,y) is observed. Return
 		; the frequency, or zero, if the pair was never observed.
 		(define (compute-pair-freq PAIR)
-			(/ (cntobj 'get-count PAIR) tot-cnt))
+			(/ (llobj 'get-count PAIR) tot-cnt))
 
 		; Compute the left-side wild-card frequency. This is the ratio
 		; P(*,y) = N(*,y) / N(*,*) = sum_x P(x,y)
 		(define (compute-left-freq ITEM)
-			(/ (cntobj 'left-wild-count ITEM) tot-cnt))
+			(/ (supobj 'left-count ITEM) tot-cnt))
 		(define (compute-right-freq ITEM)
-			(/ (cntobj 'right-wild-count ITEM) tot-cnt))
+			(/ (supobj 'right-count ITEM) tot-cnt))
 
 		; Compute and cache the pair frequency.
 		; This returns the atom holding the cached count, thus
@@ -290,7 +290,7 @@
 	; We need 'right-wild-count, provided by add-pair-count-api
 	(let ((llobj LLOBJ)
 			(star-obj (add-pair-stars LLOBJ))
-			(cntobj (add-pair-count-api LLOBJ))
+			(supobj (add-support-api LLOBJ))
 			(frqobj (add-pair-freq-api LLOBJ)))
 
 		; Loop over all pairs, computing the MI for each. The loop
@@ -328,7 +328,7 @@
 				; are not silent) which can sometimes be a huge performance
 				; hit. So avoid the throws.
 				; Anyway: zero counts means undefined MI.
-				(if (< 0 (cntobj 'right-wild-count left-item))
+				(if (< 0 (supobj 'right-count left-item))
 					(let ((r-logli (frqobj 'right-wild-logli left-item)))
 
 						; Compute the MI for exactly one pair.
@@ -344,7 +344,7 @@
 							(define pr-logli (frqobj 'pair-logli lipr))
 
 							(define right-item (llobj 'right-element lipr))
-							(if (< 0 (cntobj 'left-wild-count right-item))
+							(if (< 0 (supobj 'left-count right-item))
 								(let* ((l-logli (frqobj 'left-wild-logli right-item))
 										(fmi (- (+ r-logli l-logli) pr-logli))
 										(mi (* pr-freq fmi)))
