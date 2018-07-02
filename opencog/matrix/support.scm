@@ -390,21 +390,39 @@
 		; Compute all l_0, l_1 and l_2 norms, attach them to the
 		; wildcards, where the support-api can find them.
 
+		; Perform three sums at once. The final sqrt taken later.
+		(define (sum-norms LIST)
+			(fold
+				(lambda (lopr sum)
+					(define cnt (get-cnt lopr))
+					(if (< 0 cnt) (list
+							(+ (first sum) 1)
+							(+ (second sum) cnt)
+							(+ (third sum) (* cnt cnt)))
+						sum)
+				(list 0 0 0)
+				LIST))
+
+		(define (sum-left-norms ITEM)
+			(sum-norms (star-obj 'left-stars ITEM)))
+
+		(define (sum-right-norms ITEM)
+			(sum-norms (star-obj 'right-stars ITEM)))
+
 		(define start-time 0)
 		(define (elapsed-secs)
 			(define diff (- (current-time) start-time))
 			(set! start-time (current-time))
 			diff)
 
-		; XXX FIXME can make this 3x faster by performing all three loops
-		; at the same time.
 		(define (left-marginals)
 			(elapsed-secs)
 			(for-each
 				(lambda (ITEM)
-					(define l0 (get-left-support-size ITEM))
-					(define l1 (sum-left-count ITEM))
-					(define l2 (sum-left-length ITEM))
+					(define sums (sum-left-norms ITEM))
+					(define l0 (first sums))
+					(define l1 (second sums))
+					(define l2 (sqrt (third sums)))
 					(api-obj 'set-left-norms ITEM l0 l1 l2))
 				(star-obj 'right-basis))
 
@@ -423,9 +441,10 @@
 			(elapsed-secs)
 			(for-each
 				(lambda (ITEM)
-					(define l0 (get-right-support-size ITEM))
-					(define l1 (sum-right-count ITEM))
-					(define l2 (sum-right-length ITEM))
+					(define sums (sum-right-norms ITEM))
+					(define l0 (first sums))
+					(define l1 (second sums))
+					(define l2 (sqrt (third sums)))
 					(api-obj 'set-right-norms ITEM l0 l1 l2))
 				(star-obj 'left-basis))
 
