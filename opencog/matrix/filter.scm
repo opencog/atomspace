@@ -223,7 +223,7 @@
   left-dimension of the dataset drops; likewise on the right.
 "
 	(let* ((stars-obj (add-pair-stars LLOBJ))
-			(cnt-obj (add-pair-count-api stars-obj))
+			(sup-obj (add-support-api stars-obj))
 		)
 
 		; ---------------
@@ -233,20 +233,20 @@
 		; but is correct: as LEFT-CUT gets larger, the size of the
 		; left-basis shrinks.
 		(define (left-basis-pred ITEM)
-			(< LEFT-CUT (cnt-obj 'right-wild-count ITEM)))
+			(< LEFT-CUT (sup-obj 'right-count ITEM)))
 
 		(define (right-basis-pred ITEM)
-			(< RIGHT-CUT (cnt-obj 'left-wild-count ITEM)))
+			(< RIGHT-CUT (sup-obj 'left-count ITEM)))
 
 		; ---------------
 		; Return only those stars that pass the cutoff.
 		;
 		; See comments above: LEFT-CUT < right-wild-count is correct.
 		(define (left-stars-pred PAIR)
-			(< LEFT-CUT (cnt-obj 'right-wild-count (LLOBJ 'left-element PAIR))))
+			(< LEFT-CUT (sup-obj 'right-count (LLOBJ 'left-element PAIR))))
 
 		(define (right-stars-pred PAIR)
-			(< RIGHT-CUT (cnt-obj 'left-wild-count (LLOBJ 'right-element PAIR))))
+			(< RIGHT-CUT (sup-obj 'left-count (LLOBJ 'right-element PAIR))))
 
 		(define (pair-pred PAIR)
 			(< PAIR-CUT (LLOBJ 'get-count PAIR)))

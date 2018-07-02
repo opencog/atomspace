@@ -287,7 +287,7 @@
 	; We need 'left-basis, provided by add-pair-stars
 	; We need 'pair-freq, provided by add-pair-freq-api
 	; We need 'set-pair-mi, provided by add-pair-freq-api
-	; We need 'right-wild-count, provided by add-pair-count-api
+	; We need 'right-count, provided by add-support-api
 	(let ((llobj LLOBJ)
 			(star-obj (add-pair-stars LLOBJ))
 			(supobj (add-support-api LLOBJ))

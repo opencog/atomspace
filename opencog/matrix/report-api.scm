@@ -48,7 +48,7 @@
   'num-pairs        -- The number of non-zero entries
   'total-count      -- Total number of observations on all pairs
                        (Identical to the 'wild-wild-count on the
-                       count-api object)
+                       support-api object)
 
   'left-entropy     -- The sum H_left = -sum_x P(x,*) log_2 P(x,*)
   'right-entropy    -- The sum H_right = -sum_y P(*,y) log_2 P(*,y)
@@ -117,7 +117,7 @@
     calls 'hubbiness' (his hubbiness is the 2nd central moment, if
     I recall correctly).
 "
-	(let* ((cntobj (add-pair-count-api LLOBJ))
+	(let* ((supobj (add-support-api LLOBJ))
 			(wild-atom (LLOBJ 'wild-wild))
 			(is-filtered? (and ID (LLOBJ 'filters?)))
 		)
@@ -221,7 +221,7 @@
 			(cog-value-ref (cog-value wild-atom r-norm-key) 3))
 
 		; ----------------------------------------------------
-		(define (get-total-count) (cntobj 'wild-wild-count))
+		(define (get-total-count) (supobj 'wild-wild-count))
 
 		; ----------------------------------------------------
 		; Methods on this class.
@@ -455,13 +455,13 @@
 	(define (log2 x) (/ (log x) (log 2)))
 
 	(define rpt-obj (add-report-api LLOBJ))
-	(define cnt-obj (add-pair-count-api LLOBJ))
+	(define sup-obj (add-support-api LLOBJ))
 
 	(define size (rpt-obj 'num-pairs))
 	(define nrows (rpt-obj 'left-dim))
 	(define ncols (rpt-obj 'right-dim))
 	(define tot (* nrows ncols))
-	(define obs (cnt-obj 'wild-wild-count))
+	(define obs (sup-obj 'wild-wild-count))
 
 	(format PORT "Summary Report for Correlation Matrix ~A\n"
 		(LLOBJ 'name))

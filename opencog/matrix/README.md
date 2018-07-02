@@ -208,7 +208,7 @@ Basic definitions
 
 Let `N(x,y)` be the observed count on the pair of atoms `(x,y)`.
 
-The `add-pair-count-api` class provides an API to report the partial
+The `add-support-api` class provides an API to report the partial
 sums `N(x,*) = sum_y N(x,y)` and likewise `N(*,y)`.  If you think of
 `N(x,y)` as a matrix, these are the totals for the entries in each
 row or column of the matrix. Likewise, `N(*,*) = sum_x sum_y N(x,y)`.
