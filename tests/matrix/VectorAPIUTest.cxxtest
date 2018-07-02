@@ -281,11 +281,20 @@ void VectorAPIUTest::test_marginals(void)
 	num = eval->eval("(pcmp 'left-support (Word \"snouts\"))");
 	CHKNUM("snouts stars", num, 1);
 
-	num = eval->eval("(pcmp 'total-support)");
-	CHKNUM("total support", num, 7);
+	eval->eval("(pcmp 'left-marginals)");
+	eval->eval("(pcmp 'right-marginals)");
 
-	num = eval->eval("(pcmp 'total-count)");
-	CHKNUM("total count", num, 22);
+	num = eval->eval("(pcmp 'total-support-left)");
+	CHKNUM("total support left", num, 7);
+
+	num = eval->eval("(pcmp 'total-support-right)");
+	CHKNUM("total support right", num, 7);
+
+	num = eval->eval("(pcmp 'total-count-left)");
+	CHKNUM("total count left", num, 22);
+
+	num = eval->eval("(pcmp 'total-count-right)");
+	CHKNUM("total count right", num, 22);
 
 	printf("---------------------------------------------------------\n");
 	// Verify marginal frequencies
