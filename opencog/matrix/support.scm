@@ -66,9 +66,9 @@
 
 	(define left-total-key (PredicateNode left-total-key-name))
 
-	(define (set-left-totals ATOM L0 L1)
+	(define (set-left-totals L0 L1)
 		(set-wild-wild-count L1)
-		(cog-set-value! ATOM left-total-key (FloatValue L0 L1)))
+		(cog-set-value! (LLOBJ 'wild-wild) left-total-key (FloatValue L0 L1)))
 
 	(define right-total-key-name
 		(if (and ID (LLOBJ 'filters?))
@@ -77,9 +77,9 @@
 
 	(define right-total-key (PredicateNode right-total-key-name))
 
-	(define (set-right-totals ATOM L0 L1)
+	(define (set-right-totals L0 L1)
 		(set-wild-wild-count L1)
-		(cog-set-value! ATOM right-total-key (FloatValue L0 L1)))
+		(cog-set-value! (LLOBJ 'wild-wild) right-total-key (FloatValue L0 L1)))
 
 	; -----------------
 	; User might ask for something not in the matrix. In that
