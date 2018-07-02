@@ -34,7 +34,7 @@
 ;        ListLink
 ;   'left-wildcard and 'right-wildcard, indicating where the partial
 ;        sums, such as N(x,*) and N(*,y) should be stored.
-
+;
 ; Let N(wl,wr) denote the number of times that the pair (wl, wr) has
 ; actually been observed; that is, N("some-word", "other-word") for the
 ; example above.  Properly speaking, this count is conditioned on the
@@ -57,12 +57,13 @@
 ;    N(*,wr) = Sum_wl N(wl,wr)
 ;    N(*,*) = Sum_wl Sum_wr N(wl,wr)
 ;
-; These sums are computed, for a given item, by the `make-compute-count`
-; object defined below.  It attached these counts at the locations
-; provided by the underlying object. By default, these are given by
-; `add-pair-count-api` object, although these are designed to be
-; overloaded, if needed.
-
+; Given an object containing the raw counts N(wl,wr), these sums are
+; computed by the `add-support-compute` object. Because these take
+; considerable CPU time to compute, the resulting values are cached,
+; and can be obtained with the `add-support-api` object. (This is
+; typical throughout the code: there are pairs of objects, one which
+; computes marginals, and another that accesses the cached values.)
+;
 ; For example, for word-pair counts, the wild-card sums are stored
 ; with the atoms
 ;
@@ -88,9 +89,11 @@
 ; last of these triples.
 ;
 ; After they've been computed, the values for N(*,y) and N(x,*) can be
-; fetched with the 'left-wild-count and 'right-wild-count methods on
-; the object.  The value for N(*,*) can be gotten with the
-; 'wild-wild-count method.
+; fetched with the 'left-count and 'right-count methods on the
+; support-api object.  The value for N(*,*) can be gotten with the
+; 'wild-wild-count method. More correctly, there are two of these
+; totals, which should differ only by rounding errors: they differ in
+; the order in which the sums are performed.
 ;
 ; The fractional mutual information for the pair (x,y) is defined with
 ; a plus sign, as in Deniz Yuret's thesis (1998, page 40):
