@@ -290,7 +290,7 @@ cdef class Atom(object):
     def long_string(self):
         cdef cAtom* atom_ptr = self.handle.atom_ptr()
         if atom_ptr != NULL:
-            return atom_ptr.to_string()
+            return atom_ptr.to_string().decode('UTF-8')
         return ""
 
     def __str__(self):
@@ -301,8 +301,7 @@ cdef class Atom(object):
         return ""
 
     def __repr__(self):
-        cs = self.long_string()
-        return string(cs).decode('UTF-8')
+        return self.long_string()
 
     def __richcmp__(a1_, a2_, int op):
         if not isinstance(a1_, Atom) or not isinstance(a2_, Atom):

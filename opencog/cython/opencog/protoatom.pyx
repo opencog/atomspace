@@ -8,6 +8,22 @@ cdef ProtoAtom createProtoAtom(cProtoAtomPtr shared_ptr):
     proto_atom.shared_ptr = shared_ptr
     return proto_atom
 
+cdef list vector_of_doubles_to_list(const vector[double]* cpp_vector):
+    list = []
+    it = cpp_vector.const_begin()
+    while it != cpp_vector.const_end():
+        list.append(deref(it))
+        inc(it)
+    return list
+
+cdef list vector_of_strings_to_list(const vector[string]* cpp_vector):
+    list = []
+    it = cpp_vector.const_begin()
+    while it != cpp_vector.const_end():
+        list.append(deref(it).decode('UTF-8'))
+        inc(it)
+    return list
+
 cdef class ProtoAtom:
     """C++ ProtoAtom object wrapper for Python clients"""
 
@@ -41,15 +57,12 @@ cdef class ProtoAtom:
         return is_a(self.type, type)
 
     def to_list(self):
-        cdef const vector[double]* doubleValues;
-        if (self.is_a(types.FloatValue)):
-            list = []
-            doubleValues = &((<cFloatValue*>self.get_ptr()).value())
-            it = doubleValues.const_begin()
-            while it != doubleValues.const_end():
-                list.append(deref(it))
-                inc(it)
-            return list
+        if self.is_a(types.FloatValue):
+            return vector_of_doubles_to_list(
+                &((<cFloatValue*>self.get_ptr()).value()))
+        elif self.is_a(types.StringValue):
+            return vector_of_strings_to_list(
+                &((<cStringValue*>self.get_ptr()).value()))
         else:
             raise TypeError('Type {} is not supported'.format(self.type()))
 
