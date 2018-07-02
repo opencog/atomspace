@@ -369,12 +369,6 @@
 				0
 				(star-obj 'right-basis)))
 
-		; Compute and cache the total observation count for all pairs.
-		; This returns the atom holding the cached count.
-		; (define (cache-total-count)
-		;	(define cnt (compute-total-count))
-		;	(cntobj 'set-wild-wild-count cnt))
-
 		; -------------
 		; Compute all l_0, l_1 and l_2 norms, attach them to the
 		; wildcards, where the support-api can find them.
