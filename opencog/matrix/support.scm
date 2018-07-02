@@ -147,6 +147,10 @@
 			((total-count-left)   (get-total-count-left))
 			((total-count-right)  (get-total-count-right))
 
+			; The 'wild-wild-count method provides backwards-compat
+			; with the old `add-pair-count-api` object. Remove whenever.
+			((wild-wild-count)    (get-total-count-left))
+
 			((set-left-norms)     (apply set-left-norms args))
 			((set-right-norms)    (apply set-right-norms args))
 			((set-left-totals)    (apply set-left-totals args))
