@@ -126,10 +126,9 @@
 
 (define bapi (make-basic-api))
 (define sapi (add-pair-stars bapi))
-(define capi (add-pair-count-api sapi))
-(define fapi (add-pair-freq-api capi))
+(define fapi (add-pair-freq-api sapi))
 
-(define papi (add-support-api bapi))
+(define papi (add-support-api sapi))
 (define pcmp (add-support-compute bapi))
 
 (define cent (make-central-compute bapi))

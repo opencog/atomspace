@@ -532,31 +532,7 @@
     #:optional (ID (LLOBJ 'id)))
 "
   add-pair-count-api LLOBJ ID - Extend LLOBJ with count-getters.
-
-  Extend the LLOBJ with additional methods to get and set
-  marginal counts (subtotal wild-card counts), and total counts.
-  Basically, this decorates the class with additional methods
-  that get and set these counts in \"standardized\" places.
-  Other classes can overload these methods; these just provide
-  a reasonable default.
-
-  The optional ID argument should be #f or a string, used to construct
-  the key under which the values are stored.
-
-  If the dataset is not filtered, the counts are stored in the
-  CountTruthValue associated with the atom; else they are stored
-  in a value specific to the filter-id.
-
-  These methods do NOT compute the counts! They merely provide fast
-  access to values that were previously computed and stored in the
-  atomspace.  A method is provided to set the value, as well.
-
-  Here, the LLOBJ is expected to be an object, with methods for
-  'get-pair 'make-pair 'left-wildcard 'right-wildcard and 'wild-wild
-  on it, in the form documented above for the \"low-level API class\".
-
-  The mthods return the following. ATOM is either the atom x or the
-  atom y.
+XXX OBSOLETE! DO NOT USE IN NEW CODE! Use `add-support-api` instead!
 
   'left-wild-count ATOM   -- return N(*,y) == sum_x N(x,y)
   'right-wild-count ATOM  -- return N(x,*) == sum_y N(x,y)

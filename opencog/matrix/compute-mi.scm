@@ -3,7 +3,7 @@
 ;
 ; Compute the mutual information of pairs of items.
 ;
-; Copyright (c) 2013, 2014, 2017 Linas Vepstas
+; Copyright (c) 2013, 2014, 2017, 2018 Linas Vepstas
 ;
 ; ---------------------------------------------------------------------
 ; OVERVIEW
@@ -34,7 +34,7 @@
 ;        ListLink
 ;   'left-wildcard and 'right-wildcard, indicating where the partial
 ;        sums, such as N(x,*) and N(*,y) should be stored.
-
+;
 ; Let N(wl,wr) denote the number of times that the pair (wl, wr) has
 ; actually been observed; that is, N("some-word", "other-word") for the
 ; example above.  Properly speaking, this count is conditioned on the
@@ -57,12 +57,13 @@
 ;    N(*,wr) = Sum_wl N(wl,wr)
 ;    N(*,*) = Sum_wl Sum_wr N(wl,wr)
 ;
-; These sums are computed, for a given item, by the `make-compute-count`
-; object defined below.  It attached these counts at the locations
-; provided by the underlying object. By default, these are given by
-; `add-pair-count-api` object, although these are designed to be
-; overloaded, if needed.
-
+; Given an object containing the raw counts N(wl,wr), these sums are
+; computed by the `add-support-compute` object. Because these take
+; considerable CPU time to compute, the resulting values are cached,
+; and can be obtained with the `add-support-api` object. (This is
+; typical throughout the code: there are pairs of objects, one which
+; computes marginals, and another that accesses the cached values.)
+;
 ; For example, for word-pair counts, the wild-card sums are stored
 ; with the atoms
 ;
@@ -88,9 +89,11 @@
 ; last of these triples.
 ;
 ; After they've been computed, the values for N(*,y) and N(x,*) can be
-; fetched with the 'left-wild-count and 'right-wild-count methods on
-; the object.  The value for N(*,*) can be gotten with the
-; 'wild-wild-count method.
+; fetched with the 'left-count and 'right-count methods on the
+; support-api object.  The value for N(*,*) can be gotten with the
+; 'wild-wild-count method. More correctly, there are two of these
+; totals, which should differ only by rounding errors: they differ in
+; the order in which the sums are performed.
 ;
 ; The fractional mutual information for the pair (x,y) is defined with
 ; a plus sign, as in Deniz Yuret's thesis (1998, page 40):
@@ -148,135 +151,6 @@
 )
 
 ; ---------------------------------------------------------------------
-; ---------------------------------------------------------------------
-;
-(define-public (make-compute-count LLOBJ)
-"
-  make-compute-count LLOBJ
-
-  Extend the LLOBJ with additional methods to compute wildcard counts
-  for pairs, and store the results using the count-object API.
-  That is, compute the summations N(x,*) = sum_y N(x,y) where (x,y)
-  is a pair, and N(x,y) is the count of how often that pair has been
-  observed, and * denotes the wild-card, ranging over all items
-  supported in that slot.
-"
-	; We need 'left-basis, provided by add-pair-stars
-	; We need 'set-left-wild-count, provided by add-pair-count-api
-	(let ((llobj LLOBJ)
-			(cntobj (add-pair-count-api LLOBJ))
-			(star-obj (add-pair-stars LLOBJ)))
-
-		; Compute the left-side wild-card count. This is the number
-		; N(*,y) = sum_x N(x,y) where ITEM==y and N(x,y) is the number
-		; of times that the pair (x,y) was observed.
-		; This returns the count, or zero, if the pair was never observed.
-		(define (compute-left-count ITEM)
-			(fold
-				(lambda (pr sum) (+ sum (llobj 'get-count pr)))
-				0
-				(star-obj 'left-stars ITEM)))
-
-		; Compute and cache the left-side wild-card counts N(*,y).
-		; This returns the atom holding the cached count, thus
-		; making it convenient to persist (store) this cache in
-		; the database. It returns nil if the count was zero.
-		(define (cache-left-count ITEM)
-			(define cnt (compute-left-count ITEM))
-			(if (< 0 cnt)
-				(cntobj 'set-left-wild-count ITEM cnt)
-				'()))
-
-		; Compute the right-side wild-card count N(x,*).
-		(define (compute-right-count ITEM)
-			(fold
-				(lambda (pr sum) (+ sum (llobj 'get-count pr)))
-				0
-				(star-obj 'right-stars ITEM)))
-
-		; Compute and cache the right-side wild-card counts N(x,*).
-		; This returns the atom holding the cached count, or nil
-		; if the count was zero.
-		(define (cache-right-count ITEM)
-			(define cnt (compute-right-count ITEM))
-			(if (< 0 cnt)
-				(cntobj 'set-right-wild-count ITEM cnt)
-				'()))
-
-		; Compute and cache all of the left-side wild-card counts.
-		; This computes N(*,y) for all y, in parallel.
-		;
-		; This method returns a list of all of the atoms holding
-		; those counts; handy for storing in a database.
-		(define (cache-all-left-counts)
-			(map cache-left-count (star-obj 'right-basis)))
-
-		(define (cache-all-right-counts)
-			(map cache-right-count (star-obj 'left-basis)))
-
-		; Compute the total number of times that all pairs have been
-		; observed. In formulas, return
-		;     N(*,*) = sum_x N(x,*) = sum_x sum_y N(x,y)
-		;
-		; This method assumes that the partial wild-card counts have
-		; been previously computed and cached.  That is, it assumes that
-		; the 'right-wild-count returns a valid value, which really
-		; should be the same value as 'compute-right-count on this object.
-		(define (compute-total-count-from-left)
-			(fold
-				;;; (lambda (item sum) (+ sum (compute-right-count item)))
-				(lambda (item sum) (+ sum (cntobj 'right-wild-count item)))
-				0
-				(star-obj 'left-basis)))
-
-		; Compute the total number of times that all pairs have been
-		; observed. That is, return N(*,*) = sum_y N(*,y). Note that
-		; this should give exactly the same result as the above; however,
-		; the order in which the sums are performed is distinct, and
-		; thus any differences indicate a bug.
-		(define (compute-total-count-from-right)
-			(fold
-				;;; (lambda (item sum) (+ sum (compute-left-count item)))
-				(lambda (item sum) (+ sum (cntobj 'left-wild-count item)))
-				0
-				(star-obj 'right-basis)))
-
-		; Compute the total number of times that all pairs have been
-		; observed. That is, return N(*,*).  Throws an error if the
-		; left and right summations fail to agree.
-		(define (compute-total-count)
-			(define l-cnt (compute-total-count-from-left))
-			(define r-cnt (compute-total-count-from-right))
-
-			; The left and right counts should be equal!
-			; XXX fixme, allow for small rounding errors.
-			(if (not (eqv? l-cnt r-cnt))
-				(throw 'bad-summation 'count-all-pairs
-					(format #f "Error: pair-counts unequal: ~A ~A\n" l-cnt r-cnt)))
-			l-cnt)
-
-		; Compute and cache the total observation count for all pairs.
-		; This returns the atom holding the cached count.
-		(define (cache-total-count)
-			(define cnt (compute-total-count))
-			(cntobj 'set-wild-wild-count cnt))
-
-		; Methods on this class.
-		(lambda (message . args)
-			(case message
-				((compute-left-count)     (apply compute-left-count args))
-				((cache-left-count)       (apply cache-left-count args))
-				((compute-right-count)    (apply compute-right-count args))
-				((cache-right-count)      (apply cache-right-count args))
-				((cache-all-left-counts)  (cache-all-left-counts))
-				((cache-all-right-counts) (cache-all-right-counts))
-				((compute-total-count)    (compute-total-count))
-				((cache-total-count)      (cache-total-count))
-				(else (apply llobj        (cons message args))))
-		))
-)
-
-; ---------------------------------------------------------------------
 ;
 (define-public (make-compute-freq LLOBJ)
 "
@@ -296,31 +170,31 @@
   and it must be called *after* a valid wild-wild count is available.
 "
 	; We need 'left-basis, provided by add-pair-stars
-	; We need 'wild-wild-count, provided by add-pair-count-api
+	; We need 'wild-wild-count, provided by add-support-api
 	; We need 'set-left-wild-freq, provided by add-pair-freq-api
 	; We need 'set-size, provided by add-report-api
 	(let ((llobj LLOBJ)
-			(cntobj (add-pair-count-api LLOBJ))
+			(supobj (add-support-api LLOBJ))
 			(frqobj (add-pair-freq-api LLOBJ))
 			(wldobj (add-pair-stars LLOBJ))
 			(rptobj (add-report-api LLOBJ))
 			(tot-cnt 0))
 
 		(define (init)
-			(set! tot-cnt (cntobj `wild-wild-count)))
+			(set! tot-cnt (supobj `wild-wild-count)))
 
 		; Compute the pair frequency P(x,y) = N(x,y) / N(*,*)  This is
 		; the frequency with which the pair (x,y) is observed. Return
 		; the frequency, or zero, if the pair was never observed.
 		(define (compute-pair-freq PAIR)
-			(/ (cntobj 'get-count PAIR) tot-cnt))
+			(/ (llobj 'get-count PAIR) tot-cnt))
 
 		; Compute the left-side wild-card frequency. This is the ratio
 		; P(*,y) = N(*,y) / N(*,*) = sum_x P(x,y)
 		(define (compute-left-freq ITEM)
-			(/ (cntobj 'left-wild-count ITEM) tot-cnt))
+			(/ (supobj 'left-count ITEM) tot-cnt))
 		(define (compute-right-freq ITEM)
-			(/ (cntobj 'right-wild-count ITEM) tot-cnt))
+			(/ (supobj 'right-count ITEM) tot-cnt))
 
 		; Compute and cache the pair frequency.
 		; This returns the atom holding the cached count, thus
@@ -413,10 +287,10 @@
 	; We need 'left-basis, provided by add-pair-stars
 	; We need 'pair-freq, provided by add-pair-freq-api
 	; We need 'set-pair-mi, provided by add-pair-freq-api
-	; We need 'right-wild-count, provided by add-pair-count-api
+	; We need 'right-count, provided by add-support-api
 	(let ((llobj LLOBJ)
 			(star-obj (add-pair-stars LLOBJ))
-			(cntobj (add-pair-count-api LLOBJ))
+			(supobj (add-support-api LLOBJ))
 			(frqobj (add-pair-freq-api LLOBJ)))
 
 		; Loop over all pairs, computing the MI for each. The loop
@@ -454,7 +328,7 @@
 				; are not silent) which can sometimes be a huge performance
 				; hit. So avoid the throws.
 				; Anyway: zero counts means undefined MI.
-				(if (< 0 (cntobj 'right-wild-count left-item))
+				(if (< 0 (supobj 'right-count left-item))
 					(let ((r-logli (frqobj 'right-wild-logli left-item)))
 
 						; Compute the MI for exactly one pair.
@@ -470,7 +344,7 @@
 							(define pr-logli (frqobj 'pair-logli lipr))
 
 							(define right-item (llobj 'right-element lipr))
-							(if (< 0 (cntobj 'left-wild-count right-item))
+							(if (< 0 (supobj 'left-count right-item))
 								(let* ((l-logli (frqobj 'left-wild-logli right-item))
 										(fmi (- (+ r-logli l-logli) pr-logli))
 										(mi (* pr-freq fmi)))
@@ -557,21 +431,24 @@
 		; Store all the wild-card atoms; these are exactly the ones
 		; obtained from the object, via the left and right basis.
 		(define (store-left-wildcards)
+			; Store the wild-wild-card atom, first.
+			; This holds the totals for the matrix.
+			(store-atom (llobj 'wild-wild))
 			(store-list
 				(lambda (x) (llobj 'left-wildcard x))
 				(star-obj 'right-basis)
 				40000 "left-wilds"))
 
 		(define (store-right-wildcards)
+			; Store the wild-wild-card atom, first.
+			; This holds the totals for the matrix.
+			(store-atom (llobj 'wild-wild))
 			(store-list
 				(lambda (x) (llobj 'right-wildcard x))
 				(star-obj 'left-basis)
 				40000 "right-wilds"))
 
 		(define (store-all-wildcards)
-			; Store the wild-wild-card atom, first.
-			; This holds the totals for the matrix.
-			(store-atom (llobj 'wild-wild))
 			(store-left-wildcards)
 			(store-right-wildcards))
 
@@ -640,12 +517,12 @@
 		(set! start-time (current-time))
 		diff)
 
-	; Decorate the object with methods that report support.
+	; Decorate the object with methods that provide wild-cards.
 	; All the others get to work off of the basis cached by this one.
 	(define wild-obj (add-pair-stars OBJ))
 
-	; Decorate the object with methods that can compute counts.
-	(define count-obj (make-compute-count wild-obj))
+	; Define the object which computes left and right row-lengths
+	(define supp-obj (add-support-compute wild-obj))
 
 	; Decorate the object with methods that can compute frequencies.
 	(define freq-obj (make-compute-freq wild-obj))
@@ -658,9 +535,6 @@
 
 	; Define the object which will compute total entropy and MI.
 	(define total-obj (add-total-entropy-compute wild-obj))
-
-	; Define the object which computes left and right row-lengths
-	(define supp-obj (add-support-compute wild-obj))
 
 	; Define the object which will roll up a summary of the supports.
 	(define central-obj (make-central-compute wild-obj))
@@ -676,18 +550,15 @@
 
 	; First, compute the summations for the left and right wildcard counts.
 	; That is, compute N(x,*) and N(*,y) for the supports on x and y.
-
-	(count-obj 'cache-all-left-counts)
-	(count-obj 'cache-all-right-counts)
+	(supp-obj 'left-marginals)
+	(supp-obj 'right-marginals)
 
 	(format #t "Done with wild-card count N(x,*) and N(*,y) in ~A secs\n"
 		(elapsed-secs))
 
-	; Now, compute the grand-total.
-	(count-obj 'cache-total-count)
-	(format #t "Done computing N(*,*) total-count= ~A in ~A secs\n"
-		((add-pair-count-api OBJ) 'wild-wild-count)
-		(elapsed-secs))
+	(format #t "Total count N(*,*) = ~A = ~A\n"
+		((add-support-api OBJ) 'total-count-left)
+		((add-support-api OBJ) 'total-count-right))
 
 	; Compute the pair-frequencies, and the left and right
 	; wildcard frequencies and log-frequencies.
@@ -724,7 +595,6 @@
 
 	(display "Going to do column and row subtotals\n")
 	(subtotal-obj 'cache-all-subtotals)
-	(supp-obj 'cache-all)
 
 	(display "Going to compute the left, right and total entropy\n")
 	(total-obj 'cache-entropy)
