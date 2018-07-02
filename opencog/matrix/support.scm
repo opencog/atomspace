@@ -52,6 +52,28 @@
 	(define (set-norms ATOM L0 L1 L2)
 		(cog-set-value! ATOM norm-key (FloatValue L0 L1 L2)))
 
+	; -----------------
+	(define left-total-key-name
+		(if (and ID (LLOBJ 'filters?))
+			(string-append "*-Left Total Key " ID)
+			"*-Left Total Key-*"))
+
+	(define left-total-key (PredicateNode left-total-key-name))
+
+	(define (set-left-totals ATOM L0 L1)
+		(cog-set-value! ATOM left-total-key (FloatValue L0 L1)))
+
+	(define right-total-key-name
+		(if (and ID (LLOBJ 'filters?))
+			(string-append "*-Right Total Key " ID)
+			"*-Right Total Key-*"))
+
+	(define right-total-key (PredicateNode right-total-key-name))
+
+	(define (set-right-totals ATOM L0 L1)
+		(cog-set-value! ATOM right-total-key (FloatValue L0 L1)))
+
+	; -----------------
 	; User might ask for something not in the matrix. In that
 	; case, cog-value-ref will throw 'wrong-type-arg. If this
 	; happens, just return zero.
@@ -108,6 +130,8 @@
 			((right-length)       (apply get-right-length args))
 			((set-left-norms)     (apply set-left-norms args))
 			((set-right-norms)    (apply set-right-norms args))
+			((set-left-totals)    (apply set-left-totals args))
+			((set-right-totals)   (apply set-right-totals args))
 			(else                 (apply LLOBJ (cons message args)))))
 )
 
