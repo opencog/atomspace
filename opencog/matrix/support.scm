@@ -119,6 +119,19 @@
 		(set-norms (LLOBJ 'right-wildcard ITEM) L0 L1 L2))
 
 	;--------
+	(define (get-total-support-left)
+		(cog-value-ref (cog-value (LLOBJ 'wild-wild) left-total-key) 0))
+
+	(define (get-total-count-left)
+		(cog-value-ref (cog-value (LLOBJ 'wild-wild) left-total-key) 1))
+
+	(define (get-total-support-right)
+		(cog-value-ref (cog-value (LLOBJ 'wild-wild) right-total-key) 0))
+
+	(define (get-total-count-right)
+		(cog-value-ref (cog-value (LLOBJ 'wild-wild) right-total-key) 1))
+
+	;--------
 	; Methods on this class.
 	(lambda (message . args)
 		(case message
@@ -128,6 +141,12 @@
 			((right-count)        (apply get-right-count args))
 			((left-length)        (apply get-left-length args))
 			((right-length)       (apply get-right-length args))
+
+			((total-support-left) (get-total-support-left))
+			((total-support-right)(get-total-support-right))
+			((total-count-left)   (get-total-count-left))
+			((total-count-right)  (get-total-count-right))
+
 			((set-left-norms)     (apply set-left-norms args))
 			((set-right-norms)    (apply set-right-norms args))
 			((set-left-totals)    (apply set-left-totals args))
