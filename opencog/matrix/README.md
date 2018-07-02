@@ -248,10 +248,14 @@ methods:  `for-each-pair`, which simply calls the function for each
 pair, and a `map-pair` method which returns a list of the results of
 calling the function on each pair.
 
-The `make-compute-count` class provides methods to compute the partial
-sums `N(*,y)` and `N(x,*)` and cache the resulting values on atoms where
-they can be quickly retrieved. The location of the cached values are
-exactly where they can be found by the `add-pair-count-api`, above.
+The `add-support-compute` class provides methods to compute the
+partial sums `N(*,y)` and `N(x,*)`. It also provides methods that
+compute how many non-zero entries there are in each row or column.
+It also provides methods for the "length" of a column: that is,
+`len(y) = sqrt(sum_x N^2 (x,y))` and more generally the l_p norm.
+Because these computations can take a considerable amount of time,
+the partial sums (the "marginals") are cached. The cached values can
+be accessed with the `add-support-api` object.
 
 The `make-compute-freq` class provides methods to compute and cache
 the frequencies `p(x,y)`, `p(*,y)` and `p(x,*)`.  These are cached
@@ -271,14 +275,8 @@ e.g. tens of millions of atoms, this can take hours to run.  Thus, for
 this reason, the cached values are then saved to the currently-open
 database, so that these results become available later.
 
-Computing support and entropy
------------------------------
-The `add-support-compute` class provides methods to compute the
-partial sums `N(*,y)` and `N(x,*)`. It also provides methods that
-compute how many non-zero entries there are in each row or column.
-It provides methods for the "length" of a column: that is,
-`len(y) = sqrt(sum_x N^2 (x,y))` and more generally the l_p norm.
-
+Computing entropy
+-----------------
 The `add-pair-mi-compute` class provides methods to compute the entropy
 and mutual information of rows and columns: for example, the column
 entropy (or `left-entropy`) `h_left(y) = -sum_x P(x,y) log_2 P(x,y)`
