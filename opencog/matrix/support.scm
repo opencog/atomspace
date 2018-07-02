@@ -53,6 +53,12 @@
 		(cog-set-value! ATOM norm-key (FloatValue L0 L1 L2)))
 
 	; -----------------
+	; Set the grand-total count. Use the CountTruthValue.
+	; Backwards-compatibility method. Remove this someday.
+	(define (set-wild-wild-count CNT)
+		(cog-set-tv! (LLOBJ 'wild-wild (cog-new-ctv 0 0 CNT))))
+
+	; -----------------
 	(define left-total-key-name
 		(if (and ID (LLOBJ 'filters?))
 			(string-append "*-Left Total Key " ID)
@@ -61,6 +67,7 @@
 	(define left-total-key (PredicateNode left-total-key-name))
 
 	(define (set-left-totals ATOM L0 L1)
+		(set-wild-wild-count L1)
 		(cog-set-value! ATOM left-total-key (FloatValue L0 L1)))
 
 	(define right-total-key-name
@@ -71,6 +78,7 @@
 	(define right-total-key (PredicateNode right-total-key-name))
 
 	(define (set-right-totals ATOM L0 L1)
+		(set-wild-wild-count L1)
 		(cog-set-value! ATOM right-total-key (FloatValue L0 L1)))
 
 	; -----------------
@@ -132,6 +140,15 @@
 		(cog-value-ref (cog-value (LLOBJ 'wild-wild) right-total-key) 1))
 
 	;--------
+	; Backwards-compatibility method. Remove this someday.
+	; Note that various old datasets store wild-card counts here,
+	; and so this method is explicitly needed to access old data.
+	; The old data does not have the support-totals, above.
+	; Return the grand-total count. Use the CountTruthValue.
+	(define (get-wild-wild-count)
+		(cog-tv-count (cog-tv (LLOBJ 'wild-wild))))
+
+	;--------
 	; Methods on this class.
 	(lambda (message . args)
 		(case message
@@ -149,7 +166,7 @@
 
 			; The 'wild-wild-count method provides backwards-compat
 			; with the old `add-pair-count-api` object. Remove whenever.
-			((wild-wild-count)    (get-total-count-left))
+			((wild-wild-count)    (get-wild-wild-count))
 
 			((set-left-norms)     (apply set-left-norms args))
 			((set-right-norms)    (apply set-right-norms args))
