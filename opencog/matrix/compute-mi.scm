@@ -558,8 +558,7 @@
 
 	(format #t "Total count N(*,*) = ~A = ~A\n"
 		((add-support-api OBJ) 'total-count-left)
-		((add-support-api OBJ) 'total-count-right)
-		(elapsed-secs))
+		((add-support-api OBJ) 'total-count-right))
 
 	; Compute the pair-frequencies, and the left and right
 	; wildcard frequencies and log-frequencies.
