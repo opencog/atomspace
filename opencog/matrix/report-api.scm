@@ -263,6 +263,9 @@
 "
   add-central-compute LLOBJ - Extend LLOBJ with methods to compute
   misc graph-centrality statistics.
+
+  XXX FIXME -- this duplicates some of the abilities already offered
+  in the support object, viz, some of the grand-totals...
 "
 	(let* ((wild-obj (add-pair-stars LLOBJ))
 			(len-obj (add-support-api wild-obj))
@@ -383,7 +386,6 @@
 			(format #t "Finished right norm totals in ~A secs\n"
 				(elapsed-secs))
 		)
-
 
 		; ----------------------------------------------------
 		; Methods on this class.
