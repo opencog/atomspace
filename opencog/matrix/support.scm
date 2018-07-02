@@ -399,7 +399,7 @@
 							(+ (first sum) 1)
 							(+ (second sum) cnt)
 							(+ (third sum) (* cnt cnt)))
-						sum)
+						sum))
 				(list 0 0 0)
 				LIST))
 
