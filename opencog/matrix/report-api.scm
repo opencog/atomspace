@@ -477,7 +477,7 @@
 		size tot)
 	(format PORT "Fraction non-zero: ~9,4g Sparsity (-log_2): ~6f\n"
 		(/ size tot) (log2 (/ tot size)))
-	(format PORT "Total observations: ~d  Avg obs per pair: ~6f\n"
+	(format PORT "Total observations: ~10f  Avg obs per pair: ~6f\n"
 		obs (/ obs size))
 
 	(catch #t
