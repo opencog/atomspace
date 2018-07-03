@@ -245,8 +245,9 @@
   pass 'pair-freq as the second argument: Any method that takes a pair
   and returns a number is allowed.
 "
-	(let ((star-obj (add-pair-stars LLOBJ))
-			(api-obj (add-support-api LLOBJ))
+	(let* ((star-obj (add-pair-stars LLOBJ))
+			(api-obj (add-support-api star-obj))
+			(rpt-obj (add-report-api star-obj))
 			(get-cnt (lambda (x) (LLOBJ GET-CNT x)))
 		)
 
@@ -429,9 +430,17 @@
 			(format #t "Finished left norm marginals in ~A secs\n"
 				(elapsed-secs))
 
+			; Totals can only be computed, after above has been cached.
 			(api-obj 'set-left-totals
 				(compute-total-support-from-left)
 				(compute-total-count-from-left))
+
+			; Meta-cache, for reporting. Note that total-support-left
+			; should equal 'total-support-right, up to roundoff errors.
+			(rpt-obj 'set-size
+				(star-obj 'left-basis-size)
+				(star-obj 'right-basis-size)
+				(api-obj 'total-support-left)
 
 			(format #t "Finished left totals in ~A secs\n"
 				(elapsed-secs))
@@ -451,9 +460,17 @@
 			(format #t "Finished right norm marginals in ~A secs\n"
 				(elapsed-secs))
 
+			; Totals can only be computed, after above has been cached.
 			(api-obj 'set-right-totals
 				(compute-total-support-from-right)
 				(compute-total-count-from-right))
+
+			; Meta-cache, for reporting. Note that total-support-left
+			; should equal 'total-support-right, up to roundoff errors.
+			(rpt-obj 'set-size
+				(star-obj 'left-basis-size)
+				(star-obj 'right-basis-size)
+				(api-obj 'total-support-right)
 
 			(format #t "Finished right totals in ~A secs\n"
 				(elapsed-secs))
