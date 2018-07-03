@@ -188,8 +188,23 @@
 ; ---------------------------------------------------------------------
 ; Example usage
 ;
+; This creates the marginals needed to obtain the symmetric MI between
+; words that are attached to disjunct vectors.
+;
+; (define pca (make-psuedo-cset-api))
+; (define btp (batch-transpose pca))
+; (btp 'mmt-marginals)
+;
+; Now make use of the above....
+; (define tca (add-transpose-api pca))
+; (tca 'mmt-count (Word "eyes"))
+;
+; This creates the marginals needed to obtain the symmetric MI between
+; words that appear inside of connectors. This splurges on the left
+; wild-cards, because there are so many possibilities.
+;
 ; (define cva (make-connector-vec-api))
 ; (define cvs (add-pair-stars cva))
 ; (define cvp (add-support-api cvs))
 ; (define btc (batch-transpose cva))
-; (btc 'batch-cross)
+; (btc 'mmt-marginals)
