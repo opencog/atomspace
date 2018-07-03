@@ -551,6 +551,10 @@
 		((add-support-api OBJ) 'total-count-left)
 		((add-support-api OBJ) 'total-count-right))
 
+	; May as well get the support avarages out of the way, too.
+	(central-obj 'cache-left)
+	(central-obj 'cache-right)
+
 	; Compute the pair-frequencies, and the left and right
 	; wildcard frequencies and log-frequencies.
 	(freq-obj 'init-freq)
@@ -590,7 +594,6 @@
 	(display "Going to compute the left, right and total entropy\n")
 	(total-obj 'cache-entropy)
 	(total-obj 'cache-mi)
-	(central-obj 'cache-all)
 
 	(display "Done computing totals; start saving wildcards\n")
 	(store-obj 'store-wildcards)

@@ -396,7 +396,7 @@
 				(get-left-length)
 				(get-left-rms-count))
 
-			(format #t "Finished left norm totals in ~A secs\n"
+			(format #t "Finished column (left) norm averages in ~A secs\n"
 				(elapsed-secs))
 		)
 
@@ -413,7 +413,7 @@
 				(get-right-length)
 				(get-right-rms-count))
 
-			(format #t "Finished right norm totals in ~A secs\n"
+			(format #t "Finished row (right) norm averages in ~A secs\n"
 				(elapsed-secs))
 		)
 
