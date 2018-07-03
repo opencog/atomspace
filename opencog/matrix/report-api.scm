@@ -102,10 +102,10 @@
         P(x,*) = N(x,*) / N(*,*)
 
     Then we define these weighted averages:
-        left-support = sum_x P(x,*) |(x,*)|
-        left-count = sum_x P(x,*) N(x,*)
-        left-length = sqrt [ sum_x P(x,*) L(x,*) ]
-        left-rms-count = sqrt [ sum_x P(x,*)
+        right-support = sum_x P(x,*) |(x,*)|
+        right-count = sum_x P(x,*) N(x,*)
+        right-length = sqrt [ sum_x P(x,*) L(x,*) ]
+        right-rms-count = sqrt [ sum_x P(x,*)
                [ L^2(x,*) - (N(x,*))^2 / |(x*)|| ] ]
 
     Note that while computing the average length of a row/column,
