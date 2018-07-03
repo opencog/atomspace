@@ -487,6 +487,9 @@
 	(define arl (avg rs 'right-length))
 	(define arv (avg rs 'right-rms-count))
 
+	(define lss (prt ls 'left-support))
+	(define rss (prt rs 'right-support))
+
 	; Print nothing, if neither rows nor columns available
 	(if (not (or ls rs))
 		(format PORT "No support statistics are present. Use make-central-compute to get them.\n")
@@ -495,7 +498,7 @@
 	(format PORT "\n")
 	(format PORT "                 Left         Right     Avg-left     Avg-right\n")
 	(format PORT "                 ----         -----     --------     ---------\n")
-	(format PORT "Support (l_0)  ~A    ~A\n"  ls  rs)
+	(format PORT "Support (l_0)  ~A    ~A\n"  lss  rss)
 	(format PORT "Count   (l_1)  ~A    ~A     ~A    ~A\n" lc rc alc arc)
 	(format PORT "Length  (l_2)  ~A    ~A     ~A    ~A\n" ll rl all arl)
 	(format PORT "RMS Count      ~A    ~A     ~A    ~A\n" lv rv alv arv)
