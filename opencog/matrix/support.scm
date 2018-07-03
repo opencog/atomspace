@@ -440,7 +440,7 @@
 			(rpt-obj 'set-size
 				(star-obj 'left-basis-size)
 				(star-obj 'right-basis-size)
-				(api-obj 'total-support-left)
+				(api-obj 'total-support-left))
 
 			(format #t "Finished left totals in ~A secs\n"
 				(elapsed-secs))
@@ -470,7 +470,7 @@
 			(rpt-obj 'set-size
 				(star-obj 'left-basis-size)
 				(star-obj 'right-basis-size)
-				(api-obj 'total-support-right)
+				(api-obj 'total-support-right))
 
 			(format #t "Finished right totals in ~A secs\n"
 				(elapsed-secs))
