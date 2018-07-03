@@ -262,10 +262,13 @@
 (define-public (make-central-compute LLOBJ)
 "
   add-central-compute LLOBJ - Extend LLOBJ with methods to compute
-  misc graph-centrality statistics.
+  misc graph-centrality statistics. These are reported by the report
+  object (by the `add-report-api` object).
 
-  XXX FIXME -- this duplicates some of the abilities already offered
-  in the support object, viz, some of the grand-totals...
+  The stats include the weighted-average support, count and length of
+  rows and columns. The weighted-average is the frequency-weighted
+  average: So, for example, if a row is very long, but is very rarely
+  seen, then it will not contribute much to the average.
 "
 	(let* ((wild-obj (add-pair-stars LLOBJ))
 			(len-obj (add-support-api wild-obj))
