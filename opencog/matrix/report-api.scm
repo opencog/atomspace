@@ -276,9 +276,10 @@
 		)
 
 		(define (get-left-fn-avg FN)
-			; The Right-METHOD gives the stat on a row that we want
+			; The FN function gives the stat on a row that we want
 			; to take the weighted average of.  The weight is the
 			; probability of that row, which is P(x,*) i.e. right-freq
+			; i.e. the right-count divided by the total count.
 			; The sum is over all the rows.
 			(define weighted-avg (fold
 				(lambda (item sum)
@@ -299,9 +300,10 @@
 			(get-left-fn-avg (lambda (x) (len-obj R-METHOD x))))
 
 		(define (get-right-fn-avg FN)
-			; The Left-METHOD gives the stat on a column that we want
+			; The FN function gives the stat on a column that we want
 			; to take the weighted average of.  The weight is the
 			; probability of that column, which is P(*,y) i.e. left-freq
+			; i.e. the left-count divided by the total count.
 			; The sum is over all the columns.
 			(define weighted-avg (fold
 				(lambda (item sum)
