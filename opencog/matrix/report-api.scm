@@ -466,26 +466,26 @@
 		(lambda (key . args) #f)))
 
 	(define (prt tst val)
-		(if tst (format #f "~9,4g" val) "   n/a   "))
+		(if tst (format #f "~9,4g" (rpt-obj val)) "   n/a   "))
 
-	(define lc (prt ls (rpt-obj 'left-count)))
-	(define ll (prt ls (rpt-obj 'left-length)))
-	(define lv (prt ls (rpt-obj 'left-rms-count)))
+	(define lc (prt ls 'left-count))
+	(define ll (prt ls 'left-length))
+	(define lv (prt ls 'left-rms-count))
 
-	(define rc (prt rs (rpt-obj 'right-count)))
-	(define rl (prt rs (rpt-obj 'right-length)))
-	(define rv (prt rs (rpt-obj 'right-rms-count)))
+	(define rc (prt rs 'right-count))
+	(define rl (prt rs 'right-length))
+	(define rv (prt rs 'right-rms-count))
 
 	(define (avg tst val)
-		(if tst (format #f "~9,4g" (/ val tst)) "   n/a   "))
+		(if tst (format #f "~9,4g" (/ (rpt-obj val) tst)) "   n/a   "))
 
-	(define alc (avg ls (rpt-obj 'left-count)))
-	(define all (avg ls (rpt-obj 'left-length)))
-	(define alv (avg ls (rpt-obj 'left-rms-count)))
+	(define alc (avg ls 'left-count))
+	(define all (avg ls 'left-length))
+	(define alv (avg ls 'left-rms-count))
 
-	(define arc (avg rs (rpt-obj 'right-count)))
-	(define arl (avg rs (rpt-obj 'right-length)))
-	(define arv (avg rs (rpt-obj 'right-rms-count)))
+	(define arc (avg rs 'right-count))
+	(define arl (avg rs 'right-length))
+	(define arv (avg rs 'right-rms-count))
 
 	; Print nothing, if neither rows nor columns available
 	(if (not (or ls rs))
