@@ -396,6 +396,13 @@
 				(set! start-time (current-time))
 				diff)
 
+			; Note that total-support-left should equal
+			; 'total-support-right, up to round-off errors.
+			(rpt-obj 'set-size
+				(wild-obj 'left-basis-size)
+				(wild-obj 'right-basis-size)
+				(len-obj 'total-support-left))
+
 			(rpt-obj 'set-left-norms
 				(get-left-support)
 				(get-left-count)
@@ -412,6 +419,13 @@
 				(define diff (- (current-time) start-time))
 				(set! start-time (current-time))
 				diff)
+
+			; Note that total-support-left should equal
+			; 'total-support-right, up to round-off errors.
+			(rpt-obj 'set-size
+				(wild-obj 'left-basis-size)
+				(wild-obj 'right-basis-size)
+				(len-obj 'total-support-right))
 
 			(rpt-obj 'set-right-norms
 				(get-right-support)
