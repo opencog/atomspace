@@ -524,16 +524,7 @@
 	(format PORT "RMS Count      ~A    ~A     ~A    ~A\n" lv rv alv arv)
 )))
 
-(define*-public (print-matrix-summary-report LLOBJ
-	#:optional (PORT #t))
-"
-  print-matrix-summary-report LLOBJ #:optional PORT
-  Print a summary report about the pair dataset LLOBJ to the
-  optionally-provided output PORT (e.g. a string or file port).
-
-  See documentation for `add-report-api` for an explanation of
-  what is being printed.
-"
+(define* (do-print-report LLOBJ PORT)
 	(define (log2 x) (/ (log x) (log 2)))
 
 	(define rpt-obj (add-report-api LLOBJ))
@@ -568,6 +559,24 @@
 			#f))
 
 	(print-support-summary-report LLOBJ PORT)
+)
+
+(define*-public (print-matrix-summary-report LLOBJ
+	#:optional (PORT #t))
+"
+  print-matrix-summary-report LLOBJ #:optional PORT
+  Print a summary report about the pair dataset LLOBJ to the
+  optionally-provided output PORT (e.g. a string or file port).
+
+  See documentation for `add-report-api` for an explanation of
+  what is being printed.
+"
+	(catch #t
+		(lambda () (do-print-report LLOBJ PORT))
+		(lambda (key . args)
+			(format PORT
+				"No cached matrix data available;\n  run ((make-central-compute LLOBJ) 'cache-all) to make one.\n")
+			#f))
 )
 
 ; ---------------------------------------------------------------------
