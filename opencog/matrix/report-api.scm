@@ -272,7 +272,6 @@
 "
 	(let* ((wild-obj (add-pair-stars LLOBJ))
 			(len-obj (add-support-api wild-obj))
-			(frq-obj (add-pair-freq-api wild-obj))
 			(rpt-obj (add-report-api wild-obj))
 		)
 
@@ -281,13 +280,20 @@
 			; to take the weighted average of.  The weight is the
 			; probability of that row, which is P(x,*) i.e. right-freq
 			; The sum is over all the rows.
-			(fold
+			(define weighted-avg (fold
 				(lambda (item sum)
 					(+ sum (*
 							(FN item)
-							(frq-obj 'right-wild-freq item))))
+							(len-obj 'right-count item))))
 				0.0
 				(wild-obj 'left-basis)))
+
+			; TODO - some future day, use 'total-count-right
+			; For now, too many existing datasets don't store this value.
+			; (define total (len-obj 'total-count-right))
+			(define total (len-obj 'wild-wild-count))
+
+			(/ weighted-avg total))
 
 		(define (do-get-left-avg R-METHOD)
 			(get-left-fn-avg (lambda (x) (len-obj R-METHOD x))))
@@ -297,13 +303,20 @@
 			; to take the weighted average of.  The weight is the
 			; probability of that column, which is P(*,y) i.e. left-freq
 			; The sum is over all the columns.
-			(fold
+			(define weighted-avg (fold
 				(lambda (item sum)
 					(+ sum (*
 							(FN item)
-							(frq-obj 'left-wild-freq item))))
+							(len-obj 'left-count item))))
 				0.0
 				(wild-obj 'right-basis)))
+
+			; TODO - some future day, use 'total-count-left
+			; For now, too many existing datasets don't store this value.
+			; (define total (len-obj 'total-count-left))
+			(define total (len-obj 'wild-wild-count))
+
+			(/ weighted-avg total))
 
 		(define (do-get-right-avg L-METHOD)
 			(get-right-fn-avg (lambda (x) (len-obj L-METHOD x))))
