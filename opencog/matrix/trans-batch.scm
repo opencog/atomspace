@@ -1,7 +1,7 @@
 ;
-; batch-disjunct.scm
+; trans-batch.scm
 ;
-; Batch-compute marginals needed for the symmetric word-MI.
+; Batch-compute marginals needed for the symmetric matrix product.
 ;
 ; Copyright (c) 2018 Linas Vepstas
 ;
@@ -85,7 +85,7 @@
 ; words `w`, by more than an order of magnitude, and sometimes two,
 ; and so the sizes of these matrixes are vastly different, and the
 ; resulting computations waste not only CPU but also RAM and storage.
-; Thus, only one "side" is computed here.
+; Thus, one "side" at a time can be computed.
 ;
 ; ---------------------------------------------------------------------
 ;

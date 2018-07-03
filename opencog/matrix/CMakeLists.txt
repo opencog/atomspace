@@ -15,5 +15,6 @@ ADD_GUILE_MODULE (FILES
 	symmetric-mi.scm
 	thresh-pca.scm
 	transpose.scm
+	trans-batch.scm
 	MODULE_DESTINATION "${DATADIR}/scm/opencog/matrix"
 )
