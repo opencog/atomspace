@@ -466,7 +466,7 @@
 		(lambda (key . args) #f)))
 
 	(define (prt tst val)
-		(if tst (format #f "~9.4g" val) "   n/a   "))
+		(if tst (format #f "~9,4g" val) "   n/a   "))
 
 	(define lc (prt ls (rpt-obj 'left-count)))
 	(define ll (prt ls (rpt-obj 'left-length)))
@@ -477,7 +477,7 @@
 	(define rv (prt rs (rpt-obj 'right-rms-count)))
 
 	(define (avg tst val)
-		(if tst (format #f "~9.4g" (/ val tst)) "   n/a   "))
+		(if tst (format #f "~9,4g" (/ val tst)) "   n/a   "))
 
 	(define alc (avg ls (rpt-obj 'left-count)))
 	(define all (avg ls (rpt-obj 'left-length)))
