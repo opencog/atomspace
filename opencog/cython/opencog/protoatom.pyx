@@ -24,6 +24,22 @@ cdef list vector_of_strings_to_list(const vector[string]* cpp_vector):
         inc(it)
     return list
 
+cdef list vector_of_protoatoms_to_list(const vector[cProtoAtomPtr]* cpp_vector):
+    list = []
+    it = cpp_vector.const_begin()
+    cdef cProtoAtomPtr value
+    while it != cpp_vector.const_end():
+        value = deref(it)
+        if is_a(deref(value).get_type(), types.Value):
+            list.append(createProtoAtom(value))
+        else:
+            # TODO: Support Atoms as members of LinkValue requires inheriting
+            # Atom from ProtoAtom and constructor to create Atom from cHandle.
+            raise TypeError('Only Values are supported '
+                            'as members of LinkValue')
+        inc(it)
+    return list
+
 cdef cProtoAtom* get_protoatom_ptr(ProtoAtom protoAtom):
     """Return plain C++ ProtoAtom pointer, raise AttributeError if
     pointer is nullptr"""
@@ -35,7 +51,6 @@ cdef cProtoAtom* get_protoatom_ptr(ProtoAtom protoAtom):
 
 cdef class ProtoAtom:
     """C++ ProtoAtom object wrapper for Python clients"""
-
 
     property type:
          def __get__(self):
@@ -64,6 +79,9 @@ cdef class ProtoAtom:
         elif self.is_a(types.StringValue):
             return vector_of_strings_to_list(
                 &((<cStringValue*>get_protoatom_ptr(self)).value()))
+        elif self.is_a(types.LinkValue):
+            return vector_of_protoatoms_to_list(
+                &((<cLinkValue*>get_protoatom_ptr(self)).value()))
         else:
             raise TypeError('Type {} is not supported'.format(self.type()))
 

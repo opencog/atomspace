@@ -241,3 +241,9 @@ cdef extern from "opencog/atoms/proto/StringValue.h" namespace "opencog":
         const vector[string]& value() const;
     
     cdef cProtoAtomPtr createStringValue(...)
+
+cdef extern from "opencog/atoms/proto/LinkValue.h" namespace "opencog":
+    cdef cppclass cLinkValue "opencog::LinkValue":
+        const vector[cProtoAtomPtr]& value() const;
+
+    cdef cProtoAtomPtr createLinkValue(...)
