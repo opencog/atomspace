@@ -85,6 +85,10 @@ cdef extern from "opencog/atoms/proto/atom_types.h" namespace "opencog":
 cdef extern from "opencog/atoms/proto/ProtoAtom.h" namespace "opencog":
     cdef cppclass cProtoAtom "opencog::ProtoAtom":
         Type get_type()
+        int is_atom()
+        int is_node()
+        int is_link()
+        
         string to_string()
         string to_short_string()
         bint operator==(const cProtoAtom&)
@@ -104,15 +108,8 @@ cdef extern from "opencog/atoms/base/Link.h" namespace "opencog":
     pass
 
 cdef extern from "opencog/atoms/base/Atom.h" namespace "opencog":
-    cdef cppclass cAtom "opencog::Atom":
+    cdef cppclass cAtom "opencog::Atom" (cProtoAtom):
         cAtom()
-
-        Type get_type()
-        int is_node()
-        int is_link()
-
-        string to_string()
-        string to_short_string()
 
         output_iterator getIncomingSet(output_iterator)
 
@@ -130,7 +127,9 @@ cdef extern from "opencog/atoms/base/Atom.h" namespace "opencog":
 
 # Handle
 cdef extern from "opencog/atoms/base/Handle.h" namespace "opencog":
-    cdef cppclass cHandle "opencog::Handle":
+    ctypedef shared_ptr[cAtom] cAtomPtr "opencog::AtomPtr"
+    
+    cdef cppclass cHandle "opencog::Handle" (cAtomPtr):
         cHandle()
         cHandle(const cHandle&)
 
