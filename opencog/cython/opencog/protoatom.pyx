@@ -24,21 +24,22 @@ cdef list vector_of_strings_to_list(const vector[string]* cpp_vector):
         inc(it)
     return list
 
+cdef cProtoAtom* get_protoatom_ptr(ProtoAtom protoAtom):
+    """Return plain C++ ProtoAtom pointer, raise AttributeError if
+    pointer is nullptr"""
+    cdef cProtoAtom* ptr = protoAtom.shared_ptr.get()
+    if ptr == NULL:
+        raise AttributeError('ProtoAtom contains NULL reference')
+    else:
+        return ptr
+
 cdef class ProtoAtom:
     """C++ ProtoAtom object wrapper for Python clients"""
 
-    cdef cProtoAtom* get_ptr(self):
-        """Return plain C++ ProtoAtom pointer, raise AttributeError if
-        pointer is nullptr"""
-        cdef cProtoAtom* ptr = self.shared_ptr.get()
-        if ptr == NULL:
-            raise AttributeError('ProtoAtom contains NULL reference')
-        else:
-            return ptr
 
     property type:
          def __get__(self):
-             return self.get_ptr().get_type()
+             return get_protoatom_ptr(self).get_type()
 
     property type_name:
         def __get__(self):
@@ -59,18 +60,18 @@ cdef class ProtoAtom:
     def to_list(self):
         if self.is_a(types.FloatValue):
             return vector_of_doubles_to_list(
-                &((<cFloatValue*>self.get_ptr()).value()))
+                &((<cFloatValue*>get_protoatom_ptr(self)).value()))
         elif self.is_a(types.StringValue):
             return vector_of_strings_to_list(
-                &((<cStringValue*>self.get_ptr()).value()))
+                &((<cStringValue*>get_protoatom_ptr(self)).value()))
         else:
             raise TypeError('Type {} is not supported'.format(self.type()))
 
     def long_string(self):
-        return self.get_ptr().to_string().decode('UTF-8')
+        return get_protoatom_ptr(self).to_string().decode('UTF-8')
 
     def short_string(self):
-        return self.get_ptr().to_short_string().decode('UTF-8')
+        return get_protoatom_ptr(self).to_short_string().decode('UTF-8')
 
     def __str__(self):
         return self.short_string()
@@ -82,8 +83,8 @@ cdef class ProtoAtom:
         if not isinstance(other, ProtoAtom):
             raise TypeError('ProtoAtom cannot be compared with {}'
                             .format(type(other)))
-        cdef cProtoAtom* self_ptr = (<ProtoAtom>self).get_ptr()
-        cdef cProtoAtom* other_ptr = (<ProtoAtom>other).get_ptr()
+        cdef cProtoAtom* self_ptr = get_protoatom_ptr(<ProtoAtom>self)
+        cdef cProtoAtom* other_ptr = get_protoatom_ptr(<ProtoAtom>other)
         if op == Py_EQ:
             return deref(self_ptr) == deref(other_ptr)
         elif op == Py_NE:

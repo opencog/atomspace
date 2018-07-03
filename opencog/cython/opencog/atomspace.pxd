@@ -94,7 +94,6 @@ cdef extern from "opencog/atoms/proto/ProtoAtom.h" namespace "opencog":
 
 cdef class ProtoAtom:
     cdef cProtoAtomPtr shared_ptr
-    cdef cProtoAtom* get_ptr(ProtoAtom self)
 
 cdef ProtoAtom createProtoAtom(cProtoAtomPtr shared_ptr)
 
@@ -164,7 +163,6 @@ cdef class Atom:
     cdef object _atom_type
     cdef object _name
     cdef object _outgoing
-    cdef cAtom* get_ptr(Atom self)
 
 
 
