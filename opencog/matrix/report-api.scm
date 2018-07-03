@@ -55,23 +55,29 @@
   'total-entropy    -- The sum H_tot = sum_x sum_y P(x,y) log_2 P(x,y)
   'total-mi         -- The sum MI = H_tot - H_left - H_right
 
-  'left-support     -- average l_0 norm of rows
-  'left-count       -- average l_1 norm of rows
-  'left-length      -- average l_2 norm of rows
+  The averages below are weighted-averages, so that, for example,
+  the 'left-support is the average, taken over all columns, of the
+  support of each column (i.e. is the average of all 'left-supports).
+  The weight is the probability of that column, i.e. is P(*,y) viz
+  it is the 'left-freq or 'left-count/total.
+
+  'left-support     -- average (over columns) l_0 norm of columns
+  'left-count       -- average l_1 norm of columns
+  'left-length      -- average l_2 norm of columns
   'left-rms-count   -- standard deviation of counts
 
-  'right-support    -- average l_0 norm of columns
-  'right-count      -- average l_1 norm of columns
-  'right-length     -- average l_2 norm of columns
+  'right-support    -- average l_0 norm of rows
+  'right-count      -- average l_1 norm of rows
+  'right-length     -- average l_2 norm of rows
   'right-rms-count -- standard deviation of counts
 
   If we imagine each pair as a directed edge, an arrow pointing from
-  left to right, then the left-support is the same as the average
-  out-degree of the left-vertexes. The right-support is the average
-  in-degree of the right-vertexes. Equivalently, the left-support is
-  the average number of non-zero entries in each row, and the
+  right to left, then the left-support is the same as the average
+  out-degree of the right-vertexes. The right-support is the average
+  in-degree of the left-vertexes. Equivalently, the left-support is
+  the average number of non-zero entries in each column, and the
   right-support is the average number of non-zero entries in each
-  column.
+  row.
 
   The left and right sizes are analogous, but are weighted by the
   number of observations on each vertex.
