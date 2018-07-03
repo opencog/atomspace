@@ -172,12 +172,10 @@
 	; We need 'left-basis, provided by add-pair-stars
 	; We need 'wild-wild-count, provided by add-support-api
 	; We need 'set-left-wild-freq, provided by add-pair-freq-api
-	; We need 'set-size, provided by add-report-api
 	(let ((llobj LLOBJ)
 			(supobj (add-support-api LLOBJ))
 			(frqobj (add-pair-freq-api LLOBJ))
 			(wldobj (add-pair-stars LLOBJ))
-			(rptobj (add-report-api LLOBJ))
 			(tot-cnt 0))
 
 		(define (init)
@@ -221,10 +219,6 @@
 		; Also caches the total dimensions of the matrix.
 		(define (cache-all-pair-freqs)
 			(define cnt 0)
-			(define lefties (wldobj 'left-basis))
-			(define left-size (length lefties))
-			(define right-size (length (wldobj 'right-basis)))
-
 			; The outer-loop.
 			(define (right-loop left-item)
 				(for-each
@@ -233,10 +227,7 @@
 						(set! cnt (+ cnt 1)))
 					(wldobj 'right-stars left-item)))
 
-			(for-each right-loop lefties)
-
-			; Save the total size of the thing.
-			(rptobj 'set-size left-size right-size cnt)
+			(for-each right-loop (wldobj 'left-basis))
 
 			; Return the total.
 			cnt)
@@ -560,6 +551,10 @@
 		((add-support-api OBJ) 'total-count-left)
 		((add-support-api OBJ) 'total-count-right))
 
+	; May as well get the support avarages out of the way, too.
+	(central-obj 'cache-left)
+	(central-obj 'cache-right)
+
 	; Compute the pair-frequencies, and the left and right
 	; wildcard frequencies and log-frequencies.
 	(freq-obj 'init-freq)
@@ -599,7 +594,6 @@
 	(display "Going to compute the left, right and total entropy\n")
 	(total-obj 'cache-entropy)
 	(total-obj 'cache-mi)
-	(central-obj 'cache-all)
 
 	(display "Done computing totals; start saving wildcards\n")
 	(store-obj 'store-wildcards)
