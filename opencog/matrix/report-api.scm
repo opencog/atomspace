@@ -275,7 +275,8 @@
 			(rpt-obj (add-report-api wild-obj))
 		)
 
-		(define (get-left-fn-avg FN)
+		; Take an average over all rows
+		(define (get-row-fn-avg FN)
 			; The FN function gives the stat on a row that we want
 			; to take the weighted average of.  The weight is the
 			; probability of that row, which is P(x,*) i.e. right-freq
@@ -296,10 +297,11 @@
 
 			(/ weighted-avg total))
 
-		(define (do-get-left-avg R-METHOD)
-			(get-left-fn-avg (lambda (x) (len-obj R-METHOD x))))
+		(define (do-get-row-avg R-METHOD)
+			(get-row-fn-avg (lambda (x) (len-obj R-METHOD x))))
 
-		(define (get-right-fn-avg FN)
+		; Take an average over all columns
+		(define (get-col-fn-avg FN)
 			; The FN function gives the stat on a column that we want
 			; to take the weighted average of.  The weight is the
 			; probability of that column, which is P(*,y) i.e. left-freq
@@ -320,25 +322,25 @@
 
 			(/ weighted-avg total))
 
-		(define (do-get-right-avg L-METHOD)
-			(get-right-fn-avg (lambda (x) (len-obj L-METHOD x))))
+		(define (do-get-col-avg L-METHOD)
+			(get-col-fn-avg (lambda (x) (len-obj L-METHOD x))))
 
 		; ---------------------
 		; Get the weighted-average support.
-		(define (get-right-support) (do-get-left-avg 'right-support))
+		(define (get-right-support) (do-get-row-avg 'right-support))
 
-		(define (get-left-support) (do-get-right-avg 'left-support))
+		(define (get-left-support) (do-get-col-avg 'left-support))
 
 		; ---------------------
 		; Get the weighted-average count.
-		(define (get-right-count) (do-get-left-avg 'right-count))
+		(define (get-right-count) (do-get-row-avg 'right-count))
 
-		(define (get-left-count) (do-get-right-avg 'left-count))
+		(define (get-left-count) (do-get-col-avg 'left-count))
 
 		; ---------------------
-		(define (get-right-length) (do-get-left-avg 'right-length))
+		(define (get-right-length) (do-get-row-avg 'right-length))
 
-		(define (get-left-length) (do-get-right-avg 'left-length))
+		(define (get-left-length) (do-get-col-avg 'left-length))
 
 		; ---------
 		; XXX FIXME. This is totally insane, but guile sometimes
@@ -357,7 +359,7 @@
 		; multiple through by sup to get the implementation below.
 		(define (get-right-rms-count)
 			(real-part
-			(get-left-fn-avg
+			(get-row-fn-avg
 				(lambda (x)
 					(define sup (len-obj 'right-support x))
 					(define siz (len-obj 'right-count x))
@@ -368,7 +370,7 @@
 
 		(define (get-left-rms-count)
 			(real-part
-			(get-right-fn-avg
+			(get-col-fn-avg
 				(lambda (x)
 					(define sup (len-obj 'left-support x))
 					(define siz (len-obj 'left-count x))
