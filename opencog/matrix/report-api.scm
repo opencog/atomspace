@@ -324,19 +324,21 @@
 			(get-right-fn-avg (lambda (x) (len-obj L-METHOD x))))
 
 		; ---------------------
-		(define (get-left-support) (do-get-left-avg 'right-support))
+		; Get the weighted-average support.
+		(define (get-right-support) (do-get-left-avg 'right-support))
 
-		(define (get-right-support) (do-get-right-avg 'left-support))
-
-		; ---------------------
-		(define (get-left-count) (do-get-left-avg 'right-count))
-
-		(define (get-right-count) (do-get-right-avg 'left-count))
+		(define (get-left-support) (do-get-right-avg 'left-support))
 
 		; ---------------------
-		(define (get-left-length) (do-get-left-avg 'right-length))
+		; Get the weighted-average count.
+		(define (get-right-count) (do-get-left-avg 'right-count))
 
-		(define (get-right-length) (do-get-right-avg 'left-length))
+		(define (get-left-count) (do-get-right-avg 'left-count))
+
+		; ---------------------
+		(define (get-right-length) (do-get-left-avg 'right-length))
+
+		(define (get-left-length) (do-get-right-avg 'left-length))
 
 		; ---------
 		; XXX FIXME. This is totally insane, but guile sometimes
@@ -353,7 +355,7 @@
 		; moment = sup * variance
 		; rms-count = sqrt (moment)
 		; multiple through by sup to get the implementation below.
-		(define (get-left-rms-count)
+		(define (get-right-rms-count)
 			(real-part
 			(get-left-fn-avg
 				(lambda (x)
@@ -364,7 +366,7 @@
 					(define sizsq (/ (* siz siz) sup))
 					(sqrt (- lensq sizsq))))))
 
-		(define (get-right-rms-count)
+		(define (get-left-rms-count)
 			(real-part
 			(get-right-fn-avg
 				(lambda (x)
