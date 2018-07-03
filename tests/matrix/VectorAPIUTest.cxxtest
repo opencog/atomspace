@@ -341,18 +341,18 @@ void VectorAPIUTest::test_marginals(void)
 	CHKNUM("total-count", num, 22);
 
 	// See above for explanation of magic formula
-	num = eval->eval("(rapi 'left-support)");
-	CHKFLT("report left support", num, (3.0*(11.0/22) + 3.0*(7.0/22.0) + (4.0/22.0)));
-
 	num = eval->eval("(rapi 'right-support)");
-	CHKFLT("report right support", num,
+	CHKFLT("report right support", num, (3.0*(11.0/22) + 3.0*(7.0/22.0) + (4.0/22.0)));
+
+	num = eval->eval("(rapi 'left-support)");
+	CHKFLT("report left support", num,
 		(3.0*(11.0/22.0) + 2.0*(4.0/22.0) + (6.0/22.0) + (1.0/22.0)));
 
-	num = eval->eval("(rapi 'left-count)");
-	CHKFLT("report left count", num, (11.0*(11.0/22) + 7.0*(7.0/22.0) + 4.0*(4.0/22.0)));
-
 	num = eval->eval("(rapi 'right-count)");
-	CHKFLT("report right count", num,
+	CHKFLT("report right count", num, (11.0*(11.0/22) + 7.0*(7.0/22.0) + 4.0*(4.0/22.0)));
+
+	num = eval->eval("(rapi 'left-count)");
+	CHKFLT("report left count", num,
 		(11.0*(11.0/22.0) + 4.0*(4.0/22.0) + 6.0*(6.0/22.0) + (1.0/22.0)));
 
 	printf("---------------------------------------------------------\n");
