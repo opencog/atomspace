@@ -457,26 +457,49 @@
 (define (print-support-summary-report LLOBJ PORT)
 
 	(define rpt-obj (add-report-api LLOBJ))
-	(define ls (rpt-obj 'left-support))
-	(define rs (rpt-obj 'right-support))
-	(define lc (rpt-obj 'left-count))
-	(define rc (rpt-obj 'right-count))
-	(define ll (rpt-obj 'left-length))
-	(define rl (rpt-obj 'right-length))
-	(define lv (rpt-obj 'left-rms-count))
-	(define rv (rpt-obj 'right-rms-count))
+	(define ls
+		(catch #t (lambda () (rpt-obj 'left-support))
+		(lambda (key . args) #f)))
+
+	(define rs
+		(catch #t (lambda () (rpt-obj 'right-support))
+		(lambda (key . args) #f)))
+
+	(define (prt tst val)
+		(if tst (format #f "~9.4g" val) "   n/a   "))
+
+	(define lc (prt ls (rpt-obj 'left-count)))
+	(define ll (prt ls (rpt-obj 'left-length)))
+	(define lv (prt ls (rpt-obj 'left-rms-count)))
+
+	(define rc (prt rs (rpt-obj 'right-count)))
+	(define rl (prt rs (rpt-obj 'right-length)))
+	(define rv (prt rs (rpt-obj 'right-rms-count)))
+
+	(define (avg tst val)
+		(if tst (format #f "~9.4g" (/ val tst)) "   n/a   "))
+
+	(define alc (avg ls (rpt-obj 'left-count)))
+	(define all (avg ls (rpt-obj 'left-length)))
+	(define alv (avg ls (rpt-obj 'left-rms-count)))
+
+	(define arc (avg rs (rpt-obj 'right-count)))
+	(define arl (avg rs (rpt-obj 'right-length)))
+	(define arv (avg rs (rpt-obj 'right-rms-count)))
+
+	; Print nothing, if neither rows nor columns available
+	(if (not (or ls rs))
+		(format PORT "No support statistics are present. Use make-central-compute to get them.\n")
+		(begin
 
 	(format PORT "\n")
 	(format PORT "                 Left         Right     Avg-left     Avg-right\n")
 	(format PORT "                 ----         -----     --------     ---------\n")
-	(format PORT "Support (l_0)  ~9,4g    ~9,4g\n"  ls  rs)
-	(format PORT "Count   (l_1)  ~9,4g    ~9,4g     ~9,4g    ~9,4g\n"
-		lc rc (/ lc ls) (/ rc rs))
-	(format PORT "Length  (l_2)  ~9,4g    ~9,4g     ~9,4g    ~9,4g\n"
-		ll rl (/ ll ls) (/ rl rs))
-	(format PORT "RMS Count      ~9,4g    ~9,4g     ~9,4g    ~9,4g\n"
-		lv rv (/ lv ls) (/ rv rs))
-)
+	(format PORT "Support (l_0)  ~A    ~A\n"  ls  rs)
+	(format PORT "Count   (l_1)  ~A    ~A     ~A    ~A\n" lc rc alc arc)
+	(format PORT "Length  (l_2)  ~A    ~A     ~A    ~A\n" ll rl all arl)
+	(format PORT "RMS Count      ~A    ~A     ~A    ~A\n" lv rv alv arv)
+)))
 
 (define*-public (print-matrix-summary-report LLOBJ
 	#:optional (PORT #t))
@@ -521,12 +544,7 @@
 				"No MI statistics are present; run compute-mi to get them.\n")
 			#f))
 
-	(catch #t
-		(lambda () (print-support-summary-report LLOBJ PORT))
-		(lambda (key . args)
-			(format PORT
-				"No support statistics are present. Run compute-mi to get them.\n")
-			#f))
+	(print-support-summary-report LLOBJ PORT)
 )
 
 ; ---------------------------------------------------------------------
