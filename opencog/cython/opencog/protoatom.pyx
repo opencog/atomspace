@@ -63,6 +63,9 @@ cdef class ProtoAtom:
         elif self.is_a(types.StringValue):
             return vector_of_strings_to_list(
                 &((<cStringValue*>self.get_ptr()).value()))
+        elif self.is_a(types.RandomStream):
+            return vector_of_doubles_to_list(
+                &((<cRandomStream*>self.get_ptr()).value()))
         else:
             raise TypeError('Type {} is not supported'.format(self.type()))
 

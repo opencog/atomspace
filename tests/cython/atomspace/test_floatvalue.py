@@ -39,7 +39,7 @@ class FloatValueTest(unittest.TestCase):
         self.assertEqual(FloatValue([1.0, 2.0, 3.0]), atom.get_value(key))
 
     def test_get_list_of_items_from_value(self):
-        value = FloatValue([1.0, 2.0, 3.0])        
+        value = FloatValue([1.0, 2.0, 3.0])
         self.assertEqual([1.0, 2.0, 3.0], value.to_list())
 
     def test_str(self):

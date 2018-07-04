@@ -9,7 +9,7 @@
 
 from opencog.atomspace import AtomSpace, TruthValue, types
 from atomspace cimport (cProtoAtomPtr, createFloatValue, createStringValue, 
-                        ProtoAtom, createProtoAtom)
+                        createRandomStream, ProtoAtom, createProtoAtom)
 from libcpp.vector cimport vector
 from libcpp.string cimport string
 
@@ -46,6 +46,8 @@ cdef createValue(type, arg):
             result = createStringValue(list_of_strings_to_vector(arg))
         else:
             result = createStringValue(<string>(arg.encode('UTF-8')))
+    elif type == types.RandomStream:
+        result = createRandomStream(<int>arg)
     else:
         raise TypeError('Unexpected value type {}'.format(type))
     

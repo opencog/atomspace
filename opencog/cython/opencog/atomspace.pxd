@@ -244,3 +244,9 @@ cdef extern from "opencog/atoms/proto/StringValue.h" namespace "opencog":
         const vector[string]& value() const;
     
     cdef cProtoAtomPtr createStringValue(...)
+
+cdef extern from "opencog/atoms/proto/RandomStream.h" namespace "opencog":
+    cdef cppclass cRandomStream "opencog::RandomStream":
+        const vector[double]& value() const;
+    
+    cdef cProtoAtomPtr createRandomStream(...)
