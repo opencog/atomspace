@@ -33,9 +33,8 @@
 	(NumberNode 5)
 	)
 
-; The pattern below can confuse the search start, becuase
-; the first constant link in the clause is the quote ... 
-; and that's won't provide the desired start ...
+; Pattern uses QuoteLink to match TimesLink without
+; making actual calculations
 (define get-times-link
 	(GetLink
 		(VariableList
