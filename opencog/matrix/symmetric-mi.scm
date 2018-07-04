@@ -72,6 +72,14 @@
 				(add-tuple-math star-obj * GET-CNT)))
 		)
 
+		(define mtm-total
+			(catch #t (trans-obj 'total-mtm-count)
+				(lambda (key . args) #f)))
+
+		(define mmt-total
+			(catch #t (trans-obj 'total-mmt-count)
+				(lambda (key . args) #f)))
+
 		(define (log2 x) (* (log x) ol2))
 
 		; -------------
@@ -90,30 +98,28 @@
 		(define (compute-mtm-fmi COL-A COL-B)
 			(define marga (trans-obj 'mtm-count COL-A))
 			(define margb (trans-obj 'mtm-count COL-B))
-			(define total (trans-obj 'total-mtm-count))
 			(define prod (compute-left-product COL-A COL-B))
-			(log2 (/ (* prod total) (* marga margb))))
+			(log2 (/ (* prod mtm-total) (* marga margb))))
 
 		(define (compute-mtm-mi COL-A COL-B)
 			(define marga (trans-obj 'mtm-count COL-A))
 			(define margb (trans-obj 'mtm-count COL-B))
-			(define total (trans-obj 'total-mtm-count))
 			(define prod (compute-left-product COL-A COL-B))
-			(* prod (log2 (/ (* prod total) (* marga margb)))))
+			(define fmi (log2 (/ (* prod mtm-total) (* marga margb))))
+			(* fmi (/ prod mtm-total)))
 
 		(define (compute-mmt-fmi ROW-A ROW-B)
 			(define marga (trans-obj 'mmt-count ROW-A))
 			(define margb (trans-obj 'mmt-count ROW-B))
-			(define total (trans-obj 'total-mmt-count))
 			(define prod (compute-right-product ROW-A ROW-B))
-			(log2 (/ (* prod total) (* marga margb))))
+			(log2 (/ (* prod mmt-total) (* marga margb))))
 
 		(define (compute-mmt-mi ROW-A ROW-B)
 			(define marga (trans-obj 'mmt-count ROW-A))
 			(define margb (trans-obj 'mmt-count ROW-B))
-			(define total (trans-obj 'total-mmt-count))
 			(define prod (compute-right-product ROW-A ROW-B))
-			(* prod (log2 (/ (* prod total) (* marga margb)))))
+			(define fmi (log2 (/ (* prod mmt-total) (* marga margb))))
+			(* fmi (/ prod mmt-total)))
 
 		; -------------
 		; Methods on this class.
