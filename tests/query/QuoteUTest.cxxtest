@@ -203,7 +203,7 @@ void QuoteUTest::test_gpn_bindy(void)
 }
 
 /*
- * QuoteLink unit test.  Test proper search scope
+ * Test matching quoted TimesLink
  */
 void QuoteUTest::test_gpn_get_times_link(void)
 {
