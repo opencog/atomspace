@@ -26,3 +26,27 @@
 		(VariableNode "$stuff")
 	)
 )
+
+; data to check Times matching
+(TimesLink
+	(NumberNode 3)
+	(NumberNode 5)
+	)
+
+; The pattern below can confuse the search start, becuase
+; the first constant link in the clause is the quote ... 
+; and that's won't provide the desired start ...
+(define get-times-link
+	(GetLink
+		(VariableList
+			(VariableNode "$a")
+			(VariableNode "$b")
+			)
+		(QuoteLink
+			(TimesLink
+				(UnquoteLink (VariableNode "$a"))
+				(UnquoteLink (VariableNode "$b"))
+				)
+			)
+		)
+	)
