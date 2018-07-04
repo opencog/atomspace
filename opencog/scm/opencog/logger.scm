@@ -36,6 +36,7 @@
 	cog-logger-info-of-logger
 	cog-logger-debug-of-logger
 	cog-logger-fine-of-logger
+        cog-logger-flush-of-logger
 	cog-logger-get-filename
 	cog-logger-get-level
 	cog-logger-get-component
@@ -55,6 +56,7 @@
 	cog-logger-info
 	cog-logger-debug
 	cog-logger-fine
+        cog-logger-flush
 )
 
 ;; Documentation for the functions implemented as C++ code
@@ -361,3 +363,11 @@
     The MSG can be in any ice-9 printing format.
 "
   (cog-logger-fine-of-logger logger (apply format #f msg args)))
+
+(define (cog-logger-flush . args)
+"
+ cog-logger-flush [LOGGER]
+    Flush any pending logging. Convenient to not prematurely abort any logging.
+    If LOGGER is not provided then use the default logger.
+"
+  (apply cog-logger-flush-of-logger (apply add-default-logger args)))

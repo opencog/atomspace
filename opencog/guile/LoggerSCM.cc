@@ -60,6 +60,8 @@ protected:
 	void do_logger_info(Logger*, const std::string& msg);
 	void do_logger_debug(Logger*, const std::string& msg);
 	void do_logger_fine(Logger*, const std::string& msg);
+	void do_flush(Logger*);
+
 	bool is_logger(SCM);
 
 public:
@@ -200,6 +202,11 @@ void LoggerSCM::do_logger_fine(Logger* lg, const std::string& msg)
 	lg->fine(msg);
 }
 
+void LoggerSCM::do_flush(Logger* lg)
+{
+	lg->flush();
+}
+
 bool LoggerSCM::is_logger(SCM s)
 {
 	return SCM_SMOB_PREDICATE(SchemeSmob::cog_misc_tag, s)
@@ -264,6 +271,9 @@ void LoggerSCM::init(void)
 		&LoggerSCM::do_logger_debug, this, "logger");
 	define_scheme_primitive("cog-logger-fine-of-logger",
 		&LoggerSCM::do_logger_fine, this, "logger");
+
+	define_scheme_primitive("cog-logger-flush-of-logger",
+		&LoggerSCM::do_flush, this, "logger");
 
 	define_scheme_primitive("cog-logger?",
 		&LoggerSCM::is_logger, this, "logger");
