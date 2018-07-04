@@ -195,7 +195,10 @@
 			(if (not (null? prs))
 				(cog-value-ref prs 0)
 				(let ((simv (SIM-FUN A B)))
-					(if (<= CUTOFF simv)
+					; If we already have a similarity link for this object,
+					; go ahead and use it. Otherwise, save the similarity
+					; value only if it is greater than the cutoff.
+					(if (or (not (null? mpr)) (<= CUTOFF simv))
 						(begin
 							(set! goodcnt (+ goodcnt 1))
 							(simobj 'set-pair-similarity
