@@ -73,11 +73,11 @@
 		)
 
 		(define mtm-total
-			(catch #t (trans-obj 'total-mtm-count)
+			(catch #t (lambda () (trans-obj 'total-mtm-count))
 				(lambda (key . args) #f)))
 
 		(define mmt-total
-			(catch #t (trans-obj 'total-mmt-count)
+			(catch #t (lambda () (trans-obj 'total-mmt-count))
 				(lambda (key . args) #f)))
 
 		(define (log2 x) (* (log x) ol2))
