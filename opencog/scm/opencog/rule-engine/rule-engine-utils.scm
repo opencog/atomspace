@@ -33,11 +33,12 @@
 ;; -- ure-logger-info-enabled? -- check that the log level of the URE logger is info enabled
 ;; -- ure-logger-debug-enabled? -- check that the log level of the URE logger is debug enabled
 ;; -- ure-logger-fine-enabled? -- check that the log level of the URE logger is fine enabled
-;; -- ure-logger-error -- logger at error level of the URE logger
-;; -- ure-logger-warn -- logger at warn level of the URE logger
-;; -- ure-logger-info -- logger at info level of the URE logger
-;; -- ure-logger-debug -- logger at debug level of the URE logger
-;; -- ure-logger-fine -- logger at fine level of the URE logger
+;; -- ure-logger-error -- log at error level of the URE logger
+;; -- ure-logger-warn -- log at warn level of the URE logger
+;; -- ure-logger-info -- log at info level of the URE logger
+;; -- ure-logger-debug -- log at debug level of the URE logger
+;; -- ure-logger-fine -- log at fine level of the URE logger
+;; -- ure-logger-flush -- flush the URE logger
 ;; -- bool->tv -- Convert #t to TRUE_TV and #f to FALSE_TV
 ;; -- tv->bool -- Convert TRUE_TV to #t, anything else to #f
 ;; -- atom->number -- Convert NumberNode into its corresponding number
@@ -383,6 +384,7 @@
 (define (ure-logger-info . args) (apply cog-logger-info (cons (cog-ure-logger) args)))
 (define (ure-logger-debug . args) (apply cog-logger-debug (cons (cog-ure-logger) args)))
 (define (ure-logger-fine . args) (apply cog-logger-fine (cons (cog-ure-logger) args)))
+(define (ure-logger-flush) (cog-logger-flush (cog-ure-logger)))
 
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 ;; Helpers for Implementing URE Rules ;;
@@ -527,6 +529,7 @@
           ure-logger-info
           ure-logger-debug
           ure-logger-fine
+          ure-logger-flush
           bool->tv
           tv->bool
           atom->number
