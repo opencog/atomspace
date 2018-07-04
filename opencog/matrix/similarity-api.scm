@@ -74,7 +74,7 @@
 
   The 'set-pair-similarity method is used to set a value.
   The 'pair-similarity method is used to fetch it.
-  
+
   This creates a new NON-sparse matrix that can be understood as a
   kind-of matrix product of LLOBJ with it's transpose.
 
@@ -262,6 +262,10 @@
 
 		; Loop over the entire list of items, and compute similarity
 		; scores for them.  Hacked parallel version.
+		; XXX FIXME -- due to guile locking flakiness, setting NTHREADS
+		; to any vaue bigger than 3 results in a net slow-down, and even
+		; for NTHREADS=3, it can be pretty bad suckage, as the system
+		; starts thrashing due to some kind of live-lock like thing.
 		(define (para-batch-sim-pairs ITEM-LIST NTHREADS)
 
 			(define len (length ITEM-LIST))
@@ -314,29 +318,44 @@
 			(format #t "Started ~d threads\n" NTHREADS)
 		)
 
-		; Loop over basis elements
-		(define (batch)
-			(batch-sim-pairs
-				(if MTM?
+		; Get the entire basis, and sort it according to frequency.
+		; The returned list has the most frequent basis elements
+		; first in the list.
+		(define (get-sorted-basis)
+			(define basis (if MTM?
 					(wldobj 'right-basis)
-					(wldobj 'left-basis))))
-
-
-		; Loop over basis elements
-		(define (para-batch NTHREADS)
-			(para-batch-sim-pairs
+					(wldobj 'left-basis)))
+			(define supp-obj (add-support-api wldobj))
+			(define (nobs ITEM)
 				(if MTM?
-					(wldobj 'right-basis)
-					(wldobj 'left-basis))
-				NTHREADS))
+					(supp-obj 'left-count ITEM)
+					(supp-obj 'right-count ITEM)))
+
+			; Rank so that the commonest items are first in the list.
+			(sort basis
+				(lambda (ATOM-A ATOM-B) (> (nobs ATOM-A) (nobs ATOM-B))))
+		)
+
+		; Loop over the top-N most frequent basis elements
+		(define (batch TOP-N)
+			(define top-items (take (get-sorted-basis) TOP-N))
+			(batch-sim-pairs top-items))
+
+		; Loop over the top-N most frequent basis elements
+		; XXX Due to guile flakiness, this works very poorly for
+		; NTHREADS greater than 3, and even then it's prone to
+		; terrible slowdowns.
+		(define (para-batch TOP-N NTHREADS)
+			(define top-items (take (get-sorted-basis) TOP-N))
+			(para-batch-sim-pairs top-items NTHREADS))
 
 		; Methods on this class.
 		(lambda (message . args)
 			(case message
 
 				((compute-similarity)  (apply compute-sim args))
-				((batch-compute)       (batch))
-				((parallel-batch)       (apply para-batch args))
+				((batch-compute)       (apply batch args))
+				((parallel-batch)      (apply para-batch args))
 
 				(else                  (apply LLOBJ (cons message args)))
 		)))
