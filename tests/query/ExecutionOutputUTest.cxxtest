@@ -288,9 +288,7 @@ void ExecutionOutputUTest::test_clear_box_single_argument(void)
 	Handle X = an(VARIABLE_NODE, "$X"),
 		PXX = al(PLUS_LINK, X, X),
 		twice = al(LAMBDA_LINK, PXX),
-		// TODO: to crash this test remove the List around 21
-		// N21 = an(NUMBER_NODE, "21"),
-		N21 = al(LIST_LINK, an(NUMBER_NODE, "21")),
+		N21 = an(NUMBER_NODE, "21"),
 		twice21 = al(EXECUTION_OUTPUT_LINK, twice, N21);
 
 	Instantiator inst(&as);
