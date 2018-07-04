@@ -211,6 +211,8 @@
 		; similarity value, if it is less than CUTOFF.  This is used
 		; to avoid having N-squared pairs cluttering the atomspace.
 		;
+		; Return the number of similarity values that were above the
+		; cutoff.
 		(define (batch-simlist ITEM ITEM-LIST)
 			(set! goodcnt 0)
 			(for-each
@@ -228,19 +230,25 @@
 			(define tot (* 0.5 len (- len 1)))
 			(define done 0)
 			(define prs 0)
-			(define prevf 0)
+			(define prevf 0.0)
 			(define start (current-time))
 			(define prevt start)
 
 			(define (do-one-and-rpt ITM-LST)
+				; prs holds the running total of similarity pairs
+				; that were above the cutoff.
 				(set! prs (+ prs (batch-simlist (car ITM-LST) (cdr ITM-LST))))
 				(set! done (+  done 1))
 				(if (eqv? 0 (modulo done 10))
 					(let* ((elapsed (- (current-time) start))
 							(togo (* 0.5 (- len done) (- len (+ done 1))))
 							(frt (- tot togo))
-							(rate (* 0.001 (/ (- frt prevf) (- elapsed prevt))))
-							)
+							(rate (* 0.001 (/ (- frt prevf)
+								(exact->inexact (- elapsed prevt)))))
+						)
+
+						; frac is the percentage fraction that had
+						; similarities greater than the cutoff.
 						(format #t
 							 "Done ~A/~A frac=~5f% Time: ~A Done: ~4f% rate=~5f K prs/sec\n"
 							done len
