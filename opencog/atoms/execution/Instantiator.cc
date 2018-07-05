@@ -373,7 +373,8 @@ Handle Instantiator::walk_tree(const Handle& expr, bool silent)
 			{
 				args = beta_reduce(args, *_vmap);
 			}
-			const HandleSeq& oset(args->is_link() ? args->getOutgoingSet(): HandleSeq{args});
+			const HandleSeq& oset(args->is_link() ? args->getOutgoingSet():
+													HandleSeq{args});
 			Handle beta_reduced(vars.substitute_nocheck(body, oset));
 			return walk_tree(beta_reduced, silent);
 		}

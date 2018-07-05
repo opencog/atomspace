@@ -297,5 +297,13 @@ void ExecutionOutputUTest::test_clear_box_single_argument(void)
 
 	TS_ASSERT_EQUALS(expected, result);
 
+	// should work with variable inside the ListLink too
+
+	Handle N21_LST = al(LIST_LINK, N21),
+	       twice21_lst = al(EXECUTION_OUTPUT_LINK, twice, N21_LST),
+	       result_lst = HandleCast(inst.execute(twice21_lst));
+
+	TS_ASSERT_EQUALS(expected, result_lst);
+
 	logger().debug("END TEST: %s", __FUNCTION__);
 }
