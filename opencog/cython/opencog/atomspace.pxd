@@ -85,9 +85,9 @@ cdef extern from "opencog/atoms/proto/atom_types.h" namespace "opencog":
 cdef extern from "opencog/atoms/proto/ProtoAtom.h" namespace "opencog":
     cdef cppclass cProtoAtom "opencog::ProtoAtom":
         Type get_type()
-        int is_atom()
-        int is_node()
-        int is_link()
+        bint is_atom()
+        bint is_node()
+        bint is_link()
         
         string to_string()
         string to_short_string()
