@@ -631,67 +631,69 @@ void VectorAPIUTest::test_symmetric_mi(void)
 
 	std::string num;
 	num = eval->eval("(symc 'mmt-fmi (Word \"chicken\") (Word \"dog\"))");
-	double chidog = mmt_trop("chicken", "dog");
-	chidog = log( 174 * 16 / (53.0 * 77.0)) / log(2.0);
-	CHKFLT("chicken-dog ", num, chidog);
+	double chidog = log( 174 * 16 / (53.0 * 77.0)) / log(2.0);
+	CHKFLT("chicken-dog fmi", num, chidog);
+
+	chidog = mmt_trop("chicken", "dog");
+	CHKFLT("chicken-dog fmi again", num, chidog);
 
 	num = eval->eval("(symc 'mmt-fmi (Word \"chicken\") (Word \"table\"))");
 	double chitable = mmt_trop("chicken", "table");
-	CHKFLT("chicken-table ", num, chitable);
+	CHKFLT("chicken-table fmi", num, chitable);
 
 	num = eval->eval("(symc 'mmt-fmi (Word \"table\") (Word \"dog\"))");
 	double dogtab = mmt_trop("table", "dog");
-	CHKFLT("dog-table", num, dogtab);
+	CHKFLT("dog-table fmi", num, dogtab);
 
 	num = eval->eval("(symc 'mmt-fmi (Word \"chicken\") (Word \"chicken\"))");
 	double chichi = mmt_trop("chicken", "chicken");
-	CHKFLT("chicken-chicken ", num, chichi);
+	CHKFLT("chicken-chicken fmi", num, chichi);
 
 	num = eval->eval("(symc 'mmt-fmi (Word \"dog\") (Word \"dog\"))");
 	double dogdog = mmt_trop("dog", "dog");
-	CHKFLT("dog-dog ", num, dogdog);
+	CHKFLT("dog-dog fmi", num, dogdog);
 
 	num = eval->eval("(symc 'mmt-fmi (Word \"table\") (Word \"table\"))");
 	double tabtab = mmt_trop("table", "table");
-	CHKFLT("table-table ", num, tabtab);
+	CHKFLT("table-table fmi", num, tabtab);
 
    // --------
 	num = eval->eval("(symc 'mtm-fmi (Word \"wings\") (Word \"eyes\"))");
 	double weyes = mtm_trop("wings", "eyes");
-	CHKFLT("wings-eyes", num, weyes);
+	CHKFLT("wings-eyes fmi", num, weyes);
 
 	num = eval->eval("(symc 'mtm-fmi (Word \"eyes\") (Word \"wings\"))");
 	double ew = mtm_trop("eyes", "wings");
 	CHKFLT("eyes-wings", num, ew);
-	CHKFLT("wings-eyes", num, weyes);
+	CHKFLT("wings-eyes fmi", num, weyes);
 
 	num = eval->eval("(symc 'mtm-fmi (Word \"eyes\") (Word \"legs\"))");
 	double elegs = mtm_trop("eyes", "legs");
-	CHKFLT("eyes-legs", num, elegs);
+	CHKFLT("eyes-legs fmi", num, elegs);
 
 	num = eval->eval("(symc 'mtm-fmi (Word \"eyes\") (Word \"snouts\"))");
 	double esnouts = mtm_trop("eyes", "snouts");
-	CHKFLT("eyes-snouts", num, esnouts);
+	CHKFLT("eyes-snouts fmi", num, esnouts);
 
 	num = eval->eval("(symc 'mtm-fmi (Word \"wings\") (Word \"wings\"))");
 	double ww = mtm_trop("wings", "wings");
-	CHKFLT("wings-wings", num, ww);
+	CHKFLT("wings-wings fmi", num, ww);
 
 	num = eval->eval("(symc 'mtm-fmi (Word \"wings\") (Word \"legs\"))");
 	double wlegs = mtm_trop("wings", "legs");
-	CHKFLT("wings-legs", num, wlegs);
+	CHKFLT("wings-legs fmi", num, wlegs);
 
 	num = eval->eval("(symc 'mtm-fmi (Word \"legs\") (Word \"legs\"))");
 	double leglegs = mtm_trop("legs", "legs");
-	CHKFLT("legs-legs", num, leglegs);
+	CHKFLT("legs-legs fmi", num, leglegs);
 
 	num = eval->eval("(symc 'mtm-fmi (Word \"legs\") (Word \"snouts\"))");
 	double lesnouts = mtm_trop("legs", "snouts");
-	CHKFLT("legs-snouts", num, lesnouts);
+	CHKFLT("legs-snouts fmi", num, lesnouts);
 
 	num = eval->eval("(symc 'mtm-fmi (Word \"snouts\") (Word \"snouts\"))");
 	double sno = mtm_trop("snouts", "snouts");
-	CHKFLT("snouts-snouts", num, sno);
+	CHKFLT("snouts-snouts fmi", num, sno);
 
 	logger().debug("END TEST: %s", __FUNCTION__);
 }
