@@ -1,8 +1,6 @@
 ;
 ; Data set which the basic API will yoke together.
 
-(use-modules (opencog) (opencog nlp))
-
 ; Create the high-level par, given the low-level one.
 (define (mkfoo WA WB) (Evaluation (Predicate "foo") (List (Word WA) (Word WB))))
 
