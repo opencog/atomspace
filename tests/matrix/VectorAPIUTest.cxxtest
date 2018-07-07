@@ -631,9 +631,11 @@ void VectorAPIUTest::test_symmetric_mi(void)
 
 	std::string num;
 	num = eval->eval("(symc 'mmt-fmi (Word \"chicken\") (Word \"dog\"))");
-	double chidog = mmt_trop("chicken", "dog");
-	chidog = log( 174 * 16 / (53.0 * 77.0)) / log(2.0);
+	double chidog = log( 174 * 16 / (53.0 * 77.0)) / log(2.0);
 	CHKFLT("chicken-dog fmi", num, chidog);
+
+	chidog = mmt_trop("chicken", "dog");
+	CHKFLT("chicken-dog fmi again", num, chidog);
 
 	num = eval->eval("(symc 'mmt-fmi (Word \"chicken\") (Word \"table\"))");
 	double chitable = mmt_trop("chicken", "table");
