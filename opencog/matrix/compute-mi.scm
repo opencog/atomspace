@@ -329,24 +329,25 @@
 						; logli are defined as -log_2 in object-api.scm,
 						; so that's why it looks like the MINUS sign is being
 						; used, but it is not.
-						; Return the atom that is holding the MI value.
-						(define (do-one-pair lipr)
+						(define (do-one-pair right-item)
+							(define lipr (LLOBJ 'get-pair left-item right-item))
 							(define pr-freq (frqobj 'pair-freq lipr))
 							(define pr-logli (frqobj 'pair-logli lipr))
 
-							(define right-item (llobj 'right-element lipr))
 							(if (< 0 (supobj 'left-count right-item))
 								(let* ((l-logli (frqobj 'left-wild-logli right-item))
 										(fmi (- (+ r-logli l-logli) pr-logli))
 										(mi (* pr-freq fmi)))
 									(set! cnt-pairs (+ cnt-pairs 1))
-									(frqobj 'set-pair-mi lipr mi fmi))))
+									(frqobj 'set-pair-mi lipr mi fmi)))
+							; Return the atom that is holding the MI value.
+							lipr)
 
 						; Run the inner loop. The map returns a list of atoms
 						; that hold the MI values.
 						(CALLBACK (map
 							do-one-pair
-							(star-obj 'right-stars left-item)))
+							(star-obj 'right-duals left-item)))
 
 						; Print some progress statistics.
 						(set! cnt-lefties (+ cnt-lefties 1))
