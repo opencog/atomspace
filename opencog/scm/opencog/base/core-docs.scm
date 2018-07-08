@@ -954,6 +954,8 @@
        ; define a function that prints the atoms:
        guile> (define (prt-atom h) (display h) #f)
        guile> (cog-map-type prt-atom 'ConceptNode)
+
+  See also: cog-get-atoms TYPE - returns a list of atoms of TYPE.
 ")
 
 (set-procedure-property! cog-atomspace 'documentation
