@@ -1,7 +1,9 @@
-# The two tests below currrently work and pass, as of 10 December 2013.
-# There's this complicated cmake junk, because they will fail for
-# anyone who hasn't correctly configured their SQL setup.  To run
-# these tests, see the README file, and re-run cmake.
+# Immediately below is some complicated cmake junk to detect if SQL is
+# correctly comfigured.  If it is configured, then DB_IS_CONFIGURED
+# is set, and the unit tests are executed. If not, then not.  This
+# avoids having the unit tests fail for those users who have not
+# configured SQL.  To configure SQL, see the README file, and then
+# re-run cmake.
 
 FIND_PROGRAM(PSQL_EXECUTABLE psql)
 IF (PSQL_EXECUTABLE)
