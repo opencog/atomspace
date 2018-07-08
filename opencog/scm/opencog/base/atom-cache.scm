@@ -124,7 +124,7 @@
 "
 
 	; Sort first, and then filter.
-	(define sorted-atoms (sort! ATOM-LIST cog-atom-less?))
+	(define sorted-atoms (sort ATOM-LIST cog-atom-less?))
 	(if (null? sorted-atoms) '()
 		(fold
 			(lambda (ATM LST)
