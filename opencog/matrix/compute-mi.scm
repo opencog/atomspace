@@ -176,7 +176,7 @@
 			(supobj (add-support-api LLOBJ))
 			(frqobj (add-pair-freq-api LLOBJ))
 			(wldobj (add-pair-stars LLOBJ))
-			(tot-cnt 0))
+			(tot-cnt #f))
 
 		(define (init)
 			(set! tot-cnt (supobj `wild-wild-count)))
@@ -205,13 +205,12 @@
 				'()))
 
 		; Compute and cache the left-side wild-card frequency.
+		; This is unconditional - even if the frequency is zero.
 		(define (cache-left-freq ITEM)
-			(define freq (compute-left-freq ITEM))
-			(if (< 0 freq) (frqobj 'set-left-wild-freq ITEM freq)))
+			(frqobj 'set-left-wild-freq ITEM (compute-left-freq ITEM)))
 
 		(define (cache-right-freq ITEM)
-			(define freq (compute-right-freq ITEM))
-			(if (< 0 freq) (frqobj 'set-right-wild-freq ITEM freq)))
+			(frqobj 'set-right-wild-freq ITEM (compute-right-freq ITEM)))
 
 		; Compute and cache all of the pair frequencies.
 		; This computes P(x,y) for all (x,y)
