@@ -75,6 +75,7 @@ _exit(rc); // XXX hack to avoid double-free in __run_exit_handlers
 	void test_glob_multiple(void);
 	void test_nest(void);
 	void test_gnest(void);
+	void test_partition(void);
 };
 
 void GlobUTest::tearDown(void)
@@ -552,7 +553,7 @@ void GlobUTest::test_gnest(void)
 	eval->eval("(load-from-path \"tests/query/glob-nest.scm\")");
 
 	Handle four = eval->eval_h("(cog-execute! get-four)");
-	printf("nested %s\n", four->to_string().c_str());
+	printf("g-nested got %s\n", four->to_string().c_str());
 	TS_ASSERT_EQUALS(4, four->get_arity());
 
 	// "two" should not be found.
@@ -561,6 +562,86 @@ void GlobUTest::test_gnest(void)
 	);
 	TS_ASSERT_EQUALS(four, response);
 
+	// ----
+	logger().debug("END TEST: %s", __FUNCTION__);
+}
+
+/*
+ * Test partitioning of list of like items.
+ * Issue #1825
+ */
+void GlobUTest::test_partition(void)
+{
+	logger().debug("BEGIN TEST: %s", __FUNCTION__);
+
+	eval->eval("(load-from-path \"tests/query/glob-partition.scm\")");
+
+	Handle parts = eval->eval_h("(cog-execute! partition)");
+	printf("party got %s\n", parts->to_string().c_str());
+	TS_ASSERT_EQUALS(4, parts->get_arity());
+
+	Handle response = eval->eval_h(
+		"(SetLink"
+		"	(OrderedLink"
+		"		(ConceptNode \"begin\")"
+		"		(ConceptNode \"foo\")"
+		"		(ConceptNode \"foo\")"
+		"		(ConceptNode \"foo\")"
+		"		(ConceptNode \"end\"))"
+		"	(OrderedLink"
+		"		(ConceptNode \"begin\")"
+		"		(ConceptNode \"foo\")"
+		"		(ConceptNode \"foo\")"
+		"		(ConceptNode \"end\")"
+		"		(ConceptNode \"foo\"))"
+		"	(OrderedLink"
+		"		(ConceptNode \"begin\")"
+		"		(ConceptNode \"foo\")"
+		"		(ConceptNode \"end\")"
+		"		(ConceptNode \"foo\")"
+		"		(ConceptNode \"foo\"))"
+		"	(OrderedLink"
+		"		(ConceptNode \"begin\")"
+		"		(ConceptNode \"end\")"
+		"		(ConceptNode \"foo\")"
+		"		(ConceptNode \"foo\")"
+		"		(ConceptNode \"foo\")))"
+	);
+	TS_ASSERT_EQUALS(parts, response);
+
+	// -----------
+	parts = eval->eval_h("(cog-execute! part-deeper)");
+	printf("party got %s\n", parts->to_string().c_str());
+	TS_ASSERT_EQUALS(4, parts->get_arity());
+
+	response = eval->eval_h(
+		"(SetLink"
+		"	(OrderedLink"
+		"		(ConceptNode \"begin\")"
+		"		(ConceptNode \"bar\")"
+		"		(ConceptNode \"bar\")"
+		"		(ConceptNode \"bar\")"
+		"		(ConceptNode \"end\"))"
+		"	(OrderedLink"
+		"		(ConceptNode \"begin\")"
+		"		(ConceptNode \"bar\")"
+		"		(ConceptNode \"bar\")"
+		"		(ConceptNode \"end\")"
+		"		(ConceptNode \"bar\"))"
+		"	(OrderedLink"
+		"		(ConceptNode \"begin\")"
+		"		(ConceptNode \"bar\")"
+		"		(ConceptNode \"end\")"
+		"		(ConceptNode \"bar\")"
+		"		(ConceptNode \"bar\"))"
+		"	(OrderedLink"
+		"		(ConceptNode \"begin\")"
+		"		(ConceptNode \"end\")"
+		"		(ConceptNode \"bar\")"
+		"		(ConceptNode \"bar\")"
+		"		(ConceptNode \"bar\")))"
+	);
+	TS_ASSERT_EQUALS(parts, response);
 	// ----
 	logger().debug("END TEST: %s", __FUNCTION__);
 }
