@@ -540,7 +540,12 @@ bool PatternMatchEngine::unorder_compare(const PatternTermPtr& ptm,
 
 		if (has_glob)
 		{
+			// Each glob comparision steps the glob state forwards.
+			// Each different permutation has to start with the
+			// same glob state as before. So save and restore state.
+			std::map<GlobPair, GlobState> saved_glob_state = _glob_state;
 			match = glob_compare(mutation, osg);
+			_glob_state = saved_glob_state;
 		}
 		else
 		{
@@ -1607,13 +1612,6 @@ bool PatternMatchEngine::do_next_clause(void)
 		found = _pmc.grounding(var_grounding, clause_grounding);
 		DO_LOG(logger().fine("==================== FINITO! accepted=%d", found);)
 		DO_LOG(log_solution(var_grounding, clause_grounding);)
-
-		// Since the PM may move on and try to search for more solutions,
-		// clear the _glob_state here to prevent it from comparing the
-		// exact same term to the exact same candidate again.
-		// Otherwise, all possible ways to ground the globs in the term
-		// will be explored before moving to the next candidate.
-		_glob_state.clear();
 	}
 	else
 	{
