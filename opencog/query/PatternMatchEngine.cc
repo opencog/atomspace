@@ -696,7 +696,7 @@ bool PatternMatchEngine::glob_compare(const PatternTermSeq& osp,
 	GlobGrd glob_grd;
 	GlobPosStack glob_pos_stack;
 
-	// Common things needed to be done when we backtrack.
+	// Common things that need to be done when backtracking.
 	bool backtracking = false;
 	bool cannot_backtrack_anymore = false;
 	auto backtrack = [&](bool is_glob)
@@ -729,8 +729,8 @@ bool PatternMatchEngine::glob_compare(const PatternTermSeq& osp,
 		}
 	};
 
-	// Common things needed to be done when we find a match
-	// for a glob.
+	// Common things that need to be done when a match
+	// is found for a glob.
 	auto record_match = [&](const PatternTermPtr& glob,
 	                        const HandleSeq& glob_seq)
 	{
@@ -826,12 +826,14 @@ bool PatternMatchEngine::glob_compare(const PatternTermSeq& osp,
 			}
 			else
 			{
+				// XXX why are we not doing any checks to see if the
+				// grounding meets the variable constraints?
 				glob_pos_stack.push({glob, {ip, jg}});
 				_glob_state[gp] = {glob_grd, glob_pos_stack};
 			}
 
 			// First of all, see if we have seen this glob in
-			// previous iterations.
+			// previous iterations.  Huh ??? Why???
 			size_t last_grd = SIZE_MAX;
 			auto gi = glob_grd.find(glob);
 			if (gi != glob_grd.end())
@@ -872,7 +874,8 @@ bool PatternMatchEngine::glob_compare(const PatternTermSeq& osp,
 					continue;
 				}
 
-				// Just in case if the upper bound is zero...
+				// Just in case, if the upper bound is zero...
+				// XXX Huh ???
 				if (not _varlist->is_upper_bound(ohp, 1))
 				{
 					record_match(glob, glob_seq);
@@ -962,9 +965,10 @@ bool PatternMatchEngine::glob_compare(const PatternTermSeq& osp,
 				continue;
 			}
 
-			// Or if we are reaching the end of osp but there
-			// are two or more atoms to be matched in osg,
-			// try again.
+			// Try again if we reached the end of osp, but there
+			// are two or more atoms to be matched in osg (because
+			// maybe we can match one atom with the final atom of the
+			// pattern, but we certainly cannot match two or more.)
 			if (ip+1 == osp_size and jg+1 < osg_size)
 			{
 				backtrack(false);
@@ -1153,13 +1157,7 @@ bool PatternMatchEngine::explore_term_branches(const Handle& term,
 	// The given term may appear in the clause in more than one place.
 	// Each distinct location should be explored separately.
 	auto pl = _pat->connected_terms_map.find({term, clause_root});
-	if (_pat->connected_terms_map.end() == pl)
-	{
-		// XXX ???? Isn't this a hard-error ???
-		DO_LOG({LAZY_LOG_FINE << "Pattern term not found for " << term->to_short_string()
-		              << ", clause=" << clause_root->to_short_string();})
-		return false;
-	}
+	OC_ASSERT(_pat->connected_terms_map.end() != pl, "Internal error");
 
 	for (const PatternTermPtr &ptm : pl->second)
 	{
