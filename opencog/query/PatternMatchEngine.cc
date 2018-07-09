@@ -1157,13 +1157,7 @@ bool PatternMatchEngine::explore_term_branches(const Handle& term,
 	// The given term may appear in the clause in more than one place.
 	// Each distinct location should be explored separately.
 	auto pl = _pat->connected_terms_map.find({term, clause_root});
-	if (_pat->connected_terms_map.end() == pl)
-	{
-		// XXX ???? Isn't this a hard-error ???
-		DO_LOG({LAZY_LOG_FINE << "Pattern term not found for " << term->to_short_string()
-		              << ", clause=" << clause_root->to_short_string();})
-		return false;
-	}
+	OC_ASSERT(_pat->connected_terms_map.end() != pl, "Internal error");
 
 	for (const PatternTermPtr &ptm : pl->second)
 	{
