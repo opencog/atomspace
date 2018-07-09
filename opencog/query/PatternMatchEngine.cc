@@ -789,9 +789,9 @@ bool PatternMatchEngine::glob_compare(const PatternTermSeq& osp,
 			PatternTermPtr glob(osp[ip]);
 
 			// A glob may appear more than once in the pattern,
-			// so check if it's the case, and more importantly.
-			// if we have already grounded it previously, make
-			// sure the grounding satisfies the candidate here.
+			// so check if that's the case. If we have already
+			// grounded it previously, make sure the grounding
+			// here is consistent with the earlier grounding.
 			auto vg = var_grounding.find(ohp);
 			if (not backtracking and vg != var_grounding.end())
 			{
