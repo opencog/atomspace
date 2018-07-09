@@ -117,7 +117,7 @@
 "
   remove-duplicate-atoms ATOM-LIST - Remove duplicate atoms from list.
 
-  This does the same thing as `delete-dup-atoms` but might be faster(?)
+  This does the same thing as `delete-dup-atoms` but is slower(?)
 
   This will usually be faster than calling `delete-duplicates` whenever
   the ATOM-LIST is large (probably when its longer than 10 atoms long??)
@@ -131,6 +131,34 @@
 				(if (equal? ATM (car LST)) LST (cons ATM LST)))
 			(list (car sorted-atoms))
 			(cdr sorted-atoms)))
+)
+
+; ---------------------------------------------------------------------
+
+(define-public (keep-duplicate-atoms ATOM-LIST)
+"
+  keep-duplicate-atoms ATOM-LIST - Keep only duplicate atoms from list.
+
+  This removes all atoms in ATOM-LIST that appear only once in the list.
+  The multiplicity of the remaining atoms is reduced by one, and so
+  repeated calls to this function allows progressively higher
+  multiplicities to be removed. For example, two calls to this function
+  will cause all atoms that appear once or twice to be removed.
+"
+	; Sort first, and then filter.
+	(define sorted-atoms (sort ATOM-LIST cog-atom-less?))
+	(define head #f)
+
+	(if (null? sorted-atoms) '()
+		(begin
+			(set! head (car sorted-atoms))
+			(fold
+				(lambda (ATM LST)
+					(if (equal? ATM head)
+						(cons ATM LST)
+						(begin (set! head ATM) LST)))
+				'()
+				(cdr sorted-atoms))))
 )
 
 ; ---------------------------------------------------------------------
