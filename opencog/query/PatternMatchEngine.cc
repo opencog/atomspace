@@ -540,7 +540,12 @@ bool PatternMatchEngine::unorder_compare(const PatternTermPtr& ptm,
 
 		if (has_glob)
 		{
+			// Each glob comparision steps the glob state forwards.
+			// Each different permutation has to start with the
+			// same glob state as before. So save and restore state.
+			std::map<GlobPair, GlobState> saved_glob_state = _glob_state;
 			match = glob_compare(mutation, osg);
+			_glob_state = saved_glob_state;
 		}
 		else
 		{
