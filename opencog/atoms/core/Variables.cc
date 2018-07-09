@@ -510,21 +510,17 @@ bool Variables::is_type(const HandleSeq& hseq) const
  */
 bool Variables::is_lower_bound(const Handle& glob, size_t n) const
 {
-	// Interval restrictions?
+	// Are there any interval restrictions?
 	GlobIntervalMap::const_iterator iit = _glob_intervalmap.find(glob);
 
-	if (_glob_intervalmap.end() != iit)
-	{
-		const std::pair<double, double>& intervals = iit->second;
+	// If there are no interval restrictions, the default
+	// restrictions apply. The default restriction is 1 or more,
+	// so return true as long as `n` is larger than 0.
+	if (_glob_intervalmap.end() == iit)
+		return (n > 0);
 
-		if (n >= intervals.first)
-			return true;
-	}
-	// If there is no interval restrictions, by default it's considered
-	// as 1 to many, so returns true as long as it's larger than 0.
-	else if (n > 0) return true;
-
-	return false;
+	const std::pair<double, double>& intervals = iit->second;
+	return (n >= intervals.first);
 }
 
 /**
@@ -535,21 +531,18 @@ bool Variables::is_lower_bound(const Handle& glob, size_t n) const
  */
 bool Variables::is_upper_bound(const Handle& glob, size_t n) const
 {
-	// Interval restrictions?
+	// Are there any interval restrictions?
 	GlobIntervalMap::const_iterator iit = _glob_intervalmap.find(glob);
 
-	if (_glob_intervalmap.end() != iit)
-	{
-		const std::pair<double, double>& intervals = iit->second;
+	// If there are no interval restrictions, the default
+	// restrictions apply. The default upper bound is
+	// "unbounded"; any number of matches are OK.
+	if (_glob_intervalmap.end() == iit)
+		return true;
 
-		if (n <= intervals.second or intervals.second < 0)
-			return true;
-	}
-	// If there is no interval restrictions, by default it's considered
-	// as 1 to many, so returns true as long as it's larger than 0.
-	else if (n > 0) return true;
-
-	return false;
+	// Negative upper bound means "unbounded" (infinity).
+	const std::pair<double, double>& intervals = iit->second;
+	return (n <= intervals.second or intervals.second < 0);
 }
 
 /* ================================================================= */
