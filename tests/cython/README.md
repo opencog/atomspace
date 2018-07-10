@@ -3,13 +3,9 @@
 
 ```nose``` Python testing framework is required.
 
-Installation using ```pip``` package manager :
+Installation using ```apt-get``` package manager :
 ```
-pip install nose
-```
-or install it using ```conda``` package manager:
-```
-conda install nose
+apt-get install python-nose
 ```
 
 ## Running tests
