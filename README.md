@@ -320,7 +320,7 @@ during the build, will be more precise as to which parts will not be built.
 * C bindings for Python.
 * Strongly recommended, as many examples and important subsystems
   assume python bindings.
-* https://cython.org | `pip install cython`
+* https://cython.org | `apt-get install cython`
 
 ###### Haskell
 * Haskell bindings (experimental).
