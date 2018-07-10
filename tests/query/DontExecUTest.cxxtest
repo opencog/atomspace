@@ -63,6 +63,7 @@ public:
 	void tearDown();
 
 	void test_DontExecLink_simple();
+	void test_DontExecLink_multi();
 	void test_DontExecLink_consumption();
 };
 
@@ -101,6 +102,26 @@ void DontExecUTest::test_DontExecLink_simple()
 	logger().debug() << "put expected = " << oc_to_string(band);
 
 	TS_ASSERT_EQUALS(put_band, band);
+	logger().debug("END TEST: %s", __FUNCTION__);
+}
+
+/**
+ * Test that DontExecLink are properly consumed, even when
+ * wrapped in a set.
+ */
+void DontExecUTest::test_DontExecLink_multi()
+{
+	logger().debug("BEGIN TEST: %s", __FUNCTION__);
+	eval.eval("(load-from-path \"tests/query/dont-exec-simple.scm\")");
+
+	Handle got = eval.eval_h("(cog-execute! put-eval)");
+	Handle want = eval.eval_h("eval-expected");
+
+	TS_ASSERT_EQUALS(got, want);
+
+	logger().debug() << "put-multi result = " << oc_to_string(got);
+	logger().debug() << "put-multi expected = " << oc_to_string(want);
+
 	logger().debug("END TEST: %s", __FUNCTION__);
 }
 

@@ -248,17 +248,32 @@ Handle Instantiator::walk_tree(const Handle& expr, bool silent)
 		// awkward.  I'm confused about how to handle this best.
 		// The behavior tree uses this!
 		// Anyway, do_evaluate() will throw if rex is not evaluatable.
+		//
+		// The DontExecLink is a weird hack to halt evaluation.
+		// We unwrap it and throw it away when encountered.
+		// Some long-term fix is needed that avoids this step-three
+		// entirely.
 		if (SET_LINK == rex->get_type())
 		{
+			HandleSeq unwrap;
 			for (const Handle& plo : rex->getOutgoingSet())
 			{
-				try {
-					EvaluationLink::do_evaluate(_as, plo, true);
+				if (DONT_EXEC_LINK == plo->get_type())
+				{
+					unwrap.push_back(plo->getOutgoingAtom(0));
 				}
-				catch (const NotEvaluatableException& ex) {}
+				else
+				{
+					try {
+						EvaluationLink::do_evaluate(_as, plo, true);
+					}
+					catch (const NotEvaluatableException& ex) {}
+					unwrap.push_back(plo);
+				}
 			}
-			return rex;
+			return createLink(unwrap, SET_LINK);
 		}
+
 		try {
 			EvaluationLink::do_evaluate(_as, rex, true);
 		}
