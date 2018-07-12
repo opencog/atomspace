@@ -8,8 +8,6 @@
 # -- configure various config files.
 # -- print pretty summary
 #
-include(lib/Summary.cmake)
-
 # Need to have cmake-2.8.8 in order to be able to check the compiler
 # version.
 CMAKE_MINIMUM_REQUIRED(VERSION 2.8.8)
@@ -70,6 +68,7 @@ ENDIF (COGUTIL_FOUND)
 # add the 'cmake' directory from cogutil to search path
 list(APPEND CMAKE_MODULE_PATH  ${COGUTIL_DATA_DIR}/cmake)
 
+include(${COGUTIL_DATA_DIR}/cmake/Summary.cmake)
 # ===============================================================
 # Detect different compilers and OS'es, tweak flags as necessary.
 
