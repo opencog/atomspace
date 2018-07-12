@@ -55,7 +55,20 @@ ADD_DEFINITIONS(-DPROJECT_SOURCE_DIR=\\"${CMAKE_SOURCE_DIR}\\"
                 -DPROJECT_BINARY_DIR=\\"${CMAKE_BINARY_DIR}\\")
 
 # add the 'lib' dir to cmake's module search path
-SET(CMAKE_MODULE_PATH "${CMAKE_SOURCE_DIR}/lib/")
+list(APPEND CMAKE_MODULE_PATH "${CMAKE_SOURCE_DIR}/lib/")
+
+# Cogutil
+FIND_PACKAGE(CogUtil)
+IF (COGUTIL_FOUND)
+	MESSAGE(STATUS "CogUtil found.")
+	ADD_DEFINITIONS(-DHAVE_COGUTIL)
+    SET(HAVE_COGUTIL 1)
+ELSE (COGUTIL_FOUND)
+	MESSAGE(FATAL_ERROR "CogUtil missing: it is needed for everything!")
+ENDIF (COGUTIL_FOUND)
+
+# add the 'cmake' directory from cogutil to search path
+list(APPEND CMAKE_MODULE_PATH  ${COGUTIL_DATA_DIR}/cmake)
 
 # ===============================================================
 # Detect different compilers and OS'es, tweak flags as necessary.
@@ -204,16 +217,6 @@ MESSAGE(STATUS "Boost version ${Boost_VERSION} found.")
 IF(Boost_FOUND_SAVE)
 	SET(Boost_FOUND 1)
 ENDIF(Boost_FOUND_SAVE)
-
-# Cogutil
-FIND_PACKAGE(CogUtil)
-IF (COGUTIL_FOUND)
-	MESSAGE(STATUS "CogUtil found.")
-	ADD_DEFINITIONS(-DHAVE_COGUTIL)
-	SET(HAVE_COGUTIL 1)
-ELSE (COGUTIL_FOUND)
-	MESSAGE(FATAL_ERROR "CogUtil missing: it is needed for everything!")
-ENDIF (COGUTIL_FOUND)
 
 FIND_PACKAGE(Cxxtest)
 IF (CXXTEST_FOUND)
@@ -465,7 +468,7 @@ SET (MAN_INSTALL_DIR "${CMAKE_INSTALL_PREFIX}/share/man")
 
 # include custom opencog cmake macros
 INCLUDE("${CMAKE_SOURCE_DIR}/lib/OpenCogMacros.cmake")
-INCLUDE("${CMAKE_SOURCE_DIR}/lib/OpenCogFunctions.cmake")
+INCLUDE("${COGUTIL_DATA_DIR}/cmake/OpenCogFunctions.cmake")
 
 # small hack to handle unixes that use "/usr/lib64" instead of "/usr/lib" as the
 # default lib path on 64 bit archs
