@@ -15,7 +15,7 @@ cdef c_get_type_name(Type t):
     s = nameserver().getTypeName(t)
 
     if 0 == strcmp(s.c_str(), "*** Unknown Type! ***") :
-        s = string("")
+        s = string(b"")
     return s.c_str()
 
 # Given the string name, look up the numeric type.
