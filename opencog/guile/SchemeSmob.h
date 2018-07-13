@@ -24,6 +24,8 @@
 #include <opencog/atoms/proto/types.h>
 
 #include <opencog/truthvalue/AttentionValue.h>
+#include <opencog/truthvalue/DistributionalValue.h>
+#include <opencog/truthvalue/ConditionalDV.h>
 #include <opencog/truthvalue/TruthValue.h>
 
 #include <opencog/atomspace/AtomSpace.h>
@@ -76,9 +78,13 @@ private:
 	static size_t free_misc(SCM);
 
 	static SCM handle_to_scm(const Handle&);
+	static SCM handleseq_to_scm(const HandleSeq&);
 	static SCM protom_to_scm(const ProtoAtomPtr&);
 	static SCM tv_to_scm(const TruthValuePtr&);
 	static SCM av_to_scm(const AttentionValuePtr&);
+	static SCM dv_to_scm(const DistributionalValuePtr&);
+	static SCM dvs_to_scm(const std::vector<DistributionalValuePtr>&);
+	static SCM cdv_to_scm(const ConditionalDVPtr&);
 	static Handle scm_to_handle(SCM);
 	static ProtoAtomPtr scm_to_protom(SCM);
 	static TruthValuePtr scm_to_tv(SCM);
@@ -186,6 +192,19 @@ private:
 	static SCM ss_av_p(SCM);
 	static SCM ss_av_get_value(SCM);
 
+    // Distributional values
+	static SCM ss_new_dv(SCM, SCM);
+	static SCM ss_new_dv_simple(SCM, SCM);
+	static SCM ss_dv_p(SCM);
+	static SCM ss_dv_divide(SCM,SCM,SCM);
+	static SCM ss_dv_sum_joint(SCM,SCM,SCM);
+	static SCM ss_dv_part_joint(SCM,SCM,SCM);
+	static SCM ss_new_cdv(SCM, SCM);
+    static SCM ss_cdv_get_conditions(SCM);
+    static SCM ss_cdv_get_unconditonals(SCM);
+    static SCM ss_cdv_get_unconditonal(SCM,SCM);
+    static SCM ss_cdv_get_joint(SCM,SCM);
+
 	// Free variables
 	static SCM ss_get_free_variables(SCM);
 	static SCM ss_is_closed(SCM);
@@ -197,6 +216,7 @@ private:
 	static std::string misc_to_string(SCM);
 	static TruthValuePtr get_tv_from_list(SCM);
 	static AttentionValuePtr get_av_from_list(SCM);
+	static DistributionalValuePtr get_dv_from_list(SCM);
 	static AtomSpace* get_as_from_list(SCM);
 
 	// Logger
@@ -207,7 +227,7 @@ private:
 	static Logger* new_logger();
 	static std::mutex lgr_mtx;
 	static std::set<Logger*> deleteable_lgr;
-	
+
 	// validate arguments coming from scheme passing into C++
 	[[ noreturn ]] static void throw_exception(const std::exception&,
 	                                           const char *, SCM);
@@ -217,6 +237,9 @@ private:
 	static ProtoAtomPtr verify_protom(SCM, const char *, int pos = 1);
 	static TruthValuePtr verify_tv(SCM, const char *, int pos = 1);
 	static AttentionValuePtr verify_av(SCM, const char *, int pos = 1);
+	static DistributionalValuePtr verify_dv(SCM, const char *, int pos = 1);
+	static std::vector<DistributionalValuePtr> verify_dv_list(SCM, const char *, int pos = 1);
+	static ConditionalDVPtr verify_cdv(SCM, const char *, int pos = 1);
 	static HandleSeq verify_handle_list (SCM, const char *,
 	                                               int pos = 1);
 	static std::vector<double> verify_float_list (SCM, const char *,
@@ -251,6 +274,7 @@ public:
 	static std::string to_string(const Handle&);
 	static std::string as_to_string(const AtomSpace *);
 	static std::string av_to_string(const AttentionValuePtr&);
+	static std::string dv_to_string(const DistributionalValuePtr&);
 	static std::string tv_to_string(const TruthValuePtr&);
 };
 

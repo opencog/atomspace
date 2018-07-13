@@ -148,6 +148,24 @@ SCM SchemeSmob::handle_to_scm (const Handle& h)
 	return protom_to_scm(AtomCast(h));
 }
 
+SCM SchemeSmob::handleseq_to_scm (const HandleSeq& hs)
+{
+    SCM res;
+    bool first = true;
+    for (Handle h : hs)
+    {
+        SCM sh = handle_to_scm(h);
+        if (first) {
+            first = false;
+            res = scm_list_1(sh);
+        }
+        else {
+            res = scm_cons(sh,res);
+        }
+    }
+	return res;
+}
+
 SCM SchemeSmob::protom_to_scm (const ProtoAtomPtr& pa)
 {
 	if (nullptr == pa) return SCM_EOL;

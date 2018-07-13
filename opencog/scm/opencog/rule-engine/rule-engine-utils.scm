@@ -43,6 +43,7 @@
 ;; -- tv->bool -- Convert TRUE_TV to #t, anything else to #f
 ;; -- atom->number -- Convert NumberNode into its corresponding number
 ;; -- gt-zero-confidence -- Return TrueTV iff A's confidence is greater than 0
+;; -- has-dv -- Return TrueTV iff A has a Distributional Value
 ;; -- absolutely-true -- Return TrueTV iff A's TV is TrueTV
 ;; -- meta-bind -- Fully apply a meta rule. Convenient for testing meta-rules
 ;; -- gen-variable -- Generate VariableNode with certain prefix and index
@@ -415,6 +416,14 @@
 "
   (bool->tv (> (cog-stv-confidence A) 0)))
 
+(define-public (has-dv A)
+"
+  Return TrueTV iff A has a dv attached
+"
+  (bool->tv (not (equal? (cog-value A (PredicateNode "CDV")) '())))
+)
+
+
 (define-public (gt-zero-confidence-eval A)
 "
   Add the following evaluation in the current atomspace
@@ -535,6 +544,7 @@
           atom->number
           gt-zero-confidence
           gt-zero-confidence-eval
+          has-dv
           absolutely-true
           absolutely-true-eval
           meta-bind
