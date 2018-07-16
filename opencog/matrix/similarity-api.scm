@@ -296,10 +296,10 @@
 					(let* ((elapsed (- (current-time) start))
 							(togo (* 0.5 (- len done) (- len (+ done 1))))
 							(frt (- tot togo))
-							(rate (* 0.001 (/ (- frt prevf) (- elapsed prevt))))
+							(rate (/ (- frt prevf) (- elapsed prevt)))
 							)
 						(format #t
-							 "Done ~A/~A frac=~5f% Time: ~A Done: ~4f% rate=~5f K prs/sec\n"
+							 "Done ~A/~A frac=~5f% Time: ~A Done: ~4f% rate=~5f prs/sec\n"
 							done len
 							(* 100.0 (/ (* NTHREADS prs) frt))
 							elapsed
