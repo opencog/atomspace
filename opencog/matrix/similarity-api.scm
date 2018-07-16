@@ -185,10 +185,10 @@
 			(goodcnt 0)
 		)
 
-		; Fetch or compute the similarity value.
-		; If the sim value is stored already, return that,
-		; else compute it. If the computed value is greater than
-		; CUTOFF, then save it.
+		; Find or compute the similarity value. If the sim value
+		; is cached in the atomspace already, return that, else
+		; compute it. If the computed value is greater than CUTOFF,
+		; then cache it in the atomspace.
 		(define (compute-sim A B)
 			(define mpr (cog-link pair-sim-type A B))
 			(define prs (simobj 'pair-similarity mpr))
@@ -206,7 +206,7 @@
 									(FloatValue simv))))
 					simv)))
 
-		; Compute and store the similarity between the ITEM, and the
+		; Compute and cache the similarity between the ITEM, and the
 		; other items in the ITEM-LIST.  Do NOT actually cache the
 		; similarity value, if it is less than CUTOFF.  This is used
 		; to avoid having N-squared pairs cluttering the atomspace.
