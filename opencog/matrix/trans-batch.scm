@@ -180,9 +180,11 @@
 		; Methods on this class.
 		(lambda (message . args)
 			(case message
-				((mmt-marginals)  (batch-mmt-marginals))
-				((mtm-marginals)  (batch-mtm-marginals))
-				(else             (apply LLOBJ (cons message args))))
+				((left-marginals)  (batch-left-support))
+				((right-marginals) (batch-right-support))
+				((mmt-marginals)   (batch-mmt-marginals))
+				((mtm-marginals)   (batch-mtm-marginals))
+				(else              (apply LLOBJ (cons message args))))
 			)))
 
 ; ---------------------------------------------------------------------
@@ -208,3 +210,6 @@
 ; (define cvp (add-support-api cvs))
 ; (define btc (batch-transpose cva))
 ; (btc 'mmt-marginals)
+;
+; However, word-counts need the right marginals:
+; (btc 'right-marginals)
