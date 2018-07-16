@@ -243,14 +243,14 @@
 					(let* ((elapsed (- (current-time) start))
 							(togo (* 0.5 (- len done) (- len (+ done 1))))
 							(frt (- tot togo))
-							(rate (* 0.001 (/ (- frt prevf)
-								(exact->inexact (- elapsed prevt)))))
+							(rate (/ (- frt prevf)
+								(exact->inexact (- elapsed prevt))))
 						)
 
 						; frac is the percentage fraction that had
 						; similarities greater than the cutoff.
 						(format #t
-							 "Done ~A/~A frac=~5f% Time: ~A Done: ~4f% rate=~5f K prs/sec\n"
+							 "Done ~A/~A frac=~5f% Time: ~A Done: ~4f% rate=~5f prs/sec\n"
 							done len
 							(* 100.0 (/ prs frt))
 							elapsed
