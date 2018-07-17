@@ -267,6 +267,9 @@
 						(do-one-and-rpt ITM-LST)
 						(make-pairs (cdr ITM-LST)))))
 
+			; Reset the states, before restarting
+			(set! compcnt 0)
+			(set! savecnt 0)
 			(make-pairs ITEM-LIST)
 		)
 
@@ -323,6 +326,9 @@
 						(call-with-new-thread (lambda () (make-pairs ITM-LST)))
 						(launch (cdr ITM-LST) (- CNT 1)))))
 
+			; Reset the states, before restarting
+			(set! compcnt 0)
+			(set! savecnt 0)
 			(launch ITEM-LIST NTHREADS)
 
 			(format #t "Started ~d threads\n" NTHREADS)
