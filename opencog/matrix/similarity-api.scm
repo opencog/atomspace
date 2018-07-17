@@ -232,7 +232,7 @@
 			(define prs 0)
 			(define prevf 0.0)
 			(define start (current-time))
-			(define prevt start)
+			(define prevt 0.0)
 
 			(define (do-one-and-rpt ITM-LST)
 				; prs holds the running total of similarity pairs
@@ -243,8 +243,7 @@
 					(let* ((elapsed (- (current-time) start))
 							(togo (* 0.5 (- len done) (- len (+ done 1))))
 							(frt (- tot togo))
-							(rate (/ (- frt prevf)
-								(exact->inexact (- elapsed prevt))))
+							(rate (/ (- frt prevf) (- elapsed prevt)))
 						)
 
 						; frac is the percentage fraction that had
@@ -286,7 +285,7 @@
 			(define prs 0)
 			(define prevf 0)
 			(define start (current-time))
-			(define prevt start)
+			(define prevt 0.0)
 
 			(define (do-one-and-rpt ITM-LST)
 				; These sets are not thread-safe but I don't care.
