@@ -182,7 +182,8 @@
 	(let* ((wldobj (add-pair-stars LLOBJ))
 			(simobj (add-similarity-api wldobj MTM? ID))
 			(pair-sim-type (simobj 'pair-type))
-			(goodcnt 0)
+			(compcnt 0)  ; number computed
+			(savecnt 0)  ; number saved
 		)
 
 		; Find or compute the similarity value. If the sim value
@@ -195,12 +196,13 @@
 			(if (not (null? prs))
 				(cog-value-ref prs 0)
 				(let ((simv (SIM-FUN A B)))
+					(set! compcnt (+ compcnt 1))
 					; If we already have a similarity link for this object,
 					; go ahead and use it. Otherwise, save the similarity
 					; value only if it is greater than the cutoff.
 					(if (or (not (null? mpr)) (<= CUTOFF simv))
 						(begin
-							(set! goodcnt (+ goodcnt 1))
+							(set! savecnt (+ savecnt 1))
 							(simobj 'set-pair-similarity
 								(cog-new-link pair-sim-type A B)
 									(FloatValue simv))))
@@ -214,11 +216,9 @@
 		; Return the number of similarity values that were above the
 		; cutoff.
 		(define (batch-simlist ITEM ITEM-LIST)
-			(set! goodcnt 0)
 			(for-each
 				(lambda (item) (compute-sim ITEM item))
 				ITEM-LIST)
-			goodcnt
 		)
 
 		; Loop over the entire list of items, and compute similarity
@@ -227,38 +227,37 @@
 		(define (batch-sim-pairs ITEM-LIST)
 
 			(define len (length ITEM-LIST))
-			(define tot (* 0.5 len (- len 1)))
-			(define done 0)
-			(define prs 0)
-			(define prevf 0.0)
+			(define tot (* 0.5 len (- len 1))) ; number of pairs todo
+			(define done 0)      ; items done
+			(define prevcomp 0)  ; pairs computed
 			(define start (current-time))
-			(define prevt 0.0)
+			(define prevelap 0.0) ; previous elapsed time.
 
 			(define (do-one-and-rpt ITM-LST)
-				; prs holds the running total of similarity pairs
-				; that were above the cutoff.
-				(set! prs (+ prs (batch-simlist (car ITM-LST) (cdr ITM-LST))))
+				(batch-simlist (car ITM-LST) (cdr ITM-LST))
 				(set! done (+  done 1))
 				(if (eqv? 0 (modulo done 10))
 					(let* ((elapsed (- (current-time) start))
 							(togo (* 0.5 (- len done) (- len (+ done 1))))
-							(frt (- tot togo))
-							(rate (/ (- frt prevf) (- elapsed prevt)))
+							(nprdone (- tot togo))  ; number of pairs done
+							(rate (/ (- compcnt prevcomp) (- elapsed prevelap)))
 						)
 
-						; frac is the percentage fraction that had
+						; Frac is the percentage fraction that had
 						; similarities greater than the cutoff.
+						; Rate is the rate of computing pairs, whether
+						; or not they are actually saved.
 						(format #t
-							 "Done ~A/~A frac=~5f% Time: ~A Done: ~4f% rate=~5f prs/sec (~5f sec/pr)\n"
+							 "Done ~A/~A Frac=~5f% Time: ~A Done: ~4f% Rate=~5f prs/sec (~5f sec/pr)\n"
 							done len
-							(* 100.0 (/ prs frt))
+							(* 100.0 (/ savecnt nprdone))
 							elapsed
-							(* 100.0 (/ frt tot))
+							(* 100.0 (/ nprdone tot))
 							rate
 							(/ 1.0 rate)
 						)
-						(set! prevt (- elapsed 1.0e-6))
-						(set! prevf frt)
+						(set! prevelap (- elapsed 1.0e-6))
+						(set! prevcomp compcnt)
 				)))
 
 			; tail-recursive list-walker.
@@ -282,31 +281,31 @@
 			(define len (length ITEM-LIST))
 			(define tot (* 0.5 len (- len 1)))
 			(define done 0)
-			(define prs 0)
-			(define prevf 0)
+			(define prevcomp 0)  ; pairs computed
 			(define start (current-time))
-			(define prevt 0.0)
+			(define prevelap 0.0)
 
 			(define (do-one-and-rpt ITM-LST)
 				; These sets are not thread-safe but I don't care.
-				(set! prs (+ prs (batch-simlist (car ITM-LST) (cdr ITM-LST))))
+				(batch-simlist (car ITM-LST) (cdr ITM-LST))
 				(set! done (+ done 1))
 				(if (eqv? 0 (modulo done 20))
 					(let* ((elapsed (- (current-time) start))
 							(togo (* 0.5 (- len done) (- len (+ done 1))))
-							(frt (- tot togo))
-							(rate (/ (- frt prevf) (- elapsed prevt)))
+							(nprdone (- tot togo))
+							(rate (/ (- compcnt prevcomp) (- elapsed prevelap)))
 							)
 						(format #t
-							 "Done ~A/~A frac=~5f% Time: ~A Done: ~4f% rate=~5f prs/sec\n"
+							 "Done ~A/~A Frac=~5f% Time: ~A Done: ~4f% Rate=~5f prs/sec (~5f sec/pr)\n"
 							done len
-							(* 100.0 (/ (* NTHREADS prs) frt))
+							(* 100.0 (/ (* NTHREADS savecnt) nprdone))
 							elapsed
-							(* 100.0 (/ frt tot))
+							(* 100.0 (/ nprdone tot))
 							rate
+							(/ 1.0 rate)
 						)
-						(set! prevt (- elapsed 1.0e-6))
-						(set! prevf frt)
+						(set! prevelap (- elapsed 1.0e-6))
+						(set! prevcomp compcnt)
 					)))
 
 			; tail-recursive list-walker.
