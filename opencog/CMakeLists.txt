@@ -34,3 +34,5 @@ ENDIF (HAVE_CYTHON)
 
 # Haskell bindings.
 ADD_SUBDIRECTORY (haskell)
+
+set(atomspace_libs ${atomspace_libs} PARENT_SCOPE)

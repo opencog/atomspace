@@ -16,14 +16,16 @@ TARGET_LINK_LIBRARIES(atomutils
 )
 
 IF (CYGWIN)
-	INSTALL (TARGETS atomutils
+    INSTALL (TARGETS atomutils EXPORT AtomSpaceTargets
 		DESTINATION "lib${LIB_DIR_SUFFIX}/opencog"
 	)
 ELSE (CYGWIN)
-	INSTALL (TARGETS atomutils
+    INSTALL (TARGETS atomutils EXPORT AtomSpaceTargets
 		DESTINATION "lib${LIB_DIR_SUFFIX}/opencog"
 	)
 ENDIF (CYGWIN)
+
+set(atomspace_libs ${atomspace_libs} atomutils PARENT_SCOPE)
 
 INSTALL (FILES
 	AtomUtils.h

@@ -18,3 +18,5 @@ ADD_SUBDIRECTORY (sql)
 IF (HAVE_ZMQ)
 	ADD_SUBDIRECTORY (zmq)
 ENDIF (HAVE_ZMQ)
+
+set(atomspace_libs ${atomspace_libs} PARENT_SCOPE)

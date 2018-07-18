@@ -8,7 +8,7 @@ TARGET_LINK_LIBRARIES(persist
 	smob
 )
 
-INSTALL (TARGETS persist
+INSTALL (TARGETS persist EXPORT AtomSpaceTargets
 	DESTINATION "lib${LIB_DIR_SUFFIX}/opencog"
 )
 
@@ -16,3 +16,5 @@ INSTALL (FILES
 	PersistSCM.h
 	DESTINATION "include/opencog/persist/guile"
 )
+
+set(atomspace_libs ${atomspace_libs} persist PARENT_SCOPE)

@@ -11,9 +11,14 @@ TARGET_LINK_LIBRARIES(unify
 	${COGUTIL_LIBRARY}
 )
 
-INSTALL (TARGETS unify DESTINATION "lib${LIB_DIR_SUFFIX}/opencog")
+INSTALL (TARGETS unify 
+    EXPORT AtomSpaceTargets 
+    DESTINATION "lib${LIB_DIR_SUFFIX}/opencog")
 
 INSTALL (FILES
 	Unify.h
 	DESTINATION "include/opencog/unify"
 )
+
+set(atomspace_libs ${atomspace_libs} unify PARENT_SCOPE)
+
