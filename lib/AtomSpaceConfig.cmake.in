@@ -1,0 +1,16 @@
+@PACKAGE_INIT@
+
+include("@CMAKE_INSTALL_PREFIX@/lib/cmake/AtomSpace/AtomSpaceTargets.cmake")
+
+
+set(ATOMSPACE_LIBS @atomspace_libs@)
+FOREACH(item ${ATOMSPACE_LIBS})
+    get_property(lib_location TARGET ${item} PROPERTY LOCATION)
+    set("ATOMSPACE_${item}_LIBRARY" "${lib_location}")
+    list(APPEND ATOMSPACE_LIBRARIES "${lib_location}")
+ENDFOREACH()
+set(ATOMSPACE_INCLUDE_DIR "@CMAKE_INSTALL_PREFIX@/include/")
+set(ATOMSPACE_VERSION "@CPACK_PACKAGE_VERSION@")
+set(ATOMSPACE_FOUND 1)
+
+
