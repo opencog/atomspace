@@ -38,7 +38,9 @@ IF (HAVE_GUILE)
 	TARGET_LINK_LIBRARIES(ruleengine smob)
 ENDIF (HAVE_GUILE)
 
-INSTALL (TARGETS ruleengine DESTINATION "lib${LIB_DIR_SUFFIX}/opencog")
+INSTALL (TARGETS ruleengine 
+    EXPORT AtomSpaceTargets 
+    DESTINATION "lib${LIB_DIR_SUFFIX}/opencog")
 
 INSTALL (FILES
 	UREConfig.h
@@ -51,3 +53,6 @@ INSTALL (FILES
 
 ADD_SUBDIRECTORY(forwardchainer)
 ADD_SUBDIRECTORY(backwardchainer)
+
+set(atomspace_libs ${atomspace_libs} ruleengine PARENT_SCOPE)
+

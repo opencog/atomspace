@@ -21,7 +21,7 @@ TARGET_LINK_LIBRARIES(clearbox
 	${COGUTIL_LIBRARY}
 )
 
-INSTALL (TARGETS clearbox
+INSTALL (TARGETS clearbox EXPORT AtomSpaceTargets
 	DESTINATION "lib${LIB_DIR_SUFFIX}/opencog"
 )
 
@@ -34,3 +34,6 @@ INSTALL (FILES
 	TimesLink.h
 	DESTINATION "include/opencog/atoms/reduct"
 )
+
+set(atomspace_libs ${atomspace_libs} clearbox PARENT_SCOPE)
+

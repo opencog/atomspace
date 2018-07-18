@@ -32,7 +32,7 @@ IF(HAVE_GUILE)
 	TARGET_LINK_LIBRARIES(zmqatoms smob)
 ENDIF(HAVE_GUILE)
 
-INSTALL (TARGETS zmqatoms
+INSTALL (TARGETS zmqatoms EXPORT AtomSpaceTargets
 	DESTINATION "lib${LIB_DIR_SUFFIX}/opencog"
 )
 
@@ -43,3 +43,5 @@ INSTALL (FILES
 	ZMQPersistSCM.h
 	DESTINATION "include/opencog/persist/zmq/atomspace"
 )
+
+set(atomspace_libs ${atomspace_libs} zmqatoms PARENT_SCOPE)

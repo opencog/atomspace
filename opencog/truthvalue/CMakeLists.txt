@@ -16,7 +16,7 @@ TARGET_LINK_LIBRARIES(truthvalue
 	${COGUTIL_LIBRARY}
 )
 
-INSTALL (TARGETS truthvalue
+INSTALL (TARGETS truthvalue EXPORT AtomSpaceTargets
 	DESTINATION "lib${LIB_DIR_SUFFIX}/opencog"
 )
 
@@ -31,3 +31,6 @@ INSTALL (FILES
 	TruthValue.h
 	DESTINATION "include/opencog/truthvalue"
 )
+
+set(atomspace_libs ${atomspace_libs} truthvalue PARENT_SCOPE)
+

@@ -23,11 +23,11 @@ TARGET_LINK_LIBRARIES(lambda
 )
 
 IF (CYGWIN)
-	INSTALL (TARGETS lambda
+    INSTALL (TARGETS lambda EXPORT AtomSpaceTargets
 		DESTINATION "lib${LIB_DIR_SUFFIX}/opencog"
 	)
 ELSE (CYGWIN)
-	INSTALL (TARGETS lambda
+    INSTALL (TARGETS lambda EXPORT AtomSpaceTargets
 		DESTINATION "lib${LIB_DIR_SUFFIX}/opencog"
 	)
 ENDIF (CYGWIN)
@@ -41,3 +41,6 @@ INSTALL (FILES
 	PatternUtils.h
 	DESTINATION "include/opencog/atoms/pattern"
 )
+
+set(atomspace_libs ${atomspace_libs} lambda PARENT_SCOPE)
+
