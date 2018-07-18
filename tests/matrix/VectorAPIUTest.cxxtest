@@ -69,6 +69,25 @@ class VectorAPIUTest :  public CxxTest::TestSuite
 	void test_symmetric_mi(void);
 };
 
+#define CHKERR \
+	TSM_ASSERT("Caught scm error during eval", \
+		(false == eval->eval_error()));
+
+#define CHKPRT(X) printf("Got >>%s<<\n", X.c_str()); CHKERR;
+
+#define CHKNUM(MSG,X,VAL) \
+	printf("Expect %s=%d got=%s", MSG, VAL, X.c_str()); \
+	CHKERR; \
+	TSM_ASSERT_EQUALS(MSG, atoi(X.c_str()), VAL);
+
+#define EPS 1.0e-9
+
+#define CHKFLT(MSG,X,VAL) \
+	printf("Expect %s=%f got=%s", MSG, VAL, X.c_str()); \
+	CHKERR; \
+	TSM_ASSERT_LESS_THAN(MSG, atof(X.c_str()), VAL+EPS); \
+	TSM_ASSERT_LESS_THAN(MSG, VAL-EPS, atof(X.c_str()));
+
 /*
  * This is called once before each test, for each test (!!)
  */
@@ -90,7 +109,9 @@ void VectorAPIUTest::setUp(void)
 	eval->eval("(add-to-load-path \"../../..\")");
 
 	eval->eval("(load-from-path \"tests/query/test_types.scm\")");
+	CHKERR;
 	eval->eval("(load-from-path \"tests/matrix/basic-api.scm\")");
+	CHKERR;
 }
 
 void VectorAPIUTest::tearDown(void)
@@ -98,25 +119,6 @@ void VectorAPIUTest::tearDown(void)
 	delete eval;
 	eval = NULL;
 }
-
-#define CHKERR \
-	TSM_ASSERT("Caught scm error during eval", \
-		(false == eval->eval_error()));
-
-#define CHKPRT(X) printf("Got >>%s<<\n", X.c_str()); CHKERR;
-
-#define CHKNUM(MSG,X,VAL) \
-	printf("Expect %s=%d got=%s", MSG, VAL, X.c_str()); \
-	CHKERR; \
-	TSM_ASSERT_EQUALS(MSG, atoi(X.c_str()), VAL);
-
-#define EPS 1.0e-9
-
-#define CHKFLT(MSG,X,VAL) \
-	printf("Expect %s=%f got=%s", MSG, VAL, X.c_str()); \
-	CHKERR; \
-	TSM_ASSERT_LESS_THAN(MSG, atof(X.c_str()), VAL+EPS); \
-	TSM_ASSERT_LESS_THAN(MSG, VAL-EPS, atof(X.c_str()));
 
 // ====================================================================
 
