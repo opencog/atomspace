@@ -340,6 +340,7 @@ Handle RewriteLink::consume_quotations(const Variables& variables,
 		// will consider those as virtual.
 		if (t == GROUNDED_PREDICATE_NODE)
 			needless_quotation = false;
+
 		return h;
 	}
 
@@ -427,6 +428,7 @@ Handle RewriteLink::consume_quotations(const Variables& variables,
 	// quotations as they may otherwise change the semantics
 	bool need_quotation = (quotation_cp.is_quoted() and
 	                       (t == PUT_LINK or
+	                        nameserver().isA(t, FUNCTION_LINK) or
 	                        (t == AND_LINK and clause_root) or
 	                        is_scope_bound_to_ancestor(variables, h)));
 
