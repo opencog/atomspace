@@ -63,7 +63,8 @@ public:
     void test_implication(void);
     void test_glob(void);
     void test_implication_nodecl(void);
-	void test_local_quote_map(void);
+    void test_local_quote_map(void);
+    void test_quote_arg_map(void);
 };
 
 void MapLinkUTest::tearDown(void)
@@ -309,6 +310,25 @@ void MapLinkUTest::test_local_quote_map(void)
     Handle local_quote_map = eval->eval_h("local-quote-map"),
 	    result = HandleCast(inst.execute(local_quote_map)),
 	    expected = eval->eval_h("local-quote-map-result");
+
+    printf("result %s", result->to_string().c_str());
+    printf("expected %s\n", expected->to_string().c_str());
+
+    TS_ASSERT(result == expected);
+
+    logger().debug("END TEST: %s", __FUNCTION__);
+}
+
+void MapLinkUTest::test_quote_arg_map(void)
+{
+    logger().debug("BEGIN TEST: %s", __FUNCTION__);
+
+    eval->eval("(load-from-path \"tests/atoms/maplink.scm\")");
+
+    Instantiator inst(as);
+    Handle quote_arg_map = eval->eval_h("quote-arg-map"),
+	    result = HandleCast(inst.execute(quote_arg_map)),
+	    expected = eval->eval_h("quote-arg-map-result");
 
     printf("result %s", result->to_string().c_str());
     printf("expected %s\n", expected->to_string().c_str());

@@ -481,3 +481,31 @@
 (define local-quote-map-result
   (ListLink
     (ConceptNode "A") (ConceptNode "B")))
+
+(define quote-arg-map
+(MapLink
+  (LambdaLink
+    (VariableList
+      (VariableNode "$X")
+      (VariableNode "$Y")
+    )
+    (MemberLink
+      (VariableNode "$X")
+      (VariableNode "$Y")
+    )
+  )
+  (QuoteLink
+    (MemberLink
+      (DefinedSchemaNode "specialization-rule")
+      (ConceptNode "pm-rbs")
+    )
+  )
+)
+)
+
+(define quote-arg-map-result
+(ListLink
+  (DefinedSchemaNode "specialization-rule")
+  (ConceptNode "pm-rbs")
+)
+)
