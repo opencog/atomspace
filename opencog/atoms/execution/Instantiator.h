@@ -134,10 +134,9 @@ public:
 		_halt = false;
 	}
 
-	// TODO: set consume_quotations to false when executing, set it to
-	// true when instantiating
-	ProtoAtomPtr instantiate(const Handle& expr, const HandleMap &vars,
-	                   bool silent=false);
+	ProtoAtomPtr instantiate(const Handle& expr,
+	                         const HandleMap &vars,
+	                         bool silent=false);
 	ProtoAtomPtr execute(const Handle& expr, bool silent=false)
 	{
 		// If no actual instantiation is involved, then do not consume

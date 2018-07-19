@@ -537,8 +537,8 @@ bool Instantiator::not_self_match(Type t)
  * added to the atomspace, and its handle is returned.
  */
 ProtoAtomPtr Instantiator::instantiate(const Handle& expr,
-                                 const HandleMap &vars,
-                                 bool silent)
+                                       const HandleMap &vars,
+                                       bool silent)
 {
 	// throw, not assert, because this is a user error ...
 	if (nullptr == expr)
