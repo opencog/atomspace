@@ -322,8 +322,10 @@ bool MapLink::extract(const Handle& termpat,
 
 Handle MapLink::rewrite_one(const Handle& cterm, AtomSpace* scratch) const
 {
+	// Execute the ground, including consuming its quotation as part of
+	// the MapLink semantics
 	Instantiator inst(scratch);
-	Handle term(HandleCast(inst.execute(cterm)));
+	Handle term(HandleCast(inst.instantiate(cterm, HandleMap())));
 
 	// Extract values for variables.
 	HandleMap valmap;
