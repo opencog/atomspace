@@ -44,7 +44,7 @@ public:
 	PutLinkUTest() : _eval(&_as)
 	{
 		logger().set_print_to_stdout_flag(true);
-		logger().set_level(Logger::DEBUG);
+		logger().set_level(Logger::INFO);
 		logger().set_timestamp_flag(false);
 		logger().set_sync_flag(true); // interleave with printf correctly
 
@@ -93,6 +93,7 @@ public:
 	void test_tricky_put_6();
 	void test_tricky_put_7();
 	void test_quoted_exec();
+	void test_quoted_eval();
 };
 
 #define N _as.add_node
@@ -1920,16 +1921,16 @@ void PutLinkUTest::test_tricky_put_7()
  *    )
  *    (LambdaLink
  *       (VariableList
- *          (VariableNode "$vardecl")
- *          (VariableNode "$body")
+ *          (VariableNode "$gsn")
+ *          (VariableNode "$arg")
  *       )
  *       (QuoteLink
  *          (ExecutionOutputLink
  *             (UnquoteLink
- *                (VariableNode "$vardecl")
+ *                (VariableNode "$gsn")
  *             )
  *             (UnquoteLink
- *                (VariableNode "$body")
+ *                (VariableNode "$arg")
  *             )
  *          )
  *       )
@@ -1942,13 +1943,60 @@ void PutLinkUTest::test_quoted_exec()
 {
 	logger().info("BEGIN TEST: %s", __FUNCTION__);
 
-	std::string rs = _eval.eval("(load-from-path \"tests/atoms/put-quoted-exec.scm\")");
+	std::string rs = _eval.eval("(load-from-path \"tests/atoms/put-quoted.scm\")");
 	logger().debug() << "rs = " << rs;
 
 	Instantiator inst(&_as);
 	Handle put = _eval.eval_h("put-quoted-exec"),
 		result = HandleCast(inst.execute(put)),
 		expected = _eval.eval_h("quoted-exec");
+
+	logger().debug() << "result = " << oc_to_string(result);
+	logger().debug() << "expected = " << oc_to_string(expected);
+
+	TS_ASSERT_EQUALS(result, expected);
+
+	logger().info("END TEST: %s", __FUNCTION__);
+}
+
+/**
+ * Test
+ *
+ * (PutLink
+ *    (LambdaLink
+ *       (VariableNode "$X")
+ *    )
+ *    (LambdaLink
+ *       (VariableList
+ *          (VariableNode "$gpn")
+ *          (VariableNode "$arg")
+ *       )
+ *       (QuoteLink
+ *          (EvaluationLink
+ *             (UnquoteLink
+ *                (VariableNode "$gpn")
+ *             )
+ *             (UnquoteLink
+ *                (VariableNode "$arg")
+ *             )
+ *          )
+ *       )
+ *    )
+ * )
+ *
+ * which should return the argument, without touching the quotation.
+ */
+void PutLinkUTest::test_quoted_eval()
+{
+	logger().info("BEGIN TEST: %s", __FUNCTION__);
+
+	std::string rs = _eval.eval("(load-from-path \"tests/atoms/put-quoted.scm\")");
+	logger().debug() << "rs = " << rs;
+
+	Instantiator inst(&_as);
+	Handle put = _eval.eval_h("put-quoted-eval"),
+		result = HandleCast(inst.execute(put)),
+		expected = _eval.eval_h("quoted-eval");
 
 	logger().debug() << "result = " << oc_to_string(result);
 	logger().debug() << "expected = " << oc_to_string(expected);
