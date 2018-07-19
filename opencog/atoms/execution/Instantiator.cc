@@ -137,7 +137,13 @@ Handle Instantiator::walk_tree(const Handle& expr, bool silent)
 	if (expr->is_node())
 	{
 		if (context_cp.is_quoted())
+		{
+			// Make sure we don't consume a useful quotation
+			if (not_self_match(t))
+				_needless_quotation = false;
+
 			return expr;
+		}
 
 		// If we are here, we are a Node.
 		if (DEFINED_SCHEMA_NODE == t)
@@ -520,6 +526,9 @@ bool Instantiator::not_self_match(Type t)
 		nameserver().isA(t, FUNCTION_LINK) or
 		nameserver().isA(t, DELETE_LINK) or
 		nameserver().isA(t, VIRTUAL_LINK) or
+		nameserver().isA(t, DEFINE_LINK) or
+		nameserver().isA(t, DEFINED_SCHEMA_NODE) or
+		nameserver().isA(t, DEFINED_PREDICATE_NODE) or
 		nameserver().isA(t, DONT_EXEC_LINK);
 }
 
