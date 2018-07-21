@@ -271,7 +271,7 @@ void ODBCConnection::extract_error(const char *msg)
 /* =========================================================== */
 
 LLRecordSet *
-ODBCConnection::exec(const char * buff)
+ODBCConnection::exec(const char * buff, bool trial)
 {
     if (!is_connected) return NULL;
     ODBCRecordSet* rs = get_record_set();

@@ -55,7 +55,7 @@ class ODBCConnection : public LLConnection
         ODBCConnection(const char * uri);
         ~ODBCConnection();
 
-        LLRecordSet *exec(const char *);
+        LLRecordSet *exec(const char *, bool);
         void extract_error(const char *);
 };
 

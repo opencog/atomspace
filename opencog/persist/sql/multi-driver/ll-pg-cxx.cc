@@ -1,6 +1,6 @@
 /*
  * FUNCTION:
- * Potgres driver --
+ * Postgres driver --
  *
  * Threading:
  * ----------
@@ -93,7 +93,7 @@ LLPGRecordSet * LLPGConnection::get_record_set(void)
 /* =========================================================== */
 
 LLRecordSet *
-LLPGConnection::exec(const char * buff)
+LLPGConnection::exec(const char * buff, bool trial_run)
 {
 	if (!is_connected) return NULL;
 
@@ -106,9 +106,13 @@ LLPGConnection::exec(const char * buff)
 	    rest != PGRES_EMPTY_QUERY and
 	    rest != PGRES_TUPLES_OK)
 	{
-		opencog::logger().warn("PQresult message: %s",
-		               PQresultErrorMessage(rs->_result));
-		opencog::logger().warn("PQ query was: %s", buff);
+		// Don't log trial-run failures. Just throw.
+		if (not (trial_run and PGRES_FATAL_ERROR == rest))
+		{
+			opencog::logger().warn("PQresult message: %s",
+			               PQresultErrorMessage(rs->_result));
+			opencog::logger().warn("PQ query was: %s", buff);
+		}
 		rs->release();
 		PERR("Failed to execute!");
 	}
