@@ -107,12 +107,14 @@ LLPGConnection::exec(const char * buff, bool trial_run)
 	    rest != PGRES_TUPLES_OK)
 	{
 		// Don't log trial-run failures. Just throw.
-		if (not (trial_run and PGRES_FATAL_ERROR == rest))
+		if (trial_run and PGRES_FATAL_ERROR == rest)
 		{
-			opencog::logger().warn("PQresult message: %s",
-			               PQresultErrorMessage(rs->_result));
-			opencog::logger().warn("PQ query was: %s", buff);
+			rs->release();
+			throw opencog::SilentException();
 		}
+		opencog::logger().warn("PQresult message: %s",
+		               PQresultErrorMessage(rs->_result));
+		opencog::logger().warn("PQ query was: %s", buff);
 		rs->release();
 		PERR("Failed to execute!");
 	}
