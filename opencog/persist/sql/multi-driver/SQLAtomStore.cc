@@ -243,32 +243,29 @@ void SQLAtomStorage::do_store_single_atom(const Handle& h, int aheight)
 
 	// In a multi-user scenario, it can happen that multiple users
 	// attempt to INSERT the same atom at the same time. Only one
-	// user will win; the losers will get an exception.  If the
-	// losers catch the exception, then they can fetch the atom,
-	// and find out what UUID the winner got, and then use that
-	// henceforth (to store TV's, for example).  It seems like
-	// implementing this would not be hard.  But its late at night,
-	// and I'm tired, so punt for now.  XXX FIXME to the above.
-	//
-	// XXX Well, be careful with the above: if two users are writing
-	// the same atom at the same time, chances are good that they
-	// are writing two different truth values.  If we do the above,
-	// then the winner's truth value will be silently clobbered by
-	// the losers, which might cause surprises.  So actually passing
-	// the conflicting-INSERT error back up to the user is maybe not
-	// such a bad idea, after all ....
+	// user will win; the losers will get an exception.  The losers
+	// catch the exception, then they fetch the atom, and find out
+	// what UUID the winner got, and then use that henceforth (to
+	// store TV's, for example).
+	std::string qry = cols + vals + coda;
 
+	try
+	{
+		Response rp(conn_pool);
+		rp.try_exec(qry.c_str());
+	}
+	catch (const SilentException& ex)
+	{
+		_tlbuf.removeAtom(uuid);
+		_store_mutex.unlock();
+		do_store_single_atom(h, aheight);
+	}
+
+#if 0
+	bool try_again = false;
 	// We may have to store the atom table UUID and try again...
 	// We waste CPU cycles to store the atomtable, only if it failed.
 	// XXX this is currently dead code ...
-	bool try_again = false;
-	std::string qry = cols + vals + coda;
-	{
-		Response rp(conn_pool);
-		rp.exec(qry.c_str());
-		if (NULL == rp.rs) try_again = true;
-	}
-
 	if (try_again)
 	{
 		AtomTable *at = getAtomTable(h);
@@ -277,6 +274,7 @@ void SQLAtomStorage::do_store_single_atom(const Handle& h, int aheight)
 		Response rp(conn_pool);
 		rp.exec(qry.c_str());
 	}
+#endif
 
 	_store_count ++;
 
