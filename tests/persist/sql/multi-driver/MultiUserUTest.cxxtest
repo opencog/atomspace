@@ -140,7 +140,7 @@ class MultiUserUTest :  public CxxTest::TestSuite
 
         void do_test_multiuser(void);
         void test_multiuser(void);
-        void xtest_clobber(void);
+        void test_clobber(void);
 };
 
 MultiUserUTest:: MultiUserUTest(void)
@@ -293,13 +293,30 @@ void MultiUserUTest::atomCompare(AtomPtr a, AtomPtr b, std::string where)
         TSM_ASSERT("Missing truth value", tb);
         if (ta and tb)
         {
-            TSM_ASSERT("Truth value miscompare", (*ta)==(*tb));
-
-            if (not ((*ta) == (*tb)))
+            // Different thrads will set different confidence
+            // values, which will clobber one-another. So these
+            // cannot be meainingfully compared.
+            if (clobber)
             {
-                fprintf(stderr, "Error, truth value miscompare, "
-                    "ma=%f mb=%f ca=%f cb=%f\n",
-                    ta->get_mean(), tb->get_mean(), ta->get_count(), tb->get_count());
+                TSM_ASSERT("Truth value miscompare",
+                    ta->get_mean() == tb->get_mean());
+                if (not (ta->get_mean() == tb->get_mean()))
+                {
+                    fprintf(stderr, "Error, truth value miscompare, "
+                        "ma=%f mb=%f\n",
+                        ta->get_mean(), tb->get_mean());
+                }
+            }
+            else
+            {
+                TSM_ASSERT("Truth value miscompare", (*ta)==(*tb));
+                if (not ((*ta) == (*tb)))
+                {
+                    fprintf(stderr, "Error, truth value miscompare, "
+                        "ma=%f mb=%f ca=%f cb=%f\n",
+                        ta->get_mean(), tb->get_mean(),
+                        ta->get_count(), tb->get_count());
+                }
             }
         }
     }
@@ -525,15 +542,7 @@ void MultiUserUTest::test_multiuser(void)
     logger().debug("END TEST: %s", __FUNCTION__);
 }
 
-// Currently, this test fails, because there are two (or more) threads
-// trying to INSERT the same atom at the same time. One thread wins,
-// the others throw an error. This is not "hard" to fix; I don't think:
-// one need only to catch the error (and also not log it in error log),
-// then the losers perform an atom-get to find out what the UUID was
-// for the winning INSERT.  The winning UUID is then used for the truth
-// value stores that follow.  It's too late at night for me to fix this
-// right now, but surely it cannot be hard ....
-void MultiUserUTest::xtest_clobber(void)
+void MultiUserUTest::test_clobber(void)
 {
     logger().debug("BEGIN TEST: %s", __FUNCTION__);
     clobber = true;
