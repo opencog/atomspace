@@ -53,6 +53,3 @@ INSTALL (FILES
 	${CMAKE_CURRENT_BINARY_DIR}/core_types.scm
 	DESTINATION "${DATADIR}/scm/opencog/base"
 )
-
-set(atomspace_libs ${atomspace_libs} atomproto PARENT_SCOPE)
-

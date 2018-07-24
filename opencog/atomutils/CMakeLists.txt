@@ -25,8 +25,6 @@ ELSE (CYGWIN)
 	)
 ENDIF (CYGWIN)
 
-set(atomspace_libs ${atomspace_libs} atomutils PARENT_SCOPE)
-
 INSTALL (FILES
 	AtomUtils.h
 	FindUtils.h

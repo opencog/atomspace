@@ -77,6 +77,3 @@ INSTALL (FILES
 	VariableList.h
 	DESTINATION "include/opencog/atoms/core"
 )
-
-set(atomspace_libs ${atomspace_libs} atomcore PARENT_SCOPE)
-

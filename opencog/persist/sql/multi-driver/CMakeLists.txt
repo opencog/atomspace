@@ -49,7 +49,6 @@ IF (PGSQL_FOUND)
     INSTALL (TARGETS persist-pg EXPORT AtomSpaceTargets 
 		DESTINATION "lib${LIB_DIR_SUFFIX}/opencog"
 	)
-    set(atomspace_libs ${atomspace_libs} persist-pg)
 ENDIF (PGSQL_FOUND)
 
 ADD_EXECUTABLE(sniff
@@ -73,5 +72,3 @@ ENDIF (HAVE_GUILE)
 INSTALL (TARGETS persist-sql EXPORT AtomSpaceTargets
 	DESTINATION "lib${LIB_DIR_SUFFIX}/opencog"
 )
-
-set(atomspace_libs ${atomspace_libs} persist-sql PARENT_SCOPE)

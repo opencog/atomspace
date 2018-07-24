@@ -42,6 +42,3 @@ INSTALL (FILES
 	Satisfier.h
 	DESTINATION "include/opencog/query"
 )
-
-set(atomspace_libs ${atomspace_libs} query PARENT_SCOPE)
-

@@ -53,6 +53,3 @@ INSTALL (FILES
 
 ADD_SUBDIRECTORY(forwardchainer)
 ADD_SUBDIRECTORY(backwardchainer)
-
-set(atomspace_libs ${atomspace_libs} ruleengine PARENT_SCOPE)
-

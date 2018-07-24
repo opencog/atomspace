@@ -73,10 +73,6 @@ INSTALL (TARGETS smob EXPORT AtomSpaceTargets DESTINATION "lib${LIB_DIR_SUFFIX}/
 INSTALL (TARGETS logger EXPORT AtomSpaceTargets DESTINATION "lib${LIB_DIR_SUFFIX}/opencog")
 INSTALL (TARGETS randgen EXPORT AtomSpaceTargets DESTINATION "lib${LIB_DIR_SUFFIX}/opencog")
 
-set(atomspace_libs ${atomspace_libs} smob )
-set(atomspace_libs ${atomspace_libs} logger )
-set(atomspace_libs ${atomspace_libs} randgen PARENT_SCOPE)
-
 INSTALL (FILES
 	SchemeEval.h
 	SchemeModule.h

@@ -53,6 +53,3 @@ INSTALL (FILES
 	MapLink.h
 	DESTINATION "include/opencog/atoms/core"
 )
-
-set(atomspace_libs ${atomspace_libs} execution PARENT_SCOPE)
-

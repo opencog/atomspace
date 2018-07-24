@@ -67,8 +67,4 @@ IF(HAVE_GUILE)
 	)
 
     INSTALL (TARGETS PythonSCM EXPORT AtomSpaceTargets DESTINATION "lib${LIB_DIR_SUFFIX}/opencog")
-    set(atomspace_libs ${atomspace_libs} PythonSCM)
 ENDIF(HAVE_GUILE)
-
-set(atomspace_libs ${atomspace_libs} PythonEval PARENT_SCOPE)
-

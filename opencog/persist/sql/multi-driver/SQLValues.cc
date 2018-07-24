@@ -209,9 +209,10 @@ void SQLAtomStorage::storeValuation(const Handle& key,
 
 	// The prior valuation, if any, will be deleted first,
 	// and so an INSERT is sufficient to cover everything.
+	// During races, the second user looses.
 	cols = "INSERT INTO Valuations (";
 	vals = ") VALUES (";
-	coda = ");";
+	coda = ") ON CONFLICT DO NOTHING;";
 	STMT("key", kidbuff);
 	STMT("atom", aidbuff);
 
@@ -271,7 +272,7 @@ SQLAtomStorage::VUID SQLAtomStorage::storeValue(const ProtoAtomPtr& pap)
 
 	cols = "INSERT INTO Values (";
 	vals = ") VALUES (";
-	coda = ");";
+	coda = ") ON CONFLICT DO NOTHING;";
 	STMT("vuid", std::to_string(vuid));
 
 	Type vtype = pap->get_type();

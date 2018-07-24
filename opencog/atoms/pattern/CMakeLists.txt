@@ -41,6 +41,3 @@ INSTALL (FILES
 	PatternUtils.h
 	DESTINATION "include/opencog/atoms/pattern"
 )
-
-set(atomspace_libs ${atomspace_libs} lambda PARENT_SCOPE)
-

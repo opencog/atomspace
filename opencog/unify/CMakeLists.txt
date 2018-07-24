@@ -19,6 +19,3 @@ INSTALL (FILES
 	Unify.h
 	DESTINATION "include/opencog/unify"
 )
-
-set(atomspace_libs ${atomspace_libs} unify PARENT_SCOPE)
-

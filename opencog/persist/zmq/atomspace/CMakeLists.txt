@@ -43,5 +43,3 @@ INSTALL (FILES
 	ZMQPersistSCM.h
 	DESTINATION "include/opencog/persist/zmq/atomspace"
 )
-
-set(atomspace_libs ${atomspace_libs} zmqatoms PARENT_SCOPE)

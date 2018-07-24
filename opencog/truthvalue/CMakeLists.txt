@@ -31,6 +31,3 @@ INSTALL (FILES
 	TruthValue.h
 	DESTINATION "include/opencog/truthvalue"
 )
-
-set(atomspace_libs ${atomspace_libs} truthvalue PARENT_SCOPE)
-

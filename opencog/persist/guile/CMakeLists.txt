@@ -16,5 +16,3 @@ INSTALL (FILES
 	PersistSCM.h
 	DESTINATION "include/opencog/persist/guile"
 )
-
-set(atomspace_libs ${atomspace_libs} persist PARENT_SCOPE)

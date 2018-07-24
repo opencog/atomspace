@@ -24,8 +24,6 @@ INSTALL (TARGETS atombase EXPORT AtomSpaceTargets
 	DESTINATION "lib${LIB_DIR_SUFFIX}/opencog"
 )
 
-set(atomspace_libs ${atomspace_libs} atombase PARENT_SCOPE)
-
 INSTALL (FILES
 	Atom.h
 	ClassServer.h

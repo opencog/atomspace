@@ -28,6 +28,3 @@ INSTALL (FILES
 	TLB.h
 	DESTINATION "include/opencog/atomspaceutils"
 )
-
-set(atomspace_libs ${atomspace_libs} atomspaceutils PARENT_SCOPE)
-
