@@ -67,6 +67,8 @@ using namespace opencog;
  */
 void SQLAtomStorage::storeAtom(const Handle& h, bool synchronous)
 {
+	rethrow();
+
 	// If a synchronous store, avoid the queues entirely.
 	if (synchronous)
 	{

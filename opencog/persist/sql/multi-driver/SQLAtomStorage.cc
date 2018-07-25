@@ -220,7 +220,9 @@ void SQLAtomStorage::rethrow(void)
 ///
 void SQLAtomStorage::flushStoreQueue()
 {
+	rethrow();
 	_write_queue.barrier();
+	rethrow();
 }
 
 /* ================================================================ */
@@ -290,6 +292,7 @@ void SQLAtomStorage::create_tables(void)
  */
 void SQLAtomStorage::kill_data(void)
 {
+	rethrow();
 	Response rp(conn_pool);
 
 	// See the file "atom.sql" for detailed documentation as to the

@@ -157,6 +157,7 @@ Handle SQLAtomStorage::doGetNode(Type t, const char * str)
 
 Handle SQLAtomStorage::getNode(Type t, const char * str)
 {
+	rethrow();
 	Handle h(doGetNode(t, str));
 	if (h) get_atom_values(h);
 	return h;
@@ -210,6 +211,7 @@ Handle SQLAtomStorage::doGetLink(Type t, const HandleSeq& hseq)
 
 Handle SQLAtomStorage::getLink(Type t, const HandleSeq& hs)
 {
+	rethrow();
 	Handle hg(doGetLink(t, hs));
 	if (hg) get_atom_values(hg);
 	return hg;

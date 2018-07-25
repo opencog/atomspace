@@ -495,6 +495,8 @@ void SQLAtomStorage::get_atom_values(Handle& atom)
 void SQLAtomStorage::getValuations(AtomTable& table,
                                    const Handle& key, bool get_all_values)
 {
+	rethrow();
+
 	// If the uuid of the key is not known, the key does not exist
 	// in the database; therefore, there are no values. Just return.
 	UUID kuid = check_uuid(key);
