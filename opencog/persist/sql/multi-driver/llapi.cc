@@ -45,9 +45,6 @@
 
 #include "llapi.h"
 
-#define PERR(...) \
-    throw opencog::RuntimeException(TRACE_INFO, __VA_ARGS__);
-
 /* =========================================================== */
 
 LLConnection::LLConnection(void)
