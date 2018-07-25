@@ -39,9 +39,6 @@
 
 #include "ll-pg-cxx.h"
 
-#define PERR(...) \
-	throw opencog::RuntimeException(TRACE_INFO, __VA_ARGS__);
-
 /* =========================================================== */
 
 LLPGConnection::LLPGConnection(const char * uri)
@@ -54,7 +51,8 @@ LLPGConnection::LLPGConnection(const char * uri)
 	{
 		std::string msg = PQerrorMessage(_pgconn);
 		PQfinish(_pgconn);
-		PERR("Cannot connect to database: %s", msg.c_str());
+		throw opencog::RuntimeException(TRACE_INFO,
+			"Cannot connect to database: %s", msg.c_str());
 	}
 
 	is_connected = true;
@@ -112,11 +110,17 @@ LLPGConnection::exec(const char * buff, bool trial_run)
 			rs->release();
 			throw opencog::SilentException();
 		}
-		opencog::logger().warn("PQresult message: %s",
-		               PQresultErrorMessage(rs->_result));
-		opencog::logger().warn("PQ query was: %s", buff);
+
+		std::string msg = "PQresult message: ";
+		msg += PQresultErrorMessage(rs->_result);
+		msg += "\nPQ query was: ";
+		msg += buff;
 		rs->release();
-		PERR("Failed to execute!");
+
+		opencog::logger().warn("%s", msg.c_str());
+
+		throw opencog::RuntimeException(TRACE_INFO,
+			"Failed to execute SQL command!\n%s", msg.c_str());
 	}
 
 	/* Use numbr of columns to indicate that the query hasn't
