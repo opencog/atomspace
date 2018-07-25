@@ -234,6 +234,8 @@ class SQLAtomStorage : public AtomStorage
 		// Provider of asynchronous store of atoms.
 		// async_caller<SQLAtomStorage, Handle> _write_queue;
 		async_buffer<SQLAtomStorage, Handle> _write_queue;
+		std::exception_ptr _async_write_queue_exception;
+		void rethrow(void);
 
 	public:
 		SQLAtomStorage(std::string uri);

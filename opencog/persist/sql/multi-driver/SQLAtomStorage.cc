@@ -148,7 +148,8 @@ SQLAtomStorage::SQLAtomStorage(std::string uri) :
 	_tlbuf(&_uuid_manager),
 	_uuid_manager("uuid_pool"),
 	_vuid_manager("vuid_pool"),
-	_write_queue(this, &SQLAtomStorage::vdo_store_atom, NUM_WB_QUEUES)
+	_write_queue(this, &SQLAtomStorage::vdo_store_atom, NUM_WB_QUEUES),
+	_async_write_queue_exception(nullptr)
 {
 	init(uri.c_str());
 
@@ -189,6 +190,25 @@ bool SQLAtomStorage::connected(void)
 	return have_connection;
 }
 
+/// Rethrow asynchronous exceptions caught during atom storage.
+///
+/// Atoms are stored asynchronously, from a write queue, from some
+/// other thread. If that thread has an exception, e.g. due to some
+/// SQL error, and the exception is uncaught, then the process will
+/// die. So we have to catch that exception.  Once caught, what do
+/// we do with it? Well, we culd ignore it, but then the user would
+/// not know that the SQL backend was damaged. So, instead, we throw
+/// it at the first user, any user that is doing soem other SQL stuff.
+void SQLAtomStorage::rethrow(void)
+{
+	if (_async_write_queue_exception)
+	{
+		std::exception_ptr exptr = _async_write_queue_exception;
+		_async_write_queue_exception = nullptr;
+		std::rethrow_exception(exptr);
+	}
+}
+
 /* ================================================================== */
 /// Drain the pending store queue. This is a fencing operation; the
 /// goal is to make sure that all writes that occurred before the
@@ -209,7 +229,9 @@ bool SQLAtomStorage::connected(void)
 ///
 void SQLAtomStorage::flushStoreQueue()
 {
+	rethrow();
 	_write_queue.barrier();
+	rethrow();
 }
 
 /* ================================================================ */
@@ -279,6 +301,7 @@ void SQLAtomStorage::create_tables(void)
  */
 void SQLAtomStorage::kill_data(void)
 {
+	rethrow();
 	Response rp(conn_pool);
 
 	// See the file "atom.sql" for detailed documentation as to the

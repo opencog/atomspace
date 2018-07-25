@@ -87,6 +87,8 @@ void SQLAtomStorage::getIncoming(AtomTable& table, const char *buff)
  */
 void SQLAtomStorage::getIncomingSet(AtomTable& table, const Handle& h)
 {
+	rethrow();
+
 	// If the uuid is not known, then the atom is not in storage,
 	// and therefore, cannot have an incoming set.  Just return.
 	UUID uuid = check_uuid(h);
@@ -113,6 +115,8 @@ void SQLAtomStorage::getIncomingSet(AtomTable& table, const Handle& h)
  */
 void SQLAtomStorage::getIncomingByType(AtomTable& table, const Handle& h, Type t)
 {
+	rethrow();
+
 	// If the uuid is not known, then the atom is not in storage,
 	// and therefore, cannot have an incoming set.  Just return.
 	UUID uuid = check_uuid(h);
@@ -141,6 +145,7 @@ int SQLAtomStorage::getMaxObservedHeight(void)
 
 void SQLAtomStorage::load(AtomTable &table)
 {
+	rethrow();
 	UUID max_nrec = getMaxObservedUUID();
 	_load_count = 0;
 	max_height = getMaxObservedHeight();
@@ -198,6 +203,8 @@ void SQLAtomStorage::load(AtomTable &table)
 
 void SQLAtomStorage::loadType(AtomTable &table, Type atom_type)
 {
+	rethrow();
+
 	UUID max_nrec = getMaxObservedUUID();
 	_load_count = 0;
 
@@ -257,6 +264,8 @@ void SQLAtomStorage::loadType(AtomTable &table, Type atom_type)
 /// Store all of the atoms in the atom table.
 void SQLAtomStorage::store(const AtomTable &table)
 {
+	rethrow();
+
 	max_height = 0;
 	_store_count = 0;
 
