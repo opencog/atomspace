@@ -111,10 +111,18 @@ LLPGConnection::exec(const char * buff, bool trial_run)
 			throw opencog::SilentException();
 		}
 
-		std::string msg = "PQresult message: ";
-		msg += PQresultErrorMessage(rs->_result);
-		msg += "\nPQ query was: ";
-		msg += buff;
+		std::string msg;
+		if (PQstatus(_pgconn) != CONNECTION_OK)
+		{
+			msg = "No connection to the database!";
+		}
+		else
+		{
+			msg = "PQresult message: ";
+			msg += PQresultErrorMessage(rs->_result);
+			msg += "\nPQ query was: ";
+			msg += buff;
+		}
 		rs->release();
 
 		opencog::logger().warn("%s", msg.c_str());
