@@ -148,7 +148,8 @@ SQLAtomStorage::SQLAtomStorage(std::string uri) :
 	_tlbuf(&_uuid_manager),
 	_uuid_manager("uuid_pool"),
 	_vuid_manager("vuid_pool"),
-	_write_queue(this, &SQLAtomStorage::vdo_store_atom, NUM_WB_QUEUES)
+	_write_queue(this, &SQLAtomStorage::vdo_store_atom, NUM_WB_QUEUES),
+	_async_write_queue_exception(nullptr)
 {
 	init(uri.c_str());
 
@@ -187,6 +188,16 @@ bool SQLAtomStorage::connected(void)
 	bool have_connection = db_conn->connected();
 	conn_pool.push(db_conn);
 	return have_connection;
+}
+
+void SQLAtomStorage::rethrow(void)
+{
+	if (_async_write_queue_exception)
+	{
+		std::exception_ptr exptr = _async_write_queue_exception;
+		_async_write_queue_exception = nullptr;
+		std::rethrow_exception(exptr);
+	}
 }
 
 /* ================================================================== */

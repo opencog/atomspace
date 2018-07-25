@@ -110,8 +110,15 @@ int SQLAtomStorage::do_store_atom(const Handle& h)
 
 void SQLAtomStorage::vdo_store_atom(const Handle& h)
 {
-	if (not_yet_stored(h)) do_store_atom(h);
-	store_atom_values(h);
+	try
+	{
+		if (not_yet_stored(h)) do_store_atom(h);
+		store_atom_values(h);
+	}
+	catch (...)
+	{
+		_async_write_queue_exception = std::current_exception();
+	}
 }
 
 /* ================================================================ */
