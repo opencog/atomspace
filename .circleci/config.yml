@@ -1,0 +1,28 @@
+version: 2.0
+
+jobs:
+  atomspace:
+    docker:
+      - image: opencog/opencog-deps
+    working_directory: ~/cogutil
+    environment:
+      CU_DIR: /home/opencog/cogutil
+      AS_DIR: /home/opencog/atomspace
+      OC_DIR: /home/opencog/opencog
+    steps:
+      - checkout
+      - run: date +%d-%m-%Y > date-version
+      - restore_cache:
+          key:  cogutil-build-master-{{ checksum "date-version" }}
+      - run: cd ~/cogutil && /tmp/octool -i
+      - run: git clone --depth 1 https://github.com/opencog/atomspace .
+      - run: /tmp/octool -b
+      - run: /tmp/octool -e
+      - run: /tmp/octool -t
+      - run: /tmp/octool -i
+
+workflows:
+  version: 2
+  build_and_test:
+    jobs:
+      - atomspace
