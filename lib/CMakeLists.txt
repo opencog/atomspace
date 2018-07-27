@@ -2,6 +2,8 @@
 CONFIGURE_FILE(${CMAKE_SOURCE_DIR}/lib/atomspace-test.conf
     ${PROJECT_BINARY_DIR}/lib/atomspace-test.conf)
 
+# build_type is used in AtomSpaceConfig.cmake.in
+string(TOUPPER "${CMAKE_BUILD_TYPE}" build_type )
 
 export(EXPORT AtomSpaceTargets
           FILE "${CMAKE_CURRENT_BINARY_DIR}/AtomSpace/AtomSpaceTargets.cmake"

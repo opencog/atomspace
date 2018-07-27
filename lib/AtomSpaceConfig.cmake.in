@@ -2,7 +2,16 @@
 
 include("@CMAKE_INSTALL_PREFIX@/lib/cmake/AtomSpace/AtomSpaceTargets.cmake")
 
+# Execution depends on query and query depends on execution,
+# but circular dependencies are forbidden by cmake, so dependancy on execution is omitted
+# in query at build time. It should be set here for proper linking.
+set_property(TARGET query
+    APPEND PROPERTY IMPORTED_LINK_INTERFACE_LIBRARIES_@build_type@
+    execution
+)
+
 # these names are used in some projects e.g. opencog
+set(ATOMSPACE_LIBRARY atomspace)
 set(ATOMSPACE_atomproto_LIBRARY atomproto)
 set(ATOMSPACE_atombase_LIBRARY atombase)
 set(ATOMSPACE_atomcore_LIBRARY atomcore)
@@ -13,6 +22,7 @@ set(ATOMSPACE_truthvalue_LIBRARY truthvalue)
 set(ATOMSPACE_atomutils_LIBRARY atomutils)
 set(ATOMSPACE_clearbox_LIBRARY clearbox)
 set(ATOMSPACE_lambda_LIBRARY lambda)
+set(ATOMSPACE_PythonEval_LIBRARY PythonEval)
 set(ATOMSPACE_persist_LIBRARY persist)
 set(ATOMSPACE_query_LIBRARY query)
 set(ATOMSPACE_execution_LIBRARY execution)
@@ -30,6 +40,7 @@ set(ATOMSPACE_LIBRARIES
     atomutils
     clearbox
     lambda
+    PythonEval
     persist
     query
     execution
@@ -50,7 +61,7 @@ IF (persist-sql)
     ADD_DEFINITIONS(-DHAVE_PERSIST_SQL)
 ENDIF (persist-sql)
 
-# persist-zmq is optional
+# zmqatoms is optional
 IF (zmqatoms)
     set(ATOMSPACE_zmqatoms_LIBRARY zmqatoms)
     SET(ATOMSPACE_LIBRARIES
