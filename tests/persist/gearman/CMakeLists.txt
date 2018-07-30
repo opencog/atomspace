@@ -22,7 +22,22 @@ IF (GEARMAN_JOB_SERVER)
 		RESULT_VARIABLE RC)
 
 	IF (RC)
-		MESSAGE(WARNING "gearman-job-server is not running; will not run the GearmanUTest")
+		EXECUTE_PROCESS(COMMAND "gearmand" "-d"
+			OUTPUT_VARIABLE OUT
+			ERROR_VARIABLE ERR
+			RESULT_VARIABLE RC)
+		EXECUTE_PROCESS(COMMAND "ps" "-C" "gearmand"
+			OUTPUT_VARIABLE OUT
+			ERROR_VARIABLE ERR
+			RESULT_VARIABLE RC)
+
+		IF (RC)
+			MESSAGE(WARNING "gearman-job-server is not running; "
+				"will not run GearmanUTest")
+		ELSE (RC)
+			SET(GEARMAN_RUNNING 1)
+			MESSAGE(STATUS "gearman-job-server found")
+		ENDIF (RC)
 	ELSE (RC)
 		SET(GEARMAN_RUNNING 1)
 		MESSAGE(STATUS "gearman-job-server found")
