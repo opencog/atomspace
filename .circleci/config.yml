@@ -1,28 +1,131 @@
+
 version: 2.0
 
 jobs:
   atomspace:
     docker:
       - image: opencog/opencog-deps
-    working_directory: ~/cogutil
-    environment:
-      CU_DIR: /home/opencog/cogutil
-      AS_DIR: /home/opencog/atomspace
-      OC_DIR: /home/opencog/opencog
+        user: root
+        environment:
+          PGHOST: opencog-postgres
+          PGUSER: opencog_test
+          PGPASSWORD: cheese
+          CCACHE_DIR: /ws/ccache
+      - image: opencog/postgres
+        name: opencog-postgres
+    working_directory: /ws/atomspace
     steps:
-      - checkout
-      - run: date +%d-%m-%Y > date-version
+      - attach_workspace:
+          at: /ws
+      - run:
+          name: Install cogutil
+          command: /tmp/octool -c
+    #        git clone --depth 1 https://github.com/singnet/cogutil /ws/cogutil
+    #        mkdir -p /ws/cogutil/build
+    #        cd /ws/cogutil/build && cmake .. && make -j4 && make -j4 install
+      - run:
+          name: Start restoring ccache
+          command: date +%d-%m-%Y > /tmp/date
       - restore_cache:
-          key:  cogutil-build-master-{{ checksum "date-version" }}
-      - run: cd ~/cogutil && /tmp/octool -i
-      - run: git clone --depth 1 https://github.com/opencog/atomspace .
-      - run: /tmp/octool -b
-      - run: /tmp/octool -e
-      - run: /tmp/octool -t
-      - run: /tmp/octool -i
+          key: ccache-{{ checksum "/tmp/date" }}
+      - checkout
+      - run:
+          name: CMake Configure
+          command: mkdir build && cd build && cmake ..
+      - run:
+          name: Build
+          command: cd build && make -j4
+      - run:
+          name: Build tests
+          command: cd build && make -j4 tests
+      - run:
+          name: Run tests
+          command: cd build && make -j4 test
+      - run:
+          name: Print test log
+          command: cat build/tests/Testing/Temporary/LastTest.log
+          when: always
+      - persist_to_workspace:
+          root: /ws/
+          paths:
+            - cogutil
+            - atomspace
+            - ccache
+
+  opencog:
+    docker:
+      - image: opencog/opencog-deps
+        user: root
+        environment:
+          CCACHE_DIR: /ws/ccache
+    working_directory: /ws/opencog
+    environment:
+      ORG: singnet
+    steps:
+      - attach_workspace:
+          at: /ws
+      - run:
+          name: Install cogutil
+          command: cd /ws/cogutil/build && make -j4 install
+      - run:
+          name: Install AtomSpace
+          command: cd /ws/atomspace/build && make -j4 install
+      - run:
+          name: Start restoring ccache
+          command: date +%d-%m-%Y > /tmp/date
+      - restore_cache:
+          key: ccache-{{ checksum "/tmp/date" }}
+      - run:
+          name: Clone OpenCog
+          command: git clone --depth 1 https://github.com/$ORG/opencog .
+      - run:
+          name: CMake Configure
+          command: mkdir build && cd build && cmake ..
+      - run:
+          name: Build
+          command: cd build && make -j4
+      - run:
+          name: Build tests
+          command: cd build && make -j4 tests
+      - run:
+          name: Run tests
+          command: cd build && make -j4 test
+      - run:
+          name: Print test log
+          path: cat build/tests/Testing/Temporary/LastTest.log
+          when: always
+      - persist_to_workspace:
+          root: /ws/
+          paths:
+            - ccache
+
+  package: #Place holder
+    docker:
+      - image: opencog/opencog-deps
+        user: root
+    working_directory: /ws/atomspace
+    steps:
+      - attach_workspace:
+          at: /ws/
+      - run:
+          name: Start storing ccache
+          command: date +%d-%m-%Y > /tmp/date
+      - save_cache:
+          key:  ccache-{{ checksum "/tmp/date" }}
+          paths:
+            - /ws/ccache
 
 workflows:
   version: 2
-  build_and_test:
+  build-test-package:
     jobs:
       - atomspace
+      - opencog:
+          requires:
+            - atomspace
+      - package:
+          requires:
+            - opencog
+          filters:
+            branches:
+              only: master
