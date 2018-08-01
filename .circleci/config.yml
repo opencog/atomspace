@@ -1,4 +1,3 @@
-
 version: 2.0
 
 jobs:
@@ -14,15 +13,17 @@ jobs:
       - image: opencog/postgres
         name: opencog-postgres
     working_directory: /ws/atomspace
+    environment:
+      ORG: opencog
     steps:
       - attach_workspace:
           at: /ws
       - run:
           name: Install cogutil
-          command: /tmp/octool -c
-    #        git clone --depth 1 https://github.com/singnet/cogutil /ws/cogutil
-    #        mkdir -p /ws/cogutil/build
-    #        cd /ws/cogutil/build && cmake .. && make -j4 && make -j4 install
+          command: |
+            git clone --depth 1 https://github.com/$ORG/cogutil /ws/cogutil
+            mkdir -p /ws/cogutil/build
+            cd /ws/cogutil/build && cmake .. && make -j4 && make -j4 install
       - run:
           name: Start restoring ccache
           command: date +%d-%m-%Y > /tmp/date
@@ -60,7 +61,7 @@ jobs:
           CCACHE_DIR: /ws/ccache
     working_directory: /ws/opencog
     environment:
-      ORG: singnet
+      ORG: opencog
     steps:
       - attach_workspace:
           at: /ws
@@ -70,11 +71,6 @@ jobs:
       - run:
           name: Install AtomSpace
           command: cd /ws/atomspace/build && make -j4 install
-      - run:
-          name: Start restoring ccache
-          command: date +%d-%m-%Y > /tmp/date
-      - restore_cache:
-          key: ccache-{{ checksum "/tmp/date" }}
       - run:
           name: Clone OpenCog
           command: git clone --depth 1 https://github.com/$ORG/opencog .
@@ -94,10 +90,6 @@ jobs:
           name: Print test log
           path: cat build/tests/Testing/Temporary/LastTest.log
           when: always
-      - persist_to_workspace:
-          root: /ws/
-          paths:
-            - ccache
 
   package: #Place holder
     docker:
