@@ -14,21 +14,24 @@ jobs:
         name: opencog-postgres
     working_directory: /ws/atomspace
     environment:
-      ORG: opencog
+      ORG: singnet
     steps:
       - attach_workspace:
           at: /ws
+      - run:
+          name: Start restoring ccache
+          command: date +%d-%m-%Y > /tmp/date
+      - restore_cache:
+          keys:
+            - ccache-{{ checksum "/tmp/date" }}
+            - ccache-
       - run:
           name: Install cogutil
           command: |
             git clone --depth 1 https://github.com/$ORG/cogutil /ws/cogutil
             mkdir -p /ws/cogutil/build
             cd /ws/cogutil/build && cmake .. && make -j4 && make -j4 install
-      - run:
-          name: Start restoring ccache
-          command: date +%d-%m-%Y > /tmp/date
-      - restore_cache:
-          key: ccache-{{ checksum "/tmp/date" }}
+            ldconfig
       - checkout
       - run:
           name: CMake Configure
@@ -36,6 +39,9 @@ jobs:
       - run:
           name: Build
           command: cd build && make -j4
+      - run:
+          name: Install AtomSpace
+          command: cd build && make -j4 install && ldconfig
       - run:
           name: Build tests
           command: cd build && make -j4 tests
@@ -61,16 +67,16 @@ jobs:
           CCACHE_DIR: /ws/ccache
     working_directory: /ws/opencog
     environment:
-      ORG: opencog
+      ORG: singnet
     steps:
       - attach_workspace:
           at: /ws
       - run:
           name: Install cogutil
-          command: cd /ws/cogutil/build && make -j4 install
+          command: cd /ws/cogutil/build && make -j4 install && ldconfig
       - run:
           name: Install AtomSpace
-          command: cd /ws/atomspace/build && make -j4 install
+          command: cd /ws/atomspace/build && make -j4 install && ldconfig
       - run:
           name: Clone OpenCog
           command: git clone --depth 1 https://github.com/$ORG/opencog .
@@ -81,6 +87,9 @@ jobs:
           name: Build
           command: cd build && make -j4
       - run:
+          name: Install OpenCog
+          command: cd build && make -j4 install && ldconfig
+      - run:
           name: Build tests
           command: cd build && make -j4 tests
       - run:
@@ -88,8 +97,12 @@ jobs:
           command: cd build && make -j4 test
       - run:
           name: Print test log
-          path: cat build/tests/Testing/Temporary/LastTest.log
+          command: cat build/tests/Testing/Temporary/LastTest.log
           when: always
+      - persist_to_workspace:
+          root: /ws/
+          paths:
+            - ccache
 
   package: #Place holder
     docker:
@@ -103,7 +116,7 @@ jobs:
           name: Start storing ccache
           command: date +%d-%m-%Y > /tmp/date
       - save_cache:
-          key:  ccache-{{ checksum "/tmp/date" }}
+          key: ccache-{{ checksum "/tmp/date" }}
           paths:
             - /ws/ccache
 
