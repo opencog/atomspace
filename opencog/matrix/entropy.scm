@@ -142,29 +142,50 @@
 			(frqobj 'set-right-wild-mi LEFT-ITEM mi fmi))
 
 		; ---------------
-		; Do all four loops.
-		(define (cache-all)
-			(define start-time (current-time))
-			(define (elapsed-secs)
-				(define diff (- (current-time) start-time))
-				(set! start-time (current-time))
-				diff)
+		(define start-time (current-time))
+		(define (elapsed-secs)
+			(define diff (- (current-time) start-time))
+			(set! start-time (current-time))
+			diff)
 
+		; Loop over all columns.
+		(define (cache-all-left-entropy)
+			(elapsed-secs)
 			(for-each cache-left-entropy (star-obj 'right-basis))
 			(format #t "Finished left entropy subtotals in ~A secs\n"
 				(elapsed-secs))
+		)
 
+		; Loop over all rows.
+		(define (cache-all-right-entropy)
+			(elapsed-secs)
 			(for-each cache-right-entropy (star-obj 'left-basis))
 			(format #t "Finished right entropy subtotals in ~A secs\n"
 				(elapsed-secs))
+		)
 
+		; Loop over all columns.
+		(define (cache-all-left-mi)
+			(elapsed-secs)
 			(for-each cache-left-mi (star-obj 'right-basis))
 			(format #t "Finished left MI subtotals in ~A secs\n"
 				(elapsed-secs))
+		)
 
+		; Loop over all rows.
+		(define (cache-all-right-mi)
+			(elapsed-secs)
 			(for-each cache-right-mi (star-obj 'left-basis))
 			(format #t "Finished right MI subtotals in ~A secs\n"
 				(elapsed-secs))
+		)
+
+		; Do all four loops.
+		(define (cache-all)
+			(cache-all-left-entropy)
+			(cache-all-right-entropy)
+			(cache-all-left-mi)
+			(cache-all-right-mi)
 		)
 
 		; Methods on this class.
@@ -174,6 +195,12 @@
 				((cache-right-entropy)  (apply cache-right-entropy args))
 				((cache-left-mi)        (apply cache-left-mi args))
 				((cache-right-mi)       (apply cache-right-mi args))
+
+				((cache-all-left-entropy)  (cache-all-left-entropy))
+				((cache-all-right-entropy) (cache-all-right-entropy))
+				((cache-all-left-mi)       (cache-all-left-mi))
+				((cache-all-right-mi)      (cache-all-right-mi))
+
 				((cache-all-subtotals)  (cache-all))
 				(else (apply llobj      (cons message args))))
 		))
