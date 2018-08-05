@@ -250,9 +250,14 @@
 		; It returns a single numerical value, for the entire set.
 		(define (compute-right-entropy)
 			(right-sum
-				(lambda (x) (*
-						(frqobj 'right-wild-freq x)
-						(frqobj 'right-wild-logli x)))))
+				(lambda (x)
+					;; For cross-connectors, the observed count of a
+					;; word inside a connector might be zero, and so
+					;; log probability might be infinite. Avoid that.
+					(define lli (frqobj 'right-wild-logli x))
+					(if (finite? lli)
+						(* (frqobj 'right-wild-freq x) lli)
+						0.0))))
 
 		(define (cache-entropy)
 			(rptobj 'set-entropy
