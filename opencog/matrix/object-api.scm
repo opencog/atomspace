@@ -237,6 +237,14 @@
 
   'right-stars ROW - Likewise, but returns the set (ROW, *).
 
+  Note that for (define STARS (add-pair-stars LLOBJ))
+  the list returned by
+    (map (lambda (d) (LLOBJ 'get-pair ROW d)) (STARS 'right-duals ROW))
+  should be equal to the list
+    (STARS 'right-stars ROW)
+  and so this offers two different ways of iterating over the same
+  list of pairs.
+
   Here, the LLOBJ is expected to be an object, with methods for
   'left-type, 'right-type and 'pair-type on it. It is assumed that
   the pairs are arity-two links having the form
