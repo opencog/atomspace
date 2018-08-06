@@ -8,7 +8,7 @@ TARGET_LINK_LIBRARIES(persist
 	smob
 )
 
-INSTALL (TARGETS persist
+INSTALL (TARGETS persist EXPORT AtomSpaceTargets
 	DESTINATION "lib${LIB_DIR_SUFFIX}/opencog"
 )
 

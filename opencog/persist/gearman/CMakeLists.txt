@@ -11,4 +11,7 @@ TARGET_LINK_LIBRARIES(dist-gearman
 	${GEARMAN_LIBRARY}
 )
 
-INSTALL (TARGETS dist-gearman DESTINATION "lib${LIB_DIR_SUFFIX}/opencog")
+INSTALL (TARGETS dist-gearman 
+    EXPORT AtomSpaceTargets 
+    DESTINATION "lib${LIB_DIR_SUFFIX}/opencog")
+
