@@ -589,7 +589,10 @@
 	)
 
 	(display "Going to do column and row subtotals\n")
-	(subtotal-obj 'cache-all-subtotals)
+	(subtotal-obj 'cache-all-left-entropy)
+	(subtotal-obj 'cache-all-right-entropy)
+	(subtotal-obj 'cache-all-left-mi)
+	(subtotal-obj 'cache-all-right-mi)
 
 	(display "Going to compute the left, right and total entropy\n")
 	(total-obj 'cache-entropy)

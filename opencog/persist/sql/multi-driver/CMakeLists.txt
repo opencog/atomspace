@@ -46,7 +46,7 @@ IF (PGSQL_FOUND)
 	TARGET_LINK_LIBRARIES(persist-pg ${PGSQL_LIBRARIES})
 	TARGET_LINK_LIBRARIES(persist-sql persist-pg)
 
-	INSTALL (TARGETS persist-pg
+    INSTALL (TARGETS persist-pg EXPORT AtomSpaceTargets 
 		DESTINATION "lib${LIB_DIR_SUFFIX}/opencog"
 	)
 ENDIF (PGSQL_FOUND)
@@ -69,6 +69,6 @@ IF (HAVE_GUILE)
 	TARGET_LINK_LIBRARIES(sniff smob)
 ENDIF (HAVE_GUILE)
 
-INSTALL (TARGETS persist-sql
+INSTALL (TARGETS persist-sql EXPORT AtomSpaceTargets
 	DESTINATION "lib${LIB_DIR_SUFFIX}/opencog"
 )

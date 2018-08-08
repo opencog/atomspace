@@ -20,7 +20,7 @@ TARGET_LINK_LIBRARIES(atombase
 	${COGUTIL_LIBRARY}
 )
 
-INSTALL (TARGETS atombase
+INSTALL (TARGETS atombase EXPORT AtomSpaceTargets
 	DESTINATION "lib${LIB_DIR_SUFFIX}/opencog"
 )
 

@@ -16,7 +16,7 @@ INSTALL (FILES
 	DESTINATION "include/opencog/persist/sql"
 )
 
-INSTALL (TARGETS sql-support
+INSTALL (TARGETS sql-support EXPORT AtomSpaceTargets
     DESTINATION "lib${LIB_DIR_SUFFIX}/opencog"
 )
 

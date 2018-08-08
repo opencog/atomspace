@@ -43,7 +43,7 @@ TARGET_LINK_LIBRARIES(atomcore
 	${COGUTIL_LIBRARY}
 )
 
-INSTALL (TARGETS atomcore
+INSTALL (TARGETS atomcore EXPORT AtomSpaceTargets
 	DESTINATION "lib${LIB_DIR_SUFFIX}/opencog"
 )
 

@@ -22,7 +22,7 @@ TARGET_LINK_LIBRARIES(atomspace
 	${Boost_THREAD_LIBRARY}
 )
 
-INSTALL (TARGETS atomspace
+INSTALL (TARGETS atomspace EXPORT AtomSpaceTargets
 	DESTINATION "lib${LIB_DIR_SUFFIX}/opencog"
 )
 
