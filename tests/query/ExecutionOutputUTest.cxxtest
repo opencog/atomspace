@@ -62,6 +62,7 @@ public:
 	void test_varsub(void);
 	void test_query_exec(void);
 	void test_clear_box_single_argument(void);
+	void test_clear_box_single_argument_link(void);
 };
 
 #define an as.add_node
@@ -288,14 +289,44 @@ void ExecutionOutputUTest::test_clear_box_single_argument(void)
 	Handle X = an(VARIABLE_NODE, "$X"),
 		PXX = al(PLUS_LINK, X, X),
 		twice = al(LAMBDA_LINK, PXX),
-		// TODO: to crash this test remove the List around 21
-		// N21 = an(NUMBER_NODE, "21"),
-		N21 = al(LIST_LINK, an(NUMBER_NODE, "21")),
+		N21 = an(NUMBER_NODE, "21"),
 		twice21 = al(EXECUTION_OUTPUT_LINK, twice, N21);
 
 	Instantiator inst(&as);
 	Handle expected = an(NUMBER_NODE, "42"),
 		result = HandleCast(inst.execute(twice21));
+
+	TS_ASSERT_EQUALS(expected, result);
+
+	// should work with variable inside the ListLink too
+
+	Handle N21_LST = al(LIST_LINK, N21),
+	       twice21_lst = al(EXECUTION_OUTPUT_LINK, twice, N21_LST),
+	       result_lst = HandleCast(inst.execute(twice21_lst));
+
+	TS_ASSERT_EQUALS(expected, result_lst);
+
+	logger().debug("END TEST: %s", __FUNCTION__);
+}
+
+
+/**
+ * Execute clear box with single argument (a link different than list)
+ */
+void ExecutionOutputUTest::test_clear_box_single_argument_link(void)
+{
+	logger().debug("BEGIN TEST: %s", __FUNCTION__);
+
+	Handle X = an(VARIABLE_NODE, "$X"),
+		A = an(CONCEPT_NODE, "A"),
+		B = an(CONCEPT_NODE, "B"),
+		id = al(LAMBDA_LINK, X, X),
+		AB = al(INHERITANCE_LINK, A, B),
+		exec = al(EXECUTION_OUTPUT_LINK, id, AB);
+
+	Instantiator inst(&as);
+	Handle expected = AB,
+		result = HandleCast(inst.execute(exec));
 
 	TS_ASSERT_EQUALS(expected, result);
 

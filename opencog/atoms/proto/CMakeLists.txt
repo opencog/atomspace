@@ -30,7 +30,7 @@ TARGET_LINK_LIBRARIES(atomproto
 	${COGUTIL_LIBRARY}
 )
 
-INSTALL (TARGETS atomproto
+INSTALL (TARGETS atomproto EXPORT AtomSpaceTargets
 	DESTINATION "lib${LIB_DIR_SUFFIX}/opencog"
 )
 

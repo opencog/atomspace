@@ -16,7 +16,7 @@ TARGET_LINK_LIBRARIES(truthvalue
 	${COGUTIL_LIBRARY}
 )
 
-INSTALL (TARGETS truthvalue
+INSTALL (TARGETS truthvalue EXPORT AtomSpaceTargets
 	DESTINATION "lib${LIB_DIR_SUFFIX}/opencog"
 )
 
