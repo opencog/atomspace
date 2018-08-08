@@ -21,7 +21,7 @@ TARGET_LINK_LIBRARIES(clearbox
 	${COGUTIL_LIBRARY}
 )
 
-INSTALL (TARGETS clearbox
+INSTALL (TARGETS clearbox EXPORT AtomSpaceTargets
 	DESTINATION "lib${LIB_DIR_SUFFIX}/opencog"
 )
 
