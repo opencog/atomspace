@@ -1166,6 +1166,14 @@
   Creates a random node of type `node-type`, with name `prefix` followed by
   a random string of length `random-length`. It Makes sure the resulting node
   did not previously exist in the current atomspace.
+
+  For instance:
+
+  (random-node 'ConceptNode 8 \"texts-\")
+
+  returns
+
+  (ConceptNode \"texts-218951126396-as737yFW\")
 "
 	(cog-new-node node-type (random-node-name node-type random-length prefix)))
 
