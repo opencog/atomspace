@@ -115,7 +115,7 @@
 		; -------------
 		; If the marginal counts have not yet been computed, do so now.
 		(define (batch-left-support)
-			; The cross-objects need to have the stars created, before
+			; The shape-objects need to have the stars created, before
 			; they can be used.
 			(if (LLOBJ 'provides 'make-left-stars)
 				(LLOBJ 'make-left-stars))
@@ -130,28 +130,9 @@
 			(store-obj 'store-left-marginals)
 		)
 
-		; This assumes that pairs have been fetched already.
-		(define (batch-mmt-marginals)
-
-			; If left supports have not yet been computed, then
-			; do so now. We can tell if they have been, by simply
-			; accessing a quantity we expect to have already.
-			(catch #t (lambda () (support-obj 'total-support-left))
-				(lambda (key . args)
-					(batch-left-support)))
-
-			; 'mmt-marginals loops over 'left-basis and records
-			; them on 'right-wildcard.  Thus, we need to save
-			; the 'right-wildcard to disk.
-			(trans-obj 'mmt-marginals)
-			(store-obj 'store-right-marginals)
-			(display "Done computing and saving sum_y N(x,y) N(*,y)\n")
-		)
-
-		; -------------
 		; If the marginal counts have not yet been computed, do so now.
 		(define (batch-right-support)
-			; The cross-objects need to have the stars created, before
+			; The shape-objects need to have the stars created, before
 			; they can be used.
 			(if (LLOBJ 'provides 'make-right-stars)
 				(LLOBJ 'make-right-stars))
@@ -161,8 +142,19 @@
 			(store-obj 'store-right-marginals)
 		)
 
-		; This assumes that pairs have been fetched already.
-		(define (batch-mtm-marginals)
+		; Do both left and right. Computation of mmt marginals needs
+		; left-counts (and thus computation of left support). But many
+		; practical apps need right-counts to make effective use of
+		; the mmt marginals. So, compute both of them. The good news is
+		; that the one that mmt doesn't need is fast to compute! So do
+		; them both.
+		(define (setup-supports)
+			; If left supports have not yet been computed, then
+			; do so now. We can tell if they have been, by simply
+			; accessing a quantity we expect to have already.
+			(catch #t (lambda () (support-obj 'total-support-left))
+				(lambda (key . args)
+					(batch-left-support)))
 
 			; If right supports have not yet been computed, then
 			; do so now. We can tell if they have been, by simply
@@ -170,9 +162,29 @@
 			(catch #t (lambda () (support-obj 'total-support-right))
 				(lambda (key . args)
 					(batch-right-support)))
+		)
 
+		; -------------
+		; This assumes that pairs have been fetched already.
+		(define (batch-mmt-marginals)
+			(setup-supports)
+
+			; 'mmt-marginals loops over 'left-basis and records
+			; them on 'right-wildcard.  Thus, we need to save
+			; the 'right-wildcard to disk.
+			(trans-obj 'mmt-marginals)
+			(store-obj 'store-right-marginals)
+			(store-obj 'store-left-marginals)
+			(display "Done computing and saving sum_y N(x,y) N(*,y)\n")
+		)
+
+		; This assumes that pairs have been fetched already.
+		(define (batch-mtm-marginals)
+
+			(setup-supports)
 			(trans-obj 'mtm-marginals)
 			(store-obj 'store-left-marginals)
+			(store-obj 'store-right-marginals)
 			(display "Done computing and saving sum_x N(x,y) N(x,*)\n")
 		)
 
