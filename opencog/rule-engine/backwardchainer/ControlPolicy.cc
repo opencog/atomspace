@@ -42,12 +42,12 @@ using namespace opencog;
 #define an _query_as->add_node
 
 ControlPolicy::ControlPolicy(const UREConfig& ure_config, const BIT& bit,
-                             AtomSpace* control_as) :
+                             const Handle& target, AtomSpace* control_as) :
 	rules(ure_config.get_rules()), _ure_config(ure_config),
-	_bit(bit), _control_as(control_as), _query_as(nullptr)
+	_bit(bit), _target(target), _control_as(control_as), _query_as(nullptr)
 {
 	// Fetch default TVs for each inference rule (the TV on the member
-	// link connecting the rule to the rule base
+	// link connecting the rule to the rule base)
 	for (const Rule& rule : rules) {
 		_default_tvs[rule.get_alias()] = rule.get_tv();
 	}
@@ -191,7 +191,6 @@ HandleTVMap ControlPolicy::expansion_success_tvs(
 	return success_tvs;
 }
 
-
 std::vector<double> ControlPolicy::rule_weights(const HandleTVMap& success_tvs,
                                                 const RuleTypedSubstitutionMap& inf_rules)
 {
@@ -285,14 +284,18 @@ bool ControlPolicy::is_control_rule_active(const AndBIT& andbit,
 	Handle
 		// Control rule components
 		ctrl_vardecl = ScopeLinkCast(ctrl_rule)->get_vardecl(),
-		ctrl_expansion = retrieve_expansion(ctrl_rule),
-		ctrl_input = ctrl_expansion->getOutgoingAtom(1),
-		ctrl_andbit = ctrl_input->getOutgoingAtom(0),
-		ctrl_bitleaf = ctrl_input->getOutgoingAtom(1),
+		ctrl_ante_preproof = get_antecedent_preproof(ctrl_rule),
+		ctrl_target = ctrl_ante_preproof->getOutgoingAtom(1)->getOutgoingAtom(1),
+		ctrl_expansion = get_expansion(ctrl_rule),
+		ctrl_exp_input = ctrl_expansion->getOutgoingAtom(1),
+		ctrl_andbit = ctrl_exp_input->getOutgoingAtom(0),
+		ctrl_bitleaf = ctrl_exp_input->getOutgoingAtom(1),
+
 		// Actual components
 		actl_andbit = andbit.fcs,
 		actl_andbit_vardecl = ScopeLinkCast(actl_andbit)->get_vardecl(),
 		actl_bitleaf = bitleaf.body,
+
 		// Wrap the actual andbit in a DontExecLink to match the
 		// control rule, and to guaranty that it doesn't get executed
 		// while evaluating whether it is active (i.e. whether it
@@ -315,9 +318,12 @@ bool ControlPolicy::is_control_rule_active(const AndBIT& andbit,
 		OC_ASSERT(false, ss.str());
 	}
 
-	// Check that the control andbit matches the actual andbit, and
-	// that the control bitleaf matches the actual bitleaf.
-	return match(ctrl_andbit, nexe_actl_andbit, ctrl_vardecl)
+	// Check that
+	// 1. the control target matches the actual target
+	// 2. the control andbit matches the actual andbit
+	// 3. the control bitleaf matches the actual bitleaf
+	return match(ctrl_target, _target, ctrl_vardecl)
+		and match(ctrl_andbit, nexe_actl_andbit, ctrl_vardecl)
 		and match(ctrl_bitleaf, actl_bitleaf, ctrl_vardecl);
 }
 
@@ -334,7 +340,25 @@ bool ControlPolicy::match(const Handle& pattern, const Handle& term,
 	return (bool)result;
 }
 
-Handle ControlPolicy::retrieve_expansion(const Handle& ctrl_rule) const
+Handle ControlPolicy::get_antecedent_preproof(const Handle& ctrl_rule) const
+{
+	ScopeLinkPtr sc = ScopeLinkCast(ctrl_rule);
+	for (const Handle& h : sc->get_body()->getOutgoingSet())
+		if (is_antecedent_preproof(h))
+			return h;
+	return Handle::UNDEFINED;
+}
+
+bool ControlPolicy::is_antecedent_preproof(const Handle& h) const
+{
+	if (h->get_type() == EVALUATION_LINK) {
+		Handle schema = h->getOutgoingAtom(0);
+		return schema->get_name() == preproof_predicate_name;
+	}
+	return false;
+}
+
+Handle ControlPolicy::get_expansion(const Handle& ctrl_rule) const
 {
 	ScopeLinkPtr sc = ScopeLinkCast(ctrl_rule);
 	for (const Handle& h : sc->get_body()->getOutgoingSet())
@@ -350,25 +374,6 @@ bool ControlPolicy::is_expansion(const Handle& h) const
 		return schema->get_name() == TraceRecorder::expand_andbit_schema_name;
 	}
 	return false;
-}
-
-Handle ControlPolicy::get_expansion_control_rule_pattern(const Handle& ctrl_rule) const
-{
-	// Check that it is indeed an expansion control rule
-	OC_ASSERT(ctrl_rule->get_type() == IMPLICATION_SCOPE_LINK);
-	OC_ASSERT(ctrl_rule->get_arity() == 3);
-
-	// The pattern is in the implicant, if any
-	Handle implicant = ctrl_rule->getOutgoingAtom(1);
-
-	// If present it must be inside a conjunction of an ExecutionLink
-	// and a pattern
-	if (implicant->get_type() == AND_LINK)
-		for (const Handle& child : implicant->getOutgoingSet())
-			if (child->get_type() != EXECUTION_LINK)
-				return child;
-
-	return Handle::UNDEFINED;
 }
 
 HandleSet ControlPolicy::fetch_expansion_control_rules(const Handle& inf_rule)
