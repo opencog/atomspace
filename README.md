@@ -291,8 +291,8 @@ Essentially all Linux distributions will provide these packages.
 * https://www.boost.org/ | `apt-get install libboost-dev`
 
 ###### cmake
-* Build management tool; v2.8 or higher recommended.
-* https://www.cmake.org/ | `apt-get install cmake`
+* Build management tool; v3.0.2 or higher recommended.
+* https://www.cmake.org/ | `apt-get install cmake3`
 
 ###### cogutil
 * Common OpenCog C++ utilities.
@@ -301,9 +301,9 @@ Essentially all Linux distributions will provide these packages.
   to `sudo make install` at the end.
 
 ###### guile
-* Embedded scheme REPL (version 2.0.9 or newer is required; version 2.2
-  is strongly recommended).
-* https://www.gnu.org/software/guile/guile.html | `apt-get install guile-2.0-dev`
+* Embedded scheme REPL (version 2.2.2 or newer is required)
+* https://www.gnu.org/software/guile/guile.html 
+* For ubuntu bionic/cosmic  `apt-get install guile-2.2-dev` 
 
 ### Optional Prerequisites
 
@@ -317,7 +317,7 @@ during the build, will be more precise as to which parts will not be built.
 * https://cxxtest.sourceforge.net/ | https://launchpad.net/~opencog-dev/+archive/ppa
 
 ###### Cython
-* C bindings for Python.
+* C bindings for Python. (version 0.23 or higher)
 * Strongly recommended, as many examples and important subsystems
   assume python bindings.
 * https://cython.org | `apt-get install cython`
