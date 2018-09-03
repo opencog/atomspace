@@ -47,7 +47,7 @@ class ControlPolicy
     friend class ::ControlPolicyUTest;
 public:
 	ControlPolicy(const UREConfig& ure_config, const BIT& bit,
-	              AtomSpace* control_as=nullptr);
+	              const Handle& target, AtomSpace* control_as=nullptr);
 	~ControlPolicy();
 
 	const std::string preproof_predicate_name = "URE:BC:preproof-of";
@@ -79,6 +79,9 @@ private:
 
 	// Reference to the BackwardChainer BIT
 	const BIT& _bit;
+
+	// Target
+	const Handle& _target;
 
 	// Map alias rule to their default TV. This is used whenever no
 	// control rule can be used to predict inference expansion.
@@ -196,8 +199,35 @@ private:
 	           const Handle& vardecl=Handle::UNDEFINED) const;
 
 	/**
-	 * Given a control rule, retrieve the antecedent part concerning
-	 * the expansion. That is given
+	 * Given a control rule, get the antecedent part concerning
+	 * preproof. This is given
+	 *
+	 * ImplicationScope
+	 *   <variables>
+	 *   And
+	 *     Evaluation
+	 *       Predicate "URE:BC:preproof-of"
+	 *       List
+	 *         <inference-tree>
+	 *         <target>
+	 *     <expension>
+	 *     <patterns>
+	 *   <preproof-of-B>
+	 *
+	 * return
+	 *
+	 *     Evaluation
+	 *       Predicate "URE:BC:preproof-of"
+	 *       List
+	 *         <inference-tree>
+	 *         <target>
+	 */
+	Handle get_antecedent_preproof(const Handle& ctrl_rule) const;
+	bool is_antecedent_preproof(const Handle& h) const;
+
+	/**
+	 * Given a control rule, get the antecedent part concerning the
+	 * expansion. That is given
 	 *
 	 * ImplicationScope
 	 *   <variables>
@@ -217,14 +247,8 @@ private:
 	 *       List <A> <L> <ctrl_rule>
 	 *       <B>
 	 */
-	Handle retrieve_expansion(const Handle& ctrl_rule) const;
+	Handle get_expansion(const Handle& ctrl_rule) const;
 	bool is_expansion(const Handle& h) const;
-
-	/**
-	 * Return the pattern in a given expansion control rule, if it has
-	 * any.
-	 */
-	Handle get_expansion_control_rule_pattern(const Handle& ctrl_rule) const;
 
 	/**
 	 * Given an inference rule, fetch both pattern and pattern free
