@@ -98,6 +98,9 @@ bool check_numeric(const Handle& bool_atom)
 		// Oddly enough, sets of numbers are allowed.
 		if (SET_LINK == t and check_numeric(h)) continue;
 
+		// Allows to add, subtract, etc functions (used by as-moses)
+		if (SCHEMA_NODE == t) continue;
+
 		if (QUOTE_LINK == t) continue;
 		if (UNQUOTE_LINK == t) continue;
 
