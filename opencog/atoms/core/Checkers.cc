@@ -56,8 +56,16 @@ bool check_evaluatable(const Handle& bool_atom)
 		if (VARIABLE_NODE == t) continue;
 		if (DEFINED_PREDICATE_NODE == t) continue;
 
-		// XXX This is kind-of pushing it, but OK, allow PredicateNode
+		// Allow conjunction, disjunction and negation of
+		// predicates. Since it cannot inherit from EVALUATABLE_LINK
+		// (cause it's a Node) we have to add it here.
 		if (PREDICATE_NODE == t) continue;
+
+		// Allow conjunction, disjunction and negation of concepts as
+		// well, in that case these are interpreted as intersection,
+		// union and complement. Since it cannot inherit from
+		// EVALUATABLE_LINK (cause it's a Node) we have to add it here.
+		if (CONCEPT_NODE == t) continue;
 
 		// Fucking quote links. I hate those with a passion.
 		if (QUOTE_LINK == t) continue;
