@@ -1,5 +1,5 @@
 #
-# Master Opencog CMake file.
+# Master AtomSpace CMake file.
 #
 # General organization:
 # -- check for different compilers, OS'es
@@ -15,7 +15,6 @@ IF (COMMAND CMAKE_POLICY)
 	CMAKE_POLICY(SET CMP0003 NEW)
 	CMAKE_POLICY(SET CMP0005 OLD)
 ENDIF (COMMAND CMAKE_POLICY)
-
 
 IF(CMAKE_VERSION VERSION_GREATER 3.0.2)
 	CMAKE_POLICY(SET CMP0037 OLD)
