@@ -326,9 +326,11 @@ MESSAGE(STATUS "${PROTOBUF_DIR_MESSAGE}")
 # running the FindCython module.
 #
 # Search for Python3 first, and use that, if found. Else use Python2.
+# To use Python2 only from the build directory run the following
+# rm CMakeCache.txt && cmake -DCMAKE_DISABLE_FIND_PACKAGE_Python3Interp=TRUE ..
 
 FIND_PACKAGE(Python3Interp)
-IF (3.4.0 VERSION_LESS ${PYTHON3_VERSION_STRING})
+IF (3.4.0 VERSION_LESS "${PYTHON3_VERSION_STRING}")
 	SET (HAVE_PY_INTERP 1)
 	SET (PYTHON_VER python${PYTHON_VERSION_MAJOR}.${PYTHON_VERSION_MINOR})
 	MESSAGE(STATUS "Python ${PYTHON3_VERSION_STRING} interpreter found.")
@@ -354,7 +356,6 @@ ELSE()
 	MESSAGE(STATUS "Python libraries NOT found.")
 ENDIF()
 
-
 # Cython is used to generate python bindings.
 IF(HAVE_PY_INTERP)
 	FIND_PACKAGE(Cython 0.23.0)
@@ -379,9 +380,9 @@ IF(HAVE_PY_INTERP)
 
 	# Nosetests will find and automatically run python tests.
 	IF (PYTHON3INTERP_FOUND)
-		FIND_PROGRAM(NOSETESTS_EXECUTABLE nosetests3)
+		FIND_PROGRAM(NOSETESTS_EXECUTABLE nosetests-3.4)
 	ELSE ()
-		FIND_PROGRAM(NOSETESTS_EXECUTABLE nosetests)
+		FIND_PROGRAM(NOSETESTS_EXECUTABLE nosetests-2.7)
 	ENDIF ()
 	IF (NOSETESTS_EXECUTABLE AND CYTHON_FOUND AND HAVE_PY_LIBS)
 		SET(HAVE_NOSETESTS 1)
