@@ -43,6 +43,9 @@ jobs:
           name: Install AtomSpace
           command: cd build && make -j2 install && ldconfig
       - run:
+          name: Build examples
+          command: cd build && make -j2 examples
+      - run:
           name: Build tests
           command: cd build && make -j2 tests
       - run:
