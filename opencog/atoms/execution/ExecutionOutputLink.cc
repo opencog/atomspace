@@ -41,6 +41,7 @@ private:
     static std::unordered_map<std::string, void*> _functions;
 public:
     static void* getFunc(std::string libName,std::string funcName);
+    static void setLocalFunc(std::string libName, std::string funcName, void* func);
 };
 
 void ExecutionOutputLink::check_schema(const Handle& schema) const
@@ -250,6 +251,20 @@ DEFINE_LINK_FACTORY(ExecutionOutputLink, EXECUTION_OUTPUT_LINK)
 
 std::unordered_map<std::string, void*> LibraryManager::_librarys;
 std::unordered_map<std::string, void*> LibraryManager::_functions;
+
+void LibraryManager::setLocalFunc(std::string libName, std::string funcName, void* func)
+{
+    if (_librarys.count(libName) == 0) {
+        _librarys[libName] = NULL;
+    }
+    std::string funcID = libName + "\\" + funcName;
+    _functions[funcID] = func;
+}
+
+void opencog::setLocalFunc(std::string funcName, Handle* (*func)(AtomSpace *, Handle*))
+{
+    LibraryManager::setLocalFunc("", funcName, reinterpret_cast<void*>(func));
+}
 
 void* LibraryManager::getFunc(std::string libName,std::string funcName)
 {
