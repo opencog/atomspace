@@ -98,8 +98,8 @@
 (define (true-enough? A)
   (let* (
          (TV (cog-tv A))
-         (s (tv-mean TV))
-         (c (tv-conf TV)))
+         (s (cog-tv-mean TV))
+         (c (cog-tv-conf TV)))
     (and (> s 0.5) (> c 0))))
 
 (define (implication-scope-direct-evaluation-formula P Q)
@@ -130,7 +130,7 @@
          (Q-body (Evaluation Q X)))
     ;; (cog-logger-debug "[PLN-Induction] P = ~a" P)
     ;; (cog-logger-debug "[PLN-Induction] Q = ~a" Q)
-    ;; (cog-logger-debug "[PLN-Induction] P-true-enough-terms = ~a" P-true-enough-terms) 
+    ;; (cog-logger-debug "[PLN-Induction] P-true-enough-terms = ~a" P-true-enough-terms)
     ;; (cog-logger-debug "[PLN-Induction] Q-true-enough-terms = ~a" Q-true-enough-terms)
     ;; (cog-logger-debug "[PLN-Induction] P-length = ~a" P-length)
     ;; (cog-logger-debug "[PLN-Induction] P-inter-Q-length = ~a" P-inter-Q-length)

@@ -77,7 +77,7 @@
 (define-public (etv pos-count total-count) (cog-new-etv pos-count total-count))
 
 ; Fetch the mean, confidence and count of a TV.
-(define-public (tv-mean TV)
+(define-public (cog-tv-mean TV)
 "
   Warning: this function is obsolete, use cog-tv-mean instead
 
@@ -87,7 +87,7 @@
 	(cog-tv-mean TV)
 )
 
-(define-public (tv-conf TV)
+(define-public (cog-tv-conf TV)
 "
   Warning: this function is obsolete, use cog-tv-confidence instead
 
@@ -108,7 +108,7 @@
 ;
 ; Simple truth values won't have a count. Its faster to just check
 ; for #f than to call (cog-ctv? tv)
-(define-public (tv-count TV)
+(define-public (cog-tv-count TV)
 "
   Warning: this function is obsolete, use cog-tv-count instead
 
@@ -1278,10 +1278,10 @@
 'itv
 'ctv
 'etv
-'tv-mean
-'tv-conf
+'cog-tv-mean
+'cog-tv-conf
 'tv-non-null-conf?
-'tv-count
+'cog-tv-count
 'gar
 'gdr
 'gadr
