@@ -187,7 +187,12 @@ Handle ExecutionOutputLink::do_execute(AtomSpace* as,
 		func = reinterpret_cast<Handle* (*)(AtomSpace *, Handle*)>(sym);
 
 		// Execute the function
-		result = *func(as, &args);
+		Handle* res = func(as, &args);
+		if(res != NULL)
+		{
+			result = *res;
+			free(res);
+		}
 #endif
 	}
 	else {
@@ -261,7 +266,7 @@ void LibraryManager::setLocalFunc(std::string libName, std::string funcName, voi
     _functions[funcID] = func;
 }
 
-void opencog::setLocalFunc(std::string funcName, Handle* (*func)(AtomSpace *, Handle*))
+void opencog::setLocalSchema(std::string funcName, Handle* (*func)(AtomSpace *, Handle*))
 {
     LibraryManager::setLocalFunc("", funcName, reinterpret_cast<void*>(func));
 }

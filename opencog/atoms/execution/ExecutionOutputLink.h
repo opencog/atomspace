@@ -74,10 +74,10 @@ static inline ExecutionOutputLinkPtr ExecutionOutputLinkCast(AtomPtr a)
 #define createExecutionOutputLink std::make_shared<ExecutionOutputLink>
 
 /**
- * setLocalFunc("foo", boo) enables creating GroundedSchemaNode with the name "lib:\\foo",
+ * setLocalSchema("foo", boo) enables creating GroundedSchemaNode with the name "lib:\\foo",
  * which will call boo on execution of corresponding ExecutionOutputLink.
  */
-void setLocalFunc(std::string funcName, Handle* (*func)(AtomSpace *, Handle*));
+void setLocalSchema(std::string funcName, Handle* (*func)(AtomSpace *, Handle*));
 
 /** @}*/
 }
