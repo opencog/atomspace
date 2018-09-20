@@ -37,11 +37,11 @@ using namespace opencog;
 class LibraryManager
 {
 private:
-    static std::unordered_map<std::string, void*> _librarys;
-    static std::unordered_map<std::string, void*> _functions;
+	static std::unordered_map<std::string, void*> _librarys;
+	static std::unordered_map<std::string, void*> _functions;
 public:
-    static void* getFunc(std::string libName,std::string funcName);
-    static void setLocalFunc(std::string libName, std::string funcName, void* func);
+	static void* getFunc(std::string libName,std::string funcName);
+	static void setLocalFunc(std::string libName, std::string funcName, void* func);
 };
 
 void ExecutionOutputLink::check_schema(const Handle& schema) const
@@ -62,12 +62,12 @@ ExecutionOutputLink::ExecutionOutputLink(const HandleSeq& oset, Type t)
 {
 	if (EXECUTION_OUTPUT_LINK != t)
 		throw SyntaxException(TRACE_INFO,
-			"Expection an ExecutionOutputLink!");
+		                      "Expection an ExecutionOutputLink!");
 
 	if (2 != oset.size())
 		throw SyntaxException(TRACE_INFO,
-			"ExecutionOutputLink must have schema and args! Got arity=%d",
-			oset.size());
+		                      "ExecutionOutputLink must have schema and args! Got arity=%d",
+		                      oset.size());
 
 	check_schema(oset[0]);
 }
@@ -85,7 +85,7 @@ ExecutionOutputLink::ExecutionOutputLink(const Link& l)
 	Type tscope = l.get_type();
 	if (EXECUTION_OUTPUT_LINK != tscope)
 		throw SyntaxException(TRACE_INFO,
-			"Expection an ExecutionOutputLink!");
+		                      "Expection an ExecutionOutputLink!");
 
 	check_schema(l.getOutgoingAtom(0));
 }
@@ -156,10 +156,10 @@ Handle ExecutionOutputLink::do_execute(AtomSpace* as,
 		// so we can't rethrow.  Just throw a new exception.
 		if (applier->eval_error())
 			throw RuntimeException(TRACE_INFO,
-			    "Failed evaluation; see logfile for stack trace.");
+			                       "Failed evaluation; see logfile for stack trace.");
 #else
 		throw RuntimeException(TRACE_INFO,
-		    "Cannot evaluate scheme GroundedSchemaNode!");
+		                       "Cannot evaluate scheme GroundedSchemaNode!");
 #endif /* HAVE_GUILE */
 	}
 	else if (lang == "py")
@@ -172,7 +172,7 @@ Handle ExecutionOutputLink::do_execute(AtomSpace* as,
 		result = applier.apply(as, fun, args);
 #else
 		throw RuntimeException(TRACE_INFO,
-		    "Cannot evaluate python GroundedSchemaNode!");
+		                       "Cannot evaluate python GroundedSchemaNode!");
 #endif /* HAVE_CYTHON */
 	}
 	// Used by the Haskel bindings
@@ -214,9 +214,9 @@ Handle ExecutionOutputLink::do_execute(AtomSpace* as,
 			throw NotEvaluatableException();
 
 		throw RuntimeException(TRACE_INFO,
-		        "Invalid return value from schema %s\nArgs: %s",
-		        gsn->to_string().c_str(),
-		        cargs->to_string().c_str());
+		                       "Invalid return value from schema %s\nArgs: %s",
+		                       gsn->to_string().c_str(),
+		                       cargs->to_string().c_str());
 	}
 
 	LAZY_LOG_FINE << "Result: " << oc_to_string(result);
@@ -244,7 +244,7 @@ void ExecutionOutputLink::lang_lib_fun(const std::string& schema,
 		if (seppos == std::string::npos)
 		{
 			throw RuntimeException(TRACE_INFO,
-				"Library name and function name must be separated by '\\'");
+			                       "Library name and function name must be separated by '\\'");
 		}
 		lib = schema.substr(pos, seppos - pos);
 		fun = schema.substr(seppos + 1);
@@ -259,47 +259,47 @@ std::unordered_map<std::string, void*> LibraryManager::_functions;
 
 void LibraryManager::setLocalFunc(std::string libName, std::string funcName, void* func)
 {
-    if (_librarys.count(libName) == 0) {
-        _librarys[libName] = NULL;
-    }
-    std::string funcID = libName + "\\" + funcName;
-    _functions[funcID] = func;
+	if (_librarys.count(libName) == 0) {
+		_librarys[libName] = NULL;
+	}
+	std::string funcID = libName + "\\" + funcName;
+	_functions[funcID] = func;
 }
 
 void opencog::setLocalSchema(std::string funcName, Handle* (*func)(AtomSpace *, Handle*))
 {
-    LibraryManager::setLocalFunc("", funcName, reinterpret_cast<void*>(func));
+	LibraryManager::setLocalFunc("", funcName, reinterpret_cast<void*>(func));
 }
 
 void* LibraryManager::getFunc(std::string libName,std::string funcName)
 {
-    void* libHandle;
-    if (_librarys.count(libName) == 0) {
-        // Try and load the library and function.
-        libHandle = dlopen(libName.c_str(), RTLD_LAZY);
-        if (nullptr == libHandle)
-            throw RuntimeException(TRACE_INFO,
-                "Cannot open library: %s - %s", libName.c_str(), dlerror());
-        _librarys[libName] = libHandle;
-    }
-    else {
-        libHandle = _librarys[libName];
-    }
+	void* libHandle;
+	if (_librarys.count(libName) == 0) {
+		// Try and load the library and function.
+		libHandle = dlopen(libName.c_str(), RTLD_LAZY);
+		if (nullptr == libHandle)
+			throw RuntimeException(TRACE_INFO,
+			                       "Cannot open library: %s - %s", libName.c_str(), dlerror());
+		_librarys[libName] = libHandle;
+	}
+	else {
+		libHandle = _librarys[libName];
+	}
 
-    std::string funcID = libName + "\\" + funcName;
+	std::string funcID = libName + "\\" + funcName;
 
-    void* sym;
-    if (_functions.count(funcID) == 0){
-        sym = dlsym(libHandle, funcName.c_str());
-        if (nullptr == sym)
-            throw RuntimeException(TRACE_INFO,
-                "Cannot find symbol %s in library: %s - %s",
-                funcName.c_str(), libName.c_str(), dlerror());
-        _functions[funcID] = sym;
-    }
-    else {
-        sym = _functions[funcID];
-    }
+	void* sym;
+	if (_functions.count(funcID) == 0){
+		sym = dlsym(libHandle, funcName.c_str());
+		if (nullptr == sym)
+			throw RuntimeException(TRACE_INFO,
+			                       "Cannot find symbol %s in library: %s - %s",
+			                       funcName.c_str(), libName.c_str(), dlerror());
+		_functions[funcID] = sym;
+	}
+	else {
+		sym = _functions[funcID];
+	}
 
-    return sym;
+	return sym;
 }
