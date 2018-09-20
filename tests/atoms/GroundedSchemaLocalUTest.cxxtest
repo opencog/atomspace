@@ -1,0 +1,96 @@
+/*
+ * tests/atoms/GroundedSchemaLocalUTest.cxxtest
+ *
+ * Copyright (C) 2018 Alexey Potapov
+ * All Rights Reserved
+ *
+ * This program is free software; you can redistribute it and/or modify
+ * it under the terms of the GNU Affero General Public License v3 as
+ * published by the Free Software Foundation and including the exceptions
+ * at http://opencog.org/wiki/Licenses
+ *
+ * This program is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ * GNU General Public License for more details.
+ *
+ * You should have received a copy of the GNU Affero General Public License
+ * along with this program; if not, write to:
+ * Free Software Foundation, Inc.,
+ * 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
+ */
+
+#include <opencog/atomspace/AtomSpace.h>
+#include <opencog/atoms/execution/ExecutionOutputLink.h>
+
+using namespace opencog;
+
+#define N as->add_node
+#define L as->add_link
+
+class GroundedSchemaLocalUTest: public CxxTest::TestSuite
+{
+private:
+    AtomSpace* as;
+
+public:
+    GroundedSchemaLocalUTest(void)
+    {
+        logger().set_level(Logger::DEBUG);
+        logger().set_print_to_stdout_flag(true);
+        as = new AtomSpace();
+    }
+
+    ~GroundedSchemaLocalUTest()
+    {
+        delete as;
+        // Erase the log file if no assertions failed.
+        if (!CxxTest::TestTracker::tracker().suiteFailed())
+            std::remove(logger().get_filename().c_str());
+    }
+
+    void setUp();
+    void tearDown();
+
+    void test_local_func();
+};
+
+void GroundedSchemaLocalUTest::tearDown()
+{
+    as->clear();
+}
+
+void GroundedSchemaLocalUTest::setUp()
+{
+    as->clear();
+}
+
+Handle* safe_car(AtomSpace* as, Handle* params)
+{
+    // it is necessary to allocate memory for Handle
+    return new Handle(params->atom_ptr()->get_type() != LIST_LINK ?
+        *params :
+        params->atom_ptr()->getOutgoingSet()[0]);
+}
+
+void GroundedSchemaLocalUTest::test_local_func()
+{
+    logger().debug("BEGIN TEST: %s", __FUNCTION__);
+
+    setLocalSchema("safe_car", safe_car);
+
+    Handle eol =
+        L(EXECUTION_OUTPUT_LINK,
+            N(GROUNDED_SCHEMA_NODE, "lib:\\safe_car"),
+            L(LIST_LINK,
+                N(CONCEPT_NODE, "Arg1"),
+				N(CONCEPT_NODE, "Arg2"),
+				N(CONCEPT_NODE, "Arg3"))
+			);
+	Handle result = ((ExecutionOutputLink *)(eol.atom_ptr()))->execute(as, false);
+    logger().debug() << "Result is this:\n" << result->to_string();
+    Handle expected = N(CONCEPT_NODE, "Arg1");
+
+    TS_ASSERT_EQUALS(expected, result);
+    logger().debug("END TEST: %s", __FUNCTION__);
+}
