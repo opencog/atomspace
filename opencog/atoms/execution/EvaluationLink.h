@@ -68,6 +68,12 @@ static inline EvaluationLinkPtr EvaluationLinkCast(AtomPtr a)
 
 #define createEvaluationLink std::make_shared<EvaluationLink>
 
+/**
+ * setLocalPredicate("foo", boo) enables creating GroundedPredicateNode with the name "lib:\\foo",
+ * which will call boo on evaluation of corresponding EvaluationLink.
+ */
+void setLocalPredicate(std::string funcName, TruthValuePtr* (*func)(AtomSpace *, Handle*));
+
 /** @}*/
 }
 
