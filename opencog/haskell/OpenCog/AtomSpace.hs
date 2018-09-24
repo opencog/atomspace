@@ -36,8 +36,10 @@ module OpenCog.AtomSpace
     , module OpenCog.AtomSpace.Sugar
     -- * Function for use in GSN
     , exportFunction
+    , exportPredicate
     , Handle
     , HandleSeq
+    , TruthValueP
     , AtomSpaceRef
     -- * Utility Functions for working with Atoms
     , atomMap
@@ -55,4 +57,4 @@ import OpenCog.AtomSpace.Env
 import OpenCog.AtomSpace.Utils
 import OpenCog.AtomSpace.Sugar
 import OpenCog.AtomSpace.Query
-import OpenCog.AtomSpace.Internal    (Handle,HandleSeq)
+import OpenCog.AtomSpace.Internal    (Handle,HandleSeq,TruthValueP)

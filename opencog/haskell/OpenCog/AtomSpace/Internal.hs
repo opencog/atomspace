@@ -9,6 +9,7 @@
 module OpenCog.AtomSpace.Internal (
       Handle(..)
     , HandleSeq(..)
+    , TruthValueP(..)
     , TVRaw(..)
     , fromTVRaw
     , toTVRaw
@@ -23,6 +24,7 @@ import OpenCog.AtomSpace.Types       (AtomName(..),AtomType(..)
                                      ,Atom(..),TruthVal(..))
 type Handle = Ptr ()
 type HandleSeq = Ptr Handle
+type TruthValueP = Ptr ()
 -- Constant with the maximum number of parameters in any type of TV.
 tvMAX_PARAMS :: Int
 tvMAX_PARAMS = 5
