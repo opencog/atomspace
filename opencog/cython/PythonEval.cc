@@ -775,7 +775,7 @@ PyObject* PythonEval::call_user_function(const std::string& moduleFunction,
 // #define DEBUG
 #ifdef DEBUG
     printf("Looking for %s in module %s; here's what we have:\n",
-        functionName.c_str(), moduleFunction.c_str());
+        functionName.c_str(), PyModule_GetName(pyModule));
     print_dictionary(pyDict);
 #endif
 
