@@ -22,6 +22,7 @@
 
 #include <opencog/atomspace/AtomSpace.h>
 #include <opencog/atoms/execution/ExecutionOutputLink.h>
+#include <opencog/atoms/execution/EvaluationLink.h>
 
 using namespace opencog;
 
@@ -52,7 +53,8 @@ public:
 	void setUp();
 	void tearDown();
 
-	void test_local_func();
+	void test_local_schema();
+	void test_local_predicate();
 };
 
 void GroundedSchemaLocalUTest::tearDown()
@@ -73,7 +75,7 @@ Handle* safe_car(AtomSpace* as, Handle* params)
 	                  params->atom_ptr()->getOutgoingSet()[0]);
 }
 
-void GroundedSchemaLocalUTest::test_local_func()
+void GroundedSchemaLocalUTest::test_local_schema()
 {
 	logger().debug("BEGIN TEST: %s", __FUNCTION__);
 
@@ -86,11 +88,44 @@ void GroundedSchemaLocalUTest::test_local_func()
 		    N(CONCEPT_NODE, "Arg1"),
 		    N(CONCEPT_NODE, "Arg2"),
 		    N(CONCEPT_NODE, "Arg3"))
-			);
+		    );
 	Handle result = ((ExecutionOutputLink *)(eol.atom_ptr()))->execute(as, false);
 	logger().debug() << "Result is this:\n" << result->to_string();
 	Handle expected = N(CONCEPT_NODE, "Arg1");
 
 	TS_ASSERT_EQUALS(expected, result);
+	logger().debug("END TEST: %s", __FUNCTION__);
+}
+
+TruthValuePtr* is_square(AtomSpace* as, Handle* params)
+{
+	HandleSeq args = params->atom_ptr()->getOutgoingSet();
+	int val1 = std::stoi(args[0].atom_ptr()->get_name());
+	int val2 = std::stoi(args[1].atom_ptr()->get_name());
+	// it is necessary to allocate memory for TruthValuePtr*
+	return new TruthValuePtr(val1 == val2 * val2 ? TruthValue::TRUE_TV() : TruthValue::FALSE_TV());
+}
+
+void GroundedSchemaLocalUTest::test_local_predicate()
+{
+	logger().debug("BEGIN TEST: %s", __FUNCTION__);
+
+	setLocalPredicate("is_square", is_square);
+
+	Handle gpn = N(GROUNDED_PREDICATE_NODE, "lib:\\is_square");
+	Handle args1 = L(LIST_LINK, N(NUMBER_NODE, "9"), N(NUMBER_NODE, "3"));
+	Handle args2 = L(LIST_LINK, N(NUMBER_NODE, "8"), N(NUMBER_NODE, "3"));
+
+	Handle evl1 = L(EVALUATION_LINK, gpn, args1);
+	Handle evl2 = L(EVALUATION_LINK, gpn, args2);
+
+	TruthValuePtr result1 = ((EvaluationLink *)(evl1.atom_ptr()))->evaluate(as);
+	TruthValuePtr result2 = ((EvaluationLink *)(evl2.atom_ptr()))->evaluate(as);
+	logger().debug() << "Result is this:\n" << result1->to_string() << "\n" << result2->to_string();
+	TruthValuePtr expected1 = TruthValue::TRUE_TV();
+	TruthValuePtr expected2 = TruthValue::FALSE_TV();
+
+	TS_ASSERT(*expected1 == *result1);
+	TS_ASSERT(*expected2 == *result2);
 	logger().debug("END TEST: %s", __FUNCTION__);
 }

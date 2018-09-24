@@ -13,6 +13,7 @@ ADD_LIBRARY (execution
 	Instantiator.cc
 	MapLink.cc
 	ExecSCM.cc
+	LibraryManager.cc
 )
 
 # Without this, parallel make will race and crap up the generated files.

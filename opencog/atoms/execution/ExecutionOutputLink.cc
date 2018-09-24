@@ -20,7 +20,6 @@
  * 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
  */
 
-#include <dlfcn.h>
 #include <stdlib.h>
 
 #include <opencog/atoms/proto/atom_types.h>
@@ -31,18 +30,9 @@
 
 #include "ExecutionOutputLink.h"
 #include "Force.h"
+#include "LibraryManager.h"
 
 using namespace opencog;
-
-class LibraryManager
-{
-private:
-	static std::unordered_map<std::string, void*> _librarys;
-	static std::unordered_map<std::string, void*> _functions;
-public:
-	static void* getFunc(std::string libName,std::string funcName);
-	static void setLocalFunc(std::string libName, std::string funcName, void* func);
-};
 
 void ExecutionOutputLink::check_schema(const Handle& schema) const
 {
@@ -175,7 +165,7 @@ Handle ExecutionOutputLink::do_execute(AtomSpace* as,
 		                       "Cannot evaluate python GroundedSchemaNode!");
 #endif /* HAVE_CYTHON */
 	}
-	// Used by the Haskel bindings
+	// Used by the Haskel and C++ bindings; can be used with any language
 	else if (lang == "lib")
 	{
 #define BROKEN_CODE
@@ -254,52 +244,8 @@ void ExecutionOutputLink::lang_lib_fun(const std::string& schema,
 
 DEFINE_LINK_FACTORY(ExecutionOutputLink, EXECUTION_OUTPUT_LINK)
 
-std::unordered_map<std::string, void*> LibraryManager::_librarys;
-std::unordered_map<std::string, void*> LibraryManager::_functions;
-
-void LibraryManager::setLocalFunc(std::string libName, std::string funcName, void* func)
-{
-	if (_librarys.count(libName) == 0) {
-		_librarys[libName] = NULL;
-	}
-	std::string funcID = libName + "\\" + funcName;
-	_functions[funcID] = func;
-}
-
 void opencog::setLocalSchema(std::string funcName, Handle* (*func)(AtomSpace *, Handle*))
 {
 	LibraryManager::setLocalFunc("", funcName, reinterpret_cast<void*>(func));
 }
 
-void* LibraryManager::getFunc(std::string libName,std::string funcName)
-{
-	void* libHandle;
-	if (_librarys.count(libName) == 0) {
-		// Try and load the library and function.
-		libHandle = dlopen(libName.c_str(), RTLD_LAZY);
-		if (nullptr == libHandle)
-			throw RuntimeException(TRACE_INFO,
-			                       "Cannot open library: %s - %s", libName.c_str(), dlerror());
-		_librarys[libName] = libHandle;
-	}
-	else {
-		libHandle = _librarys[libName];
-	}
-
-	std::string funcID = libName + "\\" + funcName;
-
-	void* sym;
-	if (_functions.count(funcID) == 0){
-		sym = dlsym(libHandle, funcName.c_str());
-		if (nullptr == sym)
-			throw RuntimeException(TRACE_INFO,
-			                       "Cannot find symbol %s in library: %s - %s",
-			                       funcName.c_str(), libName.c_str(), dlerror());
-		_functions[funcID] = sym;
-	}
-	else {
-		sym = _functions[funcID];
-	}
-
-	return sym;
-}
