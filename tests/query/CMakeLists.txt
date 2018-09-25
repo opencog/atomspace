@@ -41,6 +41,7 @@ IF (HAVE_GUILE)
 	ADD_CXXTEST(DisconnectedUTest)
 	ADD_CXXTEST(ImplicationUTest)
 	ADD_CXXTEST(ExecutionOutputUTest)
+        ADD_CXXTEST(CogBindTVUTest)
 	ADD_CXXTEST(BuggyStackUTest)
 	ADD_CXXTEST(VarTypeNotUTest)
 	ADD_CXXTEST(BuggyNotUTest)
@@ -100,6 +101,8 @@ ADD_CUSTOM_TARGET (qtest
 # Copy files to the build directory.  We do this so that the
 # scheme files can be found no matter where the source directory
 # might be.
+CONFIGURE_FILE(${CMAKE_SOURCE_DIR}/tests/query/bind-tv.scm
+    ${PROJECT_BINARY_DIR}/tests/query/bind-tv.scm)
 CONFIGURE_FILE(${CMAKE_SOURCE_DIR}/tests/query/buggy-crime.scm
     ${PROJECT_BINARY_DIR}/tests/query/buggy-crime.scm)
 CONFIGURE_FILE(${CMAKE_SOURCE_DIR}/tests/query/buggy-link.scm
