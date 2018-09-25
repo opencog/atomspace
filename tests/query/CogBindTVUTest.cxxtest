@@ -78,7 +78,7 @@ void CogBindTVUTest::test_single_bindlink(void)
 
     eval->eval("(load-from-path \"tests/query/bind-tv.scm\")");
 
-    Handle answers = eval->eval_h("(cog-bind find-red)");
+    Handle answers = eval->eval_h("(cog-execute! find-red)");
     Handle answer = answers->getOutgoingAtom(0);
     TruthValuePtr stv = answer->getTruthValue(); 
     float strengh = stv->get_mean();
