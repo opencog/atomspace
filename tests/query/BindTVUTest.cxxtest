@@ -1,5 +1,5 @@
 /*
- * tests/query/CogBindTVUTest.cxxtest
+ * tests/query/BindTVUTest.cxxtest
  *
  * Copyright (C) 2018 SingularityNet Foundation
  * All Rights Reserved
@@ -30,14 +30,14 @@
 
 using namespace opencog;
 
-class CogBindTVUTest: public CxxTest::TestSuite
+class BindTVUTest: public CxxTest::TestSuite
 {
 private:
 	AtomSpace *as;
 	SchemeEval* eval;
 
 public:
-	CogBindTVUTest(void)
+	BindTVUTest(void)
 	{
 		logger().set_level(Logger::DEBUG);
 		logger().set_print_to_stdout_flag(true);
@@ -49,7 +49,7 @@ public:
 		eval->eval("(add-to-load-path \"" PROJECT_SOURCE_DIR "\")");
 	}
 
-	~CogBindTVUTest()
+	~BindTVUTest()
 	{
 		delete eval;
 		delete as;
@@ -66,17 +66,17 @@ public:
 	void test_single_bindlink(void);
 };
 
-void CogBindTVUTest::tearDown(void)
+void BindTVUTest::tearDown(void)
 {
 }
 
-void CogBindTVUTest::setUp(void)
+void BindTVUTest::setUp(void)
 {
 }
 
 // Test if the pattern matcher properly maintain the TV of the
 // predicate evaluation call set by itself (see sp doc in bind-tv.scm)
-void CogBindTVUTest::test_single_bindlink(void)
+void BindTVUTest::test_single_bindlink(void)
 {
 	logger().debug("BEGIN TEST: %s", __FUNCTION__);
 
