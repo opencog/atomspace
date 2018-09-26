@@ -1,8 +1,11 @@
 /*
  * tests/query/CogBindTVUTest.cxxtest
  *
- * Copyright (C) 2014 Cosmo Harrigan
+ * Copyright (C) 2018 SingularityNet Foundation
  * All Rights Reserved
+ *
+ * Authors: Anatoly Belikov
+ *          Nil Geisweiller
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU Affero General Public License v3 as
@@ -71,14 +74,19 @@ void CogBindTVUTest::setUp(void)
 {
 }
 
+// Test if the pattern matcher properly maintain the TV of the
+// predicate evaluation call set by itself (see sp doc in bind-tv.scm)
 void CogBindTVUTest::test_single_bindlink(void)
 {
 	logger().debug("BEGIN TEST: %s", __FUNCTION__);
 
 	eval->eval("(load-from-path \"tests/query/bind-tv.scm\")");
 
-	Handle find_red = eval->eval_h("find-red");
-	Handle answers = bindlink(as, find_red);
+	Handle query = eval->eval_h("query");
+	Handle answers = bindlink(as, query);
+
+	logger().debug() << "answers = " << oc_to_string(answers);
+
 	Handle answer = answers->getOutgoingAtom(0);
 	TruthValuePtr stv = answer->getTruthValue(); 
 	float strengh = stv->get_mean();

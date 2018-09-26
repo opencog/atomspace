@@ -1,20 +1,34 @@
-(Inheritance (stv 0.99 0.99) (Concept "BB1") (Concept "BoundingBox"))
+;; Definitions
 
-(define (redness box ) 
-    (stv 0.55 0.55)
-)
+(define (sp x)
+"
+  Return (stv 0.55 0.55) and store it into its own call, that is
 
-(define eval1 (EvaluationLink
-    (GroundedPredicateNode  "scm: redness")
-    (Variable "$X"))
-)
+  Evaluation (stv 0.55 0.55)
+    GroundedPredicate \"scm:sp\"
+    x
+"
+  (let* ((tv (stv 0.55 0.55))
+         (gp (GroundedPredicate "scm:sp"))
+         (ev (Evaluation gp x)))
+  (cog-set-tv! ev tv)
+  tv))
 
+(define GP (GroundedPredicate "scm:sp"))
+(define A (Concept "A"))
+(define B (Concept "B"))
+(define X (Variable "$X"))
+(define E (Evaluation GP A))
 
-(define find-red 
-    (BindLink (VariableNode "$X")
-              (AndLink eval1
-                       (InheritanceLink (VariableNode "$X") (ConceptNode "BoundingBox")))
-              eval1
-    )
-)
+;; Facts
 
+(Inheritance (stv 0.99 0.99) A B)
+
+;; Query
+
+(define query
+  (BindLink
+    (AndLink
+      E
+      (InheritanceLink X B))
+    E))
