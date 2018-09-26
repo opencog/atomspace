@@ -22,7 +22,7 @@
 
 ;; Facts
 
-(Inheritance (stv 0.99 0.99) A B)
+(Inheritance A B)
 
 ;; Query
 
