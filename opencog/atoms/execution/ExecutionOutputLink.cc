@@ -248,4 +248,3 @@ void opencog::setLocalSchema(std::string funcName, Handle* (*func)(AtomSpace *, 
 {
 	LibraryManager::setLocalFunc("", funcName, reinterpret_cast<void*>(func));
 }
-
