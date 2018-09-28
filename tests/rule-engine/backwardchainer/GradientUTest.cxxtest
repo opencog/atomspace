@@ -215,7 +215,7 @@ void GradientUTest::test_gradient()
 					X));
 
 	BackwardChainer bc(_as, rbs, src2);
-	bc.get_config().set_maximum_iterations(1000);
+	bc.get_config().set_maximum_iterations(10);
 	bc.do_chain();
 	Handle result = bc.get_results();
 
