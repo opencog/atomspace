@@ -127,21 +127,18 @@ void GradientUTest::set_variables()
 void GradientUTest::set_rule1()
 {
 	Handle premise1 =
-		L(NUMERIC_OUTPUT_LINK,
-			Gradient,
-			L(NUMERIC_OUTPUT_LINK, Plus, F1, F2));
-	Handle premise2 =
 		L(EVALUATION_LINK,
 			ExpandTo,
 			L(LIST_LINK,
 				L(NUMERIC_OUTPUT_LINK, Gradient, F1),
 				EGX));
-	Handle premise3 =
+	Handle premise2 =
 		L(EVALUATION_LINK,
 			ExpandTo,
 			L(LIST_LINK,
 				L(NUMERIC_OUTPUT_LINK, Gradient, F2),
 				EGY));
+
 	L(DEFINE_LINK,
 		GradientSum,
      	L(BIND_LINK,
@@ -152,8 +149,7 @@ void GradientUTest::set_rule1()
 					EGY),
       		L(AND_LINK,
 					premise1,
-					premise2,
-					premise3),
+					premise2),
 				L(EXECUTION_OUTPUT_LINK,
 					N(GROUNDED_SCHEMA_NODE, "lib:id4"),
        			L(LIST_LINK,
@@ -164,25 +160,24 @@ void GradientUTest::set_rule1()
 									Gradient,
 									L(NUMERIC_OUTPUT_LINK, Plus, F1, F2)),
 								L(NUMERIC_OUTPUT_LINK, Plus, EGX, EGY))),
-						premise1, premise2, premise3))));
+						premise1, premise2))));
 }
 
 void GradientUTest::set_rule2()
 {
-	Handle premise1 = L(NUMERIC_OUTPUT_LINK, Gradient, F0);
+	Handle GradF0 = L(NUMERIC_OUTPUT_LINK, Gradient, F0);
 
 	L(DEFINE_LINK,
 		GradientAny,
 		L(BIND_LINK,
 			L(TYPED_VARIABLE_LINK, F0, NumberT),
-			L(AND_LINK, premise1),
+			F0,
 			L(EXECUTION_OUTPUT_LINK,
 				N(GROUNDED_SCHEMA_NODE, "lib:id2"),
 				L(LIST_LINK,
 					L(EVALUATION_LINK,
 						ExpandTo,
-						L(LIST_LINK, premise1, N0)),
-					L(NUMERIC_OUTPUT_LINK, Gradient, F0)))));
+						L(LIST_LINK, GradF0, N0))))));
 }
 
 void GradientUTest::set_rbs()
