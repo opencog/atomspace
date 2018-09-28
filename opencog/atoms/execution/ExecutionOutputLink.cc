@@ -229,15 +229,15 @@ void ExecutionOutputLink::lang_lib_fun(const std::string& schema,
 
 	if (lang == "lib") {
 		// Get the name of the Library and Function. They should be
-		// sperated by "\\".
+		// separated by '\'. If no library the separator may be omitted.
 		std::size_t seppos = schema.find("\\");
-		if (seppos == std::string::npos)
-		{
-			throw RuntimeException(TRACE_INFO,
-			                       "Library name and function name must be separated by '\\'");
+		if (seppos == std::string::npos) { // No library
+			lib = "";
+			fun = schema.substr(pos);
+		} else {                  // Possible library
+			lib = schema.substr(pos, seppos - pos);
+			fun = schema.substr(seppos + 1);
 		}
-		lib = schema.substr(pos, seppos - pos);
-		fun = schema.substr(seppos + 1);
 	} else
 		fun = schema.substr(pos);
 }

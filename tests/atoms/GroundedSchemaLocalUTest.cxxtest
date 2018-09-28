@@ -55,6 +55,7 @@ public:
 	void tearDown();
 
 	void test_local_schema();
+	void test_local_schema_no_sep();
 	void test_local_predicate();
 };
 
@@ -93,6 +94,25 @@ void GroundedSchemaLocalUTest::test_local_schema()
 	Handle result = ExecutionOutputLinkCast(eol)->execute(as, false);
 	logger().debug() << "Result is this:\n" << result->to_string();
 	Handle expected = N(CONCEPT_NODE, "Arg1");
+
+	TS_ASSERT_EQUALS(expected, result);
+	logger().debug("END TEST: %s", __FUNCTION__);
+}
+
+// Like test_local_schema but no need to preprend `\` to safe_car
+void GroundedSchemaLocalUTest::test_local_schema_no_sep()
+{
+	logger().debug("BEGIN TEST: %s", __FUNCTION__);
+
+	setLocalSchema("safe_car", safe_car);
+
+	Handle eol =
+		L(EXECUTION_OUTPUT_LINK,
+		  N(GROUNDED_SCHEMA_NODE, "lib:safe_car"),
+		  N(CONCEPT_NODE, "Arg"));
+	Handle result = ExecutionOutputLinkCast(eol)->execute(as, false);
+	logger().debug() << "Result is this:\n" << result->to_string();
+	Handle expected = N(CONCEPT_NODE, "Arg");
 
 	TS_ASSERT_EQUALS(expected, result);
 	logger().debug("END TEST: %s", __FUNCTION__);
