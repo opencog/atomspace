@@ -23,6 +23,7 @@
 #include <opencog/atomspace/AtomSpace.h>
 #include <opencog/atoms/execution/ExecutionOutputLink.h>
 #include <opencog/atoms/execution/EvaluationLink.h>
+#include <opencog/atoms/core/NumberNode.h>
 
 using namespace opencog;
 
@@ -54,6 +55,7 @@ public:
 	void tearDown();
 
 	void test_local_schema();
+	void test_local_schema_no_sep();
 	void test_local_predicate();
 };
 
@@ -70,9 +72,9 @@ void GroundedSchemaLocalUTest::setUp()
 Handle* safe_car(AtomSpace* as, Handle* params)
 {
 	// it is necessary to allocate memory for Handle
-	return new Handle(params->atom_ptr()->get_type() != LIST_LINK ?
+	return new Handle((*params)->get_type() != LIST_LINK ?
 	                  *params :
-	                  params->atom_ptr()->getOutgoingSet()[0]);
+	                  (*params)->getOutgoingAtom(0));
 }
 
 void GroundedSchemaLocalUTest::test_local_schema()
@@ -89,7 +91,7 @@ void GroundedSchemaLocalUTest::test_local_schema()
 		    N(CONCEPT_NODE, "Arg2"),
 		    N(CONCEPT_NODE, "Arg3"))
 		    );
-	Handle result = ((ExecutionOutputLink *)(eol.atom_ptr()))->execute(as, false);
+	Handle result = ExecutionOutputLinkCast(eol)->execute(as, false);
 	logger().debug() << "Result is this:\n" << result->to_string();
 	Handle expected = N(CONCEPT_NODE, "Arg1");
 
@@ -97,11 +99,30 @@ void GroundedSchemaLocalUTest::test_local_schema()
 	logger().debug("END TEST: %s", __FUNCTION__);
 }
 
+// Like test_local_schema but no need to preprend `\` to safe_car
+void GroundedSchemaLocalUTest::test_local_schema_no_sep()
+{
+	logger().debug("BEGIN TEST: %s", __FUNCTION__);
+
+	setLocalSchema("safe_car", safe_car);
+
+	Handle eol =
+		L(EXECUTION_OUTPUT_LINK,
+		  N(GROUNDED_SCHEMA_NODE, "lib:safe_car"),
+		  N(CONCEPT_NODE, "Arg"));
+	Handle result = ExecutionOutputLinkCast(eol)->execute(as, false);
+	logger().debug() << "Result is this:\n" << result->to_string();
+	Handle expected = N(CONCEPT_NODE, "Arg");
+
+	TS_ASSERT_EQUALS(expected, result);
+	logger().debug("END TEST: %s", __FUNCTION__);
+}
+
 TruthValuePtr* is_square(AtomSpace* as, Handle* params)
 {
-	HandleSeq args = params->atom_ptr()->getOutgoingSet();
-	int val1 = std::stoi(args[0].atom_ptr()->get_name());
-	int val2 = std::stoi(args[1].atom_ptr()->get_name());
+	const HandleSeq& args = (*params)->getOutgoingSet();
+	int val1 = NumberNodeCast(args[0])->get_value();
+	int val2 = NumberNodeCast(args[1])->get_value();
 	// it is necessary to allocate memory for TruthValuePtr*
 	return new TruthValuePtr(val1 == val2 * val2 ? TruthValue::TRUE_TV() : TruthValue::FALSE_TV());
 }
@@ -119,13 +140,14 @@ void GroundedSchemaLocalUTest::test_local_predicate()
 	Handle evl1 = L(EVALUATION_LINK, gpn, args1);
 	Handle evl2 = L(EVALUATION_LINK, gpn, args2);
 
-	TruthValuePtr result1 = ((EvaluationLink *)(evl1.atom_ptr()))->evaluate(as);
-	TruthValuePtr result2 = ((EvaluationLink *)(evl2.atom_ptr()))->evaluate(as);
-	logger().debug() << "Result is this:\n" << result1->to_string() << "\n" << result2->to_string();
+	TruthValuePtr result1 = EvaluationLinkCast(evl1)->evaluate(as);
+	TruthValuePtr result2 = EvaluationLinkCast(evl2)->evaluate(as);
+ 	logger().debug() << "Result is this:\n" << result1->to_string() << "\n" << result2->to_string();
 	TruthValuePtr expected1 = TruthValue::TRUE_TV();
 	TruthValuePtr expected2 = TruthValue::FALSE_TV();
 
 	TS_ASSERT(*expected1 == *result1);
 	TS_ASSERT(*expected2 == *result2);
+
 	logger().debug("END TEST: %s", __FUNCTION__);
 }
