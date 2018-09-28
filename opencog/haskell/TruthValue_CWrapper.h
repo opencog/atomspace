@@ -43,5 +43,25 @@ extern "C"
                             , const char* type
                             , double* parameters );
 
+    /**
+     * TruthValuePtr_fromRaw    Helper function that creates TruthValuePtr from RawTV
+     *
+     * @param      type        TruthValue type
+     * @param      parameters  List of parameters of the TV (strenght,confidence,...)
+     *
+     * @return  TruthValuePtr
+     */
+    TruthValuePtr TruthValuePtr_fromRaw(const char* type, double* parameters);
+
+    /**
+     * PTruthValuePtr_fromRaw    Function needed for GroundedPredicate Haskell binding that converts RawTV to TruthValuePtr*
+     *
+     * @param      type        TruthValue type
+     * @param      parameters  List of parameters of the TV (strenght,confidence,...)
+     *
+     * @return  TruthValuePtr*
+     */
+    TruthValuePtr* PTruthValuePtr_fromRaw(const char* type, double* parameters);
+
 }
 

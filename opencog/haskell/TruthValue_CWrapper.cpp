@@ -20,15 +20,19 @@ int TruthValue_setOnAtom( Handle* atom
     Handle h = *atom;
     if (!h) // Invalid UUID parameter.
         return -1;
+    h->setTruthValue(TruthValuePtr_fromRaw(type,parameters));
 
+    return 0;
+}
+
+TruthValuePtr TruthValuePtr_fromRaw(const char* type, double* parameters)
+{
     if (strcmp(type,"SimpleTruthValue") == 0) {
-        h->setTruthValue(SimpleTruthValue::createTV(parameters[0],parameters[1]));
+        return SimpleTruthValue::createTV(parameters[0],parameters[1]);
     }
     else
     if (strcmp(type,"CountTruthValue") == 0) {
-        h->setTruthValue(CountTruthValue::createTV(parameters[0]
-                                                  ,parameters[1]
-                                                  ,parameters[2]));
+        return CountTruthValue::createTV(parameters[0],parameters[1],parameters[2]);
     }
     else
     if (strcmp(type,"IndefiniteTruthValue") == 0) {
@@ -38,20 +42,24 @@ int TruthValue_setOnAtom( Handle* atom
                                            ,parameters[3]);
         // iptr->setMean(parameters[0]);
         // iptr->setDiff(parameters[4]);
-        h->setTruthValue(std::static_pointer_cast<const TruthValue>(iptr));
+        return std::static_pointer_cast<const TruthValue>(iptr);
     }
     else
     if (strcmp(type,"FuzzyTruthValue") == 0) {
-        h->setTruthValue(FuzzyTruthValue::createTV(parameters[0],parameters[1]));
+        return FuzzyTruthValue::createTV(parameters[0],parameters[1]);
     }
     else
     if (strcmp(type,"ProbabilisticTruthValue") == 0) {
-        h->setTruthValue(ProbabilisticTruthValue::createTV(parameters[0]
-                                                          ,parameters[1]
-                                                          ,parameters[2]));
+        return ProbabilisticTruthValue::createTV(parameters[0],parameters[1],parameters[2]);
     }
     else
         throw InvalidParamException(TRACE_INFO,
                 ("Invalid TruthValue Type: " + std::string(type)).c_str());
-    return 0;
+}
+
+TruthValuePtr* PTruthValuePtr_fromRaw(const char* type, double* parameters)
+{
+    TruthValuePtr* result = (TruthValuePtr*)malloc(sizeof(TruthValuePtr));
+    *result = TruthValuePtr_fromRaw(type, parameters);
+    return result;
 }
