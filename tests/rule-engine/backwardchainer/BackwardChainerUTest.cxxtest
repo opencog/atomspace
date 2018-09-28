@@ -31,7 +31,7 @@ private:
 	BackwardChainer* _bc;
 
 	string load_from_path(const string& filename);
-    void reset_bc();
+	void reset_bc();
 
 public:
 	BackwardChainerUTest();
@@ -51,10 +51,10 @@ public:
 	void test_conditional_instantiation_tv_query();
 	void test_conditional_partial_instantiation();
 	void test_impossible_criminal();
-    void test_criminal();
+	void test_criminal();
 	// TODO: re-enable the following tests
 	void test_induction();
-    void test_focus_set();
+	void test_focus_set();
 };
 
 BackwardChainerUTest::BackwardChainerUTest() : _eval(&_as)
