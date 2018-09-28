@@ -75,14 +75,14 @@ void ClassServer::spliceFactory(Type t, AtomFactory* fact)
 			ok_to_clobber.insert(_atomFactory[parent]);
 	}
 
-	// Set the factory for all children of this type.  Be careful
+	// Set the factory for t and all children of its type. Be careful
 	// not to clobber any factories that might have been previously
 	// declared.
 	for (Type chi=t; chi < _nameServer.getNumberOfClasses(); chi++)
 	{
 		if (_nameServer.isAncestor(t, chi) and
 		    (nullptr == _atomFactory[chi] or
-		    ok_to_clobber.end() != ok_to_clobber.find(_atomFactory[chi])))
+		     ok_to_clobber.end() != ok_to_clobber.find(_atomFactory[chi])))
 		{
 			_atomFactory[chi] = fact;
 		}
