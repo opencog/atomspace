@@ -100,7 +100,7 @@ TYPE_OUTPUT_LINK <- LINK
 
 // ===========================================================
 // Basic set-theory-inspired links
-SET_LINK <- UNORDERED_LINK
+SET_LINK <- UNORDERED_LINK,EVALUATABLE_LINK
 LIST_LINK <- ORDERED_LINK
 MEMBER_LINK <- ORDERED_LINK,EVALUATABLE_LINK
 
@@ -335,7 +335,7 @@ PATTERN_LINK <- PRENEX_LINK         // A pattern encapsulated in a Link.
 // executed.  The distinction is made for the benefit of the C++ code,
 // so that it can dispatch appropriately, based on the base type.
 SATISFACTION_LINK <- PATTERN_LINK,EVALUATABLE_LINK  // Finds all groundings, return TV
-SATISFYING_LINK <- PATTERN_LINK    // Finds all groundings, return SetLink
+SATISFYING_LINK <- PATTERN_LINK,EVALUATABLE_LINK    // Finds all groundings, return SetLink
 
 // The GetLink is almost exactly the same thing as a SatsifyingSetLink,
 // except that GetLink is imperative, while SatisfyingSetLink is
@@ -368,14 +368,14 @@ EXISTS_LINK <- SCOPE_LINK,EVALUATABLE_LINK
 SATISFYING_SET_SCOPE_LINK <- SCOPE_LINK
 
 // Convert predicate into concept
-SATISFYING_SET_LINK <- LINK
+SATISFYING_SET_LINK <- LINK,EVALUATABLE_LINK
 
 // Basic first-order logic operations
 
 // Sugar forms of implication and equivalence links. See
 // http://wiki.opencog.org/wikihome/index.php/ImplicationLink
 // for more information
-IMPLICATION_SCOPE_LINK <- SCOPE_LINK
+IMPLICATION_SCOPE_LINK <- SCOPE_LINK,EVALUATABLE_LINK
 INTENSIONAL_IMPLICATION_SCOPE_LINK <- IMPLICATION_SCOPE_LINK
 EXTENSIONAL_IMPLICATION_SCOPE_LINK <- IMPLICATION_SCOPE_LINK
 

@@ -40,6 +40,7 @@
 
 #include "Force.h"
 #include "EvaluationLink.h"
+#include "LibraryManager.h"
 
 using namespace opencog;
 
@@ -573,6 +574,11 @@ TruthValuePtr EvaluationLink::do_evaluate(AtomSpace* as,
 	return do_evaluate(as, sna[0], sna[1], silent);
 }
 
+// Fixme: added here, because lang_lib_fun is declared inside ExecutionOutputLink class
+// It would be better to move lang_lib_fun to LibraryManager, but BackwardChainer also
+// uses this function, so more refactoring would be needed
+#include "ExecutionOutputLink.h"
+
 /// do_evaluate -- evaluate the GroundedPredicateNode of the EvaluationLink
 ///
 /// Expects "pn" to be a GroundedPredicateNode or a DefinedPredicateNode
@@ -686,20 +692,26 @@ TruthValuePtr EvaluationLink::do_evaluate(AtomSpace* as,
 #endif /* HAVE_CYTHON */
 	}
 
+	// Extract the language, library and function
+	std::string lang, lib, fun;
+	ExecutionOutputLink::lang_lib_fun(schema, lang, lib, fun);
+#define BROKEN_CODE
 #ifdef BROKEN_CODE
-	// Used by the Haskel bindings
-	// See ExecutionOutputLink.cc lines 174-187 for more
-	// code that partly implements this.
+	// Used by the C++ bindings; can be used with any language, Haskel binding is now missing
 	if (lang == "lib")
 	{
 		void* sym = LibraryManager::getFunc(lib,fun);
-
 		// Convert the void* pointer to the correct function type.
-		Handle* (*func)(AtomSpace*, Handle*);
-		func = reinterpret_cast<Handle* (*)(AtomSpace *, Handle*)>(sym);
-
-		// Execute the function
-		result = *func(as, &args);
+		TruthValuePtr* (*func)(AtomSpace*, Handle*);
+		func = reinterpret_cast<TruthValuePtr* (*)(AtomSpace *, Handle*)>(sym);
+		// Evaluate the predicate
+		TruthValuePtr* res = func(as, &args);
+		if(res != NULL)
+		{
+			TruthValuePtr result = *res;
+			free(res);
+			return result;
+		}
 	}
 #endif
 
@@ -710,3 +722,8 @@ TruthValuePtr EvaluationLink::do_evaluate(AtomSpace* as,
 }
 
 DEFINE_LINK_FACTORY(EvaluationLink, EVALUATION_LINK)
+
+void opencog::setLocalPredicate(std::string funcName, TruthValuePtr* (*func)(AtomSpace *, Handle*))
+{
+	LibraryManager::setLocalFunc("", funcName, reinterpret_cast<void*>(func));
+}

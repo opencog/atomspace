@@ -17,8 +17,10 @@
 using namespace std;
 using namespace opencog;
 
-#define al _as.add_link
-#define an _as.add_node
+#define cal _control_as.add_link
+#define can _control_as.add_node
+#define dal _dummy_as.add_link
+#define dan _dummy_as.add_node
 
 class ControlPolicyUTest: public CxxTest::TestSuite
 {
@@ -26,6 +28,10 @@ private:
 	AtomSpace _control_as;
 	SchemeEval _eval;
 	ControlPolicy* _cp;
+
+	AtomSpace _dummy_as;
+	UREConfig _dummy_ure_conf;
+	Handle _dummy_target;
 
 	void reset_bc();
 
@@ -36,10 +42,13 @@ public:
 	void tearDown();
 
 	void test_fetch_control_rules();
-	void test_is_control_rule_active();
+	void test_is_control_rule_active_1();
+	void test_is_control_rule_active_2();
 };
 
-ControlPolicyUTest::ControlPolicyUTest() : _eval(&_control_as)
+ControlPolicyUTest::ControlPolicyUTest()
+	: _eval(&_control_as)
+	, _dummy_ure_conf(_dummy_as, dan(CONCEPT_NODE, "dummy-rbs"))
 {
 	logger().set_level(Logger::DEBUG);
 	logger().set_timestamp_flag(false);
@@ -61,6 +70,9 @@ ControlPolicyUTest::ControlPolicyUTest() : _eval(&_control_as)
 		string eval_str = string("(add-to-load-path \"") + p + string("\")");
 		_eval.eval(eval_str);
 	}
+
+	// Set dummy target
+	_dummy_target = dan(CONCEPT_NODE, "dummy-target");
 }
 
 void ControlPolicyUTest::setUp()
@@ -78,9 +90,7 @@ void ControlPolicyUTest::test_fetch_control_rules()
 	logger().debug("BEGIN TEST: %s", __FUNCTION__);
 
 	_eval.eval("(load-from-path \"control-rules.scm\")");
-	AtomSpace rbs_as;
-	Handle rbs = rbs_as.add_node(CONCEPT_NODE, "dummy");
-	_cp = new ControlPolicy(UREConfig(rbs_as, rbs), BIT(), &_control_as);
+	_cp = new ControlPolicy(_dummy_ure_conf, BIT(), _dummy_target, &_control_as);
 
 	Handle rule_1_alias = _eval.eval_h("(DefinedSchemaNode \"rule-1\")");
 	HandleSet control_1_rules = _cp->fetch_expansion_control_rules(rule_1_alias);
@@ -95,15 +105,13 @@ void ControlPolicyUTest::test_fetch_control_rules()
 	logger().debug("END TEST: %s", __FUNCTION__);
 }
 
-void ControlPolicyUTest::test_is_control_rule_active()
+void ControlPolicyUTest::test_is_control_rule_active_1()
 {
 	logger().debug("BEGIN TEST: %s", __FUNCTION__);
 
 	// Fetch context sensitive rule
 	_eval.eval("(load-from-path \"control-rules.scm\")");
-	AtomSpace rbs_as;
-	Handle rbs = rbs_as.add_node(CONCEPT_NODE, "dummy");
-	_cp = new ControlPolicy(UREConfig(rbs_as, rbs), BIT(), &_control_as);
+	_cp = new ControlPolicy(_dummy_ure_conf, BIT(), _dummy_target, &_control_as);
 	Handle rule_2_alias = _eval.eval_h("(DefinedSchemaNode \"rule-2\")");
 	HandleSet control_2_rules = _cp->fetch_expansion_control_rules(rule_2_alias);
 	Handle ctrl_rule = *control_2_rules.begin();
@@ -121,6 +129,37 @@ void ControlPolicyUTest::test_is_control_rule_active()
 	BITNode bitnode(leaf);
 
 	TS_ASSERT(_cp->is_control_rule_active(andbit, bitnode, ctrl_rule));
+
+	logger().debug("END TEST: %s", __FUNCTION__);
+}
+
+void ControlPolicyUTest::test_is_control_rule_active_2()
+{
+	logger().debug("BEGIN TEST: %s", __FUNCTION__);
+
+	// Fetch context sensitive rule
+	_eval.eval("(load-from-path \"control-rules.scm\")");
+	Handle target = dal(INHERITANCE_LINK,
+	                    dan(CONCEPT_NODE, "q"),
+	                    dan(CONCEPT_NODE, "u"));
+	_cp = new ControlPolicy(_dummy_ure_conf, BIT(), target, &_control_as);
+	Handle rule_3_alias = _eval.eval_h("(DefinedSchemaNode \"rule-3\")");
+	HandleSet control_3_rules = _cp->fetch_expansion_control_rules(rule_3_alias);
+	Handle ctrl_rule = *control_3_rules.begin();
+
+	Handle inference_tree = _eval.eval_h("(BindLink"
+	                                     "  (AndLink)"
+	                                     "  (InheritanceLink"
+	                                     "    (ConceptNode \"q\")"
+	                                     "    (ConceptNode \"u\")))");
+	AndBIT andbit(inference_tree);
+
+	Handle leaf = target;
+	BITNode bitnode(leaf);
+
+	// Check that the control rule is not active, since the actual
+	// target doesn't match the pattern target in the control rule.
+	TS_ASSERT(not _cp->is_control_rule_active(andbit, bitnode, ctrl_rule));
 
 	logger().debug("END TEST: %s", __FUNCTION__);
 }

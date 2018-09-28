@@ -37,6 +37,9 @@ TARGET_LINK_LIBRARIES(DeleteLinkUTest execution atomspace)
 ADD_CXXTEST(EqualLinkUTest)
 TARGET_LINK_LIBRARIES(EqualLinkUTest execution atomspace)
 
+ADD_CXXTEST(GroundedSchemaLocalUTest)
+TARGET_LINK_LIBRARIES(GroundedSchemaLocalUTest execution atomspace)
+
 ADD_CXXTEST(StateLinkUTest)
 TARGET_LINK_LIBRARIES(StateLinkUTest execution atomspace)
 
