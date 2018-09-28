@@ -72,8 +72,13 @@ BackwardChainerUTest::BackwardChainerUTest() : _eval(&_as)
 	string cur_ppp_dir = string(PROJECT_SOURCE_DIR),
 		cur_pp_dir = cur_ppp_dir + "/tests",
 		cur_p_dir = cur_pp_dir + "/rule-engine",
-		cur_dir = cur_p_dir + "/backwardchainer";
-	vector<string> load_paths = {cur_ppp_dir, cur_pp_dir, cur_p_dir, cur_dir};
+		cur_dir = cur_p_dir + "/backwardchainer",
+		scm_dir = cur_dir + "/scm";
+	vector<string> load_paths = {cur_ppp_dir,
+	                             cur_pp_dir,
+	                             cur_p_dir,
+	                             cur_dir,
+	                             scm_dir};
 	for (string& p : load_paths)
 	{
 		string eval_str = string("(add-to-load-path \"") + p + string("\")");

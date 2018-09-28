@@ -41,9 +41,13 @@ public:
 			cur_p_dir = cur_pp_dir + "/tests",
 			cur_dir = cur_p_dir + "/rule-engine",
 			rule_dir = cur_dir + "/rules",
-			backwardchainer_dir = cur_dir + "/backwardchainer";
-		vector<string> load_paths = {cur_pp_dir, cur_p_dir, cur_dir,
-		                             rule_dir, backwardchainer_dir};
+			backwardchainer_dir = cur_dir + "/backwardchainer",
+			scm_dir = backwardchainer_dir + "/scm";
+		vector<string> load_paths = {cur_pp_dir,
+		                             cur_p_dir,
+		                             rule_dir,
+		                             backwardchainer_dir,
+		                             scm_dir};
 		for (string& p : load_paths)
 		{
 			string eval_str = string("(add-to-load-path \"") + p + string("\")");
