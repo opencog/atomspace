@@ -217,11 +217,26 @@ void GradientUTest::test_gradient()
 	BackwardChainer bc(_as, rbs, src2);
 	bc.get_config().set_maximum_iterations(10);
 	bc.do_chain();
-	Handle result = bc.get_results();
+	Handle result = bc.get_results(),
+		expected = L(SET_LINK,
+		             L(EVALUATION_LINK,
+		               N(PREDICATE_NODE, "ExpandTo"),
+		               L(LIST_LINK,
+		                 L(NUMERIC_OUTPUT_LINK,
+		                   N(CONCEPT_NODE, "Gradient"),
+		                   L(NUMERIC_OUTPUT_LINK,
+		                     N(CONCEPT_NODE, "+"),
+		                     N(NUMBER_NODE, "4"),
+		                     N(NUMBER_NODE, "3"))),
+		                 L(NUMERIC_OUTPUT_LINK,
+		                   N(CONCEPT_NODE, "+"),
+		                   N(NUMBER_NODE, "0"),
+		                   N(NUMBER_NODE, "0")))));
 
 	logger().debug() << "result = " << oc_to_string(result);
+	logger().debug() << "expected = " << oc_to_string(expected);
 
-	TS_ASSERT(true);
+	TS_ASSERT_EQUALS(result, expected);
 
 	logger().debug("END TEST: %s", __FUNCTION__);
 }
