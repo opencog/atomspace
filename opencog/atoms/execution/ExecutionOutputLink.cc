@@ -168,8 +168,6 @@ Handle ExecutionOutputLink::do_execute(AtomSpace* as,
 	// Used by the Haskel and C++ bindings; can be used with any language
 	else if (lang == "lib")
 	{
-#define BROKEN_CODE
-#ifdef BROKEN_CODE
 		void* sym = LibraryManager::getFunc(lib,fun);
 
 		// Convert the void* pointer to the correct function type.
@@ -183,7 +181,6 @@ Handle ExecutionOutputLink::do_execute(AtomSpace* as,
 			result = *res;
 			free(res);
 		}
-#endif
 	}
 	else {
 		// Unkown proceedure type
