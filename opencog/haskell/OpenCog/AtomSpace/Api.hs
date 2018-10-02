@@ -1,4 +1,4 @@
--- GSoC 2015 - Haskell bindings for OpenCog.
+-- GSoC 2015, 2018 - Haskell bindings for OpenCog.
 {-# LANGUAGE ForeignFunctionInterface #-}
 {-# LANGUAGE ConstraintKinds          #-}
 {-# LANGUAGE TypeOperators            #-}
@@ -17,6 +17,7 @@ module OpenCog.AtomSpace.Api (
     , execute
     , evaluate
     , exportFunction
+    , exportPredicate
     ) where
 
 import Foreign                       (Ptr)
@@ -33,7 +34,7 @@ import Control.Monad.Trans.Reader    (ReaderT,runReaderT,ask)
 import Control.Monad.IO.Class        (liftIO)
 import OpenCog.AtomSpace.Env         (AtomSpaceObj(..),AtomSpaceRef(..),(<:),
                                       AtomSpace(..),getAtomSpace,refToObj)
-import OpenCog.AtomSpace.Internal    (toTVRaw,fromTVRaw,Handle,HandleSeq
+import OpenCog.AtomSpace.Internal    (toTVRaw,fromTVRaw,Handle,HandleSeq,TruthValueP
                                      ,TVRaw(..),tvMAX_PARAMS)
 import OpenCog.AtomSpace.Types       (Atom(..),AtomType(..),AtomName(..)
                                      ,TruthVal(..))
@@ -371,6 +372,23 @@ setTruthValue handle tv = do
           res <- c_truthvalue_setOnAtom handle tptr lptr
           return $ res == sUCCESS
 
+
+foreign import ccall "PTruthValuePtr_fromRaw"
+  c_ptruthvalueptr_fromraw :: CString
+                            -> Ptr CDouble
+                            -> IO TruthValueP
+
+-- Internal function for creating TruthValuePtr* to be returned by GroundedPredicate function
+convertToTruthValueP :: TruthVal -> IO TruthValueP
+convertToTruthValueP tv = do
+    let (TVRaw tvtype list) = toTVRaw tv
+    withArray (map realToFrac list) $
+      \lptr -> withCString tvtype $
+      \tptr -> do
+          res <- c_ptruthvalueptr_fromraw tptr lptr
+          return res
+    
+
 -- Helpfer function for creating function that can be called from C
 exportFunction :: (Atom -> AtomSpace Atom) -> Ptr AtomSpaceRef -> Handle -> IO (Handle)
 exportFunction f asRef id = do
@@ -380,3 +398,10 @@ exportFunction f asRef id = do
     resAtom <- runReaderT op (AtomSpaceRef asRef)
     (Just resID) <- as <: insertAndGetHandle resAtom
     return resID
+
+-- Helpfer function for creating predicates that can be called from C
+exportPredicate :: (Atom -> TruthVal) -> Ptr AtomSpaceRef -> Handle -> IO (TruthValueP)
+exportPredicate p asRef id = do
+    as <- refToObj asRef
+    (Just atom) <- as <: getByHandle id
+    convertToTruthValueP $ p atom

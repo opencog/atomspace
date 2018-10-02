@@ -41,9 +41,14 @@ public:
 		       test_dir = source_dir + "/tests",
 		       test_ure_dir = test_dir + "/rule-engine",
 		       test_forwardchainer_dir = test_ure_dir + "/forwardchainer",
+		       test_scm_dir = test_forwardchainer_dir + "/scm",
 		       ure_dir = source_dir + "/opencog/scm/opencog/rule-engine";
-		vector<string> load_paths = { source_dir, test_dir, test_ure_dir,
-		                              test_forwardchainer_dir, ure_dir };
+		vector<string> load_paths = { source_dir,
+		                              test_dir,
+		                              test_ure_dir,
+		                              test_forwardchainer_dir,
+		                              test_scm_dir,
+		                              ure_dir };
 		for (string& p : load_paths) {
 			string eval_str = string("(add-to-load-path \"") + p + string("\")");
 			_eval.eval(eval_str);

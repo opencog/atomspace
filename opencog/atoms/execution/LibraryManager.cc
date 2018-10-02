@@ -36,7 +36,7 @@ void LibraryManager::setLocalFunc(std::string libName, std::string funcName, voi
 	_functions[funcID] = func;
 }
 
-void* LibraryManager::getFunc(std::string libName,std::string funcName)
+void* LibraryManager::getFunc(std::string libName, std::string funcName)
 {
 	void* libHandle;
 	if (_librarys.count(libName) == 0) {

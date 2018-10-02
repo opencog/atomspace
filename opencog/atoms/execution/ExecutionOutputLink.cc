@@ -168,8 +168,6 @@ Handle ExecutionOutputLink::do_execute(AtomSpace* as,
 	// Used by the Haskel and C++ bindings; can be used with any language
 	else if (lang == "lib")
 	{
-#define BROKEN_CODE
-#ifdef BROKEN_CODE
 		void* sym = LibraryManager::getFunc(lib,fun);
 
 		// Convert the void* pointer to the correct function type.
@@ -183,7 +181,6 @@ Handle ExecutionOutputLink::do_execute(AtomSpace* as,
 			result = *res;
 			free(res);
 		}
-#endif
 	}
 	else {
 		// Unkown proceedure type
@@ -229,15 +226,15 @@ void ExecutionOutputLink::lang_lib_fun(const std::string& schema,
 
 	if (lang == "lib") {
 		// Get the name of the Library and Function. They should be
-		// sperated by "\\".
+		// separated by '\'. If no library the separator may be omitted.
 		std::size_t seppos = schema.find("\\");
-		if (seppos == std::string::npos)
-		{
-			throw RuntimeException(TRACE_INFO,
-			                       "Library name and function name must be separated by '\\'");
+		if (seppos == std::string::npos) { // No library
+			lib = "";
+			fun = schema.substr(pos);
+		} else {                  // Possible library
+			lib = schema.substr(pos, seppos - pos);
+			fun = schema.substr(seppos + 1);
 		}
-		lib = schema.substr(pos, seppos - pos);
-		fun = schema.substr(seppos + 1);
 	} else
 		fun = schema.substr(pos);
 }
@@ -248,4 +245,3 @@ void opencog::setLocalSchema(std::string funcName, Handle* (*func)(AtomSpace *, 
 {
 	LibraryManager::setLocalFunc("", funcName, reinterpret_cast<void*>(func));
 }
-

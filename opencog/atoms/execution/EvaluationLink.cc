@@ -695,8 +695,6 @@ TruthValuePtr EvaluationLink::do_evaluate(AtomSpace* as,
 	// Extract the language, library and function
 	std::string lang, lib, fun;
 	ExecutionOutputLink::lang_lib_fun(schema, lang, lib, fun);
-#define BROKEN_CODE
-#ifdef BROKEN_CODE
 	// Used by the C++ bindings; can be used with any language, Haskel binding is now missing
 	if (lang == "lib")
 	{
@@ -706,14 +704,26 @@ TruthValuePtr EvaluationLink::do_evaluate(AtomSpace* as,
 		func = reinterpret_cast<TruthValuePtr* (*)(AtomSpace *, Handle*)>(sym);
 		// Evaluate the predicate
 		TruthValuePtr* res = func(as, &args);
+		TruthValuePtr result;
 		if(res != NULL)
 		{
-			TruthValuePtr result = *res;
+			result = *res;
 			free(res);
-			return result;
 		}
+		if (nullptr == result) {
+			// If silent is true, return a simpler and non-logged
+			// exception, which may, in some contexts, be considerably
+			// faster than the one below.
+			if (silent)
+				throw NotEvaluatableException();
+
+			throw RuntimeException(TRACE_INFO,
+			                       "Invalid return value from predicate %s\nArgs: %s",
+			                       pn->to_string().c_str(),
+			                       cargs->to_string().c_str());
+		}
+		return result;
 	}
-#endif
 
 	// Unkown proceedure type.
 	throw RuntimeException(TRACE_INFO,
