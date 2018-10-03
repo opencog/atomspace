@@ -24,3 +24,9 @@ ADD_CXXTEST(MultiAtomSpaceUTest)
 ADD_CXXTEST(MultiThreadUTest)
 ADD_CXXTEST(SCMUtilsUTest)
 ADD_CXXTEST(SCMExecutionOutputUTest)
+
+ADD_GUILE_TEST(SCMOpenogTestRunnerPass scm-opencog-test-runner-pass.scm)
+ADD_GUILE_TEST(SCMOpenogTestRunnerFail scm-opencog-test-runner-fail.scm)
+# The SCMOpenogTestRunnerFail fails purposely as it is testing that the runner
+# exits properly and thus flipping the result by setting the properties below.
+SET_TESTS_PROPERTIES(SCMOpenogTestRunnerFail PROPERTIES WILL_FAIL TRUE)
