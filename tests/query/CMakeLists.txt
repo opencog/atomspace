@@ -42,6 +42,7 @@ IF (HAVE_GUILE)
 	ADD_CXXTEST(ImplicationUTest)
 	ADD_CXXTEST(ExecutionOutputUTest)
 	ADD_CXXTEST(BindTVUTest)
+	ADD_CXXTEST(EvalLinkDefaultTVUTest)
 	ADD_CXXTEST(BuggyStackUTest)
 	ADD_CXXTEST(VarTypeNotUTest)
 	ADD_CXXTEST(BuggyNotUTest)
@@ -185,3 +186,5 @@ CONFIGURE_FILE(${CMAKE_SOURCE_DIR}/tests/query/ill-put.scm
     ${PROJECT_BINARY_DIR}/tests/query/ill-put.scm)
 CONFIGURE_FILE(${CMAKE_SOURCE_DIR}/tests/query/implication-introduction.scm
     ${PROJECT_BINARY_DIR}/tests/query/implication-introduction.scm)
+CONFIGURE_FILE(${CMAKE_SOURCE_DIR}/tests/query/eval-default-tv.scm
+    ${PROJECT_BINARY_DIR}/tests/query/eval-default-tv.scm)
