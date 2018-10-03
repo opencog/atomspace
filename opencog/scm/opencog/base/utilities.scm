@@ -1303,13 +1303,13 @@
     ; Any code written after 'test-end' is called will not be run as
     ; 'test-end calls 'exit'.
 
-  For details on the apis for writing srfi-64 test-suite see
+  For details on the apis for writing srfi-64 test-suites see
   https://srfi.schemers.org/srfi-64/srfi-64.html
 "
   (define (new-final)
     (lambda (runner)
       ((test-runner-on-final (test-runner-simple)) runner)
-      (display "%%%% Exiting test suite \n")
+      (display "%%%% Exiting test suite\n")
       (exit (+ (test-runner-fail-count runner)
                (test-runner-xfail-count runner)))))
 
