@@ -1,25 +1,33 @@
 
 
-(define (redness node)
-    (stv 0.55 0.55)
+(define (check-color object color)
+    (if (string=? (cog-name object) "RedItem")
+        (stv 0.55 0.55)
+        (stv 0.45 0.45))
 )
 
 (define red-thing (ConceptNode "RedItem"))
+(define tr-thing (ConceptNode "TransparentItem"))
 
 (Inheritance (stv 1.0 0.999) red-thing (ConceptNode "colored"))
+(Inheritance (stv 1.0 0.999) tr-thing (ConceptNode "colored"))
+(Inheritance (stv 1.0 0.999) (ConceptNode "Red") (ConceptNode "Color"))
 
-(define is-red 
+(define has-color
         (EvaluationLink
-            (GroundedPredicateNode "scm:redness")
-            (VariableNode "$X")
+            (GroundedPredicateNode "scm:check-color")
+            (ListLink (VariableNode "$X")
+                      (VariableNode "$C"))
         )
 )
+
 
 (define query
     (BindLink
         (AndLink
-           (InheritanceLink (VariableNode "$X") (ConceptNode "colored"))
-           is-red
+          (InheritanceLink (VariableNode "$X") (ConceptNode "colored"))
+          (InheritanceLink (VariableNode "$C") (ConceptNode "Color"))
+          has-color
         )
-    is-red)
-) 
+    has-color)
+)
