@@ -137,7 +137,7 @@ SchemeSmob::scm_to_string_list (SCM svalue_list)
  */
 SCM SchemeSmob::ss_new_value (SCM stype, SCM svalue_list)
 {
-	Type t = verify_atom_type(stype, "cog-new-value", 1);
+	Type t = verify_type(stype, "cog-new-value", 1);
 
 	ProtoAtomPtr pa;
 	if (FLOAT_VALUE == t)

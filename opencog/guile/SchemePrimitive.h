@@ -261,7 +261,7 @@ protected:
 	Type scm_to(SCM args, size_t idx, Type) const
 	{
 		SCM arg = scm_list_ref(args, scm_from_size_t(idx));
-		return SchemeSmob::verify_atom_type(arg, scheme_name, idx);
+		return SchemeSmob::verify_type(arg, scheme_name, idx);
 	}
 	Handle scm_to(SCM args, size_t idx, const Handle&) const
 	{
