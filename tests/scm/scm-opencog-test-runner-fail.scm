@@ -1,5 +1,6 @@
-((@@ (opencog) opencog-test-runner))
+(use-modules (opencog test-runner))
 
+(opencog-test-runner)
 (define t "opencog-test-runner-fail")
 
 ; Test that exit value is propageted correctly on fail.

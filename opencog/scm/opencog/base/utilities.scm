@@ -62,7 +62,6 @@
 ;
 
 (use-modules (srfi srfi-1))
-(use-modules (srfi srfi-64))  ; For opencog-test-runner
 (use-modules (ice-9 threads))  ; needed for par-map par-for-each
 
 ; See below; the compiler step is not needed for guile-2.1
@@ -1277,49 +1276,6 @@
   (let* ((subtypes (cog-get-subtypes atom-type))
          (rec-subtypes (map cog-get-all-subtypes subtypes)))
     (delete-duplicates (append subtypes (apply append rec-subtypes)))))
-
-; -----------------------------------------------------------------------
-; NOTE This is not exported because it is only used for testing and
-; is not part of the opencog api.
-(define (opencog-test-runner)
-"
-  opencog-test-runner
-
-  Sets a new test-runner that is based on test-runner-simple, by wrapping
-  test-on-final-simple so as to return non-zero exit codes when
-  there are test failures. This allows cmake's ctest to report the failures
-  properly, provided (test-end) is called.
-
-  Since it is not exported for using the runner follow the follwing pattern
-  in test-scripts
-
-    ((@@ (opencog) opencog-test-runner))
-
-    (test-begin \"Name of the test suite\")
-    (test-assert ...)
-    ...
-    ...
-    (test-end \"Name of the test suite\")
-    ; Any code written after 'test-end' is called will not be run as
-    ; 'test-end calls 'exit'.
-
-  For details on the apis for writing srfi-64 test-suites see
-  https://srfi.schemers.org/srfi-64/srfi-64.html
-"
-  (define (new-final)
-    (lambda (runner)
-      ((test-runner-on-final (test-runner-simple)) runner)
-      (display "%%%% Exiting test suite\n")
-      (exit (+ (test-runner-fail-count runner)
-               (test-runner-xfail-count runner)))))
-
-  (let ((runner (test-runner-simple)))
-    (test-runner-on-final! runner (new-final))
-
-    ; Set the new runner as the default factory
-    (test-runner-factory (lambda () runner))
-  )
-)
 
 ; -----------------------------------------------------------------------
 
