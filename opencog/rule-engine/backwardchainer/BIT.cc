@@ -22,11 +22,11 @@
 
 #include <boost/range/algorithm/binary_search.hpp>
 #include <boost/range/algorithm/lower_bound.hpp>
-#include <boost/range/algorithm/remove_if.hpp>
 #include <boost/range/algorithm/reverse.hpp>
 #include <boost/range/algorithm/unique.hpp>
 #include <boost/range/algorithm/find.hpp>
 #include <boost/range/algorithm/sort.hpp>
+#include <boost/range/algorithm_ext/erase.hpp>
 
 #include <boost/algorithm/string/classification.hpp>
 #include <boost/algorithm/string/split.hpp>
@@ -444,14 +444,15 @@ Handle AndBIT::expand_fcs_pattern(const Handle& fcs_pattern,
 		        or is_argument_of(h, conclusion)
 		        or (boost::find(clauses, h) != clauses.end()));
 	};
-	fcs_clauses.erase(boost::remove_if(fcs_clauses, to_remove),
-	                  fcs_clauses.end());
+	boost::remove_erase_if(fcs_clauses, to_remove);
 
 	// Add the patterns and preconditions associated to the rule
 	fcs_clauses.insert(fcs_clauses.end(), clauses.begin(), clauses.end());
 
 	// Remove redundant clauses
-	boost::unique(boost::sort(fcs_clauses));
+	boost::sort(fcs_clauses);
+	boost::erase(fcs_clauses,
+	             boost::unique<boost::return_found_end>(fcs_clauses));
 
 	return fcs->getAtomSpace()->add_link(AND_LINK, fcs_clauses);
 }
