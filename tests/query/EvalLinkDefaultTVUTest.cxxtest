@@ -30,6 +30,16 @@
 using namespace opencog;
 
 
+/*
+ * Test that it is possible to modify truth value
+ * of virtual EvaluationLink from with the grounded predicate.
+ * Also test that pattern matcher does not override the value set in
+ * the grounded predicate with the value returned.
+ * This behavior is necessary if one wants to process EvaluationLinks with
+ * truth values < 0.5 in URE since pattern matcher would dismiss such evaluation link.
+ * See the discurssion at https://github.com/opencog/atomspace/issues/1868
+ */
+
 class EvalLinkDefaultTVUTest: public CxxTest::TestSuite
 {
 private:

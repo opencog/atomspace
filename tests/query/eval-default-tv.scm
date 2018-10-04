@@ -1,4 +1,5 @@
-
+;see comment section in EvalLinkDefaultTVUTest.cxxtest 
+;see the discurssion at https://github.com/opencog/atomspace/issues/1868
 
 (define (check-color object color)
     (if (string=? (cog-name object) "RedItem")
