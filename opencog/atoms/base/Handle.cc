@@ -207,6 +207,16 @@ std::string oc_to_string(const HandleMap& hmap, const std::string& indent)
 	return ss.str();
 }
 
+std::string oc_to_string(const HandleMap::value_type& hmv, const std::string& indent)
+{
+	std::stringstream ss;
+	ss << indent << "key:" << std::endl
+	   << oc_to_string(hmv.first, indent + OC_TO_STRING_INDENT)
+	   << indent << "value:" << std::endl
+	   << oc_to_string(hmv.second, indent + OC_TO_STRING_INDENT);
+	return ss.str();
+}
+
 std::string oc_to_string(const HandleMultimap& hmultimap, const std::string& indent)
 {
 	std::stringstream ss;
