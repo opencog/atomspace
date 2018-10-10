@@ -1,5 +1,5 @@
-/*
- * SchemeSmobValue.c
+/* 
+ * SchemeSmobValue.cc
  *
  * Scheme small objects (SMOBS) for ProtoAtoms.
  *
@@ -15,8 +15,9 @@
 #include <opencog/atoms/proto/RandomStream.h>
 #include <opencog/atoms/base/Atom.h>
 #include <opencog/atoms/proto/NameServer.h>
-
 #include <opencog/guile/SchemeSmob.h>
+
+#include <opencog/atoms/proto/ValueFactory.h>
 
 using namespace opencog;
 
@@ -144,9 +145,8 @@ SCM SchemeSmob::ss_new_value (SCM stype, SCM svalue_list)
 	{
 		std::vector<double> valist;
 		valist = verify_float_list(svalue_list, "cog-new-value", 2);
-		pa = createFloatValue(valist);
+		pa = valuefactory().create(t, valist);
 	}
-
 	else if (RANDOM_STREAM == t)
 	{
 		if (!scm_is_pair(svalue_list) and !scm_is_null(svalue_list))
@@ -159,21 +159,21 @@ SCM SchemeSmob::ss_new_value (SCM stype, SCM svalue_list)
 			SCM svalue = SCM_CAR(svalue_list);
 			dim = verify_int(svalue, "cog-new-value", 2);
 		}
-		pa = createRandomStream(dim);
+		pa = valuefactory().create(t, dim);
 	}
 
 	else if (LINK_VALUE == t)
 	{
 		std::vector<ProtoAtomPtr> valist;
 		valist = verify_protom_list(svalue_list, "cog-new-value", 2);
-		pa = createLinkValue(valist);
+		pa = valuefactory().create(t, valist);
 	}
 
 	else if (STRING_VALUE == t)
 	{
 		std::vector<std::string> valist;
 		valist = verify_string_list(svalue_list, "cog-new-value", 2);
-		pa = createStringValue(valist);
+		pa = valuefactory().create(t, valist);
 	}
 
 	else

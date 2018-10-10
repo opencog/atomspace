@@ -21,6 +21,8 @@ ADD_LIBRARY (atomproto
 	RandomStream.cc
 	StreamValue.cc
 	StringValue.cc
+	ValueFactory.cc
+	FactoryLoader.cc
 )
 
 # Without this, parallel make will race and crap up the generated files.
@@ -44,6 +46,7 @@ INSTALL (FILES
 	RandomStream.h
 	StreamValue.h
 	StringValue.h
+	ValueFactory.h
 	types.h
 	DESTINATION "include/opencog/atoms/proto"
 )
