@@ -36,11 +36,11 @@ jobs:
       - restore_cache:
           name: Restore GCH Cache
           keys:
-            - ghc-{{checksum "/ws/atomspace/opencog/haskell/stack.yaml"}}
+            - ghc-{{checksum "/ws/atomspace/opencog/haskell/stack.yaml"}}-{{ arch }}
       - restore_cache:
           name: Restore Haskell Deps Cache
           keys:
-            - haskelldeps-{{checksum "/ws/atomspace/opencog/haskell/stack.yaml"}}-{{checksum "/ws/atomspace/opencog/haskell/opencog-atomspace.cabal"}}
+            - haskelldeps-{{checksum "/ws/atomspace/opencog/haskell/stack.yaml"}}-{{checksum "/ws/atomspace/opencog/haskell/opencog-atomspace.cabal"}}-{{ arch }}
       - run:
           name: CMake Configure
           command: mkdir build && cd build && cmake ..
@@ -65,12 +65,12 @@ jobs:
           when: always
       - save_cache:
           name: Save GHC Cache
-          key: ghc-{{checksum "/ws/atomspace/opencog/haskell/stack.yaml"}}
+          key: ghc-{{checksum "/ws/atomspace/opencog/haskell/stack.yaml"}}-{{ arch }}
           paths:
             - /root/.stack
       - save_cache:
           name: Save Haskell Deps Cache
-          key: haskelldeps-{{checksum "/ws/atomspace/opencog/haskell/stack.yaml"}}-{{checksum "/ws/atomspace/opencog/haskell/opencog-atomspace.cabal"}}
+          key: haskelldeps-{{checksum "/ws/atomspace/opencog/haskell/stack.yaml"}}-{{checksum "/ws/atomspace/opencog/haskell/opencog-atomspace.cabal"}}-{{ arch }}
           paths:
             - /ws/atomspace/opencog/haskell/.stack-work
       - persist_to_workspace:
@@ -95,11 +95,11 @@ jobs:
       - restore_cache:
           name: Restore GCH Cache
           keys:
-            - ghc-{{checksum "/ws/atomspace/opencog/haskell/stack.yaml"}}
+            - ghc-{{checksum "/ws/atomspace/opencog/haskell/stack.yaml"}}-{{ arch }}
       - restore_cache:
           name: Restore Haskell Deps Cache
           keys:
-            - haskelldeps-{{checksum "/ws/atomspace/opencog/haskell/stack.yaml"}}-{{checksum "/ws/atomspace/opencog/haskell/opencog-atomspace.cabal"}}
+            - haskelldeps-{{checksum "/ws/atomspace/opencog/haskell/stack.yaml"}}-{{checksum "/ws/atomspace/opencog/haskell/opencog-atomspace.cabal"}}-{{ arch }}
       - run:
           name: Install cogutil
           command: cd /ws/cogutil/build && make -j2 install && ldconfig
