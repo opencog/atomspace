@@ -14,7 +14,8 @@ namespace opencog
 {
 using CreateProto = ProtoAtomPtr (*) (...);
 
-struct FuncRegister {
+struct FuncRegister
+{
     CreateProto func;
     std::vector<std::type_index> args;
 };
@@ -33,20 +34,20 @@ private:
 public:
 
     friend ValueFactory& valuefactory();
+
     /** Registers the creator functions.
      *  @param vtype The value type.
      *  @param func a pointer to the creator function of the value.
      *  @param args  an ordered vector the types of arguments the creator takes.
      */
-    /*static*/ void register_factory(Type vtype, CreateProto func, std::vector<std::type_index> args);
+     void register_factory(Type vtype, CreateProto func, std::vector<std::type_index> args);
 
 
-    /** Does dynamic dispatching of the appropriate
-     create functions which matches argument provided.
-     @param arg the value type constructor argument
-     @param vtype The type of the Value
-     @throws invalid_argument exception.
-     */
+     /** Does dynamic dispatching of the appropriate create functions which matches argument provided.
+      * @param arg the value type constructor argument.
+      * @param vtype The type of the Value.
+      * @throws invalid_argument exception.
+      */
     template <typename T>
     ProtoAtomPtr create(Type vtype, T arg)
     {
