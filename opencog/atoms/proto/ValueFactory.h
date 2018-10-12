@@ -30,6 +30,7 @@ private:
     ValueFactory() {}
 
     std::map<Type, std::vector<FuncRegister>> func_register;
+    std::map<Type, CreateProto> cast_register;
 
 public:
 
@@ -42,6 +43,9 @@ public:
      */
      void register_factory(Type vtype, CreateProto func, std::vector<std::type_index> args);
 
+     void register_castor(Type vtype, CreateProto func);
+
+     ProtoAtomPtr cast(Type vtype, ProtoAtomPtr ptr);
 
      /** Does dynamic dispatching of the appropriate create functions which matches argument provided.
       * @param arg the value type constructor argument.
