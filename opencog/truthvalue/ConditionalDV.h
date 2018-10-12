@@ -49,7 +49,7 @@ typedef std::shared_ptr<const DistributionalValue> DistributionalValuePtr;
 class ConditionalDV;
 typedef std::shared_ptr<const ConditionalDV> ConditionalDVPtr;
 
-typedef std::map<Handle,HandleCounter> CDVrep;
+typedef std::map<ProtoAtomPtr,ValueCounter> CDVrep;
 
 class ConditionalDV
     : public ProtoAtom
@@ -64,18 +64,28 @@ class ConditionalDV
 public:
     ConditionalDV();
     ConditionalDV(CDVrep);
-    ConditionalDV(HandleSeq,std::vector<DistributionalValuePtr>);
+    ConditionalDV(ProtomSeq,std::vector<DistributionalValuePtr>);
 
     static ConditionalDVPtr createCDV();
     static ConditionalDVPtr createCDV(CDVrep);
-    static ConditionalDVPtr createCDV(HandleSeq,std::vector<DistributionalValuePtr>);
+    static ConditionalDVPtr createCDV(ProtomSeq,std::vector<DistributionalValuePtr>);
 
-    HandleSeq getConditions() const;
+	ConditionalDVPtr merge(ConditionalDVPtr) const;
+
+    ProtomSeq getConditions() const;
     std::vector<DistributionalValuePtr> getUnconditionals() const;
-    DistributionalValuePtr getUnconditional(Handle) const;
+    DistributionalValuePtr getUnconditional(ProtoAtomPtr) const;
     DistributionalValuePtr getUnconditional(DistributionalValuePtr) const;
 
+    ValueCounter getUnconditionalNoMatchP(ProtoAtomPtr) const;
+    DistributionalValuePtr getUnconditionalNoMatch(ProtoAtomPtr) const;
+    DistributionalValuePtr getUnconditionalNoMatch(DistributionalValuePtr) const;
+
     DistributionalValuePtr getJointProbability(DistributionalValuePtr) const;
+
+
+	double total_count() const;
+	double avg_count() const;
 
     virtual bool operator==(const ProtoAtom& rhs) const;
 

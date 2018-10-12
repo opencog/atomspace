@@ -166,6 +166,24 @@ SCM SchemeSmob::handleseq_to_scm (const HandleSeq& hs)
 	return res;
 }
 
+SCM SchemeSmob::protomseq_to_scm (const ProtomSeq& ps)
+{
+    SCM res;
+    bool first = true;
+    for (ProtoAtomPtr p : ps)
+    {
+        SCM sp = protom_to_scm(p);
+        if (first) {
+            first = false;
+            res = scm_list_1(sp);
+        }
+        else {
+            res = scm_cons(sp,res);
+        }
+    }
+	return res;
+}
+
 SCM SchemeSmob::protom_to_scm (const ProtoAtomPtr& pa)
 {
 	if (nullptr == pa) return SCM_EOL;

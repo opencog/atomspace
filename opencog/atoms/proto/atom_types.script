@@ -107,6 +107,10 @@ SET_LINK <- UNORDERED_LINK,EVALUATABLE_LINK
 LIST_LINK <- ORDERED_LINK
 MEMBER_LINK <- ORDERED_LINK,EVALUATABLE_LINK
 
+//Like ListLink but without special handeling if used as argument
+//Probably temorary
+PRODUCT_LINK <- ORDERED_LINK
+
 // ContextLink: Universe of discourse. This behaves like set subtraction
 // in that the set of things outside of the context have no bearing on
 // the probability.

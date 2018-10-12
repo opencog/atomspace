@@ -58,7 +58,7 @@ class DistributionalValue
 
     friend class ConditionalDV;
 
-    HandleCounter value;
+    ValueCounter value;
     int k;
 
     // Disallow assignment -- truth values are immutable!
@@ -71,20 +71,22 @@ public:
     static count_t DEFAULT_K;
 
     DistributionalValue();
-    DistributionalValue(HandleCounter);
+    DistributionalValue(ValueCounter);
     DistributionalValue(double,double);
 
-    static DistributionalValuePtr UniformDistributionalValue(Handle,int);
-    static DistributionalValuePtr UniformDistributionalValue(HandleSeq,int);
+    static DistributionalValuePtr UniformDistributionalValue(ProtoAtomPtr,int);
+    static DistributionalValuePtr UniformDistributionalValue(ProtomSeq,int);
     static DistributionalValuePtr TRUE_TV();
     static DistributionalValuePtr FALSE_TV();
     static DistributionalValuePtr DEFAULT_TV();
     static DistributionalValuePtr createDV(double,double);
-    static DistributionalValuePtr createDV(HandleCounter);
+    static DistributionalValuePtr createDV(ValueCounter);
+
+	static double intervalDist(ProtoAtomPtr,ProtoAtomPtr);
 
     ConditionalDVPtr divide(DistributionalValuePtr,int) const;
     DistributionalValuePtr SumJoint(DistributionalValuePtr,int) const;
-    HandleCounter PartJoint(Handle,int) const;
+    ValueCounter PartJoint(ProtoAtomPtr,int) const;
 
     bool IsUniform() const;
 
@@ -93,13 +95,13 @@ public:
     std::vector<double> get_var() const;
 
     double get_fstord_mean() const;
-    double middleOfInterval(Handle) const;
+    double middleOfInterval(ProtoAtomPtr) const;
 
     double get_mode_for(double) const;
     double get_mean_for(double) const;
     double get_var_for(double) const;
 
-    DistributionalValuePtr AddEvidence(Handle) const;
+    DistributionalValuePtr AddEvidence(ProtoAtomPtr) const;
     DistributionalValuePtr merge(DistributionalValuePtr) const;
     DistributionalValuePtr negate() const;
 
@@ -108,17 +110,20 @@ public:
 
     double total_count() const;
     double get_confidence() const;
+	double get_swc() const;
 
     static double to_conf(int c);
     static int to_count(double);
 
-    Handle getKey(Handle) const;
-    double getCount(Handle) const;
-    double getMean(Handle) const;
-    double getMode(Handle) const;
-    double getVar(Handle) const;
+    ProtoAtomPtr getKey(ProtoAtomPtr) const;
+    double getCount(ProtoAtomPtr) const;
+    double getCountNoMatch(ProtoAtomPtr h) const;
+    double getMean(ProtoAtomPtr) const;
+    double getMeanNoMatch(ProtoAtomPtr) const;
+    double getMode(ProtoAtomPtr) const;
+    double getVar(ProtoAtomPtr) const;
 
-    HandleSeq getKeys() const;
+    ProtomSeq getKeys() const;
 
     virtual bool operator==(const ProtoAtom& rhs) const;
 

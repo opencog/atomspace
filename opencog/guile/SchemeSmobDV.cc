@@ -93,13 +93,13 @@ SCM SchemeSmob::dvs_to_scm(const std::vector<DistributionalValuePtr>& dvs)
  */
 SCM SchemeSmob::ss_new_dv(SCM shs, SCM scs)
 {
-	HandleSeq hs = verify_handle_list(shs,"cog-new-dv",1);
+	ProtomSeq hs = verify_protom_list(shs,"cog-new-dv",1);
     std::vector<double> cs = scm_to_float_list(scs);
     auto it1 = hs.begin();
     auto it2 = cs.begin();
     auto end1 = hs.end();
     auto end2 = cs.end();
-    HandleCounter hc;
+    ValueCounter hc;
     for (;(it1 != end1) && (it2 != end2); ++it1, ++it2)
     {
         hc[*it1] = *it2;
@@ -195,10 +195,28 @@ SCM SchemeSmob::ss_dv_sum_joint(SCM sdv1,SCM sdv2,SCM si)
 SCM SchemeSmob::ss_dv_part_joint(SCM sdv,SCM sh,SCM si)
 {
     DistributionalValuePtr dv = verify_dv(sdv,"cog-dv-part-joint",1);
-    Handle h = verify_handle(sh,"cog-dv-part-joint",2);
+    ProtoAtomPtr h = verify_protom(sh,"cog-dv-part-joint",2);
     int i = scm_to_int(si);
     DistributionalValuePtr dvres = DistributionalValue::createDV(dv->PartJoint(h,i));
     return dv_to_scm(dvres);
+}
+
+SCM SchemeSmob::ss_dv_get_swc(SCM sdv)
+{
+    DistributionalValuePtr dv = verify_dv(sdv,"cog-dv-get-swc",1);
+    return scm_from_double(dv->get_swc());
+}
+
+SCM SchemeSmob::ss_dv_get_fom(SCM sdv)
+{
+    DistributionalValuePtr dv = verify_dv(sdv,"cog-dv-get-fom",1);
+    return scm_from_double(dv->get_fstord_mean());
+}
+
+SCM SchemeSmob::ss_dv_get_confidence(SCM sdv)
+{
+    DistributionalValuePtr dv = verify_dv(sdv,"cog-dv-get-confidence",1);
+    return scm_from_double(dv->get_confidence());
 }
 
 SCM SchemeSmob::cdv_to_scm (const ConditionalDVPtr& cdv)
@@ -220,7 +238,7 @@ ConditionalDVPtr SchemeSmob::verify_cdv(SCM sav, const char *subrname, int pos)
 
 SCM SchemeSmob::ss_new_cdv(SCM sconds,SCM sdvs)
 {
-    HandleSeq conds = verify_handle_list(sconds,"cog-new-cdv",1);
+    ProtomSeq conds = verify_protom_list(sconds,"cog-new-cdv",1);
     std::vector<DistributionalValuePtr> dvs = verify_dv_list(sdvs,"cog-new-cdv",2);
     ConditionalDVPtr cdv = std::make_shared<ConditionalDV>(conds,dvs);
     return cdv_to_scm(cdv);
@@ -229,8 +247,8 @@ SCM SchemeSmob::ss_new_cdv(SCM sconds,SCM sdvs)
 SCM SchemeSmob::ss_cdv_get_conditions(SCM scdv)
 {
     ConditionalDVPtr cdv = verify_cdv(scdv,"cog-cdv-get-conditions",1);
-    HandleSeq conds = cdv->getConditions();
-    return handleseq_to_scm(conds);
+    ProtomSeq conds = cdv->getConditions();
+    return protomseq_to_scm(conds);
 }
 
 SCM SchemeSmob::ss_cdv_get_unconditonals(SCM scdv)
@@ -248,6 +266,14 @@ SCM SchemeSmob::ss_cdv_get_unconditonal(SCM scdv,SCM sdv)
     return dv_to_scm(res);
 }
 
+SCM SchemeSmob::ss_cdv_get_unconditonal_no_match(SCM scdv,SCM sdv)
+{
+    ConditionalDVPtr cdv = verify_cdv(scdv,"cog-cdv-get-unconditional-no-match",1);
+    DistributionalValuePtr dv = verify_dv(sdv,"cog-cdv-get-unconditional-no-match",2);
+    DistributionalValuePtr res = cdv->getUnconditionalNoMatch(dv);
+    return dv_to_scm(res);
+}
+
 SCM SchemeSmob::ss_cdv_get_joint(SCM scdv,SCM sdv)
 {
    ConditionalDVPtr cdv = verify_cdv(scdv,"cog-cdv-get-joint",1);
@@ -256,4 +282,11 @@ SCM SchemeSmob::ss_cdv_get_joint(SCM scdv,SCM sdv)
    return dv_to_scm(res);
 }
 
+SCM SchemeSmob::ss_cdv_merge(SCM scdv1,SCM scdv2)
+{
+   ConditionalDVPtr cdv1 = verify_cdv(scdv1,"cog-cdv-merge",1);
+   ConditionalDVPtr cdv2 = verify_cdv(scdv2,"cog-cdv-merge",2);
+   ConditionalDVPtr res = cdv1->merge(cdv2);
+   return cdv_to_scm(res);
+}
 /* ===================== END OF FILE ============================ */

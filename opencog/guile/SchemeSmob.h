@@ -80,6 +80,7 @@ private:
 	static SCM handle_to_scm(const Handle&);
 	static SCM handleseq_to_scm(const HandleSeq&);
 	static SCM protom_to_scm(const ProtoAtomPtr&);
+	static SCM protomseq_to_scm(const ProtomSeq&);
 	static SCM tv_to_scm(const TruthValuePtr&);
 	static SCM av_to_scm(const AttentionValuePtr&);
 	static SCM dv_to_scm(const DistributionalValuePtr&);
@@ -90,7 +91,7 @@ private:
 	static TruthValuePtr scm_to_tv(SCM);
 
 	static std::vector<double> scm_to_float_list (SCM);
-	static std::vector<ProtoAtomPtr> scm_to_protom_list (SCM);
+	static ProtomSeq scm_to_protom_list (SCM);
 	static std::vector<std::string> scm_to_string_list (SCM);
 
 	// Value, atom creation and deletion functions
@@ -199,11 +200,16 @@ private:
 	static SCM ss_dv_divide(SCM,SCM,SCM);
 	static SCM ss_dv_sum_joint(SCM,SCM,SCM);
 	static SCM ss_dv_part_joint(SCM,SCM,SCM);
+	static SCM ss_dv_get_confidence(SCM);
+	static SCM ss_dv_get_swc(SCM);
+	static SCM ss_dv_get_fom(SCM);
 	static SCM ss_new_cdv(SCM, SCM);
     static SCM ss_cdv_get_conditions(SCM);
     static SCM ss_cdv_get_unconditonals(SCM);
     static SCM ss_cdv_get_unconditonal(SCM,SCM);
+    static SCM ss_cdv_get_unconditonal_no_match(SCM,SCM);
     static SCM ss_cdv_get_joint(SCM,SCM);
+    static SCM ss_cdv_merge(SCM,SCM);
 
 	// Free variables
 	static SCM ss_get_free_variables(SCM);
@@ -244,7 +250,7 @@ private:
 	                                               int pos = 1);
 	static std::vector<double> verify_float_list (SCM, const char *,
 	                                               int pos = 1);
-	static std::vector<ProtoAtomPtr> verify_protom_list (SCM, const char *,
+	static ProtomSeq verify_protom_list (SCM, const char *,
 	                                               int pos = 1);
 	static std::vector<std::string> verify_string_list (SCM, const char *,
 	                                               int pos = 1);

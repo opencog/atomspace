@@ -29,6 +29,8 @@
 #include <opencog/atoms/proto/types.h>
 #include <opencog/atoms/proto/NameServer.h>
 
+#include <opencog/util/Counter.h>
+
 namespace opencog
 {
 
@@ -98,6 +100,9 @@ public:
 typedef std::shared_ptr<ProtoAtom> ProtoAtomPtr;
 
 typedef std::vector<ProtoAtomPtr> ProtomSeq;
+
+//! a map from ProtoAtomPtr to double
+typedef Counter<ProtoAtomPtr, double> ValueCounter;
 
 /** @}*/
 } // namespace opencog

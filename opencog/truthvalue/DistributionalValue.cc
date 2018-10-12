@@ -27,7 +27,8 @@
 #include <stdio.h>
 
 #include <opencog/truthvalue/DistributionalValue.h>
-#include <opencog/atoms/core/NumberNode.h>
+#include <opencog/atoms/proto/FloatValue.h>
+#include <opencog/atoms/proto/LinkValue.h>
 #include <opencog/atoms/base/Link.h>
 #include <opencog/atomspace/AtomSpace.h>
 
@@ -39,7 +40,7 @@ DistributionalValue::DistributionalValue()
     : ProtoAtom(DISTRIBUTIONAL_VALUE)
 {}
 
-DistributionalValue::DistributionalValue(HandleCounter hctr)
+DistributionalValue::DistributionalValue(ValueCounter hctr)
     : ProtoAtom(DISTRIBUTIONAL_VALUE)
 {
     value = hctr;
@@ -50,11 +51,11 @@ DistributionalValue::DistributionalValue(double mode,double conf)
 {
     confidence_t cf = std::min(conf, 0.9999998);
     double count = (DEFAULT_K * cf / (1.0 - cf));
-    Handle h = createNode(NUMBER_NODE,std::to_string(mode));
+    ProtoAtomPtr h = createFloatValue(mode);
     value[h] = count;
 }
 
-DistributionalValuePtr DistributionalValue::createDV(HandleCounter hctr)
+DistributionalValuePtr DistributionalValue::createDV(ValueCounter hctr)
 {
     return std::make_shared<const DistributionalValue>(hctr);
 }
@@ -65,18 +66,18 @@ DistributionalValuePtr DistributionalValue::createDV(double mode
     return std::make_shared<const DistributionalValue>(mode,conf);
 }
 
-DistributionalValuePtr DistributionalValue::UniformDistributionalValue(Handle h,int c)
+DistributionalValuePtr DistributionalValue::UniformDistributionalValue(ProtoAtomPtr h,int c)
 {
-    HandleCounter hctr;
+    ValueCounter hctr;
     hctr[h] = c;
     return std::make_shared<const DistributionalValue>(hctr);
 }
 
 
-DistributionalValuePtr DistributionalValue::UniformDistributionalValue(HandleSeq hs,int c)
+DistributionalValuePtr DistributionalValue::UniformDistributionalValue(ProtomSeq hs,int c)
 {
-    HandleCounter hctr;
-    for (Handle h : hs)
+    ValueCounter hctr;
+    for (ProtoAtomPtr h : hs)
     {
         hctr[h] = c;
     }
@@ -85,51 +86,90 @@ DistributionalValuePtr DistributionalValue::UniformDistributionalValue(HandleSeq
 
 DistributionalValuePtr DistributionalValue::TRUE_TV()
 {
-    Handle h1 = createNode(NUMBER_NODE,"1");
-    Handle h2 = createNode(NUMBER_NODE,"0");
-    HandleCounter hc;
+    ProtoAtomPtr h1 = createFloatValue(1.0);
+    ProtoAtomPtr h2 = createFloatValue(0.0);
+    ValueCounter hc;
     hc[h1] = 1;
     hc[h2] = 0;
     return std::make_shared<const DistributionalValue>(hc);
 }
 DistributionalValuePtr DistributionalValue::FALSE_TV()
 {
-    Handle h1 = createNode(NUMBER_NODE,"1");
-    Handle h2 = createNode(NUMBER_NODE,"0");
-    HandleCounter hc;
+    ProtoAtomPtr h1 = createFloatValue(1.0);
+    ProtoAtomPtr h2 = createFloatValue(0.0);
+    ValueCounter hc;
     hc[h1] = 0;
     hc[h2] = 1;
     return std::make_shared<const DistributionalValue>(hc);
 }
 DistributionalValuePtr DistributionalValue::DEFAULT_TV()
 {
-    Handle h1 = createNode(NUMBER_NODE,"1");
-    Handle h2 = createNode(NUMBER_NODE,"0");
-    HandleCounter hc;
+    ProtoAtomPtr h1 = createFloatValue(1.0);
+    ProtoAtomPtr h2 = createFloatValue(0.0);
+    ValueCounter hc;
     hc[h1] = 0;
     hc[h2] = 0;
     return std::make_shared<const DistributionalValue>(hc);
 }
 
+double DistributionalValue::intervalDist(ProtoAtomPtr h1,ProtoAtomPtr h2)
+{
+	auto f = [](ProtomSeq::iterator it) {
+		return FloatValueCast(*it)->value()[0];
+	};
+
+    if (h1->is_type(LINK_VALUE) && h2->is_type(LINK_VALUE))
+	{
+		ProtomSeq hs1 = LinkValueCast(h1)->value();
+		ProtomSeq hs2 = LinkValueCast(h2)->value();
+		if (hs1.size() != hs2.size())
+			throw RuntimeException(TRACE_INFO,"Sizes don't match.");
+		auto it1 = hs1.begin();
+        auto it2 = hs2.begin();
+        double max = 0;
+        for (int i = 0; i < hs1.size();i++)
+        {
+            double n = abs(f(it1) - f(it2));
+            if (n > max)
+	            max = n;
+            it1 = std::next(it1);
+            it2 = std::next(it2);
+        }
+        return max;
+	}
+    else if (h1->is_type(FLOAT_VALUE) && h2->is_type(FLOAT_VALUE))
+	{
+		double v1 = FloatValueCast(h1)->value()[0];
+		double v2 = FloatValueCast(h2)->value()[0];
+		return abs(v1 - v2);
+	}
+    throw RuntimeException(TRACE_INFO,"Can't handle that case.");
+}
+
 ConditionalDVPtr DistributionalValue::divide(DistributionalValuePtr dv2,int i) const
 {
-    CDVrep res;
+	CDVrep res;
     for (auto elem : value)
     {
-        HandleSeq hs = elem.first->getOutgoingSet();
+        ProtomSeq hs = LinkValueCast(elem.first)->value();
         if (hs.empty())
             throw RuntimeException(TRACE_INFO,"Can't divide non Joint DV.");
-        Handle h = hs[i];
+        ProtoAtomPtr h = hs[i];
         hs.erase(hs.begin() + i);
-        Handle link = createLink(hs,LIST_LINK);
-        res[h][link] = getMean(elem.first) / dv2->getMean(h) * dv2->total_count();
+        ProtoAtomPtr interval;
+        if (hs.size() != 1)
+			interval = createLinkValue(hs);
+        else
+	        interval = hs[0];
+        res[h][interval] = getMean(elem.first) / dv2->getMeanNoMatch(h)
+                                               * dv2->total_count();
     }
     return ConditionalDV::createCDV(res);
 }
 
 DistributionalValuePtr DistributionalValue::SumJoint(DistributionalValuePtr dv,int pos) const
 {
-    HandleCounter res;
+    ValueCounter res;
     for (auto elem : dv->value)
     {
         res += PartJoint(elem.first,pos);
@@ -137,16 +177,16 @@ DistributionalValuePtr DistributionalValue::SumJoint(DistributionalValuePtr dv,i
     return createDV(res);
 }
 
-HandleCounter DistributionalValue::PartJoint(Handle idx,int pos) const
+ValueCounter DistributionalValue::PartJoint(ProtoAtomPtr idx,int pos) const
 {
-    HandleCounter res;
+    ValueCounter res;
     for (auto elem : value)
     {
-        HandleSeq hs = elem.first->getOutgoingSet();
+        ProtomSeq hs = LinkValueCast(elem.first)->value();
         if (hs[pos] == idx)
         {
             hs.erase(hs.begin() + pos);
-            Handle link = createLink(hs,LIST_LINK);
+            ProtoAtomPtr link = createLinkValue(hs);
             res[link] = elem.second;
         }
     }
@@ -166,9 +206,9 @@ bool DistributionalValue::IsUniform() const
     return true;
 }
 
-DistributionalValuePtr DistributionalValue::AddEvidence(Handle h) const
+DistributionalValuePtr DistributionalValue::AddEvidence(ProtoAtomPtr h) const
 {
-    HandleCounter newhc = value;
+    ValueCounter newhc = value;
     auto it = newhc.find(h);
     if (it != newhc.end())
     {
@@ -180,7 +220,7 @@ DistributionalValuePtr DistributionalValue::AddEvidence(Handle h) const
 
 DistributionalValuePtr DistributionalValue::merge(DistributionalValuePtr newgdtv) const
 {
-    HandleCounter newhc = value;
+    ValueCounter newhc = value;
     if (k == newgdtv->k)
     {
         auto it1 = newhc.begin();
@@ -192,16 +232,16 @@ DistributionalValuePtr DistributionalValue::merge(DistributionalValuePtr newgdtv
                 throw RuntimeException(TRACE_INFO
                                       ,"Intervals of DistributionalValueS don't match.");
             }
-            std::next(it1);
-            std::next(it2);
+            it1 = std::next(it1);
+            it2 = std::next(it2);
         }
         it1 = newhc.begin();
         it2 = newgdtv->value.begin();
         for (int i = 0; i < k;i++)
         {
             it1->second = it1->second + it2->second;
-            std::next(it1);
-            std::next(it2);
+            it1 = std::next(it1);
+            it2 = std::next(it2);
         }
     }
     return std::make_shared<const DistributionalValue>(newhc);
@@ -210,7 +250,7 @@ DistributionalValuePtr DistributionalValue::merge(DistributionalValuePtr newgdtv
 DistributionalValuePtr DistributionalValue::negate() const
 {
     double total = maxCount() + minCount();
-    HandleCounter res;
+    ValueCounter res;
     for (auto elem : value)
     {
         res[elem.first] = total - elem.second;
@@ -266,6 +306,10 @@ std::vector<double> DistributionalValue::get_mean() const
 
 double DistributionalValue::get_mean_for(double ai) const
 {
+	double count = total_count();
+	if (count == 0)
+		return 0;
+	else
         return ai / total_count();
 }
 
@@ -280,18 +324,18 @@ double DistributionalValue::get_fstord_mean() const
     return res;
 }
 
-double DistributionalValue::middleOfInterval(Handle h) const
+double DistributionalValue::middleOfInterval(ProtoAtomPtr h) const
 {
-    if (h->get_type() == NUMBER_NODE)
+    if (h->get_type() == FLOAT_VALUE)
     {
-        NumberNodePtr n = std::static_pointer_cast<NumberNode>(h);
-        return n->get_value();
+        FloatValuePtr n = std::static_pointer_cast<FloatValue>(h);
+        return n->value()[0];
     }
-    LinkPtr l = std::static_pointer_cast<Link>(h);
-    HandleSeq hs = l->getOutgoingSet();
-    NumberNodePtr n1 = std::static_pointer_cast<NumberNode>(hs[0]);
-    NumberNodePtr n2 = std::static_pointer_cast<NumberNode>(hs[1]);
-    return (n1->get_value() + n2->get_value()) / 2;
+    LinkValuePtr l = std::static_pointer_cast<LinkValue>(h);
+    ProtomSeq hs = l->value();
+    FloatValuePtr n1 = std::static_pointer_cast<FloatValue>(hs[0]);
+    FloatValuePtr n2 = std::static_pointer_cast<FloatValue>(hs[1]);
+    return (n1->value()[0] + n2->value()[0]) / 2;
 }
 
 std::vector<double> DistributionalValue::get_var() const
@@ -321,6 +365,16 @@ double DistributionalValue::get_confidence() const
     return c / (c + DEFAULT_K);
 }
 
+double DistributionalValue::get_swc() const
+{
+	double sum;
+	for (auto elem : value)
+	{
+		sum += FloatValueCast(elem.first)->value()[0] * elem.second;
+	}
+    return sum;
+}
+
 double DistributionalValue::to_conf(int c)
 {
     return c / (c + DEFAULT_K);
@@ -331,7 +385,7 @@ int DistributionalValue::to_count(double cf)
     return (cf * DEFAULT_K / (1 - cf));
 }
 
-Handle DistributionalValue::getKey(Handle h) const
+ProtoAtomPtr DistributionalValue::getKey(ProtoAtomPtr h) const
 {
     auto it = value.find(h);
     if (it != value.end())
@@ -341,9 +395,9 @@ Handle DistributionalValue::getKey(Handle h) const
     throw RuntimeException(TRACE_INFO, "No Key for this value.");
 }
 
-HandleSeq DistributionalValue::getKeys() const
+ProtomSeq DistributionalValue::getKeys() const
 {
-    HandleSeq res;
+    ProtomSeq res;
     for (auto h : value)
     {
         res.push_back(h.first);
@@ -351,25 +405,40 @@ HandleSeq DistributionalValue::getKeys() const
     return res;
 }
 
-double DistributionalValue::getCount(Handle h) const
+double DistributionalValue::getCount(ProtoAtomPtr h) const
 {
-    auto it = value.find(h);
-    if (it != value.end())
-    {
-        return it->second;
-    }
+	for (auto& elem : value)
+	{
+		if (*(elem.first) == *h)
+			return elem.second;
+	}
     throw RuntimeException(TRACE_INFO, "No Key for this value.");
 }
 
-double DistributionalValue::getMode(Handle val) const
+double DistributionalValue::getCountNoMatch(ProtoAtomPtr h) const
+{
+    double res;
+    for (auto v : value)
+    {
+	    double dist = DistributionalValue::intervalDist(v.first,h);
+        res += v.second * (1 - dist);
+    }
+    return res;
+}
+
+double DistributionalValue::getMode(ProtoAtomPtr val) const
 {
     return get_mode_for(getCount(val));
 }
-double DistributionalValue::getMean(Handle val) const
+double DistributionalValue::getMean(ProtoAtomPtr val) const
 {
     return get_mean_for(getCount(val));
 }
-double DistributionalValue::getVar(Handle val) const
+double DistributionalValue::getMeanNoMatch(ProtoAtomPtr val) const
+{
+    return get_mean_for(getCountNoMatch(val));
+}
+double DistributionalValue::getVar(ProtoAtomPtr val) const
 {
     return get_var_for(getCount(val));
 }
