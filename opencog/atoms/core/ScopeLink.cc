@@ -207,7 +207,7 @@ bool ScopeLink::is_equal(const Handle& other, bool silent) const
 		Handle h = getOutgoingAtom(i + vardecl_offset);
 		Handle other_h = other->getOutgoingAtom(i + other_vardecl_offset);
 		other_h = scother->_varlist.substitute_nocheck(other_h,
-		                                         _varlist.varseq, silent);
+		                                               _varlist.varseq, silent);
 		// Compare them, they should match.
 		if (*((AtomPtr)h) != *((AtomPtr) other_h)) return false;
 	}
