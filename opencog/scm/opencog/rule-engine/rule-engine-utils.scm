@@ -49,6 +49,7 @@
 ;; -- gen-variables -- Generate VariableNodes with certain prefix and indexes
 ;; -- gen-rand-variable -- Generate random VariableNode
 ;; -- gen-rand-variables -- Generate random VariableNodes
+;; -- cog-new-flattened-link -- Create flattened link TODO: remove cog- prefix
 ;;
 ;; If you add more utilities don't forget to add them in the
 ;; export-rule-engine-utils function.
@@ -495,6 +496,47 @@
 "
   (map (lambda (x) (gen-rand-variable prefix base length)) (iota n)))
 
+(define (cog-new-flattened-link link-type . args)
+"
+ Creates a new flattened link, for instance
+
+   (cog-new-flattened-link 'AndLink (AndLink A B) C)
+
+ will create the following
+
+    (AndLink A B C)
+
+ This is not recursive. So, for instance
+
+   (cog-new-flattened-link 'AndLink (AndLink A (AndLink B)) C)
+
+ will not produce
+
+   (AndLink A B C)
+
+ but will produce instead
+
+   (AndLink A (AndLink B) C)
+
+ Note that it will also remove duplicates, for instance
+
+   (cog-new-flattened-link 'AndLink (AndLink A B C) C)
+
+ will create the following
+
+   (AndLink A B C)
+
+ WARNING: TVs and other values attached to the atoms are ignored.
+   The TV's and values are not copied to the new link, nor are they
+   recomputed in any way.
+"
+  (define (flatten e r)
+    (append r (if (and (cog-link? e) (equal? (cog-type e) link-type))
+                  (cog-outgoing-set e)
+                  (list e))))
+  (let ((flat (delete-duplicates (fold flatten '() args))))
+    (cog-new-link link-type flat)))
+
 (define (export-rule-engine-utils)
   (export
           cog-fc
@@ -542,5 +584,6 @@
           gen-variables
           gen-rand-variable
           gen-rand-variables
+          cog-new-flattened-link
   )
 )
