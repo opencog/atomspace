@@ -29,7 +29,6 @@
 #include <opencog/unify/Unify.h>
 
 #include "BackwardChainer.h"
-#include "BackwardChainerPMCB.h"
 #include "../URELogger.h"
 
 using namespace opencog;
