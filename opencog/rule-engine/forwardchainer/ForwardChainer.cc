@@ -106,6 +106,7 @@ const UREConfig& ForwardChainer::get_config() const
 void ForwardChainer::do_chain()
 {
 	ure_logger().debug("Start Forward Chaining");
+	LAZY_URE_LOG_DEBUG << "With rule set:" << std::endl << oc_to_string(_rules);
 
 	// Relex2Logic uses this. TODO make a separate class to handle
 	// this robustly.
@@ -158,14 +159,25 @@ void ForwardChainer::do_step()
 bool ForwardChainer::termination()
 {
 	bool terminate = false;
+	std::string msg;
 
 	// Terminate if all sources have been tried (if sources are to be
 	// tried only once)
-	if (not _configReader.get_retry_sources())
-		terminate = 0 < _iteration and _unselected_sources.empty();
+	if (not _configReader.get_retry_sources()) {
+		if (0 < _iteration and _unselected_sources.empty()) {
+			msg = "all sources have been exhausted";
+			terminate = true;
+		}
+	}
 
 	// Terminate if max iterations has been reached
-	terminate |= _configReader.get_maximum_iterations() == _iteration;
+	if (_configReader.get_maximum_iterations() == _iteration) {
+		msg = "reach the maximum number of iterations";
+		terminate = true;
+	}
+
+	if (terminate)
+		ure_logger().debug() << "Terminate: " << msg;
 
 	return terminate;
 }
