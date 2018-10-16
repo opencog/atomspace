@@ -57,12 +57,14 @@
   Here, the LLOBJ is expected to be an object defining a sparse matrix,
   with valid counts associated with each pair. LLOBJ is expected to have
   working, functional methods for 'left-type, 'right-type and 'pair-type
-  on it. It is assumed that teh transpose-marginals on it have been
+  on it. It is assumed that the transpose-marginals on it have been
   previously computed, and are available in the atomspace.
 
   By default, the N(x,y) is taken to be the 'get-count method on LLOBJ,
   i.e. it is literally the count. The optional argument GET-CNT allows
   this to be over-ridden with any other method that returns a number.
+
+  If 'get-count is over-ridden, then the cached transpose values too ...
 "
 
 	(let* ((ol2 (/ 1.0 (log 2.0)))
