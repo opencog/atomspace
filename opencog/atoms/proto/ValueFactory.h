@@ -3,8 +3,8 @@
 
 #include "ProtoAtom.h"
 #include <opencog/atoms/base/Handle.h>
+#include <opencog/util/exceptions.h>
 
-#include <exception>
 #include <map>
 #include <typeinfo>
 #include <typeindex>
@@ -26,7 +26,7 @@ private:
     };
 
 #define THROW_ERROR \
-    (throw std::invalid_argument("There was no function found for the given type."))
+    (throw NotFoundException(TRACE_INFO, "No function found for the given type."))
 
     ValueFactory() {}
 
