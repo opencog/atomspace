@@ -37,16 +37,29 @@ public:
 
     friend ValueFactory& valuefactory();
 
-    /** Registers the creator functions.
+    /**
+     *  Registers the creator functions.
+     *
      *  @param vtype The value type.
      *  @param func a pointer to the creator function of the value.
      *  @param args  an ordered vector the types of arguments the creator takes.
      */
-     void register_factory(Type vtype, CreateProto func, std::vector<std::type_index> args);
+     void addFactory(Type vtype, CreateProto func, std::vector<std::type_index> args);
 
-     void register_castor(Type vtype, CreateProto func);
+     /**
+      * Registers the casting function for a given type.
+      *
+      * @param vtype the value type.
+      * @param func the casting function.
+      */
+     void addCreator(Type vtype, CreateProto func);
 
-     ProtoAtomPtr cast(Type vtype, ProtoAtomPtr ptr);
+     /**
+      * Casts a protoAtomPtr object into its type's Value pointer.
+      *
+      * @param ptr the protoAtomPtr to be casted.
+      */
+     ProtoAtomPtr recreate(ProtoAtomPtr ptr);
 
      /** Does dynamic dispatching of the appropriate create functions which matches argument provided.
       * @param arg the value type constructor argument.
