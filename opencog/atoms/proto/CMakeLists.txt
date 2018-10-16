@@ -22,7 +22,6 @@ ADD_LIBRARY (atomproto
 	StreamValue.cc
 	StringValue.cc
 	ValueFactory.cc
-	FactoryLoader.cc
 )
 
 # Without this, parallel make will race and crap up the generated files.
