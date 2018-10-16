@@ -8,6 +8,7 @@ ADD_LIBRARY(ruleengine
 	backwardchainer/MixtureModel
 	backwardchainer/ActionSelection
 	backwardchainer/BetaDistribution
+	backwardchainer/ThompsonSampling
 	backwardchainer/BIT
 	backwardchainer/Fitness
 	forwardchainer/FCStat

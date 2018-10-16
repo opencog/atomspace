@@ -1,7 +1,7 @@
 /*
- * ActionSelection.h
+ * ThompsonSampling.h
  *
- * Copyright (C) 2017 OpenCog Foundation
+ * Copyright (C) 2018 SingularityNET Foundation
  *
  * Authors: Nil Geisweiller
  *
@@ -20,42 +20,42 @@
  * Free Software Foundation, Inc.,
  * 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
  */
-#ifndef _OPENCOG_ACTIONSELECTION_H_
-#define _OPENCOG_ACTIONSELECTION_H_
+#ifndef _OPENCOG_THOMPSON_SAMPLING_H_
+#define _OPENCOG_THOMPSON_SAMPLING_H_
 
 #include <opencog/util/empty_string.h>
-#include <opencog/atoms/base/Handle.h>
 #include <opencog/truthvalue/TruthValue.h>
 
-#include "ThompsonSampling.h"
+#include "BetaDistribution.h"
 
 namespace opencog
 {
 
-//! a map from handles to truth values
-typedef std::map<Handle, TruthValuePtr> HandleTVMap;
-
 /**
- * Class containing methods to calculate distribution over actions
- * given the TruthValue that each action fulfills the objective of
- * interest.
+ * Class containing methods to calculate distribution over TV indices
+ * given the TruthValue that each index corresponds to an action that
+ * fulfills the objective of interest. It may also directly sample the
+ * index (see operator()).
  */
-class ActionSelection
+class ThompsonSampling
 {
 public:
-	const HandleTVMap& action2tv;
-
 	/**
 	 * CTor
+	 *
+	 * @param tvs Sequence of TruthValues denoting the probability that the
+	 *            corresponding index is associated with fulfilling the objective.
+	 *
+	 * @paran bins Number of bins to discretize the second order
+	 *             distributions associated to each TV.
 	 */
-	ActionSelection(const HandleTVMap& action2tv);
+	ThompsonSampling(const std::vector<TruthValuePtr>& tvs, unsigned bins=100);
 
 	/**
-	 * Return the action distribution, a probability for each action
-	 * to be used as sampling distribution for picking the next
-	 * action. The distribution attempts to reflect the optimal
-	 * balance between exploration and exploitation (Thompson
-	 * sampling).
+	 * Return the index distribution, a probability for each index to
+	 * be used as sampling distribution. The distribution attempts to
+	 * reflect the optimal balance between exploration and exploitation
+	 * (Thompson sampling).
 	 *
 	 * Pi = I_0^1 pdfi(x) Prod_j!=i cdfj(x) dx / nt
 	 *
@@ -66,13 +66,17 @@ public:
 	 * See Section Inference Rule Selection in the README.md of the
 	 * pln inference-control-learning for more explanations.
 	 */
-	HandleCounter distribution();
+	std::vector<double> distribution();
 
 	/**
 	 * Perform random action selection according to the action
 	 * distribution.
+	 *
+	 * TODO: for now it builds the entire selection distribution, then
+	 * select the index accordingly. This could be greatly optimized by
+	 * sampling on the fly without building it.
 	 */
-	Handle operator()();
+	size_t operator()();
 
 	std::string to_string(const std::string& indent=empty_string) const;
 
@@ -84,8 +88,12 @@ private:
 	 */
 	double Pi(size_t i, const std::vector<std::vector<double>>& cdfs) const;
 
-	TruthValueSeq _tvs;
-	ThompsonSampling _tsmp;
+	// Sequence of TruthValues denoting the probability that the
+	// corresponding index is associated with fulfilling the objective
+	const TruthValueSeq& _tvs;
+
+	// Number of bins used for discretization
+	unsigned _bins;
 };
 
 // Debugging helpers see
@@ -93,9 +101,7 @@ private:
 // The reason indent is not an optional argument with default is
 // because gdb doesn't support that, see
 // http://stackoverflow.com/questions/16734783 for more explanation.
-std::string	oc_to_string(const ActionSelection& asel,
-                         const std::string& indent=empty_string);
-std::string	oc_to_string(const HandleTVMap& h2tv,
+std::string	oc_to_string(const ThompsonSampling& asel,
                          const std::string& indent=empty_string);
 
 } // namespace opencog
