@@ -22,6 +22,7 @@
 
 #include <opencog/util/exceptions.h>
 #include <opencog/atoms/proto/FloatValue.h>
+#include <opencog/atoms/proto/ValueFactory.h>
 
 using namespace opencog;
 
@@ -144,3 +145,14 @@ ProtoAtomPtr opencog::divide(const FloatValuePtr& fvpa, const FloatValuePtr& fvp
 
 	return createFloatValue(ratio);
 }
+
+// Adds factory when the library is loaded.
+static __attribute__ ((constructor)) void init(void)
+{
+    valuefactory().addFactory(FLOAT_VALUE, (CreateProto) & (createFloatValue<std::vector<double>>),
+                                    std::vector<std::type_index> {std::type_index(typeid(std::vector<double>))});
+
+    valuefactory().addFactory(FLOAT_VALUE, (CreateProto) & (createFloatValue<double>),
+                                    std::vector<std::type_index> {std::type_index(typeid(double))});
+}
+
