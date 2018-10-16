@@ -60,22 +60,22 @@ public:
         static std::map<Type, CreateProto> cache = {};
         CreateProto  fptr = nullptr;
 
-        if(cache.find(vtype) != cache.end()) {
+        if (cache.find(vtype) != cache.end()) {
             fptr = cache[vtype];
 
         } else {
-            if(func_register.find(vtype) != func_register.end()) {
+            if (func_register.find(vtype) != func_register.end()) {
                 std::vector<FuncRegister> func_vec = func_register[vtype];
-                for(FuncRegister fr : func_vec) {
+                for (FuncRegister fr : func_vec) {
                     int size = 1;
-                    if((int)fr.args.size() != size)
+                    if ((int)fr.args.size() != size)
                         continue;
 
                     bool match = false;
-                    if(fr.args[0] == std::type_index(typeid(arg)))
+                    if (fr.args[0] == std::type_index(typeid(arg)))
                         match = true;
 
-                    if(match) {
+                    if (match) {
                         fptr = fr.func;
                         cache[vtype] = fptr;
                         break;
@@ -84,7 +84,7 @@ public:
             }
         }
 
-        if(fptr)
+        if (fptr)
             return (*fptr)(arg);
 
         THROW_ERROR;
