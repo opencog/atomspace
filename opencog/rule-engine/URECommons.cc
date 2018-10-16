@@ -24,6 +24,7 @@
 #include <opencog/atoms/base/Link.h>
 
 #include "URECommons.h"
+#include "backwardchainer/BetaDistribution.h"
 
 using namespace opencog;
 
@@ -35,4 +36,9 @@ double URECommons::tv_fitness(const Handle& h) const
 	confidence_t c = ptv->get_confidence();
 	strength_t s = ptv->get_mean();
 	return (pow(s, FITNESS_PARAM) * (pow(c, (2 - FITNESS_PARAM))));
+}
+
+double URECommons::tv_mean(const TruthValuePtr& tv) const
+{
+	return BetaDistribution(tv).mean();
 }

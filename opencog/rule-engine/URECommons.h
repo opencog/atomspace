@@ -86,6 +86,13 @@ public:
 	 * @return a fitness value
 	 */
 	double tv_fitness(const Handle& h) const;
+
+	/**
+	 * Calculate the mean of a TV, taking into account it's confidence
+	 * (assuming beta distribution). For instance the mean of (stv 1 0)
+	 * is 0.5, while the mean of (stv 0 0.99) is almost 0.
+	 */
+	double tv_mean(const TruthValuePtr& tv) const;
 };
 
 } // ~namespace opencog
