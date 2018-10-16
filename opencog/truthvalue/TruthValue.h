@@ -191,6 +191,8 @@ typedef std::vector<TruthValuePtr> TruthValueSeq;
 // http://stackoverflow.com/questions/16734783 for more explanation.
 std::string oc_to_string(TruthValuePtr tv,
                          const std::string& indent=empty_string);
+std::string oc_to_string(const TruthValueSeq& tvs,
+                         const std::string& indent=empty_string);
 
 } // namespace opencog
 

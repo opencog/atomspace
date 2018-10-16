@@ -23,6 +23,8 @@
  * 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
  */
 
+#include <sstream>
+
 #include <float.h>
 #include <math.h>
 #include <stdio.h>
@@ -33,6 +35,9 @@
 #include <opencog/truthvalue/ProbabilisticTruthValue.h>
 #include <opencog/truthvalue/SimpleTruthValue.h>
 #include <opencog/truthvalue/TruthValue.h>
+
+// For OC_TO_STRING_INDENT
+#include <opencog/atoms/base/Handle.h>
 
 namespace opencog {
 
@@ -187,6 +192,18 @@ std::string oc_to_string(TruthValuePtr tv, const std::string& indent)
 	if (tv)
 		return tv->to_string();
 	return "none";
+}
+
+std::string oc_to_string(const TruthValueSeq& tvs, const std::string& indent)
+{
+	std::stringstream ss;
+	ss << indent << "size = " << tvs.size() << std::endl;
+	size_t i = 0;
+	for (const TruthValuePtr& tv : tvs) {
+		ss << indent << "tv[" << i << "]: " << oc_to_string(tv);
+		i++;
+	}
+	return ss.str();
 }
 
 } // ~namespace opencog
