@@ -83,12 +83,8 @@ public:
                     int size = 1;
                     if ((int)fr.args.size() != size)
                         continue;
-
-                    bool match = false;
-                    if (fr.args[0] == std::type_index(typeid(arg)))
-                        match = true;
-
-                    if (match) {
+                     
+                    if (fr.args[0] == std::type_index(typeid(arg))) {
                         fptr = fr.func;
                         cache[vtype] = fptr;
                         break;
@@ -97,8 +93,9 @@ public:
             }
         }
 
-        if (fptr)
+        if (fptr) {
             return (*fptr)(arg);
+        }
 
         THROW_ERROR;
     }
