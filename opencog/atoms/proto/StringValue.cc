@@ -21,6 +21,7 @@
  */
 
 #include <opencog/atoms/proto/StringValue.h>
+#include <opencog/atoms/proto/ValueFactory.h>
 
 using namespace opencog;
 
@@ -46,4 +47,14 @@ std::string StringValue::to_string(const std::string& indent) const
 		rv += std::string(" \"") + v + "\"";
 	rv += ")\n";
 	return rv;
+}
+
+// Adds factory when library is loaded.
+static __attribute__ ((constructor)) void init(void)
+{
+    valuefactory().addFactory(STRING_VALUE, (CreateProto) & (createStringValue<std::vector<std::string>>),
+                                    std::vector<std::type_index> {std::type_index(typeid(std::vector<std::string>))});
+
+    valuefactory().addFactory(STRING_VALUE, (CreateProto) & (createStringValue<std::string>),
+                                    std::vector<std::type_index> {std::type_index(typeid(std::string))});
 }
