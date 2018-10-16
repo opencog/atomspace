@@ -479,6 +479,7 @@ std::string Rule::to_string(const std::string& indent) const
 {
 	std::stringstream ss;
 	ss << indent << "name: " << _name << std::endl
+	   << indent << "tv: " << _tv->to_string() << std::endl
 	   << indent << "rule:" << std::endl
 	   << _rule->to_string(indent + OC_TO_STRING_INDENT);
 	return ss.str();
