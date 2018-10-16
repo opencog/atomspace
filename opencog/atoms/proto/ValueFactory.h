@@ -14,15 +14,16 @@ namespace opencog
 {
 using CreateProto = ProtoAtomPtr (*) (...);
 
-struct FuncRegister
-{
-    CreateProto func;
-    std::vector<std::type_index> args;
-};
 
 class ValueFactory
 {
 private:
+    
+    struct FuncRegister
+    {
+        CreateProto func;
+        std::vector<std::type_index> args;
+    };
 
 #define THROW_ERROR \
     (throw std::invalid_argument("There was no function found for the given type."))
