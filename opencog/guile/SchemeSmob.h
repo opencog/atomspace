@@ -212,7 +212,7 @@ private:
 	[[ noreturn ]] static void throw_exception(const std::exception&,
 	                                           const char *, SCM);
 	static AtomSpace* verify_atomspace(SCM, const char *, int pos = 1);
-	static Type verify_atom_type(SCM, const char *, int pos = 1);
+	static Type verify_type(SCM, const char *, int pos = 1);
 	static Handle verify_handle(SCM, const char *, int pos = 1);
 	static ProtoAtomPtr verify_protom(SCM, const char *, int pos = 1);
 	static TruthValuePtr verify_tv(SCM, const char *, int pos = 1);

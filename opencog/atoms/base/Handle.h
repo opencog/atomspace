@@ -183,11 +183,11 @@ typedef std::vector<HandleSet> HandleSetSeq;
 //! a hash table. Usually has faster insertion.
 typedef std::unordered_set<Handle> UnorderedHandleSet;
 
-//! an ordered map from Handle to Handle set
-typedef std::map<Handle, HandleSet> HandleMultimap;
-
 //! an ordered map from Handle to Handle
 typedef std::map<Handle, Handle> HandleMap;
+
+//! an ordered map from Handle to Handle set
+typedef std::map<Handle, HandleSet> HandleMultimap;
 
 //! a sequence of ordered handle maps
 typedef std::vector<HandleMap> HandleMapSeq;
@@ -291,6 +291,8 @@ std::string oc_to_string(const HandleSetSeq& ohss,
 std::string oc_to_string(const UnorderedHandleSet& uhs,
                          const std::string& indent=empty_string);
 std::string oc_to_string(const HandleMap& hm,
+                         const std::string& indent=empty_string);
+std::string oc_to_string(const HandleMap::value_type& hmv,
                          const std::string& indent=empty_string);
 std::string oc_to_string(const HandleMultimap& hmm,
                          const std::string& indent=empty_string);

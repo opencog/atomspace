@@ -273,7 +273,7 @@ SCM SchemeSmob::ss_link_p (SCM s)
  * else throw errors.
  * Return the atom type.
  */
-Type SchemeSmob::verify_atom_type (SCM stype, const char *subrname, int pos)
+Type SchemeSmob::verify_type (SCM stype, const char *subrname, int pos)
 {
 	if (scm_is_integer(stype))
 		return scm_to_ushort(stype);
@@ -356,7 +356,7 @@ std::string SchemeSmob::verify_string (SCM sname, const char *subrname,
  */
 SCM SchemeSmob::ss_new_node (SCM stype, SCM sname, SCM kv_pairs)
 {
-	Type t = verify_atom_type(stype, "cog-new-node", 1);
+	Type t = verify_type(stype, "cog-new-node", 1);
 
 	// Special case handling for NumberNode (and TimeNode, etc.)
 	if (nameserver().isA(t, NUMBER_NODE)) {
@@ -401,7 +401,7 @@ SCM SchemeSmob::ss_new_node (SCM stype, SCM sname, SCM kv_pairs)
  */
 SCM SchemeSmob::ss_node (SCM stype, SCM sname, SCM kv_pairs)
 {
-	Type t = verify_atom_type(stype, "cog-node", 1);
+	Type t = verify_type(stype, "cog-node", 1);
 	std::string name = verify_string (sname, "cog-node", 2,
 									"string name for the node");
 
@@ -481,7 +481,7 @@ SchemeSmob::verify_handle_list (SCM satom_list, const char * subrname, int pos)
  */
 SCM SchemeSmob::ss_new_link (SCM stype, SCM satom_list)
 {
-	Type t = verify_atom_type(stype, "cog-new-link", 1);
+	Type t = verify_type(stype, "cog-new-link", 1);
 
 	HandleSeq outgoing_set;
 	outgoing_set = verify_handle_list(satom_list, "cog-new-link", 2);
@@ -515,7 +515,7 @@ SCM SchemeSmob::ss_new_link (SCM stype, SCM satom_list)
  */
 SCM SchemeSmob::ss_link (SCM stype, SCM satom_list)
 {
-	Type t = verify_atom_type(stype, "cog-link", 1);
+	Type t = verify_type(stype, "cog-link", 1);
 
 	HandleSeq outgoing_set;
 	outgoing_set = verify_handle_list (satom_list, "cog-link", 2);

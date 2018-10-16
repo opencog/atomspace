@@ -192,7 +192,7 @@ SCM SchemeSmob::ss_outgoing_set (SCM satom)
 SCM SchemeSmob::ss_outgoing_by_type (SCM satom, SCM stype)
 {
 	Handle h = verify_handle(satom, "cog-outgoing-by-type");
-	Type t = verify_atom_type(stype, "cog-outgoing-by-type", 2);
+	Type t = verify_type(stype, "cog-outgoing-by-type", 2);
 
 	if (not h->is_link()) return SCM_EOL;
 
@@ -253,7 +253,7 @@ SCM SchemeSmob::ss_incoming_set (SCM satom)
 SCM SchemeSmob::ss_incoming_by_type (SCM satom, SCM stype)
 {
 	Handle h = verify_handle(satom, "cog-incoming-by-type");
-	Type t = verify_atom_type(stype, "cog-incoming-by-type", 2);
+	Type t = verify_type(stype, "cog-incoming-by-type", 2);
 
 	HandleSeq iset;
 	h->getIncomingSetByType(std::back_inserter(iset), t);
@@ -276,7 +276,7 @@ SCM SchemeSmob::ss_incoming_by_type (SCM satom, SCM stype)
  */
 SCM SchemeSmob::ss_map_type (SCM proc, SCM stype)
 {
-	Type t = verify_atom_type (stype, "cog-map-type");
+	Type t = verify_type (stype, "cog-map-type");
 	AtomSpace* atomspace = ss_get_env_as("cog-map-type");
 
 	// Get all of the handles of the indicated type
@@ -333,7 +333,7 @@ SCM SchemeSmob::ss_get_subtypes (SCM stype)
 {
 	SCM list = SCM_EOL;
 
-	Type t = verify_atom_type(stype, "cog-get-subtypes");
+	Type t = verify_type(stype, "cog-get-subtypes");
 	std::vector<Type> subl;
 	unsigned int ns = nameserver().getChildren(t, std::back_inserter(subl));
 

@@ -41,6 +41,7 @@ INSTALL (FILES
 	opencog/persist.scm
 	opencog/query.scm
 	opencog/rule-engine.scm
+	opencog/test-runner.scm
 	DESTINATION "${DATADIR}/scm/opencog"
 )
 
