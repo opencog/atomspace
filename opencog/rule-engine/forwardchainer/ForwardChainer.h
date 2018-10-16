@@ -110,6 +110,11 @@ protected:
 	Handle select_source();
 
 	/**
+	 * Get rules that unify with the source
+	 */
+	RuleSet get_valid_rules(const Handle& source);
+
+	/**
 	 * Choose an applicable rules from the rule base by selecting
 	 * rules whose premise structurally matches with the source.
 	 *
@@ -118,6 +123,7 @@ protected:
 	 * @return  A rule that in which @param source could ground.
 	 */
 	Rule select_rule(const Handle& source);
+	Rule select_rule(const RuleSet& valid_rules);
 
 	/**
 	 * Apply rule.

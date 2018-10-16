@@ -73,6 +73,13 @@ public:
 	 */
 	RuleSelection select_rule(AndBIT& andbit, BITNode& bitleaf);
 
+	/**
+	 * Return the set of rule aliases, as aliases of inference rules
+	 * are used in control rules.
+	 */
+	static HandleSet rule_aliases(const RuleSet& rules);
+	static HandleSet rule_aliases(const RuleTypedSubstitutionMap& rules);
+
 private:
 	// Reference to URE configuration
 	const UREConfig& _ure_config;
@@ -151,13 +158,6 @@ private:
 	std::vector<double> rule_weights(
 		const HandleCounter& alias_weights,
 		const RuleTypedSubstitutionMap& inf_rules) const;
-
-	/**
-	 * Return the set of rule aliases, as aliases of inference rules
-	 * are used in control rules.
-	 */
-	HandleSet rule_aliases(const RuleSet& rules) const;
-	HandleSet rule_aliases(const RuleTypedSubstitutionMap& rules) const;
 
 	/**
 	 * Return the map from rule aliases to their default weights.

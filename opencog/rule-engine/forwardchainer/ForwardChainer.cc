@@ -30,6 +30,8 @@
 #include "ForwardChainer.h"
 #include "FocusSetPMCB.h"
 #include "../URELogger.h"
+#include "../backwardchainer/ControlPolicy.h"
+#include "../backwardchainer/ThompsonSampling.h"
 
 using namespace opencog;
 
@@ -143,6 +145,9 @@ void ForwardChainer::do_step()
 	if (not rule.is_valid()) {
 		ure_logger().debug("No selected rule, abort step");
 		return;
+	} else {
+		ure_logger().debug() << "Selected rule:" << std::endl
+		                     << oc_to_string(rule);
 	}
 
 	// Apply rule on _cur_source
@@ -294,25 +299,15 @@ An attentionbank is needed in order to get the STI...
 	return hchosen;
 }
 
-Rule ForwardChainer::select_rule(const Handle& source)
+RuleSet ForwardChainer::get_valid_rules(const Handle& source)
 {
-	URECommons urec(_as);
-	std::map<const Rule*, double> rule_weight;
-	for (const Rule& r : _rules)
-		if (not r.is_meta())
-			rule_weight[&r] = urec.tv_fitness(r.get_rule());
-
-	ure_logger().debug("%d rules to be searched as matched against the source",
-	                   rule_weight.size());
-
-	// Select a rule among the admissible rules in the rule-base via stochastic
-	// selection, based on the weights of the rules in the current context.
-	Rule rule;
-
-	while (not rule_weight.empty()) {
-		const Rule *temp = _rec.tournament_select(rule_weight);
-		ure_logger().fine("Selected rule %s to unify with the source",
-		                  temp->get_name().c_str());
+	// Generate all valid rules
+	RuleSet valid_rules;
+	for (const Rule& rule : _rules) {
+		// For now ignore meta rules as they are forwardly applied in
+		// expand_bit()
+		if (rule.is_meta())
+			continue;
 
 		// If the source is the initial source then we may use its
 		// variable declaration during rule unification. Otherwise
@@ -322,27 +317,58 @@ Rule ForwardChainer::select_rule(const Handle& source)
 			_init_vardecl : Handle(createVariableList(HandleSeq()));
 
 		const AtomSpace& ref_as(_search_focus_set ? _focus_set_as : _as);
-		RuleTypedSubstitutionMap urm = temp->unify_source(source, vardecl, &ref_as);
+		RuleTypedSubstitutionMap urm = rule.unify_source(source, vardecl, &ref_as);
 		RuleSet unified_rules = Rule::strip_typed_substitution(urm);
 
-		if (not unified_rules.empty()) {
-			// Randomly select a rule amongst the unified ones
-			rule = *std::next(unified_rules.begin(),
-			                  randGen().randint(unified_rules.size()));
+		valid_rules.insert(unified_rules.begin(), unified_rules.end());
+	}
+	return valid_rules;
+}
 
-			LAZY_URE_LOG_DEBUG << "The following rule unifies with the source:"
-			                   << std::endl << oc_to_string(rule);
-			break;
-		} else {
-			ure_logger().debug("Rule %s is not a match. Looking for another rule",
-			                   temp->get_name().c_str());
-		}
+Rule ForwardChainer::select_rule(const Handle& source)
+{
+	const RuleSet valid_rules = get_valid_rules(source);
 
-		rule_weight.erase(temp);
+	// Log valid rules
+	if (ure_logger().is_debug_enabled()) {
+		std::stringstream ss;
+		ss << "The following rules are valid:" << std::endl
+		   << oc_to_string(ControlPolicy::rule_aliases(valid_rules));
+		LAZY_URE_LOG_DEBUG << ss.str();
 	}
 
-	return rule;
+	if (valid_rules.empty())
+		return Rule();
+
+	return select_rule(valid_rules);
 };
+
+Rule ForwardChainer::select_rule(const RuleSet& valid_rules)
+{
+	// Build vector of all valid truth values
+	TruthValueSeq tvs;
+	for (const Rule& rule : valid_rules)
+		tvs.push_back(rule.get_tv());
+
+	// Build action selection distribution
+	std::vector<double> weights = ThompsonSampling(tvs).distribution();
+
+	// Log the distribution
+	if (ure_logger().is_debug_enabled()) {
+		std::stringstream ss;
+		ss << "Rule weights:" << std::endl;
+		size_t i = 0;
+		for (const Rule& rule : valid_rules) {
+			ss << weights[i] << " " << rule.get_name() << std::endl;
+			i++;
+		}
+		ure_logger().debug() << ss.str();
+	}
+
+	std::discrete_distribution<size_t> dist(weights.begin(), weights.end());
+	size_t idx = dist(randGen());
+	return *std::next(valid_rules.begin(), idx);
+}
 
 UnorderedHandleSet ForwardChainer::apply_rule(const Rule& rule)
 {

@@ -97,6 +97,22 @@ RuleSelection ControlPolicy::select_rule(AndBIT& andbit, BITNode& bitleaf)
 	return select_rule(andbit, bitleaf, valid_rules);
 }
 
+HandleSet ControlPolicy::rule_aliases(const RuleSet& rules)
+{
+	HandleSet aliases;
+	for (auto& rule : rules)
+		aliases.insert(rule.get_alias());
+	return aliases;
+}
+
+HandleSet ControlPolicy::rule_aliases(const RuleTypedSubstitutionMap& rules)
+{
+	HandleSet aliases;
+	for (auto& rule : rules)
+		aliases.insert(rule.first.get_alias());
+	return aliases;
+}
+
 RuleTypedSubstitutionMap ControlPolicy::get_valid_rules(const AndBIT& andbit,
                                                         const BITNode& bitleaf)
 {
@@ -231,22 +247,6 @@ std::vector<double> ControlPolicy::rule_weights(
 	}
 
 	return weights;
-}
-
-HandleSet ControlPolicy::rule_aliases(const RuleSet& rules) const
-{
-	HandleSet aliases;
-	for (auto& rule : rules)
-		aliases.insert(rule.get_alias());
-	return aliases;
-}
-
-HandleSet ControlPolicy::rule_aliases(const RuleTypedSubstitutionMap& rules) const
-{
-	HandleSet aliases;
-	for (auto& rule : rules)
-		aliases.insert(rule.first.get_alias());
-	return aliases;
 }
 
 HandleSet ControlPolicy::active_expansion_control_rules(

@@ -33,9 +33,13 @@ public:
 	ForwardChainerUTest() : _eval(&_as)
 	{
 #undef DEBUG
-		logger().set_level(Logger::DEBUG);
+		logger().set_level(Logger::INFO);
 		logger().set_timestamp_flag(false);
 		logger().set_print_to_stdout_flag(true);
+
+		ure_logger().set_level(Logger::INFO);
+		ure_logger().set_timestamp_flag(false);
+		ure_logger().set_print_to_stdout_flag(true);
 
 		string source_dir = string(PROJECT_SOURCE_DIR),
 		       test_dir = source_dir + "/tests",
@@ -148,7 +152,7 @@ void ForwardChainerUTest::test_do_chain_animals()
 	UnorderedHandleSet results = fc.get_chaining_result();
 	Handle Fritz_green = al(INHERITANCE_LINK, Fritz, green);
 
-	std::cout << "results = " << oc_to_string(results);
+	logger().debug() << "results = " << oc_to_string(results);
 
 	// Check that AC is in the results
 	TS_ASSERT_DIFFERS(results.find(Fritz_green), results.end());
@@ -220,10 +224,11 @@ void ForwardChainerUTest::test_negation_conflict()
 
 	Handle expected = al(SET_LINK, Gkeepcat, Akeepdog);
 
-	logger().debug() << "results = " << results->to_string();
-	logger().debug() << "expected = " << expected->to_string();
+	logger().debug() << "results = " << oc_to_string(results);
+	logger().debug() << "expected = " << oc_to_string(expected);
 
 	TS_ASSERT_EQUALS(results, expected);
 }
+
 #undef al
 #undef an
