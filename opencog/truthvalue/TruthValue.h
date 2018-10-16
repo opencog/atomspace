@@ -182,6 +182,8 @@ static inline ProtoAtomPtr ProtoAtomCast(const TruthValuePtr& tv)
     return std::shared_ptr<ProtoAtom>(tv, (ProtoAtom*) tv.get());
 }
 
+typedef std::vector<TruthValuePtr> TruthValueSeq;
+
 // Debugging helpers see
 // http://wiki.opencog.org/w/Development_standards#Print_OpenCog_Objects
 // The reason indent is not an optional argument with default is
