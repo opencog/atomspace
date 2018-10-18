@@ -219,7 +219,9 @@ bool AndBIT::operator==(const AndBIT& andbit) const
 bool AndBIT::operator<(const AndBIT& andbit) const
 {
 	// Sort by complexity to so that simpler and-BITs come first. Then
-	// by content. Makes it easier to prune by complexity.
+	// by content. Makes it easier to prune by complexity. It should
+	// also make sampling a bit faster. And finally the user probabably
+	// want that.
 	return (complexity < andbit.complexity)
 		or (complexity == andbit.complexity
 		    and content_based_handle_less()(fcs, andbit.fcs));
