@@ -14,7 +14,6 @@ ADD_LIBRARY(ruleengine
 	forwardchainer/FCStat
 	forwardchainer/ForwardChainer
 	URELogger
-	ChainerUtils.cc
 	InferenceSCM.cc
 	Rule.cc
 	URECommons.cc
