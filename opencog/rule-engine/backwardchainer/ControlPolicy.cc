@@ -29,9 +29,9 @@
 #include <opencog/unify/Unify.h>
 #include <opencog/atoms/execution/MapLink.h>
 
-#include "MixtureModel.h"
-#include "ActionSelection.h"
-#include "BetaDistribution.h"
+#include "../MixtureModel.h"
+#include "../ActionSelection.h"
+#include "../BetaDistribution.h"
 
 #include "TraceRecorder.h"
 #include "../URELogger.h"

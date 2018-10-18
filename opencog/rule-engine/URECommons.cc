@@ -24,7 +24,7 @@
 #include <opencog/atoms/base/Link.h>
 
 #include "URECommons.h"
-#include "backwardchainer/BetaDistribution.h"
+#include "BetaDistribution.h"
 
 using namespace opencog;
 

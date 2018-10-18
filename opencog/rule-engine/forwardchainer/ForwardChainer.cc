@@ -31,7 +31,7 @@
 #include "FocusSetPMCB.h"
 #include "../URELogger.h"
 #include "../backwardchainer/ControlPolicy.h"
-#include "../backwardchainer/ThompsonSampling.h"
+#include "../ThompsonSampling.h"
 
 using namespace opencog;
 
