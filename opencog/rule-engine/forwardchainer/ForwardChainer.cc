@@ -365,9 +365,9 @@ Rule ForwardChainer::select_rule(const RuleSet& valid_rules)
 		ure_logger().debug() << ss.str();
 	}
 
+	// Sample rules according to the weights
 	std::discrete_distribution<size_t> dist(weights.begin(), weights.end());
-	size_t idx = dist(randGen());
-	return *std::next(valid_rules.begin(), idx);
+	return rand_element(valid_rules, dist);
 }
 
 UnorderedHandleSet ForwardChainer::apply_rule(const Rule& rule)
