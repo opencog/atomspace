@@ -40,7 +40,7 @@ ForwardChainer::ForwardChainer(AtomSpace& as, const Handle& rbs,
                                const Handle& vardecl,
                                const HandleSeq& focus_set,
                                source_selection_mode sm) :
-    _as(as), _rbs(rbs), _configReader(as, rbs), _fcstat(as)
+    _as(as), _configReader(as, rbs), _fcstat(as)
 {
 	_ts_mode = sm;
 	init(source, vardecl, focus_set);

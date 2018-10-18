@@ -55,7 +55,6 @@ private:
 	// perhaps there is some better mechanism?
 	AtomSpace _focus_set_as;
 
-	Handle _rbs;                // rule-based system
 	UREConfig _configReader;
 
 	int _iteration;
