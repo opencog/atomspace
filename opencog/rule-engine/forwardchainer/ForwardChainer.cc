@@ -136,11 +136,11 @@ void ForwardChainer::do_step()
 	expand_meta_rules();
 
 	// Select source
-	_cur_source = select_source();
-	LAZY_URE_LOG_DEBUG << "Selected source:" << std::endl << _cur_source->to_string();
+	Handle cur_source = select_source();
+	LAZY_URE_LOG_DEBUG << "Selected source:" << std::endl << cur_source->to_string();
 
 	// Select rule
-	Rule rule = select_rule(_cur_source);
+	Rule rule = select_rule(cur_source);
 	if (not rule.is_valid()) {
 		ure_logger().debug("No selected rule, abort step");
 		return;
@@ -157,7 +157,7 @@ void ForwardChainer::do_step()
 	_fcstat.add_inference_record(_iteration - 1, // _iteration has
 	                                             // already been
 	                                             // incremented
-	                             _cur_source, rule, products);
+	                             cur_source, rule, products);
 }
 
 bool ForwardChainer::termination()

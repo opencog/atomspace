@@ -60,12 +60,14 @@ private:
 	// Current iteration
 	int _iteration;
 
-	source_selection_mode _ts_mode;
 	bool _search_focus_set;
+
+	// TODO: should be able to remove all that
+	source_selection_mode _ts_mode;
 	Handle _init_source;
 	Handle _init_vardecl;
-	Handle _cur_source;
 
+	// TODO: should be able to remove all that
 	// We maintain both selected and unselected sources, to speed up
 	// choose_source()
 	UnorderedHandleSet _selected_sources;
