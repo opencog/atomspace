@@ -57,9 +57,10 @@ private:
 
 	UREConfig _configReader;
 
+	// Current iteration
 	int _iteration;
+
 	source_selection_mode _ts_mode;
-	bool _search_in_af;
 	bool _search_focus_set;
 	Handle _init_source;
 	Handle _init_vardecl;

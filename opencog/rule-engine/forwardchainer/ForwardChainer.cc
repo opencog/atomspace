@@ -59,7 +59,6 @@ void ForwardChainer::init(const Handle& source,
 	_init_source = source;
 	_init_vardecl = vardecl;
 
-	_search_in_af = _configReader.get_attention_allocation();
 	_search_focus_set = not focus_set.empty();
 
 	// Set potential source.
