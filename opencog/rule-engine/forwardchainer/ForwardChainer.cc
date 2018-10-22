@@ -149,8 +149,8 @@ void ForwardChainer::do_step()
 		                     << oc_to_string(rule);
 	}
 
-	// Apply rule on _cur_source
-	UnorderedHandleSet products = apply_rule(rule);
+	// Apply rule on source
+	HandleSet products = apply_rule(rule, *source);
 
 	// Store results
 	update_potential_sources(products);
@@ -195,7 +195,7 @@ void ForwardChainer::apply_all_rules()
 {
 	for (const Rule& rule : _rules) {
 		ure_logger().debug("Apply rule %s", rule.get_name().c_str());
-		UnorderedHandleSet uhs = apply_rule(rule);
+		HandleSet uhs = apply_rule(rule);
 
 		// Update
 		_fcstat.add_inference_record(_iteration,
@@ -205,7 +205,7 @@ void ForwardChainer::apply_all_rules()
 	}
 }
 
-UnorderedHandleSet ForwardChainer::get_chaining_result()
+HandleSet ForwardChainer::get_chaining_result()
 {
 	return _fcstat.get_all_products();
 }
@@ -369,9 +369,9 @@ Rule ForwardChainer::select_rule(const RuleSet& valid_rules)
 	return rand_element(valid_rules, dist);
 }
 
-UnorderedHandleSet ForwardChainer::apply_rule(const Rule& rule)
+HandleSet ForwardChainer::apply_rule(const Rule& rule)
 {
-	UnorderedHandleSet results;
+	HandleSet results;
 
 	// Take the results from applying the rule, add them in the given
 	// AtomSpace and insert them in results
@@ -420,7 +420,7 @@ UnorderedHandleSet ForwardChainer::apply_rule(const Rule& rule)
 
 	LAZY_URE_LOG_DEBUG << "Results:" << std::endl << oc_to_string(results);
 
-	return UnorderedHandleSet(results.begin(), results.end());
+	return HandleSet(results.begin(), results.end());
 }
 
 void ForwardChainer::validate(const Handle& source)

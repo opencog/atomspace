@@ -130,7 +130,7 @@ Handle InferenceSCM::do_forward_chaining(Handle rbs,
 
     ForwardChainer fc(*as, rbs, source, vardecl, focus_set);
     fc.do_chain();
-    UnorderedHandleSet result = fc.get_chaining_result();
+    HandleSet result = fc.get_chaining_result();
 
     return as->add_link(SET_LINK, HandleSeq(result.begin(), result.end()));
 }

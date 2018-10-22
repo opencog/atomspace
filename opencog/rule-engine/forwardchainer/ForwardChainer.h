@@ -70,8 +70,9 @@ private:
 	// TODO: should be able to remove all that
 	// We maintain both selected and unselected sources, to speed up
 	// choose_source()
-	UnorderedHandleSet _selected_sources;
-	UnorderedHandleSet _unselected_sources;
+	HandleSet _selected_sources;
+	HandleSet _unselected_sources;
+
 
 	FCStat _fcstat;
 
@@ -84,7 +85,7 @@ private:
 	template<typename HandleContainer>
 	void update_potential_sources(const HandleContainer& input)
 	{
-		UnorderedHandleSet input_minus_selected;
+		HandleSet input_minus_selected;
 		for (const Handle& h : input)
 			if (_selected_sources.find(h) == _selected_sources.end())
 				input_minus_selected.insert(h);
@@ -100,7 +101,7 @@ private:
 
 protected:
 	RuleSet _rules; /* loaded rules */
-	UnorderedHandleSet _potential_sources;
+	HandleSet _potential_sources;
 	HandleSeq _focus_set;
 
 	/**
@@ -166,7 +167,7 @@ public:
 	/**
 	 * @return all results in their order of inference.
 	 */
-	UnorderedHandleSet get_chaining_result();
+	HandleSet get_chaining_result();
 };
 
 } // ~namespace opencog

@@ -123,7 +123,7 @@ void ForwardChainerUTest::test_do_chain_deduction()
 	fc.do_chain();
 
 	// Collect the results
-	UnorderedHandleSet results = fc.get_chaining_result();
+	HandleSet results = fc.get_chaining_result();
 
 	// Check that AC is in the results
 	Handle AC = _as.add_link(INHERITANCE_LINK, A, C);
@@ -149,7 +149,7 @@ void ForwardChainerUTest::test_do_chain_animals()
 	fc.get_config().set_maximum_iterations(800);
 	fc.do_chain();
 
-	UnorderedHandleSet results = fc.get_chaining_result();
+	HandleSet results = fc.get_chaining_result();
 	Handle Fritz_green = al(INHERITANCE_LINK, Fritz, green);
 
 	logger().debug() << "results = " << oc_to_string(results);
@@ -191,7 +191,7 @@ void ForwardChainerUTest::test_unsatisfied_premise(void)
 	fc.get_config().set_maximum_iterations(20);
 	fc.do_chain();
 
-	UnorderedHandleSet results = fc.get_chaining_result();
+	HandleSet results = fc.get_chaining_result();
 	TS_ASSERT_EQUALS(results.size(), 0);
 }
 
@@ -210,7 +210,7 @@ void ForwardChainerUTest::test_negation_conflict()
 	fc.get_config().set_maximum_iterations(20);
 	fc.do_chain();
 
-	UnorderedHandleSet resultSet = fc.get_chaining_result();
+	HandleSet resultSet = fc.get_chaining_result();
 	HandleSeq resultHandleSeq(resultSet.begin(), resultSet.end());
 	Handle results = al(SET_LINK, resultHandleSeq);
 
