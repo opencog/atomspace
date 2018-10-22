@@ -63,6 +63,14 @@ void RuleSet::expand_meta_rules(AtomSpace& as)
 	}
 }
 
+HandleSet RuleSet::aliases() const
+{
+	HandleSet aliases;
+	for (const auto& rule : *this)
+		aliases.insert(rule.get_alias());
+	return aliases;
+}
+
 Rule::Rule()
 	: premises_as_clauses(false), _rule_alias(Handle::UNDEFINED) {}
 

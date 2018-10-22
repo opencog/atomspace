@@ -42,6 +42,12 @@ class RuleSet : public std::set<Rule>
 public:
 	// Run all meta rules and insert the resulting rules back in the rule set.
 	void expand_meta_rules(AtomSpace& as);
+
+	/**
+	 * Return the set of rule aliases, as aliases of inference rules
+	 * are used in control rules.
+	 */
+	HandleSet aliases() const;
 };
 
 typedef std::map<Rule, Unify::TypedSubstitution> RuleTypedSubstitutionMap;

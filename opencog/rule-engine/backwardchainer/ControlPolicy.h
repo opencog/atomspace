@@ -74,10 +74,9 @@ public:
 	RuleSelection select_rule(AndBIT& andbit, BITNode& bitleaf);
 
 	/**
-	 * Return the set of rule aliases, as aliases of inference rules
-	 * are used in control rules.
+	 * Return the set of rule aliases (i,e. DefineSchema pointing to
+	 * rule names).
 	 */
-	static HandleSet rule_aliases(const RuleSet& rules);
 	static HandleSet rule_aliases(const RuleTypedSubstitutionMap& rules);
 
 private:

@@ -332,17 +332,17 @@ Rule ForwardChainer::select_rule(const Handle& source)
 	if (ure_logger().is_debug_enabled()) {
 		std::stringstream ss;
 		ss << "The following rules are valid:" << std::endl
-		   << oc_to_string(ControlPolicy::rule_aliases(valid_rules));
+		   << oc_to_string(valid_rules.aliases());
 		LAZY_URE_LOG_DEBUG << ss.str();
 	}
 
 	if (valid_rules.empty())
-		return Rule();
+		return {Rule(), 0.0};
 
 	return select_rule(valid_rules);
 };
 
-Rule ForwardChainer::select_rule(const RuleSet& valid_rules)
+RuleProbabilityPair ForwardChainer::select_rule(const RuleSet& valid_rules)
 {
 	// Build vector of all valid truth values
 	TruthValueSeq tvs;
