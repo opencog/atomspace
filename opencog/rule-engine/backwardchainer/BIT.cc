@@ -70,10 +70,14 @@ std::string	BITNode::to_string(const std::string& indent) const
 	ss << indent << "body:" << std::endl
 	   << oc_to_string(body, indent + OC_TO_STRING_INDENT)
 	   << indent << "exhausted: " << exhausted << std::endl
-	   << indent << "rules: size = " << rules.size();
+	   << indent << "rules:" << std::endl
+	   << (indent + oc_to_string_indent) << "size = " << rules.size();
+	std::string rule_indent = indent + oc_to_string_indent + oc_to_string_indent;
+	size_t i = 0;
 	for (const auto& rule : rules)
-		ss << std::endl << indent << rule.first.get_name()
-		   << " " << rule.first.get_rule()->id_to_string();
+		ss << std::endl << (indent + oc_to_string_indent)
+		   << "rule[" << i++ << "]:" << std::endl
+		   << rule.first.to_short_string(rule_indent);
 	return ss.str();
 }
 
@@ -115,7 +119,7 @@ AndBIT AndBIT::expand(const Handle& leaf,
                       double prob) const
 {
 	Handle new_fcs = expand_fcs(leaf, rule);
-	double new_cpx = expand_complexity(leaf, rule.first, prob);
+	double new_cpx = expand_complexity(leaf, prob);
 
 	// Only consider expansions that actually expands
 	if (content_eq(fcs, new_fcs)) {
@@ -295,8 +299,7 @@ std::string AndBIT::fcs_rewrite_to_ascii_art(const Handle& h) const
 	} else return h->id_to_string();
 }
 
-double AndBIT::expand_complexity(const Handle& leaf, const Rule& rule,
-                                 double prob) const
+double AndBIT::expand_complexity(const Handle& leaf, double prob) const
 {
 	// Calculate the complexity of the expanded and-BIT. Sum up the
 	// complexity of the parent and-BIT with the complexity of the
