@@ -186,7 +186,7 @@ private:
 	AtomSpace& _as;
 
 	// Contain the configuration
-	UREConfig _configReader;
+	UREConfig _config;
 
 	// Structure holding the Back Inference Tree
 	BIT _bit;
