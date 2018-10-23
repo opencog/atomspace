@@ -146,13 +146,9 @@ RuleSelection ControlPolicy::select_rule(const AndBIT& andbit,
 	HandleTVMap success_tvs = expansion_success_tvs(andbit, bitleaf, inf_rules);
 	std::vector<double> weights = rule_weights(success_tvs, inf_rules);
 
-	// Build weight vector, based on control rules or otherwise
-	// default rule TVs, to do weighted random selection.
-
 	// Sample an inference rule according to the distribution
 	std::discrete_distribution<size_t> dist(weights.begin(), weights.end());
-	size_t idx = dist(randGen());
-	const RuleTypedSubstitutionPair& selected_rule = *std::next(inf_rules.begin(), idx);
+	const RuleTypedSubstitutionPair& selected_rule = rand_element(inf_rules, dist);
 
 	// Return the selected rule and its probability of success, will
 	// be used to calculate the TV that the produce and-BIT is a

@@ -193,8 +193,7 @@ void BackwardChainer::expand_bit(AndBIT& andbit)
 
 	// Rule seems well, expand
 	LAZY_URE_LOG_DEBUG << "Selected rule, with probability " << prob
-	                   << " of success for BIT expansion:" << std::endl
-	                   << rule.to_string();
+	                   << " of success:" << std::endl << rule.to_string();
 
 	// Expand andbit. Warning: after this call the reference on andbit
 	// and bitleaf may no longer be valid because the container of

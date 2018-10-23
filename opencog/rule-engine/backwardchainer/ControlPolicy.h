@@ -37,14 +37,16 @@ namespace opencog
 //! a map from handles to truth values
 typedef std::map<Handle, TruthValuePtr> HandleTVMap;
 
-// Hold RuleTypedSubstitutionPair and double, the probability of
-// selecting the rule, which must be passed to the BIT to calculate
-// the and-BIT complexity.
+// Hold RuleTypedSubstitutionPair and the probability estimate that
+// selected rule fulfills the objective, which must be passed
+// to the BIT to calculate the and-BIT complexity.
+//
+// TODO: maybe wrap that in a class, and use it in foward chainer
 typedef std::pair<RuleTypedSubstitutionPair, double> RuleSelection;
 
 class ControlPolicy
 {
-    friend class ::ControlPolicyUTest;
+	friend class ::ControlPolicyUTest;
 public:
 	ControlPolicy(const UREConfig& ure_config, const BIT& bit,
 	              const Handle& target, AtomSpace* control_as=nullptr);
@@ -63,7 +65,7 @@ public:
 	 *
 	 * Unless a control_as is provided at construction time, the
 	 * Selection is random amongst the valid rules and weighted
-	 * according to their weights.
+	 * according to their truth values.
 	 *
 	 * TODO: add comments about inference control policy, see
 	 * <OPENCOG_ROOT>/examples/pln/inference-control-learning/README.md
