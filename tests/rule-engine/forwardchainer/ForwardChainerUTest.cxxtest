@@ -35,10 +35,12 @@ public:
 #undef DEBUG
 		logger().set_level(Logger::INFO);
 		logger().set_timestamp_flag(false);
+		// logger().set_sync_flag(true);
 		logger().set_print_to_stdout_flag(true);
 
 		ure_logger().set_level(Logger::INFO);
 		ure_logger().set_timestamp_flag(false);
+		// ure_logger().set_sync_flag(true);
 		ure_logger().set_print_to_stdout_flag(true);
 
 		string source_dir = string(PROJECT_SOURCE_DIR),
@@ -146,7 +148,7 @@ void ForwardChainerUTest::test_do_chain_animals()
 		vardecl = Handle::UNDEFINED;
 
 	ForwardChainer fc(_as, top_rbs, source, vardecl);
-	fc.get_config().set_maximum_iterations(800);
+	fc.get_config().set_maximum_iterations(50);
 	fc.do_chain();
 
 	HandleSet results = fc.get_chaining_result();
@@ -169,8 +171,8 @@ void ForwardChainerUTest::test_select_rule(void)
 	ForwardChainer fc(_as, rbs, h);
 
 	// Full unification
-	Rule rule = fc.select_rule(h);
-	TS_ASSERT(rule.is_valid());
+	RuleProbabilityPair rule = fc.select_rule(h);
+	TS_ASSERT(rule.first.is_valid());
 }
 
 /**

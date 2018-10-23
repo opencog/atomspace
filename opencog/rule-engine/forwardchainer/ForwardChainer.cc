@@ -21,6 +21,7 @@
  * 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
  */
 
+#include <opencog/util/random.h>
 #include <opencog/atoms/pattern/BindLink.h>
 #include <opencog/atoms/core/VariableList.h>
 #include <opencog/atomutils/FindUtils.h>
@@ -39,10 +40,9 @@ ForwardChainer::ForwardChainer(AtomSpace& as, const Handle& rbs,
                                const Handle& source,
                                const Handle& vardecl,
                                const HandleSeq& focus_set,
-                               source_selection_mode sm) :
-    _as(as), _configReader(as, rbs), _fcstat(as)
+                               source_selection_mode sm)
+	: _as(as), _config(as, rbs), _sources(_config, source, vardecl), _fcstat(as)
 {
-	_ts_mode = sm;
 	init(source, vardecl, focus_set);
 }
 
@@ -56,21 +56,7 @@ void ForwardChainer::init(const Handle& source,
 {
 	validate(source);
 
-	_init_source = source;
-	_init_vardecl = vardecl;
-
 	_search_focus_set = not focus_set.empty();
-
-	// Set potential source.
-	HandleSeq init_sources;
-
-	// Accept set of initial sources wrapped in a SET_LINK.
-	if (source->get_type() == SET_LINK) {
-		init_sources = source->getOutgoingSet();
-	} else {
-		init_sources.push_back(source);
-	}
-	update_potential_sources(init_sources);
 
 	// Add focus set atoms and sources to focus_set atomspace
 	if (_search_focus_set) {
@@ -79,12 +65,12 @@ void ForwardChainer::init(const Handle& source,
 		for (const Handle& h : _focus_set)
 			_focus_set_as.add_atom(h);
 
-		for (const Handle& h : _potential_sources)
-			_focus_set_as.add_atom(h);
+		for (const Source& src : _sources.sources)
+			_focus_set_as.add_atom(src.body);
 	}
 
 	// Set rules.
-	_rules = _configReader.get_rules();
+	_rules = _config.get_rules();
 	// TODO: For now the FC follows the old standard. We may move to
 	// the new standard when all rules have been ported to the new one.
 	for (const Rule& rule : _rules)
@@ -96,12 +82,12 @@ void ForwardChainer::init(const Handle& source,
 
 UREConfig& ForwardChainer::get_config()
 {
-	return _configReader;
+	return _config;
 }
 
 const UREConfig& ForwardChainer::get_config() const
 {
-	return _configReader;
+	return _config;
 }
 
 void ForwardChainer::do_chain()
@@ -111,7 +97,7 @@ void ForwardChainer::do_chain()
 
 	// Relex2Logic uses this. TODO make a separate class to handle
 	// this robustly.
-	if(_potential_sources.empty())
+	if(_sources.empty())
 	{
 		apply_all_rules();
 		return;
@@ -129,35 +115,43 @@ void ForwardChainer::do_step()
 {
 	_iteration++;
 	ure_logger().debug() << "Iteration " << _iteration
-	                     << "/" << _configReader.get_maximum_iterations_str();
+	                     << "/" << _config.get_maximum_iterations_str();
 
 	// Expand meta rules. This should probably be done on-the-fly in
 	// the select_rule method, but for now it's here
 	expand_meta_rules();
 
 	// Select source
-	Handle cur_source = select_source();
-	LAZY_URE_LOG_DEBUG << "Selected source:" << std::endl << cur_source->to_string();
+	Source* source = select_source();
+	if (source) {
+		LAZY_URE_LOG_DEBUG << "Selected source:" << std::endl
+		                   << source->to_string();
+	} else {
+		LAZY_URE_LOG_DEBUG << "No source selected, abort iteration";
+		return;
+	}
 
 	// Select rule
-	Rule rule = select_rule(cur_source);
+	RuleProbabilityPair rule_prob = select_rule(*source);
+	const Rule& rule = rule_prob.first;
+	double prob(rule_prob.second);
 	if (not rule.is_valid()) {
-		ure_logger().debug("No selected rule, abort step");
+		ure_logger().debug("No selected rule, abort iteration");
 		return;
 	} else {
-		ure_logger().debug() << "Selected rule:" << std::endl
-		                     << oc_to_string(rule);
+		LAZY_URE_LOG_DEBUG << "Selected rule, with probability " << prob
+		                   << " of success:" << std::endl << rule.to_string();
 	}
 
 	// Apply rule on source
 	HandleSet products = apply_rule(rule, *source);
 
-	// Store results
-	update_potential_sources(products);
-	_fcstat.add_inference_record(_iteration - 1, // _iteration has
-	                                             // already been
-	                                             // incremented
-	                             cur_source, rule, products);
+	// Save trace (before inserting new sources because it will cause
+	// the source pointer to be invalid).
+	_fcstat.add_inference_record(_iteration - 1, source->body, rule, products);
+
+	// Insert the produced sources in the population of sources
+	_sources.insert(products, *source, prob);
 }
 
 bool ForwardChainer::termination()
@@ -165,18 +159,14 @@ bool ForwardChainer::termination()
 	bool terminate = false;
 	std::string msg;
 
-	// Terminate if all sources have been tried (if sources are to be
-	// tried only once)
-	if (not _configReader.get_retry_sources()) {
-		if (0 < _iteration and _unselected_sources.empty()) {
-			msg = "all sources have been exhausted";
-			terminate = true;
-		}
+	// Terminate if all sources have been tried
+	if (_sources.exhausted) {
+		msg = "all sources have been exhausted";
+		terminate = true;
 	}
-
 	// Terminate if max iterations has been reached
-	if (_configReader.get_maximum_iterations() == _iteration) {
-		msg = "reach the maximum number of iterations";
+	else if (_config.get_maximum_iterations() == _iteration) {
+		msg = "reach maximum number of iterations";
 		terminate = true;
 	}
 
@@ -201,7 +191,6 @@ void ForwardChainer::apply_all_rules()
 		_fcstat.add_inference_record(_iteration,
 		                             _as.add_node(CONCEPT_NODE, "dummy-source"),
 		                             rule, uhs);
-		update_potential_sources(uhs);
 	}
 }
 
@@ -210,95 +199,46 @@ HandleSet ForwardChainer::get_chaining_result()
 	return _fcstat.get_all_products();
 }
 
-Handle ForwardChainer::select_source()
+Source* ForwardChainer::select_source()
 {
-	size_t selsrc_size = _selected_sources.size();
-	// If all sources have been selected then insert the sources'
-	// children in the set of potential sources
-	if (_unselected_sources.empty()) {
-		ure_logger().debug() << "All " << selsrc_size
-		                     << " sources have already been selected";
+	std::vector<double> weights = _sources.get_weights();
 
-		// Hack to help to exhaust sources with
-		// multiple matching rules. This would be
-		// better used with a memory of which
-		// source x rule pairs have been
-		// tried. But choose_source would still
-		// remain a hack anyway.
-		if (biased_randbool(0.01)) {
-			for (const Handle& h : _selected_sources) {
-				if (h->is_link()) {
-					const HandleSeq& outgoings = h->getOutgoingSet();
-					HandleSeq no_free_vars_outgoings;
-					// Only add children with no free variables in them
-					for (const Handle& ch : outgoings)
-						if (is_closed(ch))
-							no_free_vars_outgoings.push_back(ch);
-					update_potential_sources(no_free_vars_outgoings);
-				}
-			}
-			ure_logger().debug() << (_potential_sources.size() - selsrc_size)
-			                     << " sources' children have been added as "
-			                     << "potential sources";
-		} else {
-			ure_logger().debug() << "No added sources, "
-			                     << "retry existing sources instead";
-		}
-	}
-
-	ure_logger().debug() << "Selected sources so far "
-	                     << selsrc_size << "/" << _potential_sources.size();
-
-	URECommons urec(_as);
-	map<Handle, double> tournament_elem;
-
-	const UnorderedHandleSet& to_select_sources =
-		_unselected_sources.empty() ? _potential_sources : _unselected_sources;
-
-	// Log selectable sources
+	// Debug log
 	if (ure_logger().is_debug_enabled()) {
+		OC_ASSERT(weights.size() == _sources.size());
 		std::stringstream ss;
-		ss << "Available sources:";
-		for (const Handle& source : to_select_sources)
-			ss << std::endl << source->id_to_string();
+		ss << "Weighted sources:";
+		for (size_t i = 0; i < weights.size(); i++) {
+			if (0 < weights[i]) {
+				ss << std::endl << weights[i] << " "
+				   << _sources.sources[i].body->id_to_string();
+			}
+		}
 		ure_logger().debug() << ss.str();
 	}
 
-	Handle hchosen;
-	switch (_ts_mode) {
-	case source_selection_mode::TV_FITNESS:
-		for (const Handle& s : to_select_sources)
-			tournament_elem[s] = urec.tv_fitness(s);
-		hchosen = urec.tournament_select(tournament_elem);
-		break;
+	// Calculate the total weight to be sure it's greater than zero
+	double total = boost::accumulate(weights, 0.0);
 
-/*
-An attentionbank is needed in order to get the STI...
-	case source_selection_mode::STI:
-	    for (const Handle& s : to_select_sources)
-		    tournament_elem[s] = s->getSTI();
-	    hchosen = urec.tournament_select(tournament_elem);
-	    break;
-*/
-
-	case source_selection_mode::UNIFORM:
-		hchosen = rand_element(to_select_sources);
-		break;
-
-	default:
-		throw RuntimeException(TRACE_INFO, "Unknown source selection mode.");
-		break;
+	if (total == 0.0) {
+		ure_logger().debug() << "All sources have been exhausted";
+		if (_config.get_retry_exhausted_sources()) {
+			ure_logger().debug() << "Reset all exhausted flags to retry them";
+			_sources.reset_exhausted();
+			// Try again
+			select_source();
+		} else {
+			_sources.exhausted = true;
+			return nullptr;
+		}
 	}
 
-	OC_ASSERT(hchosen != Handle::UNDEFINED);
-
-	_selected_sources.insert(hchosen);
-	_unselected_sources.erase(hchosen);
-
-	return hchosen;
+	// Sample sources according to this distribution
+	std::discrete_distribution<size_t> dist(weights.begin(), weights.end());
+	return &rand_element(_sources.sources, dist);
 }
 
-RuleSet ForwardChainer::get_valid_rules(const Handle& source)
+RuleSet ForwardChainer::get_valid_rules(const Source& source)
 {
 	// Generate all valid rules
 	RuleSet valid_rules;
@@ -308,23 +248,29 @@ RuleSet ForwardChainer::get_valid_rules(const Handle& source)
 		if (rule.is_meta())
 			continue;
 
-		// If the source is the initial source then we may use its
-		// variable declaration during rule unification. Otherwise
-		// let's for now assume that any variable in a source must be
-		// treated as a constant, thus creating an empty VariableList.
-		Handle vardecl = source == _init_source ?
-			_init_vardecl : Handle(createVariableList(HandleSeq()));
-
 		const AtomSpace& ref_as(_search_focus_set ? _focus_set_as : _as);
-		RuleTypedSubstitutionMap urm = rule.unify_source(source, vardecl, &ref_as);
+		RuleTypedSubstitutionMap urm =
+			rule.unify_source(source.body, source.vardecl, &ref_as);
 		RuleSet unified_rules = Rule::strip_typed_substitution(urm);
 
-		valid_rules.insert(unified_rules.begin(), unified_rules.end());
+		// Only insert unexplored rules for this source
+		RuleSet pos_rules;
+		for (const auto& rule : unified_rules)
+			if (not source.is_exhausted(rule))
+				pos_rules.insert(rule);
+
+		valid_rules.insert(pos_rules.begin(), pos_rules.end());
 	}
 	return valid_rules;
 }
 
-Rule ForwardChainer::select_rule(const Handle& source)
+RuleProbabilityPair ForwardChainer::select_rule(const Handle& h)
+{
+	Source src(h);
+	return select_rule(src);
+}
+
+RuleProbabilityPair ForwardChainer::select_rule(Source& source)
 {
 	const RuleSet valid_rules = get_valid_rules(source);
 
@@ -336,8 +282,10 @@ Rule ForwardChainer::select_rule(const Handle& source)
 		LAZY_URE_LOG_DEBUG << ss.str();
 	}
 
-	if (valid_rules.empty())
+	if (valid_rules.empty()) {
+		source.exhausted = true;
 		return {Rule(), 0.0};
+	}
 
 	return select_rule(valid_rules);
 };
@@ -366,7 +314,20 @@ RuleProbabilityPair ForwardChainer::select_rule(const RuleSet& valid_rules)
 
 	// Sample rules according to the weights
 	std::discrete_distribution<size_t> dist(weights.begin(), weights.end());
-	return rand_element(valid_rules, dist);
+	const Rule& selected_rule = rand_element(valid_rules, dist);
+
+	// Calculate the probability estimate of having this rule fulfill
+	// the objective (required to calculate its complexity)
+	double prob = BetaDistribution(selected_rule.get_tv()).mean();
+
+	return {selected_rule, prob};
+}
+
+HandleSet ForwardChainer::apply_rule(const Rule& rule, Source& source)
+{
+	// Keep track of rule application to not do it again, and apply rule
+	source.rules.insert(rule);
+	return apply_rule(rule);
 }
 
 HandleSet ForwardChainer::apply_rule(const Rule& rule)

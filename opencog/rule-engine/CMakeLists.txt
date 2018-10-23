@@ -9,10 +9,10 @@ ADD_LIBRARY(ruleengine
 	backwardchainer/Fitness
 	forwardchainer/FCStat
 	forwardchainer/ForwardChainer
+        forwardchainer/SourceSet
 	URELogger
 	InferenceSCM
 	Rule
-	URECommons
 	UREConfig
 	MixtureModel
 	ActionSelection
@@ -43,7 +43,6 @@ INSTALL (TARGETS ruleengine
 
 INSTALL (FILES
 	UREConfig.h
-	URECommons.h
 	URELogger.h
 	Rule.h
 	UREConfig.h
