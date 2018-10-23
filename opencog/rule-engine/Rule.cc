@@ -71,6 +71,28 @@ HandleSet RuleSet::aliases() const
 	return aliases;
 }
 
+std::string RuleSet::to_string(const std::string& indent) const
+{
+	std::stringstream ss;
+	ss << indent << "size = " << size() << std::endl;
+	size_t i = 0;
+	for (const Rule& rule : *this)
+		ss << indent << "rule[" << i++ << "]:" << std::endl
+		   << oc_to_string(rule, indent + OC_TO_STRING_INDENT) << std::endl;
+	return ss.str();
+}
+
+std::string RuleSet::to_short_string(const std::string& indent) const
+{
+	std::stringstream ss;
+	ss << indent << "size = " << size();
+	size_t i = 0;
+	for (const auto& rule : *this)
+		ss << std::endl << indent << "rule[" << i++ << "]:" << std::endl
+		   << rule.to_short_string(indent + oc_to_string_indent);
+	return ss.str();
+}
+
 Rule::Rule()
 	: premises_as_clauses(false), _rule_alias(Handle::UNDEFINED) {}
 
@@ -493,6 +515,13 @@ std::string Rule::to_string(const std::string& indent) const
 	return ss.str();
 }
 
+std::string Rule::to_short_string(const std::string& indent) const
+{
+	std::stringstream ss;
+	ss << indent << get_name() << " " << get_rule()->id_to_string();
+	return ss.str();
+}
+
 Rule Rule::rand_alpha_converted() const
 {
 	// Clone the rule
@@ -608,13 +637,7 @@ std::string oc_to_string(const Rule& rule, const std::string& indent)
 }
 std::string oc_to_string(const RuleSet& rules, const std::string& indent)
 {
-	std::stringstream ss;
-	ss << indent << "size = " << rules.size() << std::endl;
-	size_t i = 0;
-	for (const Rule& rule : rules)
-		ss << indent << "rule[" << i++ << "]:" << std::endl
-		   << oc_to_string(rule, indent + OC_TO_STRING_INDENT) << std::endl;
-	return ss.str();
+	return rules.to_string(indent);
 }
 std::string oc_to_string(const RuleTypedSubstitutionPair& rule_ts,
                          const std::string& indent)

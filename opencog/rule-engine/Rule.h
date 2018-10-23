@@ -48,6 +48,9 @@ public:
 	 * are used in control rules.
 	 */
 	HandleSet aliases() const;
+
+	std::string to_string(const std::string& indent=empty_string) const;
+	std::string to_short_string(const std::string& indent=empty_string) const;
 };
 
 typedef std::map<Rule, Unify::TypedSubstitution> RuleTypedSubstitutionMap;
@@ -272,7 +275,8 @@ public:
 	 */
 	Handle apply(AtomSpace& as) const;
 
-	std::string to_string(const std::string& indent="") const;
+	std::string to_string(const std::string& indent=empty_string) const;
+	std::string to_short_string(const std::string& indent=empty_string) const;
 
 	// This flag allows to only sonsider the Rule clauses as
 	// premises. This is for backward compatibility with some rule
