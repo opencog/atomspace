@@ -115,15 +115,15 @@ public:
 	void init(const Handle& rule_alias, const Handle& rbs);
 	void init(const Handle& rule_alias, const Handle& rule, const Handle& rbs);
 
-    /**
-     * Verify if this rule is defined in the required format.
-     * The main purpose is to give user the corresponding warnings and info.
-     * Only verify a normal rule, do not use this function to verify a meta rule.
-     * Current verify items:
-     * 1.If there are multiple conslusions, they also need to be wrapped with one
-     *   single ExecutionOutPutLink, otherwise it won't work for bc.
-     */
-    bool verify_rule();
+	/**
+	 * Verify if this rule is defined in the required format.
+	 * The main purpose is to give user the corresponding warnings and info.
+	 * Only verify a normal rule, do not use this function to verify a meta rule.
+	 * Current verify items:
+	 * 1.If there are multiple conslusions, they also need to be wrapped with one
+	 *   single ExecutionOutPutLink, otherwise it won't work for bc.
+	 */
+	bool verify_rule();
 	
 	// Comparison
 	bool operator==(const Rule& r) const;
