@@ -40,7 +40,7 @@ IF (CXXTEST_FOUND)
 	ADD_SUBDIRECTORY (rule-engine)
 
 	IF (HAVE_CYTHON AND HAVE_NOSETESTS)
-		MESSAGE(STATUS "CYTHON")
+		MESSAGE(STATUS "found cython and nosetest, enabling python unit tests")
 		ADD_SUBDIRECTORY (cython)
 	ENDIF (HAVE_CYTHON AND HAVE_NOSETESTS)
 
