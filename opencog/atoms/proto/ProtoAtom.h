@@ -35,7 +35,7 @@ namespace opencog
 {
 
 /** \addtogroup grp_atomspace
- *  @{
+ *	@{
  */
 
 /**
@@ -96,8 +96,8 @@ public:
 	bool operator!=(const ProtoAtom& other) const
 		{ return not operator==(other); }
 
-    /** Ordering operator for ProtoAtoms. */
-    virtual bool operator<(const ProtoAtom&) const = 0;
+	/** Ordering operator for ProtoAtoms. */
+	virtual bool operator<(const ProtoAtom&) const = 0;
 };
 
 typedef std::shared_ptr<ProtoAtom> ProtoAtomPtr;
@@ -105,9 +105,9 @@ typedef std::shared_ptr<ProtoAtom> ProtoAtomPtr;
 typedef std::vector<ProtoAtomPtr> ProtomSeq;
 
 struct cmpByContent {
-    bool operator()(const ProtoAtomPtr a, const ProtoAtomPtr b) const {
-        return *a < *b;
-    }
+	bool operator()(const ProtoAtomPtr a, const ProtoAtomPtr b) const {
+		return *a < *b;
+	}
 };
 //! a map from ProtoAtomPtr to double
 typedef Counter<ProtoAtomPtr, double, cmpByContent> ValueCounter;
@@ -118,12 +118,12 @@ typedef Counter<ProtoAtomPtr, double, cmpByContent> ValueCounter;
 // overload of operator<< to print ProtoAtoms
 namespace std
 {
-    template<typename Out>
-    Out& operator<<(Out& out, const opencog::ProtoAtomPtr& pa)
-    {
-        out << pa->to_string("");
-        return out;
-    }
+	template<typename Out>
+	Out& operator<<(Out& out, const opencog::ProtoAtomPtr& pa)
+	{
+		out << pa->to_string("");
+		return out;
+	}
 } // ~namespace std
 
 #endif // _OPENCOG_PROTO_ATOM_H

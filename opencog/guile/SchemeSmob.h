@@ -32,7 +32,7 @@
 
 namespace opencog {
 /** \addtogroup grp_smob
- *  @{
+ *	@{
  */
 
 class Atom;
@@ -50,15 +50,15 @@ private:
 
 	enum {
 		COG_PROTOM = 1, // values or atoms - smart pointer
-		COG_AS,         // atom spaces
-		COG_LOGGER,     // logger
-		COG_EXTEND      // callbacks into C++ code.
+		COG_AS,			// atom spaces
+		COG_LOGGER,		// logger
+		COG_EXTEND		// callbacks into C++ code.
 	};
 
 	// Encrypt and decrypt atomspace pointer, work around to bug
 	// https://github.com/opencog/atomspace/issues/1382
-    static AtomSpace* encrypt(AtomSpace* as);
-    static AtomSpace* decrypt(AtomSpace* as);
+	static AtomSpace* encrypt(AtomSpace* as);
+	static AtomSpace* decrypt(AtomSpace* as);
 
 	static std::atomic_flag is_inited;
 	static void module_init(void*);
@@ -193,7 +193,7 @@ private:
 	static SCM ss_av_p(SCM);
 	static SCM ss_av_get_value(SCM);
 
-    // Distributional values
+	// Distributional values
 	static SCM ss_new_dv(SCM, SCM);
 	static SCM ss_new_dv_simple(SCM, SCM);
 	static SCM ss_dv_p(SCM);
@@ -207,13 +207,13 @@ private:
 	static SCM ss_dv_disjunction(SCM,SCM);
 	static SCM ss_dv_negate(SCM);
 	static SCM ss_new_cdv(SCM, SCM);
-    static SCM ss_cdv_get_conditions(SCM);
-    static SCM ss_cdv_get_unconditonals(SCM);
-    static SCM ss_cdv_get_unconditonal(SCM,SCM);
-    static SCM ss_cdv_get_unconditonal_no_match(SCM,SCM);
-    static SCM ss_cdv_get_joint(SCM,SCM);
-    static SCM ss_cdv_merge(SCM,SCM);
-    static SCM ss_cdv_cde(SCM,SCM);
+	static SCM ss_cdv_get_conditions(SCM);
+	static SCM ss_cdv_get_unconditonals(SCM);
+	static SCM ss_cdv_get_unconditonal(SCM,SCM);
+	static SCM ss_cdv_get_unconditonal_no_match(SCM,SCM);
+	static SCM ss_cdv_get_joint(SCM,SCM);
+	static SCM ss_cdv_merge(SCM,SCM);
+	static SCM ss_cdv_cde(SCM,SCM);
 
 	// Free variables
 	static SCM ss_get_free_variables(SCM);
@@ -240,7 +240,7 @@ private:
 
 	// validate arguments coming from scheme passing into C++
 	[[ noreturn ]] static void throw_exception(const std::exception&,
-	                                           const char *, SCM);
+											   const char *, SCM);
 	static AtomSpace* verify_atomspace(SCM, const char *, int pos = 1);
 	static Type verify_type(SCM, const char *, int pos = 1);
 	static Handle verify_handle(SCM, const char *, int pos = 1);
@@ -251,21 +251,21 @@ private:
 	static std::vector<DistributionalValuePtr> verify_dv_list(SCM, const char *, int pos = 1);
 	static ConditionalDVPtr verify_cdv(SCM, const char *, int pos = 1);
 	static HandleSeq verify_handle_list (SCM, const char *,
-	                                               int pos = 1);
+												   int pos = 1);
 	static std::vector<double> verify_float_list (SCM, const char *,
-	                                               int pos = 1);
+												   int pos = 1);
 	static ProtomSeq verify_protom_list (SCM, const char *,
-	                                               int pos = 1);
+												   int pos = 1);
 	static std::vector<std::string> verify_string_list (SCM, const char *,
-	                                               int pos = 1);
+												   int pos = 1);
 	static std::string verify_string (SCM, const char *, int pos = 1,
-	                                  const char *msg = "string");
+									  const char *msg = "string");
 	static int verify_int (SCM, const char *, int pos = 1,
-	                       const char *msg = "integer");
+						   const char *msg = "integer");
 	static size_t verify_size (SCM, const char *, int pos = 1,
-	                           const char *msg = "size integer");
+							   const char *msg = "size integer");
 	static double verify_real (SCM, const char *, int pos = 1,
-	                           const char *msg = "real number");
+							   const char *msg = "real number");
 	static Logger* verify_logger(SCM, const char *, int pos = 1);
 
 	static SCM atomspace_fluid;

@@ -50,7 +50,7 @@ bool FloatValue::operator<(const ProtoAtom& other) const
 	if (FLOAT_VALUE != other.get_type())
 		return FLOAT_VALUE < other.get_type();
 
-    const FloatValue* fov = (const FloatValue*) &other;
+	const FloatValue* fov = (const FloatValue*) &other;
 
 	return _value < fov->_value;
 }

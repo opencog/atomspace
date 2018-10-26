@@ -37,7 +37,7 @@
 
 //#include <opencog/truthvalue/DistributionalValue.h>
 /** \addtogroup grp_atomspace
- *  @{
+ *	@{
  */
 
 namespace opencog
@@ -52,65 +52,65 @@ typedef std::shared_ptr<const ConditionalDV> ConditionalDVPtr;
 typedef std::map<ProtoAtomPtr,ValueCounter> CDVrep;
 
 class ConditionalDV
-    : public ProtoAtom
+	: public ProtoAtom
 {
-    CDVrep value;
+	CDVrep value;
 
-    // Disallow assignment -- truth values are immutable!
-    ConditionalDV& operator=(const ConditionalDV& rhs) {
-        throw RuntimeException(TRACE_INFO, "Cannot modify truth values!");
-    }
+	// Disallow assignment -- truth values are immutable!
+	ConditionalDV& operator=(const ConditionalDV& rhs) {
+		throw RuntimeException(TRACE_INFO, "Cannot modify truth values!");
+	}
 
 public:
-    ConditionalDV();
-    ConditionalDV(CDVrep);
-    ConditionalDV(ProtomSeq,std::vector<DistributionalValuePtr>);
+	ConditionalDV();
+	ConditionalDV(CDVrep);
+	ConditionalDV(ProtomSeq,std::vector<DistributionalValuePtr>);
 
-    static ConditionalDVPtr createCDV();
-    static ConditionalDVPtr createCDV(CDVrep);
-    static ConditionalDVPtr createCDV(ProtomSeq,std::vector<DistributionalValuePtr>);
+	static ConditionalDVPtr createCDV();
+	static ConditionalDVPtr createCDV(CDVrep);
+	static ConditionalDVPtr createCDV(ProtomSeq,std::vector<DistributionalValuePtr>);
 
 	ConditionalDVPtr merge(ConditionalDVPtr) const;
 
-    ProtomSeq getConditions() const;
-    std::vector<DistributionalValuePtr> getUnconditionals() const;
-    DistributionalValuePtr getUnconditional(ProtoAtomPtr) const;
-    DistributionalValuePtr getUnconditional(DistributionalValuePtr) const;
+	ProtomSeq get_conditions() const;
+	std::vector<DistributionalValuePtr> get_unconditionals() const;
+	DistributionalValuePtr get_unconditional(ProtoAtomPtr) const;
+	DistributionalValuePtr get_unconditional(DistributionalValuePtr) const;
 
-    ValueCounter getUnconditionalNoMatchP(ProtoAtomPtr) const;
-    DistributionalValuePtr getUnconditionalNoMatch(ProtoAtomPtr) const;
-    DistributionalValuePtr getUnconditionalNoMatch(DistributionalValuePtr) const;
+	ValueCounter get_unconditional_no_matchP(ProtoAtomPtr) const;
+	DistributionalValuePtr get_unconditional_no_match(ProtoAtomPtr) const;
+	DistributionalValuePtr get_unconditional_no_match(DistributionalValuePtr) const;
 
-    DistributionalValuePtr getJointProbability(DistributionalValuePtr) const;
+	DistributionalValuePtr get_joint_probability(DistributionalValuePtr) const;
 
-	//Consequen-Disjuction-Elimination
+	//Consequent-Disjuction-Elimination
 	ConditionalDVPtr CDE(ConditionalDVPtr) const;
 
 	double total_count() const;
 	double avg_count() const;
 
-    virtual bool operator==(const ProtoAtom& rhs) const;
+	virtual bool operator==(const ProtoAtom& rhs) const;
 
-    virtual bool operator<(const ProtoAtom&) const;
+	virtual bool operator<(const ProtoAtom&) const;
 
-    using ProtoAtom::to_string;
-    std::string to_string(const std::string&) const;
+	using ProtoAtom::to_string;
+	std::string to_string(const std::string&) const;
 
 };
 
 static inline ConditionalDVPtr ConditionalDVCast(const ProtoAtomPtr& pa)
-    { return std::dynamic_pointer_cast<const ConditionalDV>(pa); }
+	{ return std::dynamic_pointer_cast<const ConditionalDV>(pa); }
 
 static inline ProtoAtomPtr ProtoAtomCast(const ConditionalDVPtr& cdv)
 {
-    // This should have worked!?
-    // return std::const_pointer_cast<ProtoAtom>(tv);
+	// This should have worked!?
+	// return std::const_pointer_cast<ProtoAtom>(tv);
 
-    // This, too, should have worked!?
-    // return std::shared_ptr<ProtoAtom>(tv, const_cast<ProtoAtom*>(tv.get()));
+	// This, too, should have worked!?
+	// return std::shared_ptr<ProtoAtom>(tv, const_cast<ProtoAtom*>(tv.get()));
 
-    // This works...
-    return std::shared_ptr<ProtoAtom>(cdv, (ProtoAtom*) cdv.get());
+	// This works...
+	return std::shared_ptr<ProtoAtom>(cdv, (ProtoAtom*) cdv.get());
 }
 } // namespace opencog
 
