@@ -380,7 +380,7 @@ IF(HAVE_PY_INTERP)
 
 	# Nosetests will find and automatically run python tests.
 	IF (PYTHON3INTERP_FOUND)
-		FIND_PROGRAM(NOSETESTS_EXECUTABLE nosetests-3.4)
+		FIND_PROGRAM(NOSETESTS_EXECUTABLE nosetests3)
 	ELSE ()
 		FIND_PROGRAM(NOSETESTS_EXECUTABLE nosetests-2.7)
 	ENDIF ()
@@ -544,14 +544,12 @@ IF (CXXTEST_FOUND)
 		)
 	ENDIF (CMAKE_BUILD_TYPE STREQUAL "Coverage")
 	ADD_CUSTOM_TARGET(test_python
-		DEPENDS PythonEvalUTest
-				PythonUtilitiesUTest
-				bindlink_cython atomspace_cython
-				scheme_wrapper logger_cython utilities_cython
+		DEPENDS PythonEval logger_cython scheme_wrapper bindlink_cython atomspace_cython
 		WORKING_DIRECTORY tests/cython
 		COMMAND ${CMAKE_CTEST_COMMAND} $(ARGS)
 		COMMENT "Running Python and Cython tests..."
 	)
+	add_dependencies(tests PythonEval logger_cython scheme_wrapper bindlink_cython atomspace_cython)
 	ADD_CUSTOM_TARGET(test_query
 		DEPENDS tests/query
 		#      ../reasoning/RuleEngine/RuleUTest
