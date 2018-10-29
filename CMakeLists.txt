@@ -544,11 +544,12 @@ IF (CXXTEST_FOUND)
 		)
 	ENDIF (CMAKE_BUILD_TYPE STREQUAL "Coverage")
 	ADD_CUSTOM_TARGET(test_python
-		DEPENDS tests PythonEval logger_cython scheme_wrapper bindlink_cython
+		DEPENDS PythonEval logger_cython scheme_wrapper bindlink_cython atomspace_cython
 		WORKING_DIRECTORY tests/cython
 		COMMAND ${CMAKE_CTEST_COMMAND} $(ARGS)
 		COMMENT "Running Python and Cython tests..."
 	)
+	add_dependencies(tests PythonEval logger_cython scheme_wrapper bindlink_cython atomspace_cython)
 	ADD_CUSTOM_TARGET(test_query
 		DEPENDS tests/query
 		#      ../reasoning/RuleEngine/RuleUTest
