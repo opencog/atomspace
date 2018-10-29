@@ -203,7 +203,7 @@ private:
 	// it).
 	HandleSeq fetch_execution_outputs(const Handle& schema,
 	                                  const Handle& input,
-	                                  Type type = ATOM);
+	                                  Type type=ATOM);
 
 	// Similar to above but takes instead the schema name instead of
 	// the schema Handle, assumes that output value is a NumberNode,
@@ -220,7 +220,7 @@ private:
 	// no such ExecutionLink exists.
 	double fetch_num_param(const std::string& schema_name,
 	                       const Handle& input,
-	                       double default_value = 0.0);
+	                       double default_value=0.0);
 
 	// Given <pred_name> and <input> in
 	//
@@ -230,7 +230,9 @@ private:
 	//
 	// Return TV.mean > 0.5 or default_value in case no such
 	// EvaluationLink exists.
-	bool fetch_bool_param(const std::string& pred_name, const Handle& input, bool default_value = false);
+	bool fetch_bool_param(const std::string& pred_name,
+	                      const Handle& input,
+	                      bool default_value=false);
 
 	// Log debug message about the value of parameter, fetched or default
 	template<typename T>
