@@ -13,7 +13,7 @@
 ;; -- ure-set-fuzzy-bool-parameter -- Set a fuzzy boolean parameter of an rbs
 ;; -- ure-set-attention-allocation -- Set the URE:attention-allocation parameter
 ;; -- ure-set-maximum-iterations -- Set the URE:maximum-iterations parameter
-;; -- ure-set-fc-retry-sources -- Set the URE:FC:retry-sources parameter
+;; -- ure-set-fc-retry-exhausted-sources -- Set the URE:FC:retry-exhausted-sources parameter
 ;; -- ure-set-bc-complexity-penalty -- Set the URE:BC:complexity-penalty parameter
 ;; -- ure-set-bc-maximum-bit-size -- Set the URE:BC:maximum-bit-size
 ;; -- ure-set-bc-mm-complexity-penalty -- Set the URE:BC:MM:complexity-penalty
@@ -274,18 +274,18 @@
 "
   (ure-set-num-parameter rbs "URE:maximum-iterations" value))
 
-(define (ure-set-fc-retry-sources rbs value)
+(define (ure-set-fc-retry-exhausted-sources rbs value)
 "
-  Set the URE:FC:retry-sources parameter of a given RBS
+  Set the URE:FC:retry-exhausted-sources parameter of a given RBS
 
   EvaluationLink (stv value 1)
-    PredicateNode \"URE:FC:retry-sources\"
+    PredicateNode \"URE:FC:retry-exhausted-sources\"
     rbs
 
   If the provided value is a boolean, then it is automatically
   converted into tv.
 "
-  (ure-set-fuzzy-bool-parameter rbs "URE:FC:retry-sources" value))
+  (ure-set-fuzzy-bool-parameter rbs "URE:FC:retry-exhausted-sources" value))
 
 (define (ure-set-bc-complexity-penalty rbs value)
 "
@@ -548,7 +548,7 @@
           ure-set-fuzzy-bool-parameter
           ure-set-attention-allocation
           ure-set-maximum-iterations
-          ure-set-fc-retry-sources
+          ure-set-fc-retry-exhausted-sources
           ure-set-bc-maximum-bit-size
           ure-set-bc-mm-complexity-penalty
           ure-set-bc-mm-compressiveness
