@@ -20,7 +20,7 @@ class CrispTest(TestCase):
         scheme_eval(self.atomspace, '(use-modules (opencog logger))')
         scm_dir = os.environ["SCM_DIR"]
         scheme_eval(self.atomspace, '(add-to-load-path "{0}")'.format(scm_dir))
-        load_scm(self.atomspace, "crisp-config.scm") 
+        load_scm(self.atomspace, "crisp-config.scm")
 
     def testCrisp(self):
         A = PredicateNode("A", TruthValue(1, 1))
@@ -36,4 +36,3 @@ class CrispTest(TestCase):
         chainer.do_chain()
         results = chainer.get_results()
         self.assertTrue(results.get_out()[0].name == "C")
-

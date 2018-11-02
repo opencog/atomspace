@@ -13,7 +13,7 @@ cdef extern from "opencog/rule-engine/backwardchainer/Fitness.h" namespace "open
 
 cdef extern from "opencog/rule-engine/backwardchainer/Fitness.h" namespace "opencog::AndBITFitness::FitnessType":
     cdef AndBitFitnessType Uniform
-    cdef AndBitFitnessType Trace 
+    cdef AndBitFitnessType Trace
 
 
 cdef extern from "opencog/rule-engine/backwardchainer/Fitness.h" namespace "opencog::BITNodeFitness::FitnessType":
@@ -34,7 +34,7 @@ cdef extern from "opencog/rule-engine/backwardchainer/Fitness.h" namespace "open
 
 cdef extern from "opencog/rule-engine/backwardchainer/BackwardChainer.h" namespace "opencog":
     cdef cppclass cBackwardChainer "opencog::BackwardChainer":
-        cBackwardChainer(cAtomSpace& _as, 
+        cBackwardChainer(cAtomSpace& _as,
                         const cHandle& rbs,
                         const cHandle& target,
                         const cHandle& vardecl,
@@ -44,7 +44,7 @@ cdef extern from "opencog/rule-engine/backwardchainer/BackwardChainer.h" namespa
                         const BITNodeFitness& bitnode_fitness,
                         const AndBITFitness& andbit_fitness) except +
 
-        cBackwardChainer(cAtomSpace& _as, 
+        cBackwardChainer(cAtomSpace& _as,
                         const cHandle& rbs,
                         const cHandle& target,
                         const cHandle& vardecl,
