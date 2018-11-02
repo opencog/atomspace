@@ -51,6 +51,7 @@ TARGET_LINK_LIBRARIES(PythonUtilitiesUTest
 	PythonEval
 	utilities_cython
 	atomspace_cython
+	backwardchainer_cython
 	atomspace
 	${COGUTIL_LIBRARY}
 )
@@ -91,6 +92,13 @@ IF (HAVE_NOSETESTS)
 			PROPERTIES
 			ENVIRONMENT "PYTHONDONTWRITEBYTECODE=1"
 			ENVIRONMENT "PYTHONPATH=${PROJECT_BINARY_DIR}/opencog/cython/:${PROJECT_SOURCE_DIR}/opencog/python/:${PROJECT_SOURCE_DIR}/tests/cython/bindlink")
+
+		ADD_TEST(CythonBackwardchainer ${NOSETESTS_EXECUTABLE} -vs
+			${CMAKE_SOURCE_DIR}/tests/cython/backwardchainer/)
+		SET_PROPERTY(TEST CythonBackwardchainer
+			PROPERTY ENVIRONMENT "PYTHONDONTWRITEBYTECODE=1"
+		        "SCM_DIR=${PROJECT_SOURCE_DIR}/tests/cython/backwardchainer/scm"
+			"PYTHONPATH=${PROJECT_BINARY_DIR}/opencog/cython/:${PROJECT_SOURCE_DIR}/opencog/python/:${PROJECT_SOURCE_DIR}/tests/cython/backwardchainer")
 	ENDIF (HAVE_ATOMSPACE)
 
 	IF (HAVE_ATOMSPACE AND HAVE_GUILE)
