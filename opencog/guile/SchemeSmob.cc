@@ -313,6 +313,7 @@ void SchemeSmob::register_procs()
 
 	// property getters on atoms
 	register_proc("cog-name",              1, 0, 0, C(ss_name));
+	register_proc("cog-number",            1, 0, 0, C(ss_number));
 	register_proc("cog-type",              1, 0, 0, C(ss_type));
 	register_proc("cog-arity",             1, 0, 0, C(ss_arity));
 	register_proc("cog-incoming-set",      1, 0, 0, C(ss_incoming_set));

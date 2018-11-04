@@ -118,6 +118,7 @@ private:
 
 	// Atom properties
 	static SCM ss_name(SCM);
+	static SCM ss_number(SCM);
 	static SCM ss_type(SCM);
 	static SCM ss_arity(SCM);
 	static SCM ss_as(SCM);
