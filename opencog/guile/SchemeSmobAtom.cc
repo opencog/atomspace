@@ -13,6 +13,7 @@
 
 #include <opencog/atoms/proto/NameServer.h>
 #include <opencog/atoms/proto/ProtoAtom.h>
+#include <opencog/atoms/core/NumberNode.h>
 #include <opencog/truthvalue/AttentionValue.h>
 #include <opencog/truthvalue/CountTruthValue.h>
 #include <opencog/truthvalue/TruthValue.h>
@@ -73,6 +74,21 @@ SCM SchemeSmob::ss_name (SCM satom)
 	if (h->is_node()) name = h->get_name();
 	SCM str = scm_from_utf8_string(name.c_str());
 	return str;
+}
+
+/**
+ * Return the number of the NumberNode
+ */
+SCM SchemeSmob::ss_number (SCM satom)
+{
+	Handle h = verify_handle(satom, "cog-number");
+
+	NumberNodePtr nn(NumberNodeCast(h));
+	// Faster than saying if (not nameserver().isA(h->get_type(), NUMBER_NODE))
+	if (nullptr == nn)
+		scm_wrong_type_arg_msg("cog-number", 0, satom, "NumberNode");
+	SCM num = scm_from_double(nn->get_value());
+	return num;
 }
 
 SCM SchemeSmob::ss_type (SCM satom)
