@@ -339,13 +339,9 @@ void SCMExecutionOutputUTest::test_nested(void)
 	// Define various generic utilities
 	eval->eval(
 		"(define (oc-plus x y)"
-		"   (NumberNode (number->string (+ "
-		"      (string->number (cog-name x)) "
-		"      (string->number (cog-name y))))))"
+		"   (NumberNode (+ (cog-number x) (cog-number y))))"
 		"(define (oc-times x y)"
-		"   (NumberNode (number->string (* "
-		"      (string->number (cog-name x)) "
-		"      (string->number (cog-name y))))))"
+		"   (NumberNode (* (cog-number x) (cog-number y))))"
 	);
 	CHKEV(eval);
 
@@ -357,9 +353,9 @@ void SCMExecutionOutputUTest::test_nested(void)
 		"         (ExecutionOutputLink "
 		"            (GroundedSchemaNode \"scm: oc-plus\")"
 		"            (ListLink "
-		"               (NumberNode \"1\")"
-		"               (NumberNode \"2\")))"
-		"         (NumberNode \"3\"))))"
+		"               (NumberNode 1)"
+		"               (NumberNode 2)))"
+		"         (NumberNode 3))))"
 	);
 	CHKEV(eval);
 
