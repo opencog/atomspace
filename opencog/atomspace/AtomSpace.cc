@@ -417,7 +417,11 @@ void AtomSpace::fetch_valuations(Handle key, bool get_all_values)
 
 bool AtomSpace::remove_atom(Handle h, bool recursive)
 {
-    if (_backing_store)
+    // Removal of atoms from read-only databases is not allowed.
+    // It is OK to remove atoms from a read-only atomspace, because
+    // it is acting as a cache for the database, and removal is used
+    // used to free up RAM storage.
+    if (_backing_store and not _read_only)
         _backing_store->removeAtom(h, recursive);
     return 0 < _atom_table.extract(h, recursive).size();
 }
