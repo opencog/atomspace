@@ -271,6 +271,10 @@ void AtomSpace::unregisterBackingStore(BackingStore *bs)
 
 Handle AtomSpace::add_atom(const Handle& h, bool async)
 {
+    // Cannot add atoms to a read-only atomspce. But if it's already
+    // in the atomspace, return it.
+    if (_read_only) return _atom_table.getHandle(h);
+
     // If it is a DeleteLink, then the addition will fail. Deal with it.
     Handle rh;
     try {
@@ -298,6 +302,10 @@ Handle AtomSpace::get_node(Type t, const string& name)
 
 Handle AtomSpace::add_link(Type t, const HandleSeq& outgoing, bool async)
 {
+    // Cannot add atoms to a read-only atomspce. But if it's already
+    // in the atomspace, return it.
+    if (_read_only) return _atom_table.getHandle(t, outgoing);
+
     // If it is a DeleteLink, then the addition will fail. Deal with it.
     Handle rh;
     try {
@@ -322,6 +330,9 @@ void AtomSpace::store_atom(const Handle& h)
     if (nullptr == _backing_store)
         throw RuntimeException(TRACE_INFO, "No backing store");
 
+    if (_read_only)
+        throw RuntimeException(TRACE_INFO, "Read-only AtomSpace!");
+
     _backing_store->storeAtom(h);
 }
 
@@ -330,9 +341,6 @@ Handle AtomSpace::fetch_atom(const Handle& h)
     if (nullptr == _backing_store)
         throw RuntimeException(TRACE_INFO, "No backing store");
     if (nullptr == h) return Handle::UNDEFINED;
-
-    // First, make sure the atom is actually in the atomspace.
-    Handle hc(_atom_table.add(h, false));
 
     // Now, get the latest values from the backing store.
     // The operation here is to CLOBBER the values, NOT to merge them!
@@ -350,16 +358,15 @@ Handle AtomSpace::fetch_atom(const Handle& h)
                                      h->getOutgoingSet());
     }
 
-    // Hmm I don't quite get it ...  shouldn't hv and hc be the same
-    // atom, by now? So the below should not be needed...!?
-    if (hv and hv != hc)
-    {
-        hc->copyValues(hv);
-        TruthValuePtr tv = hv->getTruthValue();
-        hc->setTruthValue(tv);
-    }
+    // If we found it, add it to the atomspace -- even when the
+    // atomspace is marked read-only; the atomspace is acting as
+    // a cache for the backingstore.
+    if (hv) return _atom_table.add(hv, false);
 
-    return hc;
+    // If it is not found, then it cannot be added.
+    if (_read_only) return Handle::UNDEFINED;
+
+    return _atom_table.add(h, false);
 }
 
 Handle AtomSpace::fetch_incoming_set(Handle h, bool recursive)
