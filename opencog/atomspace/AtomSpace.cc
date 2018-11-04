@@ -61,7 +61,7 @@ using namespace opencog;
 AtomSpace::AtomSpace(AtomSpace* parent, bool transient) :
     _atom_table(parent? &parent->_atom_table : nullptr, this, transient),
     _backing_store(nullptr),
-    _transient(transient)
+    _read_only(false)
 {
 }
 
@@ -77,6 +77,17 @@ void AtomSpace::ready_transient(AtomSpace* parent)
 void AtomSpace::clear_transient()
 {
     _atom_table.clear_transient();
+}
+
+// An extremely primitive permissions system.
+void AtomSpace::set_read_only(void)
+{
+    _read_only = true;
+}
+
+void AtomSpace::set_read_write(void)
+{
+    _read_only = false;
 }
 
 bool AtomSpace::compare_atomspaces(const AtomSpace& space_first,

@@ -76,7 +76,7 @@ class AtomSpace
 
     AtomTable& get_atomtable(void) { return _atom_table; }
 
-    bool _transient;
+    bool _read_only;
 protected:
 
     /**
@@ -92,8 +92,15 @@ public:
     AtomSpace(AtomSpace* parent=nullptr, bool transient=false);
     ~AtomSpace();
 
+    // Transient atomspaces are lighter-weight, faster, but are missing
+    // some features. They are used during pattern matching, to hold
+    // temporary results.
     void ready_transient(AtomSpace* parent);
     void clear_transient();
+
+    void set_read_only(void);
+    void set_read_write(void);
+    bool get_read_only(void) { return _read_only; }
 
     /// Get the environment that this atomspace was created in.
     AtomSpace* get_environ() const {
