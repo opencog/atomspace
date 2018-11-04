@@ -292,6 +292,10 @@ Handle AtomSpace::add_atom(const Handle& h, bool async)
 Handle AtomSpace::add_node(Type t, const string& name,
                            bool async)
 {
+    // Cannot add atoms to a read-only atomspce. But if it's already
+    // in the atomspace, return it.
+    if (_read_only) return _atom_table.getHandle(t, name);
+
     return _atom_table.add(createNode(t, name), async);
 }
 
