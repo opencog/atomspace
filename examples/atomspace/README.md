@@ -9,6 +9,7 @@ underlying the AtomSpace. This includes:
 * A simple pattern-matching example.
 * Techniques to control state in the AtomSpace.
 * How to use Values to attach arbitrary data to specific Atoms.
+* How to user a read-only base AtomSpace, with a read-write overlay.
 * How to use time-varying (streaming) Values (experimental).
 
 All of the examples are written in scheme.
@@ -28,12 +29,12 @@ It is recommended that you go through the examples in the order given.
 * `values.scm`  -- Using Values and attaching them to Atoms.
 * `filter.scm`  -- Filtering sets of atoms.
 * `map.scm`     -- Applying a map function to a set or list.
-* `recursive-loop.scm` -- An example of a tail-recursive loop.
-* `random-choice.scm`  -- Numerical programming, including loops.
-* `logger-example.scm` -- Using the built-in logger.
-* `except.scm`  -- An example of exceptions being thrown and passed.
-* `persist-example.scm` -- An example of saving atomspace data in an SQL
-                   database.
+* `recursive-loop.scm`  -- An example of a tail-recursive loop.
+* `random-choice.scm`   -- Numerical programming, including loops.
+* `logger-example.scm`  -- Using the built-in logger.
+* `except.scm`          -- Throwing and catching exceptions.
+* `persist-example.scm` -- Saving atomspace data in an SQL database.
+* `copy-on-write.scm`   -- Read-only atomspaces, with r/w overlays.
 * `stream.scm`  -- Using a stream of time-varying Values.
 * `gperf.scm`   -- Some very crude performance measurements.
 
@@ -108,7 +109,7 @@ for additional documentation.
 
 List of the various OpenCog modules
 ===================================
-A reasonably up-to-datelist of modules provided by OpenCog:
+A reasonably up-to-date list of modules provided by OpenCog:
 ```
 (use-modules (opencog))
 (use-modules (opencog exec))
