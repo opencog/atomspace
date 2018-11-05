@@ -255,25 +255,16 @@ Handle AtomTable::getHandle(Type t, const HandleSeq& seq) const
     return getLinkHandle(a);
 }
 
-Handle AtomTable::getLinkHandle(const AtomPtr& orig) const
+Handle AtomTable::getLinkHandle(const AtomPtr& a) const
 {
-    AtomPtr a(orig);
-    Type t = a->get_type();
     const HandleSeq &seq = a->getOutgoingSet();
 
     // Make sure all the atoms in the outgoing set are in the atomspace.
     // If any are not, then reject the whole mess.
-    HandleSeq resolved_seq;
-    // Reserving space improves emplace_back performance by 2x
-    resolved_seq.reserve(seq.size());
-    bool changed = false;
     for (const Handle& ho : seq) {
         Handle rh(getHandle(ho));
         if (not rh) return rh;
-        if (rh != ho) changed = true;
-        resolved_seq.emplace_back(rh);
     }
-    if (changed) a = createLink(resolved_seq, t);
 
     // Start searching to see if we have this atom.
     ContentHash ch = a->get_hash();
