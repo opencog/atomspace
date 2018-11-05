@@ -128,9 +128,9 @@ bool AtomSpace::compare_atomspaces(const AtomSpace& space_first,
     // If we get this far, we need to compare each individual atom.
 
     // Get the atoms in each atomspace.
-    HandleSeq atomsInFirstSpace, atomsInSecondSpace;
-    space_first.get_all_atoms(atomsInFirstSpace);
-    space_second.get_all_atoms(atomsInSecondSpace);
+    HandleSet atomsInFirstSpace, atomsInSecondSpace;
+    space_first.get_handleset_by_type(atomsInFirstSpace, ATOM, true);
+    space_second.get_handleset_by_type(atomsInSecondSpace, ATOM, true);
 
     // Uncheck each atom in the second atomspace.
     for (auto atom : atomsInSecondSpace)

@@ -411,45 +411,29 @@ public:
     }
 
     /**
-     * Gets all the atoms of any type and appends them to the HandleSeq.
-     * Caution: this is slower than using get_handleset_by_type() to
-     * get a set, as it forces the use of a copy to deduplicate atoms.
-     *
-     * @param appendToHandles the HandleSeq to which to append the handles.
-     *
-     * Example of call to this method:
-     * @code
-     *         HandleSeq atoms;
-     *         atomSpace.get_all_atoms(atoms);
-     * @endcode
-     */
-    void get_all_atoms(HandleSeq& appendToHandles) const
-    {
-        // Defer to handles by type for ATOMs and subclasses.
-        get_handles_by_type(appendToHandles, ATOM, true);
-    }
-
-    /**
-     * Gets all the nodes of any type and appends them to the HandleSeq.
-     * Caution: this is slower than using get_handleset_by_type() to
-     * get a set, as it forces the use of a copy to deduplicate atoms.
-     *
-     * @param appendToHandles the HandleSeq to which to append the handles.
-     *
-     * Example of call to this method:
-     * @code
-     *         HandleSeq nodes;
-     *         atomSpace.get_all_nodes(nodes);
-     * @endcode
-     */
-    void get_all_nodes(HandleSeq& appendToHandles) const
-    {
-        // Defer to handles by type for NODEs and subclasses.
-        get_handles_by_type(appendToHandles, NODE, true);
-    }
-
-    /**
      * Gets a set of handles that matches with the given type
+     * (subclasses optionally).
+     *
+     * @param hset the HandleSet into which to insert handles.
+     * @param type The desired type.
+     * @param subclass Whether type subclasses should be considered.
+     *
+     * Example of call to this method, which would return all ConceptNodes
+     * in the AtomSpace:
+     * @code
+     *         HandleSet atoms;
+     *         atomSpace.get_handlset_by_type(atoms, CONCEPT_NODE);
+     * @endcode
+     */
+    void get_handleset_by_type(HandleSet& hset,
+                               Type type,
+                               bool subclass=false) const
+    {
+        return _atom_table.getHandleSetByType(hset, type, subclass);
+    }
+
+    /**
+     * Gets a sequence of handles that matches with the given type
      * (subclasses optionally).
      * Caution: this is slower than using get_handleset_by_type() to
      * get a set, as it forces the use of a copy to deduplicate atoms.
@@ -458,14 +442,11 @@ public:
      * @param type The desired type.
      * @param subclass Whether type subclasses should be considered.
      *
-     * @note The matched entries are appended to a container whose
-     *        OutputIterator is passed as the first argument.
-     *
      * Example of call to this method, which would return all ConceptNodes
      * in the AtomSpace:
      * @code
-     *         std::list<Handle> atoms;
-     *         atomSpace.getHandlesByType(atoms, CONCEPT_NODE);
+     *         HandleSeq atoms;
+     *         atomSpace.get_handle_by_type(atoms, CONCEPT_NODE);
      * @endcode
      */
     void get_handles_by_type(HandleSeq& appendToHandles,
@@ -487,15 +468,8 @@ public:
         get_handles_by_type(back_inserter(appendToHandles), type, subclass);
     }
 
-    void get_handleset_by_type(HandleSet& hset,
-                               Type type,
-                               bool subclass=false) const
-    {
-        return _atom_table.getHandleSetByType(hset, type, subclass);
-    }
-
     /**
-     * Gets a set of handles that matches with the given type
+     * Gets a container of handles that matches with the given type
      * (subclasses optionally).
      * Caution: this is slower than using get_handleset_by_type() to
      * get a set, as it forces the use of a copy to deduplicate atoms.
@@ -513,7 +487,7 @@ public:
      * in AtomSpace:
      * @code
      *         std::list<Handle> ret;
-     *         atomSpace.getHandlesByType(back_inserter(ret), ATOM, true);
+     *         atomSpace.get_handles_by_type(back_inserter(ret), ATOM, true);
      * @endcode
      */
     template <typename OutputIterator> OutputIterator
@@ -540,8 +514,6 @@ public:
         // the lock for too long. (because we don't know how long
         // the callback will take.)
         HandleSet handle_set;
-        // The intended signatue is
-        // getHandleSet(OutputIterator result, Type type, bool subclass)
         get_handleset_by_type(handle_set, atype, subclass);
 
         // Loop over all handles in the handle set.
