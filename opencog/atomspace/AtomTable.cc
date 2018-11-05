@@ -416,8 +416,21 @@ Handle AtomTable::add(AtomPtr atom, bool async, bool force)
     // the atomspace.  Lock, to prevent two different threads from
     // trying to add exactly the same atom.
     std::unique_lock<std::recursive_mutex> lck(_mtx);
-    Handle hcheck(getHandle(orig));
-    if (hcheck) return hcheck;
+    if (not force) {
+        Handle hcheck(getHandle(orig));
+        if (hcheck) return hcheck;
+    } else {
+
+        // If force-adding, we have to be more careful.  We're looking
+        // for the atom in this table, and not some other table.
+        Handle hcheck;
+        if (orig->is_node())
+            hcheck = getNodeHandle(orig);
+        else if (orig->is_link())
+            hcheck = getLinkHandle(orig);
+
+        if (hcheck and hcheck->getAtomSpace() == _as) return hcheck;
+    }
 
     atom->copyValues(Handle(orig));
 
