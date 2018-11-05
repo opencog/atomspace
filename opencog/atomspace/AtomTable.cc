@@ -362,13 +362,13 @@ static void prt_diag(AtomPtr atom, size_t i, size_t arity, const HandleSeq& ogs)
 }
 #endif
 
-Handle AtomTable::add(AtomPtr atom, bool async)
+Handle AtomTable::add(AtomPtr atom, bool async, bool force)
 {
     // Can be null, if its a ProtoAtom
     if (nullptr == atom) return Handle::UNDEFINED;
 
     // Is the atom already in this table, or one of its environments?
-    if (in_environ(atom))
+    if (not force and in_environ(atom))
         return atom->get_handle();
 
     AtomPtr orig(atom);

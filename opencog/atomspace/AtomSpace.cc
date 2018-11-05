@@ -434,12 +434,32 @@ void AtomSpace::set_value(Handle& h,
                           const Handle& key,
                           const ProtoAtomPtr& value)
 {
-    h->setValue(key, value);
+    // If the atom is in a read-only atomspace (i.e. if the parent
+    // is read-only) and this atomspace is read-write, then make
+    // a copy of the atom, and then set the value.
+    AtomSpace* has = h->getAtomSpace();
+    if (has != this and has->_read_only and not _read_only) {
+        // Copy the atom into this atomspace
+        Handle copy(_atom_table.add(h, false, true));
+        copy->setValue(key, value);
+        return;
+    }
+    if (not _read_only) h->setValue(key, value);
 }
 
 void AtomSpace::set_truthvalue(Handle& h, const TruthValuePtr& tvp)
 {
-    h->setTruthValue(tvp);
+    // If the atom is in a read-only atomspace (i.e. if the parent
+    // is read-only) and this atomspace is read-write, then make
+    // a copy of the atom, and then set the value.
+    AtomSpace* has = h->getAtomSpace();
+    if (has != this and has->_read_only and not _read_only) {
+        // Copy the atom into this atomspace
+        Handle copy(_atom_table.add(h, false, true));
+        copy->setTruthValue(tvp);
+        return;
+    }
+    if (not _read_only) h->setTruthValue(tvp);
 }
 
 std::string AtomSpace::to_string() const

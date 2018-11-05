@@ -300,10 +300,13 @@ public:
      * and also giving each index its own unique mutex, to avoid
      * collisions.  So the API is here, but more work is still needed.
      *
+     * The `force` flag forces the addtion of this atom into the
+     * atomtable, even if it is already in a parent atomspace.
+     *
      * @param The new atom to be added.
      * @return The handle of the newly added atom.
      */
-    Handle add(AtomPtr, bool async);
+    Handle add(AtomPtr, bool async, bool force=false);
 
     /**
      * Read-write synchronization barrier fence.  When called, this
