@@ -307,12 +307,13 @@
   The root atoms are those, which have no incoming atoms, located
   in the atomspace or its ancestors (i.e. visible from the atomspace).
 "
-	(define (is-visible? atom)
-		(member
-			(cog-as atom)
-			(get-atomspace-and-parents)))
-	(define (get-atomspace-and-parents)
+	; A list of the atomspace and all parents
+	(define atomspace-and-parents
 		(unfold null? identity cog-atomspace-env (cog-atomspace)))
+
+	; Is the atom in any of the atomspaces?
+	(define (is-visible? atom)
+		(member (cog-as atom) atomspace-and-parents))
 
 	(define (apply-if-root h)
 		(if (not (any is-visible? (cog-incoming-set h)))
