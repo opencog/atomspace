@@ -304,8 +304,8 @@
 "
   traverse-roots -- Applies func to every root atom in the atomspace.
 
-  The root atoms are those, which have no incoming atoms,
-  located in the atomspace or its ancestors (i.e. visible from the atomspace).
+  The root atoms are those, which have no incoming atoms, located
+  in the atomspace or its ancestors (i.e. visible from the atomspace).
 "
 	(define (is-visible? atom)
 		(member
@@ -326,10 +326,11 @@
 "
   cog-prt-atomspace -- Prints all atoms in the atomspace
 
-  This will print all of the atoms in the atomspace: specifically, only
-  those atoms that have no incoming set in the atomspace or its ancestors,
-  and thus are at the top of a tree.  All other atoms (those which do
-  have an incoming set) will appear somewhere underneath these top-most atoms.
+  This will print all of the atoms in the atomspace: specifically,
+  only those atoms that have no incoming set in the atomspace or its
+  ancestors, and thus are at the top of a tree.  All other atoms
+  (those which do have an incoming set) will appear somewhere
+  underneath these top-most atoms.
 "
 	(traverse-roots display)
 )
