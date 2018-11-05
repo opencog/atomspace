@@ -298,13 +298,13 @@ SCM SchemeSmob::ss_map_type (SCM proc, SCM stype)
 	AtomSpace* atomspace = ss_get_env_as("cog-map-type");
 
 	// Get all of the handles of the indicated type
-	HandleSeq hseq;
-	atomspace->get_handles_by_type(hseq, t);
+	HandleSet hset;
+	atomspace->get_handleset_by_type(hset, t);
 
 	// Loop over all handles in the handle set.
 	// Call proc on each handle, in turn.
 	// Break out of the loop if proc returns anything other than #f
-	for (const Handle& h : hseq) {
+	for (const Handle& h : hset) {
 
 		// In case h got removed from the atomspace between
 		// get_handles_by_type call and now. This may happen either

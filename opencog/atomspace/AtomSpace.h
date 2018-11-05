@@ -412,12 +412,14 @@ public:
 
     /**
      * Gets all the atoms of any type and appends them to the HandleSeq.
+     * Caution: this is slower than using get_handleset_by_type() to
+     * get a set, as it forces the use of a copy to deduplicate atoms.
      *
      * @param appendToHandles the HandleSeq to which to append the handles.
      *
      * Example of call to this method:
      * @code
-     *         std::list<Handle> atoms;
+     *         HandleSeq atoms;
      *         atomSpace.get_all_atoms(atoms);
      * @endcode
      */
@@ -429,12 +431,14 @@ public:
 
     /**
      * Gets all the nodes of any type and appends them to the HandleSeq.
+     * Caution: this is slower than using get_handleset_by_type() to
+     * get a set, as it forces the use of a copy to deduplicate atoms.
      *
      * @param appendToHandles the HandleSeq to which to append the handles.
      *
      * Example of call to this method:
      * @code
-     *         std::list<Handle> nodes;
+     *         HandleSeq nodes;
      *         atomSpace.get_all_nodes(nodes);
      * @endcode
      */
@@ -445,25 +449,10 @@ public:
     }
 
     /**
-     * Gets all the links of any type and appends them to the HandleSeq.
-     *
-     * @param appendToHandles the HandleSeq to which to append the handles.
-     *
-     * Example of call to this method:
-     * @code
-     *         std::list<Handle> links;
-     *         atomSpace.get_all_links(links, LINK, true);
-     * @endcode
-     */
-    void get_all_links(HandleSeq& appendToHandles) const
-    {
-        // Defer to handles by type for LINKs and subclasses.
-        get_handles_by_type(appendToHandles, LINK, true);
-    }
-
-    /**
      * Gets a set of handles that matches with the given type
      * (subclasses optionally).
+     * Caution: this is slower than using get_handleset_by_type() to
+     * get a set, as it forces the use of a copy to deduplicate atoms.
      *
      * @param appendToHandles the HandleSeq to which to append the handles.
      * @param type The desired type.
@@ -498,9 +487,18 @@ public:
         get_handles_by_type(back_inserter(appendToHandles), type, subclass);
     }
 
+    void get_handleset_by_type(HandleSet& hset,
+                               Type type,
+                               bool subclass=false) const
+    {
+        return _atom_table.getHandleSetByType(hset, type, subclass);
+    }
+
     /**
      * Gets a set of handles that matches with the given type
      * (subclasses optionally).
+     * Caution: this is slower than using get_handleset_by_type() to
+     * get a set, as it forces the use of a copy to deduplicate atoms.
      *
      * @param result An output iterator.
      * @param type The desired type.
@@ -541,16 +539,14 @@ public:
         // First we extract, then we loop. This is to avoid holding
         // the lock for too long. (because we don't know how long
         // the callback will take.)
-        std::list<Handle> handle_set;
+        HandleSet handle_set;
         // The intended signatue is
         // getHandleSet(OutputIterator result, Type type, bool subclass)
-        get_handles_by_type(back_inserter(handle_set), atype, subclass);
+        get_handleset_by_type(handle_set, atype, subclass);
 
         // Loop over all handles in the handle set.
-        std::list<Handle>::iterator i = handle_set.begin();
-        std::list<Handle>::iterator iend = handle_set.end();
-        for (; i != iend; ++i) {
-            bool rc = (data->*cb)(*i);
+        for (const Handle& h: handle_set) {
+            bool rc = (data->*cb)(h);
             if (rc) return rc;
         }
         return false;
