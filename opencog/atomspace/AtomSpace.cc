@@ -430,6 +430,18 @@ bool AtomSpace::remove_atom(Handle h, bool recursive)
     return 0 < _atom_table.extract(h, recursive).size();
 }
 
+void AtomSpace::set_value(Handle& h,
+                          const Handle& key,
+                          const ProtoAtomPtr& value)
+{
+    h->setValue(key, value);
+}
+
+void AtomSpace::set_truthvalue(Handle& h, const TruthValuePtr& tvp)
+{
+    h->setTruthValue(tvp);
+}
+
 std::string AtomSpace::to_string() const
 {
 	std::stringstream ss;

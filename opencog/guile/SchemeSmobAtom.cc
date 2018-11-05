@@ -154,7 +154,8 @@ SCM SchemeSmob::ss_set_tv (SCM satom, SCM stv)
 	Handle h = verify_handle(satom, "cog-set-tv!");
 	TruthValuePtr tv = verify_tv(stv, "cog-set-tv!", 2);
 
-	h->setTruthValue(tv);
+	AtomSpace* as = ss_get_env_as("cog-set-tv!");
+	as->set_truthvalue(h, tv);
 	scm_remember_upto_here_1(stv);
 	return satom;
 }
@@ -174,7 +175,8 @@ SCM SchemeSmob::ss_inc_count (SCM satom, SCM scnt)
 	tv = CountTruthValue::createTV(
 		tv->get_mean(), tv->get_confidence(), cnt);
 
-	h->setTruthValue(tv);
+	AtomSpace* as = ss_get_env_as("cog-set-tv!");
+	as->set_truthvalue(h, tv);
 	return satom;
 }
 

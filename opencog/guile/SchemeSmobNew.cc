@@ -417,7 +417,7 @@ SCM SchemeSmob::ss_node (SCM stype, SCM sname, SCM kv_pairs)
 
 	// If there was a truth value, change it.
 	const TruthValuePtr tv(get_tv_from_list(kv_pairs));
-	if (tv) h->setTruthValue(tv);
+	if (tv) atomspace->set_truthvalue(h, tv);
 
 	scm_remember_upto_here_1(kv_pairs);
 	return handle_to_scm (h);
@@ -535,7 +535,7 @@ SCM SchemeSmob::ss_link (SCM stype, SCM satom_list)
 
 	// If there was a truth value, change it.
 	const TruthValuePtr tv(get_tv_from_list(satom_list));
-	if (tv) h->setTruthValue(tv);
+	if (tv) atomspace->set_truthvalue(h, tv);
 
 	scm_remember_upto_here_1(satom_list);
 	return handle_to_scm (h);

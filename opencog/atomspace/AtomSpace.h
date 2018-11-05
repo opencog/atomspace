@@ -345,6 +345,13 @@ public:
     bool remove_atom(Handle h, bool recursive=false);
 
     /**
+     * Set the Value on the atom, performing necessary permissions
+     * checking.
+     */
+    void set_value(Handle& h, const Handle& key, const ProtoAtomPtr& value);
+    void set_truthvalue(Handle& h, const TruthValuePtr&);
+
+    /**
      * Get a node from the AtomTable, if it's in there. If its not found
      * in the AtomTable, and there's a backing store, then the atom will
      * be fetched from the backingstore (and added to the AtomTable). If
