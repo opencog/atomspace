@@ -37,13 +37,16 @@ class COWSpaceUTest :  public CxxTest::TestSuite
 {
 private:
 
-	AtomSpace base;
-	AtomSpace overlay;
+	AtomSpace* base;
+	AtomSpace* ovly;
 
 public:
 	COWSpaceUTest() {}
 
-	void setUp() {}
+	void setUp() {
+		base = new AtomSpace();
+		ovly = new AtomSpace(base);
+	}
 
 	void tearDown() {}
 
@@ -52,36 +55,42 @@ public:
 		TruthValuePtr tv1(SimpleTruthValue::createTV(0.1, 0.1));
 		TruthValuePtr tv2(SimpleTruthValue::createTV(0.2, 0.2));
 
-		// Create three atoms in three different atomspaces
-		Handle h1 = base.add_node(CONCEPT_NODE, "A1 beef");
-		h1->setTruthValue(tv1);
-		Handle h2 = base.add_node(CONCEPT_NODE, "Grade A2");
-		h2->setTruthValue(tv2);
+		// Create two atoms in the base atomspace
+		Handle h1 = base->add_node(CONCEPT_NODE, "A1 beef");
+		Handle h1t = base->set_truthvalue(h1, tv1);
+		TS_ASSERT(h1 == h1t);
 
-		base.set_read_only();
-		Handle h3 = base.add_node(CONCEPT_NODE, "3");
+		Handle h2 = base->add_node(CONCEPT_NODE, "Grade A2");
+		Handle h2t = base->set_truthvalue(h2, tv2);
+		TS_ASSERT(h2 == h2t);
 
+		// Setting base to read-only should prevent insertion
+		base->set_read_only();
+		Handle h3 = base->add_node(CONCEPT_NODE, "3");
+		printf("Read-only add: %p\n", h3.operator->());
+		TS_ASSERT(h3 == nullptr);
+
+		// Setting truth value in overlay should trigger COW
 		TruthValuePtr tv3(SimpleTruthValue::createTV(0.3, 0.3));
-		// Fetch three atoms in three different atomspaces
-		Handle hn1 = as1.add_node(CONCEPT_NODE, "1");
-		Handle hn2 = as2.add_node(NUMBER_NODE, "2");
-		Handle hn3 = as3.add_node(VARIABLE_NODE, "3");
+		Handle h2o = ovly->set_truthvalue(h2, tv3);
+		TS_ASSERT(h2 != h2o);
+		TS_ASSERT(h2o->getTruthValue() == tv3);
+		TS_ASSERT(h2->getTruthValue() == tv2);
 
-		// They should match the old handles
-		TS_ASSERT(h1 == hn1);
-		TS_ASSERT(h2 == hn2);
-		TS_ASSERT(h3 == hn3);
+		Handle h2b = base->add_node(CONCEPT_NODE, "Grade A2");
+		TS_ASSERT(h2 == h2b);
+		TS_ASSERT(h2b->getTruthValue() == tv2);
 
-		// ... and they should refer to the same atoms.
-		TS_ASSERT(hn1->get_type() == h1->get_type());
-		TS_ASSERT(hn2->get_type() == h2->get_type());
-		TS_ASSERT(hn3->get_type() == h3->get_type());
+		// Setting truth value a second time in overlay should NOT COW
+		TruthValuePtr tv4(SimpleTruthValue::createTV(0.4, 0.4));
+		Handle h2v = ovly->set_truthvalue(h2, tv4);
+		TS_ASSERT(h2 != h2v);
+		TS_ASSERT(h2o == h2v);
+		TS_ASSERT(h2o->getTruthValue() == tv4);
+		TS_ASSERT(h2->getTruthValue() == tv2);
 
-		// The truth value *pointers* should be identical, as they
-		// should point to the same exact truth value instance.
-		TS_ASSERT(hn1->getTruthValue() == h1->getTruthValue());
-		TS_ASSERT(hn2->getTruthValue() == h2->getTruthValue());
-		TS_ASSERT(hn3->getTruthValue() == h3->getTruthValue());
+		Handle h2c = base->add_node(CONCEPT_NODE, "Grade A2");
+		TS_ASSERT(h2 == h2c);
+		TS_ASSERT(h2c->getTruthValue() == tv2);
 	}
-
 };
