@@ -20,6 +20,8 @@
  * 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
  */
 
+#include <opencog/util/Logger.h>
+
 #include <opencog/atoms/base/Node.h>
 #include <opencog/atoms/base/Link.h>
 #include <opencog/atomspace/AtomSpace.h>
@@ -52,6 +54,7 @@ public:
 
 	void testSimple()
 	{
+		logger().debug("BEGIN TEST: %s", __FUNCTION__);
 		TruthValuePtr tv1(SimpleTruthValue::createTV(0.1, 0.1));
 		TruthValuePtr tv2(SimpleTruthValue::createTV(0.2, 0.2));
 
@@ -92,5 +95,7 @@ public:
 		Handle h2c = base->add_node(CONCEPT_NODE, "Grade A2");
 		TS_ASSERT(h2 == h2c);
 		TS_ASSERT(h2c->getTruthValue() == tv2);
+
+		logger().debug("END TEST: %s", __FUNCTION__);
 	}
 };

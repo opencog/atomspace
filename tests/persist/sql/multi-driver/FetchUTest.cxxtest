@@ -86,6 +86,7 @@ class FetchUTest :  public CxxTest::TestSuite
 
 		void atomCompare(AtomPtr, AtomPtr, std::string);
 		void test_stuff(void);
+		void test_readonly(void);
 };
 
 FetchUTest::FetchUTest(void)
@@ -275,6 +276,54 @@ void FetchUTest::test_stuff(void)
 	TS_ASSERT((*tv) == (*dtv));
 	printf("Expecting %s\n", dtv->to_string().c_str());
 	printf("Got %s\n", tv->to_string().c_str());
+
+	logger().debug("END TEST: %s", __FUNCTION__);
+}
+
+// ============================================================
+
+void FetchUTest::test_readonly(void)
+{
+	logger().debug("BEGIN TEST: %s", __FUNCTION__);
+
+	// First, initialize the database
+	eval->eval("(use-modules (opencog persist) (opencog persist-sql))");
+	eval->eval(sql_open);
+	eval->eval(R"((cog-set-tv! (Concept "AAA") (stv 0.1 0.11)))");
+	eval->eval(R"((cog-set-tv! (Concept "BBB") (stv 0.2 0.22)))");
+	eval->eval(R"((List (Concept "AAA") (Concept "BBB")))");
+	eval->eval("(sql-store)");
+	eval->eval("(sql-close)");
+
+	delete _as;
+	_as = new AtomSpace();
+	_as->set_read_only();
+	eval = SchemeEval::get_evaluator(_as);
+	eval->eval(sql_open);
+
+	// Despite the atomsspace being eadonly, we should still be
+	// able to load atoms from the database.
+	eval->eval(R"((load-atoms-of-type 'ConceptNode))");
+	std::string prt = eval->eval("(cog-prt-atomspace)");
+	printf("Atomspace contents:\n%s\n", prt.c_str());
+	Handle a = eval->eval_h(R"((Concept "AAA"))");
+	TS_ASSERT(nullptr != a);
+
+	TruthValuePtr tv = eval->eval_tv(R"((cog-tv (Concept "AAA")))");
+	TruthValuePtr etv = SimpleTruthValue::createTV(0.1, 0.11);
+	TS_ASSERT((*tv) == (*etv));
+	printf("Expecting %s\n", etv->to_string().c_str());
+	printf("Got %s\n", tv->to_string().c_str());
+
+	// No one is messing with the flag, eh?
+	TS_ASSERT(true == _as->get_read_only());
+	Handle c = _as->add_node(CONCEPT_NODE, "foobar");
+	TS_ASSERT(c == nullptr);
+
+	// Try to change TV on A -- should fail.
+	eval->eval(R"((cog-set-tv! (Concept "AAA") (stv 0.3 0.33)))");
+	tv = eval->eval_tv(R"((cog-tv (Concept "AAA")))");
+	TS_ASSERT((*tv) == (*etv));
 
 	logger().debug("END TEST: %s", __FUNCTION__);
 }
