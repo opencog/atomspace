@@ -257,11 +257,12 @@ Handle AtomTable::getHandle(Type t, const HandleSeq& seq) const
 
 Handle AtomTable::getLinkHandle(const AtomPtr& a) const
 {
-    const HandleSeq &seq = a->getOutgoingSet();
-
     // Make sure all the atoms in the outgoing set are in the atomspace.
-    // If any are not, then reject the whole mess.
-    for (const Handle& ho : seq) {
+    // If any are not, then reject the whole mess. XXX Why? So what?
+    // If the hash-checking, below, is good, then everything should be
+    // just fine. XXX Except BackwardChainerUTest fails myseriously,
+    // when we skip this test. Not sure why. Strange. XXX FIXME.
+    for (const Handle& ho : a->getOutgoingSet()) {
         Handle rh(getHandle(ho));
         if (not rh) return rh;
     }
