@@ -1,11 +1,20 @@
  ;
  ; Example of copy-on-write into overlay AtomSpaces.
  ;
+ ; The goal is to demonstrate how to use read-write atomspaces
+ ; layered on top of a read-only atomspace.
+ ;
  ; This creates two atomspaces: the base atomspace, which
  ; will be marked read-only (after adding atoms to it),
  ; and an overlay atomspace, which will remain read-write.
  ; Atoms and truth values can be manipulated in the overlay,
  ; without damaging atoms in the base space.
+ ;
+ ; The expected use case is a very-large read-only database
+ ; holding data that is shared by many people. Individual users
+ ; can then "mount" this database, and make local changes to it
+ ; (i.e. perform read-write operations) without corrupting the
+ ; shared read-only database.
  ;
  (use-modules (opencog))
 
