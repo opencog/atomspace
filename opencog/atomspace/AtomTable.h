@@ -246,7 +246,7 @@ public:
                      bool parent=true) const
     {
         // If parent wanted, and parent exists, then we must use the
-        // handleset to disabmbiguate results.  This causes an extra
+        // handleset to disambiguate results.  This causes an extra
         // copy of the handles, unfortunately.
         if (parent and _environ) {
            HandleSet hset;
@@ -267,9 +267,21 @@ public:
                         bool subclass=false,
                         bool parent=true) const
     {
+        // If parent wanted, and parent exists, then we must use the
+        // handleset to disambiguate results.  This causes an extra
+        // copy of the handles, unfortunately.
+        if (parent and _environ) {
+           HandleSet hset;
+           getHandleSetByType(hset, type, subclass, parent);
+           std::for_each(hset.begin(), hset.end(),
+                [&](const Handle& h)->void {
+                     (func)(h);
+                });
+           return;
+        }
+
+        // No parent ... avoid the copy above.
         std::lock_guard<std::recursive_mutex> lck(_mtx);
-        if (parent and _environ)
-            _environ->foreachHandleByType(func, type, subclass);
         std::for_each(typeIndex.begin(type, subclass),
                       typeIndex.end(),
              [&](const Handle& h)->void {
@@ -283,10 +295,28 @@ public:
                         bool subclass=false,
                         bool parent=true) const
     {
-        std::lock_guard<std::recursive_mutex> lck(_mtx);
-        if (parent and _environ)
-            _environ->foreachParallelByType(func, type, subclass);
+        // If parent wanted, and parent exists, then we must use the
+        // handleset to disambiguate results.  This causes an extra
+        // copy of the handles, unfortunately.
+        if (parent and _environ) {
+           HandleSet hset;
+           getHandleSetByType(hset, type, subclass, parent);
 
+           // Parallelize, always, no matter what!
+           opencog::setting_omp(opencog::num_threads(), 1);
+
+           OMP_ALGO::for_each(hset.begin(), hset.end(),
+                [&](const Handle& h)->void {
+                     (func)(h);
+                });
+
+           // Reset to default.
+           opencog::setting_omp(opencog::num_threads());
+           return;
+        }
+
+        // No parent ... avoid the copy above.
+        std::lock_guard<std::recursive_mutex> lck(_mtx);
         // Parallelize, always, no matter what!
         opencog::setting_omp(opencog::num_threads(), 1);
 
