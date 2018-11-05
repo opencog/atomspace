@@ -230,10 +230,8 @@ Handle AtomTable::getHandle(Type t, const std::string& n) const
     return getNodeHandle(a);
 }
 
-Handle AtomTable::getNodeHandle(const AtomPtr& orig) const
+Handle AtomTable::getNodeHandle(const AtomPtr& a) const
 {
-    AtomPtr a(orig);
-
     ContentHash ch = a->get_hash();
     std::lock_guard<std::recursive_mutex> lck(_mtx);
 
