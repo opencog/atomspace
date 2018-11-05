@@ -153,10 +153,20 @@ SCM SchemeSmob::ss_set_tv (SCM satom, SCM stv)
 {
 	Handle h = verify_handle(satom, "cog-set-tv!");
 	TruthValuePtr tv = verify_tv(stv, "cog-set-tv!", 2);
-
-	h->setTruthValue(tv);
 	scm_remember_upto_here_1(stv);
-	return satom;
+
+	AtomSpace* as = ss_get_env_as("cog-set-tv!");
+	try
+	{
+		Handle newh = as->set_truthvalue(h, tv);
+
+		if (h == newh) return satom;
+		return handle_to_scm(newh);
+	}
+	catch (const std::exception& ex)
+	{
+		throw_exception(ex, "cog-set-tv!", satom);
+	}
 }
 
 // Increment the count, keeping mean and confidence as-is.
@@ -174,7 +184,8 @@ SCM SchemeSmob::ss_inc_count (SCM satom, SCM scnt)
 	tv = CountTruthValue::createTV(
 		tv->get_mean(), tv->get_confidence(), cnt);
 
-	h->setTruthValue(tv);
+	AtomSpace* as = ss_get_env_as("cog-set-tv!");
+	as->set_truthvalue(h, tv);
 	return satom;
 }
 
@@ -296,15 +307,13 @@ SCM SchemeSmob::ss_map_type (SCM proc, SCM stype)
 	AtomSpace* atomspace = ss_get_env_as("cog-map-type");
 
 	// Get all of the handles of the indicated type
-	std::list<Handle> handle_set;
-	atomspace->get_handles_by_type(back_inserter(handle_set), t, false);
+	HandleSet hset;
+	atomspace->get_handleset_by_type(hset, t);
 
 	// Loop over all handles in the handle set.
 	// Call proc on each handle, in turn.
 	// Break out of the loop if proc returns anything other than #f
-	std::list<Handle>::iterator i;
-	for (i = handle_set.begin(); i != handle_set.end(); ++i) {
-		Handle h = *i;
+	for (const Handle& h : hset) {
 
 		// In case h got removed from the atomspace between
 		// get_handles_by_type call and now. This may happen either

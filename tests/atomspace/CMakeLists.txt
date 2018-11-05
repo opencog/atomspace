@@ -21,6 +21,7 @@ ADD_CXXTEST(AtomSpaceUTest)
 ADD_CXXTEST(AtomSpaceAsyncUTest)
 ADD_CXXTEST(UseCountUTest)
 ADD_CXXTEST(MultiSpaceUTest)
+ADD_CXXTEST(COWSpaceUTest)
 ADD_CXXTEST(RemoveUTest)
 ADD_CXXTEST(ThreadSafeHandleMapUTest)
 

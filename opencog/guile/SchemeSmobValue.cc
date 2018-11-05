@@ -252,8 +252,17 @@ SCM SchemeSmob::ss_set_value (SCM satom, SCM skey, SCM svalue)
 
 	// Note that pa might be a null pointer, if svalue is '() or #f
 	// In this case, the key is removed.
-	atom->setValue(key, pa);
-	return satom;
+	AtomSpace* as = ss_get_env_as("cog-set-value!");
+	try
+	{
+		Handle newh = as->set_value(atom, key, pa);
+		if (atom == newh) return satom;
+		return handle_to_scm(newh);
+	}
+	catch (const std::exception& ex)
+	{
+		throw_exception(ex, "cog-set-value!", satom);
+	}
 }
 
 SCM SchemeSmob::ss_value (SCM satom, SCM skey)
