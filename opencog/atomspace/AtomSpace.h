@@ -346,7 +346,11 @@ public:
 
     /**
      * Set the Value on the atom, performing necessary permissions
-     * checking.
+     * checking. If this atomspace is read-only, then the setting
+     * of values is prohibited.  If this atomspace has read-write
+     * permissions, but the atom is in a parent atomspace that is
+     * read-only, then the atom is copied into this atomspace, before
+     * the value is changed. (Copy-on-write (COW) semantics).
      */
     void set_value(Handle& h, const Handle& key, const ProtoAtomPtr& value);
     void set_truthvalue(Handle& h, const TruthValuePtr&);

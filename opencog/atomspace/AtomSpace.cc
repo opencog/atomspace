@@ -430,6 +430,7 @@ bool AtomSpace::remove_atom(Handle h, bool recursive)
     return 0 < _atom_table.extract(h, recursive).size();
 }
 
+// Copy-on-write for setting values.
 void AtomSpace::set_value(Handle& h,
                           const Handle& key,
                           const ProtoAtomPtr& value)
@@ -449,6 +450,7 @@ void AtomSpace::set_value(Handle& h,
     }
 }
 
+// Copy-on-write for setting truth values.
 void AtomSpace::set_truthvalue(Handle& h, const TruthValuePtr& tvp)
 {
     // If the atom is in a read-only atomspace (i.e. if the parent
