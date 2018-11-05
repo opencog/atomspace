@@ -431,9 +431,9 @@ bool AtomSpace::remove_atom(Handle h, bool recursive)
 }
 
 // Copy-on-write for setting values.
-void AtomSpace::set_value(Handle& h,
-                          const Handle& key,
-                          const ProtoAtomPtr& value)
+Handle AtomSpace::set_value(Handle& h,
+                            const Handle& key,
+                            const ProtoAtomPtr& value)
 {
     // If the atom is in a read-only atomspace (i.e. if the parent
     // is read-only) and this atomspace is read-write, then make
@@ -444,14 +444,19 @@ void AtomSpace::set_value(Handle& h,
             // Copy the atom into this atomspace
             Handle copy(_atom_table.add(h, false, true));
             copy->setValue(key, value);
+            return copy;
         }
     } else {
         h->setValue(key, value);
+        return h;
     }
+    throw opencog::RuntimeException(TRACE_INFO,
+         "Value not changed; AtomSpace is readonly");
+    return Handle::UNDEFINED;
 }
 
 // Copy-on-write for setting truth values.
-void AtomSpace::set_truthvalue(Handle& h, const TruthValuePtr& tvp)
+Handle AtomSpace::set_truthvalue(Handle& h, const TruthValuePtr& tvp)
 {
     // If the atom is in a read-only atomspace (i.e. if the parent
     // is read-only) and this atomspace is read-write, then make
@@ -462,10 +467,15 @@ void AtomSpace::set_truthvalue(Handle& h, const TruthValuePtr& tvp)
             // Copy the atom into this atomspace
             Handle copy(_atom_table.add(h, false, true));
             copy->setTruthValue(tvp);
+            return copy;
         }
     } else {
         h->setTruthValue(tvp);
+        return h;
     }
+    throw opencog::RuntimeException(TRACE_INFO,
+         "TruthValue not changed; AtomSpace is readonly");
+    return Handle::UNDEFINED;
 }
 
 std::string AtomSpace::to_string() const

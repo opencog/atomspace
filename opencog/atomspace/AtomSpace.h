@@ -351,9 +351,11 @@ public:
      * permissions, but the atom is in a parent atomspace that is
      * read-only, then the atom is copied into this atomspace, before
      * the value is changed. (Copy-on-write (COW) semantics).
+     *
+     * If the atom is copied, then the copy is returned.
      */
-    void set_value(Handle& h, const Handle& key, const ProtoAtomPtr& value);
-    void set_truthvalue(Handle& h, const TruthValuePtr&);
+    Handle set_value(Handle& h, const Handle& key, const ProtoAtomPtr& value);
+    Handle set_truthvalue(Handle& h, const TruthValuePtr&);
 
     /**
      * Get a node from the AtomTable, if it's in there. If its not found
