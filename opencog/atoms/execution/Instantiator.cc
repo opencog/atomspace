@@ -45,7 +45,7 @@ Instantiator::Instantiator(AtomSpace* as)
 /// member of the pair is the variable; the second is the value that
 /// should be used as its replacement.  (Note that "variables" do not
 /// have to actually be VariableNode's; they can be any atom.)
-static Handle beta_reduce(const Handle& expr, const HandleMap vmap)
+static Handle beta_reduce(const Handle& expr, const HandleMap& vmap)
 {
 	// Format conversion. FreeVariables::substitute_nocheck() performs
 	// beta-reduction correctly, so we just use that. But we have to
