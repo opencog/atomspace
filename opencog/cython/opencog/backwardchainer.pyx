@@ -1,4 +1,3 @@
-from libcpp.set cimport set
 from cython.operator cimport dereference as deref
 from opencog.atomspace cimport Atom
 from opencog.atomspace cimport void_from_candle
@@ -26,15 +25,17 @@ cdef class BackwardChainer:
                   AtomSpace trace_as=None,
                   AtomSpace control_as=None,
                   Atom focus_set=None):
-
+        cdef cHandle c_vardecl
         if vardecl is None:
-            vardecl = _as.add_link(types.VariableList, [])
+            c_vardecl = c_vardecl.UNDEFINED
+        else:
+            c_vardecl = deref(vardecl.handle)
         if focus_set is None:
             focus_set = _as.add_link(types.SetLink, [])
         self.chainer = new cBackwardChainer(deref(_as.atomspace),
                                         deref(rbs.handle),
                                         deref(target.handle),
-                                        deref(vardecl.handle),
+                                        c_vardecl,
                                         <cAtomSpace*> (NULL if trace_as is None else trace_as.atomspace),
                                         <cAtomSpace*> (NULL if control_as is None else control_as.atomspace),
                                         deref(focus_set.handle))
