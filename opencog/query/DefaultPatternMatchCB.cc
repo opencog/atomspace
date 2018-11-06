@@ -676,7 +676,7 @@ bool DefaultPatternMatchCB::eval_term(const Handle& virt,
 	DO_LOG({LAZY_LOG_FINE << "Eval_term evaluation yeilded tv="
 	              << tvp->to_string() << std::endl;})
 
-	// XXX FIXME: we are making a crsip-logic go/no-go decision
+	// XXX FIXME: we are making a crisp-logic go/no-go decision
 	// based on the TV strength. Perhaps something more subtle might be
 	// wanted, here.
 	bool relation_holds = tvp->get_mean() > 0.5;

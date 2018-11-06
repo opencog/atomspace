@@ -480,7 +480,7 @@ Handle Instantiator::walk_tree(const Handle& expr, bool silent)
 	// However, some of these may hold embedded executable links
 	// inside of them, which the current unit tests and code
 	// expect to be executed.  Thus, for right now, we only avoid
-	// evaluating VirtualLinks, as these all are capable of thier
+	// evaluating VirtualLinks, as these all are capable of their
 	// own lazy-evaluation, and so, if evaluation is needed,
 	// it will be triggered by something else.
 	// Non-virtual evaluatables fall through and are handled
