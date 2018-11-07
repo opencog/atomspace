@@ -88,3 +88,10 @@ Almost everything has been implemented; a few minor work items remain.
 
 The current implementation status is tracked in
 [github bug #513](https://github.com/opencog/atomspace/issues/513)
+
+Adding New Atom Types
+---------------------
+Please see the
+[README-Adding-New-Atom-Types.md](README-Adding-New-Atom-Types.md) file.
+
+

@@ -1,7 +1,10 @@
 
-                  AtomSpace Source Code
-                  ---------------------
+AtomSpace Source Code
+=====================
 
+
+Directory overview
+------------------
 This directory contains core AtomSpace code.  Tests, example and demo
 programs have their own directories.
 
@@ -44,3 +47,10 @@ haskell         -- Haskell language bindings.
 python,cython   -- Python language bindings.
 
 benchmark       -- Performance benchmarks.
+
+Important Documentation
+-----------------------
+Please refer to the following for sepcific questions:
+
+* How to add new atom types. See
+ [README-Adding-New-Atom-Types.md](atoms/proto/README-Adding-New-Atom-Types.md)
