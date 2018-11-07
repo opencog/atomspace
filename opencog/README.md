@@ -38,7 +38,7 @@ constraint is used to avoid race conditions, to prevent different
 processes or users from accidentally seeing different versions of the
 "same" thing.
 
-By definition, Links contain (ordered) sets of Atoms: this is refered to
+By definition, Links contain (ordered) sets of Atoms: this is referred to
 as the "outgoing set" of the Link. Conversely, an Atom might be
 contained in one or more Links; these links form the "incoming set" of
 the atom.
@@ -85,9 +85,9 @@ they cannot be changed (unless they are dynamic, streaming values,
 which, by definition, are ever-changing.)  What can be altered is the
 association of Values to Atoms.
 
-Why were values made immutable? Immutabilty seems to be a simpler,
+Why were values made immutable? Immutability seems to be a simpler,
 faster solution than using mutex locks to guarantee consistent data.
-Immutability does incurr some performance costs (for managing/swapping
+Immutability does incur some performance costs (for managing/swapping
 the smart pointers, as well as forcing a malloc to change a value.).
 
 The Valuation type is a C++ class that associates the (key,atom) pair
@@ -107,7 +107,7 @@ The ValuationSpace vaguely resembles the AtomSpace, and is used to solve
 the technical issues that arise in managing valuations.
 
 Most ordinary graph DB's have a concept very similar to Values: they
-typicallly allow the user to store arbitrary data associated with each
+typically allow the user to store arbitrary data associated with each
 vertex or edge of a graph.  That is, must graph DB's have a key-value
 DB for each vertex/edge. Same idea here.
 
@@ -145,7 +145,7 @@ atomspace to be located and traversed. It implements a kind of graph
 query language. In essence, you can specify a graph with "holes" or
 "blanks" in it; the query engine will "fill in the blanks".  The query
 engine has many advanced capabilities, including automatically joining
-large, complex queries, enbling graph re-writing, and executing
+large, complex queries, enabling graph re-writing, and executing
 triggers.
 
 The query language is itself expressed as Atoms, and so the queries
@@ -162,7 +162,7 @@ graph re-write step: when a graph matches the query, the shape of the
 graph is altered (edited) as a result. Thus, each query can be thought
 of as a "rule", to be applied to the data. If the rule triggers, then
 it runs and transforms the data.  The rule-engine is the infrastructure
-that allows collections of rules to be specified, and manage thier
+that allows collections of rules to be specified, and manage their
 application.
 
 There are four different ways of managing rules. Two are the traditional
@@ -171,7 +171,7 @@ those chainers commonly seen in many kinds of logic engines and theorem
 proving systems (most rule engines provide only a forward chainer).
 
 A third type of rule engine is based on the idea of parsing. It is
-neither a foreward nor backward chainer, but combines a bit of both,
+neither a forward nor backward chainer, but combines a bit of both,
 and behaves like a parser. The current implementation is
 super-experimental, pre-prototype, in the "sheaf" directory.
 
@@ -186,7 +186,7 @@ in an experimental-prototype stage.
 Directory overview
 ==================
 This directory contains core AtomSpace code.  Unit tests are in the
-[tests](../tests) directiory, and example and demo programs are in the
+[tests](../tests) directory, and example and demo programs are in the
 [examples](../examples) directory. Here's a short description of the
 important subdirectories:
 
@@ -239,7 +239,7 @@ Please refer to the following for specific questions:
 * Atom vs. Value Design tradeoffs/justification. See
  [atoms/proto/README.md](atoms/proto/README.md)
 
-* Atomspace deisgn tradeoffs, including commentary about memory
+* Atomspace design tradeoffs, including commentary about memory
   management, multi-threading, overlay atomspaces and more, are
   discussed in the [atomspace/README.md](atomspace/README.md) file.
 
