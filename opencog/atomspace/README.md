@@ -136,6 +136,50 @@ Overlay AtomSpaces are needed in (at least) these situations:
   read-only nature.  Examples include: large genomic datasets; Sophia
   robot character personality files.
 
+The above are requirements; the base and overlay atomspaces should
+behave as intuitively described.  In practice, this means:
+
+* When a user alters a Value (TruthValue, AttentionValue, or other) in
+  the overlay, it should *not* clobber the Value in the base space.
+
+How can this be implemented?
+
+### Design A)
+A copy-on-write is performed, so that if a read-only Atom in the
+base-space is altered, a copy is created in the overlay. The copy
+has it's own key-value store, which can be freely altered, without
+disturbing the base.
+
+This design makes graph traversal hard: the copied atom fails to appear
+in the outgoing set of any Link that the base atom is in. Likewise,
+the incoming set of the copied atom is empty. There are two different
+partial solutions:
+
+#### Design A1)
+In addition to copying an atom, copy it's entire incoming set. This has
+a potentially huge negative performance impact on RAM usage.
+
+#### Design A2)
+Alter the atom's `getIncomingSet()` method, so that it returns not only
+it's own strict incoming set, but also that of any atoms that it's
+hiding. The cost here seems to be minimal.
+
+Add a "masked" bit-flag to the atom, indicating that there's another
+atom in an overlay that is covering it. This can be used to avoid
+traversing covered/masked atoms.
+
+### Design B)
+Each Atom holds an atomspace, key, value triple, so that, to find the
+value, both the key, and the relevant atomspace must be supplied.
+
+This has several downsides -- a run-time performance penalty for every
+lookup (because a more complex lookup) and an API penalty: its not
+enough to just have the atom in hand; noe must also specify the
+atomspace.
+
+------
+Conclusion: Design A2 seems like the best, for now.
+
 
 -------------------------
 Garbage Collection Design
