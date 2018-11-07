@@ -119,9 +119,9 @@ Overlay AtomSpaces are needed in (at least) these situations:
 
 * Pattern Matching -- Need to hold temporary results computed during
   the traverse, which may be discarded later, if the traverse is
-  unsuccusssful (unsatisfiable).  Temporary atoms arise in several
+  unsuccessful (unsatisfiable).  Temporary atoms arise in several
   different ways, including by black-box user-written code that might
-  get triggered during the traverse phase.  The patten matcher creates
+  get triggered during the traverse phase.  The pattern matcher creates
   a temporary "transient" atomspace, which is cleared at the end of
   each traverse.
 
@@ -174,8 +174,16 @@ value, both the key, and the relevant atomspace must be supplied.
 
 This has several downsides -- a run-time performance penalty for every
 lookup (because a more complex lookup) and an API penalty: its not
-enough to just have the atom in hand; noe must also specify the
+enough to just have the atom in hand; one must also specify the
 atomspace.
+
+### Design C)
+Store the key-value DB's in the atomspace (and not in the atom).
+This has several downsides -- a space penalty (a hash table or b-tree in
+the atomspace) and a time penalty (a hash/btree lookup).  This might be
+OK, if most atoms had no values at all attached to them.  However, for
+all existing applications, the majority of atoms have either TV's or
+AV's or both.
 
 ------
 Conclusion: Design A2 seems like the best, for now.
