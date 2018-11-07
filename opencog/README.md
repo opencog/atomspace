@@ -24,7 +24,8 @@ Atoms come in two basic types: Nodes and Links.  Nodes correspond to the
 leafs of a tree, while Links correspond to vertexes internal to the
 tree (non-leaf vertexes).  Nodes can be given a name, Links cannot.
 Nodes and Links have a type, but no further properties, except for
-values (valuations); these are described in a later section.
+values (valuations); these are key-value databases described in a
+section below.
 
 Nodes and Links can be shared between different trees.  Nodes and Links
 are, by definition, immutable: once created, they cannot be changed;
@@ -53,26 +54,12 @@ See, for example, the book "A Shorter Model Theory", by Wilfred Hodges.
 
 One way in which the concept of Atoms and AtomSpaces differ from
 "standard" Model Theory or from "plain" term graphs is that the re-write
-rules for term graphs can themselves be expressed in terms of atoms. So,
-for example, the (typed) lambda calculus can be represented with atoms,
+rules for term graphs can themselves be expressed in terms of Atoms. So,
+for example, the (typed) lambda calculus can be represented with Atoms,
 and beta-reduction is represented in terms of Atoms, as well. The
-default defintions include several variants of beta reduction, including
+default definitions include several variants of beta reduction, including
 the PutLink and the MapLink (which see, on the wiki).
 
-What is the AtomSpace?
-----------------------
-The AtomSpace is a database that holds Atoms. In the default mode, the
-AtomSpace is purely an in-RAM database, although the "backend API"
-allows portions (or all) of an AtomSpace to be persisted to disk.
-
-For some types of algorithms, it is convenient to have multiple
-AtomSpaces; the implementation here supports this, although in a
-relatively naive and unsophisticated way. The atomspaces can be nested;
-one way to think of them is that they resemble the concept of an
-"environment" in the scheme programming language (or the "environment"
-in the bash shell).  Thus, the AtomSpace can be thought of as a space
-holding "S-expressions"; indeed, every Link-Node tree (DAG) can be
-thought of as an S-expression.
 
 What is a Valuation?
 --------------------
@@ -83,7 +70,9 @@ Atoms, and for thread-safety of the index.  Thus, for rapidly-changing
 data, a different mechanism is provided: this associates one or more
 "values" to an atom; the values are indexed by a "key" (which is an
 Atom).  The values can be a vector of floats, a vector of strings, or a
-vector of values; yet more kinds of values could be defined, if desired.
+vector of values. They can also be dynamically time-varying, such as
+audio or video streams. Yet more kinds of values could be defined, if
+desired.
 
 Values differ from Atoms in that they are not indexed in the AtomSpace,
 which means that they cannot be searched-for by content. Unlike Atoms,
@@ -92,11 +81,14 @@ holding exactly the same data.  Values have no "incoming set": given
 a Value, there is no way of finding out what Atoms might be using it.
 
 Values, and in particular TruthValues, are immutable: once created,
-they cannot be changed. What can be changed is the association of
-Values to Atoms. Immutabilty seems to be a simpler, faster solution
-than using mutex locks to guarantee consistent data. Immutability does
-incurr some performance costs (for managing/swapping the smart
-pointers, as well as forcing a malloc to change a value.).
+they cannot be changed (unless they are dynamic, streaming values,
+which, by definition, are ever-changing.)  What can be altered is the
+association of Values to Atoms.
+
+Why were values made immutable? Immutabilty seems to be a simpler,
+faster solution than using mutex locks to guarantee consistent data.
+Immutability does incurr some performance costs (for managing/swapping
+the smart pointers, as well as forcing a malloc to change a value.).
 
 The Valuation type is a C++ class that associates the (key,atom) pair
 with a value; thus a Valuation is the triple (key, atom, value). Thus,
@@ -113,6 +105,82 @@ special way in the implementation.
 
 The ValuationSpace vaguely resembles the AtomSpace, and is used to solve
 the technical issues that arise in managing valuations.
+
+Most ordinary graph DB's have a concept very similar to Values: they
+typicallly allow the user to store arbitrary data associated with each
+vertex or edge of a graph.  That is, must graph DB's have a key-value
+DB for each vertex/edge. Same idea here.
+
+
+What is the AtomSpace?
+----------------------
+The AtomSpace is a database that holds Atoms. In the default mode, the
+AtomSpace is purely an in-RAM database, although the "backend API"
+allows portions (or all) of an AtomSpace to be persisted to an SQL
+DB server, or (unimplemented) various different graph DB stores.
+Currently, only the PostgresSQL backend works. The Neo4j backend is
+borken.
+
+The AtomSpace is distributed, and can be shared by different
+network-connected machines. It relies on the backend (e.g. Postgres)
+to do the hard work of actually distributing the data.  The AtomSpace
+acts like an in-RAM local cache; holding only those parts of the
+dataset that you are currently operating on.
+
+All security, access-control-lists, etc. is managed by the backend DB.
+The AtomSpace itself does not provide any use or access models.
+
+For some types of algorithms, it is convenient to have multiple
+AtomSpaces; for example, layering a smaller read-write atomspace
+on top of a much larger read-only atomspace. Nested/overlayed atomspaces
+behave somewhat like the concept of an "environment" in computer science.
+The current multi-atomspace/nesting implementation is "beta"; its used
+heavily by the pattern matcher, but remains a bit naive in some ways.
+
+
+What is the Pattern Matcher?
+----------------------------
+The pattern-matcher is the query engine that allows the contents of the
+atomspace to be located and traversed. It implements a kind of graph
+query language. In essence, you can specify a graph with "holes" or
+"blanks" in it; the query engine will "fill in the blanks".  The query
+engine has many advanced capabilities, including automatically joining
+large, complex queries, enbling graph re-writing, and executing
+triggers.
+
+The query language is itself expressed as Atoms, and so the queries
+themselves are stored in the atomspace. This enables things like a
+"dual search": given a graph, find all queries that would match that
+graph. This allows the database to act as a rule engine, holding a large
+number of rules.
+
+
+What is the Rule Engine?
+------------------------
+A single graph query (pattern-match query) can be thought of as a single
+graph re-write step: when a graph matches the query, the shape of the
+graph is altered (edited) as a result. Thus, each query can be thought
+of as a "rule", to be applied to the data. If the rule triggers, then
+it runs and transforms the data.  The rule-engine is the infrastructure
+that allows collections of rules to be specified, and manage thier
+application.
+
+There are four different ways of managing rules. Two are the traditional
+forward-chaining and backward-chaining algorithms, full analogous to
+those chainers commonly seen in many kinds of logic engines and theorem
+proving systems (most rule engines provide only a forward chainer).
+
+A third type of rule engine is based on the idea of parsing. It is
+neither a foreward nor backward chainer, but combines a bit of both,
+and behaves like a parser. The current implementation is
+super-experimental, pre-prototype, in the "sheaf" directory.
+
+A fourth type of rule engine is the so called "openpsi" system. It is
+goal-driven in its rule selection, and is modulated and prioritized
+by what is considered to be "important" at the moment. It resembles
+a kind-of planning system. Its not in this repo; it's in the
+[opencog/opencog](https://github.com/opencog/opencog) repo, and is
+in an experimental-prototype stage.
 
 
 Directory overview
