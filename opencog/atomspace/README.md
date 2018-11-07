@@ -4,13 +4,14 @@ AtomSpace Design Notes
 This directory contains the code for the AtomSpace "itself", minus
 everything else. The AtomSpace "itself" is just a class for tracking
 all the atoms in the system, and making sure that they are unique.
-There's actually not much to it. It's a replacable component, and
-could be replaced with something else, something fancier, as long
-as you keep the API.
+It manages two basic indexes, allowing atoms to be found quickly,
+by name and by type.  There's actually not much to it. It's a
+replacable component, and could be replaced with something else,
+something fancier, as long as you keep the API.
 
-However, this README also discusses the design tradeoffs that were made
-that got us to here. All of these design tradeoffs are inter-related
-and tangled. There's a reason things got to be the way they are.
+This README also discusses the design tradeoffs that were made that got
+us to here. All of these design tradeoffs are inter-related and tangled.
+There's a reason things got to be the way they are.
 
 -------------------------
 Atom Implementation Notes
@@ -21,6 +22,40 @@ Smart pointers (the C++ `std::shared_ptr` class) are used for holding
 Atoms.  The `Handle` class is a wrapper around `std::shared_ptr`.
 The Link contains an `std::vector` of Handles.  Thus, to avoid memory
 management issues, the Atom uses weak pointers for the incoming set.
+
+The above seems like the simplest, easiest, most compact and fastest
+way to implement Atoms.  Its not carved in stone, but it seems to work
+well.
+
+------------------------------
+Valuation Implementation Notes
+------------------------------
+Valuations are stored in a C++ `std::map` container -- basically, a
+key-value database -- in each atom.
+
+TruthValues and AttentionValues are layered on top of FloatValue; a
+FloatValue is just a sequence of doubles (`std::vector<double>`).
+
+Valuations are immutable. It seemed like it was just easier to make
+them immutable, rather than adding a mutex to each and every one.
+Adding a mutex would bloat each valuation with more RAM usage.  Also,
+mutexes are complex, prone to deadlocks, and can suprise users with
+unexpected data-ordering access issues.
+
+Instead, serialization is maintained by allowing the user to change
+the entries in the `std::map`, and guarding that with a mutex. Thus,
+the key-value store can be freely changed at any time, in a thread-safe
+fashion that is easy to audit and verify for correct behavior.
+
+Although the above says "valuations are immutable", the streaming
+valuations can be rapidly time-varying. The can hold video and audio
+streams, for example, or other sreams, such as 3D positional data
+in the environment.
+
+The above seems like the simplest, easiest, most compact and fastest
+way to implement Values.  Its not carved in stone, but it seems to work
+well.
+
 
 ------------------------------
 AtomSpace Implementation Notes
@@ -70,20 +105,6 @@ larger than what bdgc can easily detect. In essence, std::set does not
 play nice with bdgc. Bummer. So reference counting is done instead, and
 in order to break the circular loops, the incoming set consists of weak
 pointers. More about garbage collection below.
-
-------------------------------
-Valuation Implementation Notes
-------------------------------
-Valuations are currently stored in a ValuationSpace, but it might be
-better to store them directly, in each atom.
-
-TruthValues are stored directly with each Atom; this could be changed
-to use the generic Valuation mechanism, but this would incurr
-significant(?) performance penalty.
-
-Valuations are currently immutable, this too has performance and access
-penalties that perhaps should be re-thought?
-
 
 -------------------------
 Garbage Collection Design
