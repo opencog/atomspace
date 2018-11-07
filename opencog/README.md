@@ -166,10 +166,14 @@ important subdirectories:
 
 Important Documentation
 =======================
-Please refer to the following for sepcific questions:
+Please refer to the following for specific questions:
 
 * Atom vs. Value Design tradeoffs/justification. See
  [atoms/proto/README.md](atoms/proto/README.md)
+
+* Atomspace deisgn tradeoffs, including commentary about memory
+  management, multi-threading, overlay atomspaces and more, are
+  discussed in the [atomspace/README.md](atomspace/README.md) file.
 
 * How to add new atom or value types. See
  [README-Adding-New-Atom-Types.md](atoms/proto/README-Adding-New-Atom-Types.md)

@@ -1,20 +1,30 @@
 
-AtomSpace README
-----------------
+AtomSpace Design Notes
+======================
+This directory contains the code for the AtomSpace "itself", minus
+everything else. The AtomSpace "itself" is just a class for tracking
+all the atoms in the system, and making sure that they are unique.
+There's actually not much to it. It's a replacable component, and
+could be replaced with something else, something fancier, as long
+as you keep the API.
 
-This README contains miscellaneous notes about the atomspace.
+However, this README also discusses the design tradeoffs that were made
+that got us to here. All of these design tradeoffs are inter-related
+and tangled. There's a reason things got to be the way they are.
 
+-------------------------
 Atom Implementation Notes
-=========================
-The Link class explicitly contains the outgoing set of the Link.  The
-Atom class explicitly contains the incoming set of the Atom. Smart
-pointers (the C++ std::shared_ptr class) are used for holding Atoms.
-The Handle class is a wrapper around std::shared_ptr.  The Link contains
-an std::vector of Handles.  Thus, to avoid memory management issues, the
-Atom uses weak pointers for the incoming set.
+-------------------------
+The `Link` class explicitly contains the outgoing set of the Link.
+The `Atom` class explicitly contains the incoming set of the Atom.
+Smart pointers (the C++ `std::shared_ptr` class) are used for holding
+Atoms.  The `Handle` class is a wrapper around `std::shared_ptr`.
+The Link contains an `std::vector` of Handles.  Thus, to avoid memory
+management issues, the Atom uses weak pointers for the incoming set.
 
+------------------------------
 AtomSpace Implementation Notes
-==============================
+------------------------------
 The uniqueness constraint on Atoms implies that the AtomTable::addAtom()
 method is fairly complicated: it must be able to detect if an atom
 being added already exists in the atomspace.  The addAtom() method
@@ -61,8 +71,9 @@ play nice with bdgc. Bummer. So reference counting is done instead, and
 in order to break the circular loops, the incoming set consists of weak
 pointers. More about garbage collection below.
 
-Valuation Implementation Nodes
-==============================
+------------------------------
+Valuation Implementation Notes
+------------------------------
 Valuations are currently stored in a ValuationSpace, but it might be
 better to store them directly, in each atom.
 
@@ -74,10 +85,7 @@ Valuations are currently immutable, this too has performance and access
 penalties that perhaps should be re-thought?
 
 
-======================================================================
-======================================================================
-======================================================================
-
+-------------------------
 Garbage Collection Design
 -------------------------
 
@@ -119,10 +127,7 @@ core AtomSpace, I don't see a better way.  It is far from clear that
 any other language has a better solution, anyway.
 
 
-======================================================================
-======================================================================
-======================================================================
-
+----------------
 Threading Design
 ----------------
 
@@ -164,5 +169,4 @@ absolutely no one ever adds new atom types, once the cogserver has been
 initialized. i.e. we're using a lock to protect a case that never
 happens in real life.
 
-======================================================================
-======================================================================
+-----
