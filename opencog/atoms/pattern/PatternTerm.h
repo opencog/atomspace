@@ -109,7 +109,7 @@ public:
 
 	void addOutgoingTerm(const PatternTermPtr& ptm);
 
-	Handle getHandle();
+	const Handle& getHandle() const;
 
 	PatternTermPtr getParent();
 

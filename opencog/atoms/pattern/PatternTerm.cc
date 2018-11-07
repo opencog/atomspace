@@ -58,7 +58,7 @@ void PatternTerm::addOutgoingTerm(const PatternTermPtr& ptm)
 	_outgoing.push_back(ptm);
 }
 
-Handle PatternTerm::getHandle()
+const Handle& PatternTerm::getHandle() const
 {
 	return _handle;
 }
