@@ -188,8 +188,8 @@ penalties that perhaps should be re-thought?
 ======================================================================
 ======================================================================
 
-                      Adding atom types
-                      -----------------
+Adding atom types
+-----------------
 
 The ClassServer provides a primitive extension mechanism so that
 modules/agents/libraries may add new atom types to the default type
@@ -199,28 +199,28 @@ files with c++ code that can be used by the module/library.
 
 The macro uses a 'type script' file as input which uses the following
 format:
-
+```
 <TYPE> [<- <PARENT_TYPE1>[,<PARENT_TYPE2>,<PARENT_TYPE3>,...]] ["<TYPE_NAME>"]
-
+```
 Where
 
-    TYPE is an identifier that will be used in your code to reference
+    `TYPE` is an identifier that will be used in your code to reference
     the type's numeric code. Usually, it is defined using capital
     letters and underscores as its semantics is close to that of C/C++
     constant.
 
-    PARENT_TYPE1, PARENT_TYPE1, PARENT_TYPE2 are optional identifiers of
+    `PARENT_TYPE1, PARENT_TYPE1, PARENT_TYPE2` are optional identifiers of
     the parent types of the defined type. When more than one parent type
     is specified, they must be separated by commas.
 
-    TYPE_NAME is a string that will be used to identify the type. If
+    `TYPE_NAME` is a string that will be used to identify the type. If
     none is supplied, the cmake macro will generate one based on the
     type's identifer using camel-casing patterns (for instance,
     CUSTOM_NODE would be named "CustomNode").
 
 Above is a short snippet of valid script entries. For more examples,
-check the atom_types.script file.
-
+check the `atom_types.script` file.
+```
 ATOM
 NODE <- ATOM
 LINK <- ATOM
@@ -229,12 +229,13 @@ CONCEPT_NODE <- NODE "OddlyNamedNode"
 ASSOCIATIVE_LINK <- LINK "AssocL"
 EVALUATION_LINK <- LINK "EvalLink"
 MULTIPARENT_LINK <- ASSOCIATIVE_LINK_LINK,EVALUATION_LINK "MPLink"
-
+```
 -----
-To process the 'atom types' script file, one must add the macro
-OPENCOG_ADD_ATOM_TYPES to the CMakeLists.txt and the header file to the
-list of source files:
+To process the `atom types` script file, one must add the macro
+`OPENCOG_ADD_ATOM_TYPES` to the `CMakeLists.txt` and the header file
+to the list of source files:
 
+```
 # CMakeList.txt
 OPENCOG_ADD_ATOM_TYPES(atom_types.script atom_types.h atom_types.definitions atom_types.inheritance)
 
@@ -244,8 +245,8 @@ ADD_LIBRARY(sample
     Sample2.cc
     ...
 )
-
-The macro OPENCOG_ADD_ATOM_TYPES expects 4 parameters:
+```
+The macro `OPENCOG_ADD_ATOM_TYPES` expects 4 parameters:
 
     1. the filename of the script file that will be used as input
     2. the filename of the header file that will be generated with
@@ -260,8 +261,9 @@ The macro OPENCOG_ADD_ATOM_TYPES expects 4 parameters:
 To properly *use* the generated files, the following conventions should be
 followed:
 
-  * include the definitions file right after the standard '#include'
-    statement of the file with the code that initializes your module/agent/library.
+  * include the definitions file right after the standard `#include`
+    statement of the file with the code that initializes your
+    module/agent/library.
 
   * include the inheritance file *inside the body* of the routine
     initializing the module/agent/library.
@@ -270,7 +272,7 @@ followed:
     of the a new atom type.
 
 For instance:
-
+```
 // MyModule.cc
 #include "MyModule.h"
 #include "AnotherHeader.h"
@@ -293,24 +295,23 @@ void AnotherFile::someMethod() {
     std::string name = opencog::ClassServer::getTypeName(opencog::MYNODE);
     ...
 }
-
------
-For a fully functional example, check the ''examples/atomtypes/' directory.
+```
+For a fully functional example, check the `examples/atomtypes/` directory.
 
 
 ======================================================================
 ======================================================================
 ======================================================================
 
-                   Garbage Collection Design
-                   -------------------------
+Garbage Collection Design
+-------------------------
 
-As of October/November 2013, Handles use std::shared_pointer to deal
+As of October/November 2013, Handles use `std::shared_pointer` to deal
 with memory management, and so using GC is no longer urgent.  The
 shared_pointers seem to work OK, for now.  Based on performance
 measurements, however, shared pointers are 3x slower than GC could be
 (compare the AtomTable results for April and November 2013 in the
-opencog/benchmark/diary.txt file, which show a rough 3x slowdown.)
+`opencog/benchmark/diary.txt` file, which show a rough 3x slowdown.)
 
 Without garbage collection (or smart pointers) it becomes unsafe to use
 bare pointers in a multi-threaded environment.  With garbage collection
@@ -321,9 +322,9 @@ problem with smart pointers is that they are (1) generally slower, and
 as well as additional bytes in the object, for the counter itself.)
 
 A prototype using BDW-GC was attempted in 2014, but was found to have
-problems.  The main problem is that the std:: container classes are
+problems.  The main problem is that the `std::` container classes are
 just not freindly for garbage collection.  Consider, for example, the
-std::set container. If it has N objects in it, it will have log_2(N)
+`std::set` container. If it has N objects in it, it will have log_2(N)
 pointers (assuming a binary-tree implementation).  If N = 1 million,
 then tree depth will have a depth of about log_2(1M) = 20. If the
 terminal object (e.g. an Atom) has a back-pointer to another atom
@@ -347,8 +348,8 @@ any other language has a better solution, anyway.
 ======================================================================
 ======================================================================
 
-                       Threading Design
-                       ----------------
+Threading Design
+----------------
 
 As of November 2013, all atomspace operations should be thread-safe.
 This includes all AtomSpace API calls, and all public methods on Atoms,
