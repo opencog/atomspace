@@ -89,6 +89,7 @@ class PatternTerm
 {
 protected:
 	Handle _handle;
+	Handle _quote;
 	PatternTermPtr _parent;
 	PatternTermWSeq _outgoing;
 
@@ -110,6 +111,8 @@ public:
 	void addOutgoingTerm(const PatternTermPtr& ptm);
 
 	const Handle& getHandle() const;
+
+	const Handle& getQuote() const;
 
 	PatternTermPtr getParent();
 

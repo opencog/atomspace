@@ -27,12 +27,14 @@
 namespace opencog {
 
 PatternTerm::PatternTerm()
-	: _handle(Handle::UNDEFINED), _parent(PatternTerm::UNDEFINED),
+	: _handle(Handle::UNDEFINED),
+	  _quote(Handle::UNDEFINED),
+	  _parent(PatternTerm::UNDEFINED),
 	  _has_any_bound_var(false)
 {}
 
 PatternTerm::PatternTerm(const PatternTermPtr& parent, const Handle& h)
-	: _handle(h), _parent(parent),
+	: _handle(h), _quote(Handle::UNDEFINED), _parent(parent),
 	  _quotation(parent->_quotation.level(),
 	             false /* necessarily false since it is local */),
 	  _has_any_bound_var(false)
@@ -46,6 +48,8 @@ PatternTerm::PatternTerm(const PatternTermPtr& parent, const Handle& h)
 			throw InvalidParamException(TRACE_INFO,
 			                            "QuoteLink/UnquoteLink/LocalQuoteLink has "
 			                            "unexpected arity!");
+		// Save the quotes, useful for mapping patterns to grounds
+		_quote = _handle;
 		_handle = h->getOutgoingAtom(0);
 	}
 
@@ -61,6 +65,11 @@ void PatternTerm::addOutgoingTerm(const PatternTermPtr& ptm)
 const Handle& PatternTerm::getHandle() const
 {
 	return _handle;
+}
+
+const Handle& PatternTerm::getQuote() const
+{
+	return _quote;
 }
 
 PatternTermPtr PatternTerm::getParent()
