@@ -73,9 +73,7 @@ struct FreeVariables
 	bool is_identical(const FreeVariables& other) const;
 
 	/// Return true if variable `var` is in this variableset.
-	bool is_in_varset(const Handle& v) const {
-		return varset.end() != varset.find(v);
-	}
+	bool is_in_varset(const Handle& v) const;
 
 	/// Return true if all variables within the given range is in
 	/// varset.
@@ -142,6 +140,9 @@ struct FreeVariables
 
 	/// Return true, if there are no free variables.
 	bool empty() const;
+
+	/// Useful for debugging
+	std::string to_string(const std::string& indent=empty_string) const;
 
 protected:
 	Handle substitute_scoped(const Handle&, const HandleSeq&, bool,
@@ -270,7 +271,7 @@ struct Variables : public FreeVariables,
 	Handle get_vardecl() const;
 
 	// Useful for debugging
-	std::string to_string(const std::string& indent="") const;
+	std::string to_string(const std::string& indent=empty_string) const;
 };
 
 // Debugging helpers see
@@ -278,6 +279,10 @@ struct Variables : public FreeVariables,
 // The reason indent is not an optional argument with default is
 // because gdb doesn't support that, see
 // http://stackoverflow.com/questions/16734783 for more explanation.
+std::string oc_to_string(const FreeVariables::IndexMap& imap,
+                         const std::string& indent=empty_string);
+std::string oc_to_string(const FreeVariables& var,
+                         const std::string& indent=empty_string);
 std::string oc_to_string(const Variables& var,
                          const std::string& indent=empty_string);
 

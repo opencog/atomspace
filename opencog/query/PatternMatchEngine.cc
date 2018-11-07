@@ -249,7 +249,7 @@ bool PatternMatchEngine::ordered_compare(const PatternTermPtr& ptm,
 	if (not match) return false;
 
 	// If we've found a grounding, record it.
-	if (hp != hg) var_grounding[hp] = hg;
+	record_grounding(ptm, hg);
 
 	return true;
 }
@@ -308,7 +308,7 @@ bool PatternMatchEngine::choice_compare(const PatternTermPtr& ptm,
 				solution_drop();
 
 				// If the grounding is accepted, record it.
-				if (hp != hg) var_grounding[hp] = hg;
+				record_grounding(ptm, hg);
 
 				_choice_state[GndChoice(ptm, hg)] = icurr;
 				return true;
@@ -501,12 +501,12 @@ bool PatternMatchEngine::unorder_compare(const PatternTermPtr& ptm,
 	const HandleSeq& osg = hg->getOutgoingSet();
 	PatternTermSeq osp = ptm->getOutgoingSet();
 	size_t arity = osp.size();
-	bool has_glob = (0 < _pat->globby_holders.count(ptm->getHandle()));
+	bool has_glob = (0 < _pat->globby_holders.count(hp));
 
 	// They've got to be the same size, at the least!
 	// unless there are globs in the pattern
 	if (osg.size() != arity and not has_glob)
-		return _pmc.fuzzy_match(ptm->getHandle(), hg);
+		return _pmc.fuzzy_match(hp, hg);
 
 	// Test for case A, described above.
 	OC_ASSERT (not (take_step and have_more),
@@ -592,7 +592,7 @@ bool PatternMatchEngine::unorder_compare(const PatternTermPtr& ptm,
 				solution_drop();
 
 				// If the grounding is accepted, record it.
-				if (hp != hg) var_grounding[hp] = hg;
+				record_grounding(ptm, hg);
 
 				// Handle case 5&7 of description above.
 				have_more = true;
@@ -2101,6 +2101,24 @@ bool PatternMatchEngine::explore_clause(const Handle& term,
 		return clause_accept(clause, grnd);
 
 	return false;
+}
+
+void PatternMatchEngine::record_grounding(const PatternTermPtr& ptm,
+                                          const Handle& hg)
+{
+	const Handle& hp = ptm->getHandle();
+	// Likely a closed pattern, no need to save it
+	if (hp == hg)
+		return;
+
+	// Only record if the pattern is not quoted, otherwise the pattern
+	// is not completely self-contained.
+	if (not ptm->isQuoted())
+		var_grounding[hp] = hg;
+	// If quoted, try one last chance by checking if the quote is
+	// hidden in ptm.
+	else if (const Handle& quote = ptm->getQuote())
+		var_grounding[quote] = hg;
 }
 
 /**
