@@ -335,11 +335,16 @@ Handle RewriteLink::consume_quotations(const Variables& variables,
 	// Base case
 	if (h->is_node())
 	{
-		// Make sure quotation is removed around GroundedPredicateNode
-		// as it otherwise changes the pattern matcher semantics as it
-		// will consider those as virtual.
-		if (t == GROUNDED_PREDICATE_NODE)
-			needless_quotation = false;
+		// TODO: the following has no unit test!!! Yet it introduces a
+		// bug covered by RewriteLinkUTest::test_consume_quotations_4(),
+		// thus this code is disable till a unit test it created for it
+		// and we understand what it fixes and how it fixes.
+		//
+		// // Make sure quotation is not removed around
+		// // GroundedPredicateNode as it otherwise changes the pattern
+		// // matcher semantics as it will consider those as virtual.
+		// if (t == GROUNDED_PREDICATE_NODE)
+		// 	needless_quotation = false;
 
 		return h;
 	}
