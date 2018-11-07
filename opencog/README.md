@@ -11,15 +11,15 @@ This directory contains core AtomSpace code.  Unit tests are in the
 
 Source code overview:
 
-| Directory      |      |
-| -------------- | ---- |
-`atoms/base`     | Defines atoms, nodes, links, truth values, etc.
+<dl>
+<dt>atoms/base <dd>Defines atoms, nodes, links, truth values, etc.
                    Everything else depends on this.
 
-`atoms/core`     | Assorted special-case atoms, defined as C++ classes.
+<dt>atoms/core <dd>Assorted special-case atoms, defined as C++ classes.
                    These typically cache some special information,
                    or have "imperative" methods that do special things,
                    when called.
+</dl>
 
 atomspace        | The in-RAM database or "symbol table" that holds
                    atoms. It assures that only one version of any
