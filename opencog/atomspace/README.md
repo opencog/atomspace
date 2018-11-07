@@ -27,6 +27,11 @@ The above seems like the simplest, easiest, most compact and fastest
 way to implement Atoms.  Its not carved in stone, but it seems to work
 well.
 
+The benchmark code in the
+[opencog/benchmark](https://github.com/opencog/benchmark) repo is
+handy for verifying if your alternative design/implementation makes
+things better or worse.
+
 ------------------------------
 Valuation Implementation Notes
 ------------------------------
@@ -112,10 +117,11 @@ Garbage Collection Design
 
 As of October/November 2013, Handles use `std::shared_pointer` to deal
 with memory management, and so using GC is no longer urgent.  The
-shared_pointers seem to work OK, for now.  Based on performance
+shared pointers seem to work OK, for now.  Based on performance
 measurements, however, shared pointers are 3x slower than GC could be
 (compare the AtomTable results for April and November 2013 in the
-`opencog/benchmark/diary.txt` file, which show a rough 3x slowdown.)
+[benchmark/diary.txt](https://github.com/opencog/benchmark/blob/master/atomspace/atomspace/diary.txt)
+file, which show a rough 3x slowdown.)
 
 Without garbage collection (or smart pointers) it becomes unsafe to use
 bare pointers in a multi-threaded environment.  With garbage collection
@@ -154,16 +160,16 @@ Threading Design
 
 As of November 2013, all atomspace operations should be thread-safe.
 This includes all AtomSpace API calls, and all public methods on Atoms,
-Links, Nodes, truth and attention values.  Thread-safety is mildly
+Links, Nodes, Truth and Attention values.  Thread-safety is mildly
 tested in AtomSpaceAsyncUTest but more robust threading tests would be
 great.  In addition, comprehensive multi-threaded benchmarks are sorely
 needed.
 
-The AtomTable::getHandlesByXXX() methods offer a great opportunity for
-adding parallelism.  Currently, they use std::copy_if(), which can be
-replaced by OMP_ALGO versions, and including oc_omp.h. For examples on
-how this is done in practice, grep the moses code. Its actually quite
-very easy; I haven't done so out of laziness mostly (and the greedy
+The `AtomTable::getHandlesByXXX()` methods offer a great opportunity for
+adding parallelism.  Currently, they use `std::copy_if()`, which can be
+replaced by `OMP_ALGO` versions, and including `oc_omp.h`. For examples
+showing how this is done in practice, grep the moses code. Its actually
+quite very easy; I haven't done so out of laziness mostly (and the greedy
 desire for a benchmark).
 
 The AtomTable uses a single global lock, and it potentially causes
@@ -184,7 +190,7 @@ The atoms are all using a per-atom lock, and thus should have no
 contention (although this is a bit RAM-greedy, but what the heck --
 the alternative of one global lock would be a huge bottleneck.)
 
-The ClassServer() uses a mutex when fetching info.  If would be great
+The NameServer() uses a mutex when fetching info.  If would be great
 to make this lockless somehow, since, realistically, as, currently,
 absolutely no one ever adds new atom types, once the cogserver has been
 initialized. i.e. we're using a lock to protect a case that never
