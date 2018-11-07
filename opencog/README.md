@@ -19,38 +19,36 @@ Source code overview:
                    These typically cache some special information,
                    or have "imperative" methods that do special things,
                    when called.
-</dl>
 
-atomspace        | The in-RAM database or "symbol table" that holds
+<dt>atomspace  <dd>The in-RAM database or "symbol table" that holds
                    atoms. It assures that only one version of any
                    given atom can ever be found.
 
-persist          | Methods for communication between servers, also,
+<dt>persist    <dd>Methods for communication between servers, also,
                    saving/restoring the atomspace to databases.
 
-query            | Pattern matching for the atomspace. Allows for
+<dt>query      <dd>Pattern matching for the atomspace. Allows for
                    specific patterns to be extracted from the atomspace.
                    Like SQL, but for graphs, instead of tables.
 
-rule-engine      | Apply arbitrary collections of rules to the atomspace.
+<dt>rule-engine<dd>Apply arbitrary collections of rules to the atomspace.
                    Provides forward and backward chainers.
 
-matrix           | Present a subset of the atomspace as a matrix, e.g.
+<dt>matrix     <dd>Present a subset of the atomspace as a matrix, e.g.
                    a covariance/correlation matrix, allowing statistical
                    matrix analysis (PCA, SVD, etc.) to be performed on
                    this subset.
 
-sheaf            | Infer the grammar of a (hidden) dynamic network, by
+<dt>sheaf      <dd>Infer the grammar of a (hidden) dynamic network, by
                    means of sections of sheaves. Intended for generic
                    time series, e.g. natural language.  Currently
                    implements a Maximum Spanning Tree (MST) parser.
 
-guile, scm       | Scheme language bindings.
-haskell          | Haskell language bindings.
-python,cython    | Python language bindings.
+<dt>guile, scm <dd>Scheme language bindings.
+<dt>haskell    <dd>Haskell language bindings.
+<dt>python,cython<dd>Python language bindings.
 
-benchmark        | Performance benchmarks.
-
+</dl>
 
 Important Documentation
 -----------------------
@@ -61,3 +59,6 @@ Please refer to the following for sepcific questions:
 
 * How to add new atom or value types. See
  [README-Adding-New-Atom-Types.md](atoms/proto/README-Adding-New-Atom-Types.md)
+
+* Performance benchmarks are no longer in this repo. See the
+  [opencog/benchmark](https://github.com/opencog/benchmark) repo.
