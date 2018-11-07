@@ -7,13 +7,15 @@ Directory overview
 ------------------
 This directory contains core AtomSpace code.  Unit tests are in the
 [tests](../tests) directiory, and example and demo programs are in the
-[examples](../examples) directory.
-
-Source code overview:
+[examples](../examples) directory. Here's a short description of the
+important subdirectories:
 
 <dl>
-<dt>atoms/base <dd>Defines atoms, nodes, links, truth values, etc.
-                   Everything else depends on this.
+<dt>atoms/proto<dd>Defines Values (the base class for Atoms). Defines
+                   the atom type hierarchy.  Everything else depends
+                   on this.
+
+<dt>atoms/base <dd>Defines the basic atoms: nodes, links, and handles.
 
 <dt>atoms/core <dd>Assorted special-case atoms, defined as C++ classes.
                    These typically cache some special information,
@@ -34,10 +36,10 @@ Source code overview:
 <dt>rule-engine<dd>Apply arbitrary collections of rules to the atomspace.
                    Provides forward and backward chainers.
 
-<dt>matrix     <dd>Present a subset of the atomspace as a matrix, e.g.
-                   a covariance/correlation matrix, allowing statistical
-                   matrix analysis (PCA, SVD, etc.) to be performed on
-                   this subset.
+<dt>matrix     <dd>Present a view of a subset of the atomspace as a
+                   (sparse) matrix, *e.g.* a covariance/correlation
+                   matrix, allowing statistical matrix analysis
+                   (PCA, SVD, etc.) to be performed on this subset.
 
 <dt>sheaf      <dd>Infer the grammar of a (hidden) dynamic network, by
                    means of sections of sheaves. Intended for generic
