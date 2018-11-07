@@ -501,12 +501,12 @@ bool PatternMatchEngine::unorder_compare(const PatternTermPtr& ptm,
 	const HandleSeq& osg = hg->getOutgoingSet();
 	PatternTermSeq osp = ptm->getOutgoingSet();
 	size_t arity = osp.size();
-	bool has_glob = (0 < _pat->globby_holders.count(ptm->getHandle()));
+	bool has_glob = (0 < _pat->globby_holders.count(hp));
 
 	// They've got to be the same size, at the least!
 	// unless there are globs in the pattern
 	if (osg.size() != arity and not has_glob)
-		return _pmc.fuzzy_match(ptm->getHandle(), hg);
+		return _pmc.fuzzy_match(hp, hg);
 
 	// Test for case A, described above.
 	OC_ASSERT (not (take_step and have_more),
