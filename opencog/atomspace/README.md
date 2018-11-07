@@ -62,9 +62,9 @@ way to implement Values.  Its not carved in stone, but it seems to work
 well.
 
 
-------------------------------
-AtomSpace Implementation Notes
-------------------------------
+---------------------------------
+AtomSpace Implementation Overview
+---------------------------------
 The uniqueness constraint on Atoms implies that the AtomTable::addAtom()
 method is fairly complicated: it must be able to detect if an atom
 being added already exists in the atomspace.  The addAtom() method
@@ -106,10 +106,36 @@ point at it). This means that there are circular loops everywhere. Now,
 the Boehm GC can discover circular loops just fine, but only if they are
 reasonably short. The problem is that std::set can have pointers to
 pointers to pointers, of depth log(N), and N can get quite large,
-larger than what bdgc can easily detect. In essence, std::set does not
-play nice with bdgc. Bummer. So reference counting is done instead, and
+larger than what BDWGC can easily detect. In essence, `std::set` does not
+play nice with BDWGC. Bummer. So reference counting is done instead, and
 in order to break the circular loops, the incoming set consists of weak
 pointers. More about garbage collection below.
+
+-------------------------
+Multiple AtomSpace Design
+-------------------------
+
+Overlay AtomSpaces are needed in (at least) these situations:
+
+* Pattern Matching -- Need to hold temporary results computed during
+  the traverse, which may be discarded later, if the traverse is
+  unsuccusssful (unsatisfiable).  Temporary atoms arise in several
+  different ways, including by black-box user-written code that might
+  get triggered during the traverse phase.  The patten matcher creates
+  a temporary "transient" atomspace, which is cleared at the end of
+  each traverse.
+
+* Large dataset management -- A particularly large dataset (perhaps too
+  large to fit in RAM) is shared by multiple users. It is so large that
+  users want to avoid making private copies. Yet, since its shared,
+  updates must be disallowed.  Thus, each user gets a read-write
+  overlay, with the underlying base-space marked read-only. Since the
+  base-space is an in-RAM cache of what's on disk, it should still be
+  possible to load the base-space with atoms from disk, and to remove
+  atoms from the base-space, to free up RAM, all without violating it's
+  read-only nature.  Examples include: large genomic datasets; Sophia
+  robot character personality files.
+
 
 -------------------------
 Garbage Collection Design
@@ -158,8 +184,8 @@ any other language has a better solution, anyway.
 Threading Design
 ----------------
 
-As of November 2013, all atomspace operations should be thread-safe.
-This includes all AtomSpace API calls, and all public methods on Atoms,
+As of November 2013, all atomspace operations are thread-safe.  This
+includes all AtomSpace API calls, and all public methods on Atoms,
 Links, Nodes, Truth and Attention values.  Thread-safety is mildly
 tested in `AtomSpaceAsyncUTest` but more robust threading tests would be
 great.  In addition, comprehensive multi-threaded benchmarks are sorely
