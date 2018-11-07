@@ -5,8 +5,9 @@ AtomSpace Source Code
 
 Directory overview
 ------------------
-This directory contains core AtomSpace code.  Tests, example and demo
-programs have their own directories.
+This directory contains core AtomSpace code.  Unit tests are in the
+[tests](../tests) directiory, and example and demo programs are in the
+[examples](../examples) directory.
 
 Source code overview:
 
@@ -52,5 +53,8 @@ Important Documentation
 -----------------------
 Please refer to the following for sepcific questions:
 
-* How to add new atom types. See
+* Atom vs. Value Design tradeoffs/justification. See
+ [atoms/proto/README.md](atoms/proto/README.md)
+
+* How to add new atom or value types. See
  [README-Adding-New-Atom-Types.md](atoms/proto/README-Adding-New-Atom-Types.md)
