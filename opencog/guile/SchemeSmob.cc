@@ -355,9 +355,9 @@ void SchemeSmob::register_procs()
 	register_proc("cog-atomspace?",        1, 0, 0, C(ss_as_p));
 	register_proc("cog-atomspace",         0, 0, 0, C(ss_get_as));
 	register_proc("cog-set-atomspace!",    1, 0, 0, C(ss_set_as));
-	register_proc("cog-atomspace-env",     1, 0, 0, C(ss_as_env));
-	register_proc("cog-atomspace-uuid",    1, 0, 0, C(ss_as_uuid));
-	register_proc("cog-atomspace-clear",   1, 0, 0, C(ss_as_clear));
+	register_proc("cog-atomspace-env",     0, 1, 0, C(ss_as_env));
+	register_proc("cog-atomspace-uuid",    0, 1, 0, C(ss_as_uuid));
+	register_proc("cog-atomspace-clear",   0, 1, 0, C(ss_as_clear));
 	register_proc("cog-atomspace-readonly?", 0, 1, 0, C(ss_as_readonly_p));
 	register_proc("cog-atomspace-ro!",     0, 1, 0, C(ss_as_mark_readonly));
 	register_proc("cog-atomspace-rw!",     0, 1, 0, C(ss_as_mark_readwrite));

@@ -129,7 +129,8 @@ public:
         { return _atom_table.getNumAtomsOfType(type, subclass); }
     inline UUID get_uuid(void) const { return _atom_table.get_uuid(); }
 
-    //! Clear the atomspace, remove all atoms
+    //! Clear the atomspace, extract all atoms. Does NOT clear the
+    //! attached backingstore.
     void clear()
         { _atom_table.clear(); }
 

@@ -62,9 +62,9 @@ way to implement Values.  Its not carved in stone, but it seems to work
 well.
 
 
-------------------------------
-AtomSpace Implementation Notes
-------------------------------
+---------------------------------
+AtomSpace Implementation Overview
+---------------------------------
 The uniqueness constraint on Atoms implies that the AtomTable::addAtom()
 method is fairly complicated: it must be able to detect if an atom
 being added already exists in the atomspace.  The addAtom() method
@@ -106,10 +106,88 @@ point at it). This means that there are circular loops everywhere. Now,
 the Boehm GC can discover circular loops just fine, but only if they are
 reasonably short. The problem is that std::set can have pointers to
 pointers to pointers, of depth log(N), and N can get quite large,
-larger than what bdgc can easily detect. In essence, std::set does not
-play nice with bdgc. Bummer. So reference counting is done instead, and
+larger than what BDWGC can easily detect. In essence, `std::set` does not
+play nice with BDWGC. Bummer. So reference counting is done instead, and
 in order to break the circular loops, the incoming set consists of weak
 pointers. More about garbage collection below.
+
+-------------------------
+Multiple AtomSpace Design
+-------------------------
+
+Overlay AtomSpaces are needed in (at least) these situations:
+
+* Pattern Matching -- Need to hold temporary results computed during
+  the traverse, which may be discarded later, if the traverse is
+  unsuccessful (unsatisfiable).  Temporary atoms arise in several
+  different ways, including by black-box user-written code that might
+  get triggered during the traverse phase.  The pattern matcher creates
+  a temporary "transient" atomspace, which is cleared at the end of
+  each traverse.
+
+* Large dataset management -- A particularly large dataset (perhaps too
+  large to fit in RAM) is shared by multiple users. It is so large that
+  users want to avoid making private copies. Yet, since its shared,
+  updates must be disallowed.  Thus, each user gets a read-write
+  overlay, with the underlying base-space marked read-only. Since the
+  base-space is an in-RAM cache of what's on disk, it should still be
+  possible to load the base-space with atoms from disk, and to remove
+  atoms from the base-space, to free up RAM, all without violating it's
+  read-only nature.  Examples include: large genomic datasets; Sophia
+  robot character personality files.
+
+The above are requirements; the base and overlay atomspaces should
+behave as intuitively described.  In practice, this means:
+
+* When a user alters a Value (TruthValue, AttentionValue, or other) in
+  the overlay, it should *not* clobber the Value in the base space.
+
+How can this be implemented?
+
+### Design A)
+A copy-on-write is performed, so that if a read-only Atom in the
+base-space is altered, a copy is created in the overlay. The copy
+has it's own key-value store, which can be freely altered, without
+disturbing the base.
+
+This design makes graph traversal hard: the copied atom fails to appear
+in the outgoing set of any Link that the base atom is in. Likewise,
+the incoming set of the copied atom is empty. There are two different
+partial solutions:
+
+#### Design A1)
+In addition to copying an atom, copy it's entire incoming set. This has
+a potentially huge negative performance impact on RAM usage.
+
+#### Design A2)
+Alter the atom's `getIncomingSet()` method, so that it returns not only
+it's own strict incoming set, but also that of any atoms that it's
+hiding. The cost here seems to be minimal.
+
+Add a "masked" bit-flag to the atom, indicating that there's another
+atom in an overlay that is covering it. This can be used to avoid
+traversing covered/masked atoms.
+
+### Design B)
+Each Atom holds an atomspace, key, value triple, so that, to find the
+value, both the key, and the relevant atomspace must be supplied.
+
+This has several downsides -- a run-time performance penalty for every
+lookup (because a more complex lookup) and an API penalty: its not
+enough to just have the atom in hand; one must also specify the
+atomspace.
+
+### Design C)
+Store the key-value DB's in the atomspace (and not in the atom).
+This has several downsides -- a space penalty (a hash table or b-tree in
+the atomspace) and a time penalty (a hash/btree lookup).  This might be
+OK, if most atoms had no values at all attached to them.  However, for
+all existing applications, the majority of atoms have either TV's or
+AV's or both.
+
+------
+Conclusion: Design A2 seems like the best, for now.
+
 
 -------------------------
 Garbage Collection Design
@@ -158,8 +236,8 @@ any other language has a better solution, anyway.
 Threading Design
 ----------------
 
-As of November 2013, all atomspace operations should be thread-safe.
-This includes all AtomSpace API calls, and all public methods on Atoms,
+As of November 2013, all atomspace operations are thread-safe.  This
+includes all AtomSpace API calls, and all public methods on Atoms,
 Links, Nodes, Truth and Attention values.  Thread-safety is mildly
 tested in `AtomSpaceAsyncUTest` but more robust threading tests would be
 great.  In addition, comprehensive multi-threaded benchmarks are sorely

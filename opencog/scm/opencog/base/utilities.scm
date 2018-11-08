@@ -242,14 +242,10 @@
 ; --------------------------------------------------------------------
 (define-public (clear)
 "
-  clear -- extract all atoms in the atomspace.  This only removes the
-  atoms from the atomspace, it does NOT remove it from the backingstore,
-  if attached!
+  clear -- extract all atoms in the atomspace. Deprecated; use
+      cog-atomspace-clear instead.
 "
-	(for-each
-		extract-type
-		(cog-get-types)
-	)
+	(cog-atomspace-clear)
 )
 
 ; --------------------------------------------------------------------
