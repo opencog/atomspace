@@ -549,7 +549,6 @@ IF (CXXTEST_FOUND)
 		COMMAND ${CMAKE_CTEST_COMMAND} $(ARGS)
 		COMMENT "Running Python and Cython tests..."
 	)
-	add_dependencies(tests PythonEval logger_cython scheme_wrapper bindlink_cython atomspace_cython)
 	ADD_CUSTOM_TARGET(test_query
 		DEPENDS tests/query
 		#      ../reasoning/RuleEngine/RuleUTest
