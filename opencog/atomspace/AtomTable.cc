@@ -215,6 +215,9 @@ void AtomTable::clear()
         getHandleSetByType(allNodes, ATOM, true, false);
 
         OC_ASSERT(allNodes.size() == 0);
+        OC_ASSERT(_size == 0);
+        OC_ASSERT(_num_nodes == 0);
+        OC_ASSERT(_num_links == 0);
     }
 }
 

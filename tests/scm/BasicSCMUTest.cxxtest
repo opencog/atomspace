@@ -23,8 +23,6 @@
 
 #include <math.h>
 
-#include <boost/algorithm/string.hpp>
-
 #include <opencog/atomspace/AtomSpace.h>
 #include <opencog/atoms/base/Atom.h>
 #include <opencog/atoms/proto/NameServer.h>
@@ -282,11 +280,11 @@ void BasicSCMUTest::test_clear(void)
 		lists_sets = as->add_link(LIST_LINK, as->add_link(SET_LINK, lists_sets));
 
 	std::string rs = eval->eval("(clear)");
-	boost::trim(rs);
 	std::cout << "rs = " << rs << std::endl;
 
 	// Check that there are no error
-	TSM_ASSERT("Failed to clear the atomspace", rs.empty());
+	TSM_ASSERT("Failed to clear the atomspace", rs == "#t\n");
+	logger().debug("END TEST: %s", __FUNCTION__);
 }
 
 // ============================================================
@@ -299,11 +297,12 @@ void BasicSCMUTest::test_extract_hypergraph(void)
 	std::string rs =
 		eval->eval("(define x (ListLink (Concept \"A\") (Concept \"A\")))");
 	rs = eval->eval("(extract-hypergraph x)");
-	boost::trim(rs);
 	std::cout << "rs = " << rs << std::endl;
 
 	// Check that there are no error
-	TSM_ASSERT("Failed to clear the atomspace", rs.empty());
+	TSM_ASSERT("Failed to clear the atomspace", rs == "\n");
+
+	logger().debug("END TEST: %s", __FUNCTION__);
 }
 
 // ============================================================
