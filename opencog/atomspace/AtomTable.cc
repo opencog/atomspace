@@ -199,28 +199,22 @@ void AtomTable::clear()
     }
     else
     {
-        HandleSeq allAtoms;
+        HandleSet allNodes;
 
-        getHandlesByType(back_inserter(allAtoms), ATOM, true, false);
-
-        DPRINTF("atoms in allAtoms: %lu\n", allAtoms.size());
-
-        // Uncomment to turn on logging at DEBUG level.
-        // Logger::Level save = logger().get_level();
-        // logger().set_level(Logger::DEBUG);
+        getHandleSetByType(allNodes, NODE, true, false);
 
         // XXX FIXME TODO This is a stunningly inefficient way to clear the
         // atomtable! This will take minutes on any decent-sized atomspace!
-        HandleSeq::iterator i;
-        for (i = allAtoms.begin(); i != allAtoms.end(); ++i) {
-            extract(*i, true);
-        }
+        for (Handle h: allNodes) extract(h, true);
 
-        allAtoms.clear();
-        getHandlesByType(back_inserter(allAtoms), ATOM, true, false);
-        assert(allAtoms.size() == 0);
+        allNodes.clear();
+        getHandleSetByType(allNodes, ATOM, true, false);
+        for (Handle h: allNodes) extract(h, true);
 
-        // logger().set_level(save);
+        allNodes.clear();
+        getHandleSetByType(allNodes, ATOM, true, false);
+
+        OC_ASSERT(allNodes.size() == 0);
     }
 }
 
