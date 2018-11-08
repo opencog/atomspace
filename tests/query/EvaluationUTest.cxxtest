@@ -64,8 +64,8 @@ public:
 	void test_varval_rw(void);
 
 	void test_eval_overlay(void);
-	void xtest_logic_overlay(void);
-	void xtest_varval_overlay(void);
+	void test_logic_overlay(void);
+	void test_varval_overlay(void);
 };
 
 void EvaluationUTest::tearDown(void)
@@ -224,9 +224,10 @@ void EvaluationUTest::test_eval_overlay(void)
 	eval = seval;
 	delete as;
 	as = save;
+	as->set_read_write();
 }
 
-void EvaluationUTest::xtest_logic_overlay(void)
+void EvaluationUTest::test_logic_overlay(void)
 {
 	eval->eval("(load-from-path \"tests/query/evaluation.scm\")");
 
@@ -243,9 +244,10 @@ void EvaluationUTest::xtest_logic_overlay(void)
 	eval = seval;
 	delete as;
 	as = save;
+	as->set_read_write();
 }
 
-void EvaluationUTest::xtest_varval_overlay(void)
+void EvaluationUTest::test_varval_overlay(void)
 {
 	eval->eval("(load-from-path \"tests/query/eval-var.scm\")");
 
@@ -262,4 +264,5 @@ void EvaluationUTest::xtest_varval_overlay(void)
 	eval = seval;
 	delete as;
 	as = save;
+	as->set_read_write();
 }
