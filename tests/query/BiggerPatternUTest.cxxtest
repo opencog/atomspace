@@ -321,4 +321,5 @@ void BiggerPatternUTest::test_prep_overlay(void)
 	do_tst_prep();
 	delete as;
 	as = save;
+	as->set_read_write();
 }
