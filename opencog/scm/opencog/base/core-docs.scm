@@ -1019,8 +1019,9 @@
 
 (set-procedure-property! cog-atomspace-clear 'documentation
 "
- cog-atomspace-clear ATOMSPACE
-     Remove all atoms from ATOMSPACE.
+ cog-atomspace-clear [ATOMSPACE]
+     Remove all atoms from ATOMSPACE. The ATOMSPACE argument is
+     optional; if not specified, the current atomspace is assumed.
 ")
 
 ;set-procedure-property! cog-yield 'documentation

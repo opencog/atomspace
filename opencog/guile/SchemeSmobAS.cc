@@ -300,8 +300,7 @@ SCM SchemeSmob::ss_as_mark_readwrite(SCM sas)
 SCM SchemeSmob::ss_as_clear(SCM sas)
 {
 	AtomSpace* as = ss_to_atomspace(sas);
-	if (nullptr == as)
-		scm_wrong_type_arg_msg("cog-atomspace-clear", 1, sas, "atomspace");
+	if (nullptr == as) as = ss_get_env_as("cog-atomspace-clear");
 
 	as->clear();
 
