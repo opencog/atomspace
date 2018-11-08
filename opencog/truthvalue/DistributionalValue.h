@@ -48,6 +48,17 @@ typedef double confidence_t;
 typedef double count_t;
 
 class DistributionalValue;
+
+typedef std::vector<double> DVec;
+
+typedef std::vector<double> Interval;
+
+typedef std::vector<Interval> DVKey;
+
+typedef std::vector<DVKey> DVKeySeq;
+
+typedef Counter<DVKey, double> DVCounter;
+
 typedef std::shared_ptr<const DistributionalValue> DistributionalValuePtr;
 
 class AtomSpace;
@@ -58,8 +69,9 @@ class DistributionalValue
 
 	friend class ConditionalDV;
 
-	ValueCounter value;
-	int k;
+	DVCounter value;
+	//Number of Dimensions
+	int n;
 
 	// Disallow assignment -- truth values are immutable!
 	DistributionalValue& operator=(const DistributionalValue& rhs) {
@@ -71,27 +83,23 @@ public:
 	static count_t DEFAULT_K;
 
 	DistributionalValue();
-	DistributionalValue(ValueCounter);
+	DistributionalValue(DVCounter);
 	DistributionalValue(double,double);
 
-	static DistributionalValuePtr UniformDistributionalValue(ProtoAtomPtr,int);
-	static DistributionalValuePtr UniformDistributionalValue(ProtomSeq,int);
+	static DistributionalValuePtr UniformDistributionalValue(DVKey,int);
+	static DistributionalValuePtr UniformDistributionalValue(DVKeySeq,int);
 	static DistributionalValuePtr TRUE_TV();
 	static DistributionalValuePtr FALSE_TV();
 	static DistributionalValuePtr DEFAULT_TV();
 	static DistributionalValuePtr createDV(double,double);
-	static DistributionalValuePtr createDV(ValueCounter);
+	static DistributionalValuePtr createDV(DVCounter);
 
 	static double to_conf(int c);
 	static int to_count(double);
 
-	static double get_key_min(ProtoAtomPtr);
-	static double get_key_max(ProtoAtomPtr);
-	static double interval_dist(ProtoAtomPtr,ProtoAtomPtr);
-
 	ConditionalDVPtr divide(DistributionalValuePtr,int) const;
 	DistributionalValuePtr sum_joint(DistributionalValuePtr,int) const;
-	ValueCounter part_joint(ProtoAtomPtr,int) const;
+	DVCounter part_joint(ProtoAtomPtr,int) const;
 
 	DistributionalValuePtr conjuction(DistributionalValuePtr) const;
 	DistributionalValuePtr disjuction(DistributionalValuePtr) const;
@@ -103,13 +111,13 @@ public:
 	std::vector<double> get_var() const;
 
 	double get_fstord_mean() const;
-	double middle_of_interval(ProtoAtomPtr) const;
+	DVec middle_of_interval(DVKey) const;
 
 	double get_mode_for(double) const;
 	double get_mean_for(double) const;
 	double get_var_for(double) const;
 
-	DistributionalValuePtr add_evidence(ProtoAtomPtr) const;
+	DistributionalValuePtr add_evidence(DVKey) const;
 	DistributionalValuePtr merge(DistributionalValuePtr) const;
 	DistributionalValuePtr negate() const;
 
@@ -118,17 +126,20 @@ public:
 
 	double total_count() const;
 	double get_confidence() const;
-	double get_swc() const;
 
-	ProtoAtomPtr get_key(ProtoAtomPtr) const;
-	double get_count(ProtoAtomPtr) const;
-	double get_count_no_match(ProtoAtomPtr) const;
-	double get_mean(ProtoAtomPtr) const;
-	double get_mean_no_match(ProtoAtomPtr) const;
-	double get_mode(ProtoAtomPtr) const;
-	double get_var(ProtoAtomPtr) const;
+	static double key_contained(DVKey k1,DVKey k2);
+	static DVec get_key_min(DVKey k);
+	static DVec get_key_max(DVKey k);
 
-	ProtomSeq get_keys() const;
+	DVKey get_key(DVKey) const;
+	DVKeySeq get_keys() const;
+	double get_count(DVKey) const;
+	double get_contained_count(DVKey) const;
+	double get_mean(DVKey) const;
+	double get_contained_mean(DVKey) const;
+	double get_mode(DVKey) const;
+	double get_var(DVKey) const;
+
 
 	virtual bool operator==(const ProtoAtom& rhs) const;
 

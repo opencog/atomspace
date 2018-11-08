@@ -380,8 +380,6 @@ void SchemeSmob::register_procs()
 										   1, 0, 0, C(ss_cdv_get_unconditonals));
 	register_proc("cog-cdv-get-unconditional"
 				 ,2, 0, 0, C(ss_cdv_get_unconditonal));
-	register_proc("cog-cdv-get-unconditional-no-match"
-				 ,2, 0, 0, C(ss_cdv_get_unconditonal_no_match));
 	register_proc("cog-cdv-get-joint",	   2, 0, 0, C(ss_cdv_get_joint));
 	register_proc("cog-cdv-merge",		   2, 0, 0, C(ss_cdv_merge));
 	register_proc("cog-cdv-cde",		   2, 0, 0, C(ss_cdv_cde));

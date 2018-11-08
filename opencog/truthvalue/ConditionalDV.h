@@ -44,12 +44,16 @@ namespace opencog
 {
 
 class DistributionalValue;
+typedef std::vector<double> Interval;
+typedef std::vector<Interval> DVKey;
+typedef std::vector<DVKey> DVKeySeq;
+typedef Counter<DVKey, double> DVCounter;
 typedef std::shared_ptr<const DistributionalValue> DistributionalValuePtr;
 
 class ConditionalDV;
 typedef std::shared_ptr<const ConditionalDV> ConditionalDVPtr;
 
-typedef std::map<ProtoAtomPtr,ValueCounter> CDVrep;
+typedef std::map<DVKey,DVCounter> CDVrep;
 
 class ConditionalDV
 	: public ProtoAtom
@@ -64,22 +68,20 @@ class ConditionalDV
 public:
 	ConditionalDV();
 	ConditionalDV(CDVrep);
-	ConditionalDV(ProtomSeq,std::vector<DistributionalValuePtr>);
+	ConditionalDV(DVKeySeq,std::vector<DistributionalValuePtr>);
 
 	static ConditionalDVPtr createCDV();
 	static ConditionalDVPtr createCDV(CDVrep);
-	static ConditionalDVPtr createCDV(ProtomSeq,std::vector<DistributionalValuePtr>);
+	static ConditionalDVPtr createCDV(DVKeySeq,std::vector<DistributionalValuePtr>);
 
 	ConditionalDVPtr merge(ConditionalDVPtr) const;
 
-	ProtomSeq get_conditions() const;
+	DVKeySeq get_conditions() const;
 	std::vector<DistributionalValuePtr> get_unconditionals() const;
-	DistributionalValuePtr get_unconditional(ProtoAtomPtr) const;
-	DistributionalValuePtr get_unconditional(DistributionalValuePtr) const;
 
-	ValueCounter get_unconditional_no_matchP(ProtoAtomPtr) const;
-	DistributionalValuePtr get_unconditional_no_match(ProtoAtomPtr) const;
-	DistributionalValuePtr get_unconditional_no_match(DistributionalValuePtr) const;
+	DVCounter get_unconditionalP(DVKey) const;
+	DistributionalValuePtr get_unconditional(DVKey) const;
+	DistributionalValuePtr get_unconditional(DistributionalValuePtr) const;
 
 	DistributionalValuePtr get_joint_probability(DistributionalValuePtr) const;
 

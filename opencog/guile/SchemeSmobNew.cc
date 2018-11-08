@@ -166,6 +166,60 @@ SCM SchemeSmob::handleseq_to_scm (const HandleSeq& hs)
 	return res;
 }
 
+SCM SchemeSmob::float_list_to_scm(const std::vector<double>& v)
+{
+    SCM res;
+    bool first = true;
+    for (double d : v)
+    {
+        SCM sh = scm_from_double(d);
+        if (first) {
+            first = false;
+            res = scm_list_1(sh);
+        }
+        else {
+            res = scm_cons(sh,res);
+        }
+    }
+	return res;
+}
+
+SCM SchemeSmob::dvkey_to_scm(const DVKey& v)
+{
+    SCM res;
+    bool first = true;
+    for (auto d : v)
+    {
+        SCM sh = float_list_to_scm(d);
+        if (first) {
+            first = false;
+            res = scm_list_1(sh);
+        }
+        else {
+            res = scm_cons(sh,res);
+        }
+    }
+	return res;
+}
+
+SCM SchemeSmob::dvkeyseq_to_scm(const DVKeySeq& v)
+{
+    SCM res;
+    bool first = true;
+    for (auto d : v)
+    {
+        SCM sh = dvkey_to_scm(d);
+        if (first) {
+            first = false;
+            res = scm_list_1(sh);
+        }
+        else {
+            res = scm_cons(sh,res);
+        }
+    }
+	return res;
+}
+
 SCM SchemeSmob::protomseq_to_scm (const ProtomSeq& ps)
 {
     SCM res;

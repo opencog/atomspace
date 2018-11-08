@@ -32,6 +32,8 @@
 #include <opencog/atoms/base/Link.h>
 #include <opencog/atomspace/AtomSpace.h>
 
+#include <boost/range/combine.hpp>
+
 using namespace opencog;
 
 count_t DistributionalValue::DEFAULT_K = 800.0;
@@ -40,10 +42,11 @@ DistributionalValue::DistributionalValue()
 	: ProtoAtom(DISTRIBUTIONAL_VALUE)
 {}
 
-DistributionalValue::DistributionalValue(ValueCounter hctr)
+DistributionalValue::DistributionalValue(DVCounter dvctr)
 	: ProtoAtom(DISTRIBUTIONAL_VALUE)
 {
-	value = hctr;
+	value = dvctr;
+	n = dvctr.begin()->first.size();
 }
 
 DistributionalValue::DistributionalValue(double mode,double conf)
@@ -51,13 +54,14 @@ DistributionalValue::DistributionalValue(double mode,double conf)
 {
 	confidence_t cf = std::min(conf, 0.9999998);
 	double count = (DEFAULT_K * cf / (1.0 - cf));
-	ProtoAtomPtr h = createFloatValue(mode);
-	value[h] = count;
+	DVKey k{Interval{mode}};
+	value[k] = count;
+	n = 1;
 }
 
-DistributionalValuePtr DistributionalValue::createDV(ValueCounter hctr)
+DistributionalValuePtr DistributionalValue::createDV(DVCounter dvctr)
 {
-	return std::make_shared<const DistributionalValue>(hctr);
+	return std::make_shared<const DistributionalValue>(dvctr);
 }
 
 DistributionalValuePtr DistributionalValue::createDV(double mode
@@ -66,229 +70,50 @@ DistributionalValuePtr DistributionalValue::createDV(double mode
 	return std::make_shared<const DistributionalValue>(mode,conf);
 }
 
-DistributionalValuePtr DistributionalValue::UniformDistributionalValue(ProtoAtomPtr h,int c)
+DistributionalValuePtr DistributionalValue::UniformDistributionalValue(DVKey k,int c)
 {
-	ValueCounter hctr;
-	hctr[h] = c;
-	return std::make_shared<const DistributionalValue>(hctr);
+	DVCounter dvctr;
+	dvctr[k] = c;
+	return createDV(dvctr);
 }
 
 
-DistributionalValuePtr DistributionalValue::UniformDistributionalValue(ProtomSeq hs,int c)
+DistributionalValuePtr DistributionalValue::UniformDistributionalValue(DVKeySeq ks,int c)
 {
-	ValueCounter hctr;
-	for (ProtoAtomPtr h : hs)
+	DVCounter dvctr;
+	for (auto k : ks)
 	{
-		hctr[h] = c;
+		dvctr[k] = c;
 	}
-	return std::make_shared<const DistributionalValue>(hctr);
+	return createDV(dvctr);
 }
 
 DistributionalValuePtr DistributionalValue::TRUE_TV()
 {
-	ProtoAtomPtr h1 = createFloatValue(1.0);
-	ProtoAtomPtr h2 = createFloatValue(0.0);
-	ValueCounter hc;
-	hc[h1] = 1;
-	hc[h2] = 0;
-	return std::make_shared<const DistributionalValue>(hc);
+	DVKey v1{Interval{1.0}};
+	DVKey v2{Interval{0.0}};
+	DVCounter dvc;
+	dvc[v1] = 1;
+	dvc[v2] = 0;
+	return std::make_shared<const DistributionalValue>(dvc);
 }
 DistributionalValuePtr DistributionalValue::FALSE_TV()
 {
-	ProtoAtomPtr h1 = createFloatValue(1.0);
-	ProtoAtomPtr h2 = createFloatValue(0.0);
-	ValueCounter hc;
-	hc[h1] = 0;
-	hc[h2] = 1;
-	return std::make_shared<const DistributionalValue>(hc);
+	DVKey v1{Interval{1.0}};
+	DVKey v2{Interval{0.0}};
+	DVCounter dvc;
+	dvc[v1] = 0;
+	dvc[v2] = 1;
+	return std::make_shared<const DistributionalValue>(dvc);
 }
 DistributionalValuePtr DistributionalValue::DEFAULT_TV()
 {
-	ProtoAtomPtr h1 = createFloatValue(1.0);
-	ProtoAtomPtr h2 = createFloatValue(0.0);
-	ValueCounter hc;
-	hc[h1] = 0;
-	hc[h2] = 0;
-	return std::make_shared<const DistributionalValue>(hc);
-}
-
-double DistributionalValue::interval_dist(ProtoAtomPtr h1,ProtoAtomPtr h2)
-{
-	auto f = [](ProtomSeq::iterator it) {
-		return FloatValueCast(*it)->value()[0];
-	};
-
-	if (h1->is_type(LINK_VALUE) && h2->is_type(LINK_VALUE))
-	{
-		ProtomSeq hs1 = LinkValueCast(h1)->value();
-		ProtomSeq hs2 = LinkValueCast(h2)->value();
-		if (hs1.size() != hs2.size())
-			throw RuntimeException(TRACE_INFO,"Sizes don't match.");
-		auto it1 = hs1.begin();
-		auto it2 = hs2.begin();
-		double max = 0;
-		for (int i = 0; i < hs1.size();i++)
-		{
-			double n = abs(f(it1) - f(it2));
-			if (n > max)
-				max = n;
-			it1 = std::next(it1);
-			it2 = std::next(it2);
-		}
-		return max;
-	}
-	else if (h1->is_type(FLOAT_VALUE) && h2->is_type(FLOAT_VALUE))
-	{
-		double v1 = FloatValueCast(h1)->value()[0];
-		double v2 = FloatValueCast(h2)->value()[0];
-		return abs(v1 - v2);
-	}
-	throw RuntimeException(TRACE_INFO,"Can't handle that case.");
-}
-
-ConditionalDVPtr DistributionalValue::divide(DistributionalValuePtr dv2,int i) const
-{
-	CDVrep res;
-	for (auto elem : value)
-	{
-		ProtomSeq hs = LinkValueCast(elem.first)->value();
-		if (hs.empty())
-			throw RuntimeException(TRACE_INFO,"Can't divide non Joint DV.");
-		ProtoAtomPtr h = hs[i];
-		hs.erase(hs.begin() + i);
-		ProtoAtomPtr interval;
-		if (hs.size() != 1)
-			interval = createLinkValue(hs);
-		else
-			interval = hs[0];
-		res[h][interval] = get_mean(elem.first) / dv2->get_mean_no_match(h)
-												* dv2->total_count();
-	}
-	return ConditionalDV::createCDV(res);
-}
-
-DistributionalValuePtr DistributionalValue::sum_joint(DistributionalValuePtr dv,int pos) const
-{
-	ValueCounter res;
-	for (auto elem : dv->value)
-	{
-		res += part_joint(elem.first,pos);
-	}
-	return createDV(res);
-}
-
-ValueCounter DistributionalValue::part_joint(ProtoAtomPtr idx,int pos) const
-{
-	ValueCounter res;
-	for (auto elem : value)
-	{
-		ProtomSeq hs = LinkValueCast(elem.first)->value();
-		if (hs[pos] == idx)
-		{
-			hs.erase(hs.begin() + pos);
-			ProtoAtomPtr link = createLinkValue(hs);
-			res[link] = elem.second;
-		}
-	}
-	return res;
-}
-
-//Create a Conjuction from 2 DVs
-DistributionalValuePtr DistributionalValue::conjuction(DistributionalValuePtr dv) const
-{
-	typedef std::pair<ProtoAtomPtr,double> Elem;
-	typedef std::function<bool(Elem,Elem)> Comparator;
-
-	Comparator compF =
-		[](Elem elem1,Elem elem2)
-		{
-			double v1 = get_key_min(elem1.first);
-			double v2 = get_key_min(elem2.first);
-			return v1 < v2;
-		};
-
-	std::set<Elem,Comparator> set1(value.begin(),value.end(),compF);
-	std::set<Elem,Comparator> set2(dv->value.begin(),dv->value.end(),compF);
-
-	ValueCounter res;
-	double count = std::min(total_count(),dv->total_count());
-
-	auto it1 = set1.begin();
-	auto it2 = set2.begin();
-
-	double m1 = 1;
-	double m2 = 1;
-
-	while (m1 != 0 && m2 != 0)
-	{
-		double v1 = get_key_min(it1->first);
-		double v2 = get_key_min(it2->first);
-		if (v1 < v2)
-		{
-			double mean = get_mean_for(it1->second);
-			res[it1->first] += count * mean * m2;
-			m1 -= mean;
-			it1++;
-		}
-		else
-		{
-			double mean = get_mean_for(it2->second);
-			res[it2->first] += count * mean * m1;
-			m2 -= mean;
-			it2++;
-		}
-	}
-
-	return createDV(res);
-}
-
-//Create a disjuction from 2 DVs
-DistributionalValuePtr DistributionalValue::disjuction(DistributionalValuePtr dv) const
-{
-	typedef std::pair<ProtoAtomPtr,double> Elem;
-	typedef std::function<bool(Elem,Elem)> Comparator;
-
-	Comparator compF =
-		[](Elem elem1,Elem elem2)
-		{
-			double v1 = get_key_max(elem1.first);
-			double v2 = get_key_max(elem2.first);
-			return v1 > v2;
-		};
-
-	std::set<Elem,Comparator> set1(value.begin(),value.end(),compF);
-	std::set<Elem,Comparator> set2(dv->value.begin(),dv->value.end(),compF);
-
-	ValueCounter res;
-	double count = std::min(total_count(),dv->total_count());
-
-	auto it1 = set1.begin();
-	auto it2 = set2.begin();
-
-	double m1 = 1;
-	double m2 = 1;
-
-	while (m1 != 0 && m2 != 0)
-	{
-		double v1 = get_key_max(it1->first);
-		double v2 = get_key_max(it2->first);
-		if (v1 > v2)
-		{
-			double mean = get_mean_for(it1->second);
-			res[it1->first] += count * mean * m2;
-			m1 -= mean;
-			it1++;
-		}
-		else
-		{
-			double mean = get_mean_for(it2->second);
-			res[it2->first] += count * mean * m1;
-			m2 -= mean;
-			it2++;
-		}
-	}
-
-	return createDV(res);
+	DVKey v1{Interval{1.0}};
+	DVKey v2{Interval{0.0}};
+	DVCounter dvc;
+	dvc[v1] = 0;
+	dvc[v2] = 0;
+	return std::make_shared<const DistributionalValue>(dvc);
 }
 
 bool DistributionalValue::is_uniform() const
@@ -304,56 +129,32 @@ bool DistributionalValue::is_uniform() const
 	return true;
 }
 
-DistributionalValuePtr DistributionalValue::add_evidence(ProtoAtomPtr h) const
+DistributionalValuePtr DistributionalValue::add_evidence(DVKey h) const
 {
-	ValueCounter newhc = value;
-	auto it = newhc.find(h);
-	if (it != newhc.end())
-	{
-		it->second = it->second + 1;
-		return std::make_shared<const DistributionalValue>(newhc);
-	}
-	throw RuntimeException(TRACE_INFO, "No Interval for this value.");
+	//TODO: should this really be const??? also:
+	//There was a check for the existen of the Key
+	//But i think we should be able to add new keys using this
+	DVCounter newdvc = value;
+	newdvc[h] += 1;
+	return createDV(newdvc);
 }
 
-DistributionalValuePtr DistributionalValue::merge(DistributionalValuePtr newgdtv) const
+DistributionalValuePtr DistributionalValue::merge(DistributionalValuePtr other) const
 {
-	ValueCounter newhc = value;
-	if (k == newgdtv->k)
-	{
-		auto it1 = newhc.begin();
-		auto it2 = newgdtv->value.begin();
-		for (int i = 0; i < k;i++)
-		{
-			if (it1->first != it2->first)
-			{
-				throw RuntimeException(TRACE_INFO
-									  ,"Intervals of DistributionalValueS don't match.");
-			}
-			it1 = std::next(it1);
-			it2 = std::next(it2);
-		}
-		it1 = newhc.begin();
-		it2 = newgdtv->value.begin();
-		for (int i = 0; i < k;i++)
-		{
-			it1->second = it1->second + it2->second;
-			it1 = std::next(it1);
-			it2 = std::next(it2);
-		}
-	}
-	return std::make_shared<const DistributionalValue>(newhc);
+	DVCounter newdvc = value;
+	newdvc += other->value;
+	return createDV(newdvc);
 }
 
 DistributionalValuePtr DistributionalValue::negate() const
 {
 	double total = max_count() + min_count();
-	ValueCounter res;
+	DVCounter res;
 	for (auto elem : value)
 	{
 		res[elem.first] = total - elem.second;
 	}
-	return std::make_shared<const DistributionalValue>(res);
+	return createDV(res);
 }
 
 double DistributionalValue::min_count() const
@@ -389,7 +190,7 @@ std::vector<double> DistributionalValue::get_mode() const
 
 double DistributionalValue::get_mode_for(double ai) const
 {
-	return (ai - 1) / (total_count() - k);
+	return (ai - 1) / (total_count() - value.size());
 }
 
 std::vector<double> DistributionalValue::get_mean() const
@@ -411,29 +212,29 @@ double DistributionalValue::get_mean_for(double ai) const
 		return ai / total_count();
 }
 
+//This should be avoided where ever possible.
 double DistributionalValue::get_fstord_mean() const
 {
 	double res = 0;
 	for (auto elem : value)
 	{
-		//Is mode correct or should i use mean?
-		res = res + middle_of_interval(elem.first) * get_mode_for(elem.second);
+		//TODO: Is mode correct or should i use mean?
+		DVec mof = middle_of_interval(elem.first);
+		double mode = std::accumulate(mof.begin(),mof.end(),0.0)/mof.size();
+		res = res + mode * get_mode_for(elem.second);
 	}
 	return res;
 }
 
-double DistributionalValue::middle_of_interval(ProtoAtomPtr h) const
+DVec DistributionalValue::middle_of_interval(DVKey k) const
 {
-	if (h->get_type() == FLOAT_VALUE)
-	{
-		FloatValuePtr n = std::static_pointer_cast<FloatValue>(h);
-		return n->value()[0];
+	DVec res;
+	for (auto interval : k) {
+		if (interval.size() == 1)
+			res.push_back(interval[0]);
+		res.push_back((interval[0] + interval[1])/2);
 	}
-	LinkValuePtr l = std::static_pointer_cast<LinkValue>(h);
-	ProtomSeq hs = l->value();
-	FloatValuePtr n1 = std::static_pointer_cast<FloatValue>(hs[0]);
-	FloatValuePtr n2 = std::static_pointer_cast<FloatValue>(hs[1]);
-	return (n1->value()[0] + n2->value()[0]) / 2;
+	return res;
 }
 
 std::vector<double> DistributionalValue::get_var() const
@@ -463,16 +264,6 @@ double DistributionalValue::get_confidence() const
 	return c / (c + DEFAULT_K);
 }
 
-double DistributionalValue::get_swc() const
-{
-	double sum;
-	for (auto elem : value)
-	{
-		sum += FloatValueCast(elem.first)->value()[0] * elem.second;
-	}
-	return sum;
-}
-
 double DistributionalValue::to_conf(int c)
 {
 	return c / (c + DEFAULT_K);
@@ -483,9 +274,9 @@ int DistributionalValue::to_count(double cf)
 	return (cf * DEFAULT_K / (1 - cf));
 }
 
-ProtoAtomPtr DistributionalValue::get_key(ProtoAtomPtr h) const
+DVKey DistributionalValue::get_key(DVKey k) const
 {
-	auto it = value.find(h);
+	auto it = value.find(k);
 	if (it != value.end())
 	{
 		return it->first;
@@ -493,71 +284,101 @@ ProtoAtomPtr DistributionalValue::get_key(ProtoAtomPtr h) const
 	throw RuntimeException(TRACE_INFO, "No Key for this value.");
 }
 
-//TODO: can we asume that the first elem of a the LinkValue is the smaller?
-double DistributionalValue::get_key_min(ProtoAtomPtr p)
+DVec DistributionalValue::get_key_min(DVKey k)
 {
-	if (p->get_type() == FLOAT_VALUE) {
-		return FloatValueCast(p)->value()[0];
-	} else if (p->get_type() == LINK_VALUE) {
-		return FloatValueCast(LinkValueCast(p)->value()[0])->value()[0];
-	}
-	throw RuntimeException(TRACE_INFO, "Can't handle key of this type.");
-}
-
-double DistributionalValue::get_key_max(ProtoAtomPtr p)
-{
-	if (p->get_type() == FLOAT_VALUE) {
-		return FloatValueCast(p)->value()[0];
-	} else if (p->get_type() == LINK_VALUE) {
-		return FloatValueCast(LinkValueCast(p)->value()[1])->value()[0];
-	}
-	throw RuntimeException(TRACE_INFO, "Can't handle key of this type.");
-}
-
-ProtomSeq DistributionalValue::get_keys() const
-{
-	ProtomSeq res;
-	for (auto h : value)
-	{
-		res.push_back(std::shared_ptr<ProtoAtom>(h.first));
-	}
+	std::vector<double> res;
+	for (auto interval : k)
+		res.push_back(interval[0]);
 	return res;
 }
 
-double DistributionalValue::get_count(ProtoAtomPtr h) const
+DVec DistributionalValue::get_key_max(DVKey k)
 {
-	for (auto& elem : value)
-	{
-		if (elem.first == h)
-			return elem.second;
-	}
+	std::vector<double> res;
+	for (auto interval : k)
+		if (interval.size() == 1)
+			res.push_back(interval[0]);
+		else
+			res.push_back(interval[1]);
+
+	return res;
+}
+
+DVKeySeq DistributionalValue::get_keys() const
+{
+	DVKeySeq res;
+	for (auto k : value)
+		res.push_back(k.first);
+	return res;
+}
+
+double DistributionalValue::get_count(DVKey h) const
+{
+	auto pos = value.find(h);
+	if (pos != value.end())
+		return pos->second;
 	throw RuntimeException(TRACE_INFO, "No Key for this value.");
 }
 
-double DistributionalValue::get_count_no_match(ProtoAtomPtr h) const
+double DistributionalValue::key_contained(DVKey ks1,DVKey ks2)
 {
-	double res;
+	Interval k1,k2;
+	double sum;
+	for (auto zipped : boost::combine(ks1,ks2))
+	{
+		boost::tie(k1,k2) = zipped;
+		if (k1.size() == 1 && 1 == k2.size() && k1[0] != k2[0])
+			return 0;
+
+		if (k1.size() == 1 && 2 == k2.size() && (k1[0] < k2[0] || k1[0] > k2[1]))
+			return 0;
+
+		// The part of an interval contained in a sigelton set is infinitelly small
+		if (k1.size() == 2 && 1 == k2.size())
+			return 0;
+
+		//Two Intervals
+		//Calculate the overlapp
+		Interval res;
+		if (k1[0] > k2[0])
+			res[0] = k1[0];
+		else
+			res[0] = k2[0];
+
+		if (k1[1] < k2[1])
+			res[1] = k1[1];
+		else
+			res[1] = k2[1];
+
+		sum *= (res[1] - res[0]) / (k1[1] - k1[0]);
+	}
+	return sum;
+}
+
+double DistributionalValue::get_contained_count(DVKey h) const
+{
+	double res = 0;
 	for (auto v : value)
 	{
-		double dist = DistributionalValue::interval_dist(v.first,h);
-		res += v.second * (1 - dist);
+		double weigth = DistributionalValue::key_contained(h,v.first);
+		res += v.second * weigth;
 	}
 	return res;
 }
 
-double DistributionalValue::get_mode(ProtoAtomPtr val) const
+double DistributionalValue::get_mode(DVKey val) const
 {
 	return get_mode_for(get_count(val));
 }
-double DistributionalValue::get_mean(ProtoAtomPtr val) const
+double DistributionalValue::get_mean(DVKey val) const
 {
 	return get_mean_for(get_count(val));
 }
-double DistributionalValue::get_mean_no_match(ProtoAtomPtr val) const
+double DistributionalValue::get_contained_mean(DVKey val) const
 {
-	return get_mean_for(get_count_no_match(val));
+	return get_mean_for(get_contained_count(val));
 }
-double DistributionalValue::get_var(ProtoAtomPtr val) const
+double DistributionalValue::get_var(DVKey val) const
 {
 	return get_var_for(get_count(val));
 }
@@ -567,7 +388,20 @@ std::string DistributionalValue::to_string(const std::string& indent) const
 	std::stringstream ss;
 	for (auto elem : value)
 	{
-		ss << elem.first->to_string(indent)
+		ss << "{";
+		for (auto interval : elem.first)
+		{
+			if (interval.size() == 1)
+				ss << interval[0] << ";";
+			else
+				ss << "["
+				   << interval[0]
+				   << ","
+				   << interval[1]
+				   << ");";
+		}
+		ss.seekp(-1,std::ios_base::end);
+		ss << "}"
 		   << indent
 		   << " Count: "
 		   << elem.second
@@ -576,12 +410,11 @@ std::string DistributionalValue::to_string(const std::string& indent) const
 	return ss.str();
 }
 
-bool DistributionalValue::operator==(const ProtoAtom& rhs) const
+bool DistributionalValue::operator==(const ProtoAtom& other) const
 {
-	throw RuntimeException(TRACE_INFO, "Not Implemented");
-
-	const DistributionalValue *gdtv2 = dynamic_cast<const DistributionalValue *>(&rhs);
-	if (NULL == gdtv2) return false;
+	if (DISTRIBUTIONAL_VALUE != other.get_type()) return false;
+	const DistributionalValue* dov = (const DistributionalValue*) &other;
+	return value == dov->value;
 }
 
 bool DistributionalValue::operator<(const ProtoAtom& other) const

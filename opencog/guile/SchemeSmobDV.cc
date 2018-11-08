@@ -45,6 +45,69 @@ DistributionalValuePtr SchemeSmob::get_dv_from_list(SCM slist)
 	return nullptr;
 }
 
+Interval
+SchemeSmob::verify_interval(SCM svalue_list, const char * subrname, int pos)
+{
+	// Verify that second arg is an actual list.
+	// Null lists are not valid intervals.
+	if (!scm_is_pair(svalue_list))
+		scm_wrong_type_arg_msg(subrname, pos, svalue_list, "a non-null list of float-pt values");
+	return scm_to_float_list(svalue_list);
+}
+
+DVKey
+SchemeSmob::verify_DVKey(SCM svalue_list, const char * subrname, int pos)
+{
+	// Verify that second arg is an actual list.
+	// Null lists are not valid intervals.
+	if (!scm_is_pair(svalue_list))
+		scm_wrong_type_arg_msg(subrname, pos, svalue_list, "a non-null list of float-pt values");
+	return scm_to_DVKey(svalue_list);
+}
+
+DVKeySeq
+SchemeSmob::verify_DVKeySeq(SCM svalue_list, const char * subrname, int pos)
+{
+	// Verify that second arg is an actual list.
+	// Null lists are not valid intervals.
+	if (!scm_is_pair(svalue_list))
+		scm_wrong_type_arg_msg(subrname, pos, svalue_list, "a non-null list of float-pt values");
+	return scm_to_DVKeySeq(svalue_list);
+}
+
+DVKey SchemeSmob::scm_to_DVKey(SCM svalue_list)
+{
+	DVKey valist;
+	SCM sl = svalue_list;
+	while (scm_is_pair(sl)) {
+		SCM svalue = SCM_CAR(sl);
+
+		if (not scm_is_null(svalue)) {
+			std::vector<double> v = verify_interval(svalue,"scm_to_DVKey",0);
+			valist.emplace_back(v);
+		}
+		sl = SCM_CDR(sl);
+	}
+	return valist;
+}
+
+DVKeySeq SchemeSmob::scm_to_DVKeySeq(SCM svalue_list)
+{
+	DVKeySeq valist;
+	SCM sl = svalue_list;
+	while (scm_is_pair(sl)) {
+		SCM svalue = SCM_CAR(sl);
+
+		if (not scm_is_null(svalue)) {
+			DVKey v = verify_DVKey(svalue,"scm_to_DVKeySeq",0);
+			valist.emplace_back(v);
+		}
+		sl = SCM_CDR(sl);
+	}
+	return valist;
+}
+
+
 /* ============================================================== */
 
 std::string SchemeSmob::dv_to_string(const DistributionalValuePtr& dv)
@@ -90,20 +153,20 @@ SCM SchemeSmob::dvs_to_scm(const std::vector<DistributionalValuePtr>& dvs)
  * Create a new distributional value based on a list of handles
  *										  and a list of counts
  */
-SCM SchemeSmob::ss_new_dv(SCM shs, SCM scs)
+SCM SchemeSmob::ss_new_dv(SCM sks, SCM scs)
 {
-	ProtomSeq hs = verify_protom_list(shs,"cog-new-dv",1);
+	DVKeySeq ks = verify_DVKeySeq(sks,"cog-new-dv",1);
 	std::vector<double> cs = scm_to_float_list(scs);
-	auto it1 = hs.begin();
+	auto it1 = ks.begin();
 	auto it2 = cs.begin();
-	auto end1 = hs.end();
+	auto end1 = ks.end();
 	auto end2 = cs.end();
-	ValueCounter hc;
+	DVCounter dvc;
 	for (;(it1 != end1) && (it2 != end2); ++it1, ++it2)
 	{
-		hc[*it1] = *it2;
+		dvc[*it1] = *it2;
 	}
-	DistributionalValuePtr dv = DistributionalValue::createDV(hc);
+	DistributionalValuePtr dv = DistributionalValue::createDV(dvc);
 	return dv_to_scm(dv);
 }
 
@@ -216,12 +279,6 @@ SCM SchemeSmob::ss_dv_disjunction(SCM sdv1,SCM sdv2)
 	return dv_to_scm(dvres);
 }
 
-SCM SchemeSmob::ss_dv_get_swc(SCM sdv)
-{
-	DistributionalValuePtr dv = verify_dv(sdv,"cog-dv-get-swc",1);
-	return scm_from_double(dv->get_swc());
-}
-
 SCM SchemeSmob::ss_dv_get_fom(SCM sdv)
 {
 	DistributionalValuePtr dv = verify_dv(sdv,"cog-dv-get-fom",1);
@@ -259,7 +316,7 @@ ConditionalDVPtr SchemeSmob::verify_cdv(SCM sav, const char *subrname, int pos)
 
 SCM SchemeSmob::ss_new_cdv(SCM sconds,SCM sdvs)
 {
-	ProtomSeq conds = verify_protom_list(sconds,"cog-new-cdv",1);
+	DVKeySeq conds = verify_DVKeySeq(sconds,"cog-new-cdv",1);
 	std::vector<DistributionalValuePtr> dvs = verify_dv_list(sdvs,"cog-new-cdv",2);
 	ConditionalDVPtr cdv = ConditionalDV::createCDV(conds,dvs);
 	return cdv_to_scm(cdv);
@@ -268,8 +325,8 @@ SCM SchemeSmob::ss_new_cdv(SCM sconds,SCM sdvs)
 SCM SchemeSmob::ss_cdv_get_conditions(SCM scdv)
 {
 	ConditionalDVPtr cdv = verify_cdv(scdv,"cog-cdv-get-conditions",1);
-	ProtomSeq conds = cdv->get_conditions();
-	return protomseq_to_scm(conds);
+	DVKeySeq conds = cdv->get_conditions();
+	return dvkeyseq_to_scm(conds);
 }
 
 SCM SchemeSmob::ss_cdv_get_unconditonals(SCM scdv)
@@ -284,14 +341,6 @@ SCM SchemeSmob::ss_cdv_get_unconditonal(SCM scdv,SCM sdv)
 	ConditionalDVPtr cdv = verify_cdv(scdv,"cog-cdv-get-unconditional",1);
 	DistributionalValuePtr dv = verify_dv(sdv,"cog-cdv-get-unconditional",2);
 	DistributionalValuePtr res = cdv->get_unconditional(dv);
-	return dv_to_scm(res);
-}
-
-SCM SchemeSmob::ss_cdv_get_unconditonal_no_match(SCM scdv,SCM sdv)
-{
-	ConditionalDVPtr cdv = verify_cdv(scdv,"cog-cdv-get-unconditional-no-match",1);
-	DistributionalValuePtr dv = verify_dv(sdv,"cog-cdv-get-unconditional-no-match",2);
-	DistributionalValuePtr res = cdv->get_unconditional_no_match(dv);
 	return dv_to_scm(res);
 }
 
