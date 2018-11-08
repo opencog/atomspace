@@ -264,7 +264,7 @@ class AtomSpaceTest(TestCase):
         self.assertEquals(len(dog_predicates), 3)
 
         count = 0
-        for dogIs in self.space.xget_predicates(dog):
+        for dogIs in self.space.get_predicates(dog):
             count += 1
         self.assertEquals(count, 3)
 
@@ -293,12 +293,12 @@ class AtomSpaceTest(TestCase):
         self.assertEquals(len(dog_predicates), 1)
 
         count = 0
-        for dogIsA in self.space.xget_predicates_for(dog, isA):
+        for dogIsA in self.space.get_predicates_for(dog, isA):
             count += 1
         self.assertEquals(count, 3)
 
         count = 0
-        for dogLoves in self.space.xget_predicates_for(dog, loves):
+        for dogLoves in self.space.get_predicates_for(dog, loves):
             count += 1
         self.assertEquals(count, 1)
 

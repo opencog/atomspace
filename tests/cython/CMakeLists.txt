@@ -76,6 +76,7 @@ IF (HAVE_NOSETESTS)
 			${CMAKE_SOURCE_DIR}/tests/cython/atomspace/)
 		SET_TESTS_PROPERTIES(CythonAtomSpace
 			PROPERTIES
+			DEPENDS atomspace_cython
 			ENVIRONMENT "PYTHONDONTWRITEBYTECODE=1"
 			ENVIRONMENT "PYTHONPATH=${PROJECT_BINARY_DIR}/opencog/cython")
 
@@ -83,6 +84,8 @@ IF (HAVE_NOSETESTS)
 			${CMAKE_SOURCE_DIR}/tests/cython/utilities/)
 		SET_TESTS_PROPERTIES(CythonUtilities
 			PROPERTIES
+			DEPENDS atomspace_cython
+			DEPENDS logger_cython
 			ENVIRONMENT "PYTHONDONTWRITEBYTECODE=1"
 			ENVIRONMENT "PYTHONPATH=${PROJECT_BINARY_DIR}/opencog/cython")
 
@@ -90,6 +93,8 @@ IF (HAVE_NOSETESTS)
 			${CMAKE_SOURCE_DIR}/tests/cython/bindlink/)
 		SET_TESTS_PROPERTIES(CythonBindlink
 			PROPERTIES
+			DEPENDS atomspace_cython
+			DEPENDS bindlink_cython
 			ENVIRONMENT "PYTHONDONTWRITEBYTECODE=1"
 			ENVIRONMENT "PYTHONPATH=${PROJECT_BINARY_DIR}/opencog/cython/:${PROJECT_SOURCE_DIR}/opencog/python/:${PROJECT_SOURCE_DIR}/tests/cython/bindlink")
 
@@ -106,6 +111,8 @@ IF (HAVE_NOSETESTS)
 			${CMAKE_SOURCE_DIR}/tests/cython/guile/)
 		SET_TESTS_PROPERTIES(CythonGuile
 			PROPERTIES
+			DEPENDS atomspace_cython
+			DEPENDS scheme_wrapper
 			ENVIRONMENT "PYTHONDONTWRITEBYTECODE=1"
 			ENVIRONMENT "PYTHONPATH=${PROJECT_BINARY_DIR}/opencog/cython")
 	ENDIF (HAVE_ATOMSPACE AND HAVE_GUILE)
