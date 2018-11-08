@@ -1020,8 +1020,11 @@
 (set-procedure-property! cog-atomspace-clear 'documentation
 "
  cog-atomspace-clear [ATOMSPACE]
-     Remove all atoms from ATOMSPACE. The ATOMSPACE argument is
+     Extract all atoms from ATOMSPACE. The ATOMSPACE argument is
      optional; if not specified, the current atomspace is assumed.
+
+     This only removes the atoms from the atomspace, it does NOT
+     remove them from the backingstore.
 ")
 
 ;set-procedure-property! cog-yield 'documentation
