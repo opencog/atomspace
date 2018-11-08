@@ -157,6 +157,20 @@ cdef class AtomSpace:
             return None
         self.atomspace.clear()
 
+    def set_value(self, Atom atom, Atom key, ProtoAtom value):
+        """ Set the value on the atom at key
+        """
+        if self.atomspace == NULL:
+            return None
+        self.atomspace.set_value(deref(atom.handle), deref(key.handle), value.shared_ptr)
+
+    def set_truthvalue(self, Atom atom, TruthValue tv):
+        """ Set the truth value on atom
+        """
+        if self.atomspace == NULL:
+            return None
+        self.atomspace.set_truthvalue(deref(atom.handle), deref(tv._tvptr()))
+
     # Methods to make the atomspace act more like a standard Python container
     def __contains__(self, atom):
         """ Custom checker to see if object is in AtomSpace """
