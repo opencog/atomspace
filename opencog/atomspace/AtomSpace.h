@@ -355,8 +355,8 @@ public:
      *
      * If the atom is copied, then the copy is returned.
      */
-    Handle set_value(Handle& h, const Handle& key, const ProtoAtomPtr& value);
-    Handle set_truthvalue(Handle& h, const TruthValuePtr&);
+    Handle set_value(const Handle&, const Handle& key, const ProtoAtomPtr& value);
+    Handle set_truthvalue(const Handle&, const TruthValuePtr&);
 
     /**
      * Get a node from the AtomTable, if it's in there. If its not found

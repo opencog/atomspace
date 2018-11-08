@@ -431,7 +431,7 @@ bool AtomSpace::remove_atom(Handle h, bool recursive)
 }
 
 // Copy-on-write for setting values.
-Handle AtomSpace::set_value(Handle& h,
+Handle AtomSpace::set_value(const Handle& h,
                             const Handle& key,
                             const ProtoAtomPtr& value)
 {
@@ -456,7 +456,7 @@ Handle AtomSpace::set_value(Handle& h,
 }
 
 // Copy-on-write for setting truth values.
-Handle AtomSpace::set_truthvalue(Handle& h, const TruthValuePtr& tvp)
+Handle AtomSpace::set_truthvalue(const Handle& h, const TruthValuePtr& tvp)
 {
     // If the atom is in a read-only atomspace (i.e. if the parent
     // is read-only) and this atomspace is read-write, then make
