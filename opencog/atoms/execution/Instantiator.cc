@@ -45,7 +45,7 @@ Instantiator::Instantiator(AtomSpace* as)
 /// member of the pair is the variable; the second is the value that
 /// should be used as its replacement.  (Note that "variables" do not
 /// have to actually be VariableNode's; they can be any atom.)
-static Handle beta_reduce(const Handle& expr, const HandleMap vmap)
+static Handle beta_reduce(const Handle& expr, const HandleMap& vmap)
 {
 	// Format conversion. FreeVariables::substitute_nocheck() performs
 	// beta-reduction correctly, so we just use that. But we have to
@@ -480,7 +480,7 @@ Handle Instantiator::walk_tree(const Handle& expr, bool silent)
 	// However, some of these may hold embedded executable links
 	// inside of them, which the current unit tests and code
 	// expect to be executed.  Thus, for right now, we only avoid
-	// evaluating VirtualLinks, as these all are capable of thier
+	// evaluating VirtualLinks, as these all are capable of their
 	// own lazy-evaluation, and so, if evaluation is needed,
 	// it will be triggered by something else.
 	// Non-virtual evaluatables fall through and are handled

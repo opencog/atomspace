@@ -372,15 +372,18 @@ SCM SchemeSmob::ss_new_node (SCM stype, SCM sname, SCM kv_pairs)
 		"string name for the node"));
 
 	AtomSpace* atomspace = get_as_from_list(kv_pairs);
-	if (NULL == atomspace) atomspace = ss_get_env_as("cog-new-node");
+	if (nullptr == atomspace) atomspace = ss_get_env_as("cog-new-node");
 
 	try
 	{
 		// Now, create the actual node... in the actual atom space.
 		Handle h(atomspace->add_node(t, name));
 
-		const TruthValuePtr tv(get_tv_from_list(kv_pairs));
-		if (tv) h->setTruthValue(tv);
+		if (h)
+		{
+			const TruthValuePtr tv(get_tv_from_list(kv_pairs));
+			if (tv) h->setTruthValue(tv);
+		}
 
 		return handle_to_scm(h);
 	}
@@ -406,15 +409,15 @@ SCM SchemeSmob::ss_node (SCM stype, SCM sname, SCM kv_pairs)
 									"string name for the node");
 
 	AtomSpace* atomspace = get_as_from_list(kv_pairs);
-	if (NULL == atomspace) atomspace = ss_get_env_as("cog-node");
+	if (nullptr == atomspace) atomspace = ss_get_env_as("cog-node");
 
 	// Now, look for the actual node... in the actual atom space.
 	Handle h(atomspace->get_handle(t, name));
-	if (NULL == h) return SCM_EOL;
+	if (nullptr == h) return SCM_EOL;
 
 	// If there was a truth value, change it.
 	const TruthValuePtr tv(get_tv_from_list(kv_pairs));
-	if (tv) h->setTruthValue(tv);
+	if (tv) atomspace->set_truthvalue(h, tv);
 
 	scm_remember_upto_here_1(kv_pairs);
 	return handle_to_scm (h);
@@ -487,7 +490,7 @@ SCM SchemeSmob::ss_new_link (SCM stype, SCM satom_list)
 	outgoing_set = verify_handle_list(satom_list, "cog-new-link", 2);
 
 	AtomSpace* atomspace = get_as_from_list(satom_list);
-	if (NULL == atomspace) atomspace = ss_get_env_as("cog-new-link");
+	if (nullptr == atomspace) atomspace = ss_get_env_as("cog-new-link");
 
 	try
 	{
@@ -495,8 +498,11 @@ SCM SchemeSmob::ss_new_link (SCM stype, SCM satom_list)
 		Handle h(atomspace->add_link(t, outgoing_set));
 
 		// Fish out a truth value, if its there.
-		const TruthValuePtr tv(get_tv_from_list(satom_list));
-		if (tv) h->setTruthValue(tv);
+		if (h)
+		{
+			const TruthValuePtr tv(get_tv_from_list(satom_list));
+			if (tv) h->setTruthValue(tv);
+		}
 
 		return handle_to_scm (h);
 	}
@@ -521,7 +527,7 @@ SCM SchemeSmob::ss_link (SCM stype, SCM satom_list)
 	outgoing_set = verify_handle_list (satom_list, "cog-link", 2);
 
 	AtomSpace* atomspace = get_as_from_list(satom_list);
-	if (NULL == atomspace) atomspace = ss_get_env_as("cog-link");
+	if (nullptr == atomspace) atomspace = ss_get_env_as("cog-link");
 
 	// Now, look to find the actual link... in the actual atom space.
 	Handle h(atomspace->get_handle(t, outgoing_set));
@@ -529,7 +535,7 @@ SCM SchemeSmob::ss_link (SCM stype, SCM satom_list)
 
 	// If there was a truth value, change it.
 	const TruthValuePtr tv(get_tv_from_list(satom_list));
-	if (tv) h->setTruthValue(tv);
+	if (tv) atomspace->set_truthvalue(h, tv);
 
 	scm_remember_upto_here_1(satom_list);
 	return handle_to_scm (h);

@@ -216,13 +216,7 @@ AtomSpace* SchemeSmob::verify_atomspace(SCM sas, const char * subrname, int pos)
 SCM SchemeSmob::ss_as_uuid(SCM sas)
 {
 	AtomSpace* as = ss_to_atomspace(sas);
-	if (nullptr == as)
-	{
-		// Special care for atom whose atomspace was null
-		if (scm_is_null(sas))
-			return scm_from_ulong(ULONG_MAX);
-		scm_wrong_type_arg_msg("cog-atomspace-uuid", 1, sas, "atomspace");
-	}
+	if (nullptr == as) as = ss_get_env_as("cog-atomspace-uuid");
 
 	UUID uuid = as->get_uuid();
 	scm_remember_upto_here_1(sas);
@@ -237,17 +231,52 @@ SCM SchemeSmob::ss_as_uuid(SCM sas)
 SCM SchemeSmob::ss_as_env(SCM sas)
 {
 	AtomSpace* as = ss_to_atomspace(sas);
-	if (nullptr == as)
-	{
-		// Special care for null atomspace
-		if (scm_is_null(sas))
-			return SCM_EOL;
-		scm_wrong_type_arg_msg("cog-atomspace-env", 1, sas, "atomspace");
-	}
+	if (nullptr == as) as = ss_get_env_as("cog-atomspace-env");
 
 	AtomSpace* env = as->get_environ();
 	scm_remember_upto_here_1(sas);
 	return env ? make_as(env) : SCM_EOL;
+}
+
+/* ============================================================== */
+/**
+ * Return readonly flag of the atomspace.  If no atomspace specified,
+ * then get the current atomspace.
+ */
+SCM SchemeSmob::ss_as_readonly_p(SCM sas)
+{
+	AtomSpace* as = ss_to_atomspace(sas);
+	scm_remember_upto_here_1(sas);
+	if (nullptr == as) as = ss_get_env_as("cog-atomspace-readonly?");
+
+	if (as->get_read_only()) return SCM_BOOL_T;
+	return SCM_BOOL_F;
+}
+
+/* ============================================================== */
+/**
+ * Set the readonly flag of the atomspace.  If no atomspace specified,
+ * then set it on the current atomspace.  XXX This is a temporary hack,
+ * until a better permission system is invented. XXX FIXME.
+ */
+SCM SchemeSmob::ss_as_mark_readonly(SCM sas)
+{
+	AtomSpace* as = ss_to_atomspace(sas);
+	scm_remember_upto_here_1(sas);
+	if (nullptr == as) as = ss_get_env_as("cog-atomspace-ro!");
+
+	as->set_read_only();
+	return SCM_BOOL_T;
+}
+
+SCM SchemeSmob::ss_as_mark_readwrite(SCM sas)
+{
+	AtomSpace* as = ss_to_atomspace(sas);
+	scm_remember_upto_here_1(sas);
+	if (nullptr == as) as = ss_get_env_as("cog-atomspace-rw!");
+
+	as->set_read_write();
+	return SCM_BOOL_T;
 }
 
 /* ============================================================== */
@@ -257,8 +286,7 @@ SCM SchemeSmob::ss_as_env(SCM sas)
 SCM SchemeSmob::ss_as_clear(SCM sas)
 {
 	AtomSpace* as = ss_to_atomspace(sas);
-	if (nullptr == as)
-		scm_wrong_type_arg_msg("cog-atomspace-clear", 1, sas, "atomspace");
+	if (nullptr == as) as = ss_get_env_as("cog-atomspace-clear");
 
 	as->clear();
 

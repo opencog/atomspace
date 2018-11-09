@@ -406,7 +406,7 @@
 "
   Convert (NumberNode <number>) to number.
 "
-  (string->number (cog-name A)))
+  (cog-number A))
 
 ;; Very handy and frequent rule precondition.
 (define-public (gt-zero-confidence A)

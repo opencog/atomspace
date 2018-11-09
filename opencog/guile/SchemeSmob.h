@@ -118,6 +118,7 @@ private:
 
 	// Atom properties
 	static SCM ss_name(SCM);
+	static SCM ss_number(SCM);
 	static SCM ss_type(SCM);
 	static SCM ss_arity(SCM);
 	static SCM ss_as(SCM);
@@ -174,6 +175,9 @@ private:
 	static SCM ss_as_env(SCM);
 	static SCM ss_as_uuid(SCM);
 	static SCM ss_as_clear(SCM);
+	static SCM ss_as_mark_readonly(SCM);
+	static SCM ss_as_mark_readwrite(SCM);
+	static SCM ss_as_readonly_p(SCM);
 	static SCM make_as(AtomSpace *);
 	static void release_as(AtomSpace *);
 	static AtomSpace* ss_to_atomspace(SCM);

@@ -213,6 +213,12 @@ class SQLAtomStorage::Response
 					store->_tlbuf.addAtom(h, uuid);
 				}
 			}
+			else
+			{
+				// In case it's still in the TLB, but was
+				// previously removed from the atomspace.
+				h = table->add(h, false);
+			}
 
 			// Clobber all values, including truth values.
 			store->get_atom_values(h);

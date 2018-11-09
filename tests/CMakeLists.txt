@@ -39,9 +39,10 @@ IF (CXXTEST_FOUND)
 	# Reasoning depends on query, above.
 	ADD_SUBDIRECTORY (rule-engine)
 
-	IF (HAVE_CYTHON AND PYTHONINTERP_FOUND)
+	IF (HAVE_CYTHON AND HAVE_NOSETESTS)
+		MESSAGE(STATUS "found cython and nosetest, enabling python unit tests")
 		ADD_SUBDIRECTORY (cython)
-	ENDIF (HAVE_CYTHON AND PYTHONINTERP_FOUND)
+	ENDIF (HAVE_CYTHON AND HAVE_NOSETESTS)
 
     IF (HAVE_STACK)
          ADD_SUBDIRECTORY (haskell)

@@ -180,6 +180,9 @@ cdef extern from "opencog/atomspace/AtomSpace.h" namespace "opencog":
         cHandle get_handle(Type t, string s)
         cHandle get_handle(Type t, vector[cHandle])
 
+        cHandle set_value(cHandle h, cHandle key, cProtoAtomPtr value)
+        cHandle set_truthvalue(cHandle h, tv_ptr tvn)
+
         bint is_valid_handle(cHandle h)
         int get_size()
 

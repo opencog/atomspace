@@ -629,7 +629,11 @@ void PythonEval::build_python_error_message(const char* function_name,
         errorStringStream << "in " << function_name;
     if (pyError) {
         pyErrorString = PyObject_Str(pyError);
-        char* pythonErrorString = PyBytes_AS_STRING(pyErrorString);
+#if PY_MAJOR_VERSION == 2
+        char* pythonErrorString = PyBytes_AsString(pyErrorString);
+#else
+        char* pythonErrorString = PyUnicode_AsUTF8(pyErrorString);
+#endif
         if (pythonErrorString) {
             errorStringStream << ": " << pythonErrorString << ".";
         } else {

@@ -191,8 +191,7 @@ void Atom::copyValues(const Handle& other)
     HandleSet okeys(other->getKeys());
     for (const Handle& k: okeys)
     {
-        ProtoAtomPtr p = other->getValue(k);
-        setValue(k, p);
+        setValue(k, other->getValue(k));
     }
 }
 

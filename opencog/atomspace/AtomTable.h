@@ -216,18 +216,48 @@ public:
      * @param Whether type subclasses should be considered.
      * @return The set of atoms of a given type (subclasses optionally).
      */
+    void
+    getHandleSetByType(HandleSet& hset,
+                       Type type,
+                       bool subclass=false,
+                       bool parent=true) const
+    {
+        std::lock_guard<std::recursive_mutex> lck(_mtx);
+        auto tit = typeIndex.begin(type, subclass);
+        auto tend = typeIndex.end();
+        while (tit != tend) { hset.insert(*tit); tit++; }
+        // If an atom is already in the set, it will hide any duplicate
+        // atom in the parent.
+        if (parent and _environ)
+            _environ->getHandleSetByType(hset, type, subclass, parent);
+    }
+
+    /**
+     * Returns the set of atoms of a given type (subclasses optionally).
+     *
+     * @param The desired type.
+     * @param Whether type subclasses should be considered.
+     * @return The set of atoms of a given type (subclasses optionally).
+     */
     template <typename OutputIterator> OutputIterator
     getHandlesByType(OutputIterator result,
                      Type type,
                      bool subclass=false,
                      bool parent=true) const
     {
+        // If parent wanted, and parent exists, then we must use the
+        // handleset to disambiguate results.  This causes an extra
+        // copy of the handles, unfortunately.
+        if (parent and _environ) {
+           HandleSet hset;
+           getHandleSetByType(hset, type, subclass, parent);
+           return std::copy(hset.begin(), hset.end(), result);
+        }
+
+        // No parent ... avoid the copy above.
         std::lock_guard<std::recursive_mutex> lck(_mtx);
-        if (parent && _environ)
-            _environ->getHandlesByType(result, type, subclass, parent);
         return std::copy(typeIndex.begin(type, subclass),
-                         typeIndex.end(),
-                         result);
+                         typeIndex.end(), result);
     }
 
     /** Calls function 'func' on all atoms */
@@ -237,9 +267,21 @@ public:
                         bool subclass=false,
                         bool parent=true) const
     {
+        // If parent wanted, and parent exists, then we must use the
+        // handleset to disambiguate results.  This causes an extra
+        // copy of the handles, unfortunately.
+        if (parent and _environ) {
+           HandleSet hset;
+           getHandleSetByType(hset, type, subclass, parent);
+           std::for_each(hset.begin(), hset.end(),
+                [&](const Handle& h)->void {
+                     (func)(h);
+                });
+           return;
+        }
+
+        // No parent ... avoid the copy above.
         std::lock_guard<std::recursive_mutex> lck(_mtx);
-        if (parent && _environ)
-            _environ->foreachHandleByType(func, type, subclass);
         std::for_each(typeIndex.begin(type, subclass),
                       typeIndex.end(),
              [&](const Handle& h)->void {
@@ -253,10 +295,28 @@ public:
                         bool subclass=false,
                         bool parent=true) const
     {
-        std::lock_guard<std::recursive_mutex> lck(_mtx);
-        if (parent && _environ)
-            _environ->foreachParallelByType(func, type, subclass);
+        // If parent wanted, and parent exists, then we must use the
+        // handleset to disambiguate results.  This causes an extra
+        // copy of the handles, unfortunately.
+        if (parent and _environ) {
+           HandleSet hset;
+           getHandleSetByType(hset, type, subclass, parent);
 
+           // Parallelize, always, no matter what!
+           opencog::setting_omp(opencog::num_threads(), 1);
+
+           OMP_ALGO::for_each(hset.begin(), hset.end(),
+                [&](const Handle& h)->void {
+                     (func)(h);
+                });
+
+           // Reset to default.
+           opencog::setting_omp(opencog::num_threads());
+           return;
+        }
+
+        // No parent ... avoid the copy above.
+        std::lock_guard<std::recursive_mutex> lck(_mtx);
         // Parallelize, always, no matter what!
         opencog::setting_omp(opencog::num_threads(), 1);
 
@@ -300,10 +360,13 @@ public:
      * and also giving each index its own unique mutex, to avoid
      * collisions.  So the API is here, but more work is still needed.
      *
+     * The `force` flag forces the addtion of this atom into the
+     * atomtable, even if it is already in a parent atomspace.
+     *
      * @param The new atom to be added.
      * @return The handle of the newly added atom.
      */
-    Handle add(AtomPtr, bool async);
+    Handle add(AtomPtr, bool async, bool force=false);
 
     /**
      * Read-write synchronization barrier fence.  When called, this
