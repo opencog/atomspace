@@ -476,26 +476,6 @@
       (append (gen-variables prefix (- n 1))
               (list (gen-variable prefix (- n 1))))))
 
-;; TODO: use random-variable instead
-(define (gen-rand-variable prefix base length)
-"
-  gen-rand-variable prefix base length
-
-  Generate a random variable (Variable prefix + \"-\" + RAND). where
-  RAND is a random sequence of 'length' digits in base 'base'.
-"
-  (let* ((rand-char (lambda (i) (number->string (random base) base)))
-         (rand-chars (map rand-char (iota length)))
-         (rand-str (apply string-append rand-chars))
-         (rand-name (string-append prefix "-" rand-str)))
-    (Variable rand-name)))
-
-(define (gen-rand-variables prefix base length n)
-"
-  Generate a list of random variables calling gen-rand-variable n times.
-"
-  (map (lambda (x) (gen-rand-variable prefix base length)) (iota n)))
-
 (define (cog-new-flattened-link link-type . args)
 "
  Creates a new flattened link, for instance
