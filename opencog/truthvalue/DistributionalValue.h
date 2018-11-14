@@ -97,13 +97,6 @@ public:
 	static double to_conf(int c);
 	static int to_count(double);
 
-	ConditionalDVPtr divide(DistributionalValuePtr,int) const;
-	DistributionalValuePtr sum_joint(DistributionalValuePtr,int) const;
-	DVCounter part_joint(ProtoAtomPtr,int) const;
-
-	DistributionalValuePtr conjuction(DistributionalValuePtr) const;
-	DistributionalValuePtr disjuction(DistributionalValuePtr) const;
-
 	bool is_uniform() const;
 
 	std::vector<double> get_mode() const;

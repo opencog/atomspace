@@ -99,7 +99,7 @@ std::vector<DistributionalValuePtr> ConditionalDV::get_unconditionals() const
 	std::vector<DistributionalValuePtr> res;
 	for (auto gdtvpart : value)
 	{
-		res.push_back(std::make_shared<const DistributionalValue>(gdtvpart.second));
+		res.push_back(DistributionalValue::createDV(gdtvpart.second));
 	}
 	return res;
 }
@@ -236,18 +236,16 @@ std::string ConditionalDV::to_string(const std::string& indent) const
 		for (auto interval : elem.first)
 		{
 			if (interval.size() == 1)
-				ss << indent << interval[0] << ";";
+				ss << interval[0] << ";";
 			else
-				ss << indent
-				   << "["
+				ss << "["
 				   << interval[0]
 				   << ","
 				   << interval[1]
 				   << ");";
 		}
 		ss.seekp(-1,std::ios_base::end);
-		ss << indent
-		   << "} DV: "
+		ss << "} DV: "
 		   << std::endl
 		   << DistributionalValue(elem.second).to_string(indent + "    ")
 		   << std::endl;

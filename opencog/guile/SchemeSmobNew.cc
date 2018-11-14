@@ -150,7 +150,7 @@ SCM SchemeSmob::handle_to_scm (const Handle& h)
 
 SCM SchemeSmob::handleseq_to_scm (const HandleSeq& hs)
 {
-    SCM res;
+    SCM res = SCM_UNDEFINED;
     bool first = true;
     for (Handle h : hs)
     {
@@ -168,7 +168,7 @@ SCM SchemeSmob::handleseq_to_scm (const HandleSeq& hs)
 
 SCM SchemeSmob::float_list_to_scm(const std::vector<double>& v)
 {
-    SCM res;
+    SCM res = SCM_UNDEFINED;
     bool first = true;
     for (double d : v)
     {
@@ -186,7 +186,7 @@ SCM SchemeSmob::float_list_to_scm(const std::vector<double>& v)
 
 SCM SchemeSmob::dvkey_to_scm(const DVKey& v)
 {
-    SCM res;
+    SCM res = SCM_UNDEFINED;
     bool first = true;
     for (auto d : v)
     {
@@ -204,7 +204,7 @@ SCM SchemeSmob::dvkey_to_scm(const DVKey& v)
 
 SCM SchemeSmob::dvkeyseq_to_scm(const DVKeySeq& v)
 {
-    SCM res;
+    SCM res = SCM_UNDEFINED;
     bool first = true;
     for (auto d : v)
     {
@@ -222,7 +222,7 @@ SCM SchemeSmob::dvkeyseq_to_scm(const DVKeySeq& v)
 
 SCM SchemeSmob::protomseq_to_scm (const ProtomSeq& ps)
 {
-    SCM res;
+    SCM res = SCM_UNDEFINED;
     bool first = true;
     for (ProtoAtomPtr p : ps)
     {

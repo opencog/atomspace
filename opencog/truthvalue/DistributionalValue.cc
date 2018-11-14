@@ -323,7 +323,7 @@ double DistributionalValue::get_count(DVKey h) const
 double DistributionalValue::key_contained(DVKey ks1,DVKey ks2)
 {
 	Interval k1,k2;
-	double sum;
+	double sum = 1;
 	for (auto zipped : boost::combine(ks1,ks2))
 	{
 		boost::tie(k1,k2) = zipped;
@@ -341,16 +341,19 @@ double DistributionalValue::key_contained(DVKey ks1,DVKey ks2)
 		//Calculate the overlapp
 		Interval res;
 		if (k1[0] > k2[0])
-			res[0] = k1[0];
+			res.push_back(k1[0]);
 		else
-			res[0] = k2[0];
+			res.push_back(k2[0]);
 
 		if (k1[1] < k2[1])
-			res[1] = k1[1];
+			res.push_back(k1[1]);
 		else
-			res[1] = k2[1];
+			res.push_back(k2[1]);
 
-		sum *= (res[1] - res[0]) / (k1[1] - k1[0]);
+		if (res[0] <= res[1])
+			sum *= (res[1] - res[0]) / (k1[1] - k1[0]);
+		else
+			return 0;
 	}
 	return sum;
 }
@@ -388,7 +391,7 @@ std::string DistributionalValue::to_string(const std::string& indent) const
 	std::stringstream ss;
 	for (auto elem : value)
 	{
-		ss << "{";
+		ss << indent << "{";
 		for (auto interval : elem.first)
 		{
 			if (interval.size() == 1)
@@ -402,7 +405,6 @@ std::string DistributionalValue::to_string(const std::string& indent) const
 		}
 		ss.seekp(-1,std::ios_base::end);
 		ss << "}"
-		   << indent
 		   << " Count: "
 		   << elem.second
 		   << std::endl;

@@ -236,48 +236,48 @@ SchemeSmob::verify_dv_list (SCM sdv_list, const char * subrname, int pos)
 	return res;
 }
 
-SCM SchemeSmob::ss_dv_divide(SCM sdv1,SCM sdv2,SCM si)
-{
-	DistributionalValuePtr dv1 = verify_dv(sdv1,"cog-dv-divide",1);
-	DistributionalValuePtr dv2 = verify_dv(sdv2,"cog-dv-divide",2);
-	int i = scm_to_int(si);
-	ConditionalDVPtr cdv = dv1->divide(dv2,i);
-	return cdv_to_scm(cdv);
-}
-
-SCM SchemeSmob::ss_dv_sum_joint(SCM sdv1,SCM sdv2,SCM si)
-{
-	DistributionalValuePtr dv1 = verify_dv(sdv1,"cog-dv-sum-joint",1);
-	DistributionalValuePtr dv2 = verify_dv(sdv2,"cog-dv-sum-joint",2);
-	int i = scm_to_int(si);
-	DistributionalValuePtr dv3 = dv1->sum_joint(dv2,i);
-	return dv_to_scm(dv3);
-}
-
-SCM SchemeSmob::ss_dv_part_joint(SCM sdv,SCM sh,SCM si)
-{
-	DistributionalValuePtr dv = verify_dv(sdv,"cog-dv-part-joint",1);
-	ProtoAtomPtr h = verify_protom(sh,"cog-dv-part-joint",2);
-	int i = scm_to_int(si);
-	DistributionalValuePtr dvres = DistributionalValue::createDV(dv->part_joint(h,i));
-	return dv_to_scm(dvres);
-}
-
-SCM SchemeSmob::ss_dv_conjunction(SCM sdv1,SCM sdv2)
-{
-	DistributionalValuePtr dv1 = verify_dv(sdv1,"cog-dv-conjunction",1);
-	DistributionalValuePtr dv2 = verify_dv(sdv2,"cog-dv-conjunction",2);
-	DistributionalValuePtr dvres = dv1->conjuction(dv2);
-	return dv_to_scm(dvres);
-}
-
-SCM SchemeSmob::ss_dv_disjunction(SCM sdv1,SCM sdv2)
-{
-	DistributionalValuePtr dv1 = verify_dv(sdv1,"cog-dv-disjunction",1);
-	DistributionalValuePtr dv2 = verify_dv(sdv2,"cog-dv-disjunction",2);
-	DistributionalValuePtr dvres = dv1->disjuction(dv2);
-	return dv_to_scm(dvres);
-}
+//SCM SchemeSmob::ss_dv_divide(SCM sdv1,SCM sdv2,SCM si)
+//{
+//	DistributionalValuePtr dv1 = verify_dv(sdv1,"cog-dv-divide",1);
+//	DistributionalValuePtr dv2 = verify_dv(sdv2,"cog-dv-divide",2);
+//	int i = scm_to_int(si);
+//	ConditionalDVPtr cdv = dv1->divide(dv2,i);
+//	return cdv_to_scm(cdv);
+//}
+//
+//SCM SchemeSmob::ss_dv_sum_joint(SCM sdv1,SCM sdv2,SCM si)
+//{
+//	DistributionalValuePtr dv1 = verify_dv(sdv1,"cog-dv-sum-joint",1);
+//	DistributionalValuePtr dv2 = verify_dv(sdv2,"cog-dv-sum-joint",2);
+//	int i = scm_to_int(si);
+//	DistributionalValuePtr dv3 = dv1->sum_joint(dv2,i);
+//	return dv_to_scm(dv3);
+//}
+//
+//SCM SchemeSmob::ss_dv_part_joint(SCM sdv,SCM sh,SCM si)
+//{
+//	DistributionalValuePtr dv = verify_dv(sdv,"cog-dv-part-joint",1);
+//	ProtoAtomPtr h = verify_protom(sh,"cog-dv-part-joint",2);
+//	int i = scm_to_int(si);
+//	DistributionalValuePtr dvres = DistributionalValue::createDV(dv->part_joint(h,i));
+//	return dv_to_scm(dvres);
+//}
+//
+//SCM SchemeSmob::ss_dv_conjunction(SCM sdv1,SCM sdv2)
+//{
+//	DistributionalValuePtr dv1 = verify_dv(sdv1,"cog-dv-conjunction",1);
+//	DistributionalValuePtr dv2 = verify_dv(sdv2,"cog-dv-conjunction",2);
+//	DistributionalValuePtr dvres = dv1->conjuction(dv2);
+//	return dv_to_scm(dvres);
+//}
+//
+//SCM SchemeSmob::ss_dv_disjunction(SCM sdv1,SCM sdv2)
+//{
+//	DistributionalValuePtr dv1 = verify_dv(sdv1,"cog-dv-disjunction",1);
+//	DistributionalValuePtr dv2 = verify_dv(sdv2,"cog-dv-disjunction",2);
+//	DistributionalValuePtr dvres = dv1->disjuction(dv2);
+//	return dv_to_scm(dvres);
+//}
 
 SCM SchemeSmob::ss_dv_get_fom(SCM sdv)
 {
@@ -360,11 +360,11 @@ SCM SchemeSmob::ss_cdv_merge(SCM scdv1,SCM scdv2)
    return cdv_to_scm(res);
 }
 
-SCM SchemeSmob::ss_cdv_cde(SCM scdv1,SCM scdv2)
-{
-   ConditionalDVPtr cdv1 = verify_cdv(scdv1,"cog-cdv-cde",1);
-   ConditionalDVPtr cdv2 = verify_cdv(scdv2,"cog-cdv-cde",2);
-   ConditionalDVPtr res = cdv1->CDE(cdv2);
-   return cdv_to_scm(res);
-}
+//SCM SchemeSmob::ss_cdv_cde(SCM scdv1,SCM scdv2)
+//{
+//   ConditionalDVPtr cdv1 = verify_cdv(scdv1,"cog-cdv-cde",1);
+//   ConditionalDVPtr cdv2 = verify_cdv(scdv2,"cog-cdv-cde",2);
+//   ConditionalDVPtr res = cdv1->CDE(cdv2);
+//   return cdv_to_scm(res);
+//}
 /* ===================== END OF FILE ============================ */
