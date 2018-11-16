@@ -1,0 +1,125 @@
+/*
+ * Copyright (C) 2018 SingularityNet
+ * All Rights Reserved
+ *
+ * Written by Roman Treutlein <roman@singularitynet.io>
+ *
+ * This program is free software; you can redistribute it and/or modify
+ * it under the terms of the GNU Affero General Public License v3 as
+ * published by the Free Software Foundation and including the exceptions
+ * at http://opencog.org/wiki/Licenses
+ *
+ * This program is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ * GNU General Public License for more details.
+ *
+ * You should have received a copy of the GNU Affero General Public License
+ * along with this program; if not, write to:
+ * Free Software Foundation, Inc.,
+ * 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
+ */
+
+#include <math.h>
+
+#include <opencog/truthvalue/DistributionalValue.h>
+#include <opencog/util/Logger.h>
+#include <opencog/util/exceptions.h>
+
+using namespace opencog;
+
+class DVTest :  public CxxTest::TestSuite
+{
+private:
+
+	DistributionalValuePtr dvs[3];
+	DVKey keys[9];
+
+public:
+    DVTest()
+    {
+    }
+
+    void setUp()
+    {
+		keys[0] = DVKey{Interval{0.0 ,0.25}};
+	    keys[1] = DVKey{Interval{0.25,0.5 }};
+		keys[2] = DVKey{Interval{0.5 ,0.75}};
+		keys[3] = DVKey{Interval{0.75,1.0 }};
+
+		keys[4] = DVKey{Interval{0.0 ,0.3}};
+		keys[5] = DVKey{Interval{0.3,0.7 }};
+		keys[6] = DVKey{Interval{0.7,1.0 }};
+
+		keys[7] = DVKey{Interval{0.0,0.5}};
+		keys[8] = DVKey{Interval{0.5,1.0}};
+
+		DVCounter dvc;
+		//dvc[keys[4]] = 0;
+		dvc[keys[5]] = 10;
+		dvc[keys[6]] = 20;
+
+		dvs[0] = DistributionalValue::createDV(dvc);
+
+		DVCounter dvc1;
+		dvc1[keys[0]] = 30;
+		dvc1[keys[1]] = 30;
+		//dvc1[keys[2]] = 0;
+		//dvc1[keys[3]] = 0;
+
+		dvs[1] = DistributionalValue::createDV(dvc1);
+
+		DVCounter dvc2;
+		//dvc2[keys[0]] = 0;
+		//dvc2[keys[1]] = 0;
+		dvc2[keys[2]] = 30;
+		dvc2[keys[3]] = 30;
+
+		dvs[2] = DistributionalValue::createDV(dvc2);
+    }
+
+    void tearDown() {}
+
+    void testKeyContained()
+    {
+		DVKey key11{Interval{0.0 ,0.25}};
+		DVKey key12{Interval{0.0 ,0.5}};
+		DVKey key13{Interval{0.6 ,0.75}};
+		DVKey key14{Interval{0.3}};
+		double r1 = DistributionalValue::key_contained(key11,key12);
+		TS_ASSERT_EQUALS(r1, 1.0);
+		double r2 = DistributionalValue::key_contained(key12,key11);
+		TS_ASSERT_EQUALS(r2, 0.5);
+		double r3 = DistributionalValue::key_contained(key11,key13);
+		TS_ASSERT_EQUALS(r3, 0);
+		double r4 = DistributionalValue::key_contained(key12,key14);
+		TS_ASSERT_EQUALS(r4, 0);
+		double r5 = DistributionalValue::key_contained(key14,key12);
+		TS_ASSERT_EQUALS(r5, 1);
+    }
+
+	void printVec(DVec i)
+	{
+		std::cout << "{";
+		for (auto e : i)
+			std::cout << e << ",";
+		std::cout << "}" << std::endl;
+	}
+
+	void testMean()
+	{
+		DVec m = dvs[0]->get_mean();
+		printVec(m);
+		TS_ASSERT_EQUALS(m[0], 1.0/3.0);
+		TS_ASSERT_EQUALS(m[1], 2.0/3.0);
+	}
+
+	void testMode()
+	{
+		DVec m = dvs[0]->get_mode();
+		printVec(m);
+		TS_ASSERT_EQUALS(m[0], 9.0/28.0);
+		TS_ASSERT_EQUALS(m[1], 19.0/28.0);
+	}
+
+};

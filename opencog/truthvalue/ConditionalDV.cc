@@ -43,7 +43,7 @@ ConditionalDV::ConditionalDV()
 ConditionalDV::ConditionalDV(CDVrep rep)
 : ProtoAtom(CONDITIONAL_DISTRIBUTIONAL_VALUE)
 {
-	value = rep;
+	_value = rep;
 }
 
 ConditionalDV::ConditionalDV(DVKeySeq conds,std::vector<DistributionalValuePtr> dvs)
@@ -64,7 +64,7 @@ ConditionalDV::ConditionalDV(DVKeySeq conds,std::vector<DistributionalValuePtr> 
 
 	for (;(it1 != end1) && (it2 != end2); ++it1, ++it2)
 	{
-		value[*it1] = (*it2)->value;
+		_value[*it1] = (*it2)->_value;
 	}
 }
 
@@ -87,7 +87,7 @@ ConditionalDVPtr ConditionalDV::createCDV(DVKeySeq conds
 DVKeySeq ConditionalDV::get_conditions() const
 {
 	DVKeySeq res;
-	for (auto gdtvpart : value)
+	for (auto gdtvpart : _value)
 	{
 		res.push_back(gdtvpart.first);
 	}
@@ -97,7 +97,7 @@ DVKeySeq ConditionalDV::get_conditions() const
 std::vector<DistributionalValuePtr> ConditionalDV::get_unconditionals() const
 {
 	std::vector<DistributionalValuePtr> res;
-	for (auto gdtvpart : value)
+	for (auto gdtvpart : _value)
 	{
 		res.push_back(DistributionalValue::createDV(gdtvpart.second));
 	}
@@ -111,14 +111,13 @@ std::vector<DistributionalValuePtr> ConditionalDV::get_unconditionals() const
 DVCounter ConditionalDV::get_unconditionalP(DVKey h) const
 {
 	DVCounter res;
-	for (auto elem : value)
+	for (auto elem : _value)
 	{
 		double weight = DistributionalValue::key_contained(h,elem.first);
 		double count = elem.second.total_count();
 		if (count != 0)
-			res += elem.second / count * weight;
+			res += elem.second * weight;
 	}
-	res = res * total_count();
 	return res;
 }
 
@@ -131,19 +130,20 @@ DistributionalValuePtr ConditionalDV::get_unconditional(DVKey k) const
 DistributionalValuePtr ConditionalDV::get_unconditional(DistributionalValuePtr condDist) const
 {
 	DVCounter res;
-	for (auto v : condDist->value)
+	for (auto v : condDist->_value)
 	{
 		double val = condDist->get_mean_for(v.second);
-		res += get_unconditionalP(v.first) / total_count() * val;
+		DVCounter tmp = get_unconditionalP(v.first) * val;
+		res += tmp;
 	}
-	res = res * total_count();
+	res = res;
 	return std::make_shared<const DistributionalValue>(res);
 }
 
 double ConditionalDV::total_count() const
 {
 	double res = 0;
-	for (auto elem : value)
+	for (auto elem : _value)
 	{
 		res += elem.second.total_count();
 	}
@@ -154,7 +154,7 @@ double ConditionalDV::avg_count() const
 {
 	double res = 0;
 	int count = 0;
-	for (auto elem : value)
+	for (auto elem : _value)
 	{
 		count++;
 		res += elem.second.total_count();
@@ -176,7 +176,7 @@ DistributionalValuePtr ConditionalDV::get_joint_probability(DistributionalValueP
 			k.insert(k.end(),k2.begin(),k2.end());
 
 			//Res count based on base count
-			res[k] = base->value.at(k1) * uncond->get_mean(k2);
+			res[k] = base->_value.at(k1) * uncond->get_mean(k2);
 		}
 	}
 	return DistributionalValue::createDV(res);
@@ -186,16 +186,16 @@ DistributionalValuePtr ConditionalDV::get_joint_probability(DistributionalValueP
 ConditionalDVPtr ConditionalDV::merge(ConditionalDVPtr cdv2) const
 {
 	CDVrep res;
-	for (auto elem1 : value)
+	for (auto elem1 : _value)
 	{
-		for (auto elem2 : cdv2->value)
+		for (auto elem2 : cdv2->_value)
 		{
 			DistributionalValuePtr dv1 = DistributionalValue::createDV(elem1.second);
 			DistributionalValuePtr dv2 = DistributionalValue::createDV(elem2.second);
 			DVKey k;
 			k.insert(k.end(),elem1.first.begin(),elem1.first.end());
 			k.insert(k.end(),elem2.first.begin(),elem2.first.end());
-			res[k] = dv1->merge(dv2)->value;
+			res[k] = dv1->merge(dv2)->_value;
 		}
 	}
 	return createCDV(res);
@@ -204,7 +204,7 @@ ConditionalDVPtr ConditionalDV::merge(ConditionalDVPtr cdv2) const
 ConditionalDVPtr ConditionalDV::CDE(ConditionalDVPtr cdv2) const
 {
 	CDVrep res;
-	for (auto elem : cdv2->value)
+	for (auto elem : cdv2->_value)
 	{
 		DistributionalValuePtr v1 = get_unconditional_no_match(elem.first);
 		ValueCounter partres;
@@ -230,7 +230,7 @@ ConditionalDVPtr ConditionalDV::CDE(ConditionalDVPtr cdv2) const
 std::string ConditionalDV::to_string(const std::string& indent) const
 {
 	std::stringstream ss;
-	for (auto elem : value)
+	for (auto elem : _value)
 	{
 		ss << indent << "{";
 		for (auto interval : elem.first)
@@ -253,14 +253,24 @@ std::string ConditionalDV::to_string(const std::string& indent) const
 	return ss.str();
 }
 
-bool ConditionalDV::operator==(const ProtoAtom& rhs) const
+bool ConditionalDV::operator==(const ProtoAtom& other) const
 {
-	throw RuntimeException(TRACE_INFO, "Not Implemented");
+	if (CONDITIONAL_DISTRIBUTIONAL_VALUE != other.get_type()) return false;
+	const ConditionalDV* cov = (const ConditionalDV*) &other;
 
-	const DistributionalValue *gdtv2 = dynamic_cast<const DistributionalValue *>(&rhs);
-	if (NULL == gdtv2) return false;
+	if (_value.size() != cov->_value.size()) return false;
+
+	for (auto elem : _value) {
+		DistributionalValuePtr dv1 = DistributionalValue::createDV(elem.second);
+		auto it = cov->_value.find(elem.first);
+		if (it == _value.end())
+			return false;
+		DistributionalValuePtr dv2 = DistributionalValue::createDV(it->second);
+		if (*dv1 != *dv2)
+			return false;
+	}
+	return true;
 }
-
 bool ConditionalDV::operator<(const ProtoAtom& other) const
 {
 	if (CONDITIONAL_DISTRIBUTIONAL_VALUE != other.get_type())
@@ -268,5 +278,5 @@ bool ConditionalDV::operator<(const ProtoAtom& other) const
 
 	const ConditionalDV* dov = (const ConditionalDV*) &other;
 
-	return value < dov->value;
+	return _value < dov->_value;
 }

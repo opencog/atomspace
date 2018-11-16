@@ -69,7 +69,7 @@ class DistributionalValue
 
 	friend class ConditionalDV;
 
-	DVCounter value;
+	DVCounter _value;
 	//Number of Dimensions
 	int n;
 
@@ -85,6 +85,8 @@ public:
 	DistributionalValue();
 	DistributionalValue(DVCounter);
 	DistributionalValue(double,double);
+
+	const DVCounter& value() const { return _value; }
 
 	static DistributionalValuePtr UniformDistributionalValue(DVKey,int);
 	static DistributionalValuePtr UniformDistributionalValue(DVKeySeq,int);

@@ -33,6 +33,7 @@
 #include <opencog/atomspace/AtomSpace.h>
 
 #include <boost/range/combine.hpp>
+#include <iomanip>
 
 using namespace opencog;
 
@@ -45,7 +46,7 @@ DistributionalValue::DistributionalValue()
 DistributionalValue::DistributionalValue(DVCounter dvctr)
 	: ProtoAtom(DISTRIBUTIONAL_VALUE)
 {
-	value = dvctr;
+	_value = dvctr;
 	n = dvctr.begin()->first.size();
 }
 
@@ -55,7 +56,7 @@ DistributionalValue::DistributionalValue(double mode,double conf)
 	confidence_t cf = std::min(conf, 0.9999998);
 	double count = (DEFAULT_K * cf / (1.0 - cf));
 	DVKey k{Interval{mode}};
-	value[k] = count;
+	_value[k] = count;
 	n = 1;
 }
 
@@ -118,8 +119,8 @@ DistributionalValuePtr DistributionalValue::DEFAULT_TV()
 
 bool DistributionalValue::is_uniform() const
 {
-	double val = value.begin()->second;
-	for (auto p : value)
+	double val = _value.begin()->second;
+	for (auto p : _value)
 	{
 		if (val != p.second)
 		{
@@ -134,15 +135,15 @@ DistributionalValuePtr DistributionalValue::add_evidence(DVKey h) const
 	//TODO: should this really be const??? also:
 	//There was a check for the existen of the Key
 	//But i think we should be able to add new keys using this
-	DVCounter newdvc = value;
+	DVCounter newdvc = _value;
 	newdvc[h] += 1;
 	return createDV(newdvc);
 }
 
 DistributionalValuePtr DistributionalValue::merge(DistributionalValuePtr other) const
 {
-	DVCounter newdvc = value;
-	newdvc += other->value;
+	DVCounter newdvc = _value;
+	newdvc += other->_value;
 	return createDV(newdvc);
 }
 
@@ -150,7 +151,7 @@ DistributionalValuePtr DistributionalValue::negate() const
 {
 	double total = max_count() + min_count();
 	DVCounter res;
-	for (auto elem : value)
+	for (auto elem : _value)
 	{
 		res[elem.first] = total - elem.second;
 	}
@@ -160,7 +161,7 @@ DistributionalValuePtr DistributionalValue::negate() const
 double DistributionalValue::min_count() const
 {
 	double min = std::numeric_limits<double>::max();
-	for (auto elem : value)
+	for (auto elem : _value)
 	{
 		if (min >= elem.second)
 			min = elem.second;
@@ -170,7 +171,7 @@ double DistributionalValue::min_count() const
 double DistributionalValue::max_count() const
 {
 	double max = 0;
-	for (auto elem : value)
+	for (auto elem : _value)
 	{
 		if (max <= elem.second)
 			max = elem.second;
@@ -181,7 +182,7 @@ double DistributionalValue::max_count() const
 std::vector<double> DistributionalValue::get_mode() const
 {
 	std::vector<double> probs;
-	for (auto elem : value)
+	for (auto elem : _value)
 	{
 		probs.push_back(get_mode_for(elem.second));
 	}
@@ -190,13 +191,13 @@ std::vector<double> DistributionalValue::get_mode() const
 
 double DistributionalValue::get_mode_for(double ai) const
 {
-	return (ai - 1) / (total_count() - value.size());
+	return (ai - 1) / (total_count() - _value.size());
 }
 
 std::vector<double> DistributionalValue::get_mean() const
 {
 	std::vector<double> probs;
-	for (auto elem : value)
+	for (auto elem : _value)
 	{
 		probs.push_back(get_mean_for(elem.second));
 	}
@@ -216,7 +217,7 @@ double DistributionalValue::get_mean_for(double ai) const
 double DistributionalValue::get_fstord_mean() const
 {
 	double res = 0;
-	for (auto elem : value)
+	for (auto elem : _value)
 	{
 		//TODO: Is mode correct or should i use mean?
 		DVec mof = middle_of_interval(elem.first);
@@ -240,7 +241,7 @@ DVec DistributionalValue::middle_of_interval(DVKey k) const
 std::vector<double> DistributionalValue::get_var() const
 {
 	std::vector<double> probs;
-	for (auto elem : value)
+	for (auto elem : _value)
 	{
 		probs.push_back(get_var_for(elem.second));
 	}
@@ -255,7 +256,7 @@ double DistributionalValue::get_var_for(double ai) const
 
 double DistributionalValue::total_count() const
 {
-	return value.total_count();
+	return _value.total_count();
 }
 
 double DistributionalValue::get_confidence() const
@@ -276,8 +277,8 @@ int DistributionalValue::to_count(double cf)
 
 DVKey DistributionalValue::get_key(DVKey k) const
 {
-	auto it = value.find(k);
-	if (it != value.end())
+	auto it = _value.find(k);
+	if (it != _value.end())
 	{
 		return it->first;
 	}
@@ -307,15 +308,15 @@ DVec DistributionalValue::get_key_max(DVKey k)
 DVKeySeq DistributionalValue::get_keys() const
 {
 	DVKeySeq res;
-	for (auto k : value)
+	for (auto k : _value)
 		res.push_back(k.first);
 	return res;
 }
 
 double DistributionalValue::get_count(DVKey h) const
 {
-	auto pos = value.find(h);
-	if (pos != value.end())
+	auto pos = _value.find(h);
+	if (pos != _value.end())
 		return pos->second;
 	throw RuntimeException(TRACE_INFO, "No Key for this value.");
 }
@@ -361,7 +362,7 @@ double DistributionalValue::key_contained(DVKey ks1,DVKey ks2)
 double DistributionalValue::get_contained_count(DVKey h) const
 {
 	double res = 0;
-	for (auto v : value)
+	for (auto v : _value)
 	{
 		double weigth = DistributionalValue::key_contained(h,v.first);
 		res += v.second * weigth;
@@ -389,7 +390,7 @@ double DistributionalValue::get_var(DVKey val) const
 std::string DistributionalValue::to_string(const std::string& indent) const
 {
 	std::stringstream ss;
-	for (auto elem : value)
+	for (auto elem : _value)
 	{
 		ss << indent << "{";
 		for (auto interval : elem.first)
@@ -406,6 +407,7 @@ std::string DistributionalValue::to_string(const std::string& indent) const
 		ss.seekp(-1,std::ios_base::end);
 		ss << "}"
 		   << " Count: "
+		   << std::setprecision(18)
 		   << elem.second
 		   << std::endl;
 	}
@@ -416,7 +418,21 @@ bool DistributionalValue::operator==(const ProtoAtom& other) const
 {
 	if (DISTRIBUTIONAL_VALUE != other.get_type()) return false;
 	const DistributionalValue* dov = (const DistributionalValue*) &other;
-	return value == dov->value;
+
+	if (_value.size() != dov->_value.size()) return false;
+
+	for (auto elem : _value) {
+		// Compare floats with ULPS, because they are lexicographically
+		// ordered. For technical explanation, see
+		// http://www.cygnus-software.com/papers/comparingfloats/Comparing%20floating%20point%20numbers.htm
+		// if (1.0e-15 < fabs(1.0 - fov->_value[i]/_value[i])) return false;
+#define MAX_ULPS 24
+		double v1 = elem.second;
+		double v2 = dov->_value.get(elem.first);
+		if (MAX_ULPS < llabs(*(int64_t*) &(v1) - *(int64_t*)&(v2)))
+			return false;
+	}
+	return true;
 }
 
 bool DistributionalValue::operator<(const ProtoAtom& other) const
@@ -426,7 +442,7 @@ bool DistributionalValue::operator<(const ProtoAtom& other) const
 
 	const DistributionalValue* dov = (const DistributionalValue*) &other;
 
-	return value < dov->value;
+	return _value < dov->_value;
 }
 
 std::string oc_to_string(const DistributionalValuePtr dvp)

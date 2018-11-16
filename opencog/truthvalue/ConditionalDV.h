@@ -58,7 +58,7 @@ typedef std::map<DVKey,DVCounter> CDVrep;
 class ConditionalDV
 	: public ProtoAtom
 {
-	CDVrep value;
+	CDVrep _value;
 
 	// Disallow assignment -- truth values are immutable!
 	ConditionalDV& operator=(const ConditionalDV& rhs) {
@@ -69,6 +69,8 @@ public:
 	ConditionalDV();
 	ConditionalDV(CDVrep);
 	ConditionalDV(DVKeySeq,std::vector<DistributionalValuePtr>);
+
+	const CDVrep& value() const { return _value; }
 
 	static ConditionalDVPtr createCDV();
 	static ConditionalDVPtr createCDV(CDVrep);

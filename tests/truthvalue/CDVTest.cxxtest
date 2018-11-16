@@ -1,0 +1,136 @@
+/*
+ * Copyright (C) 2018 SingularityNet
+ * All Rights Reserved
+ *
+ * Written by Roman Treutlein <roman@singularitynet.io>
+ *
+ * This program is free software; you can redistribute it and/or modify
+ * it under the terms of the GNU Affero General Public License v3 as
+ * published by the Free Software Foundation and including the exceptions
+ * at http://opencog.org/wiki/Licenses
+ *
+ * This program is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ * GNU General Public License for more details.
+ *
+ * You should have received a copy of the GNU Affero General Public License
+ * along with this program; if not, write to:
+ * Free Software Foundation, Inc.,
+ * 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
+ */
+
+#include <math.h>
+
+#include <opencog/truthvalue/DistributionalValue.h>
+#include <opencog/truthvalue/ConditionalDV.h>
+#include <opencog/util/Logger.h>
+#include <opencog/util/exceptions.h>
+
+using namespace opencog;
+
+class CDVTest :  public CxxTest::TestSuite
+{
+private:
+
+	ConditionalDVPtr cdv;
+	DistributionalValuePtr dv;
+	DVKey keys[9];
+
+public:
+    CDVTest()
+    {
+    }
+
+    void setUp()
+    {
+		keys[0] = DVKey{Interval{0.0 ,0.25}};
+	    keys[1] = DVKey{Interval{0.25,0.5 }};
+		keys[2] = DVKey{Interval{0.5 ,0.75}};
+		keys[3] = DVKey{Interval{0.75,1.0 }};
+
+		keys[4] = DVKey{Interval{0.0 ,0.3}};
+		keys[5] = DVKey{Interval{0.3,0.7 }};
+		keys[6] = DVKey{Interval{0.7,1.0 }};
+
+		keys[7] = DVKey{Interval{0.0,0.5}};
+		keys[8] = DVKey{Interval{0.5,1.0}};
+
+		DVCounter dvc;
+		dvc[keys[4]] = 0;
+		dvc[keys[5]] = 10;
+		dvc[keys[6]] = 20;
+
+		dv = DistributionalValue::createDV(dvc);
+
+		DVCounter dvc1;
+		dvc1[keys[0]] = 30;
+		dvc1[keys[1]] = 30;
+		dvc1[keys[2]] = 0;
+		dvc1[keys[3]] = 0;
+
+		DVCounter dvc2;
+		dvc2[keys[0]] = 0;
+		dvc2[keys[1]] = 0;
+		dvc2[keys[2]] = 30;
+		dvc2[keys[3]] = 30;
+
+		CDVrep rep;
+		rep[keys[7]] = dvc1;
+		rep[keys[8]] = dvc2;
+
+		cdv = ConditionalDV::createCDV(rep);
+    }
+
+    void tearDown() {}
+
+    void testUncoditonal()
+    {
+		DistributionalValuePtr dvres = cdv->get_unconditional(dv);
+
+		DVCounter dvc1;
+		dvc1[keys[0]] = 5;
+		dvc1[keys[1]] = 5;
+		dvc1[keys[2]] = 25;
+		dvc1[keys[3]] = 25;
+
+		DistributionalValuePtr dvexp = DistributionalValue::createDV(dvc1);
+		//std::cout << std::endl << dvres->to_string() << std::endl;
+		//std::cout << std::endl << dvexp->to_string() << std::endl;
+		TS_ASSERT_EQUALS(*dvres,*dvexp);
+
+		dvres = cdv->get_unconditional(keys[0]);
+
+		DVCounter dvc2;
+		dvc2[keys[0]] = 30;
+		dvc2[keys[1]] = 30;
+		dvc2[keys[2]] = 0;
+		dvc2[keys[3]] = 0;
+
+		dvexp = DistributionalValue::createDV(dvc2);
+		//std::cout << std::endl << dvres->to_string() << std::endl;
+		//std::cout << std::endl << dvexp->to_string() << std::endl;
+		TS_ASSERT_EQUALS(*dvres,*dvexp);
+    }
+
+	void testGetJoint()
+	{
+		DistributionalValuePtr dvres = cdv->get_joint_probability(dv);
+		DVCounter dvc;
+		dvc[DVKey{keys[4][0],keys[0][0]}] = 0;
+		dvc[DVKey{keys[4][0],keys[1][0]}] = 0;
+		dvc[DVKey{keys[4][0],keys[2][0]}] = 0;
+		dvc[DVKey{keys[4][0],keys[3][0]}] = 0;
+		dvc[DVKey{keys[5][0],keys[0][0]}] = 2.5;
+		dvc[DVKey{keys[5][0],keys[1][0]}] = 2.5;
+		dvc[DVKey{keys[5][0],keys[2][0]}] = 2.5;
+		dvc[DVKey{keys[5][0],keys[3][0]}] = 2.5;
+		dvc[DVKey{keys[6][0],keys[0][0]}] = 0;
+		dvc[DVKey{keys[6][0],keys[1][0]}] = 0;
+		dvc[DVKey{keys[6][0],keys[2][0]}] = 10;
+		dvc[DVKey{keys[6][0],keys[3][0]}] = 10;
+
+		DistributionalValuePtr dvexp = DistributionalValue::createDV(dvc);
+		TS_ASSERT_EQUALS(*dvres,*dvexp);
+	}
+};
