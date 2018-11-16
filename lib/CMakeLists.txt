@@ -24,7 +24,7 @@ configure_package_config_file(AtomSpaceConfig.cmake.in ${CMAKE_CURRENT_BINARY_DI
 
 write_basic_package_version_file(
     "${CMAKE_CURRENT_BINARY_DIR}/AtomSpaceConfigVersion.cmake"
-  VERSION ${CPACK_PACKAGE_VERSION}
+  VERSION ${SEMANTIC_VERSION}
   COMPATIBILITY SameMajorVersion
 )
 INSTALL(FILES
@@ -32,4 +32,3 @@ INSTALL(FILES
        ${CMAKE_CURRENT_BINARY_DIR}/AtomSpaceConfig.cmake
        DESTINATION
        ${ConfigPackageLocation})
- 
