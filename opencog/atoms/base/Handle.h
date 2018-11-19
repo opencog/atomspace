@@ -123,6 +123,10 @@ public:
     inline bool operator!=(const Handle& h) const noexcept {
         return get() != h.get();
     }
+
+    /**
+     * Defer to Atom::operator< thus is content based.
+     */
     bool operator< (const Handle& h) const noexcept;
 
     /**
@@ -230,6 +234,7 @@ struct content_based_handle_less
     }
 };
 
+//! Content based HandleSet less than operator
 struct handle_seq_less
 {
     bool operator()(const HandleSeq& hsl, const HandleSeq& hsr) const
@@ -245,6 +250,7 @@ struct handle_seq_less
     }
 };
 
+//! Content based HandleSet pointer less than operator
 struct handle_seq_ptr_less
 {
     bool operator()(const HandleSeq* hsl, const HandleSeq* hsr) const
