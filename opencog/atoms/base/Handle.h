@@ -217,6 +217,9 @@ bool content_eq(const opencog::HandleSeq& lhs,
 bool content_eq(const opencog::HandleSet& lhs,
                 const opencog::HandleSet& rhs);
 
+bool content_eq(const opencog::HandleSetSeq& lhs,
+                const opencog::HandleSetSeq& rhs);
+
 struct content_based_atom_ptr_less
 {
     bool operator()(const Atom* al, const Atom* ar) const
