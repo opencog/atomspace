@@ -87,10 +87,10 @@ public:
 #include <opencog/atomspace/AtomSpace.h>
 #include <opencog/guile/SchemePrimitive.h>
 
-#include <opencog/rule-engine/forwardchainer/ForwardChainer.h>
-#include <opencog/rule-engine/backwardchainer/BackwardChainer.h>
-
+#include "forwardchainer/ForwardChainer.h"
+#include "backwardchainer/BackwardChainer.h"
 #include "UREConfig.h"
+
 using namespace opencog;
 
 InferenceSCM::InferenceSCM() : ModuleWrap("opencog rule-engine") {}

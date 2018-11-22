@@ -24,9 +24,7 @@
 #ifndef _OPENCOG_FORWARDCHAINERX_H_
 #define _OPENCOG_FORWARDCHAINERX_H_
 
-#include <opencog/rule-engine/URECommons.h>
-#include <opencog/rule-engine/UREConfig.h>
-
+#include "../UREConfig.h"
 #include "SourceSet.h"
 #include "FCStat.h"
 
