@@ -6,7 +6,6 @@
  ^             : Nil Geisweiller (2015-2016)
  */
 #include <opencog/rule-engine/backwardchainer/BackwardChainer.h>
-#include <opencog/rule-engine/backwardchainer/BackwardChainerPMCB.h>
 #include <opencog/guile/SchemeEval.h>
 #include <opencog/atomspace/AtomSpace.h>
 #include <opencog/atoms/pattern/PatternLink.h>

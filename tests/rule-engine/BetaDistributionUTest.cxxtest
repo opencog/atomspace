@@ -6,7 +6,7 @@
  */
 
 #include <opencog/util/Logger.h>
-#include <opencog/rule-engine/backwardchainer/BetaDistribution.h>
+#include <opencog/rule-engine/BetaDistribution.h>
 #include <opencog/truthvalue/SimpleTruthValue.h>
 
 #include <cxxtest/TestSuite.h>

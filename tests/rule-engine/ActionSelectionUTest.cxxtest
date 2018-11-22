@@ -5,7 +5,7 @@
  *      Authors: Nil Geisweiller
  */
 
-#include <opencog/rule-engine/backwardchainer/ActionSelection.h>
+#include <opencog/rule-engine/ActionSelection.h>
 #include <opencog/atomspace/AtomSpace.h>
 #include <opencog/truthvalue/SimpleTruthValue.h>
 
