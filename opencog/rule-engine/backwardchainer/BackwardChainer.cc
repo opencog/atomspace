@@ -29,7 +29,6 @@
 #include <opencog/unify/Unify.h>
 
 #include "BackwardChainer.h"
-#include "BackwardChainerPMCB.h"
 #include "../URELogger.h"
 
 using namespace opencog;
@@ -44,11 +43,11 @@ BackwardChainer::BackwardChainer(AtomSpace& as, const Handle& rbs,
                                                           // focus_set
                                  const BITNodeFitness& bitnode_fitness,
                                  const AndBITFitness& andbit_fitness)
-	: _as(as), _configReader(as, rbs),
+	: _as(as), _config(as, rbs),
 	  _bit(as, target, vardecl, bitnode_fitness),
 	  _andbit_fitness(andbit_fitness),
 	  _trace_recorder(trace_as),
-	  _control(_configReader, _bit, target, control_as),
+	  _control(_config, _bit, target, control_as),
 	  _rules(_control.rules),
 	  _iteration(0), _last_expansion_andbit(nullptr)
 {
@@ -58,12 +57,12 @@ BackwardChainer::BackwardChainer(AtomSpace& as, const Handle& rbs,
 
 UREConfig& BackwardChainer::get_config()
 {
-	return _configReader;
+	return _config;
 }
 
 const UREConfig& BackwardChainer::get_config() const
 {
-	return _configReader;
+	return _config;
 }
 
 void BackwardChainer::do_chain()
@@ -85,7 +84,7 @@ void BackwardChainer::do_step()
 	_iteration++;
 
 	ure_logger().debug() << "Iteration " << _iteration
-	                     << "/" << _configReader.get_maximum_iterations_str();
+	                     << "/" << _config.get_maximum_iterations_str();
 
 	expand_bit();
 	fulfill_bit();
@@ -97,7 +96,7 @@ bool BackwardChainer::termination()
 	bool terminate = false;
 	std::string msg;            // Cause of the termination
 
-	if (_configReader.get_maximum_iterations() == _iteration) {
+	if (_config.get_maximum_iterations() == _iteration) {
 		msg = "reached the maximum number of iterations";
 		terminate = true;
 	}
@@ -194,8 +193,7 @@ void BackwardChainer::expand_bit(AndBIT& andbit)
 
 	// Rule seems well, expand
 	LAZY_URE_LOG_DEBUG << "Selected rule, with probability " << prob
-	                   << " of success for BIT expansion:" << std::endl
-	                   << rule.to_string();
+	                   << " of success:" << std::endl << rule.to_string();
 
 	// Expand andbit. Warning: after this call the reference on andbit
 	// and bitleaf may no longer be valid because the container of
@@ -301,11 +299,11 @@ const AndBIT* BackwardChainer::select_fulfillment_andbit() const
 
 void BackwardChainer::reduce_bit()
 {
-	if (0 < _configReader.get_max_bit_size()) {
+	if (0 < _config.get_max_bit_size()) {
 		// If the BIT size has reached its maximum, randomly remove
 		// and-BITs so that the BIT size gets back below or equal to
 		// its maximum.
-		while (_configReader.get_max_bit_size() < _bit.size()) {
+		while (_config.get_max_bit_size() < _bit.size()) {
 			// Randomly select an and-BIT that is unlikely to be used
 			// for the remaining of the inferenceThe and-BITs to remove are
 			// selected so that the least likely and-BITs to be
@@ -323,13 +321,13 @@ void BackwardChainer::remove_unlikely_expandable_andbit()
 
 	// Calculate the probability of never being expanded for the
 	// remainder of the inference, thus (1-p) raised to the power of
-	// _configReader.get_maximum_iterations() - _iteration. This makes
+	// _config.get_maximum_iterations() - _iteration. This makes
 	// the assumption that the BIT (i.e. its and-BIT population) is
 	// not gonna change from this point on, a false but OK assumption
 	// for now.
 	for (double p : dist.probabilities()) {
 		double remaining_iterations =
-			_configReader.get_maximum_iterations() - _iteration;
+			_config.get_maximum_iterations() - _iteration;
 		double nep = std::pow(1 - p, remaining_iterations);
 		never_expand_probs.push_back(nep);
 	}
@@ -358,7 +356,7 @@ void BackwardChainer::remove_unlikely_expandable_andbit()
 
 double BackwardChainer::complexity_factor(const AndBIT& andbit) const
 {
-	return exp(-_configReader.get_complexity_penalty() * andbit.complexity);
+	return exp(-_config.get_complexity_penalty() * andbit.complexity);
 }
 
 double BackwardChainer::operator()(const AndBIT& andbit) const

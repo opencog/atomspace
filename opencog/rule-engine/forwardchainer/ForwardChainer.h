@@ -24,9 +24,8 @@
 #ifndef _OPENCOG_FORWARDCHAINERX_H_
 #define _OPENCOG_FORWARDCHAINERX_H_
 
-#include <opencog/rule-engine/URECommons.h>
-#include <opencog/rule-engine/UREConfig.h>
-
+#include "../UREConfig.h"
+#include "SourceSet.h"
 #include "FCStat.h"
 
 class ForwardChainerUTest;
@@ -40,6 +39,10 @@ enum class source_selection_mode
 };
 
 class Rule;
+
+// Pair of Rule and its probability estimate that it fullfils the
+// objective
+typedef std::pair<Rule, double> RuleProbabilityPair;
 
 class ForwardChainer
 {
@@ -55,22 +58,15 @@ private:
 	// perhaps there is some better mechanism?
 	AtomSpace _focus_set_as;
 
-	URECommons _rec;            // utility class
-	Handle _rbs;                // rule-based system
-	UREConfig _configReader;
+	UREConfig _config;
 
+	// Current iteration
 	int _iteration;
-	source_selection_mode _ts_mode;
-	bool _search_in_af;
-	bool _search_focus_set;
-	Handle _init_source;
-	Handle _init_vardecl;
-	Handle _cur_source;
 
-	// We maintain both selected and unselected sources, to speed up
-	// choose_source()
-	UnorderedHandleSet _selected_sources;
-	UnorderedHandleSet _unselected_sources;
+	bool _search_focus_set;
+
+	// Population of sources to expand forward
+	SourceSet _sources;
 
 	FCStat _fcstat;
 
@@ -80,49 +76,48 @@ private:
 
 	void apply_all_rules();
 
-	template<typename HandleContainer>
-	void update_potential_sources(const HandleContainer& input)
-	{
-		UnorderedHandleSet input_minus_selected;
-		for (const Handle& h : input)
-			if (_selected_sources.find(h) == _selected_sources.end())
-				input_minus_selected.insert(h);
-		_potential_sources.insert(input_minus_selected.begin(),
-		                          input_minus_selected.end());
-		_unselected_sources.insert(input_minus_selected.begin(),
-		                           input_minus_selected.end());
-	}
-
 	void validate(const Handle& source);
 
 	void expand_meta_rules();
 
 protected:
 	RuleSet _rules; /* loaded rules */
-	UnorderedHandleSet _potential_sources;
 	HandleSeq _focus_set;
 
 	/**
-	 * choose next source from the source list
+	 * choose next source to expand
 	 *
-	 * @return  A handle to the chosen source from source list
+	 * @return  A Source to expand
+	 *
+	 * Warning: it is not const because the source is gonna be modified
+	 * by keeping track of the rules applied to it.
 	 */
-	Handle select_source();
+	Source* select_source();
+
+	/**
+	 * Get rules that unify with the source
+	 */
+	RuleSet get_valid_rules(const Source& source);
 
 	/**
 	 * Choose an applicable rules from the rule base by selecting
 	 * rules whose premise structurally matches with the source.
 	 *
-	 * If no rule can be chosen return nullptr.
+	 * If no rule can be chosen return invalid rule.
 	 *
 	 * @return  A rule that in which @param source could ground.
+	 *
+	 * TODO: move to ControlPolicy
 	 */
-	Rule select_rule(const Handle& source);
+	RuleProbabilityPair select_rule(const Handle& source);
+	RuleProbabilityPair select_rule(Source& source);
+	RuleProbabilityPair select_rule(const RuleSet& valid_rules);
 
 	/**
 	 * Apply rule.
 	 */
-	UnorderedHandleSet apply_rule(const Rule& rule);
+	HandleSet apply_rule(const Rule& rule, Source& source);
+	HandleSet apply_rule(const Rule& rule);
 
 public:
 	/**
@@ -159,7 +154,7 @@ public:
 	/**
 	 * @return all results in their order of inference.
 	 */
-	UnorderedHandleSet get_chaining_result();
+	HandleSet get_chaining_result();
 };
 
 } // ~namespace opencog

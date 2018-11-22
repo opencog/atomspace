@@ -5,20 +5,19 @@ ADD_LIBRARY(ruleengine
 	backwardchainer/BackwardChainer
 	backwardchainer/TraceRecorder
 	backwardchainer/ControlPolicy
-	backwardchainer/MixtureModel
-	backwardchainer/ActionSelection
-	backwardchainer/BetaDistribution
-	backwardchainer/BackwardChainerPMCB
 	backwardchainer/BIT
 	backwardchainer/Fitness
 	forwardchainer/FCStat
 	forwardchainer/ForwardChainer
+	forwardchainer/SourceSet
 	URELogger
-	ChainerUtils.cc
-	InferenceSCM.cc
-	Rule.cc
-	URECommons.cc
-	UREConfig.cc
+	InferenceSCM
+	Rule
+	UREConfig
+	MixtureModel
+	ActionSelection
+	BetaDistribution
+	ThompsonSampling
 )
 
 ADD_DEPENDENCIES(ruleengine
@@ -44,10 +43,13 @@ INSTALL (TARGETS ruleengine
 
 INSTALL (FILES
 	UREConfig.h
-	URECommons.h
 	URELogger.h
 	Rule.h
 	UREConfig.h
+	MixtureModel.h
+	ActionSelection.h
+	BetaDistribution.h
+   ThompsonSampling.h
 	DESTINATION "include/opencog/rule-engine"
 )
 

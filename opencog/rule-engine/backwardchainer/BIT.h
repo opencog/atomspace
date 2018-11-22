@@ -168,7 +168,7 @@ public:
 	bool has_cycle(const Handle& h, HandleSet ancestors = {}) const;
 
 	/**
-	 * Comparison operators. For operator< compare fcs by size, or by
+	 * Comparison operators. For operator< compare fcs by complexity, or by
 	 * handle value if they are of the same size.
 	 */
 	bool operator==(const AndBIT& andbit) const;
@@ -254,10 +254,11 @@ private:
 	typedef std::discrete_distribution<size_t> LeafDistribution;
 
 	/**
-	 * Calculate the complexity of the and-BIT resulting from
-	 * expanding this and-BIT from leaf with rule.
+	 * Calculate the complexity of the and-BIT resulting from expanding
+	 * this and-BIT from leaf with a rule with a given probability
+	 * estimate of success.
 	 */
-	double expand_complexity(const Handle& leaf, const Rule& rule, double prob) const;
+	double expand_complexity(const Handle& leaf, double prob) const;
 
 	/**
 	 * Given an FCS, a leaf of it to expand, and a rule, return a new

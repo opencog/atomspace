@@ -22,7 +22,7 @@
  */
 
 #include "BetaDistribution.h"
-#include "../URELogger.h"
+#include "URELogger.h"
 
 #include <opencog/truthvalue/SimpleTruthValue.h>
 

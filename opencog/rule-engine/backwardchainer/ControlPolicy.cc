@@ -29,9 +29,9 @@
 #include <opencog/unify/Unify.h>
 #include <opencog/atoms/execution/MapLink.h>
 
-#include "MixtureModel.h"
-#include "ActionSelection.h"
-#include "BetaDistribution.h"
+#include "../MixtureModel.h"
+#include "../ActionSelection.h"
+#include "../BetaDistribution.h"
 
 #include "TraceRecorder.h"
 #include "../URELogger.h"
@@ -60,7 +60,7 @@ ControlPolicy::ControlPolicy(const UREConfig& ure_config, const BIT& bit,
 	// Fetches expansion control rules from _control_as
 	if (_control_as) {
 		_query_as = new AtomSpace(_control_as);
-		for (const Handle& rule_alias : rule_aliases(rules)) {
+		for (const Handle& rule_alias : rules.aliases()) {
 			HandleSet exp_ctrl_rules = fetch_expansion_control_rules(rule_alias);
 			_expansion_control_rules[rule_alias] = exp_ctrl_rules;
 
@@ -95,6 +95,14 @@ RuleSelection ControlPolicy::select_rule(AndBIT& andbit, BITNode& bitleaf)
 	}
 
 	return select_rule(andbit, bitleaf, valid_rules);
+}
+
+HandleSet ControlPolicy::rule_aliases(const RuleTypedSubstitutionMap& rules)
+{
+	HandleSet aliases;
+	for (auto& rule : rules)
+		aliases.insert(rule.first.get_alias());
+	return aliases;
 }
 
 RuleTypedSubstitutionMap ControlPolicy::get_valid_rules(const AndBIT& andbit,
@@ -138,13 +146,9 @@ RuleSelection ControlPolicy::select_rule(const AndBIT& andbit,
 	HandleTVMap success_tvs = expansion_success_tvs(andbit, bitleaf, inf_rules);
 	std::vector<double> weights = rule_weights(success_tvs, inf_rules);
 
-	// Build weight vector, based on control rules or otherwise
-	// default rule TVs, to do weighted random selection.
-
 	// Sample an inference rule according to the distribution
 	std::discrete_distribution<size_t> dist(weights.begin(), weights.end());
-	size_t idx = dist(randGen());
-	const RuleTypedSubstitutionPair& selected_rule = *std::next(inf_rules.begin(), idx);
+	const RuleTypedSubstitutionPair& selected_rule = rand_element(inf_rules, dist);
 
 	// Return the selected rule and its probability of success, will
 	// be used to calculate the TV that the produce and-BIT is a
@@ -231,22 +235,6 @@ std::vector<double> ControlPolicy::rule_weights(
 	}
 
 	return weights;
-}
-
-HandleSet ControlPolicy::rule_aliases(const RuleSet& rules) const
-{
-	HandleSet aliases;
-	for (auto& rule : rules)
-		aliases.insert(rule.get_alias());
-	return aliases;
-}
-
-HandleSet ControlPolicy::rule_aliases(const RuleTypedSubstitutionMap& rules) const
-{
-	HandleSet aliases;
-	for (auto& rule : rules)
-		aliases.insert(rule.first.get_alias());
-	return aliases;
 }
 
 HandleSet ControlPolicy::active_expansion_control_rules(

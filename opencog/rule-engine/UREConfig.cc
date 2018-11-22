@@ -35,8 +35,8 @@ const std::string UREConfig::top_rbs_name = "URE";
 // Parameters
 const std::string UREConfig::attention_alloc_name = "URE:attention-allocation";
 const std::string UREConfig::max_iter_name = "URE:maximum-iterations";
-const std::string UREConfig::fc_retry_sources_name = "URE:FC:retry-sources";
-const std::string UREConfig::bc_complexity_penalty_name = "URE:BC:complexity-penalty";
+const std::string UREConfig::complexity_penalty_name = "URE:complexity-penalty";
+const std::string UREConfig::fc_retry_exhausted_sources_name = "URE:FC:retry-exhausted-sources";
 const std::string UREConfig::bc_max_bit_size_name = "URE:BC:maximum-bit-size";
 const std::string UREConfig::bc_mm_complexity_penalty_name = "URE:BC:MM:complexity-penalty";
 const std::string UREConfig::bc_mm_compressiveness_name = "URE:BC:MM:compressiveness";
@@ -72,14 +72,14 @@ int UREConfig::get_maximum_iterations() const
 	return _common_params.max_iter;
 }
 
-bool UREConfig::get_retry_sources() const
-{
-	return _fc_params.retry_sources;
-}
-
 double UREConfig::get_complexity_penalty() const
 {
-	return _bc_params.complexity_penalty;
+	return _common_params.complexity_penalty;
+}
+
+bool UREConfig::get_retry_exhausted_sources() const
+{
+	return _fc_params.retry_exhausted_sources;
 }
 
 double UREConfig::get_max_bit_size() const
@@ -114,14 +114,14 @@ void UREConfig::set_maximum_iterations(int mi)
 	_common_params.max_iter = mi;
 }
 
-void UREConfig::set_retry_sources(bool rs)
-{
-	_fc_params.retry_sources = rs;
-}
-
 void UREConfig::set_complexity_penalty(double cp)
 {
-	_bc_params.complexity_penalty = cp;
+	_common_params.complexity_penalty = cp;
+}
+
+void UREConfig::set_retry_exhausted_sources(bool rs)
+{
+	_fc_params.retry_exhausted_sources = rs;
 }
 
 void UREConfig::set_mm_complexity_penalty(double mm_cp)
@@ -155,36 +155,36 @@ void UREConfig::fetch_common_parameters(const Handle& rbs)
 {
 	// Retrieve the rules (MemberLinks) and instantiate them
 	for (const Handle& rule_name : fetch_rule_names(rbs))
-    {
-        OC_ASSERT((rule_name->get_type() == DEFINED_SCHEMA_NODE),
-              "The rule: \n%s \n is not a DefinedSchemaNode."
-              "A rule needs an alias and to be defined a DefinedSchemaNode.\n"
-              "Please check rules in /atomspace/examples/rule-engine for example.\n\n",
-              rule_name->to_short_string().c_str());
+	{
+		OC_ASSERT(rule_name->get_type() == DEFINED_SCHEMA_NODE,
+		          "The rule: \n%s \n is not a DefinedSchemaNode."
+		          "A rule needs an alias and to be defined a DefinedSchemaNode.\n"
+		          "Please check rules in /atomspace/examples/rule-engine for example.\n\n",
+		          rule_name->to_short_string().c_str());
 
 		_common_params.rules.emplace(rule_name, rbs);
-    }
+	}
 
 	// Fetch maximum number of iterations
 	_common_params.max_iter = fetch_num_param(max_iter_name, rbs, -1);
 
 	// Fetch attention allocation parameter
 	_common_params.attention_alloc = fetch_bool_param(attention_alloc_name, rbs);
+
+	// Fetch complexity penalty parameter
+	_common_params.complexity_penalty =
+		fetch_num_param(complexity_penalty_name, rbs);
 }
 
 void UREConfig::fetch_fc_parameters(const Handle& rbs)
 {
-	// Fetch retry sources parameter
-	_fc_params.retry_sources =
-		fetch_bool_param(fc_retry_sources_name, rbs, true);
+	// Fetch retry exhausted sources parameter
+	_fc_params.retry_exhausted_sources =
+		fetch_bool_param(fc_retry_exhausted_sources_name, rbs, false);
 }
 
 void UREConfig::fetch_bc_parameters(const Handle& rbs)
 {
-	// Fetch BC complexity penalty parameter
-	_bc_params.complexity_penalty =
-		fetch_num_param(bc_complexity_penalty_name, rbs);
-
 	// Fetch BC BIT maximum size parameter
 	_bc_params.max_bit_size = fetch_num_param(bc_max_bit_size_name, rbs, -1);
 
