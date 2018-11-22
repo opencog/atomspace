@@ -13,8 +13,8 @@
 ;; -- ure-set-fuzzy-bool-parameter -- Set a fuzzy boolean parameter of an rbs
 ;; -- ure-set-attention-allocation -- Set the URE:attention-allocation parameter
 ;; -- ure-set-maximum-iterations -- Set the URE:maximum-iterations parameter
+;; -- ure-set-complexity-penalty -- Set the URE:complexity-penalty parameter
 ;; -- ure-set-fc-retry-exhausted-sources -- Set the URE:FC:retry-exhausted-sources parameter
-;; -- ure-set-bc-complexity-penalty -- Set the URE:BC:complexity-penalty parameter
 ;; -- ure-set-bc-maximum-bit-size -- Set the URE:BC:maximum-bit-size
 ;; -- ure-set-bc-mm-complexity-penalty -- Set the URE:BC:MM:complexity-penalty
 ;; -- ure-set-bc-mm-compressiveness -- Set the URE:BC:MM:compressiveness
@@ -287,18 +287,18 @@
 "
   (ure-set-fuzzy-bool-parameter rbs "URE:FC:retry-exhausted-sources" value))
 
-(define (ure-set-bc-complexity-penalty rbs value)
+(define (ure-set-complexity-penalty rbs value)
 "
-  Set the URE:BC:complexity-penalty parameter of a given RBS
+  Set the URE:complexity-penalty parameter of a given RBS
 
   ExecutionLink
-    SchemaNode \"URE:BC:complexity-penalty\"
+    SchemaNode \"URE:complexity-penalty\"
     rbs
     NumberNode value
 
   Delete any previous one if exists.
 "
-  (ure-set-num-parameter rbs "URE:BC:complexity-penalty" value))
+  (ure-set-num-parameter rbs "URE:complexity-penalty" value))
 
 (define (ure-set-bc-maximum-bit-size rbs value)
 "
@@ -528,6 +528,7 @@
           ure-set-fuzzy-bool-parameter
           ure-set-attention-allocation
           ure-set-maximum-iterations
+          ure-set-complexity-penalty
           ure-set-fc-retry-exhausted-sources
           ure-set-bc-maximum-bit-size
           ure-set-bc-mm-complexity-penalty
