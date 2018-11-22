@@ -9,7 +9,7 @@ ADD_LIBRARY(ruleengine
 	backwardchainer/Fitness
 	forwardchainer/FCStat
 	forwardchainer/ForwardChainer
-        forwardchainer/SourceSet
+	forwardchainer/SourceSet
 	URELogger
 	InferenceSCM
 	Rule
@@ -49,7 +49,7 @@ INSTALL (FILES
 	MixtureModel.h
 	ActionSelection.h
 	BetaDistribution.h
-        ThompsonSampling.h
+   ThompsonSampling.h
 	DESTINATION "include/opencog/rule-engine"
 )
 
