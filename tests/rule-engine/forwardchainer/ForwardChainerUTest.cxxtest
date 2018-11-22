@@ -6,10 +6,10 @@
  */
 #include <boost/range/algorithm/find.hpp>
 
+#include <opencog/util/random.h>
 #include <opencog/atomspace/AtomSpace.h>
 #include <opencog/attentionbank/AttentionBank.h>
 #include <opencog/guile/SchemeEval.h>
-
 #include <opencog/rule-engine/forwardchainer/ForwardChainer.h>
 
 #include <cxxtest/TestSuite.h>
@@ -43,20 +43,23 @@ public:
 		// ure_logger().set_sync_flag(true);
 		ure_logger().set_print_to_stdout_flag(true);
 
-		string source_dir = string(PROJECT_SOURCE_DIR),
-		       test_dir = source_dir + "/tests",
-		       test_ure_dir = test_dir + "/rule-engine",
-		       test_forwardchainer_dir = test_ure_dir + "/forwardchainer",
-		       test_scm_dir = test_forwardchainer_dir + "/scm",
-		       ure_dir = source_dir + "/opencog/scm/opencog/rule-engine";
-		vector<string> load_paths = { source_dir,
-		                              test_dir,
-		                              test_ure_dir,
-		                              test_forwardchainer_dir,
-		                              test_scm_dir,
-		                              ure_dir };
-		for (string& p : load_paths) {
-			string eval_str = string("(add-to-load-path \"") + p + string("\")");
+		std::string
+			source_dir = std::string(PROJECT_SOURCE_DIR),
+			test_dir = source_dir + "/tests",
+			test_ure_dir = test_dir + "/rule-engine",
+			test_forwardchainer_dir = test_ure_dir + "/forwardchainer",
+			test_scm_dir = test_forwardchainer_dir + "/scm",
+			ure_dir = source_dir + "/opencog/scm/opencog/rule-engine";
+		std::vector<std::string> load_paths =
+			{ source_dir,
+			  test_dir,
+			  test_ure_dir,
+			  test_forwardchainer_dir,
+			  test_scm_dir,
+			  ure_dir };
+		for (std::string& p : load_paths) {
+			std::string eval_str =
+				std::string("(add-to-load-path \"") + p + std::string("\")");
 			_eval.eval(eval_str);
 		}
 
@@ -86,7 +89,7 @@ void ForwardChainerUTest::setUp()
 	_as.clear();
 
 	// Load the simple deduction rbs to test it
-	string result; // to be able to read load errors
+	std::string result; // to be able to read load errors
 	result = _eval.eval("(load-from-path \"fc-deduction-config.scm\")");
 	CHKERR;
 
@@ -134,7 +137,8 @@ void ForwardChainerUTest::test_do_chain_deduction()
 
 void ForwardChainerUTest::test_do_chain_animals()
 {
-	string result = _eval.eval("(load-from-path \"fc-animals-config.scm\")");
+	std::string result =
+		_eval.eval("(load-from-path \"fc-animals-config.scm\")");
 	logger().debug() << "result = " << result;
 	_eval.eval("(load-from-path \"animals.scm\")");
 	randGen().seed(0);
