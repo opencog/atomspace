@@ -4,6 +4,7 @@
  *         Ramin Barati <rekino@gmail.com>
  *         Keyvan Mir Mohammad Sadeghi <keyvan@opencog.org>
  *         Curtis Faith <curtis.m.faith@gmail.com>
+ *         Alexey Potapov <alexey@singularitynet.io>
  * @date 2011-09-20
  *
  *
@@ -715,35 +716,71 @@ int PythonEval::argument_count(PyObject* pyFunction)
 }
 
 /**
- * Get the Python module and stripped function name given the identifer of
- * the form 'module.function'.
+ * Find the Python object by its name in the given module'.
  */
-PyObject* PythonEval::module_for_function(const std::string& moduleFunction,
-                                          std::string& functionName)
+PyObject* PythonEval::find_object(const PyObject* pyModule,
+                                  const std::string& objectName)
 {
+    PyObject* pyDict = PyModule_GetDict(_pyRootModule);
+    return PyDict_GetItemString(pyDict, objectName.c_str());
+}
+
+/**
+ * Get the Python module and/or object and stripped function name given the identifer of
+ * the form '[module.][object.[attribute.]*]function'.
+ */
+void PythonEval::module_for_function(const std::string& moduleFunction,
+                                     PyObject*& pyModule,
+                                     PyObject*& pyObject,
+                                     std::string& functionName)
+{
+    pyModule = _pyRootModule;
+    pyObject = nullptr;
+    functionName = moduleFunction;
     // Get the correct module and extract the function name.
     int index = moduleFunction.find_first_of('.');
     if (0 < index) {
         std::string moduleName = moduleFunction.substr(0, index);
-        PyObject* pyModule = _modules[moduleName];
-
-        // If not found, try loading it.
+        PyObject* pyModuleTmp = _modules[moduleName];
+        // If not found, first check that it is not an object.
+        // Then try loading it.
         // We have to guess, if its a single file, or an entire
         // directory with an __init__.py file in it ...
-        if (nullptr == pyModule) {
+        if (nullptr == pyModuleTmp &&
+            nullptr == find_object(pyModule, moduleName))
+        {
             add_modules_from_path(moduleName);
             add_modules_from_path(moduleName + ".py");
-            pyModule = _modules[moduleName];
+            pyModuleTmp = _modules[moduleName];
         }
-
-        // If found, we are done.
-        if (pyModule) {
+        // If found, set new module and truncate the function name
+        if (pyModuleTmp) {
+            pyModule = pyModuleTmp;
             functionName = moduleFunction.substr(index+1);
-            return pyModule;
         }
     }
-    functionName = moduleFunction;
-    return _pyRootModule;
+    // Iteratively check for objects in the selected (either root or loaded) module
+    index = functionName.find_first_of('.');
+    while (0 < index) {
+        std::string objectName = functionName.substr(0, index);
+        // If there is no object yet, find it in Module
+        // Else find it as Attr in Object
+        pyObject = nullptr == pyObject ?
+            find_object(pyModule, objectName) :
+            PyObject_GetAttrString(pyObject, objectName.c_str());
+        if (nullptr == pyObject) {
+            throw RuntimeException(TRACE_INFO,
+                "Python object/attribute for '%s' not found!",
+                functionName.c_str());
+        }
+        functionName = functionName.substr(index+1);
+        index = functionName.find_first_of('.');
+    }
+    // Object can actually be an 'imported as' module (e.g. "import tensorflow as tf")
+    if(pyObject && PyModule_Check(pyObject)) {
+        pyModule = pyObject;
+        pyObject = nullptr;
+    }
 }
 
 /**
@@ -762,7 +799,9 @@ PyObject* PythonEval::call_user_function(const std::string& moduleFunction,
 
     // Get the module and stripped function name.
     std::string functionName;
-    PyObject* pyModule = this->module_for_function(moduleFunction, functionName);
+    PyObject* pyModule;
+    PyObject* pyObject;
+    module_for_function(moduleFunction, pyModule, pyObject, functionName);
 
     // If we can't find that module then throw an exception.
     if (!pyModule) {
@@ -776,14 +815,18 @@ PyObject* PythonEval::call_user_function(const std::string& moduleFunction,
     // Get a reference to the user function.
     PyObject* pyDict = PyModule_GetDict(pyModule);
 
-// #define DEBUG
+    PyObject* pyUserFunc;
+    // If there is no object, then search in module
+    if(nullptr == pyObject) {
 #ifdef DEBUG
-    printf("Looking for %s in module %s; here's what we have:\n",
-        functionName.c_str(), PyModule_GetName(pyModule));
-    print_dictionary(pyDict);
+        printf("Looking for %s in module %s; here's what we have:\n",
+            functionName.c_str(), PyModule_GetName(pyModule));
+        print_dictionary(pyDict);
 #endif
-
-    PyObject* pyUserFunc = PyDict_GetItemString(pyDict, functionName.c_str());
+        pyUserFunc = PyDict_GetItemString(pyDict, functionName.c_str());
+    } else {
+        pyUserFunc = PyObject_GetAttrString(pyObject, functionName.c_str());
+    }
 
     // PyModule_GetDict returns a borrowed reference, so don't do this:
     // Py_DECREF(pyDict);
@@ -826,6 +869,8 @@ PyObject* PythonEval::call_user_function(const std::string& moduleFunction,
 
     // Now make sure the expected count matches the actual argument count.
     int actualArgumentCount = arguments->get_arity();
+    // If there is an object, its method has 'self' argument, which is passed automatically
+    if (pyObject) expectedArgumentCount--;
     if (expectedArgumentCount != actualArgumentCount) {
         PyGILState_Release(gstate);
         throw RuntimeException(TRACE_INFO,
@@ -1002,7 +1047,7 @@ void PythonEval::apply_as(const std::string& moduleFunction,
 {
     std::lock_guard<std::recursive_mutex> lck(_mtx);
 
-    PyObject *pyError, *pyModule, *pyUserFunc;
+    PyObject *pyError, *pyModule, *pyObject, *pyUserFunc;
     PyObject *pyDict;
     std::string functionName;
     std::string errorString;
@@ -1012,7 +1057,7 @@ void PythonEval::apply_as(const std::string& moduleFunction,
     gstate = PyGILState_Ensure();
 
     // Get the module and stripped function name.
-    pyModule = this->module_for_function(moduleFunction, functionName);
+    module_for_function(moduleFunction, pyModule, pyObject, functionName);
 
     // If we can't find that module then throw an exception.
     if (!pyModule)
@@ -1027,7 +1072,12 @@ void PythonEval::apply_as(const std::string& moduleFunction,
 
     // Get a reference to the user function.
     pyDict = PyModule_GetDict(pyModule);
-    pyUserFunc = PyDict_GetItemString(pyDict, functionName.c_str());
+    // If there is no object, then search in module
+    if(nullptr == pyObject) {
+        pyUserFunc = PyDict_GetItemString(pyDict, functionName.c_str());
+    } else {
+        pyUserFunc = PyObject_GetAttrString(pyObject, functionName.c_str());
+    }
 
     // PyModule_GetDict returns a borrowed reference, so don't do this:
     // Py_DECREF(pyDict);
@@ -1055,6 +1105,8 @@ void PythonEval::apply_as(const std::string& moduleFunction,
 
     // Get the expected argument count.
     int expectedArgumentCount = this->argument_count(pyUserFunc);
+    // If there is an object, its method has 'self' argument, which is passed automatically
+    if (pyObject) expectedArgumentCount--;
     if (expectedArgumentCount == MISSING_FUNC_CODE)
     {
         PyGILState_Release(gstate);

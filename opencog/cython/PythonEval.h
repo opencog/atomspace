@@ -85,8 +85,12 @@ class PythonEval : public GenericEval
         void print_dictionary(PyObject*);
         void execute_string(const char* command);
         int argument_count(PyObject* pyFunction);
-        PyObject* module_for_function(const std::string& moduleFunction,
-                                      std::string& functionName);
+        //@@@@
+        PyObject* find_object(const PyObject* pyModule,
+                              const std::string& objectName);
+        void module_for_function(const std::string& moduleFunction,
+                                 PyObject*& pyModule, PyObject*& pyObject,
+                                 std::string& functionName);
 
         static PythonEval* singletonInstance;
 
