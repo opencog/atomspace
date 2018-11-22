@@ -21,14 +21,13 @@
  * 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
  */
 
-#include "../ChainerUtils.h"
 #include "FCStat.h"
 
 using namespace opencog;
 
 void FCStat::add_inference_record(unsigned iteration, Handle source,
                                   const Rule& rule,
-                                  const UnorderedHandleSet& product)
+                                  const HandleSet& product)
 {
 	_inf_rec.emplace_back(source, rule, product);
 
@@ -39,9 +38,9 @@ void FCStat::add_inference_record(unsigned iteration, Handle source,
 		             source, p);
 }
 
-UnorderedHandleSet FCStat::get_all_products()
+HandleSet FCStat::get_all_products()
 {
-	UnorderedHandleSet all;
+	HandleSet all;
 	for(const auto& ir : _inf_rec)
 		all.insert(ir.product.begin(),ir.product.end());
 

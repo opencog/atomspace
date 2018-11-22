@@ -13,8 +13,8 @@
 ;; -- ure-set-fuzzy-bool-parameter -- Set a fuzzy boolean parameter of an rbs
 ;; -- ure-set-attention-allocation -- Set the URE:attention-allocation parameter
 ;; -- ure-set-maximum-iterations -- Set the URE:maximum-iterations parameter
-;; -- ure-set-fc-retry-sources -- Set the URE:FC:retry-sources parameter
-;; -- ure-set-bc-complexity-penalty -- Set the URE:BC:complexity-penalty parameter
+;; -- ure-set-complexity-penalty -- Set the URE:complexity-penalty parameter
+;; -- ure-set-fc-retry-exhausted-sources -- Set the URE:FC:retry-exhausted-sources parameter
 ;; -- ure-set-bc-maximum-bit-size -- Set the URE:BC:maximum-bit-size
 ;; -- ure-set-bc-mm-complexity-penalty -- Set the URE:BC:MM:complexity-penalty
 ;; -- ure-set-bc-mm-compressiveness -- Set the URE:BC:MM:compressiveness
@@ -49,6 +49,7 @@
 ;; -- gen-variables -- Generate VariableNodes with certain prefix and indexes
 ;; -- gen-rand-variable -- Generate random VariableNode
 ;; -- gen-rand-variables -- Generate random VariableNodes
+;; -- cog-new-flattened-link -- Create flattened link TODO: remove cog- prefix
 ;;
 ;; If you add more utilities don't forget to add them in the
 ;; export-rule-engine-utils function.
@@ -273,31 +274,31 @@
 "
   (ure-set-num-parameter rbs "URE:maximum-iterations" value))
 
-(define (ure-set-fc-retry-sources rbs value)
+(define (ure-set-fc-retry-exhausted-sources rbs value)
 "
-  Set the URE:FC:retry-sources parameter of a given RBS
+  Set the URE:FC:retry-exhausted-sources parameter of a given RBS
 
   EvaluationLink (stv value 1)
-    PredicateNode \"URE:FC:retry-sources\"
+    PredicateNode \"URE:FC:retry-exhausted-sources\"
     rbs
 
   If the provided value is a boolean, then it is automatically
   converted into tv.
 "
-  (ure-set-fuzzy-bool-parameter rbs "URE:FC:retry-sources" value))
+  (ure-set-fuzzy-bool-parameter rbs "URE:FC:retry-exhausted-sources" value))
 
-(define (ure-set-bc-complexity-penalty rbs value)
+(define (ure-set-complexity-penalty rbs value)
 "
-  Set the URE:BC:complexity-penalty parameter of a given RBS
+  Set the URE:complexity-penalty parameter of a given RBS
 
   ExecutionLink
-    SchemaNode \"URE:BC:complexity-penalty\"
+    SchemaNode \"URE:complexity-penalty\"
     rbs
     NumberNode value
 
   Delete any previous one if exists.
 "
-  (ure-set-num-parameter rbs "URE:BC:complexity-penalty" value))
+  (ure-set-num-parameter rbs "URE:complexity-penalty" value))
 
 (define (ure-set-bc-maximum-bit-size rbs value)
 "
@@ -475,25 +476,46 @@
       (append (gen-variables prefix (- n 1))
               (list (gen-variable prefix (- n 1))))))
 
-;; TODO: use random-variable instead
-(define (gen-rand-variable prefix base length)
+(define (cog-new-flattened-link link-type . args)
 "
-  gen-rand-variable prefix base length
+ Creates a new flattened link, for instance
 
-  Generate a random variable (Variable prefix + \"-\" + RAND). where
-  RAND is a random sequence of 'length' digits in base 'base'.
-"
-  (let* ((rand-char (lambda (i) (number->string (random base) base)))
-         (rand-chars (map rand-char (iota length)))
-         (rand-str (apply string-append rand-chars))
-         (rand-name (string-append prefix "-" rand-str)))
-    (Variable rand-name)))
+   (cog-new-flattened-link 'AndLink (AndLink A B) C)
 
-(define (gen-rand-variables prefix base length n)
+ will create the following
+
+    (AndLink A B C)
+
+ This is not recursive. So, for instance
+
+   (cog-new-flattened-link 'AndLink (AndLink A (AndLink B)) C)
+
+ will not produce
+
+   (AndLink A B C)
+
+ but will produce instead
+
+   (AndLink A (AndLink B) C)
+
+ Note that it will also remove duplicates, for instance
+
+   (cog-new-flattened-link 'AndLink (AndLink A B C) C)
+
+ will create the following
+
+   (AndLink A B C)
+
+ WARNING: TVs and other values attached to the atoms are ignored.
+   The TV's and values are not copied to the new link, nor are they
+   recomputed in any way.
 "
-  Generate a list of random variables calling gen-rand-variable n times.
-"
-  (map (lambda (x) (gen-rand-variable prefix base length)) (iota n)))
+  (define (flatten e r)
+    (append r (if (and (cog-link? e) (equal? (cog-type e) link-type))
+                  (cog-outgoing-set e)
+                  (list e))))
+  (let ((flat (delete-duplicates (fold flatten '() args))))
+    (cog-new-link link-type flat)))
 
 (define (export-rule-engine-utils)
   (export
@@ -506,7 +528,8 @@
           ure-set-fuzzy-bool-parameter
           ure-set-attention-allocation
           ure-set-maximum-iterations
-          ure-set-fc-retry-sources
+          ure-set-complexity-penalty
+          ure-set-fc-retry-exhausted-sources
           ure-set-bc-maximum-bit-size
           ure-set-bc-mm-complexity-penalty
           ure-set-bc-mm-compressiveness
@@ -542,5 +565,6 @@
           gen-variables
           gen-rand-variable
           gen-rand-variables
+          cog-new-flattened-link
   )
 )

@@ -42,6 +42,15 @@ class RuleSet : public std::set<Rule>
 public:
 	// Run all meta rules and insert the resulting rules back in the rule set.
 	void expand_meta_rules(AtomSpace& as);
+
+	/**
+	 * Return the set of rule aliases, as aliases of inference rules
+	 * are used in control rules.
+	 */
+	HandleSet aliases() const;
+
+	std::string to_string(const std::string& indent=empty_string) const;
+	std::string to_short_string(const std::string& indent=empty_string) const;
 };
 
 typedef std::map<Rule, Unify::TypedSubstitution> RuleTypedSubstitutionMap;
@@ -109,15 +118,15 @@ public:
 	void init(const Handle& rule_alias, const Handle& rbs);
 	void init(const Handle& rule_alias, const Handle& rule, const Handle& rbs);
 
-    /**
-     * Verify if this rule is defined in the required format.
-     * The main purpose is to give user the corresponding warnings and info.
-     * Only verify a normal rule, do not use this function to verify a meta rule.
-     * Current verify items:
-     * 1.If there are multiple conslusions, they also need to be wrapped with one
-     *   single ExecutionOutPutLink, otherwise it won't work for bc.
-     */
-    bool verify_rule();
+	/**
+	 * Verify if this rule is defined in the required format.
+	 * The main purpose is to give user the corresponding warnings and info.
+	 * Only verify a normal rule, do not use this function to verify a meta rule.
+	 * Current verify items:
+	 * 1.If there are multiple conslusions, they also need to be wrapped with one
+	 *   single ExecutionOutPutLink, otherwise it won't work for bc.
+	 */
+	bool verify_rule();
 	
 	// Comparison
 	bool operator==(const Rule& r) const;
@@ -266,7 +275,8 @@ public:
 	 */
 	Handle apply(AtomSpace& as) const;
 
-	std::string to_string(const std::string& indent="") const;
+	std::string to_string(const std::string& indent=empty_string) const;
+	std::string to_short_string(const std::string& indent=empty_string) const;
 
 	// This flag allows to only sonsider the Rule clauses as
 	// premises. This is for backward compatibility with some rule

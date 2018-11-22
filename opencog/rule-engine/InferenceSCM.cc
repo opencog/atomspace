@@ -87,10 +87,10 @@ public:
 #include <opencog/atomspace/AtomSpace.h>
 #include <opencog/guile/SchemePrimitive.h>
 
-#include <opencog/rule-engine/forwardchainer/ForwardChainer.h>
-#include <opencog/rule-engine/backwardchainer/BackwardChainer.h>
-
+#include "forwardchainer/ForwardChainer.h"
+#include "backwardchainer/BackwardChainer.h"
 #include "UREConfig.h"
+
 using namespace opencog;
 
 InferenceSCM::InferenceSCM() : ModuleWrap("opencog rule-engine") {}
@@ -130,7 +130,7 @@ Handle InferenceSCM::do_forward_chaining(Handle rbs,
 
     ForwardChainer fc(*as, rbs, source, vardecl, focus_set);
     fc.do_chain();
-    UnorderedHandleSet result = fc.get_chaining_result();
+    HandleSet result = fc.get_chaining_result();
 
     return as->add_link(SET_LINK, HandleSeq(result.begin(), result.end()));
 }

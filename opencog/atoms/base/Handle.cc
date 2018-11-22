@@ -125,6 +125,19 @@ bool content_eq(const HandleSet& lhs, const HandleSet& rhs)
 	return true;
 }
 
+bool content_eq(const opencog::HandleSetSeq& lhs,
+                const opencog::HandleSetSeq& rhs)
+{
+	if (lhs.size() != rhs.size())
+		return false;
+
+	auto lit = lhs.begin(), rit = rhs.begin();
+	for (; rit != rhs.end(); ++lit, ++rit)
+		if (not content_eq(*lit, *rit))
+			return false;
+	return true;
+}
+
 // The rest of this file is devoted to printing utilities used only
 // during GDB debugging. You can configure GDB as follows
 // http://wiki.opencog.org/w/Development_standards#Print_OpenCog_Objects

@@ -6,10 +6,10 @@
  */
 #include <boost/range/algorithm/find.hpp>
 
+#include <opencog/util/random.h>
 #include <opencog/atomspace/AtomSpace.h>
 #include <opencog/attentionbank/AttentionBank.h>
 #include <opencog/guile/SchemeEval.h>
-
 #include <opencog/rule-engine/forwardchainer/ForwardChainer.h>
 
 #include <cxxtest/TestSuite.h>
@@ -33,24 +33,33 @@ public:
 	ForwardChainerUTest() : _eval(&_as)
 	{
 #undef DEBUG
-		logger().set_level(Logger::DEBUG);
+		logger().set_level(Logger::INFO);
 		logger().set_timestamp_flag(false);
+		// logger().set_sync_flag(true);
 		logger().set_print_to_stdout_flag(true);
 
-		string source_dir = string(PROJECT_SOURCE_DIR),
-		       test_dir = source_dir + "/tests",
-		       test_ure_dir = test_dir + "/rule-engine",
-		       test_forwardchainer_dir = test_ure_dir + "/forwardchainer",
-		       test_scm_dir = test_forwardchainer_dir + "/scm",
-		       ure_dir = source_dir + "/opencog/scm/opencog/rule-engine";
-		vector<string> load_paths = { source_dir,
-		                              test_dir,
-		                              test_ure_dir,
-		                              test_forwardchainer_dir,
-		                              test_scm_dir,
-		                              ure_dir };
-		for (string& p : load_paths) {
-			string eval_str = string("(add-to-load-path \"") + p + string("\")");
+		ure_logger().set_level(Logger::INFO);
+		ure_logger().set_timestamp_flag(false);
+		// ure_logger().set_sync_flag(true);
+		ure_logger().set_print_to_stdout_flag(true);
+
+		std::string
+			source_dir = std::string(PROJECT_SOURCE_DIR),
+			test_dir = source_dir + "/tests",
+			test_ure_dir = test_dir + "/rule-engine",
+			test_forwardchainer_dir = test_ure_dir + "/forwardchainer",
+			test_scm_dir = test_forwardchainer_dir + "/scm",
+			ure_dir = source_dir + "/opencog/scm/opencog/rule-engine";
+		std::vector<std::string> load_paths =
+			{ source_dir,
+			  test_dir,
+			  test_ure_dir,
+			  test_forwardchainer_dir,
+			  test_scm_dir,
+			  ure_dir };
+		for (std::string& p : load_paths) {
+			std::string eval_str =
+				std::string("(add-to-load-path \"") + p + std::string("\")");
 			_eval.eval(eval_str);
 		}
 
@@ -80,7 +89,7 @@ void ForwardChainerUTest::setUp()
 	_as.clear();
 
 	// Load the simple deduction rbs to test it
-	string result; // to be able to read load errors
+	std::string result; // to be able to read load errors
 	result = _eval.eval("(load-from-path \"fc-deduction-config.scm\")");
 	CHKERR;
 
@@ -119,7 +128,7 @@ void ForwardChainerUTest::test_do_chain_deduction()
 	fc.do_chain();
 
 	// Collect the results
-	UnorderedHandleSet results = fc.get_chaining_result();
+	HandleSet results = fc.get_chaining_result();
 
 	// Check that AC is in the results
 	Handle AC = _as.add_link(INHERITANCE_LINK, A, C);
@@ -128,7 +137,8 @@ void ForwardChainerUTest::test_do_chain_deduction()
 
 void ForwardChainerUTest::test_do_chain_animals()
 {
-	string result = _eval.eval("(load-from-path \"fc-animals-config.scm\")");
+	std::string result =
+		_eval.eval("(load-from-path \"fc-animals-config.scm\")");
 	logger().debug() << "result = " << result;
 	_eval.eval("(load-from-path \"animals.scm\")");
 	randGen().seed(0);
@@ -142,13 +152,13 @@ void ForwardChainerUTest::test_do_chain_animals()
 		vardecl = Handle::UNDEFINED;
 
 	ForwardChainer fc(_as, top_rbs, source, vardecl);
-	fc.get_config().set_maximum_iterations(800);
+	fc.get_config().set_maximum_iterations(50);
 	fc.do_chain();
 
-	UnorderedHandleSet results = fc.get_chaining_result();
+	HandleSet results = fc.get_chaining_result();
 	Handle Fritz_green = al(INHERITANCE_LINK, Fritz, green);
 
-	std::cout << "results = " << oc_to_string(results);
+	logger().debug() << "results = " << oc_to_string(results);
 
 	// Check that AC is in the results
 	TS_ASSERT_DIFFERS(results.find(Fritz_green), results.end());
@@ -165,8 +175,8 @@ void ForwardChainerUTest::test_select_rule(void)
 	ForwardChainer fc(_as, rbs, h);
 
 	// Full unification
-	Rule rule = fc.select_rule(h);
-	TS_ASSERT(rule.is_valid());
+	RuleProbabilityPair rule = fc.select_rule(h);
+	TS_ASSERT(rule.first.is_valid());
 }
 
 /**
@@ -187,7 +197,7 @@ void ForwardChainerUTest::test_unsatisfied_premise(void)
 	fc.get_config().set_maximum_iterations(20);
 	fc.do_chain();
 
-	UnorderedHandleSet results = fc.get_chaining_result();
+	HandleSet results = fc.get_chaining_result();
 	TS_ASSERT_EQUALS(results.size(), 0);
 }
 
@@ -206,7 +216,7 @@ void ForwardChainerUTest::test_negation_conflict()
 	fc.get_config().set_maximum_iterations(20);
 	fc.do_chain();
 
-	UnorderedHandleSet resultSet = fc.get_chaining_result();
+	HandleSet resultSet = fc.get_chaining_result();
 	HandleSeq resultHandleSeq(resultSet.begin(), resultSet.end());
 	Handle results = al(SET_LINK, resultHandleSeq);
 
@@ -220,10 +230,11 @@ void ForwardChainerUTest::test_negation_conflict()
 
 	Handle expected = al(SET_LINK, Gkeepcat, Akeepdog);
 
-	logger().debug() << "results = " << results->to_string();
-	logger().debug() << "expected = " << expected->to_string();
+	logger().debug() << "results = " << oc_to_string(results);
+	logger().debug() << "expected = " << oc_to_string(expected);
 
 	TS_ASSERT_EQUALS(results, expected);
 }
+
 #undef al
 #undef an

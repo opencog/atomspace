@@ -35,9 +35,9 @@ struct InferenceRecord
 {
 	const Handle hsource;
 	const Rule& rule;
-	UnorderedHandleSet product;
+	HandleSet product;
 
-	InferenceRecord(Handle h, const Rule& r, const UnorderedHandleSet& p)
+	InferenceRecord(Handle h, const Rule& r, const HandleSet& p)
 		: hsource(h), rule(r), product(p) {}
 };
 
@@ -69,8 +69,8 @@ public:
 	 */
 	void add_inference_record(unsigned iteration, Handle source,
 	                          const Rule& rule,
-	                          const UnorderedHandleSet& product);
-	UnorderedHandleSet get_all_products();
+	                          const HandleSet& product);
+	HandleSet get_all_products();
 };
 
 }

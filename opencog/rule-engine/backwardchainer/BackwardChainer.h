@@ -25,11 +25,11 @@
 #ifndef _OPENCOG_BACKWARDCHAINER_H_
 #define _OPENCOG_BACKWARDCHAINER_H_
 
-#include <opencog/rule-engine/Rule.h>
-#include <opencog/rule-engine/UREConfig.h>
-#include <opencog/rule-engine/backwardchainer/BIT.h>
-#include <opencog/rule-engine/backwardchainer/TraceRecorder.h>
-#include <opencog/rule-engine/backwardchainer/ControlPolicy.h>
+#include "../Rule.h"
+#include "../UREConfig.h"
+#include "BIT.h"
+#include "TraceRecorder.h"
+#include "ControlPolicy.h"
 
 class BackwardChainerUTest;
 
@@ -186,7 +186,7 @@ private:
 	AtomSpace& _as;
 
 	// Contain the configuration
-	UREConfig _configReader;
+	UREConfig _config;
 
 	// Structure holding the Back Inference Tree
 	BIT _bit;
