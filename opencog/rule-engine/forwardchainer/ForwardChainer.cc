@@ -207,7 +207,8 @@ Source* ForwardChainer::select_source()
 	if (ure_logger().is_debug_enabled()) {
 		OC_ASSERT(weights.size() == _sources.size());
 		std::stringstream ss;
-		ss << "Weighted sources:" << std::endl << "size = " << weights.size();
+		ss << "Weighted sources (only display positive weights):" << std::endl
+		   << "size = " << weights.size();
 		for (size_t i = 0; i < weights.size(); i++) {
 			if (0 < weights[i]) {
 				ss << std::endl << weights[i] << " "
@@ -277,8 +278,11 @@ RuleProbabilityPair ForwardChainer::select_rule(Source& source)
 	// Log valid rules
 	if (ure_logger().is_debug_enabled()) {
 		std::stringstream ss;
-		ss << "The following rules are valid:" << std::endl
-		   << valid_rules.to_short_string();
+		if (valid_rules.empty())
+			ss << "No valid rule";
+		else
+			ss << "The following rules are valid:" << std::endl
+			   << valid_rules.to_short_string();
 		LAZY_URE_LOG_DEBUG << ss.str();
 	}
 
