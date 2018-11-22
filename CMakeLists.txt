@@ -25,18 +25,9 @@ PROJECT(atomspace)
 ## Get atomspace version
 FILE(READ "${CMAKE_SOURCE_DIR}/opencog/atomspace/version.h" _ATOMSPACE_H_CONTENTS)
 STRING(REGEX MATCH
-    "#define ATOMSPACE_MAJOR_VERSION ([0-9]+)"
-    _ "${_ATOMSPACE_H_CONTENTS}")
-SET(VERSION_MAJOR ${CMAKE_MATCH_1})
-STRING(REGEX MATCH
-    "#define ATOMSPACE_MINOR_VERSION ([0-9]+)"
-    _ "${_ATOMSPACE_H_CONTENTS}")
-SET(VERSION_MINOR ${CMAKE_MATCH_1})
-STRING(REGEX MATCH
-    "#define ATOMSPACE_MICRO_VERSION ([0-9]+)"
-    _ "${_ATOMSPACE_H_CONTENTS}")
-SET(VERSION_PATCH ${CMAKE_MATCH_1})
-SET(SEMANTIC_VERSION "${VERSION_MAJOR}.${VERSION_MINOR}.${VERSION_PATCH}")
+	"#define ATOMSPACE_VERSION_STRING \"([0-9]+[.0-9]+[.0-9]+)\""
+        _ "${_ATOMSPACE_H_CONTENTS}")
+SET(SEMANTIC_VERSION ${CMAKE_MATCH_1})
 
 # To supress Cygwin warning "CMake no longer defines WIN32 on Cygwin!"
 # Remove when CMake >= 2.8.4 is required to build the project
@@ -198,7 +189,7 @@ ENDIF (WIN32)
 # Check for boost. We need dynamic-linked, threaded libs by default.
 SET(Boost_USE_STATIC_LIBS OFF)
 SET(Boost_USE_MULTITHREADED ON)
-SET(MIN_BOOST 1.54)
+SET(MIN_BOOST 1.46)
 
 # Required boost packages
 FIND_PACKAGE(Boost ${MIN_BOOST} COMPONENTS date_time filesystem program_options regex serialization system thread REQUIRED)
@@ -210,7 +201,7 @@ IF(Boost_FOUND)
 	SET(BOOST_PARAMETER_MAX_ARITY 7)
 	ADD_DEFINITIONS(-DBOOST_PARAMETER_MAX_ARITY=${BOOST_PARAMETER_MAX_ARITY})
 ELSE(Boost_FOUND)
-	MESSAGE(FATAL_ERROR "Boost 1.46 or newer is needed to build OpenCog!")
+	MESSAGE(FATAL_ERROR "Boost ${MIN_BOOST} or newer is needed to build OpenCog!")
 ENDIF(Boost_FOUND)
 
 # Opencog won't compile with Boost 1.51, some kind of conflict with
@@ -590,44 +581,11 @@ SET(CPACK_PACKAGE_DESCRIPTION_SUMMARY "The OpenCog AtomSpace")
 SET(CPACK_PACKAGE_NAME "atomspace")
 SET(CPACK_PACKAGE_VENDOR "opencog.org")
 SET(CPACK_PACKAGE_VERSION "${SEMANTIC_VERSION}-${UTC_DATE}")
-SET(CPACK_PACKAGE_VERSION_MAJOR ${VERSION_MAJOR})
-SET(CPACK_PACKAGE_VERSION_MINOR ${VERSION_MINOR})
-SET(CPACK_PACKAGE_VERSION_PATCH ${VERSION_PATCH})
 SET(CPACK_RESOURCE_FILE_LICENSE "${CMAKE_CURRENT_SOURCE_DIR}/LICENSE")
 SET(CPACK_PACKAGE_FILE_NAME
 	"${CPACK_PACKAGE_NAME}_${CPACK_PACKAGE_VERSION}_${PACKAGE_ARCHITECTURE}")
-SET(CPACK_SOURCE_IGNORE_FILES
-	"~$"
-	".a$"
-	".so$"
-	".log$"
-	".tar.z$"
-	".tar.gz$"
-	".tar.bz2$"
-	"/Makefile$"
-	"/CMakeFiles/"
-	"/CMakeCache.txt$"
-	"/DartTestfile.txt$"
-	"/cmake_install.cmake$"
-	"/Testfile.cmake$"
-	"/CTestTestfile.cmake$"
-	"/CTestTestfile.cmake$"
-	"UTest$"
-	"UTest.cpp$"
-	"/_CPack_Packages/"
-	"/CPackConfig.cmake$"
-	"/CPackSourceConfig.cmake$"
-	"/sniff$"
-	"/install_manifest.txt$"
-	".stack-work/"
-	"${CPACK_PACKAGE_FILE_NAME}"
-	"^${PROJECT_SOURCE_DIR}/debian/"
-	"^${PROJECT_SOURCE_DIR}/.*spec$"
-	"^${PROJECT_SOURCE_DIR}/vendor/"
-	"^${PROJECT_SOURCE_DIR}/.git/"
-)
-
 SET(CPACK_PACKAGING_INSTALL_PREFIX "/usr/local")
+
 ## Debian specific configurations
 SET(DEPENDENCY_LIST
 	"guile-2.2 (>= 2.2.2)"
@@ -649,6 +607,7 @@ SET(DEPENDENCY_LIST
 
 STRING(REPLACE ";" ", " MAIN_DEPENDENCIES "${DEPENDENCY_LIST}")
 SET(CPACK_DEBIAN_PACKAGE_DEPENDS "${MAIN_DEPENDENCIES}")
+SET(CPACK_DEBIAN_PACKAGE_SECTION "libdevel")
 SET(CPACK_DEBIAN_PACKAGE_HOMEPAGE "http://opencog.org")
 INCLUDE(CPack)
 
