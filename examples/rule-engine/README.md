@@ -9,8 +9,7 @@ Usage
 
 First, make sure you can run the examples in examples/guile and
 examples/pattern-matcher as the rule engine heavily depends on the
-pattern matcher. Have a look at examples/guile/README.md and then
-examples/pattern-matcher/simple.scm.
+pattern matcher.
 
-Then see `simple/README.md` and `frog/README.md` for a description and
-usage of the rule engine examples.
+Then you may have a look at the different subfolders, see their
+respective README.md files.
