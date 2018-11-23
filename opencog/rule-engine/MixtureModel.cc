@@ -32,7 +32,7 @@
 #include <opencog/truthvalue/SimpleTruthValue.h>
 
 #include "BetaDistribution.h"
-#include "../URELogger.h"
+#include "URELogger.h"
 
 using namespace opencog;
 

@@ -27,7 +27,7 @@
 #include <opencog/atoms/base/Handle.h>
 #include <opencog/truthvalue/TruthValue.h>
 
-#include "BetaDistribution.h"
+#include "ThompsonSampling.h"
 
 namespace opencog
 {
@@ -74,6 +74,8 @@ public:
 	 */
 	Handle operator()();
 
+	std::string to_string(const std::string& indent=empty_string) const;
+
 private:
 	/**
 	 * Helper for distribution(). Given a vector of cdf vector, one
@@ -81,6 +83,9 @@ private:
 	 * comment of distribution()) for action i.
 	 */
 	double Pi(size_t i, const std::vector<std::vector<double>>& cdfs) const;
+
+	TruthValueSeq _tvs;
+	ThompsonSampling _tsmp;
 };
 
 // Debugging helpers see

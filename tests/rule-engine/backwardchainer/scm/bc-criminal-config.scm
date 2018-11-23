@@ -58,7 +58,7 @@
 
 ;; termination criteria parameters
 (ExecutionLink
-   (SchemaNode "URE:BC:complexity-penalty")
+   (SchemaNode "URE:complexity-penalty")
    (ConceptNode "URE")
    (NumberNode "0.1")
 )
