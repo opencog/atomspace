@@ -1,3 +1,5 @@
+;; TODO: this example is boggus, please someone fixes it.
+
 ;; This is a toy puzzle to give an example of negation conflict test.
 ;; There are two persons: American and German.
 ;; There are two pets: cat and dog.
@@ -22,27 +24,22 @@
    (Concept "dog")
    (Concept "pet"))
 
-
-
 ;; The German doesn't keep the dog.
 ;; This truth is represented by the TV (stv 0.0 1.0)
-;; Note that it won't work if you just wrap the EvaluationLink with a NotLink,
-;; Because NotLink is a virtual Link, which is only executed in runtime.
-;; NotLinks should not be used directly to represent a truth.
+;;
+;; Alternatively you could use a NotLink with a negation rule.
 (Evaluation (stv 0.0 1.0)
    (Predicate "keep-pet")
    (List
    	(Concept "German")
-        (Concept "dog")))
+      (Concept "dog")))
 
-
-
-(define (evaluation-absent predicate A B )
+;; TODO: we probably don't need that
+(define (evaluation-absent predicate A B)
     (bool->tv (null? (cog-link "EvaluationLink" predicate (List A B))) )
 )
 
-
-;; If A keeps a pet x, B is different FROM A, 
+;; If A keeps a pet X, B is different from A, 
 ;; and there exists some other pet, Y, 
 ;; that is different from X, then B keeps Y
 (define keep-different-pet-rule
@@ -102,14 +99,13 @@
      ;; should not be selected.
      (Or
         (EvaluationLink
-	   (GroundedPredicateNode "scm: evaluation-absent")
-	   (ListLink kp vA vX)
+          (GroundedPredicateNode "scm: evaluation-absent")
+          (ListLink kp vA vX)
         )
         (EvaluationLink
-	   (GroundedPredicateNode "scm: absolutely-true")
-	   (ListLink akx)
-        )       
- 
+          (GroundedPredicateNode "scm: absolutely-true")
+          (ListLink akx)
+        )
      )
 
      (Or
