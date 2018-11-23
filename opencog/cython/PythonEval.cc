@@ -761,13 +761,21 @@ void PythonEval::module_for_function(const std::string& moduleFunction,
     }
     // Iteratively check for objects in the selected (either root or loaded) module
     index = functionName.find_first_of('.');
+    bool bDecRef = false;
     while (0 < index) {
         std::string objectName = functionName.substr(0, index);
         // If there is no object yet, find it in Module
         // Else find it as Attr in Object
-        pyObject = nullptr == pyObject ?
-            find_object(pyModule, objectName) :
-            PyObject_GetAttrString(pyObject, objectName.c_str());
+        if(nullptr == pyObject) {
+            pyObject = find_object(pyModule, objectName);
+        } else {
+            PyObject* pyTmp = PyObject_GetAttrString(pyObject, objectName.c_str());
+            if(bDecRef) Py_DECREF(pyObject);
+            pyObject =  pyTmp;
+            // next time, we should use DECREF, since PyObject_GetAttrString returns new reference
+            bDecRef = true;
+        }
+
         if (nullptr == pyObject) {
             throw RuntimeException(TRACE_INFO,
                 "Python object/attribute for '%s' not found!",
@@ -776,11 +784,7 @@ void PythonEval::module_for_function(const std::string& moduleFunction,
         functionName = functionName.substr(index+1);
         index = functionName.find_first_of('.');
     }
-    // Object can actually be an 'imported as' module (e.g. "import tensorflow as tf")
-    if(pyObject && PyModule_Check(pyObject)) {
-        pyModule = pyObject;
-        pyObject = nullptr;
-    }
+    if(pyObject && !bDecRef) Py_INCREF(pyObject); // for uniformity to DEC later in any case
 }
 
 /**
@@ -841,7 +845,8 @@ PyObject* PythonEval::call_user_function(const std::string& moduleFunction,
 
     // Promote the borrowed reference for pyUserFunc since it will
     // be passed to a Python C API function later that "steals" it.
-    Py_INCREF(pyUserFunc);
+    // PyObject_GetAttrString already returns new reference, so we do this only for PyDict_GetItemString
+    if(nullptr == pyObject) Py_INCREF(pyUserFunc);
 
     // Make sure the function is callable.
     if (!PyCallable_Check(pyUserFunc)) {
@@ -870,7 +875,11 @@ PyObject* PythonEval::call_user_function(const std::string& moduleFunction,
     // Now make sure the expected count matches the actual argument count.
     int actualArgumentCount = arguments->get_arity();
     // If there is an object, its method has 'self' argument, which is passed automatically
-    if (pyObject) expectedArgumentCount--;
+    // Object can actually be an 'imported as' module (e.g. "import tensorflow as tf")
+    // TODO: maybe a better check for 'self' can be done (e.g. to distinguish class methods),
+    //       but PyInstanceMethod_Check and PyMethod_GET_SELF didn't help here...
+    if (pyObject && !PyModule_Check(pyObject)) expectedArgumentCount--;
+    if (pyObject) Py_DECREF(pyObject); // We don't need it anymore
     if (expectedArgumentCount != actualArgumentCount) {
         PyGILState_Release(gstate);
         throw RuntimeException(TRACE_INFO,
@@ -1092,7 +1101,9 @@ void PythonEval::apply_as(const std::string& moduleFunction,
 
     // Promote the borrowed reference for pyUserFunc since it will
     // be passed to a Python C API function later that "steals" it.
-    Py_INCREF(pyUserFunc);
+    // PyObject_GetAttrString already returns new reference, so we do this only for PyDict_GetItemString
+    if(nullptr == pyObject) Py_INCREF(pyUserFunc);
+
 
     // Make sure the function is callable.
     if (!PyCallable_Check(pyUserFunc))
@@ -1106,7 +1117,11 @@ void PythonEval::apply_as(const std::string& moduleFunction,
     // Get the expected argument count.
     int expectedArgumentCount = this->argument_count(pyUserFunc);
     // If there is an object, its method has 'self' argument, which is passed automatically
-    if (pyObject) expectedArgumentCount--;
+    // Object can actually be an 'imported as' module (e.g. "import tensorflow as tf")
+    // TODO: maybe a better check for 'self' can be done (e.g. to distinguish class methods),
+    //       but PyInstanceMethod_Check and PyMethod_GET_SELF didn't help here...
+    if (pyObject && !PyModule_Check(pyObject)) expectedArgumentCount--;
+    if (pyObject) Py_DECREF(pyObject); // We don't need it anymore
     if (expectedArgumentCount == MISSING_FUNC_CODE)
     {
         PyGILState_Release(gstate);
