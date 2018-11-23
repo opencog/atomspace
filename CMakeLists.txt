@@ -578,7 +578,7 @@ SET(CPACK_PACKAGE_CONTACT "opencog@googlegroups.com")
 SET(CPACK_PACKAGE_DESCRIPTION_FILE "${CMAKE_CURRENT_SOURCE_DIR}/README.md")
 SET(CPACK_PACKAGE_DIRECTORY "${CMAKE_BINARY_DIR}/packages")
 SET(CPACK_PACKAGE_DESCRIPTION_SUMMARY "The OpenCog AtomSpace")
-SET(CPACK_PACKAGE_NAME "atomspace")
+SET(CPACK_PACKAGE_NAME "atomspace-dev")
 SET(CPACK_PACKAGE_VENDOR "opencog.org")
 SET(CPACK_PACKAGE_VERSION "${SEMANTIC_VERSION}-${UTC_DATE}")
 SET(CPACK_RESOURCE_FILE_LICENSE "${CMAKE_CURRENT_SOURCE_DIR}/LICENSE")
@@ -588,7 +588,7 @@ SET(CPACK_PACKAGING_INSTALL_PREFIX "/usr/local")
 
 ## Debian specific configurations
 SET(DEPENDENCY_LIST
-	"guile-2.2 (>= 2.2.2)"
+	"guile-2.2-dev (>= 2.2.2)"
 	"python-dev (>= 2.7.5)"
 	"libzmq3-dev (>= 4.0.4)"
 	"libboost-date-time-dev (>= ${MIN_BOOST})"
