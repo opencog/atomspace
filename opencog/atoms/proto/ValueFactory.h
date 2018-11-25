@@ -66,18 +66,13 @@ public:
       * @param vtype The type of the Value.
       * @throws invalid_argument exception.
       */
-    template <typename T>
-    ProtoAtomPtr create(Type vtype, T arg)
+    template <typename TYP, typename ARG>
+    ProtoAtomPtr create(TYP vtype, ARG arg)
     {
         // Once we know there is a matching function, cache.
-        static std::map<Type, ValueFactory> cache = {};
-        ValueFactory  fptr = nullptr;
+        static ValueFactory fptr = nullptr;
 
-        if (cache.find(vtype) != cache.end())
-        {
-            fptr = cache[vtype];
-        }
-        else
+        if (nullptr == fptr)
         {
             if (_factories.find(vtype) != _factories.end())
             {
@@ -85,13 +80,12 @@ public:
                 for (const ProtoFactory& fr : func_vec)
                 {
                     int size = 1;
-                    if ((int)fr.args.size() != size)
+                    if ((int) fr.args.size() != size)
                         continue;
                      
                     if (fr.args[0] == std::type_index(typeid(arg)))
                     {
                         fptr = fr.func;
-                        cache[vtype] = fptr;
                         break;
                     }
                 }
