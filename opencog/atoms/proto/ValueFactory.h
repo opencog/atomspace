@@ -51,14 +51,14 @@ public:
       * @param vtype  the value type.
       * @param caster the casting function.
       */
-    void addCreator(Type vtype, ValueCaster caster);
+    void addCaster(Type vtype, ValueCaster caster);
 
      /**
       * Casts a protoAtomPtr object into its type's Value pointer.
       *
       * @param ptr the protoAtomPtr to be cast.
       */
-    ProtoAtomPtr recreate(ProtoAtomPtr ptr);
+    ProtoAtomPtr recast(ProtoAtomPtr ptr);
 
      /**
       * Does dynamic dispatching of the appropriate create functions
