@@ -74,11 +74,12 @@ public:
 
         if (nullptr == fptr)
         {
-            // First, find the list of factories for this type.
-            if (_factories.find(vtype) != _factories.end())
+            try
             {
-                // Second, find the matching arglist.
+                // First, find the list of factories for this type.
                 std::vector<ProtoFactory> func_vec = _factories.at(vtype);
+
+                // Second, find the matching arglist.
                 for (const ProtoFactory& fr : func_vec)
                 {
                     // At this time, only one arg is supported. FIXME
@@ -93,6 +94,7 @@ public:
                     }
                 }
             }
+            catch(...) {}
         }
 
         if (fptr)
