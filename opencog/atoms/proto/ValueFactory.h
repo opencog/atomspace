@@ -12,98 +12,112 @@
 
 namespace opencog
 {
-using CreateProto = ProtoAtomPtr (*) (...);
+using ValueFactory = ProtoAtomPtr (*) (...);
+using ValueCaster = ProtoAtomPtr (*) (const ProtoAtomPtr&);
 
 
-class ValueFactory
+class ValueServer
 {
+    friend ValueServer& valueserver();
 private:
+    ValueServer() {}
     
-    struct FuncRegister
+    struct ProtoFactory
     {
-        CreateProto func;
+        ValueFactory func;
         std::vector<std::type_index> args;
     };
 
-#define THROW_ERROR \
-    (throw NotFoundException(TRACE_INFO, "No function found for the given type."))
-
-    ValueFactory() {}
-
-    std::map<Type, std::vector<FuncRegister>> func_register;
-    std::map<Type, CreateProto> cast_register;
+    std::map<Type, std::vector<ProtoFactory>> _factories;
+    std::map<Type, ValueCaster> _vcasters;
 
 public:
 
-    friend ValueFactory& valuefactory();
-
     /**
-     *  Registers the creator functions.
+     * Registers the creator functions.
      *
-     *  @param vtype The value type.
-     *  @param func a pointer to the creator function of the value.
-     *  @param args  an ordered vector the types of arguments the creator takes.
+     * @param vtype The value type.
+     * @param func  a pointer to the creator function of the value.
+     * @param args  an ordered vector of the types of arguments the
+     *              creator takes.
      */
-     void addFactory(Type vtype, CreateProto func, std::vector<std::type_index> args);
+    void addFactory(Type vtype, ValueFactory func,
+                    std::vector<std::type_index> args);
 
      /**
       * Registers the casting function for a given type.
       *
-      * @param vtype the value type.
-      * @param func the casting function.
+      * @param vtype  the value type.
+      * @param caster the casting function.
       */
-     void addCreator(Type vtype, CreateProto func);
+    void addCaster(Type vtype, ValueCaster caster);
 
      /**
       * Casts a protoAtomPtr object into its type's Value pointer.
       *
-      * @param ptr the protoAtomPtr to be casted.
+      * @param ptr the protoAtomPtr to be cast.
       */
-     ProtoAtomPtr recreate(ProtoAtomPtr ptr);
+    ProtoAtomPtr recast(const ProtoAtomPtr& ptr) const;
 
-     /** Does dynamic dispatching of the appropriate create functions which matches argument provided.
+     /**
+      * Does dynamic dispatching of the appropriate create functions
+      * which matches argument provided.
       * @param arg the value type constructor argument.
       * @param vtype The type of the Value.
       * @throws invalid_argument exception.
       */
-    template <typename T>
-    ProtoAtomPtr create(Type vtype, T arg)
+    template <typename TYP, typename ARG>
+    ProtoAtomPtr create(TYP vtype, ARG arg) const
     {
-        // Once we know there is a matching function, cache.
-        static std::map<Type, CreateProto> cache = {};
-        CreateProto  fptr = nullptr;
+        // Look up the factory only once; cache the result.
+        static ValueFactory fptr = nullptr;
 
-        if (cache.find(vtype) != cache.end()) {
-            fptr = cache[vtype];
+        if (nullptr == fptr)
+        {
+            try
+            {
+                // First, find the list of factories for this type.
+                std::vector<ProtoFactory> func_vec = _factories.at(vtype);
 
-        } else {
-            if (func_register.find(vtype) != func_register.end()) {
-                std::vector<FuncRegister> func_vec = func_register[vtype];
-                for (FuncRegister fr : func_vec) {
+                // Second, find the matching arglist.
+                for (const ProtoFactory& fr : func_vec)
+                {
+                    // At this time, only one arg is supported. FIXME
                     int size = 1;
-                    if ((int)fr.args.size() != size)
+                    if ((int) fr.args.size() != size)
                         continue;
                      
-                    if (fr.args[0] == std::type_index(typeid(arg))) {
+                    if (fr.args[0] == std::type_index(typeid(arg)))
+                    {
                         fptr = fr.func;
-                        cache[vtype] = fptr;
                         break;
                     }
                 }
             }
+            catch(...) {}
         }
 
-        if (fptr) {
+        if (fptr)
             return (*fptr)(arg);
-        }
 
-        THROW_ERROR;
+        throw NotFoundException(TRACE_INFO,
+              "No factory found for this Value type and arguments.");
     }
-
-    // Multitype arguments or Mulit arguments are explicitly hanled for now.
-    // add a creator function here if your Value constructor takes multiple arguments.
 };
 
-ValueFactory& valuefactory();
+ValueServer& valueserver();
+
+#define TOKENPASTE(x, y) x ## y
+#define TOKENPASTE2(x, y) TOKENPASTE(x, y)
+#define DEFINE_VALUE_FACTORY(CTYPE,CREATE,ARG)                       \
+                                                                     \
+/* This runs when the shared lib is loaded. */                       \
+static __attribute__ ((constructor)) void                            \
+    TOKENPASTE2(init, __COUNTER__)(void)                             \
+{                                                                    \
+   valueserver().addFactory(CTYPE, (ValueFactory) & (CREATE<ARG>),   \
+      std::vector<std::type_index> {std::type_index(typeid(ARG))});  \
+}
+
 }
 #endif

@@ -52,9 +52,5 @@ std::string LinkValue::to_string(const std::string& indent) const
 }
 
 // Adds factory when library is loaded.
-static __attribute__ ((constructor)) void init(void)
-{
-    valuefactory().addFactory(LINK_VALUE, (CreateProto) & (createLinkValue<std::vector<ProtoAtomPtr>>),
-                                    std::vector<std::type_index> {std::type_index(typeid(std::vector<ProtoAtomPtr>))});
-}
-
+DEFINE_VALUE_FACTORY(LINK_VALUE,
+                     createLinkValue, std::vector<ProtoAtomPtr>)

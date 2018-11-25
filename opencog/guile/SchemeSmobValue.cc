@@ -145,7 +145,7 @@ SCM SchemeSmob::ss_new_value (SCM stype, SCM svalue_list)
 	{
 		std::vector<double> valist;
 		valist = verify_float_list(svalue_list, "cog-new-value", 2);
-		pa = valuefactory().create(t, valist);
+		pa = valueserver().create(t, valist);
 	}
 	else if (RANDOM_STREAM == t)
 	{
@@ -159,21 +159,21 @@ SCM SchemeSmob::ss_new_value (SCM stype, SCM svalue_list)
 			SCM svalue = SCM_CAR(svalue_list);
 			dim = verify_int(svalue, "cog-new-value", 2);
 		}
-		pa = valuefactory().create(t, dim);
+		pa = valueserver().create(t, dim);
 	}
 
 	else if (LINK_VALUE == t)
 	{
 		std::vector<ProtoAtomPtr> valist;
 		valist = verify_protom_list(svalue_list, "cog-new-value", 2);
-		pa = valuefactory().create(t, valist);
+		pa = valueserver().create(t, valist);
 	}
 
 	else if (STRING_VALUE == t)
 	{
 		std::vector<std::string> valist;
 		valist = verify_string_list(svalue_list, "cog-new-value", 2);
-		pa = valuefactory().create(t, valist);
+		pa = valueserver().create(t, valist);
 	}
 
 	else

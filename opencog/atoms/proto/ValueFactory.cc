@@ -2,33 +2,38 @@
 
 using namespace opencog;
 
-void ValueFactory::addFactory(Type vtype, CreateProto func, std::vector<std::type_index> args)
+void ValueServer::addFactory(Type vtype, ValueFactory func,
+                             std::vector<std::type_index> args)
 {
-    FuncRegister fr = {func, args};
+    ProtoFactory fr = {func, args};
 
-    if (func_register.find(vtype) != func_register.end()) {
-        func_register[vtype].push_back(fr);
-    } else {
-        func_register[vtype] = {fr};
+    if (_factories.find(vtype) != _factories.end())
+        _factories[vtype].push_back(fr);
+    else
+        _factories[vtype] = {fr};
+}
+
+void ValueServer::addCaster(Type vtype, ValueCaster func)
+{
+    _vcasters[vtype] = func;
+}
+
+ProtoAtomPtr ValueServer::recast(const ProtoAtomPtr& ptr) const
+{
+    Type vtype = ptr->get_type();
+    try
+    {
+        ValueCaster caster = _vcasters.at(vtype);
+        return (*caster)(ptr);
+    }
+    catch (...)
+    {
+        return ptr;
     }
 }
 
-void ValueFactory::addCreator(Type vtype, CreateProto func)
+ValueServer& opencog::valueserver()
 {
-    cast_register[vtype] = func;
-}
-
-ProtoAtomPtr ValueFactory::recreate(ProtoAtomPtr ptr)
-{
-    Type vtype = ptr->get_type();
-    if (cast_register.find(vtype) != cast_register.end())
-        return (*cast_register[vtype])(ptr);
-    else
-        THROW_ERROR;
-}
-
-ValueFactory& opencog::valuefactory()
-{
-    static std::unique_ptr<ValueFactory> instance(new ValueFactory());
+    static std::unique_ptr<ValueServer> instance(new ValueServer());
     return *instance;
 }
