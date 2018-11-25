@@ -2,15 +2,15 @@
 
 using namespace opencog;
 
-void ValueServer::addFactory(Type vtype, ValueFactory func, std::vector<std::type_index> args)
+void ValueServer::addFactory(Type vtype, ValueFactory func,
+                             std::vector<std::type_index> args)
 {
     ProtoFactory fr = {func, args};
 
-    if (_factories.find(vtype) != _factories.end()) {
+    if (_factories.find(vtype) != _factories.end())
         _factories[vtype].push_back(fr);
-    } else {
+    else
         _factories[vtype] = {fr};
-    }
 }
 
 void ValueServer::addCaster(Type vtype, ValueCaster func)
