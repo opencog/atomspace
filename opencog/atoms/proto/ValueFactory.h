@@ -17,6 +17,7 @@ using CreateProto = ProtoAtomPtr (*) (...);
 
 class ValueFactory
 {
+    friend ValueFactory& valuefactory();
 private:
     
     struct FuncRegister
@@ -35,16 +36,16 @@ private:
 
 public:
 
-    friend ValueFactory& valuefactory();
-
     /**
-     *  Registers the creator functions.
+     * Registers the creator functions.
      *
-     *  @param vtype The value type.
-     *  @param func a pointer to the creator function of the value.
-     *  @param args  an ordered vector the types of arguments the creator takes.
+     * @param vtype The value type.
+     * @param func  a pointer to the creator function of the value.
+     * @param args  an ordered vector of the types of arguments the
+     *              creator takes.
      */
-     void addFactory(Type vtype, CreateProto func, std::vector<std::type_index> args);
+    void addFactory(Type vtype, CreateProto func,
+                    std::vector<std::type_index> args);
 
      /**
       * Registers the casting function for a given type.
@@ -52,16 +53,18 @@ public:
       * @param vtype the value type.
       * @param func the casting function.
       */
-     void addCreator(Type vtype, CreateProto func);
+    void addCreator(Type vtype, CreateProto func);
 
      /**
       * Casts a protoAtomPtr object into its type's Value pointer.
       *
-      * @param ptr the protoAtomPtr to be casted.
+      * @param ptr the protoAtomPtr to be cast.
       */
-     ProtoAtomPtr recreate(ProtoAtomPtr ptr);
+    ProtoAtomPtr recreate(ProtoAtomPtr ptr);
 
-     /** Does dynamic dispatching of the appropriate create functions which matches argument provided.
+     /**
+      * Does dynamic dispatching of the appropriate create functions
+      * which matches argument provided.
       * @param arg the value type constructor argument.
       * @param vtype The type of the Value.
       * @throws invalid_argument exception.
@@ -73,18 +76,23 @@ public:
         static std::map<Type, CreateProto> cache = {};
         CreateProto  fptr = nullptr;
 
-        if (cache.find(vtype) != cache.end()) {
+        if (cache.find(vtype) != cache.end())
+        {
             fptr = cache[vtype];
-
-        } else {
-            if (func_register.find(vtype) != func_register.end()) {
+        }
+        else
+        {
+            if (func_register.find(vtype) != func_register.end())
+            {
                 std::vector<FuncRegister> func_vec = func_register[vtype];
-                for (FuncRegister fr : func_vec) {
+                for (FuncRegister fr : func_vec)
+                {
                     int size = 1;
                     if ((int)fr.args.size() != size)
                         continue;
                      
-                    if (fr.args[0] == std::type_index(typeid(arg))) {
+                    if (fr.args[0] == std::type_index(typeid(arg)))
+                    {
                         fptr = fr.func;
                         cache[vtype] = fptr;
                         break;
@@ -93,15 +101,11 @@ public:
             }
         }
 
-        if (fptr) {
+        if (fptr)
             return (*fptr)(arg);
-        }
 
         THROW_ERROR;
     }
-
-    // Multitype arguments or Mulit arguments are explicitly hanled for now.
-    // add a creator function here if your Value constructor takes multiple arguments.
 };
 
 ValueFactory& valuefactory();
