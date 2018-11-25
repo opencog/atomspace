@@ -69,16 +69,19 @@ public:
     template <typename TYP, typename ARG>
     ProtoAtomPtr create(TYP vtype, ARG arg)
     {
-        // Once we know there is a matching function, cache.
+        // Look up the factory only once; cache the result.
         static ValueFactory fptr = nullptr;
 
         if (nullptr == fptr)
         {
+            // First, find the list of factories for this type.
             if (_factories.find(vtype) != _factories.end())
             {
+                // Second, find the matching arglist.
                 std::vector<ProtoFactory> func_vec = _factories[vtype];
                 for (const ProtoFactory& fr : func_vec)
                 {
+                    // At this time, only one arg is supported. FIXME
                     int size = 1;
                     if ((int) fr.args.size() != size)
                         continue;
