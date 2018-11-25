@@ -58,9 +58,5 @@ std::string RandomStream::to_string(const std::string& indent) const
 // ==============================================================
 
 // Adds factor when library is loaded.
-static __attribute__ ((constructor)) void init(void)
-{
-    valuefactory().addFactory(RANDOM_STREAM, (CreateProto) & (createRandomStream<int>),
-                                    std::vector<std::type_index> {std::type_index(typeid(int))});
-}
-
+DEFINE_VALUE_FACTORY(RANDOM_STREAM,
+                     createRandomStream, int)

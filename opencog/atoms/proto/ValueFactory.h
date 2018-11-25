@@ -16,18 +16,17 @@ using CreateProto = ProtoAtomPtr (*) (...);
 using ValueCaster = ProtoAtomPtr (*) (const ProtoAtomPtr&);
 
 
-class ValueFactory
+class ValueServer
 {
-    friend ValueFactory& valuefactory();
+    friend ValueServer& valueserver();
 private:
+    ValueServer() {}
     
     struct ProtoFactory
     {
         CreateProto func;
         std::vector<std::type_index> args;
     };
-
-    ValueFactory() {}
 
     std::map<Type, std::vector<ProtoFactory>> _factories;
     std::map<Type, ValueCaster> _vcasters;
@@ -107,6 +106,19 @@ public:
     }
 };
 
-ValueFactory& valuefactory();
+ValueServer& valueserver();
+
+#define TOKENPASTE(x, y) x ## y
+#define TOKENPASTE2(x, y) TOKENPASTE(x, y)
+#define DEFINE_VALUE_FACTORY(CTYPE,CREATE,ARG)                       \
+                                                                     \
+/* This runs when the shared lib is loaded. */                       \
+static __attribute__ ((constructor)) void                            \
+    TOKENPASTE2(init, __COUNTER__)(void)                             \
+{                                                                    \
+   valueserver().addFactory(CTYPE, (CreateProto) & (CREATE<ARG>),    \
+      std::vector<std::type_index> {std::type_index(typeid(ARG))});  \
+}
+
 }
 #endif

@@ -2,7 +2,7 @@
 
 using namespace opencog;
 
-void ValueFactory::addFactory(Type vtype, CreateProto func, std::vector<std::type_index> args)
+void ValueServer::addFactory(Type vtype, CreateProto func, std::vector<std::type_index> args)
 {
     ProtoFactory fr = {func, args};
 
@@ -13,12 +13,12 @@ void ValueFactory::addFactory(Type vtype, CreateProto func, std::vector<std::typ
     }
 }
 
-void ValueFactory::addCaster(Type vtype, ValueCaster func)
+void ValueServer::addCaster(Type vtype, ValueCaster func)
 {
     _vcasters[vtype] = func;
 }
 
-ProtoAtomPtr ValueFactory::recast(ProtoAtomPtr ptr)
+ProtoAtomPtr ValueServer::recast(ProtoAtomPtr ptr)
 {
     Type vtype = ptr->get_type();
     if (_vcasters.find(vtype) != _vcasters.end())
@@ -27,8 +27,8 @@ ProtoAtomPtr ValueFactory::recast(ProtoAtomPtr ptr)
         return ptr;
 }
 
-ValueFactory& opencog::valuefactory()
+ValueServer& opencog::valueserver()
 {
-    static std::unique_ptr<ValueFactory> instance(new ValueFactory());
+    static std::unique_ptr<ValueServer> instance(new ValueServer());
     return *instance;
 }
