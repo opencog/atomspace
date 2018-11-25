@@ -26,9 +26,6 @@ private:
         std::vector<std::type_index> args;
     };
 
-#define THROW_ERROR \
-    (throw NotFoundException(TRACE_INFO, "No function found for the given type."))
-
     ValueFactory() {}
 
     std::map<Type, std::vector<FuncRegister>> func_register;
@@ -104,7 +101,8 @@ public:
         if (fptr)
             return (*fptr)(arg);
 
-        THROW_ERROR;
+        throw NotFoundException(TRACE_INFO,
+              "No factory found for this Value type and arguments.");
     }
 };
 

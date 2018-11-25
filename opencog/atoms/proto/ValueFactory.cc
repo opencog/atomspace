@@ -24,7 +24,7 @@ ProtoAtomPtr ValueFactory::recreate(ProtoAtomPtr ptr)
     if (cast_register.find(vtype) != cast_register.end())
         return (*cast_register[vtype])(ptr);
     else
-        THROW_ERROR;
+        return ptr;
 }
 
 ValueFactory& opencog::valuefactory()
