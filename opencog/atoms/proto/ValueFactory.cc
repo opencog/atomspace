@@ -18,13 +18,18 @@ void ValueServer::addCaster(Type vtype, ValueCaster func)
     _vcasters[vtype] = func;
 }
 
-ProtoAtomPtr ValueServer::recast(ProtoAtomPtr ptr)
+ProtoAtomPtr ValueServer::recast(const ProtoAtomPtr& ptr) const
 {
     Type vtype = ptr->get_type();
-    if (_vcasters.find(vtype) != _vcasters.end())
-        return (*_vcasters[vtype])(ptr);
-    else
+    try
+    {
+        ValueCaster caster = _vcasters.at(vtype);
+        return (*caster)(ptr);
+    }
+    catch (...)
+    {
         return ptr;
+    }
 }
 
 ValueServer& opencog::valueserver()

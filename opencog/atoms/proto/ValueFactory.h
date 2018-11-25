@@ -57,7 +57,7 @@ public:
       *
       * @param ptr the protoAtomPtr to be cast.
       */
-    ProtoAtomPtr recast(ProtoAtomPtr ptr);
+    ProtoAtomPtr recast(const ProtoAtomPtr& ptr) const;
 
      /**
       * Does dynamic dispatching of the appropriate create functions
@@ -67,7 +67,7 @@ public:
       * @throws invalid_argument exception.
       */
     template <typename TYP, typename ARG>
-    ProtoAtomPtr create(TYP vtype, ARG arg)
+    ProtoAtomPtr create(TYP vtype, ARG arg) const
     {
         // Look up the factory only once; cache the result.
         static ValueFactory fptr = nullptr;
@@ -78,7 +78,7 @@ public:
             if (_factories.find(vtype) != _factories.end())
             {
                 // Second, find the matching arglist.
-                std::vector<ProtoFactory> func_vec = _factories[vtype];
+                std::vector<ProtoFactory> func_vec = _factories.at(vtype);
                 for (const ProtoFactory& fr : func_vec)
                 {
                     // At this time, only one arg is supported. FIXME
