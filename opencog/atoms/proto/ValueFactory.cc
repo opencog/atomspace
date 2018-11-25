@@ -2,7 +2,7 @@
 
 using namespace opencog;
 
-void ValueServer::addFactory(Type vtype, CreateProto func, std::vector<std::type_index> args)
+void ValueServer::addFactory(Type vtype, ValueFactory func, std::vector<std::type_index> args)
 {
     ProtoFactory fr = {func, args};
 

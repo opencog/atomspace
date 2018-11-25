@@ -12,7 +12,7 @@
 
 namespace opencog
 {
-using CreateProto = ProtoAtomPtr (*) (...);
+using ValueFactory = ProtoAtomPtr (*) (...);
 using ValueCaster = ProtoAtomPtr (*) (const ProtoAtomPtr&);
 
 
@@ -24,7 +24,7 @@ private:
     
     struct ProtoFactory
     {
-        CreateProto func;
+        ValueFactory func;
         std::vector<std::type_index> args;
     };
 
@@ -41,7 +41,7 @@ public:
      * @param args  an ordered vector of the types of arguments the
      *              creator takes.
      */
-    void addFactory(Type vtype, CreateProto func,
+    void addFactory(Type vtype, ValueFactory func,
                     std::vector<std::type_index> args);
 
      /**
@@ -70,8 +70,8 @@ public:
     ProtoAtomPtr create(Type vtype, T arg)
     {
         // Once we know there is a matching function, cache.
-        static std::map<Type, CreateProto> cache = {};
-        CreateProto  fptr = nullptr;
+        static std::map<Type, ValueFactory> cache = {};
+        ValueFactory  fptr = nullptr;
 
         if (cache.find(vtype) != cache.end())
         {
@@ -116,7 +116,7 @@ ValueServer& valueserver();
 static __attribute__ ((constructor)) void                            \
     TOKENPASTE2(init, __COUNTER__)(void)                             \
 {                                                                    \
-   valueserver().addFactory(CTYPE, (CreateProto) & (CREATE<ARG>),    \
+   valueserver().addFactory(CTYPE, (ValueFactory) & (CREATE<ARG>),   \
       std::vector<std::type_index> {std::type_index(typeid(ARG))});  \
 }
 
