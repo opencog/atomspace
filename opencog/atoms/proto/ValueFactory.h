@@ -13,6 +13,7 @@
 namespace opencog
 {
 using CreateProto = ProtoAtomPtr (*) (...);
+using ValueCaster = ProtoAtomPtr (*) (const ProtoAtomPtr&);
 
 
 class ValueFactory
@@ -29,7 +30,7 @@ private:
     ValueFactory() {}
 
     std::map<Type, std::vector<FuncRegister>> func_register;
-    std::map<Type, CreateProto> cast_register;
+    std::map<Type, ValueCaster> _vcasters;
 
 public:
 
@@ -47,10 +48,10 @@ public:
      /**
       * Registers the casting function for a given type.
       *
-      * @param vtype the value type.
-      * @param func the casting function.
+      * @param vtype  the value type.
+      * @param caster the casting function.
       */
-    void addCreator(Type vtype, CreateProto func);
+    void addCreator(Type vtype, ValueCaster caster);
 
      /**
       * Casts a protoAtomPtr object into its type's Value pointer.

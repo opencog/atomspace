@@ -13,16 +13,16 @@ void ValueFactory::addFactory(Type vtype, CreateProto func, std::vector<std::typ
     }
 }
 
-void ValueFactory::addCreator(Type vtype, CreateProto func)
+void ValueFactory::addCreator(Type vtype, ValueCaster func)
 {
-    cast_register[vtype] = func;
+    _vcasters[vtype] = func;
 }
 
 ProtoAtomPtr ValueFactory::recreate(ProtoAtomPtr ptr)
 {
     Type vtype = ptr->get_type();
-    if (cast_register.find(vtype) != cast_register.end())
-        return (*cast_register[vtype])(ptr);
+    if (_vcasters.find(vtype) != _vcasters.end())
+        return (*_vcasters[vtype])(ptr);
     else
         return ptr;
 }
