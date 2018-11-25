@@ -21,7 +21,7 @@ class ValueFactory
     friend ValueFactory& valuefactory();
 private:
     
-    struct FuncRegister
+    struct ProtoFactory
     {
         CreateProto func;
         std::vector<std::type_index> args;
@@ -29,7 +29,7 @@ private:
 
     ValueFactory() {}
 
-    std::map<Type, std::vector<FuncRegister>> func_register;
+    std::map<Type, std::vector<ProtoFactory>> _factories;
     std::map<Type, ValueCaster> _vcasters;
 
 public:
@@ -80,10 +80,10 @@ public:
         }
         else
         {
-            if (func_register.find(vtype) != func_register.end())
+            if (_factories.find(vtype) != _factories.end())
             {
-                std::vector<FuncRegister> func_vec = func_register[vtype];
-                for (FuncRegister fr : func_vec)
+                std::vector<ProtoFactory> func_vec = _factories[vtype];
+                for (const ProtoFactory& fr : func_vec)
                 {
                     int size = 1;
                     if ((int)fr.args.size() != size)

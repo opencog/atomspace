@@ -4,12 +4,12 @@ using namespace opencog;
 
 void ValueFactory::addFactory(Type vtype, CreateProto func, std::vector<std::type_index> args)
 {
-    FuncRegister fr = {func, args};
+    ProtoFactory fr = {func, args};
 
-    if (func_register.find(vtype) != func_register.end()) {
-        func_register[vtype].push_back(fr);
+    if (_factories.find(vtype) != _factories.end()) {
+        _factories[vtype].push_back(fr);
     } else {
-        func_register[vtype] = {fr};
+        _factories[vtype] = {fr};
     }
 }
 
