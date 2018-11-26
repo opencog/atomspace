@@ -837,6 +837,7 @@ PyObject* PythonEval::call_user_function(const std::string& moduleFunction,
 
     // If we can't find that function then throw an exception.
     if (!pyUserFunc) {
+        if(pyObject) Py_DECREF(pyObject);
         PyGILState_Release(gstate);
         throw RuntimeException(TRACE_INFO,
             "Python function '%s' not found!",
@@ -847,6 +848,7 @@ PyObject* PythonEval::call_user_function(const std::string& moduleFunction,
     // be passed to a Python C API function later that "steals" it.
     // PyObject_GetAttrString already returns new reference, so we do this only for PyDict_GetItemString
     if(nullptr == pyObject) Py_INCREF(pyUserFunc);
+    if (pyObject) Py_DECREF(pyObject); // We don't need it anymore
 
     // Make sure the function is callable.
     if (!PyCallable_Check(pyUserFunc)) {
@@ -859,6 +861,7 @@ PyObject* PythonEval::call_user_function(const std::string& moduleFunction,
     // Get the expected argument count.
     int expectedArgumentCount = this->argument_count(pyUserFunc);
     if (expectedArgumentCount == MISSING_FUNC_CODE) {
+        Py_DECREF(pyUserFunc);
         PyGILState_Release(gstate);
         throw RuntimeException(TRACE_INFO,
             "Python function '%s' error missing 'func_code'!",
@@ -867,6 +870,7 @@ PyObject* PythonEval::call_user_function(const std::string& moduleFunction,
 
     // Get the actual argument count, passed in the ListLink.
     if (arguments->get_type() != LIST_LINK) {
+        Py_DECREF(pyUserFunc);
         PyGILState_Release(gstate);
         throw RuntimeException(TRACE_INFO,
             "Expecting arguments to be a ListLink!");
@@ -874,13 +878,10 @@ PyObject* PythonEval::call_user_function(const std::string& moduleFunction,
 
     // Now make sure the expected count matches the actual argument count.
     int actualArgumentCount = arguments->get_arity();
-    // If there is an object, its method has 'self' argument, which is passed automatically
-    // Object can actually be an 'imported as' module (e.g. "import tensorflow as tf")
-    // TODO: maybe a better check for 'self' can be done (e.g. to distinguish class methods),
-    //       but PyInstanceMethod_Check and PyMethod_GET_SELF didn't help here...
-    if (pyObject && !PyModule_Check(pyObject)) expectedArgumentCount--;
-    if (pyObject) Py_DECREF(pyObject); // We don't need it anymore
+    // If this is really a method, it has 'self' argument, which is passed automatically
+    if (PyMethod_Check(pyUserFunc)) expectedArgumentCount--;
     if (expectedArgumentCount != actualArgumentCount) {
+        Py_DECREF(pyUserFunc);
         PyGILState_Release(gstate);
         throw RuntimeException(TRACE_INFO,
             "Python function '%s' which expects '%d arguments,"
@@ -1093,6 +1094,7 @@ void PythonEval::apply_as(const std::string& moduleFunction,
 
     // If we can't find that function then throw an exception.
     if (!pyUserFunc) {
+        if(pyObject) Py_DECREF(pyObject);
         PyGILState_Release(gstate);
         throw RuntimeException(TRACE_INFO,
             "Python function '%s' not found!",
@@ -1103,7 +1105,7 @@ void PythonEval::apply_as(const std::string& moduleFunction,
     // be passed to a Python C API function later that "steals" it.
     // PyObject_GetAttrString already returns new reference, so we do this only for PyDict_GetItemString
     if(nullptr == pyObject) Py_INCREF(pyUserFunc);
-
+    if(pyObject) Py_DECREF(pyObject); // We don't need it anymore
 
     // Make sure the function is callable.
     if (!PyCallable_Check(pyUserFunc))
@@ -1116,14 +1118,11 @@ void PythonEval::apply_as(const std::string& moduleFunction,
 
     // Get the expected argument count.
     int expectedArgumentCount = this->argument_count(pyUserFunc);
-    // If there is an object, its method has 'self' argument, which is passed automatically
-    // Object can actually be an 'imported as' module (e.g. "import tensorflow as tf")
-    // TODO: maybe a better check for 'self' can be done (e.g. to distinguish class methods),
-    //       but PyInstanceMethod_Check and PyMethod_GET_SELF didn't help here...
-    if (pyObject && !PyModule_Check(pyObject)) expectedArgumentCount--;
-    if (pyObject) Py_DECREF(pyObject); // We don't need it anymore
+    // If this is really a method, it has 'self' argument, which is passed automatically
+    if (PyMethod_Check(pyUserFunc)) expectedArgumentCount--;
     if (expectedArgumentCount == MISSING_FUNC_CODE)
     {
+        Py_DECREF(pyUserFunc);
         PyGILState_Release(gstate);
         throw RuntimeException(TRACE_INFO,
             "Python function '%s' error missing 'func_code'!",
@@ -1133,6 +1132,7 @@ void PythonEval::apply_as(const std::string& moduleFunction,
     // Make sure the argument count is 1 (just the atomspace)
     if (1 != expectedArgumentCount)
     {
+        Py_DECREF(pyUserFunc);
         PyGILState_Release(gstate);
         throw RuntimeException(TRACE_INFO,
             "Python function '%s' which expects '%d arguments,"

@@ -15,6 +15,10 @@ def local_func(x1, x2, x3):
     return x3
 
 class LocalClass:
+    @staticmethod
+    def static_check(x1):
+        print("Entering static method with\n", x1)
+        return x1
     def forward(self, x1, x2):
         print("Entering LocalClass with\n", x1, x2)
         return x1
@@ -34,6 +38,13 @@ exloc = ExecutionOutputLink(
     ListLink(ConceptNode("aa"), ConceptNode("bb")))
 
 assert execute_atom(a, exloc) == ConceptNode("aa"), "Failed while calling local object method"
+
+# static method
+exst = ExecutionOutputLink(
+    GroundedSchemaNode("py:LocalClass.static_check"),
+    ListLink(ConceptNode("aa")))
+
+assert execute_atom(a, exst) == ConceptNode("aa"), "Failed while calling static class method"
 
 # external function
 exexf = ExecutionOutputLink(
