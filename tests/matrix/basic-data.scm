@@ -1,7 +1,7 @@
 ;
 ; Data set which the basic API will yoke together.
 
-; Create the high-level par, given the low-level one.
+; Create the high-level pair, given the low-level one.
 (define (mkfoo WA WB) (Evaluation (Predicate "foo") (List (Word WA) (Word WB))))
 
 ; Set the count on the high-level pair
