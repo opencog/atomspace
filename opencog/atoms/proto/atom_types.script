@@ -617,3 +617,11 @@ CONNECTOR <- LINK              // Link-grammar connector
 CONNECTOR_DIR_NODE <- NODE "ConnectorDir" // Connector direction
 CONNECTOR_SEQ <- ORDERED_LINK  // Sequence of connectors
 SECTION <- ORDERED_LINK        // Sheaf section, connector set
+
+// ====================================================================
+// Octomap related. The Octomap code is (currently) in the opencog repo.
+// We need to define these here, until SchemeSmob::ss_new_value() gets
+// converted into some kind of factory. Once we get a factory, these
+// should be moved to live with the octomap code.
+OCTOMAP_NODE <- NODE
+OCTO_VALUE <- VALUE
