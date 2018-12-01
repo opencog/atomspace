@@ -64,7 +64,7 @@ std::string SchemeSmob::av_to_string(const AttentionValuePtr& av)
 
 SCM SchemeSmob::av_to_scm (const AttentionValuePtr& av)
 {
-	return protom_to_scm(ProtoAtomCast(av));
+	return protom_to_scm(ValueCast(av));
 }
 
 /**

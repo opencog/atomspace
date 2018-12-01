@@ -170,7 +170,7 @@ public:
 static inline TruthValuePtr TruthValueCast(const ValuePtr& pa)
     { return std::dynamic_pointer_cast<const TruthValue>(pa); }
 
-static inline ValuePtr ProtoAtomCast(const TruthValuePtr& tv)
+static inline ValuePtr ValueCast(const TruthValuePtr& tv)
 {
     // This should have worked!?
     // return std::const_pointer_cast<Value>(tv);

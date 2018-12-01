@@ -144,7 +144,7 @@ public:
 static inline AttentionValuePtr AttentionValueCast(const ValuePtr& pa)
     { return std::dynamic_pointer_cast<const AttentionValue>(pa); }
 
-static inline ValuePtr ProtoAtomCast(const AttentionValuePtr& av)
+static inline ValuePtr ValueCast(const AttentionValuePtr& av)
 {
     return std::shared_ptr<Value>(av, (Value*) av.get());
 }

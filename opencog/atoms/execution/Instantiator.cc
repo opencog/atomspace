@@ -625,7 +625,7 @@ ValuePtr Instantiator::instantiate(const Handle& expr,
 	    GREATER_THAN_LINK == t)
 	{
 		TruthValuePtr tvp(EvaluationLink::do_evaluate(_as, grounded));
-		ValuePtr pap(ProtoAtomCast(tvp));
+		ValuePtr pap(ValueCast(tvp));
 		return pap;
 	}
 #endif

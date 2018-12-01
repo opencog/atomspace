@@ -58,7 +58,7 @@ ValuePtr TruthValueOfLink::execute() const
 	if (1 != ary)
 		throw SyntaxException(TRACE_INFO, "Expecting one atom!");
 
-	return ProtoAtomCast(_outgoing[0]->getTruthValue());
+	return ValueCast(_outgoing[0]->getTruthValue());
 }
 
 DEFINE_LINK_FACTORY(TruthValueOfLink, TRUTH_VALUE_OF_LINK)

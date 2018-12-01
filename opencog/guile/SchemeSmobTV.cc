@@ -202,7 +202,7 @@ std::string SchemeSmob::tv_to_string(const TruthValuePtr& tv)
 
 SCM SchemeSmob::tv_to_scm (const TruthValuePtr& tv)
 {
-	return protom_to_scm(ProtoAtomCast(tv));
+	return protom_to_scm(ValueCast(tv));
 }
 
 /**
