@@ -27,7 +27,7 @@ using namespace opencog;
 
 // ==============================================================
 
-bool StreamValue::operator==(const ProtoAtom& other) const
+bool StreamValue::operator==(const Value& other) const
 {
 	return &other == this;
 }

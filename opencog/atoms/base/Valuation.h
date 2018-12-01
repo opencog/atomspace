@@ -24,7 +24,7 @@
 #define _OPENCOG_VALUATION_H
 
 #include <opencog/atoms/base/Handle.h>
-#include <opencog/atoms/value/ProtoAtom.h>
+#include <opencog/atoms/value/Value.h>
 #include <opencog/atoms/value/atom_types.h>
 
 namespace opencog
@@ -40,7 +40,7 @@ namespace opencog
  * Values with Atoms.
  */
 class Valuation
-	: public ProtoAtom
+	: public Value
 {
 protected:
 	Handle _key;
@@ -49,7 +49,7 @@ protected:
 
 public:
 	Valuation(const Handle& k, const Handle& a, const ProtoAtomPtr& v)
-		: ProtoAtom(VALUATION), _key(k), _atom(a), _value(v) {}
+		: Value(VALUATION), _key(k), _atom(a), _value(v) {}
 
 	virtual ~Valuation() {}
 
@@ -63,7 +63,7 @@ public:
 	virtual std::string to_string(const std::string& indent) const;
 
 	/** Returns true if the two atoms are equal, else false.  */
-	virtual bool operator==(const ProtoAtom&) const;
+	virtual bool operator==(const Value&) const;
 };
 
 typedef std::shared_ptr<Valuation> ValuationPtr;

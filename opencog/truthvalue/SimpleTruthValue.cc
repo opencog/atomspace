@@ -138,7 +138,7 @@ std::string SimpleTruthValue::to_string(const std::string& indent) const
     return buf;
 }
 
-bool SimpleTruthValue::operator==(const ProtoAtom& rhs) const
+bool SimpleTruthValue::operator==(const Value& rhs) const
 {
     const SimpleTruthValue *stv = dynamic_cast<const SimpleTruthValue *>(&rhs);
     if (NULL == stv) return false;

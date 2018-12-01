@@ -55,7 +55,7 @@ public:
     CountTruthValue(CountTruthValue const&);
     CountTruthValue(const ProtoAtomPtr&);
 
-    virtual bool operator==(const ProtoAtom& rhs) const;
+    virtual bool operator==(const Value& rhs) const;
 
     virtual std::string to_string(const std::string& = "") const;
 

@@ -1,7 +1,7 @@
 #ifndef _VALUE_FACTORY_H_
 #define _VALUE_FACTORY_H_
 
-#include "ProtoAtom.h"
+#include "Value.h"
 #include <opencog/atoms/base/Handle.h>
 #include <opencog/util/exceptions.h>
 

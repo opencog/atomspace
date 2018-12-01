@@ -55,7 +55,7 @@ public:
     ProbabilisticTruthValue(ProbabilisticTruthValue const&);
     ProbabilisticTruthValue(const ProtoAtomPtr&);
 
-    virtual bool operator==(const ProtoAtom&) const;
+    virtual bool operator==(const Value&) const;
 
     std::string to_string(const std::string&) const;
 

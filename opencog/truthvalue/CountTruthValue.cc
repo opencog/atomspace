@@ -100,7 +100,7 @@ std::string CountTruthValue::to_string(const std::string& indent) const
     return buf;
 }
 
-bool CountTruthValue::operator==(const ProtoAtom& rhs) const
+bool CountTruthValue::operator==(const Value& rhs) const
 {
     const CountTruthValue *ctv = dynamic_cast<const CountTruthValue *>(&rhs);
     if (NULL == ctv) return false;

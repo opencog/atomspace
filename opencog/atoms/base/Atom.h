@@ -36,7 +36,7 @@
 #include <opencog/util/empty_string.h>
 #include <opencog/util/sigslot.h>
 #include <opencog/atoms/base/Handle.h>
-#include <opencog/atoms/value/ProtoAtom.h>
+#include <opencog/atoms/value/Value.h>
 #include <opencog/truthvalue/TruthValue.h>
 
 class AtomUTest;
@@ -102,7 +102,7 @@ typedef std::set<WinkPtr, std::owner_less<WinkPtr> > WincomingSet;
  * properties from atoms.
  */
 class Atom
-    : public ProtoAtom
+    : public Value
 {
     friend class AtomStorage;     // Needs to set atomtable
     friend class AtomTable;       // Needs to call MarkedForRemoval()
@@ -147,7 +147,7 @@ protected:
      * @param The truthValue of the atom.
      */
     Atom(Type t)
-      : ProtoAtom(t),
+      : Value(t),
         _flags(0),
         _content_hash(Handle::INVALID_HASH),
         _atom_space(nullptr)
@@ -392,7 +392,7 @@ public:
     bool operator!=(const Atom& other) const
     { return not operator==(other); }
 
-    virtual bool operator==(const ProtoAtom& other) const
+    virtual bool operator==(const Value& other) const
     {
         if (_type != other.get_type()) return false;
         return operator==(dynamic_cast<const Atom&>(other));

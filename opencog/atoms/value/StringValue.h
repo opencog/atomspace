@@ -25,7 +25,7 @@
 
 #include <string>
 #include <vector>
-#include <opencog/atoms/value/ProtoAtom.h>
+#include <opencog/atoms/value/Value.h>
 #include <opencog/atoms/value/atom_types.h>
 
 namespace opencog
@@ -39,16 +39,16 @@ namespace opencog
  * StringValues hold an ordered vector of std::strings.
  */
 class StringValue
-	: public ProtoAtom
+	: public Value
 {
 protected:
 	std::vector<std::string> _value;
 
 public:
 	StringValue(const std::string& v)
-		: ProtoAtom(STRING_VALUE) { _value.push_back(v); }
+		: Value(STRING_VALUE) { _value.push_back(v); }
 	StringValue(const std::vector<std::string>& v)
-		: ProtoAtom(STRING_VALUE), _value(v) {}
+		: Value(STRING_VALUE), _value(v) {}
 
 	virtual ~StringValue() {}
 
@@ -58,7 +58,7 @@ public:
 	virtual std::string to_string(const std::string& indent) const;
 
 	/** Returns true if the two atoms are equal.  */
-	virtual bool operator==(const ProtoAtom&) const;
+	virtual bool operator==(const Value&) const;
 };
 
 typedef std::shared_ptr<const StringValue> StringValuePtr;

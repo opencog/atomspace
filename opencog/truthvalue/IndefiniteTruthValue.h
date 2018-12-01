@@ -97,7 +97,7 @@ public:
     IndefiniteTruthValue(const ProtoAtomPtr&);
 
     //! it is a strict equality comparison, without error interval tolerance
-    virtual bool operator==(const ProtoAtom&) const;
+    virtual bool operator==(const Value&) const;
 
     strength_t get_mean() const { return _value[MEAN]; }
     strength_t getU() const { return _value[U]; }

@@ -25,7 +25,7 @@
 
 using namespace opencog;
 
-bool Valuation::operator==(const ProtoAtom& other) const
+bool Valuation::operator==(const Value& other) const
 {
 	if (VALUATION != other.get_type()) return false;
 	Valuation* vp = (Valuation*) &other;

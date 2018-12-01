@@ -146,7 +146,7 @@ static inline AttentionValuePtr AttentionValueCast(const ProtoAtomPtr& pa)
 
 static inline ProtoAtomPtr ProtoAtomCast(const AttentionValuePtr& av)
 {
-    return std::shared_ptr<ProtoAtom>(av, (ProtoAtom*) av.get());
+    return std::shared_ptr<Value>(av, (Value*) av.get());
 }
 
 /** @}*/

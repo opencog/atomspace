@@ -24,7 +24,7 @@
 #define _OPENCOG_LINK_VALUE_H
 
 #include <vector>
-#include <opencog/atoms/value/ProtoAtom.h>
+#include <opencog/atoms/value/Value.h>
 #include <opencog/atoms/value/atom_types.h>
 
 namespace opencog
@@ -39,14 +39,14 @@ namespace opencog
  * (i.e. its a link, but for values)
  */
 class LinkValue
-	: public ProtoAtom
+	: public Value
 {
 protected:
 	std::vector<ProtoAtomPtr> _value;
 
 public:
 	LinkValue(const std::vector<ProtoAtomPtr>& v)
-		: ProtoAtom(LINK_VALUE), _value(v) {}
+		: Value(LINK_VALUE), _value(v) {}
 
 	virtual ~LinkValue() {}
 
@@ -56,7 +56,7 @@ public:
 	virtual std::string to_string(const std::string& indent) const;
 
 	/** Returns true if the two atoms are equal, else false.  */
-	virtual bool operator==(const ProtoAtom&) const;
+	virtual bool operator==(const Value&) const;
 };
 
 typedef std::shared_ptr<LinkValue> LinkValuePtr;

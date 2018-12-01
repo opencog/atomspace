@@ -153,7 +153,7 @@ std::string EvidenceCountTruthValue::to_string(const std::string& indent) const
 	return buf;
 }
 
-bool EvidenceCountTruthValue::operator==(const ProtoAtom& rhs) const
+bool EvidenceCountTruthValue::operator==(const Value& rhs) const
 {
 	const EvidenceCountTruthValue *ectv
 		= dynamic_cast<const EvidenceCountTruthValue *>(&rhs);

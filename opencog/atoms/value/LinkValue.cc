@@ -25,7 +25,7 @@
 
 using namespace opencog;
 
-bool LinkValue::operator==(const ProtoAtom& other) const
+bool LinkValue::operator==(const Value& other) const
 {
 	if (LINK_VALUE != other.get_type()) return false;
 

@@ -55,7 +55,7 @@ public:
     SimpleTruthValue(const SimpleTruthValue&);
     SimpleTruthValue(const ProtoAtomPtr&);
 
-    virtual bool operator==(const ProtoAtom& rhs) const;
+    virtual bool operator==(const Value& rhs) const;
 
     std::string to_string(const std::string&) const;
 

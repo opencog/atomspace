@@ -152,7 +152,7 @@ IndefiniteTruthValue::IndefiniteTruthValue(const ProtoAtomPtr& source)
     _value[CONFIDENCE_LEVEL] = fp->value()[CONFIDENCE_LEVEL];
 }
 
-bool IndefiniteTruthValue::operator==(const ProtoAtom& rhs) const
+bool IndefiniteTruthValue::operator==(const Value& rhs) const
 {
     const IndefiniteTruthValue* itv = dynamic_cast<const IndefiniteTruthValue*>(&rhs);
     if (NULL == itv)

@@ -100,7 +100,7 @@ std::string ProbabilisticTruthValue::to_string(const std::string& indent) const
     return buf;
 }
 
-bool ProbabilisticTruthValue::operator==(const ProtoAtom& rhs) const
+bool ProbabilisticTruthValue::operator==(const Value& rhs) const
 {
     const ProbabilisticTruthValue *ctv = dynamic_cast<const ProbabilisticTruthValue *>(&rhs);
     if (NULL == ctv) return false;

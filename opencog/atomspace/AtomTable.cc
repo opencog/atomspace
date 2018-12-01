@@ -351,7 +351,7 @@ static void prt_diag(AtomPtr atom, size_t i, size_t arity, const HandleSeq& ogs)
 
 Handle AtomTable::add(AtomPtr atom, bool async, bool force)
 {
-    // Can be null, if its a ProtoAtom
+    // Can be null, if its a Value
     if (nullptr == atom) return Handle::UNDEFINED;
 
     // Is the atom already in this table, or one of its environments?
@@ -378,7 +378,7 @@ Handle AtomTable::add(AtomPtr atom, bool async, bool force)
         // Reserving space improves emplace_back performance by 2x
         closet.reserve(atom->get_arity());
         for (const Handle& h : atom->getOutgoingSet()) {
-            // operator->() will be null if its a ProtoAtom that is
+            // operator->() will be null if its a Value that is
             // not an atom.
             if (nullptr == h.operator->()) return Handle::UNDEFINED;
             closet.emplace_back(add(h, async));

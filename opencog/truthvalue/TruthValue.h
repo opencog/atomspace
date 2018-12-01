@@ -109,7 +109,7 @@ protected:
 public:
     virtual ~TruthValue() {}
 
-    virtual bool operator==(const ProtoAtom&) const = 0;
+    virtual bool operator==(const Value&) const = 0;
 
     static TruthValuePtr factory(Type, const std::vector<double>&);
     static TruthValuePtr factory(const ProtoAtomPtr&);
@@ -173,13 +173,13 @@ static inline TruthValuePtr TruthValueCast(const ProtoAtomPtr& pa)
 static inline ProtoAtomPtr ProtoAtomCast(const TruthValuePtr& tv)
 {
     // This should have worked!?
-    // return std::const_pointer_cast<ProtoAtom>(tv);
+    // return std::const_pointer_cast<Value>(tv);
 
     // This, too, should have worked!?
-    // return std::shared_ptr<ProtoAtom>(tv, const_cast<ProtoAtom*>(tv.get()));
+    // return std::shared_ptr<Value>(tv, const_cast<Value*>(tv.get()));
 
     // This works...
-    return std::shared_ptr<ProtoAtom>(tv, (ProtoAtom*) tv.get());
+    return std::shared_ptr<Value>(tv, (Value*) tv.get());
 }
 
 typedef std::vector<TruthValuePtr> TruthValueSeq;

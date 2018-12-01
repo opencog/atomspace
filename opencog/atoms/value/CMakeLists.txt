@@ -41,7 +41,7 @@ INSTALL (FILES
 	FloatValue.h
 	LinkValue.h
 	NameServer.h
-	ProtoAtom.h
+		Value.h
 	RandomStream.h
 	StreamValue.h
 	StringValue.h

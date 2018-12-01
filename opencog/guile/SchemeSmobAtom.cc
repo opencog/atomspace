@@ -12,7 +12,7 @@
 #include <libguile.h>
 
 #include <opencog/atoms/value/NameServer.h>
-#include <opencog/atoms/value/ProtoAtom.h>
+#include <opencog/atoms/value/Value.h>
 #include <opencog/atoms/core/NumberNode.h>
 #include <opencog/truthvalue/AttentionValue.h>
 #include <opencog/truthvalue/CountTruthValue.h>

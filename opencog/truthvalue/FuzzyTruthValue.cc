@@ -113,7 +113,7 @@ std::string FuzzyTruthValue::to_string(const std::string& indent) const
     return buf;
 }
 
-bool FuzzyTruthValue::operator==(const ProtoAtom& rhs) const
+bool FuzzyTruthValue::operator==(const Value& rhs) const
 {
     const FuzzyTruthValue *ftv = dynamic_cast<const FuzzyTruthValue *>(&rhs);
     if (NULL == ftv) return false;

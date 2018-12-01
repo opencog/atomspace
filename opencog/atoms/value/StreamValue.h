@@ -47,7 +47,7 @@ public:
 	virtual ~StreamValue() {}
 
 	/** Returns true if two atoms are equal.  */
-	virtual bool operator==(const ProtoAtom&) const;
+	virtual bool operator==(const Value&) const;
 };
 
 typedef std::shared_ptr<StreamValue> StreamValuePtr;

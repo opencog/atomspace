@@ -58,7 +58,7 @@ public:
     FuzzyTruthValue(FuzzyTruthValue const&);
     FuzzyTruthValue(const ProtoAtomPtr&);
 
-    virtual bool operator==(const ProtoAtom&) const;
+    virtual bool operator==(const Value&) const;
 
     /// Heuristic to compute the count given the confidence (according
     /// to the PLN book)
