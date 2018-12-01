@@ -87,7 +87,7 @@ std::string SQLAtomStorage::link_to_string(const LinkValuePtr& lvle)
 {
 	bool not_first = false;
 	std::string str = "\'{";
-	for (const ProtoAtomPtr& pap : lvle->value())
+	for (const ValuePtr& pap : lvle->value())
 	{
 		if (not_first) str += ", ";
 		not_first = true;
@@ -176,7 +176,7 @@ void SQLAtomStorage::storeValuation(const ValuationPtr& valn)
 
 void SQLAtomStorage::storeValuation(const Handle& key,
                                     const Handle& atom,
-                                    const ProtoAtomPtr& pap)
+                                    const ValuePtr& pap)
 {
 	bool notfirst = false;
 	std::string cols;
@@ -261,7 +261,7 @@ void SQLAtomStorage::storeValuation(const Handle& key,
 }
 
 // Almost a cut-n-passte of the above, but different.
-SQLAtomStorage::VUID SQLAtomStorage::storeValue(const ProtoAtomPtr& pap)
+SQLAtomStorage::VUID SQLAtomStorage::storeValue(const ValuePtr& pap)
 {
 	VUID vuid = _vuid_manager.get_uuid();
 
@@ -310,7 +310,7 @@ SQLAtomStorage::VUID SQLAtomStorage::storeValue(const ProtoAtomPtr& pap)
 /// Return a value, given by the VUID identifier, taken from the
 /// Values table. If the value type is a link, then the full recursive
 /// fetch is performed.
-ProtoAtomPtr SQLAtomStorage::getValue(VUID vuid)
+ValuePtr SQLAtomStorage::getValue(VUID vuid)
 {
 	char buff[BUFSZ];
 	snprintf(buff, BUFSZ, "SELECT * FROM Values WHERE vuid = %lu;", vuid);
@@ -320,7 +320,7 @@ ProtoAtomPtr SQLAtomStorage::getValue(VUID vuid)
 /// Return a value, given by the key-atom pair.
 /// If the value type is a link, then the full recursive
 /// fetch is performed.
-ProtoAtomPtr SQLAtomStorage::getValuation(const Handle& key,
+ValuePtr SQLAtomStorage::getValuation(const Handle& key,
                                           const Handle& atom)
 {
 	char buff[BUFSZ];
@@ -335,7 +335,7 @@ ProtoAtomPtr SQLAtomStorage::getValuation(const Handle& key,
 /// Return a value, given by indicated query buffer.
 /// If the value type is a link, then the full recursive
 /// fetch is performed.
-ProtoAtomPtr SQLAtomStorage::doGetValue(const char * buff)
+ValuePtr SQLAtomStorage::doGetValue(const char * buff)
 {
 	Response rp(conn_pool);
 	rp.exec(buff);
@@ -346,7 +346,7 @@ ProtoAtomPtr SQLAtomStorage::doGetValue(const char * buff)
 /// Return a value, given by indicated query buffer.
 /// If the value type is a link, then the full recursive
 /// fetch is performed.
-ProtoAtomPtr SQLAtomStorage::doUnpackValue(Response& rp)
+ValuePtr SQLAtomStorage::doUnpackValue(Response& rp)
 {
 	// Convert from databasse type to C++ runtime type
 	Type vtype = loading_typemap[rp.vtype];
@@ -406,14 +406,14 @@ ProtoAtomPtr SQLAtomStorage::doUnpackValue(Response& rp)
 	// vuid's, which we then fetch recursively.
 	if (vtype == LINK_VALUE)
 	{
-		std::vector<ProtoAtomPtr> lnkarr;
+		std::vector<ValuePtr> lnkarr;
 		const char *p = rp.lnkval;
 		if (p and *p == '{') p++;
 		while (p)
 		{
 			if (*p == '}' or *p == '\0') break;
 			VUID vu = atol(p);
-			ProtoAtomPtr pap = getValue(vu);
+			ValuePtr pap = getValue(vu);
 			lnkarr.emplace_back(pap);
 			p = strchr(p, ',');
 			if (p) p++;
@@ -461,7 +461,7 @@ void SQLAtomStorage::store_atom_values(const Handle& atom)
 	HandleSet keys = atom->getKeys();
 	for (const Handle& key: keys)
 	{
-		ProtoAtomPtr pap = atom->getValue(key);
+		ValuePtr pap = atom->getValue(key);
 		storeValuation(key, atom, pap);
 	}
 

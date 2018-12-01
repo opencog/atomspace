@@ -137,7 +137,7 @@ IndefiniteTruthValue::IndefiniteTruthValue(IndefiniteTruthValue const& source)
     copy(source);
 }
 
-IndefiniteTruthValue::IndefiniteTruthValue(const ProtoAtomPtr& source)
+IndefiniteTruthValue::IndefiniteTruthValue(const ValuePtr& source)
        : TruthValue(INDEFINITE_TRUTH_VALUE)
 {
     if (source->get_type() != INDEFINITE_TRUTH_VALUE)

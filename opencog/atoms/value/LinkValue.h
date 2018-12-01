@@ -42,15 +42,15 @@ class LinkValue
 	: public Value
 {
 protected:
-	std::vector<ProtoAtomPtr> _value;
+	std::vector<ValuePtr> _value;
 
 public:
-	LinkValue(const std::vector<ProtoAtomPtr>& v)
+	LinkValue(const std::vector<ValuePtr>& v)
 		: Value(LINK_VALUE), _value(v) {}
 
 	virtual ~LinkValue() {}
 
-	const std::vector<ProtoAtomPtr>& value() const { return _value; }
+	const std::vector<ValuePtr>& value() const { return _value; }
 
 	/** Returns a string representation of the value.  */
 	virtual std::string to_string(const std::string& indent) const;
@@ -60,7 +60,7 @@ public:
 };
 
 typedef std::shared_ptr<LinkValue> LinkValuePtr;
-static inline LinkValuePtr LinkValueCast(const ProtoAtomPtr& a)
+static inline LinkValuePtr LinkValueCast(const ValuePtr& a)
 	{ return std::dynamic_pointer_cast<LinkValue>(a); }
 
 template<typename ... Type>

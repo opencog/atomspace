@@ -87,7 +87,7 @@ public:
                    lti_t = DEFAULTATOMLTI,
                    vlti_t = DEFAULTATOMVLTI);
     AttentionValue(const AttentionValue&);
-    AttentionValue(const ProtoAtomPtr&);
+    AttentionValue(const ValuePtr&);
 
     //! return STI property value
     sti_t getSTI() const;
@@ -141,10 +141,10 @@ public:
     }
 };
 
-static inline AttentionValuePtr AttentionValueCast(const ProtoAtomPtr& pa)
+static inline AttentionValuePtr AttentionValueCast(const ValuePtr& pa)
     { return std::dynamic_pointer_cast<const AttentionValue>(pa); }
 
-static inline ProtoAtomPtr ProtoAtomCast(const AttentionValuePtr& av)
+static inline ValuePtr ProtoAtomCast(const AttentionValuePtr& av)
 {
     return std::shared_ptr<Value>(av, (Value*) av.get());
 }

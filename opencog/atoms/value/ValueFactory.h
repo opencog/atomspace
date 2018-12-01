@@ -12,8 +12,8 @@
 
 namespace opencog
 {
-using ValueFactory = ProtoAtomPtr (*) (...);
-using ValueCaster = ProtoAtomPtr (*) (const ProtoAtomPtr&);
+using ValueFactory = ValuePtr (*) (...);
+using ValueCaster = ValuePtr (*) (const ValuePtr&);
 
 
 class ValueServer
@@ -57,7 +57,7 @@ public:
       *
       * @param ptr the protoAtomPtr to be cast.
       */
-    ProtoAtomPtr recast(const ProtoAtomPtr& ptr) const;
+    ValuePtr recast(const ValuePtr& ptr) const;
 
      /**
       * Does dynamic dispatching of the appropriate create functions
@@ -67,7 +67,7 @@ public:
       * @throws invalid_argument exception.
       */
     template <typename TYP, typename ARG>
-    ProtoAtomPtr create(TYP vtype, ARG arg) const
+    ValuePtr create(TYP vtype, ARG arg) const
     {
         // Look up the factory only once; cache the result.
         static ValueFactory fptr = nullptr;

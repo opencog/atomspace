@@ -53,7 +53,7 @@ int FloatValue_setOnAtom( Handle* atom
 
     std::vector<double> vec(parameters,parameters+length);
 
-    ProtoAtomPtr ptr = createFloatValue(type,vec);
+    ValuePtr ptr = createFloatValue(type,vec);
 
     if (ptr == NULL)
         return -1;

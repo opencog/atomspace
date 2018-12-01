@@ -43,14 +43,14 @@ protected:
 	virtual Handle reorder(void) const;
 	bool _commutative;
 
-	ProtoAtomPtr get_value(ProtoAtomPtr) const;
+	ValuePtr get_value(ValuePtr) const;
 
 public:
 	ArithmeticLink(const HandleSeq& oset, Type=ARITHMETIC_LINK);
 	ArithmeticLink(const Link& l);
 
-	virtual ProtoAtomPtr delta_reduce(void) const;
-	virtual ProtoAtomPtr execute() const;
+	virtual ValuePtr delta_reduce(void) const;
+	virtual ValuePtr execute() const;
 };
 
 typedef std::shared_ptr<ArithmeticLink> ArithmeticLinkPtr;

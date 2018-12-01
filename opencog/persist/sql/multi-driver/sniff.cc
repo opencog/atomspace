@@ -193,19 +193,19 @@ int main ()
     store->storeAtom(key, true);
     store->storeAtom(atom, true);
 
-    ProtoAtomPtr pvf = createFloatValue(std::vector<double>({1.14, 2.24, 3.34}));
+    ValuePtr pvf = createFloatValue(std::vector<double>({1.14, 2.24, 3.34}));
     ValuationPtr valf = createValuation(key, atom, pvf);
     store->storeValuation(valf);
 
-    ProtoAtomPtr pvs = createStringValue(std::vector<std::string>({"aaa", "bb bb bb", "ccc ccc ccc"}));
+    ValuePtr pvs = createStringValue(std::vector<std::string>({"aaa", "bb bb bb", "ccc ccc ccc"}));
     ValuationPtr vals = createValuation(key, atom, pvs);
     store->storeValuation(vals);
 
-    ProtoAtomPtr pvl = createLinkValue(std::vector<ProtoAtomPtr>({pvf, pvs}));
+    ValuePtr pvl = createLinkValue(std::vector<ValuePtr>({pvf, pvs}));
     ValuationPtr vall = createValuation(key, atom, pvl);
     store->storeValuation(vall);
 
-    ProtoAtomPtr pvl2 = createLinkValue(std::vector<ProtoAtomPtr>({pvl, pvl, pvl, pvf, pvs}));
+    ValuePtr pvl2 = createLinkValue(std::vector<ValuePtr>({pvl, pvl, pvl, pvf, pvs}));
     ValuationPtr vall2 = createValuation(key, atom, pvl2);
     store->storeValuation(vall2);
 

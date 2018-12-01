@@ -133,7 +133,7 @@ void Atom::setTruthValue(const TruthValuePtr& newTV)
 
 TruthValuePtr Atom::getTruthValue() const
 {
-    ProtoAtomPtr pap(getValue(truth_key()));
+    ValuePtr pap(getValue(truth_key()));
     if (nullptr == pap) return TruthValue::DEFAULT_TV();
     return TruthValueCast(pap);
 }
@@ -141,7 +141,7 @@ TruthValuePtr Atom::getTruthValue() const
 // ==============================================================
 /// Setting values associated with this atom.
 /// If the value is a null pointer, then the key is removed.
-void Atom::setValue(const Handle& key, const ProtoAtomPtr& value)
+void Atom::setValue(const Handle& key, const ValuePtr& value)
 {
 	std::lock_guard<std::mutex> lck(_mtx);
 	if (nullptr != value)
@@ -156,7 +156,7 @@ void Atom::setValue(const Handle& key, const ProtoAtomPtr& value)
 	}
 }
 
-ProtoAtomPtr Atom::getValue(const Handle& key) const
+ValuePtr Atom::getValue(const Handle& key) const
 {
     // OK. The atomic thread-safety of shared-pointers is subtle. See
     // http://www.boost.org/doc/libs/1_53_0/libs/smart_ptr/shared_ptr.htm#ThreadSafety
@@ -169,7 +169,7 @@ ProtoAtomPtr Atom::getValue(const Handle& key) const
     // the multi-threaded async atom store in the SQL peristance backend.
     // Furthermore, we must make a copy while holding the lock! Got that?
 
-    ProtoAtomPtr pap;
+    ValuePtr pap;
     std::lock_guard<std::mutex> lck(_mtx);
     auto pr = _values.find(key);
     if (_values.end() != pr) pap = pr->second;
@@ -202,7 +202,7 @@ std::string Atom::valuesToString() const
     HandleSet keys(getKeys());
     for (const Handle& k: keys)
     {
-        ProtoAtomPtr p = getValue(k);
+        ValuePtr p = getValue(k);
         rv += "; key = " + k->to_string();
         rv += "; val = " + p->to_string() + "\n";
     }

@@ -83,12 +83,12 @@ void ArithmeticLink::init(void)
 /// ever-more rules to the rule engine to reduce ever-more interesting
 /// algebraic expressions.
 ///
-ProtoAtomPtr ArithmeticLink::delta_reduce(void) const
+ValuePtr ArithmeticLink::delta_reduce(void) const
 {
 	Handle road(reorder());
 	ArithmeticLinkPtr alp(ArithmeticLinkCast(road));
 
-	ProtoAtomPtr red(alp->FoldLink::delta_reduce());
+	ValuePtr red(alp->FoldLink::delta_reduce());
 
 	Handle h(HandleCast(red));
 	if (nullptr == h) return red;
@@ -157,11 +157,11 @@ Handle ArithmeticLink::reorder(void) const
 
 // ===========================================================
 
-ProtoAtomPtr ArithmeticLink::get_value(ProtoAtomPtr vptr) const
+ValuePtr ArithmeticLink::get_value(ValuePtr vptr) const
 {
 	while (nameserver().isA(vptr->get_type(), FUNCTION_LINK))
 	{
-		ProtoAtomPtr red(FunctionLinkCast(vptr)->execute());
+		ValuePtr red(FunctionLinkCast(vptr)->execute());
 		if (*red == *vptr) return vptr;
 		vptr = red;
 	}
@@ -170,7 +170,7 @@ ProtoAtomPtr ArithmeticLink::get_value(ProtoAtomPtr vptr) const
 
 // ===========================================================
 /// execute() -- Execute the expression
-ProtoAtomPtr ArithmeticLink::execute() const
+ValuePtr ArithmeticLink::execute() const
 {
 	return delta_reduce();
 }

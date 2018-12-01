@@ -66,7 +66,7 @@ public:
 };
 
 typedef std::shared_ptr<const FloatValue> FloatValuePtr;
-static inline FloatValuePtr FloatValueCast(const ProtoAtomPtr& a)
+static inline FloatValuePtr FloatValueCast(const ValuePtr& a)
 	{ return std::dynamic_pointer_cast<const FloatValue>(a); }
 
 template<typename ... Type>
@@ -75,14 +75,14 @@ static inline std::shared_ptr<FloatValue> createFloatValue(Type&&... args) {
 }
 
 // Scalar multiplication and addition
-ProtoAtomPtr times(double, const FloatValuePtr&);
-ProtoAtomPtr plus(double, const FloatValuePtr&);
-ProtoAtomPtr divide(double, const FloatValuePtr&);
+ValuePtr times(double, const FloatValuePtr&);
+ValuePtr plus(double, const FloatValuePtr&);
+ValuePtr divide(double, const FloatValuePtr&);
 
 // Vector multiplication and addition
-ProtoAtomPtr times(const FloatValuePtr&, const FloatValuePtr&);
-ProtoAtomPtr plus(const FloatValuePtr&, const FloatValuePtr&);
-ProtoAtomPtr divide(const FloatValuePtr&, const FloatValuePtr&);
+ValuePtr times(const FloatValuePtr&, const FloatValuePtr&);
+ValuePtr plus(const FloatValuePtr&, const FloatValuePtr&);
+ValuePtr divide(const FloatValuePtr&, const FloatValuePtr&);
 
 
 /** @}*/

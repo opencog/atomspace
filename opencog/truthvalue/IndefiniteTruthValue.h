@@ -94,7 +94,7 @@ public:
     IndefiniteTruthValue(strength_t l, strength_t u,
                          confidence_t c = DEFAULT_CONFIDENCE_LEVEL);
     IndefiniteTruthValue(IndefiniteTruthValue const&);
-    IndefiniteTruthValue(const ProtoAtomPtr&);
+    IndefiniteTruthValue(const ValuePtr&);
 
     //! it is a strict equality comparison, without error interval tolerance
     virtual bool operator==(const Value&) const;
@@ -142,7 +142,7 @@ public:
     {
         return std::static_pointer_cast<const TruthValue>(createITV(l, u, c));
     }
-    static TruthValuePtr createTV(const ProtoAtomPtr& pap)
+    static TruthValuePtr createTV(const ValuePtr& pap)
     {
         return std::static_pointer_cast<const TruthValue>(
             std::make_shared<const IndefiniteTruthValue>(pap));

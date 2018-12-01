@@ -53,7 +53,7 @@ public:
 	EvidenceCountTruthValue(count_t pos_count, count_t total_count = -1);
 	EvidenceCountTruthValue(const TruthValue&);
 	EvidenceCountTruthValue(EvidenceCountTruthValue const&);
-	EvidenceCountTruthValue(const ProtoAtomPtr&);
+	EvidenceCountTruthValue(const ValuePtr&);
 
 	virtual bool operator==(const Value&) const;
 
@@ -90,7 +90,7 @@ public:
 		return std::static_pointer_cast<const TruthValue>(createECTV(pos_count,
 		                                                       total_count));
 	}
-	static TruthValuePtr createTV(const ProtoAtomPtr& pap)
+	static TruthValuePtr createTV(const ValuePtr& pap)
 	{
 		return std::static_pointer_cast<const TruthValue>(
 			std::make_shared<const EvidenceCountTruthValue>(pap));

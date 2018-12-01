@@ -139,19 +139,19 @@ class SQLAtomStorage : public AtomStorage
 
 		typedef unsigned long VUID;
 
-		ProtoAtomPtr doUnpackValue(Response&);
-		ProtoAtomPtr doGetValue(const char *);
+		ValuePtr doUnpackValue(Response&);
+		ValuePtr doGetValue(const char *);
 
-		VUID storeValue(const ProtoAtomPtr&);
-		ProtoAtomPtr getValue(VUID);
+		VUID storeValue(const ValuePtr&);
+		ValuePtr getValue(VUID);
 		void deleteValue(VUID);
 
 		// --------------------------
 		// Valuations
 		std::mutex _valuation_mutex;
 		void storeValuation(const ValuationPtr&);
-		void storeValuation(const Handle&, const Handle&, const ProtoAtomPtr&);
-		ProtoAtomPtr getValuation(const Handle&, const Handle&);
+		void storeValuation(const Handle&, const Handle&, const ValuePtr&);
+		ValuePtr getValuation(const Handle&, const Handle&);
 		void deleteValuation(const Handle&, const Handle&);
 		void deleteValuation(Response&, UUID, UUID);
 		void deleteAllValuations(Response&, UUID);

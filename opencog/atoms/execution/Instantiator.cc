@@ -547,7 +547,7 @@ bool Instantiator::not_self_match(Type t)
  * with their values, creating a new expression. The new expression is
  * added to the atomspace, and its handle is returned.
  */
-ProtoAtomPtr Instantiator::instantiate(const Handle& expr,
+ValuePtr Instantiator::instantiate(const Handle& expr,
                                        const HandleMap &vars,
                                        bool silent)
 {
@@ -565,7 +565,7 @@ ProtoAtomPtr Instantiator::instantiate(const Handle& expr,
 	// to the instantiated tree). However, special-case the handling
 	// of expr being a FunctionLink - this can return a Value, which
 	// walk_tree cannot grok.  XXX This is all very kind-of hacky.
-	// A proper solution would convert walk_tree to return ProtoAtomPtr's
+	// A proper solution would convert walk_tree to return ValuePtr's
 	// instead of Handles. However, it seems this would require lots
 	// of upcasting, which is horribly slow. So it seems better to
 	// hold off on a "good fix", until the instantiate-to-values
@@ -599,7 +599,7 @@ ProtoAtomPtr Instantiator::instantiate(const Handle& expr,
 			}
 		}
 		FunctionLinkPtr flp(FunctionLinkCast(createLink(oset_results, t)));
-		ProtoAtomPtr pap(flp->execute());
+		ValuePtr pap(flp->execute());
 		if (pap->is_atom())
 			return _as->add_atom(HandleCast(pap));
 		return pap;
@@ -625,7 +625,7 @@ ProtoAtomPtr Instantiator::instantiate(const Handle& expr,
 	    GREATER_THAN_LINK == t)
 	{
 		TruthValuePtr tvp(EvaluationLink::do_evaluate(_as, grounded));
-		ProtoAtomPtr pap(ProtoAtomCast(tvp));
+		ValuePtr pap(ProtoAtomCast(tvp));
 		return pap;
 	}
 #endif

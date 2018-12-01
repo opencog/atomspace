@@ -60,7 +60,7 @@ void TimesLink::init(void)
 
 // ============================================================
 
-static inline double get_double(const ProtoAtomPtr& pap)
+static inline double get_double(const ValuePtr& pap)
 {
 	return NumberNodeCast(pap)->get_value();
 }
@@ -68,13 +68,13 @@ static inline double get_double(const ProtoAtomPtr& pap)
 /// Because there is no ExpLink or PowLink that can handle repeated
 /// products, or any distributive property, kons is very simple for
 /// the TimesLink.
-ProtoAtomPtr TimesLink::kons(const ProtoAtomPtr& fi, const ProtoAtomPtr& fj) const
+ValuePtr TimesLink::kons(const ValuePtr& fi, const ValuePtr& fj) const
 {
 	// Try to yank out values, if possible.
-	ProtoAtomPtr vi(get_value(fi));
+	ValuePtr vi(get_value(fi));
 	Type vitype = vi->get_type();
 
-	ProtoAtomPtr vj(get_value(fj));
+	ValuePtr vj(get_value(fj));
 	Type vjtype = vj->get_type();
 
 	// Is either one a TimesLink? If so, then flatten.

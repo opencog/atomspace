@@ -1,7 +1,7 @@
 from cpython.object cimport Py_EQ, Py_NE
 
 cdef Value createProtoAtom(cProtoAtomPtr shared_ptr):
-    """Factory method to construct Value from C++ ProtoAtomPtr (see
+    """Factory method to construct Value from C++ ValuePtr (see
     http://docs.cython.org/en/latest/src/userguide/extension_types.html#instantiation-from-existing-c-c-pointers
     for example)"""
     cdef Value proto_atom = Value.__new__(Value)

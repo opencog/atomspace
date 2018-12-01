@@ -45,19 +45,19 @@ class Valuation
 protected:
 	Handle _key;
 	Handle _atom;
-	ProtoAtomPtr _value;  // XXX TODO should this be  vector?
+	ValuePtr _value;  // XXX TODO should this be  vector?
 
 public:
-	Valuation(const Handle& k, const Handle& a, const ProtoAtomPtr& v)
+	Valuation(const Handle& k, const Handle& a, const ValuePtr& v)
 		: Value(VALUATION), _key(k), _atom(a), _value(v) {}
 
 	virtual ~Valuation() {}
 
 	const Handle& key() { return _key; }
 	const Handle& atom() { return _atom; }
-	ProtoAtomPtr& value() { return _value; }
+	ValuePtr& value() { return _value; }
 
-	void setValue(const ProtoAtomPtr&);
+	void setValue(const ValuePtr&);
 
 	/** Returns a string representation of the value.  */
 	virtual std::string to_string(const std::string& indent) const;
@@ -67,7 +67,7 @@ public:
 };
 
 typedef std::shared_ptr<Valuation> ValuationPtr;
-static inline ValuationPtr ValuationCast(const ProtoAtomPtr& a)
+static inline ValuationPtr ValuationCast(const ValuePtr& a)
 	{ return std::dynamic_pointer_cast<Valuation>(a); }
 
 #define createValuation std::make_shared<Valuation>

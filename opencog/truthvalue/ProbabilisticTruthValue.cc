@@ -61,7 +61,7 @@ ProbabilisticTruthValue::ProbabilisticTruthValue(ProbabilisticTruthValue const& 
     _value[COUNT] = source.get_count();
 }
 
-ProbabilisticTruthValue::ProbabilisticTruthValue(const ProtoAtomPtr& source)
+ProbabilisticTruthValue::ProbabilisticTruthValue(const ValuePtr& source)
        : TruthValue(PROBABILISTIC_TRUTH_VALUE)
 {
     if (source->get_type() != PROBABILISTIC_TRUTH_VALUE)

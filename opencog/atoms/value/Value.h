@@ -95,9 +95,9 @@ public:
 		{ return not operator==(other); }
 };
 
-typedef std::shared_ptr<Value> ProtoAtomPtr;
+typedef std::shared_ptr<Value> ValuePtr;
 
-typedef std::vector<ProtoAtomPtr> ProtomSeq;
+typedef std::vector<ValuePtr> ProtomSeq;
 
 /** @}*/
 } // namespace opencog
@@ -106,7 +106,7 @@ typedef std::vector<ProtoAtomPtr> ProtomSeq;
 namespace std
 {
     template<typename Out>
-    Out& operator<<(Out& out, const opencog::ProtoAtomPtr& pa)
+    Out& operator<<(Out& out, const opencog::ValuePtr& pa)
     {
         out << pa->to_string("");
         return out;

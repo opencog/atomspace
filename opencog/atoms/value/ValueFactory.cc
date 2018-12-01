@@ -18,7 +18,7 @@ void ValueServer::addCaster(Type vtype, ValueCaster func)
     _vcasters[vtype] = func;
 }
 
-ProtoAtomPtr ValueServer::recast(const ProtoAtomPtr& ptr) const
+ValuePtr ValueServer::recast(const ValuePtr& ptr) const
 {
     Type vtype = ptr->get_type();
     try

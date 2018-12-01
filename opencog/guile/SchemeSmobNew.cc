@@ -110,7 +110,7 @@ std::string SchemeSmob::handle_to_string(const Handle& h, int indent)
 
 std::string SchemeSmob::protom_to_string(SCM node)
 {
-	ProtoAtomPtr pa(scm_to_protom(node));
+	ValuePtr pa(scm_to_protom(node));
 	if (nullptr == pa) return "#<Invalid handle>";
 
 	// XXX FIXME; should not use pa->to_string() as the print method.
@@ -148,12 +148,12 @@ SCM SchemeSmob::handle_to_scm (const Handle& h)
 	return protom_to_scm(AtomCast(h));
 }
 
-SCM SchemeSmob::protom_to_scm (const ProtoAtomPtr& pa)
+SCM SchemeSmob::protom_to_scm (const ValuePtr& pa)
 {
 	if (nullptr == pa) return SCM_EOL;
 
 	// Use new so that the smart pointer increments!
-	ProtoAtomPtr* pap = new ProtoAtomPtr(pa);
+	ValuePtr* pap = new ValuePtr(pa);
 	scm_gc_register_allocation(sizeof(pa));
 
 	SCM smob;
@@ -162,7 +162,7 @@ SCM SchemeSmob::protom_to_scm (const ProtoAtomPtr& pa)
 	return smob;
 }
 
-ProtoAtomPtr SchemeSmob::scm_to_protom (SCM sh)
+ValuePtr SchemeSmob::scm_to_protom (SCM sh)
 {
 	if (not SCM_SMOB_PREDICATE(SchemeSmob::cog_misc_tag, sh))
 		return nullptr;
@@ -171,14 +171,14 @@ ProtoAtomPtr SchemeSmob::scm_to_protom (SCM sh)
 	if (COG_PROTOM != misctype)
 		return nullptr;
 
-	ProtoAtomPtr pv(*((ProtoAtomPtr *) SCM_SMOB_DATA(sh)));
+	ValuePtr pv(*((ValuePtr *) SCM_SMOB_DATA(sh)));
 	scm_remember_upto_here_1(sh);
 	return pv;
 }
 
 Handle SchemeSmob::scm_to_handle (SCM sh)
 {
-	ProtoAtomPtr pa(scm_to_protom(sh));
+	ValuePtr pa(scm_to_protom(sh));
 	if (nullptr == pa)
 		return Handle::UNDEFINED;
 

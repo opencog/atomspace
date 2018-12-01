@@ -94,7 +94,7 @@ cdef extern from "opencog/atoms/value/Value.h" namespace "opencog":
         bint operator==(const cProtoAtom&)
         bint operator!=(const cProtoAtom&)
     
-    ctypedef shared_ptr[cProtoAtom] cProtoAtomPtr "opencog::ProtoAtomPtr"
+    ctypedef shared_ptr[cProtoAtom] cProtoAtomPtr "opencog::ValuePtr"
 
 cdef class Value:
     cdef cProtoAtomPtr shared_ptr

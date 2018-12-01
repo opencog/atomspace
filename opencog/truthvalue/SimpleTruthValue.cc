@@ -63,7 +63,7 @@ SimpleTruthValue::SimpleTruthValue(const SimpleTruthValue& source)
     _value[CONFIDENCE] = source._value[CONFIDENCE];
 }
 
-SimpleTruthValue::SimpleTruthValue(const ProtoAtomPtr& source)
+SimpleTruthValue::SimpleTruthValue(const ValuePtr& source)
 	: TruthValue(SIMPLE_TRUTH_VALUE)
 {
 	if (source->get_type() != SIMPLE_TRUTH_VALUE)

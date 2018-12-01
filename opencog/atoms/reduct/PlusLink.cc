@@ -62,18 +62,18 @@ void PlusLink::init(void)
 
 // ============================================================
 
-static inline double get_double(const ProtoAtomPtr& pap)
+static inline double get_double(const ValuePtr& pap)
 {
 	return NumberNodeCast(pap)->get_value();
 }
 
-ProtoAtomPtr PlusLink::kons(const ProtoAtomPtr& fi, const ProtoAtomPtr& fj) const
+ValuePtr PlusLink::kons(const ValuePtr& fi, const ValuePtr& fj) const
 {
 	// Try to yank out values, if possible.
-	ProtoAtomPtr vi(get_value(fi));
+	ValuePtr vi(get_value(fi));
 	Type vitype = vi->get_type();
 
-	ProtoAtomPtr vj(get_value(fj));
+	ValuePtr vj(get_value(fj));
 	Type vjtype = vj->get_type();
 
 	// Are they numbers?
@@ -169,7 +169,7 @@ ProtoAtomPtr PlusLink::kons(const ProtoAtomPtr& fi, const ProtoAtomPtr& fj) cons
 			// a_plus is now (a+1) or (a+b) as described above.
 			Handle foo(createLink(rest, PLUS_LINK));
 			PlusLinkPtr ap = PlusLinkCast(foo);
-			ProtoAtomPtr a_plus(ap->delta_reduce());
+			ValuePtr a_plus(ap->delta_reduce());
 
 			return createTimesLink(exx, HandleCast(a_plus));
 		}

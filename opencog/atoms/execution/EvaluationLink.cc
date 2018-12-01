@@ -125,7 +125,7 @@ static NumberNodePtr unwrap_set(Handle h)
 	return na;
 }
 
-static double get_numeric_value(const ProtoAtomPtr& pap)
+static double get_numeric_value(const ValuePtr& pap)
 {
 	Type t = pap->get_type();
 	if (NUMBER_NODE == t or SET_LINK == t)
@@ -156,8 +156,8 @@ static TruthValuePtr greater(AtomSpace* as, const Handle& h)
 		     "GreaterThankLink expects two arguments");
 
 	Instantiator inst(as);
-	ProtoAtomPtr pap0(inst.execute(oset[0]));
-	ProtoAtomPtr pap1(inst.execute(oset[1]));
+	ValuePtr pap0(inst.execute(oset[0]));
+	ValuePtr pap1(inst.execute(oset[1]));
 
 	double v0 = get_numeric_value(pap0);
 	double v1 = get_numeric_value(pap1);
@@ -521,7 +521,7 @@ TruthValuePtr EvaluationLink::do_eval_scratch(AtomSpace* as,
 
 	else if (nameserver().isA(t, VALUE_OF_LINK))
 	{
-		ProtoAtomPtr pap(ValueOfLinkCast(evelnk)->execute());
+		ValuePtr pap(ValueOfLinkCast(evelnk)->execute());
 		// If it's an atom, recursively evaluate.
 		if (pap->is_atom())
 			return EvaluationLink::do_eval_scratch(as,

@@ -51,7 +51,7 @@ FunctionLink::FunctionLink(const Link& l)
 	init();
 }
 
-ProtoAtomPtr FunctionLink::execute() const
+ValuePtr FunctionLink::execute() const
 {
 	throw RuntimeException(TRACE_INFO, "Not executable: %s\n",
 		nameserver().getTypeName(get_type()).c_str());

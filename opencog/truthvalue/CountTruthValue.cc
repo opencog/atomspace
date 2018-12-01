@@ -61,7 +61,7 @@ CountTruthValue::CountTruthValue(CountTruthValue const& source)
     _value[COUNT] = source.get_count();
 }
 
-CountTruthValue::CountTruthValue(const ProtoAtomPtr& source)
+CountTruthValue::CountTruthValue(const ValuePtr& source)
        : TruthValue(COUNT_TRUTH_VALUE)
 {
     if (source->get_type() != COUNT_TRUTH_VALUE)

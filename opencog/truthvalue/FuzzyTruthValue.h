@@ -56,7 +56,7 @@ public:
     FuzzyTruthValue(strength_t mean, count_t count);
     FuzzyTruthValue(const TruthValue&);
     FuzzyTruthValue(FuzzyTruthValue const&);
-    FuzzyTruthValue(const ProtoAtomPtr&);
+    FuzzyTruthValue(const ValuePtr&);
 
     virtual bool operator==(const Value&) const;
 
@@ -96,7 +96,7 @@ public:
     {
         return std::static_pointer_cast<const TruthValue>(createSTV(mean, count));
     }
-    static TruthValuePtr createTV(const ProtoAtomPtr& pap)
+    static TruthValuePtr createTV(const ValuePtr& pap)
     {
         return std::static_pointer_cast<const TruthValue>(
             std::make_shared<const FuzzyTruthValue>(pap));

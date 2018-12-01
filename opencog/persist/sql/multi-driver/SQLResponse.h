@@ -344,7 +344,7 @@ class SQLAtomStorage::Response
 				hkey = store->get_recursive_if_not_exists(pu);
 			}
 
-			ProtoAtomPtr pap = store->doUnpackValue(*this);
+			ValuePtr pap = store->doUnpackValue(*this);
 			atom->setValue(hkey, pap);
 			return false;
 		}
@@ -377,7 +377,7 @@ class SQLAtomStorage::Response
 			}
 
 			// Otherwise, just get this one and only value.
-			ProtoAtomPtr pap = store->doUnpackValue(*this);
+			ValuePtr pap = store->doUnpackValue(*this);
 			h->setValue(katom, pap);
 
 			return false;

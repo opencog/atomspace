@@ -66,8 +66,8 @@ size_t SchemeSmob::free_misc(SCM node)
 		}
 
 		case COG_PROTOM:
-			ProtoAtomPtr* pap;
-			pap = (ProtoAtomPtr*) SCM_SMOB_DATA(node);
+			ValuePtr* pap;
+			pap = (ValuePtr*) SCM_SMOB_DATA(node);
 			delete pap;
 			scm_remember_upto_here_1(node);
 			return 0;

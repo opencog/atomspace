@@ -59,14 +59,14 @@ TimeLink::TimeLink(const Link &l)
 
 // ---------------------------------------------------------------
 
-ProtoAtomPtr TimeLink::execute() const
+ValuePtr TimeLink::execute() const
 {
 	// time_t now = time(nullptr);
 	struct timeval tv;
 	gettimeofday(&tv, nullptr);
 	double now = tv.tv_sec + 1.0e-6 * tv.tv_usec;
 
-	return ProtoAtomPtr(createNumberNode(now));
+	return ValuePtr(createNumberNode(now));
 }
 
 DEFINE_LINK_FACTORY(TimeLink, TIME_LINK)

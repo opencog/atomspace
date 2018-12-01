@@ -56,7 +56,7 @@ public:
 };
 
 typedef std::shared_ptr<RandomStream> RandomStreamPtr;
-static inline RandomStreamPtr RandomStreamCast(ProtoAtomPtr& a)
+static inline RandomStreamPtr RandomStreamCast(ValuePtr& a)
 	{ return std::dynamic_pointer_cast<RandomStream>(a); }
 
 template<typename ... Type>

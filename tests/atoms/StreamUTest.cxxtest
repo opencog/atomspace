@@ -40,7 +40,7 @@ class StreamUTest : public CxxTest::TestSuite
 {
 private:
 	AtomSpace _as;
-	ProtoAtomPtr value;
+	ValuePtr value;
 	Handle key;
 	Handle atom;
 
@@ -96,7 +96,7 @@ double StreamUTest::loop(const Handle& stream)
 	double sum = 0.0;
 	for (int i=0; i<LOOPCNT; i++)
 	{
-		ProtoAtomPtr pap = flp->execute();
+		ValuePtr pap = flp->execute();
 		const std::vector<double>& rv = FloatValueCast(pap)->value();
 		TS_ASSERT_EQUALS(rv.size(), LEN);
 
@@ -330,7 +330,7 @@ void StreamUTest::test_number()
 	double sum = 0.0;
 	for (int i=0; i<LOOPCNT; i++)
 	{
-		ProtoAtomPtr pap = flp->execute();
+		ValuePtr pap = flp->execute();
 		NumberNodePtr nn = NumberNodeCast(pap);
 		sum += nn->get_value();
 	}
@@ -400,18 +400,18 @@ void StreamUTest::test_guile()
 	eval.eval("(load-from-path \"tests/atoms/stream.scm\")");
 
 	FloatValuePtr voex = createFloatValue(std::vector<double>{1.0, 2.0, 3.0});
-	ProtoAtomPtr vo = eval.eval_v("(cog-execute! vo)");
+	ValuePtr vo = eval.eval_v("(cog-execute! vo)");
 	printf("     got: %s", vo->to_string().c_str());
 	printf("expected: %s\n", voex->to_string().c_str());
 	TS_ASSERT(*voex == *FloatValueCast(vo));
 
 	FloatValuePtr tymex = createFloatValue(std::vector<double>{14.0, 16.0, 18.0});
-	ProtoAtomPtr tym = eval.eval_v("(cog-execute! tym)");
+	ValuePtr tym = eval.eval_v("(cog-execute! tym)");
 	printf("     got: %s", tym->to_string().c_str());
 	printf("expected: %s\n", tymex->to_string().c_str());
 	TS_ASSERT(*tymex == *FloatValueCast(tym));
 
-	ProtoAtomPtr tymb = eval.eval_v("(cog-execute! tymb)");
+	ValuePtr tymb = eval.eval_v("(cog-execute! tymb)");
 	printf("     got: %s", tymb->to_string().c_str());
 	FloatValuePtr ftymb = FloatValueCast(tymb);
 	const std::vector<double>& vals = ftymb->value();

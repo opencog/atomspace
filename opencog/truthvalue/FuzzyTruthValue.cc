@@ -60,7 +60,7 @@ FuzzyTruthValue::FuzzyTruthValue(FuzzyTruthValue const& source)
     _value[COUNT] = source.get_count();
 }
 
-FuzzyTruthValue::FuzzyTruthValue(const ProtoAtomPtr& source)
+FuzzyTruthValue::FuzzyTruthValue(const ValuePtr& source)
     : TruthValue(FUZZY_TRUTH_VALUE)
 {
     if (source->get_type() != FUZZY_TRUTH_VALUE)

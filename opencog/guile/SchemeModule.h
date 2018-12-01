@@ -35,8 +35,8 @@ class FunctionWrap
 		TruthValuePtr (*_pred_ah)(AtomSpace*, const Handle&);
 		TruthValuePtr as_wrapper_p_h(Handle);
 
-		ProtoAtomPtr (*_proto_ah)(AtomSpace*, const Handle&);
-		ProtoAtomPtr as_wrapper_v_h(Handle);
+		ValuePtr (*_proto_ah)(AtomSpace*, const Handle&);
+		ValuePtr as_wrapper_v_h(Handle);
 
 		const char *_name;  // scheme name of the c++ function.
 	public:
@@ -46,7 +46,7 @@ class FunctionWrap
 		             const char*, const char*);
 		FunctionWrap(TruthValuePtr (*)(AtomSpace*, const Handle&),
 		             const char*, const char*);
-		FunctionWrap(ProtoAtomPtr (*)(AtomSpace*, const Handle&),
+		FunctionWrap(ValuePtr (*)(AtomSpace*, const Handle&),
 		             const char*, const char*);
 };
 

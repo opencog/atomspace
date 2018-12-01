@@ -38,7 +38,7 @@ class PlusLink : public ArithmeticLink
 {
 protected:
 	static Handle zero;
-	virtual ProtoAtomPtr kons(const ProtoAtomPtr&, const ProtoAtomPtr&) const;
+	virtual ValuePtr kons(const ValuePtr&, const ValuePtr&) const;
 
 	void init(void);
 

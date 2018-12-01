@@ -62,7 +62,7 @@ public:
 };
 
 typedef std::shared_ptr<const StringValue> StringValuePtr;
-static inline StringValuePtr StringValueCast(const ProtoAtomPtr& a)
+static inline StringValuePtr StringValueCast(const ValuePtr& a)
 	{ return std::dynamic_pointer_cast<const StringValue>(a); }
 
 template<typename ... Type>

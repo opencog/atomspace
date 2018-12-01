@@ -128,7 +128,7 @@ protected:
     AtomSpace *_atom_space;
 
     /// All of the values on the atom, including the TV.
-    mutable std::map<const Handle, ProtoAtomPtr> _values;
+    mutable std::map<const Handle, ValuePtr> _values;
 
     // Lock, used to serialize changes.
     // This costs 40 bytes per atom.  Tried using a single, global lock,
@@ -269,9 +269,9 @@ public:
     void setTruthValue(const TruthValuePtr&);
 
     /// Associate `value` to `key` for this atom.
-    void setValue(const Handle& key, const ProtoAtomPtr& value);
+    void setValue(const Handle& key, const ValuePtr& value);
     /// Get value at `key` for this atom.
-    ProtoAtomPtr getValue(const Handle& key) const;
+    ValuePtr getValue(const Handle& key) const;
 
     /// Get the set of all keys in use for this Atom.
     HandleSet getKeys() const;
@@ -402,13 +402,13 @@ public:
     virtual bool operator<(const Atom&) const = 0;
 };
 
-static inline AtomPtr AtomCast(const ProtoAtomPtr& pa)
+static inline AtomPtr AtomCast(const ValuePtr& pa)
     { return std::dynamic_pointer_cast<Atom>(pa); }
 
 static inline AtomPtr AtomCast(const Handle& h)
     { return AtomPtr(h); }
 
-static inline Handle HandleCast(const ProtoAtomPtr& pa)
+static inline Handle HandleCast(const ValuePtr& pa)
     { return Handle(AtomCast(pa)); }
 
 // Debugging helpers see

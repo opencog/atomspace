@@ -109,7 +109,7 @@ TruthValuePtr SchemeSmob::get_tv_from_list(SCM slist)
 			switch (misctype)
 			{
 				case COG_PROTOM: {
-					ProtoAtomPtr pa(scm_to_protom(sval));
+					ValuePtr pa(scm_to_protom(sval));
 					TruthValuePtr tv(TruthValueCast(pa));
 					if (tv) return tv;
 				}
@@ -272,7 +272,7 @@ SCM SchemeSmob::ss_new_etv (SCM sposcount, SCM stotalcount)
  */
 SCM SchemeSmob::ss_tv_p (SCM s)
 {
-	ProtoAtomPtr pa(scm_to_protom(s));
+	ValuePtr pa(scm_to_protom(s));
 	if (nullptr == pa) return SCM_BOOL_F;
 
 	if (nameserver().isA(pa->get_type(), TRUTH_VALUE))
@@ -287,7 +287,7 @@ SCM SchemeSmob::ss_tv_p (SCM s)
  */
 inline SCM SchemeSmob::tv_p (SCM s, Type wanted)
 {
-	ProtoAtomPtr pa(scm_to_protom(s));
+	ValuePtr pa(scm_to_protom(s));
 	if (nullptr == pa) return SCM_BOOL_F;
 
 	if (wanted == pa->get_type()) return SCM_BOOL_T;
@@ -329,7 +329,7 @@ SCM SchemeSmob::ss_etv_p (SCM s)
 
 TruthValuePtr SchemeSmob::scm_to_tv(SCM stv)
 {
-	ProtoAtomPtr pa(scm_to_protom(stv));
+	ValuePtr pa(scm_to_protom(stv));
 	TruthValuePtr tv(TruthValueCast(pa));
 
 	return tv;
@@ -337,7 +337,7 @@ TruthValuePtr SchemeSmob::scm_to_tv(SCM stv)
 
 TruthValuePtr SchemeSmob::verify_tv(SCM stv, const char *subrname, int pos)
 {
-	ProtoAtomPtr pa(scm_to_protom(stv));
+	ValuePtr pa(scm_to_protom(stv));
 	TruthValuePtr tv(TruthValueCast(pa));
 
 	if (nullptr == tv)

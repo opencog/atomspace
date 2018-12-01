@@ -112,7 +112,7 @@ public:
     virtual bool operator==(const Value&) const = 0;
 
     static TruthValuePtr factory(Type, const std::vector<double>&);
-    static TruthValuePtr factory(const ProtoAtomPtr&);
+    static TruthValuePtr factory(const ValuePtr&);
 
     virtual std::string to_short_string(const std::string&) const;
 
@@ -167,10 +167,10 @@ public:
     virtual bool isDefinedTV() const;
 };
 
-static inline TruthValuePtr TruthValueCast(const ProtoAtomPtr& pa)
+static inline TruthValuePtr TruthValueCast(const ValuePtr& pa)
     { return std::dynamic_pointer_cast<const TruthValue>(pa); }
 
-static inline ProtoAtomPtr ProtoAtomCast(const TruthValuePtr& tv)
+static inline ValuePtr ProtoAtomCast(const TruthValuePtr& tv)
 {
     // This should have worked!?
     // return std::const_pointer_cast<Value>(tv);

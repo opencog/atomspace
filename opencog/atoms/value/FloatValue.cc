@@ -63,7 +63,7 @@ std::string FloatValue::to_string(const std::string& indent) const
 // ==============================================================
 
 /// Scalar multiplication
-ProtoAtomPtr opencog::times(double scalar, const FloatValuePtr& fvp)
+ValuePtr opencog::times(double scalar, const FloatValuePtr& fvp)
 {
 	const std::vector<double>& fv = fvp->value();
 	size_t len = fv.size();
@@ -75,7 +75,7 @@ ProtoAtomPtr opencog::times(double scalar, const FloatValuePtr& fvp)
 }
 
 /// Scalar addition
-ProtoAtomPtr opencog::plus(double scalar, const FloatValuePtr& fvp)
+ValuePtr opencog::plus(double scalar, const FloatValuePtr& fvp)
 {
 	const std::vector<double>& fv = fvp->value();
 	size_t len = fv.size();
@@ -87,7 +87,7 @@ ProtoAtomPtr opencog::plus(double scalar, const FloatValuePtr& fvp)
 }
 
 /// Scalar division
-ProtoAtomPtr opencog::divide(double scalar, const FloatValuePtr& fvp)
+ValuePtr opencog::divide(double scalar, const FloatValuePtr& fvp)
 {
 	const std::vector<double>& fv = fvp->value();
 	size_t len = fv.size();
@@ -99,7 +99,7 @@ ProtoAtomPtr opencog::divide(double scalar, const FloatValuePtr& fvp)
 }
 
 /// Vector (point-wise) multiplication
-ProtoAtomPtr opencog::times(const FloatValuePtr& fvpa, const FloatValuePtr& fvpb)
+ValuePtr opencog::times(const FloatValuePtr& fvpa, const FloatValuePtr& fvpb)
 {
 	const std::vector<double>& fva = fvpa->value();
 	const std::vector<double>& fvb = fvpb->value();
@@ -115,7 +115,7 @@ ProtoAtomPtr opencog::times(const FloatValuePtr& fvpa, const FloatValuePtr& fvpb
 }
 
 /// Vector (point-wise) addition
-ProtoAtomPtr opencog::plus(const FloatValuePtr& fvpa, const FloatValuePtr& fvpb)
+ValuePtr opencog::plus(const FloatValuePtr& fvpa, const FloatValuePtr& fvpb)
 {
 	const std::vector<double>& fva = fvpa->value();
 	const std::vector<double>& fvb = fvpb->value();
@@ -131,7 +131,7 @@ ProtoAtomPtr opencog::plus(const FloatValuePtr& fvpa, const FloatValuePtr& fvpb)
 }
 
 /// Vector (point-wise) division
-ProtoAtomPtr opencog::divide(const FloatValuePtr& fvpa, const FloatValuePtr& fvpb)
+ValuePtr opencog::divide(const FloatValuePtr& fvpa, const FloatValuePtr& fvpb)
 {
 	const std::vector<double>& fva = fvpa->value();
 	const std::vector<double>& fvb = fvpb->value();

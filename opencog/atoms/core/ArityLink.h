@@ -51,7 +51,7 @@ public:
 	ArityLink(const Link &l);
 
 	// Return a pointer to the atom being specified.
-	virtual ProtoAtomPtr execute() const;
+	virtual ValuePtr execute() const;
 
 	static Handle factory(const Handle&);
 };

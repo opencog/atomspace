@@ -54,9 +54,9 @@ Handle SchemeSmob::verify_handle (SCM satom, const char * subrname, int pos)
 	return h;
 }
 
-ProtoAtomPtr SchemeSmob::verify_protom (SCM satom, const char * subrname, int pos)
+ValuePtr SchemeSmob::verify_protom (SCM satom, const char * subrname, int pos)
 {
-	ProtoAtomPtr pv(scm_to_protom(satom));
+	ValuePtr pv(scm_to_protom(satom));
 	if (nullptr == pv)
 		scm_wrong_type_arg_msg(subrname, pos, satom, "opencog value");
 

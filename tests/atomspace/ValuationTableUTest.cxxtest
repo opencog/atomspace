@@ -65,13 +65,13 @@ public:
 		Handle key = space->add_node(CONCEPT_NODE, "The F Key");
 		Handle blah = space->add_node(CONCEPT_NODE, "28675194");
 
-		ProtoAtomPtr fvalue(createFloatValue(2.222));
+		ValuePtr fvalue(createFloatValue(2.222));
 
 		// Place a valuation in the table.
 		vtable->addValuation(key, blah, fvalue);
 
 		// Get it back, and make sure that its equal to what we put in.
-		ProtoAtomPtr fetch = vtable->getValue(key, blah);
+		ValuePtr fetch = vtable->getValue(key, blah);
 
 		TS_ASSERT_EQUALS(fvalue, fetch);
 	}
@@ -83,7 +83,7 @@ public:
 		Handle kc = space->add_node(CONCEPT_NODE, "The H Key");
 		Handle blah = space->add_node(CONCEPT_NODE, "Hi Mom!");
 
-		ProtoAtomPtr fvalue(createFloatValue(2.222));
+		ValuePtr fvalue(createFloatValue(2.222));
 		vtable->addValuation(ka, blah, fvalue);
 		vtable->addValuation(kb, blah, fvalue);
 		vtable->addValuation(kc, blah, fvalue);

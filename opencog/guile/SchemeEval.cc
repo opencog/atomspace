@@ -895,7 +895,7 @@ void * SchemeEval::c_wrap_eval_v(void * p)
  * occurs, an exception is thrown, and the stack trace is logged to
  * the log file.
  */
-ProtoAtomPtr SchemeEval::eval_v(const std::string &expr)
+ValuePtr SchemeEval::eval_v(const std::string &expr)
 {
 	// If we are recursing, then we already are in the guile
 	// environment, and don't need to do any additional setup.
@@ -931,7 +931,7 @@ ProtoAtomPtr SchemeEval::eval_v(const std::string &expr)
 
 	// We do not want this->_retval to point at anything after we return.
 	// This is so that we do not hold a long-term reference to the TV.
-	ProtoAtomPtr rv;
+	ValuePtr rv;
 	swap(rv, _retval);
 	return rv;
 }
@@ -1031,7 +1031,7 @@ SCM SchemeEval::do_apply_scm(const std::string& func, const Handle& varargs )
 /* ============================================================== */
 /**
  * apply_v -- apply named function func to arguments in ListLink.
- * Return an OpenCog ProtoAtomPtr (Handle, TruthValue or Value).
+ * Return an OpenCog ValuePtr (Handle, TruthValue or Value).
  * It is assumed that varargs is a ListLink, containing a list of
  * atom handles. This list is unpacked, and then the fuction func
  * is applied to them. The function is presumed to return pointer
@@ -1039,7 +1039,7 @@ SCM SchemeEval::do_apply_scm(const std::string& func, const Handle& varargs )
  * or if n error ocurred during evaluation, then a C++ exception is
  * thrown.
  */
-ProtoAtomPtr SchemeEval::apply_v(const std::string &func, Handle varargs)
+ValuePtr SchemeEval::apply_v(const std::string &func, Handle varargs)
 {
 	// If we are recursing, then we already are in the guile
 	// environment, and don't need to do any additional setup.
@@ -1069,7 +1069,7 @@ ProtoAtomPtr SchemeEval::apply_v(const std::string &func, Handle varargs)
 
 	// We do not want this->_retval to point at anything after we return.
 	// This is so that we do not hold a long-term reference to the TV.
-	ProtoAtomPtr rv;
+	ValuePtr rv;
 	swap(rv, _retval);
 	return rv;
 }

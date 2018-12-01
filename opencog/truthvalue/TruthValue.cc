@@ -164,11 +164,11 @@ TruthValue::higher_confidence_merge(const TruthValuePtr& other) const
 
 TruthValuePtr TruthValue::factory(Type t, const std::vector<double>& v)
 {
-	ProtoAtomPtr pap = createFloatValue(t,v);
+	ValuePtr pap = createFloatValue(t,v);
 	return factory(pap);
 }
 
-TruthValuePtr TruthValue::factory(const ProtoAtomPtr& pap)
+TruthValuePtr TruthValue::factory(const ValuePtr& pap)
 {
 	Type t = pap->get_type();
 	if (SIMPLE_TRUTH_VALUE == t)
