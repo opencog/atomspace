@@ -82,8 +82,8 @@ cdef extern from "opencog/atoms/value/NameServer.h" namespace "opencog":
 cdef extern from "opencog/atoms/value/atom_types.h" namespace "opencog":
     cdef Type NOTYPE
 
-cdef extern from "opencog/atoms/value/ProtoAtom.h" namespace "opencog":
-    cdef cppclass cProtoAtom "opencog::ProtoAtom":
+cdef extern from "opencog/atoms/value/Value.h" namespace "opencog":
+    cdef cppclass cProtoAtom "opencog::Value":
         Type get_type()
         bint is_atom()
         bint is_node()
@@ -96,10 +96,10 @@ cdef extern from "opencog/atoms/value/ProtoAtom.h" namespace "opencog":
     
     ctypedef shared_ptr[cProtoAtom] cProtoAtomPtr "opencog::ProtoAtomPtr"
 
-cdef class ProtoAtom:
+cdef class Value:
     cdef cProtoAtomPtr shared_ptr
 
-cdef ProtoAtom createProtoAtom(cProtoAtomPtr shared_ptr)
+cdef Value createProtoAtom(cProtoAtomPtr shared_ptr)
 
 # Atom
 ctypedef public short av_type

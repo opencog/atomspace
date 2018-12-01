@@ -157,7 +157,7 @@ cdef class AtomSpace:
             return None
         self.atomspace.clear()
 
-    def set_value(self, Atom atom, Atom key, ProtoAtom value):
+    def set_value(self, Atom atom, Atom key, Value value):
         """ Set the value on the atom at key
         """
         if self.atomspace == NULL:

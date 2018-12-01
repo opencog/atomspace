@@ -11,7 +11,7 @@ Also refer to the list of .scm type definition files in opencog.conf
 """
 
 from cython.operator cimport dereference as deref
-from opencog.atomspace cimport (cProtoAtomPtr, ProtoAtom, cAtomSpace, 
+from opencog.atomspace cimport (cProtoAtomPtr, Value, cAtomSpace,
                                 Atom, AtomSpace, cAtom, cHandle, 
                                 AtomSpace_factory, void_from_candle,
                                 createProtoAtom)
@@ -54,7 +54,7 @@ def scheme_eval_v(AtomSpace a, str pys):
         a (AtomSpace): atomspace to work on
         pys (str): Scheme program to evaluate
     Returns:
-        ProtoAtom: result of a evaluation
+        Value: result of a evaluation
     Raises:
         RuntimeError: in case of evaluation error
     """
