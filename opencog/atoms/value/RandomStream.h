@@ -1,5 +1,5 @@
 /*
- * opencog/atoms/proto/RandomStream.h
+ * opencog/atoms/value/RandomStream.h
  *
  * Copyright (C) 2015, 2018 Linas Vepstas
  * All Rights Reserved
@@ -24,8 +24,8 @@
 #define _OPENCOG_RANDOM_STREAM_H
 
 #include <vector>
-#include <opencog/atoms/proto/StreamValue.h>
-#include <opencog/atoms/proto/atom_types.h>
+#include <opencog/atoms/value/StreamValue.h>
+#include <opencog/atoms/value/atom_types.h>
 
 namespace opencog
 {

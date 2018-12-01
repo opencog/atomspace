@@ -1,7 +1,7 @@
 /*
- * atom_types_init.cc
+ * opencog/atoms/value/StreamValue.cc
  *
- * Copyright (C) 2014 Linas Vepstas
+ * Copyright (C) 2015, 2018 Linas Vepstas
  * All Rights Reserved
  *
  * This program is free software; you can redistribute it and/or modify
@@ -20,9 +20,16 @@
  * 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
  */
 
-#include "opencog/atoms/proto/atom_types.definitions"
+#include <stdlib.h>
+#include <opencog/atoms/value/StreamValue.h>
 
-#define INHERITANCE_FILE "opencog/atoms/proto/atom_types.inheritance"
-#define INITNAME base_types_init
+using namespace opencog;
 
-#include <opencog/atoms/proto/atom_types.cc>
+// ==============================================================
+
+bool StreamValue::operator==(const ProtoAtom& other) const
+{
+	return &other == this;
+}
+
+// ==============================================================

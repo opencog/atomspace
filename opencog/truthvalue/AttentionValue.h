@@ -28,7 +28,7 @@
 #include <limits.h>
 #include <memory>
 
-#include <opencog/atoms/proto/FloatValue.h>
+#include <opencog/atoms/value/FloatValue.h>
 
 namespace opencog
 {

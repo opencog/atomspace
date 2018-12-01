@@ -33,7 +33,7 @@
 
 #include <opencog/atoms/base/Link.h>
 #include <opencog/atoms/base/Node.h>
-#include <opencog/atoms/proto/types.h>
+#include <opencog/atoms/value/types.h>
 
 #include "AtomSpace.h"
 

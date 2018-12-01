@@ -20,8 +20,8 @@
 #include <libguile.h>
 
 #include <opencog/atoms/base/Handle.h>
-#include <opencog/atoms/proto/ProtoAtom.h>
-#include <opencog/atoms/proto/types.h>
+#include <opencog/atoms/value/ProtoAtom.h>
+#include <opencog/atoms/value/types.h>
 
 #include <opencog/truthvalue/AttentionValue.h>
 #include <opencog/truthvalue/TruthValue.h>

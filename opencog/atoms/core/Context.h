@@ -31,7 +31,7 @@
 #include <boost/operators.hpp>
 
 #include <opencog/util/empty_string.h>
-#include <opencog/atoms/proto/atom_types.h>
+#include <opencog/atoms/value/atom_types.h>
 #include <opencog/atoms/base/Handle.h>
 #include <opencog/atoms/core/Quotation.h>
 #include <opencog/atoms/core/Variables.h>

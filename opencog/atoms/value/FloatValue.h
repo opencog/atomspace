@@ -1,5 +1,5 @@
 /*
- * opencog/atoms/proto/FloatValue.h
+ * opencog/atoms/value/FloatValue.h
  *
  * Copyright (C) 2015 Linas Vepstas
  * All Rights Reserved
@@ -24,8 +24,8 @@
 #define _OPENCOG_FLOAT_VALUE_H
 
 #include <vector>
-#include <opencog/atoms/proto/ProtoAtom.h>
-#include <opencog/atoms/proto/atom_types.h>
+#include <opencog/atoms/value/ProtoAtom.h>
+#include <opencog/atoms/value/atom_types.h>
 
 namespace opencog
 {

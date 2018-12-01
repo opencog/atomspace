@@ -24,8 +24,8 @@
 #define _OPENCOG_VALUATION_H
 
 #include <opencog/atoms/base/Handle.h>
-#include <opencog/atoms/proto/ProtoAtom.h>
-#include <opencog/atoms/proto/atom_types.h>
+#include <opencog/atoms/value/ProtoAtom.h>
+#include <opencog/atoms/value/atom_types.h>
 
 namespace opencog
 {

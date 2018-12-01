@@ -67,7 +67,7 @@ cdef extern from "opencog/truthvalue/SimpleTruthValue.h" namespace "opencog":
 # NameServer
 ctypedef short Type
 
-cdef extern from "opencog/atoms/proto/NameServer.h" namespace "opencog":
+cdef extern from "opencog/atoms/value/NameServer.h" namespace "opencog":
     cdef cppclass cNameServer "opencog::NameServer":
         bint isNode(Type t)
         bint isLink(Type t)
@@ -79,10 +79,10 @@ cdef extern from "opencog/atoms/proto/NameServer.h" namespace "opencog":
         Type getNumberOfClasses()
     cdef cNameServer nameserver()
 
-cdef extern from "opencog/atoms/proto/atom_types.h" namespace "opencog":
+cdef extern from "opencog/atoms/value/atom_types.h" namespace "opencog":
     cdef Type NOTYPE
 
-cdef extern from "opencog/atoms/proto/ProtoAtom.h" namespace "opencog":
+cdef extern from "opencog/atoms/value/ProtoAtom.h" namespace "opencog":
     cdef cppclass cProtoAtom "opencog::ProtoAtom":
         Type get_type()
         bint is_atom()
@@ -233,19 +233,19 @@ cdef extern from "opencog/atomutils/AtomUtils.h" namespace "opencog":
     cdef vector[cHandle] c_get_predicates "get_predicates" (cHandle& target, Type t, bint subclass)
     cdef vector[cHandle] c_get_predicates_for "get_predicates_for" (cHandle& target, cHandle& predicate)
 
-cdef extern from "opencog/atoms/proto/FloatValue.h" namespace "opencog":
+cdef extern from "opencog/atoms/value/FloatValue.h" namespace "opencog":
     cdef cppclass cFloatValue "opencog::FloatValue":
         const vector[double]& value() const;
     
     cdef cProtoAtomPtr createFloatValue(...)
 
-cdef extern from "opencog/atoms/proto/StringValue.h" namespace "opencog":
+cdef extern from "opencog/atoms/value/StringValue.h" namespace "opencog":
     cdef cppclass cStringValue "opencog::StringValue":
         const vector[string]& value() const;
     
     cdef cProtoAtomPtr createStringValue(...)
 
-cdef extern from "opencog/atoms/proto/LinkValue.h" namespace "opencog":
+cdef extern from "opencog/atoms/value/LinkValue.h" namespace "opencog":
     cdef cppclass cLinkValue "opencog::LinkValue":
         const vector[cProtoAtomPtr]& value() const;
 

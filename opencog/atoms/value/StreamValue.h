@@ -1,5 +1,5 @@
 /*
- * opencog/atoms/proto/StreamValue.cc
+ * opencog/atoms/value/StreamValue.h
  *
  * Copyright (C) 2015, 2018 Linas Vepstas
  * All Rights Reserved
@@ -20,16 +20,43 @@
  * 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
  */
 
-#include <stdlib.h>
-#include <opencog/atoms/proto/StreamValue.h>
+#ifndef _OPENCOG_STREAM_VALUE_H
+#define _OPENCOG_STREAM_VALUE_H
 
-using namespace opencog;
+#include <vector>
+#include <opencog/atoms/value/FloatValue.h>
+#include <opencog/atoms/value/atom_types.h>
 
-// ==============================================================
-
-bool StreamValue::operator==(const ProtoAtom& other) const
+namespace opencog
 {
-	return &other == this;
-}
 
-// ==============================================================
+/** \addtogroup grp_atomspace
+ *  @{
+ */
+
+/**
+ * StreamValues provide an example of streaming data.
+ */
+class StreamValue
+	: public FloatValue
+{
+protected:
+	StreamValue(Type t) : FloatValue(t) {}
+
+public:
+	virtual ~StreamValue() {}
+
+	/** Returns true if two atoms are equal.  */
+	virtual bool operator==(const ProtoAtom&) const;
+};
+
+typedef std::shared_ptr<StreamValue> StreamValuePtr;
+static inline StreamValuePtr StreamValueCast(ProtoAtomPtr& a)
+	{ return std::dynamic_pointer_cast<StreamValue>(a); }
+
+
+
+/** @}*/
+} // namespace opencog
+
+#endif // _OPENCOG_STREAM_VALUE_H

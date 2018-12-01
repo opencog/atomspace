@@ -37,10 +37,10 @@
 #include <opencog/atoms/base/Atom.h>
 #include <opencog/atoms/base/Link.h>
 #include <opencog/atoms/base/Node.h>
-#include <opencog/atoms/proto/types.h>
-#include <opencog/atoms/proto/FloatValue.h>
-#include <opencog/atoms/proto/LinkValue.h>
-#include <opencog/atoms/proto/StringValue.h>
+#include <opencog/atoms/value/types.h>
+#include <opencog/atoms/value/FloatValue.h>
+#include <opencog/atoms/value/LinkValue.h>
+#include <opencog/atoms/value/StringValue.h>
 #include <opencog/atoms/base/Valuation.h>
 
 #include <opencog/atomspace/AtomTable.h>

@@ -32,7 +32,7 @@
 
 #include <opencog/util/empty_string.h>
 #include <opencog/util/exceptions.h>
-#include <opencog/atoms/proto/FloatValue.h>
+#include <opencog/atoms/value/FloatValue.h>
 
 /** \addtogroup grp_atomspace
  *  @{

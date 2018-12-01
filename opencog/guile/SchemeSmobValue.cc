@@ -9,15 +9,15 @@
 #include <cstddef>
 #include <libguile.h>
 
-#include <opencog/atoms/proto/FloatValue.h>
-#include <opencog/atoms/proto/LinkValue.h>
-#include <opencog/atoms/proto/StringValue.h>
-#include <opencog/atoms/proto/RandomStream.h>
+#include <opencog/atoms/value/FloatValue.h>
+#include <opencog/atoms/value/LinkValue.h>
+#include <opencog/atoms/value/StringValue.h>
+#include <opencog/atoms/value/RandomStream.h>
 #include <opencog/atoms/base/Atom.h>
-#include <opencog/atoms/proto/NameServer.h>
+#include <opencog/atoms/value/NameServer.h>
 #include <opencog/guile/SchemeSmob.h>
 
-#include <opencog/atoms/proto/ValueFactory.h>
+#include <opencog/atoms/value/ValueFactory.h>
 
 using namespace opencog;
 

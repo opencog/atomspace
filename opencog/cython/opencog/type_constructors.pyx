@@ -65,4 +65,4 @@ cdef createValue(type, arg):
     
     return createProtoAtom(result)
 
-include "opencog/atoms/proto/core_types.pyx"
+include "opencog/atoms/value/core_types.pyx"

@@ -1,5 +1,5 @@
 /*
- * opencog/atoms/proto/NameServer.cc
+ * opencog/atoms/value/NameServer.cc
  *
  * Copyright (C) 2002-2007 Novamente LLC
  * Copyright (C) 2008 by OpenCog Foundation
@@ -31,9 +31,9 @@
 
 #include <exception>
 
-#include <opencog/atoms/proto/types.h>
-#include <opencog/atoms/proto/atom_types.h>
-#include <opencog/atoms/proto/ProtoAtom.h>
+#include <opencog/atoms/value/types.h>
+#include <opencog/atoms/value/atom_types.h>
+#include <opencog/atoms/value/ProtoAtom.h>
 #include <opencog/util/exceptions.h>
 
 //#define DPRINTF printf

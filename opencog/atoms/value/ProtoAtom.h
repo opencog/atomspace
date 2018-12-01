@@ -1,5 +1,5 @@
 /*
- * opencog/atoms/proto/ProtoAtom.h
+ * opencog/atoms/value/ProtoAtom.h
  *
  * Copyright (C) 2015 Linas Vepstas
  * All Rights Reserved
@@ -26,8 +26,8 @@
 #include <memory>
 #include <string>
 
-#include <opencog/atoms/proto/types.h>
-#include <opencog/atoms/proto/NameServer.h>
+#include <opencog/atoms/value/types.h>
+#include <opencog/atoms/value/NameServer.h>
 
 namespace opencog
 {

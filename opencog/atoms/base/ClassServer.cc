@@ -31,10 +31,10 @@
 
 #include <exception>
 
-#include <opencog/atoms/proto/types.h>
-#include <opencog/atoms/proto/atom_types.h>
+#include <opencog/atoms/value/types.h>
+#include <opencog/atoms/value/atom_types.h>
 #include <opencog/atoms/base/Atom.h>
-#include <opencog/atoms/proto/ProtoAtom.h>
+#include <opencog/atoms/value/ProtoAtom.h>
 
 //#define DPRINTF printf
 #define DPRINTF(...)

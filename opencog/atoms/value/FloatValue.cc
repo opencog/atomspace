@@ -1,5 +1,5 @@
 /*
- * opencog/atoms/proto/FloatValue.cc
+ * opencog/atoms/value/FloatValue.cc
  *
  * Copyright (C) 2015 Linas Vepstas
  * All Rights Reserved
@@ -21,8 +21,8 @@
  */
 
 #include <opencog/util/exceptions.h>
-#include <opencog/atoms/proto/FloatValue.h>
-#include <opencog/atoms/proto/ValueFactory.h>
+#include <opencog/atoms/value/FloatValue.h>
+#include <opencog/atoms/value/ValueFactory.h>
 
 using namespace opencog;
 

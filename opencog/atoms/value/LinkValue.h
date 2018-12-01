@@ -1,5 +1,5 @@
 /*
- * opencog/atoms/proto/LinkValue.h
+ * opencog/atoms/value/LinkValue.h
  *
  * Copyright (C) 2015 Linas Vepstas
  * All Rights Reserved
@@ -24,8 +24,8 @@
 #define _OPENCOG_LINK_VALUE_H
 
 #include <vector>
-#include <opencog/atoms/proto/ProtoAtom.h>
-#include <opencog/atoms/proto/atom_types.h>
+#include <opencog/atoms/value/ProtoAtom.h>
+#include <opencog/atoms/value/atom_types.h>
 
 namespace opencog
 {
