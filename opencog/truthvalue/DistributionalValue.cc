@@ -46,8 +46,12 @@ DistributionalValue::DistributionalValue()
 DistributionalValue::DistributionalValue(DVCounter dvctr)
 	: ProtoAtom(DISTRIBUTIONAL_VALUE)
 {
+	for (auto elem : dvctr)
+	{
+		if (elem.second <= 0)
+			throw std::invalid_argument("DV cant have an element with count 0.");
+	}
 	_value = dvctr;
-	n = dvctr.begin()->first.size();
 }
 
 DistributionalValue::DistributionalValue(double mode,double conf)
@@ -55,9 +59,10 @@ DistributionalValue::DistributionalValue(double mode,double conf)
 {
 	confidence_t cf = std::min(conf, 0.9999998);
 	double count = (DEFAULT_K * cf / (1.0 - cf));
+	//DV Interval with count 0 is undefined
+	count = std::max(count, 0.0000002);
 	DVKey k{Interval{mode}};
 	_value[k] = count;
-	n = 1;
 }
 
 DistributionalValuePtr DistributionalValue::createDV(DVCounter dvctr)
@@ -285,25 +290,7 @@ DVKey DistributionalValue::get_key(DVKey k) const
 	throw RuntimeException(TRACE_INFO, "No Key for this value.");
 }
 
-DVec DistributionalValue::get_key_min(DVKey k)
-{
-	std::vector<double> res;
-	for (auto interval : k)
-		res.push_back(interval[0]);
-	return res;
-}
 
-DVec DistributionalValue::get_key_max(DVKey k)
-{
-	std::vector<double> res;
-	for (auto interval : k)
-		if (interval.size() == 1)
-			res.push_back(interval[0]);
-		else
-			res.push_back(interval[1]);
-
-	return res;
-}
 
 DVKeySeq DistributionalValue::get_keys() const
 {

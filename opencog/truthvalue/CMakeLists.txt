@@ -9,6 +9,7 @@ ADD_LIBRARY (truthvalue
 	TruthValue.cc
     DistributionalValue.cc
     ConditionalDV.cc
+	DVFormulas.cc
 )
 
 # Without this, parallel make will race and crap up the generated files.
@@ -33,5 +34,6 @@ INSTALL (FILES
 	TruthValue.h
     DistributionalValue.h
     ConditionalDV.h
+	DVFormulas.h
 	DESTINATION "include/opencog/truthvalue"
 )

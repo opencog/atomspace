@@ -70,8 +70,6 @@ class DistributionalValue
 	friend class ConditionalDV;
 
 	DVCounter _value;
-	//Number of Dimensions
-	int n;
 
 	// Disallow assignment -- truth values are immutable!
 	DistributionalValue& operator=(const DistributionalValue& rhs) {
@@ -123,8 +121,6 @@ public:
 	double get_confidence() const;
 
 	static double key_contained(DVKey k1,DVKey k2);
-	static DVec get_key_min(DVKey k);
-	static DVec get_key_max(DVKey k);
 
 	DVKey get_key(DVKey) const;
 	DVKeySeq get_keys() const;
