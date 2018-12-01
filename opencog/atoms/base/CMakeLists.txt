@@ -12,10 +12,10 @@ ADD_LIBRARY (atombase
 )
 
 # Without this, parallel make will race and crap up the generated files.
-ADD_DEPENDENCIES(atombase opencog_atom_types atomproto)
+ADD_DEPENDENCIES(atombase opencog_atom_types value)
 
 TARGET_LINK_LIBRARIES(atombase
-	atomproto
+	value
 	truthvalue
 	${COGUTIL_LIBRARY}
 )

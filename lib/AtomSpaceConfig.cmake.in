@@ -12,7 +12,7 @@ set_property(TARGET query
 
 # these names are used in some projects e.g. opencog
 set(ATOMSPACE_LIBRARY atomspace)
-set(ATOMSPACE_atomproto_LIBRARY atomproto)
+set(ATOMSPACE_atomproto_LIBRARY value)
 set(ATOMSPACE_atombase_LIBRARY atombase)
 set(ATOMSPACE_atomcore_LIBRARY atomcore)
 set(ATOMSPACE_attentionbank_LIBRARY attentionbank)
@@ -31,7 +31,7 @@ set(ATOMSPACE_smob_LIBRARY smob)
 set(ATOMSPACE_unify_LIBRARY unify)
 
 set(ATOMSPACE_LIBRARIES
-    atomproto
+    value
     atombase
     atomcore
     attentionbank
