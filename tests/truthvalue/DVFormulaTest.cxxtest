@@ -1,0 +1,132 @@
+/*
+ * Copyright (C) 2018 SingularityNet
+ * All Rights Reserved
+ *
+ * Written by Roman Treutlein <roman@singularitynet.io>
+ *
+ * This program is free software; you can redistribute it and/or modify
+ * it under the terms of the GNU Affero General Public License v3 as
+ * published by the Free Software Foundation and including the exceptions
+ * at http://opencog.org/wiki/Licenses
+ *
+ * This program is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ * GNU General Public License for more details.
+ *
+ * You should have received a copy of the GNU Affero General Public License
+ * along with this program; if not, write to:
+ * Free Software Foundation, Inc.,
+ * 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
+ */
+
+#include <math.h>
+
+#include <opencog/truthvalue/DistributionalValue.h>
+#include <opencog/truthvalue/ConditionalDV.h>
+#include <opencog/truthvalue/DVFormulas.h>
+#include <opencog/util/Logger.h>
+#include <opencog/util/exceptions.h>
+
+using namespace opencog;
+
+class DVFormulaTest :  public CxxTest::TestSuite
+{
+private:
+
+	DistributionalValuePtr dvs[4];
+	DVKey keys[17];
+
+public:
+    DVFormulaTest()
+    {
+    }
+
+    void setUp()
+    {
+		keys[0] = DVKey{Interval{0.0 ,0.25}};
+	    keys[1] = DVKey{Interval{0.25,0.5 }};
+		keys[2] = DVKey{Interval{0.5 ,0.75}};
+		keys[3] = DVKey{Interval{0.75,1.0 }};
+
+		keys[4] = DVKey{Interval{0.0 ,0.3}};
+		keys[5] = DVKey{Interval{0.3,0.7 }};
+		keys[6] = DVKey{Interval{0.7,1.0 }};
+
+		keys[7] = DVKey{Interval{0.0,0.5}};
+		keys[8] = DVKey{Interval{0.5,1.0}};
+
+		keys[9]  = DVKey{Interval{0.0 ,0.3}, Interval{0.0,0.5}};
+		keys[10] = DVKey{Interval{0.3,0.7 }, Interval{0.0,0.5}};
+		keys[11] = DVKey{Interval{0.7,1.0 }, Interval{0.0,0.5}};
+		keys[12] = DVKey{Interval{0.0 ,0.3}, Interval{0.5,1.0}};
+		keys[13] = DVKey{Interval{0.3,0.7 }, Interval{0.5,1.0}};
+		keys[14] = DVKey{Interval{0.7,1.0 }, Interval{0.5,1.0}};
+
+		keys[15] = DVKey{Interval{0.25,0.5 }, Interval{0.0,0.5}};
+		keys[16] = DVKey{Interval{0.25,0.5 }, Interval{0.5,1.0}};
+
+		DVCounter dvc;
+		//dvc[keys[4]] = 0;
+		dvc[keys[5]] = 10;
+		dvc[keys[6]] = 20;
+
+		dvs[0] = DistributionalValue::createDV(dvc);
+
+		DVCounter dvc1;
+		dvc1[keys[0]] = 30;
+		dvc1[keys[1]] = 30;
+		//dvc1[keys[2]] = 0;
+		//dvc1[keys[3]] = 0;
+
+		dvs[1] = DistributionalValue::createDV(dvc1);
+
+		DVCounter dvc2;
+		//dvc2[keys[0]] = 0;
+		//dvc2[keys[1]] = 0;
+		dvc2[keys[2]] = 30;
+		dvc2[keys[3]] = 30;
+
+		dvs[2] = DistributionalValue::createDV(dvc2);
+
+		DVCounter dvc3;
+		dvc3[keys[9]]  = 10;
+		dvc3[keys[10]] = 10;
+		dvc3[keys[11]] = 10;
+		dvc3[keys[12]] = 10;
+		dvc3[keys[13]] = 10;
+		dvc3[keys[14]] = 10;
+		dvc3[keys[15]] = 10;
+		dvc3[keys[16]] = 10;
+
+		dvs[3] = DistributionalValue::createDV(dvc3);
+    }
+
+    void tearDown() {}
+
+	void testJointToCDV()
+	{
+		ConditionalDVPtr res = DVFormulas::joint_to_cdv(dvs[3],dvs[0],1);
+
+		//FloatCompare
+		DVCounter dvc1;
+		dvc1[keys[7]] = 14.0625;
+		dvc1[keys[8]] = 14.0625;
+
+		DVCounter dvc2;
+		dvc2[keys[7]] = 11.25;
+		dvc2[keys[8]] = 11.25;
+
+		DVCounter dvc3;
+		dvc3[keys[7]] = 5.625;
+		dvc3[keys[8]] = 5.625;
+
+		CDVrep cdvr;
+		cdvr[keys[1]] = dvc1;
+		cdvr[keys[5]] = dvc2;
+		cdvr[keys[6]] = dvc3;
+
+		ConditionalDVPtr cdv = ConditionalDV::createCDV(cdvr);
+		TS_ASSERT_EQUALS(*cdv,*res);
+	}
+};

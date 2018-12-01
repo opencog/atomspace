@@ -27,9 +27,6 @@
 #include <stdio.h>
 
 #include <opencog/truthvalue/DVFormulas.h>
-#include <opencog/atoms/proto/FloatValue.h>
-#include <opencog/atoms/proto/LinkValue.h>
-#include <opencog/atoms/base/Link.h>
 #include <opencog/atomspace/AtomSpace.h>
 
 using namespace opencog;
@@ -58,8 +55,12 @@ ConditionalDVPtr DVFormulas::joint_to_cdv(DistributionalValuePtr dv1
 										 ,int idx)
 {
 	CDVrep res;
-	if (dv1->value().begin()->first.size() > 1)
-			throw RuntimeException(TRACE_INFO,"Can't divide non Joint DV.");
+	size_t dv1dims = dv1->value().begin()->first.size();
+	size_t dv2dims = dv2->value().begin()->first.size();
+	if (dv1dims <= 1)
+		throw RuntimeException(TRACE_INFO,"Can't divide non Joint DV.");
+	if (dv1dims - 1 != dv2dims)
+		throw RuntimeException(TRACE_INFO,"The Divisor DV has to have exaclty 1 less dimensions then then dividend. This is not the case.");
 
 	for (auto elem : dv1->value())
 	{
@@ -68,8 +69,10 @@ ConditionalDVPtr DVFormulas::joint_to_cdv(DistributionalValuePtr dv1
 		DVKey h = DVKey{hs[idx]};
 		hs.erase(hs.begin() + idx);
 
-		res[h][hs] = dv1->get_mean(elem.first) / dv2->get_mean(h)
-					    					   * dv2->total_count();
+		if (dv2->get_contained_mean(hs) != 0)
+			res[hs][h] = dv1->get_mean(elem.first)
+					   / dv2->get_contained_mean(hs)
+					   * dv2->total_count();
 	}
 	return ConditionalDV::createCDV(res);
 }
