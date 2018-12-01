@@ -8,9 +8,9 @@
 #
 
 from opencog.atomspace import AtomSpace, TruthValue, types
-from atomspace cimport (cProtoAtomPtr, createFloatValue, createStringValue,
+from atomspace cimport (cValuePtr, createFloatValue, createStringValue,
                         createLinkValue, Value, createProtoAtom,
-                        cProtoAtomPtr)
+                        cValuePtr)
 from libcpp.vector cimport vector
 from libcpp.string cimport string
 
@@ -32,8 +32,8 @@ cdef vector[string] list_of_strings_to_vector(list python_list):
         cpp_vector.push_back(value.encode('UTF-8'))
     return cpp_vector
 
-cdef vector[cProtoAtomPtr] list_of_protoatoms_to_vector(list python_list):
-    cdef vector[cProtoAtomPtr] cpp_vector
+cdef vector[cValuePtr] list_of_values_to_vector(list python_list):
+    cdef vector[cValuePtr] cpp_vector
     cdef Value value
     for value in python_list:
         cpp_vector.push_back(value.shared_ptr)
@@ -43,7 +43,7 @@ cdef vector[cProtoAtomPtr] list_of_protoatoms_to_vector(list python_list):
 cdef createValue(type, arg):
     """Method to costruct atomspace value from given type and constructor 
     argument. It is similar to SchemeSmob::ss_new_value()"""
-    cdef cProtoAtomPtr result
+    cdef cValuePtr result
     
     if type == types.FloatValue:
         if (isinstance(arg, list)):
@@ -57,9 +57,9 @@ cdef createValue(type, arg):
             result = createStringValue(<string>(arg.encode('UTF-8')))
     elif type == types.LinkValue:
         if (isinstance(arg, list)):
-            result = createLinkValue(list_of_protoatoms_to_vector(arg))
+            result = createLinkValue(list_of_values_to_vector(arg))
         else:
-            result = createLinkValue(list_of_protoatoms_to_vector([arg]))
+            result = createLinkValue(list_of_values_to_vector([arg]))
     else:
         raise TypeError('Unexpected value type {}'.format(type))
     

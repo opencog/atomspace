@@ -11,7 +11,7 @@ Also refer to the list of .scm type definition files in opencog.conf
 """
 
 from cython.operator cimport dereference as deref
-from opencog.atomspace cimport (cProtoAtomPtr, Value, cAtomSpace,
+from opencog.atomspace cimport (cValuePtr, Value, cAtomSpace,
                                 Atom, AtomSpace, cAtom, cHandle, 
                                 AtomSpace_factory, void_from_candle,
                                 createProtoAtom)
@@ -46,7 +46,7 @@ def scheme_eval(AtomSpace a, str pys):
     return ret.c_str()
 
 cdef extern from "opencog/cython/opencog/PyScheme.h" namespace "opencog":
-    cProtoAtomPtr eval_scheme_v(cAtomSpace* as, const string& s) except +
+    cValuePtr eval_scheme_v(cAtomSpace* as, const string& s) except +
 
 def scheme_eval_v(AtomSpace a, str pys):
     """Evaluate Scheme program when expected result is Value.
@@ -58,7 +58,7 @@ def scheme_eval_v(AtomSpace a, str pys):
     Raises:
         RuntimeError: in case of evaluation error
     """
-    cdef cProtoAtomPtr ret
+    cdef cValuePtr ret
     cdef string expr
     expr = pys.encode('UTF-8')
     ret = eval_scheme_v(a.atomspace, expr)

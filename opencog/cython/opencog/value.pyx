@@ -1,6 +1,6 @@
 from cpython.object cimport Py_EQ, Py_NE
 
-cdef Value createProtoAtom(cProtoAtomPtr shared_ptr):
+cdef Value createProtoAtom(cValuePtr shared_ptr):
     """Factory method to construct Value from C++ ValuePtr (see
     http://docs.cython.org/en/latest/src/userguide/extension_types.html#instantiation-from-existing-c-c-pointers
     for example)"""
@@ -24,10 +24,10 @@ cdef list vector_of_strings_to_list(const vector[string]* cpp_vector):
         inc(it)
     return list
 
-cdef list vector_of_protoatoms_to_list(const vector[cProtoAtomPtr]* cpp_vector):
+cdef list vector_of_values_to_list(const vector[cValuePtr]* cpp_vector):
     list = []
     it = cpp_vector.const_begin()
-    cdef cProtoAtomPtr value
+    cdef cValuePtr value
     while it != cpp_vector.const_end():
         value = deref(it)
         if is_a(deref(value).get_type(), types.Value):
@@ -40,10 +40,10 @@ cdef list vector_of_protoatoms_to_list(const vector[cProtoAtomPtr]* cpp_vector):
         inc(it)
     return list
 
-cdef cProtoAtom* get_protoatom_ptr(Value protoAtom):
+cdef cValue* get_value_ptr(Value protoAtom):
     """Return plain C++ Value pointer, raise AttributeError if
     pointer is nullptr"""
-    cdef cProtoAtom* ptr = protoAtom.shared_ptr.get()
+    cdef cValue* ptr = protoAtom.shared_ptr.get()
     if ptr == NULL:
         raise AttributeError('Value contains NULL reference')
     else:
@@ -54,7 +54,7 @@ cdef class Value:
 
     property type:
          def __get__(self):
-             return get_protoatom_ptr(self).get_type()
+             return get_value_ptr(self).get_type()
 
     property type_name:
         def __get__(self):
@@ -75,21 +75,21 @@ cdef class Value:
     def to_list(self):
         if self.is_a(types.FloatValue):
             return vector_of_doubles_to_list(
-                &((<cFloatValue*>get_protoatom_ptr(self)).value()))
+                &((<cFloatValue*>get_value_ptr(self)).value()))
         elif self.is_a(types.StringValue):
             return vector_of_strings_to_list(
-                &((<cStringValue*>get_protoatom_ptr(self)).value()))
+                &((<cStringValue*>get_value_ptr(self)).value()))
         elif self.is_a(types.LinkValue):
-            return vector_of_protoatoms_to_list(
-                &((<cLinkValue*>get_protoatom_ptr(self)).value()))
+            return vector_of_values_to_list(
+                &((<cLinkValue*>get_value_ptr(self)).value()))
         else:
             raise TypeError('Type {} is not supported'.format(self.type()))
 
     def long_string(self):
-        return get_protoatom_ptr(self).to_string().decode('UTF-8')
+        return get_value_ptr(self).to_string().decode('UTF-8')
 
     def short_string(self):
-        return get_protoatom_ptr(self).to_short_string().decode('UTF-8')
+        return get_value_ptr(self).to_short_string().decode('UTF-8')
 
     def __str__(self):
         return self.short_string()
@@ -101,8 +101,8 @@ cdef class Value:
         if not isinstance(other, Value):
             raise TypeError('Value cannot be compared with {}'
                             .format(type(other)))
-        cdef cProtoAtom* self_ptr = get_protoatom_ptr(<Value>self)
-        cdef cProtoAtom* other_ptr = get_protoatom_ptr(<Value>other)
+        cdef cValue* self_ptr = get_value_ptr(<Value>self)
+        cdef cValue* other_ptr = get_value_ptr(<Value>other)
         if op == Py_EQ:
             return deref(self_ptr) == deref(other_ptr)
         elif op == Py_NE:
