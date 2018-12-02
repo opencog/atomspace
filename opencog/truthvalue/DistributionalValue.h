@@ -97,6 +97,8 @@ public:
 	static double to_conf(int c);
 	static int to_count(double);
 
+	static bool floatCompare(double,double);
+
 	bool is_uniform() const;
 
 	std::vector<double> get_mode() const;

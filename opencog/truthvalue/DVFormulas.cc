@@ -89,13 +89,6 @@ DistributionalValuePtr DVFormulas::sum_joint(DistributionalValuePtr dv,int pos)
 	return DistributionalValue::createDV(res);
 }
 
-bool DVFormulas::comperator(Elem elem1,Elem elem2)
-{
-	DVec v1 = get_key_min(elem1.first);
-	DVec v2 = get_key_min(elem2.first);
-	return compare(v1,v2);
-}
-
 bool DVFormulas::compare(DVec v1,DVec v2)
 {
 	auto i1 = v1.begin();
@@ -103,32 +96,36 @@ bool DVFormulas::compare(DVec v1,DVec v2)
 	for (; i1 != v1.end() && i2 != v2.end();)
 	{
 		if (i1 != i2)
-			return i1 < i2;
+			return *i1 < *i2;
 		i1++;
 		i2++;
 	}
 	return false;
 };
 
+void printVec(DVec i)
+{
+	std::cout << "{";
+	for (auto e : i)
+		std::cout << e << ",";
+	std::cout << "}" << std::endl;
+}
 
 //Create a Conjuction from 2 DVs
 DistributionalValuePtr
-DVFormulas::conjuction(DistributionalValuePtr dv1
-		              ,DistributionalValuePtr dv2)
+DVFormulas::conjunction(DistributionalValuePtr dv1
+		               ,DistributionalValuePtr dv2)
 {
-	std::set<Elem,Comparator> set1(dv1->value().begin(),dv1->value().end(),comperator);
-	std::set<Elem,Comparator> set2(dv2->value().begin(),dv2->value().end(),comperator);
-
 	DVCounter res;
 	double count = std::min(dv1->total_count(),dv2->total_count());
 
-	auto it1 = set1.begin();
-	auto it2 = set2.begin();
+	auto it1 = dv1->value().begin();
+	auto it2 = dv2->value().begin();
 
 	double m1 = 1;
 	double m2 = 1;
 
-	while (m1 != 0 && m2 != 0)
+	while ((abs(m1) > 0.0000001) && (abs(m2) > 0.0000001))
 	{
 		DVec v1 = get_key_min(it1->first);
 		DVec v2 = get_key_min(it2->first);
@@ -141,7 +138,7 @@ DVFormulas::conjuction(DistributionalValuePtr dv1
 		}
 		else
 		{
-			double mean = dv1->get_mean_for(it2->second);
+			double mean = dv2->get_mean_for(it2->second);
 			res[it2->first] += count * mean * m1;
 			m2 -= mean;
 			it2++;
@@ -153,38 +150,38 @@ DVFormulas::conjuction(DistributionalValuePtr dv1
 
 //Create a disjuction from 2 DVs
 DistributionalValuePtr
-DVFormulas::disjuction(DistributionalValuePtr dv1
-		              ,DistributionalValuePtr dv2)
+DVFormulas::disjunction(DistributionalValuePtr dv1
+		               ,DistributionalValuePtr dv2)
 {
-	std::set<Elem,Comparator> set1(dv1->value().begin(),dv1->value().end(),comperator);
-	std::set<Elem,Comparator> set2(dv2->value().begin(),dv2->value().end(),comperator);
-
 	DVCounter res;
 	double count = std::min(dv1->total_count(),dv2->total_count());
 
-	auto it1 = set1.begin();
-	auto it2 = set2.begin();
+	auto it1 = dv1->value().end();
+	auto it2 = dv2->value().end();
+
+	it1--;
+	it2--;
 
 	double m1 = 1;
 	double m2 = 1;
 
-	while (m1 != 0 && m2 != 0)
+	while ((abs(m1) > 0.0000001) && (abs(m2) > 0.0000001))
 	{
 		DVec v1 = get_key_max(it1->first);
 		DVec v2 = get_key_max(it2->first);
-		if (compare(v1 , v2))
+		if (not compare(v1 , v2))
 		{
 			double mean = dv1->get_mean_for(it1->second);
 			res[it1->first] += count * mean * m2;
 			m1 -= mean;
-			it1++;
+			it1--;
 		}
 		else
 		{
-			double mean = dv1->get_mean_for(it2->second);
+			double mean = dv2->get_mean_for(it2->second);
 			res[it2->first] += count * mean * m1;
 			m2 -= mean;
-			it2++;
+			it2--;
 		}
 	}
 

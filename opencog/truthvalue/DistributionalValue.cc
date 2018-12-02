@@ -401,6 +401,15 @@ std::string DistributionalValue::to_string(const std::string& indent) const
 	return ss.str();
 }
 
+bool DistributionalValue::floatCompare(double v1,double v2)
+{
+	#define MAX_ULPS 24
+	if (MAX_ULPS < llabs(*(int64_t*) &(v1) - *(int64_t*)&(v2)))
+		return false;
+	return true;
+}
+
+
 bool DistributionalValue::operator==(const ProtoAtom& other) const
 {
 	if (DISTRIBUTIONAL_VALUE != other.get_type()) return false;
@@ -409,14 +418,9 @@ bool DistributionalValue::operator==(const ProtoAtom& other) const
 	if (_value.size() != dov->_value.size()) return false;
 
 	for (auto elem : _value) {
-		// Compare floats with ULPS, because they are lexicographically
-		// ordered. For technical explanation, see
-		// http://www.cygnus-software.com/papers/comparingfloats/Comparing%20floating%20point%20numbers.htm
-		// if (1.0e-15 < fabs(1.0 - fov->_value[i]/_value[i])) return false;
-#define MAX_ULPS 24
 		double v1 = elem.second;
 		double v2 = dov->_value.get(elem.first);
-		if (MAX_ULPS < llabs(*(int64_t*) &(v1) - *(int64_t*)&(v2)))
+		if (not floatCompare(v1,v2))
 			return false;
 	}
 	return true;

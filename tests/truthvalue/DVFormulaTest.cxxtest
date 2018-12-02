@@ -104,6 +104,22 @@ public:
 
     void tearDown() {}
 
+	void testGetKeyMin()
+	{
+		DVec res = DVFormulas::get_key_min(keys[0]);
+		DVec vec;
+		vec.push_back(0);
+		TS_ASSERT_EQUALS(vec,res);
+	}
+
+	void testGetKeyMax()
+	{
+		DVec res = DVFormulas::get_key_max(keys[0]);
+		DVec vec;
+		vec.push_back(0.25);
+		TS_ASSERT_EQUALS(vec,res);
+	}
+
 	void testJointToCDV()
 	{
 		ConditionalDVPtr res = DVFormulas::joint_to_cdv(dvs[3],dvs[0],1);
@@ -144,4 +160,27 @@ public:
 		TS_ASSERT_EQUALS(*dv,*res);
 	}
 
+	void testConjuction()
+	{
+		DistributionalValuePtr res = DVFormulas::conjunction(dvs[0],dvs[1]);
+
+		DVCounter dvc;
+		dvc[keys[0]] = 15;
+		dvc[keys[1]] = 15;
+
+		DistributionalValuePtr dv = DistributionalValue::createDV(dvc);
+		TS_ASSERT_EQUALS(*dv,*res)
+	}
+
+	void testDisjunction()
+	{
+		DistributionalValuePtr res = DVFormulas::disjunction(dvs[0],dvs[1]);
+
+		DVCounter dvc;
+		dvc[keys[5]] = 10;
+		dvc[keys[6]] = 20;
+
+		DistributionalValuePtr dv = DistributionalValue::createDV(dvc);
+		TS_ASSERT_EQUALS(*dv,*res)
+	}
 };

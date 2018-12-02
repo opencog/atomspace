@@ -59,16 +59,13 @@ public:
 
 	static DistributionalValuePtr sum_joint(DistributionalValuePtr,int);
 
-	typedef std::pair<DVKey,double> Elem;
-	typedef std::function<bool(Elem,Elem)> Comparator;
-
 	static bool compare(DVec,DVec);
-	static bool comperator(Elem,Elem);
+	static bool floatCompare(double,double);
 
-	static DistributionalValuePtr conjuction(DistributionalValuePtr
-			                                ,DistributionalValuePtr);
-	static DistributionalValuePtr disjuction(DistributionalValuePtr
-			  	                            ,DistributionalValuePtr);
+	static DistributionalValuePtr conjunction(DistributionalValuePtr
+			                                 ,DistributionalValuePtr);
+	static DistributionalValuePtr disjunction(DistributionalValuePtr
+			  	                             ,DistributionalValuePtr);
 
 	//double middle_of_interval(DVKey) const;
 };
