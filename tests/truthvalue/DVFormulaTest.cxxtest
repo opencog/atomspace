@@ -129,4 +129,19 @@ public:
 		ConditionalDVPtr cdv = ConditionalDV::createCDV(cdvr);
 		TS_ASSERT_EQUALS(*cdv,*res);
 	}
+
+	void testSumJoint()
+	{
+		DistributionalValuePtr res = DVFormulas::sum_joint(dvs[3],1);
+
+		DVCounter dvc;
+		dvc[keys[1]] = 20;
+		dvc[keys[4]] = 20;
+		dvc[keys[5]] = 20;
+		dvc[keys[6]] = 20;
+
+		DistributionalValuePtr dv = DistributionalValue::createDV(dvc);
+		TS_ASSERT_EQUALS(*dv,*res);
+	}
+
 };

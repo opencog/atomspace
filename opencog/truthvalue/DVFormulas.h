@@ -57,8 +57,7 @@ public:
 		         						,DistributionalValuePtr
 										,int);
 
-	DistributionalValuePtr sum_joint(DistributionalValuePtr,int) const;
-	DVCounter part_joint(DistributionalValuePtr,int) const;
+	static DistributionalValuePtr sum_joint(DistributionalValuePtr,int);
 
 	typedef std::pair<DVKey,double> Elem;
 	typedef std::function<bool(Elem,Elem)> Comparator;

@@ -77,26 +77,16 @@ ConditionalDVPtr DVFormulas::joint_to_cdv(DistributionalValuePtr dv1
 	return ConditionalDV::createCDV(res);
 }
 
-DistributionalValuePtr DVFormulas::sum_joint(DistributionalValuePtr dv,int pos) const
-{
-	DVCounter res;
-	for (auto elem : dv->value())
-	{
-		res += part_joint(dv,pos);
-	}
-	return DistributionalValue::createDV(res);
-}
-
-DVCounter DVFormulas::part_joint(DistributionalValuePtr dv,int pos) const
+DistributionalValuePtr DVFormulas::sum_joint(DistributionalValuePtr dv,int pos)
 {
 	DVCounter res;
 	for (auto elem : dv->value())
 	{
 		DVKey key = elem.first;
 		key.erase(key.begin() + pos);
-		res[key] = elem.second;
+		res[key] += elem.second;
 	}
-	return res;
+	return DistributionalValue::createDV(res);
 }
 
 bool DVFormulas::comperator(Elem elem1,Elem elem2)
