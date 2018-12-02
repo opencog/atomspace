@@ -26,6 +26,7 @@
 #include <opencog/truthvalue/AttentionValue.h>
 #include <opencog/truthvalue/DistributionalValue.h>
 #include <opencog/truthvalue/ConditionalDV.h>
+#include <opencog/truthvalue/DVFormulas.h>
 #include <opencog/truthvalue/TruthValue.h>
 
 #include <opencog/atomspace/AtomSpace.h>
@@ -203,13 +204,12 @@ private:
 	static SCM ss_new_dv(SCM, SCM);
 	static SCM ss_new_dv_simple(SCM, SCM);
 	static SCM ss_dv_p(SCM);
-	//static SCM ss_dv_divide(SCM,SCM,SCM);
-	//static SCM ss_dv_sum_joint(SCM,SCM,SCM);
-	//static SCM ss_dv_part_joint(SCM,SCM,SCM);
+	static SCM ss_dv_divide(SCM,SCM,SCM);
+	static SCM ss_dv_sum_joint(SCM,SCM);
 	static SCM ss_dv_get_confidence(SCM);
 	static SCM ss_dv_get_fom(SCM);
-	//static SCM ss_dv_conjunction(SCM,SCM);
-	//static SCM ss_dv_disjunction(SCM,SCM);
+	static SCM ss_dv_conjunction(SCM,SCM);
+	static SCM ss_dv_disjunction(SCM,SCM);
 	static SCM ss_dv_negate(SCM);
 	static SCM ss_new_cdv(SCM, SCM);
 	static SCM ss_cdv_get_conditions(SCM);

@@ -115,7 +115,8 @@ DVCounter ConditionalDV::get_unconditionalP(DVKey h) const
 	{
 		double weight = DistributionalValue::key_contained(h,elem.first);
 		double count = elem.second.total_count();
-		if (count != 0)
+		//DV Elems with count of 0 are not allowed
+		if (count != 0 && weight != 0)
 			res += elem.second * weight;
 	}
 	return res;
@@ -271,6 +272,7 @@ bool ConditionalDV::operator==(const ProtoAtom& other) const
 	}
 	return true;
 }
+
 bool ConditionalDV::operator<(const ProtoAtom& other) const
 {
 	if (CONDITIONAL_DISTRIBUTIONAL_VALUE != other.get_type())

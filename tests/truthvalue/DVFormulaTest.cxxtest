@@ -67,7 +67,6 @@ public:
 		keys[16] = DVKey{Interval{0.25,0.5 }, Interval{0.5,1.0}};
 
 		DVCounter dvc;
-		//dvc[keys[4]] = 0;
 		dvc[keys[5]] = 10;
 		dvc[keys[6]] = 20;
 
@@ -76,14 +75,10 @@ public:
 		DVCounter dvc1;
 		dvc1[keys[0]] = 30;
 		dvc1[keys[1]] = 30;
-		//dvc1[keys[2]] = 0;
-		//dvc1[keys[3]] = 0;
 
 		dvs[1] = DistributionalValue::createDV(dvc1);
 
 		DVCounter dvc2;
-		//dvc2[keys[0]] = 0;
-		//dvc2[keys[1]] = 0;
 		dvc2[keys[2]] = 30;
 		dvc2[keys[3]] = 30;
 

@@ -367,19 +367,18 @@ void SchemeSmob::register_procs()
 	register_proc("cog-new-dv",			   2, 0, 0, C(ss_new_dv));
 	register_proc("cog-new-dv-simple",	   2, 0, 0, C(ss_new_dv_simple));
 	register_proc("cog-dv?",			   1, 0, 0, C(ss_dv_p));
-//	register_proc("cog-dv-divide",		   3, 0, 0, C(ss_dv_divide));
-	//register_proc("cog-dv-sum-joint",	   3, 0, 0, C(ss_dv_sum_joint));
-	//register_proc("cog-dv-part-joint",	   3, 0, 0, C(ss_dv_part_joint));
+	register_proc("cog-dv-divide",		   3, 0, 0, C(ss_dv_divide));
+	register_proc("cog-dv-sum-joint",	   2, 0, 0, C(ss_dv_sum_joint));
 	register_proc("cog-dv-get-confidence", 1, 0, 0, C(ss_dv_get_confidence));
-	//register_proc("cog-dv-conjunction",		2, 0, 0, C(ss_dv_conjunction));
-	//register_proc("cog-dv-disjunction",		2, 0, 0, C(ss_dv_disjunction));
+	register_proc("cog-dv-conjunction",    2, 0, 0, C(ss_dv_conjunction));
+	register_proc("cog-dv-disjunction",    2, 0, 0, C(ss_dv_disjunction));
 	register_proc("cog-dv-negate",		   1, 0, 0, C(ss_dv_negate));
 	register_proc("cog-new-cdv",		   2, 0, 0, C(ss_new_cdv));
 	register_proc("cog-cdv-get-conditions",1, 0, 0, C(ss_cdv_get_conditions));
-	register_proc("cog-cdv-get-unconditionals",
-										   1, 0, 0, C(ss_cdv_get_unconditonals));
+	register_proc("cog-cdv-get-unconditionals"
+		     ,1, 0, 0, C(ss_cdv_get_unconditonals));
 	register_proc("cog-cdv-get-unconditional"
-				 ,2, 0, 0, C(ss_cdv_get_unconditonal));
+		     ,2, 0, 0, C(ss_cdv_get_unconditonal));
 	register_proc("cog-cdv-get-joint",	   2, 0, 0, C(ss_cdv_get_joint));
 	register_proc("cog-cdv-merge",		   2, 0, 0, C(ss_cdv_merge));
 	//register_proc("cog-cdv-cde",		   2, 0, 0, C(ss_cdv_cde));
