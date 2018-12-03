@@ -373,6 +373,8 @@ void SchemeSmob::register_procs()
 	register_proc("cog-dv-conjunction",    2, 0, 0, C(ss_dv_conjunction));
 	register_proc("cog-dv-disjunction",    2, 0, 0, C(ss_dv_disjunction));
 	register_proc("cog-dv-negate",		   1, 0, 0, C(ss_dv_negate));
+	register_proc("cog-dv-is-empty",       1, 0, 0, C(ss_dv_is_empty));
+	register_proc("cog-cdv-is-empty",      1, 0, 0, C(ss_cdv_is_empty));
 	register_proc("cog-new-cdv",		   2, 0, 0, C(ss_new_cdv));
 	register_proc("cog-cdv-get-conditions",1, 0, 0, C(ss_cdv_get_conditions));
 	register_proc("cog-cdv-get-unconditionals"

@@ -211,6 +211,8 @@ private:
 	static SCM ss_dv_conjunction(SCM,SCM);
 	static SCM ss_dv_disjunction(SCM,SCM);
 	static SCM ss_dv_negate(SCM);
+	static SCM ss_dv_is_empty(SCM);
+	static SCM ss_cdv_is_empty(SCM);
 	static SCM ss_new_cdv(SCM, SCM);
 	static SCM ss_cdv_get_conditions(SCM);
 	static SCM ss_cdv_get_unconditonals(SCM);

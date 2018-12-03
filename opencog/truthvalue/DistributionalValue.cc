@@ -383,6 +383,8 @@ double DistributionalValue::get_var(DVKey val) const
 std::string DistributionalValue::to_string(const std::string& indent) const
 {
 	std::stringstream ss;
+	if (_value.size() == 0)
+		ss << "Empty DistributionalValue" << std::endl;
 	for (auto elem : _value)
 	{
 		ss << indent << "{";

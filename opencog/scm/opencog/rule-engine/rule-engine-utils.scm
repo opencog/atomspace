@@ -418,9 +418,18 @@
 
 (define-public (has-dv A)
 "
-  Return TrueTV iff A has a dv attached
+  Return TrueTV iff A has a dv/cdv attached and it is not empty
 "
-  (bool->tv (not (equal? (cog-value A (PredicateNode "CDV")) '())))
+	(let
+	  ((dv (cog-value A (PredicateNode "CDV"))))
+	  (if (equal? dv '())
+		(bool->tv #f)
+	    (if (cog-dv? dv)
+	        (bool->tv (not (cog-dv-is-empty dv)))
+	        (bool->tv (not (cog-cdv-is-empty dv)))
+	    )
+	  )
+	)
 )
 
 

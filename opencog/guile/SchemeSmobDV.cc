@@ -287,6 +287,18 @@ SCM SchemeSmob::ss_dv_negate(SCM sdv)
 	return dv_to_scm(dv->negate());
 }
 
+SCM SchemeSmob::ss_dv_is_empty(SCM sdv)
+{
+	DistributionalValuePtr dv = verify_dv(sdv,"cog-dv-is-empty",1);
+	return scm_from_bool(dv->value().size() == 0);
+}
+
+SCM SchemeSmob::ss_cdv_is_empty(SCM scdv)
+{
+	ConditionalDVPtr cdv = verify_cdv(scdv,"cog-cdv-is-empty",1);
+	return scm_from_bool(cdv->value().size() == 0);
+}
+
 SCM SchemeSmob::cdv_to_scm (const ConditionalDVPtr& cdv)
 {
 	return protom_to_scm(ProtoAtomCast(cdv));
