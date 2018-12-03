@@ -47,7 +47,7 @@ INSTALL (FILES
 	StringValue.h
 	ValueFactory.h
 	types.h
-	DESTINATION "include/opencog/atoms/proto"
+	DESTINATION "include/opencog/atoms/value"
 )
 
 # Install the auto-generated atom types as well
