@@ -20,7 +20,7 @@ using namespace opencog;
 /* ============================================================== */
 /**
  * Return a string holding the scheme representation of an opencog object.
- * This could be a ProtoAtom (an atom or a value), or an AtomSpace, or a
+ * This could be a Value including Atom, or an AtomSpace, or a
  * guile module created with the PrimitiveEnviron C++ module wrapper.
  *
  * Returned is a valid scheme expression that represents that object.

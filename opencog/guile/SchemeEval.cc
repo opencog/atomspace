@@ -1035,9 +1035,9 @@ SCM SchemeEval::do_apply_scm(const std::string& func, const Handle& varargs )
  * It is assumed that varargs is a ListLink, containing a list of
  * atom handles. This list is unpacked, and then the fuction func
  * is applied to them. The function is presumed to return pointer
- * to a ProtoAtom object. If the function does not return a ProtoAtom,
- * or if n error ocurred during evaluation, then a C++ exception is
- * thrown.
+ * to a ProtoAtom [now renamed Value] object. If the function does
+ * not return a ProtoAtom, or if n error ocurred during evaluation,
+ * then a C++ exception is thrown.
  */
 ValuePtr SchemeEval::apply_v(const std::string &func, Handle varargs)
 {

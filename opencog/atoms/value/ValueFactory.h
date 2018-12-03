@@ -53,9 +53,9 @@ public:
     void addCaster(Type vtype, ValueCaster caster);
 
      /**
-      * Casts a protoAtomPtr object into its type's Value pointer.
+      * Casts a ValuePtr object into its type's Value pointer.
       *
-      * @param ptr the protoAtomPtr to be cast.
+      * @param ptr the ValuePtr to be cast.
       */
     ValuePtr recast(const ValuePtr& ptr) const;
 

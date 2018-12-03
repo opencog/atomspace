@@ -5,7 +5,7 @@ from opencog.type_constructors import *
 from opencog.utilities import initialize_opencog, finalize_opencog
 
 @unittest.skip('Not implemented, see comment to '
-               'vector_of_protoatoms_to_list()')
+               'vector_of_values_to_list()')
 class LinkValueContainingAtomsTest(unittest.TestCase):
     
     def setUp(self):

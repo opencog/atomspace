@@ -1,7 +1,7 @@
 /* 
  * SchemeSmobValue.cc
  *
- * Scheme small objects (SMOBS) for ProtoAtoms.
+ * Scheme small objects (SMOBS) for ProtoAtoms [now renamed Value].
  *
  * Copyright (c) 2008,2009,2016 Linas Vepstas <linas@linas.org>
  */

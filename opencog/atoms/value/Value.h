@@ -1,5 +1,5 @@
 /*
- * opencog/atoms/value/ProtoAtom.h
+ * opencog/atoms/value/Value.h
  *
  * Copyright (C) 2015 Linas Vepstas
  * All Rights Reserved
@@ -37,7 +37,7 @@ namespace opencog
  */
 
 /**
- * ProtoAtoms are the base class for the Atom shared pointer.
+ * Values are the base class for the Atom shared pointer.
  */
 class Value
 	: public std::enable_shared_from_this<Value>
@@ -102,7 +102,7 @@ typedef std::vector<ValuePtr> ProtomSeq;
 /** @}*/
 } // namespace opencog
 
-// overload of operator<< to print ProtoAtoms
+// overload of operator<< to print Values
 namespace std
 {
     template<typename Out>

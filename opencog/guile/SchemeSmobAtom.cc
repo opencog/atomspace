@@ -45,9 +45,9 @@ Handle SchemeSmob::verify_handle (SCM satom, const char * subrname, int pos)
 		scm_wrong_type_arg_msg(subrname, pos, satom, "opencog atom");
 
 	// In the current C++ code, handles can also be pointers to
-	// protoAtoms.  Howerver, in the guile wrapper, we expect all
+	// values.  Howerver, in the guile wrapper, we expect all
 	// handles to be pointers to atoms; use verify_protom() instead,
-	// if you just want ProtoAtoms.
+	// if you just want Values.
 	if (not (h->is_link() or h->is_node()))
 		scm_wrong_type_arg_msg(subrname, pos, satom, "opencog atom");
 

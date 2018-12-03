@@ -1103,7 +1103,7 @@ A link would be:
    }
 }
 
-ProtoAtom updates would look like this (e.g. for stv==SimpleTruthValue)
+ProtoAtom aka Values updates would look like this (e.g. for stv==SimpleTruthValue)
 
 UPDATE atomspace
 SET atom = jsonb_set(properties, '{"stv"}', '[0.2, 0.54]')
