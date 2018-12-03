@@ -315,9 +315,13 @@ double DistributionalValue::key_contained(DVKey ks1,DVKey ks2)
 	for (auto zipped : boost::combine(ks1,ks2))
 	{
 		boost::tie(k1,k2) = zipped;
+		if (k1.size() == 1 && 1 == k2.size() && k1[0] == k2[0])
+			continue;
 		if (k1.size() == 1 && 1 == k2.size() && k1[0] != k2[0])
 			return 0;
 
+		if (k1.size() == 1 && 2 == k2.size() && k1[0] > k2[0] && k1[0] < k2[1])
+			continue;
 		if (k1.size() == 1 && 2 == k2.size() && (k1[0] < k2[0] || k1[0] > k2[1]))
 			return 0;
 
