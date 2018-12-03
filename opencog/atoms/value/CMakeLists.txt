@@ -41,7 +41,7 @@ INSTALL (FILES
 	FloatValue.h
 	LinkValue.h
 	NameServer.h
-		Value.h
+	Value.h
 	RandomStream.h
 	StreamValue.h
 	StringValue.h
