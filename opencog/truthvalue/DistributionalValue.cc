@@ -26,6 +26,8 @@
 #include <math.h>
 #include <stdio.h>
 
+#include <opencog/util/numeric.h>
+
 #include <opencog/truthvalue/DistributionalValue.h>
 #include <opencog/atoms/proto/FloatValue.h>
 #include <opencog/atoms/proto/LinkValue.h>
@@ -424,7 +426,7 @@ bool DistributionalValue::operator==(const ProtoAtom& other) const
 	for (auto elem : _value) {
 		double v1 = elem.second;
 		double v2 = dov->_value.get(elem.first);
-		if (not floatCompare(v1,v2))
+		if (not is_approx_eq_ulp(v1,v2))
 			return false;
 	}
 	return true;

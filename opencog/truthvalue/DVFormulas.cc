@@ -26,6 +26,7 @@
 #include <math.h>
 #include <stdio.h>
 
+#include <opencog/util/numeric.h>
 #include <opencog/truthvalue/DVFormulas.h>
 #include <opencog/atomspace/AtomSpace.h>
 
@@ -165,8 +166,10 @@ DVFormulas::disjunction(DistributionalValuePtr dv1
 	double m1 = 1;
 	double m2 = 1;
 
-	while ((abs(m1) > 0.0000001) && (abs(m2) > 0.0000001))
+	while (not is_approx_eq(m1,0.0) && not is_approx_eq(m2,0.0))
 	{
+		if (m1 < 0 || m2 < 0)
+			throw RuntimeException(TRACE_INFO,"This should not happen.");
 		DVec v1 = get_key_max(it1->first);
 		DVec v2 = get_key_max(it2->first);
 		if (not compare(v1 , v2))
