@@ -402,19 +402,12 @@ std::string DistributionalValue::to_string(const std::string& indent) const
 		   << " Count: "
 		   << std::setprecision(18)
 		   << elem.second
+		   << " Mean: "
+		   << get_mean_for(elem.second)
 		   << std::endl;
 	}
 	return ss.str();
 }
-
-bool DistributionalValue::floatCompare(double v1,double v2)
-{
-	#define MAX_ULPS 24
-	if (MAX_ULPS < llabs(*(int64_t*) &(v1) - *(int64_t*)&(v2)))
-		return false;
-	return true;
-}
-
 
 bool DistributionalValue::operator==(const ProtoAtom& other) const
 {
