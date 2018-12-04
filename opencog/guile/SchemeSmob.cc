@@ -383,7 +383,7 @@ void SchemeSmob::register_procs()
 		     ,2, 0, 0, C(ss_cdv_get_unconditonal));
 	register_proc("cog-cdv-get-joint",	   2, 0, 0, C(ss_cdv_get_joint));
 	register_proc("cog-cdv-merge",		   2, 0, 0, C(ss_cdv_merge));
-	//register_proc("cog-cdv-cde",		   2, 0, 0, C(ss_cdv_cde));
+	register_proc("cog-cdv-cde",		   2, 0, 0, C(ss_cdv_cde));
 
 	// Atom types
 	register_proc("cog-get-types",		   0, 0, 0, C(ss_get_types));

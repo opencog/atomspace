@@ -67,6 +67,8 @@ public:
 	static DistributionalValuePtr disjunction(DistributionalValuePtr
 			  	                             ,DistributionalValuePtr);
 
+	static ConditionalDVPtr consequent_disjunction_elemination(ConditionalDVPtr
+															  ,ConditionalDVPtr);
 	//double middle_of_interval(DVKey) const;
 };
 

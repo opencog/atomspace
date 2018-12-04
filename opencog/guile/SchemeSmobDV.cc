@@ -362,11 +362,11 @@ SCM SchemeSmob::ss_cdv_merge(SCM scdv1,SCM scdv2)
    return cdv_to_scm(res);
 }
 
-//SCM SchemeSmob::ss_cdv_cde(SCM scdv1,SCM scdv2)
-//{
-//   ConditionalDVPtr cdv1 = verify_cdv(scdv1,"cog-cdv-cde",1);
-//   ConditionalDVPtr cdv2 = verify_cdv(scdv2,"cog-cdv-cde",2);
-//   ConditionalDVPtr res = cdv1->CDE(cdv2);
-//   return cdv_to_scm(res);
-//}
+SCM SchemeSmob::ss_cdv_cde(SCM scdv1,SCM scdv2)
+{
+   ConditionalDVPtr cdv1 = verify_cdv(scdv1,"cog-cdv-cde",1);
+   ConditionalDVPtr cdv2 = verify_cdv(scdv2,"cog-cdv-cde",2);
+   ConditionalDVPtr res = DVFormulas::consequent_disjunction_elemination(cdv1,cdv2);
+   return cdv_to_scm(res);
+}
 /* ===================== END OF FILE ============================ */

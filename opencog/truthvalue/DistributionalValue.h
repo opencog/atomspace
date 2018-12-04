@@ -97,8 +97,6 @@ public:
 	static double to_conf(int c);
 	static int to_count(double);
 
-	static bool floatCompare(double,double);
-
 	bool is_uniform() const;
 
 	std::vector<double> get_mode() const;
@@ -124,7 +122,7 @@ public:
 
 	static double key_contained(DVKey k1,DVKey k2);
 
-	DVKey get_key(DVKey) const;
+	bool has_key(DVKey) const;
 	DVKeySeq get_keys() const;
 	double get_count(DVKey) const;
 	double get_contained_count(DVKey) const;
@@ -132,7 +130,6 @@ public:
 	double get_contained_mean(DVKey) const;
 	double get_mode(DVKey) const;
 	double get_var(DVKey) const;
-
 
 	virtual bool operator==(const ProtoAtom& rhs) const;
 

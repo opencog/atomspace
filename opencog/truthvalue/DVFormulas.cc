@@ -190,3 +190,28 @@ DVFormulas::disjunction(DistributionalValuePtr dv1
 
 	return DistributionalValue::createDV(res);
 }
+
+//A -> (B || C) + A -> B => A -> C
+ConditionalDVPtr
+DVFormulas::consequent_disjunction_elemination(ConditionalDVPtr cdv1
+											  ,ConditionalDVPtr cdv2)
+{
+	CDVrep res;
+	for (auto elem : cdv2->value())
+	{
+		DistributionalValuePtr v1 = cdv1->get_unconditional(elem.first);
+		DistributionalValuePtr v2 = DistributionalValue::createDV(elem.second);
+
+		double count = std::min(v1->total_count(),v2->total_count());
+
+		DVCounter partres;
+		for (auto elem2 : elem.second)
+		{
+			double m1 = v1->get_contained_mean(elem2.first);
+			double m2 = v2->get_mean(elem2.first);
+			partres[elem2.first] = count * ((m1 - m2) / (1 - m2));
+		}
+		res[elem.first] = partres;
+	}
+	return ConditionalDV::createCDV(res);
+}

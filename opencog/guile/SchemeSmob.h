@@ -219,7 +219,7 @@ private:
 	static SCM ss_cdv_get_unconditonal(SCM,SCM);
 	static SCM ss_cdv_get_joint(SCM,SCM);
 	static SCM ss_cdv_merge(SCM,SCM);
-	//static SCM ss_cdv_cde(SCM,SCM);
+	static SCM ss_cdv_cde(SCM,SCM);
 
 	// Free variables
 	static SCM ss_get_free_variables(SCM);

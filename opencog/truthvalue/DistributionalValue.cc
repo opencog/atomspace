@@ -56,6 +56,10 @@ DistributionalValue::DistributionalValue(DVCounter dvctr)
 	_value = dvctr;
 }
 
+//Create a DV from the Parameters of a SimpleTV
+//Not recommended as it results in a DV with only 1 singleton set
+//which in some calculations is unusalbe as the chance of overlaps in the
+//Sets/Intervals is small
 DistributionalValue::DistributionalValue(double mode,double conf)
 	: ProtoAtom(DISTRIBUTIONAL_VALUE)
 {
@@ -137,16 +141,17 @@ bool DistributionalValue::is_uniform() const
 	return true;
 }
 
+//Add Evidence for the provided key i.e increment the count of this Interval
+//Returns a new DVPtr with the update count
 DistributionalValuePtr DistributionalValue::add_evidence(DVKey h) const
 {
-	//TODO: should this really be const??? also:
-	//There was a check for the existen of the Key
-	//But i think we should be able to add new keys using this
 	DVCounter newdvc = _value;
 	newdvc[h] += 1;
 	return createDV(newdvc);
 }
 
+//Combines this DV with the provided DV
+//and returns this new one ass a result
 DistributionalValuePtr DistributionalValue::merge(DistributionalValuePtr other) const
 {
 	DVCounter newdvc = _value;
@@ -154,6 +159,7 @@ DistributionalValuePtr DistributionalValue::merge(DistributionalValuePtr other) 
 	return createDV(newdvc);
 }
 
+//Flip all the counts
 DistributionalValuePtr DistributionalValue::negate() const
 {
 	double total = max_count() + min_count();
@@ -165,6 +171,7 @@ DistributionalValuePtr DistributionalValue::negate() const
 	return createDV(res);
 }
 
+//Get the lowest count of all Interals
 double DistributionalValue::min_count() const
 {
 	double min = std::numeric_limits<double>::max();
@@ -175,6 +182,8 @@ double DistributionalValue::min_count() const
 	}
 	return min;
 }
+
+//Get the highest count of all Interals
 double DistributionalValue::max_count() const
 {
 	double max = 0;
@@ -220,7 +229,8 @@ double DistributionalValue::get_mean_for(double ai) const
 		return ai / total_count();
 }
 
-//This should be avoided where ever possible.
+//Condenses the DV into a single strenght value
+//This should be avoided where ever possible as it loses a lot of information
 double DistributionalValue::get_fstord_mean() const
 {
 	double res = 0;
@@ -234,6 +244,7 @@ double DistributionalValue::get_fstord_mean() const
 	return res;
 }
 
+//Calculates the Middle of all intervals in a Key
 DVec DistributionalValue::middle_of_interval(DVKey k) const
 {
 	DVec res;
@@ -245,6 +256,7 @@ DVec DistributionalValue::middle_of_interval(DVKey k) const
 	return res;
 }
 
+//Get the variance for all Keys
 std::vector<double> DistributionalValue::get_var() const
 {
 	std::vector<double> probs;
@@ -255,6 +267,7 @@ std::vector<double> DistributionalValue::get_var() const
 	return probs;
 }
 
+//Get the variance for a Count
 double DistributionalValue::get_var_for(double ai) const
 {
 		double a0 = total_count();
@@ -269,7 +282,7 @@ double DistributionalValue::total_count() const
 double DistributionalValue::get_confidence() const
 {
 	int c = total_count();
-	return c / (c + DEFAULT_K);
+	return to_conf(c);
 }
 
 double DistributionalValue::to_conf(int c)
@@ -282,17 +295,11 @@ int DistributionalValue::to_count(double cf)
 	return (cf * DEFAULT_K / (1 - cf));
 }
 
-DVKey DistributionalValue::get_key(DVKey k) const
+bool DistributionalValue::has_key(DVKey k) const
 {
 	auto it = _value.find(k);
-	if (it != _value.end())
-	{
-		return it->first;
-	}
-	throw RuntimeException(TRACE_INFO, "No Key for this value.");
+	return it != _value.end();
 }
-
-
 
 DVKeySeq DistributionalValue::get_keys() const
 {
@@ -310,20 +317,28 @@ double DistributionalValue::get_count(DVKey h) const
 	throw RuntimeException(TRACE_INFO, "No Key for this value.");
 }
 
+//Find out how much of Key1 is contained in Key2
 double DistributionalValue::key_contained(DVKey ks1,DVKey ks2)
 {
 	Interval k1,k2;
+	//Start with the assumption that 100% of Key1 is in Key2
 	double sum = 1;
 	for (auto zipped : boost::combine(ks1,ks2))
 	{
 		boost::tie(k1,k2) = zipped;
+		//Singleton Intervals are equal => assumption is correct and we can continue
 		if (k1.size() == 1 && 1 == k2.size() && k1[0] == k2[0])
 			continue;
+
+		//Singleton Intervals are different => no overlap return 0
 		if (k1.size() == 1 && 1 == k2.size() && k1[0] != k2[0])
 			return 0;
 
+		//Singleton Interval of Key1 is contained completely in Interval of Key2
 		if (k1.size() == 1 && 2 == k2.size() && k1[0] > k2[0] && k1[0] < k2[1])
 			continue;
+
+		//Singleton Interval of Key1 isn't contained in Interval of Key2
 		if (k1.size() == 1 && 2 == k2.size() && (k1[0] < k2[0] || k1[0] > k2[1]))
 			return 0;
 
@@ -334,17 +349,21 @@ double DistributionalValue::key_contained(DVKey ks1,DVKey ks2)
 		//Two Intervals
 		//Calculate the overlapp
 		Interval res;
+		//Find the start of the Overlapp
 		if (k1[0] > k2[0])
 			res.push_back(k1[0]);
 		else
 			res.push_back(k2[0]);
 
+		//Find the end of the Overlapp
 		if (k1[1] < k2[1])
 			res.push_back(k1[1]);
 		else
 			res.push_back(k2[1]);
 
+		//Check that the Overlapp starts before it ends
 		if (res[0] <= res[1])
+			//Figure out how much smaler the Overlapp is then K1
 			sum *= (res[1] - res[0]) / (k1[1] - k1[0]);
 		else
 			return 0;
@@ -352,6 +371,9 @@ double DistributionalValue::key_contained(DVKey ks1,DVKey ks2)
 	return sum;
 }
 
+//Get the Count of a Key that might not be in the DV explicitly
+//by a weighted sum of all the Keys that are in the DV
+//weighted by the overlapp of the given Key with the Keys of the DV
 double DistributionalValue::get_contained_count(DVKey h) const
 {
 	double res = 0;

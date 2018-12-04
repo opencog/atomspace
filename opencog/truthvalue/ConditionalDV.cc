@@ -84,6 +84,7 @@ ConditionalDVPtr ConditionalDV::createCDV(DVKeySeq conds
 	return std::make_shared<const ConditionalDV>(conds,dvs);
 }
 
+//Get all the Conditions
 DVKeySeq ConditionalDV::get_conditions() const
 {
 	DVKeySeq res;
@@ -94,6 +95,7 @@ DVKeySeq ConditionalDV::get_conditions() const
 	return res;
 }
 
+//Get all the DVs without the Conditions
 std::vector<DistributionalValuePtr> ConditionalDV::get_unconditionals() const
 {
 	std::vector<DistributionalValuePtr> res;
@@ -105,7 +107,7 @@ std::vector<DistributionalValuePtr> ConditionalDV::get_unconditionals() const
 }
 
 /*
- * Merge unconditional weighted based on the distance of the given Interval
+ * Merge unconditional weighted based on the overlap of the given Interval
  * to the condition interval
  */
 DVCounter ConditionalDV::get_unconditionalP(DVKey h) const
@@ -128,6 +130,10 @@ DistributionalValuePtr ConditionalDV::get_unconditional(DVKey k) const
 	return DistributionalValue::createDV(res);
 }
 
+/*
+ * Get a DV that is the weighted combination of all contained DVs based
+ * on a Distribution of the Condition
+ */
 DistributionalValuePtr ConditionalDV::get_unconditional(DistributionalValuePtr condDist) const
 {
 	DVCounter res;
@@ -164,6 +170,7 @@ double ConditionalDV::avg_count() const
 }
 
 
+//Given a Distribution of the Condition calculate a Joint Probability distribution
 DistributionalValuePtr ConditionalDV::get_joint_probability(DistributionalValuePtr base) const
 {
 	DVCounter res;
@@ -201,36 +208,13 @@ ConditionalDVPtr ConditionalDV::merge(ConditionalDVPtr cdv2) const
 	}
 	return createCDV(res);
 }
-/*
-ConditionalDVPtr ConditionalDV::CDE(ConditionalDVPtr cdv2) const
-{
-	CDVrep res;
-	for (auto elem : cdv2->_value)
-	{
-		DistributionalValuePtr v1 = get_unconditional_no_match(elem.first);
-		ValueCounter partres;
 
-		double count;
-		if (v1->total_count() >= elem.second.total_count())
-			count = v1->total_count();
-		else
-			count = elem.second.total_count();
-
-		for (auto elem2 : elem.second)
-		{
-			double m1 = v1->get_mean_no_match(elem2.first);
-			double m2 = DistributionalValue::createDV(elem.second)->get_mean(elem2.first);
-			partres[elem2.first] = count * ((m1 - m2) / (1 - m2));
-		}
-		res[elem.first] = partres;
-	}
-	return createCDV(res);
-}
-*/
 
 std::string ConditionalDV::to_string(const std::string& indent) const
 {
 	std::stringstream ss;
+	if (_value.size() == 0)
+		ss << "Empty ConditionalDV" << std::endl;
 	for (auto elem : _value)
 	{
 		ss << indent << "{";
