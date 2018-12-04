@@ -115,14 +115,16 @@ void printVec(DVec i)
 //Create a Conjuction from 2 DVs
 DistributionalValuePtr
 DVFormulas::conjunction(DistributionalValuePtr dv1
-		               ,DistributionalValuePtr dv2)
+                       ,DistributionalValuePtr dv2)
 {
 	DVCounter res;
 	double count = std::min(dv1->total_count(),dv2->total_count());
 
+	//We start at the begining of the map with Keys of the lowest Value
 	auto it1 = dv1->value().begin();
 	auto it2 = dv2->value().begin();
 
+	//Weighting factor representing how much of a given DV has be used already
 	double m1 = 1;
 	double m2 = 1;
 
@@ -130,15 +132,22 @@ DVFormulas::conjunction(DistributionalValuePtr dv1
 	{
 		DVec v1 = get_key_min(it1->first);
 		DVec v2 = get_key_min(it2->first);
+		//We check which key represents a lower Truthness/Value
+		//This is a fuzzy conjunction so we want to take the min of that
 		if (compare(v1 , v2))
 		{
+			//We get the mean for that Key
 			double mean = dv1->get_mean_for(it1->second);
+			//Multiply by the count to de-normalize that
+			//Weighted by how much of the other DV we already used
 			res[it1->first] += count * mean * m2;
+			//Update m1 to refelect that we have used "mean" of this DV
 			m1 -= mean;
 			it1++;
 		}
 		else
 		{
+			//Same as above just flipped dv1/it1/m1 and dv2/it2/m2
 			double mean = dv2->get_mean_for(it2->second);
 			res[it2->first] += count * mean * m1;
 			m2 -= mean;
@@ -152,17 +161,19 @@ DVFormulas::conjunction(DistributionalValuePtr dv1
 //Create a disjuction from 2 DVs
 DistributionalValuePtr
 DVFormulas::disjunction(DistributionalValuePtr dv1
-		               ,DistributionalValuePtr dv2)
+                       ,DistributionalValuePtr dv2)
 {
 	DVCounter res;
 	double count = std::min(dv1->total_count(),dv2->total_count());
 
+	//We start at the end of the map with Keys of the highest Value
 	auto it1 = dv1->value().end();
 	auto it2 = dv2->value().end();
 
 	it1--;
 	it2--;
 
+	//Weighting factor representing how much of a given DV has be used already
 	double m1 = 1;
 	double m2 = 1;
 
@@ -172,15 +183,21 @@ DVFormulas::disjunction(DistributionalValuePtr dv1
 			throw RuntimeException(TRACE_INFO,"This should not happen.");
 		DVec v1 = get_key_max(it1->first);
 		DVec v2 = get_key_max(it2->first);
+		//We check which key represents a higher Truthness/Value
+		//This is a fuzzy disjunction so we want to take the max of that
 		if (not compare(v1 , v2))
 		{
 			double mean = dv1->get_mean_for(it1->second);
+			//Multiply by the count to de-normalize that
+			//Weighted by how much of the other DV we already used
 			res[it1->first] += count * mean * m2;
+			//Update m1 to refelect that we have used "mean" of this DV
 			m1 -= mean;
 			it1--;
 		}
 		else
 		{
+			//Same as above just flipped dv1/it1/m1 and dv2/it2/m2
 			double mean = dv2->get_mean_for(it2->second);
 			res[it2->first] += count * mean * m1;
 			m2 -= mean;
