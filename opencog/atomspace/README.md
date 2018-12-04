@@ -132,7 +132,7 @@ Overlay AtomSpaces are needed in (at least) these situations:
   overlay, with the underlying base-space marked read-only. Since the
   base-space is an in-RAM cache of what's on disk, it should still be
   possible to load the base-space with atoms from disk, and to remove
-  atoms from the base-space, to free up RAM, all without violating it's
+  atoms from the base-space, to free up RAM, all without violating its
   read-only nature.  Examples include: large genomic datasets; Sophia
   robot character personality files.
 
